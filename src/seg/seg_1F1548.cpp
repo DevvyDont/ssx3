@@ -2600,8 +2600,8 @@ extern "C" void cSplashManager_CameraSnapped(int camera) {
             char *t5 = F84(SSXApp);
             if (camera == *(int *)(F84(t5) + (i << 2) + 4)) {
                 if (cGame_getSplashManager_41A8(t5, i) != 0) {
-                    Obj41A8 *o = cGame_getSplashManager_41A8(F84(SSXApp), i);
-                    o->v13();
+                    Obj41A8 *splashMan = cGame_getSplashManager_41A8(F84(SSXApp), i);
+                    splashMan->v13();
                 }
             }
             i += 1;

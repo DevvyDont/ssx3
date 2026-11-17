@@ -990,33 +990,33 @@ extern "C" V3_C7D0 MakeDebounceFunc(int n, Ent_C7D0 *params) {
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00445FB0[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *field = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)field = (float)x->val;
         else
-            *d = x->val;
+            *field = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_C7D0 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s)
-            r = 0;
+        char *inst;
+        if (!section)
+            inst = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_C7D0(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     if (obj == 0)
         return D_004C9098_C7D0;
-    void *p = *(void**)(obj + 0xC);
-    if (p && checkActiveNode(p, 0, buf))
+    void *activeNode = *(void**)(obj + 0xC);
+    if (activeNode && checkActiveNode(activeNode, 0, buf))
         return D_004C9098_C7D0;
     func_00342C08_C7D0(cMemMan_alloc(52, D_004896E8_C7D0, 0x20000000, 0), 1, obj, buf, 0);
     return D_004C9098_C7D0;
@@ -1331,33 +1331,33 @@ extern "C" V3_CFF0 MakeMeshAnimFunc(int n, Ent_CFF0 *params) {
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00446060[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *field = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)field = (float)x->val;
         else
-            *d = x->val;
+            *field = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_CFF0 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s)
-            r = 0;
+        char *inst;
+        if (!section)
+            inst = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_CFF0(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     if (obj == 0)
         return D_004C9098_CFF0;
-    void *p = *(void**)(obj + 0xC);
-    if (p && checkActiveNode(p, 11, buf))
+    void *activeNode = *(void**)(obj + 0xC);
+    if (activeNode && checkActiveNode(activeNode, 11, buf))
         return D_004C9098_CFF0;
     func_00351B40_CFF0(cMemMan_alloc(1728, D_00489708_CFF0, 0x20000000, 0), 1, obj, buf, *(int*)(D_004A3DD8_CFF0 + 0x294), 0);
     return D_004C9098_CFF0;
@@ -3798,26 +3798,26 @@ extern "C" void* CollectFunc(void* self, int n, Ent_1120* params) {
             // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
             D_004FBBD0_1120.f = Flag_1120(D_004FBBD0_1120.f);
         }
-        unsigned v[4] __attribute__((aligned(16)));
-        unsigned* vp = v;
-        v[1] = 0xFFFFFFFF;
+        unsigned argBlock[4] __attribute__((aligned(16)));
+        unsigned* vp = argBlock;
+        argBlock[1] = 0xFFFFFFFF;
         MEM_copy(vp, &D_004FBBD0_1120, 12);
-        Ent_1120* p = params;
-        for (int i = 0; i < n; i++, p++) {
-            int k = p->idx;
-            unsigned* d = (unsigned*)((k << 2) + (int)vp);
-            if (p->kind != D_004A3C68_1120[k] && D_004A3C68_1120[k] == 2)
-                *(float*)d = (float)p->val;
+        Ent_1120* keyArg = params;
+        for (int i = 0; i < n; i++, keyArg++) {
+            int k = keyArg->idx;
+            unsigned* field = (unsigned*)((k << 2) + (int)vp);
+            if (keyArg->kind != D_004A3C68_1120[k] && D_004A3C68_1120[k] == 2)
+                *(float*)field = (float)keyArg->val;
             else
-                *d = p->val;
+                *field = keyArg->val;
         }
         unsigned x = vp[0];
         if (x != 0xFFFFFFFFu) {
             if (~vp[1] == 0)
                 vp[1] = *(int*)(*(char**)(D_004A3DD8_1120 + 0x290) + 0x78);
-            unsigned b1 = vp[1];
-            unsigned b0 = vp[0];
-            cWScriptMan_collect_1120(D_004A3DD8_1120, slot, b0, b1);
+            unsigned instanceId = vp[1];
+            unsigned itemId = vp[0];
+            cWScriptMan_collect_1120(D_004A3DD8_1120, slot, itemId, instanceId);
             *(int*)((char*)self + 8) = 1;
             *func_00226610(self) = 1;
             return self;
@@ -4463,37 +4463,37 @@ extern "C" V3_2048 SetGameModeFunc(int n, Ent_2048 *params) {
     Ent_2048 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = (&D_004A3CC0)[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int argType = (&D_004A3CC0)[idx];
+        unsigned *field = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != argType && argType == 2)
+            *(float*)field = (float)x->val;
         else
-            *d = x->val;
+            *field = x->val;
     }
-    int r;
+    int notBusy;
     int k = *D_004A3DD8_2048;
     if (k != -1) {
-        int k4 = k * 4;
+        int slotOffset = k * 4;
         char *lvl = *(char**)(*(char**)(D_004A28A8_2048 + 0x84) + 0xC);
-        char *q = *(char**)(lvl + k4 + 0x28);
-        char *a = q ? q + 0x6C0 : 0;
-        char *b = a ? a - 0x6C0 : 0;
-        Sh_2048 *sh = (Sh_2048*)(b + 0x6C0);
-        r = sh->v09() ^ 1;
+        char *tableRider = *(char**)(lvl + slotOffset + 0x28);
+        char *riderPart = tableRider ? tableRider + 0x6C0 : 0;
+        char *rider = riderPart ? riderPart - 0x6C0 : 0;
+        Sh_2048 *sh = (Sh_2048*)(rider + 0x6C0);
+        notBusy = sh->v09() ^ 1;
     } else {
-        r = 0;
+        notBusy = 0;
     }
-    if (r) {
-        int v16 = 0;
+    if (notBusy) {
+        int mode = 0;
         unsigned id = buf[0];
         int b1 = buf[1];
         int w = *(int*)(*(char**)(D_004A28A8_2048 + 0x84) + 0x78);
         if (id < 8)
-            v16 = D_00445E40_2048[id];
+            mode = D_00445E40_2048[id];
         if (b1 == 0) {
-            if (v16 != 1)
+            if (mode != 1)
                 cWScriptMan_failActiveLocalMission_2048(D_004A3DD8_2048, id);
-            cSectionMan_eventbegin_2048(w, v16);
+            cSectionMan_eventbegin_2048(w, mode);
         }
     }
     return D_004C9098_2048;
@@ -4560,26 +4560,26 @@ extern "C" V3_2210 SectionFunc(int n, Ent_2210* params)
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004FBC20_2210.flag = Flag_2210(D_004FBC20_2210.flag);
     }
-    int v[4] __attribute__((aligned(16)));
-    int* vp = v;
+    int argBlock[4] __attribute__((aligned(16)));
+    int* vp = argBlock;
     MEM_copy_2210(vp, &D_004FBC20_2210, 0x10);
-    Ent_2210* p = params;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_004465C8_2210[k] && D_004465C8_2210[k] == 2)
-            *(float*)d = (float)p->val;
+    Ent_2210* keyArg = params;
+    for (int i = 0; i < n; i++, keyArg++) {
+        int k = keyArg->idx;
+        int* field = (int*)((k << 2) + (int)vp);
+        if (keyArg->kind != D_004465C8_2210[k] && D_004465C8_2210[k] == 2)
+            *(float*)field = (float)keyArg->val;
         else
-            *d = p->val;
+            *field = keyArg->val;
     }
     int ok;
     int cur = *D_004A3DD8_2210;
     if (cur != -1) {
         char* lvl = *(char**)(*(char**)(D_004A28A8_2210 + 0x84) + 0xC);
-        char* q = *(char**)(lvl + (cur << 2) + 0x28);
-        char* a = q ? q + 0x6C0 : 0;
-        char* r = a ? a - 0x6C0 : 0;
-        ok = !((cRider_2210*)(r + 0x6C0))->isBusy();
+        char* tableRider = *(char**)(lvl + (cur << 2) + 0x28);
+        char* riderPart = tableRider ? tableRider + 0x6C0 : 0;
+        char* rider = riderPart ? riderPart - 0x6C0 : 0;
+        ok = !((cRider_2210*)(rider + 0x6C0))->isBusy();
     } else {
         ok = 0;
     }
@@ -7543,68 +7543,68 @@ struct Ent_6A90 { int idx; int val; int pad; int type; };
  */
 extern "C" V3_6A90 MultiParticleFunc(int n, Ent_6A90 *params) {
     if (D_58B4_6A90 == 0) {
-        Rec_6A90 &r = D_4FBF68_6A90;
+        Rec_6A90 &defaults = D_4FBF68_6A90;
         float zero = 0.0f;
         float one = 1.0f;
-        r.a = 1;
-        r.b = 0;
-        r.c = -1.0f;
-        r.d = one;
-        r.e = 4.0f;
-        r.m[0] = zero;
-        r.m[1] = zero;
-        r.m[2] = zero;
-        r.m[3] = zero;
-        r.m[4] = zero;
-        r.m[5] = zero;
-        r.m[6] = zero;
-        r.m[7] = zero;
-        r.m[8] = zero;
-        r.m[9] = zero;
-        r.m[10] = zero;
-        r.m[11] = zero;
-        r.m[12] = zero;
-        r.m[13] = zero;
-        r.m[14] = zero;
-        r.m[15] = zero;
-        r.m[16] = zero;
-        r.m[17] = zero;
-        r.m[18] = zero;
-        r.m[19] = zero;
-        r.m[20] = zero;
-        r.m[21] = zero;
-        r.m[22] = zero;
-        r.m[23] = zero;
-        r.m[24] = zero;
-        r.m[25] = zero;
-        r.m[26] = zero;
-        r.m[27] = zero;
-        r.v[0] = one;
-        r.v[1] = zero;
-        r.v[2] = zero;
-        r.v[3] = zero;
-        r.v[4] = one;
-        r.v[5] = one;
-        r.v[6] = one;
-        r.v[7] = one;
-        r.v[8] = one;
-        r.v[9] = zero;
-        r.v[10] = zero;
-        r.v[11] = zero;
-        r.v[12] = one;
-        r.v[13] = zero;
-        r.v[14] = zero;
-        r.v[15] = zero;
-        r.k = 16;
-        r.l = 0;
-        r.n = zero;
-        r.o = 1;
-        r.p = 20.0f;
-        r.q = 0;
-        r.w = 0x80;
+        defaults.a = 1;
+        defaults.b = 0;
+        defaults.c = -1.0f;
+        defaults.d = one;
+        defaults.e = 4.0f;
+        defaults.m[0] = zero;
+        defaults.m[1] = zero;
+        defaults.m[2] = zero;
+        defaults.m[3] = zero;
+        defaults.m[4] = zero;
+        defaults.m[5] = zero;
+        defaults.m[6] = zero;
+        defaults.m[7] = zero;
+        defaults.m[8] = zero;
+        defaults.m[9] = zero;
+        defaults.m[10] = zero;
+        defaults.m[11] = zero;
+        defaults.m[12] = zero;
+        defaults.m[13] = zero;
+        defaults.m[14] = zero;
+        defaults.m[15] = zero;
+        defaults.m[16] = zero;
+        defaults.m[17] = zero;
+        defaults.m[18] = zero;
+        defaults.m[19] = zero;
+        defaults.m[20] = zero;
+        defaults.m[21] = zero;
+        defaults.m[22] = zero;
+        defaults.m[23] = zero;
+        defaults.m[24] = zero;
+        defaults.m[25] = zero;
+        defaults.m[26] = zero;
+        defaults.m[27] = zero;
+        defaults.v[0] = one;
+        defaults.v[1] = zero;
+        defaults.v[2] = zero;
+        defaults.v[3] = zero;
+        defaults.v[4] = one;
+        defaults.v[5] = one;
+        defaults.v[6] = one;
+        defaults.v[7] = one;
+        defaults.v[8] = one;
+        defaults.v[9] = zero;
+        defaults.v[10] = zero;
+        defaults.v[11] = zero;
+        defaults.v[12] = one;
+        defaults.v[13] = zero;
+        defaults.v[14] = zero;
+        defaults.v[15] = zero;
+        defaults.k = 16;
+        defaults.l = 0;
+        defaults.n = zero;
+        defaults.o = 1;
+        defaults.p = 20.0f;
+        defaults.q = 0;
+        defaults.w = 0x80;
         D_58B4_6A90 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
-        r.f = Tag_6A90(r.f);
+        defaults.f = Tag_6A90(defaults.f);
     }
     Rec_6A90 rec;
     Rec_6A90 *buf = &rec;
@@ -7612,12 +7612,12 @@ extern "C" V3_6A90 MultiParticleFunc(int n, Ent_6A90 *params) {
     Ent_6A90 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00446890_6A90[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int argType = D_00446890_6A90[idx];
+        unsigned *field = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != argType && argType == 2)
+            *(float*)field = (float)x->val;
         else
-            *d = x->val;
+            *field = x->val;
     }
     cMultiParticleMan_addParticle_6A90(D_004A4028_6A90, buf->q, buf, buf->w);
     return D_004C9098_6A90;
@@ -7995,9 +7995,9 @@ extern "C" void cWScriptMission_missionFail(P_74C0* self) {
     int iface = cBE_getInterface_Fv_74C0(cBE_getBE_74C0(), 10);
     if (!cBEMissionInterface_isMissionAvailable_74C0(iface, *(int*)((char*)self + 0x20)))
         func_001540F0_74C0(iface, *(int*)((char*)self + 0x20), 1);
-    int h = *(int*)((char*)self + 0x70);
-    if (h)
-        cWScriptMan_runScriptCode(*(int*)((char*)self + 0x10), self, h);
+    int failScript = *(int*)((char*)self + 0x70);
+    if (failScript)
+        cWScriptMan_runScriptCode(*(int*)((char*)self + 0x10), self, failScript);
     else
         self->v20();
     if (self->state == 2)

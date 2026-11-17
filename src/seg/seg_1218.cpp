@@ -1898,9 +1898,9 @@ extern "C" void cFocusMan_purgesection(S_3308 *focusMan, int sectionId) {
     int i;
 
     for (i = 0; i < focusMan->cnt; i++) {
-        void *e = focusMan->arr[i];
-        if (*(unsigned char *)((char*)e + 0x78) != sectionId) {
-            focusMan->arr[n] = e;
+        void *instance = focusMan->arr[i];
+        if (*(unsigned char *)((char*)instance + 0x78) != sectionId) {
+            focusMan->arr[n] = instance;
             n++;
         }
     }
@@ -1945,12 +1945,12 @@ struct V_33B0 { int x, y, z, w; } __attribute__((aligned(16)));
  * @param focusBox  the cFocusBox to add
  */
 extern "C" void cFocusMan_addbox(void *focusMan, V_33B0 *focusBox) {
-    V_33B0 sp0;
+    V_33B0 boxCopy;
 
     (*(int *)((char*)(focusMan) + (0xD0))) = -1;
     (*(V_33B0 **)((char*)(focusMan) + ((*(int *)((char*)(focusMan) + (0))) << 5) + (0x10))) = focusBox;
-    sp0 = *focusBox;
-    (*(V_33B0 *)((char*)((((*(int *)((char*)(focusMan) + (0))) << 5) + (int)focusMan)) + (0x20))) = sp0;
+    boxCopy = *focusBox;
+    (*(V_33B0 *)((char*)((((*(int *)((char*)(focusMan) + (0))) << 5) + (int)focusMan)) + (0x20))) = boxCopy;
     (*(int *)((char*)(focusMan) + (0))) = (int) ((*(int *)((char*)(focusMan) + (0))) + 1);
 }
 #endif
@@ -2191,11 +2191,11 @@ extern "C" void cRiderAnim_updateRule(char* self, void* x, int* anim, float dt)
         break;
     }
     if (done == 0) {
-        char* r = *(char**)(self + 0x60);
-        if (r != 0) {
+        char* rider = *(char**)(self + 0x60);
+        if (rider != 0) {
             int ok = 0;
-            if (*(int*)(r + 0x874) != 0) {
-                ok = *(int*)(r + 0x87C) != 0;
+            if (*(int*)(rider + 0x874) != 0) {
+                ok = *(int*)(rider + 0x87C) != 0;
             }
             if (ok) {
                 func_00103AA0_36A0(self, anim);
@@ -3655,7 +3655,7 @@ static inline unsigned short TriFlags_5398(sSurf_5398* s, int i)
  */
 extern "C" void cRider_checkObjectCollisions(char* self, sV4_5398* norm)
 {
-    sContact_5398 c;
+    sContact_5398 contact;
     sInfo_5398 info;
     if (cRider_getControlState_5398(self) == 9)
         return;
@@ -3663,39 +3663,39 @@ extern "C" void cRider_checkObjectCollisions(char* self, sV4_5398* norm)
     cRider_checkRailBodyCollisions(self);
     cScope_5398 sc(*(void**)(self + 0xAA0), 1);
     cScope_5398* ps = &sc;
-    float d = func_00104E70_5398(self, ps, &c);
-    if (d >= zero) {
+    float overlap = func_00104E70_5398(self, ps, &contact);
+    if (overlap >= zero) {
         if (cRider_isGroundNormalValid(self))
             norm = (sV4_5398*)(self + 0x370);
         if (norm) {
-            sV4_5398 t = Sub_5398(c.normal, Scale_5398(*norm, Dot_5398(c.normal, *norm)));
-            float len = Len_5398(t);
+            sV4_5398 flatNormal = Sub_5398(contact.normal, Scale_5398(*norm, Dot_5398(contact.normal, *norm)));
+            float len = Len_5398(flatNormal);
             if (len < 0.0010000000474974513f)
-                c.normal = *norm;
+                contact.normal = *norm;
             else
-                c.normal = Div_5398(t, len);
+                contact.normal = Div_5398(flatNormal, len);
         } else if (cRider_getMotionState(self) == 4) {
             sV4_5398* up = (sV4_5398*)(*(char**)(self + 0x77C) + 0xB0);
-            if (Dot_5398(c.normal, *up) > zero)
-                c.normal = *up;
+            if (Dot_5398(contact.normal, *up) > zero)
+                contact.normal = *up;
             else
-                c.normal = Scale_5398(*up, -1.0f);
+                contact.normal = Scale_5398(*up, -1.0f);
         }
-        float k = Dot_5398(Scale_5398(c.normal, -1.0f), Sub_5398(*(sV4_5398*)(self + 0x1E0), c.vel)) >= 0.0f
-                      ? Dot_5398(Scale_5398(c.normal, -1.0f), Sub_5398(*(sV4_5398*)(self + 0x1E0), c.vel))
+        float k = Dot_5398(Scale_5398(contact.normal, -1.0f), Sub_5398(*(sV4_5398*)(self + 0x1E0), contact.vel)) >= 0.0f
+                      ? Dot_5398(Scale_5398(contact.normal, -1.0f), Sub_5398(*(sV4_5398*)(self + 0x1E0), contact.vel))
                       : 0.0f;
-        info.pos = c.pos;
+        info.pos = contact.pos;
         info.dir = Norm_5398(*(sV4_5398*)(self + 0x1E0));
-        info.normal = c.normal;
+        info.normal = contact.normal;
         info.speed = k;
-        if ((TriFlags_5398(c.surf, c.idx) & 2) && !(c.surf->flags & 0x2000)) {
-            *(sContact_5398*)(self + 0x9E0) = c;
+        if ((TriFlags_5398(contact.surf, contact.idx) & 2) && !(contact.surf->flags & 0x2000)) {
+            *(sContact_5398*)(self + 0x9E0) = contact;
             *(sInfo_5398*)(self + 0xA60) = info;
         }
-        if (TriFlags_5398(c.surf, c.idx) & 1)
-            cRider_doObjectCollision_5398(self, c.surf, &info, &c, d);
-        if (!(c.surf->flags & 0x2000))
-            cSSXAudio_CollisionSound_5398(D_004A3500_5398, self, c.surf, c.idx);
+        if (TriFlags_5398(contact.surf, contact.idx) & 1)
+            cRider_doObjectCollision_5398(self, contact.surf, &info, &contact, overlap);
+        if (!(contact.surf->flags & 0x2000))
+            cSSXAudio_CollisionSound_5398(D_004A3500_5398, self, contact.surf, contact.idx);
     }
     func_0016D320(D_004C5830_5398, self);
     cWorldRider__cWorldRider(&sc, 2);
@@ -3917,8 +3917,8 @@ extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, s
     }
     float vn = Dot_57B8(hit->n, Sub_57B8(hit->vel, rider->mVelocity)) >= 0.0f
                    ? Dot_57B8(hit->n, Sub_57B8(hit->vel, rider->mVelocity)) : 0.0f;
-    char* h = *(char**)(obj + 0xC);
-    if (h == 0 || (*(sVE_57B8**)(h + 0xC))[14].fn(h + (*(sVE_57B8**)(h + 0xC))[14].delta) != 0) {
+    char* handler = *(char**)(obj + 0xC);
+    if (handler == 0 || (*(sVE_57B8**)(handler + 0xC))[14].fn(handler + (*(sVE_57B8**)(handler + 0xC))[14].delta) != 0) {
         func_00106538(rider, Scale_57B8(hit->n, depth * 1.100000023841858f));
         if (vn < 0.0f)
             vn = 0.0f;
@@ -3928,9 +3928,9 @@ extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, s
         cRider_updateOrientationImplicit(rider);
     } else {
         float inv = 1.0f / (100.0f / bounce + 1.0f);
-        float b = vn * inv;
-        float c = (1.0f - grip) * inv;
-        bounce = Sqrt_57B8((b * b - c) >? 0.0f) - b; // PORT: g++ maximum operator
+        float linearTerm = vn * inv;
+        float constTerm = (1.0f - grip) * inv;
+        bounce = Sqrt_57B8((linearTerm * linearTerm - constTerm) >? 0.0f) - linearTerm; // PORT: g++ maximum operator
     }
     float facing = DotV_57B8(rider->unk_180, hit->n);
     if (cRider_getMotionState(rider) == 1 || (cRider_getMotionState(rider) == 2 && *(int*)((char*)rider->mRiderHandler + 0x30) == 1)) {
@@ -3945,12 +3945,12 @@ extern "C" void cRider_doObjectCollision(cRider* rider, char* obj, char* info, s
         t4Vector w = Add_57B8(Sub_57B8(rider->mVelocity, hit->vel), Scale_57B8(hit->n, vn));
         float speed = Len_57B8(w);
         float out = Max_57B8(bounce - vn, 277.77777099609375f);
-        float f = (speed + 555.5555419921875f) * 0.5f;
+        float velScale = (speed + 555.5555419921875f) * 0.5f;
         if (speed <= 27.77777862548828f)
-            f = f / 27.77777862548828f;
+            velScale = velScale / 27.77777862548828f;
         else
-            f = f / speed;
-        ScaleEq_57B8(w, f);
+            velScale = velScale / speed;
+        ScaleEq_57B8(w, velScale);
         rider->mVelocity = Add_57B8(w, Scale_57B8(hit->n, out));
         sVEf_57B8* vt = *(sVEf_57B8**)&rider->mVtbl;
         vt[kRiderVt_vibrationBump].fn((char*)rider + vt[kRiderVt_vibrationBump].delta, vn);
@@ -4143,9 +4143,9 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
         t4Vector* vel = vt3[kRiderVt_getVelocity].fn(sub + vt3[kRiderVt_getVelocity].delta);
         cAirPredictor_startLaunchIntoAir_5D98(self->mAirPredictor, pos, vel, self->unk_2E4);
     }
-    float d0 = Dot_5D98(Get_5D98((char*)self + 0x160), info->off);
-    float d1 = Dot_5D98(Get_5D98((char*)self + 0x170), info->off);
-    float d2 = Dot_5D98(Get_5D98((char*)self + 0x180), info->off);
+    float sideDot = Dot_5D98(Get_5D98((char*)self + 0x160), info->off);
+    float frontDot = Dot_5D98(Get_5D98((char*)self + 0x170), info->off);
+    float upDot = Dot_5D98(Get_5D98((char*)self + 0x180), info->off);
     t4Vector origin = Get_5D98((char*)self + 0x190);
     t4Vector rel = Sub_5D98(info->pos, origin);
     float h = Dot_5D98(rel, Get_5D98((char*)self + 0x180));
@@ -4155,21 +4155,21 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
         if (cRider_getMotionState(self) == 1 && info->off.z > 0.800000011920929f) {
             if (cur == 20 || cur == 21) {
                 anim = 361;
-            } else if (Abs_5D98(d1) > Abs_5D98(d0) && Abs_5D98(d1) > Abs_5D98(d2)) {
-                anim = d1 < 0.0f ? 354 : 355;
-            } else if (Abs_5D98(d2) > Abs_5D98(d0) && Abs_5D98(d2) > Abs_5D98(d1)) {
-                if (d2 < 0.0f)
+            } else if (Abs_5D98(frontDot) > Abs_5D98(sideDot) && Abs_5D98(frontDot) > Abs_5D98(upDot)) {
+                anim = frontDot < 0.0f ? 354 : 355;
+            } else if (Abs_5D98(upDot) > Abs_5D98(sideDot) && Abs_5D98(upDot) > Abs_5D98(frontDot)) {
+                if (upDot < 0.0f)
                     anim = 350;
                 else if (cur == 18 || cur == 19)
                     anim = 351;
             } else {
-                anim = d0 < 0.0f ? 357 : 356;
+                anim = sideDot < 0.0f ? 357 : 356;
             }
         } else if (cRider_getMotionState(self) == 1) {
-            if (Abs_5D98(d1) > Abs_5D98(d0) && Abs_5D98(d1) > Abs_5D98(d2)) {
+            if (Abs_5D98(frontDot) > Abs_5D98(sideDot) && Abs_5D98(frontDot) > Abs_5D98(upDot)) {
                 float minSpeed = 416.5320129394531f;
                 if (minSpeed < info->vn) {
-                    if (d1 < 0.0f) {
+                    if (frontDot < 0.0f) {
                         float len = Len_5D98(self->mVelocity);
                         if (h < 60.0f && len > D_004A4C84) {
                             anim = 342;
@@ -4194,24 +4194,24 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
                         anim = (AIrand() & 1) == 0 ? 340 : 341;
                     }
                 }
-            } else if (Abs_5D98(d2) > Abs_5D98(d0) && Abs_5D98(d2) > Abs_5D98(d1)) {
-                if (d2 < 0.0f)
+            } else if (Abs_5D98(upDot) > Abs_5D98(sideDot) && Abs_5D98(upDot) > Abs_5D98(frontDot)) {
+                if (upDot < 0.0f)
                     anim = 350;
                 else if (cur >= 18 && cur <= 21)
                     anim = 351;
             } else {
                 float minSpeed = 833.337646484375f;
                 if (minSpeed < info->vn)
-                    anim = d0 < 0.0f ? 339 : 338;
+                    anim = sideDot < 0.0f ? 339 : 338;
             }
             if (anim != 438 && (cur == 20 || cur == 21))
                 anim = 361;
         } else {
             float k = Clamp_5D98(Get_5D98((char*)&self->mMatrix.row[2]).z + 1.0f - Abs_5D98(info->off.z),
                                  0.20000000298023224f, 1.399999976158142f);
-            if (Abs_5D98(d1) > Abs_5D98(d0) && Abs_5D98(d1) > Abs_5D98(d2)) {
+            if (Abs_5D98(frontDot) > Abs_5D98(sideDot) && Abs_5D98(frontDot) > Abs_5D98(upDot)) {
                 if (info->vn > k * 1388.880859375f) {
-                    if (d1 < 0.0f) {
+                    if (frontDot < 0.0f) {
                         float len = Len_5D98(self->mVelocity);
                         if (h < 60.0f && len > D_004A4C84) {
                             anim = 332;
@@ -4236,9 +4236,9 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
                         anim = (AIrand() & 1) == 0 ? 330 : 331;
                     }
                 }
-            } else if (Abs_5D98(d2) > Abs_5D98(d0) && Abs_5D98(d2) > Abs_5D98(d1)) {
+            } else if (Abs_5D98(upDot) > Abs_5D98(sideDot) && Abs_5D98(upDot) > Abs_5D98(frontDot)) {
             } else if (info->vn > k * 2083.227294921875f) {
-                anim = d0 < 0.0f ? 329 : 328;
+                anim = sideDot < 0.0f ? 329 : 328;
             }
         }
     }
@@ -5071,10 +5071,10 @@ extern "C" int cRider_checkRailBodyCollisions_impl(cRider* self)
         ScaleEq_6F78(hit.n, -1.0f);
     }
     if (hit.obj != 0) {
-        char* h = *(char**)(hit.obj + 0xC);
-        if (h != 0) {
-            sVEh_6F78* vt = *(sVEh_6F78**)(h + 0xC);
-            vt[42].fn(h + vt[42].delta, &hit);
+        char* handler = *(char**)(hit.obj + 0xC);
+        if (handler != 0) {
+            sVEh_6F78* vt = *(sVEh_6F78**)(handler + 0xC);
+            vt[42].fn(handler + vt[42].delta, &hit);
         }
     }
     sInfo_6F78 info;
@@ -5086,26 +5086,26 @@ extern "C" int cRider_checkRailBodyCollisions_impl(cRider* self)
     if (cRider_isGroundNormalValid(self)) {
         SubEq_6F78(off, Scale_6F78(self->mGroundNormal, Dot_6F78(off, self->mGroundNormal)));
     }
-    float l = Len_6F78(off);
-    if (l < 0.0010000000474974513f) {
+    float offLen = Len_6F78(off);
+    if (offLen < 0.0010000000474974513f) {
         off = hit.n;
     } else {
-        DivEq_6F78(off, l);
+        DivEq_6F78(off, offLen);
     }
     info.off = off;
-    float d = Dot_6F78(delta, off);
-    if (d < 50.0f) {
-        func_00106538(self, Scale_6F78(off, 50.0f - d));
+    float clearance = Dot_6F78(delta, off);
+    if (clearance < 50.0f) {
+        func_00106538(self, Scale_6F78(off, 50.0f - clearance));
     }
     t4Vector oldVel = self->mVelocity;
     float push = (Dot_6F78(off, Sub_6F78(hit.vel, self->mVelocity)) >? 0.0f) + 55.55555725097656f; // PORT: g++ maximum operator
     AddEq_6F78(self->mVelocity, Scale_6F78(off, push));
     t4Vector imp = Scale_6F78(Sub_6F78(oldVel, self->mVelocity), (float)*(int*)((char*)SSXApp + 0x10));
     if (hit.obj != 0) {
-        char* h = *(char**)(hit.obj + 0xC);
-        if (h != 0) {
-            sVEhv_6F78* vt = *(sVEhv_6F78**)(h + 0xC);
-            vt[43].fn(h + vt[43].delta, &hit, &imp);
+        char* handler = *(char**)(hit.obj + 0xC);
+        if (handler != 0) {
+            sVEhv_6F78* vt = *(sVEhv_6F78**)(handler + 0xC);
+            vt[43].fn(handler + vt[43].delta, &hit, &imp);
         }
     }
     if (cRider_getMotionState(self) == 0) {
@@ -5328,25 +5328,25 @@ extern "C" int cRider_checkHandplantCollisions(char* self)
         dir = DivV(*(sVec4*)(self + 0x1E0), spd);
     else
         dir = Front_7578(self);
-    sVec4 p = AddV_7578(*(sVec4*)(self + 0x110), ScaleV_7578(dir, 300.0f));
-    if (!cOverlapList_splineIntersect_7578(*(void**)(self + 0x860), &p, &hit, 2, 300.0f))
+    sVec4 probePos = AddV_7578(*(sVec4*)(self + 0x110), ScaleV_7578(dir, 300.0f));
+    if (!cOverlapList_splineIntersect_7578(*(void**)(self + 0x860), &probePos, &hit, 2, 300.0f))
         return 0;
     if (Abs(hit.normal.z) > 0.8999999761581421f)
         return 0;
-    sVec4 d = SubV(hit.pos, p);
-    if (Len(d) > 300.0f)
+    sVec4 toHit = SubV(hit.pos, probePos);
+    if (Len(toHit) > 300.0f)
         return 0;
-    d = SubV(hit.pos, *(sVec4*)(self + 0x110));
-    if (Dot(*(sVec4*)(self + 0x1E0), d) < 0.0f)
+    toHit = SubV(hit.pos, *(sVec4*)(self + 0x110));
+    if (Dot(*(sVec4*)(self + 0x1E0), toHit) < 0.0f)
         return 0;
     spd = Max_7578(spd, Kph_7578(1000.0f));
-    float r = Clamp(Kph_7578(5000.0f) / spd, 0.5f, 1.5f);
-    float s = r * 0.5f;
+    float speedRatio = Clamp(Kph_7578(5000.0f) / spd, 0.5f, 1.5f);
+    float enterSec = speedRatio * 0.5f;
     if (Dot(hit.normal, *(sVec4*)(self + 0x1E0)) < 0.0f)
         ScaleEq(hit.normal, -1.0f);
     cRider_setControlState_2(self, 13);
-    cHandplantMotion_init(s, *(char**)(self + 0x77C) + 0x110, &hit);
-    cHandplantControl_init(s, *(char**)(self + 0x77C) + 0x370, &hit, *(int*)(*(char**)(self + 0x77C) + 0x1A4));
+    cHandplantMotion_init(enterSec, *(char**)(self + 0x77C) + 0x110, &hit);
+    cHandplantControl_init(enterSec, *(char**)(self + 0x77C) + 0x370, &hit, *(int*)(*(char**)(self + 0x77C) + 0x1A4));
     cRider_setControlState_2(self, 11);
     cRider_setMotionState_7578(self, 5);
     return 1;
@@ -5820,8 +5820,8 @@ extern "C" void cRider_doOpponentCollision(char* self, char* other, sV4_7E70* n,
         return;
     float absSpd = Abs_7E70(speed);
     float lim = 555.5555419921875f;
-    float s = Clamp_7E70(speed, -lim, lim);
-    sV4_7E70 imp = Scale_7E70(*n, s);
+    float clampedSpeed = Clamp_7E70(speed, -lim, lim);
+    sV4_7E70 imp = Scale_7E70(*n, clampedSpeed);
     if (cRider_isGroundNormalValid(self)) {
         AddEq_7E70(*(sV4_7E70*)(self + 0x1E0),
                    Sub_7E70(imp, Scale_7E70(*(sV4_7E70*)(self + 0x370), Dot_7E70(imp, *(sV4_7E70*)(self + 0x370)))));
@@ -5831,7 +5831,7 @@ extern "C" void cRider_doOpponentCollision(char* self, char* other, sV4_7E70* n,
             cAI_7E70* ai = (cAI_7E70*)(self + 0x6C0);
             sV4_7E70* pos = ai->GetPos();
             cAirPredictor_startLaunchIntoAir(*(void**)(self + 0x788), pos, ai->GetDir(), *(float*)(self + 0x2E4));
-            if (Dot_7E70(*n, Get_7E70(self + 0x1C0)) * s > 0.0f)
+            if (Dot_7E70(*n, Get_7E70(self + 0x1C0)) * clampedSpeed > 0.0f)
                 absSpd = 0.0f;
         }
     }
@@ -5841,12 +5841,12 @@ extern "C" void cRider_doOpponentCollision(char* self, char* other, sV4_7E70* n,
         return;
     if (absSpd < 39.99532699584961f)
         return;
-    float r = ((sRec_7E70*)self)[*(int*)(other + 0x86C)].dist;
+    float otherDist = ((sRec_7E70*)self)[*(int*)(other + 0x86C)].dist;
     sInfo_7E70 info;
-    info.pos = Add_7E70(*(sV4_7E70*)(self + 0x110), Scale_7E70(*n, r));
+    info.pos = Add_7E70(*(sV4_7E70*)(self + 0x110), Scale_7E70(*n, otherDist));
     info.dir = Norm_7E70(*(sV4_7E70*)(self + 0x1E0));
     info.normal = *n;
-    info.speed = s;
+    info.speed = clampedSpeed;
     if ((D_005308D0_7E70[0] >> 5) & 1)
         absSpd = 599.9739990234375f;
     if (absSpd > 599.9739990234375f) {
@@ -5987,10 +5987,10 @@ extern "C" void cRider_doBump(char* self, char* info, int flag)
         return;
     }
     int played = 0;
-    float d = Dot_8388(Get_8388(self + 0x1B0), *(sV4_8388*)(info + 0x20));
-    if (d > 0.7071067690849304f) {
+    float frontDot = Dot_8388(Get_8388(self + 0x1B0), *(sV4_8388*)(info + 0x20));
+    if (frontDot > 0.7071067690849304f) {
         cRiderAnimBase_play(*(void**)(self + 0x784), 55, 0, -1.0f);
-    } else if (d < -0.7071067690849304f) {
+    } else if (frontDot < -0.7071067690849304f) {
         cRiderAnimBase_play(*(void**)(self + 0x784), 0x38, 0, -1.0f);
     } else {
         float side = Dot_8388(Get_8388(self + 0x1A0), *(sV4_8388*)(info + 0x20));
@@ -5998,11 +5998,11 @@ extern "C" void cRider_doBump(char* self, char* info, int flag)
             side = -side;
         if (*(float*)(info + 0x30) < 1111.111083984375f && Len_8388(*(sV4_8388*)(self + 0x1E0)) > 1388.888916015625f &&
             cRider_getMotionState(self) != 4) {
-            float a = *(float*)(self + 0x2DC);
-            if (Abs_8388(a) < 6.2831854820251465f) {
-                if (a < 0.0f)
+            float spinRate = *(float*)(self + 0x2DC);
+            if (Abs_8388(spinRate) < 6.2831854820251465f) {
+                if (spinRate < 0.0f)
                     *(float*)(self + 0x2DC) += (int)((unsigned int)AIrand() % 3) * -3.1415927410125732f;
-                else if (a > 0.0f)
+                else if (spinRate > 0.0f)
                     *(float*)(self + 0x2DC) += (int)((unsigned int)AIrand() % 3) * 3.1415927410125732f;
                 else
                     *(float*)(self + 0x2DC) += ((int)((unsigned int)AIrand() % 5) - 2) * 3.1415927410125732f;
@@ -6313,14 +6313,14 @@ extern "C" int cRider_isRailLandSuccess(char* self, sVec4_8A48* tgt)
 {
     if (cRider_getMotionState(self) != 0 && cRider_getMotionState(self) != 1)
         return 0;
-    sVec4_8A48 p = vAdd_8A48(*(sVec4_8A48*)((char*)(*(sPath_8A48**)(self + 0x780))->nodes + (*(int*)(self + 0x8A0) << 5)),
+    sVec4_8A48 boardCenter = vAdd_8A48(*(sVec4_8A48*)((char*)(*(sPath_8A48**)(self + 0x780))->nodes + (*(int*)(self + 0x8A0) << 5)),
                              *(sVec4_8A48*)(self + 0x9D0));
-    if (!cOverlapList_splineIntersect(*(void**)(self + 0x860), &p, tgt, 1, 300.0f))
+    if (!cOverlapList_splineIntersect(*(void**)(self + 0x860), &boardCenter, tgt, 1, 300.0f))
         return 0;
     float spd = vLen_8A48(*(sVec4_8A48*)(self + 0x1E0));
     if (0.001f < spd) {
-        sVec4_8A48 d = vSub_8A48(*tgt, p);
-        if (vDot_8A48(d, *(sVec4_8A48*)(self + 0x1E0)) < spd * -0.20000000298023224f)
+        sVec4_8A48 toRail = vSub_8A48(*tgt, boardCenter);
+        if (vDot_8A48(toRail, *(sVec4_8A48*)(self + 0x1E0)) < spd * -0.20000000298023224f)
             return 0;
     }
     if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(self + 0x784), 2) == 18) {

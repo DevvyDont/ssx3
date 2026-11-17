@@ -431,9 +431,9 @@ extern "C" void cInstanceNode_buildMeshMat(sInInst_FED8* self, int mesh, sInMat_
 {
     sInMat_FED8* base = &self->world;
     sInModel_FED8* pModel = self->pModel;
-    sInOther_FED8* o = self->other;
-    if (o != 0) {
-        if (mesh != -1 && ((InBoolFn_FED8)o->vt[26].fn)((char*)o + o->vt[26].delta)) {
+    sInOther_FED8* instNode = self->other;
+    if (instNode != 0) {
+        if (mesh != -1 && ((InBoolFn_FED8)instNode->vt[26].fn)((char*)instNode + instNode->vt[26].delta)) {
             vu0CopyMat_FED8(out, ((InPartMatFn_FED8)self->other->vt[29].fn)((char*)self->other + self->other->vt[29].delta, mesh));
             return;
         }
@@ -442,22 +442,22 @@ extern "C" void cInstanceNode_buildMeshMat(sInInst_FED8* self, int mesh, sInMat_
     sInPart_FED8* parts = pModel->parts;
     if (mesh >= 0) {
         float k = self->scale;
-        sInV4_FED8 s;
-        s.x = k;
-        s.y = k;
-        s.z = k;
-        s.w = 1.0f;
+        sInV4_FED8 scaleVec;
+        scaleVec.x = k;
+        scaleVec.y = k;
+        scaleVec.z = k;
+        scaleVec.w = 1.0f;
         vu0CopyMat_FED8(out, parts[mesh].mat);
         {
-            sInV4_FED8 t;
-            sInV4_FED8 r3 = out->r[3];
-            mulv_FED8(t, r3, s);
-            out->r[3] = t;
+            sInV4_FED8 scaledPos;
+            sInV4_FED8 translation = out->r[3];
+            mulv_FED8(scaledPos, translation, scaleVec);
+            out->r[3] = scaledPos;
         }
         for (mesh = parts[mesh].parent; mesh != -1; mesh = parts[mesh].parent) {
-            sInMat_FED8 t2;
-            mulScaled_FED8(&t2, parts[mesh].mat, s, out);
-            vu0CopyMat_FED8(out, &t2);
+            sInMat_FED8 chained;
+            mulScaled_FED8(&chained, parts[mesh].mat, scaleVec, out);
+            vu0CopyMat_FED8(out, &chained);
         }
         mulLeft_FED8(out, base);
     } else {
@@ -745,10 +745,10 @@ extern "C" void* cDeadNode_cDeadNode(void* self, int pInst)
 {
     func_0034FB00(self, 8, 6, pInst);
     *(void**)((char*)self + 0xC) = cDeadNode_vtbl;
-    unsigned int* f = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
-    *f &= 0xFFFFFF9F;
-    f = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
-    *f = (*f & 0xFFFFFFFD) | 4;
+    unsigned int* recordFlags = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
+    *recordFlags &= 0xFFFFFF9F;
+    recordFlags = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
+    *recordFlags = (*recordFlags & 0xFFFFFFFD) | 4;
     return self;
 }
 #endif

@@ -76,18 +76,18 @@ extern int D_0046D378[];
  * command item (func_002CCF98) at +0x134 with ID 0 and caption "Abort", and adds it with cMenu_addItem. Selecting it
  * runs func_001DBAB8. func_0017D298 builds it at +0x1AAC of the debug front end.
  *
- * @param arg0  the menu to construct
- * @param arg1  the owner reference; its first word (the debug front end) is stored at +0x130
- * @return @p arg0
+ * @param menu  the menu to construct
+ * @param owner  the owner reference; its first word (the debug front end) is stored at +0x130
+ * @return @p menu
  */
-extern "C" void *func_001DB2B0(char *arg0, int *arg1) {
-    cMenu_cMenu(arg0);
-    char *p = arg0 + 0x134;
-    *(int **)(arg0 + 0x12C) = D_0046D378;
-    *(int *)(arg0 + 0x130) = *arg1;
-    func_002CCF98(p, 0, D_00467DE0, 0);
-    cMenu_addItem(arg0, p, -1);
-    return arg0;
+extern "C" void *func_001DB2B0(char *menu, int *owner) {
+    cMenu_cMenu(menu);
+    char *abortItem = menu + 0x134;
+    *(int **)(menu + 0x12C) = D_0046D378;
+    *(int *)(menu + 0x130) = *owner;
+    func_002CCF98(abortItem, 0, D_00467DE0, 0);
+    cMenu_addItem(menu, abortItem, -1);
+    return menu;
 }
 #endif
 
@@ -1303,11 +1303,11 @@ INCLUDE_ASM("main/all_in_one_main", cDebugFE_getFont);
 /**
  * Returns the word at +0x18 of the debug front end, the font cDebugMenuScreen_draw reads from SSXApp's DebugFE.
  *
- * @param arg0  the debug front end
+ * @param self  the debug front end
  * @return the word at +0x18
  */
-extern "C" int cDebugFE_getFont(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x18)));
+extern "C" int cDebugFE_getFont(void *self) {
+    return (*(int *)((char*)(self) + (0x18)));
 }
 #endif
 
@@ -1700,11 +1700,11 @@ INCLUDE_ASM("main/all_in_one_main", cUILocaleInterface_setLanguage);
  * The base locale's version (vtable D_0046D848, slot 0x1C); the front-end locale overrides it with func_00195AA0, which
  * also reloads the language files.
  *
- * @param arg0  the locale interface
+ * @param self  the locale interface
  * @param arg1  the language index
  */
-extern "C" void cUILocaleInterface_setLanguage(void *arg0, signed char arg1) {
-    (*(signed char *)((char*)(arg0) + (1))) = arg1;
+extern "C" void cUILocaleInterface_setLanguage(void *self, signed char arg1) {
+    (*(signed char *)((char*)(self) + (1))) = arg1;
 }
 #endif
 
@@ -1795,11 +1795,11 @@ INCLUDE_ASM("main/all_in_one_main", cFECustom_setProfileLaunchScreen);
  *
  * No caller or vtable references it; it sits with the cFECustom helpers.
  *
- * @param arg0  the object
+ * @param self  the object
  * @param arg1  the value to store
  */
-extern "C" void cFECustom_setProfileLaunchScreen(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0xC))) = arg1;
+extern "C" void cFECustom_setProfileLaunchScreen(void *self, int arg1) {
+    (*(int *)((char*)(self) + (0xC))) = arg1;
 }
 #endif
 
@@ -2328,17 +2328,17 @@ extern void* D_0046D1D0_D508[] __asm__("cFEInput_vtbl");
  * Clears the pad-number byte at +0x4, stores cFEInput_vtbl at +0x8 and zeroes the words at +0xC (key ready), +0x10
  * (virtual key), +0x14 (ASCII key) and +0x18 (input device pointer). The load screens build the same object inline.
  *
- * @param arg0  the object
- * @return @p arg0
+ * @param self  the object
+ * @return @p self
  */
-extern "C" void *cFEInput_cFEInput(void *arg0) {
-    (*(signed char *)((char*)(arg0) + (4))) = 0;
-    (*(void ***)((char*)(arg0) + (8))) = D_0046D1D0_D508;
-    (*(int *)((char*)(arg0) + (0x18))) = 0;
-    (*(int *)((char*)(arg0) + (0xC))) = 0;
-    (*(int *)((char*)(arg0) + (0x10))) = 0;
-    (*(int *)((char*)(arg0) + (0x14))) = 0;
-    return arg0;
+extern "C" void *cFEInput_cFEInput(void *self) {
+    (*(signed char *)((char*)(self) + (4))) = 0;
+    (*(void ***)((char*)(self) + (8))) = D_0046D1D0_D508;
+    (*(int *)((char*)(self) + (0x18))) = 0;
+    (*(int *)((char*)(self) + (0xC))) = 0;
+    (*(int *)((char*)(self) + (0x10))) = 0;
+    (*(int *)((char*)(self) + (0x14))) = 0;
+    return self;
 }
 #endif
 
@@ -2411,11 +2411,11 @@ INCLUDE_ASM("main/all_in_one_main", func_001DD578);
  *
  * It follows cFEInput's out-of-line getters (cFEInput_getKeyReady, getVKey, getAsciiKey).
  *
- * @param arg0  the object
+ * @param object  the object
  * @return the word at +0x18
  */
-extern "C" int func_001DD578(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x18)));
+extern "C" int func_001DD578(void *object) {
+    return (*(int *)((char*)(object) + (0x18)));
 }
 #endif
 
@@ -4614,11 +4614,11 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE280);
  * pre-game load (cPreGameLoadScreen), 2 returns to the title screen. The constructor clears it; cFEStateLodge's callers
  * set 1 or 2 directly.
  *
- * @param arg0  the profile load state (cFEStateProfileLoad)
- * @param arg1  the action: 0, 1 or 2
+ * @param profileLoadState  the profile load state (cFEStateProfileLoad)
+ * @param action  the action: 0, 1 or 2
  */
-extern "C" void func_001DE280(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x27C))) = arg1;
+extern "C" void func_001DE280(void *profileLoadState, int action) {
+    (*(int *)((char*)(profileLoadState) + (0x27C))) = action;
 }
 #endif
 
@@ -5526,10 +5526,10 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE8A0);
  * Sets an online state's unk_6C4 (+0x6C4); func_001ABB30 opens the status popup only when it and mpPopup are set.
  *
  * @param feStateNet  the online state (cFEStateNet)
- * @param arg1  the new value
+ * @param value  the new value
  */
-extern "C" void func_001DE8A0(cFEStateNet* feStateNet, int arg1) {
-    (feStateNet->unk_6C4) = arg1;
+extern "C" void func_001DE8A0(cFEStateNet* feStateNet, int value) {
+    (feStateNet->unk_6C4) = value;
 }
 #endif
 

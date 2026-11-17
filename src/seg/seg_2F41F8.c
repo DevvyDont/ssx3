@@ -586,16 +586,16 @@ extern int func_003F4A78(void);
  */
 void NetConnIdle(void) {
     int i;
-    struct sTick *p;
+    struct sTick *idleProc;
     if (D_004A4BA0 != 0) {
         if (func_003F4DE8() < D_004A4BAC) return;
         D_004A4BAC = func_003F4DE8() + 5;
     }
     func_003F4A78();
-    p = D_0051F030;
+    idleProc = D_0051F030;
     for (i = 0xF; i >= 0; i--) {
-        if (p->fn) p->fn(p->arg, func_003F4DE8());
-        p++;
+        if (idleProc->fn) idleProc->fn(idleProc->arg, func_003F4DE8());
+        idleProc++;
     }
 }
 #endif

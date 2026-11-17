@@ -387,10 +387,10 @@ extern "C" void cRenderStateMan_purge(void)
         for (i = 0; i < 8; i++) {
             int j;
             for (j = 0; j < 9; j++) {
-                char* o = D_lensRows_CFA0[i].objs[j];
-                if (o != 0) {
-                    sLensVE_CFA0* vt = *(sLensVE_CFA0**)(o + 4);
-                    vt[1].fn(o + vt[1].delta, 3);
+                char* queryObj = D_lensRows_CFA0[i].objs[j];
+                if (queryObj != 0) {
+                    sLensVE_CFA0* vt = *(sLensVE_CFA0**)(queryObj + 4);
+                    vt[1].fn(queryObj + vt[1].delta, 3);
                 }
             }
         }
@@ -452,25 +452,25 @@ extern "C" void cRenderStateMan_init(void)
 {
     void* pm = *(void**)((char*)SSXApp->Game->World + 0x8);
     int i;
-    cWorldPainterManArg* a0 = &D_004A5560;
-    cWorldPainterManArg* a1 = &D_004A5568;
-    cWorldPainterManArg* a2 = &D_004A5570;
-    cWorldPainterManArg* a3 = &D_004A5578;
-    cWorldPainterManArg* a4 = &D_004A5580;
-    cWorldPainterManArg* a5 = &D_004A5588;
-    cWorldPainterManArg* a6 = &D_004A5590;
-    cWorldPainterManArg* a7 = &kWPR_Lighting;
-    cWorldPainterManArg* a8 = &D_004A55A0;
+    cWorldPainterManArg* cameraRegion = &D_004A5560;
+    cWorldPainterManArg* fogRegion = &D_004A5568;
+    cWorldPainterManArg* lightGlowRegion = &D_004A5570;
+    cWorldPainterManArg* screenTintRegion = &D_004A5578;
+    cWorldPainterManArg* skyBoxRegion = &D_004A5580;
+    cWorldPainterManArg* sunRegion = &D_004A5588;
+    cWorldPainterManArg* surfaceRegion = &D_004A5590;
+    cWorldPainterManArg* lightingRegion = &kWPR_Lighting;
+    cWorldPainterManArg* weatherRegion = &D_004A55A0;
     for (i = 0; i < 8; i++) {
-        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[0] = cWorldPainterMan_getQuery(pm, a0);
-        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[1] = cWorldPainterMan_getQuery(pm, a1);
-        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[2] = cWorldPainterMan_getQuery(pm, a2);
-        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[3] = cWorldPainterMan_getQuery(pm, a3);
-        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[4] = cWorldPainterMan_getQuery(pm, a4);
-        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[5] = cWorldPainterMan_getQuery(pm, a5);
-        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[6] = cWorldPainterMan_getQuery(pm, a6);
-        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[7] = cWorldPainterMan_getQuery(pm, a7);
-        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[8] = cWorldPainterMan_getQuery(pm, a8);
+        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[0] = cWorldPainterMan_getQuery(pm, cameraRegion);
+        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[1] = cWorldPainterMan_getQuery(pm, fogRegion);
+        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[2] = cWorldPainterMan_getQuery(pm, lightGlowRegion);
+        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[3] = cWorldPainterMan_getQuery(pm, screenTintRegion);
+        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[4] = cWorldPainterMan_getQuery(pm, skyBoxRegion);
+        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[5] = cWorldPainterMan_getQuery(pm, sunRegion);
+        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[6] = cWorldPainterMan_getQuery(pm, surfaceRegion);
+        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[7] = cWorldPainterMan_getQuery(pm, lightingRegion);
+        ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[8] = cWorldPainterMan_getQuery(pm, weatherRegion);
         ((sLensRow_ED048*)&D_lensRows_ED048)[i].f24 = 0;
         lensVecOneED048(&D_lensRows_ED048[i].v28);
         lensVecOneED048(&D_lensRows_ED048[i].v38);

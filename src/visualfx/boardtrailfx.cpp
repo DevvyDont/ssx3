@@ -1079,15 +1079,15 @@ extern "C" void cCutSceneTransitionMan_StartCutScene(cCutSceneTransitionMan_Star
     case 1:
         return;
     case 2: {
-        float r = self->t / self->dur;
+        float progress = self->t / self->dur;
         self->dur = dur;
-        self->t = (1.0f - r) * dur;
+        self->t = (1.0f - progress) * dur;
         break;
     }
     case 3: {
-        float r = self->t / self->dur;
+        float progress = self->t / self->dur;
         self->dur = dur;
-        self->t = r * dur;
+        self->t = progress * dur;
         break;
     }
     }
@@ -1148,8 +1148,8 @@ extern "C" void cCutSceneTransitionMan_ForceToRegularMode(void* self)
     if (*(int*)((char*)self + 0x10) != 0) {
         *(int*)((char*)self + 0x10) = 0;
         cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
-        sBTVEntry* e = &(((sBTVEntry*)obj->mVtbl))[41];
-        e->fn((char*)obj + e->delta, (char*)self + 0x20);
+        sBTVEntry* vtblEntry = &(((sBTVEntry*)obj->mVtbl))[41];
+        vtblEntry->fn((char*)obj + vtblEntry->delta, (char*)self + 0x20);
     }
 }
 #endif
@@ -1171,8 +1171,8 @@ extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(void* self)
     }
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
     *(int*)((char*)self + 0x10) = 1;
-    sBTVEntry* e = &(((sBTVEntry*)obj->mVtbl))[41];
-    e->fn((char*)obj + e->delta, (char*)self + 0x34);
+    sBTVEntry* vtblEntry = &(((sBTVEntry*)obj->mVtbl))[41];
+    vtblEntry->fn((char*)obj + vtblEntry->delta, (char*)self + 0x34);
 }
 #endif
 
@@ -1909,12 +1909,12 @@ extern "C" void InitVertex(sBTVtx_BF48* vertex, float* colour, float x, float y)
         vertex->a = (int)(colour[0] * 128.0f);
     }
     vertex->z = 1.0f;
-    sBTQuad_BF48 q;
-    q.w = 1.0f;
-    q.x = x;
-    q.y = y;
-    q.z = 0.0f;
-    vertex->st = q;
+    sBTQuad_BF48 texCoord;
+    texCoord.w = 1.0f;
+    texCoord.x = x;
+    texCoord.y = y;
+    texCoord.z = 0.0f;
+    vertex->st = texCoord;
     vertex->x = D_004A3B30 + D_004A3B38 * 0.0015625f * x;
     vertex->y = D_004A3B3C + D_004A3B44 * 0.0020833334f * y;
 }

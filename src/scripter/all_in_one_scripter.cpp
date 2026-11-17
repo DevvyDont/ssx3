@@ -289,12 +289,12 @@ extern char cScriptObjCameraManager_vtbl[];
  * g++ delete flags untouched in the second argument register (this declaration leaves them out). Nothing of the
  * manager's own is torn down.
  *
- * @param arg0  the camera manager being destroyed (this)
+ * @param manager  the camera manager being destroyed (this)
  */
-extern "C" void cScriptObjCameraManager__cScriptObjCameraManager(void *arg0) {
-    *(char **)((char*)arg0 + 0x10) = D_00482360;
-    *(char **)((char*)arg0 + 0xC) = cScriptObjCameraManager_vtbl;
-    cScriptObject__cScriptObject_48A0(arg0);
+extern "C" void cScriptObjCameraManager__cScriptObjCameraManager(void *manager) {
+    *(char **)((char*)manager + 0x10) = D_00482360;
+    *(char **)((char*)manager + 0xC) = cScriptObjCameraManager_vtbl;
+    cScriptObject__cScriptObject_48A0(manager);
 }
 #endif
 

@@ -234,10 +234,10 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_eventTrick);
  */
 extern "C" void cWScriptMan_eventTrick(void* self, sWSOpData* trickDef)
 {
-    sWSOp o;
-    o.op = 0x70003;
-    o.data = *trickDef;
-    sWSOpList_push((sWSOpList*)((char*)self + 0x40), o);
+    sWSOp event;
+    event.op = 0x70003;
+    event.data = *trickDef;
+    sWSOpList_push((sWSOpList*)((char*)self + 0x40), event);
 }
 #endif
 
@@ -527,9 +527,9 @@ extern "C" int cWScriptMan_isFunc(void* self, int idx, int value)
         cWScriptMan_isFunc_sValue key;
         key.type = 3;
         *(int*)func_00226620(&key) = value;
-        int r = func_00225248(*slot, &key)->type == 5;
+        int isFunction = func_00225248(*slot, &key)->type == 5;
         luno_cLunoVar__cLunoVar(&key, 2);
-        return r;
+        return isFunction;
     }
     return 0;
 }
@@ -566,13 +566,13 @@ extern "C" void cWScriptMan_runFunc(void* self, int idx, int value)
     int off = idx << 2;
     char* base = (char*)self + 0x3CC;
     void** slot = (void**)(base + off);
-    cWScriptMan_runFunc_sArg arg = *(cWScriptMan_runFunc_sArg*)func_00225248(*slot, &key);
+    cWScriptMan_runFunc_sArg scriptFunc = *(cWScriptMan_runFunc_sArg*)func_00225248(*slot, &key);
     cWScriptMan_isFunc_sValue ret;
     ret.type = 0;
     ret.word0 = 0;
     cWScriptMan_runFunc_sCall call;
     func_002224A8(&call);
-    func_002224B8(&call, &arg, *slot, &ret);
+    func_002224B8(&call, &scriptFunc, *slot, &ret);
     luno_cLunoVar__cLunoVar(&ret, 2);
     luno_cLunoVar__cLunoVar(&key, 2);
 }
@@ -735,12 +735,12 @@ extern "C" void cWScriptMan_doOnCollideScript(void* self, void* collideInfo, voi
     *(int*)((char*)self + 0x290) = *(int*)((char*)intersectInfo + 0x50);
     *(void**)((char*)self + 0x294) = collideInfo;
     *(void**)((char*)self + 0x298) = intersectInfo;
-    int r;
+    int raiseEvent;
     {
         sVE_30A060* vt = *(sVE_30A060**)obj;
-        r = vt[8].fn((char*)obj + vt[8].delta);
+        raiseEvent = vt[8].fn((char*)obj + vt[8].delta);
     }
-    if (r) {
+    if (raiseEvent) {
         if (SSXApp->Game->mCurrentStateID != 4) {
             char* rider = obj ? (char*)obj - 0x6C0 : 0;
             if (*(int*)(rider + 0x480) != 0) {
@@ -751,7 +751,7 @@ extern "C" void cWScriptMan_doOnCollideScript(void* self, void* collideInfo, voi
         func_003097E0(self, *(int*)(*(char**)((char*)self + 0x290) + 0x78));
     }
     {
-        sValue_30A060 arg;
+        sValue_30A060 scriptFunc;
         sValue_30A060 ret;
         sCall_30A060 call;
         int id = cWorld_getWScriptHeaderId(*(void**)((char*)self + 0x28C), *(int*)((char*)self + 0x290), 2);
@@ -759,21 +759,21 @@ extern "C" void cWScriptMan_doOnCollideScript(void* self, void* collideInfo, voi
             if (*(int*)((char*)self + 0x2A4) == 0 && *(int*)((char*)self + 0x2A8) == 0) {
                 func_00309C88(self, &id);
             } else {
-                func_00226600(&arg, cWorld_getWScriptScript(*(void**)((char*)self + 0x28C), &id), 0);
+                func_00226600(&scriptFunc, cWorld_getWScriptScript(*(void**)((char*)self + 0x28C), &id), 0);
                 ret.type = 0;
                 ret.word0 = 0;
                 func_002224A8(&call);
-                char* o = *(char**)((char*)self + 0x2A8);
-                if (o != 0)
-                    o = *(char**)(o + 0x3C);
+                char* process = *(char**)((char*)self + 0x2A8);
+                if (process != 0)
+                    process = *(char**)(process + 0x3C);
                 else
-                    o = *(char**)((char*)self + 0x2A4);
-                void* table = *(void**)(o + 0x1C);
+                    process = *(char**)((char*)self + 0x2A4);
+                void* table = *(void**)(process + 0x1C);
                 if (table != 0) {
-                    func_002224B8(&call, &arg, table, &ret);
+                    func_002224B8(&call, &scriptFunc, table, &ret);
                 } else {
                     table = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, str_SetupLocalTable, 0x20000000, 0), 8);
-                    func_002224B8(&call, &arg, table, &ret);
+                    func_002224B8(&call, &scriptFunc, table, &ret);
                     if (table != 0)
                         luno_cLunoTable__cLunoTable(table, 3);
                 }
@@ -782,10 +782,10 @@ extern "C" void cWScriptMan_doOnCollideScript(void* self, void* collideInfo, voi
         }
     }
     {
-        char* v = *(char**)(*(char**)((char*)self + 0x290) + 0xC);
-        if (v != 0) {
-            sVEF_30A060* vt = *(sVEF_30A060**)(v + 0xC);
-            vt[41].fn(v + vt[41].delta, 0.5f);
+        char* instObj = *(char**)(*(char**)((char*)self + 0x290) + 0xC);
+        if (instObj != 0) {
+            sVEF_30A060* vt = *(sVEF_30A060**)(instObj + 0xC);
+            vt[41].fn(instObj + vt[41].delta, 0.5f);
         }
     }
     *(int*)self = saved;
@@ -1733,9 +1733,9 @@ extern "C" void* cProcessList_removeHead(void* self);
  */
 extern "C" void cProcessList_deleteAll(void* self)
 {
-    cProcessList_deleteAll_cObj* p;
-    while ((p = (cProcessList_deleteAll_cObj*)cProcessList_removeHead(self)) != 0) {
-        delete p;
+    cProcessList_deleteAll_cObj* process;
+    while ((process = (cProcessList_deleteAll_cObj*)cProcessList_removeHead(self)) != 0) {
+        delete process;
     }
 }
 #endif
@@ -1750,11 +1750,11 @@ INCLUDE_ASM("wscript/wscriptman", cProcessList_removeHead);
  */
 extern "C" void* cProcessList_removeHead(void* self)
 {
-    cWScriptListNode* p = (cWScriptListNode*)((cWScriptListHead*)self)->head;
-    if (p != 0) {
-        ((cWScriptListHead*)self)->head = p->next;
+    cWScriptListNode* process = (cWScriptListNode*)((cWScriptListHead*)self)->head;
+    if (process != 0) {
+        ((cWScriptListHead*)self)->head = process->next;
     }
-    return p;
+    return process;
 }
 #endif
 
@@ -2187,10 +2187,10 @@ extern "C" void cWScriptMan_failActiveLocalMission(void* self)
         *(unsigned int*)((char*)self + 0x2B0) = 0xFFFFFFFF;
         *(unsigned int*)((char*)self + 0x2A0) = 0xFFFFFFFF;
     }
-    void* p;
-    while ((p = cProcessList_removeHead((char*)self + 0x2B8)) != 0) {
-        *(int*)p = 0;
-        func_0030B260((char*)self + 0x2B4, p);
+    void* process;
+    while ((process = cProcessList_removeHead((char*)self + 0x2B8)) != 0) {
+        *(int*)process = 0;
+        func_0030B260((char*)self + 0x2B4, process);
     }
     func_0030C790((char*)self + 0x1C4);
 }
@@ -2525,14 +2525,14 @@ extern "C" void cWScriptMan_readFromReplayFrame(sWSMan_30BD20* self, cStream_30B
             func_0030C700(self->tables[k], (func_0030C700_cObj*)stream);
         }
     }
-    void* p;
-    while ((p = cProcessList_removeHead(&self->list2B8)) != 0) {
-        *(int*)p = 0;
-        func_0030B260((char*)self + 0x2B4, p);
+    void* process;
+    while ((process = cProcessList_removeHead(&self->list2B8)) != 0) {
+        *(int*)process = 0;
+        func_0030B260((char*)self + 0x2B4, process);
     }
-    while ((p = cProcessList_removeHead(&self->list2BC)) != 0) {
-        *(int*)p = 0;
-        func_0030B260((char*)self + 0x2B4, p);
+    while ((process = cProcessList_removeHead(&self->list2BC)) != 0) {
+        *(int*)process = 0;
+        func_0030B260((char*)self + 0x2B4, process);
     }
     func_0030BEE8(self, (cWScriptListHead*)&self->list2B8, (func_0030BEE8_cStream*)stream);
     func_0030BEE8(self, (cWScriptListHead*)&self->list2BC, (func_0030BEE8_cStream*)stream);
@@ -2549,8 +2549,8 @@ extern "C" void cWScriptMan_readFromReplayFrame(sWSMan_30BD20* self, cStream_30B
     for (int j = 0; j < count; j++) {
         int id;
         stream->Read(&id, 4);
-        int r = cWScriptCache_getScriptBase(*(void**)(self->world + 4), id);
-        luno_cLunoTable_readFromReplayFrame(self->objs[id], stream, r);
+        int scriptBase = cWScriptCache_getScriptBase(*(void**)(self->world + 4), id);
+        luno_cLunoTable_readFromReplayFrame(self->objs[id], stream, scriptBase);
     }
     *(int*)((char*)self + 0x290) = 0;
     *(int*)((char*)self + 0x294) = 0;

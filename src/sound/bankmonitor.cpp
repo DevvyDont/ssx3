@@ -3168,16 +3168,16 @@ extern "C" char* cSpeechSys_cSpeechSys(cSpeechSys* self, int inchrg, int maxBank
     *(void***)(**(char***)self + 0xAB0) = cBankMonitor_vtbl;
     *(const sBmonVtblB07F8**)(**(char***)self + 0x1D4) = &D_004838C0_07F8;
     if (inchrg == 0) {
-        sBmonVtblA07F8 t1 = D_004838A0_07F8;
-        *(sBmonVtblA07F8**)(*(char**)(**(char***)self + 0x1D8) + 4) = &t1;
+        sBmonVtblA07F8 soundSysVtbl = D_004838A0_07F8;
+        *(sBmonVtblA07F8**)(*(char**)(**(char***)self + 0x1D8) + 4) = &soundSysVtbl;
         char* base1 = *(char**)(**(char***)self + 0x1D8) - 0x1C0;
-        int d1 = ((char*)self) - base1;
-        t1.e[1].delta = D_004838A0_07F8.e[1].delta + d1;
-        sBmonVtblB07F8 t2 = D_004838C0_07F8;
-        *(sBmonVtblB07F8**)(**(char***)self + 0x1D4) = &t2;
+        int soundSysAdjust = ((char*)self) - base1;
+        soundSysVtbl.e[1].delta = D_004838A0_07F8.e[1].delta + soundSysAdjust;
+        sBmonVtblB07F8 bankMgrVtbl = D_004838C0_07F8;
+        *(sBmonVtblB07F8**)(**(char***)self + 0x1D4) = &bankMgrVtbl;
         char* base2 = **(char***)self - 0x1C8;
-        int d2 = ((char*)self) - base2;
-        t2.e[1].delta = D_004838C0_07F8.e[1].delta + d2;
+        int bankMgrAdjust = ((char*)self) - base2;
+        bankMgrVtbl.e[1].delta = D_004838C0_07F8.e[1].delta + bankMgrAdjust;
     }
     self->mVtbl = D_00483870;
     self->mCallbackInstance = -1;
@@ -3239,16 +3239,16 @@ extern "C" void cSpeechSys__cSpeechSys(cSpeechSys* self, int flags)
     *(void***)(**(char***)self + 0xAB0) = cBankMonitor_vtbl;
     *(const sBmonVtblB0AE8**)(**(char***)self + 0x1D4) = &D_004838C0;
     if (flags == 0) {
-        sBmonVtblA0AE8 t1 = D_004838A0;
-        *(sBmonVtblA0AE8**)(*(char**)(**(char***)self + 0x1D8) + 4) = &t1;
+        sBmonVtblA0AE8 soundSysVtbl = D_004838A0;
+        *(sBmonVtblA0AE8**)(*(char**)(**(char***)self + 0x1D8) + 4) = &soundSysVtbl;
         char* base1 = *(char**)(**(char***)self + 0x1D8) - 0x1C0;
-        int d1 = ((char*)self) - base1;
-        t1.e[1].delta = D_004838A0.e[1].delta + d1;
-        sBmonVtblB0AE8 t2 = D_004838C0;
-        *(sBmonVtblB0AE8**)(**(char***)self + 0x1D4) = &t2;
+        int soundSysAdjust = ((char*)self) - base1;
+        soundSysVtbl.e[1].delta = D_004838A0.e[1].delta + soundSysAdjust;
+        sBmonVtblB0AE8 bankMgrVtbl = D_004838C0;
+        *(sBmonVtblB0AE8**)(**(char***)self + 0x1D4) = &bankMgrVtbl;
         char* base2 = **(char***)self - 0x1C8;
-        int d2 = ((char*)self) - base2;
-        t2.e[1].delta = D_004838C0.e[1].delta + d2;
+        int bankMgrAdjust = ((char*)self) - base2;
+        bankMgrVtbl.e[1].delta = D_004838C0.e[1].delta + bankMgrAdjust;
     }
     if (self->mSpeechInstance != 0) {
         cMemMan_free(self->mSpeechInstance);
@@ -3922,9 +3922,9 @@ extern "C" void* cSongConfiguration_cSongConfiguration(cSongConfiguration* self)
     self->mSongBig = 1;
     *(unsigned char*)((char*)self + 0x0) = D_004A35A8[0];
     *(unsigned char*)((char*)self + 0x20) = D_004A35A8[0];
-    cSongConfiguration_cSongConfiguration_sElem20* p = (cSongConfiguration_cSongConfiguration_sElem20*)((char*)self + 0x44);
-    for (int i = 0; i >= 0; i--, p++) {
-        p->b = D_004A35A8[0];
+    cSongConfiguration_cSongConfiguration_sElem20* bankData = (cSongConfiguration_cSongConfiguration_sElem20*)((char*)self + 0x44);
+    for (int i = 0; i >= 0; i--, bankData++) {
+        bankData->b = D_004A35A8[0];
     }
     return ((void*)self);
 }

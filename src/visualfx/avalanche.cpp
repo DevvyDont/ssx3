@@ -715,13 +715,13 @@ extern "C" int tActiveAvalancheNode_update(sAvNodeCA8* self, float currTime)
         self->pos = fd.pos;
         vu0CopyMatrixCA8(&self->rot, &fd.rot);
         self->vel = fd.vel;
-        sAvDataCA8* d = self->data;
+        sAvDataCA8* nodeData = self->data;
         sAvVec4CA8* vel = &self->vel;
-        if (d->type != 2 && d->emit != 0) {
+        if (nodeData->type != 2 && nodeData->emit != 0) {
             void* org = &D_004FF120_7CA8;
             void* em = self->emitter;
             self->f1FC = self->fB4;
-            int alive = currTime < d->duration;
+            int alive = currTime < nodeData->duration;
             cDynamicColourEmitter_update(em, pos, org, vel, alive, 0.01666666753590107f);
         }
         return 1;
@@ -945,9 +945,9 @@ extern "C" void tActiveAvalanche_update_7EF8(sAvActive_7EF8* self)
         self->nextEvent++;
     }
     while (self->nextSound < self->data->nSounds && (float)soundFrame_7EF8(self) <= toFrames_7EF8(self->time)) {
-        sAvObj_7EF8* o = self->objs[self->data->sounds[self->nextSound].obj];
-        if (o != 0) {
-            func_0029E560_7EF8(func_0028B180(), o->sndPos);
+        sAvObj_7EF8* cueObj = self->objs[self->data->sounds[self->nextSound].obj];
+        if (cueObj != 0) {
+            func_0029E560_7EF8(func_0028B180(), cueObj->sndPos);
         }
         self->nextSound++;
     }
@@ -985,9 +985,9 @@ extern "C" void tActiveAvalanche_end(void* self)
         }
         *(int*)self = 0;
         func_0029DEF0(func_0028B180(), 0);
-        char* p = *(char**)((char*)SSXApp->Game->AI + 0xA8);
-        if (*(int*)(p + 0x708) != 0) {
-            *(int*)(p + 0x708) = *(int*)(p + 0x708) - 1;
+        char* dangerMan = *(char**)((char*)SSXApp->Game->AI + 0xA8);
+        if (*(int*)(dangerMan + 0x708) != 0) {
+            *(int*)(dangerMan + 0x708) = *(int*)(dangerMan + 0x708) - 1;
         }
     }
 }
@@ -1524,14 +1524,14 @@ extern "C" void tActiveAvalancheNode_renderLines(void* nodep)
         int i = 0;
         sRow_8A00 pos = node->obj->pos;
         for (; i < (int)node->obj->count; i++) {
-            sVec4_8A00 v(node->obj->recs[i].dx * 2.0f, node->obj->recs[i].dy * 2.0f, node->obj->recs[i].dz * 2.0f, 0.0f);
-            AddTo_8A00(pos, v);
+            sVec4_8A00 scratchVec(node->obj->recs[i].dx * 2.0f, node->obj->recs[i].dy * 2.0f, node->obj->recs[i].dz * 2.0f, 0.0f);
+            AddTo_8A00(pos, scratchVec);
             sVec3_8A00 n = Normalize_8A00(sVec3_8A00(node->obj->recs[i].ax * 0.007874015718698502f, node->obj->recs[i].ay * 0.007874015718698502f, node->obj->recs[i].az * 0.007874015718698502f));
-            v.x = n.x;
-            v.y = n.y;
-            v.z = n.z;
-            v.w = 0.0f;
-            Rotate_8A00(matrix, v, node->obj->recs[i].angle * 0.008213315159082413f);
+            scratchVec.x = n.x;
+            scratchVec.y = n.y;
+            scratchVec.z = n.z;
+            scratchVec.w = 0.0f;
+            Rotate_8A00(matrix, scratchVec, node->obj->recs[i].angle * 0.008213315159082413f);
             matrix.v[3] = pos;
             D_004D5B70_8A00[i].r = node->obj->recs[i].r;
             D_004D5B70_8A00[i].g = node->obj->recs[i].g;

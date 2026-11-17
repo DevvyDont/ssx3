@@ -321,9 +321,9 @@ extern "C" void cGame_load(cGame* self)
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVEntryGL* vt = (sVEntryGL*)ps2GraphicsMan->mVtbl;
-        int r = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, file + *(int*)(file + 0x14), str_menu_b, 0, 1, -1);
-        self->mBoxTextureID = r;
-        *(int*)((char*)self->MenuSys + 0x60) = r;
+        int result = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, file + *(int*)(file + 0x14), str_menu_b, 0, 1, -1);
+        self->mBoxTextureID = result;
+        *(int*)((char*)self->MenuSys + 0x60) = result;
     }
     if (file != 0)
         cMemMan_free(file);
@@ -385,20 +385,20 @@ extern "C" void cGame_load(cGame* self)
     sNamedGL* objNode = (sNamedGL*)operator new(20, str_AIVisualEffectsMan, 0, 0);
     cObjNode_cObjNode1(objNode, 6);
     objNode->vtbl = D_0047CB60;
-    void* r = cAIVisualEffectsMan_construct();
+    void* result = cAIVisualEffectsMan_construct();
     self->AIVisualEffectsMan = (cAIVisualEffectsObjNode*)objNode;
-    objNode->obj = r;
+    objNode->obj = result;
     objNode = (sNamedGL*)operator new(20, str_VisualEffectsMan, 0, 0);
     cObjNode_cObjNode1(objNode, 3);
     objNode->vtbl = D_0047D070;
-    r = cVisualEffectsMan_construct();
+    result = cVisualEffectsMan_construct();
     self->VisualEffectsMan = (cVisualEffectsObjNode*)objNode;
-    objNode->obj = r;
+    objNode->obj = result;
     objNode = (sNamedGL*)operator new(20, str_SSXStatsMan, 0, 0);
     cObjNode_cObjNode1(objNode, 4);
     objNode->vtbl = cSSXStatsObjNode_vtbl;
-    r = func_002D2100();
-    objNode->obj = r;
+    result = func_002D2100();
+    objNode->obj = result;
     self->SSXStatsMan = (cSSXStatsObjNode*)objNode;
 }
 #endif
@@ -1001,11 +1001,11 @@ INCLUDE_ASM("main/gameload", cGame_sectionLoaded);
  */
 extern "C" void cGame_sectionLoaded(void* self)
 {
-    void* a = *(void**)((char*)self + 0xC);
-    if (a != 0) {
-        void* b = *(void**)((char*)a + 0xA4);
-        if (b != 0) {
-            *(int*)((char*)b + 0xD0) = -1;
+    void* gameAI = *(void**)((char*)self + 0xC);
+    if (gameAI != 0) {
+        void* focusMan = *(void**)((char*)gameAI + 0xA4);
+        if (focusMan != 0) {
+            *(int*)((char*)focusMan + 0xD0) = -1;
         }
     }
 }
@@ -1828,7 +1828,7 @@ extern "C" void cGame_updateState(void* self_)
     int next = self->mPendingStateID;
     if (next == 0)
         return;
-    int arg = self->mPendingStateStartupFlag;
+    int startupFlag = self->mPendingStateStartupFlag;
     if (self->mCurrentState != 0)
         self->mCurrentState->loseFocus();
     self->mPrevStateID = self->mCurrentStateID;
@@ -1907,7 +1907,7 @@ extern "C" void cGame_updateState(void* self_)
     }
     if (self->mCurrentState != 0) {
         cGameViewMan_updateViewState(self->ViewMan);
-        self->mCurrentState->gainFocus(arg);
+        self->mCurrentState->gainFocus(startupFlag);
     }
 }
 #endif
@@ -2001,12 +2001,12 @@ extern "C" int cGame_isPreloadedStateReady(void* self)
     if (*(int*)((char*)self + 0x208) != 0) {
         return 0;
     }
-    void* p = *(void**)((char*)self + 0x204);
-    if (p == 0) {
+    void* preloadingState = *(void**)((char*)self + 0x204);
+    if (preloadingState == 0) {
         return 1;
     }
-    sVEntry_002312D8* vt = *(sVEntry_002312D8**)((char*)p + 0xC);
-    return vt[8].fn((char*)p + vt[8].delta);
+    sVEntry_002312D8* vt = *(sVEntry_002312D8**)((char*)preloadingState + 0xC);
+    return vt[8].fn((char*)preloadingState + vt[8].delta);
 }
 #endif
 
@@ -2352,30 +2352,30 @@ extern "C" int cGame_activatePauseMenu(char* self)
     }
     int mask = 0;
     void* bi = cBE_getInterface_Fv(cBE_getBE(), 1);
-    char* g = *(char**)(self + 0x28);
+    char* replay = *(char**)(self + 0x28);
     int sel = -1;
-    if (*(int*)(g + 0x608)) {
-        int p = *(int*)(g + 0x28);
-        void** o = PlayerObj_1840(p);
-        if (!IsReady_1840(o)) {
-            mask = 1 << p;
+    if (*(int*)(replay + 0x608)) {
+        int ctrlId = *(int*)(replay + 0x28);
+        void** controller = PlayerObj_1840(ctrlId);
+        if (!IsReady_1840(controller)) {
+            mask = 1 << ctrlId;
         } else if (D_004A2E9C == 0) {
-            if (cInput_getState(o, 0x3C)) {
-                sel = p;
+            if (cInput_getState(controller, 0x3C)) {
+                sel = ctrlId;
             }
         }
     } else {
         int i;
         for (i = 0; i < Count_1840(self); i++) {
-            char* r = At_1840(self, i);
-            if (*(int*)(*(char**)(r + 0x18) + 0x87C)) {
-                int p = cBENewPlayerInterface_getRiderCtrlID(bi, i);
-                void** o = PlayerObj_1840(p);
-                if (!IsReady_1840(o)) {
-                    mask |= 1 << p;
+            char* rider = At_1840(self, i);
+            if (*(int*)(*(char**)(rider + 0x18) + 0x87C)) {
+                int ctrlId = cBENewPlayerInterface_getRiderCtrlID(bi, i);
+                void** controller = PlayerObj_1840(ctrlId);
+                if (!IsReady_1840(controller)) {
+                    mask |= 1 << ctrlId;
                 } else if (sel < 0 && D_004A2E9C == 0) {
-                    if (cInput_getState(o, 0x3C)) {
-                        sel = p;
+                    if (cInput_getState(controller, 0x3C)) {
+                        sel = ctrlId;
                     }
                 }
             }
@@ -2387,11 +2387,11 @@ extern "C" int cGame_activatePauseMenu(char* self)
             int i;
             sel = 0;
             for (i = 0; i < Count_1840(self); i++) {
-                char* r = At_1840(self, i);
-                if (*(int*)(*(char**)(r + 0x18) + 0x87C)) {
-                    int p = cBENewPlayerInterface_getRiderCtrlID(bi, i);
-                    if (IsReady_1840(PlayerObj_1840(p))) {
-                        sel = p;
+                char* rider = At_1840(self, i);
+                if (*(int*)(*(char**)(rider + 0x18) + 0x87C)) {
+                    int ctrlId = cBENewPlayerInterface_getRiderCtrlID(bi, i);
+                    if (IsReady_1840(PlayerObj_1840(ctrlId))) {
+                        sel = ctrlId;
                         break;
                     }
                 }
@@ -2432,12 +2432,12 @@ extern "C" int cGame_canUserActivatePauseMenu(void* self)
             return 0;
         }
     }
-    int r = 0;
+    int allowed = 0;
     if (cSSXScriptEngine_IsPauseMenuAllowed(ScriptEngine) != 0) {
-        int m = *(int*)((char*)self + 0x214);
-        r = m != 5 && m != 14 && m != 1 && m != 10;
+        int currentStateId = *(int*)((char*)self + 0x214);
+        allowed = currentStateId != 5 && currentStateId != 14 && currentStateId != 1 && currentStateId != 10;
     }
-    return r;
+    return allowed;
 }
 #endif
 
@@ -2898,10 +2898,10 @@ INCLUDE_ASM("main/gameload", cPreStartScreen_cPreStartScreen__FPv);
  */
 void* cPreStartScreen_cPreStartScreen(void* self)
 {
-    int t0 = 0;
-    *(int*)((char*)self + 0x4) = t0;
+    int zero = 0;
+    *(int*)((char*)self + 0x4) = zero;
     *(int*)self = (int)(void*)cPreStartScreen_vtbl;
-    *(int*)((char*)self + 0x8) = t0;
+    *(int*)((char*)self + 0x8) = zero;
     return self;
 }
 #endif

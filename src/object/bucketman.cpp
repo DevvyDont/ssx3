@@ -560,8 +560,8 @@ INCLUDE_ASM("object/bucketman", cBucketMan_setsortflag);
  */
 extern "C" void cBucketMan_setsortflag(void* self, int bucket)
 {
-    sBucketEntry* p = *(sBucketEntry**)((char*)self + 0x4);
-    p[bucket].flags |= 1;
+    sBucketEntry* buckets = *(sBucketEntry**)((char*)self + 0x4);
+    buckets[bucket].flags |= 1;
 }
 #endif
 

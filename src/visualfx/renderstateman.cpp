@@ -654,9 +654,9 @@ extern "C" void cRenderStateMan_writeToReplayFrame(void* frame)
 {
     int i;
     for (i = 0; i < 6; i++) {
-        sRSMEntry* e = &cRenderStateMan_m_state[i];
-        ((cRSMObjWF*)*e->p20)->v64(frame);
-        ((cRSMObjWF*)*e->p20)->v64(frame);
+        sRSMEntry* stateEntry = &cRenderStateMan_m_state[i];
+        ((cRSMObjWF*)*stateEntry->p20)->v64(frame);
+        ((cRSMObjWF*)*stateEntry->p20)->v64(frame);
     }
 }
 #endif
@@ -1455,10 +1455,10 @@ extern "C" void cVisualEffectsMan_commonUpdate(void* self, int i)
         cDepthFog_m_Exponent = 1;
         cDepthFog_m_NearPlane = func_002EEA08(i);
         cDepthFog_m_FarPlane = func_002EEA50(i);
-        float g = func_002EEA98(i);
-        float b = func_002EEAE0(i);
-        float a = func_002EEB28(i);
-        *dst = sRsCol_F00A0(1.0f, g, b, a);
+        float fogRed = func_002EEA98(i);
+        float fogGreen = func_002EEAE0(i);
+        float fogBlue = func_002EEB28(i);
+        *dst = sRsCol_F00A0(1.0f, fogRed, fogGreen, fogBlue);
     }
     if (cScreenTint_m_OverrideWP == 0) {
         cScreenTint_m_ColourR = func_002EEB70(i);
@@ -1583,10 +1583,10 @@ extern "C" void* cPS2AIVisualEffectsMan_cPS2AIVisualEffectsMan(void* self)
 {
     cAIVisualEffectsMan_cAIVisualEffectsMan(self);
     *(void***)((char*)self + 0x4) = cPS2AIVisualEffectsMan_vtbl;
-    void** p = (void**)cMemMan_alloc(4, str_Avalanche, 0, 0);
-    *p = cAvalanche_vtbl;
-    cAvalanche_init(p);
-    *(void***)self = p;
+    void** avalanche = (void**)cMemMan_alloc(4, str_Avalanche, 0, 0);
+    *avalanche = cAvalanche_vtbl;
+    cAvalanche_init(avalanche);
+    *(void***)self = avalanche;
     return self;
 }
 #endif
@@ -1615,9 +1615,9 @@ public:
 extern "C" void cPS2AIVisualEffectsMan__cPS2AIVisualEffectsMan(void* self, int flags)
 {
     *(void***)((char*)self + 0x4) = cPS2AIVisualEffectsMan_vtbl;
-    cPS2AIVisualEffectsMan__cPS2AIVisualEffectsMan_cVirt* o = *(cPS2AIVisualEffectsMan__cPS2AIVisualEffectsMan_cVirt**)self;
-    if (o != 0) {
-        o->v01(3);
+    cPS2AIVisualEffectsMan__cPS2AIVisualEffectsMan_cVirt* avalanche = *(cPS2AIVisualEffectsMan__cPS2AIVisualEffectsMan_cVirt**)self;
+    if (avalanche != 0) {
+        avalanche->v01(3);
     }
     *(void***)((char*)self + 0x4) = cAIVisualEffectsMan_vtbl;
     if (flags & 1) {

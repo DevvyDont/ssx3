@@ -483,8 +483,8 @@ extern "C" int cMemMan_totalUnused(void)
 {
     MUTEX_lock(cMemMan_m_mutex);
     sMallinfo_99D0 mi = func_0031FC20(TheDynamicMemMan);
-    int r = cMemMan_m_heapSize - mi.uordblks;
+    int freeBytes = cMemMan_m_heapSize - mi.uordblks;
     MUTEX_unlock(cMemMan_m_mutex);
-    return r;
+    return freeBytes;
 }
 #endif

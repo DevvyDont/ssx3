@@ -266,16 +266,16 @@ extern "C" int func_003A6948(const char* path, int n, sName_3A6948* names)
     int ret;
     {
         sStr_3A6948 full;
-        sStr_3A6948 tmp;
+        sStr_3A6948 prefixedBuf;
         sStr_3A6948 str;
         char* pre = D_004A47C0;
-        cBXString* t = (cBXString*)&tmp;
+        cBXString* prefixed = (cBXString*)&prefixedBuf;
         cBXString_cBXString2(&str, path);
-        func_003186D0(t, pre, (cBXString*)&str);
-        func_00318630((cBXString*)&full, t, str_sdb);
+        func_003186D0(prefixed, pre, (cBXString*)&str);
+        func_00318630((cBXString*)&full, prefixed, str_sdb);
         data = (sFile_3A6948*)FILE_loadz(full.s, 0x3000000);
         cBXString__cBXString(&full, 2);
-        cBXString__cBXString(t, 2);
+        cBXString__cBXString(prefixed, 2);
         cBXString__cBXString(&str, 2);
     }
     ret = data && data->magic == 0x3800;
@@ -286,20 +286,20 @@ extern "C" int func_003A6948(const char* path, int n, sName_3A6948* names)
         ret = 0;
         for (i = 0; i < n; i++)
         {
-            sStr_3A6948 s;
+            sStr_3A6948 upperName;
             unsigned int j;
             names[i].ok = 0;
-            cBXString_cBXString2(&s, names[i].name);
-            cBXString_makeUpper((cBXString*)&s);
+            cBXString_cBXString2(&upperName, names[i].name);
+            cBXString_makeUpper((cBXString*)&upperName);
             for (j = 0; j < data->count; j++)
             {
-                if (func_004165A8(&data->entries[j], s.s) == 0)
+                if (func_004165A8(&data->entries[j], upperName.s) == 0)
                 {
                     names[i].ok = ret = 1;
                     break;
                 }
             }
-            cBXString__cBXString(&s, 2);
+            cBXString__cBXString(&upperName, 2);
         }
     }
     if (data)
@@ -499,12 +499,12 @@ INCLUDE_ASM("world/world", cWorld_getSphereTreeInfo__FPvT0);
  *
  * No null checks. The body is identical to cWorld_getPolyModelInfo's.
  *
- * @param a1  the tInstanceRecord
+ * @param instance  the tInstanceRecord
  * @return the list pointer
  */
-int cWorld_getSphereTreeInfo(void* self, void* a1)
+int cWorld_getSphereTreeInfo(void* self, void* instance)
 {
-    return *(int*)((char*)*(void**)((char*)*(void**)((char*)a1 + 0x88) + 0xc) + 0x8);
+    return *(int*)((char*)*(void**)((char*)*(void**)((char*)instance + 0x88) + 0xc) + 0x8);
 }
 #endif
 
@@ -518,12 +518,12 @@ INCLUDE_ASM("world/world", cWorld_getPolyModelInfo__FPvT0);
  * No null checks. The body is identical to cWorld_getSphereTreeInfo's; func_0035DF70 (railmodifier) passes its result to
  * tSphTreeList_getMeshTree.
  *
- * @param a1  the tInstanceRecord
+ * @param instance  the tInstanceRecord
  * @return the list pointer
  */
-int cWorld_getPolyModelInfo(void* self, void* a1)
+int cWorld_getPolyModelInfo(void* self, void* instance)
 {
-    return *(int*)((char*)*(void**)((char*)*(void**)((char*)a1 + 0x88) + 0xc) + 0x8);
+    return *(int*)((char*)*(void**)((char*)*(void**)((char*)instance + 0x88) + 0xc) + 0x8);
 }
 #endif
 

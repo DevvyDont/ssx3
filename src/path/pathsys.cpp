@@ -299,8 +299,8 @@ extern "C" int cPathSys_getNearestSessionPoint(sPathNearList* list, sPathVec3* p
         if (list->entries[i].type == 2 && list->entries[i].id != 0) {
             if (cBEMissionInterface_isSessionPoint(cBE_getInterface_Fv(cBE_getBE(), 10), list->entries[i].id,
                               *(int*)((char*)SSXApp->Game->SectionMan + 0x1BC)) != 0) {
-                sPathVec3 d = list->entries[i].pos - *pos;
-                float dist = pathLen(d);
+                sPathVec3 difference = list->entries[i].pos - *pos;
+                float dist = pathLen(difference);
                 if (dist < best) {
                     best = dist;
                     bestId = list->entries[i].id;

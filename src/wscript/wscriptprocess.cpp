@@ -686,8 +686,8 @@ extern "C" void cWScriptProcess_endTask(cWScriptProcess_endTask_cProc* self)
     int next = self->cur + 1;
     if (next < self->count) {
         self->cur = next;
-        cWScriptProcess_endTask_cElem* e = &self->elems[next];
-        e->v04();
+        cWScriptProcess_endTask_cElem* nextTask = &self->elems[next];
+        nextTask->v04();
     } else {
         self->v02();
     }
@@ -1333,17 +1333,17 @@ extern "C" void* cWScriptMan_cWScriptMan(void* self)
     func_0030B058((char*)self + 0x2B4);
     func_0030B058((char*)self + 0x2B8);
     func_0030B058((char*)self + 0x2BC);
-    char* p = (char*)self + 0x2C0;
+    char* collectPool = (char*)self + 0x2C0;
     int i;
     for (i = 0; i != -1; i--) {
-        char* next = p + 0x10C;
-        unsigned int* q = (unsigned int*)(p + 0xC);
+        char* next = collectPool + 0x10C;
+        unsigned int* poolSlot = (unsigned int*)(collectPool + 0xC);
         int j;
         for (j = 63; j != -1; j--) {
-            *q++ = 0xFFFFFFFF;
+            *poolSlot++ = 0xFFFFFFFF;
         }
-        cCollectPool_init(p);
-        p = next;
+        cCollectPool_init(collectPool);
+        collectPool = next;
     }
     cWScriptMan_cWScriptMan_current = self;
     *(char**)((char*)self + 0x28C) = (char*)cWorld_m_pTheWorld;
@@ -1376,9 +1376,9 @@ extern "C" void cWScriptMan__cWScriptMan(void* self, int flags)
     cWScriptMan_purgeGlobalTables(self);
     cWScriptMan_TheWScriptMan = 0;
     if ((char*)self + 0x2C0 != 0) {
-        char* p = (char*)self + 0x2C0 + 0x10C;
-        while ((char*)self + 0x2C0 != p) {
-            p -= 0x10C;
+        char* collectPool = (char*)self + 0x2C0 + 0x10C;
+        while ((char*)self + 0x2C0 != collectPool) {
+            collectPool -= 0x10C;
         }
     }
     cProcessList__cProcessList((char*)self + 0x2BC, 2);
@@ -1672,16 +1672,16 @@ extern "C" void cWScriptMan_updateWorld(void* self)
         for (j = 0; j < cnt; j++) {
             if (defs[j].f0 != *(int*)((char*)self + 0x2A0)) {
                 void* table = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, str_SetupLocalTable, 0x20000000, 0), 8);
-                int h = cWScriptMan_getScriptCode_2(self, defs[j].f4C);
-                if (h != 0) {
-                    sWSPValue8DB8 arg;
+                int scriptCode = cWScriptMan_getScriptCode_2(self, defs[j].f4C);
+                if (scriptCode != 0) {
+                    sWSPValue8DB8 scriptFunc;
                     sWSPValue8DB8 ret;
                     sWSPCall8DB8 call;
-                    func_00226600(&arg, h, 0);
+                    func_00226600(&scriptFunc, scriptCode, 0);
                     ret.type = 0;
                     ret.word0 = 0;
                     func_002224A8(&call);
-                    func_002224B8(&call, &arg, table, &ret);
+                    func_002224B8(&call, &scriptFunc, table, &ret);
                     luno_cLunoVar__cLunoVar((cWScriptMan_isFunc_sValue*)&ret, 2);
                 }
                 if (table != 0) {
@@ -1953,26 +1953,26 @@ extern "C" void cWScriptMan_update(void* self)
     *(int*)((char*)self + 0x1C) = 0;
     *(int*)((char*)self + 0x28) = 0;
     *(int*)((char*)self + 0x34) = 0;
-    void* p;
-    while ((p = cProcessList_removeHead((char*)self + 0x2BC)) != 0) {
-        func_0030B260((char*)self + 0x2B4, p);
-        cWScriptMan_startProcess(self, p);
+    void* process;
+    while ((process = cProcessList_removeHead((char*)self + 0x2BC)) != 0) {
+        func_0030B260((char*)self + 0x2B4, process);
+        cWScriptMan_startProcess(self, process);
     }
     sCmdList_309270 list = *(sCmdList_309270*)((char*)self + 0x40);
     *(int*)((char*)self + 0x40) = 0;
     for (int i = 0; i < list.count; i++) {
-        sCmd_309270* c = &list.e[i];
-        if ((unsigned short)c->flags == 0)
-            *(void**)((char*)self + 0x290) = lookup_309270(**(sRefWorld_309270***)((char*)self + 0x28C), c->id);
+        sCmd_309270* event = &list.e[i];
+        if ((unsigned short)event->flags == 0)
+            *(void**)((char*)self + 0x290) = lookup_309270(**(sRefWorld_309270***)((char*)self + 0x28C), event->id);
         char* next = *(char**)((char*)self + 0x2B8);
         while (next != 0) {
             char* proc = next;
             next = *(char**)(proc + 0x18);
             *(char**)((char*)self + 0x2A4) = proc;
-            if (c->flags & 0x20000)
-                func_003078C0(proc, c);
-            if (c->flags & 0x10000)
-                func_00307A10((cWScriptProcList*)proc, (int)c);
+            if (event->flags & 0x20000)
+                func_003078C0(proc, event);
+            if (event->flags & 0x10000)
+                func_00307A10((cWScriptProcList*)proc, (int)event);
         }
         *(int*)((char*)self + 0x290) = 0;
         *(int*)((char*)self + 0x2A4) = 0;

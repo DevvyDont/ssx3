@@ -71,10 +71,10 @@ extern "C" void cWScriptCache__cWScriptCache(int* self, int flags)
 {
     char* old = *(char**)((char*)self + 0x4);
     if (old != 0) {
-        char* p = (char*)(*(int*)(old - 0x10) * 0xC + (int)old);
-        while (*(char**)((char*)self + 0x4) != p) {
-            p -= 0xC;
-            cWScriptCacheEntry__cWScriptCacheEntry((int*)p, 0);
+        char* cacheEntry = (char*)(*(int*)(old - 0x10) * 0xC + (int)old);
+        while (*(char**)((char*)self + 0x4) != cacheEntry) {
+            cacheEntry -= 0xC;
+            cWScriptCacheEntry__cWScriptCacheEntry((int*)cacheEntry, 0);
         }
         cMemMan_free(*(char**)((char*)self + 0x4) - 0x10);
     }
@@ -156,17 +156,17 @@ struct sWScriptCacheEntry {
 INCLUDE_ASM("world/wscriptcache", cWScriptCache_getScriptBase);
 #ifdef SKIP_ASM
 /**
- * Returns section @p a1's script data (its cache entry's mpScriptHeader).
+ * Returns section @p sectionId's script data (its cache entry's mpScriptHeader).
  *
  * The wscript code uses it as the section's script base (func_0030BB10, cWScriptMan_readFromReplayFrame).
  *
- * @param a1  the section id
+ * @param sectionId  the section id
  * @return the script file header
  */
-extern "C" int cWScriptCache_getScriptBase(void* self, int a1)
+extern "C" int cWScriptCache_getScriptBase(void* self, int sectionId)
 {
-    sWScriptCacheEntry* p = *(sWScriptCacheEntry**)((char*)self + 0x4);
-    return p[a1].field_0x8;
+    sWScriptCacheEntry* entries = *(sWScriptCacheEntry**)((char*)self + 0x4);
+    return entries[sectionId].field_0x8;
 }
 #endif
 
@@ -273,22 +273,22 @@ extern char D_004A47C0[];
 extern char str_ssf[];
 extern "C" void func_003ACBB8_impl(void *self, int arg) __asm__("func_003ACBB8");
 /**
- * Starts loading an entry's script file asynchronously from D_004A47C0 + @p arg + str_ssf.
+ * Starts loading an entry's script file asynchronously from D_004A47C0 + @p fileName + str_ssf.
  *
  * Clears mStreamed and stores the ASYNCFILE_load handle (flags 0x100); the state becomes 1 (loading), or 2 when the
  * handle is 0 or negative.
  *
- * @param arg  the file name (a cBXString)
+ * @param fileName  the file name (a cBXString)
  */
-extern "C" void func_003ACBB8_impl(void *self, int arg) {
-    sBXStr_CBB8 a;
-    sBXStr_CBB8 b;
+extern "C" void func_003ACBB8_impl(void *self, int fileName) {
+    sBXStr_CBB8 fullPath;
+    sBXStr_CBB8 prefixed;
     *(short*)((char*)self + 2) = 0;
-    func_003186D0_CBB8(&b, D_004A47C0, arg);
-    func_00318630_CBB8(&a, &b, str_ssf);
-    *(int*)((char*)self + 4) = ASYNCFILE_load_CBB8(a.p, 0x100);
-    cBXString_dt_CBB8(&a, 2);
-    cBXString_dt_CBB8(&b, 2);
+    func_003186D0_CBB8(&prefixed, D_004A47C0, fileName);
+    func_00318630_CBB8(&fullPath, &prefixed, str_ssf);
+    *(int*)((char*)self + 4) = ASYNCFILE_load_CBB8(fullPath.p, 0x100);
+    cBXString_dt_CBB8(&fullPath, 2);
+    cBXString_dt_CBB8(&prefixed, 2);
     int n = *(int*)((char*)self + 4);
     *(short*)((char*)self + 0) = n <= 0 ? 2 : 1;
 }
@@ -421,15 +421,15 @@ extern "C" void cWScriptCacheEntry_resolve(sWScriptCacheItem* ep, void* world, i
 {
     char* e = (char*)ep;
     char** wp = (char**)world;
-    char* d = WSD_CCD8;
-    if (d == 0) {
+    char* scriptData = WSD_CCD8;
+    if (scriptData == 0) {
         *(short*)e = 3;
         return;
     }
     {
-        if (!(*(unsigned short*)d == 0x1000 && *(int*)(d + 0xC) == *(int*)(*(char**)*wp + 0x4))) {
+        if (!(*(unsigned short*)scriptData == 0x1000 && *(int*)(scriptData + 0xC) == *(int*)(*(char**)*wp + 0x4))) {
             if (*(short*)(e + 0x2) == 0) {
-                cMemMan_free(d);
+                cMemMan_free(scriptData);
             }
             WSD_CCD8 = 0;
         }
@@ -456,43 +456,43 @@ extern "C" void cWScriptCacheEntry_resolve(sWScriptCacheItem* ep, void* world, i
             ref.idx = index;
             for (int i = 0; i < *(int*)(WSD_CCD8 + 0x44); i++) {
                 ref.slot = i;
-                char* o = (char*)resolve_CCD8(*wp, ref, 0x1C);
+                char* record = (char*)resolve_CCD8(*wp, ref, 0x1C);
                 char* x = (char*)(*(int**)(WSD_CCD8 + 0x50))[*(unsigned short*)(*(char**)(WSD_CCD8 + 0x48) + (i << 1))];
-                *(char**)(o + 0x88) = x;
-                int v = *(int*)(x + 0x4) & 0xFFFF0000;
-                *(int*)(o + 0x8) = v | (v >> 16) | 2;
+                *(char**)(record + 0x88) = x;
+                int highBits = *(int*)(x + 0x4) & 0xFFFF0000;
+                *(int*)(record + 0x8) = highBits | (highBits >> 16) | 2;
             }
             for (int i = 0; i < *(int*)(WSD_CCD8 + 0x4C); i++) {
-                char* r = (*(char***)(WSD_CCD8 + 0x50))[i];
-                int type = *(int*)r;
+                char* tableEntry = (*(char***)(WSD_CCD8 + 0x50))[i];
+                int type = *(int*)tableEntry;
                 if (type == 1 || type == 3) {
-                    *(void**)(r + 0xC) = resolve_CCD8(*wp, *(sRef_CCD8*)(r + 0xC), 100);
+                    *(void**)(tableEntry + 0xC) = resolve_CCD8(*wp, *(sRef_CCD8*)(tableEntry + 0xC), 100);
                 } else {
-                    *(void**)(r + 0xC) = 0;
+                    *(void**)(tableEntry + 0xC) = 0;
                 }
             }
-            int n54 = *(int*)(WSD_CCD8 + 0x54);
-            for (int i = 0; i < n54; i++) {
+            int numSplines = *(int*)(WSD_CCD8 + 0x54);
+            for (int i = 0; i < numSplines; i++) {
                 char* w = *wp;
                 ref.slot = i;
-                char* o = (char*)resolve_CCD8(w, ref, 68);
-                sPair_CCD8 p = (*(sPair_CCD8**)(WSD_CCD8 + 0x58))[i];
-                *(int*)(o + 0x28) = (short)p.b;
-                unsigned int v = p.a << 16;
-                *(unsigned int*)(o + 0x1C) = (v & 0xFFFF0000) | (v >> 16);
+                char* record = (char*)resolve_CCD8(w, ref, 68);
+                sPair_CCD8 splinePair = (*(sPair_CCD8**)(WSD_CCD8 + 0x58))[i];
+                *(int*)(record + 0x28) = (short)splinePair.b;
+                unsigned int highBits = splinePair.a << 16;
+                *(unsigned int*)(record + 0x1C) = (highBits & 0xFFFF0000) | (highBits >> 16);
             }
             {
-                sRec40_CCD8* r = *(sRec40_CCD8**)(WSD_CCD8 + 0x2C);
+                sRec40_CCD8* tableEntry = *(sRec40_CCD8**)(WSD_CCD8 + 0x2C);
                 int n = *(int*)(WSD_CCD8 + 0x28);
-                for (int i = 0; i < n; i++, r++) {
-                    r->f8 = (int)WSD_CCD8 + r->f8;
+                for (int i = 0; i < n; i++, tableEntry++) {
+                    tableEntry->f8 = (int)WSD_CCD8 + tableEntry->f8;
                 }
             }
             {
-                sRec54_CCD8* r = *(sRec54_CCD8**)(WSD_CCD8 + 0x24);
+                sRec54_CCD8* tableEntry = *(sRec54_CCD8**)(WSD_CCD8 + 0x24);
                 int n = *(int*)(WSD_CCD8 + 0x20);
-                for (int i = 0; i < n; i++, r++) {
-                    r->f8 = (int)WSD_CCD8 + r->f8;
+                for (int i = 0; i < n; i++, tableEntry++) {
+                    tableEntry->f8 = (int)WSD_CCD8 + tableEntry->f8;
                 }
             }
         }

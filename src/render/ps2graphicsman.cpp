@@ -1463,24 +1463,24 @@ extern "C" int cGraphicsMan_GetTextureID(cPS2GraphicsMan* self_, const char* nam
 {
     sGfx_96C8* self = (sGfx_96C8*)self_;
     char buf[0x10];
-    const char* p = name;
-    if (*p) {
-        char* d = buf;
+    const char* namePtr = name;
+    if (*namePtr) {
+        char* bufPtr = buf;
         do
-            *d++ = *p++;
-        while (*p && p - name < 4);
+            *bufPtr++ = *namePtr++;
+        while (*namePtr && namePtr - name < 4);
     }
-    buf[p - name] = 0;
+    buf[namePtr - name] = 0;
     for (int i = 0; i < self->count; i++) {
         if (func_004165A8(buf, self->ents[i].name) == 0)
             return self->ents[i].handle;
     }
     strcpy(self->ents[self->count].name, buf);
     for (int j = 0; j < self->numSrc; j++) {
-        void* r = SHAPE_locatez(self->src[j], self->ents[self->count].name);
-        if (r != 0) {
+        void* shape = SHAPE_locatez(self->src[j], self->ents[self->count].name);
+        if (shape != 0) {
             sVE_96C8* vt = *(sVE_96C8**)((char*)self + 0x10D8);
-            self->ents[self->count].handle = vt[46].fn((char*)self + vt[46].delta, r, str_charshp_b, 0, 1, -1);
+            self->ents[self->count].handle = vt[46].fn((char*)self + vt[46].delta, shape, str_charshp_b, 0, 1, -1);
             return self->ents[self->count++].handle;
         }
     }

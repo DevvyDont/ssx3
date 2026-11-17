@@ -89,20 +89,20 @@ struct sVtEnt { short delta; short index; void* fn; };
  */
 extern "C" int cVidEngine_PlayVideo(sVidPlayer* self)
 {
-    void* p = self->p;
-    if (p == 0) return 0;
+    void* player = self->p;
+    if (player == 0) return 0;
     if (self->active != 0) return 1;
-    func_00253860(p);
+    func_00253860(player);
     int n = D_004A2A54 + 1;
     self->active = 1;
     D_005366E8[n] = 10;
     cPauseState_Flags = D_00442918[0];
     D_004A2A54 = n;
-    sVidObj* q = ((sVidOwner*)SSXApp->Game)->obj;
+    sVidObj* cutSceneMan = ((sVidOwner*)SSXApp->Game)->obj;
     self->f14 = 0;
-    int s = q->state;
-    if (s != 0 && s != 2) self->f14 = 1;
-    cCutSceneTransitionMan_ForceToRegularMode(q);
+    int cutSceneState = cutSceneMan->state;
+    if (cutSceneState != 0 && cutSceneState != 2) self->f14 = 1;
+    cCutSceneTransitionMan_ForceToRegularMode(cutSceneMan);
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVtEnt* vt = (sVtEnt*)ps2GraphicsMan->mVtbl;
@@ -132,9 +132,9 @@ extern "C" void cMoviePlayer_asyncUpdate(void* self);
  */
 extern "C" void cVidEngine_UpdateVideo(void* self)
 {
-    void* p = *(void**)self;
-    if (p != 0 && *(int*)((char*)self + 0x4) != 0 && *(int*)((char*)self + 0xC) == 0) {
-        cMoviePlayer_asyncUpdate(p);
+    void* player = *(void**)self;
+    if (player != 0 && *(int*)((char*)self + 0x4) != 0 && *(int*)((char*)self + 0xC) == 0) {
+        cMoviePlayer_asyncUpdate(player);
         *(int*)((char*)self + 0x8) = 1;
     }
 }

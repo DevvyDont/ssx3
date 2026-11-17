@@ -89,11 +89,11 @@ extern "C" int cMenuItem_isLocked(void* self);
  */
 extern "C" int cMenuItem_canHaveFocus(void* self)
 {
-    int r = 0;
+    int canFocus = 0;
     if (cMenuItem_isActive(self) != 0) {
-        r = cMenuItem_isLocked(self) == 0;
+        canFocus = cMenuItem_isLocked(self) == 0;
     }
-    return r;
+    return canFocus;
 }
 #endif
 
@@ -611,8 +611,8 @@ extern "C" int cMenu_input(void* self)
 {
     cMenu_checkFocus((cMenu*)self);
     cMenu_input_cItem* item = *(cMenu_input_cItem**)((char*)self + (*(int*)((char*)self + 0x4) << 2) + 0xC);
-    int r = item->v02();
-    switch (r) {
+    int inputResult = item->v02();
+    switch (inputResult) {
     case 3:
         cMenu_nextFocus((cMenu*)self);
         return 0;
@@ -620,7 +620,7 @@ extern "C" int cMenu_input(void* self)
         cMenu_prevFocus((cMenu*)self);
         return 0;
     }
-    return r;
+    return inputResult;
 }
 #endif
 
@@ -1747,11 +1747,11 @@ INCLUDE_ASM("util/menu", cMenuSys_isActive);
  */
 extern "C" int cMenuSys_isActive(void* self)
 {
-    int r = 0;
+    int active = 0;
     if (*(int*)self != 0) {
-        r = *(int*)((char*)self + 0x54) != 0;
+        active = *(int*)((char*)self + 0x54) != 0;
     }
-    return r;
+    return active;
 }
 #endif
 
@@ -4901,15 +4901,15 @@ public:
 /**
  * Passes a command from an item inside an expandable menu item on to the menu that owns it.
  *
- * Calls virtual slot 3 (cMenu onCommand) of the parent menu stored at +0x0 with @p item and @p b and returns its result.
+ * Calls virtual slot 3 (cMenu onCommand) of the parent menu stored at +0x0 with @p item and @p commandArg and returns its result.
  *
  * @param item  the item that issued the command (On Tour item)
- * @param b  the command argument (On Tour arg)
+ * @param commandArg  the command argument (On Tour arg)
  * @return the parent menu's result
  */
-extern "C" int cExpandMenuItem_onCommand(cExpandMenuItem_onCommand_cMenu** self, int item, int b)
+extern "C" int cExpandMenuItem_onCommand(cExpandMenuItem_onCommand_cMenu** self, int item, int commandArg)
 {
-    return (*self)->v03(item, b);
+    return (*self)->v03(item, commandArg);
 }
 #endif
 
@@ -4976,26 +4976,26 @@ struct sMenu_2CFB58 {
  */
 extern "C" sMenuRect_2CFB58* cExpandMenuItem_preRender(sMenuRect_2CFB58* ret, sMenu_2CFB58* self)
 {
-    sMenuRect_2CFB58 r;
+    sMenuRect_2CFB58 total;
     float zero = 0.0f;
-    r.w = zero;
-    r.z = zero;
-    r.y = zero;
-    r.x = zero;
+    total.w = zero;
+    total.z = zero;
+    total.y = zero;
+    total.x = zero;
     self->f13C = *(void**)(self->owner + 0x124);
     for (int i = 0; i < self->count; i++) {
         if (cMenuItem_isActive(self->items[i])) {
             sVEnt_2CFB58* vt = self->items[i]->vt;
             self->rects[i] = vt[4].fn((char*)self->items[i] + vt[4].delta);
             if (self == cMenu_getFocusItem((cMenu*)self->owner) || self->items[i] == self->sel) {
-                r.w += self->rects[i].w;
+                total.w += self->rects[i].w;
             }
-            float h = self->rects[i].z;
+            float itemWidth = self->rects[i].z;
             if (self->items[i] != self->sel) {
-                h += 20.0f;
+                itemWidth += 20.0f;
             }
-            if (r.z < h) {
-                r.z = h;
+            if (total.z < itemWidth) {
+                total.z = itemWidth;
             }
         } else {
             sMenuRect_2CFB58 z;
@@ -5006,7 +5006,7 @@ extern "C" sMenuRect_2CFB58* cExpandMenuItem_preRender(sMenuRect_2CFB58* ret, sM
             self->rects[i] = z;
         }
     }
-    *ret = r;
+    *ret = total;
     return ret;
 }
 #endif
@@ -5536,18 +5536,18 @@ extern char D_004A39E8[];
  */
 extern "C" void* cVectorMenuItem_cVectorMenuItem(void* self, void* name, float* values, int caption, float minValue, float maxValue)
 {
-    char* s = (char*)self;
-    cExpandMenuItem_cExpandMenuItem(self, name, s + 0x654);
-    *(float**)(s + 0x5AC) = values;
-    *(void***)(s + 0x10) = cVectorMenuItem_vtbl;
-    cFloatMenuItem_ptr(s + 0x5B8, 0, values, D_004A39D8, minValue, maxValue);
-    cFloatMenuItem_ptr(s + 0x5EC, 1, values + 1, D_004A39E0, minValue, maxValue);
-    cFloatMenuItem_ptr(s + 0x620, 2, values + 2, D_004A39E8, minValue, maxValue);
-    func_002D03F0(s + 0x654, caption, (int)values);
-    cExpandMenuItem_addItem3(self, s + 0x5B8, -1);
-    cExpandMenuItem_addItem3(self, s + 0x5EC, -1);
-    cExpandMenuItem_addItem3(self, s + 0x620, -1);
-    *(int*)(s + 0x670) = 0;
+    char* menuItem = (char*)self;
+    cExpandMenuItem_cExpandMenuItem(self, name, menuItem + 0x654);
+    *(float**)(menuItem + 0x5AC) = values;
+    *(void***)(menuItem + 0x10) = cVectorMenuItem_vtbl;
+    cFloatMenuItem_ptr(menuItem + 0x5B8, 0, values, D_004A39D8, minValue, maxValue);
+    cFloatMenuItem_ptr(menuItem + 0x5EC, 1, values + 1, D_004A39E0, minValue, maxValue);
+    cFloatMenuItem_ptr(menuItem + 0x620, 2, values + 2, D_004A39E8, minValue, maxValue);
+    func_002D03F0(menuItem + 0x654, caption, (int)values);
+    cExpandMenuItem_addItem3(self, menuItem + 0x5B8, -1);
+    cExpandMenuItem_addItem3(self, menuItem + 0x5EC, -1);
+    cExpandMenuItem_addItem3(self, menuItem + 0x620, -1);
+    *(int*)(menuItem + 0x670) = 0;
     return self;
 }
 #endif

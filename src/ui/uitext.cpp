@@ -1329,11 +1329,11 @@ public:
 extern "C" void cUITextScroll_addUnicodeStringByID(cUITextScroll* self, int id)
 {
     self->mStringID = (unsigned int)id;
-    cUITextScroll_addUnicodeStringByID_cVirtA* a = *(cUITextScroll_addUnicodeStringByID_cVirtA**)((char*)*(void**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x10);
-    if (a != 0) {
-        void* r = a->v04(id);
-        if (r != 0) {
-            cUITextScroll_addUnicodeStringWrap(self, r);
+    cUITextScroll_addUnicodeStringByID_cVirtA* localeInterface = *(cUITextScroll_addUnicodeStringByID_cVirtA**)((char*)*(void**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x10);
+    if (localeInterface != 0) {
+        void* unicodeString = localeInterface->v04(id);
+        if (unicodeString != 0) {
+            cUITextScroll_addUnicodeStringWrap(self, unicodeString);
         }
         ((cUITextScroll_addUnicodeStringByID_cVirtB*)self)->v05(1);
     }

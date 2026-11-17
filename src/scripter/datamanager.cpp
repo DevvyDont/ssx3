@@ -290,9 +290,9 @@ extern "C" sDmNode5B98* cDataManager_AttachDataFromBigfile(void* self, char* big
         char* sub = big + ent[0];
         int saved = REALabortflag[0];
         REALabortflag[0] = 0;
-        int r = BIG_sizeofheader(sub);
+        int headerSize = BIG_sizeofheader(sub);
         REALabortflag[0] = saved;
-        if (r != 0) {
+        if (headerSize != 0) {
             prev = cDataManager_AttachDataFromBigfile(self, sub, prev);
         } else {
             sDmNode5B98* n = (sDmNode5B98*)func_00275CF8(self);
@@ -760,10 +760,10 @@ int tNISList_Play_impl(char* self, int fade, int notify)
     sDmItem_6388* item = (sDmItem_6388*)func_00283D70(self + 0xC, 0);
     dm->state = 3;
     char* table = (char*)SSXApp->Game->UI + 0x18;
-    char* o = (char*)cUIStateStack_findState(table, GetHashValue32(str_hud_e));
-    if (o != 0) {
-        sDmVEntry_6388* e = &(*(sDmVEntry_6388**)(o + 0x8))[24];
-        e->fn(o + e->delta, 0, 0);
+    char* hudState = (char*)cUIStateStack_findState(table, GetHashValue32(str_hud_e));
+    if (hudState != 0) {
+        sDmVEntry_6388* vtEntry = &(*(sDmVEntry_6388**)(hudState + 0x8))[24];
+        vtEntry->fn(hudState + vtEntry->delta, 0, 0);
     }
     if (func_00277DD8(self, item) == 0) {
         cSSXScriptEngine_PlayRequestScript_i(*(void**)self, *(int*)(self + 0x8), item->id, 0, (item->flags >> 3) & 1);
@@ -774,28 +774,28 @@ int tNISList_Play_impl(char* self, int fade, int notify)
             }
             int tIn = 0;
             int tHold = 0;
-            float t = 0.0f;
-            sDmFade_6388* f = (sDmFade_6388*)func_0027C070(cBXScriptEngine_GetRequestPlayerByReqHandle(*(void**)self, item->id));
+            float cutSceneTime = 0.0f;
+            sDmFade_6388* transitionInfo = (sDmFade_6388*)func_0027C070(cBXScriptEngine_GetRequestPlayerByReqHandle(*(void**)self, item->id));
             if (fade) {
-                tIn = f->tIn;
-                tHold = f->tHold;
+                tIn = transitionInfo->tIn;
+                tHold = transitionInfo->tHold;
             }
             *(int*)(self + 0xB8) = 0;
-            if (tIn + tHold + f->tOut > 0) {
-                if (f->cat != 7) {
-                    int h = cSSXScriptEngine_MakeTransitionObject(*(void**)self, f->cat, f->key);
-                    if (h != 0) {
-                        int h2 = cSSXScriptEngine_MakeTransitionObject(*(void**)self, f->cat, f->key);
+            if (tIn + tHold + transitionInfo->tOut > 0) {
+                if (transitionInfo->cat != 7) {
+                    int transition = cSSXScriptEngine_MakeTransitionObject(*(void**)self, transitionInfo->cat, transitionInfo->key);
+                    if (transition != 0) {
+                        int transitionOut = cSSXScriptEngine_MakeTransitionObject(*(void**)self, transitionInfo->cat, transitionInfo->key);
                         float tt = (float)tIn * 0.01666666753590107f;
-                        cTransitionMan_StartTransition_f(snd, 2, h, h2, tt, (float)tHold * 0.01666666753590107f, (float)f->tOut * 0.01666666753590107f, 0, 0);
-                        t = tt;
+                        cTransitionMan_StartTransition_f(snd, 2, transition, transitionOut, tt, (float)tHold * 0.01666666753590107f, (float)transitionInfo->tOut * 0.01666666753590107f, 0, 0);
+                        cutSceneTime = tt;
                         *(int*)(self + 0xB8) = tIn + tHold;
                     }
                 } else if (tIn) {
-                    int h = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, 7, f->key);
+                    int transition = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, 7, transitionInfo->key);
                     float tt = (float)tIn * 0.01666666753590107f;
-                    cTransitionMan_StartTransitionScreenGrab(snd, 2, h, 0, tt);
-                    t = tt;
+                    cTransitionMan_StartTransitionScreenGrab(snd, 2, transition, 0, tt);
+                    cutSceneTime = tt;
                 }
                 if (*(int*)(self + 0xB8) > 0) {
                     notify = 0;
@@ -804,15 +804,15 @@ int tNISList_Play_impl(char* self, int fade, int notify)
                     *(int*)(self + 0xB0) = 1;
                 }
             }
-            if (t <= 0.0f) {
-                t = 0.5f;
+            if (cutSceneTime <= 0.0f) {
+                cutSceneTime = 0.5f;
             }
-            cCutSceneTransitionMan_StartCutScene(SSXApp->Game->CutSceneTransitionMan, t);
+            cCutSceneTransitionMan_StartCutScene(SSXApp->Game->CutSceneTransitionMan, cutSceneTime);
         }
         if (notify) {
             char* eng = *(char**)self;
-            sDmVEntry2_6388* e = &(*(sDmVEntry2_6388**)(eng + 0x2A8))[6];
-            e->fn(eng + e->delta, item->id);
+            sDmVEntry2_6388* vtEntry = &(*(sDmVEntry2_6388**)(eng + 0x2A8))[6];
+            vtEntry->fn(eng + vtEntry->delta, item->id);
         }
     } else {
         if (*(int*)(self + 0x4) != 0) {
@@ -1305,12 +1305,12 @@ extern "C" int tNISList_IsSkipAllowed(void* self)
     if (*(int*)((char*)self + 0xA4) != 3) {
         return 0;
     }
-    int r = 0;
-    void* e = func_00283D70((char*)self + 0xC, 0);
-    if (*(int*)((char*)e + 0x8) & 1) {
-        r = *(int*)((char*)self + 0xA8) == 0;
+    int allowed = 0;
+    void* headEntry = func_00283D70((char*)self + 0xC, 0);
+    if (*(int*)((char*)headEntry + 0x8) & 1) {
+        allowed = *(int*)((char*)self + 0xA8) == 0;
     }
-    return r;
+    return allowed;
 }
 #endif
 
@@ -1407,11 +1407,11 @@ INCLUDE_ASM("scripter/datamanager", tNISList_IsPausedPendingNextScript);
  */
 extern "C" int tNISList_IsPausedPendingNextScript(void* self)
 {
-    int r = 0;
+    int paused = 0;
     if (*(int*)((char*)self + 0xa4) == 3) {
-        r = *(int*)((char*)self + 0xa8) != 0;
+        paused = *(int*)((char*)self + 0xa8) != 0;
     }
-    return r;
+    return paused;
 }
 #endif
 
@@ -1860,23 +1860,23 @@ int tNISList_DoTransitionToNext_impl(char* self)
     }
     char* item = (char*)func_00283D70(self + 0xC, 0);
     if (func_00277DD8(self, item) == 0) {
-        sDmFade_7980* f = (sDmFade_7980*)func_0027C070(cBXScriptEngine_GetRequestPlayerByReqHandle(ScriptEngine, *(int*)(item + 0xC)));
+        sDmFade_7980* transitionInfo = (sDmFade_7980*)func_0027C070(cBXScriptEngine_GetRequestPlayerByReqHandle(ScriptEngine, *(int*)(item + 0xC)));
         void* snd = cGame_getTransitionMan(SSXApp->Game, 0);
         if (*(int*)((char*)snd + 0x44) != 0) {
             func_002E4578(snd);
         }
-        if (f->tIn + f->tHold + f->tOut > 0) {
-            if (f->cat != 7) {
-                int h = cSSXScriptEngine_MakeTransitionObject(*(void**)self, f->cat, f->key);
-                if (h == 0) {
+        if (transitionInfo->tIn + transitionInfo->tHold + transitionInfo->tOut > 0) {
+            if (transitionInfo->cat != 7) {
+                int transition = cSSXScriptEngine_MakeTransitionObject(*(void**)self, transitionInfo->cat, transitionInfo->key);
+                if (transition == 0) {
                     return 0;
                 }
-                int h2 = cSSXScriptEngine_MakeTransitionObject(*(void**)self, f->cat, f->key);
-                cTransitionMan_StartTransition(snd, 2, h, h2, 0, 0, (float)f->tIn * 0.01666666753590107f, (float)f->tHold * 0.01666666753590107f, (float)f->tOut * 0.01666666753590107f);
-                *(int*)(self + 0xB8) = f->tIn + f->tHold;
+                int transitionOut = cSSXScriptEngine_MakeTransitionObject(*(void**)self, transitionInfo->cat, transitionInfo->key);
+                cTransitionMan_StartTransition(snd, 2, transition, transitionOut, 0, 0, (float)transitionInfo->tIn * 0.01666666753590107f, (float)transitionInfo->tHold * 0.01666666753590107f, (float)transitionInfo->tOut * 0.01666666753590107f);
+                *(int*)(self + 0xB8) = transitionInfo->tIn + transitionInfo->tHold;
             } else {
-                int h = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, 7, f->key);
-                cTransitionMan_StartTransitionScreenGrab(snd, 2, h, 0, (float)f->tIn * 0.01666666753590107f);
+                int transition = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, 7, transitionInfo->key);
+                cTransitionMan_StartTransitionScreenGrab(snd, 2, transition, 0, (float)transitionInfo->tIn * 0.01666666753590107f);
                 *(int*)(self + 0xB8) = 0;
             }
             if (*(int*)(self + 0xB8) > 0) {
@@ -1885,19 +1885,19 @@ int tNISList_DoTransitionToNext_impl(char* self)
             }
         }
     } else {
-        sDmEnt_7980* e = (sDmEnt_7980*)func_00277DE8(self, (int*)item);
+        sDmEnt_7980* videoInfo = (sDmEnt_7980*)func_00277DE8(self, (int*)item);
         void* snd = cGame_getTransitionMan(SSXApp->Game, 0);
         if (*(int*)((char*)snd + 0x44) != 0) {
             func_002E4578(snd);
         }
-        if (0.0f < e->t) {
-            if (e->cat != 7) {
-                int h = cSSXScriptEngine_MakeTransitionObject(*(void**)self, e->cat, e->key);
-                cTransitionMan_StartTransitionOut(snd, 2, h, e->t);
+        if (0.0f < videoInfo->t) {
+            if (videoInfo->cat != 7) {
+                int transition = cSSXScriptEngine_MakeTransitionObject(*(void**)self, videoInfo->cat, videoInfo->key);
+                cTransitionMan_StartTransitionOut(snd, 2, transition, videoInfo->t);
                 *(int*)(self + 0xB8) = 0;
             } else {
-                int h = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, 7, e->key);
-                cTransitionMan_StartTransitionScreenGrab(snd, 2, h, 0, e->t);
+                int transition = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, 7, videoInfo->key);
+                cTransitionMan_StartTransitionScreenGrab(snd, 2, transition, 0, videoInfo->t);
                 *(int*)(self + 0xB8) = 0;
             }
         }

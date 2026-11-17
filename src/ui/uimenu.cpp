@@ -1181,20 +1181,20 @@ public:
 extern "C" void cUIProgress_setValue(cUIProgress* self, int pos)
 {
     self->mValue = pos;
-    cUIProgress_setValue_cWidget* a = (cUIProgress_setValue_cWidget*)self->mpObjBackground;
-    cUIProgress_setValue_sVec3 v = t3vect_Zero;
-    if (a != 0) {
-        a->v20(&v);
+    cUIProgress_setValue_cWidget* background = (cUIProgress_setValue_cWidget*)self->mpObjBackground;
+    cUIProgress_setValue_sVec3 newSize = t3vect_Zero;
+    if (background != 0) {
+        background->v20(&newSize);
     }
     if (self->mpObjKnob != 0) {
         int n = self->mNumValues;
         if (n != 0) {
             if (!(self->mAttr & 1)) {
-                v.x *= (float)self->mValue / (float)n;
+                newSize.x *= (float)self->mValue / (float)n;
             } else {
-                v.y *= (float)self->mValue / (float)n;
+                newSize.y *= (float)self->mValue / (float)n;
             }
-            ((cUIProgress_setValue_cWidget*)self->mpObjKnob)->v21(&v);
+            ((cUIProgress_setValue_cWidget*)self->mpObjKnob)->v21(&newSize);
         }
     }
 }

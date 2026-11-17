@@ -778,9 +778,9 @@ extern "C" int cSSXAudio_GetFocusRider(void* self, int which)
         int best = 0;
         int bestPrio = 30000;
         for (int i = 0; i < ((sAudSys5D98*)cAudioInterface_getAI())->numUsed; i++) {
-            sAudVoice5D98* v = ((sAudSys5D98*)cAudioInterface_getAI())->voices[i];
-            if (sAudVoice5D98_isOn(v) && v->prio < bestPrio) {
-                bestPrio = v->prio;
+            sAudVoice5D98* curRider = ((sAudSys5D98*)cAudioInterface_getAI())->voices[i];
+            if (sAudVoice5D98_isOn(curRider) && curRider->prio < bestPrio) {
+                bestPrio = curRider->prio;
                 best = i;
             }
         }
@@ -788,15 +788,15 @@ extern "C" int cSSXAudio_GetFocusRider(void* self, int which)
     }
     if (which == -2) {
         for (int i = 0; i < ((sAudSys5D98*)cAudioInterface_getAI())->numVoices; i++) {
-            sAudVoice5D98* v = ((sAudSys5D98*)cAudioInterface_getAI())->voices[i];
-            if (sAudVoice5D98_isOn(v))
-                return (int)v;
+            sAudVoice5D98* curRider = ((sAudSys5D98*)cAudioInterface_getAI())->voices[i];
+            if (sAudVoice5D98_isOn(curRider))
+                return (int)curRider;
         }
     } else {
         for (int i = 0; i < ((sAudSys5D98*)cAudioInterface_getAI())->numVoices; i++) {
-            sAudVoice5D98* v = ((sAudSys5D98*)cAudioInterface_getAI())->voices[i];
-            if (v->id == which)
-                return (int)v;
+            sAudVoice5D98* curRider = ((sAudSys5D98*)cAudioInterface_getAI())->voices[i];
+            if (curRider->id == which)
+                return (int)curRider;
         }
     }
     return (int)((sAudSys5D98*)cAudioInterface_getAI())->voices[0];
@@ -1145,11 +1145,11 @@ extern "C" void cSSXAudio_InGameInit(char* self)
     void* be = cBE_getInterface_Fv(cBE_getBE(), 13);
     char* bm = cAudioInterface_getAI();
     void* rider = cRider_getIdentity(*(void**)(bm + 0x28));
-    int a = func_00158750(be, 0, (int)rider);
+    int radioPlaylist = func_00158750(be, 0, (int)rider);
     func_0028BF78(self, func_00158700(be, 0, (int)rider));
-    func_0028C2D0(self, a);
-    char* t118 = self + 0x118;
-    if (*(int*)(self + 0x530) == 0 || func_002B49E0(t118) != 401) {
+    func_0028C2D0(self, radioPlaylist);
+    char* musicSys = self + 0x118;
+    if (*(int*)(self + 0x530) == 0 || func_002B49E0(musicSys) != 401) {
         func_0028D488(self);
         cBE_getInterface_Fv(cBE_getBE(), 0);
         if (sa_state_867E8() == 0) {
@@ -1162,13 +1162,13 @@ extern "C" void cSSXAudio_InGameInit(char* self)
     cWorldPainterManArg* pa = (cWorldPainterManArg*)&D_004A5268;
     cWorldPainterManArg* pb = (cWorldPainterManArg*)&D_004A5278;
     cWorldPainterManArg* pc = (cWorldPainterManArg*)&D_004A5270;
-    void* q = *(void**)((char*)SSXApp->Game->World + 8);
-    *(void**)(self + 0x625C) = cWorldPainterMan_getQuery(q, pa);
-    *(void**)(self + 0x6260) = cWorldPainterMan_getQuery(q, pa);
-    *(void**)(self + 0x5FA0) = cWorldPainterMan_getQuery(q, pb);
-    *(void**)(self + 0x5FA4) = cWorldPainterMan_getQuery(q, pb);
-    *(void**)(self + 0x6C80) = cWorldPainterMan_getQuery(q, pc);
-    void* q2 = cWorldPainterMan_getQuery(q, pc);
+    void* painterMan = *(void**)((char*)SSXApp->Game->World + 8);
+    *(void**)(self + 0x625C) = cWorldPainterMan_getQuery(painterMan, pa);
+    *(void**)(self + 0x6260) = cWorldPainterMan_getQuery(painterMan, pa);
+    *(void**)(self + 0x5FA0) = cWorldPainterMan_getQuery(painterMan, pb);
+    *(void**)(self + 0x5FA4) = cWorldPainterMan_getQuery(painterMan, pb);
+    *(void**)(self + 0x6C80) = cWorldPainterMan_getQuery(painterMan, pc);
+    void* secondMixQuery = cWorldPainterMan_getQuery(painterMan, pc);
     *(int*)(self + 0x626C) = 0;
     *(int*)(self + 0x6274) = 0;
     *(int*)(self + 0x5FC4) = 0;
@@ -1176,19 +1176,19 @@ extern "C" void cSSXAudio_InGameInit(char* self)
     *(int*)(self + 0x6268) = -1;
     *(int*)(self + 0x6270) = 1;
     *(char*)(self + 0x5FC0) = 50;
-    *(void**)(self + 0x6C84) = q2;
+    *(void**)(self + 0x6C84) = secondMixQuery;
     func_00287F00(self, 3, 0.5f, 1.0f);
     *(int*)(self + 0x6288) = 0;
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (sa_state_867E8() == 0) {
         int i = 0;
-        int* p = (int*)(self + 0x579C);
+        int* firstTimeFlag = (int*)(self + 0x579C);
         do {
             void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
-            char* o = *(char**)(cAudioInterface_getAI() + 0x28);
-            *p = cBENewPlayerInterface_isFirstTimeOnTrack(iface, ((cSSXAudio_InGameInit_cObj*)(o + 0x6C0))->v6(), i);
+            char* playerRider = *(char**)(cAudioInterface_getAI() + 0x28);
+            *firstTimeFlag = cBENewPlayerInterface_isFirstTimeOnTrack(iface, ((cSSXAudio_InGameInit_cObj*)(playerRider + 0x6C0))->v6(), i);
             i++;
-            p++;
+            firstTimeFlag++;
         } while (i < 23);
     }
     func_0028DF08_C7B0(self);
@@ -1792,89 +1792,89 @@ struct sSaMix7700 {
 /**
  * Sets one volume control's level and applies it.
  *
- * @p v is clamped to 0..1 and stored as the control's user level; its base level is the level itself for control 0 and
+ * @p volume is clamped to 0..1 and stored as the control's user level; its base level is the level itself for control 0 and
  * the level times a per-control constant (D_004A3504 .. D_004A3528) for the others. The gain is base * the control's
  * volume (+0x6394) and the output gain * the current factor (+0x63E4). Control 0 then sets the library master volume
  * (func_003B8160, out * 127), control 1 updates the music monitor (func_002B4388) and control 4 rescales the ten mix
  * levels at +0x636C. Quirk: control 1 calls func_002B4388 twice, the first time before the new gain is computed.
  *
  * @param self_  the audio system (this)
- * @param v      the new level, 0..1 (On Tour v)
+ * @param volume      the new level, 0..1 (On Tour v)
  * @param ch     the volume control (On Tour eVolumeControl volumeControl)
  */
 // PORT: `<?`/`>?` are the g++ min/max operators (EE min.s/max.s).
-extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio* self_, float v, int ch)
+extern "C" void cSSXAudio_SetCurrVolume(cSSXAudio* self_, float volume, int ch)
 {
     sSaMix7700* self = (sSaMix7700*)self_;
-    v = (v <? 1.0f) >? 0.0f;
-    sSaChan7700* c = &self->chan[ch];
+    volume = (volume <? 1.0f) >? 0.0f;
+    sSaChan7700* currVolume = &self->chan[ch];
     switch (ch) {
     case 0:
-        c->user = v;
-        c->base = v;
+        currVolume->user = volume;
+        currVolume->base = volume;
         break;
     case 1:
-        c->user = v;
-        c->base = v * D_004A3508;
+        currVolume->user = volume;
+        currVolume->base = volume * D_004A3508;
         func_002B4388((char*)self + 0x118);
         break;
     case 2:
-        c->user = v;
-        c->base = v * D_004A3510;
+        currVolume->user = volume;
+        currVolume->base = volume * D_004A3510;
         break;
     case 3:
-        c->user = v;
-        c->base = v * D_004A3514;
+        currVolume->user = volume;
+        currVolume->base = volume * D_004A3514;
         break;
     case 4:
-        c->user = v;
-        c->base = v * D_004A350C;
+        currVolume->user = volume;
+        currVolume->base = volume * D_004A350C;
         break;
     case 5:
-        c->user = v;
-        c->base = v * D_004A3504;
+        currVolume->user = volume;
+        currVolume->base = volume * D_004A3504;
         break;
     case 6:
-        c->user = v;
-        c->base = v * D_004A3518;
+        currVolume->user = volume;
+        currVolume->base = volume * D_004A3518;
         break;
     case 7:
-        c->user = v;
-        c->base = v * D_004A351C;
+        currVolume->user = volume;
+        currVolume->base = volume * D_004A351C;
         break;
     case 8:
-        c->user = v;
-        c->base = v * D_004A3520;
+        currVolume->user = volume;
+        currVolume->base = volume * D_004A3520;
         break;
     case 9:
-        c->user = v;
-        c->base = v * D_004A3524;
+        currVolume->user = volume;
+        currVolume->base = volume * D_004A3524;
         break;
     case 10:
-        c->user = v;
-        c->base = v * D_004A3528;
+        currVolume->user = volume;
+        currVolume->base = volume * D_004A3528;
         break;
     }
-    c->gain = c->base * self->vol[ch];
-    c->out = c->gain * self->cur[ch];
+    currVolume->gain = currVolume->base * self->vol[ch];
+    currVolume->out = currVolume->gain * self->cur[ch];
     switch (ch) {
     case 0:
-        func_003B8160((int)(c->out * 127.0f));
+        func_003B8160((int)(currVolume->out * 127.0f));
         break;
     case 1:
         func_002B4388((char*)self + 0x118);
         break;
     case 4:
-        self->mix[0] = c->out * D_004A352C;
-        self->mix[1] = c->out * D_004A3530;
-        self->mix[2] = c->out * D_004A3534;
-        self->mix[3] = c->out * D_004A3538;
-        self->mix[4] = c->out * D_004A353C;
-        self->mix[5] = c->out * D_004A3540;
-        self->mix[6] = c->out * D_004A3544;
-        self->mix[7] = c->out * D_004A3548;
-        self->mix[8] = c->out * D_004A354C;
-        self->mix[9] = c->out * D_004A3550;
+        self->mix[0] = currVolume->out * D_004A352C;
+        self->mix[1] = currVolume->out * D_004A3530;
+        self->mix[2] = currVolume->out * D_004A3534;
+        self->mix[3] = currVolume->out * D_004A3538;
+        self->mix[4] = currVolume->out * D_004A353C;
+        self->mix[5] = currVolume->out * D_004A3540;
+        self->mix[6] = currVolume->out * D_004A3544;
+        self->mix[7] = currVolume->out * D_004A3548;
+        self->mix[8] = currVolume->out * D_004A354C;
+        self->mix[9] = currVolume->out * D_004A3550;
         break;
     }
 }
@@ -2675,8 +2675,8 @@ extern "C" int cSSXAudio_ReplayMode(void* self)
 {
     if (cAudioInterface_isInGame() != 0) {
         if (*(int**)((char*)cAudioInterface_getGame() + 0x28) != 0) {
-            int v = **(int**)((char*)cAudioInterface_getGame() + 0x28);
-            int busy = v != 0 && v < 10;
+            int replayState = **(int**)((char*)cAudioInterface_getGame() + 0x28);
+            int busy = replayState != 0 && replayState < 10;
             if (busy) {
                 return 1;
             }
@@ -2741,12 +2741,12 @@ static inline float audVu0Dot(const sAudV4& a, const sAudV4& b)
  */
 extern "C" int cSSXAudio_CameraInRange(void* self, sAudV4* pos, float radius)
 {
-    float r = radius * 100.0f;
-    r = r * r;
+    float rangeSq = radius * 100.0f;
+    rangeSq = rangeSq * rangeSq;
     int i;
     for (i = 0; i < cSSXAudio_GetNumViews_self(self); i++) {
-        sAudV4 d = audVu0Sub(*(sAudV4*)cSSXAudio_GetCameraPos(self, i), *pos);
-        if (audVu0Dot(d, d) < r) {
+        sAudV4 toCamera = audVu0Sub(*(sAudV4*)cSSXAudio_GetCameraPos(self, i), *pos);
+        if (audVu0Dot(toCamera, toCamera) < rangeSq) {
             return i;
         }
     }

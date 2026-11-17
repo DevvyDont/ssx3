@@ -98,11 +98,11 @@ struct sEffectLinkObj_5798 {
  */
 extern "C" void* cEffectModifier_cEffectModifier(cEffectModifier* self, int inst)
 {
-    sEffectLinkObj_5798* o = (sEffectLinkObj_5798*)self;
-    o->link.next = 0;
-    o->link.prev = 0;
-    o->vt = cEffectModifier_vtbl;
-    o->value = inst;
+    sEffectLinkObj_5798* modifier = (sEffectLinkObj_5798*)self;
+    modifier->link.next = 0;
+    modifier->link.prev = 0;
+    modifier->vt = cEffectModifier_vtbl;
+    modifier->value = inst;
     D_004A3FF4++;
     return ((void*)self);
 }
@@ -246,14 +246,14 @@ extern "C" void* cParticleModifier_cParticleModifier(cParticleModifier* self, in
     self->ParticleData = (tParticleData*)pdata;
     char* own = (char*)self->Instance;
     void* obj = *(void**)(own + 0xC);
-    void* m;
+    void* transform;
     if (obj != 0) {
         sVEntry003458C0* vt = *(sVEntry003458C0**)((char*)obj + 0xC);
-        m = vu0CopyMatrix003458C0(((char*)self) + 0x10, vt[24].fn((char*)obj + vt[24].delta));
+        transform = vu0CopyMatrix003458C0(((char*)self) + 0x10, vt[24].fn((char*)obj + vt[24].delta));
     } else {
-        m = vu0CopyMatrix003458C0(((char*)self) + 0x10, own + 0x10);
+        transform = vu0CopyMatrix003458C0(((char*)self) + 0x10, own + 0x10);
     }
-    cStaticEmitter_setupEmitter(((char*)self) + 0x50, m, (int)self->ParticleData);
+    cStaticEmitter_setupEmitter(((char*)self) + 0x50, transform, (int)self->ParticleData);
     (self)->Complete = 0;
     D_004A3FF8++;
     return ((void*)self);
@@ -492,10 +492,10 @@ extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleMo
     sEffectLinkVEntry_345D80* vt = *(sEffectLinkVEntry_345D80**)stream;
     vt[2].fn((char*)stream + vt[2].delta, data, 80);
     if (self->Complete == 0) {
-        void* t = operator_new1(216);
-        self->ParticleData = (tParticleData*)((sTarget00345C90*)t);
+        void* particleData = operator_new1(216);
+        self->ParticleData = (tParticleData*)((sTarget00345C90*)particleData);
         sEffectLinkVEntry_345D80* vt2 = *(sEffectLinkVEntry_345D80**)stream;
-        vt2[2].fn((char*)stream + vt2[2].delta, t, 216);
+        vt2[2].fn((char*)stream + vt2[2].delta, particleData, 216);
         cBaseClass_DynamicEmitter_setupEmitter(((char*)&self->Emitter), (sTarget00345C90*)self->ParticleData, -1.0f);
         cBaseClass_DynamicEmitter_readFromReplayFrame(((char*)&self->Emitter), (cStream00371318*)stream);
         func_003710D0(((char*)&self->Emitter), &(*(sVec4_00345C90*)&self->Pos), &(*(sVec4_00345C90*)&self->Vel), 1, 0.01666666753590107f);

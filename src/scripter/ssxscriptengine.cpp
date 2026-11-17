@@ -2485,11 +2485,11 @@ done:
         int ids[3];
         int best = 3;
         for (int j = 0; j < 3; j++) {
-            int v = D_00536708[j];
-            ids[j] = v;
-            if (v >= list->nriders) {
+            int aiIndex = D_00536708[j];
+            ids[j] = aiIndex;
+            if (aiIndex >= list->nriders) {
                 ids[j] = -1;
-            } else if (Call_AC60(list->riders[v], 8)) {
+            } else if (Call_AC60(list->riders[aiIndex], 8)) {
                 best = j;
             }
         }
@@ -2525,14 +2525,14 @@ done:
     if (result != 0) {
         return;
     }
-    int v = -1;
+    int aiIndex = -1;
     if (list->nfirst > 0) {
-        v = Call_AC60(list->first->rider, 7);
+        aiIndex = Call_AC60(list->first->rider, 7);
     } else if (list->nother > 0) {
-        v = Call_AC60(list->other->rider, 7);
+        aiIndex = Call_AC60(list->other->rider, 7);
     }
-    cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 0, 0x18, 1, 0, v, -1, -1);
-    cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 0, 25, 3, 0, v, -1, -1);
+    cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 0, 0x18, 1, 0, aiIndex, -1, -1);
+    cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 0, 25, 3, 0, aiIndex, -1, -1);
     func_00146320(players, idx, blk.kind, first, 1);
 }
 #endif
@@ -5209,10 +5209,10 @@ extern "C" void cScriptObjRider_OnStartObjectUse(char* self)
     *(float*)(self + 0x70) = *(float*)(info + 0x1C) * 0.01745329424738884f;
     *(float*)(self + 0x74) = *(float*)(info + 0x18) * 0.01745329424738884f;
     *(float*)(self + 0x78) = *(float*)(info + 0x14) * 0.01745329424738884f;
-    sVec_F9F8 v(*(float*)(info + 0x8), *(float*)(info + 0xC), *(float*)(info + 0x10), 1.0f);
+    sVec_F9F8 baseOffset(*(float*)(info + 0x8), *(float*)(info + 0xC), *(float*)(info + 0x10), 1.0f);
     sMat_F9F8 m;
     LoadIdentity_F9F8(&m);
-    Translate_F9F8(&m, v);
+    Translate_F9F8(&m, baseOffset);
     ROTATE_F9F8(&m, t4vect_ZAxis, -*(float*)(self + 0x78));
     ROTATE_F9F8(&m, t4vect_YAxis, *(float*)(self + 116));
     ROTATE_F9F8(&m, t4vect_XAxis, *(float*)(self + 0x70));
@@ -5313,8 +5313,8 @@ extern "C" int cScriptObjRider_IsMatchingEntity(cScriptCtx0458* self, void* msg,
     int mask = D_00481BB0[team];
     // PORT: func_0027C958 returns a record pointer as int
     char* info = (char*)func_0027C958(msg);
-    short m = *(short*)(info + 2);
-    if (m == 0 || (m & mask) != 0) {
+    short charMask = *(short*)(info + 2);
+    if (charMask == 0 || (charMask & mask) != 0) {
         return func_00280560(self, rider, *(signed char*)info, *(int*)((char*)msg + 0x8));
     }
     return 0;
@@ -5433,17 +5433,17 @@ extern "C" void cScriptObjEvent_Update(sScrObj05B8* self)
 {
     char* snd = (char*)func_0028B180();
     for (int i = 0; i < 4; i++) {
-        sScrTrig05B8* t = &self->trig[i];
-        if (t->id >= 0) {
-            if (t->count != 0) {
-                cBankMonitor_BANKMONITOR_StopHandle(**(char***)(snd + 0x118) + 0x1D8, t->id, 1, 0.0f);
-                t->target = -1;
-                t->id = -1;
-                t->count = 0;
-            } else if (cBankMonitor_BANKMONITOR_GetHandle(**(char***)(snd + 0x118) + 0x1D8, t->id, 1) == 0) {
-                t->target = -1;
-                t->id = -1;
-                t->count = 0;
+        sScrTrig05B8* soundSlot = &self->trig[i];
+        if (soundSlot->id >= 0) {
+            if (soundSlot->count != 0) {
+                cBankMonitor_BANKMONITOR_StopHandle(**(char***)(snd + 0x118) + 0x1D8, soundSlot->id, 1, 0.0f);
+                soundSlot->target = -1;
+                soundSlot->id = -1;
+                soundSlot->count = 0;
+            } else if (cBankMonitor_BANKMONITOR_GetHandle(**(char***)(snd + 0x118) + 0x1D8, soundSlot->id, 1) == 0) {
+                soundSlot->target = -1;
+                soundSlot->id = -1;
+                soundSlot->count = 0;
             }
         }
     }
@@ -5488,12 +5488,12 @@ extern "C" void cScriptObjEvent_OnStartObjectUse(void* self)
     char* info = (char*)func_0027C070(*(void**)(*(char**)((char*)self + 0x8) + 0x8));
     int key = *(int*)(info + 0x1C);
     *(void**)((char*)self + 0xF8) = cSSXScriptEngine_GetSoundBankInfo_2(ScriptEngine, key);
-    sScrTrig_0730* t = (sScrTrig_0730*)((char*)self + 0xBC);
+    sScrTrig_0730* soundSlot = (sScrTrig_0730*)((char*)self + 0xBC);
     for (i = 3; i >= 0; i--) {
-        t->c = -1;
-        t->a = -1;
-        t->b = 0;
-        t++;
+        soundSlot->c = -1;
+        soundSlot->a = -1;
+        soundSlot->b = 0;
+        soundSlot++;
     }
 }
 #endif
@@ -6120,9 +6120,9 @@ extern "C" void cScriptObjCameraManager_OnEndObjectUse(sSeEng1400* self, int pla
 {
     func_0027D170(func_0027D2E8(), self->id);
     for (int i = 0; i < 2; i++) {
-        int s = self->slots[i];
-        if (s >= 0) {
-            func_0027D688(self->objs[s], 0);
+        int cameraIndex = self->slots[i];
+        if (cameraIndex >= 0) {
+            func_0027D688(self->objs[cameraIndex], 0);
             self->slots[i] = -1;
         }
     }
@@ -6358,10 +6358,10 @@ struct sVec4_1A50 {
 extern "C" void cScriptObjCameraManager_ResetScriptManagementVars(void* self)
 {
     int i;
-    int v = -1;
+    int noCamera = -1;
     int* ids = (int*)((char*)self + 0xDC);
     for (i = 1; i >= 0; i--) {
-        ids[i] = v;
+        ids[i] = noCamera;
     }
     *(int*)((char*)self + 0xF0) = 1;
     *(float*)((char*)self + 0xF4) = 1000000000.0f;

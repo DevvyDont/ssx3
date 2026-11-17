@@ -77,18 +77,18 @@ extern "C" void cPS2BezierMan_Init(cPS2BezierMan* self)
     func_0038D638((cBezierVirt*)self);
     for (int i = 0; i < 6; i++) {
         for (int j = 0; j < 6; j++) {
-            sUV_AF30 t;
-            t.v = (float)i * 0.2f;
-            t.u = (float)j * 0.2f;
-            D_005049C0_AF30.grid6[j][i] = t;
+            sUV_AF30 gridUV;
+            gridUV.v = (float)i * 0.2f;
+            gridUV.u = (float)j * 0.2f;
+            D_005049C0_AF30.grid6[j][i] = gridUV;
         }
     }
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
-            sUV_AF30 t;
-            t.v = (float)i * 0.1428571492433548f;
-            t.u = (float)j * 0.1428571492433548f;
-            D_005049C0_AF30.grid8[j][i] = t;
+            sUV_AF30 gridUV;
+            gridUV.v = (float)i * 0.1428571492433548f;
+            gridUV.u = (float)j * 0.1428571492433548f;
+            D_005049C0_AF30.grid8[j][i] = gridUV;
         }
     }
 }

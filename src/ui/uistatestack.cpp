@@ -254,9 +254,9 @@ extern "C" void cUIStateStack_pushCheck(cList* self, cUIStateStack_pushCheck_sSt
             top = top->next;
             skipped = 1;
         }
-        int f = *(int*)((char*)top + 0x1C);
-        if (skipped || ((f >> 5) & 1)) {
-            if (((f >> 6) & 1) == 0 && cUIStateStack_pushCheck_stateId(top) < 6) {
+        int stateFlags = *(int*)((char*)top + 0x1C);
+        if (skipped || ((stateFlags >> 5) & 1)) {
+            if (((stateFlags >> 6) & 1) == 0 && cUIStateStack_pushCheck_stateId(top) < 6) {
                 covered = 1;
                 top->id = 6;
                 top->b7 = 1;
@@ -912,8 +912,8 @@ extern "C" void cUIThing_applyPivot(void* self, sUIVec2* pos, sUIVec2* size)
     unsigned int align = getUIAlign(self);
     if ((align & 1) == 0) {
         if (align & 4) {
-            float d = size->y;
-            pos->y -= d;
+            float height = size->y;
+            pos->y -= height;
         } else {
             pos->y -= size->y * 0.5f;
         }

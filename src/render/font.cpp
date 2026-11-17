@@ -3065,8 +3065,8 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetScreenWidth);
 extern "C" int cPS2GraphicsMan_GetScreenWidth(cPS2GraphicsMan* self)
 {
     int i = self->CurrentDisplayMode;
-    sFontEntry* p = (sFontEntry*)self->DisplayModes;
-    return p[i].field_0x88;
+    sFontEntry* modes = (sFontEntry*)self->DisplayModes;
+    return modes[i].field_0x88;
 }
 #endif
 
@@ -3081,8 +3081,8 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetScreenHeight);
 extern "C" int cPS2GraphicsMan_GetScreenHeight(cPS2GraphicsMan* self)
 {
     int i = self->CurrentDisplayMode;
-    sFontEntry* p = (sFontEntry*)self->DisplayModes;
-    return p[i].field_0x8c;
+    sFontEntry* modes = (sFontEntry*)self->DisplayModes;
+    return modes[i].field_0x8c;
 }
 #endif
 
@@ -5372,20 +5372,20 @@ extern "C" void cPS2GraphicsMan_InitCharMatrices(char* self)
     rs->f0 = (rs->f0 & ~0x3C0) | 0x180;
     sRS_6B40* rs2 = *(sRS_6B40**)(self + 0xE84);
     rs2->fC = (rs2->fC & 0xC0000000) | (*(unsigned int*)(self + 0x5A00) & addrMask);
-    unsigned long* p = (unsigned long*)(*(unsigned int*)(self + 0x5A00) | 0x30000000);
-    p[0] = 0x6000000C;
-    p[2] = (unsigned long)0x8000 << 45;
-    p[3] = 0x6C0A000701000101;
-    p[1] = 0;
-    p += 4;
+    unsigned long* packet = (unsigned long*)(*(unsigned int*)(self + 0x5A00) | 0x30000000);
+    packet[0] = 0x6000000C;
+    packet[2] = (unsigned long)0x8000 << 45;
+    packet[3] = 0x6C0A000701000101;
+    packet[1] = 0;
+    packet += 4;
     cQuad128_6B40* src = (cQuad128_6B40*)(self + 0x6BB0);
     for (int i = 0; i < 10; i++) {
-        ((cQuad128_6B40*)p)[i] = src[i];
+        ((cQuad128_6B40*)packet)[i] = src[i];
     }
-    p[20] = 0;
-    p[21] = (unsigned long)(((unsigned int)D_1150 >> 3) | 0x14000000) << 32;
-    p += 22;
-    *(unsigned int*)(self + 0x5A00) = (unsigned int)p & 0x0FFFFFFF;
+    packet[20] = 0;
+    packet[21] = (unsigned long)(((unsigned int)D_1150 >> 3) | 0x14000000) << 32;
+    packet += 22;
+    *(unsigned int*)(self + 0x5A00) = (unsigned int)packet & 0x0FFFFFFF;
 }
 #endif
 

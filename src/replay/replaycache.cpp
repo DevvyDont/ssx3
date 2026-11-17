@@ -1967,32 +1967,32 @@ extern "C" void* cScriptHeap_AllocMem_impl(sHeap_2308* heap, unsigned int size)
 {
     size = (size + 3) & ~3;
     sBlk_2308* prev = 0;
-    sBlk_2308* b = heap->free;
-    sBlk_2308* r = 0;
+    sBlk_2308* block = heap->free;
+    sBlk_2308* found = 0;
     unsigned int split = size + 16;
-    if (b != 0) {
+    if (block != 0) {
         do {
-            if (b->size >= size) {
-                if (split < b->size) {
-                    sBlk_2308* nb = (sBlk_2308*)((char*)b + (size + 8));
-                    nb->size = (b->size - size) - 8;
-                    nb->next = b->next;
-                    b->next = nb;
-                    b->size = size;
+            if (block->size >= size) {
+                if (split < block->size) {
+                    sBlk_2308* nb = (sBlk_2308*)((char*)block + (size + 8));
+                    nb->size = (block->size - size) - 8;
+                    nb->next = block->next;
+                    block->next = nb;
+                    block->size = size;
                 }
-                r = b;
+                found = block;
                 if (prev == 0)
-                    heap->free = r->next;
+                    heap->free = found->next;
                 else
-                    prev->next = r->next;
-                b->next = 0;
+                    prev->next = found->next;
+                block->next = 0;
                 break;
             }
-            prev = b;
-            b = b->next;
-        } while (b != 0);
+            prev = block;
+            block = block->next;
+        } while (block != 0);
     }
-    return (char*)r + 8;
+    return (char*)found + 8;
 }
 #endif
 
@@ -2024,40 +2024,40 @@ struct sRcHeap {
 extern "C" void cScriptHeap_FreeMem(cScriptHeap* scriptHeap, void* pMem)
 {
     if (pMem) {
-        sRcBlock* b = (sRcBlock*)((char*)pMem - 8);
+        sRcBlock* block = (sRcBlock*)((char*)pMem - 8);
         if (!(sRcBlock*)scriptHeap->mpTopFreeBlock) {
-            scriptHeap->mpTopFreeBlock = (tFreeBlock*)b;
+            scriptHeap->mpTopFreeBlock = (tFreeBlock*)block;
             return;
         }
         sRcBlock* prev = 0;
         sRcBlock* cur = (sRcBlock*)scriptHeap->mpTopFreeBlock;
         do {
-            if (b < cur) {
-                int size = b->size + 8;
-                if ((sRcBlock*)((char*)b + size) == cur) {
-                    b->next = cur->next;
-                    b->size = size + cur->size;
+            if (block < cur) {
+                int size = block->size + 8;
+                if ((sRcBlock*)((char*)block + size) == cur) {
+                    block->next = cur->next;
+                    block->size = size + cur->size;
                     if (!prev)
-                        scriptHeap->mpTopFreeBlock = (tFreeBlock*)b;
+                        scriptHeap->mpTopFreeBlock = (tFreeBlock*)block;
                     else
-                        prev->next = b;
+                        prev->next = block;
                     return;
                 }
                 if (!prev) {
-                    b->next = (sRcBlock*)scriptHeap->mpTopFreeBlock;
-                    scriptHeap->mpTopFreeBlock = (tFreeBlock*)b;
+                    block->next = (sRcBlock*)scriptHeap->mpTopFreeBlock;
+                    scriptHeap->mpTopFreeBlock = (tFreeBlock*)block;
                 } else {
-                    b->next = prev->next;
-                    prev->next = b;
+                    block->next = prev->next;
+                    prev->next = block;
                 }
                 return;
             }
             int size = cur->size + 8;
-            if ((sRcBlock*)((char*)cur + size) == b) {
-                cur->size = size + b->size;
-                b = cur;
-                cur = b->next;
-                b->next = 0;
+            if ((sRcBlock*)((char*)cur + size) == block) {
+                cur->size = size + block->size;
+                block = cur;
+                cur = block->next;
+                block->next = 0;
                 if (!prev)
                     scriptHeap->mpTopFreeBlock = (tFreeBlock*)cur;
                 else
@@ -2068,11 +2068,11 @@ extern "C" void cScriptHeap_FreeMem(cScriptHeap* scriptHeap, void* pMem)
             }
         } while (cur);
         if (!prev) {
-            b->next = (sRcBlock*)scriptHeap->mpTopFreeBlock;
-            scriptHeap->mpTopFreeBlock = (tFreeBlock*)b;
+            block->next = (sRcBlock*)scriptHeap->mpTopFreeBlock;
+            scriptHeap->mpTopFreeBlock = (tFreeBlock*)block;
         } else {
-            b->next = prev->next;
-            prev->next = b;
+            block->next = prev->next;
+            prev->next = block;
         }
     }
 }
@@ -2162,16 +2162,16 @@ INCLUDE_ASM("replay/replaycache", GetCubicSplineValue);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" float GetCubicSplineValue(float* pCoefficientArray, float paramValue)
 {
-    float r;
+    float result;
     if (paramValue != 0.0f) {
-        r = pCoefficientArray[0];
-        r = r * paramValue + pCoefficientArray[1];
-        r = r * paramValue + pCoefficientArray[2];
-        r = r * paramValue + pCoefficientArray[3];
+        result = pCoefficientArray[0];
+        result = result * paramValue + pCoefficientArray[1];
+        result = result * paramValue + pCoefficientArray[2];
+        result = result * paramValue + pCoefficientArray[3];
     } else {
-        r = pCoefficientArray[3];
+        result = pCoefficientArray[3];
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -3787,11 +3787,11 @@ extern "C" int cScriptPlayerEntity_SetupPlay(sRcCache_273AA8* self)
     if (self->hdr->count) {
         void* heap = *(char**)(self->owner + 8) + 8;
         self->objs = (sRcObj_273AA8**)cScriptHeap_AllocMem(heap, self->hdr->count * 4);
-        char* p = (char*)self->hdr + self->hdr->first;
+        char* channelData = (char*)self->hdr + self->hdr->first;
         for (int i = 0; i < self->hdr->count; i++) {
-            sRcRec_273AA8* e = (sRcRec_273AA8*)p;
-            p += 4;
-            switch (e->type) {
+            sRcRec_273AA8* channelHeader = (sRcRec_273AA8*)channelData;
+            channelData += 4;
+            switch (channelHeader->type) {
             case 0: {
                 sRcObj_273AA8** slot = (sRcObj_273AA8**)((i << 2) + (int)self->objs);
                 *slot = (sRcObj_273AA8*)cScriptPlayerChannelSpline_cScriptPlayerChannelSpline((cScriptPlayerChannelSpline*)func_00272488_impl(40, heap));
@@ -3815,13 +3815,13 @@ extern "C" int cScriptPlayerEntity_SetupPlay(sRcCache_273AA8* self)
             }
             int flag = 0;
             int* pd = &self->done;
-            int r = 0;
-            sRcObj_273AA8* o = self->objs[i];
-            if (o->vt[1].fn((char*)o + o->vt[1].delta, p, self, &flag) || self->done)
-                r = 1;
-            *pd = r;
+            int keysLeft = 0;
+            sRcObj_273AA8* channel = self->objs[i];
+            if (channel->vt[1].fn((char*)channel + channel->vt[1].delta, channelData, self, &flag) || self->done)
+                keysLeft = 1;
+            *pd = keysLeft;
             self->flags |= flag;
-            p += e->size;
+            channelData += channelHeader->size;
         }
     }
     self->ready = 1;
@@ -4070,17 +4070,17 @@ extern "C" int cScriptPlayerEntity_Update(cScriptPlayerEntity* self_, float prev
         for (;;) {
             float next = time;
             for (int i = 0; i < (self->mpSystemHeader)->numChannels; i++) {
-                float f = (float)((cChan_274100**)self->mpChannelPlayers)[i]->nextTime();
-                if (f >= 0.0f && f < next) {
-                    next = f;
+                float channelNextTime = (float)((cChan_274100**)self->mpChannelPlayers)[i]->nextTime();
+                if (channelNextTime >= 0.0f && channelNextTime < next) {
+                    next = channelNextTime;
                 }
             }
             if (next == time) {
                 return cScriptPlayerEntity_DoFrameUpdate((cScriptPlayerEntity*)self, time, time - prev);
             }
-            float d = next - prev;
+            float delta = next - prev;
             prev = next;
-            if (!cScriptPlayerEntity_DoFrameUpdate((cScriptPlayerEntity*)self, prev, d)) {
+            if (!cScriptPlayerEntity_DoFrameUpdate((cScriptPlayerEntity*)self, prev, delta)) {
                 return 0;
             }
         }
@@ -4425,12 +4425,12 @@ extern "C" int cScriptPlayerMain_Init_impl(sRcStream45C0* self, sRcHdr45C0* data
     if (data->size >= 13) {
         self->ext = (char*)data + 0xC;
     }
-    char* p = (char*)data + self->hdr->size;
+    char* entityData = (char*)data + self->hdr->size;
     if (self->hdr->count != 0) {
         sRcElem45C0** slot = &self->elems;
         *slot = new (owner + 8) sRcElem45C0[self->hdr->count];
         for (int i = 0; i < self->hdr->count; i++) {
-            p += cScriptPlayerEntity_Init((cScriptPlayerEntity*)(&self->elems[i]), p, (int)self);
+            entityData += cScriptPlayerEntity_Init((cScriptPlayerEntity*)(&self->elems[i]), entityData, (int)self);
         }
     }
     return self->hdr->result;
@@ -4966,43 +4966,43 @@ extern "C" void cScriptPlayerMain_DoUpdateFrame_impl(char* self)
     if (*(int*)(self + 0x20) == 0 || *(int*)(self + 0x2C) > 0) {
         return;
     }
-    cRcListener4DE0* l = (cRcListener4DE0*)cScriptPlayerMain_GetInSeqCommInterface_p();
+    cRcListener4DE0* comm = (cRcListener4DE0*)cScriptPlayerMain_GetInSeqCommInterface_p();
     if (*(int*)(self + 0x20) == 1) {
         *(int*)(self + 0x20) = 2;
-        if (l != 0) {
-            l->v01(self);
+        if (comm != 0) {
+            comm->v01(self);
         }
     }
     if (*(int*)(self + 0x2C) > 0 || *(int*)(self + 0x20) == 0) {
         return;
     }
     int changed = 0;
-    float t = (float)cScriptPlayerMain_GetScriptLength_4DE0(self);
+    float scriptLength = (float)cScriptPlayerMain_GetScriptLength_4DE0(self);
     int hit = 0;
     float rem = 0.0f;
-    if (*(int*)(self + 0x20) == 4 && t <= *(float*)(self + 0x28)) {
+    if (*(int*)(self + 0x20) == 4 && scriptLength <= *(float*)(self + 0x28)) {
         cScriptPlayerMain_Stop_4DE0(self);
         return;
     }
     if ((unsigned)(*(int*)(self + 0x20) - 3) < 2) {
-        float a = *(float*)(self + 0x24);
-        float b = *(float*)(self + 0x28);
-        float c = a;
-        float lim = b + a;
+        float step = *(float*)(self + 0x24);
+        float currFrame = *(float*)(self + 0x28);
+        float fullStep = step;
+        float lim = currFrame + step;
         if (*(int*)(self + 0x20) == 4) {
-            lim = t;
+            lim = scriptLength;
         }
-        if (t <= lim) {
-            a = lim - b;
+        if (scriptLength <= lim) {
+            step = lim - currFrame;
             hit = 1;
-            lim = t;
-            rem = c - a;
+            lim = scriptLength;
+            rem = fullStep - step;
         }
         *(int*)(self + 0x3C) = 1;
-        changed = cScriptPlayerMain_DoUpdate_4DE0(self, lim, b, a);
+        changed = cScriptPlayerMain_DoUpdate_4DE0(self, lim, currFrame, step);
         *(int*)(self + 0x3C) = 0;
     } else {
-        if (t == 0.0f) {
+        if (scriptLength == 0.0f) {
             hit = 1;
         }
         *(int*)(self + 0x3C) = 1;
@@ -5010,16 +5010,16 @@ extern "C" void cScriptPlayerMain_DoUpdateFrame_impl(char* self)
             cScriptPlayerEntity_SetupPlay_4DE0(*(char**)(self + 0x18) + i * 0x3C);
         }
         for (int i = 0; i < (*(sRcPlayHdr_4DE0**)(self + 0x10))->count; i++) {
-            int r = 0;
+            int anyChanged = 0;
             if (cScriptPlayerEntity_ExecutePlay_4DE0(*(char**)(self + 0x18) + i * 0x3C) != 0 || changed != 0) {
-                r = 1;
+                anyChanged = 1;
             }
-            changed = r;
+            changed = anyChanged;
         }
         *(int*)(self + 0x3C) = 0;
         *(int*)(self + 0x20) = 3;
-        if (l != 0) {
-            l->v02(self, 0.0f, 0.0f);
+        if (comm != 0) {
+            comm->v02(self, 0.0f, 0.0f);
         }
     }
     if (*(int*)(self + 0x40) != 0 || *(int*)(self + 0x20) == 4) {
@@ -5029,15 +5029,15 @@ extern "C" void cScriptPlayerMain_DoUpdateFrame_impl(char* self)
     if (hit != 0 && *(int*)(self + 0x1C) != 0) {
         int changed2 = 0;
         for (int i = 0; i < (*(sRcPlayHdr_4DE0**)(self + 0x10))->count; i++) {
-            int r = 0;
+            int anyChanged = 0;
             if (cScriptPlayerEntity_Restart_4DE0(*(char**)(self + 0x18) + i * 0x3C) != 0 || changed2 != 0) {
-                r = 1;
+                anyChanged = 1;
             }
-            changed2 = r;
+            changed2 = anyChanged;
         }
         *(int*)(self + 0x28) = 0;
-        while (t < rem) {
-            rem -= t;
+        while (scriptLength < rem) {
+            rem -= scriptLength;
         }
         if (rem != 0.0f) {
             *(int*)(self + 0x3C) = 1;
@@ -5048,19 +5048,19 @@ extern "C" void cScriptPlayerMain_DoUpdateFrame_impl(char* self)
             cScriptPlayerMain_Stop_4DE0(self);
         }
     } else {
-        if (t <= *(float*)(self + 0x28) + *(float*)(self + 0x24)) {
-            int v = *(int*)(self + 0x1C);
-            if (v != 0) {
-                if (l != 0) {
-                    v = l->v05(self);
+        if (scriptLength <= *(float*)(self + 0x28) + *(float*)(self + 0x24)) {
+            int keepPlaying = *(int*)(self + 0x1C);
+            if (keepPlaying != 0) {
+                if (comm != 0) {
+                    keepPlaying = comm->v05(self);
                 }
-                if (*(int*)(self + 0x20) == 0 || v != 0) {
+                if (*(int*)(self + 0x20) == 0 || keepPlaying != 0) {
                     return;
                 }
             }
             *(int*)(self + 0x20) = 4;
-            if (l != 0) {
-                l->v03(self);
+            if (comm != 0) {
+                comm->v03(self);
             }
         }
     }
@@ -5115,15 +5115,15 @@ extern "C" int cScriptPlayerMain_DoUpdate(sRcAnim51A0* self, float time, float p
         }
     }
     for (int i = 0; i < self->hdr[1]; i++) {
-        int c = 0;
+        int anyChanged = 0;
         if (cScriptPlayerEntity_Update((cScriptPlayerEntity*)(self->tracks + i * 0x3C), prev, self->time, speed, jump) != 0 || changed != 0) {
-            c = 1;
+            anyChanged = 1;
         }
-        changed = c;
+        changed = anyChanged;
     }
-    cRcListener51A0* l = (cRcListener51A0*)cScriptPlayerMain_GetInSeqCommInterface((cScriptPlayerMain*)self);
-    if (l != 0) {
-        l->v02(self, self->time, speed);
+    cRcListener51A0* comm = (cRcListener51A0*)cScriptPlayerMain_GetInSeqCommInterface((cScriptPlayerMain*)self);
+    if (comm != 0) {
+        comm->v02(self, self->time, speed);
     }
     return changed;
 }

@@ -619,15 +619,15 @@ extern "C" int usprintf(unsigned short* dst, const char* fmt, ...)
 {
     sprintf1_va_list ap;
     unsigned short buf[0x400];
-    unsigned short* p;
+    unsigned short* bufPos;
     int n;
     int i;
-    p = buf;
+    bufPos = buf;
     n = strlen(fmt);
     for (i = 0; i < n; i++) {
-        *p++ = *fmt++;
+        *bufPos++ = *fmt++;
     }
-    *p = 0;
+    *bufPos = 0;
     sprintf1_va_start(ap);
     return USTR_vsprintf(dst, buf, ap);
 }
@@ -2606,22 +2606,22 @@ extern "C" void cPS2MemCard_Update(sMC_55D8* self)
     int one = 1;
     self->x3C = one;
     if (self->busy != 0) {
-        int tmp;
+        int syncCmd;
         D_004A3940 = 0;
-        tmp = 0;
-        if (func_0040A360_i(1, &tmp, &D_004A3940) == 0) {
+        syncCmd = 0;
+        if (func_0040A360_i(1, &syncCmd, &D_004A3940) == 0) {
             return;
         }
-        int r = D_004A3940;
-        if (r == -1) {
+        int syncResult = D_004A3940;
+        if (syncResult == -1) {
             goto set;
         }
-        if (r == -2) {
+        if (syncResult == -2) {
         set:
             *(int*)((char*)self + self->port2 * 0x14 + 0x18C) = one;
-            r = D_004A3940;
+            syncResult = D_004A3940;
         }
-        if ((unsigned)(r + 19) < 9 || (unsigned)(r + 49) < 10 || (unsigned)(r + 59) < 10 || (unsigned)(r + 79) < 10) {
+        if ((unsigned)(syncResult + 19) < 9 || (unsigned)(syncResult + 49) < 10 || (unsigned)(syncResult + 59) < 10 || (unsigned)(syncResult + 79) < 10) {
             D_004A3940 = -10;
         }
         if (func_002C63E8((cPS2MemCard*)self, D_004A3940) == 0) {
@@ -2653,17 +2653,17 @@ extern "C" void cPS2MemCard_Update(sMC_55D8* self)
             if (D_004A3940 == -1) {
                 self->ports[self->port].e = 1;
             }
-            int r = D_004A3940;
-            if (r < 0) {
+            int syncResult = D_004A3940;
+            if (syncResult < 0) {
                 int st = self->state;
                 if (st != 36 && (unsigned)(st - 54) >= 6) {
-                    if ((unsigned)(st - 8) < 8 && r != -1 && func_002C63E8((cPS2MemCard*)self, r) == 0) {
+                    if ((unsigned)(st - 8) < 8 && syncResult != -1 && func_002C63E8((cPS2MemCard*)self, syncResult) == 0) {
                         VC2v_55D8(self, 320, self->index);
                         func_002C48C0((cPS2MemCard*)self, 0x10);
                         return;
                     }
                 } else {
-                    if (r == -4) {
+                    if (syncResult == -4) {
                         D_004A3940 = 0;
                     }
                 }
@@ -2727,11 +2727,11 @@ extern "C" void cPS2MemCard_Update(sMC_55D8* self)
             self->x50 = self->count;
             MEM_fill_v(self->entries, 0, 720);
             for (i = 0; i < self->count; i++) {
-                unsigned char c = i + '1';
+                unsigned char slotDigit = i + '1';
                 int j;
                 for (j = 0; j < self->x50; j++) {
                     int n = strlen(self->dirbuf[j]);
-                    if (n != 0 && (unsigned char)self->dirbuf[j][n - 1] == c) {
+                    if (n != 0 && (unsigned char)self->dirbuf[j][n - 1] == slotDigit) {
                         strcpy(self->entries[i].name, self->dirbuf[j]);
                         break;
                     }
@@ -2937,9 +2937,9 @@ extern "C" void cPS2MemCard_Update(sMC_55D8* self)
         return;
     case 64:
         {
-            int v = D_004A3940;
+            int lastResult = D_004A3940;
             self->state = 0;
-            self->x18 = v;
+            self->x18 = lastResult;
         }
         break;
     case 74:

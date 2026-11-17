@@ -459,15 +459,15 @@ extern "C" void cBankManager__cBankManager(sBankManagerBB10* self, int flags)
         sBmVtblBB10 vt = D_00483AB8_BB10;
         *(sBmVtblBB10**)(self->monitor + 4) = &vt;
         char* base = self->monitor - 0xAD0;
-        int d = (char*)self - base;
-        vt.e[1].delta = D_00483AB8_BB10.e[1].delta + d;
+        int soundSysAdjust = (char*)self - base;
+        vt.e[1].delta = D_00483AB8_BB10.e[1].delta + soundSysAdjust;
     }
     gpBankManager = 0;
     if (self->banks != 0) {
-        sBmBankBB10* q = self->banks + ((int*)self->banks)[-4];
-        while (self->banks != q) {
-            q--;
-            func_0028B278(q, 0);
+        sBmBankBB10* bankInstance = self->banks + ((int*)self->banks)[-4];
+        while (self->banks != bankInstance) {
+            bankInstance--;
+            func_0028B278(bankInstance, 0);
         }
         cMemMan_free((char*)self->banks - 0x10);
     }

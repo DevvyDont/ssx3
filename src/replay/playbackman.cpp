@@ -541,17 +541,17 @@ extern "C" void cPlaybackMan_startPreview(void* self)
     if (*(int*)((char*)self + 0x70) == 0 && *(int*)(*(char**)((char*)self + 0x4) + 0xC) > 0) {
         cAI_purgeMissionRiders(*(void**)((char*)self + 0x60));
         cAI_reinitMissionRiders(*(void**)((char*)self + 0x60));
-        void* fp = *(void**)(*(char**)((char*)self + 0x5C) + 0x28);
-        *(int*)((char*)fp + 0x4) = *(int*)fp;
-        cReplay_setReplayState(fp, 14);
+        void* replay = *(void**)(*(char**)((char*)self + 0x5C) + 0x28);
+        *(int*)((char*)replay + 0x4) = *(int*)replay;
+        cReplay_setReplayState(replay, 14);
         cPlaybackMan_saveFrame(self);
         *(int*)(*(char**)((char*)self + 0x4) + 0x8) = 0;
         AIsetseed(*(char**)((char*)self + 0x4) + 0x1C214);
         *(int*)(*(char**)((char*)self + 0x60) + 0x8) = *(int*)(*(char**)((char*)self + 0x4) + 0x1C210);
         *(int*)((char*)self + 0x70) = 1;
         char* x = *(char**)(*(char**)((char*)self + 0x60) + 0x70);
-        int v = x ? *(int*)(x + 0x18) : 0;
-        cCamera_switchChaseControllerTargetRider(*(void**)(*(char**)(*(char**)((char*)self + 0x5C) + 0x84) + 0x4), v);
+        int targetRider = x ? *(int*)(x + 0x18) : 0;
+        cCamera_switchChaseControllerTargetRider(*(void**)(*(char**)(*(char**)((char*)self + 0x5C) + 0x84) + 0x4), targetRider);
     }
 }
 #endif
@@ -576,12 +576,12 @@ extern "C" void cPlaybackMan_stopPreview(void* self)
     if (*(int*)((char*)self + 0x70) == 1) {
         cAI_purgeMissionRiders(*(void**)((char*)self + 0x60));
         cAI_reinitMissionRiders(*(void**)((char*)self + 0x60));
-        void* fp = *(void**)(*(char**)((char*)self + 0x5C) + 0x28);
-        cReplay_setReplayState(fp, *(int*)((char*)fp + 0x4));
+        void* replay = *(void**)(*(char**)((char*)self + 0x5C) + 0x28);
+        cReplay_setReplayState(replay, *(int*)((char*)replay + 0x4));
         cPlaybackMan_restoreFrame(self);
         *(int*)((char*)self + 0x70) = 0;
-        int v = *(int*)(*(char**)((char*)self + 0x60) + 0x28);
-        cCamera_switchChaseControllerTargetRider(*(void**)(*(char**)(*(char**)((char*)self + 0x5C) + 0x84) + 0x4), v);
+        int targetRider = *(int*)(*(char**)((char*)self + 0x60) + 0x28);
+        cCamera_switchChaseControllerTargetRider(*(void**)(*(char**)(*(char**)((char*)self + 0x5C) + 0x84) + 0x4), targetRider);
     }
 }
 #endif
@@ -684,10 +684,10 @@ extern "C" int cPlaybackMan_isPauseAI(void* self)
     if (*(int*)((char*)self + 0x70) == 1) {
         sPbBuf_26CE50* buf = *(sPbBuf_26CE50**)((char*)self + 0x4);
         if (buf->pos < buf->end) {
-            unsigned char* p = &buf->data[buf->pos];
-            int n = *p++;
+            unsigned char* cursor = &buf->data[buf->pos];
+            int n = *cursor++;
             for (int i = 0; i < n; i++)
-                vals[i] = *p++ * 0.003921568859368563f;
+                vals[i] = *cursor++ * 0.003921568859368563f;
             (*(sPbBuf_26CE50**)((char*)self + 0x4))->pos += 1 + n;
             cInputPad_update(*(void**)((char*)self + 0x68), n, vals);
             return 0;
@@ -697,18 +697,18 @@ extern "C" int cPlaybackMan_isPauseAI(void* self)
     } else if (*(int*)((char*)self + 0x70) == 3) {
         sPbBuf_26CE50* buf = *(sPbBuf_26CE50**)((char*)self + 0x4);
         if (buf->pos < buf->size - 0x18) {
-            unsigned char* p = &buf->data[buf->pos];
+            unsigned char* cursor = &buf->data[buf->pos];
             int n = (*(sPbAxes_26CE50**)((char*)self + 0x64))->count;
-            *p++ = n;
+            *cursor++ = n;
             for (int i = 0; i < n; i++) {
                 sPbAxes_26CE50* axes = *(sPbAxes_26CE50**)((char*)self + 0x64);
-                float v;
+                float axisValue;
                 if (i < axes->count)
-                    v = axes->items[i].value;
+                    axisValue = axes->items[i].value;
                 else
-                    v = 0.0f;
-                *p = (int)(v * 255.0f);
-                vals[i] = *p++ * 0.003921568859368563f;
+                    axisValue = 0.0f;
+                *cursor = (int)(axisValue * 255.0f);
+                vals[i] = *cursor++ * 0.003921568859368563f;
             }
             (*(sPbBuf_26CE50**)((char*)self + 0x4))->pos += 1 + n;
             (*(sPbBuf_26CE50**)((char*)self + 0x4))->end += 1 + n;
@@ -1032,10 +1032,10 @@ struct sPlaybackStream {
 extern "C" int cReplayCache_moveTo(sPlaybackStream* self, unsigned int pos)
 {
     int i = 0;
-    sPlaybackChunk* c = self->chunks;
+    sPlaybackChunk* chunk = self->chunks;
     unsigned int total = 0;
     for (; i < self->count; i++) {
-        total += (c++)->info & 0xFFF;
+        total += (chunk++)->info & 0xFFF;
         if (pos < total) {
             break;
         }
@@ -1195,19 +1195,19 @@ void cReplayFramePtr_putFrameBlock_2(void* self, int a) __asm__("cReplayFramePtr
  */
 extern "C" int cReplayFrame_loadFrame(sPbFrame_D678* self, char** pp)
 {
-    sPbHeader_D678 h;
-    char* p = *pp;
-    *pp = p + 0x28;
-    MEM_copy(&h, p, 40);
-    self->field_0x10 = h.field_0x4;
-    self->field_0x30 = h.field_0x8;
-    self->field_0x34 = h.field_0xc;
-    self->colour = h.colour;
-    self->field_0x20 = h.field_0x14;
-    self->field_0x24 = h.field_0x18;
-    self->field_0x28 = h.field_0x1c;
-    self->field_0x2c = h.field_0x20;
-    cReplayFramePtr_loadBlock(self, pp, p + 0x24);
+    sPbHeader_D678 header;
+    char* start = *pp;
+    *pp = start + 0x28;
+    MEM_copy(&header, start, 40);
+    self->field_0x10 = header.field_0x4;
+    self->field_0x30 = header.field_0x8;
+    self->field_0x34 = header.field_0xc;
+    self->colour = header.colour;
+    self->field_0x20 = header.field_0x14;
+    self->field_0x24 = header.field_0x18;
+    self->field_0x28 = header.field_0x1c;
+    self->field_0x2c = header.field_0x20;
+    cReplayFramePtr_loadBlock(self, pp, start + 0x24);
     cReplayFramePtr_putFrameBlock_2(self, 1);
     return 1;
 }

@@ -109,10 +109,10 @@ extern "C" int cMCOverlayManager_hasCardStatusCriticalError(void* self)
 {
     // masks applied as separate statements; folding them into one
     // expression collapses the two `and` instructions into one
-    int v = *(int*)((char*)self + 0x43c);
-    v &= -5;
-    v &= -481;
-    return v != 0;
+    int stateTest = *(int*)((char*)self + 0x43c);
+    stateTest &= -5;
+    stateTest &= -481;
+    return stateTest != 0;
 }
 #endif
 

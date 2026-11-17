@@ -77,9 +77,9 @@ void cMemMan_free(void* p);
  */
 extern "C" void cInstanceMan__cInstanceMan(void* self, int flags)
 {
-    void* p = *(void**)((char*)self + 0xC);
-    if (p != 0) {
-        cMemMan_free(p);
+    void* instances = *(void**)((char*)self + 0xC);
+    if (instances != 0) {
+        cMemMan_free(instances);
     }
     if (flags & 1) {
         operator_delete((int*)self);

@@ -5010,8 +5010,8 @@ extern "C" int cTransitionMan_StartTransition_def(void* self, int initiator, voi
         char* ref = (char*)self + 0x68;
         if (~*(int*)((char*)self + 0x6C) == 0) {
             char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
-            sBWVEntry4370* e = &(*(sBWVEntry4370**)(obj + 0x10D8))[59];
-            e->fn(obj + e->delta, ref, 0x100, 0x100);
+            sBWVEntry4370* vtblEntry = &(*(sBWVEntry4370**)(obj + 0x10D8))[59];
+            vtblEntry->fn(obj + vtblEntry->delta, ref, 0x100, 0x100);
             if (~*(int*)((char*)self + 0x6C) == 0) {
                 if (transitionIn != 0) {
                     sBWVEntryI4370* vt = *(sBWVEntryI4370**)transitionIn;
@@ -5413,16 +5413,16 @@ extern "C" void cTransitionMan_StartTransitionScreenGrab(void* self, int a1, int
  */
 extern "C" void cTransitionMan_OnStartObjectUse(void* self)
 {
-    sWakeParams_4B98* p = (sWakeParams_4B98*)((char*)self + 0x28);
+    sWakeParams_4B98* transitionInfo = (sWakeParams_4B98*)((char*)self + 0x28);
     cScriptObject_OnStartObjectUse((char*)self + 0x10);
     if (*(int*)((char*)self + 0x28) != 7) {
-        int r1 = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, *(int*)((char*)self + 0x28), *(int*)((char*)self + 0x38));
-        int r2 = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, *(int*)((char*)self + 0x28), *(int*)((char*)self + 0x38));
-        cTransitionMan_StartTransition(self, 2, r1, r2, *(float*)((char*)self + 0x34), *(float*)((char*)self + 0x30), 0, 0, *(float*)((char*)self + 0x2C));
+        int transitionIn = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, *(int*)((char*)self + 0x28), *(int*)((char*)self + 0x38));
+        int transitionOut = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, *(int*)((char*)self + 0x28), *(int*)((char*)self + 0x38));
+        cTransitionMan_StartTransition(self, 2, transitionIn, transitionOut, *(float*)((char*)self + 0x34), *(float*)((char*)self + 0x30), 0, 0, *(float*)((char*)self + 0x2C));
     } else {
         cTransitionMan_StartTransitionScreenGrab(self, 2, cSSXScriptEngine_MakeTransitionObject(ScriptEngine, 7, *(int*)((char*)self + 0x38)), 0, *(float*)((char*)self + 0x34));
     }
-    *(float*)((char*)self + 0x48) = p->level;
+    *(float*)((char*)self + 0x48) = transitionInfo->level;
 }
 #endif
 
@@ -5650,24 +5650,24 @@ extern "C" void* cSnowBox_cSnowBox(char* self, int viewNum, int snowBoxType, flo
     *(int*)(self + 0xA0) = BXrand();
     wakeCopyMatD88((sMatD88*)(self + 0x50), (sMatD88*)t4mat_Identity);
     {
-        sMatD88 t2;
-        sVec4D88 s;
-        sMatD88 tmp;
-        s.x = *(float*)(self + 0xC);
-        s.y = *(float*)(self + 0xC);
-        s.z = *(float*)(self + 0xC);
-        s.w = 1.0f;
-        wakeScaleMatD88(&tmp, (sMatD88*)(self + 0x50), s);
-        wakeCopyMatD88(&t2, &tmp);
-        wakeCopyMatD88((sMatD88*)(self + 0x50), &t2);
+        sMatD88 scaledCopy;
+        sVec4D88 scale;
+        sMatD88 scaled;
+        scale.x = *(float*)(self + 0xC);
+        scale.y = *(float*)(self + 0xC);
+        scale.z = *(float*)(self + 0xC);
+        scale.w = 1.0f;
+        wakeScaleMatD88(&scaled, (sMatD88*)(self + 0x50), scale);
+        wakeCopyMatD88(&scaledCopy, &scaled);
+        wakeCopyMatD88((sMatD88*)(self + 0x50), &scaledCopy);
     }
     {
-        sVec4D88 p;
-        p.x = 0.0f;
-        p.y = 0.0f;
-        p.z = 0.0f;
-        p.w = 1.0f;
-        *(sVec4D88*)(self + 0x20) = p;
+        sVec4D88 origin;
+        origin.x = 0.0f;
+        origin.y = 0.0f;
+        origin.z = 0.0f;
+        origin.w = 1.0f;
+        *(sVec4D88*)(self + 0x20) = origin;
     }
     return self;
 }

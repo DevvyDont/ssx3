@@ -598,11 +598,11 @@ struct sFpKeyF088 {
  */
 extern "C" void cReplay__cReplay(int* self, int flags)
 {
-    char* s = (char*)self;
+    char* replay = (char*)self;
     int ok = 0;
-    int v = *self;
-    if (v != 0) {
-        ok = v;
+    int state = *self;
+    if (state != 0) {
+        ok = state;
         ok = ok < 10;
     }
     if (ok) {
@@ -610,19 +610,19 @@ extern "C" void cReplay__cReplay(int* self, int flags)
     }
     cReplay_frameSync(self);
     cReplay_purge((cReplay*)((sFpOwner26F428*)self));
-    if (s + 0x494 != 0) {
-        char* p = s + 0x494 + 0x168;
-        while (s + 0x494 != p) {
-            p -= 0xB4;
-            ((sFpKeyF088*)p)->~sFpKeyF088();
+    if (replay + 0x494 != 0) {
+        char* element = replay + 0x494 + 0x168;
+        while (replay + 0x494 != element) {
+            element -= 0xB4;
+            ((sFpKeyF088*)element)->~sFpKeyF088();
         }
     }
-    if (s + 0x2C != 0) {
-        char* p = s + 0x2C + 0x380;
-        while (s + 0x2C != p) {
-            p -= 0x38;
-            sFpVEntryF088* vt = ((sFpNodeF088*)p)->vtable;
-            vt[7].fn(p + vt[7].delta, 0);
+    if (replay + 0x2C != 0) {
+        char* element = replay + 0x2C + 0x380;
+        while (replay + 0x2C != element) {
+            element -= 0x38;
+            sFpVEntryF088* vt = ((sFpNodeF088*)element)->vtable;
+            vt[7].fn(element + vt[7].delta, 0);
         }
     }
     if (flags & 1) {
@@ -889,8 +889,8 @@ static inline void addFrame_F4A8(cReplay* self, short type)
 // Replay recorder/player: per-frame update of the replay state machine.
 extern "C" void cReplay_update(cReplay* self)
 {
-    int s = self->State;
-    bool ok = !(s == 14 || s == 15);
+    int state = self->State;
+    bool ok = !(state == 14 || state == 15);
     if (!ok)
         return;
     if (self->ShowError > 0)
@@ -944,8 +944,8 @@ extern "C" void cReplay_update(cReplay* self)
         self->RecordTick++;
         return;
     case 3: {
-        void* o = D_004A28A8_F4A8->players[self->PadNum];
-        if (o != 0 && cInput_getState(o, 107))
+        void* input = D_004A28A8_F4A8->players[self->PadNum];
+        if (input != 0 && cInput_getState(input, 107))
             cReplay_updateInput((self), 0);
         cReplay_processInput(self);
         return;
@@ -1210,15 +1210,15 @@ extern "C" void cReplay_updateCameraSelect(int* self)
     if (!isStateFA78(self, 3)) {
         return;
     }
-    void* pad = *(void**)((char*)SSXApp + (self[0x28 / 4] << 2) + 0xB0);
-    if (cInput_getState(pad, 108) != 0) {
+    void* input = *(void**)((char*)SSXApp + (self[0x28 / 4] << 2) + 0xB0);
+    if (cInput_getState(input, 108) != 0) {
         cGameViewMan_updateAll(SSXApp->Game->ViewMan);
     }
     if (D_00445438[self[1584 / 4]] != 11) {
         return;
     }
-    if (cInput_getValue(pad, 49) != 0.0f || cInput_getValue(pad, 0x30) != 0.0f ||
-        cInput_getValue(pad, 50) != 0.0f || cInput_getValue(pad, 51) != 0.0f) {
+    if (cInput_getValue(input, 49) != 0.0f || cInput_getValue(input, 0x30) != 0.0f ||
+        cInput_getValue(input, 50) != 0.0f || cInput_getValue(input, 51) != 0.0f) {
         cGameViewMan_updateAll(SSXApp->Game->ViewMan);
     }
 }
@@ -1286,64 +1286,64 @@ extern "C" int cReplay_updateInput_impl(void* self, int a1) __asm__("cReplay_upd
  */
 extern "C" int cReplay_updateInput_impl(void* self, int debug)
 {
-    char* s = (char*)self;
-    char* g = (char*)SSXApp;
-    sFpView_FB88* v = (sFpView_FB88*)&gUISoundNull;
-    sFpView_FB88* cur = *(sFpView_FB88**)(*(char**)(*(char**)(g + 0x84) + 0x48) + 0x14);
-    if (cur != 0) v = cur;
-    if (*(int*)(s + 0x618) != 0) return 0;
-    int r = 0;
-    void* pad = *(void**)(g + (*(int*)(s + 0x28) << 2) + 0xB0);
-    if (*(int*)(s + 0x61C) == 0 && *(int*)(s + 0x620) == 0) {
-        if (cInput_getState(pad, 106)) {
-            *(int*)(s + 0x1C) = 10;
-            *(int*)(s + 0x20) = 0;
-            if (!isStateFB88(s, 3)) r = 7;
-            else r = isIdleFB88(s) ? 0 : 5;
-        } else if (cInput_getState(pad, 107)) {
-            if (*(int*)(s + 0x1C) > 0) *(int*)(s + 0x1C) -= 1;
-            *(int*)(s + 0x20) ^= 1;
-            if (*(int*)(s + 0x1C) <= 0 && *(int*)(s + 0x20) == 0) {
-                if (!isStateFB88(s, 3)) r = 7;
-                else r = isIdleFB88(s) ? 0 : 5;
+    char* replay = (char*)self;
+    char* app = (char*)SSXApp;
+    sFpView_FB88* uiSound = (sFpView_FB88*)&gUISoundNull;
+    sFpView_FB88* cur = *(sFpView_FB88**)(*(char**)(*(char**)(app + 0x84) + 0x48) + 0x14);
+    if (cur != 0) uiSound = cur;
+    if (*(int*)(replay + 0x618) != 0) return 0;
+    int command = 0;
+    void* input = *(void**)(app + (*(int*)(replay + 0x28) << 2) + 0xB0);
+    if (*(int*)(replay + 0x61C) == 0 && *(int*)(replay + 0x620) == 0) {
+        if (cInput_getState(input, 106)) {
+            *(int*)(replay + 0x1C) = 10;
+            *(int*)(replay + 0x20) = 0;
+            if (!isStateFB88(replay, 3)) command = 7;
+            else command = isIdleFB88(replay) ? 0 : 5;
+        } else if (cInput_getState(input, 107)) {
+            if (*(int*)(replay + 0x1C) > 0) *(int*)(replay + 0x1C) -= 1;
+            *(int*)(replay + 0x20) ^= 1;
+            if (*(int*)(replay + 0x1C) <= 0 && *(int*)(replay + 0x20) == 0) {
+                if (!isStateFB88(replay, 3)) command = 7;
+                else command = isIdleFB88(replay) ? 0 : 5;
             }
-        } else if (cInput_getState(pad, 103)) {
-            if (!isStateFB88(s, 3)) r = 7;
-            else r = isIdleFB88(s) ? 0 : 6;
-        } else if (cInput_getState(pad, 102)) {
+        } else if (cInput_getState(input, 103)) {
+            if (!isStateFB88(replay, 3)) command = 7;
+            else command = isIdleFB88(replay) ? 0 : 6;
+        } else if (cInput_getState(input, 102)) {
             if (debug) {
                 cGame_stopReplay(SSXApp->Game);
-                *(int*)(s + 0x618) = 8;
-            } else if (!isStateFB88(s, 3)) {
-                *(int*)(s + 0x618) = 7;
+                *(int*)(replay + 0x618) = 8;
+            } else if (!isStateFB88(replay, 3)) {
+                *(int*)(replay + 0x618) = 7;
             }
             return 0;
-        } else if (cInput_getState(pad, 104)) {
-            if (!isStateFB88(s, 3)) r = 7;
-            else if (!isIdleFB88(s)) {
-                v->vt[2].fn((char*)v + v->vt[2].delta, 2);
-                r = 4;
+        } else if (cInput_getState(input, 104)) {
+            if (!isStateFB88(replay, 3)) command = 7;
+            else if (!isIdleFB88(replay)) {
+                uiSound->vt[2].fn((char*)uiSound + uiSound->vt[2].delta, 2);
+                command = 4;
             } else {
-                v->vt[2].fn((char*)v + v->vt[2].delta, 4);
+                uiSound->vt[2].fn((char*)uiSound + uiSound->vt[2].delta, 4);
             }
-        } else if (cInput_getState(pad, 105)) {
-            if (isStateFB88(s, 3)) {
-                if (!isIdleNoCamFB88(s)) {
-                    v->vt[2].fn((char*)v + v->vt[2].delta, 2);
-                    r = 3;
+        } else if (cInput_getState(input, 105)) {
+            if (isStateFB88(replay, 3)) {
+                if (!isIdleNoCamFB88(replay)) {
+                    uiSound->vt[2].fn((char*)uiSound + uiSound->vt[2].delta, 2);
+                    command = 3;
                 } else {
-                    v->vt[2].fn((char*)v + v->vt[2].delta, 4);
+                    uiSound->vt[2].fn((char*)uiSound + uiSound->vt[2].delta, 4);
                 }
             } else {
-                r = 7;
+                command = 7;
             }
-        } else if (cInput_getState(pad, 108)) {
-            v->vt[2].fn((char*)v + v->vt[2].delta, 2);
+        } else if (cInput_getState(input, 108)) {
+            uiSound->vt[2].fn((char*)uiSound + uiSound->vt[2].delta, 2);
             cReplay_cycleReplayCameraAlgorithm((cReplay*)self);
         }
     }
-    *(int*)(s + 0x618) = r;
-    return r != 0;
+    *(int*)(replay + 0x618) = command;
+    return command != 0;
 }
 #endif
 

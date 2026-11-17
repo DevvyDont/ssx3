@@ -222,11 +222,11 @@ INCLUDE_ASM("world/worldview", cWorldView_getWorldBoundBox);
 /**
  * Returns the address of the view's m_WorldBoundBox (+0x220). No C caller in the source.
  *
- * @param arg0  the cWorldView (this)
+ * @param worldView  the cWorldView (this)
  * @return the box's address
  */
-extern "C" int cWorldView_getWorldBoundBox(int arg0) {
-    return arg0 + 544;
+extern "C" int cWorldView_getWorldBoundBox(int worldView) {
+    return worldView + 544;
 }
 #endif
 
@@ -444,9 +444,9 @@ extern "C" void cWorldView_refreshStreamFocus(sWV_9D60* self, int cam)
 {
     if (*(int*)((char*)self + cam * 0x50 + 0x240) != 0) {
         int frame = *(int*)(cAppMan_TheAppMan + 0x18);
-        float v = *(float*)((char*)self + cam * 0x50 + 0x280);
-        *(float*)((char*)self + cam * 0x50 + 0x284) = v;
-        *(float*)((char*)self + cam * 0x50 + 0x288) = v;
+        float loadRadius = *(float*)((char*)self + cam * 0x50 + 0x280);
+        *(float*)((char*)self + cam * 0x50 + 0x284) = loadRadius;
+        *(float*)((char*)self + cam * 0x50 + 0x288) = loadRadius;
         unsigned int i;
         for (i = 0; i < (unsigned int)self->mp_Hdr->m_uiNumSections; i++) {
             int st = self->slots[i].state;
@@ -677,26 +677,26 @@ extern "C" void cWorldView_recursiveTreeFocus(void* self_, void* sec_, int cam, 
     if (!overlap_A028(&((sWV_A028*)self_)->cams[cam].bmin, (sSection_A028*)sec_))
         return;
     if (((sSection_A028*)sec_)->info != 0) {
-        float d = cWorldView_getDistanceToBox(self_, &((sWV_A028*)self_)->cams[cam].pos, sec_, ((sSection_A028*)sec_)->bmax);
-        float m = ((sWV_A028*)self_)->cams[cam].near;
+        float dist = cWorldView_getDistanceToBox(self_, &((sWV_A028*)self_)->cams[cam].pos, sec_, ((sSection_A028*)sec_)->bmax);
+        float safeRadius = ((sWV_A028*)self_)->cams[cam].near;
         float w;
-        if (d < 0.0f) {
+        if (dist < 0.0f) {
             w = 0.800000011920929f;
             if (cWorldCache_isPageLoaded(((sWV_A028*)self_)->world, ((sSection_A028*)sec_)->info->id) == 0)
-                m = 0.0f;
+                safeRadius = 0.0f;
         } else {
-            if (((sWV_A028*)self_)->cams[cam].range < d)
+            if (((sWV_A028*)self_)->cams[cam].range < dist)
                 return;
-            w = (1.0f - d / ((sWV_A028*)self_)->cams[cam].range) * 0.800000011920929f;
-            if (d < m) {
+            w = (1.0f - dist / ((sWV_A028*)self_)->cams[cam].range) * 0.800000011920929f;
+            if (dist < safeRadius) {
                 if (cWorldCache_isPageLoaded(((sWV_A028*)self_)->world, ((sSection_A028*)sec_)->info->id) == 0)
-                    m = d;
+                    safeRadius = dist;
             }
         }
         if (loaded)
-            ((sWV_A028*)self_)->cams[cam].near = m;
-        if (m < ((sWV_A028*)self_)->cams[cam].best)
-            ((sWV_A028*)self_)->cams[cam].best = m;
+            ((sWV_A028*)self_)->cams[cam].near = safeRadius;
+        if (safeRadius < ((sWV_A028*)self_)->cams[cam].best)
+            ((sWV_A028*)self_)->cams[cam].best = safeRadius;
         cWorldCache_touchPage(((sWV_A028*)self_)->world, ((sSection_A028*)sec_)->info->id, w);
     }
     if (((sSection_A028*)sec_)->child0 != 0) {
@@ -777,18 +777,18 @@ cChunkResolve_cChunkResolve_sView* cChunkResolve_cChunkResolve_impl(cChunkResolv
         D_00508F50.f08 = 0xFFFFFFFF;
         D_004A5A68 = 1;
     }
-    cChunkResolve_cChunkResolve_sState* s = &D_00508F50;
-    self->state = s;
-    MEM_fill(s, 0, sizeof(cChunkResolve_cChunkResolve_sState));
+    cChunkResolve_cChunkResolve_sState* sharedState = &D_00508F50;
+    self->state = sharedState;
+    MEM_fill(sharedState, 0, sizeof(cChunkResolve_cChunkResolve_sState));
     D_00508F58[0] = 0xFFFFFFFF;
-    s->f0C = -1;
+    sharedState->f0C = -1;
     D_00508F50.f00 = 0;
     int i;
     for (i = 0; i < 24; i++) {
-        s->entries[i].dist = 1000.0f;
-        s->entries[i].scale = 0.5f;
-        s->entries[i].a = 0;
-        s->entries[i].b = -1;
+        sharedState->entries[i].dist = 1000.0f;
+        sharedState->entries[i].scale = 0.5f;
+        sharedState->entries[i].a = 0;
+        sharedState->entries[i].b = -1;
     }
     D_00508F50.flags = (((D_00508F50.flags | 1) & ~4) | 2) << 16;
     return self;
@@ -870,21 +870,21 @@ extern char t4mat_Identity[];
 extern "C" int cChunkResolve_resolveModelHeirarchy(cChunkResolve_resolveModelHeirarchy_cObj* self, void* pModel)
 {
     int n = *(int*)((char*)pModel + 0x4);
-    cChunkResolve_resolveModelHeirarchy_sEnt* e = *(cChunkResolve_resolveModelHeirarchy_sEnt**)((char*)pModel + 0x8);
+    cChunkResolve_resolveModelHeirarchy_sEnt* meshHierarchy = *(cChunkResolve_resolveModelHeirarchy_sEnt**)((char*)pModel + 0x8);
     int i;
-    for (i = 0; i < n; i++, e++) {
-        if (e->f4 != 0) {
-            e->f4 += (int)pModel;
-            self->v07((void*)e->f4, pModel);
+    for (i = 0; i < n; i++, meshHierarchy++) {
+        if (meshHierarchy->f4 != 0) {
+            meshHierarchy->f4 += (int)pModel;
+            self->v07((void*)meshHierarchy->f4, pModel);
         }
-        if (e->fC == 0xFFFFFFFF) {
-            e->fC = (unsigned int)t4mat_Identity;
+        if (meshHierarchy->fC == 0xFFFFFFFF) {
+            meshHierarchy->fC = (unsigned int)t4mat_Identity;
         } else {
-            e->fC += (int)pModel;
+            meshHierarchy->fC += (int)pModel;
         }
-        if (e->f8 != 0) {
-            e->f8 += (int)pModel;
-            self->v11((void*)e->f8, pModel);
+        if (meshHierarchy->f8 != 0) {
+            meshHierarchy->f8 += (int)pModel;
+            self->v11((void*)meshHierarchy->f8, pModel);
         }
     }
     return 1;
@@ -922,10 +922,10 @@ public:
 extern "C" int cChunkResolve_resolveMesh(cChunkResolve_resolveMesh_cObj* self, void* pMesh, int base)
 {
     int i = 0;
-    int* p = (int*)(*(int*)((char*)pMesh + 0x20) += base);
+    int* contextEntry = (int*)(*(int*)((char*)pMesh + 0x20) += base);
     for (; i < *(int*)((char*)pMesh + 0x1C); i++) {
-        *p += base;
-        self->v08((void*)*p++, base);
+        *contextEntry += base;
+        self->v08((void*)*contextEntry++, base);
     }
     return 1;
 }
@@ -1020,21 +1020,21 @@ extern char t4mat_Identity[];
 extern "C" int cChunkResolve_resolveParticleModelHeirarchy(cChunkResolve_resolveParticleModelHeirarchy_cObj* self, void* pModel)
 {
     int n = *(int*)((char*)pModel + 0x4);
-    cChunkResolve_resolveParticleModelHeirarchy_sEnt* e = *(cChunkResolve_resolveParticleModelHeirarchy_sEnt**)((char*)pModel + 0x8);
+    cChunkResolve_resolveParticleModelHeirarchy_sEnt* meshHierarchy = *(cChunkResolve_resolveParticleModelHeirarchy_sEnt**)((char*)pModel + 0x8);
     int i;
-    for (i = 0; i < n; i++, e++) {
-        if (e->f4 != 0) {
-            e->f4 += (int)pModel;
-            self->v16((void*)e->f4);
+    for (i = 0; i < n; i++, meshHierarchy++) {
+        if (meshHierarchy->f4 != 0) {
+            meshHierarchy->f4 += (int)pModel;
+            self->v16((void*)meshHierarchy->f4);
         }
-        if (e->fC == 0xFFFFFFFF) {
-            e->fC = (unsigned int)t4mat_Identity;
+        if (meshHierarchy->fC == 0xFFFFFFFF) {
+            meshHierarchy->fC = (unsigned int)t4mat_Identity;
         } else {
-            e->fC += (int)pModel;
+            meshHierarchy->fC += (int)pModel;
         }
-        if (e->f8 != 0) {
-            e->f8 += (int)pModel;
-            self->v11((void*)e->f8, 0);
+        if (meshHierarchy->f8 != 0) {
+            meshHierarchy->f8 += (int)pModel;
+            self->v11((void*)meshHierarchy->f8, 0);
         }
     }
     return 1;
@@ -1074,11 +1074,11 @@ INCLUDE_ASM("world/worldview", cChunkResolve_resolveParticleInstance);
 // PORT: decodes an int handle into a pointer ((void*)(i << 2)); not 64-bit safe.
 extern "C" int cChunkResolve_resolveParticleInstance(void* self, void* pInstance)
 {
-    unsigned int h = *(unsigned int*)((char*)pInstance + 0x64);
-    char* sec = (*(char***)(**(char***)self + 8))[h & 0xFF];
+    unsigned int resourceId = *(unsigned int*)((char*)pInstance + 0x64);
+    char* sec = (*(char***)(**(char***)self + 8))[resourceId & 0xFF];
     void* res;
     unsigned int i;
-    if (sec == 0 || (i = (*(unsigned int**)(sec + 0x24))[h >> 8] >> 8) == 0) {
+    if (sec == 0 || (i = (*(unsigned int**)(sec + 0x24))[resourceId >> 8] >> 8) == 0) {
         res = 0;
     } else {
         res = (void*)(i << 2);
@@ -1129,16 +1129,16 @@ INCLUDE_ASM("world/worldview", cChunkResolve_resolveMaterialBlocks);
 // PORT: decodes int handles into pointers ((void*)(i << 2)); not 64-bit safe.
 extern "C" int cChunkResolve_resolveMaterialBlocks(void* self, int n, int* data)
 {
-    int g;
-    for (g = 0; g < n; g++) {
+    int blockIndex;
+    for (blockIndex = 0; blockIndex < n; blockIndex++) {
         int j;
         unsigned int* hp = (unsigned int*)(data + 1);
         for (j = 0; j < *data; j++, hp++) {
-            unsigned int h = *hp;
-            char* sec = (*(char***)(**(char***)self + 8))[h & 0xFF];
+            unsigned int materialId = *hp;
+            char* sec = (*(char***)(**(char***)self + 8))[materialId & 0xFF];
             void* res;
             unsigned int i;
-            if (sec == 0 || (i = (*(unsigned int**)(sec + 0x4))[h >> 8] >> 8) == 0) {
+            if (sec == 0 || (i = (*(unsigned int**)(sec + 0x4))[materialId >> 8] >> 8) == 0) {
                 res = 0;
             } else {
                 res = (void*)(i << 2);
@@ -1186,10 +1186,10 @@ public:
 extern "C" int cChunkResolve_resolveAnimation(cChunkResolve_resolveAnimation_cObj* self, void* pAnimation, int base)
 {
     int i = 0;
-    int* p = (int*)(*(int*)((char*)pAnimation + 0x20) += base);
+    int* channelId = (int*)(*(int*)((char*)pAnimation + 0x20) += base);
     for (; i < *(int*)((char*)pAnimation + 0x1C); i++) {
-        *p += base;
-        self->v12((void*)*p++, base);
+        *channelId += base;
+        self->v12((void*)*channelId++, base);
     }
     return 1;
 }
@@ -1363,27 +1363,27 @@ extern "C" int cChunkResolve_resolveCollideModel(void* self, void* ctx, sChunk_3
         pCollideModel->items = (char*)pCollideModel + (int)pCollideModel->items;
     }
     if (pCollideModel->type == 3) {
-        sList_3AAA08* l = pCollideModel->list;
-        l->count = 0;
-        l->items = 0;
-        l->count = pCollideModel->n;
-        l->items = pCollideModel->items;
-        for (int i = 0; i < l->count; i++) {
-            SphereTree_init(l->items + i * 320);
+        sList_3AAA08* modelList = pCollideModel->list;
+        modelList->count = 0;
+        modelList->items = 0;
+        modelList->count = pCollideModel->n;
+        modelList->items = pCollideModel->items;
+        for (int i = 0; i < modelList->count; i++) {
+            SphereTree_init(modelList->items + i * 320);
         }
         char* data = pCollideModel->data;
-        for (int i = 0; i < l->count; i++) {
-            data += bxSphereTree_Load(l->items + i * 320, data, ctx);
+        for (int i = 0; i < modelList->count; i++) {
+            data += bxSphereTree_Load(modelList->items + i * 320, data, ctx);
         }
     } else if (pCollideModel->type == 1) {
-        sList_3AAA08* l = pCollideModel->list;
-        l->count = 0;
-        l->items = 0;
-        l->count = pCollideModel->n;
-        l->items = pCollideModel->items;
+        sList_3AAA08* modelList = pCollideModel->list;
+        modelList->count = 0;
+        modelList->items = 0;
+        modelList->count = pCollideModel->n;
+        modelList->items = pCollideModel->items;
         sNode_3AAA08* node = (sNode_3AAA08*)pCollideModel->data;
-        for (int i = 0; i < l->count; i++) {
-            ((sNode_3AAA08**)l->items)[i] = node;
+        for (int i = 0; i < modelList->count; i++) {
+            ((sNode_3AAA08**)modelList->items)[i] = node;
             node->p4 = (char*)node + (int)node->p4;
             node->p8 = (char*)node + (int)node->p8;
             node->pC = (char*)node + (int)node->pC;
@@ -1423,15 +1423,15 @@ struct cChunkResolve_resolveHalo_sObj {
  */
 extern "C" int cChunkResolve_resolveHalo(void* self, cChunkResolve_resolveHalo_sObj* obj)
 {
-    float r = func_003AD230_f(obj->flags & 0x70);
+    float haloRadius = func_003AD230_f(obj->flags & 0x70);
     obj->field_0x44 = 0;
     obj->field_0x40 = 0;
-    obj->min[0] = obj->pos[0] - r;
-    obj->min[1] = obj->pos[1] - r;
-    obj->min[2] = obj->pos[2] - r;
-    obj->max[0] = obj->pos[0] + r;
-    obj->max[1] = obj->pos[1] + r;
-    obj->max[2] = obj->pos[2] + r;
+    obj->min[0] = obj->pos[0] - haloRadius;
+    obj->min[1] = obj->pos[1] - haloRadius;
+    obj->min[2] = obj->pos[2] - haloRadius;
+    obj->max[0] = obj->pos[0] + haloRadius;
+    obj->max[1] = obj->pos[1] + haloRadius;
+    obj->max[2] = obj->pos[2] + haloRadius;
     return 1;
 }
 #endif
@@ -1453,9 +1453,9 @@ extern "C" int cChunkResolve_resolveLight(void* self, void* obj)
     if (*(int*)((char*)obj + 0xC) & 0x100) {
         return 0;
     }
-    int t = *(int*)((char*)obj + 0x10);
-    if (t < 3) {
-        if (t > 0) {
+    int lightType = *(int*)((char*)obj + 0x10);
+    if (lightType < 3) {
+        if (lightType > 0) {
             if (*(float*)((char*)obj + 0x1C) > 5000.0f) {
                 *(float*)((char*)obj + 0x1C) = 5000.0f;
             }
@@ -1502,15 +1502,15 @@ extern "C" float func_0040DA10(float);
  * the square root of that ratio x 100, 3 the cube root (func_0040DA10 log, func_0040D758 exp of a third) x 100; any
  * other type gives 1e7. No C caller in the source.
  *
- * @param p  the tLightRecord
+ * @param light  the tLightRecord
  * @param divisor  the threshold strength
  * @return the distance
  */
-extern "C" float cChunkResolve_calcMaxLightDistance(void* self, void* p, float divisor)
+extern "C" float cChunkResolve_calcMaxLightDistance(void* self, void* light, float divisor)
 {
-    float prod = *(float*)((char*)p + 0x14) * *(float*)((char*)p + 0x18);
+    float prod = *(float*)((char*)light + 0x14) * *(float*)((char*)light + 0x18);
     float ratio = prod / divisor;
-    switch (*(char*)((char*)p + 0x64)) {
+    switch (*(char*)((char*)light + 0x64)) {
     case 1:
         return ratio * 100.0f;
     case 2: {
@@ -2223,75 +2223,75 @@ extern "C" int func_003AC048_impl(void* self, char* obj, char* ctx, int index)
     int first = 1;
     int split = 0;
     if (*(unsigned int*)obj & 0x60000) split = 1;
-    char* p = (char*)(*(int*)(obj + 4) + *(int*)(ctx + 0x24));
+    char* tagPtr = (char*)(*(int*)(obj + 4) + *(int*)(ctx + 0x24));
     long tag;
     do {
-        tag = *(long*)p;
+        tag = *(long*)tagPtr;
         switch (((int)((tag << 4) >> 32)) & 7) {
         case 3: {
-            if (*(unsigned int*)(p + 4) & 0x80000000) {
+            if (*(unsigned int*)(tagPtr + 4) & 0x80000000) {
                 split = 1;
-                *(unsigned int*)(p + 4) &= 0x7FFFFFFF;
+                *(unsigned int*)(tagPtr + 4) &= 0x7FFFFFFF;
             }
-            *(int*)(p + 4) = *(int*)(ctx + 0x24) + *(int*)(p + 4);
-            p += 0x10;
-            tag = *(long*)p;
-            int* ap = (int*)(p + 4);
+            *(int*)(tagPtr + 4) = *(int*)(ctx + 0x24) + *(int*)(tagPtr + 4);
+            tagPtr += 0x10;
+            tag = *(long*)tagPtr;
+            int* ap = (int*)(tagPtr + 4);
             *ap = *(int*)(ctx + 0x24) + *ap;
             int qwc = ((int)tag) & 0xFFFF;
-            p += 0x10;
-            char* e = *(char**)ap;
-            e += (qwc - 1) * 0x10;
+            tagPtr += 0x10;
+            char* lastQword = *(char**)ap;
+            lastQword += (qwc - 1) * 0x10;
             if (first) {
-                *(int*)(e + 8) = ((unsigned int)D_2270 >> 3) | 0x14000000;
+                *(int*)(lastQword + 8) = ((unsigned int)D_2270 >> 3) | 0x14000000;
             } else {
-                *(int*)(e + 8) = ((unsigned int)D_22C8 >> 3) | 0x14000000;
+                *(int*)(lastQword + 8) = ((unsigned int)D_22C8 >> 3) | 0x14000000;
             }
             if (split) {
-                char* next = p + 0x10;
+                char* next = tagPtr + 0x10;
                 if ((((int)((*(long*)next << 4) >> 32)) & 7) == 6) {
-                    *(long*)(p + 0x8) = 0;
-                    *(long*)p = ((unsigned long)(unsigned int)D_00509400 << 32) | 0x30000001;
+                    *(long*)(tagPtr + 0x8) = 0;
+                    *(long*)tagPtr = ((unsigned long)(unsigned int)D_00509400 << 32) | 0x30000001;
                     if (first) {
-                        *(long*)(p + 0x10) = ((unsigned long)(unsigned int)D_00509410 << 32) | 0x30000001;
-                        *(long*)(p + 0x18) = 0;
+                        *(long*)(tagPtr + 0x10) = ((unsigned long)(unsigned int)D_00509410 << 32) | 0x30000001;
+                        *(long*)(tagPtr + 0x18) = 0;
                     } else {
-                        *(long*)(p + 0x10) = ((unsigned long)(unsigned int)D_00509420 << 32) | 0x30000001;
-                        *(long*)(p + 0x18) = 0;
+                        *(long*)(tagPtr + 0x10) = ((unsigned long)(unsigned int)D_00509420 << 32) | 0x30000001;
+                        *(long*)(tagPtr + 0x18) = 0;
                     }
-                    *(long*)(p + 0x20) = 0x60000000;
-                    *(long*)(p + 0x28) = 0;
+                    *(long*)(tagPtr + 0x20) = 0x60000000;
+                    *(long*)(tagPtr + 0x28) = 0;
                 } else {
-                    if (*(unsigned int*)(p + 4) & 0x80000000) {
+                    if (*(unsigned int*)(tagPtr + 4) & 0x80000000) {
                         split = 1;
-                        *(unsigned int*)(p + 4) &= 0x7FFFFFFF;
+                        *(unsigned int*)(tagPtr + 4) &= 0x7FFFFFFF;
                     }
-                    *(int*)(p + 4) = *(int*)(ctx + 0x24) + *(int*)(p + 4);
-                    p = next;
-                    tag = *(long*)p;
-                    ap = (int*)(p + 4);
+                    *(int*)(tagPtr + 4) = *(int*)(ctx + 0x24) + *(int*)(tagPtr + 4);
+                    tagPtr = next;
+                    tag = *(long*)tagPtr;
+                    ap = (int*)(tagPtr + 4);
                     *ap = *(int*)(ctx + 0x24) + *ap;
                     qwc = ((int)tag) & 0xFFFF;
-                    p += 0x10;
-                    e = *(char**)ap;
-                    e += (qwc - 1) * 0x10;
-                    *(int*)(e + 8) = ((unsigned int)D_22C8 >> 3) | 0x14000000;
+                    tagPtr += 0x10;
+                    lastQword = *(char**)ap;
+                    lastQword += (qwc - 1) * 0x10;
+                    *(int*)(lastQword + 8) = ((unsigned int)D_22C8 >> 3) | 0x14000000;
                     if (first) {
-                        *(long*)p = ((unsigned long)(unsigned int)D_00509410 << 32) | 0x30000001;
+                        *(long*)tagPtr = ((unsigned long)(unsigned int)D_00509410 << 32) | 0x30000001;
                     } else {
-                        *(long*)p = ((unsigned long)(unsigned int)D_00509420 << 32) | 0x30000001;
+                        *(long*)tagPtr = ((unsigned long)(unsigned int)D_00509420 << 32) | 0x30000001;
                     }
-                    *(long*)(p + 0x8) = 0;
-                    *(long*)(p + 0x10) = ((unsigned long)(unsigned int)D_00509420 << 32) | 0x30000001;
-                    *(long*)(p + 0x18) = 0;
+                    *(long*)(tagPtr + 0x8) = 0;
+                    *(long*)(tagPtr + 0x10) = ((unsigned long)(unsigned int)D_00509420 << 32) | 0x30000001;
+                    *(long*)(tagPtr + 0x18) = 0;
                 }
-                p += 0x20;
+                tagPtr += 0x20;
             }
             first = 0;
             break;
         }
         case 6:
-            p += 0x10;
+            tagPtr += 0x10;
             done = 1;
             break;
         }
@@ -2391,18 +2391,18 @@ extern "C" void* func_003AC508(void* self, void* a1, func_003AC358_sList* list, 
  * For every sub-mesh of every mesh of the instance's model (+0x80, as in func_003ABF50), func_003AC508 patches the next
  * chain in the instance's data, continuing where the previous one ended. Called by cPS2ChunkResolve_resolveInstance.
  *
- * @param a1  the tInstanceRecord
+ * @param instance  the tInstanceRecord
  * @return 1
  */
 // PORT: stores a pointer in an int field (offset -> pointer fixup); not 64-bit safe.
-extern "C" int func_003AC358(void* self, void* a1)
+extern "C" int func_003AC358(void* self, void* instance)
 {
     int i;
     func_003AC358_sList* list;
     void* cur;
-    *(int*)((char*)a1 + 0x98) += (int)a1;
-    list = *(func_003AC358_sList**)((char*)a1 + 0x80);
-    cur = *(void**)((char*)a1 + 0x98);
+    *(int*)((char*)instance + 0x98) += (int)instance;
+    list = *(func_003AC358_sList**)((char*)instance + 0x80);
+    cur = *(void**)((char*)instance + 0x98);
     int n = list->count;
     func_003AC358_sEnt* entry = list->entries;
     for (i = 0; i < n; i++, entry++) {
@@ -2410,7 +2410,7 @@ extern "C" int func_003AC358(void* self, void* a1)
         if (object != 0) {
             int j;
             for (j = 0; j < object->count; j++) {
-                cur = func_003AC508(self, a1, list, cur);
+                cur = func_003AC508(self, instance, list, cur);
             }
         }
     }
@@ -2485,111 +2485,111 @@ extern char D_00509400[];
  * Patches one per-instance DMA chain in place, like func_003AC048.
  *
  * The first ref of each pair points into the model's data (+0x24 of @p list), the second into the instance's own data
- * (+0x98 of @p a1). MSCAL addresses are D_2270 for the first pair and D_22C8 after; a pair whose address has bit 31 set
+ * (+0x98 of @p instance). MSCAL addresses are D_2270 for the first pair and D_22C8 after; a pair whose address has bit 31 set
  * gets the extra refs to D_00509400 (or two more converted refs) as in func_003AC048.
  *
- * @param a1  the tInstanceRecord
+ * @param instance  the tInstanceRecord
  * @param list  the tModelRecord
  * @param cur  the first DMA tag of this chain
  * @return the address after the ret tag (the next chain)
  */
 // Walks one instance DMA chain: relocates the ref tags (+0x98 instance base for geometry, +0x24 for the
 // rest) and patches each packet's MSCAL (first one D_2270, later ones D_22C8).
-extern "C" void* func_003AC508(void* self, void* a1, func_003AC358_sList* list, void* cur)
+extern "C" void* func_003AC508(void* self, void* instance, func_003AC358_sList* list, void* cur)
 {
     char* ctx = (char*)list;
-    char* p = (char*)cur;
+    char* tagPtr = (char*)cur;
     int done = 0;
     int first = 1;
     long tag;
     do {
-        tag = *(long*)p;
+        tag = *(long*)tagPtr;
         switch (((int)((tag << 4) >> 32)) & 7) {
         case 3: {
             int flag = 0;
-            if (*(int*)(p + 4) & 0x80000000) {
-                *(int*)(p + 4) &= 0x7FFFFFFF;
+            if (*(int*)(tagPtr + 4) & 0x80000000) {
+                *(int*)(tagPtr + 4) &= 0x7FFFFFFF;
                 flag = 1;
             }
-            *(int*)(p + 4) = *(int*)(ctx + 0x24) + *(int*)(p + 4);
-            p += 0x10;
-            tag = *(long*)p;
-            int* ap = (int*)(p + 4);
-            *ap = *(int*)((char*)a1 + 0x98) + *ap;
+            *(int*)(tagPtr + 4) = *(int*)(ctx + 0x24) + *(int*)(tagPtr + 4);
+            tagPtr += 0x10;
+            tag = *(long*)tagPtr;
+            int* ap = (int*)(tagPtr + 4);
+            *ap = *(int*)((char*)instance + 0x98) + *ap;
             int qwc = ((int)tag) & 0xFFFF;
-            p += 0x10;
-            char* e = *(char**)ap;
-            e += (qwc - 1) * 0x10;
+            tagPtr += 0x10;
+            char* lastQword = *(char**)ap;
+            lastQword += (qwc - 1) * 0x10;
             if (first) {
-                *(int*)(e + 8) = ((unsigned int)D_2270 >> 3) | 0x14000000;
+                *(int*)(lastQword + 8) = ((unsigned int)D_2270 >> 3) | 0x14000000;
             } else {
-                *(int*)(e + 8) = ((unsigned int)D_22C8 >> 3) | 0x14000000;
+                *(int*)(lastQword + 8) = ((unsigned int)D_22C8 >> 3) | 0x14000000;
             }
             if (flag) {
-                char* next = p + 0x10;
+                char* next = tagPtr + 0x10;
                 if ((((int)((*(long*)next << 4) >> 32)) & 7) == 6) {
-                    tag = *(long*)p;
-                    int addr = *(int*)(ctx + 0x24) + *(int*)(p + 4);
+                    tag = *(long*)tagPtr;
+                    int addr = *(int*)(ctx + 0x24) + *(int*)(tagPtr + 4);
                     qwc = ((int)tag) & 0xFFFF;
-                    e = (char*)addr + (qwc - 1) * 0x10;
+                    lastQword = (char*)addr + (qwc - 1) * 0x10;
                     if (first) {
-                        *(int*)(e + 8) = ((unsigned int)D_2270 >> 3) | 0x14000000;
+                        *(int*)(lastQword + 8) = ((unsigned int)D_2270 >> 3) | 0x14000000;
                     } else {
-                        *(int*)(e + 8) = ((unsigned int)D_22C8 >> 3) | 0x14000000;
+                        *(int*)(lastQword + 8) = ((unsigned int)D_22C8 >> 3) | 0x14000000;
                     }
-                    *(long*)(p + 0x20) = 0x60000000;
-                    *(long*)(p + 0x10) = (long)(0x30000000 | qwc) | ((long)addr << 32);
-                    *(long*)(p + 0x00) = ((unsigned long)(unsigned int)D_00509400 << 32) | 0x30000001;
-                    *(long*)(p + 0x08) = 0;
-                    *(long*)(p + 0x18) = 0;
-                    *(long*)(p + 0x28) = 0;
-                    p += 0x20;
+                    *(long*)(tagPtr + 0x20) = 0x60000000;
+                    *(long*)(tagPtr + 0x10) = (long)(0x30000000 | qwc) | ((long)addr << 32);
+                    *(long*)(tagPtr + 0x00) = ((unsigned long)(unsigned int)D_00509400 << 32) | 0x30000001;
+                    *(long*)(tagPtr + 0x08) = 0;
+                    *(long*)(tagPtr + 0x18) = 0;
+                    *(long*)(tagPtr + 0x28) = 0;
+                    tagPtr += 0x20;
                 } else {
-                    if (*(int*)(p + 4) & 0x80000000) {
-                        *(int*)(p + 4) &= 0x7FFFFFFF;
+                    if (*(int*)(tagPtr + 4) & 0x80000000) {
+                        *(int*)(tagPtr + 4) &= 0x7FFFFFFF;
                     }
-                    *(int*)(p + 4) = *(int*)(ctx + 0x24) + *(int*)(p + 4);
-                    p = next;
-                    tag = *(long*)p;
-                    ap = (int*)(p + 4);
-                    *ap = *(int*)((char*)a1 + 0x98) + *ap;
+                    *(int*)(tagPtr + 4) = *(int*)(ctx + 0x24) + *(int*)(tagPtr + 4);
+                    tagPtr = next;
+                    tag = *(long*)tagPtr;
+                    ap = (int*)(tagPtr + 4);
+                    *ap = *(int*)((char*)instance + 0x98) + *ap;
                     qwc = ((int)tag) & 0xFFFF;
-                    p += 0x10;
-                    e = *(char**)ap;
-                    e += (qwc - 1) * 0x10;
-                    *(int*)(e + 8) = ((unsigned int)D_22C8 >> 3) | 0x14000000;
-                    tag = *(long*)p;
-                    ap = (int*)(p + 4);
+                    tagPtr += 0x10;
+                    lastQword = *(char**)ap;
+                    lastQword += (qwc - 1) * 0x10;
+                    *(int*)(lastQword + 8) = ((unsigned int)D_22C8 >> 3) | 0x14000000;
+                    tag = *(long*)tagPtr;
+                    ap = (int*)(tagPtr + 4);
                     *ap = *(int*)(ctx + 0x24) + *ap;
                     qwc = ((int)tag) & 0xFFFF;
-                    p += 0x10;
-                    e = *(char**)ap;
-                    e += (qwc - 1) * 0x10;
+                    tagPtr += 0x10;
+                    lastQword = *(char**)ap;
+                    lastQword += (qwc - 1) * 0x10;
                     if (first) {
-                        *(int*)(e + 8) = ((unsigned int)D_2270 >> 3) | 0x14000000;
+                        *(int*)(lastQword + 8) = ((unsigned int)D_2270 >> 3) | 0x14000000;
                     } else {
-                        *(int*)(e + 8) = ((unsigned int)D_22C8 >> 3) | 0x14000000;
+                        *(int*)(lastQword + 8) = ((unsigned int)D_22C8 >> 3) | 0x14000000;
                     }
-                    tag = *(long*)p;
-                    ap = (int*)(p + 4);
+                    tag = *(long*)tagPtr;
+                    ap = (int*)(tagPtr + 4);
                     *ap = *(int*)(ctx + 0x24) + *ap;
                     qwc = ((int)tag) & 0xFFFF;
-                    p += 0x10;
-                    e = *(char**)ap;
-                    e += (qwc - 1) * 0x10;
-                    *(int*)(e + 8) = ((unsigned int)D_22C8 >> 3) | 0x14000000;
+                    tagPtr += 0x10;
+                    lastQword = *(char**)ap;
+                    lastQword += (qwc - 1) * 0x10;
+                    *(int*)(lastQword + 8) = ((unsigned int)D_22C8 >> 3) | 0x14000000;
                 }
             }
             first = 0;
             break;
         }
         case 6:
-            p += 0x10;
+            tagPtr += 0x10;
             done = 1;
             break;
         }
     } while (done == 0);
-    return p;
+    return tagPtr;
 }
 #endif
 

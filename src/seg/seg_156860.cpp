@@ -1377,10 +1377,10 @@ extern "C" int cGameComm_cGameComm(int vself, int port, int isServer)
     self->unk_140 = 0;
     self->unk_13C = 0;
     for (int i = 0; i < 4; i++) {
-        sGcQueue_6C78* q = &self->q[i];
-        q->wr = 0;
-        q->rd = 0;
-        MEM_fill_6C78(q->slots, 0, sizeof(q->slots));
+        sGcQueue_6C78* queue = &self->q[i];
+        queue->wr = 0;
+        queue->rd = 0;
+        MEM_fill_6C78(queue->slots, 0, sizeof(queue->slots));
     }
     self->q[4].wr = 0;
     self->q[4].rd = 0;

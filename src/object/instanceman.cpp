@@ -193,16 +193,16 @@ INCLUDE_ASM("object/instanceman", cAnimFrame_getStartTime);
 // PORT: the original reads *a before checking a for null.
 extern "C" float cAnimFrame_getStartTime(void* self)
 {
-    float r = 0.0f;
-    char** a = *(char***)(*(char**)((char*)self + 0x40) + 0x20);
-    char* b = *a;
-    if (a != 0 && b != 0) {
-        char* c = *(char**)(b + 0x4);
-        if (c != 0) {
-            r = *(float*)(c + 0x10);
+    float startTime = 0.0f;
+    char** channelList = *(char***)(*(char**)((char*)self + 0x40) + 0x20);
+    char* channel = *channelList;
+    if (channelList != 0 && channel != 0) {
+        char* segments = *(char**)(channel + 0x4);
+        if (segments != 0) {
+            startTime = *(float*)(segments + 0x10);
         }
     }
-    return r;
+    return startTime;
 }
 #endif
 
@@ -310,19 +310,19 @@ extern "C" void cAnimFrame_getDeriv(char* self, sImV4_351660* vel, sImV4_351660*
     sImCurve_351660** curves = *(sImCurve_351660***)(*(char**)(self + 0x40) + 0x20);
     int* cur = (int*)self;
     int mask = 1;
-    float* o = out;
-    for (int i = 0; i < 16; i++, mask <<= 1, o++) {
-        sImCurve_351660* c = *curves;
+    float* outRate = out;
+    for (int i = 0; i < 16; i++, mask <<= 1, outRate++) {
+        sImCurve_351660* channel = *curves;
         if (*(int*)(*(char**)(self + 0x40) + 0x18) & mask) {
-            sImSeg_351660* e = &c->segs[*cur];
-            if (!inRange_351660(e, time)) {
-                e = (sImSeg_351660*)cAnimChannel_nextSegment((sImRangeTable*)c, cur, time);
+            sImSeg_351660* segment = &channel->segs[*cur];
+            if (!inRange_351660(segment, time)) {
+                segment = (sImSeg_351660*)cAnimChannel_nextSegment((sImRangeTable*)channel, cur, time);
             }
             curves++;
             cur++;
-            *o = e->a * (time * 3.0f) * time + 2.0f * e->b * time + e->c;
+            *outRate = segment->a * (time * 3.0f) * time + 2.0f * segment->b * time + segment->c;
         } else {
-            *o = 0.0f;
+            *outRate = 0.0f;
         }
     }
     *vel = sImV4_351660(out[0], out[1], out[2], 0.0f);
@@ -461,11 +461,11 @@ static inline void vu0CopyMatIM(sImMat44* d, const sImMat44* s)
 extern "C" void cMeshAnimFrame_transform(void* self, sImMat44* xform)
 {
     sImMat44* dst = (sImMat44*)((char*)self + 0x90);
-    sImMat44 t2;
-    sImMat44 t;
-    vu0MulMatIM(&t, xform, dst);
-    vu0CopyMatIM(&t2, &t);
-    vu0CopyMatIM(dst, &t2);
+    sImMat44 productCopy;
+    sImMat44 product;
+    vu0MulMatIM(&product, xform, dst);
+    vu0CopyMatIM(&productCopy, &product);
+    vu0CopyMatIM(dst, &productCopy);
 }
 #endif
 
@@ -533,21 +533,21 @@ static inline bool sImRange_below(sImRange* self, float x)
  */
 extern "C" sImRange* cAnimChannel_nextSegment(sImRangeTable* channel, int* cur, float x)
 {
-    sImRange* e;
+    sImRange* segment;
     int i = ++*cur;
     if (i < channel->count) {
-        e = &channel->entries[i];
-        if (sImRange_contains(e, x)) {
-            return e;
+        segment = &channel->entries[i];
+        if (sImRange_contains(segment, x)) {
+            return segment;
         }
     }
-    e = channel->entries;
-    for (*cur = 0; *cur < channel->count - 1; ++*cur, e++) {
-        if (sImRange_below(e, x)) {
-            return e;
+    segment = channel->entries;
+    for (*cur = 0; *cur < channel->count - 1; ++*cur, segment++) {
+        if (sImRange_below(segment, x)) {
+            return segment;
         }
     }
-    return e;
+    return segment;
 }
 #endif
 

@@ -252,8 +252,8 @@ extern "C" void* cPS2ConsoleConfig_cPS2ConsoleConfig(void* self_)
     unsigned char clock[8];
     self[9] = 0;
     *(char**)&self[13] = cPS2ConsoleConfig_vtbl;
-    int r = func_0040BAA8();
-    switch (r) {
+    int osdSetting = func_0040BAA8();
+    switch (osdSetting) {
     case 0:
         self[10] = 1;
         break;
@@ -294,23 +294,23 @@ extern "C" void* cPS2ConsoleConfig_cPS2ConsoleConfig(void* self_)
         self[12] = 1;
         break;
     }
-    r = func_0040BB38();
-    switch (r) {
+    osdSetting = func_0040BB38();
+    switch (osdSetting) {
     case 0:
         self[0] = 0;
         break;
     case 1:
-        self[0] = r;
+        self[0] = osdSetting;
         break;
     case 2:
-        self[0] = r;
+        self[0] = osdSetting;
         break;
     default:
         self[0] = 0;
         break;
     }
-    r = func_0040BC08();
-    switch (r) {
+    osdSetting = func_0040BC08();
+    switch (osdSetting) {
     case 0:
         self[1] = 0;
         break;

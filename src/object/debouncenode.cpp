@@ -2101,26 +2101,26 @@ struct sDebCurve {
 extern "C" void cSplineSegment_getPos(sDebCurve* self, float dist, sDebVec4* pos, sDebVec4* vel, sDebVec4* acc)
 {
     dist -= self->t0;
-    float u = ((self->coef[0] * dist + self->coef[1]) * dist + self->coef[2]) * dist + self->coef[3];
+    float splineParam = ((self->coef[0] * dist + self->coef[1]) * dist + self->coef[2]) * dist + self->coef[3];
     float du = (self->coef[0] * (dist * 3.0f) + self->coef[1] * 2.0f) * dist + self->coef[2];
-    sDebVec4 a;
-    a.x = u * 6.0f;
-    a.y = 2.0f;
-    a.z = 0.0f;
-    a.w = 0.0f;
-    *acc = debVecScale(debMtxApply(&self->basis, a), du);
-    sDebVec4 p;
-    p.x = u * u * u;
-    p.y = u * u;
-    p.z = u;
-    p.w = 1.0f;
-    *pos = debMtxApply(&self->basis, p);
-    sDebVec4 v;
-    v.x = u * u * 3.0f;
-    v.y = u * 2.0f;
-    v.z = 1.0f;
-    v.w = 0.0f;
-    *vel = debMtxApply(&self->basis, v);
+    sDebVec4 secondDeriv;
+    secondDeriv.x = splineParam * 6.0f;
+    secondDeriv.y = 2.0f;
+    secondDeriv.z = 0.0f;
+    secondDeriv.w = 0.0f;
+    *acc = debVecScale(debMtxApply(&self->basis, secondDeriv), du);
+    sDebVec4 powerBasis;
+    powerBasis.x = splineParam * splineParam * splineParam;
+    powerBasis.y = splineParam * splineParam;
+    powerBasis.z = splineParam;
+    powerBasis.w = 1.0f;
+    *pos = debMtxApply(&self->basis, powerBasis);
+    sDebVec4 firstDeriv;
+    firstDeriv.x = splineParam * splineParam * 3.0f;
+    firstDeriv.y = splineParam * 2.0f;
+    firstDeriv.z = 1.0f;
+    firstDeriv.w = 0.0f;
+    *vel = debMtxApply(&self->basis, firstDeriv);
 }
 #endif
 
@@ -2240,12 +2240,12 @@ static inline float ftrunc_00345248(float x)
 extern "C" void cSpline_getPos(sDebTrack5248* self, float distance, sDebVec4* pos, sDebVec4* vel, sDebVec4* acc)
 {
     float len = self->length;
-    float q = distance / len;
-    float f = ftrunc_00345248(q);
-    if (q < f) {
-        f -= 1.0f;
+    float laps = distance / len;
+    float wholeLaps = ftrunc_00345248(laps);
+    if (laps < wholeLaps) {
+        wholeLaps -= 1.0f;
     }
-    distance -= f * len;
+    distance -= wholeLaps * len;
     while (distance < self->key->t0 && self->key->prev != 0) {
         self->back();
     }

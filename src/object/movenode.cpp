@@ -2985,8 +2985,8 @@ extern "C" void cMultiParticleMan_readFromReplayFrame(void** self, void* stream)
     cMultiParticleMan_reset(self);
     for (i = 0; i < 4; i++) {
         int has;
-        sMnVEntrySer7D28* e = &(*(sMnVEntrySer7D28**)stream)[2];
-        e->fn((char*)stream + e->delta, &has, 4);
+        sMnVEntrySer7D28* readSlot = &(*(sMnVEntrySer7D28**)stream)[2];
+        readSlot->fn((char*)stream + readSlot->delta, &has, 4);
         if (has) {
             self[i] = func_00357E80((cMultiParticle*)cMemMan_alloc(80, str_MultiParticle, 0x20000000, 0), stream);
         } else {

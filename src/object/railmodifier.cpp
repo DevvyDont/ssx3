@@ -1990,11 +1990,11 @@ static inline sRmMat33 MulI_E248(const sRmMat33& a, const sRmInertiaOwner_E248* 
 // World-space inertia: rotT * inertia * rot, with rot from the body quaternion (self + 0x40).
 extern "C" void cRollerModifier_updateMOI(void* self)
 {
-    sM44_E248 m;
-    QuatToMtx_E248(m, *(sRmVec4*)((char*)self + 0x40));
+    sM44_E248 rotMat4;
+    QuatToMtx_E248(rotMat4, *(sRmVec4*)((char*)self + 0x40));
     sRmMat33 rot;
     sRmMat33 rotT;
-    rotT = Get33_E248(m);
+    rotT = Get33_E248(rotMat4);
     rot = rotT;
     Transpose33_E248(rotT);
     *(sRmMat33*)((char*)self + 0x80) = Mul33_E248(MulI_E248(rot, (sRmInertiaOwner_E248*)self), rotT);
@@ -2067,20 +2067,20 @@ static inline void vu0AddToRM(sRmVec4& dst, const sRmVec4& b)
  */
 extern "C" sRmXform cRollerModifier_getBodyPose(void* self)
 {
-    sRmXform r = *(sRmXform*)((char*)self + 0x30);
-    sRmVec4 c;
-    sRmVec4 b;
-    sRmVec4 a;
-    sRmVec4 e;
-    sRmVec4 d;
-    vu0QuatRotToRM(a, *(sRmVec4*)((char*)self + 0x40), *(sRmVec4*)((char*)self + 0x2B0));
-    b = a;
-    vu0ScaleToRM(a, b, -1.0f);
-    c = a;
-    vu0QuatRotToRM(d, r.quat, c);
-    e = d;
-    vu0AddToRM(r.pos, e);
-    return r;
+    sRmXform pose = *(sRmXform*)((char*)self + 0x30);
+    sRmVec4 negatedCom;
+    sRmVec4 rotatedCom;
+    sRmVec4 comOffset;
+    sRmVec4 posDelta;
+    sRmVec4 poseOffset;
+    vu0QuatRotToRM(comOffset, *(sRmVec4*)((char*)self + 0x40), *(sRmVec4*)((char*)self + 0x2B0));
+    rotatedCom = comOffset;
+    vu0ScaleToRM(comOffset, rotatedCom, -1.0f);
+    negatedCom = comOffset;
+    vu0QuatRotToRM(poseOffset, pose.quat, negatedCom);
+    posDelta = poseOffset;
+    vu0AddToRM(pose.pos, posDelta);
+    return pose;
 }
 #endif
 
@@ -2484,9 +2484,9 @@ extern "C" void cTexFlipModifier_setupTexFlip(cTexFlipModifier* selfv)
             self->src[i] = &self->out[i];
             self->src[i]->fC = item->fC;
             // writes slots 1..3 of out[0] for every entry, as func_003443A8 does (bug in the original)
-            short* p = (short*)self->out;
+            short* firstRecord = (short*)self->out;
             for (int j = 1; j < 4; j++) {
-                p[j] = -1;
+                firstRecord[j] = -1;
             }
             self->out[i].value = *(unsigned short*)(item->data + (self->index << 2) + 4);
         } else {

@@ -133,15 +133,15 @@ extern "C" void cAnimNode_calcPosition(void* self, int id, int idx, sVec4_E600* 
     void* obj = (char*)self + 0x14;
     if (id == *(int*)((char*)self + 0x2C)) {
         sVEntry_E600a* vt = *(sVEntry_E600a**)((char*)self + 0x20);
-        sVec4_E600 t = vt[29].fn((char*)obj + vt[29].delta, idx)->r[3];
-        *out = t;
+        sVec4_E600 position = vt[29].fn((char*)obj + vt[29].delta, idx)->r[3];
+        *out = position;
         return;
     }
     sMat_E600 buf[24];
     sVEntry_E600b* vt = *(sVEntry_E600b**)((char*)self + 0x20);
     vt[33].fn((char*)obj + vt[33].delta, id + 0x10, buf);
-    sVec4_E600 t = buf[idx].r[3];
-    *out = t;
+    sVec4_E600 position = buf[idx].r[3];
+    *out = position;
 }
 #endif
 
@@ -254,12 +254,12 @@ extern "C" void cAnimNode_updateIntersectInfo(char* self, sBody_E698* body)
         return;
     if (*(int*)(self + 0x10) != 0)
         cAnimNode_updateMeshVelocity(self);
-    sVec4_E698 p;
-    cAnimNode_calcPosition_E698(self, body->anim, bone, &p);
-    sVec4_E698 d = vu0Sub_E698(body->pos, p);
+    sVec4_E698 meshPos;
+    cAnimNode_calcPosition_E698(self, body->anim, bone, &meshPos);
+    sVec4_E698 offset = vu0Sub_E698(body->pos, meshPos);
     sVec4_E698 rot = ((sDelta_E698*)*(char**)(self + 0x4C))[bone].rot;
     vu0AddEq_E698(body->vel, vu0Add_E698(((sDelta_E698*)*(char**)(self + 0x4C))[bone].pos,
-                                          vu0Cross_E698(d, ((sDelta_E698*)*(char**)(self + 0x4C))[bone].rot)));
+                                          vu0Cross_E698(offset, ((sDelta_E698*)*(char**)(self + 0x4C))[bone].rot)));
     vu0AddEq_E698(body->angVel, rot);
 }
 #endif
@@ -439,48 +439,48 @@ extern "C" void cAnimNode_updateMeshVelocity(char* self)
         char* node = *(char**)(self + 0x48) + k * 208;
         k++;
         sVE_E798* vt = *(sVE_E798**)(self + 0x20);
-        float t = ((float (*)(void*))vt[53].fn)(self + vt[53].delta);
+        float animSpeed = ((float (*)(void*))vt[53].fn)(self + vt[53].delta);
         sVec4_E798 pos;
         sVec4_E798 rotv;
         cAnimFrame_getDeriv(node, &pos, &rotv, *(float*)(self + 4));
         sVec4_E798 rot;
         rot = sVec4_E798(-*(float*)(node + 0x50), -*(float*)(node + 0x54), -*(float*)(node + 0x58), 0.0f);
-        vu0ScaleEq_E798(pos, t * (float)*(int*)(cAppMan_TheAppMan + 0x10));
-        vu0ScaleEq_E798(rotv, t * (float)*(int*)(cAppMan_TheAppMan + 0x10) * d2r);
-        sMat_E798 m;
+        vu0ScaleEq_E798(pos, animSpeed * (float)*(int*)(cAppMan_TheAppMan + 0x10));
+        vu0ScaleEq_E798(rotv, animSpeed * (float)*(int*)(cAppMan_TheAppMan + 0x10) * d2r);
+        sMat_E798 eulerMat;
         {
-            sVec3_E798 e;
-            e.x = rot.x;
-            e.y = rot.y;
-            e.z = rot.z;
-            float s1, c1, s2, c2;
-            func_0031BE50(&s1, &c1, e.y);
-            func_0031BE50(&s2, &c2, e.z);
-            m.r[0].x = c1 * c2;
-            m.r[0].y = -c1 * s2;
-            m.r[0].z = s1;
-            m.r[0].w = 0.0f;
-            m.r[1].x = s2;
-            m.r[1].y = c2;
-            m.r[1].z = 0.0f;
-            m.r[1].w = 0.0f;
-            m.r[2].x = 0.0f;
-            m.r[2].y = 0.0f;
-            m.r[2].z = 1.0f;
-            m.r[2].w = 0.0f;
-            m.r[3].x = 0.0f;
-            m.r[3].y = 0.0f;
-            m.r[3].z = 0.0f;
-            m.r[3].w = 1.0f;
+            sVec3_E798 eulerAngles;
+            eulerAngles.x = rot.x;
+            eulerAngles.y = rot.y;
+            eulerAngles.z = rot.z;
+            float sinY, cosY, sinZ, cosZ;
+            func_0031BE50(&sinY, &cosY, eulerAngles.y);
+            func_0031BE50(&sinZ, &cosZ, eulerAngles.z);
+            eulerMat.r[0].x = cosY * cosZ;
+            eulerMat.r[0].y = -cosY * sinZ;
+            eulerMat.r[0].z = sinY;
+            eulerMat.r[0].w = 0.0f;
+            eulerMat.r[1].x = sinZ;
+            eulerMat.r[1].y = cosZ;
+            eulerMat.r[1].z = 0.0f;
+            eulerMat.r[1].w = 0.0f;
+            eulerMat.r[2].x = 0.0f;
+            eulerMat.r[2].y = 0.0f;
+            eulerMat.r[2].z = 1.0f;
+            eulerMat.r[2].w = 0.0f;
+            eulerMat.r[3].x = 0.0f;
+            eulerMat.r[3].y = 0.0f;
+            eulerMat.r[3].z = 0.0f;
+            eulerMat.r[3].w = 1.0f;
         }
-        rotv = vu0MulMat_E798(&m, rotv);
+        rotv = vu0MulMat_E798(&eulerMat, rotv);
         pos = vu0MulMat_E798(&(*(sMat_E798**)(self + 0x44))[i], pos);
         rotv = vu0MulMat_E798(&(*(sMat_E798**)(self + 0x44))[i], rotv);
         if (ent->parent >= 0) {
-            sVec4_E798 d = vu0Sub_E798(boneE798Pos(self, i), boneE798Pos(self, ent->parent));
+            sVec4_E798 parentOffset = vu0Sub_E798(boneE798Pos(self, i), boneE798Pos(self, ent->parent));
             vu0AddEq_E798(rotv, ((sDelta_E798*)*(char**)(self + 0x4C))[ent->parent].rot);
             vu0AddEq_E798(pos, vu0Add_E798(((sDelta_E798*)*(char**)(self + 0x4C))[ent->parent].pos,
-                                           vu0Cross_E798(d, ((sDelta_E798*)*(char**)(self + 0x4C))[ent->parent].rot)));
+                                           vu0Cross_E798(parentOffset, ((sDelta_E798*)*(char**)(self + 0x4C))[ent->parent].rot)));
         }
         ((sDelta_E798*)*(char**)(self + 0x4C))[i].pos = pos;
         vu0AddEq_E798(((sDelta_E798*)*(char**)(self + 0x4C))[i].rot, rotv);

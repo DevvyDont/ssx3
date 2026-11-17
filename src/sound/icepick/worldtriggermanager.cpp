@@ -915,28 +915,28 @@ extern "C" int cWorldTriggerManager_TriggerToPatch(void* self, int trigger, int*
         *patch = 0;
         return 0;
     }
-    int r = 1;
-    int t = (*(sWTMEntry**)((char*)self + 0x33C))[trigger].type;
-    if (t == 3) {
-        *bank = t;
+    int result = 1;
+    int triggerType = (*(sWTMEntry**)((char*)self + 0x33C))[trigger].type;
+    if (triggerType == 3) {
+        *bank = triggerType;
         *patch = 0;
-    } else if (t == 1) {
+    } else if (triggerType == 1) {
         *bank = (*(sWTMEntry**)((char*)self + 0x33C))[trigger].obj->f10;
         *patch = (*(sWTMEntry**)((char*)self + 0x33C))[trigger].obj->f14;
-    } else if (t == 2) {
+    } else if (triggerType == 2) {
         *bank = (*(sWTMEntry**)((char*)self + 0x33C))[trigger].obj->f10;
-        void* p = func_0028B180();
-        int rnd = func_002ADF60(*(int*)(*(char**)*(void**)((char*)p + 0x118) + 0x1D8));
-        sWTMObj* o = (*(sWTMEntry**)((char*)self + 0x33C))[trigger].obj;
-        int v = (unsigned)((rnd & 0x7FFF) * o->f34) / 0x7FFF;
-        if (v < o->f24) *patch = o->f14;
-        else if (v < o->f28 + o->f24) *patch = o->f18;
-        else if (v < o->f2C + o->f28 + o->f24) *patch = o->f1C;
-        else *patch = o->f20;
+        void* audio = func_0028B180();
+        int rnd = func_002ADF60(*(int*)(*(char**)*(void**)((char*)audio + 0x118) + 0x1D8));
+        sWTMObj* randomData = (*(sWTMEntry**)((char*)self + 0x33C))[trigger].obj;
+        int pick = (unsigned)((rnd & 0x7FFF) * randomData->f34) / 0x7FFF;
+        if (pick < randomData->f24) *patch = randomData->f14;
+        else if (pick < randomData->f28 + randomData->f24) *patch = randomData->f18;
+        else if (pick < randomData->f2C + randomData->f28 + randomData->f24) *patch = randomData->f1C;
+        else *patch = randomData->f20;
     } else if (check == 0) {
-        r = cWorldTriggerManager_AdvancedTriggerToPatch(self, trigger, bank, patch, noAudio, viewPort);
+        result = cWorldTriggerManager_AdvancedTriggerToPatch(self, trigger, bank, patch, noAudio, viewPort);
     }
-    return r;
+    return result;
 }
 #endif
 

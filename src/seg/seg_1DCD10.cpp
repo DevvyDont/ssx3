@@ -89,8 +89,8 @@ extern sFXShape_BD10 gFXShape_BD10[] __asm__("D_004891B0");
  */
 extern "C" int cFXLoader_cFXLoader(int loader, long particlesOnly) {
     int files[2];
-    int v;
-    long r;
+    int texId;
+    long shape;
     int n = 2;
     if (particlesOnly)
         n = 1;
@@ -104,23 +104,23 @@ extern "C" int cFXLoader_cFXLoader(int loader, long particlesOnly) {
             break;
         }
     }
-    Mgr_BD10* m = D_BD10;
+    Mgr_BD10* grMan = D_BD10;
     for (int k = 0; k < 81; k++) {
-        r = 0;
+        shape = 0;
         for (int i = 0; i < n; i++) {
-            r = SHAPE_locatez(files[i], gFXShape_BD10[k].name);
-            if (r != 0)
+            shape = SHAPE_locatez(files[i], gFXShape_BD10[k].name);
+            if (shape != 0)
                 break;
         }
-        v = -1;
-        if (r != 0)
-            v = D_BD10->v46(r, gFXShape_BD10[k].name, gFXShape_BD10[k].tex, 1, -1);
-        m->SetEffectTexMap(k, v);
+        texId = -1;
+        if (shape != 0)
+            texId = D_BD10->v46(shape, gFXShape_BD10[k].name, gFXShape_BD10[k].tex, 1, -1);
+        grMan->SetEffectTexMap(k, texId);
     }
     for (int i = 0; i < n; i++)
         MEM_free(files[i]);
     for (int i = 0; i < 10; i++)
-        m->dst[i] = m->GetEffectTexMap(71 + i);
+        grMan->dst[i] = grMan->GetEffectTexMap(71 + i);
     return loader;
 }
 #endif
@@ -194,12 +194,12 @@ void operator_delete(int *);
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cFXLoader__cFXLoader(int *self, int flags) {
-    Mgr_BEE0 *m = cGraphicsMan_TheGraphicsMan_seg_1DCD10;
+    Mgr_BEE0 *grMan = cGraphicsMan_TheGraphicsMan_seg_1DCD10;
     int i;
     for (i = 0; i < 81; i++) {
-        int *slot = (int*)((char*)m + 0xF50) + i;
+        int *slot = (int*)((char*)grMan + 0xF50) + i;
         if (*slot != -1) {
-            m->v50(*slot);
+            grMan->v50(*slot);
             *slot = -1;
         }
     }
@@ -280,11 +280,11 @@ extern "C" void cFogParticleMan_render(cFogParticleMan* self) {
         Push_BF98();
         {
             Ctx_BF98* ctx = GrMan_seg_1DCD10;
-            int v = ctx->f60;
+            int texId = ctx->f60;
             ctx->top->h = 7;
             ctx->top->b = 2;
             ctx->top->i = 0x3FF;
-            *(short*)((char*)ctx->top + 0x10) = v;
+            *(short*)((char*)ctx->top + 0x10) = texId;
         }
         {
             Ctx_BF98* ctx = GrMan_seg_1DCD10;
@@ -293,8 +293,8 @@ extern "C" void cFogParticleMan_render(cFogParticleMan* self) {
         }
         G3_BF98(5, 1, 0, 3, 0);
         {
-            VEnt_BF98* e = (VEnt_BF98*)((char*)self->mVtbl + 0x18);
-            e->fn((char*)self + e->delta);
+            VEnt_BF98* vtEntry = (VEnt_BF98*)((char*)self->mVtbl + 0x18);
+            vtEntry->fn((char*)self + vtEntry->delta);
         }
         Pop_BF98();
         self->miNumSphere = 0;

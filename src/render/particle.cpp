@@ -226,13 +226,13 @@ extern "C" void cBaseClass_DynamicEmitter_setupEmitter(cEmitter_00370DC8* self, 
     *(sVec4A*)self->v1B0 = t4vect_Zero;
     *(sVec4A*)self->v1C0 = t4vect_Zero;
     *(sVec4A*)self->v1D0 = t4vect_Zero;
-    float l = life_00370DC8(def);
-    sVec4A v;
-    v.x = *(float*)(def + 0x78);
-    v.y = *(float*)(def + 0x7C);
-    v.z = *(float*)(def + 0x80);
-    v.w = 0.0f;
-    tParticleEmitter_init(self->sys, *(int*)(def + 0x0) * self->count, *(int*)(def + 0x4), &v, l,
+    float life = life_00370DC8(def);
+    sVec4A force;
+    force.x = *(float*)(def + 0x78);
+    force.y = *(float*)(def + 0x7C);
+    force.z = *(float*)(def + 0x80);
+    force.w = 0.0f;
+    tParticleEmitter_init(self->sys, *(int*)(def + 0x0) * self->count, *(int*)(def + 0x4), &force, life,
                   *(float*)(def + 0x20), *(float*)(def + 0xC));
     tParticleEmitter_setupEmitter(self->sys, t4mat_Identity, def, self->f180, seed);
     if (changed) {
@@ -2695,14 +2695,14 @@ struct sPtVEntry_5918 {
  */
 extern "C" void cPlayerShadow__cPlayerShadow(void* self, int flags)
 {
-    char* s = (char*)self;
-    int tex = *(int*)(s + 0x170);
+    char* shadow = (char*)self;
+    int tex = *(int*)(shadow + 0x170);
     if (tex >= 0) {
         func_00367B60(*(void**)(cGraphicsMan_TheGraphicsMan_particle + 0x18F4), tex);
         char* mgr = cGraphicsMan_TheGraphicsMan_particle;
         sPtVEntry_5918* vt = *(sPtVEntry_5918**)(mgr + 0x10D8);
-        vt[50].fn(mgr + vt[50].delta, *(int*)(s + 0x170));
-        *(int*)(s + 0x170) = -1;
+        vt[50].fn(mgr + vt[50].delta, *(int*)(shadow + 0x170));
+        *(int*)(shadow + 0x170) = -1;
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -3730,19 +3730,19 @@ static inline float DepthOffset7278(sPtGfx7278* self, sPt7278* pos, float dist)
  */
 extern "C" void cPS2GraphicsMan_SetViewportZBias(sPtGfx7278* self, sPt7278* pos, float dist)
 {
-    sPtView7278* v = &self->views[self->curView];
+    sPtView7278* view = &self->views[self->curView];
     if (self->texReady == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
     }
-    float d = DepthOffset7278(self, pos, dist);
-    if (d != v->depth) {
-        v->depth = d;
+    float depthOffset = DepthOffset7278(self, pos, dist);
+    if (depthOffset != view->depth) {
+        view->depth = depthOffset;
         float k = 32767.5f;
         if (self->mode == 49) {
             k = 8388467.5f;
         }
-        self->f58F8 = k + d;
-        self->f5858 = k + v->depth;
+        self->f58F8 = k + depthOffset;
+        self->f5858 = k + view->depth;
         self->texReady = 0;
     }
 }
@@ -4057,36 +4057,36 @@ inline void cGfx_7A10::ResetViewport()
  */
 void cGfx_7A10::EndFrame_impl()
 {
-    char* s = (char*)this;
+    char* gfxBase = (char*)this;
     ResetViewport();
     DrawClear();
-    unsigned int vif1 = *(unsigned int*)(s + 0x5A00);
-    unsigned int gif1 = *(unsigned int*)(s + 0x5A14);
+    unsigned int vif1 = *(unsigned int*)(gfxBase + 0x5A00);
+    unsigned int gif1 = *(unsigned int*)(gfxBase + 0x5A14);
     int vif2;
     int gif2;
-    func_00363490(*(void**)(s + 0x18F0), (unsigned int*)(s + 0x5A00), &vif2, (unsigned int*)(s + 0x5A14), &gif2);
-    WaitSema(*(int*)(s + 0x5ACC));
+    func_00363490(*(void**)(gfxBase + 0x18F0), (unsigned int*)(gfxBase + 0x5A00), &vif2, (unsigned int*)(gfxBase + 0x5A14), &gif2);
+    WaitSema(*(int*)(gfxBase + 0x5ACC));
     // bufState[2] (+0x5A90) and queuedIndex (+0x5AA4) are shared with the DMA kick thread
     // (func_00382760) and the VIF1 DMA interrupt: volatile, like func_003826E0's bufState.
-    volatile int* bufState = (volatile int*)(s + 0x5A90);
-    *(volatile int*)(s + 0x5AA4) = *(int*)(s + 0x5A10);
-    volatile int* state = &bufState[*(volatile int*)(s + 0x5AA4)];
-    *(unsigned int*)(s + 0x5AA8) = vif1;
-    *(int*)(s + 0x5AAC) = vif2;
-    *(unsigned int*)(s + 0x5AB0) = gif1;
-    *(int*)(s + 0x5AB4) = gif2;
+    volatile int* bufState = (volatile int*)(gfxBase + 0x5A90);
+    *(volatile int*)(gfxBase + 0x5AA4) = *(int*)(gfxBase + 0x5A10);
+    volatile int* state = &bufState[*(volatile int*)(gfxBase + 0x5AA4)];
+    *(unsigned int*)(gfxBase + 0x5AA8) = vif1;
+    *(int*)(gfxBase + 0x5AAC) = vif2;
+    *(unsigned int*)(gfxBase + 0x5AB0) = gif1;
+    *(int*)(gfxBase + 0x5AB4) = gif2;
     *state = 2;
-    SignalSema(*(int*)(s + 0x5ACC));
-    SignalSema(*(int*)(s + 0x5AC8));
-    *(int*)(s + 0x5A10) = *(int*)(s + 0x5A10) == 0;
-    *(int*)(s + 0x5A24) = *(int*)(s + 0x5A24) == 0;
-    *(unsigned int*)(s + 0x5A00) = *(unsigned int*)(s + 0x5A04) = *(unsigned int*)(s + 0x5A0C) + *(int*)(s + 0x5A10) * 0xCCC80;
-    *(unsigned int*)(s + 0x5A14) = *(unsigned int*)(s + 0x5A18) = *(unsigned int*)(s + 0x5A20) + *(int*)(s + 0x5A24) * 0x26600;
-    func_004247D8(*(unsigned int*)(s + 0x5A00), *(unsigned int*)(s + 0x5A00) + 0xCCC80);
-    func_004247D8(*(unsigned int*)(s + 0x5A14), *(unsigned int*)(s + 0x5A14) + 0x26600);
-    **(sPtRS_7A10**)(s + 0xE84) = D_00501420_rs7A10;
-    func_00362CC8(*(void**)(s + 0x18F0));
-    func_003673D0(*(void**)(s + 0x18F4));
+    SignalSema(*(int*)(gfxBase + 0x5ACC));
+    SignalSema(*(int*)(gfxBase + 0x5AC8));
+    *(int*)(gfxBase + 0x5A10) = *(int*)(gfxBase + 0x5A10) == 0;
+    *(int*)(gfxBase + 0x5A24) = *(int*)(gfxBase + 0x5A24) == 0;
+    *(unsigned int*)(gfxBase + 0x5A00) = *(unsigned int*)(gfxBase + 0x5A04) = *(unsigned int*)(gfxBase + 0x5A0C) + *(int*)(gfxBase + 0x5A10) * 0xCCC80;
+    *(unsigned int*)(gfxBase + 0x5A14) = *(unsigned int*)(gfxBase + 0x5A18) = *(unsigned int*)(gfxBase + 0x5A20) + *(int*)(gfxBase + 0x5A24) * 0x26600;
+    func_004247D8(*(unsigned int*)(gfxBase + 0x5A00), *(unsigned int*)(gfxBase + 0x5A00) + 0xCCC80);
+    func_004247D8(*(unsigned int*)(gfxBase + 0x5A14), *(unsigned int*)(gfxBase + 0x5A14) + 0x26600);
+    **(sPtRS_7A10**)(gfxBase + 0xE84) = D_00501420_rs7A10;
+    func_00362CC8(*(void**)(gfxBase + 0x18F0));
+    func_003673D0(*(void**)(gfxBase + 0x18F4));
     ResetViewport();
     func_00361F90(D_005059D8);
 }
@@ -4254,56 +4254,56 @@ extern "C" void cPS2GraphicsMan_DrawSprite(sGfx_7CF0* self, sV_7CF0* pos, float*
     if (self->clipValid == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
     }
-    sV_7CF0 c = mtxApply_7CF0(&self->clipMtx, *pos);
+    sV_7CF0 clipPos = mtxApply_7CF0(&self->clipMtx, *pos);
     float sw = size[0];
     float sh = size[1];
-    float w = 1.0f / c.w;
+    float w = 1.0f / clipPos.w;
     float sx = self->projMtx.m[0][0] * sw;
     float sy = self->projMtx.m[1][1] * sh;
-    c.x *= w;
-    c.y *= w;
-    c.w = w;
-    sV_7CF0 s;
-    s.x = sx * w;
-    s.y = sy * w;
-    s.z = 0.0f;
-    s.w = 0.0f;
-    sV_7CF0 lo = Sub_7CF0(c, s);
-    sV_7CF0 hi = Add_7CF0(c, s);
+    clipPos.x *= w;
+    clipPos.y *= w;
+    clipPos.w = w;
+    sV_7CF0 halfSize;
+    halfSize.x = sx * w;
+    halfSize.y = sy * w;
+    halfSize.z = 0.0f;
+    halfSize.w = 0.0f;
+    sV_7CF0 lo = Sub_7CF0(clipPos, halfSize);
+    sV_7CF0 hi = Add_7CF0(clipPos, halfSize);
     if (ClipCode_7CF0(self, lo) & ClipCode_7CF0(self, hi)) {
         return;
     }
 
-    float q = 1.0f;
+    float gsQ = 1.0f;
     unsigned int buf = self->bufAddr;
-    unsigned long* p = (unsigned long*)(buf | 0x30000000);
-    *(cQuad_7CF0*)p = 0x10000005;
-    p[2] = 0;
-    p[3] = (unsigned long)0x50000004 << 32;
-    p[4] = ((unsigned long)0x64000000 << 32) | 0x8001;
-    p[5] = 0x525120;
-    p[6] = 94;
-    p[7] = (unsigned long)uv0[0] | ((unsigned long)uv0[1] << 32);
-    p[8] = (unsigned long)(int)(col[1] * 128.0f) | ((unsigned long)(int)(col[2] * 128.0f) << 8) |
+    unsigned long* packet = (unsigned long*)(buf | 0x30000000);
+    *(cQuad_7CF0*)packet = 0x10000005;
+    packet[2] = 0;
+    packet[3] = (unsigned long)0x50000004 << 32;
+    packet[4] = ((unsigned long)0x64000000 << 32) | 0x8001;
+    packet[5] = 0x525120;
+    packet[6] = 94;
+    packet[7] = (unsigned long)uv0[0] | ((unsigned long)uv0[1] << 32);
+    packet[8] = (unsigned long)(int)(col[1] * 128.0f) | ((unsigned long)(int)(col[2] * 128.0f) << 8) |
            ((unsigned long)(int)(col[3] * 128.0f) << 16) | ((unsigned long)(int)(col[0] * 128.0f) << 24) |
-           ((unsigned long)*(unsigned int*)&q << 32);
-    p[9] = (unsigned long)(int)lo.x | ((unsigned long)(int)lo.y << 16) | ((unsigned long)(int)(lo.z * lo.w) << 32);
-    p[10] = (unsigned long)uv1[0] | ((unsigned long)uv1[1] << 32);
-    p[11] = (unsigned long)(int)hi.x | ((unsigned long)(int)hi.y << 16) | ((unsigned long)(int)(hi.z * hi.w) << 32);
-    p += 12;
-    unsigned int next = (unsigned int)p & 0x0FFFFFFF;
+           ((unsigned long)*(unsigned int*)&gsQ << 32);
+    packet[9] = (unsigned long)(int)lo.x | ((unsigned long)(int)lo.y << 16) | ((unsigned long)(int)(lo.z * lo.w) << 32);
+    packet[10] = (unsigned long)uv1[0] | ((unsigned long)uv1[1] << 32);
+    packet[11] = (unsigned long)(int)hi.x | ((unsigned long)(int)hi.y << 16) | ((unsigned long)(int)(hi.z * hi.w) << 32);
+    packet += 12;
+    unsigned int next = (unsigned int)packet & 0x0FFFFFFF;
     self->bufAddr = next;
     sRing_7CF0* ring = self->ring;
     sRS_7CF0* rs = self->top;
     if (ring->count < 2600) {
         rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
-        sEnt_7CF0* e = (sEnt_7CF0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
-        e->rs = *rs;
-        e->buf = buf;
-        e->next = next;
-        e->key = key;
-        e->flag = 0;
+        sEnt_7CF0* ringEntry = (sEnt_7CF0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        ringEntry->rs = *rs;
+        ringEntry->buf = buf;
+        ringEntry->next = next;
+        ringEntry->key = key;
+        ringEntry->flag = 0;
     }
     self->bufAddr += 0x10;
 }
@@ -4460,74 +4460,74 @@ extern "C" void cPS2GraphicsMan_DrawRotatedSprite(sGfx_81A0* self, sV_81A0* pos,
     if (self->texReady == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
     }
-    float q = 1.0f;
+    float gsQ = 1.0f;
     sV_81A0 center = Project_81A0(self, pos);
-    float s, c;
-    func_0031BE50(&s, &c, angle);
-    sV_81A0 a;
-    sV_81A0 b(c, s, 0.0f, 0.0f);
-    Rot_81A0(&a, self->cam, b);
-    Rot_81A0(&b, self->cam, sV_81A0(-b.y, b.x, b.z, b.w));
-    sV_81A0 p1 = Add_81A0(*pos, Scale_81A0(a, size[0]));
-    sV_81A0 p2 = Add_81A0(*pos, Scale_81A0(b, size[1]));
-    p1.w = q;
-    p2.w = q;
-    sV_81A0 d1 = Sub_81A0(Project_81A0(self, &p1), center);
-    sV_81A0 d2 = Sub_81A0(Project_81A0(self, &p2), center);
-    sV_81A0 v0 = Sub_81A0(Sub_81A0(center, d1), d2);
-    sV_81A0 v1 = Sub_81A0(Add_81A0(center, d1), d2);
-    sV_81A0 v2 = Add_81A0(Sub_81A0(center, d1), d2);
-    sV_81A0 v3 = Add_81A0(Add_81A0(center, d1), d2);
+    float sinAngle, cosAngle;
+    func_0031BE50(&sinAngle, &cosAngle, angle);
+    sV_81A0 axisU;
+    sV_81A0 axisV(cosAngle, sinAngle, 0.0f, 0.0f);
+    Rot_81A0(&axisU, self->cam, axisV);
+    Rot_81A0(&axisV, self->cam, sV_81A0(-axisV.y, axisV.x, axisV.z, axisV.w));
+    sV_81A0 edgeU = Add_81A0(*pos, Scale_81A0(axisU, size[0]));
+    sV_81A0 edgeV = Add_81A0(*pos, Scale_81A0(axisV, size[1]));
+    edgeU.w = gsQ;
+    edgeV.w = gsQ;
+    sV_81A0 halfU = Sub_81A0(Project_81A0(self, &edgeU), center);
+    sV_81A0 halfV = Sub_81A0(Project_81A0(self, &edgeV), center);
+    sV_81A0 corner0 = Sub_81A0(Sub_81A0(center, halfU), halfV);
+    sV_81A0 corner1 = Sub_81A0(Add_81A0(center, halfU), halfV);
+    sV_81A0 corner2 = Add_81A0(Sub_81A0(center, halfU), halfV);
+    sV_81A0 corner3 = Add_81A0(Add_81A0(center, halfU), halfV);
 
     unsigned int buf = self->bufAddr;
-    unsigned long* p = (unsigned long*)(buf | 0x30000000);
+    unsigned long* packet = (unsigned long*)(buf | 0x30000000);
     int xoff = (0x800 - (self->width >> 1)) << 4;
     int yoff = (0x800 - (self->height >> 1)) << 4;
-    int x0 = xoff + (int)(v0.x * 16.0f);
-    int y0 = yoff + (int)(v0.y * 16.0f);
-    int x1 = xoff + (int)(v1.x * 16.0f);
-    int y1 = yoff + (int)(v1.y * 16.0f);
-    int x2 = xoff + (int)(v2.x * 16.0f);
-    int y2 = yoff + (int)(v2.y * 16.0f);
-    int x3 = xoff + (int)(v3.x * 16.0f);
-    int y3 = yoff + (int)(v3.y * 16.0f);
+    int x0 = xoff + (int)(corner0.x * 16.0f);
+    int y0 = yoff + (int)(corner0.y * 16.0f);
+    int x1 = xoff + (int)(corner1.x * 16.0f);
+    int y1 = yoff + (int)(corner1.y * 16.0f);
+    int x2 = xoff + (int)(corner2.x * 16.0f);
+    int y2 = yoff + (int)(corner2.y * 16.0f);
+    int x3 = xoff + (int)(corner3.x * 16.0f);
+    int y3 = yoff + (int)(corner3.y * 16.0f);
     int z = (int)center.z;
     int cr = (int)(col[1] * 128.0f);
     int cg = (int)(col[2] * 128.0f);
     int cb = (int)(col[3] * 128.0f);
     int ca = (int)(col[0] * 128.0f);
     for (int i = 0; i < count; i++) {
-        p[0] = 0x10000007;
-        p[1] = 0;
-        p[2] = 0;
-        p[3] = (unsigned long)0x50000006 << 32;
-        p[4] = ((unsigned long)0xA4000000 << 32) | 0x8001;
-        p[5] = 0x5252525210;
-        p[6] = 84;
-        p[7] = (unsigned long)cr | ((unsigned long)cg << 8) | ((unsigned long)cb << 16) | ((unsigned long)ca << 24) | ((unsigned long)*(unsigned int*)&q << 32);
-        p[8] = (unsigned long)uv0[0] | ((unsigned long)uv0[1] << 32);
-        p[9] = (unsigned long)x0 | ((unsigned long)y0 << 16) | ((unsigned long)z << 32);
-        p[10] = (unsigned long)uv1[0] | ((unsigned long)uv0[1] << 32);
-        p[11] = (unsigned long)x1 | ((unsigned long)y1 << 16) | ((unsigned long)z << 32);
-        p[12] = (unsigned long)uv0[0] | ((unsigned long)uv1[1] << 32);
-        p[13] = (unsigned long)x2 | ((unsigned long)y2 << 16) | ((unsigned long)z << 32);
-        p[14] = (unsigned long)uv1[0] | ((unsigned long)uv1[1] << 32);
-        p[15] = (unsigned long)x3 | ((unsigned long)y3 << 16) | ((unsigned long)z << 32);
-        p += 16;
+        packet[0] = 0x10000007;
+        packet[1] = 0;
+        packet[2] = 0;
+        packet[3] = (unsigned long)0x50000006 << 32;
+        packet[4] = ((unsigned long)0xA4000000 << 32) | 0x8001;
+        packet[5] = 0x5252525210;
+        packet[6] = 84;
+        packet[7] = (unsigned long)cr | ((unsigned long)cg << 8) | ((unsigned long)cb << 16) | ((unsigned long)ca << 24) | ((unsigned long)*(unsigned int*)&gsQ << 32);
+        packet[8] = (unsigned long)uv0[0] | ((unsigned long)uv0[1] << 32);
+        packet[9] = (unsigned long)x0 | ((unsigned long)y0 << 16) | ((unsigned long)z << 32);
+        packet[10] = (unsigned long)uv1[0] | ((unsigned long)uv0[1] << 32);
+        packet[11] = (unsigned long)x1 | ((unsigned long)y1 << 16) | ((unsigned long)z << 32);
+        packet[12] = (unsigned long)uv0[0] | ((unsigned long)uv1[1] << 32);
+        packet[13] = (unsigned long)x2 | ((unsigned long)y2 << 16) | ((unsigned long)z << 32);
+        packet[14] = (unsigned long)uv1[0] | ((unsigned long)uv1[1] << 32);
+        packet[15] = (unsigned long)x3 | ((unsigned long)y3 << 16) | ((unsigned long)z << 32);
+        packet += 16;
     }
-    unsigned int next = (unsigned int)p & 0x0FFFFFFF;
+    unsigned int next = (unsigned int)packet & 0x0FFFFFFF;
     self->bufAddr = next;
     sRing_81A0* ring = self->ring;
     sRS_81A0* rs = self->top;
     if (ring->count < 2600) {
         rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
-        sEnt_81A0* e = (sEnt_81A0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
-        e->rs = *rs;
-        e->buf = buf;
-        e->next = next;
-        e->key = key;
-        e->flag = 0;
+        sEnt_81A0* ringEntry = (sEnt_81A0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        ringEntry->rs = *rs;
+        ringEntry->buf = buf;
+        ringEntry->next = next;
+        ringEntry->key = key;
+        ringEntry->flag = 0;
     }
     self->bufAddr += 0x10;
 }
@@ -5107,42 +5107,42 @@ extern "C" void cPS2GraphicsMan_RenderTriStrip(sPtGfx_9860* self, int numVerts, 
     }
     int dma = D_004A4474;
     unsigned int buf = self->bufAddr;
-    unsigned long* p = func_0038F460(dma, buf, -1, 0);
+    unsigned long* packet = func_0038F460(dma, buf, -1, 0);
     int qwc = *(int*)(dma + 0x10);
-    unsigned long* end = (unsigned long*)((char*)p + qwc * 16);
+    unsigned long* end = (unsigned long*)((char*)packet + qwc * 16);
     for (; numVerts >= 3; ) {
         int k = numVerts < 73 ? numVerts : 72;
-        int m = k * 3;
+        int vertQwords = k * 3;
         numVerts -= k;
-        if (p + (m + 5) * 2 >= end) {
+        if (packet + (vertQwords + 5) * 2 >= end) {
             int sz = qwc * 16;
-            unsigned int a = func_0038F668(dma, p, 4);
-            self->bufAddr = a;
-            p = func_0038F460(dma, a, -1, 0);
-            end = (unsigned long*)((char*)p + sz);
+            unsigned int newBufAddr = func_0038F668(dma, packet, 4);
+            self->bufAddr = newBufAddr;
+            packet = func_0038F460(dma, newBufAddr, -1, 0);
+            end = (unsigned long*)((char*)packet + sz);
         }
-        p[0] = (m + 4) | 0x10000000;
-        p[1] = 0;
-        p[2] = 0;
-        p[3] = (unsigned long)(unsigned int)(((m + 2) << 16) | 0x6C008000) << 32;
-        p[4] = (unsigned long)k | ((unsigned long)1 << 15) | ((unsigned long)1 << 46) | ((unsigned long)prim << 47) | ((unsigned long)3 << 60);
-        p[5] = regs;
-        p[6] = (long)k * 3;
-        p[7] = 0;
-        p += 8;
-        sVtx_9860* d = (sVtx_9860*)p;
+        packet[0] = (vertQwords + 4) | 0x10000000;
+        packet[1] = 0;
+        packet[2] = 0;
+        packet[3] = (unsigned long)(unsigned int)(((vertQwords + 2) << 16) | 0x6C008000) << 32;
+        packet[4] = (unsigned long)k | ((unsigned long)1 << 15) | ((unsigned long)1 << 46) | ((unsigned long)prim << 47) | ((unsigned long)3 << 60);
+        packet[5] = regs;
+        packet[6] = (long)k * 3;
+        packet[7] = 0;
+        packet += 8;
+        sVtx_9860* dstVert = (sVtx_9860*)packet;
         int i = k;
         while (i--) {
-            *d++ = *src++;
+            *dstVert++ = *src++;
         }
         numVerts += 2;
         src -= 2;
-        p = (unsigned long*)((sVtx_9860*)p + k);
-        p[0] = 0;
-        p[1] = (unsigned long)(prog | 0x14000000) << 32;
-        p += 2;
+        packet = (unsigned long*)((sVtx_9860*)packet + k);
+        packet[0] = 0;
+        packet[1] = (unsigned long)(prog | 0x14000000) << 32;
+        packet += 2;
     }
-    unsigned int next = func_0038F668(dma, p, 4);
+    unsigned int next = func_0038F668(dma, packet, 4);
     self->bufAddr = next;
     QueueRecord_9860(self, buf, next, 0);
     self->bufAddr += 0x10;
@@ -5670,34 +5670,34 @@ extern "C" void cPS2GraphicsMan_DrawCharModel(sGfx_A610* self, sMdl_A610* mdl, c
             }
             if (chunk->flags & 1) {
                 unsigned int buf = self->bufAddr;
-                unsigned long* p = (unsigned long*)(buf | 0x30000000);
+                unsigned long* packet = (unsigned long*)(buf | 0x30000000);
                 sMtxList_A610* list = &mdl->lists[matIdx];
                 sSub_A610* send = chunk->subs + chunk->numSubs;
-                for (sSub_A610* s = chunk->subs; s != send; list++, s++) {
-                    UploadMtx_A610(list, bones, &p);
-                    p[0] = ((unsigned long)s->refs->addr << 32) | 0x50000000;
-                    p[1] = 0;
-                    p += 2;
+                for (sSub_A610* subMesh = chunk->subs; subMesh != send; list++, subMesh++) {
+                    UploadMtx_A610(list, bones, &packet);
+                    packet[0] = ((unsigned long)subMesh->refs->addr << 32) | 0x50000000;
+                    packet[1] = 0;
+                    packet += 2;
                 }
-                unsigned int next = (unsigned int)p & 0x0FFFFFFF;
+                unsigned int next = (unsigned int)packet & 0x0FFFFFFF;
                 sPtRing* ring = self->ring;
                 self->bufAddr = next;
                 sRS_A610* rs = self->top;
                 if (ring->count < 2600) {
                     rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
                     int key = *(int*)((char*)ring + 0x69CC0);
-                    sPtRingEnt* e = (sPtRingEnt*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
-                    *(sRS_A610*)&e->rs = *rs;
-                    e->buf = buf;
-                    e->next = next;
-                    e->key = key;
-                    e->flag = 0;
+                    sPtRingEnt* ringEntry = (sPtRingEnt*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+                    *(sRS_A610*)&ringEntry->rs = *rs;
+                    ringEntry->buf = buf;
+                    ringEntry->next = next;
+                    ringEntry->key = key;
+                    ringEntry->flag = 0;
                 }
                 self->bufAddr += 0x10;
             } else if (chunk->flags & 0x100) {
                 unsigned int buf = self->bufAddr;
                 unsigned int prog = (unsigned int)D_398 >> 3;
-                unsigned long* p = (unsigned long*)(buf | 0x30000000);
+                unsigned long* packet = (unsigned long*)(buf | 0x30000000);
                 int nlod = mdl->numLods;
                 float* w = mdl->lodW;
                 int found = 0;
@@ -5713,98 +5713,98 @@ extern "C" void cPS2GraphicsMan_DrawCharModel(sGfx_A610* self, sMdl_A610* mdl, c
                     float scale = 12800.0f;
                     sMtxList_A610* list = &mdl->lists[matIdx];
                     sSub_A610* send = chunk->subs + chunk->numSubs;
-                    for (sSub_A610* s = chunk->subs; s != send; list++, s++) {
-                        UploadMtx_A610(list, bones, &p);
-                        int n = s->count;
-                        sDmaRef_A610* r = s->refs;
+                    for (sSub_A610* subMesh = chunk->subs; subMesh != send; list++, subMesh++) {
+                        UploadMtx_A610(list, bones, &packet);
+                        int n = subMesh->count;
+                        sDmaRef_A610* dmaRef = subMesh->refs;
                         int even = (n & 1) == 0;
-                        for (int k = 0; k < n; k += 2, r++) {
-                            unsigned short* d1 = r->data;
-                            p[0] = ((unsigned long)r->addr << 32) | 0x50000000;
-                            p[1] = 0;
-                            p[2] = ((unsigned long)(unsigned int)d1 << 32) | 0x50000001;
-                            p[3] = 0;
-                            p[4] = (unsigned long)0x640180B4 << 32;
+                        for (int k = 0; k < n; k += 2, dmaRef++) {
+                            unsigned short* firstRefData = dmaRef->data;
+                            packet[0] = ((unsigned long)dmaRef->addr << 32) | 0x50000000;
+                            packet[1] = 0;
+                            packet[2] = ((unsigned long)(unsigned int)firstRefData << 32) | 0x50000001;
+                            packet[3] = 0;
+                            packet[4] = (unsigned long)0x640180B4 << 32;
                             if (w[0] < 0.0f) {
-                                p[5] = (unsigned long)*(int*)&scale << 32;
+                                packet[5] = (unsigned long)*(int*)&scale << 32;
                             } else {
-                                p[5] = (long)*(int*)&w[0] | ((unsigned long)*(int*)&scale << 32);
+                                packet[5] = (long)*(int*)&w[0] | ((unsigned long)*(int*)&scale << 32);
                             }
-                            p += 6;
+                            packet += 6;
                             if (even || k < n - 1) {
-                                r++;
+                                dmaRef++;
                             }
-                            unsigned short* d2 = r->data;
-                            p[0] = ((unsigned long)r->addr << 32) | 0x50000000;
-                            p[1] = 0;
-                            p[2] = ((unsigned long)(unsigned int)d2 << 32) | 0x50000001;
-                            p[3] = 0;
-                            p[4] = ((unsigned long)0x640180B4 << 32) | 0x11000000;
+                            unsigned short* secondRefData = dmaRef->data;
+                            packet[0] = ((unsigned long)dmaRef->addr << 32) | 0x50000000;
+                            packet[1] = 0;
+                            packet[2] = ((unsigned long)(unsigned int)secondRefData << 32) | 0x50000001;
+                            packet[3] = 0;
+                            packet[4] = ((unsigned long)0x640180B4 << 32) | 0x11000000;
                             if (w[0] < 0.0f) {
-                                p[5] = (unsigned long)*(int*)&scale << 32;
+                                packet[5] = (unsigned long)*(int*)&scale << 32;
                             } else {
-                                p[5] = (long)*(int*)&w[0] | ((unsigned long)*(int*)&scale << 32);
+                                packet[5] = (long)*(int*)&w[0] | ((unsigned long)*(int*)&scale << 32);
                             }
-                            p += 6;
+                            packet += 6;
                             for (int j = 1; j < nlod; j++) {
-                                d1 += (*d1 + 1) * 8;
-                                d2 += (*d2 + 1) * 8;
+                                firstRefData += (*firstRefData + 1) * 8;
+                                secondRefData += (*secondRefData + 1) * 8;
                                 if (w[j] > 0.01f) {
-                                    p[0] = ((unsigned long)(unsigned int)d1 << 32) | 0x50000001;
-                                    p[1] = 0;
-                                    p[2] = (unsigned long)0x640180B4 << 32;
-                                    p[3] = (long)*(int*)&w[j] | ((unsigned long)*(int*)&scale << 32);
-                                    p[4] = ((unsigned long)(unsigned int)d2 << 32) | 0x50000001;
-                                    p[5] = 0;
-                                    p[6] = (unsigned long)0x640180B4 << 32;
-                                    p[7] = (long)*(int*)&w[j] | ((unsigned long)*(int*)&scale << 32);
-                                    p += 8;
+                                    packet[0] = ((unsigned long)(unsigned int)firstRefData << 32) | 0x50000001;
+                                    packet[1] = 0;
+                                    packet[2] = (unsigned long)0x640180B4 << 32;
+                                    packet[3] = (long)*(int*)&w[j] | ((unsigned long)*(int*)&scale << 32);
+                                    packet[4] = ((unsigned long)(unsigned int)secondRefData << 32) | 0x50000001;
+                                    packet[5] = 0;
+                                    packet[6] = (unsigned long)0x640180B4 << 32;
+                                    packet[7] = (long)*(int*)&w[j] | ((unsigned long)*(int*)&scale << 32);
+                                    packet += 8;
                                 }
                             }
-                            p[0] = 0x10000001;
-                            p[1] = 0;
-                            p[2] = ((unsigned long)(prog | 0x14000000) << 32) | 0x11000000;
-                            p[3] = ((unsigned long)(prog | 0x14000000) << 32) | 0x11000000;
-                            p += 4;
+                            packet[0] = 0x10000001;
+                            packet[1] = 0;
+                            packet[2] = ((unsigned long)(prog | 0x14000000) << 32) | 0x11000000;
+                            packet[3] = ((unsigned long)(prog | 0x14000000) << 32) | 0x11000000;
+                            packet += 4;
                         }
                     }
                 } else {
                     sMtxList_A610* list = &mdl->lists[matIdx];
                     sSub_A610* send = chunk->subs + chunk->numSubs;
-                    for (sSub_A610* s = chunk->subs; s != send; list++, s++) {
-                        UploadMtx_A610(list, bones, &p);
-                        sDmaRef_A610* r = s->refs;
-                        sDmaRef_A610* end = r + s->count;
-                        p[0] = ((unsigned long)r->addr << 32) | 0x50000000;
-                        p[1] = 0;
-                        p += 2;
-                        for (r++; r != end; r++) {
-                            p[0] = ((unsigned long)r->addr << 32) | 0x50000001;
-                            p[1] = 0;
-                            p[2] = (unsigned long)0x11000000 << 32;
-                            p[3] = (unsigned long)(prog | 0x14000000) << 32;
-                            p += 4;
+                    for (sSub_A610* subMesh = chunk->subs; subMesh != send; list++, subMesh++) {
+                        UploadMtx_A610(list, bones, &packet);
+                        sDmaRef_A610* dmaRef = subMesh->refs;
+                        sDmaRef_A610* end = dmaRef + subMesh->count;
+                        packet[0] = ((unsigned long)dmaRef->addr << 32) | 0x50000000;
+                        packet[1] = 0;
+                        packet += 2;
+                        for (dmaRef++; dmaRef != end; dmaRef++) {
+                            packet[0] = ((unsigned long)dmaRef->addr << 32) | 0x50000001;
+                            packet[1] = 0;
+                            packet[2] = (unsigned long)0x11000000 << 32;
+                            packet[3] = (unsigned long)(prog | 0x14000000) << 32;
+                            packet += 4;
                         }
-                        p[0] = 0x10000001;
-                        p[1] = 0;
-                        p[2] = (unsigned long)0x11000000 << 32;
-                        p[3] = (unsigned long)(prog | 0x14000000) << 32;
-                        p += 4;
+                        packet[0] = 0x10000001;
+                        packet[1] = 0;
+                        packet[2] = (unsigned long)0x11000000 << 32;
+                        packet[3] = (unsigned long)(prog | 0x14000000) << 32;
+                        packet += 4;
                     }
                 }
-                unsigned int next = (unsigned int)p & 0x0FFFFFFF;
+                unsigned int next = (unsigned int)packet & 0x0FFFFFFF;
                 sPtRing* ring = self->ring;
                 self->bufAddr = next;
                 sRS_A610* rs = self->top;
                 if (ring->count < 2600) {
                     rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
                     int key = *(int*)((char*)ring + 0x69CC0);
-                    sPtRingEnt* e = (sPtRingEnt*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
-                    *(sRS_A610*)&e->rs = *rs;
-                    e->buf = buf;
-                    e->next = next;
-                    e->key = key;
-                    e->flag = 0;
+                    sPtRingEnt* ringEntry = (sPtRingEnt*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+                    *(sRS_A610*)&ringEntry->rs = *rs;
+                    ringEntry->buf = buf;
+                    ringEntry->next = next;
+                    ringEntry->key = key;
+                    ringEntry->flag = 0;
                 }
                 self->bufAddr += 0x10;
             }
@@ -5971,7 +5971,7 @@ static inline void QueueRecord_B548(sPtGfx_B548* self, unsigned int buf, unsigne
 extern "C" void cPS2GraphicsMan_DrawCharShadowModel(sPtGfx_B548* self, sMdl_B548* model, char* base, float* col)
 {
     unsigned int buf = self->bufAddr;
-    unsigned long* p = (unsigned long*)(buf | 0x30000000);
+    unsigned long* packet = (unsigned long*)(buf | 0x30000000);
     self->top->f0 |= 0x30;
     self->top->f4 = (self->top->f4 & ~0x7C) | 4;
     int cnt = 0;
@@ -5985,19 +5985,19 @@ extern "C" void cPS2GraphicsMan_DrawCharShadowModel(sPtGfx_B548* self, sMdl_B548
     sBone_B548* bone = (sBone_B548*)(base + model->o20);
     for (int i = 0; i < model->nbones; i++, bone++) {
         if (bone->flags & 1) {
-            p[0] = 0x10000003;
-            BoneHeader_B548(&p, col);
+            packet[0] = 0x10000003;
+            BoneHeader_B548(&packet, col);
             sTrk_B548* tr = &model->tracks[cnt];
             for (int j = 0; j < bone->ntracks; j++, tr++) {
-                AddMats_B548(&p, self->mats, tr->n, tr->idx);
-                p[0] = ((unsigned long)*bone->refs[j].p << 32) | 0x50000000;
-                p[1] = 0;
-                p += 2;
+                AddMats_B548(&packet, self->mats, tr->n, tr->idx);
+                packet[0] = ((unsigned long)*bone->refs[j].p << 32) | 0x50000000;
+                packet[1] = 0;
+                packet += 2;
             }
         }
         cnt += bone->ntracks;
     }
-    unsigned int next = (unsigned int)p & 0x0FFFFFFF;
+    unsigned int next = (unsigned int)packet & 0x0FFFFFFF;
     self->bufAddr = next;
     QueueRecord_B548(self, buf, next, 1);
     self->bufAddr += 0x10;
@@ -6051,16 +6051,16 @@ static inline void CopyMat_BA50(void* dst, const void* src)
 extern "C" void cPS2GraphicsMan_SetShadowCharMatrices(char* self, void* mat, cQuad128_BA50* sscale, cQuad128_BA50* strans)
 {
     unsigned int buf = *(unsigned int*)(self + 0x5A00);
-    unsigned long* p = (unsigned long*)(buf | 0x30000000);
-    p[0] = 0x60000007;
-    p[2] = (unsigned long)0x8000 << 45;
-    p[3] = (unsigned long)55308 << 47;
-    p[1] = 0;
-    CopyMat_BA50(p + 4, mat);
-    ((cQuad128_BA50*)p)[6] = *sscale;
-    ((cQuad128_BA50*)p)[7] = *strans;
-    p += 16;
-    *(unsigned int*)(self + 0x5A00) = (unsigned int)p & 0x0FFFFFFF;
+    unsigned long* packet = (unsigned long*)(buf | 0x30000000);
+    packet[0] = 0x60000007;
+    packet[2] = (unsigned long)0x8000 << 45;
+    packet[3] = (unsigned long)55308 << 47;
+    packet[1] = 0;
+    CopyMat_BA50(packet + 4, mat);
+    ((cQuad128_BA50*)packet)[6] = *sscale;
+    ((cQuad128_BA50*)packet)[7] = *strans;
+    packet += 16;
+    *(unsigned int*)(self + 0x5A00) = (unsigned int)packet & 0x0FFFFFFF;
     sRS_BA50* rs = *(sRS_BA50**)(self + 0xE84);
     rs->f0 = (rs->f0 & ~0x3C0) | 0x1C0;
     sRS_BA50* rs2 = *(sRS_BA50**)(self + 0xE84);
@@ -6856,68 +6856,68 @@ extern "C" void cPS2GraphicsMan_TakeScreenGrab(sPtGfxB_CC98* self, int* obj)
     int sz = tex->size / 32;
     int w5A88 = self->f5A88 << 5;
     int h5A5C = self->f5A5C;
-    unsigned int f80 = self->f5A80;
-    unsigned long* p = func_0038F460(D_004A4474, buf, -1, 0);
-    *(cQuad128_CC98*)p = 0x10000013;
-    p[2] = 0;
-    p[3] = 0x5000001200000000UL;
-    p += 4;
-    p[0] = 0x1000000000008011UL;
-    p[1] = 0xE;
-    p[2] = (long)sz | 0x40000;
-    p[3] = 76;
-    p[4] = (unsigned long)(f80 | 0x1000000) | 0x100000000UL;
-    p[5] = 78;
-    p[6] = 0xff000000ff0000UL;
-    p[7] = 0x40;
-    p[8] = 0x30000;
-    p[9] = 71;
-    p[10] = 0;
-    p[11] = 0x18;
-    p[12] = 42;
-    p[13] = 66;
-    p[14] = 0x8000000080UL;
-    p[15] = 59;
-    p[16] = 0;
-    p[17] = 20;
-    p[18] = (long)w5A88 | (long)h5A5C << 14 | 0x2a8000000L;
-    p[19] = 6;
-    p[20] = 278;
-    p[21] = 0;
+    unsigned int zbufPage = self->f5A80;
+    unsigned long* packet = func_0038F460(D_004A4474, buf, -1, 0);
+    *(cQuad128_CC98*)packet = 0x10000013;
+    packet[2] = 0;
+    packet[3] = 0x5000001200000000UL;
+    packet += 4;
+    packet[0] = 0x1000000000008011UL;
+    packet[1] = 0xE;
+    packet[2] = (long)sz | 0x40000;
+    packet[3] = 76;
+    packet[4] = (unsigned long)(zbufPage | 0x1000000) | 0x100000000UL;
+    packet[5] = 78;
+    packet[6] = 0xff000000ff0000UL;
+    packet[7] = 0x40;
+    packet[8] = 0x30000;
+    packet[9] = 71;
+    packet[10] = 0;
+    packet[11] = 0x18;
+    packet[12] = 42;
+    packet[13] = 66;
+    packet[14] = 0x8000000080UL;
+    packet[15] = 59;
+    packet[16] = 0;
+    packet[17] = 20;
+    packet[18] = (long)w5A88 | (long)h5A5C << 14 | 0x2a8000000L;
+    packet[19] = 6;
+    packet[20] = 278;
+    packet[21] = 0;
     uPtFloatBits one;
     one.f = 1.0f;
-    p[22] = ((unsigned long)one.i << 32) | 0x80808080UL;
-    p[23] = 1;
-    p += 24;
-    int f58 = self->f5A58;
-    int f54 = self->f5A54;
-    p[0] = 0x80008;
-    p[1] = 3;
-    p[2] = 0xffff00000000UL;
-    p[3] = 5;
-    p[4] = (long)(f54 * 16 - 8) | (long)(f58 * 16 - 8) << 16;
-    p[5] = 3;
-    p[6] = 0xffff10001000UL;
-    p[7] = 5;
-    p += 8;
-    p[0] = 0;
-    p[1] = 0x3f;
-    p[2] = (unsigned long)self->vx | (unsigned long)(self->vx + (self->vw - 1)) << 16 | (unsigned long)self->vy << 32 | (unsigned long)(self->vy + (self->vh - 1)) << 48;
-    p[3] = 0x40;
-    p += 4;
-    unsigned int next = func_0038F668(D_004A4474, p, 4);
+    packet[22] = ((unsigned long)one.i << 32) | 0x80808080UL;
+    packet[23] = 1;
+    packet += 24;
+    int dispHeight = self->f5A58;
+    int dispWidth = self->f5A54;
+    packet[0] = 0x80008;
+    packet[1] = 3;
+    packet[2] = 0xffff00000000UL;
+    packet[3] = 5;
+    packet[4] = (long)(dispWidth * 16 - 8) | (long)(dispHeight * 16 - 8) << 16;
+    packet[5] = 3;
+    packet[6] = 0xffff10001000UL;
+    packet[7] = 5;
+    packet += 8;
+    packet[0] = 0;
+    packet[1] = 0x3f;
+    packet[2] = (unsigned long)self->vx | (unsigned long)(self->vx + (self->vw - 1)) << 16 | (unsigned long)self->vy << 32 | (unsigned long)(self->vy + (self->vh - 1)) << 48;
+    packet[3] = 0x40;
+    packet += 4;
+    unsigned int next = func_0038F668(D_004A4474, packet, 4);
     self->bufAddr = next;
     sPtRing* ring = self->ring;
     sPtRenderState* rs = self->top;
     if (ring->count < 2600) {
         rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
-        sPtRingEnt* e = (sPtRingEnt*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
-        e->rs = *rs;
-        e->buf = buf;
-        e->next = next;
-        e->key = key;
-        e->flag = 0;
+        sPtRingEnt* ringEntry = (sPtRingEnt*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        ringEntry->rs = *rs;
+        ringEntry->buf = buf;
+        ringEntry->next = next;
+        ringEntry->key = key;
+        ringEntry->flag = 0;
     }
     *(int*)((char*)self + 0xF44) = 1;
     self->bufAddr += 0x10;
@@ -7104,21 +7104,21 @@ extern "C" void func_00367DB8_D348(void* texset, int idx, unsigned int* buf) __a
 extern "C" int cPS2GraphicsMan_LockFrameToTexture(sPtGfx_D348* self, int idx)
 {
     unsigned int buf = self->bufAddr;
-    unsigned int p = buf | 0x30000000;
-    func_00367DB8_D348(self->texset, idx, &p);
-    unsigned int next = p & 0x0FFFFFFF;
+    unsigned int packetAddr = buf | 0x30000000;
+    func_00367DB8_D348(self->texset, idx, &packetAddr);
+    unsigned int next = packetAddr & 0x0FFFFFFF;
     self->bufAddr = next;
     sPtRing_D348* ring = self->ring;
     sPtRS_D348* rs = self->top;
     if (ring->count < 2600) {
         rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
-        sPtEnt_D348* e = (sPtEnt_D348*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
-        e->rs = *rs;
-        e->buf = buf;
-        e->next = next;
-        e->key = key;
-        e->flag = 0;
+        sPtEnt_D348* ringEntry = (sPtEnt_D348*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        ringEntry->rs = *rs;
+        ringEntry->buf = buf;
+        ringEntry->next = next;
+        ringEntry->key = key;
+        ringEntry->flag = 0;
     }
     self->bufAddr += 0x10;
     return 1;
@@ -7187,23 +7187,23 @@ struct sPtGfx_D450 {
 extern "C" int cPS2GraphicsMan_RestoreFrameLock(sPtGfx_D450* self)
 {
     unsigned int buf = self->bufAddr;
-    ulong* p = (ulong*)(buf | 0x30000000);
-    p[0] = 0x10000006;
-    p[1] = 0;
-    p[2] = (ulong)34816 << 45;
-    p[3] = (ulong)0x50000005 << 32;
-    p[4] = ((ulong)0x10000000 << 32) | 0x8004;
-    p[5] = 0xE;
-    p[6] = (ulong)self->fbp | ((ulong)self->fbw << 16) | ((ulong)self->psm << 24);
-    p[7] = 76;
-    p[8] = (ulong)self->scX | ((ulong)(self->scX + (self->scW - 1)) << 16) | ((ulong)self->scY << 32) | ((ulong)(self->scY + (self->scH - 1)) << 48);
-    p[9] = 0x40;
-    p[10] = (ulong)self->scX | ((ulong)(self->scX + (self->scW - 1)) << 16) | ((ulong)self->scY << 32) | ((ulong)(self->scY + (self->scH - 1)) << 48);
-    p[11] = 65;
-    p[12] = (ulong)((0x800 - (self->width >> 1)) << 4) | ((ulong)((0x800 - (self->height >> 1)) << 4) << 32);
-    p[13] = 0x18;
-    p += 14;
-    unsigned int next = (unsigned int)p & 0x0FFFFFFF;
+    ulong* packet = (ulong*)(buf | 0x30000000);
+    packet[0] = 0x10000006;
+    packet[1] = 0;
+    packet[2] = (ulong)34816 << 45;
+    packet[3] = (ulong)0x50000005 << 32;
+    packet[4] = ((ulong)0x10000000 << 32) | 0x8004;
+    packet[5] = 0xE;
+    packet[6] = (ulong)self->fbp | ((ulong)self->fbw << 16) | ((ulong)self->psm << 24);
+    packet[7] = 76;
+    packet[8] = (ulong)self->scX | ((ulong)(self->scX + (self->scW - 1)) << 16) | ((ulong)self->scY << 32) | ((ulong)(self->scY + (self->scH - 1)) << 48);
+    packet[9] = 0x40;
+    packet[10] = (ulong)self->scX | ((ulong)(self->scX + (self->scW - 1)) << 16) | ((ulong)self->scY << 32) | ((ulong)(self->scY + (self->scH - 1)) << 48);
+    packet[11] = 65;
+    packet[12] = (ulong)((0x800 - (self->width >> 1)) << 4) | ((ulong)((0x800 - (self->height >> 1)) << 4) << 32);
+    packet[13] = 0x18;
+    packet += 14;
+    unsigned int next = (unsigned int)packet & 0x0FFFFFFF;
     sPtRing_D450* ring = self->ring;
     sPtRS_D450* rs = self->top;
     self->bufAddr = next;
@@ -7211,12 +7211,12 @@ extern "C" int cPS2GraphicsMan_RestoreFrameLock(sPtGfx_D450* self)
     if (ring->count < 2600) {
         rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
-        sPtEnt_D450* e = (sPtEnt_D450*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
-        e->rs = *rs;
-        e->one = one;
-        e->next = next;
-        e->key = key;
-        e->buf = buf;
+        sPtEnt_D450* ringEntry = (sPtEnt_D450*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        ringEntry->rs = *rs;
+        ringEntry->one = one;
+        ringEntry->next = next;
+        ringEntry->key = key;
+        ringEntry->buf = buf;
     }
     self->bufAddr += 0x10;
     return 0;
@@ -7398,9 +7398,9 @@ extern "C" void func_00367F18_D800(void* texset, int idx, float* color, unsigned
 extern "C" void cPS2GraphicsMan_ShadowClearLockTexture(sPtGfx_D800* self, int idx, float* color)
 {
     unsigned int buf = self->bufAddr;
-    unsigned int p = buf | 0x30000000;
-    func_00367F18_D800(self->texset, idx, color, &p);
-    unsigned int next = p & 0x0FFFFFFF;
+    unsigned int packetAddr = buf | 0x30000000;
+    func_00367F18_D800(self->texset, idx, color, &packetAddr);
+    unsigned int next = packetAddr & 0x0FFFFFFF;
     self->bufAddr = next;
     sPtRing_D800* ring = self->ring;
     sPtRS_D800* rs = self->top;
@@ -7599,25 +7599,25 @@ extern "C" int cPS2GraphicsMan_GetOutCode(cPS2GraphicsMan* self, const sPtVecDBE
     if (self->mMatricesValid == 0) {
         func_0037D968(self);
     }
-    sPtVecDBE8 v = mtxApplyDBE8(&(*(&self->mScreenWorld)), *point);
+    sPtVecDBE8 screenPos = mtxApplyDBE8(&(*(&self->mScreenWorld)), *point);
     int code = 0;
-    float w = 1.0f / v.w;
-    v.x *= w;
-    v.y *= w;
-    v.w = w;
-    if (v.x < self->unk_6B70.x) {
+    float w = 1.0f / screenPos.w;
+    screenPos.x *= w;
+    screenPos.y *= w;
+    screenPos.w = w;
+    if (screenPos.x < self->unk_6B70.x) {
         code |= 2;
     }
-    if (self->unk_6B80.x < v.x) {
+    if (self->unk_6B80.x < screenPos.x) {
         code |= 1;
     }
-    if (v.y < self->unk_6B70.y) {
+    if (screenPos.y < self->unk_6B70.y) {
         code |= 8;
     }
-    if (self->unk_6B80.y < v.y) {
+    if (self->unk_6B80.y < screenPos.y) {
         code |= 4;
     }
-    float z = v.z;
+    float z = screenPos.z;
     if (w < 0.0f) {
         code ^= 0x2F;
     } else {
@@ -8103,17 +8103,17 @@ extern "C" void cPS2GraphicsMan_RenderParticleEmitter(sPtGfx_0518* self, sQuad_0
     self->top->f8 &= 0xE00003FF;
     self->top->f8 = (self->top->f8 & ~0x3E0) | 0xE0;
     unsigned int buf = self->bufAddr;
-    unsigned long* p = func_0038F460(D_004A4474, buf, -1, 0);
-    p[0] = 0x10000017;
-    p[1] = 0;
-    p[2] = 0;
-    p[3] = (unsigned long)55339 << 47;
-    p += 4;
-    CopyQuads_0518(&p, obj, 21);
-    p[0] = (unsigned long)(((unsigned int)D_0 >> 3) | 0x14000000) << 32;
-    p[1] = (unsigned long)34816 << 45;
-    p += 2;
-    self->bufAddr = func_0038F668(D_004A4474, p, 4);
+    unsigned long* packet = func_0038F460(D_004A4474, buf, -1, 0);
+    packet[0] = 0x10000017;
+    packet[1] = 0;
+    packet[2] = 0;
+    packet[3] = (unsigned long)55339 << 47;
+    packet += 4;
+    CopyQuads_0518(&packet, obj, 21);
+    packet[0] = (unsigned long)(((unsigned int)D_0 >> 3) | 0x14000000) << 32;
+    packet[1] = (unsigned long)34816 << 45;
+    packet += 2;
+    self->bufAddr = func_0038F668(D_004A4474, packet, 4);
     if (self->texReady == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
     }
@@ -8123,12 +8123,12 @@ extern "C" void cPS2GraphicsMan_RenderParticleEmitter(sPtGfx_0518* self, sQuad_0
     if (ring->count < 2600) {
         rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
-        sPtEnt_0518* e = (sPtEnt_0518*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
-        e->rs = *rs;
-        e->buf = buf;
-        e->next = next;
-        e->key = key;
-        e->flag = 0;
+        sPtEnt_0518* ringEntry = (sPtEnt_0518*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        ringEntry->rs = *rs;
+        ringEntry->buf = buf;
+        ringEntry->next = next;
+        ringEntry->key = key;
+        ringEntry->flag = 0;
     }
     self->bufAddr += 0x10;
     self->top--;
@@ -8693,44 +8693,44 @@ extern "C" void cPS2GraphicsMan_RenderSnowBoxFlakes(sPtGfx_1310* self, sPtObj_13
     if (self->texReady == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
     }
-    sMat_1310 m = MulMat_1310(self->m5860, obj->mat);
+    sMat_1310 xform = MulMat_1310(self->m5860, obj->mat);
     unsigned int buf = self->bufAddr;
-    unsigned long* p = func_0038F460(D_004A4474, buf, -1, 0);
-    p[0] = 0x1000000D;
-    p[1] = 0;
-    p[2] = 0;
-    p[3] = (unsigned long)55319 << 47;
-    p += 4;
-    sVec4_1310 v0;
-    v0.x = 0.0f;
-    v0.y = 0.0f;
-    v0.z = 0.0f;
-    v0.w = 0.0f;
-    sVec4_1310 v1;
-    v1.x = 1.0f;
-    v1.y = 1.0f;
-    v1.z = 0.0f;
-    v1.w = 0.0f;
-    CopyQuads_1310(&p, (const sQuad_1310*)&m, 4);
-    CopyQuads_1310(&p, (const sQuad_1310*)&v0, 1);
-    CopyQuads_1310(&p, (const sQuad_1310*)&v1, 1);
-    CopyQuads_1310(&p, obj->q, 5);
-    p[0] = (unsigned long)(((unsigned int)D_0 >> 3) | 0x14000000) << 32;
-    p[1] = (unsigned long)34816 << 45;
-    p += 2;
-    unsigned int next = func_0038F668(D_004A4474, p, 4);
+    unsigned long* packet = func_0038F460(D_004A4474, buf, -1, 0);
+    packet[0] = 0x1000000D;
+    packet[1] = 0;
+    packet[2] = 0;
+    packet[3] = (unsigned long)55319 << 47;
+    packet += 4;
+    sVec4_1310 zeroVec;
+    zeroVec.x = 0.0f;
+    zeroVec.y = 0.0f;
+    zeroVec.z = 0.0f;
+    zeroVec.w = 0.0f;
+    sVec4_1310 onesXY;
+    onesXY.x = 1.0f;
+    onesXY.y = 1.0f;
+    onesXY.z = 0.0f;
+    onesXY.w = 0.0f;
+    CopyQuads_1310(&packet, (const sQuad_1310*)&xform, 4);
+    CopyQuads_1310(&packet, (const sQuad_1310*)&zeroVec, 1);
+    CopyQuads_1310(&packet, (const sQuad_1310*)&onesXY, 1);
+    CopyQuads_1310(&packet, obj->q, 5);
+    packet[0] = (unsigned long)(((unsigned int)D_0 >> 3) | 0x14000000) << 32;
+    packet[1] = (unsigned long)34816 << 45;
+    packet += 2;
+    unsigned int next = func_0038F668(D_004A4474, packet, 4);
     self->bufAddr = next;
     sPtRing_1310* ring = self->ring;
     sPtRS_1310* rs = self->top;
     if (ring->count < 2600) {
         rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
-        sPtEnt_1310* e = (sPtEnt_1310*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
-        e->rs = *rs;
-        e->buf = buf;
-        e->next = next;
-        e->key = key;
-        e->flag = 0;
+        sPtEnt_1310* ringEntry = (sPtEnt_1310*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        ringEntry->rs = *rs;
+        ringEntry->buf = buf;
+        ringEntry->next = next;
+        ringEntry->key = key;
+        ringEntry->flag = 0;
     }
     self->bufAddr += 0x10;
     self->top->f4 &= ~3;
@@ -8888,44 +8888,44 @@ extern "C" void cPS2GraphicsMan_RenderSnowBoxFluffs(sPtGfx_16F0* self, sPtObj_16
     if (self->texReady == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
     }
-    sMat_16F0 m = MulMat_16F0(self->m5860, obj->mat);
+    sMat_16F0 xform = MulMat_16F0(self->m5860, obj->mat);
     unsigned int buf = self->bufAddr;
-    unsigned long* p = func_0038F460(D_004A4474, buf, -1, 0);
-    p[0] = 0x1000000D;
-    p[1] = 0;
-    p[2] = 0;
-    p[3] = (unsigned long)55319 << 47;
-    p += 4;
-    sVec4_16F0 v0;
-    v0.x = 0.0f;
-    v0.y = 0.0f;
-    v0.z = 0.0f;
-    v0.w = 0.0f;
-    sVec4_16F0 v1;
-    v1.x = 1.0f;
-    v1.y = 1.0f;
-    v1.z = 0.0f;
-    v1.w = 0.0f;
-    CopyQuads_16F0(&p, (const sQuad_16F0*)&m, 4);
-    CopyQuads_16F0(&p, (const sQuad_16F0*)&v0, 1);
-    CopyQuads_16F0(&p, (const sQuad_16F0*)&v1, 1);
-    CopyQuads_16F0(&p, obj->q, 5);
-    p[0] = (unsigned long)(((unsigned int)D_408 >> 3) | 0x14000000) << 32;
-    p[1] = (unsigned long)34816 << 45;
-    p += 2;
-    unsigned int next = func_0038F668(D_004A4474, p, 4);
+    unsigned long* packet = func_0038F460(D_004A4474, buf, -1, 0);
+    packet[0] = 0x1000000D;
+    packet[1] = 0;
+    packet[2] = 0;
+    packet[3] = (unsigned long)55319 << 47;
+    packet += 4;
+    sVec4_16F0 zeroVec;
+    zeroVec.x = 0.0f;
+    zeroVec.y = 0.0f;
+    zeroVec.z = 0.0f;
+    zeroVec.w = 0.0f;
+    sVec4_16F0 onesXY;
+    onesXY.x = 1.0f;
+    onesXY.y = 1.0f;
+    onesXY.z = 0.0f;
+    onesXY.w = 0.0f;
+    CopyQuads_16F0(&packet, (const sQuad_16F0*)&xform, 4);
+    CopyQuads_16F0(&packet, (const sQuad_16F0*)&zeroVec, 1);
+    CopyQuads_16F0(&packet, (const sQuad_16F0*)&onesXY, 1);
+    CopyQuads_16F0(&packet, obj->q, 5);
+    packet[0] = (unsigned long)(((unsigned int)D_408 >> 3) | 0x14000000) << 32;
+    packet[1] = (unsigned long)34816 << 45;
+    packet += 2;
+    unsigned int next = func_0038F668(D_004A4474, packet, 4);
     self->bufAddr = next;
     sPtRing_16F0* ring = self->ring;
     sPtRS_16F0* rs = self->top;
     if (ring->count < 2600) {
         rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
-        sPtEnt_16F0* e = (sPtEnt_16F0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
-        e->rs = *rs;
-        e->buf = buf;
-        e->next = next;
-        e->key = key;
-        e->flag = 0;
+        sPtEnt_16F0* ringEntry = (sPtEnt_16F0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        ringEntry->rs = *rs;
+        ringEntry->buf = buf;
+        ringEntry->next = next;
+        ringEntry->key = key;
+        ringEntry->flag = 0;
     }
     self->bufAddr += 0x10;
     self->top->f4 &= ~3;
@@ -9150,36 +9150,36 @@ extern "C" void cPS2GraphicsMan_RenderSpline(sPtGfx_1F10* self, sMat_1F10* BezMa
         func_0037D968((cPS2GraphicsMan*)self);
     }
     unsigned int buf = self->bufAddr;
-    unsigned long* p = (unsigned long*)(buf | 0x30000000);
-    p[0] = 0x1000000A;
-    p[1] = 0;
-    p[2] = 0;
-    p[3] = (unsigned long)55313 << 47;
-    p[4] = ((unsigned long)0x10014000 << 32) | 1;
-    p[5] = 0xE;
-    p[6] = (long)(int)(col[1] * 128.0f) | ((long)(int)(col[2] * 128.0f) << 8) | ((long)(int)(col[3] * 128.0f) << 16) | ((long)(int)(col[0] * 128.0f) << 24) | ((unsigned long)0x3F800000 << 32);
-    p[7] = 1;
-    p[8] = (unsigned long)(n | 0x8000) | ((unsigned long)32778 << 45);
-    p[9] = 4;
-    CopyMat_1F10((sMat_1F10*)(p + 10), BezMat);
-    p[18] = n;
-    p[19] = 0;
-    p[20] = 0;
-    p[21] = (unsigned long)(((unsigned int)D_3BF0 >> 3) | 0x14000000) << 32;
-    p += 22;
-    self->bufAddr = (unsigned int)p & 0x0FFFFFFF;
+    unsigned long* packet = (unsigned long*)(buf | 0x30000000);
+    packet[0] = 0x1000000A;
+    packet[1] = 0;
+    packet[2] = 0;
+    packet[3] = (unsigned long)55313 << 47;
+    packet[4] = ((unsigned long)0x10014000 << 32) | 1;
+    packet[5] = 0xE;
+    packet[6] = (long)(int)(col[1] * 128.0f) | ((long)(int)(col[2] * 128.0f) << 8) | ((long)(int)(col[3] * 128.0f) << 16) | ((long)(int)(col[0] * 128.0f) << 24) | ((unsigned long)0x3F800000 << 32);
+    packet[7] = 1;
+    packet[8] = (unsigned long)(n | 0x8000) | ((unsigned long)32778 << 45);
+    packet[9] = 4;
+    CopyMat_1F10((sMat_1F10*)(packet + 10), BezMat);
+    packet[18] = n;
+    packet[19] = 0;
+    packet[20] = 0;
+    packet[21] = (unsigned long)(((unsigned int)D_3BF0 >> 3) | 0x14000000) << 32;
+    packet += 22;
+    self->bufAddr = (unsigned int)packet & 0x0FFFFFFF;
     sPtRing_1F10* ring = self->ring;
     unsigned int next = self->bufAddr;
     sPtRS_1F10* rs = self->top;
     if (ring->count < 2600) {
         rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
-        sPtEnt_1F10* e = (sPtEnt_1F10*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
-        e->rs = *rs;
-        e->buf = buf;
-        e->next = next;
-        e->key = key;
-        e->flag = 0;
+        sPtEnt_1F10* ringEntry = (sPtEnt_1F10*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        ringEntry->rs = *rs;
+        ringEntry->buf = buf;
+        ringEntry->next = next;
+        ringEntry->key = key;
+        ringEntry->flag = 0;
     }
     self->bufAddr += 0x10;
 }
@@ -9375,21 +9375,21 @@ static inline sPt2170 Add2170(const sPt2170& a, const sPt2170& b)
  */
 extern "C" void cPS2GraphicsMan_DrawSphere(cPS2GraphicsMan* mgr, sPt2170* pos, float* col, float radius, int segs)
 {
-    sMat2170 m;
+    sMat2170 viewMat;
     int step;
     int i;
     int k;
 
-    CopyMat2170(&m, ((cRMgr2170*)mgr)->v35());
-    sPt2170 c = MulMat2170(&m, *pos);
-    if (3000.0f < c.z) {
+    CopyMat2170(&viewMat, ((cRMgr2170*)mgr)->v35());
+    sPt2170 viewCenter = MulMat2170(&viewMat, *pos);
+    if (3000.0f < viewCenter.z) {
         return;
     }
     if (segs > 0) {
         step = segs;
-    } else if (2000.0f < c.z) {
+    } else if (2000.0f < viewCenter.z) {
         step = 4;
-    } else if (750.0f < c.z) {
+    } else if (750.0f < viewCenter.z) {
         step = 2;
     } else {
         step = 1;
@@ -9473,16 +9473,16 @@ extern "C" void cPS2GraphicsMan_DrawSphere(cPS2GraphicsMan* mgr, sPt2170* pos, f
         verts[i].g = (int)(col[2] * 128.0f);
         verts[i].b = (int)(col[3] * 128.0f);
         verts[i].a = (int)(col[0] * 128.0f);
-        sPt2170 p = Add2170(c, Scale2170(D_004FFBC0[k], radius));
-        verts[i].pos = p;
+        sPt2170 circlePoint = Add2170(viewCenter, Scale2170(D_004FFBC0[k], radius));
+        verts[i].pos = circlePoint;
         i++;
     }
     verts[i].r = (int)(col[1] * 128.0f);
     verts[i].g = (int)(col[2] * 128.0f);
     verts[i].b = (int)(col[3] * 128.0f);
     verts[i].a = (int)(col[0] * 128.0f);
-    sPt2170 p = Add2170(c, Scale2170(D_004FFBC0[0], radius));
-    verts[i].pos = p;
+    sPt2170 circlePoint = Add2170(viewCenter, Scale2170(D_004FFBC0[0], radius));
+    verts[i].pos = circlePoint;
     i++;
     ((cRMgr2170*)mgr)->v73(i, verts, 0);
     (mgr->m_pCurrentDrawState)->unk_00[1] = (((int)(mgr->m_pCurrentDrawState)->unk_00[1]) & ~0x7C) | 4;
@@ -11294,23 +11294,23 @@ extern "C" void cPS2GraphicsMan_ResolveCharModel(cPS2GraphicsMan* gfx, sMdl_66F0
                 bones[i].tracks[j].keys[k].d += bones[i].tracks[j].keys[k].v;
             }
         }
-        char* s = base + bones[i].name * 32;
-        char* t = s + 0x10;
-        if (s[0x10])
-            bones[i].alpha = (int)(*(float*)(s + 0x14) * 128.0f);
+        char* nameRecord = base + bones[i].name * 32;
+        char* secondName = nameRecord + 0x10;
+        if (nameRecord[0x10])
+            bones[i].alpha = (int)(*(float*)(nameRecord + 0x14) * 128.0f);
         else
             bones[i].alpha = 0;
-        if (func_00416B18(s, str_alph, 4) == 0 || (s[0] == 'e' && s[1] == 'a'))
+        if (func_00416B18(nameRecord, str_alph, 4) == 0 || (nameRecord[0] == 'e' && nameRecord[1] == 'a'))
             bones[i].flags |= 0x8000;
         int env = 0;
-        if (t[0] != 0) {
-            if (t[0] == 'e' && t[1] == 'n' && t[2] == 'v') {
-                unsigned char c = t[3];
-                if ((unsigned)(c - '0') < 10)
-                    env = (char)c - '0';
+        if (secondName[0] != 0) {
+            if (secondName[0] == 'e' && secondName[1] == 'n' && secondName[2] == 'v') {
+                unsigned char envDigit = secondName[3];
+                if ((unsigned)(envDigit - '0') < 10)
+                    env = (char)envDigit - '0';
             }
         }
-        bones[i].name = cGraphicsMan_GetTextureID(gfx, s);
+        bones[i].name = cGraphicsMan_GetTextureID(gfx, nameRecord);
         bones[i].env = env;
     }
     for (int i = 0; i < inModel->nmats; i++) {
@@ -11319,31 +11319,31 @@ extern "C" void cPS2GraphicsMan_ResolveCharModel(cPS2GraphicsMan* gfx, sMdl_66F0
             mt[9] = tbl[mt[8]] + mt[9];
     }
     for (int i = 0; i < inModel->nblends; i++) {
-        sBlend_66F0* b = &inModel->blends[i];
-        b->w = (unsigned char*)(base + (int)b->w);
-        for (int j = 0; j < b->n; j++)
-            b->w[j * 4 + 2] += tbl[b->w[j * 4 + 3]];
-        cGraphicsMan_AddBlendedMatrix(gfx, b);
+        sBlend_66F0* blendEntry = &inModel->blends[i];
+        blendEntry->w = (unsigned char*)(base + (int)blendEntry->w);
+        for (int j = 0; j < blendEntry->n; j++)
+            blendEntry->w[j * 4 + 2] += tbl[blendEntry->w[j * 4 + 3]];
+        cGraphicsMan_AddBlendedMatrix(gfx, blendEntry);
         for (int k = 0;; k++) {
             if (k == *count) {
-                slots[*count].n = b->n;
-                slots[*count].w = b->w;
+                slots[*count].n = blendEntry->n;
+                slots[*count].w = blendEntry->w;
                 slots[*count].idx = *count;
-                b->idx = *count;
+                blendEntry->idx = *count;
                 (*count)++;
                 goto next;
             }
-            if (func_00369A78(b, &slots[k], 0, 0, 0)) {
-                b->idx = k;
+            if (func_00369A78(blendEntry, &slots[k], 0, 0, 0)) {
+                blendEntry->idx = k;
                 goto next;
             }
         }
     next:;
     }
     for (int i = 0; i < inModel->nrefs; i++) {
-        sRef_66F0* r = &inModel->refs[i];
-        for (int j = 0; j < r->n; j++)
-            r->idx[j] = inModel->blends[r->idx[j]].idx;
+        sRef_66F0* refEntry = &inModel->refs[i];
+        for (int j = 0; j < refEntry->n; j++)
+            refEntry->idx[j] = inModel->blends[refEntry->idx[j]].idx;
     }
 }
 #endif
@@ -12088,12 +12088,12 @@ extern "C" void cPS2GraphicsMan_RenderBoardWake(sPtGfx_83B8* self, void* verts, 
     if (ring->count < 2600) {
         rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
-        sPtEnt_83B8* e = (sPtEnt_83B8*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
-        e->rs = *rs;
-        e->buf = buf;
-        e->next = next;
-        e->key = key;
-        e->flag = 0;
+        sPtEnt_83B8* ringEntry = (sPtEnt_83B8*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        ringEntry->rs = *rs;
+        ringEntry->buf = buf;
+        ringEntry->next = next;
+        ringEntry->key = key;
+        ringEntry->flag = 0;
     }
     self->bufAddr += 0x10;
     self->top->f0 &= ~0x3C0;

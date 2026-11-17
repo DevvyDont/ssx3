@@ -283,42 +283,42 @@ void func_0022C410_impl(void* vctx, sPatch_C410* patch, int flag)
     dx = ctx->px - patch->v[0].x;
     dy = ctx->py - patch->v[0].y;
     dz = ctx->pz - patch->v[0].z;
-    float d0 = dx * dx + dy * dy + dz * dz;
+    float corner0DistSq = dx * dx + dy * dy + dz * dz;
     dx = ctx->px - patch->v[1].x;
     dy = ctx->py - patch->v[1].y;
     dz = ctx->pz - patch->v[1].z;
-    float d1 = dx * dx + dy * dy + dz * dz;
+    float corner1DistSq = dx * dx + dy * dy + dz * dz;
     dx = ctx->px - patch->v[2].x;
     dy = ctx->py - patch->v[2].y;
     dz = ctx->pz - patch->v[2].z;
-    float d2 = dx * dx + dy * dy + dz * dz;
+    float corner2DistSq = dx * dx + dy * dy + dz * dz;
     dx = ctx->px - patch->v[3].x;
     dy = ctx->py - patch->v[3].y;
     dz = ctx->pz - patch->v[3].z;
-    float d3 = dx * dx + dy * dy + dz * dz;
-    float e01 = ctx->c + ctx->k * (d0 + d1);
-    float e23 = ctx->c + ctx->k * (d2 + d3);
-    float e02 = ctx->c + ctx->k * (d0 + d2);
-    float e13 = ctx->c + ctx->k * (d1 + d3);
+    float corner3DistSq = dx * dx + dy * dy + dz * dz;
+    float level01 = ctx->c + ctx->k * (corner0DistSq + corner1DistSq);
+    float level23 = ctx->c + ctx->k * (corner2DistSq + corner3DistSq);
+    float level02 = ctx->c + ctx->k * (corner0DistSq + corner2DistSq);
+    float level13 = ctx->c + ctx->k * (corner1DistSq + corner3DistSq);
     float hi = ctx->f;
-    e01 = clamp_C410(e01, lo, hi);
-    e23 = clamp_C410(e23, lo, hi);
-    e02 = clamp_C410(e02, lo, hi);
-    e13 = clamp_C410(e13, lo, hi);
+    level01 = clamp_C410(level01, lo, hi);
+    level23 = clamp_C410(level23, lo, hi);
+    level02 = clamp_C410(level02, lo, hi);
+    level13 = clamp_C410(level13, lo, hi);
     unsigned char fog[4];
     int ids[2];
-    unsigned char b01 = D_004A2A10[(int)e01];
-    unsigned char b23 = D_004A2A10[(int)e23];
-    unsigned char b02 = D_004A2A10[(int)e02];
-    unsigned char b13 = D_004A2A10[(int)e13];
-    fog[0] = b01;
-    fog[1] = b23;
-    fog[2] = b02;
-    fog[3] = b13;
+    unsigned char detail01 = D_004A2A10[(int)level01];
+    unsigned char detail23 = D_004A2A10[(int)level23];
+    unsigned char detail02 = D_004A2A10[(int)level02];
+    unsigned char detail13 = D_004A2A10[(int)level13];
+    fog[0] = detail01;
+    fog[1] = detail23;
+    fog[2] = detail02;
+    fog[3] = detail13;
     ids[0] = patch->id0;
     ids[1] = patch->id1;
-    sCamObj_C410* o = ctx->cam;
-    o->vt[21].fn((char*)o + o->vt[21].delta, patch, fog, ids, flag);
+    sCamObj_C410* bezierMan = ctx->cam;
+    bezierMan->vt[21].fn((char*)bezierMan + bezierMan->vt[21].delta, patch, fog, ids, flag);
 }
 #endif
 
@@ -634,11 +634,11 @@ extern "C" void func_0022C830(sGame_C830* self)
     }
     ((cGfx_C830*)GrMan)->v14(sV3_C830(0.0f, 0.0f, 0.0f));
     // Storing through a pointer keeps the store ahead of the reload of GrMan.
-    int* p = &cDepthFog_m_Enable;
-    int saved = *p;
-    *p = 0;
+    int* depthFogEnable = &cDepthFog_m_Enable;
+    int saved = *depthFogEnable;
+    *depthFogEnable = 0;
     ((cGfx_C830*)GrMan)->v19();
-    *p = saved;
+    *depthFogEnable = saved;
     func_00285BF8(gSSXAudio, 1, (float)self->frames * (1.0f / 60.0f));
     func_002B5D78(gWorldTriggerManager);
     self->frames = 0;
@@ -784,11 +784,11 @@ static inline bool IsSection(const int& id)
  */
 extern "C" void cSectionMan_load_impl(void* self, int idx, int mode)
 {
-    int v;
+    int resolvedMode;
     if (mode == 7) {
-        v = D_00442820_CEA8[idx].mode;
+        resolvedMode = D_00442820_CEA8[idx].mode;
     } else {
-        v = mode;
+        resolvedMode = mode;
     }
     int extra = 49;
     if (D_00442488_CEA8[idx].a >= 0) {
@@ -821,11 +821,11 @@ extern "C" void cSectionMan_load_impl(void* self, int idx, int mode)
         *(int*)((char*)self + 0x1A4) = 0;
         cSectionMan_loadSection((cSectionMan*)self, extra);
     }
-    int b = D_00442488_CEA8[idx].b;
-    if (b >= 0) {
-        cSectionMan_loadSection((cSectionMan*)self, b);
+    int extraSection = D_00442488_CEA8[idx].b;
+    if (extraSection >= 0) {
+        cSectionMan_loadSection((cSectionMan*)self, extraSection);
     }
-    cSectionMan_loadMode((cSectionMan*)self, v);
+    cSectionMan_loadMode((cSectionMan*)self, resolvedMode);
 }
 #endif
 
@@ -943,15 +943,15 @@ int cSectionMan_isLoaded_impl(void* self, int idx)
             break;
         }
     }
-    int a = D_00442488_D278[idx].a;
-    if (a >= 0 && cSectionMan_mSectionMap[a].field_0x4 >= 0) {
-        if (cSectionMan_isSectionLoaded((cSectionMan*)self, a) == 0) {
+    int skySection = D_00442488_D278[idx].a;
+    if (skySection >= 0 && cSectionMan_mSectionMap[skySection].field_0x4 >= 0) {
+        if (cSectionMan_isSectionLoaded((cSectionMan*)self, skySection) == 0) {
             ok = 0;
         }
     }
-    int b = D_00442488_D278[idx].b;
-    if (b >= 0 && cSectionMan_mSectionMap[b].field_0x4 >= 0) {
-        if (cSectionMan_isSectionLoaded((cSectionMan*)self, b) == 0) {
+    int extraSection = D_00442488_D278[idx].b;
+    if (extraSection >= 0 && cSectionMan_mSectionMap[extraSection].field_0x4 >= 0) {
+        if (cSectionMan_isSectionLoaded((cSectionMan*)self, extraSection) == 0) {
             ok = 0;
         }
     }

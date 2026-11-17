@@ -133,13 +133,13 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_getFrameByIndex);
 extern "C" void* cUIScreen_getFrameByIndex(void* self, unsigned short frame)
 {
     int* list = *(int**)((char*)self + 0x34);
-    char* e = (char*)list + 4;
+    char* frameHeader = (char*)list + 4;
     unsigned int i;
     for (i = 0; i < (unsigned int)*list; i++) {
-        if (*(unsigned short*)(e + 0x8) == frame) {
-            return e;
+        if (*(unsigned short*)(frameHeader + 0x8) == frame) {
+            return frameHeader;
         }
-        e = e + *(int*)(e + 0x4);
+        frameHeader = frameHeader + *(int*)(frameHeader + 0x4);
     }
     return 0;
 }
@@ -630,11 +630,11 @@ public:
  */
 extern "C" void cUIScreen_parseEventTrigger(void* self, void* pFrame, int* msg)
 {
-    cUIScreen_parseEventTrigger_cVirtA* a = *(cUIScreen_parseEventTrigger_cVirtA**)((char*)self + 0xD0);
-    if (a->v16(self, msg[1]) == 0) {
-        cUIScreen_parseEventTrigger_cVirtB* b = **(cUIScreen_parseEventTrigger_cVirtB***)((char*)*(void**)((char*)self + 0xD0) + 0x10);
-        if (b != 0) {
-            b->v03(self, msg[1]);
+    cUIScreen_parseEventTrigger_cVirtA* state = *(cUIScreen_parseEventTrigger_cVirtA**)((char*)self + 0xD0);
+    if (state->v16(self, msg[1]) == 0) {
+        cUIScreen_parseEventTrigger_cVirtB* customInterface = **(cUIScreen_parseEventTrigger_cVirtB***)((char*)*(void**)((char*)self + 0xD0) + 0x10);
+        if (customInterface != 0) {
+            customInterface->v03(self, msg[1]);
         }
     }
 }
@@ -655,9 +655,9 @@ struct sUIFlags1C {
  */
 extern "C" void cUIScreen_parseScreenFocusGain(void* self)
 {
-    void* p = *(void**)((char*)self + 0xd0);
-    if (p != 0) {
-        ((sUIFlags1C*)((char*)p + 0x1c))->mode = 3;
+    void* state = *(void**)((char*)self + 0xd0);
+    if (state != 0) {
+        ((sUIFlags1C*)((char*)state + 0x1c))->mode = 3;
     }
 }
 #endif
@@ -707,9 +707,9 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_parseScreenEnd);
 extern "C" void cUIScreen_parseScreenEnd(void* self, void* pFrame, void* pKCP, void* pThread)
 {
     *(unsigned int*)((char*)pThread + 0x10) &= 0xFEFFFFFFU;
-    void* p = *(void**)((char*)self + 0xd0);
-    if (p != 0) {
-        ((sUIFlags1C*)((char*)p + 0x1c))->mode = 7;
+    void* state = *(void**)((char*)self + 0xd0);
+    if (state != 0) {
+        ((sUIFlags1C*)((char*)state + 0x1c))->mode = 7;
     }
 }
 #endif
@@ -1316,18 +1316,18 @@ extern "C" void cUIScrollBar_setValues(sScroll_DA20* self, int pos, int visible,
     if (strlen(name) != 0 && pos < self->pos) {
         cUIScreen* scr = self->screen;
         if (scr != 0) {
-            int f = cUIScreen_getFrameByLabel(scr, GetHashValue32(name));
-            if (f != 0xFFFF)
-                cUIScreen_playFrame(scr, f, 1);
+            int frameNum = cUIScreen_getFrameByLabel(scr, GetHashValue32(name));
+            if (frameNum != 0xFFFF)
+                cUIScreen_playFrame(scr, frameNum, 1);
         }
     }
     name = self->downLabel;
     if (strlen(name) != 0 && self->pos < pos) {
         cUIScreen* scr = self->screen;
         if (scr != 0) {
-            int f = cUIScreen_getFrameByLabel(scr, GetHashValue32(name));
-            if (f != 0xFFFF)
-                cUIScreen_playFrame(scr, f, 1);
+            int frameNum = cUIScreen_getFrameByLabel(scr, GetHashValue32(name));
+            if (frameNum != 0xFFFF)
+                cUIScreen_playFrame(scr, frameNum, 1);
         }
     }
     self->total = total;
@@ -1350,11 +1350,11 @@ extern "C" void cUIScrollBar_setValues(sScroll_DA20* self, int pos, int visible,
     cUIScrollBar_setScrollVisibile((cUIScrollBar*)self, 1);
     if (self->total != 0) {
         if (self->flags & 1) {
-            float fp = (float)self->pos / (float)self->total;
+            float posRatio = (float)self->pos / (float)self->total;
             float fv = (float)self->visible / (float)self->total;
             npos.x = tpos.x;
             nsize.x = tsize.x;
-            npos.y = tpos.y + tsize.y * fp;
+            npos.y = tpos.y + tsize.y * posRatio;
             nsize.y = tsize.y * fv;
             if (tsize.y < nsize.y)
                 nsize.y = tsize.y;
@@ -1842,28 +1842,28 @@ static inline int cUIState_onUpdate_padTest(char* pad, int slot)
 extern "C" void cUIState_onUpdate(char* self)
 {
     int mask = *(signed char*)(self + 0x15);
-    char* pad = *(char**)(*(char**)(self + 0x10) + 0xC);
+    char* input = *(char**)(*(char**)(self + 0x10) + 0xC);
     *(signed char*)(self + 0x14) = 0;
     do {
-        cUIState_onUpdate_sVEntryC* vc = *(cUIState_onUpdate_sVEntryC**)(pad + 8);
-        vc[44].fn(pad + vc[44].delta, *(unsigned char*)(self + 0x14));
-        if (cUIState_onUpdate_padTest(pad, 45)) {
-            if (cUIState_onUpdate_padTest(pad, 41) || (cUIState_onUpdate_padTest(pad, 40) && (mask & 1))) {
+        cUIState_onUpdate_sVEntryC* vc = *(cUIState_onUpdate_sVEntryC**)(input + 8);
+        vc[44].fn(input + vc[44].delta, *(unsigned char*)(self + 0x14));
+        if (cUIState_onUpdate_padTest(input, 45)) {
+            if (cUIState_onUpdate_padTest(input, 41) || (cUIState_onUpdate_padTest(input, 40) && (mask & 1))) {
                 cUIState_onUpdate_sVEntryP* vs = *(cUIState_onUpdate_sVEntryP**)(self + 8);
-                if (!vs[8].fn(self + vs[8].delta, pad)) {
+                if (!vs[8].fn(self + vs[8].delta, input)) {
                     char* n = (char*)cList_first((cList*)(self + 0x24));
                     if (n != 0) {
                         do {
                             if (*(int*)(n + 0x14) & 1) {
                                 cUIState_onUpdate_sVEntryP* vn = *(cUIState_onUpdate_sVEntryP**)(n + 8);
-                                if (vn[4].fn(n + vn[4].delta, pad)) break;
+                                if (vn[4].fn(n + vn[4].delta, input)) break;
                             }
                             n = *(char**)(n + 4);
                         } while (!cListNode_isSentinel((cListNode*)n));
                     }
                 }
                 cUIState_onUpdate_sVEntryV* vs2 = *(cUIState_onUpdate_sVEntryV**)(self + 8);
-                vs2[9].fn(self + vs2[9].delta, pad);
+                vs2[9].fn(self + vs2[9].delta, input);
                 break;
             }
         }

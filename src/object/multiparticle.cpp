@@ -1231,9 +1231,9 @@ extern "C" void cAnimComboNode_cacheFrame(sMp_9140* self)
     }
     sMpModel_9140* model = self->inst->model;
     int n = 0;
-    sMpPart_9140* p = model->parts;
-    for (int i = 0; i < model->count; i++, p++) {
-        if (p->info->active != 0) {
+    sMpPart_9140* meshPart = model->parts;
+    for (int i = 0; i < model->count; i++, meshPart++) {
+        if (meshPart->info->active != 0) {
             cMeshAnimFrame_transform(&self->items[n], (sMpMtx_9140*)((char*)self->mtx + (n << 6)));
             n++;
         }

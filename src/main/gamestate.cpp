@@ -875,12 +875,12 @@ void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState
 extern "C" void cGFTrackStartState_writeToReplayFrame(void* self, void* stream)
 {
     cGameState_writeToReplayFrame_2(self, stream);
-    sVEntry_cGFTrackStartState_writeToReplayFrame* e = &(*(sVEntry_cGFTrackStartState_writeToReplayFrame**)stream)[1];
-    e->fn((char*)stream + e->delta, (char*)self + 0x10, 4);
-    e = &(*(sVEntry_cGFTrackStartState_writeToReplayFrame**)stream)[1];
-    e->fn((char*)stream + e->delta, (char*)self + 0x14, 4);
-    e = &(*(sVEntry_cGFTrackStartState_writeToReplayFrame**)stream)[1];
-    e->fn((char*)stream + e->delta, (char*)self + 0x18, 4);
+    sVEntry_cGFTrackStartState_writeToReplayFrame* writeSlot = &(*(sVEntry_cGFTrackStartState_writeToReplayFrame**)stream)[1];
+    writeSlot->fn((char*)stream + writeSlot->delta, (char*)self + 0x10, 4);
+    writeSlot = &(*(sVEntry_cGFTrackStartState_writeToReplayFrame**)stream)[1];
+    writeSlot->fn((char*)stream + writeSlot->delta, (char*)self + 0x14, 4);
+    writeSlot = &(*(sVEntry_cGFTrackStartState_writeToReplayFrame**)stream)[1];
+    writeSlot->fn((char*)stream + writeSlot->delta, (char*)self + 0x18, 4);
 }
 #endif
 
@@ -907,12 +907,12 @@ void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameStat
 extern "C" void cGFTrackStartState_readFromReplayFrame(void* self, void* stream)
 {
     cGameState_readFromReplayFrame_2(self, stream);
-    sVEntry_cGFTrackStartState_readFromReplayFrame* e = &(*(sVEntry_cGFTrackStartState_readFromReplayFrame**)stream)[2];
-    e->fn((char*)stream + e->delta, (char*)self + 0x10, 4);
-    e = &(*(sVEntry_cGFTrackStartState_readFromReplayFrame**)stream)[2];
-    e->fn((char*)stream + e->delta, (char*)self + 0x14, 4);
-    e = &(*(sVEntry_cGFTrackStartState_readFromReplayFrame**)stream)[2];
-    e->fn((char*)stream + e->delta, (char*)self + 0x18, 4);
+    sVEntry_cGFTrackStartState_readFromReplayFrame* readSlot = &(*(sVEntry_cGFTrackStartState_readFromReplayFrame**)stream)[2];
+    readSlot->fn((char*)stream + readSlot->delta, (char*)self + 0x10, 4);
+    readSlot = &(*(sVEntry_cGFTrackStartState_readFromReplayFrame**)stream)[2];
+    readSlot->fn((char*)stream + readSlot->delta, (char*)self + 0x14, 4);
+    readSlot = &(*(sVEntry_cGFTrackStartState_readFromReplayFrame**)stream)[2];
+    readSlot->fn((char*)stream + readSlot->delta, (char*)self + 0x18, 4);
 }
 #endif
 
@@ -1166,12 +1166,12 @@ void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState
 extern "C" void cGFNextHeatState_writeToReplayFrame(void* self, void* stream)
 {
     cGameState_writeToReplayFrame_2(self, stream);
-    sVEntry_cGFNextHeatState_writeToReplayFrame* e = &(*(sVEntry_cGFNextHeatState_writeToReplayFrame**)stream)[1];
-    e->fn((char*)stream + e->delta, (char*)self + 0x10, 4);
-    e = &(*(sVEntry_cGFNextHeatState_writeToReplayFrame**)stream)[1];
-    e->fn((char*)stream + e->delta, (char*)self + 0x14, 4);
-    e = &(*(sVEntry_cGFNextHeatState_writeToReplayFrame**)stream)[1];
-    e->fn((char*)stream + e->delta, (char*)self + 0x18, 4);
+    sVEntry_cGFNextHeatState_writeToReplayFrame* writeSlot = &(*(sVEntry_cGFNextHeatState_writeToReplayFrame**)stream)[1];
+    writeSlot->fn((char*)stream + writeSlot->delta, (char*)self + 0x10, 4);
+    writeSlot = &(*(sVEntry_cGFNextHeatState_writeToReplayFrame**)stream)[1];
+    writeSlot->fn((char*)stream + writeSlot->delta, (char*)self + 0x14, 4);
+    writeSlot = &(*(sVEntry_cGFNextHeatState_writeToReplayFrame**)stream)[1];
+    writeSlot->fn((char*)stream + writeSlot->delta, (char*)self + 0x18, 4);
 }
 #endif
 
@@ -1198,12 +1198,12 @@ void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameStat
 extern "C" void cGFNextHeatState_readFromReplayFrame(void* self, void* stream)
 {
     cGameState_readFromReplayFrame_2(self, stream);
-    sVEntry_cGFNextHeatState_readFromReplayFrame* e = &(*(sVEntry_cGFNextHeatState_readFromReplayFrame**)stream)[2];
-    e->fn((char*)stream + e->delta, (char*)self + 0x10, 4);
-    e = &(*(sVEntry_cGFNextHeatState_readFromReplayFrame**)stream)[2];
-    e->fn((char*)stream + e->delta, (char*)self + 0x14, 4);
-    e = &(*(sVEntry_cGFNextHeatState_readFromReplayFrame**)stream)[2];
-    e->fn((char*)stream + e->delta, (char*)self + 0x18, 4);
+    sVEntry_cGFNextHeatState_readFromReplayFrame* readSlot = &(*(sVEntry_cGFNextHeatState_readFromReplayFrame**)stream)[2];
+    readSlot->fn((char*)stream + readSlot->delta, (char*)self + 0x10, 4);
+    readSlot = &(*(sVEntry_cGFNextHeatState_readFromReplayFrame**)stream)[2];
+    readSlot->fn((char*)stream + readSlot->delta, (char*)self + 0x14, 4);
+    readSlot = &(*(sVEntry_cGFNextHeatState_readFromReplayFrame**)stream)[2];
+    readSlot->fn((char*)stream + readSlot->delta, (char*)self + 0x18, 4);
 }
 #endif
 
@@ -1485,8 +1485,8 @@ extern "C" void cGFUserSelectState_update(void* self)
     int ns;
     switch (*(int*)((char*)self + 0x10)) {
     case 0: {
-        int r = cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 1);
-        if (!(r == 4 || r == 5 || r == 0))
+        int nisListInfo = cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 1);
+        if (!(nisListInfo == 4 || nisListInfo == 5 || nisListInfo == 0))
             return;
         int curMode = *(int*)((char*)self + 0x14);
         if (curMode == 0) {
@@ -1537,8 +1537,8 @@ extern "C" void cGFUserSelectState_update(void* self)
         break;
     case 2:
         if (*(int*)((char*)self + 0x14) != 0) {
-            int r = cSSXScriptEngine_GetNISListScriptCategory(ScriptEngine, 1, 0);
-            if (r == 0xE || r == 20) {
+            int nisListInfo = cSSXScriptEngine_GetNISListScriptCategory(ScriptEngine, 1, 0);
+            if (nisListInfo == 0xE || nisListInfo == 20) {
                 if (*(int*)((char*)self + 0x8) == 0) {
                     if (*(int*)((char*)self + 0x1C) != 0)
                         return;
@@ -1552,7 +1552,7 @@ extern "C" void cGFUserSelectState_update(void* self)
                 ns = 3;
                 break;
             }
-            if (r == 13 || r == 19)
+            if (nisListInfo == 13 || nisListInfo == 19)
                 cBXLoadIndicator_Show(SSXApp->Game->LoadIndicator, 0);
             return;
         }
@@ -1589,14 +1589,14 @@ void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState
 extern "C" void cGFUserSelectState_writeToReplayFrame(void* self, void* stream)
 {
     cGameState_writeToReplayFrame_2(self, stream);
-    sVEntry_cGFUserSelectState_writeToReplayFrame* e = &(*(sVEntry_cGFUserSelectState_writeToReplayFrame**)stream)[1];
-    e->fn((char*)stream + e->delta, (char*)self + 0x10, 4);
-    e = &(*(sVEntry_cGFUserSelectState_writeToReplayFrame**)stream)[1];
-    e->fn((char*)stream + e->delta, (char*)self + 0x14, 4);
-    e = &(*(sVEntry_cGFUserSelectState_writeToReplayFrame**)stream)[1];
-    e->fn((char*)stream + e->delta, (char*)self + 0x8, 4);
-    e = &(*(sVEntry_cGFUserSelectState_writeToReplayFrame**)stream)[1];
-    e->fn((char*)stream + e->delta, (char*)self + 0x18, 4);
+    sVEntry_cGFUserSelectState_writeToReplayFrame* writeSlot = &(*(sVEntry_cGFUserSelectState_writeToReplayFrame**)stream)[1];
+    writeSlot->fn((char*)stream + writeSlot->delta, (char*)self + 0x10, 4);
+    writeSlot = &(*(sVEntry_cGFUserSelectState_writeToReplayFrame**)stream)[1];
+    writeSlot->fn((char*)stream + writeSlot->delta, (char*)self + 0x14, 4);
+    writeSlot = &(*(sVEntry_cGFUserSelectState_writeToReplayFrame**)stream)[1];
+    writeSlot->fn((char*)stream + writeSlot->delta, (char*)self + 0x8, 4);
+    writeSlot = &(*(sVEntry_cGFUserSelectState_writeToReplayFrame**)stream)[1];
+    writeSlot->fn((char*)stream + writeSlot->delta, (char*)self + 0x18, 4);
 }
 #endif
 
@@ -1623,14 +1623,14 @@ void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameStat
 extern "C" void cGFUserSelectState_readFromReplayFrame(void* self, void* stream)
 {
     cGameState_readFromReplayFrame_2(self, stream);
-    sVEntry_cGFUserSelectState_readFromReplayFrame* e = &(*(sVEntry_cGFUserSelectState_readFromReplayFrame**)stream)[2];
-    e->fn((char*)stream + e->delta, (char*)self + 0x10, 4);
-    e = &(*(sVEntry_cGFUserSelectState_readFromReplayFrame**)stream)[2];
-    e->fn((char*)stream + e->delta, (char*)self + 0x14, 4);
-    e = &(*(sVEntry_cGFUserSelectState_readFromReplayFrame**)stream)[2];
-    e->fn((char*)stream + e->delta, (char*)self + 0x8, 4);
-    e = &(*(sVEntry_cGFUserSelectState_readFromReplayFrame**)stream)[2];
-    e->fn((char*)stream + e->delta, (char*)self + 0x18, 4);
+    sVEntry_cGFUserSelectState_readFromReplayFrame* readSlot = &(*(sVEntry_cGFUserSelectState_readFromReplayFrame**)stream)[2];
+    readSlot->fn((char*)stream + readSlot->delta, (char*)self + 0x10, 4);
+    readSlot = &(*(sVEntry_cGFUserSelectState_readFromReplayFrame**)stream)[2];
+    readSlot->fn((char*)stream + readSlot->delta, (char*)self + 0x14, 4);
+    readSlot = &(*(sVEntry_cGFUserSelectState_readFromReplayFrame**)stream)[2];
+    readSlot->fn((char*)stream + readSlot->delta, (char*)self + 0x8, 4);
+    readSlot = &(*(sVEntry_cGFUserSelectState_readFromReplayFrame**)stream)[2];
+    readSlot->fn((char*)stream + readSlot->delta, (char*)self + 0x18, 4);
 }
 #endif
 
@@ -2437,20 +2437,20 @@ static inline void* initObj_237140(void* o, int a, int b)
  */
 extern "C" void* cInputSync_createlocalinput(sOwner_237140* self, int* realinput)
 {
-    sEntry_237140* e = &self->entries[self->n++];
-    e->recs = (sRec_237140*)operator_new_tag(self->count * 100, str_InputSamples, 0, 0);
-    MEM_fill(e->recs, 0, self->count * 100);
+    sEntry_237140* syncedPad = &self->entries[self->n++];
+    syncedPad->recs = (sRec_237140*)operator_new_tag(self->count * 100, str_InputSamples, 0, 0);
+    MEM_fill(syncedPad->recs, 0, self->count * 100);
     for (int i = 0; i < self->count; i++) {
-        e->recs[i].type = 0x18;
+        syncedPad->recs[i].type = 0x18;
     }
-    e->f4 = 0;
-    e->f8 = self->f0;
-    e->fC = realinput[0];
-    e->f10 = (int*)cMemMan_alloc(676, str_SyncedPad, 0, 0);
-    *e->f10 = 0;
-    void* o = initObj_237140(cMemMan_alloc(8, str_SyncedInput, 0, 0), (int)e->f10, realinput[1]);
-    e->f14 = o;
-    return o;
+    syncedPad->f4 = 0;
+    syncedPad->f8 = self->f0;
+    syncedPad->fC = realinput[0];
+    syncedPad->f10 = (int*)cMemMan_alloc(676, str_SyncedPad, 0, 0);
+    *syncedPad->f10 = 0;
+    void* syncedInput = initObj_237140(cMemMan_alloc(8, str_SyncedInput, 0, 0), (int)syncedPad->f10, realinput[1]);
+    syncedPad->f14 = syncedInput;
+    return syncedInput;
 }
 #endif
 
@@ -2508,20 +2508,20 @@ static inline void* initObj_237280(void* o, int a, int b)
  */
 extern "C" void* cInputSync_createremoteinput(sOwner_237280* self, int realinputmap)
 {
-    sEntry_237280* e = &self->entries[self->n++];
-    e->recs = (sRec_237280*)operator_new_tag(self->count * 100, str_InputSamples, 0, 0);
-    MEM_fill(e->recs, 0, self->count * 100);
+    sEntry_237280* syncedPad = &self->entries[self->n++];
+    syncedPad->recs = (sRec_237280*)operator_new_tag(self->count * 100, str_InputSamples, 0, 0);
+    MEM_fill(syncedPad->recs, 0, self->count * 100);
     for (int i = 0; i < self->count; i++) {
-        e->recs[i].type = 0x18;
+        syncedPad->recs[i].type = 0x18;
     }
-    e->f4 = 0;
-    e->f8 = self->f0;
-    e->fC = 0;
-    e->f10 = (int*)cMemMan_alloc(676, str_SyncedPad, 0, 0);
-    *e->f10 = 0;
-    void* o = initObj_237280(cMemMan_alloc(8, str_SyncedInput, 0, 0), (int)e->f10, realinputmap);
-    e->f14 = o;
-    return o;
+    syncedPad->f4 = 0;
+    syncedPad->f8 = self->f0;
+    syncedPad->fC = 0;
+    syncedPad->f10 = (int*)cMemMan_alloc(676, str_SyncedPad, 0, 0);
+    *syncedPad->f10 = 0;
+    void* syncedInput = initObj_237280(cMemMan_alloc(8, str_SyncedInput, 0, 0), (int)syncedPad->f10, realinputmap);
+    syncedPad->f14 = syncedInput;
+    return syncedInput;
 }
 #endif
 
@@ -2756,10 +2756,10 @@ extern "C" int cInputSync_aiupdate(sPlayer002379C8* self)
     }
     int i;
     for (i = 0; i < self->count; i++) {
-        sTrack002379C8* t = &self->tracks[i];
-        sFrame002379C8* f = &t->frames[t->cur % self->nFrames];
-        cInputPad_update(t->target, f->first, f->data);
-        t->cur++;
+        sTrack002379C8* syncedPad = &self->tracks[i];
+        sFrame002379C8* inputSample = &syncedPad->frames[syncedPad->cur % self->nFrames];
+        cInputPad_update(syncedPad->target, inputSample->first, inputSample->data);
+        syncedPad->cur++;
     }
     return 1;
 }

@@ -116,15 +116,15 @@ extern void* cListNode_vtbl[];
  */
 extern "C" void* cList_cList(void* self)
 {
-    char* s = (char*)self;
-    *(void**)(s + 0x4) = s;
-    *(void**)(s + 0x0) = s;
-    *(void***)(s + 0x18) = cList_vtbl;
-    *(void***)(s + 0x8) = cListNode_vtbl;
-    *(void**)(s + 0x10) = s + 0xC;
-    *(void***)(s + 0x14) = cListNode_vtbl;
-    *(void**)(s + 0xC) = s + 0xC;
-    cList_clear(s);
+    char* list = (char*)self;
+    *(void**)(list + 0x4) = list;
+    *(void**)(list + 0x0) = list;
+    *(void***)(list + 0x18) = cList_vtbl;
+    *(void***)(list + 0x8) = cListNode_vtbl;
+    *(void**)(list + 0x10) = list + 0xC;
+    *(void***)(list + 0x14) = cListNode_vtbl;
+    *(void**)(list + 0xC) = list + 0xC;
+    cList_clear(list);
     return self;
 }
 #endif
@@ -250,10 +250,10 @@ INCLUDE_ASM("util/list", cList_clear__FPv);
  */
 void cList_clear(void* self)
 {
-    void* t0 = (char*)self + 0xc;
-    *(void**)((char*)self + 0x4) = t0;
+    void* sentinel = (char*)self + 0xc;
+    *(void**)((char*)self + 0x4) = sentinel;
     *(void**)((char*)self + 0xc) = self;
-    *(void**)((char*)self + 0x10) = t0;
+    *(void**)((char*)self + 0x10) = sentinel;
     *(void**)self = self;
 }
 #endif

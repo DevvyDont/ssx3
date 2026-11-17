@@ -1586,12 +1586,12 @@ void cCrowdRender2D__cCrowdRender2D(int* self, int flags);
 extern "C" void func_00229278(void* self, int flags)
 {
     func_00229398(self);
-    int* p = *(int**)((char*)self + 4);
+    int* crowdAnim = *(int**)((char*)self + 4);
     D_004A2A00 = 0;
-    operator_delete(p);
-    int* r = *(int**)self;
-    if (r != 0) {
-        cCrowdRender2D__cCrowdRender2D(r, 3);
+    operator_delete(crowdAnim);
+    int* renderer = *(int**)self;
+    if (renderer != 0) {
+        cCrowdRender2D__cCrowdRender2D(renderer, 3);
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -1728,17 +1728,17 @@ extern short D_00536690[];
 extern "C" void func_002294C8(void* self)
 {
     int i;
-    char* p;
-    int t;
+    char* marker;
+    int frameTexId;
     cCrowdAnim2D_update(*(void**)((char*)self + 0x4));
-    t = *(int*)((char*)*(void**)((char*)self + 0x4) + 0x10);
-    D_00536690[0] = t;
-    p = (char*)self;
+    frameTexId = *(int*)((char*)*(void**)((char*)self + 0x4) + 0x10);
+    D_00536690[0] = frameTexId;
+    marker = (char*)self;
     for (i = 39; i >= 0; i--) {
-        if (*(int*)(p + 0x2230) > 0) {
-            *(int*)(p + 0x2230) = *(int*)(p + 0x2230) - 1;
+        if (*(int*)(marker + 0x2230) > 0) {
+            *(int*)(marker + 0x2230) = *(int*)(marker + 0x2230) - 1;
         }
-        p += 0x20;
+        marker += 0x20;
     }
     func_00229530(self);
 }
@@ -2015,25 +2015,25 @@ static inline sModel_229820* HandleToModel_229820(unsigned int h)
  * Points one bone of a model's pose at the shared crowd record D_00536690.
  *
  * Finds the model behind @p handle in the world cache (cObjectInterface_getWorld: table by the low byte, entry by the
- * rest); when part @p a exists in its skeleton (+0x80) and has a bone @p b, stores D_00536690 in the pose (+0x94) entry
+ * rest); when part @p partIndex exists in its skeleton (+0x80) and has a bone @p boneIndex, stores D_00536690 in the pose (+0x94) entry
  * of that bone. @p self is not used. func_00303BA0 (a script command) calls it for its command 0.
  *
  * @param handle  the model's resource handle
- * @param a  the skeleton part index
- * @param b  the bone index within the part
+ * @param partIndex  the skeleton part index
+ * @param boneIndex  the bone index within the part
  */
 // Points bone b of part a of the model behind handle at the shared crowd pose.
-extern "C" void func_00229820(void* self, unsigned int handle, int a, int b)
+extern "C" void func_00229820(void* self, unsigned int handle, int partIndex, int boneIndex)
 {
-    sModel_229820* m = HandleToModel_229820(handle);
-    if (m != 0) {
-        sSkel_229820* s = m->skel;
-        void** dst = m->pose->bones;
-        sPartRef_229820* parts = s->parts;
-        if (a < s->count) {
-            sPart_229820* p = parts[a].part;
-            if (b < p->count)
-                dst[*p->bones[b]] = D_00536690_229820;
+    sModel_229820* model = HandleToModel_229820(handle);
+    if (model != 0) {
+        sSkel_229820* skeleton = model->skel;
+        void** dst = model->pose->bones;
+        sPartRef_229820* parts = skeleton->parts;
+        if (partIndex < skeleton->count) {
+            sPart_229820* skelPart = parts[partIndex].part;
+            if (boneIndex < skelPart->count)
+                dst[*skelPart->bones[boneIndex]] = D_00536690_229820;
         }
     }
 }
@@ -2372,20 +2372,20 @@ struct sMarkers_229BA8 {
  * Each live marker is drawn with GrMan's DrawSprite (slot 78) at its position, texture coordinates (0, 0)-(1, 1) and
  * colour (1, 1, 1, 1); the state is popped at the end. cGame_render calls it for CrowdMan2d.
  *
- * @param p  the 2D crowd manager
+ * @param crowdMan  the 2D crowd manager
  */
-extern "C" void func_00229BA8(void* p)
+extern "C" void func_00229BA8(void* crowdMan)
 {
-    sMarkers_229BA8* self = (sMarkers_229BA8*)p;
+    sMarkers_229BA8* self = (sMarkers_229BA8*)crowdMan;
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     int pushed = 0;
     sV2_229BA8 uv0;
     sV2_229BA8 uv1(1.0f, 1.0f);
     sV4_229BA8 col(1.0f, 1.0f, 1.0f, 1.0f);
     sV2_229BA8 size(100.0f, 100.0f);
-    sMarker_229BA8* m = self->markers;
+    sMarker_229BA8* markerList = self->markers;
     for (int i = 0; i < 40; i++) {
-        if (m[i].count > 0) {
+        if (markerList[i].count > 0) {
             if (!pushed) {
                 pushed = 1;
                 ((cGfx_229BA8*)ps2GraphicsMan)->top[1] = ((cGfx_229BA8*)ps2GraphicsMan)->top[0];
@@ -2427,11 +2427,11 @@ public:
  *
  * cReplay_saveFrame calls it.
  *
- * @param s  the replay stream
+ * @param stream  the replay stream
  */
-extern "C" void func_00229E20(void* self, cSSXAppStream* s)
+extern "C" void func_00229E20(void* self, cSSXAppStream* stream)
 {
-    s->write((char*)self + 0x8, 0x200);
+    stream->write((char*)self + 0x8, 0x200);
 }
 #endif
 
@@ -2460,14 +2460,14 @@ struct sCrowdId_229E58 {
  *
  * The slot delays restart at random values (func_002292E0). cReplay_restoreFrame calls it.
  *
- * @param s  the replay stream
+ * @param stream  the replay stream
  */
-extern "C" void func_00229E58(void* self, cSSXAppStream_229E58* s)
+extern "C" void func_00229E58(void* self, cSSXAppStream_229E58* stream)
 {
     func_00229398(self);
     func_002292E0(self);
     sCrowdId_229E58 ids[128];
-    s->read(ids, 0x200);
+    stream->read(ids, 0x200);
     int i;
     for (i = 0; i < 128; i++) {
         if (ids[i].id != 0xFFFFFFFF) {
@@ -2631,7 +2631,7 @@ extern "C" void func_00229FC8_impl(sVisOwner_9FC8 *self, void *vnode, int frustu
 extern "C" void func_00229FC8_impl(sVisOwner_9FC8 *self, void *vnode, int frustum)
 {
     char *node = (char *)vnode;
-    unsigned int r;
+    unsigned int testResult;
 
     if (node != 0) {
         if (!visOk_9FC8(self, node)) {
@@ -2648,7 +2648,7 @@ extern "C" void func_00229FC8_impl(sVisOwner_9FC8 *self, void *vnode, int frustu
             hi[2] = *(float *)(node + 0x74);
             lo[3] = 1.0f;
             hi[3] = 1.0f;
-            __asm__ __volatile__("cfc2.i    %0, $vi1\n" : "=r"(r));
+            __asm__ __volatile__("cfc2.i    %0, $vi1\n" : "=r"(testResult));
             __asm__ __volatile__(
                 "lqc2      $vf20, 0x0(%0)\n"
                 "lqc2      $vf21, 0x0(%1)\n"
@@ -2659,9 +2659,9 @@ extern "C" void func_00229FC8_impl(sVisOwner_9FC8 *self, void *vnode, int frustu
                 : "r"(lo), "r"(hi), "r"(node + 0x50), "r"(frustum));
         }
     } else {
-        __asm__ __volatile__("cfc2.i    %0, $vi1\n" : "=r"(r));
+        __asm__ __volatile__("cfc2.i    %0, $vi1\n" : "=r"(testResult));
     }
-    switch (r) {
+    switch (testResult) {
     case 0:
     case 3:
         if (self->last != 0) {
@@ -2740,7 +2740,7 @@ extern "C" void func_0022A128_impl(sVisOwner_A128 *self, void *vnode, int frustu
 extern "C" void func_0022A128_impl(sVisOwner_A128 *self, void *vnode, int frustum)
 {
     char *node = (char *)vnode;
-    unsigned int r;
+    unsigned int testResult;
 
     if (node != 0) {
         if (!visOk_A128(self, node)) {
@@ -2757,7 +2757,7 @@ extern "C" void func_0022A128_impl(sVisOwner_A128 *self, void *vnode, int frustu
             hi[2] = *(float *)(node + 0x16C);
             lo[3] = 1.0f;
             hi[3] = 1.0f;
-            __asm__ __volatile__("cfc2.i    %0, $vi1\n" : "=r"(r));
+            __asm__ __volatile__("cfc2.i    %0, $vi1\n" : "=r"(testResult));
             __asm__ __volatile__(
                 "lqc2      $vf20, 0x0(%0)\n"
                 "lqc2      $vf21, 0x0(%1)\n"
@@ -2768,9 +2768,9 @@ extern "C" void func_0022A128_impl(sVisOwner_A128 *self, void *vnode, int frustu
                 : "r"(lo), "r"(hi), "r"(node + 0x140), "r"(frustum));
         }
     } else {
-        __asm__ __volatile__("cfc2.i    %0, $vi1\n" : "=r"(r));
+        __asm__ __volatile__("cfc2.i    %0, $vi1\n" : "=r"(testResult));
     }
-    switch (r) {
+    switch (testResult) {
     case 0:
     case 3:
         if (self->last != 0) {
@@ -3003,11 +3003,11 @@ struct sWorld_22A4A8 {
 extern "C" void func_0022A4A8(sWorld_22A4A8* self, sItem_22A4A8* items, int n)
 {
     for (; n > 0; n--, items++) {
-        for (sNode_22A4A8* p = *(sNode_22A4A8**)(items->list + 0x28); p != 0; p = p->next) {
-            if (p->type == 7) {
-                func_0022A270(self, p, items->arg);
-            } else if (p->type == 8) {
-                self->nodes[self->count++] = p;
+        for (sNode_22A4A8* object = *(sNode_22A4A8**)(items->list + 0x28); object != 0; object = object->next) {
+            if (object->type == 7) {
+                func_0022A270(self, object, items->arg);
+            } else if (object->type == 8) {
+                self->nodes[self->count++] = object;
             }
         }
     }

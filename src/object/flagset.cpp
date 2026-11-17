@@ -1569,8 +1569,8 @@ extern "C" void cFenceNode_setupFence(void* fenceNode)
     self->obj108 = 0;
     self->node->flags = (self->node->flags & ~2u) | 4;
     char* mgr = cGraphicsMan_TheGraphicsMan;
-    sFsVE_D1E8* e = &(*(sFsVE_D1E8**)(mgr + 0x10D8))[76];
-    self->mesh = (sFsMesh_D1E8*)e->fn(mgr + e->delta, 8, 2, 0x60000000u);
+    sFsVE_D1E8* createSlot = &(*(sFsVE_D1E8**)(mgr + 0x10D8))[76];
+    self->mesh = (sFsMesh_D1E8*)createSlot->fn(mgr + createSlot->delta, 8, 2, 0x60000000u);
     sFsV3_D1E8 pos[4];
     sFsV2_D1E8 quv[4];
     sFsCol_D1E8 qcol[4];
@@ -1579,22 +1579,22 @@ extern "C" void cFenceNode_setupFence(void* fenceNode)
     sFsV2_D1E8 uv[16];
     sFsCol_D1E8 col[16];
     for (int i = 0; i < 8; i++) {
-        float t = (float)i;
-        self->top[i] = pos[0] + (pos[1] - pos[0]) * t * 0.1428571492433548f;
-        self->bottom[i] = pos[2] + (pos[3] - pos[2]) * t * 0.1428571492433548f;
-        uv[i] = quv[0] + (quv[1] - quv[0]) * t * 0.1428571492433548f;
-        uv[i + 8] = quv[2] + (quv[3] - quv[2]) * t * 0.1428571492433548f;
+        float column = (float)i;
+        self->top[i] = pos[0] + (pos[1] - pos[0]) * column * 0.1428571492433548f;
+        self->bottom[i] = pos[2] + (pos[3] - pos[2]) * column * 0.1428571492433548f;
+        uv[i] = quv[0] + (quv[1] - quv[0]) * column * 0.1428571492433548f;
+        uv[i + 8] = quv[2] + (quv[3] - quv[2]) * column * 0.1428571492433548f;
         col[i].a = 1.0f;
-        col[i].r = qcol[0].r + (qcol[1].r - qcol[0].r) * t * 0.1428571492433548f;
-        col[i].g = qcol[0].g + (qcol[1].g - qcol[0].g) * t * 0.1428571492433548f;
-        col[i].b = qcol[0].b + (qcol[1].b - qcol[0].b) * t * 0.1428571492433548f;
+        col[i].r = qcol[0].r + (qcol[1].r - qcol[0].r) * column * 0.1428571492433548f;
+        col[i].g = qcol[0].g + (qcol[1].g - qcol[0].g) * column * 0.1428571492433548f;
+        col[i].b = qcol[0].b + (qcol[1].b - qcol[0].b) * column * 0.1428571492433548f;
         col[i + 8].a = 1.0f;
-        col[i + 8].r = qcol[2].r + (qcol[3].r - qcol[2].r) * t * 0.1428571492433548f;
-        col[i + 8].g = qcol[2].g + (qcol[3].g - qcol[2].g) * t * 0.1428571492433548f;
-        col[i + 8].b = qcol[2].b + (qcol[3].b - qcol[2].b) * t * 0.1428571492433548f;
+        col[i + 8].r = qcol[2].r + (qcol[3].r - qcol[2].r) * column * 0.1428571492433548f;
+        col[i + 8].g = qcol[2].g + (qcol[3].g - qcol[2].g) * column * 0.1428571492433548f;
+        col[i + 8].b = qcol[2].b + (qcol[3].b - qcol[2].b) * column * 0.1428571492433548f;
     }
-    sFsMesh_D1E8* m = self->mesh;
-    m->vt[6].fn((char*)m + m->vt[6].delta, pos, col, uv);
+    sFsMesh_D1E8* gridMesh = self->mesh;
+    gridMesh->vt[6].fn((char*)gridMesh + gridMesh->vt[6].delta, pos, col, uv);
     func_0034CF98(self);
 }
 #endif
@@ -1929,8 +1929,8 @@ extern "C" void cAnimNode_updateRootTransform(void* self)
     char* sub = (char*)self + 0x14;
     sFlagSetVEntry_DC90c* vt2 = *(sFlagSetVEntry_DC90c**)((char*)self + 0x20);
     void* objB = sub + vt2[33].delta;
-    void* r = ((sFlagSetVEntry_DC90b*)vt2)[24].fn(sub + vt2[24].delta);
-    vt2[33].fn(objB, r, *(int*)((char*)self + 0x44));
+    void* rootTransform = ((sFlagSetVEntry_DC90b*)vt2)[24].fn(sub + vt2[24].delta);
+    vt2[33].fn(objB, rootTransform, *(int*)((char*)self + 0x44));
     *(unsigned short*)((char*)self + 0x26) &= ~1;
 }
 #endif
@@ -2150,8 +2150,8 @@ extern "C" void cAnimNode_cacheFrame(sFlagOwner_E348* self)
     if (self->items != 0) {
         for (i = 0; i < self->count; i++) {
             // PORT: pointer arithmetic done in int (gives the target's offset-first addu).
-            sFlagItem_E348* e = (sFlagItem_E348*)(i * 0xD0 + (int)self->items);
-            e->vt[2].fn((char*)e + e->vt[2].delta, self->time);
+            sFlagItem_E348* animFrame = (sFlagItem_E348*)(i * 0xD0 + (int)self->items);
+            animFrame->vt[2].fn((char*)animFrame + animFrame->vt[2].delta, self->time);
         }
     }
     self->dirty = 1;

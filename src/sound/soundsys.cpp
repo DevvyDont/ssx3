@@ -127,16 +127,16 @@ extern "C" void cBankSys__cBankSys(cBankSys* self, int flags)
     *(void**)(*(char**)self + 0xAB0) = cBankMonitor_vtbl;
     *(void**)(*(char**)self + 0x1D4) = (void*)&D_00483A80;
     if (flags == 0) {
-        sSndDtVt4 t1 = D_00483A60;
-        *(void**)(*(char**)(*(char**)self + 0x1D8) + 4) = &t1;
-        char* c1 = *(char**)(*(char**)self + 0x1D8) - 0x10;
-        int adj1 = ((char*)self) - c1;
-        t1.e[1].delta = D_00483A60.e[1].delta + adj1;
-        sSndDtVt7 t2 = D_00483A80;
-        *(void**)(*(char**)self + 0x1D4) = &t2;
-        char* c2 = *(char**)self - 0x18;
-        int adj2 = ((char*)self) - c2;
-        t2.e[1].delta = D_00483A80.e[1].delta + adj2;
+        sSndDtVt4 soundSysVtbl = D_00483A60;
+        *(void**)(*(char**)(*(char**)self + 0x1D8) + 4) = &soundSysVtbl;
+        char* soundSysBase = *(char**)(*(char**)self + 0x1D8) - 0x10;
+        int adj1 = ((char*)self) - soundSysBase;
+        soundSysVtbl.e[1].delta = D_00483A60.e[1].delta + adj1;
+        sSndDtVt7 bankMgrVtbl = D_00483A80;
+        *(void**)(*(char**)self + 0x1D4) = &bankMgrVtbl;
+        char* bankMgrBase = *(char**)self - 0x18;
+        int adj2 = ((char*)self) - bankMgrBase;
+        bankMgrVtbl.e[1].delta = D_00483A80.e[1].delta + adj2;
     }
     if (self->mBank) cMemMan_free(self->mBank);
     if (self->mPatch) cMemMan_free(self->mPatch);
@@ -251,12 +251,12 @@ static inline void snd0018AddVoice(void* vself, int a, int b)
 extern "C" int cBankSys_Play2DCallback(cBankSys* self, sSnd0018Req* req)
 {
     snd0018AddVoice((sSnd0018Sys*)gBankSys, req->f1C, req->f20);
-    sSnd0018Mgr* m1 = (sSnd0018Mgr*)gBankSys->mpVBankManager;
-    m1->sub.p3C[m1->sub.cur] = req->f18;
-    sSnd0018Mgr* m2 = (sSnd0018Mgr*)gBankSys->mpVBankManager;
-    sSnd0018Sub* s2 = &m2->sub;
-    s2->vals[m2->sub.cur] = req->vol;
-    s2->ch[m2->sub.cur].vol = SND_0018_MAX(0, SND_0018_MIN(s2->vals[s2->cur], 0x7F));
+    sSnd0018Mgr* bankMgr = (sSnd0018Mgr*)gBankSys->mpVBankManager;
+    bankMgr->sub.p3C[bankMgr->sub.cur] = req->f18;
+    sSnd0018Mgr* bankMgrVol = (sSnd0018Mgr*)gBankSys->mpVBankManager;
+    sSnd0018Sub* s2 = &bankMgrVol->sub;
+    s2->vals[bankMgrVol->sub.cur] = req->vol;
+    s2->ch[bankMgrVol->sub.cur].vol = SND_0018_MAX(0, SND_0018_MIN(s2->vals[s2->cur], 0x7F));
     cBankSys_SFX_End((cBankSys*)gBankSys);
     return 1;
 }
@@ -367,14 +367,14 @@ static inline void snd0358AddVoice(void* vself, int a, int b)
 extern "C" int cBankSys_Play2DCallbackWithPitchMult(cBankSys* self, sSnd0358Req* req)
 {
     snd0358AddVoice((sSnd0358Sys*)gBankSys, req->f1C, req->f20);
-    sSnd0358Mgr* m1 = (sSnd0358Mgr*)gBankSys->mpVBankManager;
-    m1->sub.p3C[m1->sub.cur] = req->f18;
-    sSnd0358Mgr* m2 = (sSnd0358Mgr*)gBankSys->mpVBankManager;
-    sSnd0358Sub* s2 = &m2->sub;
-    s2->vals[m2->sub.cur] = req->vol;
-    s2->ch[m2->sub.cur].vol = SND_0358_MAX(0, SND_0358_MIN(s2->vals[s2->cur], 0x7F));
-    sSnd0358Mgr* m3 = (sSnd0358Mgr*)gBankSys->mpVBankManager;
-    m3->sub.ch[m3->sub.cur].fC = req->f28;
+    sSnd0358Mgr* bankMgr = (sSnd0358Mgr*)gBankSys->mpVBankManager;
+    bankMgr->sub.p3C[bankMgr->sub.cur] = req->f18;
+    sSnd0358Mgr* bankMgrVol = (sSnd0358Mgr*)gBankSys->mpVBankManager;
+    sSnd0358Sub* s2 = &bankMgrVol->sub;
+    s2->vals[bankMgrVol->sub.cur] = req->vol;
+    s2->ch[bankMgrVol->sub.cur].vol = SND_0358_MAX(0, SND_0358_MIN(s2->vals[s2->cur], 0x7F));
+    sSnd0358Mgr* bankMgrPitch = (sSnd0358Mgr*)gBankSys->mpVBankManager;
+    bankMgrPitch->sub.ch[bankMgrPitch->sub.cur].fC = req->f28;
     cBankSys_SFX_End((cBankSys*)gBankSys);
     return 1;
 }
@@ -487,15 +487,15 @@ static inline int snd06B8CloseOnEnd(sSnd06B8Sub* o)
 extern "C" int cBankSys_SFX_End(cBankSys* vself)
 {
     cBankSys* self = vself;
-    sSnd06B8Mgr* m = ((sSnd06B8Mgr*)self->mpVBankManager);
-    sSnd06B8Sub* s = &m->sub;
+    sSnd06B8Mgr* bankMgr = ((sSnd06B8Mgr*)self->mpVBankManager);
+    sSnd06B8Sub* s = &bankMgr->sub;
     int BaseVol = s->vals[s->cur];
-    if (m->sub.tgt[m->sub.cur] != 0) {
-        s->vals[m->sub.cur] = 0;
-        s->ch[m->sub.cur].vol = SND_06B8_MAX(0, SND_06B8_MIN(s->vals[s->cur], 0x7F));
+    if (bankMgr->sub.tgt[bankMgr->sub.cur] != 0) {
+        s->vals[bankMgr->sub.cur] = 0;
+        s->ch[bankMgr->sub.cur].vol = SND_06B8_MAX(0, SND_06B8_MIN(s->vals[s->cur], 0x7F));
     } else if (s->p3C[s->cur] != 0) {
         float gain = *(float*)s->p3C[s->cur];
-        s->vals[m->sub.cur] = (int)SND_06B8_FMAX(SND_06B8_MIN((float)s->vals[s->cur] * gain, 127.0f), 0.0f);
+        s->vals[bankMgr->sub.cur] = (int)SND_06B8_FMAX(SND_06B8_MIN((float)s->vals[s->cur] * gain, 127.0f), 0.0f);
         s->ch[s->cur].vol = SND_06B8_MAX(0, SND_06B8_MIN(s->vals[s->cur], 0x7F));
     }
     int Inst = ((sSnd06B8Mgr*)self->mpVBankManager)->sub.cur;
@@ -682,33 +682,33 @@ struct sSnd0CC0Mgr {
 extern "C" int cSSXAudio_SFX_Play2D(cSSXAudio* vself, int bank, int patch)
 {
     cSSXAudio* self = vself;
-    sSnd0CC0Mgr* m = ((sSnd0CC0Mgr*)self->mpVBankManager);
-    sSnd0CC0Sub* s = &m->sub;
-    m->sub.cur++;
-    s->ch[m->sub.cur] = m->sub.def;
-    m->sub.tgt[m->sub.cur] = 0;
-    s->p34[m->sub.cur] = 0;
-    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
-    s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
-    s->p60[m->sub.cur] = 0;
-    s->p64[m->sub.cur] = 0;
-    s->p68[m->sub.cur] = 0;
-    s->p6C[m->sub.cur] = 0;
-    s->p70[m->sub.cur].f4 = 0;
-    s->p70[m->sub.cur].f0 = 100;
-    s->p70[m->sub.cur].f8 = 90;
-    s->p70[m->sub.cur].fC = 50;
-    s->p74[m->sub.cur] = 0;
-    s->p80[m->sub.cur] = 0;
-    s->p84[m->sub.cur] = 0;
-    s->p78[m->sub.cur] = 0x7F;
-    s->p7C[m->sub.cur] = 1;
+    sSnd0CC0Mgr* bankMgr = ((sSnd0CC0Mgr*)self->mpVBankManager);
+    sSnd0CC0Sub* monitor = &bankMgr->sub;
+    bankMgr->sub.cur++;
+    monitor->ch[bankMgr->sub.cur] = bankMgr->sub.def;
+    bankMgr->sub.tgt[bankMgr->sub.cur] = 0;
+    monitor->p34[bankMgr->sub.cur] = 0;
+    monitor->vals[bankMgr->sub.cur] = monitor->ch[bankMgr->sub.cur].vol;
+    monitor->p3C[bankMgr->sub.cur] = 0;
+    func_00416210((char*)monitor + bankMgr->sub.cur * 8 + 0x40, 0, 8);
+    monitor->p60[bankMgr->sub.cur] = 0;
+    monitor->p64[bankMgr->sub.cur] = 0;
+    monitor->p68[bankMgr->sub.cur] = 0;
+    monitor->p6C[bankMgr->sub.cur] = 0;
+    monitor->p70[bankMgr->sub.cur].f4 = 0;
+    monitor->p70[bankMgr->sub.cur].f0 = 100;
+    monitor->p70[bankMgr->sub.cur].f8 = 90;
+    monitor->p70[bankMgr->sub.cur].fC = 50;
+    monitor->p74[bankMgr->sub.cur] = 0;
+    monitor->p80[bankMgr->sub.cur] = 0;
+    monitor->p84[bankMgr->sub.cur] = 0;
+    monitor->p78[bankMgr->sub.cur] = 0x7F;
+    monitor->p7C[bankMgr->sub.cur] = 1;
     self->mBank[((sSnd0CC0Mgr*)self->mpVBankManager)->sub.cur] = bank;
     self->mPatch[((sSnd0CC0Mgr*)self->mpVBankManager)->sub.cur] = patch;
     sSnd0CC0Mgr** pp = ((sSnd0CC0Mgr**)self->MusicSys.mpVStreamSys);
-    int r = (int)func_00287968(self, 5, 0);
-    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    int volumePtr = (int)func_00287968(self, 5, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = volumePtr;
     return cBankSys_SFX_End((cBankSys*)self);
 }
 #endif
@@ -2640,8 +2640,8 @@ extern "C" void cSSXAudio_Land(cSSXAudio* vself, cRider* rider, float powerupGai
             return;
         }
     }
-    func_00290B58_sCurve c = D_00482D30;
-    int vol = (int)func_00290B58(&c, rider->unk_770);
+    func_00290B58_sCurve landCurve = D_00482D30;
+    int vol = (int)func_00290B58(&landCurve, rider->unk_770);
     if (vol > 127) {
         vol = 127;
     }
@@ -2669,47 +2669,47 @@ extern "C" void cSSXAudio_Land(cSSXAudio* vself, cRider* rider, float powerupGai
             flag = cSSXAudio_ReplayMode(self) == 0;
         }
     }
-    int a = 10;
-    sSnd17D0Mgr* m = self->mgr;
-    sSnd17D0Sub* s = &m->sub;
-    m->sub.cur++;
-    s->ch[m->sub.cur] = m->sub.def;
-    m->sub.tgt[m->sub.cur] = 0;
-    s->p34[m->sub.cur] = 0;
-    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
-    s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
-    s->p60[m->sub.cur] = 0;
-    s->p64[m->sub.cur] = 0;
-    s->p68[m->sub.cur] = 0;
-    s->p6C[m->sub.cur] = 0;
-    s->p70[m->sub.cur].f4 = 0;
-    s->p70[m->sub.cur].f0 = 100;
-    s->p70[m->sub.cur].f8 = 90;
-    s->p70[m->sub.cur].fC = 50;
-    s->p74[m->sub.cur] = 0;
-    s->p80[m->sub.cur] = 0;
-    s->p84[m->sub.cur] = 0;
-    s->p78[m->sub.cur] = 0x7F;
-    s->p7C[m->sub.cur] = 1;
-    self->a4[self->mgr->sub.cur] = a;
+    int bank = 10;
+    sSnd17D0Mgr* bankMgr = self->mgr;
+    sSnd17D0Sub* monitor = &bankMgr->sub;
+    bankMgr->sub.cur++;
+    monitor->ch[bankMgr->sub.cur] = bankMgr->sub.def;
+    bankMgr->sub.tgt[bankMgr->sub.cur] = 0;
+    monitor->p34[bankMgr->sub.cur] = 0;
+    monitor->vals[bankMgr->sub.cur] = monitor->ch[bankMgr->sub.cur].vol;
+    monitor->p3C[bankMgr->sub.cur] = 0;
+    func_00416210((char*)monitor + bankMgr->sub.cur * 8 + 0x40, 0, 8);
+    monitor->p60[bankMgr->sub.cur] = 0;
+    monitor->p64[bankMgr->sub.cur] = 0;
+    monitor->p68[bankMgr->sub.cur] = 0;
+    monitor->p6C[bankMgr->sub.cur] = 0;
+    monitor->p70[bankMgr->sub.cur].f4 = 0;
+    monitor->p70[bankMgr->sub.cur].f0 = 100;
+    monitor->p70[bankMgr->sub.cur].f8 = 90;
+    monitor->p70[bankMgr->sub.cur].fC = 50;
+    monitor->p74[bankMgr->sub.cur] = 0;
+    monitor->p80[bankMgr->sub.cur] = 0;
+    monitor->p84[bankMgr->sub.cur] = 0;
+    monitor->p78[bankMgr->sub.cur] = 0x7F;
+    monitor->p7C[bankMgr->sub.cur] = 1;
+    self->a4[self->mgr->sub.cur] = bank;
     self->a8[self->mgr->sub.cur] = patchNum;
-    sSnd17D0Mgr* m3 = *self->p118;
-    sSnd17D0Sub* s3 = &m3->sub;
-    s3->vals[m3->sub.cur] = vol;
-    s3->ch[m3->sub.cur].vol = (s3->vals[s3->cur] < 0x7F && s3->vals[s3->cur] < 0) ? 0 : (s3->vals[s3->cur] < 0x7F ? (unsigned char)s3->vals[s3->cur] : 0x7F);
+    sSnd17D0Mgr* bankMgrVol = *self->p118;
+    sSnd17D0Sub* volMonitor = &bankMgrVol->sub;
+    volMonitor->vals[bankMgrVol->sub.cur] = vol;
+    volMonitor->ch[bankMgrVol->sub.cur].vol = (volMonitor->vals[volMonitor->cur] < 0x7F && volMonitor->vals[volMonitor->cur] < 0) ? 0 : (volMonitor->vals[volMonitor->cur] < 0x7F ? (unsigned char)volMonitor->vals[volMonitor->cur] : 0x7F);
     sSnd17D0Mgr** pp = self->p118;
-    int r = (int)func_00287968(self, 6, 0);
-    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    int volumePtr = (int)func_00287968(self, 6, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = volumePtr;
     func_002A9988(&(*self->p118)->sub, 30.0f, -1.0f);
     {
-        sSnd17D0Mgr* m2 = *self->p118;
-        m2->sub.tgt[m2->sub.cur] = &rider->mPosition;
+        sSnd17D0Mgr* bankMgrPos = *self->p118;
+        bankMgrPos->sub.tgt[bankMgrPos->sub.cur] = &rider->mPosition;
     }
     {
         sSnd17D0Mgr** pq = self->p118;
-        int q = func_00288A20(self, rider);
-        (*pq)->sub.p64[(*pq)->sub.cur] = q;
+        int viewport = func_00288A20(self, rider);
+        (*pq)->sub.p64[(*pq)->sub.cur] = viewport;
     }
     if (flag) {
         (*self->p118)->sub.p80[(*self->p118)->sub.cur] = 1;
@@ -7417,9 +7417,9 @@ extern "C" void cSSXAudio_BigChallengeFailed(void* self, int keep)
         func_00296E20(self, *(void**)((char*)cAudioInterface_getAI() + 0x28));
         func_00297438(self, *(void**)((char*)cAudioInterface_getAI() + 0x28));
         cSSXAudio_EndUberSpin((cSSXAudio*)self, 0);
-        char* o = (char*)self + 0x118;
-        sSndVtEnt* e = &(*(sSndVtEnt**)((char*)self + 0x5558))[4];
-        e->fn(o + e->delta, 39);
+        char* musicSys = (char*)self + 0x118;
+        sSndVtEnt* vtblEntry = &(*(sSndVtEnt**)((char*)self + 0x5558))[4];
+        vtblEntry->fn(musicSys + vtblEntry->delta, 39);
         *(int*)((char*)self + 0x5FD0) = 0;
         *(int*)((char*)self + 0x5FD4) = 0;
     }
@@ -12422,12 +12422,12 @@ extern const sSnd69Vt7 D_00483838_69 __asm__("D_00483838");
  *
  * @param embedded  g++ in-charge flag: nonzero when the virtual bases are built here (the complete object)
  * @param count  maximum number of banks (On Tour MaxBanks of the base constructors)
- * @param unused  not used
+ * @param maxStreams  not used
  * @param heap  audio mode (On Tour eSOUNDDEF_MODE audioMode), passed to the base constructors
  * @return @p self
  */
 // PORT: hand-expanded g++ 2.95 virtual-base ctor (vtable upcast-offset fixup on stack copies).
-extern "C" char* cCrowdSys_cCrowdSys(cCrowdSys* self, int embedded, int count, int unused, int heap)
+extern "C" char* cCrowdSys_cCrowdSys(cCrowdSys* self, int embedded, int count, int maxStreams, int heap)
 {
     if (embedded) {
         char* mon = ((char*)self) + 0x118;
@@ -12441,16 +12441,16 @@ extern "C" char* cCrowdSys_cCrowdSys(cCrowdSys* self, int embedded, int count, i
     *(void**)(*(char**)self + 0xAB0) = cBankMonitor_vtbl;
     *(const void**)(*(char**)self + 0x1D4) = &D_00483838_69;
     if (!embedded) {
-        sSnd69Vt4 t1 = D_00483818_69;
-        *(void**)(*(char**)(*(char**)self + 0x1D8) + 4) = &t1;
-        char* c1 = *(char**)(*(char**)self + 0x1D8) - 0x118;
-        int adj1 = ((char*)self) - c1;
-        t1.e[1].delta = D_00483818_69.e[1].delta + adj1;
-        sSnd69Vt7 t2 = D_00483838_69;
-        *(void**)(*(char**)self + 0x1D4) = &t2;
-        char* c2 = *(char**)self - 0x120;
-        int adj2 = ((char*)self) - c2;
-        t2.e[1].delta = D_00483838_69.e[1].delta + adj2;
+        sSnd69Vt4 soundSysVtbl = D_00483818_69;
+        *(void**)(*(char**)(*(char**)self + 0x1D8) + 4) = &soundSysVtbl;
+        char* soundSysBase = *(char**)(*(char**)self + 0x1D8) - 0x118;
+        int adj1 = ((char*)self) - soundSysBase;
+        soundSysVtbl.e[1].delta = D_00483818_69.e[1].delta + adj1;
+        sSnd69Vt7 bankMgrVtbl = D_00483838_69;
+        *(void**)(*(char**)self + 0x1D4) = &bankMgrVtbl;
+        char* bankMgrBase = *(char**)self - 0x120;
+        int adj2 = ((char*)self) - bankMgrBase;
+        bankMgrVtbl.e[1].delta = D_00483838_69.e[1].delta + adj2;
     }
     self->mVtbl = (void**)D_004837F8;
     self->mNumInstances = 0;
@@ -12507,26 +12507,26 @@ extern "C" void cCrowdSys__cCrowdSys(cCrowdSys* self, int flags)
     *(void**)(*(char**)self + 0xAB0) = cBankMonitor_vtbl;
     *(const void**)(*(char**)self + 0x1D4) = &D_00483838_6B;
     if (flags == 0) {
-        sSnd6BVt4 t1 = D_00483818_6B;
-        *(void**)(*(char**)(*(char**)self + 0x1D8) + 4) = &t1;
-        char* c1 = *(char**)(*(char**)self + 0x1D8) - 0x118;
-        int adj1 = ((char*)self) - c1;
-        t1.e[1].delta = D_00483818_6B.e[1].delta + adj1;
-        sSnd6BVt7 t2 = D_00483838_6B;
-        *(void**)(*(char**)self + 0x1D4) = &t2;
-        char* c2 = *(char**)self - 0x120;
-        int adj2 = ((char*)self) - c2;
-        t2.e[1].delta = D_00483838_6B.e[1].delta + adj2;
+        sSnd6BVt4 soundSysVtbl = D_00483818_6B;
+        *(void**)(*(char**)(*(char**)self + 0x1D8) + 4) = &soundSysVtbl;
+        char* soundSysBase = *(char**)(*(char**)self + 0x1D8) - 0x118;
+        int adj1 = ((char*)self) - soundSysBase;
+        soundSysVtbl.e[1].delta = D_00483818_6B.e[1].delta + adj1;
+        sSnd6BVt7 bankMgrVtbl = D_00483838_6B;
+        *(void**)(*(char**)self + 0x1D4) = &bankMgrVtbl;
+        char* bankMgrBase = *(char**)self - 0x120;
+        int adj2 = ((char*)self) - bankMgrBase;
+        bankMgrVtbl.e[1].delta = D_00483838_6B.e[1].delta + adj2;
     }
     func_002A6F38((sSsMgr6F38*)self);
     D_004A36F8 = 0;
     if (((char*)self) + 0x1C != 0) {
-        char* p = ((char*)self) + 0x1C + 3 * 84;
-        while (((char*)self) + 0x1C != p) {
-            p -= 0x54;
-            func_002A4BE0((tCrowdEventData*)(p + 0x30), 2);
-            func_002A4BE0((tCrowdEventData*)(p + 0x18), 2);
-            func_002A4BE0((tCrowdEventData*)p, 2);
+        char* crowdEntry = ((char*)self) + 0x1C + 3 * 84;
+        while (((char*)self) + 0x1C != crowdEntry) {
+            crowdEntry -= 0x54;
+            func_002A4BE0((tCrowdEventData*)(crowdEntry + 0x30), 2);
+            func_002A4BE0((tCrowdEventData*)(crowdEntry + 0x18), 2);
+            func_002A4BE0((tCrowdEventData*)crowdEntry, 2);
         }
     }
     cMidiSys__cMidiSys((cMidiSys*)self, 0);
@@ -13436,11 +13436,11 @@ extern "C" int FileParser_AssignString(FileParser* self, const char* name, char*
     if (FileParser_ExpectToken(self, D_004A3740) != 0) {
         return 0;
     }
-    char* s = FileParser_GetString(self);
-    if (s == 0) {
+    char* str = FileParser_GetString(self);
+    if (str == 0) {
         return 0;
     }
-    strcpy(out, s);
+    strcpy(out, str);
     return 1;
 }
 #endif
@@ -13619,16 +13619,16 @@ extern "C" void cMidiSys__cMidiSys(cMidiSys* self, int flags)
     *(void**)(*(char**)self + 0xAB0) = cBankMonitor_vtbl;
     *(void**)(*(char**)self + 0x1D4) = (void*)&D_00483A10;
     if (flags == 0) {
-        sSndDtBVt4 t1 = D_004839F0;
-        *(void**)(*(char**)(*(char**)self + 0x1D8) + 4) = &t1;
-        char* c1 = *(char**)(*(char**)self + 0x1D8) - 0x14;
-        int adj1 = ((char*)self) - c1;
-        t1.e[1].delta = D_004839F0.e[1].delta + adj1;
-        sSndDtBVt7 t2 = D_00483A10;
-        *(void**)(*(char**)self + 0x1D4) = &t2;
-        char* c2 = *(char**)self - 0x1C;
-        int adj2 = ((char*)self) - c2;
-        t2.e[1].delta = D_00483A10.e[1].delta + adj2;
+        sSndDtBVt4 soundSysVtbl = D_004839F0;
+        *(void**)(*(char**)(*(char**)self + 0x1D8) + 4) = &soundSysVtbl;
+        char* soundSysBase = *(char**)(*(char**)self + 0x1D8) - 0x14;
+        int adj1 = ((char*)self) - soundSysBase;
+        soundSysVtbl.e[1].delta = D_004839F0.e[1].delta + adj1;
+        sSndDtBVt7 bankMgrVtbl = D_00483A10;
+        *(void**)(*(char**)self + 0x1D4) = &bankMgrVtbl;
+        char* bankMgrBase = *(char**)self - 0x1C;
+        int adj2 = ((char*)self) - bankMgrBase;
+        bankMgrVtbl.e[1].delta = D_00483A10.e[1].delta + adj2;
     }
     if (self->mMidiBanks) cMemMan_free(self->mMidiBanks);
     D_004A3744 = 0;
@@ -13935,9 +13935,9 @@ void operator_delete(int*);
 extern "C" void cPS2SoundManager__cPS2SoundManager(cPS2SoundManager* self, int flags)
 {
     *(void**)self = D_004835F8;
-    void* p = self->mSoundHeap;
-    if (p != 0) {
-        cMemMan_free(p);
+    void* soundHeap = self->mSoundHeap;
+    if (soundHeap != 0) {
+        cMemMan_free(soundHeap);
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -13991,9 +13991,9 @@ extern "C" void cPS2SoundManager_Init(cPS2SoundManager* self, int mode)
         self->mNodes[i].next = i - 1;
     }
     self->unk_31C = 0;
-    int t = 0;
-    int r = func_003B5B68(&t);
-    self->mMainMemHighAddr = t + r;
+    int blockAddr = 0;
+    int blockSize = func_003B5B68(&blockAddr);
+    self->mMainMemHighAddr = blockAddr + blockSize;
 }
 #endif
 
@@ -14120,12 +14120,12 @@ void cMemMan_free(void*);
  */
 extern "C" void cPS2SoundManager_Shutdown(cPS2SoundManager* self)
 {
-    void* p;
+    void* soundHeap;
     func_003B5B20(-1, -1);
     func_003B5320();
-    p = self->mSoundHeap;
-    if (p != 0) {
-        cMemMan_free(p);
+    soundHeap = self->mSoundHeap;
+    if (soundHeap != 0) {
+        cMemMan_free(soundHeap);
     }
     self->mSoundHeap = 0;
 }
@@ -14249,9 +14249,9 @@ extern "C" void cPS2SoundManager_DeallocSoundMem(cPS2SoundManager* self, int mem
         self->unk_318 = n->index;
     } else {
         tPS2SoundMemNode* prev = 0;
-        tPS2SoundMemNode* b = &((&self->mNodes[0]))[self->unk_318];
+        tPS2SoundMemNode* freeNode = &((&self->mNodes[0]))[self->unk_318];
         for (;;) {
-            if (n->lowAddr < b->lowAddr) {
+            if (n->lowAddr < freeNode->lowAddr) {
                 if (prev) {
                     n->next = prev->next;
                     prev->next = n->index;
@@ -14261,13 +14261,13 @@ extern "C" void cPS2SoundManager_DeallocSoundMem(cPS2SoundManager* self, int mem
                 }
                 return;
             }
-            if (b->next < 0) {
-                b->next = n->index;
+            if (freeNode->next < 0) {
+                freeNode->next = n->index;
                 n->next = -1;
                 return;
             }
-            prev = b;
-            b = &((&self->mNodes[0]))[b->next];
+            prev = freeNode;
+            freeNode = &((&self->mNodes[0]))[freeNode->next];
         }
     }
 }

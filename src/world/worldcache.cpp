@@ -144,18 +144,18 @@ void cWorldBlockAllocator_releaseBlock(void* self, void* item)
 INCLUDE_ASM("world/worldcache", cSectionBlockAllocator_cSectionBlockAllocator__FPvii);
 #ifdef SKIP_ASM
 /**
- * Constructs a cSectionBlockAllocator: stores the pool (@p a1) and the section id (@p a2) and clears m_uiNumBlocks,
+ * Constructs a cSectionBlockAllocator: stores the pool (@p allocator) and the section id (@p sectionId) and clears m_uiNumBlocks,
  * m_pAllocBlocks and m_pMRUBlock.
  *
- * @param a1  the cWorldBlockAllocator to take blocks from
- * @param a2  the section id
+ * @param allocator  the cWorldBlockAllocator to take blocks from
+ * @param sectionId  the section id
  * @return @p self
  */
-void* cSectionBlockAllocator_cSectionBlockAllocator(void* self, int a1, int a2)
+void* cSectionBlockAllocator_cSectionBlockAllocator(void* self, int allocator, int sectionId)
 {
     int zero = 0;
-    *(int*)((char*)self + 0x4) = a2;
-    *(int*)self = a1;
+    *(int*)((char*)self + 0x4) = sectionId;
+    *(int*)self = allocator;
     *(int*)((char*)self + 0x8) = zero;
     *(int*)((char*)self + 0xc) = zero;
     *(int*)((char*)self + 0x10) = zero;
@@ -358,10 +358,10 @@ struct cWorldMemoryMan__cWorldMemoryMan_sElem {
 extern "C" void cWorldMemoryMan__cWorldMemoryMan(cWorldMemoryMan__cWorldMemoryMan_sElem* self, int flags)
 {
     if (self != 0) {
-        cWorldMemoryMan__cWorldMemoryMan_sElem* p = self + 3;
-        while (self != p) {
-            p--;
-            cWorldBlockAllocator__cWorldBlockAllocator(p, 0);
+        cWorldMemoryMan__cWorldMemoryMan_sElem* blockAllocator = self + 3;
+        while (self != blockAllocator) {
+            blockAllocator--;
+            cWorldBlockAllocator__cWorldBlockAllocator(blockAllocator, 0);
         }
     }
     if (flags & 1) {
@@ -942,16 +942,16 @@ struct sWCSlots {
 extern char* cAppMan_TheAppMan;
 
 /**
- * Marks hull page @p i as wanted: stores the app tick (cAppMan_TheAppMan + 0x1C) in m_iTouchTick and @p f in
+ * Marks hull page @p i as wanted: stores the app tick (cAppMan_TheAppMan + 0x1C) in m_iTouchTick and @p priority in
  * m_fPriority, clears m_bLock and moves Empty to Queued and InActive back to Active.
  *
  * @param i  the hull page
- * @param f  the page's priority
+ * @param priority  the page's priority
  */
-extern "C" void cWorldCache_touchPage(sWCSlots* self, int i, float f)
+extern "C" void cWorldCache_touchPage(sWCSlots* self, int i, float priority)
 {
     self->slot[i].time = *(int*)(cAppMan_TheAppMan + 0x1C);
-    self->slot[i].fC = f;
+    self->slot[i].fC = priority;
     self->slot[i].f4 = 0;
     switch (self->slot[i].state) {
     case 0:
@@ -991,15 +991,15 @@ extern "C" void cWorldCache_flushPage_i(sWCSlots* self, int i)
 INCLUDE_ASM("world/worldcache", cWorldCache_setPageLock);
 #ifdef SKIP_ASM
 /**
- * Sets hull page @p a1's m_bLock to @p a2.
+ * Sets hull page @p hullPage's m_bLock to @p lock.
  *
- * @param a1  the hull page
- * @param a2  the lock flag
+ * @param hullPage  the hull page
+ * @param lock  the lock flag
  */
-extern "C" void cWorldCache_setPageLock(void* self, int a1, int a2)
+extern "C" void cWorldCache_setPageLock(void* self, int hullPage, int lock)
 {
-    self = (char*)self + a1 * 0x18;
-    *(int*)((char*)self + 0x3f4) = a2;
+    self = (char*)self + hullPage * 0x18;
+    *(int*)((char*)self + 0x3f4) = lock;
 }
 #endif
 
@@ -1007,14 +1007,14 @@ extern "C" void cWorldCache_setPageLock(void* self, int a1, int a2)
 INCLUDE_ASM("world/worldcache", cWorldCache_isPageLocked);
 #ifdef SKIP_ASM
 /**
- * Returns hull page @p arg1's m_bLock.
+ * Returns hull page @p hullPage's m_bLock.
  *
- * @param arg0  the cWorldCache (this)
- * @param arg1  the hull page
+ * @param worldCache  the cWorldCache (this)
+ * @param hullPage  the hull page
  * @return the lock flag
  */
-extern "C" int cWorldCache_isPageLocked(int arg0, int arg1) {
-    return (*(int *)((char*)(((arg1 * 0x18) + arg0)) + (0x3F4)));
+extern "C" int cWorldCache_isPageLocked(int worldCache, int hullPage) {
+    return (*(int *)((char*)(((hullPage * 0x18) + worldCache)) + (0x3F4)));
 }
 #endif
 

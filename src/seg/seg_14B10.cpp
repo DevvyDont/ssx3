@@ -380,16 +380,16 @@ static inline float Clamp_3E80(float v, float lo, float hi)
  * @param desLean  the desired lean (the steering input)
  */
 extern "C" void cRider_setupLean(char *self, float desLean) {
-    float r = Len_3E80(*(sV4_3E80 *)(self + 0x1E0)) / 694.538818359375f;
-    if (r < 1.0f)
-        desLean = desLean * r;
-    float d = Abs_3E80(desLean - *(float *)(self + 0x1F0)) * 12.002403259277344f;
-    float m = Clamp_3E80(d, 0.10000000149011612f, 14.001209259033203f);
+    float speedScale = Len_3E80(*(sV4_3E80 *)(self + 0x1E0)) / 694.538818359375f;
+    if (speedScale < 1.0f)
+        desLean = desLean * speedScale;
+    float rawRate = Abs_3E80(desLean - *(float *)(self + 0x1F0)) * 12.002403259277344f;
+    float leanRate = Clamp_3E80(rawRate, 0.10000000149011612f, 14.001209259033203f);
     int st = *(int *)(self + 0x438);
     if (st == 2 || st == 3 || st == 13)
-        m = m * 0.7561339735984802f;
+        leanRate = leanRate * 0.7561339735984802f;
     *(float *)(self + 0x1F8) = desLean;
-    *(float *)(self + 0x1F4) = m * 0.01666666753590107f;
+    *(float *)(self + 0x1F4) = leanRate * 0.01666666753590107f;
 }
 #endif
 
@@ -420,10 +420,10 @@ static inline float Clamp_3F38(float v, float lo, float hi)
  * @param desBal  the desired balance (the stick input)
  */
 extern "C" void cRider_setupRailBalance(void *self, float desBal) {
-    float d = Abs_3F38(desBal - *(float *)((char*)self + 0x22C)) * 7.0f;
-    float m = Clamp_3F38(d, 0.1f, 8.0f);
+    float rawRate = Abs_3F38(desBal - *(float *)((char*)self + 0x22C)) * 7.0f;
+    float desRate = Clamp_3F38(rawRate, 0.1f, 8.0f);
     *(float *)((char*)self + 0x234) = desBal;
-    *(float *)((char*)self + 0x230) = m * 0.01666666753590107f;
+    *(float *)((char*)self + 0x230) = desRate * 0.01666666753590107f;
 }
 #endif
 
@@ -505,10 +505,10 @@ extern "C" void cRider_setupCrouchBrake(char *self, float desCrouch, float desBr
     if (0.0f < desCrouch && *(float *)(self + 0x214) != 0.0f) {
         desCrouch = 0.0f;
     }
-    float d = Abs_3F88(desCrouch - *(float *)(self + 0x220));
-    float v = (0.1f <= d) ? d * 0.10000182688236237f : 0.010000183247029781f;
+    float crouchDelta = Abs_3F88(desCrouch - *(float *)(self + 0x220));
+    float crouchRate = (0.1f <= crouchDelta) ? crouchDelta * 0.10000182688236237f : 0.010000183247029781f;
     *(float *)(self + 0x228) = desCrouch;
-    *(float *)(self + 0x224) = v;
+    *(float *)(self + 0x224) = crouchRate;
     if (0.0f < desBrake) {
         if (0.0f < *(float *)(self + 0x220)) {
             desBrake = 0.0f;
@@ -517,9 +517,9 @@ extern "C" void cRider_setupCrouchBrake(char *self, float desCrouch, float desBr
         }
     }
     desBrake = flipBackwards_3F88(desBrake, self, 0.1f);
-    float e = Clamp_3F88(Abs_3F88(desBrake - *(float *)(self + 0x214)), 0.1f, 1.0f);
+    float brakeDelta = Clamp_3F88(Abs_3F88(desBrake - *(float *)(self + 0x214)), 0.1f, 1.0f);
     *(float *)(self + 0x21C) = desBrake;
-    *(float *)(self + 0x218) = e * 0.04166241362690926f;
+    *(float *)(self + 0x218) = brakeDelta * 0.04166241362690926f;
 }
 #endif
 
@@ -996,8 +996,8 @@ extern "C" int cRider_isChangeFakieGround_i(char* rider)
     if (*(float*)(rider + 0x214) != 0.0f) {
         return 0;
     }
-    float d = Dot_4CC0(*(Q_4CC0*)(rider + 0x1E0), *(Q_4CC0*)(rider + 0x3A0));
-    if (-k < d) {
+    float fwdSpeed = Dot_4CC0(*(Q_4CC0*)(rider + 0x1E0), *(Q_4CC0*)(rider + 0x3A0));
+    if (-k < fwdSpeed) {
         return 0;
     }
     *(Q_4CC0*)(rider + 0x120) = QuatMul_4CC0(Make_4CC0(Vec3Of_4CC0(*(Q_4CC0*)(rider + 0x1C0))), *(Q_4CC0*)(rider + 0x120));
@@ -1170,9 +1170,9 @@ struct sV4_4DB8 : t4Vector {
 extern "C" int cRider_isChangeFakieAir(cRider* rider)
 {
     int ok = 0;
-    char* s = (char*)rider->mAirPredictor;
-    s = (char*)*(int*)(s + 0xAC);
-    if (s == (char*)1 || s == (char*)3) {
+    char* airState = (char*)rider->mAirPredictor;
+    airState = (char*)*(int*)(airState + 0xAC);
+    if (airState == (char*)1 || airState == (char*)3) {
         ok = 1;
     }
     if (!ok) {
@@ -1195,25 +1195,25 @@ extern "C" int cRider_isChangeFakieAir(cRider* rider)
         return 0;
     }
     t4Vector front = rider->unk_170;
-    float d = Dot_4DB8(front, rider->mVelocity);
-    if (d > 277.77777099609375f) {
+    float frontDot = Dot_4DB8(front, rider->mVelocity);
+    if (frontDot > 277.77777099609375f) {
         return 0;
     }
-    d = Dot_4DB8(front, dir);
-    if (d > 0.8999999761581421f) {
+    frontDot = Dot_4DB8(front, dir);
+    if (frontDot > 0.8999999761581421f) {
         return 0;
     }
-    t4Vector side = Normalize_4DB8(Sub_4DB8(front, Scale_4DB8(dir, d)));
+    t4Vector side = Normalize_4DB8(Sub_4DB8(front, Scale_4DB8(dir, frontDot)));
     vel = Normalize_4DB8(Sub_4DB8(vel, Scale_4DB8(dir, Dot_4DB8(vel, dir))));
     if (Dot_4DB8(side, vel) > D_004A0EA8[0]) {
         return 0;
     }
-    char* m = (char*)rider->mAnimModel;
-    float* b = (float*)((rider->mBoneHips << 4) + *(int*)(m + 0x24));
+    char* animModel = (char*)rider->mAnimModel;
+    float* hipBone = (float*)((rider->mBoneHips << 4) + *(int*)(animModel + 0x24));
     {
         const t4Vector& origin = D_004FF130_4DB8;
-        t4Vector off = SubO_4DB8(sV4_4DB8(b[0] * *(float*)(m + 0x140), b[1] * *(float*)(m + 0x144),
-                                         b[2] * *(float*)(m + 0x148), b[3] * *(float*)(m + 0x14C)),
+        t4Vector off = SubO_4DB8(sV4_4DB8(hipBone[0] * *(float*)(animModel + 0x140), hipBone[1] * *(float*)(animModel + 0x144),
+                                         hipBone[2] * *(float*)(animModel + 0x148), hipBone[3] * *(float*)(animModel + 0x14C)),
                                 origin);
         off.z = 0.0f;
         AddEq_4DB8(rider->mPosition, Rot_4DB8(rider->mRotation, Scale_4DB8(off, 2.0f)));
@@ -1527,7 +1527,7 @@ static inline float Clamp_58B8(float v, float lo, float hi)
  */
 extern "C" void cRider_snapAxisIncrement(void* self, float* y, float* x, float step, float eps)
 {
-    float px, py, len, ang, t, r;
+    float px, py, len, ang, steps, rounded;
     float sc[2];
     if (Abs_58B8(*x) <= eps) *x = 0.0f;
     if (Abs_58B8(*y) <= eps) *y = 0.0f;
@@ -1536,10 +1536,10 @@ extern "C" void cRider_snapAxisIncrement(void* self, float* y, float* x, float s
     len = Sqrt_58B8(px * px + py * py);
     if (len == 0.0f) return;
     ang = Atan2_58B8(py, px);
-    t = ang / step;
-    if (ang < 0.0f) r = t + -0.5f;
-    else r = t + 0.5f;
-    func_0031BE50(&sc[0], &sc[1], (float)(int)r * step);
+    steps = ang / step;
+    if (ang < 0.0f) rounded = steps + -0.5f;
+    else rounded = steps + 0.5f;
+    func_0031BE50(&sc[0], &sc[1], (float)(int)rounded * step);
     *x = Clamp_58B8(sc[1] * len, -1.0f, 1.0f);
     *y = Clamp_58B8(sc[0] * len, -1.0f, 1.0f);
     if (__builtin_fabsf(*x) < 0.001f) *x = 0.0f;
@@ -1619,9 +1619,9 @@ extern "C" void cRider_checkForReaction(char* self)
     if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(self + 0x784), 2) == 10) {
         return;
     }
-    int d = AITick() - *(int*)(self + 0x354);
-    if (d < 180) {
-        if (d < 0) {
+    int delTick = AITick() - *(int*)(self + 0x354);
+    if (delTick < 180) {
+        if (delTick < 0) {
             return;
         }
         switch (*(int*)(self + 0x358)) {
@@ -2267,9 +2267,9 @@ extern "C" void cHUDFX_update(void *self) {
     if (*(int *)((char*)self + 0) != 52) {
         float lim = *(float *)((char*)self + 4);
         if (lim != -1.0f) {
-            float t = *(float *)((char*)self + 8) + 0.01666666753590107f;
-            *(float *)((char*)self + 8) = t;
-            if (lim <= t)
+            float curDecay = *(float *)((char*)self + 8) + 0.01666666753590107f;
+            *(float *)((char*)self + 8) = curDecay;
+            if (lim <= curDecay)
                 *(int *)((char*)self + 0) = 52;
         }
     }

@@ -1238,20 +1238,20 @@ extern "C" void cController__cController(char* self, int flags)
     *(const sSsVtblBB478**)(**(char***)(self + 0x118) + 0xAB0) = &D_00483760;
     *(const sSsVtblCB478**)(**(char***)(self + 0x118) + 0x1D4) = &D_004837A0;
     if (flags == 0) {
-        sSsVtblAB478 t1 = D_004837D8;
-        *(sSsVtblAB478**)(*(char**)(**(char***)(self + 0x118) + 0x1D8) + 4) = &t1;
+        sSsVtblAB478 soundSysVtbl = D_004837D8;
+        *(sSsVtblAB478**)(*(char**)(**(char***)(self + 0x118) + 0x1D8) + 4) = &soundSysVtbl;
         char* base1 = *(char**)(**(char***)(self + 0x118) + 0x1D8) - 0x5728;
-        int d1 = self - base1;
-        t1.e[1].delta = D_004837D8.e[1].delta + d1;
-        sSsVtblBB478 t2 = D_00483760;
-        *(sSsVtblBB478**)(**(char***)(self + 0x118) + 0xAB0) = &t2;
+        int soundSysAdjust = self - base1;
+        soundSysVtbl.e[1].delta = D_004837D8.e[1].delta + soundSysAdjust;
+        sSsVtblBB478 bankMonitorVtbl = D_00483760;
+        *(sSsVtblBB478**)(**(char***)(self + 0x118) + 0xAB0) = &bankMonitorVtbl;
         char* base2 = **(char***)(self + 0x118) - 0x5730;
-        int d2 = self - base2;
-        t2.e[1].delta = D_00483760.e[1].delta + d2;
-        t2.e[5].delta = D_00483760.e[5].delta + d2;
-        sSsVtblCB478 t3 = D_004837A0;
-        *(sSsVtblCB478**)(**(char***)(self + 0x118) + 0x1D4) = &t3;
-        t3.e[1].delta = D_004837A0.e[1].delta + d2;
+        int bankMgrAdjust = self - base2;
+        bankMonitorVtbl.e[1].delta = D_00483760.e[1].delta + bankMgrAdjust;
+        bankMonitorVtbl.e[5].delta = D_00483760.e[5].delta + bankMgrAdjust;
+        sSsVtblCB478 bankMgrVtbl = D_004837A0;
+        *(sSsVtblCB478**)(**(char***)(self + 0x118) + 0x1D4) = &bankMgrVtbl;
+        bankMgrVtbl.e[1].delta = D_004837A0.e[1].delta + bankMgrAdjust;
     }
     cSpeechSys__cSpeechSys(bank, 0);
     func_002B3398(mon, 0);
@@ -1467,15 +1467,15 @@ extern "C" int cBankMonitorInstance_DonePlaying(void* self)
     switch (type) {
     case 1: {
         func_003B58A0();
-        int r = func_003B8AB8(*(int*)((char*)self + 4)) != 0;
+        int result = func_003B8AB8(*(int*)((char*)self + 4)) != 0;
         func_003B58D8();
-        return r;
+        return result;
     }
     case 2: {
         func_003B58A0();
-        int r = func_003B9FC8(*(int*)((char*)self + 4));
+        int result = func_003B9FC8(*(int*)((char*)self + 4));
         func_003B58D8();
-        return r == 2 || r < 0;
+        return result == 2 || result < 0;
     }
     case 3: {
         int st[4];
@@ -1582,8 +1582,8 @@ int ExpScale_impl(int vol, float dist, float range)
     }
     int result = 0;
     if (dist < range && 0.0f < range) {
-        float t = (range - dist) / range;
-        result = (int)(t * t * (float)vol);
+        float falloff = (range - dist) / range;
+        result = (int)(falloff * falloff * (float)vol);
     }
     return result;
 }
@@ -1623,13 +1623,13 @@ INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_Doppler);
  */
 extern "C" float cBankMonitorInstance_Doppler(float delta, float time)
 {
-    float f = delta / time;
-    if (f < -894.0799560546875f) {
-        f = -894.0799560546875f;
-    } else if (894.0799560546875f < f) {
-        f = 894.0799560546875f;
+    float speed = delta / time;
+    if (speed < -894.0799560546875f) {
+        speed = -894.0799560546875f;
+    } else if (894.0799560546875f < speed) {
+        speed = 894.0799560546875f;
     }
-    return (f + 8000.0f) * 0.0001250000059371814f;
+    return (speed + 8000.0f) * 0.0001250000059371814f;
 }
 #endif
 
@@ -1712,8 +1712,8 @@ extern "C" void func_003B9C20(int h, int pos);
  */
 extern "C" void cBankMonitorInstance_PosUpdate(void* self, int pos, int elevation)
 {
-    int d = pos - *(int*)((char*)self + 0xB8);
-    if (d >= -0x1FF && d <= 0x1FF) {
+    int azimuthDiff = pos - *(int*)((char*)self + 0xB8);
+    if (azimuthDiff >= -0x1FF && azimuthDiff <= 0x1FF) {
         return;
     }
     *(int*)((char*)self + 0xB8) = pos;
@@ -1761,8 +1761,8 @@ extern "C" void cBankMonitorInstance_PitchUpdate(void* self, int vol)
     if (vol < 0) {
         vol = 0;
     }
-    int d = vol - *(int*)((char*)self + 0xB0);
-    if (d >= -0xFF && d <= 0xFF) {
+    int pitchDiff = vol - *(int*)((char*)self + 0xB0);
+    if (pitchDiff >= -0xFF && pitchDiff <= 0xFF) {
         return;
     }
     *(int*)((char*)self + 0xB0) = vol;
@@ -1818,8 +1818,8 @@ extern "C" void cBankMonitorInstance_VolUpdate(void* self, int vol)
         if (vol <= none)
             vol = 0;
         if (*(int*)((char*)self + 0xB4) >= 0) {
-            int d = vol - *(int*)((char*)self + 0xB4);
-            if (d >= -4 && d <= 4)
+            int volDiff = vol - *(int*)((char*)self + 0xB4);
+            if (volDiff >= -4 && volDiff <= 4)
                 return;
         }
         *(int*)((char*)self + 0xB4) = vol;
@@ -1840,8 +1840,8 @@ extern "C" void cBankMonitorInstance_VolUpdate(void* self, int vol)
         if (vol <= none)
             vol = 0;
         if (*(int*)((char*)self + 0xB4) >= 0) {
-            int d = vol - *(int*)((char*)self + 0xB4);
-            if (d >= -4 && d <= 4)
+            int volDiff = vol - *(int*)((char*)self + 0xB4);
+            if (volDiff >= -4 && volDiff <= 4)
                 return;
         }
         *(int*)((char*)self + 0xB4) = vol;
@@ -1862,8 +1862,8 @@ extern "C" void cBankMonitorInstance_VolUpdate(void* self, int vol)
         if (vol <= none)
             vol = 0;
         if (*(int*)((char*)self + 0xB4) >= 0) {
-            int d = vol - *(int*)((char*)self + 0xB4);
-            if (d >= -4 && d <= 4)
+            int volDiff = vol - *(int*)((char*)self + 0xB4);
+            if (volDiff >= -4 && volDiff <= 4)
                 return;
         }
         *(int*)((char*)self + 0xB4) = vol;
@@ -2129,45 +2129,45 @@ static inline float Sqrt_C868(float x)
  */
 extern "C" void cBankMonitorInstance_Update3D(void* voice, void* bm, float time)
 {
-    char* s = (char*)voice;
-    char* b = (char*)bm;
-    if (*(int*)s == 0) {
+    char* inst = (char*)voice;
+    char* monitor = (char*)bm;
+    if (*(int*)inst == 0) {
         return;
     }
     int st[4];
     sPos_C868 pos;
     int vol = 0;
-    if (*(int*)s == 3) {
+    if (*(int*)inst == 3) {
         func_003B58A0();
-        int r = func_003B7C40_st(*(int*)(s + 0x4), st);
+        int result = func_003B7C40_st(*(int*)(inst + 0x4), st);
         func_003B58D8();
-        if (r <= 0 && st[0] != 2) {
+        if (result <= 0 && st[0] != 2) {
             return;
         }
     }
-    if (*(int*)(b + 0x8E4) != 0 && *(int*)(s + 0x68) != 0) {
-        float d = Sqrt_C868(((cStreamBM_C868*)bm)->v06(voice, &pos));
-        if (*(int*)(s + 0x94) != 0 || cBankMonitorInstance_CheckActive_3(voice, bm, d) != 0) {
-            float f = *(float*)(s + 0x5C);
-            if (f != -1.0f && *(int*)(b + 0x8E0) != 0) {
-                time = cBankMonitorInstance_Doppler_3(voice, f - d, time);
+    if (*(int*)(monitor + 0x8E4) != 0 && *(int*)(inst + 0x68) != 0) {
+        float dist = Sqrt_C868(((cStreamBM_C868*)bm)->v06(voice, &pos));
+        if (*(int*)(inst + 0x94) != 0 || cBankMonitorInstance_CheckActive_3(voice, bm, dist) != 0) {
+            float prevDist = *(float*)(inst + 0x5C);
+            if (prevDist != -1.0f && *(int*)(monitor + 0x8E0) != 0) {
+                time = cBankMonitorInstance_Doppler_3(voice, prevDist - dist, time);
             } else {
                 time = 1.0f;
             }
             cBankMonitorInstance_PosUpdate(voice, pos.pos, pos.pos2);
             cBankMonitorInstance_PitchUpdate(voice, (int)(time * 4096.0f));
-            if (*(int*)(s + 0x94) != 0) {
-                vol = *(int*)(s + 0x64);
+            if (*(int*)(inst + 0x94) != 0) {
+                vol = *(int*)(inst + 0x64);
             } else {
-                float range = *(float*)(s + 0x88);
+                float range = *(float*)(inst + 0x88);
                 if (range == 0.0f) {
-                    vol = cBankMonitorInstance_Dist2Vol_4(voice, *(int*)(s + 0x64), d, 30.0f);
+                    vol = cBankMonitorInstance_Dist2Vol_4(voice, *(int*)(inst + 0x64), dist, 30.0f);
                 } else {
-                    vol = cBankMonitorInstance_Dist2Vol_4(voice, *(int*)(s + 0x64), d, range);
+                    vol = cBankMonitorInstance_Dist2Vol_4(voice, *(int*)(inst + 0x64), dist, range);
                 }
-                int m = *(int*)(s + 0x98);
-                if (m != 0x7F) {
-                    vol = vol * 0x7F / m;
+                int maxVol = *(int*)(inst + 0x98);
+                if (maxVol != 0x7F) {
+                    vol = vol * 0x7F / maxVol;
                     if (vol > 0x7F) {
                         vol = 0x7F;
                     }
@@ -2183,22 +2183,22 @@ extern "C" void cBankMonitorInstance_Update3D(void* voice, void* bm, float time)
         if (vol < 0) {
             vol = 0;
         }
-        *(float*)(s + 0x5C) = d;
+        *(float*)(inst + 0x5C) = dist;
     } else {
-        vol = *(int*)(s + 0x64);
+        vol = *(int*)(inst + 0x64);
     }
-    if (*(int*)(s + 0x54) == 0) {
-        float* p = *(float**)(s + 0x60);
-        if (p != 0) {
-            vol = (int)((float)vol * *p);
+    if (*(int*)(inst + 0x54) == 0) {
+        float* volControl = *(float**)(inst + 0x60);
+        if (volControl != 0) {
+            vol = (int)((float)vol * *volControl);
         }
         cBankMonitorInstance_VolUpdate(voice, vol);
         return;
     }
     if (cBankMonitorInstance_DonePlaying(voice) != 0) {
-        *(int*)(s + 0x8) = 0;
-        *(int*)(s + 0x54) = 0;
-        *(int*)(s + 0x4) = -1;
+        *(int*)(inst + 0x8) = 0;
+        *(int*)(inst + 0x54) = 0;
+        *(int*)(inst + 0x4) = -1;
     }
 }
 #endif

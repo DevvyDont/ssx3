@@ -284,7 +284,7 @@ extern "C" int func_003E1530(void* cache);
  */
 extern "C" void cStreamMan_update(sStreamMan7098* self)
 {
-    unsigned char* p;
+    unsigned char* chunk;
     if (self->active == 0) {
         return;
     }
@@ -294,23 +294,23 @@ extern "C" void cStreamMan_update(sStreamMan7098* self)
         }
     }
     if (self->fD4 != 0) {
-        int t = *(int*)(cAppMan_TheAppMan + 0x18);
-        if (self->fE4 != t) {
-            self->fE0 -= (float)(t - self->fE4);
-            self->fE4 = t;
+        int tick = *(int*)(cAppMan_TheAppMan + 0x18);
+        if (self->fE4 != tick) {
+            self->fE0 -= (float)(tick - self->fE4);
+            self->fE4 = tick;
         }
         if (0.0f < self->fE0) {
             return;
         }
     }
-    p = func_003E12E0(self->cache);
-    while (p != 0) {
+    chunk = func_003E12E0(self->cache);
+    while (chunk != 0) {
         int size;
         self->fE0 = self->fDC;
-        size = (p[7] << 24) | (p[6] << 16) | (p[5] << 8) | p[4];
+        size = (chunk[7] << 24) | (chunk[6] << 16) | (chunk[5] << 8) | chunk[4];
         // PORT: the payload pointer is passed as an int.
-        self->fB0 = cStreamMan_decompressChunk(self, self->f8C, size - 8, (int)(p + 8));
-        func_003E13E8(self->cache, p);
+        self->fB0 = cStreamMan_decompressChunk(self, self->f8C, size - 8, (int)(chunk + 8));
+        func_003E13E8(self->cache, chunk);
         self->fB4 = self->f8C;
         if (cStreamMan_processChunk(self, &self->fB0, &self->fB4) == 0) {
             self->pending = 1;
@@ -319,7 +319,7 @@ extern "C" void cStreamMan_update(sStreamMan7098* self)
         if (self->fD4 != 0) {
             break;
         }
-        p = func_003E12E0(self->cache);
+        chunk = func_003E12E0(self->cache);
     }
     if (func_003E1530(self->cache) == 0) {
         return;
@@ -336,19 +336,19 @@ extern "C" void* unpack(int);
 INCLUDE_ASM("world/streamman", cStreamMan_decompressChunk__FPviii);
 #ifdef SKIP_ASM
 /**
- * Decompresses a stream chunk: unpack(@p a3, @p a1), returning the unpacked size.
+ * Decompresses a stream chunk: unpack(@p src, @p dst), returning the unpacked size.
  *
- * @p a2 is not used. cStreamMan_update calls it with the decompression buffer (+0x8C), the chunk size minus 8 and the
+ * @p srcSize is not used. cStreamMan_update calls it with the decompression buffer (+0x8C), the chunk size minus 8 and the
  * chunk data after its 8-byte header.
  *
- * @param a1  the destination buffer
- * @param a2  the source size (unused)
- * @param a3  the compressed data
+ * @param dst  the destination buffer
+ * @param srcSize  the source size (unused)
+ * @param src  the compressed data
  * @return unpack's result
  */
-void* cStreamMan_decompressChunk(void* self, int a1, int a2, int a3)
+void* cStreamMan_decompressChunk(void* self, int dst, int srcSize, int src)
 {
-    return unpack(a3);
+    return unpack(src);
 }
 #endif
 
@@ -405,17 +405,17 @@ extern "C" int cStreamMan_processChunk(void* self_, void* pcount_, void* pdata_)
     unsigned char** pdata = (unsigned char**)pdata_;
     while (*pcount >= 8 || (*pcount > 0 && self->size != 0) || self->retry != 0)
     {
-        unsigned int r;
+        unsigned int addResult;
         if (self->retry != 0)
         {
-            r = cWorldCache_addBxStreamDataTest(self->cache, self->group, self->id, self->key, self->size);
-            self->result = r;
-            if (r == 0xFFFFFFFF)
+            addResult = cWorldCache_addBxStreamDataTest(self->cache, self->group, self->id, self->key, self->size);
+            self->result = addResult;
+            if (addResult == 0xFFFFFFFF)
                 return 0;
             self->retry = 0;
-            if (r != 0)
+            if (addResult != 0)
             {
-                self->dst = (char*)r;
+                self->dst = (char*)addResult;
                 self->copying = 1;
             }
             else
@@ -432,13 +432,13 @@ extern "C" int cStreamMan_processChunk(void* self_, void* pcount_, void* pdata_)
             if (self->partial != 0)
             {
                 int i;
-                unsigned char* h = hdr;
+                unsigned char* hdrCursor = hdr;
                 *(unsigned int*)(hdr + 4) = 0xFFFFFFFF;
                 for (i = 0; i < self->partial; i++)
-                    h[i] = self->buf[i];
+                    hdrCursor[i] = self->buf[i];
                 for (i = self->partial; i < 8; i++)
                 {
-                    h[i] = *(*pdata)++;
+                    hdrCursor[i] = *(*pdata)++;
                     (*pcount)--;
                 }
                 self->id = hdr[0];
@@ -449,23 +449,23 @@ extern "C" int cStreamMan_processChunk(void* self_, void* pcount_, void* pdata_)
             else
             {
                 *(unsigned int*)(hdr + 4) = 0xFFFFFFFF;
-                unsigned char* h = hdr;
+                unsigned char* hdrCursor = hdr;
                 for (int i = 0; i < 8; i++)
                 {
-                    *h++ = *(*pdata)++;
+                    *hdrCursor++ = *(*pdata)++;
                     (*pcount)--;
                 }
                 self->id = hdr[0];
                 self->key = *(int*)(hdr + 4);
                 self->size = (int)(*(long*)hdr >> 8) & 0xFFFFFF;
             }
-            r = cWorldCache_addBxStreamDataTest(self->cache, self->group, self->id, self->key, self->size);
-            self->result = r;
-            if (r == 0xFFFFFFFF)
+            addResult = cWorldCache_addBxStreamDataTest(self->cache, self->group, self->id, self->key, self->size);
+            self->result = addResult;
+            if (addResult == 0xFFFFFFFF)
                 return 0;
-            if (r != 0)
+            if (addResult != 0)
             {
-                self->dst = (char*)r;
+                self->dst = (char*)addResult;
                 self->copying = 1;
             }
             else

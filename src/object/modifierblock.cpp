@@ -657,14 +657,14 @@ extern "C" void tModifierBlock_remEffectModifier(void* self)
 {
     sModBlockLink* head = *(sModBlockLink**)((char*)self + 0x10);
     if (head != 0) {
-        sModBlockLink* p = head;
+        sModBlockLink* effect = head;
         do {
-            sModBlockLink* next = p->next;
-            if (p != 0) {
-                p->vt[1].fn((char*)p + p->vt[1].delta, 3);
+            sModBlockLink* next = effect->next;
+            if (effect != 0) {
+                effect->vt[1].fn((char*)effect + effect->vt[1].delta, 3);
             }
-            p = next;
-        } while (p != 0);
+            effect = next;
+        } while (effect != 0);
     }
 }
 #endif
@@ -760,24 +760,24 @@ extern "C" void tModifierBlock_remRailModifier(void* self, unsigned int id)
 {
     sModBlockLink3300* head = *(sModBlockLink3300**)((char*)self + 0x1C);
     if (head == 0) return;
-    sModBlockLink3300* p = head;
+    sModBlockLink3300* rail = head;
     if (~id) {
     loop:
-        if (p == 0) return;
-        if (p->id == id) {
-            p->vt[1].fn((char*)p + p->vt[1].delta, 3);
+        if (rail == 0) return;
+        if (rail->id == id) {
+            rail->vt[1].fn((char*)rail + rail->vt[1].delta, 3);
             return;
         }
-        p = p->next;
+        rail = rail->next;
         goto loop;
     } else {
         do {
-            sModBlockLink3300* next = p->next;
-            if (p != 0) {
-                p->vt[1].fn((char*)p + p->vt[1].delta, 3);
+            sModBlockLink3300* next = rail->next;
+            if (rail != 0) {
+                rail->vt[1].fn((char*)rail + rail->vt[1].delta, 3);
             }
-            p = next;
-        } while (p != 0);
+            rail = next;
+        } while (rail != 0);
     }
 }
 #endif
@@ -803,13 +803,13 @@ extern "C" void cEffectLink_append(void* pool, void* item);
  */
 extern "C" void tModifierBlock_transferEffectModifier(void* self, void* list)
 {
-    void* p = *(void**)list;
-    while (p != 0) {
-        void* next = *(void**)p;
-        sMbVEntryV3398* vt = *(sMbVEntryV3398**)((char*)p + 0x8);
-        vt[3].fn((char*)p + vt[3].delta);
-        cEffectLink_append((char*)self + 0x10, p);
-        p = next;
+    void* effect = *(void**)list;
+    while (effect != 0) {
+        void* next = *(void**)effect;
+        sMbVEntryV3398* vt = *(sMbVEntryV3398**)((char*)effect + 0x8);
+        vt[3].fn((char*)effect + vt[3].delta);
+        cEffectLink_append((char*)self + 0x10, effect);
+        effect = next;
     }
     *(void**)list = 0;
     *(void**)((char*)list + 0x4) = 0;
@@ -1379,17 +1379,17 @@ struct sSpring_3E08 {
  */
 extern "C" void cSpring_setupSpring(void* self, sSpringDesc_3E08* sdata, float len)
 {
-    sSpring_3E08* s = (sSpring_3E08*)self;
+    sSpring_3E08* spring = (sSpring_3E08*)self;
     int n = sdata->count;
-    s->count = n;
-    s->f4 = sdata->f0;
-    s->f8 = sdata->f4;
-    s->fC = sdata->f8;
-    s->f10 = sdata->fC;
-    s->f14 = sdata->f10;
-    s->f18 = sdata->f14 * 9.999999974752427e-07f;
-    s->f1C = sdata->f18;
-    s->seg = len / (float)(n - 1);
+    spring->count = n;
+    spring->f4 = sdata->f0;
+    spring->f8 = sdata->f4;
+    spring->fC = sdata->f8;
+    spring->f10 = sdata->fC;
+    spring->f14 = sdata->f10;
+    spring->f18 = sdata->f14 * 9.999999974752427e-07f;
+    spring->f1C = sdata->f18;
+    spring->seg = len / (float)(n - 1);
     cSpring_setupNodes(self);
 }
 #endif

@@ -362,13 +362,13 @@ extern "C" void cScriptPlayerMain_UpdateFrame(void* p);
  */
 extern "C" int cBXScriptEngine_ForcePlayUpdate(void* self, int requestHandle)
 {
-    void* t = func_00282CB0(self, requestHandle);
-    if (t == 0) {
+    void* request = func_00282CB0(self, requestHandle);
+    if (request == 0) {
         return 0;
     }
-    int type = *(int*)((char*)t + 0x4);
+    int type = *(int*)((char*)request + 0x4);
     if (type == 3 || type == 4) {
-        cScriptPlayerMain_UpdateFrame(*(void**)t);
+        cScriptPlayerMain_UpdateFrame(*(void**)request);
         return 1;
     }
     return 0;
@@ -749,10 +749,10 @@ struct sBxsVEntry10 {
  */
 extern "C" void cBXScriptEngine_OnInSeqPlay(void* self, void* pPlayer)
 {
-    char* t = *(char**)((char*)pPlayer + 0xC);
+    char* request = *(char**)((char*)pPlayer + 0xC);
     sBxsVEntry10* vt = *(sBxsVEntry10**)((char*)self + 0x2A8);
-    vt[10].fn((char*)self + vt[10].delta, pPlayer, *(int*)(t + 0x8), *(int*)(t + 0xC));
-    *(int*)(t + 0x4) = 4;
+    vt[10].fn((char*)self + vt[10].delta, pPlayer, *(int*)(request + 0x8), *(int*)(request + 0xC));
+    *(int*)(request + 0x4) = 4;
 }
 #endif
 
@@ -780,12 +780,12 @@ extern "C" void func_00282540(void* self, int id);
  */
 extern "C" void cBXScriptEngine_OnInSeqStop(void* self, void* msg)
 {
-    char* s = *(char**)((char*)msg + 0xC);
+    char* request = *(char**)((char*)msg + 0xC);
     sVEntry282A18* vt = *(sVEntry282A18**)((char*)self + 0x2A8);
-    vt[11].fn((char*)self + vt[11].delta, msg, *(int*)(s + 0x8), *(int*)(s + 0xC));
-    *(int*)(s + 0x4) = 2;
-    if (*(short*)(s + 0x10) != 0) {
-        func_00282540(self, *(int*)(s + 0x1C));
+    vt[11].fn((char*)self + vt[11].delta, msg, *(int*)(request + 0x8), *(int*)(request + 0xC));
+    *(int*)(request + 0x4) = 2;
+    if (*(short*)(request + 0x10) != 0) {
+        func_00282540(self, *(int*)(request + 0x1C));
     }
 }
 #endif
@@ -900,11 +900,11 @@ extern "C" void* func_00282CB0(void* self, int a1);
  */
 extern "C" int cBXScriptEngine_GetRequestPlayerByReqHandle(void* self, int requestHandle)
 {
-    int* p = (int*)func_00282CB0(self, requestHandle);
-    if (p == 0) {
+    int* request = (int*)func_00282CB0(self, requestHandle);
+    if (request == 0) {
         return 0;
     }
-    return *p;
+    return *request;
 }
 #endif
 
@@ -1508,9 +1508,9 @@ INCLUDE_ASM("scripter/bxscriptengine", cScriptObject_OnStartObjectUse__FPv);
  */
 void* cScriptObject_OnStartObjectUse(void* self)
 {
-    void* t0 = (char*)*(void**)((char*)self + 0x8) + 0x1;
-    *(int*)((char*)self + 0x8) = (int)t0;
-    return t0;
+    void* useCount = (char*)*(void**)((char*)self + 0x8) + 0x1;
+    *(int*)((char*)self + 0x8) = (int)useCount;
+    return useCount;
 }
 #endif
 

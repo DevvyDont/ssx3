@@ -1904,8 +1904,8 @@ extern "C" void cMoviePlayer_asyncUpdate(void* self)
 {
     if (*(int*)((char*)self + 0x40) == 0 && func_003AE780(*(void**)((char*)self + 0x38)) != 0) {
         (*(cMemObj_253938**)((char*)self + 0x3C))->v06();
-        void* p = *(void**)((char*)self + 0x38);
-        *(int*)((char*)self + 0xC) = func_003AE6C8(p, *(float*)((char*)p + 0x48));
+        void* decoder = *(void**)((char*)self + 0x38);
+        *(int*)((char*)self + 0xC) = func_003AE6C8(decoder, *(float*)((char*)decoder + 0x48));
         *(int*)((char*)self + 0x40) = 1;
         *(int*)((char*)self + 0x4) = 0;
     } else {
