@@ -1616,10 +1616,10 @@ extern "C" void func_0019A798(void* self)
             setText_A798(self, str_kT_129HELPSaveCashItem);
     } else {
         sEquipDb_A798* db = (sEquipDb_A798*)func_0014AD28(cBE_getInterface(cBE_getBE(), 9), *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0xBC));
-        sEquipEntry_A798* e = getEntry_A798(db, item->id);
+        sEquipEntry_A798* equipEntry = getEntry_A798(db, item->id);
         int idx = sel - (*(sList_A798**)((char*)self + 0x5C))->top;
         if (D_004A18D8 >= *(int*)((char*)self + 0xC4) + *(int*)((char*)self + (idx << 2) + 0xA78)) {
-            if (e->flags & 4)
+            if (equipEntry->flags & 4)
                 setText_A798(self, str_kT_FEYourCurrentOutfit);
             else
                 setText_A798(self, str_kT_FEYourCurrentOutfit);
@@ -2315,11 +2315,11 @@ extern "C" void func_0019B618(void* self, int reset, int select)
 {
     if (*(void**)((char*)self + 0x5C) == 0)
         return;
-    cUIObj_B618** a = (cUIObj_B618**)((char*)self + 0x8C);
-    cUIObj_B618** b = (cUIObj_B618**)((char*)self + 0xA4);
+    cUIObj_B618** nameWidgets = (cUIObj_B618**)((char*)self + 0x8C);
+    cUIObj_B618** checkWidgets = (cUIObj_B618**)((char*)self + 0xA4);
     for (int i = 0; i < 6; i++) {
-        a[i]->setVisible(0);
-        b[i]->setVisible(0);
+        nameWidgets[i]->setVisible(0);
+        checkWidgets[i]->setVisible(0);
     }
     if (reset) {
         if (*(int*)((char*)self + 0x958) == 0)
@@ -2332,28 +2332,28 @@ extern "C" void func_0019B618(void* self, int reset, int select)
         n = func_0019B598(self);
     else
         n = func_0019B518(self);
-    int v;
+    int visibleRow;
     if (n == 0) {
         (*(cUIObj_B618**)((char*)self + 0x8C))->setVisible(1);
         (*(cUIObj_B618**)((char*)self + 0x8C))->setColor(D_004C6708);
         cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x8C), GetHashValue32(str_kT_FEEmpty));
         (*(sList_B618**)((char*)self + 0x5C))->count = 1;
         (*(sList_B618**)((char*)self + 0x5C))->top = 0;
-        v = 0;
+        visibleRow = 0;
         n = 1;
     } else {
-        sList_B618* l = *(sList_B618**)((char*)self + 0x5C);
-        v = l->sel - l->top;
+        sList_B618* scrollList = *(sList_B618**)((char*)self + 0x5C);
+        visibleRow = scrollList->sel - scrollList->top;
     }
-    if (v >= n)
-        v = n - 1;
-    if (v < 0)
-        v = 0;
+    if (visibleRow >= n)
+        visibleRow = n - 1;
+    if (visibleRow < 0)
+        visibleRow = 0;
     if (reset)
-        v = 0;
+        visibleRow = 0;
     if (select) {
-        sList_B618* l = *(sList_B618**)((char*)self + 0x5C);
-        cUIMenu_setSelectedByIndex(l, l->top + v);
+        sList_B618* scrollList = *(sList_B618**)((char*)self + 0x5C);
+        cUIMenu_setSelectedByIndex(scrollList, scrollList->top + visibleRow);
     }
 }
 #endif
@@ -2656,15 +2656,15 @@ struct sVec3K19BC90 {
  */
 extern "C" void func_0019BC90(void* self)
 {
-    char* o = *(char**)((char*)self + 0x70);
-    if (o != 0) {
-        float t = (float)(*(int*)((char*)self + 0xC4) - 1500) / (float)(D_004A18D8 - 1500);
-        if (t < 0.0f) {
-            t = 0.0f;
+    char* pointsBar = *(char**)((char*)self + 0x70);
+    if (pointsBar != 0) {
+        float fillRatio = (float)(*(int*)((char*)self + 0xC4) - 1500) / (float)(D_004A18D8 - 1500);
+        if (fillRatio < 0.0f) {
+            fillRatio = 0.0f;
         }
-        sVEntry0019BC90* vt = *(sVEntry0019BC90**)(o + 8);
-        vt[9].fn(o + vt[9].delta, 1);
-        *(sVec3K19BC90*)(*(char**)((char*)self + 0x70) + 0x50) = sVec3K19BC90(1.0f, -t, 1.0f);
+        sVEntry0019BC90* vt = *(sVEntry0019BC90**)(pointsBar + 8);
+        vt[9].fn(pointsBar + vt[9].delta, 1);
+        *(sVec3K19BC90*)(*(char**)((char*)self + 0x70) + 0x50) = sVec3K19BC90(1.0f, -fillRatio, 1.0f);
     }
 }
 #endif
@@ -2705,26 +2705,26 @@ extern "C" void func_0019BD48(void* self, int delta)
 {
     if (*(void**)((char*)self + 0x74) == 0)
         return;
-    float t = (float)(*(int*)((char*)self + 0xC4) + delta - 1500) / (float)(D_004A18D8 - 1500);
-    if (t > 1.0f)
-        t = 1.0f;
-    else if (t < 0.0f)
-        t = 0.0f;
+    float fillRatio = (float)(*(int*)((char*)self + 0xC4) + delta - 1500) / (float)(D_004A18D8 - 1500);
+    if (fillRatio > 1.0f)
+        fillRatio = 1.0f;
+    else if (fillRatio < 0.0f)
+        fillRatio = 0.0f;
     if (D_004A18D8 < *(int*)((char*)self + 0xC4) + delta) {
-        char* o = *(char**)((char*)self + 0x74);
-        sVEntryK19BD48* vt = *(sVEntryK19BD48**)(o + 8);
-        vt[11].fn(o + vt[11].delta, D_004C66E8);
+        char* equipBar = *(char**)((char*)self + 0x74);
+        sVEntryK19BD48* vt = *(sVEntryK19BD48**)(equipBar + 8);
+        vt[11].fn(equipBar + vt[11].delta, D_004C66E8);
     } else {
-        char* o = *(char**)((char*)self + 0x74);
-        sVEntryK19BD48* vt = *(sVEntryK19BD48**)(o + 8);
-        vt[11].fn(o + vt[11].delta, D_004C66F8);
+        char* equipBar = *(char**)((char*)self + 0x74);
+        sVEntryK19BD48* vt = *(sVEntryK19BD48**)(equipBar + 8);
+        vt[11].fn(equipBar + vt[11].delta, D_004C66F8);
     }
     {
-        char* o = *(char**)((char*)self + 0x74);
-        sVEntryIK19BD48* vt = *(sVEntryIK19BD48**)(o + 8);
-        vt[9].fn(o + vt[9].delta, 1);
+        char* equipBar = *(char**)((char*)self + 0x74);
+        sVEntryIK19BD48* vt = *(sVEntryIK19BD48**)(equipBar + 8);
+        vt[9].fn(equipBar + vt[9].delta, 1);
     }
-    *(sVec3K19BD48*)(*(char**)((char*)self + 0x74) + 0x50) = sVec3K19BD48(1.0f, -t, 1.0f);
+    *(sVec3K19BD48*)(*(char**)((char*)self + 0x74) + 0x50) = sVec3K19BD48(1.0f, -fillRatio, 1.0f);
 }
 #endif
 

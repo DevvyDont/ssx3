@@ -649,18 +649,18 @@ struct sBuyAttrib_5300 {
  * them, and refreshes the levels, cost per level, experience display and bank. cFEStateBuyAttrib_onPopupEvent calls it
  * when the confirm popup closes with a yes.
  *
- * @param p  the buy-attributes state
+ * @param buyState  the buy-attributes state
  */
-extern "C" void func_001F5300(void* p)
+extern "C" void func_001F5300(void* buyState)
 {
-    sBuyAttrib_5300* self = (sBuyAttrib_5300*)p;
+    sBuyAttrib_5300* self = (sBuyAttrib_5300*)buyState;
     self->bank -= self->cost;
     self->cost = 0;
     cFEStateBuyAttrib_updateTotalCost(self);
     self->busy = 0;
     cUIState_hideObjSafe(self, str_PopupGroup);
-    sObj_5300* o = self->confirm;
-    o->vt[7].fn((char*)o + o->vt[7].delta, 1);
+    sObj_5300* attribMenu = self->confirm;
+    attribMenu->vt[7].fn((char*)attribMenu + attribMenu->vt[7].delta, 1);
     sIface_5300* iface = (sIface_5300*)cBE_getInterface_Fv(cBE_getBE(), 11);
     int* bought = self->bought;
     for (int i = 0; i < 7; i++) {
@@ -1360,9 +1360,9 @@ extern "C" void func_001F60E0(void* vself)
         cUIState_hideObjSafe(self, str_race_arrowdown);
     }
     char buf[32];
-    cUIText* o = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_race_medals));
+    cUIText* textWidget = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_race_medals));
     sprintf(buf, str_pct_d_pct_d_d, self->medals, self->count);
-    cUIText_setAsciiString(o, buf);
+    cUIText_setAsciiString(textWidget, buf);
     for (int i = 0; i < 5; i++) {
         int idx = i + self->scroll;
         if (idx < self->count) {
@@ -1372,23 +1372,23 @@ extern "C" void func_001F60E0(void* vself)
             char text[32];
             char medal[80];
             sprintf(peak, str_race_peakNumpct_d, i);
-            o = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(peak));
+            textWidget = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(peak));
             sprintf(num, D_004A2138, D_004780F0[idx] + 1);
-            cUIText_setAsciiString(o, num);
+            cUIText_setAsciiString(textWidget, num);
             sprintf(track, str_race_trackpct_d, i);
-            o = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(track));
-            int t;
+            textWidget = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(track));
+            int raceTime;
             if (idx % 3 == 0) {
                 sprintf(text, str_pct_s_Race, cBENewRaceInterface_getLocationName(race, D_004780D0[idx]));
-                t = func_001456A0(race, D_004780D0[idx], 4);
-                cUIText_setAsciiString(o, text);
+                raceTime = func_001456A0(race, D_004780D0[idx], 4);
+                cUIText_setAsciiString(textWidget, text);
             } else {
-                t = func_001456A0(race, D_004780D0[idx], 0);
-                cUIText_setAsciiString(o, cBENewRaceInterface_getLocationName(race, D_004780D0[idx]));
+                raceTime = func_001456A0(race, D_004780D0[idx], 0);
+                cUIText_setAsciiString(textWidget, cBENewRaceInterface_getLocationName(race, D_004780D0[idx]));
             }
             sprintf(text, str_timepct_d_b, i);
-            o = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(text));
-            cUIText_setAsciiString(o, func_0020A1A8(t));
+            textWidget = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(text));
+            cUIText_setAsciiString(textWidget, func_0020A1A8(raceTime));
             sprintf(medal, str_race_medalpct_d, i);
             if (self->done & (1 << idx)) {
                 cUIState_showObjSafe(self, medal);
@@ -1479,7 +1479,7 @@ extern "C" void func_001F6490(void* vself)
     cUIText* hdr = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_fs_medals));
     sprintf(buf, str_pct_d_pct_d_d, self->medals, self->count);
     cUIText_setAsciiString(hdr, buf);
-    cUIText* o;
+    cUIText* textWidget;
     for (int i = 0; i < 5; i++) {
         int idx = i + self->scroll;
         if (idx < self->count) {
@@ -1491,24 +1491,24 @@ extern "C" void func_001F6490(void* vself)
             char medal[64];
             int level = idx / 4;
             sprintf(peak, str_fs_peakNumpct_d, i);
-            o = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(peak));
+            textWidget = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(peak));
             sprintf(num, D_004A2138, level + 1);
-            cUIText_setAsciiString(o, num);
+            cUIText_setAsciiString(textWidget, num);
             sprintf(track, str_fs_trackpct_d, i);
-            o = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(track));
-            int t;
+            textWidget = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(track));
+            int eventPoints;
             if (idx % 4 == 0) {
                 sprintf(text, str_pct_s_Jam, cBENewRaceInterface_getLocationName(race, D_00478110[idx]));
-                cUIText_setAsciiString(o, text);
-                t = func_001456A0(race, D_00478110[idx], 5);
+                cUIText_setAsciiString(textWidget, text);
+                eventPoints = func_001456A0(race, D_00478110[idx], 5);
             } else {
-                cUIText_setAsciiString(o, cBENewRaceInterface_getLocationName(race, D_00478110[idx]));
-                t = func_001456A0(race, D_00478110[idx], func_00145870(race, D_00478110[idx]));
+                cUIText_setAsciiString(textWidget, cBENewRaceInterface_getLocationName(race, D_00478110[idx]));
+                eventPoints = func_001456A0(race, D_00478110[idx], func_00145870(race, D_00478110[idx]));
             }
-            sprintf(text, D_004A2138, t);
+            sprintf(text, D_004A2138, eventPoints);
             sprintf(timeName, str_fs_pointspct_d, i);
-            o = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(timeName));
-            cUIText_setAsciiString(o, text);
+            textWidget = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(timeName));
+            cUIText_setAsciiString(textWidget, text);
             sprintf(medal, str_fs_medalpct_d, i);
             if (self->done & (1 << idx)) {
                 cUIState_showObjSafe(self, medal);

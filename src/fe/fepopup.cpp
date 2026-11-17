@@ -1665,34 +1665,34 @@ struct sVEntry_8320 {
  */
 extern "C" void func_001C8320(void* self, cUIText* text, int* info, float* out)
 {
-    sVec3_8320 v = *(sVec3_8320*)((char*)text + 0x50);
-    char* g = (char*)cUIText_getFont(text);
-    float sx = *(float*)(g + 0x30) * v.x;
-    float sy = *(float*)(g + 0x34) * v.y;
-    *(float*)(g + 0x38) = sx;
-    *(float*)(g + 0x3C) = sy;
-    char* f;
+    sVec3_8320 textScale = *(sVec3_8320*)((char*)text + 0x50);
+    char* scaledFont = (char*)cUIText_getFont(text);
+    float sx = *(float*)(scaledFont + 0x30) * textScale.x;
+    float sy = *(float*)(scaledFont + 0x34) * textScale.y;
+    *(float*)(scaledFont + 0x38) = sx;
+    *(float*)(scaledFont + 0x3C) = sy;
+    char* measureFont;
     switch (info[0]) {
     case 1:
-        f = (char*)cUIText_getFont(text);
-        func_003921F0(f, (const char*)info[1], out, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
+        measureFont = (char*)cUIText_getFont(text);
+        func_003921F0(measureFont, (const char*)info[1], out, 0, *(float*)(measureFont + 0x38), *(float*)(measureFont + 0x3C));
         break;
     case 2:
-        f = (char*)cUIText_getFont(text);
-        cFont_textExtent(f, (const char*)info[1], out, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
+        measureFont = (char*)cUIText_getFont(text);
+        cFont_textExtent(measureFont, (const char*)info[1], out, 0, *(float*)(measureFont + 0x38), *(float*)(measureFont + 0x3C));
         break;
     case 3: {
-        char* o = (char*)SSXApp->FELocale;
-        sVEntry_8320* vt = *(sVEntry_8320**)(o + 4);
-        char* str = vt[4].fn(o + vt[4].delta, info[1]);
+        char* feLocale = (char*)SSXApp->FELocale;
+        sVEntry_8320* vt = *(sVEntry_8320**)(feLocale + 4);
+        char* str = vt[4].fn(feLocale + vt[4].delta, info[1]);
         if (str) {
-            f = (char*)cUIText_getFont(text);
-            func_003921F0(f, str, out, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
+            measureFont = (char*)cUIText_getFont(text);
+            func_003921F0(measureFont, str, out, 0, *(float*)(measureFont + 0x38), *(float*)(measureFont + 0x3C));
         } else {
             char buf[0x40];
             sprintf(buf, str_String_pct_08x, info[1]);
-            f = (char*)cUIText_getFont(text);
-            cFont_textExtent(f, buf, out, 0, *(float*)(f + 0x38), *(float*)(f + 0x3C));
+            measureFont = (char*)cUIText_getFont(text);
+            cFont_textExtent(measureFont, buf, out, 0, *(float*)(measureFont + 0x38), *(float*)(measureFont + 0x3C));
         }
         break;
     }
@@ -1790,11 +1790,11 @@ struct sVEntry001C8628 {
  */
 extern "C" void func_001C8628(void* self, void* obj, void* out)
 {
-    sVec2_8628 v;
+    sVec2_8628 widgetSize;
     sVEntry001C8628* vt = *(sVEntry001C8628**)((char*)obj + 8);
-    vt[20].fn((char*)obj + vt[20].delta, &v);
-    *(float*)((char*)out + 0x8) = v.x;
-    *(float*)((char*)out + 0xC) = v.y;
+    vt[20].fn((char*)obj + vt[20].delta, &widgetSize);
+    *(float*)((char*)out + 0x8) = widgetSize.x;
+    *(float*)((char*)out + 0xC) = widgetSize.y;
 }
 #endif
 
@@ -2175,16 +2175,16 @@ extern "C" void func_001C9038(void* self, void* text, unsigned short* str, float
     buf[0] = 0;
     int n = USTR_length(str);
     while (i < n) {
-        unsigned short c = str[i];
+        unsigned short curChar = str[i];
         unsigned short next = str[i + 1];
-        if (c == D_004A1C38 && next == D_004A1C38) {
+        if (curChar == D_004A1C38 && next == D_004A1C38) {
             buf[j] = 0;
             func_001C8568(self, text, (const char*)buf, item);
             i += 2;
             j = 0;
             cScreenPopup_increaseBoxSize(self, size, item);
             size[1] += 3.0f;
-        } else if (c == '\r') {
+        } else if (curChar == '\r') {
             buf[j] = 0;
             func_001C8568(self, text, (const char*)buf, item);
             i += 1;
@@ -2192,7 +2192,7 @@ extern "C" void func_001C9038(void* self, void* text, unsigned short* str, float
             cScreenPopup_increaseBoxSize(self, size, item);
             size[1] += 3.0f;
         } else {
-            buf[j] = c;
+            buf[j] = curChar;
             i++;
             j++;
         }
@@ -2373,17 +2373,17 @@ extern "C" void func_001C94B0(void* self, void* text, void* strp, void* outp)
     int done = 0;
     unsigned short* buf = new (str_UITEXTTEMP, 0x100, 0) unsigned short[n + 1];
     USTR_copy(buf, str);
-    sVec3_94B0 v;
+    sVec3_94B0 textScale;
     sVec2_94B0 size;
     sVEntry_94B0* vt = *(sVEntry_94B0**)((char*)text + 8);
     vt[20].fn((char*)text + vt[20].delta, &size);
-    v = *(sVec3_94B0*)((char*)text + 0x50);
+    textScale = *(sVec3_94B0*)((char*)text + 0x50);
     while (i < n) {
         if (buf[i] == D_004A1C38 && buf[i + 1] == D_004A1C38) {
             w = 0.0f;
             i += 2;
         } else {
-            float cw = func_00392C60(font, buf[i]) * v.x;
+            float cw = func_00392C60(font, buf[i]) * textScale.x;
             w += cw;
             if (size.x < w) {
                 done = 1;
@@ -2594,11 +2594,11 @@ extern "C" void func_001C9938(void* self, cUIText* text, void* strp, float* out)
     int i = 0;
     unsigned short* buf = new (str_UITEXTTEMP, 0x100, 0) unsigned short[n + 1];
     USTR_copy(buf, str);
-    sVec3_9938 v;
+    sVec3_9938 textScale;
     sVec2_9938 size;
     sVEntry_9938* vt = *(sVEntry_9938**)((char*)text + 8);
     vt[20].fn((char*)text + vt[20].delta, &size);
-    v = *(sVec3_9938*)((char*)text + 0x50);
+    textScale = *(sVec3_9938*)((char*)text + 0x50);
     while (i < n) {
         if (buf[i] == D_004A1C38 && buf[i + 1] == D_004A1C38) {
             last = -1;
@@ -2609,7 +2609,7 @@ extern "C" void func_001C9938(void* self, cUIText* text, void* strp, float* out)
                 w = 0.0f;
                 last = -1;
             } else {
-                float cw = func_00392C60(font, buf[i]) * v.x;
+                float cw = func_00392C60(font, buf[i]) * textScale.x;
                 if (buf[i] == ' ')
                     last = i;
                 w += cw;
@@ -3379,26 +3379,26 @@ extern char str_kT_OVRCMNCheatCharColon[];
 /**
  * Fills a buy popup for a reward: price, cash, the reward's name and type, and the "buy item" question.
  *
- * Sets mCost to @p a3, mMoney to @p a4 and mCreditsLeft to -1; mItemName is the ascii string @p a2, mQuestion the text
+ * Sets mCost to @p cost, mMoney to @p money and mCreditsLeft to -1; mItemName is the ascii string @p rewardName, mQuestion the text
  * id of "kT_OVRCMNBuyItem". mItemType gets the text id for @p kind: 3 "kT_OVRCMNPosterColon", 4 "kT_OVRCMNCardColon", 5
  * "kT_OVRCMNArtColon", 6 "kT_OVRCMNVideoColon", 7 "kT_OVRCMNToyColon", 8 "kT_OVRCMNCheatCharColon"; any other kind
  * leaves it unchanged.
  *
  * @param desc  the cBuyPopupInfo to fill
  * @param kind  the reward type (3..8)
- * @param a2    the reward's name (ascii string, passed as int)
- * @param a3    the price
- * @param a4    the player's cash
+ * @param rewardName    the reward's name (ascii string, passed as int)
+ * @param cost    the price
+ * @param money    the player's cash
  */
-extern "C" void func_001CAA18(int* desc, int kind, int a2, int a3, int a4)
+extern "C" void func_001CAA18(int* desc, int kind, int rewardName, int cost, int money)
 {
-    desc[4] = a2;
+    desc[4] = rewardName;
     desc[3] = 2;
     desc[8] = GetHashValue32(str_kT_OVRCMNBuyItem);
     desc[7] = 3;
     desc[2] = -1;
-    desc[0] = a3;
-    desc[1] = a4;
+    desc[0] = cost;
+    desc[1] = money;
     switch (kind) {
     case 3:
         desc[6] = GetHashValue32(str_kT_OVRCMNPosterColon);
@@ -6433,19 +6433,19 @@ extern sPopupSlot_E6F0 D_0045AAD8[][4][5];
 /**
  * Counts the events listed for one peak of one mountain in the event table D_0045AAD8.
  *
- * Looks at the five entries D_0045AAD8[@p a][@p b][0..4] and counts them up to the first whose first byte (the event's
+ * Looks at the five entries D_0045AAD8[@p mountain][@p peak][0..4] and counts them up to the first whose first byte (the event's
  * track/kind selector) is negative. Used by the trophy room (cFEStateTrophyRoom_onWidgetCreate) and the lodge
  * (cFEStatePeakRoom_updateMedalsList) to size their event rows.
  *
- * @param a  the mountain (0..2)
- * @param b  the peak (0..3)
+ * @param mountain  the mountain (0..2)
+ * @param peak  the peak (0..3)
  * @return the number of events before the first terminator (0..5)
  */
-extern "C" int func_001CE6F0(int a, int b)
+extern "C" int func_001CE6F0(int mountain, int peak)
 {
     int n = 0;
     for (int i = 0; i < 5; i++) {
-        if (D_0045AAD8[a][b][i].id >= 0) {
+        if (D_0045AAD8[mountain][peak][i].id >= 0) {
             n++;
         } else {
             break;

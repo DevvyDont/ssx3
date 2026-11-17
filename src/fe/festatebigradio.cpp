@@ -1054,18 +1054,18 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
  * the empty func_001A94D8; other events go to cFEStateNet_onPopupEvent. cFEStateBraggingRights_onPopupEvent calls it
  * online for that popup.
  *
- * @param a1  the popup
- * @param a2  the popup event
+ * @param popup  the popup
+ * @param popupEvent  the popup event
  */
-extern "C" void func_00194440(void* self, void* a1, int a2)
+extern "C" void func_00194440(void* self, void* popup, int popupEvent)
 {
-    if (a2 == 0xF) {
+    if (popupEvent == 0xF) {
         if (D_004A33CC != 0) {
             func_00265768(D_004A33CC, 249);
         }
         func_001A94D8(self);
     } else {
-        cFEStateNet_onPopupEvent(self, a1, a2);
+        cFEStateNet_onPopupEvent(self, popup, popupEvent);
     }
 }
 #endif

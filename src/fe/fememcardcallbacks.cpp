@@ -2410,7 +2410,7 @@ static inline bool IsModeK1D9880(char* mp, int m) { return *(int*)(mp + 0x130) =
  */
 extern "C" int func_001D9880(void* self)
 {
-    int r = 0;
+    int allowed = 0;
     int one = 1;
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     int st = *(int*)((char*)self + 0x1C0);
@@ -2418,11 +2418,11 @@ extern "C" int func_001D9880(void* self)
         && (*(cMovieStreamK1D9880**)(mp + 0x434))->v11() == 0) {
         if (!IsModeK1D9880(mp, 6) && !IsModeK1D9880(mp, 1)) {
             if ((*(cMovieStreamK1D9880**)(mp + 0x434))->v75() != 0) {
-                r = one;
+                allowed = one;
             }
         }
     }
-    return r;
+    return allowed;
 }
 #endif
 

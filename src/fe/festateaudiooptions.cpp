@@ -419,20 +419,20 @@ static inline int Find_196B90(char* mgr, int hash)
  * Runs the cUIState constructor func_0039E2A0 (the engine reaches it in the second argument register), sets the state
  * id (+0xC) to 17, stores cFEStateRequestLine_vtbl and the user (+0x44), and copies the user's control mask from the
  * custom interface (func_001A1CD0) into +0x15 when there is one. Zeroes the 0x100-byte buffer at +0x4C and the fields
- * up to +0x200, keeps @p a3 at +0x16C, finds the "checkbox", "empty_box" and "yell_dollar_sign" texture elements
+ * up to +0x200, keeps @p inStore at +0x16C, finds the "checkbox", "empty_box" and "yell_dollar_sign" texture elements
  * (+0x204, +0x208, +0x20C), reads the user's character (+0x48, cBENewPlayerInterface_getPlayerCharID), money (+0x168,
  * cBEEconInterface_getMoney) and two 64-bit values of BE interface 13 (func_00158728 into +0x160, func_00158750 into
  * +0x158), copies the audio object's word +0x504 into +0x14C and runs cFEStateRequestLine_generatePlayList.
  *
- * @param p    the state's memory (528 bytes)
- * @param a1   the UI engine (not read here; see above)
+ * @param requestLine    the state's memory (528 bytes)
+ * @param uiEngine   the UI engine (not read here; see above)
  * @param idx  the user
- * @param a3   nonzero when opened from the store (cFECustom_getNextState passes D_004A19D8)
- * @return @p p
+ * @param inStore   nonzero when opened from the store (cFECustom_getNextState passes D_004A19D8)
+ * @return @p requestLine
  */
-extern "C" void* func_00196B90(void* p, int a1, signed char idx, int a3)
+extern "C" void* func_00196B90(void* requestLine, int uiEngine, signed char idx, int inStore)
 {
-    sAudioState_196B90* self = (sAudioState_196B90*)p;
+    sAudioState_196B90* self = (sAudioState_196B90*)requestLine;
     func_0039E2A0(self);
     *(int*)((char*)self + 0xC) = 17;
     *(void***)((char*)self + 0x8) = cFEStateRequestLine_vtbl;
@@ -452,7 +452,7 @@ extern "C" void* func_00196B90(void* p, int a1, signed char idx, int a3)
     self->f1B8 = 0;
     for (int i = 5; i >= 0; i--)
         self->a1BC[i] = 0;
-    self->f16C = a3;
+    self->f16C = inStore;
     self->f1D4 = 0;
     self->f1DC = 0;
     self->f1D8 = 0;

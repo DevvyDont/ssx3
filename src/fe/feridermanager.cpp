@@ -101,18 +101,18 @@ extern "C" void func_0019E7F0(int* self)
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     void* db = func_0014BDB8_noarg();
     sItemListE7F0* list = (sItemListE7F0*)func_0014AD28(iface, self[1], self[0]);
-    sBoneEntE7F0* e = (sBoneEntE7F0*)func_0014D998(db, self[0]);
+    sBoneEntE7F0* partEntry = (sBoneEntE7F0*)func_0014D998(db, self[0]);
     int n = func_0014D988(db, self[0]);
     *(int*)((char*)self + 0xCB8) = 0;
     int i;
-    for (i = 0; i < n; i++, e++) {
-        if (e->type == 6) {
-            sItemE7F0* it = getItemK19E7F0(list, list->map[e->slot]);
+    for (i = 0; i < n; i++, partEntry++) {
+        if (partEntry->type == 6) {
+            sItemE7F0* it = getItemK19E7F0(list, list->map[partEntry->slot]);
             if (func_0019CCE8(D_004A1968, self[1], it->id) < 0) {
                 char buf[0x100];
-                if (func_0014B988(iface, self[1], self[0], e, buf)) {
-                    int r = func_0019DA10(mgr, self[0], buf, 11, 1, 1);
-                    func_0019CD38(D_004A1968, self[1], it->id, r);
+                if (func_0014B988(iface, self[1], self[0], partEntry, buf)) {
+                    int fileSlot = func_0019DA10(mgr, self[0], buf, 11, 1, 1);
+                    func_0019CD38(D_004A1968, self[1], it->id, fileSlot);
                 }
             }
         }
@@ -234,20 +234,20 @@ extern "C" void func_0019EBA0(void* self)
     if (animModel != 0) {
         cAnimModel__cAnimModel(animModel, 3);
     }
-    char* o = *(char**)((char*)self + 0xC);
-    if (o != 0) {
-        sVE_EBA0* vt = *(sVE_EBA0**)(o + 0x58);
-        vt[1].fn(o + vt[1].delta, 3);
+    char* ownedObject = *(char**)((char*)self + 0xC);
+    if (ownedObject != 0) {
+        sVE_EBA0* vt = *(sVE_EBA0**)(ownedObject + 0x58);
+        vt[1].fn(ownedObject + vt[1].delta, 3);
     }
-    o = *(char**)((char*)self + 0xC74);
-    if (o != 0) {
-        sVE_EBA0* vt = *(sVE_EBA0**)(o + 0xC4);
-        vt[1].fn(o + vt[1].delta, 3);
+    ownedObject = *(char**)((char*)self + 0xC74);
+    if (ownedObject != 0) {
+        sVE_EBA0* vt = *(sVE_EBA0**)(ownedObject + 0xC4);
+        vt[1].fn(ownedObject + vt[1].delta, 3);
     }
-    o = *(char**)((char*)self + 0xC70);
-    if (o != 0) {
-        sVE_EBA0* vt = *(sVE_EBA0**)(o + 0xA4);
-        vt[1].fn(o + vt[1].delta, 3);
+    ownedObject = *(char**)((char*)self + 0xC70);
+    if (ownedObject != 0) {
+        sVE_EBA0* vt = *(sVE_EBA0**)(ownedObject + 0xA4);
+        vt[1].fn(ownedObject + vt[1].delta, 3);
     }
     *(void**)((char*)self + 0x8) = 0;
     *(void**)((char*)self + 0xC) = 0;
@@ -293,11 +293,11 @@ struct sItemListEC68 {
  * queued texture file (func_0019CCE8 / func_0019DC20, slot reset with func_0019CD38) and a queued model-part file
  * (func_0019CBE0 / func_0019DC20, reset with func_0019CC30).
  *
- * @param p  the front-end rider
+ * @param rider  the front-end rider
  */
-extern "C" void func_0019EC68(void* p)
+extern "C" void func_0019EC68(void* rider)
 {
-    int* self = (int*)p;
+    int* self = (int*)rider;
     if (self[1] < 0)
         return;
     if (self[0] < 0)
@@ -308,14 +308,14 @@ extern "C" void func_0019EC68(void* p)
     int n = list->count;
     int i;
     for (i = 0; i < n; i++) {
-        int r = func_0019CCE8(D_004A1968, self[1], list->items[i].id);
-        if (r >= 0) {
-            func_0019DC20(mgr, self[0], r);
+        int fileSlot = func_0019CCE8(D_004A1968, self[1], list->items[i].id);
+        if (fileSlot >= 0) {
+            func_0019DC20(mgr, self[0], fileSlot);
             func_0019CD38(D_004A1968, self[1], list->items[i].id, -1);
         }
-        r = func_0019CBE0(D_004A1968, self[1], list->items[i].id);
-        if (r >= 0) {
-            func_0019DC20(mgr, self[0], r);
+        fileSlot = func_0019CBE0(D_004A1968, self[1], list->items[i].id);
+        if (fileSlot >= 0) {
+            func_0019DC20(mgr, self[0], fileSlot);
             func_0019CC30(D_004A1968, self[1], list->items[i].id, -1);
         }
     }
@@ -380,10 +380,10 @@ extern "C" void func_0019ED80(sFERiderED80* self)
     func_00104D50(anim, self);
     cRiderAnimBase_play(self->anim, 434, 0, -1.0f);
     cRiderAnimBase_setupAnimation(self->anim, 0);
-    sHalfED80 p[2];
-    p[1] = tPose_Identity;
-    p[0] = tPose_Identity;
-    cAnimModel_transform(self->model, p);
+    sHalfED80 identityPose[2];
+    identityPose[1] = tPose_Identity;
+    identityPose[0] = tPose_Identity;
+    cAnimModel_transform(self->model, identityPose);
     cFERider_initBoneMap(self);
 }
 #endif
@@ -461,7 +461,7 @@ struct sVE_EE88 {
 extern "C" void func_0019EE88(void* selfp)
 {
     sFERider_EE88* self = (sFERider_EE88*)selfp;
-    sMtx_EE88 m;
+    sMtx_EE88 worldMatrix;
     sVec4_EE88 pos;
     if (self->pending >= 0)
         return;
@@ -469,7 +469,7 @@ extern "C" void func_0019EE88(void* selfp)
         return;
     if (self->f14 == 0)
         return;
-    func_00389260(&m);
+    func_00389260(&worldMatrix);
     int type = self->type;
     if (self->fCD0 != 0) {
         switch (type) {
@@ -488,46 +488,46 @@ extern "C" void func_0019EE88(void* selfp)
     }
     switch (type) {
     case 0:
-        func_00389590(&m, func_0038AC20(D_005047F8, str_moby), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, func_0038AC20(D_005047F8, str_moby), D_00504810, 1.0f);
         break;
     case 1:
-        func_00389590(&m, func_0038AC20(D_005047F8, str_kaori), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, func_0038AC20(D_005047F8, str_kaori), D_00504810, 1.0f);
         break;
     case 2:
-        func_00389590(&m, func_0038AC20(D_005047F8, str_allegra), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, func_0038AC20(D_005047F8, str_allegra), D_00504810, 1.0f);
         break;
     case 3:
-        func_00389590(&m, func_0038AC20(D_005047F8, str_mac), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, func_0038AC20(D_005047F8, str_mac), D_00504810, 1.0f);
         break;
     case 4:
-        func_00389590(&m, func_0038AC20(D_005047F8, str_zoe), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, func_0038AC20(D_005047F8, str_zoe), D_00504810, 1.0f);
         break;
     case 5:
-        func_00389590(&m, func_0038AC20(D_005047F8, str_griff), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, func_0038AC20(D_005047F8, str_griff), D_00504810, 1.0f);
         break;
     case 6:
-        func_00389590(&m, func_0038AC20(D_005047F8, str_elise), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, func_0038AC20(D_005047F8, str_elise), D_00504810, 1.0f);
         break;
     case 7:
-        func_00389590(&m, func_0038AC20(D_005047F8, str_nate), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, func_0038AC20(D_005047F8, str_nate), D_00504810, 1.0f);
         break;
     case 8:
-        func_00389590(&m, func_0038AC20(D_005047F8, str_psymon), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, func_0038AC20(D_005047F8, str_psymon), D_00504810, 1.0f);
         break;
     case 9:
-        func_00389590(&m, func_0038AC20(D_005047F8, str_viggo), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, func_0038AC20(D_005047F8, str_viggo), D_00504810, 1.0f);
         break;
     default:
-        func_00389590(&m, func_0038AC20(D_005047F8, str_fe_map), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, func_0038AC20(D_005047F8, str_fe_map), D_00504810, 1.0f);
         break;
     }
     int idx = cAnimModel_getBoneSkelIndex(self->model, 0, str_hips);
     pos = self->model->bones[idx * 2];
-    func_00389CB8(&m, &pos, 1.0f);
+    func_00389CB8(&worldMatrix, &pos, 1.0f);
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVE_EE88* vt = (sVE_EE88*)ps2GraphicsMan->mVtbl;
-        vt[69].fn((char*)ps2GraphicsMan + vt[69].delta, &m, 1);
+        vt[69].fn((char*)ps2GraphicsMan + vt[69].delta, &worldMatrix, 1);
     }
     int* fl = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
     unsigned int old = (unsigned int)(*fl & 0x3E0) >> 5;
@@ -655,20 +655,20 @@ extern "C" void cAnimModel_buildSkelMatrices(void* model);
  */
 extern "C" void func_0019F2D0(void* self)
 {
-    sHalfF2D0 p[2];
+    sHalfF2D0 poses[2];
     if (*(int*)((char*)self + 0xCCC) != 0) {
-        p[0] = *(sHalfF2D0*)((char*)self + 0xC30);
-        p[1] = *(sHalfF2D0*)((char*)self + 0xC30);
-        cAnimModel_transform(*(void**)((char*)self + 0x8), p);
+        poses[0] = *(sHalfF2D0*)((char*)self + 0xC30);
+        poses[1] = *(sHalfF2D0*)((char*)self + 0xC30);
+        cAnimModel_transform(*(void**)((char*)self + 0x8), poses);
         cAnimModel_buildSkelMatrices(*(void**)((char*)self + 0x8));
     } else {
-        p[0] = *(sHalfF2D0*)((char*)self + 0xC30);
-        p[1] = *(sHalfF2D0*)((char*)self + 0xC50);
+        poses[0] = *(sHalfF2D0*)((char*)self + 0xC30);
+        poses[1] = *(sHalfF2D0*)((char*)self + 0xC50);
         (*(sQuadF2D0**)(*(char**)((char*)self + 0x8) + 0x24))[*(int*)((char*)self + 0xCAC)] = t4vect_Origin;
         (*(sQuadF2D0**)(*(char**)((char*)self + 0x8) + 0x28))[*(int*)((char*)self + 0xCAC)] = D_004FF220;
         (*(sQuadF2D0**)(*(char**)((char*)self + 0x8) + 0x24))[*(int*)((char*)self + 0xCB0)] = t4vect_Origin;
         (*(sQuadF2D0**)(*(char**)((char*)self + 0x8) + 0x28))[*(int*)((char*)self + 0xCB0)] = D_004FF220;
-        cAnimModel_transform(*(void**)((char*)self + 0x8), p);
+        cAnimModel_transform(*(void**)((char*)self + 0x8), poses);
         cAnimModel_buildSkelMatrices(*(void**)((char*)self + 0x8));
     }
     *(int*)((char*)self + 0x14) = 1;
@@ -1126,9 +1126,9 @@ extern "C" void func_0019F780(int* self)
     int i;
     for (i = 0; i < n; i++) {
         if (it[i].flags & 0x10) {
-            sBoneEntF780* e = getEntK19F780(db, func_0014D448(db, self[0], it[i].id));
-            if (e->f10 >= 0)
-                cAnimModel_setModelPartVariant(*(void**)((char*)self + 0x8), e->f10, e->f1);
+            sBoneEntF780* partEntry = getEntK19F780(db, func_0014D448(db, self[0], it[i].id));
+            if (partEntry->f10 >= 0)
+                cAnimModel_setModelPartVariant(*(void**)((char*)self + 0x8), partEntry->f10, partEntry->f1);
         }
     }
     **(int**)((char*)self + 0xC74) = 1;
@@ -1217,8 +1217,8 @@ extern "C" void func_0019F908(sRiderTable_F878* self, sPkg_F908* pkg, int replac
     int n = pkg->count;
     int i;
     for (i = 0; i < n; i++) {
-        sPkgEnt_F908* e = &pkg->ents[i];
-        char* data = (char*)pkg + e->off;
+        sPkgEnt_F908* imageEntry = &pkg->ents[i];
+        char* data = (char*)pkg + imageEntry->off;
         char name[8];
         *(sName2_F908*)name = *(sName2_F908*)D_004A19A8;
         func_00416210(name + 2, 0, 6);
@@ -1305,14 +1305,14 @@ extern "C" void func_0019FA78(int* self, sItemListFA78* list)
         list = (sItemListFA78*)func_0014AD28(iface, self[1], self[0]);
     int flag = 1;
     int n = func_0014D988(db, self[0]);
-    sBoneEntFA78* e = (sBoneEntFA78*)func_0014D998(db, self[0]);
+    sBoneEntFA78* partEntry = (sBoneEntFA78*)func_0014D998(db, self[0]);
     int i;
-    for (i = 0; i < n; i++, e++) {
-        sItemFA78* it = getItemK19FA78(list, list->map[e->slot]);
-        int r = func_0019CCE8(D_004A1968, self[1], it->id);
-        if (r >= 0) {
-            if (e->type != 6) {
-                func_0019DC20(mgr, self[0], r);
+    for (i = 0; i < n; i++, partEntry++) {
+        sItemFA78* it = getItemK19FA78(list, list->map[partEntry->slot]);
+        int fileSlot = func_0019CCE8(D_004A1968, self[1], it->id);
+        if (fileSlot >= 0) {
+            if (partEntry->type != 6) {
+                func_0019DC20(mgr, self[0], fileSlot);
                 func_0019CD38(D_004A1968, self[1], it->id, -1);
             } else {
                 flag = 0;
@@ -1377,9 +1377,9 @@ static inline sItemFBE0* getItemK19FBE0(sItemListFBE0* list, int i)
  *
  * @param list  the character's item list
  * @param a2    not used
- * @param a3    passed to func_0019DA10 as its keep-existing argument (nonzero keeps a slot already loading or loaded)
+ * @param keepLoaded    passed to func_0019DA10 as its keep-existing argument (nonzero keeps a slot already loading or loaded)
  */
-extern "C" void func_0019FBE0(int* self, sItemListFBE0* list, int a2, int a3)
+extern "C" void func_0019FBE0(int* self, sItemListFBE0* list, int a2, int keepLoaded)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     void* db = func_0014BDB8_noarg();
@@ -1388,16 +1388,16 @@ extern "C" void func_0019FBE0(int* self, sItemListFBE0* list, int a2, int a3)
     *(int*)((char*)self + 0xCB8) = 0;
     *(int*)((char*)self + 0xCC0) = 0;
     int n = func_0014D988(db, self[0]);
-    sBoneEntFBE0* e = (sBoneEntFBE0*)func_0014D998(db, self[0]);
+    sBoneEntFBE0* partEntry = (sBoneEntFBE0*)func_0014D998(db, self[0]);
     int i;
-    for (i = 0; i < n; i++, e++) {
-        sItemFBE0* it = getItemK19FBE0(list, list->map[e->slot]);
+    for (i = 0; i < n; i++, partEntry++) {
+        sItemFBE0* it = getItemK19FBE0(list, list->map[partEntry->slot]);
         if (func_0019CCE8(D_004A1968, self[1], it->id) < 0) {
             if (it->flags & 0x10) {
                 char buf[0x100];
-                if (func_0014B988(iface, self[1], self[0], e, buf)) {
-                    int r = func_0019DA10(mgr, self[0], buf, 11, a3, 1);
-                    func_0019CD38(D_004A1968, self[1], it->id, r);
+                if (func_0014B988(iface, self[1], self[0], partEntry, buf)) {
+                    int fileSlot = func_0019DA10(mgr, self[0], buf, 11, keepLoaded, 1);
+                    func_0019CD38(D_004A1968, self[1], it->id, fileSlot);
                 }
             }
         }
@@ -1452,9 +1452,9 @@ extern "C" int func_0019FD58(int* self)
     char* mgr = (char*)SSXApp->RealFE + 0x1A70;
     for (int i = 0; i < n; i++) {
         sItemFD58* it = &list->items[i];
-        int r = func_0019CCE8(D_004A1968, self[1], it->id);
-        if (r >= 0) {
-            if (func_0019E238(mgr, self[0], r) == 0) {
+        int fileSlot = func_0019CCE8(D_004A1968, self[1], it->id);
+        if (fileSlot >= 0) {
+            if (func_0019E238(mgr, self[0], fileSlot) == 0) {
                 ok = 0;
             }
         }
@@ -1464,15 +1464,15 @@ extern "C" int func_0019FD58(int* self)
         MEM_fill(used, 0, sizeof(used));
         for (int i = 0; i < n; i++) {
             sItemFD58* it = &list->items[i];
-            int r = func_0019CCE8(D_004A1968, self[1], it->id);
-            if (r >= 0) {
-                if (func_0019E2B0(mgr, self[0], r) && used[r] == 0) {
-                    sPkg_F908* pkg = (sPkg_F908*)func_0019E2B0(mgr, self[0], r);
+            int fileSlot = func_0019CCE8(D_004A1968, self[1], it->id);
+            if (fileSlot >= 0) {
+                if (func_0019E2B0(mgr, self[0], fileSlot) && used[fileSlot] == 0) {
+                    sPkg_F908* pkg = (sPkg_F908*)func_0019E2B0(mgr, self[0], fileSlot);
                     int fl = it->flags & 0x10;
                     func_0019F908((sRiderTable_F878*)self, pkg, fl != 0);
                 }
-                used[r] = 1;
-                func_0019DC20(mgr, self[0], r);
+                used[fileSlot] = 1;
+                func_0019DC20(mgr, self[0], fileSlot);
                 func_0019CD38(D_004A1968, self[1], it->id, -1);
             }
         }
@@ -1531,9 +1531,9 @@ static inline sBoneEntFF00* getEntK19FF00(sBoneDbFF00* db, int i)
  * @param list   the character's item list
  * @param prev   the previous item list to compare with, or null
  * @param force  nonzero to queue every item's part
- * @param a4     passed to func_0019DA10 as its keep-existing argument
+ * @param keepLoaded     passed to func_0019DA10 as its keep-existing argument
  */
-extern "C" void func_0019FF00(int* self, sItemListFF00* list, sItemFF00* prev, int force, int a4)
+extern "C" void func_0019FF00(int* self, sItemListFF00* list, sItemFF00* prev, int force, int keepLoaded)
 {
     int n = list->count;
     sBoneDbFF00* db = (sBoneDbFF00*)func_0014BDB8_noarg();
@@ -1551,10 +1551,10 @@ extern "C" void func_0019FF00(int* self, sItemListFF00* list, sItemFF00* prev, i
         sItemFF00* it = &list->items[i];
         if (func_0019CBE0(D_004A1968, self[1], it->id) < 0) {
             if (force || ((it->flags & 0x10) && (prev == 0 || (prev->flags & 0x10) == 0))) {
-                sBoneEntFF00* e = getEntK19FF00(db, func_0014D448(db, self[0], it->id));
-                if (e->file) {
-                    int r = func_0019DA10(mgr, self[0], e->file, 8, a4, 1);
-                    func_0019CC30(D_004A1968, self[1], it->id, r);
+                sBoneEntFF00* partEntry = getEntK19FF00(db, func_0014D448(db, self[0], it->id));
+                if (partEntry->file) {
+                    int fileSlot = func_0019DA10(mgr, self[0], partEntry->file, 8, keepLoaded, 1);
+                    func_0019CC30(D_004A1968, self[1], it->id, fileSlot);
                     *(int*)((char*)self + 0xCBC) = 0;
                     *(int*)((char*)self + 0xCB4) = 0;
                 } else {
@@ -1655,9 +1655,9 @@ extern "C" int func_001A0100(int* self)
     char* mgr = (char*)SSXApp->RealFE + 0x1A70;
     for (int i = 0; i < n; i++) {
         sItem_A0100* it = &list->items[i];
-        int r = func_0019CBE0(D_004A1968, self[1], it->id);
-        if (r >= 0) {
-            if (func_0019E238(mgr, self[0], r) == 0) {
+        int fileSlot = func_0019CBE0(D_004A1968, self[1], it->id);
+        if (fileSlot >= 0) {
+            if (func_0019E238(mgr, self[0], fileSlot) == 0) {
                 ok = 0;
             }
         }
@@ -1666,33 +1666,33 @@ extern "C" int func_001A0100(int* self)
         for (int i = 0; i < n;) {
             int next = i + 1;
             sItem_A0100* it = &list->items[i];
-            int r = func_0019CBE0(D_004A1968, self[1], it->id);
-            if (r >= 0) {
+            int fileSlot = func_0019CBE0(D_004A1968, self[1], it->id);
+            if (fileSlot >= 0) {
                 sMdfArchive_A0100 arc;
                 func_00314978(&arc);
-                void* pkg = func_0019E2B0(mgr, self[0], r);
+                void* pkg = func_0019E2B0(mgr, self[0], fileSlot);
                 if (pkg) {
                     func_00314A40_data(&arc, pkg);
                 }
                 for (int j = i; j < n; j++) {
                     sItem_A0100* jt = &list->items[j];
-                    void* g;
+                    void* slotTable;
                     if (self) {
-                        g = D_004A1968;
+                        slotTable = D_004A1968;
                     } else {
-                        g = D_004A1968;
+                        slotTable = D_004A1968;
                     }
-                    if (func_0019CBE0(g, self[1], jt->id) == r) {
+                    if (func_0019CBE0(slotTable, self[1], jt->id) == fileSlot) {
                         if (pkg) {
-                            sBoneEnt_A0100* e = getEnt_A0100((sBoneDb_A0100*)func_0014BDB8_noarg(), jt->id, self[0]);
-                            if (e->file) {
-                                void* part = cMdfArchive_getModelPart(&arc, e->file);
+                            sBoneEnt_A0100* partEntry = getEnt_A0100((sBoneDb_A0100*)func_0014BDB8_noarg(), jt->id, self[0]);
+                            if (partEntry->file) {
+                                void* part = cMdfArchive_getModelPart(&arc, partEntry->file);
                                 if (part) {
-                                    cAnimModel_addModelPartLOD(*(void**)((char*)self + 0x8), 0, part, e->lod);
+                                    cAnimModel_addModelPartLOD(*(void**)((char*)self + 0x8), 0, part, partEntry->lod);
                                 }
                             }
                         }
-                        func_0019DC20(mgr, self[0], r);
+                        func_0019DC20(mgr, self[0], fileSlot);
                         func_0019CC30(D_004A1968, self[1], jt->id, -1);
                     }
                 }
@@ -1836,12 +1836,12 @@ extern "C" void cFERider_setCharID(void* slot, int a1, int a2);
  * Sets the character of front-end rider @p idx (cFERider_setCharID on that rider).
  *
  * @param idx  the rider (human index)
- * @param a2   the character id
- * @param a3   nonzero to load everything
+ * @param charId   the character id
+ * @param loadAll   nonzero to load everything
  */
-extern "C" void func_001A0508(void* self, int idx, int a2, int a3)
+extern "C" void func_001A0508(void* self, int idx, int charId, int loadAll)
 {
-    cFERider_setCharID((char*)self + idx * 0xce0, a2, a3);
+    cFERider_setCharID((char*)self + idx * 0xce0, charId, loadAll);
 }
 #endif
 
@@ -1899,11 +1899,11 @@ extern "C" void cFERider_setVisible(void* slot, int v);
  * Shows or hides front-end rider @p i (cFERider_setVisible on that rider).
  *
  * @param i  the rider
- * @param v  nonzero to show it
+ * @param visible  nonzero to show it
  */
-extern "C" void func_001A0570(void* self, int i, int v)
+extern "C" void func_001A0570(void* self, int i, int visible)
 {
-    cFERider_setVisible((char*)self + i * 0xce0, v);
+    cFERider_setVisible((char*)self + i * 0xce0, visible);
 }
 #endif
 
@@ -1920,14 +1920,14 @@ extern "C" void func_0019EE88(void* rider);
  */
 extern "C" void func_001A0598(char* self)
 {
-    char* p = (char*)GrMan;
-    *(int*)(p + 0x24) = 46;
-    *(int*)(p + 0x84) = 47;
-    *(int*)(p + 0x10A8) = *(int*)(p + 0x1008);
+    char* riderBase = (char*)GrMan;
+    *(int*)(riderBase + 0x24) = 46;
+    *(int*)(riderBase + 0x84) = 47;
+    *(int*)(riderBase + 0x10A8) = *(int*)(riderBase + 0x1008);
     for (int i = 0; i < 2; i++) {
-        p = self + i * 3296;
-        if (*(int*)(p + 0xCC8) != 0)
-            func_0019EE88(p);
+        riderBase = self + i * 3296;
+        if (*(int*)(riderBase + 0xCC8) != 0)
+            func_0019EE88(riderBase);
     }
 }
 #endif

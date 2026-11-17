@@ -67,11 +67,11 @@ struct sVEntry001A07C8 {
  * For the event whose hash is "whitefade" sends handleEvent (vtable entry 24) with (1, 0) to the state at +0x10 when
  * there is one and reports the event handled.
  *
- * @param a1    the screen that sent the event
+ * @param screen    the screen that sent the event
  * @param hash  the event (a name hash)
  * @return 1 for "whitefade", else 0
  */
-extern "C" int func_001A07C8(void* self, int a1, int hash)
+extern "C" int func_001A07C8(void* self, int screen, int hash)
 {
     if (hash == GetHashValue32(str_whitefade)) {
         void* obj = *(void**)((char*)self + 0x10);
@@ -556,14 +556,14 @@ static inline bool IsMode1_1A16C0()
  * the lodge or lodge rider detail instead of character setup / rider detail while D_004A19D8 is set; audio options;
  * event select (clearing cUITemplate_MAP_mMapStyle, setting D_004A2598); options; options save/load; title; mountain,
  * peak and rewards rooms; the online main menu or SSX world when D_004A1A70 is 1. For state 35 and out-of-range paths
- * it goes by the custom interface's +0xC (24 options save/load, 9 character select, 39 lodge). State 33 with @p arg 1
+ * it goes by the custom interface's +0xC (24 options save/load, 9 character select, 39 lodge). State 33 with @p stateData 1
  * sets the next app module to a new cPreGameLoadScreen and returns 0.
  *
  * @param desc  the current state
- * @param arg   the state data passed along (picks the branch for state 33; the peak and rewards rooms get it)
+ * @param stateData   the state data passed along (picks the branch for state 33; the peak and rewards rooms get it)
  * @return the new state, or 0 when there is none
  */
-extern "C" void* func_001A16C0(void** self, char* desc, int arg)
+extern "C" void* func_001A16C0(void** self, char* desc, int stateData)
 {
     switch (*(int*)(desc + 0xC)) {
     case 9:
@@ -613,9 +613,9 @@ extern "C" void* func_001A16C0(void** self, char* desc, int arg)
     case 20: {
         D_004A2598 = 1;
         cUITemplate_MAP_mMapStyle = 0;
-        char* p = (char*)cFEStateEventSelect_cFEStateEventSelect1(cMemMan_alloc(828, str_cFEStateEventSelect, 0, 0), *self, 0);
-        p[0x44] = 0;
-        return p;
+        char* eventSelect = (char*)cFEStateEventSelect_cFEStateEventSelect1(cMemMan_alloc(828, str_cFEStateEventSelect, 0, 0), *self, 0);
+        eventSelect[0x44] = 0;
+        return eventSelect;
     }
     case 21:
         D_004A2598 = 1;
@@ -625,11 +625,11 @@ extern "C" void* func_001A16C0(void** self, char* desc, int arg)
         return cFEStateCharSelect_cFEStateCharSelect(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, desc[0x44]);
     case 8: {
         cBE_getInterface_Fv(cBE_getBE(), 0);
-        int c = D_00535C11[0];
-        if (c >= 3) {
+        int gamePath = D_00535C11[0];
+        if (gamePath >= 3) {
             goto other;
         }
-        if (c < 0) {
+        if (gamePath < 0) {
             goto other;
         }
     }
@@ -659,7 +659,7 @@ extern "C" void* func_001A16C0(void** self, char* desc, int arg)
     case 38:
         return func_001887A0(cMemMan_alloc(84, str_cFEStateOptions, 0, 0), *self, 0);
     case 33:
-        switch (arg) {
+        switch (stateData) {
         case 0:
             if (((int*)self)[3] == 34) {
                 return func_001887A0(cMemMan_alloc(84, str_cFEStateOptions, 0, 0), *self, 0);
@@ -696,9 +696,9 @@ extern "C" void* func_001A16C0(void** self, char* desc, int arg)
     case 44:
         return cFEStateMountainRoom_cFEStateMountainRoom(cMemMan_alloc(200, str_cFEStateMountainRoom, 0, 0), *self, desc[0x44]);
     case 45:
-        return cFEStatePeakRoom_cFEStatePeakRoom(cMemMan_alloc(228, str_cFEStatePeakRoom, 0, 0), *self, desc[0x44], arg);
+        return cFEStatePeakRoom_cFEStatePeakRoom(cMemMan_alloc(228, str_cFEStatePeakRoom, 0, 0), *self, desc[0x44], stateData);
     case 47:
-        return cFEStateRewardsRoom_cFEStateRewardsRoom(cMemMan_alloc(80, str_cFEStateRewardsRoom, 0, 0), *self, desc[0x44], arg != 0);
+        return cFEStateRewardsRoom_cFEStateRewardsRoom(cMemMan_alloc(80, str_cFEStateRewardsRoom, 0, 0), *self, desc[0x44], stateData != 0);
     }
     return 0;
 }

@@ -806,11 +806,11 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF778);
  * An out-of-line inline accessor with no caller. It sits right after cFEStateNetQuickMessages' destructor; in that
  * class +0x6D0 is mbChanged.
  *
- * @param arg0  the state
+ * @param netState  the state
  * @return the int at +0x6D0
  */
-extern "C" int func_001DF778(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x6D0)));
+extern "C" int func_001DF778(void *netState) {
+    return (*(int *)((char*)(netState) + (0x6D0)));
 }
 #endif
 //100%
@@ -1010,11 +1010,11 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF990);
  * cFEStateNetHelpPopup_onGainTransition shows the title from this id (an empty title when 0). An out-of-line inline
  * setter with no caller.
  *
- * @param arg0   the help popup
+ * @param helpPopup   the help popup
  * @param value  the title's text id
  */
-extern "C" void func_001DF990(void *arg0, int value) {
-    (*(int *)((char*)(arg0) + (0x54))) = value;
+extern "C" void func_001DF990(void *helpPopup, int value) {
+    (*(int *)((char*)(helpPopup) + (0x54))) = value;
 }
 #endif
 //100%
@@ -1026,11 +1026,11 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF998);
  * cFEStateNetHelpPopup_onGainTransition shows it in the third text widget (+0xB0). An out-of-line inline setter with no
  * caller.
  *
- * @param arg0   the help popup
+ * @param helpPopup   the help popup
  * @param value  the bottom note's text id
  */
-extern "C" void func_001DF998(void *arg0, int value) {
-    (*(int *)((char*)(arg0) + (0x64))) = value;
+extern "C" void func_001DF998(void *helpPopup, int value) {
+    (*(int *)((char*)(helpPopup) + (0x64))) = value;
 }
 #endif
 //100%
@@ -1042,11 +1042,11 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF9A0);
  * When it is nonzero, cFEStateNetHelpPopup_handleEvent forwards events to mpParentState. An out-of-line inline setter
  * with no caller.
  *
- * @param arg0   the help popup
+ * @param helpPopup   the help popup
  * @param value  nonzero to forward events to the parent
  */
-extern "C" void func_001DF9A0(void *arg0, int value) {
-    (*(int *)((char*)(arg0) + (0x50))) = value;
+extern "C" void func_001DF9A0(void *helpPopup, int value) {
+    (*(int *)((char*)(helpPopup) + (0x50))) = value;
 }
 #endif
 //100%
@@ -1057,11 +1057,11 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF9A8);
  *
  * An out-of-line inline getter with no caller (see func_001DF9A0).
  *
- * @param arg0  the help popup
+ * @param helpPopup  the help popup
  * @return the forwarding flag
  */
-extern "C" int func_001DF9A8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x50)));
+extern "C" int func_001DF9A8(void *helpPopup) {
+    return (*(int *)((char*)(helpPopup) + (0x50)));
 }
 #endif
 //100%
@@ -1072,11 +1072,11 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF9B0);
  *
  * An out-of-line inline accessor with no caller; cFEStateCharEquip_cFEStateCharEquip stores 1 there in the store.
  *
- * @param arg0  the equip-gear state
+ * @param charEquip  the equip-gear state
  * @return 1 in store mode, else 0
  */
-extern "C" int func_001DF9B0(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xC8))) == 1;
+extern "C" int func_001DF9B0(void *charEquip) {
+    return (*(int *)((char*)(charEquip) + (0xC8))) == 1;
 }
 #endif
 //100%
@@ -1088,11 +1088,11 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF9C0);
  * cFEStateCharEquip_onUpdate sets it to 1 once the character's icon file has arrived in the FE file cache. An
  * out-of-line inline getter with no caller.
  *
- * @param arg0  the equip-gear state
+ * @param charEquip  the equip-gear state
  * @return nonzero once the icons are loaded
  */
-extern "C" int func_001DF9C0(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xA60)));
+extern "C" int func_001DF9C0(void *charEquip) {
+    return (*(int *)((char*)(charEquip) + (0xA60)));
 }
 #endif
 //100%
@@ -1104,11 +1104,11 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF9C8);
  * The constructor cFEStateCharEquip_cFEStateCharEquip stores its canSwitchMode argument there. An out-of-line inline
  * setter with no caller.
  *
- * @param arg0   the equip-gear state
+ * @param charEquip   the equip-gear state
  * @param value  nonzero to allow switching
  */
-extern "C" void func_001DF9C8(void *arg0, int value) {
-    (*(int *)((char*)(arg0) + (0xAE4))) = value;
+extern "C" void func_001DF9C8(void *charEquip, int value) {
+    (*(int *)((char*)(charEquip) + (0xAE4))) = value;
 }
 #endif
 //100%
@@ -1119,11 +1119,11 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF9D0);
  *
  * An out-of-line inline getter with no caller.
  *
- * @param arg0  the equip-gear state
+ * @param charEquip  the equip-gear state
  * @return the stored flag
  */
-extern "C" int func_001DF9D0(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xAE4)));
+extern "C" int func_001DF9D0(void *charEquip) {
+    return (*(int *)((char*)(charEquip) + (0xAE4)));
 }
 #endif
 //100%
@@ -1184,11 +1184,11 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFA70);
  *
  * An out-of-line inline getter with no caller.
  *
- * @param arg0  the gallery state
+ * @param gallery  the gallery state
  * @return the store number, or a negative value outside a store
  */
-extern "C" int func_001DFA70(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x8F0)));
+extern "C" int func_001DFA70(void *gallery) {
+    return (*(int *)((char*)(gallery) + (0x8F0)));
 }
 #endif
 //100%
@@ -1199,11 +1199,11 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFA78);
  *
  * An out-of-line inline accessor with no caller.
  *
- * @param arg0  the gallery state
+ * @param gallery  the gallery state
  * @return 1 when the store number is 0 or more, else 0
  */
-extern "C" unsigned int func_001DFA78(void *arg0) {
-    return (unsigned int) ~(*(int *)((char*)(arg0) + (0x8F0))) >> 0x1F;
+extern "C" unsigned int func_001DFA78(void *gallery) {
+    return (unsigned int) ~(*(int *)((char*)(gallery) + (0x8F0))) >> 0x1F;
 }
 #endif
 
@@ -1233,11 +1233,11 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFA90);
  * cFEStateRewardGalleryBase_updateIconsLoad sets the bit when the icon file has arrived; cFEStateRewardGalleryBase_loadIcons sets it right away when there is no icon
  * file. An out-of-line inline accessor with no caller.
  *
- * @param arg0  the gallery state
+ * @param gallery  the gallery state
  * @return 1 when the icons are loaded, else 0
  */
-extern "C" int func_001DFA90(void *arg0) {
-    return ((int) (*(int *)((char*)(arg0) + (0x48))) >> 3) & 1;
+extern "C" int func_001DFA90(void *gallery) {
+    return ((int) (*(int *)((char*)(gallery) + (0x48))) >> 3) & 1;
 }
 #endif
 
@@ -1282,11 +1282,11 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFAB0);
  * The gallery code sets bit 1 (clearing bit 0, loading) once the rewards are allocated. An out-of-line inline accessor
  * with no caller.
  *
- * @param arg0  the gallery state
+ * @param gallery  the gallery state
  * @return 1 when the rewards are loaded, else 0
  */
-extern "C" int func_001DFAB0(void *arg0) {
-    return ((int) (*(int *)((char*)(arg0) + (0x48))) >> 1) & 1;
+extern "C" int func_001DFAB0(void *gallery) {
+    return ((int) (*(int *)((char*)(gallery) + (0x48))) >> 1) & 1;
 }
 #endif
 
@@ -1449,12 +1449,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFB98);
  *
  * Vtable entry 35 (+0x11C) of D_0046A248; zero and negative values are returned unchanged.
  *
- * @param a1  the reward record
+ * @param reward  the reward record
  * @return the price
  */
-extern "C" int func_001DFB98(void* self, void* a1)
+extern "C" int func_001DFB98(void* self, void* reward)
 {
-    int value = *(short*)((char*)a1 + 0xc);
+    int value = *(short*)((char*)reward + 0xc);
     if (value > 0) value = value * 10;
     return value;
 }
@@ -1570,12 +1570,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFC68);
  *
  * Vtable entry 35 (+0x11C) of D_0046A0C8; zero and negative values are returned unchanged.
  *
- * @param a1  the reward record
+ * @param reward  the reward record
  * @return the price
  */
-extern "C" int func_001DFC68(void* self, void* a1)
+extern "C" int func_001DFC68(void* self, void* reward)
 {
-    int value = *(short*)((char*)a1 + 0xc);
+    int value = *(short*)((char*)reward + 0xc);
     if (value > 0) value = value * 10;
     return value;
 }
@@ -1691,12 +1691,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFD38);
  *
  * Vtable entry 35 (+0x11C) of D_00469F48; zero and negative values are returned unchanged.
  *
- * @param a1  the reward record
+ * @param reward  the reward record
  * @return the price
  */
-extern "C" int func_001DFD38(void* self, void* a1)
+extern "C" int func_001DFD38(void* self, void* reward)
 {
-    int value = *(short*)((char*)a1 + 0xc);
+    int value = *(short*)((char*)reward + 0xc);
     if (value > 0) value = value * 10;
     return value;
 }
@@ -1812,12 +1812,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFE08);
  *
  * Vtable entry 35 (+0x11C) of D_00469DC8; zero and negative values are returned unchanged.
  *
- * @param a1  the reward record
+ * @param reward  the reward record
  * @return the price
  */
-extern "C" int func_001DFE08(void* self, void* a1)
+extern "C" int func_001DFE08(void* self, void* reward)
 {
-    int value = *(short*)((char*)a1 + 0xc);
+    int value = *(short*)((char*)reward + 0xc);
     if (value > 0) value = value * 10;
     return value;
 }
@@ -1933,12 +1933,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFED8);
  *
  * Vtable entry 35 (+0x11C) of D_00469C48; zero and negative values are returned unchanged.
  *
- * @param a1  the reward record
+ * @param reward  the reward record
  * @return the price
  */
-extern "C" int func_001DFED8(void* self, void* a1)
+extern "C" int func_001DFED8(void* self, void* reward)
 {
-    int value = *(short*)((char*)a1 + 0xc);
+    int value = *(short*)((char*)reward + 0xc);
     if (value > 0) value = value * 10;
     return value;
 }
@@ -2054,12 +2054,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DFFA8);
  *
  * Vtable entry 35 (+0x11C) of D_00469AC8; zero and negative values are returned unchanged.
  *
- * @param a1  the reward record
+ * @param reward  the reward record
  * @return the price
  */
-extern "C" int func_001DFFA8(void* self, void* a1)
+extern "C" int func_001DFFA8(void* self, void* reward)
 {
-    int value = *(short*)((char*)a1 + 0xc);
+    int value = *(short*)((char*)reward + 0xc);
     if (value > 0) value = value * 10;
     return value;
 }
@@ -2205,11 +2205,11 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0030);
  * The constructor cFEStateVideoPlayer_cFEStateVideoPlayer sets it to 1; while it is set, the input handler cFEStateVideoPlayer_onInputBegin stops the movie when the
  * input's entry 5 or 6 answers nonzero. An out-of-line inline setter with no caller.
  *
- * @param arg0   the video-player state
+ * @param videoPlayer   the video-player state
  * @param value  nonzero to let input stop the movie
  */
-extern "C" void func_001E0030(void *arg0, int value) {
-    (*(int *)((char*)(arg0) + (0x270))) = value;
+extern "C" void func_001E0030(void *videoPlayer, int value) {
+    (*(int *)((char*)(videoPlayer) + (0x270))) = value;
 }
 #endif
 //100%
@@ -2220,11 +2220,11 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0038);
  *
  * An out-of-line inline setter with no caller.
  *
- * @param arg0   the video-player state
+ * @param videoPlayer   the video-player state
  * @param value  nonzero for full screen
  */
-extern "C" void func_001E0038(void *arg0, int value) {
-    (*(int *)((char*)(arg0) + (0x258))) = value;
+extern "C" void func_001E0038(void *videoPlayer, int value) {
+    (*(int *)((char*)(videoPlayer) + (0x258))) = value;
 }
 #endif
 //100%
@@ -2235,11 +2235,11 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0040);
  *
  * An out-of-line inline setter with no caller. The start routine cFEStateVideoPlayer_Start also sets the word to 1.
  *
- * @param arg0   the video-player state
+ * @param videoPlayer   the video-player state
  * @param value  nonzero to play the movie's sound
  */
-extern "C" void func_001E0040(void *arg0, int value) {
-    (*(int *)((char*)(arg0) + (0x254))) = value;
+extern "C" void func_001E0040(void *videoPlayer, int value) {
+    (*(int *)((char*)(videoPlayer) + (0x254))) = value;
 }
 #endif
 //100%
@@ -2292,11 +2292,11 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E00D0);
  * The room starts the pass image load in its constructor and resets the slot to -1 once the image is taken
  * (cFEStateMountainRoom_updateTextureLoad). An out-of-line inline accessor with no caller.
  *
- * @param arg0  the mountain-room state
+ * @param mountainRoom  the mountain-room state
  * @return 1 when the slot is -1, else 0
  */
-extern "C" int func_001E00D0(void *arg0) {
-    return ~(*(int *)((char*)(arg0) + (0xBC))) == 0;
+extern "C" int func_001E00D0(void *mountainRoom) {
+    return ~(*(int *)((char*)(mountainRoom) + (0xBC))) == 0;
 }
 #endif
 //100%
@@ -2338,14 +2338,14 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0110);
  * Reads the mVisible bit (bit 6) of the widget's mAttr; 0 when there is no widget. An out-of-line inline accessor with
  * no caller.
  *
- * @param arg0  the mountain-room state
+ * @param mountainRoom  the mountain-room state
  * @return 1 when the pass is shown, else 0
  */
-extern "C" int func_001E0110(void *arg0) {
+extern "C" int func_001E0110(void *mountainRoom) {
     int var_2;
     void *temp_3;
 
-    temp_3 = (*(void **)((char*)(arg0) + (0x48)));
+    temp_3 = (*(void **)((char*)(mountainRoom) + (0x48)));
     var_2 = 0;
     if (temp_3 != 0) {
         var_2 = ((int) (*(int *)((char*)(temp_3) + (0x14))) >> 6) & 1;
@@ -2362,23 +2362,23 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0130);
  * Each check reads the widget's mVisible bit (bit 6 of mAttr) and is 0 for a missing widget. cFEStateMountainRoom_updateTextureLoad makes the
  * same test before showing the pass. An out-of-line inline accessor with no caller.
  *
- * @param arg0  the mountain-room state
+ * @param mountainRoom  the mountain-room state
  * @return 1 when both are shown, else 0
  */
-extern "C" int func_001E0130(void *arg0) {
+extern "C" int func_001E0130(void *mountainRoom) {
     int var_2;
     int var_5;
     void *temp_3;
     void *temp_4;
 
-    temp_3 = (*(void **)((char*)(arg0) + (0x48)));
+    temp_3 = (*(void **)((char*)(mountainRoom) + (0x48)));
     var_5 = 0;
     var_2 = 0;
     if (temp_3 != 0) {
         var_2 = ((int) (*(int *)((char*)(temp_3) + (0x14))) >> 6) & 1;
     }
     if (var_2 != 0) {
-        temp_4 = (*(void **)((char*)(arg0) + (0x4C)));
+        temp_4 = (*(void **)((char*)(mountainRoom) + (0x4C)));
         if (temp_4 != 0) {
             var_5 = ((int) (*(int *)((char*)(temp_4) + (0x14))) >> 6) & 1;
         }
@@ -2523,11 +2523,11 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E02C8);
  *
  * The constructor cFEStateRewardsRoom_cFEStateRewardsRoom stores its inStore argument there. An out-of-line inline accessor with no caller.
  *
- * @param arg0  the rewards-room state
+ * @param rewardsRoom  the rewards-room state
  * @return the in-store flag
  */
-extern "C" int func_001E02C8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x4C)));
+extern "C" int func_001E02C8(void *rewardsRoom) {
+    return (*(int *)((char*)(rewardsRoom) + (0x4C)));
 }
 #endif
 
@@ -2777,11 +2777,11 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0570);
  *
  * An out-of-line inline accessor with no caller.
  *
- * @param arg0  the audio-options state
+ * @param audioOptions  the audio-options state
  * @return the in-store flag
  */
-extern "C" int func_001E0570(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x74)));
+extern "C" int func_001E0570(void *audioOptions) {
+    return (*(int *)((char*)(audioOptions) + (0x74)));
 }
 #endif
 //100%
@@ -2832,11 +2832,11 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E05D8);
  *
  * An out-of-line inline accessor with no caller.
  *
- * @param arg0  the request-line state
+ * @param requestLine  the request-line state
  * @return the in-store flag
  */
-extern "C" int func_001E05D8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x16C)));
+extern "C" int func_001E05D8(void *requestLine) {
+    return (*(int *)((char*)(requestLine) + (0x16C)));
 }
 #endif
 //100%
@@ -2845,12 +2845,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E05E0);
 /**
  * Counts the set bits of a 64-bit mask.
  *
- * @param unused  the request-line state (not used)
+ * @param requestLine  the request-line state (not used)
  * @param bits    the 64-bit mask
  * @return the number of bits set (0..64)
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" int func_001E05E0(void* unused, unsigned long bits) {
+extern "C" int func_001E05E0(void* requestLine, unsigned long bits) {
     int count;
     int i;
     int bit;
@@ -2899,12 +2899,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0648);
 /**
  * Reports whether the request line's playlist (the 64-bit mask at +0x158) is empty.
  *
- * @param arg0  the request-line state
+ * @param requestLine  the request-line state
  * @return 1 when no song is selected, else 0
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" int func_001E0648(void *arg0) {
-    return (*(long *)((char*)(arg0) + (0x158))) == 0;
+extern "C" int func_001E0648(void *requestLine) {
+    return (*(long *)((char*)(requestLine) + (0x158))) == 0;
 }
 #endif
 //100%
@@ -2945,11 +2945,11 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0698);
 /**
  * Counts the songs in the request line's playlist (the set bits of the 64-bit mask at +0x158).
  *
- * @param arg0  the request-line state
+ * @param requestLine  the request-line state
  * @return the number of selected songs
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" int func_001E0698(void *arg0) {
+extern "C" int func_001E0698(void *requestLine) {
     int temp_2;
     int var_4;
     int var_5;
@@ -2957,7 +2957,7 @@ extern "C" int func_001E0698(void *arg0) {
     var_5 = 0;
     var_4 = 0;
     do {
-        temp_2 = ((unsigned long) (*(unsigned long *)((char*)(arg0) + (0x158))) >> var_4) & 1;
+        temp_2 = ((unsigned long) (*(unsigned long *)((char*)(requestLine) + (0x158))) >> var_4) & 1;
         var_4 += 1;
         var_5 += temp_2;
     } while (var_4 < 0x40);
@@ -2999,11 +2999,11 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E0708);
 /**
  * Counts the owned songs (the set bits of the 64-bit mask at +0x160).
  *
- * @param arg0  the request-line state
+ * @param requestLine  the request-line state
  * @return the number of owned songs
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" int func_001E0708(void *arg0) {
+extern "C" int func_001E0708(void *requestLine) {
     int temp_2;
     int var_4;
     int var_5;
@@ -3011,7 +3011,7 @@ extern "C" int func_001E0708(void *arg0) {
     var_5 = 0;
     var_4 = 0;
     do {
-        temp_2 = ((unsigned long) (*(unsigned long *)((char*)(arg0) + (0x160))) >> var_4) & 1;
+        temp_2 = ((unsigned long) (*(unsigned long *)((char*)(requestLine) + (0x160))) >> var_4) & 1;
         var_4 += 1;
         var_5 += temp_2;
     } while (var_4 < 0x40);
@@ -5017,91 +5017,91 @@ struct sRun_12F0 {
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
 extern "C" void func_001E12F0(void)
 {
-    sCount_12F0* d = (sCount_12F0*)D_00441630;
+    sCount_12F0* groupTable = (sCount_12F0*)D_00441630;
     int i;
     int n;
 
     n = 6;
-    d[2].count = n;
-    d[3].count = n;
-    d[4].count = n;
-    d[5].count = n;
-    d[6].count = n;
-    d[1].count = n;
-    d[0].count = 0;
+    groupTable[2].count = n;
+    groupTable[3].count = n;
+    groupTable[4].count = n;
+    groupTable[5].count = n;
+    groupTable[6].count = n;
+    groupTable[1].count = n;
+    groupTable[0].count = 0;
     n = 11;
-    d[7].count = n;
+    groupTable[7].count = n;
     n = 17;
-    d[8].count = n;
+    groupTable[8].count = n;
     n = 7;
-    d[9].count = n;
+    groupTable[9].count = n;
     n = 6;
-    d[10].count = n;
+    groupTable[10].count = n;
     n = 8;
-    d[11].count = n;
+    groupTable[11].count = n;
     n = 3;
-    d[13].count = n;
-    d[14].count = n;
-    d[15].count = n;
-    d[16].count = n;
-    d[17].count = n;
-    d[18].count = n;
-    d[19].count = n;
-    d[20].count = n;
-    d[21].count = n;
-    d[12].count = n;
+    groupTable[13].count = n;
+    groupTable[14].count = n;
+    groupTable[15].count = n;
+    groupTable[16].count = n;
+    groupTable[17].count = n;
+    groupTable[18].count = n;
+    groupTable[19].count = n;
+    groupTable[20].count = n;
+    groupTable[21].count = n;
+    groupTable[12].count = n;
     n = 4;
-    d[23].count = n;
-    d[24].count = n;
-    d[25].count = n;
-    d[26].count = n;
-    d[27].count = n;
-    d[22].count = n;
+    groupTable[23].count = n;
+    groupTable[24].count = n;
+    groupTable[25].count = n;
+    groupTable[26].count = n;
+    groupTable[27].count = n;
+    groupTable[22].count = n;
     n = 16;
-    d[28].count = n;
-    d[29].count = n;
-    d[30].count = n;
-    d[31].count = n;
-    d[32].count = n;
-    d[33].count = n;
-    d[40].count = 0;
+    groupTable[28].count = n;
+    groupTable[29].count = n;
+    groupTable[30].count = n;
+    groupTable[31].count = n;
+    groupTable[32].count = n;
+    groupTable[33].count = n;
+    groupTable[40].count = 0;
     n = 2;
-    d[35].count = n;
-    d[36].count = n;
-    d[37].count = n;
-    d[38].count = n;
-    d[39].count = n;
-    d[34].count = n;
-    d[41].count = 0;
-    d[42].count = 0;
-    d[43].count = 0;
-    d[44].count = 0;
-    d[45].count = 0;
-    d[46].count = 0;
-    d[47].count = 0;
+    groupTable[35].count = n;
+    groupTable[36].count = n;
+    groupTable[37].count = n;
+    groupTable[38].count = n;
+    groupTable[39].count = n;
+    groupTable[34].count = n;
+    groupTable[41].count = 0;
+    groupTable[42].count = 0;
+    groupTable[43].count = 0;
+    groupTable[44].count = 0;
+    groupTable[45].count = 0;
+    groupTable[46].count = 0;
+    groupTable[47].count = 0;
     n = 1;
     FM_OPAQUE(n);
     FM_OPAQUE(n);
     FM_OPAQUE(n);
     FM_OPAQUE(n);
     FM_OPAQUE(n);
-    d[53].count = n;
-    d[48].count = 0;
-    d[54].count = n;
-    d[49].count = 0;
-    d[55].count = n;
-    d[50].count = 0;
-    d[56].count = n;
-    d[51].count = 0;
-    d[57].count = n;
-    d[0].start = 0;
-    d[58].count = n;
-    d[59].count = n;
-    d[60].count = n;
-    d[52].count = n;
+    groupTable[53].count = n;
+    groupTable[48].count = 0;
+    groupTable[54].count = n;
+    groupTable[49].count = 0;
+    groupTable[55].count = n;
+    groupTable[50].count = 0;
+    groupTable[56].count = n;
+    groupTable[51].count = 0;
+    groupTable[57].count = n;
+    groupTable[0].start = 0;
+    groupTable[58].count = n;
+    groupTable[59].count = n;
+    groupTable[60].count = n;
+    groupTable[52].count = n;
     for (i = 1; i <= 60; i++) {
-        sRun_12F0* e = (sRun_12F0*)&d->start;
-        e[i].start = e[i - 1].start + e[i - 1].count;
+        sRun_12F0* groupRuns = (sRun_12F0*)&groupTable->start;
+        groupRuns[i].start = groupRuns[i - 1].start + groupRuns[i - 1].count;
     }
 }
 #endif
@@ -5141,10 +5141,10 @@ extern "C" void func_001E1458(void)
             D_004A20C8 = 1;
             func_001E12F0();
         }
-        int t = *(int*)((char*)cAppMan_TheAppMan + 0x1C);
-        if (t - D_004A20BC > 600) {
+        int appTicks = *(int*)((char*)cAppMan_TheAppMan + 0x1C);
+        if (appTicks - D_004A20BC > 600) {
             func_001E14C0(1);
-            D_004A20BC = t;
+            D_004A20BC = appTicks;
         }
     }
 }
@@ -5177,8 +5177,8 @@ extern "C" void func_001E14C0(int type)
     int i;
     for (i = 0; i < 61; i++) {
         if (func_001E3A30((void*)i) == 0) {
-            int t = D_00441630_14C0[i].type;
-            if (t == type || t == 5) {
+            int groupType = D_00441630_14C0[i].type;
+            if (groupType == type || groupType == 5) {
                 func_001E1548((void*)i);
             }
         }
@@ -5350,21 +5350,21 @@ struct sRangeK1E1AD0 {
  * Picks a random message from a message group that is not about a given character and not already queued.
  *
  * Allocates a list (operator new, tag "AddForeshadowMessage"), collects the group's message indices i (from its first
- * message for its count) whose character (+0xC of D_004C6C08[i]) does not match @p arg (func_001E1A30) and that are not
+ * message for its count) whose character (+0xC of D_004C6C08[i]) does not match @p skipCharId (func_001E1A30) and that are not
  * in the message list (func_001E3388 returns -1), returns one of them at random (BXrand) and frees the list. Likely
  * bug: when nothing qualifies it returns 0x100 without freeing the list.
  *
- * @param r    the message group (a D_00441630 entry: +0x4 first message, +0x8 count)
- * @param arg  the character whose messages are skipped
+ * @param messageGroup    the message group (a D_00441630 entry: +0x4 first message, +0x8 count)
+ * @param skipCharId  the character whose messages are skipped
  * @return a message index, or 0x100 when none qualifies
  */
-extern "C" int func_001E1AD0(sRangeK1E1AD0* r, int arg)
+extern "C" int func_001E1AD0(sRangeK1E1AD0* messageGroup, int skipCharId)
 {
-    int* list = (int*)operator_new_tag(r->count * 4, str_AddForeshadowMessage, 0x100, 0);
+    int* list = (int*)operator_new_tag(messageGroup->count * 4, str_AddForeshadowMessage, 0x100, 0);
     int n = 0;
     int i;
-    for (i = r->start; i < r->count + r->start; i++) {
-        if (func_001E1A30(D_004C6C08_1AD0[i].fC, arg) == 0 && func_001E3388(i) == -1) {
+    for (i = messageGroup->start; i < messageGroup->count + messageGroup->start; i++) {
+        if (func_001E1A30(D_004C6C08_1AD0[i].fC, skipCharId) == 0 && func_001E3388(i) == -1) {
             list[n++] = i;
         }
     }
@@ -5424,15 +5424,15 @@ extern "C" void func_001E1C10(int which)
             if (func_001E3A30((void*)29) != 0) {
                 break;
             }
-            sEntry14_1C10* r;
+            sEntry14_1C10* foreshadowGroup;
             if (ch != 3) {
                 sEntry14_1C10* tbl = D_00441630_1C10;
-                r = &tbl[0x1C];
+                foreshadowGroup = &tbl[0x1C];
             } else {
                 sEntry14_1C10* tbl = D_00441630_1C10;
-                r = &tbl[29];
+                foreshadowGroup = &tbl[29];
             }
-            id = func_001E1AD0((sRangeK1E1AD0*)r, ch);
+            id = func_001E1AD0((sRangeK1E1AD0*)foreshadowGroup, ch);
             if (id != 0x100) {
                 func_001E2FE0(id, 0);
             }
@@ -5445,15 +5445,15 @@ extern "C" void func_001E1C10(int which)
             if (func_001E3A30((void*)0x1F) != 0) {
                 break;
             }
-            sEntry14_1C10* r;
+            sEntry14_1C10* foreshadowGroup;
             if (ch != 7) {
                 sEntry14_1C10* tbl = D_00441630_1C10;
-                r = &tbl[0x1E];
+                foreshadowGroup = &tbl[0x1E];
             } else {
                 sEntry14_1C10* tbl = D_00441630_1C10;
-                r = &tbl[0x1F];
+                foreshadowGroup = &tbl[0x1F];
             }
-            id = func_001E1AD0((sRangeK1E1AD0*)r, ch);
+            id = func_001E1AD0((sRangeK1E1AD0*)foreshadowGroup, ch);
             if (id != 0x100) {
                 func_001E2FE0(id, 0);
             }
@@ -5466,15 +5466,15 @@ extern "C" void func_001E1C10(int which)
             if (func_001E3A30((void*)33) != 0) {
                 break;
             }
-            sEntry14_1C10* r;
+            sEntry14_1C10* foreshadowGroup;
             if (ch != 8) {
                 sEntry14_1C10* tbl = D_00441630_1C10;
-                r = &tbl[0x20];
+                foreshadowGroup = &tbl[0x20];
             } else {
                 sEntry14_1C10* tbl = D_00441630_1C10;
-                r = &tbl[33];
+                foreshadowGroup = &tbl[33];
             }
-            id = func_001E1AD0((sRangeK1E1AD0*)r, ch);
+            id = func_001E1AD0((sRangeK1E1AD0*)foreshadowGroup, ch);
             if (id != 0x100) {
                 func_001E2FE0(id, 0);
             }
@@ -5867,20 +5867,20 @@ extern "C" void func_001E2828(void* a, int b);
  * event's location id and the result.
  *
  * @param key  the game mode
- * @param a1   the event's location id (declared void*)
- * @param a2   the race result (0 = won)
+ * @param locationId   the event's location id (declared void*)
+ * @param raceResult   the race result (0 = won)
  */
-extern "C" void func_001E25D8(int key, void* a1, int a2)
+extern "C" void func_001E25D8(int key, void* locationId, int raceResult)
 {
     int n = *(int*)SSXApp->Game->Replay;
     int busy = n != 0 && n < 10;
     if (busy == 0) {
         switch (key) {
         case 4:
-            func_001E2648(a1, a2);
+            func_001E2648(locationId, raceResult);
             break;
         case 5:
-            func_001E2828(a1, a2);
+            func_001E2828(locationId, raceResult);
             break;
         }
     }
@@ -6132,12 +6132,12 @@ extern "C" void func_001E2A08(int charID, int level)
     if (cBENewPlayerInterface_getRiderCharID(iface, cBENewPlayerInterface_getHumanRider(iface, 0)) == charID)
         return;
     int id = func_001E2B38(charID);
-    sEntry14_2A08* e = &D_00441630_2A08[id];
+    sEntry14_2A08* aggressionGroup = &D_00441630_2A08[id];
     if (func_001E3A30((void*)id)) {
         if (level < 5)
             func_001E3A78(id, 0);
     } else if ((int)((BXrand() & 7) + 0xF) < level) {
-        func_001E2FE0(e->start + BXrand() % e->count, 0);
+        func_001E2FE0(aggressionGroup->start + BXrand() % aggressionGroup->count, 0);
         func_001E3A78(id, 1);
     }
 }
@@ -6203,10 +6203,10 @@ extern "C" int func_001E2BB8(int type, int all)
     int total = 0;
     int i;
     for (i = 0; i < 61; i++) {
-        sEntry14_2BB8* e = &D_00441630_2BB8[i];
-        if (e->type == type) {
-            if (all != 0 || (e->f10 != 0 && func_001E3A30((void*)i) != 0)) {
-                total += e->count;
+        sEntry14_2BB8* groupEntry = &D_00441630_2BB8[i];
+        if (groupEntry->type == type) {
+            if (all != 0 || (groupEntry->f10 != 0 && func_001E3A30((void*)i) != 0)) {
+                total += groupEntry->count;
             } else {
                 total += 1;
             }
@@ -6274,17 +6274,17 @@ extern "C" int func_001E2C80(int type, int idx, int mode)
     int result = -1;
     int i;
     for (i = 0; i < 61; i++) {
-        sEntry14_2C80* e = &D_00441630_2C80[i];
-        if (e->type == type) {
+        sEntry14_2C80* groupEntry = &D_00441630_2C80[i];
+        if (groupEntry->type == type) {
             int n;
-            if (mode == 0 || e->f10 == 0 || func_001E3A30((void*)i) != 0) {
-                n = e->count;
+            if (mode == 0 || groupEntry->f10 == 0 || func_001E3A30((void*)i) != 0) {
+                n = groupEntry->count;
             } else {
                 n = 1;
             }
             n += base;
             if (idx < n) {
-                result = e->first + (idx - base);
+                result = groupEntry->first + (idx - base);
                 goto done;
             }
             base = n;
@@ -6313,18 +6313,18 @@ struct sPopupEntry14 {
 extern sPopupEntry14 D_00441630[];
 
 /**
- * Reports whether message @p i belongs to a group of category @p v (+0xC of its D_00441630 group).
+ * Reports whether message @p i belongs to a group of category @p category (+0xC of its D_00441630 group).
  *
- * @param v  the category (3 back-country result, 4 foreshadow, 5 aggression, 8 peak awards, as the subject strings name
+ * @param category  the category (3 back-country result, 4 foreshadow, 5 aggression, 8 peak awards, as the subject strings name
  *           them)
  * @param i  the message index
  * @return 1 when it does, else 0
  */
-extern "C" int func_001E2D58(int v, int i)
+extern "C" int func_001E2D58(int category, int i)
 {
-    sPopupEntry18* a = &D_004C6C08[i];
-    sPopupEntry14* b = &D_00441630[a->field_0x4];
-    return b->field_0xC == v;
+    sPopupEntry18* messageEntry = &D_004C6C08[i];
+    sPopupEntry14* groupEntry = &D_00441630[messageEntry->field_0x4];
+    return groupEntry->field_0xC == category;
 }
 #endif
 
@@ -6335,16 +6335,16 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E2D98);
 extern sEntry14_2C60 D_00441630_2C60[] __asm__("D_00441630");
 
 /**
- * Reports whether message group @p i has category @p v (+0xC of D_00441630).
+ * Reports whether message group @p i has category @p category (+0xC of D_00441630).
  *
- * @param v  the category
+ * @param category  the category
  * @param i  the group index
  * @return 1 when it does, else 0
  */
-extern "C" int func_001E2D98(int v, int i)
+extern "C" int func_001E2D98(int category, int i)
 {
-    int* p = (int*)&D_00441630_2C60[0] + i * 5;
-    return p[3] == v;
+    int* groupWords = (int*)&D_00441630_2C60[0] + i * 5;
+    return groupWords[3] == category;
 }
 #endif
 
@@ -6364,22 +6364,22 @@ extern "C" int func_001E2DC0(int idx)
 {
     sPopupEntry18* ta = &D_004C6C08[idx];
     sPopupEntry14* target = &D_00441630[ta->field_0x4];
-    int r = 0;
+    int position = 0;
     int i = 0;
     while (i <= idx) {
-        sPopupEntry18* a = &D_004C6C08[i];
-        sPopupEntry14* e = &D_00441630[a->field_0x4];
-        int start = *(int*)((char*)e + 4);
-        int count = *(int*)((char*)e + 8);
+        sPopupEntry18* messageEntry = &D_004C6C08[i];
+        sPopupEntry14* groupEntry = &D_00441630[messageEntry->field_0x4];
+        int start = *(int*)((char*)groupEntry + 4);
+        int count = *(int*)((char*)groupEntry + 8);
         if (start + count - 1 < idx) {
-            if (e->field_0xC == target->field_0xC) r += count;
+            if (groupEntry->field_0xC == target->field_0xC) position += count;
             i += count;
         } else {
-            if (e->field_0xC == target->field_0xC) r += idx - start + 1;
+            if (groupEntry->field_0xC == target->field_0xC) position += idx - start + 1;
             break;
         }
     }
-    return r - 1;
+    return position - 1;
 }
 #endif
 
@@ -6513,23 +6513,23 @@ struct sVEntryK1E2FE0 {
  */
 extern "C" void func_001E2FE0(int id, unsigned char flag)
 {
-    sPopupList_2FE0* t = func_001E39F8_list2FE0();
-    if (t->count == 25)
+    sPopupList_2FE0* messageList = func_001E39F8_list2FE0();
+    if (messageList->count == 25)
         func_001E31B8(0);
     if (D_004C6C08_2FE0[id].field_0x8 == 1)
         flag = func_001E3100(id);
-    t->entries[t->count].id = id;
-    t->entries[t->count].flag = flag;
-    t->mask &= ~(1 << t->count);
-    char* o = (char*)SSXApp->Game->UI;
-    if (o != 0) {
-        char* obj = (char*)cUIStateStack_findState(o + 0x18, GetHashValue32(str_hud_b));
+    messageList->entries[messageList->count].id = id;
+    messageList->entries[messageList->count].flag = flag;
+    messageList->mask &= ~(1 << messageList->count);
+    char* gameUi = (char*)SSXApp->Game->UI;
+    if (gameUi != 0) {
+        char* obj = (char*)cUIStateStack_findState(gameUi + 0x18, GetHashValue32(str_hud_b));
         if (obj != 0) {
             sVEntryK1E2FE0* vt = *(sVEntryK1E2FE0**)(obj + 8);
             vt[24].fn(obj + vt[24].delta, 8, 0);
         }
     }
-    t->count++;
+    messageList->count++;
 }
 #endif
 
@@ -6673,10 +6673,10 @@ extern "C" void func_001E32C8(int type)
 {
     int n = 0;
     int j = 0;
-    sPopupList_32C8* t = func_001E39F8_list32C8();
-    for (; n < t->count; n++) {
-        sPopupEntry18_32C8* a = &D_004C6C08_32C8[t->entries[j].id];
-        if (type == a->field_0x4) {
+    sPopupList_32C8* messageList = func_001E39F8_list32C8();
+    for (; n < messageList->count; n++) {
+        sPopupEntry18_32C8* messageEntry = &D_004C6C08_32C8[messageList->entries[j].id];
+        if (type == messageEntry->field_0x4) {
             func_001E31B8(j);
         } else {
             j++;
@@ -6793,10 +6793,10 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E34D8);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" int func_001E34D8(int i)
 {
-    sPopupEntry18* a = &D_004C6C08[i];
+    sPopupEntry18* currentEntry = &D_004C6C08[i];
     int n = i + 1;
-    sPopupEntry18* b = &D_004C6C08[n];
-    if (b->field_0x4 == a->field_0x4)
+    sPopupEntry18* followingEntry = &D_004C6C08[n];
+    if (followingEntry->field_0x4 == currentEntry->field_0x4)
         return n;
     return -1;
 }
@@ -6941,17 +6941,17 @@ extern "C" unsigned char func_001E3680(int id)
     if (D_004A20C4 != 0) {
         return id;
     }
-    int n1 = func_001E2BB8(4, 0);
-    int n2 = func_001E33E8_noarg();
+    int faqRowCount = func_001E2BB8(4, 0);
+    int queuedCount = func_001E33E8_noarg();
     int i;
-    for (i = 0; i < n1 + n2; i++) {
+    for (i = 0; i < faqRowCount + queuedCount; i++) {
         int k = i + 1;
-        int idx = n2 - k;
+        int idx = queuedCount - k;
         if (idx >= 0) {
             if (func_001E3620(idx) == id) {
                 return i;
             }
-        } else if (idx + n1 >= 0) {
+        } else if (idx + faqRowCount >= 0) {
             if (func_001E2C80(4, ~idx, 1) == id) {
                 return i;
             }
@@ -7102,14 +7102,14 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void func_00147A30(void* iface, int a1, int a2, int a3);
 
 /**
- * Sets or clears the human rider's message flag number @p a (func_00147A30 on the player interface).
+ * Sets or clears the human rider's message flag number @p flagIndex (func_00147A30 on the player interface).
  *
- * @param a  the flag index
- * @param b  nonzero to set the flag, 0 to clear it
+ * @param flagIndex  the flag index
+ * @param enabled  nonzero to set the flag, 0 to clear it
  */
-extern "C" void func_001E3A78(int a, int b)
+extern "C" void func_001E3A78(int flagIndex, int enabled)
 {
-    func_00147A30(cBE_getInterface_Fv(cBE_getBE(), 1), 0, a, b);
+    func_00147A30(cBE_getInterface_Fv(cBE_getBE(), 1), 0, flagIndex, enabled);
 }
 #endif
 
@@ -7330,12 +7330,12 @@ extern int D_004428F0[];
  */
 extern "C" void func_001E3E30(cOVState_MESSAGECENTER* self)
 {
-    int s = self->miMiscData;
-    if (s == 1) {
+    int openMode = self->miMiscData;
+    if (openMode == 1) {
         func_001E3A78(7, 0);
         cOVStateManager_removePDATemplate();
         cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
-    } else if (s == 0) {
+    } else if (openMode == 0) {
         func_001E3A78(7, 1);
         cOVStateManager_removePDATemplate();
         cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
@@ -7403,45 +7403,45 @@ struct sPopup_1E3EC0 {
 extern "C" void func_001E3EC0(sPopup_1E3EC0* self, void* w)
 {
     char buf[32];
-    int h = *(int*)((char*)w + 0x38);
-    if (h == GetHashValue32(D_004A20A8))
+    int widgetHash = *(int*)((char*)w + 0x38);
+    if (widgetHash == GetHashValue32(D_004A20A8))
         self->f14C = w;
-    else if (h == GetHashValue32(str_btext3_b))
+    else if (widgetHash == GetHashValue32(str_btext3_b))
         self->f150 = w;
-    if (h == GetHashValue32(D_004A2098)) {
+    if (widgetHash == GetHashValue32(D_004A2098)) {
         self->f154 = w;
         return;
     }
-    if (h == GetHashValue32(str_btext1)) {
+    if (widgetHash == GetHashValue32(str_btext1)) {
         self->f158 = w;
         return;
     }
-    if (h == GetHashValue32(str_TotalMessagesLabel)) {
+    if (widgetHash == GetHashValue32(str_TotalMessagesLabel)) {
         self->f13C = w;
         return;
     }
-    if (h == GetHashValue32(str_UnreadMessagesLabel)) {
+    if (widgetHash == GetHashValue32(str_UnreadMessagesLabel)) {
         self->f140 = w;
         return;
     }
-    if (h == GetHashValue32(str_MessageView)) {
+    if (widgetHash == GetHashValue32(str_MessageView)) {
         sVEntry_1E3EC0* vt = *(sVEntry_1E3EC0**)((char*)w + 8);
         vt[9].fn((char*)w + vt[9].delta, 0);
         return;
     }
-    if (h == GetHashValue32(str_MenuFroms)) {
+    if (widgetHash == GetHashValue32(str_MenuFroms)) {
         self->f144 = w;
         return;
     }
-    if (h == GetHashValue32(str_arr_down_b)) {
+    if (widgetHash == GetHashValue32(str_arr_down_b)) {
         self->f160 = w;
         return;
     }
-    if (h == GetHashValue32(str_arr_up_b)) {
+    if (widgetHash == GetHashValue32(str_arr_up_b)) {
         self->f15C = w;
         return;
     }
-    if (h == GetHashValue32(str_NoMessage)) {
+    if (widgetHash == GetHashValue32(str_NoMessage)) {
         self->f148 = w;
         sVEntry_1E3EC0* vt = *(sVEntry_1E3EC0**)((char*)w + 8);
         vt[9].fn((char*)w + vt[9].delta, 0);
@@ -7449,29 +7449,29 @@ extern "C" void func_001E3EC0(sPopup_1E3EC0* self, void* w)
     }
     for (int i = 0; i < 8; i++) {
         sprintf(buf, str_UnreadMailpct_d, i);
-        if (h == GetHashValue32(buf)) {
+        if (widgetHash == GetHashValue32(buf)) {
             self->a9C[i] = w;
             break;
         }
         sprintf(buf, str_FAQIconpct_d, i);
-        if (h == GetHashValue32(buf)) {
+        if (widgetHash == GetHashValue32(buf)) {
             self->aBC[i] = w;
             return;
         }
         sprintf(buf, str_Frompct_d, i);
-        if (h == GetHashValue32(buf)) {
+        if (widgetHash == GetHashValue32(buf)) {
             self->aDC[i] = w;
             return;
         }
         sprintf(buf, str_Subjectpct_d, i);
-        if (h == GetHashValue32(buf)) {
+        if (widgetHash == GetHashValue32(buf)) {
             self->aFC[i] = w;
             sVEntry_1E3EC0* vt = *(sVEntry_1E3EC0**)((char*)w + 8);
             vt[27].fn((char*)w + vt[27].delta, 1);
             return;
         }
         sprintf(buf, str_Numberpct_d, i);
-        if (h == GetHashValue32(buf)) {
+        if (widgetHash == GetHashValue32(buf)) {
             self->a11C[i] = w;
             return;
         }
@@ -7580,23 +7580,23 @@ extern "C" void func_001E4200(cOVState_MESSAGECENTER* self, void* widget, unsign
         return;
     }
     sPopupList* list = func_001E39F8_list();
-    int n1 = func_001E2BB8(4, 1);
-    int n2 = func_001E33E8_noarg();
+    int faqRowCount = func_001E2BB8(4, 1);
+    int queuedCount = func_001E33E8_noarg();
     switch (event) {
     case 5:
-        if (n1 + n2 > 0) {
+        if (faqRowCount + queuedCount > 0) {
             int k = *(unsigned char*)((char*)self->mpMenu + 0x95);
-            int idx = n2 - k - 1;
+            int idx = queuedCount - k - 1;
             if (idx >= 0) {
                 int id = func_001E3620(idx);
                 list->mask |= 1 << idx;
                 func_001E50C8(self, id, k + 1);
-            } else if (idx + n1 >= 0) {
+            } else if (idx + faqRowCount >= 0) {
                 int w = *(int*)((char*)widget + 0x18);
-                sPopupEntry18_4200* a = &D_004C6C08_4200[w];
-                sPopupEntry14_4200* e = &D_00441630_4200[a->id];
-                if (e->enabled != 0 && w == e->start) {
-                    func_001E3A78(a->id, !func_001E3A30_b(a->id));
+                sPopupEntry18_4200* messageEntry = &D_004C6C08_4200[w];
+                sPopupEntry14_4200* groupEntry = &D_00441630_4200[messageEntry->id];
+                if (groupEntry->enabled != 0 && w == groupEntry->start) {
+                    func_001E3A78(messageEntry->id, !func_001E3A30_b(messageEntry->id));
                     func_001E48B0(self);
                     func_001E4658(self);
                     func_001E4458(self);
@@ -7608,8 +7608,8 @@ extern "C" void func_001E4200(cOVState_MESSAGECENTER* self, void* widget, unsign
         break;
     case 7:
         self->mbMessageDeleted = 0;
-        if (n2 > 0) {
-            int idx = n2 - *(unsigned char*)((char*)self->mpMenu + 0x95) - 1;
+        if (queuedCount > 0) {
+            int idx = queuedCount - *(unsigned char*)((char*)self->mpMenu + 0x95) - 1;
             if (idx >= 0) {
                 func_001E5148(self, idx);
                 self->mbMessageDeleted = 1;
@@ -7618,9 +7618,9 @@ extern "C" void func_001E4200(cOVState_MESSAGECENTER* self, void* widget, unsign
         }
         break;
     case 6: {
-        int f = cUIScreen_getFrameByLabel(self->mpMessageScreen, GetHashValue32(str_TransitionOut_b));
-        if (f != 0xFFFF) {
-            cUIScreen_playFrame(self->mpMessageScreen, f, 1);
+        int outFrame = cUIScreen_getFrameByLabel(self->mpMessageScreen, GetHashValue32(str_TransitionOut_b));
+        if (outFrame != 0xFFFF) {
+            cUIScreen_playFrame(self->mpMessageScreen, outFrame, 1);
         }
         func_0039F190((char*)self->mpEngine + 0x18, 1);
         D_004A20C0 = 0;
@@ -7629,9 +7629,9 @@ extern "C" void func_001E4200(cOVState_MESSAGECENTER* self, void* widget, unsign
     case 1: {
         int i;
         for (i = 0; i < 8; i++) {
-            void* o = ((void**)((char*)self + 0xFC))[i];
-            sVEntry001E4200* vt = *(sVEntry001E4200**)((char*)o + 8);
-            vt[5].fn((char*)o + vt[5].delta, 0);
+            void* subjectText = ((void**)((char*)self + 0xFC))[i];
+            sVEntry001E4200* vt = *(sVEntry001E4200**)((char*)subjectText + 8);
+            vt[5].fn((char*)subjectText + vt[5].delta, 0);
         }
         break;
     }
@@ -7689,11 +7689,11 @@ extern "C" void func_001E4458(cOVState_MESSAGECENTER* self)
         func_001E4840(self, self->mpButtonText3);
         if (self->mpButtonText1 != 0) {
             int id = func_001E2C80(4, -diff, 1);
-            sEntry18_4458* a = &D_004C6C08_4458[id];
-            int t = a->field_0x4;
-            sEntry14_4458* b = &D_00441630_4458[t];
-            if (id == b->field_0x4) {
-                if (func_001E3A30((void*)t))
+            sEntry18_4458* messageEntry = &D_004C6C08_4458[id];
+            int groupIndex = messageEntry->field_0x4;
+            sEntry14_4458* groupEntry = &D_00441630_4458[groupIndex];
+            if (id == groupEntry->field_0x4) {
+                if (func_001E3A30((void*)groupIndex))
                     cUIText_setUnicodeStringByID(self->mpButtonText1, GetHashValue32(str_kT_BTNCollapse));
                 else
                     cUIText_setUnicodeStringByID(self->mpButtonText1, GetHashValue32(str_kT_BTNExpand));
@@ -7796,13 +7796,13 @@ struct sVEntryK1E4658 {
 extern "C" void func_001E4658(cOVState_MESSAGECENTER* self)
 {
     if (self->mScrollOffset == 0) {
-        char* o = (char*)self->mpArrowUp;
-        sVEntryK1E4658* vt = *(sVEntryK1E4658**)(o + 8);
-        vt[9].fn(o + vt[9].delta, 0);
+        char* arrowWidget = (char*)self->mpArrowUp;
+        sVEntryK1E4658* vt = *(sVEntryK1E4658**)(arrowWidget + 8);
+        vt[9].fn(arrowWidget + vt[9].delta, 0);
     } else {
-        char* o = (char*)self->mpArrowUp;
-        sVEntryK1E4658* vt = *(sVEntryK1E4658**)(o + 8);
-        vt[9].fn(o + vt[9].delta, 1);
+        char* arrowWidget = (char*)self->mpArrowUp;
+        sVEntryK1E4658* vt = *(sVEntryK1E4658**)(arrowWidget + 8);
+        vt[9].fn(arrowWidget + vt[9].delta, 1);
     }
     int n;
     if (D_004A20C4 != 0) {
@@ -7813,13 +7813,13 @@ extern "C" void func_001E4658(cOVState_MESSAGECENTER* self)
         n += func_001E2BB8(4, 0);
     }
     if (self->mScrollOffset + 8 >= n) {
-        char* o = (char*)self->mpArrowDown;
-        sVEntryK1E4658* vt = *(sVEntryK1E4658**)(o + 8);
-        vt[9].fn(o + vt[9].delta, 0);
+        char* arrowWidget = (char*)self->mpArrowDown;
+        sVEntryK1E4658* vt = *(sVEntryK1E4658**)(arrowWidget + 8);
+        vt[9].fn(arrowWidget + vt[9].delta, 0);
     } else {
-        char* o = (char*)self->mpArrowDown;
-        sVEntryK1E4658* vt = *(sVEntryK1E4658**)(o + 8);
-        vt[9].fn(o + vt[9].delta, 1);
+        char* arrowWidget = (char*)self->mpArrowDown;
+        sVEntryK1E4658* vt = *(sVEntryK1E4658**)(arrowWidget + 8);
+        vt[9].fn(arrowWidget + vt[9].delta, 1);
     }
 }
 #endif
@@ -8004,17 +8004,17 @@ extern "C" void func_001E48B0(cOVState_MESSAGECENTER* selfp)
             int n = i + 1;
             int k = local - self->scroll - n;
             if (k >= 0) {
-                int r1 = func_001E3620_48B0(k);
-                func_001E4C78_48B0(self, k, i, r1, func_001E3650_48B0(k));
+                int messageIndex = func_001E3620_48B0(k);
+                func_001E4C78_48B0(self, k, i, messageIndex, func_001E3650_48B0(k));
             } else if (k + online >= 0) {
                 int nk = ~k;
-                int r;
+                int faqMessage;
                 if (D_004A20C4) {
-                    r = func_001E2C80_48B0(4, nk, 0);
+                    faqMessage = func_001E2C80_48B0(4, nk, 0);
                 } else {
-                    r = func_001E2C80_48B0(4, nk, 1);
+                    faqMessage = func_001E2C80_48B0(4, nk, 1);
                 }
-                func_001E4C78_48B0(self, -1, i, r, (unsigned char)func_001E4B80_48B0(self, r));
+                func_001E4C78_48B0(self, -1, i, faqMessage, (unsigned char)func_001E4B80_48B0(self, faqMessage));
             } else {
                 func_001E4840_48B0(self, self->a[i]);
                 func_001E4840_48B0(self, self->b[i]);
@@ -8027,8 +8027,8 @@ extern "C" void func_001E48B0(cOVState_MESSAGECENTER* selfp)
     unsigned char keep = self->menu[0x95];
     cUIMenu_setScrollableMenu_48B0(self->menu, sel);
     self->menu[0x95] = keep;
-    unsigned char s = self->scroll;
-    self->menu[0x98] = s;
+    unsigned char scrollByte = self->scroll;
+    self->menu[0x98] = scrollByte;
 }
 #endif
 
@@ -8058,19 +8058,19 @@ extern sPopupEntry18_4B80 D_004C6C08_4B80[] __asm__("D_004C6C08");
  */
 extern "C" unsigned char func_001E4B80(cOVState_MESSAGECENTER* self, int idx)
 {
-    unsigned char r = 0xFF;
+    unsigned char variant = 0xFF;
     if (D_004A20C4 == 0) {
         return 0xFF;
     }
-    sPopupEntry18_4B80* a = &D_004C6C08_4B80[idx];
-    if (a->field_0x8 == 1) {
-        int v = func_001E2DC0(idx);
+    sPopupEntry18_4B80* messageEntry = &D_004C6C08_4B80[idx];
+    if (messageEntry->field_0x8 == 1) {
+        int position = func_001E2DC0(idx);
         int div = 1;
-        sPopupEntry14* b = &D_00441630[a->field_0x4];
-        switch (b->field_0xC) {
+        sPopupEntry14* groupEntry = &D_00441630[messageEntry->field_0x4];
+        switch (groupEntry->field_0xC) {
         case 3:
             div = 10;
-            v = v / 2;
+            position = position / 2;
             break;
         case 5:
             div = 11;
@@ -8082,9 +8082,9 @@ extern "C" unsigned char func_001E4B80(cOVState_MESSAGECENTER* self, int idx)
             div = 4;
             break;
         }
-        r = v % div;
+        variant = position % div;
     }
-    return r;
+    return variant;
 }
 #endif
 
@@ -8184,13 +8184,13 @@ extern "C" void func_001E4C78(cOVState_MESSAGECENTER* self_, int idx, int slot, 
 {
     sPopup_4C78* self = (sPopup_4C78*)self_;
     char buf[16];
-    sEnt18_4C78* a = &D_004C6C08_4C78[id];
-    sEnt14_4C78* b = &D_00441630_4C78[a->f4];
-    char* p = (char*)func_001E39F8(self);
+    sEnt18_4C78* messageEntry = &D_004C6C08_4C78[id];
+    sEnt14_4C78* groupEntry = &D_00441630_4C78[messageEntry->f4];
+    char* messageList = (char*)func_001E39F8(self);
     if (idx == -1) {
-        if (b->f10 != 0) {
-            if (id == b->f4) {
-                if (func_001E3A30((void*)a->f4) == 0)
+        if (groupEntry->f10 != 0) {
+            if (id == groupEntry->f4) {
+                if (func_001E3A30((void*)messageEntry->f4) == 0)
                     setTint_4C78(self->aBC[slot], self->f164, idx);
                 else
                     setTint_4C78(self->aBC[slot], self->f168, idx);
@@ -8202,7 +8202,7 @@ extern "C" void func_001E4C78(cOVState_MESSAGECENTER* self_, int idx, int slot, 
         func_001E4878((cOVState_MESSAGECENTER*)self, self->aBC[slot]);
     } else {
         int mask = 1 << idx;
-        if (*(int*)(p + 0xC8) & mask) {
+        if (*(int*)(messageList + 0xC8) & mask) {
             func_001E4840((cOVState_MESSAGECENTER*)self, self->a9C[slot]);
             func_001E4840((cOVState_MESSAGECENTER*)self, self->aBC[slot]);
         } else {
@@ -8211,9 +8211,9 @@ extern "C" void func_001E4C78(cOVState_MESSAGECENTER* self_, int idx, int slot, 
         }
     }
     if (self->a11C[slot] != 0) {
-        if (b->f10 != 0) {
-            if (id == b->f4) {
-                if (func_001E3A30((void*)a->f4) == 0)
+        if (groupEntry->f10 != 0) {
+            if (id == groupEntry->f4) {
+                if (func_001E3A30((void*)messageEntry->f4) == 0)
                     sprintf(buf, D_004A2100);
                 else
                     sprintf(buf, D_004A2108);
@@ -8227,14 +8227,14 @@ extern "C" void func_001E4C78(cOVState_MESSAGECENTER* self_, int idx, int slot, 
         show_4C78(self->a11C[slot]);
     }
     if (self->aDC[slot] != 0) {
-        cUIText_setUnicodeStringByID((cUIText*)self->aDC[slot], func_001E2EA0(a->fC));
+        cUIText_setUnicodeStringByID((cUIText*)self->aDC[slot], func_001E2EA0(messageEntry->fC));
         show_4C78(self->aDC[slot]);
         self->aDC[slot]->f18 = id;
     }
-    if (a->f8 == 1) {
+    if (messageEntry->f8 == 1) {
         func_001E4F70((cOVState_MESSAGECENTER*)self, slot, id, sub);
     } else if (self->aFC[slot] != 0) {
-        cUIText_setUnicodeStringByID((cUIText*)self->aFC[slot], a->f10);
+        cUIText_setUnicodeStringByID((cUIText*)self->aFC[slot], messageEntry->f10);
         show_4C78(self->aFC[slot]);
     }
 }
@@ -8323,19 +8323,19 @@ extern char str_cOVState_ViewPopup[];
  * Opens the view popup for a message.
  *
  * Allocates a cOVState_ViewPopup (0x70 bytes, cMemMan_alloc), constructs it (cOVState_ViewPopup_cOVState_ViewPopup with
- * mpEngine, this, @p a1, @p a2) and pushes it (cUIStateStack_pushPopup) on the stack at +0x18 of the object reached
+ * mpEngine, this, @p messageIndex, @p messageNumber) and pushes it (cUIStateStack_pushPopup) on the stack at +0x18 of the object reached
  * through mpMessageScreen's word +0xD0 and that object's +0x10.
  *
- * @param a1  the message index (the popup's miMessage)
- * @param a2  the number to show (miNumber; -1 from onGainFocus)
+ * @param messageIndex  the message index (the popup's miMessage)
+ * @param messageNumber  the number to show (miNumber; -1 from onGainFocus)
  */
-extern "C" void func_001E50C8(cOVState_MESSAGECENTER* self, int a1, int a2)
+extern "C" void func_001E50C8(cOVState_MESSAGECENTER* self, int messageIndex, int messageNumber)
 {
-    void* item = cOVState_ViewPopup_cOVState_ViewPopup((cOVState_ViewPopup*)cMemMan_alloc(0x70, str_cOVState_ViewPopup, 0, 0), self->mpEngine, self, a1, a2);
+    void* item = cOVState_ViewPopup_cOVState_ViewPopup((cOVState_ViewPopup*)cMemMan_alloc(0x70, str_cOVState_ViewPopup, 0, 0), self->mpEngine, self, messageIndex, messageNumber);
     void* screen = self->mpMessageScreen;
-    void* b = *(void**)((char*)screen + 0xD0);
-    void* c = *(void**)((char*)b + 0x10);
-    cUIStateStack_pushPopup((char*)c + 0x18, item);
+    void* screenOwner = *(void**)((char*)screen + 0xD0);
+    void* ownerEngine = *(void**)((char*)screenOwner + 0x10);
+    cUIStateStack_pushPopup((char*)ownerEngine + 0x18, item);
 }
 #endif
 
@@ -8575,25 +8575,25 @@ extern "C" void func_001E5780(cOVState_ViewPopup* self, int idx);
  */
 extern "C" void func_001E5428(cOVState_ViewPopup* self)
 {
-    sPopupEntry18_5428* a = &D_004C6C08_5428[self->miMessage];
-    sPopupEntry14_5428* e = &D_00441630_5428[a->field_0x4];
-    if (e->type == 4) {
-        void* o = self->mpButtonSquare;
-        if (o != 0) {
-            sVEntryK1E5428* vt = *(sVEntryK1E5428**)((char*)o + 8);
-            vt[9].fn((char*)o + vt[9].delta, 0);
+    sPopupEntry18_5428* messageEntry = &D_004C6C08_5428[self->miMessage];
+    sPopupEntry14_5428* groupEntry = &D_00441630_5428[messageEntry->field_0x4];
+    if (groupEntry->type == 4) {
+        void* buttonWidget = self->mpButtonSquare;
+        if (buttonWidget != 0) {
+            sVEntryK1E5428* vt = *(sVEntryK1E5428**)((char*)buttonWidget + 8);
+            vt[9].fn((char*)buttonWidget + vt[9].delta, 0);
         }
-        o = (void*)self->mpDeleteMessage;
-        if (o != 0) {
-            sVEntryK1E5428* vt = *(sVEntryK1E5428**)((char*)o + 8);
-            vt[9].fn((char*)o + vt[9].delta, 0);
+        buttonWidget = (void*)self->mpDeleteMessage;
+        if (buttonWidget != 0) {
+            sVEntryK1E5428* vt = *(sVEntryK1E5428**)((char*)buttonWidget + 8);
+            vt[9].fn((char*)buttonWidget + vt[9].delta, 0);
         }
         if (self->mpKeepMessage != 0) {
             cUIText_setUnicodeStringByID(self->mpKeepMessage, GetHashValue32(str_kT_BTNKeepMsg));
         }
     }
     if (self->mpNumber != 0) {
-        if (e->type == 4) {
+        if (groupEntry->type == 4) {
             unsigned short buf[0x18];
             char* mgr = (char*)SSXApp->FELocale;
             sVEntryS1E5428* vt = *(sVEntryS1E5428**)(mgr + 4);
@@ -8607,7 +8607,7 @@ extern "C" void func_001E5428(cOVState_ViewPopup* self)
         }
     }
     if (self->mpFrom != 0) {
-        cUIText_setUnicodeStringByID(self->mpFrom, func_001E2EA0(a->field_0xC));
+        cUIText_setUnicodeStringByID(self->mpFrom, func_001E2EA0(messageEntry->field_0xC));
     }
     func_001E55D0(self, self->miMessage);
     func_001E5780(self, self->miMessage);
@@ -8628,13 +8628,13 @@ extern "C" void func_001E5638(cOVState_ViewPopup* self, int idx);
  */
 extern "C" void func_001E55D0(cOVState_ViewPopup* self, int idx)
 {
-    char* e = (char*)&D_004C6C08[idx];
-    if (*(int*)(e + 0x8) == 1) {
+    char* messageEntry = (char*)&D_004C6C08[idx];
+    if (*(int*)(messageEntry + 0x8) == 1) {
         func_001E5638(self, idx);
     } else {
         cUIText* uiText = self->mpSubject;
         if (uiText != 0) {
-            cUIText_setUnicodeStringByID(uiText, *(int*)(e + 0x10));
+            cUIText_setUnicodeStringByID(uiText, *(int*)(messageEntry + 0x10));
         }
     }
 }
@@ -8718,13 +8718,13 @@ struct sVEntry001E5780 {
  */
 extern "C" void func_001E5780(cOVState_ViewPopup* self, int idx)
 {
-    char* e = (char*)&D_004C6C08[idx];
-    int kind = *(int*)(e + 0x8);
+    char* messageEntry = (char*)&D_004C6C08[idx];
+    int kind = *(int*)(messageEntry + 0x8);
     if (kind < 2) {
         if (kind >= 0) {
-            char* t = (char*)self->mpMessageLine0;
-            *(int*)(t + 0x14) |= 0x80;
-            cUIText_setUnicodeStringByID(self->mpMessageLine0, *(int*)(e + 0x14));
+            char* lineWidget = (char*)self->mpMessageLine0;
+            *(int*)(lineWidget + 0x14) |= 0x80;
+            cUIText_setUnicodeStringByID(self->mpMessageLine0, *(int*)(messageEntry + 0x14));
             void* obj = self->mpMessageLine0;
             sVEntry001E5780* vt = *(sVEntry001E5780**)((char*)obj + 8);
             vt[9].fn((char*)obj + vt[9].delta, 1);
@@ -8815,30 +8815,30 @@ unsigned char func_001E33E8_noarg() __asm__("func_001E33E8__FPv");
 extern "C" void func_001E58E0(cOVState_ViewPopup* self)
 {
     int id = self->miMessage;
-    sPopupEntry18_5800* a = &D_004C6C08_5800[id];
-    sEntry14_5800* b = &D_00441630_5800[a->field_0x4];
-    if (b->type == 4) {
+    sPopupEntry18_5800* messageEntry = &D_004C6C08_5800[id];
+    sEntry14_5800* groupEntry = &D_00441630_5800[messageEntry->field_0x4];
+    if (groupEntry->type == 4) {
         int n = func_001E34D8(id);
         if (n == -1) {
-            char* o = (char*)self->mpParentState;
-            sVE5800* vt = *(sVE5800**)(o + 8);
-            vt[17].fn(o + vt[17].delta, self, 20);
+            char* parentState = (char*)self->mpParentState;
+            sVE5800* vt = *(sVE5800**)(parentState + 8);
+            vt[17].fn(parentState + vt[17].delta, self, 20);
             return;
         }
         self->miMessage = n;
         self->miNumber = self->miNumber + 1;
         func_001E5428(self);
     } else if (func_001E3408() > 0) {
-        sPopupList* t = func_001E39F8_list();
+        sPopupList* messageList = func_001E39F8_list();
         int idx;
         self->miMessage = func_001E3460(&idx);
-        t->mask |= 1 << idx;
+        messageList->mask |= 1 << idx;
         self->miNumber = func_001E33E8_noarg() - idx;
         func_001E5428(self);
     } else {
-        char* o = (char*)self->mpParentState;
-        sVE5800* vt = *(sVE5800**)(o + 8);
-        vt[17].fn(o + vt[17].delta, self, 20);
+        char* parentState = (char*)self->mpParentState;
+        sVE5800* vt = *(sVE5800**)(parentState + 8);
+        vt[17].fn(parentState + vt[17].delta, self, 20);
     }
 }
 #endif
@@ -8889,14 +8889,14 @@ extern "C" unsigned char func_001E5AA0(cOVState_ViewPopup* self, int idx)
     if (D_004A20C4 == 0) {
         return 0xFF;
     }
-    int v = func_001E2DC0(idx);
+    int position = func_001E2DC0(idx);
     int div = 1;
-    sPopupEntry18* a = &D_004C6C08[idx];
-    sPopupEntry14* b = &D_00441630[a->field_0x4];
-    switch (b->field_0xC) {
+    sPopupEntry18* messageEntry = &D_004C6C08[idx];
+    sPopupEntry14* groupEntry = &D_00441630[messageEntry->field_0x4];
+    switch (groupEntry->field_0xC) {
     case 3:
         div = 10;
-        v = v / 2;
+        position = position / 2;
         break;
     case 5:
         div = 11;
@@ -8908,7 +8908,7 @@ extern "C" unsigned char func_001E5AA0(cOVState_ViewPopup* self, int idx)
         div = 4;
         break;
     }
-    return v % div;
+    return position % div;
 }
 #endif
 
@@ -9030,21 +9030,21 @@ extern "C" void func_001E5B80(void* self)
     unsigned short* fmt = 0;
     switch (event) {
     case 1: {
-        char* o = (char*)SSXApp->FELocale;
-        sVEntry5B80* vt = *(sVEntry5B80**)(o + 4);
-        fmt = vt[4].fn(o + vt[4].delta, GetHashValue32(str_kT_cmnSlopeCaps));
+        char* object = (char*)SSXApp->FELocale;
+        sVEntry5B80* vt = *(sVEntry5B80**)(object + 4);
+        fmt = vt[4].fn(object + vt[4].delta, GetHashValue32(str_kT_cmnSlopeCaps));
         break;
     }
     case 2: {
-        char* o = (char*)SSXApp->FELocale;
-        sVEntry5B80* vt = *(sVEntry5B80**)(o + 4);
-        fmt = vt[4].fn(o + vt[4].delta, GetHashValue32(str_kT_cmnBigAirCaps));
+        char* object = (char*)SSXApp->FELocale;
+        sVEntry5B80* vt = *(sVEntry5B80**)(object + 4);
+        fmt = vt[4].fn(object + vt[4].delta, GetHashValue32(str_kT_cmnBigAirCaps));
         break;
     }
     case 3: {
-        char* o = (char*)SSXApp->FELocale;
-        sVEntry5B80* vt = *(sVEntry5B80**)(o + 4);
-        fmt = vt[4].fn(o + vt[4].delta, GetHashValue32(str_kT_cmnPipeCaps));
+        char* object = (char*)SSXApp->FELocale;
+        sVEntry5B80* vt = *(sVEntry5B80**)(object + 4);
+        fmt = vt[4].fn(object + vt[4].delta, GetHashValue32(str_kT_cmnPipeCaps));
         break;
     }
     }
@@ -9101,34 +9101,34 @@ extern "C" void func_001E5B80(void* self)
             sprintf(name, str_run_2_pct_d, i);
             uiText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
             sprintf(name, str_total_pct_d, i);
-            cUIObj_5B80* b = (cUIObj_5B80*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+            cUIObj_5B80* totalText = (cUIObj_5B80*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
             if (kind == 2 || flag) {
                 if (hl) {
                     cUIText_setAsciiString(uiText, str_DNF);
                     any = 1;
-                    b->setVisible(0);
+                    totalText->setVisible(0);
                 } else {
                     sprintf(num, "%d", cGameModeMan_getHeatScore(info, idx, 1));
                     cUIText_setAsciiString(uiText, num);
                     int total = cGameModeMan_getHeatScore(info, idx, 0) + cGameModeMan_getHeatScore(info, idx, 1);
                     sprintf(num2, "%d", total);
-                    cUIText_setAsciiString((cUIText*)b, num2);
+                    cUIText_setAsciiString((cUIText*)totalText, num2);
                     if (i - 1 == D_00536730[pl0] && flag) {
                         cUIText_setAsciiString(uiText, D_004A2168);
                     }
                 }
             } else {
                 cUIText_setAsciiString(uiText, D_004A2168);
-                b->setVisible(0);
+                totalText->setVisible(0);
             }
         }
         last = -1;
         int k;
         for (k = 1; k < 7; k++) {
             sprintf(name, str_help_current0pct_d, k);
-            int s = D_00536730[cBENewPlayerInterface_getHumanRider(iface1, 0)];
-            int m = s < 6 ? s : 5;
-            if (kind == 1 && m + 1 == k && !any) {
+            int playerPlace = D_00536730[cBENewPlayerInterface_getHumanRider(iface1, 0)];
+            int placeMarker = playerPlace < 6 ? playerPlace : 5;
+            if (kind == 1 && placeMarker + 1 == k && !any) {
                 last = k;
                 cUIState_showObjSafe(self, name);
             } else {
@@ -9137,8 +9137,8 @@ extern "C" void func_001E5B80(void* self)
         }
         if (flag) {
             sprintf(name, str_help_current0pct_d, last);
-            cUIText* o = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
-            cUIText_setUnicodeStringByID(o, GetHashValue32(str_kT_CMNHELPEarnedEnoughPoints));
+            cUIText* object = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+            cUIText_setUnicodeStringByID(object, GetHashValue32(str_kT_CMNHELPEarnedEnoughPoints));
         }
     }
     {
@@ -9159,17 +9159,17 @@ extern "C" void func_001E5B80(void* self)
         }
         for (i = 0; i < 5; i++) {
             sprintf(name, str_overlayOptpct_d, i);
-            cUIObj_5B80* o = (cUIObj_5B80*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
-            if (o != 0) {
+            cUIObj_5B80* object = (cUIObj_5B80*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+            if (object != 0) {
                 if (i < 5) {
-                    cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_00441D10[ids.v[i]]));
+                    cUIText_setUnicodeStringByID((cUIText*)object, GetHashValue32(D_00441D10[ids.v[i]]));
                     if (i == 0 && ids.v[0] == 1 && info->f70 == 3) {
-                        cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(str_kT_OVRCMNFinalRound));
+                        cUIText_setUnicodeStringByID((cUIText*)object, GetHashValue32(str_kT_OVRCMNFinalRound));
                     }
-                    *(int*)((char*)o + 0x18) = ids.v[i];
+                    *(int*)((char*)object + 0x18) = ids.v[i];
                 } else {
-                    o->setVisible(0);
-                    o->v08(1);
+                    object->setVisible(0);
+                    object->v08(1);
                 }
             }
         }
@@ -9222,9 +9222,9 @@ extern "C" void func_001E64C8(void* self)
 {
     char buf[32];
     cUIState_onGainFocus_v(self);
-    int* p = (int*)SSXApp->GameModeMan;
+    int* heatData = (int*)SSXApp->GameModeMan;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
-    int x = *p;
+    int x = *heatData;
     int n = D_00536730[cBENewPlayerInterface_getHumanRider(iface, 0)] + 1;
     if (n >= 7) {
         n = 6;
@@ -9251,15 +9251,15 @@ void func_0026F898(void* self, int val);
  * When the screen's "overlayMenu" has row 2 selected (+0x95; Replay in the default option list) passes the input's byte
  * +0x4 to the replay (func_0026F898).
  *
- * @param a1  the input
+ * @param input  the input
  * @return 0
  */
-extern "C" int func_001E65B8(void* self, void* a1)
+extern "C" int func_001E65B8(void* self, void* input)
 {
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_overlayMenu));
     if (obj != 0) {
         if (*(unsigned char*)((char*)obj + 0x95) == 2) {
-            func_0026F898(SSXApp->Game->Replay, *(unsigned char*)((char*)a1 + 4));
+            func_0026F898(SSXApp->Game->Replay, *(unsigned char*)((char*)input + 4));
         }
     }
     return 0;
@@ -9487,19 +9487,19 @@ extern "C" int func_001E6718(void* self)
         void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
         void* iface0 = cBE_getInterface_Fv(cBE_getBE(), 0);
         void* net = cBE_getInterface_Fv(cBE_getBE(), 2);
-        sRaceSetup_6718* p = (sRaceSetup_6718*)SSXApp->GameModeMan;
-        int mode = p->mode;
+        sRaceSetup_6718* raceSetup = (sRaceSetup_6718*)SSXApp->GameModeMan;
+        int mode = raceSetup->mode;
         int track = cBENewRaceInterface_newRace.cGameMode;
         int players = cBENewRaceInterface_newRace.cGamePath;
         if ((track != 0 && players == 2) || (track == 5 || track == 6)) {
-            cUIThing* o = (cUIThing*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_screenData));
-            o->setVisible(1);
-            t3Vector pos = *(t3Vector*)((char*)o + 0x44);
-            t3Vector v;
-            v.x = pos.x;
-            v.y = 200.0f;
-            v.z = pos.z;
-            *(t3Vector*)((char*)o + 0x44) = v;
+            cUIThing* dataPanel = (cUIThing*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_screenData));
+            dataPanel->setVisible(1);
+            t3Vector pos = *(t3Vector*)((char*)dataPanel + 0x44);
+            t3Vector raisedPos;
+            raisedPos.x = pos.x;
+            raisedPos.y = 200.0f;
+            raisedPos.z = pos.z;
+            *(t3Vector*)((char*)dataPanel + 0x44) = raisedPos;
         }
         cUIText* uiText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_track_event));
         unsigned short name[0x38];
@@ -9592,8 +9592,8 @@ extern "C" int func_001E6718(void* self)
                 } else if (cBENewRaceInterface_newRace.cGamePath == 2 && i == D_00536730[pl1]) {
                     cUIText_setAsciiString(uiText, func_00146F88(player, pl1));
                 } else {
-                    int rider = p->rider[idx];
-                    int outfit = p->outfit[idx];
+                    int rider = raceSetup->rider[idx];
+                    int outfit = raceSetup->outfit[idx];
                     cUIText_setAsciiString(uiText, func_0014EEC8(net, rider, outfit));
                 }
                 sprintf(buf, str_timePointspct_d, i + 1);
@@ -9708,8 +9708,8 @@ extern "C" int func_001E6718(void* self)
                     cUIState_showObjSafe(self, str_bronze);
                 }
                 if (cBENewRaceInterface_newRace.cGamePath == 0 && D_004A213C != 0) {
-                    void* m = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_gold));
-                    cUIIcon_setTextureByHashValue(m, GetHashValue32(str_platinum));
+                    void* goldIcon = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_gold));
+                    cUIIcon_setTextureByHashValue(goldIcon, GetHashValue32(str_platinum));
                 }
             }
             if (show2) {
@@ -9739,7 +9739,7 @@ extern "C" int func_001E6718(void* self)
                 } else {
                     if (i < 5) {
                         cUIText_setUnicodeStringByID((cUIText*)button, GetHashValue32(D_00441D10[ids.v[i]]));
-                        if (i == 0 && ids.v[0] == 1 && p->f70 == 3) {
+                        if (i == 0 && ids.v[0] == 1 && raceSetup->f70 == 3) {
                             cUIText_setUnicodeStringByID((cUIText*)button, GetHashValue32(str_kT_OVRCMNFinalRound));
                         }
                         *(int*)((char*)button + 0x18) = ids.v[i];
@@ -9855,23 +9855,23 @@ extern "C" void func_001E75D0(void* self)
     }
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && cGameComm_mGameComm != 0 && cGameComm_mGameComm->mConnected != 0) {
-        cUIObjK1DEB90* o = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ChatGroup));
-        if (o != 0) {
-            o->v09(1);
+        cUIObjK1DEB90* groupWidget = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ChatGroup));
+        if (groupWidget != 0) {
+            groupWidget->v09(1);
         }
         cUIText* uiText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_chatText));
         if (uiText != 0) {
             cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_POPUP235Chat_b));
         }
-        o = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptexts));
-        if (o != 0) {
-            o->v09(1);
+        groupWidget = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptexts));
+        if (groupWidget != 0) {
+            groupWidget->v09(1);
         }
-        char* p = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_textScrollChat_b));
-        *(int*)(p + 0x74) |= 1;
-        *(sRect_75D0*)(p + 0xA8) = D_004C8408;
-        cUITextScroll_setInputMap(p, 1);
-        ((cUIObjK1DEB90*)p)->v09(0);
+        char* chatScroll = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_textScrollChat_b));
+        *(int*)(chatScroll + 0x74) |= 1;
+        *(sRect_75D0*)(chatScroll + 0xA8) = D_004C8408;
+        cUITextScroll_setInputMap(chatScroll, 1);
+        ((cUIObjK1DEB90*)chatScroll)->v09(0);
     }
     cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 0xE);
 }
@@ -9914,20 +9914,20 @@ extern "C" void func_001E7928(void* self)
     if (cGameComm_mGameComm != 0) {
         if (cGameComm_mGameComm->mConnected != 0) {
             if (cOVState_onUpdate_HandleIncomingChat(self) != 0) {
-                cUIObjK1DEB90* o = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_b));
-                if (o != 0) {
-                    o->v09(0);
+                cUIObjK1DEB90* panelWidget = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_b));
+                if (panelWidget != 0) {
+                    panelWidget->v09(0);
                 }
-                o = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptexts));
-                if (o != 0) {
-                    o->v09(0);
+                panelWidget = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptexts));
+                if (panelWidget != 0) {
+                    panelWidget->v09(0);
                 }
             }
         }
         if (*(int*)((char*)cAppMan_TheAppMan + 0x18) % 30 == 0 && cGameComm_mGameComm->mConnected == 0) {
-            cUIObjK1DEB90* o = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ChatGroup));
-            if (o != 0) {
-                o->v09(0);
+            cUIObjK1DEB90* panelWidget = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ChatGroup));
+            if (panelWidget != 0) {
+                panelWidget->v09(0);
             }
             cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_chatText));
             if (text != 0) {
@@ -9960,21 +9960,21 @@ struct sVEntry001E7AA8 {
  * Passes the input's pad byte (+0x4) to the replay (func_0026F898) while "overlayMenu" has row 2 selected; in a
  * connected network game triggers overlay 40 when the input's vtable entry 27 answers nonzero.
  *
- * @param a1  the input
+ * @param input  the input
  * @return 0
  */
-extern "C" int func_001E7AA8(void* self, void* a1)
+extern "C" int func_001E7AA8(void* self, void* input)
 {
     void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_overlayMenu));
     if (obj != 0) {
         if (*(unsigned char*)((char*)obj + 0x95) == 2) {
-            func_0026F898(SSXApp->Game->Replay, *(unsigned char*)((char*)a1 + 4));
+            func_0026F898(SSXApp->Game->Replay, *(unsigned char*)((char*)input + 4));
         }
     }
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && cGameComm_mGameComm != 0 && cGameComm_mGameComm->mConnected != 0) {
-        sVEntry001E7AA8* vt = *(sVEntry001E7AA8**)((char*)a1 + 8);
-        if (vt[27].fn((char*)a1 + vt[27].delta) != 0) {
+        sVEntry001E7AA8* vt = *(sVEntry001E7AA8**)((char*)input + 8);
+        if (vt[27].fn((char*)input + vt[27].delta) != 0) {
             cOVStateManager_triggerOverlay(40);
         }
     }
@@ -10101,28 +10101,28 @@ extern "C" void func_001E7BB0(void* self)
     if (obj != 0) {
         *(int*)(obj + 0x90) |= 8;
     }
-    int* p = (int*)SSXApp->GameModeMan;
+    int* modeData = (int*)SSXApp->GameModeMan;
     cBE_getInterface_Fv(cBE_getBE(), 0);
     void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
     char* iface8 = (char*)cBE_getInterface_Fv(cBE_getBE(), 8);
     char* ifaceD = (char*)cBE_getInterface_Fv(cBE_getBE(), 13);
     int pl = cBENewPlayerInterface_getHumanRider(iface1, 0);
-    int mode = *p;
+    int mode = *modeData;
     int sel = D_00536730[pl];
     cUIState_hideObjSafe(self, str_firstrun);
     cUIState_hideObjSafe(self, str_secondrun);
     cUIState_hideObjSafe(self, str_thirdrun);
     cUIState_hideObjSafe(self, str_finalrun);
-    cUIObj_7BB0* o = (cUIObj_7BB0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_pointstotal));
-    cUIText_setAsciiString((cUIText*)o, func_0020A1A8(func_004139F8(D_00536640[pl] * 0.01666666753590107f)));
+    cUIObj_7BB0* screenWidget = (cUIObj_7BB0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_pointstotal));
+    cUIText_setAsciiString((cUIText*)screenWidget, func_0020A1A8(func_004139F8(D_00536640[pl] * 0.01666666753590107f)));
     int off = pl * 4;
     int i;
     for (i = 1; i < 7; i++) {
         sprintf(buf, str_placepct_d, i);
-        o = (cUIObj_7BB0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));
-        o->setVisible(0);
+        screenWidget = (cUIObj_7BB0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));
+        screenWidget->setVisible(0);
         if (i == sel + 1) {
-            o->setVisible(1);
+            screenWidget->setVisible(1);
         }
     }
     if (*(int*)(ifaceD + 0x14) == 0 && (mode == 3 || cBENewRaceInterface_newRace.cGameEvent == 4)) {
@@ -10147,19 +10147,19 @@ extern "C" void func_001E7BB0(void* self)
     } else {
         cUIState_hideObjSafe(self, str_bronze);
     }
-    o = (cUIObj_7BB0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_new_record));
+    screenWidget = (cUIObj_7BB0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_new_record));
     int vis = 0;
     if (*(int*)(iface8 + 0x18) >= 0 || *(int*)(iface8 + 0x1C) >= 0) {
         vis = 1;
     }
     if (vis) {
-        o->setVisible(1);
+        screenWidget->setVisible(1);
     } else {
-        o->setVisible(0);
+        screenWidget->setVisible(0);
     }
-    char* r = *(char**)((char*)SSXApp->Game->AI + off + 0x28);
+    char* humanRider = *(char**)((char*)SSXApp->Game->AI + off + 0x28);
     if (cBENewRaceInterface_newRace.cGamePath == 2
-        || *(int*)(r + 0x480) != 0
+        || *(int*)(humanRider + 0x480) != 0
         || cBENewRaceInterface_newRace.cGameEvent == 6 || cBENewRaceInterface_newRace.cGameEvent == 7 || cBENewRaceInterface_newRace.cGameEvent == 8) {
         cUIState_hideObjSafe(self, str_screendata);
         cUIState_hideObjSafe(self, str_3D_Ov);
@@ -10261,12 +10261,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E81D0);
  *
  * Message 0 clears it and 1 sets it (the overlay factory starts it at 1); others are ignored.
  *
- * @param a1  the message
+ * @param message  the message
  * @return 0
  */
-extern "C" int func_001E81D0(void* self, int a1)
+extern "C" int func_001E81D0(void* self, int message)
 {
-    switch (a1) {
+    switch (message) {
     case 0:
         *(int*)((char*)self + 0xA0) = 0;
         break;
@@ -10339,13 +10339,13 @@ extern "C" void func_001E8200(void* self)
     void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
     char* iface8 = (char*)cBE_getInterface_Fv(cBE_getBE(), 8);
     char* ifaceD = (char*)cBE_getInterface_Fv(cBE_getBE(), 13);
-    int* p = (int*)SSXApp->GameModeMan;
+    int* modeData = (int*)SSXApp->GameModeMan;
     signed char event = cBENewRaceInterface_newRace.cGameMode;
     cUIState_hideObjSafe(self, str_firstrun);
     cUIState_hideObjSafe(self, str_secondrun);
     cUIState_hideObjSafe(self, str_thirdrun);
     cUIState_hideObjSafe(self, str_finalrun);
-    int mode = *p;
+    int mode = *modeData;
     if (event != 6) {
         switch (mode) {
         case 0:
@@ -10386,39 +10386,39 @@ extern "C" void func_001E8200(void* self)
     }
     int off = pl * 4;
     int i;
-    cUIObj_8200* o;
+    cUIObj_8200* screenWidget;
     for (i = 1; i < 7; i++) {
         sprintf(buf, str_placepct_d, i);
-        o = (cUIObj_8200*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));
-        o->setVisible(0);
+        screenWidget = (cUIObj_8200*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf));
+        screenWidget->setVisible(0);
         if (i == sel + 1) {
-            o->setVisible(1);
+            screenWidget->setVisible(1);
         }
     }
     if ((unsigned int)sel >= 6) {
         cUIState_showObjSafe(self, str_place6);
     }
-    o = (cUIObj_8200*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_pointstotal));
+    screenWidget = (cUIObj_8200*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_pointstotal));
     char* loc = (char*)SSXApp->FELocale;
     sVEntry8200* vt = *(sVEntry8200**)(loc + 4);
     strcpy1(fmt, vt[4].fn(loc + vt[4].delta, GetHashValue32(str_kT_OVRCMNPointstotal)));
     sprintf1(text, fmt, *(unsigned int*)((char*)D_00536640 + off));
-    cUIText_setUnicodeString(o, text);
-    o = (cUIObj_8200*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_new_record));
+    cUIText_setUnicodeString(screenWidget, text);
+    screenWidget = (cUIObj_8200*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_new_record));
     int vis = 0;
     if (*(int*)(iface8 + 0x18) >= 0 || *(int*)(iface8 + 0x1C) >= 0) {
         vis = 1;
     }
     if (vis) {
-        o->setVisible(1);
+        screenWidget->setVisible(1);
     } else {
-        o->setVisible(0);
+        screenWidget->setVisible(0);
     }
-    char* r = *(char**)((char*)SSXApp->Game->AI + off + 0x28);
+    char* humanRider = *(char**)((char*)SSXApp->Game->AI + off + 0x28);
     if (cBENewRaceInterface_newRace.cGamePath == 2
-        || *(int*)(r + 0x480) != 0
+        || *(int*)(humanRider + 0x480) != 0
         || cBENewRaceInterface_newRace.cGameEvent == 9 || cBENewRaceInterface_newRace.cGameEvent == 10 || cBENewRaceInterface_newRace.cGameEvent == 11
-        || (mode == 1 && p[0x70 / 4] == 3)) {
+        || (mode == 1 && modeData[0x70 / 4] == 3)) {
         cUIState_hideObjSafe(self, str_screendata);
         cUIState_hideObjSafe(self, str_3D_Ov);
     }
@@ -10515,12 +10515,12 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E88F0);
  *
  * Message 0 clears it and 1 sets it (the overlay factory starts it at 1); others are ignored.
  *
- * @param a1  the message
+ * @param message  the message
  * @return 0
  */
-extern "C" int func_001E88F0(void* self, int a1)
+extern "C" int func_001E88F0(void* self, int message)
 {
-    switch (a1) {
+    switch (message) {
     case 0:
         *(int*)((char*)self + 0xA0) = 0;
         break;
@@ -10623,7 +10623,7 @@ extern "C" void func_001E8920(void* self)
     cOVState_onCreateScreen(self);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
-    char* p = (char*)SSXApp->GameModeMan;
+    char* modeData = (char*)SSXApp->GameModeMan;
     int trk = D_00535C12[0];
     int pl = cBENewPlayerInterface_getHumanRider(iface1, 0);
     cUIText* uiText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_title1));
@@ -10634,50 +10634,50 @@ extern "C" void func_001E8920(void* self)
             cUIText_setUnicodeString(uiText, func_001FD190(trk));
         }
     }
-    cUIText* a = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_label_target_timescore));
-    cUIText* b = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_target_timescore));
-    cUIText* c = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_label_timescore));
-    cUIText* d = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_timescore));
+    cUIText* targetLabel = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_label_target_timescore));
+    cUIText* targetValue = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_target_timescore));
+    cUIText* resultLabel = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_label_timescore));
+    cUIText* resultValue = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_timescore));
     if (trk >= 6 && trk <= 8) {
-        cUIText_setUnicodeStringByID(a, GetHashValue32(str_kT_OVRCMNTimeToBeatColon));
-        cUIText_setUnicodeStringByID(c, GetHashValue32(str_kT_OVRCMNYourTimeColon));
-        cUIText_setAsciiString(b, func_0020A1A8(func_004139F8(*(unsigned int*)(p + 0x78) * 0.01666666753590107f)));
+        cUIText_setUnicodeStringByID(targetLabel, GetHashValue32(str_kT_OVRCMNTimeToBeatColon));
+        cUIText_setUnicodeStringByID(resultLabel, GetHashValue32(str_kT_OVRCMNYourTimeColon));
+        cUIText_setAsciiString(targetValue, func_0020A1A8(func_004139F8(*(unsigned int*)(modeData + 0x78) * 0.01666666753590107f)));
         if (D_005366A8[0] != 0) {
-            cUIText_setAsciiString(d, str_DNF);
+            cUIText_setAsciiString(resultValue, str_DNF);
         } else {
-            cUIText_setAsciiString(d, func_0020A1A8(func_004139F8(D_00536640[0] * 0.01666666753590107f)));
+            cUIText_setAsciiString(resultValue, func_0020A1A8(func_004139F8(D_00536640[0] * 0.01666666753590107f)));
         }
     } else {
         char buf[32];
-        cUIText_setUnicodeStringByID(a, GetHashValue32(str_kT_OVRCMNScoreToBeatColon));
-        cUIText_setUnicodeStringByID(c, GetHashValue32(str_kT_CMNYourScore));
-        sprintf(buf, D_004A2138, *(int*)(p + 0x7C));
-        cUIText_setAsciiString(b, buf);
+        cUIText_setUnicodeStringByID(targetLabel, GetHashValue32(str_kT_OVRCMNScoreToBeatColon));
+        cUIText_setUnicodeStringByID(resultLabel, GetHashValue32(str_kT_CMNYourScore));
+        sprintf(buf, D_004A2138, *(int*)(modeData + 0x7C));
+        cUIText_setAsciiString(targetValue, buf);
         if (D_005366A8[0] != 0) {
-            cUIText_setAsciiString(d, str_DNF);
+            cUIText_setAsciiString(resultValue, str_DNF);
         } else {
             sprintf(buf, D_004A2138, D_00536640[0]);
-            cUIText_setAsciiString(d, buf);
+            cUIText_setAsciiString(resultValue, buf);
         }
     }
-    cUIObj_8920* o = (cUIObj_8920*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_b));
-    int s = D_00536730[pl];
-    if (s == 0) goto yes;
-    if (s == 1) goto yes;
-    if (s == 2) goto yes;
-    if (s != 3) goto no;
+    cUIObj_8920* screenWidget = (cUIObj_8920*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_b));
+    int playerPlace = D_00536730[pl];
+    if (playerPlace == 0) goto yes;
+    if (playerPlace == 1) goto yes;
+    if (playerPlace == 2) goto yes;
+    if (playerPlace != 3) goto no;
 yes:
-    cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(str_kT_HELPCongratWonChal));
+    cUIText_setUnicodeStringByID((cUIText*)screenWidget, GetHashValue32(str_kT_HELPCongratWonChal));
     goto done;
 no:
     if (trk >= 6 && trk <= 8) {
-        cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(str_kT_HELPSorryBeatTime));
+        cUIText_setUnicodeStringByID((cUIText*)screenWidget, GetHashValue32(str_kT_HELPSorryBeatTime));
     } else {
-        cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(str_kT_HELPSorryBeatScore));
+        cUIText_setUnicodeStringByID((cUIText*)screenWidget, GetHashValue32(str_kT_HELPSorryBeatScore));
     }
 done:
     if (cGameModeMan_bGiveUp[pl] != 0) {
-        o->setVisible(0);
+        screenWidget->setVisible(0);
     }
     {
         sIdx3_8920 ids = D_0046E9B0;
@@ -10685,14 +10685,14 @@ done:
         int i;
         for (i = 0; i < 5; i++) {
             sprintf(name, str_overlayOptpct_d, i);
-            o = (cUIObj_8920*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
-            if (o != 0) {
+            screenWidget = (cUIObj_8920*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(name));
+            if (screenWidget != 0) {
                 if (i < 3) {
-                    cUIText_setUnicodeStringByID((cUIText*)o, GetHashValue32(D_00441D10[ids.v[i]]));
-                    *(int*)((char*)o + 0x18) = ids.v[i];
+                    cUIText_setUnicodeStringByID((cUIText*)screenWidget, GetHashValue32(D_00441D10[ids.v[i]]));
+                    *(int*)((char*)screenWidget + 0x18) = ids.v[i];
                 } else {
-                    o->setVisible(0);
-                    o->v08(1);
+                    screenWidget->setVisible(0);
+                    screenWidget->v08(1);
                 }
             }
         }
