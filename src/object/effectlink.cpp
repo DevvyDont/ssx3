@@ -126,6 +126,17 @@ struct sEffVEntry57C8 {
     int (*fn)(void*);
 };
 
+/**
+ * Constructs an effect modifier from a replay frame.
+ *
+ * Clears the effect-link Next/Prev, installs cEffectModifier_vtbl, reads Instance through the stream's vtable entry 3
+ * (instance-pointer read) and increments the live effect count D_004A3FF4 (read by func_00360D18). The particle and
+ * halo replay constructors (func_003459A8, func_003461C0) start with it.
+ *
+ * @param effectModifier  the modifier being constructed
+ * @param obj  replay stream to read from
+ * @return effectModifier
+ */
 extern "C" void* func_003457C8(cEffectModifier* effectModifier, void* obj)
 {
     sEffectLinkObj_57C8* self = (sEffectLinkObj_57C8*)effectModifier;
@@ -273,6 +284,18 @@ struct sEffectLinkVEntry_3459A8 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Constructs a particle modifier from a replay frame.
+ *
+ * Runs the effect-modifier replay constructor func_003457C8, installs cParticleModifier_vtbl, constructs the Emitter
+ * (cStaticEmitter_cStaticEmitter) and reads Complete (+0x1E4). While not complete it allocates and reads the 0xD8-byte
+ * ParticleData, reads Transform (0x40 bytes), sets the emitter up (cStaticEmitter_setupEmitter) and lets it read its
+ * own state (cStaticEmitter_readFromReplayFrame); a completed modifier gets the identity Transform and no ParticleData.
+ * Increments the particle-modifier count D_004A3FF8.
+ *
+ * @param stream  replay stream to read from
+ * @return self
+ */
 extern "C" void* func_003459A8(cParticleModifier* self, void* stream)
 {
     func_003457C8((cEffectModifier*)self, stream);
@@ -743,6 +766,17 @@ struct sEffSrc_6120 {
     int f20;    // 0x20
 };
 
+/**
+ * Constructs a halo modifier for an instance from halo make-data.
+ *
+ * Runs cEffectModifier_cEffectModifier, installs cHaloModifier_vtbl and copies from src: Type (+0x4) to +0x24, Mesh
+ * (+0x8) to +0x28, the colour (ColourR/G/B/A at +0x10..+0x18 and +0xC) to +0x10 as (R, G, B, A), Radius (+0x1C) to
+ * +0x20 and Speed (+0x20) to +0x2C; zeroes +0x30 and increments the halo count D_004A4000.
+ *
+ * @param src  halo make-data (tAddHaloData layout)
+ * @param a2  instance record the halo belongs to
+ * @return self
+ */
 extern "C" void* func_00346120(sEffObj_6120* self, sEffSrc_6120* src, int a2)
 {
     cEffectModifier_cEffectModifier((cEffectModifier*)self, a2);
@@ -771,6 +805,15 @@ struct sEffVEntry61C0 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Constructs a halo modifier from a replay frame.
+ *
+ * Runs the effect-modifier replay constructor func_003457C8, installs cHaloModifier_vtbl, reads the 0x30-byte halo
+ * state at +0x10 through the stream's read slot (vtable entry 2) and increments the halo count D_004A4000.
+ *
+ * @param stream  replay stream to read from
+ * @return self
+ */
 extern "C" void* func_003461C0(void* self, void* stream)
 {
     func_003457C8((cEffectModifier*)self, stream);

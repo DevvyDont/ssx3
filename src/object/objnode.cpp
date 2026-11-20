@@ -56,6 +56,16 @@ extern void* cTypeObjNode_vtbl[];
 extern int D_0044AFF0[];
 extern "C" void* cObjNode_cObjNode1(void* self, void* a1);
 
+/**
+ * Constructs the typed object-node base of a node.
+ *
+ * Runs cObjNode_cObjNode1 with the bucket, installs cTypeObjNode_vtbl, stores type at +0x10, clears the flags (+0x12)
+ * and increments the live count for that type (D_0044AFF0[type]).
+ *
+ * @param a1  update bucket
+ * @param type  node type (tObjNodeType)
+ * @return self
+ */
 extern "C" void* func_00354720(void* self, void* a1, int type)
 {
     cObjNode_cObjNode1(self, a1);
@@ -135,6 +145,16 @@ static inline int objNextId_4850(int* c)
     return (*c)++;
 }
 
+/**
+ * Constructs the sorted object-node base of a node.
+ *
+ * Runs func_00354720, installs cSortObjNode_vtbl and takes SortIndex (+0x14) from cSortObjNode_ObjNodeNoSortIndex for
+ * type 6 or cSortObjNode_ObjNodeSortIndex otherwise, post-incrementing the counter.
+ *
+ * @param bucket  update bucket
+ * @param type  node type
+ * @return self
+ */
 extern "C" void* func_00354850(void* self, void* bucket, int type)
 {
     int id;
@@ -237,6 +257,11 @@ extern "C" void cSortObjNode_writeToReplayFrame(void* self, cTypeObjNode_writeTo
 //100%
 INCLUDE_ASM("object/objnode", func_003549D0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs the bucket manager by zeroing its first two words.
+ *
+ * @return self
+ */
 void* func_003549D0(void* self)
 {
     int zero = 0;

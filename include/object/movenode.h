@@ -7,8 +7,9 @@
 // Size 0x2C: subclasses that add no members are allocated 0x2C in retail - cMemMan_alloc(0x2C, "ParticleNode") and
 // (0x2C, "cParticleNode") for cParticleNode (func_003578A8), (0x2C, "Object") for cObjectNode (func_00356DB0); On Tour has
 // cParticleNode/cObjectNode == cMoveNode == 0x28 (its cObjNode is 4 bytes smaller, see object/instancenode.h).
-// Constructors cMoveNode_cMoveNode (bucket, type, inst: sets RootTransformDirty) and the replay-frame one (reads
-// Debounce/Fade/TransferHack as three 4-byte blocks at +0x20/+0x24/+0x28, then tModifierBlock_readFromReplayFrame);
+// Constructors func_00355280 (bucket, type, inst: sets RootTransformDirty) and cMoveNode_cMoveNode, the replay-frame
+// one (reads Debounce/Fade/TransferHack as three 4-byte blocks at +0x20/+0x24/+0x28, then
+// tModifierBlock_readFromReplayFrame);
 // destructor cMoveNode__cMoveNode; vtable cMoveNode_vtbl. Methods: src/object/movenode.cpp and the one-liners in
 // src/object/railmodifier.cpp (methods.txt).
 // A FLAT layout: cInstanceNode (0x00-0x1C, object/instancenode.h, copied inline) + cMoveNode's own fields, which are

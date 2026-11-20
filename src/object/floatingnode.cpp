@@ -788,6 +788,18 @@ extern "C" void func_0034FC78(void* self, void* node);
 extern "C" void func_002D1BF0(void* node);
 extern char cInstanceNode_vtbl[];
 
+/**
+ * Constructs the instance-node base of a node for a placed instance.
+ *
+ * Runs the sort-node constructor func_00354850, stores the record in Instance, installs cInstanceNode_vtbl and makes
+ * this node the record's active node (func_0034FC78). Unless the record flags have bit 0x100 or the type is 6, 0x10 or
+ * 22, it also passes the record to func_002D1BF0.
+ *
+ * @param a1  update bucket
+ * @param type  node type (tObjNodeType)
+ * @param node  instance record the node drives
+ * @return self
+ */
 extern "C" void* func_0034FB00(cInstanceNode* self, void* a1, int type, void* node)
 {
     func_00354850(self, a1, type);

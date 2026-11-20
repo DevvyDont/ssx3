@@ -272,6 +272,11 @@ extern "C" void cBucketMan_remove(cBucketMan* self, sBucketNode* node)
 //100%
 INCLUDE_ASM("object/bucketman", func_00354E78);
 #ifdef SKIP_ASM
+/**
+ * Removes @p node from its bucket with cBucketMan_remove and then clears the node's prev and next links.
+ *
+ * @param node  the scene node to unlink
+ */
 extern "C" void func_00354E78(cBucketMan* self, sBucketNode* node)
 {
     cBucketMan_remove(self, node);
@@ -524,6 +529,17 @@ struct sBucketVEntry51A8b {
 void* cBucketMan_first(cBucketMan* self, int index);
 void* cBucketMan_next(cBucketMan* self, void* node, int index);
 
+/**
+ * Deletes every node in bucket @p index whose section id equals @p key.
+ *
+ * Walks the bucket with cBucketMan_first / cBucketMan_next (fetching the next node before acting), calls each node's
+ * virtual slot 11 (getSectionId; cObjNode_vtbl word 23) and, on a match, calls virtual slot 1 (the destructor) with
+ * flags 3 to destroy and free the node. The game loader purges buckets 1 and 8 this way when a world section is
+ * unloaded.
+ *
+ * @param index  the bucket number
+ * @param key  the section id whose nodes are deleted
+ */
 extern "C" void func_003551A8(cBucketMan* self, int index, int key)
 {
     void* node = cBucketMan_first(self, index);
@@ -571,6 +587,18 @@ INCLUDE_ASM("object/bucketman", func_00355280);
 extern void* cMoveNode_vtbl[];
 extern "C" void* func_0034FB00(void* self, void* a1, int type, void* a3);
 
+/**
+ * Constructs a cMoveNode for a placed instance.
+ *
+ * Runs the cInstanceNode constructor func_0034FB00, installs cMoveNode_vtbl, sets Fade to 1.0, sets the
+ * RootTransformDirty bit in Flags and zeroes ModifierBlock, Debounce and TransferHack. Subclass constructors call it as
+ * their base with their node type: cFloatingNode (0xE), cParticleNode (0xD), the object node (17).
+ *
+ * @param a1  the bucket the node is added to
+ * @param type  the node type (tObjNodeType)
+ * @param a3  the instance record the node belongs to
+ * @return @p self
+ */
 extern "C" void* func_00355280(void* self, void* a1, int type, void* a3)
 {
     func_0034FB00(self, a1, type, a3);

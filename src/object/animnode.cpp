@@ -511,6 +511,17 @@ struct sAnimNode_EBA0 {
     sAnimLink_EBA0 link; // 0x14
 };
 
+/**
+ * Runs the frame-update world script of the instance whose node sits 0x14 bytes into @p self, and returns whether that
+ * node is still the instance's active node.
+ *
+ * Passes the instance record at @p self + 0x2C (the node's Instance) to func_002D1AC8, which runs the record's type-5
+ * script through func_0030A688 (the type cWScriptMan uses for frame-update scripts), then compares the record's
+ * active-node pointer (+0xC) with @p self + 0x14. Its callers (func_00341D48, func_00342358, func_00358EB8) return 0
+ * from their node update when it returns 0.
+ *
+ * @return 1 if the node at @p self + 0x14 is still the record's active node, otherwise 0
+ */
 // is this node's link at the head of its list, after func_002D1AC8?
 extern "C" int func_0034EBA0(sAnimNode_EBA0* self)
 {
@@ -578,6 +589,23 @@ struct sAnimInfo_EC58 {
     float f4, f8, fC, f10, f14, f18;
 };
 
+/**
+ * Constructs a floating node from a placed instance and its floating parameters.
+ *
+ * Runs the cMoveNode constructor func_00355280 with node type 0xE, installs cFloatingNode_vtbl and copies the spring
+ * constants from @p info: ZSpring (+0x4), ZDamp (+0x8), ASpring (+0xC), ADamp (+0x10), ForceScale (+0x14) and
+ * TorqueScale (+0x18 scaled by 1e-6). Zeroes the tilt state (OX, WX, TX, OY, WY, TY), Vel, Force and Info, and sets Zo
+ * and Z to the z of the instance's root translation (record + 0x40). Then calls cFloatingNode_initInfo, allocates
+ * AnimMats ("FloatingMats", one 0x40-byte matrix per mesh of the instance's model), sets the RootTransformDirty bit in
+ * Flags and, in the instance record's flags (+0x8), clears bit 1 and sets bit 2.
+ *
+ * The world script loader (src/seg/seg_1FBE38.cpp) calls it on a cMemMan_alloc(0x7C) block.
+ *
+ * @param a1  the bucket the node is added to
+ * @param a2  the instance record (tInstanceRecord) the node animates
+ * @param info  the floating parameters: spring, damping and scale values at +0x4..+0x18
+ * @return @p self
+ */
 extern "C" void* func_0034EC58(cFloatingNode* self, void* a1, void* a2, sAnimInfo_EC58* info)
 {
     func_00355280(self, a1, 0xE, a2);
@@ -631,6 +659,20 @@ struct sAnimFrame_ED88 {
     sAnimFrame_ED88() {}
 };
 
+/**
+ * Reconstructs a floating node from a replay frame.
+ *
+ * Runs the replay cMoveNode constructor (cMoveNode_cMoveNode), clears Info and installs cFloatingNode_vtbl. Reads a
+ * 4-byte flag from @p stream (virtual slot 2, read) and calls cFloatingNode_initInfo when it is set, then reads the
+ * 0x48-byte cFloatingNodeState into +0x2C. Allocates AnimMats ("FloatingMats", one 0x40-byte matrix per mesh of the
+ * instance's model) and sets the RootTransformDirty bit in Flags.
+ *
+ * The replay loader calls it for node type 14 on a cMemMan_alloc(0x7C, "Floating") block.
+ *
+ * @param bucket  the bucket the node is added to
+ * @param stream  the replay frame to read from
+ * @return @p self
+ */
 extern "C" void* func_0034ED88(cFloatingNode* self, void* bucket, void* stream)
 {
     int hasInfo;

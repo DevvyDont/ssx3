@@ -55,6 +55,15 @@ struct sInstPool {
     sInstSlot* slots;       // 0xC
 };
 
+/**
+ * Claims the dynamic instance record with a given id.
+ *
+ * When the id's low byte matches the manager's section id (+0x0), takes record id >> 8 from the record array (+0xC,
+ * 0xB0 bytes each), stamps its id (+0x78: section byte, index) and sets flag 0x2000 (in use).
+ *
+ * @param handle  instance id (tResourceID)
+ * @return the record, or 0 when the id belongs to another section
+ */
 extern "C" sInstSlot* func_003512C0(sInstPool* self, unsigned int handle)
 {
     if ((handle & 0xFF) == self->gen) {
@@ -79,6 +88,16 @@ void cAnimFrame_update_impl(char* self, float t) __asm__("cAnimFrame_update");
 extern char cAnimFrame_vtbl[];
 
 extern "C" void* func_00351330_impl(char* self, float* src, float f) __asm__("func_00351330");
+/**
+ * Constructs an animation frame for an anim record at a start time.
+ *
+ * Installs cAnimFrame_vtbl (+0x84), clears the frame (func_003513D0), attaches the record (func_00351398) and evaluates
+ * it at time (cAnimFrame_update).
+ *
+ * @param src  anim record (tAnimRecord)
+ * @param time  time to evaluate at
+ * @return self
+ */
 extern "C" void* func_00351330_impl(char* self, float* src, float time)
 {
     *(void**)(self + 0x84) = cAnimFrame_vtbl;
@@ -92,6 +111,13 @@ extern "C" void* func_00351330_impl(char* self, float* src, float time)
 //100%
 INCLUDE_ASM("object/instanceman", func_00351398);
 #ifdef SKIP_ASM
+/**
+ * Attaches an anim record to an animation frame and copies its first six values.
+ *
+ * Stores src at +0x40 and src[0..5] at +0x44..+0x58.
+ *
+ * @param src  anim record (tAnimRecord)
+ */
 extern "C" void func_00351398(void* self, float* src)
 {
     *(float**)((char*)self + 0x40) = src;
@@ -109,6 +135,9 @@ INCLUDE_ASM("object/instanceman", func_003513D0);
 #ifdef SKIP_ASM
 extern "C" void* MEM_fill(void* dst, int value, int size);
 
+/**
+ * Clears an animation frame: zeroes its two 0x40-byte value blocks (+0x0, +0x44) and the record pointer (+0x40).
+ */
 extern "C" void func_003513D0(void* self)
 {
     MEM_fill(self, 0, 0x40);
@@ -126,6 +155,12 @@ public:
     virtual void v1(void *p, int n);
 };
 
+/**
+ * Writes an animation frame's 0x40-byte value block to a replay stream (stream vtable entry 1).
+ *
+ * @param src  the animation frame
+ * @param sink  replay stream to write to
+ */
 extern "C" void func_00351410(void *src, cInstSink *sink) {
     sink->v0(src, 0x40);
 }
@@ -133,6 +168,12 @@ extern "C" void func_00351410(void *src, cInstSink *sink) {
 //100%
 INCLUDE_ASM("object/instanceman", func_00351448);
 #ifdef SKIP_ASM
+/**
+ * Reads an animation frame's 0x40-byte value block back from a replay stream (stream vtable entry 2).
+ *
+ * @param src  the animation frame
+ * @param sink  replay stream to read from
+ */
 extern "C" void func_00351448(void *src, cInstSink *sink) {
     sink->v1(src, 0x40);
 }
@@ -167,6 +208,16 @@ extern "C" void* func_00351330(void* self, float* src, float f);
 // PORT: cMeshAnimFrame_update is defined later in the unit with a typed self; bound by asm label.
 void cMeshAnimFrame_update_vf(void* self, float f) __asm__("cMeshAnimFrame_update");
 
+/**
+ * Constructs a mesh animation frame for an anim record at a start time.
+ *
+ * Runs the cAnimFrame constructor func_00351330, installs cMeshAnimFrame_vtbl, sets the frame matrix (+0x90) to
+ * identity, stores the record at +0x40 again and evaluates it (cMeshAnimFrame_update).
+ *
+ * @param src  anim record
+ * @param time  time to evaluate at
+ * @return self
+ */
 extern "C" void* func_00351480(void* self, float* src, float time)
 {
     func_00351330(self, src, time);
@@ -478,6 +529,16 @@ extern void* D_00490AB0[];
 // PORT: func_00351A60 is defined later in the unit as (void*); bound by asm label with its real float argument.
 void func_00351A60_vf(void* self, float f) __asm__("func_00351A60__FPv");
 
+/**
+ * Constructs a camera animation frame for an anim record at a start time.
+ *
+ * Runs the cAnimFrame constructor func_00351330, installs the camera-frame vtable D_00490AB0 and evaluates the frame
+ * (func_00351A60).
+ *
+ * @param src  anim record
+ * @param f  time to evaluate at
+ * @return self
+ */
 extern "C" void* func_00351A10(void* self, float* src, float f)
 {
     func_00351330(self, src, f);
@@ -490,6 +551,11 @@ extern "C" void* func_00351A10(void* self, float* src, float f)
 //99.29%
 INCLUDE_ASM("object/instanceman", func_00351A60__FPv);
 #ifdef SKIP_ASM
+/**
+ * Updates a camera animation frame by forwarding to cAnimFrame_update.
+ *
+ * @return whatever cAnimFrame_update leaves (callers ignore it)
+ */
 void* func_00351A60(void* self)
 {
     return cAnimFrame_update(self);
@@ -768,6 +834,25 @@ struct sImSrc {
     float s;              // 0x30
 };
 
+/**
+ * Constructs a mesh-anim (break-apart) node: the instance's meshes fly off from where they are.
+ *
+ * Runs the record constructor func_0034FB00 (node type 11), installs cMeshAnimNode_vtbl and constructs its 24-entry
+ * Qrot, Axis, Pos and Vel arrays. From def: Type (+0x4) to +0x6B0, Drag (+0x8) to +0x6B4, Life (+0x10) to +0x1C,
+ * FadeTime (+0x30) to +0x24, and AngVel (+0x2C, degrees) as radians per update to +0x20. The mesh matrices come from
+ * the root instance (def RootInstId/RootMesh) or the old node owner's anim mats when it has them, else are built from
+ * the model's bones scaled by the model scale; each is split into Qrot and Pos (tPose_tPose). The old node is deleted
+ * (vtable entry 1, flags 3). Disperse (+0x390) and InitVel (+0x3A0) come from def, InitVel plus the hit direction
+ * scaled by |speed| * VelScale when a collision is given. The record flags get bit 0x4, lose 0x2 and 0x60, then
+ * func_00352230 randomises the motion.
+ *
+ * @param a1  update bucket
+ * @param a2  instance record to break apart
+ * @param def  mesh-anim make-data (tMakeMeshAnimData layout)
+ * @param src  collision that caused it (direction and speed), or 0
+ * @param owner  node the instance had before, deleted here, or 0
+ * @return self
+ */
 extern "C" sImInst* func_00351B40(sImInst* self, void* a1, void* a2, sImDef* def, sImSrc* src, sImObj* owner)
 {
     func_0034FB00(self, a1, 11, a2);
@@ -1004,6 +1089,15 @@ static inline void AddEq_352230(sV4_352230& d, const sV4_352230& b)
         : "memory");
 }
 
+/**
+ * Randomises a mesh-anim node's per-mesh spin and velocity.
+ *
+ * For every mesh of the model (def +0x80, count +0x4): Angle = AngVel (+0x20) * random 0.5..1 and Axis = a random unit
+ * vector. Then Vel = InitVel (+0x3A0) * cAppMan_TheAppMan +0x14 plus a random per-axis term up to Disperse (+0x390)
+ * with random sign, divided by the frame rate.
+ *
+ * @param debris  the mesh-anim node
+ */
 extern "C" void func_00352230(void* debris)
 {
     sDebris_352230* self = (sDebris_352230*)debris;

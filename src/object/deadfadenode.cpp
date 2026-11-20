@@ -245,6 +245,15 @@ INCLUDE_ASM("object/deadfadenode", func_00350B98);
 void* cInstanceNode_ctor_v(void* self) __asm__("cInstanceNode_cInstanceNode");
 extern char cDeadFadeNode_vtbl[];
 
+/**
+ * Reconstructs a dead-fade node from a replay frame.
+ *
+ * Runs the replay cInstanceNode constructor (cInstanceNode_cInstanceNode), installs cDeadFadeNode_vtbl, sets the word
+ * at +0x1C to -1 and clears the word at +0x38. The replay loader calls it for node type 22 on a cMemMan_alloc(0x3C,
+ * "DeadFade") block and deletes the node again at once.
+ *
+ * @return @p self
+ */
 extern "C" void* func_00350B98(void* self)
 {
     cInstanceNode_ctor_v(self);
@@ -484,6 +493,16 @@ INCLUDE_ASM("object/deadfadenode", func_00350E90);
 extern "C" void* func_0034FB00(void* self, int a1, int type, void* a3);
 extern char D_00491800[];
 
+/**
+ * Constructs a hide node for an instance record (node type 16, bucket 1).
+ *
+ * Runs the cInstanceNode constructor func_0034FB00 with bucket 1, type 0x10 and the instance record, installs the
+ * vtable D_00491800, then in the record's flags (+0x8) clears bits 5 and 6 (0x60) and bit 1 and sets bit 2. The world
+ * script code (src/seg/seg_1FBE38.cpp) calls it on a cMemMan_alloc(0x1C) block.
+ *
+ * @param a1  the instance record to hide
+ * @return @p self
+ */
 extern "C" void* func_00350E90(void* self, void* a1)
 {
     func_0034FB00(self, 1, 0x10, a1);
@@ -502,6 +521,14 @@ INCLUDE_ASM("object/deadfadenode", func_00350F08);
 extern "C" void cInstanceNode_cInstanceNode(void* self);
 extern char D_00491800[];
 
+/**
+ * Reconstructs a hide node from a replay frame.
+ *
+ * Runs the replay cInstanceNode constructor (cInstanceNode_cInstanceNode) and installs the hide node vtable D_00491800.
+ * The replay loader calls it for node type 16 on a cMemMan_alloc(0x1C, "Hide") block.
+ *
+ * @return @p self
+ */
 extern "C" void* func_00350F08(void* self)
 {
     cInstanceNode_cInstanceNode(self);
@@ -513,6 +540,13 @@ extern "C" void* func_00350F08(void* self)
 //100%
 INCLUDE_ASM("object/deadfadenode", func_00350F40__FPv);
 #ifdef SKIP_ASM
+/**
+ * Writes the node to a replay frame by forwarding to cInstanceNode_writeToReplayFrame.
+ *
+ * It fills the writeToReplayFrame slot (word 25) of the hide node vtable D_00491800.
+ *
+ * @return cInstanceNode_writeToReplayFrame()'s result
+ */
 void* func_00350F40(void* self)
 {
     return cInstanceNode_writeToReplayFrame(self);
@@ -525,6 +559,16 @@ INCLUDE_ASM("object/deadfadenode", func_00350F60);
 extern "C" void* func_0034FB00(void* self, int a1, int type, void* a3);
 extern char D_00491680[];
 
+/**
+ * Constructs a restore node for an instance record (node type 19, bucket 1).
+ *
+ * Runs the cInstanceNode constructor func_0034FB00 with bucket 1, type 19 and the instance record, installs the vtable
+ * D_00491680, then in the record's flags (+0x8) clears bits 5 and 6 (0x60) and bit 1 and sets bit 2. World script code
+ * and the debounce node code call it on a cMemMan_alloc(0x1C, "RestoreNode") block.
+ *
+ * @param a1  the instance record to restore
+ * @return @p self
+ */
 extern "C" void* func_00350F60(void* self, void* a1)
 {
     func_0034FB00(self, 1, 19, a1);
@@ -543,6 +587,14 @@ INCLUDE_ASM("object/deadfadenode", func_00350FD8);
 extern "C" void cInstanceNode_cInstanceNode(void* self);
 extern char D_00491680[];
 
+/**
+ * Reconstructs a restore node from a replay frame.
+ *
+ * Runs the replay cInstanceNode constructor (cInstanceNode_cInstanceNode) and installs the restore node vtable
+ * D_00491680. The replay loader calls it for node type 19 on a cMemMan_alloc(0x1C, "Restore") block.
+ *
+ * @return @p self
+ */
 extern "C" void* func_00350FD8(void* self)
 {
     cInstanceNode_cInstanceNode(self);
@@ -554,6 +606,13 @@ extern "C" void* func_00350FD8(void* self)
 //100%
 INCLUDE_ASM("object/deadfadenode", func_00351010__FPv);
 #ifdef SKIP_ASM
+/**
+ * Writes the node to a replay frame by forwarding to cInstanceNode_writeToReplayFrame.
+ *
+ * It fills the writeToReplayFrame slot (word 25) of the restore node vtable D_00491680.
+ *
+ * @return cInstanceNode_writeToReplayFrame()'s result
+ */
 void* func_00351010(void* self)
 {
     return cInstanceNode_writeToReplayFrame(self);

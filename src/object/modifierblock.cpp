@@ -684,6 +684,12 @@ struct sModBlockLink3228 {
     sModBlockVEntry3228* vt;      // 0x8
 };
 
+/**
+ * Tells every effect on a modifier block to fade out.
+ *
+ * Walks the effect chain (+0x10, cEffectLink list) and calls each link's vtable entry 3 (fadeEffect), reading the next
+ * link first.
+ */
 extern "C" void func_00353228(void* self)
 {
     sModBlockLink3228* head = *(sModBlockLink3228**)((char*)self + 0x10);
@@ -713,6 +719,12 @@ struct sModBlockLink3278 {
     sModBlockVEntry3278* vt;      // 0x8
 };
 
+/**
+ * Removes every halo effect from a modifier block.
+ *
+ * Walks the effect chain (+0x10) and deletes (vtable entry 1, flags 3) each link whose getType (vtable entry 2) is 3,
+ * the halo modifier's type.
+ */
 extern "C" void func_00353278(void* self)
 {
     sModBlockLink3278* head = *(sModBlockLink3278**)((char*)self + 0x10);
@@ -1289,6 +1301,14 @@ struct sMbTrackRef3CF0 {
     void* model;            // 0x14
 };
 
+/**
+ * Points the sky box at a world section's sky instance.
+ *
+ * Stores id as the section (+0x10). A negative id resets the sky box (func_00353D98); otherwise, when the world's
+ * section table has entries for it, the sky instance (+0x14) becomes record 0 of that section's resource set.
+ *
+ * @param id  world section id, or negative for none
+ */
 extern "C" void func_00353CF0(sMbTrackRef3CF0* self, int id)
 {
     self->id = id;
@@ -1308,6 +1328,11 @@ extern "C" void func_00353CF0(sMbTrackRef3CF0* self, int id)
 //100%
 INCLUDE_ASM("object/modifierblock", func_00353D98__FPv);
 #ifdef SKIP_ASM
+/**
+ * Resets the sky box: section -1 (+0x10) and no sky instance (+0x14).
+ *
+ * @return -1 (left over from the store; callers ignore it)
+ */
 int func_00353D98(void* self)
 {
     int invalid = -1;
@@ -1320,6 +1345,11 @@ int func_00353D98(void* self)
 //100%
 INCLUDE_ASM("object/modifierblock", func_00353DA8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs a spring with no node array (Nodes, +0x24, = 0).
+ *
+ * @return self
+ */
 void* func_00353DA8(void* self)
 {
     *(int*)((char*)self + 0x24) = 0;
@@ -1405,6 +1435,15 @@ struct sMbVEntrySer3E80 {
 
 extern "C" void cSpring_setupNodes(void* self);
 
+/**
+ * Constructs a spring from a replay frame.
+ *
+ * Reads the 36-byte spring header (node count first) through the stream's read slot (vtable entry 2), allocates the
+ * nodes (cSpring_setupNodes) and reads count * 80 bytes into Nodes (+0x24).
+ *
+ * @param stream  replay stream to read from
+ * @return self
+ */
 extern "C" void* func_00353E80(void* self, void* stream)
 {
     sMbVEntrySer3E80* e = &(*(sMbVEntrySer3E80**)stream)[2];

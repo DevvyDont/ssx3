@@ -963,6 +963,14 @@ static inline sVec4CFF0 xformCFF0(const sMat33CFF0& m, sBodyCFF0* b)
     return r;
 }
 
+/**
+ * Sets a rigid body's angular velocity and recomputes its angular momentum to match.
+ *
+ * Stores newPos as W (+0x90), inverts the inverse inertia InvMOI (+0x50, 3x3, by adjugate over determinant) and sets
+ * the angular momentum (+0x30) to that inertia times W.
+ *
+ * @param newPos  new angular velocity W
+ */
 extern "C" void func_0035CFF0(sBodyCFF0* self, const sVec4CFF0* newPos)
 {
     self->outPos = *newPos;
@@ -1129,6 +1137,17 @@ static inline void NormalizeD340(t4Vector& v)
         : "memory");
 }
 
+/**
+ * Integrates a rigid body over one time step under a force and torque.
+ *
+ * Position (+0x0) += V (+0x80) * dt; the orientation quaternion (+0x10) += its derivative from W (+0x90) * dt and is
+ * renormalised; the linear momentum (+0x20) += force * dt and the angular momentum (+0x30) += torque * dt.
+ *
+ * @param body  the rigid body
+ * @param force  force applied over the step
+ * @param torque  torque applied over the step
+ * @param dt  time step
+ */
 extern "C" void func_0035D340(sRmBody_D340* body, const t4Vector* force, const t4Vector* torque, float dt)
 {
     t4Vector step;
@@ -1309,6 +1328,19 @@ static inline sRmVec4 PointVelD4A0(sRmRigid_D4A0* b, const sRmVec4& p)
     return AddD4A0(b->vel, CrossD4A0(b->angVel, SubD4A0(p, b->pos)));
 }
 
+/**
+ * Resolves a rigid body's contact with a surface by friction and bounce impulses.
+ *
+ * With nonzero mu and a tangential point velocity above 0.001, applies a friction impulse against the sliding direction
+ * (func_0035D908) and stops if the point now separates. Then applies the normal impulse -(1 + restitution) * normal
+ * speed / (inverse mass + angular term) along n (func_0035D908).
+ *
+ * @param body  the rigid body
+ * @param point  contact point
+ * @param n  contact normal
+ * @param restitution  elasticity
+ * @param mu  friction coefficient
+ */
 extern "C" void func_0035D4A0(sRmRigid_D4A0* body, sRmVec4* point, sRmVec4* n, float restitution, float mu)
 {
     sRmVec4 arm = SubD4A0(*point, body->pos);
@@ -1805,6 +1837,18 @@ struct sRailDF70 {
     sRmVec4 off;            // 0x2B0
 };
 
+/**
+ * Constructs a roller modifier from a replay frame.
+ *
+ * Builds the bases (cTransformModifier_vtbl, then cRigidBody_cRigidBody and cRollerModifier_vtbl), constructs the
+ * sphere tree, reads the rigid body (cRigidBody_readFromReplayFrame), 40 bytes of roller data and the instance through
+ * the stream, attaches the instance's mesh sphere tree, restores the centre-of-mass offset and the halved body inertia
+ * from the instance data, rebuilds Transform from the body pose, transforms the sphere tree and recomputes the inertia
+ * (cRollerModifier_updateMOI, cRigidBody_updateImplicit).
+ *
+ * @param stream  replay stream to read from
+ * @return self
+ */
 extern "C" sRailDF70* func_0035DF70(sRailDF70* self, cStreamDF70* stream)
 {
     self->vt = cTransformModifier_vtbl;
@@ -2362,6 +2406,17 @@ static inline float ftrunc_0035F0B8(float x)
     return t;
 }
 
+/**
+ * Constructs a texture-flip modifier for an instance from tex-flip make-data.
+ *
+ * Stores Instance, zeroes TexIndex, NumMaterials, NumTexFlipMaterials and Time, takes Type (+0x4) and Dir (+0xC) and
+ * sets Speed and BaseSpeed to Speed (+0x10) / frame rate. A negative StartId (+0x8) picks a random start index (ceil of
+ * 0..8), otherwise TexIndex = StartId. Ends with cTexFlipModifier_setupTexFlip.
+ *
+ * @param def  tex-flip make-data (tAddTexFlipData)
+ * @param owner  instance record
+ * @return self
+ */
 extern "C" cTexFlipModifier* func_0035F0B8(cTexFlipModifier* self, void* def, void* owner)
 {
     char* defData = (char*)def;
@@ -2407,6 +2462,13 @@ public:
 
 extern "C" void cTexFlipModifier_setupTexFlip(cTexFlipModifier* self);
 
+/**
+ * Constructs a texture-flip modifier from a replay frame: reads the 0x18-byte state and Instance, then
+ * cTexFlipModifier_setupTexFlip.
+ *
+ * @param obj  replay stream to read from
+ * @return self
+ */
 extern "C" void* func_0035F1A8(cTexFlipModifier* self, func_0035F1A8_cObj* obj)
 {
     obj->v02(self, 0x18);
@@ -2538,6 +2600,12 @@ struct sRailModSelect {
     sRailOut14 out[1];      // 0x48
 };
 
+/**
+ * Points every flipping material of a texture-flip modifier at the texture for TexIndex.
+ *
+ * For each of the materials (count +0x20) it reads the instance model's material list (+0x94) and, where an entry has a
+ * texture table (+0x10), copies the u16 for TexIndex (+0x14) into that material's record in MaterialBlock.
+ */
 extern "C" void func_0035F3A8(sRailModSelect* self)
 {
     int i;
@@ -2735,6 +2803,16 @@ struct sRmState_F6E8 {
     int f40;            // 0x40
 };
 
+/**
+ * Constructs a UV-scroll modifier from UV-scroll make-data.
+ *
+ * Sets On to 1, Type from +0x4, UV from UStart/VStart (+0x8, +0xC), TimeOn/TimeOff from +0x18/+0x1C, zeroes Time and
+ * Angle, AngVel = AngVel (+0x20) / frame rate, Axis = (AxisX, AxisY, AxisZ, 0) and UVScroll from UScroll/VScroll
+ * (+0x10, +0x14).
+ *
+ * @param d  UV-scroll make-data (tAddUVScrollData)
+ * @return self
+ */
 extern "C" void* func_0035F6E8(sRmState_F6E8* self, sRmDesc_F6E8* d)
 {
     self->f40 = 1;
@@ -2762,6 +2840,12 @@ struct sRailSerVEntry {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Constructs a UV-scroll modifier from a replay frame by reading the whole 80-byte object.
+ *
+ * @param stream  replay stream to read from
+ * @return self
+ */
 extern "C" void* func_0035F788(cUVScrollModifier* self, void* stream)
 {
     sRailSerVEntry* vt = *(sRailSerVEntry**)stream;
@@ -3034,6 +3118,13 @@ extern "C" void cUVScrollModifier_writeToReplayFrame(cUVScrollModifier* self, cU
 //100%
 INCLUDE_ASM("object/railmodifier", func_0035FDD0);
 #ifdef SKIP_ASM
+/**
+ * Returns its first argument and does nothing else.
+ *
+ * It is variadic: the prologue only spills the remaining argument registers. Nothing references it.
+ *
+ * @return self
+ */
 extern "C" void* func_0035FDD0(void* self, ...)
 {
     return self;
@@ -3145,6 +3236,15 @@ extern char gBucketMan;
 // D_004FFB00/D_004FFB10 and the list gBucketMan (g++ __static_initialization_and_destruction_0).
 // The unit declares func_0035FE10 returning void*; bind this definition by asm label.
 extern "C" void func_0035FE10_init(int initialize, int priority) __asm__("func_0035FE10");
+/**
+ * Runs the railmodifier unit's static initialisation: builds its global vectors and matrices and the bucket manager.
+ *
+ * Only for priority 0xFFFF with initialize set. Constructs the colour/parameter vectors D_004FF740..D_004FFAB0, the
+ * Catmull-Rom basis D_004FFAC0 used for rail segment matrices, D_004FFB00/D_004FFB10, and gBucketMan (func_003549D0).
+ *
+ * @param initialize  nonzero for construction
+ * @param priority  init priority; only 0xFFFF does anything
+ */
 extern "C" void func_0035FE10_init(int initialize, int priority)
 {
     if (priority == 0xFFFF && initialize != 0) {
@@ -3220,6 +3320,11 @@ INCLUDE_ASM("object/railmodifier", func_00360700);
 #ifdef SKIP_ASM
 extern void* cObjNode_vtbl[];
 
+/**
+ * Constructs a bare object node: Next (+0x4) and Prev (+0x8) = 0, vtable cObjNode_vtbl.
+ *
+ * @return self
+ */
 extern "C" void* func_00360700(void* self)
 {
     *(int*)((char*)self + 0x4) = 0;
@@ -3276,6 +3381,11 @@ void cObjNode_renderModel(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360740__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that a plain object node never sorts before another one.
+ *
+ * @return 0 (false)
+ */
 int func_00360740(void* self)
 {
     return 0;
@@ -3285,6 +3395,11 @@ int func_00360740(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360748__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that a plain object node never equals another one in sort order.
+ *
+ * @return 0 (false)
+ */
 int func_00360748(void* self)
 {
     return 0;
@@ -3294,6 +3409,11 @@ int func_00360748(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360750__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns a plain object node's sort index, which is always 0.
+ *
+ * @return 0
+ */
 int func_00360750(void* self)
 {
     return 0;
@@ -3331,6 +3451,11 @@ int cObjNode_isType(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360768);
 #ifdef SKIP_ASM
+/**
+ * Returns the world section of a plain object node, which has none.
+ *
+ * @return 0xFFFFFFFF (no section)
+ */
 extern "C" unsigned int func_00360768()
 {
     return 0xFFFFFFFFU;
@@ -3413,6 +3538,12 @@ extern "C" int cTypeObjNode_isType(void* self, int type)
 //100%
 INCLUDE_ASM("object/railmodifier", func_003607B0);
 #ifdef SKIP_ASM
+/**
+ * Returns a typed object node's ObjNodeType (+0x10, tObjNodeType).
+ *
+ * @param node  the typed object node
+ * @return ObjNodeType
+ */
 extern "C" short func_003607B0(void *node) {
     return (*(short *)((char*)(node) + (0x10)));
 }
@@ -3420,6 +3551,11 @@ extern "C" short func_003607B0(void *node) {
 //100%
 INCLUDE_ASM("object/railmodifier", func_003607B8);
 #ifdef SKIP_ASM
+/**
+ * Sets the RootTransformDirty bit (bit 0 of Flags, +0x12) of a typed object node.
+ *
+ * @param node  the typed object node
+ */
 extern "C" void func_003607B8(void *node) {
     (*(unsigned short *)((char*)(node) + (0x12))) = (unsigned short) ((*(unsigned short *)((char*)(node) + (0x12))) | 1);
 }
@@ -3427,6 +3563,12 @@ extern "C" void func_003607B8(void *node) {
 //100%
 INCLUDE_ASM("object/railmodifier", func_003607C8);
 #ifdef SKIP_ASM
+/**
+ * Tests the RootTransformDirty bit (bit 0 of Flags, +0x12) of a typed object node.
+ *
+ * @param node  the typed object node
+ * @return that bit (0 or 1)
+ */
 extern "C" int func_003607C8(void *node) {
     return (*(unsigned short *)((char*)(node) + (0x12))) & 1;
 }
@@ -3434,6 +3576,11 @@ extern "C" int func_003607C8(void *node) {
 //100%
 INCLUDE_ASM("object/railmodifier", func_003607D8);
 #ifdef SKIP_ASM
+/**
+ * Clears the RootTransformDirty bit (bit 0 of Flags, +0x12) of a typed object node.
+ *
+ * @param node  the typed object node
+ */
 extern "C" void func_003607D8(void *node) {
     (*(unsigned short *)((char*)(node) + (0x12))) = (unsigned short) ((*(unsigned short *)((char*)(node) + (0x12))) & 0xFFFE);
 }
@@ -3443,6 +3590,15 @@ INCLUDE_ASM("object/railmodifier", func_003607E8);
 #ifdef SKIP_ASM
 extern int D_0044AFF0[];
 
+/**
+ * Returns how many object nodes of a type are alive (D_0044AFF0[idx]).
+ *
+ * D_0044AFF0 is the per-type count the cTypeObjNode constructors increment and its destructor decrements
+ * (src/object/objnode.cpp); On Tour has 23 types (kNumObjNodeType).
+ *
+ * @param idx  node type (tObjNodeType)
+ * @return the live count for that type
+ */
 extern "C" int func_003607E8(int idx)
 {
     return D_0044AFF0[idx];
@@ -3517,6 +3673,9 @@ INCLUDE_ASM("object/railmodifier", func_00360888);
 extern int cSortObjNode_ObjNodeSortIndex;
 extern int cSortObjNode_ObjNodeNoSortIndex;
 
+/**
+ * Resets both sort-index counters (cSortObjNode_ObjNodeSortIndex, cSortObjNode_ObjNodeNoSortIndex) to 1.
+ */
 extern "C" void func_00360888(void)
 {
     cSortObjNode_ObjNodeSortIndex = 1;
@@ -3528,6 +3687,11 @@ INCLUDE_ASM("object/railmodifier", func_00360898);
 #ifdef SKIP_ASM
 extern int cSortObjNode_ObjNodeSortIndex;
 
+/**
+ * Hands out the next sort index (cSortObjNode_ObjNodeSortIndex, post-increment).
+ *
+ * @return the index before the increment
+ */
 extern "C" int func_00360898(void)
 {
     return cSortObjNode_ObjNodeSortIndex++;
@@ -3538,6 +3702,11 @@ INCLUDE_ASM("object/railmodifier", func_003608B0);
 #ifdef SKIP_ASM
 extern int cSortObjNode_ObjNodeNoSortIndex;
 
+/**
+ * Hands out the next no-sort index (cSortObjNode_ObjNodeNoSortIndex, post-increment).
+ *
+ * @return the index before the increment
+ */
 extern "C" int func_003608B0(void)
 {
     return cSortObjNode_ObjNodeNoSortIndex++;
@@ -3548,6 +3717,11 @@ INCLUDE_ASM("object/railmodifier", func_003608C8);
 #ifdef SKIP_ASM
 extern int cSortObjNode_ObjNodeSortIndex;
 
+/**
+ * Returns the current sort-index counter, cSortObjNode_ObjNodeSortIndex.
+ *
+ * @return cSortObjNode_ObjNodeSortIndex
+ */
 extern "C" int func_003608C8(void) {
     return cSortObjNode_ObjNodeSortIndex;
 }
@@ -3557,6 +3731,11 @@ INCLUDE_ASM("object/railmodifier", func_003608D0);
 #ifdef SKIP_ASM
 extern int cSortObjNode_ObjNodeNoSortIndex;
 
+/**
+ * Returns the current no-sort-index counter, cSortObjNode_ObjNodeNoSortIndex.
+ *
+ * @return cSortObjNode_ObjNodeNoSortIndex
+ */
 extern "C" int func_003608D0(void) {
     return cSortObjNode_ObjNodeNoSortIndex;
 }
@@ -3566,6 +3745,11 @@ INCLUDE_ASM("object/railmodifier", func_003608D8);
 #ifdef SKIP_ASM
 extern int cSortObjNode_ObjNodeSortIndex;
 
+/**
+ * Sets the sort-index counter, cSortObjNode_ObjNodeSortIndex.
+ *
+ * @param sortIndex  new counter value
+ */
 extern "C" void func_003608D8(int sortIndex) {
     cSortObjNode_ObjNodeSortIndex = sortIndex;
 }
@@ -3575,6 +3759,11 @@ INCLUDE_ASM("object/railmodifier", func_003608E0);
 #ifdef SKIP_ASM
 extern int cSortObjNode_ObjNodeNoSortIndex;
 
+/**
+ * Sets the no-sort-index counter, cSortObjNode_ObjNodeNoSortIndex.
+ *
+ * @param noSortIndex  new counter value
+ */
 extern "C" void func_003608E0(int noSortIndex) {
     cSortObjNode_ObjNodeNoSortIndex = noSortIndex;
 }
@@ -3684,6 +3873,11 @@ int cInstanceNode_isMoveNode(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360920__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the world section of an instance node: the low byte of its instance's id (Instance +0x78).
+ *
+ * @return the section number
+ */
 unsigned char func_00360920(void* self)
 {
     return *(unsigned char*)((char*)*(void**)((char*)self + 0x18) + 0x78);
@@ -3788,6 +3982,12 @@ int cInstanceNode_getFocusCount(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360968);
 #ifdef SKIP_ASM
+/**
+ * Returns an instance node's Instance (+0x18).
+ *
+ * @param instanceNode  the instance node
+ * @return Instance
+ */
 extern "C" int func_00360968(cInstanceNode* instanceNode) {
     return ((int)instanceNode->Instance);
 }
@@ -3796,6 +3996,11 @@ extern "C" int func_00360968(cInstanceNode* instanceNode) {
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360970__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns an instance node's root transform: the matrix at Instance +0x10.
+ *
+ * @return pointer to the instance's matrix
+ */
 void* func_00360970(void* self)
 {
     return (char*)*(void**)((char*)self + 0x18) + 0x10;
@@ -3805,6 +4010,13 @@ void* func_00360970(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360980__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns an instance node's root transform for an instance: always the matrix at its own Instance +0x10.
+ *
+ * The instance argument of the slot is not declared and not used.
+ *
+ * @return pointer to the node's instance matrix
+ */
 void* func_00360980(void* self)
 {
     return (char*)*(void**)((char*)self + 0x18) + 0x10;
@@ -3828,6 +4040,11 @@ int cInstanceNode_hasAnimMats(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360998__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns an instance node's animation matrices: none.
+ *
+ * @return 0
+ */
 int func_00360998(void* self)
 {
     return 0;
@@ -3837,6 +4054,11 @@ int func_00360998(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_003609A0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns an instance node's animation matrices for an instance: none.
+ *
+ * @return 0
+ */
 int func_003609A0(void* self)
 {
     return 0;
@@ -3846,6 +4068,11 @@ int func_003609A0(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_003609A8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns one animation matrix of an instance node: none.
+ *
+ * @return 0
+ */
 int func_003609A8(void* self)
 {
     return 0;
@@ -4005,6 +4232,11 @@ int cInstanceNode_hasBoundBox(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360A18__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns an instance node's bound box: none.
+ *
+ * @return 0
+ */
 int func_00360A18(void* self)
 {
     return 0;
@@ -4096,6 +4328,11 @@ extern "C" void* cInstanceNode__cInstanceNode(void*);
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360A70__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys a hide node: reinstalls D_00491800 and runs cInstanceNode__cInstanceNode (which forwards the delete flags).
+ *
+ * @return cInstanceNode__cInstanceNode's result
+ */
 void* func_00360A70(void* self)
 {
     *(int*)((char*)self + 0xc) = (int)(void*)D_00491800;
@@ -4106,6 +4343,9 @@ void* func_00360A70(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360A98__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing when a hide node expires.
+ */
 void func_00360A98(void* self)
 {
 }
@@ -4114,6 +4354,9 @@ void func_00360A98(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360AA0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing when a hide node loses focus.
+ */
 void func_00360AA0(void* self)
 {
 }
@@ -4122,6 +4365,9 @@ void func_00360AA0(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360AA8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ignores signals sent to a hide node.
+ */
 void func_00360AA8(void* self)
 {
 }
@@ -4130,6 +4376,9 @@ void func_00360AA8(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360AB0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ignores collisions with a hide node.
+ */
 void func_00360AB0(void* self)
 {
 }
@@ -4141,6 +4390,12 @@ extern "C" void* cInstanceNode__cInstanceNode(void*);
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360AB8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys a restore node: reinstalls D_00491680 and runs cInstanceNode__cInstanceNode (which forwards the delete
+ * flags).
+ *
+ * @return cInstanceNode__cInstanceNode's result
+ */
 void* func_00360AB8(void* self)
 {
     *(int*)((char*)self + 0xc) = (int)(void*)D_00491680;
@@ -4151,6 +4406,9 @@ void* func_00360AB8(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360AE0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing when a restore node expires.
+ */
 void func_00360AE0(void* self)
 {
 }
@@ -4159,6 +4417,9 @@ void func_00360AE0(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360AE8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ignores signals sent to a restore node.
+ */
 void func_00360AE8(void* self)
 {
 }
@@ -4221,6 +4482,9 @@ void cTransformModifier_update(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360B38__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: a transform modifier's root-transform update hook.
+ */
 void func_00360B38(void* self)
 {
 }
@@ -4536,6 +4800,12 @@ INCLUDE_ASM("object/railmodifier", func_00360C08);
 #ifdef SKIP_ASM
 extern void* cPhysicsModifier_vtbl[];
 
+/**
+ * Constructs a physics modifier: installs cPhysicsModifier_vtbl and sets Active to 1.
+ *
+ * @param physicsModifier  the physics modifier
+ * @return physicsModifier
+ */
 extern "C" void *func_00360C08(cPhysicsModifier* physicsModifier) {
     ((int*)physicsModifier->mVtbl) = &(*(int*)&cPhysicsModifier_vtbl);
     (physicsModifier->Active) = 1;
@@ -4659,6 +4929,13 @@ extern "C" void cEffectLink__cEffectLink(cEffectLink* self, int flags)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360CE8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the type of a plain effect link, 1.
+ *
+ * func_00353278 compares this slot's result with 3 (the halo modifier) to find halo links.
+ *
+ * @return 1
+ */
 int func_00360CE8(void* self)
 {
     return 0x1;
@@ -4725,6 +5002,13 @@ INCLUDE_ASM("object/railmodifier", func_00360D18);
 #ifdef SKIP_ASM
 extern int D_004A3FF4;
 
+/**
+ * Returns the number of live effect modifiers, D_004A3FF4.
+ *
+ * src/object/effectlink.cpp's cEffectModifier constructors increment D_004A3FF4 and its destructor decrements it.
+ *
+ * @return D_004A3FF4
+ */
 extern "C" int func_00360D18(void) {
     return D_004A3FF4;
 }
@@ -4763,6 +5047,13 @@ INCLUDE_ASM("object/railmodifier", func_00360D30);
 #ifdef SKIP_ASM
 extern int D_004A3FFC;
 
+/**
+ * Returns the number of live dynamic particle modifiers, D_004A3FFC.
+ *
+ * src/object/effectlink.cpp's dynamic-particle constructors increment D_004A3FFC and the destructor decrements it.
+ *
+ * @return D_004A3FFC
+ */
 extern "C" int func_00360D30(void) {
     return D_004A3FFC;
 }
@@ -4820,6 +5111,12 @@ void cRailLink_writeToReplayFrame(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360D98);
 #ifdef SKIP_ASM
+/**
+ * Returns a rail modifier's SplineId (+0x30).
+ *
+ * @param arg0  the rail modifier
+ * @return SplineId
+ */
 extern "C" int func_00360D98(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x30)));
 }
@@ -4901,6 +5198,14 @@ public:
     virtual int v16();
 };
 
+/**
+ * Returns the mesh a move node's transform modifier follows, or 0.
+ *
+ * Calls the getMesh slot (vtable word 33, cTransformModifier_getMesh by default) of the transform modifier at
+ * ModifierBlock +0x0; returns 0 when there is no modifier block or no transform modifier.
+ *
+ * @return the modifier's mesh index, or 0
+ */
 extern "C" int func_00360DE8(cMoveNode* self)
 {
     cVirt16** holder = (cVirt16**)self->ModifierBlock;
@@ -4933,6 +5238,15 @@ extern "C" int cMoveNode_getTransformModifier(cMoveNode* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360E50);
 #ifdef SKIP_ASM
+/**
+ * Tells whether a move node has a UV-scroll modifier (the source of its texture matrix).
+ *
+ * True when ModifierBlock exists and its UV-scroll slot (+0x4) is set; cMoveNode_getTextureMat reads the matrix from
+ * that modifier.
+ *
+ * @param moveNode  the move node
+ * @return 1 if it has one, else 0
+ */
 extern "C" int func_00360E50(cMoveNode* moveNode) {
     int var_2;
     void *temp_3;
@@ -4948,6 +5262,14 @@ extern "C" int func_00360E50(cMoveNode* moveNode) {
 //100%
 INCLUDE_ASM("object/railmodifier", func_00360E70);
 #ifdef SKIP_ASM
+/**
+ * Tells whether a move node has a texture-flip modifier (the source of its material block).
+ *
+ * True when ModifierBlock exists and its texture-flip slot (+0x8) is set.
+ *
+ * @param moveNode  the move node
+ * @return 1 if it has one, else 0
+ */
 extern "C" int func_00360E70(cMoveNode* moveNode) {
     int var_2;
     void *temp_3;
@@ -5022,6 +5344,11 @@ INCLUDE_ASM("object/railmodifier", func_00360F20);
 #ifdef SKIP_ASM
 extern "C" void tModifierBlock_remTransformModifier(int);
 
+/**
+ * Removes a move node's transform modifier (tModifierBlock_remTransformModifier), if it has a modifier block.
+ *
+ * @param moveNode  the move node
+ */
 extern "C" void func_00360F20(cMoveNode* moveNode) {
     int temp_4;
 
@@ -5036,6 +5363,11 @@ INCLUDE_ASM("object/railmodifier", func_00360F48);
 #ifdef SKIP_ASM
 extern "C" void tModifierBlock_remUVScrollModifier(int);
 
+/**
+ * Removes a move node's UV-scroll modifier (tModifierBlock_remUVScrollModifier), if it has a modifier block.
+ *
+ * @param moveNode  the move node
+ */
 extern "C" void func_00360F48(cMoveNode* moveNode) {
     int temp_4;
 
@@ -5050,6 +5382,11 @@ INCLUDE_ASM("object/railmodifier", func_00360F70);
 #ifdef SKIP_ASM
 extern "C" void tModifierBlock_remTexFlipModifier(int);
 
+/**
+ * Removes a move node's texture-flip modifier (tModifierBlock_remTexFlipModifier), if it has a modifier block.
+ *
+ * @param moveNode  the move node
+ */
 extern "C" void func_00360F70(cMoveNode* moveNode) {
     int temp_4;
 
@@ -5064,6 +5401,11 @@ INCLUDE_ASM("object/railmodifier", func_00360F98);
 #ifdef SKIP_ASM
 extern "C" void tModifierBlock_remPhysicsModifier(int);
 
+/**
+ * Removes a move node's physics modifier (tModifierBlock_remPhysicsModifier), if it has a modifier block.
+ *
+ * @param moveNode  the move node
+ */
 extern "C" void func_00360F98(cMoveNode* moveNode) {
     int temp_4;
 
@@ -5078,6 +5420,11 @@ INCLUDE_ASM("object/railmodifier", func_00360FC0);
 #ifdef SKIP_ASM
 extern "C" void func_00353278(int);
 
+/**
+ * Removes a move node's halo effects (func_00353278), if it has a modifier block.
+ *
+ * @param moveNode  the move node
+ */
 extern "C" void func_00360FC0(cMoveNode* moveNode) {
     int temp_4;
 
@@ -5092,6 +5439,11 @@ INCLUDE_ASM("object/railmodifier", func_00360FE8);
 #ifdef SKIP_ASM
 extern "C" void tModifierBlock_remEffectModifier(int);
 
+/**
+ * Removes a move node's effect modifiers (tModifierBlock_remEffectModifier), if it has a modifier block.
+ *
+ * @param moveNode  the move node
+ */
 extern "C" void func_00360FE8(cMoveNode* moveNode) {
     int temp_4;
 
@@ -5106,6 +5458,11 @@ INCLUDE_ASM("object/railmodifier", func_00361010);
 #ifdef SKIP_ASM
 extern "C" void func_00353228(int);
 
+/**
+ * Fades out a move node's effects (func_00353228), if it has a modifier block.
+ *
+ * @param moveNode  the move node
+ */
 extern "C" void func_00361010(cMoveNode* moveNode) {
     int temp_4;
 
@@ -5119,6 +5476,11 @@ extern "C" void func_00361010(cMoveNode* moveNode) {
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361038__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys an object node: reinstalls D_00490E80 and runs cMoveNode__cMoveNode (which forwards the delete flags).
+ *
+ * @return cMoveNode__cMoveNode's result
+ */
 void* func_00361038(void* self)
 {
     *(int*)((char*)self + 0xc) = (int)(void*)D_00490E80;
@@ -5129,6 +5491,11 @@ void* func_00361038(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361060__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that an animated node's per-frame update keeps the node alive.
+ *
+ * @return 1
+ */
 int func_00361060(void* self)
 {
     return 0x1;
@@ -5155,6 +5522,11 @@ extern "C" float cAnimNode_getAnimFrame(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361080__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns an animated node's animation speed, which is 0 for the base class.
+ *
+ * @return 0.0f
+ */
 float func_00361080(void* self)
 {
     return 0.0f;
@@ -5239,6 +5611,14 @@ extern "C" sElem003610E0* cAnimNode_getAnimMat(void* self, int i)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361140);
 #ifdef SKIP_ASM
+/**
+ * Clears an animated node's two frame-event times (+0x8, +0xC) by setting them to 1e10.
+ *
+ * The animated-node update functions (func_00358EB8, func_003592D0) store the same 1e10 into these fields of their
+ * embedded animated node.
+ *
+ * @param arg0  the animated node
+ */
 extern "C" void func_00361140(void *arg0) {
     (*(float *)((char*)(arg0) + (8))) = 1e10f;
     (*(float *)((char*)(arg0) + (0xC))) = 1e10f;
@@ -5248,6 +5628,11 @@ extern "C" void func_00361140(void *arg0) {
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361150__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns an animated object node's state block, which is the node itself.
+ *
+ * @return self
+ */
 void* func_00361150(void* self)
 {
     return self;
@@ -5257,6 +5642,11 @@ void* func_00361150(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361158);
 #ifdef SKIP_ASM
+/**
+ * Returns an animated object node's speed (+0x10), or 0 once it is complete (+0x8 set).
+ *
+ * @return the speed, or 0.0f
+ */
 extern "C" float func_00361158(void* self)
 {
     return *(int*)((char*)self + 0x8) == 0 ? *(float*)((char*)self + 0x10) : 0.0f;
@@ -5266,6 +5656,11 @@ extern "C" float func_00361158(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361170);
 #ifdef SKIP_ASM
+/**
+ * Returns an animated object node's play direction: 1 when its speed (+0x10) is >= 0, else -1.
+ *
+ * @return 1 or -1
+ */
 extern "C" int func_00361170(void* self)
 {
     int direction = -1;
@@ -5296,6 +5691,11 @@ INCLUDE_ASM("object/railmodifier", func_003611A0);
 extern void* cAnimFrame_vtbl[];
 extern "C" void func_003513D0(void*);
 
+/**
+ * Constructs an empty animation frame: installs cAnimFrame_vtbl (+0x84) and resets it with func_003513D0.
+ *
+ * @return self
+ */
 extern "C" void* func_003611A0(void* self)
 {
     *(int*)((char*)self + 0x84) = (int)(void*)cAnimFrame_vtbl;
@@ -5331,6 +5731,11 @@ struct sVec4_361208 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
+/**
+ * Returns an animation frame's angles: the values at +0x50..+0x58 negated, with w = 0.
+ *
+ * @param out  receives the angles
+ */
 extern "C" void func_00361208(void* self, sVec4_361208* out)
 {
     sVec4_361208 negated;
@@ -5349,6 +5754,14 @@ extern void* cMeshAnimFrame_vtbl[];
 extern "C" void func_003513D0(void*);
 extern "C" void func_003612C0(void*);
 
+/**
+ * Constructs an empty mesh animation frame.
+ *
+ * Builds the cAnimFrame part (cAnimFrame_vtbl, func_003513D0), installs cMeshAnimFrame_vtbl and sets FrameMatrix
+ * (+0x90) to identity with func_003612C0.
+ *
+ * @return self
+ */
 extern "C" void* func_00361248(void* self)
 {
     *(int*)((char*)self + 0x84) = (int)(void*)cAnimFrame_vtbl;
@@ -5387,6 +5800,9 @@ INCLUDE_ASM("object/railmodifier", func_003612C0);
 #ifdef SKIP_ASM
 extern char t4mat_Identity[];
 
+/**
+ * Resets a mesh animation frame's FrameMatrix (+0x90) to t4mat_Identity.
+ */
 // Copy the 4x4 matrix t4mat_Identity into self+0x90.
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
 extern "C" void func_003612C0(void* self)
@@ -5411,6 +5827,12 @@ extern "C" void func_003612C0(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_003612F8);
 #ifdef SKIP_ASM
+/**
+ * Returns a mesh animation frame's FrameMatrix (frame + 0x90).
+ *
+ * @param frame  the mesh animation frame
+ * @return pointer to FrameMatrix
+ */
 extern "C" int func_003612F8(int frame) {
     return frame + 144;
 }
@@ -5422,6 +5844,11 @@ extern void* cAnimFrame_vtbl[];
 extern void* D_00490AB0[];
 extern "C" void func_003513D0(void*);
 
+/**
+ * Constructs an empty camera animation frame: the cAnimFrame part (cAnimFrame_vtbl, func_003513D0), then D_00490AB0.
+ *
+ * @return self
+ */
 extern "C" void* func_00361300(void* self)
 {
     *(int*)((char*)self + 0x84) = (int)(void*)cAnimFrame_vtbl;
@@ -5437,6 +5864,11 @@ INCLUDE_ASM("object/railmodifier", func_00361340);
 extern void* cAnimFrame_vtbl[];
 void operator_delete(int*);
 
+/**
+ * Destroys a camera animation frame: reinstalls cAnimFrame_vtbl and frees the frame when bit 0 of flags is set.
+ *
+ * @param flags  destructor flags
+ */
 extern "C" void func_00361340(void* self, int flags)
 {
     *(void***)((char*)self + 0x84) = cAnimFrame_vtbl;
@@ -5449,6 +5881,12 @@ extern "C" void func_00361340(void* self, int flags)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361370);
 #ifdef SKIP_ASM
+/**
+ * Sets a camera animation frame's animation record (+0x40).
+ *
+ * @param frame  the camera animation frame
+ * @param source  the animation record
+ */
 extern "C" void func_00361370(void *frame, int source) {
     (*(int *)((char*)(frame) + (0x40))) = source;
 }
@@ -5460,6 +5898,11 @@ struct sVec4_361378 {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
+/**
+ * Returns a camera animation frame's position: the values at +0x44..+0x4C with w = 1.
+ *
+ * @param out  receives the position
+ */
 extern "C" void func_00361378(void* self, sVec4_361378* out)
 {
     sVec4_361378 result;
@@ -5477,6 +5920,11 @@ struct sVec3_3613B0 {
     float x, y, z;
 };
 
+/**
+ * Returns a camera animation frame's angles: the three values at +0x50..+0x58.
+ *
+ * @param out  receives the angles
+ */
 extern "C" void func_003613B0(void* self, sVec3_3613B0* out)
 {
     sVec3_3613B0 result;
@@ -5489,6 +5937,12 @@ extern "C" void func_003613B0(void* self, sVec3_3613B0* out)
 //100%
 INCLUDE_ASM("object/railmodifier", func_003613F0);
 #ifdef SKIP_ASM
+/**
+ * Returns a camera animation frame's focal length (+0x70) through out.
+ *
+ * @param frame  the camera animation frame
+ * @param out  receives the focal length
+ */
 extern "C" void func_003613F0(void *frame, float *out) {
     *out = (*(float *)((char*)(frame) + (0x70)));
 }
@@ -5501,6 +5955,14 @@ extern "C" void func_0034DBA8(void* self, int flags);
 void operator_delete(int*);
 extern void* D_004908F8[];
 
+/**
+ * Destroys a teeter animation node.
+ *
+ * Reinstalls D_004908F8 (+0x50), destroys the animated-node part at +0x30 (func_0034DBA8, flags 0) and frees the node
+ * when bit 0 of flags is set.
+ *
+ * @param flags  destructor flags
+ */
 extern "C" void func_00361400(void* self, int flags)
 {
     *(void***)((char*)self + 0x50) = D_004908F8;
@@ -5514,6 +5976,11 @@ extern "C" void func_00361400(void* self, int flags)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361458__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns a teeter animation node's state block, which is the node itself.
+ *
+ * @return self
+ */
 void* func_00361458(void* self)
 {
     return self;
@@ -5523,6 +5990,11 @@ void* func_00361458(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361460);
 #ifdef SKIP_ASM
+/**
+ * Returns a teeter animation node's play direction: 1 when the value at +0x4 is >= 0, else -1.
+ *
+ * @return 1 or -1
+ */
 extern "C" int func_00361460(void* self)
 {
     int direction = -1;
@@ -5627,6 +6099,12 @@ extern "C" void* cInstanceNode__cInstanceNode(void*);
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361500__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys a conveyor node: reinstalls D_00490570 and runs cInstanceNode__cInstanceNode (which forwards the delete
+ * flags).
+ *
+ * @return cInstanceNode__cInstanceNode's result
+ */
 void* func_00361500(void* self)
 {
     *(int*)((char*)self + 0xc) = (int)(void*)D_00490570;
@@ -5637,6 +6115,11 @@ void* func_00361500(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361528__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns a conveyor node's state block (self + 0x1C).
+ *
+ * @return pointer to the state
+ */
 void* func_00361528(void* self)
 {
     return (char*)self + 0x1C;
@@ -5723,6 +6206,9 @@ void* cFlexBridgeNode_getBoundBox(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361578__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: a flex rail's per-frame node update.
+ */
 void func_00361578(void* self)
 {
 }
@@ -5731,6 +6217,9 @@ void func_00361578(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361580__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: a flex rail's segment-matrix update.
+ */
 void func_00361580(void* self)
 {
 }
@@ -5739,6 +6228,9 @@ void func_00361580(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361588__FPv);
 #ifdef SKIP_ASM
+/**
+ * Ignores forces applied to a flex rail.
+ */
 void func_00361588(void* self)
 {
 }
@@ -5747,6 +6239,9 @@ void func_00361588(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361590__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: a flex rail's intersect-info update.
+ */
 void func_00361590(void* self)
 {
 }
@@ -5755,6 +6250,11 @@ void func_00361590(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361598__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the mesh of a flex rail segment: always 0.
+ *
+ * @return 0
+ */
 int func_00361598(void* self)
 {
     return 0;
@@ -5764,6 +6264,11 @@ int func_00361598(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_003615A0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Reports that the node is a flex rail.
+ *
+ * @return 1
+ */
 int func_003615A0(void* self)
 {
     return 0x1;
@@ -5781,6 +6286,13 @@ struct sRailEntry50 {
 //100%
 INCLUDE_ASM("object/railmodifier", func_003615A8);
 #ifdef SKIP_ASM
+/**
+ * Returns the mesh of a float rail segment: the int at +0x44 of that segment's entry in the 0x50-byte node array
+ * (+0x70).
+ *
+ * @param a1  segment index
+ * @return the segment mesh index
+ */
 extern "C" int func_003615A8(void* self, int a1)
 {
     sRailEntry50* p = *(sRailEntry50**)((char*)self + 0x70);
@@ -5797,6 +6309,13 @@ struct sRailEntry60 {
 //100%
 INCLUDE_ASM("object/railmodifier", func_003615C0);
 #ifdef SKIP_ASM
+/**
+ * Returns the mesh of a spring rail segment: the int at +0x54 of that segment's entry in the 0x60-byte node array
+ * (+0x70).
+ *
+ * @param a1  segment index
+ * @return the segment mesh index
+ */
 extern "C" int func_003615C0(void* self, int a1)
 {
     sRailEntry60* p = *(sRailEntry60**)((char*)self + 0x70);
@@ -5860,6 +6379,19 @@ typedef int tMmiQuad __attribute__((mode(TI)));
             : "memory");                                                                                               \
     }
 
+/**
+ * Builds a rail segment's cubic coefficient matrix from four control points.
+ *
+ * For each axis (x, y, z) multiplies the four control points' components by the Catmull-Rom basis D_004FFAC0, giving
+ * the x, y and z coefficient rows 0-2 with (0, 0, 0, 1) as row 3, then transposes out in place. Nothing in retail calls
+ * it.
+ *
+ * @param out  receives the matrix
+ * @param a  first control point
+ * @param b  second control point
+ * @param c  third control point
+ * @param d  fourth control point
+ */
 // PORT: hand-written MMI 4x4 transpose (MMI_TRANSPOSE4: lq/pextlw/pextuw/pcpyld/pcpyud/sq, no gcc 2.95 pattern;
 // retail's registers differ per call site, so an operand asm) plus VU0 macro asm; a port replaces them with a
 // plain C transpose and a C vector-matrix product.
@@ -5884,6 +6416,12 @@ extern "C" void func_003615D8(void* self, t4Matrix* out, const float* a, const f
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361750);
 #ifdef SKIP_ASM
+/**
+ * Tells whether a flag set holds no flags: its flag count (+0x5C) is 0.
+ *
+ * @param arg0  the flag set
+ * @return 1 if empty, else 0
+ */
 extern "C" int func_00361750(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x5C))) == 0;
 }
@@ -5891,6 +6429,12 @@ extern "C" int func_00361750(void *arg0) {
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361760);
 #ifdef SKIP_ASM
+/**
+ * Returns a flag manager's current wind factor (+0x10).
+ *
+ * @param arg0  the flag manager
+ * @return the wind factor
+ */
 extern "C" float func_00361760(void *arg0) {
     return (*(float *)((char*)(arg0) + (0x10)));
 }
@@ -6087,6 +6631,11 @@ void cPositionModifier_update(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361900__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns a position modifier's RootTransformDirty (+0x44).
+ *
+ * @return RootTransformDirty
+ */
 int func_00361900(void* self)
 {
     return *(int*)((char*)self + 0x44);
@@ -6112,6 +6661,11 @@ int cPositionModifier_getTransformType(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361910__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns a position modifier's BoundBox (self + 0x10).
+ *
+ * @return pointer to BoundBox
+ */
 void* func_00361910(void* self)
 {
     return (char*)self + 0x10;
@@ -6136,6 +6690,11 @@ extern "C" void cPositionModifier_setBoundBox(cPositionModifier* self, void* bou
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361930__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns a position modifier's Radius (+0x40).
+ *
+ * @return Radius
+ */
 float func_00361930(void* self)
 {
     return *(float*)((char*)self + 0x40);
@@ -6145,6 +6704,11 @@ float func_00361930(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361938__FPvf);
 #ifdef SKIP_ASM
+/**
+ * Sets a position modifier's Radius (+0x40).
+ *
+ * @param val  new radius
+ */
 void func_00361938(void* self, float val)
 {
     *(float*)((char*)self + 0x40) = val;
@@ -6243,6 +6807,12 @@ int cParentModifier_getTransformType(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_003619D8);
 #ifdef SKIP_ASM
+/**
+ * Sets a parent modifier's ParentInst (+0xA0). Nothing in retail calls it.
+ *
+ * @param modifier  the parent modifier
+ * @param parentInst  instance record to follow
+ */
 extern "C" void func_003619D8(void *modifier, int parentInst) {
     (*(int *)((char*)(modifier) + (0xA0))) = parentInst;
 }
@@ -6689,6 +7259,12 @@ extern "C" void cMultiSplineModifier_setBoundBox(cMultiSplineModifier* self, voi
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361C08);
 #ifdef SKIP_ASM
+/**
+ * Returns a multi-spline modifier's FocusCount.
+ *
+ * @param multiSplineModifier  the multi-spline modifier
+ * @return FocusCount
+ */
 extern "C" int func_00361C08(cMultiSplineModifier* multiSplineModifier) {
     return (multiSplineModifier->FocusCount);
 }
@@ -6954,6 +7530,12 @@ extern "C" void* cMoveNode__cMoveNode(void*);
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361D48);
 #ifdef SKIP_ASM
+/**
+ * Returns the int at +0x10 of its argument. Nothing in retail calls it.
+ *
+ * @param arg0  the object to read
+ * @return that int
+ */
 extern "C" int func_00361D48(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x10)));
 }
@@ -6993,6 +7575,11 @@ extern "C" unsigned int cRailManNode_getSectionId()
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361D88__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns an anim combo node's state block, which is the node itself.
+ *
+ * @return self
+ */
 void* func_00361D88(void* self)
 {
     return self;
@@ -7002,6 +7589,14 @@ void* func_00361D88(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361D90);
 #ifdef SKIP_ASM
+/**
+ * Returns an anim combo node's play direction from its active speed.
+ *
+ * While the second range is active (+0x14) the sign of its step (+0x0) decides, otherwise the sign of the base speed
+ * (+0x28): 1 when >= 0, else -1.
+ *
+ * @return 1 or -1
+ */
 extern "C" int func_00361D90(void* self)
 {
     int direction;
@@ -7026,6 +7621,11 @@ extern "C" void* func_00341CF0(void*);
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361DE0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys an anim delta node: reinstalls D_0048EA70 (+0x3C) and runs the animated-object destructor func_00341CF0.
+ *
+ * @return func_00341CF0's result
+ */
 void* func_00361DE0(void* self)
 {
     *(int*)((char*)self + 0x3c) = (int)(void*)D_0048EA70;
@@ -7036,6 +7636,11 @@ void* func_00361DE0(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361E08__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns an anim delta node's state block, which is the node itself.
+ *
+ * @return self
+ */
 void* func_00361E08(void* self)
 {
     return self;
@@ -7047,6 +7652,13 @@ extern "C" void* func_0035FE10(int, int);
 //99.38%
 INCLUDE_ASM("object/railmodifier", func_00361E10__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs this unit's static initialisation: func_0035FE10 with initialize 1 and priority 0xFFFF.
+ *
+ * The argument is not used.
+ *
+ * @return func_0035FE10's result
+ */
 void* func_00361E10(void* self)
 {
     return func_0035FE10(1, 0xffff);
@@ -7060,6 +7672,11 @@ extern "C" int func_00362340(void);
 extern "C" int func_003623A8(void);
 extern "C" void func_00361F98(void* self, int cause, int (*handler)(void), int arg);
 
+/**
+ * Installs the renderer's two INTC handlers: func_00362340 for cause 5 (VIF1) and func_003623A8 for cause 7 (VU1).
+ *
+ * Both go through func_00361F98 with a 0 argument, which records each handler id in the per-cause table at +0x0.
+ */
 extern "C" void func_00361E30(void* self)
 {
     func_00361F98(self, 5, func_00362340, 0);
@@ -7072,6 +7689,11 @@ INCLUDE_ASM("object/railmodifier", func_00361E80);
 #ifdef SKIP_ASM
 extern "C" void* func_00362008(void* self, int id);
 
+/**
+ * Removes the renderer's INTC handlers for causes 5 (VIF1) and 7 (VU1) with func_00362008.
+ *
+ * @return func_00362008's result for cause 7
+ */
 extern "C" void* func_00361E80(void* self)
 {
     func_00362008(self, 5);
@@ -7094,6 +7716,13 @@ static inline void func_00361EB8_fill(int* p, int v)
     }
 }
 
+/**
+ * Sets up the renderer's interrupt handler table (D_005059D8 in cPS2GraphicsMan_Init).
+ *
+ * Fills the 16 INTC handler ids (+0x0) and the 16 DMAC handler ids (+0x40) with -1 (the preview build's bxps2intc.cpp
+ * asserts call these mIntCID and mDMACID), clears the counters at +0x80 (func_00361F60) and installs the VIF1/VU1
+ * handlers (func_00361E30).
+ */
 extern "C" void func_00361EB8(void* self)
 {
     func_00361EB8_fill((int*)self, -1);
@@ -7108,6 +7737,13 @@ extern "C" void* func_00361E80(void* self);
 //99.29%
 INCLUDE_ASM("object/railmodifier", func_00361F40__FPv);
 #ifdef SKIP_ASM
+/**
+ * Tears down the renderer's interrupt handlers by removing the VIF1/VU1 ones (func_00361E80).
+ *
+ * cPS2GraphicsMan_Purge calls it on D_005059D8.
+ *
+ * @return func_00361E80's result
+ */
 void* func_00361F40(void* self)
 {
     return func_00361E80(self);
@@ -7127,6 +7763,9 @@ struct sRailPairs {
     sRailPair pairs[3];
 };
 
+/**
+ * Zeroes the three counter pairs at +0x80 of the interrupt handler table (the VIF1 handler counts into the first).
+ */
 extern "C" void func_00361F60(sRailPairs* self)
 {
     int i;
@@ -7140,6 +7779,9 @@ extern "C" void func_00361F60(sRailPairs* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361F90__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing; cPS2GraphicsMan_DrawFrame calls it on the interrupt handler table (D_005059D8) at the end of a frame.
+ */
 void func_00361F90(void* self)
 {
 }
@@ -7152,6 +7794,16 @@ extern "C" int func_00424880(int ch);
 extern "C" int func_00423A80(int cause, int (*handler)(void), int arg);
 extern "C" int func_004248E8(int ch);
 
+/**
+ * Registers an INTC handler for an interrupt cause and records its id.
+ *
+ * Calls func_00424880(cause), stores the id func_00423A80(cause, handler, next) returns at +cause*4, then calls
+ * func_004248E8(cause).
+ *
+ * @param cause  INTC cause number (5 = VIF1, 7 = VU1)
+ * @param handler  handler function
+ * @param next  argument passed through to func_00423A80
+ */
 extern "C" void func_00361F98(void* self, int cause, int (*handler)(void), int next)
 {
     func_00424880(cause);
@@ -7166,6 +7818,14 @@ INCLUDE_ASM("object/railmodifier", func_00362008);
 extern "C" int func_00424880(int ch);
 extern "C" void* RemoveIntcHandler(int ch, int id);
 
+/**
+ * Removes the INTC handler recorded for a cause.
+ *
+ * Calls func_00424880(ch), sets the cause's slot (+ch*4) to -1 and calls RemoveIntcHandler with the old id.
+ *
+ * @param ch  INTC cause number
+ * @return RemoveIntcHandler's result
+ */
 extern "C" void* func_00362008(void* self, int ch)
 {
     func_00424880(ch);
@@ -7183,6 +7843,17 @@ extern "C" int func_00423AB0(int, int, int);
 extern "C" void func_00424950(int);
 extern "C" void func_004249B8(int);
 
+/**
+ * Registers a DMAC handler for a channel and records its id.
+ *
+ * Calls func_00424950(channel), stores the id func_00423AB0(channel, handler, next) returns at +0x40 + channel*4, then
+ * calls func_004249B8(channel).
+ *
+ * @param owner  the interrupt handler table
+ * @param channel  DMA channel number
+ * @param handler  handler function
+ * @param next  argument passed through to func_00423AB0
+ */
 extern "C" void func_00362058(int owner, int channel, int handler, int next) {
     func_00424950(channel);
     (*(int *)(((char*)(owner) + (channel << 2)) + (0x40))) = func_00423AB0(channel, handler, next);
@@ -7194,6 +7865,13 @@ INCLUDE_ASM("object/railmodifier", func_003620C8);
 #ifdef SKIP_ASM
 extern "C" void RemoveDmacHandler(int, int);
 
+/**
+ * Removes the DMAC handler recorded for a channel.
+ *
+ * Calls func_00424950(idx), sets the channel's slot (+0x40 + idx*4) to -1 and calls RemoveDmacHandler with the old id.
+ *
+ * @param idx  DMA channel number
+ */
 extern "C" void func_003620C8(char* self, int idx)
 {
     func_00424950(idx);
@@ -7208,6 +7886,11 @@ extern "C" void func_003620C8(char* self, int idx)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00362120);
 #ifdef SKIP_ASM
+/**
+ * Stores all 32 FPU registers into buf as 64-bit words (the interrupt handlers' save half; func_00362230 restores).
+ *
+ * @param buf  0x100-byte save area
+ */
 // PORT: PS2-only inline asm (dump all 32 FPU registers as 64-bit words into buf).
 extern "C" void func_00362120(void* buf)
 {
@@ -7289,6 +7972,11 @@ extern "C" void func_00362120(void* buf)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00362230);
 #ifdef SKIP_ASM
+/**
+ * Reloads all 32 FPU registers from buf, as saved by func_00362120.
+ *
+ * @param buf  0x100-byte save area
+ */
 // PORT: PS2-only inline asm (reload all 32 FPU registers from buf; deliberately
 // no FPU clobbers so the compiler doesn't save/restore $f20-$f31 around it).
 extern "C" void func_00362230(void* buf)
@@ -7380,6 +8068,15 @@ struct sIntcStats00362340 {
 };
 extern sIntcStats00362340 D_005059D8;
 
+/**
+ * Handles the VIF1 interrupt: cancels a VIF1 interrupt stall and counts it.
+ *
+ * Saves the FPU registers (func_00362120). When VIF1_STAT (0x10003C00) has bit 10 set (stalled on an interrupt) it
+ * writes 8 (STC, stall cancel) to VIF1_FBRST (0x10003C10). It counts the interrupt at D_005059D8 +0x80, restores the
+ * FPU registers (func_00362230) and re-enables interrupts.
+ *
+ * @return 1 (handled)
+ */
 extern "C" int func_00362340(void)
 {
     char buf[0x100];
@@ -7402,6 +8099,11 @@ INCLUDE_ASM("object/railmodifier", func_003623A8);
 extern "C" void func_00362120(void*);
 extern "C" void func_00362230(void*);
 
+/**
+ * Handles the VU1 interrupt: only saves and restores the FPU registers and re-enables interrupts.
+ *
+ * @return 1 (handled)
+ */
 extern "C" int func_003623A8(void)
 {
     char buf[0x100];
@@ -7421,6 +8123,17 @@ struct sGifPacket {
     ulong* cur;     // 0x4
 };
 
+/**
+ * Appends SCISSOR_1 and SCISSOR_2 GS register writes (A+D pairs) for the same rectangle to a packet.
+ *
+ * Both get x .. x + w - 1 and y .. y + height - 1; the packet advances by four 64-bit words and its count by 2.
+ *
+ * @param pkt  packet being built
+ * @param x  left edge
+ * @param w  width
+ * @param y  top edge
+ * @param height  height
+ */
 // PORT: 64-bit GS register writes (ulong).
 extern "C" void func_003623D8(sGifPacket* pkt, int x, int w, int y, int height)
 {
@@ -7443,6 +8156,9 @@ struct sPair64 {
     long b;
 };
 
+/**
+ * Appends a TEXFLUSH GS register write (A+D pair, register 0x3F, data 0) to a packet and counts it.
+ */
 extern "C" void func_00362448(void* self)
 {
     sPair64*& cur = *(sPair64**)((char*)self + 0x4);
@@ -7456,6 +8172,20 @@ extern "C" void func_00362448(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00362478);
 #ifdef SKIP_ASM
+/**
+ * Appends an ALPHA blend register write (A+D pair) for a blend mode to a packet.
+ *
+ * Context 1 selects ALPHA_2 (0x43), anything else ALPHA_1 (0x42). Each mode has a fixed register value; modes 11-14 put
+ * fix in the FIX field and mode 2 uses FIX 0x80.
+ *
+ * Quirk: modes 15 and 18-20 (and any value not listed) leave the data word as it was, but the entry is still added and
+ * counted.
+ *
+ * @param pkt  packet being built
+ * @param mode  blend mode
+ * @param fix  fixed alpha for modes 11-14
+ * @param ctx  GS context (0 or 1)
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 // PORT: 64-bit GS register writes (ulong).
 // Emits one GS ALPHA register write (0x42 for context 1, 0x43 for context 2) for the given blend mode.
@@ -7505,6 +8235,16 @@ extern "C" void func_00362478(sGifPacket* pkt, int mode, int fix, int ctx)
 //100%
 INCLUDE_ASM("object/railmodifier", func_003625C0);
 #ifdef SKIP_ASM
+/**
+ * Appends a CLAMP register write (A+D pair) for a texture wrap mode to a packet.
+ *
+ * Context 1 selects CLAMP_2 (9), anything else CLAMP_1 (8). Mode 3 clamps both axes (5), mode 1 clamps T only (4), mode
+ * 2 clamps S only (1), anything else repeats both (0).
+ *
+ * @param pkt  packet being built
+ * @param mode  wrap mode
+ * @param ctx  GS context (0 or 1)
+ */
 // PORT: 64-bit GS register writes (ulong).
 extern "C" void func_003625C0(sGifPacket* pkt, int mode, int ctx)
 {
@@ -7543,6 +8283,18 @@ extern "C" void func_003625C0(sGifPacket* pkt, int mode, int ctx)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00362660);
 #ifdef SKIP_ASM
+/**
+ * Appends a ZBUF register write (A+D pair) to a packet.
+ *
+ * Context 1 selects ZBUF_2 (0x4F), anything else ZBUF_1 (0x4E). The value holds zbp, the Z format (psm - 0x30) at bit
+ * 24 and ZMSK (bit 32) when zmsk is 1.
+ *
+ * @param pkt  packet being built
+ * @param zbp  Z buffer base pointer
+ * @param psm  Z pixel format (0x30-0x3A)
+ * @param zmsk  1 to mask Z writes
+ * @param ctx  GS context (0 or 1)
+ */
 // PORT: 64-bit GS register writes (ulong).
 extern "C" void func_00362660(sGifPacket* pkt, unsigned int zbp, unsigned int psm, int zmsk, int ctx)
 {
@@ -7574,6 +8326,19 @@ struct sRmGsPacket {
     ulong* ptr;     // 0x4
 };
 
+/**
+ * Appends a TEST register write (A+D pair) for an alpha and depth test to a packet.
+ *
+ * Context 1 selects TEST_2 (0x48), anything else TEST_1 (0x47). Alpha test is on with ATST ALWAYS for atest 0/1 (and
+ * unknown values), LESS for 2 and GREATER for 3, reference aref, AFAIL 1 (keep frame buffer only); depth test is on
+ * with ZTST GEQUAL for ztest 1, GREATER for 0 and ALWAYS otherwise.
+ *
+ * @param pkt  packet being built
+ * @param ztest  depth test mode
+ * @param atest  alpha test mode
+ * @param aref  alpha reference
+ * @param ctx  GS context (0 or 1)
+ */
 // GS TEST register (TEST_1 = 0x47, TEST_2 = 0x48), as in libgraph's SCE_GS_SET_TEST.
 extern "C" void func_003626D8(sRmGsPacket* pkt, int ztest, int atest, unsigned int aref, int ctx)
 {
@@ -7640,6 +8405,17 @@ struct sRmPkt27A8 {
     ulong* base;    // 0x8
 };
 
+/**
+ * Writes the DMA/VIF/GIF header in front of a block of count A+D register writes; does nothing when count is 0.
+ *
+ * The header is six 64-bit words: a DMA tag for count + 2 quadwords, a VIF NOP, a VIF DIRECT of count + 1 quadwords
+ * (mode 2: an UNPACK V4-32 to VU1 address 0x3F2 instead) and a GIF tag (NLOOP count, EOP, one A+D register). Mode 0
+ * builds it at D_00505A80 with a RET tag and appends a CALL to D_00505A80 at *pp; modes 1 and 2 write it at the packet
+ * base with a CNT tag after handing the packet's current end back through *pp.
+ *
+ * @param pp  the caller's DMA chain cursor
+ * @param mode  0, 1 or 2 as above
+ */
 // PORT: 64-bit DMA/VIF/GIF tag writes (ulong) and addresses held in int.
 extern "C" void func_003627A8(sRmPkt27A8* self, ulong** pp, int mode)
 {
@@ -7689,6 +8465,15 @@ extern "C" void func_003627A8(sRmPkt27A8* self, ulong** pp, int mode)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00362978);
 #ifdef SKIP_ASM
+/**
+ * Appends a DMA packet to a draw bucket's chain.
+ *
+ * The first packet becomes the head (+0xC); later ones are linked by turning the previous tail's tag (through the
+ * uncached-accelerated mirror, | 0x30000000) into a NEXT tag to the new packet. The tail (+0x10) becomes tail.
+ *
+ * @param packet  start of the packet
+ * @param tail  address of its closing tag
+ */
 // Append a DMA packet to a chain: the first one becomes the head, later ones are
 // linked by patching the previous tail's tag (via the uncached-accelerated
 // mirror, | 0x30000000) into a NEXT tag pointing at the new packet.
@@ -7767,6 +8552,14 @@ static inline sRmSaved_29B8* save_29B8(sRmBatch_29B8* self, sRmCtx_29B8* ctx)
     return d;
 }
 
+/**
+ * Builds the defer manager's three preset draw states.
+ *
+ * Clears the static base (+0x57484) and resets the manager (func_00362CC8). Starting from sDrawState_s_defaultDrawState in the current
+ * draw-state slot of cGraphicsMan_TheGraphicsMan, it edits the state bit fields three times and saves each copy into the draw-state
+ * array (+0x51484, count +0x51480): the presets at +0x57488, +0x5748C and +0x57490. The base is then set to the count
+ * so later resets keep them.
+ */
 extern "C" void func_003629B8(sRmBatch_29B8* self)
 {
     self->base = 0;
@@ -7811,6 +8604,15 @@ struct sRail20_2CC8 {
 
 extern sRail20_2CC8 sDrawState_s_defaultDrawState;
 
+/**
+ * Resets the defer manager for a new frame.
+ *
+ * Zeroes the record count (+0x0) and the bucket count (+0x57494), drops the draw states saved after the presets
+ * (+0x51480 = +0x57484), clears the two 0x400-byte hash tables at +0x674A0 and +0x678A0 by DMA from the zero-filled
+ * scratchpad (D_004A5B84), zeroes the sort-item count (+0x67CA4) and the scissor count (+0x6AED0), sets the current
+ * draw state (+0x69CA8) to sDrawState_s_defaultDrawState, and the current matrix (+0x69CC0) and scissor (+0x69CC4) to
+ * -1 with no cached matrices (+0x69CC8).
+ */
 extern "C" void func_00362CC8(char* self)
 {
     *(int*)(self + 0x0) = 0;
@@ -7965,6 +8767,17 @@ static inline void addEntry_2DE8(sRmBatch_2DE8* self, sRmEntry_2DE8* e, unsigned
     self->last = node;
 }
 
+/**
+ * Files the frame's deferred draw records into buckets by draw state, textures and matrix.
+ *
+ * Streams the 0x80-byte records (+0x80, count +0x0) through the scratchpad ring D_004A4474 in chunks. For each it finds
+ * the shared state (func_00394ED0) and, unless it continues the previous record, the bucket with the same state,
+ * texture pair and matrix index (func_00395000). A new bucket is added to the hash and gets a sort item with the key
+ * from func_00364240; continuation records are chained to the previous bucket. The record's packet is appended to the
+ * bucket with func_00362978.
+ *
+ * @param vself  the defer manager
+ */
 // DeferMan_BuildBuckets (REF n2-render-layer.md): streams the draw records through the scratchpad in
 // chunks and files each into a bucket by (state, textures, matrix); new buckets get a sort key.
 // PORT: (int) of a pointer for hashing.
@@ -8066,6 +8879,26 @@ static inline void resetState_3490(sRail20_2CC8* d)
     *d = sDrawState_s_defaultDrawState;
 }
 
+/**
+ * Builds the frame's DMA chains from the deferred draw records.
+ *
+ * Buckets the records (func_00362DE8), writes the default state (func_00364360), sorts the buckets (func_00364050),
+ * resets the texture use table (func_003666F8) and prepares the texture manager (cGraphicsMan_TheGraphicsMan +0x18F4:
+ * func_00396128 and func_00365F68 on +0x1F60). It records each texture's last use and use count in D_0053AB80, then
+ * splits the sorted list into three passes at the pass types in D_004A4058 (state word 2 bits 5-9). For every bucket it
+ * writes the state change (func_00363C20) when the state differs, the texture setup (func_00368660) and a CALL to the
+ * bucket's chain, whose tail becomes a RET. After a type-6 pass it runs func_0036AC00 per entry and resets the state;
+ * after a type-9 pass it ends both chains with END tags, reports their positions in out1/out2 and runs
+ * func_0036C790/func_003904A0 per entry. Finally it ends both chains, stores the main chain's end in *pktAddr and
+ * closes the texture manager (func_00365FA8).
+ *
+ * Likely bug: the copy of D_004A4058 holds two pass types, so the third pass switches on an unwritten stack word.
+ *
+ * @param pktAddr  main chain cursor (in: start, out: end)
+ * @param out1  receives the main chain position after the type-9 pass
+ * @param path  second chain cursor
+ * @param out2  receives the second chain position after the type-9 pass
+ */
 // Draws the sorted batch: counts texture use, splits the sorted list into three passes by
 // blend mode, then emits each node's DMA chain (closing the VIF/GIF chains between passes).
 // PORT: DMA tags written as 64-bit words through uncached (| 0x30000000 / | 0x20000000) addresses held in int.
@@ -8271,6 +9104,21 @@ static inline unsigned int Bits3C20(unsigned int w, unsigned int m)
 
 // PORT: 64-bit DMA/GIF tag writes (ulong); self arrives as a pointer-sized integer (__SIZE_TYPE__).
 extern "C" void func_00363C20_impl(__SIZE_TYPE__ selfi, sRmGs3C20* st, int a2, ulong** pp) __asm__("func_00363C20");
+/**
+ * Writes the GS register changes needed to go from the defer manager's current draw state (+0x69CA8) to st.
+ *
+ * Starts with a one-quadword CNT tag. When st's VU1 program type (word 0 bits 6-9) is nonzero it emits the program
+ * setup (func_00364CD0): mode 0 when the type changes, mode 1 when only the matrix/layer index changes, mode 2 when the
+ * frame word (word 3 bits 0-29) changes. It then collects A+D writes only for fields that differ: SCISSOR from the
+ * rectangle table (+0x6AED4) indexed by word 2 bits 0-4, ZBUF for both contexts on the Z-mask bit, TEST for both
+ * contexts, CLAMP_1/2 (word 0 bits 2-3 / 4-5) and ALPHA_1/2 (word 1 bits 2-6 / 7-11 with FIX from word 0). It copies st
+ * into the current state and closes the block with func_003627A8 mode 1.
+ *
+ * @param selfi  the defer manager (passed as an integer)
+ * @param st  draw state to switch to
+ * @param a2  the bucket's matrix/layer index
+ * @param pp  DMA chain cursor
+ */
 extern "C" void func_00363C20_impl(__SIZE_TYPE__ selfi, sRmGs3C20* st, int a2, ulong** pp)
 {
     sRmRend3C20* self = (sRmRend3C20*)selfi;
@@ -8353,6 +9201,12 @@ extern void* D_004A4474;
 extern "C" void* func_0038F460(void* ring, unsigned int addr, int size, int flags);
 extern "C" void func_0038F6A8(void* ring);
 
+/**
+ * Sorts the defer manager's sort items (+0x67CA8, count +0x67CA4) by key with a four-pass 8-bit radix sort.
+ *
+ * The 4 x 257 histogram lives in the scratchpad ring (func_0038F460) and D_00505B70 is the swap buffer; after the
+ * fourth pass the sorted items are back in place.
+ */
 // 4-pass 8-bit radix sort of the item list at self+0x67CA8 (count at +0x67CA4).
 extern "C" void func_00364050(char* self)
 {
@@ -8393,8 +9247,19 @@ extern "C" void func_00364050(char* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00364240);
 #ifdef SKIP_ASM
+/**
+ * Builds the sort key for a draw state and texture pair.
+ *
+ * Packs 31 minus the pass type (word 2 bits 5-9) into bits 26-31, a field chosen by word 1 bits 0-1 (0x3FF, 0x3FE or
+ * word 2 bits 10-28) into bits 16-25, a rank of the VU1 program type (word 0 bits 6-9) into bits 13-15 and the texture
+ * ids into bits 3-12, then returns the complement so the radix sort orders them high to low.
+ *
+ * Quirk: the word-2 field is up to 19 bits wide and is not masked, so a value above 0x3FF spills into the pass bits.
+ *
+ * @param key  texture pair (low and high 16 bits; negative halves are skipped)
+ * @return the sort key
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
-// Packs the rail's blend/test state into a negated register word.
 extern "C" unsigned int func_00364240(unsigned int* self, int key)
 {
     int a = 31 - ((self[2] & 0x3E0) >> 5);
@@ -8473,6 +9338,17 @@ struct sRmPkt4360 {
     ulong* base;    // 0x8
 };
 
+/**
+ * Writes the complete default draw state (sDrawState_s_defaultDrawState) to the DMA chain.
+ *
+ * After a one-quadword CNT tag it emits the VU1 program setup (func_00364CD0 mode 0) and CLAMP, ALPHA, ZBUF and TEST
+ * for context 1 and then context 2, closing the block with func_003627A8 mode 1.
+ *
+ * Likely bug: the context-2 ZBUF and TEST writes take their fields from word 1 one or two bits higher than the
+ * context-1 writes and func_00363C20 do.
+ *
+ * @param pp  DMA chain cursor
+ */
 // PORT: 64-bit DMA/GIF tag writes (ulong).
 extern "C" void func_00364360(void* self, ulong** pp)
 {
@@ -8566,6 +9442,15 @@ struct sRailXfTable_45B8 {
     sRailXf_45B8 entries[1];    // 0x69CD0
 };
 
+/**
+ * Finds or adds a 0x180-byte matrix record in the defer manager's matrix cache.
+ *
+ * Compares in's four keys (the matrices at +0xE0/+0x120 and vectors at +0x160/+0x170) with each cached record
+ * (+0x69CD0, count +0x69CC8); on no match appends a copy. The index ends up in the current matrix (+0x69CC0). There is
+ * no capacity check.
+ *
+ * @param in  matrix record to look up
+ */
 extern "C" void func_003645B8(sRailXfTable_45B8* self, sRailXf_45B8* in)
 {
     int i;
@@ -8608,6 +9493,14 @@ struct sRailKeyTable {
     sRailKey4 keys[1];          // 0x6AED4
 };
 
+/**
+ * Finds or adds a scissor rectangle (four u16 values) in the defer manager's table and makes it current.
+ *
+ * Searches the table at +0x6AED4 (count +0x6AED0); on no match appends k. The index is stored at +0x69CC4. There is no
+ * capacity check.
+ *
+ * @param k  rectangle to look up
+ */
 extern "C" void func_00364B88(sRailKeyTable* self, sRailKey4* k)
 {
     int i;
@@ -8637,6 +9530,11 @@ struct sData20 {
     int w[5];
 };
 
+/**
+ * Sets the defer manager's current draw state (+0x69CA8) to a copy of the 20-byte state src.
+ *
+ * @param src  draw state to copy
+ */
 extern "C" void func_00364C90(void* self, sData20* src)
 {
     *(sData20*)((char*)self + 0x69CA8) = *src;
@@ -8787,6 +9685,23 @@ static inline void putQw_4CD0(ulong*& p, const void* src, int n)
 // DMA CALL tag to a static chain.
 #define DMA_CALL_4CD0(addr) (((ulong)(unsigned int)(addr) << 32) | 0x50000000)
 
+/**
+ * Writes the VU1 microprogram setup for a draw-state program type to the DMA chain.
+ *
+ * Uses the current matrix record (+0x69CC0 into the 0x180-byte records at +0x69CD0). Mode 0 writes the program's CALL
+ * and its constants, mode 1 only the per-matrix constants, mode 2 only the per-draw CALL to w3 (types 6, 7). Types 1,
+ * 2, 3 and 6 unpack record quadwords 8-13; type 1 CALLs D_0042E590, type 2 D_00430A80 (with fixed GS data, two
+ * cBezierMan_TheBezierMan buffers and 1/3, 1/5, 1/7 constants), type 3 D_00435BD0; type 4 CALLs D_00439A40 with the
+ * world-view set (mode 0) or the world-clip set (mode 1); type 5 CALLs D_0043B3F0 with the screen set; type 6 CALLs
+ * D_00434990 and adds the world matrix times a texture bias matrix built once into D_004FFB80 (flag D_004A5990); types
+ * 6 and 7 add a CALL to w3 when it is nonzero. Types 0 and 8 write nothing.
+ *
+ * @param vself  the defer manager
+ * @param type  VU1 program type (state word 0 bits 6-9)
+ * @param mode  0, 1 or 2 as above
+ * @param w3  per-draw chain address (state word 3 bits 0-29)
+ * @param pp  DMA chain cursor
+ */
 // Per material type, emits the VU1 microprogram CALL and its constant header (mode 0), the matrix
 // header only (mode 1), or the per-draw CALL (mode 2, types 6 and 7).
 // PORT: 64-bit DMA/VIF/GIF words (ulong), 128-bit copies (cQuad128), addresses held in int.
@@ -9187,6 +10102,18 @@ struct sRailModE40 {
     void* pool;                 // 0x23E8
 };
 
+/**
+ * Sets up a texture-memory block allocator with one free block and an empty link pool.
+ *
+ * Block 0 covers the whole size from the start address (+0x1FF4 = size), links 1-291 form the spare-link stack (head
+ * +0x23DC = 1), the 17 size-class heads of both lists are emptied, the address list starts at block 0 (+0x23C0) and
+ * block 0 is filed into its size class (func_003660A8). pool (+0x23E8) is the owner table freed blocks report to.
+ *
+ * @param list  the allocator
+ * @param a1  start address
+ * @param a2  size
+ * @param pool  owner table
+ */
 extern "C" void func_00365E40(void* list, int a1, int a2, void* pool)
 {
     sRailModE40* self = (sRailModE40*)list;
@@ -9227,6 +10154,12 @@ INCLUDE_ASM("object/railmodifier", func_00365F68);
 extern "C" void func_00424698(void* begin, void* end);
 extern "C" int func_0038F708(void* base, int size, int mode);
 
+/**
+ * Moves a block allocator's link array into the scratchpad ring for fast access.
+ *
+ * Writes the 0x1FF0-byte array back from the data cache (func_00424698), copies it with func_0038F708 and points the
+ * links pointer (+0x1FF0) at the copy. func_00365FA8 undoes it.
+ */
 extern "C" void func_00365F68(void* self)
 {
     func_00424698(self, (char*)self + 0x1FEF);
@@ -9240,6 +10173,10 @@ INCLUDE_ASM("object/railmodifier", func_00365FA8);
 extern "C" void func_004247D8(void* begin, void* end);
 extern "C" void func_0038F738(void* base, int size, int mode);
 
+/**
+ * Moves a block allocator's link array back from the scratchpad ring (func_004247D8, func_0038F738) and points the
+ * links pointer (+0x1FF0) at it again.
+ */
 extern "C" void func_00365FA8(void* self)
 {
     func_004247D8(self, (char*)self + 0x1FEF);
@@ -9261,6 +10198,11 @@ struct sRailLink {
 //100%
 INCLUDE_ASM("object/railmodifier", func_00365FE8);
 #ifdef SKIP_ASM
+/**
+ * Pops a spare link off the allocator's stack (head +0x23DC).
+ *
+ * @return the link index
+ */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Pop a link index off the free list headed at f23DC.
 extern "C" int func_00365FE8(sRailModE40* self)
@@ -9294,6 +10236,11 @@ struct sRailNodeMan {
     int freeHead;           // 0x23dc
 };
 
+/**
+ * Removes a block from the allocator's address list and returns its link to the spare stack (+0x23DC).
+ *
+ * @param idx  block index
+ */
 extern "C" void func_00366008(sRailNodeMan* self, int idx)
 {
     sRailNode* node = &self->nodes[idx];
@@ -9329,6 +10276,18 @@ static inline int railFloorLog2_60A8(int x)
     return r;
 }
 
+/**
+ * Files a block into its size-class list.
+ *
+ * The class is floor(log2(size)) - 6. Used blocks (address word bit 0) go into list A, ordered by address; free blocks
+ * into list B, ordered by size.
+ *
+ * Quirk: an entry is compared only with members that have a successor, so one that belongs before the last member is
+ * appended after it.
+ *
+ * @param selfp  the allocator
+ * @param idx  block index
+ */
 // Links node idx into its size-class list (list A ordered by field_0x0, list B by size).
 extern "C" void func_003660A8(void* selfp, int idx)
 {
@@ -9386,6 +10345,11 @@ extern "C" void func_003660A8(void* selfp, int idx)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00366238);
 #ifdef SKIP_ASM
+/**
+ * Removes a block from its size-class list.
+ *
+ * @param idx  block index
+ */
 extern "C" void func_00366238(sRailNodeMan* self, int idx)
 {
     sRailNode* node = &self->nodes[idx];
@@ -9414,6 +10378,16 @@ extern "C" void func_003660A8(void* self, int idx);
 // PORT: the unit declares func_00365FE8 as void; it returns the popped free index.
 extern "C" int func_00365FE8_pop(void* self) __asm__("func_00365FE8");
 
+/**
+ * Allocates size units from a free block, splitting off the rest as a new free block when a spare link is left.
+ *
+ * The block leaves its size list; on an exact fit (or no spare link) the whole block is marked used. Otherwise a new
+ * block (func_00365FE8) takes the remainder, with no owner, after it in the address list and in its size class. The
+ * block is marked used (bit 0) and refiled (func_003660A8).
+ *
+ * @param idx  free block to allocate from
+ * @param size  units needed
+ */
 extern "C" void func_003662D0(sRailNodeMan* self, int idx, int size)
 {
     sRailNode* node = &self->nodes[idx];
@@ -9444,6 +10418,16 @@ extern "C" void func_003662D0(sRailNodeMan* self, int idx, int size)
 //100%
 INCLUDE_ASM("object/railmodifier", func_003663D8);
 #ifdef SKIP_ASM
+/**
+ * Frees a used block, detaches it from its owner and merges it with free neighbours.
+ *
+ * Unless the owner (+0x8) is 0x7FFFFFFF, sets the owner texture's block fields (pool +0x23E8 entry: +0x28/+0x30, or
+ * +0x2C/+0x34 when flag bit 2 is set) to -1. Clears the low six flag bits, refiles the block and repeatedly joins it
+ * with a free block before or after it in the address list.
+ *
+ * @param selfp  the allocator
+ * @param idx  block index
+ */
 extern "C" void func_003663D8(void* selfp, int idx)
 {
     sRailNodeMan* self = (sRailNodeMan*)selfp;
@@ -9494,6 +10478,12 @@ struct sRailLink6548 {
     int f18;
 };
 
+/**
+ * Frees every used block of an allocator that is not locked (flag bit 1), walking the address list (+0x23C0).
+ *
+ * The next used block is found before each free, as freeing merges neighbours. func_00367360 (the texture manager's
+ * purge) runs it on both of its allocators.
+ */
 // Walks the rail's link list and calls func_003663D8 on every enabled link without flag bit 1.
 extern "C" void func_00366548(void* self)
 {
@@ -9532,6 +10522,9 @@ struct sRailLink6618 {
     int f18;
 };
 
+/**
+ * Frees every used block of an allocator, clearing its lock bit (flag bit 1) first.
+ */
 // Walks the rail's link list, clearing flag bit 1 and calling func_003663D8 on every enabled link.
 extern "C" void func_00366618(void* self)
 {
@@ -9589,6 +10582,12 @@ static inline unsigned int spadFree66F8()
     return p ? 0x70004000 - (int)p : 0;
 }
 
+/**
+ * Resets the 2000-entry texture use table D_0053AB80 to all-ones (-1).
+ *
+ * Invalidates the table's cache lines (func_004247D8), fills the free scratchpad above D_004A5B84 with 0xFF bytes and
+ * copies that into the table in chunks with func_0038F738.
+ */
 extern "C" void func_003666F8()
 {
     cQuad128 fill = makeFill66F8(0xFFFFFFFF, 0xFFFFFFFF);
@@ -9620,6 +10619,12 @@ static inline int railFloorLog2(int x)
     return r;
 }
 
+/**
+ * Finds the first free block of at least size units, searching the free lists from its size class upwards.
+ *
+ * @param size  units needed
+ * @return the block index, or -1
+ */
 extern "C" int func_003667F8(sRailNodeMan* self, int size)
 {
     int bucket;
@@ -9649,6 +10654,11 @@ struct sRailLink6888 {
     int f18;
 };
 
+/**
+ * Returns the largest free block in the address list (ties go to the later one).
+ *
+ * @return the block index, or -1 when no block is free
+ */
 // Returns the index of the disabled link with the largest f4 (at least 0), or -1.
 extern "C" int func_00366888(void* self)
 {
@@ -9685,8 +10695,19 @@ static inline int railFloorLog2v(int x)
     return r;
 }
 
-// Picks the cheapest free node of at least 'size' bytes from its size class (skipping locked nodes and the two
-// given owners; owners whose limit is above 'age' cost size*weight) and frees it. Returns 1 if one was freed.
+/**
+ * Evicts the cheapest used block of size's size class that is large enough.
+ *
+ * Walks list A of that class, skipping blocks smaller than size, locked ones (flag bit 1) and those owned by skipA or
+ * skipB. A block whose owner texture is used again later this frame (its last use in D_0053AB80 is after age) costs
+ * size times its use count, any other costs 0; the cheapest is freed with func_003663D8.
+ *
+ * @param size  units needed
+ * @param skipA  owner to keep
+ * @param skipB  another owner to keep
+ * @param age  current position in the frame's draw order
+ * @return 1 if a block was freed, else 0
+ */
 extern "C" int func_003668F8(sRailNodeMan* self, int size, int skipA, int skipB, int age)
 {
     int i = self->headsA[railFloorLog2v(size) - 6].next2;

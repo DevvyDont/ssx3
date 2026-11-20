@@ -80,6 +80,14 @@ static inline int octEmpty_8C48(sOctCell_8C48* o)
     return 1;
 }
 
+/**
+ * Removes a flex rail from the world space hash.
+ *
+ * Takes the space hash (cObjectInterface_getNash), bumps its +0xA0 counter, finds the hash key of BoundBox (+0x30,
+ * nash_Nash_findkey), picks the octant from the key's sign bits and removes the rail's hash node (+0x54) from that
+ * cell's list 2 (nash_Cell_remnode). An octant left with no children and no lists is deleted. Finally deletes the hash
+ * node and nulls +0x54.
+ */
 extern "C" void func_00348C48(void* self)
 {
     sHashCellR_8C48* cell = (sHashCellR_8C48*)cObjectInterface_getNash();
@@ -134,6 +142,19 @@ struct sFlexRailElem_348D98 {
     char pad48[8];
 };
 
+/**
+ * Constructs a float rail (node type 20) for a placed rail instance.
+ *
+ * Runs the flex-rail constructor func_00347D90, installs D_0048FF30 and copies LSpring, LDamp and ForceScale (desc
+ * +0x48..+0x50) to +0x60..+0x68. Allocates NumNodes 0x50-byte nodes ("FloatRailNodes", +0x70); each gets the next valid
+ * instance id (desc +0x4) and mesh (desc +0x24), zero Vel and Force, and its Pos and OPos from the mesh position
+ * (func_00349220). Then builds the segment matrices (func_003492A8), BoundBox (func_00349110) and the space hash entry
+ * (cFlexRailNode_addSpaceHash).
+ *
+ * @param a1  rail instance record
+ * @param desc  float rail make-data
+ * @return self
+ */
 extern "C" void* func_00348D98(char* self, void* a1, char* desc)
 {
     func_00347D90(self, 20, a1, desc);
@@ -201,6 +222,17 @@ struct sFrStreamVEntry_348FA0 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Constructs a float rail from a replay frame.
+ *
+ * Runs func_00347EA8, installs D_0048FF30, reads LSpring/LDamp/ForceScale (+0x60, 0xC bytes) and the NumNodes * 0x50
+ * node array (allocated as "FloatRailNodes" at +0x70), then rebuilds the matrices (func_003492A8), BoundBox
+ * (func_00349110) and space hash entry (cFlexRailNode_addSpaceHash).
+ *
+ * @param a1  update bucket
+ * @param stream  replay stream to read from
+ * @return self
+ */
 extern "C" void* func_00348FA0(char* self, void* a1, void* stream)
 {
     func_00347EA8(self, a1, stream);
@@ -226,6 +258,14 @@ void cMemMan_free(void*);
 extern "C" void func_00348C48(void* self);
 extern "C" void func_00347F90(void* self, int flags);
 
+/**
+ * Destroys a float rail.
+ *
+ * Reinstalls D_0048FF30, removes the rail from the space hash (func_00348C48), frees the node array (+0x70) and runs
+ * the flex-rail destructor func_00347F90 with flags.
+ *
+ * @param flags  destructor flags
+ */
 extern "C" void func_003490B0(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0048FF30;
@@ -285,6 +325,9 @@ static inline void vu0AddFRBox(sFrBoxVec4& dst, sFrBoxVec4& b)
         : "m"(dst), "m"(b));
 }
 
+/**
+ * Recomputes a float rail's BoundBox from its node positions, padded by 200 on each axis.
+ */
 // bounding box of the rail elements, padded by 200 on x/y/z
 extern "C" void func_00349110(sFrBoxRail* self)
 {
@@ -376,6 +419,13 @@ struct sFrNode9220 {
     int bone;               // 0x44
 };
 
+/**
+ * Sets a float rail node's Pos and OPos to the current position of its mesh.
+ *
+ * Builds the mesh matrix of the node's instance and mesh (cInstanceNode_buildMeshMat) and copies its translation.
+ *
+ * @param node  rail node to update
+ */
 extern "C" void func_00349220(void* self, sFrNode9220* node)
 {
     sFrNodeMtx boneMat;
@@ -489,6 +539,14 @@ static inline void updateMat_92A8(sFrM4_92A8& out, const sFrV4_92A8& a, const sF
     MMI_TRANSPOSE4(&out);
 }
 
+/**
+ * Rebuilds a float rail's segment matrices from its node positions.
+ *
+ * Each segment matrix (+0x50) is the cubic for that segment built from the four surrounding node positions with the
+ * basis D_004FFAC0; the first and last segments repeat the end node as the missing control point.
+ *
+ * @param selfv  the float rail
+ */
 // PORT: hand-written MMI 4x4 transpose (MMI_TRANSPOSE4: lq/pextlw/pextuw/pcpyld/pcpyud/sq, no gcc 2.95 pattern;
 // retail's registers differ per call site, so an operand asm) plus VU0 macro asm; a port replaces them with a
 // plain C transpose and a C vector-matrix product.
@@ -546,6 +604,15 @@ static inline void vu0AddFR(sFrVec4& dst, sFrVec4 b)
         : "m"(dst), "m"(b));
 }
 
+/**
+ * Adds a force at a hit point to the two float rail nodes around it.
+ *
+ * Does nothing when the hit segment (intInfo +0x64) is negative. Otherwise node seg gets offset * (1 - t) and node seg
+ * + 1 gets offset * t added to its Force (t at +0x68).
+ *
+ * @param node  intersect info of the hit (segment +0x64, t +0x68)
+ * @param offset  force to apply
+ */
 extern "C" void func_00349798(void* self, void* node, sFrVec4* offset)
 {
     if (*(int*)((char*)node + 0x64) >= 0) {
@@ -560,6 +627,16 @@ extern "C" void func_00349798(void* self, void* node, sFrVec4* offset)
 //100%
 INCLUDE_ASM("object/flexrailnode", func_00349840);
 #ifdef SKIP_ASM
+/**
+ * Adds the float rail's velocity at the hit point to an intersect info.
+ *
+ * Does nothing when the hit segment (+0x64) is negative. Otherwise adds Vel[seg] * t + Vel[seg + 1] * (1 - t) to the
+ * info's +0x20 vector (t at +0x68).
+ *
+ * Likely bug: the weights are the reverse of func_00349798 (applyForce), which gives node seg the (1 - t) share.
+ *
+ * @param node  intersect info of the hit
+ */
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 // PORT: PS2-only VU0 inline asm (vector add-assign).
 extern "C" void func_00349840(void* self, void* node)
@@ -656,6 +733,13 @@ static inline void vu0AddEq_98E8(sFrV_98E8& dst, sFrV_98E8 b)
         : "m"(dst), "m"(b));
 }
 
+/**
+ * Steps the float rail's spring simulation by one update.
+ *
+ * For each node: snaps Pos and OPos back to the mesh (func_00349220) while the instance has an active node (+0xC);
+ * accel = -(Pos - OPos) * LSpring (+0x60) + Force * ForceScale (+0x68) - Vel * LDamp (+0x64); Pos += Vel * dt; Vel +=
+ * accel * dt (dt from cObjectInterface_getUpdateTime); Force is cleared.
+ */
 extern "C" void func_003498E8(char* self)
 {
     float dt = cObjectInterface_getUpdateTime();
@@ -686,6 +770,14 @@ struct sFlexRailVEntry9AD0 {
 
 extern "C" void func_00348B40(void* self, void* stream);
 
+/**
+ * Writes a float rail to a replay frame.
+ *
+ * Writes the flex-rail base (func_00348B40), LSpring/LDamp/ForceScale (+0x60, 0xC bytes) and the NumNodes * 0x50 node
+ * array (+0x70).
+ *
+ * @param stream  replay stream to write to
+ */
 extern "C" void func_00349AD0(void* self, void* stream)
 {
     func_00348B40(self, stream);
@@ -741,6 +833,19 @@ struct sFlexElem_9B48 {
     char pad58[8];
 };
 
+/**
+ * Constructs a spring rail (node type 21) for a placed rail instance.
+ *
+ * Runs the flex-rail constructor func_00347D90, installs D_0048FD90 and copies ASpring, ADamp and TorqueScale (desc
+ * +0x48..+0x50) to +0x60..+0x68. Allocates NumNodes 0x60-byte nodes ("SpringRailNodes", +0x70); each gets the next
+ * valid instance id and mesh, zero V/O/W/T and its P from the mesh position (func_0034A028). V of each node becomes the
+ * vector to the next node's P. Then builds the segment matrices (func_0034A0B0), BoundBox (func_00349F18) and the space
+ * hash entry (cFlexRailNode_addSpaceHash).
+ *
+ * @param a1  rail instance record
+ * @param desc  spring rail make-data
+ * @return self
+ */
 extern "C" void* func_00349B48(char* self, void* a1, char* desc)
 {
     func_00347D90(self, 21, a1, desc);
@@ -807,6 +912,17 @@ struct sFrStreamVEntry_349DB0 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Constructs a spring rail from a replay frame.
+ *
+ * Runs func_00347EA8, installs D_0048FD90, reads ASpring/ADamp/TorqueScale (+0x60, 0xC bytes) and the NumNodes * 0x60
+ * node array ("SpringRailNodes", +0x70), then rebuilds the matrices (func_0034A0B0) and the space hash entry. Unlike
+ * the float rail's replay ctor it does not recompute BoundBox (it comes back from the replay state).
+ *
+ * @param a1  update bucket
+ * @param stream  replay stream to read from
+ * @return self
+ */
 extern "C" void* func_00349DB0(char* self, void* a1, void* stream)
 {
     func_00347EA8(self, a1, stream);
@@ -831,6 +947,14 @@ void cMemMan_free(void*);
 extern "C" void func_00348C48(void* self);
 extern "C" void func_00347F90(void* self, int flags);
 
+/**
+ * Destroys a spring rail.
+ *
+ * Reinstalls D_0048FD90, removes the rail from the space hash (func_00348C48), frees the node array (+0x70) and runs
+ * func_00347F90 with flags.
+ *
+ * @param flags  destructor flags
+ */
 extern "C" void func_00349EB8(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_0048FD90;
@@ -861,6 +985,9 @@ struct sFrBoxRail60 {
     sFrBoxElem60* elems; // 0x70
 };
 
+/**
+ * Recomputes a spring rail's BoundBox from its node positions, padded by 200 on each axis.
+ */
 // PORT: PS2-only VU0 inline asm (vector sub-assign).
 // PORT: PS2-only VU0 inline asm (vector add-assign).
 // bounding box of the rail elements, padded by 200 on x/y/z
@@ -913,6 +1040,11 @@ struct sFrNodeA028 {
     int bone;               // 0x54
 };
 
+/**
+ * Sets a spring rail node's P to the current position of its mesh (cInstanceNode_buildMeshMat translation).
+ *
+ * @param node  rail node to update
+ */
 extern "C" void func_0034A028(void* self, sFrNodeA028* node)
 {
     sFrNodeMtx boneMat;
@@ -1043,6 +1175,14 @@ static inline void updateMatEnd_A0B0(sFrM4_A0B0& out, const sFrV4_A0B0& a, const
     MMI_TRANSPOSE4(&out);
 }
 
+/**
+ * Rebuilds a spring rail's segment matrices from its node positions.
+ *
+ * Same scheme as func_003492A8: each segment cubic comes from the surrounding four P values with basis D_004FFAC0,
+ * repeating the end node for the first and last segments.
+ *
+ * @param selfv  the spring rail
+ */
 // PORT: hand-written MMI 4x4 transpose (MMI_TRANSPOSE4: lq/pextlw/pextuw/pcpyld/pcpyud/sq, no gcc 2.95 pattern;
 // retail's registers differ per call site, so an operand asm) plus VU0 macro asm; a port replaces them with a
 // plain C transpose and a C vector-matrix product.
@@ -1184,6 +1324,18 @@ static inline void vu0AddEq_A568(sV4_A568& dst, sV4_A568 b)
         : "m"(dst), "m"(b));
 }
 
+/**
+ * Turns a force at a hit point into torque on the spring rail's segments up to the hit.
+ *
+ * Clamps dir to length 200, then does nothing when the hit segment (+0x64) is negative. torque = clamped dir cross (hit
+ * point - P[0]); each segment before the hit gets torque * |V[i]| / |arm| * TorqueScale (+0x68) added to T, the hit
+ * segment gets torque * |hit - P[seg]| / |arm| * TorqueScale.
+ *
+ * Quirk: each loop pass also rescales a copy of the arm to |V[i]| and never uses it.
+ *
+ * @param node  intersect info of the hit (position, segment +0x64)
+ * @param dir  force to apply
+ */
 extern "C" void func_0034A568(sFrRailA568* self, sFrNodeA568* node, sV4_A568* dir)
 {
     float len = vu0Len_A568(*dir);
@@ -1285,6 +1437,14 @@ static inline void vu0AddEq_A838(sFrV_A838& dst, const sFrV_A838& b)
         : "memory");
 }
 
+/**
+ * Adds the spring rail's rotational motion at the hit point to an intersect info.
+ *
+ * For each node from 0 to the hit segment (+0x64; none when negative) adds (hit point - P[i]) cross W[i] to the info's
+ * +0x20 vector.
+ *
+ * @param node  intersect info of the hit
+ */
 extern "C" void func_0034A838(sFrR_A838* self, sFrN_A838* node)
 {
     if (node->idx < 0)
@@ -1436,6 +1596,13 @@ static inline void vu0AddEq_A8C8(sV4_A8C8& dst, const sV4_A8C8& b)
         : "memory");
 }
 
+/**
+ * Steps the spring rail's angular springs by one update and repositions its nodes.
+ *
+ * For each segment: torque = -O * ASpring (+0x60) - W * ADamp (+0x64) + T; O += W * dt; W += torque * dt. Then walks
+ * the chain accumulating O and places P[i + 1] at P[i] + V[i] bent by the accumulated angle (normalised V + V cross
+ * angle, scaled back to |V|). T of every node is cleared. dt comes from cObjectInterface_getUpdateTime.
+ */
 extern "C" void func_0034A8C8(sFrRailA8C8* self)
 {
     float dt = cObjectInterface_getUpdateTime();
@@ -1477,6 +1644,14 @@ struct sFlexRailVEntryAC10 {
 
 extern "C" void func_00348B40(void* self, void* stream);
 
+/**
+ * Writes a spring rail to a replay frame.
+ *
+ * Writes the flex-rail base (func_00348B40), ASpring/ADamp/TorqueScale (+0x60, 0xC bytes) and the NumNodes * 0x60 node
+ * array (+0x70).
+ *
+ * @param stream  replay stream to write to
+ */
 extern "C" void func_0034AC10(void* self, void* stream)
 {
     func_00348B40(self, stream);
@@ -1525,6 +1700,17 @@ static inline float perSec_34AC88(float x)
     return x * (1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
 }
 
+/**
+ * Converts flag make-data into the runtime flag state, turning per-second rates into per-frame ones.
+ *
+ * The held-side and over-saturate ints become bytes (mBaseSideHeld, mOppositeSideHeld, mPerpSideHeld, mOverSaturate);
+ * the 4 wave Speeds and the U/V scroll rates are divided by the frame rate (cAppMan_TheAppMan +0x10); Magnitudes,
+ * Frequencies, low/high wind movement and MinWindFactor are copied.
+ *
+ * @param out  tFlagState to fill (0x58 bytes)
+ * @param src  tMakeFlagData to read
+ * @return out
+ */
 extern "C" sFrRailDesc* func_0034AC88(sFrRailDesc* out, void* src)
 {
     sFrRailOut_AC88* d = (sFrRailOut_AC88*)out;
@@ -1582,6 +1768,17 @@ struct sFrRailDesc {
 extern "C" sFrRailDesc* func_0034AC88(sFrRailDesc* out, void* src);
 extern "C" void func_0034C548(void* mgr, void* node, sFrRailDesc* desc);
 
+/**
+ * Constructs a flag node (node type 10) and registers the flag with the flag manager.
+ *
+ * Runs the record constructor func_0034FB00, installs cFlagNode_vtbl, sets the record flags to (flags & ~0x2) | 0x4,
+ * converts src (func_0034AC88) and adds the instance to the flag manager (func_0034C548 on func_002D1CB0()).
+ *
+ * @param bucket  update bucket
+ * @param node  flag instance record
+ * @param src  flag make-data
+ * @return self
+ */
 extern "C" void* func_0034ADD8(void* self, void* bucket, void* node, void* src)
 {
     sFrRailDesc desc;
@@ -1672,6 +1869,13 @@ void cFlagNode_render(void* self)
 //100%
 INCLUDE_ASM("object/flexrailnode", func_0034AF20);
 #ifdef SKIP_ASM
+/**
+ * Constructs a flag-set state: no instances, model id -1.
+ *
+ * Sets mCurrentNumInstances (+0x5C) to 0 and mModelID (+0x58) to -1.
+ *
+ * @return self
+ */
 extern "C" void* func_0034AF20(void* self)
 {
     *(int*)((char*)self + 0x5c) = 0;
@@ -1697,6 +1901,15 @@ struct sFlexRail_AF38 {
     void** vt;          // 0x184
 };
 
+/**
+ * Constructs an empty flag set.
+ *
+ * Runs func_0034AF20, nulls mGridMesh (+0x60) and mVerts (+0x74), installs D_0048FBF8 (vtable at +0x184), clears the 60
+ * mInstances (+0x94) and gives the set the current grid-update parity D_004A4010 (mFrameToUpdateGrid, +0x90), which
+ * then alternates 0/1 for the next set.
+ *
+ * @return self
+ */
 extern "C" void* func_0034AF38(void* self)
 {
     sFlexRail_AF38* s = (sFlexRail_AF38*)self;
@@ -1724,6 +1937,11 @@ INCLUDE_ASM("object/flexrailnode", func_0034AFB8);
 extern void* D_0048FBF8[];
 void operator_delete(int*);
 
+/**
+ * Destroys a flag set: reinstalls its vtable D_0048FBF8 and deletes it when bit 0 of flags is set.
+ *
+ * @param flags  destructor flags
+ */
 extern "C" void func_0034AFB8(void* self, int flags)
 {
     *(void***)((char*)self + 0x184) = D_0048FBF8;
@@ -1738,6 +1956,16 @@ INCLUDE_ASM("object/flexrailnode", func_0034AFE8);
 #ifdef SKIP_ASM
 extern "C" int func_00415FC8(const void* a, const void* b, int n);
 
+/**
+ * Returns whether a flag set in use already holds flags of the same kind as a new one.
+ *
+ * True when the set has instances (+0x5C), its model id (+0x58) equals the instance's model id (first word of ctx
+ * +0x80) and the 0x58-byte flag data compares equal (func_00415FC8).
+ *
+ * @param data  converted flag data of the new flag
+ * @param ctx  instance record of the new flag
+ * @return 1 if the flag can join this set, else 0
+ */
 extern "C" int func_0034AFE8(void* self, void* data, void* ctx)
 {
     if (*(int*)((char*)self + 0x5C) == 0) {
@@ -1767,6 +1995,16 @@ struct sFlagSet_34B038 {
     void* meshes[1];
 };
 
+/**
+ * Adds a flag instance to a flag set, creating the set's cloth mesh for the first one.
+ *
+ * For an empty set it copies the flag data, stores the instance's model id (+0x58) and builds the mesh
+ * (cFlagSet_CreateMesh). The instance is appended to mInstances (+0x94) and the count (+0x5C) incremented; nothing
+ * checks the 60-entry limit.
+ *
+ * @param def  converted flag data
+ * @param mesh  instance record of the flag
+ */
 extern "C" void func_0034B038(sFlagSet_34B038* self, sFlagDef_34B038* def, char* mesh)
 {
     if (self->count == 0) {
@@ -1799,6 +2037,16 @@ struct sFrRail_B168 {
 
 extern "C" void func_0034B7B8(void* self);
 
+/**
+ * Removes a flag instance from a flag set, purging the mesh when the set empties.
+ *
+ * Fails when the set is empty or its model id (+0x58) differs from the instance's. Otherwise finds the instance by id
+ * (+0x78), moves the last instance into its place, clears the last slot and decrements the count; an empty set frees
+ * its mesh (func_0034B7B8).
+ *
+ * @param rider  instance record of the flag to remove
+ * @return 1 if the instance was removed, else 0
+ */
 extern "C" int func_0034B168(sFrRail_B168* self, sFrRider_B168* rider)
 {
     if (self->count == 0) {

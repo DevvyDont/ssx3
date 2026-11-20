@@ -76,6 +76,14 @@ struct sMoveList {
     unsigned int* entries;  // 0xC
 };
 
+/**
+ * Drops a world section's instances from a multi-particle system.
+ *
+ * Removes every id in InstIds (+0xC, NumInst +0x4) whose low byte is the section, moving the last id into the hole and
+ * rechecking it; a removed last entry becomes -1.
+ *
+ * @param key  world section id
+ */
 extern "C" void func_00358140(sMoveList* self, unsigned int key)
 {
     int i;
@@ -103,6 +111,12 @@ struct sParticleList {
     int* items;   // 0xc
 };
 
+/**
+ * Adds an instance id to a multi-particle system when it has room (NumInst below MaxInst).
+ *
+ * @param list  the multi-particle system
+ * @param item  instance id to add
+ */
 extern "C" void func_003581B8(sParticleList* list, int item)
 {
     int n = list->count;
@@ -123,6 +137,14 @@ struct sMoveList_81F0 {
     unsigned int* entries;  // 0xC
 };
 
+/**
+ * Removes an instance id from a multi-particle system.
+ *
+ * Finds the first matching id in InstIds, decrements NumInst and moves the last id into its place (or sets the slot to
+ * -1 when it was last).
+ *
+ * @param key  instance id to remove
+ */
 // Removes the first entry equal to key, filling the hole with the last entry.
 extern "C" void func_003581F0(sMoveList_81F0* self, unsigned int key)
 {
@@ -315,6 +337,12 @@ public:
 
 extern char cPhysicsModifier_vtbl[];
 
+/**
+ * Constructs a physics modifier from a replay frame: installs cPhysicsModifier_vtbl and reads its first 4 bytes.
+ *
+ * @param obj  replay stream (its read slot, vtable entry 2)
+ * @return self
+ */
 extern "C" void* func_00358468(cPhysicsModifier* self, func_00358468_cObj* obj)
 {
     self->mVtbl = (void**)cPhysicsModifier_vtbl;
@@ -350,6 +378,15 @@ extern void* D_004A4040;
 extern void* cRailManNode_vtbl[];
 extern "C" void* func_00354850(void* self, void* a1, int type);
 
+/**
+ * Constructs the rail manager node (node type 18) and makes it the active one.
+ *
+ * Runs the sort-node constructor func_00354850, installs cRailManNode_vtbl, sets all 128 rail slots (+0x18) to -1,
+ * stores itself in D_004A4040 (the active rail manager) and clears the slots again.
+ *
+ * @param a1  update bucket
+ * @return self
+ */
 extern "C" void* func_003584F0(void* self, void* a1)
 {
     char* s = (char*)self;
@@ -465,6 +502,14 @@ struct sMpMgr_8700 {
     sMpSlot_8700 slots[128];
 };
 
+/**
+ * Re-enables every disabled rail of a world section and frees its slot.
+ *
+ * With an active rail manager (D_004A4040), each used slot whose id has this section calls func_00358998.
+ * cGame_sectionUnloading calls it with the unloading section.
+ *
+ * @param kind  world section id
+ */
 extern "C" void func_00358700(int kind)
 {
     int i;
@@ -582,6 +627,15 @@ static inline void remove_8780(char* w, void* item, const sMpBox_8780* box)
     }
 }
 
+/**
+ * Takes a rail out of collision by removing its segments from the world space hash.
+ *
+ * Looks up the spline of rail slot idx (+0x18) and, for each of its segments (next +0x64), removes the segment from the
+ * space hash using its box (+0x6C..+0x80): nash_Nash_findkey, nash_Cell_remnode on list 2, and deletes an octant that
+ * becomes empty.
+ *
+ * @param idx  rail slot index
+ */
 // Removes every particle node of slot 'idx' from the world's spatial tree.
 extern "C" void func_00358780(void* self, int idx)
 {
@@ -685,6 +739,14 @@ static inline void insert_8998(char* w, void* item, const sMpBox_8998* box)
     nash_Octant_addnode(findRoot_8998(w, c.x, c.y, c.z), 2, item, &c);
 }
 
+/**
+ * Puts a rail back into collision by reinserting its segments into the world space hash, then frees its slot.
+ *
+ * For each segment of the spline in slot idx it adds the segment to the space hash by its box (nash_Octant_addnode,
+ * list 2), then sets the slot to -1.
+ *
+ * @param idx  rail slot index
+ */
 // Re-inserts every particle node of slot 'idx' into the world's spatial tree, then frees the slot.
 extern "C" void func_00358998(void* self, int idx)
 {
@@ -730,6 +792,16 @@ extern "C" void* func_003584F0(void* self, void* a1);
 extern "C" void func_00358780(void* self, int idx);
 extern "C" void func_00358998(void* self, int idx);
 
+/**
+ * Switches a rail (spline) off or back on, creating the rail manager on first use.
+ *
+ * Creates the manager if D_004A4040 is 0 (536 bytes "RailMan", bucket 1). Finds the slot holding key, or else the first
+ * free one. Switching off a rail that is already off, or on a rail that is not off, does nothing; otherwise the slot
+ * takes key and func_00358998 (on) or func_00358780 (off) runs. Nothing happens when all 128 slots are used.
+ *
+ * @param key  spline id of the rail
+ * @param add  nonzero to switch the rail back on, 0 to switch it off
+ */
 extern "C" void func_00358B28(sMPRef8B28 key, int add)
 {
     if (D_004A4040 == 0) {
@@ -848,6 +920,20 @@ struct sMP8C80 {
     sMPElem8C80* elems84;   // 0x84
 };
 
+/**
+ * Constructs an anim combo node: an animated object that can switch to a second time range on a signal.
+ *
+ * Builds the cAnimObjectNode part at +0x18 (func_00341AA0, node type 3) and installs D_0048EC28. From adata: the second
+ * range's start (+0x8) = FromTime2, or ToTime when FromTime2 is negative, in seconds/30; its end (+0xC) = ToTime2 / 30,
+ * or the animation length when negative; step (+0x0) = Speed2 / 30 / frame rate; Stop flags (+0x16 Stop != 0, +0x17
+ * Stop < 0). Allocates the "ComboXform" matrices (+0x84, one per animated mesh) and clears the active/stopped bytes and
+ * the current time.
+ *
+ * @param bucket  update bucket
+ * @param pInstance  instance record
+ * @param adata  anim combo make-data (tMakeAnimComboData)
+ * @return self
+ */
 // FAKEMATCH: the fC (life) store goes through a one-member union view (uFloat8C80), which makes it MEM_IN_STRUCT so sched1
 // no longer keeps the TheAppMan (cAppMan_TheAppMan) load after it; plain form 91.43%. Byte-identical and behaves like the plain form;
 // landed marked under the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest
@@ -931,6 +1017,14 @@ void cMemMan_free(void*);
 extern "C" void func_00341CF0(void* p, int flags);
 extern char D_0048EC28[];
 
+/**
+ * Destroys an anim combo node.
+ *
+ * Reinstalls D_0048EC28, frees ComboXform (+0x84), destroys the cAnimObjectNode part (func_00341CF0 on +0x18) and
+ * deletes the node when bit 0 of flags is set.
+ *
+ * @param flags  destructor flags
+ */
 extern "C" void func_00358E50(void* self, int flags)
 {
     *(void**)((char*)self + 0x54) = D_0048EC28;
@@ -951,6 +1045,17 @@ INCLUDE_ASM("object/multiparticle", func_00358EB8);
 extern "C" void func_00341D48(void* p);
 extern "C" int func_0034EBA0(void* p);
 
+/**
+ * Updates an anim combo node for one frame.
+ *
+ * Resets the frame-event times (+0x3C, +0x40) to 1e10. When stopped (+0x15) it returns 1 at once. When the second range
+ * is not active (+0x14) it runs the normal animated-object update (func_00341D48). When active it counts down the start
+ * delay (+0x24); once that is 0 it advances the time (+0x4) by the step, sets the frame events to the current frame,
+ * and on reaching the end (+0xC) clamps there, ends the range and marks the node stopped if Stop is set; it returns 0
+ * when the frame-update script (func_0034EBA0) says so. Otherwise sets RootTransformDirty (+0x5A) and returns 1.
+ *
+ * @return 0 when the frame-update script asks to stop updating, else 1
+ */
 extern "C" int func_00358EB8(void* self)
 {
     char* comboNode = (char*)self;
@@ -1023,6 +1128,15 @@ INCLUDE_ASM("object/multiparticle", func_00358FD0);
 extern "C" void func_00341FE8(void*);
 extern "C" void func_00359030(void*);
 
+/**
+ * Handles a signal on an anim combo node: signal 130 starts the second time range.
+ *
+ * For 130, when neither active nor stopped (+0x14, +0x15), it copies +0x38 to +0x10, snapshots the current mesh
+ * matrices (func_00359030), marks the range active and sets the time to its start (+0x8). Any other signal goes to the
+ * animated-object handler func_00341FE8.
+ *
+ * @param msg  signal id
+ */
 extern "C" void func_00358FD0(void* self, int msg)
 {
     if (msg == 130) {
@@ -1099,6 +1213,14 @@ struct sMp_9030 {
     sMtx_9030* mtx;         // 0x84
 };
 
+/**
+ * Copies the current matrices of the instance's animated meshes into the ComboXform buffer (+0x84).
+ *
+ * Does nothing when the node has no animated meshes. For each model part with anim info it copies the next frame's
+ * matrix in order.
+ *
+ * @param vself  the anim combo node
+ */
 // Gathers the world matrices of the model's active parts into the matrix buffer at 0x84.
 extern "C" void func_00359030(void* vself)
 {
@@ -1149,6 +1271,12 @@ struct sVEntry003590F0 {
 
 extern "C" void func_00342150(void* self, void* stream);
 
+/**
+ * Writes an anim combo node to a replay frame: the animated-object part (func_00342150 on +0x18), then its 0x18-byte
+ * combo block.
+ *
+ * @param obj  replay stream to write to
+ */
 extern "C" void func_003590F0(void* self, void* obj)
 {
     func_00342150((char*)self + 0x18, obj);
@@ -1247,6 +1375,16 @@ INCLUDE_ASM("object/multiparticle", func_00359228);
 extern "C" void func_00341AA0(void* self, int a, int type, int b, int c);
 extern void* D_0048EA70[];
 
+/**
+ * Constructs an anim delta node (node type 2): an animated object that plays while a delta budget lasts.
+ *
+ * Builds the cAnimObjectNode base (func_00341AA0), installs D_0048EA70 at +0x3C and zeroes Delta (+0x6C) and +0x4.
+ *
+ * @param a  update bucket
+ * @param b  instance record
+ * @param c  anim delta make-data
+ * @return self
+ */
 extern "C" void* func_00359228(void* self, int a, int b, int c)
 {
     func_00341AA0(self, a, 2, b, c);
@@ -1300,6 +1438,19 @@ struct sVEntry_3592D0 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Updates an anim delta node: the animation runs while Delta is positive and Delta drains by the speed.
+ *
+ * Resets the frame-event times (+0x24, +0x28). Unless the node is complete (+0x8): with Delta (+0x6C) above 0 and the
+ * delay (+0xC) at 0, Delta drops by |speed| (+0x10) down to 0; the base update (func_00341D48) runs and +0x4 records
+ * whether Delta is still positive. With Delta at 0 the delay counts down. RootTransformDirty (+0x42) is set unless the
+ * animated branch returned early.
+ *
+ * Quirk: the branch that expires the node (vtable entry 34) re-tests +0x8, which is already known to be 0, so it never
+ * runs.
+ *
+ * @return 0 only from that dead expire branch, else 1
+ */
 extern "C" int func_003592D0(void* self)
 {
     char* deltaNode = (char*)self;
@@ -1348,6 +1499,12 @@ INCLUDE_ASM("object/multiparticle", func_003593D0);
 // PORT: func_00341FE8 really takes (self, id, value); the unit declares it (void*).
 extern "C" void func_00341FE8_set(void* self, int id, float v) __asm__("func_00341FE8");
 
+/**
+ * Handles a signal on an anim delta node: signal 140 adds arg / 30 to Delta (+0x6C); others go to func_00341FE8.
+ *
+ * @param id  signal id
+ * @param signalArg  signal argument
+ */
 extern "C" void func_003593D0(void* self, int id, float signalArg)
 {
     if (id == 140) {
@@ -1369,6 +1526,11 @@ struct sSerVEntry_00359410 {
 
 extern "C" void func_00342150(void* self, void* stream);
 
+/**
+ * Writes an anim delta node to a replay frame: the animated-object part (func_00342150), then Delta (+0x6C).
+ *
+ * @param stream  replay stream to write to
+ */
 extern "C" void func_00359410(void* self, void* stream)
 {
     func_00342150(self, stream);

@@ -1344,6 +1344,19 @@ struct sFlexDef_347D90 {
     int f44;
 };
 
+/**
+ * Constructs the flex-rail base of a float or spring rail (bucket 1) for a placed rail instance.
+ *
+ * Runs the record constructor func_0034FB00, installs the flex-rail vtable D_004900D0, sets RailFlags (+0x24) from def
+ * +0x44 and NumNodes (+0x20) to the number of the 8 instance ids (def +0x4..+0x20) that are not -1. Allocates NumNodes
+ * - 1 segment matrices ("FlexNodeMats", +0x50) and a "Tube" object (+0x58) built by func_00372520 with NumNodes * 8 -
+ * 9.
+ *
+ * @param a2  node type (20 float rail, 21 spring rail)
+ * @param a3  rail instance record
+ * @param def  rail make-data
+ * @return self
+ */
 extern "C" void* func_00347D90(char* self, void* a2, void* a3, sFlexDef_347D90* def)
 {
     func_0034FB00(self, 1, a2, a3);
@@ -1374,6 +1387,17 @@ struct sSerVEntry_00347EA8 {
 
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a, void* stream);
 
+/**
+ * Constructs the flex-rail base of a float or spring rail from a replay frame.
+ *
+ * Runs the replay constructor cInstanceNode_cInstanceNode, installs D_004900D0, reads the 0x30-byte rail state at +0x20
+ * (NumNodes, RailFlags, BoundBox) through the stream's read slot (vtable entry 2) and allocates Mats and Tube as
+ * func_00347D90 does.
+ *
+ * @param a  update bucket
+ * @param stream  replay stream to read from
+ * @return self
+ */
 extern "C" void* func_00347EA8(char* self, void* a, void* stream)
 {
     sFlexSeg_347D90** segs = (sFlexSeg_347D90**)(self + 0x50);
@@ -1400,6 +1424,14 @@ void cMemMan_free(void*);
 extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 extern char D_004900D0[];
 
+/**
+ * Destroys the flex-rail base of a float or spring rail.
+ *
+ * Reinstalls D_004900D0, frees the segment matrices (+0x50), destroys the Tube object (+0x58, its vtable entry 1 with
+ * flags 3) and runs cInstanceNode__cInstanceNode with flags.
+ *
+ * @param flags  destructor flags passed on to cInstanceNode__cInstanceNode
+ */
 extern "C" void func_00347F90(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = D_004900D0;
@@ -1517,6 +1549,16 @@ struct sFlex_3480C8 {
     char boxMax[0x10];      // 0x40
 };
 
+/**
+ * Starts drawing a flex rail but draws nothing.
+ *
+ * Returns when graphics-manager slot 93 culls BoundBox (+0x30, +0x40). Otherwise fills the 8-row basis table D_004FF6C0
+ * once (guard D_004A5980) with (t^3, t^2, t, 1), clears the draw state's first texture id and sets its blend bits to 4,
+ * then runs empty loops over the segments.
+ *
+ * Quirks: the loops have no body, so nothing is drawn; and rows 4 to 7 of the table repeat t = 3/7 instead of
+ * continuing to 1.
+ */
 extern "C" void func_003480C8(sFlex_3480C8* self)
 {
     cPS2GraphicsMan* ctx = cGraphicsMan_TheGraphicsMan;
@@ -1809,10 +1851,27 @@ static inline void Init_8290(sFbHit_8290* h)
 extern float D_0048E7D8[5];
 extern float D_0048E7F0[5];
 
-// Closest point on the bridge's cubic segments to pt: a coarse search over t = k/4, then a
-// golden-section refinement; records the hit in res when it beats *bestDist.
-// cFlexRailNode::splineIntersect (On Tour name): closest point on the segments' cubics to bpos: a coarse
-// search over t = i/4, then a golden-section refinement; records the hit when it beats dist.
+/**
+ * Finds the point of a flex rail's spline closest to bpos and records it as a hit when it beats the best so far.
+ *
+ * Skipped unless RailFlags (+0x24) shares a bit with splineFilterMask. For each segment matrix (+0x50, P(t) = M * (t^3,
+ * t^2, t, 1)) it samples t = 0, 0.25, ... 1, projects bpos onto each chord to pick the nearest quarter, takes the
+ * search bracket for it from D_0048E7D8/D_0048E7F0 and narrows it by golden-section search (at most 24 steps, until the
+ * bracket is under 0.0005). When *hit is 0 or the distance beats *dist, it sets *hit and *dist and fills intInfo: type
+ * 2, position, unit tangent, Instance as the object, the mesh from vtable entry 49 (getMesh), the segment, t and the
+ * surface from the instance's mesh table (+0x88, short at +0x1A per 12-byte entry; -1 becomes 0). minBpos and maxBpos
+ * are not used.
+ *
+ * Quirk: the chord projection is clamped at 0 but not at 1.
+ *
+ * @param minBpos  minimum corner of the query box (unused)
+ * @param maxBpos  maximum corner of the query box (unused)
+ * @param bpos  query point
+ * @param splineFilterMask  rail flag bits to accept
+ * @param hit  set to 1 when a hit is recorded
+ * @param dist  best distance so far; updated on a hit
+ * @param intInfo  intersect info filled on a hit
+ */
 extern "C" void func_00348290(char* self, const sFbV_8290* minBpos, const sFbV_8290* maxBpos, const sFbV_8290* bpos,
                               unsigned int splineFilterMask, int* hit, float* dist, sFbHit_8290* intInfo)
 {
@@ -1931,6 +1990,14 @@ struct sSerVEntry_00348B40 {
 
 extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
 
+/**
+ * Writes the flex-rail base of a float or spring rail to a replay frame.
+ *
+ * Writes the instance-node part (cInstanceNode_writeToReplayFrame), then the 0x30-byte rail state at +0x20 (NumNodes,
+ * RailFlags, BoundBox) through the stream's write slot (vtable entry 1).
+ *
+ * @param stream  replay stream to write to
+ */
 extern "C" void func_00348B40(void* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);

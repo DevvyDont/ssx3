@@ -161,6 +161,12 @@ struct sFlagSetVEntryB7B8 {
     void (*fn)(void*, void*);
 };
 
+/**
+ * Frees a flag set's grid mesh and vertex buffer.
+ *
+ * Releases the grid mesh (+0x60) through graphics-manager slot 77 and frees the vertex array (+0x74) with cMemMan_free,
+ * nulling each pointer.
+ */
 extern "C" void func_0034B7B8(void* self)
 {
     char* flagSet = (char*)self;
@@ -220,6 +226,18 @@ struct sFlagElem_B818 {
     int parity;             // 0x90
 };
 
+/**
+ * Updates a flag set: advances its wave clocks, regenerates the cloth every other frame and scrolls its texture.
+ *
+ * Returns when flag updates are off (D_004A4240), the set is empty (+0x5C) or has no grid mesh (+0x60). The wind blend
+ * is mMinWindFactor (+0x4C) + the flag manager's wind factor (func_002D1CB0() +0x10) * (1 - mMinWindFactor); each of
+ * the 4 clocks mFlagTime (+0x78) advances by mSpeed[i] (+0x4) times that and wraps at 1. On frames whose parity
+ * (func_002D1C98() % 2) equals mFrameToUpdateGrid (+0x90) it builds up to 50 vertices with func_0034BCA0 and hands them
+ * to the mesh's vtable entry 3. When either scroll rate (+0x50, +0x54) exceeds 0.001 it adds them to mScrollU/V (+0x88,
+ * +0x8C), wrapping at 1.
+ *
+ * @param elem  the flag set
+ */
 extern "C" void func_0034B818(void* elem)
 {
     sFlagElem_B818* self = (sFlagElem_B818*)elem;
@@ -348,6 +366,18 @@ struct sFSE_34B9B0 {
 
 #define TOP_34B9B0(c) (*(sRS_34B9B0**)((c) + 0xE84))
 
+/**
+ * Draws every instance of a flag set with its cloth mesh and scrolled texture.
+ *
+ * Returns when flag rendering is off (D_004A4244). Pushes a copy of the default draw state; with mOverSaturate (+0x3)
+ * set it forces the alpha field to 0xFF and blend mode 11, otherwise blend mode 5. For each instance in mInstances
+ * (+0x94, count +0x5C) whose world-cache page is loaded and whose bounding box (+0x60..+0x74) survives the cull
+ * (graphics-manager slot 93 against slot 43's view), it builds an identity texture matrix translated by mScrollU/V
+ * (+0x88, +0x8C) and draws the grid mesh (+0x60, its vtable entry 7, with the instance matrix and its +0x94) or,
+ * without a mesh, the instance itself (graphics-manager slot 96). Pops the draw state.
+ *
+ * @param e  the flag set
+ */
 extern "C" void func_0034B9B0(sFlagSetEntry* e)
 {
     char* self = (char*)e;
@@ -440,6 +470,23 @@ struct sFlagElem_BCA0 {
     float phase[4];         // 0x78
 };
 
+/**
+ * Computes the animated cloth vertices of a flag set into out.
+ *
+ * The wind blend is mMinWindFactor + wind factor * (1 - mMinWindFactor); wave phase i is mFlagTime[i] * -2pi and wave
+ * amplitude i is mMagnitude[i] times the blend. Per column it accumulates two sine waves (frequencies +0x24, +0x28)
+ * into a horizontal offset plus the low/high wind movement (+0x34, +0x40) weighted by the blend; the ratio along the
+ * flag depends on which sides are held (mBaseSideHeld +0x0, mOppositeSideHeld +0x1: both, neither, or one, which
+ * mirrors the columns). Per vertex it adds the column offset to the rest vertex (mVerts +0x74; the top row stays put
+ * when mPerpSideHeld +0x2 is set) and two ripple waves (+0x2C, +0x30) when their amplitude exceeds 0.01. Sines and
+ * cosines come from the 512-entry table D_00504FB8. Grid size: mFlagVertsHorizontal/Vertical (+0x64, +0x68).
+ *
+ * Likely bug: vertexIndex only advances in the moving branch, so when the top row is held its rest vertices are copied
+ * but the index does not move past them, and the next row overwrites them.
+ *
+ * @param vself  the flag set
+ * @param vout  output vertex array (cols * rows t3Vectors)
+ */
 // cFlagSet::updateGrid(t3Vector* verts) (SSX On Tour symbols). Animates the flag mesh: waves along the columns, then per-vertex ripples, into out[cols * rows].
 extern "C" void func_0034BCA0(void* vself, void* vout)
 {
@@ -562,6 +609,15 @@ struct sFlagSet_C2E0 {
     void* items[1];     // 0x94
 };
 
+/**
+ * Writes a flag set to a replay frame.
+ *
+ * Writes the 0x60-byte set state (flag data, model id, instance count) through the stream's write slot (vtable entry
+ * 1), then each instance in mInstances (+0x94, count +0x5C) through the instance-write slot (vtable entry 5).
+ *
+ * @param elem  the flag set
+ * @param stream  replay stream to write to
+ */
 extern "C" void func_0034C2E0(void* elem, void* stream)
 {
     int i;
@@ -592,6 +648,16 @@ struct sFlagSetVEntryC378b {
 
 extern "C" void cFlagSet_CreateMesh(void* self, void* item);
 
+/**
+ * Reads a flag set back from a replay frame.
+ *
+ * Reads the 0x60-byte set state through the stream's read slot (vtable entry 2), then each instance pointer through
+ * vtable entry 3 into mInstances (+0x94), and rebuilds the cloth mesh from the first instance (cFlagSet_CreateMesh)
+ * when the set is not empty.
+ *
+ * @param elem  the flag set
+ * @param stream  replay stream to read from
+ */
 extern "C" void func_0034C378(void* elem, void* stream)
 {
     int i;
@@ -712,6 +778,16 @@ struct sFlagSet_C548 {
 extern "C" int func_0034AFE8(void* self, void* data, void* ctx);
 extern "C" void func_0034B038(void* self, void* data, void* ctx);
 
+/**
+ * Adds a flag instance to the flag manager, grouping it with flags of the same kind.
+ *
+ * First looks for a set in use (+0x5C) among the 15 sets at +0x20 (0x188 bytes each) whose func_0034AFE8 says it
+ * matches, and adds the flag there (func_0034B038); otherwise adds it to the first unused set. Quirk: when all 15 sets
+ * are in use and none matches, the flag is silently dropped.
+ *
+ * @param node  instance record of the flag
+ * @param desc  converted flag data (tFlagState, 0x58 bytes)
+ */
 extern "C" void func_0034C548(sFlagSet_C548* self, void* node, void* desc)
 {
     int i;
@@ -748,6 +824,13 @@ struct sFlagSet_C600 {
 
 extern "C" int func_0034B168(void* elem, void* arg);
 
+/**
+ * Removes a flag instance from whichever flag-manager set holds it.
+ *
+ * Walks the 15 sets at +0x20 and stops at the first set in use whose func_0034B168 removes the instance.
+ *
+ * @param arg  instance record of the flag
+ */
 extern "C" void func_0034C600(sFlagSet_C600* self, void* arg)
 {
     int i;
@@ -1049,6 +1132,22 @@ extern "C" void cFenceNode_setupFence(void* self);
 extern "C" void func_0034D6F0(void* self, float dt);
 extern "C" void func_0034CC80(char* self, char* obj, int flag);
 
+/**
+ * Constructs a fence node (node type 9) for a fence instance that was hit, and sets it swinging.
+ *
+ * Runs the record constructor func_0034FB00, installs cFenceNode_vtbl, constructs the 16 Verts (+0x44), copies the
+ * fence make-data into FenceData (+0x1C) with InstId set to -1, zeroes Force, ForceMax and ForceStep (+0x2C..+0x34),
+ * builds the grid (cFenceNode_setupFence) and zeroes NextPropTime/PrevPropTime (+0x38, +0x3C). The starting force is
+ * 0.001 * |info +0x30| * (direction info +0x10 dotted with the fence's normalised x axis when it has a grid mesh
+ * (+0x40), or with info +0x20 otherwise); it is applied with func_0034D6F0 and passed on to the neighbour fences
+ * (NextInstance +0x104, PrevInstance +0x108) through func_0034CC80.
+ *
+ * @param bucket  update bucket the node joins
+ * @param pInst  fence instance record
+ * @param tdata  fence make-data (InstId, Type, Flexibility)
+ * @param info  intersect info of the hit
+ * @return self
+ */
 extern "C" cFenceNode_C8E8* func_0034C8E8(cFenceNode_C8E8* self, int bucket, void* pInst, tMakeFenceData_C8E8* tdata, char* info)
 {
     float force;
@@ -1114,6 +1213,20 @@ extern void* cFenceNode_vtbl[];
 
 // PORT: the unit declares this as void (callers ignore the result); bound by asm label.
 extern "C" sFlagSet_CAB8* func_0034CAB8_ctor(sFlagSet_CAB8* self, int a1, void* obj, sFlagBlock_CAB8* desc, int flag, float dt) __asm__("func_0034CAB8");
+/**
+ * Constructs a fence node for a neighbouring fence instance that a swinging fence pushes.
+ *
+ * Runs the record constructor func_0034FB00 (node type 9), installs cFenceNode_vtbl, constructs the Verts, copies desc
+ * into FenceData with InstId -1, zeroes Force/ForceMax/ForceStep, builds the grid (cFenceNode_setupFence), applies dt
+ * (func_0034D6F0) and sets both NextPropTime and PrevPropTime (+0x38, +0x3C) to 4. flag is not used.
+ *
+ * @param a1  update bucket the node joins
+ * @param obj  fence instance record
+ * @param desc  fence make-data copied from the pushing fence
+ * @param flag  whether this is the next (1) or previous (0) neighbour; unused
+ * @param dt  force to start with
+ * @return self
+ */
 extern "C" sFlagSet_CAB8* func_0034CAB8_ctor(sFlagSet_CAB8* self, int a1, void* obj, sFlagBlock_CAB8* desc, int flag, float dt)
 {
     func_0034FB00(self, a1, 9, obj);
@@ -1236,6 +1349,18 @@ static inline float fabs_34CC80(float x)
     return r;
 }
 
+/**
+ * Passes a fence's swing on to one neighbouring fence instance.
+ *
+ * Does nothing without a grid mesh (+0x40) or neighbour. The force passed on is ForceMax (+0x30) * 0.4, with the sign
+ * opposite to ForceStep (+0x34). If the neighbour already has a node (+0xC) that is a fence (isType(9)) and |force| is
+ * at least 0.25, the node of NextInstance (+0x104) when flag is set, else of PrevInstance (+0x108), gets func_0034CDE8.
+ * If the neighbour has no node and |force| is at least 0.25, a 268-byte "Fence" node is allocated and built with
+ * func_0034CAB8 (bucket 1, this fence's FenceData).
+ *
+ * @param obj  neighbour instance record (NextInstance or PrevInstance)
+ * @param flag  1 for the next neighbour, 0 for the previous
+ */
 extern "C" void func_0034CC80(char* self, char* obj, int flag)
 {
     if (*(int*)(self + 0x40) == 0) {
@@ -1291,6 +1416,15 @@ INCLUDE_ASM("object/flagset", func_0034CDE8);
 #ifdef SKIP_ASM
 extern "C" void func_0034D6F0(void* self, float dt);
 
+/**
+ * Applies a force arriving from a neighbouring fence and arms the propagation timer for that side.
+ *
+ * Calls func_0034D6F0 with dt, then sets NextPropTime (+0x38) when on is set, else PrevPropTime (+0x3C), to 4 if it is
+ * 0.
+ *
+ * @param on  1 when the force came through the next neighbour, 0 for the previous
+ * @param dt  force to apply
+ */
 extern "C" void func_0034CDE8(void* self, int on, float dt)
 {
     func_0034D6F0(self, dt);
@@ -1450,6 +1584,16 @@ struct sFlagSet_CF98 {
     sFsVec3_CF98 bottom[8]; // 0xA4
 };
 
+/**
+ * Bends a fence's grid mesh by its current force.
+ *
+ * Does nothing without a grid mesh (+0x40). The sway vector is (200, 0, 0) * Force (+0x2C) * Flexibility (+0x24); each
+ * of the 8 columns gets it scaled by the weight table D_0044AFD0. The top row (+0x44) always moves; the bottom row
+ * (+0xA4) moves too when the fence Type (+0x20) is 1, otherwise it stays at rest. The 16 points go to the mesh's vtable
+ * entry 3.
+ *
+ * @param p  the fence node
+ */
 extern "C" void func_0034CF98(void* p)
 {
     sFlagSet_CF98* self = (sFlagSet_CF98*)p;
@@ -1665,7 +1809,15 @@ static inline float fabs_34D6F0(float x)
     return r;
 }
 
-// Accumulates wind strength on the flag set (clamped to 1) and sets the flap speed with the wind direction.
+/**
+ * Adds a hit force to a fence's swing.
+ *
+ * ForceMax (+0x30) grows by |force| up to 1. ForceStep (+0x34) becomes ForceMax * 0.1, signed like force when the fence
+ * is at rest (ForceStep 0) and keeping its current sign otherwise.
+ *
+ * @param vself  the fence node
+ * @param force  force to add (sign gives the direction when at rest)
+ */
 extern "C" void func_0034D6F0(void* vself, float force)
 {
     sFlag34D6F0* self = (sFlag34D6F0*)vself;
@@ -1775,6 +1927,22 @@ struct sFlagSlot_34D9B0 {
     sFlagSlot_34D9B0() {}
 };
 
+/**
+ * Constructs the animation-node base of an animated object for a placed instance.
+ *
+ * Builds the cMoveNode part at +0x14 (func_00355280) and installs D_00490CC8 as its vtable. Allocates one 64-byte
+ * matrix per mesh of the instance's model (model def +0x80, count +0x4) into AnimMats (+0x44, "AnimMats") and builds
+ * the mesh cache (cAnimNode_setAnimMeshCache). The frame block at +0x0 starts at the first frame's start time
+ * (cAnimFrame_getStartTime of +0x48, else 0) in +0x0 and +0x4, frame events at 1e10 (+0x8, +0xC) and +0x10 = 1. When
+ * force is set or the record flags have bit 0, the record flags get bit 0x4 and lose bit 0x2. Ends with
+ * cAnimNode_cacheFrame.
+ *
+ * @param a1  update bucket
+ * @param a2  node type
+ * @param a3  instance record to animate
+ * @param force  force the instance visible
+ * @return self
+ */
 extern "C" void* func_0034D9B0(char* self, void* a1, int a2, void* a3, int force)
 {
     char* node = self + 0x14;
@@ -1820,6 +1988,17 @@ struct sFlagSlot_34DAC8 {
     sFlagSlot_34DAC8() {}
 };
 
+/**
+ * Constructs the animation-node base of an animated object from a replay frame.
+ *
+ * Runs the cMoveNode replay constructor on +0x14, installs D_00490CC8, allocates AnimMats like func_0034D9B0, builds
+ * the mesh cache, reads the 20-byte frame block at +0x0 and one more 4-byte word that it discards, then
+ * cAnimNode_cacheFrame.
+ *
+ * @param a1  update bucket
+ * @param stream  replay stream to read from
+ * @return self
+ */
 extern "C" void* func_0034DAC8(char* self, void* a1, void* stream)
 {
     int unusedFlag;
@@ -1868,6 +2047,15 @@ void operator_delete(int*);
 extern "C" void cMoveNode__cMoveNode(void* self, int flags);
 extern void* D_00490CC8[];
 
+/**
+ * Destroys the animation-node base of an animated object.
+ *
+ * Reinstalls D_00490CC8, frees AnimMats (+0x44), runs each AnimFrames element's destructor (+0x48, vtable entry 1, in
+ * reverse) and frees the array, frees +0x4C, destroys the cMoveNode part (cMoveNode__cMoveNode) and deletes the object
+ * when bit 0 of flags is set.
+ *
+ * @param flags  destructor flags; bit 0 deletes the storage
+ */
 extern "C" void func_0034DBA8(sFlagOwner_DBA8* self, int flags)
 {
     self->vtable = D_00490CC8;
@@ -2102,6 +2290,12 @@ INCLUDE_ASM("object/flagset", func_0034E320);
 #ifdef SKIP_ASM
 extern char t4mat_Identity[];
 
+/**
+ * Returns the frame matrix of one animated mesh, or the identity matrix when there are no anim frames.
+ *
+ * @param i  animated-mesh index
+ * @return AnimFrames[i] +0x90 (0xD0-byte frames at +0x48), or t4mat_Identity
+ */
 extern "C" void* func_0034E320(void* self, int i) {
     char* base = *(char**)((char*)self + 0x48);
     if (base == 0) {
@@ -2169,6 +2363,14 @@ struct sSerVEntry_0034E3D8 {
 
 extern "C" void cMoveNode_writeToReplayFrame(void* self, void* stream);
 
+/**
+ * Writes the animation-node base of an animated object to a replay frame.
+ *
+ * Writes the cMoveNode part (cMoveNode_writeToReplayFrame on +0x14), then the 20-byte frame block at +0x0 and a 4-byte
+ * stack word that is never set (the replay constructor reads and drops it).
+ *
+ * @param stream  replay stream to write to
+ */
 extern "C" void func_0034E3D8(void* self, void* stream)
 {
     int dummy;

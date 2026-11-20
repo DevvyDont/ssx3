@@ -407,6 +407,12 @@ extern "C" void cMoveNode_setDebounce(cMoveNode* self, float secs)
 //100%
 INCLUDE_ASM("object/movenode", func_00355878__FPvT0);
 #ifdef SKIP_ASM
+/**
+ * Sets a move node's fade from add-fade data: Fade (+0x24) = fadeData +0x4.
+ *
+ * @param fadeData  add-fade make-data
+ * @return the new Fade (left in f0; callers ignore it)
+ */
 float func_00355878(void* self, void* fadeData)
 {
     float fade = *(float*)((char*)fadeData + 0x4);
@@ -444,6 +450,14 @@ extern char str_PositionModifier[];
 extern "C" void* func_00356EB8(cPositionModifier* self, sMoveQuad* pos);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
+/**
+ * Gives a move node a fixed position offset.
+ *
+ * Allocates a 144-byte "PositionModifier", builds it from pos (func_00356EB8) and installs it with
+ * cMoveNode_addTransformModifier.
+ *
+ * @param pos  offset to apply
+ */
 extern "C" void func_003558B8(cMoveNode* self, sMoveQuad* pos)
 {
     cMoveNode_addTransformModifier(self, func_00356EB8((cPositionModifier*)cMemMan_alloc(144, str_PositionModifier, 0x20000000, 0), pos));
@@ -457,6 +471,14 @@ extern char str_PositionModifier[];
 extern "C" void* func_00356F10(cPositionModifier* mem, void* desc);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
+/**
+ * Gives a move node a fixed transform taken from a matrix.
+ *
+ * Allocates a 144-byte "PositionModifier", builds it from the matrix (func_00356F10) and installs it with
+ * cMoveNode_addTransformModifier.
+ *
+ * @param desc  matrix (t4Matrix) to use
+ */
 extern "C" void func_00355918(cMoveNode* self, void* desc)
 {
     cMoveNode_addTransformModifier(self, func_00356F10((cPositionModifier*)cMemMan_alloc(144, str_PositionModifier, 0x20000000, 0), desc));
@@ -515,6 +537,13 @@ extern char str_AvaSplineModifier[];
 extern "C" void* func_00357750(cAvaSplineModifier* self, void* src);
 extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 
+/**
+ * Puts a move node on the avalanche spline, unless the avalanche cookie check failed.
+ *
+ * When cAvalanche_m_badCookie is 0, allocates a 144-byte "AvaSplineModifier" for Instance (func_00357750) and installs
+ * it with cMoveNode_addTransformModifier. Its caller in seg_1FBE38 passes the instance record as a second argument,
+ * which this body never reads.
+ */
 extern "C" void func_00355A78(cMoveNode* self)
 {
     if (cAvalanche_m_badCookie == 0) {
@@ -1872,6 +1901,19 @@ struct sMoveFlags_6DB0 {
 extern void* D_00490E80[];
 extern "C" void* func_00355280(void* self, void* a1, int type, void* a3);
 
+/**
+ * Constructs an object node (node type 17) for a placed instance.
+ *
+ * Runs the cMoveNode record constructor func_00355280 and installs D_00490E80. When the instance is forced visible or
+ * the record flags have both bits 0x1 and 0x2, the flags get 0x4 and lose 0x2; for a solid object they get 0x20 and
+ * lose 0x40.
+ *
+ * @param a1  update bucket
+ * @param a2  instance record
+ * @param a3  solid flag
+ * @param a4  force the instance visible
+ * @return self
+ */
 extern "C" void* func_00356DB0(void* self, void* a1, void* a2, int a3, int a4)
 {
     func_00355280(self, a1, 17, a2);
@@ -1894,6 +1936,11 @@ INCLUDE_ASM("object/movenode", func_00356E60);
 extern "C" void* cMoveNode_cMoveNode(void* self);
 extern void* D_00490E80[];
 
+/**
+ * Constructs an object node from a replay frame: cMoveNode_cMoveNode, then installs D_00490E80.
+ *
+ * @return self
+ */
 extern "C" void* func_00356E60(void* self)
 {
     cMoveNode_cMoveNode(self);
@@ -1907,6 +1954,11 @@ extern "C" void* cMoveNode_writeToReplayFrame(void* self);
 //99.29%
 INCLUDE_ASM("object/movenode", func_00356E98__FPv);
 #ifdef SKIP_ASM
+/**
+ * Writes an object node to a replay frame by forwarding to cMoveNode_writeToReplayFrame.
+ *
+ * @return cMoveNode_writeToReplayFrame's result (callers ignore it)
+ */
 void* func_00356E98(void* self)
 {
     return cMoveNode_writeToReplayFrame(self);
@@ -1923,6 +1975,15 @@ struct sMoveQuad {
 extern void* cPositionModifier_vtbl[];
 extern sMoveQuad t4mat_Identity[];
 
+/**
+ * Constructs a position modifier for a fixed offset.
+ *
+ * Installs cPositionModifier_vtbl, stores pos in Offset, copies t4mat_Identity into Transform, sets RootTransformDirty
+ * and puts Offset in Transform's translation row.
+ *
+ * @param pos  offset
+ * @return self
+ */
 extern "C" void* func_00356EB8(cPositionModifier* self, sMoveQuad* pos)
 {
     *(void***)self = cPositionModifier_vtbl;
@@ -1957,6 +2018,15 @@ struct sMoveQuad2 {
 
 extern void* cPositionModifier_vtbl[];
 
+/**
+ * Constructs a position modifier from a matrix.
+ *
+ * Installs cPositionModifier_vtbl, takes Offset from the matrix's translation row (src +0x30), copies the matrix into
+ * Transform and sets RootTransformDirty.
+ *
+ * @param src  matrix (t4Matrix)
+ * @return self
+ */
 extern "C" void* func_00356F10(cPositionModifier* self, void* src)
 {
     *(void***)self = cPositionModifier_vtbl;
@@ -1993,6 +2063,15 @@ struct sMnVEntrySer6F68 {
 
 // PORT: callers declare this void; the body returns self, so bind it via an asm label.
 extern "C" void* func_00356F68_ret(void* self, void* stream) __asm__("func_00356F68");
+/**
+ * Constructs a position modifier from a replay frame.
+ *
+ * Installs cPositionModifier_vtbl, reads the 0x40-byte state at +0x10 (BoundBox, Offset, Radius, RootTransformDirty)
+ * through the stream's read slot (vtable entry 2), copies t4mat_Identity into Transform and sets RootTransformDirty.
+ *
+ * @param stream  replay stream to read from
+ * @return self
+ */
 extern "C" void* func_00356F68_ret(void* self, void* stream)
 {
     *(void***)self = cPositionModifier_vtbl;
@@ -2061,6 +2140,17 @@ INCLUDE_ASM("object/movenode", func_00357038);
 #ifdef SKIP_ASM
 extern char cParentModifier_vtbl[];
 
+/**
+ * Constructs a parent modifier: an offset that follows a mesh of another instance.
+ *
+ * Builds the position-modifier base from pos (func_00356EB8), installs cParentModifier_vtbl and stores ParentInst and
+ * Mesh.
+ *
+ * @param parentInstance  instance record to follow
+ * @param meshIndex  mesh of that instance
+ * @param pos  offset from it
+ * @return self
+ */
 extern "C" void* func_00357038(cParentModifier* self, void* parentInstance, void* meshIndex, sMoveQuad* pos)
 {
     func_00356EB8((cPositionModifier*)self, pos);
@@ -2292,6 +2382,18 @@ INCLUDE_ASM("object/movenode", func_003572E0);
 #ifdef SKIP_ASM
 extern char cMagnetModifier_vtbl[];
 
+/**
+ * Constructs a magnet modifier that pulls riders toward a point.
+ *
+ * Installs cMagnetModifier_vtbl, stores Instance and Radius, Speed = speed * 27.78 (100 / 3.6), Being -1, Time 0,
+ * AllowCollide 0, copies mat into Transform, sets RootTransformDirty and takes Offset from the translation row.
+ *
+ * @param inst  instance record
+ * @param mat  magnet transform
+ * @param radius  pull radius
+ * @param speed  pull speed (scaled by 100/3.6)
+ * @return self
+ */
 extern "C" void* func_003572E0(cMagnetModifier* self, void* inst, void* mat, float radius, float speed)
 {
     *(void**)self = cMagnetModifier_vtbl;
@@ -2340,6 +2442,15 @@ struct sMnVEntryRd7358 {
 
 extern char cMagnetModifier_vtbl[];
 
+/**
+ * Constructs a magnet modifier from a replay frame.
+ *
+ * Installs cMagnetModifier_vtbl, reads Instance through the stream's instance slot (vtable entry 3), then 80 bytes at
+ * +0x10 and 0x40 bytes at +0x60, and sets RootTransformDirty.
+ *
+ * @param stream  replay stream to read from
+ * @return self
+ */
 extern "C" void* func_00357358(cMagnetModifier* self, void* stream)
 {
     char* payload = (char*)self + 0x10;
@@ -2560,6 +2671,14 @@ INCLUDE_ASM("object/movenode", func_00357750);
 #ifdef SKIP_ASM
 extern void* cAvaSplineModifier_vtbl[];
 
+/**
+ * Constructs an avalanche spline modifier for an instance.
+ *
+ * Installs cAvaSplineModifier_vtbl, stores Instance, zeroes Radius and copies the instance's matrix into the transform.
+ *
+ * @param src  instance record
+ * @return self
+ */
 // PORT: PS2-only VU0 inline asm (4x4 matrix copy, src+0x10 -> self+0x40); the PC
 // port needs a plain 64-byte copy.
 extern "C" void* func_00357750(cAvaSplineModifier* self, void* src)
@@ -2604,6 +2723,15 @@ struct sMnVEntryRd7798 {
 // pass-through wrapper and this caller passes two args (prototype mismatch).
 void* func_002D1CF0_2(void*, void*) __asm__("func_002D1CF0__FPv");
 
+/**
+ * Constructs an avalanche spline modifier from a replay frame.
+ *
+ * Installs cAvaSplineModifier_vtbl, reads Instance (stream vtable entry 3) and 0x30 bytes at +0x10, then refetches the
+ * instance transform into +0x40 (func_002D1CF0).
+ *
+ * @param stream  replay stream to read from
+ * @return self
+ */
 extern "C" void* func_00357798(cAvaSplineModifier* self, void* stream)
 {
     char* payload = (char*)self + 0x10;
@@ -2671,6 +2799,18 @@ extern "C" void* func_00355280(void* self, void* a1, int type, void* a3);
 extern "C" void cMoveNode_transferFromOld(cMoveNode* self, void* a1);
 extern void* cParticleNode_vtbl[];
 
+/**
+ * Constructs a particle node (node type 13) for an instance that takes over from its old node.
+ *
+ * Runs the cMoveNode record constructor func_00355280, installs cParticleNode_vtbl, takes the old node's modifiers
+ * (cMoveNode_transferFromOld) and adds the particle effect (cMoveNode_addParticle).
+ *
+ * @param a1  update bucket
+ * @param a2  instance record
+ * @param particle  particle make-data
+ * @param a4  node the instance had before
+ * @return self
+ */
 extern "C" void* func_003578A8(cParticleNode* self, void* a1, void* a2, void* particle, void* a4)
 {
     func_00355280(((cMoveNode*)self), a1, 13, a2);
@@ -2831,6 +2971,13 @@ extern "C" void* func_003581B8(int, int);
 //100%
 INCLUDE_ASM("object/movenode", func_00357AE8__FPvii);
 #ifdef SKIP_ASM
+/**
+ * Adds an instance to one of the multi-particle manager's four systems (func_003581B8 on Particles[particleIndex]).
+ *
+ * @param particleIndex  system index (0-3)
+ * @param instId  instance id to add
+ * @return whatever func_003581B8 leaves (callers ignore it)
+ */
 void* func_00357AE8(void* self, int particleIndex, int instId)
 {
     return func_003581B8(*(int*)((char*)self + (particleIndex << 2)), instId);
@@ -2842,6 +2989,14 @@ extern "C" void* func_003581F0(int, int);
 //100%
 INCLUDE_ASM("object/movenode", func_00357B10__FPvii);
 #ifdef SKIP_ASM
+/**
+ * Removes an instance from one of the multi-particle manager's four systems (func_003581F0 on
+ * Particles[particleIndex]).
+ *
+ * @param particleIndex  system index (0-3)
+ * @param instId  instance id to remove
+ * @return whatever func_003581F0 leaves (callers ignore it)
+ */
 void* func_00357B10(void* self, int particleIndex, int instId)
 {
     return func_003581F0(*(int*)((char*)self + (particleIndex << 2)), instId);
@@ -2877,6 +3032,13 @@ INCLUDE_ASM("object/movenode", func_00357B90);
 #ifdef SKIP_ASM
 extern "C" void func_00358140(void* p, void* arg);
 
+/**
+ * Drops a world section's instances from all four multi-particle systems.
+ *
+ * Calls func_00358140 on each system in Particles that exists. cGame_sectionUnloading calls it.
+ *
+ * @param sectionId  world section being unloaded
+ */
 extern "C" void func_00357B90(void** self, void* sectionId)
 {
     int i;
@@ -3025,6 +3187,18 @@ extern char str_Particle_b[];
 extern "C" void MEM_copy(void* dst, const void* src, int n);
 extern "C" void cMultiParticle_setupMultiParticle(void* self);
 
+/**
+ * Constructs a multi-particle system for up to a given number of instances.
+ *
+ * Sets MaxInst to the given maximum and NumInst to 0, copies the 216-byte particle data into a new "Particle" block,
+ * sets up the emitter and id list (cMultiParticle_setupMultiParticle), then copies BoundBox from the emitter and Offset
+ * from the emitter position with w = 0.
+ *
+ * @param mem  storage for the system
+ * @param a1  particle data (tParticleData, 216 bytes)
+ * @param a2  maximum instance count
+ * @return mem
+ */
 extern "C" void* func_00357DD8(cMultiParticle* mem, void* a1, void* a2)
 {
     cMultiParticle* self = mem;
@@ -3059,6 +3233,17 @@ static inline void read_357E80(void* stream, void* dst, int n)
     vt[2].fn((char*)stream + vt[2].delta, dst, n);
 }
 
+/**
+ * Constructs a multi-particle system from a replay frame.
+ *
+ * Reads MaxInst and NumInst, a new 216-byte "Particle" block, sets up the emitter (cMultiParticle_setupMultiParticle)
+ * and lets it read its state (cStaticEmitter_readFromReplayFrame), then reads Offset, BoundBox and NumInst instance
+ * ids.
+ *
+ * @param mem  storage for the system
+ * @param stream  replay stream to read from
+ * @return mem
+ */
 extern "C" void* func_00357E80(cMultiParticle* mem, void* stream)
 {
     cMultiParticle* self = mem;

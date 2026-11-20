@@ -239,6 +239,19 @@ struct sDebounce_3010 {
 extern char D_00490570[];
 extern "C" void* func_0034FB00(void* self, void* a1, int type, void* a3);
 
+/**
+ * Constructs a conveyor node (node type 0xF) for a placed instance from its make-data.
+ *
+ * Runs the record constructor func_0034FB00, installs the conveyor vtable D_00490570, then fills the node state at
+ * +0x1C: Vel (+0x1C) from desc +0x4, UVScroll (+0x38) from desc +0x8/+0xC, UV (+0x40/+0x44) zeroed, and the first 8
+ * Rotate flags (+0x20) from desc +0x10..+0x17 (entries 8 and up are left as they are). Finally clears bit 0x2 and sets
+ * bit 0x4 in the instance record's flags.
+ *
+ * @param a1  update bucket the node joins
+ * @param a2  instance record the node drives
+ * @param desc  conveyor make-data (Vel, UScroll, VScroll, Rotate0..7)
+ * @return self
+ */
 extern "C" void* func_00343010(sDebounce_3010* self, void* a1, void* a2, sDesc_3010* desc)
 {
     func_0034FB00(self, a1, 0xF, a2);
@@ -270,6 +283,16 @@ struct sDebounceVEntry30D0 {
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void*, void*);
 extern char D_00490570[];
 
+/**
+ * Constructs a conveyor node from a replay frame.
+ *
+ * Runs the replay constructor cInstanceNode_cInstanceNode, installs the conveyor vtable D_00490570 and reads the
+ * 44-byte node state (+0x1C..+0x47: Vel, Rotate flags, UVScroll, UV) through the stream's read slot (vtable entry 2).
+ *
+ * @param unused  update bucket, passed on to cInstanceNode_cInstanceNode
+ * @param stream  replay stream to read from
+ * @return self
+ */
 extern "C" void* func_003430D0(void* self, void* unused, void* stream)
 {
     cInstanceNode_cInstanceNode(self, unused, stream);
@@ -534,6 +557,18 @@ struct sNode3130 {
     signed char flags[32];      // 0x20
 };
 
+/**
+ * Applies the conveyor's push to a rider's intersect info for the bone it hit.
+ *
+ * Does nothing when the hit bone (+0x5C) is negative. Otherwise builds the bone's world matrix: its local matrix times
+ * each parent's (model def +0x80, bone table +0x8, 16-byte bones with parent and matrix), then the node's root
+ * transform (vtable entry 24). If the bone's Rotate flag (+0x20 + bone) is set, the push is linear: impulse = hit
+ * direction (+0x10) scaled by Vel (+0x1C) over the distance from the bone origin to the hit point; impulse is added to
+ * the velocity (+0x30) and offset cross impulse to the angular term (+0x20). If the flag is clear, only (bone Y axis
+ * cross hit direction) scaled by Vel is added to +0x20.
+ *
+ * @param hit  intersect info of the collision (position, direction, accumulators, bone index)
+ */
 extern "C" void func_00343130(sNode3130* self, sHit3130* hit)
 {
     if (hit->bone < 0) {
@@ -573,6 +608,11 @@ struct sDebounceScroll {
     float v;  // 0x44
 };
 
+/**
+ * Advances the conveyor's texture scroll by one frame.
+ *
+ * Adds UVScroll (+0x38/+0x3C) to UV (+0x40/+0x44) and wraps each component back into -1..1 by one step.
+ */
 extern "C" void func_003434E8(sDebounceScroll* self)
 {
     self->u += self->du;
@@ -679,7 +719,14 @@ static inline int Visible_343588(sDfCam_343588* cam, sDfObj_343588* obj)
     return 0;
 }
 
-// Draws the debounce node's object: culls its box, then draws it offset in x/y by the values at 0x40.
+/**
+ * Draws the conveyor's instance with its texture scrolled by the current UV.
+ *
+ * Returns when the instance's world-cache page is not loaded, or when graphics-manager slot 93 culls the instance's
+ * bounding box (+0x60..+0x74) against the view matrix from slot 43. Otherwise copies the identity matrix t4mat_Identity,
+ * puts UV (+0x40/+0x44) into its translation x/y and draws the instance through graphics-manager slot 96 with that
+ * texture matrix and mode 2.
+ */
 extern "C" void func_00343588(char* self)
 {
     sDfCam_343588* cam = (sDfCam_343588*)cWorld_m_pTheWorld->m_pWorldCache;
@@ -723,6 +770,14 @@ struct sDebounceVEntry {
 
 extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
 
+/**
+ * Writes the conveyor node to a replay frame.
+ *
+ * Writes the instance-node part (cInstanceNode_writeToReplayFrame), then the 44-byte node state at +0x1C (Vel, Rotate
+ * flags, UVScroll, UV) through the stream's write slot (vtable entry 1).
+ *
+ * @param stream  replay stream to write to
+ */
 extern "C" void func_00343718(void* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
@@ -737,6 +792,17 @@ INCLUDE_ASM("object/debouncenode", func_00343768);
 extern "C" void* func_0034FB00(void* self, void* a1, int type, void* a3);
 extern char cCounterNode_vtbl[];
 
+/**
+ * Constructs a counter node (node type 7) for a placed instance.
+ *
+ * Runs the record constructor func_0034FB00, installs cCounterNode_vtbl, sets the count (+0x1C) to the short StartCount
+ * at counterData +0x4 and the counted value (+0x20) to 0.
+ *
+ * @param bucket  update bucket the node joins
+ * @param inst  instance record the node belongs to
+ * @param counterData  counter make-data (StartCount at +0x4)
+ * @return self
+ */
 extern "C" void* func_00343768(void* self, void* bucket, void* inst, void* counterData)
 {
     func_0034FB00(self, bucket, 7, inst);
@@ -928,6 +994,15 @@ struct sState00343A68 {
     char rest[0x1F4 - 0x10C];
 };
 
+/**
+ * Constructs the 3D crowd manager: five crowd blocks of 0x1F4 bytes, all empty.
+ *
+ * For each block it sets the crowd model id (+0x4) and all 32 member ids (+0xC, 8-byte entries) to -1 and resets the
+ * block with func_003442E0, stores the manager in D_004A3FF0 (the global the world scripts and replay code use), then
+ * resets all five blocks again. cGame's loader allocates it (2500 bytes, "CrowdMan3d").
+ *
+ * @return self
+ */
 extern "C" sState00343A68* func_00343A68(sState00343A68* self)
 {
     sState00343A68* p = self;
@@ -967,6 +1042,15 @@ struct sDebounce_343B28 {
     sDebounceElem_343B28 elems[5];
 };
 
+/**
+ * Destroys the 3D crowd manager.
+ *
+ * Frees each block's animation data (func_00344348), clears the global D_004A3FF0, then runs the block destructor
+ * (func_00344348 again) over the five blocks in reverse and deletes the manager when bit 0 of flags is set. The second
+ * pass is harmless because func_00344800 nulls the pointers it frees.
+ *
+ * @param flags  destructor flags; bit 0 deletes the storage
+ */
 extern "C" void func_00343B28(void* self, int flags)
 {
     sDebounce_343B28* d = (sDebounce_343B28*)self;
@@ -999,6 +1083,12 @@ struct sDebounceBlock {
     char data[0x1F4];
 };
 
+/**
+ * Empties every crowd block of the 3D crowd manager.
+ *
+ * For each of the five blocks: frees its animation data (func_00344348) and resets its state (func_003442E0). Used
+ * before a replay frame is read (func_00344240).
+ */
 extern "C" void func_00343BC0(sDebounceBlock* self)
 {
     int i;
@@ -1018,6 +1108,14 @@ struct sDebounceElem3C08 {
 
 extern "C" void func_00344898(void* elem, void* arg);
 
+/**
+ * Removes every crowd member that belongs to a world section from all five crowd blocks.
+ *
+ * Calls func_00344898 on each block; that drops the members whose instance id has the section in its low byte and frees
+ * a block that becomes empty. cGame_sectionUnloading calls it with the unloading section.
+ *
+ * @param arg  world section id being unloaded
+ */
 extern "C" void func_00343C08(sDebounceElem3C08* self, void* arg)
 {
     int i;
@@ -1129,6 +1227,16 @@ struct sDebounceMgr3F38 {
     sBlock3F38 blocks[5];
 };
 
+/**
+ * Removes one instance from the 3D crowd it belongs to.
+ *
+ * Looks up the instance record for id, takes the crowd key from its model (+0x80, value >> 8) and finds the block whose
+ * key (+0x8) matches. In that block it clears the member entry with this id, sets the record's flags to (flags & ~0x4)
+ * | 0x2, decrements the member count (+0x0) and, when the block is empty, frees its animation data (func_00344800) and
+ * resets it (func_003442E0). The world script handler calls it for crowd command 1.
+ *
+ * @param id  instance id (tResourceID) of the crowd member
+ */
 extern "C" void func_00343F38(sDebounceMgr3F38* self, unsigned int id)
 {
     sModel3F38* model = getModel3F38(id);
@@ -1154,6 +1262,12 @@ struct sDebounceElem40C8 {
 
 extern "C" void func_003449F0(void* elem);
 
+/**
+ * Updates the 3D crowds: advances the animation of every block that is in use.
+ *
+ * A block is in use while its key (+0x8) is not -1; each such block goes through func_003449F0. Called once per game
+ * update for cGame's CrowdMan3d.
+ */
 extern "C" void func_003440C8(sDebounceElem40C8* self)
 {
     int i;
@@ -1179,6 +1293,12 @@ struct sDebounceElem4138 {
 
 extern "C" void func_00344E18(void* elem);
 
+/**
+ * Renders the 3D crowds: draws every block that is in use.
+ *
+ * A block is in use while its key (+0x8) is not -1; each such block is drawn by func_00344E18. Called from the game
+ * render pass.
+ */
 extern "C" void func_00344138(sDebounceElem4138* self)
 {
     int i;
@@ -1211,6 +1331,14 @@ struct sDebounceVEntry41A8 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Writes the 3D crowd manager to a replay frame.
+ *
+ * For each of the five blocks it writes the 4-byte key (+0x8) through the stream's write slot (vtable entry 1) and, for
+ * a block in use, the block's member data (func_00344FC0).
+ *
+ * @param s  replay stream to write to
+ */
 extern "C" void func_003441A8(sDebounceElem41A8* self, cDebounceStream* s)
 {
     int i;
@@ -1243,6 +1371,14 @@ struct sDebounceVEntry4240 {
     void (*fn)(void*, void*, int);
 };
 
+/**
+ * Reads the 3D crowd manager back from a replay frame.
+ *
+ * Empties all blocks first (func_00343BC0), then for each of the five reads the 4-byte key (+0x8) through the stream's
+ * read slot (vtable entry 2) and, for a block in use, its member data and animation (func_00344FF8).
+ *
+ * @param s  replay stream to read from
+ */
 extern "C" void func_00344240(sDebounceElem4240* self, cDebounceStream* s)
 {
     int i;
@@ -1282,6 +1418,13 @@ struct sDebounceState {
     int field_0x1f0;          // 0x1f0
 };
 
+/**
+ * Resets one crowd block to empty.
+ *
+ * Zeroes the member count (+0x0), the animation time (+0x1DC), the animation matrices, mesh array and anim def pointers
+ * (+0x1E8, +0x1EC, +0x1F0) and the item counts (+0x110, +0x114); sets the model id (+0x4) and key (+0x8) to -1 and
+ * every member entry (+0xC, 32 of them) to id -1, value 0. It does not free anything.
+ */
 extern "C" void func_003442E0(sDebounceState* self)
 {
     int i;
@@ -1306,6 +1449,11 @@ extern "C" void* func_00344800(void* self);
 //100%
 INCLUDE_ASM("object/debouncenode", func_00344348__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys one crowd block by freeing its animation data (func_00344800).
+ *
+ * @return nothing meaningful: it forwards func_00344800, which returns no value
+ */
 void* func_00344348(void* self)
 {
     return func_00344800(self);
@@ -1318,6 +1466,14 @@ INCLUDE_ASM("object/debouncenode", func_00344368);
 extern char* cAppMan_TheAppMan;
 extern "C" void func_003443A8(void* self);
 
+/**
+ * Sets the crowd model of a block and builds its animation data.
+ *
+ * Stores modelId at +0x4, zeroes the animation time (+0x1DC), sets the time step (+0x1E4) to 1 / the frame rate at
+ * cAppMan_TheAppMan +0x10 and calls func_003443A8.
+ *
+ * @param modelId  instance id (tResourceID) of the crowd model
+ */
 extern "C" void func_00344368(void* self, int modelId)
 {
     char* owner = (char*)self;
@@ -1471,6 +1627,20 @@ extern "C" void func_00344AA0_43A8(void* self) __asm__("func_00344AA0");
 
 
 extern "C" void func_003443A8_impl(sDbOwner_43A8* self) __asm__("func_003443A8");
+/**
+ * Builds a crowd block's animation data from its crowd model.
+ *
+ * Looks up the model record (id at +0x4) and takes its anim def (+0x80) and the period (def +0x14). Allocates one
+ * 64-byte matrix per def entry ("AnimMats", +0x1E8), counts the entries with an animation source (+0x10C) and allocates
+ * that many cMeshAnimFrame objects ("CrowdAnimMesh", 0xD0 bytes each, +0x1EC), initialising each from its source
+ * (func_00351398) and updating it to the current time (vtable entry 2). Builds the part matrices (func_00344AA0), then
+ * reads the model's item list (+0x94): +0x114 takes the first word of the first item with data, +0x110 the item count,
+ * and for each item the slot pointer table (+0x11C) points at its own 20-byte slot (+0x13C, with the item's +0xC and
+ * the u16 at data +0x4) or at the item itself when it has no data.
+ *
+ * Likely bug: the loop that sets the slot's three ids to -1 always writes slot 0, not the current slot. The tables hold
+ * 8 entries but the item count is not checked against that.
+ */
 extern "C" void func_003443A8_impl(sDbOwner_43A8* self)
 {
     sDbModel_43A8* animModel = self->model.get();
@@ -1604,6 +1774,14 @@ struct sDebounce4730 {
     sSlot4730 slots[1];     // 0x13C
 };
 
+/**
+ * Selects the per-item value for one crowd member variant.
+ *
+ * For every item of the block's crowd model (+0x94 list) that has data, copies the u16 at data + 4 + index * 4 into
+ * that item's slot value (+0x13C + 20 * item).
+ *
+ * @param index  variant index (the member entry's value)
+ */
 extern "C" void func_00344730(sDebounce4730* self, int index)
 {
     sModel4730* animModel = self->model.get();
@@ -1644,6 +1822,12 @@ struct sDebounceOwner4800 {
 // (its wrapper func_00344348 only forwards). Bound by asm label.
 void func_00344800_v(sDebounceOwner4800* self) __asm__("func_00344800");
 
+/**
+ * Frees a crowd block's animation data.
+ *
+ * Destroys the cMeshAnimFrame array (+0x1EC; each element's destructor, vtable entry 1, in reverse, then frees the
+ * array block) and frees the matrix buffer (+0x1E8); both pointers end up null.
+ */
 void func_00344800_v(sDebounceOwner4800* self)
 {
     sDebounceItem4800* items = self->items;
@@ -1693,6 +1877,14 @@ struct sDebounceOwner49F0 {
 
 extern "C" void func_00344AA0(sDebounceOwner49F0* self);
 
+/**
+ * Advances a crowd block's animation by one frame.
+ *
+ * Adds the time step (+0x1E4) to the time (+0x1DC), wrapping it by the period (+0x1E0), updates each animated mesh
+ * (+0x1EC, count +0x10C) to the new time through its vtable entry 2 and rebuilds the part matrices (func_00344AA0).
+ *
+ * @param elem  the crowd block (0x1F4 bytes)
+ */
 // PORT: pointer held in int for the element address (index-first addu); not 64-bit safe.
 extern "C" void func_003449F0(void* elem)
 {
@@ -1888,6 +2080,14 @@ static inline void scaleTrans_4AA0(sDbMat_4AA0* m, const sDbV4_4AA0& s)
 
 // Rebuilds the world matrix of every part; animated parts take their local matrix from the next animation item.
 extern "C" void func_00344AA0_4AA0(sDbAnim_4AA0* self) __asm__("func_00344AA0");
+/**
+ * Rebuilds the world matrix of every part of a crowd block's model.
+ *
+ * Walks the anim def's parts (+0x1F0: count +0x4, 16-byte parts at +0x8 with parent, animated flag and matrix). A
+ * part's local matrix is the next animated mesh's frame matrix (+0x90) when the part is animated, otherwise its own
+ * matrix; its translation row is scaled by the model's scale (+0x84). Child parts are multiplied by their parent's
+ * result; the results go to the matrix buffer (+0x1E8).
+ */
 extern "C" void func_00344AA0_4AA0(sDbAnim_4AA0* self)
 {
     sDbPart_4AA0* part = self->info->parts;
@@ -1965,6 +2165,14 @@ static inline int IsLoaded_44E18(sModel_44E18* m)
 struct sVE7_44E18 { short delta; short index; void (*fn)(void*, void*, float, void*, void*, void*, int, int); };
 struct sVE5_44E18 { short delta; short index; void (*fn)(void*, void*, void*, int, int); };
 
+/**
+ * Draws every member of a crowd block.
+ *
+ * Skips free entries (id -1) and members whose world-cache page is not loaded. When +0x114 is 2 or more it first
+ * selects the member's variant (func_00344730 with the entry's value) and draws the member through graphics-manager
+ * slot 95 with the slot table (+0x118) and matrix buffer (+0x1E8); otherwise it draws through slot 96 with the matrix
+ * buffer only.
+ */
 extern "C" void func_00344E18(void* self)
 {
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
@@ -1995,16 +2203,21 @@ extern "C" void func_00344E18(void* self)
 //100%
 INCLUDE_ASM("object/debouncenode", func_00344FC0);
 #ifdef SKIP_ASM
-// Serialisation stream: v01 = read(buf, size), v02 = write(buf, size).
+// Replay stream: vtable entry 1 writes, entry 2 reads (as the other replay writers and readers use it).
 class cDebounceStream {
 public:
-    virtual void v01(void* buf, int size);
-    virtual void v02(void* buf, int size);
+    virtual void write(void* buf, int size);
+    virtual void read(void* buf, int size);
 };
 
+/**
+ * Writes a crowd block's member data (its first 268 bytes: count, model id, key, 32 entries) to a replay frame.
+ *
+ * @param s  replay stream to write to (vtable entry 1)
+ */
 extern "C" void func_00344FC0(void* self, cDebounceStream* s)
 {
-    s->v01(self, 268);
+    s->write(self, 268);
 }
 #endif
 
@@ -2013,9 +2226,17 @@ INCLUDE_ASM("object/debouncenode", func_00344FF8);
 #ifdef SKIP_ASM
 extern "C" void func_003443A8(void* self);
 
+/**
+ * Reads a crowd block's member data back from a replay frame and rebuilds its animation.
+ *
+ * Reads the first 268 bytes (count, model id, key, 32 entries) through the stream's vtable entry 2, then frees
+ * (func_00344800) and rebuilds (func_003443A8) the animation data.
+ *
+ * @param s  replay stream to read from
+ */
 extern "C" void func_00344FF8(void* self, cDebounceStream* s)
 {
-    s->v02(self, 268);
+    s->read(self, 268);
     func_00344800(self);
     func_003443A8(self);
 }
@@ -2175,6 +2396,13 @@ struct sSplineFollow51C0 {
     float length;           // 0xC
 };
 
+/**
+ * Points a spline at a spline record and measures it.
+ *
+ * Sets SplineId to id, Seg to the record's first segment (+0x24), SegIndex to 0 and Length to cSpline_calcLength().
+ *
+ * @param id  resource id of the spline (low 8 bits: resource set, >> 8: index)
+ */
 extern "C" void func_003451C0(sSplineFollow51C0* self, unsigned int id)
 {
     self->ref.id = id;
@@ -2261,6 +2489,14 @@ extern "C" void cSpline_getPos(sDebTrack5248* self, float distance, sDebVec4* po
 //100%
 INCLUDE_ASM("object/debouncenode", func_00345320);
 #ifdef SKIP_ASM
+/**
+ * Returns whether a spline's bounding box survives view culling.
+ *
+ * Builds the min/max corners from the spline record's box (+0x4..+0x18, w = 1) and asks graphics-manager slot 93 to
+ * cull them against the view matrix from slot 43.
+ *
+ * @return 1 unless the cull test returns 1 (fully outside)
+ */
 extern "C" int func_00345320(sTrackRef51C0* self)
 {
     float* bounds = (float*)self->get();
@@ -2377,6 +2613,15 @@ struct sCtl00345430 {
     short f10;
 };
 
+/**
+ * Draws a spline's visible segments as debug lines in one colour.
+ *
+ * Sets the current draw state's +0x10 short to -1 and mode bits to 1, then walks the segment list of Seg's spline
+ * (+0x68: count +0x20, first +0x24, next +0x64) and, for each segment that func_00345638 reports visible, calls
+ * graphics-manager slot 75 with the segment data (+0x10), the colour and 10.
+ *
+ * @param arg  address of the colour to draw with (cSplineModifier passes its +0x20)
+ */
 extern "C" void func_00345430(void* self, int arg)
 {
     cPS2GraphicsMan* w = cGraphicsMan_TheGraphicsMan;

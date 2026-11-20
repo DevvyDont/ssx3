@@ -67,6 +67,12 @@ extern "C" void cInstanceNode__cInstanceNode(cInstanceNode* self, int flags)
 //100%
 INCLUDE_ASM("object/instancenode", func_0034FC78);
 #ifdef SKIP_ASM
+/**
+ * Makes an instance node the active node of an instance record (record +0xC).
+ *
+ * @param node  the instance node
+ * @param inst  instance record
+ */
 extern "C" void func_0034FC78(int node, void* inst)
 {
     *(int*)((char*)inst + 0xc) = node;
@@ -76,6 +82,11 @@ extern "C" void func_0034FC78(int node, void* inst)
 //100%
 INCLUDE_ASM("object/instancenode", func_0034FC80);
 #ifdef SKIP_ASM
+/**
+ * Clears an instance record's active node if it is this node.
+ *
+ * @param inst  instance record (may be 0)
+ */
 extern "C" void func_0034FC80(void* self, void* inst)
 {
     if (inst != 0) {
@@ -93,6 +104,11 @@ INCLUDE_ASM("object/instancenode", func_0034FCA0);
 #ifdef SKIP_ASM
 extern "C" void func_002D1A78(int);
 
+/**
+ * Runs the init world script (type 0) of the node's instance (func_002D1A78 on Instance).
+ *
+ * @param instanceNode  the instance node
+ */
 extern "C" void func_0034FCA0(cInstanceNode* instanceNode) {
     func_002D1A78(((int)instanceNode->Instance));
 }
@@ -101,6 +117,11 @@ extern "C" void func_0034FCA0(cInstanceNode* instanceNode) {
 //100%
 INCLUDE_ASM("object/instancenode", func_0034FCC0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs the expire world script (type 4) of the node's instance through func_002D19E8.
+ *
+ * @return func_002D19E8's result (nonzero when a script ran)
+ */
 void* func_0034FCC0(void* self)
 {
     return func_002D19E8(*(int*)((char*)self + 0x18));
@@ -710,6 +731,14 @@ struct sInstNodeList {
     sInstNodeEntry* entries;  // 0x8
 };
 
+/**
+ * Returns whether any mesh of an instance's model is animated.
+ *
+ * Walks the model's mesh list (self +0x80: count +0x4, 16-byte entries at +0x8) and checks each entry's animated word
+ * (+0x8).
+ *
+ * @return 1 if at least one mesh is animated, else 0
+ */
 extern "C" int func_00350698(void* self)
 {
     sInstNodeList* list = *(sInstNodeList**)((char*)self + 0x80);
