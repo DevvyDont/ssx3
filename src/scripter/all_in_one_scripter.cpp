@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/ssxscriptengine.h"
 
 //100%
 INCLUDE_ASM("scripter/all_in_one_scripter", __sti__all_in_one_scripter_cpp);
@@ -617,8 +618,8 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cSSXScriptEngine_IsNISActive);
  * @param scriptEngine  the script engine
  * @return 1 if an NIS list is active, else 0
  */
-extern "C" int cSSXScriptEngine_IsNISActive(void *scriptEngine) {
-    return (*(int *)((char*)(scriptEngine) + (0x550))) != 2;
+extern "C" int cSSXScriptEngine_IsNISActive(cSSXScriptEngine* scriptEngine) {
+    return (scriptEngine->mPlayingNISList) != 2;
 }
 #endif
 
@@ -631,8 +632,8 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cSSXScriptEngine_GetActiveNIS);
  * @param scriptEngine  the script engine
  * @return mPlayingNISList
  */
-extern "C" int cSSXScriptEngine_GetActiveNIS(void *scriptEngine) {
-    return (*(int *)((char*)(scriptEngine) + (0x550)));
+extern "C" int cSSXScriptEngine_GetActiveNIS(cSSXScriptEngine* scriptEngine) {
+    return (scriptEngine->mPlayingNISList);
 }
 #endif
 

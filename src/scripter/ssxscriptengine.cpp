@@ -635,7 +635,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_SetNISListViewIndex);
  * @param scriptEngine  the script engine
  * @param viewIndex  the view index
  */
-extern "C" void cSSXScriptEngine_SetNISListViewIndex(void *scriptEngine, int viewIndex) {
+extern "C" void cSSXScriptEngine_SetNISListViewIndex(cSSXScriptEngine* scriptEngine, int viewIndex) {
     int var_3;
     int var_6;
 
@@ -643,7 +643,7 @@ extern "C" void cSSXScriptEngine_SetNISListViewIndex(void *scriptEngine, int vie
     var_3 = 1;
     do {
         var_3 -= 1;
-        (*(int *)((char*)((var_6 + (*(int *)((char*)(scriptEngine) + (0x54C))))) + (8))) = viewIndex;
+        (*(int *)((char*)((var_6 + ((int)scriptEngine->mpNISLists))) + (8))) = viewIndex;
         var_6 += 204;
     } while (var_3 >= 0);
 }
@@ -926,8 +926,8 @@ extern "C" void tNISList_GetVideoCategory(int, int);
  * @param nisList  the NIS list (0 main, 1 auxiliary transition)
  * @param listIndex  the entry index
  */
-extern "C" void cSSXScriptEngine_GetNISListVideoCategory(void *scriptEngine, int nisList, int listIndex) {
-    tNISList_GetVideoCategory((*(int *)((char*)(scriptEngine) + (0x54C))) + (nisList * 204), listIndex);
+extern "C" void cSSXScriptEngine_GetNISListVideoCategory(cSSXScriptEngine* scriptEngine, int nisList, int listIndex) {
+    tNISList_GetVideoCategory(((int)scriptEngine->mpNISLists) + (nisList * 204), listIndex);
 }
 #endif
 //100%
@@ -944,8 +944,8 @@ extern "C" void tNISList_GetScriptIndex(int, int);
  * @param nisList  the NIS list (0 main, 1 auxiliary transition)
  * @param listIndex  the entry index
  */
-extern "C" void cSSXScriptEngine_GetNISListScriptIndex(void *scriptEngine, int nisList, int listIndex) {
-    tNISList_GetScriptIndex((*(int *)((char*)(scriptEngine) + (0x54C))) + (nisList * 204), listIndex);
+extern "C" void cSSXScriptEngine_GetNISListScriptIndex(cSSXScriptEngine* scriptEngine, int nisList, int listIndex) {
+    tNISList_GetScriptIndex(((int)scriptEngine->mpNISLists) + (nisList * 204), listIndex);
 }
 #endif
 
@@ -1015,11 +1015,11 @@ extern "C" void tNISList_IsPendingScriptReady(int, int);
  * @param scriptEngine  the script engine
  * @param nisList  the NIS list (0 main, 1 auxiliary transition)
  */
-extern "C" void cSSXScriptEngine_IsNISListNextScriptReady(void *scriptEngine, int nisList) {
+extern "C" void cSSXScriptEngine_IsNISListNextScriptReady(cSSXScriptEngine* scriptEngine, int nisList) {
     int temp_5;
 
     temp_5 = nisList * 204;
-    tNISList_IsPendingScriptReady((*(int *)((char*)(scriptEngine) + (0x54C))) + temp_5, temp_5);
+    tNISList_IsPendingScriptReady(((int)scriptEngine->mpNISLists) + temp_5, temp_5);
 }
 #endif
 
