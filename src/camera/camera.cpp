@@ -9600,7 +9600,7 @@ extern "C" void cBasicCameraAlgorithm_setPosition(cBasicCameraAlgorithm* basicCa
 INCLUDE_ASM("camera/camera", cBasicCameraAlgorithm_setPitch);
 #ifdef SKIP_ASM
 /**
- * Sets Pitch.
+ * Sets the camera algorithm's pitch (Pitch).
  *
  * @param basicCameraAlgorithm  the algorithm
  * @param fparg0  the new pitch (radians)
@@ -9613,7 +9613,7 @@ extern "C" void cBasicCameraAlgorithm_setPitch(cBasicCameraAlgorithm* basicCamer
 INCLUDE_ASM("camera/camera", cBasicCameraAlgorithm_setHeading);
 #ifdef SKIP_ASM
 /**
- * Sets Heading.
+ * Sets the camera algorithm's heading (Heading).
  *
  * @param basicCameraAlgorithm  the algorithm
  * @param fparg0  the new heading (radians)
@@ -9642,7 +9642,7 @@ extern "C" long long *cBasicCameraAlgorithm_getPosition(long long *outPosition, 
 INCLUDE_ASM("camera/camera", cBasicCameraAlgorithm_getPitch);
 #ifdef SKIP_ASM
 /**
- * Returns Pitch.
+ * Returns the camera algorithm's pitch (Pitch).
  *
  * @param basicCameraAlgorithm  the algorithm
  * @return the pitch (radians)
@@ -9655,7 +9655,7 @@ extern "C" float cBasicCameraAlgorithm_getPitch(cBasicCameraAlgorithm* basicCame
 INCLUDE_ASM("camera/camera", cBasicCameraAlgorithm_getHeading);
 #ifdef SKIP_ASM
 /**
- * Returns Heading.
+ * Returns the camera algorithm's heading (Heading).
  *
  * @param basicCameraAlgorithm  the algorithm
  * @return the heading (radians)
@@ -9775,7 +9775,7 @@ void cCameraController_update(void* self)
 INCLUDE_ASM("camera/camera", cCameraAlgorithm_setAlgorithmType);
 #ifdef SKIP_ASM
 /**
- * Sets AlgorithmType.
+ * Sets the camera algorithm's type (AlgorithmType).
  *
  * @param cameraAlgorithm  the algorithm
  * @param algoType  the new type (an eCamAlgoType)
@@ -9788,7 +9788,7 @@ extern "C" void cCameraAlgorithm_setAlgorithmType(cCameraAlgorithm* cameraAlgori
 INCLUDE_ASM("camera/camera", cCameraAlgorithm_getType);
 #ifdef SKIP_ASM
 /**
- * Returns AlgorithmType.
+ * Returns the camera algorithm's type (AlgorithmType).
  *
  * @param cameraAlgorithm  the algorithm
  * @return the type (an eCamAlgoType)
@@ -10185,7 +10185,7 @@ extern "C" int cCamera_getCurrentController(cCamera* camera) {
 INCLUDE_ASM("camera/camera", cCamera_getManualController);
 #ifdef SKIP_ASM
 /**
- * Returns ManualController.
+ * Returns the camera's manual controller (ManualController).
  *
  * @param camera  the camera
  * @return the manual controller
@@ -10198,7 +10198,7 @@ extern "C" int cCamera_getManualController(cCamera* camera) {
 INCLUDE_ASM("camera/camera", cCamera_getChaseController);
 #ifdef SKIP_ASM
 /**
- * Returns ChaseController.
+ * Returns the camera's chase controller (ChaseController).
  *
  * @param camera  the camera
  * @return the chase controller
@@ -10211,7 +10211,7 @@ extern "C" int cCamera_getChaseController(cCamera* camera) {
 INCLUDE_ASM("camera/camera", cCamera_getScriptController);
 #ifdef SKIP_ASM
 /**
- * Returns ScriptController.
+ * Returns the camera's script controller (ScriptController).
  *
  * @param camera  the camera
  * @return the script controller

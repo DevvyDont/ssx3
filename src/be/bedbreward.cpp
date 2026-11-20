@@ -1215,7 +1215,7 @@ INCLUDE_ASM("be/bedbreward", cBENetworkInterface_getIsRankedGame);
 #ifdef SKIP_ASM
 
 /**
- * Returns cBENetworkInterface_networkOpt.bIsRankedGame.
+ * Returns whether the online game is ranked (cBENetworkInterface_networkOpt.bIsRankedGame).
  *
  * @return bIsRankedGame
  */
@@ -1320,7 +1320,7 @@ INCLUDE_ASM("be/bedbreward", cBENetworkInterface_getClientID);
 #ifdef SKIP_ASM
 
 /**
- * Returns cBENetworkInterface_networkOpt.iClientID.
+ * Returns this console's network client id (cBENetworkInterface_networkOpt.iClientID).
  *
  * @return iClientID
  */
@@ -1349,7 +1349,7 @@ INCLUDE_ASM("be/bedbreward", cBENetworkInterface_getHostName);
 #ifdef SKIP_ASM
 
 /**
- * Returns cBENetworkInterface_networkOpt.strHostName.
+ * Returns the online game's host name (cBENetworkInterface_networkOpt.strHostName).
  *
  * @return the host name buffer
  */
@@ -1378,7 +1378,7 @@ INCLUDE_ASM("be/bedbreward", cBENetworkInterface_getGameName);
 #ifdef SKIP_ASM
 
 /**
- * Returns cBENetworkInterface_networkOpt.strGameName.
+ * Returns the online game's name (cBENetworkInterface_networkOpt.strGameName).
  *
  * @return the game name buffer
  */
@@ -1407,7 +1407,7 @@ INCLUDE_ASM("be/bedbreward", cBENetworkInterface_getPassword);
 #ifdef SKIP_ASM
 
 /**
- * Returns cBENetworkInterface_networkOpt.strPassword.
+ * Returns the online game's password (cBENetworkInterface_networkOpt.strPassword).
  *
  * @return the password buffer
  */
@@ -1447,7 +1447,7 @@ INCLUDE_ASM("be/bedbreward", cBENetworkInterface_getMyCharacterID);
 #ifdef SKIP_ASM
 
 /**
- * Returns cBENetworkInterface_networkOpt.MyCharacterID.
+ * Returns this player's character id (cBENetworkInterface_networkOpt.MyCharacterID).
  *
  * @return this player's character id
  */
@@ -1474,7 +1474,7 @@ INCLUDE_ASM("be/bedbreward", cBENetworkInterface_getOpponentCharacterID);
 #ifdef SKIP_ASM
 
 /**
- * Returns cBENetworkInterface_networkOpt.OpponentCharacterID.
+ * Returns the online opponent's character id (cBENetworkInterface_networkOpt.OpponentCharacterID).
  *
  * @return the remote player's character id
  */
