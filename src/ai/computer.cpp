@@ -726,7 +726,7 @@ unsigned int AIrand();
 extern "C" float cComputer_calculateDifficultyScore(cComputer* self, int a1, int a2, int a3);
 struct sAi0010FC30;
 extern "C" int cAI_aiRidersOnPath(sAi0010FC30* self, int team);
-extern "C" float cRider_calculateAheadDist(void* self, int arg1);
+extern "C" float cRider_calculateAheadDist(cRider* self, int arg1);
 extern "C" float cPath_intersectPath(void* path, void* a1, void* a2, void* a3, int n);
 
 struct sVec4_10D410 {
@@ -861,7 +861,7 @@ extern "C" float cComputer_scorePath(cComputer* self, char* tgt)
     char* rider = (char*)self->mRider;
     float len = vu0Length_10D410(*(sVec4_10D410*)(rider + 0x1E0));
     float total = 22.0f;
-    float lookAheadSec = cRider_calculateAheadDist(rider, 1) / len;
+    float lookAheadSec = cRider_calculateAheadDist((cRider*)rider, 1) / len;
     sVec4_10D410 pos = vu0Add_10D410(*(sVec4_10D410*)((char*)self->mRider + 0x110), vu0Scale_10D410(*(sVec4_10D410*)((char*)self->mRider + 0x1E0), lookAheadSec));
     sVec4_10D410 out;
     float distOut;
@@ -1340,21 +1340,21 @@ extern "C" int AITick();
  * @param mode  the reaction (On Tour eReactionType react); 0 clears it
  * @param forceDelaySec  how long it lasts, in seconds (On Tour forceDelaySec)
  */
-extern "C" void cRider_flagEventReaction(void* self, int mode, float forceDelaySec)
+extern "C" void cRider_flagEventReaction(cRider* self, int mode, float forceDelaySec)
 {
     int reactionTick;
     if (mode == 0)
     {
         reactionTick = -1;
-        *(int*)((char*)self + 0x358) = 0;
+        self->ReactionEventType = 0;
     }
     else
     {
         int frames = (int)(forceDelaySec * 60.0f);
         reactionTick = AITick() + frames;
-        *(int*)((char*)self + 0x358) = mode;
+        self->ReactionEventType = mode;
     }
-    *(int*)((char*)self + 0x354) = reactionTick;
+    self->ReactionEventTick = reactionTick;
 }
 #endif
 
@@ -1367,7 +1367,7 @@ extern "C" void* cBE_getBE();
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cBEStatInterface_getTrickAttrib(void* iface, int rider, int b);
 extern "C" void func_0029AB08(void* mgr, void* rider, float cur, float amt);
-extern "C" void cRider_flagEventReaction(void* self, int mode, float t);
+extern "C" void cRider_flagEventReaction(cRider* self, int mode, float t);
 
 // PORT: g++ `<?` (min) operator.
 static inline float clamp_10E098(float v, float lo, float hi)
@@ -1389,36 +1389,36 @@ static inline float clamp_10E098(float v, float lo, float hi)
  * @param mask  boost source flags (On Tour powerSourceFlags), tested against mBoostSourceMask for a gain
  * @param amt  amount to add, negative to drain (On Tour powerUp)
  */
-extern "C" void cRider_flagEventBoostPowerUp(void* self, int mask, float amt)
+extern "C" void cRider_flagEventBoostPowerUp(cRider* self, int mask, float amt)
 {
-    if (*(int*)((char*)self + 0x304) == 3)
+    if (self->mBoostMode == 3)
         return;
     float floatZero = 0.0f;
     if (amt == floatZero)
         return;
     if (amt > floatZero)
     {
-        cBEStatInterface_getTrickAttrib(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)((char*)self + 0x86C), *(int*)((char*)self + 0xB34));
-        if ((mask & *(int*)((char*)self + 0xB28)) == 0)
+        cBEStatInterface_getTrickAttrib(cBE_getInterface_Fv(cBE_getBE(), 3), self->mAIIndex, self->mStatsIndex);
+        if ((mask & self->mBoostSourceMask) == 0)
             return;
     }
-    func_0029AB08(cAudioInterface_bxAudio(), self, *(float*)((char*)self + 0x2F8), amt);
-    *(float*)((char*)self + 0x2F8) = clamp_10E098(*(float*)((char*)self + 0x2F8) + amt, floatZero, 1.0f);
-    if (*(float*)((char*)self + 0x2F8) == 1.0f && amt > floatZero && *(int*)((char*)self + 0xB2C) != 0)
+    func_0029AB08(cAudioInterface_bxAudio(), self, self->unk_2F8, amt);
+    self->unk_2F8 = clamp_10E098(self->unk_2F8 + amt, floatZero, 1.0f);
+    if (self->unk_2F8 == 1.0f && amt > floatZero && self->mUberFlags != 0)
     {
-        if (*(float*)((char*)self + 0x2F0) == floatZero)
+        if (self->mUberTimer == floatZero)
             cRider_flagEventReaction(self, 5, floatZero);
-        if (*(int*)((char*)self + 0x2F4) <= 0)
-            *(int*)((char*)self + 0x2F4) += 1;
-        if (*(int*)((char*)self + 0x2F4) >= 1 && *(int*)((char*)self + 0x2F4) <= 9)
+        if (self->mUberLevel <= 0)
+            self->mUberLevel += 1;
+        if (self->mUberLevel >= 1 && self->mUberLevel <= 9)
         {
             // PORT: g++ `>?` (max) operator.
-            *(float*)((char*)self + 0x2F0) = *(float*)((char*)self + 0x2F0) >? 20.0f;
+            self->mUberTimer = self->mUberTimer >? 20.0f;
         }
     }
-    else if (amt < 0.0f && *(int*)((char*)self + 0x2F4) < 10)
+    else if (amt < 0.0f && self->mUberLevel < 10)
     {
-        *(float*)((char*)self + 0x2F0) = 0.0f;
+        self->mUberTimer = 0.0f;
     }
 }
 #endif
@@ -1449,7 +1449,7 @@ extern "C" void cBEAggressionInterface_applyAggression(void* agg, int a, int b, 
  * @param self  the rider that was bumped (this)
  * @param attacker  the rider that did the bumping (On Tour attacker)
  */
-extern "C" void cRider_flagEventBump(void* self, void* attacker)
+extern "C" void cRider_flagEventBump(cRider* self, void* attacker)
 {
     func_00298488(cAudioInterface_bxAudio(), self, attacker);
     func_002A0A30(cAudioInterface_bxAudio(), attacker, self, 1, 0);
@@ -1487,7 +1487,7 @@ extern "C" void cBEAggressionInterface_applyAggression(void* agg, int a, int b, 
  * @param self  the rider that was knocked down (this)
  * @param attacker  the rider that did the bumping (On Tour attacker)
  */
-extern "C" void cRider_flagEventBumpKnockdown(void* self, void* attacker)
+extern "C" void cRider_flagEventBumpKnockdown(cRider* self, void* attacker)
 {
     func_00298488(cAudioInterface_bxAudio(), self, attacker);
     func_002A0A30(cAudioInterface_bxAudio(), attacker, self, 1, 1);
@@ -1526,7 +1526,7 @@ extern "C" void cBEAggressionInterface_applyAggression(void* agg, int a, int b, 
  * @param self  the rider that was punched (this)
  * @param attacker  the rider that threw the punch (On Tour attacker)
  */
-extern "C" void cRider_flagEventPunch(void* self, void* attacker)
+extern "C" void cRider_flagEventPunch(cRider* self, void* attacker)
 {
     cSSXAudio_Punch(cAudioInterface_bxAudio(), attacker, self);
     func_002A0A30(cAudioInterface_bxAudio(), attacker, self, 0, 0);
@@ -1556,7 +1556,7 @@ extern "C" void cSSXAudio_KnockdownSFX(void* snd, void* obj);
 void* cBEAggressionInterface_getThis();
 extern "C" void cBEAggressionInterface_applyAggression(void* agg, int a, int b, int c);
 extern "C" float cRiderMetrix_evFrag(char* self);
-extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
+extern "C" void cRider_flagEventBoostPowerUp(cRider*, int, float);
 
 /**
  * Reacts to a punch that knocked this rider down: sounds, the harshest aggression event and a frag reward for the
@@ -1571,7 +1571,7 @@ extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
  * @param self  the rider that was knocked down (this)
  * @param attacker  the rider that threw the punch (On Tour attacker); it earns the frag
  */
-extern "C" void cRider_flagEventPunchKnockdown(void* self, void* attacker)
+extern "C" void cRider_flagEventPunchKnockdown(cRider* self, void* attacker)
 {
     cSSXAudio_Punch(cAudioInterface_bxAudio(), attacker, self);
     func_002A0A30(cAudioInterface_bxAudio(), attacker, self, 0, 1);
@@ -1583,7 +1583,7 @@ extern "C" void cRider_flagEventPunchKnockdown(void* self, void* attacker)
     char* oa = (char*)self + 0x6C0;
     sVEntry0010E468* ea = &(*(sVEntry0010E468**)oa)[7];
     cBEAggressionInterface_applyAggression(agg, rb, ea->fn(oa + ea->delta), 3);
-    cRider_flagEventBoostPowerUp(attacker, 2, cRiderMetrix_evFrag(*(char**)((char*)attacker + 0x790)));
+    cRider_flagEventBoostPowerUp((cRider*)attacker, 2, cRiderMetrix_evFrag(*(char**)((char*)attacker + 0x790)));
 }
 #endif
 
@@ -1607,15 +1607,15 @@ extern "C" void cRiderMetrix_evCheckpoint(void*, int);
  *
  * @param checkpoint  the checkpoint passed (On Tour tPathCheckpoint *cp): time bonus in seconds, then distance left
  */
-extern "C" void cRider_flagEventPathCheckpoint(void* self, int* checkpoint)
+extern "C" void cRider_flagEventPathCheckpoint(cRider* self, int* checkpoint)
 {
-    *(int*)((char*)self + 0xE8) = *(int*)((char*)self + 0xEC);
+    *(int*)((char*)self + 0xE8) = self->unk_0EC;
     if (((D_005308D0[0] >> 9) & 1) == 0)
     {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         if (D_00535C12[0] == 1)
         {
-            cRiderMetrix_evCheckpoint(*(void**)((char*)self + 0x790), *checkpoint);
+            cRiderMetrix_evCheckpoint(self->mMetrix, *checkpoint);
         }
     }
 }
@@ -1649,7 +1649,7 @@ struct sVEntry0010E5D8 { short delta; short index; int (*fn)(void*); };
  * @param isPrev  On Tour isPrev; unused
  * @param isCur  On Tour isCur; unused
  */
-extern "C" void cRider_flagEventPathEvent(void* self, int* pathEvent, int isPrev, int isCur)
+extern "C" void cRider_flagEventPathEvent(cRider* self, int* pathEvent, int isPrev, int isCur)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     char* gameModeMan = (char*)SSXApp->GameModeMan;
@@ -1664,7 +1664,7 @@ extern "C" void cRider_flagEventPathEvent(void* self, int* pathEvent, int isPrev
         shouldTriggerFinishLine = 1;
     if (*pathEvent == 1 && shouldTriggerFinishLine != 0)
     {
-        int ok = *(float*)((char*)self + 0x470) >= 0.0f;
+        int ok = self->mFinishTime >= 0.0f;
         if (!ok)
             cRider_doFinishEvent(self);
     }
@@ -1694,9 +1694,9 @@ extern "C" void func_002A3B18(void*, void*, int);
  *
  * @param amount  seconds of boost to add (On Tour sec)
  */
-extern "C" void cRider_flagEventSpeedBoost(void* self, float amount)
+extern "C" void cRider_flagEventSpeedBoost(cRider* self, float amount)
 {
-    *(float*)((char*)self + 0x2E8) += amount;
+    self->mPowerUpBoostTimer += amount;
     cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 0, self, 1.0f);
     func_002A3B18(cAudioInterface_bxAudio(), self, 1);
 }
@@ -1716,9 +1716,9 @@ extern "C" void func_002A3B18(void*, void*, int);
  *
  * @param amount  the time to add
  */
-extern "C" void cRider_flagEventTrickBoost(void* self, float amount)
+extern "C" void cRider_flagEventTrickBoost(cRider* self, float amount)
 {
-    *(float*)((char*)self + 0x2EC) += amount;
+    self->mPowerUpTrickTimer += amount;
     cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 1, self, 1.0f);
     func_002A3B18(cAudioInterface_bxAudio(), self, 2);
 }
@@ -1729,7 +1729,7 @@ INCLUDE_ASM("ai/computer", cRider_flagEventTrickMultiplier);
 #ifdef SKIP_ASM
 int cRider_getMotionState(void* self);
 extern "C" float cRiderMetrix_evCollectMultiplier(char* self, float value);
-extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
+extern "C" void cRider_flagEventBoostPowerUp(cRider*, int, float);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
 
@@ -1742,11 +1742,11 @@ extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
  *
  * @param value  the multiplier
  */
-extern "C" void cRider_flagEventTrickMultiplier(void* self, float value)
+extern "C" void cRider_flagEventTrickMultiplier(cRider* self, float value)
 {
     if (cRider_getMotionState(self) == 1 || cRider_getMotionState(self) == 4)
     {
-        cRider_flagEventBoostPowerUp(self, 4, cRiderMetrix_evCollectMultiplier(*(char**)((char*)self + 0x790), value));
+        cRider_flagEventBoostPowerUp(self, 4, cRiderMetrix_evCollectMultiplier((char*)self->mMetrix, value));
         cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 2, self, value);
     }
 }
@@ -1755,7 +1755,7 @@ extern "C" void cRider_flagEventTrickMultiplier(void* self, float value)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ai/computer", cRider_flagEventAddPoints);
 #ifdef SKIP_ASM
-extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
+extern "C" void cRider_flagEventBoostPowerUp(cRider*, int, float);
 extern "C" float cRiderMetrix_evAddPoints(int);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
@@ -1766,9 +1766,9 @@ extern "C" void cSSXAudio_PlayIconSound(void*, int, void*, float);
  * The points reach cRiderMetrix_evAddPoints untouched in a1 (the C declaration takes only self), which adds them to the score; its
  * result (0) goes to cRider_flagEventBoostPowerUp with source mask 0x10.
  */
-extern "C" void cRider_flagEventAddPoints(void* self)
+extern "C" void cRider_flagEventAddPoints(cRider* self)
 {
-    cRider_flagEventBoostPowerUp(self, 0x10, cRiderMetrix_evAddPoints(*(int*)((char*)self + 0x790)));
+    cRider_flagEventBoostPowerUp(self, 0x10, cRiderMetrix_evAddPoints((int)self->mMetrix));
     cSSXAudio_PlayIconSound(cAudioInterface_bxAudio(), 3, self, 1.0f);
 }
 #endif
@@ -1779,7 +1779,7 @@ INCLUDE_ASM("ai/computer", cRider_flagEventLand);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void cRider_flagEventReaction(void* self, int mode, float t);
+extern "C" void cRider_flagEventReaction(cRider* self, int mode, float t);
 void cRider_flagEventBoostPowerUp_fi(void*, float, int) __asm__("cRider_flagEventBoostPowerUp");
 void func_00111AA0_impl(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
 extern "C" float cRiderMetrix_evLand(void* self, int stance, int alternate, int style, int flag);
@@ -1811,33 +1811,33 @@ struct sVEf_0010E910 { short delta; short index; void (*fn)(void*, float); };
  * @param evt  the ground intersection landed on (On Tour tIntersectInfo): position, normal, surface at +0x4C
  * @param speed  the landing speed (On Tour speed)
  */
-extern "C" void cRider_flagEventLand(char* self, int isPipe, int rsm, int pressMode, char* evt, float speed)
+extern "C" void cRider_flagEventLand(cRider* self, int isPipe, int rsm, int pressMode, char* evt, float speed)
 {
-    char* metrix = *(char**)(self + 0x790);
+    char* metrix = (char*)self->mMetrix;
     int prevNumUber = *(int*)(metrix + 0x114);
     int prevNumCombo = *(int*)(metrix + 0x134);
     int prevPoints = *(int*)(metrix + 0x198);
-    float powerUp = cRiderMetrix_evLand(metrix, *(int*)(self + 0x320) != *(int*)(self + 0x324), isPipe, rsm, pressMode);
-    char* metrixAfter = *(char**)(self + 0x790);
+    float powerUp = cRiderMetrix_evLand(metrix, self->IsRidingFakie != self->IsGoofyStance, isPipe, rsm, pressMode);
+    char* metrixAfter = (char*)self->mMetrix;
     int curNumUber = *(int*)(metrixAfter + 0x114);
     int curNumCombo = *(int*)(metrixAfter + 0x134);
     int curPoints = *(int*)(metrixAfter + 0x198);
-    cReplay_eventLand_10E910(SSXApp->Game->Replay, *(int*)(self + 0x86C), metrixAfter + 0xFC);
+    cReplay_eventLand_10E910(SSXApp->Game->Replay, self->mAIIndex, metrixAfter + 0xFC);
     if (prevNumUber < curNumUber)
     {
-        int uberLevel = *(int*)(self + 0x2F4);
+        int uberLevel = self->mUberLevel;
         if (uberLevel < 10)
         {
             int numUber = curNumUber - prevNumUber;
             int lim = 10 - uberLevel;
             int nv = uberLevel + (numUber < lim ? numUber : lim);
-            *(int*)(self + 0x2F4) = nv;
+            self->mUberLevel = nv;
             if (nv == 10)
-                *(float*)(self + 0x2F0) = 60.0f;
+                self->mUberTimer = 60.0f;
         }
     }
-    func_00111AA0_impl(*(void**)(self + 0x77C), evt, evt + 0x10, *(int*)(evt + 0x4C), speed);
-    char* being = self + 0x6C0;
+    func_00111AA0_impl(self->mRiderHandler, evt, evt + 0x10, *(int*)(evt + 0x4C), speed);
+    char* being = ((char*)self) + 0x6C0;
     sVE_0010E910* ve = &(*(sVE_0010E910**)being)[8];
     if (ve->fn(being + ve->delta))
     {
@@ -1845,15 +1845,15 @@ extern "C" void cRider_flagEventLand(char* self, int isPipe, int rsm, int pressM
             cRider_flagEventReaction(self, 3, 0.0f);
         else if (prevNumUber < curNumUber)
             cRider_flagEventReaction(self, 2, 0.0f);
-        else if (cBEStatInterface_shouldCelebrateTrick(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)(self + 0x86C), curPoints - prevPoints))
+        else if (cBEStatInterface_shouldCelebrateTrick(cBE_getInterface_Fv(cBE_getBE(), 3), self->mAIIndex, curPoints - prevPoints))
             cRider_flagEventReaction(self, 1, 0.0f);
     }
-    cRider_flagEventBoostPowerUp_fi(self, powerUp, 1);
+    cRider_flagEventBoostPowerUp_fi(((char*)self), powerUp, 1);
     if (0.0f < powerUp)
-        *(float*)(self + 0x2EC) = 0.0f;
-    sVEf_0010E910* vf = &(*(sVEf_0010E910**)(self + 0x6C0))[17];
-    vf->fn(self + vf->delta, speed * 0.5f);
-    cSSXAudio_Land(gSSXAudio, self, powerUp);
+        self->mPowerUpTrickTimer = 0.0f;
+    sVEf_0010E910* vf = &((sVEf_0010E910*)self->mVtbl)[17];
+    vf->fn(((char*)self) + vf->delta, speed * 0.5f);
+    cSSXAudio_Land(gSSXAudio, ((char*)self), powerUp);
 }
 #endif
 
@@ -2119,7 +2119,7 @@ INCLUDE_ASM("ai/computer", cRider_flagEventWorld);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sVE_0010F1C0 { short delta; short index; int (*fn)(void*); };
-extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
+extern "C" void cRider_flagEventBoostPowerUp(cRider*, int, float);
 extern "C" void cRider_flagEventAddPoints_i(void* self, int v) __asm__("cRider_flagEventAddPoints");
 extern "C" void cRider_checkForReset(void* rider, int a, int b);
 
@@ -2141,28 +2141,28 @@ static inline void computerV_0010F1C0(char* self, int i)
  * @param kind  the event id
  * @param amt  the event's value
  */
-extern "C" void cRider_flagEventWorld(char* self, int kind, float amt)
+extern "C" void cRider_flagEventWorld(cRider* self, int kind, float amt)
 {
     switch (kind) {
     case 0:
         break;
     case 1:
-        computerV_0010F1C0(self, 13);
+        computerV_0010F1C0(((char*)self), 13);
         break;
     case 2:
-        computerV_0010F1C0(self, 14);
+        computerV_0010F1C0(((char*)self), 14);
         break;
     case 3:
-        computerV_0010F1C0(self, 15);
+        computerV_0010F1C0(((char*)self), 15);
         break;
     case 4:
         cRider_flagEventBoostPowerUp(self, 8, amt);
         break;
     case 6:
-        cRider_flagEventAddPoints_i(self, (int)amt);
+        cRider_flagEventAddPoints_i(((char*)self), (int)amt);
         break;
     case 5:
-        cRider_checkForReset(self, 0, 4);
+        cRider_checkForReset(((char*)self), 0, 4);
         break;
     case 7:
         break;
@@ -2174,7 +2174,7 @@ extern "C" void cRider_flagEventWorld(char* self, int kind, float amt)
 INCLUDE_ASM("ai/computer", cRider_flagEventWipeoutRecover);
 #ifdef SKIP_ASM
 extern "C" float cRiderMetrix_evWipeoutRecover(int);
-extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
+extern "C" void cRider_flagEventBoostPowerUp(cRider*, int, float);
 
 /**
  * Tells the rider metrix the rider got up after a wipeout and adds the boost it returns.
@@ -2182,9 +2182,9 @@ extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
  * Calls cRider_flagEventBoostPowerUp with source mask 1 and cRiderMetrix_evWipeoutRecover's result for the rider's mMetrix. The
  * callers' second argument reaches cRiderMetrix_evWipeoutRecover untouched in a1 (the C declaration takes only self).
  */
-extern "C" void cRider_flagEventWipeoutRecover(void* self)
+extern "C" void cRider_flagEventWipeoutRecover(cRider* self)
 {
-    cRider_flagEventBoostPowerUp(self, 1, cRiderMetrix_evWipeoutRecover(*(int*)((char*)self + 0x790)));
+    cRider_flagEventBoostPowerUp(self, 1, cRiderMetrix_evWipeoutRecover((int)self->mMetrix));
 }
 #endif
 
@@ -2223,10 +2223,10 @@ extern "C" void cBERewardInterface_awardUserBigChallenge(void*, int, int);
  * @param peakID  the peak the mission belongs to (On Tour peakID)
  * @param money  the cash reward (On Tour money)
  */
-extern "C" void cRider_flagEventMissionSuccess(void* self, int peakID, int money)
+extern "C" void cRider_flagEventMissionSuccess(cRider* self, int peakID, int money)
 {
-    cRiderMetrix_evMissionSuccess(*(int*)((char*)self + 0x790), money);
-    cBERewardInterface_awardUserBigChallenge(cBE_getInterface_Fv(cBE_getBE(), 13), *(int*)((char*)self + 0x86C), peakID);
+    cRiderMetrix_evMissionSuccess((int)self->mMetrix, money);
+    cBERewardInterface_awardUserBigChallenge(cBE_getInterface_Fv(cBE_getBE(), 13), self->mAIIndex, peakID);
 }
 #endif
 
@@ -3712,9 +3712,9 @@ static inline void vu0AddEq_112180(sVec4_00112180& dst, sVec4_00112180 b)
  *
  * @param flag  On Tour resetPosition: also move the rider to the start gate
  */
-extern "C" void cRider_initPath(char* self, int flag)
+extern "C" void cRider_initPath(cRider* self, int flag)
 {
-    float* startPoint = (float*)cPathSys_getStartpoint(gPaths, 1, *(int*)(self + 0x86C));
+    float* startPoint = (float*)cPathSys_getStartpoint(gPaths, 1, self->mAIIndex);
     if (flag)
     {
         sVec4_00112180 dir;
@@ -3727,28 +3727,28 @@ extern "C" void cRider_initPath(char* self, int flag)
         pos.y = startPoint[3];
         pos.z = startPoint[4];
         pos.w = 1.0f;
-        vu0AddEq_112180(pos, vu0Scale_112180(dir, func_00115B08(self)));
-        cRider_putAt_112180(self, &pos, &dir, 5, 0.0f);
+        vu0AddEq_112180(pos, vu0Scale_112180(dir, func_00115B08((char*)self)));
+        cRider_putAt_112180(((char*)self), &pos, &dir, 5, 0.0f);
     }
-    *(int*)(*(char**)(self + 0xABC) + 0x14) = -1;
-    *(int*)(*(char**)(self + 0xAC0) + 0x14) = -1;
-    *(void**)(self + 0xAB4) = ((void**)startPoint)[8];
-    *(void**)(self + 0xAB8) = ((void**)startPoint)[9];
+    *(int*)((char*)self->mAIPathHint + 0x14) = -1;
+    *(int*)((char*)self->mTrackPathHint + 0x14) = -1;
+    *(void**)(((char*)self) + 0xAB4) = ((void**)startPoint)[8];
+    *(void**)(((char*)self) + 0xAB8) = ((void**)startPoint)[9];
     sVec4_00112180 up;
     up.x = 0.0f;
     up.y = 0.0f;
     up.z = 0.0f;
     up.w = 1.0f;
     float out;
-    float res = cPath_intersectPath1(*(void**)(self + 0xAB4), self + 0x110, &up, &out, *(void**)(self + 0xAC0), 1);
-    float trackLen = *(float*)(*(char**)(self + 0xAB4) + 0x38);
+    float res = cPath_intersectPath1(*(void**)(((char*)self) + 0xAB4), ((char*)self) + 0x110, &up, &out, self->mTrackPathHint, 1);
+    float trackLen = *(float*)(*(char**)(((char*)self) + 0xAB4) + 0x38);
     if (trackLen < res)
         res = 0.0f;
-    *(float*)(self + 0x4D0) = *(float*)(self + 0x4D4) = trackLen - res;
-    res = cPath_intersectPath1(*(void**)(self + 0xAB8), self + 0x110, self + 0x490, self + 0x4C8, *(void**)(self + 0xABC), 1);
-    *(float*)(self + 0x4C0) = *(float*)(self + 0x4C4) = res;
-    sVec4_00112180 pos2 = cPath_getPathPos_112180(*(void**)(self + 0xAB8), 0, res + 796.0f);
-    *(sVec4_00112180*)(self + 0x4A0) = pos2;
+    self->mDistToFinish = *(float*)(((char*)self) + 0x4D4) = trackLen - res;
+    res = cPath_intersectPath1(*(void**)(((char*)self) + 0xAB8), ((char*)self) + 0x110, ((char*)self) + 0x490, ((char*)self) + 0x4C8, self->mAIPathHint, 1);
+    *(float*)(((char*)self) + 0x4C0) = *(float*)(((char*)self) + 0x4C4) = res;
+    sVec4_00112180 pos2 = cPath_getPathPos_112180(*(void**)(((char*)self) + 0xAB8), 0, res + 796.0f);
+    *(sVec4_00112180*)(((char*)self) + 0x4A0) = pos2;
 }
 #endif
 
@@ -3762,10 +3762,10 @@ struct sVE_00112338 { short delta; short index; int (*fn)(void*, float, float); 
 
 extern sEnt_00112338 D_004A5D60[];
 extern "C" void* MEM_copy(void*, void*, int);
-extern "C" void cRider_checkTrackPathEvents(void* self, float* a, float* b, sVec4_00112338* c);
-extern "C" void cRider_checkTrackPathSwitch(void* self, int a);
+extern "C" void cRider_checkTrackPathEvents(cRider* self, float* a, float* b, sVec4_00112338* c);
+extern "C" void cRider_checkTrackPathSwitch(cRider* self, int a);
 extern "C" float cPath_getLength(void* self);
-extern "C" void cRider_flagEventPathEvent(void* self, int* arg, int a2, int a3);
+extern "C" void cRider_flagEventPathEvent(cRider* self, int* arg, int a2, int a3);
 
 /**
  * Tracks the rider along its track path: switches path when needed and raises the path events it enters and leaves.
@@ -3779,7 +3779,7 @@ extern "C" void cRider_flagEventPathEvent(void* self, int* arg, int a2, int a3);
  * Each event in the new list is reported with cRider_flagEventPathEvent (flagEventPathEvent) as current, flagged as previous too
  * when it was in the old list; old events no longer present are reported as previous only.
  */
-extern "C" void cRider_updateTrackPath(char* self)
+extern "C" void cRider_updateTrackPath(cRider* self)
 {
     sComp_00112338* rider = (sComp_00112338*)self;
     MEM_copy(D_004A5D60, rider->ent, rider->count << 4);
@@ -3788,23 +3788,23 @@ extern "C" void cRider_updateTrackPath(char* self)
     float pathDistXY;
     float pathParam;
     cRider_checkTrackPathEvents(self, &pathDistXY, &pathParam, &pathPos);
-    if (0.0f < *(float*)(self + 0x4D4))
+    if (0.0f < *(float*)(((char*)self) + 0x4D4))
     {
-        void* old = *(void**)(self + 0xAB4);
+        void* old = *(void**)(((char*)self) + 0xAB4);
         if (500.0f < pathDistXY && SSXApp->Game->AI->AITick % 60 == 0)
             cRider_checkTrackPathSwitch(self, 0);
-        else if (cPath_getLength(*(void**)(self + 0xAB4)) - 200.0f < pathParam)
+        else if (cPath_getLength(*(void**)(((char*)self) + 0xAB4)) - 200.0f < pathParam)
             cRider_checkTrackPathSwitch(self, 1);
         else
         {
-            char* trackPath = *(char**)(self + 0xAB4);
+            char* trackPath = *(char**)(((char*)self) + 0xAB4);
             sVE_00112338* ve = &(*(sVE_00112338**)(trackPath + 0x34))[2];
-            if (ve->fn(trackPath + ve->delta, *(float*)(self + 0x4D4), *(float*)(self + 0x4D0)))
+            if (ve->fn(trackPath + ve->delta, *(float*)(((char*)self) + 0x4D4), self->mDistToFinish))
                 cRider_checkTrackPathSwitch(self, 0);
         }
-        if (*(void**)(self + 0xAB4) != old)
+        if (*(void**)(((char*)self) + 0xAB4) != old)
         {
-            *(int*)(*(char**)(self + 0xAC0) + 0x14) = -1;
+            *(int*)((char*)self->mTrackPathHint + 0x14) = -1;
             cRider_checkTrackPathEvents(self, &pathDistXY, &pathParam, &pathPos);
         }
     }
@@ -3839,7 +3839,7 @@ INCLUDE_ASM("ai/computer", cRider_calculateAheadDist);
  * @param useNormalDistance  On Tour UseNormalDistance: use the normal look-ahead distance
  * @return 796.0 when @p useNormalDistance is set, else 200.0
  */
-extern "C" float cRider_calculateAheadDist(void* self, int useNormalDistance)
+extern "C" float cRider_calculateAheadDist(cRider* self, int useNormalDistance)
 {
     float aheadDist = 796.0f;
     if (useNormalDistance == 0) {
@@ -3864,7 +3864,7 @@ INCLUDE_ASM("ai/computer", cRider_setAimTarget);
  *
  * @return the copied vector (an artefact of the C; the caller ignores it)
  */
-extern "C" cQuad128 cRider_setAimTarget(void* self)
+extern "C" cQuad128 cRider_setAimTarget(cRider* self)
 {
     cQuad128 aimPoint = *(cQuad128*)((char*)self + 0x4A0);
     *(cQuad128*)((char*)self + 0x4B0) = aimPoint;
@@ -3904,7 +3904,7 @@ extern "C" float cPath_intersectPath1(void* path, void* a1, void* a2, void* a3, 
 extern "C" float cPath_intersectPath(void* path, void* a1, void* a2, void* a3, int n);
 sVec4_001125C0 cPath_getPathPos_1125C0(void* path, int* inRange, float t) __asm__("cPath_getPathPos");
 extern "C" float cPath_getLength(void* self);
-extern "C" void cRider_checkAIPathSwitch(void* self, int a);
+extern "C" void cRider_checkAIPathSwitch(cRider* self, int a);
 
 static inline float atan2_001125C0(float y, float x)
 {
@@ -3941,34 +3941,34 @@ static inline float atan2_001125C0(float y, float x)
  * 500 off the path (only every 60th AITick), with 1 within 200 of the path's end, or with 0 when the path's vtable slot
  * 2 says so. Finally +0x4CC = atan2 of the aim point minus the closest point (x/y).
  */
-extern "C" void cRider_updateAIPath(char* self)
+extern "C" void cRider_updateAIPath(cRider* self)
 {
-    *(float*)(self + 0x4C0) = *(float*)(self + 0x4C4);
-    int nf = !cRider_isPipeJump_b(self);
+    *(float*)(((char*)self) + 0x4C0) = *(float*)(((char*)self) + 0x4C4);
+    int nf = !cRider_isPipeJump_b((char*)self);
     if (nf)
-        *(float*)(self + 0x4C4) = cPath_intersectPath1(*(void**)(self + 0xAB8), self + 0x110, self + 0x490, self + 0x4C8, *(void**)(self + 0xABC), nf);
+        *(float*)(((char*)self) + 0x4C4) = cPath_intersectPath1(*(void**)(((char*)self) + 0xAB8), ((char*)self) + 0x110, ((char*)self) + 0x490, ((char*)self) + 0x4C8, self->mAIPathHint, nf);
     else
-        *(float*)(self + 0x4C4) = cPath_intersectPath(*(void**)(self + 0xAB8), self + 0x110, self + 0x490, self + 0x4C8, 0);
+        *(float*)(((char*)self) + 0x4C4) = cPath_intersectPath(*(void**)(((char*)self) + 0xAB8), ((char*)self) + 0x110, ((char*)self) + 0x490, ((char*)self) + 0x4C8, 0);
     float k = cRider_calculateAheadDist(self, nf);
-    *(sVec4_001125C0*)(self + 0x4A0) = cPath_getPathPos_1125C0(*(void**)(self + 0xAB8), 0, *(float*)(self + 0x4C4) + k);
-    cRider_setAimTarget_2(self, nf);
-    if (0.0f < *(float*)(self + 0x4D4))
+    *(sVec4_001125C0*)(((char*)self) + 0x4A0) = cPath_getPathPos_1125C0(*(void**)(((char*)self) + 0xAB8), 0, *(float*)(((char*)self) + 0x4C4) + k);
+    cRider_setAimTarget_2(((char*)self), nf);
+    if (0.0f < *(float*)(((char*)self) + 0x4D4))
     {
-        if (500.0f < *(float*)(self + 0x4C8) && SSXApp->Game->AI->AITick % 60 == 0)
+        if (500.0f < *(float*)(((char*)self) + 0x4C8) && SSXApp->Game->AI->AITick % 60 == 0)
             cRider_checkAIPathSwitch(self, 0);
-        else if (cPath_getLength(*(void**)(self + 0xAB8)) - 200.0f < *(float*)(self + 0x4C4))
+        else if (cPath_getLength(*(void**)(((char*)self) + 0xAB8)) - 200.0f < *(float*)(((char*)self) + 0x4C4))
             cRider_checkAIPathSwitch(self, 1);
         else
         {
-            char* aiPath = *(char**)(self + 0xAB8);
+            char* aiPath = *(char**)(((char*)self) + 0xAB8);
             sVE_001125C0* ve = &(*(sVE_001125C0**)(aiPath + 0x34))[2];
-            if (ve->fn(aiPath + ve->delta, *(float*)(self + 0x4C0), *(float*)(self + 0x4C4)))
+            if (ve->fn(aiPath + ve->delta, *(float*)(((char*)self) + 0x4C0), *(float*)(((char*)self) + 0x4C4)))
                 cRider_checkAIPathSwitch(self, 0);
         }
     }
-    float dx = *(float*)(self + 0x4A0) - *(float*)(self + 0x490);
-    float dy = *(float*)(self + 0x4A4) - *(float*)(self + 0x494);
-    *(float*)(self + 0x4CC) = atan2_001125C0(dy, dx);
+    float dx = *(float*)(((char*)self) + 0x4A0) - *(float*)(((char*)self) + 0x490);
+    float dy = *(float*)(((char*)self) + 0x4A4) - *(float*)(((char*)self) + 0x494);
+    *(float*)(((char*)self) + 0x4CC) = atan2_001125C0(dy, dx);
 }
 #endif
 
@@ -4084,43 +4084,42 @@ static inline float vu0Dot_1127F0(const sVec4_1127F0& a, const sVec4_1127F0& b)
  * @param vself  the rider (this)
  * @param skipCur  On Tour mustSwitch: never keep the current track path
  */
-extern "C" void cRider_checkTrackPathSwitch(void* vself, int skipCur)
+extern "C" void cRider_checkTrackPathSwitch(cRider* vself, int skipCur)
 {
-    char* self = (char*)vself;
     void* paths[3];
     sVec4_1127F0 out;
     sVec4_1127F0 pos;
-    float len = vu0Length_1127F0(*(sVec4_1127F0*)(self + 0x1E0));
-    void* best = *(void**)(self + 0xAB4);
+    float len = vu0Length_1127F0(*(sVec4_1127F0*)&vself->mVelocity);
+    void* best = *(void**)(((char*)vself) + 0xAB4);
     float bestD = 9.999999933815813e+36f;
     if (len == 0.0f) {
-        pos = *(sVec4_1127F0*)(self + 0x110);
+        pos = *(sVec4_1127F0*)&vself->mPosition;
     } else {
-        float aheadScale = cRider_calculateAheadDist(self, 1) / len;
-        pos = vu0Add_1127F0(*(sVec4_1127F0*)(self + 0x110), vu0Scale_1127F0(*(sVec4_1127F0*)(self + 0x1E0), aheadScale));
+        float aheadScale = cRider_calculateAheadDist(vself, 1) / len;
+        pos = vu0Add_1127F0(*(sVec4_1127F0*)&vself->mPosition, vu0Scale_1127F0(*(sVec4_1127F0*)&vself->mVelocity, aheadScale));
     }
     int n = cPathSys_getNearTrackPaths(gPaths, &pos, paths, 3);
     for (int i = 0; i < n; i++) {
-        if (skipCur && paths[i] == *(void**)(self + 0xAB4)) {
+        if (skipCur && paths[i] == *(void**)(((char*)vself) + 0xAB4)) {
             continue;
         }
         float tOut;
         float nearParam = cPath_intersectPath(paths[i], &pos, &out, &tOut, 1);
-        if (paths[i] == *(void**)(self + 0xAB4)) {
-            if (1592.0f < __builtin_fabsf(*(float*)((char*)paths[i] + 0x38) - *(float*)(self + 0x4D0) - nearParam)) {
-                *(int*)(*(char**)(self + 0xAC0) + 0x14) = -1;
+        if (paths[i] == *(void**)(((char*)vself) + 0xAB4)) {
+            if (1592.0f < __builtin_fabsf(*(float*)((char*)paths[i] + 0x38) - vself->mDistToFinish - nearParam)) {
+                *(int*)((char*)vself->mTrackPathHint + 0x14) = -1;
             }
         }
         nearParam += 796.0f;
         sVec4_1127F0 aheadDelta = vu0Sub_1127F0(pos, cPath_getPathPos_1127F0(paths[i], 0, nearParam));
-        sVec4_1127F0 nearDelta = vu0Sub_1127F0(*(sVec4_1127F0*)(self + 0x110), out);
+        sVec4_1127F0 nearDelta = vu0Sub_1127F0(*(sVec4_1127F0*)&vself->mPosition, out);
         float dist = vu0Dot_1127F0(nearDelta, nearDelta) + vu0Dot_1127F0(aheadDelta, aheadDelta);
         if (dist < bestD) {
             best = paths[i];
             bestD = dist;
         }
     }
-    *(void**)(self + 0xAB4) = best;
+    *(void**)(((char*)vself) + 0xAB4) = best;
 }
 #endif
 
@@ -4241,24 +4240,23 @@ struct sVEf_112A50 { short delta; short index; float (*fn)(void*, void*); };
  * @param vself  the rider (this)
  * @param keep  On Tour mustSwitch: do not consider the current AI path
  */
-extern "C" void cRider_checkAIPathSwitch(void* vself, int keep)
+extern "C" void cRider_checkAIPathSwitch(cRider* vself, int keep)
 {
-    char* self = (char*)vself;
     void* paths[6];
     sVec4_112A50 out;
     sVec4_112A50 pos;
-    float len = vu0Length_112A50(*(sVec4_112A50*)(self + 0x1E0));
+    float len = vu0Length_112A50(*(sVec4_112A50*)&vself->mVelocity);
     void* best = 0;
     float bestD = 9.999999933815813e+36f;
     float bestW = -1.0f;
     if (len == 0.0f) {
-        pos = *(sVec4_112A50*)(self + 0x110);
+        pos = *(sVec4_112A50*)&vself->mPosition;
     } else {
-        pos = vu0Add_112A50(*(sVec4_112A50*)(self + 0x110), vu0Scale_112A50(*(sVec4_112A50*)(self + 0x1E0), 796.0f / len));
+        pos = vu0Add_112A50(*(sVec4_112A50*)&vself->mPosition, vu0Scale_112A50(*(sVec4_112A50*)&vself->mVelocity, 796.0f / len));
     }
     int n = cPathSys_getNearAIPaths(gPaths, &pos, paths, 6, 0);
     for (int i = 0; i < n; i++) {
-        if (paths[i] == *(void**)(self + 0xAB8) && keep) {
+        if (paths[i] == *(void**)(((char*)vself) + 0xAB8) && keep) {
             continue;
         }
         float tOut;
@@ -4267,17 +4265,17 @@ extern "C" void cRider_checkAIPathSwitch(void* vself, int keep)
             continue;
         }
         sVec4_112A50 aheadDelta = vu0Sub_112A50(pos, cPath_getPathPos_112A50(paths[i], 0, nearParam + 796.0f));
-        sVec4_112A50 nearDelta = vu0Sub_112A50(*(sVec4_112A50*)(self + 0x110), out);
+        sVec4_112A50 nearDelta = vu0Sub_112A50(*(sVec4_112A50*)&vself->mPosition, out);
         float dist = vu0Dot_112A50(nearDelta, nearDelta) + vu0Dot_112A50(aheadDelta, aheadDelta);
-        char* being = self + 0x6C0;
+        char* being = ((char*)vself) + 0x6C0;
         sVEi_112A50* ve = &(*(sVEi_112A50**)being)[9];
         if (ve->fn(being + ve->delta) == 1) {
-            sVEf_112A50* vf = &(*(sVEf_112A50**)(self + 0x6C0))[20];
-            dist = vf->fn(self + vf->delta, paths[i]);
+            sVEf_112A50* vf = &((sVEf_112A50*)vself->mVtbl)[20];
+            dist = vf->fn(((char*)vself) + vf->delta, paths[i]);
             if (bestW < dist) {
                 best = paths[i];
                 bestW = dist;
-                if (best == *(void**)(self + 0xAB8)) {
+                if (best == *(void**)(((char*)vself) + 0xAB8)) {
                     best = 0;
                 }
             }
@@ -4285,19 +4283,19 @@ extern "C" void cRider_checkAIPathSwitch(void* vself, int keep)
             if (dist < bestD) {
                 best = paths[i];
                 bestD = dist;
-                if (best == *(void**)(self + 0xAB8)) {
+                if (best == *(void**)(((char*)vself) + 0xAB8)) {
                     best = 0;
                 }
             }
         }
     }
     if (best != 0) {
-        *(void**)(self + 0xAB8) = best;
-        *(int*)(*(char**)(self + 0xABC) + 0x14) = -1;
-        float pathParam = cPath_intersectPath1(*(void**)(self + 0xAB8), self + 0x110, self + 0x490, self + 0x4C8, *(void**)(self + 0xABC), 1);
-        *(float*)(self + 0x4C4) = pathParam;
-        *(sVec4_112A50*)(self + 0x4A0) = cPath_getPathPos_112A50(*(void**)(self + 0xAB8), 0, pathParam + 796.0f);
-        *(float*)(self + 0x4C0) = *(float*)(self + 0x4C4);
+        *(void**)(((char*)vself) + 0xAB8) = best;
+        *(int*)((char*)vself->mAIPathHint + 0x14) = -1;
+        float pathParam = cPath_intersectPath1(*(void**)(((char*)vself) + 0xAB8), ((char*)vself) + 0x110, ((char*)vself) + 0x490, ((char*)vself) + 0x4C8, vself->mAIPathHint, 1);
+        *(float*)(((char*)vself) + 0x4C4) = pathParam;
+        *(sVec4_112A50*)(((char*)vself) + 0x4A0) = cPath_getPathPos_112A50(*(void**)(((char*)vself) + 0xAB8), 0, pathParam + 796.0f);
+        *(float*)(((char*)vself) + 0x4C0) = *(float*)(((char*)vself) + 0x4C4);
     }
 }
 #endif
@@ -4364,45 +4362,45 @@ static inline float vu0Dot_112D58(const sVec4_112D58& a, const sVec4_112D58& b)
  * position (+0x4C4, +0x4C0) re-measured, and the closest point (+0x490) and aim point (+0x4A0, 796 on) are taken from
  * the path's reset positions.
  */
-extern "C" void cRider_switchToResetPath(char* self)
+extern "C" void cRider_switchToResetPath(cRider* self)
 {
     void* paths[6];
     sVec4_112D58 pos;
-    int n = cPathSys_getNearResetPaths_112D58(gPaths, self + 0x110, paths, 6);
+    int n = cPathSys_getNearResetPaths_112D58(gPaths, ((char*)self) + 0x110, paths, 6);
     void* best = 0;
     float bestD = 9.999999933815813e+36f;
     int i;
     for (i = 0; i < n; i++)
     {
         float tOut;
-        float nearParam = cPath_intersectPath(paths[i], self + 0x110, &pos, &tOut, 1);
+        float nearParam = cPath_intersectPath(paths[i], ((char*)self) + 0x110, &pos, &tOut, 1);
         float len = cPath_getLength(paths[i]);
-        char* being = self + 0x6C0;
+        char* being = ((char*)self) + 0x6C0;
         sVE_112D58* ve = &(*(sVE_112D58**)being)[8];
         if (ve->fn(being + ve->delta) == 0 && len - 200.0f < nearParam)
             continue;
         float aheadParam = nearParam + 796.0f;
-        sVec4_112D58 aheadDelta = vu0Sub_112D58(*(sVec4_112D58*)(self + 0x110), cAIPath_getResetPos_112D58(paths[i], &aheadParam));
-        sVec4_112D58 nearDelta = vu0Sub_112D58(*(sVec4_112D58*)(self + 0x110), pos);
+        sVec4_112D58 aheadDelta = vu0Sub_112D58(*(sVec4_112D58*)&self->mPosition, cAIPath_getResetPos_112D58(paths[i], &aheadParam));
+        sVec4_112D58 nearDelta = vu0Sub_112D58(*(sVec4_112D58*)&self->mPosition, pos);
         float dist = vu0Dot_112D58(nearDelta, nearDelta) + vu0Dot_112D58(aheadDelta, aheadDelta);
         if (dist < bestD)
         {
             best = paths[i];
             bestD = dist;
-            if (best == *(void**)(self + 0xAB8))
+            if (best == *(void**)(((char*)self) + 0xAB8))
                 best = 0;
         }
     }
-    if (*(void**)(self + 0xAB8) == 0)
+    if (*(void**)(((char*)self) + 0xAB8) == 0)
         return;
     if (best)
-        *(void**)(self + 0xAB8) = best;
-    *(int*)(*(char**)(self + 0xABC) + 0x14) = -1;
-    *(float*)(self + 0x4C4) = cPath_intersectPath1(*(void**)(self + 0xAB8), self + 0x110, self + 0x490, self + 0x4C8, *(void**)(self + 0xABC), 1);
-    *(sVec4_112D58*)(self + 0x490) = cAIPath_getResetPos_112D58(*(void**)(self + 0xAB8), (float*)(self + 0x4C4));
-    float aimParam = *(float*)(self + 0x4C4) + 796.0f;
-    *(sVec4_112D58*)(self + 0x4A0) = cAIPath_getResetPos_112D58(*(void**)(self + 0xAB8), &aimParam);
-    *(float*)(self + 0x4C0) = *(float*)(self + 0x4C4);
+        *(void**)(((char*)self) + 0xAB8) = best;
+    *(int*)((char*)self->mAIPathHint + 0x14) = -1;
+    *(float*)(((char*)self) + 0x4C4) = cPath_intersectPath1(*(void**)(((char*)self) + 0xAB8), ((char*)self) + 0x110, ((char*)self) + 0x490, ((char*)self) + 0x4C8, self->mAIPathHint, 1);
+    *(sVec4_112D58*)(((char*)self) + 0x490) = cAIPath_getResetPos_112D58(*(void**)(((char*)self) + 0xAB8), (float*)(((char*)self) + 0x4C4));
+    float aimParam = *(float*)(((char*)self) + 0x4C4) + 796.0f;
+    *(sVec4_112D58*)(((char*)self) + 0x4A0) = cAIPath_getResetPos_112D58(*(void**)(((char*)self) + 0xAB8), &aimParam);
+    *(float*)(((char*)self) + 0x4C0) = *(float*)(((char*)self) + 0x4C4);
 }
 #endif
 
@@ -4436,7 +4434,7 @@ struct sPathSys_112FB0 { char pad0[0x18]; tPathCheckpoint_112FB0 Checkpoints[6];
  * @param pathPos  receives the nearest point on the path
  */
 // cRider::checkTrackPathEvents(float& pathDistXY, float& pathParam, t4Vector& pathPos) (On Tour name)
-extern "C" void cRider_checkTrackPathEvents(void* vself, float* pathDistXY, float* pathParam, sVec4_00112338* pathPos)
+extern "C" void cRider_checkTrackPathEvents(cRider* vself, float* pathDistXY, float* pathParam, sVec4_00112338* pathPos)
 {
     cRider* self = (cRider*)vself;
     float trackParam = cPath_intersectPath1_2FB0(*(void**)((char*)self + 0xAB4), &self->mPosition, pathPos, pathDistXY, self->mTrackPathHint, 1);

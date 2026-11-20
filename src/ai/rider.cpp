@@ -2487,8 +2487,8 @@ extern "C" void cRiderHandler__getMotionStateName(int);
  *
  * @param rider  the cRider
  */
-extern "C" void cRider_getMotionStateName(void *rider) {
-    cRiderHandler__getMotionStateName((*(int *)((char*)(rider) + (0x77C))));
+extern "C" void cRider_getMotionStateName(cRider* rider) {
+    cRiderHandler__getMotionStateName(((int)rider->mRiderHandler));
 }
 #endif
 
@@ -2542,8 +2542,8 @@ extern "C" void cRiderHandler__getControlStateName(int);
  *
  * @param rider  the cRider
  */
-extern "C" void cRider_getControlStateName(void *rider) {
-    cRiderHandler__getControlStateName((*(int *)((char*)(rider) + (0x77C))));
+extern "C" void cRider_getControlStateName(cRider* rider) {
+    cRiderHandler__getControlStateName(((int)rider->mRiderHandler));
 }
 #endif
 //100%
@@ -4257,8 +4257,8 @@ extern "C" void cRiderHandler_renderRiderFX(int);
  *
  * @param rider  the cRider
  */
-extern "C" void cRider_renderFX(void *rider) {
-    cRiderHandler_renderRiderFX((*(int *)((char*)(rider) + (0x77C))));
+extern "C" void cRider_renderFX(cRider* rider) {
+    cRiderHandler_renderRiderFX(((int)rider->mRiderHandler));
 }
 #endif
 
@@ -4790,63 +4790,63 @@ extern "C" int func_001446A0(void* self, int a1);
  * @param query  the query number
  * @return the answer (a flag or a count)
  */
-extern "C" int cRider_getMissionInt(char* self, int query)
+extern "C" int cRider_getMissionInt(cRider* self, int query)
 {
     int res;
     switch (query) {
     case 0:
-        return cRider_getMotionState(self) == 2;
+        return cRider_getMotionState((char*)self) == 2;
     case 1:
-        return cRider_getControlState(self) == 9;
+        return cRider_getControlState((char*)self) == 9;
     case 2:
         {
             bool ok = false;
-            if (cRider_getMotionState(self) == 1 || (cRider_getMotionState(self) == 2 && *(int*)(*(char**)(self + 0x77C) + 0x30) == 1)) {
+            if (cRider_getMotionState((char*)self) == 1 || (cRider_getMotionState((char*)self) == 2 && *(int*)((char*)self->mRiderHandler + 0x30) == 1)) {
                 ok = true;
             }
             return ok;
         }
     case 3:
-        return cRider_getMotionState(self) == 0;
+        return cRider_getMotionState((char*)self) == 0;
     case 4:
-        return cRider_getMotionState(self) == 4;
+        return cRider_getMotionState((char*)self) == 4;
     case 5:
         res = 0;
-        if (cRider_getControlState(self) == 5) {
-            res = cSpinControl_isGrabHeld(*(char**)(self + 0x77C) + 0x230) != 0;
+        if (cRider_getControlState((char*)self) == 5) {
+            res = cSpinControl_isGrabHeld((char*)self->mRiderHandler + 0x230) != 0;
         }
         return res;
     case 6:
         res = 0;
-        if (cRider_getControlState(self) == 5) {
-            res = cSpinControl_isTweakHeld(*(char**)(self + 0x77C) + 0x230) != 0;
+        if (cRider_getControlState((char*)self) == 5) {
+            res = cSpinControl_isTweakHeld((char*)self->mRiderHandler + 0x230) != 0;
         }
         return res;
     case 7:
         res = 0;
-        if (cRider_getControlState(self) == 5) {
-            res = cSpinControl_isUberHeld(*(char**)(self + 0x77C) + 0x230) != 0;
+        if (cRider_getControlState((char*)self) == 5) {
+            res = cSpinControl_isUberHeld((char*)self->mRiderHandler + 0x230) != 0;
         }
         return res;
     case 9:
-        return *(int*)(self + 0x330) == 1;
+        return self->PressMode == 1;
     case 10:
-        return *(int*)(self + 0x330) == 2;
+        return self->PressMode == 2;
     case 11:
-        return *(float*)(self + 0x2FC) != 0.0f;
+        return self->mBoostStrength != 0.0f;
     case 8:
-        return *(int*)(*(char**)(self + 0x790) + 0x198);
+        return *(int*)((char*)self->mMetrix + 0x198);
     case 15:
-        return *(int*)(*(char**)(self + 0x790) + 0x138);
+        return *(int*)((char*)self->mMetrix + 0x138);
     case 16:
-        return *(int*)(*(char**)(self + 0x790) + 0x13C);
+        return *(int*)((char*)self->mMetrix + 0x13C);
     case 17:
-        return *(int*)(*(char**)(self + 0x790) + 0x19C);
+        return *(int*)((char*)self->mMetrix + 0x19C);
     case 18:
         res = 0;
-        if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(self + 0x784), 1) == 13) {
-            if (func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(self + 0x784), 1) + 0xB0, 0)) {
-                res = !func_001446A0(cRiderAnimBase_getCurrentAnimSequence(*(void**)(self + 0x784), 1) + 0xB0, 1);
+        if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) == 13) {
+            if (func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 0)) {
+                res = !func_001446A0(cRiderAnimBase_getCurrentAnimSequence(self->mRiderAnim, 1) + 0xB0, 1);
             }
         }
         return res;
@@ -5542,7 +5542,7 @@ INCLUDE_ASM("ai/rider", cRider_OnInSeqUpdate);
 #ifdef SKIP_ASM
 extern "C" void GetSSXActorFrame(int, void*);
 extern "C" void cRider_DoInSeqAnimUpdate(void*, void*, float, float, int);
-extern "C" void cRider_DoInSeqSoundUpdate(void*, void*, float, float, int);
+extern "C" void cRider_DoInSeqSoundUpdate(cRider*, void*, float, float, int);
 
 /**
  * Per-frame update from the in-sequence script player while the rider is in an NIS.
@@ -6804,7 +6804,7 @@ struct sSfxEnt_5448 {
  * @param frameDelta  frames advanced (On Tour frameDelta); unused
  * @param flags  On Tour eventBits: bit 0 key event, bit 1 sequence ended
  */
-extern "C" void cRider_DoInSeqSoundUpdate(void* vself, void* vobj, float when, float frameDelta, int flags)
+extern "C" void cRider_DoInSeqSoundUpdate(cRider* vself, void* vobj, float when, float frameDelta, int flags)
 {
     cRider* self = (cRider*)vself;
     char* obj = (char*)vobj;

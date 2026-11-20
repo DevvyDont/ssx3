@@ -119,12 +119,12 @@ extern "C" void cAI_AIStateUpdate(cAI* self) {
     if (self->PreviousAIState != self->CurrentAIState) {
         cAIState_3C20 *prev = (cAIState_3C20*)self->PreviousAIStateHandler;
         if (prev != 0)
-            prev->m1(((char*)self));
-        ((cAIState_3C20*)self->CurrentAIStateHandler)->m0(((char*)self));
+            prev->m1((char*)self);
+        ((cAIState_3C20*)self->CurrentAIStateHandler)->m0((char*)self);
         self->PreviousAIStateHandler = 0;
         self->PreviousAIState = self->CurrentAIState;
     }
-    ((cAIState_3C20*)self->CurrentAIStateHandler)->m2(((char*)self));
+    ((cAIState_3C20*)self->CurrentAIStateHandler)->m2((char*)self);
 }
 #endif
 
@@ -379,17 +379,17 @@ static inline float Clamp_3E80(float v, float lo, float hi)
  *
  * @param desLean  the desired lean (the steering input)
  */
-extern "C" void cRider_setupLean(char *self, float desLean) {
-    float speedScale = Len_3E80(*(sV4_3E80 *)(self + 0x1E0)) / 694.538818359375f;
+extern "C" void cRider_setupLean(cRider* self, float desLean) {
+    float speedScale = Len_3E80(*(sV4_3E80*)&self->mVelocity) / 694.538818359375f;
     if (speedScale < 1.0f)
         desLean = desLean * speedScale;
-    float rawRate = Abs_3E80(desLean - *(float *)(self + 0x1F0)) * 12.002403259277344f;
+    float rawRate = Abs_3E80(desLean - self->mSlewed[0].cur) * 12.002403259277344f;
     float leanRate = Clamp_3E80(rawRate, 0.10000000149011612f, 14.001209259033203f);
-    int st = *(int *)(self + 0x438);
+    int st = self->mSurfaceType;
     if (st == 2 || st == 3 || st == 13)
         leanRate = leanRate * 0.7561339735984802f;
-    *(float *)(self + 0x1F8) = desLean;
-    *(float *)(self + 0x1F4) = leanRate * 0.01666666753590107f;
+    self->mSlewed[0].target = desLean;
+    self->mSlewed[0].rate = leanRate * 0.01666666753590107f;
 }
 #endif
 
@@ -419,11 +419,11 @@ static inline float Clamp_3F38(float v, float lo, float hi)
  *
  * @param desBal  the desired balance (the stick input)
  */
-extern "C" void cRider_setupRailBalance(void *self, float desBal) {
-    float rawRate = Abs_3F38(desBal - *(float *)((char*)self + 0x22C)) * 7.0f;
+extern "C" void cRider_setupRailBalance(cRider* self, float desBal) {
+    float rawRate = Abs_3F38(desBal - self->mSlewed[5].cur) * 7.0f;
     float desRate = Clamp_3F38(rawRate, 0.1f, 8.0f);
-    *(float *)((char*)self + 0x234) = desBal;
-    *(float *)((char*)self + 0x230) = desRate * 0.01666666753590107f;
+    self->mSlewed[5].target = desBal;
+    self->mSlewed[5].rate = desRate * 0.01666666753590107f;
 }
 #endif
 
@@ -491,35 +491,35 @@ static inline float flipBackwards_3F88(float b, char *self, float th)
  * @param desCrouch  the desired crouch, 0..1
  * @param desBrake  the desired brake, 0..1
  */
-extern "C" void cRider_setupCrouchBrake(char *self, float desCrouch, float desBrake) {
-    if (0.0f < desCrouch && *(float *)(self + 0x214) != 0.0f) {
-        *(float *)(self + 0x21C) = 0.0f;
-        *(float *)(self + 0x218) = 0.04166241362690926f;
+extern "C" void cRider_setupCrouchBrake(cRider* self, float desCrouch, float desBrake) {
+    if (0.0f < desCrouch && self->mSlewed[3].cur != 0.0f) {
+        self->mSlewed[3].target = 0.0f;
+        self->mSlewed[3].rate = 0.04166241362690926f;
         return;
     }
-    if (0.0f < desBrake && *(float *)(self + 0x220) != 0.0f) {
-        *(float *)(self + 0x228) = 0.0f;
-        *(float *)(self + 0x224) = 0.10000182688236237f;
+    if (0.0f < desBrake && self->mSlewed[4].cur != 0.0f) {
+        self->mSlewed[4].target = 0.0f;
+        self->mSlewed[4].rate = 0.10000182688236237f;
         return;
     }
-    if (0.0f < desCrouch && *(float *)(self + 0x214) != 0.0f) {
+    if (0.0f < desCrouch && self->mSlewed[3].cur != 0.0f) {
         desCrouch = 0.0f;
     }
-    float crouchDelta = Abs_3F88(desCrouch - *(float *)(self + 0x220));
+    float crouchDelta = Abs_3F88(desCrouch - self->mSlewed[4].cur);
     float crouchRate = (0.1f <= crouchDelta) ? crouchDelta * 0.10000182688236237f : 0.010000183247029781f;
-    *(float *)(self + 0x228) = desCrouch;
-    *(float *)(self + 0x224) = crouchRate;
+    self->mSlewed[4].target = desCrouch;
+    self->mSlewed[4].rate = crouchRate;
     if (0.0f < desBrake) {
-        if (0.0f < *(float *)(self + 0x220)) {
+        if (0.0f < self->mSlewed[4].cur) {
             desBrake = 0.0f;
-        } else if (vu0Dot_3F88(*(sVec4_3F88 *)(self + 0x1E0), *(sVec4_3F88 *)(self + 0x3A0)) < 0.0f) {
+        } else if (vu0Dot_3F88(*(sVec4_3F88*)&self->mVelocity, *(sVec4_3F88*)&self->mGroundForward) < 0.0f) {
             desBrake = 0.0f;
         }
     }
-    desBrake = flipBackwards_3F88(desBrake, self, 0.1f);
-    float brakeDelta = Clamp_3F88(Abs_3F88(desBrake - *(float *)(self + 0x214)), 0.1f, 1.0f);
-    *(float *)(self + 0x21C) = desBrake;
-    *(float *)(self + 0x218) = brakeDelta * 0.04166241362690926f;
+    desBrake = flipBackwards_3F88(desBrake, ((char*)self), 0.1f);
+    float brakeDelta = Clamp_3F88(Abs_3F88(desBrake - self->mSlewed[3].cur), 0.1f, 1.0f);
+    self->mSlewed[3].target = desBrake;
+    self->mSlewed[3].rate = brakeDelta * 0.04166241362690926f;
 }
 #endif
 
@@ -546,27 +546,27 @@ extern "C" void func_002992D8(int mgr, char* rider);
  * @param isHeld  nonzero while the boost button is held
  * @param isPressed  nonzero on the frame the boost button is pressed
  */
-extern "C" void cRider_setupBoostWarp(char* rider, int isHeld, int isPressed)
+extern "C" void cRider_setupBoostWarp(cRider* rider, int isHeld, int isPressed)
 {
-    if (isPressed) cCheatFX_setCheatInput(*(char**)(rider + 0x77C) + 0xD20, 0);
+    if (isPressed) cCheatFX_setCheatInput((char*)rider->mRiderHandler + 0xD20, 0);
     if (isHeld) {
-        if (*(float*)(rider + 0x2F8) > 0.0f) {
-            if (*(float*)(rider + 0x2FC) == 0.0f) {
-                float x = *(float*)(rider + 0x2F8);
-                if (x > 0.6666666865348816f) *(float*)(rider + 0x2FC) = 1.0f;
-                else if (x > 0.3333333432674408f) *(float*)(rider + 0x2FC) = 0.625f;
-                else *(float*)(rider + 0x2FC) = 0.25f;
-                func_00298D90(cAudioInterface_bxAudio(), rider, isPressed);
+        if (rider->unk_2F8 > 0.0f) {
+            if (rider->mBoostStrength == 0.0f) {
+                float x = rider->unk_2F8;
+                if (x > 0.6666666865348816f) rider->mBoostStrength = 1.0f;
+                else if (x > 0.3333333432674408f) rider->mBoostStrength = 0.625f;
+                else rider->mBoostStrength = 0.25f;
+                func_00298D90(cAudioInterface_bxAudio(), ((char*)rider), isPressed);
             }
-            if (*(float*)(rider + 0x2E8) == 0.0f && *(int*)(rider + 0x304) != 0 && *(int*)(rider + 0x2F4) < 10) {
-                *(float*)(rider + 0x2F8) -= 0.00150679936632514f;
+            if (rider->mPowerUpBoostTimer == 0.0f && rider->mBoostMode != 0 && rider->mUberLevel < 10) {
+                rider->unk_2F8 -= 0.00150679936632514f;
             }
             return;
         }
-        if (isPressed) cSSXAudio_TurboDeny(cAudioInterface_bxAudio(), rider);
+        if (isPressed) cSSXAudio_TurboDeny(cAudioInterface_bxAudio(), ((char*)rider));
     }
-    if (*(float*)(rider + 0x2FC) > 0.0f) func_002992D8(cAudioInterface_bxAudio(), rider);
-    *(float*)(rider + 0x2FC) = 0.0f;
+    if (rider->mBoostStrength > 0.0f) func_002992D8(cAudioInterface_bxAudio(), ((char*)rider));
+    rider->mBoostStrength = 0.0f;
 }
 #endif
 
@@ -1011,7 +1011,7 @@ extern "C" int cRider_isChangeFakieGround_i(char* rider)
 INCLUDE_ASM("seg/seg_14B10", cRider_isChangeFakieAir);
 #ifdef SKIP_ASM
 extern "C" void cRider_updateOrientationImplicit(cRider* self);
-extern "C" void cRider_doChangeFakie(char* s);
+extern "C" void cRider_doChangeFakie(cRider* s);
 extern "C" void cAirPredictor_startLaunchIntoAir(cAirPredictor* ap, t4Vector* pos, t4Vector* vel, float t);
 extern float D_004A0EA8[];
 extern t4Vector D_004FF130_4DB8 __asm__("t4vect_Origin");
@@ -1219,7 +1219,7 @@ extern "C" int cRider_isChangeFakieAir(cRider* rider)
         AddEq_4DB8(rider->mPosition, Rot_4DB8(rider->mRotation, Scale_4DB8(off, 2.0f)));
     }
     cRider_updateOrientationImplicit(rider);
-    cRider_doChangeFakie((char*)rider);
+    cRider_doChangeFakie(rider);
     cAirPredictor_startLaunchIntoAir(rider->mAirPredictor, &rider->mPosition, &rider->mVelocity, 3333.33349609375f);
     return 1;
 }
@@ -1280,28 +1280,28 @@ static inline Q_5168 Scale_5168(const Q_5168& v, float s)
  *
  * @param rider  the rider (this)
  */
-extern "C" void cRider_doChangeFakie(char* rider)
+extern "C" void cRider_doChangeFakie(cRider* rider)
 {
-    *(int*)(rider + 0x320) ^= 1;
-    cRiderAnimBase_changeHeadingOffset(*(void**)(rider + 0x784), 3.1415927410125732f);
-    if (*(int*)(rider + 0x320)) {
-        SetHeading_5168(*(char**)(rider + 0x784), 3.1415927410125732f);
+    rider->IsRidingFakie ^= 1;
+    cRiderAnimBase_changeHeadingOffset(rider->mRiderAnim, 3.1415927410125732f);
+    if (rider->IsRidingFakie) {
+        SetHeading_5168((char*)rider->mRiderAnim, 3.1415927410125732f);
     } else {
-        SetHeading_5168(*(char**)(rider + 0x784), 0.0f);
+        SetHeading_5168((char*)rider->mRiderAnim, 0.0f);
     }
-    *(int*)(*(char**)(rider + 0x784) + 0x18) = *(int*)(rider + 0x320);
-    *(Q_5168*)(rider + 0x3A0) = Scale_5168(*(Q_5168*)(rider + 0x3A0), -1.0f);
-    *(Q_5168*)(rider + 0x3B0) = Scale_5168(*(Q_5168*)(rider + 0x3B0), -1.0f);
-    *(float*)(rider + 0x1F0) = -*(float*)(rider + 0x1F0);
-    *(float*)(rider + 0x1F8) = -*(float*)(rider + 0x1F8);
-    *(float*)(rider + 0x214) = -*(float*)(rider + 0x214);
-    *(float*)(rider + 0x21C) = -*(float*)(rider + 0x21C);
-    *(float*)(rider + 0x208) = -*(float*)(rider + 0x208);
-    *(float*)(rider + 0x210) = -*(float*)(rider + 0x210);
-    *(float*)(rider + 0x1FC) = -*(float*)(rider + 0x1FC);
-    *(float*)(rider + 0x204) = -*(float*)(rider + 0x204);
-    *(float*)(rider + 0x280) = -*(float*)(rider + 0x280);
-    *(float*)(rider + 0x288) = -*(float*)(rider + 0x288);
+    *(int*)((char*)rider->mRiderAnim + 0x18) = rider->IsRidingFakie;
+    *(Q_5168*)&rider->mGroundForward = Scale_5168(*(Q_5168*)&rider->mGroundForward, -1.0f);
+    *(Q_5168*)&rider->mGroundSide = Scale_5168(*(Q_5168*)&rider->mGroundSide, -1.0f);
+    rider->mSlewed[0].cur = -rider->mSlewed[0].cur;
+    rider->mSlewed[0].target = -rider->mSlewed[0].target;
+    rider->mSlewed[3].cur = -rider->mSlewed[3].cur;
+    rider->mSlewed[3].target = -rider->mSlewed[3].target;
+    rider->mSlewed[2].cur = -rider->mSlewed[2].cur;
+    rider->mSlewed[2].target = -rider->mSlewed[2].target;
+    rider->mSlewed[1].cur = -rider->mSlewed[1].cur;
+    rider->mSlewed[1].target = -rider->mSlewed[1].target;
+    rider->mSlewed[12].cur = -rider->mSlewed[12].cur;
+    rider->mSlewed[12].target = -rider->mSlewed[12].target;
 }
 #endif
 
@@ -1363,19 +1363,19 @@ extern "C" void cRider_doRailslideModeOrientation(cRider* self)
         if (self->IsRidingFakie == 0) {
             self->mRotation = QuatMul_5358(Q_5358(V3_5358(self->mMatrix.row[2]), 0.0f), self->mRotation);
             cRider_updateOrientationImplicit(self);
-            cRider_doChangeFakie((char*)self);
+            cRider_doChangeFakie(self);
         }
     } else if (state == 1) {
         if (self->IsRidingFakie != 0) {
             self->mRotation = QuatMul_5358(Q_5358(V3_5358(self->mMatrix.row[2]), 0.0f), self->mRotation);
             cRider_updateOrientationImplicit(self);
-            cRider_doChangeFakie((char*)self);
+            cRider_doChangeFakie(self);
         }
     } else {
         if (self->IsRidingFakie != 0) {
             self->mRotation = QuatMul_5358(Q_5358(V3_5358(self->mMatrix.row[2]), 0.0f), self->mRotation);
             cRider_updateOrientationImplicit(self);
-            cRider_doChangeFakie((char*)self);
+            cRider_doChangeFakie(self);
         }
         if (self->RailslideMode == 4) {
             cRider_rotateOrientation_5358(self, *(Q_5168*)&self->mMatrix.row[2], 1.5707964f);
@@ -1433,33 +1433,33 @@ static inline void SetHeading_5640(char* a, float angle)
  * func_00116930 runs (an empty stub: On Tour verifyRailslideModeDEBUG).
  */
 // Finishes a pending turn-around request (state 3 = left, 4 = right) of the rider.
-extern "C" void cRider_undoRailslideModeOrientation(char* self)
+extern "C" void cRider_undoRailslideModeOrientation(cRider* self)
 {
-    if (*(int*)(self + 0x328) == 0)
+    if (self->RailslideMode == 0)
         return;
-    if (cRider_getMotionState(self) == 1) {
-        if (*(int*)(self + 0x328) == 3 || *(int*)(self + 0x328) == 4)
-            SetHeading_5640(*(char**)(self + 0x784), 0.0f);
-        if (*(int*)(self + 0x328) == 3)
-            cRiderAnimBase_play(*(void**)(self + 0x784), 282, 0, -1.0f);
-        else if (*(int*)(self + 0x328) == 4)
-            cRiderAnimBase_play(*(void**)(self + 0x784), 277, 0, -1.0f);
+    if (cRider_getMotionState((char*)self) == 1) {
+        if (self->RailslideMode == 3 || self->RailslideMode == 4)
+            SetHeading_5640((char*)self->mRiderAnim, 0.0f);
+        if (self->RailslideMode == 3)
+            cRiderAnimBase_play(self->mRiderAnim, 282, 0, -1.0f);
+        else if (self->RailslideMode == 4)
+            cRiderAnimBase_play(self->mRiderAnim, 277, 0, -1.0f);
         else
-            cRiderAnimBase_play(*(void**)(self + 0x784), 268, 0, -1.0f);
-    } else if (cRider_getMotionState(self) == 0) {
-        if (*(int*)(self + 0x328) == 3) {
-            cRider_rotateOrientation(self, *(Q_5640*)(self + 0x1C0), 1.5707964f);
-            cRiderAnimBase_changeHeadingOffset(*(void**)(self + 0x784), 1.5707964f);
-            SetHeading_5640(*(char**)(self + 0x784), 0.0f);
-        } else if (*(int*)(self + 0x328) == 4) {
-            cRider_rotateOrientation(self, *(Q_5640*)(self + 0x1C0), -1.5707964f);
-            cRiderAnimBase_changeHeadingOffset(*(void**)(self + 0x784), -1.5707964f);
-            SetHeading_5640(*(char**)(self + 0x784), 0.0f);
+            cRiderAnimBase_play(self->mRiderAnim, 268, 0, -1.0f);
+    } else if (cRider_getMotionState((char*)self) == 0) {
+        if (self->RailslideMode == 3) {
+            cRider_rotateOrientation(((char*)self), *(Q_5640*)&self->mMatrix.row[2], 1.5707964f);
+            cRiderAnimBase_changeHeadingOffset(self->mRiderAnim, 1.5707964f);
+            SetHeading_5640((char*)self->mRiderAnim, 0.0f);
+        } else if (self->RailslideMode == 4) {
+            cRider_rotateOrientation(((char*)self), *(Q_5640*)&self->mMatrix.row[2], -1.5707964f);
+            cRiderAnimBase_changeHeadingOffset(self->mRiderAnim, -1.5707964f);
+            SetHeading_5640((char*)self->mRiderAnim, 0.0f);
         }
-        cRiderAnimBase_play(*(void**)(self + 0x784), 5, 0, -1.0f);
+        cRiderAnimBase_play(self->mRiderAnim, 5, 0, -1.0f);
     }
-    *(int*)(self + 0x328) = 0;
-    func_00116930_p(self);
+    self->RailslideMode = 0;
+    func_00116930_p((char*)self);
 }
 #endif
 
@@ -1525,7 +1525,7 @@ static inline float Clamp_58B8(float v, float lo, float hi)
  * @param step  the angle increment in radians (On Tour rad)
  * @param eps  the dead zone (On Tour deadZone)
  */
-extern "C" void cRider_snapAxisIncrement(void* self, float* y, float* x, float step, float eps)
+extern "C" void cRider_snapAxisIncrement(cRider* self, float* y, float* x, float step, float eps)
 {
     float px, py, len, ang, steps, rounded;
     float sc[2];
@@ -1560,8 +1560,8 @@ extern "C" float cBECharacterInterface_getScale(int, int);
  * @param self  the rider
  * @return the knee offset
  */
-extern "C" float cRider_getStartGateKneeOffset(void *self) {
-    return (cBECharacterInterface_getScale(cBE_getInterface__Fv(cBE_getBE(), 2), (*(int *)((char*)(self) + (0x86C)))) * -90.0f) + 75.0f;
+extern "C" float cRider_getStartGateKneeOffset(cRider* self) {
+    return (cBECharacterInterface_getScale(cBE_getInterface__Fv(cBE_getBE(), 2), (self->mAIIndex)) * -90.0f) + 75.0f;
 }
 #endif
 
@@ -1605,58 +1605,58 @@ static inline float vAbs_115B58(float x)
  * types 1 and 2 also cue func_0029FF80), 0x13A for type 4, and 0x13E for types 5 and 6 when |mSlewed[1].cur| < 0.75 and
  * the control state is 0. The reaction is then cleared (type 0, tick -1), also when it is older than 180 ticks.
  */
-extern "C" void cRider_checkForReaction(char* self)
+extern "C" void cRider_checkForReaction(cRider* self)
 {
-    if (*(int*)(self + 0x358) == 0) {
+    if (self->ReactionEventType == 0) {
         return;
     }
-    if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(self + 0x784), 2) == 5) {
+    if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 2) == 5) {
         return;
     }
-    if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(self + 0x784), 1) != 0) {
+    if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 1) != 0) {
         return;
     }
-    if (cRiderAnimBase_getCurrentAnimCategory(*(void**)(self + 0x784), 2) == 10) {
+    if (cRiderAnimBase_getCurrentAnimCategory(self->mRiderAnim, 2) == 10) {
         return;
     }
-    int delTick = AITick() - *(int*)(self + 0x354);
+    int delTick = AITick() - self->ReactionEventTick;
     if (delTick < 180) {
         if (delTick < 0) {
             return;
         }
-        switch (*(int*)(self + 0x358)) {
+        switch (self->ReactionEventType) {
         case 1:
-            *(long*)(*(char**)(self + 0x784) + 0x20) = *(long*)(self + 0x8C8);
-            cRiderAnimBase_play(*(void**)(self + 0x784), 315, 0, -1.0f);
-            *(long*)(*(char**)(self + 0x784) + 0x20) = -1;
-            func_0029FF80(cAudioInterface_bxAudio(), self, 0);
+            *(long*)((char*)self->mRiderAnim + 0x20) = *(long*)(((char*)self) + 0x8C8);
+            cRiderAnimBase_play(self->mRiderAnim, 315, 0, -1.0f);
+            *(long*)((char*)self->mRiderAnim + 0x20) = -1;
+            func_0029FF80(cAudioInterface_bxAudio(), ((char*)self), 0);
             break;
         case 2:
-            *(long*)(*(char**)(self + 0x784) + 0x20) = *(long*)(self + 0x8C8);
-            cRiderAnimBase_play(*(void**)(self + 0x784), 315, 0, -1.0f);
-            *(long*)(*(char**)(self + 0x784) + 0x20) = -1;
-            func_0029FF80(cAudioInterface_bxAudio(), self, 1);
+            *(long*)((char*)self->mRiderAnim + 0x20) = *(long*)(((char*)self) + 0x8C8);
+            cRiderAnimBase_play(self->mRiderAnim, 315, 0, -1.0f);
+            *(long*)((char*)self->mRiderAnim + 0x20) = -1;
+            func_0029FF80(cAudioInterface_bxAudio(), ((char*)self), 1);
             break;
         case 3:
-            *(long*)(*(char**)(self + 0x784) + 0x20) = *(long*)(self + 0x8C8);
-            cRiderAnimBase_play(*(void**)(self + 0x784), 315, 0, -1.0f);
-            *(long*)(*(char**)(self + 0x784) + 0x20) = -1;
+            *(long*)((char*)self->mRiderAnim + 0x20) = *(long*)(((char*)self) + 0x8C8);
+            cRiderAnimBase_play(self->mRiderAnim, 315, 0, -1.0f);
+            *(long*)((char*)self->mRiderAnim + 0x20) = -1;
             break;
         case 4:
-            *(long*)(*(char**)(self + 0x784) + 0x20) = *(long*)(self + 0x8C8);
-            cRiderAnimBase_play(*(void**)(self + 0x784), 314, 0, -1.0f);
-            *(long*)(*(char**)(self + 0x784) + 0x20) = -1;
+            *(long*)((char*)self->mRiderAnim + 0x20) = *(long*)(((char*)self) + 0x8C8);
+            cRiderAnimBase_play(self->mRiderAnim, 314, 0, -1.0f);
+            *(long*)((char*)self->mRiderAnim + 0x20) = -1;
             break;
         case 5:
         case 6:
-            if (vAbs_115B58(*(float*)(self + 0x1FC)) < 0.75f && cRider_getControlState(self) == 0) {
-                cRiderAnimBase_play(*(void**)(self + 0x784), 318, 0, -1.0f);
+            if (vAbs_115B58(self->mSlewed[1].cur) < 0.75f && cRider_getControlState((char*)self) == 0) {
+                cRiderAnimBase_play(self->mRiderAnim, 318, 0, -1.0f);
             }
             break;
         }
     }
-    *(int*)(self + 0x358) = 0;
-    *(int*)(self + 0x354) = -1;
+    self->ReactionEventType = 0;
+    self->ReactionEventTick = -1;
 }
 #endif
 
@@ -1848,22 +1848,22 @@ void cRider_setControlState_61D0(void* self, int on) __asm__("cRider_setControlS
  * @param dir  the press input (On Tour boardPress): its sign picks the press
  * @return 1 when a press started, else 0
  */
-extern "C" int cRider_checkForBoardPress(char* rider, float dir)
+extern "C" int cRider_checkForBoardPress(cRider* rider, float dir)
 {
     int st;
     if (dir == 0.0f) return 0;
-    if (*(int*)(rider + 0x328) == 3 || *(int*)(rider + 0x328) == 4) return 0;
-    if (!cRider_getMotionState(rider)) {
-        if (Dot4_61D0(*(V4_61D0*)(rider + 0x1E0), *(V4_61D0*)(rider + 0x3A0)) < 0.0f) return 0;
+    if (rider->RailslideMode == 3 || rider->RailslideMode == 4) return 0;
+    if (!cRider_getMotionState((char*)rider)) {
+        if (Dot4_61D0(*(V4_61D0*)&rider->mVelocity, *(V4_61D0*)&rider->mGroundForward) < 0.0f) return 0;
     }
     if (dir > 0.0f) {
-        cRiderAnimBase_play_61D0(*(void**)(rider + 0x784), 0x18, 0, -1.0f);
-        *(int*)(rider + 0x330) = 1;
+        cRiderAnimBase_play_61D0(rider->mRiderAnim, 0x18, 0, -1.0f);
+        rider->PressMode = 1;
     } else {
-        cRiderAnimBase_play_61D0(*(void**)(rider + 0x784), 0x20, 0, -1.0f);
-        *(int*)(rider + 0x330) = 2;
+        cRiderAnimBase_play_61D0(rider->mRiderAnim, 0x20, 0, -1.0f);
+        rider->PressMode = 2;
     }
-    cRider_setControlState_61D0(rider, 1);
+    cRider_setControlState_61D0(((char*)rider), 1);
     return 1;
 }
 #endif
@@ -1888,16 +1888,16 @@ extern "C" void cCheatFX_setCheatInput(char *, int);
  * @param isJumpPressed  nonzero on the frame the jump button is pressed
  * @return 1 when the prewind started, else 0
  */
-extern "C" int cRider_checkForPrewind(char *self, int isJumpHeld, int isJumpPressed) {
+extern "C" int cRider_checkForPrewind(cRider* self, int isJumpHeld, int isJumpPressed) {
     if (isJumpPressed != 0)
-        cCheatFX_setCheatInput(*(char **)(self + 0x77C) + 0xD20, 1);
-    if ((*(float *)(self + 0x360) == 0.0f && isJumpHeld != 0) || isJumpPressed != 0) {
-        if (cRider_getControlState_62C8(self) == 1)
-            cBoardPressControl_forceExit(*(char **)(self + 0x77C) + 0x1D0);
-        cRider_setControlState_62C8(self, 2);
+        cCheatFX_setCheatInput((char*)self->mRiderHandler + 0xD20, 1);
+    if ((*(float *)(((char*)self) + 0x360) == 0.0f && isJumpHeld != 0) || isJumpPressed != 0) {
+        if (cRider_getControlState_62C8((char*)self) == 1)
+            cBoardPressControl_forceExit((char*)self->mRiderHandler + 0x1D0);
+        cRider_setControlState_62C8(((char*)self), 2);
         return 1;
     }
-    *(float *)(self + 0x360) = 1.0f;
+    *(float *)(((char*)self) + 0x360) = 1.0f;
     return 0;
 }
 #endif
