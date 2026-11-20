@@ -49,7 +49,7 @@ INCLUDE_ASM("seg/seg_156860", cCommSystem_cCommSystem);
 extern "C" void ccs_5698(void *) __asm__("MUTEX_create");
 extern "C" void ccs_6448(void *, int, int) __asm__("MEM_fill");
 extern "C" void *ccs_new(unsigned int, void *, unsigned int, int) __asm__("operator_new__FUi");
-extern "C" void ccs_3B18(void *) __asm__("func_003F3B18");
+extern "C" void ccs_3B18(void *) __asm__("NetConnStartup");
 extern char str_Comm_pool[];
 extern char str_www_ea_com[];
 extern int cCommSystem_mNumNetConn;
@@ -60,7 +60,7 @@ extern "C" int *cCommSystem_cCommSystem_(int *self) __asm__("cCommSystem_cCommSy
  * Creates the pool mutex, allocates the zeroed 0xFC00-byte "Comm pool" and links its 256 tCommMsgElem entries
  * into the free list, clears the channel slot and cCommSystem_mNumNetConn, sets mActiveNetConn to -1 and
  * mNetConnState and mInterfaceType to 1, then sends the IOP's 'netw'/'crea' request
- * (func_003F3B18("www.ea.com")).
+ * (NetConnStartup("www.ea.com")).
  *
  * @return self
  */
@@ -149,8 +149,8 @@ INCLUDE_ASM("seg/seg_156860", func_00255A20);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void NetConnIdle(void);
-extern "C" int func_003F3CC0_5A20(int sel, int a, int b) __asm__("func_003F3CC0");
-extern "C" int func_003F3C50(void* params, int a);
+extern "C" int NetConnStatus_5A20(int sel, int a, int b) __asm__("NetConnStatus");
+extern "C" int NetConnConnect(void* params, int a);
 extern "C" void func_00255FE8(void* self, int reason);
 extern "C" void func_00256038(void* self, int* out);
 // cCommSystem_mNetConns: the 'netw'/'list' reply buffer (func_00255F20), 10 entries of 0x100 bytes; +0x80 is an entry's name field
@@ -188,22 +188,22 @@ extern "C" void func_00255A20(sComm_5A20* self)
     case 6:
         break;
     case 2:
-        if (func_003F3CC0_5A20(0x6F6E6C6E, 0, 0) == 0) {
-            func_003F3C50(cCommSystem_mNetConns + 0x80 + (self->index << 8), 0);
+        if (NetConnStatus_5A20(0x6F6E6C6E, 0, 0) == 0) {
+            NetConnConnect(cCommSystem_mNetConns + 0x80 + (self->index << 8), 0);
             self->state = 3;
         }
         break;
     case 3: {
-        if (func_003F3CC0_5A20(0x6F6E6C6E, 0, 0) != 0 && func_003F3CC0_5A20(0x686F7374, 0, 0) != 0) {
+        if (NetConnStatus_5A20(0x6F6E6C6E, 0, 0) != 0 && NetConnStatus_5A20(0x686F7374, 0, 0) != 0) {
             self->state = 4;
             self->timer = 1800;
-            self->type = func_003F3CC0_5A20(0x74797065, 0, 0);
-            int bb = func_003F3CC0_5A20(0x62626E64, 0, 0);
+            self->type = NetConnStatus_5A20(0x74797065, 0, 0);
+            int bb = NetConnStatus_5A20(0x62626E64, 0, 0);
             if (bb == 1) {
                 self->bband = bb;
             }
         }
-        int conn = func_003F3CC0_5A20(0x636F6E6E, 0, 0);
+        int conn = NetConnStatus_5A20(0x636F6E6E, 0, 0);
         if ((conn >> 24) == '-') {
             func_00255FE8(self, conn);
             self->timer = 0;
@@ -398,12 +398,12 @@ extern "C" void func_00255EC0(void *pool, void *node) {
 INCLUDE_ASM("seg/seg_156860", func_00255F20);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_003F3BC8_5F20(int, void *, int) __asm__("func_003F3BC8");
+extern "C" int NetConnQuery_5F20(int, void *, int) __asm__("NetConnQuery");
 extern char cCommSystem_mNetConns[];
 extern int cCommSystem_mNumNetConn;
 
 extern "C" int func_00255F20(void *arg0, int arg1) {
-    cCommSystem_mNumNetConn = func_003F3BC8_5F20(arg1, cCommSystem_mNetConns, 10);
+    cCommSystem_mNumNetConn = NetConnQuery_5F20(arg1, cCommSystem_mNetConns, 10);
     return 1;
 }
 #endif
@@ -426,12 +426,12 @@ extern "C" void func_00255F50(void *commSystem, int configIndex) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00255FA0);
 #ifdef SKIP_ASM
-extern "C" void func_003F40B8();
+extern "C" void NetConnDisconnect();
 
 extern "C" void func_00255FA0(void *commSystem) {
     if ((*(int *)((char*)(commSystem) + (0x1C))) >= 0) {
         (*(int *)((char*)(commSystem) + (0x1C))) = -1;
-        func_003F40B8();
+        NetConnDisconnect();
     }
     (*(int *)((char*)(commSystem) + (0x24))) = 0;
     (*(int *)((char*)(commSystem) + (0x20))) = 1;
@@ -442,12 +442,12 @@ extern "C" void func_00255FA0(void *commSystem) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00255FE8);
 #ifdef SKIP_ASM
-extern "C" void func_003F40B8();
+extern "C" void NetConnDisconnect();
 
 extern "C" void func_00255FE8(void *commSystem, int errorCode) {
     if ((*(int *)((char*)(commSystem) + (0x1C))) >= 0) {
         (*(int *)((char*)(commSystem) + (0x1C))) = -1;
-        func_003F40B8();
+        NetConnDisconnect();
     }
     (*(int *)((char*)(commSystem) + (0x28))) = errorCode;
     (*(int *)((char*)(commSystem) + (0x20))) = 6;
@@ -459,13 +459,13 @@ extern "C" void func_00255FE8(void *commSystem, int errorCode) {
 INCLUDE_ASM("seg/seg_156860", func_00256038);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_003F3CC0_6038(int, int, int) __asm__("func_003F3CC0");
+extern "C" int NetConnStatus_6038(int, int, int) __asm__("NetConnStatus");
 
 extern "C" void func_00256038(void *commSystem, int *localAddr) {
     int temp_2;
 
     *localAddr = 0;
-    temp_2 = func_003F3CC0_6038(0x61646472, 0, 0);
+    temp_2 = NetConnStatus_6038(0x61646472, 0, 0);
     if (temp_2 & 0xFFFFFF00) {
         *localAddr = temp_2;
     }
@@ -607,7 +607,7 @@ INCLUDE_ASM("seg/seg_156860", func_002562D0);
 struct sKey_62D0 { int a; int b; };
 extern sKey_62D0 D_004A2ED8;
 extern "C" void MEM_fill_62D0(void *, int, int) __asm__("MEM_fill");
-extern "C" char *func_003F3F78();
+extern "C" char *NetConnMAC();
 extern "C" void func_003FD0D8(void *);
 extern "C" char *strcpy(char *, const char *);
 
@@ -621,7 +621,7 @@ extern "C" void func_002562D0(int *self)
     self[35] = 0;
     *(sKey_62D0 *)(self + 0x1D) = D_004A2ED8;
     self[33] = 8;
-    strcpy((char *)(self + 0x26), func_003F3F78());
+    strcpy((char *)(self + 0x26), NetConnMAC());
     strcpy((char *)(self + 0x2A), "SLUS_20772");
     self[46] = 0;
     self[47] = self[8];

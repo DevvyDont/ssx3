@@ -1718,7 +1718,7 @@ extern void* online_Event_vtbl[];
 extern int D_004A3018;
 extern "C" void func_0025A948(LobbyMan* self);
 extern "C" void func_003E8260(void* p, int a, int timeout, void* cb, void* user);
-extern "C" int func_003F3A98(void* p, int a);
+extern "C" int SocketLookup(void* p, int a);
 extern "C" void func_00268BA8(void* self, void* a1, int a2);
 
 struct sMsgListNodeB6D8 {
@@ -1752,7 +1752,7 @@ static inline sMsgListIterB6D8 sMsgListB6D8_insert(sMsgListIterB6D8 pos, void* c
  * Creates the LobbyApi first if needed (func_0025A948) and stores @p conn in unk_014. With @p conn set it reuses the
  * address cached in D_004A3018: enters mState 3 with a 30-second mTimeout, stores mServerAddr and connects on port
  * 11000 (func_003E8260, reply thunk func_00268BA8). Otherwise it enters mState 2 and starts a host lookup of
- * mServerName with func_003F3A98() into mpHostLookup (func_0025AC50() polls it). Either way posts a type-200 event.
+ * mServerName with SocketLookup() into mpHostLookup (func_0025AC50() polls it). Either way posts a type-200 event.
  *
  * @param conn  nonzero to connect to the cached server address, 0 to look the server name up first
  */
@@ -1770,7 +1770,7 @@ extern "C" void func_0025B6D8(LobbyMan* self, int conn)
         func_003E8260(self->mpLobbyApi, serverAddr, 11000, (void*)func_00268BA8, ((char*)self));
     } else {
         *(int*)self = 2;
-        self->mpHostLookup = (void*)func_003F3A98(self->mServerName, 0);
+        self->mpHostLookup = (void*)SocketLookup(self->mServerName, 0);
     }
     int type = 200;
     int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
@@ -2511,7 +2511,7 @@ extern void* D_004A33F0;
 extern void* D_004A33F4;
 extern "C" void func_00268C70();
 extern "C" int cDirtysock_tag_TagFieldSetNumber(char* buf, int size, const char* key, int value);
-extern "C" const char* func_003F3F78();
+extern "C" const char* NetConnMAC();
 void* func_00266F38(void* self);
 
 struct sMsgListNodeC610 {
@@ -2553,7 +2553,7 @@ struct sDsSlotC610 {
 /**
  * Sends the lobby login ('auth') request with the account name, password and hardware flags.
  *
- * Builds a 0x200-byte tag record: NAME = mUserName, PASS = mPassword, TOS = 1, MID = func_003F3F78()'s hex string (from
+ * Builds a 0x200-byte tag record: NAME = mUserName, PASS = mPassword, TOS = 1, MID = NetConnMAC()'s hex string (from
  * the 'macx' query), PID = "SSX-PS2-2004", then HWFLAG and HWMASK. When cCommSystem_mCommSystem->mInterfaceType is not
  * 1, HWFLAG gets its bit 0x4, 0x10000 for bit 0x10 and 0x20 for bit 0x8, and HWMASK starts at 0x10024; HWMASK always
  * adds 0x800 and 0x100. HWFLAG adds 0x800 when bit 0 of the word at +0x88 is set in any of 8 0x8C-byte records of the
@@ -2571,7 +2571,7 @@ extern "C" void func_0025C610(LobbyMan* self)
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_NAME, (const char*)self->mUserName);
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PASS, (const char*)self->mPassword);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x200, str_TOS, 1);
-    cDirtysock_tag_TagFieldSetString(buf, 0x200, str_MID, func_003F3F78());
+    cDirtysock_tag_TagFieldSetString(buf, 0x200, str_MID, NetConnMAC());
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PID, str_SSX_PS2_2004);
     int interfaceType = cCommSystem_mCommSystem->mInterfaceType;
     if (interfaceType != 1) {
@@ -2791,7 +2791,7 @@ extern char str_MID[];
 extern char str_PID[];
 extern char str_CDEV[];
 extern char str_SSX_PS2_2004[];
-extern "C" const char* func_003F3F78();
+extern "C" const char* NetConnMAC();
 extern "C" void* cBXString_operatorE1(void* self, const char* str);
 extern "C" void func_0025B608(LobbyMan* self, int a1, int tag, void* cb, int a4, float f);
 extern "C" void func_00268C98(void* self, void* a1, int a2);
@@ -2829,7 +2829,7 @@ extern "C" void func_0025CD50_impl(char* self, const char* name) __asm__("func_0
 /**
  * Sends the persona selection ('pers') request and remembers the chosen persona.
  *
- * Assigns @p name to mPersona, then builds PERS = @p name, MID = func_003F3F78()'s hex string, PID = "SSX-PS2-2004"
+ * Assigns @p name to mPersona, then builds PERS = @p name, MID = NetConnMAC()'s hex string, PID = "SSX-PS2-2004"
  * and, when mHaveCPAT is set, CDEV = mCPAT. func_0025B608() sends it (mState 9, 20 s timeout, reply through
  * func_00268C98 to LobbyMan_onpersonaselected()) and an Event of type 217 is pushed onto mEventList. Unlike most requests it does
  * not check mState first.
@@ -2843,7 +2843,7 @@ extern "C" void func_0025CD50_impl(char* self, const char* name)
     buf[0] = 0;
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PERS, name);
     const char* key = str_MID;
-    cDirtysock_tag_TagFieldSetString(buf, 0x200, key, func_003F3F78());
+    cDirtysock_tag_TagFieldSetString(buf, 0x200, key, NetConnMAC());
     cDirtysock_tag_TagFieldSetString(buf, 0x200, str_PID, str_SSX_PS2_2004);
     if (*(int*)(self + 0x18) != 0)
         cDirtysock_tag_TagFieldSetString(buf, 0x200, str_CDEV, self + 0x1C);

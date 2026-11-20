@@ -182,7 +182,7 @@ cSpline_calcLength__FP7cSpline = 0x003454E8; //type:func
 // +0x50 were split as their own labels (D_004FA398, D_004FA3A8, D_004FA3C0).
 cRenderStateMan_m_state = 0x004FA370; // size:0x780
 
-// 'netw'/'list' IOP reply buffer: 10 entries of 0x100 bytes (func_003F3BC8 sends b << 8 with b = 10, from
+// 'netw'/'list' IOP reply buffer: 10 entries of 0x100 bytes (NetConnQuery sends b << 8 with b = 10, from
 // func_00255F20); D_00537190 follows. Entry fields at +0x4, +0x42, +0x80 were split as their own labels.
 cCommSystem_mNetConns = 0x00536790; // size:0xA00
 
@@ -9870,6 +9870,19 @@ FILEDEV_readexec = 0x003E33B0; //type:func
 FILEDEV_write = 0x003E3478; //type:func
 FILEDEV_getsize = 0x003E34E8; //type:func
 FILEDEV_getstartsector = 0x003E3538; //type:func
+
+// fn_u8c: names by evidence (docs/function_names.tsv)
+SocketLookup = 0x003F3A98; //type:func
+NetConnStartup = 0x003F3B18; //type:func
+NetConnQuery = 0x003F3BC8; //type:func
+NetConnConnect = 0x003F3C50; //type:func
+NetConnStatus = 0x003F3CC0; //type:func
+NetConnMAC = 0x003F3F78; //type:func
+NetConnDisconnect = 0x003F40B8; //type:func
+NetConnShutdown = 0x003F4118; //type:func
+NetConnSleep = 0x003F41B8; //type:func
+NetConnIdleAdd = 0x003F4210; //type:func
+NetConnIdleDel = 0x003F4250; //type:func
 
 // Spreadsheet Auto Generation
 

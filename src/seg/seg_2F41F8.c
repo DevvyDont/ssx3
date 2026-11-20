@@ -367,7 +367,7 @@ int *f39C8impl(int hostName, int timeout) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F41F8", func_003F3A98);
+INCLUDE_ASM("seg/seg_2F41F8", SocketLookup);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_003F39C8(void);
@@ -381,7 +381,7 @@ extern int func_003F39C8(void);
  * @param timeoutMs  timeout
  * @return the lookup object, or 0
  */
-int func_003F3A98(void* hostName, int timeoutMs) { return func_003F39C8(); }
+int SocketLookup(void* hostName, int timeoutMs) { return func_003F39C8(); }
 #endif
 
 //100%
@@ -412,7 +412,7 @@ int func_003F3AB8(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F41F8", func_003F3B18);
+INCLUDE_ASM("seg/seg_2F41F8", NetConnStartup);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -436,7 +436,7 @@ extern int f4C68e(char *, int, int, int, int, int, int, int, int, int *) __asm__
  * @param startupParams  startup parameter text
  * @return 0, or -1 when already started
  */
-int func_003F3B18(int startupParams) {
+int NetConnStartup(int startupParams) {
     char buf[16];
     if (D_004A4BA0 != 0) return -1;
     if (func_003F5470() <= 0) {
@@ -451,7 +451,7 @@ int func_003F3B18(int startupParams) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F41F8", func_003F3BC8);
+INCLUDE_ASM("seg/seg_2F41F8", NetConnQuery);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -469,7 +469,7 @@ extern int func_003F4C68b(char *, int, int, int, int, int, int, int, int, int *)
  * @param maxConfigs  capacity in entries
  * @return the number of entries
  */
-int func_003F3BC8(int self, int configList, int maxConfigs) {
+int NetConnQuery(int self, int configList, int maxConfigs) {
     char buf[16];
     int out;
     func_003F4C98(buf, 'netw', 'list');
@@ -479,7 +479,7 @@ int func_003F3BC8(int self, int configList, int maxConfigs) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F41F8", func_003F3C50);
+INCLUDE_ASM("seg/seg_2F41F8", NetConnConnect);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // FAKEMATCH: `if (a > 0)` around an identical copy of the body: the target has no compare; jump2 merges the arms and the leftover block boundary holds sched2 back; straight-line form 78.57%. Byte-identical and behaves like the plain form; landed marked under the 2026-11-14
@@ -501,7 +501,7 @@ extern int f4C68s(char *, int, int, int, int, int, int, int, int, int *) __asm__
 // NOTE: retail had a branch on `a` whose two paths were identical (jump2
 // cross-jumped them after sched2, leaving only a block boundary before the
 // 'netw'/'star' setup). The original condition is unknown.
-int func_003F3C50(int configName) {
+int NetConnConnect(int configName) {
     char buf[16];
     int out;
     if (configName > 0) {
@@ -516,7 +516,7 @@ int func_003F3C50(int configName) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F41F8", func_003F3CC0);
+INCLUDE_ASM("seg/seg_2F41F8", NetConnStatus);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -539,7 +539,7 @@ extern int f4C68m(char *, int, int, int, int, int, int, int, int, int *) __asm__
  * @param statusBufSize  reply buffer size
  * @return the selected status, or -1 for an unknown selector
  */
-int func_003F3CC0(int tag, int statusBuf, int statusBufSize) {
+int NetConnStatus(int tag, int statusBuf, int statusBufSize) {
     char buf[16];
     int statusReply;
     int addrReply;
@@ -584,22 +584,22 @@ int func_003F3CC0(int tag, int statusBuf, int statusBufSize) {
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_2F41F8", func_003F3F78);
+INCLUDE_ASM("seg/seg_2F41F8", NetConnMAC);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char D_004512E8[];
 extern const char str_0123456789abcdefUSBD_IRX[];
-extern void f3CC0(int, unsigned char *, int) __asm__("func_003F3CC0");
+extern void f3CC0(int, unsigned char *, int) __asm__("NetConnStatus");
 /**
  * Returns the console's MAC address as text: "$" followed by twelve lower-case hex digits.
  *
- * Built once into the static buffer D_004512E8 from func_003F3CC0('macx'); later calls return the cached text. LobbyMan
+ * Built once into the static buffer D_004512E8 from NetConnStatus('macx'); later calls return the cached text. LobbyMan
  * sends it as the MID tag and cCommSystem copies it.
  *
  * @return the static MAC text
  */
-char *func_003F3F78(void) {
+char *NetConnMAC(void) {
     unsigned char macBytes[16];
     if (D_004512E8[0] == 0) {
         f3CC0(0x6d616378, macBytes, 0x10);
@@ -623,7 +623,7 @@ char *func_003F3F78(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F41F8", func_003F40B8);
+INCLUDE_ASM("seg/seg_2F41F8", NetConnDisconnect);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_004A4BA4;
@@ -633,11 +633,11 @@ extern int func_003F4C68(char *, int, int, int, int, int, int, int, int, int);
 /**
  * Asks the IOP network module to disconnect ('netw'/'shut') and waits for it.
  *
- * cCommSystem calls it when it drops its net connection; func_003F4118 calls it before destroying the module.
+ * cCommSystem calls it when it drops its net connection; NetConnShutdown calls it before destroying the module.
  *
  * @return 0
  */
-int func_003F40B8(void) {
+int NetConnDisconnect(void) {
     char buf[16];
     func_003F4C98(buf, 'netw', 'shut');
     func_003F4C68(buf, 1, D_004A4BA4, 0, 0, 0, 0, 0, 1, 0);
@@ -646,28 +646,28 @@ int func_003F40B8(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F41F8", func_003F4118);
+INCLUDE_ASM("seg/seg_2F41F8", NetConnShutdown);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_004A4BA0;
 
 extern int D_004A4BA4;
 
-extern int func_003F40B8(void);
+extern int NetConnDisconnect(void);
 extern int func_003F4C98(char *, int, int);
 extern int func_003F4C68(char *, int, int, int, int, int, int, int, int, int);
 /**
- * Shuts the IOP network module down: disconnects (func_003F40B8), sends 'netw'/'dest' and clears the started flag
+ * Shuts the IOP network module down: disconnects (NetConnDisconnect), sends 'netw'/'dest' and clears the started flag
  * D_004A4BA0.
  *
  * Nothing in retail calls it.
  *
  * @return 0, or -1 when the module was not started
  */
-int func_003F4118(void) {
+int NetConnShutdown(void) {
     char buf[16];
     if (D_004A4BA0 == 0) return -1;
-    func_003F40B8();
+    NetConnDisconnect();
     func_003F4C98(buf, 'netw', 'dest');
     func_003F4C68(buf, 1, D_004A4BA4, 0, 0, 0, 0, 0, 1, 0);
     D_004A4BA0 = 0;
@@ -691,7 +691,7 @@ int func_003F4198(void) { return func_003F4DE8(); }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F41F8", func_003F41B8);
+INCLUDE_ASM("seg/seg_2F41F8", NetConnSleep);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -703,7 +703,7 @@ extern unsigned int func_003F4DE8u(void) __asm__("func_003F4DE8");
  *
  * @param n  milliseconds to wait
  */
-void func_003F41B8(int n) {
+void NetConnSleep(int n) {
     if (n == 0) n = 5;
     if (n > 0) {
         unsigned int end = func_003F4DE8u() + n;
@@ -713,7 +713,7 @@ void func_003F41B8(int n) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F41F8", func_003F4210);
+INCLUDE_ASM("seg/seg_2F41F8", NetConnIdleAdd);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_0051F030: the periodic callbacks run by NetConnIdle (fn 0 = free slot). */
@@ -730,7 +730,7 @@ extern struct sTick D_0051F030[16];
  * @param procData  its argument
  * @return 0, or -1 when all slots are taken
  */
-int func_003F4210(void (*fn)(int, int), int procData) {
+int NetConnIdleAdd(void (*fn)(int, int), int procData) {
     int i;
     struct sTick *idleSlot = D_0051F030;
     for (i = 0; i < 16; i++) {
@@ -746,20 +746,20 @@ int func_003F4210(void (*fn)(int, int), int procData) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_2F41F8", func_003F4250);
+INCLUDE_ASM("seg/seg_2F41F8", NetConnIdleDel);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_0051F030: the periodic callbacks run by NetConnIdle (fn 0 = free slot). */
 extern struct sTick D_0051F030[16];
 
 /**
- * Removes an idle callback registered with func_003F4210 (the slot whose function and argument both match).
+ * Removes an idle callback registered with NetConnIdleAdd (the slot whose function and argument both match).
  *
  * @param fn  the callback
  * @param procData  its argument
  * @return 0, or -1 when no slot matches
  */
-int func_003F4250(void (*fn)(int, int), int procData) {
+int NetConnIdleDel(void (*fn)(int, int), int procData) {
     int i;
     struct sTick *idleSlot = D_0051F030;
     for (i = 0; i < 16; i++) {
@@ -1327,7 +1327,7 @@ extern int func_003F4A78(void);
  *
  * Sends a blocking request to the fixed directory service (a handle whose IOP id is 1) with the directory area of
  * D_0051F0C0 (+0x4D88 .. +0x4D8C, 0x800 bytes) as the reply buffer, then pumps replies (func_003F4A78) until the ring
- * is empty. func_003F4C98 searches that directory. Called by func_003F3B18 right after starting the queue.
+ * is empty. func_003F4C98 searches that directory. Called by NetConnStartup right after starting the queue.
  *
  * @return 0
  */

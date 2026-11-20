@@ -125,7 +125,7 @@ struct LobbyMan {
                                     //       removes that entry
     LobbyApiRefT* mpLobbyApi;       // 0x054 [P] preview "lobbyapi" (offset 0x28 there); [R] ctor 0;
                                     //       [U] func_0025A948 stores func_003E7FF0's handle; every request uses it
-    void* mpHostLookup;             // 0x058 [R] ctor 0; [U] connect stores func_003F3A98(mServerName, 0) (a
+    void* mpHostLookup;             // 0x058 [R] ctor 0; [U] connect stores SocketLookup(mServerName, 0) (a
                                     //       DirtySock host lookup: result +0x4, poll fn +0x8, release fn +0xC);
                                     //       update polls/frees it through those
     void* mpRoomList;               // 0x05C [P] getnumrooms() reads it (preview 0x30); [U] func_0025A778:

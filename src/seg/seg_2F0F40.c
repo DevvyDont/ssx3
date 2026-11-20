@@ -513,7 +513,7 @@ extern int strlen(const char* s);
 extern char* strcat(char*, const char*);
 extern int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src);
 extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key, const char* val);
-extern int func_003F3A98(int, int);
+extern int SocketLookup(int, int);
 extern int func_003F5D88(int);
 /**
  * Starts connecting the buddy client to a buddy server and prepares the login packet.
@@ -523,7 +523,7 @@ extern int func_003F5D88(int);
  * without ':' is a login key: USER = @p nick, LKEY = login. Otherwise "user:secret" gives USER = user followed by
  * @p nick (when it fits in 0x100), and LKEY = secret without its leading '$' or PASS = secret. Copies @p nick into
  * +0x494 (0x10 bytes, the resource sent as LRSC), dropping a leading '/' (an overlapping strcpy) and cutting at the
- * next '/'. Then starts the host lookup (+0x0 = func_003F3A98(@p serverName, @p ms * 1000)), reports state 1
+ * next '/'. Then starts the host lookup (+0x0 = SocketLookup(@p serverName, @p ms * 1000)), reports state 1
  * (connecting), sets the connect deadline +0xC to now + @p ms * 1000 and the last show state +0x2C4 to -1.
  * func_003F17D8 finishes the connection.
  *
@@ -579,7 +579,7 @@ int func_003F08E8(char* self, int serverName, int port, int ms, char* host, char
     }
     sep = strchr(nickBuf, '/');
     if (sep) *sep = 0;
-    *(int*)self = func_003F3A98(serverName, ms * 1000);
+    *(int*)self = SocketLookup(serverName, ms * 1000);
     func_003F0610((int*)self, 1);
     *(int*)(self + 0xC) = func_003F5D88(*(int*)(self + 4)) + ms * 1000;
     *(int*)(self + 0x2C4) = -1;
