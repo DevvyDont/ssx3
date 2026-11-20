@@ -1376,10 +1376,10 @@ static inline sItemFBE0* getItemK19FBE0(sItemListFBE0* list, int i)
  * character's bank (func_0019E070).
  *
  * @param list  the character's item list
- * @param a2    not used
+ * @param ignored    not used
  * @param keepLoaded    passed to func_0019DA10 as its keep-existing argument (nonzero keeps a slot already loading or loaded)
  */
-extern "C" void func_0019FBE0(int* self, sItemListFBE0* list, int a2, int keepLoaded)
+extern "C" void func_0019FBE0(int* self, sItemListFBE0* list, int ignored, int keepLoaded)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     void* db = func_0014BDB8_noarg();

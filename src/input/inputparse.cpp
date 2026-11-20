@@ -3285,9 +3285,9 @@ extern "C" int cPS2PadDevice_sampleButtons(sPad_326EB0* self, float* out)
     int ok = 0;
     int ret;
     if (self->phase == 0) {
-        int r = func_003FF708(self->port, self->slot, self->buf);
-        if (r == 1) {
-            self->phase = r;
+        int result = func_003FF708(self->port, self->slot, self->buf);
+        if (result == 1) {
+            self->phase = result;
             self->modeSet = 0;
             self->actSmall = 0;
             self->lastSmall = -1;
@@ -3327,9 +3327,9 @@ extern "C" int cPS2PadDevice_sampleButtons(sPad_326EB0* self, float* out)
         break;
     case 2:
         if (self->analog == 0 || self->modeSet == 0) {
-            int r = func_004000D8(self->port, self->slot, 1, 3);
-            if (r == 1) {
-                self->modeSet = r;
+            int result = func_004000D8(self->port, self->slot, 1, 3);
+            if (result == 1) {
+                self->modeSet = result;
                 self->phase = 3;
             }
         } else {
@@ -3353,11 +3353,11 @@ extern "C" int cPS2PadDevice_sampleButtons(sPad_326EB0* self, float* out)
         }
         break;
     case 6: {
-        int r = func_003FFCD8(self->port, self->slot);
-        if (r == 1) {
+        int result = func_003FFCD8(self->port, self->slot);
+        if (result == 1) {
             self->phase = 1;
             self->modeSet = 0;
-        } else if (r == 0) {
+        } else if (result == 0) {
             if (++self->retry >= 5) {
                 self->pressure = 1;
                 self->phase = 7;
@@ -3380,11 +3380,11 @@ extern "C" int cPS2PadDevice_sampleButtons(sPad_326EB0* self, float* out)
         }
         break;
     case 9: {
-        int r = func_003FFCD8(self->port, self->slot);
-        if (r == 1) {
+        int result = func_003FFCD8(self->port, self->slot);
+        if (result == 1) {
             self->phase = 1;
             self->modeSet = 0;
-        } else if (r == 0) {
+        } else if (result == 0) {
             if (++self->retry >= 5) {
                 self->actuator = 1;
                 self->phase = 10;

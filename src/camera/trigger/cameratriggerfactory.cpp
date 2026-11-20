@@ -3571,15 +3571,15 @@ extern "C" int cBoundedAlgorithm_getBoundAction(void *boundedAlgo) {
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176438);
 #ifdef SKIP_ASM
 /**
- * Returns the word at +0x18 of @p arg0.
+ * Returns the word at +0x18 of @p object.
  *
  * An inline accessor emitted with this unit's other copies; nothing calls it or stores its address.
  *
- * @param arg0  the object to read
+ * @param object  the object to read
  * @return the 32-bit word at +0x18
  */
-extern "C" int func_00176438(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x18)));
+extern "C" int func_00176438(void *object) {
+    return (*(int *)((char*)(object) + (0x18)));
 }
 #endif
 
@@ -5319,8 +5319,8 @@ extern "C" void cSPOKEChaseAlgorithm_update_v(char* self)
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
     *(float*)self = 0.7853981852531433f;
-    t4Vector d = Sub_8208(*(t4Vector*)(self + 0x20), *(t4Vector*)(self + 0x40));
-    float len = Length_8208(d);
+    t4Vector scratchVec = Sub_8208(*(t4Vector*)(self + 0x20), *(t4Vector*)(self + 0x40));
+    float len = Length_8208(scratchVec);
     float distFrac;
     if (len >= 150.0f) {
         if (len <= 1500.0f) {
@@ -5338,11 +5338,11 @@ extern "C" void cSPOKEChaseAlgorithm_update_v(char* self)
     {
         t4Vector keptEye = Scale_8208(*(t4Vector*)(self + 0x40), keepWeight);
         float newWeight = 1.0f - keepWeight;
-        AddD_8208(d, keptEye, Scale_8208(f_177FC0_8208(self, info.dir), newWeight));
-        *(t4Vector*)(self + 0x40) = d;
+        AddD_8208(scratchVec, keptEye, Scale_8208(f_177FC0_8208(self, info.dir), newWeight));
+        *(t4Vector*)(self + 0x40) = scratchVec;
     }
-    AddD_8208(d, f_177EF8_8208(self), ScaleP_8208(&D_004FF160_8208, 37.0f));
-    *(t4Vector*)(self + 0x20) = d;
+    AddD_8208(scratchVec, f_177EF8_8208(self), ScaleP_8208(&D_004FF160_8208, 37.0f));
+    *(t4Vector*)(self + 0x20) = scratchVec;
 }
 #endif
 

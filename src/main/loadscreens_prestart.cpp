@@ -595,26 +595,26 @@ extern "C" void cPreGameLoadScreen_update(void* self)
     cLoadIndicator_update(SSXApp->LoadIndicator);
     tmp = *(int*)((char*)self + 4) != 0;
     if (tmp) {
-        float* f = (float*)((char*)SSXApp->LoadIndicator + 4);
-        *f -= 0.0833333358168602f;
-        if (*f < 0.0f) {
-            *f = 0.0f;
+        float* fade = (float*)((char*)SSXApp->LoadIndicator + 4);
+        *fade -= 0.0833333358168602f;
+        if (*fade < 0.0f) {
+            *fade = 0.0f;
         }
     } else {
-        float* f = (float*)((char*)SSXApp->LoadIndicator + 4);
-        *f += 0.0833333358168602f;
-        if (*f > 1.0f) {
-            *f = 1.0f;
+        float* fade = (float*)((char*)SSXApp->LoadIndicator + 4);
+        *fade += 0.0833333358168602f;
+        if (*fade > 1.0f) {
+            *fade = 1.0f;
         }
     }
     if (*(int*)((char*)SSXApp + 4) == 0) {
-        sModule_232930* m = (sModule_232930*)cMemMan_alloc(0x18, str_cGameLoadScreen, 0x100, 0);
-        cFadeScreen_cFadeScreen_r(m);
-        tmp = (unsigned int)m;
-        m->vt = cGameLoadScreen_vtbl;
-        m->fC = 0;
-        m->f10 = 0;
-        m->f14 = 0;
+        sModule_232930* loadScreen = (sModule_232930*)cMemMan_alloc(0x18, str_cGameLoadScreen, 0x100, 0);
+        cFadeScreen_cFadeScreen_r(loadScreen);
+        tmp = (unsigned int)loadScreen;
+        loadScreen->vt = cGameLoadScreen_vtbl;
+        loadScreen->fC = 0;
+        loadScreen->f10 = 0;
+        loadScreen->f14 = 0;
         cAppMan_setNextModule((cAppMan*)SSXApp, tmp);
     }
 }
@@ -698,14 +698,14 @@ extern void* cStartScreen_vtbl[];
  *
  * cInitLoadScreen's update (cInitLoadScreen_update) builds it with type 2 (progressive) or 0.
  *
- * @param arg  the start screen type (0 shows the memory card state, 2 the progressive-scan state)
+ * @param screenType  the start screen type (0 shows the memory card state, 2 the progressive-scan state)
  * @return @p self
  */
-extern "C" void* cStartScreen_cStartScreen(void* self, int arg)
+extern "C" void* cStartScreen_cStartScreen(void* self, int screenType)
 {
     cFadeScreen_cFadeScreen(self);
     *(void***)self = cStartScreen_vtbl;
-    *(int*)((char*)self + 0x18) = arg;
+    *(int*)((char*)self + 0x18) = screenType;
     *(int*)((char*)self + 0xC) = 0;
     return self;
 }
@@ -830,10 +830,10 @@ extern "C" void cStartScreen_load(void* self)
         void* item = func_00186A08(operator new(584, str_cFEStateMemCard, 0, 0), *(void**)((char*)self + 0xC));
         cUIStateStack_push(*(char**)((char*)self + 0xC) + 0x18, item);
     } else if (mode == 2) {
-        void* p = operator new(72, str_cFEStateProgressive, 0, 0);
-        func_0039E2A0(p, *(void**)((char*)self + 0xC));
-        *(void**)((char*)p + 8) = D_0047CA18;
-        cUIStateStack_push(*(char**)((char*)self + 0xC) + 0x18, p);
+        void* progressiveState = operator new(72, str_cFEStateProgressive, 0, 0);
+        func_0039E2A0(progressiveState, *(void**)((char*)self + 0xC));
+        *(void**)((char*)progressiveState + 8) = D_0047CA18;
+        cUIStateStack_push(*(char**)((char*)self + 0xC) + 0x18, progressiveState);
     }
 }
 #endif
@@ -959,9 +959,9 @@ extern "C" void cGraphicsMan_PurgeTextures(void* world);
 extern "C" void cStartScreen_purge(void* self)
 {
     ((cWorld232D50*)GrMan)->v19();
-    void* p = *(void**)((char*)self + 0xC);
-    if (p != 0) {
-        func_00397B70(p, 3);
+    void* uiEngine = *(void**)((char*)self + 0xC);
+    if (uiEngine != 0) {
+        func_00397B70(uiEngine, 3);
     }
     *(void**)((char*)self + 0xC) = 0;
     cGraphicsMan_PurgeTextures(GrMan);
@@ -1139,12 +1139,12 @@ extern "C" void cGameLoadScreen_load(void* self)
     (*(sUI_2E20**)((char*)self + 0xC))->fC = n;
     void* item;
     if (D_004A19D8 == 0) {
-        signed char* g = (signed char*)((char*)&cBENewRaceInterface_newRace);
-        if (g[0x49] != 0)
+        signed char* newRaceBytes = (signed char*)((char*)&cBENewRaceInterface_newRace);
+        if (newRaceBytes[0x49] != 0)
             goto other;
-        if (g[0x48] == 5)
+        if (newRaceBytes[0x48] == 5)
             goto makeA;
-        if (g[0x48] != 6)
+        if (newRaceBytes[0x48] != 6)
             goto other;
     }
 makeA:
@@ -1152,19 +1152,19 @@ makeA:
     goto done;
 other:
     {
-        signed char* g2 = (signed char*)((char*)&cBENewRaceInterface_newRace);
+        signed char* raceDbBytes = (signed char*)((char*)&cBENewRaceInterface_newRace);
         int x = 0;
-        if (g2[0x49] == 0) {
-            int t = g2[0x48] != 5;
-            if (t)
-                x = g2[0x48] != 6;
+        if (raceDbBytes[0x49] == 0) {
+            int notMode5 = raceDbBytes[0x48] != 5;
+            if (notMode5)
+                x = raceDbBytes[0x48] != 6;
         }
         if (x) {
             item = new (str_cGameLoadStateConquer, 0, 0) cLoadItemB_2E20(*(void**)((char*)self + 0xC));
         } else {
-            cLoadItemC_2E20* c = new (str_cGameLoadState, 0, 0) cLoadItemC_2E20(*(void**)((char*)self + 0xC));
-            item = c;
-            c->owner = self;
+            cLoadItemC_2E20* loadState = new (str_cGameLoadState, 0, 0) cLoadItemC_2E20(*(void**)((char*)self + 0xC));
+            item = loadState;
+            loadState->owner = self;
             cGameLoadScreen_loadTexture_2E20(self, 0);
         }
     }
@@ -1291,8 +1291,8 @@ extern "C" void cGameLoadScreen_gainFocus(void)
     cGraphicsMan_UploadTextures(GrMan);
     cSSXApp_startGameLoad(SSXApp);
     // Storing through a pointer keeps the store ahead of the reload of GrMan.
-    int* p = &cDepthFog_m_Enable;
-    *p = 0;
+    int* fogEnable = &cDepthFog_m_Enable;
+    *fogEnable = 0;
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVE_3260* vt = (sVE_3260*)ps2GraphicsMan->mVtbl;
     vt[15].fn((char*)ps2GraphicsMan + vt[15].delta, sVec3i_3260(0, 0, 0));
@@ -1393,15 +1393,15 @@ public:
 extern "C" void cGameLoadScreen_purge(void* self)
 {
     ((cWorld002332E8*)GrMan)->v19();
-    void* o = *(void**)((char*)self + 0xC);
-    if (o != 0) {
-        func_00397B70(o, 3);
+    void* uiEngine = *(void**)((char*)self + 0xC);
+    if (uiEngine != 0) {
+        func_00397B70(uiEngine, 3);
     }
     int i;
     for (i = 0; i < 2; i++) {
-        void* p = ((void**)((char*)self + 0x10))[i];
-        if (p != 0) {
-            ((cWorld002332E8*)GrMan)->v50(p);
+        void* textureId = ((void**)((char*)self + 0x10))[i];
+        if (textureId != 0) {
+            ((cWorld002332E8*)GrMan)->v50(textureId);
         }
     }
     cGraphicsMan_PurgeTextures(GrMan);

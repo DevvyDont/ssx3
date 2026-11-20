@@ -492,7 +492,7 @@ struct sAnimNameTable_11BE88
 extern "C" void func_0011BE88(cRider* self, void** list, int n)
 {
     void* iface = cBE_getInterface(cBE_getBE(), 9);
-    int a = func_0014AC30(self->mAIIndex);
+    int characterId = func_0014AC30(self->mAIIndex);
     if (cBELibrary_getCheatCharacterID(self->mAIIndex)) {
         for (int i = 0; i < n; i++) {
             char* name = *(char**)((char*)list[i] + 0x2C);
@@ -514,10 +514,10 @@ extern "C" void func_0011BE88(cRider* self, void** list, int n)
         next:;
         }
     } else {
-        int b = func_0014AC50(self->mAIIndex);
+        int profileIndex = func_0014AC50(self->mAIIndex);
         for (int i = 0; i < n; i++) {
             char buf[0x100];
-            if (func_0014B988(iface, b, a, list[i], buf) == 0) continue;
+            if (func_0014B988(iface, profileIndex, characterId, list[i], buf) == 0) continue;
             char* name = buf;
             sAnimNameTable_11BE88* nameTable = ((sAnimNameTable_11BE88*)self->mLoadList);
             if (*name == 0) continue;
@@ -4399,7 +4399,7 @@ extern "C" void func_00122680(void)
         ((cGraphicsMan_2680*)GrMan)->PopView();
         ((cGraphicsMan_2680*)GrMan)->PopViewport();
         ((cGraphicsMan_2680*)GrMan)->stateTop--;
-        int unused[4]; // frame +16 (see FAKEMATCH above)
+        int framePad[4]; // frame +16 (see FAKEMATCH above)
     }
 }
 #endif
@@ -5603,11 +5603,11 @@ struct sAnimEventInfo_123E30
  *
  * @param id  the script player entity (On Tour: pEntity); its word +8 is passed to the subject lookup
  * @param currFrame  the current frame (the first float argument; On Tour: currFrame); unused
- * @param b  a second float argument that the caller (cScriptPlayerEntity_ExecutePlay) does not set; unused
+ * @param ignoredFloat  a second float argument that the caller (cScriptPlayerEntity_ExecutePlay) does not set; unused
  * @param type  the entity type (On Tour: type); unused
  * @param flags  event bits; bit 0x10 enables the event handling
  */
-extern "C" void cRider_OnInSeqKeyEvent(cRider* self, int id, float currFrame, float b, int type, int flags)
+extern "C" void cRider_OnInSeqKeyEvent(cRider* self, int id, float currFrame, float ignoredFloat, int type, int flags)
 {
     sAnimEventInfo_123E30 info;
     if (flags & 0x10)

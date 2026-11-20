@@ -635,15 +635,15 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021CB70);
  *
  * No callers; the block's type is not known.
  *
- * @param p  the block to fill
+ * @param block  the block to fill
  */
-extern "C" void func_0021CB70(int *p) {
-    p[0]=1;
-    p[1]=0;
-    p[2]=0;
-    p[3]=0;
-    p[4]=0;
-    p[5]=0;
+extern "C" void func_0021CB70(int *block) {
+    block[0]=1;
+    block[1]=0;
+    block[2]=0;
+    block[3]=0;
+    block[4]=0;
+    block[5]=0;
 }
 #endif
 
@@ -1663,34 +1663,34 @@ extern "C" void cOVStateHUD1P_renderWipeoutMeter(float fill, float alpha, char* 
     int alt = cBENewPlayerInterface_getControllerMapping(cBE_getInterface_Fv(cBE_getBE(), 1), ((sHudRoot_D9A0*)self)->players[idx].rider);
     t2Vector elemPos;
     t2Vector sc;
-    sVtxPos t;     // icon colour first, then reused for the bar size
+    sVtxPos colourOrSize;     // icon colour first, then reused for the bar size
     t2Vector pos;
     t2Vector drawPos;
-    t2Vector v;
+    t2Vector scratchVec;
     if (icon != 0) {
         char* ie = elems + 0x7BC;
         tHUDDef_getPos(ie, &elemPos);
         tHUDDef_getScale(ie, &sc);
-        tHUDDef_getColour(ie, &t);
+        tHUDDef_getColour(ie, &colourOrSize);
         if (alt == 0) {
             pos = elemPos;
-            func_001E95A0(self + 0x6AC, &pos, &sc, &t, elems[0x7DC], elems[0x7DD]);
+            func_001E95A0(self + 0x6AC, &pos, &sc, &colourOrSize, elems[0x7DC], elems[0x7DD]);
         } else {
             pos = elemPos;
-            func_001E95A0(self + 0x7F8, &pos, &sc, &t, elems[0x7DC], elems[0x7DD]);
+            func_001E95A0(self + 0x7F8, &pos, &sc, &colourOrSize, elems[0x7DC], elems[0x7DD]);
         }
     }
     char* meterDef = elems + 0x798;
     tHUDDef_getPos(meterDef, &elemPos);
-    tHUDDef_getSize(meterDef, &t, 0);
+    tHUDDef_getSize(meterDef, &colourOrSize, 0);
     tHUDDef_getScale(meterDef, &sc);
     sc.x *= scale[0];
     sc.y *= scale[1];
-    t.x *= sc.x;
-    t.y *= sc.y;
-    v.x = 1.0f;
-    v.y = 1.0f;
-    cOVStateHUD1P_calcElemPos(self, &drawPos, &elemPos, &t, &v, elems[0x7B8], elems[0x7B9], idx);
+    colourOrSize.x *= sc.x;
+    colourOrSize.y *= sc.y;
+    scratchVec.x = 1.0f;
+    scratchVec.y = 1.0f;
+    cOVStateHUD1P_calcElemPos(self, &drawPos, &elemPos, &colourOrSize, &scratchVec, elems[0x7B8], elems[0x7B9], idx);
     int* w = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
     *w = (*w & ~0x3E0) | ((elems[0x7BA] << 5) & 0x3E0);
     sHudVertex vtx[4];
@@ -1705,23 +1705,23 @@ extern "C" void cOVStateHUD1P_renderWipeoutMeter(float fill, float alpha, char* 
     }
     {
         sHudSprite* pieceSprite = ((sHudRoot_D9A0*)self)->sprites[alt == 0 ? 18 : 19];
-        v.x = sc.x * 20.0f;
-        v.y = sc.y * 20.0f;
+        scratchVec.x = sc.x * 20.0f;
+        scratchVec.y = sc.y * 20.0f;
         t2Vector iconPos;
         iconPos.x = drawPos.x;
-        iconPos.y = drawPos.y + (t.y - v.y) * 0.5f;
+        iconPos.y = drawPos.y + (colourOrSize.y - scratchVec.y) * 0.5f;
         setTex_D9A0(pieceSprite);
         setUV(vtx, pieceSprite);
         vtx[0].pos = sVtxPos(iconPos.x, iconPos.y, 0.0f, 1.0f);
-        vtx[1].pos = sVtxPos(iconPos.x + v.x, iconPos.y, 0.0f, 1.0f);
-        vtx[2].pos = sVtxPos(iconPos.x, iconPos.y + v.y, 0.0f, 1.0f);
-        vtx[3].pos = sVtxPos(iconPos.x + v.x, iconPos.y + v.y, 0.0f, 1.0f);
+        vtx[1].pos = sVtxPos(iconPos.x + scratchVec.x, iconPos.y, 0.0f, 1.0f);
+        vtx[2].pos = sVtxPos(iconPos.x, iconPos.y + scratchVec.y, 0.0f, 1.0f);
+        vtx[3].pos = sVtxPos(iconPos.x + scratchVec.x, iconPos.y + scratchVec.y, 0.0f, 1.0f);
         drawQuad_D9A0(verts);
     }
-    float iconSpan = v.x + sc.x * 3.0f;
+    float iconSpan = scratchVec.x + sc.x * 3.0f;
     drawPos.x += iconSpan;
-    t.x -= iconSpan;
-    v = drawPos;
+    colourOrSize.x -= iconSpan;
+    scratchVec = drawPos;
     float segW = sc.x * (bar->scale * 9.0f);
     {
         sHudSprite* pieceSprite = ((sHudRoot_D9A0*)self)->sprites[0x10];
@@ -1729,20 +1729,20 @@ extern "C" void cOVStateHUD1P_renderWipeoutMeter(float fill, float alpha, char* 
         setUV(vtx, pieceSprite);
         vtx[0].pos = sVtxPos(drawPos.x, drawPos.y, 0.0f, 1.0f);
         vtx[1].pos = sVtxPos(drawPos.x + segW, drawPos.y, 0.0f, 1.0f);
-        vtx[2].pos = sVtxPos(drawPos.x, drawPos.y + t.y, 0.0f, 1.0f);
-        vtx[3].pos = sVtxPos(drawPos.x + segW, drawPos.y + t.y, 0.0f, 1.0f);
+        vtx[2].pos = sVtxPos(drawPos.x, drawPos.y + colourOrSize.y, 0.0f, 1.0f);
+        vtx[3].pos = sVtxPos(drawPos.x + segW, drawPos.y + colourOrSize.y, 0.0f, 1.0f);
         drawQuad_D9A0(verts);
         drawPos.x += segW;
     }
     if (bar->count > 0) {
         sHudSprite* pieceSprite = ((sHudRoot_D9A0*)self)->sprites[17];
         setTex_D9A0(pieceSprite);
-        float midW = t.x - (segW + segW);
+        float midW = colourOrSize.x - (segW + segW);
         setUV(vtx, pieceSprite);
         vtx[0].pos = sVtxPos(drawPos.x, drawPos.y, 0.0f, 1.0f);
         vtx[1].pos = sVtxPos(drawPos.x + midW, drawPos.y, 0.0f, 1.0f);
-        vtx[2].pos = sVtxPos(drawPos.x, drawPos.y + t.y, 0.0f, 1.0f);
-        vtx[3].pos = sVtxPos(drawPos.x + midW, drawPos.y + t.y, 0.0f, 1.0f);
+        vtx[2].pos = sVtxPos(drawPos.x, drawPos.y + colourOrSize.y, 0.0f, 1.0f);
+        vtx[3].pos = sVtxPos(drawPos.x + midW, drawPos.y + colourOrSize.y, 0.0f, 1.0f);
         drawQuad_D9A0(verts);
         drawPos.x += midW;
     }
@@ -1752,8 +1752,8 @@ extern "C" void cOVStateHUD1P_renderWipeoutMeter(float fill, float alpha, char* 
         setUVFlip(vtx, pieceSprite);
         vtx[0].pos = sVtxPos(drawPos.x, drawPos.y, 0.0f, 1.0f);
         vtx[1].pos = sVtxPos(drawPos.x + segW, drawPos.y, 0.0f, 1.0f);
-        vtx[2].pos = sVtxPos(drawPos.x, drawPos.y + t.y, 0.0f, 1.0f);
-        vtx[3].pos = sVtxPos(drawPos.x + segW, drawPos.y + t.y, 0.0f, 1.0f);
+        vtx[2].pos = sVtxPos(drawPos.x, drawPos.y + colourOrSize.y, 0.0f, 1.0f);
+        vtx[3].pos = sVtxPos(drawPos.x + segW, drawPos.y + colourOrSize.y, 0.0f, 1.0f);
         drawQuad_D9A0(verts);
         drawPos.x += segW;
     }
@@ -1769,18 +1769,18 @@ extern "C" void cOVStateHUD1P_renderWipeoutMeter(float fill, float alpha, char* 
         fillInset.x = D_004A5B28 * sc.x;
         fillInset.y = D_004A5B2C * sc.y;
         t2Vector fs;
-        fs.x = (t.x - (fillInset.x + fillInset.x)) * fill;
-        fs.y = t.y - (fillInset.y + fillInset.y);
+        fs.x = (colourOrSize.x - (fillInset.x + fillInset.x)) * fill;
+        fs.y = colourOrSize.y - (fillInset.y + fillInset.y);
         sColour col = D_004C8668;
         col.r *= alpha;
-        v.x += fillInset.x;
-        v.y += fillInset.y;
+        scratchVec.x += fillInset.x;
+        scratchVec.y += fillInset.y;
         int* w2 = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
         *w2 = (*w2 & ~0x3E0) | (((elems[0x7BA] + 1) << 5) & 0x3E0);
         t2Vector one;
         one.x = 1.0f;
         one.y = 1.0f;
-        cOVStateHUD1P_renderQuad(self, &v, &fs, &one, &col);
+        cOVStateHUD1P_renderQuad(self, &scratchVec, &fs, &one, &col);
     }
 }
 #endif

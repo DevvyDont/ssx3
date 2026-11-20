@@ -179,7 +179,7 @@ extern "C" void cGameViewMan_updateViewState(cGameViewMan22E550* self)
         return;
     }
     float w = (float)((cDisp22E550*)GrMan)->v10();
-    float h = (float)((cDisp22E550*)GrMan)->v11();
+    float screenHeight = (float)((cDisp22E550*)GrMan)->v11();
     switch (self->mode) {
     case 3:
     case 4:
@@ -190,11 +190,11 @@ extern "C" void cGameViewMan_updateViewState(cGameViewMan22E550* self)
         self->rects[0].x = 0.0f;
         self->rects[0].y = 0.0f;
         self->rects[0].w = hw;
-        self->rects[0].h = h;
+        self->rects[0].h = screenHeight;
         self->rects[1].x = hw;
         self->rects[1].y = 0.0f;
         self->rects[1].w = hw;
-        self->rects[1].h = h;
+        self->rects[1].h = screenHeight;
         self->cams[0]->farClip = 20000.0f;
         self->cams[1]->farClip = 20000.0f;
         break;
@@ -202,7 +202,7 @@ extern "C" void cGameViewMan_updateViewState(cGameViewMan22E550* self)
     default:
         self->views = 1;
         self->rects[0].w = w;
-        self->rects[0].h = h;
+        self->rects[0].h = screenHeight;
         self->f14 = 0;
         self->rects[0].x = 0.0f;
         self->rects[0].y = 0.0f;

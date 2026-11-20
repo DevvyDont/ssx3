@@ -2700,21 +2700,21 @@ extern "C" int cFadeScreen_drawFade(void* self)
     ((cCtx231D60*)GrMan)->top->f4_23 = 2;
     ((cCtx231D60*)GrMan)->top->f4_20 = 0;
     ((cCtx231D60*)GrMan)->top->f4_12 = 0;
-    float a = Clamp231D60(*(float*)((char*)self + 4) * 5.0f, 0.0f, 1.0f);
-    float p0[2];
-    float p1[2];
+    float alpha = Clamp231D60(*(float*)((char*)self + 4) * 5.0f, 0.0f, 1.0f);
+    float minCorner[2];
+    float maxCorner[2];
     float col[4];
-    p0[0] = -1.0f;
-    p0[1] = -1.0f;
-    p1[0] = 1.0f;
-    p1[1] = 1.0f;
-    col[0] = a;
+    minCorner[0] = -1.0f;
+    minCorner[1] = -1.0f;
+    maxCorner[0] = 1.0f;
+    maxCorner[1] = 1.0f;
+    col[0] = alpha;
     col[1] = 0.0f;
     col[2] = 0.0f;
     col[3] = 0.0f;
-    func_0038EC40((void*)D_004A28AC, p0, p1, col, 0.0f);
+    func_0038EC40((void*)D_004A28AC, minCorner, maxCorner, col, 0.0f);
     *(int*)&GrMan->m_pCurrentDrawState -= 20;
-    return a >= 1.0f;
+    return alpha >= 1.0f;
     }
     return 0;
 }
@@ -2871,8 +2871,8 @@ extern "C" void cLoadIndicator_render(sFade_1FC0* self)
         (*pfn)(thisp, 0.0f, 0.0f, (float)((cGfx_1FC0*)GrMan)->GetScreenWidth(), (float)((cGfx_1FC0*)GrMan)->GetScreenHeight(), 1);
     }
     ((cGfx_1FC0*)GrMan)->SetViewportOrthographic(0.0f, 0.0f, 640.0f, 480.0f, 1, 0, 0.0f, 1.0f);
-    float s = fCos(self->t * 6.2831854820251465f);
-    sV2_1FC0 size((s + 1.0f) * 9.0f, 18.0f);
+    float pulse = fCos(self->t * 6.2831854820251465f);
+    sV2_1FC0 size((pulse + 1.0f) * 9.0f, 18.0f);
     sV4_1FC0 pos(599.0f, 445.0f, 0.0f, 1.0f);
     int f10v = *(int*)(D_004A28A8_1FC0 + 0xA0);
     *(short*)((char*)((cGfx_1FC0*)GrMan)->stateTop + 0x10) = f10v;

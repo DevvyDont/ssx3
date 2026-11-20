@@ -480,7 +480,7 @@ extern void* D_004A3E90_v __asm__("cBXString_EmptyString");
 extern "C" void* cFEStateNetMessenger_cFEStateNetMessenger(cFEStateNetMessenger* self, void* pEngine, void* pParentState)
 {
     // An unused 16-byte local is needed to reproduce the 0x30-byte frame.
-    int unused[4];
+    int framePad[4];
     cFEStateNet_cFEStateNet_3(self, (int)pEngine, (int)pParentState);
     void* empty = D_004A3E90_v;
     self->mVtbl = D_00467F28;
@@ -3829,7 +3829,7 @@ extern "C" void* cFEStateNet_cFEStateNet_impl(void* self, void* engine, void* ow
 extern "C" void* cFEStateNet_cFEStateNet_impl(void* self, void* engine, void* owner)
 {
     // An unused 16-byte local is needed to reproduce the 0x40-byte frame.
-    int unused[4];
+    int framePad[4];
     char* selfBytes = (char*)self;
     func_0039E318(self, engine, owner);
     sList_8500* msgList = (sList_8500*)(selfBytes + 0x6C8);
@@ -14508,9 +14508,9 @@ extern "C" void func_001B47C0(cFEStateNetConfig* self, int a1);
  * (func_0039A670), shows the "checking" popup for slot 1 (func_001B47C0) and sets miState 1.
  *
  * @param obj  the network-configuration state (this)
- * @param a1  unused
+ * @param ignored  unused
  */
-extern "C" void func_001B5268(cFEStateNetConfig* obj, int a1)
+extern "C" void func_001B5268(cFEStateNetConfig* obj, int ignored)
 {
     cFEStateNetConfig* self = obj;
     cUIMenu_setSelectedByIndex(((void*)self->mpMenuConfig), 0);
@@ -19974,12 +19974,12 @@ public:
  *
  * Clears bit 0 and sets 0x80 in the box's flags word (+0x14) and adds the twelve entries by string id. It then selects
  * the entry with data 1 and right after that sets the current index to 1 directly, which wins (index 1 is the second
- * entry); finally it calls the box's virtual slot 9 with 1. @p a2 is not used.
+ * entry); finally it calls the box's virtual slot 9 with 1. @p ignored is not used.
  *
  * @param box  the "LBMonth" list box
- * @param a2  unused (cFEStateCreateStep2_onWidgetCreate passes 1)
+ * @param ignored  unused (cFEStateCreateStep2_onWidgetCreate passes 1)
  */
-extern "C" void func_001BB5D0(cFEStateCreateStep2* self, void* box, int a2)
+extern "C" void func_001BB5D0(cFEStateCreateStep2* self, void* box, int ignored)
 {
     unsigned char out = 0;
     *(int*)((char*)box + 0x14) = (*(int*)((char*)box + 0x14) & ~1) | 0x80;
@@ -26660,7 +26660,7 @@ extern "C" void func_001C3310(cFEStateStats* self_)
     char name[32];
     char txt[64];
     int score;
-    int v1;
+    int secondStat;
     if (self_->mpScreen != 0) {
         int n = func_0025F338(LobbyMan_mLobbyMan);
         char* obj = (char*)cUIScreen_getObjectByHashName(self_->mpScreen, GetHashValue32(str_ResultsMenu));
@@ -26682,7 +26682,7 @@ extern "C" void func_001C3310(cFEStateStats* self_)
         int* pb;
         int* pa;
         pa = &score;
-        pb = &v1;
+        pb = &secondStat;
         for (i = 0; i < 10; i++, idx++) {
             sprintf(name, str_personaItem0pct_i, i);
             cUIText* uiText = cUIScreen_getObjectByHashName(self_->mpScreen, GetHashValue32(name));

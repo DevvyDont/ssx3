@@ -180,15 +180,15 @@ INCLUDE_ASM("bx/ps2main", det2x2);
 /**
  * Returns the determinant of a 2x2 matrix passed row by row: first * fourth - second * third.
  *
- * @param a  row 0, column 0
- * @param b  row 0, column 1
- * @param c  row 1, column 0
- * @param d  row 1, column 1
+ * @param mat00  row 0, column 0
+ * @param mat01  row 0, column 1
+ * @param mat10  row 1, column 0
+ * @param mat11  row 1, column 1
  * @return the determinant
  */
-extern "C" float det2x2(float a, float b, float c, float d)
+extern "C" float det2x2(float mat00, float mat01, float mat10, float mat11)
 {
-    return a * d - b * c;
+    return mat00 * mat11 - mat01 * mat10;
 }
 #endif
 
@@ -203,21 +203,21 @@ extern "C" float det2x2(float a, float b, float c, float d);
  * The three 2x2 minors come from det2x2. det4x4 and adjoint pass 3x3 minors of a 4x4 matrix
  * column by column; the determinant is the same either way.
  *
- * @param a  row 0, column 0
- * @param b  row 0, column 1
- * @param c  row 0, column 2
- * @param d  row 1, column 0
- * @param e  row 1, column 1
- * @param f  row 1, column 2
- * @param g  row 2, column 0
- * @param h  row 2, column 1
+ * @param mat00  row 0, column 0
+ * @param mat01  row 0, column 1
+ * @param mat02  row 0, column 2
+ * @param mat10  row 1, column 0
+ * @param mat11  row 1, column 1
+ * @param mat12  row 1, column 2
+ * @param mat20  row 2, column 0
+ * @param mat21  row 2, column 1
  * @param i  row 2, column 2
  * @return the determinant
  */
 // 3x3 determinant by cofactor expansion along the first column.
-extern "C" float det3x3(float a, float b, float c, float d, float e, float f, float g, float h, float i)
+extern "C" float det3x3(float mat00, float mat01, float mat02, float mat10, float mat11, float mat12, float mat20, float mat21, float i)
 {
-    return a * det2x2(e, f, h, i) - d * det2x2(b, c, h, i) + g * det2x2(b, c, e, f);
+    return mat00 * det2x2(mat11, mat12, mat21, i) - mat10 * det2x2(mat01, mat02, mat21, i) + mat20 * det2x2(mat01, mat02, mat11, mat12);
 }
 #endif
 
@@ -239,25 +239,25 @@ extern "C" float det4x4(void* vm)
 {
     float (*mat)[4] = (float (*)[4])vm;
     float ans;
-    float a1, a2, a3, a4, b1, b2, b3, b4;
-    float c1, c2, c3, c4, d1, d2, d3, d4;
+    float mat00, mat10, mat20, mat30, mat01, mat11, mat21, mat31;
+    float mat02, mat12, mat22, mat32, mat03, mat13, mat23, mat33;
 
-    a1 = mat[0][0]; b1 = mat[0][1];
-    c1 = mat[0][2]; d1 = mat[0][3];
+    mat00 = mat[0][0]; mat01 = mat[0][1];
+    mat02 = mat[0][2]; mat03 = mat[0][3];
 
-    a2 = mat[1][0]; b2 = mat[1][1];
-    c2 = mat[1][2]; d2 = mat[1][3];
+    mat10 = mat[1][0]; mat11 = mat[1][1];
+    mat12 = mat[1][2]; mat13 = mat[1][3];
 
-    a3 = mat[2][0]; b3 = mat[2][1];
-    c3 = mat[2][2]; d3 = mat[2][3];
+    mat20 = mat[2][0]; mat21 = mat[2][1];
+    mat22 = mat[2][2]; mat23 = mat[2][3];
 
-    a4 = mat[3][0]; b4 = mat[3][1];
-    c4 = mat[3][2]; d4 = mat[3][3];
+    mat30 = mat[3][0]; mat31 = mat[3][1];
+    mat32 = mat[3][2]; mat33 = mat[3][3];
 
-    ans = a1 * det3x3(b2, b3, b4, c2, c3, c4, d2, d3, d4)
-        - b1 * det3x3(a2, a3, a4, c2, c3, c4, d2, d3, d4)
-        + c1 * det3x3(a2, a3, a4, b2, b3, b4, d2, d3, d4)
-        - d1 * det3x3(a2, a3, a4, b2, b3, b4, c2, c3, c4);
+    ans = mat00 * det3x3(mat11, mat21, mat31, mat12, mat22, mat32, mat13, mat23, mat33)
+        - mat01 * det3x3(mat10, mat20, mat30, mat12, mat22, mat32, mat13, mat23, mat33)
+        + mat02 * det3x3(mat10, mat20, mat30, mat11, mat21, mat31, mat13, mat23, mat33)
+        - mat03 * det3x3(mat10, mat20, mat30, mat11, mat21, mat31, mat12, mat22, mat32);
     return ans;
 }
 #endif
@@ -279,40 +279,40 @@ extern "C" float det3x3(float a, float b, float c, float d, float e, float f, fl
 extern "C" void adjoint(void* vm)
 {
     float (*mat)[4] = (float (*)[4])vm;
-    float a1, a2, a3, a4, b1, b2, b3, b4;
-    float c1, c2, c3, c4, d1, d2, d3, d4;
+    float mat00, mat10, mat20, mat30, mat01, mat11, mat21, mat31;
+    float mat02, mat12, mat22, mat32, mat03, mat13, mat23, mat33;
 
-    a1 = mat[0][0]; b1 = mat[0][1];
-    c1 = mat[0][2]; d1 = mat[0][3];
+    mat00 = mat[0][0]; mat01 = mat[0][1];
+    mat02 = mat[0][2]; mat03 = mat[0][3];
 
-    a2 = mat[1][0]; b2 = mat[1][1];
-    c2 = mat[1][2]; d2 = mat[1][3];
+    mat10 = mat[1][0]; mat11 = mat[1][1];
+    mat12 = mat[1][2]; mat13 = mat[1][3];
 
-    a3 = mat[2][0]; b3 = mat[2][1];
-    c3 = mat[2][2]; d3 = mat[2][3];
+    mat20 = mat[2][0]; mat21 = mat[2][1];
+    mat22 = mat[2][2]; mat23 = mat[2][3];
 
-    a4 = mat[3][0]; b4 = mat[3][1];
-    c4 = mat[3][2]; d4 = mat[3][3];
+    mat30 = mat[3][0]; mat31 = mat[3][1];
+    mat32 = mat[3][2]; mat33 = mat[3][3];
 
-    mat[0][0] =  det3x3(b2, b3, b4, c2, c3, c4, d2, d3, d4);
-    mat[1][0] = -det3x3(a2, a3, a4, c2, c3, c4, d2, d3, d4);
-    mat[2][0] =  det3x3(a2, a3, a4, b2, b3, b4, d2, d3, d4);
-    mat[3][0] = -det3x3(a2, a3, a4, b2, b3, b4, c2, c3, c4);
+    mat[0][0] =  det3x3(mat11, mat21, mat31, mat12, mat22, mat32, mat13, mat23, mat33);
+    mat[1][0] = -det3x3(mat10, mat20, mat30, mat12, mat22, mat32, mat13, mat23, mat33);
+    mat[2][0] =  det3x3(mat10, mat20, mat30, mat11, mat21, mat31, mat13, mat23, mat33);
+    mat[3][0] = -det3x3(mat10, mat20, mat30, mat11, mat21, mat31, mat12, mat22, mat32);
 
-    mat[0][1] = -det3x3(b1, b3, b4, c1, c3, c4, d1, d3, d4);
-    mat[1][1] =  det3x3(a1, a3, a4, c1, c3, c4, d1, d3, d4);
-    mat[2][1] = -det3x3(a1, a3, a4, b1, b3, b4, d1, d3, d4);
-    mat[3][1] =  det3x3(a1, a3, a4, b1, b3, b4, c1, c3, c4);
+    mat[0][1] = -det3x3(mat01, mat21, mat31, mat02, mat22, mat32, mat03, mat23, mat33);
+    mat[1][1] =  det3x3(mat00, mat20, mat30, mat02, mat22, mat32, mat03, mat23, mat33);
+    mat[2][1] = -det3x3(mat00, mat20, mat30, mat01, mat21, mat31, mat03, mat23, mat33);
+    mat[3][1] =  det3x3(mat00, mat20, mat30, mat01, mat21, mat31, mat02, mat22, mat32);
 
-    mat[0][2] =  det3x3(b1, b2, b4, c1, c2, c4, d1, d2, d4);
-    mat[1][2] = -det3x3(a1, a2, a4, c1, c2, c4, d1, d2, d4);
-    mat[2][2] =  det3x3(a1, a2, a4, b1, b2, b4, d1, d2, d4);
-    mat[3][2] = -det3x3(a1, a2, a4, b1, b2, b4, c1, c2, c4);
+    mat[0][2] =  det3x3(mat01, mat11, mat31, mat02, mat12, mat32, mat03, mat13, mat33);
+    mat[1][2] = -det3x3(mat00, mat10, mat30, mat02, mat12, mat32, mat03, mat13, mat33);
+    mat[2][2] =  det3x3(mat00, mat10, mat30, mat01, mat11, mat31, mat03, mat13, mat33);
+    mat[3][2] = -det3x3(mat00, mat10, mat30, mat01, mat11, mat31, mat02, mat12, mat32);
 
-    mat[0][3] = -det3x3(b1, b2, b3, c1, c2, c3, d1, d2, d3);
-    mat[1][3] =  det3x3(a1, a2, a3, c1, c2, c3, d1, d2, d3);
-    mat[2][3] = -det3x3(a1, a2, a3, b1, b2, b3, d1, d2, d3);
-    mat[3][3] =  det3x3(a1, a2, a3, b1, b2, b3, c1, c2, c3);
+    mat[0][3] = -det3x3(mat01, mat11, mat21, mat02, mat12, mat22, mat03, mat13, mat23);
+    mat[1][3] =  det3x3(mat00, mat10, mat20, mat02, mat12, mat22, mat03, mat13, mat23);
+    mat[2][3] = -det3x3(mat00, mat10, mat20, mat01, mat11, mat21, mat03, mat13, mat23);
+    mat[3][3] =  det3x3(mat00, mat10, mat20, mat01, mat11, mat21, mat02, mat12, mat22);
 }
 #endif
 

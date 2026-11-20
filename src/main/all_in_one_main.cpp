@@ -1320,11 +1320,11 @@ INCLUDE_ASM("main/all_in_one_main", cDebugFE_getBoxTID);
 /**
  * Returns the word at +0x20 of the debug front end, 8 bytes after its font word (cDebugFE_getFont).
  *
- * @param arg0  the debug front end
+ * @param debugFE  the debug front end
  * @return the word at +0x20
  */
-extern "C" int cDebugFE_getBoxTID(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x20)));
+extern "C" int cDebugFE_getBoxTID(void *debugFE) {
+    return (*(int *)((char*)(debugFE) + (0x20)));
 }
 #endif
 
@@ -1334,10 +1334,10 @@ INCLUDE_ASM("main/all_in_one_main", cDebugFE_startlobby);
 /**
  * Copies the word at +0x10 of the debug front end into +0x14, the word just before its font (+0x18).
  *
- * @param arg0  the debug front end
+ * @param debugFE  the debug front end
  */
-extern "C" void cDebugFE_startlobby(void *arg0) {
-    (*(int *)((char*)(arg0) + (0x14))) = (int) (*(int *)((char*)(arg0) + (0x10)));
+extern "C" void cDebugFE_startlobby(void *debugFE) {
+    (*(int *)((char*)(debugFE) + (0x14))) = (int) (*(int *)((char*)(debugFE) + (0x10)));
 }
 #endif
 
@@ -1502,18 +1502,18 @@ extern int D_0046D8C0[];
  * Destroys a private message: its three strings, then frees the object when asked to.
  *
  * Stores the vtable D_0046D8C0 at +0xC, destroys the cBXStrings at +0x8, +0x4 and +0x0 (cBXString__cBXString with flags
- * 2: destroy without freeing) and calls operator_delete when bit 0 of @p arg1 is set.
+ * 2: destroy without freeing) and calls operator_delete when bit 0 of @p flags is set.
  *
- * @param arg0  the message (0x10 bytes: three cBXStrings and the vptr at +0xC)
- * @param arg1  g++ destructor flags; bit 0 set frees the object's memory
+ * @param message  the message (0x10 bytes: three cBXStrings and the vptr at +0xC)
+ * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cPrivateMessage__cPrivateMessage(char *arg0, int arg1) {
-    *(int **)(arg0 + 0xC) = D_0046D8C0;
-    cBXString__cBXString(arg0 + 8, 2);
-    cBXString__cBXString(arg0 + 4, 2);
-    cBXString__cBXString(arg0, 2);
-    if (arg1 & 1) {
-        operator_delete((int*)arg0);
+extern "C" void cPrivateMessage__cPrivateMessage(char *message, int flags) {
+    *(int **)(message + 0xC) = D_0046D8C0;
+    cBXString__cBXString(message + 8, 2);
+    cBXString__cBXString(message + 4, 2);
+    cBXString__cBXString(message, 2);
+    if (flags & 1) {
+        operator_delete((int*)message);
     }
 }
 #endif
@@ -1644,11 +1644,11 @@ INCLUDE_ASM("main/all_in_one_main", cFE_getUI);
 /**
  * Returns the front end's UI engine, the pointer at +0xC.
  *
- * @param arg0  the front end (cFE)
+ * @param frontEnd  the front end (cFE)
  * @return the UI engine pointer cFE_cFE allocates ("UIEngine") and stores at +0xC
  */
-extern "C" int cFE_getUI(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0xC)));
+extern "C" int cFE_getUI(void *frontEnd) {
+    return (*(int *)((char*)(frontEnd) + (0xC)));
 }
 #endif
 
@@ -1680,17 +1680,17 @@ extern "C" void cUILocaleInterface_setTextNumCharFlag_CC08(void*, int) __asm__("
 /**
  * Sets the locale's display mode (the byte at +0x0) and turns the text-num-char flag on for mode 2.
  *
- * Stores @p v at +0x0, then calls cUILocaleInterface_setTextNumCharFlag, which sets bit 3 of the attribute byte at +0x3 (tAttrLocale's fourth
- * flag, On Tour's mTextNumChar) when @p v is 2 and clears it otherwise. It is slot 0x14 of both the base locale vtable
+ * Stores @p mode at +0x0, then calls cUILocaleInterface_setTextNumCharFlag, which sets bit 3 of the attribute byte at +0x3 (tAttrLocale's fourth
+ * flag, On Tour's mTextNumChar) when @p mode is 2 and clears it otherwise. It is slot 0x14 of both the base locale vtable
  * D_0046D848 and the front-end locale's D_0046BF98.
  *
  * The object is the locale interface.
  *
- * @param v  the new display mode
+ * @param mode  the new display mode
  */
-extern "C" void cUILocaleInterface_setDisplayMode(signed char *self, signed char v) {
-    *self = v;
-    cUILocaleInterface_setTextNumCharFlag_CC08(self, v == 2);
+extern "C" void cUILocaleInterface_setDisplayMode(signed char *self, signed char mode) {
+    *self = mode;
+    cUILocaleInterface_setTextNumCharFlag_CC08(self, mode == 2);
 }
 #endif
 
@@ -1704,10 +1704,10 @@ INCLUDE_ASM("main/all_in_one_main", cUILocaleInterface_setLanguage);
  * also reloads the language files.
  *
  * @param self  the locale interface
- * @param arg1  the language index
+ * @param language  the language index
  */
-extern "C" void cUILocaleInterface_setLanguage(void *self, signed char arg1) {
-    (*(signed char *)((char*)(self) + (1))) = arg1;
+extern "C" void cUILocaleInterface_setLanguage(void *self, signed char language) {
+    (*(signed char *)((char*)(self) + (1))) = language;
 }
 #endif
 
@@ -1753,13 +1753,13 @@ extern void* D_0046D810_CC60[] __asm__("cFECustom_vtbl");
  *
  * No other field is set. No caller in the code; it is an out-of-line copy of an inline constructor.
  *
- * @param arg0  the object
- * @return @p arg0
+ * @param feCustom  the object
+ * @return @p feCustom
  */
-extern "C" void *cFECustom_cFECustom1(void *arg0) {
-    (*(int *)((char*)(arg0) + (0))) = 0;
-    (*(void ***)((char*)(arg0) + (4))) = D_0046D810_CC60;
-    return arg0;
+extern "C" void *cFECustom_cFECustom1(void *feCustom) {
+    (*(int *)((char*)(feCustom) + (0))) = 0;
+    (*(void ***)((char*)(feCustom) + (4))) = D_0046D810_CC60;
+    return feCustom;
 }
 #endif
 
@@ -1799,10 +1799,10 @@ INCLUDE_ASM("main/all_in_one_main", cFECustom_setProfileLaunchScreen);
  * No caller or vtable references it; it sits with the cFECustom helpers.
  *
  * @param self  the object
- * @param arg1  the value to store
+ * @param launchScreen  the value to store
  */
-extern "C" void cFECustom_setProfileLaunchScreen(void *self, int arg1) {
-    (*(int *)((char*)(self) + (0xC))) = arg1;
+extern "C" void cFECustom_setProfileLaunchScreen(void *self, int launchScreen) {
+    (*(int *)((char*)(self) + (0xC))) = launchScreen;
 }
 #endif
 
@@ -2530,10 +2530,10 @@ INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_setIncludeNumbers);
  * Sets the on-screen keyboard's word at +0xD8 (func_00180508 starts it at 0).
  *
  * @param screen  the keyboard
- * @param arg1  the new value
+ * @param includeNumbers  the new value
  */
-extern "C" void cScreenKeyboard_setIncludeNumbers(void *screen, int arg1) {
-    (*(int *)((char*)(screen) + (0xD8))) = arg1;
+extern "C" void cScreenKeyboard_setIncludeNumbers(void *screen, int includeNumbers) {
+    (*(int *)((char*)(screen) + (0xD8))) = includeNumbers;
 }
 #endif
 
@@ -2544,10 +2544,10 @@ INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_setIncludeShift);
  * Sets the on-screen keyboard's word at +0xDC (func_00180508 starts it at 0).
  *
  * @param screen  the keyboard
- * @param arg1  the new value
+ * @param includeShift  the new value
  */
-extern "C" void cScreenKeyboard_setIncludeShift(void *screen, int arg1) {
-    (*(int *)((char*)(screen) + (0xDC))) = arg1;
+extern "C" void cScreenKeyboard_setIncludeShift(void *screen, int includeShift) {
+    (*(int *)((char*)(screen) + (0xDC))) = includeShift;
 }
 #endif
 
@@ -2558,10 +2558,10 @@ INCLUDE_ASM("main/all_in_one_main", cScreenKeyboard_setIncludeSpace);
  * Sets the on-screen keyboard's word at +0xE0 (func_00180508 starts it at 0).
  *
  * @param screen  the keyboard
- * @param arg1  the new value
+ * @param includeSpace  the new value
  */
-extern "C" void cScreenKeyboard_setIncludeSpace(void *screen, int arg1) {
-    (*(int *)((char*)(screen) + (0xE0))) = arg1;
+extern "C" void cScreenKeyboard_setIncludeSpace(void *screen, int includeSpace) {
+    (*(int *)((char*)(screen) + (0xE0))) = includeSpace;
 }
 #endif
 
@@ -4151,9 +4151,9 @@ extern "C" void *cFEMemCard_cFEMemCard1(void *self) {
     *(int **)((char *)self + 8) = D_00474E08;
     *(int *)((char *)self + 0x4C) = 0;
     *(int *)((char *)self + 0x54) = 0;
-    unsigned short t = D_004A1390[0];
+    unsigned short emptyChar = D_004A1390[0];
     *(int **)((char *)self + 8) = D_0046C980;
-    *(unsigned short *)((char *)self + 0x58) = t;
+    *(unsigned short *)((char *)self + 0x58) = emptyChar;
     return self;
 }
 #endif
@@ -5419,9 +5419,9 @@ struct sList_E7B0 {
 extern "C" void* cFEStateNet_cFEStateNet1(cFEStateNet* self)
 {
     // An unused 16-byte local is needed to reproduce the 0x40-byte frame.
-    int unused[4];
+    int framePad[4];
     func_0039E318_E7B0(self, 0, 0);
-    sList_E7B0* l = (sList_E7B0*)(((char*)self) + 0x6C8);
+    sList_E7B0* msgList = (sList_E7B0*)(((char*)self) + 0x6C8);
     self->unk_048 = 0;
     self->unk_058 = 0;
     self->mpKeyboard = 0;
@@ -5433,8 +5433,8 @@ extern "C" void* cFEStateNet_cFEStateNet1(cFEStateNet* self)
     self->mVtbl = cFEStateNet_vtbl;
     cBXString_cBXString2(((char*)self) + 0x6C0, D_004A1390_E7B0);
     self->mMsgList.mpNode = (void*)((sListNode_E7B0*)cMemMan_alloc(0xC, str_StlBlock, 0x20000000, 0));
-    l->head->next = (sListNode_E7B0*)self->mMsgList.mpNode;
-    l->head->prev = (sListNode_E7B0*)self->mMsgList.mpNode;
+    msgList->head->next = (sListNode_E7B0*)self->mMsgList.mpNode;
+    msgList->head->prev = (sListNode_E7B0*)self->mMsgList.mpNode;
     return ((void*)self);
 }
 #endif

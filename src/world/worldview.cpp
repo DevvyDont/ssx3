@@ -2431,13 +2431,13 @@ extern char D_2358[];
  *
  * Offsets are relative to @p ctx's +0x24 data. No C caller in the source.
  *
- * @param a0  unused
- * @param a1  unused
+ * @param ignored0  unused
+ * @param ignored1  unused
  * @param ctx  the record whose +0x24 data the offsets are relative to
  * @param tagPtr  the first DMA tag
  * @return the address after the ret tag
  */
-extern "C" char* func_003AC438(int a0, int a1, char* ctx, char* tagPtr)
+extern "C" char* func_003AC438(int ignored0, int ignored1, char* ctx, char* tagPtr)
 {
     int done = 0;
     int first = 1;

@@ -5659,8 +5659,8 @@ extern "C" void cLookAtChaseAlgorithm_updateFollowDistance_impl(char* self, char
         pk = &decelSmoothness;
     else
     {
-        int u = 0; // FAKEMATCH: dead chain, see header
-        int w = u;
+        int deadZero = 0; // FAKEMATCH: dead chain, see header
+        int w = deadZero;
         pk = &accelSmoothness;
     }
     const float& k = *pk;
@@ -8715,8 +8715,8 @@ extern "C" void f_6C60_def(void* algorithm, long id)
     if (id == ((LongFn_6C60)mvt[7].fn)(mgr + mvt[7].delta)) {
         sVec4 pos = getVec_6C60(self, 4);
         sVec4 dir = getVec_6C60(self, 3);
-        sVec4 v;
-        sVec4 t;
+        sVec4 vecCopy;
+        sVec4 scratchVec;
         sVec4 directionVel;
         *(int*)(self + 0x2C0) = 5000;
         *(float*)(self + 0x1E0) = 10.0f;
@@ -8732,10 +8732,10 @@ extern "C" void f_6C60_def(void* algorithm, long id)
         *(float*)(self + 0x1D4) = ((FloatFn_6C60)svt1[13].fn)(self + svt1[13].delta);
         *(int*)(self + 0x1E8) = 0;
         *(int*)(self + 0x1EC) = 0;
-        Cross_6C60(t, (const sVec4&)D_004FF160_6C60, pos);
-        v = t;
+        Cross_6C60(scratchVec, (const sVec4&)D_004FF160_6C60, pos);
+        vecCopy = scratchVec;
         *(float*)(self + 0x224) = 0.92f;
-        *(sVec4*)(self + 0xF0) = t;
+        *(sVec4*)(self + 0xF0) = scratchVec;
         *(int*)(self + 0x2E4) = 1;
         *(int*)(self + 0x2C4) = -1;
         *(float*)(self + 0x228) = 1.0f;
@@ -8758,20 +8758,20 @@ extern "C" void f_6C60_def(void* algorithm, long id)
         *(int*)(self + 0x244) = 0;
         *(int*)(self + 0x240) = 0;
         *(sVec4*)(self + 0x190) = dir;
-        Scale_6C60(t, pos, 250.0f);
+        Scale_6C60(scratchVec, pos, 250.0f);
         *(int*)(self + 0x300) = 1;
-        v = t;
-        *(sVec4*)(self + 0x1A0) = t;
+        vecCopy = scratchVec;
+        *(sVec4*)(self + 0x1A0) = scratchVec;
         *(float*)(self + 0x248) = 0.5f;
         *(int*)(self + 0x24C) = 0;
         *(int*)(self + 0x250) = 0;
         {
             char* cam = *(char**)(self + 0x30);
             sVEntry<void>* cvt = *(sVEntry<void>**)cam;
-            ((VecFn2_6C60)cvt[4].fn)(&v, cam + cvt[4].delta);
+            ((VecFn2_6C60)cvt[4].fn)(&vecCopy, cam + cvt[4].delta);
         }
         *(int*)(self + 0x2EC) = 0;
-        *(sVec4*)(self + 0x1B0) = v;
+        *(sVec4*)(self + 0x1B0) = vecCopy;
         *(int*)(self + 0x2B4) = 0;
         *(int*)(self + 0x2B8) = 0;
         *(int*)(self + 0x2F0) = 0;
@@ -8787,10 +8787,10 @@ extern "C" void f_6C60_def(void* algorithm, long id)
         {
             char* cam = *(char**)(self + 0x30);
             sVEntry<void>* cvt = *(sVEntry<void>**)cam;
-            ((VecFn2_6C60)cvt[4].fn)(&t, cam + cvt[4].delta);
+            ((VecFn2_6C60)cvt[4].fn)(&scratchVec, cam + cvt[4].delta);
         }
-        Scale_6C60(directionVel, t, 2.0f);
-        v = directionVel;
+        Scale_6C60(directionVel, scratchVec, 2.0f);
+        vecCopy = directionVel;
         *(sVec4*)(self + 0x1C0) = directionVel;
         *(sVec4*)(self + 0x100) = dir;
         *(int*)(self + 0x108) = 0;

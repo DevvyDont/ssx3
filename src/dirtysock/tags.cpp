@@ -1389,7 +1389,7 @@ INCLUDE_ASM("dirtysock/tags", func_003ECE38);
  * (when both @p out and @p dflt are given).
  *
  * @param src    the tag record
- * @param unused not read
+ * @param ignored not read
  * @param out    receives the block, or 0 to only locate it
  * @param size   size of @p out in bytes
  * @param dflt   text copied when there is no block, or 0
@@ -1397,7 +1397,7 @@ INCLUDE_ASM("dirtysock/tags", func_003ECE38);
  */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Finds the next "=" or ":" field separator in p and copies the following value into out (or dflt when there is none); returns the value start or 0.
-extern "C" unsigned char* func_003ECE38(unsigned char* src, int unused, char* out, int size, const char* dflt)
+extern "C" unsigned char* func_003ECE38(unsigned char* src, int ignored, char* out, int size, const char* dflt)
 {
     int i;
     unsigned char* cursor = src;

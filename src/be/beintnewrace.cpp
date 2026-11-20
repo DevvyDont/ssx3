@@ -163,10 +163,10 @@ extern "C" void cBENewRaceInterface_setDebugLocationFile(void* self, const char*
     char* base = (char*)&D_0043D984;
     char* newRace = (char*)&(*(&cBENewRaceInterface_newRace));
     strcpy(base + *(int*)(newRace + 0x40) * 100, name);
-    char* p1 = base + 0x10;
-    strcpy(p1 + *(int*)(newRace + 0x40) * 100, name);
-    char* p2 = base - 0x30;
-    strcpy(p2 + *(int*)(newRace + 0x40) * 100, name);
+    char* bigFileNames = base + 0x10;
+    strcpy(bigFileNames + *(int*)(newRace + 0x40) * 100, name);
+    char* locationNames = base - 0x30;
+    strcpy(locationNames + *(int*)(newRace + 0x40) * 100, name);
     strcpy(str_dbg, name);
 }
 #endif

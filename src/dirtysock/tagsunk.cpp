@@ -92,12 +92,12 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00259398__FPviT0T0);
  * func_0025A778() installs it as the room list's compare callback (func_003EE5A0); the name is the string at +0x1C of
  * each entry.
  *
- * @param a1   not read
+ * @param sortParam   not read
  * @param lhs  first entry
  * @param rhs  second entry
  * @return strcasecmp()'s result: negative, 0 or positive as lhs sorts before, with or after rhs
  */
-void* func_00259398(void* self, int a1, void* lhs, void* rhs)
+void* func_00259398(void* self, int sortParam, void* lhs, void* rhs)
 {
     return strcasecmp((char*)lhs + 0x1c, (char*)rhs + 0x1c);
 }
@@ -112,12 +112,12 @@ INCLUDE_ASM("dirtysock/tagsunk", func_002593B8__FPviT0T0);
  * func_0025A778() installs it as the user list's compare callback (func_003EE5A0); the name is the string at +0x8 of
  * each entry.
  *
- * @param a1   not read
+ * @param sortParam   not read
  * @param lhs  first entry
  * @param rhs  second entry
  * @return strcasecmp()'s result: negative, 0 or positive as lhs sorts before, with or after rhs
  */
-void* func_002593B8(void* self, int a1, void* lhs, void* rhs)
+void* func_002593B8(void* self, int sortParam, void* lhs, void* rhs)
 {
     return strcasecmp((char*)lhs + 0x8, (char*)rhs + 0x8);
 }
@@ -131,11 +131,11 @@ INCLUDE_ASM("dirtysock/tagsunk", func_002593D8);
  *
  * Has the (self, a1, entry) shape of the lobby list callbacks; no caller or reference is known in the split.
  *
- * @param a1     not read
+ * @param filterParam     not read
  * @param entry  the list entry
  * @return 1 when bit 21 of the entry's word at +0x4 is clear, 0 when it is set
  */
-extern "C" int func_002593D8(void* self, void* a1, void* entry)
+extern "C" int func_002593D8(void* self, void* filterParam, void* entry)
 {
     return (((*(int*)((char*)entry + 4)) >> 0x15) ^ 1) & 1;
 }
@@ -148,12 +148,12 @@ INCLUDE_ASM("dirtysock/tagsunk", func_002593F0);
  *
  * A compare callback of the lobby-list shape; no caller or reference is known in the split.
  *
- * @param a1   not read
+ * @param sortParam   not read
  * @param lhs  first entry
  * @param rhs  second entry
  * @return *rhs - *lhs (negative when lhs's value is larger)
  */
-extern "C" int func_002593F0(void* self, void* a1, int* lhs, int* rhs)
+extern "C" int func_002593F0(void* self, void* sortParam, int* lhs, int* rhs)
 {
     return *rhs - *lhs;
 }
@@ -171,12 +171,12 @@ extern char str_l[];
  * longs, into two ints) and subtracts the first values. func_00259468() is the ascending version. No caller or
  * reference is known in the split.
  *
- * @param a1   not read
+ * @param sortParam   not read
  * @param lhs  first entry
  * @param rhs  second entry
  * @return rhs's first value minus lhs's
  */
-extern "C" int func_00259400(void* self, int a1, char* lhs, char* rhs)
+extern "C" int func_00259400(void* self, int sortParam, char* lhs, char* rhs)
 {
     int lhsStats[2];
     int rhsStats[2];
@@ -197,12 +197,12 @@ extern char str_l[];
  * Same decoding as func_00259400() (the text at +0x28, template "l*"), with the subtraction reversed. No caller or
  * reference is known in the split.
  *
- * @param a1   not read
+ * @param sortParam   not read
  * @param lhs  first entry
  * @param rhs  second entry
  * @return lhs's first value minus rhs's
  */
-extern "C" int func_00259468(void* self, int a1, char* lhs, char* rhs)
+extern "C" int func_00259468(void* self, int sortParam, char* lhs, char* rhs)
 {
     int lhsStats[2];
     int rhsStats[2];
@@ -558,9 +558,9 @@ static inline sMsgListIterK2c sMsgListK2c_insert(sMsgListIterK2c pos, void* cons
  * Called through the functor thunk func_00268AE0 (the rank-list and rank-snapshot callback set by func_0025A778() and
  * func_0025E348()); func_0025E348() also calls it directly.
  *
- * @param unused  not read
+ * @param message  not read
  */
-extern "C" void LobbyMan_onranklistupdate(LobbyMan* self, int unused)
+extern "C" void LobbyMan_onranklistupdate(LobbyMan* self, int message)
 {
     int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
     event[0] = 225;
@@ -711,8 +711,8 @@ extern "C" void LobbyMan_onchatmsg(LobbyMan* self, char* msg)
             break;
         char cmd[0x100];
         char sig[0x40];
-        int a, b, c, d, e, f, g, h, i, j, k, l;
-        func_004178B0(text, str_pct_s_pct_d_pct_d_pct_d_pct_d_pct_d_pct, cmd, &a, &b, &c, &d, &e, &f, &g, &h, sig, &i, &j, &k, &l);
+        int locationId, gameMode, gameEvent, ranked, multipliers, powerUps, numberAI, pointIcons, i, j, k, rank;
+        func_004178B0(text, str_pct_s_pct_d_pct_d_pct_d_pct_d_pct_d_pct, cmd, &locationId, &gameMode, &gameEvent, &ranked, &multipliers, &powerUps, &numberAI, &pointIcons, sig, &i, &j, &k, &rank);
         if (func_004165A8(cmd, str_challenge) == 0) {
             if (func_004165A8(sig, cCommSystem_getSignature(cCommSystem_mCommSystem)) != 0) {
                 func_0025FB80(self, (int)name, D_004807E8);
@@ -721,7 +721,7 @@ extern "C" void LobbyMan_onchatmsg(LobbyMan* self, char* msg)
             } else if (*(int*)self == 22 && func_004165A8(self->mOpponent, name) == 0) {
                 func_0025F628(self, 1, 1);
             } else {
-                func_00262AF0((BuddyMan*)((char*)Mgr_9B10()), name, a, b, c, d != 0, e != 0, f != 0, g, h != 0, text, i, j, k, l);
+                func_00262AF0((BuddyMan*)((char*)Mgr_9B10()), name, locationId, gameMode, gameEvent, ranked != 0, multipliers != 0, powerUps != 0, numberAI, pointIcons != 0, text, i, j, k, rank);
             }
         } else if (func_004165A8(cmd, str_lockChal) == 0) {
             if (*(int*)self == 22 && func_004165A8(self->mOpponent, name) == 0) {
@@ -6258,7 +6258,7 @@ extern void* cBXString_EmptyString;
 extern "C" void func_00260F80(void)
 {
     // An unused 32-byte local is needed to reproduce the 0x30-byte frame.
-    int unused[8];
+    int framePad[8];
     char* buddyMan = (char*)operator new(0xF0, str_BuddyMan, 0x20000000, 0);
     *(int*)(buddyMan + 0x40) = -1;
     *(int*)(buddyMan + 0xA4) = 0x15180;
@@ -6885,9 +6885,9 @@ static inline sMsgListIter_002618C0 sMsgList_002618C0_insert(sMsgListIter_002618
  * The callback thunk func_00268FB8 calls it; func_002620D8 registers it with the add call func_003F0E38. The reply
  * itself is not read.
  *
- * @param unused  not read
+ * @param buddyMan  not read
  */
-extern "C" void BuddyMan_onBuddyAdd(int unused)
+extern "C" void BuddyMan_onBuddyAdd(int buddyMan)
 {
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     int* event = (int*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
@@ -6944,9 +6944,9 @@ struct sMsg_00261970 {
  * The callback thunk func_00268F90 calls it; func_00261EF8 and two other BuddyMan functions register it with the delete
  * call func_003F11F8. The reply itself is not read.
  *
- * @param unused  not read
+ * @param buddyMan  not read
  */
-extern "C" void BuddyMan_onBuddyDelete(int unused)
+extern "C" void BuddyMan_onBuddyDelete(int buddyMan)
 {
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     sMsg_00261970* event = (sMsg_00261970*)cMemMan_alloc(8, str_NetEvent, 0x20000000, 0);
@@ -8535,12 +8535,12 @@ INCLUDE_ASM("dirtysock/tagsunk", func_002634C0);
  *
  * BuddyMan_onconnect installs it on mpRoster with func_003EE5A0. A null entry sorts after a non-null one.
  *
- * @param a1    not read
+ * @param sortParam    not read
  * @param lhs   first entry (its name is at +0), or 0
  * @param rhs   second entry, or 0
  * @return strcasecmp of the names; 0 when both are null, 1 when only @p lhs is, -1 when only @p rhs is
  */
-extern "C" int func_002634C0(void* self, int a1, void* lhs, void* rhs)
+extern "C" int func_002634C0(void* self, int sortParam, void* lhs, void* rhs)
 {
     if (lhs == 0) {
         return rhs != 0;

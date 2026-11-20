@@ -7150,13 +7150,13 @@ extern "C" void func_001E3AC8(int idx, float x, float y)
         clamped = adjusted;
     }
     y = y * 0.9916666746139526f;
-    cSnd_3AC8* s = 0;
+    cSnd_3AC8* gamepad = 0;
     if (PadCache != 0) {
-        s = *(cSnd_3AC8**)(PadCache + (i << 2) + 0x2EEC);
+        gamepad = *(cSnd_3AC8**)(PadCache + (i << 2) + 0x2EEC);
     }
-    if (s->getState() == 2) {
-        s->setVolume(0, ((y - 0.5f) * 0.009999999776482582f >? (clamped - 2.0f) / 972.2222290039062f) >? 0.0f);
-        s->setVolume(1, ((y - 70.0f) * 0.0062500000931322575f >? (clamped - 100.0f) / 5000.0f) >? 0.0f);
+    if (gamepad->getState() == 2) {
+        gamepad->setVolume(0, ((y - 0.5f) * 0.009999999776482582f >? (clamped - 2.0f) / 972.2222290039062f) >? 0.0f);
+        gamepad->setVolume(1, ((y - 70.0f) * 0.0062500000931322575f >? (clamped - 100.0f) / 5000.0f) >? 0.0f);
     }
 }
 #endif

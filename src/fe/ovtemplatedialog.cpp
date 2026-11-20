@@ -2055,7 +2055,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
                 // The dead `goto chk` (folded only at combine) keeps `any = 0` from
                 // being propagated by gcse, so the zero flag and its test survive
                 // as in the original (same trick as gamestate cGFTrackStartState_preloadUpdate).
-                { int t = z + 1; if (t != 1) { any = 1; goto chk; } }
+                { int alwaysOne = z + 1; if (alwaysOne != 1) { any = 1; goto chk; } }
                 break;
             }
             case 2:

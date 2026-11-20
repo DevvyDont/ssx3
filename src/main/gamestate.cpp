@@ -236,9 +236,9 @@ extern "C" void cGFRidingState_gainFocus(void)
     cAI_setAIState(*(void**)(cGameState_mpGame + 0xC), 5);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (D_00535C10[0] != 4) {
-        char* g = cGameState_mpGame;
-        *(int*)(*(char**)(g + 0xC) + 0x14) = 1;
-        *(int*)(*(char**)(g + 0xC) + 0x8C) = 0;
+        char* game = cGameState_mpGame;
+        *(int*)(*(char**)(game + 0xC) + 0x14) = 1;
+        *(int*)(*(char**)(game + 0xC) + 0x8C) = 0;
     }
     cBE_setState(1);
     char* gs = cGameState_mpGame;

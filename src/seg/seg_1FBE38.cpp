@@ -4486,11 +4486,11 @@ extern "C" V3_2048 SetGameModeFunc(int n, Ent_2048 *params) {
     if (notBusy) {
         int mode = 0;
         unsigned id = buf[0];
-        int b1 = buf[1];
+        int secondValue = buf[1];
         int w = *(int*)(*(char**)(D_004A28A8_2048 + 0x84) + 0x78);
         if (id < 8)
             mode = D_00445E40_2048[id];
-        if (b1 == 0) {
+        if (secondValue == 0) {
             if (mode != 1)
                 cWScriptMan_failActiveLocalMission_2048(D_004A3DD8_2048, id);
             cSectionMan_eventbegin_2048(w, mode);

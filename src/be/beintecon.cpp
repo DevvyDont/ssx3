@@ -1106,9 +1106,9 @@ extern "C" void func_00151A88(sEconItems_151A88* self, int k)
     }
     for (i = n; i < 525; i++)
     {
-        sEconItem_151A88* q = &self->items[i];
-        q->id = -1;
-        q->flags = 0;
+        sEconItem_151A88* emptySlot = &self->items[i];
+        emptySlot->id = -1;
+        emptySlot->flags = 0;
     }
     func_001513B8(self);
 }

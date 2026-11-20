@@ -696,8 +696,8 @@ extern "C" void cGameModeHandler_purge(void* self)
     gm->unk_94 = 0;
     func_00416210(gm->iCharacters, 0, 40);
     func_00416210(cGameModeHandler_pManager->iCheatCharacters, 0, 40);
-    sVEntry00238C80* e = &(*(sVEntry00238C80**)self)[5];
-    e->fn((char*)self + e->delta);
+    sVEntry00238C80* vtEntry = &(*(sVEntry00238C80**)self)[5];
+    vtEntry->fn((char*)self + vtEntry->delta);
 }
 #endif
 

@@ -124,7 +124,7 @@ extern "C" void cFEStateUberTrick_updateTrickMenu(void* vself)
             *mp = 0;
         }
     }
-    sGateVec_3DE0 textSize0, textSize1, textSize2, s3, instPos0, instPos1, instPos2, btnPos0, btnPos1, btnPos2, btnSize0, btnSize1, btnSize2;
+    sGateVec_3DE0 textSize0, textSize1, textSize2, spareVec, instPos0, instPos1, instPos2, btnPos0, btnPos1, btnPos2, btnSize0, btnSize1, btnSize2;
     int count;
     int cur;
     int slot = 1;
