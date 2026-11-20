@@ -555,16 +555,16 @@ struct sHL { char pad[0xBB8]; signed char lv[1]; };
 /**
  * Returns the level reached in one career highlight by the current character of player 0's profile.
  *
- * Reads byte @p riderIndex of the highlight levels at +0xBB8 in cBELibrary_profileLib[0] for rider slot 0's
+ * Reads byte @p highlight of the highlight levels at +0xBB8 in cBELibrary_profileLib[0] for rider slot 0's
  * character (cBELibrary_getCharacterID(0)). Callers sum the 8 highlights and compare the total with 24.
  *
- * @param riderIndex  which highlight (0-7; On Tour: eBEChallengeType); despite the name, not a rider index
+ * @param highlight  which highlight (0-7; On Tour: eBEChallengeType)
  * @return the highlight's level
  */
-signed char cBEScoreInterface_getCurrentHighlightLevel(void* self, int riderIndex)
+signed char cBEScoreInterface_getCurrentHighlightLevel(void* self, int highlight)
 {
     int charID = cBELibrary_getCharacterID(0);
-    int offset = riderIndex + charID * 3976;
+    int offset = highlight + charID * 3976;
     return ((sHL*)cBELibrary_profileLib)->lv[offset];
 }
 #endif
