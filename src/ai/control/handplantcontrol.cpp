@@ -330,12 +330,12 @@ extern "C" void cHandplantMotion_init(cHandplantMotion* self, sHit_8BA0* hit, fl
     (*(sQ_8BA0*)&self->ApproachDir) = Normalize_8BA0(Sub_8BA0((*(sQ_8BA0*)&self->SplinePos), *(sQ_8BA0*)(*(char**)(*(char**)(rider + 0x780) + 0x2C) + (*(int*)(rider + 0x8A8) << 5))));
     self->EnterSec = dur;
     self->ElapsedSec = 0.0f;
-    self->InitTangentSpeed = Dot_8BA0(*(sQ_8BA0*)((char*)self->mRider + 0x1E0), (*(sQ_8BA0*)&self->SplineDir));
+    self->InitTangentSpeed = Dot_8BA0(*(sQ_8BA0*)&self->mRider->mVelocity, (*(sQ_8BA0*)&self->SplineDir));
     int isRail = 0;
     if (hit->obj)
         isRail = hit->obj->flags & 1;
     self->IsRailSpline = isRail;
-    sQ_8BA0 idealOrientation = *(sQ_8BA0*)((char*)self->mRider + 0x120);
+    sQ_8BA0 idealOrientation = *(sQ_8BA0*)&self->mRider->mRotation;
     sQ_8BA0 deltaRot;
     sQ_8BA0 axis;
     axis = Cross_8BA0(up_8BA0((char*)self->mRider), (const sQ_8BA0&)D_004FF160_8BA0);
@@ -356,7 +356,7 @@ extern "C" void cHandplantMotion_init(cHandplantMotion* self, sHit_8BA0* hit, fl
     self->IsToeside = Dot_8BA0(n, fwd) < 0.0f;
     if (self->IsToeside)
         ScaleEq_8BA0(n, -1.0f);
-    if (*(int*)((char*)self->mRider + 0x320))
+    if (self->mRider->IsRidingFakie)
         self->IsToeside ^= 1;
     axis = Cross_8BA0(fwd, n);
     len = Len_8BA0(axis);
@@ -365,7 +365,7 @@ extern "C" void cHandplantMotion_init(cHandplantMotion* self, sHit_8BA0* hit, fl
         deltaRot = AxisAngle_8BA0(axis, func_0031C128(len <? 1.0f));
         idealOrientation = QuatMul_8BA0(deltaRot, idealOrientation);
     }
-    deltaRot = QuatMul_8BA0(idealOrientation, Conj_8BA0(*(sQ_8BA0*)((char*)self->mRider + 0x120)));
+    deltaRot = QuatMul_8BA0(idealOrientation, Conj_8BA0(*(sQ_8BA0*)&self->mRider->mRotation));
     float ang;
     if (0.0f < deltaRot.w) {
         ang = (1.5707963705062866f - func_0031C128(deltaRot.w <? 1.0f)) * 2.0f;
@@ -406,7 +406,7 @@ struct sVec4_9178 {
 extern "C" void cHandplantMotion_loseFocus(cHandplantMotion* self)
 {
     cHandplantMotion_calcExitVel(self);
-    *(sVec4_9178*)((char*)self->mRider + 0x1E0) = *(sVec4_9178*)&self->ExitVel;
+    *(sVec4_9178*)&self->mRider->mVelocity = *(sVec4_9178*)&self->ExitVel;
 }
 #endif
 
@@ -572,40 +572,40 @@ static inline int landed_91A8(char* ap)
  */
 extern "C" void cHandplantMotion_step(cHandplantMotion* self)
 {
-    float step = *(float*)((char*)self->mRider + 0x300) * 0.01666666753590107f;
+    float step = self->mRider->mTimeScale * 0.01666666753590107f;
     self->ElapsedSec += step;
     if (self->ElapsedSec <= self->EnterSec) {
         float progress = self->ElapsedSec / self->EnterSec;
-        *(sQ_91A8*)((char*)self->mRider + 0x110) =
+        *(sQ_91A8*)&self->mRider->mPosition =
             vu0Add_91A8(vu0Scale_91A8(vu0Sub_91A8((*(sQ_91A8*)&self->InitPos), (*(sQ_91A8*)&self->SplinePos)), progress * (progress - 2.0f)), (*(sQ_91A8*)&self->InitPos));
-        *(float*)((char*)self->mRider + 0x11C) = 1.0f;
+        self->mRider->mPosition.w = 1.0f;
         sQ_91A8 deltaRot;
         {
             float sinHalf, cosHalf;
             fSinCos(&sinHalf, &cosHalf, self->SnapRotationRate * step * 0.5f);
             deltaRot = sQ_91A8(sinHalf * self->SnapRotationAxis.x, sinHalf * self->SnapRotationAxis.y, sinHalf * self->SnapRotationAxis.z, cosHalf);
         }
-        *(sQ_91A8*)((char*)self->mRider + 0x120) = QuatMul_91A8(deltaRot, *(sQ_91A8*)((char*)self->mRider + 0x120));
+        *(sQ_91A8*)&self->mRider->mRotation = QuatMul_91A8(deltaRot, *(sQ_91A8*)&self->mRider->mRotation);
     } else {
-        *(sQ_91A8*)((char*)self->mRider + 0x110) = (*(sQ_91A8*)&self->SplinePos);
-        *(sQ_91A8*)((char*)self->mRider + 0x1E0) = (const sQ_91A8&)D_004FF120_91A8;
+        *(sQ_91A8*)&self->mRider->mPosition = (*(sQ_91A8*)&self->SplinePos);
+        *(sQ_91A8*)&self->mRider->mVelocity = (const sQ_91A8&)D_004FF120_91A8;
         if (eq_91A8((self), (const sQ_91A8&)D_004FF120_91A8)) {
             if (cHandplantMotion_calcExitVel((self))) {
                 (*(sQ_91A8*)&self->AirPredictorPos) = vu0Add_91A8((*(sQ_91A8*)&self->SplinePos), vu0ScaleP_91A8((const sQ_91A8*)&D_004FF160_91A8, 5.0f));
                 (*(sQ_91A8*)&self->AirPredictorVel) = (*(sQ_91A8*)&self->ExitVel);
-                cAirPredictor_startLaunchIntoAir(*(void**)((char*)self->mRider + 0x788), &(*(sQ_91A8*)&self->AirPredictorPos), &(*(sQ_91A8*)&self->AirPredictorVel),
+                cAirPredictor_startLaunchIntoAir(self->mRider->mAirPredictor, &(*(sQ_91A8*)&self->AirPredictorPos), &(*(sQ_91A8*)&self->AirPredictorVel),
                                                  3333.33349609375f);
-                for (int i = 0; i < 8 || !landed_91A8(*(char**)((char*)self->mRider + 0x788)); i++)
-                    cAirPredictor_updateFlightPath(*(void**)((char*)self->mRider + 0x788), &(*(sQ_91A8*)&self->AirPredictorPos), &(*(sQ_91A8*)&self->AirPredictorVel), 0.01666666753590107f);
+                for (int i = 0; i < 8 || !landed_91A8((char*)self->mRider->mAirPredictor); i++)
+                    cAirPredictor_updateFlightPath(self->mRider->mAirPredictor, &(*(sQ_91A8*)&self->AirPredictorPos), &(*(sQ_91A8*)&self->AirPredictorVel), 0.01666666753590107f);
             }
         } else {
-            if (landed_91A8(*(char**)((char*)self->mRider + 0x788))) {
-                char* ap = *(char**)((char*)self->mRider + 0x788);
+            if (landed_91A8((char*)self->mRider->mAirPredictor)) {
+                char* ap = (char*)self->mRider->mAirPredictor;
                 if (0.0f < vu0Dot_91A8(*(sQ_91A8*)(ap + 0x20), (*(sQ_91A8*)&self->ExitVel)))
-                    cRider_alignRiderAxis((char*)self->mRider, ap + 0x20, ap + 0x10, *(float*)((char*)self->mRider + 0x300) + *(float*)((char*)self->mRider + 0x300),
-                                  *(float*)((char*)self->mRider + 0x300) * 6.632251739501953f);
+                    cRider_alignRiderAxis((char*)self->mRider, ap + 0x20, ap + 0x10, self->mRider->mTimeScale + self->mRider->mTimeScale,
+                                  self->mRider->mTimeScale * 6.632251739501953f);
             } else {
-                cAirPredictor_updateFlightPath(*(void**)((char*)self->mRider + 0x788), &(*(sQ_91A8*)&self->AirPredictorPos), &(*(sQ_91A8*)&self->AirPredictorVel), 0.01666666753590107f);
+                cAirPredictor_updateFlightPath(self->mRider->mAirPredictor, &(*(sQ_91A8*)&self->AirPredictorPos), &(*(sQ_91A8*)&self->AirPredictorVel), 0.01666666753590107f);
             }
         }
     }
@@ -1004,8 +1004,8 @@ extern "C" void cAirMotion_step(cAirMotion* self)
         sVec4HP up = *(sVec4HP*)(rider1 + 0x180);
         *(sVec4HP*)(rider1 + 0x370) = up;
     }
-    *(sVec4HP*)((char*)self->mRider + 0x3D0) = *(sVec4HP*)t4vect_Zero;
-    int st = *(int*)(*(char**)((char*)self->mRider + 0x788) + 0xAC);
+    *(sVec4HP*)&self->mRider->unk_3D0 = *(sVec4HP*)t4vect_Zero;
+    int st = *(int*)((char*)self->mRider->mAirPredictor + 0xAC);
     int ok = 0;
     if (st == 1 || st == 3) ok = 1;
     if (ok) {
@@ -1027,7 +1027,7 @@ extern "C" void cAirMotion_step(cAirMotion* self)
                 x = timeScale / timeLeft;
             else
                 x = timeScale * 59.999996185302734f;
-            float y = *(float*)((char*)self->mRider + 0x300) * 1.396263599395752f;
+            float y = self->mRider->mTimeScale * 1.396263599395752f;
             if (cRider_getControlState(self->mRider) == 5) {
                 char* rider3 = (char*)self->mRider;
                 int big = 1;
@@ -1567,12 +1567,12 @@ extern "C" void cAirMotion_chooseFakieLandAnim(cAirMotion* self, float normSpeed
 {
     if (normSpeed < -2222.22216796875f)
     {
-        cRiderAnimBase_play_i(*(void**)((char*)self->mRider + 0x784), 65, 0, -1.0f);
-        *(int*)((char*)self->mRider + 0x2DC) = 0;
+        cRiderAnimBase_play_i(self->mRider->mRiderAnim, 65, 0, -1.0f);
+        *(int*)&self->mRider->mSpinRate = 0;
     }
     else
     {
-        cRiderAnimBase_play_i(*(void**)((char*)self->mRider + 0x784), 0x40, 0, -1.0f);
+        cRiderAnimBase_play_i(self->mRider->mRiderAnim, 0x40, 0, -1.0f);
     }
 }
 #endif
@@ -1592,8 +1592,8 @@ extern "C" void cAirMotion_chooseLandAnim(cAirMotion* self, float normSpeed)
 {
     if (normSpeed < -2222.22216796875f)
     {
-        cRiderAnimBase_play_i(*(void**)((char*)self->mRider + 0x784), 0x3F, 0, -1.0f);
-        *(int*)((char*)self->mRider + 0x2DC) = 0;
+        cRiderAnimBase_play_i(self->mRider->mRiderAnim, 0x3F, 0, -1.0f);
+        *(int*)&self->mRider->mSpinRate = 0;
     }
     else
     {
@@ -1874,13 +1874,13 @@ extern "C" void cRailslideMotion_gainFocus(cRailslideMotion* self)
     *(int*)&self->RailLeanAngle = 0;
     *(int*)&self->RailTime = 0;
     *(int*)&self->RailOffCenter = 0;
-    *(int*)((char*)self->mRider + 0x2DC) = 0;
+    *(int*)&self->mRider->mSpinRate = 0;
     char* rider4 = (char*)self->mRider;
     *(float*)(rider4 + 0x260) = 0.05000000447034836f;
     *(int*)(rider4 + 0x264) = 0;
     self->ForceNaturalAir = 0;
     *(int*)&self->CrookedSlideAngle = 0;
-    *(sQuadHP_0013AD20*)&self->PrevPos = *(sQuadHP_0013AD20*)((char*)self->mRider + 0x110);
+    *(sQuadHP_0013AD20*)&self->PrevPos = *(sQuadHP_0013AD20*)&self->mRider->mPosition;
     *(int*)&self->StuckSec = 0;
 }
 #endif
@@ -2948,7 +2948,7 @@ extern "C" void cRailslideMotion_loseFocus(cRailslideMotion* self)
     char* rider2 = (char*)self->mRider;
     *(float*)(rider2 + 0x264) = 1.0f;
     *(float*)(rider2 + 0x260) = 0.03333333507180214f;
-    *(int*)((char*)self->mRider + 0x5AC) = 0;
+    self->mRider->unk_5AC = 0;
 }
 #endif
 
@@ -3034,23 +3034,23 @@ extern "C" void* cGroundMotion_cGroundMotion(cGroundMotion* self, int inChrg)
         self->mRider = (cRider*)vb;
         cRider_cRider(vb);
     }
-    *(void**)((char*)self->mRider + 0x6E8) = (void*)&D_00459A98;
-    *(void**)((char*)self->mRider + 0x6D0) = D_00459B90;
-    *(void**)((char*)self->mRider + 0x6C0) = (void*)&D_00459AE0;
+    self->mRider->mScriptObjectVtbl = (void*)&D_00459A98;
+    self->mRider->mScriptObjRiderVtbl = D_00459B90;
+    self->mRider->mVtbl = (void*)&D_00459AE0;
     if (!inChrg)
     {
         sVtbl9_13C650 scriptObjVtbl = D_00459A98;
-        *(void**)((char*)self->mRider + 0x6E8) = &scriptObjVtbl;
+        self->mRider->mScriptObjectVtbl = &scriptObjVtbl;
         char* base = (char*)self->mRider - 0x20;
         int baseDelta = (char*)self - base;
         scriptObjVtbl.e[1].delta = D_00459A98.e[1].delta + baseDelta;
         sVtbl22_13C650 riderVtbl = D_00459AE0;
-        *(void**)((char*)self->mRider + 0x6C0) = &riderVtbl;
+        self->mRider->mVtbl = &riderVtbl;
         riderVtbl.e[1].delta = D_00459AE0.e[1].delta + baseDelta;
     }
     self->AITickOnLoseFocus = 0;
     self->AITickOnGainFocus = 0;
-    *(int*)((char*)self->mRider + 0x31C) = 0;
+    *(int*)&self->mRider->unk_31C = 0;
     return ((void*)self);
 }
 #endif
@@ -3166,7 +3166,7 @@ extern "C" float cGroundMotion_getSnowForce(cGroundMotion* self, float* snow, fl
         force = snow[0] * (1.0f - (height + self->PowderDepth1G + (height + self->PowderDepth1G)) / (self->PowderDepth3G - self->PowderDepth1G));
         force -= snow[7] * normalVel;
     }
-    *(float*)((char*)self->mRider + 0x758) = -height / self->PowderDepth3G >? 0.0f;
+    self->mRider->mAudioPressure = -height / self->PowderDepth3G >? 0.0f;
     return force;
 }
 #endif
@@ -3505,8 +3505,8 @@ extern "C" float cGroundMotion_getDigForce(cGroundMotion* self, float* snow, flo
     }
     dv = dv * hpCurve_13D028(D_004A1140, hpAbs_13D028(sv) * 0.035999998450279236f);
     dv = dv * -snow[2];
-    cBEStatInterface_getEdgingAttrib(cBE_getInterface_Fv(cBE_getBE(), 3), *(int*)((char*)self->mRider + 0x86C), *(int*)((char*)self->mRider + 0xB34));
-    float boostStrength = *(float*)((char*)self->mRider + 0x2FC);
+    cBEStatInterface_getEdgingAttrib(cBE_getInterface_Fv(cBE_getBE(), 3), self->mRider->mAIIndex, self->mRider->mStatsIndex);
+    float boostStrength = self->mRider->mBoostStrength;
     float one = 1.0f;
     if (0.0f < boostStrength)
         dv = dv * (one / (boostStrength * 4.008637428283691f + one));
@@ -7359,18 +7359,18 @@ extern "C" void* cHandplantMotion_cHandplantMotion(cHandplantMotion* self, int i
         self->mRider = (cRider*)vb;
         cRider_cRider(vb);
     }
-    *(void**)((char*)self->mRider + 0x6E8) = (void*)&D_004595C0_00141480;
-    *(void**)((char*)self->mRider + 0x6D0) = D_00459B90;
-    *(void**)((char*)self->mRider + 0x6C0) = (void*)&D_00459608_00141480;
+    self->mRider->mScriptObjectVtbl = (void*)&D_004595C0_00141480;
+    self->mRider->mScriptObjRiderVtbl = D_00459B90;
+    self->mRider->mVtbl = (void*)&D_00459608_00141480;
     if (!inChrg)
     {
         sVtblA_00141480 scriptObjVtbl = D_004595C0_00141480;
-        *(void**)((char*)self->mRider + 0x6E8) = &scriptObjVtbl;
+        self->mRider->mScriptObjectVtbl = &scriptObjVtbl;
         char* base = (char*)self->mRider - 0xB0;
         int baseDelta = (char*)self - base;
         scriptObjVtbl.e[1].delta = D_004595C0_00141480.e[1].delta + baseDelta;
         sVtblB_00141480 riderVtbl = D_00459608_00141480;
-        *(void**)((char*)self->mRider + 0x6C0) = &riderVtbl;
+        self->mRider->mVtbl = &riderVtbl;
         riderVtbl.e[1].delta = D_00459608_00141480.e[1].delta + baseDelta;
     }
     return ((void*)self);
@@ -7693,18 +7693,18 @@ extern "C" void* cWipeoutControl_cWipeoutControl(cWipeoutControl* self, int inCh
         self->mRider = (cRider*)vb;
         cRider_cRider(vb);
     }
-    *(void**)((char*)self->mRider + 0x6E8) = (void*)&D_00458C10_00142388;
-    *(void**)((char*)self->mRider + 0x6D0) = D_00459B90;
-    *(void**)((char*)self->mRider + 0x6C0) = (void*)&D_00458C58_00142388;
+    self->mRider->mScriptObjectVtbl = (void*)&D_00458C10_00142388;
+    self->mRider->mScriptObjRiderVtbl = D_00459B90;
+    self->mRider->mVtbl = (void*)&D_00458C58_00142388;
     if (!inChrg)
     {
         sVtblA_00142388 scriptObjVtbl = D_00458C10_00142388;
-        *(void**)((char*)self->mRider + 0x6E8) = &scriptObjVtbl;
+        self->mRider->mScriptObjectVtbl = &scriptObjVtbl;
         char* base = (char*)self->mRider - 0x90;
         int baseDelta = (char*)self - base;
         scriptObjVtbl.e[1].delta = D_00458C10_00142388.e[1].delta + baseDelta;
         sVtblB_00142388 riderVtbl = D_00458C58_00142388;
-        *(void**)((char*)self->mRider + 0x6C0) = &riderVtbl;
+        self->mRider->mVtbl = &riderVtbl;
         riderVtbl.e[1].delta = D_00458C58_00142388.e[1].delta + baseDelta;
     }
     return ((void*)self);

@@ -415,8 +415,8 @@ extern "C" int cComputer_chooseRandomGrab(cComputer* computer, float time)
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 6);
     int anim = cBEBAGTInterface_getGrabAnim(iface, riderV7_10CBE0(((char*)self->mRider)), idx);
     float spd = cRider_getGrabAnimSpeedScale(((char*)self->mRider));
-    float grabTime = cRiderAnimBase_getAIAnimEventTime(*(char**)(((char*)self->mRider) + 0x784), anim, 2) / spd;
-    float holdTime = cRiderAnimBase_getAIAnimEventTime(*(char**)(((char*)self->mRider) + 0x784), anim, 1) / spd;
+    float grabTime = cRiderAnimBase_getAIAnimEventTime((char*)self->mRider->mRiderAnim, anim, 2) / spd;
+    float holdTime = cRiderAnimBase_getAIAnimEventTime((char*)self->mRider->mRiderAnim, anim, 1) / spd;
     if (time < grabTime) return -1;
     self->mGrabEndTime = time - grabTime;
     self->mHoldToLandTime = grabTime - holdTime;
@@ -478,13 +478,13 @@ extern "C" int cComputer_chooseRandomTweakGrab(cComputer* computer, float time)
         int anim = cBEBAGTInterface_getTweakAnim(iface, riderV7_10CD20(((char*)self->mRider)), i);
         if (anim == 438)
             continue;
-        int alt = (*(int*)(((char*)self->mRider) + 0xB2C) & 1) ? cBEBAGTInterface_getUberAnim(iface, riderV7_10CD20(((char*)self->mRider)), i, *(int*)(((char*)self->mRider) + 0x2F4) >= 5) : 438;
-        if (0.0f < *(float*)(((char*)self->mRider) + 0x2F0) && alt != 438)
+        int alt = (self->mRider->mUberFlags & 1) ? cBEBAGTInterface_getUberAnim(iface, riderV7_10CD20(((char*)self->mRider)), i, self->mRider->mUberLevel >= 5) : 438;
+        if (0.0f < self->mRider->mUberTimer && alt != 438)
             continue;
         int anim2 = cBEBAGTInterface_getGrabAnim(iface, riderV7_10CD20(((char*)self->mRider)), i);
-        float normalTime = cRiderAnimBase_getAIAnimEventTime(*(char**)(((char*)self->mRider) + 0x784), anim2, 1) / spd;
-        float tweakHoldTime = cRiderAnimBase_getAIAnimEventTime(*(char**)(((char*)self->mRider) + 0x784), anim, 1) / spd;
-        float tweakTime = cRiderAnimBase_getAIAnimEventTime(*(char**)(((char*)self->mRider) + 0x784), anim, 2) / spd;
+        float normalTime = cRiderAnimBase_getAIAnimEventTime((char*)self->mRider->mRiderAnim, anim2, 1) / spd;
+        float tweakHoldTime = cRiderAnimBase_getAIAnimEventTime((char*)self->mRider->mRiderAnim, anim, 1) / spd;
+        float tweakTime = cRiderAnimBase_getAIAnimEventTime((char*)self->mRider->mRiderAnim, anim, 2) / spd;
         float sum = tweakTime + normalTime;
         if (sum < time && self->TweakHistoryCounter[i] < best)
         {
@@ -540,7 +540,7 @@ extern "C" int cComputer_chooseRandomUberGrab(cComputer* computer, float time)
 {
     cComputer* self = computer;
     self->mIsTweak = 0;
-    if (*(float*)(((char*)self->mRider) + 0x2F0) <= 0.0f)
+    if (self->mRider->mUberTimer <= 0.0f)
         return -1;
     self->mGrabStartTime = time;
     int found = -1;
@@ -550,13 +550,13 @@ extern "C" int cComputer_chooseRandomUberGrab(cComputer* computer, float time)
     float spd = cRider_getGrabAnimSpeedScale(((char*)self->mRider));
     for (; i < 15; i++)
     {
-        int anim = cBEBAGTInterface_getUberAnim(iface, riderV7_10CF68(((char*)self->mRider)), i, *(int*)(((char*)self->mRider) + 0x2F4) >= 5);
+        int anim = cBEBAGTInterface_getUberAnim(iface, riderV7_10CF68(((char*)self->mRider)), i, self->mRider->mUberLevel >= 5);
         if (anim == 438)
             continue;
         int anim2 = cBEBAGTInterface_getGrabAnim(iface, riderV7_10CF68(((char*)self->mRider)), i);
-        float normalTime = cRiderAnimBase_getAIAnimEventTime(*(char**)(((char*)self->mRider) + 0x784), anim2, 1) / spd;
-        float uberHoldTime = cRiderAnimBase_getAIAnimEventTime(*(char**)(((char*)self->mRider) + 0x784), anim, 1) / spd;
-        float uberTime = cRiderAnimBase_getAIAnimEventTime(*(char**)(((char*)self->mRider) + 0x784), anim, 2) / spd;
+        float normalTime = cRiderAnimBase_getAIAnimEventTime((char*)self->mRider->mRiderAnim, anim2, 1) / spd;
+        float uberHoldTime = cRiderAnimBase_getAIAnimEventTime((char*)self->mRider->mRiderAnim, anim, 1) / spd;
+        float uberTime = cRiderAnimBase_getAIAnimEventTime((char*)self->mRider->mRiderAnim, anim, 2) / spd;
         float sum = uberTime + normalTime;
         if (sum < time && self->UberHistoryCounter[i] < best)
         {
@@ -848,7 +848,7 @@ extern "C" float cComputer_scorePath(cComputer* self, char* tgt)
     if (self->mShouldTakeShortcuts == 0 && solo != 0) {
         return 0.0f;
     }
-    float speed = vu0Length_10D410(*(sVec4_10D410*)((char*)self->mRider + 0x1E0)) * 0.035999998450279236f;
+    float speed = vu0Length_10D410(*(sVec4_10D410*)&self->mRider->mVelocity) * 0.035999998450279236f;
     if (lvl == 0) {
         if ((float)speedLimit_10D410(kind) < speed) {
             return 0.0f;
@@ -862,7 +862,7 @@ extern "C" float cComputer_scorePath(cComputer* self, char* tgt)
     float len = vu0Length_10D410(*(sVec4_10D410*)(rider + 0x1E0));
     float total = 22.0f;
     float lookAheadSec = cRider_calculateAheadDist((cRider*)rider, 1) / len;
-    sVec4_10D410 pos = vu0Add_10D410(*(sVec4_10D410*)((char*)self->mRider + 0x110), vu0Scale_10D410(*(sVec4_10D410*)((char*)self->mRider + 0x1E0), lookAheadSec));
+    sVec4_10D410 pos = vu0Add_10D410(*(sVec4_10D410*)&self->mRider->mPosition, vu0Scale_10D410(*(sVec4_10D410*)&self->mRider->mVelocity, lookAheadSec));
     sVec4_10D410 out;
     float distOut;
     cPath_intersectPath(tgt, &pos, &out, &distOut, 1);
@@ -1017,7 +1017,7 @@ extern "C" int cComputer_isFarBehind(cComputer* self)
     if (opponent == 0)
         return 0;
     float relDist = cRider_getDistanceLeft((void*)opponent) - (self->mRider)->mDistToFinish;
-    if (relDist < *(float*)((char*)(self->mRider) + 0xDC))
+    if (relDist < self->mRider->mRubberBandBehind)
         return 1;
     return 0;
 }
@@ -1043,7 +1043,7 @@ extern "C" int cComputer_isFarAhead(cComputer* self)
     if (opponent == 0)
         return 0;
     float relDist = cRider_getDistanceLeft((void*)opponent) - (self->mRider)->mDistToFinish;
-    if (*(float*)((char*)self->mRider + 0xE0) < relDist)
+    if (self->mRider->mRubberBandAhead < relDist)
         return 1;
     return 0;
 }
@@ -1302,7 +1302,7 @@ extern "C" float cComputer_setupWarp(cComputer* self)
     if (D_00535C11[0] == 2) return 1.0f;
     if (*(float*)(rider + 0x4D0) < 50000.0f) return 1.0f;
     float warpVal;
-    float relDist = cRider_getDistanceLeft((void*)rival) - *(float*)((char*)self->mRider + 0x4D0);
+    float relDist = cRider_getDistanceLeft((void*)rival) - self->mRider->mDistToFinish;
     char* rider2 = (char*)self->mRider;
     float k = *(float*)(rider2 + 0xDC);
     if (relDist < k && (*(int*)(rider2 + 0xE4) == 2 || *(int*)(rider2 + 0xE4) == 3))
@@ -3262,7 +3262,7 @@ extern "C" void cRiderHandler_resetRiderFX(cRiderHandler* self)
     cPunchFX_readFromReplayFrame(((char*)self) + 0xC70);
     cCheatFX_reset(((char*)self) + 0xD20);
     cWorldPainterMan_reset_noarg();
-    int id = *(int*)((char*)self->GroundMotion.mRider + 0x870);
+    int id = self->GroundMotion.mRider->mViewIndex;
     if (id >= 0)
     {
         char* obj = (char*)cGame_getSplashManager(SSXApp->Game, id);
@@ -3592,22 +3592,22 @@ extern "C" void cRiderHandler_readFromReplayFrame(cRiderHandler* self, char* dat
 {
     cStream_00111D98* st = (cStream_00111D98*)data;
     st->Read(self->GroundMotion.mRider, 1728);
-    func_00104DE0(*(void**)((char*)self->GroundMotion.mRider + 0x784), data);
-    cAnimModel_readFromReplayFrame(*(void**)((char*)self->GroundMotion.mRider + 0x780), data);
-    cAirPredictor_readFromReplayFrame(*(void**)((char*)self->GroundMotion.mRider + 0x788), data);
-    cRiderMetrix_readFromReplayFrame(*(void**)((char*)self->GroundMotion.mRider + 0x790), data);
+    func_00104DE0(self->GroundMotion.mRider->mRiderAnim, data);
+    cAnimModel_readFromReplayFrame(self->GroundMotion.mRider->mAnimModel, data);
+    cAirPredictor_readFromReplayFrame(self->GroundMotion.mRider->mAirPredictor, data);
+    cRiderMetrix_readFromReplayFrame(self->GroundMotion.mRider->mMetrix, data);
     int ids[2];
     sRef_00111D98 lineId;
     st->Read(&lineId, 4);
-    st->Read(*(void**)((char*)self->GroundMotion.mRider + 0x864), 0x10);
+    st->Read(self->GroundMotion.mRider->mLineHint, 0x10);
     if (~lineId.id != 0) {
-        **(void***)((char*)self->GroundMotion.mRider + 0x864) = lineId.get();
+        *(void**)self->GroundMotion.mRider->mLineHint = lineId.get();
     }
     sRef_00111D98 wallId;
     st->Read(&wallId, 4);
-    st->Read(*(void**)((char*)self->GroundMotion.mRider + 0x868), 0x10);
+    st->Read(self->GroundMotion.mRider->mWallHint, 0x10);
     if (~wallId.id != 0) {
-        **(void***)((char*)self->GroundMotion.mRider + 0x868) = wallId.get();
+        *(void**)self->GroundMotion.mRider->mWallHint = wallId.get();
     }
     st->Read(((char*)self) + 0xDE0, 4);
     st->Read(((char*)self) + 0xDE4, 4);
@@ -3636,17 +3636,17 @@ extern "C" void cRiderHandler_readFromReplayFrame(cRiderHandler* self, char* dat
     cPlayerIndicatorFX_readFromReplayFrame(((char*)self) + 0xB00);
     cPunchFX_readFromReplayFrame(((char*)self) + 0xC70);
     cCheatFX_readFromReplayFrame(((char*)self) + 0xD20, data);
-    st->Read(*(void**)((char*)self->GroundMotion.mRider + 0xABC), 0x20);
-    st->Read(*(void**)((char*)self->GroundMotion.mRider + 0xAC0), 0x20);
+    st->Read(self->GroundMotion.mRider->mAIPathHint, 0x20);
+    st->Read(self->GroundMotion.mRider->mTrackPathHint, 0x20);
     st->Read(ids, 8);
     *(void**)((char*)self->GroundMotion.mRider + 0xAB4) = cPathSys_getTrackPath(gPaths, ids[0]);
     *(void**)((char*)self->GroundMotion.mRider + 0xAB8) = cPathSys_getAIPath(gPaths, ids[1]);
-    sQuad_00111D98* focusBox = *(sQuad_00111D98**)((char*)self->GroundMotion.mRider + 0x78C);
+    sQuad_00111D98* focusBox = (sQuad_00111D98*)self->GroundMotion.mRider->mFocusBox;
     if (focusBox != 0) {
-        *focusBox = *(sQuad_00111D98*)((char*)self->GroundMotion.mRider + 0x110);
+        *focusBox = *(sQuad_00111D98*)&self->GroundMotion.mRider->mPosition;
     }
-    cRiderAnimBase_setupAnimation(*(void**)((char*)self->GroundMotion.mRider + 0x784), 0);
-    cAnimModel_buildSkelMatrices(*(void**)((char*)self->GroundMotion.mRider + 0x780));
+    cRiderAnimBase_setupAnimation(self->GroundMotion.mRider->mRiderAnim, 0);
+    cAnimModel_buildSkelMatrices(self->GroundMotion.mRider->mAnimModel);
     cRider_updateCollideInfo(self->GroundMotion.mRider);
 }
 #endif

@@ -100,8 +100,8 @@ extern "C" void cWipeoutMotion_gainFocus(cWipeoutMotion* self, int prev)
         cAirPredictor_startLaunchIntoAir(*(void**)(rider + 0x788), pos, rider + 0x1E0, 3333.33349609375f);
     }
     self->ForceNaturalAir = 0;
-    *(int*)((char*)self->mRider + 0x2DC) = 0;
-    *(int*)((char*)self->mRider + 0x2E0) = 0;
+    *(int*)&self->mRider->mSpinRate = 0;
+    *(int*)&self->mRider->mFlipRate = 0;
 }
 #endif
 
@@ -176,8 +176,8 @@ static inline void vu0SubWM(sVec4WM& dst, const sVec4WM& a, const sVec4WM& b)
  */
 extern "C" void cWipeoutMotion_throwItem(cWipeoutMotion* self, sVec4WM* initVel, sVec4WM* initAngVel, sVecPairWM* itemBoneID)
 {
-    *(sVecPairWM*)((char*)self->mRider + 0x130) = *itemBoneID;
-    *(int*)((char*)self->mRider + 0x150) = 1;
+    *(sVecPairWM*)&self->mRider->mRootPoseOverridePos = *itemBoneID;
+    self->mRider->mUseRootPoseOverride = 1;
     *(sVec4WM*)&self->BoardAngVelocity = *initAngVel;
     *(sVec4WM*)&self->BoardVelocity = *initVel;
     if (*(int*)self == 0)
@@ -225,7 +225,7 @@ static inline sVec4WM vu0ScaleMemWM_136DE0(const sVec4WM& v, float s)
 extern "C" void cWipeoutMotion_throwRider(cWipeoutMotion* self, sVec4WM* initVel, sVec4WM* initAngVel)
 {
     *(sVec4WM*)&self->RiderAngVelocity = *initAngVel;
-    *(sVec4WM*)((char*)self->mRider + 0x1E0) = *initVel;
+    *(sVec4WM*)&self->mRider->mVelocity = *initVel;
     if (*(int*)self == 0)
     {
         sVec4WM* n = (sVec4WM*)((char*)self->mRider + 0x370);
@@ -802,7 +802,7 @@ extern "C" void cWipeoutMotion_updateBoardSphereTree(cWipeoutMotion* self)
     pts[2] = vu0Sub_7550(bone->pos, vu0Scale_7550(boardAxis, 30.0f));
     pts[3] = vu0Sub_7550(bone->pos, vu0Scale_7550(boardAxis, 70.0f));
     cRiderSphereTree_Update(self->BoardSphereTree, 4, pts, radii.r, &bone->pos,
-                  *(float*)(*(char**)((char*)self->mRider + 0x780) + 0x140) * 90.0f);
+                  *(float*)((char*)self->mRider->mAnimModel + 0x140) * 90.0f);
 }
 #endif
 
@@ -847,7 +847,7 @@ extern "C" void cWipeoutMotion_stepAirMotion(cWipeoutMotion* wipeoutMotion)
     char* rider = (char*)wipeoutMotion->mRider;
     float dt = *(float*)(rider + 0x300) * 0.01666666753590107f;
     cAirPredictor_updateFlightPath(*(void**)(rider + 0x788), rider + 0x110, rider + 0x1E0, dt);
-    int st = *(int*)(*(char**)((char*)wipeoutMotion->mRider + 0x788) + 0xAC);
+    int st = *(int*)((char*)wipeoutMotion->mRider->mAirPredictor + 0xAC);
     int ok = 0;
     if (st == 1 || st == 3) ok = 1;
     if (ok)

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/rider.h"
 #include "inseq/scriptplayerchannel.h"
 #include "inseq/scriptheap.h"
 #include "replay/frameptr.h"
@@ -505,7 +506,7 @@ extern "C" void cReplay_stopInstantReplay(cReplay* self)
 {
     if (self->InstantReplay != 0) {
         cReplay_stopReplay(self);
-        cRiderMetrix_resetHUDfx(*(void**)((char*)SSXApp->Game->AI->Players[0]->mRider + 0x790));
+        cRiderMetrix_resetHUDfx(SSXApp->Game->AI->Players[0]->mRider->mMetrix);
     }
 }
 #endif

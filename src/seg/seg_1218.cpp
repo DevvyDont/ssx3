@@ -774,7 +774,7 @@ extern "C" void cComputer_attackTargetCruise(cComputer* self, sPad_0B90* cmd)
     cRider_0B90* tgt = list->riders[ctl->target];
     float diff = rec->angle - *(float*)((char*)self->mRider + 0x4CC);
     float ang = diff - Floor_0B90(diff * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
-    float mySpd = Len_0B90(*(sV4_0B90*)((char*)self->mRider + 0x1E0));
+    float mySpd = Len_0B90(*(sV4_0B90*)&self->mRider->mVelocity);
     float absAng = Abs_0B90(ang);
     // Angle thresholds: 90, 50 and 15 degrees in radians.
     float behindAng = 1.5707964897155762f;
@@ -967,7 +967,7 @@ extern "C" void cComputer_avoidTargetCruise(cComputer* self, sPad_0F88* cmd)
     cRider_0F88* tgt = D_004A28A8_0F88->game->list->riders[ctl->target];
     float diff = rec->angle - *(float*)((char*)self->mRider + 0x4CC);
     float ang = diff - Floor_0F88(diff * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
-    float mySpd = Len_0F88(*(sV4_0F88*)((char*)self->mRider + 0x1E0));
+    float mySpd = Len_0F88(*(sV4_0F88*)&self->mRider->mVelocity);
     float hisSpd = Len_0F88(*tgt->GetVel());
     float steer = 0.0f;
     if (Abs_0F88(ang) > 1.5707964897155762f) {
@@ -6875,11 +6875,11 @@ extern "C" void cComputer_getPrewindCmd(cComputer* self, sPad_AA70* cmd)
     cTrack_AA70* trk = *(cTrack_AA70**)(rider + 0xAB8);
     int n = trk->Query(buf, 12, *(float*)(rider + 0x4C0), *(float*)(rider + 0x4C4) + 50.0f);
     int sel = -1;
-    if (Len_AA70(*(sV4_AA70*)((char*)self->mRider + 0x1E0)) < self->mDesiredSpeed - 138.88890075683594f)
+    if (Len_AA70(*(sV4_AA70*)&self->mRider->mVelocity) < self->mDesiredSpeed - 138.88890075683594f)
         cmd->b14 = 1;
     if (self->mToPipe) {
         sV4_AA70 jumpSpan = Sub_AA70(*(sV4_AA70*)&self->mEndJumpPos, *(sV4_AA70*)&self->mStartJumpPos);
-        sV4_AA70 fromJumpStart = Sub_AA70(*(sV4_AA70*)((char*)self->mRider + 0x110), *(sV4_AA70*)&self->mStartJumpPos);
+        sV4_AA70 fromJumpStart = Sub_AA70(*(sV4_AA70*)&self->mRider->mPosition, *(sV4_AA70*)&self->mStartJumpPos);
         if (Len_AA70(fromJumpStart) < Len_AA70(jumpSpan) - 50.0f)
             cmd->b13 = 1;
         return;
@@ -6962,7 +6962,7 @@ extern "C" void cComputer_getBoardPressCmd(cComputer* self, sPad_AD78* cmd)
     }
     if (pressMarkerFound) {
         cmd->w0 = (int)(pressDir * 31.0f);
-        sVec4_AD78 sideAxis = *(sVec4_AD78*)((char*)self->mRider + 0x1A0);
+        sVec4_AD78 sideAxis = *(sVec4_AD78*)&self->mRider->mMatrix;
         float z = sideAxis.z + sideAxis.z;
         float y = clamp_AD78(z, -1.0f, 1.0f);
         if (vAbs_AD78(y) > 0.1f)
@@ -7049,7 +7049,7 @@ extern "C" void cComputer_getRailslideCmd(cComputer* self, sPad_AED8* cmd)
         cComputer_setupPrewindState_AED8(((char*)self), isSpin, isFlip, toRail, toPipe);
         return;
     }
-    sVec4_AED8 sideAxis = *(sVec4_AED8*)((char*)self->mRider + 0x1A0);
+    sVec4_AED8 sideAxis = *(sVec4_AED8*)&self->mRider->mMatrix;
     float z = sideAxis.z + sideAxis.z;
     float y = clamp_AED8(z, -1.0f, 1.0f);
     if (vAbs_AED8(y) > 0.1f)
@@ -7061,7 +7061,7 @@ extern "C" void cComputer_getRailslideCmd(cComputer* self, sPad_AED8* cmd)
         cmd->w0 = (int)(spinSign * 31.0f);
     }
     int speedMarkerFound = func_0010BB18(self, (float*)(((char*)self) + 0xDF0), &ok);
-    float len = vLen_AED8(*(sVec4_AED8*)((char*)self->mRider + 0x1E0));
+    float len = vLen_AED8(*(sVec4_AED8*)&self->mRider->mVelocity);
     if (speedMarkerFound && ok && len < self->mDesiredSpeed - 138.88890075683594f)
         *(unsigned int*)cmd |= 0x10000;
 }
@@ -7086,8 +7086,8 @@ extern "C" void cSpinControl_predictFlipSec(void*, float*, float*);
 extern "C" void cComputer_setupEndSpin(cComputer* self, float airTime)
 {
     float spinCur, spinNext, flipCur, flipNext;
-    cSpinControl_predictSpinSec(*(char**)((char*)self->mRider + 0x77C) + 0x230, &spinCur, &spinNext);
-    cSpinControl_predictFlipSec(*(char**)((char*)self->mRider + 0x77C) + 0x230, &flipCur, &flipNext);
+    cSpinControl_predictSpinSec((char*)self->mRider->mRiderHandler + 0x230, &spinCur, &spinNext);
+    cSpinControl_predictFlipSec((char*)self->mRider->mRiderHandler + 0x230, &flipCur, &flipNext);
     int stop = 0;
     if (self->mToRail && airTime < 1.0f)
         stop = 1;
@@ -7164,7 +7164,7 @@ extern "C" int cComputer_chooseGrabMain(char*, float);
 // so jump2 only deletes the branch after sched2 and the compare loads stay.
 extern "C" int cComputer_getSpinCmd(cComputer* self, sPad_B250* cmd)
 {
-    char* obj = *(char**)((char*)self->mRider + 0x788);
+    char* obj = (char*)self->mRider->mAirPredictor;
     int simState = *(int*)(obj + 0xAC);
     int ok = 0;
     if (simState == 1 || simState == 3)
@@ -7192,7 +7192,7 @@ extern "C" int cComputer_getSpinCmd(cComputer* self, sPad_B250* cmd)
                 self->mGrabEndTime = gap;
                 self->mIsNaturalAir = 0;
             } else if (self->mGrabID == -1 && gap > 0.5f && gap < self->mGrabEndTime &&
-                       cRiderAnimBase_getCurrentAnimCategory(*(void**)((char*)self->mRider + 0x784), 2) != 20) {
+                       cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) != 20) {
                 self->mGrabID = cComputer_chooseGrabMain(((char*)self), gap);
             } else {
                 int stop = 0;
@@ -7267,7 +7267,7 @@ extern "C" float func_00100348_B590(void*, sVec4_B590*) __asm__("func_00100348")
  */
 extern "C" void cComputer_getNaturalAirCmd(cComputer* self, sPad_B590* cmd)
 {
-    char* airPredictor = *(char**)((char*)self->mRider + 0x788);
+    char* airPredictor = (char*)self->mRider->mAirPredictor;
     int st = *(int*)(airPredictor + 0xAC);
     int ok = 0;
     if (st == 1 || st == 3)
@@ -7716,7 +7716,7 @@ static inline float vLen_C0A8(const sVec4_C0A8& v)
 extern "C" void cComputer_setupCrouch(cComputer* self, void* cmd)
 {
     sPad_C0A8* crouchCmd = (sPad_C0A8*)cmd;
-    float len = vLen_C0A8(*(sVec4_C0A8*)((char*)self->mRider + 0x1E0));
+    float len = vLen_C0A8(*(sVec4_C0A8*)&self->mRider->mVelocity);
     float pressAmount = 0.97f;
     if (len < 833.3334350585938f)
         pressAmount = 1.0f;
@@ -7767,7 +7767,7 @@ static inline float vLen_C140(const sVec4_C140& v)
 extern "C" void cComputer_setupRecklessCrouch(cComputer* self, void* cmd)
 {
     sPad_C140* crouchCmd = (sPad_C140*)cmd;
-    float len = vLen_C140(*(sVec4_C140*)((char*)self->mRider + 0x1E0));
+    float len = vLen_C140(*(sVec4_C140*)&self->mRider->mVelocity);
     float pressAmount = 0.97f;
     if (len < 833.3334350585938f)
         pressAmount = 1.0f;
@@ -7807,7 +7807,7 @@ extern "C" int cBENewRaceInterface_getLocationID(void* iface);
  * @return 1 when the roll (AIrand() % 100 under mTrickDifficulty * 100) passes, otherwise 0
  */
 extern "C" int cComputer_shouldRiderUber(cComputer* self) {
-    if (*(unsigned int*)((char*)self->mRider + 0xB2C) & 1) {
+    if ((unsigned int)self->mRider->mUberFlags & 1) {
         if (cBENewRaceInterface_getLocationID(cBE_getInterface_C258(cBE_getBE(), 0)) != 0xE) {
             unsigned int roll = AIrand();
             float thr = self->mTrickDifficulty * 100.0f;

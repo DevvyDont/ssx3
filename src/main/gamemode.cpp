@@ -3226,7 +3226,7 @@ extern "C" int func_0023C560(void* self)
     }
     if (ok) {
         int bonusPoints = cBENewRaceInterface_getPeakSplitTimePoints(iface, D_00535C12[0], *(short*)((char*)self + 0xA), *(unsigned short*)((char*)self + 8)) * 100;
-        void* riderMetrix = *(void**)((char*)SSXApp->Game->AI->Riders[0] + 0x790);
+        void* riderMetrix = SSXApp->Game->AI->Riders[0]->mMetrix;
         int curScore = *(int*)((char*)riderMetrix + 0x198);
         if (bonusPoints != 0) {
             cRiderMetrix_evSplitPoints(riderMetrix, curScore - bonusPoints);
