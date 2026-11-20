@@ -547,22 +547,22 @@ extern "C" float func_00290B58_impl(sCurve_290B58* c, float x) __asm__("func_002
  * applies (a NaN input or unsorted keys). The audio code keeps its volume and pitch curves in D_00482AF8..D_00482DA0
  * and gAudioTables (func_00290C10).
  *
- * @param c  the curve
+ * @param curvePoints  the curve
  * @param x  the input value
  * @return the curve's value at @p x
  */
-extern "C" float func_00290B58_impl(sCurve_290B58* c, float x)
+extern "C" float func_00290B58_impl(sCurve_290B58* curvePoints, float x)
 {
     for (int i = 1; i < 5; i++) {
-        if (c->key[i - 1] <= x && x < c->key[i]) {
-            float t = (x - c->key[i - 1]) * (c->value[i] - c->value[i - 1]);
-            return c->value[i - 1] + t / (c->key[i] - c->key[i - 1]);
+        if (curvePoints->key[i - 1] <= x && x < curvePoints->key[i]) {
+            float scaledRise = (x - curvePoints->key[i - 1]) * (curvePoints->value[i] - curvePoints->value[i - 1]);
+            return curvePoints->value[i - 1] + scaledRise / (curvePoints->key[i] - curvePoints->key[i - 1]);
         }
     }
-    if (x < c->key[0])
-        return c->value[0];
-    if (c->key[4] <= x)
-        return c->value[4];
+    if (x < curvePoints->key[0])
+        return curvePoints->value[0];
+    if (curvePoints->key[4] <= x)
+        return curvePoints->value[4];
     return 0.0f;
 }
 #endif
@@ -584,12 +584,12 @@ extern func_00290B58_sCurve gAudioTables[];
  * func_00290C40 uses curve 3.
  *
  * @param i  the gAudioTables index
- * @param v  the input value
+ * @param inputValue  the input value
  * @return the curve's value
  */
-extern "C" float func_00290C10(int i, float v)
+extern "C" float func_00290C10(int i, float inputValue)
 {
-    return func_00290B58(&gAudioTables[i], v);
+    return func_00290B58(&gAudioTables[i], inputValue);
 }
 #endif
 
@@ -918,10 +918,10 @@ extern "C" void func_002910E0(cSSXAudio* vself)
     snd10E0Init(self, 0, 0x20);
     (*self->p118)->sub.p3C[(*self->p118)->sub.cur] = (int)((char*)self + 0x5830);
     (*self->p118)->sub.p7C[(*self->p118)->sub.cur] = 0;
-    sSnd10E0Mgr* m = *self->p118;
+    sSnd10E0Mgr* bankManager = *self->p118;
     sSndKey8_10E0 k = D_004A3680[0];
-    sSnd10E0Sub* s = &m->sub;
-    *(sSndKey8_10E0*)((char*)s + (m->sub.cur << 3) + 0x40) = k;
+    sSnd10E0Sub* playOpts = &bankManager->sub;
+    *(sSndKey8_10E0*)((char*)playOpts + (bankManager->sub.cur << 3) + 0x40) = k;
     cBankSys_SFX_End((cBankSys*)self);
     *(int*)((char*)self + 0x5834) = 1;
 }
@@ -1128,12 +1128,12 @@ INCLUDE_ASM("sound/soundsys", func_002917B8);
  * func_002917D0 asks with 0; func_00291C88 and func_00292508 pass the rider's surface, whose patches start at surface *
  * 8.
  *
- * @param a1  the surface
+ * @param surfaceType  the surface
  * @return the bank number
  */
-extern "C" int func_002917B8(void* self, int a1)
+extern "C" int func_002917B8(void* self, int surfaceType)
 {
-    if (a1 > 3) {
+    if (surfaceType > 3) {
         return 1;
     }
     return 0x10;
@@ -1228,56 +1228,56 @@ void func_002917D0_17D0(void* vself, void* obj)
     if (D_00535C11[0] == 2) {
         flag = cSSXAudio_ReplayMode(self) == 0;
     }
-    int a = func_002917B8(self, 0);
-    sSnd17D0Mgr* m = self->mgr;
-    sSnd17D0Sub* s = &m->sub;
-    m->sub.cur++;
-    s->ch[m->sub.cur] = m->sub.def;
-    m->sub.tgt[m->sub.cur] = 0;
-    s->p34[m->sub.cur] = 0;
-    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
-    s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
-    s->p60[m->sub.cur] = 0;
-    s->p64[m->sub.cur] = 0;
-    s->p68[m->sub.cur] = 0;
-    s->p6C[m->sub.cur] = 0;
-    s->p70[m->sub.cur].f4 = 0;
-    s->p70[m->sub.cur].f0 = 100;
-    s->p70[m->sub.cur].f8 = 90;
-    s->p70[m->sub.cur].fC = 50;
-    s->p74[m->sub.cur] = 0;
-    s->p80[m->sub.cur] = 0;
-    s->p84[m->sub.cur] = 0;
-    s->p78[m->sub.cur] = 0x7F;
-    s->p7C[m->sub.cur] = 1;
-    self->a4[self->mgr->sub.cur] = a;
+    int boardBank = func_002917B8(self, 0);
+    sSnd17D0Mgr* bankManager = self->mgr;
+    sSnd17D0Sub* playOpts = &bankManager->sub;
+    bankManager->sub.cur++;
+    playOpts->ch[bankManager->sub.cur] = bankManager->sub.def;
+    bankManager->sub.tgt[bankManager->sub.cur] = 0;
+    playOpts->p34[bankManager->sub.cur] = 0;
+    playOpts->vals[bankManager->sub.cur] = playOpts->ch[bankManager->sub.cur].vol;
+    playOpts->p3C[bankManager->sub.cur] = 0;
+    func_00416210((char*)playOpts + bankManager->sub.cur * 8 + 0x40, 0, 8);
+    playOpts->p60[bankManager->sub.cur] = 0;
+    playOpts->p64[bankManager->sub.cur] = 0;
+    playOpts->p68[bankManager->sub.cur] = 0;
+    playOpts->p6C[bankManager->sub.cur] = 0;
+    playOpts->p70[bankManager->sub.cur].f4 = 0;
+    playOpts->p70[bankManager->sub.cur].f0 = 100;
+    playOpts->p70[bankManager->sub.cur].f8 = 90;
+    playOpts->p70[bankManager->sub.cur].fC = 50;
+    playOpts->p74[bankManager->sub.cur] = 0;
+    playOpts->p80[bankManager->sub.cur] = 0;
+    playOpts->p84[bankManager->sub.cur] = 0;
+    playOpts->p78[bankManager->sub.cur] = 0x7F;
+    playOpts->p7C[bankManager->sub.cur] = 1;
+    self->a4[self->mgr->sub.cur] = boardBank;
     self->a8[self->mgr->sub.cur] = 0;
-    sSnd17D0Mgr* m3 = *self->p118;
-    sSnd17D0Sub* s3 = &m3->sub;
-    s3->vals[m3->sub.cur] = 0;
-    s3->ch[m3->sub.cur].vol = (s3->vals[s3->cur] < 0x7F && s3->vals[s3->cur] < 0) ? 0 : (s3->vals[s3->cur] < 0x7F ? (unsigned char)s3->vals[s3->cur] : 0x7F);
+    sSnd17D0Mgr* volumeManager = *self->p118;
+    sSnd17D0Sub* volumeOpts = &volumeManager->sub;
+    volumeOpts->vals[volumeManager->sub.cur] = 0;
+    volumeOpts->ch[volumeManager->sub.cur].vol = (volumeOpts->vals[volumeOpts->cur] < 0x7F && volumeOpts->vals[volumeOpts->cur] < 0) ? 0 : (volumeOpts->vals[volumeOpts->cur] < 0x7F ? (unsigned char)volumeOpts->vals[volumeOpts->cur] : 0x7F);
     sSnd17D0Mgr** pp = self->p118;
-    int r = (int)func_00287968(self, 6, 0);
-    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    int volumeControl = (int)func_00287968(self, 6, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = volumeControl;
     {
-        sSnd17D0Mgr* m2 = *self->p118;
-        m2->sub.tgt[m2->sub.cur] = (char*)obj + 0x110;
+        sSnd17D0Mgr* optsManager = *self->p118;
+        optsManager->sub.tgt[optsManager->sub.cur] = (char*)obj + 0x110;
     }
     {
-        sSnd17D0Mgr* m2 = *self->p118;
+        sSnd17D0Mgr* optsManager = *self->p118;
         sSndKey8_17D0 k = D_004A3688_17D0[0];
-        sSnd17D0Sub* s2 = &m2->sub;
-        *(sSndKey8_17D0*)((char*)s2 + (m2->sub.cur << 3) + 0x40) = k;
+        sSnd17D0Sub* callbackOpts = &optsManager->sub;
+        *(sSndKey8_17D0*)((char*)callbackOpts + (optsManager->sub.cur << 3) + 0x40) = k;
     }
     {
-        sSnd17D0Mgr* m2 = *self->p118;
-        m2->sub.p60[m2->sub.cur] = (int)obj;
+        sSnd17D0Mgr* optsManager = *self->p118;
+        optsManager->sub.p60[optsManager->sub.cur] = (int)obj;
     }
     {
         sSnd17D0Mgr** pq = self->p118;
-        int q = func_00288A20(self, obj);
-        (*pq)->sub.p64[(*pq)->sub.cur] = q;
+        int listenerView = func_00288A20(self, obj);
+        (*pq)->sub.p64[(*pq)->sub.cur] = listenerView;
     }
     func_002A9988(&(*self->p118)->sub, 100.0f, -1.0f);
     (*self->p118)->sub.p7C[(*self->p118)->sub.cur] = 0;
@@ -1408,34 +1408,34 @@ void func_00291C88_1C88(void* vself, void* obj, int n)
         if (D_00535C11[0] == 2) {
             flag = cSSXAudio_ReplayMode(self) == 0;
         }
-        int a = func_002917B8(self, n);
-        int b = n * 8 + 4;
-        snd1C88AddVoice(self, a, b);
-        sSnd1C88Mgr* m3 = *self->p118;
-        sSnd1C88Sub* s3 = &m3->sub;
-        s3->vals[m3->sub.cur] = 0;
-        s3->ch[m3->sub.cur].vol = (s3->vals[s3->cur] < 0x7F && s3->vals[s3->cur] < 0) ? 0 : (s3->vals[s3->cur] < 0x7F ? (unsigned char)s3->vals[s3->cur] : 0x7F);
+        int boardBank = func_002917B8(self, n);
+        int patchNum = n * 8 + 4;
+        snd1C88AddVoice(self, boardBank, patchNum);
+        sSnd1C88Mgr* volumeManager = *self->p118;
+        sSnd1C88Sub* volumeOpts = &volumeManager->sub;
+        volumeOpts->vals[volumeManager->sub.cur] = 0;
+        volumeOpts->ch[volumeManager->sub.cur].vol = (volumeOpts->vals[volumeOpts->cur] < 0x7F && volumeOpts->vals[volumeOpts->cur] < 0) ? 0 : (volumeOpts->vals[volumeOpts->cur] < 0x7F ? (unsigned char)volumeOpts->vals[volumeOpts->cur] : 0x7F);
         sSnd1C88Mgr** pp = self->p118;
-        int r = (int)func_00287968(self, 6, 0);
-        (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+        int volumeControl = (int)func_00287968(self, 6, 0);
+        (*pp)->sub.p3C[(*pp)->sub.cur] = volumeControl;
         {
-            sSnd1C88Mgr* m2 = *self->p118;
-            m2->sub.tgt[m2->sub.cur] = (char*)obj + 0x110;
+            sSnd1C88Mgr* optsManager = *self->p118;
+            optsManager->sub.tgt[optsManager->sub.cur] = (char*)obj + 0x110;
         }
         {
-            sSnd1C88Mgr* m2 = *self->p118;
+            sSnd1C88Mgr* optsManager = *self->p118;
             sSndKey8_1C88 k = D_004A3690_1C88[0];
-            sSnd1C88Sub* s2 = &m2->sub;
-            *(sSndKey8_1C88*)((char*)s2 + (m2->sub.cur << 3) + 0x40) = k;
+            sSnd1C88Sub* callbackOpts = &optsManager->sub;
+            *(sSndKey8_1C88*)((char*)callbackOpts + (optsManager->sub.cur << 3) + 0x40) = k;
         }
         {
-            sSnd1C88Mgr* m2 = *self->p118;
-            m2->sub.p60[m2->sub.cur] = (int)obj;
+            sSnd1C88Mgr* optsManager = *self->p118;
+            optsManager->sub.p60[optsManager->sub.cur] = (int)obj;
         }
         {
             sSnd1C88Mgr** pq = self->p118;
-            int q = func_00288A20(self, obj);
-            (*pq)->sub.p64[(*pq)->sub.cur] = q;
+            int listenerView = func_00288A20(self, obj);
+            (*pq)->sub.p64[(*pq)->sub.cur] = listenerView;
         }
         (*self->p118)->sub.p7C[(*self->p118)->sub.cur] = 0;
         func_002A9988(&(*self->p118)->sub, 100.0f, -1.0f);
@@ -1445,30 +1445,30 @@ void func_00291C88_1C88(void* vself, void* obj, int n)
         }
         cBankSys_SFX_End((cBankSys*)self);
     } else {
-        int a = func_002917B8(self, n);
-        int b = n * 8 + 6;
-        snd1C88AddVoice(self, a, b);
-        sSnd1C88Mgr* m3 = *self->p118;
-        sSnd1C88Sub* s3 = &m3->sub;
-        s3->vals[m3->sub.cur] = 0;
-        s3->ch[m3->sub.cur].vol = (s3->vals[s3->cur] < 0x7F && s3->vals[s3->cur] < 0) ? 0 : (s3->vals[s3->cur] < 0x7F ? (unsigned char)s3->vals[s3->cur] : 0x7F);
+        int boardBank = func_002917B8(self, n);
+        int patchNum = n * 8 + 6;
+        snd1C88AddVoice(self, boardBank, patchNum);
+        sSnd1C88Mgr* volumeManager = *self->p118;
+        sSnd1C88Sub* volumeOpts = &volumeManager->sub;
+        volumeOpts->vals[volumeManager->sub.cur] = 0;
+        volumeOpts->ch[volumeManager->sub.cur].vol = (volumeOpts->vals[volumeOpts->cur] < 0x7F && volumeOpts->vals[volumeOpts->cur] < 0) ? 0 : (volumeOpts->vals[volumeOpts->cur] < 0x7F ? (unsigned char)volumeOpts->vals[volumeOpts->cur] : 0x7F);
         sSnd1C88Mgr** pp = self->p118;
-        int r = (int)func_00287968(self, 6, 0);
-        (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+        int volumeControl = (int)func_00287968(self, 6, 0);
+        (*pp)->sub.p3C[(*pp)->sub.cur] = volumeControl;
         {
-            sSnd1C88Mgr* m2 = *self->p118;
-            m2->sub.tgt[m2->sub.cur] = (char*)obj + 0x110;
+            sSnd1C88Mgr* optsManager = *self->p118;
+            optsManager->sub.tgt[optsManager->sub.cur] = (char*)obj + 0x110;
         }
         {
-            sSnd1C88Mgr* m2 = *self->p118;
+            sSnd1C88Mgr* optsManager = *self->p118;
             sSndKey8_1C88 k = D_004A3698_1C88[0];
-            sSnd1C88Sub* s2 = &m2->sub;
-            *(sSndKey8_1C88*)((char*)s2 + (m2->sub.cur << 3) + 0x40) = k;
+            sSnd1C88Sub* callbackOpts = &optsManager->sub;
+            *(sSndKey8_1C88*)((char*)callbackOpts + (optsManager->sub.cur << 3) + 0x40) = k;
         }
         (*self->p118)->sub.p7C[(*self->p118)->sub.cur] = 0;
         {
-            sSnd1C88Mgr* m2 = *self->p118;
-            m2->sub.p60[m2->sub.cur] = (int)obj;
+            sSnd1C88Mgr* optsManager = *self->p118;
+            optsManager->sub.p60[optsManager->sub.cur] = (int)obj;
         }
         func_002A9988(&(*self->p118)->sub, 100.0f, -1.0f);
         cBankSys_SFX_End((cBankSys*)self);
@@ -1565,58 +1565,58 @@ void func_00292508_2508(void* vself, void* obj, int n)
     if (D_00535C11[0] == 2) {
         flag = cSSXAudio_ReplayMode(self) == 0;
     }
-    int a = func_002917B8(self, n);
-    int b = n * 8 + 3;
-    sSnd2508Mgr* m = self->mgr;
-    sSnd2508Sub* s = &m->sub;
-    m->sub.cur++;
-    s->ch[m->sub.cur] = m->sub.def;
-    m->sub.tgt[m->sub.cur] = 0;
-    s->p34[m->sub.cur] = 0;
-    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
-    s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
-    s->p60[m->sub.cur] = 0;
-    s->p64[m->sub.cur] = 0;
-    s->p68[m->sub.cur] = 0;
-    s->p6C[m->sub.cur] = 0;
-    s->p70[m->sub.cur].f4 = 0;
-    s->p70[m->sub.cur].f0 = 100;
-    s->p70[m->sub.cur].f8 = 90;
-    s->p70[m->sub.cur].fC = 50;
-    s->p74[m->sub.cur] = 0;
-    s->p80[m->sub.cur] = 0;
-    s->p84[m->sub.cur] = 0;
-    s->p78[m->sub.cur] = 0x7F;
-    s->p7C[m->sub.cur] = 1;
-    self->a4[self->mgr->sub.cur] = a;
-    self->a8[self->mgr->sub.cur] = b;
-    sSnd2508Mgr* m3 = *self->p118;
-    sSnd2508Sub* s3 = &m3->sub;
-    s3->vals[m3->sub.cur] = 0;
-    s3->ch[m3->sub.cur].vol = (s3->vals[s3->cur] < 0x7F && s3->vals[s3->cur] < 0) ? 0 : (s3->vals[s3->cur] < 0x7F ? (unsigned char)s3->vals[s3->cur] : 0x7F);
+    int boardBank = func_002917B8(self, n);
+    int patchNum = n * 8 + 3;
+    sSnd2508Mgr* bankManager = self->mgr;
+    sSnd2508Sub* playOpts = &bankManager->sub;
+    bankManager->sub.cur++;
+    playOpts->ch[bankManager->sub.cur] = bankManager->sub.def;
+    bankManager->sub.tgt[bankManager->sub.cur] = 0;
+    playOpts->p34[bankManager->sub.cur] = 0;
+    playOpts->vals[bankManager->sub.cur] = playOpts->ch[bankManager->sub.cur].vol;
+    playOpts->p3C[bankManager->sub.cur] = 0;
+    func_00416210((char*)playOpts + bankManager->sub.cur * 8 + 0x40, 0, 8);
+    playOpts->p60[bankManager->sub.cur] = 0;
+    playOpts->p64[bankManager->sub.cur] = 0;
+    playOpts->p68[bankManager->sub.cur] = 0;
+    playOpts->p6C[bankManager->sub.cur] = 0;
+    playOpts->p70[bankManager->sub.cur].f4 = 0;
+    playOpts->p70[bankManager->sub.cur].f0 = 100;
+    playOpts->p70[bankManager->sub.cur].f8 = 90;
+    playOpts->p70[bankManager->sub.cur].fC = 50;
+    playOpts->p74[bankManager->sub.cur] = 0;
+    playOpts->p80[bankManager->sub.cur] = 0;
+    playOpts->p84[bankManager->sub.cur] = 0;
+    playOpts->p78[bankManager->sub.cur] = 0x7F;
+    playOpts->p7C[bankManager->sub.cur] = 1;
+    self->a4[self->mgr->sub.cur] = boardBank;
+    self->a8[self->mgr->sub.cur] = patchNum;
+    sSnd2508Mgr* volumeManager = *self->p118;
+    sSnd2508Sub* volumeOpts = &volumeManager->sub;
+    volumeOpts->vals[volumeManager->sub.cur] = 0;
+    volumeOpts->ch[volumeManager->sub.cur].vol = (volumeOpts->vals[volumeOpts->cur] < 0x7F && volumeOpts->vals[volumeOpts->cur] < 0) ? 0 : (volumeOpts->vals[volumeOpts->cur] < 0x7F ? (unsigned char)volumeOpts->vals[volumeOpts->cur] : 0x7F);
     sSnd2508Mgr** pp = self->p118;
-    int r = (int)func_00287968(self, 6, 0);
-    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    int volumeControl = (int)func_00287968(self, 6, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = volumeControl;
     {
-        sSnd2508Mgr* m2 = *self->p118;
-        m2->sub.tgt[m2->sub.cur] = (char*)obj + 0x110;
+        sSnd2508Mgr* optsManager = *self->p118;
+        optsManager->sub.tgt[optsManager->sub.cur] = (char*)obj + 0x110;
     }
     {
-        sSnd2508Mgr* m2 = *self->p118;
+        sSnd2508Mgr* optsManager = *self->p118;
         sSndKey8_2508 k = D_004A36A0_2508[0];
-        sSnd2508Sub* s2 = &m2->sub;
-        *(sSndKey8_2508*)((char*)s2 + (m2->sub.cur << 3) + 0x40) = k;
+        sSnd2508Sub* callbackOpts = &optsManager->sub;
+        *(sSndKey8_2508*)((char*)callbackOpts + (optsManager->sub.cur << 3) + 0x40) = k;
     }
     (*self->p118)->sub.p7C[(*self->p118)->sub.cur] = 0;
     {
-        sSnd2508Mgr* m2 = *self->p118;
-        m2->sub.p60[m2->sub.cur] = (int)obj;
+        sSnd2508Mgr* optsManager = *self->p118;
+        optsManager->sub.p60[optsManager->sub.cur] = (int)obj;
     }
     {
         sSnd2508Mgr** pq = self->p118;
-        int q = func_00288A20(self, obj);
-        (*pq)->sub.p64[(*pq)->sub.cur] = q;
+        int listenerView = func_00288A20(self, obj);
+        (*pq)->sub.p64[(*pq)->sub.cur] = listenerView;
     }
     func_002A9988(&(*self->p118)->sub, 100.0f, -1.0f);
     if (flag) {
@@ -1803,12 +1803,12 @@ extern int cPauseState_Flags;
  */
 extern "C" void func_00292CB8(void* self, void* obj) {
     int volume;
-    int b;
+    int pitchBend;
     cRider* rider = *(cRider**)((char*)obj + 0x80);
-    b = 0x40;
+    pitchBend = 0x40;
     volume = 0;
     if (cRider_getMotionState(rider) == 0) {
-        func_00293168(self, rider, &volume, &b);
+        func_00293168(self, rider, &volume, &pitchBend);
     }
     if (cRider_getMotionState(rider) == 2) {
         volume = 0;
@@ -1825,7 +1825,7 @@ extern "C" void func_00292CB8(void* self, void* obj) {
         volume = 0;
     }
     *(int*)((char*)obj + 0x64) = volume;
-    cBankMonitorInstance_PitchUpdate(obj, b);
+    cBankMonitorInstance_PitchUpdate(obj, pitchBend);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -2009,10 +2009,10 @@ extern func_00290B58_sCurve D_00482B20;
 extern "C" void func_00293168(void* self, void* vrider, int* out1, int* out2) {
     cRider* rider = (cRider*)vrider;
     float spd = rider->mAudioSpeed;
-    func_00290B58_sCurve c1 = D_00482AF8;
-    func_00290B58_sCurve c2 = D_00482B20;
-    *out1 = (int)func_00290B58(&c1, spd);
-    *out2 = (int)(func_00290B58(&c2, spd) * 4096.0f);
+    func_00290B58_sCurve volumeCurve = D_00482AF8;
+    func_00290B58_sCurve bendCurve = D_00482B20;
+    *out1 = (int)func_00290B58(&volumeCurve, spd);
+    *out2 = (int)(func_00290B58(&bendCurve, spd) * 4096.0f);
 }
 #endif
 //100%
@@ -2186,19 +2186,19 @@ void func_00293538_impl(void* self, cRider* rider, int* volume, int* pitch)
     sSsVt_3538* vt = *(sSsVt_3538**)obj;
     int idx = vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta);
     float prev = *(float*)((char*)getLevels_3538(self) + (idx << 2));
-    float d = prev - level;
-    if (__builtin_fabsf(d) > 0.1f) {
+    float levelDiff = prev - level;
+    if (__builtin_fabsf(levelDiff) > 0.1f) {
         if (level < prev) {
-            level = prev - d * 0.25f;
+            level = prev - levelDiff * 0.25f;
         } else if (prev < level) {
             level = prev + (level - prev) * 0.25f;
         }
     }
-    func_00290B58_sCurve c1 = D_00482B78;
+    func_00290B58_sCurve volumeCurve = D_00482B78;
     *(float*)((char*)getLevels_3538(self) + (idx << 2)) = level;
-    func_00290B58_sCurve c2 = D_00482BA0;
-    *volume = (int)func_00290B58(&c1, level);
-    *pitch = (int)(func_00290B58(&c2, level) * 4096.0f);
+    func_00290B58_sCurve bendCurve = D_00482BA0;
+    *volume = (int)func_00290B58(&volumeCurve, level);
+    *pitch = (int)(func_00290B58(&bendCurve, level) * 4096.0f);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -2237,19 +2237,19 @@ void func_00293740_impl(void* self, cRider* rider, int* volume, int* pitch)
     sSsVt_3740* vt = *(sSsVt_3740**)obj;
     int idx = vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta);
     float prev = *(float*)((char*)getLevels_3740(self) + (idx << 2));
-    float d = prev - level;
-    if (__builtin_fabsf(d) > 0.1f) {
+    float levelDiff = prev - level;
+    if (__builtin_fabsf(levelDiff) > 0.1f) {
         if (level < prev) {
-            level = prev - d * 0.25f;
+            level = prev - levelDiff * 0.25f;
         } else if (prev < level) {
             level = prev + (level - prev) * 0.25f;
         }
     }
-    func_00290B58_sCurve c1 = D_00482BC8;
+    func_00290B58_sCurve volumeCurve = D_00482BC8;
     *(float*)((char*)getLevels_3740(self) + (idx << 2)) = level;
-    func_00290B58_sCurve c2 = D_00482BF0;
-    *volume = (int)func_00290B58(&c1, level);
-    *pitch = (int)(func_00290B58(&c2, level) * 4096.0f);
+    func_00290B58_sCurve bendCurve = D_00482BF0;
+    *volume = (int)func_00290B58(&volumeCurve, level);
+    *pitch = (int)(func_00290B58(&bendCurve, level) * 4096.0f);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -2288,19 +2288,19 @@ void func_00293948_impl(void* self, cRider* rider, int* volume, int* pitch)
     sSsVt_3948* vt = *(sSsVt_3948**)obj;
     int idx = vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta);
     float prev = *(float*)((char*)getLevels_3948(self) + (idx << 2));
-    float d = prev - level;
-    if (__builtin_fabsf(d) > 0.1f) {
+    float levelDiff = prev - level;
+    if (__builtin_fabsf(levelDiff) > 0.1f) {
         if (level < prev) {
-            level = prev - d * 0.25f;
+            level = prev - levelDiff * 0.25f;
         } else if (prev < level) {
             level = prev + (level - prev) * 0.25f;
         }
     }
-    func_00290B58_sCurve c1 = D_00482C18;
+    func_00290B58_sCurve volumeCurve = D_00482C18;
     *(float*)((char*)getLevels_3948(self) + (idx << 2)) = level;
-    func_00290B58_sCurve c2 = D_00482C40;
-    *volume = (int)func_00290B58(&c1, level);
-    *pitch = (int)(func_00290B58(&c2, level) * 4096.0f);
+    func_00290B58_sCurve bendCurve = D_00482C40;
+    *volume = (int)func_00290B58(&volumeCurve, level);
+    *pitch = (int)(func_00290B58(&bendCurve, level) * 4096.0f);
 }
 #endif
 //100%
@@ -2379,19 +2379,19 @@ extern "C" void func_00293BB0(void* self, cRider* rider, int* volume, int* pitch
     sSndVtI* vt = *(sSndVtI**)obj;
     int idx = vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta);
     float prev = *(float*)((char*)sndLevels5990(self) + (idx << 2));
-    float d = prev - level;
-    if (__builtin_fabsf(d) > 0.1f) {
+    float levelDiff = prev - level;
+    if (__builtin_fabsf(levelDiff) > 0.1f) {
         if (level < prev) {
-            level = prev - d * 0.5f;
+            level = prev - levelDiff * 0.5f;
         } else if (prev < level) {
             level = prev + (level - prev) * 0.125f;
         }
     }
-    func_00290B58_sCurve c1 = D_00482C68;
+    func_00290B58_sCurve volumeCurve = D_00482C68;
     *(float*)((char*)sndLevels5990(self) + (idx << 2)) = level;
-    func_00290B58_sCurve c2 = D_00482C90;
-    *volume = (int)func_00290B58(&c1, level);
-    *pitch = (int)(func_00290B58(&c2, pressure) * 4096.0f);
+    func_00290B58_sCurve bendCurve = D_00482C90;
+    *volume = (int)func_00290B58(&volumeCurve, level);
+    *pitch = (int)(func_00290B58(&bendCurve, pressure) * 4096.0f);
     float speed = rider->mAudioSpeed;
     if (speed < 0.1f) {
         *volume = (int)((float)*volume * speed * 10.0f);
@@ -2470,18 +2470,18 @@ extern "C" void func_00293FC8(void* self, cRider* rider, int* volume, int* pitch
     sSsVt_3FC8* vt = *(sSsVt_3FC8**)obj;
     int idx = vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta);
     float prev = *(float*)((char*)self + (idx << 2) + 0x5990);
-    float d = prev - level;
-    if (__builtin_fabsf(d) > 0.1f) {
+    float levelDiff = prev - level;
+    if (__builtin_fabsf(levelDiff) > 0.1f) {
         if (level < prev) {
-            level = prev - d * 0.5f;
+            level = prev - levelDiff * 0.5f;
         } else if (prev < level) {
             level = prev + (level - prev) * 0.125f;
         }
     }
     *(float*)((char*)self + (idx << 2) + 0x5990) = level;
     *volume = 0x7F;
-    func_00290B58_sCurve c = D_00482D08;
-    *pitch = (int)(func_00290B58(&c, pressure) * 4096.0f);
+    func_00290B58_sCurve bendCurve = D_00482D08;
+    *pitch = (int)(func_00290B58(&bendCurve, pressure) * 4096.0f);
     float speed = rider->mAudioSpeed;
     if (speed < 0.1f) {
         *volume = (int)((float)*volume * speed * 10.0f);
@@ -3721,8 +3721,8 @@ extern "C" void func_00296310(cSSXAudio* vself, char* obj)
     }
     struct func_00290B58_sCurve curve = D_00482DA0;
     int vol = (int)func_00290B58(&curve, *(float*)(obj + 0x770));
-    int a = 0;
-    int b;
+    int bankNum = 0;
+    int patchNum;
     if (vol > 0x7F) {
         vol = 0x7F;
     }
@@ -3734,10 +3734,10 @@ extern "C" void func_00296310(cSSXAudio* vself, char* obj)
         goto state23;
     if (st == 3) {
 state23:
-        a = 10;
-        b = 9;
+        bankNum = 10;
+        patchNum = 9;
     } else {
-        b = (func_002ADF60((*self->p118)->sub.vbase) & 0x7FFF) * 3 / 0x7FFF + 0x30;
+        patchNum = (func_002ADF60((*self->p118)->sub.vbase) & 0x7FFF) * 3 / 0x7FFF + 0x30;
     }
     int flag = 0;
     int ok = *(int*)(obj + 0x874) && *(int*)(obj + 0x87C);
@@ -3747,19 +3747,19 @@ state23:
             flag = cSSXAudio_ReplayMode(self) == 0;
         }
     }
-    sfxBegin_6310(self, a, b);
+    sfxBegin_6310(self, bankNum, patchNum);
     optsVol_6310(*self->p118, vol);
     struct cBankManager** pp = self->p118;
-    int r = (int)func_00287968(self, 5, 0);
-    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    int volumeControl = (int)func_00287968(self, 5, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = volumeControl;
     {
-        struct cBankManager* m2 = *self->p118;
-        m2->sub.tgt[m2->sub.cur] = obj + 0x110;
+        struct cBankManager* optsManager = *self->p118;
+        optsManager->sub.tgt[optsManager->sub.cur] = obj + 0x110;
     }
     {
         struct cBankManager** pq = self->p118;
-        int q = func_00288A20(self, obj);
-        (*pq)->sub.p64[(*pq)->sub.cur] = q;
+        int listenerView = func_00288A20(self, obj);
+        (*pq)->sub.p64[(*pq)->sub.cur] = listenerView;
     }
     if (flag) {
         (*self->p118)->sub.p80[(*self->p118)->sub.cur] = 1;
@@ -3802,10 +3802,10 @@ extern func_00290B58_sCurve D_00482DA0;
 /**
  * Starts a wiping-out rider's slide loop (bank 0, patch 51) unless it is already playing.
  *
- * Does nothing while the slide handle (+0x774 of the rider at @p t's +0x80) is 0 or more. Computer and non-local riders
+ * Does nothing while the slide handle (+0x774 of the rider at @p wipeoutControl's +0x80) is 0 or more. Computer and non-local riders
  * farther than 100 units from every camera (cSSXAudio_CameraInRange) get nothing. The volume is curve D_00482DA0 at the
  * rider's +0x770, clamped to 0..127. The play-option level (the inlined SFX_Begin) gets that volume, volume control
- * func_00287968(5, 0), the rider's position (+0x110) to follow, the listening view (func_00288A20), @p t as user data,
+ * func_00287968(5, 0), the rider's position (+0x110) to follow, the listening view (func_00288A20), @p wipeoutControl as user data,
  * callback key D_004A36B0 (func_00296E18, empty), the +0x7C option cleared and, for a local human when the byte at
  * D_00535C11 is 2 and not replaying, the rider's viewport (+0x870). cBankSys_SFX_End's handle goes to the rider's
  * +0x774; func_00296E20 stops it.
@@ -3813,22 +3813,22 @@ extern func_00290B58_sCurve D_00482DA0;
  * The wipeout control calls it when the rider's animation category is 29 or 25.
  *
  * @param vself  the audio system (cSSXAudio)
- * @param t  the wipeout control (its rider at +0x80)
+ * @param wipeoutControl  the wipeout control (its rider at +0x80)
  */
-extern "C" void func_00296868(cSSXAudio* vself, sSndOwner* t)
+extern "C" void func_00296868(cSSXAudio* vself, sSndOwner* wipeoutControl)
 {
     sSSXAudioView* self = (sSSXAudioView*)vself;
-    if (*(int*)(t->rider + 0x774) >= 0) {
+    if (*(int*)(wipeoutControl->rider + 0x774) >= 0) {
         return;
     }
-    if (sndVCall(t->rider + 0x6C0, 9) != 0 || *(int*)(t->rider + 0x87C) == 0) {
-        if (cSSXAudio_CameraInRange(self, sndVCall(t->rider + 0x6C0, 5), 100.0f) < 0) {
+    if (sndVCall(wipeoutControl->rider + 0x6C0, 9) != 0 || *(int*)(wipeoutControl->rider + 0x87C) == 0) {
+        if (cSSXAudio_CameraInRange(self, sndVCall(wipeoutControl->rider + 0x6C0, 5), 100.0f) < 0) {
             return;
         }
     }
     func_00290B58_sCurve curve = D_00482DA0;
-    int vol = (int)func_00290B58(&curve, *(float*)(t->rider + 0x770));
-    int b = 51;
+    int vol = (int)func_00290B58(&curve, *(float*)(wipeoutControl->rider + 0x770));
+    int patchNum = 51;
     if (vol > 0x7F) {
         vol = 0x7F;
     }
@@ -3836,64 +3836,64 @@ extern "C" void func_00296868(cSSXAudio* vself, sSndOwner* t)
         vol = 0;
     }
     int flag = 0;
-    bool ok = *(int*)(t->rider + 0x874) && *(int*)(t->rider + 0x87C);
+    bool ok = *(int*)(wipeoutControl->rider + 0x874) && *(int*)(wipeoutControl->rider + 0x87C);
     if (ok) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         if (D_00535C11[0] == 2) {
             flag = cSSXAudio_ReplayMode(self) == 0;
         }
     }
-    cBankManager* m = self->mpVBankManager;
-    cSndPlayOpts* s = &m->sub;
-    m->sub.cur++;
-    s->ch[m->sub.cur] = m->sub.def;
-    m->sub.tgt[m->sub.cur] = 0;
-    s->p34[m->sub.cur] = 0;
-    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
-    s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
-    s->p60[m->sub.cur] = 0;
-    s->p64[m->sub.cur] = 0;
-    s->p68[m->sub.cur] = 0;
-    s->p6C[m->sub.cur] = 0;
-    s->p70[m->sub.cur].f4 = 0;
-    s->p70[m->sub.cur].f0 = 100;
-    s->p70[m->sub.cur].f8 = 90;
-    s->p70[m->sub.cur].fC = 50;
-    s->p74[m->sub.cur] = 0;
-    s->p80[m->sub.cur] = 0;
-    s->p84[m->sub.cur] = 0;
-    s->p78[m->sub.cur] = 0x7F;
-    s->p7C[m->sub.cur] = 1;
+    cBankManager* bankManager = self->mpVBankManager;
+    cSndPlayOpts* playOpts = &bankManager->sub;
+    bankManager->sub.cur++;
+    playOpts->ch[bankManager->sub.cur] = bankManager->sub.def;
+    bankManager->sub.tgt[bankManager->sub.cur] = 0;
+    playOpts->p34[bankManager->sub.cur] = 0;
+    playOpts->vals[bankManager->sub.cur] = playOpts->ch[bankManager->sub.cur].vol;
+    playOpts->p3C[bankManager->sub.cur] = 0;
+    func_00416210((char*)playOpts + bankManager->sub.cur * 8 + 0x40, 0, 8);
+    playOpts->p60[bankManager->sub.cur] = 0;
+    playOpts->p64[bankManager->sub.cur] = 0;
+    playOpts->p68[bankManager->sub.cur] = 0;
+    playOpts->p6C[bankManager->sub.cur] = 0;
+    playOpts->p70[bankManager->sub.cur].f4 = 0;
+    playOpts->p70[bankManager->sub.cur].f0 = 100;
+    playOpts->p70[bankManager->sub.cur].f8 = 90;
+    playOpts->p70[bankManager->sub.cur].fC = 50;
+    playOpts->p74[bankManager->sub.cur] = 0;
+    playOpts->p80[bankManager->sub.cur] = 0;
+    playOpts->p84[bankManager->sub.cur] = 0;
+    playOpts->p78[bankManager->sub.cur] = 0x7F;
+    playOpts->p7C[bankManager->sub.cur] = 1;
     self->mBank[self->mpVBankManager->sub.cur] = 0;
-    self->mPatch[self->mpVBankManager->sub.cur] = b;
-    cBankManager* m3 = *self->p118;
-    cSndPlayOpts* s3 = &m3->sub;
-    s3->vals[m3->sub.cur] = vol;
-    s3->ch[m3->sub.cur].vol = (s3->vals[s3->cur] < 0x7F && s3->vals[s3->cur] < 0) ? 0 : (s3->vals[s3->cur] < 0x7F ? (unsigned char)s3->vals[s3->cur] : 0x7F);
+    self->mPatch[self->mpVBankManager->sub.cur] = patchNum;
+    cBankManager* volumeManager = *self->p118;
+    cSndPlayOpts* volumeOpts = &volumeManager->sub;
+    volumeOpts->vals[volumeManager->sub.cur] = vol;
+    volumeOpts->ch[volumeManager->sub.cur].vol = (volumeOpts->vals[volumeOpts->cur] < 0x7F && volumeOpts->vals[volumeOpts->cur] < 0) ? 0 : (volumeOpts->vals[volumeOpts->cur] < 0x7F ? (unsigned char)volumeOpts->vals[volumeOpts->cur] : 0x7F);
     cBankManager** pp = self->p118;
-    int r = (int)func_00287968(self, 5, 0);
-    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    int volumeControl = (int)func_00287968(self, 5, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = volumeControl;
     {
-        cBankManager* m2 = *self->p118;
-        m2->sub.tgt[m2->sub.cur] = t->rider + 0x110;
+        cBankManager* optsManager = *self->p118;
+        optsManager->sub.tgt[optsManager->sub.cur] = wipeoutControl->rider + 0x110;
     }
     {
         cBankManager** pq = self->p118;
-        int q = func_00288A20(self, t ? t->rider : 0);
-        (*pq)->sub.p64[(*pq)->sub.cur] = q;
+        int listenerView = func_00288A20(self, wipeoutControl ? wipeoutControl->rider : 0);
+        (*pq)->sub.p64[(*pq)->sub.cur] = listenerView;
     }
     {
-        cBankManager* m2 = *self->p118;
-        m2->sub.p60[m2->sub.cur] = (int)t;
+        cBankManager* optsManager = *self->p118;
+        optsManager->sub.p60[optsManager->sub.cur] = (int)wipeoutControl;
     }
     OPTS_Callback(*self->p118, D_004A36B0_cb[0]);
     (*self->p118)->sub.p7C[(*self->p118)->sub.cur] = 0;
     if (flag) {
         (*self->p118)->sub.p80[(*self->p118)->sub.cur] = 1;
-        (*self->p118)->sub.p84[(*self->p118)->sub.cur] = *(int*)(t->rider + 0x870);
+        (*self->p118)->sub.p84[(*self->p118)->sub.cur] = *(int*)(wipeoutControl->rider + 0x870);
     }
-    *(int*)(t->rider + 0x774) = cBankSys_SFX_End((cBankSys*)self);
+    *(int*)(wipeoutControl->rider + 0x774) = cBankSys_SFX_End((cBankSys*)self);
 }
 #endif
 
@@ -3971,28 +3971,28 @@ extern func_00290B58_sCurve D_00482DA0;
  * from every camera (cSSXAudio_CameraInRange on the position from cRider vtable slot 5) are skipped. The volume is the
  * curve D_00482DA0 (func_00290B58) of the rider's unk_770, clamped to 0..127. A play-option level is pushed with
  * defaults (the inlined SFX_Begin) for bank 0, patch 52 and gets that volume, the volume control func_00287968(vself,
- * 5, 0), the rider's mPosition to follow, the view from func_00288A20, @p t as its pointer, the empty callback
+ * 5, 0), the rider's mPosition to follow, the view from func_00288A20, @p wipeoutControl as its pointer, the empty callback
  * func_00297430 (pointer to member D_004A36B8) and mCloseOnEnd 0. For a local human (mIsHuman and mIsLocal) when the
  * new-race game path (byte D_00535C11) is 2 (multiplayer) and not replaying, it also gets two-player pan on side
  * mViewIndex. cBankSys_SFX_End starts it and the handle is stored in mWipeoutTumbleHandle.
  *
  * @param vself  the audio system
- * @param t  the rider's wipeout control (cWipeoutControl; its rider pointer at +0x80)
+ * @param wipeoutControl  the rider's wipeout control (cWipeoutControl; its rider pointer at +0x80)
  */
-extern "C" void func_00296E80(cSSXAudio* vself, sSndOwner* t)
+extern "C" void func_00296E80(cSSXAudio* vself, sSndOwner* wipeoutControl)
 {
     sSSXAudioView* self = (sSSXAudioView*)vself;
-    if (*(int*)(t->rider + 0x778) >= 0) {
+    if (*(int*)(wipeoutControl->rider + 0x778) >= 0) {
         return;
     }
-    if (sndVCall(t->rider + 0x6C0, 9) != 0 || *(int*)(t->rider + 0x87C) == 0) {
-        if (cSSXAudio_CameraInRange(self, sndVCall(t->rider + 0x6C0, 5), 100.0f) < 0) {
+    if (sndVCall(wipeoutControl->rider + 0x6C0, 9) != 0 || *(int*)(wipeoutControl->rider + 0x87C) == 0) {
+        if (cSSXAudio_CameraInRange(self, sndVCall(wipeoutControl->rider + 0x6C0, 5), 100.0f) < 0) {
             return;
         }
     }
     func_00290B58_sCurve curve = D_00482DA0;
-    int vol = (int)func_00290B58(&curve, *(float*)(t->rider + 0x770));
-    int b = 52;
+    int vol = (int)func_00290B58(&curve, *(float*)(wipeoutControl->rider + 0x770));
+    int patchNum = 52;
     if (vol > 0x7F) {
         vol = 0x7F;
     }
@@ -4000,64 +4000,64 @@ extern "C" void func_00296E80(cSSXAudio* vself, sSndOwner* t)
         vol = 0;
     }
     int flag = 0;
-    bool ok = *(int*)(t->rider + 0x874) && *(int*)(t->rider + 0x87C);
+    bool ok = *(int*)(wipeoutControl->rider + 0x874) && *(int*)(wipeoutControl->rider + 0x87C);
     if (ok) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         if (D_00535C11[0] == 2) {
             flag = cSSXAudio_ReplayMode(self) == 0;
         }
     }
-    cBankManager* m = self->mpVBankManager;
-    cSndPlayOpts* s = &m->sub;
-    m->sub.cur++;
-    s->ch[m->sub.cur] = m->sub.def;
-    m->sub.tgt[m->sub.cur] = 0;
-    s->p34[m->sub.cur] = 0;
-    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
-    s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
-    s->p60[m->sub.cur] = 0;
-    s->p64[m->sub.cur] = 0;
-    s->p68[m->sub.cur] = 0;
-    s->p6C[m->sub.cur] = 0;
-    s->p70[m->sub.cur].f4 = 0;
-    s->p70[m->sub.cur].f0 = 100;
-    s->p70[m->sub.cur].f8 = 90;
-    s->p70[m->sub.cur].fC = 50;
-    s->p74[m->sub.cur] = 0;
-    s->p80[m->sub.cur] = 0;
-    s->p84[m->sub.cur] = 0;
-    s->p78[m->sub.cur] = 0x7F;
-    s->p7C[m->sub.cur] = 1;
+    cBankManager* bankManager = self->mpVBankManager;
+    cSndPlayOpts* playOpts = &bankManager->sub;
+    bankManager->sub.cur++;
+    playOpts->ch[bankManager->sub.cur] = bankManager->sub.def;
+    bankManager->sub.tgt[bankManager->sub.cur] = 0;
+    playOpts->p34[bankManager->sub.cur] = 0;
+    playOpts->vals[bankManager->sub.cur] = playOpts->ch[bankManager->sub.cur].vol;
+    playOpts->p3C[bankManager->sub.cur] = 0;
+    func_00416210((char*)playOpts + bankManager->sub.cur * 8 + 0x40, 0, 8);
+    playOpts->p60[bankManager->sub.cur] = 0;
+    playOpts->p64[bankManager->sub.cur] = 0;
+    playOpts->p68[bankManager->sub.cur] = 0;
+    playOpts->p6C[bankManager->sub.cur] = 0;
+    playOpts->p70[bankManager->sub.cur].f4 = 0;
+    playOpts->p70[bankManager->sub.cur].f0 = 100;
+    playOpts->p70[bankManager->sub.cur].f8 = 90;
+    playOpts->p70[bankManager->sub.cur].fC = 50;
+    playOpts->p74[bankManager->sub.cur] = 0;
+    playOpts->p80[bankManager->sub.cur] = 0;
+    playOpts->p84[bankManager->sub.cur] = 0;
+    playOpts->p78[bankManager->sub.cur] = 0x7F;
+    playOpts->p7C[bankManager->sub.cur] = 1;
     self->mBank[self->mpVBankManager->sub.cur] = 0;
-    self->mPatch[self->mpVBankManager->sub.cur] = b;
-    cBankManager* m3 = *self->p118;
-    cSndPlayOpts* s3 = &m3->sub;
-    s3->vals[m3->sub.cur] = vol;
-    s3->ch[m3->sub.cur].vol = (s3->vals[s3->cur] < 0x7F && s3->vals[s3->cur] < 0) ? 0 : (s3->vals[s3->cur] < 0x7F ? (unsigned char)s3->vals[s3->cur] : 0x7F);
+    self->mPatch[self->mpVBankManager->sub.cur] = patchNum;
+    cBankManager* volManager = *self->p118;
+    cSndPlayOpts* volOpts = &volManager->sub;
+    volOpts->vals[volManager->sub.cur] = vol;
+    volOpts->ch[volManager->sub.cur].vol = (volOpts->vals[volOpts->cur] < 0x7F && volOpts->vals[volOpts->cur] < 0) ? 0 : (volOpts->vals[volOpts->cur] < 0x7F ? (unsigned char)volOpts->vals[volOpts->cur] : 0x7F);
     cBankManager** pp = self->p118;
-    int r = (int)func_00287968(self, 5, 0);
-    (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+    int volControl = (int)func_00287968(self, 5, 0);
+    (*pp)->sub.p3C[(*pp)->sub.cur] = volControl;
     {
-        cBankManager* m2 = *self->p118;
-        m2->sub.tgt[m2->sub.cur] = t->rider + 0x110;
+        cBankManager* levelManager = *self->p118;
+        levelManager->sub.tgt[levelManager->sub.cur] = wipeoutControl->rider + 0x110;
     }
     {
         cBankManager** pq = self->p118;
-        int q = func_00288A20(self, t ? t->rider : 0);
-        (*pq)->sub.p64[(*pq)->sub.cur] = q;
+        int viewIndex = func_00288A20(self, wipeoutControl ? wipeoutControl->rider : 0);
+        (*pq)->sub.p64[(*pq)->sub.cur] = viewIndex;
     }
     {
-        cBankManager* m2 = *self->p118;
-        m2->sub.p60[m2->sub.cur] = (int)t;
+        cBankManager* levelManager = *self->p118;
+        levelManager->sub.p60[levelManager->sub.cur] = (int)wipeoutControl;
     }
     OPTS_Callback(*self->p118, D_004A36B8_cb[0]);
     (*self->p118)->sub.p7C[(*self->p118)->sub.cur] = 0;
     if (flag) {
         (*self->p118)->sub.p80[(*self->p118)->sub.cur] = 1;
-        (*self->p118)->sub.p84[(*self->p118)->sub.cur] = *(int*)(t->rider + 0x870);
+        (*self->p118)->sub.p84[(*self->p118)->sub.cur] = *(int*)(wipeoutControl->rider + 0x870);
     }
-    *(int*)(t->rider + 0x778) = cBankSys_SFX_End((cBankSys*)self);
+    *(int*)(wipeoutControl->rider + 0x778) = cBankSys_SFX_End((cBankSys*)self);
 }
 #endif
 
@@ -4810,31 +4810,31 @@ void func_00298488_8488(void* self, sSs8488Rider* a, sSs8488Rider* b) __asm__("f
 /**
  * Plays the collision sound of two riders that bump into each other, near a camera.
  *
- * Plays nothing when @p a is more than 100 units from every camera (cSSXAudio_CameraInRange) or outside every camera
+ * Plays nothing when @p rider is more than 100 units from every camera (cSSXAudio_CameraInRange) or outside every camera
  * view (func_00288C08), when neither rider is a local human (mIsHuman and mIsLocal), or while play-history event 7 is
  * still live (cSSXAudio_PlayHistoryExists). The volume is func_00290C10(1, length of the sum of both riders'
  * velocities, from cRider vtable slot 2). A play-option level is pushed with defaults for bank 0, patch 54 with that
- * volume, the volume control func_00287968(self, 5, 0), a 3D radius of 100 (func_002A9988), the view of @p a
- * (func_00288A20) and @p a's mPosition to follow; cBankSys_SFX_End starts it and the handle goes into the play history
+ * volume, the volume control func_00287968(self, 5, 0), a 3D radius of 100 (func_002A9988), the view of @p rider
+ * (func_00288A20) and @p rider's mPosition to follow; cBankSys_SFX_End starts it and the handle goes into the play history
  * as event 7 for 50 ms past the monitor clock (cSSXAudio_PlayHistoryAdd).
  *
- * @param a  the rider whose position the sound follows
- * @param b  the other rider
+ * @param rider  the rider whose position the sound follows
+ * @param opponent  the other rider
  */
-void func_00298488_8488(void* self, sSs8488Rider* a, sSs8488Rider* b)
+void func_00298488_8488(void* self, sSs8488Rider* rider, sSs8488Rider* opponent)
 {
-    if (cSSXAudio_CameraInRange(self, a->v05(), 100.0f) < 0) return;
-    if (func_00288C08_8488(self, a->v05(), 100.0f) == 0) return;
-    bool okA = *(int*)((char*)a + 0x874) && a->f87C;
+    if (cSSXAudio_CameraInRange(self, rider->v05(), 100.0f) < 0) return;
+    if (func_00288C08_8488(self, rider->v05(), 100.0f) == 0) return;
+    bool okA = *(int*)((char*)rider + 0x874) && rider->f87C;
     if (!okA) {
-        bool okB = *(int*)((char*)b + 0x874) && b->f87C;
+        bool okB = *(int*)((char*)opponent + 0x874) && opponent->f87C;
         if (!okB) return;
     }
     if (cSSXAudio_PlayHistoryExists((cSSXAudio*)self, 7, 0) != 0) return;
-    sVec4_8488 sum = vu0Add_8488(*a->v02(), *b->v02());
-    int c = (int)func_00290C10(1, (float)(int)vu0Length_8488(sum));
-    int h = snd8488Add(self, a, 0, 54, c);
-    cSSXAudio_PlayHistoryAdd((cSSXAudio*)self, (void*)7, h, *(volatile int*)(**(char***)((char*)self + 0x118) + 0x260) + 50, 0, 0);
+    sVec4_8488 sum = vu0Add_8488(*rider->v02(), *opponent->v02());
+    int volume = (int)func_00290C10(1, (float)(int)vu0Length_8488(sum));
+    int handle = snd8488Add(self, rider, 0, 54, volume);
+    cSSXAudio_PlayHistoryAdd((cSSXAudio*)self, (void*)7, handle, *(volatile int*)(**(char***)((char*)self + 0x118) + 0x260) + 50, 0, 0);
 }
 #endif
 
@@ -5331,14 +5331,14 @@ extern "C" void func_00299638(void* self, char* obj)
     if (up) {
         return;
     }
-    char* p = **(char***)((char*)self + 0x118) + 0x1D8;
+    char* bankMonitor = **(char***)((char*)self + 0x118) + 0x1D8;
     sSndKey8_9638* key = D_004A3678_key;
-    int r = (int)func_00287968(self, 9, 0);
-    func_002ADCA0_key(p, 400, key->v, r, 0, 107, 0x7F, 0);
-    int m = *(int*)(obj + 0x2F4);
-    if (m == 10) {
+    int volControl = (int)func_00287968(self, 9, 0);
+    func_002ADCA0_key(bankMonitor, 400, key->v, volControl, 0, 107, 0x7F, 0);
+    int uberLevel = *(int*)(obj + 0x2F4);
+    if (uberLevel == 10) {
         func_002A3C00((cSSXAudio*)self, obj, 0x10);
-    } else if (m >= 5) {
+    } else if (uberLevel >= 5) {
         func_002A3C00((cSSXAudio*)self, obj, 0x8);
     } else {
         func_002A3C00((cSSXAudio*)self, obj, 0x4);
@@ -6250,32 +6250,32 @@ extern "C" void func_0029AB40(cSSXAudio* vself)
     int n = 1;
     if (D_00535C11[0] == 2) n = 2;
     for (int i = 0; i < n; i++) {
-        sRider_AB40* r0 = (sRider_AB40*)((cAI*)cAudioInterface_getAI())->Riders[i];
-        bool ok = r0->f874 && r0->f87C;
+        sRider_AB40* viewRider = (sRider_AB40*)((cAI*)cAudioInterface_getAI())->Riders[i];
+        bool ok = viewRider->f874 && viewRider->f87C;
         if (!ok) continue;
         sRider_AB40* rider = (sRider_AB40*)((cAI*)cAudioInterface_getAI())->Riders[i];
         sMon1B0_AB40* mon = rider->p790->p1B0;
         sMon_AB40* mp = mon ? &mon->m : 0;
-        int v = (int)ffloor_AB40(mp->f8 / mp->f4 * 10.0f);
-        if (self->arr1[i] < v && v > 0) {
+        int barTenths = (int)ffloor_AB40(mp->f8 / mp->f4 * 10.0f);
+        if (self->arr1[i] < barTenths && barTenths > 0) {
             void* sub = &(*self->p118)->sub;
-            int h = (int)func_00287968(self, 9, 0);
-            func_002ADCA0_AB40(sub, 150, D_004A36C0_AB40[0].v, h, 0, 101, 0x7F, self->arr2[rider->f870]);
+            int volControl = (int)func_00287968(self, 9, 0);
+            func_002ADCA0_AB40(sub, 150, D_004A36C0_AB40[0].v, volControl, 0, 101, 0x7F, self->arr2[rider->f870]);
             self->arr2[rider->f870] += 0x100;
         }
-        self->arr1[i] = v;
+        self->arr1[i] = barTenths;
         int w = (int)ffloor_AB40(rider->f2F0 * 2.0f);
         if (w > 0) {
             if (w == self->arr3[i] - 1) {
                 if (w >= 13) {
                 } else if ((w & 1) && w >= 5) {
                 } else {
-                    int c = 1;
+                    int playBeep = 1;
                     int pos = rider->f470 >= 0.0f;
-                    if (pos) c = 0;
-                    if ((cPauseState_Flags & 1) || cReplay_isPauseAI(*(void**)((char*)cAudioInterface_getGame() + 0x28)) != 0) c = 0;
-                    if (*(int*)((char*)cAudioInterface_getGame() + 0x214) != 4) c = 0;
-                    if (c) {
+                    if (pos) playBeep = 0;
+                    if ((cPauseState_Flags & 1) || cReplay_isPauseAI(*(void**)((char*)cAudioInterface_getGame() + 0x28)) != 0) playBeep = 0;
+                    if (*(int*)((char*)cAudioInterface_getGame() + 0x214) != 4) playBeep = 0;
+                    if (playBeep) {
                         sndAB40Add(self, 0, 104, 9);
                     }
                 }
@@ -7227,14 +7227,14 @@ extern "C" void func_0029C7B0(void* vself)
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cSSXAudio_PlayHistoryExists((cSSXAudio*)vself, 0, 0) == 0) {
-        int m = D_00535C11[0];
-        if (m == 1) {
+        int gamePath = D_00535C11[0];
+        if (gamePath == 1) {
             func_002A3170(vself);
-        } else if (m == 2) {
+        } else if (gamePath == 2) {
             func_002A3170(vself);
         } else {
-            int* p = (int*)SSXApp->GameModeMan;
-            if (p[152 / 4] != 0) {
+            int* gameModeMan = (int*)SSXApp->GameModeMan;
+            if (gameModeMan[152 / 4] != 0) {
                 func_002A3400((cSSXAudio*)vself);
                 func_002B1758(base + 0x5560, 0);
                 if (func_002A4078(vself) != 0 || func_002A40E8(vself) != 0) {
@@ -7242,11 +7242,11 @@ extern "C" void func_0029C7B0(void* vself)
                     *(int*)(base + 0x5778) = func_002B4908(base + 0x118);
                 }
             } else {
-                int v = p[0];
-                if (v == 1) {
+                int heatNum = gameModeMan[0];
+                if (heatNum == 1) {
                     *(int*)(base + 0x5774) = 1;
                     *(int*)(base + 0x5778) = func_002B4908(base + 0x118);
-                } else if (v == 2) {
+                } else if (heatNum == 2) {
                     if (func_002A4078(vself) != 0 || func_002A40E8(vself) != 0) {
                         *(int*)(base + 0x5774) = 1;
                         *(int*)(base + 0x5778) = func_002B4908(base + 0x118);
@@ -8146,35 +8146,35 @@ extern "C" void func_0029DEF0(cSSXAudio* vself, int on)
             char* obj = (char*)cSSXAudio_GetFocusRider(self, id);
             self->idx = sndVCall(obj + 0x6C0, 7);
             {
-                sV3DEF0* p = (sV3DEF0*)sndVCall(obj + 0x6C0, 5);
+                sV3DEF0* riderPos = (sV3DEF0*)sndVCall(obj + 0x6C0, 5);
                 sOutDEF0 out;
                 sV3DEF0 pos;
-                pos.x = p->x;
-                pos.y = p->y;
-                pos.z = p->z;
+                pos.x = riderPos->x;
+                pos.y = riderPos->y;
+                pos.z = riderPos->z;
                 cAvalanche_getAvalancheDataByPosition_c(&out, &pos);
                 *(sOutDEF0*)&self->xf = out;
             }
             sndBeginVoice(self, 8, 2);
-            cBankManager** p0 = self->p118;
-            int v = func_0029E438(self, (char*)&self->xf);
-            cBankManager* m3 = *p0;
-            cSndPlayOpts* s3 = &m3->sub;
-            s3->vals[m3->sub.cur] = v;
-            s3->ch[m3->sub.cur].vol = (s3->vals[s3->cur] < 0x7F && s3->vals[s3->cur] < 0) ? 0 : (s3->vals[s3->cur] < 0x7F ? (unsigned char)s3->vals[s3->cur] : 0x7F);
+            cBankManager** bankManagerRef = self->p118;
+            int volume = func_0029E438(self, (char*)&self->xf);
+            cBankManager* volManager = *bankManagerRef;
+            cSndPlayOpts* volOpts = &volManager->sub;
+            volOpts->vals[volManager->sub.cur] = volume;
+            volOpts->ch[volManager->sub.cur].vol = (volOpts->vals[volOpts->cur] < 0x7F && volOpts->vals[volOpts->cur] < 0) ? 0 : (volOpts->vals[volOpts->cur] < 0x7F ? (unsigned char)volOpts->vals[volOpts->cur] : 0x7F);
             cBankManager** pp = self->p118;
-            int r = (int)func_00287968(self, 5, 0);
-            (*pp)->sub.p3C[(*pp)->sub.cur] = r;
+            int volControl = (int)func_00287968(self, 5, 0);
+            (*pp)->sub.p3C[(*pp)->sub.cur] = volControl;
             {
-                cBankManager* m2 = *self->p118;
-                m2->sub.tgt[m2->sub.cur] = &self->xf;
+                cBankManager* levelManager = *self->p118;
+                levelManager->sub.tgt[levelManager->sub.cur] = &self->xf;
             }
             func_002A9988(&(*self->p118)->sub, 100.0f, -1.0f);
             OPTS_Callback(*self->p118, D_004A36D0_cb[0]);
             {
                 cBankManager** pq = self->p118;
-                int q = func_00288A20(self, obj);
-                (*pq)->sub.p64[(*pq)->sub.cur] = q;
+                int viewIndex = func_00288A20(self, obj);
+                (*pq)->sub.p64[(*pq)->sub.cur] = viewIndex;
             }
             (*self->p118)->sub.p74[(*self->p118)->sub.cur] = 1;
             self->handle5FF4 = cBankSys_SFX_End((cBankSys*)self);
@@ -8704,10 +8704,10 @@ extern "C" void func_00287F00(void* self, int a1, float f0, float f1);
  *
  * @param instanceIndex  the speech instance (0 is the only one handled)
  * @param type  the volume class from func_0029EEE0
- * @param a3  the character index passed on to func_00287968
+ * @param charIndex  the character index passed on to func_00287968
  * @return a pointer to the volume (float), or 0
  */
-extern "C" void* func_0029F000(cSSXAudio* self, int instanceIndex, int type, int a3)
+extern "C" void* func_0029F000(cSSXAudio* self, int instanceIndex, int type, int charIndex)
 {
     if (instanceIndex == 0) {
         if (type == 2) {
@@ -8716,7 +8716,7 @@ extern "C" void* func_0029F000(cSSXAudio* self, int instanceIndex, int type, int
         if (type == 11) {
             return (char*)self + 0x5730;
         }
-        return func_00287968(self, type, a3);
+        return func_00287968(self, type, charIndex);
     }
     return 0;
 }
@@ -8854,10 +8854,10 @@ extern sSsOpts9F198 D_00535610_ss9F198 __asm__("cBEOptionInterface_mOption");
 extern "C" int func_0029F198(void* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 4);
-    sSsOpts9F198 o = D_00535610_ss9F198;
-    unsigned m = o.w0 >> 22;
-    m &= 7;
-    switch (m) {
+    sSsOpts9F198 optionCopy = D_00535610_ss9F198;
+    unsigned languageIndex = optionCopy.w0 >> 22;
+    languageIndex &= 7;
+    switch (languageIndex) {
     case 0:
         return 1;
     case 1:
@@ -9245,26 +9245,26 @@ extern "C" void func_0029FCC8(cSSXAudio* self, void* vrider)
     int chk = 0;
     if (rider->v09() != 0 || rider->f87C == 0) chk = 1;
     if (chk && cSSXAudio_GetFocusRider_p(self, -1) != rider) return;
-    float v = rider->f470;
+    float finishTime = rider->f470;
     float zero = 0.0f;
-    int pos2 = v >= zero;
+    int pos2 = finishTime >= zero;
     if (pos2) return;
     char* snd = (char*)self + 0x5560;
     if (func_002B0E28(snd, 0) == 0) return;
-    int r = func_0029F330_i(rider);
+    int speakerBit = func_0029F330_i(rider);
     if (cSSXAudio_CameraInRange(self, rider->v05(), D_004A36D8) < 0) return;
     int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
     if (sel == 1) {
         if (func_002B1458(snd, 0, 8324, (int)rider, cRider_getIdentity(rider), 0, 0, zero) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 8324), 2, r, 3);
+            D_004A482C_4(func_003D8008(1, 0, 8324), 2, speakerBit, 3);
         }
     } else if (sel == 2) {
         if (func_002B1458(snd, 0, 8323, (int)rider, cRider_getIdentity(rider), 0, 0, zero) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 8323), 2, r, 3);
+            D_004A482C_4(func_003D8008(1, 0, 8323), 2, speakerBit, 3);
         }
     } else {
         if (func_002B1458(snd, 0, 8337, (int)rider, cRider_getIdentity(rider), 0, 0, zero) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 8337), 2, r, 3);
+            D_004A482C_4(func_003D8008(1, 0, 8337), 2, speakerBit, 3);
         }
     }
 }
@@ -9332,36 +9332,36 @@ extern "C" void func_0029FF80(cSSXAudio* self, sSsFF80Rider* rider, int alt)
     int chk = 0;
     if (rider->v09() != 0 || rider->f87C == 0) chk = 1;
     if (chk && cSSXAudio_GetFocusRider_p(self, -1) != rider) return;
-    int r = func_0029F330_i(rider);
+    int speakerBit = func_0029F330_i(rider);
     if (cSSXAudio_CameraInRange(self, rider->v05(), D_004A36D8) < 0) return;
     if (alt != 0) {
         int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
         if (sel == 1) {
             if (func_002B1458((char*)self + 0x5560, 0, 8336, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-                D_004A482C(func_003D8008(1, 0, 8336), 1, r);
+                D_004A482C(func_003D8008(1, 0, 8336), 1, speakerBit);
             }
         } else if (sel == 2) {
             if (func_002B1458((char*)self + 0x5560, 0, 8347, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-                D_004A482C(func_003D8008(1, 0, 8347), 1, r);
+                D_004A482C(func_003D8008(1, 0, 8347), 1, speakerBit);
             }
         } else {
             if (func_002B1458((char*)self + 0x5560, 0, 8349, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-                D_004A482C(func_003D8008(1, 0, 8349), 1, r);
+                D_004A482C(func_003D8008(1, 0, 8349), 1, speakerBit);
             }
         }
     } else {
         int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
         if (sel == 1) {
             if (func_002B1458((char*)self + 0x5560, 0, 8322, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-                D_004A482C(func_003D8008(1, 0, 8322), 1, r);
+                D_004A482C(func_003D8008(1, 0, 8322), 1, speakerBit);
             }
         } else if (sel == 2) {
             if (func_002B1458((char*)self + 0x5560, 0, 8346, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-                D_004A482C(func_003D8008(1, 0, 8346), 1, r);
+                D_004A482C(func_003D8008(1, 0, 8346), 1, speakerBit);
             }
         } else {
             if (func_002B1458((char*)self + 0x5560, 0, 8348, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-                D_004A482C(func_003D8008(1, 0, 8348), 1, r);
+                D_004A482C(func_003D8008(1, 0, 8348), 1, speakerBit);
             }
         }
     }
@@ -9432,7 +9432,7 @@ extern "C" void func_002A02D8(cSSXAudio* self, sSs02D8Rider* rider)
     if (rider->v09() != 0 || rider->f87C == 0) chk = 1;
     if (chk && cSSXAudio_GetFocusRider_p(self, -1) != rider) return;
     if (func_002B0E28((char*)self + 0x5560, 0) == 0) return;
-    int r = func_0029F330_i(rider);
+    int speakerBit = func_0029F330_i(rider);
     int mode;
     if (func_002A3F90(self) != 0 || func_002A4040(self) != 0) {
         mode = 1;
@@ -9443,15 +9443,15 @@ extern "C" void func_002A02D8(cSSXAudio* self, sSs02D8Rider* rider)
     int sel = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
     if (sel == 1) {
         if (func_002B1458((char*)self + 0x5560, 0, 8328, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 8328), 2, r, mode);
+            D_004A482C_4(func_003D8008(1, 0, 8328), 2, speakerBit, mode);
         }
     } else if (sel == 2) {
         if (func_002B1458((char*)self + 0x5560, 0, 8352, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 8352), 2, r, mode);
+            D_004A482C_4(func_003D8008(1, 0, 8352), 2, speakerBit, mode);
         }
     } else {
         if (func_002B1458((char*)self + 0x5560, 0, 8353, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) != 0) {
-            D_004A482C_4(func_003D8008(1, 0, 8353), 2, r, mode);
+            D_004A482C_4(func_003D8008(1, 0, 8353), 2, speakerBit, mode);
         }
     }
 }
@@ -9538,72 +9538,72 @@ void func_002A0560_0560(void* self, sSs0560Rider* a, sSs0560Rider* b) __asm__("f
  *
  * Needs the Character volume on, no NIS playing (ScriptEngine->mPlayingNISList == 2), no replay, no cheat identity on
  * either rider, at least 600 AI ticks since mGruntCycle, neither rider past the finish line, and one of them the focus
- * rider or a local human. Speech instance 0 must be ready, @p a within 30 units of a camera and @p b in the same camera
- * range. The closing speed is @p a's velocity minus @p b's velocity along @p b's heading (the angle at +0x4CC,
+ * rider or a local human. Speech instance 0 must be ready, @p passer within 30 units of a camera and @p passed in the same camera
+ * range. The closing speed is @p passer's velocity minus @p passed's velocity along @p passed's heading (the angle at +0x4CC,
  * fSinCos); it must lie between 670.56 and 1788.16 (15 and 40 mph in cm/s), and from 1341.12 (30 mph) the mode is 2,
- * else 1. With the relation func_002A1820 == 2, speech 8321 is requested for @p a and 8319 for @p b; with 0 or 1, 8320
- * for @p a (its event also gets @p b's character bit func_002A1D48 ORed with 0x1000) and 8317 for @p b. Each queued
+ * else 1. With the relation func_002A1820 == 2, speech 8321 is requested for @p passer and 8319 for @p passed; with 0 or 1, 8320
+ * for @p passer (its event also gets @p passed's character bit func_002A1D48 ORed with 0x1000) and 8317 for @p passed. Each queued
  * request goes to the speech hook D_004A482C with the speaker's bit and the mode.
  *
- * @param a  the rider that passes
- * @param b  the rider being passed
+ * @param passer  the rider that passes
+ * @param passed  the rider being passed
  */
-void func_002A0560_0560(void* self, sSs0560Rider* a, sSs0560Rider* b)
+void func_002A0560_0560(void* self, sSs0560Rider* passer, sSs0560Rider* passed)
 {
     if (func_0029F0A0(self) == 0) return;
     if (!sndA30Mode0560(2)) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
-    if (cRider_getCheatIdentity(a) != 0) return;
-    if (cRider_getCheatIdentity(b) != 0) return;
+    if (cRider_getCheatIdentity(passer) != 0) return;
+    if (cRider_getCheatIdentity(passed) != 0) return;
     if (*(int*)(*(int*)((char*)cAudioInterface_getGame() + 0xC) + 8) - *(int*)((char*)self + 0x582C) < 600) return;
-    int posA = a->f470 >= 0.0f;
+    int posA = passer->f470 >= 0.0f;
     if (posA) return;
-    int posB = b->f470 >= 0.0f;
+    int posB = passed->f470 >= 0.0f;
     if (posB) return;
     int chkA = 0;
-    if (a->v09() != 0 || a->f87C == 0) chkA = 1;
+    if (passer->v09() != 0 || passer->f87C == 0) chkA = 1;
     int chkB = 0;
-    if (b->v09() != 0 || b->f87C == 0) chkB = 1;
+    if (passed->v09() != 0 || passed->f87C == 0) chkB = 1;
     void* pl = cSSXAudio_GetFocusRider_p(self, -1);
-    if (chkA && chkB && a != pl && b != pl) return;
+    if (chkA && chkB && passer != pl && passed != pl) return;
     char* snd = (char*)self + 0x5560;
     if (func_002B0E28(snd, 0) == 0) return;
-    int okA = cSSXAudio_CameraInRange(self, a->v05(), D_004A36D8);
+    int okA = cSSXAudio_CameraInRange(self, passer->v05(), D_004A36D8);
     if (okA < 0) return;
-    int okB = cSSXAudio_CameraInRange(self, b->v05(), D_004A36D8);
+    int okB = cSSXAudio_CameraInRange(self, passed->v05(), D_004A36D8);
     if (okA != okB) return;
-    float t0, t1;
-    fSinCos_0560(b->f4CC, &t0, &t1);
-    sVec4_0560 v;
-    v.x = t1;
-    v.y = t0;
-    v.z = 0;
-    v.w = 0;
-    float d = vu0Dot_0560(v, *a->v02());
-    d -= vu0Dot_0560(v, *b->v02());
-    if (!(d > 670.55999755859375f)) return;
-    if (!(d < 1788.159912109375f)) return;
+    float headingSin, headingCos;
+    fSinCos_0560(passed->f4CC, &headingSin, &headingCos);
+    sVec4_0560 headingDir;
+    headingDir.x = headingCos;
+    headingDir.y = headingSin;
+    headingDir.z = 0;
+    headingDir.w = 0;
+    float closingSpeed = vu0Dot_0560(headingDir, *passer->v02());
+    closingSpeed -= vu0Dot_0560(headingDir, *passed->v02());
+    if (!(closingSpeed > 670.55999755859375f)) return;
+    if (!(closingSpeed < 1788.159912109375f)) return;
     int mode = 1;
-    int rA = func_0029F330_i(a);
-    int s = func_002A1D48_i(self, b);
-    int rB = func_0029F330_i(b);
-    if (d >= 1341.1199951171875f) mode = 2;
-    unsigned sel = func_002A1820_0560(self, a, b);
+    int rA = func_0029F330_i(passer);
+    int passedBit = func_002A1D48_i(self, passed);
+    int rB = func_0029F330_i(passed);
+    if (closingSpeed >= 1341.1199951171875f) mode = 2;
+    unsigned sel = func_002A1820_0560(self, passer, passed);
     if (sel == 2) {
-        d = 0.0f;
-        if (func_002B1458_f(snd, 0, 8321, (int)a, cRider_getIdentity(a), d, 0, 0) != 0) {
+        closingSpeed = 0.0f;
+        if (func_002B1458_f(snd, 0, 8321, (int)passer, cRider_getIdentity(passer), closingSpeed, 0, 0) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 8321), 2, rA, mode);
         }
-        if (func_002B1458_f(snd, 0, 8319, (int)b, cRider_getIdentity(b), d, 0, 0) != 0) {
+        if (func_002B1458_f(snd, 0, 8319, (int)passed, cRider_getIdentity(passed), closingSpeed, 0, 0) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 8319), 2, rB, mode);
         }
     } else if (sel < 2) {
-        d = 0.0f;
-        if (func_002B1458_f(snd, 0, 8320, (int)a, cRider_getIdentity(a), d, 0, 0) != 0) {
-            s |= 0x1000;
-            D_004A482C_5(func_003D8008(1, 0, 8320), 3, rA, mode, s);
+        closingSpeed = 0.0f;
+        if (func_002B1458_f(snd, 0, 8320, (int)passer, cRider_getIdentity(passer), closingSpeed, 0, 0) != 0) {
+            passedBit |= 0x1000;
+            D_004A482C_5(func_003D8008(1, 0, 8320), 3, rA, mode, passedBit);
         }
-        if (func_002B1458_f(snd, 0, 8317, (int)b, cRider_getIdentity(b), d, 0, 0) != 0) {
+        if (func_002B1458_f(snd, 0, 8317, (int)passed, cRider_getIdentity(passed), closingSpeed, 0, 0) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 8317), 2, rB, mode);
         }
     }
@@ -9662,64 +9662,64 @@ extern "C" int func_002A1820(void* self, sSs1820Rider* a, sSs1820Rider* b);
  * Plays the victim's grunt for a rider-on-rider hit and, for a plain punch, the attacker's and victim's speech.
  *
  * Needs the Character volume on, no NIS playing, no replay, no cheat identity on either rider, neither past the finish
- * line and one of them the focus rider or a local human. Then @p b grunts (cSSXAudio_PlayGrunt(self, b, 0, 1)). The
- * speech needs speech instance 0 ready, either rider within 30 units of a camera, and @p p7 and @p p8 both 0. By the
- * riders' relation (func_002A1820) it requests 8335 for @p b and 8330 for @p a (2), 8318 and 8330 (1), or 8312 and 8334
+ * line and one of them the focus rider or a local human. Then @p victim grunts (cSSXAudio_PlayGrunt(self, b, 0, 1)). The
+ * speech needs speech instance 0 ready, either rider within 30 units of a camera, and @p isBump and @p isHardHit both 0. By the
+ * riders' relation (func_002A1820) it requests 8335 for @p victim and 8330 for @p attacker (2), 8318 and 8330 (1), or 8312 and 8334
  * (0); each queued request goes to the speech hook D_004A482C with the speaker's bit and 3. cComputer's bump, knockdown
  * and punch reactions call it.
  *
- * @param a  the attacking rider
- * @param b  the rider that was hit
- * @param p7  1 for a bump, 0 for a punch
- * @param p8  1 when the hit knocks the rider down (or is the harder kind), else 0
+ * @param attacker  the attacking rider
+ * @param victim  the rider that was hit
+ * @param isBump  1 for a bump, 0 for a punch
+ * @param isHardHit  1 when the hit knocks the rider down (or is the harder kind), else 0
  */
-extern "C" void func_002A0A30(cSSXAudio* self, sSs0A30Rider* a, sSs0A30Rider* b, int p7, int p8)
+extern "C" void func_002A0A30(cSSXAudio* self, sSs0A30Rider* attacker, sSs0A30Rider* victim, int isBump, int isHardHit)
 {
     if (func_0029F0A0(self) == 0) return;
     if (!sndA30Mode(2)) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
-    if (cRider_getCheatIdentity(a) != 0) return;
-    if (cRider_getCheatIdentity(b) != 0) return;
-    int posA = a->f470 >= 0.0f;
+    if (cRider_getCheatIdentity(attacker) != 0) return;
+    if (cRider_getCheatIdentity(victim) != 0) return;
+    int posA = attacker->f470 >= 0.0f;
     if (posA) return;
-    int posB = b->f470 >= 0.0f;
+    int posB = victim->f470 >= 0.0f;
     if (posB) return;
     int chkA = 0;
-    if (a->v09() != 0 || a->f87C == 0) chkA = 1;
+    if (attacker->v09() != 0 || attacker->f87C == 0) chkA = 1;
     int chkB = 0;
-    if (b->v09() != 0 || b->f87C == 0) chkB = 1;
+    if (victim->v09() != 0 || victim->f87C == 0) chkB = 1;
     void* pl = cSSXAudio_GetFocusRider_p(self, -1);
-    if (chkA && chkB && a != pl && b != pl) return;
-    cSSXAudio_PlayGrunt(self, b, 0, 1);
+    if (chkA && chkB && attacker != pl && victim != pl) return;
+    cSSXAudio_PlayGrunt(self, victim, 0, 1);
     char* snd = (char*)self + 0x5560;
     if (func_002B0E28(snd, 0) == 0) return;
-    int okB = cSSXAudio_CameraInRange(self, b->v05(), D_004A36D8) >= 0;
-    int okA = cSSXAudio_CameraInRange(self, a->v05(), D_004A36D8) >= 0;
+    int okB = cSSXAudio_CameraInRange(self, victim->v05(), D_004A36D8) >= 0;
+    int okA = cSSXAudio_CameraInRange(self, attacker->v05(), D_004A36D8) >= 0;
     if (!okB && !okA) return;
-    int rA = func_0029F330_i(a);
-    int rB = func_0029F330_i(b);
-    if (p8 != 0) return;
-    if (p7 != 0) return;
-    int sel = func_002A1820(self, (sSs1820Rider*)a, (sSs1820Rider*)b);
+    int rA = func_0029F330_i(attacker);
+    int rB = func_0029F330_i(victim);
+    if (isHardHit != 0) return;
+    if (isBump != 0) return;
+    int sel = func_002A1820(self, (sSs1820Rider*)attacker, (sSs1820Rider*)victim);
     if (sel == 2) {
-        if (func_002B1458_f(snd, 0, 8335, (int)b, cRider_getIdentity(b), 0.0f, 0, 0) != 0) {
+        if (func_002B1458_f(snd, 0, 8335, (int)victim, cRider_getIdentity(victim), 0.0f, 0, 0) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 8335), 2, rB, 3);
         }
-        if (func_002B1458_f(snd, 0, 8330, (int)a, cRider_getIdentity(a), 0.0f, 0, 0) != 0) {
+        if (func_002B1458_f(snd, 0, 8330, (int)attacker, cRider_getIdentity(attacker), 0.0f, 0, 0) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 8330), 2, rA, 3);
         }
     } else if (sel == 1) {
-        if (func_002B1458_f(snd, 0, 8318, (int)b, cRider_getIdentity(b), 0.0f, 0, 0) != 0) {
+        if (func_002B1458_f(snd, 0, 8318, (int)victim, cRider_getIdentity(victim), 0.0f, 0, 0) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 8318), 2, rB, 3);
         }
-        if (func_002B1458_f(snd, 0, 8330, (int)a, cRider_getIdentity(a), 0.0f, 0, 0) != 0) {
+        if (func_002B1458_f(snd, 0, 8330, (int)attacker, cRider_getIdentity(attacker), 0.0f, 0, 0) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 8330), 2, rA, 3);
         }
     } else if (sel == 0) {
-        if (func_002B1458_f(snd, 0, 8312, (int)b, cRider_getIdentity(b), 0.0f, 0, 0) != 0) {
+        if (func_002B1458_f(snd, 0, 8312, (int)victim, cRider_getIdentity(victim), 0.0f, 0, 0) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 8312), 2, rB, 3);
         }
-        if (func_002B1458_f(snd, 0, 8334, (int)a, cRider_getIdentity(a), 0.0f, 0, 0) != 0) {
+        if (func_002B1458_f(snd, 0, 8334, (int)attacker, cRider_getIdentity(attacker), 0.0f, 0, 0) != 0) {
             D_004A482C_4(func_003D8008(1, 0, 8334), 2, rA, 3);
         }
     }
@@ -9783,9 +9783,9 @@ extern "C" void func_002A0E70(cSSXAudio* self, sSs0E70Rider* rider, int play)
     int chk = 0;
     if (rider->v09() != 0 || rider->f87C == 0) chk = 1;
     if (chk && cSSXAudio_GetFocusRider_p(self, -1) != rider) return;
-    float v = rider->f470;
+    float finishTime = rider->f470;
     float zero = 0.0f;
-    int pos = v >= zero;
+    int pos = finishTime >= zero;
     if (pos) return;
     char* snd = (char*)self + 0x5560;
     if (func_002B0E28(snd, 0) == 0) return;
@@ -9794,9 +9794,9 @@ extern "C" void func_002A0E70(cSSXAudio* self, sSs0E70Rider* rider, int play)
     if (play == 0) return;
     int ok = rider->f874 != 0 && rider->f87C != 0;
     if (!ok) return;
-    int r = func_0029F330_i(rider);
+    int speakerBit = func_0029F330_i(rider);
     if (func_002B1458(snd, 0, 8311, (int)rider, cRider_getIdentity(rider), 0, 0, zero) == 0) return;
-    D_004A482C(func_003D8008(1, 0, 8311), 1, r);
+    D_004A482C(func_003D8008(1, 0, 8311), 1, speakerBit);
 }
 #endif
 
@@ -9903,13 +9903,13 @@ void func_002A1138_impl(void* self, char* rider, void* obj)
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (rider == 0) rider = (char*)((cAI*)cAudioInterface_getAI())->Riders[1];
     if (obj == 0) obj = ((cAI*)cAudioInterface_getAI())->Riders[0];
-    char* o = rider + 0x6C0;
-    sSsVt1138* e = &(*(sSsVt1138**)o)[5];
-    if (cSSXAudio_CameraInRange(self, e->fn(o + e->delta), D_004A36D8) < 0) return;
+    char* beingPart = rider + 0x6C0;
+    sSsVt1138* posEntry = &(*(sSsVt1138**)beingPart)[5];
+    if (cSSXAudio_CameraInRange(self, posEntry->fn(beingPart + posEntry->delta), D_004A36D8) < 0) return;
     if (func_002B1458((char*)self + 0x5560, 0, 8403, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
-    int r = func_0029F330_i(rider);
-    int s = func_002A1D48_i(self, obj);
-    D_004A482C_5(func_003D8008(1, 0, 8403), 3, r, s, 4);
+    int speakerBit = func_0029F330_i(rider);
+    int subjectBit = func_002A1D48_i(self, obj);
+    D_004A482C_5(func_003D8008(1, 0, 8403), 3, speakerBit, subjectBit, 4);
 }
 #endif
 
@@ -9945,13 +9945,13 @@ void func_002A1280_impl(void* self, char* rider, void* obj)
 {
     if (func_0029F0A0(self) == 0) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
-    char* o = rider + 0x6C0;
-    sSsVt1280* e = &(*(sSsVt1280**)o)[5];
-    if (cSSXAudio_CameraInRange(self, e->fn(o + e->delta), D_004A36D8) < 0) return;
+    char* beingPart = rider + 0x6C0;
+    sSsVt1280* posEntry = &(*(sSsVt1280**)beingPart)[5];
+    if (cSSXAudio_CameraInRange(self, posEntry->fn(beingPart + posEntry->delta), D_004A36D8) < 0) return;
     if (func_002B1458((char*)self + 0x5560, 0, 8404, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
-    int r = func_0029F330_i(rider);
-    int s = func_002A1D48_i(self, obj);
-    D_004A482C_4(func_003D8008(1, 0, 8404), 2, r, s);
+    int speakerBit = func_0029F330_i(rider);
+    int subjectBit = func_002A1D48_i(self, obj);
+    D_004A482C_4(func_003D8008(1, 0, 8404), 2, speakerBit, subjectBit);
 }
 #endif
 
@@ -10009,26 +10009,26 @@ void func_002A1400_impl(void* self, char* rider)
 {
     if (func_0029F0A0(self) == 0) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
-    char* o = rider + 0x6C0;
-    sSsVt1280* e = &(*(sSsVt1280**)o)[5];
-    if (cSSXAudio_CameraInRange(self, e->fn(o + e->delta), D_004A36D8) < 0) return;
+    char* beingPart = rider + 0x6C0;
+    sSsVt1280* posEntry = &(*(sSsVt1280**)beingPart)[5];
+    if (cSSXAudio_CameraInRange(self, posEntry->fn(beingPart + posEntry->delta), D_004A36D8) < 0) return;
     if (func_002B1458((char*)self + 0x5560, 0, 8377, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
-    int r = func_0029F330_i(rider);
+    int speakerBit = func_0029F330_i(rider);
     int k = func_002A1E68(self, rider);
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    int v;
+    int placeMode;
     if (k == 1) {
-        v = 1;
+        placeMode = 1;
     } else if (func_002A4248_s(self) != 0) {
-        v = 2;
+        placeMode = 2;
     } else if (D_00535C11[0] == 2) {
-        v = 2;
+        placeMode = 2;
     } else if (k == 2 || k == 4) {
-        v = 4;
+        placeMode = 4;
     } else {
-        v = 2;
+        placeMode = 2;
     }
-    D_004A482C_4(func_003D8008(1, 0, 8377), 2, r, v);
+    D_004A482C_4(func_003D8008(1, 0, 8377), 2, speakerBit, placeMode);
 }
 #endif
 
@@ -10052,19 +10052,19 @@ extern "C" void func_002A1560(cSSXAudio* self, char* rider)
 {
     if (func_0029F0A0(self) == 0) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
-    char* o = rider + 0x6C0;
+    char* beingPart = rider + 0x6C0;
     int check = 0;
-    sSsVt1280* e9 = &(*(sSsVt1280**)o)[9];
-    if (e9->fn(o + e9->delta) != 0 || *(int*)(rider + 0x87C) == 0) check = 1;
+    sSsVt1280* computerEntry = &(*(sSsVt1280**)beingPart)[9];
+    if (computerEntry->fn(beingPart + computerEntry->delta) != 0 || *(int*)(rider + 0x87C) == 0) check = 1;
     if (check && cSSXAudio_GetFocusRider_p(self, -1) != rider) return;
     char* bm = (char*)self + 0x5560;
     if (func_002B0E28(bm, 0) == 0) return;
-    char* o2 = rider + 0x6C0;
-    sSsVt1280* e = &(*(sSsVt1280**)o2)[5];
-    if (cSSXAudio_CameraInRange(self, e->fn(o2 + e->delta), D_004A36D8) < 0) return;
+    char* posPart = rider + 0x6C0;
+    sSsVt1280* posEntry = &(*(sSsVt1280**)posPart)[5];
+    if (cSSXAudio_CameraInRange(self, posEntry->fn(posPart + posEntry->delta), D_004A36D8) < 0) return;
     if (func_002B1458(bm, 0, 8376, (int)rider, cRider_getIdentity(rider), 0, 0, 0.0f) == 0) return;
-    int r = func_0029F330_i(rider);
-    D_004A482C(func_003D8008(1, 0, 8376), 1, r);
+    int speakerBit = func_0029F330_i(rider);
+    D_004A482C(func_003D8008(1, 0, 8376), 1, speakerBit);
 }
 #endif
 
@@ -10090,18 +10090,18 @@ extern signed char D_00535C11[];
  * rider, the identity and refresh 1; when queued, the speech hook D_004A482C gets its packed id and the identity's
  * speech bit (func_0029F2B0(identity, 0)). The front-end rider manager calls it.
  *
- * @param a1  the character identity
+ * @param identity  the character identity
  */
-extern "C" void func_002A16B0(cSSXAudio* self, int a1)
+extern "C" void func_002A16B0(cSSXAudio* self, int identity)
 {
     if (func_0029F0A0(self) != 0) {
         char* bm = (char*)self + 0x5560;
         if (func_002B0E28(bm, 0) != 0) {
             cBE_getInterface_Fv(cBE_getBE(), 0);
             if (D_00535C11[0] != 0) {
-                if (func_002B1458(bm, 0, 8380, 0, a1, 0, 1, 0.0f) != 0) {
-                    int r = func_0029F2B0_r(a1, 0);
-                    D_004A482C(func_003D8008(1, 0, 8380), 1, r);
+                if (func_002B1458(bm, 0, 8380, 0, identity, 0, 1, 0.0f) != 0) {
+                    int speakerBit = func_0029F2B0_r(identity, 0);
+                    D_004A482C(func_003D8008(1, 0, 8380), 1, speakerBit);
                 }
             }
         }
@@ -10128,16 +10128,16 @@ extern void (*D_004A482C)(void*, int, int);
  * queued, the speech hook D_004A482C gets its packed id and the identity's speech bit (func_0029F2B0(identity, 0)). The
  * front-end rider manager calls it for the equip screen's customize request.
  *
- * @param a1  the character identity
+ * @param identity  the character identity
  */
-extern "C" void func_002A1778(cSSXAudio* self, int a1)
+extern "C" void func_002A1778(cSSXAudio* self, int identity)
 {
     if (func_0029F0A0(self) != 0) {
         char* bm = (char*)self + 0x5560;
         if (func_002B0E28(bm, 0) != 0) {
-            if (func_002B1458(bm, 0, 8381, 0, a1, 0, 1, 0.0f) != 0) {
-                int r = func_0029F2B0_r(a1, 0);
-                D_004A482C(func_003D8008(1, 0, 8381), 1, r);
+            if (func_002B1458(bm, 0, 8381, 0, identity, 0, 1, 0.0f) != 0) {
+                int speakerBit = func_0029F2B0_r(identity, 0);
+                D_004A482C(func_003D8008(1, 0, 8381), 1, speakerBit);
             }
         }
     }
@@ -10179,27 +10179,27 @@ struct sSs1820Rider : public sSs1820RiderA, public cSs1820Obj {
  * (cBEAggressionInterface_getAggression, each way between the riders' AI indices from cRider vtable slot 7) are below
  * 2, the state cBEAggressionInterface_getState(a, b) 0 or 1 is returned; anything else gives 2.
  *
- * @param a  the first rider (the attacker or passer)
- * @param b  the second rider
+ * @param firstRider  the first rider (the attacker or passer)
+ * @param secondRider  the second rider
  * @return 0, 1 or 2
  */
-extern "C" int func_002A1820(void* self, sSs1820Rider* a, sSs1820Rider* b)
+extern "C" int func_002A1820(void* self, sSs1820Rider* firstRider, sSs1820Rider* secondRider)
 {
     if (((cAI*)cAudioInterface_getAI())->NumberOfRidersAllocated == 2) return 2;
-    int oka = a->f874 != 0 && a->f87C != 0;
+    int oka = firstRider->f874 != 0 && firstRider->f87C != 0;
     if (oka) {
-        int okb = b->f874 != 0 && b->f87C != 0;
+        int okb = secondRider->f874 != 0 && secondRider->f87C != 0;
         if (okb) return 2;
     }
-    int r = 2;
-    int c1 = cBEAggressionInterface_getAggression(cBEAggressionInterface_getThis(), a->v07(), b->v07());
-    int c2 = cBEAggressionInterface_getAggression(cBEAggressionInterface_getThis(), b->v07(), a->v07());
-    if (c1 < 2 && c2 < 2) {
-        int t = cBEAggressionInterface_getState(cBEAggressionInterface_getThis(), a->v07(), b->v07());
-        if (t == 0) r = 0;
-        else if (t == 1) r = 1;
+    int relation = 2;
+    int aggressionAB = cBEAggressionInterface_getAggression(cBEAggressionInterface_getThis(), firstRider->v07(), secondRider->v07());
+    int aggressionBA = cBEAggressionInterface_getAggression(cBEAggressionInterface_getThis(), secondRider->v07(), firstRider->v07());
+    if (aggressionAB < 2 && aggressionBA < 2) {
+        int rivalState = cBEAggressionInterface_getState(cBEAggressionInterface_getThis(), firstRider->v07(), secondRider->v07());
+        if (rivalState == 0) relation = 0;
+        else if (rivalState == 1) relation = 1;
     }
-    return r;
+    return relation;
 }
 #endif
 
@@ -10340,17 +10340,17 @@ INCLUDE_ASM("sound/soundsys", func_002A1BD8);
 /**
  * Returns the bit of a location for the location-dependent speech; the combined locations 17..21 also need a part.
  *
- * Locations 0..4 give 0x1..0x10 and 5..16 give 0x40..0x20000 (0x20 is skipped). For 17..21 @p b picks the part (14, 15,
+ * Locations 0..4 give 0x1..0x10 and 5..16 give 0x40..0x20000 (0x20 is skipped). For 17..21 @p subLocation picks the part (14, 15,
  * 16 or 17): 17 gives 0x1 / 0x40 / 0x200 for 14 / 15 / 16, 18 gives 0x2 / 0x1000 for 14 / 17, 19 gives 0x4 / 0x400 /
  * 0x2000 for 14 / 16 / 17, 20 gives 0x8 / 0x80 for 14 / 15, and 21 gives 0x10 / 0x100 / 0x800 / 0x4000 for 14 / 15 / 16
- * / 17. Anything else, or @p b of -1, gives 0.
+ * / 17. Anything else, or @p subLocation of -1, gives 0.
  *
  * @param location  the location id
- * @param b  the part of a combined location, or -1
+ * @param subLocation  the part of a combined location, or -1
  * @return the bit, or 0
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int func_002A1BD8(void* self, int location, int b)
+extern "C" int func_002A1BD8(void* self, int location, int subLocation)
 {
     switch (location) {
     case 0: return 0x1;
@@ -10371,26 +10371,26 @@ extern "C" int func_002A1BD8(void* self, int location, int b)
     case 15: return 0x10000;
     case 16: return 0x20000;
     }
-    if (b != -1) {
+    if (subLocation != -1) {
         if (location == 17) {
-            if (b == 0xE) return 0x1;
-            if (b == 0xF) return 0x40;
-            if (b == 0x10) return 0x200;
+            if (subLocation == 0xE) return 0x1;
+            if (subLocation == 0xF) return 0x40;
+            if (subLocation == 0x10) return 0x200;
         } else if (location == 18) {
-            if (b == 0xE) return 0x2;
-            if (b == 17) return 0x1000;
+            if (subLocation == 0xE) return 0x2;
+            if (subLocation == 17) return 0x1000;
         } else if (location == 19) {
-            if (b == 0xE) return 0x4;
-            if (b == 0x10) return 0x400;
-            if (b == 17) return 0x2000;
+            if (subLocation == 0xE) return 0x4;
+            if (subLocation == 0x10) return 0x400;
+            if (subLocation == 17) return 0x2000;
         } else if (location == 20) {
-            if (b == 0xE) return 0x8;
-            if (b == 0xF) return 0x80;
+            if (subLocation == 0xE) return 0x8;
+            if (subLocation == 0xF) return 0x80;
         } else if (location == 21) {
-            if (b == 0xE) return 0x10;
-            if (b == 0xF) return 0x100;
-            if (b == 0x10) return 0x800;
-            if (b == 17) return 0x4000;
+            if (subLocation == 0xE) return 0x10;
+            if (subLocation == 0xF) return 0x100;
+            if (subLocation == 0x10) return 0x800;
+            if (subLocation == 17) return 0x4000;
         }
     }
     return 0;
@@ -10497,70 +10497,70 @@ extern int D_00536730[];
  */
 extern "C" int func_002A1E68(void *self, void *obj)
 {
-    int r;
-    int v;
+    int placeBit;
+    int racePlace;
 
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (D_00535C11[0] == 2) {
         if (func_002A4078(self) != 0) {
-            v = *(int *)((char *)obj + 0xEC);
-            if (v == 0) {
-                r = 1;
-            } else if (v == 1) {
-                r = 2;
-            } else if (v == 2) {
-                r = 4;
-            } else if (v == 3) {
-                r = 8;
+            racePlace = *(int *)((char *)obj + 0xEC);
+            if (racePlace == 0) {
+                placeBit = 1;
+            } else if (racePlace == 1) {
+                placeBit = 2;
+            } else if (racePlace == 2) {
+                placeBit = 4;
+            } else if (racePlace == 3) {
+                placeBit = 8;
             } else {
-                r = (v == 4) ? 0x10 : 0x200;
+                placeBit = (racePlace == 4) ? 0x10 : 0x200;
             }
         } else {
-            v = *(int *)((char *)obj + 0xEC);
-            r = (v == 0) ? 1 : 2;
+            racePlace = *(int *)((char *)obj + 0xEC);
+            placeBit = (racePlace == 0) ? 1 : 2;
         }
-        return r;
+        return placeBit;
     } else {
         // Retail selects on a condition the compiler had folded to 1 (`li 1; movn` in case 5): a local flag that is
         // constant here, e.g. a feature toggle. Evaluating `mode != 2` instead gives a run-time xori (99.00).
         int notTwo = 1;
         switch (D_00536730[0]) {
         case 0:
-            r = 1;
+            placeBit = 1;
             break;
         case 1:
-            r = 2;
+            placeBit = 2;
             break;
         case 2:
-            r = 4;
+            placeBit = 4;
             break;
         case 3:
-            r = 8;
+            placeBit = 8;
             break;
         case 4:
-            r = 0x10;
+            placeBit = 0x10;
             break;
         case 5:
-            r = notTwo ? 0x200 : 0x20;
+            placeBit = notTwo ? 0x200 : 0x20;
             break;
         case 6:
-            r = 0x40;
+            placeBit = 0x40;
             break;
         case 7:
-            r = 0x80;
+            placeBit = 0x80;
             break;
         case 8:
-            r = 0x100;
+            placeBit = 0x100;
             break;
         case 9:
-            r = 0x200;
+            placeBit = 0x200;
             break;
         default:
-            r = 0;
+            placeBit = 0;
             break;
         }
     }
-    return r;
+    return placeBit;
 }
 #endif
 
@@ -10626,9 +10626,9 @@ extern "C" void func_002A2018(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8392, 0, 10, 0, 0, 0.0f) != 0) {
-            int r = func_0029F198(self);
-            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-            D_004A482C_4(func_003D8008(1, 0, 8392), 2, r, m);
+            int languageBit = func_0029F198(self);
+            int peakBit = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+            D_004A482C_4(func_003D8008(1, 0, 8392), 2, languageBit, peakBit);
         }
     }
 }
@@ -10660,9 +10660,9 @@ extern "C" void func_002A20D0(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8393, 0, 10, 0, 0, 0.0f) != 0) {
-            int r = func_0029F198(self);
-            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-            D_004A482C_4(func_003D8008(1, 0, 8393), 2, r, m);
+            int languageBit = func_0029F198(self);
+            int peakBit = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+            D_004A482C_4(func_003D8008(1, 0, 8393), 2, languageBit, peakBit);
         }
     }
 }
@@ -10697,10 +10697,10 @@ extern "C" void func_002A2188(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8394, 0, 10, 0, 0, 0.0f) != 0) {
-            int r = func_0029F198(self);
-            int a = func_002A1D48_r(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
-            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-            D_004A482C_5(func_003D8008(1, 0, 8394), 3, r, a, m);
+            int languageBit = func_0029F198(self);
+            int riderBit = func_002A1D48_r(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
+            int peakBit = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+            D_004A482C_5(func_003D8008(1, 0, 8394), 3, languageBit, riderBit, peakBit);
         }
     }
 }
@@ -10731,9 +10731,9 @@ extern "C" void func_002A2260(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8423, 0, 10, 0, 0, 0.0f) != 0) {
-            int r = func_0029F198(self);
-            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-            D_004A482C_4(func_003D8008(1, 0, 8423), 2, r, m);
+            int languageBit = func_0029F198(self);
+            int peakBit = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+            D_004A482C_4(func_003D8008(1, 0, 8423), 2, languageBit, peakBit);
         }
     }
 }
@@ -10764,9 +10764,9 @@ extern "C" void func_002A2318(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8424, 0, 10, 0, 0, 0.0f) != 0) {
-            int r = func_0029F198(self);
-            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-            D_004A482C_4(func_003D8008(1, 0, 8424), 2, r, m);
+            int languageBit = func_0029F198(self);
+            int peakBit = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+            D_004A482C_4(func_003D8008(1, 0, 8424), 2, languageBit, peakBit);
         }
     }
 }
@@ -10800,14 +10800,14 @@ extern "C" void func_002A23D0(cSSXAudio* self, int mode)
 {
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8425, 0, 10, 0, 0, 0.0f) != 0) {
-            int r = func_0029F198(self);
-            int m;
+            int languageBit = func_0029F198(self);
+            int peakBit;
             if (mode == -1) {
-                m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+                peakBit = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
             } else {
-                m = func_002A1E20(self, mode);
+                peakBit = func_002A1E20(self, mode);
             }
-            D_004A482C_4(func_003D8008(1, 0, 8425), 2, r, m);
+            D_004A482C_4(func_003D8008(1, 0, 8425), 2, languageBit, peakBit);
         }
     }
 }
@@ -10829,18 +10829,18 @@ extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
  * Requests DJ speech line 8396 about a location, with mode 3.
  *
  * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit, the location bit func_002A1BD8(@p a1, -1) and 3.
+ * speech hook D_004A482C gets its packed id, the language bit, the location bit func_002A1BD8(@p location, -1) and 3.
  * func_002A4770 calls it.
  *
- * @param a1  the location id
+ * @param location  the location id
  */
-extern "C" void func_002A24B0(cSSXAudio* self, int a1)
+extern "C" void func_002A24B0(cSSXAudio* self, int location)
 {
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8396, 0, 10, 0, 0, 0.0f) != 0) {
-            int r = func_0029F198(self);
-            int m = func_002A1BD8(self, a1, -1);
-            D_004A482C_5(func_003D8008(1, 0, 8396), 3, r, m, 3);
+            int languageBit = func_0029F198(self);
+            int locationBit = func_002A1BD8(self, location, -1);
+            D_004A482C_5(func_003D8008(1, 0, 8396), 3, languageBit, locationBit, 3);
         }
     }
 }
@@ -10865,18 +10865,18 @@ extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
  * Requests DJ speech line 8396 about the current location (or a part of a combined location), with mode 3.
  *
  * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit, the bit func_002A1BD8(current location, @p a1) and 3.
+ * speech hook D_004A482C gets its packed id, the language bit, the bit func_002A1BD8(current location, @p subLocation) and 3.
  * func_002A19D8 (event 12, with -1) and func_002A43B8 (with unk_575C) call it.
  *
- * @param a1  the part of a combined location (func_002A1BD8), or -1
+ * @param subLocation  the part of a combined location (func_002A1BD8), or -1
  */
-extern "C" void func_002A2568(cSSXAudio* self, int a1)
+extern "C" void func_002A2568(cSSXAudio* self, int subLocation)
 {
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8396, 0, 10, 0, 0, 0.0f) != 0) {
-            int r = func_0029F198(self);
-            int m = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), a1);
-            D_004A482C_5(func_003D8008(1, 0, 8396), 3, r, m, 3);
+            int languageBit = func_0029F198(self);
+            int locationBit = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), subLocation);
+            D_004A482C_5(func_003D8008(1, 0, 8396), 3, languageBit, locationBit, 3);
         }
     }
 }
@@ -10908,9 +10908,9 @@ extern "C" void func_002A2638(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8378, 0, 10, 0, 0, 0.0f) != 0) {
-            int r = func_0029F198(self);
-            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-            D_004A482C_4(func_003D8008(1, 0, 8378), 2, r, m);
+            int languageBit = func_0029F198(self);
+            int peakBit = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+            D_004A482C_4(func_003D8008(1, 0, 8378), 2, languageBit, peakBit);
         }
     }
 }
@@ -10932,28 +10932,28 @@ extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
  * Interrupts speech instance 0 and requests DJ speech line 8421 with two yes/no choices.
  *
  * Needs DJ speech allowed (func_0029F0D8). Stops speech instance 0 (func_002B11B0), then requests 8421 with identity
- * 10; when queued, clears unk_5794 and the speech hook D_004A482C gets its packed id, the language bit, 1 when @p a is
- * set (else 2) and 2 when @p b is set (else 1). The music code (func_002872A8, func_0028E100, func_0028E8C0),
+ * 10; when queued, clears unk_5794 and the speech hook D_004A482C gets its packed id, the language bit, 1 when @p firstChoice is
+ * set (else 2) and 2 when @p secondChoice is set (else 1). The music code (func_002872A8, func_0028E100, func_0028E8C0),
  * func_002A3170 and func_002A43B8 call it, mostly with (0, 0).
  *
- * @param a  the first choice
- * @param b  the second choice
+ * @param firstChoice  the first choice
+ * @param secondChoice  the second choice
  */
-extern "C" void func_002A26F0(void* self, int a, int b)
+extern "C" void func_002A26F0(void* self, int firstChoice, int secondChoice)
 {
     if (func_0029F0D8(self) != 0) {
         char* bm = (char*)self + 0x5560;
         func_002B11B0(bm, 0);
         if (func_002B1458(bm, 0, 8421, 0, 10, 0, 0, 0.0f) != 0) {
-            int r = func_0029F198(self);
+            int languageBit = func_0029F198(self);
             int x = 2;
-            if (a) x = 1;
+            if (firstChoice) x = 1;
             if (*(int*)((char*)self + 0x5794) != 0) {
                 *(int*)((char*)self + 0x5794) = 0;
             }
             int y = 2;
-            if (!b) y = 1;
-            D_004A482C_5(func_003D8008(1, 0, 8421), 3, r, x, y);
+            if (!secondChoice) y = 1;
+            D_004A482C_5(func_003D8008(1, 0, 8421), 3, languageBit, x, y);
         }
     }
 }
@@ -10978,8 +10978,8 @@ extern "C" void func_002A27D8(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8422, 0, 10, 0, 0, 0.0f) != 0) {
-            int r = func_0029F198(self);
-            D_004A482C(func_003D8008(1, 0, 8422), 1, r);
+            int languageBit = func_0029F198(self);
+            D_004A482C(func_003D8008(1, 0, 8422), 1, languageBit);
         }
     }
 }
@@ -11010,7 +11010,7 @@ extern "C" void func_002A2860(cSSXAudio* self, int n)
 {
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8399, 0, 10, 0, 0, 0.0f) != 0) {
-            int r = func_0029F198(self);
+            int languageBit = func_0029F198(self);
             int lo = 0;
             int hi = 0;
             if (n >= 0 && n != 999) {
@@ -11021,7 +11021,7 @@ extern "C" void func_002A2860(cSSXAudio* self, int n)
                     hi = 1 << n;
                 }
             }
-            D_004A482C_6(func_003D8008(1, 0, 8399), 4, r, 3, lo, hi);
+            D_004A482C_6(func_003D8008(1, 0, 8399), 4, languageBit, 3, lo, hi);
         }
     }
 }
@@ -11056,10 +11056,10 @@ extern "C" void func_002A2938(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8450, 0, 10, 0, 0, 0.0f) != 0) {
-            int r = func_0029F198(self);
-            int a = func_002A1D48_r(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
-            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-            D_004A482C_5(func_003D8008(1, 0, 8450), 3, r, a, m);
+            int languageBit = func_0029F198(self);
+            int riderBit = func_002A1D48_r(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
+            int peakBit = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+            D_004A482C_5(func_003D8008(1, 0, 8450), 3, languageBit, riderBit, peakBit);
         }
     }
 }
@@ -11092,9 +11092,9 @@ extern "C" void func_002A2A10(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8459, 0, 10, 0, 0, 0.0f) != 0) {
-            int r = func_0029F198(self);
-            int m = func_002A1DA0_r(self, cBENewRaceInterface_getRival(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), 0);
-            D_004A482C_4(func_003D8008(1, 0, 8459), 2, r, m);
+            int languageBit = func_0029F198(self);
+            int rivalBit = func_002A1DA0_r(self, cBENewRaceInterface_getRival(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), 0);
+            D_004A482C_4(func_003D8008(1, 0, 8459), 2, languageBit, rivalBit);
         }
     }
 }
@@ -11126,9 +11126,9 @@ extern "C" void func_002A2AD0(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8491, 0, 10, 0, 0, 0.0f) != 0) {
-            int r = func_0029F198(self);
-            int m = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
-            D_004A482C_4(func_003D8008(1, 0, 8491), 2, r, m);
+            int languageBit = func_0029F198(self);
+            int peakBit = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+            D_004A482C_4(func_003D8008(1, 0, 8491), 2, languageBit, peakBit);
         }
     }
 }
@@ -11156,9 +11156,9 @@ extern "C" void func_002A2B88(void* self)
 {
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8492, 0, 10, 0, 0, 0.0f) != 0) {
-            int r = func_0029F198(self);
-            int v = *(int*)((char*)self + 0x5780);
-            D_004A482C_4(func_003D8008(1, 0, 8492), 2, r, v);
+            int languageBit = func_0029F198(self);
+            int playedBefore = *(int*)((char*)self + 0x5780);
+            D_004A482C_4(func_003D8008(1, 0, 8492), 2, languageBit, playedBefore);
         }
         *(int*)((char*)self + 0x5780) = 1;
     }
@@ -11191,9 +11191,9 @@ extern "C" void func_002A2C30(cSSXAudio* self)
 {
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8493, 0, 10, 0, 0, 0.0f) != 0) {
-            int r = func_0029F198(self);
-            int m = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), -1);
-            D_004A482C_4(func_003D8008(1, 0, 8493), 2, r, m);
+            int languageBit = func_0029F198(self);
+            int locationBit = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), -1);
+            D_004A482C_4(func_003D8008(1, 0, 8493), 2, languageBit, locationBit);
         }
     }
 }
@@ -11215,18 +11215,18 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
  * Requests DJ speech line 8494 about a location (rider 0's frags after an event).
  *
  * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and the location bit func_002A1BD8(@p a1, -1).
+ * speech hook D_004A482C gets its packed id, the language bit and the location bit func_002A1BD8(@p location, -1).
  * func_002A4770 calls it for the frag result (5 or more frags).
  *
- * @param a1  the location id
+ * @param location  the location id
  */
-extern "C" void func_002A2CF0(cSSXAudio* self, int a1)
+extern "C" void func_002A2CF0(cSSXAudio* self, int location)
 {
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8494, 0, 10, 0, 0, 0.0f) != 0) {
-            int r = func_0029F198(self);
-            int m = func_002A1BD8(self, a1, -1);
-            D_004A482C_4(func_003D8008(1, 0, 8494), 2, r, m);
+            int languageBit = func_0029F198(self);
+            int locationBit = func_002A1BD8(self, location, -1);
+            D_004A482C_4(func_003D8008(1, 0, 8494), 2, languageBit, locationBit);
         }
     }
 }
@@ -11248,18 +11248,18 @@ extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
  * Requests DJ speech line 8495 about a location (rider 0's uber tricks after an event).
  *
  * Needs DJ speech allowed (func_0029F0D8); the request goes to speech instance 0 with identity 10 and, when queued, the
- * speech hook D_004A482C gets its packed id, the language bit and the location bit func_002A1BD8(@p a1, -1).
+ * speech hook D_004A482C gets its packed id, the language bit and the location bit func_002A1BD8(@p location, -1).
  * func_002A4770 calls it for the uber-trick result.
  *
- * @param a1  the location id
+ * @param location  the location id
  */
-extern "C" void func_002A2DA0(cSSXAudio* self, int a1)
+extern "C" void func_002A2DA0(cSSXAudio* self, int location)
 {
     if (func_0029F0D8(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8495, 0, 10, 0, 0, 0.0f) != 0) {
-            int r = func_0029F198(self);
-            int m = func_002A1BD8(self, a1, -1);
-            D_004A482C_4(func_003D8008(1, 0, 8495), 2, r, m);
+            int languageBit = func_0029F198(self);
+            int locationBit = func_002A1BD8(self, location, -1);
+            D_004A482C_4(func_003D8008(1, 0, 8495), 2, languageBit, locationBit);
         }
     }
 }
@@ -11439,8 +11439,8 @@ extern "C" void func_002A31C0(cSSXAudio* self)
     if (*(int*)SSXApp->GameModeMan < 2) {
         if (cSSXAudio_PlayHistoryExists(self, 0, 0) != 0) return;
         if (func_002B1458((char*)self + 0x5560, 0, 8384, 0, 11, 0, 0, 0.0f) == 0) return;
-        int r = func_0029F198(self);
-        D_004A482C_4(func_003D8008(1, 0, 8384), 2, r, 1);
+        int languageBit = func_0029F198(self);
+        D_004A482C_4(func_003D8008(1, 0, 8384), 2, languageBit, 1);
     }
 }
 #endif
@@ -11470,9 +11470,9 @@ extern "C" void func_002A32B0(cSSXAudio* self)
 {
     if (func_0029F128(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8385, 0, 11, 0, 0, 0.0f) != 0) {
-            int r = func_0029F198(self);
-            int a = func_002A1D48_r(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
-            D_004A482C_4(func_003D8008(1, 0, 8385), 2, r, a);
+            int languageBit = func_0029F198(self);
+            int riderBit = func_002A1D48_r(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
+            D_004A482C_4(func_003D8008(1, 0, 8385), 2, languageBit, riderBit);
         }
     }
 }
@@ -11503,9 +11503,9 @@ extern "C" void func_002A3358(cSSXAudio* self)
 {
     if (func_0029F128(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8386, 0, 11, 0, 0, 0.0f) != 0) {
-            int r = func_0029F198(self);
-            int a = func_002A1D48_r(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
-            D_004A482C_4(func_003D8008(1, 0, 8386), 2, r, a);
+            int languageBit = func_0029F198(self);
+            int riderBit = func_002A1D48_r(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
+            D_004A482C_4(func_003D8008(1, 0, 8386), 2, languageBit, riderBit);
         }
     }
 }
@@ -11539,9 +11539,9 @@ extern "C" void func_002A3400(cSSXAudio* self)
     if (func_0029F128(self) == 0) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
     if (func_002B1458((char*)self + 0x5560, 0, 8387, 0, 11, 0, 0, 0.0f) == 0) return;
-    int r = func_0029F198(self);
-    int m = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), -1);
-    D_004A482C_4(func_003D8008(1, 0, 8387), 2, r, m);
+    int languageBit = func_0029F198(self);
+    int locationBit = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), -1);
+    D_004A482C_4(func_003D8008(1, 0, 8387), 2, languageBit, locationBit);
 }
 #endif
 
@@ -11580,9 +11580,9 @@ struct sSsVt_34D0 { short delta; short index; int (*fn)(void *); };
 extern "C" int func_002A34D0(cSSXAudio* vself, cRider *rider, int flag, int which)
 {
     int sel;
-    int a;
-    int b;
-    int c;
+    int languageBit;
+    int riderBit;
+    int placeBit;
 
     if (func_0029F128(((char*)vself)) == 0) {
         return 1;
@@ -11624,36 +11624,36 @@ extern "C" int func_002A34D0(cSSXAudio* vself, cRider *rider, int flag, int whic
     if (func_002B1458_f(((char*)vself) + 0x5560, 0, 8388, 0, 11, 0.0f, 0, 0) == 0) {
         return 1;
     }
-    a = func_0029F198(((char*)vself));
-    b = func_002A1D48_i(((char*)vself), rider);
+    languageBit = func_0029F198(((char*)vself));
+    riderBit = func_002A1D48_i(((char*)vself), rider);
     if (sel != 0) {
-        c = func_002A1E68(((char*)vself), rider);
+        placeBit = func_002A1E68(((char*)vself), rider);
     } else {
         switch ((unsigned int)rider->unk_0EC) {
         case 0:
-            c = 1;
+            placeBit = 1;
             break;
         case 1:
-            c = 2;
+            placeBit = 2;
             break;
         case 2:
-            c = 4;
+            placeBit = 4;
             break;
         case 3:
-            c = 8;
+            placeBit = 8;
             break;
         case 4:
-            c = 0x10;
+            placeBit = 0x10;
             break;
         case 5:
-            c = 0x200;
+            placeBit = 0x200;
             break;
         default:
-            c = 0;
+            placeBit = 0;
             break;
         }
     }
-    D_004A482C_5(func_003D8008(1, 0, 8388), 3, a, b, c);
+    D_004A482C_5(func_003D8008(1, 0, 8388), 3, languageBit, riderBit, placeBit);
     return 1;
 }
 #endif
@@ -11688,19 +11688,19 @@ extern "C" void func_002A3708(cSSXAudio* self, char* rider)
     if (cSSXAudio_ReplayMode(self) != 0) return;
     if (cRider_getCheatIdentity(rider) != 0) return;
     if (func_002A4248_s(self) != 0) {
-        char* o = rider + 0x6C0;
-        char* p = *(char**)self->MusicSys.mpVStreamSys + 0x1D8;
+        char* beingPart = rider + 0x6C0;
+        char* bankMonitor = *(char**)self->MusicSys.mpVStreamSys + 0x1D8;
         sSndKey8* key = D_004A36E8;
-        sSsVt1280* e = &(*(sSsVt1280**)o)[7];
-        int v = e->fn(o + e->delta);
-        func_002ADCA0(p, 1000, key->v, 0, v, 0, 0, 0);
+        sSsVt1280* indexEntry = &(*(sSsVt1280**)beingPart)[7];
+        int aiIndex = indexEntry->fn(beingPart + indexEntry->delta);
+        func_002ADCA0(bankMonitor, 1000, key->v, 0, aiIndex, 0, 0, 0);
         return;
     }
     if (func_002B1458((char*)self + 0x5560, 0, 8389, 0, 11, 0, 0, 0.0f) == 0) return;
-    int a = func_0029F198(self);
-    int b = func_002A1D48_i(self, rider);
-    int c = func_002A1E68(self, rider);
-    D_004A482C_5(func_003D8008(1, 0, 8389), 3, a, b, c);
+    int languageBit = func_0029F198(self);
+    int riderBit = func_002A1D48_i(self, rider);
+    int placeBit = func_002A1E68(self, rider);
+    D_004A482C_5(func_003D8008(1, 0, 8389), 3, languageBit, riderBit, placeBit);
 }
 #endif
 
@@ -11736,17 +11736,17 @@ extern "C" void func_002A3860(cSSXAudio* self)
     if (cSSXAudio_ReplayMode(self) != 0) return;
     int n = 0;
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    signed char* g = (signed char*)((char*)&cBENewRaceInterface_newRace);
-    if (g[0x49] == 2) {
+    signed char* newRaceBytes = (signed char*)((char*)&cBENewRaceInterface_newRace);
+    if (newRaceBytes[0x49] == 2) {
         n = D_00536730[1] < D_00536730[0];
     }
     if (func_002B1458((char*)self + 0x5560, 0, 8391, 0, 11, 0, 0, 0.0f) == 0) return;
-    int a = func_0029F198(self);
+    int languageBit = func_0029F198(self);
     sSndRiderList3860* lst = (sSndRiderList3860*)((char*)cAudioInterface_getAI() + 0x28);
     FM_OPAQUE(lst);
-    int b = func_002A1D48_i(self, lst->r[n]);
+    int riderBit = func_002A1D48_i(self, lst->r[n]);
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 13);
-    if (g[0x49] != 2 && *(int*)(iface + 0x14) == 0) {
+    if (newRaceBytes[0x49] != 2 && *(int*)(iface + 0x14) == 0) {
         n = 8;
     } else {
         n = D_00536730[n];
@@ -11760,7 +11760,7 @@ extern "C" void func_002A3860(cSSXAudio* self)
             if (z) n = 0;
         }
     }
-    D_004A482C_5(func_003D8008(1, 0, 8391), 3, a, b, n);
+    D_004A482C_5(func_003D8008(1, 0, 8391), 3, languageBit, riderBit, n);
 }
 #endif
 
@@ -11790,9 +11790,9 @@ extern "C" void func_002A39E0(cSSXAudio* self)
 {
     if (func_0029F128(self) != 0) {
         if (func_002B1458((char*)self + 0x5560, 0, 8379, 0, 11, 0, 0, 0.0f) != 0) {
-            int r = func_0029F198(self);
-            int m = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), -1);
-            D_004A482C_4(func_003D8008(1, 0, 8379), 2, r, m);
+            int languageBit = func_0029F198(self);
+            int locationBit = func_002A1BD8(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)), -1);
+            D_004A482C_4(func_003D8008(1, 0, 8379), 2, languageBit, locationBit);
         }
     }
 }
@@ -11807,17 +11807,17 @@ extern "C" void func_002A73A8(cCrowdSys* self, int a1, int i);
 /**
  * Raises the crowd level 0 reaction when a monitored stream has finished; returns whether it did.
  *
- * Asks the sound driver for the status of the stream whose handle is at @p arg1 + 0x1C (SNDSTRM_requeststatus inside
+ * Asks the sound driver for the status of the stream whose handle is at @p monitorInst + 0x1C (SNDSTRM_requeststatus inside
  * SNDSYS_entercritical / SNDSYS_leavecritical); a status word of 3 calls func_002A73A8(self, 0, 0) and returns 1. The
  * retail image has no direct reference to it.
  *
- * @param arg1  the monitor instance whose +0x1C holds the stream handle
+ * @param monitorInst  the monitor instance whose +0x1C holds the stream handle
  * @return 1 when the stream reported state 3, else 0
  */
-extern "C" int func_002A3AA0(void* self, void* arg1) {
+extern "C" int func_002A3AA0(void* self, void* monitorInst) {
     int st[4];
     SNDSYS_entercritical();
-    int status = SNDSTRM_requeststatus(*(int *)((char*)arg1 + 0x1C), st);
+    int status = SNDSTRM_requeststatus(*(int *)((char*)monitorInst + 0x1C), st);
     SNDSYS_leavecritical();
     if (status >= 0) {
         if (st[0] == 3) {
@@ -11847,12 +11847,12 @@ extern void (*D_004A482C)(void*, int, int);
  *
  * Needs ArcadeSpeech audible (func_0029F160), a rider that is the focus rider and not past the finish line, and no
  * replay. When request 8359 (speech instance 0, identity 12) is queued, the speech hook D_004A482C gets its packed id
- * and @p a2. cRider_flagEventSpeedBoost and cRider_flagEventTrickBoost call it.
+ * and @p eventValue. cRider_flagEventSpeedBoost and cRider_flagEventTrickBoost call it.
  *
  * @param obj  the rider (cRider)
- * @param a2  the value passed to the event
+ * @param eventValue  the value passed to the event
  */
-extern "C" void func_002A3B18(cSSXAudio* self, void* obj, int a2)
+extern "C" void func_002A3B18(cSSXAudio* self, void* obj, int eventValue)
 {
     if (func_0029F160(self) == 0) return;
     if (obj == 0) return;
@@ -11861,7 +11861,7 @@ extern "C" void func_002A3B18(cSSXAudio* self, void* obj, int a2)
     if (obj != cSSXAudio_GetFocusRider_p(self, -1)) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
     if (func_002B1458((char*)self + 0x5560, 0, 8359, 0, 0xC, 0, 0, 0.0f) != 0) {
-        D_004A482C(func_003D8008(1, 0, 8359), 1, a2);
+        D_004A482C(func_003D8008(1, 0, 8359), 1, eventValue);
     }
 }
 #endif
@@ -11881,27 +11881,27 @@ extern void (*D_004A482C)(void*, int, int);
 /**
  * Raises arcade announcer event 8360 (an event result) for the focus rider.
  *
- * Needs ArcadeSpeech audible (func_0029F160), a rider that is the focus rider and no replay; unless @p a2 is 2 the
+ * Needs ArcadeSpeech audible (func_0029F160), a rider that is the focus rider and no replay; unless @p resultBit is 2 the
  * rider must not be past the finish line. When request 8360 (speech instance 0, identity 12) is queued, the speech hook
- * D_004A482C gets its packed id and @p a2. Values seen: 1 big challenge complete (func_0029D8E0, rider 0), 2 time ran
+ * D_004A482C gets its packed id and @p resultBit. Values seen: 1 big challenge complete (func_0029D8E0, rider 0), 2 time ran
  * out (cRider_updateFinishTest, after the did-not-finish finish), 4 / 8 / 0x10 max power at an uber level below 5, 5..9
  * or 10 (func_00299638).
  *
  * @param obj  the rider (cRider)
- * @param a2  the result bit passed to the event
+ * @param resultBit  the result bit passed to the event
  */
-extern "C" void func_002A3C00(cSSXAudio* self, void* obj, int a2)
+extern "C" void func_002A3C00(cSSXAudio* self, void* obj, int resultBit)
 {
     if (func_0029F160(self) == 0) return;
     if (obj == 0) return;
-    if (a2 != 2) {
+    if (resultBit != 2) {
         int done = *(float*)((char*)obj + 0x470) >= 0.0f;
         if (done) return;
     }
     if (obj != cSSXAudio_GetFocusRider_p(self, -1)) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
     if (func_002B1458((char*)self + 0x5560, 0, 8360, 0, 0xC, 0, 0, 0.0f) != 0) {
-        D_004A482C(func_003D8008(1, 0, 8360), 1, a2);
+        D_004A482C(func_003D8008(1, 0, 8360), 1, resultBit);
     }
 }
 #endif
@@ -11930,9 +11930,9 @@ extern "C" void func_002A3CE8(cSSXAudio* self, char* rider, int n)
     float zero;
     if (func_0029F160(self) == 0) return;
     if (rider == 0) return;
-    float v = *(float*)(rider + 0x470);
+    float finishTime = *(float*)(rider + 0x470);
     zero = 0.0f;
-    int done = v >= zero;
+    int done = finishTime >= zero;
     if (done) return;
     if (n != 1 && rider != cSSXAudio_GetFocusRider_p(self, -1)) return;
     if (cSSXAudio_ReplayMode(self) != 0) return;
@@ -12163,11 +12163,11 @@ extern "C" int func_002A40E8(void* self)
     if (D_00535C10[0] == 1) {
         return 1;
     }
-    int r = 0;
+    int isMode6 = 0;
     if (D_00535C10[0] == 6) {
-        r = 1;
+        isMode6 = 1;
     }
-    return r;
+    return isMode6;
 }
 #endif
 
@@ -12544,13 +12544,13 @@ extern "C" void func_002A45C0(cSSXAudio* self)
     }
     int id = D_00536730[0];
     char* rider = (char*)((cAI*)cAudioInterface_getAI())->Riders[0];
-    int a;
+    int fragCount;
     if (func_002A4078(self) != 0) {
-        a = *(int*)(*(char**)(rider + 0x790) + 0x128);
+        fragCount = *(int*)(*(char**)(rider + 0x790) + 0x128);
     } else {
-        a = 0;
+        fragCount = 0;
     }
-    func_002A4660(self, id, a, *(int*)(*(char**)(rider + 0x790) + 0x114), *(int*)(rider + 0x480) ^ 1);
+    func_002A4660(self, id, fragCount, *(int*)(*(char**)(rider + 0x790) + 0x114), *(int*)(rider + 0x480) ^ 1);
 }
 #endif
 
@@ -12565,28 +12565,28 @@ extern "C" int* cBENewRaceInterface_getLocation(void*);
 /**
  * Adds one heat's result to the event-result tracking, and on the event's last heat marks the result as pending.
  *
- * On the last heat (bIsLastHeat, or iNextHeat not above iHeatNum) it sets unk_57F8, sets unk_57FC when @p a4 is set and
+ * On the last heat (bIsLastHeat, or iNextHeat not above iHeatNum) it sets unk_57F8, sets unk_57FC when @p finished is set and
  * the heat is 3, and stores the place (unk_5800) and the current location (unk_5810). The frag and uber-trick counts
  * are always added to unk_5804 and unk_5808. func_002A4770 picks the line from these.
  *
- * @param a1  the rider's rank (0 = first)
- * @param a2  the frags of the heat
- * @param a3  the uber tricks of the heat
- * @param a4  nonzero when the rider finished
+ * @param rank  the rider's rank (0 = first)
+ * @param frags  the frags of the heat
+ * @param uberTricks  the uber tricks of the heat
+ * @param finished  nonzero when the rider finished
  */
-extern "C" void func_002A4660(void* self, int a1, int a2, int a3, int a4)
+extern "C" void func_002A4660(void* self, int rank, int frags, int uberTricks, int finished)
 {
     char* gameModeMan = (char*)SSXApp->GameModeMan;
     if (*(int*)(gameModeMan + 0x98) != 0 || *(int*)(gameModeMan + 0x70) <= *(int*)gameModeMan) {
         *(int*)((char*)self + 0x57F8) = 1;
-        if (a4 != 0 && *(int*)gameModeMan == 3) {
+        if (finished != 0 && *(int*)gameModeMan == 3) {
             *(int*)((char*)self + 0x57FC) = 1;
         }
-        *(int*)((char*)self + 0x5800) = a1;
+        *(int*)((char*)self + 0x5800) = rank;
         *(int*)((char*)self + 0x5810) = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0));
     }
-    *(int*)((char*)self + 0x5804) += a2;
-    *(int*)((char*)self + 0x5808) += a3;
+    *(int*)((char*)self + 0x5804) += frags;
+    *(int*)((char*)self + 0x5808) += uberTricks;
 }
 #endif
 
@@ -12780,11 +12780,11 @@ INCLUDE_ASM("sound/soundsys", func_002A4A68);
  *
  * Its pointer to member is D_004A36F0, which func_002A49E8 installs with a 30 s delay.
  *
- * @param arg0  the audio system (cSSXAudio)
+ * @param ssxAudio  the audio system (cSSXAudio)
  * @return 1
  */
-extern "C" int func_002A4A68(void *arg0) {
-    (*(int *)((char*)(arg0) + (0x5818))) = 0;
+extern "C" int func_002A4A68(void *ssxAudio) {
+    (*(int *)((char*)(ssxAudio) + (0x5818))) = 0;
     return 1;
 }
 #endif
@@ -12816,10 +12816,10 @@ extern "C" void func_002A4A78(void* self)
             func_0028DEF0(self, 13);
             func_002ADCA0(**(char***)((char*)self + 0x118) + 0x1D8, 2, D_004A3650->v, 0, 2, 0, 0, 0);
         } else {
-            char* p = **(char***)((char*)self + 0x118) + 0x1D8;
+            char* bankMonitor = **(char***)((char*)self + 0x118) + 0x1D8;
             const sSndKey8_4A78* key = D_004A3650;
-            int r = func_002B4908((char*)self + 0x118);
-            func_002ADCA0(p, 2, key->v, 0, 4, r, 0, 0);
+            int songValue = func_002B4908((char*)self + 0x118);
+            func_002ADCA0(bankMonitor, 2, key->v, 0, 4, songValue, 0, 0);
         }
     }
 }
@@ -13253,43 +13253,43 @@ void func_002A4E88_c(sCrowd4E88* self)
         if (pCurrAmbientInfo->handle >= 0) {
             sCrowdVec* pos = &pCurrAmbientInfo->vec;
             pCurrAmbientInfo->vec = mean;
-            sCrowdVoice* h = (sCrowdVoice*)cBankMonitor_BANKMONITOR_GetHandle(&D_004A36F8->mpVBankManager->sub, pCurrAmbientInfo->handle, 1);
-            if (h == 0) {
+            sCrowdVoice* voiceInst = (sCrowdVoice*)cBankMonitor_BANKMONITOR_GetHandle(&D_004A36F8->mpVBankManager->sub, pCurrAmbientInfo->handle, 1);
+            if (voiceInst == 0) {
                 crowdBegin((sSndSys69A0*)D_004A36F8, self->fD8, pCurrAmbientInfo->key, 1);
                 {
-                    cBankManager* m2 = D_004A36F8->mpVBankManager;
-                    m2->sub.tgt[m2->sub.cur] = pos;
+                    cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                    bankMgr->sub.tgt[bankMgr->sub.cur] = pos;
                 }
                 {
-                    cBankManager* m2 = D_004A36F8->mpVBankManager;
-                    cSndPlayOpts* ss = &m2->sub;
-                    ss->vals[m2->sub.cur] = best;
-                    ss->ch[m2->sub.cur].vol = SND_MAX(0, SND_MIN(ss->vals[ss->cur], 0x7F));
+                    cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                    cSndPlayOpts* ss = &bankMgr->sub;
+                    ss->vals[bankMgr->sub.cur] = best;
+                    ss->ch[bankMgr->sub.cur].vol = SND_MAX(0, SND_MIN(ss->vals[ss->cur], 0x7F));
                 }
                 {
-                    cBankManager* m2 = D_004A36F8->mpVBankManager;
-                    m2->sub.p3C[m2->sub.cur] = self->f17C;
+                    cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                    bankMgr->sub.p3C[bankMgr->sub.cur] = self->f17C;
                 }
                 {
-                    cBankManager* m2 = D_004A36F8->mpVBankManager;
-                    m2->sub.p74[m2->sub.cur] = 1;
+                    cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                    bankMgr->sub.p74[bankMgr->sub.cur] = 1;
                 }
                 OPTS_Callback(D_004A36F8->mpVBankManager, D_004A3700_cb[0]);
                 {
-                    cBankManager* m2 = D_004A36F8->mpVBankManager;
-                    m2->sub.p60[m2->sub.cur] = (int)self;
+                    cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                    bankMgr->sub.p60[bankMgr->sub.cur] = (int)self;
                 }
                 {
-                    cBankManager* m2 = D_004A36F8->mpVBankManager;
-                    m2->sub.p7C[m2->sub.cur] = 0;
+                    cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                    bankMgr->sub.p7C[bankMgr->sub.cur] = 0;
                 }
                 {
-                    cBankManager* m2 = D_004A36F8->mpVBankManager;
-                    m2->sub.p64[m2->sub.cur] = self->mViewPort;
+                    cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                    bankMgr->sub.p64[bankMgr->sub.cur] = self->mViewPort;
                 }
                 pCurrAmbientInfo->handle = cBankSys_SFX_End((cBankSys*)D_004A36F8);
             } else {
-                h->vol = best;
+                voiceInst->vol = best;
             }
         }
     } else {
@@ -13298,43 +13298,43 @@ void func_002A4E88_c(sCrowd4E88* self)
             if (pCurrAmbientInfo->cnt != 0 && pCurrAmbientInfo->handle >= 0) {
                 sCrowdVec* pos = &pCurrAmbientInfo->vec;
                 pCurrAmbientInfo->vec = chanPos[pCurrAmbientInfo->idx];
-                sCrowdVoice* h = (sCrowdVoice*)cBankMonitor_BANKMONITOR_GetHandle(&D_004A36F8->mpVBankManager->sub, pCurrAmbientInfo->handle, 1);
-                if (h == 0) {
+                sCrowdVoice* voiceInst = (sCrowdVoice*)cBankMonitor_BANKMONITOR_GetHandle(&D_004A36F8->mpVBankManager->sub, pCurrAmbientInfo->handle, 1);
+                if (voiceInst == 0) {
                     crowdBegin((sSndSys69A0*)D_004A36F8, self->fD8, pCurrAmbientInfo->key, 1);
                     {
-                        cBankManager* m2 = D_004A36F8->mpVBankManager;
-                        m2->sub.tgt[m2->sub.cur] = pos;
+                        cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                        bankMgr->sub.tgt[bankMgr->sub.cur] = pos;
                     }
                     {
-                        cBankManager* m2 = D_004A36F8->mpVBankManager;
-                        cSndPlayOpts* ss = &m2->sub;
-                        ss->vals[m2->sub.cur] = chanDist[pCurrAmbientInfo->idx] + chanSum[pCurrAmbientInfo->idx];
-                        ss->ch[m2->sub.cur].vol = SND_MAX(0, SND_MIN(ss->vals[ss->cur], 0x7F));
+                        cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                        cSndPlayOpts* ss = &bankMgr->sub;
+                        ss->vals[bankMgr->sub.cur] = chanDist[pCurrAmbientInfo->idx] + chanSum[pCurrAmbientInfo->idx];
+                        ss->ch[bankMgr->sub.cur].vol = SND_MAX(0, SND_MIN(ss->vals[ss->cur], 0x7F));
                     }
                     {
-                        cBankManager* m2 = D_004A36F8->mpVBankManager;
-                        m2->sub.p3C[m2->sub.cur] = self->f17C;
+                        cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                        bankMgr->sub.p3C[bankMgr->sub.cur] = self->f17C;
                     }
                     {
-                        cBankManager* m2 = D_004A36F8->mpVBankManager;
-                        m2->sub.p74[m2->sub.cur] = 1;
+                        cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                        bankMgr->sub.p74[bankMgr->sub.cur] = 1;
                     }
                     {
-                        cBankManager* m2 = D_004A36F8->mpVBankManager;
-                        m2->sub.p64[m2->sub.cur] = self->mViewPort;
+                        cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                        bankMgr->sub.p64[bankMgr->sub.cur] = self->mViewPort;
                     }
                     OPTS_Callback(D_004A36F8->mpVBankManager, D_004A3700_cb[0]);
                     {
-                        cBankManager* m2 = D_004A36F8->mpVBankManager;
-                        m2->sub.p60[m2->sub.cur] = (int)self;
+                        cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                        bankMgr->sub.p60[bankMgr->sub.cur] = (int)self;
                     }
                     {
-                        cBankManager* m2 = D_004A36F8->mpVBankManager;
-                        m2->sub.p7C[m2->sub.cur] = 0;
+                        cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                        bankMgr->sub.p7C[bankMgr->sub.cur] = 0;
                     }
                     pCurrAmbientInfo->handle = cBankSys_SFX_End((cBankSys*)D_004A36F8);
                 } else {
-                    h->vol = chanDist[pCurrAmbientInfo->idx] + chanSum[pCurrAmbientInfo->idx];
+                    voiceInst->vol = chanDist[pCurrAmbientInfo->idx] + chanSum[pCurrAmbientInfo->idx];
                 }
             }
         }
@@ -13344,36 +13344,36 @@ void func_002A4E88_c(sCrowd4E88* self)
     if (self->state != 0) {
         cCrowdSys* sys = D_004A36F8;
         sCrowdVt4E88* vt = (sCrowdVt4E88*)((void*)sys->mVtbl);
-        int r = vt[2].fn((char*)sys + vt[2].delta, self->mViewPort, &outA, &outB);
-        if (r == 1 || r == 2) {
-            self->f18C = r;
+        int anticipateLevel = vt[2].fn((char*)sys + vt[2].delta, self->mViewPort, &outA, &outB);
+        if (anticipateLevel == 1 || anticipateLevel == 2) {
+            self->f18C = anticipateLevel;
         }
-        if (self->state == 1 && r != 3) {
+        if (self->state == 1 && anticipateLevel != 3) {
             func_002A6848((cCrowdInstance*)self);
-            int e = func_002A4CA0((sSndRandList*)&((sSndSys69A0*)D_004A36F8)->ent[r].c);
-            if (e != 0) {
-                func_002A8450_c((sSndSys69A0*)D_004A36F8, self->fD8, e);
+            int cheerSample = func_002A4CA0((sSndRandList*)&((sSndSys69A0*)D_004A36F8)->ent[anticipateLevel].c);
+            if (cheerSample != 0) {
+                func_002A8450_c((sSndSys69A0*)D_004A36F8, self->fD8, cheerSample);
                 {
-                    cBankManager* m2 = D_004A36F8->mpVBankManager;
-                    m2->sub.tgt[m2->sub.cur] = &self->vec10;
+                    cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                    bankMgr->sub.tgt[bankMgr->sub.cur] = &self->vec10;
                 }
                 {
-                    cBankManager* m2 = D_004A36F8->mpVBankManager;
-                    cSndPlayOpts* ss = &m2->sub;
-                    ss->vals[m2->sub.cur] = best * outB >> 12;
-                    ss->ch[m2->sub.cur].vol = SND_MAX(0, SND_MIN(ss->vals[ss->cur], 0x7F));
+                    cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                    cSndPlayOpts* ss = &bankMgr->sub;
+                    ss->vals[bankMgr->sub.cur] = best * outB >> 12;
+                    ss->ch[bankMgr->sub.cur].vol = SND_MAX(0, SND_MIN(ss->vals[ss->cur], 0x7F));
                 }
                 {
-                    cBankManager* m2 = D_004A36F8->mpVBankManager;
-                    m2->sub.p3C[m2->sub.cur] = self->f17C;
+                    cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                    bankMgr->sub.p3C[bankMgr->sub.cur] = self->f17C;
                 }
                 {
-                    cBankManager* m2 = D_004A36F8->mpVBankManager;
-                    m2->sub.p74[m2->sub.cur] = 1;
+                    cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                    bankMgr->sub.p74[bankMgr->sub.cur] = 1;
                 }
                 {
-                    cBankManager* m2 = D_004A36F8->mpVBankManager;
-                    m2->sub.p64[m2->sub.cur] = self->mViewPort;
+                    cBankManager* bankMgr = D_004A36F8->mpVBankManager;
+                    bankMgr->sub.p64[bankMgr->sub.cur] = self->mViewPort;
                 }
                 self->handle = func_002A86B8_c((sSndSys69A0*)D_004A36F8);
                 if (self->handle >= 0) {
@@ -13383,17 +13383,17 @@ void func_002A4E88_c(sCrowd4E88* self)
         }
     }
     if (self->handle >= 0) {
-        sCrowdVoice* h = (sCrowdVoice*)cBankMonitor_BANKMONITOR_GetHandle(&D_004A36F8->mpVBankManager->sub, self->handle, 2);
-        if (h == 0) {
+        sCrowdVoice* voiceInst = (sCrowdVoice*)cBankMonitor_BANKMONITOR_GetHandle(&D_004A36F8->mpVBankManager->sub, self->handle, 2);
+        if (voiceInst == 0) {
             func_002A6848((cCrowdInstance*)self);
             self->f18C = 0;
         } else {
-            int v = best;
+            int cheerVolume = best;
             if (self->state == 2) {
-                cBankMonitorInstance_PitchUpdate(h, outA);
-                v = best * outB >> 12;
+                cBankMonitorInstance_PitchUpdate(voiceInst, outA);
+                cheerVolume = best * outB >> 12;
             }
-            h->vol = v;
+            voiceInst->vol = cheerVolume;
         }
     }
     self->vol = best;
@@ -13522,22 +13522,22 @@ int func_002A5D08_5D08(sPool5D08* self, sSnd5D08Sub* P, int key) __asm__("func_0
 /**
  * Adds a crowd object to a crowd instance and starts or joins the ambient loop of its sample; returns its slot.
  *
- * Fails (-1) with 15 objects already or no position target in the current play-option level @p P. The object takes a
+ * Fails (-1) with 15 objects already or no position target in the current play-option level @p objectOpts. The object takes a
  * free slot with the level's position pointer and volume (as its loudness). It joins the ambient loop playing the same
  * sample (@p key); the first object also sets the instance's viewport, vol control and averaged position. Without a
  * matching loop it takes a free one (mNumCrowdAmbience grows), places it at the object and starts the sample from the
  * instance's bank unk_0D8 at the loop's position, with the object's loudness, the vol control, external volume, the
  * viewport and the callback D_004A3700, keeping the handle. func_002A7678 calls it.
  *
- * @param P  the current play-option level (cBankManager + 0x1D8) that describes the object
+ * @param objectOpts  the current play-option level (cBankManager + 0x1D8) that describes the object
  * @param key  the ambient sample (patch) of the object
  * @return the crowd object slot, or -1
  */
-int func_002A5D08_5D08(sPool5D08* self, sSnd5D08Sub* P, int key)
+int func_002A5D08_5D08(sPool5D08* self, sSnd5D08Sub* objectOpts, int key)
 {
     int idx = -1;
     int cnt = self->count;
-    if (cnt >= 15 || P->tgt[P->cur] == 0) {
+    if (cnt >= 15 || objectOpts->tgt[objectOpts->cur] == 0) {
         return -1;
     }
     sPoolSlot5D08* found = 0;
@@ -13549,8 +13549,8 @@ int func_002A5D08_5D08(sPool5D08* self, sSnd5D08Sub* P, int key)
         }
     }
     self->count++;
-    found->p = P->tgt[P->cur];
-    found->v4 = P->vals[P->cur];
+    found->p = objectOpts->tgt[objectOpts->cur];
+    found->v4 = objectOpts->vals[objectOpts->cur];
     i = 0;
     do {
         if (self->groups[i].key == key) {
@@ -13561,82 +13561,82 @@ int func_002A5D08_5D08(sPool5D08* self, sSnd5D08Sub* P, int key)
         i++;
     } while (i < 3);
     if (self->count == 1) {
-        self->f0 = P->p64[P->cur];
-        self->f17C = P->p3C[P->cur];
+        self->f0 = objectOpts->p64[objectOpts->cur];
+        self->f17C = objectOpts->p3C[objectOpts->cur];
         self->vec10 = *found->p;
     }
     if (found->grp == 0) {
-        int h = 0;
+        int groupIndex = 0;
         do {
-            if (self->groups[h].cnt == 0) {
-                found->grp = &self->groups[h];
-                self->groups[h].key = key;
-                self->groups[h].cnt++;
+            if (self->groups[groupIndex].cnt == 0) {
+                found->grp = &self->groups[groupIndex];
+                self->groups[groupIndex].key = key;
+                self->groups[groupIndex].cnt++;
                 self->f170++;
                 break;
             }
-            h++;
-        } while (h < 3);
+            groupIndex++;
+        } while (groupIndex < 3);
         found->grp->vec = *found->p;
         cCrowdSys* sys = D_004A36F8;
-        sSnd5D08Mgr* m = (sSnd5D08Mgr*)sys->mpVBankManager;
-        int a = self->fD8;
-        sSnd5D08Sub* s = &m->sub;
-        m->sub.cur++;
-        s->ch[m->sub.cur] = m->sub.def;
-        m->sub.tgt[m->sub.cur] = 0;
-        s->p34[m->sub.cur] = 0;
-        s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
-        s->p3C[m->sub.cur] = 0;
-        func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
-        s->p60[m->sub.cur] = 0;
-        s->p64[m->sub.cur] = 0;
-        s->p68[m->sub.cur] = 0;
-        s->p6C[m->sub.cur] = 0;
-        s->p70[m->sub.cur].f4 = 0;
-        s->p70[m->sub.cur].f0 = 100;
-        s->p70[m->sub.cur].f8 = 90;
-        s->p70[m->sub.cur].fC = 50;
-        s->p74[m->sub.cur] = 0;
-        s->p80[m->sub.cur] = 0;
-        s->p84[m->sub.cur] = 0;
-        s->p78[m->sub.cur] = 0x7F;
-        s->p7C[m->sub.cur] = 1;
-        sys->mBank[((sSnd5D08Mgr*)sys->mpVBankManager)->sub.cur] = a;
+        sSnd5D08Mgr* bankMgr = (sSnd5D08Mgr*)sys->mpVBankManager;
+        int crowdBank = self->fD8;
+        sSnd5D08Sub* playOpts = &bankMgr->sub;
+        bankMgr->sub.cur++;
+        playOpts->ch[bankMgr->sub.cur] = bankMgr->sub.def;
+        bankMgr->sub.tgt[bankMgr->sub.cur] = 0;
+        playOpts->p34[bankMgr->sub.cur] = 0;
+        playOpts->vals[bankMgr->sub.cur] = playOpts->ch[bankMgr->sub.cur].vol;
+        playOpts->p3C[bankMgr->sub.cur] = 0;
+        func_00416210((char*)playOpts + bankMgr->sub.cur * 8 + 0x40, 0, 8);
+        playOpts->p60[bankMgr->sub.cur] = 0;
+        playOpts->p64[bankMgr->sub.cur] = 0;
+        playOpts->p68[bankMgr->sub.cur] = 0;
+        playOpts->p6C[bankMgr->sub.cur] = 0;
+        playOpts->p70[bankMgr->sub.cur].f4 = 0;
+        playOpts->p70[bankMgr->sub.cur].f0 = 100;
+        playOpts->p70[bankMgr->sub.cur].f8 = 90;
+        playOpts->p70[bankMgr->sub.cur].fC = 50;
+        playOpts->p74[bankMgr->sub.cur] = 0;
+        playOpts->p80[bankMgr->sub.cur] = 0;
+        playOpts->p84[bankMgr->sub.cur] = 0;
+        playOpts->p78[bankMgr->sub.cur] = 0x7F;
+        playOpts->p7C[bankMgr->sub.cur] = 1;
+        sys->mBank[((sSnd5D08Mgr*)sys->mpVBankManager)->sub.cur] = crowdBank;
         sys->mPatch[((sSnd5D08Mgr*)sys->mpVBankManager)->sub.cur] = key;
         {
             cCrowdSys* crowdSys = D_004A36F8;
             ((sSnd5D08Mgr*)crowdSys->mpVBankManager)->sub.tgt[((sSnd5D08Mgr*)crowdSys->mpVBankManager)->sub.cur] = &found->grp->vec;
-            sSnd5D08Mgr* m2 = (sSnd5D08Mgr*)crowdSys->mpVBankManager;
-            sSnd5D08Sub* ss = &m2->sub;
-            ss->vals[m2->sub.cur] = found->v4;
-            ss->ch[m2->sub.cur].vol = SND_5D08_MAX(0, SND_5D08_MIN(ss->vals[ss->cur], 0x7F));
+            sSnd5D08Mgr* curBankMgr = (sSnd5D08Mgr*)crowdSys->mpVBankManager;
+            sSnd5D08Sub* ss = &curBankMgr->sub;
+            ss->vals[curBankMgr->sub.cur] = found->v4;
+            ss->ch[curBankMgr->sub.cur].vol = SND_5D08_MAX(0, SND_5D08_MIN(ss->vals[ss->cur], 0x7F));
         }
         {
-            sSnd5D08Mgr* m2 = (sSnd5D08Mgr*)D_004A36F8->mpVBankManager;
-            m2->sub.p3C[m2->sub.cur] = self->f17C;
+            sSnd5D08Mgr* curBankMgr = (sSnd5D08Mgr*)D_004A36F8->mpVBankManager;
+            curBankMgr->sub.p3C[curBankMgr->sub.cur] = self->f17C;
         }
         {
-            sSnd5D08Mgr* m2 = (sSnd5D08Mgr*)D_004A36F8->mpVBankManager;
-            m2->sub.p74[m2->sub.cur] = 1;
+            sSnd5D08Mgr* curBankMgr = (sSnd5D08Mgr*)D_004A36F8->mpVBankManager;
+            curBankMgr->sub.p74[curBankMgr->sub.cur] = 1;
         }
         {
-            sSnd5D08Mgr* m2 = (sSnd5D08Mgr*)D_004A36F8->mpVBankManager;
-            m2->sub.p64[m2->sub.cur] = self->f0;
+            sSnd5D08Mgr* curBankMgr = (sSnd5D08Mgr*)D_004A36F8->mpVBankManager;
+            curBankMgr->sub.p64[curBankMgr->sub.cur] = self->f0;
         }
         {
-            sSnd5D08Mgr* m2 = (sSnd5D08Mgr*)D_004A36F8->mpVBankManager;
+            sSnd5D08Mgr* curBankMgr = (sSnd5D08Mgr*)D_004A36F8->mpVBankManager;
             sSndKey8_5D08 k = D_004A3700_5D08[0];
-            sSnd5D08Sub* s4 = &m2->sub;
-            *(sSndKey8_5D08*)((char*)s4 + (m2->sub.cur << 3) + 0x40) = k;
+            sSnd5D08Sub* callbackOpts = &curBankMgr->sub;
+            *(sSndKey8_5D08*)((char*)callbackOpts + (curBankMgr->sub.cur << 3) + 0x40) = k;
         }
         {
-            sSnd5D08Mgr* m2 = (sSnd5D08Mgr*)D_004A36F8->mpVBankManager;
-            m2->sub.p60[m2->sub.cur] = (int)self;
+            sSnd5D08Mgr* curBankMgr = (sSnd5D08Mgr*)D_004A36F8->mpVBankManager;
+            curBankMgr->sub.p60[curBankMgr->sub.cur] = (int)self;
         }
         {
-            sSnd5D08Mgr* m2 = (sSnd5D08Mgr*)D_004A36F8->mpVBankManager;
-            m2->sub.p7C[m2->sub.cur] = 0;
+            sSnd5D08Mgr* curBankMgr = (sSnd5D08Mgr*)D_004A36F8->mpVBankManager;
+            curBankMgr->sub.p7C[curBankMgr->sub.cur] = 0;
         }
         found->grp->handle = cBankSys_SFX_End((cBankSys*)D_004A36F8);
     }
@@ -13684,16 +13684,16 @@ extern "C" void func_002A62F0(cCrowdInstance* vself, int idx, float fade)
     sSsMgr62F0* self = (sSsMgr62F0*)vself;
     if (idx < 0) return;
     if (self->ent[idx].active == 0) return;
-    sSsVoice62F0* v = self->ent[idx].v;
+    sSsVoice62F0* ambientInfo = self->ent[idx].v;
     self->nactive--;
     self->ent[idx].active = 0;
     self->ent[idx].v = 0;
-    if (--v->refs == 0) {
-        if (v->id >= 0) {
-            cBankMonitor_BANKMONITOR_StopHandle((char*)D_004A36F8->mpVBankManager + 0x1D8, v->id, 1, fade);
+    if (--ambientInfo->refs == 0) {
+        if (ambientInfo->id >= 0) {
+            cBankMonitor_BANKMONITOR_StopHandle((char*)D_004A36F8->mpVBankManager + 0x1D8, ambientInfo->id, 1, fade);
         }
-        v->id = -1;
-        v->f0 = -1;
+        ambientInfo->id = -1;
+        ambientInfo->f0 = -1;
         self->f18C = 0;
         self->nvoices--;
     }
@@ -13793,20 +13793,20 @@ extern "C" void func_002A64A0(cCrowdInstance* vself, int idx)
     tCrowdData* crowdData = &((&D_004A36F8->mCrowdData[0]))[idx];
     vself->mAmbientCheerIntensity = idx;
     vself->unk_188 = crowdData->mAttack + crowdData->mDecay;
-    int r = func_002A4CA0((sSndRandList*)crowdData);
-    if (r == 0) return;
-    func_002A8450((char**)D_004A36F8, vself->unk_0D8, r);
-    sSnd64A0Mgr* m1 = (sSnd64A0Mgr*)D_004A36F8->mpVBankManager;
-    m1->sub.tgt[m1->sub.cur] = ((char*)vself) + 0x10;
-    sSnd64A0Mgr* m2 = (sSnd64A0Mgr*)D_004A36F8->mpVBankManager;
-    m2->sub.setVal(m2->sub.cur, vself->unk_178);
-    m2->sub.update(m2->sub.cur);
-    sSnd64A0Mgr* m3 = (sSnd64A0Mgr*)D_004A36F8->mpVBankManager;
-    m3->sub.p3C[m3->sub.cur] = (int)vself->unk_17C;
-    sSnd64A0Mgr* m4 = (sSnd64A0Mgr*)D_004A36F8->mpVBankManager;
-    m4->sub.p74[m4->sub.cur] = 1;
-    sSnd64A0Mgr* m5 = (sSnd64A0Mgr*)D_004A36F8->mpVBankManager;
-    m5->sub.p64[m5->sub.cur] = *(int*)vself;
+    int cheerSample = func_002A4CA0((sSndRandList*)crowdData);
+    if (cheerSample == 0) return;
+    func_002A8450((char**)D_004A36F8, vself->unk_0D8, cheerSample);
+    sSnd64A0Mgr* posMgr = (sSnd64A0Mgr*)D_004A36F8->mpVBankManager;
+    posMgr->sub.tgt[posMgr->sub.cur] = ((char*)vself) + 0x10;
+    sSnd64A0Mgr* volMgr = (sSnd64A0Mgr*)D_004A36F8->mpVBankManager;
+    volMgr->sub.setVal(volMgr->sub.cur, vself->unk_178);
+    volMgr->sub.update(volMgr->sub.cur);
+    sSnd64A0Mgr* ctlMgr = (sSnd64A0Mgr*)D_004A36F8->mpVBankManager;
+    ctlMgr->sub.p3C[ctlMgr->sub.cur] = (int)vself->unk_17C;
+    sSnd64A0Mgr* extMgr = (sSnd64A0Mgr*)D_004A36F8->mpVBankManager;
+    extMgr->sub.p74[extMgr->sub.cur] = 1;
+    sSnd64A0Mgr* viewMgr = (sSnd64A0Mgr*)D_004A36F8->mpVBankManager;
+    viewMgr->sub.p64[viewMgr->sub.cur] = *(int*)vself;
     vself->unk_174 = func_002A86B8((char**)D_004A36F8);
     vself->unk_18C = idx + 1;
 }
@@ -13871,20 +13871,20 @@ extern "C" void func_002A6648(cCrowdInstance* vself, int idx)
     tCrowdData* crowdData = &((&D_004A36F8->mCrowdData[0]))[idx];
     vself->mAmbientCheerIntensity = idx;
     vself->unk_188 = crowdData->mAttack + crowdData->mDecay;
-    int r = func_002A4CA0((sSndRandList*)((char*)crowdData + 0x18));
-    if (r == 0) return;
-    func_002A8450((char**)D_004A36F8, vself->unk_0D8, r);
-    sSnd6648Mgr* m1 = (sSnd6648Mgr*)D_004A36F8->mpVBankManager;
-    m1->sub.tgt[m1->sub.cur] = ((char*)vself) + 0x10;
-    sSnd6648Mgr* m2 = (sSnd6648Mgr*)D_004A36F8->mpVBankManager;
-    m2->sub.setVal(m2->sub.cur, vself->unk_178);
-    m2->sub.update(m2->sub.cur);
-    sSnd6648Mgr* m3 = (sSnd6648Mgr*)D_004A36F8->mpVBankManager;
-    m3->sub.p3C[m3->sub.cur] = (int)vself->unk_17C;
-    sSnd6648Mgr* m4 = (sSnd6648Mgr*)D_004A36F8->mpVBankManager;
-    m4->sub.p74[m4->sub.cur] = 1;
-    sSnd6648Mgr* m5 = (sSnd6648Mgr*)D_004A36F8->mpVBankManager;
-    m5->sub.p64[m5->sub.cur] = *(int*)vself;
+    int cheerSample = func_002A4CA0((sSndRandList*)((char*)crowdData + 0x18));
+    if (cheerSample == 0) return;
+    func_002A8450((char**)D_004A36F8, vself->unk_0D8, cheerSample);
+    sSnd6648Mgr* posMgr = (sSnd6648Mgr*)D_004A36F8->mpVBankManager;
+    posMgr->sub.tgt[posMgr->sub.cur] = ((char*)vself) + 0x10;
+    sSnd6648Mgr* volMgr = (sSnd6648Mgr*)D_004A36F8->mpVBankManager;
+    volMgr->sub.setVal(volMgr->sub.cur, vself->unk_178);
+    volMgr->sub.update(volMgr->sub.cur);
+    sSnd6648Mgr* ctlMgr = (sSnd6648Mgr*)D_004A36F8->mpVBankManager;
+    ctlMgr->sub.p3C[ctlMgr->sub.cur] = (int)vself->unk_17C;
+    sSnd6648Mgr* extMgr = (sSnd6648Mgr*)D_004A36F8->mpVBankManager;
+    extMgr->sub.p74[extMgr->sub.cur] = 1;
+    sSnd6648Mgr* viewMgr = (sSnd6648Mgr*)D_004A36F8->mpVBankManager;
+    viewMgr->sub.p64[viewMgr->sub.cur] = *(int*)vself;
     vself->unk_174 = func_002A86B8((char**)D_004A36F8);
     vself->unk_18C = ~idx;
 }
@@ -13968,21 +13968,21 @@ extern "C" void func_002A68B0(cCrowdInstance* self, char* obj, float dt) {
         cBankMonitorInstance_Reset(obj);
         return;
     }
-    float t = self->unk_188;
-    if (!(t <= 0.0f)) {
+    float timeLeft = self->unk_188;
+    if (!(timeLeft <= 0.0f)) {
         int idx = self->mAmbientCheerIntensity;
         cCrowdSys* base = D_004A36F8;
-        float rem = t - dt;
+        float rem = timeLeft - dt;
         self->unk_188 = rem;
-        char* e = (char*)base + (idx * 0x54 + 0x1C);
-        float f = *(float*)(e + 0x4C);
+        char* crowdData = (char*)base + (idx * 0x54 + 0x1C);
+        float decayTime = *(float*)(crowdData + 0x4C);
         int vol = 0x40;
-        if (f < rem) {
-            float r = *(float*)(e + 0x50) * (*(float*)(e + 0x48) - (rem - f)) / *(float*)(e + 0x48);
-            vol = (int)r + 0x40;
+        if (decayTime < rem) {
+            float bendOffset = *(float*)(crowdData + 0x50) * (*(float*)(crowdData + 0x48) - (rem - decayTime)) / *(float*)(crowdData + 0x48);
+            vol = (int)bendOffset + 0x40;
         } else if (rem > 0.0f) {
-            float r = *(float*)(e + 0x50) * rem / f;
-            vol = (int)r + 0x40;
+            float bendOffset = *(float*)(crowdData + 0x50) * rem / decayTime;
+            vol = (int)bendOffset + 0x40;
         }
         SNDSYS_entercritical();
         SNDpitchbend(*(int*)(obj + 4), vol);
@@ -14218,16 +14218,16 @@ struct sSnd6D78Parser {
  * Sets up the crowd system: @p n crowd instances, all sample lists cleared, then crowd.inf's GLOBAL and level sections.
  *
  * Allocates the instances (operator new[], "CrowdInstances") into mpCrowdInstances, clears every intensity's mAttack,
- * mDecay, mMaxBend and sample lists, gives each instance the cheer bank @p v (unk_0D8), and reads the file
+ * mDecay, mMaxBend and sample lists, gives each instance the cheer bank @p cheerBank (unk_0D8), and reads the file
  * @p name with a FileParser: section "GLOBAL" and then section @p key go through func_002A7040. cSSXAudio_InGameLoad
  * calls it with 2 instances in the multiplayer game path, else 1, and bank 5.
  *
  * @param name  the crowd.inf path
  * @param key  the section of the level
  * @param n  the number of crowd instances (viewports)
- * @param v  the bank the cheers play from
+ * @param cheerBank  the bank the cheers play from
  */
-extern "C" void func_002A6D78(sSnd6D78Self* self, const char* name, const char* key, int n, int v)
+extern "C" void func_002A6D78(sSnd6D78Self* self, const char* name, const char* key, int n, int cheerBank)
 {
     self->count = n;
     sSnd6D78Voice*& slot = self->voices;
@@ -14241,15 +14241,15 @@ extern "C" void func_002A6D78(sSnd6D78Self* self, const char* name, const char* 
         func_002A4CF8((tCrowdEventData*)(&self->ent[i].a));
     }
     for (int i = 0; i < n; i++) {
-        self->voices[i].fD8 = v;
+        self->voices[i].fD8 = cheerBank;
     }
-    sSnd6D78Parser p;
-    FileParser_FileParser((FileParser*)((sSndFileBuf*)&p), name, 0x100);
-    p.cur = p.data;
-    if (FileParser_FindSection((FileParser*)(&p), str_GLOBAL)) func_002A7040((cCrowdSys*)self, &p);
-    p.cur = p.data;
-    if (FileParser_FindSection((FileParser*)(&p), key)) func_002A7040((cCrowdSys*)self, &p);
-    FileParser__FileParser((FileParser*)(&p), 2);
+    sSnd6D78Parser infParser;
+    FileParser_FileParser((FileParser*)((sSndFileBuf*)&infParser), name, 0x100);
+    infParser.cur = infParser.data;
+    if (FileParser_FindSection((FileParser*)(&infParser), str_GLOBAL)) func_002A7040((cCrowdSys*)self, &infParser);
+    infParser.cur = infParser.data;
+    if (FileParser_FindSection((FileParser*)(&infParser), key)) func_002A7040((cCrowdSys*)self, &infParser);
+    FileParser__FileParser((FileParser*)(&infParser), 2);
 }
 #endif
 
@@ -14287,10 +14287,10 @@ extern "C" void func_002A6F38(sSsMgr6F38* self)
     func_002A7718((cCrowdSys*)self);
     char* base = self->arr;
     if (base != 0) {
-        char* p = base + *(int*)(base - 0x10) * 400;
-        while (self->arr != p) {
-            p -= 0x190;
-            func_002A4E38((cCrowdInstance*)p, 0);
+        char* curInstance = base + *(int*)(base - 0x10) * 400;
+        while (self->arr != curInstance) {
+            curInstance -= 0x190;
+            func_002A4E38((cCrowdInstance*)curInstance, 0);
         }
         cMemMan_free(self->arr - 0x10);
         self->arr = 0;
@@ -14336,7 +14336,7 @@ extern const char str_MAXBENDpct_d[];
  */
 extern "C" void func_002A7040(cCrowdSys* self, void* parser)
 {
-    sSnd6D78Self* s = (sSnd6D78Self*)self;
+    sSnd6D78Self* crowdSys = (sSnd6D78Self*)self;
     char val[0x200];
     char key[0x200];
     while (!FileParser_IsEOF((FileParser*)parser)) {
@@ -14345,34 +14345,34 @@ extern "C" void func_002A7040(cCrowdSys* self, void* parser)
             sprintf(key, str_TRICKpct_d, i + 1);
             if (strcasecmp(name, key) == 0) {
                 FileParser_AssignString((FileParser*)parser, name, val);
-                func_002A4C28((sSndHandleList5*)&s->ent[i].a, (int)val, 0);
+                func_002A4C28((sSndHandleList5*)&crowdSys->ent[i].a, (int)val, 0);
                 break;
             }
             sprintf(key, str_FALLpct_d, i + 1);
             if (strcasecmp(name, key) == 0) {
                 FileParser_AssignString((FileParser*)parser, name, val);
-                func_002A4C28((sSndHandleList5*)&s->ent[i].b, (int)val, 0);
+                func_002A4C28((sSndHandleList5*)&crowdSys->ent[i].b, (int)val, 0);
                 break;
             }
             sprintf(key, str_ANTICIPATEpct_d, i + 1);
             if (strcasecmp(name, key) == 0) {
                 FileParser_AssignString((FileParser*)parser, name, val);
-                func_002A4C28((sSndHandleList5*)&s->ent[i].c, (int)val, 0);
+                func_002A4C28((sSndHandleList5*)&crowdSys->ent[i].c, (int)val, 0);
                 break;
             }
             sprintf(key, str_ATTACKpct_d, i + 1);
             if (strcasecmp(name, key) == 0) {
-                FileParser_AssignFloat((FileParser*)parser, name, &s->ent[i].f48);
+                FileParser_AssignFloat((FileParser*)parser, name, &crowdSys->ent[i].f48);
                 break;
             }
             sprintf(key, str_DECAYpct_d, i + 1);
             if (strcasecmp(name, key) == 0) {
-                FileParser_AssignFloat((FileParser*)parser, name, &s->ent[i].f4C);
+                FileParser_AssignFloat((FileParser*)parser, name, &crowdSys->ent[i].f4C);
                 break;
             }
             sprintf(key, str_MAXBENDpct_d, i + 1);
             if (strcasecmp(name, key) == 0) {
-                FileParser_AssignFloat((FileParser*)parser, name, (float*)&s->ent[i].f50);
+                FileParser_AssignFloat((FileParser*)parser, name, (float*)&crowdSys->ent[i].f50);
                 break;
             }
         }
@@ -14586,28 +14586,28 @@ struct sSnd7468Mgr {
  */
 extern "C" void func_002A7468(char** sys)
 {
-    sSnd7468Mgr* m = *(sSnd7468Mgr**)sys;
-    sSnd7468Sub* s = &m->sub;
-    m->sub.cur++;
-    s->ch[m->sub.cur] = s->def;
-    m->sub.tgt[m->sub.cur] = 0;
-    s->p34[m->sub.cur] = 0;
-    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
-    s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
-    s->p60[m->sub.cur] = 0;
-    s->p64[m->sub.cur] = 0;
-    s->p68[m->sub.cur] = 0;
-    s->p6C[m->sub.cur] = 0;
-    s->env[m->sub.cur].b = 0;
-    s->env[m->sub.cur].a = 100;
-    s->env[m->sub.cur].c = 90;
-    s->env[m->sub.cur].d = 50;
-    s->p74[m->sub.cur] = 0;
-    s->p80[m->sub.cur] = 0;
-    s->p84[m->sub.cur] = 0;
-    s->p78[m->sub.cur] = 0x7F;
-    s->p7C[m->sub.cur] = 1;
+    sSnd7468Mgr* bankMgr = *(sSnd7468Mgr**)sys;
+    sSnd7468Sub* playOpts = &bankMgr->sub;
+    bankMgr->sub.cur++;
+    playOpts->ch[bankMgr->sub.cur] = playOpts->def;
+    bankMgr->sub.tgt[bankMgr->sub.cur] = 0;
+    playOpts->p34[bankMgr->sub.cur] = 0;
+    playOpts->vals[bankMgr->sub.cur] = playOpts->ch[bankMgr->sub.cur].vol;
+    playOpts->p3C[bankMgr->sub.cur] = 0;
+    func_00416210((char*)playOpts + bankMgr->sub.cur * 8 + 0x40, 0, 8);
+    playOpts->p60[bankMgr->sub.cur] = 0;
+    playOpts->p64[bankMgr->sub.cur] = 0;
+    playOpts->p68[bankMgr->sub.cur] = 0;
+    playOpts->p6C[bankMgr->sub.cur] = 0;
+    playOpts->env[bankMgr->sub.cur].b = 0;
+    playOpts->env[bankMgr->sub.cur].a = 100;
+    playOpts->env[bankMgr->sub.cur].c = 90;
+    playOpts->env[bankMgr->sub.cur].d = 50;
+    playOpts->p74[bankMgr->sub.cur] = 0;
+    playOpts->p80[bankMgr->sub.cur] = 0;
+    playOpts->p84[bankMgr->sub.cur] = 0;
+    playOpts->p78[bankMgr->sub.cur] = 0x7F;
+    playOpts->p7C[bankMgr->sub.cur] = 1;
 }
 #endif
 
@@ -14619,20 +14619,20 @@ extern "C" int func_002A5D08(void* voice, void* bank, int a1);
 /**
  * Adds a crowd object from the current play-option level to the crowd instance of that level's viewport.
  *
- * Calls func_002A5D08 on instance mViewport[cur] with the options and @p a1, then pops the level. Returns the handle
+ * Calls func_002A5D08 on instance mViewport[cur] with the options and @p ambientPatch, then pops the level. Returns the handle
  * (slot << 8 | viewport) or -1 (no instances, or no free slot). The world trigger update func_002B4C38 keeps it.
  *
- * @param a1  the ambient sample (patch) of the object
+ * @param ambientPatch  the ambient sample (patch) of the object
  * @return the crowd object handle, or -1
  */
-extern "C" int func_002A7678(cCrowdSys* self, int a1)
+extern "C" int func_002A7678(cCrowdSys* self, int ambientPatch)
 {
     cCrowdInstance* crowdInstance = self->mpCrowdInstances;
     if (crowdInstance == 0) {
         return -1;
     }
     char* bankMonitor = *(char**)self + 0x1D8;
-    int packedId = func_002A5D08(&crowdInstance[(*(int**)(bankMonitor + 0x64))[*(int*)(bankMonitor + 0x1C)]], bankMonitor, a1);
+    int packedId = func_002A5D08(&crowdInstance[(*(int**)(bankMonitor + 0x64))[*(int*)(bankMonitor + 0x1C)]], bankMonitor, ambientPatch);
     if (packedId >= 0) {
         char* monitor = *(char**)self + 0x1D8;
         packedId = (packedId << 8) | (*(int**)(monitor + 0x64))[*(int*)(monitor + 0x1C)];
@@ -15442,39 +15442,39 @@ struct sSnd8450Sys {
  * Opens a play-option level for a MIDI sequence: pushes a level with the defaults and records the bank and sequence.
  *
  * Same push as func_002A7468 (default channel, delay {100, 0, 90, 50}, mMapToMaxVol 0x7F, mCloseOnEnd 1); then
- * mMidiBanks[level] gets (@p a, @p b). func_002A86B8 plays it. The crowd cheers and loops and func_002A8B28 use it.
+ * mMidiBanks[level] gets (@p bankIndex, @p midiData). func_002A86B8 plays it. The crowd cheers and loops and func_002A8B28 use it.
  *
  * @param sys  the MIDI system (cMidiSys; the crowd system or D_004A3744)
- * @param a  the bank (cBankManager bank index)
- * @param b  the MIDI sequence data in that bank
+ * @param bankIndex  the bank (cBankManager bank index)
+ * @param midiData  the MIDI sequence data in that bank
  */
-extern "C" void func_002A8450(char** sys, int a, int b)
+extern "C" void func_002A8450(char** sys, int bankIndex, int midiData)
 {
     sSnd8450Sys* self = (sSnd8450Sys*)sys;
-    sSnd8450Mgr* m = self->mgr;
-    sSnd8450Sub* s = &m->sub;
-    m->sub.cur++;
-    s->ch[m->sub.cur] = m->sub.def;
-    m->sub.tgt[m->sub.cur] = 0;
-    s->p34[m->sub.cur] = 0;
-    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
-    s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
-    s->p60[m->sub.cur] = 0;
-    s->p64[m->sub.cur] = 0;
-    s->p68[m->sub.cur] = 0;
-    s->p6C[m->sub.cur] = 0;
-    s->p70[m->sub.cur].f4 = 0;
-    s->p70[m->sub.cur].f0 = 100;
-    s->p70[m->sub.cur].f8 = 90;
-    s->p70[m->sub.cur].fC = 50;
-    s->p74[m->sub.cur] = 0;
-    s->p80[m->sub.cur] = 0;
-    s->p84[m->sub.cur] = 0;
-    s->p78[m->sub.cur] = 0x7F;
-    s->p7C[m->sub.cur] = 1;
-    self->e10[self->mgr->sub.cur].a = a;
-    self->e10[self->mgr->sub.cur].b = b;
+    sSnd8450Mgr* bankMgr = self->mgr;
+    sSnd8450Sub* playOpts = &bankMgr->sub;
+    bankMgr->sub.cur++;
+    playOpts->ch[bankMgr->sub.cur] = bankMgr->sub.def;
+    bankMgr->sub.tgt[bankMgr->sub.cur] = 0;
+    playOpts->p34[bankMgr->sub.cur] = 0;
+    playOpts->vals[bankMgr->sub.cur] = playOpts->ch[bankMgr->sub.cur].vol;
+    playOpts->p3C[bankMgr->sub.cur] = 0;
+    func_00416210((char*)playOpts + bankMgr->sub.cur * 8 + 0x40, 0, 8);
+    playOpts->p60[bankMgr->sub.cur] = 0;
+    playOpts->p64[bankMgr->sub.cur] = 0;
+    playOpts->p68[bankMgr->sub.cur] = 0;
+    playOpts->p6C[bankMgr->sub.cur] = 0;
+    playOpts->p70[bankMgr->sub.cur].f4 = 0;
+    playOpts->p70[bankMgr->sub.cur].f0 = 100;
+    playOpts->p70[bankMgr->sub.cur].f8 = 90;
+    playOpts->p70[bankMgr->sub.cur].fC = 50;
+    playOpts->p74[bankMgr->sub.cur] = 0;
+    playOpts->p80[bankMgr->sub.cur] = 0;
+    playOpts->p84[bankMgr->sub.cur] = 0;
+    playOpts->p78[bankMgr->sub.cur] = 0x7F;
+    playOpts->p7C[bankMgr->sub.cur] = 1;
+    self->e10[self->mgr->sub.cur].a = bankIndex;
+    self->e10[self->mgr->sub.cur].b = midiData;
 }
 #endif
 
@@ -15593,22 +15593,22 @@ static inline int snd86B8Handle(sSnd86B8Mgr* m, int id)
 extern "C" int func_002A86B8(char** vself)
 {
     sSnd86B8Sys* self = (sSnd86B8Sys*)vself;
-    sSnd86B8Mgr* m = self->mgr;
-    sSnd86B8Sub* s = &m->sub;
+    sSnd86B8Mgr* bankMgr = self->mgr;
+    sSnd86B8Sub* s = &bankMgr->sub;
     int BaseVol = s->vals[s->cur];
-    if (m->sub.tgt[m->sub.cur] != 0) {
-        s->vals[m->sub.cur] = 0;
-        s->ch[m->sub.cur].vol = SND_86B8_MAX(0, SND_86B8_MIN(s->vals[s->cur], 0x7F));
+    if (bankMgr->sub.tgt[bankMgr->sub.cur] != 0) {
+        s->vals[bankMgr->sub.cur] = 0;
+        s->ch[bankMgr->sub.cur].vol = SND_86B8_MAX(0, SND_86B8_MIN(s->vals[s->cur], 0x7F));
     } else if (s->p3C[s->cur] != 0) {
         float gain = *(float*)s->p3C[s->cur];
-        s->vals[m->sub.cur] = (int)SND_86B8_FMAX(SND_86B8_MIN((float)s->vals[s->cur] * gain, 127.0f), 0.0f);
+        s->vals[bankMgr->sub.cur] = (int)SND_86B8_FMAX(SND_86B8_MIN((float)s->vals[s->cur] * gain, 127.0f), 0.0f);
         s->ch[s->cur].vol = SND_86B8_MAX(0, SND_86B8_MIN(s->vals[s->cur], 0x7F));
     }
     int Inst = self->mgr->sub.cur;
     int Handle = -1;
     int bank = snd86B8Handle(self->mgr, self->p10[Inst].id);
-    sSnd86B8Sub* s2 = &self->mgr->sub;
-    if (s2->p6C[s2->cur] == 0.0f && bank >= 0) {
+    sSnd86B8Sub* levelOpts = &self->mgr->sub;
+    if (levelOpts->p6C[levelOpts->cur] == 0.0f && bank >= 0) {
         int sound = self->p10[Inst].f4;
         SNDSYS_entercritical();
         Handle = SNDMIDI_play(&self->mgr->sub.ch[self->mgr->sub.cur], sound, bank, -1);
@@ -15658,14 +15658,14 @@ extern "C" int func_002A86B8(char** sys);
 extern "C" int func_002A8B28(cMidiSys* midiSys, char* obj)
 {
     func_002A8450((char**)D_004A3744, *(int*)(obj + 0x1C), *(int*)(obj + 0x20));
-    sSnd8450Mgr* m = (sSnd8450Mgr*)D_004A3744->mpVBankManager;
-    m->sub.p3C[m->sub.cur] = *(int*)(obj + 0x18);
-    sSnd8450Mgr* m2 = (sSnd8450Mgr*)D_004A3744->mpVBankManager;
-    sSnd8450Sub* s = &m2->sub;
-    s->vals[m2->sub.cur] = *(int*)(obj + 0x24);
+    sSnd8450Mgr* ctlMgr = (sSnd8450Mgr*)D_004A3744->mpVBankManager;
+    ctlMgr->sub.p3C[ctlMgr->sub.cur] = *(int*)(obj + 0x18);
+    sSnd8450Mgr* volMgr = (sSnd8450Mgr*)D_004A3744->mpVBankManager;
+    sSnd8450Sub* s = &volMgr->sub;
+    s->vals[volMgr->sub.cur] = *(int*)(obj + 0x24);
 #define SND_X (s->vals[s->cur])
 #define SND_MIN127 (SND_X < 0x7F ? SND_X : 0x7F)
-    s->ch[m2->sub.cur].vol = SND_MIN127 < 0 ? 0 : SND_MIN127;
+    s->ch[volMgr->sub.cur].vol = SND_MIN127 < 0 ? 0 : SND_MIN127;
     func_002A86B8((char**)D_004A3744);
     return 1;
 }
@@ -16160,17 +16160,17 @@ struct s2A92F8Entry {
  * it is pushed on unk_310. Unless load limits are set (unk_31C), func_003B5B20(-1, mMainMemHighAddr) applies the new
  * limit. cPS2SoundManager_DeallocSoundMem calls it.
  *
- * @param e  the memory node
+ * @param memNode  the memory node
  */
-extern "C" void func_002A92F8(cPS2SoundManager* self, s2A92F8Entry* e)
+extern "C" void func_002A92F8(cPS2SoundManager* self, s2A92F8Entry* memNode)
 {
-    self->mMainMemHighAddr = e->unk8;
-    e->unk4 = -1;
-    e->unk8 = -1;
-    e->unkC = 0;
-    e->unk10 = 0;
-    e->next = self->unk_310;
-    self->unk_310 = e->index;
+    self->mMainMemHighAddr = memNode->unk8;
+    memNode->unk4 = -1;
+    memNode->unk8 = -1;
+    memNode->unkC = 0;
+    memNode->unk10 = 0;
+    memNode->next = self->unk_310;
+    self->unk_310 = memNode->index;
     if (self->unk_31C == 0) {
         func_003B5B20(-1, self->mMainMemHighAddr);
     }

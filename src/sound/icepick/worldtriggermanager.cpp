@@ -289,96 +289,96 @@ static inline void voiceTail_4C38(struct sWt4C38* t)
  */
 extern "C" void func_002B4C38(sWorldTrigger70* tt)
 {
-    struct sWt4C38* t = (struct sWt4C38*)tt;
+    struct sWt4C38* instance = (struct sWt4C38*)tt;
     int rec[3];
-    int r;
-    if (t->f30 == -1) {
-        if (func_002B5838(t, t->fC) != 0)
-            t->f38 = 1;
+    int swapResult;
+    if (instance->f30 == -1) {
+        if (func_002B5838(instance, instance->fC) != 0)
+            instance->f38 = 1;
         else
-            t->f38 = 0;
-        if (t->f38 == 0) {
-            if (func_002B66E8((sWorldTrigger70**)gWorldTriggerManager, t->f4, t->f8, tt) != 0) {
-                func_002B5898(t);
+            instance->f38 = 0;
+        if (instance->f38 == 0) {
+            if (func_002B66E8((sWorldTrigger70**)gWorldTriggerManager, instance->f4, instance->f8, tt) != 0) {
+                func_002B5898(instance);
                 return;
             }
         }
         {
-            int ok = func_002B5818(t, t->fC, &rec[0], &rec[1], &rec[2], t->f3C, 0);
-            t->f60 = rec[0];
-            t->f64 = rec[1];
+            int ok = func_002B5818(instance, instance->fC, &rec[0], &rec[1], &rec[2], instance->f3C, 0);
+            instance->f60 = rec[0];
+            instance->f64 = rec[1];
             if (!ok) {
-                func_002B5898(t);
+                func_002B5898(instance);
                 return;
             }
         }
         if (rec[2] != 0) {
-            t->f30 = -9999;
+            instance->f30 = -9999;
             return;
         }
-        r = -1;
+        swapResult = -1;
         if (rec[0] == 3) {
-            if (*(int*)(cSSXAudio_GetFocusRider(cAudioInterface_bxAudio(), -1) + 0x870) != t->f3C) {
-                func_002B5898(t);
+            if (*(int*)(cSSXAudio_GetFocusRider(cAudioInterface_bxAudio(), -1) + 0x870) != instance->f3C) {
+                func_002B5898(instance);
                 return;
             }
-            r = func_002B6630((sWorldTrigger70**)gWorldTriggerManager, t->fC);
-            if (r > 0) {
-                func_002B5898(t);
+            swapResult = func_002B6630((sWorldTrigger70**)gWorldTriggerManager, instance->fC);
+            if (swapResult > 0) {
+                func_002B5898(instance);
                 return;
             }
-            if (func_004165A8(t->f40, D_004A35A8) == 0) {
-                if (func_002B5878(t, t->fC, t->f40) == 0) {
-                    func_002B5898(t);
+            if (func_004165A8(instance->f40, D_004A35A8) == 0) {
+                if (func_002B5878(instance, instance->fC, instance->f40) == 0) {
+                    func_002B5898(instance);
                     return;
                 }
             }
-            r = func_0029B818(cAudioInterface_bxAudio(), t->f40, rec);
+            swapResult = func_0029B818(cAudioInterface_bxAudio(), instance->f40, rec);
         }
-        if (func_002B67D8(gWorldTriggerManager, t->fC) == 0 || func_002B6808((sTriggerIdCache*)gWorldTriggerManager, t->f4) != 0) {
-            if (rec[0] == 3 && r != 1)
+        if (func_002B67D8(gWorldTriggerManager, instance->fC) == 0 || func_002B6808((sTriggerIdCache*)gWorldTriggerManager, instance->f4) != 0) {
+            if (rec[0] == 3 && swapResult != 1)
                 return;
-            if (func_002B6988(gWorldTriggerManager, t->fC) != 0) {
-                if (func_002B69B8(gWorldTriggerManager, (void*)t->f4, tt) == 0) {
-                    t->f30 = -9999;
+            if (func_002B6988(gWorldTriggerManager, instance->fC) != 0) {
+                if (func_002B69B8(gWorldTriggerManager, (void*)instance->f4, tt) == 0) {
+                    instance->f30 = -9999;
                     return;
                 }
             }
-            if (t->f38 != 0) {
+            if (instance->f38 != 0) {
                 func_002A7468(cAudioInterface_bxAudio());
-                voiceTail_4C38(t);
-                t->f30 = func_002A7678(cAudioInterface_bxAudio(), rec[1]);
+                voiceTail_4C38(instance);
+                instance->f30 = func_002A7678(cAudioInterface_bxAudio(), rec[1]);
                 return;
             }
             sfxBegin_4C38((struct sSnd4C38Sys*)cAudioInterface_bxAudio(), rec[0], rec[1]);
-            voiceTail_4C38(t);
-            t->f30 = cBankSys_SFX_End(cAudioInterface_bxAudio());
+            voiceTail_4C38(instance);
+            instance->f30 = cBankSys_SFX_End(cAudioInterface_bxAudio());
             return;
         }
-        func_002B5898(t);
+        func_002B5898(instance);
         return;
     }
-    if (func_002B6988(gWorldTriggerManager, t->fC) != 0 && func_002B69B8(gWorldTriggerManager, (void*)t->f4, tt) != 0) {
-        if (t->f30 != -9999)
-            cBankMonitor_BANKMONITOR_StopHandle(&(*((struct sSnd4C38Sys*)cAudioInterface_bxAudio())->p118)->sub, t->f30, 1, 0.1f);
-        sfxBegin_4C38((struct sSnd4C38Sys*)cAudioInterface_bxAudio(), t->f60, t->f64);
-        voiceTail_4C38(t);
-        t->f30 = cBankSys_SFX_End(cAudioInterface_bxAudio());
+    if (func_002B6988(gWorldTriggerManager, instance->fC) != 0 && func_002B69B8(gWorldTriggerManager, (void*)instance->f4, tt) != 0) {
+        if (instance->f30 != -9999)
+            cBankMonitor_BANKMONITOR_StopHandle(&(*((struct sSnd4C38Sys*)cAudioInterface_bxAudio())->p118)->sub, instance->f30, 1, 0.1f);
+        sfxBegin_4C38((struct sSnd4C38Sys*)cAudioInterface_bxAudio(), instance->f60, instance->f64);
+        voiceTail_4C38(instance);
+        instance->f30 = cBankSys_SFX_End(cAudioInterface_bxAudio());
         return;
     }
-    if (t->f38 != 0) {
-        if (t->f30 == -9999)
+    if (instance->f38 != 0) {
+        if (instance->f30 == -9999)
             return;
-        func_002A7340(cAudioInterface_bxAudio(), t->f30, (int)(t->f10 * 127.0f));
+        func_002A7340(cAudioInterface_bxAudio(), instance->f30, (int)(instance->f10 * 127.0f));
         return;
     }
-    if (t->f30 == -9999)
+    if (instance->f30 == -9999)
         return;
     {
-        char* h = (char*)cBankMonitor_BANKMONITOR_GetHandle(&(*((struct sSnd4C38Sys*)cAudioInterface_bxAudio())->p118)->sub, t->f30, 1);
-        if (h == 0)
+        char* bankInstance = (char*)cBankMonitor_BANKMONITOR_GetHandle(&(*((struct sSnd4C38Sys*)cAudioInterface_bxAudio())->p118)->sub, instance->f30, 1);
+        if (bankInstance == 0)
             return;
-        *(int*)(h + 100) = (int)(t->f10 * 127.0f);
+        *(int*)(bankInstance + 100) = (int)(instance->f10 * 127.0f);
     }
 }
 #endif
@@ -950,41 +950,41 @@ extern "C" int func_002B5F60(char* self, void* evt, int id, char* rider, int vol
         }
         *(void**)(self + 0x328) = evt;
     }
-    int type, a, b;
-    if (cWorldTriggerManager_TriggerToPatch(self, id, &type, &a, &b, 1, 0) != 0 && b == 0)
+    int type, patch, noAudio;
+    if (cWorldTriggerManager_TriggerToPatch(self, id, &type, &patch, &noAudio, 1, 0) != 0 && noAudio == 0)
     {
         sWtSnd5F60* snd = (sWtSnd5F60*)cAudioInterface_bxAudio();
         int tp = type;
-        int ar = a;
-        sWtTrack5F60* t = snd->track;
-        sWtSub5F60* s = &t->sub;
-        t->sub.cur++;
-        s->ents[t->sub.cur] = s->cfg;
-        t->sub.arr24[t->sub.cur] = 0;
-        s->p34[t->sub.cur] = 0;
-        s->p38[t->sub.cur] = s->ents[t->sub.cur].b0;
-        s->p3C[t->sub.cur] = 0;
-        func_00416210((char*)s + t->sub.cur * 8 + 0x40, 0, 8);
-        s->p60[t->sub.cur] = 0;
-        s->p64[t->sub.cur] = 0;
-        s->p68[t->sub.cur] = 0;
-        s->p6C[t->sub.cur] = 0;
-        s->p70[t->sub.cur].f4 = 0;
-        s->p70[t->sub.cur].f0 = 100;
-        s->p70[t->sub.cur].f8 = 90;
-        s->p70[t->sub.cur].fC = 50;
-        s->p74[t->sub.cur] = 0;
-        s->p80[t->sub.cur] = 0;
-        s->p84[t->sub.cur] = 0;
-        s->p78[t->sub.cur] = 0x7F;
-        s->p7C[t->sub.cur] = 1;
+        int ar = patch;
+        sWtTrack5F60* bankManager = snd->track;
+        sWtSub5F60* playOpts = &bankManager->sub;
+        bankManager->sub.cur++;
+        playOpts->ents[bankManager->sub.cur] = playOpts->cfg;
+        bankManager->sub.arr24[bankManager->sub.cur] = 0;
+        playOpts->p34[bankManager->sub.cur] = 0;
+        playOpts->p38[bankManager->sub.cur] = playOpts->ents[bankManager->sub.cur].b0;
+        playOpts->p3C[bankManager->sub.cur] = 0;
+        func_00416210((char*)playOpts + bankManager->sub.cur * 8 + 0x40, 0, 8);
+        playOpts->p60[bankManager->sub.cur] = 0;
+        playOpts->p64[bankManager->sub.cur] = 0;
+        playOpts->p68[bankManager->sub.cur] = 0;
+        playOpts->p6C[bankManager->sub.cur] = 0;
+        playOpts->p70[bankManager->sub.cur].f4 = 0;
+        playOpts->p70[bankManager->sub.cur].f0 = 100;
+        playOpts->p70[bankManager->sub.cur].f8 = 90;
+        playOpts->p70[bankManager->sub.cur].fC = 50;
+        playOpts->p74[bankManager->sub.cur] = 0;
+        playOpts->p80[bankManager->sub.cur] = 0;
+        playOpts->p84[bankManager->sub.cur] = 0;
+        playOpts->p78[bankManager->sub.cur] = 0x7F;
+        playOpts->p7C[bankManager->sub.cur] = 1;
         snd->types[snd->track->sub.cur] = tp;
         snd->args[snd->track->sub.cur] = ar;
         {
-            sWtTrack5F60* t2 = *((sWtSnd5F60*)cAudioInterface_bxAudio())->cur;
-            sWtSub5F60* s2 = &t2->sub;
-            s2->p38[t2->sub.cur] = vol;
-            s2->ents[t2->sub.cur].b0 = MAX_5F60(MIN_5F60(s2->p38[s2->cur], 0x7F), 0);
+            sWtTrack5F60* volManager = *((sWtSnd5F60*)cAudioInterface_bxAudio())->cur;
+            sWtSub5F60* s2 = &volManager->sub;
+            s2->p38[volManager->sub.cur] = vol;
+            s2->ents[volManager->sub.cur].b0 = MAX_5F60(MIN_5F60(s2->p38[s2->cur], 0x7F), 0);
         }
         {
             sWtTrack5F60** pt = ((sWtSnd5F60*)cAudioInterface_bxAudio())->cur;
@@ -993,13 +993,13 @@ extern "C" int func_002B5F60(char* self, void* evt, int id, char* rider, int vol
         }
         if (rider != 0)
         {
-            sWtTrack5F60* t3 = *((sWtSnd5F60*)cAudioInterface_bxAudio())->cur;
-            t3->sub.arr24[t3->sub.cur] = (int)(rider + 0x110);
+            sWtTrack5F60* riderManager = *((sWtSnd5F60*)cAudioInterface_bxAudio())->cur;
+            riderManager->sub.arr24[riderManager->sub.cur] = (int)(rider + 0x110);
             sWtTrack5F60** pt = ((sWtSnd5F60*)cAudioInterface_bxAudio())->cur;
             int h = func_00288A20(cAudioInterface_bxAudio(), rider);
             (*pt)->sub.p64[(*pt)->sub.cur] = h;
-            sWtTrack5F60* t4 = *((sWtSnd5F60*)cAudioInterface_bxAudio())->cur;
-            t4->sub.p34[t4->sub.cur] = 1;
+            sWtTrack5F60* flagManager = *((sWtSnd5F60*)cAudioInterface_bxAudio())->cur;
+            flagManager->sub.p34[flagManager->sub.cur] = 1;
         }
         return cBankSys_SFX_End(cAudioInterface_bxAudio());
     }
@@ -1544,10 +1544,10 @@ struct sTriggerSlots {
  */
 extern "C" sTriggerSlots* func_002B6AA0(sTriggerSlots* self)
 {
-    sTriggerSlot120* p = self->slots;
-    for (int i = 1; i != -1; i--, p++) {
-        p->unk0 = 0;
-        p->q = t4vect_Zero;
+    sTriggerSlot120* overlapList = self->slots;
+    for (int i = 1; i != -1; i--, overlapList++) {
+        overlapList->unk0 = 0;
+        overlapList->q = t4vect_Zero;
     }
     return self;
 }
@@ -1583,12 +1583,12 @@ extern "C" void func_002B6B50(void*);
  *
  * The world view calls it with the file data and its resource id when a world audio file loads.
  *
- * @param a1  the world audio file data, or 0
+ * @param icePickData  the world audio file data, or 0
  * @return 1
  */
-extern "C" int func_002B6B08(void* self, int a1)
+extern "C" int func_002B6B08(void* self, int icePickData)
 {
-    if (a1 != 0) {
+    if (icePickData != 0) {
         func_002B6B50(self);
     }
     return 1;
@@ -1605,11 +1605,11 @@ INCLUDE_ASM("sound/icepick/worldtriggermanager", func_002B6B30);
  *
  * The world view calls it for type-13 resources (world audio files).
  *
- * @param a1  the world audio file data, or 0
+ * @param icePickData  the world audio file data, or 0
  */
-extern "C" void func_002B6B30(void* self, int a1)
+extern "C" void func_002B6B30(void* self, int icePickData)
 {
-    if (a1 != 0) {
+    if (icePickData != 0) {
         func_002B6C20(self);
     }
 }
@@ -1674,12 +1674,12 @@ extern "C" void func_002B7318(void* self, sTriggerEntry18* e);
 /**
  * Adds every active audio instance in a list to the audio grid (func_002B7318); returns 1.
  *
- * @param a1  the world audio file data (not used)
+ * @param icePickData  the world audio file data (not used)
  * @param entries  the 0x18-byte audio instances
  * @param n  their count
  * @return 1
  */
-extern "C" int func_002B6C90(void* self, int a1, sTriggerEntry18* entries, int n)
+extern "C" int func_002B6C90(void* self, int icePickData, sTriggerEntry18* entries, int n)
 {
     for (int i = 0; i < n; i++) {
         if (entries[i].active != 0) {
@@ -1815,49 +1815,49 @@ struct sShape_2B6F40 {
  */
 extern "C" void func_002B6F40(void* self, int* shape, sVec3_2B6CF8* lo, sVec3_2B6CF8* hi)
 {
-    sShape_2B6F40* s = (sShape_2B6F40*)shape;
-    switch (s->type)
+    sShape_2B6F40* shapeRec = (sShape_2B6F40*)shape;
+    switch (shapeRec->type)
     {
     case 0:
-        lo->x = s->cx - s->e0;
-        lo->y = s->cy - s->e0;
-        lo->z = s->cz - s->e0;
-        hi->x = s->cx + s->e0;
-        hi->y = s->cy + s->e0;
-        hi->z = s->cz + s->e0;
+        lo->x = shapeRec->cx - shapeRec->e0;
+        lo->y = shapeRec->cy - shapeRec->e0;
+        lo->z = shapeRec->cz - shapeRec->e0;
+        hi->x = shapeRec->cx + shapeRec->e0;
+        hi->y = shapeRec->cy + shapeRec->e0;
+        hi->z = shapeRec->cz + shapeRec->e0;
         break;
     case 1:
     {
-        sVec3_2B6CF8 a;
-        sVec3_2B6CF8 b;
-        sVec3_2B6CF8 c;
+        sVec3_2B6CF8 axisDir;
+        sVec3_2B6CF8 sideDir;
+        sVec3_2B6CF8 upDir;
         sVec3_2B6CF8 z;
-        a = sVec3_2B6CF8(s->ax, s->ay, s->az);
+        axisDir = sVec3_2B6CF8(shapeRec->ax, shapeRec->ay, shapeRec->az);
         z = sVec3_2B6CF8(0.0f, 0.0f, 1.0f);
-        b = Cross_2B6F40(z, a);
-        b = b * (1.0f / wtSqrt_2B6F40(b.x * b.x + b.y * b.y + b.z * b.z));
-        c = Cross_2B6F40(a, b);
-        *lo = sVec3_2B6CF8(s->cx, s->cy, s->cz);
-        *hi = sVec3_2B6CF8(s->cx, s->cy, s->cz);
-        *lo -= a * s->e0 + b * s->e1 + c * s->e2;
-        *hi += a * s->e0 + b * s->e1 + c * s->e2;
+        sideDir = Cross_2B6F40(z, axisDir);
+        sideDir = sideDir * (1.0f / wtSqrt_2B6F40(sideDir.x * sideDir.x + sideDir.y * sideDir.y + sideDir.z * sideDir.z));
+        upDir = Cross_2B6F40(axisDir, sideDir);
+        *lo = sVec3_2B6CF8(shapeRec->cx, shapeRec->cy, shapeRec->cz);
+        *hi = sVec3_2B6CF8(shapeRec->cx, shapeRec->cy, shapeRec->cz);
+        *lo -= axisDir * shapeRec->e0 + sideDir * shapeRec->e1 + upDir * shapeRec->e2;
+        *hi += axisDir * shapeRec->e0 + sideDir * shapeRec->e1 + upDir * shapeRec->e2;
         break;
     }
     case 2:
-        lo->x = s->cx - s->e0;
-        lo->y = s->cy - s->e0;
-        lo->z = s->cz - s->e0;
-        hi->x = s->cx + s->e0;
-        hi->y = s->cy + s->e0;
-        hi->z = s->cz + s->e0;
+        lo->x = shapeRec->cx - shapeRec->e0;
+        lo->y = shapeRec->cy - shapeRec->e0;
+        lo->z = shapeRec->cz - shapeRec->e0;
+        hi->x = shapeRec->cx + shapeRec->e0;
+        hi->y = shapeRec->cy + shapeRec->e0;
+        hi->z = shapeRec->cz + shapeRec->e0;
         break;
     case 3:
-        lo->x = s->cx - s->e0;
-        lo->y = s->cy - s->e0;
-        lo->z = s->cz - s->e0;
-        hi->x = s->cx + s->e0;
-        hi->y = s->cy + s->e0;
-        hi->z = s->cz + s->e0;
+        lo->x = shapeRec->cx - shapeRec->e0;
+        lo->y = shapeRec->cy - shapeRec->e0;
+        lo->z = shapeRec->cz - shapeRec->e0;
+        hi->x = shapeRec->cx + shapeRec->e0;
+        hi->y = shapeRec->cy + shapeRec->e0;
+        hi->z = shapeRec->cz + shapeRec->e0;
         break;
     }
 }
@@ -1975,16 +1975,16 @@ static inline bool QEmpty_2B7410(int* c)
  *
  * Skips null, inactive or volume-less instances; frees a cell's item list when it becomes empty.
  *
- * @param e  the audio instance
+ * @param instAudio  the audio instance
  */
-extern "C" void func_002B7410(void* self, sWtmEnt18* e)
+extern "C" void func_002B7410(void* self, sWtmEnt18* instAudio)
 {
-    if (e == 0) return;
-    if (e->active == 0) return;
-    if (((int*)((sTriggerEntry18*)e)->unk10)[1] == 0) return;
+    if (instAudio == 0) return;
+    if (instAudio->active == 0) return;
+    if (((int*)((sTriggerEntry18*)instAudio)->unk10)[1] == 0) return;
     sVec3_2B6CF8 lo;
     sVec3_2B6CF8 hi;
-    func_002B6CF8(self, e, &lo, &hi);
+    func_002B6CF8(self, instAudio, &lo, &hi);
     char* base = *(char**)((char*)cAudioInterface_getGame() + 0x20);
     sBox_2B7410 box;
     box.x0 = lo.x;
@@ -1999,12 +1999,12 @@ extern "C" void func_002B7410(void* self, sWtmEnt18* e)
     sCell_2B7410 cell;
     GetCell_2B7410(&cell, &box);
     sQNode_2B7410* n = (sQNode_2B7410*)Child_2B7410(Child_2B7410(Child_2B7410(base, cell.ix, 80), cell.iy, 40), cell.iz, 20);
-    Remove_2B7410(n, e, &cell);
+    Remove_2B7410(n, instAudio, &cell);
     if (QEmpty_2B7410(n->items)) {
         operator_delete(n->items);
         n->items = 0;
     }
-    func_002B77C0_7410(self, e);
+    func_002B77C0_7410(self, instAudio);
 }
 #endif
 
@@ -2094,23 +2094,23 @@ extern "C" void func_002B75D0(sWtm_75D0* self, const sV4_75D0* pos)
         const sV4_75D0* posPtr = pos;
         sWtm_75D0** pl = selfList;
         const sV4_75D0** pp = &posPtr;
-        sQH_75D0 h0, h1, h2, h3, h4, h5, h6, h7;
+        sQH_75D0 octantQuery0, octantQuery1, octantQuery2, octantQuery3, octantQuery4, octantQuery5, octantQuery6, octantQuery7;
         sOctRoot_75D0* k;
-        if (root[0].node) wtq_75D0(&h0, pl, pl, pp, root[0].node, &root[0]);
+        if (root[0].node) wtq_75D0(&octantQuery0, pl, pl, pp, root[0].node, &root[0]);
         k = &root[1];
-        if (root[1].node) wtq_75D0(&h1, pl, pl, pp, k->node, k);
+        if (root[1].node) wtq_75D0(&octantQuery1, pl, pl, pp, k->node, k);
         k = &root[2];
-        if (root[2].node) wtq_75D0(&h2, pl, pl, pp, k->node, k);
+        if (root[2].node) wtq_75D0(&octantQuery2, pl, pl, pp, k->node, k);
         k = &root[3];
-        if (root[3].node) wtq_75D0(&h3, pl, pl, pp, k->node, k);
+        if (root[3].node) wtq_75D0(&octantQuery3, pl, pl, pp, k->node, k);
         k = &root[4];
-        if (root[4].node) wtq_75D0(&h4, pl, pl, pp, k->node, k);
+        if (root[4].node) wtq_75D0(&octantQuery4, pl, pl, pp, k->node, k);
         k = &root[5];
-        if (root[5].node) wtq_75D0(&h5, pl, pl, pp, k->node, k);
+        if (root[5].node) wtq_75D0(&octantQuery5, pl, pl, pp, k->node, k);
         k = &root[6];
-        if (root[6].node) wtq_75D0(&h6, pl, pl, pp, k->node, k);
+        if (root[6].node) wtq_75D0(&octantQuery6, pl, pl, pp, k->node, k);
         k = &root[7];
-        if (root[7].node) wtq_75D0(&h7, pl, pl, pp, k->node, k);
+        if (root[7].node) wtq_75D0(&octantQuery7, pl, pl, pp, k->node, k);
         self->last = *pos;
     }
 }
@@ -2248,110 +2248,110 @@ extern "C" void wtEval_7908(void* self, const sV4_75D0* listener, int c, sWtTrig
  * list.
  *
  * @param listener  the listener position
- * @param c  the viewport
- * @param e  the audio instance
+ * @param viewPort  the viewport
+ * @param instAudio  the audio instance
  */
-extern "C" void wtEval_7908(void* self, const sV4_75D0* listener, int c, sWtTrig_7908* e)
+extern "C" void wtEval_7908(void* self, const sV4_75D0* listener, int viewPort, sWtTrig_7908* instAudio)
 {
     sVec3_2B6CF8 org;
     sWtShape_7908* recs[4];
     sVec3_2B6CF8 pos;
-    sVec3_2B6CF8 d;
+    sVec3_2B6CF8 toListener;
     int i;
     float dist;
-    float v;
+    float volume;
 
-    org = sVec3_2B6CF8(*(float*)(e->obj + 0x40), *(float*)(e->obj + 0x44), *(float*)(e->obj + 0x48));
-    int* info = e->info;
+    org = sVec3_2B6CF8(*(float*)(instAudio->obj + 0x40), *(float*)(instAudio->obj + 0x44), *(float*)(instAudio->obj + 0x48));
+    int* info = instAudio->info;
     char* base = (char*)info + 8;
-    char* p = base + (info[0] << 2);
+    char* shapeCursor = base + (info[0] << 2);
     int n = info[1];
 
     for (int j = 0; j < n; j++) {
-        recs[j] = (sWtShape_7908*)p;
-        switch (*(int*)p) {
+        recs[j] = (sWtShape_7908*)shapeCursor;
+        switch (*(int*)shapeCursor) {
         case 0:
-            p += 0x1C;
+            shapeCursor += 0x1C;
             break;
         case 1:
-            p += 0x30;
+            shapeCursor += 0x30;
             break;
         case 2:
-            p += 0x30;
+            shapeCursor += 0x30;
             break;
         case 3:
-            p += 0x18;
+            shapeCursor += 0x18;
             break;
         }
     }
 
     for (i = 0; i < n; i++) {
-        sWtShape_7908* s = recs[i];
-        switch (s->type) {
+        sWtShape_7908* shapeRec = recs[i];
+        switch (shapeRec->type) {
         case 0: {
-            pos = org + sVec3_2B6CF8(s->cx, s->cy, s->cz);
+            pos = org + sVec3_2B6CF8(shapeRec->cx, shapeRec->cy, shapeRec->cz);
             sV4_75D0 diff = Sub_75D0(*listener, sV4_75D0(pos.x, pos.y, pos.z, 0.0f));
-            d.x = diff.x;
-            d.y = diff.y;
-            d.z = diff.z;
-            dist = __builtin_fabsf(wtSqrt_2B6F40(d.x * d.x + d.y * d.y + d.z * d.z));
-            if (dist < s->f14) {
-                wtSet_7908(gWorldTriggerManager, e->obj, i, c, s->id, 1, wtCurve_7908(self, s->f18, dist / s->f14), pos);
+            toListener.x = diff.x;
+            toListener.y = diff.y;
+            toListener.z = diff.z;
+            dist = __builtin_fabsf(wtSqrt_2B6F40(toListener.x * toListener.x + toListener.y * toListener.y + toListener.z * toListener.z));
+            if (dist < shapeRec->f14) {
+                wtSet_7908(gWorldTriggerManager, instAudio->obj, i, viewPort, shapeRec->id, 1, wtCurve_7908(self, shapeRec->f18, dist / shapeRec->f14), pos);
             }
             break;
         }
         case 1: {
-            pos = org + sVec3_2B6CF8(s->cx, s->cy, s->cz);
+            pos = org + sVec3_2B6CF8(shapeRec->cx, shapeRec->cy, shapeRec->cz);
             {
                 sV4_75D0 diff = Sub_75D0(*listener, sV4_75D0(pos.x, pos.y, pos.z, 0.0f));
-                d.x = diff.x;
-                d.y = diff.y;
-                d.z = diff.z;
+                toListener.x = diff.x;
+                toListener.y = diff.y;
+                toListener.z = diff.z;
             }
-            sVec3_2B6CF8 a;
-            sVec3_2B6CF8 b;
+            sVec3_2B6CF8 axisDir;
+            sVec3_2B6CF8 sideDir;
             sVec3_2B6CF8 cc;
-            Basis_7908(s, a, b, cc);
-            float da = Dot_7908(a, d);
-            float db = Dot_7908(b, d);
-            float dc = Dot_7908(cc, d);
-            float ta = s->f14 != 0.0f ? (da * da) / (s->f14 * s->f14) : 0.0f;
-            float tb = s->f18 != 0.0f ? (db * db) / (s->f18 * s->f18) : 0.0f;
-            float tc = s->f1C != 0.0f ? (dc * dc) / (s->f1C * s->f1C) : 0.0f;
+            Basis_7908(shapeRec, axisDir, sideDir, cc);
+            float da = Dot_7908(axisDir, toListener);
+            float db = Dot_7908(sideDir, toListener);
+            float dc = Dot_7908(cc, toListener);
+            float ta = shapeRec->f14 != 0.0f ? (da * da) / (shapeRec->f14 * shapeRec->f14) : 0.0f;
+            float tb = shapeRec->f18 != 0.0f ? (db * db) / (shapeRec->f18 * shapeRec->f18) : 0.0f;
+            float tc = shapeRec->f1C != 0.0f ? (dc * dc) / (shapeRec->f1C * shapeRec->f1C) : 0.0f;
             dist = ta + tb + tc;
             if (dist < 1.0f) {
-                wtSet_7908(gWorldTriggerManager, e->obj, i, c, s->id, 1, wtCurve_7908(self, s->f2C, dist), pos);
+                wtSet_7908(gWorldTriggerManager, instAudio->obj, i, viewPort, shapeRec->id, 1, wtCurve_7908(self, shapeRec->f2C, dist), pos);
             }
             break;
         }
         case 2: {
-            pos = org + sVec3_2B6CF8(s->cx, s->cy, s->cz);
+            pos = org + sVec3_2B6CF8(shapeRec->cx, shapeRec->cy, shapeRec->cz);
             sVec3_2B6CF8 dir = sVec3_2B6CF8(listener->x, listener->y, listener->z) - pos;
             dist = __builtin_fabsf(wtSqrt_2B6F40(dir.x * dir.x + dir.y * dir.y + dir.z * dir.z));
-            if (dist < s->f14) {
+            if (dist < shapeRec->f14) {
                 dir *= 1.0f / dist;
-                float dot = Dot_7908(dir, sVec3_2B6CF8(s->f18, s->f1C, s->f20));
-                if (dot > s->f28) {
-                    v = wtCurve_7908(self, s->f24, dist / s->f14);
-                    float cone = Acos_7908(s->f28);
-                    v *= wtCurve_7908(self, s->f2C, Acos_7908(dot) / cone);
-                    wtSet_7908(gWorldTriggerManager, e->obj, i, c, s->id, 1, v, pos);
+                float dot = Dot_7908(dir, sVec3_2B6CF8(shapeRec->f18, shapeRec->f1C, shapeRec->f20));
+                if (dot > shapeRec->f28) {
+                    volume = wtCurve_7908(self, shapeRec->f24, dist / shapeRec->f14);
+                    float cone = Acos_7908(shapeRec->f28);
+                    volume *= wtCurve_7908(self, shapeRec->f2C, Acos_7908(dot) / cone);
+                    wtSet_7908(gWorldTriggerManager, instAudio->obj, i, viewPort, shapeRec->id, 1, volume, pos);
                 }
             }
             break;
         }
         case 3: {
-            pos = org + sVec3_2B6CF8(s->cx, s->cy, s->cz);
+            pos = org + sVec3_2B6CF8(shapeRec->cx, shapeRec->cy, shapeRec->cz);
             sV4_75D0 diff = Sub_75D0(*listener, sV4_75D0(pos.x, pos.y, pos.z, 0.0f));
             dist = __builtin_fabsf(Length_75D0(diff));
-            if (dist < s->f14) {
+            if (dist < shapeRec->f14) {
                 if (dist <= 0.9f) {
-                    v = 1.0f;
+                    volume = 1.0f;
                 } else {
-                    v = 1.0f - dist;
-                    v *= 10.0f;
+                    volume = 1.0f - dist;
+                    volume *= 10.0f;
                 }
-                wtSet_7908(gWorldTriggerManager, e->obj, i, c, s->id, 0, v, pos);
+                wtSet_7908(gWorldTriggerManager, instAudio->obj, i, viewPort, shapeRec->id, 0, volume, pos);
             }
             break;
         }

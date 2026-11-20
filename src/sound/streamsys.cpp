@@ -75,16 +75,16 @@ INCLUDE_ASM("sound/streamsys", func_002A9C00);
  *
  * Takes the level's volume control and volume (scaled by it and clamped to 0..127, as cStreamInstance_cStreamInstance
  * does), keeps @p mem as the buffer without owning it (+4 = 1) and opens the stream with SNDSTRM_create(.., @p n,
- * @p m, mem, size). func_002AA870 runs it.
+ * @p maxChunks, mem, size). func_002AA870 runs it.
  *
  * @param p  the play options (cBankManager + 0x1D8)
  * @param mem  the stream buffer
  * @param size  the buffer size
  * @param n  the maximum number of requests
- * @param m  the maximum number of chunks
+ * @param maxChunks  the maximum number of chunks
  * @return this
  */
-extern "C" sStreamInst_99D8* func_002A9C00(sStreamInst_99D8* self, sSsPlayer_99D8* p, char* mem, int size, int n, int m)
+extern "C" sStreamInst_99D8* func_002A9C00(sStreamInst_99D8* self, sSsPlayer_99D8* p, char* mem, int size, int n, int maxChunks)
 {
     self->scale = p->scales[p->cur];
     self->vol = curVol_99D8(p);
@@ -94,7 +94,7 @@ extern "C" sStreamInst_99D8* func_002A9C00(sStreamInst_99D8* self, sSsPlayer_99D
     }
     self->mem = mem;
     self->f4 = 1;
-    self->handle = SNDSTRM_create(&p->ents[p->cur], n, m, mem, size);
+    self->handle = SNDSTRM_create(&p->ents[p->cur], n, maxChunks, mem, size);
     return self;
 }
 #endif
@@ -183,13 +183,13 @@ extern "C" void func_003B7F60(int h, int a, int b);
 /**
  * Sets a stream's 3D position: azimuth and elevation (func_003B7F60, in a sound-driver critical section).
  *
- * @param a  the azimuth
- * @param b  the elevation
+ * @param azimuth  the azimuth
+ * @param elevation  the elevation
  */
-extern "C" void func_002A9ED8(void* self, int a, int b)
+extern "C" void func_002A9ED8(void* self, int azimuth, int elevation)
 {
     SNDSYS_entercritical();
-    func_003B7F60(*(int*)((char*)self + 0x8), a, b);
+    func_003B7F60(*(int*)((char*)self + 0x8), azimuth, elevation);
     SNDSYS_leavecritical();
 }
 #endif
@@ -307,18 +307,18 @@ int func_002AA068_impl(void* self, int a1, int* out) __asm__("func_002AA068");
  * Reads the status of a stream's current request: the stream status first (into @p out, or a local buffer), then
  * SNDSTRM_requeststatus of the request it names.
  *
- * @param a1  receives the request status (SNDREQUESTSTATUS)
+ * @param requestStatus  receives the request status (SNDREQUESTSTATUS)
  * @param out  receives the stream status, or 0
  * @return the driver's result
  */
-int func_002AA068_impl(void* self, int a1, int* out)
+int func_002AA068_impl(void* self, int requestStatus, int* out)
 {
     int buf[4];
     int* status = out ? out : buf;
     int result;
     func_002AA020(self, status);
     SNDSYS_entercritical();
-    result = SNDSTRM_requeststatus(status[1], a1);
+    result = SNDSTRM_requeststatus(status[1], requestStatus);
     SNDSYS_leavecritical();
     return result;
 }
@@ -601,16 +601,16 @@ INCLUDE_ASM("sound/streamsys", func_002AA398);
  * Queues a big-file element on the stream (by index, func_003E2CE0); 0 when no big file is set.
  *
  * @param holdTime  the hold time of the request
- * @param b  the element index in the big file
+ * @param element  the element index in the big file
  * @param off  the offset in the element
  * @return the request handle, or 0
  */
-extern "C" int func_002AA398(void* self, int holdTime, int b, int off)
+extern "C" int func_002AA398(void* self, int holdTime, int element, int off)
 {
     void* dec = *(void**)((char*)self + 0x74);
     if (dec != 0) {
         int n;
-        func_003E2CE0(dec, 0, b, &n, 0);
+        func_003E2CE0(dec, 0, element, &n, 0);
         return SNDSTRM_queuefile(*(int*)((char*)self + 0x8), holdTime, (int)((char*)self + 0x14), off + n);
     }
     return 0;
@@ -661,14 +661,14 @@ extern "C" int SNDSTRM_timemult(int, int);
  * Multiplies the stream's timing (SNDSTRM_timemult, in a critical section) and returns the driver's result.
  *
  * @param stream  this
- * @param arg1  the multiplier
+ * @param multAmount  the multiplier
  * @return the driver's result
  */
-extern "C" int func_002AA448(void *stream, int arg1) {
+extern "C" int func_002AA448(void *stream, int multAmount) {
     int result;
 
     SNDSYS_entercritical();
-    result = SNDSTRM_timemult((*(int *)((char*)(stream) + (8))), arg1);
+    result = SNDSTRM_timemult((*(int *)((char*)(stream) + (8))), multAmount);
     SNDSYS_leavecritical();
     return result;
 }
@@ -782,32 +782,32 @@ extern const sSsVtblBA648 D_004839B8_A648 __asm__("D_004839B8");
  * Without bit 1 (a base of a bigger object) the vtables are temporary copies with adjusted deltas.
  * cController__cController, cSSXAudio__cSSXAudio, cSpeechSys__cSpeechSys and func_002B3398 call it.
  *
- * @param p  the stream system
+ * @param streamSysObj  the stream system
  * @param flags  bit 1: destroy the virtual bases; bit 0: delete the object
  */
 // PORT: g++ 2.95 virtual-base destruction with stack vtable this-adjust fix-ups, written out by hand.
-extern "C" void func_002AA648(void* p, int flags)
+extern "C" void func_002AA648(void* streamSysObj, int flags)
 {
-    char* self = (char*)p;
+    char* self = (char*)streamSysObj;
     *(const sSsVtblAA648**)(*(char**)(*(char**)self + 0x1D8) + 4) = &D_00483998_A648;
     *(void***)(*(char**)self + 0xAB0) = cBankMonitor_vtbl;
     *(const sSsVtblBA648**)(*(char**)self + 0x1D4) = &D_004839B8_A648;
     if (flags == 0) {
-        sSsVtblAA648 t1 = D_00483998_A648;
-        *(sSsVtblAA648**)(*(char**)(*(char**)self + 0x1D8) + 4) = &t1;
+        sSsVtblAA648 soundSysVtbl = D_00483998_A648;
+        *(sSsVtblAA648**)(*(char**)(*(char**)self + 0x1D8) + 4) = &soundSysVtbl;
         char* base1 = *(char**)(*(char**)self + 0x1D8) - 0xC;
-        int d1 = self - base1;
-        t1.e[1].delta = D_00483998_A648.e[1].delta + d1;
-        sSsVtblBA648 t2 = D_004839B8_A648;
-        *(sSsVtblBA648**)(*(char**)self + 0x1D4) = &t2;
+        int soundSysDelta = self - base1;
+        soundSysVtbl.e[1].delta = D_00483998_A648.e[1].delta + soundSysDelta;
+        sSsVtblBA648 bankMgrVtbl = D_004839B8_A648;
+        *(sSsVtblBA648**)(*(char**)self + 0x1D4) = &bankMgrVtbl;
         char* base2 = *(char**)self - 0x14;
-        int d2 = self - base2;
-        t2.e[1].delta = D_004839B8_A648.e[1].delta + d2;
+        int bankMgrDelta = self - base2;
+        bankMgrVtbl.e[1].delta = D_004839B8_A648.e[1].delta + bankMgrDelta;
     }
     for (int i = 0; i < *(int*)(self + 4); i++) {
-        void* e = (*(void***)(self + 8))[i];
-        if (e != 0) {
-            func_002A9DF0(e, 3);
+        void* streamInst = (*(void***)(self + 8))[i];
+        if (streamInst != 0) {
+            func_002A9DF0(streamInst, 3);
         }
     }
     if (*(void**)(self + 8) != 0) {
@@ -861,13 +861,13 @@ extern "C" sStreamInst_99D8* func_002A9C00(sStreamInst_99D8* self, sSsPlayer_99D
  * @param mem  the stream buffer
  * @param size  the buffer size
  * @param n  the maximum number of requests
- * @param m  the maximum number of chunks
+ * @param maxChunks  the maximum number of chunks
  */
-extern "C" void func_002AA870(void* self, int idx, int heap, char* mem, int size, int n, int m)
+extern "C" void func_002AA870(void* self, int idx, int heap, char* mem, int size, int n, int maxChunks)
 {
     sStreamInst_99D8** slot = (sStreamInst_99D8**)((idx << 2) + *(int*)((char*)self + 0x8));
     void* obj = cMemMan_alloc(132, str_StreamBuffer, heap, 0);
-    *slot = func_002A9C00((sStreamInst_99D8*)obj, (sSsPlayer_99D8*)(*(char**)self + 0x1D8), mem, size, n, m);
+    *slot = func_002A9C00((sStreamInst_99D8*)obj, (sSsPlayer_99D8*)(*(char**)self + 0x1D8), mem, size, n, maxChunks);
 }
 #endif
 
@@ -917,37 +917,37 @@ struct sMgr_A910 {
  * Creates a stream with a volume control: pushes a play-option level with the defaults, sets its volume control,
  * creates the instance (func_002AA7F0) and pops the level.
  *
- * @param a1  the stream index
- * @param a2  the volume control (float*)
- * @param a3  the memory type
- * @param a4  the extra buffer space
+ * @param streamIndex  the stream index
+ * @param volControl  the volume control (float*)
+ * @param memType  the memory type
+ * @param buffSpace  the extra buffer space
  */
-extern "C" void func_002AA910(sMgr_A910** self, int a1, int a2, int a3, int a4)
+extern "C" void func_002AA910(sMgr_A910** self, int streamIndex, int volControl, int memType, int buffSpace)
 {
-    sMgr_A910* m = *self;
-    sStack_A910* st = &m->st;
-    m->st.depth++;
-    st->entries[m->st.depth] = m->st.cur;
-    m->st.flags[m->st.depth] = 0;
-    st->a34[m->st.depth] = 0;
-    st->a38[m->st.depth] = st->entries[m->st.depth].kind;
-    st->a3C[m->st.depth] = 0;
-    func_00416210((char*)st + m->st.depth * 8 + 0x40, 0, 8);
-    st->a60[m->st.depth] = 0;
-    st->a64[m->st.depth] = 0;
-    st->a68[m->st.depth] = 0;
-    st->a6C[m->st.depth] = 0;
-    st->a70[m->st.depth].b = 0;
-    st->a70[m->st.depth].a = 100;
-    st->a70[m->st.depth].c = 90;
-    st->a70[m->st.depth].d = 50;
-    st->a74[m->st.depth] = 0;
-    st->a80[m->st.depth] = 0;
-    st->a84[m->st.depth] = 0;
-    st->a78[m->st.depth] = 127;
-    st->a7C[m->st.depth] = 1;
-    (*self)->st.a3C[(*self)->st.depth] = a2;
-    func_002AA7F0(self, a1, a3, a4);
+    sMgr_A910* bankMgr = *self;
+    sStack_A910* st = &bankMgr->st;
+    bankMgr->st.depth++;
+    st->entries[bankMgr->st.depth] = bankMgr->st.cur;
+    bankMgr->st.flags[bankMgr->st.depth] = 0;
+    st->a34[bankMgr->st.depth] = 0;
+    st->a38[bankMgr->st.depth] = st->entries[bankMgr->st.depth].kind;
+    st->a3C[bankMgr->st.depth] = 0;
+    func_00416210((char*)st + bankMgr->st.depth * 8 + 0x40, 0, 8);
+    st->a60[bankMgr->st.depth] = 0;
+    st->a64[bankMgr->st.depth] = 0;
+    st->a68[bankMgr->st.depth] = 0;
+    st->a6C[bankMgr->st.depth] = 0;
+    st->a70[bankMgr->st.depth].b = 0;
+    st->a70[bankMgr->st.depth].a = 100;
+    st->a70[bankMgr->st.depth].c = 90;
+    st->a70[bankMgr->st.depth].d = 50;
+    st->a74[bankMgr->st.depth] = 0;
+    st->a80[bankMgr->st.depth] = 0;
+    st->a84[bankMgr->st.depth] = 0;
+    st->a78[bankMgr->st.depth] = 127;
+    st->a7C[bankMgr->st.depth] = 1;
+    (*self)->st.a3C[(*self)->st.depth] = volControl;
+    func_002AA7F0(self, streamIndex, memType, buffSpace);
     (*self)->st.depth--;
 }
 #endif
@@ -1084,15 +1084,15 @@ extern "C" int func_002AA398(void*, int, int, int);
  *
  * @param idx  the stream index
  * @param holdTime  the hold time
- * @param arg3  the element index
+ * @param element  the element index
  * @param offset  the offset in the element
  * @return the request handle, or -1
  */
-extern "C" int func_002AADC0(void* self, int idx, int holdTime, int arg3, int offset)
+extern "C" int func_002AADC0(void* self, int idx, int holdTime, int element, int offset)
 {
     void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
     if (stream != 0) {
-        return func_002AA398(stream, holdTime, arg3, offset);
+        return func_002AA398(stream, holdTime, element, offset);
     }
     return -1;
 }
@@ -1414,12 +1414,12 @@ extern "C" void SNDSTRM_modifyhold(int, int);
 /**
  * Monitor callback: releases the hold on the request whose handle the monitor carries (+0x1C); returns 1.
  *
- * @param arg1  the monitor instance
+ * @param monitorInst  the monitor instance
  * @return 1
  */
-extern "C" int func_002AB1A0(void* self, void* arg1)
+extern "C" int func_002AB1A0(void* self, void* monitorInst)
 {
-    SNDSTRM_modifyhold(*(int*)((char*)arg1 + 0x1C), 0);
+    SNDSTRM_modifyhold(*(int*)((char*)monitorInst + 0x1C), 0);
     return 1;
 }
 #endif
@@ -1432,13 +1432,13 @@ extern "C" int func_002AA448(void*, int);
  * Multiplies the timing of stream @p idx (func_002AA448); -1 without the stream.
  *
  * @param idx  the stream index
- * @param arg2  the multiplier
+ * @param multAmount  the multiplier
  * @return the driver's result, or -1
  */
-extern "C" int func_002AB1C8(void* self, int idx, int arg2)
+extern "C" int func_002AB1C8(void* self, int idx, int multAmount)
 {
     void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
-    return stream != 0 ? func_002AA448(stream, arg2) : -1;
+    return stream != 0 ? func_002AA448(stream, multAmount) : -1;
 }
 #endif
 
@@ -1483,13 +1483,13 @@ extern const sSsVtblCB200 D_004837A0_B200 __asm__("D_004837A0");
  * D_004838F8, D_00483870 and D_004837F8 are stored and +0x5720 is cleared.
  *
  * @param embedded  nonzero to also construct the virtual bases (the in-charge flag)
- * @param a2  the maximum number of banks
- * @param a3  the maximum number of streams
+ * @param maxBanks  the maximum number of banks
+ * @param maxStreams  the maximum number of streams
  * @param heap  the audio mode passed to the bases
  * @return this
  */
 // PORT: g++ 2.95 virtual-base construction with stack vtable this-adjust fix-ups, written out by hand.
-extern "C" char* func_002AB200(char* self, int embedded, int a2, int a3, int heap)
+extern "C" char* func_002AB200(char* self, int embedded, int maxBanks, int maxStreams, int heap)
 {
     if (embedded != 0) {
         *(char**)(self + 0x5560) = self + 0x6200;
@@ -1498,30 +1498,30 @@ extern "C" char* func_002AB200(char* self, int embedded, int a2, int a3, int hea
         *(char**)(self + 0x5908) = self + 0x5728;
         *(char**)(self + 0x118) = self + 0x6200;
         cSoundSys_cSoundSys(self + 0x5728, heap);
-        cBankManager_cBankManager(*(void**)(self + 0x6200), 0, a2, heap);
-        cStreamSys_cStreamSys(*(sStreamSysA490**)(self + 0x5560), 0, a2, a3, heap);
+        cBankManager_cBankManager(*(void**)(self + 0x6200), 0, maxBanks, heap);
+        cStreamSys_cStreamSys(*(sStreamSysA490**)(self + 0x5560), 0, maxBanks, maxStreams, heap);
     }
-    cCrowdSys_cCrowdSys(self, 0, a2, a3, heap);
-    func_002B28C0(self + 0x118, 0, a2, a3, heap);
-    cSpeechSys_cSpeechSys(self + 0x5560, 0, a2, a3, heap);
+    cCrowdSys_cCrowdSys(self, 0, maxBanks, maxStreams, heap);
+    func_002B28C0(self + 0x118, 0, maxBanks, maxStreams, heap);
+    cSpeechSys_cSpeechSys(self + 0x5560, 0, maxBanks, maxStreams, heap);
     *(const sSsVtblAB200**)(*(char**)(**(char***)(self + 0x118) + 0x1D8) + 4) = &D_004837D8_B200;
     *(const sSsVtblBB200**)(**(char***)(self + 0x118) + 0xAB0) = &D_00483760_B200;
     *(const sSsVtblCB200**)(**(char***)(self + 0x118) + 0x1D4) = &D_004837A0_B200;
     if (embedded == 0) {
-        sSsVtblAB200 t1 = D_004837D8_B200;
-        *(sSsVtblAB200**)(*(char**)(**(char***)(self + 0x118) + 0x1D8) + 4) = &t1;
+        sSsVtblAB200 soundSysVtbl = D_004837D8_B200;
+        *(sSsVtblAB200**)(*(char**)(**(char***)(self + 0x118) + 0x1D8) + 4) = &soundSysVtbl;
         char* base1 = *(char**)(**(char***)(self + 0x118) + 0x1D8) - 0x5728;
-        int d1 = self - base1;
-        t1.e[1].delta = D_004837D8_B200.e[1].delta + d1;
-        sSsVtblBB200 t2 = D_00483760_B200;
-        *(sSsVtblBB200**)(**(char***)(self + 0x118) + 0xAB0) = &t2;
+        int soundSysDelta = self - base1;
+        soundSysVtbl.e[1].delta = D_004837D8_B200.e[1].delta + soundSysDelta;
+        sSsVtblBB200 monitorVtbl = D_00483760_B200;
+        *(sSsVtblBB200**)(**(char***)(self + 0x118) + 0xAB0) = &monitorVtbl;
         char* base2 = **(char***)(self + 0x118) - 0x5730;
-        int d2 = self - base2;
-        t2.e[1].delta = D_00483760_B200.e[1].delta + d2;
-        t2.e[5].delta = D_00483760_B200.e[5].delta + d2;
-        sSsVtblCB200 t3 = D_004837A0_B200;
-        *(sSsVtblCB200**)(**(char***)(self + 0x118) + 0x1D4) = &t3;
-        t3.e[1].delta = D_004837A0_B200.e[1].delta + d2;
+        int bankMgrDelta = self - base2;
+        monitorVtbl.e[1].delta = D_00483760_B200.e[1].delta + bankMgrDelta;
+        monitorVtbl.e[5].delta = D_00483760_B200.e[5].delta + bankMgrDelta;
+        sSsVtblCB200 bankMgrVtbl = D_004837A0_B200;
+        *(sSsVtblCB200**)(**(char***)(self + 0x118) + 0x1D4) = &bankMgrVtbl;
+        bankMgrVtbl.e[1].delta = D_004837A0_B200.e[1].delta + bankMgrDelta;
     }
     *(void***)(self + 0x5558) = D_004838F8;
     *(void***)(self + 0x571C) = D_00483870;
@@ -1764,11 +1764,11 @@ struct sStrmVtEntF { short delta; short index; void (*fn)(void*, float); };
  * Updates the sound controller each frame: async loads, crowd, bank monitor, music, speech and streams.
  *
  * Runs cAsyncSys_ASYNCSYS_Update, func_002A6D18 (crowd), the bank monitor's vtable slot 5 (BANKMONITOR_Update) with
- * @p v, func_002B4388 (music), func_002B0C78 (speech) and func_002AAC28 (streams). func_00285BF8 calls it.
+ * @p frameTime, func_002B4388 (music), func_002B0C78 (speech) and func_002AAC28 (streams). func_00285BF8 calls it.
  *
- * @param v  the frame time
+ * @param frameTime  the frame time
  */
-extern "C" void func_002AB958(void* self, float v)
+extern "C" void func_002AB958(void* self, float frameTime)
 {
     char** sys = (char**)((char*)self + 0x118);
     cAsyncSys_ASYNCSYS_Update(*(void**)*sys);
@@ -1776,7 +1776,7 @@ extern "C" void func_002AB958(void* self, float v)
     char* bankMan = *(char**)*sys;
     char* bankMon = bankMan + 0x1D8;
     sStrmVtEntF* entry = &(*(sStrmVtEntF**)(bankMan + 0xAB0))[5];
-    entry->fn(bankMon + entry->delta, v);
+    entry->fn(bankMon + entry->delta, frameTime);
     func_002B4388(sys);
     func_002B0C78((char*)self + 0x5560);
     func_002AAC28(*sys);
@@ -2024,13 +2024,13 @@ INCLUDE_ASM("sound/streamsys", func_002ABCE8__FPvii);
 /**
  * Records a monitor instance's bank and patch (+0xC, +0x10).
  *
- * @param a1  the bank
- * @param a2  the patch
+ * @param bank  the bank
+ * @param patch  the patch
  */
-void func_002ABCE8(void* self, int a1, int a2)
+void func_002ABCE8(void* self, int bank, int patch)
 {
-    *(int*)((char*)self + 0xc) = a1;
-    *(int*)((char*)self + 0x10) = a2;
+    *(int*)((char*)self + 0xc) = bank;
+    *(int*)((char*)self + 0x10) = patch;
 }
 #endif
 
@@ -2042,15 +2042,15 @@ extern "C" char* strcpy(char* dst, const char* src);
 /**
  * Records a monitor instance's stream: the stream instance (+0xC), the file name (+0x10) and the offset (+0x50).
  *
- * @param a  the stream instance
+ * @param streamInst  the stream instance
  * @param name  the file name
- * @param b  the offset in the file
+ * @param fileOffset  the offset in the file
  */
-extern "C" void func_002ABCF8(void* self, int a, const char* name, int b)
+extern "C" void func_002ABCF8(void* self, int streamInst, const char* name, int fileOffset)
 {
-    *(int*)((char*)self + 0xC) = a;
+    *(int*)((char*)self + 0xC) = streamInst;
     strcpy((char*)self + 0x10, name);
-    *(int*)((char*)self + 0x50) = b;
+    *(int*)((char*)self + 0x50) = fileOffset;
 }
 #endif
 
@@ -2060,13 +2060,13 @@ INCLUDE_ASM("sound/streamsys", func_002ABD38__FPvii);
 /**
  * Records a monitor instance's MIDI sequence and bank (+0xC, +0x10).
  *
- * @param a1  the sequence data
- * @param a2  the bank
+ * @param midiData  the sequence data
+ * @param bank  the bank
  */
-void func_002ABD38(void* self, int a1, int a2)
+void func_002ABD38(void* self, int midiData, int bank)
 {
-    *(int*)((char*)self + 0xc) = a1;
-    *(int*)((char*)self + 0x10) = a2;
+    *(int*)((char*)self + 0xc) = midiData;
+    *(int*)((char*)self + 0x10) = bank;
 }
 #endif
 
@@ -2094,11 +2094,11 @@ public:
 extern "C" void func_002ABD48(void* self, func_002ABD48_cObj* obj)
 {
     char buf[0x20];
-    float d;
-    float d2 = obj->v06(self, buf);
+    float distance;
+    float distSq = obj->v06(self, buf);
     // PORT: sqrt.s (sqrtf without errno check)
-    __asm__("sqrt.s %0, %1" : "=f"(d) : "f"(d2));
-    *(float*)((char*)self + 0x5C) = d;
+    __asm__("sqrt.s %0, %1" : "=f"(distance) : "f"(distSq));
+    *(float*)((char*)self + 0x5C) = distance;
 }
 #endif
 

@@ -1951,28 +1951,28 @@ typedef int (*tBmSetE8C0)(void*, int);
  *
  * @param vself  the cSSXAudio
  * @param id  the music event id (a music state for the default case)
- * @param a2  nonzero to treat ids 19 and 20 as the transport end / start
+ * @param transportCall  nonzero to treat ids 19 and 20 as the transport end / start
  */
 // PORT: 64-bit long sound key
-extern "C" void func_0028E8C0(void* vself, int id, int a2)
+extern "C" void func_0028E8C0(void* vself, int id, int transportCall)
 {
     char* self = (char*)vself;
-    if (id == 19 && a2 != 0 && *(int*)(self + 0x627C) != 0) {
+    if (id == 19 && transportCall != 0 && *(int*)(self + 0x627C) != 0) {
         if (func_002A3FE8(self) != 0 && *(int*)(self + 0x578C) == 0) {
             if (func_0028D960(self)) {
                 cBE_getInterface_Fv(cBE_getBE(), 0);
                 int mode = D_00535C10[0];
                 if (mode != 5 && mode != 6) {
                     if (*(int*)(self + 0x6258) == 0) {
-                        char* p = **(char***)(self + 0x118) + 0x1D8;
+                        char* monitor = **(char***)(self + 0x118) + 0x1D8;
                         const sSndKey8_E8C0* key = D_004A3650_E8C0;
-                        int r = func_002B4908(self + 0x118);
-                        func_002ADCA0(p, 0, key->v, 0, 4, r, 0, 0);
+                        int sedValue = func_002B4908(self + 0x118);
+                        func_002ADCA0(monitor, 0, key->v, 0, 4, sedValue, 0, 0);
                     } else {
-                        char* p = **(char***)(self + 0x118) + 0x1D8;
+                        char* monitor = **(char***)(self + 0x118) + 0x1D8;
                         const sSndKey8_E8C0* key = D_004A3650_E8C0;
-                        int r = func_002B4908(self + 0x118);
-                        func_002ADCA0(p, 0, key->v, 0, 5, r, 0, 0);
+                        int sedValue = func_002B4908(self + 0x118);
+                        func_002ADCA0(monitor, 0, key->v, 0, 5, sedValue, 0, 0);
                     }
                     char* mon = self + 0x118;
                     sBmVtE8C0* vt = *(sBmVtE8C0**)(self + 0x5558);
@@ -1983,11 +1983,11 @@ extern "C" void func_0028E8C0(void* vself, int id, int a2)
             if (func_0028D960(self)) {
                 // NOTE: the target keeps this 1 in $s1 across five calls (a named local, not a literal).
                 int wantType = 1;
-                int t = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
+                int locationGroup = func_002A1E20(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cAudioInterface_getBE(), 0)));
                 if (*(int*)(self + 0x62B8) == 0) {
                     func_002B3D48(self + 0x118, 2.0f);
                 }
-                if (t == wantType) {
+                if (locationGroup == wantType) {
                     if (func_0028DEF0(self, 11)) {
                         func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 3000, D_004A3648_E8C0->v, 0, 0, 1, 0, 0);
                         func_002ADCA0(**(char***)(self + 0x118) + 0x1D8, 2500, D_004A3650_E8C0->v, 0, 0, 0, 0, 0);
@@ -2008,7 +2008,7 @@ extern "C" void func_0028E8C0(void* vself, int id, int a2)
         }
         *(int*)(self + 0x6258) = 0;
     } else if (id == 20) {
-        if (a2 != 0) {
+        if (transportCall != 0) {
             *(int*)(self + 0x6258) = 0;
             *(int*)(self + 0x577C) = 0;
             *(int*)(self + 0x6254) = 1;
@@ -2338,7 +2338,7 @@ extern "C" int func_002B3BC0(void* self, int v);
 extern "C" int func_0028F3C8(void* self, int code)
 {
     void* monitor = (char*)self + 0x118;
-    int r = func_002B3BC0(monitor, code);
+    int changed = func_002B3BC0(monitor, code);
     if (func_002B49E0(monitor) == -1) {
         if ((unsigned)(code - 10) < 2 || code == 18) {
             if (D_004A3620 == 1) {
@@ -2347,7 +2347,7 @@ extern "C" int func_0028F3C8(void* self, int code)
             *(int*)((char*)self + 0x530) = 0;
         }
     }
-    return r;
+    return changed;
 }
 #endif
 
@@ -2522,9 +2522,9 @@ extern "C" void func_0028FA98(void* self, float v);
  * with a 1 s fade (func_0028FA98) and, with a1 set in locations 17-21 (func_002A3F90), restarts the location music
  * (func_0028CF98(self, 0, 0, -1, 0)).
  *
- * @param a1  nonzero to restart the location music
+ * @param restartMusic  nonzero to restart the location music
  */
-extern "C" void func_0028F678(void* self, int a1)
+extern "C" void func_0028F678(void* self, int restartMusic)
 {
     if (*(int*)((char*)self + 0x6088) != 0) {
         cSSXAudio_ResumeSFX(self);
@@ -2532,7 +2532,7 @@ extern "C" void func_0028F678(void* self, int a1)
     }
     if (*(int*)((char*)self + 0x62A8) >= 0) {
         func_0028FA98(self, 1.0f);
-        if (a1 != 0 && func_002A3F90(self) != 0) {
+        if (restartMusic != 0 && func_002A3F90(self) != 0) {
             func_0028CF98(self, 0, 0, -1, 0);
         }
     }
@@ -2655,16 +2655,16 @@ static inline void bmPush_F768(sMgr_F768** self, int kind)
  * control 1 (func_00287968(1, 0)) and plays it with cBankSys_SFX_End. Called by the load screen and func_0028F5B8;
  * func_0028FA98 stops it.
  *
- * @param p  the cSSXAudio
+ * @param ssxAudio  the cSSXAudio
  */
-extern "C" void func_0028F768(void* p)
+extern "C" void func_0028F768(void* ssxAudio)
 {
-    sMgr_F768** self = (sMgr_F768**)p;
+    sMgr_F768** self = (sMgr_F768**)ssxAudio;
     bmPush_F768(self, 13);
-    sMgr_F768* m2 = **(sMgr_F768***)((char*)self + 0x118);
-    sStack_F768* st2 = &m2->st;
-    st2->a38[m2->st.depth] = 127;
-    st2->entries[m2->st.depth].kind = BM_MAX_F768(BM_MIN_F768(st2->a38[st2->depth], 127), 0);
+    sMgr_F768* bankManager = **(sMgr_F768***)((char*)self + 0x118);
+    sStack_F768* st2 = &bankManager->st;
+    st2->a38[bankManager->st.depth] = 127;
+    st2->entries[bankManager->st.depth].kind = BM_MAX_F768(BM_MIN_F768(st2->a38[st2->depth], 127), 0);
     sMgr_F768** pp = *(sMgr_F768***)((char*)self + 0x118);
     (*pp)->st.a3C[(*pp)->st.depth] = (int)func_00287968(self, 1, 0);
     *(int*)((char*)self + 0x62A8) = cBankSys_SFX_End(self);
@@ -2737,10 +2737,10 @@ extern "C" void func_0028FAE0(char* self)
         func_002B3AC0(self + 0x118);
         func_0028D488(self);
         func_0028CF98(self, 0, 0, -1, 0);
-        char* p = **(char***)(self + 0x118) + 0x1D8;
+        char* bankMonitor = **(char***)(self + 0x118) + 0x1D8;
         const sBmKeyFAE0* key = D_004A3650_FAE0;
-        int v = func_002B4908(self + 0x118);
-        func_002ADCA0_FAE0(p, 3000, key->v, 0, 4, v, 0, 0);
+        int sedValue = func_002B4908(self + 0x118);
+        func_002ADCA0_FAE0(bankMonitor, 3000, key->v, 0, 4, sedValue, 0, 0);
     }
 }
 #endif

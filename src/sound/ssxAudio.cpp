@@ -474,83 +474,83 @@ struct sSnd54F8Mgr {
 /**
  * Plays a speech file from a stream at a position (or 2D) and registers the voice with the bank monitor.
  *
- * Starts stream @p a1 on the file @p a2 at @p a3 (func_002AAD78 with the hold time @p a5); a negative handle is
- * returned as is. Then pushes a play-option level with the defaults, sets the 3D radius (func_002A9988): @p f when
- * above 0, else 29.997713 for a human speaker and 100 otherwise, stores @p a6 as the voice's user pointer and, with a
- * position @p a4, follows it on the closest view (func_00288940). In the multiplayer game path a human speaker's voice
- * is panned to its side @p a8 (two-player pan). The handle goes to cBankMonitor_BANKMONITOR_Create(.., 0x7F, type 3)
+ * Starts stream @p streamIndex on the file @p fileName at @p fileOffset (func_002AAD78 with the hold time @p holdTime); a negative handle is
+ * returned as is. Then pushes a play-option level with the defaults, sets the 3D radius (func_002A9988): @p radius when
+ * above 0, else 29.997713 for a human speaker and 100 otherwise, stores @p userInfo as the voice's user pointer and, with a
+ * position @p position, follows it on the closest view (func_00288940). In the multiplayer game path a human speaker's voice
+ * is panned to its side @p viewport (two-player pan). The handle goes to cBankMonitor_BANKMONITOR_Create(.., 0x7F, type 3)
  * and func_002ABCF8 records the stream's slot, file and offset on the instance; the level is popped. It fills slot 1 of
  * cSSXAudio's cSpeechSys vtable (D_004836D8; pure virtual in cSpeechSys), which func_002B04D8 calls to start a speech
  * line.
  *
  * @param vself  the audio system
- * @param a1  the stream index
- * @param a2  the file name (the speech .big path)
- * @param a3  the offset of the line in the file
- * @param a4  the speaker's position (t4Vector*), or 0 for none
- * @param a5  the stream hold time
- * @param a6  the user pointer stored on the voice (the request's identity)
- * @param a7  nonzero when the speaker is a human rider
- * @param f  the 3D radius, or 0 for the default
- * @param a8  the speaker's view (two-player side)
+ * @param streamIndex  the stream index
+ * @param fileName  the file name (the speech .big path)
+ * @param fileOffset  the offset of the line in the file
+ * @param position  the speaker's position (t4Vector*), or 0 for none
+ * @param holdTime  the stream hold time
+ * @param userInfo  the user pointer stored on the voice (the request's identity)
+ * @param isHuman  nonzero when the speaker is a human rider
+ * @param radius  the 3D radius, or 0 for the default
+ * @param viewport  the speaker's view (two-player side)
  * @return the stream voice handle, or a negative value on failure
  */
-extern "C" int func_002854F8(cSSXAudio* vself, int a1, const char* a2, int a3, int a4, int a5, int a6, int a7, float f, int a8)
+extern "C" int func_002854F8(cSSXAudio* vself, int streamIndex, const char* fileName, int fileOffset, int position, int holdTime, int userInfo, int isHuman, float radius, int viewport)
 {
     cSSXAudio* self = vself;
     // PORT: a2 (a name pointer) is passed through func_002AAD78 as an int
-    int r = func_002AAD78(((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys), a1, a5, (int)a2, a3);
-    if (r < 0) {
-        return r;
+    int voiceHandle = func_002AAD78(((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys), streamIndex, holdTime, (int)fileName, fileOffset);
+    if (voiceHandle < 0) {
+        return voiceHandle;
     }
-    sSnd54F8Mgr* m = *((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys);
-    sSnd54F8Sub* s = &m->sub;
-    m->sub.cur++;
-    s->ch[m->sub.cur] = m->sub.def;
-    m->sub.tgt[m->sub.cur] = 0;
-    s->p34[m->sub.cur] = 0;
-    s->vals[m->sub.cur] = s->ch[m->sub.cur].vol;
-    s->p3C[m->sub.cur] = 0;
-    func_00416210((char*)s + m->sub.cur * 8 + 0x40, 0, 8);
-    s->p60[m->sub.cur] = 0;
-    s->p64[m->sub.cur] = 0;
-    s->p68[m->sub.cur] = 0.0f;
-    s->p6C[m->sub.cur] = 0.0f;
-    s->p70[m->sub.cur].f4 = 0;
-    s->p70[m->sub.cur].f0 = 100;
-    s->p70[m->sub.cur].f8 = 90;
-    s->p70[m->sub.cur].fC = 50;
-    s->p74[m->sub.cur] = 0;
-    s->p80[m->sub.cur] = 0;
-    s->p84[m->sub.cur] = 0;
-    s->p78[m->sub.cur] = 0x7F;
-    s->p7C[m->sub.cur] = 1;
-    if (f <= 0.0f) {
-        if (a7 != 0) {
+    sSnd54F8Mgr* bankMgr = *((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys);
+    sSnd54F8Sub* playOpts = &bankMgr->sub;
+    bankMgr->sub.cur++;
+    playOpts->ch[bankMgr->sub.cur] = bankMgr->sub.def;
+    bankMgr->sub.tgt[bankMgr->sub.cur] = 0;
+    playOpts->p34[bankMgr->sub.cur] = 0;
+    playOpts->vals[bankMgr->sub.cur] = playOpts->ch[bankMgr->sub.cur].vol;
+    playOpts->p3C[bankMgr->sub.cur] = 0;
+    func_00416210((char*)playOpts + bankMgr->sub.cur * 8 + 0x40, 0, 8);
+    playOpts->p60[bankMgr->sub.cur] = 0;
+    playOpts->p64[bankMgr->sub.cur] = 0;
+    playOpts->p68[bankMgr->sub.cur] = 0.0f;
+    playOpts->p6C[bankMgr->sub.cur] = 0.0f;
+    playOpts->p70[bankMgr->sub.cur].f4 = 0;
+    playOpts->p70[bankMgr->sub.cur].f0 = 100;
+    playOpts->p70[bankMgr->sub.cur].f8 = 90;
+    playOpts->p70[bankMgr->sub.cur].fC = 50;
+    playOpts->p74[bankMgr->sub.cur] = 0;
+    playOpts->p80[bankMgr->sub.cur] = 0;
+    playOpts->p84[bankMgr->sub.cur] = 0;
+    playOpts->p78[bankMgr->sub.cur] = 0x7F;
+    playOpts->p7C[bankMgr->sub.cur] = 1;
+    if (radius <= 0.0f) {
+        if (isHuman != 0) {
             func_002A9988(&(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub, 29.997713088989258f, -1.0f);
         } else {
             func_002A9988(&(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub, 100.0f, -1.0f);
         }
     } else {
-        func_002A9988(&(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub, f, -1.0f);
+        func_002A9988(&(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub, radius, -1.0f);
     }
-    (*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.p60[(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.cur] = a6;
-    if (a4 != 0) {
-        (*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.tgt[(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.cur] = a4;
+    (*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.p60[(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.cur] = userInfo;
+    if (position != 0) {
+        (*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.tgt[(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.cur] = position;
         sSnd54F8Mgr** pp = ((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys);
-        int v = func_00288940(self, a4);
-        (*pp)->sub.p64[(*pp)->sub.cur] = v;
+        int closestView = func_00288940(self, position);
+        (*pp)->sub.p64[(*pp)->sub.cur] = closestView;
     }
-    if (cBE_getInterface_Fv(cBE_getBE(), 0) != 0 && D_00535C11[0] == 2 && a7 != 0 && cSSXAudio_ReplayMode(self) == 0) {
+    if (cBE_getInterface_Fv(cBE_getBE(), 0) != 0 && D_00535C11[0] == 2 && isHuman != 0 && cSSXAudio_ReplayMode(self) == 0) {
         (*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.p80[(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.cur] = 1;
-        (*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.p84[(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.cur] = a8;
+        (*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.p84[(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.cur] = viewport;
     }
-    void* bm = cBankMonitor_BANKMONITOR_Create(&(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub, r, 0x7F, 3);
+    void* bm = cBankMonitor_BANKMONITOR_Create(&(*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub, voiceHandle, 0x7F, 3);
     if (bm != 0) {
-        func_002ABCF8(bm, func_002AB188(((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys), a1), a2, a3);
+        func_002ABCF8(bm, func_002AB188(((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys), streamIndex), fileName, fileOffset);
     }
     (*((sSnd54F8Mgr**)self->MusicSys.mpVStreamSys))->sub.cur--;
-    return r;
+    return voiceHandle;
 }
 #endif
 
@@ -2742,17 +2742,17 @@ extern "C" void func_002887F8(sSaMix87F8* self)
     self->dirty = 0;
     for (int i = 0; i < 11; i++) {
         if (self->delta[i] == 0.0f) continue;
-        float v = self->cur[i] + self->delta[i];
-        self->cur[i] = v;
+        float mixValue = self->cur[i] + self->delta[i];
+        self->cur[i] = mixValue;
         if (self->delta[i] < 0.0f) {
-            if (v <= self->target[i]) {
+            if (mixValue <= self->target[i]) {
                 self->cur[i] = self->target[i];
                 self->delta[i] = 0.0f;
             } else {
                 self->dirty = 1;
             }
         } else {
-            if (self->target[i] <= v) {
+            if (self->target[i] <= mixValue) {
                 self->cur[i] = self->target[i];
                 self->delta[i] = 0.0f;
             } else {
@@ -2761,18 +2761,18 @@ extern "C" void func_002887F8(sSaMix87F8* self)
         }
         self->chan[i][1] = self->chan[i][0] * self->cur[i];
     }
-    sSaMixOut87F8* o = (sSaMixOut87F8*)self;
-    float m = o->master;
-    o->out[0] = m * D_004A352C;
-    o->out[1] = m * D_004A3530;
-    o->out[2] = m * D_004A3534;
-    o->out[3] = m * D_004A3538;
-    o->out[4] = m * D_004A353C;
-    o->out[5] = m * D_004A3540;
-    o->out[6] = m * D_004A3544;
-    o->out[7] = m * D_004A3548;
-    o->out[8] = m * D_004A354C;
-    o->out[9] = m * D_004A3550;
+    sSaMixOut87F8* mixOut = (sSaMixOut87F8*)self;
+    float charLevel = mixOut->master;
+    mixOut->out[0] = charLevel * D_004A352C;
+    mixOut->out[1] = charLevel * D_004A3530;
+    mixOut->out[2] = charLevel * D_004A3534;
+    mixOut->out[3] = charLevel * D_004A3538;
+    mixOut->out[4] = charLevel * D_004A353C;
+    mixOut->out[5] = charLevel * D_004A3540;
+    mixOut->out[6] = charLevel * D_004A3544;
+    mixOut->out[7] = charLevel * D_004A3548;
+    mixOut->out[8] = charLevel * D_004A354C;
+    mixOut->out[9] = charLevel * D_004A3550;
 }
 #endif
 
@@ -3886,13 +3886,13 @@ INCLUDE_ASM("sound/ssxAudio", func_00289D08);
  *
  * cSSXApp_initload uses it.
  *
- * @param a1  the options' sound mode
+ * @param beMode  the options' sound mode
  * @return the driver mode (eSOUNDDEF_MODE)
  */
-extern "C" int func_00289D08(void* self, unsigned char a1)
+extern "C" int func_00289D08(void* self, unsigned char beMode)
 {
     int result = 1;
-    switch (a1) {
+    switch (beMode) {
     case 0:
         break;
     case 1:
@@ -3915,13 +3915,13 @@ INCLUDE_ASM("sound/ssxAudio", func_00289D60);
 /**
  * Converts the sound driver's mode to the options' sound mode: 1 gives 0, 2 gives 1, 0 gives 2, 3 gives 3.
  *
- * @param a1  the driver mode (eSOUNDDEF_MODE)
+ * @param audioMode  the driver mode (eSOUNDDEF_MODE)
  * @return the options' sound mode
  */
-extern "C" void* func_00289D60(void* self, int a1)
+extern "C" void* func_00289D60(void* self, int audioMode)
 {
     int result = 0;
-    switch (a1) {
+    switch (audioMode) {
     case 1:
         break;
     case 2:
@@ -4026,73 +4026,73 @@ struct sAsync289DF0 {
  */
 extern "C" void func_00289DF0(void* self, int flush)
 {
-    sAsync289DF0* s = (sAsync289DF0*)self;
+    sAsync289DF0* asyncSys = (sAsync289DF0*)self;
     int id = -1;
     {
-        sRing289DF0* q = &s->q18C;
-        if (s->q18C.head != s->q18C.tail) {
-            int v = q->data[q->tail];
-            if (++s->q18C.tail >= s->q18C.size)
-                s->q18C.tail = 0;
-            id = v;
+        sRing289DF0* queue = &asyncSys->q18C;
+        if (asyncSys->q18C.head != asyncSys->q18C.tail) {
+            int frontValue = queue->data[queue->tail];
+            if (++asyncSys->q18C.tail >= asyncSys->q18C.size)
+                asyncSys->q18C.tail = 0;
+            id = frontValue;
         }
     }
     int slot;
     {
-        sRing289DF0* q = &s->q19C;
-        if (s->q19C.head == s->q19C.tail) {
+        sRing289DF0* queue = &asyncSys->q19C;
+        if (asyncSys->q19C.head == asyncSys->q19C.tail) {
             slot = -1;
         } else {
-            int v = q->data[q->tail];
-            if (++s->q19C.tail >= s->q19C.size)
-                s->q19C.tail = 0;
-            slot = v;
+            int frontValue = queue->data[queue->tail];
+            if (++asyncSys->q19C.tail >= asyncSys->q19C.size)
+                asyncSys->q19C.tail = 0;
+            slot = frontValue;
         }
     }
     int kind;
     {
-        sRing289DF0* q = &s->q1AC;
-        if (s->q1AC.head == s->q1AC.tail) {
+        sRing289DF0* queue = &asyncSys->q1AC;
+        if (asyncSys->q1AC.head == asyncSys->q1AC.tail) {
             kind = -1;
         } else {
-            int v = q->data[q->tail];
-            if (++s->q1AC.tail >= s->q1AC.size)
-                s->q1AC.tail = 0;
-            kind = v;
+            int frontValue = queue->data[queue->tail];
+            if (++asyncSys->q1AC.tail >= asyncSys->q1AC.size)
+                asyncSys->q1AC.tail = 0;
+            kind = frontValue;
         }
     }
     {
-        sRing289DF0* q = &s->q1BC;
-        if (s->q1BC.head != s->q1BC.tail) {
-            int v = q->data[q->tail];
-            if (++s->q1BC.tail >= s->q1BC.size)
-                s->q1BC.tail = 0;
+        sRing289DF0* queue = &asyncSys->q1BC;
+        if (asyncSys->q1BC.head != asyncSys->q1BC.tail) {
+            int frontValue = queue->data[queue->tail];
+            if (++asyncSys->q1BC.tail >= asyncSys->q1BC.size)
+                asyncSys->q1BC.tail = 0;
         }
     }
-    if (s->busy) {
+    if (asyncSys->busy) {
         switch (kind) {
         case 0:
         case 2: {
-            int r = ASYNCFILE_cancel(s->handle);
-            ASYNCFILE_release(s->handle, 0, 0);
-            s->v05(id, -1, r == 1 ? 1 : 2, s->names[slot], 0, 0);
-            s->busy = 0;
+            int cancelResult = ASYNCFILE_cancel(asyncSys->handle);
+            ASYNCFILE_release(asyncSys->handle, 0, 0);
+            asyncSys->v05(id, -1, cancelResult == 1 ? 1 : 2, asyncSys->names[slot], 0, 0);
+            asyncSys->busy = 0;
             break;
         }
         case 1: {
-            int r = ASYNCFILE_cancel(s->handle);
-            ASYNCFILE_release(s->handle, 0, 0);
-            s->v05(id, -1, r == 1 ? 1 : 2, s->names[slot], 0, 0);
-            s->busy = 0;
+            int cancelResult = ASYNCFILE_cancel(asyncSys->handle);
+            ASYNCFILE_release(asyncSys->handle, 0, 0);
+            asyncSys->v05(id, -1, cancelResult == 1 ? 1 : 2, asyncSys->names[slot], 0, 0);
+            asyncSys->busy = 0;
             break;
         }
         }
     }
     if (flush) {
-        s->q18C.tail = s->q18C.head;
-        s->q19C.tail = s->q19C.head;
-        s->q1AC.tail = s->q1AC.head;
-        s->q1BC.tail = s->q1BC.head;
+        asyncSys->q18C.tail = asyncSys->q18C.head;
+        asyncSys->q19C.tail = asyncSys->q19C.head;
+        asyncSys->q1AC.tail = asyncSys->q1AC.head;
+        asyncSys->q1BC.tail = asyncSys->q1BC.head;
     }
     cAsyncSys_ASYNCSYS_StartLoad(self);
 }

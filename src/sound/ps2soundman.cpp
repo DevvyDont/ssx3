@@ -169,11 +169,11 @@ extern "C" void func_002A97C0(char* self, int flags)
 {
     *(const sSmVtbl97C0**)(*(char**)self + 4) = &D_00483BE0;
     if (flags == 0) {
-        sSmVtbl97C0 t1 = D_00483BE0;
-        *(sSmVtbl97C0**)(*(char**)self + 4) = &t1;
+        sSmVtbl97C0 vtableCopy = D_00483BE0;
+        *(sSmVtbl97C0**)(*(char**)self + 4) = &vtableCopy;
         char* base = *(char**)self - 0x88;
-        int d = self - base;
-        t1.e[1].delta = D_00483BE0.e[1].delta + d;
+        int thisDelta = self - base;
+        vtableCopy.e[1].delta = D_00483BE0.e[1].delta + thisDelta;
     }
     if (*(void**)(self + 0x20) != 0) {
         cMemMan_free(*(void**)(self + 0x20));

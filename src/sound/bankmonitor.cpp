@@ -1378,16 +1378,16 @@ extern char str_pathxSND[];
  *
  * func_002AE048 installs MEM_alloc as the hook.
  *
- * @param a  the size in bytes
+ * @param size  the size in bytes
  * @return the block, or 0 when no hook is installed
  */
-extern "C" void* func_002ADFC8(int a)
+extern "C" void* func_002ADFC8(int size)
 {
-    void* r = 0;
+    void* block = 0;
     if (D_004A378C != 0) {
-        r = D_004A378C(str_pathxSND, a, 0);
+        block = D_004A378C(str_pathxSND, size, 0);
     }
-    return r;
+    return block;
 }
 #endif
 
@@ -1547,12 +1547,12 @@ INCLUDE_ASM("sound/bankmonitor", func_002AE188);
  *
  * func_002AE690 calls it when it closes a slot.
  *
- * @param p  the slot memory to forget
+ * @param slotMemory  the slot memory to forget
  */
-extern "C" void func_002AE188(void* p)
+extern "C" void func_002AE188(void* slotMemory)
 {
     for (int i = 0; i < 24; i++) {
-        if (D_004D3E98[i] == p) {
+        if (D_004D3E98[i] == slotMemory) {
             D_004D3E98[i] = 0;
         }
     }
@@ -1622,17 +1622,17 @@ extern sBankSlot_2AE230 D_004D3EF8_2AE230[24] __asm__("D_004D3EF8");
  */
 extern "C" int func_002AE230(int bank, int id)
 {
-    sBankSlot_2AE230* s = D_004D3EF8_2AE230;
-    for (int i = 0; i < 24; i++, s++) {
+    sBankSlot_2AE230* record = D_004D3EF8_2AE230;
+    for (int i = 0; i < 24; i++, record++) {
         if (bank < 0) {
-            if (s->bank < 0) {
+            if (record->bank < 0) {
                 // the do/while(0) wrapper (a compiled-out macro block) is needed to match register allocation
                 do {
                     return i;
                 } while (0);
             }
-        } else if (s->bank == bank) {
-            if (id < 0 || s->id == id)
+        } else if (record->bank == bank) {
+            if (id < 0 || record->id == id)
                 return i;
         }
     }
@@ -1680,22 +1680,22 @@ extern "C" int func_002AE230(int a, int b);
  * the bank index (+0x0) and the bank handle (+0x4). Called by the Pathfinder library (func_003D2DF8), which first
  * evicts the oldest bank (func_002AE3A8) when memory runs short.
  *
- * @param a  the player-slot index
- * @param unused  the bank's name (passed by the library, not used)
- * @param b  the bank index within the slot
- * @param c  the loaded bank handle
+ * @param slotIndex  the player-slot index
+ * @param bankName  the bank's name (passed by the library, not used)
+ * @param bankIndex  the bank index within the slot
+ * @param bankHandle  the loaded bank handle
  * @return c, or -13 when no record is free
  */
-extern "C" int func_002AE298(int a, int unused, int b, int c)
+extern "C" int func_002AE298(int slotIndex, int bankName, int bankIndex, int bankHandle)
 {
-    int i = func_002AE230(a, b);
+    int i = func_002AE230(slotIndex, bankIndex);
     if (i >= 0 || (i = func_002AE230(-1, -1)) >= 0) {
-        sBankMonSlot28v* e = &D_004D3EF8_v[i];
-        e->f1C = 1;
-        e->f8 = a;
-        e->f0 = b;
-        e->f4 = c;
-        return c;
+        sBankMonSlot28v* record = &D_004D3EF8_v[i];
+        record->f1C = 1;
+        record->f8 = slotIndex;
+        record->f0 = bankIndex;
+        record->f4 = bankHandle;
+        return bankHandle;
     }
     return -13;
 }
@@ -1727,26 +1727,26 @@ extern "C" int SNDbankremove(int id);
  * +0x24 = -1, +0x1C = 0). Quirk: it passes -1 to SNDbankremove, not the record's handle. Called by func_002AE3A8 and
  * the Pathfinder library (func_003D3140).
  *
- * @param a  the player-slot index
- * @param b  the bank index within the slot
+ * @param slotIndex  the player-slot index
+ * @param bankIndex  the bank index within the slot
  * @return 0, or -1 when no record matches
  */
-extern "C" int func_002AE328(int a, int b)
+extern "C" int func_002AE328(int slotIndex, int bankIndex)
 {
     int none = -1;
-    int i = func_002AE230(a, b);
+    int i = func_002AE230(slotIndex, bankIndex);
     if (i < 0) {
         return -1;
     }
-    sBankMonSlot28* e = &D_004D3EF8[i];
-    if (e->f4 >= 0) {
+    sBankMonSlot28* record = &D_004D3EF8[i];
+    if (record->f4 >= 0) {
         SNDbankremove(-1);
-        e->f14 = 0;
-        e->f4 = none;
-        e->f8 = none;
-        e->f0 = none;
-        e->f1C = 0;
-        e->f24 = none;
+        record->f14 = 0;
+        record->f4 = none;
+        record->f8 = none;
+        record->f0 = none;
+        record->f1C = 0;
+        record->f24 = none;
     }
     return 0;
 }
@@ -1766,20 +1766,20 @@ extern "C" int func_002AE328(int a, int b);
  * non-negative play time (+0x24, set by func_002AE7A8 from func_002AF370), then unregisters it with func_002AE328.
  * Called by the Pathfinder library (func_003D2DF8) before it registers a new bank.
  *
- * @param a  the player-slot index
+ * @param slotIndex  the player-slot index
  * @return 0 when no bank has a play time, otherwise func_002AE328's result
  */
-extern "C" int func_002AE3A8(int a)
+extern "C" int func_002AE3A8(int slotIndex)
 {
     int best = 0x7FFFFFF;
     int bestIdx = -1;
     int i = 0;
     sBankMonSlot28* tbl = D_004D3EF8;
     int id;
-    while (i < 24 && (id = func_002AE230(a, i)) >= 0) {
-        int t = tbl[id].f24;
-        if (t >= 0 && t < best) {
-            best = t;
+    while (i < 24 && (id = func_002AE230(slotIndex, i)) >= 0) {
+        int playTime = tbl[id].f24;
+        if (playTime >= 0 && playTime < best) {
+            best = playTime;
             bestIdx = i;
         }
         i++;
@@ -1787,7 +1787,7 @@ extern "C" int func_002AE3A8(int a)
     if (bestIdx == -1) {
         return 0;
     }
-    return func_002AE328(a, bestIdx);
+    return func_002AE328(slotIndex, bestIdx);
 }
 #endif
 
@@ -1804,14 +1804,14 @@ extern "C" int SNDSTRM_overhead(int n, int m);
  * (func_003D3058).
  *
  * @param n  the number of queued requests
- * @param m  the packet-player chunk count (0 for a bank-only slot)
+ * @param maxChunks  the packet-player chunk count (0 for a bank-only slot)
  * @return the size in bytes
  */
-extern "C" int func_002AE478(int n, int m)
+extern "C" int func_002AE478(int n, int maxChunks)
 {
     int size = n * 0xC + 0x70;
-    if (m > 0) {
-        size += SNDSTRM_overhead(n, m);
+    if (maxChunks > 0) {
+        size += SNDSTRM_overhead(n, maxChunks);
     }
     return size + (0x10 - (size & 0xF));
 }
@@ -1842,12 +1842,12 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
  * @param name  the player name (11 characters kept)
  * @param desc  play options to copy, or 0 for the defaults
  * @param count  the number of queued requests
- * @param m  the packet-player chunk count; 0 makes a bank player
+ * @param maxChunks  the packet-player chunk count; 0 makes a bank player
  * @param mem  the memory for the slot (func_002AE478 bytes)
  * @param size  its size in bytes
  * @return the slot index, -13 when none is free, or SNDSTRM_create's error
  */
-extern "C" int func_002AE4C0(char* name, sBankDesc_2AE4C0* desc, int count, int m, char* mem, int size)
+extern "C" int func_002AE4C0(char* name, sBankDesc_2AE4C0* desc, int count, int maxChunks, char* mem, int size)
 {
     int slot = func_002AE1B8();
     if (slot < 0)
@@ -1855,30 +1855,30 @@ extern "C" int func_002AE4C0(char* name, sBankDesc_2AE4C0* desc, int count, int 
     D_004D3E98[slot] = mem;
     mem += 0x70;
     func_002AE138(D_004D3E98[slot]);
-    char* b = (char*)D_004D3E98[slot];
-    *(char**)(b + 0x6C) = mem;
+    char* slotData = (char*)D_004D3E98[slot];
+    *(char**)(slotData + 0x6C) = mem;
     mem = count * 12 + mem;
-    int off = mem - b;
+    int off = mem - slotData;
     mem = mem + (0x10 - off % 16);
-    size -= mem - b;
+    size -= mem - slotData;
     int i;
     for (i = 0; i < count; i++)
-        (*(sBankEnt_2AE4C0**)(b + 0x6C))[i].f4 = -1;
+        (*(sBankEnt_2AE4C0**)(slotData + 0x6C))[i].f4 = -1;
     if (desc)
-        *(sBankDesc_2AE4C0*)(b + 0x30) = *desc;
+        *(sBankDesc_2AE4C0*)(slotData + 0x30) = *desc;
     else
-        SNDplaysetdef(b + 0x30);
-    *(char*)(b + 0x35) = 0;
-    sprintf(b + 0x1C, str_pct_s_c, 11, name);
-    if (m > 0)
-        *(int*)(b + 0x0) = SNDSTRM_create(b + 0x30, count, m, mem, size);
+        SNDplaysetdef(slotData + 0x30);
+    *(char*)(slotData + 0x35) = 0;
+    sprintf(slotData + 0x1C, str_pct_s_c, 11, name);
+    if (maxChunks > 0)
+        *(int*)(slotData + 0x0) = SNDSTRM_create(slotData + 0x30, count, maxChunks, mem, size);
     else
-        *(char*)(b + 0x64) = 1;
-    if (*(int*)(b + 0x0) < 0 && *(signed char*)(b + 0x64) == 0)
-        return *(int*)(b + 0x0);
-    *(char*)(b + 0x66) = count;
-    *(int*)(b + 0x14) = 0x7F;
-    *(int*)(b + 0x10) = 0;
+        *(char*)(slotData + 0x64) = 1;
+    if (*(int*)(slotData + 0x0) < 0 && *(signed char*)(slotData + 0x64) == 0)
+        return *(int*)(slotData + 0x0);
+    *(char*)(slotData + 0x66) = count;
+    *(int*)(slotData + 0x14) = 0x7F;
+    *(int*)(slotData + 0x10) = 0;
     return slot;
 }
 #endif
@@ -1900,21 +1900,21 @@ extern "C" void SNDSTRM_destroy(int id);
  */
 extern "C" void func_002AE690(int idx)
 {
-    void* m = D_004D3E98[idx];
-    if (*(signed char*)((char*)m + 0x64) != 0) {
+    void* slotData = D_004D3E98[idx];
+    if (*(signed char*)((char*)slotData + 0x64) != 0) {
         int id = func_002AE230(idx, -1);
         while (id >= 0) {
-            sBankMonSlot28* e = &D_004D3EF8[id];
-            if (D_004A3794 != 0 && e->f14 != 0) {
-                D_004A3794((void*)e->f14);
+            sBankMonSlot28* record = &D_004D3EF8[id];
+            if (D_004A3794 != 0 && record->f14 != 0) {
+                D_004A3794((void*)record->f14);
             }
-            func_002AE1F0((int*)e);
+            func_002AE1F0((int*)record);
             id = func_002AE230(idx, -1);
         }
     } else {
-        SNDSTRM_destroy(*(int*)m);
+        SNDSTRM_destroy(*(int*)slotData);
     }
-    func_002AE188(m);
+    func_002AE188(slotData);
 }
 #endif
 
@@ -1928,16 +1928,16 @@ INCLUDE_ASM("sound/bankmonitor", func_002AE768);
  * memory (func_003B7E10) instead of the file. Called by the Pathfinder library (func_003D30A8).
  *
  * @param idx  the player-slot index
- * @param a1  the preloaded data
- * @param a2  its size in bytes
+ * @param preloadData  the preloaded data
+ * @param preloadSize  its size in bytes
  */
-extern "C" void func_002AE768(unsigned int idx, int a1, int a2)
+extern "C" void func_002AE768(unsigned int idx, int preloadData, int preloadSize)
 {
     if (idx < 24) {
-        void* m = D_004D3E98[idx];
-        if (m != 0 && *(signed char*)((char*)m + 0x64) == 0) {
-            *(int*)((char*)m + 0x28) = a1;
-            *(int*)((char*)m + 0x2c) = a2;
+        void* slotData = D_004D3E98[idx];
+        if (slotData != 0 && *(signed char*)((char*)slotData + 0x64) == 0) {
+            *(int*)((char*)slotData + 0x28) = preloadData;
+            *(int*)((char*)slotData + 0x2c) = preloadSize;
         }
     }
 }
@@ -1973,75 +1973,75 @@ extern "C" int func_003B7E10(int h, int a, int b, unsigned int t);
  * handle and a4. Both paths set the dirty byte (+0x65). Called by the Pathfinder library (func_003D41A8).
  *
  * @param idx  the player-slot index
- * @param a1  the hold time for a queued file (ms; -1 holds)
- * @param a2  the file name to queue
+ * @param holdTime  the hold time for a queued file (ms; -1 holds)
+ * @param fileName  the file name to queue
  * @param key  bank << 16 | patch for a bank player, or the file offset in 128-byte units for a stream
- * @param a4  the request's length, kept in its table entry (+0x0)
+ * @param requestLength  the request's length, kept in its table entry (+0x0)
  * @param vol  a new volume, or < 0 to keep it
- * @param a6  added to the patch number (bank player)
- * @param a7  nonzero to purge the stream first
+ * @param patchOffset  added to the patch number (bank player)
+ * @param purgeFirst  nonzero to purge the stream first
  * @return the sound or request handle, or a negative error
  */
-extern "C" int func_002AE7A8(int idx, int a1, int a2, unsigned int key, int a4, signed char vol, int a6, int a7)
+extern "C" int func_002AE7A8(int idx, int holdTime, int fileName, unsigned int key, int requestLength, signed char vol, int patchOffset, int purgeFirst)
 {
-    int h = -1;
+    int bankHandle = -1;
     // NOTE: retail rematerialises `li v0,1` right before each 0x65 store (after unrelated loads):
     // a function-scope local set early whose pseudo gets no callee-saved register (all nine are taken),
     // so reload re-creates the constant at each use.
     signed char dirty = 1;
-    char* m = (char*)D_004D3E98[idx];
+    char* slotData = (char*)D_004D3E98[idx];
     if (vol >= 0)
     {
-        *(signed char*)(m + 0x30) = vol;
+        *(signed char*)(slotData + 0x30) = vol;
         func_002AF6C0(idx, vol);
     }
-    int r;
-    if (*(signed char*)(m + 0x64) != 0)
+    int playHandle;
+    if (*(signed char*)(slotData + 0x64) != 0)
     {
-        if (a6 <= h)
-            a6 = 0;
-        int s = func_002AE230(idx, key >> 16);
-        if (s >= 0)
-            h = D_004D3EF8[s].f4;
-        if (h < 0)
+        if (patchOffset <= bankHandle)
+            patchOffset = 0;
+        int bankRecord = func_002AE230(idx, key >> 16);
+        if (bankRecord >= 0)
+            bankHandle = D_004D3EF8[bankRecord].f4;
+        if (bankHandle < 0)
             return -1;
-        *(int*)(m + 4) = (key & 0xFFFF) + a6 - 1;
+        *(int*)(slotData + 4) = (key & 0xFFFF) + patchOffset - 1;
         SNDSYS_entercritical();
-        r = SNDBANK_play(h, *(int*)(m + 4), m + 0x30);
+        playHandle = SNDBANK_play(bankHandle, *(int*)(slotData + 4), slotData + 0x30);
         SNDSYS_leavecritical();
-        D_004D3EF8[s].f24 = func_002AF370_r();
-        *(int*)(m + 0) = h;
-        (*(sBankEnt_2AE7A8**)(m + 0x6C))[0].f4 = r;
-        (*(sBankEnt_2AE7A8**)(m + 0x6C))[0].f0 = a4;
-        *(signed char*)(m + 0x65) = dirty;
+        D_004D3EF8[bankRecord].f24 = func_002AF370_r();
+        *(int*)(slotData + 0) = bankHandle;
+        (*(sBankEnt_2AE7A8**)(slotData + 0x6C))[0].f4 = playHandle;
+        (*(sBankEnt_2AE7A8**)(slotData + 0x6C))[0].f0 = requestLength;
+        *(signed char*)(slotData + 0x65) = dirty;
     }
     else
     {
-        unsigned int t = key << 7;
+        unsigned int fileOffset = key << 7;
         int j;
-        if (a7)
+        if (purgeFirst)
         {
-            SNDSTRM_purge_r(*(int*)(m + 0));
-            for (j = *(signed char*)(m + 0x66) - 1; j > 0; j--)
+            SNDSTRM_purge_r(*(int*)(slotData + 0));
+            for (j = *(signed char*)(slotData + 0x66) - 1; j > 0; j--)
             {
-                (*(sBankEnt_2AE7A8**)(m + 0x6C))[j - 1].f4 = -1;
-                (*(sBankEnt_2AE7A8**)(m + 0x6C))[j - 1].f0 = -1;
+                (*(sBankEnt_2AE7A8**)(slotData + 0x6C))[j - 1].f4 = -1;
+                (*(sBankEnt_2AE7A8**)(slotData + 0x6C))[j - 1].f0 = -1;
             }
         }
-        if (*(int*)(m + 0x28) && t < *(unsigned int*)(m + 0x2C))
-            r = func_003B7E10(*(int*)(m + 0), a1, *(int*)(m + 0x28), t);
+        if (*(int*)(slotData + 0x28) && fileOffset < *(unsigned int*)(slotData + 0x2C))
+            playHandle = func_003B7E10(*(int*)(slotData + 0), holdTime, *(int*)(slotData + 0x28), fileOffset);
         else
-            r = SNDSTRM_queuefile(*(int*)(m + 0), a1, a2, t);
-        if (r >= 0)
+            playHandle = SNDSTRM_queuefile(*(int*)(slotData + 0), holdTime, fileName, fileOffset);
+        if (playHandle >= 0)
         {
-            for (j = *(signed char*)(m + 0x66) - 1; j > 0; j--)
-                (*(sBankEnt_2AE7A8**)(m + 0x6C))[j] = (*(sBankEnt_2AE7A8**)(m + 0x6C))[j - 1];
-            (*(sBankEnt_2AE7A8**)(m + 0x6C))[0].f4 = r;
-            (*(sBankEnt_2AE7A8**)(m + 0x6C))[0].f0 = a4;
+            for (j = *(signed char*)(slotData + 0x66) - 1; j > 0; j--)
+                (*(sBankEnt_2AE7A8**)(slotData + 0x6C))[j] = (*(sBankEnt_2AE7A8**)(slotData + 0x6C))[j - 1];
+            (*(sBankEnt_2AE7A8**)(slotData + 0x6C))[0].f4 = playHandle;
+            (*(sBankEnt_2AE7A8**)(slotData + 0x6C))[0].f0 = requestLength;
         }
-        *(signed char*)(m + 0x65) = dirty;
+        *(signed char*)(slotData + 0x65) = dirty;
     }
-    return r;
+    return playHandle;
 }
 #endif
 
@@ -2060,9 +2060,9 @@ extern "C" void SNDSTRM_modifyhold(void*);
  */
 extern "C" void func_002AE9F8(int i)
 {
-    void* p = D_004D3E98[i];
-    if (*(signed char*)((char*)p + 0x64) == 0) {
-        SNDSTRM_modifyhold(*(void**)((char*)*(void**)((char*)p + 0x6C) + 0x4));
+    void* slotData = D_004D3E98[i];
+    if (*(signed char*)((char*)slotData + 0x64) == 0) {
+        SNDSTRM_modifyhold(*(void**)((char*)*(void**)((char*)slotData + 0x6C) + 0x4));
     }
 }
 #endif
@@ -2082,9 +2082,9 @@ extern "C" void func_002AEFA8(int a0);
  */
 extern "C" int func_002AEA38(int idx)
 {
-    void* p = D_004D3E98[idx];
-    if (p != 0) {
-        if (*(char*)((char*)p + 0x65) != 0) {
+    void* slotData = D_004D3E98[idx];
+    if (slotData != 0) {
+        if (*(char*)((char*)slotData + 0x65) != 0) {
             func_002AEFA8(0);
         }
     }
@@ -2111,16 +2111,16 @@ struct sMonEntC { int f0; int f4; int f8; };
  */
 extern "C" int func_002AEAA8(int idx, int sub)
 {
-    void* m = D_004D3E98[idx];
-    if (m != 0 && *(signed char*)((char*)m + 0x65) != 0) {
+    void* slotData = D_004D3E98[idx];
+    if (slotData != 0 && *(signed char*)((char*)slotData + 0x65) != 0) {
         func_002AEFA8(0);
     }
     if (sub < 0) {
-        return *(int*)((char*)m + 0x54);
+        return *(int*)((char*)slotData + 0x54);
     }
-    if (sub < *(signed char*)((char*)m + 0x66)) {
-        if ((*(sMonEntC**)((char*)m + 0x6C))[sub].f4 >= 0) {
-            return (*(sMonEntC**)((char*)m + 0x6C))[sub].f8;
+    if (sub < *(signed char*)((char*)slotData + 0x66)) {
+        if ((*(sMonEntC**)((char*)slotData + 0x6C))[sub].f4 >= 0) {
+            return (*(sMonEntC**)((char*)slotData + 0x6C))[sub].f8;
         }
         return -8;
     }
@@ -2152,9 +2152,9 @@ extern "C" int func_002AEB40(int idx, int key)
         func_002AEFA8(0);
     }
     for (int i = 0; i < *(signed char*)((char*)ch + 0x66); i++) {
-        sEntryEB40* e = &(*(sEntryEB40**)((char*)ch + 0x6C))[i];
-        if (e->key == key) {
-            return e->value;
+        sEntryEB40* request = &(*(sEntryEB40**)((char*)ch + 0x6C))[i];
+        if (request->key == key) {
+            return request->value;
         }
     }
     return -8;
@@ -2199,11 +2199,11 @@ INCLUDE_ASM("sound/bankmonitor", func_002AEC28);
  */
 extern "C" int func_002AEC28(int idx)
 {
-    void* m = D_004D3E98[idx];
-    if (m == 0) {
+    void* slotData = D_004D3E98[idx];
+    if (slotData == 0) {
         return -8;
     }
-    *(char*)((char*)m + 0x65) = 1;
+    *(char*)((char*)slotData + 0x65) = 1;
     return 1;
 }
 #endif
@@ -2290,61 +2290,61 @@ struct sStrmHdr_EC58 {
 // PORT: the end of this function stores the out-pointers themselves into the slot (as in the original)
 extern "C" int func_002AEC58(int idx, int* outA, int* outB)
 {
-    sMonSlot_EC58* m = (sMonSlot_EC58*)D_004D3E98[idx];
+    sMonSlot_EC58* slotData = (sMonSlot_EC58*)D_004D3E98[idx];
     *outA = 0;
     *outB = 0;
-    if (m == 0) {
+    if (slotData == 0) {
         return -1;
     }
-    int f60 = -8;
-    m->busy = 1;
-    if (m->h < 0) {
+    int statusResult = -8;
+    slotData->busy = 1;
+    if (slotData->h < 0) {
         return -2;
     }
-    m->dirty = 1;
+    slotData->dirty = 1;
     SNDSYS_entercritical();
     sStrmInfo_EC58 info;
     sStrmState_EC58 st;
     sStrmHdr_EC58 hdr;
     char buf[0x70];
     sStrmPos_EC58 pos;
-    if (m->isMem != 0) {
-        if (m->sub >= 0 && m->subs->id >= 0) {
-            f60 = func_003B6670(m->h, m->sub, &hdr, buf, &pos.samples);
-            if (f60 >= 0) {
-                *outB = SNDtimeremaining(m->subs->id);
+    if (slotData->isMem != 0) {
+        if (slotData->sub >= 0 && slotData->subs->id >= 0) {
+            statusResult = func_003B6670(slotData->h, slotData->sub, &hdr, buf, &pos.samples);
+            if (statusResult >= 0) {
+                *outB = SNDtimeremaining(slotData->subs->id);
                 if (*outB < 0) {
                     *outB = 0;
-                    m->subs->id = -1;
+                    slotData->subs->id = -1;
                     goto done;
                 }
                 *outB *= 10;
                 *outA = (int)((float)pos.samples / (float)hdr.rate * 1000.0f) - *outB;
             }
-            m->subs->pos = *outB;
-            m->f50 = m->subs->size;
-            m->status = func_003B86C0(m->subs->id);
-            m->f5C = m->subs->id;
+            slotData->subs->pos = *outB;
+            slotData->f50 = slotData->subs->size;
+            slotData->status = func_003B86C0(slotData->subs->id);
+            slotData->f5C = slotData->subs->id;
         }
     } else {
-        f60 = SNDSTRM_status(m->h, &info);
-        m->f50 = 0;
-        if (info.count >= m->count) {
-            m->busy = 0;
+        statusResult = SNDSTRM_status(slotData->h, &info);
+        slotData->f50 = 0;
+        if (info.count >= slotData->count) {
+            slotData->busy = 0;
         }
-        for (int j = 0; j < m->count; j++) {
-            m->subs[j].pos = 0;
-            if (m->subs[j].id < 0) {
+        for (int j = 0; j < slotData->count; j++) {
+            slotData->subs[j].pos = 0;
+            if (slotData->subs[j].id < 0) {
                 continue;
             }
-            SNDSTRM_requeststatus(m->subs[j].id, (int)&st);
+            SNDSTRM_requeststatus(slotData->subs[j].id, (int)&st);
             switch (st.state) {
             case 1:
-                m->subs[j].pos = m->subs[j].size;
-                m->f54 += m->subs[j].size;
-                m->f50 += st.c;
-                m->busy = 0;
-                m->f5C = m->subs[j].id;
+                slotData->subs[j].pos = slotData->subs[j].size;
+                slotData->f54 += slotData->subs[j].size;
+                slotData->f50 += st.c;
+                slotData->busy = 0;
+                slotData->f5C = slotData->subs[j].id;
                 break;
             case 0:
             case 2:
@@ -2352,28 +2352,28 @@ extern "C" int func_002AEC58(int idx, int* outA, int* outB)
                 *outB = st.b;
                 if (outA == 0 && outB == 0) {
                     *outA = 0;
-                    *outB = m->subs[j].size;
+                    *outB = slotData->subs[j].size;
                 }
-                m->subs[j].pos = *outB;
-                m->f54 += *outB;
-                m->f50 += st.c;
+                slotData->subs[j].pos = *outB;
+                slotData->f54 += *outB;
+                slotData->f50 += st.c;
                 if (st.c < st.b) {
-                    m->busy = 0;
+                    slotData->busy = 0;
                 }
-                m->f5C = m->subs[j].id;
+                slotData->f5C = slotData->subs[j].id;
                 break;
             default:
-                m->subs[j].id = -1;
+                slotData->subs[j].id = -1;
                 break;
             }
         }
-        m->status = func_003B7F18(m->h);
+        slotData->status = func_003B7F18(slotData->h);
     }
 done:
-    m->f48 = (int)outA;
-    m->f4C = (int)outB;
-    m->f60 = f60;
-    m->dirty = 0;
+    slotData->f48 = (int)outA;
+    slotData->f4C = (int)outB;
+    slotData->f60 = statusResult;
+    slotData->dirty = 0;
     SNDSYS_leavecritical();
     return 0;
 }
@@ -2460,92 +2460,92 @@ extern "C" void func_002AEFA8(int reset)
 {
     SNDSYS_entercritical();
     for (int i = 0; i < 24; i++) {
-        sMonSlot_EFA8* m = (sMonSlot_EFA8*)D_004D3E98[i];
-        if (m == 0) {
+        sMonSlot_EFA8* slotData = (sMonSlot_EFA8*)D_004D3E98[i];
+        if (slotData == 0) {
             continue;
         }
         if (reset != 0) {
-            m->f60 = 0;
-            m->dirty = 1;
+            slotData->f60 = 0;
+            slotData->dirty = 1;
             continue;
         }
         int f60 = -8;
-        int f48 = 0;
+        int elapsedMs = 0;
         int f4C = 0;
-        m->busy = 1;
-        if (m->h >= 0) {
+        slotData->busy = 1;
+        if (slotData->h >= 0) {
             sStrmInfo_EFA8 info;
             sStrmState_EFA8 st;
             sStrmHdr_EFA8 hdr;
             char buf[0x70];
             sStrmPos_EFA8 pos;
-            if (m->isMem != 0) {
-                if (m->sub >= 0 && m->subs->id >= 0) {
-                    f60 = func_003B6670(m->h, m->sub, &hdr, buf, &pos.samples);
+            if (slotData->isMem != 0) {
+                if (slotData->sub >= 0 && slotData->subs->id >= 0) {
+                    f60 = func_003B6670(slotData->h, slotData->sub, &hdr, buf, &pos.samples);
                     if (f60 >= 0) {
-                        f4C = SNDtimeremaining(m->subs->id);
+                        f4C = SNDtimeremaining(slotData->subs->id);
                         if (f4C < 0) {
                             f4C = 0;
-                            m->subs->id = -1;
+                            slotData->subs->id = -1;
                             goto done;
                         }
                         f4C *= 10;
-                        f48 = (int)((float)pos.samples / (float)hdr.rate * 1000.0f) - f4C;
+                        elapsedMs = (int)((float)pos.samples / (float)hdr.rate * 1000.0f) - f4C;
                     }
-                    m->subs->pos = f4C;
-                    m->f50 = m->subs->size;
-                    m->status = func_003B86C0(m->subs->id);
-                    m->f5C = m->subs->id;
+                    slotData->subs->pos = f4C;
+                    slotData->f50 = slotData->subs->size;
+                    slotData->status = func_003B86C0(slotData->subs->id);
+                    slotData->f5C = slotData->subs->id;
                 }
             } else {
-                f60 = SNDSTRM_status(m->h, &info);
-                m->f50 = 0;
-                if (info.count >= m->count) {
-                    m->busy = 0;
+                f60 = SNDSTRM_status(slotData->h, &info);
+                slotData->f50 = 0;
+                if (info.count >= slotData->count) {
+                    slotData->busy = 0;
                 }
-                for (int j = 0; j < m->count; j++) {
-                    m->subs[j].pos = 0;
-                    if (m->subs[j].id < 0) {
+                for (int j = 0; j < slotData->count; j++) {
+                    slotData->subs[j].pos = 0;
+                    if (slotData->subs[j].id < 0) {
                         continue;
                     }
-                    SNDSTRM_requeststatus(m->subs[j].id, (int)&st);
+                    SNDSTRM_requeststatus(slotData->subs[j].id, (int)&st);
                     switch (st.state) {
                     case 1:
-                        m->subs[j].pos = m->subs[j].size;
-                        m->f54 += m->subs[j].size;
-                        m->f50 += st.c;
-                        m->busy = 0;
-                        m->f5C = m->subs[j].id;
+                        slotData->subs[j].pos = slotData->subs[j].size;
+                        slotData->f54 += slotData->subs[j].size;
+                        slotData->f50 += st.c;
+                        slotData->busy = 0;
+                        slotData->f5C = slotData->subs[j].id;
                         break;
                     case 0:
                     case 2:
-                        f48 = st.a;
+                        elapsedMs = st.a;
                         f4C = st.b;
-                        if (f48 == 0 && f4C == 0) {
-                            f48 = f4C;
-                            f4C = m->subs[j].size;
+                        if (elapsedMs == 0 && f4C == 0) {
+                            elapsedMs = f4C;
+                            f4C = slotData->subs[j].size;
                         }
-                        m->subs[j].pos = f4C;
-                        m->f54 += f4C;
-                        m->f50 += st.c;
+                        slotData->subs[j].pos = f4C;
+                        slotData->f54 += f4C;
+                        slotData->f50 += st.c;
                         if (st.c < st.b) {
-                            m->busy = 0;
+                            slotData->busy = 0;
                         }
-                        m->f5C = m->subs[j].id;
+                        slotData->f5C = slotData->subs[j].id;
                         break;
                     default:
-                        m->subs[j].id = -1;
+                        slotData->subs[j].id = -1;
                         break;
                     }
                 }
-                m->status = func_003B7F18(m->h);
+                slotData->status = func_003B7F18(slotData->h);
             }
         }
     done:
-        m->f48 = f48;
-        m->f4C = f4C;
-        m->f60 = f60;
-        m->dirty = 0;
+        slotData->f48 = elapsedMs;
+        slotData->f4C = f4C;
+        slotData->f60 = f60;
+        slotData->dirty = 0;
     }
     SNDSYS_leavecritical();
 }
@@ -2562,25 +2562,25 @@ extern "C" void func_002AEFA8(int a0);
  * Called by the Pathfinder library (func_003D11B8).
  *
  * @param idx  the player-slot index
- * @param a  receives the elapsed time (slot +0x48)
- * @param b  receives the remaining time (slot +0x4C)
+ * @param elapsedOut  receives the elapsed time (slot +0x48)
+ * @param remainingOut  receives the remaining time (slot +0x4C)
  * @return the status result (+0x60) when nonzero, else the current handle (+0x5C); -8 for an unused slot
  */
-extern "C" int func_002AF2F0(int idx, int* a, int* b)
+extern "C" int func_002AF2F0(int idx, int* elapsedOut, int* remainingOut)
 {
-    void* m = D_004D3E98[idx];
-    if (m == 0) {
+    void* slotData = D_004D3E98[idx];
+    if (slotData == 0) {
         return -8;
     }
-    if (*(signed char*)((char*)m + 0x65) != 0) {
+    if (*(signed char*)((char*)slotData + 0x65) != 0) {
         func_002AEFA8(0);
     }
-    *a = *(int*)((char*)m + 0x48);
-    *b = *(int*)((char*)m + 0x4C);
-    if (*(int*)((char*)m + 0x60) != 0) {
-        return *(int*)((char*)m + 0x60);
+    *elapsedOut = *(int*)((char*)slotData + 0x48);
+    *remainingOut = *(int*)((char*)slotData + 0x4C);
+    if (*(int*)((char*)slotData + 0x60) != 0) {
+        return *(int*)((char*)slotData + 0x60);
     }
-    return *(int*)((char*)m + 0x5C);
+    return *(int*)((char*)slotData + 0x5C);
 }
 #endif
 
@@ -2609,13 +2609,13 @@ INCLUDE_ASM("sound/bankmonitor", func_002AF3B8);
 /**
  * Returns a bank player slot's current bank handle (slot +0x0), or -1 for an unused slot or a stream.
  *
- * @param arg0  the player-slot index
+ * @param slotIndex  the player-slot index
  * @return the handle, or -1
  */
-extern "C" int func_002AF3B8(int arg0) {
+extern "C" int func_002AF3B8(int slotIndex) {
     void *temp_4;
 
-    temp_4 = D_004D3E98[arg0];
+    temp_4 = D_004D3E98[slotIndex];
     if ((temp_4 != 0) && ((*(signed char *)((char*)(temp_4) + (0x64))) != 0)) {
         return (*(int *)((char*)(temp_4) + (0)));
     }
@@ -2628,13 +2628,13 @@ INCLUDE_ASM("sound/bankmonitor", func_002AF3F0);
 /**
  * Returns a stream player slot's stream handle (slot +0x0), or -1 for an unused slot or a bank player.
  *
- * @param arg0  the player-slot index
+ * @param slotIndex  the player-slot index
  * @return the handle, or -1
  */
-extern "C" int func_002AF3F0(int arg0) {
+extern "C" int func_002AF3F0(int slotIndex) {
     void *temp_4;
 
-    temp_4 = D_004D3E98[arg0];
+    temp_4 = D_004D3E98[slotIndex];
     if ((temp_4 != 0) && ((*(signed char *)((char*)(temp_4) + (0x64))) == 0)) {
         return (*(int *)((char*)(temp_4) + (0)));
     }
@@ -2678,9 +2678,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002AF480);
  */
 extern "C" int func_002AF480(int idx)
 {
-    void* m = D_004D3E98[idx];
-    if (m != 0) {
-        return *(int*)((char*)m + 0x14);
+    void* slotData = D_004D3E98[idx];
+    if (slotData != 0) {
+        return *(int*)((char*)slotData + 0x14);
     }
     return -8;
 }
@@ -2697,9 +2697,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002AF4B0);
  */
 extern "C" int func_002AF4B0(int idx)
 {
-    void* m = D_004D3E98[idx];
-    if (m != 0) {
-        return *(int*)((char*)m + 0x10);
+    void* slotData = D_004D3E98[idx];
+    if (slotData != 0) {
+        return *(int*)((char*)slotData + 0x10);
     }
     return -8;
 }
@@ -2720,25 +2720,25 @@ extern "C" int func_003B88C8(void* h, int a, int b);
  * (func_003D5CC0) with bus 0.
  *
  * @param idx  the player-slot index
- * @param a  the effect bus
- * @param b  the send level
+ * @param effectBus  the effect bus
+ * @param sendLevel  the send level
  * @return the driver call's result, or -8 for an unused slot
  */
-extern "C" int func_002AF4E0(int idx, int a, int b)
+extern "C" int func_002AF4E0(int idx, int effectBus, int sendLevel)
 {
-    void* m = D_004D3E98[idx];
-    int r = -8;
-    if (m != 0) {
+    void* slotData = D_004D3E98[idx];
+    int result = -8;
+    if (slotData != 0) {
         SNDSYS_entercritical();
-        if (*(signed char*)((char*)m + 0x64) != 0) {
-            r = func_003B88C8(*(void**)m, a, b);
+        if (*(signed char*)((char*)slotData + 0x64) != 0) {
+            result = func_003B88C8(*(void**)slotData, effectBus, sendLevel);
         } else {
-            r = func_003B8050(*(void**)m, a, b);
+            result = func_003B8050(*(void**)slotData, effectBus, sendLevel);
         }
         SNDSYS_leavecritical();
-        *(int*)((char*)m + 0x10) = b;
+        *(int*)((char*)slotData + 0x10) = sendLevel;
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -2757,24 +2757,24 @@ extern "C" int func_003B8700(void* h, int a);
  * (func_003D5EE8).
  *
  * @param idx  the player-slot index
- * @param a  the dry level
+ * @param dryLevel  the dry level
  * @return the driver call's result, or -8 for an unused slot
  */
-extern "C" int func_002AF580(int idx, int a)
+extern "C" int func_002AF580(int idx, int dryLevel)
 {
-    void* m = D_004D3E98[idx];
-    int r = -8;
-    if (m != 0) {
+    void* slotData = D_004D3E98[idx];
+    int result = -8;
+    if (slotData != 0) {
         SNDSYS_entercritical();
-        if (*(signed char*)((char*)m + 0x64) != 0) {
-            r = func_003B8700(*(void**)m, a);
+        if (*(signed char*)((char*)slotData + 0x64) != 0) {
+            result = func_003B8700(*(void**)slotData, dryLevel);
         } else {
-            r = func_003B8010(*(void**)m, a);
+            result = func_003B8010(*(void**)slotData, dryLevel);
         }
         SNDSYS_leavecritical();
-        *(int*)((char*)m + 0x14) = a;
+        *(int*)((char*)slotData + 0x14) = dryLevel;
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -2795,26 +2795,26 @@ int func_003B7EB0_r(int h, int v, int c) __asm__("func_003B7EB0");
  * Pathfinder library (func_003D6318).
  *
  * @param idx  the player-slot index
- * @param c  the target volume
- * @param v  the fade time in ms
+ * @param targetVolume  the target volume
+ * @param fadeMs  the fade time in ms
  * @param busy  nonzero to do nothing
  * @return the driver call's result, or 0
  */
-extern "C" int func_002AF608(int idx, int c, int v, char busy)
+extern "C" int func_002AF608(int idx, int targetVolume, int fadeMs, char busy)
 {
-    void* m = D_004D3E98[idx];
-    int r = 0;
+    void* slotData = D_004D3E98[idx];
+    int driverResult = 0;
     if (busy == 0) {
         SNDSYS_entercritical();
-        *(int*)((char*)m + 0x8) = c;
-        if (*(signed char*)((char*)m + 0x64) != 0) {
-            r = SNDautovol(*(int*)((char*)*(void**)((char*)m + 0x6C) + 0x4), v / 10, c);
+        *(int*)((char*)slotData + 0x8) = targetVolume;
+        if (*(signed char*)((char*)slotData + 0x64) != 0) {
+            driverResult = SNDautovol(*(int*)((char*)*(void**)((char*)slotData + 0x6C) + 0x4), fadeMs / 10, targetVolume);
         } else {
-            r = func_003B7EB0_r(*(int*)m, v, c);
+            driverResult = func_003B7EB0_r(*(int*)slotData, fadeMs, targetVolume);
         }
         SNDSYS_leavecritical();
     }
-    return r;
+    return driverResult;
 }
 #endif
 
@@ -2837,34 +2837,34 @@ extern "C" void func_003B7E70(int h, int v);
  * stores it. A pending fade makes it return -8. Called by func_002AE7A8 and the Pathfinder library.
  *
  * @param idx  the player-slot index
- * @param v  the new volume
+ * @param volume  the new volume
  * @return 0, or -8 while a fade is pending
  */
-extern "C" int func_002AF6C0(int idx, int v)
+extern "C" int func_002AF6C0(int idx, int volume)
 {
-    void* m = D_004D3E98[idx];
-    int r = 0;
+    void* slotData = D_004D3E98[idx];
+    int result = 0;
     if (*(int*)((char*)cAudioInterface_bxAudio() + 0x6280) == 0) return 0;
-    if (*(signed char*)((char*)m + 0x65) != 0) {
+    if (*(signed char*)((char*)slotData + 0x65) != 0) {
         func_002AEFA8(0);
     }
-    int cur = *(int*)((char*)m + 0xC);
-    if (*(int*)((char*)m + 0x8) < 0 || *(int*)((char*)m + 0x8) == cur) {
-        *(int*)((char*)m + 0x8) = -1;
-        if (cur != v && v >= 0 && cur >= 0) {
+    int cur = *(int*)((char*)slotData + 0xC);
+    if (*(int*)((char*)slotData + 0x8) < 0 || *(int*)((char*)slotData + 0x8) == cur) {
+        *(int*)((char*)slotData + 0x8) = -1;
+        if (cur != volume && volume >= 0 && cur >= 0) {
             SNDSYS_entercritical();
-            if (*(signed char*)((char*)m + 0x64) != 0) {
-                SNDvol(*(int*)((char*)*(void**)((char*)m + 0x6C) + 0x4), v);
+            if (*(signed char*)((char*)slotData + 0x64) != 0) {
+                SNDvol(*(int*)((char*)*(void**)((char*)slotData + 0x6C) + 0x4), volume);
             } else {
-                func_003B7E70(*(int*)m, v);
+                func_003B7E70(*(int*)slotData, volume);
             }
             SNDSYS_leavecritical();
-            *(int*)((char*)m + 0xC) = v;
+            *(int*)((char*)slotData + 0xC) = volume;
         }
     } else {
-        r = -8;
+        result = -8;
     }
-    return r;
+    return result;
 }
 #endif
 
@@ -2889,22 +2889,22 @@ extern "C" void SNDpitchmult(int h, int v);
  */
 extern "C" int func_002AF7A0(int idx, int reset)
 {
-    void* m = D_004D3E98[idx];
-    unsigned short v;
+    void* slotData = D_004D3E98[idx];
+    unsigned short pitchMult;
     if (reset != 0) {
-        v = 0;
-        *(int*)((char*)m + 0x18) = *(unsigned short*)((char*)m + 0x3C);
+        pitchMult = 0;
+        *(int*)((char*)slotData + 0x18) = *(unsigned short*)((char*)slotData + 0x3C);
     } else {
-        v = *(int*)((char*)m + 0x18);
+        pitchMult = *(int*)((char*)slotData + 0x18);
     }
     SNDSYS_entercritical();
-    if (*(signed char*)((char*)m + 0x64) != 0) {
-        SNDpitchmult(*(int*)((char*)*(void**)((char*)m + 0x6C) + 4), v);
+    if (*(signed char*)((char*)slotData + 0x64) != 0) {
+        SNDpitchmult(*(int*)((char*)*(void**)((char*)slotData + 0x6C) + 4), pitchMult);
     } else {
-        SNDSTRM_pitchmult(*(int*)m, v);
+        SNDSTRM_pitchmult(*(int*)slotData, pitchMult);
     }
     SNDSYS_leavecritical();
-    *(char*)((char*)m + 0x65) = 1;
+    *(char*)((char*)slotData + 0x65) = 1;
     return 0;
 }
 #endif
@@ -2928,15 +2928,15 @@ extern "C" void SNDstop(int);
  */
 extern "C" int func_002AF838(int idx)
 {
-    void* m = D_004D3E98[idx];
+    void* slotData = D_004D3E98[idx];
     SNDSYS_entercritical();
-    if (*(signed char*)((char*)m + 0x64) != 0) {
-        SNDstop(*(int*)((char*)*(void**)((char*)m + 0x6C) + 0x4));
+    if (*(signed char*)((char*)slotData + 0x64) != 0) {
+        SNDstop(*(int*)((char*)*(void**)((char*)slotData + 0x6C) + 0x4));
     } else {
-        SNDSTRM_purge(*(int*)((char*)m + 0x0));
+        SNDSTRM_purge(*(int*)((char*)slotData + 0x0));
     }
     SNDSYS_leavecritical();
-    *(char*)((char*)m + 0x65) = 1;
+    *(char*)((char*)slotData + 0x65) = 1;
     return 0;
 }
 #endif
@@ -2955,15 +2955,15 @@ extern "C" int func_002AF8A8_impl(int a) __asm__("func_002AF8A8");
  * Returns -1 without playing while D_004A37BC is set (func_002B1128 sets it while it flushes a channel). SPCH_Init
  * registers it with the speech driver (func_003D6840).
  *
- * @param a  the speech event, passed on to func_002B0F48
+ * @param speechEvent  the speech event, passed on to func_002B0F48
  * @return func_002B0F48's result (the started speech's handle, or -1)
  */
-extern "C" int func_002AF8A8_impl(int a)
+extern "C" int func_002AF8A8_impl(int speechEvent)
 {
     if (D_004A37BC != 0) {
         return -1;
     }
-    return func_002B0F48((cSpeechSys*)((char*)D_004A37B4), a);
+    return func_002B0F48((cSpeechSys*)((char*)D_004A37B4), speechEvent);
 }
 #endif
 
@@ -3037,11 +3037,11 @@ void* func_002AF960_impl(const char* name, int unused, void* data) __asm__("func
  * func_003D69F0(data), copies name into mName and points mShortName after its last '\'. Called by func_002B0348.
  *
  * @param name  the bank path without extension
- * @param unused  not used (callers pass the short name)
+ * @param shortName  not used (callers pass the short name)
  * @param data  the header data already in memory, or 0 to load it
  * @return the new cSpeechBank, or 0 when the file is missing
  */
-void* func_002AF960_impl(const char* name, int unused, void* data)
+void* func_002AF960_impl(const char* name, int shortName, void* data)
 {
     char buf[80];
     int owned = data == 0;
@@ -3122,19 +3122,19 @@ struct sBmStream_FA68 {
  * cMemMan_alloc(0x904, "SpeechInstance").
  *
  * @param mem  the memory for the object
- * @param a1  the instance's index in cSpeechSys::mSpeechInstance
- * @param a2  the cStreamSys stream id
- * @param a3  the speech.inf section to read
- * @param a4  the memory type passed to the stream open
- * @param a5  nonzero to also load the language headers ("%slanghead.big")
+ * @param instanceIndex  the instance's index in cSpeechSys::mSpeechInstance
+ * @param streamId  the cStreamSys stream id
+ * @param section  the speech.inf section to read
+ * @param memType  the memory type passed to the stream open
+ * @param loadLangHead  nonzero to also load the language headers ("%slanghead.big")
  * @param a6  stored in unk_008 (no reader found)
  * @return mem
  */
-extern "C" void* func_002AFA68(cSpeechInstance* mem, int a1, int a2, int a3, int a4, int a5, int a6)
+extern "C" void* func_002AFA68(cSpeechInstance* mem, int instanceIndex, int streamId, int section, int memType, int loadLangHead, int a6)
 {
     sBmStream_FA68* self = (sBmStream_FA68*)mem;
-    self->f0 = a1;
-    self->f4 = a2;
+    self->f0 = instanceIndex;
+    self->f4 = streamId;
     self->f900 = 1;
     self->f8 = a6;
     self->fEC = 0;
@@ -3149,8 +3149,8 @@ extern "C" void* func_002AFA68(cSpeechInstance* mem, int a1, int a2, int a3, int
         self->pairs[i].a = 0;
         self->pairs[i].b = 0;
     }
-    func_002AA910(D_004A37B4->mpVStreamSys, self->f4, a4, 0, 0x20000);
-    func_002B0088((cSpeechInstance*)self, a1, a3, a5);
+    func_002AA910(D_004A37B4->mpVStreamSys, self->f4, memType, 0, 0x20000);
+    func_002B0088((cSpeechInstance*)self, instanceIndex, section, loadLangHead);
     return self;
 }
 #endif
@@ -3461,19 +3461,19 @@ extern "C" void func_002B0348(sBankList_0348* self, int a, int b, int c);
  * uninitialised one (name). Called by the constructor func_002AFA68 and by func_002B0F10.
  *
  * @param speechInstance  the cSpeechInstance
- * @param a1  the instance's index
- * @param a2  the section to read
- * @param a3  nonzero to also load the language headers
+ * @param instanceIndex  the instance's index
+ * @param section  the section to read
+ * @param loadLangHead  nonzero to also load the language headers
  */
-extern "C" void func_002B0088(cSpeechInstance* speechInstance, int a1, int a2, int a3)
+extern "C" void func_002B0088(cSpeechInstance* speechInstance, int instanceIndex, int section, int loadLangHead)
 {
     char parser[2064];
     char value[0x100];
-    char v40[0x40];
+    char bigFileName[0x40];
     char path[0x80];
     char name[0x60];
     FileParser_FileParser(parser, D_004A37B0, 0x100);
-    if (FileParser_FindPartialSection(parser, a2) != 0)
+    if (FileParser_FindPartialSection(parser, section) != 0)
     {
         FileParser_SkipSectionNames(parser);
         while (FileParser_IsEOF(parser) == 0)
@@ -3481,19 +3481,19 @@ extern "C" void func_002B0088(cSpeechInstance* speechInstance, int a1, int a2, i
             char* key = FileParser_GetName(parser);
             if (strcasecmp(str_BIGFILE, key) == 0)
             {
-                FileParser_AssignString(parser, str_BIGFILE, v40);
-                func_002AAB98_2B0088(D_004A37B4->mpVStreamSys, speechInstance->unk_004, v40);
+                FileParser_AssignString(parser, str_BIGFILE, bigFileName);
+                func_002AAB98_2B0088(D_004A37B4->mpVStreamSys, speechInstance->unk_004, bigFileName);
             }
             if (strcasecmp(str_BASEPATH, key) == 0)
             {
                 FileParser_AssignString(parser, str_BASEPATH, ((char*)speechInstance) + 0x6C);
                 sprintf(value, str_pct_sheaders_big, ((char*)speechInstance) + 0x6C);
-                if (func_002AFD40(speechInstance, 1, value, a1, a2) == 0)
+                if (func_002AFD40(speechInstance, 1, value, instanceIndex, section) == 0)
                     break;
-                if (a3)
+                if (loadLangHead)
                 {
                     sprintf(value, str_pct_slanghead_big, ((char*)speechInstance) + 0x6C);
-                    func_002AFD40(speechInstance, 0, value, a1, a2);
+                    func_002AFD40(speechInstance, 0, value, instanceIndex, section);
                 }
                 speechInstance->unk_0EC += 1;
             }
@@ -3538,11 +3538,11 @@ extern "C" int func_002B0290(cSpeechInstance* speechInstance)
         return 0;
     }
     int ok = (int)func_002AAE78(D_004A37B4->mpVStreamSys, speechInstance->unk_004) < 500;
-    int r = 0;
+    int canPlay = 0;
     if (ok) {
-        r = state;
+        canPlay = state;
     }
-    return r;
+    return canPlay;
 }
 #endif
 
@@ -3582,13 +3582,13 @@ struct sBankList_0348 {
  * On success increments the bank count (unk_0F0) and the global bank count D_004A37B8. Called by func_002AFD40 and
  * func_002B0088.
  *
- * @param a  the bank path without extension
- * @param b  the short name
- * @param c  the header data, or 0 to load it
+ * @param bankPath  the bank path without extension
+ * @param shortName  the short name
+ * @param headerData  the header data, or 0 to load it
  */
-extern "C" void func_002B0348(sBankList_0348* self, int a, int b, int c)
+extern "C" void func_002B0348(sBankList_0348* self, int bankPath, int shortName, int headerData)
 {
-    self->ids[self->count] = func_002AF960(a, b, c);
+    self->ids[self->count] = func_002AF960(bankPath, shortName, headerData);
     if (self->ids[self->count] != 0) {
         self->count++;
         D_004A37B8++;
@@ -3671,60 +3671,60 @@ extern "C" int func_002B04D8_impl(sBankList* self, sBmArgs_04D8* a) __asm__("fun
  * (D_004A37E0) every 200 ms, with the instance, the handle and the volume id. When it is idle it applies slot 3
  * (UpdateSpeechVolume) to the stream (func_002AB0D0) and starts the speech with hold unk_8C8. Called by func_002B0F48.
  *
- * @param a  the speech driver event (bank id, play argument, request key)
+ * @param speechEvent  the speech driver event (bank id, play argument, request key)
  * @return the speech handle from the play slot, or -1
  */
-extern "C" int func_002B04D8_impl(sBankList* self, sBmArgs_04D8* a)
+extern "C" int func_002B04D8_impl(sBankList* self, sBmArgs_04D8* speechEvent)
 {
     int idx = -1;
     int i;
-    if (func_002AFA58((cSpeechBank*)self->streams[a->f0], a->f0)) {
-        idx = a->f0;
+    if (func_002AFA58((cSpeechBank*)self->streams[speechEvent->f0], speechEvent->f0)) {
+        idx = speechEvent->f0;
     } else {
         for (i = 0; i < self->count; i++) {
-            if (func_002AFA58((cSpeechBank*)self->streams[i], a->f0)) {
+            if (func_002AFA58((cSpeechBank*)self->streams[i], speechEvent->f0)) {
                 idx = i;
             }
         }
     }
-    if (idx >= 0 && func_002B1520_c((char*)D_004A37B4, self->f0, a->fC)) {
+    if (idx >= 0 && func_002B1520_c((char*)D_004A37B4, self->f0, speechEvent->fC)) {
         sBmObj** slot = at_04D8(self->streams, idx);
         int lang = func_002B03B8((char*)*slot + 4);
         char buf[0x100];
         sprintf(buf, str_pct_spct_spct_s_dat, str_data_b, (char*)D_004A37B4 + 0x158 + lang * 20, (char*)*slot + 4);
         cSpeechSys* speechSys = D_004A37B4;
         sSndVtSlot* vt0 = (sSndVtSlot*)speechSys->mVtbl;
-        int h = ((int (*)(void*, int, int))vt0[2].fn)((char*)speechSys + vt0[2].delta, self->f0, (*slot)->f40);
-        char* d; sSndVtSlot* vt;
-        int t = (int)func_002AAE78(D_004A37B4->mpVStreamSys, self->id);
-        int r;
+        int volumeId = ((int (*)(void*, int, int))vt0[2].fn)((char*)speechSys + vt0[2].delta, self->f0, (*slot)->f40);
+        char* speechBase; sSndVtSlot* vt;
+        int remainingMs = (int)func_002AAE78(D_004A37B4->mpVStreamSys, self->id);
+        int playHandle;
         if (func_002AAE08(D_004A37B4->mpVStreamSys, self->id) != 0) {
             if (func_002AB028(D_004A37B4->mpVStreamSys, self->id) != 0) {
-                d = (char*)D_004A37B4;
-                vt = *(sSndVtSlot**)(d + 0x1BC);
-                r = ((Fn1_04D8)vt[1].fn)(d + vt[1].delta, self->id, buf, a->f4, *(int*)((char*)self + 0x8CC), -1, *(int*)((char*)self + 0x8D0), *(float*)((char*)self + 0x8F4), *(int*)((char*)self + 0x8F8), *(int*)((char*)self + 0x8FC));
-                if (r >= 0) {
-                    func_002ADCA0_c(&(*((cBankManager**)D_004A37B4->mpVStreamSys))->sub, t, D_004A37D8[0], (int)self, r, h, 0, 0);
+                speechBase = (char*)D_004A37B4;
+                vt = *(sSndVtSlot**)(speechBase + 0x1BC);
+                playHandle = ((Fn1_04D8)vt[1].fn)(speechBase + vt[1].delta, self->id, buf, speechEvent->f4, *(int*)((char*)self + 0x8CC), -1, *(int*)((char*)self + 0x8D0), *(float*)((char*)self + 0x8F4), *(int*)((char*)self + 0x8F8), *(int*)((char*)self + 0x8FC));
+                if (playHandle >= 0) {
+                    func_002ADCA0_c(&(*((cBankManager**)D_004A37B4->mpVStreamSys))->sub, remainingMs, D_004A37D8[0], (int)self, playHandle, volumeId, 0, 0);
                 }
-                return r;
+                return playHandle;
             }
-            d = (char*)D_004A37B4;
-            vt = *(sSndVtSlot**)(d + 0x1BC);
-            r = ((Fn1_04D8)vt[1].fn)(d + vt[1].delta, self->id, buf, a->f4, *(int*)((char*)self + 0x8CC), -1, *(int*)((char*)self + 0x8D0), *(float*)((char*)self + 0x8F4), *(int*)((char*)self + 0x8F8), *(int*)((char*)self + 0x8FC));
-            if (r >= 0) {
-                func_002ADCA0_c(&(*((cBankManager**)D_004A37B4->mpVStreamSys))->sub, 200, D_004A37E0[0], (int)self, r, h, 0, 0);
+            speechBase = (char*)D_004A37B4;
+            vt = *(sSndVtSlot**)(speechBase + 0x1BC);
+            playHandle = ((Fn1_04D8)vt[1].fn)(speechBase + vt[1].delta, self->id, buf, speechEvent->f4, *(int*)((char*)self + 0x8CC), -1, *(int*)((char*)self + 0x8D0), *(float*)((char*)self + 0x8F4), *(int*)((char*)self + 0x8F8), *(int*)((char*)self + 0x8FC));
+            if (playHandle >= 0) {
+                func_002ADCA0_c(&(*((cBankManager**)D_004A37B4->mpVStreamSys))->sub, 200, D_004A37E0[0], (int)self, playHandle, volumeId, 0, 0);
             }
-            return r;
+            return playHandle;
         }
-        d = (char*)D_004A37B4;
-        vt = *(sSndVtSlot**)(d + 0x1BC);
-        int w = ((int (*)(void*, int, int, int))vt[3].fn)(d + vt[3].delta, self->f0, h, *(int*)((char*)self + 0x8D0));
+        speechBase = (char*)D_004A37B4;
+        vt = *(sSndVtSlot**)(speechBase + 0x1BC);
+        int w = ((int (*)(void*, int, int, int))vt[3].fn)(speechBase + vt[3].delta, self->f0, volumeId, *(int*)((char*)self + 0x8D0));
         if (w != 0) {
             func_002AB0D0(D_004A37B4->mpVStreamSys, self->id, w);
         }
-        cSpeechSys* d2 = D_004A37B4;
-        sSndVtSlot* vt2 = (sSndVtSlot*)d2->mVtbl;
-        return ((Fn1_04D8)vt2[1].fn)((char*)d2 + vt2[1].delta, self->id, buf, a->f4, *(int*)((char*)self + 0x8CC), *(int*)((char*)self + 0x8C8), *(int*)((char*)self + 0x8D0), *(float*)((char*)self + 0x8F4), *(int*)((char*)self + 0x8F8), *(int*)((char*)self + 0x8FC));
+        cSpeechSys* speechSystem = D_004A37B4;
+        sSndVtSlot* vt2 = (sSndVtSlot*)speechSystem->mVtbl;
+        return ((Fn1_04D8)vt2[1].fn)((char*)speechSystem + vt2[1].delta, self->id, buf, speechEvent->f4, *(int*)((char*)self + 0x8CC), *(int*)((char*)self + 0x8C8), *(int*)((char*)self + 0x8D0), *(float*)((char*)self + 0x8F4), *(int*)((char*)self + 0x8F8), *(int*)((char*)self + 0x8FC));
     }
     return -1;
 }
@@ -3752,10 +3752,10 @@ INCLUDE_ASM("sound/bankmonitor", func_002B07E8);
  * Called by func_002B0FE8.
  *
  * @param speechInstance  the cSpeechInstance
- * @param arg1  the value
+ * @param value  the value
  */
-extern "C" void func_002B07E8(cSpeechInstance* speechInstance, int arg1) {
-    (speechInstance->unk_8C4) = arg1;
+extern "C" void func_002B07E8(cSpeechInstance* speechInstance, int value) {
+    (speechInstance->unk_8C4) = value;
 }
 #endif
 //100%
@@ -3767,10 +3767,10 @@ INCLUDE_ASM("sound/bankmonitor", func_002B07F0);
  * Called by func_002B1020.
  *
  * @param speechInstance  the cSpeechInstance
- * @param arg1  the value
+ * @param holdValue  the value
  */
-extern "C" void func_002B07F0(cSpeechInstance* speechInstance, int arg1) {
-    (speechInstance->unk_8C8) = arg1;
+extern "C" void func_002B07F0(cSpeechInstance* speechInstance, int holdValue) {
+    (speechInstance->unk_8C8) = holdValue;
 }
 #endif
 
@@ -4014,9 +4014,9 @@ extern "C" void func_003D67F8(void);
 extern "C" void func_002B0DA0(cSpeechSys* self)
 {
     for (int i = 0; i < 2; i++) {
-        void* p = (self->mSpeechInstance)[i];
-        if (p != 0) {
-            func_002AFB38((cSpeechInstance*)p, 3);
+        void* instance = (self->mSpeechInstance)[i];
+        if (instance != 0) {
+            func_002AFB38((cSpeechInstance*)instance, 3);
         }
         (self->mSpeechInstance)[i] = 0;
     }
@@ -4135,13 +4135,13 @@ extern "C" void func_002B07E8(cSpeechInstance* p, int a);
  * Sets speech instance i's unk_8C4 (func_002B07E8) when it exists.
  *
  * @param i  the instance index
- * @param a  the value
+ * @param value  the value
  */
-extern "C" void func_002B0FE8(cSpeechSys* self, int i, int a)
+extern "C" void func_002B0FE8(cSpeechSys* self, int i, int value)
 {
     void* instance = (self->mSpeechInstance)[i];
     if (instance != 0) {
-        func_002B07E8((cSpeechInstance*)instance, a);
+        func_002B07E8((cSpeechInstance*)instance, value);
     }
 }
 #endif
@@ -4154,13 +4154,13 @@ extern "C" void func_002B07F0(cSpeechInstance* p, int a);
  * Sets speech instance i's unk_8C8 (func_002B07F0), the hold used on an idle stream, when it exists.
  *
  * @param i  the instance index
- * @param a  the value
+ * @param holdValue  the value
  */
-extern "C" void func_002B1020(cSpeechSys* self, int i, int a)
+extern "C" void func_002B1020(cSpeechSys* self, int i, int holdValue)
 {
     void* instance = (self->mSpeechInstance)[i];
     if (instance != 0) {
-        func_002B07F0((cSpeechInstance*)instance, a);
+        func_002B07F0((cSpeechInstance*)instance, holdValue);
     }
 }
 #endif
@@ -4175,20 +4175,20 @@ INCLUDE_ASM("sound/bankmonitor", func_002B1058);
  * func_002B0F48). Afterwards mCallback / mCallbackInstance and the three fields are cleared.
  *
  * @param idx  the instance index (driver channel)
- * @param a2  unk_8CC for this trigger (passed to the play slot)
+ * @param playArg  unk_8CC for this trigger (passed to the play slot)
  * @param callback  function to call with the started handle, or 0
- * @param a4  unk_8D0 for this trigger
- * @param v  unk_8F4 for this trigger, when > 0
+ * @param volumeArg  unk_8D0 for this trigger
+ * @param floatArg  unk_8F4 for this trigger, when > 0
  */
-extern "C" void func_002B1058(cSpeechSys* self, int idx, int a2, int callback, int a4, float v)
+extern "C" void func_002B1058(cSpeechSys* self, int idx, int playArg, int callback, int volumeArg, float floatArg)
 {
     int** chans = (int**)self->mSpeechInstance;
     if (chans[idx] != 0) {
-        *(int*)((char*)chans[idx] + 0x8CC) = a2;
-        if (v > 0.0f) {
-            *(float*)((char*)((int**)self->mSpeechInstance)[idx] + 0x8F4) = v;
+        *(int*)((char*)chans[idx] + 0x8CC) = playArg;
+        if (floatArg > 0.0f) {
+            *(float*)((char*)((int**)self->mSpeechInstance)[idx] + 0x8F4) = floatArg;
         }
-        *(int*)((char*)((int**)self->mSpeechInstance)[idx] + 0x8D0) = a4;
+        *(int*)((char*)((int**)self->mSpeechInstance)[idx] + 0x8D0) = volumeArg;
         if (callback != 0) {
             self->mCallback = (void (*)(int))callback;
             self->mCallbackInstance = idx;
@@ -4301,10 +4301,10 @@ extern "C" void func_002AB1A0(int);
  *
  * Called as (cSpeechSys*, cMonitorInstance*) by func_002B1268; returns func_002AB1A0's value in v0.
  *
- * @param arg0  the cSpeechSys (its first word is the cStreamSys pointer)
+ * @param speechSys  the cSpeechSys (its first word is the cStreamSys pointer)
  */
-extern "C" void func_002B1248(int *arg0) {
-    func_002AB1A0(*arg0);
+extern "C" void func_002B1248(int *speechSys) {
+    func_002AB1A0(*speechSys);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -4341,9 +4341,9 @@ extern "C" int func_002B1268(cSpeechSys* self, void* msg)
     int slot = *(int*)((char*)msg + 0x20);
     if (slot != -1) {
         sVE1268* vt = (sVE1268*)self->mVtbl;
-        int r = vt[3].fn((char*)self + vt[3].delta, *(int*)ent, slot, *(int*)(ent + 0x8D0));
-        if (r != 0) {
-            func_002AB0D0(*(void**)self, *(int*)(ent + 4), r);
+        int speechVolume = vt[3].fn((char*)self + vt[3].delta, *(int*)ent, slot, *(int*)(ent + 0x8D0));
+        if (speechVolume != 0) {
+            func_002AB0D0(*(void**)self, *(int*)(ent + 4), speechVolume);
         }
     }
     return func_002B1248_pp(self, msg);
@@ -4376,8 +4376,8 @@ extern "C" int func_002B1348(cSpeechSys* self, void* msg)
     char* ent = *(char**)((char*)msg + 0x18);
     if (func_002AAE08(*(void**)self, *(int*)(ent + 4)) - 1 > 0) {
         if (func_002AB028(*(void**)self, *(int*)(ent + 4)) != 0) {
-            float f = func_002AAE78(*(void**)self, *(int*)(ent + 4));
-            func_002ADCA0(*((int*)D_004A37B4->mpVStreamSys) + 472, (int)f, D_004A37D8_2B1348[0].v, ent, *(int*)((char*)msg + 0x1C), *(int*)((char*)msg + 0x20), 0, 0);
+            float remainingMs = func_002AAE78(*(void**)self, *(int*)(ent + 4));
+            func_002ADCA0(*((int*)D_004A37B4->mpVStreamSys) + 472, (int)remainingMs, D_004A37D8_2B1348[0].v, ent, *(int*)((char*)msg + 0x1C), *(int*)((char*)msg + 0x20), 0, 0);
             return 1;
         }
         if (func_002AB150(*(void**)self, func_002B1220((cSpeechSys*)((char*)D_004A37B4), *(int*)ent)) != *(int*)((char*)msg + 0x1C)) {
@@ -4439,10 +4439,10 @@ struct sBankEntries {
  * @param identity  its identity
  * @param callback  function stored in the request, or 0
  * @param refresh  nonzero to refresh an existing request
- * @param f  a float stored in the request
+ * @param requestValue  a float stored in the request
  * @return 1 when added or refreshed, 0 otherwise
  */
-extern "C" int func_002B1458(sBankEntries* self, int instIndex, int requestId, int object, int identity, int callback, int refresh, float f)
+extern "C" int func_002B1458(sBankEntries* self, int instIndex, int requestId, int object, int identity, int callback, int refresh, float requestValue)
 {
     int freeIdx = -1;
     int i;
@@ -4470,7 +4470,7 @@ extern "C" int func_002B1458(sBankEntries* self, int instIndex, int requestId, i
     self->entries[freeIdx].b = requestId;
     self->entries[freeIdx].c = object;
     self->entries[freeIdx].d = identity;
-    self->entries[freeIdx].f = f;
+    self->entries[freeIdx].f = requestValue;
     self->entries[freeIdx].e = callback;
     return 1;
 }
@@ -4537,16 +4537,16 @@ extern "C" int func_002B1520(sBMon_1520* self, int id, int key)
 {
     for (int j = 0; j < 10; j++) {
         if (self->ents[j].used != 0 && self->ents[j].id == id && self->ents[j].key == key) {
-            int v = 0;
-            int u = 0;
+            int slotFiveValue = 0;
+            int slotEightValue = 0;
             int z = -1;
             if (self->ents[j].obj != 0) {
-                v = ((cBMVoice_1520*)self->ents[j].obj->voice)->v05();
-                u = ((cBMVoice_1520*)self->ents[j].obj->voice)->v08();
+                slotFiveValue = ((cBMVoice_1520*)self->ents[j].obj->voice)->v05();
+                slotEightValue = ((cBMVoice_1520*)self->ents[j].obj->voice)->v08();
                 z = self->ents[j].obj->z;
             }
-            *(int*)(self->slots[id] + 0x8CC) = v;
-            *(int*)(self->slots[id] + 0x8F8) = u;
+            *(int*)(self->slots[id] + 0x8CC) = slotFiveValue;
+            *(int*)(self->slots[id] + 0x8F8) = slotEightValue;
             *(int*)(self->slots[id] + 0x8FC) = z;
             *(float*)(self->slots[id] + 0x8F4) = self->ents[j].t;
             *(int*)(self->slots[id] + 0x8D0) = self->ents[j].w;
@@ -4696,12 +4696,12 @@ struct sMgr_1780 {
  *
  * @param entry  the play options (SNDPLAYOPTS) for the stream
  * @param n  the maximum queued requests
- * @param m  the maximum packet-player chunks
+ * @param maxChunks  the maximum packet-player chunks
  * @param mem  the stream's memory
  * @param size  its size
  * @return func_002AB128(stream system, 2)
  */
-extern "C" int func_002B1780(sEntry_1780* entry, int n, int m, char* mem, int size)
+extern "C" int func_002B1780(sEntry_1780* entry, int n, int maxChunks, char* mem, int size)
 {
     sMgr_1780* mg = *((sMgr_1780**)gMusicSys->mpVStreamSys);
     sStack_1780* st = &mg->st;
@@ -4726,11 +4726,11 @@ extern "C" int func_002B1780(sEntry_1780* entry, int n, int m, char* mem, int si
     st->a78[mg->st.depth] = 127;
     st->a7C[mg->st.depth] = 1;
     {
-        sMgr_1780* m2 = *((sMgr_1780**)gMusicSys->mpVStreamSys);
-        int off = m2->st.depth * (int)sizeof(sEntry_1780);
-        *(sEntry_1780*)((char*)m2->st.entries + off) = *entry;
+        sMgr_1780* bankManager = *((sMgr_1780**)gMusicSys->mpVStreamSys);
+        int off = bankManager->st.depth * (int)sizeof(sEntry_1780);
+        *(sEntry_1780*)((char*)bankManager->st.entries + off) = *entry;
     }
-    func_002AA870(((sMgr_1780**)gMusicSys->mpVStreamSys), 2, 0, mem, size, n, m);
+    func_002AA870(((sMgr_1780**)gMusicSys->mpVStreamSys), 2, 0, mem, size, n, maxChunks);
     (*((sMgr_1780**)gMusicSys->mpVStreamSys))->st.depth--;
     return func_002AB128(((sMgr_1780**)gMusicSys->mpVStreamSys), 2);
 }
@@ -4834,7 +4834,7 @@ extern const char str_SongInstance[];
  * is the music.inf section name).
  *
  * @param songName  the music base path (cMusicSys::mBasePath)
- * @param a1  the song's section name
+ * @param sectionName  the song's section name
  * @param config  the song's cSongConfiguration
  * @param playOpts  the cBankMonitor play options (cSndPlayOpts part)
  * @param baseVol  the base volume
@@ -4843,9 +4843,9 @@ extern const char str_SongInstance[];
  * @param syncLoad  nonzero to load and open the streams at once
  * @return the new cSongInstance
  */
-extern "C" void* func_002B1B98(int songName, int a1, int config, int playOpts, char baseVol, int volControl, int bankIndex, int syncLoad)
+extern "C" void* func_002B1B98(int songName, int sectionName, int config, int playOpts, char baseVol, int volControl, int bankIndex, int syncLoad)
 {
-    return func_002B1C50(cMemMan_alloc(196, str_SongInstance, 0, 0), songName, a1, config, playOpts, baseVol, volControl, bankIndex, syncLoad);
+    return func_002B1C50(cMemMan_alloc(196, str_SongInstance, 0, 0), songName, sectionName, config, playOpts, baseVol, volControl, bankIndex, syncLoad);
 }
 #endif
 
@@ -4927,29 +4927,29 @@ extern "C" void* func_002B1C50_body(sBankMon_1C50* self, int a0, int a1, int a2,
  * "<mPath><mPathData>" (func_002B4A20) and, with a7 set, opens the streams at once (func_002B21E0 with force). Note a1
  * is not used.
  *
- * @param a0  the music base path
- * @param a1  the song's section name (not used)
- * @param a2  the song's cSongConfiguration
- * @param a3  the cBankMonitor play options (cSndPlayOpts part)
- * @param a4  the base volume
- * @param a5  an optional volume control, or 0
- * @param a6  the cBankManager bank index for the overlay
- * @param a7  nonzero to load synchronously and open the streams
+ * @param basePath  the music base path
+ * @param sectionName  the song's section name (not used)
+ * @param songConfig  the song's cSongConfiguration
+ * @param playOpts  the cBankMonitor play options (cSndPlayOpts part)
+ * @param baseVol  the base volume
+ * @param volControl  an optional volume control, or 0
+ * @param bankIndex  the cBankManager bank index for the overlay
+ * @param syncLoad  nonzero to load synchronously and open the streams
  * @return self
  */
-extern "C" void* func_002B1C50_body(sBankMon_1C50* self, int a0, int a1, int a2, int a3, char a4, int a5, int a6, int a7)
+extern "C" void* func_002B1C50_body(sBankMon_1C50* self, int basePath, int sectionName, int songConfig, int playOpts, char baseVol, int volControl, int bankIndex, int syncLoad)
 {
-    char* snd = (char*)a2;
-    sBankDef_1C50* def = (sBankDef_1C50*)a3;
+    char* snd = (char*)songConfig;
+    sBankDef_1C50* def = (sBankDef_1C50*)playOpts;
     self->f1C = -1;
     self->buf24 = 0;
     self->buf28 = 0;
     self->f2C = 0;
     self->f30 = -1;
     self->f38 = 0;
-    self->f34 = a6;
-    self->f3C = a5;
-    self->f40 = a4;
+    self->f34 = bankIndex;
+    self->f3C = volControl;
+    self->f40 = baseVol;
     self->f48 = 0;
     self->f4C = 0;
     self->f50 = 0;
@@ -4963,16 +4963,16 @@ extern "C" void* func_002B1C50_body(sBankMon_1C50* self, int a0, int a1, int a2,
     def->vols[def->cur] = (int)BM_MAX_1C50(BM_MIN_1C50((float)def->vols[def->cur] * scale, 127.0f), 0.0f);
     def->entries[def->cur].vol = BM_MAX_1C50(BM_MIN_1C50(def->vols[def->cur], 127), 0);
     if (*(int*)(snd + 0xA4) == 1) {
-        sprintf(self->name, str_pct_spct_spct_s_b, str_data_b, str_audio_music_big, a0);
+        sprintf(self->name, str_pct_spct_spct_s_b, str_data_b, str_audio_music_big, basePath);
     } else {
-        sprintf(self->name, str_pct_spct_spct_s_b, str_data_b, str_audio_music2_big, a0);
+        sprintf(self->name, str_pct_spct_spct_s_b, str_data_b, str_audio_music2_big, basePath);
     }
     self->snd = snd;
     self->entry = *bankCur_1C50(def);
     char buf[0x100];
     sprintf(buf, str_pct_spct_s_c, self->name, snd);
-    func_002B4A20((void***)gMusicSys, buf, a7);
-    if (a7 != 0) {
+    func_002B4A20((void***)gMusicSys, buf, syncLoad);
+    if (syncLoad != 0) {
         func_002B21E0((cSongInstance*)self, 1);
     }
     return self;
@@ -5077,18 +5077,18 @@ extern "C" void func_003D16F0(int id, short v);
  * when none is parked yet); func_002B21E0 sends it with force after opening them. Reached from cMusicSys's slot 3
  * (func_002B3B88).
  *
- * @param v  the music event (the cMusicSys state code)
+ * @param musicEvent  the music event (the cMusicSys state code)
  * @param force  nonzero to send even while unk_5C is set
  */
-extern "C" void func_002B20C8(cSongInstance* self, int v, int force)
+extern "C" void func_002B20C8(cSongInstance* self, int musicEvent, int force)
 {
     if (self->unk_5C != 0 && force == 0) {
         return;
     }
     if (self->unk_2C != 0) {
-        func_003D16F0(-1, v);
+        func_003D16F0(-1, musicEvent);
     } else if (self->unk_30 == -1) {
-        self->unk_30 = v;
+        self->unk_30 = musicEvent;
     }
 }
 #endif
@@ -5138,22 +5138,22 @@ extern "C" void func_003B80A0(int h, int v);
  *
  * The cutoff is cached in unk_44 (only when the stream has a handle) and applied inside the critical section.
  *
- * @param v  the cutoff
+ * @param lowPass  the cutoff
  */
-extern "C" void func_002B2160(cSongInstance* self, int v)
+extern "C" void func_002B2160(cSongInstance* self, int lowPass)
 {
-    if (v > 0xFFFF) {
-        v = 0xFFFF;
+    if (lowPass > 0xFFFF) {
+        lowPass = 0xFFFF;
     }
-    if (v < 0) {
-        v = 0;
+    if (lowPass < 0) {
+        lowPass = 0;
     }
-    if (v != self->unk_44) {
+    if (lowPass != self->unk_44) {
         SNDSYS_entercritical();
-        int h = func_002B2488(self);
-        if (h >= 0) {
-            self->unk_44 = v;
-            func_003B80A0(h, v);
+        int streamHandle = func_002B2488(self);
+        if (streamHandle >= 0) {
+            self->unk_44 = lowPass;
+            func_003B80A0(streamHandle, lowPass);
         }
         SNDSYS_leavecritical();
     }
@@ -5223,19 +5223,19 @@ extern "C" void func_002B21E0(cSongInstance* mon, int force)
         return;
     if (mon->unk_54 == 0)
         return;
-    float v;
-    float* p = mon->unk_3C;
-    if (p)
-        v = (float)mon->unk_40 * 0.009999999776482582f * (float)*(int*)(*(char**)mon + 0x88) * *p;
+    float volume;
+    float* volumeControl = mon->unk_3C;
+    if (volumeControl)
+        volume = (float)mon->unk_40 * 0.009999999776482582f * (float)*(int*)(*(char**)mon + 0x88) * *volumeControl;
     else
-        v = (float)mon->unk_40 * 0.009999999776482582f * (float)*(int*)(*(char**)mon + 0x88);
-    v *= D_004A3508;
+        volume = (float)mon->unk_40 * 0.009999999776482582f * (float)*(int*)(*(char**)mon + 0x88);
+    volume *= D_004A3508;
     SNDSYS_entercritical();
-    int h = func_002B2488(mon);
-    if (h >= 0)
+    int streamHandle = func_002B2488(mon);
+    if (streamHandle >= 0)
     {
-        signed char vol = (int)((v <? 127.0f) >? 0.0f);
-        func_003B7E70(h, vol);
+        signed char vol = (int)((volume <? 127.0f) >? 0.0f);
+        func_003B7E70(streamHandle, vol);
     }
     SNDSYS_leavecritical();
 }
@@ -5249,12 +5249,12 @@ extern "C" void func_003D5508(int cmd, int v);
 /**
  * Sets the song overlay's level (func_003D5508(0x11000002, v), 0..100) when unk_54 is set.
  *
- * @param v  the level in percent
+ * @param levelPercent  the level in percent
  */
-extern "C" void func_002B23E8(cSongInstance* self, signed char v)
+extern "C" void func_002B23E8(cSongInstance* self, signed char levelPercent)
 {
     if (self->unk_54 != 0) {
-        func_003D5508(0x11000002, v);
+        func_003D5508(0x11000002, levelPercent);
     }
 }
 #endif
@@ -5273,14 +5273,14 @@ extern "C" void func_003B7EB0(int h, int v, int c);
  * The fade runs inside the critical section, only when the stream has a handle; func_002B21E0 stops applying the volume
  * once unk_48 is set.
  *
- * @param t  the fade time in seconds
+ * @param fadeSeconds  the fade time in seconds
  */
-extern "C" void func_002B2418(cSongInstance* self, float t)
+extern "C" void func_002B2418(cSongInstance* self, float fadeSeconds)
 {
     SNDSYS_entercritical();
-    int h = func_002B2488(self);
-    if (h >= 0) {
-        func_003B7EB0(h, (int)(t * 1000.0f), 0);
+    int streamHandle = func_002B2488(self);
+    if (streamHandle >= 0) {
+        func_003B7EB0(streamHandle, (int)(fadeSeconds * 1000.0f), 0);
     }
     SNDSYS_leavecritical();
     self->unk_48 = 1;
@@ -5408,13 +5408,13 @@ struct sBmInfo {
  * Gets the stream status first (func_002B2578) and uses its second word as the request handle. The parameter is
  * declared int but is the out buffer.
  *
- * @param v  receives the request status (type, position, length, ...)
+ * @param requestStatus  receives the request status (type, position, length, ...)
  */
-extern "C" void func_002B25C8(cSongInstance* self, int v)
+extern "C" void func_002B25C8(cSongInstance* self, int requestStatus)
 {
     sBmInfo info;
     func_002B2578(self, &info);
-    SNDSTRM_requeststatus(info.handle, v);
+    SNDSTRM_requeststatus(info.handle, requestStatus);
 }
 #endif
 
@@ -5536,9 +5536,9 @@ extern "C" float func_0040D8D0(float x, float y);
  */
 extern "C" float func_002B2718(cSongInstance* self)
 {
-    float a = func_002B2690(self);
-    float b = func_002B2600(self);
-    return a - func_0040D8D0(b, func_002B2690(self));
+    float beatLength = func_002B2690(self);
+    float playPosition = func_002B2600(self);
+    return beatLength - func_0040D8D0(playPosition, func_002B2690(self));
 }
 #endif
 
@@ -5767,14 +5767,14 @@ static inline int* Row_28C0(int (*g)[5], int i)
  * Called by the cSSXAudio constructor on gSSXAudio + 0x118.
  *
  * @param inchrg  g++ 2.95 in-charge flag (nonzero: also construct the virtual bases)
- * @param a2  the maximum bank count for the bases
- * @param a3  the maximum stream count for cStreamSys
+ * @param maxBanks  the maximum bank count for the bases
+ * @param maxStreams  the maximum stream count for cStreamSys
  * @param heap  the memory type for the bases
  * @return self
  */
 // The music system's constructor (sound/musicsys.cpp in the July 2003 prototype): reads the song list.
 // PORT: g++ 2.95 constructor of a class with virtual bases (stack vtable this-adjust fix-ups written out by hand).
-extern "C" char* func_002B28C0(char* self, int inchrg, int a2, int a3, int heap)
+extern "C" char* func_002B28C0(char* self, int inchrg, int maxBanks, int maxStreams, int heap)
 {
     if (inchrg) {
         char* vb = self + 0x5448;
@@ -5783,23 +5783,23 @@ extern "C" char* func_002B28C0(char* self, int inchrg, int a2, int a3, int heap)
         *(char**)self = vb2;
         *(char**)(self + 0x5628) = vb;
         cSoundSys_cSoundSys((cSoundSys*)vb, heap);
-        cBankManager_cBankManager(*(void**)(self + 0x5F20), 0, a2, heap);
-        cStreamSys_cStreamSys(*(void**)self, 0, a2, a3, heap);
+        cBankManager_cBankManager(*(void**)(self + 0x5F20), 0, maxBanks, heap);
+        cStreamSys_cStreamSys(*(void**)self, 0, maxBanks, maxStreams, heap);
     }
     *(const sSndVtbl4**)(*(char**)(**(char***)self + 0x1D8) + 4) = &D_00483928_v;
     *(void***)(**(char***)self + 0xAB0) = cBankMonitor_vtbl;
     *(const sSndVtbl7**)(**(char***)self + 0x1D4) = &D_00483948_v;
     if (inchrg == 0) {
-        sSndVtbl4 t1 = D_00483928_v;
-        *(sSndVtbl4**)(*(char**)(**(char***)self + 0x1D8) + 4) = &t1;
+        sSndVtbl4 soundSysVtbl = D_00483928_v;
+        *(sSndVtbl4**)(*(char**)(**(char***)self + 0x1D8) + 4) = &soundSysVtbl;
         char* base1 = *(char**)(**(char***)self + 0x1D8) - 0x5448;
-        int d1 = self - base1;
-        t1.e[1].delta = D_00483928_v.e[1].delta + d1;
-        sSndVtbl7 t2 = D_00483948_v;
-        *(sSndVtbl7**)(**(char***)self + 0x1D4) = &t2;
+        int soundSysDelta = self - base1;
+        soundSysVtbl.e[1].delta = D_00483928_v.e[1].delta + soundSysDelta;
+        sSndVtbl7 bankManagerVtbl = D_00483948_v;
+        *(sSndVtbl7**)(**(char***)self + 0x1D4) = &bankManagerVtbl;
         char* base2 = **(char***)self - 0x5450;
-        int d2 = self - base2;
-        t2.e[1].delta = D_00483948_v.e[1].delta + d2;
+        int bankManagerDelta = self - base2;
+        bankManagerVtbl.e[1].delta = D_00483948_v.e[1].delta + bankManagerDelta;
     }
     *(int*)(self + 0x3E4) = 0;
     *(int*)(self + 0x3E8) = 0;
@@ -5816,35 +5816,35 @@ extern "C" char* func_002B28C0(char* self, int inchrg, int a2, int a3, int heap)
     sBank28C0* sv = (sBank28C0*)self;
     int i = 0;
     do {
-        int* e = Row_28C0(((sSpeechMon*)self)->grid, i);
+        int* categoryInts = Row_28C0(((sSpeechMon*)self)->grid, i);
         for (int j = 4; j >= 0; j--)
-            e[j] = 0;
+            categoryInts[j] = 0;
         i++;
     } while (i < 0x40);
     {
-        int* e = (int*)(self + 0x920);
+        int* categoryInts = (int*)(self + 0x920);
         for (int j = 4; j >= 0; j--)
-            e[j] = 0;
+            categoryInts[j] = 0;
     }
-    for (int p = 0; p < 6400; p += 100) {
-        self[p + 2356] = D_004A35A8[0];
-        self[p + 8756] = D_004A35A8[0];
-        self[p + 15156] = D_004A35A8[0];
+    for (int textOffset = 0; textOffset < 6400; textOffset += 100) {
+        self[textOffset + 2356] = D_004A35A8[0];
+        self[textOffset + 8756] = D_004A35A8[0];
+        self[textOffset + 15156] = D_004A35A8[0];
     }
-    sLoc28C0 L;
-    FileParser_FileParser_p(L.parser, D_004A37E8, 0x100);
-    *(int*)(L.parser + 8) = *(int*)(L.parser + 4);
-    if (FileParser_FindSection(L.parser, str_GLOBAL) != 0) {
-        while (FileParser_IsEOF(L.parser) == 0) {
-            FileParser_GetName(L.parser);
-            FileParser_AssignString(L.parser, str_BASEPATH, self + 0x104);
+    sLoc28C0 musicInf;
+    FileParser_FileParser_p(musicInf.parser, D_004A37E8, 0x100);
+    *(int*)(musicInf.parser + 8) = *(int*)(musicInf.parser + 4);
+    if (FileParser_FindSection(musicInf.parser, str_GLOBAL) != 0) {
+        while (FileParser_IsEOF(musicInf.parser) == 0) {
+            FileParser_GetName(musicInf.parser);
+            FileParser_AssignString(musicInf.parser, str_BASEPATH, self + 0x104);
         }
     }
-    *(int*)(L.parser + 8) = *(int*)(L.parser + 4);
+    *(int*)(musicInf.parser + 8) = *(int*)(musicInf.parser + 4);
     *(int*)(self + 0x3E4) = 0;
     *(int*)(self + 0x3EC) = 0;
     while (*(int*)(self + 0x3E4) < 0x40) {
-        char* tok = FileParser_FindNextSection(L.parser);
+        char* tok = FileParser_FindNextSection(musicInf.parser);
         if (tok == 0)
             break;
         if (strcasecmp(tok, str_GLOBAL) == 0)
@@ -5856,88 +5856,88 @@ extern "C" char* func_002B28C0(char* self, int inchrg, int a2, int a3, int heap)
         *(long*)(self + 0x3F8) |= bit;
         strcpy(self + (*(int*)(self + 0x3E4) * 11 + 292), tok);
         sv->ents[*(int*)(self + 0x3E4)] = (char*)cSongConfiguration_cSongConfiguration((cSongConfiguration*)cMemMan_alloc(172, str_cSongConfiguration, 0, 0));
-        while (FileParser_IsEOF(L.parser) == 0) {
-            char* key = FileParser_GetName(L.parser);
+        while (FileParser_IsEOF(musicInf.parser) == 0) {
+            char* key = FileParser_GetName(musicInf.parser);
             if (strcasecmp(key, str_TITLE) == 0) {
-                FileParser_AssignString(L.parser, str_TITLE, self + (*(int*)(self + 0x3E4) * 100 + 2356));
+                FileParser_AssignString(musicInf.parser, str_TITLE, self + (*(int*)(self + 0x3E4) * 100 + 2356));
             } else if (strcasecmp(key, str_ARTIST) == 0) {
-                FileParser_AssignString(L.parser, str_ARTIST, self + (*(int*)(self + 0x3E4) * 100 + 8756));
+                FileParser_AssignString(musicInf.parser, str_ARTIST, self + (*(int*)(self + 0x3E4) * 100 + 8756));
             } else if (strcasecmp(key, str_ALBUM) == 0) {
-                FileParser_AssignString(L.parser, str_ALBUM, self + (*(int*)(self + 0x3E4) * 100 + 15156));
+                FileParser_AssignString(musicInf.parser, str_ALBUM, self + (*(int*)(self + 0x3E4) * 100 + 15156));
             } else if (strcasecmp(key, str_ADDTOFE) == 0) {
-                FileParser_AssignInt(L.parser, str_ADDTOFE, &L.iA);
-                if (L.iA == 1)
+                FileParser_AssignInt(musicInf.parser, str_ADDTOFE, &musicInf.iA);
+                if (musicInf.iA == 1)
                     *(int*)(self + 0x3EC) += 1;
             } else if (strcasecmp(key, str_CATEGORY) == 0) {
-                FileParser_AssignInt(L.parser, str_CATEGORY, &L.iB);
-                if (L.iB < 5)
-                    ((sSpeechMon*)self)->grid[((sSpeechMon*)self)->count][L.iB] = 1;
+                FileParser_AssignInt(musicInf.parser, str_CATEGORY, &musicInf.iB);
+                if (musicInf.iB < 5)
+                    ((sSpeechMon*)self)->grid[((sSpeechMon*)self)->count][musicInf.iB] = 1;
             } else if (strcasecmp(key, str_PATHDATA) == 0) {
-                FileParser_AssignString(L.parser, str_PATHDATA, L.buf);
-                strcpy(sv->ents[*(int*)(self + 0x3E4)], L.buf);
+                FileParser_AssignString(musicInf.parser, str_PATHDATA, musicInf.buf);
+                strcpy(sv->ents[*(int*)(self + 0x3E4)], musicInf.buf);
             } else if (strcasecmp(key, str_MUSDATA) == 0) {
-                FileParser_AssignString(L.parser, str_MUSDATA, L.buf);
-                strcpy(sv->ents[*(int*)(self + 0x3E4)] + 0x20, L.buf);
+                FileParser_AssignString(musicInf.parser, str_MUSDATA, musicInf.buf);
+                strcpy(sv->ents[*(int*)(self + 0x3E4)] + 0x20, musicInf.buf);
             } else if (strcasecmp(key, str_LOOPDATA) == 0) {
-                FileParser_AssignString(L.parser, str_LOOPDATA, L.buf);
-                strcpy(((sSongCfg28C0*)sv->ents[*(int*)(self + 0x3E4)])->bankData[((sSongCfg28C0*)sv->ents[*(int*)(self + 0x3E4)])->numBankData], L.buf);
+                FileParser_AssignString(musicInf.parser, str_LOOPDATA, musicInf.buf);
+                strcpy(((sSongCfg28C0*)sv->ents[*(int*)(self + 0x3E4)])->bankData[((sSongCfg28C0*)sv->ents[*(int*)(self + 0x3E4)])->numBankData], musicInf.buf);
                 ((sSongCfg28C0*)sv->ents[*(int*)(self + 0x3E4)])->numBankData++;
             } else if (strcasecmp(key, str_BeatsPerMeasure) == 0) {
-                FileParser_AssignInt(L.parser, str_BeatsPerMeasure, &L.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x64) = L.iC;
+                FileParser_AssignInt(musicInf.parser, str_BeatsPerMeasure, &musicInf.iC);
+                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x64) = musicInf.iC;
             } else if (strcasecmp(key, str_MeasuresPerBar) == 0) {
-                FileParser_AssignInt(L.parser, str_MeasuresPerBar, &L.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x68) = L.iC;
+                FileParser_AssignInt(musicInf.parser, str_MeasuresPerBar, &musicInf.iC);
+                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x68) = musicInf.iC;
             } else if (strcasecmp(key, str_PhrasesPerBank) == 0) {
-                FileParser_AssignInt(L.parser, str_PhrasesPerBank, &L.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x6C) = L.iC;
+                FileParser_AssignInt(musicInf.parser, str_PhrasesPerBank, &musicInf.iC);
+                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x6C) = musicInf.iC;
             } else if (strcasecmp(key, str_BeatsPerPhrase) == 0) {
-                FileParser_AssignInt(L.parser, str_BeatsPerPhrase, &L.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x70) = L.iC;
+                FileParser_AssignInt(musicInf.parser, str_BeatsPerPhrase, &musicInf.iC);
+                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x70) = musicInf.iC;
             } else if (strcasecmp(key, str_PhraseAlign) == 0) {
-                FileParser_AssignInt(L.parser, str_PhraseAlign, &L.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x74) = L.iC;
+                FileParser_AssignInt(musicInf.parser, str_PhraseAlign, &musicInf.iC);
+                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x74) = musicInf.iC;
             } else if (strcasecmp(key, str_DelayCount) == 0) {
-                FileParser_AssignInt(L.parser, str_DelayCount, &L.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x78) = L.iC;
+                FileParser_AssignInt(musicInf.parser, str_DelayCount, &musicInf.iC);
+                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x78) = musicInf.iC;
             } else if (strcasecmp(key, str_DelayFeedback) == 0) {
-                FileParser_AssignInt(L.parser, str_DelayFeedback, &L.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x7C) = L.iC;
+                FileParser_AssignInt(musicInf.parser, str_DelayFeedback, &musicInf.iC);
+                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x7C) = musicInf.iC;
             } else if (strcasecmp(key, str_DelayTime) == 0) {
-                FileParser_AssignInt(L.parser, str_DelayTime, &L.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x80) = L.iC;
+                FileParser_AssignInt(musicInf.parser, str_DelayTime, &musicInf.iC);
+                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x80) = musicInf.iC;
             } else if (strcasecmp(key, str_DelayLevel) == 0) {
-                FileParser_AssignInt(L.parser, str_DelayLevel, &L.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x84) = L.iC;
+                FileParser_AssignInt(musicInf.parser, str_DelayLevel, &musicInf.iC);
+                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x84) = musicInf.iC;
             } else if (strcasecmp(key, str_Pathlevel) == 0) {
-                FileParser_AssignInt(L.parser, str_Pathlevel, &L.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x88) = L.iC;
+                FileParser_AssignInt(musicInf.parser, str_Pathlevel, &musicInf.iC);
+                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x88) = musicInf.iC;
             } else if (strcasecmp(key, str_Asynclevel) == 0) {
-                FileParser_AssignInt(L.parser, str_Asynclevel, &L.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x8C) = L.iC;
+                FileParser_AssignInt(musicInf.parser, str_Asynclevel, &musicInf.iC);
+                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x8C) = musicInf.iC;
             } else if (strcasecmp(key, str_BPM) == 0) {
-                FileParser_AssignFloat(L.parser, str_BPM, &L.fD);
-                *(float*)(sv->ents[*(int*)(self + 0x3E4)] + 0x90) = L.fD;
+                FileParser_AssignFloat(musicInf.parser, str_BPM, &musicInf.fD);
+                *(float*)(sv->ents[*(int*)(self + 0x3E4)] + 0x90) = musicInf.fD;
             } else if (strcasecmp(key, str_SEDVALUE) == 0) {
-                FileParser_AssignInt(L.parser, str_SEDVALUE, &L.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x98) = L.iC;
+                FileParser_AssignInt(musicInf.parser, str_SEDVALUE, &musicInf.iC);
+                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x98) = musicInf.iC;
             } else if (strcasecmp(key, str_LOWPASS) == 0) {
-                FileParser_AssignInt(L.parser, str_LOWPASS, &L.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x9C) = L.iC;
+                FileParser_AssignInt(musicInf.parser, str_LOWPASS, &musicInf.iC);
+                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x9C) = musicInf.iC;
             } else if (strcasecmp(key, str_DUCKTOLOOPS) == 0) {
-                FileParser_AssignInt(L.parser, str_DUCKTOLOOPS, &L.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x94) = L.iC;
+                FileParser_AssignInt(musicInf.parser, str_DUCKTOLOOPS, &musicInf.iC);
+                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0x94) = musicInf.iC;
             } else if (strcasecmp(key, str_PREVIEW) == 0) {
-                FileParser_AssignInt(L.parser, str_PREVIEW, &L.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0xA0) = L.iC;
+                FileParser_AssignInt(musicInf.parser, str_PREVIEW, &musicInf.iC);
+                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0xA0) = musicInf.iC;
             } else if (strcasecmp(key, str_SONGBIG) == 0) {
-                FileParser_AssignInt(L.parser, str_SONGBIG, &L.iC);
-                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0xA4) = L.iC;
+                FileParser_AssignInt(musicInf.parser, str_SONGBIG, &musicInf.iC);
+                *(int*)(sv->ents[*(int*)(self + 0x3E4)] + 0xA4) = musicInf.iC;
             }
         }
         *(int*)(self + 0x3E4) += 1;
     }
-    FileParser__FileParser(L.parser, 2);
+    FileParser__FileParser(musicInf.parser, 2);
     return self;
 }
 #endif
@@ -5987,22 +5987,22 @@ extern "C" void func_002B3398(char* self, int flags)
     *(void***)(**(char***)self + 0xAB0) = cBankMonitor_vtbl;
     *(const sBmonVtblB3398**)(**(char***)self + 0x1D4) = &D_00483948;
     if (flags == 0) {
-        sBmonVtblA3398 t1 = D_00483928;
-        *(sBmonVtblA3398**)(*(char**)(**(char***)self + 0x1D8) + 4) = &t1;
+        sBmonVtblA3398 soundSysVtbl = D_00483928;
+        *(sBmonVtblA3398**)(*(char**)(**(char***)self + 0x1D8) + 4) = &soundSysVtbl;
         char* base1 = *(char**)(**(char***)self + 0x1D8) - 0x5448;
-        int d1 = self - base1;
-        t1.e[1].delta = D_00483928.e[1].delta + d1;
-        sBmonVtblB3398 t2 = D_00483948;
-        *(sBmonVtblB3398**)(**(char***)self + 0x1D4) = &t2;
+        int soundSysDelta = self - base1;
+        soundSysVtbl.e[1].delta = D_00483928.e[1].delta + soundSysDelta;
+        sBmonVtblB3398 bankManagerVtbl = D_00483948;
+        *(sBmonVtblB3398**)(**(char***)self + 0x1D4) = &bankManagerVtbl;
         char* base2 = **(char***)self - 0x5450;
-        int d2 = self - base2;
-        t2.e[1].delta = D_00483948.e[1].delta + d2;
+        int bankManagerDelta = self - base2;
+        bankManagerVtbl.e[1].delta = D_00483948.e[1].delta + bankManagerDelta;
     }
     for (int i = 0; i < *(int*)(self + 0x3E4); i++) {
-        char* o = ((char**)(self + 4))[i];
-        if (o != 0) {
-            sBmonVcall3398* e = &(*(sBmonVcall3398**)(o + 0xA8))[1];
-            e->fn(o + e->delta, 3);
+        char* songConfig = ((char**)(self + 4))[i];
+        if (songConfig != 0) {
+            sBmonVcall3398* dtorSlot = &(*(sBmonVcall3398**)(songConfig + 0xA8))[1];
+            dtorSlot->fn(songConfig + dtorSlot->delta, 3);
         }
     }
     if (*(void**)(self + 0x5434) != 0) {
@@ -6079,40 +6079,40 @@ struct sBmTrack35A0 {
  * Pushes a level as cSndPlayOpts_OPTS_Open does, stores the volume control in it, starts the song and pops the level.
  * cSSXAudio's override func_0028F478 calls it; callers pass the song name, bank 12 and music volume control 1.
  *
- * @param a1  the song (section) name, or 0 for mCurrentSongNum
- * @param a2  the cBankManager bank for its loop overlay
- * @param a3  the volume control (float*)
- * @param a4  nonzero to load and open the streams at once
+ * @param songName  the song (section) name, or 0 for mCurrentSongNum
+ * @param bankIndex  the cBankManager bank for its loop overlay
+ * @param volumeControl  the volume control (float*)
+ * @param syncLoad  nonzero to load and open the streams at once
  */
-extern "C" void func_002B35A0(sBmTrack35A0*** self, int a1, int a2, int a3, int a4)
+extern "C" void func_002B35A0(sBmTrack35A0*** self, int songName, int bankIndex, int volumeControl, int syncLoad)
 {
-    sBmTrack35A0* t = **self;
-    sBmSub35A0* s = &t->sub;
-    t->sub.cur++;
-    s->ents[t->sub.cur] = s->cfg;
-    t->sub.arr24[t->sub.cur] = 0;
-    s->p34[t->sub.cur] = 0;
-    s->p38[t->sub.cur] = s->ents[t->sub.cur].b0;
-    s->p3C[t->sub.cur] = 0;
-    func_00416210((char*)s + t->sub.cur * 8 + 0x40, 0, 8);
-    s->p60[t->sub.cur] = 0;
-    s->p64[t->sub.cur] = 0;
-    s->p68[t->sub.cur] = 0;
-    s->p6C[t->sub.cur] = 0;
-    s->p70[t->sub.cur].f4 = 0;
-    s->p70[t->sub.cur].f0 = 100;
-    s->p70[t->sub.cur].f8 = 90;
-    s->p70[t->sub.cur].fC = 50;
-    s->p74[t->sub.cur] = 0;
-    s->p80[t->sub.cur] = 0;
-    s->p84[t->sub.cur] = 0;
-    s->p78[t->sub.cur] = 0x7F;
-    s->p7C[t->sub.cur] = 1;
-    sBmTrack35A0* t2 = **self;
-    t2->sub.p3C[t2->sub.cur] = a3;
-    func_002B3838((cMusicSys*)self, a1, a2, a4);
-    sBmTrack35A0* t3 = **self;
-    t3->sub.cur--;
+    sBmTrack35A0* bankManager = **self;
+    sBmSub35A0* playOpts = &bankManager->sub;
+    bankManager->sub.cur++;
+    playOpts->ents[bankManager->sub.cur] = playOpts->cfg;
+    bankManager->sub.arr24[bankManager->sub.cur] = 0;
+    playOpts->p34[bankManager->sub.cur] = 0;
+    playOpts->p38[bankManager->sub.cur] = playOpts->ents[bankManager->sub.cur].b0;
+    playOpts->p3C[bankManager->sub.cur] = 0;
+    func_00416210((char*)playOpts + bankManager->sub.cur * 8 + 0x40, 0, 8);
+    playOpts->p60[bankManager->sub.cur] = 0;
+    playOpts->p64[bankManager->sub.cur] = 0;
+    playOpts->p68[bankManager->sub.cur] = 0;
+    playOpts->p6C[bankManager->sub.cur] = 0;
+    playOpts->p70[bankManager->sub.cur].f4 = 0;
+    playOpts->p70[bankManager->sub.cur].f0 = 100;
+    playOpts->p70[bankManager->sub.cur].f8 = 90;
+    playOpts->p70[bankManager->sub.cur].fC = 50;
+    playOpts->p74[bankManager->sub.cur] = 0;
+    playOpts->p80[bankManager->sub.cur] = 0;
+    playOpts->p84[bankManager->sub.cur] = 0;
+    playOpts->p78[bankManager->sub.cur] = 0x7F;
+    playOpts->p7C[bankManager->sub.cur] = 1;
+    sBmTrack35A0* volManager = **self;
+    volManager->sub.p3C[volManager->sub.cur] = volumeControl;
+    func_002B3838((cMusicSys*)self, songName, bankIndex, syncLoad);
+    sBmTrack35A0* popManager = **self;
+    popManager->sub.cur--;
 }
 #endif
 
@@ -6164,58 +6164,58 @@ static inline float bmMax3838(float a, float b)
  * volume, volume control, a2, a3), loads its overlay bank (func_002B43D8), sets unk_41C = -1 and mSongPlaying = 1.
  *
  * @param self_  the cMusicSys
- * @param a1  the song name, or 0 for mCurrentSongNum
- * @param a2  the cBankManager bank for its loop overlay
- * @param a3  nonzero to load synchronously
+ * @param songName  the song name, or 0 for mCurrentSongNum
+ * @param bankIndex  the cBankManager bank for its loop overlay
+ * @param syncLoad  nonzero to load synchronously
  */
-extern "C" void func_002B3838(cMusicSys* self_, int a1, int a2, int a3)
+extern "C" void func_002B3838(cMusicSys* self_, int songName, int bankIndex, int syncLoad)
 {
     sSpeechMon* self = (sSpeechMon*)self_;
-    cBankManager* t;
+    cBankManager* bankManager;
     sSndPlayer* sub;
     float* pf;
-    char c;
-    int arg;
+    char baseVol;
+    int songConfig;
     int name;
     int base;
     func_002B3AC0(self);
-    t = *self->pp;
-    sub = &t->sub;
-    c = sub->vals[sub->cur];
+    bankManager = *self->pp;
+    sub = &bankManager->sub;
+    baseVol = sub->vals[sub->cur];
     pf = (float*)sub->p3C[sub->cur];
     if (pf != 0) {
-        float f = (float)c * *pf;
-        f = bmMax3838(bmMin3838(f, 127.0f), 0.0f);
-        sub->vals[t->sub.cur] = (char)(int)f;
+        float scaledVol = (float)baseVol * *pf;
+        scaledVol = bmMax3838(bmMin3838(scaledVol, 127.0f), 0.0f);
+        sub->vals[bankManager->sub.cur] = (char)(int)scaledVol;
         {
-            signed char* d = &((sSndOptsRec*)(t->sub.cur * 24 + (int)sub->ch))->vol;
-            unsigned char r;
+            signed char* levelVol = &((sSndOptsRec*)(bankManager->sub.cur * 24 + (int)sub->ch))->vol;
+            unsigned char clampedVol;
             if (sub->vals[sub->cur] > 0x7E || sub->vals[sub->cur] >= 0) {
-                r = sub->vals[sub->cur] < 0x7F ? (unsigned char)sub->vals[sub->cur] : 0x7F;
+                clampedVol = sub->vals[sub->cur] < 0x7F ? (unsigned char)sub->vals[sub->cur] : 0x7F;
             } else {
-                r = 0;
+                clampedVol = 0;
             }
-            *d = r;
+            *levelVol = clampedVol;
         }
     }
-    if (a1 != 0) {
+    if (songName != 0) {
         int idx = self->count - 1;
         while (idx >= 0) {
-            if (func_004165A8(self->names[idx], (void*)a1) == 0) {
+            if (func_004165A8(self->names[idx], (void*)songName) == 0) {
                 break;
             }
             idx--;
         }
         self->current = idx;
-        name = a1;
+        name = songName;
         base = (int)&(*self->pp)->sub;
-        *(int*)((char*)self + 0x408) = (int)func_002B1B98((int)self->obj, name, self->arr[idx], base, c, (int)pf, a2, a3);
+        *(int*)((char*)self + 0x408) = (int)func_002B1B98((int)self->obj, name, self->arr[idx], base, baseVol, (int)pf, bankIndex, syncLoad);
     } else {
         int k = self->current;
         name = (int)self->names[k];
-        arg = self->arr[k];
+        songConfig = self->arr[k];
         base = (int)&(*self->pp)->sub;
-        *(int*)((char*)self + 0x408) = (int)func_002B1B98((int)self->obj, name, arg, base, c, (int)pf, a2, a3);
+        *(int*)((char*)self + 0x408) = (int)func_002B1B98((int)self->obj, name, songConfig, base, baseVol, (int)pf, bankIndex, syncLoad);
     }
     func_002B43D8(self);
     *(int*)((char*)self + 0x41C) = -1;
@@ -6283,20 +6283,20 @@ extern "C" void func_002B1F78(cSongInstance* self, int flags);
 // PORT: 64-bit long sound keys
 extern "C" void func_002B3AC0(void* self)
 {
-    char* s = (char*)self;
-    func_002ADDE0_3AC0(**(char***)s + 0x1D8, D_004A3838[0].v);
-    func_002ADDE0_3AC0(**(char***)s + 0x1D8, D_004A3840[0].v);
-    func_002ADDE0_3AC0(**(char***)s + 0x1D8, D_004A3848[0].v);
-    if (*(void**)(s + 0x408) != 0) {
-        cAsyncSys_ASYNCSYS_Cancel(**(void***)s, *(int*)(*(char**)(s + 0x408) + 0x34));
-        func_0028BCE8(**(void***)s, *(int*)(*(char**)(s + 0x408) + 0x34));
+    char* musicSys = (char*)self;
+    func_002ADDE0_3AC0(**(char***)musicSys + 0x1D8, D_004A3838[0].v);
+    func_002ADDE0_3AC0(**(char***)musicSys + 0x1D8, D_004A3840[0].v);
+    func_002ADDE0_3AC0(**(char***)musicSys + 0x1D8, D_004A3848[0].v);
+    if (*(void**)(musicSys + 0x408) != 0) {
+        cAsyncSys_ASYNCSYS_Cancel(**(void***)musicSys, *(int*)(*(char**)(musicSys + 0x408) + 0x34));
+        func_0028BCE8(**(void***)musicSys, *(int*)(*(char**)(musicSys + 0x408) + 0x34));
     }
     func_002B3A98(self);
-    *(int*)(s + 0x418) = 0;
-    if (*(void**)(s + 0x408) != 0) {
-        func_002B1F78((cSongInstance*)(*(void**)(s + 0x408)), 3);
+    *(int*)(musicSys + 0x418) = 0;
+    if (*(void**)(musicSys + 0x408) != 0) {
+        func_002B1F78((cSongInstance*)(*(void**)(musicSys + 0x408)), 3);
     }
-    *(void**)(s + 0x408) = 0;
+    *(void**)(musicSys + 0x408) = 0;
 }
 #endif
 
@@ -6308,14 +6308,14 @@ extern "C" void func_002B20C8(cSongInstance* mon, int a1, int a2);
 /**
  * cMusicSys virtual slot 3: sends a music event to the current song (func_002B20C8, not forced) while playing.
  *
- * @param a1  the music event
+ * @param musicEvent  the music event
  */
-extern "C" void func_002B3B88(void* self, int a1)
+extern "C" void func_002B3B88(void* self, int musicEvent)
 {
     if (*(int*)((char*)self + 0x418) != 0) {
         void* curSong = *(void**)((char*)self + 0x408);
         if (curSong != 0) {
-            func_002B20C8((cSongInstance*)curSong, a1, 0);
+            func_002B20C8((cSongInstance*)curSong, musicEvent, 0);
         }
     }
 }
@@ -6335,16 +6335,16 @@ struct sBankMonVEntry {
  *
  * Only while a song is playing (mSongPlaying). v stays in the second argument register for the slot 3 call.
  *
- * @param v  the new music state
+ * @param musicState  the new music state
  * @return 1 when the state changed, else 0
  */
-extern "C" int func_002B3BC0(void* self, int v)
+extern "C" int func_002B3BC0(void* self, int musicState)
 {
     int changed = 0;
-    if (*(int*)((char*)self + 0x418) != 0 && v != *(int*)((char*)self + 0x41C)) {
+    if (*(int*)((char*)self + 0x418) != 0 && musicState != *(int*)((char*)self + 0x41C)) {
         sBankMonVEntry* vt = *(sBankMonVEntry**)((char*)self + 0x5440);
         vt[3].fn((char*)self + vt[3].delta);
-        *(int*)((char*)self + 0x41C) = v;
+        *(int*)((char*)self + 0x41C) = musicState;
         changed = 1;
     }
     return changed;
@@ -6421,13 +6421,13 @@ INCLUDE_ASM("sound/bankmonitor", func_002B3CC0);
 /**
  * Sets the current song's unk_54, which func_002B21E0 and func_002B23E8 need set to apply volume and level.
  *
- * @param a1  the new value
+ * @param enabled  the new value
  */
-extern "C" void func_002B3CC0(void* self, int a1)
+extern "C" void func_002B3CC0(void* self, int enabled)
 {
     void* curSong = *(void**)((char*)self + 0x408);
     if (curSong != 0) {
-        *(int*)((char*)curSong + 0x54) = a1;
+        *(int*)((char*)curSong + 0x54) = enabled;
     }
 }
 #endif
@@ -6459,14 +6459,14 @@ extern "C" void func_002B23E8(cSongInstance* self, signed char v);
 /**
  * Sets the current song's overlay level (func_002B23E8) while a song is playing.
  *
- * @param v  the level in percent
+ * @param levelPercent  the level in percent
  */
-extern "C" void func_002B3D10(void* self, signed char v)
+extern "C" void func_002B3D10(void* self, signed char levelPercent)
 {
     if (*(int*)((char*)self + 0x418) != 0) {
         void* curSong = *(void**)((char*)self + 0x408);
         if (curSong != 0) {
-            func_002B23E8((cSongInstance*)curSong, v);
+            func_002B23E8((cSongInstance*)curSong, levelPercent);
         }
     }
 }
@@ -6920,13 +6920,13 @@ struct sBankMonHdr { char pad[0x40]; int f40; char names[1][0x20]; };
 extern "C" void func_002B43D8(void* self)
 {
     char buf[256];
-    void* p = *(void**)((char*)self + 0x408);
-    if (p != 0) {
-        int bank = *(int*)((char*)p + 0x34);
-        if ((*(sBankMonHdr**)p)->f40 != 0) {
-            int n = func_002B24C0((cSongInstance*)p);
-            void* q = *(void**)((char*)self + 0x408);
-            sprintf(buf, str_pct_spct_s_c, (char*)q + 0x60, (*(sBankMonHdr**)q)->names[n]);
+    void* songInstance = *(void**)((char*)self + 0x408);
+    if (songInstance != 0) {
+        int bank = *(int*)((char*)songInstance + 0x34);
+        if ((*(sBankMonHdr**)songInstance)->f40 != 0) {
+            int n = func_002B24C0((cSongInstance*)songInstance);
+            void* currentSong = *(void**)((char*)self + 0x408);
+            sprintf(buf, str_pct_spct_s_c, (char*)currentSong + 0x60, (*(sBankMonHdr**)currentSong)->names[n]);
             func_0028BD10(**(void***)self, bank, buf, 0x100);
             *(int*)((char*)*(void**)((char*)self + 0x408) + 0x38) = 1;
         }
@@ -6947,9 +6947,9 @@ extern void func_002ADCA0_4470(int a, int b, long t, int c, int d, int e, int f,
 // PORT: 64-bit long sound key, read unaligned from a const table
 extern "C" void func_002B4470(void* self)
 {
-    void* p = *(void**)((char*)self + 0x408);
-    if (p != 0 && *(int*)((char*)p + 0x4C) == 0) {
-        *(int*)((char*)p + 0x4C) = 1;
+    void* songInstance = *(void**)((char*)self + 0x408);
+    if (songInstance != 0 && *(int*)((char*)songInstance + 0x4C) == 0) {
+        *(int*)((char*)songInstance + 0x4C) = 1;
         func_002ADCA0_4470(*(int*)(*(int*)self) + 472, 0, D_004A3838_4470[0].v, 0, 0, 0, 0, 0);
     }
 }
@@ -6995,11 +6995,11 @@ public:
  *
  * On gSSXAudio the slot is func_0028C430, which plays the next loop-bank phrase.
  *
- * @param a  the cMonitorInstance
+ * @param monitorInst  the cMonitorInstance
  */
-extern "C" void func_002B4540(cMusicSys* self, int a)
+extern "C" void func_002B4540(cMusicSys* self, int monitorInst)
 {
-    ((func_002B4540_cObj*)self)->v01(a);
+    ((func_002B4540_cObj*)self)->v01(monitorInst);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
@@ -7024,11 +7024,11 @@ extern "C" void func_002ADCA0(int a, int b, long t, void* c, int d, int e, int f
 extern "C" void func_002B4568(void* self, void* ent)
 {
     if (*(void**)((char*)self + 0x408) != 0) {
-        float a = func_002B2690((cSongInstance*)ent);
-        float b = func_002B2718((cSongInstance*)ent);
-        int c = func_002B2778((cSongInstance*)ent) + 1;
-        int d = func_002B2500((cSongInstance*)ent);
-        func_002ADCA0(**(int**)self + 472, (int)b, D_004A3840_2B4568[0].v, *(void**)((char*)self + 0x408), d, c, (int)a, 0);
+        float beatLength = func_002B2690((cSongInstance*)ent);
+        float timeToBeat = func_002B2718((cSongInstance*)ent);
+        int nextBeat = func_002B2778((cSongInstance*)ent) + 1;
+        int phraseStart = func_002B2500((cSongInstance*)ent);
+        func_002ADCA0(**(int**)self + 472, (int)timeToBeat, D_004A3840_2B4568[0].v, *(void**)((char*)self + 0x408), phraseStart, nextBeat, (int)beatLength, 0);
     }
 }
 #endif
@@ -7312,9 +7312,9 @@ extern "C" float func_002B4920(void* self)
         return 0.0f;
     }
     SNDSYS_entercritical();
-    float r = func_002B2718((cSongInstance*)(*(void**)((char*)self + 0x408)));
+    float timeToBeat = func_002B2718((cSongInstance*)(*(void**)((char*)self + 0x408)));
     SNDSYS_leavecritical();
-    return r;
+    return timeToBeat;
 }
 #endif
 
@@ -7340,9 +7340,9 @@ public:
  */
 extern "C" void func_002B4978(func_002B4978_cObj* self, int i)
 {
-    int v = *(int*)((char*)self->entries[i] + 0xA0);
-    if (v >= 0) {
-        self->v03(v);
+    int previewValue = *(int*)((char*)self->entries[i] + 0xA0);
+    if (previewValue >= 0) {
+        self->v03(previewValue);
     }
 }
 #endif
@@ -7355,14 +7355,14 @@ INCLUDE_ASM("sound/bankmonitor", func_002B49C0);
  *
  * The audio code tags songs 101-103 (peak ambience), 201, 301 ("charsel") and 401 ("pktrans").
  *
- * @param a1  the tag
+ * @param songTag  the tag
  */
-extern "C" void func_002B49C0(void* self, int a1)
+extern "C" void func_002B49C0(void* self, int songTag)
 {
     if (*(int*)((char*)self + 0x418) != 0) {
         void* curSong = *(void**)((char*)self + 0x408);
         if (curSong != 0) {
-            *(int*)((char*)curSong + 0x58) = a1;
+            *(int*)((char*)curSong + 0x58) = songTag;
         }
     }
 }
@@ -7394,13 +7394,13 @@ INCLUDE_ASM("sound/bankmonitor", func_002B4A08);
 /**
  * Sets the current song's unk_5C, which makes func_002B20C8 ignore unforced music events.
  *
- * @param a1  the new value
+ * @param holdEvents  the new value
  */
-extern "C" void func_002B4A08(void* self, int a1)
+extern "C" void func_002B4A08(void* self, int holdEvents)
 {
     void* curSong = *(void**)((char*)self + 0x408);
     if (curSong != 0) {
-        *(int*)((char*)curSong + 0x5c) = a1;
+        *(int*)((char*)curSong + 0x5c) = holdEvents;
     }
 }
 #endif
