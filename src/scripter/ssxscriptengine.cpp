@@ -6124,7 +6124,7 @@ extern "C" void func_0028E8C0(void* self, int id, int a2);
 extern "C" void func_002A19D8(void* self, int id);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* bank, int id, int a, float f);
 void cScriptObjEvent_ScriptSoundIDToGameSoundInfo(void* self, int a1, void* a2, void* a3);
-extern "C" int func_00287968(void* self, int a1, int a2);
+extern "C" int cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" int cBankSys_SFX_End(void* self);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern void* cWScriptMan_TheWScriptMan;
@@ -6258,7 +6258,7 @@ struct sSeEngine_08E8 {
  * walks the frame's sound list until a sound whose start frame is before @p when; a sound whose slot (track index) is
  * free, or holds a different sound (stopped first), is started: bank and index from cScriptObjEvent_ScriptSoundIDToGameSoundInfo, a new SFX record on
  * the audio system's bank monitor with default settings, the sound's volume (clamped to 0-127), the volume setting
- * func_00287968(4, 0), then cBankSys_SFX_End, whose handle goes into the slot.
+ * cSSXAudio_GetCurrAppliedVolumePtr(4, 0), then cBankSys_SFX_End, whose handle goes into the slot.
  *
  * Likely bug: the abort list holds 20 entries and its count is never checked.
  *
@@ -6386,7 +6386,7 @@ extern "C" void cScriptObjEvent_OnInSeqKeyEvent(sSeEngine_08E8* self, void* obj,
                 }
                 {
                     sWtTrack_08E8** pt = snd->cur;
-                    int volumeSetting = func_00287968(snd, 4, 0);
+                    int volumeSetting = cSSXAudio_GetCurrAppliedVolumePtr(snd, 4, 0);
                     (*pt)->sub.p3C[(*pt)->sub.cur] = volumeSetting;
                 }
                 {

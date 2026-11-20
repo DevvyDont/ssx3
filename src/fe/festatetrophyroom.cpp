@@ -1717,7 +1717,7 @@ extern "C" int cBESaveInterface_loadSaveGame(void* self, char* buf);
 extern "C" int cBESaveInterface_loadSaveProfile(void* self, char* buf, int idx);
 extern "C" void cFEMemCard_setSoundMode(unsigned int mode);
 extern "C" void func_00287410(void* opt, int v);
-extern "C" void func_00287488(void* opt, int v);
+extern "C" void cSSXAudio_SetSFXVolume(void* opt, int v);
 extern "C" void func_00287520(void* opt, int v);
 extern "C" void cSSXAudio_SetArcadeSFX(void* opt, int v);
 extern "C" void func_002875D0(void* opt, int v);
@@ -1761,7 +1761,7 @@ struct sMemCard_1D5F40 {
  * cFEMemCard_mInstance). Mode 2 (settings) loads the buffer at +0x1D0 with cBESaveInterface_loadSaveGame (On Tour
  * cBESaveInterface::loadSaveGame) and, when the audio object exists (cAudioInterface_bxAudio), applies the loaded sound options
  * from cBEOptionInterface_mOption: the output mode (bits 12-13) through cFEMemCard_setSoundMode, the SFX, speech and music
- * volumes (4-bit fields) through func_00287410, func_00287488 and func_00287520, bit 17 through cSSXAudio_SetArcadeSFX
+ * volumes (4-bit fields) through func_00287410, cSSXAudio_SetSFXVolume and func_00287520, bit 17 through cSSXAudio_SetArcadeSFX
  * and bit 16 through func_002875D0. Mode 0 (profile) loads it with cBESaveInterface_loadSaveProfile (On Tour loadSaveProfile) into slot
  * +0x1CC. Mode 1 (replay) does nothing here. A failed load returns 0 at once, keeping the buffer.
  *
@@ -1781,7 +1781,7 @@ extern "C" int cFEMemCard_readDone()
             cBE_getInterface_Fv(cBE_getBE(), 4);
             cFEMemCard_setSoundMode(Cfg_1D5F40().output);
             func_00287410(cAudioInterface_bxAudio(), Cfg_1D5F40().sfxVol);
-            func_00287488(cAudioInterface_bxAudio(), Cfg_1D5F40().speechVol);
+            cSSXAudio_SetSFXVolume(cAudioInterface_bxAudio(), Cfg_1D5F40().speechVol);
             func_00287520(cAudioInterface_bxAudio(), Cfg_1D5F40().musicVol);
             cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_1D5F40().f17 != 0);
             func_002875D0(cAudioInterface_bxAudio(), Cfg_1D5F40().f16 != 0);
@@ -1810,17 +1810,17 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_setSoundMode);
 #ifdef SKIP_ASM
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" int func_00287670(void* opt);
-extern "C" int func_002876A0(void* opt);
+extern "C" int cSSXAudio_GetSFXVolume(void* opt);
 extern "C" int func_002876D0(void* opt);
 extern "C" void cSSXAudio_FrontEndPurge(void* opt);
 extern "C" void SSXAUDIO_DeInit();
 extern "C" void SSXAUDIO_Init(int lang);
 extern "C" void func_00287410(void* opt, int v);
-extern "C" void func_00287488(void* opt, int v);
+extern "C" void cSSXAudio_SetSFXVolume(void* opt, int v);
 extern "C" void func_00287520(void* opt, int v);
 extern "C" void cSSXAudio_SetArcadeSFX(void* opt, int v);
 extern "C" void func_002875D0(void* opt, int v);
-extern "C" void func_00285FB0(void* opt);
+extern "C" void cSSXAudio_FrontEndLoad(void* opt);
 
 struct sLang_001D64C0 {
     int f0;
@@ -1851,9 +1851,9 @@ struct sOpt_001D64C0 : sOptBase_001D64C0, sOptSub_001D64C0 {
  * The output setting @p mode maps to an SSXAUDIO mode: 1 -> 2, 2 -> 0, 3 -> 3, anything else -> 1. The audio object
  * (cAudioInterface_bxAudio) is asked to switch through method slot 2 of the object at +0x1D8 of its +0x118 member's first
  * pointer; only when that returns 1 does the restart run: it saves the SFX, speech and music volumes (func_00287670,
- * func_002876A0, func_002876D0), the arcade-SFX flag (+0x62B8), the +0x62B4 flag and the +0x534 word, then calls
+ * cSSXAudio_GetSFXVolume, func_002876D0), the arcade-SFX flag (+0x62B8), the +0x62B4 flag and the +0x534 word, then calls
  * cSSXAudio_FrontEndPurge, SSXAUDIO_DeInit and SSXAUDIO_Init(new mode), puts the volumes and flags back (func_00287410,
- * func_00287488, func_00287520, cSSXAudio_SetArcadeSFX, func_002875D0), reloads with func_00285FB0 and hands the saved
+ * cSSXAudio_SetSFXVolume, func_00287520, cSSXAudio_SetArcadeSFX, func_002875D0), reloads with cSSXAudio_FrontEndLoad and hands the saved
  * +0x534 word back through virtual slot 4 of the audio object's second base.
  *
  * @param mode  the output setting, 0-3 (bits 12-13 of cBEOptionInterface_mOption)
@@ -1878,7 +1878,7 @@ extern "C" void cFEMemCard_setSoundMode(unsigned int mode)
     }
     if ((*((sOpt_001D64C0*)cAudioInterface_bxAudio())->holder)->lang->v02(lang) == 1) {
         float sfxVolume = func_00287670(cAudioInterface_bxAudio());
-        float speechVolume = func_002876A0(cAudioInterface_bxAudio());
+        float speechVolume = cSSXAudio_GetSFXVolume(cAudioInterface_bxAudio());
         float musicVolume = func_002876D0(cAudioInterface_bxAudio());
         int x = *(int*)((char*)cAudioInterface_bxAudio() + 0x62B8);
         int y = *(int*)((char*)cAudioInterface_bxAudio() + 0x62B4);
@@ -1887,11 +1887,11 @@ extern "C" void cFEMemCard_setSoundMode(unsigned int mode)
         SSXAUDIO_DeInit();
         SSXAUDIO_Init(lang);
         func_00287410(cAudioInterface_bxAudio(), (int)sfxVolume);
-        func_00287488(cAudioInterface_bxAudio(), (int)speechVolume);
+        cSSXAudio_SetSFXVolume(cAudioInterface_bxAudio(), (int)speechVolume);
         func_00287520(cAudioInterface_bxAudio(), (int)musicVolume);
         cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), x);
         func_002875D0(cAudioInterface_bxAudio(), y);
-        func_00285FB0(cAudioInterface_bxAudio());
+        cSSXAudio_FrontEndLoad(cAudioInterface_bxAudio());
         sOpt_001D64C0* audio = (sOpt_001D64C0*)cAudioInterface_bxAudio();
         audio->v04(z);
     }

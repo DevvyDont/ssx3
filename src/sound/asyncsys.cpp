@@ -40,22 +40,22 @@ void cAsyncSys_ASYNCSYS_Init(cAsyncSys* self, unsigned int x, int flags)
 //100%
 INCLUDE_ASM("sound/asyncsys", cAsyncSys_ASYNCSYS_DeInit);
 #ifdef SKIP_ASM
-extern "C" void func_00289DF0(void* self, int a);
+extern "C" void cAsyncSys_DoCancel(void* self, int a);
 extern "C" void func_003E4FB0(int a);
 void cMemMan_free(void* p);
 
 /**
  * Shuts the async system down: services it until no request is pending, then frees its buffer.
  *
- * Calls func_00289DF0(self, 1) and, while the pending count (+0x4) is nonzero, sleeps (func_003E4FB0(2)) and calls
+ * Calls cAsyncSys_DoCancel(self, 1) and, while the pending count (+0x4) is nonzero, sleeps (func_003E4FB0(2)) and calls
  * it again. Frees the "AsyncSysBuffer" (+0x1CC) and clears it and its size (+0x1D0).
  */
 extern "C" void cAsyncSys_ASYNCSYS_DeInit(cAsyncSys* self)
 {
-    func_00289DF0(self, 1);
+    cAsyncSys_DoCancel(self, 1);
     while (*(int*)((char*)self + 4) != 0) {
         func_003E4FB0(2);
-        func_00289DF0(self, 1);
+        cAsyncSys_DoCancel(self, 1);
     }
     if (self->field_0x1CC != 0) {
         cMemMan_free(self->field_0x1CC);
@@ -252,7 +252,7 @@ struct sAsync28A558 {
  * mMemType) and @p memFlags onto the flags queue (+0x1BC, mMainMemFlags); each push is skipped when that queue is full.
  * Copies @p name into the file-name slot +0x8 (mFileIndex) of the six 64-byte names at +0xC, pushes that slot onto the
  * name-index queue (+0x19C), advances the slot (back to 0 after 5) and calls cAsyncSys_ASYNCSYS_StartLoad. The name ring has six slots
- * whatever the queue size, so a seventh pending load overwrites the oldest name. func_0028BD10 (the bank manager's
+ * whatever the queue size, so a seventh pending load overwrites the oldest name. cBankManager_BANK_AsyncLoad (the bank manager's
  * async load) calls it.
  *
  * @param bankId  the bank's user handle, given back to the owner's callbacks (On Tour bankID)
@@ -312,7 +312,7 @@ extern "C" void cAsyncSys_ASYNCSYS_QueueLoad(void* self, int bankId, const char*
 INCLUDE_ASM("sound/asyncsys", cAsyncSys_ASYNCSYS_Cancel);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_00289DF0(void* self, int a);
+extern "C" void cAsyncSys_DoCancel(void* self, int a);
 extern "C" void cAsyncSys_ASYNCSYS_StartLoad(void* self);
 
 struct sRing_A728 {
@@ -462,10 +462,10 @@ static inline void Push1BC_A728(sAsync_A728* s, int v)
 /**
  * Cancels every load queued for one bank, aborting it when it is the one in progress.
  *
- * When busy (+0x4) and the front user handle (+0x18C) is @p id, calls func_00289DF0(this, 0) and returns. Otherwise
+ * When busy (+0x4) and the front user handle (+0x18C) is @p id, calls cAsyncSys_DoCancel(this, 0) and returns. Otherwise
  * pops every queued entry from the four queues (user handle, name index, memory type, flags) and pushes back those
  * whose user handle is not @p id, which keeps their order; then, when not busy, starts the next load (cAsyncSys_ASYNCSYS_StartLoad).
- * func_0028BC58 calls it.
+ * cBankManager_BANK_SyncLoad calls it.
  *
  * @param id  the bank's user handle (On Tour bankID)
  */
@@ -473,7 +473,7 @@ extern "C" void cAsyncSys_ASYNCSYS_Cancel(void* self, int id)
 {
     sAsync_A728* asyncSys = (sAsync_A728*)self;
     if (asyncSys->busy != 0 && Peek18C_A728(asyncSys) == id) {
-        func_00289DF0(self, 0);
+        cAsyncSys_DoCancel(self, 0);
         return;
     }
     int n = (asyncSys->q18C.head - asyncSys->q18C.tail + asyncSys->q18C.size) % asyncSys->q18C.size;
@@ -552,9 +552,9 @@ struct sAsync_AAF8 {
  * (cBankManager_ASYNCSYS_OnEndAsyncLoad) with the user handle, the bank handle, end state 0 (complete), the file name,
  * the memory and the size; an empty file reports handle -1 and end state 2 (error). Then mBusy is cleared, all four
  * queues are popped and cAsyncSys_ASYNCSYS_StartLoad starts the next load. Any status other than 0 or 1 cancels through
- * func_00289DF0(this, 0).
+ * cAsyncSys_DoCancel(this, 0).
  *
- * func_002AB958 (the stream system's update) calls it.
+ * cController_Update (the stream system's update) calls it.
  */
 extern "C" void cAsyncSys_ASYNCSYS_Update(void* self)
 {
@@ -718,7 +718,7 @@ extern "C" void cAsyncSys_ASYNCSYS_Update(void* self)
         }
         case -1:
         default:
-            func_00289DF0(asyncSys, 0);
+            cAsyncSys_DoCancel(asyncSys, 0);
             break;
         }
         break;
@@ -800,7 +800,7 @@ extern "C" void cAsyncSys_ASYNCSYS_Update(void* self)
         }
         case -1:
         default:
-            func_00289DF0(asyncSys, 0);
+            cAsyncSys_DoCancel(asyncSys, 0);
             break;
         }
         break;
@@ -902,7 +902,7 @@ INCLUDE_ASM("sound/asyncsys", cAudioInterface_isInGame);
  * Says whether a game is running: SSXApp has a cGame.
  *
  * One of the audio code's static accessors (On Tour cAudioInterface): tests SSXApp->Game (+0x84). The sound code
- * (func_00288A20, func_0029EEE0, func_0028BF78, bmRestartC2D0, ...) uses it to skip in-game work in the front end.
+ * (cSSXAudio_GetClosestCamera1, cSSXAudio_GetSpeechVolumeIdentifier, func_0028BF78, bmRestartC2D0, ...) uses it to skip in-game work in the front end.
  *
  * @return 1 if SSXApp->Game is set, else 0
  */
@@ -953,7 +953,7 @@ INCLUDE_ASM("sound/asyncsys", cAudioInterface_getAI);
  * Returns the game's AI manager (SSXApp->Game->AI).
  *
  * Static accessor of the audio code (On Tour cAudioInterface); dereferences SSXApp->Game without a null check, so it is
- * only valid in a game. func_00286EA0 passes it to cAI_isRaceFinished.
+ * only valid in a game. cSSXAudio_OnFinishEvent passes it to cAI_isRaceFinished.
  *
  * @return SSXApp->Game->AI
  */
@@ -1002,7 +1002,7 @@ INCLUDE_ASM("sound/asyncsys", cAudioInterface_getGameView);
 /**
  * Returns game view @p i's camera: entry @p i of the camera array at +0x4 of SSXApp->Game->ViewMan.
  *
- * cSSXAudio_GetCameraPos and func_00288A20 use it.
+ * cSSXAudio_GetCameraPos and cSSXAudio_GetClosestCamera1 use it.
  *
  * @param i  the view index
  * @return the view's camera
@@ -1076,11 +1076,11 @@ INCLUDE_ASM("sound/asyncsys", cBankInstance__cBankInstance);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern "C" void cBankInstance_Unload(void* self);
-extern "C" void func_0028B730(void* self);
-extern "C" void func_0028B650(void* self);
+extern "C" void cBankInstance_UnshareBank(void* self);
+extern "C" void cBankInstance_DeallocMem(void* self);
 
 /**
- * Destroys a sound-bank instance: unloads it (cBankInstance_Unload), then runs func_0028B730 and func_0028B650, and frees it
+ * Destroys a sound-bank instance: unloads it (cBankInstance_Unload), then runs cBankInstance_UnshareBank and cBankInstance_DeallocMem, and frees it
  * with operator_delete when bit 0 of @p flags is set.
  *
  * cBankManager__cBankManager destroys its bank table with it.
@@ -1090,8 +1090,8 @@ extern "C" void func_0028B650(void* self);
 extern "C" void cBankInstance__cBankInstance(void* self, int flags)
 {
     cBankInstance_Unload(self);
-    func_0028B730(self);
-    func_0028B650(self);
+    cBankInstance_UnshareBank(self);
+    cBankInstance_DeallocMem(self);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -1160,7 +1160,7 @@ public:
  * freed (MEM_free). Result 8 keeps the loaded data (recorded as mpMainMemData and its size for a dynamic bank). Both
  * set +0x0 (mBankStatus) to 1; any other result frees the loaded data (unless it is the instance's main memory) and
  * sets it to 0. Finally calls slot 7 of the same sound-system object and copies @p file into +0x20 (mBankFilename).
- * func_0028BC58 calls it.
+ * cBankManager_BANK_SyncLoad calls it.
  *
  * @param file  the bank file name
  * @param align  allocation flags for FILE_loadsizez when the bank is dynamic (On Tour mainMemFlag); despite the name,

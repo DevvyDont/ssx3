@@ -194,7 +194,7 @@ struct cRider {
     /* 0x760 */ int unk_760; // sound state = cRider_getMotionState(rider), written when it changes (cSSXAudio_HandleAIGlide, cSSXAudio_HandleGlide)
     /* 0x764 */ int unk_764; // written with the same value as 0x760 (cSSXAudio_BeginRiderSound)
     /* 0x768 */ int unk_768; // sound id from cSSXAudio_Surface(self, rider) (cSSXAudio_HandleAIGlide, cSSXAudio_HandleGlide)
-    /* 0x76C */ int unk_76C; // like 0x768; set to 9 on one func_002934D0 result (cSSXAudio_HandleCarve)
+    /* 0x76C */ int unk_76C; // like 0x768; set to 9 on one cSSXAudio_GetSurfaceProgramType result (cSSXAudio_HandleCarve)
     /* 0x770 */ float unk_770; // fed to curve D_00482D30 for the sound volume (cSSXAudio_Land)
     /* 0x774 */ int mWipeoutSlideHandle; // [P] GetWipeoutSlideHandle (bracketed +0x40)
     /* 0x778 */ int mWipeoutTumbleHandle; // [P] GetWipeoutTumbleHandle

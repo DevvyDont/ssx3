@@ -108,7 +108,7 @@ extern char str_FEAsyncManager[];
 extern char D_0047AB40[];
 extern char str_load[];
 extern "C" void* cConsoleConfig_construct();
-extern "C" void* func_00375A08();
+extern "C" void* cGraphicsMan_construct();
 void cLightMan_construct();
 void cBezierMan_construct();
 extern "C" void cSSXApp_parseCommandLine(cSSXApp* self, int argc, char** argv);
@@ -144,7 +144,7 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
     cPlayerMgr_6900* volatile pm = (cPlayerMgr_6900*)cMemMan_alloc(12028, str_PadCache, 0, 0);
     cPadCache_init(pm);
     PadCache = pm;
-    char* graphicsMan = (char*)func_00375A08();
+    char* graphicsMan = (char*)cGraphicsMan_construct();
     GrMan = (cPS2GraphicsMan*)(graphicsMan);
     sVE_6900* vt = ((sGfx_6900*)graphicsMan)->vt;
     ((V0Fn_6900)vt[2].fn)(graphicsMan + vt[2].delta);
@@ -1044,11 +1044,11 @@ extern "C" void* cGameAnimMap_cGameAnimMap(void* self);
 extern "C" void cGameAnimMap_initMap(void* self);
 extern "C" void* cAnimDataBase_cAnimDataBase(void* self);
 extern "C" void* cAudioInterface_bxAudio();
-extern "C" int func_00289D08(void* self, unsigned char a1);
+extern "C" int cSSXAudio_BEAudioModeToAudioMode(void* self, unsigned char a1);
 extern "C" void SSXAUDIO_Init(int a);
 extern "C" void func_0031A6B8();
 extern "C" void func_00287410(void* opt, int v);
-extern "C" void func_00287488(void* opt, int v);
+extern "C" void cSSXAudio_SetSFXVolume(void* opt, int v);
 extern "C" void func_00287520(void* opt, int v);
 extern "C" void cSSXAudio_SetArcadeSFX(void* opt, int v);
 extern "C" void func_002875D0(void* opt, int v);
@@ -1190,10 +1190,10 @@ extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
     cGameAnimMap_initMap(self->f94);
     self->f90 = cAnimDataBase_cAnimDataBase(cMemMan_alloc(0x3FC, str_AnimDataBase, 0, 0));
     cBE_getInterface_Fv(cBE_getBE(), 4);
-    SSXAUDIO_Init(func_00289D08(cAudioInterface_bxAudio(), D_00535610_82D0.output));
+    SSXAUDIO_Init(cSSXAudio_BEAudioModeToAudioMode(cAudioInterface_bxAudio(), D_00535610_82D0.output));
     func_0031A6B8();
     func_00287410(cAudioInterface_bxAudio(), Cfg_82D0().sfxVol);
-    func_00287488(cAudioInterface_bxAudio(), Cfg_82D0().speechVol);
+    cSSXAudio_SetSFXVolume(cAudioInterface_bxAudio(), Cfg_82D0().speechVol);
     func_00287520(cAudioInterface_bxAudio(), Cfg_82D0().musicVol);
     cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_82D0().f17 != 0);
     func_002875D0(cAudioInterface_bxAudio(), Cfg_82D0().f16 != 0);
@@ -1368,7 +1368,7 @@ struct sVE_228C08 {
  * Applies the saved display options to the graphics manager: the TV display format and the screen offset.
  *
  * Passes the options' 2-bit display format (bits 20-21 of cBEOptionInterface_mOption; values above 2 count as 0) to GrMan's
- * slot 40 (0 normal, 1 letterbox, 2 widescreen, by the scales func_00377950 sets), then option bytes 6 and 5
+ * slot 40 (0 normal, 1 letterbox, 2 widescreen, by the scales cPS2GraphicsMan_SetTVDisplayFormat sets), then option bytes 6 and 5
  * to slot 12, the screen x and y offset. The C takes no arguments; initload passes the app anyway.
  */
 extern "C" void cSSXApp_activateBEOptions()
@@ -3729,8 +3729,8 @@ extern "C" void cUIEngine_render2D(void* p);
 void cWScriptMan_render(void* p);
 void cSSXScriptEngine_Render(void* p);
 extern "C" void cBXLoadIndicator_Render(void* p);
-extern "C" void func_00285BF8(void* snd, float dt, int a2);
-extern "C" void func_002B5D78(void* p);
+extern "C" void cSSXAudio_Update(void* snd, float dt, int a2);
+extern "C" void cWorldTriggerManager_Update(void* p);
 extern void* gWorldTriggerManager;
 
 struct sV4_22B008 {
@@ -4186,8 +4186,8 @@ extern "C" int cGame_render(sGame_22B008* self)
     cSSXScriptEngine_Render(ScriptEngine);
     cBXLoadIndicator_Render(self->f94);
     ((cGfx_22B008*)GrMan)->v20();
-    func_00285BF8(gSSXAudio, (float)self->frames * (1.0f / 60.0f), 1);
-    func_002B5D78(gWorldTriggerManager);
+    cSSXAudio_Update(gSSXAudio, (float)self->frames * (1.0f / 60.0f), 1);
+    cWorldTriggerManager_Update(gWorldTriggerManager);
     self->frames = 0;
     return 1;
 }

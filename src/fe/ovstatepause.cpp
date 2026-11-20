@@ -25,7 +25,7 @@ extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, ...);
 extern "C" void cUIText_setUnicodeString(void* obj, unsigned short* s);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_00287410(void* snd, int v);
-extern "C" void func_00287488(void* snd, int v);
+extern "C" void cSSXAudio_SetSFXVolume(void* snd, int v);
 extern "C" void func_00287520(void* snd, int v);
 extern "C" void cSSXAudio_SetArcadeSFX(void* snd, int v);
 extern "C" void func_002875D0(void* snd, int v);
@@ -256,7 +256,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
         if (w != 0) {
             w->max = 12;
             w->value = iface->getOptions().f8;
-            func_00287488(cAudioInterface_bxAudio(), Cfg_PO().f8);
+            cSSXAudio_SetSFXVolume(cAudioInterface_bxAudio(), Cfg_PO().f8);
         }
     }
     {
@@ -412,7 +412,7 @@ extern "C" int cUIListBox_getCurrentEntryData(void* obj);
 extern "C" void cChaseCameraController_switchCamera_UserChange(void* a0, int a1, void* a2);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_00287410(void* snd, int v);
-extern "C" void func_00287488(void* snd, int v);
+extern "C" void cSSXAudio_SetSFXVolume(void* snd, int v);
 extern "C" void func_00287520(void* snd, int v);
 extern "C" void cSSXAudio_SetArcadeSFX(void* snd, int v);
 extern "C" void func_002875D0(void* snd, int v);
@@ -526,7 +526,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(void* self, char* obj, unsi
             func_00287410(cAudioInterface_bxAudio(), iface->getOptions().f0);
         } else if (IsId_A238(obj, str_5sl)) {
             SetF8_A238(*(int*)(obj + 0x74));
-            func_00287488(cAudioInterface_bxAudio(), iface->getOptions().f8);
+            cSSXAudio_SetSFXVolume(cAudioInterface_bxAudio(), iface->getOptions().f8);
         } else if (IsId_A238(obj, str_6sl)) {
             SetF4_A238(*(int*)(obj + 0x74));
             func_00287520(cAudioInterface_bxAudio(), iface->getOptions().f4);

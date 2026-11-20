@@ -1936,7 +1936,7 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_processLocalMissionCmd);
 extern "C" void cWScriptMan_updateWorld(cWScriptMan* self);
 extern "C" void cWScriptMan_doMissionCmd(void* self, int id, int a2, int a3);
 extern "C" void* cAudioInterface_bxAudio();
-extern "C" void func_0029D6E0(void* snd, int a1);
+extern "C" void cSSXAudio_BigChallengeBegin(void* snd, int a1);
 extern "C" void cSSXAudio_BigChallengeFailed(void* snd, int a1);
 extern "C" void cReplay_startRace(void* p);
 extern "C" void cPlaybackMan_startPreview(void* p);
@@ -1945,7 +1945,7 @@ extern "C" void cPlaybackMan_startPreview(void* p);
  * Carries out the local mission request queued by the menus, then clears it.
  *
  * Switches on the request at +0x2AC for the mission saved in +0x2B0: 1 (cWScriptMan_startLocalMission) updates the world, sends mission
- * command 1, plays the big-challenge start audio (func_0029D6E0) and calls cReplay_startRace; 2
+ * command 1, plays the big-challenge start audio (cSSXAudio_BigChallengeBegin) and calls cReplay_startRace; 2
  * (cWScriptMan_restartLocalMission) sends command 3; 3 (cWScriptMan_cancelLocalMission) and 4
  * (cWScriptMan_quitLocalMission) send commands 18 and 5, update the world and play the failure audio
  * (cSSXAudio_BigChallengeFailed); 5 (cWScriptMan_previewLocalMission) starts the playback preview (cPlaybackMan_startPreview), sends
@@ -1961,7 +1961,7 @@ extern "C" void cWScriptMan_processLocalMissionCmd(cWScriptMan* vself)
     case 1:
         cWScriptMan_updateWorld(vself);
         cWScriptMan_doMissionCmd(((char*)vself), (int)vself->LocalMissionCmdId, 1, 0);
-        func_0029D6E0(cAudioInterface_bxAudio(), (int)vself->LocalMissionId);
+        cSSXAudio_BigChallengeBegin(cAudioInterface_bxAudio(), (int)vself->LocalMissionId);
         cReplay_startRace(SSXApp->Game->Replay);
         break;
     case 2:

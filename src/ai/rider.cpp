@@ -166,8 +166,8 @@ struct sVE_11B978 {
     void (*fn)(void*, int);
 };
 extern "C" void* cAudioInterface_bxAudio();
-// PORT: func_00289AF8 takes (mgr, rider); the mangled name says one void* param.
-void func_00289AF8_impl(void* mgr, void* rider) __asm__("func_00289AF8__FPv");
+// PORT: cSSXAudio_RiderDeleted takes (mgr, rider); the mangled name says one void* param.
+void cSSXAudio_RiderDeleted_impl(void* mgr, void* rider) __asm__("cSSXAudio_RiderDeleted__FPv");
 extern "C" void cScriptObject_DeInitScriptObject(void* p);
 extern "C" void cScriptObject__cScriptObject(void* p, int flags);
 extern "C" void cAnimModel__cAnimModel(void* p, int flags);
@@ -193,7 +193,7 @@ static inline void vdel_11B978(char* o, int off)
 /**
  * Destroys a rider: frees the helper objects it owns, then unwinds its base classes.
  *
- * Reinstalls the cRider vtables, stops the rider's sounds (func_00289AF8), deinitialises the script object
+ * Reinstalls the cRider vtables, stops the rider's sounds (cSSXAudio_RiderDeleted), deinitialises the script object
  * and deletes mRiderAnim, mAnimModel, mSphereTree, the path hints, mAirPredictor, the focus box (after taking
  * it out of the AI's focus manager), mMetrix, the overlap list, the wall and line hints, the bolt-on and
  * attached-emitter FX and mShadow. Then restores the base vtables, runs cScriptObject__cScriptObject() and
@@ -206,7 +206,7 @@ extern "C" void cRider__cRider(cRider* self, int flags)
     self->mScriptObjectVtbl = D_00459BD0;
     self->mScriptObjRiderVtbl = D_00459B90;
     self->mVtbl = D_00459C18;
-    func_00289AF8_impl(cAudioInterface_bxAudio(), self);
+    cSSXAudio_RiderDeleted_impl(cAudioInterface_bxAudio(), self);
     cScriptObject_DeInitScriptObject(self->unk_6DC);
     char* polyMember = (char*)self->mRiderAnim;
     if (polyMember != 0)
@@ -4005,7 +4005,7 @@ struct sPath_20D8 {
     int pad;
     sQ_20D8 q[5];
 };
-extern "C" void func_00389260(void* p);
+extern "C" void cIrradiance_Clear(void* p);
 extern "C" void* cRenderStateMan_getIrradiance(void* p);
 extern "C" float cRenderStateMan_RimLightIntensityOffset(void* p);
 extern "C" void* cRider_getHipPosition(void* dst, cRider* self);
@@ -4025,7 +4025,7 @@ extern "C" void func_00389520(void* m, sQ_20D8* q, sV3_20D8* v);
 extern "C" void cRider_SetRiderLights(cRider* self)
 {
     sQ_20D8 hipPos;
-    func_00389260(self->unk_7C0);
+    cIrradiance_Clear(self->unk_7C0);
     {
         char* obj = (char*)&self->mVtbl;
         sVE_20D8* vt = *(sVE_20D8**)obj;
@@ -4449,7 +4449,7 @@ extern sV3_2898 D_004A5E40;
 
 extern "C" void func_00374D00(void* obj, sV3_2898* a, sV3_2898* b, sV3_2898* dir, sMat_2898* bones, int f);
 extern "C" void cAnimModel_rendershadow(void* model, int lod, sV4_2898* a, sV4_2898* b);
-extern "C" void func_00375890(void* obj);
+extern "C" void cPlayerShadow_AddShadow(void* obj);
 int cRider_getMotionState(void*);
 
 // PORT: PS2-only VU0 inline asm (vector add).
@@ -4524,7 +4524,7 @@ static inline sRS_2898*& top_2898(void* g) { return *(sRS_2898**)((char*)g + 0xE
  * centred between bones unk_918 and unk_8E8, lit straight down, with the rider's up axis, renders the model's
  * shadow pass (cAnimModel_rendershadow at LOD 3; board colour grey 0.3, black on the ground; shadow colour grey 0.3)
  * through graphics slots 31, 53, 55, 101, 54 and 32, and pops the state. The shadow itself is drawn on every
- * call (func_00375890).
+ * call (cPlayerShadow_AddShadow).
  */
 extern "C" void cRider_RenderShadow(cRider* self)
 {
@@ -4598,7 +4598,7 @@ extern "C" void cRider_RenderShadow(cRider* self)
         cPS2GraphicsMan* grManPopState = GrMan;
         top_2898(grManPopState)--;
     }
-    func_00375890(Shadow_2898(self));
+    cPlayerShadow_AddShadow(Shadow_2898(self));
 }
 #endif
 
@@ -6567,7 +6567,7 @@ INCLUDE_ASM("ai/rider", cRider_doFinishEvent);
 extern "C" float cRiderMetrix_evFinishRace(void* self);
 extern "C" void cChaseCameraController_switchCamera_EndRace(void* self);
 extern "C" void cGameModeMan_raceFinish(void* self, int a1, int a2);
-extern "C" void func_00286EA0(void* self, void* rider);
+extern "C" void cSSXAudio_OnFinishEvent(void* self, void* rider);
 extern "C" void* cAudioInterface_bxAudio();
 
 struct sVEntry125108 { short delta; short index; int (*fn)(void*); };
@@ -6583,7 +6583,7 @@ static inline void* getC0_125108()
  * Online (cGameComm present), a human who finished sets the local or remote finished flag. Calls the metrix
  * finish (cRiderMetrix_evFinishRace), sets mFinishTick to the race clock plus mPenaltyTicks and mFinishTime to at least
  * 0, reports cGameModeMan_raceFinish(AI index, the metrix's stats at +0xFC), switches a split-screen rider's
- * chase camera to the end-race camera and calls func_00286EA0 on the audio system. A rider who did not finish
+ * chase camera to the end-race camera and calls cSSXAudio_OnFinishEvent on the audio system. A rider who did not finish
  * also gets unk_100 cleared.
  */
 extern "C" void cRider_doFinishEvent(cRider* self)
@@ -6608,7 +6608,7 @@ extern "C" void cRider_doFinishEvent(cRider* self)
         char* tbl = (char*)SSXApp->Game->ViewMan;
         cChaseCameraController_switchCamera_EndRace(*(void**)(*(char**)(tbl + (k << 2) + 4) + 0xA8));
     }
-    func_00286EA0(cAudioInterface_bxAudio(), self);
+    cSSXAudio_OnFinishEvent(cAudioInterface_bxAudio(), self);
     if (self->mDidNotFinish == 1) self->unk_100 = 0;
 }
 #endif
@@ -6716,8 +6716,8 @@ extern "C" void* cAudioInterface_bxAudio();
 extern "C" int cBankMonitor_BANKMONITOR_GetHandle(void* bank, int id, int a);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* bank, int id, int a, float f);
 void cScriptObjRider_ScriptSoundIDToGameSoundInfo(void* self, int a1, void* a2, void* a3);
-extern "C" int func_00287968(void* self, int a1, int a2);
-extern "C" int func_00288A20(void* self, void* rider);
+extern "C" int cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
+extern "C" int cSSXAudio_GetClosestCamera1(void* self, void* rider);
 extern "C" int cBankSys_SFX_End(void* self);
 extern "C" void* func_00416210(void* dst, int c, int n);
 
@@ -6794,8 +6794,8 @@ struct sSfxEnt_5448 {
  * First forgets any of the rider's 4 sequence sound handles (+0xB08) the bank monitor no longer has. On a key event
  * (bit 0 of @p flags) it walks the frame's sound list (+0xC of @p vobj) while each entry's frame equals @p when, maps
  * the script sound id (cScriptObjRider_ScriptSoundIDToGameSoundInfo), fills a new sound-play slot in the audio system with defaults, the entry's
- * volume (clamped 0..127), the volume control (func_00287968) and the rider's position and closest camera
- * (func_00288A20), starts it (cBankSys_SFX_End) and keeps the handle in the entry's slot. At the end of the sequence
+ * volume (clamped 0..127), the volume control (cSSXAudio_GetCurrAppliedVolumePtr) and the rider's position and closest camera
+ * (cSSXAudio_GetClosestCamera1), starts it (cBankSys_SFX_End) and keeps the handle in the entry's slot. At the end of the sequence
  * (bit 1) every slot no longer in the list is stopped.
  *
  * @param vself  the rider (this)
@@ -6860,14 +6860,14 @@ extern "C" void cRider_DoInSeqSoundUpdate(cRider* vself, void* vobj, float when,
             }
             {
                 sWtTrack_5448** pt = snd->cur;
-                int h = func_00287968(snd, 4, 0);
+                int h = cSSXAudio_GetCurrAppliedVolumePtr(snd, 4, 0);
                 (*pt)->sub.p3C[(*pt)->sub.cur] = h;
             }
             {
                 sWtTrack_5448* posTrack = *snd->cur;
                 posTrack->sub.arr24[posTrack->sub.cur] = (int)rp;
                 sWtTrack_5448** pt = snd->cur;
-                int h = func_00288A20(snd, self);
+                int h = cSSXAudio_GetClosestCamera1(snd, self);
                 (*pt)->sub.p64[(*pt)->sub.cur] = h;
             }
             *(int*)((char*)ids + (curSound->slot << 2)) = cBankSys_SFX_End(snd);

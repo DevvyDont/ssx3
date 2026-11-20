@@ -570,8 +570,8 @@ extern "C" void cUIEngine_render2D(void* p);
 extern "C" void cBXLoadIndicator_Render(void* p);
 extern "C" int cMenuSys_isActive(void* p);
 extern "C" void cMenuSys_render(void* p);
-extern "C" void func_00285BF8(void* self, int a, float dt);
-extern "C" void func_002B5D78(void* p);
+extern "C" void cSSXAudio_Update(void* self, int a, float dt);
+extern "C" void cWorldTriggerManager_Update(void* p);
 
 /**
  * Finishes a game frame: draws each view's bucket 3, then the full-screen 2D overlays, and runs the per-frame audio and
@@ -584,8 +584,8 @@ extern "C" void func_002B5D78(void* p);
  * colour (1, 0.8, 0.8, 0), and draws the script engine (cSSXScriptEngine_Render(ScriptEngine)), the UI (cUIEngine_render2D on +0x48),
  * the load indicator (cBXLoadIndicator_Render on +0x94) and, when cMenuSys_isActive, the debug menu system (cMenuSys_render on
  * +0xA4). It calls GrMan slot 14 with a zero vector and slot 19 with cDepthFog_m_Enable cleared for the call, then
- * advances the audio by mUpdateTick / 60 seconds (func_00285BF8(gSSXAudio, 1, ..)), runs
- * func_002B5D78(gWorldTriggerManager) and zeroes mUpdateTick (+0xAC). cGame_render calls it at the end of each of its
+ * advances the audio by mUpdateTick / 60 seconds (cSSXAudio_Update(gSSXAudio, 1, ..)), runs
+ * cWorldTriggerManager_Update(gWorldTriggerManager) and zeroes mUpdateTick (+0xAC). cGame_render calls it at the end of each of its
  * three render paths.
  */
 extern "C" void func_0022C830(sGame_C830* self)
@@ -639,8 +639,8 @@ extern "C" void func_0022C830(sGame_C830* self)
     *depthFogEnable = 0;
     ((cGfx_C830*)GrMan)->v19();
     *depthFogEnable = saved;
-    func_00285BF8(gSSXAudio, 1, (float)self->frames * (1.0f / 60.0f));
-    func_002B5D78(gWorldTriggerManager);
+    cSSXAudio_Update(gSSXAudio, 1, (float)self->frames * (1.0f / 60.0f));
+    cWorldTriggerManager_Update(gWorldTriggerManager);
     self->frames = 0;
 }
 #endif

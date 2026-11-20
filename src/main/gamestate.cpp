@@ -24,8 +24,8 @@ extern "C" void* cAudioInterface_bxAudio(void);
 extern "C" void cGameComm_gameStartGate(void* p);
 extern "C" void cGame_resetWorld(void* self);
 extern "C" void cReplay_startRace(void* p);
-void func_0029C418(void* p);
-extern "C" void func_0029C420(void* p, int a1);
+void cSSXAudio_CountdownStart(void* p);
+extern "C" void cSSXAudio_CountdownBeep(void* p, int a1);
 extern "C" void cGFGateState_runScript(void* self, int a1);
 int GetHashValue32(char* s);
 extern char* cGameState_mpGame;
@@ -63,8 +63,8 @@ extern "C" void cGFGateState_gainFocus(void* self)
         return;
     }
     cAI_setAIState(*(void**)(cGameState_mpGame + 0xC), 4);
-    func_0029C418(cAudioInterface_bxAudio());
-    func_0029C420(cAudioInterface_bxAudio(), 3);
+    cSSXAudio_CountdownStart(cAudioInterface_bxAudio());
+    cSSXAudio_CountdownBeep(cAudioInterface_bxAudio(), 3);
     cGFGateState_runScript(self, GetHashValue32(str_StartlightBegin));
     cUIStateStack_purgeNormalStates(*(char**)(cGameState_mpGame + 0x48) + 0x18);
 }
@@ -112,10 +112,10 @@ extern "C" int cReplay_isPauseAI(void* p);
 extern "C" void cGFGateState_runScript(void* self, int a1);
 extern "C" void* cUIStateStack_findState(void* list, int hash);
 extern "C" void* cAudioInterface_bxAudio(void);
-extern "C" void func_0029C7B0(void* p);
+extern "C" void cSSXAudio_CountdownGateDrop(void* p);
 void func_0028C8C0(void* self, int val);
 extern "C" void cGameState_gotoNextState(void* self);
-extern "C" void func_0029C420(void* p, int secs);
+extern "C" void cSSXAudio_CountdownBeep(void* p, int secs);
 extern char* cGameState_mpGame;
 extern signed char D_00535C10[];
 extern char str_StartgateOpen[];
@@ -162,14 +162,14 @@ extern "C" void cGFGateState_update(void* self)
             sVEntry00234C68* vtEntry = &(*(sVEntry00234C68**)(obj + 8))[24];
             vtEntry->fn(obj + vtEntry->delta, 6, 0);
         }
-        func_0029C7B0(cAudioInterface_bxAudio());
+        cSSXAudio_CountdownGateDrop(cAudioInterface_bxAudio());
         func_0028C8C0(cAudioInterface_bxAudio(), 0x78);
         cGameState_gotoNextState(self);
     }
     int frames = *(int*)(*(char**)(cGameState_mpGame + 0xC) + 0x1C);
     float secs = frames / 60;
     if (frames % 60 == 0) {
-        func_0029C420(cAudioInterface_bxAudio(), (int)ffloor_00234C68(secs));
+        cSSXAudio_CountdownBeep(cAudioInterface_bxAudio(), (int)ffloor_00234C68(secs));
     }
 }
 #endif
@@ -2005,7 +2005,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cSSXScriptEngine_ResetNISList(void* a, int b);
 extern "C" void* cAudioInterface_bxAudio(void);
-extern "C" void func_002871B0(void* mgr);
+extern "C" void cSSXAudio_ResetAudioVariables(void* mgr);
 extern char* cGameState_mpGame;
 extern signed char D_00535C10[];
 
@@ -2018,7 +2018,7 @@ static inline int isMode4_236CD8()
  * Resets the race for the event: clears the NIS list, sets the AI back, and resets the audio.
  *
  * Calls cSSXScriptEngine_ResetNISList(ScriptEngine, 0); unless the race's game mode (cGameMode, D_00535C10) is 4, calls
- * virtual slot 5 of the game's AI with 3 and sets the AI's +0x14 to 1; then func_002871B0 on the audio (cAudioInterface_bxAudio).
+ * virtual slot 5 of the game's AI with 3 and sets the AI's +0x14 to 1; then cSSXAudio_ResetAudioVariables on the audio (cAudioInterface_bxAudio).
  */
 extern "C" void cGFPreEventState_ResetGameState(void* self)
 {
@@ -2028,7 +2028,7 @@ extern "C" void cGFPreEventState_ResetGameState(void* self)
         (*(cRace236CD8**)(cGameState_mpGame + 0xC))->v05(3);
         *(int*)(*(char**)(cGameState_mpGame + 0xC) + 0x14) = 1;
     }
-    func_002871B0(cAudioInterface_bxAudio());
+    cSSXAudio_ResetAudioVariables(cAudioInterface_bxAudio());
 }
 #endif
 

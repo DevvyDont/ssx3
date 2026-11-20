@@ -214,7 +214,7 @@ extern "C" void cInstanceNode_buildMeshMat(void* obj, int a1, sMat_5400* out);
 extern "C" void cOverlapList_gettyped(void* cell, sAABox_5400* box);
 extern "C" sLightSet_5400* cRenderStateMan_getCustomIrradiance(void);
 extern "C" int cIrradianceDataBase_GetIDByName(void*, void*);
-extern "C" sLightSet_5400* func_0038ABF8(void* self, int i);
+extern "C" sLightSet_5400* cIrradianceDataBase_Get(void* self, int i);
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline sVec_5400 Sub_5400(const sVec_5400& a, const sVec_5400& b)
@@ -281,7 +281,7 @@ static inline sLightSet_5400* Resolve_5400(sLightRef_5400* ref)
         ref->handle = cIrradianceDataBase_GetIDByName(D_005047F8, ref);
         ref->magic = 0x123400;
     }
-    return func_0038ABF8(D_005047F8, ref->handle);
+    return cIrradianceDataBase_Get(D_005047F8, ref->handle);
 }
 
 // Pushes node onto the front of hash chain heads[slot].
@@ -411,7 +411,7 @@ extern "C" sLightSet_5400* cWorldLightMan_getRealTimeLights(sMan_5400* self, cha
                     if (*(signed char*)ref != 0) {
                         node->target = *Resolve_5400(ref);
                     } else {
-                        node->target = *func_0038ABF8(D_005047F8, D_004A43C4);
+                        node->target = *cIrradianceDataBase_Get(D_005047F8, D_004A43C4);
                     }
                 }
             }

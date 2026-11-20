@@ -4,7 +4,7 @@
 // cPS2GraphicsMan: the PS2 renderer (one instance). It owns the matrix/viewport stacks, the projective textures,
 // the deferred draw list (cPS2DeferManager), the texture manager, the VIF/GIF double buffers and the DMA kick thread
 // that flips the frame. Size 0x75E0: cMemMan_alloc(0x75E0, "PS2GraphicsMan") + cPS2GraphicsMan ctor cPS2GraphicsMan_cPS2GraphicsMan in
-// its create function func_00375A08. Base class cGraphicsMan (ctor cGraphicsMan_cGraphicsMan, dtor cGraphicsMan__cGraphicsMan, vtable
+// its create function cGraphicsMan_construct. Base class cGraphicsMan (ctor cGraphicsMan_cGraphicsMan, dtor cGraphicsMan__cGraphicsMan, vtable
 // cGraphicsMan_vtbl): its data is 0x0-0x10D8 and it declares the virtuals, so the vptr is at +0x10D8 (cPS2GraphicsMan's
 // vtable cPS2GraphicsMan_vtbl, 124 slots, stored by cPS2GraphicsMan_cPS2GraphicsMan). EA paths (preview asserts): source/render/graphicsman.cpp,
 // source/render/graphicsman.h, source/render/ps2graphicsman.cpp/.h.
@@ -65,7 +65,7 @@ struct tTVDisplayFormat {
 // cPS2GraphicsMan_AddProjectiveTexture (cPS2GraphicsMan's override) copies in order. EA's type name is not known.
 struct tProjTexInfo {
     t4Vector unk_00;                // 0x00 [U] cPS2GraphicsMan_AddProjectiveTexture (first argument)
-    t4Matrix unk_10;                // 0x10 [U] cPS2GraphicsMan_AddProjectiveTexture (second argument); passed to slot 93 by func_0037DF88
+    t4Matrix unk_10;                // 0x10 [U] cPS2GraphicsMan_AddProjectiveTexture (second argument); passed to slot 93 by cPS2GraphicsMan_CheckProjectiveTexturesHits
     t4Matrix unk_50;                // 0x50 [U] cPS2GraphicsMan_AddProjectiveTexture (third argument)
     float unk_90;                   // 0x90 [U] cPS2GraphicsMan_AddProjectiveTexture (float argument)
     int unk_94;                     // 0x94 [U] cPS2GraphicsMan_AddProjectiveTexture (int argument)
@@ -128,7 +128,7 @@ struct cPS2GraphicsMan {
     float mFarPlane;                // 0x26C [O]; [R] ctor stores 0
     int mNumViews;                  // 0x270 [O]; [R] ctor stores 1; accessors cGraphicsMan_SetNumViews/cGraphicsMan_GetNumViews
     int mViewIndex;                 // 0x274 [O]; [R] ctor stores 0; accessors cGraphicsMan_SetViewIndex/cGraphicsMan_GetViewIndex
-    int mNumTextureFiles;           // 0x278 [O]; [U] func_00369890 / cGraphicsMan_GetTextureID
+    int mNumTextureFiles;           // 0x278 [O]; [U] cGraphicsMan_InitTextureFiles / cGraphicsMan_GetTextureID
     void** mTextureFiles;           // 0x27C [O] const char**; [U] cGraphicsMan_GetTextureID passes each to SHAPE_locatez
     tTextureRef mTexRefs[256];      // 0x280 [O]; [U] cGraphicsMan_GetTextureID
     int mNumTexRefs;                // 0xE80 [O]; [P] GetNumTexRefs (cGraphicsMan_GetNumTexRefs)
@@ -259,7 +259,7 @@ struct cPS2GraphicsMan {
     int unk_6C54[4];                // 0x6C54 [R] Init zeroes them
     char unk_6C64[0x70];            // 0x6C64 [U] per-view depth-fog entries, 0x20 each (func_0036ABA0, func_0036A428)
     float unk_6CD4[2][7];           // 0x6CD4 [U] per-view bloom parameters (func_0036C740, func_0036C790)
-    void (*mPhase2Callback)(int);   // 0x6D0C [X] phase2Callback; [U] func_003866E0 sets, func_00382760 calls
+    void (*mPhase2Callback)(int);   // 0x6D0C [X] phase2Callback; [U] cPS2GraphicsMan_SetLensFXCallBack sets, func_00382760 calls
     int mPhase2CallbackArg;         // 0x6D10 [X]
     int mShinyBoarder;              // 0x6D14 [P] SetShinyBoarder (cPS2GraphicsMan_SetShinyBoarder) bool
     char unk_6D18[0x8];             // 0x6D18 padding to 16

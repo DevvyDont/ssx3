@@ -2985,7 +2985,7 @@ extern "C" int cOVStateManager_allowPauseMenu(void);
 extern "C" void cPadCache_clearAllVibrations(void* p);
 extern "C" void func_0020CA10(void);
 extern "C" void cSSXAudio_PauseAudio(void* snd);
-extern "C" void func_00294F48(void* snd);
+extern "C" void cSSXAudio_PlayPauseSound(void* snd);
 extern "C" int cOVStateManager_pauseOverlayActive(void);
 extern "C" void cPlaybackMan_update(void* p);
 int GetHashValue32(char* str);
@@ -3143,7 +3143,7 @@ extern "C" bool cGame_updateUI(sApp_4B48* self)
         sUIObj_4B48* uiObject = self->ui->fC;
         uiObject->vt[44].fn((char*)uiObject + uiObject->vt[44].delta, self->f228);
         cSSXAudio_PauseAudio(cAudioInterface_bxAudio());
-        func_00294F48(cAudioInterface_bxAudio());
+        cSSXAudio_PlayPauseSound(cAudioInterface_bxAudio());
         return false;
     }
     int wasPaused = cPauseState_Flags & 1;

@@ -909,7 +909,7 @@ extern "C" void* cAnimObjectNode_cAnimObjectNode1(void* self, int a, int type, v
 extern "C" bool tActiveAvalancheNode_update_7EF8(void* node, float t) __asm__("tActiveAvalancheNode_update");
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void tActiveAvalanche_end_7EF8(void* self) __asm__("tActiveAvalanche_end");
-void func_0029E560_7EF8(void* snd, const sAvV4_7EF8& pos) __asm__("func_0029E560__FPv");
+void cSSXAudio_AvalancheGroundHit_7EF8(void* snd, const sAvV4_7EF8& pos) __asm__("cSSXAudio_AvalancheGroundHit__FPv");
 
 static inline unsigned short soundFrame_7EF8(const sAvActive_7EF8* a)
 {
@@ -959,13 +959,13 @@ extern "C" void tActiveAvalanche_update_7EF8(sAvActive_7EF8* self)
             }
             cAnimObjectNode_cAnimObjectNode1(cMemMan_alloc(108, str_AnimObject_b, 0x20000000, 0), 1, 1, self->data->events[self->nextEvent].obj, &D_004D5770);
         }
-        func_0029E560_7EF8(cAudioInterface_bxAudio(), pos_7EF8(self->data->events[self->nextEvent].obj));
+        cSSXAudio_AvalancheGroundHit_7EF8(cAudioInterface_bxAudio(), pos_7EF8(self->data->events[self->nextEvent].obj));
         self->nextEvent++;
     }
     while (self->nextSound < self->data->nSounds && (float)soundFrame_7EF8(self) <= toFrames_7EF8(self->time)) {
         sAvObj_7EF8* cueObj = self->objs[self->data->sounds[self->nextSound].obj];
         if (cueObj != 0) {
-            func_0029E560_7EF8(cAudioInterface_bxAudio(), cueObj->sndPos);
+            cSSXAudio_AvalancheGroundHit_7EF8(cAudioInterface_bxAudio(), cueObj->sndPos);
         }
         self->nextSound++;
     }
@@ -980,14 +980,14 @@ INCLUDE_ASM("visualfx/avalanche", tActiveAvalanche_end);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 extern "C" void* cAudioInterface_bxAudio();
-extern "C" void func_0029DEF0(void* self, int a1);
+extern "C" void cSSXAudio_Avalanche(void* self, int a1);
 
 /**
  * Stops an active avalanche and releases what it holds.
  *
  * Frees the array at +0x8. If the avalanche is running (+0x0), every node in the list from +0x4 is ended with
  * tActiveAvalancheNode_end(node, 1), the running flag is cleared, the audio interface's avalanche sound is switched off
- * (func_0029DEF0 with 0) and the counter at +0x708 of the AI's +0xA8 object is decremented if non-zero.
+ * (cSSXAudio_Avalanche with 0) and the counter at +0x708 of the AI's +0xA8 object is decremented if non-zero.
  */
 extern "C" void tActiveAvalanche_end(void* self)
 {
@@ -1002,7 +1002,7 @@ extern "C" void tActiveAvalanche_end(void* self)
             n = *(char**)(n + 0x2E4);
         }
         *(int*)self = 0;
-        func_0029DEF0(cAudioInterface_bxAudio(), 0);
+        cSSXAudio_Avalanche(cAudioInterface_bxAudio(), 0);
         char* dangerMan = (char*)SSXApp->Game->AI->DangerMan;
         if (*(int*)(dangerMan + 0x708) != 0) {
             *(int*)(dangerMan + 0x708) = *(int*)(dangerMan + 0x708) - 1;
@@ -2136,7 +2136,7 @@ extern "C" float cRenderStateMan_SnowFlakeColourB(int a);
 extern "C" void cBaseClass_DynamicEmitter_setupEmitter(void* self, void* node, float k);
 extern "C" void tActiveAvalancheNode_calculateScale(void* self, float t);
 
-extern "C" void func_0029DEF0(void* self, int a1);
+extern "C" void cSSXAudio_Avalanche(void* self, int a1);
 extern void* cAvalanche_m_avalancheList;
 
 struct sVec_D97A8 {
@@ -2222,7 +2222,7 @@ extern sAvSlot_D97A8 D_slots_D97A8[] __asm__("cAvalanche_m_activeAvalanches");
  * Starts the avalanche with the given id in a free active slot.
  *
  * Gives each of its nodes a free active node from the 64-entry pool (position, rotation, scale, and for nodes
- * with an emitter a reset emitter in the snow-flake colour), builds the node array, calls func_0029DEF0(sound
+ * with an emitter a reset emitter in the snow-flake colour), builds the node array, calls cSSXAudio_Avalanche(sound
  * manager, 1) and counts the avalanche in the danger manager (+0x708).
  *
  * @param id  avalanche id
@@ -2291,7 +2291,7 @@ extern "C" int cAvalanche_triggerAvalanche(int id)
                 }
             }
             tActiveAvalanche_buildArray((tActiveAvalanche*)slot);
-            func_0029DEF0(cAudioInterface_bxAudio(), 1);
+            cSSXAudio_Avalanche(cAudioInterface_bxAudio(), 1);
             (*(int*)((char*)SSXApp->Game->AI->DangerMan + 0x708))++;
             return slot - D_slots_D97A8;
         }

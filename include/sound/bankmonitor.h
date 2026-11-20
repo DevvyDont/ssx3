@@ -68,13 +68,13 @@ struct cDelayOpts {
 };
 
 // One of cMonitor's 48 timed callbacks (On Tour class cMonitorInstance, 0x2C). Methods 0x2AD848..0x2AD998: ctor
-// func_002AD848__FPv, dtor func_002AD860, Create cMonitorInstance_Create, IsFree cMonitorInstance_IsFree, Reset cMonitorInstance_Reset, CountReset
-// func_002AD970__FPvi, Enable func_002AD980__FPv, Disable func_002AD990__FPv (On Tour's order).
+// cMonitorInstance_cMonitorInstance__FPv, dtor cMonitorInstance__cMonitorInstance, Create cMonitorInstance_Create, IsFree cMonitorInstance_IsFree, Reset cMonitorInstance_Reset, CountReset
+// cMonitorInstance_CountReset__FPvi, Enable cMonitorInstance_Enable__FPv, Disable cMonitorInstance_Disable__FPv (On Tour's order).
 struct cMonitorInstance {
     int mEnabled;           // 0x00 [O]; [U] Enable stores 1, Disable 0
     int mCountReset;        // 0x04 [O]; [R] ctor -1; [U] CountReset stores it and mCountdown; IsFree tests == -1
     int mCountdown;         // 0x08 [O]; [U] CountReset
-    tSndCallback mCallback; // 0x0C [O] (On Tour: a member-function pointer); [U] Create copies 8 bytes (sdl/sdr); func_002ADDE0 compares its index (0xE) and function (0x10)
+    tSndCallback mCallback; // 0x0C [O] (On Tour: a member-function pointer); [U] Create copies 8 bytes (sdl/sdr); cMonitor_MONITOR_DestroyAll1 compares its index (0xE) and function (0x10)
     int mCounter;           // 0x14 [O]
     void* mPtr;             // 0x18 [O]; [U] Create stores its Ptr argument
     int mData1;             // 0x1C [O]; [U] Create
@@ -107,9 +107,9 @@ struct cMonitor {
     // --- cMonitor (On Tour: mCounter 0x8C .. mMonitorInstance 0x9C, 4 bytes later than retail)
     volatile int mCounter;           // 0x088 [P] MONITOR_Counter / MONITOR_Delta (preview 0x7C, seen); [R] ctor 0; [U] MONITOR_Update (cMonitor_MONITOR_Update) increments it unless paused
     volatile int mLastCounter;       // 0x08C [P] MONITOR_Delta (preview 0x80, seen); [R] ctor 0
-    volatile int mReEntryCheck;      // 0x090 [O]; [R] ctor 0; [U] MONITOR_Create (func_002ADCA0) ++/-- around the slot search
+    volatile int mReEntryCheck;      // 0x090 [O]; [R] ctor 0; [U] MONITOR_Create (cMonitor_MONITOR_Create) ++/-- around the slot search
     int mPaused;                     // 0x094 [P] MONITOR_Paused/Pause/Resume (preview 0x88, seen); [U] cMonitor_MONITOR_Update
-    cMonitorInstance mMonitorInstance[48]; // 0x098 [O]; [R] ctor constructs 48 (func_002AD848), dtor destroys them; [U] cMonitor_MONITOR_GetFreeInstance/func_002ADCA0/cMonitor_MONITOR_Destroy/func_002ADDA0/func_002ADDE0
+    cMonitorInstance mMonitorInstance[48]; // 0x098 [O]; [R] ctor constructs 48 (cMonitorInstance_cMonitorInstance), dtor destroys them; [U] cMonitor_MONITOR_GetFreeInstance/cMonitor_MONITOR_Create/cMonitor_MONITOR_Destroy/cMonitor_MONITOR_DestroyAll/cMonitor_MONITOR_DestroyAll1
     void** mVtbl;                    // 0x8D8 [R] cMonitor_vtbl (cMonitor ctor/dtor); cBankMonitor_vtbl in a cBankMonitor (shared primary vptr)
 };
 

@@ -17,8 +17,8 @@
 // at preview 0x275AF8..0x278E0C).
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, bases written out inline. Evidence tags:
-//   [R] retail constructors / destructors (cCrowdSys_cCrowdSys / cCrowdSys__cCrowdSys, cCrowdInstance func_002A4D68 /
-//       func_002A4E38), allocation tags, the crowd.inf keys func_002A7040 parses;
+//   [R] retail constructors / destructors (cCrowdSys_cCrowdSys / cCrowdSys__cCrowdSys, cCrowdInstance cCrowdInstance_cCrowdInstance /
+//       cCrowdInstance__cCrowdInstance), allocation tags, the crowd.inf keys func_002A7040 parses;
 //   [P] the July 2003 preview: assert strings next to the field they test, CROWD_GetData's linkonce;
 //   [U] how the retail methods use the field.
 // On Tour has no crowd sound system: no [O] evidence. Struct names other than cCrowdSys / cCrowdInstance are ours.

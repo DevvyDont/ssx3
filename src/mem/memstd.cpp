@@ -3093,7 +3093,7 @@ struct sMesh_254C48 {
 
 /**
  * Draws a new movie frame: uploads the frame's pixels (@p res + 4 header, data as in func_00254410) into each tile's
- * texture (graphics manager slot 49, func_0037D318) and draws the tiles (func_002548D0).
+ * texture (graphics manager slot 49, cPS2GraphicsMan_SetNewTextureData1) and draws the tiles (func_002548D0).
  *
  * Remembers @p res in +0xC when it is non-null, though it then reads it unconditionally. Vtable slot 4 of D_00480270.
  *

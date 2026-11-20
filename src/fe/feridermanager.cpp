@@ -325,8 +325,8 @@ extern "C" void cFERider_cancelAllFiles(void* rider)
 //100%
 INCLUDE_ASM("fe/feridermanager", cFERider_compileModel);
 #ifdef SKIP_ASM
-void func_00369890(void* self, int a1, int a2);
-extern "C" void func_00369690(void* self, int count, void* src);
+void cGraphicsMan_InitTextureFiles(void* self, int a1, int a2);
+extern "C" void cGraphicsMan_SetTextureRefs(void* self, int count, void* src);
 extern "C" void cAnimModel_compile(void* self, int a1);
 // PORT: cMemMan_alloc bound as a placement operator new (gcc treats operator new as malloc-like)
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
@@ -360,7 +360,7 @@ struct sFERiderED80 {
 /**
  * Compiles the front-end rider's model and starts its animation.
  *
- * Sets +0xCB4, prepares the graphics manager's bone setup (func_00369890, func_00369690 with the model's bones),
+ * Sets +0xCB4, prepares the graphics manager's bone setup (cGraphicsMan_InitTextureFiles, cGraphicsMan_SetTextureRefs with the model's bones),
  * compiles the anim model (cAnimModel_compile with 1), creates its animation (cRiderAnimBase with cRiderAnim_vtbl, tag
  * "RiderAnim"), binds it to the rider (func_00104D50), plays animation 434, applies the identity pose
  * (cAnimModel_transform with tPose_Identity) and builds the bone map (cFERider_initBoneMap).
@@ -368,8 +368,8 @@ struct sFERiderED80 {
 extern "C" void cFERider_compileModel(sFERiderED80* self)
 {
     self->fCB4 = 1;
-    func_00369890(GrMan, 0, 0);
-    func_00369690(GrMan, self->count, self->bones);
+    cGraphicsMan_InitTextureFiles(GrMan, 0, 0);
+    cGraphicsMan_SetTextureRefs(GrMan, self->count, self->bones);
     cAnimModel_compile(self->model, 1);
     char* anim = (char*)new (str_RiderAnim, 0, 0) sAnimMemED80;
     cRiderAnimBase_cRiderAnimBase(anim);
@@ -413,8 +413,8 @@ struct sMtx_EE88 {
     float m[40];
 } __attribute__((aligned(16)));
 
-extern "C" void func_00389260(sMtx_EE88* m);
-extern "C" void* func_0038AC20(char* tbl, char* name);
+extern "C" void cIrradiance_Clear(sMtx_EE88* m);
+extern "C" void* cIrradianceDataBase_Get1(char* tbl, char* name);
 extern "C" void func_00389590(sMtx_EE88* m, void* a, char* b, float s);
 extern "C" void func_00389CB8(sMtx_EE88* m, sVec4_EE88* v, float s);
 extern "C" void cAnimModel_render(void* model, int a, int b, int c);
@@ -469,7 +469,7 @@ extern "C" void cFERider_render(void* selfp)
         return;
     if (self->f14 == 0)
         return;
-    func_00389260(&worldMatrix);
+    cIrradiance_Clear(&worldMatrix);
     int type = self->type;
     if (self->fCD0 != 0) {
         switch (type) {
@@ -488,37 +488,37 @@ extern "C" void cFERider_render(void* selfp)
     }
     switch (type) {
     case 0:
-        func_00389590(&worldMatrix, func_0038AC20(D_005047F8, str_moby), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(D_005047F8, str_moby), D_00504810, 1.0f);
         break;
     case 1:
-        func_00389590(&worldMatrix, func_0038AC20(D_005047F8, str_kaori), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(D_005047F8, str_kaori), D_00504810, 1.0f);
         break;
     case 2:
-        func_00389590(&worldMatrix, func_0038AC20(D_005047F8, str_allegra), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(D_005047F8, str_allegra), D_00504810, 1.0f);
         break;
     case 3:
-        func_00389590(&worldMatrix, func_0038AC20(D_005047F8, str_mac), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(D_005047F8, str_mac), D_00504810, 1.0f);
         break;
     case 4:
-        func_00389590(&worldMatrix, func_0038AC20(D_005047F8, str_zoe), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(D_005047F8, str_zoe), D_00504810, 1.0f);
         break;
     case 5:
-        func_00389590(&worldMatrix, func_0038AC20(D_005047F8, str_griff), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(D_005047F8, str_griff), D_00504810, 1.0f);
         break;
     case 6:
-        func_00389590(&worldMatrix, func_0038AC20(D_005047F8, str_elise), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(D_005047F8, str_elise), D_00504810, 1.0f);
         break;
     case 7:
-        func_00389590(&worldMatrix, func_0038AC20(D_005047F8, str_nate), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(D_005047F8, str_nate), D_00504810, 1.0f);
         break;
     case 8:
-        func_00389590(&worldMatrix, func_0038AC20(D_005047F8, str_psymon), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(D_005047F8, str_psymon), D_00504810, 1.0f);
         break;
     case 9:
-        func_00389590(&worldMatrix, func_0038AC20(D_005047F8, str_viggo), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(D_005047F8, str_viggo), D_00504810, 1.0f);
         break;
     default:
-        func_00389590(&worldMatrix, func_0038AC20(D_005047F8, str_fe_map), D_00504810, 1.0f);
+        func_00389590(&worldMatrix, cIrradianceDataBase_Get1(D_005047F8, str_fe_map), D_00504810, 1.0f);
         break;
     }
     int idx = cAnimModel_getBoneSkelIndex(self->model, 0, str_hips);

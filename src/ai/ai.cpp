@@ -3456,7 +3456,7 @@ extern "C" void cFinishLineControl_readFromReplayFrame(cFinishLineControl* self,
 INCLUDE_ASM("ai/ai", cWipeoutControl_gainFocus);
 #ifdef SKIP_ASM
 extern "C" void* cAudioInterface_bxAudio();
-extern "C" void func_0029E578(void* self, void* a1);
+extern "C" void cSSXAudio_ResetWipeoutRecoverHit(void* self, void* a1);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" void cReplay_eventWipeout(void* self, int key, int id);
 extern "C" void cWScriptMan_eventWipeout(void* self);
@@ -3501,7 +3501,7 @@ struct sAiObj12CA30
  * Enters the wipeout control: clears the power-up timers and recovery, and snapshots the hip and board poses.
  *
  * Zeroes mPowerUpBoostTimer, mPowerUpTrickTimer, IsNewImpact and RecoverPercent, clears the audio word of the
- * rider's view (func_0029E578), copies the hip and board-child bone poses (plus mModelOffset) into
+ * rider's view (cSSXAudio_ResetWipeoutRecoverHit), copies the hip and board-child bone poses (plus mModelOffset) into
  * RiderPrevPose and BoardPrevPose, and sets RiderState 0 (Launch). When cRiderAnimBase_getCurrentAnimCategory(mRiderAnim, 2) is 0x16
  * it calls cWipeoutMotion_throwItem (rider velocity, no spin, BoardPrevPose) and clears unk_318. Then
  * notifies the replay (cReplay_eventWipeout) and queues world-script op 0x70004 (cWScriptMan_eventWipeout).
@@ -3513,7 +3513,7 @@ extern "C" void cWipeoutControl_gainFocus(cWipeoutControl* self)
     *(int*)&self->mRider->mPowerUpBoostTimer = 0;
     self->IsNewImpact = 0;
     *(int*)&self->RecoverPercent = 0;
-    func_0029E578(cAudioInterface_bxAudio(), (char*)self->mRider);
+    cSSXAudio_ResetWipeoutRecoverHit(cAudioInterface_bxAudio(), (char*)self->mRider);
     char* rider = (char*)self->mRider;
     (*(&self->RiderPrevPose)) = (*(tPose**)(*(char**)(rider + 0x780) + 0x2C))[*(int*)(rider + 0x89C)];
     (*(&self->BoardPrevPose)) = (*(tPose**)(*(char**)(rider + 0x780) + 0x2C))[*(int*)(rider + 0x8A4)];
@@ -3628,8 +3628,8 @@ extern "C" float cRiderAnimBase_getCurrentAnimFramePercent(void* self, int i);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" void cWipeoutControl_playWipeoutHitTransitionAnim(cWipeoutControl* self);
 extern "C" void cWipeoutMotion_throwRider(char* self, void* vel, void* angvel);
-extern "C" void func_00296868(void* mgr, void* self);
-extern "C" void func_00296E80(void* mgr, void* self);
+extern "C" void cSSXAudio_WipeoutSlideStart(void* mgr, void* self);
+extern "C" void cSSXAudio_WipeoutTumbleStart(void* mgr, void* self);
 
 struct sV_12CD20
 {
@@ -3716,7 +3716,7 @@ static inline sV_12CD20 Conj_12CD20(const tPose& p)
  * (mBoneHips) goes to cWipeoutMotion_throwRider() with the rider's unchanged mVelocity; a class-0x17 clip
  * also throws the board from the mBoneBoardChild poses (cWipeoutMotion_throwItem). RiderState then becomes
  * RS_Air or RS_Ground from the wipeout motion's state, the hit-transition clip plays, and on the ground the
- * slide sound (func_00296868, classes 0x1D/0x19) or the tumble sound (func_00296E80) starts. Before that, the
+ * slide sound (cSSXAudio_WipeoutSlideStart, classes 0x1D/0x19) or the tumble sound (cSSXAudio_WipeoutTumbleStart) starts. Before that, the
  * two poses and the clip progress are recorded each tick while the progress is below 0.95. A linear hip
  * velocity is also computed but never used (On Tour's calcVelFromAnim, inlined).
  */
@@ -3757,9 +3757,9 @@ extern "C" void cWipeoutControl_updateLaunch(cWipeoutControl* self)
             cWipeoutControl_playWipeoutHitTransitionAnim(self);
             if (cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 29 ||
                 cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 25)
-                func_00296868(cAudioInterface_bxAudio(), (self));
+                cSSXAudio_WipeoutSlideStart(cAudioInterface_bxAudio(), (self));
             else
-                func_00296E80(cAudioInterface_bxAudio(), (self));
+                cSSXAudio_WipeoutTumbleStart(cAudioInterface_bxAudio(), (self));
         }
         return;
     }
@@ -3784,8 +3784,8 @@ extern "C" void cWipeoutControl_playWipeoutStuckAnim(cWipeoutControl* self);
 extern "C" float cWipeoutControl_chooseTumbleAnimRate(cWipeoutControl* self);
 extern "C" void cCamera_shakeCamera(void* obj, int mode, float a, float b);
 extern "C" void* cAudioInterface_bxAudio();
-extern "C" void func_00296E20(void* mgr, void* rider);
-extern "C" void func_00297438(void* mgr, void* rider);
+extern "C" void cSSXAudio_WipeoutSlideEnd(void* mgr, void* rider);
+extern "C" void cSSXAudio_WipeoutTumbleEnd(void* mgr, void* rider);
 extern "C" void cSSXAudio_PlayGrunt(void* mgr, void* rider, int a, int b);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" int cRiderAnimBase_isCurrentAnimEndFlag(void* self, int i);
@@ -3816,8 +3816,8 @@ static inline float aiRatio_12D160(float v, float hi)
 
 static inline void aiTail_12D160(void* self)
 {
-    func_00296E20(cAudioInterface_bxAudio(), *(char**)((char*)self + 0x80));
-    func_00297438(cAudioInterface_bxAudio(), *(char**)((char*)self + 0x80));
+    cSSXAudio_WipeoutSlideEnd(cAudioInterface_bxAudio(), *(char**)((char*)self + 0x80));
+    cSSXAudio_WipeoutTumbleEnd(cAudioInterface_bxAudio(), *(char**)((char*)self + 0x80));
 }
 
 /**
@@ -3928,9 +3928,9 @@ extern "C" void cWipeoutControl_playWipeoutStuckAnim(cWipeoutControl* self);
 extern "C" void cWipeoutControl_playWipeoutGroundImpactAnim(cWipeoutControl* self);
 extern "C" float cWipeoutControl_chooseTumbleAnimRate(cWipeoutControl* self);
 extern "C" void* cAudioInterface_bxAudio();
-extern "C" void func_00296310(void* mgr, void* rider);
-extern "C" void func_00296868(void* mgr, void* self);
-extern "C" void func_00296E80(void* mgr, void* self);
+extern "C" void cSSXAudio_WipeoutHit(void* mgr, void* rider);
+extern "C" void cSSXAudio_WipeoutSlideStart(void* mgr, void* self);
+extern "C" void cSSXAudio_WipeoutTumbleStart(void* mgr, void* self);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void*, int);
 extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" float cRiderAnimBase_getCurrentAnimFramePercent(void* self, int i);
@@ -3998,7 +3998,7 @@ static inline int aiIsOne_12D4E8(char* r)
  * is on the ground, a head-on hit on flat ground (mGroundNormal z > 0.9, impact within about 25 degrees of
  * straight down into it) goes to RS_Stuck and keeps only the normal part of mVelocity, else RS_Ground starts
  * with the ground-impact clip and slide sound (classes 0x1D/0x19) or the ground tumble at the same progress
- * and the tumble sound; both play the wipeout-hit sound (func_00296310). Without an impact, once the clip
+ * and the tumble sound; both play the wipeout-hit sound (cSSXAudio_WipeoutHit). Without an impact, once the clip
  * ends (at once for 0x1D/0x19): a full meter or finished race recovers (RS_Recover) or, with the board
  * detached, resets (eAR_UberWipeout); else a grounded wipeout motion goes to RS_Ground and a finished air
  * clip is re-picked.
@@ -4027,7 +4027,7 @@ extern "C" void cWipeoutControl_updateAir(cWipeoutControl* self)
                     cRiderAnimBase_getCurrentAnimCategory(self->mRider->mRiderAnim, 2) == 25)
                 {
                     cWipeoutControl_playWipeoutGroundImpactAnim(self);
-                    func_00296868(cAudioInterface_bxAudio(), self);
+                    cSSXAudio_WipeoutSlideStart(cAudioInterface_bxAudio(), self);
                 }
                 else
                 {
@@ -4035,11 +4035,11 @@ extern "C" void cWipeoutControl_updateAir(cWipeoutControl* self)
                     cWipeoutControl_playWipeoutGroundAnim(self);
                     float animDuration = *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x10);
                     cAnimSequence_setSubAnimTime(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2), 0, animDuration * framePercent);
-                    func_00296E80(cAudioInterface_bxAudio(), self);
+                    cSSXAudio_WipeoutTumbleStart(cAudioInterface_bxAudio(), self);
                 }
                 *(int*)self = 2;
             }
-            func_00296310(cAudioInterface_bxAudio(), self->mRider);
+            cSSXAudio_WipeoutHit(cAudioInterface_bxAudio(), self->mRider);
         }
         self->IsNewImpact = 0;
         char* rider3 = (char*)self->mRider;

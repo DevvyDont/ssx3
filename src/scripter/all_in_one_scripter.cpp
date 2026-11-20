@@ -1068,7 +1068,7 @@ INCLUDE_ASM("scripter/all_in_one_scripter", func_00284BA0);
 /**
  * Returns the volume-duck mask for a duck stream: 371 (0x173) for stream 0, otherwise 0.
  *
- * func_00287F00 passes the result as the mask argument of cSSXAudio_DuckVolume.
+ * cSSXAudio_DuckToStream passes the result as the mask argument of cSSXAudio_DuckVolume.
  *
  * @param duckStream  the duck stream number
  * @return 0x173 for stream 0, else 0

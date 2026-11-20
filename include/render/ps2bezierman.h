@@ -5,9 +5,9 @@
 // (4x4, 6x6, 8x8 tessellation, or mixed edges) and draws them through three VIF caches. Retail keeps On Tour's PSP
 // class name (cPS2BezierMan_cPS2BezierMan__FPv, vtables.tsv); the allocation tag says "PS2BezierMan".
 // Size 0x9C90: [R] cBezierMan_construct__Fv (render/bezierman) does cMemMan_alloc(0x9C90, "PS2BezierMan") + the ctor
-// cPS2BezierMan_cPS2BezierMan__FPv (render/ps2bezierman): cBezierMan ctor func_00374C90 (vtable D_00493820, stores
+// cPS2BezierMan_cPS2BezierMan__FPv (render/ps2bezierman): cBezierMan ctor cBezierMan_cBezierMan (vtable D_00493820, stores
 // TheBezierMan), vtable D_00493760, func_00372B30 on this + 0x10, then Init (cPS2BezierMan_Init). Dtor cPS2BezierMan__cPS2BezierMan (Purge,
-// then cBezierMan dtor func_00374CA8, which clears TheBezierMan).
+// then cBezierMan dtor cBezierMan__cBezierMan, which clears TheBezierMan).
 // Bases: cBezierMan (On Tour 0x8: m_currPatchDist 0x0, then its vptr at 0x4) <- cPS2BezierMan.
 // Methods (D_00493760; the same order as On Tour's cBezierMan declarations): 0 ~ cPS2BezierMan__cPS2BezierMan, 1 Init cPS2BezierMan_Init,
 // 2 Purge cPS2BezierMan_Purge, 3 Reset cPS2BezierMan_Reset__FPv, 4 UpdatePatchesCache cBezierMan_UpdatePatchesCache__FPv (empty), 5/6 SetNearLOD/
@@ -18,7 +18,7 @@
 // cPS2BezierMan_AddPatch, 21 func_0038B190 (queues one patch by its edge LODs). cBezierMan's own slots (D_00493820):
 // cBezierMan_Reset__FPv (3), cBezierMan_UpdatePatchesCache__FPv (4), cBezierMan_AddPatch (21: calls slot 20). Non-virtual accessors:
 // cPS2BezierMan_GetVifCache (cache pointer + slot), cPS2BezierMan_GetBezST (lw 0x1A0), cPS2BezierMan_GetBezdST (lw 0x320).
-// Instance global: cBezierMan_TheBezierMan (gp+0x1158) = cBezierMan::TheBezierMan (func_00374C90 stores it, func_00374CA8 clears
+// Instance global: cBezierMan_TheBezierMan (gp+0x1158) = cBezierMan::TheBezierMan (cBezierMan_cBezierMan stores it, cBezierMan__cBezierMan clears
 // it); cBezierMan_getBezierMan returns it (getBezierMan).
 //
 // FLAT layout. Members: [O] On Tour's cBezierMan / cPSPBezierMan (mNearLODcm, mFarLODcm and the four enable flags, which

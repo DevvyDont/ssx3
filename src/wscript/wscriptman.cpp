@@ -1321,7 +1321,7 @@ extern "C" int cBEMissionInterface_isMissionAvailable(void* iface, unsigned int 
 extern "C" int cBEMissionInterface_isMissionShowIcon(void* iface, unsigned int id);
 extern "C" int cBEMissionInterface_getNextMissionID(void* iface, unsigned int id);
 extern "C" void* cAudioInterface_bxAudio();
-extern "C" void func_0029D6E0(void* p, unsigned int id);
+extern "C" void cSSXAudio_BigChallengeBegin(void* p, unsigned int id);
 extern "C" void cSSXAudio_BigChallengeFailed(void* p, int a1);
 extern signed char D_00535C10[];
 
@@ -1421,7 +1421,7 @@ extern "C" int cWScriptMan_doMissionCmd(cWScriptMan* self, unsigned int id, unsi
         }
         if (obj != 0) {
             obj->v17();
-            func_0029D6E0(cAudioInterface_bxAudio(), id);
+            cSSXAudio_BigChallengeBegin(cAudioInterface_bxAudio(), id);
         }
         break;
     case 4:

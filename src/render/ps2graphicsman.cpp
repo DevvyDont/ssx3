@@ -39,7 +39,7 @@ extern "C" int cPSPGraphicsMan_NewNonBindTexID(cTexSlots367150* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_003671C8);
+INCLUDE_ASM("render/ps2graphicsman", cPSPGraphicsMan_DeleteNonBindTexID);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -59,7 +59,7 @@ struct cTexSlots3671C8 {
  *
  * @param id  the texture id (slot index) to free
  */
-extern "C" void func_003671C8(cTexSlots3671C8* self, int id)
+extern "C" void cPSPGraphicsMan_DeleteNonBindTexID(cTexSlots3671C8* self, int id)
 {
     operator_delete((int*)self->slots[id]);
     self->slots[id] = self->freeHead;
@@ -69,14 +69,14 @@ extern "C" void func_003671C8(cTexSlots3671C8* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00367230);
+INCLUDE_ASM("render/ps2graphicsman", cPSPGraphicsMan_PurgeNonBindTexIDs);
 #ifdef SKIP_ASM
 /**
  * Does nothing useful: counts through the 500 non-bound texture ids with an empty loop body.
  *
  * The per-id work of this purge is compiled out in retail; only the loop remains. func_00367360 calls it.
  */
-extern "C" void func_00367230(void)
+extern "C" void cPSPGraphicsMan_PurgeNonBindTexIDs(void)
 {
     for (int i = 0; i < 500; i++) {
     }
@@ -107,7 +107,7 @@ extern "C" void cPSPGraphicsMan_NewBindTexID(void* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_003672C0);
+INCLUDE_ASM("render/ps2graphicsman", cPSPGraphicsMan_DeleteBindTexID);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -124,7 +124,7 @@ struct sGmPtrTable {
  *
  * @param idx  the texture id (slot index) to free
  */
-extern "C" void func_003672C0(sGmPtrTable* self, int idx)
+extern "C" void cPSPGraphicsMan_DeleteBindTexID(sGmPtrTable* self, int idx)
 {
     int** base = self->entries; int** slot = base + idx;
     operator_delete(*slot);
@@ -134,7 +134,7 @@ extern "C" void func_003672C0(sGmPtrTable* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00367310);
+INCLUDE_ASM("render/ps2graphicsman", cPSPGraphicsMan_PurgeBindTexIDs);
 #ifdef SKIP_ASM
 /**
  * Does nothing useful: counts through the 1500 bound texture ids with an empty loop body.
@@ -142,7 +142,7 @@ INCLUDE_ASM("render/ps2graphicsman", func_00367310);
  * The per-id work of this purge is compiled out in retail; only the loop remains. func_00367360 calls it (passing the
  * texture manager, which the definition ignores).
  */
-extern "C" void func_00367310(void)
+extern "C" void cPSPGraphicsMan_PurgeBindTexIDs(void)
 {
     for (int i = 0; i < 1500; i++) {
     }
@@ -176,21 +176,21 @@ void* func_00367340(void* self, int start, int size)
 INCLUDE_ASM("render/ps2graphicsman", func_00367360);
 #ifdef SKIP_ASM
 extern "C" void func_00366548(void* p);
-// PORT: the unit defines func_00367310(void), but this caller passes self.
-void func_00367310_1(void* self) __asm__("func_00367310");
+// PORT: the unit defines cPSPGraphicsMan_PurgeBindTexIDs(void), but this caller passes self.
+void cPSPGraphicsMan_PurgeBindTexIDs_1(void* self) __asm__("cPSPGraphicsMan_PurgeBindTexIDs");
 
 /**
  * Purges the texture manager: frees every unlocked VRAM block and forgets the textures bound to the GS contexts.
  *
- * Runs the two id purges (func_00367230, func_00367310), frees the unlocked blocks of both GS memory heaps (+0x1F60 and
+ * Runs the two id purges (cPSPGraphicsMan_PurgeNonBindTexIDs, cPSPGraphicsMan_PurgeBindTexIDs), frees the unlocked blocks of both GS memory heaps (+0x1F60 and
  * +0x4350, func_00366548), and sets the per-context bound texture ids (+0x1F4C, two words) and the loaded-CLUT texture
  * (+0x1F54) to -1. cPS2GraphicsMan_Purge calls it on mpTextureMan.
  */
 extern "C" void func_00367360(void* self)
 {
     int i;
-    func_00367230();
-    func_00367310_1(self);
+    cPSPGraphicsMan_PurgeNonBindTexIDs();
+    cPSPGraphicsMan_PurgeBindTexIDs_1(self);
     func_00366548((char*)self + 0x1F60);
     func_00366548((char*)self + 0x4350);
     for (i = 1; i >= 0; i--) {
@@ -583,7 +583,7 @@ static inline void fill7BC0(int* p, int v)
  *
  * Frees the texture's block (+0x30) in the main heap (+0x1F60; the second heap +0x4350 for texel format 9) and its CLUT
  * block (+0x34, main heap) with func_003663D8 when they exist; when the texture owns its data (+0x0) frees the pixel
- * and CLUT buffers (+0x1C, +0x20). Then deletes the id (func_003672C0 for ids below 1500, else func_003671C8) and sets
+ * and CLUT buffers (+0x1C, +0x20). Then deletes the id (cPSPGraphicsMan_DeleteBindTexID for ids below 1500, else cPSPGraphicsMan_DeleteNonBindTexID) and sets
  * the per-context bound texture ids (+0x1F4C) and the loaded-CLUT texture (+0x1F54) to -1.
  * cPS2GraphicsMan_RemoveTexture calls it.
  *
@@ -608,9 +608,9 @@ extern "C" void func_00367BC0(sGmMan7BC0* self, int id)
         }
     }
     if (id < 1500) {
-        func_003672C0((sGmPtrTable*)self, id);
+        cPSPGraphicsMan_DeleteBindTexID((sGmPtrTable*)self, id);
     } else {
-        func_003671C8((cTexSlots3671C8*)self, id);
+        cPSPGraphicsMan_DeleteNonBindTexID((cTexSlots3671C8*)self, id);
     }
     fill7BC0((int*)(selfBytes + 0x1F4C), -1);
     *(int*)(selfBytes + 0x1F54) = -1;
@@ -652,7 +652,7 @@ extern "C" void func_00369098(void* self, int idx);
  *
  * When @p upload is set, copies @p data over the texture's pixel buffer (+0x1C, size +0x10) and @p clut over its CLUT
  * buffer (+0x20, 4 << bits-per-pixel bytes), each only when given. Then calls func_00369098 on the texture. @p width,
- * @p height and the format arguments are not used. func_0037D318 calls it on mpTextureMan.
+ * @p height and the format arguments are not used. cPS2GraphicsMan_SetNewTextureData1 calls it on mpTextureMan.
  *
  * @param idx  the texture id
  * @param data  the new pixels, or null
@@ -1660,7 +1660,7 @@ extern "C" void cGraphicsMan_ForceActiveDrawState(cGraphicsMan* self, int* mask)
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00369690);
+INCLUDE_ASM("render/ps2graphicsman", cGraphicsMan_SetTextureRefs);
 #ifdef SKIP_ASM
 extern "C" void* MEM_copy(void*, void*, int);
 
@@ -1668,12 +1668,12 @@ extern "C" void* MEM_copy(void*, void*, int);
  * Replaces the named-texture reference table: stores @p count in mNumTexRefs and copies @p count tTextureRefs (0xC
  * bytes each) from @p src into mTexRefs.
  *
- * cFERider_compileModel calls it on the graphics manager after clearing the texture file list (func_00369890).
+ * cFERider_compileModel calls it on the graphics manager after clearing the texture file list (cGraphicsMan_InitTextureFiles).
  *
  * @param count  number of references
  * @param src  the tTextureRef array to copy
  */
-extern "C" void func_00369690(void* self, int count, void* src)
+extern "C" void cGraphicsMan_SetTextureRefs(void* self, int count, void* src)
 {
     *(int*)((char*)self + 0xE80) = count;
     MEM_copy((char*)self + 0x280, src, count * 0xC);
@@ -1753,7 +1753,7 @@ extern "C" int cGraphicsMan_GetTextureID(cGraphicsMan* graphicsMan, const char* 
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_00369890__FPvii);
+INCLUDE_ASM("render/ps2graphicsman", cGraphicsMan_InitTextureFiles__FPvii);
 #ifdef SKIP_ASM
 /**
  * Sets the list of texture files that cGraphicsMan_GetTextureID searches and clears the cached references.
@@ -1764,7 +1764,7 @@ INCLUDE_ASM("render/ps2graphicsman", func_00369890__FPvii);
  * @param numFiles  number of texture file names
  * @param fileNames  the array of file names (const char**, held as an int)
  */
-void func_00369890(void* self, int numFiles, int fileNames)
+void cGraphicsMan_InitTextureFiles(void* self, int numFiles, int fileNames)
 {
     *(int*)((char*)self + 0x27c) = fileNames;
     *(int*)((char*)self + 0x278) = numFiles;
@@ -1773,7 +1773,7 @@ void func_00369890(void* self, int numFiles, int fileNames)
 #endif
 
 //100%
-INCLUDE_ASM("render/ps2graphicsman", func_003698A0);
+INCLUDE_ASM("render/ps2graphicsman", cGraphicsMan_ResetBlendedMatrixHistory);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 
@@ -1783,7 +1783,7 @@ void cMemMan_free(void* p);
  *
  * cAnimModel_compile calls it; cGraphicsMan_AddBlendedMatrix fills the history again.
  */
-extern "C" void func_003698A0(void* self)
+extern "C" void cGraphicsMan_ResetBlendedMatrixHistory(void* self)
 {
     void* history = *(void**)((char*)self + 0xF48);
     if (history != 0) {

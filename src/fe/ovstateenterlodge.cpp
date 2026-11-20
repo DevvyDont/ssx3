@@ -298,7 +298,7 @@ extern "C" int cOVState_BIGCHALLENGE_START_onWidgetMenu(void* self, int pMenu, i
 INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_START_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cAudioInterface_bxAudio();
-void func_0029D6D0(void* self);
+void cSSXAudio_SetBigChallengeStarting(void* self);
 extern "C" void cWScriptMan_startLocalMission(void* self);
 extern "C" void cWScriptMan_cancelLocalMission(void* self);
 extern "C" void cWScriptMan_restartLocalMission(void* self);
@@ -321,7 +321,7 @@ struct sMgr_75A0 {
  *
  * Yes (Cross on choice 0) queues WScriptMan operation 2 (cWScriptMan_restartLocalMission, probably a restart) when a challenge
  * already runs (cWScriptMan_isLocalMissionActive), else stores the offer's mission id (+0x9C) in cWScriptMan_TheWScriptMan +0x2A0 and queues
- * operation 1 (start, cWScriptMan_startLocalMission); it also sets the audio's mBigChallengeStarting (func_0029D6D0). No
+ * operation 1 (start, cWScriptMan_startLocalMission); it also sets the audio's mBigChallengeStarting (cSSXAudio_SetBigChallengeStarting). No
  * falls through to Triangle: store the id, queue operation 3 (decline, cWScriptMan_cancelLocalMission).
  * Both set the pending overlay action cOVStateManager_mStatus to 3 (close) and pop the pause-mode stack D_005366E8,
  * restoring the pause mask cPauseState_Flags.
@@ -345,7 +345,7 @@ extern "C" void cOVState_BIGCHALLENGE_START_onWidgetEvent(void* self, void* item
             }
             cOVStateManager_mStatus = 3;
             cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
-            func_0029D6D0(cAudioInterface_bxAudio());
+            cSSXAudio_SetBigChallengeStarting(cAudioInterface_bxAudio());
             break;
         }
     case 6:
@@ -476,7 +476,7 @@ extern char str_TransitionOut_b[];
  * Ignored for a null @p item. Event 5 (select) on "yes_b" (misc data 0) puts the mission id (+0x9C) into
  * cWScriptMan_TheWScriptMan + 0x2A0, restarts it (cWScriptMan_restartLocalMission), pops this state from mpEngine's
  * state stack (cUIStateStack_pop), pops the pause-mode stack (D_005366E8 / D_004A2A54) into cPauseState_Flags and calls
- * func_0029D6D0 on the audio object. On "info" (misc data 2) it opens overlay 29 (cOVStateManager_triggerOverlay) and
+ * cSSXAudio_SetBigChallengeStarting on the audio object. On "info" (misc data 2) it opens overlay 29 (cOVStateManager_triggerOverlay) and
  * stays. Event 6 (back) first plays mpScreen's "TransitionOut_b" frame when it has one. Event 6, and event 5 on any
  * other widget, then cancel the challenge (cWScriptMan_cancelLocalMission), pop the state and restore cPauseState_Flags
  * the same way. Other events do nothing.
@@ -497,7 +497,7 @@ extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetEvent(void* self, void* item,
             cWScriptMan_restartLocalMission(cWScriptMan_TheWScriptMan);
             cUIStateStack_pop_r((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
             cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
-            func_0029D6D0(cAudioInterface_bxAudio());
+            cSSXAudio_SetBigChallengeStarting(cAudioInterface_bxAudio());
             return;
         }
         if (choice == 2) {

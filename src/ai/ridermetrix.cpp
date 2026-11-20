@@ -903,7 +903,7 @@ extern "C" int cBEEconInterface_getMoney1(void* iface, int a);
 extern "C" void cSSXAudio_PointsEvent(void* audio, void* rider, int points);
 extern "C" void cSSXAudio_StartUberSpin(void* audio, void* rider);
 extern "C" void cSSXAudio_EndUberSpin(void* audio, void* rider);
-extern "C" void func_00299638(void* audio, void* rider);
+extern "C" void cSSXAudio_MaxPowerEvent(void* audio, void* rider);
 extern "C" void cSSXAudio_LoseMaxPowerEvent(void* audio, void* rider);
 extern char str_STALLED[];
 extern char str_OFF_AXIS[];
@@ -1265,7 +1265,7 @@ extern "C" void cRiderMetrix_updateStaticHUD(cRiderMetrix* vself)
     if (slotFree_117FE0(&self->slots[9])) {
         if (self->rider->f2F0 > 0.0f) {
             func_001171A8_f(&self->slots[9], 9, 0, 0.0f, 0);
-            func_00299638(cAudioInterface_bxAudio(), self->rider);
+            cSSXAudio_MaxPowerEvent(cAudioInterface_bxAudio(), self->rider);
         }
     } else {
         float cur = self->slots[9].value / self->slots[9].total;

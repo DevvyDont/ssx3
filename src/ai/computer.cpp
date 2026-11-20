@@ -1365,7 +1365,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cBEStatInterface_getTrickAttrib(void* iface, int rider, int b);
-extern "C" void func_0029AB08(void* mgr, void* rider, float cur, float amt);
+extern "C" void cSSXAudio_BoostBar(void* mgr, void* rider, float cur, float amt);
 extern "C" void cRider_flagEventReaction(cRider* self, int mode, float t);
 
 // PORT: g++ `<?` (min) operator.
@@ -1381,7 +1381,7 @@ static inline float clamp_10E098(float v, float lo, float hi)
  *
  * Does nothing in boost mode 3 (mBoostMode) or for a zero amount. A gain first calls a BE stat getter
  * (cBEStatInterface_getTrickAttrib, result unused) and is dropped unless @p mask shares a bit with mBoostSourceMask. It
- * notifies the audio system (func_0029AB08), then clamps. A gain that fills the meter with uber enabled
+ * notifies the audio system (cSSXAudio_BoostBar), then clamps. A gain that fills the meter with uber enabled
  * (mUberFlags) shows HUD message 5 when mUberTimer is 0, raises an mUberLevel of 0 or less by one and, at
  * levels 1-9, makes mUberTimer at least 20; a loss below level 10 stops mUberTimer.
  *
@@ -1401,7 +1401,7 @@ extern "C" void cRider_flagEventBoostPowerUp(cRider* self, int mask, float amt)
         if ((mask & self->mBoostSourceMask) == 0)
             return;
     }
-    func_0029AB08(cAudioInterface_bxAudio(), self, self->unk_2F8, amt);
+    cSSXAudio_BoostBar(cAudioInterface_bxAudio(), self, self->unk_2F8, amt);
     self->unk_2F8 = clamp_10E098(self->unk_2F8 + amt, floatZero, 1.0f);
     if (self->unk_2F8 == 1.0f && amt > floatZero && self->mUberFlags != 0)
     {
@@ -1432,7 +1432,7 @@ struct sVEntry0010E228 {
 };
 
 extern "C" void* cAudioInterface_bxAudio();
-extern "C" void func_00298488(void* snd, void* a, void* b);
+extern "C" void cSSXAudio_RiderCollision(void* snd, void* a, void* b);
 extern "C" void func_002A0A30(void* snd, void* a, void* b, int c, int d);
 void* cBEAggressionInterface_getThis();
 extern "C" void cBEAggressionInterface_applyAggression(void* agg, int a, int b, int c);
@@ -1440,7 +1440,7 @@ extern "C" void cBEAggressionInterface_applyAggression(void* agg, int a, int b, 
 /**
  * Reacts to a light bump from another rider: collision sound and a mild aggression event.
  *
- * Plays the rider-collision sound (func_00298488, On Tour cSSXAudio::RiderCollision) and func_002A0A30(audio, attacker,
+ * Plays the rider-collision sound (cSSXAudio_RiderCollision, On Tour cSSXAudio::RiderCollision) and func_002A0A30(audio, attacker,
  * self, 1, 0), then reports aggression behaviour 0 (kAGG_MILDCONTACT) from @p attacker against @p self to cBEAggressionInterface_applyAggression (On Tour
  * cBEAggressionInterface::applyAggression). Each rider's id comes from its cBeing vtable (+0x6C0) slot 7 (On Tour
  * cBeing::getAIIndex).
@@ -1450,7 +1450,7 @@ extern "C" void cBEAggressionInterface_applyAggression(void* agg, int a, int b, 
  */
 extern "C" void cRider_flagEventBump(cRider* self, void* attacker)
 {
-    func_00298488(cAudioInterface_bxAudio(), self, attacker);
+    cSSXAudio_RiderCollision(cAudioInterface_bxAudio(), self, attacker);
     func_002A0A30(cAudioInterface_bxAudio(), attacker, self, 1, 0);
     void* agg = cBEAggressionInterface_getThis();
     char* ob = (char*)attacker + 0x6C0;
@@ -1472,7 +1472,7 @@ struct sVEntry0010E2E8 {
 };
 
 extern "C" void* cAudioInterface_bxAudio();
-extern "C" void func_00298488(void* snd, void* a, void* b);
+extern "C" void cSSXAudio_RiderCollision(void* snd, void* a, void* b);
 extern "C" void func_002A0A30(void* snd, void* a, void* b, int c, int d);
 void* cBEAggressionInterface_getThis();
 extern "C" void cBEAggressionInterface_applyAggression(void* agg, int a, int b, int c);
@@ -1488,7 +1488,7 @@ extern "C" void cBEAggressionInterface_applyAggression(void* agg, int a, int b, 
  */
 extern "C" void cRider_flagEventBumpKnockdown(cRider* self, void* attacker)
 {
-    func_00298488(cAudioInterface_bxAudio(), self, attacker);
+    cSSXAudio_RiderCollision(cAudioInterface_bxAudio(), self, attacker);
     func_002A0A30(cAudioInterface_bxAudio(), attacker, self, 1, 1);
     void* agg = cBEAggressionInterface_getThis();
     char* ob = (char*)attacker + 0x6C0;
@@ -1870,9 +1870,9 @@ extern "C" void func_00116930(cRider* self);
 extern "C" void cRider_rotateOrientation(cRider* self, const t4Vector& axis, float angle);
 extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" float cRiderMetrix_evWipeout(cRiderMetrix* m, int a);
-extern "C" void func_00296310(void* mgr, cRider* rider);
+extern "C" void cSSXAudio_WipeoutHit(void* mgr, cRider* rider);
 extern "C" void cSSXAudio_PlayGrunt(void* mgr, void* rider, int a, int b);
-extern "C" void func_002961F0(void* mgr, cRider* rider, float v);
+extern "C" void cSSXAudio_Wipeout(void* mgr, cRider* rider, float v);
 void cRider_setControlState_EB30(void* self, int v) __asm__("cRider_setControlState__FPv");
 void cRider_setMotionState_EB30(void* self, int v) __asm__("cRider_setMotionState__FPv");
 struct sCfg_EB30 { int a; int b; };
@@ -2041,7 +2041,7 @@ static inline sXf_EB30 Combine_EB30(const sXf_EB30& a, const sXf_EB30& b)
  *
  * Rumbles (cBeing vtable slot 17, vibrationBump) with the hit strength (+0x30 of @p evt) * 5, takes the boost from
  * cRiderMetrix_evWipeout (On Tour cRiderMetrix::evWipeout(@p isPunch)) and passes it to cRider_flagEventBoostPowerUp(1), plays the
- * hit (func_00296310), a grunt and the wipeout sound (func_002961F0), and spawns the impact effect (func_00111AA0) with
+ * hit (cSSXAudio_WipeoutHit), a grunt and the wipeout sound (cSSXAudio_Wipeout), and spawns the impact effect (func_00111AA0) with
  * surface @p surf. Control state 13 is set first; a rider sliding sideways on a rail (RailslideMode 3 or 4) is turned +/-90
  * degrees about its up axis and its anim heading offset follows.
  *
@@ -2061,9 +2061,9 @@ extern "C" void cRider_flagEventWipeout(cRider* rider, int anim, int isPunch, in
     vt[kRiderVt_vibrationBump].fn((char*)rider + vt[kRiderVt_vibrationBump].delta, *(float*)(evt + 0x30) * 5.0f);
     float amt = cRiderMetrix_evWipeout(rider->mMetrix, isPunch);
     cRider_flagEventBoostPowerUp(rider, 1, amt);
-    func_00296310(cAudioInterface_bxAudio(), rider);
+    cSSXAudio_WipeoutHit(cAudioInterface_bxAudio(), rider);
     cSSXAudio_PlayGrunt(cAudioInterface_bxAudio(), rider, 0, 0);
-    func_002961F0(cAudioInterface_bxAudio(), rider, amt);
+    cSSXAudio_Wipeout(cAudioInterface_bxAudio(), rider, amt);
     func_00111AA0_impl(rider->mRiderHandler, evt, evt + 0x20, surf, *(float*)(evt + 0x30));
     cRider_setControlState_EB30(rider, 13);
     if (rider->RailslideMode == 3) {

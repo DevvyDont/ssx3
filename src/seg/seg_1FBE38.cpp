@@ -7865,16 +7865,16 @@ INCLUDE_ASM("seg/seg_1FBE38", cWScriptMission_processComplete);
 struct P_7240 { int state; char pad[0x58]; virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04(); virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08(); virtual void v09(); virtual void v10(); virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18(); };
 int cWScriptMan_isProcessActive_7240(void*, void*) __asm__("cWScriptMan_isProcessActive__FPvT0");
 extern "C" void *cAudioInterface_bxAudio_7240(void) __asm__("cAudioInterface_bxAudio");
-extern "C" void func_0029D8E0_7240(void*) __asm__("func_0029D8E0");
+extern "C" void cSSXAudio_BigChallengeComplete_7240(void*) __asm__("cSSXAudio_BigChallengeComplete");
 /**
  * Completes a mission that the script manager still lists: runs its virtual slots 6 and 18, then calls
- * func_0029D8E0 on the sound system.
+ * cSSXAudio_BigChallengeComplete on the sound system.
  */
 extern "C" void cWScriptMission_processComplete(P_7240* self) {
     if (cWScriptMan_isProcessActive_7240(*(void**)((char*)self + 0x10), self)) {
         self->v06();
         self->v18();
-        func_0029D8E0_7240(cAudioInterface_bxAudio_7240());
+        cSSXAudio_BigChallengeComplete_7240(cAudioInterface_bxAudio_7240());
     }
 }
 #endif

@@ -3043,14 +3043,14 @@ extern "C" int func_00104CA0(int riderAnim, void* sequencer, void* sequence) {
 INCLUDE_ASM("seg/seg_1218", func_00104CC8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_00289B18_4CC8(int, int, int) __asm__("func_00289B18");
+extern "C" void cSSXAudio_PlayAniTag_4CC8(int, int, int) __asm__("cSSXAudio_PlayAniTag");
 extern int gSSXAudio_seg_1218 __asm__("gSSXAudio");
 
 extern "C" void func_00104CC8(void *riderAnim, int soundId) {
     int temp_2 = (*(int *)((char*)(riderAnim) + (0x60)));
     int maskedSoundId = soundId & 0xFFFF;
     if (temp_2 != 0) {
-        func_00289B18_4CC8(gSSXAudio_seg_1218, temp_2, maskedSoundId);
+        cSSXAudio_PlayAniTag_4CC8(gSSXAudio_seg_1218, temp_2, maskedSoundId);
     }
 }
 #endif

@@ -916,7 +916,7 @@ static inline void setVert_C590(sBezVert_C590* v, const sV3_C590& p, const sUV_C
  * Draws an @p n x @p n grid of patch points as strips: first each row, then each column.
  *
  * Every point becomes a vertex at (x, y, z, 1) with texture coordinates (u, v, 1) and colour 0x80 in all four channels;
- * each row or column of @p n vertices goes to graphics manager virtual slot 73 (func_00381AD0). The vertex buffer holds
+ * each row or column of @p n vertices goes to graphics manager virtual slot 73 (cPS2GraphicsMan_RenderLineStrip). The vertex buffer holds
  * 64 entries. No caller references it in this build.
  *
  * @param pts  the n * n grid points, row-major
@@ -1045,7 +1045,7 @@ extern "C" void func_0038C788(void* self, int type, int idx)
 INCLUDE_ASM("render/bezierman", func_0038CA08);
 #ifdef SKIP_ASM
 extern void* cGraphicsMan_TheGraphicsMan_bezierman __asm__("cGraphicsMan_TheGraphicsMan");
-extern "C" unsigned int func_0037DF88(void* self, void* a1, void* a2);
+extern "C" unsigned int cPS2GraphicsMan_CheckProjectiveTexturesHits(void* self, void* a1, void* a2);
 
 struct sBezVec4_CA08 {
     float x, y, z, w;
@@ -1055,7 +1055,7 @@ struct sBezVec4_CA08 {
  * Tests a patch's bounding box against the projective textures and leaves the hit mask as the result.
  *
  * Builds the box corners (+0x158/+0x15C/+0x160 and +0x164/+0x168/+0x16C of the patch record, w = 1.0) and calls
- * func_0037DF88 on cGraphicsMan_TheGraphicsMan, which sets bit i for each projective texture i whose clip test (slot
+ * cPS2GraphicsMan_CheckProjectiveTexturesHits on cGraphicsMan_TheGraphicsMan, which sets bit i for each projective texture i whose clip test (slot
  * 93) does not reject the box. The C body is void, but that mask stays in the return register: func_0038CA70 and
  * func_0038CE20 read it through an int-returning alias and pass it to func_0038D448.
  *
@@ -1074,7 +1074,7 @@ extern "C" void func_0038CA08(void* self, void* obj)
     boxMax.y = *(float*)(objData + 0x168);
     boxMax.z = *(float*)(objData + 0x16C);
     boxMax.w = 1.0f;
-    func_0037DF88(cGraphicsMan_TheGraphicsMan_bezierman, &boxMin, &boxMax);
+    cPS2GraphicsMan_CheckProjectiveTexturesHits(cGraphicsMan_TheGraphicsMan_bezierman, &boxMin, &boxMax);
 }
 #endif
 

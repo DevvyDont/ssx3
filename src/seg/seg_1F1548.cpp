@@ -9,8 +9,8 @@ INCLUDE_ASM("seg/seg_1F1548", cPS2VisualEffectsMan_cPS2VisualEffectsMan);
 #ifdef SKIP_ASM
 extern "C" void *cMemMan_alloc(int, const char *, int, int);
 extern "C" void* cVisualEffectsMan_cVisualEffectsMan(void*);
-extern "C" void* func_00372AA0(void*);
-void* func_003759E8(void*);
+extern "C" void* cPathArrow_cPathArrow(void*);
+void* cDetailSystem_cDetailSystem(void*);
 extern char cPS2VisualEffectsMan_vtbl[];
 extern char str_RenderToggles[];
 extern char str_VisualEffectsTest[];
@@ -71,7 +71,7 @@ extern "C" sMgr_0548* cPS2VisualEffectsMan_cPS2VisualEffectsMan(sMgr_0548* self)
     { void* effect = cMemMan_alloc(4, str_Plants_b, 0, 0); *(char**)effect = D_00493178; self->objs[3] = effect; }
     { void* effect = cMemMan_alloc(4, str_DepthFog, 0, 0); *(char**)effect = D_00487E88; self->objs[4] = effect; }
     { void* effect = cMemMan_alloc(4, str_HeightFog, 0, 0); *(char**)effect = D_00487E58; self->objs[5] = effect; }
-    self->objs[6] = func_003759E8(cMemMan_alloc(4, str_DetailSystem, 0, 0));
+    self->objs[6] = cDetailSystem_cDetailSystem(cMemMan_alloc(4, str_DetailSystem, 0, 0));
     { void* effect = cMemMan_alloc(4, str_ScreenTint, 0, 0); *(char**)effect = D_00492FA0; self->objs[7] = effect; }
     { void* effect = cMemMan_alloc(4, str_Shadow_c, 0, 0); *(char**)effect = D_00487E28; self->objs[8] = effect; }
     { void* effect = cMemMan_alloc(4, str_SnowSurface, 0, 0); *(char**)effect = D_00487DF8; self->objs[9] = effect; }
@@ -81,7 +81,7 @@ extern "C" sMgr_0548* cPS2VisualEffectsMan_cPS2VisualEffectsMan(sMgr_0548* self)
     { void* effect = cMemMan_alloc(4, str_SnowfallToggles, 0, 0); *(char**)effect = D_00488050; self->objs[13] = effect; }
     { void* effect = cMemMan_alloc(4, str_SplashToggles, 0, 0); *(char**)effect = D_004882B0; self->objs[14] = effect; }
     { void* effect = cMemMan_alloc(4, str_Tube, 0, 0); *(char**)effect = D_004930A0; self->objs[15] = effect; }
-    self->objs[16] = func_00372AA0(cMemMan_alloc(4, str_PathArrow, 0, 0));
+    self->objs[16] = cPathArrow_cPathArrow(cMemMan_alloc(4, str_PathArrow, 0, 0));
     return self;
 }
 #endif

@@ -9,7 +9,7 @@
 // _vt$16cPS2SoundManager. Retail methods: sound/soundsys unit 0x2A8C20..0x2A9350.
 //   cPS2SoundManager : cSoundManager (On Tour: an interface with only a vptr, size 0x4; On Tour's PSP version is
 //   cPSPSoundManager, 0x8)
-// Size 0x320 [R]: cSoundManager::Construct (func_002A8FA0) = ctor cPS2SoundManager_cPS2SoundManager(cMemMan_alloc(0x320,
+// Size 0x320 [R]: cSoundManager::Construct (cSoundManager_Construct) = ctor cPS2SoundManager_cPS2SoundManager(cMemMan_alloc(0x320,
 // "PS2SoundManager")). Vtable D_004835F8: Init, SetMode, Shutdown, AllocSoundMem, DeallocSoundMem,
 // SetSoundMemLoadLimits, RestoreSoundMemLoadLimits, dtor (preview cPS2SoundManager::<virtual slot 1..8>, On Tour's
 // cSoundManager method order). The preview's offsets agree with retail (asserts at preview 0x27A37C..0x27AD4C).

@@ -2140,7 +2140,7 @@ extern struct S_5A28 D_0050A8E8_5A28 __asm__("D_0050A8E8");
  *
  * Only while started; appends to the sound driver state D_0050A8E8 +0x1C8 (count +0x179, room for 4) without a bound
  * check. The clients get user-data event records from func_003B5F98 and the stream parser SNDSTRMI_parseheader.
- * cSSXAudio_cSSXAudio registers func_00289650 with it.
+ * cSSXAudio_cSSXAudio registers cSSXAudio_HandleUserChunk with it.
  *
  * @param client  the callback, called with an event record
  */
@@ -2162,7 +2162,7 @@ extern struct G_5A60 D_0050A8E8_5A60[] __asm__("D_0050A8E8");
 /**
  * Removes a callback from the sound system's user-data client list.
  *
- * Inside the critical section; shifts the later entries down. cSSXAudio__cSSXAudio removes func_00289650 with it.
+ * Inside the critical section; shifts the later entries down. cSSXAudio__cSSXAudio removes cSSXAudio_HandleUserChunk with it.
  *
  * @param client  the callback
  */

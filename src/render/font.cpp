@@ -395,7 +395,7 @@ static inline int fontGetTex1E30(void* s)
  * The Unicode counterpart of cFont_text: binds the font's TextureID as texture 0 of the current draw state and offsets
  * the position by Offset * Scale. With a nonzero ShadowOffset it first draws the text at the shadow offset in
  * ShadowColor, with the draw state's 5-bit field at bits 5-9 of word 2 lowered by one (not below 0), then restores that
- * field; the text itself is drawn in Color. Both draws go through graphics manager virtual slot 81 (func_00379028) with
+ * field; the text itself is drawn in Color. Both draws go through graphics manager virtual slot 81 (cPS2GraphicsMan_DrawString3D1) with
  * Scale and UVScale.
  *
  * @param x  the screen x
@@ -2409,7 +2409,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_RenderBoardTrail__FPv);
 /**
  * Does nothing: the base-class body of cGraphicsMan vtable slot 88.
  *
- * cPS2GraphicsMan does not override the slot (it overrides the next one, 89, with func_00386E78).
+ * cPS2GraphicsMan does not override the slot (it overrides the next one, 89, with cPS2GraphicsMan_RenderMultipleBoardTrails).
  */
 void cGraphicsMan_RenderBoardTrail(void* self)
 {
@@ -2422,7 +2422,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_RenderBoardTrail1__FPv);
 /**
  * Does nothing: the base-class body of cGraphicsMan vtable slot 89.
  *
- * cPS2GraphicsMan overrides the slot with func_00386E78.
+ * cPS2GraphicsMan overrides the slot with cPS2GraphicsMan_RenderMultipleBoardTrails.
  */
 void cGraphicsMan_RenderBoardTrail1(void* self)
 {
@@ -6844,7 +6844,7 @@ extern char D_00488680[];
  * Destructor body for the visual effect allocated as "Tube": stores the cVisualEffect base vtable D_00488680 and frees
  * the object when bit 0 of @p flags is set.
  *
- * Slot 1 of vtable D_004930A0 (slot 2 func_00372500, slot 3 the empty cTube_render).
+ * Slot 1 of vtable D_004930A0 (slot 2 cTube_update, slot 3 the empty cTube_render).
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
@@ -6962,7 +6962,7 @@ INCLUDE_ASM("render/font", cTube_render__FPv);
 /**
  * Does nothing.
  *
- * Slot 3 of vtable D_004930A0 (the "Tube" effect); D_00493068 overrides that slot with func_003726C8, which draws the
+ * Slot 3 of vtable D_004930A0 (the "Tube" effect); D_00493068 overrides that slot with cSimpleTube_render, which draws the
  * tube.
  */
 void cTube_render(void* self)
@@ -6976,7 +6976,7 @@ INCLUDE_ASM("render/font", func_003968D0);
 /**
  * Copies the 16-byte vector at @p src into entry @p index of the array at +0x8.
  *
- * Slot 5 of vtable D_00493068 (the object func_00372520 builds; its destructor func_00372660 frees the same +0x8
+ * Slot 5 of vtable D_00493068 (the object cSimpleTube_cSimpleTube builds; its destructor cSimpleTube__cSimpleTube frees the same +0x8
  * array). No bounds check.
  *
  * @param index  the entry
@@ -7000,7 +7000,7 @@ extern char D_00488680[];
  * Destructor body for the visual effect allocated as "PathArrow": stores the cVisualEffect base vtable D_00488680 and
  * frees the object when bit 0 of @p flags is set.
  *
- * Slot 1 of vtable D_00493038, which func_00372AA0 installs (slots 2 and 3 are the empty cPathArrow_update and
+ * Slot 1 of vtable D_00493038, which cPathArrow_cPathArrow installs (slots 2 and 3 are the empty cPathArrow_update and
  * cPathArrow_render).
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
@@ -7051,7 +7051,7 @@ extern char D_00488680[];
  * Destructor body for the visual effect allocated as "DetailSystem": stores the cVisualEffect base vtable D_00488680
  * and frees the object when bit 0 of @p flags is set.
  *
- * Slot 1 of vtable D_00493000, which func_003759E8 installs (slot 2 func_00375A00, slot 5 the empty cDetailSystem_addPatch).
+ * Slot 1 of vtable D_00493000, which cDetailSystem_cDetailSystem installs (slot 2 cDetailSystem_update, slot 5 the empty cDetailSystem_addPatch).
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */

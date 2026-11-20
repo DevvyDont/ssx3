@@ -1324,7 +1324,7 @@ extern "C" void cFlexBridgeNode_writeToReplayFrame(void* self, void* stream)
 INCLUDE_ASM("object/flexbridgenode", cFlexRailNode_cFlexRailNode);
 #ifdef SKIP_ASM
 extern "C" void* cInstanceNode_cInstanceNode1(void* self, int type, void* a2, void* a3);
-extern "C" void* func_00372520(void* self, int n);
+extern "C" void* cSimpleTube_cSimpleTube(void* self, int n);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
@@ -1349,7 +1349,7 @@ struct sFlexDef_347D90 {
  *
  * Runs the record constructor cInstanceNode_cInstanceNode1, installs the flex-rail vtable D_004900D0, sets RailFlags (+0x24) from def
  * +0x44 and NumNodes (+0x20) to the number of the 8 instance ids (def +0x4..+0x20) that are not -1. Allocates NumNodes
- * - 1 segment matrices ("FlexNodeMats", +0x50) and a "Tube" object (+0x58) built by func_00372520 with NumNodes * 8 -
+ * - 1 segment matrices ("FlexNodeMats", +0x50) and a "Tube" object (+0x58) built by cSimpleTube_cSimpleTube with NumNodes * 8 -
  * 9.
  *
  * @param nodeType  node type (20 float rail, 21 spring rail)
@@ -1371,7 +1371,7 @@ extern "C" void* cFlexRailNode_cFlexRailNode(char* self, void* nodeType, void* i
     }
     sFlexSeg_347D90** segs = (sFlexSeg_347D90**)(self + 0x50);
     *segs = new (str_FlexNodeMats, 0x20000000, 0) sFlexSeg_347D90[*(int*)(self + 0x20) - 1];
-    *(void**)(self + 0x58) = func_00372520(cMemMan_alloc(0xC, str_Tube_b, 0x20000000, 0), *(int*)(self + 0x20) * 8 - 9);
+    *(void**)(self + 0x58) = cSimpleTube_cSimpleTube(cMemMan_alloc(0xC, str_Tube_b, 0x20000000, 0), *(int*)(self + 0x20) * 8 - 9);
     return self;
 }
 #endif
@@ -1406,7 +1406,7 @@ extern "C" void* cFlexRailNode_cFlexRailNode1(char* self, void* bucket, void* st
     sSerVEntry_00347EA8* readSlot = &(*(sSerVEntry_00347EA8**)stream)[2];
     readSlot->fn((char*)stream + readSlot->delta, self + 0x20, 0x30);
     *segs = new (str_FlexNodeMats, 0x20000000, 0) sFlexSeg_347D90[*(int*)(self + 0x20) - 1];
-    *(void**)(self + 0x58) = func_00372520(cMemMan_alloc(0xC, str_Tube_b, 0x20000000, 0), *(int*)(self + 0x20) * 8 - 9);
+    *(void**)(self + 0x58) = cSimpleTube_cSimpleTube(cMemMan_alloc(0xC, str_Tube_b, 0x20000000, 0), *(int*)(self + 0x20) * 8 - 9);
     return self;
 }
 #endif

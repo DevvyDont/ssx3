@@ -68,14 +68,14 @@ extern "C" sStreamInst_99D8* cStreamInstance_cStreamInstance(sStreamInst_99D8* s
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002A9C00);
+INCLUDE_ASM("sound/streamsys", cStreamInstance_cStreamInstance1);
 #ifdef SKIP_ASM
 /**
  * Constructs a sound stream instance in caller-supplied memory, from the current play-option level.
  *
  * Takes the level's volume control and volume (scaled by it and clamped to 0..127, as cStreamInstance_cStreamInstance
  * does), keeps @p mem as the buffer without owning it (+4 = 1) and opens the stream with SNDSTRM_create(.., @p n,
- * @p maxChunks, mem, size). func_002AA870 runs it.
+ * @p maxChunks, mem, size). cStreamSys_STREAM_CreateInstance1 runs it.
  *
  * @param p  the play options (cBankManager + 0x1D8)
  * @param mem  the stream buffer
@@ -84,7 +84,7 @@ INCLUDE_ASM("sound/streamsys", func_002A9C00);
  * @param maxChunks  the maximum number of chunks
  * @return this
  */
-extern "C" sStreamInst_99D8* func_002A9C00(sStreamInst_99D8* self, sSsPlayer_99D8* p, char* mem, int size, int n, int maxChunks)
+extern "C" sStreamInst_99D8* cStreamInstance_cStreamInstance1(sStreamInst_99D8* self, sSsPlayer_99D8* p, char* mem, int size, int n, int maxChunks)
 {
     self->scale = p->scales[p->cur];
     self->vol = curVol_99D8(p);
@@ -99,7 +99,7 @@ extern "C" sStreamInst_99D8* func_002A9C00(sStreamInst_99D8* self, sSsPlayer_99D
 }
 #endif
 //100%
-INCLUDE_ASM("sound/streamsys", func_002A9DD8);
+INCLUDE_ASM("sound/streamsys", cStreamInstance_cStreamInstance2);
 #ifdef SKIP_ASM
 /**
  * Constructs a stream instance around an existing stream handle: no buffer, no big-file data.
@@ -108,7 +108,7 @@ INCLUDE_ASM("sound/streamsys", func_002A9DD8);
  * @param handle  the sound-driver stream handle
  * @return this
  */
-extern "C" void *func_002A9DD8(void *stream, int handle) {
+extern "C" void *cStreamInstance_cStreamInstance2(void *stream, int handle) {
     (*(int *)((char*)(stream) + (8))) = handle;
     (*(int *)((char*)(stream) + (0))) = 0;
     (*(int *)((char*)(stream) + (0x74))) = 0;
@@ -118,7 +118,7 @@ extern "C" void *func_002A9DD8(void *stream, int handle) {
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002A9DF0);
+INCLUDE_ASM("sound/streamsys", cStreamInstance__cStreamInstance);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
@@ -134,7 +134,7 @@ extern "C" void* MEM_free(void* self);
  *
  * @param flags  bit 0 set to also delete the object
  */
-extern "C" void func_002A9DF0(void* self, int flags)
+extern "C" void cStreamInstance__cStreamInstance(void* self, int flags)
 {
     if (*(void**)self != 0) {
         SNDSTRM_destroy(*(int*)((char*)self + 0x8));
@@ -152,7 +152,7 @@ extern "C" void func_002A9DF0(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002A9E78);
+INCLUDE_ASM("sound/streamsys", cStreamInstance_SetBigFile);
 #ifdef SKIP_ASM
 extern "C" int BXFILE_exists(const char* name);
 extern "C" int func_003E1EC8(const char* name, int a1);
@@ -163,8 +163,8 @@ extern "C" int func_003E1EC8(const char* name, int a1);
  *
  * @param name  the big-file name
  */
-// PORT: second parameter is a const char* passed as int (unit declares func_002A9E78(void*, int)).
-extern "C" void func_002A9E78(void* self, int name)
+// PORT: second parameter is a const char* passed as int (unit declares cStreamInstance_SetBigFile(void*, int)).
+extern "C" void cStreamInstance_SetBigFile(void* self, int name)
 {
     if (BXFILE_exists((const char*)name) != 0) {
         strcpy((char*)self + 0x14, (const char*)name);
@@ -174,7 +174,7 @@ extern "C" void func_002A9E78(void* self, int name)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002A9ED8);
+INCLUDE_ASM("sound/streamsys", cStreamInstance_Set3DPosition);
 #ifdef SKIP_ASM
 extern "C" void SNDSYS_entercritical();
 extern "C" void SNDSYS_leavecritical();
@@ -186,7 +186,7 @@ extern "C" void func_003B7F60(int h, int a, int b);
  * @param azimuth  the azimuth
  * @param elevation  the elevation
  */
-extern "C" void func_002A9ED8(void* self, int azimuth, int elevation)
+extern "C" void cStreamInstance_Set3DPosition(void* self, int azimuth, int elevation)
 {
     SNDSYS_entercritical();
     func_003B7F60(*(int*)((char*)self + 0x8), azimuth, elevation);
@@ -211,7 +211,7 @@ void cStreamInstance_SetBaseVolume(void* self, int val)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002A9F38);
+INCLUDE_ASM("sound/streamsys", cStreamInstance_SetPitch);
 #ifdef SKIP_ASM
 extern "C" void SNDSYS_entercritical();
 extern "C" void SNDSYS_leavecritical();
@@ -222,7 +222,7 @@ extern "C" void SNDSTRM_pitchmult(int h, int v);
  *
  * @param pitch  the pitch (0x1000 = normal)
  */
-extern "C" void func_002A9F38(void* self, int pitch)
+extern "C" void cStreamInstance_SetPitch(void* self, int pitch)
 {
     SNDSYS_entercritical();
     SNDSTRM_pitchmult(*(int*)((char*)self + 0x8), pitch);
@@ -231,7 +231,7 @@ extern "C" void func_002A9F38(void* self, int pitch)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002A9F80);
+INCLUDE_ASM("sound/streamsys", cStreamInstance_Update);
 #ifdef SKIP_ASM
 int cAudioInterface_getTimerHz(void* self);
 void* cStreamInstance_Purge(void* self);
@@ -243,7 +243,7 @@ extern "C" void func_003B7E70(int h, int vol);
  * Updates a stream instance: purges it once its counter (+0x80) passes twice the timer rate, otherwise re-applies the
  * volume scaled by its volume control (clamped 0..127, func_003B7E70).
  */
-extern "C" void func_002A9F80(void* self)
+extern "C" void cStreamInstance_Update(void* self)
 {
     if (cAudioInterface_getTimerHz(self) * 2 < *(int*)((char*)self + 0x80)) {
         cStreamInstance_Purge(self);
@@ -267,14 +267,14 @@ extern "C" void func_002A9F80(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AA020);
+INCLUDE_ASM("sound/streamsys", cStreamInstance_GetStatus);
 #ifdef SKIP_ASM
 extern "C" void SNDSYS_entercritical();
 extern "C" void SNDSYS_leavecritical();
 extern "C" int SNDSTRM_status(int h, void* out);
 
 // PORT: returns int; the unit declares it void(void*, void*) further down
-int func_002AA020_impl(void* self, void* out) __asm__("func_002AA020");
+int cStreamInstance_GetStatus_impl(void* self, void* out) __asm__("cStreamInstance_GetStatus");
 
 /**
  * Reads a stream's status from the sound driver (SNDSTRM_status, in a critical section).
@@ -282,7 +282,7 @@ int func_002AA020_impl(void* self, void* out) __asm__("func_002AA020");
  * @param out  receives the status (SNDSTREAMSTATUS)
  * @return the driver's result
  */
-int func_002AA020_impl(void* self, void* out)
+int cStreamInstance_GetStatus_impl(void* self, void* out)
 {
     int result;
     SNDSYS_entercritical();
@@ -293,15 +293,15 @@ int func_002AA020_impl(void* self, void* out)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/streamsys", func_002AA068);
+INCLUDE_ASM("sound/streamsys", cStreamInstance_GetRequestStatus);
 #ifdef SKIP_ASM
-extern "C" void func_002AA020(void*, void*);
+extern "C" void cStreamInstance_GetStatus(void*, void*);
 extern "C" void SNDSYS_entercritical();
 extern "C" void SNDSYS_leavecritical();
 extern "C" int SNDSTRM_requeststatus(int h, int a1);
 
 // PORT: returns int and takes (self, int, out); later callers in this unit declare it void(void*, sStatus*, int)
-int func_002AA068_impl(void* self, int a1, int* out) __asm__("func_002AA068");
+int cStreamInstance_GetRequestStatus_impl(void* self, int a1, int* out) __asm__("cStreamInstance_GetRequestStatus");
 
 /**
  * Reads the status of a stream's current request: the stream status first (into @p out, or a local buffer), then
@@ -311,12 +311,12 @@ int func_002AA068_impl(void* self, int a1, int* out) __asm__("func_002AA068");
  * @param out  receives the stream status, or 0
  * @return the driver's result
  */
-int func_002AA068_impl(void* self, int requestStatus, int* out)
+int cStreamInstance_GetRequestStatus_impl(void* self, int requestStatus, int* out)
 {
     int buf[4];
     int* status = out ? out : buf;
     int result;
-    func_002AA020(self, status);
+    cStreamInstance_GetStatus(self, status);
     SNDSYS_entercritical();
     result = SNDSTRM_requeststatus(status[1], requestStatus);
     SNDSYS_leavecritical();
@@ -325,28 +325,28 @@ int func_002AA068_impl(void* self, int requestStatus, int* out)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AA0C0);
+INCLUDE_ASM("sound/streamsys", cStreamInstance_GetTime);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct func_002AA0C0_sStatus {
+struct cStreamInstance_GetTime_sStatus {
     int state;
     int a;
     int b;
     int c;
 };
 
-// the unit declares func_002AA068 later with a different pointer type; alias it
-void func_002AA068_status(void* self, func_002AA0C0_sStatus* out, int flags) __asm__("func_002AA068");
+// the unit declares cStreamInstance_GetRequestStatus later with a different pointer type; alias it
+void cStreamInstance_GetRequestStatus_status(void* self, cStreamInstance_GetTime_sStatus* out, int flags) __asm__("cStreamInstance_GetRequestStatus");
 
 /**
  * Returns the played time of the current request while it plays (request state 2), else 0.
  *
  * @return the time
  */
-extern "C" float func_002AA0C0(void* self)
+extern "C" float cStreamInstance_GetTime(void* self)
 {
-    func_002AA0C0_sStatus st;
-    func_002AA068_status(self, &st, 0);
+    cStreamInstance_GetTime_sStatus st;
+    cStreamInstance_GetRequestStatus_status(self, &st, 0);
     if (st.state == 2) {
         return (float)st.a;
     }
@@ -355,12 +355,12 @@ extern "C" float func_002AA0C0(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/streamsys", func_002AA108);
+INCLUDE_ASM("sound/streamsys", cStreamInstance_GetTimeRemaining);
 #ifdef SKIP_ASM
-struct func_002AA1B8_sStatus;
-extern "C" void func_002AA068(void* self, func_002AA1B8_sStatus* out, int flags);
+struct cStreamInstance_Playing_sStatus;
+extern "C" void cStreamInstance_GetRequestStatus(void* self, cStreamInstance_Playing_sStatus* out, int flags);
 
-struct func_002AA108_sStatus {
+struct cStreamInstance_GetTimeRemaining_sStatus {
     int state;
     int a;
     int b;
@@ -372,10 +372,10 @@ struct func_002AA108_sStatus {
  *
  * @return the time
  */
-extern "C" float func_002AA108(void* self)
+extern "C" float cStreamInstance_GetTimeRemaining(void* self)
 {
-    func_002AA108_sStatus st;
-    func_002AA068(self, (func_002AA1B8_sStatus*)&st, 0);
+    cStreamInstance_GetTimeRemaining_sStatus st;
+    cStreamInstance_GetRequestStatus(self, (cStreamInstance_Playing_sStatus*)&st, 0);
     if (st.state == 2) {
         return (float)st.b;
     }
@@ -384,9 +384,9 @@ extern "C" float func_002AA108(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AA150);
+INCLUDE_ASM("sound/streamsys", cStreamInstance_IsBufferFilled);
 #ifdef SKIP_ASM
-struct func_002AA150_sStatus {
+struct cStreamInstance_IsBufferFilled_sStatus {
     int state;
     int a;
     int b;
@@ -399,17 +399,17 @@ struct func_002AA150_sStatus {
  * @param minVal  the amount (milliseconds)
  * @return 1 or 0
  */
-extern "C" int func_002AA150(void* self, int minVal)
+extern "C" int cStreamInstance_IsBufferFilled(void* self, int minVal)
 {
-    func_002AA150_sStatus st;
-    func_002AA020(self, &st);
+    cStreamInstance_IsBufferFilled_sStatus st;
+    cStreamInstance_GetStatus(self, &st);
     return st.b >= minVal;
 }
 #endif
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AA188);
+INCLUDE_ASM("sound/streamsys", cStreamInstance_IsCurrRequestedRead);
 #ifdef SKIP_ASM
-struct func_002AA188_sStatus {
+struct cStreamInstance_IsCurrRequestedRead_sStatus {
     int state;
     int a;
     int b;
@@ -421,71 +421,71 @@ struct func_002AA188_sStatus {
  *
  * @return 1 or 0
  */
-extern "C" int func_002AA188(void* self)
+extern "C" int cStreamInstance_IsCurrRequestedRead(void* self)
 {
-    func_002AA188_sStatus st;
-    func_002AA068(self, (func_002AA1B8_sStatus*)&st, 0);
+    cStreamInstance_IsCurrRequestedRead_sStatus st;
+    cStreamInstance_GetRequestStatus(self, (cStreamInstance_Playing_sStatus*)&st, 0);
     return st.state == 1;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/streamsys", func_002AA1B8);
+INCLUDE_ASM("sound/streamsys", cStreamInstance_Playing);
 #ifdef SKIP_ASM
-struct func_002AA1B8_sStatus {
+struct cStreamInstance_Playing_sStatus {
     int state;
     int a;
     int b;
     int c;
 };
 
-extern "C" void func_002AA068(void* self, func_002AA1B8_sStatus* out, int flags);
+extern "C" void cStreamInstance_GetRequestStatus(void* self, cStreamInstance_Playing_sStatus* out, int flags);
 
 /**
  * Tells whether the current request is playing (request state 2).
  *
  * @return 1 or 0
  */
-extern "C" int func_002AA1B8(void* self)
+extern "C" int cStreamInstance_Playing(void* self)
 {
-    func_002AA1B8_sStatus st;
-    func_002AA068(self, &st, 0);
+    cStreamInstance_Playing_sStatus st;
+    cStreamInstance_GetRequestStatus(self, &st, 0);
     return st.state == 2;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AA1E8);
+INCLUDE_ASM("sound/streamsys", cStreamInstance_ReleaseHold);
 #ifdef SKIP_ASM
 extern "C" void SNDSTRM_modifyhold(int, int);
 
 /**
  * Releases the hold on the stream's current request (SNDSTRM_modifyhold(request, 0)).
  */
-extern "C" void func_002AA1E8(void* self)
+extern "C" void cStreamInstance_ReleaseHold(void* self)
 {
     int buf[2];
-    func_002AA020(self, buf);
+    cStreamInstance_GetStatus(self, buf);
     SNDSTRM_modifyhold(buf[1], 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AA210);
+INCLUDE_ASM("sound/streamsys", cStreamInstance_GetCurrActiveSampleHandle);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// func_002AA020 returns the status (the unit declares it void); the int return keeps $2 free as the target has it.
-int func_002AA020_st(void* self, int* out) __asm__("func_002AA020");
+// cStreamInstance_GetStatus returns the status (the unit declares it void); the int return keeps $2 free as the target has it.
+int cStreamInstance_GetStatus_st(void* self, int* out) __asm__("cStreamInstance_GetStatus");
 
 /**
  * Returns the stream's current request handle, or -1 when the stream has no request (status word 0 is 0).
  *
  * @return the request handle, or -1
  */
-extern "C" int func_002AA210(void* self)
+extern "C" int cStreamInstance_GetCurrActiveSampleHandle(void* self)
 {
     int st[2];
-    func_002AA020_st(self, st);
+    cStreamInstance_GetStatus_st(self, st);
     if (st[0] == 0) {
         return -1;
     }
@@ -494,7 +494,7 @@ extern "C" int func_002AA210(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AA240);
+INCLUDE_ASM("sound/streamsys", cStreamInstance_ReleaseHold1);
 #ifdef SKIP_ASM
 extern "C" void SNDSTRM_modifyhold(int, int);
 
@@ -503,33 +503,33 @@ extern "C" void SNDSTRM_modifyhold(int, int);
  *
  * @param requestHandle  the request
  */
-extern "C" void func_002AA240(void* self, int requestHandle)
+extern "C" void cStreamInstance_ReleaseHold1(void* self, int requestHandle)
 {
     SNDSTRM_modifyhold(requestHandle, 0);
 }
 #endif
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AA260);
+INCLUDE_ASM("sound/streamsys", cStreamInstance_GetRequestLength);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct func_002AA260_sStatus {
+struct cStreamInstance_GetRequestLength_sStatus {
     int state;
     int a;
     int b;
     int c;
 };
 
-void func_002AA068_status(void* self, func_002AA260_sStatus* out, int flags) __asm__("func_002AA068");
+void cStreamInstance_GetRequestStatus_status(void* self, cStreamInstance_GetRequestLength_sStatus* out, int flags) __asm__("cStreamInstance_GetRequestStatus");
 
 /**
  * Returns the length of the current request (played plus remaining time) while it plays, else 0.
  *
  * @return the length
  */
-extern "C" float func_002AA260(void* self)
+extern "C" float cStreamInstance_GetRequestLength(void* self)
 {
-    func_002AA260_sStatus st;
-    func_002AA068_status(self, &st, 0);
+    cStreamInstance_GetRequestLength_sStatus st;
+    cStreamInstance_GetRequestStatus_status(self, &st, 0);
     if (st.state == 2) {
         return (float)(st.a + st.b);
     }
@@ -537,28 +537,28 @@ extern "C" float func_002AA260(void* self)
 }
 #endif
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AA2B0);
+INCLUDE_ASM("sound/streamsys", cStreamInstance_Pause);
 #ifdef SKIP_ASM
 /**
  * Pauses the stream: pitch multiplier 0 (SNDSTRM_pitchmult, in a critical section).
  *
  * @param stream  this
  */
-extern "C" void func_002AA2B0(void *stream) {
+extern "C" void cStreamInstance_Pause(void *stream) {
     SNDSYS_entercritical();
     SNDSTRM_pitchmult((*(int *)((char*)(stream) + (8))), 0);
     SNDSYS_leavecritical();
 }
 #endif
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AA2E8);
+INCLUDE_ASM("sound/streamsys", cStreamInstance_Resume);
 #ifdef SKIP_ASM
 /**
  * Resumes the stream: pitch multiplier 0x1000 (SNDSTRM_pitchmult, in a critical section).
  *
  * @param stream  this
  */
-extern "C" void func_002AA2E8(void *stream) {
+extern "C" void cStreamInstance_Resume(void *stream) {
     SNDSYS_entercritical();
     SNDSTRM_pitchmult((*(int *)((char*)(stream) + (8))), 0x1000);
     SNDSYS_leavecritical();
@@ -566,7 +566,7 @@ extern "C" void func_002AA2E8(void *stream) {
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AA320);
+INCLUDE_ASM("sound/streamsys", cStreamInstance_Queue);
 #ifdef SKIP_ASM
 extern "C" int SNDSTRM_queuefile(int h, int a, int buf, int off);
 extern "C" void func_003E2CE0(void* dec, int src, int a, int* out, int b);
@@ -581,7 +581,7 @@ extern "C" void func_003E2CE0(void* dec, int src, int a, int* out, int b);
  * @return the request handle
  */
 // PORT: buf is a pointer carried in an int (the unit's caller declares this function with int params).
-extern "C" int func_002AA320(void* self, int holdTime, int buf, int off)
+extern "C" int cStreamInstance_Queue(void* self, int holdTime, int buf, int off)
 {
     if (*(void**)((char*)self + 0x74) != 0) {
         int n;
@@ -595,7 +595,7 @@ extern "C" int func_002AA320(void* self, int holdTime, int buf, int off)
 extern "C" void* SNDSTRM_purge(int);
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AA398);
+INCLUDE_ASM("sound/streamsys", cStreamInstance_Queue1);
 #ifdef SKIP_ASM
 /**
  * Queues a big-file element on the stream (by index, func_003E2CE0); 0 when no big file is set.
@@ -605,7 +605,7 @@ INCLUDE_ASM("sound/streamsys", func_002AA398);
  * @param off  the offset in the element
  * @return the request handle, or 0
  */
-extern "C" int func_002AA398(void* self, int holdTime, int element, int off)
+extern "C" int cStreamInstance_Queue1(void* self, int holdTime, int element, int off)
 {
     void* dec = *(void**)((char*)self + 0x74);
     if (dec != 0) {
@@ -633,27 +633,27 @@ void* cStreamInstance_Purge(void* self)
 }
 #endif
 
-extern "C" void func_002AA020(void*, void*);
+extern "C" void cStreamInstance_GetStatus(void*, void*);
 
 //99.38% - identical instructions; jal addend differs only because the
 // callee sits at a different .text offset in our object than in the target
-INCLUDE_ASM("sound/streamsys", func_002AA428);
+INCLUDE_ASM("sound/streamsys", cStreamInstance_Requests);
 #ifdef SKIP_ASM
 /**
  * Returns the number of requests queued on the stream (status word 0).
  *
  * @return the count
  */
-extern "C" int func_002AA428(void* self)
+extern "C" int cStreamInstance_Requests(void* self)
 {
     int buf[4];
-    func_002AA020(self, buf);
+    cStreamInstance_GetStatus(self, buf);
     return buf[0];
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AA448);
+INCLUDE_ASM("sound/streamsys", cStreamInstance_TimeMult);
 #ifdef SKIP_ASM
 extern "C" int SNDSTRM_timemult(int, int);
 
@@ -664,7 +664,7 @@ extern "C" int SNDSTRM_timemult(int, int);
  * @param multAmount  the multiplier
  * @return the driver's result
  */
-extern "C" int func_002AA448(void *stream, int multAmount) {
+extern "C" int cStreamInstance_TimeMult(void *stream, int multAmount) {
     int result;
 
     SNDSYS_entercritical();
@@ -751,12 +751,12 @@ extern "C" sStreamSysA490* cStreamSys_cStreamSys(sStreamSysA490* self, int inchr
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AA648);
+INCLUDE_ASM("sound/streamsys", cStreamSys__cStreamSys);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int* ptr);
 extern "C" void cBankManager__cBankManager(void* self, int flags);
-extern "C" void func_002A9DF0(void* e, int a1);
+extern "C" void cStreamInstance__cStreamInstance(void* e, int a1);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 extern void* cBankMonitor_vtbl[];
 
@@ -786,7 +786,7 @@ extern const sSsVtblBA648 D_004839B8_A648 __asm__("D_004839B8");
  * @param flags  bit 1: destroy the virtual bases; bit 0: delete the object
  */
 // PORT: g++ 2.95 virtual-base destruction with stack vtable this-adjust fix-ups, written out by hand.
-extern "C" void func_002AA648(void* streamSysObj, int flags)
+extern "C" void cStreamSys__cStreamSys(void* streamSysObj, int flags)
 {
     char* self = (char*)streamSysObj;
     *(const sSsVtblAA648**)(*(char**)(*(char**)self + 0x1D8) + 4) = &D_00483998_A648;
@@ -807,7 +807,7 @@ extern "C" void func_002AA648(void* streamSysObj, int flags)
     for (int i = 0; i < *(int*)(self + 4); i++) {
         void* streamInst = (*(void***)(self + 8))[i];
         if (streamInst != 0) {
-            func_002A9DF0(streamInst, 3);
+            cStreamInstance__cStreamInstance(streamInst, 3);
         }
     }
     if (*(void**)(self + 8) != 0) {
@@ -824,7 +824,7 @@ extern "C" void func_002AA648(void* streamSysObj, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AA7F0);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_CreateInstance);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern char str_StreamBuffer[];
@@ -837,7 +837,7 @@ extern char str_StreamBuffer[];
  * @param heap  the memory type
  * @param extra  the extra buffer space
  */
-extern "C" void func_002AA7F0(void* self, int idx, int heap, int extra)
+extern "C" void cStreamSys_STREAM_CreateInstance(void* self, int idx, int heap, int extra)
 {
     sStreamInst_99D8** slot = (sStreamInst_99D8**)((idx << 2) + *(int*)((char*)self + 0x8));
     void* mem = cMemMan_alloc(132, str_StreamBuffer, heap, 0);
@@ -846,15 +846,15 @@ extern "C" void func_002AA7F0(void* self, int idx, int heap, int extra)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AA870);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_CreateInstance1);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern char str_StreamBuffer[];
-extern "C" sStreamInst_99D8* func_002A9C00(sStreamInst_99D8* self, sSsPlayer_99D8* p, char* mem, int size, int n, int m);
+extern "C" sStreamInst_99D8* cStreamInstance_cStreamInstance1(sStreamInst_99D8* self, sSsPlayer_99D8* p, char* mem, int size, int n, int m);
 
 /**
  * Creates stream instance @p idx in caller-supplied memory: allocates the 132-byte object ("StreamBuffer") and runs
- * func_002A9C00 with the buffer and counts.
+ * cStreamInstance_cStreamInstance1 with the buffer and counts.
  *
  * @param idx  the stream index
  * @param heap  the memory type of the object
@@ -863,19 +863,19 @@ extern "C" sStreamInst_99D8* func_002A9C00(sStreamInst_99D8* self, sSsPlayer_99D
  * @param n  the maximum number of requests
  * @param maxChunks  the maximum number of chunks
  */
-extern "C" void func_002AA870(void* self, int idx, int heap, char* mem, int size, int n, int maxChunks)
+extern "C" void cStreamSys_STREAM_CreateInstance1(void* self, int idx, int heap, char* mem, int size, int n, int maxChunks)
 {
     sStreamInst_99D8** slot = (sStreamInst_99D8**)((idx << 2) + *(int*)((char*)self + 0x8));
     void* obj = cMemMan_alloc(132, str_StreamBuffer, heap, 0);
-    *slot = func_002A9C00((sStreamInst_99D8*)obj, (sSsPlayer_99D8*)(*(char**)self + 0x1D8), mem, size, n, maxChunks);
+    *slot = cStreamInstance_cStreamInstance1((sStreamInst_99D8*)obj, (sSsPlayer_99D8*)(*(char**)self + 0x1D8), mem, size, n, maxChunks);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/streamsys", func_002AA910);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_Create);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern "C" void func_002AA7F0(void* self, int a1, int a2, int a3);
+extern "C" void cStreamSys_STREAM_CreateInstance(void* self, int a1, int a2, int a3);
 
 struct sEntry_A910 {
     signed char kind;
@@ -915,14 +915,14 @@ struct sMgr_A910 {
 
 /**
  * Creates a stream with a volume control: pushes a play-option level with the defaults, sets its volume control,
- * creates the instance (func_002AA7F0) and pops the level.
+ * creates the instance (cStreamSys_STREAM_CreateInstance) and pops the level.
  *
  * @param streamIndex  the stream index
  * @param volControl  the volume control (float*)
  * @param memType  the memory type
  * @param buffSpace  the extra buffer space
  */
-extern "C" void func_002AA910(sMgr_A910** self, int streamIndex, int volControl, int memType, int buffSpace)
+extern "C" void cStreamSys_STREAM_Create(sMgr_A910** self, int streamIndex, int volControl, int memType, int buffSpace)
 {
     sMgr_A910* bankMgr = *self;
     sStack_A910* st = &bankMgr->st;
@@ -947,116 +947,116 @@ extern "C" void func_002AA910(sMgr_A910** self, int streamIndex, int volControl,
     st->a78[bankMgr->st.depth] = 127;
     st->a7C[bankMgr->st.depth] = 1;
     (*self)->st.a3C[(*self)->st.depth] = volControl;
-    func_002AA7F0(self, streamIndex, memType, buffSpace);
+    cStreamSys_STREAM_CreateInstance(self, streamIndex, memType, buffSpace);
     (*self)->st.depth--;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/streamsys", func_002AAB98);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_SetBigFile);
 #ifdef SKIP_ASM
-extern "C" void func_002A9E78(void*, int);
+extern "C" void cStreamInstance_SetBigFile(void*, int);
 
 /**
- * Sets the big file of stream @p i (func_002A9E78), when that stream exists.
+ * Sets the big file of stream @p i (cStreamInstance_SetBigFile), when that stream exists.
  *
  * @param i  the stream index
  * @param val  the big-file name
  */
-extern "C" void func_002AAB98(void* self, int i, int val)
+extern "C" void cStreamSys_STREAM_SetBigFile(void* self, int i, int val)
 {
     void* stream = (*(void***)((char*)self + 0x8))[i];
     if (stream != 0) {
-        func_002A9E78(stream, val);
+        cStreamInstance_SetBigFile(stream, val);
     }
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/streamsys", func_002AABD0);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_Destroy);
 #ifdef SKIP_ASM
-extern "C" void func_002A9DF0(void* e, int a1);
+extern "C" void cStreamInstance__cStreamInstance(void* e, int a1);
 
 /**
- * Destroys stream @p i (func_002A9DF0 with flags 3) and clears its slot.
+ * Destroys stream @p i (cStreamInstance__cStreamInstance with flags 3) and clears its slot.
  *
  * @param i  the stream index
  */
-extern "C" void func_002AABD0(void* self, int i)
+extern "C" void cStreamSys_STREAM_Destroy(void* self, int i)
 {
     void* stream = (*(void***)((char*)self + 0x8))[i];
     if (stream != 0) {
-        func_002A9DF0(stream, 3);
+        cStreamInstance__cStreamInstance(stream, 3);
     }
     (*(void***)((char*)self + 0x8))[i] = 0;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/streamsys", func_002AAC28);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_Update);
 #ifdef SKIP_ASM
-extern "C" void func_002A9F80(void* e);
+extern "C" void cStreamInstance_Update(void* e);
 
 /**
- * Updates every stream instance (func_002A9F80); func_002AB958 calls it each frame.
+ * Updates every stream instance (cStreamInstance_Update); cController_Update calls it each frame.
  */
-extern "C" void func_002AAC28(void* self)
+extern "C" void cStreamSys_STREAM_Update(void* self)
 {
     for (int i = 0; i < *(int*)((char*)self + 0x4); i++) {
         void* stream = (*(void***)((char*)self + 0x8))[i];
         if (stream != 0) {
-            func_002A9F80(stream);
+            cStreamInstance_Update(stream);
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AAC98);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_Pause);
 #ifdef SKIP_ASM
-extern "C" void func_002AA2B0(void* p);
+extern "C" void cStreamInstance_Pause(void* p);
 
 /**
- * Pauses every stream instance (func_002AA2B0).
+ * Pauses every stream instance (cStreamInstance_Pause).
  */
-extern "C" void func_002AAC98(void* self)
+extern "C" void cStreamSys_STREAM_Pause(void* self)
 {
     int i;
     for (i = 0; i < *(int*)((char*)self + 0x4); i++) {
         void* stream = *(void**)((char*)*(void**)((char*)self + 0x8) + i * 4);
         if (stream != 0) {
-            func_002AA2B0(stream);
+            cStreamInstance_Pause(stream);
         }
     }
 }
 #endif
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AAD08);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_Resume);
 #ifdef SKIP_ASM
-extern "C" void func_002AA2E8(void* p);
+extern "C" void cStreamInstance_Resume(void* p);
 
 /**
- * Resumes every stream instance (func_002AA2E8).
+ * Resumes every stream instance (cStreamInstance_Resume).
  */
-extern "C" void func_002AAD08(void* self)
+extern "C" void cStreamSys_STREAM_Resume(void* self)
 {
     int i;
     for (i = 0; i < *(int*)((char*)self + 0x4); i++) {
         void* stream = *(void**)((char*)*(void**)((char*)self + 0x8) + i * 4);
         if (stream != 0) {
-            func_002AA2E8(stream);
+            cStreamInstance_Resume(stream);
         }
     }
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/streamsys", func_002AAD78);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_Queue);
 #ifdef SKIP_ASM
-extern "C" int func_002AA320(void* e, int a, int b, int c);
+extern "C" int cStreamInstance_Queue(void* e, int a, int b, int c);
 
 /**
- * Queues a file on stream @p i (func_002AA320); -1 when the stream does not exist.
+ * Queues a file on stream @p i (cStreamInstance_Queue); -1 when the stream does not exist.
  *
  * @param i  the stream index
  * @param holdTime  the hold time
@@ -1064,23 +1064,23 @@ extern "C" int func_002AA320(void* e, int a, int b, int c);
  * @param offset  the offset in the file
  * @return the request handle, or -1
  */
-extern "C" int func_002AAD78(void* self, int i, int holdTime, int buf, int offset)
+extern "C" int cStreamSys_STREAM_Queue(void* self, int i, int holdTime, int buf, int offset)
 {
     void* stream = (*(void***)((char*)self + 0x8))[i];
     if (stream != 0) {
-        return func_002AA320(stream, holdTime, buf, offset);
+        return cStreamInstance_Queue(stream, holdTime, buf, offset);
     }
     return -1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AADC0);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_Queue1);
 #ifdef SKIP_ASM
-extern "C" int func_002AA398(void*, int, int, int);
+extern "C" int cStreamInstance_Queue1(void*, int, int, int);
 
 /**
- * Queues a big-file element on stream @p idx (func_002AA398); -1 when the stream does not exist.
+ * Queues a big-file element on stream @p idx (cStreamInstance_Queue1); -1 when the stream does not exist.
  *
  * @param idx  the stream index
  * @param holdTime  the hold time
@@ -1088,46 +1088,46 @@ extern "C" int func_002AA398(void*, int, int, int);
  * @param offset  the offset in the element
  * @return the request handle, or -1
  */
-extern "C" int func_002AADC0(void* self, int idx, int holdTime, int element, int offset)
+extern "C" int cStreamSys_STREAM_Queue1(void* self, int idx, int holdTime, int element, int offset)
 {
     void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
     if (stream != 0) {
-        return func_002AA398(stream, holdTime, element, offset);
+        return cStreamInstance_Queue1(stream, holdTime, element, offset);
     }
     return -1;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/streamsys", func_002AAE08);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_Requests);
 #ifdef SKIP_ASM
-extern "C" int func_002AA428(void*);
+extern "C" int cStreamInstance_Requests(void*);
 
 /**
- * Returns the number of requests queued on stream @p i (func_002AA428), or 0 without the stream.
+ * Returns the number of requests queued on stream @p i (cStreamInstance_Requests), or 0 without the stream.
  *
  * @param i  the stream index
  * @return the count
  */
-extern "C" int func_002AAE08(void* self, int i)
+extern "C" int cStreamSys_STREAM_Requests(void* self, int i)
 {
     void* stream = (*(void***)((char*)self + 0x8))[i];
     if (stream != 0) {
-        return func_002AA428(stream);
+        return cStreamInstance_Requests(stream);
     }
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AAE40);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_Purge);
 #ifdef SKIP_ASM
 /**
  * Purges stream @p i (cStreamInstance_Purge), when it exists.
  *
  * @param i  the stream index
  */
-extern "C" void func_002AAE40(void* self, int i)
+extern "C" void cStreamSys_STREAM_Purge(void* self, int i)
 {
     void* stream = (*(void***)((char*)self + 0x8))[i];
     if (stream != 0) {
@@ -1137,83 +1137,83 @@ extern "C" void func_002AAE40(void* self, int i)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/streamsys", func_002AAE78);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_TimeRemaining);
 #ifdef SKIP_ASM
-extern "C" float func_002AA108(void* self);
+extern "C" float cStreamInstance_GetTimeRemaining(void* self);
 
 /**
- * Returns the remaining time of stream @p i's current request (func_002AA108), or 0.
+ * Returns the remaining time of stream @p i's current request (cStreamInstance_GetTimeRemaining), or 0.
  *
  * @param i  the stream index (negative gives 0)
  * @return the time
  */
-extern "C" float func_002AAE78(void* self, int i)
+extern "C" float cStreamSys_STREAM_TimeRemaining(void* self, int i)
 {
     void* stream;
     if (i < 0 || (stream = (*(void***)((char*)self + 0x8))[i]) == 0) {
         return 0.0f;
     }
-    return func_002AA108(stream);
+    return cStreamInstance_GetTimeRemaining(stream);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/streamsys", func_002AAEC0);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_RequestLength);
 #ifdef SKIP_ASM
-extern "C" float func_002AA260(void*);
+extern "C" float cStreamInstance_GetRequestLength(void*);
 
 /**
- * Returns the length of stream @p idx's current request (func_002AA260), or 0.
+ * Returns the length of stream @p idx's current request (cStreamInstance_GetRequestLength), or 0.
  *
  * @param idx  the stream index (negative gives 0)
  * @return the length
  */
-extern "C" float func_002AAEC0(void* self, int idx)
+extern "C" float cStreamSys_STREAM_RequestLength(void* self, int idx)
 {
     void* stream;
     if (idx < 0 || (stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4)) == 0) {
         return 0.0f;
     }
-    return func_002AA260(stream);
+    return cStreamInstance_GetRequestLength(stream);
 }
 #endif
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AAF08);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_IsBufferFilled);
 #ifdef SKIP_ASM
-extern "C" int func_002AA150(void*, int);
+extern "C" int cStreamInstance_IsBufferFilled(void*, int);
 
 /**
- * Tells whether stream @p idx has at least @p minVal buffered (func_002AA150); 0 without the stream.
+ * Tells whether stream @p idx has at least @p minVal buffered (cStreamInstance_IsBufferFilled); 0 without the stream.
  *
  * @param idx  the stream index
  * @param minVal  the amount (milliseconds)
  * @return 1 or 0
  */
-extern "C" int func_002AAF08(void* self, int idx, int minVal)
+extern "C" int cStreamSys_STREAM_IsBufferFilled(void* self, int idx, int minVal)
 {
     void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
-    return stream != 0 ? func_002AA150(stream, minVal) : 0;
+    return stream != 0 ? cStreamInstance_IsBufferFilled(stream, minVal) : 0;
 }
 #endif
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AAF40);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_IsCurrRequestedRead);
 #ifdef SKIP_ASM
-extern "C" int func_002AA188(void*);
+extern "C" int cStreamInstance_IsCurrRequestedRead(void*);
 
 /**
- * Tells whether stream @p idx's current request has been read (func_002AA188); 0 without the stream.
+ * Tells whether stream @p idx's current request has been read (cStreamInstance_IsCurrRequestedRead); 0 without the stream.
  *
  * @param idx  the stream index
  * @return 1 or 0
  */
-extern "C" int func_002AAF40(void* self, int idx)
+extern "C" int cStreamSys_STREAM_IsCurrRequestedRead(void* self, int idx)
 {
     void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
-    return stream != 0 ? func_002AA188(stream) : 0;
+    return stream != 0 ? cStreamInstance_IsCurrRequestedRead(stream) : 0;
 }
 #endif
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AAF78);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_IsRequestedDequeued);
 #ifdef SKIP_ASM
 // PORT: the unit declares SNDSTRM_requeststatus(int, int); this call passes an out buffer
 int SNDSTRM_requeststatus_pbuf(int h, int* out) __asm__("SNDSTRM_requeststatus");
@@ -1224,7 +1224,7 @@ int SNDSTRM_requeststatus_pbuf(int h, int* out) __asm__("SNDSTRM_requeststatus")
  * @param handle  the request handle
  * @return 1 or 0
  */
-extern "C" int func_002AAF78(void* self, int handle)
+extern "C" int cStreamSys_STREAM_IsRequestedDequeued(void* self, int handle)
 {
     int st[4];
     int result;
@@ -1235,7 +1235,7 @@ extern "C" int func_002AAF78(void* self, int handle)
 }
 #endif
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AAFD0);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_IsRequestedPlaying);
 #ifdef SKIP_ASM
 // PORT: the unit declares SNDSTRM_requeststatus(int, int); this call passes an out buffer
 int SNDSTRM_requeststatus_pbuf(int h, int* out) __asm__("SNDSTRM_requeststatus");
@@ -1246,7 +1246,7 @@ int SNDSTRM_requeststatus_pbuf(int h, int* out) __asm__("SNDSTRM_requeststatus")
  * @param handle  the request handle
  * @return 1 or 0
  */
-extern "C" int func_002AAFD0(void* self, int handle)
+extern "C" int cStreamSys_STREAM_IsRequestedPlaying(void* self, int handle)
 {
     int st[4];
     int result;
@@ -1258,66 +1258,66 @@ extern "C" int func_002AAFD0(void* self, int handle)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/streamsys", func_002AB028);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_Playing);
 #ifdef SKIP_ASM
-extern "C" int func_002AA1B8(void*);
+extern "C" int cStreamInstance_Playing(void*);
 
 /**
- * Tells whether stream @p i is playing (func_002AA1B8); 0 without the stream.
+ * Tells whether stream @p i is playing (cStreamInstance_Playing); 0 without the stream.
  *
  * @param i  the stream index
  * @return 1 or 0
  */
-extern "C" int func_002AB028(void* self, int i)
+extern "C" int cStreamSys_STREAM_Playing(void* self, int i)
 {
     void* stream = (*(void***)((char*)self + 0x8))[i];
     if (stream != 0) {
-        return func_002AA1B8(stream);
+        return cStreamInstance_Playing(stream);
     }
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AB060);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_ReleaseHold);
 #ifdef SKIP_ASM
-extern "C" void func_002AA1E8(void*);
+extern "C" void cStreamInstance_ReleaseHold(void*);
 
 /**
- * Releases the hold on stream @p idx's current request (func_002AA1E8), when the stream exists.
+ * Releases the hold on stream @p idx's current request (cStreamInstance_ReleaseHold), when the stream exists.
  *
  * @param idx  the stream index
  */
-extern "C" void func_002AB060(void* self, int idx)
+extern "C" void cStreamSys_STREAM_ReleaseHold(void* self, int idx)
 {
     void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
     if (stream != 0) {
-        func_002AA1E8(stream);
+        cStreamInstance_ReleaseHold(stream);
     }
 }
 #endif
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AB098);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_ReleaseHold1);
 #ifdef SKIP_ASM
-extern "C" void func_002AA240(void*, int);
+extern "C" void cStreamInstance_ReleaseHold1(void*, int);
 
 /**
- * Releases the hold on a given request of stream @p idx (func_002AA240), when the stream exists.
+ * Releases the hold on a given request of stream @p idx (cStreamInstance_ReleaseHold1), when the stream exists.
  *
  * @param idx  the stream index
  * @param requestHandle  the request
  */
-extern "C" void func_002AB098(void* self, int idx, int requestHandle)
+extern "C" void cStreamSys_STREAM_ReleaseHold1(void* self, int idx, int requestHandle)
 {
     void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
     if (stream != 0) {
-        func_002AA240(stream, requestHandle);
+        cStreamInstance_ReleaseHold1(stream, requestHandle);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AB0D0);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_SetVolControl);
 #ifdef SKIP_ASM
 /**
  * Sets the volume control (float*) of stream @p i (its +0x10), when the stream exists.
@@ -1325,7 +1325,7 @@ INCLUDE_ASM("sound/streamsys", func_002AB0D0);
  * @param i  the stream index
  * @param val  the volume control
  */
-extern "C" void func_002AB0D0(void* self, int i, int val)
+extern "C" void cStreamSys_STREAM_SetVolControl(void* self, int i, int val)
 {
     void* stream = (*(void***)((char*)self + 0x8))[i];
     if (stream != 0) {
@@ -1335,7 +1335,7 @@ extern "C" void func_002AB0D0(void* self, int i, int val)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AB0F0);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_SetBaseVolume);
 #ifdef SKIP_ASM
 /**
  * Sets the base volume of stream @p idx (cStreamInstance_SetBaseVolume), when the stream exists.
@@ -1343,7 +1343,7 @@ INCLUDE_ASM("sound/streamsys", func_002AB0F0);
  * @param idx  the stream index
  * @param val  the volume
  */
-extern "C" void func_002AB0F0(void* self, int idx, int val)
+extern "C" void cStreamSys_STREAM_SetBaseVolume(void* self, int idx, int val)
 {
     void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
     if (stream != 0) {
@@ -1352,7 +1352,7 @@ extern "C" void func_002AB0F0(void* self, int idx, int val)
 }
 #endif
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AB128);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_GetHandle);
 #ifdef SKIP_ASM
 /**
  * Returns the sound-driver handle of stream @p idx (its +8), or -1 without the stream.
@@ -1360,7 +1360,7 @@ INCLUDE_ASM("sound/streamsys", func_002AB128);
  * @param idx  the stream index
  * @return the handle, or -1
  */
-extern "C" int func_002AB128(void* self, int idx)
+extern "C" int cStreamSys_STREAM_GetHandle(void* self, int idx)
 {
     void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
     if (stream != 0) {
@@ -1371,28 +1371,28 @@ extern "C" int func_002AB128(void* self, int idx)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/streamsys", func_002AB150);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_GetCurrActiveSampleHandle);
 #ifdef SKIP_ASM
-extern "C" int func_002AA210(void*);
+extern "C" int cStreamInstance_GetCurrActiveSampleHandle(void*);
 
 /**
- * Returns stream @p i's current request handle (func_002AA210), or -1.
+ * Returns stream @p i's current request handle (cStreamInstance_GetCurrActiveSampleHandle), or -1.
  *
  * @param i  the stream index
  * @return the request handle, or -1
  */
-extern "C" int func_002AB150(void* self, int i)
+extern "C" int cStreamSys_STREAM_GetCurrActiveSampleHandle(void* self, int i)
 {
     void* stream = (*(void***)((char*)self + 0x8))[i];
     if (stream != 0) {
-        return func_002AA210(stream);
+        return cStreamInstance_GetCurrActiveSampleHandle(stream);
     }
     return -1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AB188__FPvi);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_GetInstance__FPvi);
 #ifdef SKIP_ASM
 /**
  * Returns stream instance @p index from the table (it may be 0).
@@ -1400,14 +1400,14 @@ INCLUDE_ASM("sound/streamsys", func_002AB188__FPvi);
  * @param index  the stream index
  * @return the stream instance
  */
-int func_002AB188(void* self, int index)
+int cStreamSys_STREAM_GetInstance(void* self, int index)
 {
     return *(int*)((char*)*(void**)((char*)self + 0x8) + index * 4);
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AB1A0);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_ReleaseHoldCallback);
 #ifdef SKIP_ASM
 extern "C" void SNDSTRM_modifyhold(int, int);
 
@@ -1417,33 +1417,33 @@ extern "C" void SNDSTRM_modifyhold(int, int);
  * @param monitorInst  the monitor instance
  * @return 1
  */
-extern "C" int func_002AB1A0(void* self, void* monitorInst)
+extern "C" int cStreamSys_STREAM_ReleaseHoldCallback(void* self, void* monitorInst)
 {
     SNDSTRM_modifyhold(*(int*)((char*)monitorInst + 0x1C), 0);
     return 1;
 }
 #endif
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AB1C8);
+INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_TimeMult);
 #ifdef SKIP_ASM
-extern "C" int func_002AA448(void*, int);
+extern "C" int cStreamInstance_TimeMult(void*, int);
 
 /**
- * Multiplies the timing of stream @p idx (func_002AA448); -1 without the stream.
+ * Multiplies the timing of stream @p idx (cStreamInstance_TimeMult); -1 without the stream.
  *
  * @param idx  the stream index
  * @param multAmount  the multiplier
  * @return the driver's result, or -1
  */
-extern "C" int func_002AB1C8(void* self, int idx, int multAmount)
+extern "C" int cStreamSys_STREAM_TimeMult(void* self, int idx, int multAmount)
 {
     void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
-    return stream != 0 ? func_002AA448(stream, multAmount) : -1;
+    return stream != 0 ? cStreamInstance_TimeMult(stream, multAmount) : -1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AB200);
+INCLUDE_ASM("sound/streamsys", cController_cController);
 #ifdef SKIP_ASM
 extern "C" void* cSoundSys_cSoundSys(void* self, int heap);
 extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, int heap);
@@ -1489,7 +1489,7 @@ extern const sSsVtblCB200 D_004837A0_B200 __asm__("D_004837A0");
  * @return this
  */
 // PORT: g++ 2.95 virtual-base construction with stack vtable this-adjust fix-ups, written out by hand.
-extern "C" char* func_002AB200(char* self, int embedded, int maxBanks, int maxStreams, int heap)
+extern "C" char* cController_cController(char* self, int embedded, int maxBanks, int maxStreams, int heap)
 {
     if (embedded != 0) {
         *(char**)(self + 0x5560) = self + 0x6200;
@@ -1537,7 +1537,7 @@ INCLUDE_ASM("sound/streamsys", cController__cController);
 void operator_delete(int* ptr);
 extern "C" void cBankManager__cBankManager(void* self, int flags);
 extern "C" void cCrowdSys__cCrowdSys(void* self, int flags);
-extern "C" void func_002AA648(void* self, int flags);
+extern "C" void cStreamSys__cStreamSys(void* self, int flags);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 extern "C" void cSpeechSys__cSpeechSys(char* self, int flags);
 extern "C" void func_002B3398(char* self, int flags);
@@ -1568,7 +1568,7 @@ extern const sSsVtblCB478 D_004837A0;
  *
  * Hand-written g++ 2.95 virtual-base destruction: installs the cController vtables at +0x5558, +0x571C and +0xC and in
  * the shared sound object (+0x118), then runs the sub-object destructors (cSpeechSys__cSpeechSys, func_002B3398, cCrowdSys__cCrowdSys,
- * func_002AA648, cBankManager__cBankManager, cSoundSys__cSoundSys) with this-adjusted temporary vtables, and deletes the object when
+ * cStreamSys__cStreamSys, cBankManager__cBankManager, cSoundSys__cSoundSys) with this-adjusted temporary vtables, and deletes the object when
  * bit 0 of @p flags is set.
  *
  * @param flags  g++ 2.95 in-charge flags; bit 0 deletes the object
@@ -1604,7 +1604,7 @@ extern "C" void cController__cController(char* self, int flags)
     func_002B3398(mon, 0);
     cCrowdSys__cCrowdSys(self, 0);
     if (flags & 2) {
-        func_002AA648(*(void**)(self + 0x118), 0);
+        cStreamSys__cStreamSys(*(void**)(self + 0x118), 0);
         cBankManager__cBankManager(**(void***)(self + 0x118), 0);
         cSoundSys__cSoundSys(*(void**)(**(char***)(self + 0x118) + 0x1D8), 0);
     }
@@ -1686,7 +1686,7 @@ extern "C" void cController_BANKMONITOR_Update(void* self, float time)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AB828);
+INCLUDE_ASM("sound/streamsys", cMonitorInstance_Update);
 #ifdef SKIP_ASM
 extern "C" void cMonitorInstance_Reset(void* e);
 
@@ -1709,7 +1709,7 @@ struct sStrmTick {
  *
  * @param entry  the monitor instance
  */
-extern "C" void func_002AB828(void* entry, void* self)
+extern "C" void cMonitorInstance_Update(void* entry, void* self)
 {
     sStrmTick* tick = (sStrmTick*)entry;
     if (tick->active) {
@@ -1725,36 +1725,36 @@ extern "C" void func_002AB828(void* entry, void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/streamsys", func_002AB8E8);
+INCLUDE_ASM("sound/streamsys", cController_MONITOR_Update);
 #ifdef SKIP_ASM
 extern "C" void cMonitor_MONITOR_Update(void* bm);
-extern "C" void func_002AB828(void* e, void* self);
+extern "C" void cMonitorInstance_Update(void* e, void* self);
 
 /**
  * Updates the monitors unless paused: cMonitor_MONITOR_Update and then each of the 48 monitor instances
- * (func_002AB828).
+ * (cMonitorInstance_Update).
  *
  * It fills slot 1 of cSSXAudio's cBankMonitor vtable (D_00483640), where cBankMonitor has cMonitor_MONITOR_Update.
  */
-extern "C" void func_002AB8E8(void* self)
+extern "C" void cController_MONITOR_Update(void* self)
 {
     char* snd = **(char***)((char*)self + 0x118);
     char* bm = snd + 0x1D8;
     if (*(int*)(snd + 0x26C) == 0) {
         cMonitor_MONITOR_Update(bm);
         for (int i = 0; i < 48; i++) {
-            func_002AB828(**(char***)((char*)self + 0x118) + 0x270 + i * 44, self);
+            cMonitorInstance_Update(**(char***)((char*)self + 0x118) + 0x270 + i * 44, self);
         }
     }
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/streamsys", func_002AB958);
+INCLUDE_ASM("sound/streamsys", cController_Update);
 #ifdef SKIP_ASM
 extern "C" void cAsyncSys_ASYNCSYS_Update(void* snd);
 extern "C" void func_002A6D18(void* self);
-extern "C" void func_002AAC28(void* self);
+extern "C" void cStreamSys_STREAM_Update(void* self);
 extern "C" void func_002B0C78(void* self);
 extern "C" void func_002B4388(void* self);
 
@@ -1764,11 +1764,11 @@ struct sStrmVtEntF { short delta; short index; void (*fn)(void*, float); };
  * Updates the sound controller each frame: async loads, crowd, bank monitor, music, speech and streams.
  *
  * Runs cAsyncSys_ASYNCSYS_Update, func_002A6D18 (crowd), the bank monitor's vtable slot 5 (BANKMONITOR_Update) with
- * @p frameTime, func_002B4388 (music), func_002B0C78 (speech) and func_002AAC28 (streams). func_00285BF8 calls it.
+ * @p frameTime, func_002B4388 (music), func_002B0C78 (speech) and cStreamSys_STREAM_Update (streams). cSSXAudio_Update calls it.
  *
  * @param frameTime  the frame time
  */
-extern "C" void func_002AB958(void* self, float frameTime)
+extern "C" void cController_Update(void* self, float frameTime)
 {
     char** sys = (char**)((char*)self + 0x118);
     cAsyncSys_ASYNCSYS_Update(*(void**)*sys);
@@ -1779,19 +1779,19 @@ extern "C" void func_002AB958(void* self, float frameTime)
     entry->fn(bankMon + entry->delta, frameTime);
     func_002B4388(sys);
     func_002B0C78((char*)self + 0x5560);
-    func_002AAC28(*sys);
+    cStreamSys_STREAM_Update(*sys);
 }
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AB9E0);
+INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_cBankMonitorInstance);
 #ifdef SKIP_ASM
 /**
  * Constructs a bank monitor instance: free (type 0), 0x8000 pitch, distance -1.0, the handles -1 / -30000.
  *
  * @return this
  */
-extern "C" void* func_002AB9E0(void* self)
+extern "C" void* cBankMonitorInstance_cBankMonitorInstance(void* self)
 {
     *(int*)((char*)self + 0xB0) = 0x8000;
     *(float*)((char*)self + 0x90) = -1.0f;
@@ -1805,7 +1805,7 @@ extern "C" void* func_002AB9E0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002ABA18);
+INCLUDE_ASM("sound/streamsys", cBankMonitorInstance__cBankMonitorInstance);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -1814,7 +1814,7 @@ void operator_delete(int* ptr);
  *
  * @param flags  bit 0 set to also delete the object
  */
-extern "C" void func_002ABA18(int* self, int flags)
+extern "C" void cBankMonitorInstance__cBankMonitorInstance(int* self, int flags)
 {
     if (flags & 1) {
         operator_delete(self);
@@ -1924,7 +1924,7 @@ extern "C" int cBankMonitorInstance_IsFree(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002ABBD8);
+INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_DistSq);
 #ifdef SKIP_ASM
 /**
  * Returns the squared distance between two positions.
@@ -1933,7 +1933,7 @@ INCLUDE_ASM("sound/streamsys", func_002ABBD8);
  * @param posB  the second position
  * @return the squared distance
  */
-extern "C" float func_002ABBD8(void* self, float* posA, float* posB)
+extern "C" float cBankMonitorInstance_DistSq(void* self, float* posA, float* posB)
 {
     float dx = posA[0] - posB[0];
     float dy = posA[1] - posB[1];
@@ -2019,7 +2019,7 @@ extern "C" float cBankMonitorInstance_Doppler(float delta, float time)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002ABCE8__FPvii);
+INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_SetBank__FPvii);
 #ifdef SKIP_ASM
 /**
  * Records a monitor instance's bank and patch (+0xC, +0x10).
@@ -2027,7 +2027,7 @@ INCLUDE_ASM("sound/streamsys", func_002ABCE8__FPvii);
  * @param bank  the bank
  * @param patch  the patch
  */
-void func_002ABCE8(void* self, int bank, int patch)
+void cBankMonitorInstance_SetBank(void* self, int bank, int patch)
 {
     *(int*)((char*)self + 0xc) = bank;
     *(int*)((char*)self + 0x10) = patch;
@@ -2035,7 +2035,7 @@ void func_002ABCE8(void* self, int bank, int patch)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002ABCF8);
+INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_SetStream);
 #ifdef SKIP_ASM
 extern "C" char* strcpy(char* dst, const char* src);
 
@@ -2046,7 +2046,7 @@ extern "C" char* strcpy(char* dst, const char* src);
  * @param name  the file name
  * @param fileOffset  the offset in the file
  */
-extern "C" void func_002ABCF8(void* self, int streamInst, const char* name, int fileOffset)
+extern "C" void cBankMonitorInstance_SetStream(void* self, int streamInst, const char* name, int fileOffset)
 {
     *(int*)((char*)self + 0xC) = streamInst;
     strcpy((char*)self + 0x10, name);
@@ -2055,7 +2055,7 @@ extern "C" void func_002ABCF8(void* self, int streamInst, const char* name, int 
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002ABD38__FPvii);
+INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_SetMIDI__FPvii);
 #ifdef SKIP_ASM
 /**
  * Records a monitor instance's MIDI sequence and bank (+0xC, +0x10).
@@ -2063,7 +2063,7 @@ INCLUDE_ASM("sound/streamsys", func_002ABD38__FPvii);
  * @param midiData  the sequence data
  * @param bank  the bank
  */
-void func_002ABD38(void* self, int midiData, int bank)
+void cBankMonitorInstance_SetMIDI(void* self, int midiData, int bank)
 {
     *(int*)((char*)self + 0xc) = midiData;
     *(int*)((char*)self + 0x10) = bank;
@@ -2071,9 +2071,9 @@ void func_002ABD38(void* self, int midiData, int bank)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002ABD48);
+INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_SetLastDistance);
 #ifdef SKIP_ASM
-class func_002ABD48_cObj {
+class cBankMonitorInstance_SetLastDistance_cObj {
 public:
     char pad[0x8D8];
     // vptr at 0x8D8; slot N at vtable offset N*8
@@ -2091,7 +2091,7 @@ public:
  *
  * @param obj  the bank monitor
  */
-extern "C" void func_002ABD48(void* self, func_002ABD48_cObj* obj)
+extern "C" void cBankMonitorInstance_SetLastDistance(void* self, cBankMonitorInstance_SetLastDistance_cObj* obj)
 {
     char buf[0x20];
     float distance;
@@ -2105,7 +2105,7 @@ extern "C" void func_002ABD48(void* self, func_002ABD48_cObj* obj)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_PosUpdate);
 #ifdef SKIP_ASM
-extern "C" void func_002A9ED8(void* s, int pos, int a2);
+extern "C" void cStreamInstance_Set3DPosition(void* s, int pos, int a2);
 extern "C" void SNDSYS_entercritical();
 extern "C" void SNDSYS_leavecritical();
 extern "C" void SND3dpos(int h, int pos, int a2);
@@ -2115,7 +2115,7 @@ extern "C" void SNDMIDI_azimuth(int h, int pos);
  * Updates the 3D position (azimuth, elevation) of an instance's sound.
  *
  * Does nothing when the azimuth differs from the cached one (+0xB8) by less than 0x200; otherwise caches it and, by
- * type, calls SND3dpos (sample), SNDMIDI_azimuth (sequence) or func_002A9ED8 (stream at +0xC).
+ * type, calls SND3dpos (sample), SNDMIDI_azimuth (sequence) or cStreamInstance_Set3DPosition (stream at +0xC).
  *
  * @param pos  the azimuth (On Tour Azimuth)
  * @param elevation  the elevation (On Tour Elevation)
@@ -2139,7 +2139,7 @@ extern "C" void cBankMonitorInstance_PosUpdate(void* self, int pos, int elevatio
         SNDSYS_leavecritical();
         break;
     case 3:
-        func_002A9ED8(*(void**)((char*)self + 0xC), pos, elevation);
+        cStreamInstance_Set3DPosition(*(void**)((char*)self + 0xC), pos, elevation);
         break;
     }
 }
@@ -2148,7 +2148,7 @@ extern "C" void cBankMonitorInstance_PosUpdate(void* self, int pos, int elevatio
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_PitchUpdate);
 #ifdef SKIP_ASM
-extern "C" void func_002A9F38(void* s, int vol);
+extern "C" void cStreamInstance_SetPitch(void* s, int vol);
 extern "C" void SNDSYS_entercritical();
 extern "C" void SNDSYS_leavecritical();
 extern "C" void SNDpitchmult(int h, int vol);
@@ -2158,7 +2158,7 @@ extern "C" void SNDMIDI_pitchmult(int h, int vol);
  * Sets the pitch multiplier of an instance's sound.
  *
  * The value is clamped to 0..0x3FFF (0x1000 = normal pitch) and ignored when within 0xFF of the cached pitch at +0xB0;
- * otherwise it is cached and applied by type: SNDpitchmult (sample), SNDMIDI_pitchmult (sequence) or func_002A9F38 (stream
+ * otherwise it is cached and applied by type: SNDpitchmult (sample), SNDMIDI_pitchmult (sequence) or cStreamInstance_SetPitch (stream
  * at +0xC). Note the parameter is named vol but is a pitch.
  *
  * @param vol  the pitch multiplier, 4.12 fixed point (On Tour Pitch)
@@ -2188,7 +2188,7 @@ extern "C" void cBankMonitorInstance_PitchUpdate(void* self, int vol)
         SNDSYS_leavecritical();
         break;
     case 3:
-        func_002A9F38(*(void**)((char*)self + 0xC), vol);
+        cStreamInstance_SetPitch(*(void**)((char*)self + 0xC), vol);
         break;
     }
 }

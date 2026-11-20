@@ -137,7 +137,7 @@ extern "C" sSndPlayOpts9350* cSndPlayOpts_cSndPlayOpts(sSndPlayOpts9350* self, i
 #endif
 
 //100%
-INCLUDE_ASM("sound/ps2soundman", func_002A97C0);
+INCLUDE_ASM("sound/ps2soundman", cSndPlayOpts__cSndPlayOpts);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 void operator_delete(int* ptr);
@@ -165,7 +165,7 @@ extern const sSmVtbl97C0 D_00483BE0;
  * @param flags  bit 0 frees the memory, bit 1 destroys the virtual base; 0 for a not-in-charge call
  */
 // PORT: g++ 2.95 virtual-base destruction with a stack vtable this-adjust fix-up, written out by hand.
-extern "C" void func_002A97C0(char* self, int flags)
+extern "C" void cSndPlayOpts__cSndPlayOpts(char* self, int flags)
 {
     *(const sSmVtbl97C0**)(*(char**)self + 4) = &D_00483BE0;
     if (flags == 0) {
@@ -207,7 +207,7 @@ extern "C" void func_002A97C0(char* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("sound/ps2soundman", func_002A9988);
+INCLUDE_ASM("sound/ps2soundman", cSndPlayOpts_OPTS_Radius);
 #ifdef SKIP_ASM
 /**
  * Sets the current play-option level's two 3D distances; a negative second one copies the first.
@@ -219,7 +219,7 @@ INCLUDE_ASM("sound/ps2soundman", func_002A9988);
  * @param dist  the first distance (+0x6C)
  * @param vanish  the second distance (+0x68); negative to use @p dist
  */
-extern "C" void func_002A9988(void* self, float dist, float vanish)
+extern "C" void cSndPlayOpts_OPTS_Radius(void* self, float dist, float vanish)
 {
     (*(float**)((char*)self + 0x6C))[*(int*)((char*)self + 0x1C)] = dist;
     if (vanish < 0.0f) {

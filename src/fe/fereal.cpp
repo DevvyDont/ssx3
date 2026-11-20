@@ -874,7 +874,7 @@ extern "C" void* cFECustom_cFECustom(void* self, void* owner);
 extern "C" void* cFESound_cFESound(void* self);
 extern "C" void cIrradianceDataBase_Load(void* db);
 extern "C" void* cAudioInterface_bxAudio();
-extern "C" void func_00285FB0(void* snd);
+extern "C" void cSSXAudio_FrontEndLoad(void* snd);
 extern char* cAppMan_TheAppMan;
 extern char str_data_ui_fe[];
 extern char str_FEUIInput[];
@@ -931,7 +931,7 @@ static inline void progress_1E80(float t)
  * "data/ui/fe" into the UI engine and the character animations, and calls func_0019CE68 on +0x1A70 and
  * cFERiderManager_init on the rider manager (+0xB0). The camera gets (0, 0, -195) and (0, 1, 0) and is updated. The
  * engine gets a cFEInput ("FEUIInput"), a cFECustom ("FEUICustom"), a sound object ("FEUISound"), the app's
- * fonts and locale; finally it loads the irradiance database and calls func_00285FB0(cAudioInterface_bxAudio()).
+ * fonts and locale; finally it loads the irradiance database and calls cSSXAudio_FrontEndLoad(cAudioInterface_bxAudio()).
  */
 // Front end: loads the UI files, rider data and sound for the front end.
 extern "C" void cRealFE_load(sRealFE_1E80* self)
@@ -993,7 +993,7 @@ extern "C" void cRealFE_load(sRealFE_1E80* self)
     void* fontInterface = *(void**)(g + 0x88);
     self->ui->f8 = fontInterface;
     cIrradianceDataBase_Load(D_005047F8);
-    func_00285FB0(cAudioInterface_bxAudio());
+    cSSXAudio_FrontEndLoad(cAudioInterface_bxAudio());
 }
 #endif
 
@@ -1082,7 +1082,7 @@ extern "C" void cMoviePlayer_asyncRender(void* h, int a1);
 extern "C" void cUIEngine_render3D(void* ui);
 extern "C" void cFERiderManager_render(void* p);
 extern "C" void cUIEngine_render2D(void* ui);
-extern "C" void func_00285BF8(void* snd, int a1, float t);
+extern "C" void cSSXAudio_Update(void* snd, int a1, float t);
 extern "C" void* cAudioInterface_bxAudio();
 extern int cRealFE_mMovieList;
 extern char t4mat_Identity[];
@@ -1163,7 +1163,7 @@ static inline unsigned int feCallU(int slot)
  * (slot 26) as a 4-vertex tri strip (slot 71). Otherwise it sets the perspective from the camera (+0x10, +0x14, +0x18
  * to slot 25) and the view matrix (+0x50 to slot 34), draws the scene with a fixed draw state (cUIEngine_render3D on the UI
  * engine at +0xC, cFERiderManager_render on the rider manager at +0xB0), then the UI (cUIEngine_render2D), flips the frame and calls
- * func_00285BF8 on the audio object with 0.02.
+ * cSSXAudio_Update on the audio object with 0.02.
  *
  * @return 1 when a frame was drawn, 0 when the renderer was not ready
  */
@@ -1280,7 +1280,7 @@ extern "C" int cRealFE_render(void* self)
     feCall(22);
     cUIEngine_render2D(*(void**)((char*)self + 0xC));
     feCall(20);
-    func_00285BF8(cAudioInterface_bxAudio(), 0, 0.019999999552965164f);
+    cSSXAudio_Update(cAudioInterface_bxAudio(), 0, 0.019999999552965164f);
     return 1;
 }
 #endif
@@ -1302,7 +1302,7 @@ extern "C" int cMoviePlayer_init(void* p, void* q);
 extern "C" int cMoviePlayer_asyncPlay(void* self);
 extern "C" void cMoviePlayer_asyncUpdate(void* self);
 extern "C" void cMoviePlayer__cMoviePlayer(void* p, int a1);
-int func_00289DE0(void* self);
+int cSSXAudio_PlayIntroMovieWithDJ(void* self);
 void* cInput_getState(void* self, int a1);
 extern "C" void cUIEngine_update(void* self);
 extern "C" void func_0019D250(void* p);
@@ -1341,7 +1341,7 @@ struct sVE_27A0 {
  * Does nothing while +0xB5ADC (a frame counter that cRealFE_render() counts down) is set; then calls
  * cFadeScreen_update(). If there is no movie player (+0xB5AD4) and cRealFE_mMovieList has a bit set, it creates one
  * ("MoviePlayer", 68 bytes) and starts the movie of the lowest set bit (1, 2 or 4; for 4 the file depends on the BE
- * option bits and func_00289DE0), clearing that bit and recording it in D_004A19D0; bit 4 also makes the movie
+ * option bits and cSSXAudio_PlayIntroMovieWithDJ), clearing that bit and recording it in D_004A19D0; bit 4 also makes the movie
  * skippable (+0xB5AD8). While a movie plays it runs cMoviePlayer_asyncUpdate() and, when skippable, ends it on a
  * press of input 0x70 or 122 on either pad; when it ends the player is destroyed, +0xB5ADC is set to 1 and, if no
  * movie is left, func_002B3A98 is called on the audio object (+0x118). Without a movie it updates the UI engine (+0xC,
@@ -1371,7 +1371,7 @@ extern "C" void cRealFE_update(char* self)
                 D_004A19D0 = 2;
             } else if (movieBits & 4) {
                 cBE_getInterface_Fv(cBE_getBE(), 4);
-                if (((cBEOptionInterface_mOption[0] >> 22) & 7) == 0 && func_00289DE0(cAudioInterface_bxAudio()) != 0) {
+                if (((cBEOptionInterface_mOption[0] >> 22) & 7) == 0 && cSSXAudio_PlayIntroMovieWithDJ(cAudioInterface_bxAudio()) != 0) {
                     info.b = D_004A19E0;
                     info.a = D_00441250[0];
                 } else {

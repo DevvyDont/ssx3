@@ -860,7 +860,7 @@ extern "C" void cRenderStateMan_resolveIrradianceName(void* self)
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_Irradiance);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0038ABF8(void* self, int i);
+extern "C" void* cIrradianceDataBase_Get(void* self, int i);
 extern int D_004A43C4;
 
 extern "C" void* cRenderStateMan_Irradiance_r(void* self) __asm__("cRenderStateMan_Irradiance");
@@ -868,7 +868,7 @@ extern "C" void* cRenderStateMan_Irradiance_r(void* self) __asm__("cRenderStateM
  * Returns the irradiance record for an irradiance name field, resolving the name on first use.
  *
  * A field not yet tagged 0x123400 at +0x4 is resolved with cRenderStateMan_resolveIrradianceName, or, when its name is empty, gives the default
- * id D_004A43C4. The record comes from func_0038ABF8 on the irradiance database D_005047F8. cRenderStateMan_getCustomIrradiance,
+ * id D_004A43C4. The record comes from cIrradianceDataBase_Get on the irradiance database D_005047F8. cRenderStateMan_getCustomIrradiance,
  * cRenderStateMan_LightIrradiance, cRenderStateMan_ShadowIrradiance, cRenderStateMan_TunnelIrradiance and cRenderStateMan_ObjectIrradiance call it.
  *
  * @return the irradiance record
@@ -877,12 +877,12 @@ extern "C" void* cRenderStateMan_Irradiance_r(void* self)
 {
     if (*(int*)((char*)self + 4) != 0x123400) {
         if (*(signed char*)self == 0) {
-            return func_0038ABF8(D_005047F8, D_004A43C4);
+            return cIrradianceDataBase_Get(D_005047F8, D_004A43C4);
         }
         cRenderStateMan_resolveIrradianceName(self);
-        return func_0038ABF8(D_005047F8, *(int*)self);
+        return cIrradianceDataBase_Get(D_005047F8, *(int*)self);
     }
-    return func_0038ABF8(D_005047F8, *(int*)self);
+    return cIrradianceDataBase_Get(D_005047F8, *(int*)self);
 }
 #endif
 

@@ -442,7 +442,7 @@ extern "C" void cWorld_load(void* a, const char* name, void* b);
 void* cSkyBox_cSkyBox(void* p);
 extern "C" void* cSectionMan_cSectionMan(void* p, void* game);
 extern "C" void func_002C2F18(void* p);
-extern "C" void* func_002B6AA0(void* p, int a);
+extern "C" void* cWorldSound_cWorldSound(void* p, int a);
 extern "C" void cBXNash_initTheAIFwdDiffCache(void* p);
 extern "C" void cSectionMan_activate(void* p, int id, int a);
 extern "C" int cSectionMan_isLoaded(void* p, int id);
@@ -523,7 +523,7 @@ extern "C" void cGame_loadTrack(cGame* self)
     *(void**)&self->SectionMan = cSectionMan_cSectionMan(cMemMan_alloc(468, str_SectionMan, 0, 0), ((char*)self));
     tbl = new (str_SurfPropCache, 0, 0) sTbl_F6B0;
     func_002C2F18(self->SurfPropCache);
-    *(void**)&self->WorldSound = func_002B6AA0(cMemMan_alloc(592, str_cWorldSound, 0, 0), 0);
+    *(void**)&self->WorldSound = cWorldSound_cWorldSound(cMemMan_alloc(592, str_cWorldSound, 0, 0), 0);
     cBXNash_initTheAIFwdDiffCache(self->BXNash);
     sBXStr_F6B0 dir;
     dir.p = cBXString_EmptyString;
@@ -601,7 +601,7 @@ void cBigFile__cBigFile(cBigFile* self, int flags);
 extern "C" void cFont__cFont(void* p, int flags);
 extern "C" void cGraphicsMan_PurgeTextures(void* p);
 extern "C" void cIrradianceDataBase_Purge(void* p);
-extern "C" void func_002B6AE0(void* p, int flags);
+extern "C" void cWorldSound__cWorldSound(void* p, int flags);
 extern "C" void cWorldTriggerManager_Reset(void* a);
 extern "C" void cSSXAudio_InGameDeInit(void* p);
 extern "C" void cSSXAudio_InGamePurge(void* p);
@@ -770,7 +770,7 @@ extern "C" void cGame_purge(char* self)
     cGraphicsMan_PurgeTextures(GrMan);
     cIrradianceDataBase_Purge(D_005047F8);
     *(void**)&SSXApp->Game = 0;
-    if (*(void**)(self + 0x4C) != 0) func_002B6AE0(*(void**)(self + 0x4C), 3);
+    if (*(void**)(self + 0x4C) != 0) cWorldSound__cWorldSound(*(void**)(self + 0x4C), 3);
     cWorldTriggerManager_Reset(gWorldTriggerManager);
     cSSXAudio_InGameDeInit(gSSXAudio);
     cSSXAudio_InGamePurge(gSSXAudio);
@@ -895,7 +895,7 @@ extern "C" void func_00229498(void* self);
 extern "C" void func_00343BC0(void* self);
 extern "C" void cMultiParticleMan_reset(void* self);
 extern "C" void* cUIStateStack_findState(void* list, int hash);
-extern "C" void func_00287108(void* self);
+extern "C" void cSSXAudio_PartialRestart(void* self);
 extern "C" void* cAudioInterface_bxAudio(void);
 int GetHashValue32(char* s);
 extern char str_hud_c[];
@@ -917,7 +917,7 @@ struct sVEntry_230180b {
  *
  * It also snaps the views and resets the map, the replay, the script engine, the crowds and the particles. It
  * tells the UI state found by str_hud_c's hash about it (slot 24 with 7), and reruns the global world
- * scripts and the mission setup. Last, it calls func_00287108 on the audio system (On Tour PartialRestart).
+ * scripts and the mission setup. Last, it calls cSSXAudio_PartialRestart on the audio system (On Tour PartialRestart).
  */
 extern "C" void cGame_partialRestart(cGame* self)
 {
@@ -947,7 +947,7 @@ extern "C" void cGame_partialRestart(cGame* self)
     }
     cWScriptMan_runGlobalScripts(cWScriptMan_TheWScriptMan);
     cWScriptMan_setupMissions(self->WScriptMan);
-    func_00287108(cAudioInterface_bxAudio());
+    cSSXAudio_PartialRestart(cAudioInterface_bxAudio());
 }
 #endif
 
@@ -1289,7 +1289,7 @@ extern "C" int cOVStateManager_allowPauseMenu(void);
 extern "C" void cPadCache_clearAllVibrations(void* p);
 extern "C" void func_0020CA10(void);
 extern "C" void cSSXAudio_PauseAudio(void* p);
-extern "C" void func_00294F48(void* p);
+extern "C" void cSSXAudio_PlayPauseSound(void* p);
 extern "C" int cOVStateManager_pauseOverlayActive(void);
 extern "C" void cPlaybackMan_update(void* p);
 extern "C" int cInputSync_aiinputready(void* p);
@@ -1480,7 +1480,7 @@ static inline int updateState_2306B8(cGame* self)
             vt[44].fn((char*)o + vt[44].delta, (*(unsigned char*)&self->PauseOwner));
         }
         cSSXAudio_PauseAudio(cAudioInterface_bxAudio());
-        func_00294F48(cAudioInterface_bxAudio());
+        cSSXAudio_PlayPauseSound(cAudioInterface_bxAudio());
         return 0;
     }
     {

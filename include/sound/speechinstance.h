@@ -36,7 +36,7 @@ struct tSpeechEventFile {
 // cSpeechInstance (0x904): one speech stream.
 struct cSpeechInstance {
     int unk_000;                       // 0x000 [R] ctor arg 1 = the instance's index in cSpeechSys::mSpeechInstance; [U] func_002B04D8 passes it to cSpeechSys (request match func_002B1520, vtable slots 2/3)
-    int unk_004;                       // 0x004 [R] ctor arg 2; [U] the cStreamSys stream id: STREAM_ calls (func_002AA910 in the ctor, func_002AABD0 in the dtor, func_002AAE08 / func_002AAE40 / func_002AAE78 / func_002AB028 / func_002AB0D0) and STREAM_SetBigFile (func_002AAB98, speech.inf BIGFILE)
+    int unk_004;                       // 0x004 [R] ctor arg 2; [U] the cStreamSys stream id: STREAM_ calls (cStreamSys_STREAM_Create in the ctor, cStreamSys_STREAM_Destroy in the dtor, cStreamSys_STREAM_Requests / cStreamSys_STREAM_Purge / cStreamSys_STREAM_TimeRemaining / cStreamSys_STREAM_Playing / cStreamSys_STREAM_SetVolControl) and STREAM_SetBigFile (cStreamSys_STREAM_SetBigFile, speech.inf BIGFILE)
     int unk_008;                       // 0x008 [R] ctor arg 6; no read found
     char unk_00C[0x60];                // 0x00C [R] ctor clears byte 0 (an empty string); no other access found
     char mBasePath[0x60];              // 0x06C [R] speech.inf BASEPATH (func_002B0088 AssignString); [U] func_002AFD40 / func_002B0088 sprintf the .big / events / bank paths from it

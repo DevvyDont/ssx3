@@ -530,18 +530,18 @@ INCLUDE_ASM("seg/seg_14B10", cRider_setupBoostWarp);
 #ifdef SKIP_ASM
 extern "C" int cAudioInterface_bxAudio();
 extern "C" void cCheatFX_setCheatInput(char *, int);
-extern "C" void func_00298D90(int mgr, char* rider, int b);
+extern "C" void cSSXAudio_TurboOn(int mgr, char* rider, int b);
 extern "C" void cSSXAudio_TurboDeny(int mgr, char* rider);
-extern "C" void func_002992D8(int mgr, char* rider);
+extern "C" void cSSXAudio_TurboOff(int mgr, char* rider);
 
 /**
  * Handles the boost button: starts, sustains or denies a boost and burns the boost bar.
  *
  * A press sends cheat input 0 (cCheatFX_setCheatInput on the handler's +0xD20). While held with boost in the bar
  * (+0x2F8 > 0): with no boost active (mBoostStrength == 0) it sets the strength from the bar (> 2/3: 1.0, > 1/3: 0.625,
- * else 0.25) and starts the turbo sound (func_00298D90, On Tour TurboOn); the bar burns 0.0015068 per tick unless
+ * else 0.25) and starts the turbo sound (cSSXAudio_TurboOn, On Tour TurboOn); the bar burns 0.0015068 per tick unless
  * mPowerUpBoostTimer is running, mBoostMode is 0 or mUberLevel >= 10. A press with an empty bar plays
- * cSSXAudio_TurboDeny. In every other case an active boost is stopped (func_002992D8, On Tour TurboOff) and
+ * cSSXAudio_TurboDeny. In every other case an active boost is stopped (cSSXAudio_TurboOff, On Tour TurboOff) and
  * mBoostStrength cleared.
  *
  * @param rider  the rider (this)
@@ -558,7 +558,7 @@ extern "C" void cRider_setupBoostWarp(cRider* rider, int isHeld, int isPressed)
                 if (x > 0.6666666865348816f) rider->mBoostStrength = 1.0f;
                 else if (x > 0.3333333432674408f) rider->mBoostStrength = 0.625f;
                 else rider->mBoostStrength = 0.25f;
-                func_00298D90(cAudioInterface_bxAudio(), ((char*)rider), isPressed);
+                cSSXAudio_TurboOn(cAudioInterface_bxAudio(), ((char*)rider), isPressed);
             }
             if (rider->mPowerUpBoostTimer == 0.0f && rider->mBoostMode != 0 && rider->mUberLevel < 10) {
                 rider->unk_2F8 -= 0.00150679936632514f;
@@ -567,7 +567,7 @@ extern "C" void cRider_setupBoostWarp(cRider* rider, int isHeld, int isPressed)
         }
         if (isPressed) cSSXAudio_TurboDeny(cAudioInterface_bxAudio(), ((char*)rider));
     }
-    if (rider->mBoostStrength > 0.0f) func_002992D8(cAudioInterface_bxAudio(), ((char*)rider));
+    if (rider->mBoostStrength > 0.0f) cSSXAudio_TurboOff(cAudioInterface_bxAudio(), ((char*)rider));
     rider->mBoostStrength = 0.0f;
 }
 #endif
@@ -1774,7 +1774,7 @@ void cRiderMetrix_evAutoResetSurface(void *);
 extern "C" void cRider_setMotionState_6120(void *, int) __asm__("cRider_setMotionState__FPv");
 extern "C" void cRider_setControlState_6120(void *, int) __asm__("cRider_setControlState__FPv");
 extern "C" int cAudioInterface_bxAudio();
-extern "C" void func_0029A220(int, void *);
+extern "C" void cSSXAudio_PlayerResetEvent(int, void *);
 extern "C" void cReplay_eventReset(int, int);
 
 /**
@@ -1797,7 +1797,7 @@ extern "C" int cRider_checkForReset(cRider* self, int isResetInput, int forceAut
         *(int *)((char*)self->mRiderHandler + 0x350) = (forceAutoReset != 0);
         cRider_setControlState_6120(((char*)self), 9);
         cRider_setMotionState_6120(((char*)self), 3);
-        func_0029A220(cAudioInterface_bxAudio(), ((char*)self));
+        cSSXAudio_PlayerResetEvent(cAudioInterface_bxAudio(), ((char*)self));
         cReplay_eventReset((int)SSXApp->Game->Replay, self->mAIIndex);
         return 1;
     }

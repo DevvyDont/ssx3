@@ -1148,7 +1148,7 @@ extern "C" void cBEOptionInterface_defaultSound(void* iface);
 extern "C" void cFEStateOptionsSound_setSoundMode(cFEStateOptionsSound* self, unsigned int mode);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_00287410(void* snd, int v);
-extern "C" void func_00287488(void* snd, int v);
+extern "C" void cSSXAudio_SetSFXVolume(void* snd, int v);
 extern "C" void func_00287520(void* snd, int v);
 extern "C" void cSSXAudio_SetArcadeSFX(void* snd, int v);
 extern "C" void func_002875D0(void* snd, int v);
@@ -1199,7 +1199,7 @@ static inline sSndCfg_18A3D8 Cfg_18A3D8()
  * Only event 22 from the popup hashed "111resetopts" does anything. When the popup's virtual slot 23 (getData) with 2
  * is nonzero it resets the sound options (cBEOptionInterface_defaultSound, the sound step of cBEOptionInterface_revert), switches the
  * speaker mode to bits 12-13 (`output`) with cFEStateOptionsSound_setSoundMode, re-applies the effects, speech and music volumes
- * (func_00287410, func_00287488, func_00287520 on gSSXAudio), bit 17 (`f17`) through cSSXAudio_SetArcadeSFX and bit 16
+ * (func_00287410, cSSXAudio_SetSFXVolume, func_00287520 on gSSXAudio), bit 17 (`f17`) through cSSXAudio_SetArcadeSFX and bit 16
  * (`f16`) through func_002875D0, and refreshes the widgets with cFEStateOptionsSound_updateWidget.
  *
  * It sets the sound changed flag D_004A14D4 even when the reset is declined, unlike the game and HUD popup handlers.
@@ -1219,7 +1219,7 @@ extern "C" void cFEStateOptionsSound_onPopupEvent(cFEStateOptionsSound* self, ch
                 cBEOptionInterface_defaultSound(iface);
                 cFEStateOptionsSound_setSoundMode(self, D_00535610_18A3D8.output);
                 func_00287410(cAudioInterface_bxAudio(), Cfg_18A3D8().sfxVol);
-                func_00287488(cAudioInterface_bxAudio(), Cfg_18A3D8().speechVol);
+                cSSXAudio_SetSFXVolume(cAudioInterface_bxAudio(), Cfg_18A3D8().speechVol);
                 func_00287520(cAudioInterface_bxAudio(), Cfg_18A3D8().musicVol);
                 cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_18A3D8().f17 != 0);
                 func_002875D0(cAudioInterface_bxAudio(), Cfg_18A3D8().f16 != 0);
@@ -1301,7 +1301,7 @@ extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" void cFEStateOptionsSound_setSoundMode(cFEStateOptionsSound* self, unsigned int mode);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_00287410(void* snd, int v);
-extern "C" void func_00287488(void* snd, int v);
+extern "C" void cSSXAudio_SetSFXVolume(void* snd, int v);
 extern "C" void func_00287520(void* snd, int v);
 extern "C" void cSSXAudio_SetArcadeSFX(void* snd, int v);
 extern "C" void func_002875D0(void* snd, int v);
@@ -1369,7 +1369,7 @@ struct sOptSound_18A8D0 {
  * returns for the widget's mMiscData.
  *
  * Event 9 (a value changed) stores the widget's value into cBEOptionInterface_mOption and applies it: "1lb" the speaker
- * mode `output` (cFEStateOptionsSound_setSoundMode), the sliders "2sl" `sfxVol` (func_00287410), "3sl" `speechVol` (func_00287488) and
+ * mode `output` (cFEStateOptionsSound_setSoundMode), the sliders "2sl" `sfxVol` (func_00287410), "3sl" `speechVol` (cSSXAudio_SetSFXVolume) and
  * "4sl" `musicVol` (func_00287520) from the slider value at +0x74, "5lb" bit 17 (cSSXAudio_SetArcadeSFX) and "6lb" bit
  * 16 (func_002875D0); "7lb" sets bit 18 (`f18`) only while D_004A1A70 is 1. Every event 9 sets the sound changed flag
  * D_004A14D4.
@@ -1399,7 +1399,7 @@ extern "C" void cFEStateOptionsSound_onWidgetEvent(cFEStateOptionsSound* self, c
             vt[1].fn(iface + vt[1].delta);
         }
         func_00287410(cAudioInterface_bxAudio(), Cfg_18A8D0().sfxVol);
-        func_00287488(cAudioInterface_bxAudio(), Cfg_18A8D0().speechVol);
+        cSSXAudio_SetSFXVolume(cAudioInterface_bxAudio(), Cfg_18A8D0().speechVol);
         func_00287520(cAudioInterface_bxAudio(), Cfg_18A8D0().musicVol);
         cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_18A8D0().f17 != 0);
         func_002875D0(cAudioInterface_bxAudio(), Cfg_18A8D0().f16 != 0);
@@ -1423,7 +1423,7 @@ extern "C" void cFEStateOptionsSound_onWidgetEvent(cFEStateOptionsSound* self, c
         else if (Is_18A8D0(*(int*)(widget + 0x38), str_3sl)) {
             unsigned char vol = *(unsigned char*)(widget + 0x74);
             D_00535610_18A8D0.speechVol = vol;
-            func_00287488(cAudioInterface_bxAudio(), Cfg_18A8D0().speechVol);
+            cSSXAudio_SetSFXVolume(cAudioInterface_bxAudio(), Cfg_18A8D0().speechVol);
         }
         else if (Is_18A8D0(*(int*)(widget + 0x38), str_4sl)) {
             unsigned char vol = *(unsigned char*)(widget + 0x74);
@@ -1459,9 +1459,9 @@ extern "C" void cUIListBox_deleteAllEntries(void* box);
 extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int v);
 extern "C" void* cAudioInterface_bxAudio();
-int func_00289DC0(void* snd);
+int cSSXAudio_GetCurrentSoundMode(void* snd);
 extern "C" void func_00287410(void* snd, int v);
-extern "C" void func_00287488(void* snd, int v);
+extern "C" void cSSXAudio_SetSFXVolume(void* snd, int v);
 extern "C" void func_00287520(void* snd, int v);
 extern "C" void cSSXAudio_SetArcadeSFX(void* snd, int v);
 extern "C" void func_002875D0(void* snd, int v);
@@ -1532,7 +1532,7 @@ static inline void* Find_18B380(sOptSound_18B380* self, char* name)
 /**
  * Fills the sound options widgets from the current sound settings and applies them.
  *
- * "1lb" lists stereo/surround/mono/DTS and selects the sound manager's current mode (func_00289DC0); the
+ * "1lb" lists stereo/surround/mono/DTS and selects the sound manager's current mode (cSSXAudio_GetCurrentSoundMode); the
  * sliders "2sl", "3sl", "4sl" (range 12) show the effects, speech and music volumes and push them to the
  * sound manager (cAudioInterface_bxAudio); "5lb" and "6lb" are off/on switches applied the same way; "7lb" is filled
  * only when D_004A1A70 is 1.
@@ -1553,7 +1553,7 @@ extern "C" void cFEStateOptionsSound_updateWidget(cFEStateOptionsSound* vself)
         cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_20SpeakerMono), 2);
         cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_20SpeakerDTS), 3);
         unsigned char sel;
-        if (cUIListBox_getEntryByData(w, func_00289DC0(cAudioInterface_bxAudio()), &sel))
+        if (cUIListBox_getEntryByData(w, cSSXAudio_GetCurrentSoundMode(cAudioInterface_bxAudio()), &sel))
             cUIListBox_setCurrentEntryByIndex(w, sel);
     }
     }
@@ -1570,7 +1570,7 @@ extern "C" void cFEStateOptionsSound_updateWidget(cFEStateOptionsSound* vself)
     if (w != 0) {
         *(int*)(w + 0x78) = 12;
         *(int*)(w + 0x74) = iface->getOptions().speechVol;
-        func_00287488(cAudioInterface_bxAudio(), Cfg_18B380().speechVol);
+        cSSXAudio_SetSFXVolume(cAudioInterface_bxAudio(), Cfg_18B380().speechVol);
     }
     }
     {
@@ -1625,17 +1625,17 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_setSoundMode);
 #ifdef SKIP_ASM
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" int func_00287670(void* snd);
-extern "C" int func_002876A0(void* snd);
+extern "C" int cSSXAudio_GetSFXVolume(void* snd);
 extern "C" int func_002876D0(void* snd);
 extern "C" void cSSXAudio_FrontEndPurge(void* snd);
 extern "C" void SSXAUDIO_DeInit();
 extern "C" void SSXAUDIO_Init(int mode);
 extern "C" void func_00287410(void* snd, int v);
-extern "C" void func_00287488(void* snd, int v);
+extern "C" void cSSXAudio_SetSFXVolume(void* snd, int v);
 extern "C" void func_00287520(void* snd, int v);
 extern "C" void cSSXAudio_SetArcadeSFX(void* snd, int v);
 extern "C" void func_002875D0(void* snd, int v);
-extern "C" void func_00285FB0(void* snd);
+extern "C" void cSSXAudio_FrontEndLoad(void* snd);
 
 struct sVE_18BEF8i {
     short delta;
@@ -1656,10 +1656,10 @@ struct sVE_18BEF8v {
  * 1. The device object is reached from gSSXAudio (cAudioInterface_bxAudio) + 0x118 through two loads and then +0x1D8; its virtual
  * slot 2 is asked to take the audio mode, and only a return of 1 goes on.
  *
- * The restart saves the effects, speech and music levels (func_00287670, func_002876A0, func_002876D0, 0-11 scale), the
+ * The restart saves the effects, speech and music levels (func_00287670, cSSXAudio_GetSFXVolume, func_002876D0, 0-11 scale), the
  * switches at gSSXAudio + 0x62B8 (the arcade effects flag) and + 0x62B4 (func_002875D0's flag) and the word at + 0x534;
  * calls cSSXAudio_FrontEndPurge, SSXAUDIO_DeInit and SSXAUDIO_Init(audio mode); re-applies the volumes (func_00287410,
- * func_00287488, func_00287520), the two switches (cSSXAudio_SetArcadeSFX, func_002875D0) and func_00285FB0; and
+ * cSSXAudio_SetSFXVolume, func_00287520), the two switches (cSSXAudio_SetArcadeSFX, func_002875D0) and cSSXAudio_FrontEndLoad; and
  * finally passes the saved + 0x534 word to virtual slot 4 of the sub-object at gSSXAudio + 0x118 (its vtable pointer is
  * at + 0x5558).
  *
@@ -1687,7 +1687,7 @@ extern "C" void cFEStateOptionsSound_setSoundMode(cFEStateOptionsSound* self, un
     sVE_18BEF8i* vt = *(sVE_18BEF8i**)(obj + 4);
     if (vt[2].fn(obj + vt[2].delta, audioMode) == 1) {
         float sfxVolume = func_00287670(cAudioInterface_bxAudio());
-        float speechVolume = func_002876A0(cAudioInterface_bxAudio());
+        float speechVolume = cSSXAudio_GetSFXVolume(cAudioInterface_bxAudio());
         float musicVolume = func_002876D0(cAudioInterface_bxAudio());
         int arcadeOn = *(int*)((char*)cAudioInterface_bxAudio() + 0x62B8);
         int arcadeSfx = *(int*)((char*)cAudioInterface_bxAudio() + 0x62B4);
@@ -1696,11 +1696,11 @@ extern "C" void cFEStateOptionsSound_setSoundMode(cFEStateOptionsSound* self, un
         SSXAUDIO_DeInit();
         SSXAUDIO_Init(audioMode);
         func_00287410(cAudioInterface_bxAudio(), (int)sfxVolume);
-        func_00287488(cAudioInterface_bxAudio(), (int)speechVolume);
+        cSSXAudio_SetSFXVolume(cAudioInterface_bxAudio(), (int)speechVolume);
         func_00287520(cAudioInterface_bxAudio(), (int)musicVolume);
         cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), arcadeOn);
         func_002875D0(cAudioInterface_bxAudio(), arcadeSfx);
-        func_00285FB0(cAudioInterface_bxAudio());
+        cSSXAudio_FrontEndLoad(cAudioInterface_bxAudio());
         char* snd = (char*)cAudioInterface_bxAudio();
         sVE_18BEF8v* vt2 = *(sVE_18BEF8v**)(snd + 0x5558);
         char* sub = snd + 0x118;

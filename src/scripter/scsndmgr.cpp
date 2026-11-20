@@ -88,14 +88,14 @@ struct sSndList;
 extern "C" sSndEntry* cScriptSoundBankManager_GetBankInfo(sSndList* self, int id);
 extern "C" sSndEntry* cScriptSoundBankManager_GetEmptyBankInfo(sSndList* self);
 extern "C" void* cAudioInterface_bxAudio();
-extern "C" void func_0028BE60(void* bank, int handle, void* data, int b);
+extern "C" void cBankManager_BANK_Attach(void* bank, int handle, void* data, int b);
 
 /**
  * Links a script sound bank: loads its data into a free bank slot unless the user ID is already linked.
  *
  * When no used slot has @p id (cScriptSoundBankManager_GetBankInfo), it takes the first free slot (cScriptSoundBankManager_GetEmptyBankInfo), stores the ID
  * and data and loads the bank into the audio object's sound system under the slot's bank number
- * (func_0028BE60). There is no check for a full table: a null slot would be written through.
+ * (cBankManager_BANK_Attach). There is no check for a full table: a null slot would be written through.
  *
  * @param id  the caller's bank ID (On Tour userID)
  * @param data  the bank data, kept by the slot
@@ -109,7 +109,7 @@ extern "C" int cScriptSoundBankManager_LinkBank(sSndList* self, int id, void* da
         bankInfo = (char*)cScriptSoundBankManager_GetEmptyBankInfo(self);
         *(int*)(bankInfo + 0x0) = id;
         *(void**)(bankInfo + 0x8) = data;
-        func_0028BE60(**(void***)((char*)cAudioInterface_bxAudio() + 0x118), *(int*)(bankInfo + 0x4), data, dataSize);
+        cBankManager_BANK_Attach(**(void***)((char*)cAudioInterface_bxAudio() + 0x118), *(int*)(bankInfo + 0x4), data, dataSize);
     }
     return *(int*)(bankInfo + 0x4);
 }
@@ -226,19 +226,19 @@ extern "C" sSndEntry* cScriptSoundBankManager_GetBankInfo(sSndList* self, int id
 INCLUDE_ASM("scripter/scsndmgr", cScriptSoundBankManager_UnlinkBank);
 #ifdef SKIP_ASM
 extern "C" void* cAudioInterface_bxAudio();
-extern "C" void func_0028BE90(void* bank, int handle);
+extern "C" void cBankManager_BANK_UnAttach(void* bank, int handle);
 
 /**
  * Unloads one script sound bank from the audio system and frees its slot.
  *
  * Unloads the slot's bank number (+0x4) from the audio object's sound system (cAudioInterface_bxAudio() +0x118,
- * func_0028BE90), then sets the slot's user ID to -1 and its data to 0.
+ * cBankManager_BANK_UnAttach), then sets the slot's user ID to -1 and its data to 0.
  *
  * @param pBankInfo  the bank's slot (On Tour tScriptSoundBankInfo* pBankInfo: userID, bankNum, pData)
  */
 extern "C" void cScriptSoundBankManager_UnlinkBank(sSndList* self, sSndEntry* pBankInfo)
 {
-    func_0028BE90(**(void***)((char*)cAudioInterface_bxAudio() + 0x118), pBankInfo->unk4);
+    cBankManager_BANK_UnAttach(**(void***)((char*)cAudioInterface_bxAudio() + 0x118), pBankInfo->unk4);
     pBankInfo->id = -1;
     pBankInfo->data = 0;
 }

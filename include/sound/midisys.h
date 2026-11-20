@@ -23,7 +23,7 @@ struct cBankManager;
 
 // One cMidiSys::mMidiBanks level (8 bytes; member names are ours). [U] MIDI_Begin (func_002A8450) stores (bank,
 // data) at [mInst]; MIDI_End (func_002A86B8) plays data from bank, passes them to cBankMonitorInstance SetMIDI
-// (func_002ABD38, On Tour SetMIDI(void* pData, int Bank)) and to the delay-echo monitors.
+// (cBankMonitorInstance_SetMIDI, On Tour SetMIDI(void* pData, int Bank)) and to the delay-echo monitors.
 struct tMidiBank {
     int mBank;    // 0x0 [U] cBankManager bank index (BANK_Handle'd before playing)
     void* mpData; // 0x4 [U] the MIDI sequence inside the bank (On Tour SetMIDI's pData)

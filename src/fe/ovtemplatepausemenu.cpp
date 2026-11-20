@@ -421,7 +421,7 @@ void* cUIStateStack_pop_r(void* self, int a1) __asm__("cUIStateStack_pop");
 extern "C" void cOVStateManager_triggerOverlay(int cmd);
 extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* mem, void* owner, int a2, int a3);
 extern "C" void* cAudioInterface_bxAudio();
-extern "C" void func_00289BB8(void* audio);
+extern "C" void cSSXAudio_ResumeAudio(void* audio);
 extern "C" void cOVTemplate_PauseMenu_setPDAIconColor(void* self, int idx, int on);
 extern int cPauseState_Flags;
 extern int D_004A2A54;
@@ -522,7 +522,7 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(sPauseMenu_PMWE* self, sWidg
             cOVStateManager_removePDATemplate();
             cUIStateStack_pop_r(self->owner + 0x18, 1);
             cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
-            func_00289BB8(cAudioInterface_bxAudio());
+            cSSXAudio_ResumeAudio(cAudioInterface_bxAudio());
             break;
         case 2:
             D_004A2708 = 1;
@@ -572,7 +572,7 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(sPauseMenu_PMWE* self, sWidg
         cOVStateManager_removePDATemplate();
         cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
         cUIStateStack_pop_r(self->owner + 0x18, 1);
-        func_00289BB8(cAudioInterface_bxAudio());
+        cSSXAudio_ResumeAudio(cAudioInterface_bxAudio());
         break;
     case 1: {
         if (self->busy == 0) {

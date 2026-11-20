@@ -1651,7 +1651,7 @@ extern "C" void* func_003AD198();
 extern "C" void cOcclusionMan_addVisCurtain(void* self, void* obj);
 // PORT: the unit declares this later returning void*; bind this char* view by symbol.
 char* cAudioInterface_getGame_AE68() __asm__("cAudioInterface_getGame");
-extern "C" void func_002B6B08(void* self, void* obj, unsigned int arg);
+extern "C" void cWorldSound_InitWorldAudioFile(void* self, void* obj, unsigned int arg);
 extern char* D_004A28A8_AE68 __asm__("SSXApp");
 extern "C" int cAI_swaploadInjectedPathFile(void* self, int a, unsigned int b, void* obj);
 void cMemMan_free(void* p);
@@ -1665,7 +1665,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 void cBEMissionInterface_addStreamData_AE68(void* self, int a, void* p, int v) __asm__("cBEMissionInterface_addStreamData__FPv");
 extern "C" void* cAudioInterface_bxAudio();
-extern "C" void func_00286CA8(void* self, unsigned int arg, void* obj);
+extern "C" void cSSXAudio_AttachAudioBank(void* self, unsigned int arg, void* obj);
 extern "C" void func_002105D0(void* obj);
 extern "C" void cAvalanche_resolve(void* obj);
 
@@ -1770,7 +1770,7 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int RID,
         ((tMsg2_AE68)VT_AE68(self, 152)->fn)((char*)self + VT_AE68(self, 0x98)->delta, RID, obj);
         break;
     case 13:
-        func_002B6B08(*(void**)(cAudioInterface_getGame_AE68() + 0x4C), obj, RID);
+        cWorldSound_InitWorldAudioFile(*(void**)(cAudioInterface_getGame_AE68() + 0x4C), obj, RID);
         break;
     case 17:
         gCamTriggerMan_resolve((void*)RID, (int)obj);
@@ -1791,7 +1791,7 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int RID,
         cSSXScriptEngine_AttachAnchorDataTable(ScriptEngine, RID & 0xFF, obj);
         break;
     case 20:
-        func_00286CA8(cAudioInterface_bxAudio(), RID, obj);
+        cSSXAudio_AttachAudioBank(cAudioInterface_bxAudio(), RID, obj);
         break;
     case 19:
         cBEMissionInterface_addStreamData_AE68(cBE_getInterface_Fv(cBE_getBE(), 10), RID & 0xFF, obj + 4, *(int*)obj);
@@ -1834,7 +1834,7 @@ extern "C" void cSSXScriptEngine_DetachAnchorDataTable(void* p, unsigned char id
 extern "C" void cSSXAudio_UnAttachAudioBank(void* p, unsigned int param, void* data);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void* cAudioInterface_getGame();
-extern "C" void func_002B6B30(void* p, void* data, unsigned int param);
+extern "C" void cWorldSound_PurgeWorldAudioFile(void* p, void* data, unsigned int param);
 extern "C" void cWorldPainterSection_unload(void* entry);
 extern "C" void cAvalanche_reset();
 extern "C" void nash_Cell_remnode(void* node, int idx, void* item, const void* target, const void* cur);
@@ -1913,7 +1913,7 @@ static inline void update_B498(char* w, int idx, void* item, const sWVBox_B498* 
  * Undoes the resolve of a stream data chunk that is about to be unloaded.
  *
  * Dispatches on @p msg: spatial types take their nodes out of the world's spatial hash (nash_Nash_findkey, nash_Cell_remnode)
- * and free them; type 13 purges a world audio file (func_002B6B30), 15 unloads a world-painter section (cWorldPainterSection_unload),
+ * and free them; type 13 purges a world audio file (cWorldSound_PurgeWorldAudioFile), 15 unloads a world-painter section (cWorldPainterSection_unload),
  * 18 detaches a script anchor table, 20 unattaches an audio bank, 19 removes mission stream data through BE interface
  * 10, 11 removes an occlusion curtain (cOcclusionMan_removeVisCurtain), 14 drops an AI file (cAI_removeInjectedFile) and 22 resets the avalanche;
  * types 17 and 21 go to func_0016CF18 and func_00210608. Other types need nothing.
@@ -1993,7 +1993,7 @@ extern "C" void* cPS2ChunkResolve_unresolve(char* self, unsigned int msg, unsign
         break;
     }
     case 13:
-        func_002B6B30(*(void**)((char*)cAudioInterface_getGame() + 0x4C), data, resourceId);
+        cWorldSound_PurgeWorldAudioFile(*(void**)((char*)cAudioInterface_getGame() + 0x4C), data, resourceId);
         break;
     case 17:
         func_0016CF18(resourceId);

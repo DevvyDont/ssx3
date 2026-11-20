@@ -1100,28 +1100,28 @@ extern "C" int cAsyncSys_ASYNCSYS_GetCurrOperationUserHandle(char *self) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cAsyncSys_ASYNCSYS_CancelCurrent);
 #ifdef SKIP_ASM
-extern "C" void func_00289DF0(void*, int);
+extern "C" void cAsyncSys_DoCancel(void*, int);
 /**
- * Cancels the async loader's current operation: func_00289DF0(@p asyncSys, 0).
+ * Cancels the async loader's current operation: cAsyncSys_DoCancel(@p asyncSys, 0).
  *
  * @param asyncSys  the cAsyncSys
  */
 extern "C" void cAsyncSys_ASYNCSYS_CancelCurrent(void *asyncSys) {
-    func_00289DF0(asyncSys, 0);
+    cAsyncSys_DoCancel(asyncSys, 0);
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cAsyncSys_ASYNCSYS_CancelAll);
 #ifdef SKIP_ASM
-extern "C" void func_00289DF0(void*, int);
+extern "C" void cAsyncSys_DoCancel(void*, int);
 /**
- * Cancels every queued async load: func_00289DF0(@p asyncSys, 1).
+ * Cancels every queued async load: cAsyncSys_DoCancel(@p asyncSys, 1).
  *
  * @param asyncSys  the cAsyncSys
  */
 extern "C" void cAsyncSys_ASYNCSYS_CancelAll(void *asyncSys) {
-    func_00289DF0(asyncSys, 1);
+    cAsyncSys_DoCancel(asyncSys, 1);
 }
 #endif
 

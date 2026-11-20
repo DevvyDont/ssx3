@@ -790,7 +790,7 @@ INCLUDE_ASM("render/lightman", c2DRender_drawLine);
 /**
  * Draws a line from @p start to @p end in colour @p col.
  *
- * Both vertices get R, G, B = col[1..3] * 255 and A = col[0] * 128 and go to vtable slot 73 (func_00381AD0) with a
+ * Both vertices get R, G, B = col[1..3] * 255 and A = col[0] * 128 and go to vtable slot 73 (cPS2GraphicsMan_RenderLineStrip) with a
  * count of 2. No caller.
  *
  * @param start  the first end point
@@ -2154,7 +2154,7 @@ extern int D_004A46B4;
  * Reports once that the thunder of the last lightning flash is due.
  *
  * When cScreenTint_m_LightningEnable is set and the countdown D_004A46B4 has reached 0, sets it to -1 and returns 1.
- * Caller: func_00285BF8 (audio).
+ * Caller: cSSXAudio_Update (audio).
  *
  * @return 1 on the frame the thunder is due, else 0
  */
