@@ -248,7 +248,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip__cFEStateCharEquip);
 #ifdef SKIP_ASM
 struct sEquipTable_DC20;
 extern "C" void func_0019DC20(sEquipTable_DC20* self, int bank, int i);
-extern "C" void cFEStateCharEquip_cancelLargePreviewLoad(void* self);
+extern "C" void cFEStateCharEquip_cancelLargePreviewLoad(cFEStateCharEquip* self);
 extern "C" void cUIState__cUIState(void* self, int flags);
 extern void* cFEStateCharEquip_vtbl[];
 extern void* cFEState_vtbl[];
@@ -306,7 +306,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void cRiderAnimBase_reset(void* self);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
-extern "C" void cFEStateCharEquip_update3DPositions(void* self);
+extern "C" void cFEStateCharEquip_update3DPositions(cFEStateCharEquip* self);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* self, int a1);
 extern char str_12equ_char[];
@@ -370,8 +370,8 @@ extern "C" void cFEStateCharEquip_onDestroyScreen(cFEStateCharEquip* self)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onGainFocus);
 #ifdef SKIP_ASM
-extern "C" void cFEStateCharEquip_initStorePreview(void* self);
-extern "C" void cFEStateCharEquip_initInventoryPreview(void* self);
+extern "C" void cFEStateCharEquip_initStorePreview(cFEStateCharEquip* self);
+extern "C" void cFEStateCharEquip_initInventoryPreview(cFEStateCharEquip* self);
 extern "C" void cFEStateCharEquip_updatePolyBar(cFEStateCharEquip* self);
 extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(cFEStateCharEquip* self, int a1);
 extern "C" void func_0019B618(cFEStateCharEquip* self, int a1, int a2);
@@ -677,9 +677,9 @@ void* cList_first(cList* list);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIState_onUpdate(void* self);
 extern "C" int func_0019E238(sEquipTable* self, int a1, int a2);
-extern "C" void func_0019A9B8(void* self);
-extern "C" void cFEStateCharEquip_updatePreviewLoad(void* self);
-extern "C" void cFEStateCharEquip_update3DPositions(void* self);
+extern "C" void func_0019A9B8(cFEStateCharEquip* self);
+extern "C" void cFEStateCharEquip_updatePreviewLoad(cFEStateCharEquip* self);
+extern "C" void cFEStateCharEquip_update3DPositions(cFEStateCharEquip* self);
 extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
 extern char str_loading_text[];
 
@@ -697,23 +697,23 @@ struct sVEntryK199938 {
  * a large preview is pending (0xA6C, 0x95C), otherwise until the FE rider's model is shown (+0xCC8). Then
  * cFEStateCharEquip_updatePreviewLoad() advances the preview load and cFEStateCharEquip_update3DPositions() places the camera and models.
  */
-extern "C" void cFEStateCharEquip_onUpdate(void* self)
+extern "C" void cFEStateCharEquip_onUpdate(cFEStateCharEquip* self)
 {
     cUIState_onUpdate(self);
-    if (*(int*)((char*)self + 0xA60) == 0
-        && func_0019E238((sEquipTable*)((char*)SSXApp->RealFE + 0x1A70), *(int*)((char*)self + 0xBC),
-                         *(int*)((char*)self + 0xA64))) {
-        *(int*)((char*)self + 0xA60) = 1;
+    if (self->mIconsLoaded == 0
+        && func_0019E238((sEquipTable*)((char*)SSXApp->RealFE + 0x1A70), self->mCharID,
+                         self->mIconsFileIndex)) {
+        self->mIconsLoaded = 1;
         func_0019A9B8(self);
     }
     void* screen = cList_first((cList*)((char*)self + 0x24));
     char* obj = (char*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_loading_text));
     if (obj != 0) {
-        char* feRider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
+        char* feRider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum);
         int on = 0;
-        int mode1 = *(int*)((char*)self + 0xC8) == 1;
+        int mode1 = self->mEquipMode == 1;
         if (mode1) {
-            if (*(int*)((char*)self + 0xA6C) >= 0 || *(int*)((char*)self + 0x95C) > 0)
+            if (self->mPreviewTextureFileIndex >= 0 || self->mLargePreviewDelay > 0)
                 on = 1;
         } else {
             on = *(int*)(feRider + 0xCC8);
@@ -795,27 +795,27 @@ static inline float clamp_9A38(float v, float lo, float hi)
  * @param in  the controller input (cUIInput)
  * @return 1 when any camera control was used, otherwise 0
  */
-extern "C" int cFEStateCharEquip_onInputBegin(void* self, cPad_9A38* in)
+extern "C" int cFEStateCharEquip_onInputBegin(cFEStateCharEquip* self, cPad_9A38* in)
 {
     int handled = 0;
     if (!isMode1_9A38(self)) {
-    int mode = *(int*)((char*)self + 0xAE0);
+    int mode = self->mCameraState;
     if (mode == 1 || mode == 4) {
     if (in->isCamRotate()) {
-        *(float*)((char*)self + 0xAAC) += in->getCamRotate() * 3.0f;
-        while (*(float*)((char*)self + 0xAAC) >= 360.0f)
-            *(float*)((char*)self + 0xAAC) -= 360.0f;
-        while (*(float*)((char*)self + 0xAAC) < 0.0f)
-            *(float*)((char*)self + 0xAAC) += 360.0f;
+        self->mPlayerRotation += in->getCamRotate() * 3.0f;
+        while (self->mPlayerRotation >= 360.0f)
+            self->mPlayerRotation -= 360.0f;
+        while (self->mPlayerRotation < 0.0f)
+            self->mPlayerRotation += 360.0f;
         handled = 1;
     }
     if (in->isCamZoom()) {
         // PORT: <? (GNU min operator)
-        *(float*)((char*)self + 0xAA4) = clamp_9A38(*(float*)((char*)self + 0xAA4) + in->getCamZoom() * -0.10000000149011612f, 0.0f, 1.0f);
+        self->mZoom = clamp_9A38(self->mZoom + in->getCamZoom() * -0.10000000149011612f, 0.0f, 1.0f);
         handled = 1;
     }
     if (in->isCamPan()) {
-        *(float*)((char*)self + 0xAA8) = clamp_9A38(*(float*)((char*)self + 0xAA8) + in->getCamPan() * -0.10000000149011612f, -1.0f, 1.0f);
+        self->mPan = clamp_9A38(self->mPan + in->getCamPan() * -0.10000000149011612f, -1.0f, 1.0f);
         handled = 1;
     }
     }
@@ -831,9 +831,9 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onWidgetEvent);
 extern "C" void cFEStateCharEquip_updateHeading(cFEStateCharEquip* self, int id);
 extern "C" void func_0019B180(void* self, int id);
 extern "C" void func_0019B618(cFEStateCharEquip* self, int a1, int a2);
-extern "C" void cFEStateCharEquip_startLargePreviewLoad(void* self, int a1);
-extern "C" void func_0019A9B8(void* self);
-extern "C" void func_0019ACA0(void* self);
+extern "C" void cFEStateCharEquip_startLargePreviewLoad(cFEStateCharEquip* self, int a1);
+extern "C" void func_0019A9B8(cFEStateCharEquip* self);
+extern "C" void func_0019ACA0(cFEStateCharEquip* self);
 extern "C" int func_0019BEE8(cFEStateCharEquip* self);
 extern "C" void func_0019C7E8(cFEStateCharEquip* self, void* item);
 extern "C" void cFEStateCharEquip_updatePolyBar(cFEStateCharEquip* self);
@@ -910,7 +910,7 @@ static inline int isMode1_9C28(sCharEquip_9C28* self)
  * @param w  the row widget that sent the event; nothing happens when null
  * @param ev  the widget event (5 accept, 6 back, 1 focused)
  */
-extern "C" void cFEStateCharEquip_onWidgetEvent(void* selfv, cUIThing* w, unsigned int ev)
+extern "C" void cFEStateCharEquip_onWidgetEvent(cFEStateCharEquip* selfv, cUIThing* w, unsigned int ev)
 {
     sCharEquip_9C28* self = (sCharEquip_9C28*)selfv;
     if (((char*)w) == 0)
@@ -955,7 +955,7 @@ extern "C" void cFEStateCharEquip_onWidgetEvent(void* selfv, cUIThing* w, unsign
         func_0019B618((cFEStateCharEquip*)self, 0, 1);
         cFEStateCharEquip_updatePolyBar((cFEStateCharEquip*)self);
         cFEStateCharEquip_updatePolyEquipPreviewBar((cFEStateCharEquip*)self, *(int*)((char*)vals + (w->mMiscData << 2)));
-        func_0019ACA0(self);
+        func_0019ACA0((cFEStateCharEquip*)self);
         return;
     }
     case 6: {
@@ -980,8 +980,8 @@ extern "C" void cFEStateCharEquip_onWidgetEvent(void* selfv, cUIThing* w, unsign
     }
     case 1:
         if (isMode1_9C28(self))
-            cFEStateCharEquip_startLargePreviewLoad(self, 1);
-        func_0019A9B8(self);
+            cFEStateCharEquip_startLargePreviewLoad((cFEStateCharEquip*)self, 1);
+        func_0019A9B8((cFEStateCharEquip*)self);
         break;
     }
 }
@@ -991,7 +991,7 @@ extern "C" void cFEStateCharEquip_onWidgetEvent(void* selfv, cUIThing* w, unsign
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onWidgetMenu);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void cFEStateCharEquip_switchEquipMode(void* self);
+extern "C" void cFEStateCharEquip_switchEquipMode(cFEStateCharEquip* self);
 extern int D_004A18D8;
 
 struct sEquipItem_9F20 {
@@ -1082,7 +1082,7 @@ extern "C" int cFEStateCharEquip_onWidgetMenu(sEquipDetail_9F20* self, int pMenu
         break;
     case 8:
         if (self->fAE4 != 0) {
-            cFEStateCharEquip_switchEquipMode(self);
+            cFEStateCharEquip_switchEquipMode((cFEStateCharEquip*)self);
             return 257;
         }
         return 0x100;
@@ -1137,12 +1137,12 @@ struct sVEK19A098b {
  * @param name  the icon name
  * @return the texture id (+0xA68), or -1 when the package is not loaded or has no such image
  */
-extern "C" int cFEStateCharEquip_getIconID(void* self, const char* name)
+extern "C" int cFEStateCharEquip_getIconID(cFEStateCharEquip* self, const char* name)
 {
-    if (*(int*)((char*)self + 0xA60) == 0)
+    if (self->mIconsLoaded == 0)
         return -1;
     sPkgK19A098* pkg = (sPkgK19A098*)func_0019E2B0((sEquipTable*)((char*)SSXApp->RealFE + 0x1A70),
-                                                  *(int*)((char*)self + 0xBC), *(int*)((char*)self + 0xA64));
+                                                  self->mCharID, self->mIconsFileIndex);
     if (pkg == 0)
         return -1;
     int n = pkg->count;
@@ -1154,17 +1154,17 @@ extern "C" int cFEStateCharEquip_getIconID(void* self, const char* name)
         if (func_004165A8(nm, name) == 0) {
             sPkgEntK19A098* entry = &pkg->ents[i];
             char* data = (char*)pkg + entry->off;
-            int id = *(int*)((char*)self + 0xA68);
+            int id = self->mIconTextureID;
             if (id == -1) {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
                 sVEK19A098a* vt = (sVEK19A098a*)ps2GraphicsMan->mVtbl;
-                *(int*)((char*)self + 0xA68) = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, data, str_icon, 0, 1, -1);
+                self->mIconTextureID = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, data, str_icon, 0, 1, -1);
             } else {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
                 sVEK19A098b* vt = (sVEK19A098b*)ps2GraphicsMan->mVtbl;
                 vt[48].fn((char*)ps2GraphicsMan + vt[48].delta, id, data, 1);
             }
-            return *(int*)((char*)self + 0xA68);
+            return self->mIconTextureID;
         }
     }
     return -1;
@@ -1176,7 +1176,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_updateIconTexturesLoa
 #ifdef SKIP_ASM
 struct sEquipTable;
 extern "C" int func_0019E238(sEquipTable* self, int a1, int a2);
-extern "C" void func_0019A9B8(void* self);
+extern "C" void func_0019A9B8(cFEStateCharEquip* self);
 
 /**
  * Marks the icon package loaded once its file is ready and refreshes the item preview.
@@ -1184,12 +1184,12 @@ extern "C" void func_0019A9B8(void* self);
  * When +0xA60 is clear and the file manager reports the icon file ready (func_0019E238 on +0xBC, +0xA64), sets +0xA60
  * and calls func_0019A9B8. No call site was found in the asm.
  */
-extern "C" void cFEStateCharEquip_updateIconTexturesLoad(void* self)
+extern "C" void cFEStateCharEquip_updateIconTexturesLoad(cFEStateCharEquip* self)
 {
-    if (*(int*)((char*)self + 0xA60) == 0
-        && func_0019E238((sEquipTable*)((char*)SSXApp->RealFE + 0x1A70), *(int*)((char*)self + 0xBC),
-                         *(int*)((char*)self + 0xA64))) {
-        *(int*)((char*)self + 0xA60) = 1;
+    if (self->mIconsLoaded == 0
+        && func_0019E238((sEquipTable*)((char*)SSXApp->RealFE + 0x1A70), self->mCharID,
+                         self->mIconsFileIndex)) {
+        self->mIconsLoaded = 1;
         func_0019A9B8(self);
     }
 }
@@ -1216,28 +1216,28 @@ struct sVEntry0019A238 {
  * preview group (+0x80), shows the user's front-end rider (cFERider_setVisible with 1) and sets the camera state (+0xAE0) to
  * 1.
  */
-extern "C" void cFEStateCharEquip_initInventoryPreview(void* self)
+extern "C" void cFEStateCharEquip_initInventoryPreview(cFEStateCharEquip* self)
 {
-    if (*(cUIText**)((char*)self + 0x48) != 0) {
-        cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x48), GetHashValue32(str_kT_CMNEquipGear));
+    if (self->mpTitleText != 0) {
+        cUIText_setUnicodeStringByID(self->mpTitleText, GetHashValue32(str_kT_CMNEquipGear));
     }
-    char* widget = *(char**)((char*)self + 0x60);
+    char* widget = (char*)self->mpMoneyGroup;
     if (widget != 0) {
         sVEntry0019A238* vt = *(sVEntry0019A238**)(widget + 8);
         vt[9].fn(widget + vt[9].delta, 0);
     }
-    widget = *(char**)((char*)self + 0x88);
+    widget = (char*)self->mpLargePreview;
     if (widget != 0) {
         sVEntry0019A238* vt = *(sVEntry0019A238**)(widget + 8);
         vt[9].fn(widget + vt[9].delta, 0);
     }
-    widget = *(char**)((char*)self + 0x80);
+    widget = (char*)self->mpSmallIconPreviewGroup;
     if (widget != 0) {
         sVEntry0019A238* vt = *(sVEntry0019A238**)(widget + 8);
         vt[9].fn(widget + vt[9].delta, 1);
     }
-    cFERider_setVisible((cFERider*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 1);
-    *(int*)((char*)self + 0xAE0) = 1;
+    cFERider_setVisible((cFERider*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum), 1);
+    self->mCameraState = 1;
 }
 #endif
 
@@ -1261,23 +1261,23 @@ struct sVEntry0019A308 {
  * Titles it kT_CMNBuyGear (+0x48), hides the small icon preview group (+0x80) and the points group (+0x6C), hides the
  * user's front-end rider and shows the money group (+0x60).
  */
-extern "C" void cFEStateCharEquip_initStorePreview(void* self)
+extern "C" void cFEStateCharEquip_initStorePreview(cFEStateCharEquip* self)
 {
-    if (*(cUIText**)((char*)self + 0x48) != 0) {
-        cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x48), GetHashValue32(str_kT_CMNBuyGear));
+    if (self->mpTitleText != 0) {
+        cUIText_setUnicodeStringByID(self->mpTitleText, GetHashValue32(str_kT_CMNBuyGear));
     }
-    char* widget = *(char**)((char*)self + 0x80);
+    char* widget = (char*)self->mpSmallIconPreviewGroup;
     if (widget != 0) {
         sVEntry0019A308* vt = *(sVEntry0019A308**)(widget + 8);
         vt[9].fn(widget + vt[9].delta, 0);
     }
-    widget = *(char**)((char*)self + 0x6C);
+    widget = (char*)self->mpPointsGroup;
     if (widget != 0) {
         sVEntry0019A308* vt = *(sVEntry0019A308**)(widget + 8);
         vt[9].fn(widget + vt[9].delta, 0);
     }
-    cFERider_setVisible((cFERider*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
-    widget = *(char**)((char*)self + 0x60);
+    cFERider_setVisible((cFERider*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum), 0);
+    widget = (char*)self->mpMoneyGroup;
     if (widget != 0) {
         sVEntry0019A308* vt = *(sVEntry0019A308**)(widget + 8);
         vt[9].fn(widget + vt[9].delta, 1);
@@ -1316,19 +1316,19 @@ static inline int isDetailK19A3D0(void* self)
  * (depth +0x120 = 0, the 80 bytes at +0xD0 filled with D_004A11D0), updates the heading and rebuilds and redraws the
  * list (func_0019B180, func_0019B618 with 1, 1).
  */
-extern "C" void cFEStateCharEquip_switchEquipMode(void* self)
+extern "C" void cFEStateCharEquip_switchEquipMode(cFEStateCharEquip* self)
 {
     if (isDetailK19A3D0(self)) {
-        *(int*)((char*)self + 0xC8) = 0;
-        cFEStateCharEquip_initInventoryPreview(self);
-        if (*(cUIText**)((char*)self + 0x50) != 0) {
-            cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x50), GetHashValue32(str_kT_CMNBuyGear));
+        self->mEquipMode = 0;
+        cFEStateCharEquip_initInventoryPreview((cFEStateCharEquip*)self);
+        if (self->mpButtonHelpText != 0) {
+            cUIText_setUnicodeStringByID(self->mpButtonHelpText, GetHashValue32(str_kT_CMNBuyGear));
         }
     } else {
-        *(int*)((char*)self + 0xC8) = 1;
-        cFEStateCharEquip_initStorePreview(self);
-        if (*(cUIText**)((char*)self + 0x50) != 0) {
-            cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x50), GetHashValue32(str_kT_CMNEquipGear));
+        self->mEquipMode = 1;
+        cFEStateCharEquip_initStorePreview((cFEStateCharEquip*)self);
+        if (self->mpButtonHelpText != 0) {
+            cUIText_setUnicodeStringByID(self->mpButtonHelpText, GetHashValue32(str_kT_CMNEquipGear));
         }
     }
     ((sEquipDetailK19A3D0*)self)->f120 = 0;
@@ -1351,15 +1351,15 @@ extern "C" void func_0019DC20(sEquipTable_DC20* self, int bank, int i);
  * Releases the queued preview file (+0xA6C, func_0019DC20) if any, clears the file name (+0x960) and sets +0xA6C and
  * the delay (+0x95C) to -1.
  */
-extern "C" void cFEStateCharEquip_cancelLargePreviewLoad(void* self)
+extern "C" void cFEStateCharEquip_cancelLargePreviewLoad(cFEStateCharEquip* self)
 {
-    int idx = *(int*)((char*)self + 0xA6C);
+    int idx = self->mPreviewTextureFileIndex;
     if (idx >= 0) {
-        func_0019DC20((sEquipTable_DC20*)((char*)SSXApp->RealFE + 0x1A70), *(int*)((char*)self + 0xBC), idx);
+        func_0019DC20((sEquipTable_DC20*)((char*)SSXApp->RealFE + 0x1A70), self->mCharID, idx);
     }
     *(char*)((char*)self + 0x960) = 0;
-    *(int*)((char*)self + 0xA6C) = -1;
-    *(int*)((char*)self + 0x95C) = -1;
+    self->mPreviewTextureFileIndex = -1;
+    self->mLargePreviewDelay = -1;
 }
 #endif
 
@@ -1373,7 +1373,7 @@ extern "C" char* func_0014B700(void* iface, int rider);
 extern "C" char* strrchr(const char* s, int c);
 extern "C" char* strncpy(char* dst, const char* src, int n);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void cFEStateCharEquip_cancelLargePreviewLoad(void* self);
+extern "C" void cFEStateCharEquip_cancelLargePreviewLoad(cFEStateCharEquip* self);
 extern char str_pct_s_pct_spct_s[];
 
 static inline int isDigitK19A4E8(unsigned char c)
@@ -1392,28 +1392,28 @@ static inline int isDigitK19A4E8(unsigned char c)
  *
  * @param flag  nonzero for the longer delay
  */
-extern "C" void cFEStateCharEquip_startLargePreviewLoad(void* self, int flag)
+extern "C" void cFEStateCharEquip_startLargePreviewLoad(cFEStateCharEquip* self, int flag)
 {
-    if (*(void**)((char*)self + 0x5C) == 0)
+    if (self->mpMenu == 0)
         return;
-    cFEStateCharEquip_cancelLargePreviewLoad(self);
-    releaseK199148(*(int*)((char*)self + 0xA74));
-    *(int*)((char*)self + 0xA74) = *(int*)((char*)self + 0xA70);
-    *(int*)((char*)self + 0xA70) = -1;
-    int idx = *(unsigned char*)(*(char**)((char*)self + 0x5C) + 0x95);
+    cFEStateCharEquip_cancelLargePreviewLoad((cFEStateCharEquip*)self);
+    releaseK199148(self->mOldPreviewTextureID);
+    self->mOldPreviewTextureID = self->mPreviewTextureID;
+    self->mPreviewTextureID = -1;
+    int idx = *(unsigned char*)((char*)self->mpMenu + 0x95);
     if (idx < 0)
         return;
-    if (idx >= *(int*)((char*)self + 0x958))
+    if (idx >= self->mNumItems)
         return;
     char* namePart = *(char**)(*(char**)((char*)self + (idx << 2) + 0x124) + 0x30);
     if (namePart == 0)
         return;
     if (flag)
-        *(int*)((char*)self + 0x95C) = 20;
+        self->mLargePreviewDelay = 20;
     else
-        *(int*)((char*)self + 0x95C) = 1;
+        self->mLargePreviewDelay = 1;
     char* buf = (char*)self + 0x960;
-    char* fileName = func_0014B700(cBE_getInterface_Fv(cBE_getBE(), 9), *(int*)((char*)self + 0xBC));
+    char* fileName = func_0014B700(cBE_getInterface_Fv(cBE_getBE(), 9), self->mCharID);
     char* dot = strrchr(fileName, '.');
     int len = dot - fileName - 1;
     strncpy(buf, fileName, len);
@@ -1437,7 +1437,7 @@ extern "C" int func_0019E238(sEquipTable* self, int a1, int a2);
 // PORT: func_0019E2B0 returns a pointer through int (the unit defines it as int).
 extern "C" int func_0019E2B0(sEquipTable* self, int a1, int a2);
 extern "C" int func_0019DA10(void* self, int bank, void* name, int a3, int a4, int a5);
-extern "C" void func_0019A9B8(void* self);
+extern "C" void func_0019A9B8(cFEStateCharEquip* self);
 extern char str_preview[];
 
 struct sVEntryK19A638 {
@@ -1453,30 +1453,30 @@ struct sVEntryK19A638 {
  * Once the queued file is ready, makes its texture (graphics manager vtable entry 46, kind "preview") into +0xA70, or
  * -1 when the file is empty, releases the file and refreshes the item preview (func_0019A9B8).
  */
-extern "C" void cFEStateCharEquip_updatePreviewLoad(void* self)
+extern "C" void cFEStateCharEquip_updatePreviewLoad(cFEStateCharEquip* self)
 {
-    int mode1 = *(int*)((char*)self + 0xC8) == 1;
+    int mode1 = self->mEquipMode == 1;
     if (!mode1)
         return;
-    if (*(int*)((char*)self + 0x95C) > 0) {
-        if (--*(int*)((char*)self + 0x95C) == 0) {
-            *(int*)((char*)self + 0xA6C) = func_0019DA10((char*)SSXApp->RealFE + 0x1A70,
-                                                         *(int*)((char*)self + 0xBC), (char*)self + 0x960, 9, 1, 0);
-            *(int*)((char*)self + 0x95C) = -1;
+    if (self->mLargePreviewDelay > 0) {
+        if (--self->mLargePreviewDelay == 0) {
+            self->mPreviewTextureFileIndex = func_0019DA10((char*)SSXApp->RealFE + 0x1A70,
+                                                         self->mCharID, (char*)self + 0x960, 9, 1, 0);
+            self->mLargePreviewDelay = -1;
         }
-    } else if (*(int*)((char*)self + 0xA6C) >= 0) {
+    } else if (self->mPreviewTextureFileIndex >= 0) {
         char* tbl = (char*)SSXApp->RealFE + 0x1A70;
-        if (func_0019E238((sEquipTable*)tbl, *(int*)((char*)self + 0xBC), *(int*)((char*)self + 0xA6C))) {
-            char* entry = (char*)func_0019E2B0((sEquipTable*)tbl, *(int*)((char*)self + 0xBC), *(int*)((char*)self + 0xA6C));
+        if (func_0019E238((sEquipTable*)tbl, self->mCharID, self->mPreviewTextureFileIndex)) {
+            char* entry = (char*)func_0019E2B0((sEquipTable*)tbl, self->mCharID, self->mPreviewTextureFileIndex);
             if (entry != 0) {
                 cPS2GraphicsMan* ps2GraphicsMan = GrMan;
                 sVEntryK19A638* vt = (sVEntryK19A638*)ps2GraphicsMan->mVtbl;
-                *(int*)((char*)self + 0xA70) = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, entry + *(int*)(entry + 0x14), str_preview, 0, 1, -1);
+                self->mPreviewTextureID = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, entry + *(int*)(entry + 0x14), str_preview, 0, 1, -1);
             } else {
-                *(int*)((char*)self + 0xA70) = -1;
+                self->mPreviewTextureID = -1;
             }
-            func_0019DC20((sEquipTable_DC20*)tbl, *(int*)((char*)self + 0xBC), *(int*)((char*)self + 0xA6C));
-            *(int*)((char*)self + 0xA6C) = -1;
+            func_0019DC20((sEquipTable_DC20*)tbl, self->mCharID, self->mPreviewTextureFileIndex);
+            self->mPreviewTextureFileIndex = -1;
             func_0019A9B8(self);
         }
     }
@@ -1493,11 +1493,11 @@ extern "C" void func_0019FA78(void* a0, int a1);
  *
  * No call site was found in the asm.
  */
-extern "C" void cFEStateCharEquip_cancelPreviewLoad(void* self)
+extern "C" void cFEStateCharEquip_cancelPreviewLoad(cFEStateCharEquip* self)
 {
     char* mgr = (char*)SSXApp->RealFE;
     if (mgr != 0) {
-        func_0019FA78(cFERiderManager_getHuman1(mgr + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
+        func_0019FA78(cFERiderManager_getHuman1(mgr + 0xB0, self->mUserNum), 0);
     }
 }
 #endif
@@ -1590,16 +1590,16 @@ static inline void setText_A798(void* self, char* s)
  * kT_FEHELPRemoveItems when the row's points would pass the limit D_004A18D8, else kT_FEYourCurrentOutfit. Shows the
  * help text again. Likely bug: both outcomes of the item's equipped test (entry flag 4) choose kT_FEYourCurrentOutfit.
  */
-extern "C" void cFEStateCharEquip_updateHelpText(void* self)
+extern "C" void cFEStateCharEquip_updateHelpText(cFEStateCharEquip* self)
 {
-    if (*(cUIObj_A798**)((char*)self + 0x4C) == 0)
+    if ((cUIObj_A798*)self->mpHelpText == 0)
         return;
-    (*(cUIObj_A798**)((char*)self + 0x4C))->setVisible(0);
-    int sel = (*(sList_A798**)((char*)self + 0x5C))->sel;
-    if (sel < 0 || sel >= *(int*)((char*)self + 0x958)) {
-        (*(cUIObj_A798**)((char*)self + 0x4C))->setVisible(1);
+    ((cUIObj_A798*)self->mpHelpText)->setVisible(0);
+    int sel = ((sList_A798*)self->mpMenu)->sel;
+    if (sel < 0 || sel >= self->mNumItems) {
+        ((cUIObj_A798*)self->mpHelpText)->setVisible(1);
         if (!isMode1_A798(self)) {
-            if (*(int*)((char*)self + 0xAE4) != 0)
+            if (self->mCanSwitchMode != 0)
                 setText_A798(self, str_kT_HELPNoItemsCTM);
             else
                 setText_A798(self, str_kT_HELPBuyItemInCTM);
@@ -1615,15 +1615,15 @@ extern "C" void cFEStateCharEquip_updateHelpText(void* self)
         int cost = item->cost;
         if (cost > 0)
             cost *= 10;
-        if (*(int*)((char*)self + 0xC0) >= cost)
+        if (self->mMoneyAvailable >= cost)
             setText_A798(self, str_kT_FEHELPItemAvailBuy);
         else
             setText_A798(self, str_kT_129HELPSaveCashItem);
     } else {
-        sEquipDb_A798* db = (sEquipDb_A798*)func_0014AD28(cBE_getInterface(cBE_getBE(), 9), *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0xBC));
+        sEquipDb_A798* db = (sEquipDb_A798*)func_0014AD28(cBE_getInterface(cBE_getBE(), 9), self->mUserNum, self->mCharID);
         sEquipEntry_A798* equipEntry = getEntry_A798(db, item->id);
-        int idx = sel - (*(sList_A798**)((char*)self + 0x5C))->top;
-        if (D_004A18D8 >= *(int*)((char*)self + 0xC4) + *(int*)((char*)self + (idx << 2) + 0xA78)) {
+        int idx = sel - ((sList_A798*)self->mpMenu)->top;
+        if (D_004A18D8 >= self->mCurrentPolyCount + *(int*)((char*)self + (idx << 2) + 0xA78)) {
             if (equipEntry->flags & 4)
                 setText_A798(self, str_kT_FEYourCurrentOutfit);
             else
@@ -1632,37 +1632,37 @@ extern "C" void cFEStateCharEquip_updateHelpText(void* self)
             setText_A798(self, str_kT_FEHELPRemoveItems);
         }
     }
-    (*(cUIObj_A798**)((char*)self + 0x4C))->setVisible(1);
+    ((cUIObj_A798*)self->mpHelpText)->setVisible(1);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019A9B8);
 #ifdef SKIP_ASM
-extern "C" void func_0019AB78(void* self);
-extern "C" void func_0019AA08(void* self);
-extern "C" void cFEStateCharEquip_updateHelpText(void* self);
+extern "C" void func_0019AB78(cFEStateCharEquip* self);
+extern "C" void func_0019AA08(cFEStateCharEquip* self);
+extern "C" void cFEStateCharEquip_updateHelpText(cFEStateCharEquip* self);
 
 /**
  * Refreshes the equip screen's item preview for the current mode (func_0019AB78 in the store, func_0019AA08 in the
  * inventory) and then its help text (cFEStateCharEquip_updateHelpText).
  */
-extern "C" void func_0019A9B8(void* self)
+extern "C" void func_0019A9B8(cFEStateCharEquip* self)
 {
-    bool buyMode = *(int*)((char*)self + 0xC8) == 1;
+    bool buyMode = self->mEquipMode == 1;
     if (buyMode) {
         func_0019AB78(self);
     } else {
         func_0019AA08(self);
     }
-    cFEStateCharEquip_updateHelpText(self);
+    cFEStateCharEquip_updateHelpText((cFEStateCharEquip*)self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019AA08);
 #ifdef SKIP_ASM
-extern "C" int cFEStateCharEquip_getIconID(void* self, const char* name);
+extern "C" int cFEStateCharEquip_getIconID(cFEStateCharEquip* self, const char* name);
 extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(cFEStateCharEquip* self, int a1);
 
 struct sVEK19AA08 {
@@ -1685,34 +1685,34 @@ static inline void showK19AA08(char* o, int on)
  * name, shows the icon with its texture (cFEStateCharEquip_getIconID). Finally updates the points preview bar (cFEStateCharEquip_updatePolyEquipPreviewBar) with
  * the row's points, or 0.
  */
-extern "C" void func_0019AA08(void* self)
+extern "C" void func_0019AA08(cFEStateCharEquip* self)
 {
-    if (*(void**)((char*)self + 0x5C) == 0)
+    if (self->mpMenu == 0)
         return;
-    char* widget = *(char**)((char*)self + 0x6C);
+    char* widget = (char*)self->mpPointsGroup;
     if (widget != 0)
         showK19AA08(widget, 0);
-    widget = *(char**)((char*)self + 0x84);
+    widget = (char*)self->mpSmallBoltIcon;
     if (widget != 0)
         showK19AA08(widget, 0);
-    widget = *(char**)((char*)self + 0x7C);
+    widget = (char*)self->mpPointsCost;
     if (widget != 0)
         showK19AA08(widget, 0);
-    int idx = *(unsigned char*)(*(char**)((char*)self + 0x5C) + 0x95);
+    int idx = *(unsigned char*)((char*)self->mpMenu + 0x95);
     int rowValue = 0;
-    if (idx < *(int*)((char*)self + 0x958)) {
+    if (idx < self->mNumItems) {
         char* item = *(char**)((char*)self + (idx << 2) + 0x124);
         unsigned int flags = *(unsigned int*)(item + 0x34);
         if (flags & 4) {
             if (!(flags & 0x20)) {
-                showK19AA08(*(char**)((char*)self + 0x6C), 1);
-                int topIndex = *(unsigned char*)(*(char**)((char*)self + 0x5C) + 0x98);
-                char* iconWidget = *(char**)((char*)self + 0x84);
+                showK19AA08((char*)self->mpPointsGroup, 1);
+                int topIndex = *(unsigned char*)((char*)self->mpMenu + 0x98);
+                char* iconWidget = (char*)self->mpSmallBoltIcon;
                 rowValue = *(int*)((char*)self + ((idx - topIndex) << 2) + 0xA78);
-                if (iconWidget != 0 && *(char**)(item + 0x30) != 0 && *(int*)((char*)self + 0xA60) != 0) {
+                if (iconWidget != 0 && *(char**)(item + 0x30) != 0 && self->mIconsLoaded != 0) {
                     showK19AA08(iconWidget, 1);
-                    int iconId = cFEStateCharEquip_getIconID(self, *(char**)(item + 0x30));
-                    char* iconWidget2 = *(char**)((char*)self + 0x84);
+                    int iconId = cFEStateCharEquip_getIconID((cFEStateCharEquip*)self, *(char**)(item + 0x30));
+                    char* iconWidget2 = (char*)self->mpSmallBoltIcon;
                     *(int*)(iconWidget2 + 0x78) = iconId;
                     *(int*)(iconWidget2 + 0x7C) = 0;
                 }
@@ -1750,32 +1750,32 @@ static inline void showK19AB78(void* o, int on)
  * ready, and the cost (+0x68) as the item's price x 10 (getDollarString) for an item that is not a category; otherwise
  * hides them.
  */
-extern "C" void func_0019AB78(void* self)
+extern "C" void func_0019AB78(cFEStateCharEquip* self)
 {
-    char* menu = *(char**)((char*)self + 0x5C);
+    char* menu = (char*)self->mpMenu;
     if (menu == 0)
         return;
     int sel = *(unsigned char*)(menu + 0x95);
     char* item = 0;
-    if (sel >= 0 && sel < *(int*)((char*)self + 0x958))
+    if (sel >= 0 && sel < self->mNumItems)
         item = *(char**)((char*)self + (sel << 2) + 0x124);
-    if (*(void**)((char*)self + 0x88) != 0) {
-        showK19AB78(*(void**)((char*)self + 0x88), 0);
-        if (item != 0 && *(int*)((char*)self + 0xA70) >= 0) {
-            char* widget = *(char**)((char*)self + 0x88);
-            *(int*)(widget + 0x78) = *(int*)((char*)self + 0xA70);
+    if (self->mpLargePreview != 0) {
+        showK19AB78(self->mpLargePreview, 0);
+        if (item != 0 && self->mPreviewTextureID >= 0) {
+            char* widget = (char*)self->mpLargePreview;
+            *(int*)(widget + 0x78) = self->mPreviewTextureID;
             *(int*)(widget + 0x7C) = 0;
-            showK19AB78(*(void**)((char*)self + 0x88), 1);
+            showK19AB78(self->mpLargePreview, 1);
         }
     }
-    if (*(void**)((char*)self + 0x68) != 0) {
-        showK19AB78(*(void**)((char*)self + 0x68), 0);
+    if (self->mpCost != 0) {
+        showK19AB78(self->mpCost, 0);
         if (item != 0 && !(*(int*)(item + 0x34) & 0x20)) {
             int price = *(short*)(item + 0xE);
             if (price > 0)
                 price *= 10;
-            cUIText_setAsciiString(*(cUIText**)((char*)self + 0x68), getDollarString_price(price));
-            showK19AB78(*(void**)((char*)self + 0x68), 1);
+            cUIText_setAsciiString(self->mpCost, getDollarString_price(price));
+            showK19AB78(self->mpCost, 1);
         }
     }
 }
@@ -1796,10 +1796,10 @@ extern "C" void func_0019FBE0(void* rider, void* item, int a2, int a3);
  *
  * cFEStateCharEquip_onWidgetEvent calls it after equipping or removing an item.
  */
-extern "C" void func_0019ACA0(void* self)
+extern "C" void func_0019ACA0(cFEStateCharEquip* self)
 {
-    void* rider = cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
-    func_0019FBE0(rider, func_0014AD28(cBE_getInterface_Fv(cBE_getBE(), 9), *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0xBC)), 0, 1);
+    void* rider = cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum);
+    func_0019FBE0(rider, func_0014AD28(cBE_getInterface_Fv(cBE_getBE(), 9), self->mUserNum, self->mCharID), 0, 1);
 }
 #endif
 
@@ -1861,13 +1861,13 @@ static inline void copyRow_19AD18(sCharEquipDetail_19AD18* self, int dst, int sr
  *
  * @param n  rows to scroll (negative moves the rows down)
  */
-extern "C" void func_0019AD18(sCharEquipDetail_19AD18* self, int n)
+extern "C" void func_0019AD18(cFEStateCharEquip* self, int n)
 {
-    if (self->f5C == 0) {
+    if ((int)self->mpMenu == 0) {
         return;
     }
     if (n < -6 || n > 6) {
-        if (isMode1_19AD18(self)) {
+        if (isMode1_19AD18(((sCharEquipDetail_19AD18*)self))) {
             func_0019B598((cFEStateCharEquip*)self);
         } else {
             func_0019B518((cFEStateCharEquip*)self);
@@ -1877,9 +1877,9 @@ extern "C" void func_0019AD18(sCharEquipDetail_19AD18* self, int n)
     if (n < 0) {
         int i;
         for (i = 5; i >= -n; i--) {
-            copyRow_19AD18(self, i, i + n);
+            copyRow_19AD18(((sCharEquipDetail_19AD18*)self), i, i + n);
         }
-        if (isMode1_19AD18(self)) {
+        if (isMode1_19AD18(((sCharEquipDetail_19AD18*)self))) {
             int j;
             for (j = 0; j < -n; j++) {
                 func_0019BA60((cFEStateCharEquip*)self, j);
@@ -1893,9 +1893,9 @@ extern "C" void func_0019AD18(sCharEquipDetail_19AD18* self, int n)
     } else if (n > 0) {
         int i;
         for (i = n; i < 6; i++) {
-            copyRow_19AD18(self, i - n, i);
+            copyRow_19AD18(((sCharEquipDetail_19AD18*)self), i - n, i);
         }
-        if (isMode1_19AD18(self)) {
+        if (isMode1_19AD18(((sCharEquipDetail_19AD18*)self))) {
             int j;
             for (j = 6 - n; j < 6; j++) {
                 func_0019BA60((cFEStateCharEquip*)self, j);
@@ -1951,10 +1951,10 @@ static inline sEquipEntry_AFD0* getEntry_AFD0(sEquipDb_AFD0* db, int id)
  * @param itemId   the category
  * @return 1 when there is one, else 0
  */
-extern "C" int func_0019AFD0(void* self, int library, sEquipDb_AFD0* db, int itemId)
+extern "C" int func_0019AFD0(cFEStateCharEquip* self, int library, sEquipDb_AFD0* db, int itemId)
 {
     sEquipItem_AFD0* items[528];
-    int n = func_0014D7E8(library, *(int*)((char*)self + 0xBC), itemId, items, -1, 1);
+    int n = func_0014D7E8(library, self->mCharID, itemId, items, -1, 1);
     int i;
     for (i = 0; i < n; i++) {
         sEquipItem_AFD0* it = items[i];
@@ -2013,16 +2013,16 @@ static inline sEquipEntry_B098* getEntry_B098(sEquipDb_B098* db, int id)
  * @param itemId   the category
  * @return 0 when the store sells something in it, else 1
  */
-extern "C" int func_0019B098(void* self, int library, sEquipDb_B098* db, int itemId)
+extern "C" int func_0019B098(cFEStateCharEquip* self, int library, sEquipDb_B098* db, int itemId)
 {
     sEquipItem_B098* items[528];
-    int n = func_0014D7E8(library, *(int*)((char*)self + 0xBC), itemId, items, -1, 1);
+    int n = func_0014D7E8(library, self->mCharID, itemId, items, -1, 1);
     int i;
     for (i = 0; i < n; i++) {
         sEquipItem_B098* it = items[i];
         if (it->flags & 4) {
             if (!(getEntry_B098(db, it->id)->flags & 2)) {
-                if (it->slot == *(int*)((char*)self + 0xCC)) {
+                if (it->slot == self->mStoreNum) {
                     if (!(it->flags & 0x20)) {
                         return 0;
                     }
@@ -2125,7 +2125,7 @@ extern "C" int func_0019B180_impl(void* selfv, int cat)
                     continue;
             }
             sEquipEntry_B180* entry = getEntry_B180(db, it->id);
-            if ((it->flags & 0x20) && func_0019B098(self, lib, (sEquipDb_B098*)db, it->id) == 0) {
+            if ((it->flags & 0x20) && func_0019B098((cFEStateCharEquip*)self, lib, (sEquipDb_B098*)db, it->id) == 0) {
                 self->items[self->count] = it;
                 self->count++;
             } else if (!(it->flags & 0x20) && !(entry->flags & 2)
@@ -2150,7 +2150,7 @@ extern "C" int func_0019B180_impl(void* selfv, int cat)
             }
             sEquipEntry_B180* entry = getEntry_B180(db, it->id);
             if ((!(it->flags & 0x20) && (entry->flags & 2))
-                || ((it->flags & 0x20) && func_0019AFD0(self, lib, (sEquipDb_AFD0*)db, it->id) != 0)) {
+                || ((it->flags & 0x20) && func_0019AFD0((cFEStateCharEquip*)self, lib, (sEquipDb_AFD0*)db, it->id) != 0)) {
                 self->items[self->count] = it;
                 self->count++;
             }
@@ -2959,10 +2959,9 @@ static inline float VecDot_BFE8(const sQuat_BFE8& a, const sQuat_BFE8& b)
  *
  * @param vself  the equip state
  */
-extern "C" void cFEStateCharEquip_update3DPositions(void* vself)
+extern "C" void cFEStateCharEquip_update3DPositions(cFEStateCharEquip* vself)
 {
-    char* self = (char*)vself;
-    char* rider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44));
+    char* rider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, vself->mUserNum);
     int ok = 0;
     if (*(unsigned int*)rider < 10 && *(int*)(rider + 0xCB8) != 0) {
         ok = *(int*)(rider + 0xCB4) != 0;
@@ -2970,33 +2969,33 @@ extern "C" void cFEStateCharEquip_update3DPositions(void* vself)
     if (ok) {
         sXform_BFE8 xf;
         float zero;
-        float zoom = *(float*)(self + 0xAA4);
-        float zOff = *(float*)(self + 0xAA8) * zoom * 65.0f;
+        float zoom = vself->mZoom;
+        float zOff = vself->mPan * zoom * 65.0f;
         float yOff = zoom * 320.0f;
-        float yaw = *(float*)(self + 0xAAC);
-        int state = *(int*)(self + 0xAE0);
+        float yaw = vself->mPlayerRotation;
+        int state = vself->mCameraState;
         if (state == 1) {
             sQuat_BFE8 point;
             point.w = 1.0f;
             point.x = -105.0f;
             point.y = yOff + -100.0f;
             point.z = zOff + -80.0f;
-            *(sQuat_BFE8*)(self + 0xAC0) = point;
+            *(sQuat_BFE8*)&vself->mCharPos = point;
             point.x = 265.75f;
             point.y = -1073.5f;
             point.z = -232.0f;
-            *(sQuat_BFE8*)(self + 0xAD0) = point;
+            *(sQuat_BFE8*)&vself->mBoardPos = point;
         } else if (state == 2) {
             sQuat_BFE8 point;
             point.x = -250.0f;
             point.y = -650.0f;
             point.z = -215.0f;
             point.w = 1.0f;
-            *(sQuat_BFE8*)(self + 0xAC0) = point;
+            *(sQuat_BFE8*)&vself->mCharPos = point;
             point.x = -100.0f;
             point.y = 45.0f;
             point.z = 15.0f;
-            *(sQuat_BFE8*)(self + 0xAD0) = point;
+            *(sQuat_BFE8*)&vself->mBoardPos = point;
         } else if (state == 3) {
             sQuat_BFE8 pos;
             sQuat_BFE8 lookAt;
@@ -3008,15 +3007,15 @@ extern "C" void cFEStateCharEquip_update3DPositions(void* vself)
             lookAt.y = 45.0f;
             lookAt.z = 15.0f;
             lookAt.w = 1.0f;
-            sQuat_BFE8 dPos = VecSub_BFE8(pos, *(sQuat_BFE8*)(self + 0xAC0));
-            sQuat_BFE8 dAt = VecSub_BFE8(lookAt, *(sQuat_BFE8*)(self + 0xAD0));
-            VecAdd_BFE8(*(sQuat_BFE8*)(self + 0xAC0), *(sQuat_BFE8*)(self + 0xAC0), VecScale_BFE8(dPos, 0.2f));
-            VecAdd_BFE8(*(sQuat_BFE8*)(self + 0xAD0), *(sQuat_BFE8*)(self + 0xAD0), VecScale_BFE8(dAt, 0.2f));
+            sQuat_BFE8 dPos = VecSub_BFE8(pos, *(sQuat_BFE8*)&vself->mCharPos);
+            sQuat_BFE8 dAt = VecSub_BFE8(lookAt, *(sQuat_BFE8*)&vself->mBoardPos);
+            VecAdd_BFE8(*(sQuat_BFE8*)&vself->mCharPos, *(sQuat_BFE8*)&vself->mCharPos, VecScale_BFE8(dPos, 0.2f));
+            VecAdd_BFE8(*(sQuat_BFE8*)&vself->mBoardPos, *(sQuat_BFE8*)&vself->mBoardPos, VecScale_BFE8(dAt, 0.2f));
             if (VecDot_BFE8(dAt, dAt) < 0.2f) {
-                if (self) { // FAKEMATCH: identical arms, see header
-                    *(int*)(self + 0xAE0) = 2;
+                if (((char*)vself)) { // FAKEMATCH: identical arms, see header
+                    vself->mCameraState = 2;
                 } else {
-                    *(int*)(self + 0xAE0) = 2;
+                    vself->mCameraState = 2;
                 }
             }
         } else if (state == 4) {
@@ -3030,37 +3029,37 @@ extern "C" void cFEStateCharEquip_update3DPositions(void* vself)
             lookAt.y = -1073.5f;
             lookAt.z = -232.0f;
             lookAt.w = 1.0f;
-            sQuat_BFE8 dPos = VecSub_BFE8(pos, *(sQuat_BFE8*)(self + 0xAC0));
-            sQuat_BFE8 dAt = VecSub_BFE8(lookAt, *(sQuat_BFE8*)(self + 0xAD0));
-            VecAdd_BFE8(*(sQuat_BFE8*)(self + 0xAC0), *(sQuat_BFE8*)(self + 0xAC0), VecScale_BFE8(dPos, 0.2f));
-            VecAdd_BFE8(*(sQuat_BFE8*)(self + 0xAD0), *(sQuat_BFE8*)(self + 0xAD0), VecScale_BFE8(dAt, 0.2f));
+            sQuat_BFE8 dPos = VecSub_BFE8(pos, *(sQuat_BFE8*)&vself->mCharPos);
+            sQuat_BFE8 dAt = VecSub_BFE8(lookAt, *(sQuat_BFE8*)&vself->mBoardPos);
+            VecAdd_BFE8(*(sQuat_BFE8*)&vself->mCharPos, *(sQuat_BFE8*)&vself->mCharPos, VecScale_BFE8(dPos, 0.2f));
+            VecAdd_BFE8(*(sQuat_BFE8*)&vself->mBoardPos, *(sQuat_BFE8*)&vself->mBoardPos, VecScale_BFE8(dAt, 0.2f));
             if (VecDot_BFE8(dPos, dPos) < 0.2f) {
-                *(int*)(self + 0xAE0) = 1;
+                vself->mCameraState = 1;
             }
         }
         xf.rot.x = 0.0f;
         xf.rot.w = 1.0f;
         xf.rot.y = 0.0f;
         xf.rot.z = 0.0f;
-        xf.pos = *(sQuat_BFE8*)(self + 0xAC0);
+        xf.pos = *(sQuat_BFE8*)&vself->mCharPos;
         zero = 0.0f;
 
         xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(t4vect_XAxis, zero));
         xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(t4vect_YAxis, zero));
         xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(t4vect_ZAxis, (yaw + 80.0f) * 0.01745329424738884f));
         cFERider_setPose(rider, &xf);
-        xf.pos = *(sQuat_BFE8*)(self + 0xAD0);
+        xf.pos = *(sQuat_BFE8*)&vself->mBoardPos;
         xf.rot.w = 1.0f;
         xf.rot.x = zero;
         xf.rot.y = zero;
         xf.rot.z = zero;
-        *(float*)(self + 0xAB0) += 1.0f;
-        if (*(float*)(self + 0xAB0) >= 360.0f) {
-            *(float*)(self + 0xAB0) -= 360.0f;
+        vself->mBoardRotation += 1.0f;
+        if (vself->mBoardRotation >= 360.0f) {
+            vself->mBoardRotation -= 360.0f;
         }
         xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(t4vect_ZAxis, 245.0f * 0.01745329424738884f));
         xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(t4vect_YAxis, 320.0f * 0.01745329424738884f));
-        xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(t4vect_XAxis, (*(float*)(self + 0xAB0) + 90.0f) * 0.01745329424738884f));
+        xf.rot = QuatMul_BFE8(xf.rot, AxisAngle_BFE8(t4vect_XAxis, (vself->mBoardRotation + 90.0f) * 0.01745329424738884f));
         cFERider_setBoardPose(rider, &xf);
     }
     char* cam = (char*)SSXApp->RealFE;
