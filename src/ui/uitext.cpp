@@ -1572,7 +1572,7 @@ extern "C" void func_0038E5E8(int ctx, sQuadVtx_23B8* v, sRect_23B8* dst, sRect_
 extern "C" void func_0038E738(int ctx, sQuadVtx_23B8* v, sRect_23B8* dst, sRect_23B8* uv);
 
 /**
- * Draws the texture element @p o tiled @p tx times across and @p ty times down the rectangle @p r, cropping the last
+ * Draws the texture element @p element tiled @p tx times across and @p ty times down the rectangle @p destRect, cropping the last
  * partial row and column.
  *
  * Selects the element's texture (tex) as texture 0 of GrMan's current draw state, then returns at once if @p tx or
@@ -1585,51 +1585,51 @@ extern "C" void func_0038E738(int ctx, sQuadVtx_23B8* v, sRect_23B8* dst, sRect_
  * The four vertices get alpha = c.a * 128 and red/green/blue = c * 255; func_003A20A0 scales all four by 128, so the
  * colour here is twice as strong. No caller in retail references it.
  *
- * @param o  the texture element: texture id (tex) and its texture rectangle (v0 top, u0 left, u1 right, v1 bottom)
- * @param r  the screen rectangle to fill (x, y, w, h)
- * @param c  the colour (a, r, g, b in 0..1)
+ * @param element  the texture element: texture id (tex) and its texture rectangle (v0 top, u0 left, u1 right, v1 bottom)
+ * @param destRect  the screen rectangle to fill (x, y, w, h)
+ * @param colour  the colour (a, r, g, b in 0..1)
  * @param flags  bit 0 mirror horizontally, bit 1 mirror vertically, bit 2 draw the texture turned 90 degrees
  * @param tx  how many times the texture repeats across (may be fractional)
  * @param ty  how many times the texture repeats down (may be fractional)
  */
-extern "C" void func_003A23B8(sSprite_23B8* o, sRect_23B8 r, sColor_23B8 c, int flags, float tx, float ty)
+extern "C" void func_003A23B8(sSprite_23B8* element, sRect_23B8 destRect, sColor_23B8 colour, int flags, float tx, float ty)
 {
-    int tex = o->tex;
+    int tex = element->tex;
     (GrMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex;
-    float x0 = r.x;
-    float y0 = r.y;
-    float v0 = o->v0;
-    float v1 = o->v1;
-    float u0 = o->u0;
-    float u1 = o->u1;
+    float x0 = destRect.x;
+    float y0 = destRect.y;
+    float topV = element->v0;
+    float bottomV = element->v1;
+    float leftU = element->u0;
+    float rightU = element->u1;
     if (tx <= 0.0f) {
         return;
     }
     if (ty <= 0.0f) {
         return;
     }
-    float w = r.w / tx;
-    float h = r.h / ty;
+    float w = destRect.w / tx;
+    float tileHeight = destRect.h / ty;
     if (flags & 1) {
-        u0 = u1;
-        u1 = o->u0;
+        leftU = rightU;
+        rightU = element->u0;
     }
     if (flags & 2) {
-        v0 = v1;
-        v1 = o->v0;
+        topV = bottomV;
+        bottomV = element->v0;
     }
     int nx = (int)tx;
     float y = y0;
     int ny = (int)ty;
-    sQuadVtx_23B8 v[4];
+    sQuadVtx_23B8 quadVerts[4];
     float fny = (float)ny;
     for (int i = 0; i < 4; i++) {
-        sQuadVtx_23B8* p = &v[i];
-        p->a = (int)(c.a * 128.0f);
-        p->r = (int)(c.r * 255.0f);
-        p->g = (int)(c.g * 255.0f);
-        p->b = (int)(c.b * 255.0f);
-        p->q = 1.0f;
+        sQuadVtx_23B8* vert = &quadVerts[i];
+        vert->a = (int)(colour.a * 128.0f);
+        vert->r = (int)(colour.r * 255.0f);
+        vert->g = (int)(colour.g * 255.0f);
+        vert->b = (int)(colour.b * 255.0f);
+        vert->q = 1.0f;
     }
     int j;
     float x;
@@ -1638,61 +1638,61 @@ extern "C" void func_003A23B8(sSprite_23B8* o, sRect_23B8 r, sColor_23B8 c, int 
             x = x0;
             if (flags & 4) {
                 for (int i = 0; i < nx; i++) {
-                    sRect_23B8 dst(x, y, w, h);
-                    sRect_23B8 uv(u0, v0, u1 - u0, v1 - v0);
-                    func_0038E738(D_004A28AC_23B8, v, &dst, &uv);
+                    sRect_23B8 dst(x, y, w, tileHeight);
+                    sRect_23B8 uv(leftU, topV, rightU - leftU, bottomV - topV);
+                    func_0038E738(D_004A28AC_23B8, quadVerts, &dst, &uv);
                     x += w;
                 }
                 if ((float)nx != tx) {
-                    sRect_23B8 dst(x, y, (x0 + r.w) - x, h);
-                    sRect_23B8 uv(u0, v0, u1 - u0, (v0 + (v1 - v0) * (tx - (float)nx)) - v0);
-                    func_0038E738(D_004A28AC_23B8, v, &dst, &uv);
+                    sRect_23B8 dst(x, y, (x0 + destRect.w) - x, tileHeight);
+                    sRect_23B8 uv(leftU, topV, rightU - leftU, (topV + (bottomV - topV) * (tx - (float)nx)) - topV);
+                    func_0038E738(D_004A28AC_23B8, quadVerts, &dst, &uv);
                 }
             } else {
                 for (int i = 0; i < nx; i++) {
-                    sRect_23B8 dst(x, y, w, h);
-                    sRect_23B8 uv(u0, v0, u1 - u0, v1 - v0);
-                    func_0038E5E8(D_004A28AC_23B8, v, &dst, &uv);
+                    sRect_23B8 dst(x, y, w, tileHeight);
+                    sRect_23B8 uv(leftU, topV, rightU - leftU, bottomV - topV);
+                    func_0038E5E8(D_004A28AC_23B8, quadVerts, &dst, &uv);
                     x += w;
                 }
                 if ((float)nx != tx) {
-                    sRect_23B8 dst(x, y, (x0 + r.w) - x, h);
-                    sRect_23B8 uv(u0, v0, (u0 + (u1 - u0) * (tx - (float)nx)) - u0, v1 - v0);
-                    func_0038E5E8(D_004A28AC_23B8, v, &dst, &uv);
+                    sRect_23B8 dst(x, y, (x0 + destRect.w) - x, tileHeight);
+                    sRect_23B8 uv(leftU, topV, (leftU + (rightU - leftU) * (tx - (float)nx)) - leftU, bottomV - topV);
+                    func_0038E5E8(D_004A28AC_23B8, quadVerts, &dst, &uv);
                 }
             }
-            y += h;
+            y += tileHeight;
         }
     }
     if (fny != ty) {
         x = x0;
         if (flags & 4) {
-            float u0b = u0 + (u1 - u0) * (1.0f - (ty - fny));
-            float hh = (y0 + r.h) - y;
+            float u0b = leftU + (rightU - leftU) * (1.0f - (ty - fny));
+            float hh = (y0 + destRect.h) - y;
             for (int i = 0; i < nx; i++) {
                 sRect_23B8 dst(x, y, w, hh);
-                sRect_23B8 uv(u0b, v0, u1 - u0b, v1 - v0);
-                func_0038E738(D_004A28AC_23B8, v, &dst, &uv);
+                sRect_23B8 uv(u0b, topV, rightU - u0b, bottomV - topV);
+                func_0038E738(D_004A28AC_23B8, quadVerts, &dst, &uv);
                 x += w;
             }
             if ((float)nx != tx) {
-                sRect_23B8 dst(x, y, (x0 + r.w) - x, hh);
-                sRect_23B8 uv(u0b, v0, u1 - u0b, (v0 + (v1 - v0) * (tx - (float)nx)) - v0);
-                func_0038E738(D_004A28AC_23B8, v, &dst, &uv);
+                sRect_23B8 dst(x, y, (x0 + destRect.w) - x, hh);
+                sRect_23B8 uv(u0b, topV, rightU - u0b, (topV + (bottomV - topV) * (tx - (float)nx)) - topV);
+                func_0038E738(D_004A28AC_23B8, quadVerts, &dst, &uv);
             }
         } else {
-            float v1b = v0 + (v1 - v0) * (ty - fny);
-            float hh = (y0 + r.h) - y;
+            float v1b = topV + (bottomV - topV) * (ty - fny);
+            float hh = (y0 + destRect.h) - y;
             for (int i = 0; i < nx; i++) {
                 sRect_23B8 dst(x, y, w, hh);
-                sRect_23B8 uv(u0, v0, u1 - u0, v1b - v0);
-                func_0038E5E8(D_004A28AC_23B8, v, &dst, &uv);
+                sRect_23B8 uv(leftU, topV, rightU - leftU, v1b - topV);
+                func_0038E5E8(D_004A28AC_23B8, quadVerts, &dst, &uv);
                 x += w;
             }
             if ((float)nx != tx) {
-                sRect_23B8 dst(x, y, (x0 + r.w) - x, hh);
-                sRect_23B8 uv(u0, v0, (u0 + (u1 - u0) * (tx - (float)nx)) - u0, v1b - v0);
-                func_0038E5E8(D_004A28AC_23B8, v, &dst, &uv);
+                sRect_23B8 dst(x, y, (x0 + destRect.w) - x, hh);
+                sRect_23B8 uv(leftU, topV, (leftU + (rightU - leftU) * (tx - (float)nx)) - leftU, v1b - topV);
+                func_0038E5E8(D_004A28AC_23B8, quadVerts, &dst, &uv);
             }
         }
     }
@@ -1737,58 +1737,58 @@ extern "C" void func_0038E2E8(int ctx, sQuadVtx_2A00* v, sRect_2A00* r, sMat3_2A
 extern "C" void func_0038E468(int ctx, sQuadVtx_2A00* v, sRect_2A00* r, sMat3_2A00* m);
 
 /**
- * Draws the texture element @p o once over the rectangle @p r, with the corners transformed by the 3x3 matrix @p m.
+ * Draws the texture element @p element once over the rectangle @p destRect, with the corners transformed by the 3x3 matrix @p transform.
  *
  * Selects the element's texture (tex) as texture 0 of GrMan's current draw state, sets the four vertices' texture
  * coordinates to the element's rectangle (u0/u1 swapped when flag bit 0 is set, v0/v1 when bit 1 is set) and their
  * colour to alpha = c.a * 128, red/green/blue = c * 255 (func_003A20A0 scales all four by 128), then hands the quad to
  * the 2D renderer D_004A28AC through func_0038E2E8, or func_0038E468 (corners in the order that turns the texture 90
- * degrees) when bit 2 is set; both transform each corner by @p m (func_0038E0A8) before submitting. No caller in retail
+ * degrees) when bit 2 is set; both transform each corner by @p transform (func_0038E0A8) before submitting. No caller in retail
  * references it.
  *
- * @param o  the texture element: texture id (tex) and its texture rectangle (v0 top, u0 left, u1 right, v1 bottom)
- * @param r  the screen rectangle (x, y, w, h) before the transform
- * @param m  the 3x3 transform applied to each corner (rows of three floats)
- * @param c  the colour (a, r, g, b in 0..1)
+ * @param element  the texture element: texture id (tex) and its texture rectangle (v0 top, u0 left, u1 right, v1 bottom)
+ * @param destRect  the screen rectangle (x, y, w, h) before the transform
+ * @param transform  the 3x3 transform applied to each corner (rows of three floats)
+ * @param colour  the colour (a, r, g, b in 0..1)
  * @param flags  bit 0 mirror horizontally, bit 1 mirror vertically, bit 2 draw the texture turned 90 degrees
  */
-extern "C" void func_003A2A00(sSprite_2A00* o, sRect_2A00 r, sMat3_2A00 m, sColor_2A00 c, int flags)
+extern "C" void func_003A2A00(sSprite_2A00* element, sRect_2A00 destRect, sMat3_2A00 transform, sColor_2A00 colour, int flags)
 {
-    int tex = o->tex;
+    int tex = element->tex;
     (GrMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex;
-    float v0 = o->v0;
-    float v1 = o->v1;
-    float u0 = o->u0;
-    float u1 = o->u1;
+    float topV = element->v0;
+    float bottomV = element->v1;
+    float leftU = element->u0;
+    float rightU = element->u1;
     if (flags & 1) {
-        u0 = u1;
-        u1 = o->u0;
+        leftU = rightU;
+        rightU = element->u0;
     }
     if (flags & 2) {
-        v0 = v1;
-        v1 = o->v0;
+        topV = bottomV;
+        bottomV = element->v0;
     }
-    sQuadVtx_2A00 v[4];
+    sQuadVtx_2A00 quadVerts[4];
     for (int i = 0; i < 4; i++) {
-        sQuadVtx_2A00* p = &v[i];
-        p->a = (int)(c.a * 128.0f);
-        p->r = (int)(c.r * 255.0f);
-        p->g = (int)(c.g * 255.0f);
-        p->b = (int)(c.b * 255.0f);
-        p->q = 1.0f;
+        sQuadVtx_2A00* vert = &quadVerts[i];
+        vert->a = (int)(colour.a * 128.0f);
+        vert->r = (int)(colour.r * 255.0f);
+        vert->g = (int)(colour.g * 255.0f);
+        vert->b = (int)(colour.b * 255.0f);
+        vert->q = 1.0f;
     }
-    v[0].s = u0;
-    v[0].t = v0;
-    v[1].s = u1;
-    v[1].t = v0;
-    v[2].s = u0;
-    v[2].t = v1;
-    v[3].s = u1;
-    v[3].t = v1;
+    quadVerts[0].s = leftU;
+    quadVerts[0].t = topV;
+    quadVerts[1].s = rightU;
+    quadVerts[1].t = topV;
+    quadVerts[2].s = leftU;
+    quadVerts[2].t = bottomV;
+    quadVerts[3].s = rightU;
+    quadVerts[3].t = bottomV;
     if (flags & 4) {
-        func_0038E468(D_004A28AC_2A00, v, &r, &m);
+        func_0038E468(D_004A28AC_2A00, quadVerts, &destRect, &transform);
     } else {
-        func_0038E2E8(D_004A28AC_2A00, v, &r, &m);
+        func_0038E2E8(D_004A28AC_2A00, quadVerts, &destRect, &transform);
     }
 }
 #endif
@@ -1832,125 +1832,125 @@ extern "C" void func_0038E880(int ctx, sQuadVtx_2BC8* v, sRect_2BC8* dst, sRect_
 extern "C" void func_0038EA60(int ctx, sQuadVtx_2BC8* v, sRect_2BC8* dst, sRect_2BC8* uv, sMat3_2BC8* m);
 
 /**
- * Draws the texture element @p o tiled @p tx times across and @p ty times down the rectangle @p r, like func_003A23B8,
- * with every tile's corners transformed by the 3x3 matrix @p m.
+ * Draws the texture element @p element tiled @p tx times across and @p ty times down the rectangle @p destRect, like func_003A23B8,
+ * with every tile's corners transformed by the 3x3 matrix @p transform.
  *
  * Selects the element's texture (tex) as texture 0 of GrMan's current draw state and returns if @p tx or @p ty is not
  * positive. Tiles are r.w / tx by r.h / ty: floor(ty) rows of floor(tx) full tiles, a cropped last tile per row when @p
  * tx has a fraction and a cropped last row when @p ty has one (texture ranges cut by the same fractions). Each quad
  * goes to the 2D renderer D_004A28AC through func_0038E880, or func_0038EA60 (texture turned 90 degrees) when flag bit
- * 2 is set; both transform the corners by @p m. Flag bit 0 swaps the left and right texture coordinates, bit 1 the top
+ * 2 is set; both transform the corners by @p transform. Flag bit 0 swaps the left and right texture coordinates, bit 1 the top
  * and bottom ones. Vertex colour: alpha = c.a * 128, red/green/blue = c * 255 (func_003A20A0 uses 128 for all four). No
  * caller in retail references it.
  *
- * @param o  the texture element: texture id (tex) and its texture rectangle (v0 top, u0 left, u1 right, v1 bottom)
- * @param r  the screen rectangle to fill (x, y, w, h) before the transform
- * @param m  the 3x3 transform applied to every tile's corners
- * @param c  the colour (a, r, g, b in 0..1)
+ * @param element  the texture element: texture id (tex) and its texture rectangle (v0 top, u0 left, u1 right, v1 bottom)
+ * @param destRect  the screen rectangle to fill (x, y, w, h) before the transform
+ * @param transform  the 3x3 transform applied to every tile's corners
+ * @param colour  the colour (a, r, g, b in 0..1)
  * @param flags  bit 0 mirror horizontally, bit 1 mirror vertically, bit 2 draw the texture turned 90 degrees
  * @param tx  how many times the texture repeats across (may be fractional)
  * @param ty  how many times the texture repeats down (may be fractional)
  */
-extern "C" void func_003A2BC8(sSprite_2BC8* o, sRect_2BC8 r, sMat3_2BC8 m, sColor_2BC8 c, int flags, float tx, float ty)
+extern "C" void func_003A2BC8(sSprite_2BC8* element, sRect_2BC8 destRect, sMat3_2BC8 transform, sColor_2BC8 colour, int flags, float tx, float ty)
 {
     int j;
     float x;
-    int tex = o->tex;
+    int tex = element->tex;
     (GrMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex;
-    float x0 = r.x;
-    float y0 = r.y;
-    float v0 = o->v0;
-    float v1 = o->v1;
-    float u0 = o->u0;
-    float u1 = o->u1;
+    float x0 = destRect.x;
+    float y0 = destRect.y;
+    float topV = element->v0;
+    float bottomV = element->v1;
+    float leftU = element->u0;
+    float rightU = element->u1;
     if (tx <= 0.0f) {
         return;
     }
     if (ty <= 0.0f) {
         return;
     }
-    float w = r.w / tx;
-    float h = r.h / ty;
+    float w = destRect.w / tx;
+    float tileHeight = destRect.h / ty;
     if (flags & 1) {
-        u0 = u1;
-        u1 = o->u0;
+        leftU = rightU;
+        rightU = element->u0;
     }
     if (flags & 2) {
-        v0 = v1;
-        v1 = o->v0;
+        topV = bottomV;
+        bottomV = element->v0;
     }
     int nx = (int)tx;
     float y = y0;
     int ny = (int)ty;
-    sQuadVtx_2BC8 v[4];
+    sQuadVtx_2BC8 quadVerts[4];
     for (int i = 0; i < 4; i++) {
-        sQuadVtx_2BC8* p = &v[i];
-        p->a = (int)(c.a * 128.0f);
-        p->r = (int)(c.r * 255.0f);
-        p->g = (int)(c.g * 255.0f);
-        p->b = (int)(c.b * 255.0f);
-        p->q = 1.0f;
+        sQuadVtx_2BC8* vert = &quadVerts[i];
+        vert->a = (int)(colour.a * 128.0f);
+        vert->r = (int)(colour.r * 255.0f);
+        vert->g = (int)(colour.g * 255.0f);
+        vert->b = (int)(colour.b * 255.0f);
+        vert->q = 1.0f;
     }
     if (ny != 0) {
         for (y = y0, j = 0; j < ny; j++) {
             x = x0;
             if (flags & 4) {
                 for (int i = 0; i < nx; i++) {
-                    sRect_2BC8 dst(x, y, w, h);
-                    sRect_2BC8 uv(u0, v0, u1 - u0, v1 - v0);
-                    func_0038EA60(D_004A28AC_2BC8, v, &dst, &uv, &m);
+                    sRect_2BC8 dst(x, y, w, tileHeight);
+                    sRect_2BC8 uv(leftU, topV, rightU - leftU, bottomV - topV);
+                    func_0038EA60(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
                     x += w;
                 }
                 if ((float)nx != tx) {
-                    sRect_2BC8 dst(x, y, (x0 + r.w) - x, h);
-                    sRect_2BC8 uv(u0, v0, u1 - u0, (v0 + (v1 - v0) * (tx - (float)nx)) - v0);
-                    func_0038EA60(D_004A28AC_2BC8, v, &dst, &uv, &m);
+                    sRect_2BC8 dst(x, y, (x0 + destRect.w) - x, tileHeight);
+                    sRect_2BC8 uv(leftU, topV, rightU - leftU, (topV + (bottomV - topV) * (tx - (float)nx)) - topV);
+                    func_0038EA60(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
                 }
             } else {
                 for (int i = 0; i < nx; i++) {
-                    sRect_2BC8 dst(x, y, w, h);
-                    sRect_2BC8 uv(u0, v0, u1 - u0, v1 - v0);
-                    func_0038E880(D_004A28AC_2BC8, v, &dst, &uv, &m);
+                    sRect_2BC8 dst(x, y, w, tileHeight);
+                    sRect_2BC8 uv(leftU, topV, rightU - leftU, bottomV - topV);
+                    func_0038E880(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
                     x += w;
                 }
                 if ((float)nx != tx) {
-                    sRect_2BC8 dst(x, y, (x0 + r.w) - x, h);
-                    sRect_2BC8 uv(u0, v0, (u0 + (u1 - u0) * (tx - (float)nx)) - u0, v1 - v0);
-                    func_0038E880(D_004A28AC_2BC8, v, &dst, &uv, &m);
+                    sRect_2BC8 dst(x, y, (x0 + destRect.w) - x, tileHeight);
+                    sRect_2BC8 uv(leftU, topV, (leftU + (rightU - leftU) * (tx - (float)nx)) - leftU, bottomV - topV);
+                    func_0038E880(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
                 }
             }
-            y += h;
+            y += tileHeight;
         }
     }
     if ((float)ny != ty) {
         x = x0;
         if (flags & 4) {
-            float u0b = u0 + (u1 - u0) * (1.0f - (ty - (float)ny));
-            float hh = (y0 + r.h) - y;
+            float u0b = leftU + (rightU - leftU) * (1.0f - (ty - (float)ny));
+            float hh = (y0 + destRect.h) - y;
             for (int i = 0; i < nx; i++) {
                 sRect_2BC8 dst(x, y, w, hh);
-                sRect_2BC8 uv(u0b, v0, u1 - u0b, v1 - v0);
-                func_0038EA60(D_004A28AC_2BC8, v, &dst, &uv, &m);
+                sRect_2BC8 uv(u0b, topV, rightU - u0b, bottomV - topV);
+                func_0038EA60(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
                 x += w;
             }
             if ((float)nx != tx) {
-                sRect_2BC8 dst(x, y, (x0 + r.w) - x, hh);
-                sRect_2BC8 uv(u0b, v0, u1 - u0b, (v0 + (v1 - v0) * (tx - (float)nx)) - v0);
-                func_0038EA60(D_004A28AC_2BC8, v, &dst, &uv, &m);
+                sRect_2BC8 dst(x, y, (x0 + destRect.w) - x, hh);
+                sRect_2BC8 uv(u0b, topV, rightU - u0b, (topV + (bottomV - topV) * (tx - (float)nx)) - topV);
+                func_0038EA60(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
             }
         } else {
-            float v1b = v0 + (v1 - v0) * (ty - (float)ny);
-            float hh = (y0 + r.h) - y;
+            float v1b = topV + (bottomV - topV) * (ty - (float)ny);
+            float hh = (y0 + destRect.h) - y;
             for (int i = 0; i < nx; i++) {
                 sRect_2BC8 dst(x, y, w, hh);
-                sRect_2BC8 uv(u0, v0, u1 - u0, v1b - v0);
-                func_0038E880(D_004A28AC_2BC8, v, &dst, &uv, &m);
+                sRect_2BC8 uv(leftU, topV, rightU - leftU, v1b - topV);
+                func_0038E880(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
                 x += w;
             }
             if ((float)nx != tx) {
-                sRect_2BC8 dst(x, y, (x0 + r.w) - x, hh);
-                sRect_2BC8 uv(u0, v0, (u0 + (u1 - u0) * (tx - (float)nx)) - u0, v1b - v0);
-                func_0038E880(D_004A28AC_2BC8, v, &dst, &uv, &m);
+                sRect_2BC8 dst(x, y, (x0 + destRect.w) - x, hh);
+                sRect_2BC8 uv(leftU, topV, (leftU + (rightU - leftU) * (tx - (float)nx)) - leftU, v1b - topV);
+                func_0038E880(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
             }
         }
     }

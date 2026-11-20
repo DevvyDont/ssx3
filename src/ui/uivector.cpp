@@ -4904,22 +4904,22 @@ struct sFlags_6548 {
  *
  * func_003A4900 runs it on mAttr (+0x14).
  *
- * @param f  the tAttrThing (cUIThing + 0x14)
- * @return @p f
+ * @param attrThing  the tAttrThing (cUIThing + 0x14)
+ * @return @p attrThing
  */
-extern "C" sFlags_6548* func_003A6548(sFlags_6548* f)
+extern "C" sFlags_6548* func_003A6548(sFlags_6548* attrThing)
 {
-    f->b0 = 1;
-    f->b7 = 0;
-    f->f8 = 0;
-    f->b5 = 0;
-    f->b4 = 0;
-    f->b2 = 0;
-    f->b1 = 1;
-    f->b3 = 1;
-    f->b6 = 1;
-    f->f13 = 9;
-    return f;
+    attrThing->b0 = 1;
+    attrThing->b7 = 0;
+    attrThing->f8 = 0;
+    attrThing->b5 = 0;
+    attrThing->b4 = 0;
+    attrThing->b2 = 0;
+    attrThing->b1 = 1;
+    attrThing->b3 = 1;
+    attrThing->b6 = 1;
+    attrThing->f13 = 9;
+    return attrThing;
 }
 #endif
 //100%
@@ -5026,12 +5026,12 @@ struct sCount_6618 {
  *
  * func_003A64F8 runs it on mAttrVector (+0x74).
  *
- * @param p  the tAttrVector (cUIVector + 0x74)
+ * @param attrVector  the tAttrVector (cUIVector + 0x74)
  * @return the same address
  */
-extern "C" void* func_003A6618(void* p)
+extern "C" void* func_003A6618(void* attrVector)
 {
-    sCount_6618* self = (sCount_6618*)p;
+    sCount_6618* self = (sCount_6618*)attrVector;
     self->flag = 0;
     self->pad1 = 0;
     self->count = 0;

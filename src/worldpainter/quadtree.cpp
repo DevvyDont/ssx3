@@ -90,13 +90,13 @@ extern "C" void func_002C1A00(void* self, void* node, unsigned short x, unsigned
  * + m_root), the coordinates doubled, 0x8000 / size and the key and data to func_002C1A00, which walks down and splits
  * nodes. Nothing in retail calls it (trees come pre-built from the world-painter data).
  *
- * @param a1  the leaf key to store (the region index)
- * @param a2  the leaf data pointer to store
+ * @param leafKey  the leaf key to store (the region index)
+ * @param leafData  the leaf data pointer to store
  * @param fx  the area's minimum x in world units
  * @param fz  the area's minimum y (the tree's second axis) in world units
  * @param fsize  the area's width in world units
  */
-extern "C" void func_002C1950(cQuadTree* self, int a1, int a2, float fx, float fz, float fsize)
+extern "C" void func_002C1950(cQuadTree* self, int leafKey, int leafData, float fx, float fz, float fsize)
 {
     int x = (int)((fx - self->m_offsetX) * *(float*)self);
     int z = (int)((fz - self->m_offsetY) * *(float*)self);
@@ -105,7 +105,7 @@ extern "C" void func_002C1950(cQuadTree* self, int a1, int a2, float fx, float f
         return;
     }
     int size = 0x8000 / (int)fsize;
-    func_002C1A00(self, (char*)self->m_nodes + self->m_root * 8, (unsigned short)(x << 1), (unsigned short)(z << 1), size, a1, a2);
+    func_002C1A00(self, (char*)self->m_nodes + self->m_root * 8, (unsigned short)(x << 1), (unsigned short)(z << 1), size, leafKey, leafData);
 }
 #endif
 INCLUDE_ASM("worldpainter/quadtree", func_002C1A00);
@@ -423,37 +423,37 @@ extern unsigned short D_00445950[];
  * upper-case and lower-case letters are their range's first code (D_00445940) plus the offset into the range. Any other
  * byte (control characters, 0x7F and above) gives 0. cMemCard_AsciiToShiftJIS calls it per character.
  *
- * @param c  the ASCII character
+ * @param asciiChar  the ASCII character
  * @return the 16-bit Shift-JIS code with its bytes swapped, or 0
  */
-extern "C" short func_002C2338(unsigned char c)
+extern "C" short func_002C2338(unsigned char asciiChar)
 {
     int off = 0;
     int idx = 0;
-    unsigned short v;
+    unsigned short sjisCode;
 
-    if (c >= 0x20 && c <= 47) {
+    if (asciiChar >= 0x20 && asciiChar <= 47) {
         off = 1;
-    } else if (c >= 0x30 && c <= 57) {
-    } else if (c >= 58 && c <= 0x40) {
+    } else if (asciiChar >= 0x30 && asciiChar <= 57) {
+    } else if (asciiChar >= 58 && asciiChar <= 0x40) {
         off = 11;
-    } else if (c >= 65 && c <= 90) {
+    } else if (asciiChar >= 65 && asciiChar <= 90) {
         idx = 1;
-    } else if (c >= 91 && c <= 0x60) {
+    } else if (asciiChar >= 91 && asciiChar <= 0x60) {
         off = 37;
-    } else if (c >= 97 && c <= 122) {
+    } else if (asciiChar >= 97 && asciiChar <= 122) {
         idx = 2;
-    } else if (c >= 123 && c <= 0x7E) {
+    } else if (asciiChar >= 123 && asciiChar <= 0x7E) {
         off = 0x3F;
     } else {
         return 0;
     }
     if (off != 0) {
-        v = D_00445950[(c - 0x20) + 1 - off];
+        sjisCode = D_00445950[(asciiChar - 0x20) + 1 - off];
     } else {
-        v = D_00445940[idx].base + c - D_00445940[idx].first;
+        sjisCode = D_00445940[idx].base + asciiChar - D_00445940[idx].first;
     }
-    return (v << 8) | (v >> 8);
+    return (sjisCode << 8) | (sjisCode >> 8);
 }
 #endif
 
@@ -930,18 +930,18 @@ int* func_002C29D0_impl(int a0, int a1, int size) __asm__("func_002C29D0");
  * creates and starts the thread (CreateThread / StartThread, priority 99) with its id in the rest of the handle. When
  * the stack or the thread cannot be made, everything allocated is freed again.
  *
- * @param a0  the thread's entry function
- * @param a1  the argument passed to the entry function
+ * @param threadEntry  the thread's entry function
+ * @param threadArg  the argument passed to the entry function
  * @param size  the stack size in bytes
  * @return the handle, or 0
  */
-int* func_002C29D0_impl(int a0, int a1, int size)
+int* func_002C29D0_impl(int threadEntry, int threadArg, int size)
 {
     int* thread = (int*)func_002C28C0_29D0(0, 0xC, 0);
     thread[0] = 0;
     thread[0] = func_002C28C0_29D0((int)str_threadstack, size, 0);
     if (thread[0] != 0) {
-        if (func_003E50C8(thread + 1, a0, a1, thread[0], size, 99) == 0) {
+        if (func_003E50C8(thread + 1, threadEntry, threadArg, thread[0], size, 99) == 0) {
             func_002C28F8_29D0(thread[0]);
             thread[0] = 0;
         }
@@ -1025,11 +1025,11 @@ extern "C" void func_003E56E0();
 /**
  * Destroys a mutex made by func_002C2B28: calls func_003E56E0 (DeleteSema), then frees the block with func_002C28F8.
  *
- * @param arg0  the mutex block
+ * @param mutexBlock  the mutex block
  */
-extern "C" void func_002C2B68(int arg0) {
+extern "C" void func_002C2B68(int mutexBlock) {
     func_003E56E0();
-    func_002C28F8(arg0);
+    func_002C28F8(mutexBlock);
 }
 #endif
 //100%
@@ -1519,9 +1519,9 @@ extern "C" void func_002C4210(cPS2MemCard* self)
 {
     char* buf = (char*)self + 0x4C0;
     MEM_fill(buf, 0, 0x1000);
-    int r = func_0040A688(self->mDevice, 0, (char*)self + 0x139, 0, 6, buf);
-    D_004A3940 = r;
-    if (r < 0) {
+    int mcResult = func_0040A688(self->mDevice, 0, (char*)self + 0x139, 0, 6, buf);
+    D_004A3940 = mcResult;
+    if (mcResult < 0) {
         func_002C48C0(self, 1);
     } else {
         func_002C48C0(self, 6);
@@ -1572,9 +1572,9 @@ extern "C" void func_002C42B0(cPS2MemCard* self)
     char* path = (char*)self + 0xF9;
     strcpy(name, (char*)self + self->unk_01C * 0x78 + 0x1B0);
     sprintf(path, str_pct_s_pct_s_h, name, name);
-    int r = func_0040A688(self->mDevice, 0, path, 0, 1, (char*)self + 0x480);
-    D_004A3940 = r;
-    if (r < 0) {
+    int mcResult = func_0040A688(self->mDevice, 0, path, 0, 1, (char*)self + 0x480);
+    D_004A3940 = mcResult;
+    if (mcResult < 0) {
         func_002C48C0(self, 1);
     } else {
         func_002C48C0(self, 35);
@@ -1613,9 +1613,9 @@ extern int D_004A3940;
  */
 extern "C" void func_002C4388(cPS2MemCard* self)
 {
-    int r = func_0040A998(self->mDevice, 0);
-    D_004A3940 = r;
-    if (r < 0) {
+    int mcResult = func_0040A998(self->mDevice, 0);
+    D_004A3940 = mcResult;
+    if (mcResult < 0) {
         func_002C48C0(self, 1);
     } else {
         func_002C48C0(self, 18);
@@ -1816,16 +1816,16 @@ extern char str_pct_s_pct_s_h[];
  * strcpy2), then does what cPS2MemCard_StartFileSlotWrite does (path "/<name>/<name>", buffer, size, state 21).
  *
  * @param wname  the save directory and file name (16-bit characters)
- * @param a2  the data to write
- * @param a3  the number of bytes to write
+ * @param writeBuffer  the data to write
+ * @param writeSize  the number of bytes to write
  */
-extern "C" void cPS2MemCard_StartFileSlotWrite1(cPS2MemCard* self, unsigned short* wname, int a2, int a3)
+extern "C" void cPS2MemCard_StartFileSlotWrite1(cPS2MemCard* self, unsigned short* wname, int writeBuffer, int writeSize)
 {
     char* name = (char*)self + 0xB9;
     strcpy2_impl(name, wname);
     sprintf((char*)self + 0xF9, str_pct_s_pct_s_h, name, name);
-    self->unk_02C = a2;
-    self->unk_020 = a3;
+    self->unk_02C = writeBuffer;
+    self->unk_020 = writeSize;
     func_002C48C0(self, 21);
 }
 #endif
@@ -1846,16 +1846,16 @@ extern char str_pct_s_pct_s_h[];
  * writes the buffer (state 23, sceMcWrite).
  *
  * @param src  the save directory and file name (ASCII; no length check)
- * @param a2  the data to write
- * @param a3  the number of bytes to write
+ * @param writeBuffer  the data to write
+ * @param writeSize  the number of bytes to write
  */
-extern "C" void cPS2MemCard_StartFileSlotWrite(cPS2MemCard* self, const char* src, int a2, int a3)
+extern "C" void cPS2MemCard_StartFileSlotWrite(cPS2MemCard* self, const char* src, int writeBuffer, int writeSize)
 {
     char* name = (char*)self + 0xB9;
     strcpy(name, src);
     sprintf((char*)self + 0xF9, str_pct_s_pct_s_h, name, name);
-    self->unk_02C = a2;
-    self->unk_020 = a3;
+    self->unk_02C = writeBuffer;
+    self->unk_020 = writeSize;
     func_002C48C0(self, 21);
 }
 #endif
@@ -1908,17 +1908,17 @@ extern "C" void func_002C54D0(cPS2MemCard* self, int a1, char* dst);
 
 /**
  * Starts writing a save file into an existing file slot: copies the slot's name into a 64-byte stack buffer
- * (func_002C54D0) and passes it, @p a2 and @p a3 to the card's virtual slot 36 (cPS2MemCard_StartFileSlotWrite).
+ * (func_002C54D0) and passes it, @p writeBuffer and @p writeSize to the card's virtual slot 36 (cPS2MemCard_StartFileSlotWrite).
  *
- * @param a1  the file slot index (0 .. mMaxFiles - 1; not checked)
- * @param a2  the data to write
- * @param a3  the number of bytes to write
+ * @param fileSlot  the file slot index (0 .. mMaxFiles - 1; not checked)
+ * @param writeBuffer  the data to write
+ * @param writeSize  the number of bytes to write
  */
-extern "C" void cPS2MemCard_StartFileSlotWrite2(cPS2MemCard* self, int a1, int a2, int a3)
+extern "C" void cPS2MemCard_StartFileSlotWrite2(cPS2MemCard* self, int fileSlot, int writeBuffer, int writeSize)
 {
     char name[64];
-    func_002C54D0(self, a1, name);
-    ((cPS2MemCard_StartFileSlotWrite2_cObj*)self)->v36(name, a2, a3);
+    func_002C54D0(self, fileSlot, name);
+    ((cPS2MemCard_StartFileSlotWrite2_cObj*)self)->v36(name, writeBuffer, writeSize);
 }
 #endif
 
@@ -2000,16 +2000,16 @@ extern char str_pct_s_pct_s_h[];
  * cPS2MemCard_StartFileSlotRead calls it with a file slot's name.
  *
  * @param src  the save directory and file name (ASCII; no length check)
- * @param a2  the buffer to read into
- * @param a3  the number of bytes to read
+ * @param readBuffer  the buffer to read into
+ * @param readSize  the number of bytes to read
  */
-extern "C" void func_002C4788(cPS2MemCard* self, char* src, int a2, int a3)
+extern "C" void func_002C4788(cPS2MemCard* self, char* src, int readBuffer, int readSize)
 {
     char* name = (char*)self + 0xB9;
     strcpy(name, src);
     sprintf((char*)self + 0xF9, str_pct_s_pct_s_h, name, name);
-    self->unk_02C = a2;
-    self->unk_020 = a3;
+    self->unk_02C = readBuffer;
+    self->unk_020 = readSize;
     func_002C48C0(self, 27);
 }
 #endif
@@ -2208,9 +2208,9 @@ extern "C" void* func_002C48C0(cPS2MemCard* vself, int state)
             I_48C0(0x30) = 0;
         }
         if (I_48C0(0x18) >= 0) {
-            int r = func_00409E70(I_48C0(0x18));
-            D_004A3940 = r;
-            if (r >= 0) {
+            int mcResult = func_00409E70(I_48C0(0x18));
+            D_004A3940 = mcResult;
+            if (mcResult >= 0) {
                 func_002C48C0((cPS2MemCard*)self, 2);
             }
             I_48C0(0x18) = -1;
@@ -2225,19 +2225,19 @@ extern "C" void* func_002C48C0(cPS2MemCard* vself, int state)
         break;
     case 36: {
         I_48C0(72) = 0;
-        int r = func_00409E38(I_48C0(0xC), 0, S_48C0(249));
-        D_004A3940 = r;
-        if (r < 0)
+        int mcResult = func_00409E38(I_48C0(0xC), 0, S_48C0(249));
+        D_004A3940 = mcResult;
+        if (mcResult < 0)
             func_002C48C0((cPS2MemCard*)self, 1);
         break;
     }
     case 37: {
         char* path = S_48C0(121);
         sprintf(path, str_pct_s_pct_s_i, S_48C0(249), str_icon_sys);
-        int r = func_00409D10(I_48C0(0xC), 0, path, 515);
-        D_004A3940 = r;
+        int mcResult = func_00409D10(I_48C0(0xC), 0, path, 515);
+        D_004A3940 = mcResult;
         I_48C0(0x18) = -1;
-        if (r < 0)
+        if (mcResult < 0)
             func_002C48C0((cPS2MemCard*)self, 1);
         break;
     }
@@ -2258,16 +2258,16 @@ extern "C" void* func_002C48C0(cPS2MemCard* vself, int state)
         strcpy(D_005376F8.fnameView, D_004459F0[0]);
         strcpy(D_005376F8.fnameCopy, D_004459F0[1]);
         strcpy(D_005376F8.fnameDel, D_004459F0[2]);
-        int r = func_0040A1A8(I_48C0(0x18), (int)&D_005376F8, 964);
-        D_004A3940 = r;
-        if (r < 0)
+        int mcResult = func_0040A1A8(I_48C0(0x18), (int)&D_005376F8, 964);
+        D_004A3940 = mcResult;
+        if (mcResult < 0)
             func_002C48C0((cPS2MemCard*)self, 1);
         break;
     }
     case 39: {
-        int r = func_00409E70(I_48C0(0x18));
-        D_004A3940 = r;
-        if (r < 0) {
+        int mcResult = func_00409E70(I_48C0(0x18));
+        D_004A3940 = mcResult;
+        if (mcResult < 0) {
             I_48C0(0x18) = -1;
             func_002C48C0((cPS2MemCard*)self, 1);
         } else {
@@ -2290,9 +2290,9 @@ extern "C" void* func_002C48C0(cPS2MemCard* vself, int state)
         int slot = slotOf_48C0(I_48C0(0x4), 45, 49);
         char* path = S_48C0(121);
         sprintf(path, str_pct_s_pct_s_h, S_48C0(185), D_004459F0[slot]);
-        int r = func_00409D10(I_48C0(0xC), 0, path, 515);
-        D_004A3940 = r;
-        if (r < 0) {
+        int mcResult = func_00409D10(I_48C0(0xC), 0, path, 515);
+        D_004A3940 = mcResult;
+        if (mcResult < 0) {
             I_48C0(0x18) = -1;
             func_002C48C0((cPS2MemCard*)self, 1);
         } else {
@@ -2301,9 +2301,9 @@ extern "C" void* func_002C48C0(cPS2MemCard* vself, int state)
         break;
     }
     case 42: case 46: case 50: {
-        int r = func_0040A1A8(I_48C0(0x18), I_48C0(0x30), I_48C0(52));
-        D_004A3940 = r;
-        if (r < 0)
+        int mcResult = func_0040A1A8(I_48C0(0x18), I_48C0(0x30), I_48C0(52));
+        D_004A3940 = mcResult;
+        if (mcResult < 0)
             func_002C48C0((cPS2MemCard*)self, 1);
         break;
     }
@@ -2312,9 +2312,9 @@ extern "C" void* func_002C48C0(cPS2MemCard* vself, int state)
             MEM_free(*(void**)S_48C0(0x30));
             I_48C0(0x30) = 0;
         }
-        int r = func_00409E70(I_48C0(0x18));
-        D_004A3940 = r;
-        if (r < 0) {
+        int mcResult = func_00409E70(I_48C0(0x18));
+        D_004A3940 = mcResult;
+        if (mcResult < 0) {
             I_48C0(0x18) = -1;
             func_002C48C0((cPS2MemCard*)self, 1);
         } else {
@@ -2323,9 +2323,9 @@ extern "C" void* func_002C48C0(cPS2MemCard* vself, int state)
         break;
     }
     case 22: {
-        int r = func_00409D10(I_48C0(0xC), 0, S_48C0(249), 515);
-        D_004A3940 = r;
-        if (r < 0) {
+        int mcResult = func_00409D10(I_48C0(0xC), 0, S_48C0(249), 515);
+        D_004A3940 = mcResult;
+        if (mcResult < 0) {
             I_48C0(0x18) = -1;
             func_002C48C0((cPS2MemCard*)self, 1);
         } else {
@@ -2334,19 +2334,19 @@ extern "C" void* func_002C48C0(cPS2MemCard* vself, int state)
         break;
     }
     case 23: {
-        int r = func_0040A1A8(I_48C0(0x18), I_48C0(44), I_48C0(0x20));
-        D_004A3940 = r;
+        int mcResult = func_0040A1A8(I_48C0(0x18), I_48C0(44), I_48C0(0x20));
+        D_004A3940 = mcResult;
         I_48C0(44) = 0;
         I_48C0(0x20) = 0;
-        if (r < 0)
+        if (mcResult < 0)
             func_002C48C0((cPS2MemCard*)self, 1);
         break;
     }
     case 0x18:
         if (I_48C0(0x18) >= 0) {
-            int r = func_00409E70(I_48C0(0x18));
-            D_004A3940 = r;
-            if (r < 0) {
+            int mcResult = func_00409E70(I_48C0(0x18));
+            D_004A3940 = mcResult;
+            if (mcResult < 0) {
                 I_48C0(0x18) = -1;
                 func_002C48C0((cPS2MemCard*)self, 1);
             } else {
@@ -2358,25 +2358,25 @@ extern "C" void* func_002C48C0(cPS2MemCard* vself, int state)
         break;
     case 0x1C: {
         I_48C0(68) = 0;
-        int r = func_00409D10(I_48C0(0xC), 0, S_48C0(249), 1);
-        D_004A3940 = r;
+        int mcResult = func_00409D10(I_48C0(0xC), 0, S_48C0(249), 1);
+        D_004A3940 = mcResult;
         I_48C0(0x18) = -1;
-        if (r != 0)
+        if (mcResult != 0)
             func_002C48C0((cPS2MemCard*)self, 1);
         break;
     }
     case 29: {
-        int r = func_0040A090(I_48C0(0x18), I_48C0(44), I_48C0(0x20));
-        D_004A3940 = r;
-        if (r != 0)
+        int mcResult = func_0040A090(I_48C0(0x18), I_48C0(44), I_48C0(0x20));
+        D_004A3940 = mcResult;
+        if (mcResult != 0)
             func_002C48C0((cPS2MemCard*)self, 1);
         break;
     }
     case 0x1E:
         if (I_48C0(0x18) >= 0) {
-            int r = func_00409E70(I_48C0(0x18));
-            D_004A3940 = r;
-            if (r < 0) {
+            int mcResult = func_00409E70(I_48C0(0x18));
+            D_004A3940 = mcResult;
+            if (mcResult < 0) {
                 I_48C0(0x18) = -1;
                 func_002C48C0((cPS2MemCard*)self, 1);
             } else {
@@ -2388,9 +2388,9 @@ extern "C" void* func_002C48C0(cPS2MemCard* vself, int state)
         break;
     case 54: {
         *(int*)((char*)self + I_48C0(0xC) * 0x14 + 0x184) = 0;
-        int r = func_0040AA68(I_48C0(0xC), 0, S_48C0(249));
-        D_004A3940 = r;
-        if (r < 0)
+        int mcResult = func_0040AA68(I_48C0(0xC), 0, S_48C0(249));
+        D_004A3940 = mcResult;
+        if (mcResult < 0)
             func_002C48C0((cPS2MemCard*)self, 1);
         break;
     }
@@ -2398,25 +2398,25 @@ extern "C" void* func_002C48C0(cPS2MemCard* vself, int state)
         int slot = slotOf_48C0(I_48C0(0x4), 0x38, 57);
         char* path = S_48C0(121);
         sprintf(path, str_pct_s_pct_s_h, S_48C0(185), D_004459F0[slot]);
-        int r = func_0040AA68(I_48C0(0xC), 0, path);
-        D_004A3940 = r;
-        if (r < 0)
+        int mcResult = func_0040AA68(I_48C0(0xC), 0, path);
+        D_004A3940 = mcResult;
+        if (mcResult < 0)
             func_002C48C0((cPS2MemCard*)self, 1);
         break;
     }
     case 58: {
         char* path = S_48C0(121);
         sprintf(path, str_pct_s_pct_s_h, S_48C0(185), str_icon_sys);
-        int r = func_0040AA68(I_48C0(0xC), 0, path);
-        D_004A3940 = r;
-        if (r < 0)
+        int mcResult = func_0040AA68(I_48C0(0xC), 0, path);
+        D_004A3940 = mcResult;
+        if (mcResult < 0)
             func_002C48C0((cPS2MemCard*)self, 1);
         break;
     }
     case 59: {
-        int r = func_0040AA68(I_48C0(0xC), 0, S_48C0(185));
-        D_004A3940 = r;
-        if (r < 0)
+        int mcResult = func_0040AA68(I_48C0(0xC), 0, S_48C0(185));
+        D_004A3940 = mcResult;
+        if (mcResult < 0)
             func_002C48C0((cPS2MemCard*)self, 1);
         break;
     }
@@ -2430,9 +2430,9 @@ extern "C" void* func_002C48C0(cPS2MemCard* vself, int state)
         }
         break;
     case 8: {
-        int r = func_00409D10(I_48C0(0xC), 0, S_48C0(121), 1);
-        D_004A3940 = r;
-        if (r < 0) {
+        int mcResult = func_00409D10(I_48C0(0xC), 0, S_48C0(121), 1);
+        D_004A3940 = mcResult;
+        if (mcResult < 0) {
             I_48C0(0x18) = -1;
             func_002C5570((cPS2MemCard*)self, I_48C0(40));
             func_002C48C0((cPS2MemCard*)self, 0x10);
@@ -2442,18 +2442,18 @@ extern "C" void* func_002C48C0(cPS2MemCard* vself, int state)
         break;
     }
     case 10: {
-        int r = func_0040A090(I_48C0(0x18), (int)&D_005376F8, 964);
-        D_004A3940 = r;
-        if (r < 0) {
+        int mcResult = func_0040A090(I_48C0(0x18), (int)&D_005376F8, 964);
+        D_004A3940 = mcResult;
+        if (mcResult < 0) {
             func_002C5570((cPS2MemCard*)self, I_48C0(40));
             func_002C48C0((cPS2MemCard*)self, 0xF);
         }
         break;
     }
     case 9: {
-        int r = func_00409E70(I_48C0(0x18));
-        D_004A3940 = r;
-        if (r < 0) {
+        int mcResult = func_00409E70(I_48C0(0x18));
+        D_004A3940 = mcResult;
+        if (mcResult < 0) {
             func_002C48C0((cPS2MemCard*)self, 0x10);
         } else {
             I_48C0(0x18) = -1;
@@ -2467,9 +2467,9 @@ extern "C" void* func_002C48C0(cPS2MemCard* vself, int state)
         char* name = (char*)self + I_48C0(0x28) * 0x78 + 0x1B0;
         sprintf(path, str_pct_s_pct_s_h, name, name);
         MEM_fill(buf, 0, 0x40);
-        int r = func_0040A688(I_48C0(0xC), 0, path, 0, 1, buf);
-        D_004A3940 = r;
-        if (r < 0)
+        int mcResult = func_0040A688(I_48C0(0xC), 0, path, 0, 1, buf);
+        D_004A3940 = mcResult;
+        if (mcResult < 0)
             func_002C48C0((cPS2MemCard*)self, 0x10);
         break;
     }
@@ -2479,16 +2479,16 @@ extern "C" void* func_002C48C0(cPS2MemCard* vself, int state)
         char* buf = S_48C0(1152);
         sprintf(path, str_pct_s_pct_s_h, (char*)self + I_48C0(0x28) * 0x78 + 0x1B0, D_004459F0[slot]);
         MEM_fill(buf, 0, 0x40);
-        int r = func_0040A688(I_48C0(0xC), 0, path, 0, 1, buf);
-        D_004A3940 = r;
-        if (r < 0)
+        int mcResult = func_0040A688(I_48C0(0xC), 0, path, 0, 1, buf);
+        D_004A3940 = mcResult;
+        if (mcResult < 0)
             func_002C48C0((cPS2MemCard*)self, 0x10);
         break;
     }
     case 0xF: {
-        int r = func_00409E70(I_48C0(0x18));
-        D_004A3940 = r;
-        if (r < 0) {
+        int mcResult = func_00409E70(I_48C0(0x18));
+        D_004A3940 = mcResult;
+        if (mcResult < 0) {
             I_48C0(0x18) = -1;
             func_002C48C0((cPS2MemCard*)self, 0x10);
         } else {
@@ -2527,13 +2527,13 @@ extern "C" int func_002C50E0(cPS2MemCard* self)
 {
     D_004A3938 = 0;
     self->unk_020 = 0;
-    int h = self->mDevice;
+    int devicePort = self->mDevice;
     D_004A3944 = 0;
     D_004A393C = 0;
-    int r = func_0040A498(h, 0, &D_004A3938, &D_004A393C, &D_004A3944) == 0;
-    self->unk_040 = r;
+    int syncPending = func_0040A498(devicePort, 0, &D_004A3938, &D_004A393C, &D_004A3944) == 0;
+    self->unk_040 = syncPending;
     self->unk_04C = 5;
-    return r;
+    return syncPending;
 }
 #endif
 
@@ -2852,11 +2852,11 @@ extern "C" void func_002C53E0(sQT_53E0* self, int idx, unsigned short* dst)
         break;
     case 0: {
         // PORT: g++ `>?` (max) operator, removed in GCC 4.3.
-        int v = cPS2MemCard_GetFreeSpace1_i(self, idx) >? 0;
+        int freeClusters = cPS2MemCard_GetFreeSpace1_i(self, idx) >? 0;
         char* obj = (char*)SSXApp->FELocale;
         func_002C53E0_sVEntry* vt = *(func_002C53E0_sVEntry**)(obj + 4);
         char* thisp = obj + vt[4].delta;
-        sprintf1(dst, vt[4].fn(thisp, GetHashValue32(str_kT_MEMFreePS2)), v);
+        sprintf1(dst, vt[4].fn(thisp, GetHashValue32(str_kT_MEMFreePS2)), freeClusters);
         break;
     }
     default:
@@ -4221,9 +4221,9 @@ extern "C" void func_002C6848(cPS2MemCard* self)
 {
     char* buf = (char*)self + 0x4C0;
     MEM_fill(buf, 0, 0x1000);
-    int r = func_0040A688(self->mDevice, 0, (char*)self + 0x139, 0, 0x40, buf);
-    D_004A3940 = r;
-    if (r < 0) {
+    int mcResult = func_0040A688(self->mDevice, 0, (char*)self + 0x139, 0, 0x40, buf);
+    D_004A3940 = mcResult;
+    if (mcResult < 0) {
         func_002C48C0(self, 1);
     } else {
         func_002C48C0(self, 61);
@@ -4294,11 +4294,11 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C6968);
  * descriptor in mFileDescriptor.
  *
  * @param name  the file path (ASCII; no length check)
- * @param a2  the sceMcOpen mode flags
+ * @param openMode  the sceMcOpen mode flags
  */
-extern "C" void func_002C6968(cPS2MemCard* self, const char* name, int a2)
+extern "C" void func_002C6968(cPS2MemCard* self, const char* name, int openMode)
 {
-    self->unk_14E0 = a2;
+    self->unk_14E0 = openMode;
     strcpy((char*)self + 0xF9, name);
     func_002C48C0(self, 0x3F);
 }
@@ -4320,9 +4320,9 @@ extern int D_004A3940;
 extern "C" void func_002C69A0(cPS2MemCard* self)
 {
     self->mFileDescriptor = -1;
-    int r = func_00409D10(self->mDevice, 0, (char*)self + 0xF9, self->unk_14E0);
-    D_004A3940 = r;
-    if (r < 0) {
+    int mcResult = func_00409D10(self->mDevice, 0, (char*)self + 0xF9, self->unk_14E0);
+    D_004A3940 = mcResult;
+    if (mcResult < 0) {
         func_002C48C0(self, 1);
     } else {
         func_002C48C0(self, 0x40);
@@ -4398,9 +4398,9 @@ extern int D_004A3940;
  */
 extern "C" void func_002C6A88(cPS2MemCard* self)
 {
-    int r = func_00409F28(self->mFileDescriptor, self->unk_14E4, self->unk_14E8);
-    D_004A3940 = r;
-    if (r < 0) {
+    int mcResult = func_00409F28(self->mFileDescriptor, self->unk_14E4, self->unk_14E8);
+    D_004A3940 = mcResult;
+    if (mcResult < 0) {
         func_002C48C0(self, 1);
     } else {
         func_002C48C0(self, 66);
@@ -4436,9 +4436,9 @@ extern int D_004A3940;
  */
 extern "C" void func_002C6B00(cPS2MemCard* self)
 {
-    int r = func_0040AB80(self->mFileDescriptor);
-    D_004A3940 = r;
-    if (r < 0) {
+    int mcResult = func_0040AB80(self->mFileDescriptor);
+    D_004A3940 = mcResult;
+    if (mcResult < 0) {
         func_002C48C0(self, 1);
     } else {
         func_002C48C0(self, 72);
@@ -4480,9 +4480,9 @@ extern int D_004A3940;
  */
 extern "C" void func_002C6B78(cPS2MemCard* self)
 {
-    int r = func_0040A090(self->mFileDescriptor, self->unk_02C, self->unk_024);
-    D_004A3940 = r;
-    if (r < 0) {
+    int mcResult = func_0040A090(self->mFileDescriptor, self->unk_02C, self->unk_024);
+    D_004A3940 = mcResult;
+    if (mcResult < 0) {
         func_002C48C0(self, 1);
     } else {
         func_002C48C0(self, 68);
@@ -4524,9 +4524,9 @@ extern int D_004A3940;
  */
 extern "C" void func_002C6BF8(cPS2MemCard* self)
 {
-    int r = func_0040A1A8(self->mFileDescriptor, self->unk_02C, self->unk_024);
-    D_004A3940 = r;
-    if (r < 0) {
+    int mcResult = func_0040A1A8(self->mFileDescriptor, self->unk_02C, self->unk_024);
+    D_004A3940 = mcResult;
+    if (mcResult < 0) {
         func_002C48C0(self, 1);
     } else {
         func_002C48C0(self, 70);
@@ -4538,15 +4538,15 @@ extern "C" void func_002C6BF8(cPS2MemCard* self)
 INCLUDE_ASM("worldpainter/quadtree", func_002C6C50);
 #ifdef SKIP_ASM
 /**
- * Starts creating a directory: stores @p a2 in unk_020, copies @p name into the path (unk_0F9) and calls func_002C48C0
+ * Starts creating a directory: stores @p requestValue in unk_020, copies @p name into the path (unk_0F9) and calls func_002C48C0
  * with state 75; cPS2MemCard_Update then runs func_002C6C88 (sceMcMkdir). The mkdir does not use unk_020.
  *
  * @param name  the directory path (ASCII; no length check)
- * @param a2  the value stored in unk_020
+ * @param requestValue  the value stored in unk_020
  */
-extern "C" void func_002C6C50(cPS2MemCard* self, const char* name, int a2)
+extern "C" void func_002C6C50(cPS2MemCard* self, const char* name, int requestValue)
 {
-    self->unk_020 = a2;
+    self->unk_020 = requestValue;
     strcpy((char*)self + 0xF9, name);
     func_002C48C0(self, 75);
 }
@@ -4566,9 +4566,9 @@ extern int D_004A3940;
  */
 extern "C" void func_002C6C88(cPS2MemCard* self)
 {
-    int r = func_00409E38(self->mDevice, 0, (char*)self + 0xF9);
-    D_004A3940 = r;
-    if (r < 0) {
+    int mcResult = func_00409E38(self->mDevice, 0, (char*)self + 0xF9);
+    D_004A3940 = mcResult;
+    if (mcResult < 0) {
         func_002C48C0(self, 1);
     } else {
         func_002C48C0(self, 76);
@@ -4606,9 +4606,9 @@ extern int D_004A3940;
  */
 extern "C" void func_002C6D18(cPS2MemCard* self)
 {
-    int r = func_0040AA68(self->mDevice, 0, (char*)self + 0xF9);
-    D_004A3940 = r;
-    if (r < 0) {
+    int mcResult = func_0040AA68(self->mDevice, 0, (char*)self + 0xF9);
+    D_004A3940 = mcResult;
+    if (mcResult < 0) {
         func_002C48C0(self, 1);
     } else {
         func_002C48C0(self, 78);

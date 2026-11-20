@@ -342,11 +342,11 @@ extern "C" const char* func_00195EB8(func_00195EB8_sLocale* self, int key)
 {
     if (self->useDefault == 0) {
         for (signed char i = 0; i < 20; i++) {
-            signed char* f = self->files[i];
-            if (f != 0 && *f == self->lang) {
-                const char* s = func_002C6DE0(f, key);
-                if (s != 0) {
-                    return s;
+            signed char* localeFile = self->files[i];
+            if (localeFile != 0 && *localeFile == self->lang) {
+                const char* foundString = func_002C6DE0(localeFile, key);
+                if (foundString != 0) {
+                    return foundString;
                 }
             }
         }
@@ -374,16 +374,16 @@ struct func_00195F70_sArr {
  *
  * Unlike func_00195EB8 it does not check the files' language. Locale vtable slot 5.
  *
- * @param arg  the string index
+ * @param stringIndex  the string index
  * @return the string, or 0
  */
-extern "C" void* func_00195F70(void* self, void* arg)
+extern "C" void* func_00195F70(void* self, void* stringIndex)
 {
     func_00195F70_sArr* arr = (func_00195F70_sArr*)((char*)self + 8);
     signed char i;
     for (i = 0; i < 20; i++) {
         if (arr->items[i] != 0) {
-            void* found = func_002C6DC0_2(arr->items[i], arg);
+            void* found = func_002C6DC0_2(arr->items[i], stringIndex);
             if (found != 0) {
                 return found;
             }
