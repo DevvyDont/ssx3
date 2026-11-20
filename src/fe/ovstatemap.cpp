@@ -1475,7 +1475,7 @@ extern "C" void* cBXString_Concat(void* self, const char* str);
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void cUITextScroll_addAsciiString(void* text, char* str);
 extern "C" void func_001A83D8(void* list, int keep, unsigned int sel, int a3, int pos, int a5, int a6, int trim);
-extern "C" int func_00258160(int a, char* name, int len);
+extern "C" int cGameComm_getQueuedChat(int a, char* name, int len);
 extern char str_helptext_b[];
 extern char str_helptexts[];
 extern char str_textScrollChat_b[];
@@ -1503,14 +1503,14 @@ static inline void show_A4E0(char* o, int on)
  * Prints an incoming in-race chat message on an in-game state's screen.
  *
  * Only online (the first word of cBENetworkInterface_networkOpt set) with a screen and a connected cGameComm. When a
- * chat packet is queued (func_00258160 into mszChatBuff), hides "helptext" and "helptexts" and shows "textScrollChat"
+ * chat packet is queued (cGameComm_getQueuedChat into mszChatBuff), hides "helptext" and "helptexts" and shows "textScrollChat"
  * with "<opponent's name>: <message>" (the name from the network options + 0x498), scrolled by func_001A83D8 from the
  * scroll's counters at +0xC4/+0xC6/+0xC8. The 0x41 size passed for the 0x40-byte buffer is not checked by
  * cGameComm_readPacket, which copies the whole payload (up to 236 bytes).
  *
  * @return 1 when a chat message was shown, else 0 (On Tour returns bool)
  */
-// PORT: the session pointer is passed through func_00258160's int parameter.
+// PORT: the session pointer is passed through cGameComm_getQueuedChat's int parameter.
 extern "C" int cOVState_onUpdate_HandleIncomingChat(cOVState* self)
 {
     int ret = 0;
@@ -1520,7 +1520,7 @@ extern "C" int cOVState_onUpdate_HandleIncomingChat(cOVState* self)
         cGameComm* sess = cGameComm_mGameComm;
         if (sess != 0 && sess->mConnected != 0) {
             char* name = ((char*)self) + 0x58;
-            if (func_00258160((int)sess, name, 65) != 0) {
+            if (cGameComm_getQueuedChat((int)sess, name, 65) != 0) {
                 char* helpText = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_b));
                 if (helpText != 0)
                     show_A4E0(helpText, 0);

@@ -51,7 +51,7 @@ enum tGameComm {
 struct tGameCommPacket {
     unsigned char mType;         // 0x00 [O] tGameCommHeader::mType; [U] the queue it goes to (mReadQueue[mType]):
                                  //      0 input samples (cInputSync), 1 chat (sendChat cGameComm_sendChat, getQueuedChat
-                                 //      func_00258160), 2 BE sync data (asyncRead/asyncWrite), 3 commands (tGameCmdPacket)
+                                 //      cGameComm_getQueuedChat), 2 BE sync data (asyncRead/asyncWrite), 3 commands (tGameCmdPacket)
     unsigned char mPlayerID;     // 0x01 [O]; [U] writePacket (cGameComm_writePacket) stores 0
     unsigned short mSize;        // 0x02 [O]; [U] the packet size including this header (writePacket: len + 4)
     unsigned char mData[236];    // 0x04 [O]; [U] payload (writePacket copies len bytes)

@@ -1696,14 +1696,14 @@ extern "C" void func_00210940(void* self)
 INCLUDE_ASM("fe/ovstatetrophy", func_00210B58);
 #ifdef SKIP_ASM
 extern char D_004A2560[];
-extern "C" int func_00258160(int a, char* name, int len);
+extern "C" int cGameComm_getQueuedChat(int a, char* name, int len);
 extern "C" void func_00210BD8(void* self, char* name, int a);
 extern "C" void func_00210F40(void* self, int a1, int a2, int a3, int a4, int a5, int a6);
 
 /**
  * Starts the chat overlay: on the first transition it shows a waiting incoming message, or else opens the keyboard.
  *
- * When @p ok is set it reads an incoming chat packet into the buffer at +0x9C (func_00258160, up to 65 bytes) and
+ * When @p ok is set it reads an incoming chat packet into the buffer at +0x9C (cGameComm_getQueuedChat, up to 65 bytes) and
  * appends it as the opponent's line (func_00210BD8); without one it opens the keyboard (func_00210F40 with empty texts
  * and a 61-character limit).
  *
@@ -1716,7 +1716,7 @@ extern "C" int func_00210B58(void* self, int ok)
 {
     if (ok != 0) {
         char* name = (char*)self + 0x9C;
-        if (func_00258160((int)cGameComm_mGameComm, name, 65) != 0) {
+        if (cGameComm_getQueuedChat((int)cGameComm_mGameComm, name, 65) != 0) {
             func_00210BD8(self, name, 0);
         } else {
             // PORT: func_00210F40's unit definition takes these string pointers as int.
@@ -1796,7 +1796,7 @@ INCLUDE_ASM("fe/ovstatetrophy", func_00210D20);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cOVState_onUpdate(void* self);
 extern "C" void* cUIStateStack_popToState(void* list);
-extern "C" int func_00258160(int a, char* name, int len);
+extern "C" int cGameComm_getQueuedChat(int a, char* name, int len);
 extern "C" void func_00210BD8(void* self, char* name, int a);
 
 /**
@@ -1804,7 +1804,7 @@ extern "C" void func_00210BD8(void* self, char* name, int a);
  *
  * After cOVState_onUpdate, if cGameComm_mGameComm exists and its mPauseTimeout or mOverlayTimeout has reached 0, it
  * closes the engine's popups (cUIStateStack_popToState on the state stack) and sets this state's mAttrState to mode 7 with
- * mPendingDelete. While the screen exists it then reads an incoming chat packet into +0x9C (func_00258160, up to 65
+ * mPendingDelete. While the screen exists it then reads an incoming chat packet into +0x9C (cGameComm_getQueuedChat, up to 65
  * bytes) and appends it as the opponent's line (func_00210BD8).
  */
 extern "C" void func_00210D20(void* self)
@@ -1820,7 +1820,7 @@ extern "C" void func_00210D20(void* self)
     }
     if (*(int*)((char*)self + 0x40) != 0) {
         char* name = (char*)self + 0x9C;
-        if (func_00258160((int)cGameComm_mGameComm, name, 65) != 0) {
+        if (cGameComm_getQueuedChat((int)cGameComm_mGameComm, name, 65) != 0) {
             func_00210BD8(self, name, 0);
         }
     }
@@ -1863,7 +1863,7 @@ extern "C" int strlen(const char* s);
  * Ignored without a screen. Event 6, while no keyboard is open, pops the top state (cUIStateStack_pop on the engine's
  * stack) and sets this state's mAttrState to mode 7 with mPendingDelete. Event 5, while no keyboard is open, opens the
  * keyboard (func_00210F40, empty texts, 61 characters) and calls cKeyboardPopup_setIncludeKey(75, 1, 2) on it. Event 13
- * first shows any incoming message (func_00258160, func_00210BD8), then sends the keyboard's mszEditString (+0x74) when
+ * first shows any incoming message (cGameComm_getQueuedChat, func_00210BD8), then sends the keyboard's mszEditString (+0x74) when
  * it is not empty (cGameComm_sendChat on cGameComm_mGameComm) and appends it as our own line. Other events go to
  * cOVState_onWidgetEvent. Event 13 reads the keyboard at +0xE0 without checking that one is open.
  *
@@ -1891,7 +1891,7 @@ extern "C" void func_00210DF0(void* self, void* item, unsigned int key)
         break;
     case 13: {
         char* name = (char*)self + 0x9C;
-        if (func_00258160((int)cGameComm_mGameComm, name, 65) != 0) {
+        if (cGameComm_getQueuedChat((int)cGameComm_mGameComm, name, 65) != 0) {
             func_00210BD8(self, name, 0);
         }
         char* typedText = *(char**)((char*)self + 0xE0) + 0x74;

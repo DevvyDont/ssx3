@@ -2614,7 +2614,7 @@ extern "C" void cGameComm_updateCmdQueue(sGameComm_7F98* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("seg/seg_156860", func_00258160);
+INCLUDE_ASM("seg/seg_156860", cGameComm_getQueuedChat);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cGameComm_readPacket_8160(int, int, int, int) __asm__("cGameComm_readPacket");
@@ -2629,7 +2629,7 @@ extern "C" int cGameComm_readPacket_8160(int, int, int, int) __asm__("cGameComm_
  * @param maxSize  its size
  * @return 1 when a message was read, else 0
  */
-extern "C" int func_00258160(int gameComm, int data, int maxSize) {
+extern "C" int cGameComm_getQueuedChat(int gameComm, int data, int maxSize) {
     return cGameComm_readPacket_8160(gameComm, 1, data, maxSize) > 0;
 }
 #endif
@@ -3324,7 +3324,7 @@ extern "C" int strlen(int);
  * Sends a text message to the peer (a packet of type 1 with the terminating zero), when there is no error and the link
  * is connected.
  *
- * The trophy screen's chat sends with it; func_00258160 reads these.
+ * The trophy screen's chat sends with it; cGameComm_getQueuedChat reads these.
  *
  * @param gameComm  the game link
  * @param message  the text

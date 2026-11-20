@@ -6485,7 +6485,7 @@ cSSXAudio_GetAudioUpdateState = 0x002BADC8; //type:func
 cWorldPainterLayer_getQuadTreeContents = 0x002BAF90; //type:func
 cWorldPainterMan_load1 = 0x002BB348; //type:func
 cWorldPainterSection_cWorldPainterSection = 0x002BB370; //type:func
-cWorldPainterSection_load = 0x002BB570; //type:func
+cWorldPainterSection_load1 = 0x002BB570; //type:func
 cWorldPainterSection_unload = 0x002BB5A8; //type:func
 cWorldPainterSection_resolve = 0x002BB5F0; //type:func
 cWorldPainterMan_render = 0x002BB6E0; //type:func
@@ -10711,6 +10711,11 @@ cGameComm_sendChat = 0x00258C50; //type:func
 cWorldPainterMan_load = 0x002BB318; //type:func
 cWorldPainterSection_update = 0x002BB3F0; //type:func
 cPS2ExecutionMan__cPS2ExecutionMan = 0x00320AD8; //type:func
+
+// fn_namesg: names by evidence (docs/function_names.tsv)
+cAI_hasRaceStarted = 0x0012A240; //type:func
+cGameComm_getQueuedChat = 0x00258160; //type:func
+cWorldPainterSection_load = 0x002BB4D8; //type:func
 
 // Spreadsheet Auto Generation
 

@@ -1237,7 +1237,7 @@ extern "C" int func_0012A1F0(cAI* self, int idx)
 }
 #endif
 //100%
-INCLUDE_ASM("ai/ai", func_0012A240);
+INCLUDE_ASM("ai/ai", cAI_hasRaceStarted);
 #ifdef SKIP_ASM
 /**
  * Returns whether the AI's CurrentAIState (the first word of @p aiMan) is 5, On Tour's AIS_Race.
@@ -1247,7 +1247,7 @@ INCLUDE_ASM("ai/ai", func_0012A240);
  * @param aiMan  the cAI
  * @return 1 while racing, else 0
  */
-extern "C" int func_0012A240(int *aiMan) {
+extern "C" int cAI_hasRaceStarted(int *aiMan) {
     return *aiMan == 5;
 }
 #endif

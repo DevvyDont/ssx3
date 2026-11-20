@@ -2375,33 +2375,33 @@ extern "C" void cWorldPainterMan_update(cWorldPainterMan* self) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_load);
 #ifdef SKIP_ASM
-extern "C" void func_002BB4D8(int, int);
+extern "C" void cWorldPainterSection_load(int, int);
 
 /**
- * Starts loading a section's world-painter file: m_pCache[@p sectionId].load(@p fileName) via func_002BB4D8.
+ * Starts loading a section's world-painter file: m_pCache[@p sectionId].load(@p fileName) via cWorldPainterSection_load.
  *
  * @param worldPainterMan  the manager
  * @param sectionId  the section index into m_pCache (12-byte cWorldPainterSection entries)
- * @param fileName  the file name (a cBXString, passed through to func_002BB4D8)
+ * @param fileName  the file name (a cBXString, passed through to cWorldPainterSection_load)
  */
 extern "C" void cWorldPainterMan_load(cWorldPainterMan* worldPainterMan, int sectionId, int fileName) {
-    func_002BB4D8(((int)worldPainterMan->m_pCache) + (sectionId * 0xC), fileName);
+    cWorldPainterSection_load(((int)worldPainterMan->m_pCache) + (sectionId * 0xC), fileName);
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_load1);
 #ifdef SKIP_ASM
-extern "C" void cWorldPainterSection_load(void*, int, int);
+extern "C" void cWorldPainterSection_load1(void*, int, int);
 /**
- * Installs already-loaded world-painter data for a section: m_pCache[@p sectionId] gets it through cWorldPainterSection_load.
+ * Installs already-loaded world-painter data for a section: m_pCache[@p sectionId] gets it through cWorldPainterSection_load1.
  *
  * @param worldPainterMan  the manager
  * @param sectionId  the section index into m_pCache
  * @param wpData  the section's world-painter data (a tWPHeader), kept in place (streamed)
  */
 extern "C" void cWorldPainterMan_load1(cWorldPainterMan* worldPainterMan, int sectionId, int wpData) {
-    cWorldPainterSection_load((char*)worldPainterMan->m_pCache + sectionId * 12, sectionId, wpData);
+    cWorldPainterSection_load1((char*)worldPainterMan->m_pCache + sectionId * 12, sectionId, wpData);
 }
 #endif
 
@@ -2496,7 +2496,7 @@ extern "C" void cWorldPainterSection_update(cWorldPainterSection* self_) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BB4D8);
+INCLUDE_ASM("bx/seg_1BA100", cWorldPainterSection_load);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sBXStr_B4D8 { char *p; int pad[3]; sBXStr_B4D8() {} };
@@ -2506,7 +2506,7 @@ extern "C" int ASYNCFILE_load_B4D8(const char*, int) __asm__("ASYNCFILE_load");
 extern "C" void cBXString_dt_B4D8(sBXStr_B4D8*, int) __asm__("cBXString__cBXString");
 extern char D_004A3870[];
 extern char str_swp[];
-extern "C" void func_002BB4D8_B4D8(void *self, int arg) __asm__("func_002BB4D8");
+extern "C" void cWorldPainterSection_load_B4D8(void *self, int arg) __asm__("cWorldPainterSection_load");
 /**
  * Starts an asynchronous load of a section's world-painter file.
  *
@@ -2516,7 +2516,7 @@ extern "C" void func_002BB4D8_B4D8(void *self, int arg) __asm__("func_002BB4D8")
  *
  * @param fileName  the file name (a cBXString)
  */
-extern "C" void func_002BB4D8_B4D8(void *self, int fileName) {
+extern "C" void cWorldPainterSection_load_B4D8(void *self, int fileName) {
     sBXStr_B4D8 swpPath;
     sBXStr_B4D8 basePath;
     *(short*)((char*)self + 2) = 0;
@@ -2531,7 +2531,7 @@ extern "C" void func_002BB4D8_B4D8(void *self, int fileName) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", cWorldPainterSection_load);
+INCLUDE_ASM("bx/seg_1BA100", cWorldPainterSection_load1);
 #ifdef SKIP_ASM
 extern "C" void cWorldPainterSection_resolve(cWorldPainterSection*);
 
@@ -2545,7 +2545,7 @@ extern "C" void cWorldPainterSection_resolve(cWorldPainterSection*);
  * @param sectionId  the section index (unused)
  * @param wpData  the world-painter data (a tWPHeader)
  */
-extern "C" void cWorldPainterSection_load(void *section, int sectionId, int wpData) {
+extern "C" void cWorldPainterSection_load1(void *section, int sectionId, int wpData) {
     (*(short *)((char*)(section) + (2))) = 1;
     (*(short *)((char*)(section) + (0))) = 2;
     (*(int *)((char*)(section) + (8))) = wpData;
