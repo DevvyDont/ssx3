@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatebonusmaterial.h"
 
 //100%
 INCLUDE_ASM("fe/festatebonusmaterial", cFEStateBonusMaterial_onCreateScreen);
@@ -11,11 +12,11 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 /**
  * Creates the bonus material screen ("146Bonusmat") and plays its first frame.
  */
-extern "C" void cFEStateBonusMaterial_onCreateScreen(void* self)
+extern "C" void cFEStateBonusMaterial_onCreateScreen(cFEStateBonusMaterial* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_146Bonusmat), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -35,7 +36,7 @@ extern char D_004A1508[];
  *
  * @param menu  the widget being created
  */
-extern "C" void cFEStateBonusMaterial_onWidgetCreate(void* self, void* menu)
+extern "C" void cFEStateBonusMaterial_onWidgetCreate(cFEStateBonusMaterial* self, void* menu)
 {
     int menuHash = *(int*)((char*)menu + 0x38);
     if (menuHash == GetHashValue32(D_004A14F8)) {
@@ -63,7 +64,7 @@ INCLUDE_ASM("fe/festatebonusmaterial", cFEStateBonusMaterial_onWidgetMenu);
  * @return 0x100 for events 8 and 9, otherwise 0x101
  */
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int cFEStateBonusMaterial_onWidgetMenu(void* self, int menu, unsigned int key)
+extern "C" int cFEStateBonusMaterial_onWidgetMenu(cFEStateBonusMaterial* self, int menu, unsigned int key)
 {
     int result = 257;
     if (key < 10) {
@@ -116,7 +117,7 @@ struct sVEntryK195600 {
  * @param item  the entry (its index at +0x18 picks the video from D_00441128), or 0
  * @param event  widget event number (On Tour Event)
  */
-extern "C" void cFEStateBonusMaterial_onWidgetEvent(void* self, void* item, unsigned int event)
+extern "C" void cFEStateBonusMaterial_onWidgetEvent(cFEStateBonusMaterial* self, void* item, unsigned int event)
 {
     if (item == 0)
         return;
@@ -124,18 +125,18 @@ extern "C" void cFEStateBonusMaterial_onWidgetEvent(void* self, void* item, unsi
     case 4:
         break;
     case 5: {
-        void* popup = cFEStateVideoPlayer_cFEStateVideoPlayer(cMemMan_alloc(640, str_cFEStateVideoPlayer, 0, 0), *(void**)((char*)self + 0x10), self,
-                                *(signed char*)((char*)self + 0x44));
+        void* popup = cFEStateVideoPlayer_cFEStateVideoPlayer(cMemMan_alloc(640, str_cFEStateVideoPlayer, 0, 0), self->mpEngine, self,
+                                self->mUserNum);
         cFEStateVideoPlayer_setVideoSourceFiles(popup, D_00441128[*(int*)((char*)item + 0x18)], 0);
-        cUIStateStack_pushPopup(*(char**)((char*)self + 0x10) + 0x18, popup);
+        cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, popup);
         break;
     }
     case 6: {
-        char* factory = **(char***)((char*)self + 0x10);
+        char* factory = *(char**)self->mpEngine;
         sVEntryK195600* vt = *(sVEntryK195600**)(factory + 4);
         void* nextState = vt[5].fn(factory + vt[5].delta, self, *(int*)((char*)item + 0x18));
         if (nextState != 0)
-            cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, nextState);
+            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         break;
     }
     }

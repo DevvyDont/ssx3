@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatelodge.h"
 #include "render/ps2graphicsman.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -2890,20 +2891,20 @@ extern void* cFEStateLodge_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateLodge_cFEStateLodge(void* self)
+extern "C" void* cFEStateLodge_cFEStateLodge(cFEStateLodge* self)
 {
     func_0039E2A0(self);
-    *(int*)((char*)self + 0xC) = 39;
-    *(void***)((char*)self + 0x8) = cFEStateLodge_vtbl;
+    self->mHashName = 39;
+    self->mVtbl = cFEStateLodge_vtbl;
     int idx = cBENewPlayerInterface_getPlayerCtrlID(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
-    *(signed char*)((char*)self + 0x44) = 0;
-    void* factory = **(void***)((char*)self + 0x10);
+    self->mUserNum = 0;
+    void* factory = *(void**)self->mpEngine;
     if (factory != 0) {
         unsigned char mask = 1 << idx;
         cFECustom_setPlayerCtrlMask(factory, 0, mask);
-        *(unsigned char*)((char*)self + 0x15) = mask;
+        self->mCtrlBits = mask;
     }
-    return self;
+    return ((void*)self);
 }
 #endif
 

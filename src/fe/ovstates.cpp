@@ -1,4 +1,7 @@
 #include "common.h"
+#include "fe/festatetitle.h"
+#include "fe/festatemainmenu.h"
+#include "fe/festatebonusmaterial.h"
 #include "be/beintnetwork.h"
 #include "main/ssxapp.h"
 
@@ -16,14 +19,14 @@ extern char str_06title[];
  * Builds the title screen ("06title"), plays its first frame, clears its idle timer and sets the front-end
  * music state to the title (func_0028F140(audio, 0)).
  */
-extern "C" void cFEStateTitle_onCreateScreen(void* self)
+extern "C" void cFEStateTitle_onCreateScreen(cFEStateTitle* self)
 {
     void* engine;
     void* screen;
-    *(int*)((char*)self + 0x48) = 0;
-    engine = *(void**)((char*)self + 0x10);
+    self->mNumTicksIdle = 0;
+    engine = (void*)self->mpEngine;
     screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_06title), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -62,14 +65,14 @@ public:
  *
  * @return 1 when the transition is done, 0 while waiting
  */
-extern "C" int cFEStateTitle_onGainTransition(void* self)
+extern "C" int cFEStateTitle_onGainTransition(cFEStateTitle* self)
 {
     if (D_004A17C0 == 0 || --D_004A17C0 == 0) {
-        cUIObj_1947F8* uiObj = (cUIObj_1947F8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Menu0000));
+        cUIObj_1947F8* uiObj = (cUIObj_1947F8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu0000));
         if (uiObj != 0) {
             uiObj->v07(1);
         }
-        uiObj = (cUIObj_1947F8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_tReal));
+        uiObj = (cUIObj_1947F8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_tReal));
         if (uiObj != 0) {
             uiObj->setVisible(1);
         }
@@ -119,12 +122,12 @@ static inline int isActive_1948A8(sList_1948A8* l, int j)
  * (+0x48). Past 1800 frames (30 s at 60 Hz) the timer restarts and bit 0x4 of cRealFE_mMovieList is set, which
  * cRealFE_update plays as a skippable movie.
  */
-extern "C" void cFEStateTitle_onUpdate(sSelf_1948A8* self)
+extern "C" void cFEStateTitle_onUpdate(cFEStateTitle* self)
 {
-    cUIState_onUpdate(self);
-    self->timer += 1;
-    if (self->timer > 1800) {
-        self->timer = 0;
+    cUIState_onUpdate(((sSelf_1948A8*)self));
+    self->mNumTicksIdle += 1;
+    if (self->mNumTicksIdle > 1800) {
+        self->mNumTicksIdle = 0;
         cRealFE_mMovieList |= 4;
         return;
     }
@@ -142,7 +145,7 @@ extern "C" void cFEStateTitle_onUpdate(sSelf_1948A8* self)
                 }
             }
             if (found) {
-                self->timer = 0;
+                self->mNumTicksIdle = 0;
             }
         }
     }
@@ -172,7 +175,7 @@ extern char str_tReal[];
  *
  * @param item  the widget being created
  */
-extern "C" void cFEStateTitle_onWidgetCreate(void* self, void* item)
+extern "C" void cFEStateTitle_onWidgetCreate(cFEStateTitle* self, void* item)
 {
     int id = *(int*)((char*)item + 0x38);
     if (id == GetHashValue32(str_tReal)) {
@@ -201,14 +204,14 @@ extern "C" void cUIStateStack_push(void* list, void* item);
  * @param msg  the widget (On Tour pWidget), despite the name
  * @param type  the widget event; only 5 acts
  */
-extern "C" void cFEStateTitle_onWidgetEvent(void* self, void* msg, int type)
+extern "C" void cFEStateTitle_onWidgetEvent(cFEStateTitle* self, void* msg, int type)
 {
     if (type == 5) {
-        void* obj = **(void***)((char*)self + 0x10);
+        void* obj = *(void**)self->mpEngine;
         sVEntry_cFEStateTitle_onWidgetEvent* vt = *(sVEntry_cFEStateTitle_onWidgetEvent**)((char*)obj + 0x4);
         void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, *(int*)((char*)msg + 0x18));
         if (nextState != 0) {
-            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
+            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         }
     }
 }
@@ -224,7 +227,7 @@ INCLUDE_ASM("fe/ovstates", cFEStateTitle_onWidgetMenu);
  * @param Event  the menu event (6 Cross)
  * @return 0x101 (animation and sound) for event 6, else 0x100 (animation only)
  */
-extern "C" int cFEStateTitle_onWidgetMenu(void* self, int pMenu, int Event)
+extern "C" int cFEStateTitle_onWidgetMenu(cFEStateTitle* self, int pMenu, int Event)
 {
     return Event != 6 ? 0x100 : 257;
 }
@@ -244,14 +247,14 @@ extern void* cFEStateMainMenu_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateMainMenu_cFEStateMainMenu1(void* self)
+extern "C" void* cFEStateMainMenu_cFEStateMainMenu1(cFEStateMainMenu* self)
 {
     func_0039E2A0(self);
-    *(int*)((char*)self + 0xC) = 2;
-    *(void***)((char*)self + 0x8) = cFEStateMainMenu_vtbl;
-    *(int*)((char*)self + 0x48) = 0;
-    *(int*)((char*)self + 0x4C) = 0;
-    return self;
+    self->mHashName = 2;
+    self->mVtbl = cFEStateMainMenu_vtbl;
+    self->mGoToNextState = 0;
+    self->mpSelectMultiModeWidget = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -281,17 +284,17 @@ struct sVEnt2_00194AA8 { short delta; short index; int (*fn)(void*); };
  * func_00256C50, func_00255898); clears bIsNetworkGame and calls the network interface's slot 1; sets the FE
  * music state 1; stores the number of active pads (UI input slots 44 / 45) in +0x55.
  */
-extern "C" void cFEStateMainMenu_onCreateScreen(void* self)
+extern "C" void cFEStateMainMenu_onCreateScreen(cFEStateMainMenu* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_07main_men), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
     MEM_fill(D_005308B8, 0, 0x20);
-    *(int*)((char*)self + 0x48) = 0;
-    *(char*)((char*)self + 0x54) = 0;
+    self->mGoToNextState = 0;
+    self->mHackCheatTotal = 0;
     func_00266CD8();
     func_00261008();
     func_0025B688();
@@ -302,14 +305,14 @@ extern "C" void cFEStateMainMenu_onCreateScreen(void* self)
     sVEnt0_00194AA8* vt0 = *(sVEnt0_00194AA8**)((char*)iface + 0xC);
     vt0[1].fn((char*)iface + vt0[1].delta);
     func_0028F140(cAudioInterface_bxAudio(), 1);
-    char* obj = *(char**)(*(char**)((char*)self + 0x10) + 0xC);
-    *(unsigned char*)((char*)self + 0x55) = 0;
+    char* obj = *(char**)((char*)self->mpEngine + 0xC);
+    *(unsigned char*)&self->mNumOfCtrl = 0;
     for (int i = 0; i < 2; i++) {
         sVEnt1_00194AA8* vt1 = *(sVEnt1_00194AA8**)(obj + 8);
         vt1[44].fn(obj + vt1[44].delta, i);
         sVEnt2_00194AA8* vt2 = *(sVEnt2_00194AA8**)(obj + 8);
         if (vt2[45].fn(obj + vt2[45].delta) != 0) {
-            (*(unsigned char*)((char*)self + 0x55))++;
+            (*(unsigned char*)&self->mNumOfCtrl)++;
         }
     }
 }
@@ -365,11 +368,11 @@ public:
  * "3multi play" is greyed out (DisableTextWidget) with fewer than two active pads (+0x55); otherwise, while the
  * state's mode is 5, it is restored: slot 25 (cUIText_setUseStaticColour) and slot 8 (cUIThing_setStatic) cleared, alpha 1. "5online" is greyed out while D_004A29EC (set by initOnline) is 0.
  */
-extern "C" void cFEStateMainMenu_onPreRender2D(void* self)
+extern "C" void cFEStateMainMenu_onPreRender2D(cFEStateMainMenu* self)
 {
-    cUIObj_194BF0* obj = (cUIObj_194BF0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_3multi_play));
+    cUIObj_194BF0* obj = (cUIObj_194BF0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_3multi_play));
     if (obj != 0) {
-        if (*(signed char*)((char*)self + 0x55) < 2) {
+        if (*(signed char*)&self->mNumOfCtrl < 2) {
             DisableTextWidget(obj);
         } else if ((*(unsigned char*)((char*)self + 0x1D) & 0x3F) == 5) {
             obj->setUseStaticColour(0);
@@ -380,7 +383,7 @@ extern "C" void cFEStateMainMenu_onPreRender2D(void* self)
         }
     }
     if (D_004A29EC == 0) {
-        void* uiObj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_5online));
+        void* uiObj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_5online));
         if (uiObj != 0) {
             DisableTextWidget(uiObj);
         }
@@ -405,7 +408,7 @@ extern char str_5online[];
  *
  * @param item  the widget being created
  */
-extern "C" void cFEStateMainMenu_onWidgetCreate(void* self, void* item)
+extern "C" void cFEStateMainMenu_onWidgetCreate(cFEStateMainMenu* self, void* item)
 {
     int id;
     id = *(int*)((char*)item + 0x38);
@@ -501,22 +504,22 @@ public:
  * active pads into +0x55; if "Menu" has row 2 selected and fewer than 2 are active, row 1 is selected. The
  * local class name cProfileMan_194DD0 is misleading.
  */
-extern "C" void cFEStateMainMenu_onUpdate(void* self)
+extern "C" void cFEStateMainMenu_onUpdate(cFEStateMainMenu* self)
 {
     int i = 0;
     cUIState_onUpdate(self);
-    cProfileMan_194DD0* pm = *(cProfileMan_194DD0**)((char*)*(void**)((char*)self + 0x10) + 0xC);
-    *(signed char*)((char*)self + 0x55) = 0;
+    cProfileMan_194DD0* pm = *(cProfileMan_194DD0**)((char*)self->mpEngine + 0xC);
+    *(signed char*)&self->mNumOfCtrl = 0;
     for (; i < 2; i++) {
         pm->select(i);
         if (pm->isValid()) {
-            (*(signed char*)((char*)self + 0x55))++;
+            (*(signed char*)&self->mNumOfCtrl)++;
         }
     }
-    void* menu = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Menu));
+    void* menu = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu));
     if (menu != 0) {
         if (*(unsigned char*)((char*)menu + 0x95) == 2) {
-            if (*(signed char*)((char*)self + 0x55) < 2) {
+            if (*(signed char*)&self->mNumOfCtrl < 2) {
                 cUIMenu_setSelectedByIndex(menu, 1);
             }
         }
@@ -599,9 +602,8 @@ static inline void setWidgetVisible_194EB0(char* self, char* name)
  * @param item_  the item (On Tour pWidget); ignored when null
  * @param type  the widget event: 5 Cross, 6 Triangle, 7 Square, 8 Circle
  */
-extern "C" void cFEStateMainMenu_onWidgetEvent(void* self_, void* item_, unsigned int type)
+extern "C" void cFEStateMainMenu_onWidgetEvent(cFEStateMainMenu* self_, void* item_, unsigned int type)
 {
-    char* self = (char*)self_;
     char* item = (char*)item_;
     if (item == 0)
         return;
@@ -612,18 +614,18 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(void* self_, void* item_, unsigne
         switch (*(int*)(item + 0x18)) {
         case 11:
             cBENewRaceInterface_setGamePath(iface, 0);
-            *(int*)(self + 0x48) = 1;
+            self_->mGoToNextState = 1;
             break;
         case 9:
             cBENewRaceInterface_setGamePath(iface, 1);
-            *(int*)(self + 0x48) = 1;
+            self_->mGoToNextState = 1;
             // both arms set the flag; the leftover compare on the cheat counter is in the target too
-            if (*(signed char*)(self + 0x54) >= 7)
-                *(int*)(self + 0x48) = 1;
+            if (*(signed char*)&self_->mHackCheatTotal >= 7)
+                self_->mGoToNextState = 1;
             break;
         case 22:
             cBENewRaceInterface_setGamePath(iface, 2);
-            *(int*)(self + 0x48) = 1;
+            self_->mGoToNextState = 1;
             break;
         case 49:
             cBENewRaceInterface_setGamePath(iface, 2);
@@ -632,52 +634,52 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(void* self_, void* item_, unsigne
             func_00260F80();
             func_00266CA0();
         case 5:
-            *(int*)(self + 0x48) = 1;
+            self_->mGoToNextState = 1;
             break;
         }
         sVE_194EB0* ivt = *(sVE_194EB0**)(iface + 0xC);
         ((void (*)(void*))ivt[1].fn)(iface + ivt[1].delta);
-        if (*(int*)(item + 0x18) == 22 && *(int*)(self + 0x48) == 0) {
-            *(int*)(self + 0x50) = *(signed char*)(self + 0x14);
+        if (*(int*)(item + 0x18) == 22 && self_->mGoToNextState == 0) {
+            self_->mSaveCurrentCtrl = self_->mCurrentCtrl;
             char* popup = (char*)operator new(76, str_cFEPopupSelectMultiplayerMode, 0, 0);
-            func_0039E318(popup, *(void**)(self + 0x10), self);
+            func_0039E318(popup, self_->mpEngine, ((char*)self_));
             *(void***)(popup + 0x8) = cFEPopupSelectMultiplayerMode_vtbl;
             int bit = 1;
-            bit <<= *(int*)(self + 0x50);
+            bit <<= self_->mSaveCurrentCtrl;
             *(char*)(popup + 0x15) = bit;
             *(char*)(popup + 0x48) = 0;
-            cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, popup);
-            *(char**)(self + 0x4C) = item;
-            setWidgetHidden_194EB0(self, str_hl);
-            setWidgetHidden_194EB0(self, str_3_help_multi);
-            setWidgetHidden_194EB0(self, str_btext5);
-            setWidgetHidden_194EB0(self, str_ps2sq);
+            cUIStateStack_pushPopup((char*)self_->mpEngine + 0x18, popup);
+            self_->mpSelectMultiModeWidget = (cUIThing*)item;
+            setWidgetHidden_194EB0(((char*)self_), str_hl);
+            setWidgetHidden_194EB0(((char*)self_), str_3_help_multi);
+            setWidgetHidden_194EB0(((char*)self_), str_btext5);
+            setWidgetHidden_194EB0(((char*)self_), str_ps2sq);
             return;
         }
-        sObj_194EB0* obj = **(sObj_194EB0***)(self + 0x10);
-        void* nextState = ((void* (*)(void*, void*, int))obj->vt[4].fn)((char*)obj + obj->vt[4].delta, self, *(int*)(item + 0x18));
+        sObj_194EB0* obj = *(sObj_194EB0**)self_->mpEngine;
+        void* nextState = ((void* (*)(void*, void*, int))obj->vt[4].fn)((char*)obj + obj->vt[4].delta, ((char*)self_), *(int*)(item + 0x18));
         if (nextState != 0)
-            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
+            cUIStateStack_push((char*)self_->mpEngine + 0x18, nextState);
         break;
     }
     case 6: {
-        sObj_194EB0* obj = **(sObj_194EB0***)(self + 0x10);
-        void* nextState = ((void* (*)(void*, void*, int))obj->vt[5].fn)((char*)obj + obj->vt[5].delta, self, *(int*)(item + 0x18));
+        sObj_194EB0* obj = *(sObj_194EB0**)self_->mpEngine;
+        void* nextState = ((void* (*)(void*, void*, int))obj->vt[5].fn)((char*)obj + obj->vt[5].delta, ((char*)self_), *(int*)(item + 0x18));
         if (nextState != 0)
-            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
+            cUIStateStack_push((char*)self_->mpEngine + 0x18, nextState);
         break;
     }
     case 7: {
-        char* optionsState = (char*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), *(void**)(self + 0x10), 1);
+        char* optionsState = (char*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), self_->mpEngine, 1);
         *(int*)(optionsState + 0x1C) = (*(int*)(optionsState + 0x1C) & ~0x3F00) | 0x100;
-        cUIStateStack_pushSpecial(*(char**)(self + 0x10) + 0x18, optionsState, 0, 0);
+        cUIStateStack_pushSpecial((char*)self_->mpEngine + 0x18, optionsState, 0, 0);
         break;
     }
     case 8:
-        if (++*(signed char*)(self + 0x54) >= 7) {
-            setWidgetVisible_194EB0(self, str_2quick_play);
-            setWidgetVisible_194EB0(self, str_3multi_play);
-            setWidgetVisible_194EB0(self, str_4online);
+        if (++*(signed char*)&self_->mHackCheatTotal >= 7) {
+            setWidgetVisible_194EB0(((char*)self_), str_2quick_play);
+            setWidgetVisible_194EB0(((char*)self_), str_3multi_play);
+            setWidgetVisible_194EB0(((char*)self_), str_4online);
         }
         break;
     }
@@ -696,11 +698,11 @@ INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_onWidgetMenu);
  * @return for event 6, 1 (sound only) while the choice flag +0x48 is 0, else 0x101; 0x100 for event 9; 0x101
  *         otherwise
  */
-extern "C" int cFEStateMainMenu_onWidgetMenu(void* self, int pMenu, int Event)
+extern "C" int cFEStateMainMenu_onWidgetMenu(cFEStateMainMenu* self, int pMenu, int Event)
 {
     switch (Event) {
     case 6:
-        return *(int*)((char*)self + 0x48) == 0 ? 1 : 257;
+        return self->mGoToNextState == 0 ? 1 : 257;
     case 9:
         return 0x100;
     }
@@ -752,7 +754,7 @@ static inline void Show195328(void* self, char* name)
  * @param msg  the popup event (0x15, 0x16)
  */
 // On confirm (msg 0x16) commits the selected entry, then re-shows the four main-menu buttons.
-extern "C" void cFEStateMainMenu_onPopupEvent(void* self, char* obj, int msg)
+extern "C" void cFEStateMainMenu_onPopupEvent(cFEStateMainMenu* self, char* obj, int msg)
 {
     if (msg == 21) {
         return;
@@ -762,12 +764,12 @@ extern "C" void cFEStateMainMenu_onPopupEvent(void* self, char* obj, int msg)
     }
     sVEi_195328* ovt = *(sVEi_195328**)(obj + 8);
     if (ovt[23].fn(obj + ovt[23].delta, 0) != 0) {
-        *(int*)((char*)self + 0x48) = 1;
-        int savedCtrl = *(signed char*)((char*)self + 0x50);
-        *(char*)((char*)self + 0x14) = savedCtrl;
-        cUIThing_playKeyframerEvent(*(void**)((char*)self + 0x4C), 2);
-        sVEv_195328* svt = *(sVEv_195328**)((char*)self + 8);
-        svt[19].fn((char*)self + svt[19].delta, *(void**)((char*)self + 0x4C), 5);
+        self->mGoToNextState = 1;
+        int savedCtrl = *(signed char*)&self->mSaveCurrentCtrl;
+        *(char*)&self->mCurrentCtrl = savedCtrl;
+        cUIThing_playKeyframerEvent(self->mpSelectMultiModeWidget, 2);
+        sVEv_195328* svt = (sVEv_195328*)self->mVtbl;
+        svt[19].fn((char*)self + svt[19].delta, self->mpSelectMultiModeWidget, 5);
     }
     Show195328(self, str_hl);
     Show195328(self, str_3_help_multi);
@@ -788,12 +790,12 @@ extern char cFEStateBonusMaterial_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateBonusMaterial_cFEStateBonusMaterial1(void* self)
+extern "C" void* cFEStateBonusMaterial_cFEStateBonusMaterial1(cFEStateBonusMaterial* self)
 {
     func_0039E2A0(self);
-    *(void**)((char*)self + 0x8) = cFEStateBonusMaterial_vtbl;
-    *(int*)((char*)self + 0xC) = 5;
-    return self;
+    self->mVtbl = (void**)cFEStateBonusMaterial_vtbl;
+    self->mHashName = 5;
+    return ((void*)self);
 }
 #endif
 

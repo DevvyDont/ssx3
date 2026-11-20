@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatempcircuit.h"
 
 //100%
 INCLUDE_ASM("fe/ovstatemission", cFEStateMPCircuit_onCreateScreen);
@@ -17,15 +18,15 @@ extern char str_ListBox[];
  *
  * Sets the list box's flag 0x80, clears flag 1, and fills it with cFEStateMPCircuit_initCircuitList().
  */
-extern "C" void cFEStateMPCircuit_onCreateScreen(void* self)
+extern "C" void cFEStateMPCircuit_onCreateScreen(cFEStateMPCircuit* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_108cct_select), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ListBox));
+    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ListBox));
     if (obj != 0) {
         *(int*)((char*)obj + 0x14) = (*(int*)((char*)obj + 0x14) & ~1) | 0x80;
         cFEStateMPCircuit_initCircuitList_2(self, obj);
@@ -64,13 +65,13 @@ extern char str_ListBox[];
  *
  * @param pPreSt  the state that had focus before (On Tour pPreSt), passed on to cUIState_onGainFocus()
  */
-extern "C" void cFEStateMPCircuit_onGainFocus(void* self, int pPreSt)
+extern "C" void cFEStateMPCircuit_onGainFocus(cFEStateMPCircuit* self, int pPreSt)
 {
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ListBox));
+    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ListBox));
     if (obj != 0) {
-        int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(cUIListBox_getCurrentAsciiText(obj)));
+        int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(cUIListBox_getCurrentAsciiText(obj)));
         if (frame != 0xFFFF) {
-            cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame, 1);
+            cUIScreen_playFrame(self->mpScreen, frame, 1);
         }
     }
     cFEStateMPCircuit_updateWidget(self);
@@ -102,34 +103,34 @@ struct sVEntry_33A0 {
  * @param item  the widget (its index at +0x18), or 0
  * @param msg  widget event number (On Tour Event)
  */
-extern "C" void cFEStateMPCircuit_onWidgetEvent(void* self, void* item, unsigned int msg)
+extern "C" void cFEStateMPCircuit_onWidgetEvent(cFEStateMPCircuit* self, void* item, unsigned int msg)
 {
     if (item == 0) {
         return;
     }
     switch (msg) {
     case 5: {
-        void* obj = **(void***)((char*)self + 0x10);
+        void* obj = *(void**)self->mpEngine;
         sVEntry_33A0* vt = *(sVEntry_33A0**)((char*)obj + 4);
         void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, *(int*)((char*)item + 0x18));
         if (nextState != 0) {
-            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
+            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         }
         break;
     }
     case 6: {
-        void* obj = **(void***)((char*)self + 0x10);
+        void* obj = *(void**)self->mpEngine;
         sVEntry_33A0* vt = *(sVEntry_33A0**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
         if (nextState != 0) {
-            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
+            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         }
         break;
     }
     case 9: {
-        int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(cUIListBox_getCurrentAsciiText(item)));
+        int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(cUIListBox_getCurrentAsciiText(item)));
         if (frame != 0xFFFF) {
-            cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame, 1);
+            cUIScreen_playFrame(self->mpScreen, frame, 1);
         }
         cFEStateMPCircuit_updateWidget(self);
         break;

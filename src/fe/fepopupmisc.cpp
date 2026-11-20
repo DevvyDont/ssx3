@@ -1,4 +1,10 @@
 #include "common.h"
+#include "fe/festaterewardsroom.h"
+#include "fe/festatepeakroom.h"
+#include "fe/festatempcircuit.h"
+#include "fe/fepopupvideocalibration.h"
+#include "fe/fepopupselectmultiplayermode.h"
+#include "fe/fepopupscreenpos.h"
 #include "fe/festateruleselect.h"
 #include "fe/festateriderbio.h"
 #include "fe/festatepreviewreward.h"
@@ -60,23 +66,23 @@ public:
  *
  * Shows the "brightps2" image and sets Text0000 to kT_THXBrightness.
  */
-extern "C" void cFEPopupVideoCalibration_onCreateScreen(void* self)
+extern "C" void cFEPopupVideoCalibration_onCreateScreen(cFEPopupVideoCalibration* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_156thx), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cUIObjK1DEB90* obj = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1540));
+    cUIObjK1DEB90* obj = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1540));
     if (obj != 0) {
         obj->v09(1);
     }
-    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Text0000));
+    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Text0000));
     if (text != 0) {
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_THXBrightness));
     }
-    *(char*)((char*)self + 0x48) = 0;
+    self->mImage = 0;
 }
 #endif
 
@@ -128,32 +134,32 @@ struct sPopup_EC68 {
  * @param in  the input (On Tour cUIInput* pInput)
  * @return 1 (the popup takes every input)
  */
-extern "C" int cFEPopupVideoCalibration_onInputBegin(sPopup_EC68* self, char* in)
+extern "C" int cFEPopupVideoCalibration_onInputBegin(cFEPopupVideoCalibration* self, char* in)
 {
     sVEi_EC68* vt = *(sVEi_EC68**)(in + 8);
     if (vt[5].fn(in + vt[5].delta) != 0) {
-        if (self->shown == 0) {
-            cUIObjK1DEB90* obj = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A1540));
+        if (*(signed char*)&self->mImage == 0) {
+            cUIObjK1DEB90* obj = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1540));
             if (obj != 0) {
                 obj->v09(0);
             }
-            obj = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A1540_DEC68[1]));
+            obj = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1540_DEC68[1]));
             if (obj != 0) {
                 obj->v09(1);
             }
-            cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_Text0000));
+            cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Text0000));
             if (text != 0) {
                 cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_THXBars));
             }
-            obj = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_Text0001));
+            obj = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Text0001));
             if (obj != 0) {
                 obj->v09(0);
             }
-            self->shown = 1;
+            *(signed char*)&self->mImage = 1;
         } else {
-            self->flags = ((self->flags | 0x80) & ~0x3F00) | 0x700;
+            self->mAttrState = ((self->mAttrState | 0x80) & ~0x3F00) | 0x700;
         }
-        sDefObj_EC68* uiSound = *(sDefObj_EC68**)(self->owner + 0x14);
+        sDefObj_EC68* uiSound = *(sDefObj_EC68**)((char*)self->mpEngine + 0x14);
         if (uiSound == 0)
             uiSound = &D_004A5A58_EC68;
         if (uiSound != 0)
@@ -218,14 +224,14 @@ static inline int optB5_EE10(sOptions_EE10 o)
 /**
  * Opens the screen-position popup ("24screen_position") and loads the current screen offset from the options.
  */
-extern "C" void cFEPopupScreenPos_onCreateScreen(void* self)
+extern "C" void cFEPopupScreenPos_onCreateScreen(cFEPopupScreenPos* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_24screen_position), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
-        *(int*)((char*)self + 0xC) = GetHashValue32(str_24screen_position);
+        self->mHashName = GetHashValue32(str_24screen_position);
     }
     void* be = cBE_getBE();
     cBE_getInterface_Fv(be, 4);
@@ -246,15 +252,15 @@ INCLUDE_ASM("fe/fepopupmisc", cFEPopupScreenPos_getData);
  *           update), anything else for the accepted flag
  * @return the x offset, the y offset, or 1 when the popup was accepted and 0 when it was cancelled
  */
-extern "C" int cFEPopupScreenPos_getData(void* self, int i)
+extern "C" int cFEPopupScreenPos_getData(cFEPopupScreenPos* self, int i)
 {
     switch (i) {
     case 0:
-        return *(int*)((char*)self + 0x48);
+        return self->mX;
     case 1:
-        return *(int*)((char*)self + 0x4c);
+        return self->mY;
     }
-    return *(signed char*)((char*)self + 0x50);
+    return *(signed char*)&self->mAccept;
 }
 #endif
 
@@ -355,9 +361,9 @@ static inline int clamp_F050(int v, int lo, int hi)
  * through
  * the renderer (GrMan slot 12). Accept plays sound 6 and back sound 3.
  */
-extern "C" void cFEPopupScreenPos_onUpdate(sPopup_F050* self)
+extern "C" void cFEPopupScreenPos_onUpdate(cFEPopupScreenPos* self)
 {
-    char* in = *(char**)(self->owner + 0xC);
+    char* in = *(char**)((char*)self->mpEngine + 0xC);
     for (int i = 0; i < 2; i++) {
         sVEs_F050* vt = *(sVEs_F050**)(in + 8);
         vt[44].fn(in + vt[44].delta, i);
@@ -365,35 +371,35 @@ extern "C" void cFEPopupScreenPos_onUpdate(sPopup_F050* self)
             continue;
         }
         if (padCall_F050(in, 5)) {
-            sound_F050(self, 6);
-            self->accepted = 1;
-            self->flags |= 0x80;
-            func_0039F190(self->owner + 0x18, 1);
+            sound_F050(((sPopup_F050*)self), 6);
+            *(signed char*)&self->mAccept = 1;
+            self->mAttrState |= 0x80;
+            func_0039F190((char*)self->mpEngine + 0x18, 1);
         } else if (padCall_F050(in, 6)) {
-            sound_F050(self, 3);
-            self->accepted = 0;
-            self->flags |= 0x80;
-            func_0039F190(self->owner + 0x18, 1);
+            sound_F050(((sPopup_F050*)self), 3);
+            *(signed char*)&self->mAccept = 0;
+            self->mAttrState |= 0x80;
+            func_0039F190((char*)self->mpEngine + 0x18, 1);
         } else if (padCall_F050(in, 19)) {
-            self->x--;
-            playFrame_F050(self, str_hl_left);
+            self->mX--;
+            playFrame_F050(((sPopup_F050*)self), str_hl_left);
         } else if (padCall_F050(in, 20)) {
-            self->x++;
-            playFrame_F050(self, str_hl_right);
+            self->mX++;
+            playFrame_F050(((sPopup_F050*)self), str_hl_right);
         } else if (padCall_F050(in, 17)) {
-            self->y++;
-            playFrame_F050(self, str_hl_up);
+            self->mY++;
+            playFrame_F050(((sPopup_F050*)self), str_hl_up);
         } else if (padCall_F050(in, 18)) {
-            self->y--;
-            playFrame_F050(self, str_hl_down);
+            self->mY--;
+            playFrame_F050(((sPopup_F050*)self), str_hl_down);
         }
-        if (self->x < -20 || self->x > 20 || self->y < -20 || self->y > 20) {
-            sound_F050(self, 4);
+        if (self->mX < -20 || self->mX > 20 || self->mY < -20 || self->mY > 20) {
+            sound_F050(((sPopup_F050*)self), 4);
         }
-        self->x = clamp_F050(self->x, -20, 20);
-        self->y = clamp_F050(self->y, -20, 20);
+        self->mX = clamp_F050(self->mX, -20, 20);
+        self->mY = clamp_F050(self->mY, -20, 20);
         sVEp_F050* rv = (sVEp_F050*)GrMan->mVtbl;
-        rv[12].fn((char*)GrMan + rv[12].delta, self->x, self->y);
+        rv[12].fn((char*)GrMan + rv[12].delta, self->mX, self->mY);
         return;
     }
 }
@@ -2405,11 +2411,11 @@ extern void* cFEStatePeakRoom_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStatePeakRoom_cFEStatePeakRoom1(void* self)
+extern "C" void* cFEStatePeakRoom_cFEStatePeakRoom1(cFEStatePeakRoom* self)
 {
     func_0039E2A0(self, 0);
-    *(void***)((char*)self + 0x8) = cFEStatePeakRoom_vtbl;
-    return self;
+    self->mVtbl = cFEStatePeakRoom_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -2491,11 +2497,11 @@ extern void* cFEStateRewardsRoom_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateRewardsRoom_cFEStateRewardsRoom1(void* self)
+extern "C" void* cFEStateRewardsRoom_cFEStateRewardsRoom1(cFEStateRewardsRoom* self)
 {
     func_0039E2A0(self, 0);
-    *(void***)((char*)self + 0x8) = cFEStateRewardsRoom_vtbl;
-    return self;
+    self->mVtbl = cFEStateRewardsRoom_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -2532,8 +2538,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardsRoom_isInStore);
  * @param rewardsRoom  the rewards-room state
  * @return the in-store flag
  */
-extern "C" int cFEStateRewardsRoom_isInStore(void *rewardsRoom) {
-    return (*(int *)((char*)(rewardsRoom) + (0x4C)));
+extern "C" int cFEStateRewardsRoom_isInStore(cFEStateRewardsRoom* rewardsRoom) {
+    return (rewardsRoom->mInStore);
 }
 #endif
 
@@ -2566,12 +2572,12 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 /**
  * Opens the multiplayer-mode popup ("86multiplayermode").
  */
-extern "C" void cFEPopupSelectMultiplayerMode_onCreateScreen(void* self)
+extern "C" void cFEPopupSelectMultiplayerMode_onCreateScreen(cFEPopupSelectMultiplayerMode* self)
 {
     int hash = GetHashValue32(str_86multiplayermode);
-    *(int*)((char*)self + 0xC) = hash;
-    void* screen = cUIEngine_addScreenByHashName(*(void**)((char*)self + 0x10), self, hash, 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mHashName = hash;
+    void* screen = cUIEngine_addScreenByHashName(self->mpEngine, self, hash, 0);
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -2593,7 +2599,7 @@ extern char D_004A14F8[];
  *
  * @param item  the widget being created (On Tour cUIThing* pWidget)
  */
-extern "C" void cFEPopupSelectMultiplayerMode_onWidgetCreate(void* self, void* item)
+extern "C" void cFEPopupSelectMultiplayerMode_onWidgetCreate(cFEPopupSelectMultiplayerMode* self, void* item)
 {
     int itemHash = *(int*)((char*)item + 0x38);
     if (itemHash == GetHashValue32(str_menu0000)) {
@@ -2629,19 +2635,19 @@ extern "C" void func_0039F190(void* self, int a1);
  * @param pWidget  the widget that sent the event
  * @param Event  the widget event
  */
-extern "C" void cFEPopupSelectMultiplayerMode_onWidgetEvent(void* self, void* pWidget, int Event)
+extern "C" void cFEPopupSelectMultiplayerMode_onWidgetEvent(cFEPopupSelectMultiplayerMode* self, void* pWidget, int Event)
 {
     switch (Event) {
     case 5: {
-        char* engine = *(char**)((char*)self + 0x10);
-        *(char*)((char*)self + 0x48) = 1;
+        char* engine = (char*)self->mpEngine;
+        self->mMultiMode = 1;
         D_004A19D4 = *(int*)((char*)pWidget + 0x18) != 0;
         func_0039F190(engine + 0x18, 1);
         break;
     }
     case 6: {
-        char* engine = *(char**)((char*)self + 0x10);
-        *(char*)((char*)self + 0x48) = 0;
+        char* engine = (char*)self->mpEngine;
+        self->mMultiMode = 0;
         func_0039F190(engine + 0x18, 1);
         break;
     }
@@ -2665,7 +2671,7 @@ extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
  * @param idx   the event's index argument (the menu's scroll offset for events 2 and 3)
  * @return always 0x101, the base handler's result
  */
-extern "C" int cFEPopupSelectMultiplayerMode_onWidgetMenu(void* self, void* menu, unsigned int key, int idx)
+extern "C" int cFEPopupSelectMultiplayerMode_onWidgetMenu(cFEPopupSelectMultiplayerMode* self, void* menu, unsigned int key, int idx)
 {
     switch (key) {
     default:
@@ -3174,11 +3180,11 @@ extern void* cFEStateMPCircuit_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateMPCircuit_cFEStateMPCircuit1(void* self)
+extern "C" void* cFEStateMPCircuit_cFEStateMPCircuit1(cFEStateMPCircuit* self)
 {
     func_0039E2A0(self, 0);
-    *(void***)((char*)self + 0x8) = cFEStateMPCircuit_vtbl;
-    return self;
+    self->mVtbl = cFEStateMPCircuit_vtbl;
+    return ((void*)self);
 }
 #endif
 

@@ -1,4 +1,6 @@
 #include "common.h"
+#include "fe/festatelodgeriderdetail.h"
+#include "fe/festatelodge.h"
 #include "fe/festatebuyattrib.h"
 #include "fe/festatecareerstats.h"
 #include "fe/messagecenter.h"
@@ -2996,8 +2998,8 @@ extern char D_0046D0D0[];
  * body as cFEState's own destructor cFEState__cFEState, so the class tears down nothing of its own. The g++ delete
  * flags reach func_0039E390() untouched in the second argument register.
  */
-extern "C" void cFEStateLodge__cFEStateLodge(void *self) {
-    *(char **)((char*)self + 8) = D_0046D0D0;
+extern "C" void cFEStateLodge__cFEStateLodge(cFEStateLodge* self) {
+    self->mVtbl = (void**)D_0046D0D0;
     func_0039E390_a(self);
 }
 #endif
@@ -3038,8 +3040,8 @@ extern char D_0046D0D0[];
  * body as cFEState's own destructor cFEState__cFEState, so the class tears down nothing of its own. The g++ delete
  * flags reach func_0039E390() untouched in the second argument register.
  */
-extern "C" void cFEStateLodgeRiderDetail__cFEStateLodgeRiderDetail(void *self) {
-    *(char **)((char*)self + 8) = D_0046D0D0;
+extern "C" void cFEStateLodgeRiderDetail__cFEStateLodgeRiderDetail(cFEStateLodgeRiderDetail* self) {
+    self->mVtbl = (void**)D_0046D0D0;
     func_0039E390_a(self);
 }
 #endif

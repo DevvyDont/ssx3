@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festaterewardsroom.h"
 #include "online/lobbyman.h"
 #include "render/ps2graphicsman.h"
 #include "be/beintnetwork.h"
@@ -637,16 +638,16 @@ extern void* cFEStateRewardsRoom_vtbl[];
  * @param inStore  the in-store flag; the front end's factories pass 1
  * @return @p self
  */
-extern "C" void* cFEStateRewardsRoom_cFEStateRewardsRoom(void* self, int engine, signed char idx, int inStore)
+extern "C" void* cFEStateRewardsRoom_cFEStateRewardsRoom(cFEStateRewardsRoom* self, int engine, signed char idx, int inStore)
 {
     func_0039E2A0(self);
-    *(int*)((char*)self + 0xC) = 46;
-    *(void***)((char*)self + 0x8) = cFEStateRewardsRoom_vtbl;
-    *(signed char*)((char*)self + 0x44) = idx;
-    *(char*)((char*)self + 0x15) = cFECustom_getPlayerCtrlMask(**(void***)((char*)self + 0x10), idx);
-    *(int*)((char*)self + 0x4C) = inStore;
-    *(int*)((char*)self + 0x48) = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
-    return self;
+    self->mHashName = 46;
+    self->mVtbl = cFEStateRewardsRoom_vtbl;
+    self->mUserNum = idx;
+    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, idx);
+    self->mInStore = inStore;
+    self->mCharID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
+    return ((void*)self);
 }
 #endif
 
@@ -663,11 +664,11 @@ extern char str_128rewardsroom[];
 /**
  * Opens the rewards-room screen ("128rewardsroom") and switches the front-end sound-bank mode to 6.
  */
-extern "C" void cFEStateRewardsRoom_onCreateScreen(void* self)
+extern "C" void cFEStateRewardsRoom_onCreateScreen(cFEStateRewardsRoom* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_128rewardsroom), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -679,7 +680,7 @@ extern "C" void cFEStateRewardsRoom_onCreateScreen(void* self)
 INCLUDE_ASM("fe/festatetrophyroom", cFEStateRewardsRoom_onWidgetCreate);
 #ifdef SKIP_ASM
 struct cUIText;
-extern "C" void cFEStateRewardsRoom_setRewardsWidgetText(void* self, int index, cUIText* text);
+extern "C" void cFEStateRewardsRoom_setRewardsWidgetText(cFEStateRewardsRoom* self, int index, cUIText* text);
 extern char str_art[];
 extern char str_video[];
 extern char str_poster[];
@@ -702,7 +703,7 @@ extern char str_txtmdl_5[];
  *
  * @param w  the widget just created (its hash name is at +0x38)
  */
-extern "C" void cFEStateRewardsRoom_onWidgetCreate(void* self, void* w)
+extern "C" void cFEStateRewardsRoom_onWidgetCreate(cFEStateRewardsRoom* self, void* w)
 {
     int id = *(int*)((char*)w + 0x38);
     if (id == GetHashValue32(str_art)) {
@@ -752,7 +753,7 @@ extern "C" void cUIStateStack_push(void* list, void* item);
  * @param item  the widget that sent the event; nothing happens when null
  * @param msg  the widget event (5 accept, 6 back)
  */
-extern "C" void cFEStateRewardsRoom_onWidgetEvent(void* self, void* item, unsigned int msg)
+extern "C" void cFEStateRewardsRoom_onWidgetEvent(cFEStateRewardsRoom* self, void* item, unsigned int msg)
 {
     if (item == 0) {
         return;
@@ -761,18 +762,18 @@ extern "C" void cFEStateRewardsRoom_onWidgetEvent(void* self, void* item, unsign
     case 0:
         break;
     case 5: {
-        void* obj = **(void***)((char*)self + 0x10);
+        void* obj = *(void**)self->mpEngine;
         sVEntry001D4EA8* vt = *(sVEntry001D4EA8**)((char*)obj + 4);
         void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, *(int*)((char*)item + 0x18));
-        cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
+        cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         break;
     }
     case 6: {
-        void* obj = **(void***)((char*)self + 0x10);
+        void* obj = *(void**)self->mpEngine;
         sVEntry001D4EA8* vt = *(sVEntry001D4EA8**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
         if (nextState != 0) {
-            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
+            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         }
         break;
     }
@@ -795,7 +796,7 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEStateRewardsRoom_onWidgetMenu);
  * @return 0x100 for events 8 and 9, otherwise 0x101
  */
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int cFEStateRewardsRoom_onWidgetMenu(void* self, int pMenu, unsigned int key)
+extern "C" int cFEStateRewardsRoom_onWidgetMenu(cFEStateRewardsRoom* self, int pMenu, unsigned int key)
 {
     int result = 257;
     if (key < 10) {
@@ -831,12 +832,12 @@ extern char str_pct_d_pct_d[];
  * @param index  the reward kind
  * @param text  the text to set
  */
-extern "C" void cFEStateRewardsRoom_setRewardsWidgetText(void* self, int index, cUIText* text)
+extern "C" void cFEStateRewardsRoom_setRewardsWidgetText(cFEStateRewardsRoom* self, int index, cUIText* text)
 {
     char buf[256];
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
     int total = cBERewardInterface_getTotalNumRewards(iface, index);
-    int got = cBERewardInterface_getNumOwnedRewards(iface, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0x48), index);
+    int got = cBERewardInterface_getNumOwnedRewards(iface, self->mUserNum, self->mCharID, index);
     sprintf(buf, str_pct_d_pct_d, got, total);
     cUIText_setAsciiString(text, buf);
 }

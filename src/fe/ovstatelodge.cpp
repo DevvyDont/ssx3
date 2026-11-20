@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatepeakroom.h"
 #include "fe/festatemountainroom.h"
 #include "render/ps2graphicsman.h"
 #include "main/ssxapp.h"
@@ -909,16 +910,16 @@ struct sLodge_3780 {
  * @param peakNum  the peak (On Tour peakNum)
  * @return @p self
  */
-extern "C" void* cFEStatePeakRoom_cFEStatePeakRoom(void* self, int engine, int userNum, int peakNum)
+extern "C" void* cFEStatePeakRoom_cFEStatePeakRoom(cFEStatePeakRoom* self, int engine, int userNum, int peakNum)
 {
     signed char idx = userNum;
     func_0039E2A0(self);
-    *(int*)((char*)self + 0xC) = 44;
-    *(void***)((char*)self + 0x8) = cFEStatePeakRoom_vtbl;
-    *(signed char*)((char*)self + 0x44) = idx;
-    *(char*)((char*)self + 0x15) = cFECustom_getPlayerCtrlMask(**(void***)((char*)self + 0x10), idx);
+    self->mHashName = 44;
+    self->mVtbl = cFEStatePeakRoom_vtbl;
+    self->mUserNum = idx;
+    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, idx);
     sLodge_3780* peakRoom = (sLodge_3780*)self;
-    peakRoom->charID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
+    peakRoom->charID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
     peakRoom->fE0 = peakNum;
     for (int i = 3; i >= 0; i--) {
         peakRoom->slots[i] = 0;
@@ -932,7 +933,7 @@ extern "C" void* cFEStatePeakRoom_cFEStatePeakRoom(void* self, int engine, int u
         peakRoom->grid[5][j] = 0;
     }
     peakRoom->fD0 = 0;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -947,11 +948,11 @@ extern char str_126peakroom[];
 /**
  * Creates the peak (trophy) room screen ("126peakroom") and plays its first frame.
  */
-extern "C" void cFEStatePeakRoom_onCreateScreen(void* self)
+extern "C" void cFEStatePeakRoom_onCreateScreen(cFEStatePeakRoom* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_126peakroom), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -1139,8 +1140,8 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBERewardInterface_isTrophyOwned(void* self, int rider, int a, int b, int c);
-extern "C" void cFEStatePeakRoom_updateHelpText(void* self, int id);
-extern "C" void cFEStatePeakRoom_updateMedalsList(void* self, int id);
+extern "C" void cFEStatePeakRoom_updateHelpText(cFEStatePeakRoom* self, int id);
+extern "C" void cFEStatePeakRoom_updateMedalsList(cFEStatePeakRoom* self, int id);
 extern "C" void cUIStateStack_push(void* list, void* item);
 
 struct sVEntA_001D3C80 { short delta; short index; void* (*fn)(void*, void*, int); };
@@ -1158,34 +1159,34 @@ struct sItem_001D3C80 { int pad[2]; sVEntB_001D3C80* vt; };
  * @param item  the menu entry (its trophy index at +0x18), or 0
  * @param key  widget event number (On Tour Event)
  */
-extern "C" void cFEStatePeakRoom_onWidgetEvent(void* self, void* item, unsigned int key)
+extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, void* item, unsigned int key)
 {
     if (item == 0) {
         return;
     }
     switch (key) {
     case 5:
-        if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)((char*)self + 0x44),
-                          *(int*)((char*)self + 0xDC), *(int*)((char*)self + 0xE0), *(int*)((char*)item + 0x18)) != 0) {
-            void* obj = **(void***)((char*)self + 0x10);
+        if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 13), self->mUserNum,
+                          self->mCharID, self->mPeakNum, *(int*)((char*)item + 0x18)) != 0) {
+            void* obj = *(void**)self->mpEngine;
             sVEntA_001D3C80* vt = *(sVEntA_001D3C80**)((char*)obj + 4);
-            void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, (*(int*)((char*)self + 0xE0) << 16) | *(int*)((char*)item + 0x18));
-            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
+            void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, (self->mPeakNum << 16) | *(int*)((char*)item + 0x18));
+            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         }
         break;
     case 6: {
-        int id = (*(int*)((char*)self + 0xE0) << 16) | *(int*)((char*)item + 0x18);
+        int id = (self->mPeakNum << 16) | *(int*)((char*)item + 0x18);
         for (int i = 0; i < 4; i++) {
             sItem_001D3C80* listItem = ((sItem_001D3C80**)((char*)self + 0x48))[i];
             if (listItem != 0) {
                 listItem->vt[9].fn((char*)listItem + listItem->vt[9].delta, 0);
             }
         }
-        void* obj = **(void***)((char*)self + 0x10);
+        void* obj = *(void**)self->mpEngine;
         sVEntA_001D3C80* vt = *(sVEntA_001D3C80**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, id);
         if (nextState != 0) {
-            cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
+            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         }
         break;
     }
@@ -1214,7 +1215,7 @@ extern "C" void* cList_getByIndex(void* list, int id);
  * @param id  the menu item index (On Tour index)
  * @return 0x100 for events 8 and 9, 0x10 for event 6 on an unowned trophy, otherwise 0x101
  */
-extern "C" int cFEStatePeakRoom_onWidgetMenu(void* self, void* item, unsigned int key, int id)
+extern "C" int cFEStatePeakRoom_onWidgetMenu(cFEStatePeakRoom* self, void* item, unsigned int key, int id)
 {
     switch (key) {
     default:
@@ -1225,8 +1226,8 @@ extern "C" int cFEStatePeakRoom_onWidgetMenu(void* self, void* item, unsigned in
     case 6: {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
         void* entry = cList_getByIndex((char*)item + 0x74, id);
-        if (cBERewardInterface_isTrophyOwned(iface, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0xDC),
-                          *(int*)((char*)self + 0xE0), *(int*)((char*)entry + 0x18)) == 0) {
+        if (cBERewardInterface_isTrophyOwned(iface, self->mUserNum, self->mCharID,
+                          self->mPeakNum, *(int*)((char*)entry + 0x18)) == 0) {
             return 0x10;
         }
         break;
@@ -1268,16 +1269,16 @@ public:
  *
  * @param index  the trophy (On Tour trophyType)
  */
-extern "C" void cFEStatePeakRoom_updateHelpText(void* self, int index)
+extern "C" void cFEStatePeakRoom_updateHelpText(cFEStatePeakRoom* self, int index)
 {
-    if (*(void**)((char*)self + 0xD0) != 0) {
-        if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 13), *(signed char*)((char*)self + 0x44),
-                          *(int*)((char*)self + 0xDC), *(int*)((char*)self + 0xE0), index) != 0) {
-            cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0xD0), GetHashValue32(str_kT_HELPSelectGoal));
+    if (self->mpHelpText != 0) {
+        if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 13), self->mUserNum,
+                          self->mCharID, self->mPeakNum, index) != 0) {
+            cUIText_setUnicodeStringByID(self->mpHelpText, GetHashValue32(str_kT_HELPSelectGoal));
         } else {
-            cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0xD0), GetHashValue32(str_kT_HELP_LockedGoal));
+            cUIText_setUnicodeStringByID(self->mpHelpText, GetHashValue32(str_kT_HELP_LockedGoal));
         }
-        (*(cPeakWidget_3EC8**)((char*)self + 0xD0))->show(1);
+        ((cPeakWidget_3EC8*)self->mpHelpText)->show(1);
     }
 }
 #endif
@@ -1341,7 +1342,7 @@ struct sRoom_3F80 {
  * @param vself  the peak-room state (this)
  * @param peak  the trophy group, 0-3 (On Tour trophyType): despite its name not a peak; the peak is +0xE0
  */
-extern "C" void cFEStatePeakRoom_updateMedalsList(void* vself, int peak)
+extern "C" void cFEStatePeakRoom_updateMedalsList(cFEStatePeakRoom* vself, int peak)
 {
     sRoom_3F80* self = (sRoom_3F80*)vself;
     int n;

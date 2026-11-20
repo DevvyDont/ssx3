@@ -1,4 +1,12 @@
 #include "common.h"
+#include "fe/festatetransition.h"
+#include "fe/festatetitle.h"
+#include "fe/festateoptionssound.h"
+#include "fe/festateoptionshud.h"
+#include "fe/festateoptionsgame.h"
+#include "fe/festatemainmenu.h"
+#include "fe/festatebonusmaterial.h"
+#include "fe/fepopupvideocalibration.h"
 #include "fe/festatecharselect.h"
 #include "fe/festateubertrick.h"
 #include "fe/popupinfo.h"
@@ -4268,10 +4276,10 @@ extern void* cFEStateOptionsGame_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateOptionsGame_cFEStateOptionsGame(void *self) {
+extern "C" void* cFEStateOptionsGame_cFEStateOptionsGame(cFEStateOptionsGame* self) {
     func_0039E2A0_DF48(self, 0);
-    *(void***)((char*)self + 8) = cFEStateOptionsGame_vtbl;
-    return self;
+    self->mVtbl = cFEStateOptionsGame_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -4289,8 +4297,8 @@ extern void* D_0046D0D0[];
  * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
  * (bit 0 frees).
  */
-extern "C" void cFEStateOptionsGame__cFEStateOptionsGame(void *self) {
-    *(void***)((char*)self + 8) = D_0046D0D0;
+extern "C" void cFEStateOptionsGame__cFEStateOptionsGame(cFEStateOptionsGame* self) {
+    self->mVtbl = D_0046D0D0;
     func_0039E390_DDF80(self);
 }
 #endif
@@ -4314,10 +4322,10 @@ extern void* cFEStateOptionsSound_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateOptionsSound_cFEStateOptionsSound(void *self) {
+extern "C" void* cFEStateOptionsSound_cFEStateOptionsSound(cFEStateOptionsSound* self) {
     func_0039E2A0_DFB0(self, 0);
-    *(void***)((char*)self + 8) = cFEStateOptionsSound_vtbl;
-    return self;
+    self->mVtbl = cFEStateOptionsSound_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -4335,8 +4343,8 @@ extern void* D_0046D0D0[];
  * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
  * (bit 0 frees).
  */
-extern "C" void cFEStateOptionsSound__cFEStateOptionsSound(void *self) {
-    *(void***)((char*)self + 8) = D_0046D0D0;
+extern "C" void cFEStateOptionsSound__cFEStateOptionsSound(cFEStateOptionsSound* self) {
+    self->mVtbl = D_0046D0D0;
     func_0039E390_DDFE8(self);
 }
 #endif
@@ -4362,10 +4370,10 @@ extern void* D_0046C550[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateOptionsHUD_cFEStateOptionsHUD(void *self) {
+extern "C" void* cFEStateOptionsHUD_cFEStateOptionsHUD(cFEStateOptionsHUD* self) {
     func_0039E2A0_E018(self, 0);
-    *(void***)((char*)self + 8) = D_0046C550;
-    return self;
+    self->mVtbl = D_0046C550;
+    return ((void*)self);
 }
 #endif
 
@@ -4382,8 +4390,8 @@ extern void* D_0046D0D0[];
  *
  * The g++ delete flags pass through in the second argument register.
  */
-extern "C" void cFEStateOptionsHUD__cFEStateOptionsHUD(void *self) {
-    *(void***)((char*)self + 8) = D_0046D0D0;
+extern "C" void cFEStateOptionsHUD__cFEStateOptionsHUD(cFEStateOptionsHUD* self) {
+    self->mVtbl = D_0046D0D0;
     func_0039E390_DE050(self);
 }
 #endif
@@ -5230,12 +5238,12 @@ extern int D_0046BB88_E628[] __asm__("cFEStateTransition_vtbl");
  *
  * @return @p self
  */
-extern "C" void *cFEStateTransition_cFEStateTransition(void *self) {
+extern "C" void *cFEStateTransition_cFEStateTransition(cFEStateTransition* self) {
     func_0039E2A0_E628(self);
-    *(int **)((char *)self + 8) = D_0046BB88_E628;
-    *(int *)((char *)self + 0x48) = 0;
-    *(int *)((char *)self + 0x4C) = 0;
-    return self;
+    self->mVtbl = (void**)D_0046BB88_E628;
+    self->mpSnow = 0;
+    self->mpWhite = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -5254,8 +5262,8 @@ extern void* cFEStateTransition_vtbl[];
  *
  * @return no meaningful value (func_0039E390 returns nothing)
  */
-extern "C" void* cFEStateTransition__cFEStateTransition(void *self) {
-    *(void***)((char*)self + 8) = cFEStateTransition_vtbl;
+extern "C" void* cFEStateTransition__cFEStateTransition(cFEStateTransition* self) {
+    self->mVtbl = cFEStateTransition_vtbl;
     return func_0039E390_E668(self);
 }
 #endif
@@ -5273,10 +5281,10 @@ extern int cFEStateTitle_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *cFEStateTitle_cFEStateTitle(void *self) {
+extern "C" void *cFEStateTitle_cFEStateTitle(cFEStateTitle* self) {
     func_0039E2A0_E690(self, 0);
-    *(int **)((char *)self + 8) = cFEStateTitle_vtbl;
-    return self;
+    self->mVtbl = (void**)cFEStateTitle_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -5295,8 +5303,8 @@ extern void* D_0046D0D0[];
  *
  * @return nothing meaningful (whatever func_0039E390 leaves)
  */
-extern "C" void* cFEStateTitle__cFEStateTitle(void *self) {
-    *(void***)((char*)self + 8) = D_0046D0D0;
+extern "C" void* cFEStateTitle__cFEStateTitle(cFEStateTitle* self) {
+    self->mVtbl = D_0046D0D0;
     return func_0039E390_E6C8(self);
 }
 #endif
@@ -5314,10 +5322,10 @@ extern int cFEStateMainMenu_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *cFEStateMainMenu_cFEStateMainMenu(void *self) {
+extern "C" void *cFEStateMainMenu_cFEStateMainMenu(cFEStateMainMenu* self) {
     func_0039E2A0_E6F0(self, 0);
-    *(int **)((char *)self + 8) = cFEStateMainMenu_vtbl;
-    return self;
+    self->mVtbl = (void**)cFEStateMainMenu_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -5337,8 +5345,8 @@ extern void* D_0046D0D0[];
  *
  * @return nothing meaningful (whatever func_0039E390 leaves)
  */
-extern "C" void* cFEStateMainMenu__cFEStateMainMenu(void *self) {
-    *(void***)((char*)self + 8) = D_0046D0D0;
+extern "C" void* cFEStateMainMenu__cFEStateMainMenu(cFEStateMainMenu* self) {
+    self->mVtbl = D_0046D0D0;
     return func_0039E390_E728(self);
 }
 #endif
@@ -5356,10 +5364,10 @@ extern int cFEStateBonusMaterial_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *cFEStateBonusMaterial_cFEStateBonusMaterial(void *self) {
+extern "C" void *cFEStateBonusMaterial_cFEStateBonusMaterial(cFEStateBonusMaterial* self) {
     func_0039E2A0_E750(self, 0);
-    *(int **)((char *)self + 8) = cFEStateBonusMaterial_vtbl;
-    return self;
+    self->mVtbl = (void**)cFEStateBonusMaterial_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -5379,8 +5387,8 @@ extern void* D_0046D0D0[];
  *
  * @return nothing meaningful (whatever func_0039E390 leaves)
  */
-extern "C" void* cFEStateBonusMaterial__cFEStateBonusMaterial(void *self) {
-    *(void***)((char*)self + 8) = D_0046D0D0;
+extern "C" void* cFEStateBonusMaterial__cFEStateBonusMaterial(cFEStateBonusMaterial* self) {
+    self->mVtbl = D_0046D0D0;
     return func_0039E390_E788(self);
 }
 #endif
@@ -5846,8 +5854,8 @@ extern void* cFEPopupVideoCalibration_vtbl[];
  *
  * @return no meaningful value (func_0039E390 returns nothing)
  */
-extern "C" void* cFEPopupVideoCalibration__cFEPopupVideoCalibration(void *self) {
-    *(void***)((char*)self + 8) = cFEPopupVideoCalibration_vtbl;
+extern "C" void* cFEPopupVideoCalibration__cFEPopupVideoCalibration(cFEPopupVideoCalibration* self) {
+    self->mVtbl = cFEPopupVideoCalibration_vtbl;
     return func_0039E390_EB58(self);
 }
 #endif

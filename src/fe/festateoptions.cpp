@@ -1,4 +1,7 @@
 #include "common.h"
+#include "fe/festateoptionssound.h"
+#include "fe/festateoptionshud.h"
+#include "fe/festateoptionsgame.h"
 #include "render/ps2graphicsman.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
@@ -520,26 +523,26 @@ static inline void setText_188F28(sOptGame_188F28* self, char** names, int i, ch
  * gets Off/16:9/anamorphic and selects the widescreen setting (iUseWidescreen). Each row also gets its title and help
  * text, the entry "1" is hidden but enabled, and the "Menu" selection starts at entry 1.
  */
-extern "C" void cFEStateOptionsGame_onCreateScreen(sOptGame_188F28* self)
+extern "C" void cFEStateOptionsGame_onCreateScreen(cFEStateOptionsGame* self)
 {
-    void* engine = self->engine;
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_19game_opt), 0);
-    self->screen = (char*)screen;
+    void* engine = self->mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, ((sOptGame_188F28*)self), GetHashValue32(str_19game_opt), 0);
+    self->mpScreen = (cUIScreen*)((char*)screen);
     if (screen != 0)
         cUIScreen_playFrame(screen, 0, 0);
     sOptionIface_188F28* iface = (sOptionIface_188F28*)cBE_getInterface_Fv(cBE_getBE(), 4);
-    self->item[0] = -1;
-    self->item[1] = 1;
-    self->item[2] = 2;
-    cUIObj_188F28* uiObj = (cUIObj_188F28*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A14F8));
-    cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004A1500));
+    ((signed char*)&self->mLanguageSlot)[0] = -1;
+    ((signed char*)&self->mLanguageSlot)[1] = 1;
+    ((signed char*)&self->mLanguageSlot)[2] = 2;
+    cUIObj_188F28* uiObj = (cUIObj_188F28*)cUIScreen_getObjectByHashName((char*)self->mpScreen, GetHashValue32(D_004A14F8));
+    cUIScreen_getObjectByHashName((char*)self->mpScreen, GetHashValue32(D_004A1500));
     uiObj->setVisible(0);
     uiObj->setStatic(1);
-    void* menu = cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_Menu));
+    void* menu = cUIScreen_getObjectByHashName((char*)self->mpScreen, GetHashValue32(str_Menu));
     if (menu != 0)
         cUIMenu_setSelectedByIndex(menu, 1);
-    if (self->item[0] >= 0) {
-        void* w = find_188F28(self, D_00440FD8, 0);
+    if (((signed char*)&self->mLanguageSlot)[0] >= 0) {
+        void* w = find_188F28(((sOptGame_188F28*)self), D_00440FD8, 0);
         if (w != 0) {
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_LANGAmerican), 0);
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_LANGFrench), 1);
@@ -550,36 +553,36 @@ extern "C" void cFEStateOptionsGame_onCreateScreen(sOptGame_188F28* self)
                 cUIListBox_setCurrentEntryByIndex(w, sel);
         }
         {
-            cUIText* label = (cUIText*)find_188F28(self, D_00440FB8, 0);
+            cUIText* label = (cUIText*)find_188F28(((sOptGame_188F28*)self), D_00440FB8, 0);
             if (label != 0)
                 cUIText_setUnicodeStringByID(label, GetHashValue32(D_00440FC8[0]));
         }
         {
-            cUIText* label = (cUIText*)find_188F28(self, D_00440FF8, 0);
+            cUIText* label = (cUIText*)find_188F28(((sOptGame_188F28*)self), D_00440FF8, 0);
             if (label != 0)
                 cUIText_setUnicodeStringByID(label, GetHashValue32(D_00440FE8[0]));
         }
     }
-    if (self->item[1] >= 0) {
-        void* w = find_188F28(self, D_00440FD8, 1);
+    if (((signed char*)&self->mLanguageSlot)[1] >= 0) {
+        void* w = find_188F28(((sOptGame_188F28*)self), D_00440FD8, 1);
         if (w != 0) {
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNMPH), 0);
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNKPH), 0);
             cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().iUseMetricUnits);
         }
         {
-            cUIText* label = (cUIText*)find_188F28(self, D_00440FB8, 1);
+            cUIText* label = (cUIText*)find_188F28(((sOptGame_188F28*)self), D_00440FB8, 1);
             if (label != 0)
                 cUIText_setUnicodeStringByID(label, GetHashValue32(D_00440FC8[1]));
         }
         {
-            cUIText* label = (cUIText*)find_188F28(self, D_00440FF8, 1);
+            cUIText* label = (cUIText*)find_188F28(((sOptGame_188F28*)self), D_00440FF8, 1);
             if (label != 0)
                 cUIText_setUnicodeStringByID(label, GetHashValue32(D_00440FE8[1]));
         }
     }
-    if (self->item[2] >= 0) {
-        void* w = find_188F28(self, D_00440FD8, 2);
+    if (((signed char*)&self->mLanguageSlot)[2] >= 0) {
+        void* w = find_188F28(((sOptGame_188F28*)self), D_00440FD8, 2);
         if (w != 0) {
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNOff), 0);
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_19Widescreen169), 0);
@@ -587,12 +590,12 @@ extern "C" void cFEStateOptionsGame_onCreateScreen(sOptGame_188F28* self)
             cUIListBox_setCurrentEntryByIndex(w, iface->getOptions().iUseWidescreen);
         }
         {
-            cUIText* label = (cUIText*)find_188F28(self, D_00440FB8, 2);
+            cUIText* label = (cUIText*)find_188F28(((sOptGame_188F28*)self), D_00440FB8, 2);
             if (label != 0)
                 cUIText_setUnicodeStringByID(label, GetHashValue32(D_00440FC8[2]));
         }
         {
-            cUIText* label = (cUIText*)find_188F28(self, D_00440FF8, 2);
+            cUIText* label = (cUIText*)find_188F28(((sOptGame_188F28*)self), D_00440FF8, 2);
             if (label != 0)
                 cUIText_setUnicodeStringByID(label, GetHashValue32(D_00440FE8[2]));
         }
@@ -623,7 +626,7 @@ int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBEOptionInterface_defaultGame(void* iface);
-extern "C" void cFEStateOptionsGame_updateWidget(void* self);
+extern "C" void cFEStateOptionsGame_updateWidget(cFEStateOptionsGame* self);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0029ED90(void* p, int a);
 extern char str_111resetopts[];
@@ -690,7 +693,7 @@ static inline sGameCfg_189610 Cfg_189610()
  * @param popup  the popup state; its mHashName (+0xC) says which popup it is
  * @param event  popup event code (22 is handled; 21 and the rest are ignored)
  */
-extern "C" void cFEStateOptionsGame_onPopupEvent(void* self, char* popup, int event)
+extern "C" void cFEStateOptionsGame_onPopupEvent(cFEStateOptionsGame* self, char* popup, int event)
 {
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (event) {
@@ -747,7 +750,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsGame_onWidgetMenu);
  * @param event  menu event code
  * @return 0x100 or 0x101 (cUIMenu reply codes)
  */
-extern "C" int cFEStateOptionsGame_onWidgetMenu(void* self, int menu, int event)
+extern "C" int cFEStateOptionsGame_onWidgetMenu(cFEStateOptionsGame* self, int menu, int event)
 {
     return event != 9 ? 257 : 0x100;
 }
@@ -763,7 +766,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsGame_onWidgetPair);
  * @param event  pair event code
  * @return 0x100 when @p event is nonzero, else 0
  */
-extern "C" int cFEStateOptionsGame_onWidgetPair(void* self, int pair, int event)
+extern "C" int cFEStateOptionsGame_onWidgetPair(cFEStateOptionsGame* self, int pair, int event)
 {
     return event ? 0x100 : 0;
 }
@@ -860,7 +863,7 @@ static inline void Refresh_189980(sOptGame_189980* self)
  * @param widget  the widget the event is for (null: nothing happens)
  * @param event  UI event code (5, 6, 7 or 9 are handled)
  */
-extern "C" void cFEStateOptionsGame_onWidgetEvent(sOptGame_189980* self, char* widget, unsigned int event)
+extern "C" void cFEStateOptionsGame_onWidgetEvent(cFEStateOptionsGame* self, char* widget, unsigned int event)
 {
     if (widget == 0) {
         return;
@@ -869,27 +872,27 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(sOptGame_189980* self, char* w
     switch (event) {
     case 7: {
         char* popup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
-        func_0039E318(popup, self->engine, self);
+        func_0039E318(popup, (char*)self->mpEngine, ((sOptGame_189980*)self));
         *(void***)(popup + 8) = D_0046B3D0;
         popup[0x48] = 0;
-        cUIStateStack_pushPopup(self->engine + 0x18, popup);
+        cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, popup);
         break;
     }
     case 5:
         if (Is_189980(*(int*)(widget + 0x38), D_004A1520)) {
             char* popup = (char*)operator new(84, str_cFEPopupScreenPos, 0x100, 0);
-            func_0039E318(popup, self->engine, self);
+            func_0039E318(popup, (char*)self->mpEngine, ((sOptGame_189980*)self));
             *(void***)(popup + 8) = cFEPopupScreenPos_vtbl;
             *(int*)(popup + 0x4C) = 0;
             *(int*)(popup + 0x48) = 0;
             popup[0x50] = 0;
-            cUIStateStack_pushPopup(self->engine + 0x18, popup);
+            cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, popup);
         } else if (Is_189980(*(int*)(widget + 0x38), D_004A1528)) {
             char* popup = (char*)operator new(76, str_cFEPopupVideoCalibration, 0x100, 0);
-            func_0039E318(popup, self->engine, self);
+            func_0039E318(popup, (char*)self->mpEngine, ((sOptGame_189980*)self));
             *(void***)(popup + 8) = cFEPopupVideoCalibration_vtbl;
             *(int*)(popup + 0xC) = 27;
-            cUIStateStack_pushPopup(self->engine + 0x18, popup);
+            cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, popup);
         }
         break;
     case 6: {
@@ -903,30 +906,30 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(sOptGame_189980* self, char* w
             sVE_189980b* vt = *(sVE_189980b**)(locale + 4);
             vt[3].fn(locale + vt[3].delta, D_00535610_189980.iLanguage);
         }
-        Refresh_189980(self);
-        char* eng = *(char**)self->engine;
+        Refresh_189980(((sOptGame_189980*)self));
+        char* eng = *(char**)(char*)self->mpEngine;
         sVE_189980c* vt = *(sVE_189980c**)(eng + 4);
-        void* nextState = vt[5].fn(eng + vt[5].delta, self, *(int*)(widget + 0x18));
+        void* nextState = vt[5].fn(eng + vt[5].delta, ((sOptGame_189980*)self), *(int*)(widget + 0x18));
         if (nextState != 0) {
-            cUIStateStack_push(self->engine + 0x18, nextState);
+            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         }
         break;
     }
     case 9:
-        if (self->item[0] >= 0 && Is_189980(*(int*)(widget + 0x38), D_00440FD8[self->item[0]])) {
+        if (((signed char*)&self->mLanguageSlot)[0] >= 0 && Is_189980(*(int*)(widget + 0x38), D_00440FD8[((signed char*)&self->mLanguageSlot)[0]])) {
             D_00535610_189980.iLanguage = cUIListBox_getCurrentEntryData(widget);
             char* locale = (char*)SSXApp->FELocale;
             sVE_189980b* vt = *(sVE_189980b**)(locale + 4);
             char* thisp = locale + vt[3].delta;
             vt[3].fn(thisp, cUIListBox_getCurrentEntryData(widget));
-            Refresh_189980(self);
+            Refresh_189980(((sOptGame_189980*)self));
             func_0029ED90(cAudioInterface_bxAudio(), 1);
         }
-        if (self->item[1] >= 0 && Is_189980(*(int*)(widget + 0x38), D_00440FD8[self->item[1]])) {
+        if (((signed char*)&self->mLanguageSlot)[1] >= 0 && Is_189980(*(int*)(widget + 0x38), D_00440FD8[((signed char*)&self->mLanguageSlot)[1]])) {
             bool on = *(unsigned char*)(widget + 0x319);
             D_00535610_189980.iUseMetricUnits = on;
         }
-        if (self->item[2] >= 0 && Is_189980(*(int*)(widget + 0x38), D_00440FD8[self->item[2]])) {
+        if (((signed char*)&self->mLanguageSlot)[2] >= 0 && Is_189980(*(int*)(widget + 0x38), D_00440FD8[((signed char*)&self->mLanguageSlot)[2]])) {
             D_00535610_189980.iUseWidescreen = *(unsigned char*)(widget + 0x319);
         }
         cSSXApp_activateBEOptions(SSXApp);
@@ -1010,7 +1013,7 @@ static inline void* find_189D60(sOptGame_189D60* self, int i)
  *
  * @param self_  the cFEStateOptionsGame state
  */
-extern "C" void cFEStateOptionsGame_updateWidget(void* self_)
+extern "C" void cFEStateOptionsGame_updateWidget(cFEStateOptionsGame* self_)
 {
     sOptGame_189D60* self = (sOptGame_189D60*)self_;
     sOptionIface_189D60* iface = (sOptionIface_189D60*)cBE_getInterface_Fv(cBE_getBE(), 4);
@@ -1081,7 +1084,7 @@ int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void cFEStateOptionsSound_updateWidget(void* self);
+extern "C" void cFEStateOptionsSound_updateWidget(cFEStateOptionsSound* self);
 extern char str_141advsettings[];
 extern char str_ongroup[];
 extern char str_fegroup[];
@@ -1108,25 +1111,25 @@ public:
  * Calls cFEStateOptionsSound_updateWidget, then shows "ongroup" and entry "7" (disabled) when D_004A1A70 is
  * 1, and "fegroup" otherwise (D_004A1A70's meaning is unknown).
  */
-extern "C" void cFEStateOptionsSound_onCreateScreen(void* self)
+extern "C" void cFEStateOptionsSound_onCreateScreen(cFEStateOptionsSound* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_141advsettings), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
     cFEStateOptionsSound_updateWidget(self);
     int on = D_004A1A70 == 1;
-    cUIObj_18A298* onObj = (cUIObj_18A298*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ongroup));
+    cUIObj_18A298* onObj = (cUIObj_18A298*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ongroup));
     if (onObj != 0) {
         onObj->setVisible(on);
     }
-    cUIObj_18A298* offObj = (cUIObj_18A298*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_fegroup));
+    cUIObj_18A298* offObj = (cUIObj_18A298*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_fegroup));
     if (offObj != 0) {
         offObj->setVisible(on ^ 1);
     }
-    cUIObj_18A298* item7 = (cUIObj_18A298*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1528));
+    cUIObj_18A298* item7 = (cUIObj_18A298*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1528));
     if (item7 != 0) {
         item7->setVisible(on);
         item7->setStatic(on ^ 1);
@@ -1141,14 +1144,14 @@ int GetHashValue32(char* str);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBEOptionInterface_defaultSound(void* iface);
-extern "C" void cFEStateOptionsSound_setSoundMode(void* self, unsigned int mode);
+extern "C" void cFEStateOptionsSound_setSoundMode(cFEStateOptionsSound* self, unsigned int mode);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_00287410(void* snd, int v);
 extern "C" void func_00287488(void* snd, int v);
 extern "C" void func_00287520(void* snd, int v);
 extern "C" void cSSXAudio_SetArcadeSFX(void* snd, int v);
 extern "C" void func_002875D0(void* snd, int v);
-extern "C" void cFEStateOptionsSound_updateWidget(void* self);
+extern "C" void cFEStateOptionsSound_updateWidget(cFEStateOptionsSound* self);
 extern char str_111resetopts[];
 extern int D_004A14D4;
 
@@ -1203,7 +1206,7 @@ static inline sSndCfg_18A3D8 Cfg_18A3D8()
  * @param popup  the popup state; its mHashName (+0xC) is checked
  * @param event  popup event code (22 is handled)
  */
-extern "C" void cFEStateOptionsSound_onPopupEvent(void* self, char* popup, int event)
+extern "C" void cFEStateOptionsSound_onPopupEvent(cFEStateOptionsSound* self, char* popup, int event)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (event) {
@@ -1254,7 +1257,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_onWidgetMenu);
  * @param event  menu event code
  * @return 0x100, 0 or 0x101 (cUIMenu reply codes)
  */
-extern "C" int cFEStateOptionsSound_onWidgetMenu(void* self, int menu, int event)
+extern "C" int cFEStateOptionsSound_onWidgetMenu(cFEStateOptionsSound* self, int menu, int event)
 {
     switch (event) {
     case 9:
@@ -1276,7 +1279,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSound_onWidgetPair);
  * @param event  pair event code
  * @return 0x100 when @p event is nonzero, else 0
  */
-extern "C" int cFEStateOptionsSound_onWidgetPair(void* self, int pair, int event)
+extern "C" int cFEStateOptionsSound_onWidgetPair(cFEStateOptionsSound* self, int pair, int event)
 {
     return event ? 0x100 : 0;
 }
@@ -1294,7 +1297,7 @@ extern "C" void func_0039E318(void* self, void* engine, void* owner);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
-extern "C" void cFEStateOptionsSound_setSoundMode(void* self, unsigned int mode);
+extern "C" void cFEStateOptionsSound_setSoundMode(cFEStateOptionsSound* self, unsigned int mode);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_00287410(void* snd, int v);
 extern "C" void func_00287488(void* snd, int v);
@@ -1373,7 +1376,7 @@ struct sOptSound_18A8D0 {
  * @param widget  the widget the event is for (null: nothing happens)
  * @param event  UI event code (6, 7 and 9 are handled)
  */
-extern "C" void cFEStateOptionsSound_onWidgetEvent(sOptSound_18A8D0* self, char* widget, unsigned int event)
+extern "C" void cFEStateOptionsSound_onWidgetEvent(cFEStateOptionsSound* self, char* widget, unsigned int event)
 {
     if (widget == 0)
         return;
@@ -1383,10 +1386,10 @@ extern "C" void cFEStateOptionsSound_onWidgetEvent(sOptSound_18A8D0* self, char*
         break;
     case 7: {
         char* resetPopup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
-        func_0039E318(resetPopup, self->engine, self);
+        func_0039E318(resetPopup, (char*)self->mpEngine, ((sOptSound_18A8D0*)self));
         *(void***)(resetPopup + 8) = D_0046B3D0;
         resetPopup[0x48] = 0;
-        cUIStateStack_pushPopup(self->engine + 0x18, resetPopup);
+        cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, resetPopup);
         break;
     }
     case 6: {
@@ -1399,11 +1402,11 @@ extern "C" void cFEStateOptionsSound_onWidgetEvent(sOptSound_18A8D0* self, char*
         func_00287520(cAudioInterface_bxAudio(), Cfg_18A8D0().musicVol);
         cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_18A8D0().f17 != 0);
         func_002875D0(cAudioInterface_bxAudio(), Cfg_18A8D0().f16 != 0);
-        char* eng = *(char**)self->engine;
+        char* eng = *(char**)(char*)self->mpEngine;
         sVE_18A8D0c* vt = *(sVE_18A8D0c**)(eng + 4);
-        void* nextState = vt[5].fn(eng + vt[5].delta, self, *(int*)(widget + 0x18));
+        void* nextState = vt[5].fn(eng + vt[5].delta, ((sOptSound_18A8D0*)self), *(int*)(widget + 0x18));
         if (nextState != 0)
-            cUIStateStack_push(self->engine + 0x18, nextState);
+            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         break;
     }
     case 9:
@@ -1536,7 +1539,7 @@ static inline void* Find_18B380(sOptSound_18B380* self, char* name)
  * @param vself  the cFEStateOptionsSound state
  */
 // Sound options screen: fills the option widgets from the current sound settings.
-extern "C" void cFEStateOptionsSound_updateWidget(void* vself)
+extern "C" void cFEStateOptionsSound_updateWidget(cFEStateOptionsSound* vself)
 {
     sOptSound_18B380* self = (sOptSound_18B380*)vself;
     sOptionIface_18B380* iface = (sOptionIface_18B380*)cBE_getInterface_Fv(cBE_getBE(), 4);
@@ -1661,7 +1664,7 @@ struct sVE_18BEF8v {
  *
  * @param mode  the speaker list choice ("1lb" entry data): 0 stereo, 1 surround, 2 mono, 3 DTS
  */
-extern "C" void cFEStateOptionsSound_setSoundMode(void* self, unsigned int mode)
+extern "C" void cFEStateOptionsSound_setSoundMode(cFEStateOptionsSound* self, unsigned int mode)
 {
     int audioMode;
     switch (mode) {
@@ -1740,7 +1743,7 @@ int GetHashValue32(char* str);
 extern char str_21hud_opt[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void cFEStateOptionsHUD_updateWidget(void* self);
+extern "C" void cFEStateOptionsHUD_updateWidget(cFEStateOptionsHUD* self);
 
 /**
  * Creates the HUD options screen ("21hud_opt"), plays its frame 0 and fills its menu with cFEStateOptionsHUD_updateWidget.
@@ -1748,11 +1751,11 @@ extern "C" void cFEStateOptionsHUD_updateWidget(void* self);
  * The screen comes from cUIEngine_addScreenByHashName on the engine (+0x10) and is stored in mpScreen (+0x40); a
  * missing screen is not played, but cFEStateOptionsHUD_updateWidget runs either way.
  */
-extern "C" void cFEStateOptionsHUD_onCreateScreen(void* self)
+extern "C" void cFEStateOptionsHUD_onCreateScreen(cFEStateOptionsHUD* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_21hud_opt), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -1789,7 +1792,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBEOptionInterface_defaultHUD(void* self);
-extern "C" void cFEStateOptionsHUD_updateWidget(void* self);
+extern "C" void cFEStateOptionsHUD_updateWidget(cFEStateOptionsHUD* self);
 
 /**
  * Handles the HUD options screen's reset popup: on acceptance it restores the default HUD options.
@@ -1801,7 +1804,7 @@ extern "C" void cFEStateOptionsHUD_updateWidget(void* self);
  * @param widget  the popup state (despite the name); its mHashName (+0xC) is checked
  * @param msg  popup event code (22 is handled)
  */
-extern "C" void cFEStateOptionsHUD_onPopupEvent(void* self, void* widget, int msg)
+extern "C" void cFEStateOptionsHUD_onPopupEvent(cFEStateOptionsHUD* self, void* widget, int msg)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (msg) {
@@ -1835,7 +1838,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsHUD_onWidgetMenu);
  * @param event  menu event code
  * @return 0x100, 0 or 0x101 (cUIMenu reply codes)
  */
-extern "C" int cFEStateOptionsHUD_onWidgetMenu(void* self, int menu, int event)
+extern "C" int cFEStateOptionsHUD_onWidgetMenu(cFEStateOptionsHUD* self, int menu, int event)
 {
     switch (event) {
     case 9:
@@ -1902,7 +1905,7 @@ static inline int Is_0018C2A0(int id, char* s) { return id == GetHashValue32(s);
  * @param widget  the widget the event is for (null: nothing happens)
  * @param event  UI event code (1, 2, 6 and 7 are handled)
  */
-extern "C" void cFEStateOptionsHUD_onWidgetEvent(char* self, char* widget, unsigned int event)
+extern "C" void cFEStateOptionsHUD_onWidgetEvent(cFEStateOptionsHUD* self, char* widget, unsigned int event)
 {
     if (widget == 0) {
         return;
@@ -1911,20 +1914,20 @@ extern "C" void cFEStateOptionsHUD_onWidgetEvent(char* self, char* widget, unsig
     switch (event) {
     case 7: {
         char* resetPopup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
-        func_0039E318(resetPopup, *(void**)(self + 0x10), self);
+        func_0039E318(resetPopup, self->mpEngine, ((char*)self));
         *(void***)(resetPopup + 8) = D_0046B3D0;
         *(char*)(resetPopup + 0x48) = 0;
-        cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, resetPopup);
+        cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, resetPopup);
         break;
     }
     case 6: {
         sVE_18C2A0n* vt = *(sVE_18C2A0n**)(iface + 0xC);
         vt[1].fn(iface + vt[1].delta);
-        char* obj = **(char***)(self + 0x10);
+        char* obj = *(char**)self->mpEngine;
         sVE_18C2A0p* vt2 = *(sVE_18C2A0p**)(obj + 4);
-        void* nextState = vt2[5].fn(obj + vt2[5].delta, self, *(int*)(widget + 0x18));
+        void* nextState = vt2[5].fn(obj + vt2[5].delta, ((char*)self), *(int*)(widget + 0x18));
         if (nextState != 0) {
-            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
+            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
         }
         break;
     }
@@ -1996,12 +1999,11 @@ struct sVE_18C478v {
  *
  * @param vself  the HUD options state
  */
-extern "C" void cFEStateOptionsHUD_updateWidget(void* vself)
+extern "C" void cFEStateOptionsHUD_updateWidget(cFEStateOptionsHUD* vself)
 {
-    char* self = (char*)vself;
     cBE_getInterface_Fv(cBE_getBE(), 4);
     sName_C478 name = *(sName_C478*)D_004A14F8;
-    char* menu = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_Menu));
+    char* menu = (char*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_Menu));
     if (menu != 0) {
         int i;
         for (i = 0; i < 3; i++) {

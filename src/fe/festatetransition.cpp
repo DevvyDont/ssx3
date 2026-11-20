@@ -1,4 +1,6 @@
 #include "common.h"
+#include "fe/festatetransition.h"
+#include "fe/festatetitle.h"
 
 //100%
 INCLUDE_ASM("fe/festatetransition", cFEStateBackground_onCreateScreen);
@@ -32,13 +34,13 @@ extern char str_whitefade[];
 /**
  * Creates the transition state's two screens, "transition" and "whitefade".
  */
-extern "C" void cFEStateTransition_onCreateScreen(void* self)
+extern "C" void cFEStateTransition_onCreateScreen(cFEStateTransition* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* engine2;
-    *(void**)((char*)self + 0x48) = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_transition), 0);
-    engine2 = *(void**)((char*)self + 0x10);
-    *(void**)((char*)self + 0x4C) = cUIEngine_addScreenByHashName(engine2, self, GetHashValue32(str_whitefade), 0);
+    self->mpSnow = (cUIScreen*)cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_transition), 0);
+    engine2 = (void*)self->mpEngine;
+    self->mpWhite = (cUIScreen*)cUIEngine_addScreenByHashName(engine2, self, GetHashValue32(str_whitefade), 0);
 }
 #endif
 
@@ -57,15 +59,15 @@ extern char str_start[];
  * @param id  the event's label hash
  * @return 0
  */
-extern "C" int cFEStateTransition_onScreenEvent(void* self, void* screen, int id)
+extern "C" int cFEStateTransition_onScreenEvent(cFEStateTransition* self, void* screen, int id)
 {
     int eventHash1 = GetHashValue32(str_end);
     int eventHash2 = GetHashValue32(str_start);
     if (id == eventHash1) {
-        *(int*)((char*)self + 0x1C) &= ~8;
+        self->mAttrState &= ~8;
         *(int*)((char*)screen + 0x54) &= ~0x40;
     } else if (id == eventHash2) {
-        *(int*)((char*)self + 0x1C) |= 8;
+        self->mAttrState |= 8;
         *(int*)((char*)screen + 0x54) |= 0x40;
     }
     return 0;
@@ -88,20 +90,20 @@ extern "C" void cSSXAudio_MenuSound(void*, int);
  * @param which  the event id (On Tour: int msg); only 0 and 1 do anything
  * @return 0
  */
-extern "C" int cFEStateTransition_handleEvent(void* self, int which)
+extern "C" int cFEStateTransition_handleEvent(cFEStateTransition* self, int which)
 {
     if (which == 0) {
-        void* screen = *(void**)((char*)self + 0x48);
+        void* screen = self->mpSnow;
         if (screen != 0) {
             *(int*)((char*)screen + 0x54) |= 0x40;
-            cUIScreen_playFrame(*(void**)((char*)self + 0x48), 0, 0);
+            cUIScreen_playFrame(self->mpSnow, 0, 0);
             cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 0xF);
         }
     } else if (which == 1) {
-        void* screen = *(void**)((char*)self + 0x4C);
+        void* screen = self->mpWhite;
         if (screen != 0) {
             *(int*)((char*)screen + 0x54) |= 0x40;
-            cUIScreen_playFrame(*(void**)((char*)self + 0x4C), 0, 0);
+            cUIScreen_playFrame(self->mpWhite, 0, 0);
         }
     }
     return 0;
@@ -122,13 +124,13 @@ extern void* cFEStateTitle_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateTitle_cFEStateTitle1(void* self)
+extern "C" void* cFEStateTitle_cFEStateTitle1(cFEStateTitle* self)
 {
     func_0039E2A0(self);
-    *(void***)((char*)self + 0x8) = cFEStateTitle_vtbl;
-    *(int*)((char*)self + 0x48) = 0;
-    *(int*)((char*)self + 0xC) = 0;
-    return self;
+    self->mVtbl = cFEStateTitle_vtbl;
+    self->mNumTicksIdle = 0;
+    self->mHashName = 0;
+    return ((void*)self);
 }
 #endif
 

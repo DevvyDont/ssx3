@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatempcircuit.h"
 
 //100%
 INCLUDE_ASM("fe/festateselectmp", cFEStateSelectMultiplayerMode_onCreateScreen);
@@ -114,12 +115,12 @@ extern void* cFEStateMPCircuit_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateMPCircuit_cFEStateMPCircuit(void* self)
+extern "C" void* cFEStateMPCircuit_cFEStateMPCircuit(cFEStateMPCircuit* self)
 {
     func_0039E2A0(self);
-    *(void***)((char*)self + 0x8) = cFEStateMPCircuit_vtbl;
-    *(int*)((char*)self + 0xC) = 23;
-    return self;
+    self->mVtbl = cFEStateMPCircuit_vtbl;
+    self->mHashName = 23;
+    return ((void*)self);
 }
 #endif
 
