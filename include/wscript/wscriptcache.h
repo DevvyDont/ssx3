@@ -10,8 +10,23 @@
 
 #include "layout.h"
 
-struct cWScriptCacheEntry;
 struct cWorld;
+struct tScriptFileHeader;
+
+// One world section's cached script (cWScriptCache::mpCache, one per section). Size 0xC [R]: cWScriptCache_init
+// allocates the array with a 0xC stride (behind a 0x10-byte count header) and constructs each entry
+// (cWScriptCacheEntry_cWScriptCacheEntry: mState 0, mAsyncHandle -1, no header). Member names are EA's ([O]); every
+// retail access through `this` in its 13 methods falls on a member start.
+struct cWScriptCacheEntry {
+    short mState;                   // 0x000 [O]; [R] ctor 0
+    short mStreamed;                // 0x002 [O]; [R] ctor 0
+    int mAsyncHandle;               // 0x004 [O]; [R] ctor -1
+    tScriptFileHeader* mpScriptHeader; // 0x008 [O]; [R] ctor 0
+};
+
+CHECK_OFFSET(cWScriptCacheEntry, mAsyncHandle, 0x004);
+CHECK_OFFSET(cWScriptCacheEntry, mpScriptHeader, 0x008);
+CHECK_SIZE(cWScriptCacheEntry, 0xC);
 
 struct cWScriptCache {
     cWorld* mpWorld;                // 0x000 [O]

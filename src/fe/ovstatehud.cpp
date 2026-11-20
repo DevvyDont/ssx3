@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/bxloadindicator.h"
 #include "fe/festatelodge.h"
 #include "render/ps2graphicsman.h"
 #include "main/game.h"
@@ -2595,7 +2596,7 @@ extern char str_fefont[];
  *
  * @param vself  the loading indicator (this)
  */
-extern "C" void cBXLoadIndicator_Init(void* vself)
+extern "C" void cBXLoadIndicator_Init(cBXLoadIndicator* vself)
 {
     sHudIds001F30D8* self = (sHudIds001F30D8*)vself;
     char* locale = (char*)SSXApp->FELocale;
@@ -2638,9 +2639,9 @@ INCLUDE_ASM("fe/ovstatehud", cBXLoadIndicator_Update);
  * When the indicator mask (+0x4) is nonzero, adds 1/60 to the animation frame (+0x8) and subtracts 2.0 until it
  * is at most 2.0.
  */
-extern "C" void cBXLoadIndicator_Update(void* self)
+extern "C" void cBXLoadIndicator_Update(cBXLoadIndicator* self)
 {
-    if (*(int*)((char*)self + 4) != 0) {
+    if ((int)self->mLoadIndicators != 0) {
         float* animFrame = (float*)((char*)self + 8);
         float two = 2.0f;
         *animFrame += 0.01666666753590107f;
@@ -2843,9 +2844,9 @@ INCLUDE_ASM("fe/ovstatehud", cBXLoadIndicator_Show);
  *
  * @param bit  the reason (On Tour eLoadIndicator)
  */
-extern "C" void cBXLoadIndicator_Show(void* self, int bit)
+extern "C" void cBXLoadIndicator_Show(cBXLoadIndicator* self, int bit)
 {
-    *(int*)((char*)self + 0x4) |= (1 << bit);
+    *(int*)&self->mLoadIndicators |= (1 << bit);
 }
 #endif
 
@@ -2860,11 +2861,11 @@ INCLUDE_ASM("fe/ovstatehud", cBXLoadIndicator_Hide);
  *
  * @param bit  the indicator to hide (On Tour eLoadIndicator); callers use 0 to 4
  */
-extern "C" void cBXLoadIndicator_Hide(void* self, int bit)
+extern "C" void cBXLoadIndicator_Hide(cBXLoadIndicator* self, int bit)
 {
-    *(int*)((char*)self + 0x4) &= ~(1 << bit);
-    if (*(int*)((char*)self + 0x4) == 0) {
-        *(int*)((char*)self + 0x8) = 0;
+    *(int*)&self->mLoadIndicators &= ~(1 << bit);
+    if ((int)self->mLoadIndicators == 0) {
+        *(int*)&self->mAnimFrame = 0;
     }
 }
 #endif

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/blockman.h"
 
 INCLUDE_ASM("bx/blockman", cBlockMan_init);
 
@@ -16,14 +17,14 @@ INCLUDE_ASM("bx/blockman", cBlockMan_isBlock);
  * @param addr  the address to test
  * @return 1 when inside, else 0
  */
-extern "C" int cBlockMan_isBlock(void *block, int addr) {
+extern "C" int cBlockMan_isBlock(cBlockMan* block, int addr) {
     int temp_5;
     int var_3;
 
-    temp_5 = addr - (*(int *)((char*)(block) + (0)));
+    temp_5 = addr - ((int)block->Memory);
     var_3 = 0;
     if (temp_5 > 0) {
-        var_3 = temp_5 < (*(int *)((char*)(block) + (4)));
+        var_3 = temp_5 < (block->MemorySize);
     }
     return var_3;
 }
@@ -47,13 +48,13 @@ struct sPool_6C00 {
  * @param size  the size needed in bytes
  * @return the block, or null when no group can serve it
  */
-extern "C" int* cBlockMan_alloc(void* self, unsigned int size) {
+extern "C" int* cBlockMan_alloc(cBlockMan* self, unsigned int size) {
     int i;
     sPool_6C00* pool;
     int* head;
 
-    for (i = 0; i < *(int*)((char*)self + 0xC); i++) {
-        pool = (sPool_6C00*)((i << 4) + *(int*)((char*)self + 8));
+    for (i = 0; i < self->NumGroups; i++) {
+        pool = (sPool_6C00*)((i << 4) + (int)self->Groups);
         if (pool->blockSize >= size) {
             head = pool->freeList;
             if (head != 0) {
@@ -83,17 +84,17 @@ struct sPool_6C60 {
  *
  * @param ptr  the block to free
  */
-extern "C" void cBlockMan_free(void* self, int* ptr) {
+extern "C" void cBlockMan_free(cBlockMan* self, int* ptr) {
     int i;
     int off;
     sPool_6C60* pool;
 
-    for (i = 0; i < *(int*)((char*)self + 0xC); i++) {
-        pool = (sPool_6C60*)((i << 4) + *(int*)((char*)self + 8));
+    for (i = 0; i < self->NumGroups; i++) {
+        pool = (sPool_6C60*)((i << 4) + (int)self->Groups);
         off = (int)ptr - pool->base;
         if (off >= 0 && off < pool->size) {
             *ptr = (int)pool->freeList;
-            ((sPool_6C60*)((i << 4) + *(int*)((char*)self + 8)))->freeList = ptr;
+            ((sPool_6C60*)((i << 4) + (int)self->Groups))->freeList = ptr;
             return;
         }
     }

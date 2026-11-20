@@ -333,14 +333,14 @@ void cMemMan_free(void* p);
 /**
  * Unloads an entry's script data: frees it unless streamed, clears mpScriptHeader and sets state 0.
  */
-extern "C" void cWScriptCacheEntry_unload(void* self)
+extern "C" void cWScriptCacheEntry_unload(cWScriptCacheEntry* self)
 {
-    void* buf = *(void**)((char*)self + 0x8);
+    void* buf = self->mpScriptHeader;
     if (buf != 0) {
-        if (*(short*)((char*)self + 0x2) == 0) {
+        if (self->mStreamed == 0) {
             cMemMan_free(buf);
         }
-        *(void**)((char*)self + 0x8) = 0;
+        self->mpScriptHeader = 0;
     }
     *(short*)self = 0;
 }
@@ -529,7 +529,7 @@ static inline int valid_D120(sRef_D120 r)
  * @param entry  the script slot
  * @return the tResourceID, or -1
  */
-extern "C" unsigned int cWScriptCacheEntry_getWScriptHeaderId(void* cache, void* inst, int entry)
+extern "C" unsigned int cWScriptCacheEntry_getWScriptHeaderId(cWScriptCacheEntry* cache, void* inst, int entry)
 {
     char* data = *(char**)((char*)inst + 0x88);
     if (data == 0 || WSD_D120 == 0) {
@@ -1039,10 +1039,10 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getWScriptScript);
  * @param i  index of the script within the section
  * @return the script's code pointer, or 0 when the entry is not loaded
  */
-extern "C" int cWScriptCacheEntry_getWScriptScript(void* self, int i)
+extern "C" int cWScriptCacheEntry_getWScriptScript(cWScriptCacheEntry* self, int i)
 {
     if (*(short*)self == 3) {
-        void* data = *(void**)((char*)self + 0x8);
+        void* data = self->mpScriptHeader;
         return (*(int**)((char*)data + 0x3C))[i];
     }
     return 0;
@@ -1058,10 +1058,10 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getNumGlobalScripts);
  * @return the count at +0x10 of the entry's data (+0x8) when the entry's state (the short at +0x0) is 3 (loaded) and it
  *         has data, else 0
  */
-extern "C" int cWScriptCacheEntry_getNumGlobalScripts(void* self)
+extern "C" int cWScriptCacheEntry_getNumGlobalScripts(cWScriptCacheEntry* self)
 {
     if (*(short*)self == 3) {
-        void* data = *(void**)((char*)self + 0x8);
+        void* data = self->mpScriptHeader;
         if (data != 0) {
             return *(int*)((char*)data + 0x10);
         }
@@ -1079,10 +1079,10 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getGlobalScripts);
  * @return the pointer at +0x14 of the entry's data (+0x8) when the entry's state (the short at +0x0) is 3 (loaded) and
  *         it has data, else 0
  */
-extern "C" int cWScriptCacheEntry_getGlobalScripts(void* self)
+extern "C" int cWScriptCacheEntry_getGlobalScripts(cWScriptCacheEntry* self)
 {
     if (*(short*)self == 3) {
-        void* data = *(void**)((char*)self + 0x8);
+        void* data = self->mpScriptHeader;
         if (data != 0) {
             return *(int*)((char*)data + 0x14);
         }
@@ -1099,10 +1099,10 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getNumProcessScripts);
  *
  * @return the count at +0x28 of the entry's data when the entry is loaded (state 3) and has data, else 0
  */
-extern "C" int cWScriptCacheEntry_getNumProcessScripts(void* self)
+extern "C" int cWScriptCacheEntry_getNumProcessScripts(cWScriptCacheEntry* self)
 {
     if (*(short*)self == 3) {
-        void* data = *(void**)((char*)self + 0x8);
+        void* data = self->mpScriptHeader;
         if (data != 0) {
             return *(int*)((char*)data + 0x28);
         }
@@ -1119,10 +1119,10 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getProcessScripts);
  *
  * @return the pointer at +0x2C of the entry's data when the entry is loaded (state 3) and has data, else 0
  */
-extern "C" int cWScriptCacheEntry_getProcessScripts(void* self)
+extern "C" int cWScriptCacheEntry_getProcessScripts(cWScriptCacheEntry* self)
 {
     if (*(short*)self == 3) {
-        void* data = *(void**)((char*)self + 0x8);
+        void* data = self->mpScriptHeader;
         if (data != 0) {
             return *(int*)((char*)data + 0x2C);
         }
@@ -1140,10 +1140,10 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getNumMissionScripts);
  * @return the count at +0x20 of the entry's data (+0x8) when the entry's state (the short at +0x0) is 3 (loaded) and it
  *         has data, else 0
  */
-extern "C" int cWScriptCacheEntry_getNumMissionScripts(void* self)
+extern "C" int cWScriptCacheEntry_getNumMissionScripts(cWScriptCacheEntry* self)
 {
     if (*(short*)self == 3) {
-        void* data = *(void**)((char*)self + 0x8);
+        void* data = self->mpScriptHeader;
         if (data != 0) {
             return *(int*)((char*)data + 0x20);
         }
@@ -1161,10 +1161,10 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCacheEntry_getMissionScripts);
  * @return the pointer at +0x24 of the entry's data (+0x8) when the entry's state (the short at +0x0) is 3 (loaded) and
  *         it has data, else 0
  */
-extern "C" int cWScriptCacheEntry_getMissionScripts(void* self)
+extern "C" int cWScriptCacheEntry_getMissionScripts(cWScriptCacheEntry* self)
 {
     if (*(short*)self == 3) {
-        void* data = *(void**)((char*)self + 0x8);
+        void* data = self->mpScriptHeader;
         if (data != 0) {
             return *(int*)((char*)data + 0x24);
         }

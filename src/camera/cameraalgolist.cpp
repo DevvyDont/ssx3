@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camera/cameraalgolist.h"
 
 //100%
 INCLUDE_ASM("camera/cameraalgolist", cCameraAlgoList_insert);
@@ -43,7 +44,7 @@ struct sAlgoListK2 {
  * @param owned  nonzero if removing the node should also destroy the algorithm
  * @param w      target weight
  */
-extern "C" void cCameraAlgoList_insert(sAlgoListK2* list, cCamAlgoK2* algo, int owned, float w)
+extern "C" void cCameraAlgoList_insert(cCameraAlgoList* list, cCamAlgoK2* algo, int owned, float w)
 {
     algo->v04();
     sAlgoNodeK2* n = (sAlgoNodeK2*)cMemMan_alloc(0x1C, str_Algorithm_List_Node, 0x20000000, 0);
@@ -55,13 +56,13 @@ extern "C" void cCameraAlgoList_insert(sAlgoListK2* list, cCamAlgoK2* algo, int 
         n->weight = 1.0f;
     else
         n->weight = 0.0f;
-    sAlgoNodeK2* oldHead = list->head;
+    sAlgoNodeK2* oldHead = (sAlgoNodeK2*)list->Head;
     n->target = w;
     if (oldHead != 0)
         oldHead->prev = n;
-    sAlgoNodeK2* old = list->head;
-    list->head = n;
-    list->count++;
+    sAlgoNodeK2* old = (sAlgoNodeK2*)list->Head;
+    list->Head = (cCameraAlgoListNode*)n;
+    list->Length++;
     n->next = old;
 }
 #endif
@@ -115,17 +116,17 @@ static inline void sAlgoNodeK2b_delete(sAlgoNodeK2b* n)
  * @param n  the node to remove
  * @return the node that followed @p n (0 at the end)
  */
-extern "C" sAlgoNodeK2b* cCameraAlgoList_remove(sAlgoListK2b* list, sAlgoNodeK2b* n)
+extern "C" sAlgoNodeK2b* cCameraAlgoList_remove(cCameraAlgoList* list, sAlgoNodeK2b* n)
 {
     sAlgoNodeK2b* next = n->next;
     if (n->prev == 0)
-        list->head = next;
+        list->Head = (cCameraAlgoListNode*)next;
     else
         n->prev->next = next;
     if (n->next != 0)
         n->next->prev = n->prev;
     sAlgoNodeK2b_delete(n);
-    list->count--;
+    list->Length--;
     return next;
 }
 #endif
@@ -176,16 +177,16 @@ static inline void sAlgoNode_delete(sAlgoNode* n)
  *
  * @param list  the algorithm list (this)
  */
-extern "C" void cCameraAlgoList_removeAll(sAlgoList* list)
+extern "C" void cCameraAlgoList_removeAll(cCameraAlgoList* list)
 {
-    sAlgoNode* n = list->head;
+    sAlgoNode* n = (sAlgoNode*)list->Head;
     while (n != 0) {
         sAlgoNode* next = n->next;
         sAlgoNode_delete(n);
         n = next;
     }
-    list->count = 0;
-    list->head = 0;
+    list->Length = 0;
+    list->Head = 0;
 }
 #endif
 

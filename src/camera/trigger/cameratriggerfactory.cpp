@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/backgroundman.h"
 #include "camera/race/allspinchasealgo.h"
 #include "camera/race/directionchasealgo.h"
 #include "render/ps2graphicsman.h"
@@ -7366,13 +7367,13 @@ struct sIdList_0017ABE0 {
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cBackgroundMan__cBackgroundMan(sIdList_0017ABE0* self, int flags)
+extern "C" void cBackgroundMan__cBackgroundMan(cBackgroundMan* self, int flags)
 {
-    if (self->ids != 0)
+    if (self->mpiImageTID != 0)
     {
-        for (int i = 0; i < self->count; i++)
+        for (int i = 0; i < self->miNumImage; i++)
         {
-            int id = self->ids[i];
+            int id = self->mpiImageTID[i];
             if (id >= 0)
             {
                 cPS2GraphicsMan* obj = GrMan;
@@ -7380,8 +7381,8 @@ extern "C" void cBackgroundMan__cBackgroundMan(sIdList_0017ABE0* self, int flags
                 vt[50].fn((char*)obj + vt[50].delta, id);
             }
         }
-        if (self->ids != 0)
-            cMemMan_free(self->ids);
+        if (self->mpiImageTID != 0)
+            cMemMan_free(self->mpiImageTID);
     }
     if (flags & 1)
         operator_delete((int*)self);
@@ -7400,12 +7401,12 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBackgroundMan_setActiveImage
  * @param i  the image index
  * @return 1, always
  */
-extern "C" int cBackgroundMan_setActiveImage(void* self, int i)
+extern "C" int cBackgroundMan_setActiveImage(cBackgroundMan* self, int i)
 {
-    if (i >= 0 && i < *(int*)((char*)self + 0x4)) {
-        *(int*)((char*)self + 0x8) = i;
+    if (i >= 0 && i < self->miNumImage) {
+        self->miActiveImage = i;
     } else {
-        *(int*)((char*)self + 0x8) = -1;
+        self->miActiveImage = -1;
     }
     return 1;
 }

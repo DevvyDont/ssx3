@@ -1,4 +1,5 @@
 #include "common.h"
+#include "animation/mdfarchive.h"
 
 struct cAnimSequence {
     char pad_0x00[0x98];
@@ -1211,7 +1212,7 @@ extern "C" char *FILE_loadpack(int, int);
  * @param name  the archive's file name
  * @param flags  memory flags for the load
  */
-extern "C" void cMdfArchive_loadArchive(void *self, int name, int flags) {
+extern "C" void cMdfArchive_loadArchive(cMdfArchive* self, int name, int flags) {
     char *data = FILE_loadpack(name, flags);
     *(char **)self = data;
     cMdfArchive_linkArchive_impl(self, data);
@@ -1251,8 +1252,8 @@ INCLUDE_ASM("animation/animsequencer", cMdfArchive_getNumModelParts);
  *
  * @return the model part count
  */
-extern "C" short cMdfArchive_getNumModelParts(void *self) {
-    char *header = *(char **)((char *)self + 4);
+extern "C" short cMdfArchive_getNumModelParts(cMdfArchive* self) {
+    char *header = (char*)self->ArchiveHeader;
     if (header != 0) {
         return *(short *)(header + 4);
     }
@@ -1273,10 +1274,10 @@ extern "C" int strcasecmp(const char* a, const char* b);
  * @param name  the part name to look for
  * @return 1 when found, else 0
  */
-extern "C" int cMdfArchive_findModelPart(char* self, const char* name) {
+extern "C" int cMdfArchive_findModelPart(cMdfArchive* self, const char* name) {
     int i;
-    for (i = 0; i < *(short*)(*(char**)(self + 4) + 4); i++) {
-        if (strcasecmp(name, *(char**)(self + 8) + i * 0x60) == 0)
+    for (i = 0; i < *(short*)((char*)self->ArchiveHeader + 4); i++) {
+        if (strcasecmp(name, (char*)self->ModelHeaders + i * 0x60) == 0)
             return 1;
     }
     return 0;
@@ -1295,11 +1296,11 @@ extern "C" int strcasecmp(const char* a, const char* b);
  * @param name  the part name to look for
  * @return the part header inside the archive, or 0
  */
-extern "C" char* cMdfArchive_getModelPartPtr(char* self, const char* name) {
+extern "C" char* cMdfArchive_getModelPartPtr(cMdfArchive* self, const char* name) {
     int i;
-    for (i = 0; i < *(short*)(*(char**)(self + 4) + 4); i++) {
-        if (strcasecmp(name, *(char**)(self + 8) + i * 0x60) == 0)
-            return *(char**)(self + 8) + i * 0x60;
+    for (i = 0; i < *(short*)((char*)self->ArchiveHeader + 4); i++) {
+        if (strcasecmp(name, (char*)self->ModelHeaders + i * 0x60) == 0)
+            return (char*)self->ModelHeaders + i * 0x60;
     }
     return 0;
 }
@@ -1359,7 +1360,7 @@ INCLUDE_ASM("animation/animsequencer", cMdfArchive_getModelPartPtrByIndex);
  * @param index  the part index
  * @return the part header inside the archive
  */
-extern "C" int cMdfArchive_getModelPartPtrByIndex(void *archive, int index) {
-    return (*(int *)((char*)(archive) + (8))) + (index * 0x60);
+extern "C" int cMdfArchive_getModelPartPtrByIndex(cMdfArchive* archive, int index) {
+    return ((int)archive->ModelHeaders) + (index * 0x60);
 }
 #endif

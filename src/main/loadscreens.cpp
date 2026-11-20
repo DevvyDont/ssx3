@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/backgroundman.h"
 #include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
 #include "be/beintnetwork.h"
@@ -53,19 +54,19 @@ struct sBgMan_17ACC8 {
  *
  * @return 1 when the file was loaded, 0 if it could not be read
  */
-extern "C" int cBackgroundMan_loadImages(sBgMan_17ACC8* self)
+extern "C" int cBackgroundMan_loadImages(cBackgroundMan* self)
 {
     sBgFile_17ACC8* file = (sBgFile_17ACC8*)FILE_loadz(str_data_textures_backs_ssh, 0x100);
     if (file == 0) {
         return 0;
     }
     int n = file->count;
-    self->count = n;
-    self->images = (int*)operator_new_tag(n * 4, str_BackTID, 0, 0);
-    for (int i = 0; i < self->count; i++) {
+    self->miNumImage = n;
+    self->mpiImageTID = (int*)operator_new_tag(n * 4, str_BackTID, 0, 0);
+    for (int i = 0; i < self->miNumImage; i++) {
         char* shape = (char*)file + file->shapes[i].offset;
         void* img = SHAPE_unpack(shape);
-        self->images[i] = ((sRVEntry_17ACC8*)GrMan->mVtbl)[46].fn((char*)GrMan + ((sRVEntry_17ACC8*)GrMan->mVtbl)[46].delta, img, str_back, 0, 1, -1);
+        self->mpiImageTID[i] = ((sRVEntry_17ACC8*)GrMan->mVtbl)[46].fn((char*)GrMan + ((sRVEntry_17ACC8*)GrMan->mVtbl)[46].delta, img, str_back, 0, 1, -1);
         if (img != shape && img != 0) {
             cMemMan_free(img);
         }
@@ -170,9 +171,9 @@ static inline void setState_AE00()
  * the array at +0x0) as the state's texture (+0x10). Then pops the draw state, view and viewport (slots 32, 22).
  * cDebugMenuScreen_draw calls it for its popup instead of the menu.
  */
-extern "C" void cBackgroundMan_renderImage(sBgMan_AE00* self)
+extern "C" void cBackgroundMan_renderImage(cBackgroundMan* self)
 {
-    if (self->cur < 0 || self->cur >= self->count) {
+    if (self->miActiveImage < 0 || self->miActiveImage >= self->miNumImage) {
         return;
     }
     call0_AE00(21);
@@ -230,7 +231,7 @@ extern "C" void cBackgroundMan_renderImage(sBgMan_AE00* self)
     verts[3].u = 1.0f;
     verts[3].v = 1.0f;
     setAlpha_AE00(ctx_AE00()->top, 0x18);
-    *(short*)((char*)ctx_AE00()->top + 0x10) = imageOf_AE00(self);
+    *(short*)((char*)ctx_AE00()->top + 0x10) = imageOf_AE00(((sBgMan_AE00*)self));
     {
         sCtx_AE00* graphics = ctx_AE00();
         sVEnt_AE00* vtEntry = &graphics->vt[71];
@@ -356,7 +357,7 @@ extern "C" sLS_B1B0* cDebugMenuScreen_cDebugMenuScreen(sLS_B1B0* self)
     self->vt = cDebugMenuScreen_vtbl;
     cBackgroundMan_cBackgroundMan(self->bg);
     cTrackFileMan_scanLocations(&self->sub);
-    cBackgroundMan_loadImages((sBgMan_17ACC8*)self->bg);
+    cBackgroundMan_loadImages((cBackgroundMan*)((sBgMan_17ACC8*)self->bg));
     void* iface0 = cBE_getInterface_B1B0(cBE_getBE(), 0);
     void* iface7 = cBE_getInterface_B1B0(SSXApp->BE, 7);
     self->f8C24 = 0;

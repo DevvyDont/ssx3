@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/irradiance.h"
 #include "render/playershadow.h"
 #include "render/particle.h"
 #include "render/ps2bezierman.h"
@@ -14103,7 +14104,7 @@ INCLUDE_ASM("render/particle", func_00389840);
 INCLUDE_ASM("render/particle", func_00389C38);
 #ifdef SKIP_ASM
 struct sParticleEntryA0;
-extern "C" sParticleEntryA0* cIrradianceDataBase_Get(void* self, int i);
+extern "C" sParticleEntryA0* cIrradianceDataBase_Get(cIrradianceDataBase* self, int i);
 extern "C" void func_00389CB8(sPartVec4* self, void* p, float s);
 extern int D_004A43C4;
 
@@ -14130,7 +14131,7 @@ extern "C" void func_00389C38(sPartVec4* self, void* sunPos)
     cIrradiance_Clear(self);
     sPartLib_9C38* lib = &D_005047F8;
     if (lib->count > 0) {
-        func_00389590(self, (sPartVec4*)cIrradianceDataBase_Get(lib, D_004A43C4), &D_00504810, 1.0f);
+        func_00389590(self, (sPartVec4*)cIrradianceDataBase_Get((cIrradianceDataBase*)lib, D_004A43C4), &D_00504810, 1.0f);
     }
     if (sunPos != 0) {
         func_00389CB8(self, sunPos, 1.0f);
@@ -14873,20 +14874,20 @@ struct sParticleEntryA0 {
  * @param i  the entry index
  * @return the entry
  */
-extern "C" sParticleEntryA0* cIrradianceDataBase_Get(void* self, int i)
+extern "C" sParticleEntryA0* cIrradianceDataBase_Get(cIrradianceDataBase* self, int i)
 {
-    int count = *(int*)((char*)self + 0x4);
+    int count = self->mNumItem;
     if (i >= count) {
         i = count - 1;
     }
-    return *(sParticleEntryA0**)((char*)self + 0x8) + i;
+    return (sParticleEntryA0*)self->mIrradianceArray + i;
 }
 #endif
 
 //100%
 INCLUDE_ASM("render/particle", cIrradianceDataBase_Get1);
 #ifdef SKIP_ASM
-extern "C" int cIrradianceDataBase_GetIDByName(void* self, const char* name);
+extern "C" int cIrradianceDataBase_GetIDByName(cIrradianceDataBase* self, const char* name);
 
 /**
  * Returns the irradiance entry named @p name: cIrradianceDataBase_Get with the index from cIrradianceDataBase_GetIDByName (entry
@@ -14897,7 +14898,7 @@ extern "C" int cIrradianceDataBase_GetIDByName(void* self, const char* name);
  * @param name  the entry name
  * @return the entry
  */
-extern "C" sParticleEntryA0* cIrradianceDataBase_Get1(void* self, const char* name)
+extern "C" sParticleEntryA0* cIrradianceDataBase_Get1(cIrradianceDataBase* self, const char* name)
 {
     return cIrradianceDataBase_Get(self, cIrradianceDataBase_GetIDByName(self, name));
 }
@@ -14918,11 +14919,11 @@ extern "C" int func_004165A8(const void* a, const void* b);
  * @param name  the irradiance name
  * @return the entry's index, or 0 when the name is unknown
  */
-extern "C" int cIrradianceDataBase_GetIDByName(void* self, const char* name)
+extern "C" int cIrradianceDataBase_GetIDByName(cIrradianceDataBase* self, const char* name)
 {
     int i;
-    for (i = 0; i < *(int*)((char*)self + 0x4); i++) {
-        if (func_004165A8(name, *(char**)((char*)self + 0xC) + (i << 3)) == 0) {
+    for (i = 0; i < self->mNumItem; i++) {
+        if (func_004165A8(name, self->mIrradianceNames + (i << 3)) == 0) {
             return i;
         }
     }

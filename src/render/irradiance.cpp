@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/irradiance.h"
 
 //100%
 INCLUDE_ASM("render/irradiance", cIrradianceDataBase_Load);
@@ -26,22 +27,22 @@ struct cIrradianceDataBase_ACD0 {
  * "IrradianceNames" (+0xC) and "IrradianceArray" (+0x8) blocks, n goes to +0x4 and the loaded file is freed,
  * leaving +0x0 pointing at the freed block.
  */
-extern "C" void cIrradianceDataBase_Load(cIrradianceDataBase_ACD0* self)
+extern "C" void cIrradianceDataBase_Load(cIrradianceDataBase* self)
 {
     int* file = (int*)FILE_load(str_data_worlds_irr_dat, 0x100);
-    self->file = file;
+    self->mData = (char*)file;
     int n = file[0];
     char* src = (char*)(file + 1);
     int indexSize = n * 8;
     int sampleSize = n * 160;
-    self->count = n;
-    self->index = operator_new_tag(indexSize, str_IrradianceNames, 0, 0);
+    self->mNumItem = n;
+    self->mIrradianceNames = (char*)operator_new_tag(indexSize, str_IrradianceNames, 0, 0);
     char* src2 = src + indexSize;
-    self->samples = operator_new_tag(sampleSize, str_IrradianceArray, 0x2000000, 0);
-    func_0041605C(self->index, src, indexSize);
-    func_0041605C(self->samples, src2, sampleSize);
-    if (self->file != 0) {
-        cMemMan_free(self->file);
+    self->mIrradianceArray = (cIrradiance*)operator_new_tag(sampleSize, str_IrradianceArray, 0x2000000, 0);
+    func_0041605C(self->mIrradianceNames, src, indexSize);
+    func_0041605C(self->mIrradianceArray, src2, sampleSize);
+    if ((int*)self->mData != 0) {
+        cMemMan_free((int*)self->mData);
     }
 }
 #endif
@@ -57,18 +58,18 @@ void cMemMan_free(void*);
  * When the word at +0x4 is non-zero it frees the blocks at +0xC and +0x8 with cMemMan_free, then zeroes +0xC, +0x8 and
  * +0x4. Callers: cRealFE_purge and cGame_purge.
  */
-extern "C" void cIrradianceDataBase_Purge(void* self)
+extern "C" void cIrradianceDataBase_Purge(cIrradianceDataBase* self)
 {
-    if (*(int*)((char*)self + 0x4) != 0) {
-        if (*(void**)((char*)self + 0xC) != 0) {
-            cMemMan_free(*(void**)((char*)self + 0xC));
+    if (self->mNumItem != 0) {
+        if (self->mIrradianceNames != 0) {
+            cMemMan_free(self->mIrradianceNames);
         }
-        if (*(void**)((char*)self + 0x8) != 0) {
-            cMemMan_free(*(void**)((char*)self + 0x8));
+        if (self->mIrradianceArray != 0) {
+            cMemMan_free(self->mIrradianceArray);
         }
-        *(void**)((char*)self + 0xC) = 0;
-        *(void**)((char*)self + 0x8) = 0;
-        *(int*)((char*)self + 0x4) = 0;
+        self->mIrradianceNames = 0;
+        self->mIrradianceArray = 0;
+        self->mNumItem = 0;
     }
 }
 #endif

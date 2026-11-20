@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/blockman.h"
 
 struct cBigFile {
     int field_0x0;
@@ -156,9 +157,9 @@ INCLUDE_ASM("bx/bigfile", cBlockMan_allignSize);
  * @param size  the size in bytes
  * @return @p size rounded up
  */
-extern "C" int cBlockMan_allignSize(void* self, int size)
+extern "C" int cBlockMan_allignSize(cBlockMan* self, int size)
 {
-    int align = *(int*)((char*)self + 0x10);
+    int align = self->Allignment;
     return align * ((size + align - 1) / align);
 }
 #endif
