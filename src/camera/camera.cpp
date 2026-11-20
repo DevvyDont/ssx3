@@ -8713,8 +8713,8 @@ extern "C" void f_6C60_def(void* algorithm, long id)
     char* mgr = *(char**)(*(char**)(self + 0x30) + 4) + 0x6C0;
     sVEntry<void>* mvt = *(sVEntry<void>**)mgr;
     if (id == ((LongFn_6C60)mvt[7].fn)(mgr + mvt[7].delta)) {
-        sVec4 pos = getVec_6C60(self, 4);
-        sVec4 dir = getVec_6C60(self, 3);
+        sVec4 front = getVec_6C60(self, 4);
+        sVec4 velocity = getVec_6C60(self, 3);
         sVec4 vecCopy;
         sVec4 scratchVec;
         sVec4 directionVel;
@@ -8727,12 +8727,12 @@ extern "C" void f_6C60_def(void* algorithm, long id)
         *(t4Vector*)(self + 0xC0) = D_004FF120_6C60;
         *(t4Vector*)(self + 0xD0) = D_004FF120_6C60;
         *(t4Vector*)(self + 0xE0) = D_004FF120_6C60;
-        *(sVec4*)(self + 0x80) = pos;
+        *(sVec4*)(self + 0x80) = front;
         sVEntry<void>* svt1 = *(sVEntry<void>**)(self + 0x10);
         *(float*)(self + 0x1D4) = ((FloatFn_6C60)svt1[13].fn)(self + svt1[13].delta);
         *(int*)(self + 0x1E8) = 0;
         *(int*)(self + 0x1EC) = 0;
-        Cross_6C60(scratchVec, (const sVec4&)D_004FF160_6C60, pos);
+        Cross_6C60(scratchVec, (const sVec4&)D_004FF160_6C60, front);
         vecCopy = scratchVec;
         *(float*)(self + 0x224) = 0.92f;
         *(sVec4*)(self + 0xF0) = scratchVec;
@@ -8757,8 +8757,8 @@ extern "C" void f_6C60_def(void* algorithm, long id)
         *(t4Vector*)(self + 0x170) = D_004FF120_6C60;
         *(int*)(self + 0x244) = 0;
         *(int*)(self + 0x240) = 0;
-        *(sVec4*)(self + 0x190) = dir;
-        Scale_6C60(scratchVec, pos, 250.0f);
+        *(sVec4*)(self + 0x190) = velocity;
+        Scale_6C60(scratchVec, front, 250.0f);
         *(int*)(self + 0x300) = 1;
         vecCopy = scratchVec;
         *(sVec4*)(self + 0x1A0) = scratchVec;
@@ -8792,7 +8792,7 @@ extern "C" void f_6C60_def(void* algorithm, long id)
         Scale_6C60(directionVel, scratchVec, 2.0f);
         vecCopy = directionVel;
         *(sVec4*)(self + 0x1C0) = directionVel;
-        *(sVec4*)(self + 0x100) = dir;
+        *(sVec4*)(self + 0x100) = velocity;
         *(int*)(self + 0x108) = 0;
         sVEntry<void>* svt2 = *(sVEntry<void>**)(self + 0x10);
         ((VoidFn_6C60)svt2[5].fn)(self + svt2[5].delta);

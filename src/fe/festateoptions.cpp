@@ -2547,23 +2547,25 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsController_vibratePad);
 #ifdef SKIP_ASM
 extern char* PadCache;
 
-class cSnd_18D108 {
+// The pad device (vtable 0x48E488: dtor, sampleButtons, numActuators, setActuator; On Tour cPadDevice).
+class cPadDevice {
 public:
-    virtual void v01();
-    virtual void v02();
-    virtual int getState();
-    virtual void setVolume(int ch, float v);
+    virtual ~cPadDevice();
+    virtual int sampleButtons();
+    virtual int numActuators();
+    virtual void setActuator(int act, float frequency);
 };
 
 /**
  * Rumbles a controller pad with two motor strengths derived from @p x and @p y.
  *
  * Scales @p x to x' = max(0, x * 0.91333 - 18.5185) and @p y by 0.99167, then looks up pad @p idx (as a signed char) in
- * PadCache's device table (+0x2EEC). When the device's getState() is 2, sets motor 0 to the largest of 0, (y - 0.5) *
- * 0.01 and (x' - 2) / 972.22, and motor 1 to the largest of 0, (y - 70) * 0.00625 and (x' - 100) / 5000 (setVolume).
- * Callers: cFEStateOptionsController_onCreateScreen and _onDestroyScreen, cFEStateOptionsController_onPopupEvent, cFEStateOptionsController_onWidgetEvent, cFEStateOptionsController_onUpdate;
+ * PadCache's device table (+0x2EEC). When the device has 2 actuators (numActuators), sets motor 0 to the largest of 0,
+ * (y - 0.5) * 0.01 and (x' - 2) / 972.22, and motor 1 to the largest of 0, (y - 70) * 0.00625 and (x' - 100) / 5000
+ * (setActuator). Callers: cFEStateOptionsController_onCreateScreen and _onDestroyScreen,
+ * cFEStateOptionsController_onPopupEvent, cFEStateOptionsController_onWidgetEvent, cFEStateOptionsController_onUpdate;
  * fepopupmisc's func_001E3AC8 is the same body without the state argument. Likely bug: with no PadCache the device
- * stays 0 and getState() is still called through it.
+ * stays 0 and numActuators() is still called through it.
  *
  * @param idx  the pad index
  * @param x  first strength input (feeds both motors' second terms)
@@ -2579,13 +2581,13 @@ extern "C" void cFEStateOptionsController_vibratePad(void* self, int idx, float 
         clampedX = scaledX;
     }
     y = y * 0.9916666746139526f;
-    cSnd_18D108* rumbleDevice = 0;
+    cPadDevice* rumbleDevice = 0;
     if (PadCache != 0) {
-        rumbleDevice = *(cSnd_18D108**)(PadCache + (i << 2) + 0x2EEC);
+        rumbleDevice = *(cPadDevice**)(PadCache + (i << 2) + 0x2EEC);
     }
-    if (rumbleDevice->getState() == 2) {
-        rumbleDevice->setVolume(0, ((y - 0.5f) * 0.009999999776482582f >? (clampedX - 2.0f) / 972.2222290039062f) >? 0.0f);
-        rumbleDevice->setVolume(1, ((y - 70.0f) * 0.0062500000931322575f >? (clampedX - 100.0f) / 5000.0f) >? 0.0f);
+    if (rumbleDevice->numActuators() == 2) {
+        rumbleDevice->setActuator(0, ((y - 0.5f) * 0.009999999776482582f >? (clampedX - 2.0f) / 972.2222290039062f) >? 0.0f);
+        rumbleDevice->setActuator(1, ((y - 70.0f) * 0.0062500000931322575f >? (clampedX - 100.0f) / 5000.0f) >? 0.0f);
     }
 }
 #endif

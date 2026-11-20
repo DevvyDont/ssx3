@@ -7119,22 +7119,23 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E3AC8);
 #ifdef SKIP_ASM
 extern char* PadCache;
 
-class cSnd_3AC8 {
+// The pad device (vtable 0x48E488: dtor, sampleButtons, numActuators, setActuator; On Tour cPadDevice).
+class cPadDevice {
 public:
-    virtual void v01();
-    virtual void v02();
-    virtual int getState();
-    virtual void setVolume(int ch, float v);
+    virtual ~cPadDevice();
+    virtual int sampleButtons();
+    virtual int numActuators();
+    virtual void setActuator(int act, float frequency);
 };
 
 /**
  * Sets the two vibration levels of pad @p idx from two values.
  *
- * Uses the pad device at PadCache + 0x2EEC + 4 x idx (the virtuals the source declares as getState and setVolume). With
- * x' = max(0, 0.91333 x - 18.5185) and y scaled by 0.99167, when the device's state is 2 sets channel 0 to max((y -
- * 0.5) / 100, (x' - 2) / 972.22, 0) and channel 1 to max((y - 70) / 160, (x' - 100) / 5000, 0). Same body as
- * cFEStateOptionsController_vibratePad in fe/festateoptions without its unused state argument. Likely bug: with PadCache null the device stays
- * null and is still called.
+ * Uses the pad device at PadCache + 0x2EEC + 4 x idx. With x' = max(0, 0.91333 x - 18.5185) and y scaled by 0.99167,
+ * when the device has 2 actuators (numActuators) sets actuator 0 to max((y - 0.5) / 100, (x' - 2) / 972.22, 0) and
+ * actuator 1 to max((y - 70) / 160, (x' - 100) / 5000, 0). Same body as cFEStateOptionsController_vibratePad in
+ * fe/festateoptions without its unused state argument. Likely bug: with PadCache null the device stays null and is
+ * still called.
  *
  * @param idx  the pad (0 or 1)
  * @param x    the first level input
@@ -7150,13 +7151,13 @@ extern "C" void func_001E3AC8(int idx, float x, float y)
         clamped = adjusted;
     }
     y = y * 0.9916666746139526f;
-    cSnd_3AC8* gamepad = 0;
+    cPadDevice* gamepad = 0;
     if (PadCache != 0) {
-        gamepad = *(cSnd_3AC8**)(PadCache + (i << 2) + 0x2EEC);
+        gamepad = *(cPadDevice**)(PadCache + (i << 2) + 0x2EEC);
     }
-    if (gamepad->getState() == 2) {
-        gamepad->setVolume(0, ((y - 0.5f) * 0.009999999776482582f >? (clamped - 2.0f) / 972.2222290039062f) >? 0.0f);
-        gamepad->setVolume(1, ((y - 70.0f) * 0.0062500000931322575f >? (clamped - 100.0f) / 5000.0f) >? 0.0f);
+    if (gamepad->numActuators() == 2) {
+        gamepad->setActuator(0, ((y - 0.5f) * 0.009999999776482582f >? (clamped - 2.0f) / 972.2222290039062f) >? 0.0f);
+        gamepad->setActuator(1, ((y - 70.0f) * 0.0062500000931322575f >? (clamped - 100.0f) / 5000.0f) >? 0.0f);
     }
 }
 #endif

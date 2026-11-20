@@ -1269,10 +1269,11 @@ struct sVtxPos {
     void setZW(float az, float aw) { z = az; w = aw; }
 } __attribute__((aligned(16)));
 
-// One vertex as the render context's slot-71 draw call takes it: UV + q, integer colour, position.
+// One vertex as the render context's slot-71 draw call takes it: UV + q, the colour as R, G, B, A words (the GS
+// RGBAQ order), position.
 struct sHudVertex {
     float u, v, q, pad;
-    int g, b, a, r;
+    int r, g, b, a;
     sVtxPos pos;
 };
 
@@ -1358,8 +1359,8 @@ extern "C" void cOVStateHUD1P_calcElemPos(void*, void*, void*, void*, void*, int
  * Stem BG and White Stem Fill. Element @p sel of @p elems gives position, size and scale; the scale is multiplied by
  * (@p sx, @p sy), the size by that scale, and cOVStateHUD1P_calcElemPos places the element with its alignment and the reflect
  * flags @p x. The element's layer byte (+0x22) goes to bits 5-9 of the current draw state's word +0x8. All four
- * vertices get @p col times 128 and q = 1; @p col is A, R, G, B (the tHUDDef colour order), so the vertex word that the
- * unit's sHudVertex calls r (+0x1C) receives the alpha.
+ * vertices get @p col times 128 and q = 1; @p col is A, R, G, B (the tHUDDef colour order) and the vertex words are
+ * R, G, B, A (the GS RGBAQ order), so col[0] goes to the last word.
  *
  * The Bottom and Mid Stacker pieces are 23 tall and the Top 31, times the element's y scale and bar->scale (On Tour
  * tBarConfig partScale), with bar->count (numMidSegments) Mid Stacker pieces between them. Each piece spans the
@@ -1410,11 +1411,11 @@ extern "C" void func_0021D1A0(float fill, float sx, float sy, char* self, char* 
         int vtxAlpha = (int)(col[0] * 128.0f);
         int vtxRed = (int)(col[1] * 128.0f);
         int vtxGreen = (int)(col[2] * 128.0f);
-        int a = (int)(col[3] * 128.0f);
-        vtx[i].r = vtxAlpha;
-        vtx[i].g = vtxRed;
-        vtx[i].b = vtxGreen;
-        vtx[i].a = a;
+        int vtxBlue = (int)(col[3] * 128.0f);
+        vtx[i].a = vtxAlpha;
+        vtx[i].r = vtxRed;
+        vtx[i].g = vtxGreen;
+        vtx[i].b = vtxBlue;
         vtx[i].q = 1.0f;
         vtx[i].pos.setZW(0.0f, 1.0f);
     }
@@ -1550,7 +1551,6 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVStateHUD1P_renderWipeoutMeter);
 // loop) and the (x, y, z, const float& w) ctor the quad builders use.
 
 
-// One vertex as the render context's slot-71 draw call takes it: UV + q, integer colour, position.
 
 
 // The render context D_004A289C_D9A0 as these functions use it: GS state block pointer at 0xE84, vptr at 0x10D8 (slot 71
@@ -1558,10 +1558,10 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVStateHUD1P_renderWipeoutMeter);
 
 
 
-// An RGBA colour as the element colour getter tHUDDef_getColour writes it and cOVStateHUD1P_renderBitmap takes it (the first component
-// is the one the fades scale).
+// An ARGB colour as the element colour getter tHUDDef_getColour writes it and cOVStateHUD1P_renderBitmap takes it
+// (the alpha comes first; the fades scale it).
 struct sColour {
-    float r, g, b, a;
+    float a, r, g, b;
 };
 
 // A HUD sprite: texture id and UV rectangle.
@@ -1697,10 +1697,10 @@ extern "C" void cOVStateHUD1P_renderWipeoutMeter(float fill, float alpha, char* 
     sHudVertex* verts = vtx;
     for (int i = 0; i < 4; i++) {
         int vtxAlpha = (int)(alpha * 128.0f);
-        vtx[i].r = vtxAlpha;
+        vtx[i].a = vtxAlpha;
+        vtx[i].r = 0x80;
         vtx[i].g = 0x80;
         vtx[i].b = 0x80;
-        vtx[i].a = 0x80;
         vtx[i].q = 1.0f;
     }
     {
@@ -1772,7 +1772,7 @@ extern "C" void cOVStateHUD1P_renderWipeoutMeter(float fill, float alpha, char* 
         fs.x = (colourOrSize.x - (fillInset.x + fillInset.x)) * fill;
         fs.y = colourOrSize.y - (fillInset.y + fillInset.y);
         sColour col = D_004C8668;
-        col.r *= alpha;
+        col.a *= alpha;
         scratchVec.x += fillInset.x;
         scratchVec.y += fillInset.y;
         int* w2 = (int*)((char*)GrMan->m_pCurrentDrawState + 8);
@@ -1796,8 +1796,6 @@ INCLUDE_ASM("fe/all_in_one_fe", cOVStateHUD1P_renderRank);
 // The render context D_004A289C_E1B0 as these functions use it: GS state block pointer at 0xE84, vptr at 0x10D8 (slot 71
 // draws a vertex list).
 
-// An RGBA colour as the element colour getter tHUDDef_getColour writes it and cOVStateHUD1P_renderBitmap takes it (the first component
-// is the one the fades scale).
 // Four floats, 4-byte aligned (not a t4Vector, which is 16-aligned): the 4-float slots some callers give the element
 // position / scale getters.
 struct sFloat4 {
@@ -1877,7 +1875,7 @@ extern "C" void cOVStateHUD1P_renderRank(char* self, char* obj, int* rider, int 
         if (*(int*)(panelRider + 0xEC) == 0) {
             k = D_00504FB8[(int)(rankAnimFrame * 12.566370964050293f * 81.4873275756836f) & 0x1FF] * 0.199636310338974f * (1.0f - rankAnimFrame * rankAnimFrame) + k;
         } else {
-            col.r = col.r * (rankAnimFrame * 0.5f + 0.5f);
+            col.a = col.a * (rankAnimFrame * 0.5f + 0.5f);
         }
     }
     tHUDDef_getScale(obj + 0x360, &sc);
@@ -2073,7 +2071,6 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021EA00);
 // loop) and the (x, y, z, const float& w) ctor the quad builders use.
 
 
-// One vertex as the render context's slot-71 draw call takes it: UV + q, integer colour, position.
 
 
 // The render context D_004A289C_EA00 as these functions use it: GS state block pointer at 0xE84, vptr at 0x10D8 (slot 71
@@ -2085,8 +2082,8 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021EA00);
  * Draws one column of the glow texture (see func_0021E7E0): one quad, or for a height over 72 three rows whose top and
  * bottom rows are 36 tall.
  *
- * Every vertex gets the colour @p col times 128 (the unit's sColour r, the first component, is the alpha: tHUDDef
- * colours are A, R, G, B), q = 1, and u = @p uMin on the even (left) and @p uMax on the odd (right) vertices. Above 72
+ * Every vertex gets the colour @p col times 128 (tHUDDef colours are A, R, G, B; the vertex takes R, G, B, A),
+ * q = 1, and u = @p uMin on the even (left) and @p uMax on the odd (right) vertices. Above 72
  * it builds 8 vertices at y = @p pos[1], + 36, + @p height - 36 and + @p height with v = @p vMin, the middle v twice
  * and @p vMax, so the middle row stretches the texture's centre line; otherwise 4 vertices from @p vMin to @p vMax. It
  * draws them through GrMan's virtual slot 71 (vertex count 8 or 4). The texture must already be bound; the HUD state
@@ -2101,21 +2098,19 @@ INCLUDE_ASM("fe/all_in_one_fe", func_0021EA00);
  * @param uMax  right u
  * @param vMax  bottom v
  */
-// An RGBA colour as the element colour getter tHUDDef_getColour writes it and cOVStateHUD1P_renderBitmap takes it (the first component
-// is the one the fades scale).
 extern "C" void func_0021EA00(void* self, sColour* col, float* pos, float w, float height, float uMin, float vMin, float uMax, float vMax)
 {
     if (height > 72.0f) {
         sHudVertex vtx[8];
         for (int i = 0; i < 8; i++) {
+            int alpha = (int)(col->a * 128.0f);
             int red = (int)(col->r * 128.0f);
             int green = (int)(col->g * 128.0f);
             int blue = (int)(col->b * 128.0f);
-            int alpha = (int)(col->a * 128.0f);
+            vtx[i].a = alpha;
             vtx[i].r = red;
             vtx[i].g = green;
             vtx[i].b = blue;
-            vtx[i].a = alpha;
             vtx[i].q = 1.0f;
             if (i & 1)
                 vtx[i].u = uMax;
@@ -2144,14 +2139,14 @@ extern "C" void func_0021EA00(void* self, sColour* col, float* pos, float w, flo
     } else {
         sHudVertex vtx[4];
         for (int i = 0; i < 4; i++) {
+            int alpha = (int)(col->a * 128.0f);
             int red = (int)(col->r * 128.0f);
             int green = (int)(col->g * 128.0f);
             int blue = (int)(col->b * 128.0f);
-            int alpha = (int)(col->a * 128.0f);
+            vtx[i].a = alpha;
             vtx[i].r = red;
             vtx[i].g = green;
             vtx[i].b = blue;
-            vtx[i].a = alpha;
             vtx[i].q = 1.0f;
             if (i & 1)
                 vtx[i].u = uMax;
