@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/loadscreens.h"
 #include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
 #include "main/ssxapp.h"
@@ -133,9 +134,9 @@ INCLUDE_ASM("main/loadscreens_prestart", cPreStartScreen_loseFocus);
  *
  * @return 1 when the timer is at least 0.75, otherwise 0
  */
-extern "C" int cPreStartScreen_loseFocus(void* self)
+extern "C" int cPreStartScreen_loseFocus(cPreStartScreen* self)
 {
-    if (*(float*)((char*)self + 0x4) < 0.75f) {
+    if (self->progressivetimer < 0.75f) {
         return 0;
     }
     return 1;
@@ -156,7 +157,7 @@ extern void* D_0046D970[];
  *
  * @param flags  the destructor flags (bit 0: free the memory)
  */
-extern "C" void cInitLoadScreen__cInitLoadScreen(void* self, int flags)
+extern "C" void cInitLoadScreen__cInitLoadScreen(cInitLoadScreen* self, int flags)
 {
     *(void***)self = D_0046D970;
     if (flags & 1) {
@@ -186,7 +187,7 @@ struct cAppMan;
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cLoadIndicator_update(void* fade);
-extern "C" void* cStartScreen_cStartScreen(void* self, int arg);
+extern "C" void* cStartScreen_cStartScreen(cStartScreen* self, int arg);
 extern char str_StartScreen[];
 
 /**
@@ -198,10 +199,10 @@ extern char str_StartScreen[];
  * progressive flag (+0x4) is set, otherwise 0, and queues it with cAppMan_setNextModule. Update slot (+0x34) of
  * cInitLoadScreen_vtbl.
  */
-extern "C" void cInitLoadScreen_update(void* self)
+extern "C" void cInitLoadScreen_update(cInitLoadScreen* self)
 {
     cLoadIndicator_update(SSXApp->LoadIndicator);
-    if (*(int*)((char*)self + 8) != 0) {
+    if (self->ending != 0) {
         float* fade = (float*)((char*)SSXApp->LoadIndicator + 4);
         *fade -= 0.0833333358168602f;
         if (*fade < 0.0f) {
@@ -216,7 +217,7 @@ extern "C" void cInitLoadScreen_update(void* self)
     }
     if (*(int*)((char*)SSXApp + 4) == 0) {
         cAppMan_setNextModule((cAppMan*)SSXApp,
-            (unsigned int)cStartScreen_cStartScreen(cMemMan_alloc(0x1C, str_StartScreen, 0x100, 0), *(int*)((char*)self + 4) ? 2 : 0));
+            (unsigned int)cStartScreen_cStartScreen((cStartScreen*)cMemMan_alloc(0x1C, str_StartScreen, 0x100, 0), self->progressive ? 2 : 0));
     }
 }
 #endif
@@ -291,9 +292,9 @@ struct sLoadScreen2326D8 {
  *
  * @return 1 when the load indicator's alpha (+0x4) is 0, otherwise 0
  */
-extern "C" int cInitLoadScreen_loseFocus(sLoadScreen2326D8* self)
+extern "C" int cInitLoadScreen_loseFocus(cInitLoadScreen* self)
 {
-    self->done = 1;
+    self->ending = 1;
     return *(float*)((char*)SSXApp->LoadIndicator + 4) == 0.0f;
 }
 #endif
@@ -372,7 +373,7 @@ extern void* D_0046D970[];
  *
  * @param flags  the destructor flags (bit 0: free the memory)
  */
-extern "C" void cPreGameLoadScreen__cPreGameLoadScreen(void* self, int flags)
+extern "C" void cPreGameLoadScreen__cPreGameLoadScreen(cPreGameLoadScreen* self, int flags)
 {
     *(void***)self = D_0046D970;
     if (flags & 1) {
@@ -395,7 +396,7 @@ extern void* D_0046D970[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void cPreFELoadScreen__cPreFELoadScreen(void* self, int flags)
+extern "C" void cPreFELoadScreen__cPreFELoadScreen(cPreFELoadScreen* self, int flags)
 {
     *(void***)self = D_0046D970;
     if (flags & 1) {
@@ -420,9 +421,9 @@ struct sLoadScreen2327B0 {
  *
  * @return 1 when the load indicator's alpha (+0x4) is 0, otherwise 0
  */
-extern "C" int cPreGameLoadScreen_loseFocus(sLoadScreen2327B0* self)
+extern "C" int cPreGameLoadScreen_loseFocus(cPreGameLoadScreen* self)
 {
-    self->done = 1;
+    self->ending = 1;
     return *(float*)((char*)SSXApp->LoadIndicator + 4) == 0.0f;
 }
 #endif
@@ -443,9 +444,9 @@ struct sLoadScreen2327E8 {
  *
  * @return 1 when the load indicator's alpha (+0x4) is 0, otherwise 0
  */
-extern "C" int cPreFELoadScreen_loseFocus(sLoadScreen2327E8* self)
+extern "C" int cPreFELoadScreen_loseFocus(cPreFELoadScreen* self)
 {
-    self->done = 1;
+    self->ending = 1;
     return *(float*)((char*)SSXApp->LoadIndicator + 4) == 0.0f;
 }
 #endif
@@ -589,11 +590,11 @@ struct sModule_232930 {
 // Matches only with exceptions enabled for this unit (UNIT_CFLAGS "-fexceptions" in configure.py).
 // `tmp` is reused for the fade direction and the module handle: one variable spanning both blocks is what
 // gives the retail register allocation (the handle is taken before the fields are filled in).
-extern "C" void cPreGameLoadScreen_update(void* self)
+extern "C" void cPreGameLoadScreen_update(cPreGameLoadScreen* self)
 {
     int tmp;
     cLoadIndicator_update(SSXApp->LoadIndicator);
-    tmp = *(int*)((char*)self + 4) != 0;
+    tmp = self->ending != 0;
     if (tmp) {
         float* fade = (float*)((char*)SSXApp->LoadIndicator + 4);
         *fade -= 0.0833333358168602f;
@@ -655,11 +656,11 @@ struct sModule_232A00 {
  * 0x1C bytes) and queues it.
  */
 // Same shape as cPreGameLoadScreen_update (see the note there): exceptions enabled for this unit, `tmp` reused.
-extern "C" void cPreFELoadScreen_update(void* self)
+extern "C" void cPreFELoadScreen_update(cPreFELoadScreen* self)
 {
     int tmp;
     cLoadIndicator_update(SSXApp->LoadIndicator);
-    tmp = *(int*)((char*)self + 4) != 0;
+    tmp = self->ending != 0;
     if (tmp) {
         float* fade = (float*)((char*)SSXApp->LoadIndicator + 4);
         *fade -= 0.0833333358168602f;
@@ -701,13 +702,13 @@ extern void* cStartScreen_vtbl[];
  * @param screenType  the start screen type (0 shows the memory card state, 2 the progressive-scan state)
  * @return @p self
  */
-extern "C" void* cStartScreen_cStartScreen(void* self, int screenType)
+extern "C" void* cStartScreen_cStartScreen(cStartScreen* self, int screenType)
 {
     cFadeScreen_cFadeScreen(self);
     *(void***)self = cStartScreen_vtbl;
-    *(int*)((char*)self + 0x18) = screenType;
-    *(int*)((char*)self + 0xC) = 0;
-    return self;
+    self->meStartScreen_type = screenType;
+    self->mpUI = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -809,13 +810,13 @@ struct sUI_232B28 {
  * cFEStateMemCard (584 bytes, func_00186A08); type 2 pushes a 72-byte "cFEStateProgressive" (cUIState base
  * cUIState_cUIState, vtable D_0047CA18); any other type pushes nothing. Load slot (+0x14) of cStartScreen_vtbl.
  */
-extern "C" void cStartScreen_load(void* self)
+extern "C" void cStartScreen_load(cStartScreen* self)
 {
     ((cWorld_232B28*)GrMan)->v44(0x100);
     void* ui = cUIEngine_cUIEngine(operator new(0x70, str_UIEngine_b, 0x100, 0));
-    *(void**)((char*)self + 0xC) = ui;
+    self->mpUI = (cUIEngine*)ui;
     cUIEngine_loadFile(ui, str_data_ui_su);
-    (*(sUI_232B28**)((char*)self + 0xC))->f10 = (int)SSXApp->FELocale;
+    ((sUI_232B28*)self->mpUI)->f10 = (int)SSXApp->FELocale;
     sNode_232B28* n = (sNode_232B28*)operator new(0x1C, str_GLUIInput, 0x100, 0);
     n->f4 = 0;
     n->f8 = cFEInput_vtbl;
@@ -823,17 +824,17 @@ extern "C" void cStartScreen_load(void* self)
     n->fC = 0;
     n->f10 = 0;
     n->f14 = 0;
-    (*(sUI_232B28**)((char*)self + 0xC))->fC = n;
-    (*(sUI_232B28**)((char*)self + 0xC))->f8 = (int)SSXApp->Fonts;
-    int mode = *(int*)((char*)self + 0x18);
+    ((sUI_232B28*)self->mpUI)->fC = n;
+    ((sUI_232B28*)self->mpUI)->f8 = (int)SSXApp->Fonts;
+    int mode = self->meStartScreen_type;
     if (mode == 0) {
-        void* item = func_00186A08(operator new(584, str_cFEStateMemCard, 0, 0), *(void**)((char*)self + 0xC));
-        cUIStateStack_push(*(char**)((char*)self + 0xC) + 0x18, item);
+        void* item = func_00186A08(operator new(584, str_cFEStateMemCard, 0, 0), self->mpUI);
+        cUIStateStack_push((char*)self->mpUI + 0x18, item);
     } else if (mode == 2) {
         void* progressiveState = operator new(72, str_cFEStateProgressive, 0, 0);
-        cUIState_cUIState(progressiveState, *(void**)((char*)self + 0xC));
+        cUIState_cUIState(progressiveState, self->mpUI);
         *(void**)((char*)progressiveState + 8) = D_0047CA18;
-        cUIStateStack_push(*(char**)((char*)self + 0xC) + 0x18, progressiveState);
+        cUIStateStack_push((char*)self->mpUI + 0x18, progressiveState);
     }
 }
 #endif
@@ -870,10 +871,10 @@ static inline void clear_2C98(int* p)
  * Calls cGraphicsMan_UploadTextures, clears cDepthFog_m_Enable, cScreenTint_m_Enable and cLightGlow_m_Enable and sets
  * the clear colour to (0, 0, 0) (SetScreenClearColour, slot 15). GainFocus slot (+0x2C) of cStartScreen_vtbl.
  */
-extern "C" void cStartScreen_gainFocus(void* self)
+extern "C" void cStartScreen_gainFocus(cStartScreen* self)
 {
     cGraphicsMan_UploadTextures(GrMan);
-    *(int*)((char*)self + 0x14) = 0;
+    self->DisplayTicks = 0;
     clear_2C98(&cDepthFog_m_Enable);
     clear_2C98(&cScreenTint_m_Enable);
     clear_2C98(&cLightGlow_m_Enable);
@@ -913,11 +914,11 @@ extern "C" void cUIEngine_update(void*);
  *
  * Update slot (+0x34) of cStartScreen_vtbl.
  */
-extern "C" void cStartScreen_update(void* self)
+extern "C" void cStartScreen_update(cStartScreen* self)
 {
     cLoadScreen_update(self);
-    cUIEngine_update(*(void**)((char*)self + 0xC));
-    (*(int*)((char*)self + 0x14))++;
+    cUIEngine_update(self->mpUI);
+    (self->DisplayTicks)++;
 }
 #endif
 
@@ -956,14 +957,14 @@ extern "C" void cGraphicsMan_PurgeTextures(void* world);
  * Calls GrMan's FlushRenderer (slot 19), destroys the engine at +0xC with cUIEngine__cUIEngine(engine, 3) when set, clears the
  * pointer and calls cGraphicsMan_PurgeTextures. Purge slot (+0x1C) of cStartScreen_vtbl.
  */
-extern "C" void cStartScreen_purge(void* self)
+extern "C" void cStartScreen_purge(cStartScreen* self)
 {
     ((cWorld232D50*)GrMan)->v19();
-    void* uiEngine = *(void**)((char*)self + 0xC);
+    void* uiEngine = self->mpUI;
     if (uiEngine != 0) {
         cUIEngine__cUIEngine(uiEngine, 3);
     }
-    *(void**)((char*)self + 0xC) = 0;
+    self->mpUI = 0;
     cGraphicsMan_PurgeTextures(GrMan);
 }
 #endif
@@ -1006,13 +1007,13 @@ extern "C" void cUIEngine_render2D(void* obj);
  *
  * @return 1 when a frame was drawn, otherwise 0
  */
-extern "C" int cStartScreen_render(void* self)
+extern "C" int cStartScreen_render(cStartScreen* self)
 {
     if (((cWorld232DA8*)GrMan)->v17() == 0) {
         return 0;
     }
     if (cFadeScreen_drawFade(self) == 0) {
-        cUIEngine_render2D(*(void**)((char*)self + 0xC));
+        cUIEngine_render2D(self->mpUI);
     }
     ((cWorld232DA8*)GrMan)->v20();
     return 1;
@@ -1118,17 +1119,17 @@ struct cLoadItemC_2E20 {
  *
  * Load slot (+0x14) of cGameLoadScreen_vtbl.
  */
-extern "C" void cGameLoadScreen_load(void* self)
+extern "C" void cGameLoadScreen_load(cGameLoadScreen* self)
 {
     cPS2GraphicsMan* w = GrMan;
     sVE_2E20* vt = (sVE_2E20*)w->mVtbl;
     vt[44].fn((char*)w + vt[44].delta, 0x100);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     void* ui = cUIEngine_cUIEngine(operator new(0x70, str_UIEngine_b, 0x100, 0));
-    *(void**)((char*)self + 0xC) = ui;
+    self->mpUI = (cUIEngine*)ui;
     cUIEngine_loadFile(ui, str_data_ui_gl);
-    (*(sUI_2E20**)((char*)self + 0xC))->f8 = (int)SSXApp->Fonts;
-    (*(sUI_2E20**)((char*)self + 0xC))->f10 = (int)SSXApp->FELocale;
+    ((sUI_2E20*)self->mpUI)->f8 = (int)SSXApp->Fonts;
+    ((sUI_2E20*)self->mpUI)->f10 = (int)SSXApp->FELocale;
     sNode_2E20* n = (sNode_2E20*)operator new(0x1C, str_GLUIInput, 0x100, 0);
     n->f4 = 0;
     n->f8 = cFEInput_vtbl;
@@ -1136,7 +1137,7 @@ extern "C" void cGameLoadScreen_load(void* self)
     n->fC = 0;
     n->f10 = 0;
     n->f14 = 0;
-    (*(sUI_2E20**)((char*)self + 0xC))->fC = n;
+    ((sUI_2E20*)self->mpUI)->fC = n;
     void* item;
     if (D_004A19D8 == 0) {
         signed char* newRaceBytes = (signed char*)((char*)&cBENewRaceInterface_newRace);
@@ -1148,7 +1149,7 @@ extern "C" void cGameLoadScreen_load(void* self)
             goto other;
     }
 makeA:
-    item = new (str_cGameLoadStateOutLodge, 0, 0) cLoadItemA_2E20(*(void**)((char*)self + 0xC));
+    item = new (str_cGameLoadStateOutLodge, 0, 0) cLoadItemA_2E20(self->mpUI);
     goto done;
 other:
     {
@@ -1160,16 +1161,16 @@ other:
                 x = raceDbBytes[0x48] != 6;
         }
         if (x) {
-            item = new (str_cGameLoadStateConquer, 0, 0) cLoadItemB_2E20(*(void**)((char*)self + 0xC));
+            item = new (str_cGameLoadStateConquer, 0, 0) cLoadItemB_2E20(self->mpUI);
         } else {
-            cLoadItemC_2E20* loadState = new (str_cGameLoadState, 0, 0) cLoadItemC_2E20(*(void**)((char*)self + 0xC));
+            cLoadItemC_2E20* loadState = new (str_cGameLoadState, 0, 0) cLoadItemC_2E20(self->mpUI);
             item = loadState;
-            loadState->owner = self;
+            loadState->owner = ((void*)self);
             cGameLoadScreen_loadTexture_2E20(self, 0);
         }
     }
 done:
-    cUIStateStack_push(*(char**)((char*)self + 0xC) + 0x18, item);
+    cUIStateStack_push((char*)self->mpUI + 0x18, item);
 }
 #endif
 
@@ -1226,7 +1227,7 @@ static inline int loadTex_3048(char* data, const char* name)
  * Textures go through GrMan's slot 46, the file data is freed and the big file closed. On Tour's version also
  * takes a state argument.
  */
-extern "C" void cGameLoadScreen_loadTexture(char* self)
+extern "C" void cGameLoadScreen_loadTexture(cGameLoadScreen* self)
 {
     char name[0x70];
     cBigFile bf;
@@ -1234,7 +1235,7 @@ extern "C" void cGameLoadScreen_loadTexture(char* self)
     void* fe = cBE_getInterface_Fv(cBE_getBE(), 0);
     if (D_00535C11[0] == 2) {
         cBigFile_cBigFile1_3048(&bf, str_data_ui_charpic_big, 0x100);
-        int* slot = (int*)(self + 0x10);
+        int* slot = (int*)(((char*)self) + 0x10);
         for (int i = 0; i < 2; i++) {
             sprintf(name, str_pct_spct_s_ssh, D_00442928[cBENewPlayerInterface_getPlayerCharID(plr, i != 0)], D_004A2B3C);
             char* data = FILE_loadpackz(name, 0x3000100);
@@ -1251,7 +1252,7 @@ extern "C" void cGameLoadScreen_loadTexture(char* self)
             n = 0;
         sprintf(name, str_pct_s_ssh, str_at_plus_J[n]);
         char* data = FILE_loadpackz(name, 0x3000100);
-        *(int*)(self + 0x10) = loadTex_3048(data, str_coursePics);
+        self->mTexID[0] = loadTex_3048(data, str_coursePics);
         if (data != 0)
             cMemMan_free(data);
         cBigFile__cBigFile(&bf, 2);
@@ -1390,10 +1391,10 @@ public:
  * cGraphicsMan_PurgeTextures and func_0028FA98(audio, 1.0) on the audio (cAudioInterface_bxAudio). Purge slot (+0x1C) of
  * cGameLoadScreen_vtbl.
  */
-extern "C" void cGameLoadScreen_purge(void* self)
+extern "C" void cGameLoadScreen_purge(cGameLoadScreen* self)
 {
     ((cWorld002332E8*)GrMan)->v19();
-    void* uiEngine = *(void**)((char*)self + 0xC);
+    void* uiEngine = self->mpUI;
     if (uiEngine != 0) {
         cUIEngine__cUIEngine(uiEngine, 3);
     }
@@ -1448,13 +1449,13 @@ extern "C" void cUIEngine_render2D(void* obj);
  *
  * @return 1 when a frame was drawn, otherwise 0
  */
-extern "C" int cGameLoadScreen_render(void* self)
+extern "C" int cGameLoadScreen_render(cGameLoadScreen* self)
 {
     if (((cWorld233390*)GrMan)->v17() == 0) {
         return 0;
     }
     if (cFadeScreen_drawFade(self) == 0) {
-        cUIEngine_render2D(*(void**)((char*)self + 0xC));
+        cUIEngine_render2D(self->mpUI);
     }
     ((cWorld233390*)GrMan)->v20();
     return 1;
@@ -1473,9 +1474,9 @@ void cLoadScreen_update(void*);
  *
  * Update slot (+0x34) of cGameLoadScreen_vtbl.
  */
-extern "C" void cGameLoadScreen_update(void* self)
+extern "C" void cGameLoadScreen_update(cGameLoadScreen* self)
 {
-    cUIEngine_update(*(void**)((char*)self + 0xC));
+    cUIEngine_update(self->mpUI);
     cLoadScreen_update(self);
 }
 #endif

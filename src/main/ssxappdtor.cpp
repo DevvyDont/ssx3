@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/loadscreens.h"
 #include "main/game.h"
 #include "movie/mcoverlaymanager.h"
 #include "render/ps2graphicsman.h"
@@ -401,11 +402,11 @@ extern char cInitLoadScreen_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *cInitLoadScreen_cInitLoadScreen(void *self) {
-    *(void **)((char *)self + 0) = cInitLoadScreen_vtbl;
-    *(int *)((char *)self + 4) = 0;
-    *(int *)((char *)self + 8) = 0;
-    return self;
+extern "C" void *cInitLoadScreen_cInitLoadScreen(cInitLoadScreen* self) {
+    self->mVtbl = (void**)cInitLoadScreen_vtbl;
+    self->progressive = 0;
+    self->ending = 0;
+    return ((void*)self);
 }
 #endif
 //100%
@@ -418,8 +419,8 @@ INCLUDE_ASM("main/ssxappdtor", cInitLoadScreen_activateProgressiveMode);
  *
  * @param initLoadScreen  the initial load screen
  */
-extern "C" void cInitLoadScreen_activateProgressiveMode(void *initLoadScreen) {
-    (*(int *)((char*)(initLoadScreen) + (4))) = 1;
+extern "C" void cInitLoadScreen_activateProgressiveMode(cInitLoadScreen* initLoadScreen) {
+    (initLoadScreen->progressive) = 1;
 }
 #endif
 
@@ -460,11 +461,11 @@ extern char D_0047D818[];
  *
  * @return @p self
  */
-extern "C" void *cLoadScreen_cLoadScreen(void *self) {
+extern "C" void *cLoadScreen_cLoadScreen(cLoadScreen* self) {
     cFadeScreen_cFadeScreen(self);
-    *(int *)((char *)self + 0xC) = 0;
-    *(void **)((char *)self + 0) = D_0047D818;
-    return self;
+    self->mpUI = 0;
+    self->mVtbl = (void**)D_0047D818;
+    return ((void*)self);
 }
 #endif
 
@@ -527,13 +528,13 @@ extern char cGameLoadScreen_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *cGameLoadScreen_cGameLoadScreen(void *self) {
+extern "C" void *cGameLoadScreen_cGameLoadScreen(cGameLoadScreen* self) {
     cFadeScreen_cFadeScreen(self);
-    *(int *)((char *)self + 0xC) = 0;
-    *(void **)((char *)self + 0) = cGameLoadScreen_vtbl;
-    *(int *)((char *)self + 0x10) = 0;
-    *(int *)((char *)self + 0x14) = 0;
-    return self;
+    self->mpUI = 0;
+    self->mVtbl = (void**)cGameLoadScreen_vtbl;
+    self->mTexID[0] = 0;
+    self->mTexID[1] = 0;
+    return ((void*)self);
 }
 #endif
 //100%

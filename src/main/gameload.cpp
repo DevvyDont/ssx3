@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/loadscreens.h"
 #include "sound/ssxaudio.h"
 #include "render/ps2graphicsman.h"
 #include "be/beintnetwork.h"
@@ -2462,7 +2463,7 @@ struct sQuadVtx {
  *
  * @param value  the texture id
  */
-extern "C" void cLoadScreen_drawSplash(void* self, int value) {
+extern "C" void cLoadScreen_drawSplash(cLoadScreen* self, int value) {
     sQuadVtx verts[4];
     t4Vector cornerPos;
     int i;
@@ -2507,7 +2508,7 @@ extern char* cAppMan_TheAppMan;
  *
  * @return cFadeScreen_loseFocus's result, or 0
  */
-extern "C" int cLoadScreen_loseFocus(void* self)
+extern "C" int cLoadScreen_loseFocus(cLoadScreen* self)
 {
     if (*(float*)(cAppMan_TheAppMan + 0x38) == 100.0f) {
         return cFadeScreen_loseFocus(self);
