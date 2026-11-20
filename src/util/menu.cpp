@@ -7,13 +7,6 @@
 #include "main/ssxapp.h"
 #include "ai/ai.h"
 
-struct cMenuItem {
-    char pad_0x00[0x4];
-    int field_0x4;
-    void* field_0x8;
-    int field_0xC;
-    void* vtable; // 0x10
-};
 extern void* cMenuItem_vtbl[16];
 
 //100%
@@ -22,18 +15,18 @@ INCLUDE_ASM("util/menu", cMenuItem_cMenuItem__FP9cMenuItemPv);
 /**
  * Constructs a base menu item: active, with the given ID and no argument.
  *
- * Stores cMenuItem's vtable at +0x10, Flags (+0x4) = 1 (active), ID (+0x8) = @p text and Arg (+0xC) = 0.
- * Menu (+0x0) is left for cMenu_addItem() to fill.
+ * Stores cMenuItem's vtable in mVtbl, Flags = 1 (active), ID = @p id and Arg = 0. Menu is left for cMenu_addItem()
+ * to fill.
  *
- * @param text  the item's ID (On Tour cMenuItem::ID); derived items pass -1 for none
+ * @param id  the item's ID (On Tour cMenuItem::ID); derived items pass -1 for none
  * @return @p self
  */
-cMenuItem* cMenuItem_cMenuItem(cMenuItem* self, void* text)
+cMenuItem* cMenuItem_cMenuItem(cMenuItem* self, void* id)
 {
-    self->vtable = cMenuItem_vtbl;
-    self->field_0x4 = 1;
-    self->field_0x8 = text;
-    self->field_0xC = 0;
+    self->mVtbl = cMenuItem_vtbl;
+    self->Flags = 1;
+    self->ID = (int)id;
+    self->Arg = 0;
     return self;
 }
 #endif
@@ -68,7 +61,7 @@ extern "C" int cMenuItem_getKey(void** self);
  *
  * @return the navigation result (0 none, 1 pop menu, 2 exit menus, 3 next item, 4 previous item)
  */
-extern "C" int cMenuItem_input(void* self)
+extern "C" int cMenuItem_input(cMenuItem* self)
 {
     switch (cMenuItem_getKey((void**)self)) {
     case 8:
@@ -87,15 +80,15 @@ extern "C" int cMenuItem_input(void* self)
 //100%
 INCLUDE_ASM("util/menu", cMenuItem_canHaveFocus);
 #ifdef SKIP_ASM
-extern "C" int cMenuItem_isActive(void* self);
-extern "C" int cMenuItem_isLocked(void* self);
+extern "C" int cMenuItem_isActive(cMenuItem* self);
+extern "C" int cMenuItem_isLocked(cMenuItem* self);
 
 /**
  * Tells whether a menu item can take the focus.
  *
  * @return 1 when the item is active (cMenuItem_isActive) and not locked (cMenuItem_isLocked), else 0
  */
-extern "C" int cMenuItem_canHaveFocus(void* self)
+extern "C" int cMenuItem_canHaveFocus(cMenuItem* self)
 {
     int canFocus = 0;
     if (cMenuItem_isActive(self) != 0) {
@@ -135,9 +128,9 @@ INCLUDE_ASM("util/menu", cMenuItem_isActive);
  *
  * @return 1 when the item is active, otherwise 0
  */
-extern "C" int cMenuItem_isActive(void* self)
+extern "C" int cMenuItem_isActive(cMenuItem* self)
 {
-    return *(int*)((char*)self + 0x4) & 1;
+    return self->Flags & 1;
 }
 #endif
 
@@ -150,12 +143,12 @@ INCLUDE_ASM("util/menu", cMenuItem_activate);
  *
  * @param enable  nonzero to activate
  */
-extern "C" void cMenuItem_activate(void* self, int enable)
+extern "C" void cMenuItem_activate(cMenuItem* self, int enable)
 {
     if (enable) {
-        *(int*)((char*)self + 0x4) |= 1;
+        self->Flags |= 1;
     } else {
-        *(int*)((char*)self + 0x4) &= ~1;
+        self->Flags &= ~1;
     }
 }
 #endif
@@ -170,9 +163,9 @@ INCLUDE_ASM("util/menu", cMenuItem_isLocked);
  *
  * @return 8 when the item is locked, otherwise 0
  */
-extern "C" int cMenuItem_isLocked(void* self)
+extern "C" int cMenuItem_isLocked(cMenuItem* self)
 {
-    return *(int*)((char*)self + 0x4) & 8;
+    return self->Flags & 8;
 }
 #endif
 
@@ -185,7 +178,7 @@ INCLUDE_ASM("util/menu", cMenuItem_lock);
  *
  * @param enable  nonzero to lock
  */
-extern "C" void cMenuItem_lock(void *self, int enable) {
+extern "C" void cMenuItem_lock(cMenuItem* self, int enable) {
     int *flags = (int *)((char *)self + 4);
 
     if (enable != 0) {
@@ -822,7 +815,7 @@ extern "C" void cMenu_render(sMenu_2CAD58* self)
     int i;
     total.x = total.y = total.w = total.h = 0.0f;
     for (i = 0; i < self->NumItems; i++) {
-        if (cMenuItem_isActive(self->Items[i])) {
+        if (cMenuItem_isActive((cMenuItem*)self->Items[i])) {
             item[i] = self->Items[i]->getRect();
             total.h += item[i].h;
             if (item[i].w > total.w) {
@@ -852,7 +845,7 @@ extern "C" void cMenu_render(sMenu_2CAD58* self)
     }
     cMenu_preRender_s(self);
     for (i = self->TopItem; i < self->NumItems; i++) {
-        if (cMenuItem_isActive(self->Items[i])) {
+        if (cMenuItem_isActive((cMenuItem*)self->Items[i])) {
             if (i != self->FocusItem && total.y + item[i].h > self->MenuSys->getDisplayHeight() - kScreenGapY) {
                 break;
             }
@@ -2373,8 +2366,8 @@ extern "C" void* cBoolMenuItem_cBoolMenuItem(void* self, void* text, int flagPtr
 //100%
 INCLUDE_ASM("util/menu", cBoolMenuItem_input);
 #ifdef SKIP_ASM
-extern "C" int cMenuItem_input(void* self);
-extern "C" int cMenuItem_isLocked(void* self);
+extern "C" int cMenuItem_input(cMenuItem* self);
+extern "C" int cMenuItem_isLocked(cMenuItem* self);
 extern "C" int cMenuItem_getKey(void** self);
 
 class cBoolMenuItem_input_cMenu {
@@ -2398,8 +2391,8 @@ public:
  */
 extern "C" int cBoolMenuItem_input(void** self)
 {
-    int baseResult = cMenuItem_input(self);
-    if (cMenuItem_isLocked(self) == 0 && baseResult == 0) {
+    int baseResult = cMenuItem_input((cMenuItem*)self);
+    if (cMenuItem_isLocked((cMenuItem*)self) == 0 && baseResult == 0) {
         if ((self[6] != 0 && self[7] != 0 && (cMenuItem_getKey(self) == 2 || cMenuItem_getKey(self) == 3)) || cMenuItem_getKey(self) == 6) {
             *(int*)self[8] ^= 1;
             ((cBoolMenuItem_input_cMenu*)self[0])->v04(self);
@@ -2574,8 +2567,8 @@ extern "C" void cEnumMenuItem_setEnumTagsNullTerm(void *self, int *table) {
 //100%
 INCLUDE_ASM("util/menu", cEnumMenuItem_input);
 #ifdef SKIP_ASM
-extern "C" int cMenuItem_input(void* self);
-extern "C" int cMenuItem_isLocked(void* self);
+extern "C" int cMenuItem_input(cMenuItem* self);
+extern "C" int cMenuItem_isLocked(cMenuItem* self);
 extern "C" int cMenuItem_getKey(void** self);
 
 struct sVEnt_2CC8F0 { short delta; short index; void* fn; };
@@ -2617,8 +2610,8 @@ static inline void notify_2CC8F0(sList_2CC8F0* self)
 extern "C" int cEnumMenuItem_input(void* vself)
 {
     sList_2CC8F0* self = (sList_2CC8F0*)vself;
-    int result = cMenuItem_input(self);
-    if (cMenuItem_isLocked(self) != 0) {
+    int result = cMenuItem_input((cMenuItem*)self);
+    if (cMenuItem_isLocked((cMenuItem*)self) != 0) {
         return result;
     }
     if (result != 0) {
@@ -2768,7 +2761,7 @@ extern "C" cSubMenuItem_sItem* cSubMenuItem_cSubMenuItem(cSubMenuItem_sItem* sel
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", cSubMenuItem_input);
 #ifdef SKIP_ASM
-extern "C" int cMenuItem_input(void* self);
+extern "C" int cMenuItem_input(cMenuItem* self);
 extern "C" int cMenuItem_getKey(void** self);
 extern "C" void cMenuSys_pushMenu(cMenuSys* stack, void* item);
 
@@ -2784,8 +2777,8 @@ extern "C" void cMenuSys_pushMenu(cMenuSys* stack, void* item);
  */
 extern "C" int cSubMenuItem_input(void* self)
 {
-    int result = cMenuItem_input(self);
-    if (cMenuItem_isLocked(self) == 0 && result == 0 && cMenuItem_getKey((void**)self) == 6) {
+    int result = cMenuItem_input((cMenuItem*)self);
+    if (cMenuItem_isLocked((cMenuItem*)self) == 0 && result == 0 && cMenuItem_getKey((void**)self) == 6) {
         cMenuSys_pushMenu((cMenuSys*)(*(void**)((char*)*(void**)self + 0x124)), *(void**)((char*)self + 0x18));
     }
     return result;
@@ -2873,7 +2866,7 @@ extern "C" s2CCDF0Item* cPopMenuItem_cPopMenuItem(s2CCDF0Item* self, void* text)
 //100%
 INCLUDE_ASM("util/menu", cPopMenuItem_input);
 #ifdef SKIP_ASM
-extern "C" int cMenuItem_input(void* self);
+extern "C" int cMenuItem_input(cMenuItem* self);
 extern "C" int cMenuItem_getKey(void** self);
 extern "C" void cMenuSys_popMenu(cMenuSys* stack);
 
@@ -2885,8 +2878,8 @@ extern "C" void cMenuSys_popMenu(cMenuSys* stack);
  */
 extern "C" int cPopMenuItem_input(void* self)
 {
-    int result = cMenuItem_input(self);
-    if (cMenuItem_isLocked(self) == 0 && result == 0 && cMenuItem_getKey((void**)self) == 6) {
+    int result = cMenuItem_input((cMenuItem*)self);
+    if (cMenuItem_isLocked((cMenuItem*)self) == 0 && result == 0 && cMenuItem_getKey((void**)self) == 6) {
         cMenuSys_popMenu((cMenuSys*)(*(void**)((char*)*(void**)self + 0x124)));
     }
     return result;
@@ -3058,7 +3051,7 @@ public:
     virtual int v03(void* item, void* data);
 };
 
-extern "C" int cMenuItem_input(void* self);
+extern "C" int cMenuItem_input(cMenuItem* self);
 extern "C" int cMenuItem_getKey(void** self);
 
 /**
@@ -3069,8 +3062,8 @@ extern "C" int cMenuItem_getKey(void** self);
  */
 extern "C" int cCommandMenuItem_input(void* self)
 {
-    int baseResult = cMenuItem_input(self);
-    if (cMenuItem_isLocked(self) == 0 && baseResult == 0 && cMenuItem_getKey((void**)self) == 6) {
+    int baseResult = cMenuItem_input((cMenuItem*)self);
+    if (cMenuItem_isLocked((cMenuItem*)self) == 0 && baseResult == 0 && cMenuItem_getKey((void**)self) == 6) {
         baseResult = (*(cCommandMenuItem_input_cMenu**)self)->v03(self, *(void**)((char*)self + 0x1C));
     }
     return baseResult;
@@ -3191,7 +3184,7 @@ extern "C" void cCallbackMenuItem_init(void *self, int label, int callback) {
 //100%
 INCLUDE_ASM("util/menu", cCallbackMenuItem_input);
 #ifdef SKIP_ASM
-extern "C" int cMenuItem_input(void* self);
+extern "C" int cMenuItem_input(cMenuItem* self);
 extern "C" int cMenuItem_getKey(void** self);
 
 /**
@@ -3202,8 +3195,8 @@ extern "C" int cMenuItem_getKey(void** self);
  */
 extern "C" int cCallbackMenuItem_input(void* self)
 {
-    int result = cMenuItem_input(self);
-    if (cMenuItem_isLocked(self) == 0 && result == 0 && cMenuItem_getKey((void**)self) == 6) {
+    int result = cMenuItem_input((cMenuItem*)self);
+    if (cMenuItem_isLocked((cMenuItem*)self) == 0 && result == 0 && cMenuItem_getKey((void**)self) == 6) {
         (*(void (**)())((char*)self + 0x18))();
     }
     return result;
@@ -3596,8 +3589,8 @@ static inline float ffloor_002CD5A0(float x)
 extern "C" int cCharMenuItem_input(void* self)
 {
     char* item = (char*)self;
-    int result = cMenuItem_input(self);
-    if (cMenuItem_isLocked(self) != 0) {
+    int result = cMenuItem_input((cMenuItem*)self);
+    if (cMenuItem_isLocked((cMenuItem*)self) != 0) {
         return result;
     }
     if (result != 0) {
@@ -3890,8 +3883,8 @@ static inline float ffloor_002CD9D8(float x)
 extern "C" int cIntMenuItem_input(void* self)
 {
     char* menuItem = (char*)self;
-    int result = cMenuItem_input(self);
-    if (cMenuItem_isLocked(self) != 0) {
+    int result = cMenuItem_input((cMenuItem*)self);
+    if (cMenuItem_isLocked((cMenuItem*)self) != 0) {
         return result;
     }
     if (result != 0) {
@@ -4110,8 +4103,8 @@ void* cMenuItem_getRightShift_DD78(void* self) __asm__("cMenuItem_getRightShift_
 extern "C" int cFloatMenuItem_input(void* self)
 {
     char* menuItem = (char*)self;
-    int result = cMenuItem_input(self);
-    if (cMenuItem_isLocked(self) != 0) {
+    int result = cMenuItem_input((cMenuItem*)self);
+    if (cMenuItem_isLocked((cMenuItem*)self) != 0) {
         return result;
     }
     if (result != 0) {
@@ -4343,8 +4336,8 @@ extern "C" void* cAngleMenuItem_cAngleMenuItem(void* self, void* text, int value
 //100%
 INCLUDE_ASM("util/menu", cAngleMenuItem_input);
 #ifdef SKIP_ASM
-extern "C" int cMenuItem_input(void* self);
-extern "C" int cMenuItem_isLocked(void* self);
+extern "C" int cMenuItem_input(cMenuItem* self);
+extern "C" int cMenuItem_isLocked(cMenuItem* self);
 
 /**
  * Handles input for an angle item: left and right move the angle by a fraction of its range, faster while
@@ -4363,8 +4356,8 @@ extern "C" int cMenuItem_isLocked(void* self);
 extern "C" int cAngleMenuItem_input(void* self)
 {
     char* menuItem = (char*)self;
-    int result = cMenuItem_input(self);
-    if (cMenuItem_isLocked(self) != 0) {
+    int result = cMenuItem_input((cMenuItem*)self);
+    if (cMenuItem_isLocked((cMenuItem*)self) != 0) {
         return result;
     }
     if (result != 0) {
@@ -4499,7 +4492,7 @@ extern "C" cTextMenuItem_cTextMenuItem_sItem* cTextMenuItem_cTextMenuItem(cTextM
 //100%
 INCLUDE_ASM("util/menu", cTextMenuItem_input);
 #ifdef SKIP_ASM
-extern "C" int cMenuItem_input(void* self);
+extern "C" int cMenuItem_input(cMenuItem* self);
 extern "C" int cMenuItem_getKey(void** self);
 extern "C" int strlen(const char* s);
 int cMenuSys_getVKey(void* self);
@@ -4533,7 +4526,7 @@ static inline int validChar_E488(char c)
  */
 extern "C" int cTextMenuItem_input(sTextItem_E488* self)
 {
-    int result = cMenuItem_input(self);
+    int result = cMenuItem_input((cMenuItem*)self);
     if (result == 0) {
     int len = strlen(self->name);
     int mod = len + 1;
@@ -4881,8 +4874,8 @@ extern "C" sColorMenuItem* cColorMenuItem_cColorMenuItem(sColorMenuItem* self, v
 //100%
 INCLUDE_ASM("util/menu", cColorMenuItem_input);
 #ifdef SKIP_ASM
-extern "C" int cMenuItem_input(void* self);
-extern "C" int cMenuItem_isLocked(void* self);
+extern "C" int cMenuItem_input(cMenuItem* self);
+extern "C" int cMenuItem_isLocked(cMenuItem* self);
 
 /**
  * Handles input for a colour-channel item: left and right move the channel between 0 and 1, faster while
@@ -4900,8 +4893,8 @@ extern "C" int cMenuItem_isLocked(void* self);
 extern "C" int cColorMenuItem_input(void* self)
 {
     char* menuItem = (char*)self;
-    int result = cMenuItem_input(self);
-    if (cMenuItem_isLocked(self) != 0) {
+    int result = cMenuItem_input((cMenuItem*)self);
+    if (cMenuItem_isLocked((cMenuItem*)self) != 0) {
         return result;
     }
     if (result != 0) {
@@ -5527,7 +5520,7 @@ extern "C" void cExpandMenuItem_setTitle(void* self, void* item)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/menu", cExpandMenuItem_input);
 #ifdef SKIP_ASM
-extern "C" int cMenuItem_isLocked(void* self);
+extern "C" int cMenuItem_isLocked(cMenuItem* self);
 extern "C" void cMenu_checkFocus(cMenu* self);
 extern "C" void cMenu_nextFocus(cMenu* self);
 extern "C" void cMenu_prevFocus(cMenu* self);
@@ -5562,7 +5555,7 @@ extern "C" void* cExpandMenuItem_input(void* expandItem)
     cMenu_checkFocus((cMenu*)(&self->menu));
     int prev = self->menu.selected;
     int key = ((cExpandMenuItem_input_cItem*)self->menu.items[prev])->v02();
-    if (cMenuItem_isLocked(self) != 0) {
+    if (cMenuItem_isLocked((cMenuItem*)self) != 0) {
         return (void*)key;
     }
     switch (key) {
@@ -5639,7 +5632,7 @@ extern "C" void cExpandMenuItem_onChange(cExpandMenuItem_onChange_cMenu** self)
 //100%
 INCLUDE_ASM("util/menu", cExpandMenuItem_preRender);
 #ifdef SKIP_ASM
-extern "C" int cMenuItem_isActive(void* self);
+extern "C" int cMenuItem_isActive(cMenuItem* self);
 extern "C" void* cMenu_getFocusItem(cMenu* self);
 
 struct sMenuRect_2CFB58 { float x, y, z, w; };
@@ -5683,7 +5676,7 @@ extern "C" sMenuRect_2CFB58* cExpandMenuItem_preRender(sMenuRect_2CFB58* ret, sM
     total.x = zero;
     self->f13C = *(void**)(self->owner + 0x124);
     for (int i = 0; i < self->count; i++) {
-        if (cMenuItem_isActive(self->items[i])) {
+        if (cMenuItem_isActive((cMenuItem*)self->items[i])) {
             sVEnt_2CFB58* vt = self->items[i]->vt;
             self->rects[i] = vt[4].fn((char*)self->items[i] + vt[4].delta);
             if (self == cMenu_getFocusItem((cMenu*)self->owner) || self->items[i] == self->sel) {
@@ -5713,7 +5706,7 @@ extern "C" sMenuRect_2CFB58* cExpandMenuItem_preRender(sMenuRect_2CFB58* ret, sM
 //100%
 INCLUDE_ASM("util/menu", cExpandMenuItem_render);
 #ifdef SKIP_ASM
-extern "C" int cMenuItem_isActive(void* self);
+extern "C" int cMenuItem_isActive(cMenuItem* self);
 extern "C" void* cMenu_getFocusItem(cMenu* self);
 
 struct cExpandMenuItem_render_sRect {
@@ -5757,7 +5750,7 @@ extern "C" void cExpandMenuItem_render(cExpandMenuItem_render_sOwner* self, cExp
 {
     cExpandMenuItem_render_sRect pos = *irect;
     for (int i = 0; i < self->count; i++) {
-        if (cMenuItem_isActive(self->items[i]) == 0) {
+        if (cMenuItem_isActive((cMenuItem*)self->items[i]) == 0) {
             continue;
         }
         if ((void*)self == cMenu_getFocusItem((cMenu*)self->menu) || self->items[i] == self->cur) {
@@ -6416,8 +6409,8 @@ extern "C" void cGraphMenuItem_gainFocus(void* self)
 //100%
 INCLUDE_ASM("util/menu", cGraphMenuItem_input);
 #ifdef SKIP_ASM
-extern "C" int cMenuItem_input(void* self);
-extern "C" int cMenuItem_isLocked(void* self);
+extern "C" int cMenuItem_input(cMenuItem* self);
+extern "C" int cMenuItem_isLocked(cMenuItem* self);
 extern "C" int cMenuItem_getKey(void** self);
 float cMenuItem_getLeft_f(void* self) __asm__("cMenuItem_getLeft__FPv");
 float cMenuItem_getRight_f(void* self) __asm__("cMenuItem_getRight__FPv");
@@ -6468,7 +6461,7 @@ struct sCurveItem_D0908 {
 extern "C" int cGraphMenuItem_input(sCurveItem_D0908* self)
 {
     int result = 0;
-    if (cMenuItem_isLocked(self) == 0) {
+    if (cMenuItem_isLocked((cMenuItem*)self) == 0) {
     int changed = 0;
     if (cMenuItem_getKey((void**)self) == 6) {
         self->editing ^= 1;
@@ -6538,10 +6531,10 @@ extern "C" int cGraphMenuItem_input(sCurveItem_D0908* self)
                 }
             }
         } else {
-            result = cMenuItem_input(self);
+            result = cMenuItem_input((cMenuItem*)self);
         }
     } else {
-        result = cMenuItem_input(self);
+        result = cMenuItem_input((cMenuItem*)self);
     }
     if (changed) {
         sVE_D0908* vt = *(sVE_D0908**)(self->menu + 0x12C);

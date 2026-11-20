@@ -41,4 +41,21 @@ CHECK_OFFSET(cMenu, DrawLayer, 0x128);
 CHECK_OFFSET(cMenu, mVtbl, 0x12C);
 CHECK_SIZE(cMenu, 0x130);
 
+// cMenuItem: the base of every debug-menu row (cSpaceMenuItem, cIntMenuItem, cFloatMenuItem, cColorMenuItem,
+// cRGBTitleMenuItem, cExpandMenuItem, ...; each derived constructor stores its own vtable at +0x10). Size 0x14: On
+// Tour's, and retail's methods reach the vptr at +0x10 (g++ 2.95 puts it after the members). Member names are EA's,
+// from On Tour's DWARF ([O]); [R] retail's constructor cMenuItem_cMenuItem; [U] how retail code uses the field.
+struct cMenuItem {
+    cMenu* Menu;                     // 0x00 [O]; [U] cMenu_addItem fills it
+    int Flags;                       // 0x04 [O]; [R] ctor = 1 (active)
+    int ID;                          // 0x08 [O]; [R] ctor = its argument (-1 from derived items without one)
+    void* Arg;                       // 0x0C [O]; [R] ctor = 0
+    void** mVtbl;                    // 0x10 [R] ctor = cMenuItem_vtbl; derived ctors store their own
+};
+
+CHECK_OFFSET(cMenuItem, Flags, 0x04);
+CHECK_OFFSET(cMenuItem, Arg, 0x0C);
+CHECK_OFFSET(cMenuItem, mVtbl, 0x10);
+CHECK_SIZE(cMenuItem, 0x14);
+
 #endif /* UTIL_MENU_H */
