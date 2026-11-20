@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/rollermodifier.h"
 #include "object/boostmodifier.h"
 #include "world/world.h"
 
@@ -25,7 +26,7 @@ struct sSphV4 { float x, y, z, w; } __attribute__((aligned(16)));
  * @param isLow  nonzero for a low-detail wrapper: +0x0 is then 0 and cWorldSphTree_GetIdealParam() returns -1
  * @return @p self
  */
-extern "C" void* cWorldSphTree_cWorldSphTree(void* self, void* ast, int isLow)
+extern "C" void* cWorldSphTree_cWorldSphTree(void* self, bxSphereTree* ast, int isLow)
 {
     *(void***)((char*)self + 0x50) = cWorldSphTree_vtbl;
     *(int*)((char*)self + 0x8) = 0;
@@ -35,9 +36,9 @@ extern "C" void* cWorldSphTree_cWorldSphTree(void* self, void* ast, int isLow)
     } else {
         *(int*)self = 1;
     }
-    *(void**)((char*)self + 0x64) = ast;
-    *(void**)((char*)self + 0x60) = ast;
-    sSphV4 center = *(sSphV4*)((char*)ast + 0x80);
+    *(void**)((char*)self + 0x64) = ((void*)ast);
+    *(void**)((char*)self + 0x60) = ((void*)ast);
+    sSphV4 center = *(sSphV4*)&ast->transCenter;
     float radius = SphereTree_GetRadius(ast);
     sSphV4 corner;
     *(sSphV4*)((char*)self + 0x40) = center;
@@ -197,7 +198,7 @@ extern "C" void SphereTree_TransformRel(void* p, void* a, float f);
  * @param mat  the transform (On Tour const t4Matrix& mat)
  * @param scale  the uniform scale (On Tour scale)
  */
-extern "C" void cWorldSphTree_Transform(void* self, void* mat, float scale)
+extern "C" void cWorldSphTree_Transform(void* self, t4Matrix* mat, float scale)
 {
     bxSphereTree_operatorE(*(void**)((char*)self + 0x68), *(void**)((char*)self + 0x60));
     *(void**)((char*)self + 0x60) = *(void**)((char*)self + 0x68);

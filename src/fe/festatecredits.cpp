@@ -1,4 +1,7 @@
 #include "common.h"
+#include "ui/uiinput.h"
+#include "ui/uistate.h"
+#include "ui/uithing.h"
 #include "fe/festatecredits.h"
 #include "render/ps2graphicsman.h"
 
@@ -58,7 +61,7 @@ INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onGainFocus);
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUITextScroll_addUnicodeStringByID(void* self, int id);
-extern "C" void cFEState_onGainFocus(void* self, void* a1);
+extern "C" void cFEState_onGainFocus(void* self, cUIState* a1);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_TextScroll[];
 extern char str_kT_CREDITSpct_03d[];
@@ -105,7 +108,7 @@ public:
  *
  * @param pPrevState  the state that had focus before, passed on to cFEState_onGainFocus()
  */
-extern "C" void cFEStateCredits_onGainFocus(cFEStateCredits* self, void* pPrevState)
+extern "C" void cFEStateCredits_onGainFocus(cFEStateCredits* self, cUIState* pPrevState)
 {
     cUIObjK185BA0* textScroll = (cUIObjK185BA0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextScroll));
     self->mpTextScroll = (cUITextScroll*)textScroll;
@@ -371,16 +374,16 @@ struct sVEntry001863E8 {
  * @param pInput  the controller input (cUIInput)
  * @return 1 when up or down was pressed, otherwise 0
  */
-extern "C" int cFEStateCredits_onInputBegin(cFEStateCredits* self, void* pInput)
+extern "C" int cFEStateCredits_onInputBegin(cFEStateCredits* self, cUIInput* pInput)
 {
-    sVEntry001863E8* vtEntry = &(*(sVEntry001863E8**)((char*)pInput + 8))[17];
+    sVEntry001863E8* vtEntry = &((sVEntry001863E8*)pInput->mVtbl)[17];
     if (vtEntry->fn((char*)pInput + vtEntry->delta)) {
         if (self->mPixelDelta >= -7) {
             self->mPixelDelta -= 1;
         }
         return 1;
     }
-    vtEntry = &(*(sVEntry001863E8**)((char*)pInput + 8))[18];
+    vtEntry = &((sVEntry001863E8*)pInput->mVtbl)[18];
     if (vtEntry->fn((char*)pInput + vtEntry->delta)) {
         if (self->mPixelDelta < 8) {
             self->mPixelDelta += 1;
@@ -433,9 +436,9 @@ extern "C" void cUIStateStack_push(void* list, void* item);
  * @param item  the widget that sent the event; nothing happens when null
  * @param msg  the widget event (only 6, back, is handled)
  */
-extern "C" void cFEStateCredits_onWidgetEvent(cFEStateCredits* self, void* item, int msg)
+extern "C" void cFEStateCredits_onWidgetEvent(cFEStateCredits* self, cUIThing* item, int msg)
 {
-    if (item != 0 && msg == 6) {
+    if (((void*)item) != 0 && msg == 6) {
         void* obj = *(void**)self->mpEngine;
         sVEntry001864B0* vt = *(sVEntry001864B0**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, 36);
@@ -472,7 +475,7 @@ extern sFlowState_865A8 D_004A4E80;
  *
  * @param pPrevState  the state that had focus before, passed on to cUIState_onGainFocus()
  */
-extern "C" void cFEState_onGainFocus(void* self, void* pPrevState)
+extern "C" void cFEState_onGainFocus(void* self, cUIState* pPrevState)
 {
     void* screen = cList_first((cList*)((char*)self + 0x24));
     if (screen != 0) {

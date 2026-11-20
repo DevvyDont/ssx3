@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ui/uistate.h"
+#include "ui/uithing.h"
 #include "ui/uiengine.h"
 #include "fe/festatetitle.h"
 #include "fe/festatemainmenu.h"
@@ -172,11 +174,11 @@ extern char str_tReal[];
  *
  * @param item  the widget being created
  */
-extern "C" void cFEStateTitle_onWidgetCreate(cFEStateTitle* self, void* item)
+extern "C" void cFEStateTitle_onWidgetCreate(cFEStateTitle* self, cUIThing* item)
 {
-    int id = *(int*)((char*)item + 0x38);
+    int id = item->mHashName;
     if (id == GetHashValue32(str_tReal)) {
-        *(int*)((char*)item + 0x18) = 0;
+        item->mMiscData = 0;
         cUIThing_setSound(item, 0, 0);
     }
 }
@@ -201,12 +203,12 @@ extern "C" void cUIStateStack_push(void* list, void* item);
  * @param msg  the widget (On Tour pWidget), despite the name
  * @param type  the widget event; only 5 acts
  */
-extern "C" void cFEStateTitle_onWidgetEvent(cFEStateTitle* self, void* msg, int type)
+extern "C" void cFEStateTitle_onWidgetEvent(cFEStateTitle* self, cUIThing* msg, int type)
 {
     if (type == 5) {
         void* obj = *(void**)self->mpEngine;
         sVEntry_cFEStateTitle_onWidgetEvent* vt = *(sVEntry_cFEStateTitle_onWidgetEvent**)((char*)obj + 0x4);
-        void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, *(int*)((char*)msg + 0x18));
+        void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, msg->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         }
@@ -405,32 +407,32 @@ extern char str_5online[];
  *
  * @param item  the widget being created
  */
-extern "C" void cFEStateMainMenu_onWidgetCreate(cFEStateMainMenu* self, void* item)
+extern "C" void cFEStateMainMenu_onWidgetCreate(cFEStateMainMenu* self, cUIThing* item)
 {
     int id;
-    id = *(int*)((char*)item + 0x38);
+    id = item->mHashName;
     if (id == GetHashValue32(str_1conquer)) {
-        *(int*)((char*)item + 0x18) = 11;
+        item->mMiscData = 11;
         return;
     }
-    id = *(int*)((char*)item + 0x38);
+    id = item->mHashName;
     if (id == GetHashValue32(str_2quick_play)) {
-        *(int*)((char*)item + 0x18) = 9;
+        item->mMiscData = 9;
         return;
     }
-    id = *(int*)((char*)item + 0x38);
+    id = item->mHashName;
     if (id == GetHashValue32(str_3multi_play)) {
-        *(int*)((char*)item + 0x18) = 22;
+        item->mMiscData = 22;
         return;
     }
-    id = *(int*)((char*)item + 0x38);
+    id = item->mHashName;
     if (id == GetHashValue32(str_4bonus_material)) {
-        *(int*)((char*)item + 0x18) = 5;
+        item->mMiscData = 5;
         return;
     }
-    id = *(int*)((char*)item + 0x38);
+    id = item->mHashName;
     if (id == GetHashValue32(str_5online)) {
-        *(int*)((char*)item + 0x18) = 49;
+        item->mMiscData = 49;
     }
 }
 #endif
@@ -599,16 +601,15 @@ static inline void setWidgetVisible_194EB0(char* self, char* name)
  * @param item_  the item (On Tour pWidget); ignored when null
  * @param type  the widget event: 5 Cross, 6 Triangle, 7 Square, 8 Circle
  */
-extern "C" void cFEStateMainMenu_onWidgetEvent(cFEStateMainMenu* self_, void* item_, unsigned int type)
+extern "C" void cFEStateMainMenu_onWidgetEvent(cFEStateMainMenu* self_, cUIThing* item_, unsigned int type)
 {
-    char* item = (char*)item_;
-    if (item == 0)
+    if (((char*)item_) == 0)
         return;
     switch (type) {
     case 5: {
         func_001A86E8(0);
         char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 0);
-        switch (*(int*)(item + 0x18)) {
+        switch (item_->mMiscData) {
         case 11:
             cBENewRaceInterface_setGamePath(iface, 0);
             self_->mGoToNextState = 1;
@@ -636,7 +637,7 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(cFEStateMainMenu* self_, void* it
         }
         sVE_194EB0* ivt = *(sVE_194EB0**)(iface + 0xC);
         ((void (*)(void*))ivt[1].fn)(iface + ivt[1].delta);
-        if (*(int*)(item + 0x18) == 22 && self_->mGoToNextState == 0) {
+        if (item_->mMiscData == 22 && self_->mGoToNextState == 0) {
             self_->mSaveCurrentCtrl = self_->mCurrentCtrl;
             char* popup = (char*)operator new(76, str_cFEPopupSelectMultiplayerMode, 0, 0);
             cUIState_cUIState1(popup, self_->mpEngine, ((char*)self_));
@@ -646,7 +647,7 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(cFEStateMainMenu* self_, void* it
             *(char*)(popup + 0x15) = bit;
             *(char*)(popup + 0x48) = 0;
             cUIStateStack_pushPopup(self_->mpEngine->mStateStack, popup);
-            self_->mpSelectMultiModeWidget = (cUIThing*)item;
+            self_->mpSelectMultiModeWidget = (cUIThing*)item_;
             setWidgetHidden_194EB0(((char*)self_), str_hl);
             setWidgetHidden_194EB0(((char*)self_), str_3_help_multi);
             setWidgetHidden_194EB0(((char*)self_), str_btext5);
@@ -654,14 +655,14 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(cFEStateMainMenu* self_, void* it
             return;
         }
         sObj_194EB0* obj = *(sObj_194EB0**)self_->mpEngine;
-        void* nextState = ((void* (*)(void*, void*, int))obj->vt[4].fn)((char*)obj + obj->vt[4].delta, ((char*)self_), *(int*)(item + 0x18));
+        void* nextState = ((void* (*)(void*, void*, int))obj->vt[4].fn)((char*)obj + obj->vt[4].delta, ((char*)self_), item_->mMiscData);
         if (nextState != 0)
             cUIStateStack_push(self_->mpEngine->mStateStack, nextState);
         break;
     }
     case 6: {
         sObj_194EB0* obj = *(sObj_194EB0**)self_->mpEngine;
-        void* nextState = ((void* (*)(void*, void*, int))obj->vt[5].fn)((char*)obj + obj->vt[5].delta, ((char*)self_), *(int*)(item + 0x18));
+        void* nextState = ((void* (*)(void*, void*, int))obj->vt[5].fn)((char*)obj + obj->vt[5].delta, ((char*)self_), item_->mMiscData);
         if (nextState != 0)
             cUIStateStack_push(self_->mpEngine->mStateStack, nextState);
         break;
@@ -751,7 +752,7 @@ static inline void Show195328(void* self, char* name)
  * @param msg  the popup event (0x15, 0x16)
  */
 // On confirm (msg 0x16) commits the selected entry, then re-shows the four main-menu buttons.
-extern "C" void cFEStateMainMenu_onPopupEvent(cFEStateMainMenu* self, char* obj, int msg)
+extern "C" void cFEStateMainMenu_onPopupEvent(cFEStateMainMenu* self, cUIState* obj, int msg)
 {
     if (msg == 21) {
         return;
@@ -759,8 +760,8 @@ extern "C" void cFEStateMainMenu_onPopupEvent(cFEStateMainMenu* self, char* obj,
     if (msg != 22) {
         return;
     }
-    sVEi_195328* ovt = *(sVEi_195328**)(obj + 8);
-    if (ovt[23].fn(obj + ovt[23].delta, 0) != 0) {
+    sVEi_195328* ovt = (sVEi_195328*)obj->mVtbl;
+    if (ovt[23].fn(((char*)obj) + ovt[23].delta, 0) != 0) {
         self->mGoToNextState = 1;
         int savedCtrl = *(signed char*)&self->mSaveCurrentCtrl;
         *(char*)&self->mCurrentCtrl = savedCtrl;

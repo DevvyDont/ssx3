@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "ui/uiengine.h"
 #include "fe/festatebonusmaterial.h"
 
@@ -37,19 +38,19 @@ extern char D_004A1508[];
  *
  * @param menu  the widget being created
  */
-extern "C" void cFEStateBonusMaterial_onWidgetCreate(cFEStateBonusMaterial* self, void* menu)
+extern "C" void cFEStateBonusMaterial_onWidgetCreate(cFEStateBonusMaterial* self, cUIThing* menu)
 {
-    int menuHash = *(int*)((char*)menu + 0x38);
+    int menuHash = menu->mHashName;
     if (menuHash == GetHashValue32(D_004A14F8)) {
-        *(int*)((char*)menu + 0x18) = 0;
+        menu->mMiscData = 0;
     }
-    menuHash = *(int*)((char*)menu + 0x38);
+    menuHash = menu->mHashName;
     if (menuHash == GetHashValue32(D_004A1500)) {
-        *(int*)((char*)menu + 0x18) = 1;
+        menu->mMiscData = 1;
     }
-    menuHash = *(int*)((char*)menu + 0x38);
+    menuHash = menu->mHashName;
     if (menuHash == GetHashValue32(D_004A1508)) {
-        *(int*)((char*)menu + 0x18) = 2;
+        menu->mMiscData = 2;
     }
 }
 #endif
@@ -118,9 +119,9 @@ struct sVEntryK195600 {
  * @param item  the entry (its index at +0x18 picks the video from D_00441128), or 0
  * @param event  widget event number (On Tour Event)
  */
-extern "C" void cFEStateBonusMaterial_onWidgetEvent(cFEStateBonusMaterial* self, void* item, unsigned int event)
+extern "C" void cFEStateBonusMaterial_onWidgetEvent(cFEStateBonusMaterial* self, cUIThing* item, unsigned int event)
 {
-    if (item == 0)
+    if (((void*)item) == 0)
         return;
     switch (event) {
     case 4:
@@ -128,14 +129,14 @@ extern "C" void cFEStateBonusMaterial_onWidgetEvent(cFEStateBonusMaterial* self,
     case 5: {
         void* popup = cFEStateVideoPlayer_cFEStateVideoPlayer(cMemMan_alloc(640, str_cFEStateVideoPlayer, 0, 0), self->mpEngine, self,
                                 self->mUserNum);
-        cFEStateVideoPlayer_setVideoSourceFiles(popup, D_00441128[*(int*)((char*)item + 0x18)], 0);
+        cFEStateVideoPlayer_setVideoSourceFiles(popup, D_00441128[item->mMiscData], 0);
         cUIStateStack_pushPopup(self->mpEngine->mStateStack, popup);
         break;
     }
     case 6: {
         char* factory = *(char**)self->mpEngine;
         sVEntryK195600* vt = *(sVEntryK195600**)(factory + 4);
-        void* nextState = vt[5].fn(factory + vt[5].delta, self, *(int*)((char*)item + 0x18));
+        void* nextState = vt[5].fn(factory + vt[5].delta, self, item->mMiscData);
         if (nextState != 0)
             cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         break;

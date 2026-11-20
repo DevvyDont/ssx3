@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ui/uiengine.h"
+#include "ui/uithing.h"
 #include "be/beintnewrace.h"
 #include "fe/ovstateprofile.h"
 #include "fe/ovstateautosave.h"
@@ -871,7 +873,7 @@ static inline void* GetText_K211BC8(char* key)
  * @param event  the widget event: 5, 6, 7, 13 or 14
  */
 // Profile screen: handles menu events (5 = name picked, 6 = back, 7 = slot chosen, 13 = name entered).
-extern "C" void cOVState_PROFILE_onWidgetEvent(cOVState_PROFILE* vself, char* item, int event)
+extern "C" void cOVState_PROFILE_onWidgetEvent(cOVState_PROFILE* vself, cUIThing* item, int event)
 {
     cOVState_PROFILE* self = vself;
     switch (event) {
@@ -896,11 +898,11 @@ extern "C" void cOVState_PROFILE_onWidgetEvent(cOVState_PROFILE* vself, char* it
         break;
     }
     case 5: {
-        if (item == 0) break;
+        if (((char*)item) == 0) break;
         if (self->mIsProcessing != 0) break;
         char* mp = (char*)cSSXApp_getMCManager(SSXApp);
         if (self->mScreenStatus != 3) break;
-        ((sMgrK211BC8*)mp)->fF8 = self->mSlot = *(int*)(item + 0x18);
+        ((sMgrK211BC8*)mp)->fF8 = self->mSlot = item->mMiscData;
         if (self->mState == 1) {
             if (((char*)self->mpKeyboard) == 0) {
                 char* kb = (char*)cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(1092, str_Keyboard_b, 0x100, 0), ((void*)self->mpEngine), vself, 0, self->mCtrlBits);
@@ -949,7 +951,7 @@ extern "C" void cOVState_PROFILE_onWidgetEvent(cOVState_PROFILE* vself, char* it
         if (self->mIsProcessing != 1 && self->mState != 6) {
             char* mp = (char*)cSSXApp_getMCManager(SSXApp);
             if (VCALL_K211BC8(*(char**)(mp + 1076), 0, 54), *(int*)(mp + 0x428)) != 0) {
-                ((sMgrK211BC8*)mp)->fF8 = self->mSlot = *(int*)(item + 0x18);
+                ((sMgrK211BC8*)mp)->fF8 = self->mSlot = item->mMiscData;
                 if (self->mState == 1) {
                     if (VCALL_K211BC8(*(char**)(mp + 1076), 0, 67), self->mSlot) != 0) {
                         self->mIsProcessing = 1;
@@ -1011,7 +1013,7 @@ extern void* cOVState_AUTOSAVE_vtbl[];
  * @param iParent  the overlay to return to (On Tour iParent)
  * @return @p self
  */
-extern "C" void* cOVState_AUTOSAVE_cOVState_AUTOSAVE(cOVState_AUTOSAVE* self, void* pEngine, int iParent)
+extern "C" void* cOVState_AUTOSAVE_cOVState_AUTOSAVE(cOVState_AUTOSAVE* self, cUIEngine* pEngine, int iParent)
 {
     cFEMemCard_cFEMemCard2(self, pEngine, 0);
     self->mVtbl = cOVState_AUTOSAVE_vtbl;

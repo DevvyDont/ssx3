@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "fe/festatempcircuit.h"
 
 //100%
@@ -39,15 +40,15 @@ extern char D_004A1500[];
  *
  * @param item  the widget just created (On Tour pWidget)
  */
-extern "C" void cFEStateSelectMultiplayerMode_onWidgetCreate(void* self, void* item)
+extern "C" void cFEStateSelectMultiplayerMode_onWidgetCreate(void* self, cUIThing* item)
 {
-    int id = *(int*)((char*)item + 0x38);
+    int id = item->mHashName;
     if (id == GetHashValue32(D_004A14F8)) {
-        *(int*)((char*)item + 0x18) = 0;
+        item->mMiscData = 0;
     } else {
-        int id2 = *(int*)((char*)item + 0x38);
+        int id2 = item->mHashName;
         if (id2 == GetHashValue32(D_004A1500)) {
-            *(int*)((char*)item + 0x18) = 1;
+            item->mMiscData = 1;
         }
     }
 }
@@ -73,16 +74,16 @@ extern "C" void cUIStateStack_push(void* list, void* item);
  * @param item  the widget (On Tour pWidget)
  * @param msg  the event (On Tour Event)
  */
-extern "C" void cFEStateSelectMultiplayerMode_onWidgetEvent(void* self, void* item, int msg)
+extern "C" void cFEStateSelectMultiplayerMode_onWidgetEvent(void* self, cUIThing* item, int msg)
 {
-    if (item == 0) {
+    if (((void*)item) == 0) {
         return;
     }
     switch (msg) {
     case 5: {
         void* obj = **(void***)((char*)self + 0x10);
         sVEntry001A3160* vt = *(sVEntry001A3160**)((char*)obj + 4);
-        void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, *(int*)((char*)item + 0x18));
+        void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
         }
@@ -91,7 +92,7 @@ extern "C" void cFEStateSelectMultiplayerMode_onWidgetEvent(void* self, void* it
     case 6: {
         void* obj = **(void***)((char*)self + 0x10);
         sVEntry001A3160* vt = *(sVEntry001A3160**)((char*)obj + 4);
-        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
+        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push((char*)*(void**)((char*)self + 0x10) + 0x18, nextState);
         }

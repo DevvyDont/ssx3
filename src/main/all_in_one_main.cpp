@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "fe/fememcard.h"
 #include "fe/feinput.h"
 #include "fe/festatecredits.h"
@@ -5813,15 +5814,15 @@ extern char str_no[];
  * @param widget  the widget (may be null)
  * @param event  the widget event
  */
-extern "C" void cFEPopupOptionReset_onWidgetEvent(char *self, char *widget, int event) {
-    if (widget != 0) {
+extern "C" void cFEPopupOptionReset_onWidgetEvent(char *self, cUIThing* widget, int event) {
+    if (((char*)widget) != 0) {
         if (event == 5) {
-            int yesCheckHash = *(int*)(widget + 0x38);
+            int yesCheckHash = widget->mHashName;
             if (yesCheckHash == GetHashValue32(str_yes)) {
                 *(char*)(self + 0x48) = 1;
                 cUIStateStack_pop(*(int*)(self + 0x10) + 0x18, 1);
             } else {
-                int noCheckHash = *(int*)(widget + 0x38);
+                int noCheckHash = widget->mHashName;
                 if (noCheckHash == GetHashValue32(str_no)) {
                     *(char*)(self + 0x48) = 0;
                     cUIStateStack_pop(*(int*)(self + 0x10) + 0x18, 1);

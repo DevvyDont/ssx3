@@ -1,4 +1,7 @@
 #include "common.h"
+#include "ui/uistate.h"
+#include "ui/uiengine.h"
+#include "ui/uithing.h"
 #include "render/ps2graphicsman.h"
 #include "main/ssxapp.h"
 
@@ -127,7 +130,7 @@ static inline int Find_8DB8(char* mgr, int hash)
  * @param canSwitchMode  nonzero when the option button may switch between the two modes (kept at 0xAE4)
  * @return the constructed state
  */
-extern "C" void* cFEStateCharEquip_cFEStateCharEquip(void* mem, void* owner, signed char team, int inStore, int canSwitchMode)
+extern "C" void* cFEStateCharEquip_cFEStateCharEquip(void* mem, cUIEngine* owner, signed char team, int inStore, int canSwitchMode)
 {
     sCharEquip_8DB8* self = (sCharEquip_8DB8*)mem;
     cUIState_cUIState(self);
@@ -516,21 +519,21 @@ static inline bool isC8_FE(sCharEquip_FE* s)
  *
  * @param w  the widget just created (its hash name is at +0x38)
  */
-extern "C" void cFEStateCharEquip_onWidgetCreate(sCharEquip_FE* self, void* w)
+extern "C" void cFEStateCharEquip_onWidgetCreate(sCharEquip_FE* self, cUIThing* w)
 {
-    int id = *(int*)((char*)w + 0x38);
+    int id = w->mHashName;
     if (id == GetHashValue32(str_title_equip_character)) {
-        self->f48 = w;
+        self->f48 = ((void*)w);
         if (isC8_FE(self)) {
             cUIText_setUnicodeStringByID_eate(self->f48, GetHashValue32(str_kT_CMNBuyGear));
         } else {
             cUIText_setUnicodeStringByID_eate(self->f48, GetHashValue32(str_kT_CMNEquipGear));
         }
     } else if (id == GetHashValue32(str_helptext)) {
-        self->f4C = w;
+        self->f4C = ((void*)w);
         hide_FE(self->f4C);
     } else if (id == GetHashValue32(str_btext5)) {
-        self->f50 = w;
+        self->f50 = ((void*)w);
         if (self->fAE4 == 0) {
             hide_FE(self->f50);
         } else {
@@ -541,54 +544,54 @@ extern "C" void cFEStateCharEquip_onWidgetCreate(sCharEquip_FE* self, void* w)
             }
         }
     } else if (id == GetHashValue32(str_ps2sq) || id == GetHashValue32(str_xby) || id == GetHashValue32(str_ngcy)) {
-        self->f54 = w;
+        self->f54 = ((void*)w);
         if (self->fAE4 == 0) {
             hide_FE(self->f54);
         }
     } else if (id == GetHashValue32(str_heading)) {
-        self->f58 = w;
+        self->f58 = ((void*)w);
         cFEStateCharEquip_updateHeading_eate(self, D_004A11D0_eate);
     } else if (id == GetHashValue32(str_MnuGroups)) {
-        self->f5C = w;
+        self->f5C = ((void*)w);
         cUIMenu_setScrollableMenu_FE(self->f5C, self->f958);
     } else if (id == GetHashValue32(str_buytotals)) {
-        self->f60 = w;
+        self->f60 = ((void*)w);
         if (!isC8_FE(self)) {
             hide_FE(self->f60);
         }
     } else if (id == GetHashValue32(str_1right)) {
-        self->f64 = w;
+        self->f64 = ((void*)w);
         cFEStateCharEquip_updateBankWidget_eate(self);
     } else if (id == GetHashValue32(str_2right)) {
-        self->f68 = w;
+        self->f68 = ((void*)w);
         cUIText_setAsciiString_eate(self->f68, D_004A1408);
     } else if (id == GetHashValue32(str_bolt01)) {
-        self->f84 = w;
+        self->f84 = ((void*)w);
     } else if (id == GetHashValue32(str_barandpoints)) {
-        self->f6C = w;
+        self->f6C = ((void*)w);
         hide_FE(self->f6C);
     } else if (id == GetHashValue32(str_overbar)) {
-        self->f70 = w;
+        self->f70 = ((void*)w);
         hide_FE(self->f70);
     } else if (id == GetHashValue32(str_overbar2)) {
-        self->f74 = w;
+        self->f74 = ((void*)w);
         hide_FE(self->f74);
     } else if (id == GetHashValue32(str_equip_points)) {
-        self->f78 = w;
+        self->f78 = ((void*)w);
     } else if (id == GetHashValue32(str_equip_btm_left)) {
-        self->f80 = w;
+        self->f80 = ((void*)w);
         hide_FE(self->f80);
     } else if (id == GetHashValue32(str_points)) {
-        self->f7C = w;
+        self->f7C = ((void*)w);
         cUIText_setAsciiString_eate(self->f7C, D_004A1408);
     } else if (id == GetHashValue32(str_largeshape)) {
-        self->f88 = w;
+        self->f88 = ((void*)w);
         hide_FE(self->f88);
     } else {
         for (int i = 0; i < 6; i++) {
             if (id == GetHashValue32(D_00441218[i])) {
-                self->f8C[i] = w;
-                *(int*)((char*)w + 0x18) = i;
+                self->f8C[i] = ((void*)w);
+                w->mMiscData = i;
                 if (i < self->f958) {
                     if (isC8_FE(self)) {
                         func_0019BA60_eate(self, i);
@@ -601,7 +604,7 @@ extern "C" void cFEStateCharEquip_onWidgetCreate(sCharEquip_FE* self, void* w)
                 return;
             }
             if (id == GetHashValue32(D_00441230[i])) {
-                self->fA4[i] = w;
+                self->fA4[i] = ((void*)w);
                 if (i < self->f958) {
                     if (isC8_FE(self)) {
                         func_0019BA60_eate(self, i);
@@ -638,11 +641,11 @@ extern "C" void func_0019B618(void* self, int a1, int a2);
  * @param widget  the popup state that sent the event
  * @param msg  the popup event (0x15 opened, 0x16 closed)
  */
-extern "C" void cFEStateCharEquip_onPopupEvent(void* self, void* widget, int msg)
+extern "C" void cFEStateCharEquip_onPopupEvent(void* self, cUIState* widget, int msg)
 {
     switch (msg) {
     case 21:
-        if (*(int*)((char*)widget + 0xC) != 7) {
+        if (widget->mHashName != 7) {
             *(int*)((char*)self + 0x1C) &= ~8;
         }
         break;
@@ -650,7 +653,7 @@ extern "C" void cFEStateCharEquip_onPopupEvent(void* self, void* widget, int msg
         if (((*(int*)((char*)self + 0x1C) >> 3) & 1) == 0) {
             *(int*)((char*)self + 0x1C) |= 8;
         }
-        if (*(int*)((char*)widget + 0xC) == 7 && *(int*)((char*)widget + 0x6C) != 0) {
+        if (widget->mHashName == 7 && *(int*)((char*)widget + 0x6C) != 0) {
             func_0019BE80(self);
             cFEStateCharEquip_updateBankWidget(self);
             if (func_0019B458((sEquipDetail*)self, *(unsigned char*)(*(char**)((char*)self + 0x5C) + 0x95))) {
@@ -905,16 +908,16 @@ static inline int isMode1_9C28(sCharEquip_9C28* self)
  * @param w  the row widget that sent the event; nothing happens when null
  * @param ev  the widget event (5 accept, 6 back, 1 focused)
  */
-extern "C" void cFEStateCharEquip_onWidgetEvent(void* selfv, char* w, unsigned int ev)
+extern "C" void cFEStateCharEquip_onWidgetEvent(void* selfv, cUIThing* w, unsigned int ev)
 {
     sCharEquip_9C28* self = (sCharEquip_9C28*)selfv;
-    if (w == 0)
+    if (((char*)w) == 0)
         return;
     switch (ev) {
     case 5: {
         if (self->list == 0)
             return;
-        int idx = self->list->top + *(int*)(w + 0x18);
+        int idx = self->list->top + w->mMiscData;
         if (idx >= self->count)
             return;
         sItem_9C28* item = self->items[idx];
@@ -942,14 +945,14 @@ extern "C" void cFEStateCharEquip_onWidgetEvent(void* selfv, char* w, unsigned i
         }
         int* vals = self->vals;
         void* iface = cBE_getInterface(cBE_getBE(), 9);
-        if (D_004A18D8 < *(int*)((char*)vals + (*(int*)(w + 0x18) << 2)) + self->spent)
+        if (D_004A18D8 < *(int*)((char*)vals + (w->mMiscData << 2)) + self->spent)
             return;
         if (!func_0019BEE8(self))
             return;
         self->spent = func_0014B478(iface, self->team, self->slot);
         func_0019B618(self, 0, 1);
         cFEStateCharEquip_updatePolyBar(self);
-        cFEStateCharEquip_updatePolyEquipPreviewBar(self, *(int*)((char*)vals + (*(int*)(w + 0x18) << 2)));
+        cFEStateCharEquip_updatePolyEquipPreviewBar(self, *(int*)((char*)vals + (w->mMiscData << 2)));
         func_0019ACA0(self);
         return;
     }

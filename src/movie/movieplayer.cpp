@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "render/occlusionman.h"
 #include "render/ps2graphicsman.h"
 #include "movie/mcoverlaymanager.h"
@@ -5450,7 +5451,7 @@ extern "C" void cOcclusionMan_removeVisCurtain(cOcclusionMan* occlusionMan, tVis
 //100%
 INCLUDE_ASM("movie/movieplayer", cOcclusionMan_updateView);
 #ifdef SKIP_ASM
-extern "C" void cOcclusionMan_updateVisPlane(cOcclusionMan* self, const void* eye, void* frustum);
+extern "C" void cOcclusionMan_updateVisPlane(cOcclusionMan* self, t4Vector* eye, tVisCurtainRecord* frustum);
 extern "C" void func_00229F88(int index, void* v, void* m);
 extern "C" void qsort(void* base, int n, int size, int (*cmp)(const void*, const void*));
 extern "C" int cOcclusionMan__VisSortFunc(const void* a, const void* b);
@@ -5656,7 +5657,7 @@ extern "C" void cOcclusionMan_updateView(sVisMgr_25C0* self, sBounds_25C0* bb)
     self->nvis = n;
     for (int i = 0; i < self->nvis; i++) {
         self->mask |= 1 << i;
-        cOcclusionMan_updateVisPlane((cOcclusionMan*)self, &eye, self->ents[i].view);
+        cOcclusionMan_updateVisPlane((cOcclusionMan*)self, (t4Vector*)(&eye), (tVisCurtainRecord*)self->ents[i].view);
         func_00229F88(i, &self->ents[i].view->normal, (char*)self->ents[i].view + 0x60);
     }
 }
@@ -5799,7 +5800,7 @@ static inline void makePlane_29B0(sFrustum_29B0* f, int i, const sVec4_29B0& eye
  * @param eyep  the eye position
  * @param frustumPtr  the curtain record
  */
-extern "C" void cOcclusionMan_updateVisPlane(cOcclusionMan* self, const void* eyep, void* frustumPtr)
+extern "C" void cOcclusionMan_updateVisPlane(cOcclusionMan* self, t4Vector* eyep, tVisCurtainRecord* frustumPtr)
 {
     const sVec4_29B0& eye = *(const sVec4_29B0*)eyep;
     sFrustum_29B0* frustum = (sFrustum_29B0*)frustumPtr;

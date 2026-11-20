@@ -3624,10 +3624,10 @@ INCLUDE_ASM("seg/seg_1218", cRiderAnim_linkToRider);
  * @param riderAnim  the rider animation object (this)
  * @param rider  the rider (cRider) to drive
  */
-extern "C" void cRiderAnim_linkToRider(void *riderAnim, void *rider) {
+extern "C" void cRiderAnim_linkToRider(void *riderAnim, cRider* rider) {
     (*(int *)((char*)(riderAnim) + (0x64))) = 0;
-    (*(void **)((char*)(riderAnim) + (0x60))) = rider;
-    (*(int *)((char*)(riderAnim) + (0x54))) = (int) (*(int *)((char*)(rider) + (0x780)));
+    (*(void **)((char*)(riderAnim) + (0x60))) = ((void*)rider);
+    (*(int *)((char*)(riderAnim) + (0x54))) = (int) ((int)rider->mAnimModel);
 }
 #endif
 
@@ -6393,7 +6393,7 @@ static inline sV4_7E70 Get_7E70(char* p) { return *(sV4_7E70*)p; }
  * @param flag  nonzero for a punch (On Tour isPunch), 0 for a collision
  * @param speed  the signed impulse along @p n (On Tour impulse)
  */
-extern "C" void cRider_doOpponentCollision(cRider* self, char* other, sV4_7E70* n, int flag, float speed)
+extern "C" void cRider_doOpponentCollision(cRider* self, cRider* other, sV4_7E70* n, int flag, float speed)
 {
     if (cRider_getControlState_7E70((char*)self) == 10)
         return;
@@ -6420,7 +6420,7 @@ extern "C" void cRider_doOpponentCollision(cRider* self, char* other, sV4_7E70* 
         return;
     if (absSpd < 39.99532699584961f)
         return;
-    float otherDist = ((sRec_7E70*)self)[*(int*)(other + 0x86C)].dist;
+    float otherDist = ((sRec_7E70*)self)[other->mAIIndex].dist;
     sInfo_7E70 info;
     info.pos = Add_7E70(*(sV4_7E70*)&self->mPosition, Scale_7E70(*n, otherDist));
     info.dir = Norm_7E70(*(sV4_7E70*)&self->mVelocity);
@@ -6462,15 +6462,15 @@ extern "C" void cRider_doOpponentCollision(cRider* self, char* other, sV4_7E70* 
         }
         cRider_flagEventWipeout_7E70(((char*)self), anim, flag, 0, &info);
         if (flag)
-            cRider_flagEventPunchKnockdown(((char*)self), other);
+            cRider_flagEventPunchKnockdown(((char*)self), ((char*)other));
         else
-            cRider_flagEventBumpKnockdown(((char*)self), other);
+            cRider_flagEventBumpKnockdown(((char*)self), ((char*)other));
     } else {
         cRider_doBump_7E70(((char*)self), &info, 0);
         if (flag)
-            cRider_flagEventPunch(((char*)self), other);
+            cRider_flagEventPunch(((char*)self), ((char*)other));
         else
-            cRider_flagEventBump(((char*)self), other);
+            cRider_flagEventBump(((char*)self), ((char*)other));
     }
 }
 #endif

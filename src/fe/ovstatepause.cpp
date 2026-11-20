@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uistate.h"
 #include "be/beintnewrace.h"
 #include "fe/ovstateheat.h"
 #include "fe/ovstaterewards.h"
@@ -3142,7 +3143,7 @@ extern "C" void cFEMemCard_onPopupEvent(void* self, void* a1, int key);
  * @param popup  the popup state that sent the event
  * @param key  the popup event
  */
-extern "C" void cOVState_SAVEREPLAY_onPopupEvent(cOVState_SAVEREPLAY* self, void* popup, int key)
+extern "C" void cOVState_SAVEREPLAY_onPopupEvent(cOVState_SAVEREPLAY* self, cUIState* popup, int key)
 {
     if (key == 22) {
         if (self->mPopupType == 5) {

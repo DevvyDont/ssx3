@@ -1,4 +1,7 @@
 #include "common.h"
+#include "inseq/scriptplayerentity.h"
+#include "inseq/scriptplayermain.h"
+#include "ai/rider.h"
 #include "scripter/bxscriptengine.h"
 #include "scripter/scriptobjcamera.h"
 #include "scripter/scriptdatabaseobject.h"
@@ -1627,7 +1630,7 @@ extern "C" void cSSXScriptEngine_OnReleaseRequest(cSSXScriptEngine* self, int re
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_AddObject);
 #ifdef SKIP_ASM
 extern "C" int cScriptDatabaseObject_AddObject(cScriptDatabaseObject* self, void* obj);
-extern "C" int cScriptObjCameraManager_AddCameraObject(void* self, void* obj);
+extern "C" int cScriptObjCameraManager_AddCameraObject(void* self, cScriptObjCamera* obj);
 extern "C" int cScriptObjCameraManager_SetTransitionObject(void* self, void* obj);
 
 class cScriptOwner9D00 {
@@ -1665,7 +1668,7 @@ extern "C" int cSSXScriptEngine_AddObject(cSSXScriptEngine* self, cScriptOwner9D
 {
     int result = cScriptDatabaseObject_AddObject((cScriptDatabaseObject*)(self), obj);
     if (obj->state == 1) {
-        cScriptObjCameraManager_AddCameraObject(&((sScrSlot9D00*)&self->mObjectCameraManager[0])[*(int*)((char*)obj + 0x7C)], obj);
+        cScriptObjCameraManager_AddCameraObject(&((sScrSlot9D00*)&self->mObjectCameraManager[0])[*(int*)((char*)obj + 0x7C)], (cScriptObjCamera*)obj);
     } else if (obj->state == 2) {
         cScriptObjCameraManager_SetTransitionObject(&((sScrSlot9D00*)&self->mObjectCameraManager[0])[obj->v09()], obj);
     }
@@ -2217,7 +2220,7 @@ int cBXScriptEngine_GetRequestHandleFromPlayer(void* self, void* a1);
  *
  * @param pPlayer  the script player
  */
-extern "C" void cSSXScriptEngine_OnInSeqPlay(cSSXScriptEngine* self, void* pPlayer)
+extern "C" void cSSXScriptEngine_OnInSeqPlay(cSSXScriptEngine* self, cScriptPlayerMain* pPlayer)
 {
     cBXScriptEngine_OnInSeqPlay(self, pPlayer);
     int listIndex = self->mPlayingNISList;
@@ -2240,7 +2243,7 @@ int cBXScriptEngine_GetRequestHandleFromPlayer(void* self, void* a1);
  * @param x  current frame (On Tour currFrame)
  * @param y  frame delta (On Tour frameDelta)
  */
-extern "C" void cSSXScriptEngine_OnInSeqUpdate(cSSXScriptEngine* self, void* pPlayer, float x, float y)
+extern "C" void cSSXScriptEngine_OnInSeqUpdate(cSSXScriptEngine* self, cScriptPlayerMain* pPlayer, float x, float y)
 {
     int listIndex = self->mPlayingNISList;
     if (listIndex != 2) {
@@ -2260,7 +2263,7 @@ int cBXScriptEngine_GetRequestHandleFromPlayer(void* self, void* a1);
  *
  * @param pPlayer  the script player
  */
-extern "C" void cSSXScriptEngine_OnInSeqPlayStopping(cSSXScriptEngine* self, void* pPlayer)
+extern "C" void cSSXScriptEngine_OnInSeqPlayStopping(cSSXScriptEngine* self, cScriptPlayerMain* pPlayer)
 {
     int listIndex = self->mPlayingNISList;
     if (listIndex != 2) {
@@ -2281,7 +2284,7 @@ int cBXScriptEngine_GetRequestHandleFromPlayer(void* self, void* a1);
  *
  * @param pPlayer  the script player
  */
-extern "C" void cSSXScriptEngine_OnInSeqStop(cSSXScriptEngine* self, void* pPlayer)
+extern "C" void cSSXScriptEngine_OnInSeqStop(cSSXScriptEngine* self, cScriptPlayerMain* pPlayer)
 {
     int listIndex = self->mPlayingNISList;
     if (listIndex != 2) {
@@ -3085,9 +3088,9 @@ static inline float Atan2_27B750(float y, float x)
  * @param pitch  receives the pitch of the start direction
  * @param yaw  receives the heading of the start direction
  */
-extern "C" void cSSXScriptEngine_FillOrientationFromStartPointInfo(cSSXScriptEngine* self, char* obj, sVec4_27B750* pos, int* roll, float* pitch, float* yaw)
+extern "C" void cSSXScriptEngine_FillOrientationFromStartPointInfo(cSSXScriptEngine* self, cRider* obj, sVec4_27B750* pos, int* roll, float* pitch, float* yaw)
 {
-    char* sub = obj + 0x6C0;
+    char* sub = ((char*)obj) + 0x6C0;
     sVEntry_27B750* vtEntry = &(*(sVEntry_27B750**)sub)[7];
     sNode_27B750* startPoint = (sNode_27B750*)cPathSys_getStartpoint(gPaths, 1, vtEntry->fn(sub + vtEntry->delta));
     *pos = sVec4_27B750(startPoint->px, startPoint->py, startPoint->pz, 1.0f);
@@ -3162,12 +3165,12 @@ static inline float Atan2_27B948(float y, float x)
  * @param pitch  receives the pitch of the rider's direction (+0x1B0)
  * @param yaw  receives the heading of the rider's direction
  */
-extern "C" void cSSXScriptEngine_FillOrientationFromRiderOrientationInfo(cSSXScriptEngine* self, char* obj, sVec4_27B948* pos, int* roll, float* pitch, float* yaw)
+extern "C" void cSSXScriptEngine_FillOrientationFromRiderOrientationInfo(cSSXScriptEngine* self, cRider* obj, sVec4_27B948* pos, int* roll, float* pitch, float* yaw)
 {
-    char* sub = obj + 0x6C0;
+    char* sub = ((char*)obj) + 0x6C0;
     sVEntry_27B948* vtEntry = &(*(sVEntry_27B948**)sub)[5];
     *pos = *vtEntry->fn(sub + vtEntry->delta);
-    sVec4_27B948 dir = *(sVec4_27B948*)(obj + 0x1B0);
+    sVec4_27B948 dir = *(sVec4_27B948*)&obj->mMatrix.row[1];
     *yaw = Atan2_27B948(dir.y, dir.x);
     sVec2_27B948 horiz(dir.x, dir.y);
     *pitch = Atan2_27B948(dir.z, Length_27B948(horiz));
@@ -3557,7 +3560,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjGS_IsMatchingEntity);
  * @param type  the entity type
  * @return 1 for type 6, else 0
  */
-extern "C" int cScriptObjGS_IsMatchingEntity(void* self, void* entity, int type)
+extern "C" int cScriptObjGS_IsMatchingEntity(void* self, cScriptPlayerEntity* entity, int type)
 {
     return type == 6;
 }
@@ -5765,7 +5768,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjRider_IsMatchingEntity);
 #ifdef SKIP_ASM
 extern "C" int cRider_isLoaded(void* self);
 extern "C" int cRider_getIdentity(void* self);
-extern "C" int cScriptObjRider_IsSuitableRole(void* self, void* rider, int id, int a3);
+extern "C" int cScriptObjRider_IsSuitableRole(void* self, cRider* rider, int id, int a3);
 extern int D_00481BB0[];
 
 class cScriptCtx0458 {
@@ -5791,7 +5794,7 @@ public:
  * @param type  the entity type asked for; only 5 can match
  * @return nonzero when the entity matches this rider
  */
-extern "C" int cScriptObjRider_IsMatchingEntity(cScriptCtx0458* self, void* msg, int type)
+extern "C" int cScriptObjRider_IsMatchingEntity(cScriptCtx0458* self, cScriptPlayerEntity* msg, int type)
 {
     if (type != 5) return 0;
     void* rider = self->v06();
@@ -5802,7 +5805,7 @@ extern "C" int cScriptObjRider_IsMatchingEntity(cScriptCtx0458* self, void* msg,
     char* info = (char*)GetSSXActorHeader(msg);
     short charMask = *(short*)(info + 2);
     if (charMask == 0 || (charMask & mask) != 0) {
-        return cScriptObjRider_IsSuitableRole(self, rider, *(signed char*)info, *(int*)((char*)msg + 0x8));
+        return cScriptObjRider_IsSuitableRole(self, (cRider*)rider, *(signed char*)info, (int)msg->mpOwner);
     }
     return 0;
 }
@@ -5860,12 +5863,12 @@ extern "C" void* cSSXScriptEngine_GetSubjectRider(cSSXScriptEngine* self, int i,
  * @param playerMain  the script player (cScriptPlayerMain)
  * @return 1 when the rider suits the role, else 0 (also for negative or larger roles)
  */
-extern "C" int cScriptObjRider_IsSuitableRole(void* self, void* rider, int id, int playerMain)
+extern "C" int cScriptObjRider_IsSuitableRole(void* self, cRider* rider, int id, int playerMain)
 {
     if (id != 0) {
         if (id >= 0) {
             if (id < 22) {
-                return cSSXScriptEngine_GetSubjectRider(ScriptEngine, id - 1, playerMain) == rider;
+                return cSSXScriptEngine_GetSubjectRider(ScriptEngine, id - 1, playerMain) == ((void*)rider);
             }
         }
     } else {
@@ -6105,7 +6108,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjEvent_IsMatchingEntity);
  * @param type  the entity type
  * @return 1 for type 7, else 0
  */
-extern "C" int cScriptObjEvent_IsMatchingEntity(void* self, void* entity, int type)
+extern "C" int cScriptObjEvent_IsMatchingEntity(void* self, cScriptPlayerEntity* entity, int type)
 {
     return type == 7;
 }
@@ -6274,13 +6277,13 @@ struct sSeEngine_08E8 {
  * @param when  the current frame
  * @param flags  the event bits
  */
-extern "C" void cScriptObjEvent_OnInSeqKeyEvent(sSeEngine_08E8* self, void* obj, int entityType, float when, int flags)
+extern "C" void cScriptObjEvent_OnInSeqKeyEvent(sSeEngine_08E8* self, cScriptPlayerEntity* obj, int entityType, float when, int flags)
 {
     sSeInfo_08E8 info;
     GetSSXGameEventFrame(obj, &info);
     void* iface0 = cBE_getInterface_Fv(cBE_getBE(), 0);
     int owner;
-    if (*(signed char*)GetSSXScriptHeader(*(void**)((char*)obj + 8)) != 0) {
+    if (*(signed char*)GetSSXScriptHeader(obj->mpOwner) != 0) {
         owner = cSSXScriptEngine_GetTransportWorldSectionID_08E8(ScriptEngine);
     } else {
         void* mgr = SSXApp->Game->SectionMan;
@@ -6547,12 +6550,12 @@ void cScriptObjCamera_SetCameraManager(void* self, int val);
  * @param obj  the script camera object
  * @return 1, or 0 when both slots are taken
  */
-extern "C" int cScriptObjCameraManager_AddCameraObject(void* self, void* obj)
+extern "C" int cScriptObjCameraManager_AddCameraObject(void* self, cScriptObjCamera* obj)
 {
     void** slots = (void**)((char*)self + 0xD0);
     for (int i = 0; i < 2; i++) {
         if (slots[i] == 0) {
-            slots[i] = obj;
+            slots[i] = ((void*)obj);
             cScriptObjCamera_SetCameraManager(obj, (int)self); // PORT: pointer passed as int (callee mangled __FPvi)
             return 1;
         }
@@ -6790,7 +6793,7 @@ struct sNode_2814F8
  * @param flags  the event bits
  * @param currFrame  the current frame
  */
-extern "C" void cScriptObjCameraManager_OnInSeqKeyEvent(void* self, void* obj, int type, int flags, float currFrame)
+extern "C" void cScriptObjCameraManager_OnInSeqKeyEvent(void* self, cScriptPlayerEntity* obj, int type, int flags, float currFrame)
 {
     if ((flags & 0xC) == 0)
         return;
@@ -6981,12 +6984,12 @@ void* cSSXScriptEngine_GetScriptSetupInfo_2(void* self, int idx) __asm__("cSSXSc
  * @param n  the entity type
  * @return 1 when it matches, else 0
  */
-extern "C" int cScriptObjCameraManager_IsMatchingEntity(void* self, void* entity, int n)
+extern "C" int cScriptObjCameraManager_IsMatchingEntity(void* self, cScriptPlayerEntity* entity, int n)
 {
     if (n != 4) {
         return 0;
     }
-    return *(int*)((char*)cSSXScriptEngine_GetScriptSetupInfo_2(ScriptEngine, *(int*)((char*)entity + 0x8)) + 0xC) ==
+    return *(int*)((char*)cSSXScriptEngine_GetScriptSetupInfo_2(ScriptEngine, (int)entity->mpOwner) + 0xC) ==
            *(int*)((char*)self + 0xF8);
 }
 #endif

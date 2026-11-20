@@ -1,4 +1,5 @@
 #include "common.h"
+#include "replay/frameptr.h"
 #include "sound/bankmonitor.h"
 #include "sound/ssxaudio.h"
 #include "sound/crowdsys.h"
@@ -4923,7 +4924,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_MusicTrigger_isEqual);
  * @param rhs  the region's tWPData_MusicTrigger (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_MusicTrigger_isEqual(tWPInGameData_MusicTrigger* lhs, void *rhs) {
+extern "C" int tWPInGameData_MusicTrigger_isEqual(tWPInGameData_MusicTrigger* lhs, tWPData* rhs) {
     if ((lhs->m_Type) != (*(int *)((char*)(rhs) + (4)))) {
         return 0;
     }
@@ -4943,7 +4944,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Mix_isEqual);
  * @param rhs  the region's tWPData_Mix (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_Mix_isEqual(tWPInGameData_Mix* lhs, void *rhs) {
+extern "C" int tWPInGameData_Mix_isEqual(tWPInGameData_Mix* lhs, tWPData* rhs) {
     return (lhs->m_MixPreset) == (*(int *)((char*)(rhs) + (4)));
 }
 #endif
@@ -4960,7 +4961,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Ambience_isEqual);
  * @param rhs  the region's tWPData_Ambience (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_Ambience_isEqual(tWPInGameData_Ambience* lhs, void *rhs) {
+extern "C" int tWPInGameData_Ambience_isEqual(tWPInGameData_Ambience* lhs, tWPData* rhs) {
     return (lhs->m_BankID) == (*(int *)((char*)(rhs) + (4)));
 }
 #endif
@@ -4977,7 +4978,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Speech_isEqual);
  * @param rhs  the region's tWPData_Speech (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_Speech_isEqual(tWPInGameData_Speech* lhs, void *rhs) {
+extern "C" int tWPInGameData_Speech_isEqual(tWPInGameData_Speech* lhs, tWPData* rhs) {
     return (lhs->m_SpeechID) == (*(int *)((char*)(rhs) + (4)));
 }
 #endif
@@ -4994,7 +4995,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Camera_isEqual);
  * @param rhs  the region's tWPData_Camera (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_Camera_isEqual(tWPInGameData_Camera* lhs, void *rhs) {
+extern "C" int tWPInGameData_Camera_isEqual(tWPInGameData_Camera* lhs, tWPData* rhs) {
     int var_2;
 
     var_2 = 0;
@@ -5018,7 +5019,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Fog_isEqual);
  * @param rhs  the region's tWPData_Fog (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_Fog_isEqual(tWPInGameData_Fog* lhs, void *rhs) {
+extern "C" int tWPInGameData_Fog_isEqual(tWPInGameData_Fog* lhs, tWPData* rhs) {
     if (lhs->m_FogDensity != *(float*)((char*)rhs + 4)) return 0;
     if (lhs->m_FogNear != *(float*)((char*)rhs + 8)) return 0;
     if (lhs->m_FogFar != *(float*)((char*)rhs + 0xC)) return 0;
@@ -5042,7 +5043,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlow_isEqual);
  * @param rhs  the region's tWPData_LightGlow (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_LightGlow_isEqual(tWPInGameData_LightGlow* lhs, void *rhs) {
+extern "C" int tWPInGameData_LightGlow_isEqual(tWPInGameData_LightGlow* lhs, tWPData* rhs) {
     if (lhs->m_LightGlowCutoff != *(float*)((char*)rhs + 0x4)) return 0;
     if (lhs->m_LightGlowCutoffScale != *(float*)((char*)rhs + 0x8)) return 0;
     if (lhs->m_LightGlowCopyIntensity != *(float*)((char*)rhs + 0xC)) return 0;
@@ -5067,7 +5068,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTint_isEqual);
  * @param rhs  the region's tWPData_ScreenTint (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_ScreenTint_isEqual(tWPInGameData_ScreenTint* lhs, void *rhs) {
+extern "C" int tWPInGameData_ScreenTint_isEqual(tWPInGameData_ScreenTint* lhs, tWPData* rhs) {
     if (lhs->m_ScreenTintScaleR != *(float*)((char*)rhs + 4)) return 0;
     if (lhs->m_ScreenTintScaleG != *(float*)((char*)rhs + 8)) return 0;
     if (lhs->m_ScreenTintScaleB != *(float*)((char*)rhs + 0xC)) return 0;
@@ -5090,7 +5091,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SkyBox_isEqual);
  * @param rhs  the region's tWPData_SkyBox (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_SkyBox_isEqual(tWPInGameData_SkyBox* lhs, void *rhs) {
+extern "C" int tWPInGameData_SkyBox_isEqual(tWPInGameData_SkyBox* lhs, tWPData* rhs) {
     int var_2;
 
     var_2 = 0;
@@ -5114,7 +5115,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Sun_isEqual);
  * @param rhs  the region's tWPData_Sun (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_Sun_isEqual(tWPInGameData_Sun* lhs, void *rhs) {
+extern "C" int tWPInGameData_Sun_isEqual(tWPInGameData_Sun* lhs, tWPData* rhs) {
     if (lhs->m_SunPitchOffset != *(float*)((char*)rhs + 0x4)) return 0;
     if (lhs->m_SunYawOffset != *(float*)((char*)rhs + 0x8)) return 0;
     if (lhs->m_SunColorR != *(float*)((char*)rhs + 0xC)) return 0;
@@ -5141,7 +5142,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Surface_isEqual);
  * @param rhs  the region's tWPData_Surface (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_Surface_isEqual(tWPInGameData_Surface* lhs, void *rhs) {
+extern "C" int tWPInGameData_Surface_isEqual(tWPInGameData_Surface* lhs, tWPData* rhs) {
     int var_2;
 
     var_2 = 0;
@@ -5168,13 +5169,13 @@ extern "C" int func_002BB100_DE30(char *, char *) __asm__("func_002BB100");
  * @param rhs  the region's tWPData_Lighting (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_Lighting_isEqual(tWPInGameData_Lighting* lhs, char *rhs) {
-    if (func_002BB100_DE30(((char*)lhs) + 8, rhs + 4)) return 0;
-    if (func_002BB100_DE30(((char*)lhs) + 0x18, rhs + 0xC)) return 0;
-    if (func_002BB100_DE30(((char*)lhs) + 0x28, rhs + 0x14)) return 0;
-    if (func_002BB100_DE30(((char*)lhs) + 0x38, rhs + 0x1C)) return 0;
-    if (lhs->m_AmbientLightIntensityOffset != *(float*)(rhs + 0x24)) return 0;
-    if (lhs->m_RimLightIntensityOffset != *(float*)(rhs + 0x28)) return 0;
+extern "C" int tWPInGameData_Lighting_isEqual(tWPInGameData_Lighting* lhs, tWPData* rhs) {
+    if (func_002BB100_DE30(((char*)lhs) + 8, ((char*)rhs) + 4)) return 0;
+    if (func_002BB100_DE30(((char*)lhs) + 0x18, ((char*)rhs) + 0xC)) return 0;
+    if (func_002BB100_DE30(((char*)lhs) + 0x28, ((char*)rhs) + 0x14)) return 0;
+    if (func_002BB100_DE30(((char*)lhs) + 0x38, ((char*)rhs) + 0x1C)) return 0;
+    if (lhs->m_AmbientLightIntensityOffset != *(float*)(((char*)rhs) + 0x24)) return 0;
+    if (lhs->m_RimLightIntensityOffset != *(float*)(((char*)rhs) + 0x28)) return 0;
     return 1;
 }
 #endif
@@ -5193,7 +5194,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Weather_isEqual);
  * @return 1 if every value matches, else 0
  */
 // Environment property compare: all 19 current values against the incoming set.
-extern "C" int tWPInGameData_Weather_isEqual(tWPInGameData_Weather* lhs, void *rhs) {
+extern "C" int tWPInGameData_Weather_isEqual(tWPInGameData_Weather* lhs, tWPData* rhs) {
     if ((lhs->m_SnowIntensity) != (*(float *)((char*)(rhs) + (0x4)))) {
         return 0;
     }
@@ -5268,7 +5269,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Danger_isEqual);
  * @param rhs  the region's tWPData_Danger (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int tWPInGameData_Danger_isEqual(tWPInGameData_Danger* lhs, void *rhs) {
+extern "C" int tWPInGameData_Danger_isEqual(tWPInGameData_Danger* lhs, tWPData* rhs) {
     if ((lhs->m_Level) != (*(int *)((char*)(rhs) + (4)))) {
         return 0;
     }
@@ -5609,15 +5610,15 @@ struct VE_E2D8 { short delta; short idx; int (*fn)(void *, void *, int); };
  *
  * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
  */
-extern "C" void tWPInGameData_MusicTrigger_readFromReplayFrame(tWPInGameData_MusicTrigger* self, char *frame) {
+extern "C" void tWPInGameData_MusicTrigger_readFromReplayFrame(tWPInGameData_MusicTrigger* self, cReplayFramePtr* frame) {
     VE_E2D8 *readEntry = &(*(VE_E2D8 **)frame)[2];
-    readEntry->fn(frame + readEntry->delta, ((char*)self) + 8, 4);
+    readEntry->fn(((char*)frame) + readEntry->delta, ((char*)self) + 8, 4);
     readEntry = &(*(VE_E2D8 **)frame)[2];
-    readEntry->fn(frame + readEntry->delta, ((char*)self), 4);
+    readEntry->fn(((char*)frame) + readEntry->delta, ((char*)self), 4);
     readEntry = &(*(VE_E2D8 **)frame)[2];
-    readEntry->fn(frame + readEntry->delta, ((char*)self) + 0x10, 4);
+    readEntry->fn(((char*)frame) + readEntry->delta, ((char*)self) + 0x10, 4);
     readEntry = &(*(VE_E2D8 **)frame)[2];
-    readEntry->fn(frame + readEntry->delta, ((char*)self), 4);
+    readEntry->fn(((char*)frame) + readEntry->delta, ((char*)self), 4);
 }
 #endif
 
@@ -6021,15 +6022,15 @@ struct VE_F2A0 { short delta; short idx; int (*fn)(void *, void *, int); };
  *
  * @param frame  the replay frame to read from (On Tour cReplayFramePtr* data)
  */
-extern "C" void tWPInGameData_Danger_readFromReplayFrame(tWPInGameData_Danger* self, char *frame) {
+extern "C" void tWPInGameData_Danger_readFromReplayFrame(tWPInGameData_Danger* self, cReplayFramePtr* frame) {
     VE_F2A0 *readEntry = &(*(VE_F2A0 **)frame)[2];
-    readEntry->fn(frame + readEntry->delta, ((char*)self) + 8, 4);
+    readEntry->fn(((char*)frame) + readEntry->delta, ((char*)self) + 8, 4);
     readEntry = &(*(VE_F2A0 **)frame)[2];
-    readEntry->fn(frame + readEntry->delta, ((char*)self), 4);
+    readEntry->fn(((char*)frame) + readEntry->delta, ((char*)self), 4);
     readEntry = &(*(VE_F2A0 **)frame)[2];
-    readEntry->fn(frame + readEntry->delta, ((char*)self) + 0x10, 4);
+    readEntry->fn(((char*)frame) + readEntry->delta, ((char*)self) + 0x10, 4);
     readEntry = &(*(VE_F2A0 **)frame)[2];
-    readEntry->fn(frame + readEntry->delta, ((char*)self), 4);
+    readEntry->fn(((char*)frame) + readEntry->delta, ((char*)self), 4);
 }
 #endif
 
@@ -6045,15 +6046,15 @@ struct VE_F340 { short delta; short idx; int (*fn)(void *, void *, int); };
  *
  * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
  */
-extern "C" void tWPInGameData_MusicTrigger_writeToReplayFrame(tWPInGameData_MusicTrigger* self, char *frame) {
+extern "C" void tWPInGameData_MusicTrigger_writeToReplayFrame(tWPInGameData_MusicTrigger* self, cReplayFramePtr* frame) {
     VE_F340 *writeEntry = &(*(VE_F340 **)frame)[1];
-    writeEntry->fn(frame + writeEntry->delta, ((char*)self) + 8, 4);
+    writeEntry->fn(((char*)frame) + writeEntry->delta, ((char*)self) + 8, 4);
     writeEntry = &(*(VE_F340 **)frame)[1];
-    writeEntry->fn(frame + writeEntry->delta, ((char*)self), 4);
+    writeEntry->fn(((char*)frame) + writeEntry->delta, ((char*)self), 4);
     writeEntry = &(*(VE_F340 **)frame)[1];
-    writeEntry->fn(frame + writeEntry->delta, ((char*)self) + 0x10, 4);
+    writeEntry->fn(((char*)frame) + writeEntry->delta, ((char*)self) + 0x10, 4);
     writeEntry = &(*(VE_F340 **)frame)[1];
-    writeEntry->fn(frame + writeEntry->delta, ((char*)self), 4);
+    writeEntry->fn(((char*)frame) + writeEntry->delta, ((char*)self), 4);
 }
 #endif
 
@@ -6454,14 +6455,14 @@ struct VE_0308 { short delta; short idx; int (*fn)(void *, void *, int); };
  *
  * @param frame  the replay frame to write to (On Tour cReplayFramePtr* data)
  */
-extern "C" void tWPInGameData_Danger_writeToReplayFrame(tWPInGameData_Danger* self, char *frame) {
+extern "C" void tWPInGameData_Danger_writeToReplayFrame(tWPInGameData_Danger* self, cReplayFramePtr* frame) {
     VE_0308 *writeEntry = &(*(VE_0308 **)frame)[1];
-    writeEntry->fn(frame + writeEntry->delta, ((char*)self) + 8, 4);
+    writeEntry->fn(((char*)frame) + writeEntry->delta, ((char*)self) + 8, 4);
     writeEntry = &(*(VE_0308 **)frame)[1];
-    writeEntry->fn(frame + writeEntry->delta, ((char*)self), 4);
+    writeEntry->fn(((char*)frame) + writeEntry->delta, ((char*)self), 4);
     writeEntry = &(*(VE_0308 **)frame)[1];
-    writeEntry->fn(frame + writeEntry->delta, ((char*)self) + 0x10, 4);
+    writeEntry->fn(((char*)frame) + writeEntry->delta, ((char*)self) + 0x10, 4);
     writeEntry = &(*(VE_0308 **)frame)[1];
-    writeEntry->fn(frame + writeEntry->delta, ((char*)self), 4);
+    writeEntry->fn(((char*)frame) + writeEntry->delta, ((char*)self), 4);
 }
 #endif

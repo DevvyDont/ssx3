@@ -1,4 +1,6 @@
 #include "common.h"
+#include "camera/camera.h"
+#include "scripter/scriptobjcamera.h"
 #include "camera/trigger/cameratriggerlist.h"
 #include "scripter/ssxscriptengine.h"
 #include "main/game.h"
@@ -29,7 +31,7 @@ extern char str_ScriptObjCam[];
  * @param camera  the owning cCamera
  * @return self
  */
-extern "C" void* cScriptCameraController_cScriptCameraController(void* self, void* script, void* camera)
+extern "C" void* cScriptCameraController_cScriptCameraController(void* self, void* script, cCamera* camera)
 {
     int i;
     cCameraController_cCameraController(self, camera);
@@ -109,10 +111,10 @@ extern char str_Algorithmic_Script_Camera_Algo[];
  *
  * @param cam  the script camera object (cScriptObjCamera)
  */
-extern "C" void cScriptCameraController_addCamera(char* self, char* cam)
+extern "C" void cScriptCameraController_addCamera(char* self, cScriptObjCamera* cam)
 {
     void* ctl;
-    switch (cScriptPlayerEntity_GetType(*(void**)(*(char**)(cam + 0x14) + 8)))
+    switch (cScriptPlayerEntity_GetType(*(void**)((char*)cam->mpCameraEntity + 8)))
     {
     case 0:
         ctl = cScriptManualAlgorithm_cScriptManualAlgorithm(cMemMan_alloc(176, str_Manual_Script_Camera_Algo, 0x20000000, 0));
@@ -131,7 +133,7 @@ extern "C" void cScriptCameraController_addCamera(char* self, char* cam)
     }
     // PORT: the camera pointer is passed through an int parameter.
     cScriptAlgorithm_setScriptObj(ctl, (int)cam);
-    *(void**)(cam + 0x1C) = ctl;
+    cam->mpCameraAlgorithm = (cScriptAlgorithm*)ctl;
     cScriptCameraController_addAlgorithm_3(self, ctl, 1);
     *(int*)(self + 0x18) = 1;
 }
@@ -162,12 +164,12 @@ extern "C" void cCameraAlgoList_remove(sScrAlgoList* list, sScrAlgoNode* node);
  *
  * @param algo  the script camera object (On Tour's cScriptObjCamera)
  */
-extern "C" void cScriptCameraController_removeCamera(void* self, void* algo)
+extern "C" void cScriptCameraController_removeCamera(void* self, cScriptObjCamera* algo)
 {
     if (*(int*)((char*)self + 0x18) != 0) {
         sScrAlgoList* list = *(sScrAlgoList**)((char*)self + 0x8);
         for (sScrAlgoNode* n = list->head; n != 0; n = n->next) {
-            int k = *(int*)((char*)algo + 0x1C);
+            int k = (int)algo->mpCameraAlgorithm;
             if (n->key == k) {
                 cCameraAlgoList_remove(list, n);
                 break;

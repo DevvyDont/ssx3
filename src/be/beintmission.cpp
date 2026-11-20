@@ -1,4 +1,5 @@
 #include "common.h"
+#include "replay/frameptr.h"
 #include "main/ssxapp.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -1461,7 +1462,7 @@ extern char D_004A6CAC[];
  *
  * @param stream  the replay frame stream
  */
-extern "C" void cBEMissionInterface_writeToReplayFrame(void* self, void* stream)
+extern "C" void cBEMissionInterface_writeToReplayFrame(void* self, cReplayFramePtr* stream)
 {
     int characterId = cBELibrary_getCharacterID(0);
     char* base = D_004A6CAC;
@@ -1495,7 +1496,7 @@ extern char D_004A6CAC[];
  *
  * @param stream  the replay frame stream
  */
-extern "C" void cBEMissionInterface_readFromReplayFrame(void* self, void* stream)
+extern "C" void cBEMissionInterface_readFromReplayFrame(void* self, cReplayFramePtr* stream)
 {
     int characterId = cBELibrary_getCharacterID(0);
     char* base = D_004A6CAC;

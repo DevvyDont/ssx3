@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ui/uiengine.h"
+#include "ui/uithing.h"
 #include "be/beintnewrace.h"
 #include "main/ssxapp.h"
 
@@ -209,15 +211,15 @@ struct sStateK182C80 {
  * @param item  the widget (On Tour pWidget)
  * @param event  the event (On Tour Event)
  */
-extern "C" void cFEStateCharSetup_onWidgetEvent(void* self, void* item, unsigned int event)
+extern "C" void cFEStateCharSetup_onWidgetEvent(void* self, cUIThing* item, unsigned int event)
 {
-    if (item == 0)
+    if (((void*)item) == 0)
         return;
     switch (event) {
     case 5: {
         char* factory = **(char***)((char*)self + 0x10);
         sVEntryK182C80* vt = *(sVEntryK182C80**)(factory + 4);
-        void* nextState = vt[4].fn(factory + vt[4].delta, self, *(int*)((char*)item + 0x18));
+        void* nextState = vt[4].fn(factory + vt[4].delta, self, item->mMiscData);
         if (nextState != 0)
             cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, nextState);
         cFEStateCharSetup_show3DCharacter(self, 0);
@@ -226,7 +228,7 @@ extern "C" void cFEStateCharSetup_onWidgetEvent(void* self, void* item, unsigned
     case 6: {
         char* factory = **(char***)((char*)self + 0x10);
         sVEntryK182C80* vt = *(sVEntryK182C80**)(factory + 4);
-        void* nextState = vt[5].fn(factory + vt[5].delta, self, *(int*)((char*)item + 0x18));
+        void* nextState = vt[5].fn(factory + vt[5].delta, self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, nextState);
             cFEStateCharSetup_show3DCharacter(self, 0);
@@ -466,7 +468,7 @@ extern void* cFEStateRiderDetail_vtbl[];
  * @param idx  the user (controller) index
  * @return @p self
  */
-extern "C" void* cFEStateRiderDetail_cFEStateRiderDetail(void* self, void* engine, signed char idx)
+extern "C" void* cFEStateRiderDetail_cFEStateRiderDetail(void* self, cUIEngine* engine, signed char idx)
 {
     cFEStateCharSetup_cFEStateCharSetup(self, engine, idx);
     *(int*)((char*)self + 0xC) = 13;

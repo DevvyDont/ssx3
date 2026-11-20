@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "ui/uiengine.h"
 #include "fe/festateruleselect.h"
 #include "fe/festateriderbio.h"
@@ -339,16 +340,16 @@ extern "C" void cFEStateRiderBio_setupBioScreen(cFEStateRiderBio* self);
  * @param item  the widget (On Tour pWidget)
  * @param msg  the event (On Tour Event)
  */
-extern "C" void cFEStateRiderBio_onWidgetEvent(cFEStateRiderBio* self, void* item, int msg)
+extern "C" void cFEStateRiderBio_onWidgetEvent(cFEStateRiderBio* self, cUIThing* item, int msg)
 {
-    if (item == 0) {
+    if (((void*)item) == 0) {
         return;
     }
     switch (msg) {
     case 6: {
         void* obj = *(void**)self->mpEngine;
         sVEntry001912D0* vt = *(sVEntry001912D0**)((char*)obj + 4);
-        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
+        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         }

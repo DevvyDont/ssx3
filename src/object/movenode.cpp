@@ -1,4 +1,11 @@
 #include "common.h"
+#include "object/instancenode.h"
+#include "object/railmodifier.h"
+#include "object/physicsmodifier.h"
+#include "object/texflipmodifier.h"
+#include "object/uvscrollmodifier.h"
+#include "object/transformmodifier.h"
+#include "bx/math3d.h"
 #include "object/particlenode.h"
 #include "object/multiparticle.h"
 #include "object/positionmodifier.h"
@@ -162,7 +169,7 @@ extern "C" void tModifierBlock_remTransformModifier(void* block);
  *
  * @param mod  the transform modifier (On Tour cTransformModifier* modifier)
  */
-extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod)
+extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, cTransformModifier* mod)
 {
     sMoveNodeVEntryV54B0* vtEntry = &((sMoveNodeVEntryV54B0*)self->mVtbl)[49];
     vtEntry->fn((char*)self + vtEntry->delta);
@@ -171,7 +178,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod)
     } else {
         tModifierBlock_remTransformModifier(((void*)self->ModifierBlock));
     }
-    *(void**)((void*)self->ModifierBlock) = mod;
+    *(void**)((void*)self->ModifierBlock) = ((void*)mod);
     vtEntry = &((sMoveNodeVEntryV54B0*)self->mVtbl)[48];
     vtEntry->fn((char*)self + vtEntry->delta);
     unsigned int* instFlags = (unsigned int*)((char*)self->Instance + 8);
@@ -192,14 +199,14 @@ extern "C" void tModifierBlock_remUVScrollModifier(void* block);
  *
  * @param modifier  the new modifier (On Tour cUVScrollModifier* modifier)
  */
-extern "C" void cMoveNode_addUVScrollModifier(cMoveNode* self, void* modifier)
+extern "C" void cMoveNode_addUVScrollModifier(cMoveNode* self, cUVScrollModifier* modifier)
 {
     if (((void*)self->ModifierBlock) == 0) {
         cMoveNode_addModifierBlock(self);
     } else {
         tModifierBlock_remUVScrollModifier(((void*)self->ModifierBlock));
     }
-    *(void**)((char*)((void*)self->ModifierBlock) + 0x4) = modifier;
+    *(void**)((char*)((void*)self->ModifierBlock) + 0x4) = ((void*)modifier);
 }
 #endif
 
@@ -216,14 +223,14 @@ extern "C" void tModifierBlock_remTexFlipModifier(void* block);
  *
  * @param modifier  the new modifier (On Tour cTexFlipModifier* modifier)
  */
-extern "C" void cMoveNode_addTexFlipModifier(cMoveNode* self, void* modifier)
+extern "C" void cMoveNode_addTexFlipModifier(cMoveNode* self, cTexFlipModifier* modifier)
 {
     if (((void*)self->ModifierBlock) == 0) {
         cMoveNode_addModifierBlock(self);
     } else {
         tModifierBlock_remTexFlipModifier(((void*)self->ModifierBlock));
     }
-    *(void**)((char*)((void*)self->ModifierBlock) + 0x8) = modifier;
+    *(void**)((char*)((void*)self->ModifierBlock) + 0x8) = ((void*)modifier);
 }
 #endif
 
@@ -240,14 +247,14 @@ extern "C" void tModifierBlock_remPhysicsModifier(void* block);
  *
  * @param modifier  the new modifier (On Tour cPhysicsModifier* modifier)
  */
-extern "C" void cMoveNode_addPhysicsModifier(cMoveNode* self, void* modifier)
+extern "C" void cMoveNode_addPhysicsModifier(cMoveNode* self, cPhysicsModifier* modifier)
 {
     if (((void*)self->ModifierBlock) == 0) {
         cMoveNode_addModifierBlock(self);
     } else {
         tModifierBlock_remPhysicsModifier(((void*)self->ModifierBlock));
     }
-    *(void**)((char*)((void*)self->ModifierBlock) + 0xC) = modifier;
+    *(void**)((char*)((void*)self->ModifierBlock) + 0xC) = ((void*)modifier);
 }
 #endif
 
@@ -282,7 +289,7 @@ extern "C" void cRailLink_add(void* list, void* item);
  *
  * @param item  the rail modifier (On Tour cRailModifier* modifier)
  */
-extern "C" void cMoveNode_addRailModifier(cMoveNode* self, void* item)
+extern "C" void cMoveNode_addRailModifier(cMoveNode* self, cRailModifier* item)
 {
     if (((void*)self->ModifierBlock) == 0) {
         cMoveNode_addModifierBlock(self);
@@ -448,7 +455,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_addPosition);
 struct sMoveQuad;
 extern char str_PositionModifier[];
 extern "C" void* cPositionModifier_cPositionModifier(cPositionModifier* self, sMoveQuad* pos);
-extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
+extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, cTransformModifier* mod);
 
 /**
  * Gives a move node a fixed position offset.
@@ -460,7 +467,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addPosition(cMoveNode* self, sMoveQuad* pos)
 {
-    cMoveNode_addTransformModifier(self, cPositionModifier_cPositionModifier((cPositionModifier*)cMemMan_alloc(144, str_PositionModifier, 0x20000000, 0), pos));
+    cMoveNode_addTransformModifier(self, (cTransformModifier*)cPositionModifier_cPositionModifier((cPositionModifier*)cMemMan_alloc(144, str_PositionModifier, 0x20000000, 0), pos));
 }
 #endif
 
@@ -469,7 +476,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_addPosition1);
 #ifdef SKIP_ASM
 extern char str_PositionModifier[];
 extern "C" void* cPositionModifier_cPositionModifier1(cPositionModifier* mem, void* desc);
-extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
+extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, cTransformModifier* mod);
 
 /**
  * Gives a move node a fixed transform taken from a matrix.
@@ -481,7 +488,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addPosition1(cMoveNode* self, void* desc)
 {
-    cMoveNode_addTransformModifier(self, cPositionModifier_cPositionModifier1((cPositionModifier*)cMemMan_alloc(144, str_PositionModifier, 0x20000000, 0), desc));
+    cMoveNode_addTransformModifier(self, (cTransformModifier*)cPositionModifier_cPositionModifier1((cPositionModifier*)cMemMan_alloc(144, str_PositionModifier, 0x20000000, 0), desc));
 }
 #endif
 
@@ -491,7 +498,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_addParent);
 struct sMoveQuad;
 extern char str_ParentModifier[];
 extern "C" void* cParentModifier_cParentModifier1(cParentModifier* self, void* a1, void* a2, sMoveQuad* pos);
-extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
+extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, cTransformModifier* mod);
 
 /**
  * Attaches the node to a parent instance: a new cParentModifier ("ParentModifier", cParentModifier_cParentModifier1) as its transform
@@ -503,7 +510,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addParent(cMoveNode* self, void* parentinst, void* mesh, sMoveQuad* pos)
 {
-    cMoveNode_addTransformModifier(self, cParentModifier_cParentModifier1((cParentModifier*)cMemMan_alloc(176, str_ParentModifier, 0x20000000, 0), parentinst, mesh, pos));
+    cMoveNode_addTransformModifier(self, (cTransformModifier*)cParentModifier_cParentModifier1((cParentModifier*)cMemMan_alloc(176, str_ParentModifier, 0x20000000, 0), parentinst, mesh, pos));
 }
 #endif
 
@@ -512,7 +519,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_addMagnet);
 #ifdef SKIP_ASM
 extern char str_MagnetModifier[];
 extern "C" void* cMagnetModifier_cMagnetModifier(cMagnetModifier* self, void* owner, void* a2, float f0, float f1);
-extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
+extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, cTransformModifier* mod);
 
 /**
  * Makes the node a magnet: a new cMagnetModifier ("MagnetModifier", cMagnetModifier_cMagnetModifier) on its instance as its transform
@@ -522,9 +529,9 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
  * @param radius  the radius (On Tour radius)
  * @param magnetSpeed  the speed (On Tour speed)
  */
-extern "C" void cMoveNode_addMagnet(cMoveNode* self, void* mat, float radius, float magnetSpeed)
+extern "C" void cMoveNode_addMagnet(cMoveNode* self, t4Matrix* mat, float radius, float magnetSpeed)
 {
-    cMoveNode_addTransformModifier(self, cMagnetModifier_cMagnetModifier((cMagnetModifier*)cMemMan_alloc(176, str_MagnetModifier, 0x20000000, 0),
+    cMoveNode_addTransformModifier(self, (cTransformModifier*)cMagnetModifier_cMagnetModifier((cMagnetModifier*)cMemMan_alloc(176, str_MagnetModifier, 0x20000000, 0),
                                       self->Instance, mat, radius, magnetSpeed));
 }
 #endif
@@ -535,7 +542,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_addAvaSpline);
 extern int cAvalanche_m_badCookie;
 extern char str_AvaSplineModifier[];
 extern "C" void* cAvaSplineModifier_cAvaSplineModifier(cAvaSplineModifier* self, void* src);
-extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
+extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, cTransformModifier* mod);
 
 /**
  * Puts a move node on the avalanche spline, unless the avalanche cookie check failed.
@@ -547,7 +554,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
 extern "C" void cMoveNode_addAvaSpline(cMoveNode* self)
 {
     if (cAvalanche_m_badCookie == 0) {
-        cMoveNode_addTransformModifier(self, cAvaSplineModifier_cAvaSplineModifier((cAvaSplineModifier*)cMemMan_alloc(144, str_AvaSplineModifier, 0x20000000, 0), self->Instance));
+        cMoveNode_addTransformModifier(self, (cTransformModifier*)cAvaSplineModifier_cAvaSplineModifier((cAvaSplineModifier*)cMemMan_alloc(144, str_AvaSplineModifier, 0x20000000, 0), self->Instance));
     }
 }
 #endif
@@ -557,7 +564,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_addSpline1);
 #ifdef SKIP_ASM
 extern char str_SplineModifier[];
 extern "C" void* cSplineModifier_cSplineModifier1(void* mem, void* desc);
-extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
+extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, cTransformModifier* mod);
 
 /**
  * Gives the node a spline path: builds a cSplineModifier from the spline data and attaches it.
@@ -569,7 +576,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addSpline1(cMoveNode* self, void* desc)
 {
-    cMoveNode_addTransformModifier(self, cSplineModifier_cSplineModifier1(cMemMan_alloc(0xF0, str_SplineModifier, 0x20000000, 0), desc));
+    cMoveNode_addTransformModifier(self, (cTransformModifier*)cSplineModifier_cSplineModifier1(cMemMan_alloc(0xF0, str_SplineModifier, 0x20000000, 0), desc));
 }
 #endif
 
@@ -578,7 +585,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_addSpline);
 #ifdef SKIP_ASM
 extern char str_MultiSplineModifier[];
 extern "C" void* cMultiSplineModifier_cMultiSplineModifier(void* mem, void* desc, void* owner);
-extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
+extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, cTransformModifier* mod);
 
 /**
  * Makes a new spline-path modifier ("MultiSplineModifier") the node's root transform.
@@ -587,7 +594,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addSpline(cMoveNode* self, void* desc)
 {
-    cMoveNode_addTransformModifier(self, cMultiSplineModifier_cMultiSplineModifier(cMemMan_alloc(88, str_MultiSplineModifier, 0x20000000, 0), desc,
+    cMoveNode_addTransformModifier(self, (cTransformModifier*)cMultiSplineModifier_cMultiSplineModifier(cMemMan_alloc(88, str_MultiSplineModifier, 0x20000000, 0), desc,
                                       self->Instance));
 }
 #endif
@@ -597,7 +604,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_addUVScroll);
 #ifdef SKIP_ASM
 extern char str_UVScrollModifier[];
 extern "C" void* cUVScrollModifier_cUVScrollModifier(void* mem, void* desc);
-extern "C" void cMoveNode_addUVScrollModifier(cMoveNode* self, void* mod);
+extern "C" void cMoveNode_addUVScrollModifier(cMoveNode* self, cUVScrollModifier* mod);
 
 /**
  * Adds a UV-scroll modifier built from a placement record: a new "UVScrollModifier" (cUVScrollModifier_cUVScrollModifier) on the node.
@@ -606,7 +613,7 @@ extern "C" void cMoveNode_addUVScrollModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addUVScroll(cMoveNode* self, void* desc)
 {
-    cMoveNode_addUVScrollModifier(self, cUVScrollModifier_cUVScrollModifier(cMemMan_alloc(80, str_UVScrollModifier, 0x20000000, 0), desc));
+    cMoveNode_addUVScrollModifier(self, (cUVScrollModifier*)cUVScrollModifier_cUVScrollModifier(cMemMan_alloc(80, str_UVScrollModifier, 0x20000000, 0), desc));
 }
 #endif
 
@@ -615,7 +622,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_addTexFlip);
 #ifdef SKIP_ASM
 extern char str_TexFlipModifier[];
 extern "C" void* cTexFlipModifier_cTexFlipModifier(void* mem, void* desc, void* owner);
-extern "C" void cMoveNode_addTexFlipModifier(cMoveNode* self, void* mod);
+extern "C" void cMoveNode_addTexFlipModifier(cMoveNode* self, cTexFlipModifier* mod);
 
 /**
  * Adds a texture-flip modifier built from a placement record: a new "TexFlipModifier" (cTexFlipModifier_cTexFlipModifier, with the node's
@@ -625,7 +632,7 @@ extern "C" void cMoveNode_addTexFlipModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addTexFlip(cMoveNode* self, void* desc)
 {
-    cMoveNode_addTexFlipModifier(self, cTexFlipModifier_cTexFlipModifier(cMemMan_alloc(232, str_TexFlipModifier, 0x20000000, 0), desc, self->Instance));
+    cMoveNode_addTexFlipModifier(self, (cTexFlipModifier*)cTexFlipModifier_cTexFlipModifier(cMemMan_alloc(232, str_TexFlipModifier, 0x20000000, 0), desc, self->Instance));
 }
 #endif
 
@@ -634,7 +641,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_addBoost);
 #ifdef SKIP_ASM
 extern char str_BoostModifier[];
 extern "C" void* cBoostModifier_cBoostModifier(void* mem, void* desc, void* owner);
-extern "C" void cMoveNode_addPhysicsModifier(cMoveNode* self, void* mod);
+extern "C" void cMoveNode_addPhysicsModifier(cMoveNode* self, cPhysicsModifier* mod);
 
 /**
  * Adds a boost modifier built from a placement record: a new "BoostModifier" (cBoostModifier_cBoostModifier, with the node's
@@ -644,7 +651,7 @@ extern "C" void cMoveNode_addPhysicsModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addBoost(cMoveNode* self, void* desc)
 {
-    cMoveNode_addPhysicsModifier(self, cBoostModifier_cBoostModifier(cMemMan_alloc(80, str_BoostModifier, 0x20000000, 0), desc, self->Instance));
+    cMoveNode_addPhysicsModifier(self, (cPhysicsModifier*)cBoostModifier_cBoostModifier(cMemMan_alloc(80, str_BoostModifier, 0x20000000, 0), desc, self->Instance));
 }
 #endif
 
@@ -682,7 +689,7 @@ extern const char str_DynamicParticleModifier[];
  * @param index  the mesh index (On Tour mesh)
  * @param offset  emitter offset from the mesh (On Tour const t4Vector&)
  */
-extern "C" void cMoveNode_addDynamicParticle(cMoveNode* self, void* desc, int index, void* offset)
+extern "C" void cMoveNode_addDynamicParticle(cMoveNode* self, void* desc, int index, t4Vector* offset)
 {
     if (index < 0 || index >= *(int*)(*(char**)((char*)self->Instance + 0x80) + 4)) {
         operator_delete((int*)desc);
@@ -697,7 +704,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_addRoller);
 #ifdef SKIP_ASM
 extern char str_RollerModifier[];
 extern "C" void* cRollerModifier_cRollerModifier(void* mem, void* a1, void* a2, void* a3);
-extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
+extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, cTransformModifier* mod);
 
 /**
  * Makes a new roller modifier ("RollerModifier") the node's root transform.
@@ -708,7 +715,7 @@ extern "C" void cMoveNode_addTransformModifier(cMoveNode* self, void* mod);
  */
 extern "C" void cMoveNode_addRoller(cMoveNode* self, void* rdata, void* ii, void* ci)
 {
-    cMoveNode_addTransformModifier(self, cRollerModifier_cRollerModifier(cMemMan_alloc(720, str_RollerModifier, 0x20000000, 0), rdata, ii, ci));
+    cMoveNode_addTransformModifier(self, (cTransformModifier*)cRollerModifier_cRollerModifier(cMemMan_alloc(720, str_RollerModifier, 0x20000000, 0), rdata, ii, ci));
 }
 #endif
 
@@ -718,7 +725,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_addRail);
 extern char str_RailModifier[];
 extern "C" int tModifierBlock_findRail(void* self, int id);
 extern "C" void* cRailModifier_cRailModifier(void* mem, void* desc, void* owner);
-extern "C" void cMoveNode_addRailModifier(cMoveNode* self, void* item);
+extern "C" void cMoveNode_addRailModifier(cMoveNode* self, cRailModifier* item);
 
 /**
  * Adds a rail modifier ("RailModifier") for a rail description, unless the node already has a rail with that
@@ -732,7 +739,7 @@ extern "C" void cMoveNode_addRail(cMoveNode* self, void* desc)
     if (block != 0 && tModifierBlock_findRail(block, *(int*)((char*)desc + 0x4)) != 0) {
         return;
     }
-    cMoveNode_addRailModifier(self, cRailModifier_cRailModifier(cMemMan_alloc(144, str_RailModifier, 0x20000000, 0), desc,
+    cMoveNode_addRailModifier(self, (cRailModifier*)cRailModifier_cRailModifier(cMemMan_alloc(144, str_RailModifier, 0x20000000, 0), desc,
                                       self->Instance));
 }
 #endif
@@ -813,28 +820,27 @@ struct sNodeVEntryV_355F10 {
  *
  * @param srcv  the node being replaced (On Tour cInstanceNode* pOldNode); null is ignored
  */
-extern "C" void cMoveNode_transferFromOld(cMoveNode* self, void* srcv)
+extern "C" void cMoveNode_transferFromOld(cMoveNode* self, cInstanceNode* srcv)
 {
-    char* src = (char*)srcv;
-    if (src == 0) {
+    if (((char*)srcv) == 0) {
         return;
     }
-    sNodeVEntryI_355F10* vi = *(sNodeVEntryI_355F10**)(src + 0xC);
-    if (vi[16].fn(src + vi[16].delta) != 0) {
-        cMoveNode_transferEffectModifier(self, (cMoveNode*)src);
+    sNodeVEntryI_355F10* vi = (sNodeVEntryI_355F10*)srcv->mVtbl;
+    if (vi[16].fn(((char*)srcv) + vi[16].delta) != 0) {
+        cMoveNode_transferEffectModifier(self, (cMoveNode*)srcv);
     }
-    sNodeVEntryP_355F10* vp = *(sNodeVEntryP_355F10**)(src + 0xC);
-    char* transform = vp[24].fn(src + vp[24].delta);
+    sNodeVEntryP_355F10* vp = (sNodeVEntryP_355F10*)srcv->mVtbl;
+    char* transform = vp[24].fn(((char*)srcv) + vp[24].delta);
     if (transform == (char*)self->Instance + 0x10) {
-        sNodeVEntryD_355F10* vd = *(sNodeVEntryD_355F10**)(src + 0xC);
-        vd[1].fn(src + vd[1].delta, 3);
+        sNodeVEntryD_355F10* vd = (sNodeVEntryD_355F10*)srcv->mVtbl;
+        vd[1].fn(((char*)srcv) + vd[1].delta, 3);
         return;
     }
     sMat44_355F10 copy;
     vu0CopyMatrix_355F10(&copy, transform);
     int keep = *(int*)((char*)self->Instance + 8);
-    sNodeVEntryD_355F10* vd = *(sNodeVEntryD_355F10**)(src + 0xC);
-    vd[1].fn(src + vd[1].delta, 3);
+    sNodeVEntryD_355F10* vd = (sNodeVEntryD_355F10*)srcv->mVtbl;
+    vd[1].fn(((char*)srcv) + vd[1].delta, 3);
     *(int*)((char*)self->Instance + 8) = keep;
     cMoveNode_addPosition1(self, &copy);
     self->TransferHack = 1;
@@ -1346,7 +1352,7 @@ INCLUDE_ASM("object/movenode", cMoveNode_renderModel);
  * @param flags  draw flags passed on to the graphics manager
  */
 // Draws the node with a caller-supplied texture and flags (visibility, rotation and light as in cMoveNode_render).
-extern "C" void cMoveNode_renderModel(cMoveNode* self, void* tex, int flags)
+extern "C" void cMoveNode_renderModel(cMoveNode* self, t4Matrix* tex, int flags)
 {
     sMnCam_6298* cam = (sMnCam_6298*)cWorld_m_pTheWorld->m_pWorldCache;
     sMnObj_6298* obj = OBJ_6298(self);
@@ -2796,7 +2802,7 @@ extern "C" void cAvaSplineModifier_writeToReplayFrame(cAvaSplineModifier* self, 
 INCLUDE_ASM("object/movenode", cParticleNode_cParticleNode1);
 #ifdef SKIP_ASM
 extern "C" void* cMoveNode_cMoveNode1(void* self, void* a1, int type, void* a3);
-extern "C" void cMoveNode_transferFromOld(cMoveNode* self, void* a1);
+extern "C" void cMoveNode_transferFromOld(cMoveNode* self, cInstanceNode* a1);
 extern void* cParticleNode_vtbl[];
 
 /**
@@ -2815,7 +2821,7 @@ extern "C" void* cParticleNode_cParticleNode1(cParticleNode* self, void* bucket,
 {
     cMoveNode_cMoveNode1(((cMoveNode*)self), bucket, 13, instRecord);
     self->mVtbl = cParticleNode_vtbl;
-    cMoveNode_transferFromOld(((cMoveNode*)self), oldNode);
+    cMoveNode_transferFromOld(((cMoveNode*)self), (cInstanceNode*)oldNode);
     cMoveNode_addParticle(((cMoveNode*)self), particle);
     return ((cMoveNode*)self);
 }

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "replay/frameptr.h"
 #include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
 #include "be/beintnetwork.h"
@@ -917,7 +918,7 @@ struct sVEntry_cGFFinishlineState_writeToReplayFrame {
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFFinishlineState_writeToReplayFrame(void* self, void* stream)
+extern "C" void cGFFinishlineState_writeToReplayFrame(void* self, cReplayFramePtr* stream)
 {
     cGameState_writeToReplayFrame_2(self, stream);
     sVEntry_cGFFinishlineState_writeToReplayFrame* writeEntry = &(*(sVEntry_cGFFinishlineState_writeToReplayFrame**)stream)[1];
@@ -944,7 +945,7 @@ struct sVEntry_cGFFinishlineState_readFromReplayFrame {
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFFinishlineState_readFromReplayFrame(void* self, void* stream)
+extern "C" void cGFFinishlineState_readFromReplayFrame(void* self, cReplayFramePtr* stream)
 {
     cGameState_readFromReplayFrame_2(self, stream);
     sVEntry_cGFFinishlineState_readFromReplayFrame* readEntry = &(*(sVEntry_cGFFinishlineState_readFromReplayFrame**)stream)[2];
@@ -1393,7 +1394,7 @@ struct sVEntry_cGFEventStartState_writeToReplayFrame {
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFEventStartState_writeToReplayFrame(void* self, void* stream)
+extern "C" void cGFEventStartState_writeToReplayFrame(void* self, cReplayFramePtr* stream)
 {
     cGameState_writeToReplayFrame_2(self, stream);
     sVEntry_cGFEventStartState_writeToReplayFrame* writeEntry = &(*(sVEntry_cGFEventStartState_writeToReplayFrame**)stream)[1];
@@ -1427,7 +1428,7 @@ struct sVEntry_cGFEventStartState_readFromReplayFrame {
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFEventStartState_readFromReplayFrame(void* self, void* stream)
+extern "C" void cGFEventStartState_readFromReplayFrame(void* self, cReplayFramePtr* stream)
 {
     cGameState_readFromReplayFrame_2(self, stream);
     sVEntry_cGFEventStartState_readFromReplayFrame* readEntry = &(*(sVEntry_cGFEventStartState_readFromReplayFrame**)stream)[2];

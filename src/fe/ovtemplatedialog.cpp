@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "be/beintnewrace.h"
 #include "fe/ovtemplatedialog.h"
 #include "fe/ovstatereplay.h"
@@ -1859,9 +1860,9 @@ extern char str_Menu0000_b[];
  *
  * @param item  the widget being created; only the one whose hash name (+0x38) is "Menu0000" is touched
  */
-extern "C" void cOVTemplate_Dialog_onWidgetCreate(cOVTemplate_Dialog* self, void* item)
+extern "C" void cOVTemplate_Dialog_onWidgetCreate(cOVTemplate_Dialog* self, cUIThing* item)
 {
-    int id = *(int*)((char*)item + 0x38);
+    int id = item->mHashName;
     if (id == GetHashValue32(str_Menu0000_b)) {
         if (self->mDialogType == 6) {
             cUIMenu_setSelectedByIndex(item, 0);
@@ -1975,16 +1976,16 @@ static inline void Pop_20D5A8()
  * @param w  the button (its index at +0x18: 0 yes, 1 no), or 0
  * @param ev  widget event number: 5 select, 6 back
  */
-extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, char* w, int ev)
+extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, cUIThing* w, int ev)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (w == 0) {
+    if (((char*)w) == 0) {
         return;
     }
     switch (ev) {
     case 5:
         Play_20D5A8(((char*)self));
-        switch (*(int*)(w + 0x18)) {
+        switch (w->mMiscData) {
         case 0:
             self->mRemovePDA = 1;
             switch (self->mDialogType) {

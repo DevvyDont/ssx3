@@ -15,7 +15,7 @@ extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" int cWScriptMan_getScriptCode_2(void* self, int id) __asm__("cWScriptMan_getScriptCode");
 struct cWScriptTask_initTask_sObj;
 struct cWScriptTask_initTask_sDef;
-extern "C" void cWScriptTask_initTask(cWScriptTask* self, void* owner, cWScriptTask_initTask_sDef* def);
+extern "C" void cWScriptTask_initTask(cWScriptTask* self, cWScriptProcess* owner, cWScriptTask_initTask_sDef* def);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char cWScriptProcess_vtbl[];
@@ -53,7 +53,7 @@ struct sDef_307598 {
  * @param def  the 0x40-byte process definition from the world (On Tour tWScriptProcessData)
  * @return @p self
  */
-extern "C" void* cWScriptProcess_cWScriptProcess(cWScriptProcess* self, void* man, int sectionId, sDef_307598* def)
+extern "C" void* cWScriptProcess_cWScriptProcess(cWScriptProcess* self, cWScriptMan* man, int sectionId, sDef_307598* def)
 {
     self->mVtbl = (void**)cWScriptProcess_vtbl;
     MEM_fill(self->ProcessScriptCode, 0, 0xC);
@@ -987,7 +987,7 @@ struct cWScriptTask_initTask_sObj {
  * @param owner  the cWScriptProcess the task belongs to
  * @param def    the task's data record (On Tour: tWScriptTaskData)
  */
-extern "C" void cWScriptTask_initTask(cWScriptTask* self, void* owner, cWScriptTask_initTask_sDef* def)
+extern "C" void cWScriptTask_initTask(cWScriptTask* self, cWScriptProcess* owner, cWScriptTask_initTask_sDef* def)
 {
     int i;
     int j;

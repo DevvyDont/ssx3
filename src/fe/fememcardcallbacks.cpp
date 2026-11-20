@@ -1,4 +1,8 @@
 #include "common.h"
+#include "movie/mcoverlaymanager.h"
+#include "ui/uistate.h"
+#include "ui/uiinput.h"
+#include "ui/uiengine.h"
 #include "fe/fememcard.h"
 #include "main/ssxapp.h"
 
@@ -1722,12 +1726,12 @@ struct sVEntryK1D8C50 {
  * @param input  the UI input (On Tour cUIInput* pInput)
  * @return 1 when left or right was pressed, otherwise 0
  */
-extern "C" int cFEMemCard_onInputBegin(cFEMemCard* self, void* input)
+extern "C" int cFEMemCard_onInputBegin(cFEMemCard* self, cUIInput* input)
 {
     int handled = 0;
     if (self->mIsProcessing == 1)
         return 0;
-    sVEntryK1D8C50* vt = *(sVEntryK1D8C50**)((char*)input + 8);
+    sVEntryK1D8C50* vt = (sVEntryK1D8C50*)input->mVtbl;
     if (vt[19].fn((char*)input + vt[19].delta)) {
         handled = 1;
         self->mDoPrevMemCard = handled;
@@ -1737,7 +1741,7 @@ extern "C" int cFEMemCard_onInputBegin(cFEMemCard* self, void* input)
                 cUIScreen_playFrame(self->mpScreen, frame, 1);
         }
     } else {
-        sVEntryK1D8C50* vt2 = *(sVEntryK1D8C50**)((char*)input + 8);
+        sVEntryK1D8C50* vt2 = (sVEntryK1D8C50*)input->mVtbl;
         if (vt2[20].fn((char*)input + vt2[20].delta)) {
             handled = 1;
             self->mDoNextMemCard = handled;
@@ -2313,14 +2317,14 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_checkNextAvailableDevice);
  * @param back  nonzero to step backwards
  * @return 1 when idx + 1 (or idx - 1) is a valid device index, otherwise -1
  */
-extern "C" int cFEMemCard_checkNextAvailableDevice(cFEMemCard* self, void* list, int idx, int back)
+extern "C" int cFEMemCard_checkNextAvailableDevice(cFEMemCard* self, cMCOverlayManager* list, int idx, int back)
 {
     int step = 1;
     if (back) {
         step = -1;
     }
     idx += step;
-    if (idx >= 0 && idx <= *(int*)((char*)list + 0x424) - 1) {
+    if (idx >= 0 && idx <= list->mMaxDevices - 1) {
         return 1;
     }
     return -1;
@@ -2493,7 +2497,7 @@ struct sMemCardPopupK1D99C8 {
  * @param bSnowFlake  passed on to initPopup(), which ignores it
  * @return @p self
  */
-extern "C" sMemCardPopupK1D99C8* cFEPopupConfirm_cFEPopupConfirm(sMemCardPopupK1D99C8* self, void* engine, void* owner, int ustrDisplay, int bYesOnly, int bNoButtons, int layerOffset, int passUpdate, int bSnowFlake)
+extern "C" sMemCardPopupK1D99C8* cFEPopupConfirm_cFEPopupConfirm(sMemCardPopupK1D99C8* self, cUIEngine* engine, cUIState* owner, int ustrDisplay, int bYesOnly, int bNoButtons, int layerOffset, int passUpdate, int bSnowFlake)
 {
     cScreenPopup_cScreenPopup(self, engine, owner);
     self->vtbl = cFEPopupConfirm_vtbl;
@@ -2704,7 +2708,7 @@ struct sMcSlot9D48 {
  * @param owner   the parent state (mpParentState)
  * @return @p self
  */
-extern "C" void* cFEStateNetHelpPopup_cFEStateNetHelpPopup(void* self, void* engine, void* owner)
+extern "C" void* cFEStateNetHelpPopup_cFEStateNetHelpPopup(void* self, cUIEngine* engine, cUIState* owner)
 {
     cUIState_cUIState1(self, engine, owner);
     *(void**)((char*)self + 0x8) = cFEStateNetHelpPopup_vtbl;

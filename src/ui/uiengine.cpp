@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ui/uiinput.h"
+#include "ui/uistate.h"
 #include "ui/uiengine.h"
 #include "ui/uitexturebank.h"
 #include "ui/uithing.h"
@@ -197,7 +199,7 @@ struct sUIScrTbl { unsigned int count; sUIScrEnt ents[1]; };
  * @param screen  an existing screen object to fill, or 0 to allocate one
  * @return the screen
  */
-extern "C" void* cUIEngine_addScreenByHashName(cUIEngine* self, void* owner, unsigned int hash, void* screen)
+extern "C" void* cUIEngine_addScreenByHashName(cUIEngine* self, cUIState* owner, unsigned int hash, void* screen)
 {
     char* bank = self->mpData;
     sUIScrTbl* tbl = (sUIScrTbl*)(bank + *(int*)(bank + 0xC));
@@ -225,7 +227,7 @@ extern "C" void* cUIEngine_addScreenByHashName(cUIEngine* self, void* owner, uns
         cUIThing_cUIThing_3(newScreen->o40, 0, 0);
         newScreen->vt48 = cUIGroup_vtbl;
         cList_cList(newScreen->oB4);
-        newScreen->owner = owner;
+        newScreen->owner = ((void*)owner);
         screen = newScreen;
     }
     cUIScreen_setData(screen, data);
@@ -1556,7 +1558,7 @@ static inline int isClear_9970(int flags)
  * @param in  the input (On Tour const cUIInput* pInput)
  * @return 1 when the input was used, else 0 (On Tour returns bool)
  */
-extern "C" int cUIListBox_onInput(cUIListBox* self, void* in)
+extern "C" int cUIListBox_onInput(cUIListBox* self, cUIInput* in)
 {
     if (self->mNumEntries == 0)
         return 0;

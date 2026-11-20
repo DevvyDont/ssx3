@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -31,12 +32,12 @@ static inline void SetText_6540(void* w, int text)
  *
  * @param w  the widget being created
  */
-extern "C" void cFEStateAudioOptions_onWidgetCreate(void* self, void* w)
+extern "C" void cFEStateAudioOptions_onWidgetCreate(void* self, cUIThing* w)
 {
-    int id = *(int*)((char*)w + 0x38);
+    int id = w->mHashName;
     if (id == GetHashValue32(str_0box))
     {
-        *(void**)((char*)self + 0x4C) = w;
+        *(void**)((char*)self + 0x4C) = ((void*)w);
         if (*(int*)((char*)self + 0x78) == 0)
             SetText_6540(w, *(int*)((char*)self + 0x5C));
         else
@@ -44,7 +45,7 @@ extern "C" void cFEStateAudioOptions_onWidgetCreate(void* self, void* w)
     }
     else if (id == GetHashValue32(str_1box))
     {
-        *(void**)((char*)self + 0x54) = w;
+        *(void**)((char*)self + 0x54) = ((void*)w);
         if (*(int*)((char*)self + 0x78) == 2)
             SetText_6540(w, *(int*)((char*)self + 0x5C));
         else
@@ -52,7 +53,7 @@ extern "C" void cFEStateAudioOptions_onWidgetCreate(void* self, void* w)
     }
     else if (id == GetHashValue32(str_2box))
     {
-        *(void**)((char*)self + 0x50) = w;
+        *(void**)((char*)self + 0x50) = ((void*)w);
         if (*(int*)((char*)self + 0x78) == 1)
             SetText_6540(w, *(int*)((char*)self + 0x5C));
         else
@@ -60,7 +61,7 @@ extern "C" void cFEStateAudioOptions_onWidgetCreate(void* self, void* w)
     }
     else if (id == GetHashValue32(str_2box))
     {
-        *(void**)((char*)self + 0x50) = w;
+        *(void**)((char*)self + 0x50) = ((void*)w);
         if (*(int*)((char*)self + 0x78) == 1)
             SetText_6540(w, *(int*)((char*)self + 0x5C));
         else
@@ -68,7 +69,7 @@ extern "C" void cFEStateAudioOptions_onWidgetCreate(void* self, void* w)
     }
     else if (id == GetHashValue32(str_3box))
     {
-        *(void**)((char*)self + 0x58) = w;
+        *(void**)((char*)self + 0x58) = ((void*)w);
         if (*(int*)((char*)self + 0x78) == 3)
             SetText_6540(w, *(int*)((char*)self + 0x5C));
         else
@@ -76,26 +77,26 @@ extern "C" void cFEStateAudioOptions_onWidgetCreate(void* self, void* w)
     }
     else if (id == GetHashValue32(str_radio_big))
     {
-        *(int*)((char*)w + 0x18) = 0;
+        w->mMiscData = 0;
     }
     else if (id == GetHashValue32(str_big_mountain))
     {
-        *(int*)((char*)w + 0x18) = 2;
+        w->mMiscData = 2;
     }
     else if (id == GetHashValue32(str_request_line))
     {
-        *(void**)((char*)self + 0x68) = w;
-        *(int*)((char*)w + 0x18) = 1;
+        *(void**)((char*)self + 0x68) = ((void*)w);
+        w->mMiscData = 1;
     }
     else if (id == GetHashValue32(str_edit_req))
     {
-        *(void**)((char*)self + 0x64) = w;
-        *(int*)((char*)w + 0x18) = 4;
+        *(void**)((char*)self + 0x64) = ((void*)w);
+        w->mMiscData = 4;
     }
     else if (id == GetHashValue32(str_playlist))
     {
-        *(void**)((char*)self + 0x6C) = w;
-        *(int*)((char*)w + 0x18) = 3;
+        *(void**)((char*)self + 0x6C) = ((void*)w);
+        w->mMiscData = 3;
     }
 }
 #endif

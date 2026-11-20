@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ui/uistate.h"
+#include "ui/uithing.h"
 #include "be/beintnewrace.h"
 #include "fe/festatecredits.h"
 #include "ui/uiengine.h"
@@ -486,7 +488,7 @@ struct sVE_4F40 {
  * @param item  the popup (the cUIStateBuyPopup)
  * @param msg  the popup event
  */
-extern "C" void cFEStateUberTrick_onPopupEvent(cFEStateUberTrick* self, void* item, int msg)
+extern "C" void cFEStateUberTrick_onPopupEvent(cFEStateUberTrick* self, cUIState* item, int msg)
 {
     switch (msg) {
     case 21:
@@ -551,46 +553,46 @@ static inline int Is_185080(int id, char* s)
  *
  * @param widget  the widget just created (On Tour pWidget)
  */
-extern "C" void cFEStateUberTrick_onWidgetCreate(cFEStateUberTrick* self, void* widget)
+extern "C" void cFEStateUberTrick_onWidgetCreate(cFEStateUberTrick* self, cUIThing* widget)
 {
     cUIText* text = (cUIText*)widget;
     for (int i = 0; i < 6; i++) {
-        if (Is_185080(*(int*)((char*)widget + 0x38), str_mute)) {
+        if (Is_185080(widget->mHashName, str_mute)) {
             cUIText_setAsciiString(text, str_Mute);
-            *(int*)((char*)widget + 0x18) = 1;
+            widget->mMiscData = 1;
             return;
         }
-        if (Is_185080(*(int*)((char*)widget + 0x38), str_indy)) {
+        if (Is_185080(widget->mHashName, str_indy)) {
             cUIText_setAsciiString(text, str_Indy);
-            *(int*)((char*)widget + 0x18) = 3;
+            widget->mMiscData = 3;
             return;
         }
-        if (Is_185080(*(int*)((char*)widget + 0x38), str_stalefish)) {
+        if (Is_185080(widget->mHashName, str_stalefish)) {
             cUIText_setAsciiString(text, str_Stalefish);
-            *(int*)((char*)widget + 0x18) = 2;
+            widget->mMiscData = 2;
             return;
         }
-        if (Is_185080(*(int*)((char*)widget + 0x38), str_method)) {
+        if (Is_185080(widget->mHashName, str_method)) {
             cUIText_setAsciiString(text, str_Method);
-            *(int*)((char*)widget + 0x18) = 0;
+            widget->mMiscData = 0;
             return;
         }
-        if (Is_185080(*(int*)((char*)widget + 0x38), str_nose)) {
+        if (Is_185080(widget->mHashName, str_nose)) {
             cUIText_setAsciiString(text, str_Nose_Grab);
-            *(int*)((char*)widget + 0x18) = 4;
+            widget->mMiscData = 4;
             return;
         }
-        if (Is_185080(*(int*)((char*)widget + 0x38), str_tail)) {
+        if (Is_185080(widget->mHashName, str_tail)) {
             cUIText_setAsciiString(text, str_Tail_Grab);
-            *(int*)((char*)widget + 0x18) = 9;
+            widget->mMiscData = 9;
             return;
         }
     }
-    if (Is_185080(*(int*)((char*)widget + 0x38), str_done)) {
-        *(int*)((char*)widget + 0x18) = -1;
-    } else if (Is_185080(*(int*)((char*)widget + 0x38), str_MenuMain)) {
+    if (Is_185080(widget->mHashName, str_done)) {
+        widget->mMiscData = -1;
+    } else if (Is_185080(widget->mHashName, str_MenuMain)) {
         self->mpMainMenu = (cUIMenu*)widget;
-    } else if (Is_185080(*(int*)((char*)widget + 0x38), str_MenuTrick)) {
+    } else if (Is_185080(widget->mHashName, str_MenuTrick)) {
         self->mpTrickMenu = (cUIMenu*)widget;
     }
 }
@@ -737,12 +739,12 @@ static inline void Back_185268(char* self)
  * @param item  the widget that sent the event
  * @param msg  the widget event
  */
-extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, char* item, int msg)
+extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, cUIThing* item, int msg)
 {
     switch (msg) {
     case 5:
-        if (*(char**)(item + 0x40) == (char*)self->mpMainMenu) {
-            if (Is_185268(*(int*)(item + 0x38), str_done)) {
+        if ((char*)item->mpParent == (char*)self->mpMainMenu) {
+            if (Is_185268(item->mHashName, str_done)) {
                 Back_185268(((char*)self));
             } else {
                 SetActive_185268((char*)self->mpMainMenu, 0);
@@ -752,7 +754,7 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, char* i
                 cFEStateUberTrick_costVisible(self, 1);
                 cFEStateUberTrick_previewVisible(self, 1);
             }
-        } else if (*(char**)(item + 0x40) == (char*)self->mpTrickMenu) {
+        } else if ((char*)item->mpParent == (char*)self->mpTrickMenu) {
             char* categoryItem = *(char**)((char*)self->mpMainMenu + 0xA0);
             char* trickItem = *(char**)((char*)self->mpTrickMenu + 0xA0);
             if (categoryItem != 0 && trickItem != 0) {
@@ -790,7 +792,7 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, char* i
         }
         break;
     case 6:
-        if (*(char**)(item + 0x40) == (char*)self->mpTrickMenu) {
+        if ((char*)item->mpParent == (char*)self->mpTrickMenu) {
             SetActive_185268((char*)self->mpMainMenu, 1);
             SetActive_185268((char*)self->mpTrickMenu, 0);
             {
@@ -807,7 +809,7 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, char* i
         }
         break;
     case 7:
-        if (*(char**)(item + 0x40) == (char*)self->mpTrickMenu) {
+        if ((char*)item->mpParent == (char*)self->mpTrickMenu) {
             char* categoryItem = *(char**)((char*)self->mpMainMenu + 0xA0);
             char* trickItem = *(char**)((char*)self->mpTrickMenu + 0xA0);
             if (categoryItem != 0 && trickItem != 0) {
@@ -825,8 +827,8 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, char* i
         break;
     case 1:
         *(int*)((char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum) + 0xCD0) = 1;
-        if (*(char**)(item + 0x40) == (char*)self->mpMainMenu) {
-            if (self->mpTrickMenu != 0 && *(int*)(item + 0x18) != -1) {
+        if ((char*)item->mpParent == (char*)self->mpMainMenu) {
+            if (self->mpTrickMenu != 0 && item->mMiscData != -1) {
                 cFEStateUberTrick_trickVisible(self, 1);
                 cFEStateUberTrick_updateTrickMenu(((char*)self));
                 cUIText* helpText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_choose));
@@ -838,7 +840,7 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, char* i
                 if (helpText != 0)
                     cUIText_setUnicodeStringByID(helpText, GetHashValue32(str_kT_FEHELPAcceptTrick));
             }
-        } else if ((char*)self->mpTrickMenu != 0 && *(char**)(item + 0x40) == (char*)self->mpTrickMenu) {
+        } else if ((char*)self->mpTrickMenu != 0 && (char*)item->mpParent == (char*)self->mpTrickMenu) {
             cUIText* helpText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_custom));
             char* categoryItem = *(char**)((char*)self->mpMainMenu + 0xA0);
             char* trickItem = *(char**)((char*)self->mpTrickMenu + 0xA0);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "render/ps2graphicsman.h"
 #include "animation/animmodel.h"
 #include "be/beintnewrace.h"
@@ -5125,13 +5126,13 @@ static inline t4Vector MatMulV_34D0(const char* m, const t4Vector& v) return r
  *
  * @param mat  the start transform (On Tour: const t4Matrix & mat)
  */
-extern "C" void cRider_initForMission(cRider* self, char* mat)
+extern "C" void cRider_initForMission(cRider* self, t4Matrix* mat)
 {
     t4Vector pos;
     t4Vector dir;
     cReplay_eventReset((int)SSXApp->Game->Replay, self->mAIIndex);
-    pos = *(t4Vector*)(mat + 0x30);
-    dir = MatMulV_34D0(mat, t4vect_XAxis);
+    pos = mat->row[3];
+    dir = MatMulV_34D0(((char*)mat), t4vect_XAxis);
     cRiderMetrix_evReset(self->mMetrix, 1);
     cRider_setMotionState_impl(self, 3);
     cRider_setControlState_impl(self, 13);

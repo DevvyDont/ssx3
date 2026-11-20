@@ -1,4 +1,7 @@
 #include "common.h"
+#include "ui/uimenu.h"
+#include "ui/uiinput.h"
+#include "ui/uithing.h"
 #include "ui/uiengine.h"
 #include "fe/festatepeakroom.h"
 #include "fe/festatemountainroom.h"
@@ -67,7 +70,7 @@ struct sMountainRoomK2678 {
  * @param idx  the player number (On Tour userNum)
  * @return @p self
  */
-extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(cFEStateMountainRoom* self, void* ui, int idx)
+extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(cFEStateMountainRoom* self, cUIEngine* ui, int idx)
 {
     signed char pl = idx;
     cUIState_cUIState_Room(self, (int)ui);
@@ -467,11 +470,11 @@ static inline int IsShown1D2EA0(char* self)
  * @return 1 when the peak pass was shown and is closed, otherwise 0
  */
 // Lodge menu: when the detail panel is shown and the widget accepts, plays the select sound and closes the panel.
-extern "C" int cFEStateMountainRoom_onInputBegin(cFEStateMountainRoom* self, char* widget)
+extern "C" int cFEStateMountainRoom_onInputBegin(cFEStateMountainRoom* self, cUIInput* widget)
 {
     if (IsShown1D2EA0(((char*)self))) {
-    sVEi1D2EA0* wvt = *(sVEi1D2EA0**)(widget + 8);
-    if (wvt[6].fn(widget + wvt[6].delta)) {
+    sVEi1D2EA0* wvt = (sVEi1D2EA0*)widget->mVtbl;
+    if (wvt[6].fn(((char*)widget) + wvt[6].delta)) {
         char* snd = *(char**)&self->mpEngine->mpSound;
         if (snd == 0) {
             snd = &gUISoundNull;
@@ -560,14 +563,14 @@ struct sText_MR {
  * @param msg  widget event number (On Tour Event)
  */
 // Widget events of the mountain-room menu: opens sub-screens and updates the description text.
-extern "C" void cFEStateMountainRoom_onWidgetEvent(cFEStateMountainRoom* self, char* w, unsigned int msg)
+extern "C" void cFEStateMountainRoom_onWidgetEvent(cFEStateMountainRoom* self, cUIThing* w, unsigned int msg)
 {
-    if (w == 0) {
+    if (((char*)w) == 0) {
         return;
     }
     switch (msg) {
     case 5: {
-        int idx = *(int*)(w + 0x18);
+        int idx = w->mMiscData;
         if (idx == 0) {
             cFEStateMountainRoom_showPassFront_MR(((char*)self));
             break;
@@ -579,7 +582,7 @@ extern "C" void cFEStateMountainRoom_onWidgetEvent(cFEStateMountainRoom* self, c
     }
     case 6: {
         sFactory_MR* factory = *(sFactory_MR**)self->mpEngine;
-        void* nextState = factory->vt[5].fn((char*)factory + factory->vt[5].delta, ((char*)self), *(int*)(w + 0x18));
+        void* nextState = factory->vt[5].fn((char*)factory + factory->vt[5].delta, ((char*)self), w->mMiscData);
         if (nextState == 0) {
             break;
         }
@@ -591,7 +594,7 @@ extern "C" void cFEStateMountainRoom_onWidgetEvent(cFEStateMountainRoom* self, c
             break;
         }
         int stringId = 0;
-        switch (*(int*)(w + 0x18)) {
+        switch (w->mMiscData) {
         case 0:
             stringId = GetHashValue32(str_kT_HELPViewPass);
             break;
@@ -1160,23 +1163,23 @@ struct sItem_001D3C80 { int pad[2]; sVEntB_001D3C80* vt; };
  * @param item  the menu entry (its trophy index at +0x18), or 0
  * @param key  widget event number (On Tour Event)
  */
-extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, void* item, unsigned int key)
+extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, cUIThing* item, unsigned int key)
 {
-    if (item == 0) {
+    if (((void*)item) == 0) {
         return;
     }
     switch (key) {
     case 5:
         if (cBERewardInterface_isTrophyOwned(cBE_getInterface_Fv(cBE_getBE(), 13), self->mUserNum,
-                          self->mCharID, self->mPeakNum, *(int*)((char*)item + 0x18)) != 0) {
+                          self->mCharID, self->mPeakNum, item->mMiscData) != 0) {
             void* obj = *(void**)self->mpEngine;
             sVEntA_001D3C80* vt = *(sVEntA_001D3C80**)((char*)obj + 4);
-            void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, (self->mPeakNum << 16) | *(int*)((char*)item + 0x18));
+            void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, (self->mPeakNum << 16) | item->mMiscData);
             cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         }
         break;
     case 6: {
-        int id = (self->mPeakNum << 16) | *(int*)((char*)item + 0x18);
+        int id = (self->mPeakNum << 16) | item->mMiscData;
         for (int i = 0; i < 4; i++) {
             sItem_001D3C80* listItem = ((sItem_001D3C80**)((char*)self + 0x48))[i];
             if (listItem != 0) {
@@ -1192,8 +1195,8 @@ extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, void* ite
         break;
     }
     case 1:
-        cFEStatePeakRoom_updateHelpText(self, *(int*)((char*)item + 0x18));
-        cFEStatePeakRoom_updateMedalsList(self, *(int*)((char*)item + 0x18));
+        cFEStatePeakRoom_updateHelpText(self, item->mMiscData);
+        cFEStatePeakRoom_updateMedalsList(self, item->mMiscData);
         break;
     }
 }
@@ -1216,7 +1219,7 @@ extern "C" void* cList_getByIndex(void* list, int id);
  * @param id  the menu item index (On Tour index)
  * @return 0x100 for events 8 and 9, 0x10 for event 6 on an unowned trophy, otherwise 0x101
  */
-extern "C" int cFEStatePeakRoom_onWidgetMenu(cFEStatePeakRoom* self, void* item, unsigned int key, int id)
+extern "C" int cFEStatePeakRoom_onWidgetMenu(cFEStatePeakRoom* self, cUIMenu* item, unsigned int key, int id)
 {
     switch (key) {
     default:

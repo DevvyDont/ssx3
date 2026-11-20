@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "util/menusys.h"
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
@@ -2275,7 +2276,7 @@ struct cMenuSys_pushMenu_sStack {
  * @param stack  the menu system
  * @param item  the menu to open
  */
-extern "C" void cMenuSys_pushMenu(cMenuSys* stack, void* item)
+extern "C" void cMenuSys_pushMenu(cMenuSys* stack, cMenu* item)
 {
     cMenuSys_pushMenu_sStack* self = (cMenuSys_pushMenu_sStack*)stack;
     if (self->count != 0) {
@@ -2748,11 +2749,11 @@ struct cSubMenuItem_sItem {
  * @param cap  the item's label text, stored at +0x14
  * @return @p self
  */
-extern "C" cSubMenuItem_sItem* cSubMenuItem_cSubMenuItem(cSubMenuItem_sItem* self, void* sub, void* cap)
+extern "C" cSubMenuItem_sItem* cSubMenuItem_cSubMenuItem(cSubMenuItem_sItem* self, cMenu* sub, void* cap)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     self->field_0x14 = cap;
-    self->field_0x18 = sub;
+    self->field_0x18 = ((void*)sub);
     self->vtable = cSubMenuItem_vtbl;
     return self;
 }
@@ -2763,7 +2764,7 @@ INCLUDE_ASM("util/menu", cSubMenuItem_input);
 #ifdef SKIP_ASM
 extern "C" int cMenuItem_input(cMenuItem* self);
 extern "C" int cMenuItem_getKey(void** self);
-extern "C" void cMenuSys_pushMenu(cMenuSys* stack, void* item);
+extern "C" void cMenuSys_pushMenu(cMenuSys* stack, cMenu* item);
 
 /**
  * Handles input for a sub-menu item: the select command pushes the item's sub-menu onto the menu system.
@@ -2779,7 +2780,7 @@ extern "C" int cSubMenuItem_input(void* self)
 {
     int result = cMenuItem_input((cMenuItem*)self);
     if (cMenuItem_isLocked((cMenuItem*)self) == 0 && result == 0 && cMenuItem_getKey((void**)self) == 6) {
-        cMenuSys_pushMenu((cMenuSys*)(*(void**)((char*)*(void**)self + 0x124)), *(void**)((char*)self + 0x18));
+        cMenuSys_pushMenu((cMenuSys*)(*(void**)((char*)*(void**)self + 0x124)), (cMenu*)(*(void**)((char*)self + 0x18)));
     }
     return result;
 }
@@ -4861,10 +4862,10 @@ struct sColorMenuItem {
  * @param adjust  channel index 0 to 3, stored at +0x18
  * @return @p self
  */
-extern "C" sColorMenuItem* cColorMenuItem_cColorMenuItem(sColorMenuItem* self, void* color, void* adjust)
+extern "C" sColorMenuItem* cColorMenuItem_cColorMenuItem(sColorMenuItem* self, tARGB* color, void* adjust)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
-    self->field_0x14 = color;
+    self->field_0x14 = ((void*)color);
     self->field_0x18 = adjust;
     self->vtable = cColorMenuItem_vtbl;
     return self;
@@ -5503,7 +5504,7 @@ void cExpandMenuItem_addItem3(void* self, void* item, int index) __asm__("cExpan
  *
  * @param item  the new title item
  */
-extern "C" void cExpandMenuItem_setTitle(void* self, void* item)
+extern "C" void cExpandMenuItem_setTitle(void* self, cMenuItem* item)
 {
     char* expandItem = (char*)self;
     for (int i = 0; i < ((cMenuList*)(expandItem + 0x18))->count; i++) {
@@ -5512,7 +5513,7 @@ extern "C" void cExpandMenuItem_setTitle(void* self, void* item)
             break;
         }
     }
-    *(void**)(expandItem + 0x14) = item;
+    *(void**)(expandItem + 0x14) = ((void*)item);
     cExpandMenuItem_addItem3(self, item, 0);
 }
 #endif
@@ -5837,10 +5838,10 @@ struct cRGBTitleMenuItem_sItem {
  * @param color  the colour the row shows, stored at +0x14
  * @return @p self
  */
-extern "C" cRGBTitleMenuItem_sItem* cRGBTitleMenuItem_cRGBTitleMenuItem(cRGBTitleMenuItem_sItem* self, void* cap, void* color)
+extern "C" cRGBTitleMenuItem_sItem* cRGBTitleMenuItem_cRGBTitleMenuItem(cRGBTitleMenuItem_sItem* self, void* cap, tARGB* color)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
-    self->field_0x14 = color;
+    self->field_0x14 = ((void*)color);
     self->field_0x18 = cap;
     self->vtable = cRGBTitleMenuItem_vtbl;
     return self;
@@ -6095,18 +6096,18 @@ extern void* cARGBMenuItem_vtbl[];
  * @param color  the tARGB colour the item edits
  * @return @p self
  */
-extern "C" void* cARGBMenuItem_cARGBMenuItem(void* self, void* name, void* title, void* color)
+extern "C" void* cARGBMenuItem_cARGBMenuItem(void* self, void* name, void* title, tARGB* color)
 {
     char* menuItem = (char*)self;
     cExpandMenuItem_cExpandMenuItem(self, name, menuItem + 0x640);
-    *(void**)(menuItem + 0x5AC) = color;
+    *(void**)(menuItem + 0x5AC) = ((void*)color);
     *(void***)(menuItem + 0x10) = cARGBMenuItem_vtbl;
     // PORT: the channel index is passed in the unit's void* parameter
     cColorMenuItem_cColorMenuItem((sColorMenuItem*)(menuItem + 0x5B0), color, (void*)0);
     cColorMenuItem_cColorMenuItem((sColorMenuItem*)(menuItem + 0x5D4), color, (void*)1);
     cColorMenuItem_cColorMenuItem((sColorMenuItem*)(menuItem + 0x5F8), color, (void*)2);
     cColorMenuItem_cColorMenuItem((sColorMenuItem*)(menuItem + 0x61C), color, (void*)3);
-    cRGBTitleMenuItem_cRGBTitleMenuItem((cRGBTitleMenuItem_sItem*)(menuItem + 0x640), title, color);
+    cRGBTitleMenuItem_cRGBTitleMenuItem((cRGBTitleMenuItem_sItem*)(menuItem + 0x640), title, (tARGB*)color);
     cExpandMenuItem_addItem3(self, menuItem + 0x5B0, -1);
     cExpandMenuItem_addItem3(self, menuItem + 0x5D4, -1);
     cExpandMenuItem_addItem3(self, menuItem + 0x5F8, -1);

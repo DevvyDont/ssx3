@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "intersect/aifwddiff.h"
 #include "render/ps2graphicsman.h"
 
@@ -539,7 +540,7 @@ static inline sVec4_28030 vu0Scale_28030(const sVec4_28030& v, float s)
  * @param loc   out: the contact point (On Tour loc)
  * @return 1 on contact
  */
-extern "C" int bxSphereTree_Is2SidedTriCollision(void* self, sVec4_28030* point1, void* point2, void* point3, sVec4_28030* dir, void* overlap, void* loc)
+extern "C" int bxSphereTree_Is2SidedTriCollision(void* self, sVec4_28030* point1, t4Vector* point2, t4Vector* point3, sVec4_28030* dir, t4Vector* overlap, t4Vector* loc)
 {
     float dot;
     {

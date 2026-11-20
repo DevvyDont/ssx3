@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiscreen.h"
 #include "fe/festatetransition.h"
 #include "fe/festatetitle.h"
 
@@ -59,16 +60,16 @@ extern char str_start[];
  * @param id  the event's label hash
  * @return 0
  */
-extern "C" int cFEStateTransition_onScreenEvent(cFEStateTransition* self, void* screen, int id)
+extern "C" int cFEStateTransition_onScreenEvent(cFEStateTransition* self, cUIScreen* screen, int id)
 {
     int eventHash1 = GetHashValue32(str_end);
     int eventHash2 = GetHashValue32(str_start);
     if (id == eventHash1) {
         self->mAttrState &= ~8;
-        *(int*)((char*)screen + 0x54) &= ~0x40;
+        screen->mRootGroup.mAttr &= ~0x40;
     } else if (id == eventHash2) {
         self->mAttrState |= 8;
-        *(int*)((char*)screen + 0x54) |= 0x40;
+        screen->mRootGroup.mAttr |= 0x40;
     }
     return 0;
 }

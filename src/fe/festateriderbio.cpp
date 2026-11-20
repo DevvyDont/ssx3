@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ui/uistate.h"
+#include "ui/uithing.h"
 #include "fe/festateubertrick.h"
 #include "main/ssxapp.h"
 
@@ -191,11 +193,11 @@ static inline int Is_001835F8(int id, char* s) { return id == GetHashValue32(s);
  * @param item  the popup that sent the event
  * @param msg  the popup event; only 0x16 is handled
  */
-extern "C" void cFEStateRiderDetail_onPopupEvent(void* self, void* item, int msg)
+extern "C" void cFEStateRiderDetail_onPopupEvent(void* self, cUIState* item, int msg)
 {
     void* pi = cBE_getInterface_Fv(cBE_getBE(), 1);
     if (msg == 22) {
-        if (Is_001835F8(*(int*)((char*)item + 0xC), str_131cheat_char)) {
+        if (Is_001835F8(item->mHashName, str_131cheat_char)) {
             int cheatCharId = *(int*)((char*)item + 0x70);
             if (*(int*)((char*)item + 0x74) != 0) {
                 void* pi2 = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -203,7 +205,7 @@ extern "C" void cFEStateRiderDetail_onPopupEvent(void* self, void* item, int msg
                 sVE_35F8* vt = *(sVE_35F8**)((char*)pi2 + 0xC);
                 vt[1].fn((char*)pi2 + vt[1].delta);
             }
-        } else if (*(int*)((char*)item + 0xC) == 0) {
+        } else if (item->mHashName == 0) {
             char* name = (char*)item + 0x74;
             if (*(int*)((char*)item + 0x5C) != 0 && strlen(name) != 0) {
                 cBENewPlayerInterface_setPlayerName(pi, *(signed char*)((char*)self + 0x44), name);
@@ -263,12 +265,12 @@ struct sBits_3710 {
  * @param item  the widget (ignored when 0); its miscellaneous data (+0x18) is the option
  * @param msg  the widget event
  */
-extern "C" void cFEStateRiderDetail_onWidgetEvent(char* self, char* item, unsigned int msg)
+extern "C" void cFEStateRiderDetail_onWidgetEvent(char* self, cUIThing* item, unsigned int msg)
 {
-    if (item == 0) return;
+    if (((char*)item) == 0) return;
     switch (msg) {
     case 5: {
-        int sub = *(int*)(item + 0x18);
+        int sub = item->mMiscData;
         if (sub == 8) {
             char* w = (char*)cKeyboardPopup_cKeyboardPopup(cMemMan_alloc(1092, str_cKeyboardPopup, 0x100, 0), *(void**)(self + 0x10), self, 0, 0xF);
             *(int*)(w + 0x140) = 55;
@@ -311,7 +313,7 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(char* self, char* item, unsign
     case 6: {
         char* obj = **(char***)(self + 0x10);
         sVE_3710* vt = *(sVE_3710**)(obj + 4);
-        void* nextState = vt[5].fn(obj + vt[5].delta, self, *(int*)(item + 0x18));
+        void* nextState = vt[5].fn(obj + vt[5].delta, self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
             cFEStateCharSetup_show3DCharacter(self, 0);

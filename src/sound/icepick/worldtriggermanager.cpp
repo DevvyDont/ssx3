@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/rider.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cWorldTriggerManager_cWorldTriggerManager(void* self);
@@ -937,7 +938,7 @@ struct sWtSnd5F60 {
  * @param vol  the volume (0..127)
  * @return the sound handle, or -1
  */
-extern "C" int cWorldTriggerManager_HandleCollision(char* self, void* evt, int id, char* rider, int vol)
+extern "C" int cWorldTriggerManager_HandleCollision(char* self, void* evt, int id, cRider* rider, int vol)
 {
     if (*(int*)(*(char**)(self + 0x33C) + id * 8) == 3)
         return -1;
@@ -991,12 +992,12 @@ extern "C" int cWorldTriggerManager_HandleCollision(char* self, void* evt, int i
             int h = cSSXAudio_GetCurrAppliedVolumePtr(cAudioInterface_bxAudio(), 7, 0);
             (*pt)->sub.p3C[(*pt)->sub.cur] = h;
         }
-        if (rider != 0)
+        if (((char*)rider) != 0)
         {
             sWtTrack5F60* riderManager = *((sWtSnd5F60*)cAudioInterface_bxAudio())->cur;
-            riderManager->sub.arr24[riderManager->sub.cur] = (int)(rider + 0x110);
+            riderManager->sub.arr24[riderManager->sub.cur] = (int)(((char*)rider) + 0x110);
             sWtTrack5F60** pt = ((sWtSnd5F60*)cAudioInterface_bxAudio())->cur;
-            int h = cSSXAudio_GetClosestCamera1(cAudioInterface_bxAudio(), rider);
+            int h = cSSXAudio_GetClosestCamera1(cAudioInterface_bxAudio(), ((char*)rider));
             (*pt)->sub.p64[(*pt)->sub.cur] = h;
             sWtTrack5F60* flagManager = *((sWtSnd5F60*)cAudioInterface_bxAudio())->cur;
             flagManager->sub.p34[flagManager->sub.cur] = 1;

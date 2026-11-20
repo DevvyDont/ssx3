@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ui/uithing.h"
+#include "bx/math3d.h"
 #include "world/world.h"
 
 //100%
@@ -7,7 +9,7 @@ INCLUDE_ASM("object/flagset", cFlagSet_CreateMesh);
 extern char* cGraphicsMan_TheGraphicsMan;
 extern char str_Flag_Verts[];
 unsigned int BXrand();
-extern "C" void cFlagSet_updateGrid(void* self, void* verts);
+extern "C" void cFlagSet_updateGrid(void* self, t3Vector* verts);
 
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
@@ -143,7 +145,7 @@ extern "C" void cFlagSet_CreateMesh(void* flagSet, void* item)
         }
     }
     sFsV3_CM verts[50];
-    cFlagSet_updateGrid(self, verts);
+    cFlagSet_updateGrid(self, (t3Vector*)verts);
     sFsMesh_CM* flagMesh = self->mesh;
     flagMesh->vt[6].fn((char*)flagMesh + flagMesh->vt[6].delta, verts, col, uv);
 }
@@ -191,7 +193,7 @@ INCLUDE_ASM("object/flagset", cFlagSet_update);
 extern int D_004A4240;
 extern "C" void* cObjectInterface_getFlagManager();
 extern "C" int cObjectInterface_getAITick();
-extern "C" void cFlagSet_updateGrid(void* self, void* verts);
+extern "C" void cFlagSet_updateGrid(void* self, t3Vector* verts);
 
 struct sFlagVert_B818 {
     float x, y, z;
@@ -262,7 +264,7 @@ extern "C" void cFlagSet_update(void* elem)
     }
     if (cObjectInterface_getAITick() % 2 == self->parity) {
         sFlagVert_B818 verts[50];
-        cFlagSet_updateGrid(self, verts);
+        cFlagSet_updateGrid(self, (t3Vector*)verts);
         sFlagMesh_B818* gridMesh = self->mesh;
         sFlagVEntry_B818* setVertsSlot = &gridMesh->vt[3];
         setVertsSlot->fn((char*)gridMesh + setVertsSlot->delta, verts);
@@ -488,7 +490,7 @@ struct sFlagElem_BCA0 {
  * @param vout  output vertex array (cols * rows t3Vectors)
  */
 // cFlagSet::updateGrid(t3Vector* verts) (SSX On Tour symbols). Animates the flag mesh: waves along the columns, then per-vertex ripples, into out[cols * rows].
-extern "C" void cFlagSet_updateGrid(void* vself, void* vout)
+extern "C" void cFlagSet_updateGrid(void* vself, t3Vector* vout)
 {
     sFlagElem_BCA0* self = (sFlagElem_BCA0*)vself;
     sFsV3_CM* out = (sFsV3_CM*)vout;
@@ -2258,7 +2260,7 @@ struct sFsModel_DD18 {
  * @param out  receives one matrix per bone (On Tour animMats)
  */
 // Builds the world matrix of every bone: root or parent * (bone matrix with its translation scaled).
-extern "C" void cAnimNode_makeAnimMats(void* self, void* vroot, sFsMtx_DD18* out)
+extern "C" void cAnimNode_makeAnimMats(void* self, t4Matrix* vroot, sFsMtx_DD18* out)
 {
     sFsMtx_DD18* root = (sFsMtx_DD18*)vroot;
     sFsModel_DD18* model = *(sFsModel_DD18**)((char*)self + 0x2C);

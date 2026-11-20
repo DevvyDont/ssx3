@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ui/uitext.h"
+#include "ui/uithing.h"
 #include "fe/ovstatemap.h"
 #include "ui/uiengine.h"
 #include "be/beintnetwork.h"
@@ -370,8 +372,8 @@ INCLUDE_ASM("fe/ovstatemap", cOVState_MAP_onWidgetEvent);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028FAE0(void* self);
 extern "C" void cGame_setState(void* self, int a, int b, int refresh);
-extern "C" void cOVState_MAP_setWidgetHiliteColor(cOVState_MAP* self, void* obj, int on);
-extern "C" void cOVState_MAP_setWidgetUnHiliteColor(cOVState_MAP* self, void* obj, int on);
+extern "C" void cOVState_MAP_setWidgetHiliteColor(cOVState_MAP* self, cUIText* obj, int on);
+extern "C" void cOVState_MAP_setWidgetUnHiliteColor(cOVState_MAP* self, cUIText* obj, int on);
 void* cUIStateStack_pop_8C28(void* self, int a1) __asm__("cUIStateStack_pop");
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
@@ -416,15 +418,15 @@ public:
  * @param Event  UI event code (1, 2, 5, 6 or 7)
  */
 // Map overlay message handler: confirm/cancel of the map popup and toggling of the legend objects.
-extern "C" void cOVState_MAP_onWidgetEvent(cOVState_MAP* selfp, void* pWidget, int Event)
+extern "C" void cOVState_MAP_onWidgetEvent(cOVState_MAP* selfp, cUIThing* pWidget, int Event)
 {
-    if (pWidget == 0) {
+    if (((void*)pWidget) == 0) {
         return;
     }
     switch (Event) {
     case 5:
         if (selfp->mSessionPopupActive != 0) {
-            if (*(int*)((char*)pWidget + 0x18) != 0) {
+            if (pWidget->mMiscData != 0) {
                 selfp->mSessionPopupActive = 0;
                 cOVState_MAP_setupPopup(selfp);
                 break;
@@ -440,7 +442,7 @@ extern "C" void cOVState_MAP_onWidgetEvent(cOVState_MAP* selfp, void* pWidget, i
             cOVState_MAP_setupScreenExit(selfp);
         } else {
             selfp->mSessionPopupActive = 1;
-            selfp->mSelectedSessionPoint = *(int*)((char*)pWidget + 0x18);
+            selfp->mSelectedSessionPoint = pWidget->mMiscData;
             cOVState_MAP_setupPopup(selfp);
             cObjV_00208C28* confirmNo = (cObjV_00208C28*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(str_ConfirmMenu_No));
             confirmNo->set(cVec_00208C28(1.0f, 0.0f, 0.0f, 0.0f));
@@ -459,8 +461,8 @@ extern "C" void cOVState_MAP_onWidgetEvent(cOVState_MAP* selfp, void* pWidget, i
         break;
     case 1:
         if (selfp->mSessionPopupActive != 0) {
-            cOVState_MAP_setWidgetHiliteColor(selfp, pWidget, 1);
-            if (*(int*)((char*)pWidget + 0x18) == 0) {
+            cOVState_MAP_setWidgetHiliteColor(selfp, (cUIText*)pWidget, 1);
+            if (pWidget->mMiscData == 0) {
                 cUIState_showObjSafe(((char*)selfp), str_ConfirmMenu_Yes_x);
                 cUIState_hideObjSafe(((char*)selfp), str_ConfirmMenu_No_x);
                 cUIState_showObjSafe(((char*)selfp), str_ConfirmMenu_Yes_a);
@@ -479,7 +481,7 @@ extern "C" void cOVState_MAP_onWidgetEvent(cOVState_MAP* selfp, void* pWidget, i
         break;
     case 2:
         if (selfp->mSessionPopupActive != 0) {
-            cOVState_MAP_setWidgetUnHiliteColor(selfp, pWidget, 1);
+            cOVState_MAP_setWidgetUnHiliteColor(selfp, (cUIText*)pWidget, 1);
         }
         break;
     case 7:
@@ -859,13 +861,13 @@ extern char kMAPCOLOR_HIGHLIGHTED_LOCKED[];
  * @param obj  the text widget
  * @param on   nonzero when the entry is unlocked
  */
-extern "C" void cOVState_MAP_setWidgetHiliteColor(cOVState_MAP* self, void* obj, int on)
+extern "C" void cOVState_MAP_setWidgetHiliteColor(cOVState_MAP* self, cUIText* obj, int on)
 {
     if (on != 0) {
-        sVEntry_cOVState_MAP_setWidgetHiliteColor* vt = *(sVEntry_cOVState_MAP_setWidgetHiliteColor**)((char*)obj + 0x8);
+        sVEntry_cOVState_MAP_setWidgetHiliteColor* vt = (sVEntry_cOVState_MAP_setWidgetHiliteColor*)obj->mVtbl;
         vt[11].fn((char*)obj + vt[11].delta, kMAPCOLOR_HIGHLIGHTED);
     } else {
-        sVEntry_cOVState_MAP_setWidgetHiliteColor* vt = *(sVEntry_cOVState_MAP_setWidgetHiliteColor**)((char*)obj + 0x8);
+        sVEntry_cOVState_MAP_setWidgetHiliteColor* vt = (sVEntry_cOVState_MAP_setWidgetHiliteColor*)obj->mVtbl;
         vt[11].fn((char*)obj + vt[11].delta, kMAPCOLOR_HIGHLIGHTED_LOCKED);
     }
 }
@@ -890,13 +892,13 @@ extern char kMAPCOLOR_REGULAR_LOCKED[];
  * @param obj  text widget to colour (On Tour: pText)
  * @param on   nonzero for an unlocked entry (On Tour: unlocked)
  */
-extern "C" void cOVState_MAP_setWidgetUnHiliteColor(cOVState_MAP* self, void* obj, int on)
+extern "C" void cOVState_MAP_setWidgetUnHiliteColor(cOVState_MAP* self, cUIText* obj, int on)
 {
     if (on != 0) {
-        sVEntry_cOVState_MAP_setWidgetUnHiliteColor* vt = *(sVEntry_cOVState_MAP_setWidgetUnHiliteColor**)((char*)obj + 0x8);
+        sVEntry_cOVState_MAP_setWidgetUnHiliteColor* vt = (sVEntry_cOVState_MAP_setWidgetUnHiliteColor*)obj->mVtbl;
         vt[11].fn((char*)obj + vt[11].delta, kMAPCOLOR_REGULAR);
     } else {
-        sVEntry_cOVState_MAP_setWidgetUnHiliteColor* vt = *(sVEntry_cOVState_MAP_setWidgetUnHiliteColor**)((char*)obj + 0x8);
+        sVEntry_cOVState_MAP_setWidgetUnHiliteColor* vt = (sVEntry_cOVState_MAP_setWidgetUnHiliteColor*)obj->mVtbl;
         vt[11].fn((char*)obj + vt[11].delta, kMAPCOLOR_REGULAR_LOCKED);
     }
 }

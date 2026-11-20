@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "be/beintnewrace.h"
 #include "fe/bxloadindicator.h"
 #include "fe/festatelodge.h"
@@ -103,11 +104,11 @@ extern "C" void cUIStateStack_push(void* list, void* item);
  * @param item  the chosen item; ignored when null
  * @param Event  the widget event; only 5 (Cross) acts
  */
-extern "C" void cOVStateHiScoreList_onWidgetEvent(void* self, void* item, int Event)
+extern "C" void cOVStateHiScoreList_onWidgetEvent(void* self, cUIThing* item, int Event)
 {
-    if (item != 0 && Event == 5) {
+    if (((void*)item) != 0 && Event == 5) {
         void* nextState = 0;
-        if (*(int*)((char*)item + 0x18) == 1) {
+        if (item->mMiscData == 1) {
             sObj001E9130* factory = **(sObj001E9130***)((char*)self + 0x10);
             nextState = factory->vt[4].fn((char*)factory + factory->vt[4].delta, self, 1);
         }

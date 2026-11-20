@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiinput.h"
 #include "ui/uitextscroll.h"
 #include "ui/uithing.h"
 #include "ui/uivector.h"
@@ -842,7 +843,7 @@ static inline int pressed13E0(char* input, int key)
  * @param input  the input (On Tour const cUIInput* pInput)
  * @return 1 when a key was used, else 0 (On Tour returns bool)
  */
-extern "C" int cUITextScroll_onInput(sUIText13E0* self, char* input)
+extern "C" int cUITextScroll_onInput(sUIText13E0* self, cUIInput* input)
 {
     sUIFont13E0* font = (sUIFont13E0*)cUITextScroll_getFont((cUITextScroll*)self);
     if (font == 0) {
@@ -850,13 +851,13 @@ extern "C" int cUITextScroll_onInput(sUIText13E0* self, char* input)
     }
     signed char rows = (int)(self->height / (self->scale * ((float)font->height * font->scale) + 3.0f));
     if (self->flags & 1) {
-        if (pressed13E0(input, self->keyUp) != 0) {
+        if (pressed13E0(((char*)input), self->keyUp) != 0) {
             if (self->cur != 0) {
                 self->cur--;
             }
             return 1;
         }
-        if (pressed13E0(input, self->keyDown) != 0) {
+        if (pressed13E0(((char*)input), self->keyDown) != 0) {
             if (self->cur < self->count - 1) {
                 self->cur++;
             }
@@ -869,13 +870,13 @@ extern "C" int cUITextScroll_onInput(sUIText13E0* self, char* input)
             self->top = self->cur - rows + 1;
         }
     } else {
-        if (pressed13E0(input, self->keyUp) != 0) {
+        if (pressed13E0(((char*)input), self->keyUp) != 0) {
             if (self->top != 0) {
                 self->top--;
             }
             return 1;
         }
-        if (pressed13E0(input, self->keyDown) == 0) {
+        if (pressed13E0(((char*)input), self->keyDown) == 0) {
             return 0;
         }
         if (self->top < self->count - rows) {

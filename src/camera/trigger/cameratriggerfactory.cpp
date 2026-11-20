@@ -1,4 +1,5 @@
 #include "common.h"
+#include "camera/camera.h"
 #include "fe/backgroundman.h"
 #include "camera/race/allspinchasealgo.h"
 #include "camera/race/directionchasealgo.h"
@@ -6061,14 +6062,14 @@ static inline sVec4_1789E8 Get_1789E8(char* o, int slot)
  * @param src  the rider camera target (On Tour cRiderCameraTarget* target)
  * @return @p self
  */
-extern "C" void* cPOST_RACE_1ChaseAlgorithm_cPOST_RACE_1ChaseAlgorithm(cPOST_RACE_1ChaseAlgorithm* self, char* src)
+extern "C" void* cPOST_RACE_1ChaseAlgorithm_cPOST_RACE_1ChaseAlgorithm(cPOST_RACE_1ChaseAlgorithm* self, cRiderCameraTarget* src)
 {
     cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(((char*)self));
     sVec4_1789E8* startDir = (sVec4_1789E8*)(((char*)self) + 0x390);
     self->AlgorithmType = 68;
     self->mVtbl = cPOST_RACE_1ChaseAlgorithm_vtbl;
     self->AgeInFrames = 0;
-    sVec4_1789E8 dir = (Length_1789E8(Get_1789E8(src, 3)) > 1.0f) ? Normalize_1789E8(Get_1789E8(src, 3)) : Get_1789E8(src, 4);
+    sVec4_1789E8 dir = (Length_1789E8(Get_1789E8(((char*)src), 3)) > 1.0f) ? Normalize_1789E8(Get_1789E8(((char*)src), 3)) : Get_1789E8(((char*)src), 4);
     *startDir = dir;
     self->StartDir.z = 0.0f;
     float len = Length_1789E8(*(sVec4_1789E8*)&self->StartDir);

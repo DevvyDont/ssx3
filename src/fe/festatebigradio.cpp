@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uistate.h"
 #include "be/beintnewrace.h"
 #include "online/lobbyman.h"
 
@@ -922,10 +923,10 @@ static inline int isOn00194168()
  * @param pPopup  the popup that sent the event
  * @param Event  the popup event
  */
-extern "C" void cFEStateBraggingRights_onPopupEvent(void* self, void* pPopup, int Event)
+extern "C" void cFEStateBraggingRights_onPopupEvent(void* self, cUIState* pPopup, int Event)
 {
     if (isOn00194168()) {
-        if (*(int*)((char*)pPopup + 0x18) == 2104) {
+        if (pPopup->miMiscData == 2104) {
             func_00194440(self, pPopup, Event);
         } else {
             cFEStateNet_onPopupEvent(self, pPopup, Event);

@@ -635,7 +635,7 @@ extern "C" float func_00290C10(int i, float v);
  * @param src  the rider
  * @return the volume, 0..127
  */
-extern "C" int cSSXAudio_GetGruntVol(cSSXAudio* self, void* src)
+extern "C" int cSSXAudio_GetGruntVol(cSSXAudio* self, cRider* src)
 {
     char* obj = (char*)src + 0x6C0;
     sSndVEntryVec* vt = *(sSndVEntryVec**)obj;
@@ -1781,7 +1781,7 @@ extern "C" void cSSXAudio_StopAllRiderSounds(void* self)
 //100%
 INCLUDE_ASM("sound/soundsys", cSSXAudio_HandleChatter);
 #ifdef SKIP_ASM
-extern "C" void cSSXAudio_ChatterProgram(cSSXAudio*, void*, int*, int*);
+extern "C" void cSSXAudio_ChatterProgram(cSSXAudio*, cRider*, int*, int*);
 extern "C" void cBankMonitorInstance_PitchUpdate(void*, int);
 extern "C" void* cAudioInterface_getGame();
 extern "C" int cReplay_isPauseAI(void* p);
@@ -1827,8 +1827,8 @@ extern "C" void cSSXAudio_HandleChatter(cSSXAudio* self, void* obj) {
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_HandleGlide);
 #ifdef SKIP_ASM
-extern "C" int cSSXAudio_GetSurfaceProgramType(cSSXAudio* self, int id, void* rider);
-extern "C" void cSSXAudio_GlideProgram(cSSXAudio* self, int id, void* rider, int* out, int* size);
+extern "C" int cSSXAudio_GetSurfaceProgramType(cSSXAudio* self, int id, cRider* rider);
+extern "C" void cSSXAudio_GlideProgram(cSSXAudio* self, int id, cRider* rider, int* out, int* size);
 extern "C" void cBankMonitorInstance_Reset(void*);
 extern "C" void cBankMonitorInstance_PitchUpdate(void*, int);
 extern "C" void* cAudioInterface_getGame();
@@ -1890,7 +1890,7 @@ extern "C" void cSSXAudio_HandleGlide(cSSXAudio* self, void* obj) {
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_HandleAIGlide);
 #ifdef SKIP_ASM
-extern "C" void cSSXAudio_AIGlideProgram(cSSXAudio* self, int id, void* rider, int* out, int* size);
+extern "C" void cSSXAudio_AIGlideProgram(cSSXAudio* self, int id, cRider* rider, int* out, int* size);
 extern "C" void cBankMonitorInstance_Reset(void*);
 extern "C" void cBankMonitorInstance_PitchUpdate(void*, int);
 extern "C" void* cAudioInterface_getGame();
@@ -1937,8 +1937,8 @@ extern "C" void cSSXAudio_HandleAIGlide(cSSXAudio* self, void* obj) {
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_HandleCarve);
 #ifdef SKIP_ASM
-extern "C" int cSSXAudio_GetSurfaceProgramType(cSSXAudio* self, int id, void* rider);
-extern "C" void cSSXAudio_CarveProgram(cSSXAudio* self, int id, void* rider, int* out, int* size);
+extern "C" int cSSXAudio_GetSurfaceProgramType(cSSXAudio* self, int id, cRider* rider);
+extern "C" void cSSXAudio_CarveProgram(cSSXAudio* self, int id, cRider* rider, int* out, int* size);
 extern "C" void cBankMonitorInstance_Reset(void*);
 extern "C" void cBankMonitorInstance_PitchUpdate(void*, int);
 extern "C" void* cAudioInterface_getGame();
@@ -2005,7 +2005,7 @@ extern func_00290B58_sCurve D_00482B20;
  * @param out1  receives the volume
  * @param out2  receives the pitch bend
  */
-extern "C" void cSSXAudio_ChatterProgram(cSSXAudio* self, void* vrider, int* out1, int* out2) {
+extern "C" void cSSXAudio_ChatterProgram(cSSXAudio* self, cRider* vrider, int* out1, int* out2) {
     cRider* rider = (cRider*)vrider;
     float spd = rider->mAudioSpeed;
     func_00290B58_sCurve volumeCurve = D_00482AF8;
@@ -2018,7 +2018,7 @@ extern "C" void cSSXAudio_ChatterProgram(cSSXAudio* self, void* vrider, int* out
 INCLUDE_ASM("sound/soundsys", cSSXAudio_GlideProgram);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int cSSXAudio_GetSurfaceProgramType(cSSXAudio* self, int id, void* rider);
+extern "C" int cSSXAudio_GetSurfaceProgramType(cSSXAudio* self, int id, cRider* rider);
 void snd_dec_a(void*, void*, int*, int*) __asm__("cSSXAudio_HardGlideProgram");
 void snd_dec_b(void*, void*, int*, int*) __asm__("cSSXAudio_SoftGlideProgram");
 void snd_dec_c(void*, void*, int*, int*) __asm__("cSSXAudio_RailGlideProgram");
@@ -2034,7 +2034,7 @@ void snd_dec_c(void*, void*, int*, int*) __asm__("cSSXAudio_RailGlideProgram");
  * @param out  receives the volume
  * @param size  receives the pitch bend (0x1000 is no bend)
  */
-extern "C" void cSSXAudio_GlideProgram(cSSXAudio* self, int id, void* rider, int* out, int* size) {
+extern "C" void cSSXAudio_GlideProgram(cSSXAudio* self, int id, cRider* rider, int* out, int* size) {
     *out = 0;
     *size = 0x1000;
     int programType = cSSXAudio_GetSurfaceProgramType(self, id, rider);
@@ -2051,7 +2051,7 @@ extern "C" void cSSXAudio_GlideProgram(cSSXAudio* self, int id, void* rider, int
 INCLUDE_ASM("sound/soundsys", cSSXAudio_AIGlideProgram);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int cSSXAudio_GetSurfaceProgramType(cSSXAudio* self, int id, void* rider);
+extern "C" int cSSXAudio_GetSurfaceProgramType(cSSXAudio* self, int id, cRider* rider);
 void snd_dec_d(void*, void*, int*, int*) __asm__("cSSXAudio_AIHardGlideProgram");
 void snd_dec_e(void*, void*, int*, int*) __asm__("cSSXAudio_AISoftGlideProgram");
 void snd_dec_f(void*, void*, int*, int*) __asm__("cSSXAudio_AIRailGlideProgram");
@@ -2064,7 +2064,7 @@ void snd_dec_f(void*, void*, int*, int*) __asm__("cSSXAudio_AIRailGlideProgram")
  * @param out  receives the volume
  * @param size  receives the pitch bend (0x1000 is no bend)
  */
-extern "C" void cSSXAudio_AIGlideProgram(cSSXAudio* self, int id, void* rider, int* out, int* size) {
+extern "C" void cSSXAudio_AIGlideProgram(cSSXAudio* self, int id, cRider* rider, int* out, int* size) {
     *out = 0;
     *size = 0x1000;
     int programType = cSSXAudio_GetSurfaceProgramType(self, id, rider);
@@ -2081,7 +2081,7 @@ extern "C" void cSSXAudio_AIGlideProgram(cSSXAudio* self, int id, void* rider, i
 INCLUDE_ASM("sound/soundsys", cSSXAudio_CarveProgram);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int cSSXAudio_GetSurfaceProgramType(cSSXAudio* self, int id, void* rider);
+extern "C" int cSSXAudio_GetSurfaceProgramType(cSSXAudio* self, int id, cRider* rider);
 void snd_dec_g(void*, void*, int*, int*) __asm__("cSSXAudio_HardCarveProgram");
 void snd_dec_h(void*, void*, int*, int*) __asm__("cSSXAudio_SoftCarveProgram");
 void snd_dec_i(void*, void*, int*, int*) __asm__("cSSXAudio_RailCarveProgram");
@@ -2094,7 +2094,7 @@ void snd_dec_i(void*, void*, int*, int*) __asm__("cSSXAudio_RailCarveProgram");
  * @param out  receives the volume
  * @param size  receives the pitch bend (0x1000 is no bend)
  */
-extern "C" void cSSXAudio_CarveProgram(cSSXAudio* self, int id, void* rider, int* out, int* size) {
+extern "C" void cSSXAudio_CarveProgram(cSSXAudio* self, int id, cRider* rider, int* out, int* size) {
     *out = 0;
     *size = 0x1000;
     int programType = cSSXAudio_GetSurfaceProgramType(self, id, rider);
@@ -2122,7 +2122,7 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_GetSurfaceProgramType);
  * @param rider  the rider
  * @return the program type: 0, 1 or 2
  */
-extern "C" int cSSXAudio_GetSurfaceProgramType(cSSXAudio* self, int kind, void *rider)
+extern "C" int cSSXAudio_GetSurfaceProgramType(cSSXAudio* self, int kind, cRider* rider)
 {
     int result;
 
@@ -2627,19 +2627,19 @@ static inline int clampVol_4170(int v, int lo, int hi)
 // `return hi` (stops jump1 turning the second belowHi test into a movn; retail keeps the branch); plain form 90.49%
 // (99.07% with the volatile view alone).
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
-extern "C" void cSSXAudio_Lift(cSSXAudio* self, void* obj)
+extern "C" void cSSXAudio_Lift(cSSXAudio* self, cRider* obj)
 {
     int idx = -1;
     if (cSSXAudio_ReplayMode(self) != 0) {
         idx = 0;
     } else {
-        bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+        bool ok = obj->mIsHuman && obj->mIsLocal;
         if (ok) {
-            idx = *(int*)((char*)obj + 0x870);
+            idx = obj->mViewIndex;
         }
     }
     if (cSSXAudio_GetFocusRider(self, idx) == (int)obj) {
-        int volume = clampVol_4170((int)(*(float*)((char*)obj + 0x75C) * 127.0f), 0x40, 0x7F);
+        int volume = clampVol_4170((int)(obj->mAudioSpeed * 127.0f), 0x40, 0x7F);
         SNDSYS_entercritical();
         int soundFinished = SNDover(self->mCharLiftHandle) != 0;
         SNDSYS_leavecritical();
@@ -2647,7 +2647,7 @@ extern "C" void cSSXAudio_Lift(cSSXAudio* self, void* obj)
             cBankMonitor_BANKMONITOR_StopHandle(*(char**)self->MusicSys.mpVStreamSys + 0x1D8, self->mCharLiftHandle, 1, 0.0f);
         }
         int flag = 0;
-        bool ok2 = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+        bool ok2 = obj->mIsHuman && obj->mIsLocal;
         if (ok2) {
             cBE_getInterface_Fv(cBE_getBE(), 0);
             if (cBENewRaceInterface_newRace.cGamePath == 2) {
@@ -2685,33 +2685,33 @@ struct sSsVt4678 { short delta; short index; int (*fn)(void*); };
  *
  * @param rider  the rider
  */
-extern "C" void cSSXAudio_LiftWithAirTime(cSSXAudio* self, char* rider)
+extern "C" void cSSXAudio_LiftWithAirTime(cSSXAudio* self, cRider* rider)
 {
-    int simState = *(int*)(*(char**)(rider + 0x788) + 0xAC);
+    int simState = *(int*)((char*)rider->mAirPredictor + 0xAC);
     int ok = simState == 1 || simState == 3;
     if (!ok) {
-        char* riderObj = rider + 0x6C0;
+        char* riderObj = ((char*)rider) + 0x6C0;
         sSsVt4678* vtEntry = &(*(sSsVt4678**)riderObj)[7];
         cSSXAudio_SetNeedLift(self, vtEntry->fn(riderObj + vtEntry->delta), 1);
         return;
     }
     int idx = -1;
     {
-        char* riderObj = rider + 0x6C0;
+        char* riderObj = ((char*)rider) + 0x6C0;
         sSsVt4678* vtEntry = &(*(sSsVt4678**)riderObj)[7];
         cSSXAudio_SetNeedLift(self, vtEntry->fn(riderObj + vtEntry->delta), 0);
     }
-    float x = *(float*)(*(char**)(rider + 0x788) + 0x98);
-    func_0029FCC8(self, rider);
+    float x = *(float*)((char*)rider->mAirPredictor + 0x98);
+    func_0029FCC8(self, ((char*)rider));
     if (cSSXAudio_ReplayMode(self) != 0) {
         idx = 0;
     } else {
-        int ok2 = *(int*)(rider + 0x874) != 0 && *(int*)(rider + 0x87C) != 0;
+        int ok2 = rider->mIsHuman != 0 && rider->mIsLocal != 0;
         if (ok2) {
-            idx = *(int*)(rider + 0x870);
+            idx = rider->mViewIndex;
         }
     }
-    if (cSSXAudio_GetFocusRider_p(self, idx) == rider && x > 2.0f) {
+    if (cSSXAudio_GetFocusRider_p(self, idx) == ((char*)rider) && x > 2.0f) {
         func_002A7408((cCrowdSys*)self, idx);
     }
 }
@@ -2737,7 +2737,7 @@ struct sSnd4860 {
     int vals[6];
 };
 
-extern "C" void cSSXAudio_LiftWithAirTime(cSSXAudio* self, char* rider);
+extern "C" void cSSXAudio_LiftWithAirTime(cSSXAudio* self, cRider* rider);
 
 /**
  * Runs LiftWithAirTime() for each rider flagged in mNeedLift, clearing the flags of riders that do not exist.
@@ -2749,7 +2749,7 @@ extern "C" void cSSXAudio_UpdateLift(cSSXAudio* self)
         if (audio->vals[i] != 0 && i < ((cAI*)cAudioInterface_getAI())->NumberOfRidersAllocated) {
             char* rider = (char*)((cAI*)cAudioInterface_getAI())->Riders[i];
             if (rider != 0) {
-                cSSXAudio_LiftWithAirTime(self, rider);
+                cSSXAudio_LiftWithAirTime(self, (cRider*)rider);
                 continue;
             }
         }
@@ -3371,10 +3371,10 @@ struct sSsVt6088 { short delta; short index; int (*fn)(void*); };
  * @param evt  the instance hit (On Tour tInstanceRecord* pInst)
  * @param idx  collision hull
  */
-extern "C" void cSSXAudio_CollisionSound(cSSXAudio* self, char* rider, char* evt, int idx)
+extern "C" void cSSXAudio_CollisionSound(cSSXAudio* self, cRider* rider, char* evt, int idx)
 {
     if (*(void**)(evt + 0x8C) == 0) return;
-    char* obj = rider + 0x6C0;
+    char* obj = ((char*)rider) + 0x6C0;
     sSsVt6088* vtEntry = &(*(sSsVt6088**)obj)[5];
     if (cSSXAudio_CameraInRange(self, vtEntry->fn(obj + vtEntry->delta), 100.0f) < 0) return;
     if (cSSXAudio_PlayHistoryExists_p(self, evt, idx) != 0) return;
@@ -3388,7 +3388,7 @@ extern "C" void cSSXAudio_CollisionSound(cSSXAudio* self, char* rider, char* evt
     int* ids = tbl + 2;
     int* trigger = ids;
     if (ids[idx] != 0) trigger = &ids[idx];
-    int handle = cWorldTriggerManager_HandleCollision(gWorldTriggerManager, evt, *trigger, rider, volume);
+    int handle = cWorldTriggerManager_HandleCollision(gWorldTriggerManager, evt, *trigger, ((char*)rider), volume);
     if (handle < 0) return;
     cSSXAudio_PlayHistoryAdd(self, evt, handle, *(volatile int*)(*(char**)self->MusicSys.mpVStreamSys + 0x260) + 1000, 0, idx);
 }
@@ -3423,18 +3423,18 @@ static inline float absf_961F0(float x)
  * @param rider  the rider
  * @param intensity  the boost change from cRiderMetrix_evWipeout
  */
-extern "C" void cSSXAudio_Wipeout(cSSXAudio* self, char* rider, float intensity)
+extern "C" void cSSXAudio_Wipeout(cSSXAudio* self, cRider* rider, float intensity)
 {
     int idx = -1;
     if (cSSXAudio_ReplayMode(self) != 0) {
         idx = 0;
     } else {
-        int ok = *(int*)(rider + 0x874) != 0 && *(int*)(rider + 0x87C) != 0;
+        int ok = rider->mIsHuman != 0 && rider->mIsLocal != 0;
         if (ok) {
-            idx = *(int*)(rider + 0x870);
+            idx = rider->mViewIndex;
         }
     }
-    if (cSSXAudio_GetFocusRider_p(self, idx) != rider) {
+    if (cSSXAudio_GetFocusRider_p(self, idx) != ((char*)rider)) {
         return;
     }
     float magnitude = absf_961F0(intensity);
@@ -3447,7 +3447,7 @@ extern "C" void cSSXAudio_Wipeout(cSSXAudio* self, char* rider, float intensity)
     } else {
         func_002A73D8((cCrowdSys*)self, 2, idx);
     }
-    func_0028F108(self, rider);
+    func_0028F108(self, ((char*)rider));
 }
 #endif
 
@@ -3709,16 +3709,16 @@ extern func_00290B58_sCurve D_00482DA0;
  * @param vself  the audio system (cSSXAudio)
  * @param obj  the rider
  */
-extern "C" void cSSXAudio_WipeoutHit(cSSXAudio* vself, char* obj)
+extern "C" void cSSXAudio_WipeoutHit(cSSXAudio* vself, cRider* obj)
 {
     struct sSSXAudioView* self = (struct sSSXAudioView*)vself;
-    if (vcall_6310(obj + 0x6C0, 9) != 0 || *(int*)(obj + 0x87C) == 0) {
-        if (cSSXAudio_CameraInRange(self, vcall_6310(obj + 0x6C0, 5), 100.0f) < 0) {
+    if (vcall_6310(((char*)obj) + 0x6C0, 9) != 0 || obj->mIsLocal == 0) {
+        if (cSSXAudio_CameraInRange(self, vcall_6310(((char*)obj) + 0x6C0, 5), 100.0f) < 0) {
             return;
         }
     }
     struct func_00290B58_sCurve curve = D_00482DA0;
-    int vol = (int)func_00290B58(&curve, *(float*)(obj + 0x770));
+    int vol = (int)func_00290B58(&curve, obj->unk_770);
     int bankNum = 0;
     int patchNum;
     if (vol > 0x7F) {
@@ -3727,7 +3727,7 @@ extern "C" void cSSXAudio_WipeoutHit(cSSXAudio* vself, char* obj)
     if (vol < 0) {
         vol = 0;
     }
-    int st = *(int*)(obj + 0x438);
+    int st = obj->mSurfaceType;
     if (st == 2)
         goto state23;
     if (st == 3) {
@@ -3738,7 +3738,7 @@ state23:
         patchNum = (cSoundSys_SndRand((*self->p118)->sub.vbase) & 0x7FFF) * 3 / 0x7FFF + 0x30;
     }
     int flag = 0;
-    int ok = *(int*)(obj + 0x874) && *(int*)(obj + 0x87C);
+    int ok = obj->mIsHuman && obj->mIsLocal;
     if (ok) {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         if (cBENewRaceInterface_newRace.cGamePath == 2) {
@@ -3752,16 +3752,16 @@ state23:
     (*pp)->sub.p3C[(*pp)->sub.cur] = volumeControl;
     {
         struct cBankManager* optsManager = *self->p118;
-        optsManager->sub.tgt[optsManager->sub.cur] = obj + 0x110;
+        optsManager->sub.tgt[optsManager->sub.cur] = ((char*)obj) + 0x110;
     }
     {
         struct cBankManager** pq = self->p118;
-        int listenerView = cSSXAudio_GetClosestCamera1(self, obj);
+        int listenerView = cSSXAudio_GetClosestCamera1(self, ((char*)obj));
         (*pq)->sub.p64[(*pq)->sub.cur] = listenerView;
     }
     if (flag) {
         (*self->p118)->sub.p80[(*self->p118)->sub.cur] = 1;
-        (*self->p118)->sub.p84[(*self->p118)->sub.cur] = *(int*)(obj + 0x870);
+        (*self->p118)->sub.p84[(*self->p118)->sub.cur] = obj->mViewIndex;
     }
     cBankSys_SFX_End((cBankSys*)self);
 }
@@ -3923,11 +3923,11 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, fl
  *
  * @param obj  the rider
  */
-extern "C" void cSSXAudio_WipeoutSlideEnd(cSSXAudio* self, void* obj)
+extern "C" void cSSXAudio_WipeoutSlideEnd(cSSXAudio* self, cRider* obj)
 {
-    if (*(int*)((char*)obj + 0x774) >= 0) {
-        cBankMonitor_BANKMONITOR_StopHandle((char*)**(void***)((char*)cAudioInterface_bxAudio() + 0x118) + 0x1D8, *(int*)((char*)obj + 0x774), 1, 0.75f);
-        *(int*)((char*)obj + 0x774) = -1;
+    if (obj->mWipeoutSlideHandle >= 0) {
+        cBankMonitor_BANKMONITOR_StopHandle((char*)**(void***)((char*)cAudioInterface_bxAudio() + 0x118) + 0x1D8, obj->mWipeoutSlideHandle, 1, 0.75f);
+        obj->mWipeoutSlideHandle = -1;
     }
 }
 #endif
@@ -4087,11 +4087,11 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, fl
  *
  * @param obj  the rider (cRider)
  */
-extern "C" void cSSXAudio_WipeoutTumbleEnd(cSSXAudio* self, void* obj)
+extern "C" void cSSXAudio_WipeoutTumbleEnd(cSSXAudio* self, cRider* obj)
 {
-    if (*(int*)((char*)obj + 0x778) >= 0) {
-        cBankMonitor_BANKMONITOR_StopHandle((char*)**(void***)((char*)cAudioInterface_bxAudio() + 0x118) + 0x1D8, *(int*)((char*)obj + 0x778), 1, 0.75f);
-        *(int*)((char*)obj + 0x778) = -1;
+    if (obj->mWipeoutTumbleHandle >= 0) {
+        cBankMonitor_BANKMONITOR_StopHandle((char*)**(void***)((char*)cAudioInterface_bxAudio() + 0x118) + 0x1D8, obj->mWipeoutTumbleHandle, 1, 0.75f);
+        obj->mWipeoutTumbleHandle = -1;
     }
 }
 #endif
@@ -4635,7 +4635,7 @@ static inline int snd8138AddVoice(void* vself, void* obj, int a, int b, int type
  * @param obj  the rider
  * @param obj2  the opponent
  */
-extern "C" void cSSXAudio_Punch(cSSXAudio* self, void* obj, void* obj2)
+extern "C" void cSSXAudio_Punch(cSSXAudio* self, cRider* obj, cRider* obj2)
 {
     if (!snd8138Active(obj) && !snd8138Active(obj2)) {
         return;
@@ -4935,9 +4935,9 @@ static inline int snd89A8AddVoice(void* vself, void* obj, int a, int b, int type
  *
  * @param obj  the rider
  */
-extern "C" void cSSXAudio_WallCollision(cSSXAudio* self, void* obj)
+extern "C" void cSSXAudio_WallCollision(cSSXAudio* self, cRider* obj)
 {
-    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    bool ok = obj->mIsHuman && obj->mIsLocal;
     if (!ok) {
         return;
     }
@@ -4965,9 +4965,9 @@ extern "C" void cMonitor_MONITOR_Create(void*, int, long, int, int, int, int, in
  * @param obj  the rider
  */
 // PORT: 64-bit long sound key
-extern "C" void cSSXAudio_KnockdownSFX(cSSXAudio* self, void* obj)
+extern "C" void cSSXAudio_KnockdownSFX(cSSXAudio* self, cRider* obj)
 {
-    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    bool ok = obj->mIsHuman && obj->mIsLocal;
     if (ok) {
         char* bankMon = *(char**)self->MusicSys.mpVStreamSys + 0x1D8;
         sSndKey8* key = D_004A3678;
@@ -5131,11 +5131,11 @@ static inline void snd8D90Start(sSnd8D90Sys* self, int a, int b)
  * @param flag  nonzero when the boost has just been switched on (adds the one-shot)
  */
 // PORT: 64-bit long sound key
-extern "C" void cSSXAudio_TurboOn(cSSXAudio* vself, void* obj, int flag)
+extern "C" void cSSXAudio_TurboOn(cSSXAudio* vself, cRider* obj, int flag)
 {
     sSnd8D90Sys* self = (sSnd8D90Sys*)vself;
     if (cSSXAudio_ReplayMode(self) != 0) return;
-    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    bool ok = obj->mIsHuman && obj->mIsLocal;
     if (!ok) return;
     const sSndKey8_8D90* key = D_004A36A8_8D90;
     cMonitor_MONITOR_DestroyAll1_8D90(&(*self->p118)->sub, key->v);
@@ -5162,12 +5162,12 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, fl
  *
  * @param obj  the rider (cRider)
  */
-extern "C" void cSSXAudio_TurboOff(void* self, void* obj)
+extern "C" void cSSXAudio_TurboOff(void* self, cRider* obj)
 {
     if (cSSXAudio_ReplayMode(self) != 0) {
         return;
     }
-    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    bool ok = obj->mIsHuman && obj->mIsLocal;
     if (ok) {
         int n = --*(int*)((char*)self + 0x59E4);
         if (n <= 0) {
@@ -5275,12 +5275,12 @@ static inline void AddVoice299368(cSSXAudio* self, int a, int bb, int type)
  * @param obj  the rider
  */
 // PORT: the 8-byte stream id is passed by value from an unaligned global (64-bit `long`).
-extern "C" void cSSXAudio_TurboDeny(cSSXAudio* self, char* obj)
+extern "C" void cSSXAudio_TurboDeny(cSSXAudio* self, cRider* obj)
 {
     if (cSSXAudio_ReplayMode((self)) != 0) {
         return;
     }
-    if (!IsReady299368(obj)) {
+    if (!IsReady299368(((char*)obj))) {
         return;
     }
     cMonitor_MONITOR_DestroyAll1(&(*(sSnd9368Mgr**)self->MusicSys.mpVStreamSys)->sub, D_004A36A8_9368[0].v);
@@ -5316,16 +5316,16 @@ extern "C" void func_002A3C00(cSSXAudio* self, void* obj, int flags);
  * @param obj  the rider (cRider)
  */
 // PORT: 64-bit long sound keys
-extern "C" void cSSXAudio_MaxPowerEvent(void* self, char* obj)
+extern "C" void cSSXAudio_MaxPowerEvent(void* self, cRider* obj)
 {
     if (cSSXAudio_ReplayMode(self) != 0) {
         return;
     }
-    bool ok = *(int*)(obj + 0x874) && *(int*)(obj + 0x87C);
+    bool ok = obj->mIsHuman && obj->mIsLocal;
     if (!ok) {
         return;
     }
-    bool up = 0.0f <= *(float*)(obj + 0x470);
+    bool up = 0.0f <= obj->mFinishTime;
     if (up) {
         return;
     }
@@ -5333,13 +5333,13 @@ extern "C" void cSSXAudio_MaxPowerEvent(void* self, char* obj)
     sSndKey8_9638* key = D_004A3678_key;
     int volControl = (int)cSSXAudio_GetCurrAppliedVolumePtr(self, 9, 0);
     cMonitor_MONITOR_Create_key(bankMonitor, 400, key->v, volControl, 0, 107, 0x7F, 0);
-    int uberLevel = *(int*)(obj + 0x2F4);
+    int uberLevel = obj->mUberLevel;
     if (uberLevel == 10) {
-        func_002A3C00((cSSXAudio*)self, obj, 0x10);
+        func_002A3C00((cSSXAudio*)self, ((char*)obj), 0x10);
     } else if (uberLevel >= 5) {
-        func_002A3C00((cSSXAudio*)self, obj, 0x8);
+        func_002A3C00((cSSXAudio*)self, ((char*)obj), 0x8);
     } else {
-        func_002A3C00((cSSXAudio*)self, obj, 0x4);
+        func_002A3C00((cSSXAudio*)self, ((char*)obj), 0x4);
     }
     long id = D_004A36A8_key[0].v;
     cMonitor_MONITOR_DestroyAll1_key(**(char***)((char*)self + 0x118) + 0x1D8, id);
@@ -5454,17 +5454,17 @@ extern int cPauseState_Flags;
  *
  * @param obj  the rider
  */
-extern "C" void cSSXAudio_LoseMaxPowerEvent(cSSXAudio* self, void* obj)
+extern "C" void cSSXAudio_LoseMaxPowerEvent(cSSXAudio* self, cRider* obj)
 {
     if (cSSXAudio_ReplayMode(self) != 0) {
         return;
     }
-    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    bool ok = obj->mIsHuman && obj->mIsLocal;
     if (!ok) {
         return;
     }
     int playBeeps = 1;
-    int pos = *(float*)((char*)obj + 0x470) >= 0.0f;
+    int pos = obj->mFinishTime >= 0.0f;
     if (pos) playBeeps = 0;
     if ((cPauseState_Flags & 1) || cReplay_isPauseAI(*(void**)((char*)cAudioInterface_getGame() + 0x28)) != 0) playBeeps = 0;
     if (*(int*)((char*)cAudioInterface_getGame() + 0x214) != 4) playBeeps = 0;
@@ -5564,12 +5564,12 @@ extern "C" int cSSXAudio_ReplayMode(void* self);
  *
  * @param obj  the rider
  */
-extern "C" void cSSXAudio_UberRailDeny(cSSXAudio* self, void* obj)
+extern "C" void cSSXAudio_UberRailDeny(cSSXAudio* self, cRider* obj)
 {
     if (cSSXAudio_ReplayMode(self) != 0) {
         return;
     }
-    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    bool ok = obj->mIsHuman && obj->mIsLocal;
     if (ok) {
         snd9B70AddVoice(self, 0, 108, 9);
     }
@@ -5687,7 +5687,7 @@ extern "C" void func_002A0560(void* self, void* a, void* b);
  * @param lim  old position
  * @param n  new position (0 is first)
  */
-extern "C" void cSSXAudio_ChangePosition(cSSXAudio* self, void* obj, void* pPrevPosRider, void* pNextPosRider, int lim, int n)
+extern "C" void cSSXAudio_ChangePosition(cSSXAudio* self, cRider* obj, cRider* pPrevPosRider, cRider* pNextPosRider, int lim, int n)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGameMode != 0 && func_002A4290(self) == 0) {
@@ -5696,8 +5696,8 @@ extern "C" void cSSXAudio_ChangePosition(cSSXAudio* self, void* obj, void* pPrev
     if (*(int*)((char*)cAudioInterface_getGame() + 0x214) != 4) {
         return;
     }
-    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
-    if (!ok && cSSXAudio_GetFocusRider_p(self, -1) != obj) {
+    bool ok = obj->mIsHuman && obj->mIsLocal;
+    if (!ok && cSSXAudio_GetFocusRider_p(self, -1) != ((void*)obj)) {
         return;
     }
     int cnt = ((cAI*)cAudioInterface_getAI())->NumberOfPlayersAllocated;
@@ -5709,11 +5709,11 @@ extern "C" void cSSXAudio_ChangePosition(cSSXAudio* self, void* obj, void* pPrev
         cSSXAudio_PlayHistoryAdd(self, (void*)1, handle, *(volatile int*)(*(char**)self->MusicSys.mpVStreamSys + 0x260) + 200, 0, 0);
     }
     if (n < lim) {
-        if (pPrevPosRider != 0) {
+        if (((void*)pPrevPosRider) != 0) {
             func_002A0560(self, obj, pPrevPosRider);
         }
     } else {
-        if (pNextPosRider != 0) {
+        if (((void*)pNextPosRider) != 0) {
             func_002A0560(self, pNextPosRider, obj);
         }
     }
@@ -5805,9 +5805,9 @@ static inline int sndA220AddVoice(void* vself, int a, int b, int type)
 }
 
 extern "C" int cSSXAudio_ReplayMode(void* self);
-extern "C" void cSSXAudio_WipeoutSlideEnd(cSSXAudio* self, void* obj);
-extern "C" void cSSXAudio_WipeoutTumbleEnd(cSSXAudio* self, void* obj);
-extern "C" void cSSXAudio_TurboOff(void* self, void* obj);
+extern "C" void cSSXAudio_WipeoutSlideEnd(cSSXAudio* self, cRider* obj);
+extern "C" void cSSXAudio_WipeoutTumbleEnd(cSSXAudio* self, cRider* obj);
+extern "C" void cSSXAudio_TurboOff(void* self, cRider* obj);
 extern "C" void func_0028F108(void* self, void* rider);
 // cSSXAudio_GetFocusRider returns a rider pointer here (the unit declares it int).
 void* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
@@ -5822,9 +5822,9 @@ void* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFoc
  *
  * @param obj  the rider (cRider)
  */
-extern "C" void cSSXAudio_PlayerResetEvent(void* self, void* obj)
+extern "C" void cSSXAudio_PlayerResetEvent(void* self, cRider* obj)
 {
-    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    bool ok = obj->mIsHuman && obj->mIsLocal;
     if (ok && cSSXAudio_ReplayMode(self) == 0) {
         sndA220AddVoice(self, 0, 123, 5);
     }
@@ -5833,7 +5833,7 @@ extern "C" void cSSXAudio_PlayerResetEvent(void* self, void* obj)
     if (*(int*)((char*)self + 0x59E4) > 0) {
         cSSXAudio_TurboOff(self, obj);
     }
-    if (obj == cSSXAudio_GetFocusRider_p(self, -1)) {
+    if (((void*)obj) == cSSXAudio_GetFocusRider_p(self, -1)) {
         func_0028F108(self, obj);
     }
 }
@@ -5927,9 +5927,9 @@ static inline int sndA530AddVoice(void* vself, int a, int b, int type)
  *
  * @param obj  the rider
  */
-extern "C" void cSSXAudio_Tweak(cSSXAudio* self, void* obj)
+extern "C" void cSSXAudio_Tweak(cSSXAudio* self, cRider* obj)
 {
-    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    bool ok = obj->mIsHuman && obj->mIsLocal;
     if (ok) {
         sndA530AddVoice(self, 0, 119, 9);
     }
@@ -6034,12 +6034,12 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, fl
  * @param obj  the rider
  * @param n  the rider's points
  */
-extern "C" void cSSXAudio_PointsEvent(cSSXAudio* self, void* obj, int n)
+extern "C" void cSSXAudio_PointsEvent(cSSXAudio* self, cRider* obj, int n)
 {
     if (cSSXAudio_ReplayMode(self) != 0) {
         return;
     }
-    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    bool ok = obj->mIsHuman && obj->mIsLocal;
     if (ok) {
         int curPoints = n % 100;
         if (curPoints < self->mPointsLastValue) {
@@ -6373,12 +6373,12 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, fl
  *
  * @param obj  the rider
  */
-extern "C" void cSSXAudio_StartUberSpin(cSSXAudio* self, void* obj)
+extern "C" void cSSXAudio_StartUberSpin(cSSXAudio* self, cRider* obj)
 {
     if (cSSXAudio_ReplayMode(self) != 0) {
         return;
     }
-    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    bool ok = obj->mIsHuman && obj->mIsLocal;
     if (ok) {
         if (self->mUberSpinHandle != -1) {
             cBankMonitor_BANKMONITOR_StopHandle(*(char**)self->MusicSys.mpVStreamSys + 0x1D8, self->mUberSpinHandle, 1, 0.0f);
@@ -6398,12 +6398,12 @@ extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, fl
  *
  * @param obj  the rider, or 0
  */
-extern "C" void cSSXAudio_EndUberSpin(cSSXAudio* self, void* obj)
+extern "C" void cSSXAudio_EndUberSpin(cSSXAudio* self, cRider* obj)
 {
-    if (obj != 0) {
+    if (((void*)obj) != 0) {
         int ok = 0;
-        if (*(int*)((char*)obj + 0x874) != 0) {
-            ok = *(int*)((char*)obj + 0x87C) != 0;
+        if (obj->mIsHuman != 0) {
+            ok = obj->mIsLocal != 0;
         }
         if (!ok) {
             return;
@@ -6511,12 +6511,12 @@ extern "C" void func_002A3DE0(cSSXAudio* self, void* obj, int ev);
  * @param iNum  number of uber tricks just landed (On Tour iNum)
  * @param iPrevious  number landed before (On Tour iPrevious)
  */
-extern "C" void cSSXAudio_LandedUberTrick(cSSXAudio* self, void* obj, int iNum, int iPrevious)
+extern "C" void cSSXAudio_LandedUberTrick(cSSXAudio* self, cRider* obj, int iNum, int iPrevious)
 {
     if (cSSXAudio_ReplayMode(self) != 0) {
         return;
     }
-    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    bool ok = obj->mIsHuman && obj->mIsLocal;
     if (ok) {
         sndB430AddVoice(self, 0, 103, 9);
         int total = iPrevious + iNum;
@@ -6574,11 +6574,11 @@ extern "C" void func_002A3DE0(cSSXAudio* self, void* obj, int ev);
  *
  * @param obj  the rider
  */
-extern "C" void cSSXAudio_LandedMonsterCombo(cSSXAudio* self, void* obj)
+extern "C" void cSSXAudio_LandedMonsterCombo(cSSXAudio* self, cRider* obj)
 {
     int ok = 0;
-    if (*(int*)((char*)obj + 0x874) != 0) {
-        ok = *(int*)((char*)obj + 0x87C) != 0;
+    if (obj->mIsHuman != 0) {
+        ok = obj->mIsLocal != 0;
     }
     if (ok) {
         func_002A3DE0(self, obj, 8);
@@ -6704,9 +6704,9 @@ static inline int sndB968AddVoice(void* vself, void* obj, int a, int b, int type
  *
  * @param obj  the rider
  */
-extern "C" void cSSXAudio_BindingsOn(cSSXAudio* self, void* obj)
+extern "C" void cSSXAudio_BindingsOn(cSSXAudio* self, cRider* obj)
 {
-    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    bool ok = obj->mIsHuman && obj->mIsLocal;
     if (ok) {
         sndB968AddVoice(self, obj, 0, 80, 5);
     }
@@ -6815,9 +6815,9 @@ static inline int sndBCF8AddVoice(void* vself, void* obj, int a, int b, int type
  *
  * @param obj  the rider
  */
-extern "C" void cSSXAudio_BindingsOff(cSSXAudio* self, void* obj)
+extern "C" void cSSXAudio_BindingsOff(cSSXAudio* self, cRider* obj)
 {
-    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    bool ok = obj->mIsHuman && obj->mIsLocal;
     if (ok) {
         sndBCF8AddVoice(self, obj, 0, 81, 5);
     }
@@ -6926,9 +6926,9 @@ static inline int sndC088AddVoice(void* vself, void* obj, int a, int b, int type
  *
  * @param obj  the rider
  */
-extern "C" void cSSXAudio_UndoBindings(cSSXAudio* self, void* obj)
+extern "C" void cSSXAudio_UndoBindings(cSSXAudio* self, cRider* obj)
 {
-    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    bool ok = obj->mIsHuman && obj->mIsLocal;
     if (ok) {
         sndC088AddVoice(self, obj, 0, 82, 5);
     }
@@ -7450,10 +7450,10 @@ extern "C" void func_002A3EB8(cSSXAudio* self, void* obj, int n);
  * @param obj  the rider, or 0; a rider that is not a local human plays nothing
  * @param x  the icon's multiplier
  */
-extern "C" void cSSXAudio_PlayIconSound(cSSXAudio* self, int kind, void* obj, float x)
+extern "C" void cSSXAudio_PlayIconSound(cSSXAudio* self, int kind, cRider* obj, float x)
 {
-    if (obj != 0) {
-        bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    if (((void*)obj) != 0) {
+        bool ok = obj->mIsHuman && obj->mIsLocal;
         if (!ok) {
             return;
         }
@@ -7915,9 +7915,9 @@ extern "C" void cSSXAudio_BigChallengeComplete(void* self)
 INCLUDE_ASM("sound/soundsys", cSSXAudio_BigChallengeFailed);
 #ifdef SKIP_ASM
 extern "C" void cSSXAudio_MenuSound(cSSXAudio* self, int id);
-extern "C" void cSSXAudio_WipeoutSlideEnd(cSSXAudio* self, void* obj);
-extern "C" void cSSXAudio_WipeoutTumbleEnd(cSSXAudio* self, void* obj);
-extern "C" void cSSXAudio_EndUberSpin(cSSXAudio* self, void* obj);
+extern "C" void cSSXAudio_WipeoutSlideEnd(cSSXAudio* self, cRider* obj);
+extern "C" void cSSXAudio_WipeoutTumbleEnd(cSSXAudio* self, cRider* obj);
+extern "C" void cSSXAudio_EndUberSpin(cSSXAudio* self, cRider* obj);
 
 struct sSndVtEnt { short delta; short index; void (*fn)(void*, int); };
 
@@ -8036,9 +8036,9 @@ static inline int sndDC48AddVoice(void* vself, int a, int b, int type)
  *
  * @param obj  the rider
  */
-extern "C" void cSSXAudio_HandPlantSound(cSSXAudio* self, void* obj)
+extern "C" void cSSXAudio_HandPlantSound(cSSXAudio* self, cRider* obj)
 {
-    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    bool ok = obj->mIsHuman && obj->mIsLocal;
     if (ok) {
         sndDC48AddVoice(self, 0, 97, 9);
     }
@@ -8103,7 +8103,7 @@ static inline void sndBeginVoice(sSSXAudioView* self, int a, int b)
     self->mPatch[self->mpVBankManager->sub.cur] = b;
 }
 
-extern "C" int cSSXAudio_GetAvalancheVolume(cSSXAudio* self, void* blk);
+extern "C" int cSSXAudio_GetAvalancheVolume(cSSXAudio* self, tAvalanchePositionalData* blk);
 struct sQDEF0 {
     int w[4];
 } __attribute__((aligned(16)));
@@ -8154,7 +8154,7 @@ extern "C" void cSSXAudio_Avalanche(cSSXAudio* vself, int on)
             }
             sndBeginVoice(self, 8, 2);
             cBankManager** bankManagerRef = self->p118;
-            int volume = cSSXAudio_GetAvalancheVolume((cSSXAudio*)self, (char*)&self->xf);
+            int volume = cSSXAudio_GetAvalancheVolume((cSSXAudio*)self, (tAvalanchePositionalData*)((char*)&self->xf));
             cBankManager* volManager = *bankManagerRef;
             sSndPlayOptsView* volOpts = &volManager->sub;
             volOpts->vals[volManager->sub.cur] = volume;
@@ -8203,10 +8203,9 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_GetAvalancheVolume);
  * @return the volume, 0..127
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int cSSXAudio_GetAvalancheVolume(cSSXAudio* self, void* snd_)
+extern "C" int cSSXAudio_GetAvalancheVolume(cSSXAudio* self, tAvalanchePositionalData* snd_)
 {
-    char* snd = (char*)snd_;
-    float volume = (100.0f - *(float*)(snd + 0x14) * 0.01f) * 1.27f * *(float*)(snd + 0x10);
+    float volume = (100.0f - snd_->m_distance * 0.01f) * 1.27f * snd_->m_averageScale;
     int n = (int)(volume * 8.466667f);
     if (n > 127)
         n = 127;
@@ -8220,7 +8219,7 @@ extern "C" int cSSXAudio_GetAvalancheVolume(cSSXAudio* self, void* snd_)
 //100%
 INCLUDE_ASM("sound/soundsys", cSSXAudio_HandleAvalanche);
 #ifdef SKIP_ASM
-extern "C" int cSSXAudio_GetAvalancheVolume(cSSXAudio*, void *);
+extern "C" int cSSXAudio_GetAvalancheVolume(cSSXAudio*, tAvalanchePositionalData*);
 extern "C" void cAvalanche_getAvalancheDataByPosition(void *, float *);
 
 struct sVEntryP_29E4A0 { short delta; short index; float* (*fn)(void*); };
@@ -8298,9 +8297,9 @@ INCLUDE_ASM("sound/soundsys", cSSXAudio_ResetWipeoutRecoverHit);
  *
  * @param rider  the rider (cRider)
  */
-extern "C" void cSSXAudio_ResetWipeoutRecoverHit(void* self, void* rider)
+extern "C" void cSSXAudio_ResetWipeoutRecoverHit(void* self, cRider* rider)
 {
-    int idx = *(int*)((char*)rider + 0x870);
+    int idx = rider->mViewIndex;
     self = (char*)self + idx * 4;
     *(int*)((char*)self + 0x6080) = 0;
 }
@@ -8418,14 +8417,14 @@ static inline char* sndE590Tbl(void* self)
  * @param obj  the rider
  * @param x  recovery progress (On Tour percent)
  */
-extern "C" void cSSXAudio_PlayWipeoutRecoverHit(cSSXAudio* self, void* obj, float x)
+extern "C" void cSSXAudio_PlayWipeoutRecoverHit(cSSXAudio* self, cRider* obj, float x)
 {
     if (cSSXAudio_ReplayMode(self) != 0) {
         return;
     }
-    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    bool ok = obj->mIsHuman && obj->mIsLocal;
     if (ok) {
-        int idx = *(int*)((char*)obj + 0x870);
+        int idx = obj->mViewIndex;
         float prev = *(float*)(sndE590Tbl(self) + (idx << 2));
         unsigned short pitch = (int)((x <? prev) * 5.0f) * 80 + 0x1000;
         sndE590AddVoice(self, 0, 95, 9, pitch);
@@ -8538,14 +8537,14 @@ static inline char* sndE970Tbl(void* self)
  *
  * @param obj  the rider
  */
-extern "C" void cSSXAudio_PlayWipeoutRecoverFull(cSSXAudio* self, void* obj)
+extern "C" void cSSXAudio_PlayWipeoutRecoverFull(cSSXAudio* self, cRider* obj)
 {
     if (cSSXAudio_ReplayMode(self) != 0) {
         return;
     }
-    bool ok = *(int*)((char*)obj + 0x874) && *(int*)((char*)obj + 0x87C);
+    bool ok = obj->mIsHuman && obj->mIsLocal;
     if (ok) {
-        int idx = *(int*)((char*)obj + 0x870);
+        int idx = obj->mViewIndex;
         if (*(float*)(sndE970Tbl(self) + (idx << 2)) == 1.0f) {
             return;
         }
@@ -8559,7 +8558,7 @@ extern "C" void cSSXAudio_PlayWipeoutRecoverFull(cSSXAudio* self, void* obj)
 INCLUDE_ASM("sound/soundsys", func_0029ED18);
 #ifdef SKIP_ASM
 extern "C" void* cAudioInterface_getAI();
-extern "C" void cSSXAudio_EndUberSpin(cSSXAudio* self, void* obj);
+extern "C" void cSSXAudio_EndUberSpin(cSSXAudio* self, cRider* obj);
 extern "C" void cBankMonitor_BANKMONITOR_StopHandle(void* p, int idx, int a2, float v);
 
 /**
@@ -9071,7 +9070,7 @@ struct sSsVtF660 { short delta; short index; void* (*fn)(void*); };
  * @param length  grunt length (On Tour eCharGruntLength)
  * @param allowAI  nonzero to allow computer riders (On Tour allowAI)
  */
-extern "C" void cSSXAudio_PlayGrunt(cSSXAudio* vself, void* vrider, int length, int allowAI)
+extern "C" void cSSXAudio_PlayGrunt(cSSXAudio* vself, cRider* vrider, int length, int allowAI)
 {
     sSnd17D0Sys* self = (sSnd17D0Sys*)vself;
     cRider* rider = (cRider*)vrider;
@@ -9619,7 +9618,7 @@ extern "C" int func_002B0E28(void* self, int i);
 int func_002B1458_f(void* self, int a, int b, int c, int d, float f, int e, int refresh) __asm__("func_002B1458");
 extern "C" void* func_003D8008(int a, int b, int c);
 extern "C" int cRider_getIdentity(void*);
-extern "C" void cSSXAudio_PlayGrunt(cSSXAudio* self, void* rider, int a, int b);
+extern "C" void cSSXAudio_PlayGrunt(cSSXAudio* self, cRider* rider, int a, int b);
 // PORT: the unit defines func_0029F330 as void; it returns its tail call's result.
 int func_0029F330_i(void* self) __asm__("func_0029F330");
 void* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
@@ -9687,7 +9686,7 @@ extern "C" void func_002A0A30(cSSXAudio* self, sSs0A30Rider* attacker, sSs0A30Ri
     if (victim->v09() != 0 || victim->f87C == 0) chkB = 1;
     void* pl = cSSXAudio_GetFocusRider_p(self, -1);
     if (chkA && chkB && attacker != pl && victim != pl) return;
-    cSSXAudio_PlayGrunt(self, victim, 0, 1);
+    cSSXAudio_PlayGrunt(self, (cRider*)victim, 0, 1);
     char* snd = (char*)&self->SpeechSys;
     if (func_002B0E28(snd, 0) == 0) return;
     int okB = cSSXAudio_CameraInRange(self, victim->v05(), D_004A36D8) >= 0;
@@ -9731,7 +9730,7 @@ extern "C" int func_002B0E28(void* self, int i);
 extern "C" int func_002B1458(void* self, int a, int b, int c, int d, int e, int refresh, float f);
 extern "C" void* func_003D8008(int a, int b, int c);
 extern "C" int cRider_getIdentity(void*);
-extern "C" void cSSXAudio_PlayGrunt(cSSXAudio* self, void* rider, int a, int b);
+extern "C" void cSSXAudio_PlayGrunt(cSSXAudio* self, cRider* rider, int a, int b);
 // PORT: the unit defines func_0029F330 as void; it returns its tail call's result.
 int func_0029F330_i(void* self) __asm__("func_0029F330");
 void* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
@@ -9787,7 +9786,7 @@ extern "C" void func_002A0E70(cSSXAudio* self, sSs0E70Rider* rider, int play)
     char* snd = (char*)&self->SpeechSys;
     if (func_002B0E28(snd, 0) == 0) return;
     if (cSSXAudio_CameraInRange(self, rider->v05(), D_004A36D8) < 0) return;
-    cSSXAudio_PlayGrunt(self, rider, 2, 0);
+    cSSXAudio_PlayGrunt(self, (cRider*)rider, 2, 0);
     if (play == 0) return;
     int ok = rider->f874 != 0 && rider->f87C != 0;
     if (!ok) return;

@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ui/uistate.h"
+#include "ui/uiengine.h"
 #include "online/lobbyman.h"
 #include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
@@ -31,9 +33,9 @@ extern sVE0720 cFEStateTransition_vtbl[];
  * @param owner  the UI engine
  * @return @p self
  */
-extern "C" void* cFECustom_cFECustom(void* self, void* owner)
+extern "C" void* cFECustom_cFECustom(void* self, cUIEngine* owner)
 {
-    *(void**)((char*)self + 0x0) = owner;
+    *(void**)((char*)self + 0x0) = ((void*)owner);
     *(void**)((char*)self + 0x10) = 0;
     *(void***)((char*)self + 0x4) = cFECustom_vtbl;
     char* transition = (char*)cMemMan_alloc(80, str_cFEStateTransition, 0, 0);
@@ -560,9 +562,9 @@ static inline bool IsMode1_1A16C0()
  * @param stateData   the state data passed along (picks the branch for state 33; the peak and rewards rooms get it)
  * @return the new state, or 0 when there is none
  */
-extern "C" void* cFECustom_getPrevState(void** self, char* desc, int stateData)
+extern "C" void* cFECustom_getPrevState(void** self, cUIState* desc, int stateData)
 {
-    switch (*(int*)(desc + 0xC)) {
+    switch (desc->mHashName) {
     case 9:
         if (IsMode1_1A16C0()) {
             return cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cMemMan_alloc(1744, str_cFEStateOnlineMainMenu, 0, 0), *self);
@@ -574,7 +576,7 @@ extern "C" void* cFECustom_getPrevState(void** self, char* desc, int stateData)
         case 0:
             return cFEStateMainMenu_cFEStateMainMenu1(cMemMan_alloc(88, str_cFEStateMainMenu, 0, 0), *self);
         case 2:
-            if (desc[0x44] == 1) {
+            if (((char*)desc)[0x44] == 1) {
                 return cFEStateCharSetup_cFEStateCharSetup(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0), *self, 0);
             }
             return cFEStateMainMenu_cFEStateMainMenu1(cMemMan_alloc(88, str_cFEStateMainMenu, 0, 0), *self);
@@ -588,15 +590,15 @@ extern "C" void* cFECustom_getPrevState(void** self, char* desc, int stateData)
         if (D_004A19D8 != 0) {
             return cFEStateLodge_cFEStateLodge(cMemMan_alloc(88, str_cFEStateLodge, 0, 0), *self);
         }
-        return cFEStateCharSetup_cFEStateCharSetup(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0), *self, desc[0x44]);
+        return cFEStateCharSetup_cFEStateCharSetup(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0), *self, ((char*)desc)[0x44]);
     case 15:
     case 18:
         if (D_004A19D8 != 0) {
             return cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail(cMemMan_alloc(76, str_cFEStateLodgeRiderDetail, 0, 0), *self);
         }
-        return cFEStateRiderDetail_cFEStateRiderDetail(cMemMan_alloc(84, str_cFEStateRiderDetail, 0, 0), *self, desc[0x44]);
+        return cFEStateRiderDetail_cFEStateRiderDetail(cMemMan_alloc(84, str_cFEStateRiderDetail, 0, 0), *self, ((char*)desc)[0x44]);
     case 17:
-        return cFEStateAudioOptions_cFEStateAudioOptions(cMemMan_alloc(0x80, str_cFEStateAudioOptions, 0, 0), *self, desc[0x44], D_004A19D8);
+        return cFEStateAudioOptions_cFEStateAudioOptions(cMemMan_alloc(0x80, str_cFEStateAudioOptions, 0, 0), *self, ((char*)desc)[0x44], D_004A19D8);
     case 19:
         cBE_getInterface_Fv(cBE_getBE(), 0);
         switch (cBENewRaceInterface_newRace.cGamePath) {
@@ -619,7 +621,7 @@ extern "C" void* cFECustom_getPrevState(void** self, char* desc, int stateData)
         cUITemplate_MAP_mMapStyle = 0;
         return cFEStateEventSelect_cFEStateEventSelect1(cMemMan_alloc(828, str_cFEStateEventSelect, 0, 0), *self, 0);
     case 12:
-        return cFEStateCharSelect_cFEStateCharSelect(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, desc[0x44]);
+        return cFEStateCharSelect_cFEStateCharSelect(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, ((char*)desc)[0x44]);
     case 8: {
         cBE_getInterface_Fv(cBE_getBE(), 0);
         int gamePath = cBENewRaceInterface_newRace.cGamePath;
@@ -640,7 +642,7 @@ extern "C" void* cFECustom_getPrevState(void** self, char* desc, int stateData)
         if (sc == 24) {
             return cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad1(cMemMan_alloc(76, str_cFEStateOptionsSaveLoad, 0, 0), *self);
         } else if (sc == 9) {
-            return cFEStateCharSelect_cFEStateCharSelect(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, desc[0x44]);
+            return cFEStateCharSelect_cFEStateCharSelect(cMemMan_alloc(144, str_cFEStateCharSelect, 0, 0), *self, ((char*)desc)[0x44]);
         } else if (sc == 39) {
             return cFEStateLodge_cFEStateLodge(cMemMan_alloc(88, str_cFEStateLodge, 0, 0), *self);
         }
@@ -682,20 +684,20 @@ extern "C" void* cFECustom_getPrevState(void** self, char* desc, int stateData)
         if (D_004A19D8 != 0) {
             return cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail(cMemMan_alloc(76, str_cFEStateLodgeRiderDetail, 0, 0), *self);
         }
-        return cFEStateCharSetup_cFEStateCharSetup(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0), *self, desc[0x44]);
+        return cFEStateCharSetup_cFEStateCharSetup(cMemMan_alloc(80, str_cFEStateCharSetup, 0, 0), *self, ((char*)desc)[0x44]);
     case 42:
         return cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail(cMemMan_alloc(76, str_cFEStateLodgeRiderDetail, 0, 0), *self);
     case 46:
         if (D_004A19D8 != 0) {
             return cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail(cMemMan_alloc(76, str_cFEStateLodgeRiderDetail, 0, 0), *self);
         }
-        return cFEStateRiderDetail_cFEStateRiderDetail(cMemMan_alloc(84, str_cFEStateRiderDetail, 0, 0), *self, desc[0x44]);
+        return cFEStateRiderDetail_cFEStateRiderDetail(cMemMan_alloc(84, str_cFEStateRiderDetail, 0, 0), *self, ((char*)desc)[0x44]);
     case 44:
-        return cFEStateMountainRoom_cFEStateMountainRoom(cMemMan_alloc(200, str_cFEStateMountainRoom, 0, 0), *self, desc[0x44]);
+        return cFEStateMountainRoom_cFEStateMountainRoom(cMemMan_alloc(200, str_cFEStateMountainRoom, 0, 0), *self, ((char*)desc)[0x44]);
     case 45:
-        return cFEStatePeakRoom_cFEStatePeakRoom(cMemMan_alloc(228, str_cFEStatePeakRoom, 0, 0), *self, desc[0x44], stateData);
+        return cFEStatePeakRoom_cFEStatePeakRoom(cMemMan_alloc(228, str_cFEStatePeakRoom, 0, 0), *self, ((char*)desc)[0x44], stateData);
     case 47:
-        return cFEStateRewardsRoom_cFEStateRewardsRoom(cMemMan_alloc(80, str_cFEStateRewardsRoom, 0, 0), *self, desc[0x44], stateData != 0);
+        return cFEStateRewardsRoom_cFEStateRewardsRoom(cMemMan_alloc(80, str_cFEStateRewardsRoom, 0, 0), *self, ((char*)desc)[0x44], stateData != 0);
     }
     return 0;
 }
@@ -867,7 +869,7 @@ extern "C" void cRealFE_loadCharAnimations_1(void* self) __asm__("cRealFE_loadCh
 extern "C" void func_0019CE68(void* self);
 extern "C" void cFERiderManager_init(void* self);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cFECustom_cFECustom(void* self, void* owner);
+extern "C" void* cFECustom_cFECustom(void* self, cUIEngine* owner);
 extern "C" void* cFESound_cFESound(void* self);
 extern "C" void cIrradianceDataBase_Load(void* db);
 extern "C" void* cAudioInterface_bxAudio();
@@ -982,7 +984,7 @@ extern "C" void cRealFE_load(sRealFE_1E80* self)
     *(int*)(in + 0x10) = 0;
     *(int*)(in + 0x14) = 0;
     ui2->input = in;
-    self->ui->custom = cFECustom_cFECustom(cMemMan_alloc(20, str_FEUICustom, 0, 0), self->ui);
+    self->ui->custom = cFECustom_cFECustom(cMemMan_alloc(20, str_FEUICustom, 0, 0), (cUIEngine*)self->ui);
     self->ui->sound = cFESound_cFESound(cMemMan_alloc(8, str_FEUISound, 0, 0));
     char* g = (char*)SSXApp;
     void* feLocale = *(void**)(g + 0x8C);
@@ -1743,7 +1745,7 @@ extern void* cFEStateSelectMultiplayerMode_vtbl[];
  * @param owner  the UI engine
  * @return @p self
  */
-extern "C" void* cFEStateSelectMultiplayerMode_cFEStateSelectMultiplayerMode(void* self, void* owner)
+extern "C" void* cFEStateSelectMultiplayerMode_cFEStateSelectMultiplayerMode(void* self, cUIEngine* owner)
 {
     cUIState_cUIState(self, owner);
     *(int*)((char*)self + 0xC) = 22;

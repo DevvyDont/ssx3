@@ -2013,15 +2013,15 @@ INCLUDE_ASM("object/splinemodifier", cRailLink_add);
  *
  * @param node  the link to insert (On Tour cRailLink* effect)
  */
-extern "C" void cRailLink_add(cRailLink* self, void* node)
+extern "C" void cRailLink_add(cRailLink* self, cRailLink* node)
 {
     void* head = *(void**)self;
     if (head != 0) {
-        *(void**)((char*)head + 0x4) = node;
+        *(void**)((char*)head + 0x4) = ((void*)node);
     }
-    *(void**)((char*)node + 0x4) = ((void*)self);
+    node->Prev = (cRailLink*)((void*)self);
     *(void**)node = *(void**)self;
-    *(void**)self = node;
+    *(void**)self = ((void*)node);
 }
 #endif
 

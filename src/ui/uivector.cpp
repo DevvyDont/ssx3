@@ -1554,13 +1554,13 @@ struct sVEntry3A4D00 {
  * @param obj  list node (a UI thing) to try
  * @return @p obj when it handled the input, 0 otherwise
  */
-extern "C" void* cListOpOnInput_onListNode(void* self, void* obj)
+extern "C" void* cListOpOnInput_onListNode(void* self, cListNode* obj)
 {
-    sVEntry3A4D00* vt = *(sVEntry3A4D00**)((char*)obj + 8);
+    sVEntry3A4D00* vt = (sVEntry3A4D00*)obj->mVtbl;
     if (vt[0xF].fn((char*)obj + vt[0xF].delta, *(void**)((char*)self + 4)) == 0) {
         return 0;
     }
-    return obj;
+    return ((void*)obj);
 }
 #endif
 
@@ -2596,7 +2596,7 @@ struct sVEntry5530 {
  *
  * @param obj  the new entry (On Tour pWidget)
  */
-extern "C" void cUIPair_setEntry(cUIPair* self, void* obj)
+extern "C" void cUIPair_setEntry(cUIPair* self, cUIThing* obj)
 {
     char* old = (char*)self->mpEntry;
     if (old != 0) {
@@ -2634,7 +2634,7 @@ struct sVEntry5588 {
  *
  * @param obj  the new widget (On Tour pWidget)
  */
-extern "C" void cUIPair_setWidget(cUIPair* self, void* obj)
+extern "C" void cUIPair_setWidget(cUIPair* self, cUIThing* obj)
 {
     char* old = (char*)self->mpWidget;
     if (old != 0) {

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uistate.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -756,7 +757,7 @@ struct sVtEntK187580
  * @param popup  the popup state that sent the event (passed on to cFEMemCard_onPopupEvent)
  * @param key  the popup event: 0xF / 0x10 / 0x11 for buttons 0-2, 0x16 when the popup closes
  */
-extern "C" void cFEStateMemCard_onPopupEvent(void *self, void *popup, int key)
+extern "C" void cFEStateMemCard_onPopupEvent(void *self, cUIState* popup, int key)
 {
   cFEMemCard_onPopupEvent(self, popup, key);
   int st = *((int *) (((char *) self) + 0x19C));

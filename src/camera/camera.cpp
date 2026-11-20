@@ -4345,9 +4345,9 @@ extern "C" void cCameraAlgoList_removeAll(void* list);
  * @param algo  the algorithm to add
  * @param w  blend rate (1.0 = cut)
  */
-extern "C" void cChaseCameraController_addAlgorithm(cChaseCameraController* self, void* algo, float w)
+extern "C" void cChaseCameraController_addAlgorithm(cChaseCameraController* self, cCameraAlgorithm* algo, float w)
 {
-    self->LatestAlgoType = *(int*)((char*)algo + 0xC);
+    self->LatestAlgoType = algo->AlgorithmType;
     void* list = self->AlgorithmList;
     if (*(int*)((char*)list + 0x4) == 0) {
         cCameraAlgoList_insert(list, algo, 1, 1.0f);
@@ -10109,9 +10109,9 @@ INCLUDE_ASM("camera/camera", cSimpleCamera_setPose);
  * @param pose  the new pose (a tPose)
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void cSimpleCamera_setPose(cSimpleCamera* simpleCamera, void *pose) {
-    (*(long long*)&simpleCamera->Pose) = (long long) (*(long long *)((char*)(pose) + (0)));
-    (*(long long*)&simpleCamera->Pose.Q) = (long long) (*(long long *)((char*)(pose) + (0x10)));
+extern "C" void cSimpleCamera_setPose(cSimpleCamera* simpleCamera, tPose* pose) {
+    (*(long long*)&simpleCamera->Pose) = (long long) (*(long long*)&pose->P);
+    (*(long long*)&simpleCamera->Pose.Q) = (long long) (*(long long*)&pose->Q);
 }
 #endif
 //100%

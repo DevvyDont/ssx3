@@ -1,4 +1,5 @@
 #include "common.h"
+#include "inseq/scriptplayermain.h"
 #include "scripter/ssxscriptengine.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -1601,7 +1602,7 @@ extern "C" void* cBXScriptEngine_GetRequestPlayerByReqHandle(void* self, int a1)
  * @param obj  the InSeq script player (cScriptPlayerMain)
  * @return 1 when it is, else 0
  */
-extern "C" int tNISList_IsPlayingScriptOwner(void* self, void* obj)
+extern "C" int tNISList_IsPlayingScriptOwner(void* self, cScriptPlayerMain* obj)
 {
     if (*(int*)((char*)self + 0xA4) != 3) {
         return 0;
@@ -1610,7 +1611,7 @@ extern "C" int tNISList_IsPlayingScriptOwner(void* self, void* obj)
     if (tNISList_IsVideo(self, headEntry) != 0) {
         return 0;
     }
-    return obj == cBXScriptEngine_GetRequestPlayerByReqHandle(ScriptEngine, *(int*)((char*)headEntry + 0xC));
+    return ((void*)obj) == cBXScriptEngine_GetRequestPlayerByReqHandle(ScriptEngine, *(int*)((char*)headEntry + 0xC));
 }
 #endif
 
@@ -1672,7 +1673,7 @@ int tNISList_IsInTransition(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/datamanager", tNISList_OnScriptPlay);
 #ifdef SKIP_ASM
-extern "C" int tNISList_IsPlayingScriptOwner(void* self, void* obj);
+extern "C" int tNISList_IsPlayingScriptOwner(void* self, cScriptPlayerMain* obj);
 char* GetSSXScriptHeader(void* obj);
 extern "C" void cRenderStateMan_setCustomIrradiance(int a0);
 extern char str_TRANSP[];
@@ -1687,9 +1688,9 @@ extern char str_TRANSP[];
  * @param requestHandle   the play request handle (On Tour requestHandle); unused
  * @param obj  the script player (On Tour cScriptPlayerMain*)
  */
-extern "C" void tNISList_OnScriptPlay(void* self, int requestHandle, void* obj)
+extern "C" void tNISList_OnScriptPlay(void* self, int requestHandle, cScriptPlayerMain* obj)
 {
-    if (tNISList_IsPlayingScriptOwner(self, obj) != 0) {
+    if (tNISList_IsPlayingScriptOwner(self, (cScriptPlayerMain*)obj) != 0) {
         char* name = GetSSXScriptHeader(obj);
         char* msg = str_TRANSP;
         if (*name != 0) {
@@ -1702,7 +1703,7 @@ extern "C" void tNISList_OnScriptPlay(void* self, int requestHandle, void* obj)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/datamanager", tNISList_OnScriptUpdate);
 #ifdef SKIP_ASM
-extern "C" int tNISList_IsPlayingScriptOwner(void* self, void* obj);
+extern "C" int tNISList_IsPlayingScriptOwner(void* self, cScriptPlayerMain* obj);
 char* GetSSXScriptHeader(void* obj);
 extern "C" int cScriptPlayerMain_GetNumUpdatesToEndLeft(void* obj);
 extern "C" void tNISList_DoTransitionToNext(void* self);
@@ -1720,7 +1721,7 @@ extern "C" void tNISList_DoTransitionToNext(void* self);
  */
 extern "C" void tNISList_OnScriptUpdate(void* self, int requestHandle, void* obj)
 {
-    if (tNISList_IsPlayingScriptOwner(self, obj) != 0 && *(int*)((char*)self + 0x4) != 0 &&
+    if (tNISList_IsPlayingScriptOwner(self, (cScriptPlayerMain*)obj) != 0 && *(int*)((char*)self + 0x4) != 0 &&
         *(int*)((char*)obj + 0x1C) == 0) {
         char* name = GetSSXScriptHeader(obj);
         if (cScriptPlayerMain_GetNumUpdatesToEndLeft(obj) + 1 <= *(short*)(name + 0x12)) {
@@ -1733,7 +1734,7 @@ extern "C" void tNISList_OnScriptUpdate(void* self, int requestHandle, void* obj
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/datamanager", tNISList_OnScriptStopping);
 #ifdef SKIP_ASM
-extern "C" int tNISList_IsPlayingScriptOwner(void* self, void* obj);
+extern "C" int tNISList_IsPlayingScriptOwner(void* self, cScriptPlayerMain* obj);
 extern "C" void tNISList_WaitOnPendingNextScript(void* self);
 extern "C" void cBXScriptEngine_PauseScript(void* self, int a1);
 
@@ -1746,9 +1747,9 @@ extern "C" void cBXScriptEngine_PauseScript(void* self, int a1);
  * @param requestHandle  the stopping script's request handle
  * @param obj  the stopping InSeq player
  */
-extern "C" void tNISList_OnScriptStopping(void* self, int requestHandle, void* obj)
+extern "C" void tNISList_OnScriptStopping(void* self, int requestHandle, cScriptPlayerMain* obj)
 {
-    if (tNISList_IsPlayingScriptOwner(self, obj) != 0) {
+    if (tNISList_IsPlayingScriptOwner(self, (cScriptPlayerMain*)obj) != 0) {
         if (*(int*)((char*)self + 0xB8) != 0) {
             cBXScriptEngine_PauseScript(*(void**)self, requestHandle);
         }
@@ -1760,7 +1761,7 @@ extern "C" void tNISList_OnScriptStopping(void* self, int requestHandle, void* o
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/datamanager", tNISList_OnScriptStop);
 #ifdef SKIP_ASM
-extern "C" int tNISList_IsPlayingScriptOwner(void* self, void* obj);
+extern "C" int tNISList_IsPlayingScriptOwner(void* self, cScriptPlayerMain* obj);
 char* GetSSXScriptHeader(void* obj);
 extern "C" void cRenderStateMan_setCustomIrradiance(int a0);
 
@@ -1774,9 +1775,9 @@ extern "C" void cRenderStateMan_setCustomIrradiance(int a0);
  * @param requestHandle  the request handle (unused)
  * @param obj  the cScriptPlayerMain that stopped
  */
-extern "C" void tNISList_OnScriptStop(void* self, int requestHandle, void* obj)
+extern "C" void tNISList_OnScriptStop(void* self, int requestHandle, cScriptPlayerMain* obj)
 {
-    if (tNISList_IsPlayingScriptOwner(self, obj) != 0) {
+    if (tNISList_IsPlayingScriptOwner(self, (cScriptPlayerMain*)obj) != 0) {
         if (*GetSSXScriptHeader(obj) != 0) {
             cRenderStateMan_setCustomIrradiance(0);
         }

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "render/graphicsman.h"
 #include "world/worldview.h"
 #include "render/particle.h"
@@ -2643,7 +2644,7 @@ static inline void vu0SubInGM_0058(sGmV4_0058& d, const sGmV4_0058& b)
  * @param boundBox  receives the emitter's bounding box
  * @param seed  the random seed; negative picks a random one
  */
-extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* self, void* transform, void* particleData, void* boundBox, float seed)
+extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* self, t4Matrix* transform, void* particleData, tBoundBox* boundBox, float seed)
 {
     tParticleEmitter_setSize(self, *(float*)((char*)particleData + 0x10), *(float*)((char*)particleData + 0xCC), *(float*)((char*)particleData + 0x18));
     float halfSpread = *(float*)((char*)particleData + 0x1C) * 0.5f;
@@ -2677,7 +2678,7 @@ extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* self, void* tran
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/graphicsman", cStaticEmitter_setupEmitter);
 #ifdef SKIP_ASM
-extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* gfx, void* a1, void* desc, void* out, float f);
+extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* gfx, t4Matrix* a1, void* desc, tBoundBox* out, float f);
 
 /**
  * Sets a static emitter up from particle data (On Tour setupEmitter(const t4Matrix& transform, const tParticleData*
@@ -2691,7 +2692,7 @@ extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* gfx, void* a1, v
  * @param transform  the emitter's world transform
  * @param particleData  the tParticleData to read
  */
-extern "C" void cStaticEmitter_setupEmitter(cStaticEmitter* self, void* transform, char* particleData)
+extern "C" void cStaticEmitter_setupEmitter(cStaticEmitter* self, t4Matrix* transform, char* particleData)
 {
     self->mNumFlipTextures = *(int*)(particleData + 0xD0);
     self->mFlipTextureRate = *(float*)(particleData + 0xD4);
@@ -2712,7 +2713,7 @@ extern "C" void cStaticEmitter_setupEmitter(cStaticEmitter* self, void* transfor
     force.z = *(float*)(particleData + 0x80);
     force.w = 0.0f;
     tParticleEmitter_init((tParticleEmitter*)(((char*)self) + 0x10), *(int*)(particleData + 0x0), *(int*)(particleData + 0x4), x, *(float*)(particleData + 0x20), *(float*)(particleData + 0xC), &force);
-    tParticleEmitter_setupEmitter((tParticleEmitter*)(((char*)self) + 0x10), transform, particleData, ((char*)self) + 0x160, -1.0f);
+    tParticleEmitter_setupEmitter((tParticleEmitter*)(((char*)self) + 0x10), transform, particleData, (tBoundBox*)(((char*)self) + 0x160), -1.0f);
 }
 #endif
 

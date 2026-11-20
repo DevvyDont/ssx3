@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "fe/feasyncmanager.h"
 #include "ui/uiengine.h"
 #include "fe/festatempcircuit.h"
@@ -105,16 +106,16 @@ struct sVEntry_33A0 {
  * @param item  the widget (its index at +0x18), or 0
  * @param msg  widget event number (On Tour Event)
  */
-extern "C" void cFEStateMPCircuit_onWidgetEvent(cFEStateMPCircuit* self, void* item, unsigned int msg)
+extern "C" void cFEStateMPCircuit_onWidgetEvent(cFEStateMPCircuit* self, cUIThing* item, unsigned int msg)
 {
-    if (item == 0) {
+    if (((void*)item) == 0) {
         return;
     }
     switch (msg) {
     case 5: {
         void* obj = *(void**)self->mpEngine;
         sVEntry_33A0* vt = *(sVEntry_33A0**)((char*)obj + 4);
-        void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, *(int*)((char*)item + 0x18));
+        void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         }
@@ -123,7 +124,7 @@ extern "C" void cFEStateMPCircuit_onWidgetEvent(cFEStateMPCircuit* self, void* i
     case 6: {
         void* obj = *(void**)self->mpEngine;
         sVEntry_33A0* vt = *(sVEntry_33A0**)((char*)obj + 4);
-        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
+        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         }

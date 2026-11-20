@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ui/uiinput.h"
+#include "ui/uithing.h"
 #include "ui/uiprogress.h"
 #include "ui/uipair.h"
 #include "ui/uimenu.h"
@@ -32,7 +34,7 @@ struct cUIMenu_sVEntryB {
  * @param item  the widget to select (On Tour cUIThing* pWidget)
  * @param play  nonzero to play the selection animation, 0 to jump to its end (On Tour createContext)
  */
-extern "C" void cUIMenu_setSelected(cUIMenu* self, char* item, int play)
+extern "C" void cUIMenu_setSelected(cUIMenu* self, cUIThing* item, int play)
 {
     self->mStoredIndex = 0xFF;
     char* cur = (char*)self->mpSelected;
@@ -54,7 +56,7 @@ extern "C" void cUIMenu_setSelected(cUIMenu* self, char* item, int play)
     self->mpSelected = (cUIThing*)item;
     char* selState = *(char**)((char*)self->mpScreen + 0xD0);
     cUIMenu_sVEntryB* vb2 = *(cUIMenu_sVEntryB**)(selState + 8);
-    vb2[19].fn(selState + vb2[19].delta, item, 1);
+    vb2[19].fn(selState + vb2[19].delta, ((char*)item), 1);
     char* newSelected = (char*)self->mpSelected;
     cUIMenu_sVEntryA* va2 = *(cUIMenu_sVEntryA**)(newSelected + 8);
     va2[7].fn(newSelected + va2[7].delta, 1);
@@ -75,7 +77,7 @@ extern "C" void cUIMenu_setSelected(cUIMenu* self, char* item, int play)
 //100%
 INCLUDE_ASM("ui/uimenu", cUIMenu_onInputChangeItem);
 #ifdef SKIP_ASM
-extern "C" void cUIMenu_setSelected(cUIMenu* self, char* item, int play);
+extern "C" void cUIMenu_setSelected(cUIMenu* self, cUIThing* item, int play);
 // PORT: called with an int index here (the unit declares an unsigned char parameter).
 void* cList_getByIndex_i_AE98(void* list, int i) __asm__("cList_getByIndex");
 
@@ -122,7 +124,7 @@ extern "C" int cUIMenu_onInputChangeItem(cUIMenu* selfp, unsigned char OldScroll
             cUIMenu_onInputChangeItem_notify(((char*)selfp), 4, selfp->mScrollItemOffset);
         }
         char* pNextSelected = (char*)cList_getByIndex_i_AE98(((char*)selfp) + 0x74, MenuEntryIndex);
-        cUIMenu_setSelected(selfp, pNextSelected, *(int*)&selfp->mAttrMenu & 1);
+        cUIMenu_setSelected(selfp, (cUIThing*)pNextSelected, *(int*)&selfp->mAttrMenu & 1);
         cUIMenu_onInputChangeItem_notify(((char*)selfp), 5, selfp->mScrollItemOffset);
         return 1;
     }
@@ -199,7 +201,7 @@ static inline void playEvent_B000(char* thing, int which)
  * @param in  the input (On Tour const cUIInput*)
  * @return 1 when the menu used the input, otherwise 0
  */
-extern "C" int cUIMenu_onInput(cUIMenu* self, void* in)
+extern "C" int cUIMenu_onInput(cUIMenu* self, cUIInput* in)
 {
     if (((self->mAttr >> 5) & 1) || (char*)self->mpSelected == 0) {
         return 0;
@@ -495,7 +497,7 @@ extern "C" unsigned char cUIMenu_reverseFindFirstHighlightable(cUIMenu* self, un
 //100%
 INCLUDE_ASM("ui/uimenu", cUIMenu_setSelectedByIndex);
 #ifdef SKIP_ASM
-extern "C" void cUIMenu_setSelected(cUIMenu* self, char* item, int play);
+extern "C" void cUIMenu_setSelected(cUIMenu* self, cUIThing* item, int play);
 // PORT: called with an int index here (the unit declares an unsigned char parameter).
 void* cList_getByIndex_i(void* list, int i) __asm__("cList_getByIndex");
 
@@ -530,7 +532,7 @@ extern "C" void cUIMenu_setSelectedByIndex(cUIMenu* self, unsigned char idx)
         cUIMenu_notify(((char*)self), 2, self->mScrollItemOffset);
         cUIMenu_notify(((char*)self), 4, self->mScrollItemOffset);
     }
-    cUIMenu_setSelected(self, (char*)cList_getByIndex_i(((char*)self) + 0x74, idx - self->mScrollItemOffset), 1);
+    cUIMenu_setSelected(self, (cUIThing*)((char*)cList_getByIndex_i(((char*)self) + 0x74, idx - self->mScrollItemOffset)), 1);
 }
 #endif
 
@@ -879,7 +881,7 @@ static inline int focusMove_BED8(char* self, int dir)
  * @param in  the input (On Tour const cUIInput* pInput)
  * @return 1 when the pair used the input, otherwise the second widget's answer (0 without one)
  */
-extern "C" int cUIPair_onInput(cUIPair* self, void* in)
+extern "C" int cUIPair_onInput(cUIPair* self, cUIInput* in)
 {
     int result = 0;
     char* listener = gUISoundNull;

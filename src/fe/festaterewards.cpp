@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ui/uiinput.h"
+#include "ui/uistate.h"
 #include "ui/uiengine.h"
 #include "fe/festatepreviewreward.h"
 #include "fe/festaterewards.h"
@@ -217,13 +219,13 @@ struct sGallery_F270 {
  * @param in  the input object; its vtable slots are the button tests
  * @return 1 when the input was handled (every back, accept and move input), otherwise 0
  */
-extern "C" int cFEStateRewardGalleryBase_onInputBegin(cFEStateRewardGalleryBase* self, char* in)
+extern "C" int cFEStateRewardGalleryBase_onInputBegin(cFEStateRewardGalleryBase* self, cUIInput* in)
 {
     sSnd_F270* snd = &D_004A5A58_F270;
     if (*(sSnd_F270**)&self->mpEngine->mpSound != 0) {
         snd = *(sSnd_F270**)&self->mpEngine->mpSound;
     }
-    if (Test_F270(in, 6)) {
+    if (Test_F270(((char*)in), 6)) {
         Play_F270(snd, 3);
         int i;
         for (i = 0; i < 4; i++) {
@@ -252,7 +254,7 @@ extern "C" int cFEStateRewardGalleryBase_onInputBegin(cFEStateRewardGalleryBase*
     int row = curIdx / self->mMaxRewardColumns;
     int col = curIdx % self->mMaxRewardColumns;
     int scroll = self->mFirstVisibleRow;
-    if (Test_F270(in, 5)) {
+    if (Test_F270(((char*)in), 5)) {
         int idx = self->mFirstVisibleRow * self->mMaxRewardColumns + curIdx;
         if (self->mNumTotalRewards > 0) {
             if (Call_F270(((char*)self), 38, idx)) {
@@ -281,27 +283,27 @@ extern "C" int cFEStateRewardGalleryBase_onInputBegin(cFEStateRewardGalleryBase*
         Play_F270(snd, 4);
         return 1;
     } else {
-        if (Test_F270(in, 19)) {
+        if (Test_F270(((char*)in), 19)) {
             col--;
             if (col < 0) col = self->mMaxRewardColumns - 1;
             changed = 1;
-        } else if (Test_F270(in, 20)) {
+        } else if (Test_F270(((char*)in), 20)) {
             col++;
             if (col >= self->mMaxRewardColumns || (self->mFirstVisibleRow + row) * self->mMaxRewardColumns + col >= self->mNumTotalRewards) col = 0;
             changed = 1;
-        } else if (Test_F270(in, 17)) {
+        } else if (Test_F270(((char*)in), 17)) {
             row--;
             if (row < 0) row = self->mMaxRewardRows - 1;
             changed = 1;
-        } else if (Test_F270(in, 18)) {
+        } else if (Test_F270(((char*)in), 18)) {
             row++;
             if (row >= self->mMaxRewardRows || self->mNumRows < self->mFirstVisibleRow + row) row = 0;
             changed = 1;
-        } else if (Test_F270(in, 27)) {
+        } else if (Test_F270(((char*)in), 27)) {
             scroll -= self->mMaxRewardRows;
             if (scroll < 0) scroll = (self->mNumRows - 1) / self->mMaxRewardRows * self->mMaxRewardRows;
             changed = 1;
-        } else if (Test_F270(in, 25)) {
+        } else if (Test_F270(((char*)in), 25)) {
             changed = 1;
             scroll += self->mMaxRewardRows;
             if (scroll >= self->mNumRows) scroll = 0;
@@ -318,7 +320,7 @@ extern "C" int cFEStateRewardGalleryBase_onInputBegin(cFEStateRewardGalleryBase*
             sVEi_F270* svt = (sVEi_F270*)self->mVtbl;
             svt[40].fn(((char*)self) + svt[40].delta);
             Call_F270(((char*)self), 33, idx);
-            if (Test_F270(in, 17) || Test_F270(in, 18)) {
+            if (Test_F270(((char*)in), 17) || Test_F270(((char*)in), 18)) {
                 Play_F270(snd, 2);
             } else {
                 Play_F270(snd, 1);
@@ -603,11 +605,11 @@ struct sVE_FD18 {
  * @param widget  the popup state that sent the event (a cUIStateBuyPopup when its mHashName is 7)
  * @param msg     the popup event; 21 and 22 are handled
  */
-extern "C" void cFEStateRewardGalleryBase_onPopupEvent(cFEStateRewardGalleryBase* self, void* widget, int msg)
+extern "C" void cFEStateRewardGalleryBase_onPopupEvent(cFEStateRewardGalleryBase* self, cUIState* widget, int msg)
 {
     switch (msg) {
     case 21:
-        if (*(int*)((char*)widget + 0xC) != 7) {
+        if (widget->mHashName != 7) {
             self->mAttrState &= ~8;
         }
         break;
@@ -615,7 +617,7 @@ extern "C" void cFEStateRewardGalleryBase_onPopupEvent(cFEStateRewardGalleryBase
         if (((self->mAttrState >> 3) & 1) == 0) {
             self->mAttrState |= 8;
         }
-        if (*(int*)((char*)widget + 0xC) == 7 && *(int*)((char*)widget + 0x6C) != 0) {
+        if (widget->mHashName == 7 && *(int*)((char*)widget + 0x6C) != 0) {
             sVE_FD18* vt = (sVE_FD18*)self->mVtbl;
             vt[30].fn((char*)self + vt[30].delta,
                       self->mFirstVisibleRow * self->mMaxRewardColumns + *(int*)((char*)self->mpSelected + 0x18));
@@ -1090,9 +1092,9 @@ extern "C" void cFEStateRewardGalleryBase_buyReward(cFEStateRewardGalleryBase* s
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_showReward);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cFEStatePreviewReward_cFEStatePreviewReward(cFEStatePreviewReward* self, void* engine, void* owner, int player);
+extern "C" void* cFEStatePreviewReward_cFEStatePreviewReward(cFEStatePreviewReward* self, cUIEngine* engine, cUIState* owner, int player);
 extern "C" void cFEStatePreviewReward_setReward(cFEStatePreviewReward* self, int kind, void* data);
-extern "C" void* cFEStateVideoPlayer_cFEStateVideoPlayer(void* self, void* engine, void* owner, signed char idx);
+extern "C" void* cFEStateVideoPlayer_cFEStateVideoPlayer(void* self, cUIEngine* engine, cUIState* owner, signed char idx);
 extern "C" void cFEStateVideoPlayer_setVideoSourceFiles(void* self, const char* a, const char* b);
 extern "C" void cUIStateStack_pushPopup(void* stack, void* state);
 extern char str_cFEStatePreviewReward[];
@@ -1122,12 +1124,12 @@ extern "C" void cFEStateRewardGalleryBase_showReward(cFEStateRewardGalleryBase* 
     case 4:
     case 5:
     case 7:
-        nextState = cFEStatePreviewReward_cFEStatePreviewReward((cFEStatePreviewReward*)cMemMan_alloc(0x78, str_cFEStatePreviewReward, 0, 0), self->mpEngine, self,
+        nextState = cFEStatePreviewReward_cFEStatePreviewReward((cFEStatePreviewReward*)cMemMan_alloc(0x78, str_cFEStatePreviewReward, 0, 0), self->mpEngine, (cUIState*)self,
                           self->mUserNum);
         cFEStatePreviewReward_setReward((cFEStatePreviewReward*)nextState, self->mRewardType, data);
         break;
     case 6:
-        nextState = cFEStateVideoPlayer_cFEStateVideoPlayer(cMemMan_alloc(640, str_cFEStateVideoPlayer, 0, 0), self->mpEngine, self,
+        nextState = cFEStateVideoPlayer_cFEStateVideoPlayer(cMemMan_alloc(640, str_cFEStateVideoPlayer, 0, 0), self->mpEngine, (cUIState*)self,
                           self->mUserNum);
         cFEStateVideoPlayer_setVideoSourceFiles(nextState, *(const char**)((char*)data + 4), 0);
         break;
@@ -1788,7 +1790,7 @@ extern void* cFEStateRewardGalleryPosters_vtbl[];
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
-extern "C" void* cFEStateRewardGalleryPosters_cFEStateRewardGalleryPosters(void* self, void* engine, signed char idx, int inStore)
+extern "C" void* cFEStateRewardGalleryPosters_cFEStateRewardGalleryPosters(void* self, cUIEngine* engine, signed char idx, int inStore)
 {
     cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(self, engine, idx, inStore, 3);
     *(void***)((char*)self + 0x8) = cFEStateRewardGalleryPosters_vtbl;
@@ -1919,7 +1921,7 @@ extern void* cFEStateRewardGalleryTradingCards_vtbl[];
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
-extern "C" void* cFEStateRewardGalleryTradingCards_cFEStateRewardGalleryTradingCards(void* self, void* engine, signed char idx, int inStore)
+extern "C" void* cFEStateRewardGalleryTradingCards_cFEStateRewardGalleryTradingCards(void* self, cUIEngine* engine, signed char idx, int inStore)
 {
     cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(self, engine, idx, inStore, 4);
     *(void***)((char*)self + 0x8) = cFEStateRewardGalleryTradingCards_vtbl;
@@ -2049,7 +2051,7 @@ extern void* cFEStateRewardGalleryConceptArts_vtbl[];
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
-extern "C" void* cFEStateRewardGalleryConceptArts_cFEStateRewardGalleryConceptArts(void* self, void* engine, signed char idx, int inStore)
+extern "C" void* cFEStateRewardGalleryConceptArts_cFEStateRewardGalleryConceptArts(void* self, cUIEngine* engine, signed char idx, int inStore)
 {
     cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(self, engine, idx, inStore, 5);
     *(void***)((char*)self + 0x8) = cFEStateRewardGalleryConceptArts_vtbl;
@@ -2179,7 +2181,7 @@ extern void* cFEStateRewardGalleryVideos_vtbl[];
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
-extern "C" void* cFEStateRewardGalleryVideos_cFEStateRewardGalleryVideos(void* self, void* engine, signed char idx, int inStore)
+extern "C" void* cFEStateRewardGalleryVideos_cFEStateRewardGalleryVideos(void* self, cUIEngine* engine, signed char idx, int inStore)
 {
     cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(self, engine, idx, inStore, 6);
     *(void***)((char*)self + 0x8) = cFEStateRewardGalleryVideos_vtbl;
@@ -2309,7 +2311,7 @@ extern void* cFEStateRewardGalleryToys_vtbl[];
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
-extern "C" void* cFEStateRewardGalleryToys_cFEStateRewardGalleryToys(void* self, void* engine, signed char idx, int inStore)
+extern "C" void* cFEStateRewardGalleryToys_cFEStateRewardGalleryToys(void* self, cUIEngine* engine, signed char idx, int inStore)
 {
     cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(self, engine, idx, inStore, 7);
     *(void***)((char*)self + 0x8) = cFEStateRewardGalleryToys_vtbl;
@@ -2440,7 +2442,7 @@ extern void* cFEStateRewardGalleryCheatChars_vtbl[];
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
-extern "C" void* cFEStateRewardGalleryCheatChars_cFEStateRewardGalleryCheatChars(void* self, void* engine, signed char idx, int inStore)
+extern "C" void* cFEStateRewardGalleryCheatChars_cFEStateRewardGalleryCheatChars(void* self, cUIEngine* engine, signed char idx, int inStore)
 {
     cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(self, engine, idx, inStore, 8);
     *(void***)((char*)self + 0x8) = cFEStateRewardGalleryCheatChars_vtbl;
@@ -2564,7 +2566,7 @@ struct sRewardState_1AA0 {
  * @param player  user number
  * @return @p self
  */
-extern "C" void* cFEStatePreviewReward_cFEStatePreviewReward(cFEStatePreviewReward* self, void* engine, void* owner, int player)
+extern "C" void* cFEStatePreviewReward_cFEStatePreviewReward(cFEStatePreviewReward* self, cUIEngine* engine, cUIState* owner, int player)
 {
     signed char idx = player;
     int i;
@@ -2895,9 +2897,9 @@ extern sDefObj_1FF0 gUISoundNull;
  * @param obj  the input (On Tour cUIInput* pInput)
  * @return 1 when the preview closes, otherwise 0
  */
-extern "C" int cFEStatePreviewReward_onInputBegin(cFEStatePreviewReward* self, void* obj)
+extern "C" int cFEStatePreviewReward_onInputBegin(cFEStatePreviewReward* self, cUIInput* obj)
 {
-    sVE_1FF0a* vt = *(sVE_1FF0a**)((char*)obj + 8);
+    sVE_1FF0a* vt = (sVE_1FF0a*)obj->mVtbl;
     if (vt[6].fn((char*)obj + vt[6].delta) != 0) {
     sDefObj_1FF0* sound = *(sDefObj_1FF0**)&self->mpEngine->mpSound;
     if (sound == 0) {
@@ -3068,7 +3070,7 @@ extern void* cFEStateVideoPlayer_vtbl[];
  * @param player  user number
  * @return @p vself
  */
-extern "C" void* cFEStateVideoPlayer_cFEStateVideoPlayer(void* vself, void* engine, void* owner, signed char player)
+extern "C" void* cFEStateVideoPlayer_cFEStateVideoPlayer(void* vself, cUIEngine* engine, cUIState* owner, signed char player)
 {
     char* self = (char*)vself;
     cUIState_cUIState1(self, engine, owner);
@@ -3237,7 +3239,7 @@ static inline int vcall001D2518(void* obj, int slot)
  * @param obj  the input object
  * @return 1 when a stop was requested, otherwise 0
  */
-extern "C" int cFEStateVideoPlayer_onInputBegin(void* self, void* obj)
+extern "C" int cFEStateVideoPlayer_onInputBegin(void* self, cUIInput* obj)
 {
     if (*(int*)((char*)self + 0x270) != 0) {
         if (vcall001D2518(obj, 5) != 0 || vcall001D2518(obj, 6) != 0) {

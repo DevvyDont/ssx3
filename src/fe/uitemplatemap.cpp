@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uistate.h"
 #include "fe/ovstatetransport.h"
 #include "main/ssxapp.h"
 
@@ -93,10 +94,10 @@ struct sMapTmpl_200700 {
  * @param screen  the map screen (On Tour cUIScreen* screen)
  * @param owner  the UI state the template belongs to (On Tour cUIState* pState)
  */
-extern "C" void cUITemplate_MAP_onCreateScreen(void* tmpl, void* screen, void* owner)
+extern "C" void cUITemplate_MAP_onCreateScreen(void* tmpl, void* screen, cUIState* owner)
 {
     sMapTmpl_200700* self = (sMapTmpl_200700*)tmpl;
-    self->owner = owner;
+    self->owner = ((void*)owner);
     self->screen = screen;
     if (cUITemplate_MAP_mMapStyle == 1 || cUITemplate_MAP_mMapStyle == 3 || cUITemplate_MAP_mMapStyle == 4)
         cOVStateManager_addPDATemplate();
@@ -3023,7 +3024,7 @@ int GetHashValue32(char* str);
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void cOVState_onCreateScreen(void* self);
-extern "C" void cUITemplate_MAP_onCreateScreen(void* tmpl, void* screen, void* owner);
+extern "C" void cUITemplate_MAP_onCreateScreen(void* tmpl, void* screen, cUIState* owner);
 extern char str_Map_b[];
 
 /**
@@ -3044,7 +3045,7 @@ extern "C" void cOVState_TRANSPORT_onCreateScreen(cOVState_TRANSPORT* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
     cOVState_onCreateScreen(self);
-    cUITemplate_MAP_onCreateScreen((char*)&self->mMap, self->mpScreen, self);
+    cUITemplate_MAP_onCreateScreen((char*)&self->mMap, self->mpScreen, (cUIState*)self);
 }
 #endif
 

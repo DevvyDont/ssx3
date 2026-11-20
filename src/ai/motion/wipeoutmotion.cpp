@@ -1,4 +1,5 @@
 #include "common.h"
+#include "replay/frameptr.h"
 #include "ai/riderhandler.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -1761,7 +1762,7 @@ struct sVEntry00138AD8 {
  *
  * @param obj  the replay frame pointer to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cWipeoutMotion_writeToReplayFrame(cWipeoutMotion* self, void* obj)
+extern "C" void cWipeoutMotion_writeToReplayFrame(cWipeoutMotion* self, cReplayFramePtr* obj)
 {
     sVEntry00138AD8* vt = *(sVEntry00138AD8**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x40);
@@ -1785,7 +1786,7 @@ struct sVEntry00138B10 {
  *
  * @param obj  the replay frame pointer to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cWipeoutMotion_readFromReplayFrame(cWipeoutMotion* self, void* obj)
+extern "C" void cWipeoutMotion_readFromReplayFrame(cWipeoutMotion* self, cReplayFramePtr* obj)
 {
     sVEntry00138B10* vt = *(sVEntry00138B10**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x40);

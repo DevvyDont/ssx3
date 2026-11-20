@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "ui/uianimation.h"
 
 //100%
@@ -371,7 +372,7 @@ struct sUIAnim75E0 {
  * @param mode      playback mode; only the low 3 bits count
  * @param FrameNum  the external clock frame, used in mode 0
  */
-extern "C" void cUIAnimation_updateThing(sUIAnim75E0* self, char* obj, int mode, unsigned short FrameNum)
+extern "C" void cUIAnimation_updateThing(sUIAnim75E0* self, cUIThing* obj, int mode, unsigned short FrameNum)
 {
     unsigned short frame = self->frame;
     if ((mode & 7) == 0 && self->start != 0xFFFF) {
@@ -384,8 +385,8 @@ extern "C" void cUIAnimation_updateThing(sUIAnim75E0* self, char* obj, int mode,
     if (frame < self->hdr->nframes) {
         for (unsigned int i = 0; i < self->hdr->ntracks; i++) {
             float chanValue = cUIAnimationChannel_evalAtFrameFloat((cUIAnimationChannel_evalAtFrameFloat_sAnim**)(self->tracks + (i << 2)), frame);
-            sUIAnimVt75E0* vt = *(sUIAnimVt75E0**)(obj + 8);
-            vt[12].fn(obj + vt[12].delta, cUIAnimationChannel_getAnimChanType(self->tracks + (i << 2)), chanValue);
+            sUIAnimVt75E0* vt = (sUIAnimVt75E0*)obj->mVtbl;
+            vt[12].fn(((char*)obj) + vt[12].delta, cUIAnimationChannel_getAnimChanType(self->tracks + (i << 2)), chanValue);
         }
     }
     self->cur = frame;

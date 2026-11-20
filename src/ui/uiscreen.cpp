@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiinput.h"
 #include "ui/uiengine.h"
 #include "ui/uislider.h"
 #include "ui/uiscrollbar.h"
@@ -1543,13 +1544,13 @@ struct cUISlider_onInput_sVEntryS {
  * @param input  the input (On Tour const cUIInput* pInput)
  * @return 1 for left or right (even at the end of the range), else 0 (On Tour returns bool)
  */
-extern "C" int cUISlider_onInput(cUISlider* self, char* input)
+extern "C" int cUISlider_onInput(cUISlider* self, cUIInput* input)
 {
     char* customSnd = *(char**)((char*)cUIThing_getEngine(((char*)self)) + 0x14);
     char* snd = &gUISoundNull;
     if (customSnd) snd = customSnd;
-    cUISlider_onInput_sVEntryI* vi = *(cUISlider_onInput_sVEntryI**)(input + 8);
-    if (vi[19].fn(input + vi[19].delta)) {
+    cUISlider_onInput_sVEntryI* vi = (cUISlider_onInput_sVEntryI*)input->mVtbl;
+    if (vi[19].fn(((char*)input) + vi[19].delta)) {
         if (self->mValue > 0) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 8);
             if (ev != 0xFFFF) {
@@ -1564,8 +1565,8 @@ extern "C" int cUISlider_onInput(cUISlider* self, char* input)
         }
         return 1;
     }
-    cUISlider_onInput_sVEntryI* vi2 = *(cUISlider_onInput_sVEntryI**)(input + 8);
-    if (vi2[20].fn(input + vi2[20].delta)) {
+    cUISlider_onInput_sVEntryI* vi2 = (cUISlider_onInput_sVEntryI*)input->mVtbl;
+    if (vi2[20].fn(((char*)input) + vi2[20].delta)) {
         if (self->mValue + 1 < self->mNumValues) {
             unsigned short ev = cUIThing_getKeyframerEvent((cUIThing*)self, 9);
             if (ev != 0xFFFF) {

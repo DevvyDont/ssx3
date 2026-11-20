@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/math3d.h"
 #include "visualfx/fog.h"
 #include "ai/riderhandler.h"
 #include "be/beintnetwork.h"
@@ -599,7 +600,7 @@ extern "C" void cWorldLightMan_IntersectLights1(void* self, void* pos, void* ove
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_IntersectLights);
 #ifdef SKIP_ASM
-extern "C" float cWorldLightMan_GetIntensity(void* a, void* b, void* light);
+extern "C" float cWorldLightMan_GetIntensity(void* a, t4Vector* b, void* light);
 
 struct sLight_5B68 {
     char pad_0x0[0x8];
@@ -642,7 +643,7 @@ extern "C" void cWorldLightMan_IntersectLights(void* lightMan, void* point, void
     for (unsigned int j = 0; j < n; j++) {
         sLight_5B68* lightRec = mgr->lights[j];
         if (lightRec->type == 6) {
-            float lightScore = cWorldLightMan_GetIntensity(lightMan, point, lightRec);
+            float lightScore = cWorldLightMan_GetIntensity(lightMan, (t4Vector*)point, lightRec);
             if (minScore < lightScore) {
                 int k;
                 for (k = 0; k < count && lightScore < score[k]; k++) {
@@ -667,7 +668,7 @@ extern "C" void cWorldLightMan_IntersectLights(void* lightMan, void* point, void
 INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_GetIntensity);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" float cWorldLightMan_GetIntensity(void* a, void* b, void* light);
+extern "C" float cWorldLightMan_GetIntensity(void* a, t4Vector* b, void* light);
 
 struct cWorldLightMan_CalcLightDist_sVec3;
 struct cWorldLightMan_CalcLightDist_sLight;
@@ -765,7 +766,7 @@ static inline float Pow_5D30(float x, int n)
  * @param lp  the light record
  * @return the intensity
  */
-extern "C" float cWorldLightMan_GetIntensity(void* lightMan, void* point, void* lp)
+extern "C" float cWorldLightMan_GetIntensity(void* lightMan, t4Vector* point, void* lp)
 {
     sLight_5D30* light = (sLight_5D30*)lp;
     float dist;

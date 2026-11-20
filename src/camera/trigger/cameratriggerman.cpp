@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/rider.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -839,16 +840,16 @@ static inline int active_D320(char* rider)
  *
  * @param rider  the rider (On Tour cRider&)
  */
-extern "C" void cCameraTriggerMan_checkCollisions(char* self, char* rider)
+extern "C" void cCameraTriggerMan_checkCollisions(char* self, cRider* rider)
 {
-    if (active_D320(rider)) {
-        int idx = *(int*)(rider + 0x870);
+    if (active_D320(((char*)rider))) {
+        int idx = rider->mViewIndex;
         cActiveTriggerList_clearFlags(self + 0x14 + idx * 4);
         sCtx_D320 ctx;
         sRoot_D320* w = (sRoot_D320*)SSXApp->Game->BXNash;
         ctx.list = (char*)(idx * 4 + (int)self) + 0x14;
-        ctx.rider = rider;
-        char* sub = rider + 0x6C0;
+        ctx.rider = ((char*)rider);
+        char* sub = ((char*)rider) + 0x6C0;
         sQuad_D320* riderPosMin = getPos_D320(sub);
         sQuad_D320* riderPosMax = getPos_D320(sub);
         sBox_D320 box;
@@ -881,11 +882,11 @@ extern "C" void cCameraTriggerMan_checkCollisions(char* self, char* rider)
             if (*(int*)(n + 0xC) == 0) {
                 char* trigger = *(char**)n;
                 if (cCameraTriggerStack_recordExitGetNext((sCamTrigStack*)(self + (idx * 32 + 0x1C)), *(int*)trigger, &changed, &top)) {
-                    doTriggerAction_D320(*(void**)(trigger + 0x10), rider);
+                    doTriggerAction_D320(*(void**)(trigger + 0x10), ((char*)rider));
                 } else if (changed) {
                     char* topActive = (char*)cActiveTriggerList_find1(self + (idx * 4 + 20), top);
                     if (topActive) {
-                        doTriggerAction_D320(*(void**)(topActive + 0xC), rider);
+                        doTriggerAction_D320(*(void**)(topActive + 0xC), ((char*)rider));
                     }
                 }
                 n = (char*)cActiveTriggerList_remove(self + (idx * 4 + 20), n);
@@ -896,7 +897,7 @@ extern "C" void cCameraTriggerMan_checkCollisions(char* self, char* rider)
         for (char* listNode = *(char**)((char*)(idx * 4 + (int)self) + 0x14); listNode != 0; listNode = *(char**)(listNode + 4)) {
             if (*(int*)(listNode + 8)) {
                 cCameraTriggerStack_recordEnter(self + (idx * 32 + 0x1C), **(int**)listNode);
-                doTriggerAction_D320(*(void**)(*(char**)listNode + 0xC), rider);
+                doTriggerAction_D320(*(void**)(*(char**)listNode + 0xC), ((char*)rider));
             }
         }
     }

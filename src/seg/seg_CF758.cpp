@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiengine.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -351,7 +352,7 @@ struct sChallenge_1CEEA0 {
  * @param rewardType  reward type (3-8 from the subclasses)
  * @return @p self
  */
-extern "C" sChallenge_1CEEA0* cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(sChallenge_1CEEA0* self, void* parent, signed char player, int rank, int rewardType)
+extern "C" sChallenge_1CEEA0* cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(sChallenge_1CEEA0* self, cUIEngine* parent, signed char player, int rank, int rewardType)
 {
     int i;
     int j;

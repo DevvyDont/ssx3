@@ -1068,10 +1068,10 @@ INCLUDE_ASM("render/font", cPlayerLights_AddAmbient);
  * @param playerLights  the player lights (this)
  * @param colour  the colour to add (three floats R, G, B)
  */
-extern "C" void cPlayerLights_AddAmbient(cPlayerLights* playerLights, void *colour) {
-    (playerLights->mExtraAmbientLight.R) = (float) ((playerLights->mExtraAmbientLight.R) + (*(float *)((char*)(colour) + (0))));
-    (playerLights->mExtraAmbientLight.G) = (float) ((playerLights->mExtraAmbientLight.G) + (*(float *)((char*)(colour) + (4))));
-    (playerLights->mExtraAmbientLight.B) = (float) ((playerLights->mExtraAmbientLight.B) + (*(float *)((char*)(colour) + (8))));
+extern "C" void cPlayerLights_AddAmbient(cPlayerLights* playerLights, tRGB* colour) {
+    (playerLights->mExtraAmbientLight.R) = (float) ((playerLights->mExtraAmbientLight.R) + (colour->R));
+    (playerLights->mExtraAmbientLight.G) = (float) ((playerLights->mExtraAmbientLight.G) + (colour->G));
+    (playerLights->mExtraAmbientLight.B) = (float) ((playerLights->mExtraAmbientLight.B) + (colour->B));
 }
 #endif
 

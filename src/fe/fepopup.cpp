@@ -1,4 +1,7 @@
 #include "common.h"
+#include "fe/popupinfo.h"
+#include "ui/uiinput.h"
+#include "ui/uistate.h"
 #include "ui/uiengine.h"
 #include "fe/buypopupinfo.h"
 #include "fe/uistatebuypopup.h"
@@ -36,7 +39,7 @@ extern sQuad_58E8 gPopupBlack;
  * @param owner  the parent state that receives the popup's events (mpParentState)
  * @return @p self
  */
-extern "C" void* cScreenPopup_cScreenPopup(cScreenPopup* self, void* engine, void* owner)
+extern "C" void* cScreenPopup_cScreenPopup(cScreenPopup* self, cUIEngine* engine, cUIState* owner)
 {
     cUIState_cUIState1(self, engine, owner);
     self->mVtbl = cScreenPopup_vtbl;
@@ -205,7 +208,7 @@ struct sVec3_5C30 { float x, y, z; };
 int GetHashValue32(char* str);
 int cUIScreen_getFrameByLabel(cUIScreen* screen, int hash);
 extern "C" void cScreenPopup_SetTextObjectsAlpha(cScreenPopup* self, float t);
-extern "C" void cScreenPopup_initScreenPopup(cScreenPopup* self, void* p);
+extern "C" void cScreenPopup_initScreenPopup(cScreenPopup* self, cPopupInfo* p);
 extern "C" void cScreenPopup_scaleBackground(cScreenPopup* self, sColor_7738* color);
 extern char str_Start[];
 
@@ -229,7 +232,7 @@ extern "C" int cScreenPopup_onGainTransition(cScreenPopup* self, int first)
         bgScale.g = 0.2f;
         bgScale.b = 1.0f;
         self->mbFirstGainTran = 1;
-        cScreenPopup_initScreenPopup(self, (char*)self + 0xBC);
+        cScreenPopup_initScreenPopup(self, (cPopupInfo*)((char*)self + 0xBC));
         cScreenPopup_scaleBackground(self, (sColor_7738*)&bgScale);
         if (self->meBackgroundType == 1)
             cScreenPopup_SetTextObjectsAlpha(self, 0.0f);
@@ -288,7 +291,7 @@ struct sVEntry001C5DD8 {
     void (*fn)(void*, int);
 };
 extern "C" void cScreenPopup_restoreElements(cScreenPopup* self);
-extern "C" void cScreenPopup_initScreenPopup(cScreenPopup* self, void* p);
+extern "C" void cScreenPopup_initScreenPopup(cScreenPopup* self, cPopupInfo* p);
 extern "C" void cScreenPopup_scaleBackground(cScreenPopup* self, sColor_7738* color);
 
 /**
@@ -302,7 +305,7 @@ extern "C" void cScreenPopup_redrawPopup(cScreenPopup* self)
 {
     if (self->mbFirstGainTran != 0) {
         cScreenPopup_restoreElements(self);
-        cScreenPopup_initScreenPopup(self, (char*)self + 0xBC);
+        cScreenPopup_initScreenPopup(self, (cPopupInfo*)((char*)self + 0xBC));
         sColor5DD8 bgScale = *(sColor5DD8*)&self->mvCurrentScale[0];
         cScreenPopup_scaleBackground(self, (sColor_7738*)&bgScale);
         sVEntry001C5DD8* vt = (sVEntry001C5DD8*)self->mVtbl;
@@ -712,12 +715,12 @@ struct sVec3_6B08 {
 };
 extern "C" void cScreenPopup_FillObjectPointers(cScreenPopup* self);
 extern "C" sVec3_6B08* cPopupInfo_getPopupConfirmation(void* info, int i);
-extern "C" void cScreenPopup_createTitleBar(cScreenPopup* self, void* a1);
-extern "C" void cScreenPopup_setPopupMessage(cScreenPopup* self, void* a1);
-extern "C" void cScreenPopup_FillOptions(cScreenPopup* self, void* a1);
+extern "C" void cScreenPopup_createTitleBar(cScreenPopup* self, cPopupInfo* a1);
+extern "C" void cScreenPopup_setPopupMessage(cScreenPopup* self, cPopupInfo* a1);
+extern "C" void cScreenPopup_FillOptions(cScreenPopup* self, cPopupInfo* a1);
 extern "C" void cScreenPopup_adjustMenuPosition(cScreenPopup* self);
 extern "C" void cScreenPopup_adjustButtonPosition(cScreenPopup* self);
-extern "C" void cScreenPopup_handlePostPending(cScreenPopup* self, void* a1);
+extern "C" void cScreenPopup_handlePostPending(cScreenPopup* self, cPopupInfo* a1);
 extern "C" void cScreenPopup_adjustLayer(void* self, int v);
 extern "C" void cScreenPopup_setupBackgroundType(void* self, int v);
 extern "C" void cScreenPopup_centerPopup(cScreenPopup* self);
@@ -736,16 +739,16 @@ extern "C" void cScreenPopup_checkAndFixTextEntry(cScreenPopup* self, cUIText* t
  *
  * @param info  the popup description (On Tour: cPopupInfo *pInfo); the popup's own copy at +0xBC in practice
  */
-extern "C" void cScreenPopup_initScreenPopup(cScreenPopup* self, void* info)
+extern "C" void cScreenPopup_initScreenPopup(cScreenPopup* self, cPopupInfo* info)
 {
     cScreenPopup_FillObjectPointers(self);
-    self->miMiscData = *(int*)((char*)info + 0x94);
-    self->mbPassUpdate = *(int*)((char*)info + 0x98);
-    self->mbReceivePrev = *(int*)((char*)info + 0xA8);
-    self->meType = *(int*)((char*)info + 0x0);
-    self->mbCenterOptions = *(int*)((char*)info + 0xB8);
-    self->mbCenterText = *(int*)((char*)info + 0xBC);
-    float minSize = *(float*)((char*)info + 0xB0);
+    self->miMiscData = info->miMiscData;
+    self->mbPassUpdate = info->mbPassUpdate;
+    self->mbReceivePrev = info->mbReceivePrev;
+    self->meType = info->meType;
+    self->mbCenterOptions = info->mbCenterOptions;
+    self->mbCenterText = info->mbCenterText;
+    float minSize = info->mfMinSize;
     self->mfMinSize = minSize;
     if (minSize != 0.0f)
         *(sVec3_6B08*)&self->mvCurSize[0] = sVec3_6B08(minSize, 0.0f, 0.0f);
@@ -755,7 +758,7 @@ extern "C" void cScreenPopup_initScreenPopup(cScreenPopup* self, void* info)
         *(sVec3_6B08*)&self->mvCurSize[0] = sVec3_6B08(300.0f, 0.0f, 0.0f);
     for (int i = 0; i < 5; i++)
         ((sVec3_6B08*)((char*)self + 0x2D0))[i] = *cPopupInfo_getPopupConfirmation(info, i);
-    sVec3_6B08 offset = *(sVec3_6B08*)((char*)info + 0x9C);
+    sVec3_6B08 offset = *(sVec3_6B08*)&info->mvOffset[0];
     *(sVec3_6B08*)&self->mvOffset[0] = offset;
     cScreenPopup_createTitleBar(self, info);
     cScreenPopup_setPopupMessage(self, info);
@@ -763,17 +766,17 @@ extern "C" void cScreenPopup_initScreenPopup(cScreenPopup* self, void* info)
     cScreenPopup_adjustMenuPosition(self);
     cScreenPopup_adjustButtonPosition(self);
     cScreenPopup_handlePostPending(self, info);
-    int layerOffset = *(int*)((char*)info + 0x90);
+    int layerOffset = info->miLayerOffset;
     self->miLayerOffset = layerOffset;
     if (layerOffset != 0)
         cScreenPopup_adjustLayer(self, layerOffset);
-    int bgType = *(int*)((char*)info + 0xC0);
+    int bgType = info->meBackgroundType;
     self->meBackgroundType = bgType;
     cScreenPopup_setupBackgroundType(self, bgType);
-    self->miDefaultOption = *(int*)((char*)info + 0xAC);
-    self->miMaxChars = *(int*)((char*)info + 0xC4);
+    self->miDefaultOption = info->miDefaultOption;
+    self->miMaxChars = info->miMaxChars;
     cScreenPopup_centerPopup(self);
-    if (*(int*)((char*)info + 0x0) == -1) {
+    if (info->meType == -1) {
         cScreenPopup_FillTextEntryBox(self);
         cScreenPopup_checkAndFixTextEntry(self, self->mpEnterBox, (const char*)self->mszInputText);
     }
@@ -817,7 +820,7 @@ extern "C" void cScreenPopup_increaseBoxSize(cScreenPopup* self, float* size, fl
  * @param infop  the popup description (cPopupInfo); its type is overwritten for a text-entry popup
  * @return 1 for a text-entry popup (the caller restores type -1 afterwards), else 0
  */
-extern "C" int cScreenPopup_handleEntryBox(cScreenPopup* self, void* infop)
+extern "C" int cScreenPopup_handleEntryBox(cScreenPopup* self, cPopupInfo* infop)
 {
     int* info = (int*)infop;
     cScreenPopup* screenPopup = self;
@@ -893,11 +896,11 @@ extern "C" void cScreenPopup_changePivot(cScreenPopup* self, void* obj, unsigned
  *
  * @param pInfo  the popup description (On Tour cPopupInfo* pInfo)
  */
-extern "C" void cScreenPopup_handlePostPending(cScreenPopup* self, void* pInfo)
+extern "C" void cScreenPopup_handlePostPending(cScreenPopup* self, cPopupInfo* pInfo)
 {
     char* postText = (char*)self->mpPostText;
     if (postText != 0) {
-        if (*(int*)((char*)pInfo + 0x4C) != 0) {
+        if (pInfo->mtPostPending.eType != 0) {
             sVec3_7040 textPos = *(sVec3_7040*)&self->mvPosTitle[0];
             textPos.y += self->mvCurSize[1];
             *(sVec3_7040*)(postText + 0x44) = textPos;
@@ -1000,7 +1003,7 @@ extern "C" void cScreenPopup_changePivot(cScreenPopup* self, void* obj, unsigned
  *
  * @param pInfo  the popup description (cPopupInfo)
  */
-extern "C" void cScreenPopup_setPopupMessage(cScreenPopup* self, void* pInfo)
+extern "C" void cScreenPopup_setPopupMessage(cScreenPopup* self, cPopupInfo* pInfo)
 {
     char* messageText = (char*)self->mpMessageText;
     if (messageText != 0) {
@@ -1043,7 +1046,7 @@ struct sPopup_7388 {
     char pad[0x90];
     cUIObj_7388* items[5];
 };
-extern "C" int cScreenPopup_handleEntryBox(cScreenPopup* self, void* info);
+extern "C" int cScreenPopup_handleEntryBox(cScreenPopup* self, cPopupInfo* info);
 extern "C" int* cPopupInfo_getPopupOptionNames(void* info, int i);
 extern "C" void cScreenPopup_setTextString2(cScreenPopup* self, cUIText* text, int* info);
 extern "C" void cScreenPopup_getStringSize3(cScreenPopup* self, void* obj, void* out);
@@ -1060,7 +1063,7 @@ extern "C" void cScreenPopup_increaseBoxSize(cScreenPopup* self, float* size, fl
  *
  * @param infop  the popup description (cPopupInfo); meType is the number of options, -1 for text entry
  */
-extern "C" void cScreenPopup_FillOptions(cScreenPopup* self, void* infop)
+extern "C" void cScreenPopup_FillOptions(cScreenPopup* self, cPopupInfo* infop)
 {
     int* info = (int*)infop;
     switch (info[0]) {
@@ -1076,7 +1079,7 @@ extern "C" void cScreenPopup_FillOptions(cScreenPopup* self, void* infop)
     }
     *(int*)&self->mvButtonOffset[0] = 0;
     *(int*)&self->mvLargestOption[0] = 0;
-    int hasEntryBox = cScreenPopup_handleEntryBox(self, info);
+    int hasEntryBox = cScreenPopup_handleEntryBox(self, (cPopupInfo*)info);
     if (info[0] == 0)
         ((cUIObj_7388*)self->mpButtonGroup)->setVisible(0);
     else
@@ -1818,12 +1821,12 @@ extern "C" void cScreenPopup_changePivot(cScreenPopup* self, void* obj, unsigned
  *
  * @param pInfo  the popup description (On Tour cPopupInfo* pInfo)
  */
-extern "C" void cScreenPopup_createTitleBar(cScreenPopup* self, void* pInfo)
+extern "C" void cScreenPopup_createTitleBar(cScreenPopup* self, cPopupInfo* pInfo)
 {
     cUIText* text = self->mpTitleText;
     if (text != 0) {
         int* info = (int*)((char*)pInfo + 0xC);
-        if (*(int*)((char*)pInfo + 0xC) != 0) {
+        if (pInfo->mtTitle.eType != 0) {
             float item[4];
             cScreenPopup_setTextString2(self, text, info);
             {
@@ -2676,7 +2679,7 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_createConfirmationPopup);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cScreenPopup_cScreenPopup(cScreenPopup* mem, void* engine, void* owner);
+extern "C" void* cScreenPopup_cScreenPopup(cScreenPopup* mem, cUIEngine* engine, cUIState* owner);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char str_Confirmation_Popup[];
@@ -2703,7 +2706,7 @@ struct sSelfK1C9B98 { char pad[0x2D0]; sEntryK1C9B98 entries[4]; };
  */
 extern "C" void cScreenPopup_createConfirmationPopup(cScreenPopup* self, int idx)
 {
-    char* popup = (char*)cScreenPopup_cScreenPopup((cScreenPopup*)cMemMan_alloc(864, str_Confirmation_Popup, 0x100, 0), self->mpEngine, self);
+    char* popup = (char*)cScreenPopup_cScreenPopup((cScreenPopup*)cMemMan_alloc(864, str_Confirmation_Popup, 0x100, 0), self->mpEngine, (cUIState*)self);
     self->mpConfirmPopup = (cScreenPopup*)popup;
     char* slots = popup + 0xBC;
     *(int*)(popup + 0xBC) = 2;
@@ -2894,7 +2897,7 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_onWidgetEvent);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cScreenPopup_createConfirmationPopup(cScreenPopup* self, int idx);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cKeyboardPopup_cKeyboardPopup(cKeyboardPopup* self, void* engine, void* owner, int a3, unsigned char a4);
+extern "C" void* cKeyboardPopup_cKeyboardPopup(cKeyboardPopup* self, cUIEngine* engine, cUIState* owner, int a3, unsigned char a4);
 extern "C" void cKeyboardPopup_setMaxCharacters(cKeyboardPopup* popup, int a1);
 extern "C" void cUIStateStack_pushPopup(void* stack, void* item);
 extern char str_cKeyboardPopup[];
@@ -2959,7 +2962,7 @@ extern "C" void cScreenPopup_onWidgetEvent(cScreenPopup* self, int id, int ev)
                 break;
             }
             void* mem = cMemMan_alloc(1092, str_cKeyboardPopup, 0x100, 0);
-            self->mpKeyboard = (cKeyboardPopup*)cKeyboardPopup_cKeyboardPopup((cKeyboardPopup*)mem, self->mpEngine, ((char*)self), 0, 0xF);
+            self->mpKeyboard = (cKeyboardPopup*)cKeyboardPopup_cKeyboardPopup((cKeyboardPopup*)mem, self->mpEngine, (cUIState*)(((char*)self)), 0, 0xF);
             cKeyboardPopup_setMaxCharacters(self->mpKeyboard, self->miMaxChars);
             cUIStateStack_pushPopup(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, self->mpKeyboard);
             if (self->mpStaticBox != 0) {
@@ -3161,11 +3164,11 @@ struct sVE1CA598 {
  * @param msg  the event (On Tour: Event)
  */
 // Child-popup message handler: forwards results, plays sounds and closes the popup when done.
-extern "C" void cScreenPopup_onPopupEvent(cScreenPopup* self, void* child, int msg)
+extern "C" void cScreenPopup_onPopupEvent(cScreenPopup* self, cUIState* child, int msg)
 {
     switch (msg) {
     case 21:
-        if (child == (void*)self->mpKeyboard) {
+        if (((void*)child) == (void*)self->mpKeyboard) {
             cKeyboardPopup_setInputText((cKeyboardPopup*)child, (const char*)self->mszInputText);
             cKeyboardPopup_setStatic2(self->mpKeyboard, (const char*)self->mszStaticText);
         }
@@ -3182,10 +3185,10 @@ extern "C" void cScreenPopup_onPopupEvent(cScreenPopup* self, void* child, int m
         cUIStateStack_pop_i(self->mpEngine->mStateStack, 1);
         break;
     case 22:
-        if (child == (void*)self->mpKeyboard) {
+        if (((void*)child) == (void*)self->mpKeyboard) {
             self->mpKeyboard = 0;
         }
-        if (child == (void*)self->mpConfirmPopup) {
+        if (((void*)child) == (void*)self->mpConfirmPopup) {
             self->mpConfirmPopup = 0;
             if (self->miConfimationReturnCode != -1) {
                 char* obj = (char*)self->mpParentState;
@@ -3478,7 +3481,7 @@ extern void* cUIStateBuyPopup_vtbl[];
  * @param idx  the user the popup belongs to (On Tour userNum)
  * @return @p self
  */
-extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(cUIStateBuyPopup* self, void* engine, void* owner, signed char idx)
+extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(cUIStateBuyPopup* self, cUIEngine* engine, cUIState* owner, signed char idx)
 {
     cUIState_cUIState1(self, engine, owner);
     self->mVtbl = cUIStateBuyPopup_vtbl;
@@ -3752,7 +3755,7 @@ extern void* cKeyboardPopup_vtbl[];
  * @param CtrlBits  the controller bits (On Tour CtrlBits; stored in mCtrlBits)
  * @return @p self
  */
-extern "C" void* cKeyboardPopup_cKeyboardPopup(cKeyboardPopup* self, void* engine, void* owner, int Password, unsigned char CtrlBits)
+extern "C" void* cKeyboardPopup_cKeyboardPopup(cKeyboardPopup* self, cUIEngine* engine, cUIState* owner, int Password, unsigned char CtrlBits)
 {
     cUIState_cUIState1(self, engine, owner);
     int defaultStr = cBXString_EmptyString;
@@ -6028,9 +6031,9 @@ static inline int isOnK1CDB98()
  * @param ev  the input object (On Tour: cUIInput *pInput)
  * @return always 1 (input consumed)
  */
-extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, char* ev)
+extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, cUIInput* ev)
 {
-    if (InputK1CDB98(ev, 8) != 0)
+    if (InputK1CDB98(((char*)ev), 8) != 0)
         return 1;
     {
         char name[32];
@@ -6043,22 +6046,22 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, char* ev)
                 o->SetColor(sColorK1CDB98(0.3f, 0.0f, 0.0f, 0.0f));
             }
         }
-        if (InputK1CDB98(ev, 19)) {
+        if (InputK1CDB98(((char*)ev), 19)) {
             changed = 1;
             cKeyboardPopup_kbMoveLeft(self, 1);
-        } else if (InputK1CDB98(ev, 20)) {
+        } else if (InputK1CDB98(((char*)ev), 20)) {
             changed = 1;
             cKeyboardPopup_kbMoveRight(self, 1);
-        } else if (InputK1CDB98(ev, 17)) {
+        } else if (InputK1CDB98(((char*)ev), 17)) {
             changed = 1;
             cKeyboardPopup_kbMoveUp(self, 1);
-        } else if (InputK1CDB98(ev, 18)) {
+        } else if (InputK1CDB98(((char*)ev), 18)) {
             changed = 1;
             cKeyboardPopup_kbMoveDown(self, 1);
-        } else if (InputK1CDB98(ev, 5)) {
+        } else if (InputK1CDB98(((char*)ev), 5)) {
             changed = 1;
             cKeyboardPopup_pressKey(self, 0);
-        } else if (InputK1CDB98(ev, 7)) {
+        } else if (InputK1CDB98(((char*)ev), 7)) {
             if (isOnK1CDB98()) {
                 if ((int)SSXApp->Game == 0) {
                     changed = 1;
@@ -6076,26 +6079,26 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, char* ev)
                 }
                 sound = 5;
             }
-        } else if (InputK1CDB98(ev, 6)) {
+        } else if (InputK1CDB98(((char*)ev), 6)) {
             changed = 1;
             sound = 6;
             cUIStateStack_pop(self->mpEngine->mStateStack, 1);
             char* o = (char*)self->mpParentState;
             sVEntryK1CDB98* vt = *(sVEntryK1CDB98**)(o + 8);
             ((void (*)(void*, int, int))vt[19].fn)(o + vt[19].delta, 0, 0xE);
-        } else if (InputK1CDB98(ev, 25)) {
+        } else if (InputK1CDB98(((char*)ev), 25)) {
             changed = 1;
             self->mbCapsOn ^= 1;
             cKeyboardPopup_redrawScreen(self);
-        } else if (InputK1CDB98(ev, 27)) {
+        } else if (InputK1CDB98(((char*)ev), 27)) {
             changed = 1;
             self->mbShiftOn ^= 1;
             cKeyboardPopup_redrawScreen(self);
         } else {
             int fail = 0;
-            if (InputK1CDB98(ev, 41)) {
+            if (InputK1CDB98(((char*)ev), 41)) {
                 int typed = 0;
-                switch (InputK1CDB98(ev, 42)) {
+                switch (InputK1CDB98(((char*)ev), 42)) {
                 case 8:
                     if (cKeyboardPopup_allowSelection(self, 27, 0)) self->miCurrentKey = 27;
                     else fail = 1;
@@ -6137,14 +6140,14 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, char* ev)
                     break;
                 case 0x70: case 113: case 114: case 115: case 116:
                 case 117: case 118: case 119: case 0x78: case 121: {
-                    int key = InputK1CDB98(ev, 42) - 108;
+                    int key = InputK1CDB98(((char*)ev), 42) - 108;
                     if (cKeyboardPopup_allowSelection(self, key, 0)) self->miCurrentKey = key;
                     else fail = 1;
                     break;
                 }
                 default:
-                    if (InputK1CDB98(ev, 43) >= 0x20) {
-                        char asciiChar = InputK1CDB98(ev, 43);
+                    if (InputK1CDB98(((char*)ev), 43) >= 0x20) {
+                        char asciiChar = InputK1CDB98(((char*)ev), 43);
                         fail = !cKeyboardPopup_updateToAscii_b(self, asciiChar);
                         if (!fail) {
                             if (cKeyboardPopup_allowSelection(self, self->miCurrentKey, 0)) {

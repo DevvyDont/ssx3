@@ -1,4 +1,7 @@
 #include "common.h"
+#include "ui/uistate.h"
+#include "ui/uiinput.h"
+#include "ui/uithing.h"
 #include "be/beintnewrace.h"
 #include "ui/uiengine.h"
 #include "fe/festatecharselect.h"
@@ -238,11 +241,11 @@ static inline float clamp_1450(float v, float lo, float hi)
  * @param pInput  the input object
  * @return 1 when any of the values changed, else 0
  */
-extern "C" int cFEStateCharSelect_onInputBegin(cFEStateCharSelect* self, char* pInput)
+extern "C" int cFEStateCharSelect_onInputBegin(cFEStateCharSelect* self, cUIInput* pInput)
 {
     int changed = 0;
-    if (padBtn_1450(pInput, 35)) {
-        self->mPlayerRotation += padAxis_1450(pInput, 38) * 3.0f;
+    if (padBtn_1450(((char*)pInput), 35)) {
+        self->mPlayerRotation += padAxis_1450(((char*)pInput), 38) * 3.0f;
         if (self->mPlayerRotation >= 360.0f) {
             float angle = self->mPlayerRotation;
             do
@@ -262,12 +265,12 @@ extern "C" int cFEStateCharSelect_onInputBegin(cFEStateCharSelect* self, char* p
         }
         changed = 1;
     }
-    if (padBtn_1450(pInput, 33)) {
-        self->mZoom = clamp_1450(self->mZoom + padAxis_1450(pInput, 36) * -0.10000000149011612f, 0.0f, 1.0f);
+    if (padBtn_1450(((char*)pInput), 33)) {
+        self->mZoom = clamp_1450(self->mZoom + padAxis_1450(((char*)pInput), 36) * -0.10000000149011612f, 0.0f, 1.0f);
         changed = 1;
     }
-    if (padBtn_1450(pInput, 34)) {
-        self->mPan = clamp_1450(self->mPan + padAxis_1450(pInput, 37) * -0.10000000149011612f, -1.0f, 1.0f);
+    if (padBtn_1450(((char*)pInput), 34)) {
+        self->mPan = clamp_1450(self->mPan + padAxis_1450(((char*)pInput), 37) * -0.10000000149011612f, -1.0f, 1.0f);
         changed = 1;
     }
     return changed;
@@ -829,7 +832,7 @@ struct sCharSel_2220 {
  * @param slot  the base character id
  * @return @p self
  */
-extern "C" sCharSel_2220* cFEStateCheatCharSelect_cFEStateCheatCharSelect(sCharSel_2220* self, void* engine, void* owner, signed char player, int slot)
+extern "C" sCharSel_2220* cFEStateCheatCharSelect_cFEStateCheatCharSelect(sCharSel_2220* self, cUIEngine* engine, cUIState* owner, signed char player, int slot)
 {
     cUIState_cUIState1(self, engine, owner);
     self->fC = 10;
@@ -1027,19 +1030,19 @@ struct sVEK182690b {
  * @param menu  the picture widget (ignored when 0); its id plus the menu's scroll offset is the entry
  * @param msg  the widget event
  */
-extern "C" void cFEStateCheatCharSelect_onWidgetEvent(void* self, void* menu, unsigned int msg)
+extern "C" void cFEStateCheatCharSelect_onWidgetEvent(void* self, cUIThing* menu, unsigned int msg)
 {
-    if (menu == 0)
+    if (((void*)menu) == 0)
         return;
     switch (msg) {
     case 2: {
-        sVEK182690a* vt = *(sVEK182690a**)((char*)menu + 8);
+        sVEK182690a* vt = (sVEK182690a*)menu->mVtbl;
         vt[21].fn((char*)menu + vt[21].delta, D_004C66A8);
         break;
     }
     case 1: {
-        int sel = *(int*)((char*)menu + 0x18) + *(unsigned char*)(*(char**)((char*)self + 0x6C) + 0x98);
-        sVEK182690a* vt = *(sVEK182690a**)((char*)menu + 8);
+        int sel = menu->mMiscData + *(unsigned char*)(*(char**)((char*)self + 0x6C) + 0x98);
+        sVEK182690a* vt = (sVEK182690a*)menu->mVtbl;
         vt[21].fn((char*)menu + vt[21].delta, D_004C66B8);
         cUIText_setAsciiString(*(cUIText**)((char*)self + 0x50), *(const char**)((char*)self + (sel << 2) + 0x16C));
         break;
@@ -1049,7 +1052,7 @@ extern "C" void cFEStateCheatCharSelect_onWidgetEvent(void* self, void* menu, un
         cUIStateStack_pop(*(char**)((char*)self + 0x10) + 0x18, 1);
         break;
     case 5: {
-        int sel = *(int*)((char*)menu + 0x18) + *(unsigned char*)(*(char**)((char*)self + 0x6C) + 0x98);
+        int sel = menu->mMiscData + *(unsigned char*)(*(char**)((char*)self + 0x6C) + 0x98);
         if (sel == 0)
             *(int*)((char*)self + 0x70) = 0;
         else
@@ -1139,7 +1142,7 @@ extern void* cFEStateCharSetup_vtbl[];
  * @param idx  the user (controller) index
  * @return @p self
  */
-extern "C" void* cFEStateCharSetup_cFEStateCharSetup(void* self, void* engine, signed char idx)
+extern "C" void* cFEStateCharSetup_cFEStateCharSetup(void* self, cUIEngine* engine, signed char idx)
 {
     cUIState_cUIState(self, engine);
     *(int*)((char*)self + 0xC) = 0xC;

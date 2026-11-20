@@ -3008,13 +3008,13 @@ extern "C" void cScriptPlayerChannelBlock_LoadNextScriptKey(cScriptPlayerChannel
  * @param flags  the sequence's event bits (On Tour int& events)
  * @return 1 when the channel has keys, otherwise 0
  */
-extern "C" int cScriptPlayerChannelBlock_Play(cScriptPlayerChannelBlock* self, unsigned short* data, void* owner, int* flags)
+extern "C" int cScriptPlayerChannelBlock_Play(cScriptPlayerChannelBlock* self, unsigned short* data, cScriptPlayerEntity* owner, int* flags)
 {
     self->mpData = (const char*)data;
     self->mpOwner = (cScriptPlayerEntity*)owner;
     self->mpHeader = (tInSeqBlockChannelHeader*)data;
     if (data[0] != 0) {
-        char* heap = *(char**)(*(char**)((char*)owner + 0x8) + 0x8);
+        char* heap = *(char**)((char*)owner->mpOwner + 0x8);
         self->mpBlockArray = (tBlockEntry*)cScriptHeap_AllocMem(heap + 8, data[1] * 0x1C);
         self->mNextKeyIndex = 0;
         char* base = (char*)self->mpHeader;
@@ -3309,13 +3309,13 @@ extern "C" void cScriptPlayerChannelEvent_LoadNextScriptKey(cScriptPlayerChannel
  * @param flags  the sequence's event bits (On Tour int& events)
  * @return 1 while a key is still pending, otherwise 0
  */
-extern "C" int cScriptPlayerChannelEvent_Play(cScriptPlayerChannelEvent* self, unsigned short* data, void* owner, int* flags)
+extern "C" int cScriptPlayerChannelEvent_Play(cScriptPlayerChannelEvent* self, unsigned short* data, cScriptPlayerEntity* owner, int* flags)
 {
     self->mpData = (const char*)data;
     self->mpOwner = (cScriptPlayerEntity*)owner;
     self->mpHeader = (tInSeqEventChannelHeader*)data;
     if (data[0] != 0) {
-        char* heap = *(char**)(*(char**)((char*)owner + 0x8) + 0x8);
+        char* heap = *(char**)((char*)owner->mpOwner + 0x8);
         self->mpEventArray = (tEventEntry*)cScriptHeap_AllocMem(heap + 8, data[1] * 8);
         self->mNextKeyIndex = 0;
         char* base = (char*)self->mpHeader;
@@ -3543,13 +3543,13 @@ extern "C" void cScriptPlayerChannelObject_LoadNextScriptKey(cScriptPlayerChanne
  * @param flags  the sequence's event bits (On Tour int& events)
  * @return 1 when the channel has keys, otherwise 0
  */
-extern "C" int cScriptPlayerChannelObject_Play(cScriptPlayerChannelObject* self, unsigned short* data, void* owner, int* flags)
+extern "C" int cScriptPlayerChannelObject_Play(cScriptPlayerChannelObject* self, unsigned short* data, cScriptPlayerEntity* owner, int* flags)
 {
     self->mpData = (const char*)data;
     self->mpOwner = (cScriptPlayerEntity*)owner;
     self->mpHeader = (tInSeqObjectChannelHeader*)data;
     if (data[0] != 0) {
-        char* heap = *(char**)(*(char**)((char*)owner + 0x8) + 0x8);
+        char* heap = *(char**)((char*)owner->mpOwner + 0x8);
         self->mpObjectArray = (tObjectEntry*)cScriptHeap_AllocMem(heap + 8, data[1] * 36);
         for (int i = 0; i < ((unsigned short*)self->mpHeader)[1]; i++) {
         }

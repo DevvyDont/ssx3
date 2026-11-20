@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/rider.h"
 #include "be/beintnewrace.h"
 #include "fe/ovtemplatedialog.h"
 #include "fe/ovstateheat.h"
@@ -2879,7 +2880,7 @@ static inline void TextSize_00C0(sFont_00C0* f, const char* str, float* rect, t2
  * @param rider  the rider (cRider; its cBeing interface at +0x6C0 gives the velocity)
  * @param x  reflect flags for cOVStateHUD1P_calcElemPos
  */
-extern "C" void cOVStateHUD1P_renderSpeed(char* self, char* obj, char* rider, int x)
+extern "C" void cOVStateHUD1P_renderSpeed(char* self, char* obj, cRider* rider, int x)
 {
     sSettings_00C0 settings;
     t2Vector elemPos;
@@ -2895,7 +2896,7 @@ extern "C" void cOVStateHUD1P_renderSpeed(char* self, char* obj, char* rider, in
     char* kmh = str_KM_H;
     char* mph = str_MPH;
     char* units = kmh;
-    cBeing* being = (cBeing*)(rider + 0x6C0);
+    cBeing* being = (cBeing*)(((char*)rider) + 0x6C0);
     float speed = vu0Length_00C0(*(const sVec4_00C0*)being->getVelocity()) * 0.035999998450279236f;
     if (!settings.metric) {
         speed *= 0.6209999918937683f;

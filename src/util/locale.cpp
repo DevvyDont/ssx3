@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiengine.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -423,7 +424,7 @@ extern char str_empty_box[];
  * @param inStore  nonzero when opened from the store (+0x74)
  * @return self
  */
-extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* self, void* engine, signed char idx, int inStore)
+extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* self, cUIEngine* engine, signed char idx, int inStore)
 {
     char* selfBytes = (char*)self;
     cUIState_cUIState(self, engine);

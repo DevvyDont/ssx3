@@ -1,4 +1,7 @@
 #include "common.h"
+#include "ui/uilistbox.h"
+#include "ui/uiscreen.h"
+#include "ui/uimenu.h"
 #include "be/beintnewrace.h"
 #include "ui/uiengine.h"
 #include "fe/festateruleselect.h"
@@ -368,7 +371,7 @@ extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int 
 extern "C" void* func_001887A0(void* mem, void* owner, int a2);
 extern "C" void cFEStateRuleSelect_updateBE(cFEStateRuleSelect* self, int idx, int a2);
 struct sRuleSel_2380;
-extern "C" void cFEStateRuleSelect_checkConflictForMenu(sRuleSel_2380* self, void* item);
+extern "C" void cFEStateRuleSelect_checkConflictForMenu(sRuleSel_2380* self, cUIListBox* item);
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
 extern "C" void cUIStateStack_push(void* stack, void* state);
 extern "C" void MEM_fill(void* dst, int c, int n);
@@ -430,7 +433,7 @@ extern "C" void cFEStateRuleSelect_onWidgetEvent(cFEStateRuleSelect* self, sMsg_
     case 9: {
         int id = msg->id;
         cFEStateRuleSelect_updateBE(self, id, cUIListBox_getCurrentEntryData(msg));
-        cFEStateRuleSelect_checkConflictForMenu((sRuleSel_2380*)self, msg);
+        cFEStateRuleSelect_checkConflictForMenu((sRuleSel_2380*)self, (cUIListBox*)msg);
         break;
     }
     case 7: {
@@ -506,7 +509,7 @@ static inline void SetVisible_1E48(char* o, int on)
  * @return for event 1, 1 when the rule is enabled and 0 when it is disabled; 0x100 for event 9; otherwise
  *         0x101
  */
-extern "C" int cFEStateRuleSelect_onWidgetMenu(cFEStateRuleSelect* self, void* pMenu, unsigned int type, int idx)
+extern "C" int cFEStateRuleSelect_onWidgetMenu(cFEStateRuleSelect* self, cUIMenu* pMenu, unsigned int type, int idx)
 {
     switch (type) {
     case 9:
@@ -699,9 +702,9 @@ struct sRuleSel_2380 {
  *
  * @param item  the rule's list box that changed
  */
-extern "C" void cFEStateRuleSelect_checkConflictForMenu(sRuleSel_2380* self, void* item)
+extern "C" void cFEStateRuleSelect_checkConflictForMenu(sRuleSel_2380* self, cUIListBox* item)
 {
-    int mask = D_004410C8[*(int*)((char*)item + 0x18)] << 1;
+    int mask = D_004410C8[item->mMiscData] << 1;
     if (cUIListBox_getCurrentEntryData(item) == 0) {
         for (int i = 1; i < 15; i++) {
             int bit = 1 << i;
@@ -1033,7 +1036,7 @@ struct sOwner_00192970 {
  *
  * @param screen  the screen holding the panel's widgets
  */
-extern "C" void cBraggingRightsMenu_setEnableItem(sOwner_00192970* self, void* screen)
+extern "C" void cBraggingRightsMenu_setEnableItem(sOwner_00192970* self, cUIScreen* screen)
 {
     sName11_00192970 leftArrowName = *(sName11_00192970*)str_0arrw_left;
     sName12_00192970 rightArrowName = *(sName12_00192970*)str_0arrw_right;

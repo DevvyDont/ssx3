@@ -482,13 +482,13 @@ extern "C" void MUTEX_unlock(void *);
  * @param pool  the connection manager
  * @param node  the element
  */
-extern "C" void cCommSystem_freeCommMsgElem(cCommSystem* pool, void *node) {
+extern "C" void cCommSystem_freeCommMsgElem(cCommSystem* pool, tCommMsgElem* node) {
     void *mutex = (char*)&pool->mCommMsgAllocMutex;
     MUTEX_lock(mutex);
     void *head = pool->mFree;
-    *(int *)((char*)node + 4) = 0;
-    *(void **)((char*)node + 0) = head;
-    *(int *)((char*)node + 8) = 0;
+    node->mSize = 0;
+    node->unk_00 = (tCommMsgElem*)head;
+    node->mOffset = 0;
     pool->mFree = (tCommMsgElem*)node;
     MUTEX_unlock(mutex);
 }

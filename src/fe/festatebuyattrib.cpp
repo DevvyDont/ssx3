@@ -1,4 +1,7 @@
 #include "common.h"
+#include "ui/uiinput.h"
+#include "ui/uistate.h"
+#include "ui/uithing.h"
 #include "ui/uiengine.h"
 #include "fe/festatebuyattrib.h"
 #include "fe/festatecareerstats.h"
@@ -74,16 +77,16 @@ static inline int IsHash_4910(int id, char* s) { return id == GetHashValue32(s);
  *
  * @param widget  the widget just created (its hash name is at +0x38)
  */
-extern "C" void cFEStateBuyAttrib_onWidgetCreate(cFEStateBuyAttrib* self, void* widget)
+extern "C" void cFEStateBuyAttrib_onWidgetCreate(cFEStateBuyAttrib* self, cUIThing* widget)
 {
-    if (IsHash_4910(*(int*)((char*)widget + 0x38), str_BuyAttributesPrompt)) {
+    if (IsHash_4910(widget->mHashName, str_BuyAttributesPrompt)) {
         cUIText_setUnicodeStringByID((cUIText*)widget, GetHashValue32(str_kT_OVRCMNBuyAttributesColon_b));
-    } else if (IsHash_4910(*(int*)((char*)widget + 0x38), str_AttribMenu)) {
+    } else if (IsHash_4910(widget->mHashName, str_AttribMenu)) {
         self->pAttribMenu = (cUIMenu*)widget;
-    } else if (IsHash_4910(*(int*)((char*)widget + 0x38), str_Buy_yes)) {
-        *(int*)((char*)widget + 0x18) = 0;
-    } else if (IsHash_4910(*(int*)((char*)widget + 0x38), str_Buy_no)) {
-        *(int*)((char*)widget + 0x18) = 1;
+    } else if (IsHash_4910(widget->mHashName, str_Buy_yes)) {
+        widget->mMiscData = 0;
+    } else if (IsHash_4910(widget->mHashName, str_Buy_no)) {
+        widget->mMiscData = 1;
     }
 }
 #endif
@@ -180,7 +183,7 @@ extern "C" void cFEStateBuyAttrib_buyExperience(cFEStateBuyAttrib* self);
  * @param sender  the popup that closed (the cUIStateBuyPopup)
  * @param msg  the popup event (0x15 opened, 0x16 closed)
  */
-extern "C" void cFEStateBuyAttrib_onPopupEvent(cFEStateBuyAttrib* self, void* sender, int msg)
+extern "C" void cFEStateBuyAttrib_onPopupEvent(cFEStateBuyAttrib* self, cUIState* sender, int msg)
 {
     if (msg == 22) {
         if (*(int*)((char*)sender + 0x6C) != 0) {
@@ -337,15 +340,15 @@ static inline void playFrame_4C30(sBuyAttrib_4C30* s, char* name)
  *
  * @param w  the controller input (cUIInput)
  */
-extern "C" void cFEStateBuyAttrib_onInputAlways(cFEStateBuyAttrib* self, char* w)
+extern "C" void cFEStateBuyAttrib_onInputAlways(cFEStateBuyAttrib* self, cUIInput* w)
 {
     int changed = 0;
-    cUIState_onInputAlways_2(((sBuyAttrib_4C30*)self), w);
+    cUIState_onInputAlways_2(((sBuyAttrib_4C30*)self), ((char*)w));
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 11);
     unsigned char idx = *((unsigned char*)cUIScreen_getObjectByHashName(self->mpAttribScreen, GetHashValue32(str_AttribMenu)) + 0x95);
     if (self->mBuyPrompt == 0) {
-        sVEi_4C30* vt = *(sVEi_4C30**)(w + 8);
-        if (vt[19].fn(w + vt[19].delta) != 0) {
+        sVEi_4C30* vt = (sVEi_4C30*)w->mVtbl;
+        if (vt[19].fn(((char*)w) + vt[19].delta) != 0) {
             int* bought = self->mPotentialExperience;
             int* cnt = &bought[idx];
             changed = 1;
@@ -358,8 +361,8 @@ extern "C" void cFEStateBuyAttrib_onInputAlways(cFEStateBuyAttrib* self, char* w
                 defaultMsg_4C30(((sBuyAttrib_4C30*)self), 4);
             }
         } else {
-            sVEi_4C30* vt2 = *(sVEi_4C30**)(w + 8);
-            if (vt2[20].fn(w + vt2[20].delta) != 0) {
+            sVEi_4C30* vt2 = (sVEi_4C30*)w->mVtbl;
+            if (vt2[20].fn(((char*)w) + vt2[20].delta) != 0) {
                 int* level = self->mExperienceLevel;
                 int* lvl = &level[idx];
                 changed = 1;
@@ -832,9 +835,9 @@ extern "C" void cUIStateStack_push(void* list, void* item);
  * @param item  the widget that sent the event; nothing happens when null
  * @param msg  the widget event (6 back; 5 accept is ignored)
  */
-extern "C" void cFEStateCareerStats_onWidgetEvent(cFEStateCareerStats* self, void* item, int msg)
+extern "C" void cFEStateCareerStats_onWidgetEvent(cFEStateCareerStats* self, cUIThing* item, int msg)
 {
-    if (item == 0) {
+    if (((void*)item) == 0) {
         return;
     }
     switch (msg) {
@@ -843,7 +846,7 @@ extern "C" void cFEStateCareerStats_onWidgetEvent(cFEStateCareerStats* self, voi
     case 6: {
         void* obj = *(void**)self->mpEngine;
         sVEntry001F5650* vt = *(sVEntry001F5650**)((char*)obj + 4);
-        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
+        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         }
@@ -916,18 +919,18 @@ static inline void playFrame_56C8(sCareer_56C8* s, char* name)
  * @param w  the controller input (cUIInput)
  * @return 1 when a key changed the page or a list, otherwise 0
  */
-extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, char* w)
+extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, cUIInput* w)
 {
     int msg = 0;
     int handled = 0;
-    if (wantCall_56C8(w, 19)) {
+    if (wantCall_56C8(((char*)w), 19)) {
         playFrame_56C8(((sCareer_56C8*)self), str_hll);
         msg = 1;
         handled = 1;
         if (--self->mStatsState < 0) {
             self->mStatsState = 3;
         }
-    } else if (wantCall_56C8(w, 20)) {
+    } else if (wantCall_56C8(((char*)w), 20)) {
         playFrame_56C8(((sCareer_56C8*)self), str_hlr);
         msg = 1;
         handled = 1;
@@ -940,7 +943,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, char*
         cFEStateCareerStats_setupLayout(self);
     }
     if (self->mStatsState == 0) {
-        if (wantCall_56C8(w, 17)) {
+        if (wantCall_56C8(((char*)w), 17)) {
             if (self->mTopHighlightNumber > 0) {
                 self->mTopHighlightNumber--;
                 cFEStateCareerStats_setupHighlightsList(self);
@@ -950,7 +953,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, char*
             } else {
                 msg = 4;
             }
-        } else if (wantCall_56C8(w, 18)) {
+        } else if (wantCall_56C8(((char*)w), 18)) {
             if (self->mTopHighlightNumber + 3 < 0x18) {
                 self->mTopHighlightNumber++;
                 cFEStateCareerStats_setupHighlightsList(self);
@@ -962,7 +965,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, char*
             }
         }
     } else if (self->mStatsState == 1) {
-        if (wantCall_56C8(w, 17)) {
+        if (wantCall_56C8(((char*)w), 17)) {
             if (self->mTopRaceEvent > 0) {
                 self->mTopRaceEvent--;
                 cFEStateCareerStats_setupRacePlatinumMedalsList(self);
@@ -972,7 +975,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, char*
             } else {
                 msg = 4;
             }
-        } else if (wantCall_56C8(w, 18)) {
+        } else if (wantCall_56C8(((char*)w), 18)) {
             if (self->mTopRaceEvent + 5 < self->mTotalRaceEvent) {
                 handled = 1;
                 self->mTopRaceEvent++;
@@ -984,7 +987,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, char*
             }
         }
     } else if (self->mStatsState == 2) {
-        if (wantCall_56C8(w, 17)) {
+        if (wantCall_56C8(((char*)w), 17)) {
             if (self->mTopFreestyleEvent > 0) {
                 self->mTopFreestyleEvent--;
                 cFEStateCareerStats_setupFSPlatinumMedalsList(self);
@@ -994,7 +997,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, char*
             } else {
                 msg = 4;
             }
-        } else if (wantCall_56C8(w, 18)) {
+        } else if (wantCall_56C8(((char*)w), 18)) {
             if (self->mTopFreestyleEvent + 5 < self->mTotalFreestyleEvent) {
                 handled = 1;
                 self->mTopFreestyleEvent++;

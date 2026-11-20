@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ui/uistate.h"
+#include "ui/uithing.h"
 #include "ui/uiengine.h"
 #include "fe/festatelodgeriderdetail.h"
 #include "fe/festatelodge.h"
@@ -80,30 +82,30 @@ struct sWVt_3840 { short delta; short index; void (*fn)(void*, int); };
  *
  * @param w  the widget just created (its hash name is at +0x38)
  */
-extern "C" void cFEStateLodge_onWidgetCreate(cFEStateLodge* self, void* w)
+extern "C" void cFEStateLodge_onWidgetCreate(cFEStateLodge* self, cUIThing* w)
 {
-    int hashName = *(int*)((char*)w + 0x38);
+    int hashName = w->mHashName;
     if (hashName == GetHashValue32(str_option_0)) {
-        *(int*)((char*)w + 0x18) = 0;
+        w->mMiscData = 0;
     } else if (hashName == GetHashValue32(str_option_1)) {
-        *(int*)((char*)w + 0x18) = 1;
+        w->mMiscData = 1;
     } else if (hashName == GetHashValue32(str_option_2)) {
-        *(int*)((char*)w + 0x18) = 2;
+        w->mMiscData = 2;
     } else if (hashName == GetHashValue32(str_option_3)) {
-        *(int*)((char*)w + 0x18) = 3;
+        w->mMiscData = 3;
     } else if (hashName == GetHashValue32(str_option_4)) {
-        *(int*)((char*)w + 0x18) = 4;
+        w->mMiscData = 4;
     } else if (hashName == GetHashValue32(str_option_5)) {
-        *(int*)((char*)w + 0x18) = 5;
+        w->mMiscData = 5;
     } else if (hashName == GetHashValue32(str_option_5b)) {
-        *(int*)((char*)w + 0x18) = 8;
+        w->mMiscData = 8;
     } else if (hashName == GetHashValue32(str_option_6)) {
-        *(int*)((char*)w + 0x18) = 6;
+        w->mMiscData = 6;
     } else if (hashName == GetHashValue32(str_option_7)) {
-        *(int*)((char*)w + 0x18) = 7;
-        sWVt_3840* vt = *(sWVt_3840**)((char*)w + 8);
+        w->mMiscData = 7;
+        sWVt_3840* vt = (sWVt_3840*)w->mVtbl;
         vt[8].fn((char*)w + vt[8].delta, 1);
-        vt = *(sWVt_3840**)((char*)w + 8);
+        vt = (sWVt_3840*)w->mVtbl;
         vt[9].fn((char*)w + vt[9].delta, 0);
     } else if (hashName == GetHashValue32(str_title_lodge)) {
         int lvl = cBENewPlayerInterface_getLastHub(cBE_getInterface_Fv(cBE_getBE(), 1), 0);
@@ -166,19 +168,19 @@ struct sVE_1F3A38p {
  * @param w  the option widget that sent the event; nothing happens when null
  * @param event  the widget event (only 5, accept, is handled)
  */
-extern "C" void cFEStateLodge_onWidgetEvent(cFEStateLodge* self, char* w, int event)
+extern "C" void cFEStateLodge_onWidgetEvent(cFEStateLodge* self, cUIThing* w, int event)
 {
-    if (w == 0) {
+    if (((char*)w) == 0) {
         return;
     }
     if (event != 5) {
         return;
     }
-    if (D_00441AF8[*(int*)(w + 0x18)] == 0) {
+    if (D_00441AF8[w->mMiscData] == 0) {
         return;
     }
     cBE_getInterface_Fv(cBE_getBE(), 4);
-    if (*(int*)(w + 0x18) == 0 && self->bToNextState == 0) {
+    if (w->mMiscData == 0 && self->bToNextState == 0) {
         char* mgr = (char*)SSXApp->FELocale;
         sVE_1F3A38s* vt = *(sVE_1F3A38s**)(mgr + 4);
         unsigned short* text = vt[4].fn(mgr + vt[4].delta, GetHashValue32(str_kT_CMNSaveProgress));
@@ -188,7 +190,7 @@ extern "C" void cFEStateLodge_onWidgetEvent(cFEStateLodge* self, char* w, int ev
         cUIStateStack_pushPopup(self->mpEngine->mStateStack, newState);
         return;
     }
-    int k = *(int*)(w + 0x18);
+    int k = w->mMiscData;
     if (k == 6 && self->bToNextState == 0) {
         char* mgr = (char*)SSXApp->FELocale;
         sVE_1F3A38s* vt = *(sVE_1F3A38s**)(mgr + 4);
@@ -209,7 +211,7 @@ extern "C" void cFEStateLodge_onWidgetEvent(cFEStateLodge* self, char* w, int ev
     cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b)), 1);
     char* obj = *(char**)self->mpEngine;
     sVE_1F3A38p* vt = *(sVE_1F3A38p**)(obj + 4);
-    void* nextState = vt[4].fn(obj + vt[4].delta, ((char*)self), *(int*)(w + 0x18));
+    void* nextState = vt[4].fn(obj + vt[4].delta, ((char*)self), w->mMiscData);
     if (nextState != 0) {
         cUIStateStack_push(self->mpEngine->mStateStack, nextState);
     }
@@ -294,7 +296,7 @@ struct sVE_1F3CF0o {
  * @param msg  the popup that sent the event (despite the name)
  * @param id  the popup event (0xF yes, 0x10 no, 0x15 opened, 0x16 closed)
  */
-extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, char* msg, unsigned int id)
+extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, cUIState* msg, unsigned int id)
 {
     switch (id) {
     case 0xF:
@@ -329,7 +331,7 @@ extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, char* msg, unsig
     case 21:
         break;
     case 22:
-        if (*(int*)(msg + 0xC) != 0) {
+        if (msg->mHashName != 0) {
             break;
         }
         if (self->mbIsYesOrNo == 0) {
@@ -470,21 +472,21 @@ static inline void commitK1F4108(void* np)
  * @param popup  the popup state that sent the event
  * @param event  the popup event (0x16 closed)
  */
-extern "C" void cFEStateLodgeRiderDetail_onPopupEvent(cFEStateLodgeRiderDetail* self, char* popup, int event)
+extern "C" void cFEStateLodgeRiderDetail_onPopupEvent(cFEStateLodgeRiderDetail* self, cUIState* popup, int event)
 {
     void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
     if (event != 22)
         return;
-    if (IsK1F4108(*(int*)(popup + 0xC), str_131cheat_char_b)) {
-        int cheatCharId = *(int*)(popup + 0x70);
-        if (*(int*)(popup + 0x74) != 0) {
+    if (IsK1F4108(popup->mHashName, str_131cheat_char_b)) {
+        int cheatCharId = *(int*)(((char*)popup) + 0x70);
+        if (*(int*)(((char*)popup) + 0x74) != 0) {
             void* np2 = cBE_getInterface_Fv(cBE_getBE(), 1);
             cBENewPlayerInterface_setPlayerCheatCharID(np2, self->mUserNum, cheatCharId);
             commitK1F4108(np2);
         }
-    } else if (*(int*)(popup + 0xC) == 0) {
-        if (*(int*)(popup + 0x5C) != 0) {
-            char* name = popup + 0x74;
+    } else if (popup->mHashName == 0) {
+        if (*(int*)(((char*)popup) + 0x5C) != 0) {
+            char* name = ((char*)popup) + 0x74;
             if (strlen(name) != 0) {
                 cBENewPlayerInterface_setPlayerName(np, self->mUserNum, name);
                 commitK1F4108(np);
@@ -523,23 +525,23 @@ extern char str_rider_name_b[];
  *
  * @param w  the widget just created (its hash name is at +0x38)
  */
-extern "C" void cFEStateLodgeRiderDetail_onWidgetCreate(cFEStateLodgeRiderDetail* self, void* w)
+extern "C" void cFEStateLodgeRiderDetail_onWidgetCreate(cFEStateLodgeRiderDetail* self, cUIThing* w)
 {
-    int hashName = *(int*)((char*)w + 0x38);
+    int hashName = w->mHashName;
     if (hashName == GetHashValue32(str_Option_1_b)) {
-        *(int*)((char*)w + 0x18) = 9;
+        w->mMiscData = 9;
     }     else if (hashName == GetHashValue32(str_Option_2_b)) {
-        *(int*)((char*)w + 0x18) = 10;
+        w->mMiscData = 10;
     }     else if (hashName == GetHashValue32(str_Option_3_b)) {
-        *(int*)((char*)w + 0x18) = 11;
+        w->mMiscData = 11;
     }     else if (hashName == GetHashValue32(str_Option_4_b)) {
-        *(int*)((char*)w + 0x18) = 12;
+        w->mMiscData = 12;
     }     else if (hashName == GetHashValue32(str_Option_5_b)) {
-        *(int*)((char*)w + 0x18) = 13;
+        w->mMiscData = 13;
     }     else if (hashName == GetHashValue32(str_Option_6)) {
-        *(int*)((char*)w + 0x18) = 14;
+        w->mMiscData = 14;
     }     else if (hashName == GetHashValue32(str_Option_7)) {
-        *(int*)((char*)w + 0x18) = 15;
+        w->mMiscData = 15;
     } else if (hashName == GetHashValue32(str_rider_name_b)) {
         void* np = cBE_getInterface_Fv(cBE_getBE(), 1);
         signed char cid = cBENewPlayerInterface_getRiderCharID(np, cBENewPlayerInterface_getHumanRider(np, 0));
@@ -646,14 +648,14 @@ struct sVE_1F4400 {
  * @param w  the option widget that sent the event; nothing happens when null
  * @param event  the widget event (5 accept, 6 back)
  */
-extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(cFEStateLodgeRiderDetail* self, char* w, int event)
+extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(cFEStateLodgeRiderDetail* self, cUIThing* w, int event)
 {
-    if (w == 0) {
+    if (((char*)w) == 0) {
         return;
     }
     switch (event) {
     case 5: {
-        int k = *(int*)(w + 0x18);
+        int k = w->mMiscData;
         if (D_00441AF8[k] == 0) {
             return;
         }
@@ -692,7 +694,7 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(cFEStateLodgeRiderDetail*
         cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b)), 1);
         char* obj = *(char**)self->mpEngine;
         sVE_1F4400* vt = *(sVE_1F4400**)(obj + 4);
-        void* nextState = vt[4].fn(obj + vt[4].delta, ((char*)self), *(int*)(w + 0x18));
+        void* nextState = vt[4].fn(obj + vt[4].delta, ((char*)self), w->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         }

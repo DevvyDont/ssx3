@@ -1,4 +1,5 @@
 #include "common.h"
+#include "replay/frameptr.h"
 #include "be/beintnewrace.h"
 #include "main/gamemode.h"
 #include "be/beintnetwork.h"
@@ -871,7 +872,7 @@ void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFTrackStartState_writeToReplayFrame(void* self, void* stream)
+extern "C" void cGFTrackStartState_writeToReplayFrame(void* self, cReplayFramePtr* stream)
 {
     cGameState_writeToReplayFrame_2(self, stream);
     sVEntry_cGFTrackStartState_writeToReplayFrame* writeSlot = &(*(sVEntry_cGFTrackStartState_writeToReplayFrame**)stream)[1];
@@ -903,7 +904,7 @@ void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameStat
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFTrackStartState_readFromReplayFrame(void* self, void* stream)
+extern "C" void cGFTrackStartState_readFromReplayFrame(void* self, cReplayFramePtr* stream)
 {
     cGameState_readFromReplayFrame_2(self, stream);
     sVEntry_cGFTrackStartState_readFromReplayFrame* readSlot = &(*(sVEntry_cGFTrackStartState_readFromReplayFrame**)stream)[2];
@@ -1161,7 +1162,7 @@ void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFNextHeatState_writeToReplayFrame(void* self, void* stream)
+extern "C" void cGFNextHeatState_writeToReplayFrame(void* self, cReplayFramePtr* stream)
 {
     cGameState_writeToReplayFrame_2(self, stream);
     sVEntry_cGFNextHeatState_writeToReplayFrame* writeSlot = &(*(sVEntry_cGFNextHeatState_writeToReplayFrame**)stream)[1];
@@ -1193,7 +1194,7 @@ void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameStat
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFNextHeatState_readFromReplayFrame(void* self, void* stream)
+extern "C" void cGFNextHeatState_readFromReplayFrame(void* self, cReplayFramePtr* stream)
 {
     cGameState_readFromReplayFrame_2(self, stream);
     sVEntry_cGFNextHeatState_readFromReplayFrame* readSlot = &(*(sVEntry_cGFNextHeatState_readFromReplayFrame**)stream)[2];
@@ -1584,7 +1585,7 @@ void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFUserSelectState_writeToReplayFrame(void* self, void* stream)
+extern "C" void cGFUserSelectState_writeToReplayFrame(void* self, cReplayFramePtr* stream)
 {
     cGameState_writeToReplayFrame_2(self, stream);
     sVEntry_cGFUserSelectState_writeToReplayFrame* writeSlot = &(*(sVEntry_cGFUserSelectState_writeToReplayFrame**)stream)[1];
@@ -1618,7 +1619,7 @@ void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameStat
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFUserSelectState_readFromReplayFrame(void* self, void* stream)
+extern "C" void cGFUserSelectState_readFromReplayFrame(void* self, cReplayFramePtr* stream)
 {
     cGameState_readFromReplayFrame_2(self, stream);
     sVEntry_cGFUserSelectState_readFromReplayFrame* readSlot = &(*(sVEntry_cGFUserSelectState_readFromReplayFrame**)stream)[2];

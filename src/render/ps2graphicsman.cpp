@@ -1673,7 +1673,7 @@ extern "C" void* MEM_copy(void*, void*, int);
  * @param count  number of references
  * @param src  the tTextureRef array to copy
  */
-extern "C" void cGraphicsMan_SetTextureRefs(void* self, int count, void* src)
+extern "C" void cGraphicsMan_SetTextureRefs(void* self, int count, tTextureRef* src)
 {
     *(int*)((char*)self + 0xE80) = count;
     MEM_copy((char*)self + 0x280, src, count * 0xC);

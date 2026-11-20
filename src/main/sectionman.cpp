@@ -154,7 +154,7 @@ struct sSectionNode_E298 {
 };
 
 void* cSectionMan_allocEvent(void* self);
-extern "C" void cSectionMan_removeActiveEvent(cSectionMan* self, void* prev, void* node);
+extern "C" void cSectionMan_removeActiveEvent(cSectionMan* self, tSectionManEvent* prev, tSectionManEvent* node);
 
 /**
  * Makes a section event active, moving it to the end of the active list if it was already there.
@@ -171,7 +171,7 @@ extern "C" void cSectionMan_addActiveEvent(cSectionMan* self, int id)
         if (n->id == id) {
             sSectionNode_E298* cur = n;
             n = n->next;
-            cSectionMan_removeActiveEvent(self, prev, cur);
+            cSectionMan_removeActiveEvent(self, (tSectionManEvent*)prev, (tSectionManEvent*)cur);
         } else {
             prev = n;
             n = n->next;
@@ -198,10 +198,10 @@ INCLUDE_ASM("main/sectionman", cSectionMan_getNextActiveEvent);
  * @param pPrevEvent  the previous event, or 0 to start at the head of the list
  * @return the event after @p pPrevEvent, the first event when it is 0, or 0 at the end of the list
  */
-extern "C" int cSectionMan_getNextActiveEvent(cSectionMan* self, void* pPrevEvent)
+extern "C" int cSectionMan_getNextActiveEvent(cSectionMan* self, tSectionManEvent* pPrevEvent)
 {
-    if (pPrevEvent != 0) {
-        return *(int*)((char*)pPrevEvent + 0x4);
+    if (((void*)pPrevEvent) != 0) {
+        return (int)pPrevEvent->pNext;
     }
     return (int)self->m_pActiveEventList;
 }
@@ -219,12 +219,12 @@ void cSectionMan_freeEvent_v(void* self, void* node) __asm__("cSectionMan_freeEv
  * @param prev  the event before @p node in the active list, or 0 when @p node is the head
  * @param node  the event to remove
  */
-extern "C" void cSectionMan_removeActiveEvent(cSectionMan* self, void* prev, void* node)
+extern "C" void cSectionMan_removeActiveEvent(cSectionMan* self, tSectionManEvent* prev, tSectionManEvent* node)
 {
-    if (prev == 0) {
-        self->m_pActiveEventList = (tSectionManEvent*)(*(int*)((char*)node + 0x4));
+    if (((void*)prev) == 0) {
+        self->m_pActiveEventList = (tSectionManEvent*)((int)node->pNext);
     } else {
-        *(int*)((char*)prev + 0x4) = *(int*)((char*)node + 0x4);
+        prev->pNext = (tSectionManEvent*)((int)node->pNext);
     }
     cSectionMan_freeEvent_v(self, node);
     self->m_iNumActiveEvent = self->m_iNumActiveEvent - 1;

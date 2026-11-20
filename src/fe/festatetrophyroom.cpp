@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "ui/uitext.h"
 #include "fe/fememcard.h"
 #include "ui/uiengine.h"
@@ -105,16 +106,16 @@ static inline void vcall_43F0(void* o, int slot, int arg)
  *
  * @param w  the widget just created (its hash name is at +0x38)
  */
-extern "C" void cFEStateTrophyRoom_onWidgetCreate(sTrophy_43F0* self, void* w)
+extern "C" void cFEStateTrophyRoom_onWidgetCreate(sTrophy_43F0* self, cUIThing* w)
 {
-    int hashName = *(int*)((char*)w + 0x38);
+    int hashName = w->mHashName;
     if (hashName == GetHashValue32(str_bitmap)) {
-        self->f48 = w;
+        self->f48 = ((void*)w);
         cFEStateTrophyRoom_updateBigArt(self, self->f9C);
         return;
     }
     if (hashName == GetHashValue32(str_stats)) {
-        self->f4C = w;
+        self->f4C = ((void*)w);
         vcall_43F0(w, 9, 0);
         return;
     }
@@ -140,7 +141,7 @@ extern "C" void cFEStateTrophyRoom_onWidgetCreate(sTrophy_43F0* self, void* w)
     for (int i = 0; i < 6; i++) {
         if (hashName == GetHashValue32(D_00441600[i])) {
             int n = func_001CE6F0(self->f54, self->f58);
-            *(int*)((char*)w + 0x18) = i;
+            w->mMiscData = i;
             if (n < i) {
                 vcall_43F0(w, 9, 0);
                 vcall_43F0(w, 8, 1);
@@ -221,9 +222,9 @@ public:
  * @param item  the widget that sent the event; nothing happens when null
  * @param msg  the widget event (1 focused, 6 back)
  */
-extern "C" void cFEStateTrophyRoom_onWidgetEvent(void* self, void* item, int msg)
+extern "C" void cFEStateTrophyRoom_onWidgetEvent(void* self, cUIThing* item, int msg)
 {
-    if (item == 0) {
+    if (((void*)item) == 0) {
         return;
     }
     switch (msg) {
@@ -241,9 +242,9 @@ extern "C" void cFEStateTrophyRoom_onWidgetEvent(void* self, void* item, int msg
         break;
     }
     case 1:
-        *(int*)((char*)self + 0x9C) = *(int*)((char*)item + 0x18);
-        cFEStateTrophyRoom_updateBigArt(self, *(int*)((char*)item + 0x18));
-        cFEStateTrophyRoom_updateStats(self, *(int*)((char*)item + 0x18));
+        *(int*)((char*)self + 0x9C) = item->mMiscData;
+        cFEStateTrophyRoom_updateBigArt(self, item->mMiscData);
+        cFEStateTrophyRoom_updateStats(self, item->mMiscData);
         break;
     }
 }
@@ -706,21 +707,21 @@ extern char str_txtmdl_5[];
  *
  * @param w  the widget just created (its hash name is at +0x38)
  */
-extern "C" void cFEStateRewardsRoom_onWidgetCreate(cFEStateRewardsRoom* self, void* w)
+extern "C" void cFEStateRewardsRoom_onWidgetCreate(cFEStateRewardsRoom* self, cUIThing* w)
 {
-    int id = *(int*)((char*)w + 0x38);
+    int id = w->mHashName;
     if (id == GetHashValue32(str_art)) {
-        *(int*)((char*)w + 0x18) = 5;
+        w->mMiscData = 5;
     } else if (id == GetHashValue32(str_video)) {
-        *(int*)((char*)w + 0x18) = 6;
+        w->mMiscData = 6;
     } else if (id == GetHashValue32(str_poster)) {
-        *(int*)((char*)w + 0x18) = 3;
+        w->mMiscData = 3;
     } else if (id == GetHashValue32(str_toys)) {
-        *(int*)((char*)w + 0x18) = 7;
+        w->mMiscData = 7;
     } else if (id == GetHashValue32(str_trading_cards)) {
-        *(int*)((char*)w + 0x18) = 4;
+        w->mMiscData = 4;
     } else if (id == GetHashValue32(str_cheat_character)) {
-        *(int*)((char*)w + 0x18) = 8;
+        w->mMiscData = 8;
     } else if (id == GetHashValue32(str_txtmdl_0)) {
         cFEStateRewardsRoom_setRewardsWidgetText(self, 5, (cUIText*)w);
     } else if (id == GetHashValue32(str_txtmdl_1)) {
@@ -756,9 +757,9 @@ extern "C" void cUIStateStack_push(void* list, void* item);
  * @param item  the widget that sent the event; nothing happens when null
  * @param msg  the widget event (5 accept, 6 back)
  */
-extern "C" void cFEStateRewardsRoom_onWidgetEvent(cFEStateRewardsRoom* self, void* item, unsigned int msg)
+extern "C" void cFEStateRewardsRoom_onWidgetEvent(cFEStateRewardsRoom* self, cUIThing* item, unsigned int msg)
 {
-    if (item == 0) {
+    if (((void*)item) == 0) {
         return;
     }
     switch (msg) {
@@ -767,14 +768,14 @@ extern "C" void cFEStateRewardsRoom_onWidgetEvent(cFEStateRewardsRoom* self, voi
     case 5: {
         void* obj = *(void**)self->mpEngine;
         sVEntry001D4EA8* vt = *(sVEntry001D4EA8**)((char*)obj + 4);
-        void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, *(int*)((char*)item + 0x18));
+        void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, item->mMiscData);
         cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         break;
     }
     case 6: {
         void* obj = *(void**)self->mpEngine;
         sVEntry001D4EA8* vt = *(sVEntry001D4EA8**)((char*)obj + 4);
-        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
+        void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, item->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         }

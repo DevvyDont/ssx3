@@ -1,4 +1,7 @@
 #include "common.h"
+#include "sound/bankmonitor.h"
+#include "worldpainter/worldpainterquery.h"
+#include "ai/rider.h"
 #include "be/beintnewrace.h"
 #include "sound/ssxaudio.h"
 #include "main/game.h"
@@ -643,7 +646,7 @@ static inline float Atan2_5930(float y, float x)
  * @param outAngles  the sound driver's play options (SNDPLAYOPTS) to fill
  * @return the squared distance in square metres
  */
-extern "C" float cSSXAudio_Calc3DPos(char* audio, char* source, char* outAngles)
+extern "C" float cSSXAudio_Calc3DPos(char* audio, char* source, SNDPLAYOPTS* outAngles)
 {
     if (*(int*)((char*)cAudioInterface_getApp() + 0x84) == 0)
         return 1.0f;
@@ -659,19 +662,19 @@ extern "C" float cSSXAudio_Calc3DPos(char* audio, char* source, char* outAngles)
     relPos.y = (tp.y + cy) * 0.009999999776482582f;
     relPos.z = (tp.z + cz) * 0.009999999776482582f;
     if (*(int*)(audio + 0x62B0) == 0) {
-        *(short*)(outAngles + 8) = 0;
-        *(short*)(outAngles + 10) = 0;
+        *(short*)&outAngles->azimuth = 0;
+        outAngles->elevation = 0;
     } else {
         if (*(int*)(source + 0xA0) != 0) {
             if (*(int*)(source + 0xA4) != 0)
-                *(short*)(outAngles + 8) = 0x4000;
+                *(short*)&outAngles->azimuth = 0x4000;
             else
-                *(unsigned short*)(outAngles + 8) = 0xC000;
+                outAngles->azimuth = 0xC000;
         } else {
-            *(short*)(outAngles + 8) = (int)(Atan2_5930(relPos.x, relPos.z) * 10430.3779296875f);
+            *(short*)&outAngles->azimuth = (int)(Atan2_5930(relPos.x, relPos.z) * 10430.3779296875f);
         }
         float len = sqrt_5930(relPos.x * relPos.x + relPos.z * relPos.z);
-        *(short*)(outAngles + 10) = (int)(Atan2_5930(relPos.y, len) * 10430.3779296875f);
+        outAngles->elevation = (int)(Atan2_5930(relPos.y, len) * 10430.3779296875f);
     }
     return relPos.x * relPos.x + relPos.y * relPos.y + relPos.z * relPos.z;
 }
@@ -1510,11 +1513,11 @@ struct sSaVt6EA0 { short delta; short index; int (*fn)(void*, int); };
  * @param rider  the rider (cRider)
  */
 // PORT: rider pointers passed through int parameters of some callees.
-extern "C" void cSSXAudio_OnFinishEvent(char* self, char* rider)
+extern "C" void cSSXAudio_OnFinishEvent(char* self, cRider* rider)
 {
-    if (rider != (char*)cSSXAudio_GetFocusRider((cSSXAudio*)self, *(int*)(rider + 0x870)))
+    if (((char*)rider) != (char*)cSSXAudio_GetFocusRider((cSSXAudio*)self, rider->mViewIndex))
         return;
-    func_002A73A8((char*)gSSXAudio, 2, cSSXAudio_ReplayMode((cSSXAudio*)self) ? 0 : *(int*)(rider + 0x870));
+    func_002A73A8((char*)gSSXAudio, 2, cSSXAudio_ReplayMode((cSSXAudio*)self) ? 0 : rider->mViewIndex);
     int flag = 1;
     cSSXAudio_WipeoutSlideEnd(self, (int)rider);
     cSSXAudio_WipeoutTumbleEnd(self, (int)rider);
@@ -1542,18 +1545,18 @@ extern "C" void cSSXAudio_OnFinishEvent(char* self, char* rider)
         }
     }
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    if (*(int*)(rider + 0x480) == 0) {
+    if (rider->mDidNotFinish == 0) {
         if (func_002A4078(self))
-            func_002A3708(self, rider);
+            func_002A3708(self, ((char*)rider));
         else if (sa_state6EA0() == 2) {
             if (cAI_isRaceFinished(cAudioInterface_getAI()))
-                func_002A3708(self, rider);
+                func_002A3708(self, ((char*)rider));
             else
-                func_002A34D0(self, rider, 0, -1);
+                func_002A34D0(self, ((char*)rider), 0, -1);
         } else if (heatNum < 3)
-            func_002A34D0(self, rider, 0, -1);
+            func_002A34D0(self, ((char*)rider), 0, -1);
         else
-            func_002A3708(self, rider);
+            func_002A3708(self, ((char*)rider));
     }
     if (sa_state6EA0() == 0)
         func_002A45C0(self);
@@ -3587,8 +3590,8 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_UpdateAudioWorldPainter);
 extern "C" int func_0028D960(void* self);
 extern "C" void func_0028D988(void* self, void* rider, void* obj);
 extern "C" int cSSXAudio_NeedWPAmbience(cSSXAudio* self);
-extern "C" void cSSXAudio_ReactToWPAmbienceEvent(void* self, void* rider, void* obj);
-extern "C" void cSSXAudio_ReactToWPMixEvent(cSSXAudio* self, int id, void* obj);
+extern "C" void cSSXAudio_ReactToWPAmbienceEvent(void* self, cRider* rider, tWPInGameData* obj);
+extern "C" void cSSXAudio_ReactToWPMixEvent(cSSXAudio* self, int id, tWPInGameData* obj);
 
 struct sSaVec98A8 { float x, y, z, w; } __attribute__((aligned(16)));
 struct sSaVt98A8a { short delta; short index; sSaVec98A8* (*fn)(void*); };
@@ -3612,13 +3615,13 @@ struct sSaObjs98A8 {
  *
  * @param rider  the rider (On Tour cRider*)
  */
-extern "C" void cSSXAudio_UpdateAudioWorldPainter(cSSXAudio* self, char* rider)
+extern "C" void cSSXAudio_UpdateAudioWorldPainter(cSSXAudio* self, cRider* rider)
 {
-    unsigned int idx = *(unsigned int*)(rider + 0x870);
+    unsigned int idx = (unsigned int)rider->mViewIndex;
     if (idx >= 2) return;
     sSaVec98A8 pos;
     {
-        char* being = rider + 0x6C0;
+        char* being = ((char*)rider) + 0x6C0;
         sSaVt98A8a* vt = *(sSaVt98A8a**)being;
         pos = *vt[5].fn(being + vt[5].delta);
     }
@@ -3626,16 +3629,16 @@ extern "C" void cSSXAudio_UpdateAudioWorldPainter(cSSXAudio* self, char* rider)
         float k = -99999.0f;
         char* painterQuery = ((sSaObjs98A8*)self)->a[idx];
         sSaVt98A8b* va = *(sSaVt98A8b**)(painterQuery + 4);
-        func_0028D988(self, rider, va[2].fn(painterQuery + va[2].delta, pos.x, pos.y, k));
+        func_0028D988(self, ((char*)rider), va[2].fn(painterQuery + va[2].delta, pos.x, pos.y, k));
         char* mixQuery = ((sSaObjs98A8*)self)->b[idx];
         sSaVt98A8b* vb = *(sSaVt98A8b**)(mixQuery + 4);
         // PORT: cSSXAudio_ReactToWPMixEvent's unit declaration takes the rider as int
-        cSSXAudio_ReactToWPMixEvent(self, (int)rider, vb[2].fn(mixQuery + vb[2].delta, pos.x, pos.y, k));
+        cSSXAudio_ReactToWPMixEvent(self, (int)rider, (tWPInGameData*)vb[2].fn(mixQuery + vb[2].delta, pos.x, pos.y, k));
     }
     if (cSSXAudio_NeedWPAmbience(self) != 0) {
         char* ambienceQuery = ((sSaObjs98A8*)self)->c[idx];
         sSaVt98A8b* vc = *(sSaVt98A8b**)(ambienceQuery + 4);
-        cSSXAudio_ReactToWPAmbienceEvent(self, rider, vc[2].fn(ambienceQuery + vc[2].delta, pos.x, pos.y, -99999.0f));
+        cSSXAudio_ReactToWPAmbienceEvent(self, rider, (tWPInGameData*)vc[2].fn(ambienceQuery + vc[2].delta, pos.x, pos.y, -99999.0f));
     }
 }
 #endif
@@ -3677,11 +3680,11 @@ struct sSaVt99F8b { short delta; short index; int (*fn)(void*, int); };
  * @param rider  the rider
  * @param obj  the world-painter data (tWPInGameData)
  */
-extern "C" void cSSXAudio_ReactToWPAmbienceEvent(void* self, void* rider, void* obj)
+extern "C" void cSSXAudio_ReactToWPAmbienceEvent(void* self, cRider* rider, tWPInGameData* obj)
 {
-    if (rider != cSSXAudio_GetFocusRider_p(self, -1)) return;
-    if (obj == 0) return;
-    sSaVt99F8a* vt = *(sSaVt99F8a**)((char*)obj + 4);
+    if (((void*)rider) != cSSXAudio_GetFocusRider_p(self, -1)) return;
+    if (((void*)obj) == 0) return;
+    sSaVt99F8a* vt = (sSaVt99F8a*)obj->mVtbl;
     int id = *vt[4].fn((char*)obj + vt[4].delta);
     if (id == -1) return;
     if (id == 0x1F) {
@@ -3745,7 +3748,7 @@ extern "C" void cSSXAudio_UndoBindings(void* a0, void* a1);
  * @param rider  the rider
  * @param type  the tag (patch)
  */
-extern "C" void cSSXAudio_PlayAniTag(cSSXAudio* ssxAudio, void* rider, int type)
+extern "C" void cSSXAudio_PlayAniTag(cSSXAudio* ssxAudio, cRider* rider, int type)
 {
     if (type == 80) {
         cSSXAudio_BindingsOff(ssxAudio, rider);
@@ -3828,7 +3831,7 @@ struct sSsxAudioVEntryI {
  * @param src  the rider (cRider)
  * @return 0, 1 or 2
  */
-extern "C" int cSSXAudio_GetCharacterLevel(cSSXAudio* self, void* src)
+extern "C" int cSSXAudio_GetCharacterLevel(cSSXAudio* self, cRider* src)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
     char* obj = (char*)src + 0x6C0;
@@ -3865,10 +3868,10 @@ struct sSsxAudioVEntryP {
  * @param id   the rider (On Tour pRider), passed as an int
  * @param obj  the painter data at the rider's position (On Tour const tWPInGameData*), or 0
  */
-extern "C" void cSSXAudio_ReactToWPMixEvent(cSSXAudio* self, int id, void* obj)
+extern "C" void cSSXAudio_ReactToWPMixEvent(cSSXAudio* self, int id, tWPInGameData* obj)
 {
-    if (id == cSSXAudio_GetFocusRider(self, -1) && obj != 0) {
-        sSsxAudioVEntryP* vt = *(sSsxAudioVEntryP**)((char*)obj + 0x4);
+    if (id == cSSXAudio_GetFocusRider(self, -1) && ((void*)obj) != 0) {
+        sSsxAudioVEntryP* vt = (sSsxAudioVEntryP*)obj->mVtbl;
         cSSXAudio_MixVolume(self, *vt[3].fn((char*)obj + vt[3].delta));
     }
 }

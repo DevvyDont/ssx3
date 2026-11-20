@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/bankmonitor.h"
 #include "sound/streaminstance.h"
 #include "sound/streamsys.h"
 
@@ -1418,9 +1419,9 @@ extern "C" void SNDSTRM_modifyhold(int, int);
  * @param monitorInst  the monitor instance
  * @return 1
  */
-extern "C" int cStreamSys_STREAM_ReleaseHoldCallback(cStreamSys* self, void* monitorInst)
+extern "C" int cStreamSys_STREAM_ReleaseHoldCallback(cStreamSys* self, cMonitorInstance* monitorInst)
 {
-    SNDSTRM_modifyhold(*(int*)((char*)monitorInst + 0x1C), 0);
+    SNDSTRM_modifyhold(monitorInst->mData1, 0);
     return 1;
 }
 #endif
@@ -1619,7 +1620,7 @@ extern "C" void cController__cController(char* self, int flags)
 INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_Update);
 #ifdef SKIP_ASM
 extern "C" int cBankMonitorInstance_IsFree(void* self);
-extern "C" void cBankMonitorInstance_Update3D(void* voice, void* bm, float v);
+extern "C" void cBankMonitorInstance_Update3D(void* voice, cBankMonitor* bm, float v);
 
 class cStrmCbOwner {
 public:
@@ -1657,7 +1658,7 @@ extern "C" void cBankMonitorInstance_Update(void* voice, void* self, float time)
                 bm += 0x1D8;
             }
         }
-        cBankMonitorInstance_Update3D(voice, bm, time);
+        cBankMonitorInstance_Update3D(voice, (cBankMonitor*)bm, time);
     }
 }
 #endif
@@ -2552,10 +2553,9 @@ static inline float Sqrt_C868(float x)
  * @param bm     the bank monitor (On Tour Monitor)
  * @param time   elapsed time (On Tour Time); reused for the Doppler factor
  */
-extern "C" void cBankMonitorInstance_Update3D(void* voice, void* bm, float time)
+extern "C" void cBankMonitorInstance_Update3D(void* voice, cBankMonitor* bm, float time)
 {
     char* inst = (char*)voice;
-    char* monitor = (char*)bm;
     if (*(int*)inst == 0) {
         return;
     }
@@ -2570,11 +2570,11 @@ extern "C" void cBankMonitorInstance_Update3D(void* voice, void* bm, float time)
             return;
         }
     }
-    if (*(int*)(monitor + 0x8E4) != 0 && *(int*)(inst + 0x68) != 0) {
+    if (bm->mPositionalEnable != 0 && *(int*)(inst + 0x68) != 0) {
         float dist = Sqrt_C868(((cStreamBM_C868*)bm)->v06(voice, &pos));
         if (*(int*)(inst + 0x94) != 0 || cBankMonitorInstance_CheckActive_3(voice, bm, dist) != 0) {
             float prevDist = *(float*)(inst + 0x5C);
-            if (prevDist != -1.0f && *(int*)(monitor + 0x8E0) != 0) {
+            if (prevDist != -1.0f && bm->mDopplerEnable != 0) {
                 time = cBankMonitorInstance_Doppler_3(voice, prevDist - dist, time);
             } else {
                 time = 1.0f;

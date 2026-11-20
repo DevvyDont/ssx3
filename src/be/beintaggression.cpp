@@ -1,4 +1,5 @@
 #include "common.h"
+#include "replay/frameptr.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BEAggressionInt[];
@@ -321,7 +322,7 @@ struct sStreamVE_1560A0 { short delta; short index; void (*fn)(void*, void*, int
  *
  * @param stream  the replay frame stream
  */
-extern "C" void cBEAggressionInterface_writeToReplayFrame(void* self, void* stream)
+extern "C" void cBEAggressionInterface_writeToReplayFrame(void* self, cReplayFramePtr* stream)
 {
     int n = D_005305E0[0];
     sStreamVE_1560A0* vt = *(sStreamVE_1560A0**)stream;
@@ -355,7 +356,7 @@ struct sStreamVE_1561B0 { short delta; short index; void (*fn)(void*, void*, int
  *
  * @param stream  the replay frame stream
  */
-extern "C" void cBEAggressionInterface_readFromReplayFrame(void* self, void* stream)
+extern "C" void cBEAggressionInterface_readFromReplayFrame(void* self, cReplayFramePtr* stream)
 {
     int n;
     sStreamVE_1561B0* vt = *(sStreamVE_1561B0**)stream;

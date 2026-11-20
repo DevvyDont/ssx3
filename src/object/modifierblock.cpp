@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/effectlink.h"
 #include "render/ps2graphicsman.h"
 #include "object/modifierblock.h"
 
@@ -800,7 +801,7 @@ extern "C" void cEffectLink_append(void* pool, void* item);
  *
  * @param list  the effect list head to empty (On Tour link): another modifier block's +0x10
  */
-extern "C" void tModifierBlock_transferEffectModifier(tModifierBlock* self, void* list)
+extern "C" void tModifierBlock_transferEffectModifier(tModifierBlock* self, cEffectLink* list)
 {
     void* effect = *(void**)list;
     while (effect != 0) {
@@ -811,7 +812,7 @@ extern "C" void tModifierBlock_transferEffectModifier(tModifierBlock* self, void
         effect = next;
     }
     *(void**)list = 0;
-    *(void**)((char*)list + 0x4) = 0;
+    list->Prev = 0;
 }
 #endif
 

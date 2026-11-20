@@ -1,4 +1,5 @@
 #include "common.h"
+#include "animation/adfdatasource.h"
 
 //100%
 INCLUDE_ASM("animation/mdfarchive", cMdfArchive_getModelPartByIndex);
@@ -247,14 +248,14 @@ void cGameAnimMap_setMap_handle(sMdfIndex_00314E88* self, unsigned int hash, sMd
  * @param kind  the bank number stored in each id
  * @param list  the animation data source (cAdfDataSource) of the bank
  */
-extern "C" void cGameAnimMap_addSource(sMdfIndex_00314E88* self, int kind, char* list)
+extern "C" void cGameAnimMap_addSource(sMdfIndex_00314E88* self, int kind, cAdfDataSource* list)
 {
     sMdfHandle_00314F30 handle;
-    for (int i = 0; i < *(short*)(*(char**)(list + 4) + 2); i++)
+    for (int i = 0; i < *(short*)((char*)list->Archive + 2); i++)
     {
         SetKind_00314F30(&handle, kind);
         SetIndex_00314F30(&handle, i);
-        cGameAnimMap_setMap_handle(self, *(unsigned int*)(i * 0x14 + *(int*)(list + 8)), handle);
+        cGameAnimMap_setMap_handle(self, *(unsigned int*)(i * 0x14 + (int)list->Anims), handle);
     }
 }
 #endif
@@ -271,11 +272,11 @@ extern void* kAnimIDInvalid;
  *
  * @param list  the animation data source (cAdfDataSource) of the bank
  */
-extern "C" void cGameAnimMap_remSource(sMdfIndex_00314E88* self, char* list)
+extern "C" void cGameAnimMap_remSource(sMdfIndex_00314E88* self, cAdfDataSource* list)
 {
-    for (int i = 0; i < *(short*)(*(char**)(list + 4) + 2); i++)
+    for (int i = 0; i < *(short*)((char*)list->Archive + 2); i++)
     {
-        cGameAnimMap_setMap(self, *(unsigned int*)(i * 0x14 + *(int*)(list + 8)), kAnimIDInvalid);
+        cGameAnimMap_setMap(self, *(unsigned int*)(i * 0x14 + (int)list->Anims), kAnimIDInvalid);
     }
 }
 #endif

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "fe/festateriderbio.h"
 #include "be/beintnewrace.h"
 #include "main/ssxapp.h"
@@ -65,16 +66,16 @@ struct sVEK18EB40b {
  * @param menu  the widget the event is for (null: nothing happens)
  * @param msg  UI event code (1, 2, 5 or 6)
  */
-extern "C" void cFEStateProfileSelect_onWidgetEvent(void* self, char* menu, unsigned int msg)
+extern "C" void cFEStateProfileSelect_onWidgetEvent(void* self, cUIThing* menu, unsigned int msg)
 {
-    if (menu == 0)
+    if (((char*)menu) == 0)
         return;
     switch (msg) {
     case 5: {
         ((cUIObjK18EB40*)menu)->setColor(sColorK18EB40(1.0f, 1.0f, 0.0f, 0.0f));
         char* custom = **(char***)((char*)self + 0x10);
         sVEK18EB40b* vt = *(sVEK18EB40b**)(custom + 4);
-        void* nextState = vt[4].fn(custom + vt[4].delta, self, *(int*)(menu + 0x18));
+        void* nextState = vt[4].fn(custom + vt[4].delta, self, menu->mMiscData);
         if (nextState != 0)
             cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, nextState);
         break;
@@ -82,7 +83,7 @@ extern "C" void cFEStateProfileSelect_onWidgetEvent(void* self, char* menu, unsi
     case 6: {
         char* custom = **(char***)((char*)self + 0x10);
         sVEK18EB40b* vt = *(sVEK18EB40b**)(custom + 4);
-        void* nextState = vt[5].fn(custom + vt[5].delta, self, *(int*)(menu + 0x18));
+        void* nextState = vt[5].fn(custom + vt[5].delta, self, menu->mMiscData);
         if (nextState != 0)
             cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, nextState);
         break;
@@ -1135,7 +1136,7 @@ static inline void* GetText_K18FD90(char* key)
  * @param item  the widget that sent the event (its +0x18 word is the slot index)
  * @param event  the widget event
  */
-extern "C" void cFEStateProfileLoad_onWidgetEvent(void* vself, char* item, int event)
+extern "C" void cFEStateProfileLoad_onWidgetEvent(void* vself, cUIThing* item, int event)
 {
     sProfileK18FD90* self = (sProfileK18FD90*)vself;
     switch (event) {
@@ -1159,11 +1160,11 @@ extern "C" void cFEStateProfileLoad_onWidgetEvent(void* vself, char* item, int e
         break;
     }
     case 5: {
-        if (item == 0) break;
+        if (((char*)item) == 0) break;
         if (self->f1A8 != 0) break;
         char* mp = (char*)cSSXApp_getMCManager(SSXApp);
         if (self->f214 != 3) break;
-        ((sMgrK18FD90*)mp)->fF8 = self->f1C4 = *(int*)(item + 0x18);
+        ((sMgrK18FD90*)mp)->fF8 = self->f1C4 = item->mMiscData;
         switch (cFEStateProfileLoad_mScreenAction) {
         case 1:
         case 3:
@@ -1223,7 +1224,7 @@ extern "C" void cFEStateProfileLoad_onWidgetEvent(void* vself, char* item, int e
         if (self->f1A8 != 1 && self->state != 6 && cFEStateProfileLoad_mScreenAction != 2 && self->f220 != 0) {
             char* mp = (char*)cSSXApp_getMCManager(SSXApp);
             if (VCALL_K18FD90(*(char**)(mp + 1076), 0, 54), *(int*)(mp + 0x428)) != 0) {
-                ((sMgrK18FD90*)mp)->fF8 = self->f1C4 = *(int*)(item + 0x18);
+                ((sMgrK18FD90*)mp)->fF8 = self->f1C4 = item->mMiscData;
                 if (self->state == 1) {
                     if (VCALL_K18FD90(*(char**)(mp + 1076), 0, 67), self->f1C4) != 0) {
                         self->f1A8 = 1;

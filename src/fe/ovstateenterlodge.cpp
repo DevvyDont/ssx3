@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ui/uistate.h"
+#include "ui/uithing.h"
 #include "ui/uitext.h"
 #include "fe/ovstateenterlodge.h"
 #include "fe/ovstatetoptimes.h"
@@ -48,7 +50,7 @@ extern "C" void cUIState_onGainFocus(void* self, void* a1);
  *
  * @param pPrevState  the state that had the focus before (passed on)
  */
-extern "C" void cOVState_ENTERLODGE_onGainFocus(cOVState_ENTERLODGE* self, void* pPrevState)
+extern "C" void cOVState_ENTERLODGE_onGainFocus(cOVState_ENTERLODGE* self, cUIState* pPrevState)
 {
     void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_yes_b));
     if (obj != 0) {
@@ -137,13 +139,13 @@ struct sSelf001F72E0 {
  * @param widget  the item (On Tour pWidget); ignored when null
  * @param msg  the widget event: 5 Cross, 6 Triangle
  */
-extern "C" void cOVState_ENTERLODGE_onWidgetEvent(cOVState_ENTERLODGE* self, void* widget, int msg)
+extern "C" void cOVState_ENTERLODGE_onWidgetEvent(cOVState_ENTERLODGE* self, cUIThing* widget, int msg)
 {
-    if (widget != 0) {
+    if (((void*)widget) != 0) {
         switch (msg) {
         case 5:
             ((sGame001F72E0*)SSXApp->Game)->flag->active = 1;
-            switch (*(int*)((char*)widget + 0x18)) {
+            switch (widget->mMiscData) {
             case 0:
                 {
                     void* game = SSXApp->Game;
@@ -244,15 +246,15 @@ extern char str_no_b[];
  *
  * @param item  the widget being created
  */
-extern "C" void cOVState_BIGCHALLENGE_START_onWidgetCreate(cOVState_BIGCHALLENGE_START* self, void* item)
+extern "C" void cOVState_BIGCHALLENGE_START_onWidgetCreate(cOVState_BIGCHALLENGE_START* self, cUIThing* item)
 {
-    int id = *(int*)((char*)item + 0x38);
+    int id = item->mHashName;
     if (id == GetHashValue32(str_yes_b)) {
-        *(int*)((char*)item + 0x18) = 0;
+        item->mMiscData = 0;
     } else {
-        int id2 = *(int*)((char*)item + 0x38);
+        int id2 = item->mHashName;
         if (id2 == GetHashValue32(str_no_b)) {
-            *(int*)((char*)item + 0x18) = 1;
+            item->mMiscData = 1;
         }
     }
 }
@@ -333,14 +335,14 @@ struct sMgr_75A0 {
  * @param item  the selected item; ignored when null
  * @param msg  the widget event: 5 Cross, 6 Triangle
  */
-extern "C" void cOVState_BIGCHALLENGE_START_onWidgetEvent(cOVState_BIGCHALLENGE_START* self, void* item, int msg)
+extern "C" void cOVState_BIGCHALLENGE_START_onWidgetEvent(cOVState_BIGCHALLENGE_START* self, cUIThing* item, int msg)
 {
-    if (item == 0) {
+    if (((void*)item) == 0) {
         return;
     }
     switch (msg) {
     case 5:
-        if (*(int*)((char*)item + 0x18) == 0) {
+        if (item->mMiscData == 0) {
             if (cWScriptMan_isLocalMissionActive(cWScriptMan_TheWScriptMan) != 0) {
                 cWScriptMan_restartLocalMission(cWScriptMan_TheWScriptMan);
             } else {
@@ -427,19 +429,19 @@ extern char str_info[];
  *
  * @param item  the widget being created
  */
-extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetCreate(cOVState_BIGCHALLENGE_FAIL* self, void* item)
+extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetCreate(cOVState_BIGCHALLENGE_FAIL* self, cUIThing* item)
 {
-    int id = *(int*)((char*)item + 0x38);
+    int id = item->mHashName;
     if (id == GetHashValue32(str_yes_b)) {
-        *(int*)((char*)item + 0x18) = 0;
+        item->mMiscData = 0;
     } else {
-        int id2 = *(int*)((char*)item + 0x38);
+        int id2 = item->mHashName;
         if (id2 == GetHashValue32(str_no_b)) {
-            *(int*)((char*)item + 0x18) = 1;
+            item->mMiscData = 1;
         } else {
-            int id3 = *(int*)((char*)item + 0x38);
+            int id3 = item->mHashName;
             if (id3 == GetHashValue32(str_info)) {
-                *(int*)((char*)item + 0x18) = 2;
+                item->mMiscData = 2;
             }
         }
     }
@@ -488,14 +490,14 @@ extern char str_TransitionOut_b[];
  * @param item  the widget; its misc data (+0x18) is set by cOVState_BIGCHALLENGE_FAIL_onWidgetCreate
  * @param msg  the widget event: 5 select, 6 back
  */
-extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetEvent(cOVState_BIGCHALLENGE_FAIL* self, void* item, int msg)
+extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetEvent(cOVState_BIGCHALLENGE_FAIL* self, cUIThing* item, int msg)
 {
-    if (item == 0) {
+    if (((void*)item) == 0) {
         return;
     }
     switch (msg) {
     case 5: {
-        int choice = *(int*)((char*)item + 0x18);
+        int choice = item->mMiscData;
         if (choice == 0) {
             ((sMgr_75A0*)cWScriptMan_TheWScriptMan)->f2A0 = self->mMissionId;
             cWScriptMan_restartLocalMission(cWScriptMan_TheWScriptMan);
@@ -781,7 +783,7 @@ static inline void LoadRider1F7F08(void* self, int n)
  *
  * @param pPrevState  the state that had the focus before (passed on)
  */
-extern "C" void cOVState_TOPTIMES_onGainFocus(cOVState_TOPTIMES* self, void* pPrevState)
+extern "C" void cOVState_TOPTIMES_onGainFocus(cOVState_TOPTIMES* self, cUIState* pPrevState)
 {
     cUIState_onGainFocus(self, pPrevState);
     char* prof = (char*)cBE_getInterface_Fv(cBE_getBE(), 8);
@@ -834,9 +836,9 @@ struct sVEntry_001F80D8 {
  * @param pWidget  the chosen item; ignored when null
  * @param Event  the widget event; only 5 (Cross) acts
  */
-extern "C" void cOVState_TOPTIMES_onWidgetEvent(cOVState_TOPTIMES* self, void* pWidget, int Event)
+extern "C" void cOVState_TOPTIMES_onWidgetEvent(cOVState_TOPTIMES* self, cUIThing* pWidget, int Event)
 {
-    if (pWidget != 0) {
+    if (((void*)pWidget) != 0) {
         if (Event == 5) {
             sVEntry_001F80D8* vt = (sVEntry_001F80D8*)self->mVtbl;
             vt[26].fn((char*)self + vt[26].delta);
@@ -860,10 +862,10 @@ extern "C" void cOVStateManager_triggerOverlay(int id);
  *
  * @param pWidget  the chosen item (On Tour: cUIThing *pWidget)
  */
-extern "C" void cOVState_TOPTIMES_handleNext(cOVState_TOPTIMES* self, void* pWidget)
+extern "C" void cOVState_TOPTIMES_handleNext(cOVState_TOPTIMES* self, cUIThing* pWidget)
 {
     if (self->mIsNextScreenPending == 0) {
-        int choice = *(int*)((char*)pWidget + 0x18);
+        int choice = pWidget->mMiscData;
         switch (choice) {
         case 0:
             self->mIsNextScreenPending = 1;

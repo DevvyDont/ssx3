@@ -1,4 +1,5 @@
 #include "common.h"
+#include "replay/frameptr.h"
 #include "wscript/wscriptprocess.h"
 #include "wscript/wscriptman.h"
 #include "render/ps2graphicsman.h"
@@ -123,7 +124,7 @@ extern "C" int cProcessList_removeProcess_vv(void* self, void* node) __asm__("cP
  *
  * @param node  the process
  */
-extern "C" void cWScriptMan_removeProcess(cWScriptMan* self, void* node) {
+extern "C" void cWScriptMan_removeProcess(cWScriptMan* self, cWScriptProcess* node) {
     if (cProcessList_removeProcess_vv(((char*)self) + 0x2B8, node) == 0 &&
         cProcessList_removeProcess_vv(((char*)self) + 0x2B4, node) == 0) {
         cProcessList_removeProcess_vv(((char*)self) + 0x2BC, node);
@@ -148,11 +149,11 @@ struct sVEntry00309750 {
  *
  * @param obj  the process to start (On Tour process)
  */
-extern "C" void cWScriptMan_startProcess(cWScriptMan* self, void* obj)
+extern "C" void cWScriptMan_startProcess(cWScriptMan* self, cWScriptProcess* obj)
 {
     void* saved = self->CurrentProcess;
     self->CurrentProcess = (cWScriptProcess*)obj;
-    sVEntry00309750* vt = *(sVEntry00309750**)((char*)obj + 0x5C);
+    sVEntry00309750* vt = (sVEntry00309750*)obj->mVtbl;
     vt[4].fn((char*)obj + vt[4].delta);
     self->CurrentProcess = (cWScriptProcess*)saved;
 }
@@ -175,11 +176,11 @@ struct sVEntry00309798 {
  *
  * @param obj  the process to stop (On Tour process)
  */
-extern "C" void cWScriptMan_stopProcess(cWScriptMan* self, void* obj)
+extern "C" void cWScriptMan_stopProcess(cWScriptMan* self, cWScriptProcess* obj)
 {
     void* saved = self->CurrentProcess;
     self->CurrentProcess = (cWScriptProcess*)obj;
-    sVEntry00309798* vt = *(sVEntry00309798**)((char*)obj + 0x5C);
+    sVEntry00309798* vt = (sVEntry00309798*)obj->mVtbl;
     vt[6].fn((char*)obj + vt[6].delta);
     self->CurrentProcess = (cWScriptProcess*)saved;
 }
@@ -1272,7 +1273,7 @@ extern "C" void cWScriptMan_doProcessCmd(cWScriptMan* self, unsigned int id, int
             obj = cProcessList_findProcess1((char*)&self->IdleList, id);
         }
         if (obj != 0) {
-            cWScriptMan_startProcess(self, obj);
+            cWScriptMan_startProcess(self, (cWScriptProcess*)obj);
         }
         break;
     case 0:
@@ -1280,7 +1281,7 @@ extern "C" void cWScriptMan_doProcessCmd(cWScriptMan* self, unsigned int id, int
             obj = cProcessList_findProcess1((char*)&self->ActiveList, id);
         }
         if (obj != 0) {
-            cWScriptMan_stopProcess(self, obj);
+            cWScriptMan_stopProcess(self, (cWScriptProcess*)obj);
         }
         break;
     case 2:
@@ -2672,7 +2673,7 @@ struct sWSManBB10 {
 
 class cCollectPool_writeToReplayFrame_cObj;
 extern "C" int cCollectPool_writeToReplayFrame(void* a, cCollectPool_writeToReplayFrame_cObj* obj);
-extern "C" void cWScriptMan_writeReplayProcessList(cWScriptMan* self, void** list, void* stream);
+extern "C" void cWScriptMan_writeReplayProcessList(cWScriptMan* self, void** list, cReplayFramePtr* stream);
 extern "C" int cWScriptCache_getScriptBase(void* a, int id);
 extern "C" void luno_cLunoTable_writeToReplayFrame(void* obj, void* stream, int a2);
 
@@ -2686,7 +2687,7 @@ extern "C" void luno_cLunoTable_writeToReplayFrame(void* obj, void* stream, int 
  *
  * @param stream  the replay frame stream
  */
-extern "C" void cWScriptMan_writeToReplayFrame(sWSManBB10* self, void* stream)
+extern "C" void cWScriptMan_writeToReplayFrame(sWSManBB10* self, cReplayFramePtr* stream)
 {
     int count;
     int j;
@@ -2746,7 +2747,7 @@ struct sVEntry30BC80 {
  * @param list  the process list
  * @param stream  the replay frame stream
  */
-extern "C" void cWScriptMan_writeReplayProcessList(cWScriptMan* self, void** list, void* stream)
+extern "C" void cWScriptMan_writeReplayProcessList(cWScriptMan* self, void** list, cReplayFramePtr* stream)
 {
     int n = cProcessList_getCount((cWScriptListHead*)list);
     sVEntry30BC80* vtEntry = &(*(sVEntry30BC80**)stream)[1];

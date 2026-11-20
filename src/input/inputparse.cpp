@@ -1598,7 +1598,7 @@ struct sEntry_324590 {
     void* code;     // 0x40
 };
 extern "C" sEntry_324590* cInputMapParser_lookupIdentifierName_K(void* self, const char* name) __asm__("cInputMapParser_lookupIdentifierName");
-extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* node, int* src, void* code, int cap, int a5);
+extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNode* node, int* src, void* code, int cap, int a5);
 extern char D_0048E208[];
 extern char str_opcode_buffer_overflow[];
 
@@ -1621,7 +1621,7 @@ extern "C" int cInputMapParser_compileStatement(cInputMapParser* self, const cha
     }
     int sep = ' ';
     int state = 0;
-    int n = cInputMapParser_compileParseNode(self, ident->code, &state, out, max, defaultModifier);
+    int n = cInputMapParser_compileParseNode(self, (tParseNode*)ident->code, &state, out, max, defaultModifier);
     max -= n;
     out += n;
     if (max <= 0) {
@@ -1693,7 +1693,7 @@ union sInsn_324678 {
  * @param defaultModifier  button modifier for buttons and references without one
  * @return the number of op-codes written, or -1 on error
  */
-extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* vnode, int* dst, void* vcode, int cap, int defaultModifier)
+extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNode* vnode, int* dst, void* vcode, int cap, int defaultModifier)
 {
     sNode_324678* node = (sNode_324678*)vnode;
     sInsn_324678* code = (sInsn_324678*)vcode;
@@ -1719,7 +1719,7 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* vno
         code[1].f = node->value;
         return 2;
     case 1:
-        return cInputMapParser_compileParseNode(self, ((sVar_324678*)node->a)->expr, dst, code, cap, node->b != 5 ? node->b : defaultModifier);
+        return cInputMapParser_compileParseNode(self, (tParseNode*)((sVar_324678*)node->a)->expr, dst, code, cap, node->b != 5 ? node->b : defaultModifier);
     case 2: {
         int idx = cInputMapParser_buttonToRegister(self, node->index, node->b == 5 ? defaultModifier : node->b);
         if (*dst == -1) {
@@ -1752,7 +1752,7 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* vno
         return 1;
     case 5: {
         int cond = -1;
-        int condLen = cInputMapParser_compileParseNode(self, node->a, &cond, code, cap, defaultModifier);
+        int condLen = cInputMapParser_compileParseNode(self, (tParseNode*)node->a, &cond, code, cap, defaultModifier);
         if (condLen < 0) {
             return -1;
         }
@@ -1769,7 +1769,7 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* vno
             self->FreeRegisters[self->NumFreeRegisters++] = reg;
         }
         cap--;
-        int thenLen = cInputMapParser_compileParseNode(self, node->then_, dst, code + 1, cap, defaultModifier);
+        int thenLen = cInputMapParser_compileParseNode(self, (tParseNode*)node->then_, dst, code + 1, cap, defaultModifier);
         if (thenLen < 0) {
             return -1;
         }
@@ -1786,7 +1786,7 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* vno
         }
         code->j.op = 3;
         code->j.reg = 0;
-        int elseLen = cInputMapParser_compileParseNode(self, node->else_, dst, code + 1, cap - 1, defaultModifier);
+        int elseLen = cInputMapParser_compileParseNode(self, (tParseNode*)node->else_, dst, code + 1, cap - 1, defaultModifier);
         if (elseLen < 0) {
             return -1;
         }
@@ -1834,7 +1834,7 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* vno
 INCLUDE_ASM("input/inputparse", cInputMapParser_compileBinaryNode);
 #ifdef SKIP_ASM
 extern "C" void cInputMapParser_error(void* self, const char* fmt, ...);
-extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* node, int* src, void* code, int cap, int a5);
+extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNode* node, int* src, void* code, int cap, int a5);
 extern char str_failed_to_allocate_temporary_register[];
 extern char str_opcode_buffer_overflow[];
 
@@ -1855,17 +1855,17 @@ struct sInsn_00324EC8 {
  * @param defaultModifier  button modifier passed down to the operands
  * @return the number of op-codes written, or -1 on error
  */
-extern "C" int cInputMapParser_compileBinaryNode(cInputMapParser* self, void* node, int* dst, sInsn_00324EC8* code, int cap, int op, int defaultModifier)
+extern "C" int cInputMapParser_compileBinaryNode(cInputMapParser* self, tParseNode* node, int* dst, sInsn_00324EC8* code, int cap, int op, int defaultModifier)
 {
     int src = -1;
-    int srcLen = cInputMapParser_compileParseNode(self, *(void**)((char*)node + 4), &src, code, cap, defaultModifier);
+    int srcLen = cInputMapParser_compileParseNode(self, (tParseNode*)(*(void**)((char*)node + 4)), &src, code, cap, defaultModifier);
     if (srcLen < 0) {
         return -1;
     }
     code += srcLen;
     cap -= srcLen;
     int argReg = -1;
-    int argLen = cInputMapParser_compileParseNode(self, *(void**)((char*)node + 8), &argReg, code, cap, defaultModifier);
+    int argLen = cInputMapParser_compileParseNode(self, (tParseNode*)(*(void**)((char*)node + 8)), &argReg, code, cap, defaultModifier);
     if (argLen < 0) {
         return -1;
     }
@@ -1902,7 +1902,7 @@ extern "C" int cInputMapParser_compileBinaryNode(cInputMapParser* self, void* no
 INCLUDE_ASM("input/inputparse", cInputMapParser_compileUnaryNode);
 #ifdef SKIP_ASM
 extern "C" void cInputMapParser_error(void* self, const char* fmt, ...);
-extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* node, int* src, void* code, int cap, int a5);
+extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, tParseNode* node, int* src, void* code, int cap, int a5);
 extern char str_failed_to_allocate_temporary_register[];
 extern char str_opcode_buffer_overflow[];
 
@@ -1923,11 +1923,11 @@ struct sInsn_003250D8 {
  * @param defaultModifier  button modifier passed down to the operand
  * @return the number of op-codes written, or -1 on error
  */
-extern "C" int cInputMapParser_compileUnaryNode(cInputMapParser* self, void* node, int* dst, sInsn_003250D8* code, int cap, int op, int defaultModifier)
+extern "C" int cInputMapParser_compileUnaryNode(cInputMapParser* self, tParseNode* node, int* dst, sInsn_003250D8* code, int cap, int op, int defaultModifier)
 {
     void* operand = *(void**)((char*)node + 4);
     int src = -1;
-    int n = cInputMapParser_compileParseNode(self, operand, &src, code, cap, defaultModifier);
+    int n = cInputMapParser_compileParseNode(self, (tParseNode*)operand, &src, code, cap, defaultModifier);
     if (n < 0) {
         return -1;
     }

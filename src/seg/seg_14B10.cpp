@@ -151,7 +151,7 @@ extern "C" void cAI_setAIState(cAI*, int);
  * @param stateHandler  the handler (unused)
  * @param aiObj  the AI
  */
-extern "C" void cGameInitHandler_OnUpdate(void *stateHandler, void *aiObj) {
+extern "C" void cGameInitHandler_OnUpdate(void *stateHandler, cAI* aiObj) {
     cAI_setAIState((cAI*)aiObj, 2);
 }
 #endif
@@ -175,8 +175,8 @@ INCLUDE_ASM("seg/seg_14B10", cFreerideHandler_OnGainState);
  * @param stateHandler  the handler (unused)
  * @param aiObj  the AI
  */
-extern "C" void cFreerideHandler_OnGainState(void *stateHandler, void *aiObj) {
-    (*(int *)((char*)(aiObj) + (0x14))) = 0;
+extern "C" void cFreerideHandler_OnGainState(void *stateHandler, cAI* aiObj) {
+    (aiObj->ComputerRidersActive) = 0;
 }
 #endif
 
@@ -193,7 +193,7 @@ extern "C" void cAI_setAIState(cAI*, int);
  * @param stateHandler  the handler (unused)
  * @param aiObj  the AI
  */
-extern "C" void cFreerideHandler_OnUpdate(void *stateHandler, void *aiObj) {
+extern "C" void cFreerideHandler_OnUpdate(void *stateHandler, cAI* aiObj) {
     cAI_setAIState((cAI*)aiObj, 5);
 }
 #endif
@@ -217,8 +217,8 @@ INCLUDE_ASM("seg/seg_14B10", cPreRaceHandler_OnGainState);
  * @param stateHandler  the handler
  * @param aiObj  the AI
  */
-extern "C" void cPreRaceHandler_OnGainState(void *stateHandler, void *aiObj) {
-    (*(int *)((char*)(aiObj) + (0xC))) = 0;
+extern "C" void cPreRaceHandler_OnGainState(void *stateHandler, cAI* aiObj) {
+    (aiObj->EventTimerTick) = 0;
     (*(int *)((char*)(stateHandler) + (4))) = 0;
 }
 #endif
@@ -251,8 +251,8 @@ INCLUDE_ASM("seg/seg_14B10", cCountdownHandler_OnGainState);
  * @param handler  the handler (this; unused)
  * @param aiManager  the AI (cAI)
  */
-extern "C" void cCountdownHandler_OnGainState(void *handler, void *aiManager) {
-    (*(int *)((char*)(aiManager) + (0x1C))) = 180;
+extern "C" void cCountdownHandler_OnGainState(void *handler, cAI* aiManager) {
+    (aiManager->CountdownTicksLeft) = 180;
 }
 #endif
 
@@ -270,15 +270,15 @@ extern "C" void cAI_setAIState(cAI*, int);
  * @param handler  the handler (this; unused)
  * @param aiManager  the AI (cAI)
  */
-extern "C" void cCountdownHandler_OnUpdate(void *handler, void *aiManager) {
+extern "C" void cCountdownHandler_OnUpdate(void *handler, cAI* aiManager) {
     int temp_2;
 
-    temp_2 = (*(int *)((char*)(aiManager) + (0x1C)));
+    temp_2 = (aiManager->CountdownTicksLeft);
     if (temp_2 <= 0) {
         cAI_setAIState((cAI*)aiManager, 5);
         return;
     }
-    (*(int *)((char*)(aiManager) + (0x1C))) = (int) (temp_2 - 1);
+    (aiManager->CountdownTicksLeft) = (int) (temp_2 - 1);
 }
 #endif
 
@@ -294,8 +294,8 @@ INCLUDE_ASM("seg/seg_14B10", cCountdownHandler_OnLoseState);
  * @param handler  the handler (this; unused)
  * @param aiManager  the AI (cAI)
  */
-extern "C" void cCountdownHandler_OnLoseState(void *handler, void *aiManager) {
-    (*(int *)((char*)(aiManager) + (0x1C))) = 0;
+extern "C" void cCountdownHandler_OnLoseState(void *handler, cAI* aiManager) {
+    (aiManager->CountdownTicksLeft) = 0;
 }
 #endif
 
@@ -335,8 +335,8 @@ extern "C" void cGame_setState(int, int, int, int);
  * @param handler  the handler (this; unused)
  * @param aiManager  the AI (cAI)
  */
-extern "C" void cRaceHandler_OnUpdate(void *handler, void *aiManager) {
-    (*(int *)((char*)(aiManager) + (0xC))) = (int) ((*(int *)((char*)(aiManager) + (0xC))) + 1);
+extern "C" void cRaceHandler_OnUpdate(void *handler, cAI* aiManager) {
+    (aiManager->EventTimerTick) = (int) ((aiManager->EventTimerTick) + 1);
     if (cAI_isRaceFinished(aiManager) == 1) {
         cAI_setAIState((cAI*)aiManager, 6);
         cGame_setState(((int)SSXApp->Game), 5, 0, 0);

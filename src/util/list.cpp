@@ -345,7 +345,7 @@ public:
  * @param pOperator  the operator to apply (On Tour cListOperator* pOperator)
  * @return the first nonzero node result, or 0 (On Tour returns void*)
  */
-extern "C" int cList_traverseFlat(cList* self, void* pOperator)
+extern "C" int cList_traverseFlat(cList* self, cListOperator* pOperator)
 {
     cList_traverseFlat_cVirt* n = (cList_traverseFlat_cVirt*)self->mStart.mpNext;
     while (n->mpNext != n) {
@@ -381,7 +381,7 @@ public:
  * @param pOperator  the operator to apply (On Tour cListOperator* pOperator)
  * @return the first nonzero node result, or 0 (On Tour returns void*)
  */
-extern "C" int cList_traverseRecurse(cList* self, void* pOperator)
+extern "C" int cList_traverseRecurse(cList* self, cListOperator* pOperator)
 {
     cList_traverseRecurse_cVirt* n = (cList_traverseRecurse_cVirt*)self->mStart.mpNext;
     while (n->mpNext != n) {

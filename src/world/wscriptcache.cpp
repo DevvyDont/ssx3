@@ -305,7 +305,7 @@ struct sWSCItemFields {
     int value;    // 0x8
 };
 
-extern "C" void cWScriptCacheEntry_resolve(sWScriptCacheItem* e, void* world, int index);
+extern "C" void cWScriptCacheEntry_resolve(sWScriptCacheItem* e, cWorld* world, int index);
 
 /**
  * Gives an entry the script data that came with the stream: stores @p value, marks it streamed (mStreamed 1, not freed
@@ -418,7 +418,7 @@ static inline void* resolve_CCD8(char* w, sRef_CCD8 ref, int tblOff)
  * @param world  the cWorld
  * @param index  the section id
  */
-extern "C" void cWScriptCacheEntry_resolve(sWScriptCacheItem* ep, void* world, int index)
+extern "C" void cWScriptCacheEntry_resolve(sWScriptCacheItem* ep, cWorld* world, int index)
 {
     char* e = (char*)ep;
     char** wp = (char**)world;

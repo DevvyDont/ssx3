@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -196,7 +197,7 @@ static inline void Opened1867A8(void* self, void* item)
  * @param obj  the widget
  * @param msg  the widget event (5 accept, 6 back)
  */
-extern "C" void cFEStateEventSelect_onWidgetEvent(void* self, void* obj, int msg)
+extern "C" void cFEStateEventSelect_onWidgetEvent(void* self, cUIThing* obj, int msg)
 {
     if (msg == 5) {
         if (cUITemplate_MAP_onWidgetEvent((char*)self + 0x48, obj, 5) == 1) {
@@ -205,7 +206,7 @@ extern "C" void cFEStateEventSelect_onWidgetEvent(void* self, void* obj, int msg
                 cUIStateStack_pop(*(char**)((char*)self + 0x10) + 0x18, 1);
             } else {
                 cMgr1867A8* feCustom = **(cMgr1867A8***)((char*)self + 0x10);
-                Opened1867A8(self, feCustom->v04(self, *(int*)((char*)obj + 0x18)));
+                Opened1867A8(self, feCustom->v04(self, obj->mMiscData));
             }
         }
     } else if (msg == 6) {
@@ -215,7 +216,7 @@ extern "C" void cFEStateEventSelect_onWidgetEvent(void* self, void* obj, int msg
                 cUIStateStack_pop(*(char**)((char*)self + 0x10) + 0x18, 1);
             } else {
                 cMgr1867A8* feCustom = **(cMgr1867A8***)((char*)self + 0x10);
-                Opened1867A8(self, feCustom->v05(self, *(int*)((char*)obj + 0x18)));
+                Opened1867A8(self, feCustom->v05(self, obj->mMiscData));
             }
         }
     } else {

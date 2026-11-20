@@ -1,4 +1,7 @@
 #include "common.h"
+#include "ui/uimenu.h"
+#include "ui/uistate.h"
+#include "ui/uithing.h"
 #include "be/beintnewrace.h"
 #include "main/ssxapp.h"
 
@@ -299,15 +302,15 @@ static inline int countSel_7500(sReqLine_7500* self)
  * @param msg  UI event code (1, 5 or 6)
  */
 // Request-line widget events: 1 hilights a song, 5 toggles it (done/selected masks), 6 saves the masks and leaves.
-extern "C" void cFEStateRequestLine_onWidgetEvent(void* requestLine, void* item, unsigned int msg)
+extern "C" void cFEStateRequestLine_onWidgetEvent(void* requestLine, cUIThing* item, unsigned int msg)
 {
     sReqLine_7500* self = (sReqLine_7500*)requestLine;
-    if (item == 0) {
+    if (((void*)item) == 0) {
         return;
     }
     switch (msg) {
     case 5: {
-        int k = self->top + *(int*)((char*)item + 0x18);
+        int k = self->top + item->mMiscData;
         if (k >= self->count) {
             return;
         }
@@ -356,7 +359,7 @@ extern "C" void cFEStateRequestLine_onWidgetEvent(void* requestLine, void* item,
         break;
     }
     case 1: {
-        int idx = self->list[self->top + *(int*)((char*)item + 0x18)];
+        int idx = self->list[self->top + item->mMiscData];
         cFEStateRequestLine_updateHilightedSongInfo(self, idx);
         cFEStateRequestLine_updateHelpText(self, idx);
         cFEStateRequestLine_updateButtonsText(self, idx);
@@ -395,7 +398,7 @@ extern "C" void func_002B4978(void* list, int idx);
  * @param k  row index in the menu
  * @return 0x10 to refuse, 0 for key 9, else 0x101
  */
-extern "C" int cFEStateRequestLine_onWidgetMenu(void* requestLine, void* item, unsigned int msg, int k)
+extern "C" int cFEStateRequestLine_onWidgetMenu(void* requestLine, cUIMenu* item, unsigned int msg, int k)
 {
     sReqLine_7500* self = (sReqLine_7500*)requestLine;
     switch (msg) {
@@ -483,11 +486,11 @@ struct sMsgCenter_979D8 {
  * @param item  the popup state
  * @param msg  popup event code (0x15 or 0x16)
  */
-extern "C" void cFEStateRequestLine_onPopupEvent(sMsgCenter_979D8* self, void* item, int msg)
+extern "C" void cFEStateRequestLine_onPopupEvent(sMsgCenter_979D8* self, cUIState* item, int msg)
 {
     switch (msg) {
     case 21:
-        if (*(int*)((char*)item + 0xC) != 7) {
+        if (item->mHashName != 7) {
             self->flags &= ~8;
         }
         break;
@@ -495,7 +498,7 @@ extern "C" void cFEStateRequestLine_onPopupEvent(sMsgCenter_979D8* self, void* i
         if (((self->flags >> 3) & 1) == 0) {
             self->flags |= 8;
         }
-        if (*(int*)((char*)item + 0xC) == 7 && *(int*)((char*)item + 0x6C) != 0) {
+        if (item->mHashName == 7 && *(int*)((char*)item + 0x6C) != 0) {
             int song = self->list[self->top + *(int*)(*(char**)(self->menu + 0xA0) + 0x18)];
             cFEStateRequestLine_buySong(self, song);
             cFEStateRequestLine_updatePlayList(self);

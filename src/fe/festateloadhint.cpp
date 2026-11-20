@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
 #include "be/beintnetwork.h"
@@ -209,7 +210,7 @@ INCLUDE_ASM("fe/festateloadhint", cFELoadState_onWidgetCreate);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void cFELoadState_widgetCreateQP(void* self, void* widget);
+extern "C" void cFELoadState_widgetCreateQP(void* self, cUIThing* widget);
 
 /**
  * Creates the load screen's quick-play widget, except on the online game path.
@@ -219,7 +220,7 @@ extern "C" void cFELoadState_widgetCreateQP(void* self, void* widget);
  *
  * @param widget  the widget being created
  */
-extern "C" void cFELoadState_onWidgetCreate(void* self, void* widget)
+extern "C" void cFELoadState_onWidgetCreate(void* self, cUIThing* widget)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (cBENewRaceInterface_newRace.cGamePath != 2) {
@@ -1391,9 +1392,8 @@ struct sVEnt_7AB0 { short delta; short index; void* (*fn)(void*, int); };
  *
  * @param widget  the widget being created (On Tour cUIThing* pWidget)
  */
-extern "C" void cFELoadState_widgetCreateQP(void* self, void* widget)
+extern "C" void cFELoadState_widgetCreateQP(void* self, cUIThing* widget)
 {
-    char* w = (char*)widget;
     void* iface1 = cBE_getInterface_Fv(cBE_getBE(), 1);
     void* iface2 = cBE_getInterface_Fv(cBE_getBE(), 2);
     void* iface3 = cBE_getInterface_Fv(cBE_getBE(), 3);
@@ -1401,36 +1401,36 @@ extern "C" void cFELoadState_widgetCreateQP(void* self, void* widget)
     char* st = cBEScoreInterface_getPlayerLastCompletedEventStats(iface8, cBENewPlayerInterface_getHumanRider(iface1, 0));
     unsigned short text[0x18];
     unsigned short fmtw[0x20];
-    if (wHash_7AB0(w) == GetHashValue32(str_results_rider)) {
+    if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_rider)) {
         func_002C2540(text, cBECharacterInterface_getShortName(iface2, cBENewPlayerInterface_getHumanRider(iface1, 0)));
         cUIText_setUnicodeString(widget, (char*)text);
-    } else if (wHash_7AB0(w) == GetHashValue32(str_results_ranking)) {
+    } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_ranking)) {
         char* locale = (char*)SSXApp->FELocale;
         sVEnt_7AB0* vt = *(sVEnt_7AB0**)(locale + 4);
         strcpy1(fmtw, vt[4].fn(locale + vt[4].delta, GetHashValue32(str_kT_OVRCMNLevelNum)));
         sprintf1(text, fmtw, cBEStatInterface_getStatLevel(iface3, cBENewPlayerInterface_getHumanRider(iface1, 0)));
         cUIText_setUnicodeString(widget, (char*)text);
-    } else if (wHash_7AB0(w) == GetHashValue32(str_results_knockdown)) {
+    } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_knockdown)) {
         func_002C2540(fmtw, str_pct_d_g);
         sprintf1(text, fmtw, *(int*)(st + 0x2C));
         cUIText_setUnicodeString(widget, (char*)text);
-    } else if (wHash_7AB0(w) == GetHashValue32(str_results_wipeouts)) {
+    } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_wipeouts)) {
         func_002C2540(fmtw, str_pct_d_g);
         sprintf1(text, fmtw, *(int*)(st + 0x28));
         cUIText_setUnicodeString(widget, (char*)text);
-    } else if (wHash_7AB0(w) == GetHashValue32(str_results_ubertricks)) {
+    } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_ubertricks)) {
         func_002C2540(fmtw, str_pct_d_g);
         sprintf1(text, fmtw, *(int*)(st + 0x18));
         cUIText_setUnicodeString(widget, (char*)text);
-    } else if (wHash_7AB0(w) == GetHashValue32(str_results_ubergrinds)) {
+    } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_ubergrinds)) {
         func_002C2540(fmtw, str_pct_d_g);
         sprintf1(text, fmtw, *(int*)(st + 0x20));
         cUIText_setUnicodeString(widget, (char*)text);
-    } else if (wHash_7AB0(w) == GetHashValue32(str_results_handplants)) {
+    } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_handplants)) {
         func_002C2540(fmtw, str_pct_d_g);
         sprintf1(text, fmtw, *(int*)(st + 0xC));
         cUIText_setUnicodeString(widget, (char*)text);
-    } else if (wHash_7AB0(w) == GetHashValue32(str_results_grabtime)) {
+    } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_grabtime)) {
         int totalSeconds = (int)*(float*)(st + 0x48);
         int min = totalSeconds / 60;
         int sec = totalSeconds % 60;
@@ -1439,7 +1439,7 @@ extern "C" void cFELoadState_widgetCreateQP(void* self, void* widget)
         __builtin_memcpy(fmt, D_0047BF78, sizeof("%02.0f:%02.0f"));
         sprintf(buf, fmt, fptodp((float)min), fptodp((float)sec));
         cUIText_setAsciiString((cUIText*)widget, buf);
-    } else if (wHash_7AB0(w) == GetHashValue32(str_results_best_combo)) {
+    } else if (wHash_7AB0(((char*)widget)) == GetHashValue32(str_results_best_combo)) {
         func_002C2540(fmtw, str_pct_d_g);
         sprintf1(text, fmtw, *(int*)(st + 0x88));
         cUIText_setUnicodeString(widget, (char*)text);

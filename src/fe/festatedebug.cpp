@@ -1,4 +1,6 @@
 #include "common.h"
+#include "ui/uiscreen.h"
+#include "ui/uiengine.h"
 #include "fe/festatecharselect.h"
 
 //100%
@@ -47,7 +49,7 @@ public:
  *
  * @param screen  the screen holding the keyboard (On Tour mpScreen)
  */
-extern "C" void cScreenKeyboard_initScreenKeyboard(char* self, void* screen)
+extern "C" void cScreenKeyboard_initScreenKeyboard(char* self, cUIScreen* screen)
 {
     cUIObjK180B60* textObj;
     textObj = (cUIObjK180B60*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_keyboard_arrLeft));
@@ -240,7 +242,7 @@ extern void* cFEStateCharSelect_vtbl[];
  * @param count  the rider slot choosing now (0 = first player); stored as mUserNum
  * @return @p self
  */
-extern "C" void* cFEStateCharSelect_cFEStateCharSelect(cFEStateCharSelect* self, void* owner, int count)
+extern "C" void* cFEStateCharSelect_cFEStateCharSelect(cFEStateCharSelect* self, cUIEngine* owner, int count)
 {
     signed char n = count;
     int i = 0;

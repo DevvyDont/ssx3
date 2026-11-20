@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/worldview.h"
 #include "object/uvscrollmodifier.h"
 #include "object/transformmodifier.h"
 #include "object/texflipmodifier.h"
@@ -770,7 +771,7 @@ static inline void resetHit_C698(sRmHit_C698* h)
  * @param bestDist  in/out: the best distance so far (On Tour float& dist)
  * @param out  receives the hit (On Tour tIntersectInfo* intInfo)
  */
-extern "C" void cRailModifier_splineIntersect(cRailModifier* self, void* box, void* box2, const t4Vector* point, unsigned int mask,
+extern "C" void cRailModifier_splineIntersect(cRailModifier* self, t4Vector* box, t4Vector* box2, const t4Vector* point, unsigned int mask,
                               int* found, float* bestDist, sRmHit_C698* out)
 {
     sRmSpline_C698* spline = (sRmSpline_C698*)(*(sRmRef_C698*)&self->SplineId).get(*cObjectInterface_getWorld());
@@ -6681,10 +6682,10 @@ INCLUDE_ASM("object/railmodifier", cPositionModifier_setBoundBox);
  *
  * @param boundbox  the new bound box
  */
-extern "C" void cPositionModifier_setBoundBox(cPositionModifier* self, void* boundbox)
+extern "C" void cPositionModifier_setBoundBox(cPositionModifier* self, tBoundBox* boundbox)
 {
     *(cQuad128*)&self->BoundBox = *(cQuad128*)boundbox;
-    *(cQuad128*)&self->BoundBox.MaxPoint = *(cQuad128*)((char*)boundbox + 0x10);
+    *(cQuad128*)&self->BoundBox.MaxPoint = *(cQuad128*)&boundbox->MaxPoint;
 }
 #endif
 
@@ -6890,10 +6891,10 @@ INCLUDE_ASM("object/railmodifier", cMagnetModifier_setBoundBox);
  *
  * @param boundbox  the new bound box (On Tour const tBoundBox& boundbox)
  */
-extern "C" void cMagnetModifier_setBoundBox(cMagnetModifier* self, void* boundbox)
+extern "C" void cMagnetModifier_setBoundBox(cMagnetModifier* self, tBoundBox* boundbox)
 {
     *(cQuad128*)&self->BoundBox = *(cQuad128*)boundbox;
-    *(cQuad128*)&self->BoundBox.MaxPoint = *(cQuad128*)((char*)boundbox + 0x10);
+    *(cQuad128*)&self->BoundBox.MaxPoint = *(cQuad128*)&boundbox->MaxPoint;
 }
 #endif
 
@@ -7007,10 +7008,10 @@ INCLUDE_ASM("object/railmodifier", cAvaSplineModifier_setBoundBox);
  *
  * @param boundbox  the new bound box (On Tour const tBoundBox& boundbox)
  */
-extern "C" void cAvaSplineModifier_setBoundBox(cAvaSplineModifier* self, void* boundbox)
+extern "C" void cAvaSplineModifier_setBoundBox(cAvaSplineModifier* self, tBoundBox* boundbox)
 {
     *(cQuad128*)&self->BoundBox = *(cQuad128*)boundbox;
-    *(cQuad128*)&self->BoundBox.MaxPoint = *(cQuad128*)((char*)boundbox + 0x10);
+    *(cQuad128*)&self->BoundBox.MaxPoint = *(cQuad128*)&boundbox->MaxPoint;
 }
 #endif
 
@@ -7140,10 +7141,10 @@ INCLUDE_ASM("object/railmodifier", cSplineModifier_setBoundBox);
  *
  * @param boundbox  the new box (On Tour const tBoundBox&)
  */
-extern "C" void cSplineModifier_setBoundBox(cSplineModifier* self, void* boundbox)
+extern "C" void cSplineModifier_setBoundBox(cSplineModifier* self, tBoundBox* boundbox)
 {
     *(cQuad128*)&self->BoundBox = *(cQuad128*)boundbox;
-    *(cQuad128*)&self->BoundBox.MaxPoint = *(cQuad128*)((char*)boundbox + 0x10);
+    *(cQuad128*)&self->BoundBox.MaxPoint = *(cQuad128*)&boundbox->MaxPoint;
 }
 #endif
 
@@ -7254,11 +7255,11 @@ INCLUDE_ASM("object/railmodifier", cMultiSplineModifier_setBoundBox);
  *
  * @param boundbox  the new box (On Tour const tBoundBox&)
  */
-extern "C" void cMultiSplineModifier_setBoundBox(cMultiSplineModifier* self, void* boundbox)
+extern "C" void cMultiSplineModifier_setBoundBox(cMultiSplineModifier* self, tBoundBox* boundbox)
 {
     void* nodes = self->Nodes;
     *(cQuad128*)((char*)nodes + 0x30) = *(cQuad128*)boundbox;
-    *(cQuad128*)((char*)nodes + 0x40) = *(cQuad128*)((char*)boundbox + 0x10);
+    *(cQuad128*)((char*)nodes + 0x40) = *(cQuad128*)&boundbox->MaxPoint;
 }
 #endif
 
@@ -7436,10 +7437,10 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier_setBoundBox);
  *
  * @param bb  the new box (On Tour const tBoundBox&)
  */
-extern "C" void cRollerModifier_setBoundBox(cRollerModifier* self, void* bb)
+extern "C" void cRollerModifier_setBoundBox(cRollerModifier* self, tBoundBox* bb)
 {
     *(cQuad128*)&self->boundbox = *(cQuad128*)bb;
-    *(cQuad128*)&self->boundbox.MaxPoint = *(cQuad128*)((char*)bb + 0x10);
+    *(cQuad128*)&self->boundbox.MaxPoint = *(cQuad128*)&bb->MaxPoint;
 }
 #endif
 

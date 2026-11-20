@@ -1,4 +1,5 @@
 #include "common.h"
+#include "replay/frameptr.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -615,7 +616,7 @@ struct sVEntry00113AA0 {
  *
  * @param obj  the replay frame (cReplayFramePtr)
  */
-extern "C" void cAirPredictor_writeToReplayFrame(void* self, void* obj)
+extern "C" void cAirPredictor_writeToReplayFrame(void* self, cReplayFramePtr* obj)
 {
     sVEntry00113AA0* vt = *(sVEntry00113AA0**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 176);
@@ -636,7 +637,7 @@ struct sVEntry00113AD8 {
  *
  * @param obj  the replay frame (cReplayFramePtr)
  */
-extern "C" void cAirPredictor_readFromReplayFrame(void* self, void* obj)
+extern "C" void cAirPredictor_readFromReplayFrame(void* self, cReplayFramePtr* obj)
 {
     sVEntry00113AD8* vt = *(sVEntry00113AD8**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 176);

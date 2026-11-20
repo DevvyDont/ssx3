@@ -1,4 +1,7 @@
 #include "common.h"
+#include "ai/computer.h"
+#include "ai/player.h"
+#include "replay/frameptr.h"
 #include "bx/math3d.h"
 #include "ai/riderhandler.h"
 #include "sound/ssxaudio.h"
@@ -766,7 +769,7 @@ extern "C" int cBENewPlayerInterface_getRiderCtrlID(void* iface, int i);
 extern "C" int cBENewPlayerInterface_getControllerMapping(void* iface, int i);
 extern "C" int cInputSync_createlocalinput(void* a, void* b);
 extern "C" int cInputSync_createremoteinput(void* a, void* b);
-extern "C" void cAI_applyPlayerRulesCustom(cAI* self, void* obj, int i);
+extern "C" void cAI_applyPlayerRulesCustom(cAI* self, cPlayer* obj, int i);
 // PORT: cPlayer_cPlayer returns self here (declared void elsewhere in this unit); bound by asm label.
 extern "C" char* cPlayer_cPlayer_IP(void* self, int inChrg) __asm__("cPlayer_cPlayer");
 extern "C" void cRider_addFocusBox(void* self);
@@ -873,7 +876,7 @@ extern "C" void cAI_InitPlayers(cAI* aiManager)
         cRider_addFocusBox(*(void**)(obj + 0x18));
         nPlayers++;
         cRider_addRiderMetrix(*(cRider**)(obj + 0x18));
-        cAI_applyPlayerRulesCustom((cAI*)self, obj, i);
+        cAI_applyPlayerRulesCustom((cAI*)self, (cPlayer*)obj, i);
         *(int*)(*(char**)(obj + 0x18) + 0x2F8) = 0;
         cRider_initOnce(self->mRiders[i], 0);
         cBENewRaceInterface_assignPlayer(rm, idx, idx);
@@ -1038,7 +1041,7 @@ struct cRider;
 void cRider_addRiderMetrix(cRider* rider);
 extern "C" void cComputer_setAttributeLevels(void*);
 extern "C" void cComputer_updateRiderDifficulty(void*);
-extern "C" void cAI_applyComputerRulesCustom(cAI* self, void* rider);
+extern "C" void cAI_applyComputerRulesCustom(cAI* self, cComputer* rider);
 void cBENewRaceInterface_assignPlayer(void*, int, int);
 extern char str_ComputerRider[];
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -1097,7 +1100,7 @@ extern "C" void cAI_initComputerRiders(cAI* aiManager)
         cRider_addRiderMetrix(*(cRider**)(obj + 0x18));
         cComputer_setAttributeLevels(obj);
         cComputer_updateRiderDifficulty(obj);
-        cAI_applyComputerRulesCustom((cAI*)self, obj);
+        cAI_applyComputerRulesCustom((cAI*)self, (cComputer*)obj);
         cBENewRaceInterface_assignPlayer(rm, idx, idx);
         self->mObjs[self->mNumComputers] = obj;
         self->mNumComputers++;
@@ -2396,7 +2399,7 @@ static inline int OptBit_12B498(sOptView_12B498* o, int b)
  * @param obj  the new cPlayer (On Tour pPlayer)
  * @param i  the player index, 0 or 1, selecting the per-player rule entry (On Tour playerIndex)
  */
-extern "C" void cAI_applyPlayerRulesCustom(cAI* self, void* obj, int i)
+extern "C" void cAI_applyPlayerRulesCustom(cAI* self, cPlayer* obj, int i)
 {
     int boostMode = 1;
     if (OptBit_12B498(&D_005308B8_12B498, 3))
@@ -2405,29 +2408,29 @@ extern "C" void cAI_applyPlayerRulesCustom(cAI* self, void* obj, int i)
         boostMode = 0;
     else
         if ((D_005308B8_12B498.e[i].f0 >> 5) & 1) boostMode = 2;
-    char* playerRider = *(char**)((char*)obj + 0x18);
+    char* playerRider = (char*)obj->mRider;
     *(int*)(playerRider + 0x304) = boostMode;
     cRider_initBoost(playerRider);
     if ((D_005308B8_12B498.e[i].f0 >> 3) & 1)
-        *(float*)(*(char**)((char*)obj + 0x18) + 0xB24) = 1.0f;
+        *(float*)((char*)obj->mRider + 0xB24) = 1.0f;
     if (OptBit_12B498(&D_005308B8_12B498, 4))
-        *(int*)(*(char**)((char*)obj + 0x18) + 0xB28) = 2;
+        *(int*)((char*)obj->mRider + 0xB28) = 2;
     if ((D_005308B8_12B498.e[i].f0 >> 4) & 1)
-        cRider_setUbersAllowed(*(void**)((char*)obj + 0x18), 0);
+        cRider_setUbersAllowed(obj->mRider, 0);
     else if (OptBit_12B498(&D_005308B8_12B498, 1))
-        cRider_setUbersAllowed(*(void**)((char*)obj + 0x18), 1);
+        cRider_setUbersAllowed(obj->mRider, 1);
     if (D_005308B8_12B498.e[i].f0 & 1)
-        *(int*)(*(char**)((char*)obj + 0x18) + 0xB20) = 2;
-    (*(sRider_12B498**)((char*)obj + 0x18))->fB30 = cBERules_getPlayerStartDelaySecs(i);
+        *(int*)((char*)obj->mRider + 0xB20) = 2;
+    ((sRider_12B498*)obj->mRider)->fB30 = cBERules_getPlayerStartDelaySecs(i);
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0)
     {
         if (cBENetworkInterface_networkOpt.bIsRankedGame != 0)
-            *(int*)(*(char**)((char*)obj + 0x18) + 0xB34) = 8;
+            *(int*)((char*)obj->mRider + 0xB34) = 8;
     }
     else if ((D_005308B8_12B498.e[i].f0 >> 1) & 1)
-        *(int*)(*(char**)((char*)obj + 0x18) + 0xB34) = 1;
-    char* riderMetrix = *(char**)(*(char**)((char*)obj + 0x18) + 0x790);
+        *(int*)((char*)obj->mRider + 0xB34) = 1;
+    char* riderMetrix = *(char**)((char*)obj->mRider + 0x790);
     if ((D_005308B8_12B498.e[i].f0 >> 2) & 1)
         *(float*)(riderMetrix + 0x1C4) = 0.5f;
     cRiderMetrix_setInitialPointsTotal(riderMetrix, D_005308B8_12B498.e[i].x);
@@ -2463,7 +2466,7 @@ static inline int OptBit_0012B698(sOptFlags_0012B698* o, int b)
  *
  * @param rider  the new cComputer (On Tour pComputer)
  */
-extern "C" void cAI_applyComputerRulesCustom(cAI* self, void* rider)
+extern "C" void cAI_applyComputerRulesCustom(cAI* self, cComputer* rider)
 {
     int boostMode = 1;
     if (OptBit_0012B698(&D_005308B8, 3))
@@ -2472,16 +2475,16 @@ extern "C" void cAI_applyComputerRulesCustom(cAI* self, void* rider)
         boostMode = 0;
     else
         if ((D_005308B8.f0 >> 5) & 1) boostMode = 2;
-    char* computerRider = *(char**)((char*)rider + 0x18);
+    char* computerRider = (char*)rider->mRider;
     *(int*)(computerRider + 0x304) = boostMode;
     cRider_initBoost(computerRider);
     if ((D_005308B8.f0 >> 3) & 1)
-        *(float*)(*(char**)((char*)rider + 0x18) + 0xB24) = 1.0f;
+        *(float*)((char*)rider->mRider + 0xB24) = 1.0f;
     if (OptBit_0012B698(&D_005308B8, 4))
-        *(int*)(*(char**)((char*)rider + 0x18) + 0xB28) = 2;
+        *(int*)((char*)rider->mRider + 0xB28) = 2;
     if (OptBit_0012B698(&D_005308B8, 1))
-        cRider_setUbersAllowed(*(void**)((char*)rider + 0x18), 1);
-    *(int*)(*(char**)((char*)rider + 0x18) + 0xB30) = cBERules_getAIStartDelaySecs();
+        cRider_setUbersAllowed(rider->mRider, 1);
+    *(int*)((char*)rider->mRider + 0xB30) = cBERules_getAIStartDelaySecs();
 }
 #endif
 
@@ -2536,7 +2539,7 @@ static inline void replayWriteObj(char* obj, void* frame)
  *
  * @param frame  the replay frame (On Tour cReplayFramePtr)
  */
-extern "C" void cAI_writeToReplayFrame(cAI* self, void* frame)
+extern "C" void cAI_writeToReplayFrame(cAI* self, cReplayFramePtr* frame)
 {
     sVEntryWF* vt = *(sVEntryWF**)frame;
     vt[1].fn((char*)frame + vt[1].delta, (self), 40);
@@ -2583,7 +2586,7 @@ static inline void replayReadObj(char* obj, void* frame)
  *
  * @param frame  the replay frame (On Tour cReplayFramePtr)
  */
-extern "C" void cAI_readFromReplayFrame(cAI* self, void* frame)
+extern "C" void cAI_readFromReplayFrame(cAI* self, cReplayFramePtr* frame)
 {
     sVEntryRF* vt = *(sVEntryRF**)frame;
     vt[2].fn((char*)frame + vt[2].delta, (self), 40);
@@ -3151,7 +3154,7 @@ struct sAiVEntry12C558 {
  *
  * @param obj  the replay frame (On Tour cReplayFramePtr); its virtual write (slot 1) does the copy
  */
-extern "C" void cGateControl_writeToReplayFrame(cGateControl* self, void* obj)
+extern "C" void cGateControl_writeToReplayFrame(cGateControl* self, cReplayFramePtr* obj)
 {
     sAiVEntry12C558* vt = *(sAiVEntry12C558**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 20);
@@ -3172,7 +3175,7 @@ struct sAiVEntry12C590 {
  *
  * @param obj  the replay frame (On Tour cReplayFramePtr); its virtual read (slot 2) does the copy
  */
-extern "C" void cGateControl_readFromReplayFrame(cGateControl* self, void* obj)
+extern "C" void cGateControl_readFromReplayFrame(cGateControl* self, cReplayFramePtr* obj)
 {
     sAiVEntry12C590* vt = *(sAiVEntry12C590**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 20);
@@ -3424,7 +3427,7 @@ struct sVEntry0012C9C0 {
  *
  * @param obj  the replay frame (On Tour cReplayFramePtr); its virtual write (slot 1) does the copy
  */
-extern "C" void cFinishLineControl_writeToReplayFrame(cFinishLineControl* self, void* obj)
+extern "C" void cFinishLineControl_writeToReplayFrame(cFinishLineControl* self, cReplayFramePtr* obj)
 {
     sVEntry0012C9C0* vt = *(sVEntry0012C9C0**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x4);
@@ -3445,7 +3448,7 @@ struct sVEntry0012C9F8 {
  *
  * @param obj  the replay frame (On Tour cReplayFramePtr); its virtual read (slot 2) does the copy
  */
-extern "C" void cFinishLineControl_readFromReplayFrame(cFinishLineControl* self, void* obj)
+extern "C" void cFinishLineControl_readFromReplayFrame(cFinishLineControl* self, cReplayFramePtr* obj)
 {
     sVEntry0012C9F8* vt = *(sVEntry0012C9F8**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x4);
@@ -4817,7 +4820,7 @@ struct sVEntry0012E708 {
  *
  * @param obj  replay frame to write to (On Tour cReplayFramePtr)
  */
-extern "C" void cWipeoutControl_writeToReplayFrame(cWipeoutControl* self, void* obj)
+extern "C" void cWipeoutControl_writeToReplayFrame(cWipeoutControl* self, cReplayFramePtr* obj)
 {
     sVEntry0012E708* vt = *(sVEntry0012E708**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x80);
@@ -4841,7 +4844,7 @@ struct sVEntry0012E740 {
  *
  * @param obj  replay frame to read from (On Tour cReplayFramePtr)
  */
-extern "C" void cWipeoutControl_readFromReplayFrame(cWipeoutControl* self, void* obj)
+extern "C" void cWipeoutControl_readFromReplayFrame(cWipeoutControl* self, cReplayFramePtr* obj)
 {
     sVEntry0012E740* vt = *(sVEntry0012E740**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x80);
@@ -5495,7 +5498,7 @@ struct sVEntry0012F5B0 {
  *
  * @param obj  replay frame to write to (On Tour cReplayFramePtr)
  */
-extern "C" void cResetControl_writeToReplayFrame(cResetControl* self, void* obj)
+extern "C" void cResetControl_writeToReplayFrame(cResetControl* self, cReplayFramePtr* obj)
 {
     sVEntry0012F5B0* vt = *(sVEntry0012F5B0**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x8);
@@ -5518,7 +5521,7 @@ struct sVEntry0012F5E8 {
  *
  * @param obj  replay frame to read from (On Tour cReplayFramePtr)
  */
-extern "C" void cResetControl_readFromReplayFrame(cResetControl* self, void* obj)
+extern "C" void cResetControl_readFromReplayFrame(cResetControl* self, cReplayFramePtr* obj)
 {
     sVEntry0012F5E8* vt = *(sVEntry0012F5E8**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x8);
@@ -5805,7 +5808,7 @@ struct sVEntry0012FBF0 {
  *
  * @param obj  replay frame to write to (On Tour cReplayFramePtr)
  */
-extern "C" void cNaturalAirControl_writeToReplayFrame(cNaturalAirControl* self, void* obj)
+extern "C" void cNaturalAirControl_writeToReplayFrame(cNaturalAirControl* self, cReplayFramePtr* obj)
 {
     sVEntry0012FBF0* vt = *(sVEntry0012FBF0**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 20);
@@ -5828,7 +5831,7 @@ struct sVEntry0012FC28 {
  *
  * @param obj  replay frame to read from (On Tour cReplayFramePtr)
  */
-extern "C" void cNaturalAirControl_readFromReplayFrame(cNaturalAirControl* self, void* obj)
+extern "C" void cNaturalAirControl_readFromReplayFrame(cNaturalAirControl* self, cReplayFramePtr* obj)
 {
     sVEntry0012FC28* vt = *(sVEntry0012FC28**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 20);
@@ -7022,7 +7025,7 @@ struct sVEntry00131598 {
  *
  * @param obj  replay frame to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cBoardPressControl_writeToReplayFrame(cBoardPressControl* self, void* obj)
+extern "C" void cBoardPressControl_writeToReplayFrame(cBoardPressControl* self, cReplayFramePtr* obj)
 {
     sVEntry00131598* vt = *(sVEntry00131598**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 20);
@@ -7045,7 +7048,7 @@ struct sVEntry001315D0 {
  *
  * @param obj  replay frame to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cBoardPressControl_readFromReplayFrame(cBoardPressControl* self, void* obj)
+extern "C" void cBoardPressControl_readFromReplayFrame(cBoardPressControl* self, cReplayFramePtr* obj)
 {
     sVEntry001315D0* vt = *(sVEntry001315D0**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 20);
@@ -7816,7 +7819,7 @@ struct sVEntry00132840 {
  *
  * @param obj  replay frame to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cRailslideControl_writeToReplayFrame(cRailslideControl* self, void* obj)
+extern "C" void cRailslideControl_writeToReplayFrame(cRailslideControl* self, cReplayFramePtr* obj)
 {
     sVEntry00132840* vt = *(sVEntry00132840**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x8);
@@ -7839,7 +7842,7 @@ struct sVEntry00132878 {
  *
  * @param obj  replay frame to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cRailslideControl_readFromReplayFrame(cRailslideControl* self, void* obj)
+extern "C" void cRailslideControl_readFromReplayFrame(cRailslideControl* self, cReplayFramePtr* obj)
 {
     sVEntry00132878* vt = *(sVEntry00132878**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x8);
@@ -8259,7 +8262,7 @@ struct sVEntry001330B8 {
  *
  * @param obj  replay frame to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cHandplantControl_writeToReplayFrame(cHandplantControl* self, void* obj)
+extern "C" void cHandplantControl_writeToReplayFrame(cHandplantControl* self, cReplayFramePtr* obj)
 {
     sVEntry001330B8* vt = *(sVEntry001330B8**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 20);
@@ -8282,7 +8285,7 @@ struct sVEntry001330F0 {
  *
  * @param obj  replay frame to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cHandplantControl_readFromReplayFrame(cHandplantControl* self, void* obj)
+extern "C" void cHandplantControl_readFromReplayFrame(cHandplantControl* self, cReplayFramePtr* obj)
 {
     sVEntry001330F0* vt = *(sVEntry001330F0**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 20);
@@ -9999,7 +10002,7 @@ struct sVEntry001361F8 {
  *
  * @param obj  replay frame to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cSpinControl_writeToReplayFrame(cSpinControl* self, void* obj)
+extern "C" void cSpinControl_writeToReplayFrame(cSpinControl* self, cReplayFramePtr* obj)
 {
     sVEntry001361F8* vt = *(sVEntry001361F8**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 88);
@@ -10022,7 +10025,7 @@ struct sVEntry00136230 {
  *
  * @param obj  replay frame to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cSpinControl_readFromReplayFrame(cSpinControl* self, void* obj)
+extern "C" void cSpinControl_readFromReplayFrame(cSpinControl* self, cReplayFramePtr* obj)
 {
     sVEntry00136230* vt = *(sVEntry00136230**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 88);
@@ -10254,7 +10257,7 @@ struct sVEntry001368E8 {
  *
  * @param obj  replay frame to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cUberGrindControl_writeToReplayFrame(cUberGrindControl* self, void* obj)
+extern "C" void cUberGrindControl_writeToReplayFrame(cUberGrindControl* self, cReplayFramePtr* obj)
 {
     sVEntry001368E8* vt = *(sVEntry001368E8**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x8);
@@ -10277,7 +10280,7 @@ struct sVEntry00136920 {
  *
  * @param obj  replay frame to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cUberGrindControl_readFromReplayFrame(cUberGrindControl* self, void* obj)
+extern "C" void cUberGrindControl_readFromReplayFrame(cUberGrindControl* self, cReplayFramePtr* obj)
 {
     sVEntry00136920* vt = *(sVEntry00136920**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x8);

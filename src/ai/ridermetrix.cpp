@@ -32,10 +32,10 @@ struct sMetrixEntry_001172E0
  * @param rider  the owning rider
  */
 // PORT: element address built through int (pointer in int).
-extern "C" void cRiderMetrix_linkToRider(cRiderMetrix* self, char* rider)
+extern "C" void cRiderMetrix_linkToRider(cRiderMetrix* self, cRider* rider)
 {
     self->Rider = (cRider*)rider;
-    if (*(int*)(rider + 0x870) >= 0)
+    if (rider->mViewIndex >= 0)
     {
         sMetrixEntry_001172E0** slot = (sMetrixEntry_001172E0**)(((char*)self) + 0x1B0);
         self->NumHUDfx = 44;

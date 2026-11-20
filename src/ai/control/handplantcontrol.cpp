@@ -1,4 +1,5 @@
 #include "common.h"
+#include "replay/frameptr.h"
 #include "ai/ai.h"
 #include "ai/riderhandler.h"
 #include "sound/ssxaudio.h"
@@ -869,7 +870,7 @@ struct sVEntry00139970 {
  *
  * @param obj  replay stream to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cHandplantMotion_writeToReplayFrame(cHandplantMotion* self, void* obj)
+extern "C" void cHandplantMotion_writeToReplayFrame(cHandplantMotion* self, cReplayFramePtr* obj)
 {
     sVEntry00139970* vt = *(sVEntry00139970**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 160);
@@ -892,7 +893,7 @@ struct sVEntry001399A8 {
  *
  * @param obj  replay stream to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cHandplantMotion_readFromReplayFrame(cHandplantMotion* self, void* obj)
+extern "C" void cHandplantMotion_readFromReplayFrame(cHandplantMotion* self, cReplayFramePtr* obj)
 {
     sVEntry001399A8* vt = *(sVEntry001399A8**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 160);
@@ -1103,7 +1104,7 @@ extern "C" void cRider_undoRailslideModeOrientation(void* rider);
 extern "C" int cRider_isChangeFakieGround(void* rider);
 extern "C" void cAirMotion_chooseFakieLandAnim(cAirMotion* self, float v);
 extern "C" void cAirMotion_chooseLandAnim(cAirMotion* self, float v);
-extern "C" int cAirMotion_checkTerrainCollisions(cAirMotion* self, void* out);
+extern "C" int cAirMotion_checkTerrainCollisions(cAirMotion* self, t4Vector* out);
 extern "C" void cWScriptMan_eventLand(void* p);
 extern "C" void* cBE_getBE();
 extern "C" int cRiderAnimBase_play_i(void* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
@@ -1450,7 +1451,7 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
     cRider_updateBoundBox_9C88(RIDER_139C88, 0);
     sVec4HP out;
     *(int*)(*(char**)(RIDER_139C88 + 0xAA0) + 0x28) = kInAirSphereMask;
-    int got = cAirMotion_checkTerrainCollisions(self, &out);
+    int got = cAirMotion_checkTerrainCollisions(self, (t4Vector*)(&out));
     *(unsigned int*)(*(char**)(RIDER_139C88 + 0xAA0) + 0x28) = 0xFFFFFFFF;
     if (got) {
         cRider_checkObjectCollisions_p(RIDER_139C88, &out);
@@ -1755,7 +1756,7 @@ static inline t4Vector riderVec_AA48(char* r, int off)
  * @param outp  receives the surface normal when the function returns 1
  * @return 1 when the rider hit terrain while moving into it, otherwise 0 (also 0 when it was only pushed out)
  */
-extern "C" int cAirMotion_checkTerrainCollisions(cAirMotion* self, void* outp)
+extern "C" int cAirMotion_checkTerrainCollisions(cAirMotion* self, t4Vector* outp)
 {
     if (cRider_getControlState(RIDER_AA48) == 9)
         return 0;
@@ -1807,7 +1808,7 @@ struct sVEntry0013ACB0 {
  *
  * @param obj  replay stream to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cAirMotion_writeToReplayFrame(cAirMotion* self, void* obj)
+extern "C" void cAirMotion_writeToReplayFrame(cAirMotion* self, cReplayFramePtr* obj)
 {
     sVEntry0013ACB0* vt = *(sVEntry0013ACB0**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x4);
@@ -1830,7 +1831,7 @@ struct sVEntry0013ACE8 {
  *
  * @param obj  replay stream to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cAirMotion_readFromReplayFrame(cAirMotion* self, void* obj)
+extern "C" void cAirMotion_readFromReplayFrame(cAirMotion* self, cReplayFramePtr* obj)
 {
     sVEntry0013ACE8* vt = *(sVEntry0013ACE8**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x4);
@@ -2968,7 +2969,7 @@ struct sVEntry0013C5E0 {
  *
  * @param obj  replay stream to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cRailslideMotion_writeToReplayFrame(cRailslideMotion* self, void* obj)
+extern "C" void cRailslideMotion_writeToReplayFrame(cRailslideMotion* self, cReplayFramePtr* obj)
 {
     sVEntry0013C5E0* vt = *(sVEntry0013C5E0**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 80);
@@ -2991,7 +2992,7 @@ struct sVEntry0013C618 {
  *
  * @param obj  replay stream to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cRailslideMotion_readFromReplayFrame(cRailslideMotion* self, void* obj)
+extern "C" void cRailslideMotion_readFromReplayFrame(cRailslideMotion* self, cReplayFramePtr* obj)
 {
     sVEntry0013C618* vt = *(sVEntry0013C618**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 80);
@@ -4916,7 +4917,7 @@ struct sVEntry0013F848 {
  *
  * @param obj  replay stream to write to (On Tour cReplayFramePtr*)
  */
-extern "C" void cGroundMotion_writeToReplayFrame(cGroundMotion* self, void* obj)
+extern "C" void cGroundMotion_writeToReplayFrame(cGroundMotion* self, cReplayFramePtr* obj)
 {
     sVEntry0013F848* vt = *(sVEntry0013F848**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x18);
@@ -4939,7 +4940,7 @@ struct sVEntry0013F880 {
  *
  * @param obj  replay stream to read from (On Tour cReplayFramePtr*)
  */
-extern "C" void cGroundMotion_readFromReplayFrame(cGroundMotion* self, void* obj)
+extern "C" void cGroundMotion_readFromReplayFrame(cGroundMotion* self, cReplayFramePtr* obj)
 {
     sVEntry0013F880* vt = *(sVEntry0013F880**)obj;
     vt[2].fn((char*)obj + vt[2].delta, self, 0x18);

@@ -1,4 +1,8 @@
 #include "common.h"
+#include "ui/uimenu.h"
+#include "ui/uiinput.h"
+#include "ui/uistate.h"
+#include "ui/uithing.h"
 #include "ui/uiengine.h"
 #include "fe/festateoptionssound.h"
 #include "fe/festateoptionshud.h"
@@ -57,24 +61,24 @@ static inline int Is_00188870(int id, char* s) { return id == GetHashValue32(s);
  *
  * @param item  the widget being created; matched by its hash name (+0x38)
  */
-extern "C" void cFEStateOptions_onWidgetCreate(void* self, void* item)
+extern "C" void cFEStateOptions_onWidgetCreate(void* self, cUIThing* item)
 {
-    if (Is_00188870(*(int*)((char*)item + 0x38), D_004A14F8)) {
-        *(int*)((char*)item + 0x18) = 0x1C;
-    } else if (Is_00188870(*(int*)((char*)item + 0x38), D_004A1500)) {
-        *(int*)((char*)item + 0x18) = 29;
-    } else if (Is_00188870(*(int*)((char*)item + 0x38), D_004A1508)) {
-        *(int*)((char*)item + 0x18) = 0x1F;
-    } else if (Is_00188870(*(int*)((char*)item + 0x38), D_004A1510)) {
-        *(int*)((char*)item + 0x18) = 0x1E;
-    } else if (Is_00188870(*(int*)((char*)item + 0x38), D_004A1518)) {
-        *(int*)((char*)item + 0x18) = 0x20;
-    } else if (Is_00188870(*(int*)((char*)item + 0x38), D_004A1520)) {
-        *(int*)((char*)item + 0x18) = 36;
-    } else if (Is_00188870(*(int*)((char*)item + 0x38), D_004A1528)) {
-        *(int*)((char*)item + 0x18) = 36;
-    } else if (Is_00188870(*(int*)((char*)item + 0x38), D_004A1530)) {
-        *(int*)((char*)item + 0x18) = 34;
+    if (Is_00188870(item->mHashName, D_004A14F8)) {
+        item->mMiscData = 0x1C;
+    } else if (Is_00188870(item->mHashName, D_004A1500)) {
+        item->mMiscData = 29;
+    } else if (Is_00188870(item->mHashName, D_004A1508)) {
+        item->mMiscData = 0x1F;
+    } else if (Is_00188870(item->mHashName, D_004A1510)) {
+        item->mMiscData = 0x1E;
+    } else if (Is_00188870(item->mHashName, D_004A1518)) {
+        item->mMiscData = 0x20;
+    } else if (Is_00188870(item->mHashName, D_004A1520)) {
+        item->mMiscData = 36;
+    } else if (Is_00188870(item->mHashName, D_004A1528)) {
+        item->mMiscData = 36;
+    } else if (Is_00188870(item->mHashName, D_004A1530)) {
+        item->mMiscData = 34;
     }
 }
 #endif
@@ -153,11 +157,11 @@ static inline int Is_00188980(int id, char* s) { return id == GetHashValue32(s);
  * @param widget  the widget the event is for
  * @param event  UI event code (5, 6 or 13 are handled)
  */
-extern "C" void cFEStateOptions_onWidgetEvent(sOpt_188980* self, char* widget, unsigned int event)
+extern "C" void cFEStateOptions_onWidgetEvent(sOpt_188980* self, cUIThing* widget, unsigned int event)
 {
     switch (event) {
     case 5:
-        if (Is_00188980(*(int*)(widget + 0x38), D_004A1520)) {
+        if (Is_00188980(widget->mHashName, D_004A1520)) {
             void* mem = cMemMan_alloc(1092, str_cKeyboardPopup, 0x100, 0);
             void* pop = cKeyboardPopup_cKeyboardPopup(mem, self->engine, self, 0, self->port);
             self->popup = pop;
@@ -166,7 +170,7 @@ extern "C" void cFEStateOptions_onWidgetEvent(sOpt_188980* self, char* widget, u
             cKeyboardPopup_setIncludeKey(self->popup, 75, 1, 2);
             cUIStateStack_pushPopup(self->engine + 0x18, self->popup);
             break;
-        } else if (Is_00188980(*(int*)(widget + 0x38), D_004A1530)) {
+        } else if (Is_00188980(widget->mHashName, D_004A1530)) {
             if (D_004A14E0 == 0 && (D_004A14D0 != 0 || D_004A14D4 != 0 || D_004A14DC != 0 || D_004A14D8 != 0)) {
                 cFEStateOptions_saveOptionPrompt(self);
                 break;
@@ -185,7 +189,7 @@ extern "C" void cFEStateOptions_onWidgetEvent(sOpt_188980* self, char* widget, u
         {
             char* obj = *(char**)self->engine;
             sVE_188980p* vt = *(sVE_188980p**)(obj + 4);
-            void* r = vt[4].fn(obj + vt[4].delta, self, *(int*)(widget + 0x18));
+            void* r = vt[4].fn(obj + vt[4].delta, self, widget->mMiscData);
             if (r != 0)
                 cUIStateStack_push(self->engine + 0x18, r);
         }
@@ -235,9 +239,9 @@ extern int D_004A3484;
  * @param pInput  the UI input object
  * @return always 0
  */
-extern "C" int cFEStateOptions_onInputBegin(void* self, void* pInput)
+extern "C" int cFEStateOptions_onInputBegin(void* self, cUIInput* pInput)
 {
-    D_004A3484 = *(unsigned char*)((char*)pInput + 4);
+    D_004A3484 = pInput->mPadNum;
     return 0;
 }
 #endif
@@ -260,7 +264,7 @@ extern char D_004A1530[];
  * @param index  index of the current entry in the menu list
  * @return 0x100, 0x101 or 1 (menu handling codes)
  */
-extern "C" int cFEStateOptions_onWidgetMenu(void* self, void* menu, unsigned int key, int index)
+extern "C" int cFEStateOptions_onWidgetMenu(void* self, cUIMenu* menu, unsigned int key, int index)
 {
     if (key < 10) {
         if (key >= 8) {
@@ -323,11 +327,11 @@ static inline int IsK188D08(int id, char* s)
  * @param popup  the popup state; its hash (+0xC) and screen (+0x40) are read
  * @param event  popup event code (0x15 or 0x16 are handled)
  */
-extern "C" void cFEStateOptions_onPopupEvent(void* self, char* popup, int event)
+extern "C" void cFEStateOptions_onPopupEvent(void* self, cUIState* popup, int event)
 {
     switch (event) {
     case 21: {
-        void* scr = *(void**)(popup + 0x40);
+        void* scr = popup->mpScreen;
         cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(scr, GetHashValue32(str_reset_text));
         if (text != 0) {
             cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_FESaveOptionsQuesPS2));
@@ -335,10 +339,10 @@ extern "C" void cFEStateOptions_onPopupEvent(void* self, char* popup, int event)
         break;
     }
     case 22:
-        if (IsK188D08(*(int*)(popup + 0xC), str_111resetopts)) {
+        if (IsK188D08(popup->mHashName, str_111resetopts)) {
             void* uiObj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A1530));
-            sVEK188D08a* vt = *(sVEK188D08a**)(popup + 8);
-            if (vt[23].fn(popup + vt[23].delta, 0)) {
+            sVEK188D08a* vt = (sVEK188D08a*)popup->mVtbl;
+            if (vt[23].fn(((char*)popup) + vt[23].delta, 0)) {
                 if (uiObj != 0) {
                     *(int*)((char*)self + 0x48) = 1;
                     *(int*)((char*)self + 0x4C) = 1;
@@ -694,24 +698,24 @@ static inline sGameCfg_189610 Cfg_189610()
  * @param popup  the popup state; its mHashName (+0xC) says which popup it is
  * @param event  popup event code (22 is handled; 21 and the rest are ignored)
  */
-extern "C" void cFEStateOptionsGame_onPopupEvent(cFEStateOptionsGame* self, char* popup, int event)
+extern "C" void cFEStateOptionsGame_onPopupEvent(cFEStateOptionsGame* self, cUIState* popup, int event)
 {
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (event) {
     case 21:
         break;
     case 22:
-        if (Is_189610(*(int*)(popup + 0xC), str_111resetopts)) {
-            if (GetOpt_189610(popup, 2)) {
+        if (Is_189610(popup->mHashName, str_111resetopts)) {
+            if (GetOpt_189610(((char*)popup), 2)) {
                 cBEOptionInterface_defaultGame(iface);
                 D_004A14D0 = 1;
                 cFEStateOptionsGame_updateWidget(self);
                 func_0029ED90(cAudioInterface_bxAudio(), 1);
             }
-        } else if (Is_189610(*(int*)(popup + 0xC), str_24screen_position)) {
-            if (GetOpt_189610(popup, 2)) {
-                int hzOffset = GetOpt_189610(popup, 0);
-                int vtOffset = GetOpt_189610(popup, 1);
+        } else if (Is_189610(popup->mHashName, str_24screen_position)) {
+            if (GetOpt_189610(((char*)popup), 2)) {
+                int hzOffset = GetOpt_189610(((char*)popup), 0);
+                int vtOffset = GetOpt_189610(((char*)popup), 1);
                 sGameCfg_189610* gameOptions = &D_00535610_189610;
                 D_004A14D0 = 1;
                 gameOptions->f6 = hzOffset;
@@ -723,8 +727,8 @@ extern "C" void cFEStateOptionsGame_onPopupEvent(cFEStateOptionsGame* self, char
                 void (**pf)(void*, int, int) = &vt[12].fn;
                 (*pf)(thisp, Cfg_189610().f6, Cfg_189610().f5);
             }
-        } else if (*(int*)(popup + 0xC) == 27) {
-            if (GetOpt_189610(popup, 2)) {
+        } else if (popup->mHashName == 27) {
+            if (GetOpt_189610(((char*)popup), 2)) {
                 cBEOptionInterface_defaultGame(iface);
                 D_004A14D0 = 1;
                 cFEStateOptionsGame_updateWidget(self);
@@ -864,9 +868,9 @@ static inline void Refresh_189980(sOptGame_189980* self)
  * @param widget  the widget the event is for (null: nothing happens)
  * @param event  UI event code (5, 6, 7 or 9 are handled)
  */
-extern "C" void cFEStateOptionsGame_onWidgetEvent(cFEStateOptionsGame* self, char* widget, unsigned int event)
+extern "C" void cFEStateOptionsGame_onWidgetEvent(cFEStateOptionsGame* self, cUIThing* widget, unsigned int event)
 {
-    if (widget == 0) {
+    if (((char*)widget) == 0) {
         return;
     }
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 4);
@@ -880,7 +884,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(cFEStateOptionsGame* self, cha
         break;
     }
     case 5:
-        if (Is_189980(*(int*)(widget + 0x38), D_004A1520)) {
+        if (Is_189980(widget->mHashName, D_004A1520)) {
             char* popup = (char*)operator new(84, str_cFEPopupScreenPos, 0x100, 0);
             cUIState_cUIState1(popup, (char*)self->mpEngine, ((sOptGame_189980*)self));
             *(void***)(popup + 8) = cFEPopupScreenPos_vtbl;
@@ -888,7 +892,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(cFEStateOptionsGame* self, cha
             *(int*)(popup + 0x48) = 0;
             popup[0x50] = 0;
             cUIStateStack_pushPopup(self->mpEngine->mStateStack, popup);
-        } else if (Is_189980(*(int*)(widget + 0x38), D_004A1528)) {
+        } else if (Is_189980(widget->mHashName, D_004A1528)) {
             char* popup = (char*)operator new(76, str_cFEPopupVideoCalibration, 0x100, 0);
             cUIState_cUIState1(popup, (char*)self->mpEngine, ((sOptGame_189980*)self));
             *(void***)(popup + 8) = cFEPopupVideoCalibration_vtbl;
@@ -910,28 +914,28 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(cFEStateOptionsGame* self, cha
         Refresh_189980(((sOptGame_189980*)self));
         char* eng = *(char**)(char*)self->mpEngine;
         sVE_189980c* vt = *(sVE_189980c**)(eng + 4);
-        void* nextState = vt[5].fn(eng + vt[5].delta, ((sOptGame_189980*)self), *(int*)(widget + 0x18));
+        void* nextState = vt[5].fn(eng + vt[5].delta, ((sOptGame_189980*)self), widget->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         }
         break;
     }
     case 9:
-        if (((signed char*)&self->mLanguageSlot)[0] >= 0 && Is_189980(*(int*)(widget + 0x38), D_00440FD8[((signed char*)&self->mLanguageSlot)[0]])) {
-            D_00535610_189980.iLanguage = cUIListBox_getCurrentEntryData(widget);
+        if (((signed char*)&self->mLanguageSlot)[0] >= 0 && Is_189980(widget->mHashName, D_00440FD8[((signed char*)&self->mLanguageSlot)[0]])) {
+            D_00535610_189980.iLanguage = cUIListBox_getCurrentEntryData(((char*)widget));
             char* locale = (char*)SSXApp->FELocale;
             sVE_189980b* vt = *(sVE_189980b**)(locale + 4);
             char* thisp = locale + vt[3].delta;
-            vt[3].fn(thisp, cUIListBox_getCurrentEntryData(widget));
+            vt[3].fn(thisp, cUIListBox_getCurrentEntryData(((char*)widget)));
             Refresh_189980(((sOptGame_189980*)self));
             func_0029ED90(cAudioInterface_bxAudio(), 1);
         }
-        if (((signed char*)&self->mLanguageSlot)[1] >= 0 && Is_189980(*(int*)(widget + 0x38), D_00440FD8[((signed char*)&self->mLanguageSlot)[1]])) {
-            bool on = *(unsigned char*)(widget + 0x319);
+        if (((signed char*)&self->mLanguageSlot)[1] >= 0 && Is_189980(widget->mHashName, D_00440FD8[((signed char*)&self->mLanguageSlot)[1]])) {
+            bool on = *(unsigned char*)(((char*)widget) + 0x319);
             D_00535610_189980.iUseMetricUnits = on;
         }
-        if (((signed char*)&self->mLanguageSlot)[2] >= 0 && Is_189980(*(int*)(widget + 0x38), D_00440FD8[((signed char*)&self->mLanguageSlot)[2]])) {
-            D_00535610_189980.iUseWidescreen = *(unsigned char*)(widget + 0x319);
+        if (((signed char*)&self->mLanguageSlot)[2] >= 0 && Is_189980(widget->mHashName, D_00440FD8[((signed char*)&self->mLanguageSlot)[2]])) {
+            D_00535610_189980.iUseWidescreen = *(unsigned char*)(((char*)widget) + 0x319);
         }
         cSSXApp_activateBEOptions(SSXApp);
         D_004A14D0 = 1;
@@ -1207,15 +1211,15 @@ static inline sSndCfg_18A3D8 Cfg_18A3D8()
  * @param popup  the popup state; its mHashName (+0xC) is checked
  * @param event  popup event code (22 is handled)
  */
-extern "C" void cFEStateOptionsSound_onPopupEvent(cFEStateOptionsSound* self, char* popup, int event)
+extern "C" void cFEStateOptionsSound_onPopupEvent(cFEStateOptionsSound* self, cUIState* popup, int event)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (event) {
     case 21:
         break;
     case 22:
-        if (Is_18A3D8(*(int*)(popup + 0xC), str_111resetopts)) {
-            if (GetOpt_18A3D8(popup, 2)) {
+        if (Is_18A3D8(popup->mHashName, str_111resetopts)) {
+            if (GetOpt_18A3D8(((char*)popup), 2)) {
                 cBEOptionInterface_defaultSound(iface);
                 cFEStateOptionsSound_setSoundMode(self, D_00535610_18A3D8.output);
                 func_00287410(cAudioInterface_bxAudio(), Cfg_18A3D8().sfxVol);
@@ -1373,9 +1377,9 @@ static inline sSndCfg_18A8D0 Cfg_18A8D0()
  * @param widget  the widget the event is for (null: nothing happens)
  * @param event  UI event code (6, 7 and 9 are handled)
  */
-extern "C" void cFEStateOptionsSound_onWidgetEvent(cFEStateOptionsSound* self, char* widget, unsigned int event)
+extern "C" void cFEStateOptionsSound_onWidgetEvent(cFEStateOptionsSound* self, cUIThing* widget, unsigned int event)
 {
-    if (widget == 0)
+    if (((char*)widget) == 0)
         return;
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (event) {
@@ -1401,42 +1405,42 @@ extern "C" void cFEStateOptionsSound_onWidgetEvent(cFEStateOptionsSound* self, c
         cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_18A8D0().iUseArcadeSFX != 0);
         char* eng = *(char**)(char*)self->mpEngine;
         sVE_18A8D0c* vt = *(sVE_18A8D0c**)(eng + 4);
-        void* nextState = vt[5].fn(eng + vt[5].delta, (self), *(int*)(widget + 0x18));
+        void* nextState = vt[5].fn(eng + vt[5].delta, (self), widget->mMiscData);
         if (nextState != 0)
             cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         break;
     }
     case 9:
-        if (Is_18A8D0(*(int*)(widget + 0x38), str_1lb)) {
-            D_00535610_18A8D0.output = cUIListBox_getCurrentEntryData(widget);
-            cFEStateOptionsSound_setSoundMode(self, cUIListBox_getCurrentEntryData(widget));
+        if (Is_18A8D0(widget->mHashName, str_1lb)) {
+            D_00535610_18A8D0.output = cUIListBox_getCurrentEntryData(((char*)widget));
+            cFEStateOptionsSound_setSoundMode(self, cUIListBox_getCurrentEntryData(((char*)widget)));
         }
-        else if (Is_18A8D0(*(int*)(widget + 0x38), str_2sl)) {
-            unsigned char vol = *(unsigned char*)(widget + 0x74);
+        else if (Is_18A8D0(widget->mHashName, str_2sl)) {
+            unsigned char vol = *(unsigned char*)(((char*)widget) + 0x74);
             D_00535610_18A8D0.sfxVol = vol;
             func_00287410(cAudioInterface_bxAudio(), Cfg_18A8D0().sfxVol);
         }
-        else if (Is_18A8D0(*(int*)(widget + 0x38), str_3sl)) {
-            unsigned char vol = *(unsigned char*)(widget + 0x74);
+        else if (Is_18A8D0(widget->mHashName, str_3sl)) {
+            unsigned char vol = *(unsigned char*)(((char*)widget) + 0x74);
             D_00535610_18A8D0.speechVol = vol;
             cSSXAudio_SetSFXVolume(cAudioInterface_bxAudio(), Cfg_18A8D0().speechVol);
         }
-        else if (Is_18A8D0(*(int*)(widget + 0x38), str_4sl)) {
-            unsigned char vol = *(unsigned char*)(widget + 0x74);
+        else if (Is_18A8D0(widget->mHashName, str_4sl)) {
+            unsigned char vol = *(unsigned char*)(((char*)widget) + 0x74);
             D_00535610_18A8D0.musicVol = vol;
             func_00287520(cAudioInterface_bxAudio(), Cfg_18A8D0().musicVol);
         }
-        else if (Is_18A8D0(*(int*)(widget + 0x38), str_5lb)) {
-            D_00535610_18A8D0.iUseDJSpeech = cUIListBox_getCurrentEntryData(widget) != 0;
+        else if (Is_18A8D0(widget->mHashName, str_5lb)) {
+            D_00535610_18A8D0.iUseDJSpeech = cUIListBox_getCurrentEntryData(((char*)widget)) != 0;
             cSSXAudio_SetDJSpeech(cAudioInterface_bxAudio(), Cfg_18A8D0().iUseDJSpeech != 0);
         }
-        else if (Is_18A8D0(*(int*)(widget + 0x38), str_6lb)) {
-            D_00535610_18A8D0.iUseArcadeSFX = cUIListBox_getCurrentEntryData(widget) != 0;
+        else if (Is_18A8D0(widget->mHashName, str_6lb)) {
+            D_00535610_18A8D0.iUseArcadeSFX = cUIListBox_getCurrentEntryData(((char*)widget)) != 0;
             cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_18A8D0().iUseArcadeSFX != 0);
         }
         bool on = D_004A1A70 == 1;
-        if (on && Is_18A8D0(*(int*)(widget + 0x38), str_7lb))
-            D_00535610_18A8D0.f18 = cUIListBox_getCurrentEntryData(widget) != 0;
+        if (on && Is_18A8D0(widget->mHashName, str_7lb))
+            D_00535610_18A8D0.f18 = cUIListBox_getCurrentEntryData(((char*)widget)) != 0;
         D_004A14D4 = 1;
         break;
     }
@@ -1801,16 +1805,16 @@ extern "C" void cFEStateOptionsHUD_updateWidget(cFEStateOptionsHUD* self);
  * @param widget  the popup state (despite the name); its mHashName (+0xC) is checked
  * @param msg  popup event code (22 is handled)
  */
-extern "C" void cFEStateOptionsHUD_onPopupEvent(cFEStateOptionsHUD* self, void* widget, int msg)
+extern "C" void cFEStateOptionsHUD_onPopupEvent(cFEStateOptionsHUD* self, cUIState* widget, int msg)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (msg) {
     case 21:
         break;
     case 22: {
-        int popupHash = *(int*)((char*)widget + 0xC);
+        int popupHash = widget->mHashName;
         if (popupHash == GetHashValue32(str_111resetopts)) {
-            sVE_18C1B8* getDataEntry = &(*(sVE_18C1B8**)((char*)widget + 8))[23];
+            sVE_18C1B8* getDataEntry = &((sVE_18C1B8*)widget->mVtbl)[23];
             if (getDataEntry->fn((char*)widget + getDataEntry->delta, 2) != 0) {
                 cBEOptionInterface_defaultHUD(iface);
                 cFEStateOptionsHUD_updateWidget(self);
@@ -1902,9 +1906,9 @@ static inline int Is_0018C2A0(int id, char* s) { return id == GetHashValue32(s);
  * @param widget  the widget the event is for (null: nothing happens)
  * @param event  UI event code (1, 2, 6 and 7 are handled)
  */
-extern "C" void cFEStateOptionsHUD_onWidgetEvent(cFEStateOptionsHUD* self, char* widget, unsigned int event)
+extern "C" void cFEStateOptionsHUD_onWidgetEvent(cFEStateOptionsHUD* self, cUIThing* widget, unsigned int event)
 {
-    if (widget == 0) {
+    if (((char*)widget) == 0) {
         return;
     }
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 4);
@@ -1922,24 +1926,24 @@ extern "C" void cFEStateOptionsHUD_onWidgetEvent(cFEStateOptionsHUD* self, char*
         vt[1].fn(iface + vt[1].delta);
         char* obj = *(char**)self->mpEngine;
         sVE_18C2A0p* vt2 = *(sVE_18C2A0p**)(obj + 4);
-        void* nextState = vt2[5].fn(obj + vt2[5].delta, ((char*)self), *(int*)(widget + 0x18));
+        void* nextState = vt2[5].fn(obj + vt2[5].delta, ((char*)self), widget->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         }
         break;
     }
     case 1: {
-        sVE_18C2A0* vt = *(sVE_18C2A0**)(widget + 8);
-        vt[9].fn(widget + vt[9].delta, 1);
+        sVE_18C2A0* vt = (sVE_18C2A0*)widget->mVtbl;
+        vt[9].fn(((char*)widget) + vt[9].delta, 1);
         D_004A14D8 = 1;
-        D_00535610_C2A0.mode = *(unsigned char*)(widget + 0x18);
+        D_00535610_C2A0.mode = *(unsigned char*)&widget->mMiscData;
         break;
     }
     case 2:
-        if (Is_0018C2A0(*(int*)(widget + 0x38), D_004A14F8) || Is_0018C2A0(*(int*)(widget + 0x38), D_004A1500) ||
-            Is_0018C2A0(*(int*)(widget + 0x38), D_004A1508)) {
-            sVE_18C2A0* vt = *(sVE_18C2A0**)(widget + 8);
-            vt[9].fn(widget + vt[9].delta, 0);
+        if (Is_0018C2A0(widget->mHashName, D_004A14F8) || Is_0018C2A0(widget->mHashName, D_004A1500) ||
+            Is_0018C2A0(widget->mHashName, D_004A1508)) {
+            sVE_18C2A0* vt = (sVE_18C2A0*)widget->mVtbl;
+            vt[9].fn(((char*)widget) + vt[9].delta, 0);
         }
         break;
     }
@@ -2270,9 +2274,9 @@ static inline int Is_0018CA10(int id, char* s) { return id == GetHashValue32(s);
  * @param widget  the widget the event is for (null: nothing happens)
  * @param event  UI event code (6, 7 and 9 are handled)
  */
-extern "C" void cFEStateOptionsController_onWidgetEvent(char* self, char* widget, unsigned int event)
+extern "C" void cFEStateOptionsController_onWidgetEvent(char* self, cUIThing* widget, unsigned int event)
 {
-    if (widget == 0) {
+    if (((char*)widget) == 0) {
         return;
     }
     char* iface = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -2290,15 +2294,15 @@ extern "C" void cFEStateOptionsController_onWidgetEvent(char* self, char* widget
         vt[1].fn(iface + vt[1].delta);
         char* obj = **(char***)(self + 0x10);
         sVE_18CA10p* vt2 = *(sVE_18CA10p**)(obj + 4);
-        void* nextState = vt2[5].fn(obj + vt2[5].delta, self, *(int*)(widget + 0x18));
+        void* nextState = vt2[5].fn(obj + vt2[5].delta, self, widget->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
         }
         break;
     }
     case 9:
-        if (Is_0018CA10(*(int*)(widget + 0x38), str_1lb)) {
-            cBENewPlayerInterface_setUseDualShock(iface, 0, cUIListBox_getCurrentEntryData(widget) != 0);
+        if (Is_0018CA10(widget->mHashName, str_1lb)) {
+            cBENewPlayerInterface_setUseDualShock(iface, 0, cUIListBox_getCurrentEntryData(((char*)widget)) != 0);
             if (cBENewPlayerInterface_getUseDualShock(iface, 0)) {
                 cFEStateOptionsController_vibratePad(self, 0, 10.0f, 10.0f);
                 *(int*)(self + 0x48) = 0x3C;
@@ -2306,8 +2310,8 @@ extern "C" void cFEStateOptionsController_onWidgetEvent(char* self, char* widget
             } else {
                 cFEStateOptionsController_vibratePad(self, 0, 0.0f, 0.0f);
             }
-        } else if (Is_0018CA10(*(int*)(widget + 0x38), str_2lb)) {
-            cBENewPlayerInterface_setUseDualShock(iface, 1, cUIListBox_getCurrentEntryData(widget) != 0);
+        } else if (Is_0018CA10(widget->mHashName, str_2lb)) {
+            cBENewPlayerInterface_setUseDualShock(iface, 1, cUIListBox_getCurrentEntryData(((char*)widget)) != 0);
             if (cBENewPlayerInterface_getUseDualShock(iface, 1)) {
                 cFEStateOptionsController_vibratePad(self, 1, 10.0f, 10.0f);
                 *(int*)(self + 0x4C) = 0x3C;
@@ -2315,12 +2319,12 @@ extern "C" void cFEStateOptionsController_onWidgetEvent(char* self, char* widget
             } else {
                 cFEStateOptionsController_vibratePad(self, 1, 0.0f, 0.0f);
             }
-        } else if (Is_0018CA10(*(int*)(widget + 0x38), str_3lb)) {
-            cBENewPlayerInterface_setControllerMapping(iface, 0, cUIListBox_getCurrentEntryData(widget));
-            cFEStateOptionsController_displayPadConfig(self, cUIListBox_getCurrentEntryData(widget) == 0);
-        } else if (Is_0018CA10(*(int*)(widget + 0x38), str_4lb)) {
-            cBENewPlayerInterface_setControllerMapping(iface, 1, cUIListBox_getCurrentEntryData(widget));
-            cFEStateOptionsController_displayPadConfig(self, cUIListBox_getCurrentEntryData(widget) == 0);
+        } else if (Is_0018CA10(widget->mHashName, str_3lb)) {
+            cBENewPlayerInterface_setControllerMapping(iface, 0, cUIListBox_getCurrentEntryData(((char*)widget)));
+            cFEStateOptionsController_displayPadConfig(self, cUIListBox_getCurrentEntryData(((char*)widget)) == 0);
+        } else if (Is_0018CA10(widget->mHashName, str_4lb)) {
+            cBENewPlayerInterface_setControllerMapping(iface, 1, cUIListBox_getCurrentEntryData(((char*)widget)));
+            cFEStateOptionsController_displayPadConfig(self, cUIListBox_getCurrentEntryData(((char*)widget)) == 0);
         }
         D_004A14DC = 1;
         break;
@@ -2659,20 +2663,20 @@ static inline int IsHash_D2E8(int id, char* s) { return id == GetHashValue32(s);
  *
  * @param widget  the widget being created; matched by its hash name (+0x38)
  */
-extern "C" void cFEStateOptionsSaveLoad_onWidgetCreate(void* self, void* widget)
+extern "C" void cFEStateOptionsSaveLoad_onWidgetCreate(void* self, cUIThing* widget)
 {
-    if (IsHash_D2E8(*(int*)((char*)widget + 0x38), str_1saveoptions)) {
-        *(int*)((char*)widget + 0x18) = 0;
-    } else if (IsHash_D2E8(*(int*)((char*)widget + 0x38), str_2loadoptions)) {
-        *(int*)((char*)widget + 0x18) = 2;
-    } else if (IsHash_D2E8(*(int*)((char*)widget + 0x38), str_3loadreplay)) {
-        *(int*)((char*)widget + 0x18) = 1;
-    } else if (IsHash_D2E8(*(int*)((char*)widget + 0x38), str_4new_game)) {
-        *(int*)((char*)widget + 0x18) = 3;
-    } else if (IsHash_D2E8(*(int*)((char*)widget + 0x38), D_004A1508)) {
-        *(int*)((char*)widget + 0x18) = 0x300;
-    } else if (IsHash_D2E8(*(int*)((char*)widget + 0x38), D_004A1500)) {
-        *(int*)((char*)widget + 0x18) = 0x200;
+    if (IsHash_D2E8(widget->mHashName, str_1saveoptions)) {
+        widget->mMiscData = 0;
+    } else if (IsHash_D2E8(widget->mHashName, str_2loadoptions)) {
+        widget->mMiscData = 2;
+    } else if (IsHash_D2E8(widget->mHashName, str_3loadreplay)) {
+        widget->mMiscData = 1;
+    } else if (IsHash_D2E8(widget->mHashName, str_4new_game)) {
+        widget->mMiscData = 3;
+    } else if (IsHash_D2E8(widget->mHashName, D_004A1508)) {
+        widget->mMiscData = 0x300;
+    } else if (IsHash_D2E8(widget->mHashName, D_004A1500)) {
+        widget->mMiscData = 0x200;
     }
 }
 #endif
@@ -2776,21 +2780,21 @@ struct sVE_18D460p {
  * @param widget  the popup state (its misc data at +0x18 holds the answer)
  * @param event  popup event code (0xF, 0x10, 0x15 or 0x16)
  */
-extern "C" void cFEStateOptionsSaveLoad_onPopupEvent(char* self, char* widget, unsigned int event)
+extern "C" void cFEStateOptionsSaveLoad_onPopupEvent(char* self, cUIState* widget, unsigned int event)
 {
     switch (event) {
     case 0xF:
-        *(int*)(widget + 0x18) = 1;
+        widget->miMiscData = 1;
         cUIStateStack_pop(*(char**)(self + 0x10) + 0x18, 1);
         break;
     case 0x10:
-        *(int*)(widget + 0x18) = 0;
+        widget->miMiscData = 0;
         cUIStateStack_pop(*(char**)(self + 0x10) + 0x18, 1);
         break;
     case 21:
         break;
     case 22: {
-        if (*(int*)(widget + 0x18) == 0) {
+        if (widget->miMiscData == 0) {
             break;
         }
         int sel = *(signed char*)(self + 0x44);
@@ -2866,15 +2870,15 @@ struct sVE_18D648v {
  * @param widget  the selected widget
  * @param event  UI event code (5 or 6 are handled)
  */
-extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(char* self, char* widget, int event)
+extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(char* self, cUIThing* widget, int event)
 {
-    if (widget == 0) {
+    if (((char*)widget) == 0) {
         return;
     }
     switch (event) {
     case 5: {
-        unsigned int widgetId = *(unsigned int*)(widget + 0x18);
-        *(int*)(widget + 0x18) = 3;
+        unsigned int widgetId = (unsigned int)widget->mMiscData;
+        widget->mMiscData = 3;
         if (widgetId == 3) {
             *(signed char*)(self + 0x48) = *(signed char*)(self + 0x14);
             char* mgr = (char*)SSXApp->FELocale;
@@ -2902,7 +2906,7 @@ extern "C" void cFEStateOptionsSaveLoad_onWidgetEvent(char* self, char* widget, 
     case 6: {
         char* obj = **(char***)(self + 0x10);
         sVE_18D648p* vt = *(sVE_18D648p**)(obj + 4);
-        void* nextState = vt[5].fn(obj + vt[5].delta, self, *(int*)(widget + 0x18));
+        void* nextState = vt[5].fn(obj + vt[5].delta, self, widget->mMiscData);
         if (nextState != 0) {
             cUIStateStack_push(*(char**)(self + 0x10) + 0x18, nextState);
         }
@@ -3340,12 +3344,12 @@ public:
  * @param widget  the widget that sent the event (its +0x18 word is the slot index)
  * @param event  the widget event
  */
-extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(sDevSel_18DEA0* self, char* widget, unsigned int event)
+extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(sDevSel_18DEA0* self, cUIThing* widget, unsigned int event)
 {
     char* app = (char*)cSSXApp_getMCManager(SSXApp);
     switch (event) {
     case 5: {
-        if (widget == 0)
+        if (((char*)widget) == 0)
             return;
         if (self->busy != 0)
             return;
@@ -3355,7 +3359,7 @@ extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(sDevSel_18DEA0* self, 
             return;
         if (self->f224 == 0)
             return;
-        int pickedSlot = *(int*)(widget + 0x18);
+        int pickedSlot = widget->mMiscData;
         self->slot = pickedSlot;
         *(int*)(app + 0xF8) = pickedSlot;
         if (self->mode == 2 && self->f22C != 0) {
@@ -3407,7 +3411,7 @@ extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(sDevSel_18DEA0* self, 
         char* mcManager = (char*)cSSXApp_getMCManager(SSXApp);
         if ((*(cDev_18DEA0**)(mcManager + 0x434))->v54(*(int*)(mcManager + 0x428)) == 0)
             return;
-        int pickedSlot = *(int*)(widget + 0x18);
+        int pickedSlot = widget->mMiscData;
         self->slot = pickedSlot;
         *(int*)(mcManager + 0xF8) = pickedSlot;
         int currentState = self->state;

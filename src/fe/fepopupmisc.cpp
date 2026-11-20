@@ -136,10 +136,10 @@ struct sPopup_EC68 {
  * @param in  the input (On Tour cUIInput* pInput)
  * @return 1 (the popup takes every input)
  */
-extern "C" int cFEPopupVideoCalibration_onInputBegin(cFEPopupVideoCalibration* self, char* in)
+extern "C" int cFEPopupVideoCalibration_onInputBegin(cFEPopupVideoCalibration* self, cUIInput* in)
 {
-    sVEi_EC68* vt = *(sVEi_EC68**)(in + 8);
-    if (vt[5].fn(in + vt[5].delta) != 0) {
+    sVEi_EC68* vt = (sVEi_EC68*)in->mVtbl;
+    if (vt[5].fn(((char*)in) + vt[5].delta) != 0) {
         if (*(signed char*)&self->mImage == 0) {
             cUIObjK1DEB90* obj = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1540));
             if (obj != 0) {
