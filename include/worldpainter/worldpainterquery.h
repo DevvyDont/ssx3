@@ -35,7 +35,8 @@
 //   it, the Lighting ctor/setDefaults copy it into the names);
 //   kWPR_MusicTrigger..kWPR_Danger (static const tWorldPainterRegionType(n, n), n = 0..13, a copy per translation
 //   unit, 8 bytes apart: D_004A52E8.. worldpainterlayer, D_004A5360.. worldpainterman, D_004A53D8.. worldpainterquery,
-//   kWPR_Lighting = D_004A5598 lensfx's copy; [O] On Tour globals kWPR_*).
+//   and the visualfx copy named kWPR_MusicTrigger..kWPR_Danger at 0x4A5540 (worldlightman's static initializer
+//   func_002F6B88 fills it; lensfx's cRenderStateMan_init reads it); [O] On Tour globals kWPR_*).
 //
 // A FLAT layout, like main/game.h. Evidence tags:
 //   [R] retail's constructors (cWorldPainterQuery_cWorldPainterQuery, tWPInGameData_MusicTrigger_tWPInGameData_MusicTrigger ... tWPInGameData_Danger_tWPInGameData_Danger for the

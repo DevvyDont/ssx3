@@ -422,15 +422,15 @@ struct sLensRow_ED048 {
 // The unit declares cRenderStateMan_m_state later as sLensFxSlot[]; bind views to the labels.
 extern sLensRow_ED048 D_lensRows_ED048[] __asm__("cRenderStateMan_m_state");
 extern int cRenderStateMan_m_initialized;
-extern cWorldPainterManArg D_004A5560;
-extern cWorldPainterManArg D_004A5568;
-extern cWorldPainterManArg D_004A5570;
-extern cWorldPainterManArg D_004A5578;
-extern cWorldPainterManArg D_004A5580;
-extern cWorldPainterManArg D_004A5588;
-extern cWorldPainterManArg D_004A5590;
+extern cWorldPainterManArg kWPR_Camera;
+extern cWorldPainterManArg kWPR_Fog;
+extern cWorldPainterManArg kWPR_LightGlow;
+extern cWorldPainterManArg kWPR_ScreenTint;
+extern cWorldPainterManArg kWPR_SkyBox;
+extern cWorldPainterManArg kWPR_Sun;
+extern cWorldPainterManArg kWPR_Surface;
 extern cWorldPainterManArg kWPR_Lighting;
-extern cWorldPainterManArg D_004A55A0;
+extern cWorldPainterManArg kWPR_Weather;
 void* cWorldPainterMan_getQuery(void* self, cWorldPainterManArg* x);
 
 static inline void lensVecOneED048(sLensVec_ED048* v)
@@ -445,22 +445,23 @@ static inline void lensVecOneED048(sLensVec_ED048* v)
  * Sets up the render-state manager's world-painter queries for a newly loaded track.
  *
  * Takes the world painter manager from the game's world (+0x8) and, for each of the 8 rows of cRenderStateMan_m_state,
- * stores cWorldPainterMan_getQuery's result for the nine region types D_004A5560..D_004A55A0 (kWPR_Lighting among
- * them), clears +0x24 and sets both colours at +0x28 and +0x38 to one. Then sets cRenderStateMan_m_initialized.
+ * stores cWorldPainterMan_getQuery's result for the nine region types kWPR_Camera, kWPR_Fog, kWPR_LightGlow,
+ * kWPR_ScreenTint, kWPR_SkyBox, kWPR_Sun, kWPR_Surface, kWPR_Lighting and kWPR_Weather (q[0]..q[8]), clears +0x24
+ * and sets both colours at +0x28 and +0x38 to one. Then sets cRenderStateMan_m_initialized.
  */
 extern "C" void cRenderStateMan_init(void)
 {
     void* pm = *(void**)((char*)SSXApp->Game->World + 0x8);
     int i;
-    cWorldPainterManArg* cameraRegion = &D_004A5560;
-    cWorldPainterManArg* fogRegion = &D_004A5568;
-    cWorldPainterManArg* lightGlowRegion = &D_004A5570;
-    cWorldPainterManArg* screenTintRegion = &D_004A5578;
-    cWorldPainterManArg* skyBoxRegion = &D_004A5580;
-    cWorldPainterManArg* sunRegion = &D_004A5588;
-    cWorldPainterManArg* surfaceRegion = &D_004A5590;
+    cWorldPainterManArg* cameraRegion = &kWPR_Camera;
+    cWorldPainterManArg* fogRegion = &kWPR_Fog;
+    cWorldPainterManArg* lightGlowRegion = &kWPR_LightGlow;
+    cWorldPainterManArg* screenTintRegion = &kWPR_ScreenTint;
+    cWorldPainterManArg* skyBoxRegion = &kWPR_SkyBox;
+    cWorldPainterManArg* sunRegion = &kWPR_Sun;
+    cWorldPainterManArg* surfaceRegion = &kWPR_Surface;
     cWorldPainterManArg* lightingRegion = &kWPR_Lighting;
-    cWorldPainterManArg* weatherRegion = &D_004A55A0;
+    cWorldPainterManArg* weatherRegion = &kWPR_Weather;
     for (i = 0; i < 8; i++) {
         ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[0] = cWorldPainterMan_getQuery(pm, cameraRegion);
         ((sLensRow_ED048*)&D_lensRows_ED048)[i].q[1] = cWorldPainterMan_getQuery(pm, fogRegion);
