@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/scriptobjcamera.h"
 #include "scripter/scriptdatabaseobject.h"
 #include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
@@ -1724,7 +1725,7 @@ extern "C" void cSSXScriptEngine_RemoveObject(cSSXScriptEngine* self, int idx)
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_IsObjInUseByPlayer);
 #ifdef SKIP_ASM
 int cScriptDatabaseObject_GetObject(void* self, int i);
-extern "C" int cScriptObjCamera_IsInUseByPlayer(void* self, int val);
+extern "C" int cScriptObjCamera_IsInUseByPlayer(cScriptObjCamera* self, int val);
 extern "C" void cScriptDatabaseObject_IsObjInUseByPlayer(void* self, int i, int val);
 extern "C" void cScriptObjTransition_IsInUseByPlayer(void* obj, int val);
 
@@ -1743,7 +1744,7 @@ extern "C" void cSSXScriptEngine_IsObjInUseByPlayer(cSSXScriptEngine* self, int 
     int* obj = (int*)cScriptDatabaseObject_GetObject(self, i);
     int type = *obj;
     if (type == 1) {
-        cScriptObjCamera_IsInUseByPlayer(obj, val);
+        cScriptObjCamera_IsInUseByPlayer((cScriptObjCamera*)obj, val);
     } else if (type != 2) {
         cScriptDatabaseObject_IsObjInUseByPlayer(self, i, val);
     } else {
@@ -4857,14 +4858,14 @@ extern char t4mat_Identity[];
  */
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy of t4mat_Identity, likely identity);
 // the PC port needs a plain 64-byte copy.
-extern "C" void* cScriptObjCamera_cScriptObjCamera(void* self, int viewIndex)
+extern "C" void* cScriptObjCamera_cScriptObjCamera(cScriptObjCamera* self, int viewIndex)
 {
     cScriptObject_cScriptObject(self, 1);
-    *(void**)((char*)self + 0xC) = cScriptObjCamera_vtbl;
-    *(int*)((char*)self + 0x20) = -1;
-    *(int*)((char*)self + 0x10) = 0;
-    *(int*)((char*)self + 0x14) = 0;
-    *(int*)((char*)self + 0x18) = 0;
+    self->mVtbl = (void**)cScriptObjCamera_vtbl;
+    self->mPlayerID = -1;
+    self->mpCameraManager = 0;
+    self->mpCameraEntity = 0;
+    *(int*)&self->mWeight = 0;
     __asm__ __volatile__(
         ".set noreorder\n"
         "lqc2      $vf1, 0x0(%1)\n"
@@ -4879,11 +4880,11 @@ extern "C" void* cScriptObjCamera_cScriptObjCamera(void* self, int viewIndex)
         :
         : "r"((char*)self + 0x30), "r"(t4mat_Identity)
         : "memory");
-    *(int*)((char*)self + 0x7C) = viewIndex;
-    *(int*)((char*)self + 0x70) = 0;
-    *(int*)((char*)self + 0x74) = 0;
-    *(int*)((char*)self + 0x78) = 0;
-    return self;
+    self->mViewIndex = viewIndex;
+    *(int*)&self->mBaseRotX = 0;
+    *(int*)&self->mBaseRotY = 0;
+    *(int*)&self->mBaseRotZ = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -4925,19 +4926,19 @@ struct sSeVEntryD688 {
  */
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy of t4mat_Identity, likely identity);
 // the PC port needs a plain 64-byte copy.
-extern "C" void cScriptObjCamera_SetCameraEntity(char* self, void* anim)
+extern "C" void cScriptObjCamera_SetCameraEntity(cScriptObjCamera* self, void* anim)
 {
     if (anim != 0) {
         int id = cScriptDatabaseObject_GetPlayerIDByEntity((sScriptEng0050*)cScriptDatabaseObject_GetDatabaseObject(), anim);
-        if (*(void**)(self + 0x14) != 0) {
-            sSeVEntryD688* vt = *(sSeVEntryD688**)(self + 0xC);
-            vt[5].fn(self + vt[5].delta, *(int*)(self + 0x20));
+        if (self->mpCameraEntity != 0) {
+            sSeVEntryD688* vt = (sSeVEntryD688*)self->mVtbl;
+            vt[5].fn(((char*)self) + vt[5].delta, self->mPlayerID);
         }
-        *(void**)(self + 0x14) = anim;
-        *(int*)(self + 0x20) = id;
-        sSeVEntryD688* vt = *(sSeVEntryD688**)(self + 0xC);
-        vt[4].fn(self + vt[4].delta, id);
-    } else if (*(void**)(self + 0x14) != 0) {
+        self->mpCameraEntity = (cScriptEntityCamera*)anim;
+        self->mPlayerID = id;
+        sSeVEntryD688* vt = (sSeVEntryD688*)self->mVtbl;
+        vt[4].fn(((char*)self) + vt[4].delta, id);
+    } else if (self->mpCameraEntity != 0) {
         __asm__ __volatile__(
             ".set noreorder\n"
             "lqc2      $vf1, 0x0(%1)\n"
@@ -4950,15 +4951,15 @@ extern "C" void cScriptObjCamera_SetCameraEntity(char* self, void* anim)
             "sqc2      $vf4, 0x30(%0)\n"
             ".set reorder\n"
             :
-            : "r"(self + 0x30), "r"(t4mat_Identity)
+            : "r"(((char*)self) + 0x30), "r"(t4mat_Identity)
             : "memory");
-        *(int*)(self + 0x70) = 0;
-        *(int*)(self + 0x74) = 0;
-        *(int*)(self + 0x78) = 0;
-        sSeVEntryD688* vt = *(sSeVEntryD688**)(self + 0xC);
-        vt[5].fn(self + vt[5].delta, *(int*)(self + 0x20));
-        *(void**)(self + 0x14) = 0;
-        *(int*)(self + 0x20) = -1;
+        *(int*)&self->mBaseRotX = 0;
+        *(int*)&self->mBaseRotY = 0;
+        *(int*)&self->mBaseRotZ = 0;
+        sSeVEntryD688* vt = (sSeVEntryD688*)self->mVtbl;
+        vt[5].fn(((char*)self) + vt[5].delta, self->mPlayerID);
+        self->mpCameraEntity = 0;
+        self->mPlayerID = -1;
     }
 }
 #endif
@@ -4990,12 +4991,12 @@ extern "C" int cScriptDatabaseObject_IsEntityInUseByPlayer(cScriptDatabaseObject
  * @param val  the player ID
  * @return 1 when it is, 0 otherwise or when no entity is bound
  */
-extern "C" int cScriptObjCamera_IsInUseByPlayer(void* self, int val)
+extern "C" int cScriptObjCamera_IsInUseByPlayer(cScriptObjCamera* self, int val)
 {
-    if (*(void**)((char*)self + 0x14) == 0) {
+    if (self->mpCameraEntity == 0) {
         return 0;
     }
-    return cScriptDatabaseObject_IsEntityInUseByPlayer(cScriptDatabaseObject_GetDatabaseObject(), *(int*)(*(char**)((char*)self + 0x14) + 0x4), val);
+    return cScriptDatabaseObject_IsEntityInUseByPlayer(cScriptDatabaseObject_GetDatabaseObject(), *(int*)((char*)self->mpCameraEntity + 0x4), val);
 }
 #endif
 
@@ -5016,9 +5017,9 @@ public:
  * Pauses the camera object's script: calls the second virtual of the object at +0x10 (On Tour mpCameraManager, a
  * cScriptEntity; presumably PauseEntityScript).
  */
-extern "C" void cScriptObjCamera_PauseObjScript(void* self)
+extern "C" void cScriptObjCamera_PauseObjScript(cScriptObjCamera* self)
 {
-    (*(cSsxScriptVirt**)((char*)self + 0x10))->v02();
+    ((cSsxScriptVirt*)self->mpCameraManager)->v02();
 }
 #endif
 
@@ -5029,9 +5030,9 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCamera_ResumeObjScript);
  * Resumes the camera object's script: calls the third virtual of the object at +0x10 (On Tour mpCameraManager, a
  * cScriptEntity; presumably ResumeEntityScript).
  */
-extern "C" void cScriptObjCamera_ResumeObjScript(void* self)
+extern "C" void cScriptObjCamera_ResumeObjScript(cScriptObjCamera* self)
 {
-    (*(cSsxScriptVirt**)((char*)self + 0x10))->v03();
+    ((cSsxScriptVirt*)self->mpCameraManager)->v03();
 }
 #endif
 
@@ -5051,14 +5052,14 @@ extern "C" void cCamera_setCurrentController(void* self, int mode);
  * this object to the cScriptCameraController (+0xAC) of the view manager's camera whose index is in the word at
  * +0x7C, and makes controller 3 current on that camera when the controller's word at +0x18 is set.
  */
-extern "C" void cScriptObjCamera_OnStartObjectUse(void* self)
+extern "C" void cScriptObjCamera_OnStartObjectUse(cScriptObjCamera* self)
 {
     cScriptObject_OnStartObjectUse(self);
     if ((void*)SSXApp->Game != 0) {
-        *(float*)((char*)self + 0x18) = 1.0f;
-        cScriptObjCamera_CalculateBaseTransform(self, *(int*)((char*)self + 0x14));
+        self->mWeight = 1.0f;
+        cScriptObjCamera_CalculateBaseTransform(self, (int)self->mpCameraEntity);
         char* riders = (char*)SSXApp->Game->ViewMan;
-        char* rider = *(char**)(riders + (*(int*)((char*)self + 0x7C) << 2) + 4);
+        char* rider = *(char**)(riders + (self->mViewIndex << 2) + 4);
         cScriptCameraController_addCamera(*(void**)(rider + 0xAC), self);
         if (*(int*)(*(char**)(rider + 0xAC) + 0x18) != 0) {
             cCamera_setCurrentController(rider, 3);
@@ -5094,14 +5095,14 @@ public:
  * and calls the current Controller's slot 4. The local view calls the camera a rider. On Tour passes a playerID;
  * this C takes none.
  */
-extern "C" void cScriptObjCamera_OnEndObjectUse(void* self)
+extern "C" void cScriptObjCamera_OnEndObjectUse(cScriptObjCamera* self)
 {
     cScriptObject_OnEndObjectUse(self);
     char* app = (char*)SSXApp;
     if (*(void**)(app + 0x84) != 0) {
-        *(int*)((char*)self + 0x18) = 0;
+        *(int*)&self->mWeight = 0;
         char* riders = *(char**)(*(char**)(app + 0x84) + 0x84);
-        char* rider = *(char**)(riders + (*(int*)((char*)self + 0x7C) << 2) + 4);
+        char* rider = *(char**)(riders + (self->mViewIndex << 2) + 4);
         cScriptCameraController_removeCamera(*(void**)(rider + 0xAC), self);
         if (*(int*)(*(char**)(rider + 0xAC) + 0x18) == 0) {
             cCamera_setCurrentController(rider, 2);
@@ -6558,7 +6559,7 @@ extern "C" int cScriptObjCameraManager_AddCameraObject(void* self, void* obj)
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_RemoveCameraObject);
 #ifdef SKIP_ASM
 void cScriptObjCamera_SetCameraManager(void* self, int val);
-extern "C" void cScriptObjCamera_SetCameraEntity(char* self, void* anim);
+extern "C" void cScriptObjCamera_SetCameraEntity(cScriptObjCamera* self, void* anim);
 
 struct sSeEng11E8 {
     char pad_0x0[0x8];
@@ -6588,7 +6589,7 @@ extern "C" int cScriptObjCameraManager_RemoveCameraObject_impl(sSeEng11E8* self,
         char* cameraObj = self->objs[i];
         if (cameraObj != 0 && *(int*)(cameraObj + 4) == k) {
             if (self->count > 0 && *(int*)(cameraObj + 0x14) != 0) {
-                cScriptObjCamera_SetCameraEntity(cameraObj, 0);
+                cScriptObjCamera_SetCameraEntity((cScriptObjCamera*)cameraObj, 0);
                 for (int j = 0; j < 2; j++) {
                     if (self->slots[j] == i) {
                         self->slots[j] = -1;
@@ -6688,7 +6689,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_OnEndObjectUse);
 #ifdef SKIP_ASM
 extern "C" cScriptDatabaseObject* cScriptDatabaseObject_GetDatabaseObject(void);
 extern "C" void cScriptDatabaseObject_MarkObjectAsUnreserved(cScriptDatabaseObject* mgr, int id);
-extern "C" void cScriptObjCamera_SetCameraEntity(char* self, void* anim);
+extern "C" void cScriptObjCamera_SetCameraEntity(cScriptObjCamera* self, void* anim);
 extern "C" void cScriptObjCameraManager_ResetScriptManagementVars(void* self);
 extern "C" void cFocusMan_removebox(void* a, void* b, void* c);
 // PORT: cScriptObjTransition_SetTransition's mangled signature is (void*, int, int); it also takes four floats (same alias as cScriptObjCameraManager_SetTransitionObject).
@@ -6727,7 +6728,7 @@ extern "C" void cScriptObjCameraManager_OnEndObjectUse(sSeEng1400* self, int pla
     for (int i = 0; i < 2; i++) {
         int cameraIndex = self->slots[i];
         if (cameraIndex >= 0) {
-            cScriptObjCamera_SetCameraEntity(self->objs[cameraIndex], 0);
+            cScriptObjCamera_SetCameraEntity((cScriptObjCamera*)self->objs[cameraIndex], 0);
             self->slots[i] = -1;
         }
     }
@@ -7025,7 +7026,7 @@ extern "C" void cScriptObjCameraManager_ResetScriptManagementVars(void* self)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_SetupCameraObject);
 #ifdef SKIP_ASM
-extern "C" void cScriptObjCamera_SetCameraEntity(char* self, void* anim);
+extern "C" void cScriptObjCamera_SetCameraEntity(cScriptObjCamera* self, void* anim);
 int cScriptEntity_IsPlaying(void* self);
 
 struct sSseAnim1AC8 {
@@ -7082,7 +7083,7 @@ extern "C" void cScriptObjCameraManager_SetupCameraObject(void* selfp, int ch, i
         }
     }
     if (anim == 9) {
-        cScriptObjCamera_SetCameraEntity((char*)self->rigs[slot], 0);
+        cScriptObjCamera_SetCameraEntity((cScriptObjCamera*)((char*)self->rigs[slot]), 0);
         self->chans[ch] = -1;
         return;
     }
@@ -7094,7 +7095,7 @@ extern "C" void cScriptObjCameraManager_SetupCameraObject(void* selfp, int ch, i
                 return;
             }
             if (cScriptEntity_IsPlaying(cameraEntity) != 0 && cameraEntity->id == anim) {
-                cScriptObjCamera_SetCameraEntity((char*)self->rigs[slot], cameraEntity);
+                cScriptObjCamera_SetCameraEntity((cScriptObjCamera*)((char*)self->rigs[slot]), cameraEntity);
                 break;
             }
         }

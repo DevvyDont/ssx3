@@ -1,0 +1,50 @@
+#ifndef SCRIPTER_SCRIPTOBJCAMERA_H
+#define SCRIPTER_SCRIPTOBJCAMERA_H
+
+// cScriptObjCamera: a script-driven camera object: a camera entity (mpCameraEntity), its weight in the camera
+// manager's blend (mWeight), the algorithm that moves it (mpCameraAlgorithm), the player it serves and its base
+// transform / rotation. The camera manager points at two (On Tour cScriptObjCameraManager::mpCameraObjects[2]).
+// Methods in scripter/ssxscriptengine and scripter/all_in_one_scripter.
+//
+// Size 0x80 (On Tour's; retail's methods reach mViewIndex at size - 4). A FLAT layout, like main/game.h: member names,
+// order and offsets are EA's, from SSX On Tour's PSP DWARF ([O]), and every retail access in the methods
+// falls on a member start. Enums and bools are words; members of class type are byte arrays (type in
+// the comment).
+
+#include "layout.h"
+#include "bx/math3d.h"
+
+struct cScriptAlgorithm;
+struct cScriptEntityCamera;
+struct cScriptObjCameraManager;
+
+struct cScriptObjCamera {
+    char unk_000[0xC];                        // 0x000 the base part; no retail access
+    void** mVtbl;                             // 0x00C [R] ctor = cScriptObjCamera_vtbl; [U] SetCameraEntity's virtual call
+    cScriptObjCameraManager* mpCameraManager; // 0x010 [O]
+    cScriptEntityCamera* mpCameraEntity;      // 0x014 [O]
+    float mWeight;                            // 0x018 [O]
+    cScriptAlgorithm* mpCameraAlgorithm;      // 0x01C [O]
+    int mPlayerID;                            // 0x020 [O]
+    char unk_024[0xC];                        // 0x024 padding
+    t4Matrix mBaseTransform;                  // 0x030 [O]
+    float mBaseRotX;                          // 0x070 [O]
+    float mBaseRotY;                          // 0x074 [O]
+    float mBaseRotZ;                          // 0x078 [O]
+    int mViewIndex;                           // 0x07C [O]
+};
+
+CHECK_OFFSET(cScriptObjCamera, mVtbl, 0x00C);
+CHECK_OFFSET(cScriptObjCamera, mpCameraManager, 0x010);
+CHECK_OFFSET(cScriptObjCamera, mpCameraEntity, 0x014);
+CHECK_OFFSET(cScriptObjCamera, mWeight, 0x018);
+CHECK_OFFSET(cScriptObjCamera, mpCameraAlgorithm, 0x01C);
+CHECK_OFFSET(cScriptObjCamera, mPlayerID, 0x020);
+CHECK_OFFSET(cScriptObjCamera, mBaseTransform, 0x030);
+CHECK_OFFSET(cScriptObjCamera, mBaseRotX, 0x070);
+CHECK_OFFSET(cScriptObjCamera, mBaseRotY, 0x074);
+CHECK_OFFSET(cScriptObjCamera, mBaseRotZ, 0x078);
+CHECK_OFFSET(cScriptObjCamera, mViewIndex, 0x07C);
+CHECK_SIZE(cScriptObjCamera, 0x80);
+
+#endif

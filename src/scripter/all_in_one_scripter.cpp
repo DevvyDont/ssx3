@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/scriptobjcamera.h"
 #include "scripter/ssxscriptengine.h"
 
 //100%
@@ -698,8 +699,8 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetCameraEntity);
  * @param cameraObj  the camera object
  * @return its camera entity
  */
-extern "C" int cScriptObjCamera_GetCameraEntity(void *cameraObj) {
-    return (*(int *)((char*)(cameraObj) + (0x14)));
+extern "C" int cScriptObjCamera_GetCameraEntity(cScriptObjCamera* cameraObj) {
+    return ((int)cameraObj->mpCameraEntity);
 }
 #endif
 
@@ -712,8 +713,8 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetCameraWeight);
  * @param cameraObj  the camera object
  * @return its weight
  */
-extern "C" float cScriptObjCamera_GetCameraWeight(void *cameraObj) {
-    return (*(float *)((char*)(cameraObj) + (0x18)));
+extern "C" float cScriptObjCamera_GetCameraWeight(cScriptObjCamera* cameraObj) {
+    return (cameraObj->mWeight);
 }
 #endif
 
@@ -740,8 +741,8 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetBaseRotX);
  * @param cameraObj  the camera object
  * @return its base X rotation
  */
-extern "C" float cScriptObjCamera_GetBaseRotX(void *cameraObj) {
-    return (*(float *)((char*)(cameraObj) + (0x70)));
+extern "C" float cScriptObjCamera_GetBaseRotX(cScriptObjCamera* cameraObj) {
+    return (cameraObj->mBaseRotX);
 }
 #endif
 
@@ -754,8 +755,8 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetBaseRotY);
  * @param cameraObj  the camera object
  * @return its base Y rotation
  */
-extern "C" float cScriptObjCamera_GetBaseRotY(void *cameraObj) {
-    return (*(float *)((char*)(cameraObj) + (0x74)));
+extern "C" float cScriptObjCamera_GetBaseRotY(cScriptObjCamera* cameraObj) {
+    return (cameraObj->mBaseRotY);
 }
 #endif
 
@@ -768,8 +769,8 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetBaseRotZ);
  * @param cameraObj  the camera object
  * @return its base Z rotation
  */
-extern "C" float cScriptObjCamera_GetBaseRotZ(void *cameraObj) {
-    return (*(float *)((char*)(cameraObj) + (0x78)));
+extern "C" float cScriptObjCamera_GetBaseRotZ(cScriptObjCamera* cameraObj) {
+    return (cameraObj->mBaseRotZ);
 }
 #endif
 
@@ -782,8 +783,8 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetViewIndex);
  * @param cameraObj  the camera object
  * @return its view index
  */
-extern "C" int cScriptObjCamera_GetViewIndex(void *cameraObj) {
-    return (*(int *)((char*)(cameraObj) + (0x7C)));
+extern "C" int cScriptObjCamera_GetViewIndex(cScriptObjCamera* cameraObj) {
+    return (cameraObj->mViewIndex);
 }
 #endif
 
@@ -796,8 +797,8 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetCameraManager);
  * @param cameraObj  the camera object
  * @return its camera manager
  */
-extern "C" int cScriptObjCamera_GetCameraManager(void *cameraObj) {
-    return (*(int *)((char*)(cameraObj) + (0x10)));
+extern "C" int cScriptObjCamera_GetCameraManager(cScriptObjCamera* cameraObj) {
+    return ((int)cameraObj->mpCameraManager);
 }
 #endif
 
@@ -856,8 +857,8 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCamera_GetCameraAlgorithm)
  * @param cameraObj  the camera object
  * @return its camera algorithm
  */
-extern "C" int cScriptObjCamera_GetCameraAlgorithm(void *cameraObj) {
-    return (*(int *)((char*)(cameraObj) + (0x1C)));
+extern "C" int cScriptObjCamera_GetCameraAlgorithm(cScriptObjCamera* cameraObj) {
+    return ((int)cameraObj->mpCameraAlgorithm);
 }
 #endif
 
