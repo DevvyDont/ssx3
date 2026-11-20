@@ -1,4 +1,5 @@
 #include "common.h"
+#include "wscript/wscriptcache.h"
 #include "world/world.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -23,18 +24,18 @@ extern char str_tWScriptCache[];
  * @param count  number of world sections (On Tour numSections)
  */
 // PORT: array cookie arithmetic through int (pointer in int).
-extern "C" void cWScriptCache_init(void* self, int count)
+extern "C" void cWScriptCache_init(cWScriptCache* self, int count)
 {
-    char* old = *(char**)((char*)self + 0x4);
+    char* old = (char*)self->mpCache;
     if (old != 0) {
         char* oldEntry = (char*)(*(int*)(old - 0x10) * 0xC + (int)old);
-        while (*(char**)((char*)self + 0x4) != oldEntry) {
+        while ((char*)self->mpCache != oldEntry) {
             oldEntry -= 0xC;
             cWScriptCacheEntry__cWScriptCacheEntry((int*)oldEntry, 0);
         }
-        cMemMan_free(*(char**)((char*)self + 0x4) - 0x10);
+        cMemMan_free((char*)self->mpCache - 0x10);
     }
-    *(int*)((char*)self + 0x8) = count;
+    self->mNumSections = (unsigned int)count;
     char** slot = (char**)((char*)self + 0x4);
     char* mem = (char*)operator_new_tag(count * 0xC + 0x10, str_tWScriptCache, 0x20000000, 0);
     char* arr = mem + 0x10;
@@ -45,7 +46,7 @@ extern "C" void cWScriptCache_init(void* self, int count)
         cWScriptCacheEntry_cWScriptCacheEntry(newEntry);
     }
     *slot = arr;
-    *(int*)((char*)self + 0xC) = 0;
+    self->mNumLoading = 0;
 }
 #endif
 
@@ -95,11 +96,11 @@ extern "C" void cWScriptCacheEntry_update(int);
  *
  * No C caller in the source.
  */
-extern "C" void cWScriptCache_update(void *self) {
+extern "C" void cWScriptCache_update(cWScriptCache* self) {
     unsigned int i;
 
-    for (i = 0; i < *(unsigned int *)((char *)self + 8); i++) {
-        cWScriptCacheEntry_update(*(int *)((char *)self + 4) + i * 0xC);
+    for (i = 0; i < self->mNumSections; i++) {
+        cWScriptCacheEntry_update((int)self->mpCache + i * 0xC);
     }
 }
 #endif
@@ -163,9 +164,9 @@ INCLUDE_ASM("world/wscriptcache", cWScriptCache_getScriptBase);
  * @param sectionId  the section id
  * @return the script file header
  */
-extern "C" int cWScriptCache_getScriptBase(void* self, int sectionId)
+extern "C" int cWScriptCache_getScriptBase(cWScriptCache* self, int sectionId)
 {
-    sWScriptCacheEntry* entries = *(sWScriptCacheEntry**)((char*)self + 0x4);
+    sWScriptCacheEntry* entries = (sWScriptCacheEntry*)self->mpCache;
     return entries[sectionId].field_0x8;
 }
 #endif

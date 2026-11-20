@@ -1,4 +1,5 @@
 #include "common.h"
+#include "animation/adfdatasource.h"
 #include "render/ps2graphicsman.h"
 #include "animation/animmodel.h"
 
@@ -1304,7 +1305,7 @@ extern "C" void cAnimDataBase_purgeChanCache(void)
 //100%
 INCLUDE_ASM("animation/animmodel", cAdfDataSource_cAdfDataSource1);
 #ifdef SKIP_ASM
-extern "C" void cAdfDataSource_populateFromData(void* self, char* data);
+extern "C" void cAdfDataSource_populateFromData(cAdfDataSource* self, char* data);
 
 /**
  * Constructs an animation data source over @p data that is already in memory, and returns @p self.
@@ -1318,7 +1319,7 @@ extern "C" void cAdfDataSource_populateFromData(void* self, char* data);
 extern "C" void* cAdfDataSource_cAdfDataSource1(void* self, char* data)
 {
     *(int*)self = 0;
-    cAdfDataSource_populateFromData(self, data);
+    cAdfDataSource_populateFromData((cAdfDataSource*)self, data);
     return self;
 }
 #endif
@@ -1341,7 +1342,7 @@ extern "C" void* cAdfDataSource_cAdfDataSource(char** self, void* src)
 {
     char* data = FILE_loadpack(src, 0);
     *self = data;
-    cAdfDataSource_populateFromData(self, data);
+    cAdfDataSource_populateFromData((cAdfDataSource*)self, data);
     return self;
 }
 #endif
@@ -1357,13 +1358,13 @@ INCLUDE_ASM("animation/animmodel", cAdfDataSource_populateFromData);
  *
  * @param data  the loaded animation archive
  */
-extern "C" void cAdfDataSource_populateFromData(void* self, char* data)
+extern "C" void cAdfDataSource_populateFromData(cAdfDataSource* self, char* data)
 {
-    *(char**)((char*)self + 0x4) = data;
-    *(char**)((char*)self + 0x8) = data + 0x10;
-    *(char**)((char*)self + 0xC) = data + *(int*)(data + 0x4);
-    *(char**)((char*)self + 0x10) = data + *(int*)(data + 0x8);
-    *(char**)((char*)self + 0x14) = data + *(int*)(data + 0xC);
+    self->Archive = (tAdfArchive*)data;
+    self->Anims = (tAdfAnimHeader*)(data + 0x10);
+    self->Chunks = (tAdfAnimChunk*)(data + *(int*)(data + 0x4));
+    self->Tags = (tAdfTag*)(data + *(int*)(data + 0x8));
+    self->ChannelData = (unsigned char*)(data + *(int*)(data + 0xC));
 }
 #endif
 
@@ -1380,7 +1381,7 @@ void operator_delete(int*);
  *
  * @param flags  bit 0: delete the object itself
  */
-extern "C" void cAdfDataSource__cAdfDataSource(void* self, int flags)
+extern "C" void cAdfDataSource__cAdfDataSource(cAdfDataSource* self, int flags)
 {
     void* data = *(void**)self;
     if (data != 0)

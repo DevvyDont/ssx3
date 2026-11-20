@@ -1,4 +1,5 @@
 #include "common.h"
+#include "wscript/wscriptcache.h"
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
 #include "scripter/ssxscriptengine.h"
@@ -2604,12 +2605,12 @@ extern "C" void cWScriptCache_init(void* self, int a1);
  * @param world  the owning world (On Tour cWorld*)
  * @return self
  */
-extern "C" void* cWScriptCache_cWScriptCache(void* self, int world)
+extern "C" void* cWScriptCache_cWScriptCache(cWScriptCache* self, int world)
 {
-    *(int*)((char*)self + 0x0) = world;
-    *(int*)((char*)self + 0x4) = 0;
+    self->mpWorld = (cWorld*)world;
+    self->mpCache = 0;
     cWScriptCache_init(self, 1);
-    return self;
+    return ((void*)self);
 }
 #endif
 
