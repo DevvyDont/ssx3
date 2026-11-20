@@ -4855,7 +4855,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002B1C50);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* bmNew_1C50(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" int func_003D3058(int a, int b);
-extern "C" void func_002B4A20(void* self, void* name, int sync);
+extern "C" void func_002B4A20(cMusicSys* self, void* name, int sync);
 extern "C" void func_002B21E0(cSongInstance*, int);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_PathfinderStream[];
@@ -4971,7 +4971,7 @@ extern "C" void* func_002B1C50_body(sBankMon_1C50* self, int basePath, int secti
     self->entry = *bankCur_1C50(def);
     char buf[0x100];
     sprintf(buf, str_pct_spct_s_c, self->name, snd);
-    func_002B4A20((void***)gMusicSys, buf, syncLoad);
+    func_002B4A20((cMusicSys*)((void***)gMusicSys), buf, syncLoad);
     if (syncLoad != 0) {
         func_002B21E0((cSongInstance*)self, 1);
     }
@@ -5167,7 +5167,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void func_002B20C8(cSongInstance* mon, int a1, int a2);
 extern "C" void func_002B2160(cSongInstance* self, int v);
 extern "C" int func_002B2488(cSongInstance* self);
-extern "C" int func_002B4AA0(void* self, int force);
+extern "C" int func_002B4AA0(cMusicSys* self, int force);
 int cMusicSys_GetMPFFile(void* self);
 extern "C" void SNDSYS_entercritical(void);
 extern "C" void SNDSYS_leavecritical(void);
@@ -5199,7 +5199,7 @@ extern "C" void func_002B21E0(cSongInstance* mon, int force)
 {
     if (mon->unk_2C == 0)
     {
-        if (func_002B4AA0((void***)gMusicSys, force) == 0)
+        if (func_002B4AA0((cMusicSys*)((void***)gMusicSys), force) == 0)
             return;
         (mon)->unk_2C = 1;
         func_003D2350(cMusicSys_GetMPFFile((void***)gMusicSys));
@@ -6141,8 +6141,8 @@ struct sBankEntry64_3838 {
 extern "C" void SNDSYS_leavecritical(void);
 extern "C" void SNDSYS_entercritical(void);
 extern "C" int func_004165A8(void*, void*);
-extern "C" void func_002B3AC0(void* self);
-extern "C" void func_002B43D8(void* self);
+extern "C" void func_002B3AC0(cMusicSys* self);
+extern "C" void func_002B43D8(cMusicSys* self);
 extern "C" void* func_002B1B98(int a0, int a1, int a2, int a3, char a4, int a5, int a6, int a7);
 
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
@@ -6178,7 +6178,7 @@ extern "C" void func_002B3838(cMusicSys* self_, int songName, int bankIndex, int
     int songConfig;
     int name;
     int base;
-    func_002B3AC0(self);
+    func_002B3AC0((cMusicSys*)self);
     bankManager = *self->pp;
     sub = &bankManager->sub;
     baseVol = sub->vals[sub->cur];
@@ -6217,7 +6217,7 @@ extern "C" void func_002B3838(cMusicSys* self_, int songName, int bankIndex, int
         base = (int)&(*self->pp)->sub;
         *(int*)((char*)self + 0x408) = (int)func_002B1B98((int)self->obj, name, songConfig, base, baseVol, (int)pf, bankIndex, syncLoad);
     }
-    func_002B43D8(self);
+    func_002B43D8((cMusicSys*)self);
     *(int*)((char*)self + 0x41C) = -1;
     *(int*)((char*)self + 0x418) = 1;
 }
@@ -6231,9 +6231,9 @@ extern "C" void func_002B2018(cSongInstance*);
 /**
  * Pauses the current song (func_002B2018) when there is one.
  */
-extern "C" void func_002B3A70(void* self)
+extern "C" void func_002B3A70(cMusicSys* self)
 {
-    void* curSong = *(void**)((char*)self + 0x408);
+    void* curSong = self->mCurrent;
     if (curSong != 0) {
         func_002B2018((cSongInstance*)curSong);
     }
@@ -6248,9 +6248,9 @@ extern "C" void func_002B2070(cSongInstance*);
 /**
  * Resumes the current song (func_002B2070) when there is one.
  */
-extern "C" void func_002B3A98(void* self)
+extern "C" void func_002B3A98(cMusicSys* self)
 {
-    void* curSong = *(void**)((char*)self + 0x408);
+    void* curSong = self->mCurrent;
     if (curSong != 0) {
         func_002B2070((cSongInstance*)curSong);
     }
@@ -6270,7 +6270,7 @@ extern const sSndKey8_3AC0 D_004A3848[];
 extern void cMonitor_MONITOR_DestroyAll1_3AC0(void* bank, long key) __asm__("cMonitor_MONITOR_DestroyAll1");
 extern "C" void cAsyncSys_ASYNCSYS_Cancel(void* self, int i);
 extern "C" void cBankManager_BANK_UnLoad(void* self, int i);
-extern "C" void func_002B3A98(void* self);
+extern "C" void func_002B3A98(cMusicSys* self);
 extern "C" void func_002B1F78(cSongInstance* self, int flags);
 
 /**
@@ -6281,22 +6281,21 @@ extern "C" void func_002B1F78(cSongInstance* self, int flags);
  * (func_002B1F78 with 3) and clears it.
  */
 // PORT: 64-bit long sound keys
-extern "C" void func_002B3AC0(void* self)
+extern "C" void func_002B3AC0(cMusicSys* self)
 {
-    char* musicSys = (char*)self;
-    cMonitor_MONITOR_DestroyAll1_3AC0(**(char***)musicSys + 0x1D8, D_004A3838[0].v);
-    cMonitor_MONITOR_DestroyAll1_3AC0(**(char***)musicSys + 0x1D8, D_004A3840[0].v);
-    cMonitor_MONITOR_DestroyAll1_3AC0(**(char***)musicSys + 0x1D8, D_004A3848[0].v);
-    if (*(void**)(musicSys + 0x408) != 0) {
-        cAsyncSys_ASYNCSYS_Cancel(**(void***)musicSys, *(int*)(*(char**)(musicSys + 0x408) + 0x34));
-        cBankManager_BANK_UnLoad(**(void***)musicSys, *(int*)(*(char**)(musicSys + 0x408) + 0x34));
+    cMonitor_MONITOR_DestroyAll1_3AC0(**(char***)self + 0x1D8, D_004A3838[0].v);
+    cMonitor_MONITOR_DestroyAll1_3AC0(**(char***)self + 0x1D8, D_004A3840[0].v);
+    cMonitor_MONITOR_DestroyAll1_3AC0(**(char***)self + 0x1D8, D_004A3848[0].v);
+    if (self->mCurrent != 0) {
+        cAsyncSys_ASYNCSYS_Cancel(**(void***)self, *(int*)((char*)self->mCurrent + 0x34));
+        cBankManager_BANK_UnLoad(**(void***)self, *(int*)((char*)self->mCurrent + 0x34));
     }
     func_002B3A98(self);
-    *(int*)(musicSys + 0x418) = 0;
-    if (*(void**)(musicSys + 0x408) != 0) {
-        func_002B1F78((cSongInstance*)(*(void**)(musicSys + 0x408)), 3);
+    self->mSongPlaying = 0;
+    if (self->mCurrent != 0) {
+        func_002B1F78((cSongInstance*)(self->mCurrent), 3);
     }
-    *(void**)(musicSys + 0x408) = 0;
+    self->mCurrent = 0;
 }
 #endif
 
@@ -6310,10 +6309,10 @@ extern "C" void func_002B20C8(cSongInstance* mon, int a1, int a2);
  *
  * @param musicEvent  the music event
  */
-extern "C" void func_002B3B88(void* self, int musicEvent)
+extern "C" void func_002B3B88(cMusicSys* self, int musicEvent)
 {
-    if (*(int*)((char*)self + 0x418) != 0) {
-        void* curSong = *(void**)((char*)self + 0x408);
+    if (self->mSongPlaying != 0) {
+        void* curSong = self->mCurrent;
         if (curSong != 0) {
             func_002B20C8((cSongInstance*)curSong, musicEvent, 0);
         }
@@ -6338,13 +6337,13 @@ struct sBankMonVEntry {
  * @param musicState  the new music state
  * @return 1 when the state changed, else 0
  */
-extern "C" int func_002B3BC0(void* self, int musicState)
+extern "C" int func_002B3BC0(cMusicSys* self, int musicState)
 {
     int changed = 0;
-    if (*(int*)((char*)self + 0x418) != 0 && musicState != *(int*)((char*)self + 0x41C)) {
-        sBankMonVEntry* vt = *(sBankMonVEntry**)((char*)self + 0x5440);
+    if (self->mSongPlaying != 0 && musicState != self->unk_41C) {
+        sBankMonVEntry* vt = (sBankMonVEntry*)self->mVtbl;
         vt[3].fn((char*)self + vt[3].delta);
-        *(int*)((char*)self + 0x41C) = musicState;
+        self->unk_41C = musicState;
         changed = 1;
     }
     return changed;
@@ -6362,10 +6361,10 @@ void func_002B2120_m(void* mon) __asm__("func_002B2120");
  *
  * The C declaration takes only self; the callers pass a volume (0..127) as the second argument.
  */
-extern "C" void func_002B3C28(void* self)
+extern "C" void func_002B3C28(cMusicSys* self)
 {
-    if (*(int*)((char*)self + 0x418) != 0) {
-        void* curSong = *(void**)((char*)self + 0x408);
+    if (self->mSongPlaying != 0) {
+        void* curSong = self->mCurrent;
         if (curSong != 0) {
             func_002B2120_m(curSong);
         }
@@ -6384,11 +6383,11 @@ extern void func_002B2140_3C60(int) __asm__("func_002B2140");
  *
  * @param musicSys  the cMusicSys
  */
-extern "C" void func_002B3C60(void *musicSys) {
+extern "C" void func_002B3C60(cMusicSys* musicSys) {
     int temp_4;
 
-    if ((*(int *)((char*)(musicSys) + (0x418))) != 0) {
-        temp_4 = (*(int *)((char*)(musicSys) + (0x408)));
+    if ((musicSys->mSongPlaying) != 0) {
+        temp_4 = ((int)musicSys->mCurrent);
         if (temp_4 != 0) {
             func_002B2140_3C60(temp_4);
         }
@@ -6404,10 +6403,10 @@ INCLUDE_ASM("sound/bankmonitor", func_002B3C98);
  *
  * @param baseVol  the base volume
  */
-extern "C" void func_002B3C98(void* self, signed char baseVol)
+extern "C" void func_002B3C98(cMusicSys* self, signed char baseVol)
 {
-    if (*(int*)((char*)self + 0x418) != 0) {
-        void* curSong = *(void**)((char*)self + 0x408);
+    if (self->mSongPlaying != 0) {
+        void* curSong = self->mCurrent;
         if (curSong != 0) {
             *(signed char*)((char*)curSong + 0x40) = baseVol;
         }
@@ -6423,9 +6422,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002B3CC0);
  *
  * @param enabled  the new value
  */
-extern "C" void func_002B3CC0(void* self, int enabled)
+extern "C" void func_002B3CC0(cMusicSys* self, int enabled)
 {
-    void* curSong = *(void**)((char*)self + 0x408);
+    void* curSong = self->mCurrent;
     if (curSong != 0) {
         *(int*)((char*)curSong + 0x54) = enabled;
     }
@@ -6440,10 +6439,10 @@ INCLUDE_ASM("sound/bankmonitor", func_002B3CD8);
  *
  * @param cutoff  the cutoff
  */
-extern "C" void func_002B3CD8(void* self, int cutoff)
+extern "C" void func_002B3CD8(cMusicSys* self, int cutoff)
 {
-    if (*(int*)((char*)self + 0x418) != 0) {
-        void* curSong = *(void**)((char*)self + 0x408);
+    if (self->mSongPlaying != 0) {
+        void* curSong = self->mCurrent;
         if (curSong != 0) {
             func_002B2160((cSongInstance*)curSong, cutoff);
         }
@@ -6461,10 +6460,10 @@ extern "C" void func_002B23E8(cSongInstance* self, signed char v);
  *
  * @param levelPercent  the level in percent
  */
-extern "C" void func_002B3D10(void* self, signed char levelPercent)
+extern "C" void func_002B3D10(cMusicSys* self, signed char levelPercent)
 {
-    if (*(int*)((char*)self + 0x418) != 0) {
-        void* curSong = *(void**)((char*)self + 0x408);
+    if (self->mSongPlaying != 0) {
+        void* curSong = self->mCurrent;
         if (curSong != 0) {
             func_002B23E8((cSongInstance*)curSong, levelPercent);
         }
@@ -6482,10 +6481,10 @@ extern "C" void func_002B2418(cSongInstance* mon, float v);
  *
  * @param fadeTime  the fade time in seconds
  */
-extern "C" void func_002B3D48(void* self, float fadeTime)
+extern "C" void func_002B3D48(cMusicSys* self, float fadeTime)
 {
-    if (*(int*)((char*)self + 0x418) != 0) {
-        void* curSong = *(void**)((char*)self + 0x408);
+    if (self->mSongPlaying != 0) {
+        void* curSong = self->mCurrent;
         if (curSong != 0) {
             func_002B2418((cSongInstance*)curSong, fadeTime);
         }
@@ -6512,15 +6511,15 @@ extern void cMonitor_MONITOR_Create_3D80(int a, int b, long t, int c, int d, int
  * @param target  the target base volume
  * @param duration  the fade time in seconds
  */
-extern "C" void func_002B3D80(void* self, signed char target, float duration)
+extern "C" void func_002B3D80(cMusicSys* self, signed char target, float duration)
 {
     signed char cur;
-    void* voice = *(void**)((char*)self + 0x408);
+    void* voice = self->mCurrent;
     if (voice != 0 && target != (cur = *(signed char*)((char*)voice + 0x40))) {
         int steps = (target - cur) / 25;
-        *(int*)((char*)self + 0x414) = target;
-        *(float*)((char*)self + 0x410) = (float)cur;
-        *(float*)((char*)self + 0x40C) = (float)steps / duration;
+        self->unk_414 = target;
+        self->unk_410 = (float)cur;
+        self->unk_40C = (float)steps / duration;
         cMonitor_MONITOR_Create_3D80(**(int**)self + 472, 40, D_004A3850_3D80[0].v, 0, 0, 0, 0, 0);
     }
 }
@@ -6536,18 +6535,18 @@ INCLUDE_ASM("sound/bankmonitor", func_002B3E20);
  *
  * @return 1 when the fade is done, else 0
  */
-extern "C" int func_002B3E20(void* self)
+extern "C" int func_002B3E20(cMusicSys* self)
 {
-    float step = *(float*)((char*)self + 0x40C);
-    float cur = *(float*)((char*)self + 0x410) + step;
-    *(float*)((char*)self + 0x410) = cur;
-    if ((step > 0.0f && cur < (float)*(int*)((char*)self + 0x414))
-        || (step < 0.0f && cur > (float)*(int*)((char*)self + 0x414))) {
-        *(signed char*)((char*)*(void**)((char*)self + 0x408) + 0x40) = (signed char)(int)*(float*)((char*)self + 0x410);
+    float step = self->unk_40C;
+    float cur = self->unk_410 + step;
+    self->unk_410 = cur;
+    if ((step > 0.0f && cur < (float)self->unk_414)
+        || (step < 0.0f && cur > (float)self->unk_414)) {
+        *(signed char*)((char*)self->mCurrent + 0x40) = (signed char)(int)self->unk_410;
         return 0;
     }
-    signed char targetVol = *(int*)((char*)self + 0x414);
-    *(signed char*)((char*)*(void**)((char*)self + 0x408) + 0x40) = targetVol;
+    signed char targetVol = self->unk_414;
+    *(signed char*)((char*)self->mCurrent + 0x40) = targetVol;
     return 1;
 }
 #endif
@@ -6890,12 +6889,12 @@ extern "C" void func_002B4620(void*);
 /**
  * Updates the current song (func_002B21E0 without force) and starts its overlay (func_002B4620) when unk_50 is set.
  */
-extern "C" void func_002B4388(void* self)
+extern "C" void func_002B4388(cMusicSys* self)
 {
-    void* curSong = *(void**)((char*)self + 0x408);
+    void* curSong = self->mCurrent;
     if (curSong != 0) {
         func_002B21E0((cSongInstance*)curSong, 0);
-        if (*(int*)((char*)*(void**)((char*)self + 0x408) + 0x50) != 0) {
+        if (*(int*)((char*)self->mCurrent + 0x50) != 0) {
             func_002B4620(self);
         }
     }
@@ -6917,18 +6916,18 @@ struct sBankMonHdr { char pad[0x40]; int f40; char names[1][0x20]; };
  *
  * Only when the song has loop banks; the file is "<mPath><mBankData[n]>" with n from func_002B24C0.
  */
-extern "C" void func_002B43D8(void* self)
+extern "C" void func_002B43D8(cMusicSys* self)
 {
     char buf[256];
-    void* songInstance = *(void**)((char*)self + 0x408);
+    void* songInstance = self->mCurrent;
     if (songInstance != 0) {
         int bank = *(int*)((char*)songInstance + 0x34);
         if ((*(sBankMonHdr**)songInstance)->f40 != 0) {
             int n = func_002B24C0((cSongInstance*)songInstance);
-            void* currentSong = *(void**)((char*)self + 0x408);
+            void* currentSong = self->mCurrent;
             sprintf(buf, str_pct_spct_s_c, (char*)currentSong + 0x60, (*(sBankMonHdr**)currentSong)->names[n]);
             cBankManager_BANK_AsyncLoad(**(void***)self, bank, buf, 0x100);
-            *(int*)((char*)*(void**)((char*)self + 0x408) + 0x38) = 1;
+            *(int*)((char*)self->mCurrent + 0x38) = 1;
         }
     }
 }
@@ -6945,9 +6944,9 @@ extern void cMonitor_MONITOR_Create_4470(int a, int b, long t, int c, int d, int
  * Arms the D_004A3838 callback (func_002B4740) at once and sets unk_4C, when the current song's unk_4C is 0.
  */
 // PORT: 64-bit long sound key, read unaligned from a const table
-extern "C" void func_002B4470(void* self)
+extern "C" void func_002B4470(cMusicSys* self)
 {
-    void* songInstance = *(void**)((char*)self + 0x408);
+    void* songInstance = self->mCurrent;
     if (songInstance != 0 && *(int*)((char*)songInstance + 0x4C) == 0) {
         *(int*)((char*)songInstance + 0x4C) = 1;
         cMonitor_MONITOR_Create_4470(*(int*)(*(int*)self) + 472, 0, D_004A3838_4470[0].v, 0, 0, 0, 0, 0);
@@ -6963,16 +6962,16 @@ struct sPacked8 { long v; } __attribute__((packed));
 extern const sPacked8 D_004A3838_2B44D8[] __asm__("D_004A3838");
 extern const sPacked8 D_004A3840_2B44D8[] __asm__("D_004A3840");
 extern "C" void cMonitor_MONITOR_DestroyAll1(int a, long t);
-extern "C" void func_002B4708(void* self);
+extern "C" void func_002B4708(cMusicSys* self);
 
 /**
  * Cancels the song's D_004A3838 and D_004A3840 callbacks (cMonitor_MONITOR_DestroyAll1) and clears unk_4C (func_002B4708).
  *
  * Only when there is a current song.
  */
-extern "C" void func_002B44D8(void* self)
+extern "C" void func_002B44D8(cMusicSys* self)
 {
-    if (*(void**)((char*)self + 0x408) != 0) {
+    if (self->mCurrent != 0) {
         cMonitor_MONITOR_DestroyAll1(*(int*)(*(int*)self) + 472, D_004A3838_2B44D8[0].v);
         cMonitor_MONITOR_DestroyAll1(*(int*)(*(int*)self) + 472, D_004A3840_2B44D8[0].v);
         func_002B4708(self);
@@ -7021,14 +7020,14 @@ extern "C" void cMonitor_MONITOR_Create(int a, int b, long t, void* c, int d, in
  *
  * @param ent  the cSongInstance to time against
  */
-extern "C" void func_002B4568(void* self, void* ent)
+extern "C" void func_002B4568(cMusicSys* self, void* ent)
 {
-    if (*(void**)((char*)self + 0x408) != 0) {
+    if (self->mCurrent != 0) {
         float beatLength = func_002B2690((cSongInstance*)ent);
         float timeToBeat = func_002B2718((cSongInstance*)ent);
         int nextBeat = func_002B2778((cSongInstance*)ent) + 1;
         int phraseStart = func_002B2500((cSongInstance*)ent);
-        cMonitor_MONITOR_Create(**(int**)self + 472, (int)timeToBeat, D_004A3840_2B4568[0].v, *(void**)((char*)self + 0x408), phraseStart, nextBeat, (int)beatLength, 0);
+        cMonitor_MONITOR_Create(**(int**)self + 472, (int)timeToBeat, D_004A3840_2B4568[0].v, self->mCurrent, phraseStart, nextBeat, (int)beatLength, 0);
     }
 }
 #endif
@@ -7089,9 +7088,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002B46D0);
 /**
  * Sets the current song's unk_50, so func_002B4388 starts its overlay.
  */
-extern "C" void func_002B46D0(void* self)
+extern "C" void func_002B46D0(cMusicSys* self)
 {
-    void* curSong = *(void**)((char*)self + 0x408);
+    void* curSong = self->mCurrent;
     if (curSong != 0) {
         *(int*)((char*)curSong + 0x50) = 1;
     }
@@ -7106,9 +7105,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002B46E8);
  *
  * @return unk_4C, or 0
  */
-extern "C" void* func_002B46E8(void* self)
+extern "C" void* func_002B46E8(cMusicSys* self)
 {
-    void* inner = *(void**)((char*)self + 0x408);
+    void* inner = self->mCurrent;
     if (inner == 0) {
         return 0;
     }
@@ -7122,9 +7121,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002B4708);
 /**
  * Clears the current song's unk_4C when there is a song.
  */
-extern "C" void func_002B4708(void* self)
+extern "C" void func_002B4708(cMusicSys* self)
 {
-    void* curSong = *(void**)((char*)self + 0x408);
+    void* curSong = self->mCurrent;
     if (curSong != 0) {
         *(int*)((char*)curSong + 0x4c) = 0;
     }
@@ -7139,9 +7138,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002B4720);
  *
  * @return the base volume
  */
-extern "C" int func_002B4720(void* self)
+extern "C" int func_002B4720(cMusicSys* self)
 {
-    char* curSong = *(char**)((char*)self + 0x408);
+    char* curSong = (char*)self->mCurrent;
     if (curSong == 0) {
         return 0;
     }
@@ -7151,7 +7150,7 @@ extern "C" int func_002B4720(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmonitor", func_002B4740);
 #ifdef SKIP_ASM
-extern "C" void func_002B4568(void* self, void* ent);
+extern "C" void func_002B4568(cMusicSys* self, void* ent);
 
 /**
  * Monitor callback (D_004A3838) waiting for the song's loop bank: arms the beat callback once it is loaded.
@@ -7160,9 +7159,9 @@ extern "C" void func_002B4568(void* self, void* ent);
  *
  * @return 1 when done, 0 to be called again
  */
-extern "C" int func_002B4740(void* self)
+extern "C" int func_002B4740(cMusicSys* self)
 {
-    void* ent = *(void**)((char*)self + 0x408);
+    void* ent = self->mCurrent;
     char* table = *(char**)((char*)**(void***)self + 0xACC);
     int state = *(int*)(table + *(int*)((char*)ent + 0x34) * 0x60);
     switch (state) {
@@ -7191,10 +7190,10 @@ extern "C" int SNDbankinuse(int);
  *
  * @return 1 when unk_4C was cleared, 0 to be called again
  */
-extern "C" int func_002B47C0(void* self)
+extern "C" int func_002B47C0(cMusicSys* self)
 {
     int ok = 0;
-    int slot = *(int*)((char*)*(void**)((char*)self + 0x408) + 0x34);
+    int slot = *(int*)((char*)self->mCurrent + 0x34);
     void* other = **(void***)self;
     SNDSYS_entercritical();
     bool notReady = *(int*)(slot * 0x60 + *(int*)((char*)other + 0xACC)) != 1;
@@ -7203,7 +7202,7 @@ extern "C" int func_002B47C0(void* self)
     }
     SNDSYS_leavecritical();
     if (ok == 0) {
-        *(int*)((char*)*(void**)((char*)self + 0x408) + 0x4C) = 0;
+        *(int*)((char*)self->mCurrent + 0x4C) = 0;
         return 1;
     }
     return 0;
@@ -7232,10 +7231,10 @@ INCLUDE_ASM("sound/bankmonitor", func_002B4878);
  *
  * @return mDuckToLoops, or 1
  */
-extern "C" int func_002B4878(void* self)
+extern "C" int func_002B4878(cMusicSys* self)
 {
-    if (*(int*)((char*)self + 0x418) != 0) {
-        void* curSong = *(void**)((char*)self + 0x408);
+    if (self->mSongPlaying != 0) {
+        void* curSong = self->mCurrent;
         if (curSong != 0) {
             return func_002B4868(curSong);
         }
@@ -7265,10 +7264,10 @@ INCLUDE_ASM("sound/bankmonitor", func_002B48C8);
  *
  * @return mSedValue, or -1
  */
-extern "C" int func_002B48C8(void* self)
+extern "C" int func_002B48C8(cMusicSys* self)
 {
-    if (*(int*)((char*)self + 0x418) != 0) {
-        void** curSong = *(void***)((char*)self + 0x408);
+    if (self->mSongPlaying != 0) {
+        void** curSong = (void**)self->mCurrent;
         if (curSong != 0) {
             return func_002B48B8(curSong);
         }
@@ -7306,13 +7305,13 @@ extern "C" float func_002B2718(cSongInstance* self);
  *
  * @return the time in ms
  */
-extern "C" float func_002B4920(void* self)
+extern "C" float func_002B4920(cMusicSys* self)
 {
-    if (*(int*)((char*)self + 0x418) == 0) {
+    if (self->mSongPlaying == 0) {
         return 0.0f;
     }
     SNDSYS_entercritical();
-    float timeToBeat = func_002B2718((cSongInstance*)(*(void**)((char*)self + 0x408)));
+    float timeToBeat = func_002B2718((cSongInstance*)(self->mCurrent));
     SNDSYS_leavecritical();
     return timeToBeat;
 }
@@ -7357,10 +7356,10 @@ INCLUDE_ASM("sound/bankmonitor", func_002B49C0);
  *
  * @param songTag  the tag
  */
-extern "C" void func_002B49C0(void* self, int songTag)
+extern "C" void func_002B49C0(cMusicSys* self, int songTag)
 {
-    if (*(int*)((char*)self + 0x418) != 0) {
-        void* curSong = *(void**)((char*)self + 0x408);
+    if (self->mSongPlaying != 0) {
+        void* curSong = self->mCurrent;
         if (curSong != 0) {
             *(int*)((char*)curSong + 0x58) = songTag;
         }
@@ -7376,10 +7375,10 @@ INCLUDE_ASM("sound/bankmonitor", func_002B49E0);
  *
  * @return the tag, or -1
  */
-extern "C" int func_002B49E0(void* self)
+extern "C" int func_002B49E0(cMusicSys* self)
 {
-    if (*(int*)((char*)self + 0x418) != 0) {
-        void* curSong = *(void**)((char*)self + 0x408);
+    if (self->mSongPlaying != 0) {
+        void* curSong = self->mCurrent;
         if (curSong != 0) {
             return *(int*)((char*)curSong + 0x58);
         }
@@ -7396,9 +7395,9 @@ INCLUDE_ASM("sound/bankmonitor", func_002B4A08);
  *
  * @param holdEvents  the new value
  */
-extern "C" void func_002B4A08(void* self, int holdEvents)
+extern "C" void func_002B4A08(cMusicSys* self, int holdEvents)
 {
-    void* curSong = *(void**)((char*)self + 0x408);
+    void* curSong = self->mCurrent;
     if (curSong != 0) {
         *(int*)((char*)curSong + 0x5c) = holdEvents;
     }
@@ -7421,16 +7420,16 @@ extern "C" void FILE_loadat(void* name, void* buf, int size);
  * @param name  the file name
  * @param sync  nonzero to load synchronously
  */
-extern "C" void func_002B4A20(void* self, void* name, int sync)
+extern "C" void func_002B4A20(cMusicSys* self, void* name, int sync)
 {
-    if (*(void**)((char*)self + 0x5438) != 0) {
-        ASYNCFILE_cancel(*(void**)((char*)self + 0x5438));
-        ASYNCFILE_release(*(void**)((char*)self + 0x5438), 0, 0);
+    if (self->unk_5438 != 0) {
+        ASYNCFILE_cancel(self->unk_5438);
+        ASYNCFILE_release(self->unk_5438, 0, 0);
     }
     if (sync == 0) {
-        *(void**)((char*)self + 0x5438) = ASYNCFILE_loadat(name, *(void**)((char*)self + 0x5434), 25600);
+        self->unk_5438 = ASYNCFILE_loadat(name, self->mMPFFile, 25600);
     } else {
-        FILE_loadat(name, *(void**)((char*)self + 0x5434), 25600);
+        FILE_loadat(name, self->mMPFFile, 25600);
     }
 }
 #endif
@@ -7446,13 +7445,13 @@ extern "C" int ASYNCFILE_getstatus(void*);
  * @param force  nonzero to return 1 at once
  * @return 1 or 0
  */
-extern "C" int func_002B4AA0(void* self, int force)
+extern "C" int func_002B4AA0(cMusicSys* self, int force)
 {
     void* asyncFile;
     if (force != 0) {
         return 1;
     }
-    asyncFile = *(void**)((char*)self + 0x5438);
+    asyncFile = self->unk_5438;
     if (asyncFile != 0 && ASYNCFILE_getstatus(asyncFile) == 1) {
         return 1;
     }
