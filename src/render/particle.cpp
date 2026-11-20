@@ -11661,10 +11661,10 @@ INCLUDE_ASM("render/particle", cGridMesh__cGridMesh);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char cGarbageMan_vtbl[];
+extern char D_00493938[];
 
 /**
- * Destroys a grid mesh's base part: stores the base vtable cGarbageMan_vtbl (+0x4) and frees the object when bit 0 of
+ * Destroys a grid mesh's base part: stores the base vtable D_00493938 (+0x4) and frees the object when bit 0 of
  * @p flags is set.
  *
  * Slot 1 of the abstract grid-mesh vtable (whose other slots are pure virtual, apart from cGridMesh_SetScale__FPv);
@@ -11674,7 +11674,7 @@ extern char cGarbageMan_vtbl[];
  */
 extern "C" void cGridMesh__cGridMesh(int* self, int flags)
 {
-    *(void**)((char*)self + 0x4) = cGarbageMan_vtbl;
+    *(void**)((char*)self + 0x4) = D_00493938;
     if (flags & 1) {
         operator_delete(self);
     }

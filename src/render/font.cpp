@@ -3082,10 +3082,10 @@ INCLUDE_ASM("render/font", cGarbageMan__cGarbageMan);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char cGarbageMan_vtbl[];
+extern char D_00493938[];
 
 /**
- * Destructor body: stores the vtable cGarbageMan_vtbl at +4 and frees the object when bit 0 of @p flags is set.
+ * Destructor body: stores the vtable D_00493938 at +4 and frees the object when bit 0 of @p flags is set.
  *
  * It is the only slot (slot 1) of that one-entry vtable.
  *
@@ -3093,7 +3093,7 @@ extern char cGarbageMan_vtbl[];
  */
 extern "C" void cGarbageMan__cGarbageMan(int* self, int flags)
 {
-    *(void**)((char*)self + 0x4) = cGarbageMan_vtbl;
+    *(void**)((char*)self + 0x4) = D_00493938;
     if (flags & 1) {
         operator_delete(self);
     }

@@ -273,15 +273,15 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D2988);
 INCLUDE_ASM("seg/seg_1D3510", cMemCard__cMemCard);
 #ifdef SKIP_ASM
 void operator_delete(int *);
-extern void* D_004871E8[];
+extern void* cMemCard_vtbl[];
 /**
- * Destroys a memory-card object of the base class: stores the base vtable D_004871E8 back at +0 and frees the object
+ * Destroys a memory-card object of the base class: stores the base vtable cMemCard_vtbl back at +0 and frees the object
  * when bit 0 of @p flags is set.
  *
  * @param flags  bit 0: free the memory
  */
 extern "C" void cMemCard__cMemCard(void ***self, int flags) {
-    *self = D_004871E8;
+    *self = cMemCard_vtbl;
     if (flags & 1) operator_delete((int*)self);
 }
 #endif
@@ -292,7 +292,7 @@ INCLUDE_ASM("seg/seg_1D3510", cMemCard_IsDeviceChanged);
 /**
  * Returns 1.
  *
- * It is word 53 (slot 26) of both D_004871E8 (the base memory-card vtable) and cPS2MemCard_vtbl, which does not
+ * It is word 53 (slot 26) of both cMemCard_vtbl (the base memory-card vtable) and cPS2MemCard_vtbl, which does not
  * override it.
  *
  * @return 1
@@ -305,7 +305,7 @@ extern "C" int cMemCard_IsDeviceChanged(void) {
 /**
  * Does nothing.
  *
- * It is word 55 (slot 27) of both D_004871E8 (the base memory-card vtable) and cPS2MemCard_vtbl.
+ * It is word 55 (slot 27) of both cMemCard_vtbl (the base memory-card vtable) and cPS2MemCard_vtbl.
  */
 extern "C" void cMemCard_ClearDeviceChanges(void) {
 }
@@ -313,7 +313,7 @@ extern "C" void cMemCard_ClearDeviceChanges(void) {
 /**
  * Does nothing.
  *
- * It is word 57 (slot 28) of both D_004871E8 (the base memory-card vtable) and cPS2MemCard_vtbl.
+ * It is word 57 (slot 28) of both cMemCard_vtbl (the base memory-card vtable) and cPS2MemCard_vtbl.
  */
 extern "C" void cMemCard_SetAllDevicesChanged(void) {
 }
@@ -324,7 +324,7 @@ INCLUDE_ASM("seg/seg_1D3510", cMemCard_FileExistsError);
 /**
  * Returns 0.
  *
- * It is word 149 (slot 74) of D_004871E8, the base memory-card vtable; cPS2MemCard_vtbl overrides that slot with
+ * It is word 149 (slot 74) of cMemCard_vtbl, the base memory-card vtable; cPS2MemCard_vtbl overrides that slot with
  * cPS2MemCard_FileExistsError.
  *
  * @return 0

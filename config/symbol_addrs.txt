@@ -15953,5 +15953,8 @@ cPlants_vtbl = 0x00493178;
 cRenderToggles_vtbl = 0x004931A8;
 cPS2GridMesh_vtbl = 0x00493208;
 cBezierMan_vtbl = 0x00493820;
-cGarbageMan_vtbl = 0x00493938;
+D_00493938 = 0x00493938;
 cUIState_vtbl = 0x004946C8;
+
+// SSX On Tour (PSP, ULKS-46038) dev-build global names, round data_vtables_round10 (docs/ontour_globals.tsv)
+cMemCard_vtbl = 0x004871E8;

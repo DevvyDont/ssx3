@@ -1311,14 +1311,14 @@ void operator_delete(int* ptr);
 extern "C" void MEM_free(void* p);
 extern "C" void cPS2MemCard_CleanUp(cPS2MemCard* self);
 extern void* cPS2MemCard_vtbl[];
-extern void* D_004871E8[];
+extern void* cMemCard_vtbl[];
 
 /**
  * Destroys the PS2 memory card object: finishes any pending card operation, frees the icon data and restores the
  * cMemCard base vtable.
  *
  * Calls cPS2MemCard_CleanUp (waits for a pending sceMcSync and clears the operation state), MEM_frees the icon file data
- * (+0x30), stores D_004871E8 and frees the object when bit 0 of @p flags is set.
+ * (+0x30), stores cMemCard_vtbl and frees the object when bit 0 of @p flags is set.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
@@ -1330,7 +1330,7 @@ extern "C" void cPS2MemCard__cPS2MemCard(void* self, int flags)
     if (iconData != 0) {
         MEM_free(iconData);
     }
-    *(void***)self = D_004871E8;
+    *(void***)self = cMemCard_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

@@ -4876,3 +4876,5 @@ ps2_addr	name	previous	source	evidence
 00493820	cBezierMan_vtbl	D_00493820	vtables.py	[D] slot 1 cBezierMan__cBezierMan; [C] stored by cBezierMan__cBezierMan, cBezierMan_cBezierMan; [M] own slot(s) cBezierMan_AddPatch, cBezierMan_GetPatchDist__FPv, cBezierMan_Reset__FPv +2
 00493938	cGarbageMan_vtbl	D_00493938	vtables.py	[D] slot 1 cGarbageMan__cGarbageMan; [C] stored by cGarbageMan__cGarbageMan
 004946C8	cUIState_vtbl	D_004946C8	vtables.py	[D] slot 1 cUIState__cUIState; [C] stored by cUIState__cUIState, cUIState_cUIState, cUIState_cUIState1, cUIState_cUIState2; [M] own slot(s) cUIState_getData__FPv, cUIState_handleEvent__FPv, cUIState_onCreateScreen__FPv +18
+004871E8	cMemCard_vtbl	D_004871E8	vtables.py	[D] slot 1 cMemCard__cMemCard (preview build _$_8cMemCard); [M] own slots cMemCard_IsDeviceChanged / ClearDeviceChanges / SetAllDevicesChanged (preview linkonce names)
+00493938	D_00493938	cGarbageMan_vtbl	vtables.py	held: one-slot vtable, only [D] (round 9 overcounted the destructor's own store as [C])
