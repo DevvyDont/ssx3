@@ -2915,14 +2915,14 @@ extern void EIntr(void);
  */
 void (*func_004008A0(void (*cb)(int)))(int) {
     void (*old)(int);
-    int s;
+    int intrEnabled;
     if (func_004013E8(1) != 0)
         return 0;
-    s = DIntr();
+    intrEnabled = DIntr();
     old = D_005264C0;
     D_005264C0 = cb;
     __asm__ volatile("sw $28,%0" : "=m"(D_005264C4)); /* the callback runs with this $gp */
-    if (s != 0)
+    if (intrEnabled != 0)
         EIntr();
     return old;
 }
@@ -2935,16 +2935,16 @@ extern int iSignalSema_i(int) __asm__("iSignalSema");
 /**
  * Finishes a libcdvd asynchronous N-command: releases the command semaphore and wakes the callback thread.
  *
- * Copies the pending command's function code (*@p p, the global D_00451658: 1 read, 3 get-TOC) to D_0045165C for the
+ * Copies the pending command's function code (*@p pendingCode, the global D_00451658: 1 read, 3 get-TOC) to D_0045165C for the
  * callback. Code 11 only clears it and the busy flag D_00451634. Otherwise it signals the N-command semaphore
  * D_00451628 (which the issuing call left held) and, when the callback thread D_00451614 exists and a callback
  * D_005264C0 is set, signals the thread's semaphore D_00451620; with no callback it clears the busy flag itself. Uses
  * iSignalSema, so it runs in the SIF RPC completion (interrupt) context: func_00400B48 calls it.
  *
- * @param p  the pending command's function code (always &D_00451658)
+ * @param pendingCode  the pending command's function code (always &D_00451658)
  */
-void func_00400908(int *p) {
-    D_00451658 = *p;
+void func_00400908(int *pendingCode) {
+    D_00451658 = *pendingCode;
     D_0045165C = D_00451658;
     if (D_00451658 == 11) {
         D_00451658 = 0;
@@ -3017,26 +3017,26 @@ extern void func_004009A8(void);
  * thread parameters D_00526510 (entry func_004009A8, stack, size, priority, gp 0), creates the thread and starts it,
  * keeping its id in D_00451614. Later calls only call ChangeThreadPriority.
  *
- * @param a  the thread priority
- * @param b  the thread's stack
- * @param c  the stack size in bytes
+ * @param priority  the thread priority
+ * @param stackAddr  the thread's stack
+ * @param stackBytes  the stack size in bytes
  * @return 1 when the thread was created, 0 when only its priority changed
  */
-int func_00400A78(int a, int b, int c) {
+int func_00400A78(int priority, int stackAddr, int stackBytes) {
     int ok;
     ok = 1;
     if (D_00451614 == 0) {
         D_005264D8 = GetThreadId();
         ReferThreadStatus_i(D_005264D8, &D_005264E0);
-        D_00526510.stackSize = c;
+        D_00526510.stackSize = stackBytes;
         D_00526510.entry = func_004009A8;
-        D_00526510.stack = b;
-        D_00526510.initPriority = a;
+        D_00526510.stack = stackAddr;
+        D_00526510.initPriority = priority;
         D_00526510.gpReg = 0;
         D_00451614 = CreateThread(&D_00526510);
         StartThread(D_00451614, 0);
     } else {
-        ChangeThreadPriority(D_00451614, a);
+        ChangeThreadPriority(D_00451614, priority);
         ok = 0;
     }
     return ok;
@@ -3051,34 +3051,34 @@ extern void func_00400908(int *);
 /**
  * SIF RPC completion handler of a CD read: patches the unaligned head and tail bytes into the read buffer.
  *
- * The IOP returns the bytes of the read that share a 64-byte cache line with other data in a fixup block (@p a, read
+ * The IOP returns the bytes of the read that share a 64-byte cache line with other data in a fixup block (@p fixupBlock, read
  * through its uncached alias): n0 bytes for d0 from b0 and n1 bytes for d1 from b1. Each byte is written through both
  * the uncached and the cached address of the destination. Then func_00400908 finishes the command (&D_00451658).
  * func_00401DF8 passes it with the fixup buffer D_00452700.
  *
- * @param a  the fixup block (the RPC end parameter)
+ * @param fixupBlock  the fixup block (the RPC end parameter)
  */
-void func_00400B48(void *a) {
-    struct S0B48 *s = (struct S0B48 *)((unsigned)a | 0x20000000);
-    unsigned char *e;
+void func_00400B48(void *fixupBlock) {
+    struct S0B48 *fixup = (struct S0B48 *)((unsigned)fixupBlock | 0x20000000);
+    unsigned char *uncachedDst;
     int i;
-    unsigned char *d;
-    if (s->n0 > 0) {
-        e = (unsigned char *)((unsigned)s->d0 | 0x20000000);
-        d = s->d0;
-        for (i = 0; i < s->n0; i++) {
-            unsigned char c = s->b0[i];
-            e[i] = c;
-            d[i] = c;
+    unsigned char *cachedDst;
+    if (fixup->n0 > 0) {
+        uncachedDst = (unsigned char *)((unsigned)fixup->d0 | 0x20000000);
+        cachedDst = fixup->d0;
+        for (i = 0; i < fixup->n0; i++) {
+            unsigned char byteValue = fixup->b0[i];
+            uncachedDst[i] = byteValue;
+            cachedDst[i] = byteValue;
         }
     }
-    if (s->n1 > 0) {
-        e = (unsigned char *)((unsigned)s->d1 | 0x20000000);
-        d = s->d1;
-        for (i = 0; i < s->n1; i++) {
-            unsigned char c = s->b1[i];
-            e[i] = c;
-            d[i] = c;
+    if (fixup->n1 > 0) {
+        uncachedDst = (unsigned char *)((unsigned)fixup->d1 | 0x20000000);
+        cachedDst = fixup->d1;
+        for (i = 0; i < fixup->n1; i++) {
+            unsigned char byteValue = fixup->b1[i];
+            uncachedDst[i] = byteValue;
+            cachedDst[i] = byteValue;
         }
     }
     func_00400908((int *)&D_00451658);
@@ -3098,16 +3098,16 @@ extern int Q0C00_create(struct QSema *) __asm__("CreateSema");
  * libcdvd entry point that takes a semaphore calls it first.
  */
 void func_00400C00(void) {
-    struct QSema s;
+    struct QSema semaParam;
     if (D_00451628 == -1 || D_0045162C == -1 || D_00451630 == -1) {
-        s.option = 0;
-        s.init_count = 1;
-        s.max_count = 1;
-        D_00451628 = Q0C00_create(&s);
-        D_0045162C = Q0C00_create(&s);
-        D_00451630 = Q0C00_create(&s);
-        s.init_count = 0;
-        D_00451620 = Q0C00_create(&s);
+        semaParam.option = 0;
+        semaParam.init_count = 1;
+        semaParam.max_count = 1;
+        D_00451628 = Q0C00_create(&semaParam);
+        D_0045162C = Q0C00_create(&semaParam);
+        D_00451630 = Q0C00_create(&semaParam);
+        semaParam.init_count = 0;
+        D_00451620 = Q0C00_create(&semaParam);
         D_00451634 = 0;
     }
 }
@@ -3129,7 +3129,7 @@ extern void EIntr(void);
  * (func_00426050) that func_00400E30 installed.
  */
 void func_00400CB8(void) {
-    int s;
+    int intrEnabled;
     if (D_00451614 != 0) {
         D_00451658 = -1;
         cb_DC0(D_00451620);
@@ -3138,9 +3138,9 @@ void func_00400CB8(void) {
     cb_DB0(D_0045162C);
     cb_DB0(D_00451630);
     cb_DB0(D_00451620);
-    s = cb_078();
+    intrEnabled = cb_078();
     func_00426050(0x80000012);
-    if (s)
+    if (intrEnabled)
         EIntr();
 }
 #endif
@@ -3158,21 +3158,21 @@ extern int func_00400E30(void);
  * stores the function in D_005264C8, its argument in D_005264D0 and the caller's $gp in D_005264CC; the handler
  * func_00400DD8 calls it. The game's func_00319930 installs func_00319910 with the power-off thread's semaphore.
  *
- * @param a  the callback
- * @param b  the argument it is called with
+ * @param callback  the callback
+ * @param callbackArg  the argument it is called with
  * @return the previous callback
  */
-void (*func_00400D58(void (*a)(int), int b))(int) {
-    int s;
+void (*func_00400D58(void (*callback)(int), int callbackArg))(int) {
+    int intrEnabled;
     void (*old)(int);
     if (D_00451640 < 0)
         func_00400E30();
-    s = DIntr();
+    intrEnabled = DIntr();
     old = D_005264C8;
-    D_005264D0 = b;
-    D_005264C8 = a;
+    D_005264D0 = callbackArg;
+    D_005264C8 = callback;
     __asm__ volatile("sw $28,%0" : "=m"(D_005264CC));
-    if (s)
+    if (intrEnabled)
         EIntr();
     return old;
 }
@@ -3216,11 +3216,11 @@ extern void func_00426020(int, void (*)(void), int);
  * @return 1
  */
 int func_00400E30(void) {
-    int s;
+    int intrEnabled;
     D_00451624 = 1;
-    s = DIntr();
+    intrEnabled = DIntr();
     func_00426020(0x80000012, func_00400DD8, 0);
-    if (s)
+    if (intrEnabled)
         EIntr();
     D_00451624 = 0;
     D_00451640 = 1;
@@ -3251,19 +3251,19 @@ int f0EA8(char *out, char *name, int arg) __asm__("func_00400EA8");
  *
  * Takes the N-command semaphore D_00451628 without blocking (returns 0 when it is held or an N-command runs), binds
  * server 0x80000597 on first use (retrying, "Libcdvd bind err CdSearchFile"), copies @p name (up to 0xFF characters)
- * into the request D_00526540 with @p arg, writes it back from the cache and calls RPC 0. The record (sector, size,
+ * into the request D_00526540 with @p searchParam, writes it back from the cache and calls RPC 0. The record (sector, size,
  * name at +8; printed with the debug strings "search name/size/loc lbn") is copied from the request's uncached alias to
  * @p out. func_004011C0 calls it with 0.
  *
  * @param out  the 0x24-byte file record to fill
  * @param name  the file's path on the disc
- * @param arg  an extra word sent with the request
+ * @param searchParam  an extra word sent with the request
  * @return the server's result word (non-zero when found), 0 on failure
  */
-int f0EA8(char *out, char *name, int arg) {
+int f0EA8(char *out, char *name, int searchParam) {
     int i;
     int n;
-    int v;
+    int searchResult;
     func_00400C00();
     if (D_00451628 != PollSema(D_00451628))
         return 0;
@@ -3299,7 +3299,7 @@ int f0EA8(char *out, char *name, int arg) {
         D_00526540.name[0xFF] = 0;
     if (D_00451610 > 0)
         func_00425C60(D_00497A28, D_00526564);
-    D_00526540.arg = arg;
+    D_00526540.arg = searchParam;
     D_00526540.self = &D_00526540;
     func_00426358((int)&D_00526540, 300);
     if (sceSifCallRpc(&D_005266C0, 0, 0, &D_00526540, 300, D_00526680, 4, 0, 0) < 0) {
@@ -3313,9 +3313,9 @@ int f0EA8(char *out, char *name, int arg) {
         func_00425C60(D_00497A50, ((int *)out)[1]);
     if (D_00451610 > 0)
         func_00425C60(D_00497A60, ((int *)out)[0]);
-    v = *(int *)((int)D_00526680 | 0x20000000);
+    searchResult = *(int *)((int)D_00526680 | 0x20000000);
     SignalSema(D_00451628);
-    return v;
+    return searchResult;
 }
 #endif
 
@@ -3326,12 +3326,12 @@ extern int func_00400EA8(int, int, int);
 /**
  * Looks a file up on the disc: func_00400EA8 with an extra request word of 0.
  *
- * @param a  the 0x24-byte file record to fill (sector, size, name)
- * @param b  the file's path on the disc
+ * @param fileRecord  the 0x24-byte file record to fill (sector, size, name)
+ * @param path  the file's path on the disc
  * @return non-zero when the file was found, 0 otherwise
  */
-int func_004011C0(int a, int b) {
-    return func_00400EA8(a, b, 0);
+int func_004011C0(int fileRecord, int path) {
+    return func_00400EA8(fileRecord, path, 0);
 }
 #endif
 
@@ -3356,18 +3356,18 @@ extern void func_00426408(int);
  * use (D_0045163C), retrying on error ("Libcdvd bind err N CMD"). On success the caller holds the semaphore and must
  * release it.
  *
- * @param a  the command being issued (for the debug output)
+ * @param cmdNumber  the command being issued (for the debug output)
  * @return 1 when the command may be issued, 0 otherwise
  */
-int func_004011E0(int a) {
+int func_004011E0(int cmdNumber) {
     int i;
     func_00400C00();
     if (D_00451628 != PollSema(D_00451628)) {
         if (D_00451610 > 0)
-            func_00425C60(D_00497A78, a, D_0045161C);
+            func_00425C60(D_00497A78, cmdNumber, D_0045161C);
         return 0;
     }
-    D_0045161C = a;
+    D_0045161C = cmdNumber;
     ReferThreadStatus(D_005264D8, &D_005264E0);
     if (func_004013E8(1) != 0) {
         SignalSema(D_00451628);
@@ -3408,16 +3408,16 @@ extern void SignalSema(int);
  * @return the ready state (6 = not ready), or 0 on failure
  */
 int func_00401350(void) {
-    int v;
+    int readyState;
     if (func_004011E0(2) == 0)
         return 0;
     if (sceSifCallRpc(&D_004527D0, 14, 0, 0, 0, D_00451680, 4, 0, 0) < 0) {
         SignalSema(D_00451628);
         return 0;
     }
-    v = *(int *)((unsigned)D_00451680 | 0x20000000);
+    readyState = *(int *)((unsigned)D_00451680 | 0x20000000);
     SignalSema(D_00451628);
-    return v;
+    return readyState;
 }
 #endif
 
@@ -3433,11 +3433,11 @@ extern void func_00425C60();
  * set or the N-command RPC client D_004527D0 is still busy (sceSifCheckStatRpc), then returns 0. Any other mode returns
  * at once.
  *
- * @param a  0 to block until the command ends, otherwise only poll
+ * @param mode  0 to block until the command ends, otherwise only poll
  * @return 1 while a command is still running, else 0
  */
-int func_004013E8(int a) {
-    if (a == 0) {
+int func_004013E8(int mode) {
+    if (mode == 0) {
         if (D_00451610 > 0)
             func_00425C60(D_00497AB8);
         while (D_00451634 || sceSifCheckStatRpc(&D_004527D0))
@@ -3461,11 +3461,11 @@ extern void func_00425C60();
  * Mode 0 prints "S cmd wait" (debug) and sleeps 60 ticks at a time (func_00400838) while the S-command RPC client
  * D_00453180 is busy (sceSifCheckStatRpc), then returns 0. Any other mode returns the busy state at once.
  *
- * @param a  0 to block until the command ends, otherwise only poll
+ * @param mode  0 to block until the command ends, otherwise only poll
  * @return non-zero while an S-command is still running, else 0
  */
-int func_00401488(int a) {
-    if (a == 0) {
+int func_00401488(int mode) {
+    if (mode == 0) {
         if (D_00451610 > 0)
             func_00425C60(D_00497AC8);
         while (sceSifCheckStatRpc(&D_00453180))
@@ -3497,18 +3497,18 @@ extern void func_00426408(int);
  * (D_0045164C), retrying on error ("Libcdvd bind err S cmd"). On success the caller holds the semaphore and must
  * release it.
  *
- * @param a  the command being issued (for the debug output)
+ * @param cmdNumber  the command being issued (for the debug output)
  * @return 1 when the command may be issued, 0 otherwise
  */
-int func_004014F8(int a) {
+int func_004014F8(int cmdNumber) {
     int i;
     func_00400C00();
     if (D_0045162C != PollSema(D_0045162C)) {
         if (D_00451610 > 0)
-            func_00425C60(D_00497AD8, a, D_00451618);
+            func_00425C60(D_00497AD8, cmdNumber, D_00451618);
         return 0;
     }
-    D_00451618 = a;
+    D_00451618 = cmdNumber;
     ReferThreadStatus(D_005264D8, &D_005264E0);
     if (func_00401488(1) != 0) {
         SignalSema(D_0045162C);
@@ -3551,7 +3551,7 @@ INCLUDE_ASM("seg/seg_2FE810", func_00401668);
  * @return 1
  */
 int func_00401668(long id, int *out) {
-    int v;
+    int entry;
     if (id != 32769) {
         if (id != 32771) {
             if (id != 32770) {
@@ -3560,31 +3560,31 @@ int func_00401668(long id, int *out) {
                         if (id != 32787) {
                             if (id != 32786) {
                                 if (id == 32788)
-                                    v = (int)&D_00453180;
+                                    entry = (int)&D_00453180;
                                 else
-                                    v = 0;
+                                    entry = 0;
                             } else {
-                                v = (int)D_00452C40;
+                                entry = (int)D_00452C40;
                             }
                         } else {
-                            v = (int)D_00452800;
+                            entry = (int)D_00452800;
                         }
                     } else {
-                        v = D_0045162C;
+                        entry = D_0045162C;
                     }
                 } else {
-                    v = (int)&D_004527D0;
+                    entry = (int)&D_004527D0;
                 }
             } else {
-                v = (int)D_00451700;
+                entry = (int)D_00451700;
             }
         } else {
-            v = (int)D_00451680;
+            entry = (int)D_00451680;
         }
     } else {
-        v = D_00451628;
+        entry = D_00451628;
     }
-    *out = v;
+    *out = entry;
     return 1;
 }
 #endif
@@ -3624,9 +3624,9 @@ extern void func_00426358(int, int);
 int func_00401718(int mode)
 {
     int i;
-    int r;
+    int bindResult;
     int ret;
-    int st, a, b;
+    int st, versionWord1, versionWord2;
     int *buf;
 
     if (func_00401488(1) != 0)
@@ -3643,9 +3643,9 @@ int func_00401718(int mode)
     D_00451638 = 0;
     D_00451654++;
     while (1) {
-        if ((r = func_00426B48(&D_005266E8, 0x80000592, 0)) < 0) {
+        if ((bindResult = func_00426B48(&D_005266E8, 0x80000592, 0)) < 0) {
             if (D_00451610 > 0)
-                func_00425C60(D_00497B18, r, D_00451654);
+                func_00425C60(D_00497B18, bindResult, D_00451654);
             for (i = 0x100000; i--; )
                 ;
             continue;
@@ -3665,13 +3665,13 @@ int func_00401718(int mode)
             ;
     }
     ret = 1;
-    a = *(int *)((unsigned)(buf + 1) | 0x20000000);
-    b = *(int *)((unsigned)(buf + 2) | 0x20000000);
+    versionWord1 = *(int *)((unsigned)(buf + 1) | 0x20000000);
+    versionWord2 = *(int *)((unsigned)(buf + 2) | 0x20000000);
     st = *(int *)((unsigned)(buf + 3) | 0x20000000);
     if (st != 0xFF) {
         if (st == 0xFE)
             D_00451610 = 1;
-        else if (a / 256 < 2 || b / 256 < 2)
+        else if (versionWord1 / 256 < 2 || versionWord2 / 256 < 2)
             ret = 2;
     }
     D_00451624 = 0;
@@ -3712,16 +3712,16 @@ extern void func_00426358(int, int);
  * Older form of the disc-ready check: asks the disk-ready RPC server (0x8000059A) whether a disc is ready.
  *
  * Prints "OLD DiskReady Call" (debug), takes the S-command semaphore D_0045162C without blocking (6 when held), fails
- * while an S-command runs, binds server 0x8000059A on first use ("Libcdvd bind err CdDiskReady"), sends @p a (RPC 0)
+ * while an S-command runs, binds server 0x8000059A on first use ("Libcdvd bind err CdDiskReady"), sends @p mode (RPC 0)
  * and returns the reply word ("DiskReady ended"). func_00401BF0 falls back to it when the newer server 0x8000059C does
  * not answer.
  *
- * @param a  the mode passed to the server (8 makes failures return -1 instead of 6)
+ * @param mode  the mode passed to the server (8 makes failures return -1 instead of 6)
  * @return the ready state from the IOP; 6 (not ready) on failure, or -1 in mode 8
  */
-int func_004019F8(int a) {
-    int r;
-    int v;
+int func_004019F8(int mode) {
+    int spinCount;
+    int readyState;
     if (D_00451610 > 0)
         func_00425C60(D_00497B48);
     func_00400C00();
@@ -3729,7 +3729,7 @@ int func_004019F8(int a) {
         return 6;
     if (func_00401488(1) != 0) {
         SignalSema(D_0045162C);
-        return a != 8 ? 6 : -1;
+        return mode != 8 ? 6 : -1;
     }
     func_00426408(0);
     if (D_00451648 < 0) {
@@ -3737,7 +3737,7 @@ int func_004019F8(int a) {
             if (func_00426B48(&D_00526710, 0x8000059A, 0) < 0) {
                 if (D_00451610 > 0)
                     func_00425C60(D_00497B60);
-                for (r = 0x100000; r--; )
+                for (spinCount = 0x100000; spinCount--; )
                     ;
                 continue;
             }
@@ -3745,21 +3745,21 @@ int func_004019F8(int a) {
                 D_00451648 = 0;
                 break;
             }
-            for (r = 0x100000; r--; )
+            for (spinCount = 0x100000; spinCount--; )
                 ;
         }
     }
-    D_00526750[0] = a;
+    D_00526750[0] = mode;
     func_00426358((int)D_00526750, 4);
     if (sceSifCallRpc(&D_00526710, 0, 0, D_00526750, 4, D_00452800, 4, 0, 0) < 0) {
         SignalSema(D_0045162C);
-        return a != 8 ? 6 : -1;
+        return mode != 8 ? 6 : -1;
     }
     if (D_00451610 > 0)
         func_00425C60(D_00497B80);
-    v = *(int *)((unsigned)D_00452800 | 0x20000000);
+    readyState = *(int *)((unsigned)D_00452800 | 0x20000000);
     SignalSema(D_0045162C);
-    return v;
+    return readyState;
 }
 #endif
 
@@ -3785,21 +3785,21 @@ static inline int semaId1BF0(void) {
  *
  * Prints "NEW DiskReady Call" (debug), takes the third semaphore D_00451630 without blocking and binds server
  * 0x8000059C on first use; when that server has not appeared after 17 tries it releases the semaphore and uses the
- * older server through func_004019F8. Sends @p a (RPC 0), returns the reply word from D_00453080 ("DiskReady ended")
+ * older server through func_004019F8. Sends @p mode (RPC 0), returns the reply word from D_00453080 ("DiskReady ended")
  * and releases the semaphore.
  *
- * @param a  the mode passed to the server (8 makes failures return -1 instead of 6)
+ * @param mode  the mode passed to the server (8 makes failures return -1 instead of 6)
  * @return the ready state (6 = not ready); 6 on failure, or -1 in mode 8
  */
-int func_00401BF0(int a) {
+int func_00401BF0(int mode) {
     int i;
-    int r;
-    int v;
+    int spinCount;
+    int readyState;
     if (D_00451610 > 0)
         b1_log(D_00497B98);
     b1_0C00();
     if (D_00451630 != b1_3DF0(semaId1BF0()))
-        return a != 8 ? 6 : -1;
+        return mode != 8 ? 6 : -1;
     b1_6408(0);
     i = 0;
     if (D_00451648 < 0) {
@@ -3807,7 +3807,7 @@ int func_00401BF0(int a) {
             if (func_00426B48(&D_00526710, 0x8000059C, 0) < 0) {
                 if (D_00451610 > 0)
                     b1_log(D_00497B60);
-                for (r = 0x100000; r--; )
+                for (spinCount = 0x100000; spinCount--; )
                     ;
                 continue;
             }
@@ -3817,24 +3817,24 @@ int func_00401BF0(int a) {
             }
             if (i >= 17) {
                 b1_3DC0(semaId1BF0());
-                return b1_19F8(a);
+                return b1_19F8(mode);
             }
-            for (r = 0x100000; r--; )
+            for (spinCount = 0x100000; spinCount--; )
                 ;
             i++;
         }
     }
-    D_00526750[0] = a;
+    D_00526750[0] = mode;
     b1_6358(D_00526750, 4);
     if (sceSifCallRpc(&D_00526710, 0, 0, D_00526750, 4, D_00453080, 4, 0, 0) < 0) {
         b1_3DC0(semaId1BF0());
-        return a != 8 ? 6 : -1;
+        return mode != 8 ? 6 : -1;
     }
     if (D_00451610 > 0)
         b1_log(D_00497B80);
-    v = *(int *)((unsigned)D_00453080 | 0x20000000);
+    readyState = *(int *)((unsigned)D_00453080 | 0x20000000);
     b1_3DC0(semaId1BF0());
-    return v;
+    return readyState;
 }
 #endif
 
@@ -3867,21 +3867,21 @@ extern void func_00426358(int, int);
  */
 int func_00401DF8(int lsn, int sectors, int buf, unsigned char *mode) {
     int size;
-    sCdReadCmd *p = (sCdReadCmd *)D_00451700;
+    sCdReadCmd *readCmd = (sCdReadCmd *)D_00451700;
     if ((D_00451638 & 1) == 0) {
         if (func_00401350() == 6)
             return 0;
     }
     if (func_004011E0(4) == 0)
         return 0;
-    p->lsn = lsn;
-    p->sectors = sectors;
-    p->buf = buf;
-    p->trycount = mode[0];
-    p->spindlctrl = mode[1];
-    p->datapattern = mode[2];
-    p->ebuf = D_00452700;
-    p->res = D_004527C0;
+    readCmd->lsn = lsn;
+    readCmd->sectors = sectors;
+    readCmd->buf = buf;
+    readCmd->trycount = mode[0];
+    readCmd->spindlctrl = mode[1];
+    readCmd->datapattern = mode[2];
+    readCmd->ebuf = D_00452700;
+    readCmd->res = D_004527C0;
     switch (mode[2]) {
     case 1:
         size = sectors * 2328;
@@ -3898,13 +3898,13 @@ int func_00401DF8(int lsn, int sectors, int buf, unsigned char *mode) {
     if ((D_00451638 & 2) == 0)
         func_00426358(buf, size);
     func_00426358((int)D_00452700, 144);
-    func_00426358((int)p, 0x18);
+    func_00426358((int)readCmd, 0x18);
     func_00426358((int)D_004527C0, 4);
     if (D_00451610 > 0)
         func_00425C60(D_00497BB0);
     D_00451658 = 1;
     D_00451634 = 1;
-    if (sceSifCallRpc(&D_004527D0, 1, 1, p, 0x18, 0, 0, func_00400B48, D_00452700) < 0) {
+    if (sceSifCallRpc(&D_004527D0, 1, 1, readCmd, 0x18, 0, 0, func_00400B48, D_00452700) < 0) {
         D_00451658 = 0;
         D_00451634 = 0;
         SignalSema(D_00451628);
@@ -3934,27 +3934,27 @@ extern void SignalSema(int);
  * @return the reply's result word, or 0 on failure
  */
 int func_00401FD8(char *dst) {
-    int v;
-    int *p = D_00451700;
+    int tocResult;
+    int *sendBuf = D_00451700;
     if (func_004011E0(8) == 0)
         return 0;
-    p[0] = (int)D_00526780;
+    sendBuf[0] = (int)D_00526780;
     func_00426358((int)D_00526780, 2064);
-    func_00426358((int)p, 12);
+    func_00426358((int)sendBuf, 12);
     D_00451658 = 3;
-    if (sceSifCallRpc(&D_004527D0, 4, 0, p, 12, D_00451680, 8, 0, 0) < 0) {
+    if (sceSifCallRpc(&D_004527D0, 4, 0, sendBuf, 12, D_00451680, 8, 0, 0) < 0) {
         D_00451658 = 0;
         SignalSema(D_00451628);
         return 0;
     }
     D_00451658 = 0;
-    v = D_00451680[0];
+    tocResult = D_00451680[0];
     if (D_00451680[1] == 0)
         __builtin_memcpy(dst, (char *)((unsigned)D_00526780 | 0x20000000), 0x400);
     else
         __builtin_memcpy(dst, (char *)((unsigned)D_00526780 | 0x20000000), 2064);
     SignalSema(D_00451628);
-    return v;
+    return tocResult;
 }
 #endif
 
@@ -3972,16 +3972,16 @@ extern void SignalSema(int);
  * @return the disc type, or 0 on failure
  */
 int func_00402268(void) {
-    int v;
+    int diskType;
     if (func_004014F8(1) == 0)
         return 0;
     if (sceSifCallRpc(&D_00453180, 3, 0, 0, 0, D_00452800, 4, 0, 0) < 0) {
         SignalSema(D_0045162C);
         return 0;
     }
-    v = *(int *)((unsigned)D_00452800 | 0x20000000);
+    diskType = *(int *)((unsigned)D_00452800 | 0x20000000);
     SignalSema(D_0045162C);
-    return v;
+    return diskType;
 }
 #endif
 
@@ -3999,16 +3999,16 @@ extern void SignalSema(int);
  * @return the error code (0 = no error), or -1 on failure
  */
 int func_00402300(void) {
-    int v;
+    int errorCode;
     if (func_004014F8(3) == 0)
         return -1;
     if (sceSifCallRpc(&D_00453180, 4, 0, 0, 0, D_00452800, 4, 0, 0) < 0) {
         SignalSema(D_0045162C);
         return -1;
     }
-    v = *(int *)((unsigned)D_00452800 | 0x20000000);
+    errorCode = *(int *)((unsigned)D_00452800 | 0x20000000);
     SignalSema(D_0045162C);
-    return v;
+    return errorCode;
 }
 #endif
 
@@ -4028,7 +4028,7 @@ extern void SignalSema(int);
  * @return the result word (non-zero on success), 0 on failure
  */
 int func_00402398(int *out) {
-    int v;
+    int rpcResult;
     if (func_004014F8(33) == 0)
         return 0;
     if (sceSifCallRpc(&D_00453180, 33, 0, 0, 0, D_00452800, 8, 0, 0) < 0) {
@@ -4036,9 +4036,9 @@ int func_00402398(int *out) {
         return 0;
     }
     *out = *(int *)((unsigned)(D_00452800 + 1) | 0x20000000);
-    v = *(int *)((unsigned)D_00452800 | 0x20000000);
+    rpcResult = *(int *)((unsigned)D_00452800 | 0x20000000);
     SignalSema(D_0045162C);
-    return v;
+    return rpcResult;
 }
 #endif
 
@@ -4051,27 +4051,27 @@ extern void func_00426358_p(int *, int) __asm__("func_00426358");
 /**
  * Sets the drive's media mode (CD or DVD) with a libcdvd S-command.
  *
- * Takes the S-command channel (func_004014F8(34)), sends @p a with the function number and send/reply sizes held in
+ * Takes the S-command channel (func_004014F8(34)), sends @p media with the function number and send/reply sizes held in
  * D_004531A8, D_004531AC and D_004531B0, and returns the reply word from D_00452800. The boot code func_0031B008 and
  * func_00319610 call it with 2; the EA CD code passes its configured media mode.
  *
- * @param a  the media mode (2 = DVD)
+ * @param media  the media mode (2 = DVD)
  * @return the result word, or 0 on failure
  */
-int func_00402450(int a) {
-    int v;
-    int *p = D_00452C40;
+int func_00402450(int media) {
+    int result;
+    int *sendBuf = D_00452C40;
     if (func_004014F8(34) == 0)
         return 0;
-    D_00452C40[0] = a;
-    func_00426358_p(p, 4);
-    if (sceSifCallRpc(&D_00453180, D_004531A8, 0, p, D_004531AC, D_00452800, D_004531B0, 0, 0) < 0) {
+    D_00452C40[0] = media;
+    func_00426358_p(sendBuf, 4);
+    if (sceSifCallRpc(&D_00453180, D_004531A8, 0, sendBuf, D_004531AC, D_00452800, D_004531B0, 0, 0) < 0) {
         SignalSema(D_0045162C);
         return 0;
     }
-    v = *(int *)((unsigned)D_00452800 | 0x20000000);
+    result = *(int *)((unsigned)D_00452800 | 0x20000000);
     SignalSema(D_0045162C);
-    return v;
+    return result;
 }
 #endif
 
@@ -4088,14 +4088,14 @@ extern void func_00425C60();
  * Reads the console's real-time clock (libcdvd S-command, RPC function 1) into an 8-byte record.
  *
  * Takes the S-command channel (func_004014F8(15)), prints "Libcdvd call Clock read 1" and "... 2" around the call
- * (debug), copies the 8 bytes after the result word of the 16-byte reply D_00452800 to @p a and releases the semaphore.
+ * (debug), copies the 8 bytes after the result word of the 16-byte reply D_00452800 to @p clockOut and releases the semaphore.
  * systemInit and cPS2ConsoleConfig_cPS2ConsoleConfig call it.
  *
- * @param a  receives the 8-byte clock record
+ * @param clockOut  receives the 8-byte clock record
  * @return the result word (non-zero on success), 0 on failure
  */
-int func_00402520(struct P8 *a) {
-    int v;
+int func_00402520(struct P8 *clockOut) {
+    int result;
     if (func_004014F8(15) == 0)
         return 0;
     if (D_00451610 > 0)
@@ -4104,12 +4104,12 @@ int func_00402520(struct P8 *a) {
         SignalSema(D_0045162C);
         return 0;
     }
-    *a = *(struct P8 *)((unsigned)&D_00452800[1] | 0x20000000);
+    *clockOut = *(struct P8 *)((unsigned)&D_00452800[1] | 0x20000000);
     if (D_00451610 > 0)
         func_00425C60(D_00497BF8);
-    v = *(int *)((unsigned)D_00452800 | 0x20000000);
+    result = *(int *)((unsigned)D_00452800 | 0x20000000);
     SignalSema(D_0045162C);
-    return v;
+    return result;
 }
 #endif
 
@@ -4122,29 +4122,29 @@ extern void func_00426358_p(int *, int) __asm__("func_00426358");
 /**
  * Sends a disc-tray request with a libcdvd S-command (RPC function 5).
  *
- * Takes the S-command channel (func_004014F8(26)), sends @p a, stores reply word 1 in @p out when given and returns the
+ * Takes the S-command channel (func_004014F8(26)), sends @p request, stores reply word 1 in @p out when given and returns the
  * reply's result word. func_0031AD20 calls it with 2 to check whether the tray has been opened.
  *
- * @param a  the request (2 = check the tray state)
+ * @param request  the request (2 = check the tray state)
  * @param out  receives the tray status, may be 0
  * @return the result word, or -1 on failure
  */
-int func_00402618(int a, int *out) {
-    int v;
-    int *p = D_00452C40;
+int func_00402618(int request, int *out) {
+    int result;
+    int *sendBuf = D_00452C40;
     if (func_004014F8(26) == 0)
         return -1;
-    D_00452C40[0] = a;
-    func_00426358_p(p, 4);
-    if (sceSifCallRpc(&D_00453180, 5, 0, p, 4, D_00452800, 8, 0, 0) < 0) {
+    D_00452C40[0] = request;
+    func_00426358_p(sendBuf, 4);
+    if (sceSifCallRpc(&D_00453180, 5, 0, sendBuf, 4, D_00452800, 8, 0, 0) < 0) {
         SignalSema(D_0045162C);
         return -1;
     }
     if (out)
         *out = *(int *)((unsigned)&D_00452800[1] | 0x20000000);
-    v = *(int *)((unsigned)D_00452800 | 0x20000000);
+    result = *(int *)((unsigned)D_00452800 | 0x20000000);
     SignalSema(D_0045162C);
-    return v;
+    return result;
 }
 #endif
 
@@ -4198,99 +4198,99 @@ extern int i7B8_3DD8(int *) __asm__("func_00403DD8");
  *
  * Clears the work area, aligns its start to 4 bytes as the decoder's internal state and fails with "The size of work
  * area is too small" (func_004034A8) when less than 4288 bytes remain. The memory after the first 4288 bytes becomes
- * the decoder's pool (func_00402D50 at state + 264). Resets the public fields of @p a (width, height and frame count
+ * the decoder's pool (func_00402D50 at state + 264). Resets the public fields of @p mpeg (width, height and frame count
  * words to 0, the 64-bit time stamps to -1) and links the state at a[16] and back at +0x858; installs the default
  * callbacks func_00403DB0 and func_00403DD8, allocates a 0x600-byte block (func_00402D88), resets the stream state
  * (func_00403338, func_00402B58, func_00402BB0), points the nine per-picture tables at the state's own arrays and sets
  * the scratchpad address 0x70003600. Called by PS2_SONY_CODEC_INTERNAL_Init.
  *
- * @param a  the decoder handle
+ * @param mpeg  the decoder handle
  * @param buf  the work area
  * @param size  the work area size in bytes
  * @return 1, or 0 when the work area is too small
  */
 // sceMpegCreate(mp, buff, size)
-int func_004027B8(int *a, int buf, int size) {
-    int *p;
-    int *q;
-    int v;
+int func_004027B8(int *mpeg, int buf, int size) {
+    int *decState;
+    int *pool;
+    int unsetValue;
     int rem;
     i7B8_memset(buf, 0, size);
-    p = (int *)(((unsigned)(buf + 3) >> 2) << 2);
-    rem = size - ((int)p - buf);
+    decState = (int *)(((unsigned)(buf + 3) >> 2) << 2);
+    rem = size - ((int)decState - buf);
     if ((unsigned)rem < 4288) {
-        i7B8_34A8(p, D_00497C20);
+        i7B8_34A8(decState, D_00497C20);
         return 0;
     }
-    q = p + 264 / 4;
-    a[16] = (int)p;
-    i7B8_2D50(q, (int)p + 4288, rem - 4288);
-    v = -1;
-    a[0] = 0;
-    a[1] = 0;
-    a[2] = 0;
-    *(long *)&a[4] = -1;
-    *(long *)&a[6] = -1;
-    *(long *)&a[8] = 0;
-    *(long *)&a[10] = -1;
-    *(long *)&a[12] = -1;
-    *(long *)&a[14] = 0;
-    p[45] = 0;
-    p[46] = 0;
-    p[47] = 0;
-    p[48] = 0;
-    p[49] = 0;
-    p[50] = 0;
-    p[51] = 0;
-    p[52] = 0;
-    p[53] = 0;
-    p[54] = 0;
-    p[55] = 0;
-    p[56] = 0;
-    p[57] = 0;
-    p[58] = 0;
-    p[62] = 0;
-    p[3] = 0;
-    p[5] = 0;
-    p[11] = 0;
-    p[13] = 0;
-    p[15] = 0;
-    *(long *)&p[60] = -1;
-    p[7] = (int)i7B8_3DB0;
-    p[9] = (int)i7B8_3DD8;
-    p[17] = i7B8_2D88(p, q, 0x600, 8);
-    p[18] = 0;
-    p[63] = 0;
-    p[64] = 0;
-    p[65] = 0;
-    p[28] = 0;
-    *(long *)&p[30] = 0;
-    p[32] = v;
-    *(long *)&p[34] = 0;
-    p[36] = 0;
-    p[43] = 0;
-    p[37] = v;
-    p[38] = v;
-    p[39] = v;
-    p[534] = (int)a;
-    p[44] = 1;
-    i7B8_3338(p);
-    i7B8_2B58(a);
-    i7B8_2BB0(a);
-    p[110] = (int)p + 488;
-    p[111] = (int)p + 592;
-    p[113] = (int)p + 696;
-    p[114] = (int)p + 800;
-    p[115] = (int)p + 904;
-    p[117] = (int)p + 0x3F0;
-    p[118] = (int)p + 1112;
-    p[119] = (int)p + 1216;
-    p[121] = (int)p + 1320;
-    i7B8_2D68(q);
-    p[532] = v;
-    p[533] = 0;
-    p[531] = 0;
-    p[519] = 0x70003600;
+    pool = decState + 264 / 4;
+    mpeg[16] = (int)decState;
+    i7B8_2D50(pool, (int)decState + 4288, rem - 4288);
+    unsetValue = -1;
+    mpeg[0] = 0;
+    mpeg[1] = 0;
+    mpeg[2] = 0;
+    *(long *)&mpeg[4] = -1;
+    *(long *)&mpeg[6] = -1;
+    *(long *)&mpeg[8] = 0;
+    *(long *)&mpeg[10] = -1;
+    *(long *)&mpeg[12] = -1;
+    *(long *)&mpeg[14] = 0;
+    decState[45] = 0;
+    decState[46] = 0;
+    decState[47] = 0;
+    decState[48] = 0;
+    decState[49] = 0;
+    decState[50] = 0;
+    decState[51] = 0;
+    decState[52] = 0;
+    decState[53] = 0;
+    decState[54] = 0;
+    decState[55] = 0;
+    decState[56] = 0;
+    decState[57] = 0;
+    decState[58] = 0;
+    decState[62] = 0;
+    decState[3] = 0;
+    decState[5] = 0;
+    decState[11] = 0;
+    decState[13] = 0;
+    decState[15] = 0;
+    *(long *)&decState[60] = -1;
+    decState[7] = (int)i7B8_3DB0;
+    decState[9] = (int)i7B8_3DD8;
+    decState[17] = i7B8_2D88(decState, pool, 0x600, 8);
+    decState[18] = 0;
+    decState[63] = 0;
+    decState[64] = 0;
+    decState[65] = 0;
+    decState[28] = 0;
+    *(long *)&decState[30] = 0;
+    decState[32] = unsetValue;
+    *(long *)&decState[34] = 0;
+    decState[36] = 0;
+    decState[43] = 0;
+    decState[37] = unsetValue;
+    decState[38] = unsetValue;
+    decState[39] = unsetValue;
+    decState[534] = (int)mpeg;
+    decState[44] = 1;
+    i7B8_3338(decState);
+    i7B8_2B58(mpeg);
+    i7B8_2BB0(mpeg);
+    decState[110] = (int)decState + 488;
+    decState[111] = (int)decState + 592;
+    decState[113] = (int)decState + 696;
+    decState[114] = (int)decState + 800;
+    decState[115] = (int)decState + 904;
+    decState[117] = (int)decState + 0x3F0;
+    decState[118] = (int)decState + 1112;
+    decState[119] = (int)decState + 1216;
+    decState[121] = (int)decState + 1320;
+    i7B8_2D68(pool);
+    decState[532] = unsetValue;
+    decState[533] = 0;
+    decState[531] = 0;
+    decState[519] = 0x70003600;
     return 1;
 }
 #endif
@@ -4440,15 +4440,15 @@ INCLUDE_ASM("seg/seg_2FE810", func_00402B00);
  * the limit.
  *
  * @param mpeg  the decoder handle
- * @param a  the I-picture limit
- * @param b  the P-picture limit
- * @param c  the B-picture limit
+ * @param maxIPictures  the I-picture limit
+ * @param maxPPictures  the P-picture limit
+ * @param maxBPictures  the B-picture limit
  */
-void func_00402B00(int *mpeg, int a, int b, int c) {
+void func_00402B00(int *mpeg, int maxIPictures, int maxPPictures, int maxBPictures) {
     int *mpegSys = (int *)mpeg[16];
-    mpegSys[37] = a;
-    mpegSys[38] = b;
-    mpegSys[39] = c;
+    mpegSys[37] = maxIPictures;
+    mpegSys[38] = maxPPictures;
+    mpegSys[39] = maxBPictures;
 }
 #endif
 
@@ -4459,15 +4459,15 @@ INCLUDE_ASM("seg/seg_2FE810", func_00402B18);
  * Reads back the I, P and B picture decode limits (see func_00402B00).
  *
  * @param mpeg  the decoder handle
- * @param a  receives the I-picture limit
- * @param b  receives the P-picture limit
- * @param c  receives the B-picture limit
+ * @param maxIOut  receives the I-picture limit
+ * @param maxPOut  receives the P-picture limit
+ * @param maxBOut  receives the B-picture limit
  */
-void func_00402B18(int *mpeg, int *a, int *b, int *c) {
+void func_00402B18(int *mpeg, int *maxIOut, int *maxPOut, int *maxBOut) {
     int *mpegSys = (int *)mpeg[16];
-    *a = mpegSys[37];
-    *b = mpegSys[38];
-    *c = mpegSys[39];
+    *maxIOut = mpegSys[37];
+    *maxPOut = mpegSys[38];
+    *maxBOut = mpegSys[39];
 }
 #endif
 
@@ -4551,13 +4551,13 @@ INCLUDE_ASM("seg/seg_2FE810", func_00402BB0);
  */
 int func_00402BB0(int *mpeg) {
     char *mpegSys = (char *)mpeg[16];
-    int *t;
-    if ((t = *(int **)(mpegSys + 0x1B8))) t[10] = 0;
-    if ((t = *(int **)(mpegSys + 0x1C8))) t[10] = 0;
-    if ((t = *(int **)(mpegSys + 0x1D8))) t[10] = 0;
-    if ((t = *(int **)(mpegSys + 0x1BC))) t[10] = 0;
-    if ((t = *(int **)(mpegSys + 0x1CC))) t[10] = 0;
-    if ((t = *(int **)(mpegSys + 0x1DC))) t[10] = 0;
+    int *picRecord;
+    if ((picRecord = *(int **)(mpegSys + 0x1B8))) picRecord[10] = 0;
+    if ((picRecord = *(int **)(mpegSys + 0x1C8))) picRecord[10] = 0;
+    if ((picRecord = *(int **)(mpegSys + 0x1D8))) picRecord[10] = 0;
+    if ((picRecord = *(int **)(mpegSys + 0x1BC))) picRecord[10] = 0;
+    if ((picRecord = *(int **)(mpegSys + 0x1CC))) picRecord[10] = 0;
+    if ((picRecord = *(int **)(mpegSys + 0x1DC))) picRecord[10] = 0;
     return 1;
 }
 #endif
@@ -4651,13 +4651,13 @@ INCLUDE_ASM("seg/seg_2FE810", func_00402CA8);
  * stamp from the previous one and this step when the picture carries none.
  *
  * @param mpeg  the decoder handle
- * @param v  the 64-bit interpolation step
+ * @param timeStep  the 64-bit interpolation step
  * @return 1
  */
-int func_00402CA8(int *mpeg, long v) {
+int func_00402CA8(int *mpeg, long timeStep) {
     int *mpegSys = (int *)mpeg[16];
     mpegSys[28] = 1;
-    *(long *)&mpegSys[30] = v;
+    *(long *)&mpegSys[30] = timeStep;
     return 1;
 }
 #endif
@@ -4686,12 +4686,12 @@ INCLUDE_ASM("seg/seg_2FE810", func_00402CD8);
  * Sets the decoder's output picture address (internal +0xD8) without decoding.
  *
  * @param mpeg  the decoder handle
- * @param v  the output address
+ * @param outputAddr  the output address
  * @return 1
  */
-int func_00402CD8(int *mpeg, int v) {
+int func_00402CD8(int *mpeg, int outputAddr) {
     int *mpegSys = (int *)mpeg[16];
-    mpegSys[54] = v;
+    mpegSys[54] = outputAddr;
     return 1;
 }
 #endif
@@ -4786,12 +4786,12 @@ INCLUDE_ASM("seg/seg_2FE810", func_00402D38);
  * stamp to the next picture instead of its own and resets it to -1.
  *
  * @param mpeg  the decoder handle
- * @param v  the time stamp
+ * @param timeStamp  the time stamp
  * @return 1
  */
-int func_00402D38(int *mpeg, long v) {
+int func_00402D38(int *mpeg, long timeStamp) {
     int *mpegSys = (int *)mpeg[16];
-    *(long *)&mpegSys[60] = v;
+    *(long *)&mpegSys[60] = timeStamp;
     mpegSys[62] = 1;
     return 1;
 }
@@ -4856,20 +4856,20 @@ extern void func_004034A8(int *, int);
  * Rounds the current position up to @p align and takes @p size bytes when they fit before base + size; otherwise
  * reports "work area size is too small" through the decoder's error path (func_004034A8).
  *
- * @param a  the decoder state errors are reported for
- * @param p  the pool record (base, size, current, mark)
+ * @param decState  the decoder state errors are reported for
+ * @param pool  the pool record (base, size, current, mark)
  * @param size  the block size in bytes
  * @param align  the alignment in bytes
  * @return the block's address, or 0 when the pool is exhausted
  */
-unsigned func_00402D88(int *a, unsigned *p, unsigned size, unsigned align) {
-    unsigned s = (p[2] + align - 1) / align * align;
-    unsigned e = s + size;
-    if (p[0] + p[1] >= e) {
-        p[2] = e;
-        return s;
+unsigned func_00402D88(int *decState, unsigned *pool, unsigned size, unsigned align) {
+    unsigned blockStart = (pool[2] + align - 1) / align * align;
+    unsigned blockEnd = blockStart + size;
+    if (pool[0] + pool[1] >= blockEnd) {
+        pool[2] = blockEnd;
+        return blockStart;
     }
-    func_004034A8(a, (int)D_00497C48);
+    func_004034A8(decState, (int)D_00497C48);
     return 0;
 }
 #endif
@@ -4906,54 +4906,54 @@ extern int func_00407520();
  * reference picture (func_00403240) and sets the end flag (word 0). Returns once a picture was output (+0x820) or the
  * end flag is set.
  *
- * @param a  the decoder handle
+ * @param mpeg  the decoder handle
  * @return 1, or -1 when the output buffer is misaligned
  */
-int func_00402E10(int *a) {
-    int *p = (int *)a[16];
-    int r = 0;
-    int s = 1;
-    p[0] = 0;
-    if ((p[54] & 0x3F) != 0) {
-        func_00403470_k(p, D_00497C68, p[54]);
+int func_00402E10(int *mpeg) {
+    int *decState = (int *)mpeg[16];
+    int picResult = 0;
+    int picType = 1;
+    decState[0] = 0;
+    if ((decState[54] & 0x3F) != 0) {
+        func_00403470_k(decState, D_00497C68, decState[54]);
         return -1;
     }
-    p[520] = 0;
+    decState[520] = 0;
     for (;;) {
-        if (r != -1) {
+        if (picResult != -1) {
             do {
-                s = func_00407520(p);
-                if (s == 0)
+                picType = func_00407520(decState);
+                if (picType == 0)
                     break;
-                if (p[93] == p[53])
+                if (decState[93] == decState[53])
                     break;
-            } while (p[530] != 0);
+            } while (decState[530] != 0);
         }
-        switch (s) {
+        switch (picType) {
         case 0:
-            func_00403240(a);
-            p[0] = 1;
+            func_00403240(mpeg);
+            decState[0] = 1;
             break;
         case 1:
-            p[42] = 0;
-            p[41] = 0;
-            p[40] = 0;
-            r = func_00403098(a, 0, p[37]);
-            p[40]++;
+            decState[42] = 0;
+            decState[41] = 0;
+            decState[40] = 0;
+            picResult = func_00403098(mpeg, 0, decState[37]);
+            decState[40]++;
             break;
         case 2:
-            r = func_00403098(a, p[41], p[38]);
-            p[41]++;
+            picResult = func_00403098(mpeg, decState[41], decState[38]);
+            decState[41]++;
             break;
         case 3:
         case 4:
-            r = func_00403098(a, p[42], p[39]);
-            p[42]++;
+            picResult = func_00403098(mpeg, decState[42], decState[39]);
+            decState[42]++;
             break;
         }
-        if (p[520] != 0)
+        if (decState[520] != 0)
             return 1;
-        if (p[0] != 0)
+        if (decState[0] != 0)
             return 1;
     }
 }
@@ -4977,34 +4977,34 @@ extern void s2_7E90(struct P_2F80 *, int, int) __asm__("func_00407E90");
  * frame number mpeg[2] becomes +0x118 - +0xAC, and the counters +0x118 / +0x04 advance when +0x120 is clear.
  * func_00403098 calls it for frame pictures (+0x174 == 3).
  *
- * @param a  the decoder handle
- * @param b  the index of this picture among its type
- * @param c  the type's decode limit, -1 for none
+ * @param mpeg  the decoder handle
+ * @param picIndex  the index of this picture among its type
+ * @param picLimit  the type's decode limit, -1 for none
  * @return non-zero when the picture was decoded
  */
-int func_00402F80(struct A_2F80 *a, int b, int c) {
-    struct P_2F80 *p = a->f40;
+int func_00402F80(struct A_2F80 *mpeg, int picIndex, int picLimit) {
+    struct P_2F80 *decState = mpeg->f40;
     int t, ret;
     int flag = 0;
-    if (c == -1 || b < c) {
-        if (p->f8 == 0) {
-            a->f8 = 0;
-            p->f8 = 1;
+    if (picLimit == -1 || picIndex < picLimit) {
+        if (decState->f8 == 0) {
+            mpeg->f8 = 0;
+            decState->f8 = 1;
         }
-        t = s2_7F20(p, 0) ? s2_7DC0(p) != 0 : 0;
+        t = s2_7F20(decState, 0) ? s2_7DC0(decState) != 0 : 0;
         ret = t;
     } else {
-        ret = s2_7F20(p, 0);
+        ret = s2_7F20(decState, 0);
         flag = 1;
-        s2_2C80(a);
+        s2_2C80(mpeg);
     }
-    s2_7E90(p, p->f118, p->f4);
-    if ((t = p->f174) != 3 && flag == 0)
-        p->f120 = p->f120 == 0;
-    a->f8 = p->f118 - p->fAC;
-    if (p->f120 == 0) {
-        p->f118++;
-        p->f4++;
+    s2_7E90(decState, decState->f118, decState->f4);
+    if ((t = decState->f174) != 3 && flag == 0)
+        decState->f120 = decState->f120 == 0;
+    mpeg->f8 = decState->f118 - decState->fAC;
+    if (decState->f120 == 0) {
+        decState->f118++;
+        decState->f4++;
     }
     return ret;
 }
@@ -5022,14 +5022,14 @@ extern int s98_2F80(struct A_3098 *, int, int) __asm__("func_00402F80");
  *
  * Chooses by the picture structure at internal +0x174 (3 = frame). Called by the decode loop func_00402E10.
  *
- * @param a  the decoder handle
- * @param b  the index of this picture among its type
- * @param c  the type's decode limit, -1 for none
+ * @param mpeg  the decoder handle
+ * @param picIndex  the index of this picture among its type
+ * @param picLimit  the type's decode limit, -1 for none
  * @return the chosen routine's result
  */
-int func_00403098(struct A_3098 *a, int b, int c) {
-    if (a->f40->f174 != 3) return s98_30E0(a, b, c);
-    return s98_2F80(a, b, c);
+int func_00403098(struct A_3098 *mpeg, int picIndex, int picLimit) {
+    if (mpeg->f40->f174 != 3) return s98_30E0(mpeg, picIndex, picLimit);
+    return s98_2F80(mpeg, picIndex, picLimit);
 }
 #endif
 
@@ -5053,52 +5053,52 @@ extern void s3_3240(struct A_30E0 *) __asm__("func_00403240");
  * output (func_00407E90), sets the frame number mpeg[2], advances +0x118 / +0x04 and raises the needs-data callback
  * (func_00402C80) when the pair was skipped.
  *
- * @param a  the decoder handle
- * @param b  the index of this picture among its type
- * @param c  the type's decode limit, -1 for none
+ * @param mpeg  the decoder handle
+ * @param picIndex  the index of this picture among its type
+ * @param picLimit  the type's decode limit, -1 for none
  * @return 1 when the second field was decoded, 0 otherwise, -1 for a field mismatch
  */
-int func_004030E0(struct A_30E0 *a, int b, int c) {
-    struct P_30E0 *p = a->f40;
+int func_004030E0(struct A_30E0 *mpeg, int picIndex, int picLimit) {
+    struct P_30E0 *decState = mpeg->f40;
     int flag = 0;
-    int ret, k, t;
-    p->f120 = 0;
-    if (c == -1 || b < c)
+    int ret, k, secondFieldOk;
+    decState->f120 = 0;
+    if (picLimit == -1 || picIndex < picLimit)
         flag = 1;
-    if (p->f8 == 0) {
-        a->f8 = 0;
-        p->f8 = 1;
+    if (decState->f8 == 0) {
+        mpeg->f8 = 0;
+        decState->f8 = 1;
     }
-    if (s3_7F20(p, 0)) {
+    if (s3_7F20(decState, 0)) {
         if (flag)
-            s3_7DC0(p);
+            s3_7DC0(decState);
     }
-    p->f120 = 1;
-    if (s3_7520(p) == 0) {
-        s3_3240(a);
-        p->f0 = 1;
+    decState->f120 = 1;
+    if (s3_7520(decState) == 0) {
+        s3_3240(mpeg);
+        decState->f0 = 1;
         return 0;
     }
     k = 2;
-    if (p->fD4 != 1)
+    if (decState->fD4 != 1)
         k = 1;
-    if (p->f174 != k)
+    if (decState->f174 != k)
         return -1;
     ret = 0;
-    t = 0;
-    if (s3_7F20(p, 1))
-        t = 1;
-    if (t && flag) {
-        if (s3_7DC0(p))
+    secondFieldOk = 0;
+    if (s3_7F20(decState, 1))
+        secondFieldOk = 1;
+    if (secondFieldOk && flag) {
+        if (s3_7DC0(decState))
             ret = 1;
     }
-    s3_7E90(p, p->f118, p->f4);
-    p->f120 = 0;
-    a->f8 = p->f118 - p->fAC;
-    p->f118++;
-    p->f4++;
+    s3_7E90(decState, decState->f118, decState->f4);
+    decState->f120 = 0;
+    mpeg->f8 = decState->f118 - decState->fAC;
+    decState->f118++;
+    decState->f4++;
     if (!flag)
-        s3_2C80(a);
+        s3_2C80(mpeg);
     return ret;
 }
 #endif
@@ -5160,18 +5160,18 @@ extern void func_004087D0(int *, int, int, int);
  * converts it with func_004086C0 (frame pictures, +0x174 == 3) or func_004087D0 (field pictures), giving the picture
  * count +0x118 minus one. Clears +0x120.
  *
- * @param p  the decoder's internal state
+ * @param decState  the decoder's internal state
  */
-void func_004032B8(int *p) {
-    int n = p[280 / 4];
-    if (p[288 / 4] != 0) {
-        func_004034A8(p, (int)D_00497CC8);
-    } else if (p[372 / 4] == 3) {
-        func_004086C0(p, p[444 / 4], n - 1);
+void func_004032B8(int *decState) {
+    int n = decState[280 / 4];
+    if (decState[288 / 4] != 0) {
+        func_004034A8(decState, (int)D_00497CC8);
+    } else if (decState[372 / 4] == 3) {
+        func_004086C0(decState, decState[444 / 4], n - 1);
     } else {
-        func_004087D0(p, p[460 / 4], p[476 / 4], n - 1);
+        func_004087D0(decState, decState[460 / 4], decState[476 / 4], n - 1);
     }
-    p[288 / 4] = 0;
+    decState[288 / 4] = 0;
 }
 #endif
 
@@ -5243,10 +5243,10 @@ extern void func_00425C60(char *, int);
  *
  * The fallback of func_004034A8 when no error callback is installed.
  *
- * @param a  the message
+ * @param message  the message
  */
-void func_00403460(int a) {
-    func_00425C60(D_00497CE8, a);
+void func_00403460(int message) {
+    func_00425C60(D_00497CE8, message);
 }
 #endif
 
@@ -5381,42 +5381,42 @@ extern void func_004076F8();
  * 0x58000000 via func_00406DF0), otherwise the default table D_00453200 / D_00453240 is DMA'd in (func_00403AD0). Then
  * reads the extensions and user data (func_004076F8) and sets the picture buffers up (func_00403748).
  *
- * @param p  the decoder's internal state
+ * @param decState  the decoder's internal state
  */
-void func_00403620(int *p) {
-    unsigned v;
+void func_00403620(int *decState) {
+    unsigned headerBits;
     int w;
-    int b;
-    p[212 / 4] = 0;
-    v = func_004072E8(p, 32);
-    w = (v >> 8) & 0xFFF;
-    p[292 / 4] = v >> 20;
-    p[296 / 4] = w;
+    int loadMatrix;
+    decState[212 / 4] = 0;
+    headerBits = func_004072E8(decState, 32);
+    w = (headerBits >> 8) & 0xFFF;
+    decState[292 / 4] = headerBits >> 20;
+    decState[296 / 4] = w;
     if (w >= 2801)
-        func_004034A8(p, (int)D_00497CF8);
-    v = func_004072E8(p, 30);
-    p[308 / 4] = v >> 12;
-    p[312 / 4] = (v >> 1) & 0x3FF;
-    b = func_004072E8(p, 1);
-    p[2112 / 4] = b;
-    if (b != 0) {
-        func_00406E20((int)p);
-        func_00406DF0(p, 0x50000000);
-        func_00406E20((int)p);
+        func_004034A8(decState, (int)D_00497CF8);
+    headerBits = func_004072E8(decState, 30);
+    decState[308 / 4] = headerBits >> 12;
+    decState[312 / 4] = (headerBits >> 1) & 0x3FF;
+    loadMatrix = func_004072E8(decState, 1);
+    decState[2112 / 4] = loadMatrix;
+    if (loadMatrix != 0) {
+        func_00406E20((int)decState);
+        func_00406DF0(decState, 0x50000000);
+        func_00406E20((int)decState);
     } else {
-        func_00403AD0(p, 0x50000000, D_00453200);
+        func_00403AD0(decState, 0x50000000, D_00453200);
     }
-    b = func_004072E8(p, 1);
-    p[2116 / 4] = b;
-    if (b != 0) {
-        func_00406E20((int)p);
-        func_00406DF0(p, 0x58000000);
-        func_00406E20((int)p);
+    loadMatrix = func_004072E8(decState, 1);
+    decState[2116 / 4] = loadMatrix;
+    if (loadMatrix != 0) {
+        func_00406E20((int)decState);
+        func_00406DF0(decState, 0x58000000);
+        func_00406E20((int)decState);
     } else {
-        func_00403AD0(p, 0x58000000, D_00453240);
+        func_00403AD0(decState, 0x58000000, D_00453240);
     }
-    func_004076F8(p);
-    func_00403748(p[2136 / 4]);
+    func_004076F8(decState);
+    func_00403748(decState[2136 / 4]);
 }
 #endif
 
@@ -5517,35 +5517,35 @@ extern void func_00405B48(unsigned);
  * extensions, which it merges into +0x124, +0x128, +0x134 and +0x138. Profile/level other than 0x48, 0x58 or 0x44
  * (main/simple profile at main level, main at high) reports "Unsupported profile/level".
  *
- * @param p  the decoder's internal state
+ * @param decState  the decoder's internal state
  */
-void func_00403BB0(int *p) {
-    unsigned v;
-    unsigned h;
+void func_00403BB0(int *decState) {
+    unsigned extBits;
+    unsigned profileLevel;
     unsigned w;
-    int t;
+    int chromaFormat;
     unsigned x;
     unsigned y;
     unsigned z;
-    p[2120 / 4] = 1;
+    decState[2120 / 4] = 1;
     func_00405B48(0);
-    v = func_004072E8(p, 28);
-    x = (v >> 1) & 0xFFF;
-    t = (v >> 17) & 3;
-    y = (v >> 13) & 3;
-    z = (v >> 15) & 3;
-    p[320 / 4] = t;
-    if (t != 1)
-        func_004034A8(p, (int)D_00497D10);
-    p[316 / 4] = (v >> 19) & 1;
-    h = v >> 20;
-    w = (unsigned)func_004072E8(p, 16) >> 8;
-    if (h != 72 && h != 88 && h != 68)
-        func_004034A8(p, (int)D_00497D38);
-    p[292 / 4] = (z << 12) | (p[292 / 4] & 0xFFF);
-    p[296 / 4] = (y << 12) | (p[296 / 4] & 0xFFF);
-    p[308 / 4] = p[308 / 4] + (x << 18);
-    p[312 / 4] = p[312 / 4] + (w << 10);
+    extBits = func_004072E8(decState, 28);
+    x = (extBits >> 1) & 0xFFF;
+    chromaFormat = (extBits >> 17) & 3;
+    y = (extBits >> 13) & 3;
+    z = (extBits >> 15) & 3;
+    decState[320 / 4] = chromaFormat;
+    if (chromaFormat != 1)
+        func_004034A8(decState, (int)D_00497D10);
+    decState[316 / 4] = (extBits >> 19) & 1;
+    profileLevel = extBits >> 20;
+    w = (unsigned)func_004072E8(decState, 16) >> 8;
+    if (profileLevel != 72 && profileLevel != 88 && profileLevel != 68)
+        func_004034A8(decState, (int)D_00497D38);
+    decState[292 / 4] = (z << 12) | (decState[292 / 4] & 0xFFF);
+    decState[296 / 4] = (y << 12) | (decState[296 / 4] & 0xFFF);
+    decState[308 / 4] = decState[308 / 4] + (x << 18);
+    decState[312 / 4] = decState[312 / 4] + (w << 10);
 }
 #endif
 
@@ -5602,10 +5602,10 @@ extern void func_004034A8(int *, int);
  *
  * Entries 0 and 6 (reserved ids) of the extension handler table D_00497FE0; reports through func_004034A8.
  *
- * @param p  the decoder's internal state
+ * @param decState  the decoder's internal state
  */
-void func_00403D80(int *p) {
-    func_004034A8(p, (int)D_00497D88);
+void func_00403D80(int *decState) {
+    func_004034A8(decState, (int)D_00497D88);
 }
 #endif
 
@@ -5620,10 +5620,10 @@ extern void func_004034A8(int *, int);
  * Entry 9 of the extension handler table D_00497FE0 (MPEG-2 extension id 9); reports its "not supported" message
  * D_00497DA0 through func_004034A8.
  *
- * @param p  the decoder's internal state
+ * @param decState  the decoder's internal state
  */
-void func_00403D90(int *p) {
-    func_004034A8(p, (int)D_00497DA0);
+void func_00403D90(int *decState) {
+    func_004034A8(decState, (int)D_00497DA0);
 }
 #endif
 
@@ -5638,10 +5638,10 @@ extern void func_004034A8(int *, int);
  * Entry 10 of the extension handler table D_00497FE0 (MPEG-2 extension id 10); reports its "not supported" message
  * D_00497DD8 through func_004034A8.
  *
- * @param p  the decoder's internal state
+ * @param decState  the decoder's internal state
  */
-void func_00403DA0(int *p) {
-    func_004034A8(p, (int)D_00497DD8);
+void func_00403DA0(int *decState) {
+    func_004034A8(decState, (int)D_00497DD8);
 }
 #endif
 
@@ -5708,7 +5708,7 @@ extern void q4050_3470(int *, char *, int) __asm__("func_00403470");
  * type: frame, field, or dual prime (vectors from func_00405E30). Backward after forward averages. An invalid motion
  * type reports "(a)/(b)/(c) invalid motion_type(%d)" (func_00403470). Called by func_00403E00.
  *
- * @param p  the decoder's internal state
+ * @param decState  the decoder's internal state
  * @param bx  the macroblock's x position in pixels
  * @param by  the macroblock's y position in pixels
  * @param mbtype  the macroblock_type bits
@@ -5717,7 +5717,7 @@ extern void q4050_3470(int *, char *, int) __asm__("func_00403470");
  * @param mvfs  the motion_vertical_field_select flags
  * @param dmv  the dual-prime differential vector
  */
-void func_00404050(int *p, int bx, int by, int mbtype, int mtype, int PMV[2][2][2], int mvfs[2][2], int *dmv)
+void func_00404050(int *decState, int bx, int by, int mbtype, int mtype, int PMV[2][2][2], int mvfs[2][2], int *dmv)
 {
     int DMV[2][2];
     int ref[2][2];
@@ -5725,74 +5725,74 @@ void func_00404050(int *p, int bx, int by, int mbtype, int mtype, int PMV[2][2][
 
     sel = 1;
     avg = 0;
-    *(int *)((char *)p + p[0x810 / 4] * 0x140 + 0x6BC) = 0;
+    *(int *)((char *)decState + decState[0x810 / 4] * 0x140 + 0x6BC) = 0;
     fwd = mbtype & 8;
-    if (fwd || p[336 / 4] == 2) {
-        if (p[372 / 4] == 3) {
+    if (fwd || decState[336 / 4] == 2) {
+        if (decState[372 / 4] == 3) {
             if (mtype == 2 || !fwd) {
-                q4050_4758(p, p[440 / 4], 0, 0, 0, 16, bx, by, PMV[0][0][0], PMV[0][0][1], 0, 0);
+                q4050_4758(decState, decState[440 / 4], 0, 0, 0, 16, bx, by, PMV[0][0][0], PMV[0][0][1], 0, 0);
             } else if (mtype == 1) {
-                q4050_4758(p, p[440 / 4], mvfs[0][0], 0, 0, 8, bx, by, PMV[0][0][0], PMV[0][0][1] >> 1, 1, 0);
-                q4050_4758(p, p[440 / 4], mvfs[1][0], 1, 0, 8, bx, by, PMV[1][0][0], PMV[1][0][1] >> 1, 1, 0);
+                q4050_4758(decState, decState[440 / 4], mvfs[0][0], 0, 0, 8, bx, by, PMV[0][0][0], PMV[0][0][1] >> 1, 1, 0);
+                q4050_4758(decState, decState[440 / 4], mvfs[1][0], 1, 0, 8, bx, by, PMV[1][0][0], PMV[1][0][1] >> 1, 1, 0);
             } else if (mtype == 3) {
-                q4050_5E30(p, &DMV[0][0], dmv, PMV[0][0][0], PMV[0][0][1] >> 1);
-                q4050_4758(p, p[440 / 4], 0, 0, 0, 8, bx, by, PMV[0][0][0], PMV[0][0][1] >> 1, sel, 0);
-                q4050_4758(p, p[440 / 4], 1, 0, 0, 8, bx, by, DMV[0][0], DMV[0][1], sel, sel);
-                q4050_4758(p, p[440 / 4], 1, 1, 0, 8, bx, by, PMV[0][0][0], PMV[0][0][1] >> 1, sel, 0);
-                q4050_4758(p, p[440 / 4], 0, 1, 0, 8, bx, by, DMV[1][0], DMV[1][1], sel, sel);
+                q4050_5E30(decState, &DMV[0][0], dmv, PMV[0][0][0], PMV[0][0][1] >> 1);
+                q4050_4758(decState, decState[440 / 4], 0, 0, 0, 8, bx, by, PMV[0][0][0], PMV[0][0][1] >> 1, sel, 0);
+                q4050_4758(decState, decState[440 / 4], 1, 0, 0, 8, bx, by, DMV[0][0], DMV[0][1], sel, sel);
+                q4050_4758(decState, decState[440 / 4], 1, 1, 0, 8, bx, by, PMV[0][0][0], PMV[0][0][1] >> 1, sel, 0);
+                q4050_4758(decState, decState[440 / 4], 0, 1, 0, 8, bx, by, DMV[1][0], DMV[1][1], sel, sel);
             } else {
-                q4050_3470(p, D_00497E38, mtype);
+                q4050_3470(decState, D_00497E38, mtype);
             }
         } else {
-            cur = p[372 / 4] == 2;
-            ref[0][0] = p[456 / 4];
-            ref[0][1] = p[472 / 4];
-            ref[1][0] = p[460 / 4];
-            ref[1][1] = p[476 / 4];
-            if (p[336 / 4] == 2 && p[288 / 4] && cur != mvfs[0][0])
+            cur = decState[372 / 4] == 2;
+            ref[0][0] = decState[456 / 4];
+            ref[0][1] = decState[472 / 4];
+            ref[1][0] = decState[460 / 4];
+            ref[1][1] = decState[476 / 4];
+            if (decState[336 / 4] == 2 && decState[288 / 4] && cur != mvfs[0][0])
                 sel = 1;
             else
                 sel = 0;
             if (mtype == 1 || !fwd) {
-                q4050_4758(p, ref[sel][mvfs[0][0]], 0, 0, 0, 16, bx, by, PMV[0][0][0], PMV[0][0][1], 0, 0);
+                q4050_4758(decState, ref[sel][mvfs[0][0]], 0, 0, 0, 16, bx, by, PMV[0][0][0], PMV[0][0][1], 0, 0);
             } else if (mtype == 2) {
-                q4050_4758(p, ref[sel][mvfs[0][0]], 0, 0, 0, 8, bx, by, PMV[0][0][0], PMV[0][0][1], 0, 0);
-                if (p[336 / 4] == 2 && p[288 / 4] && cur != mvfs[1][0])
+                q4050_4758(decState, ref[sel][mvfs[0][0]], 0, 0, 0, 8, bx, by, PMV[0][0][0], PMV[0][0][1], 0, 0);
+                if (decState[336 / 4] == 2 && decState[288 / 4] && cur != mvfs[1][0])
                     sel = 1;
                 else
                     sel = 0;
-                q4050_4758(p, ref[sel][mvfs[1][0]], 0, 0, 8, 8, bx, by, PMV[1][0][0], PMV[1][0][1], 0, 0);
+                q4050_4758(decState, ref[sel][mvfs[1][0]], 0, 0, 8, 8, bx, by, PMV[1][0][0], PMV[1][0][1], 0, 0);
             } else if (mtype == 3) {
-                if (p[288 / 4])
+                if (decState[288 / 4])
                     sel = 1;
                 else
                     sel = 0;
-                q4050_5E30(p, &DMV[0][0], dmv, PMV[0][0][0], PMV[0][0][1]);
-                q4050_4758(p, ref[0][cur], 0, 0, 0, 16, bx, by, PMV[0][0][0], PMV[0][0][1], 0, 0);
-                q4050_4758(p, ref[sel][!cur], 0, 0, 0, 16, bx, by, DMV[0][0], DMV[0][1], 0, 1);
+                q4050_5E30(decState, &DMV[0][0], dmv, PMV[0][0][0], PMV[0][0][1]);
+                q4050_4758(decState, ref[0][cur], 0, 0, 0, 16, bx, by, PMV[0][0][0], PMV[0][0][1], 0, 0);
+                q4050_4758(decState, ref[sel][!cur], 0, 0, 0, 16, bx, by, DMV[0][0], DMV[0][1], 0, 1);
             } else {
-                q4050_3470(p, D_00497E58, mtype);
+                q4050_3470(decState, D_00497E58, mtype);
             }
         }
         avg = 1;
     }
     if (mbtype & 4) {
-        if (p[372 / 4] == 3) {
+        if (decState[372 / 4] == 3) {
             sel = 1;
             if (mtype == 2) {
-                q4050_4758(p, p[444 / 4], 0, 0, 0, 16, bx, by, PMV[0][1][0], PMV[0][1][1], 0, avg);
+                q4050_4758(decState, decState[444 / 4], 0, 0, 0, 16, bx, by, PMV[0][1][0], PMV[0][1][1], 0, avg);
             } else {
-                q4050_4758(p, p[444 / 4], mvfs[0][1], 0, 0, 8, bx, by, PMV[0][1][0], PMV[0][1][1] >> 1, sel, avg);
-                q4050_4758(p, p[444 / 4], mvfs[1][1], 1, 0, 8, bx, by, PMV[1][1][0], PMV[1][1][1] >> 1, sel, avg);
+                q4050_4758(decState, decState[444 / 4], mvfs[0][1], 0, 0, 8, bx, by, PMV[0][1][0], PMV[0][1][1] >> 1, sel, avg);
+                q4050_4758(decState, decState[444 / 4], mvfs[1][1], 1, 0, 8, bx, by, PMV[1][1][0], PMV[1][1][1] >> 1, sel, avg);
             }
         } else {
             if (mtype == 1) {
-                q4050_4758(p, mvfs[0][1] ? p[476 / 4] : p[460 / 4], 0, 0, 0, 16, bx, by, PMV[0][1][0], PMV[0][1][1], 0, avg);
+                q4050_4758(decState, mvfs[0][1] ? decState[476 / 4] : decState[460 / 4], 0, 0, 0, 16, bx, by, PMV[0][1][0], PMV[0][1][1], 0, avg);
             } else if (mtype == 2) {
-                q4050_4758(p, mvfs[0][1] ? p[476 / 4] : p[460 / 4], 0, 0, 0, 8, bx, by, PMV[0][1][0], PMV[0][1][1], 0, avg);
-                q4050_4758(p, mvfs[1][1] ? p[476 / 4] : p[460 / 4], 0, 0, 8, 8, bx, by, PMV[1][1][0], PMV[1][1][1], 0, avg);
+                q4050_4758(decState, mvfs[0][1] ? decState[476 / 4] : decState[460 / 4], 0, 0, 0, 8, bx, by, PMV[0][1][0], PMV[0][1][1], 0, avg);
+                q4050_4758(decState, mvfs[1][1] ? decState[476 / 4] : decState[460 / 4], 0, 0, 8, 8, bx, by, PMV[1][1][0], PMV[1][1][1], 0, avg);
             } else {
-                q4050_3470(p, D_00497E78, mtype);
+                q4050_3470(decState, D_00497E78, mtype);
             }
         }
     }
@@ -5834,25 +5834,25 @@ void f4B78(struct S4B78 *s, int n) __asm__("func_00404B78");
  * +0x81C); otherwise func_00405A88 combines dst, the prediction and the residual. Called by func_00406318 and
  * func_004060C8.
  *
- * @param s  the decoder's internal state
+ * @param decState  the decoder's internal state
  * @param n  the macroblock record (0 or 1)
  */
-void f4B78(struct S4B78 *s, int n) {
+void f4B78(struct S4B78 *decState, int n) {
     int i;
-    if (s->e[n].enable != 0) {
-        for (i = 0; i < s->e[n].count; i++) {
-            s->e[n].fa[i](&s->e[n].blk[i]);
-            s->e[n].fb[i](&s->e[n].blk[i + 4]);
+    if (decState->e[n].enable != 0) {
+        for (i = 0; i < decState->e[n].count; i++) {
+            decState->e[n].fa[i](&decState->e[n].blk[i]);
+            decState->e[n].fb[i](&decState->e[n].blk[i + 4]);
         }
     }
-    if (s->e[n].f130 != 0 && s->e[n].f13C != 0)
-        func_004034A8((int *)s, (int)D_00497E98);
-    if (s->e[n].f130 != 0)
-        add_4B78(s->e[n].dst, s->e[n].src);
-    else if (s->e[n].f13C != 0)
-        add_4B78(s->e[n].dst, s->f81C);
+    if (decState->e[n].f130 != 0 && decState->e[n].f13C != 0)
+        func_004034A8((int *)decState, (int)D_00497E98);
+    if (decState->e[n].f130 != 0)
+        add_4B78(decState->e[n].dst, decState->e[n].src);
+    else if (decState->e[n].f13C != 0)
+        add_4B78(decState->e[n].dst, decState->f81C);
     else
-        mix_4B78(s->e[n].dst, s->f81C, s->e[n].src);
+        mix_4B78(decState->e[n].dst, decState->f81C, decState->e[n].src);
 }
 #endif
 
@@ -6989,10 +6989,10 @@ int f5B70(struct M5B70 *p) __asm__("func_00405B70");
  * +0x838 and the remaining bits in the buffer (+0x83C, 32 when the top is valid). On an IPU error it reports "Error
  * code detected(BDEC)", raises the stop/restart DMA callbacks around an IPU reset, stops channel 3 and returns 0.
  *
- * @param p  the decoder's internal state
+ * @param decState  the decoder's internal state
  * @return 1, or 0 after an error or a stop request
  */
-int f5B70(struct M5B70 *p) {
+int f5B70(struct M5B70 *decState) {
     int cmd[8];
     int cmd2[8];
     int ret = 1;
@@ -7000,14 +7000,14 @@ int f5B70(struct M5B70 *p) {
     long top;
     int bp;
     int n;
-    func_00406E20((int)p);
+    func_00406E20((int)decState);
     while (*(volatile int *)0x1000B020 != 0 && !(*(volatile int *)0x10002010 & 0x4000)) {
         if (*(volatile int *)0x1000B420 == 0 && !(*(volatile int *)0x1000B400 & 0x100)) {
             cmd[0] = 1;
-            func_00402C30(p->f858, cmd);
+            func_00402C30(decState->f858, cmd);
         }
     }
-    if (p->f10A0 != 0) {
+    if (decState->f10A0 != 0) {
         st = DIntr();
         *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 | 0x10000;
         *(volatile int *)0x1000B400 = 0;
@@ -7022,23 +7022,23 @@ int f5B70(struct M5B70 *p) {
     }
     bp = *(volatile int *)0x10002020;
     top = *(long *)0x10002030;
-    p->f838 = (int)top;
+    decState->f838 = (int)top;
     if (top < 0) {
         if (bp & 0x1F)
             n = 0x20 - (bp & 0x1F);
         else
             n = 0;
-        p->f83C = n;
+        decState->f83C = n;
     } else {
-        p->f83C = 0x20;
+        decState->f83C = 0x20;
     }
     if (*(volatile int *)0x10002010 & 0x4000) {
-        func_004034A8((int *)p, (int)D_00497EB0);
+        func_004034A8((int *)decState, (int)D_00497EB0);
         cmd2[0] = 2;
-        func_00402C30(p->f858, cmd2);
+        func_00402C30(decState->f858, cmd2);
         *(int *)0x10002010 = 0x40000000;
         cmd2[0] = 3;
-        func_00402C30(p->f858, cmd2);
+        func_00402C30(decState->f858, cmd2);
         st = DIntr();
         *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 | 0x10000;
         *(volatile int *)0x1000B000 = 0;
@@ -7128,17 +7128,17 @@ extern void lx5_3470(int *, char *, int) __asm__("func_00403470");
  * an error unless it is MPEG-2 stuffing (11 bits of 15, flushed with func_004071F8): it reports "Invalid
  * macroblock_address_increment code(0x%08x)", sets the fault flag +0x11C and returns 1.
  *
- * @param p  the decoder's internal state
+ * @param decState  the decoder's internal state
  * @return the address increment
  */
-int func_00405FB8(int *p) {
+int func_00405FB8(int *decState) {
     int sum = 0;
-    int c;
-    int t;
+    int vlcCode;
+    int peekBits;
     int again;
     do {
-        c = lx5_6F78(p, 0);
-        switch ((unsigned)c) {
+        vlcCode = lx5_6F78(decState, 0);
+        switch ((unsigned)vlcCode) {
         case 35:
             again = 1;
             sum += 33;
@@ -7147,17 +7147,17 @@ int func_00405FB8(int *p) {
             again = 1;
             break;
         case 0:
-            t = lx5_70F0(p, 11);
-            if (p[2120 / 4] != 0 && t == 15) {
-                lx5_71F8(p, 11);
+            peekBits = lx5_70F0(decState, 11);
+            if (decState[2120 / 4] != 0 && peekBits == 15) {
+                lx5_71F8(decState, 11);
                 again = 1;
                 break;
             }
-            lx5_3470(p, D_00497ED0, c);
-            p[284 / 4] = 1;
+            lx5_3470(decState, D_00497ED0, vlcCode);
+            decState[284 / 4] = 1;
             return 1;
         default:
-            sum += c;
+            sum += vlcCode;
             again = 0;
             break;
         }
@@ -7184,35 +7184,35 @@ extern void func_004034A8(int *, int);
  * finishes the last macroblock (func_00404B78) when the picture decoded cleanly and reports "= Skip to the next picture
  * =" after results 1 or 2. Called by func_00407DC0.
  *
- * @param p  the decoder's internal state
+ * @param decState  the decoder's internal state
  * @return 1 when the picture decoded completely, else 0
  */
-int func_004060C8(int *p) {
+int func_004060C8(int *decState) {
     int n;
-    int r;
-    p[2064 / 4] = 0;
-    n = p[300 / 4] * p[304 / 4];
-    p[2068 / 4] = 0;
-    if (p[372 / 4] != 3)
+    int sliceResult;
+    decState[2064 / 4] = 0;
+    n = decState[300 / 4] * decState[304 / 4];
+    decState[2068 / 4] = 0;
+    if (decState[372 / 4] != 3)
         n >>= 1;
     do {
-        r = func_00406318(p, n);
-    } while (r == 1 || r == 3);
-    func_00406E20((int)p);
-    if (func_00405B70(p) == 0) {
-        r = 4;
-        if (p[4256 / 4] != 0)
-            p[4256 / 4] = 0;
+        sliceResult = func_00406318(decState, n);
+    } while (sliceResult == 1 || sliceResult == 3);
+    func_00406E20((int)decState);
+    if (func_00405B70(decState) == 0) {
+        sliceResult = 4;
+        if (decState[4256 / 4] != 0)
+            decState[4256 / 4] = 0;
         else
-            r = 2;
+            sliceResult = 2;
     }
     while ((*(volatile unsigned *)0x1000D400 >> 8) & 1)
         ;
-    if (r == 0)
-        func_00404B78(p, p[2064 / 4] == 0);
-    if ((unsigned)(r - 1) < 2)
-        func_004034A8(p, (int)D_00497F08);
-    return r == 0;
+    if (sliceResult == 0)
+        func_00404B78(decState, decState[2064 / 4] == 0);
+    if ((unsigned)(sliceResult - 1) < 2)
+        func_004034A8(decState, (int)D_00497F08);
+    return sliceResult == 0;
 }
 #endif
 
@@ -7297,76 +7297,76 @@ extern void func_00404B78(int *, int);
  * issues it (func_00403E00) and finishes the previous one (func_00404B78), alternating the two macroblock records
  * (+0x810). Reports "Too many macroblocks in picture" past @p n.
  *
- * @param p  the decoder's internal state
+ * @param decState  the decoder's internal state
  * @param n  the number of macroblocks in the picture
  * @return 0 at the end of the picture, 1 or 3 to continue with the next slice, 2 on an error, 4 on a stop request
  */
-int func_00406318(int *p, int n) {
-    int a;
-    int b;
-    int c;
-    int d;
-    int e;
-    int s[8];
-    int q[4];
-    int r[4];
-    int v;
-    a = 0;
-    b = 0;
-    v = _sliceA0(p, n, &a, &b, s);
-    if (v != 0)
-        return v;
-    p[284 / 4] = 0;
+int func_00406318(int *decState, int n) {
+    int mbAddress;
+    int mbIncrement;
+    int mbType;
+    int motionType;
+    int dctType;
+    int pmv[8];
+    int fieldSelect[4];
+    int dmVector[4];
+    int sliceResult;
+    mbAddress = 0;
+    mbIncrement = 0;
+    sliceResult = _sliceA0(decState, n, &mbAddress, &mbIncrement, pmv);
+    if (sliceResult != 0)
+        return sliceResult;
+    decState[284 / 4] = 0;
     for (;;) {
-        if (a >= n)
+        if (mbAddress >= n)
             return 0;
-        p[(1740 + p[2064 / 4] * 320) / 4] = 0;
-        if (func_00405B70(p) == 0) {
-            if (p[4256 / 4] != 0) {
-                p[4256 / 4] = 0;
+        decState[(1740 + decState[2064 / 4] * 320) / 4] = 0;
+        if (func_00405B70(decState) == 0) {
+            if (decState[4256 / 4] != 0) {
+                decState[4256 / 4] = 0;
                 return 4;
             }
             return 2;
         }
-        if (b == 0) {
-            if (func_004070F0((int)p, 23) == 0) {
-                p[284 / 4] = 0;
+        if (mbIncrement == 0) {
+            if (func_004070F0((int)decState, 23) == 0) {
+                decState[284 / 4] = 0;
                 return 3;
             }
-            if (p[284 / 4] != 0) {
-                p[284 / 4] = 0;
+            if (decState[284 / 4] != 0) {
+                decState[284 / 4] = 0;
                 return 3;
             }
-            b = func_00405FB8(p);
-            if (p[284 / 4] != 0) {
-                p[284 / 4] = 0;
+            mbIncrement = func_00405FB8(decState);
+            if (decState[284 / 4] != 0) {
+                decState[284 / 4] = 0;
                 return 1;
             }
         }
-        if (a >= n) {
-            func_004034A8(p, (int)D_00497F70);
+        if (mbAddress >= n) {
+            func_004034A8(decState, (int)D_00497F70);
             return 2;
         }
-        if (b == 1) {
-            if (func_004065D0(p, &c, &d, &e, s, q, r) == 0) {
-                p[284 / 4] = 0;
+        if (mbIncrement == 1) {
+            if (func_004065D0(decState, &mbType, &motionType, &dctType, pmv, fieldSelect, dmVector) == 0) {
+                decState[284 / 4] = 0;
                 return 1;
             }
         } else {
-            if (func_00406510(p, s, &d, q, &c) == 0) {
-                p[284 / 4] = 0;
+            if (func_00406510(decState, pmv, &motionType, fieldSelect, &mbType) == 0) {
+                decState[284 / 4] = 0;
                 return 2;
             }
         }
-        if (func_00403E00_k(p, a, b, c, d, s, q, r) == 0) {
-            p[284 / 4] = 0;
+        if (func_00403E00_k(decState, mbAddress, mbIncrement, mbType, motionType, pmv, fieldSelect, dmVector) == 0) {
+            decState[284 / 4] = 0;
             return 2;
         }
-        if (a != 0)
-            func_00404B78(p, p[2064 / 4] ^ 1);
-        a++;
-        p[2064 / 4] ^= 1;
-        b--;
+        if (mbAddress != 0)
+            func_00404B78(decState, decState[2064 / 4] ^ 1);
+        mbAddress++;
+        decState[2064 / 4] ^= 1;
+        mbIncrement--;
     }
 }
 #endif
@@ -7384,37 +7384,37 @@ extern void func_004034A8(int *, int);
  * clears the intra bit of the macroblock type. A skipped macroblock in an I picture reports "skiped macroblock in I
  * picure is not allowed".
  *
- * @param p  the decoder's internal state
- * @param q  the motion vectors (PMV)
- * @param r  receives the motion type
- * @param s  the motion_vertical_field_select flags
- * @param t  the macroblock type (intra bit cleared)
+ * @param decState  the decoder's internal state
+ * @param pmv  the motion vectors (PMV)
+ * @param motionType  receives the motion type
+ * @param fieldSelect  the motion_vertical_field_select flags
+ * @param mbType  the macroblock type (intra bit cleared)
  * @return 1, or 0 in an I picture
  */
-int func_00406510(int *p, int *q, int *r, int *s, int *t) {
+int func_00406510(int *decState, int *pmv, int *motionType, int *fieldSelect, int *mbType) {
     int ok = 1;
-    int v;
-    p[p[2064 / 4] * 320 / 4 + 1740 / 4] = 1;
-    p[432 / 4] = 1;
-    if (p[336 / 4] == 2) {
-        q[5] = 0;
-        q[4] = 0;
-        q[1] = 0;
-        q[0] = 0;
+    int bottomField;
+    decState[decState[2064 / 4] * 320 / 4 + 1740 / 4] = 1;
+    decState[432 / 4] = 1;
+    if (decState[336 / 4] == 2) {
+        pmv[5] = 0;
+        pmv[4] = 0;
+        pmv[1] = 0;
+        pmv[0] = 0;
     }
-    if (p[372 / 4] == 3) {
-        *r = 2;
+    if (decState[372 / 4] == 3) {
+        *motionType = 2;
     } else {
-        *r = 1;
-        v = p[372 / 4] == 2;
-        s[1] = v;
-        s[0] = v;
+        *motionType = 1;
+        bottomField = decState[372 / 4] == 2;
+        fieldSelect[1] = bottomField;
+        fieldSelect[0] = bottomField;
     }
-    if (p[336 / 4] == 1) {
-        func_004034A8(p, (int)D_00497F90);
+    if (decState[336 / 4] == 1) {
+        func_004034A8(decState, (int)D_00497F90);
         ok = 0;
     }
-    *t &= ~1;
+    *mbType &= ~1;
     return ok;
 }
 #endif
@@ -7444,7 +7444,7 @@ extern void m65D0_8AF8(int, int) __asm__("func_00408AF8");
  * 0x300-byte output (func_00408AF8) and issues an IPU BDEC command; otherwise marks the record skipped. Resets the
  * vectors after intra macroblocks without concealment vectors and for P macroblocks without a forward vector.
  *
- * @param p  the decoder's internal state
+ * @param decState  the decoder's internal state
  * @param mbtype  receives the macroblock_type bits
  * @param motion_type  receives the motion type
  * @param dct_type  receives the DCT type
@@ -7453,26 +7453,26 @@ extern void m65D0_8AF8(int, int) __asm__("func_00408AF8");
  * @param dmvector  receives the dual-prime differential vector
  * @return 1, or 0 on an error (fault flag +0x11C set)
  */
-int func_004065D0(int *p, int *mbtype, int *motion_type, int *dct_type, int *PMV, int *mvfs, int *dmvector) {
+int func_004065D0(int *decState, int *mbtype, int *motion_type, int *dct_type, int *PMV, int *mvfs, int *dmvector) {
     int macroblock_type;
     int motion_vector_count, mv_format, dmv, mvscale;
-    *(volatile unsigned int *)0x10002010 = (*(volatile unsigned int *)0x10002010 & 0xF8FFFFFF) | (p[336 / 4] << 24);
-    macroblock_type = m65D0_6F78(p, 1);
+    *(volatile unsigned int *)0x10002010 = (*(volatile unsigned int *)0x10002010 & 0xF8FFFFFF) | (decState[336 / 4] << 24);
+    macroblock_type = m65D0_6F78(decState, 1);
     *mbtype = macroblock_type;
     if (macroblock_type == 0) {
-        func_004034A8(p, (int)D_00497FC0);
-        p[284 / 4] = 1;
+        func_004034A8(decState, (int)D_00497FC0);
+        decState[284 / 4] = 1;
         return 0;
     }
     if (macroblock_type & 0xC) {
-        if (p[372 / 4] == 3 && p[380 / 4])
+        if (decState[372 / 4] == 3 && decState[380 / 4])
             *motion_type = 2;
         else
-            *motion_type = m65D0_72E8(p, 2);
-    } else if ((macroblock_type & 1) && p[0x180 / 4]) {
-        *motion_type = (p[372 / 4] == 3) ? 2 : 1;
+            *motion_type = m65D0_72E8(decState, 2);
+    } else if ((macroblock_type & 1) && decState[0x180 / 4]) {
+        *motion_type = (decState[372 / 4] == 3) ? 2 : 1;
     }
-    if (p[372 / 4] == 3) {
+    if (decState[372 / 4] == 3) {
         motion_vector_count = (*motion_type == 1) ? 2 : 1;
         mv_format = (*motion_type == 2);
     } else {
@@ -7480,59 +7480,59 @@ int func_004065D0(int *p, int *mbtype, int *motion_type, int *dct_type, int *PMV
         mv_format = 0;
     }
     dmv = (*motion_type == 3);
-    mvscale = (mv_format == 0 && p[372 / 4] == 3);
-    *dct_type = (p[372 / 4] == 3 && !p[380 / 4] && (*mbtype & 3)) ? m65D0_72E8(p, 1) : 0;
+    mvscale = (mv_format == 0 && decState[372 / 4] == 3);
+    *dct_type = (decState[372 / 4] == 3 && !decState[380 / 4] && (*mbtype & 3)) ? m65D0_72E8(decState, 1) : 0;
 
     if (*mbtype & 0x10)
-        p[436 / 4] = m65D0_72E8(p, 5);
+        decState[436 / 4] = m65D0_72E8(decState, 5);
 
-    if ((*mbtype & 8) || ((*mbtype & 1) && p[0x180 / 4])) {
-        if (p[2120 / 4])
-            m65D0_6B00(p, PMV, dmvector, mvfs, 0, motion_vector_count, mv_format, p[356 / 4] - 1, p[360 / 4] - 1, dmv, mvscale);
+    if ((*mbtype & 8) || ((*mbtype & 1) && decState[0x180 / 4])) {
+        if (decState[2120 / 4])
+            m65D0_6B00(decState, PMV, dmvector, mvfs, 0, motion_vector_count, mv_format, decState[356 / 4] - 1, decState[360 / 4] - 1, dmv, mvscale);
         else
-            m65D0_6CA0(p, PMV, dmvector, p[344 / 4] - 1, p[344 / 4] - 1, 0, 0, p[340 / 4]);
+            m65D0_6CA0(decState, PMV, dmvector, decState[344 / 4] - 1, decState[344 / 4] - 1, 0, 0, decState[340 / 4]);
     }
-    if (p[284 / 4])
+    if (decState[284 / 4])
         return 0;
 
     if (*mbtype & 4) {
-        if (p[2120 / 4])
-            m65D0_6B00(p, PMV, dmvector, mvfs, 1, motion_vector_count, mv_format, p[364 / 4] - 1, p[368 / 4] - 1, 0, mvscale);
+        if (decState[2120 / 4])
+            m65D0_6B00(decState, PMV, dmvector, mvfs, 1, motion_vector_count, mv_format, decState[364 / 4] - 1, decState[368 / 4] - 1, 0, mvscale);
         else
-            m65D0_6CA0(p, PMV + 2, dmvector, p[352 / 4] - 1, p[352 / 4] - 1, 0, 0, p[348 / 4]);
+            m65D0_6CA0(decState, PMV + 2, dmvector, decState[352 / 4] - 1, decState[352 / 4] - 1, 0, 0, decState[348 / 4]);
     }
-    if (p[284 / 4])
+    if (decState[284 / 4])
         return 0;
 
-    if ((*mbtype & 1) && p[0x180 / 4])
-        m65D0_71F8(p, 1);
+    if ((*mbtype & 1) && decState[0x180 / 4])
+        m65D0_71F8(decState, 1);
 
     if (*mbtype & 3) {
-        m65D0_8AF8(p[p[2064 / 4] * 320 / 4 + 1428 / 4], 0x300);
-        m65D0_6E20(p);
-        m65D0_6DF0(p, 0x20000000 | ((*mbtype & 1) << 27) | (p[432 / 4] << 26) | (*dct_type << 25) | (p[436 / 4] << 16));
+        m65D0_8AF8(decState[decState[2064 / 4] * 320 / 4 + 1428 / 4], 0x300);
+        m65D0_6E20(decState);
+        m65D0_6DF0(decState, 0x20000000 | ((*mbtype & 1) << 27) | (decState[432 / 4] << 26) | (*dct_type << 25) | (decState[436 / 4] << 16));
     } else {
-        p[p[2064 / 4] * 320 / 4 + 1740 / 4] = 1;
+        decState[decState[2064 / 4] * 320 / 4 + 1740 / 4] = 1;
     }
-    p[432 / 4] = 0;
-    if (p[284 / 4])
+    decState[432 / 4] = 0;
+    if (decState[284 / 4])
         return 0;
 
     if (!(*mbtype & 1))
-        p[432 / 4] = 1;
+        decState[432 / 4] = 1;
 
-    if ((*mbtype & 1) && !p[0x180 / 4]) {
+    if ((*mbtype & 1) && !decState[0x180 / 4]) {
         PMV[0] = PMV[1] = PMV[4] = PMV[5] = 0;
         PMV[2] = PMV[3] = PMV[6] = PMV[7] = 0;
     }
 
-    if (p[336 / 4] == 2 && !(*mbtype & 9)) {
+    if (decState[336 / 4] == 2 && !(*mbtype & 9)) {
         PMV[0] = PMV[1] = PMV[4] = PMV[5] = 0;
-        if (p[372 / 4] == 3) {
+        if (decState[372 / 4] == 3) {
             *motion_type = 2;
         } else {
             *motion_type = 1;
-            mvfs[0] = (p[372 / 4] == 2);
+            mvfs[0] = (decState[372 / 4] == 2);
         }
     }
     return 1;
@@ -7752,47 +7752,47 @@ extern int func_00402C80(int *);
  * dual-prime vector), waits for the result, then stores IPU_TOP (+0x838) and the bits left in the buffer (+0x83C). Sets
  * the fault flag +0x11C when the code is 0. Raises the needs-data callback every 5001 polls.
  *
- * @param p  the decoder's internal state
+ * @param decState  the decoder's internal state
  * @param cmd  the VLC table
  * @return the decoded value (low 16 bits, signed)
  */
-int func_00406F78(int p, int cmd) {
-    int m = 0;
+int func_00406F78(int decState, int cmd) {
+    int waitCount = 0;
     int n = 0;
     int w;
-    long v;
-    long b;
-    int s;
+    long vdecResult;
+    long topBits;
+    int bitPos;
     if ((*(volatile int *)0x10002010 & 0x80004000) == 0x80000000) {
         do {
             if (n++ >= 5001) {
-                func_00402C80(*(int **)(p + 0x858));
+                func_00402C80(*(int **)(decState + 0x858));
                 n = 0;
             }
         } while ((*(volatile int *)0x10002010 & 0x80004000) == 0x80000000);
     }
     w = (cmd << 26) | 0x30000000;
     *(volatile int *)0x10002000 = w;
-    *(int *)(p + 0x818) = D_004532C0[w >> 28];
-    v = *(volatile long *)0x10002000;
-    if (v < 0) {
+    *(int *)(decState + 0x818) = D_004532C0[w >> 28];
+    vdecResult = *(volatile long *)0x10002000;
+    if (vdecResult < 0) {
         do {
-            if (m++ >= 5001) {
-                func_00402C80(*(int **)(p + 0x858));
-                m = 0;
+            if (waitCount++ >= 5001) {
+                func_00402C80(*(int **)(decState + 0x858));
+                waitCount = 0;
             }
-            v = *(volatile long *)0x10002000;
-        } while (v < 0);
+            vdecResult = *(volatile long *)0x10002000;
+        } while (vdecResult < 0);
     }
-    s = *(volatile int *)0x10002020;
-    b = *(long *)0x10002030;
-    *(int *)(p + 0x838) = (int)b;
-    if (b < 0)
-        *(int *)(p + 0x83C) = -(s & 0x1F) & 0x1F;
+    bitPos = *(volatile int *)0x10002020;
+    topBits = *(long *)0x10002030;
+    *(int *)(decState + 0x838) = (int)topBits;
+    if (topBits < 0)
+        *(int *)(decState + 0x83C) = -(bitPos & 0x1F) & 0x1F;
     else
-        *(int *)(p + 0x83C) = 32;
-    *(int *)(p + 0x11C) = (int)v == 0;
-    return (short)v;
+        *(int *)(decState + 0x83C) = 32;
+    *(int *)(decState + 0x11C) = (int)vdecResult == 0;
+    return (short)vdecResult;
 }
 #endif
 
@@ -7807,31 +7807,31 @@ extern long func_00406EC8_k() __asm__("func_00406EC8");
  * When the cached IPU_TOP is stale (+0x818) or has fewer than @p n bits left (+0x83C), waits for the IPU, issues FDEC 0
  * and caches the new top word with 32 bits. Returns its top @p n bits.
  *
- * @param p  the decoder's internal state
+ * @param decState  the decoder's internal state
  * @param n  the number of bits (1..32)
  * @return the bits
  */
-int func_004070F0(int p, int n) {
-    int c;
+int func_004070F0(int decState, int n) {
+    int waitCount;
     int x;
     int *e;
-    if (*(int *)(p + 0x818) || *(int *)(p + 0x83C) < n) {
-        c = 0;
+    if (*(int *)(decState + 0x818) || *(int *)(decState + 0x83C) < n) {
+        waitCount = 0;
         if ((*(volatile int *)0x10002010 & 0x80004000) == 0x80000000) {
             do {
-                if (c++ >= 5001) {
-                    func_00402C80(*(int **)(p + 0x858));
-                    c = 0;
+                if (waitCount++ >= 5001) {
+                    func_00402C80(*(int **)(decState + 0x858));
+                    waitCount = 0;
                 }
             } while ((*(volatile int *)0x10002010 & 0x80004000) == 0x80000000);
         }
         *(volatile int *)0x10002000 = 0x40000000;
-        *(int *)(p + 0x818) = D_004532C0[4];
-        x = (int)func_00406EC8_k(p);
-        *(int *)(p + 0x838) = x;
-        *(int *)(p + 0x83C) = 32;
+        *(int *)(decState + 0x818) = D_004532C0[4];
+        x = (int)func_00406EC8_k(decState);
+        *(int *)(decState + 0x838) = x;
+        *(int *)(decState + 0x83C) = 32;
     }
-    return (unsigned)*(int *)(p + 0x838) >> (32 - n);
+    return (unsigned)*(int *)(decState + 0x838) >> (32 - n);
 }
 #endif
 
@@ -7841,34 +7841,34 @@ INCLUDE_ASM("seg/seg_2FE810", func_004071F8);
 extern int func_00402C80(int *);
 extern long func_00406EC8_k() __asm__("func_00406EC8");
 /**
- * Skips @p v bits of the bitstream (IPU FDEC with a bit step) and caches the next top word.
+ * Skips @p bitCount bits of the bitstream (IPU FDEC with a bit step) and caches the next top word.
  *
  * Like the other bit readers it first waits for the IPU, raising the needs-data callback every 5001 polls. Records the
  * command's table entry in +0x818 and stores the new IPU_TOP in +0x838 with 32 bits available (+0x83C).
  *
- * @param p  the decoder's internal state
- * @param v  the number of bits to skip (0..32)
+ * @param decState  the decoder's internal state
+ * @param bitCount  the number of bits to skip (0..32)
  */
-void func_004071F8(int p, int v) {
+void func_004071F8(int decState, int bitCount) {
     int n = 0;
     int w;
     int x;
-    int *e;
+    int *tableEntry;
     if ((*(volatile int *)0x10002010 & 0x80004000) == 0x80000000) {
         do {
             if (n++ >= 5001) {
-                func_00402C80(*(int **)(p + 0x858));
+                func_00402C80(*(int **)(decState + 0x858));
                 n = 0;
             }
         } while ((*(volatile int *)0x10002010 & 0x80004000) == 0x80000000);
     }
-    w = v | 0x40000000;
+    w = bitCount | 0x40000000;
     *(volatile int *)0x10002000 = w;
-    e = &D_004532C0[(unsigned)w >> 28];
-    *(int *)(p + 0x818) = *e;
-    x = (int)func_00406EC8_k(p, e);
-    *(int *)(p + 0x838) = x;
-    *(int *)(p + 0x83C) = 32;
+    tableEntry = &D_004532C0[(unsigned)w >> 28];
+    *(int *)(decState + 0x818) = *tableEntry;
+    x = (int)func_00406EC8_k(decState, tableEntry);
+    *(int *)(decState + 0x838) = x;
+    *(int *)(decState + 0x83C) = 32;
 }
 #endif
 
@@ -7884,39 +7884,39 @@ extern long func_00406EC8_k() __asm__("func_00406EC8");
  * the cached top word when it is stale or too short (FDEC 0), takes its top @p n bits, then advances the IPU by @p n
  * bits (FDEC n) and caches the next top word.
  *
- * @param p  the decoder's internal state
+ * @param decState  the decoder's internal state
  * @param n  the number of bits (1..32)
  * @return the bits read
  */
-int func_004072E8(int p, int n) {
-    int c = 0;
+int func_004072E8(int decState, int n) {
+    int waitCount = 0;
     int w;
-    unsigned r;
+    unsigned bits;
     int x;
-    int *e;
+    int *tableEntry;
     if ((*(volatile int *)0x10002010 & 0x80004000) == 0x80000000) {
         do {
-            if (c++ >= 5001) {
-                func_00402C80(*(int **)(p + 0x858));
-                c = 0;
+            if (waitCount++ >= 5001) {
+                func_00402C80(*(int **)(decState + 0x858));
+                waitCount = 0;
             }
         } while ((*(volatile int *)0x10002010 & 0x80004000) == 0x80000000);
     }
-    if (*(int *)(p + 0x818) || *(int *)(p + 0x83C) < n) {
+    if (*(int *)(decState + 0x818) || *(int *)(decState + 0x83C) < n) {
         *(volatile int *)0x10002000 = 0x40000000;
-        *(int *)(p + 0x818) = D_004532C0[4];
-        x = (int)func_00406EC8_k(p);
-        *(int *)(p + 0x838) = x;
+        *(int *)(decState + 0x818) = D_004532C0[4];
+        x = (int)func_00406EC8_k(decState);
+        *(int *)(decState + 0x838) = x;
     }
-    r = (unsigned)*(int *)(p + 0x838) >> (32 - n);
-    *(int *)(p + 0x83C) = 32;
+    bits = (unsigned)*(int *)(decState + 0x838) >> (32 - n);
+    *(int *)(decState + 0x83C) = 32;
     w = n | 0x40000000;
     *(volatile int *)0x10002000 = w;
-    e = &D_004532C0[(unsigned)w >> 28];
-    *(int *)(p + 0x818) = *e;
-    x = (int)func_00406EC8_k(p);
-    *(int *)(p + 0x838) = x;
-    return r;
+    tableEntry = &D_004532C0[(unsigned)w >> 28];
+    *(int *)(decState + 0x818) = *tableEntry;
+    x = (int)func_00406EC8_k(decState);
+    *(int *)(decState + 0x838) = x;
+    return bits;
 }
 #endif
 
@@ -7990,31 +7990,31 @@ extern void s7_2C30(int, struct B7520 *) __asm__("func_00402C30");
  * callback 5 with two 64-bit stamps preset to -1 and stores what comes back in +0x828 / +0x830, and returns the picture
  * coding type (+0x150). Called by the decode loop func_00402E10 and func_004030E0.
  *
- * @param a  the decoder's internal state
+ * @param decState  the decoder's internal state
  * @return the picture coding type (1 I, 2 P, 3 B, 4 D), or 0 at the sequence end
  */
-int func_00407520(struct S_7520 *a) {
-    struct B7520 b;
+int func_00407520(struct S_7520 *decState) {
+    struct B7520 stampEvent;
     for (;;) {
-        s7_7438(a);
-        switch ((unsigned)s7_72E8(a, 0x20)) {
+        s7_7438(decState);
+        switch ((unsigned)s7_72E8(decState, 0x20)) {
         case 435:
-            s7_3620(a);
+            s7_3620(decState);
             break;
         case 440:
-            s7_7AD0(a);
+            s7_7AD0(decState);
             break;
         case 439:
             return 0;
         case 0x100:
-            s7_7630(a);
-            b.op = 5;
-            b.l1 = -1;
-            b.l2 = -1;
-            s7_2C30(a->f858, &b);
-            a->f830 = b.l2;
-            a->f828 = b.l1;
-            return a->f150;
+            s7_7630(decState);
+            stampEvent.op = 5;
+            stampEvent.l1 = -1;
+            stampEvent.l2 = -1;
+            s7_2C30(decState->f858, &stampEvent);
+            decState->f830 = stampEvent.l2;
+            decState->f828 = stampEvent.l1;
+            return decState->f150;
         }
     }
 }
@@ -8069,23 +8069,23 @@ extern int func_004072E8();
  * After moving to the next start code, loops while it is 0x1B5 (extension) or 0x1B2 (user data): an extension's 4-bit
  * id selects its handler from a copy of the table D_00497FE0 (ids above 10 use entry 0); user data is skipped.
  *
- * @param p  the decoder's internal state
+ * @param decState  the decoder's internal state
  */
-void func_004076F8(int p) {
-    struct PT44 t = *(struct PT44 *)D_00497FE0;
+void func_004076F8(int decState) {
+    struct PT44 handlers = *(struct PT44 *)D_00497FE0;
     unsigned i;
-    int r;
-    func_00407438(p);
-    while ((r = func_004070F0(p, 32)) == 437 || r == 434) {
-        if (r == 437) {
-            func_004071F8(p, 32);
-            i = func_004072E8(p, 4);
+    int startCode;
+    func_00407438(decState);
+    while ((startCode = func_004070F0(decState, 32)) == 437 || startCode == 434) {
+        if (startCode == 437) {
+            func_004071F8(decState, 32);
+            i = func_004072E8(decState, 4);
             i = i > 10 ? 0 : i;
-            ((void (*)(int))t.v[i])(p);
-            func_00407438(p);
+            ((void (*)(int))handlers.v[i])(decState);
+            func_00407438(decState);
         } else {
-            func_004071F8(p, 32);
-            func_00407438(p);
+            func_004071F8(decState, 32);
+            func_00407438(decState);
         }
     }
 }
@@ -8111,14 +8111,14 @@ void func_00407820(int *mpegSys) {
     mpegSys[364 / 4] = Q_72E8((int)mpegSys, 4);
     mpegSys[368 / 4] = Q_72E8((int)mpegSys, 4);
     {
-        int v = Q_72E8((int)mpegSys, 2);
-        *(volatile unsigned *)0x10002010 = (*(volatile unsigned *)0x10002010 & 0xFFFCFFFF) | (v << 16);
+        int headerField = Q_72E8((int)mpegSys, 2);
+        *(volatile unsigned *)0x10002010 = (*(volatile unsigned *)0x10002010 & 0xFFFCFFFF) | (headerField << 16);
     }
     {
-        int v = Q_72E8((int)mpegSys, 2);
-        mpegSys[372 / 4] = v;
+        int headerField = Q_72E8((int)mpegSys, 2);
+        mpegSys[372 / 4] = headerField;
         if (mpegSys[212 / 4] == 0)
-            mpegSys[212 / 4] = v;
+            mpegSys[212 / 4] = headerField;
     }
     mpegSys[376 / 4] = Q_72E8((int)mpegSys, 1);
     mpegSys[380 / 4] = Q_72E8((int)mpegSys, 1);
@@ -8167,29 +8167,29 @@ int f_407A58(struct S407A58 *p, int n) __asm__("func_00407A58");
  * pictures with a non-zero reference it clears +0x854 and remembers the reference; a negative reference with +0x854
  * clear would add 0x400, which cannot happen for the 10-bit value the caller reads (dead branch).
  *
- * @param p  the decoder's internal state
+ * @param decState  the decoder's internal state
  * @param n  the temporal reference
  * @return the highest picture number so far
  */
-int f_407A58(struct S407A58 *p, int n) {
-    int t = 0;
-    int m = 0;
+int f_407A58(struct S407A58 *decState, int n) {
+    int refWrapped = 0;
+    int anchorRef = 0;
     int x;
-    if (p->f150 != 3) {
+    if (decState->f150 != 3) {
         if (n != 0) {
             if (n < 0)
-                t = p->f854 == 0;
-            p->f854 = 0;
-            m = n;
+                refWrapped = decState->f854 == 0;
+            decState->f854 = 0;
+            anchorRef = n;
         }
     }
-    p->f1AC = p->f84C + n;
-    if (t && m >= n)
-        p->f1AC += 0x400;
-    x = p->f850;
-    if (x < p->f1AC)
-        x = p->f1AC;
-    p->f850 = x;
+    decState->f1AC = decState->f84C + n;
+    if (refWrapped && anchorRef >= n)
+        decState->f1AC += 0x400;
+    x = decState->f850;
+    if (x < decState->f1AC)
+        x = decState->f1AC;
+    decState->f850 = x;
     return x;
 }
 #endif
@@ -8239,23 +8239,23 @@ extern char D_00498038[];
  * bitstream (SETIQ 0x50000000 / 0x58000000); a chroma matrix flag reports "load_chroma_intra_quantizer_matrix == 1" or
  * the non-intra one.
  *
- * @param p  the decoder's internal state
+ * @param decState  the decoder's internal state
  */
-void func_00407B70(int *p) {
-    if ((p[2112 / 4] = func_004072E8((int)p, 1)) != 0) {
-        func_00406E20((int)p);
-        func_00406DF0(p, 0x50000000);
-        func_00406E20((int)p);
+void func_00407B70(int *decState) {
+    if ((decState[2112 / 4] = func_004072E8((int)decState, 1)) != 0) {
+        func_00406E20((int)decState);
+        func_00406DF0(decState, 0x50000000);
+        func_00406E20((int)decState);
     }
-    if ((p[2116 / 4] = func_004072E8((int)p, 1)) != 0) {
-        func_00406E20((int)p);
-        func_00406DF0(p, 0x58000000);
-        func_00406E20((int)p);
+    if ((decState[2116 / 4] = func_004072E8((int)decState, 1)) != 0) {
+        func_00406E20((int)decState);
+        func_00406DF0(decState, 0x58000000);
+        func_00406E20((int)decState);
     }
-    if (func_004072E8((int)p, 1) != 0)
-        func_004034A8(p, (int)D_00498010);
-    if (func_004072E8((int)p, 1) != 0)
-        func_004034A8(p, (int)D_00498038);
+    if (func_004072E8((int)decState, 1) != 0)
+        func_004034A8(decState, (int)D_00498010);
+    if (func_004072E8((int)decState, 1) != 0)
+        func_004034A8(decState, (int)D_00498038);
 }
 #endif
 
@@ -8270,23 +8270,23 @@ extern int sc_72E8(struct S_7C38 *, int) __asm__("func_004072E8");
  * Reads one to three frame centre offsets (horizontal into +0x18C[i], vertical into +0x198[i]); the count follows
  * progressive_sequence, repeat_first_field, top_field_first and the picture structure, as in MSSG mpeg2decode.
  *
- * @param a  the decoder's internal state
+ * @param decState  the decoder's internal state
  */
-void func_00407C38(struct S_7C38 *a) {
+void func_00407C38(struct S_7C38 *decState) {
     int n;
     int i;
-    if (a->f13C) {
-        if (a->f184 == 0) n = 1;
-        else n = a->f178 ? 3 : 2;
+    if (decState->f13C) {
+        if (decState->f184 == 0) n = 1;
+        else n = decState->f178 ? 3 : 2;
     } else {
-        if (a->f174 != 3) n = 1;
-        else n = a->f184 ? 3 : 2;
+        if (decState->f174 != 3) n = 1;
+        else n = decState->f184 ? 3 : 2;
     }
     for (i = 0; i < n; i++) {
-        a->f18C[i] = sc_72E8(a, 16);
-        sc_72E8(a, 1);
-        a->f198[i] = sc_72E8(a, 16);
-        sc_72E8(a, 1);
+        decState->f18C[i] = sc_72E8(decState, 16);
+        sc_72E8(decState, 1);
+        decState->f198[i] = sc_72E8(decState, 16);
+        sc_72E8(decState, 1);
     }
 }
 #endif
@@ -8328,35 +8328,35 @@ extern int func_004060C8(int *);
  * is the frame one (+0x1C0) or the top / bottom field one (+0x1D0 / +0x1E0) by picture structure; an unknown structure
  * reports "unknown picture sutructure". When func_004060C8 succeeds, word 10 of the record is set.
  *
- * @param p  the decoder's internal state
+ * @param decState  the decoder's internal state
  * @return func_004060C8's result (non-zero when decoded)
  */
-int func_00407DC0(int *p) {
-    int *q;
-    int r;
-    if (p[372 / 4] == 3 && p[288 / 4] != 0) {
-        func_004034A8(p, D_00498068);
-        p[288 / 4] = 0;
+int func_00407DC0(int *decState) {
+    int *picRecord;
+    int decoded;
+    if (decState[372 / 4] == 3 && decState[288 / 4] != 0) {
+        func_004034A8(decState, D_00498068);
+        decState[288 / 4] = 0;
     }
-    switch (p[372 / 4]) {
+    switch (decState[372 / 4]) {
     case 3:
-        q = (int *)p[0x1C0 / 4];
+        picRecord = (int *)decState[0x1C0 / 4];
         break;
     case 1:
-        q = (int *)p[464 / 4];
+        picRecord = (int *)decState[464 / 4];
         break;
     case 2:
-        q = (int *)p[0x1E0 / 4];
+        picRecord = (int *)decState[0x1E0 / 4];
         break;
     default:
-        q = (int *)p[0x1C0 / 4];
-        func_004034A8(p, D_00498088);
+        picRecord = (int *)decState[0x1C0 / 4];
+        func_004034A8(decState, D_00498088);
         break;
     }
-    r = func_004060C8(p);
-    if (r != 0)
-        q[40 / 4] = 1;
-    return r;
+    decoded = func_004060C8(decState);
+    if (decoded != 0)
+        picRecord[40 / 4] = 1;
+    return decoded;
 }
 #endif
 
@@ -8376,23 +8376,23 @@ extern void func_004087D0(int *, int, int, int);
  * @param flag  non-zero to output a picture
  */
 void func_00407E90(int *mpegSys, int n, int flag) {
-    int a, b;
+    int firstRec, secondRec;
     if (flag) {
         if (mpegSys[372 / 4] == 3) {
             if (mpegSys[336 / 4] == 3)
-                a = mpegSys[452 / 4];
+                firstRec = mpegSys[452 / 4];
             else
-                a = mpegSys[440 / 4];
-            func_004086C0(mpegSys, a, n - 1);
+                firstRec = mpegSys[440 / 4];
+            func_004086C0(mpegSys, firstRec, n - 1);
         } else {
             if (mpegSys[336 / 4] == 3) {
-                a = mpegSys[468 / 4];
-                b = mpegSys[484 / 4];
+                firstRec = mpegSys[468 / 4];
+                secondRec = mpegSys[484 / 4];
             } else {
-                a = mpegSys[456 / 4];
-                b = mpegSys[472 / 4];
+                firstRec = mpegSys[456 / 4];
+                secondRec = mpegSys[472 / 4];
             }
-            func_004087D0(mpegSys, a, b, n - 1);
+            func_004087D0(mpegSys, firstRec, secondRec, n - 1);
         }
     }
     if (mpegSys[0xF8 / 4] == 1)
@@ -8438,92 +8438,92 @@ struct M7F20 {
  * field only) and decodes into the backward one. The chosen frame/top/bottom record (by +0x174) gets state 0, the
  * picture's time stamps (+0x828 / +0x830) and its type, structure and display fields.
  *
- * @param m  the decoder's internal state
- * @param a1  non-zero for the second field of a pair
+ * @param decState  the decoder's internal state
+ * @param secondField  non-zero for the second field of a pair
  * @return 1 when the needed reference pictures are present, else 0
  */
-int func_00407F20(struct M7F20 *m, int a1) {
+int func_00407F20(struct M7F20 *decState, int secondField) {
     int lim = 4;
     struct F7F20 *x;
-    struct F7F20 *f = 0;
-    int r = 0;
-    if (m->f174 == 3)
+    struct F7F20 *curRec = 0;
+    int refsReady = 0;
+    if (decState->f174 == 3)
         lim = 2;
-    if (m->f150 == 3) {
-        m->c[0].cur = m->c[0].next;
-        m->c[1].cur = m->c[1].next;
-        m->c[2].cur = m->c[2].next;
-        if (m->fA0 + m->fA4 >= lim) {
-            m->fE8 = 0;
-            m->f1A8 = 0;
-            m->f1A4 = 0;
+    if (decState->f150 == 3) {
+        decState->c[0].cur = decState->c[0].next;
+        decState->c[1].cur = decState->c[1].next;
+        decState->c[2].cur = decState->c[2].next;
+        if (decState->fA0 + decState->fA4 >= lim) {
+            decState->fE8 = 0;
+            decState->f1A8 = 0;
+            decState->f1A4 = 0;
         }
-        if ((m->fE8 != 0 || m->f1A8 != 0) && m->f1A4 == 0) {
-            m->c[0].ref0->state = 0;
-            m->c[1].ref0->state = 0;
-            m->c[2].ref0->state = 0;
+        if ((decState->fE8 != 0 || decState->f1A8 != 0) && decState->f1A4 == 0) {
+            decState->c[0].ref0->state = 0;
+            decState->c[1].ref0->state = 0;
+            decState->c[2].ref0->state = 0;
         }
-        m->fE8 = 0;
-        m->f1A8 = 0;
-        if (m->f174 == 3) {
-            if (m->c[0].ref0->state == 1 || m->f1A4 != 0)
-                if (m->c[0].ref1->state == 1)
-                    r = 1;
+        decState->fE8 = 0;
+        decState->f1A8 = 0;
+        if (decState->f174 == 3) {
+            if (decState->c[0].ref0->state == 1 || decState->f1A4 != 0)
+                if (decState->c[0].ref1->state == 1)
+                    refsReady = 1;
         } else {
-            if ((m->c[1].ref0->state == 1 && m->c[2].ref0->state == 1) || m->f1A4 != 0) {
-                if (m->c[1].ref1->state == 1)
-                    if (m->c[2].ref1->state == 1)
-                        r = 1;
+            if ((decState->c[1].ref0->state == 1 && decState->c[2].ref0->state == 1) || decState->f1A4 != 0) {
+                if (decState->c[1].ref1->state == 1)
+                    if (decState->c[2].ref1->state == 1)
+                        refsReady = 1;
             }
         }
     } else {
-        if (a1 == 0) {
-            struct F7F20 *t;
-            t = m->c[0].ref0; m->c[0].ref0 = m->c[0].ref1; m->c[0].ref1 = t;
-            t = m->c[1].ref0; m->c[1].ref0 = m->c[1].ref1; m->c[1].ref1 = t;
-            t = m->c[2].ref0; m->c[2].ref0 = m->c[2].ref1; m->c[2].ref1 = t;
+        if (secondField == 0) {
+            struct F7F20 *swapTmp;
+            swapTmp = decState->c[0].ref0; decState->c[0].ref0 = decState->c[0].ref1; decState->c[0].ref1 = swapTmp;
+            swapTmp = decState->c[1].ref0; decState->c[1].ref0 = decState->c[1].ref1; decState->c[1].ref1 = swapTmp;
+            swapTmp = decState->c[2].ref0; decState->c[2].ref0 = decState->c[2].ref1; decState->c[2].ref1 = swapTmp;
         }
-        m->c[0].cur = m->c[0].ref1;
-        m->c[1].cur = m->c[1].ref1;
-        m->c[2].cur = m->c[2].ref1;
-        if (m->f174 == 3) {
-            if (m->f150 != 2 || m->c[0].ref0->state == 1)
-                r = 1;
+        decState->c[0].cur = decState->c[0].ref1;
+        decState->c[1].cur = decState->c[1].ref1;
+        decState->c[2].cur = decState->c[2].ref1;
+        if (decState->f174 == 3) {
+            if (decState->f150 != 2 || decState->c[0].ref0->state == 1)
+                refsReady = 1;
         } else {
-            x = m->f174 == 1 ? m->c[2].ref1 : m->c[1].ref1;
-            if (m->f150 != 2 || (a1 != 0 && x->state == 1) || (m->c[1].ref0->state == 1 && m->c[2].ref0->state == 1))
-                r = 1;
+            x = decState->f174 == 1 ? decState->c[2].ref1 : decState->c[1].ref1;
+            if (decState->f150 != 2 || (secondField != 0 && x->state == 1) || (decState->c[1].ref0->state == 1 && decState->c[2].ref0->state == 1))
+                refsReady = 1;
         }
     }
-    switch (m->f174) {
+    switch (decState->f174) {
     case 3:
-        f = m->c[0].cur;
+        curRec = decState->c[0].cur;
         break;
     case 1:
-        f = m->c[1].cur;
+        curRec = decState->c[1].cur;
         break;
     case 2:
-        f = m->c[2].cur;
+        curRec = decState->c[2].cur;
         break;
     }
-    f->state = 0;
-    f->t18 = m->t828;
-    f->f2C = m->f150;
-    f->t20 = m->t830;
-    f->f30 = m->f174;
-    f->f34 = m->f13C;
-    f->f38 = m->f188;
-    f->f3C = m->f178;
-    f->f40 = m->f184;
-    f->f44 = m->f18C;
-    f->f48 = m->f190;
-    f->f4C = m->f194;
-    f->f50 = m->f198;
-    f->f54 = m->f19C;
-    f->f58 = m->f1A0;
-    f->f5C = m->f148;
-    f->f60 = m->f14C;
-    return r;
+    curRec->state = 0;
+    curRec->t18 = decState->t828;
+    curRec->f2C = decState->f150;
+    curRec->t20 = decState->t830;
+    curRec->f30 = decState->f174;
+    curRec->f34 = decState->f13C;
+    curRec->f38 = decState->f188;
+    curRec->f3C = decState->f178;
+    curRec->f40 = decState->f184;
+    curRec->f44 = decState->f18C;
+    curRec->f48 = decState->f190;
+    curRec->f4C = decState->f194;
+    curRec->f50 = decState->f198;
+    curRec->f54 = decState->f19C;
+    curRec->f58 = decState->f1A0;
+    curRec->f5C = decState->f148;
+    curRec->f60 = decState->f14C;
+    return refsReady;
 }
 #endif
 
@@ -8539,23 +8539,23 @@ extern char D_004980A8[];
  * With a RAW8 width/height given (+0xDC / +0xE0) both must cover the picture; otherwise the macroblock count (+0xE4)
  * must cover its width times height in macroblocks. Reports "Too small buffer size for %dx%d picture" when it does not.
  *
- * @param p  the decoder's internal state
- * @param q  the picture-size record (see func_00403600)
+ * @param decState  the decoder's internal state
+ * @param picSize  the picture-size record (see func_00403600)
  * @return 1 when it fits, else 0
  */
-int func_004081D8(int *p, int *q) {
+int func_004081D8(int *decState, int *picSize) {
     char buf[256];
-    int r;
-    int n = p[0xE0 / 4];
+    int fits;
+    int n = decState[0xE0 / 4];
     if (n != 0)
-        r = p[220 / 4] >= q[1] && n >= q[2];
+        fits = decState[220 / 4] >= picSize[1] && n >= picSize[2];
     else
-        r = p[228 / 4] >= q[3] * q[4];
-    if (r == 0) {
-        sprintf(buf, D_004980A8, q[1], q[2]);
-        func_004034A8(p, (int)buf);
+        fits = decState[228 / 4] >= picSize[3] * picSize[4];
+    if (fits == 0) {
+        sprintf(buf, D_004980A8, picSize[1], picSize[2]);
+        func_004034A8(decState, (int)buf);
     }
-    return r;
+    return fits;
 }
 #endif
 
@@ -8573,33 +8573,33 @@ extern void EIntr(void);
  * scratchpad (channel 9) and on to the output (+0xD8, channel 8), one row per DMA pair, waiting for each. With a RAW8
  * width (+0xE0) the output rows are strided; field pictures copy two interleaved passes.
  *
- * @param s  the decoder's internal state
- * @param p  the picture record
+ * @param decState  the decoder's internal state
+ * @param picRecord  the picture record
  */
-void func_00408278(struct S8278 *s, unsigned *p) {
+void func_00408278(struct S8278 *decState, unsigned *picRecord) {
     int n;
-    unsigned src = p[0] & 0x0FFFFFFF;
-    unsigned dst = s->fD8 & 0x0FFFFFFF;
+    unsigned src = picRecord[0] & 0x0FFFFFFF;
+    unsigned dst = decState->fD8 & 0x0FFFFFFF;
     int size, stride, qwc;
     int i, j, st;
-    unsigned d;
-    if (s->f174 == 3 || s->fE0 == 0) {
-        size = p[4] * 0x180;
+    unsigned dstRow;
+    if (decState->f174 == 3 || decState->fE0 == 0) {
+        size = picRecord[4] * 0x180;
         qwc = size >> 4;
-        if (s->fE0 != 0)
-            stride = (s->fE0 >> 4) * 0x180;
+        if (decState->fE0 != 0)
+            stride = (decState->fE0 >> 4) * 0x180;
         else
             stride = size;
         n = 1;
     } else {
-        stride = (s->fE0 >> 4) * 0xC0;
-        size = ((int)p[4] >> 1) * 0x180;
+        stride = (decState->fE0 >> 4) * 0xC0;
+        size = ((int)picRecord[4] >> 1) * 0x180;
         n = 2;
         qwc = size >> 4;
     }
     for (j = 0; j < n; j++) {
-        d = dst;
-        for (i = 0; i < (int)p[3]; i++) {
+        dstRow = dst;
+        for (i = 0; i < (int)picRecord[3]; i++) {
             st = DIntr();
             *(volatile int *)0x1000D480 = 0;
             *(volatile int *)0x1000D410 = src;
@@ -8611,7 +8611,7 @@ void func_00408278(struct S8278 *s, unsigned *p) {
                 ;
             st = DIntr();
             *(volatile int *)0x1000D080 = 0;
-            *(volatile int *)0x1000D010 = d;
+            *(volatile int *)0x1000D010 = dstRow;
             *(volatile int *)0x1000D020 = qwc;
             *(volatile int *)0x1000D000 = 0x100;
             if (st)
@@ -8620,10 +8620,10 @@ void func_00408278(struct S8278 *s, unsigned *p) {
                 ;
             while (*(volatile int *)0x1000D020 != 0)
                 ;
-            d += stride;
+            dstRow += stride;
             src += size;
         }
-        dst += s->fE4 * 0xC0;
+        dst += decState->fE4 * 0xC0;
     }
 }
 #endif
@@ -8663,52 +8663,52 @@ extern long mul85(long, long) __asm__("func_004114D0");
  * progressive_sequence, progressive_frame, top_field_first, repeat_first_field, picture structure and type. The C still
  * differs from retail in one instruction's position (97.98%).
  *
- * @param a  the decoder's internal state
- * @param b  the picture record
- * @param o1  receives the presentation stamp
- * @param o2  receives the decode stamp
- * @param o3  receives the flags word
+ * @param decState  the decoder's internal state
+ * @param picRecord  the picture record
+ * @param ptsOut  receives the presentation stamp
+ * @param dtsOut  receives the decode stamp
+ * @param flagsOut  receives the flags word
  * @return the flags word
  */
-long func_00408530(struct S85 *a, struct B85 *b, long *o1, long *o2, long *o3) {
-    long r;
-    long v;
+long func_00408530(struct S85 *decState, struct B85 *picRecord, long *ptsOut, long *dtsOut, long *flagsOut) {
+    long picFlags;
+    long picPts;
     int x;
-    int e;
-    int s;
-    if (a->f70 != 0) {
-        v = b->f18;
-        if (v >= 0) {
-            *o1 = v;
+    int roundCount;
+    int lastPts;
+    if (decState->f70 != 0) {
+        picPts = picRecord->f18;
+        if (picPts >= 0) {
+            *ptsOut = picPts;
         } else {
-            s = a->f80;
-            if (s < 0) {
-                *o1 = v;
+            lastPts = decState->f80;
+            if (lastPts < 0) {
+                *ptsOut = picPts;
             } else {
-                long t;
+                long bothOdd;
                 int y;
-                x = a->f88;
+                x = decState->f88;
 
-                t = mul85(x & 1, a->f78 & 1);
-                e = a->f90;
-                y = mul85(t, e & 1);
-                *o1 = s + ((int)(mul85(a->f78, x) >> 1) + y);
-                if (mul85(x & 1, a->f78 & 1))
-                    a->f90 = e + 1;
+                bothOdd = mul85(x & 1, decState->f78 & 1);
+                roundCount = decState->f90;
+                y = mul85(bothOdd, roundCount & 1);
+                *ptsOut = lastPts + ((int)(mul85(decState->f78, x) >> 1) + y);
+                if (mul85(x & 1, decState->f78 & 1))
+                    decState->f90 = roundCount + 1;
             }
         }
     } else {
-        *o1 = b->f18;
+        *ptsOut = picRecord->f18;
     }
-    if (a->fF8 == 2 && a->fF0 >= 0) {
-        *o1 = a->fF0;
-        a->fF8 = 0;
-        a->fF0 = -1;
+    if (decState->fF8 == 2 && decState->fF0 >= 0) {
+        *ptsOut = decState->fF0;
+        decState->fF8 = 0;
+        decState->fF0 = -1;
     }
-    *o2 = b->f20;
-    r = (long)b->f34 << 8 | (long)b->f38 << 7 | (long)b->f3c << 6 | (long)b->f40 << 5 | (long)b->f30 << 3 | (long)b->f2c;
-    *o3 = r;
-    return r;
+    *dtsOut = picRecord->f20;
+    picFlags = (long)picRecord->f34 << 8 | (long)picRecord->f38 << 7 | (long)picRecord->f3c << 6 | (long)picRecord->f40 << 5 | (long)picRecord->f30 << 3 | (long)picRecord->f2c;
+    *flagsOut = picFlags;
+    return picFlags;
 }
 #endif
 
@@ -8733,30 +8733,30 @@ void d86C0(struct S86C0 *a, struct B86C0 *b, int c) __asm__("func_004086C0");
  * and when the buffer is big enough (func_004081D8) and the record is decoded converts it (func_00409088, colour
  * conversion on) or copies it (func_00408278), then marks the output (func_00408508).
  *
- * @param a  the decoder's internal state
- * @param b  the picture record
- * @param c  the picture counter (unused)
+ * @param decState  the decoder's internal state
+ * @param picRecord  the picture record
+ * @param picNumber  the picture counter (unused)
  */
-void d86C0(struct S86C0 *a, struct B86C0 *b, int c) {
-    struct R86C0 *r = (struct R86C0 *)a->f858;
-    int m;
-    q86_8530(a, b, &r->f10, &r->f18, &r->f20);
-    r = (struct R86C0 *)a->f858;
-    a->f80 = r->f10;
-    m = r->f20 >> 5;
-    a->f88 = D_004532E8[m & 0xF];
-    a->fCC = b->f5C;
-    a->fD0 = b->f60;
-    a->fB4 = b->f44;
-    a->fB8 = b->f48;
-    a->fBC = b->f4C;
-    a->fC0 = b->f50;
-    a->fC4 = b->f54;
-    a->fC8 = b->f58;
-    if (q86_81D8(a, b) && b->f28 == 1) {
-        if (a->fB0 != 0) q86_9088(a, b);
-        else q86_8278(a, b);
-        q86_8508(a);
+void d86C0(struct S86C0 *decState, struct B86C0 *picRecord, int picNumber) {
+    struct R86C0 *handle = (struct R86C0 *)decState->f858;
+    int flagBits;
+    q86_8530(decState, picRecord, &handle->f10, &handle->f18, &handle->f20);
+    handle = (struct R86C0 *)decState->f858;
+    decState->f80 = handle->f10;
+    flagBits = handle->f20 >> 5;
+    decState->f88 = D_004532E8[flagBits & 0xF];
+    decState->fCC = picRecord->f5C;
+    decState->fD0 = picRecord->f60;
+    decState->fB4 = picRecord->f44;
+    decState->fB8 = picRecord->f48;
+    decState->fBC = picRecord->f4C;
+    decState->fC0 = picRecord->f50;
+    decState->fC4 = picRecord->f54;
+    decState->fC8 = picRecord->f58;
+    if (q86_81D8(decState, picRecord) && picRecord->f28 == 1) {
+        if (decState->fB0 != 0) q86_9088(decState, picRecord);
+        else q86_8278(decState, picRecord);
+        q86_8508(decState);
     }
 }
 #endif
@@ -8785,47 +8785,47 @@ void d87D0(struct S87D0 *a, struct B87D0 *b, struct B87D0 *c) __asm__("func_0040
  * enough and both fields are decoded, converts or copies the pair with the record's row count doubled for the call,
  * then marks the output.
  *
- * @param a  the decoder's internal state
- * @param b  the first field's record
- * @param c  the second field's record
+ * @param decState  the decoder's internal state
+ * @param fieldRec1  the first field's record
+ * @param fieldRec2  the second field's record
  */
-void d87D0(struct S87D0 *a, struct B87D0 *b, struct B87D0 *c) {
-    struct B87D0 *t, *u;
-    struct R87D0 *r, *r2, *r3;
-    int m = 0;
-    if (a->f174 == 2) {
-        t = b;
-        u = c;
-        m = 0x40;
+void d87D0(struct S87D0 *decState, struct B87D0 *fieldRec1, struct B87D0 *fieldRec2) {
+    struct B87D0 *firstField, *secondField;
+    struct R87D0 *mpegHandle, *mpegHandle2, *mpegHandle3;
+    int topFirstFlag = 0;
+    if (decState->f174 == 2) {
+        firstField = fieldRec1;
+        secondField = fieldRec2;
+        topFirstFlag = 0x40;
     } else {
-        t = c;
-        u = b;
+        firstField = fieldRec2;
+        secondField = fieldRec1;
     }
-    r = (struct R87D0 *)a->f858;
-    q87_8530(a, t, &r->f10, &r->f18, &r->f20);
-    r2 = (struct R87D0 *)a->f858;
-    a->f80 = r2->f10;
-    a->f88.l = 1;
-    q87_8530(a, u, &r2->f28, &r2->f30, &r2->f38);
-    r3 = (struct R87D0 *)a->f858;
-    a->f80 = r3->f28;
-    a->f88.l = 1;
-    r3->f20 |= m;
-    r3->f38 |= m;
-    a->fCC = t->f5C;
-    a->fD0 = t->f60;
-    a->fB4 = t->f44;
-    a->fB8 = u->f48;
-    a->fC0 = t->f50;
-    a->fC4 = u->f54;
-    if (q87_81D8(a, b) && b->f28 == 1 && c->f28 == 1) {
-        b->f10 *= 2;
-        if (a->fB0 != 0)
-            q87_9088(a, b);
+    mpegHandle = (struct R87D0 *)decState->f858;
+    q87_8530(decState, firstField, &mpegHandle->f10, &mpegHandle->f18, &mpegHandle->f20);
+    mpegHandle2 = (struct R87D0 *)decState->f858;
+    decState->f80 = mpegHandle2->f10;
+    decState->f88.l = 1;
+    q87_8530(decState, secondField, &mpegHandle2->f28, &mpegHandle2->f30, &mpegHandle2->f38);
+    mpegHandle3 = (struct R87D0 *)decState->f858;
+    decState->f80 = mpegHandle3->f28;
+    decState->f88.l = 1;
+    mpegHandle3->f20 |= topFirstFlag;
+    mpegHandle3->f38 |= topFirstFlag;
+    decState->fCC = firstField->f5C;
+    decState->fD0 = firstField->f60;
+    decState->fB4 = firstField->f44;
+    decState->fB8 = secondField->f48;
+    decState->fC0 = firstField->f50;
+    decState->fC4 = secondField->f54;
+    if (q87_81D8(decState, fieldRec1) && fieldRec1->f28 == 1 && fieldRec2->f28 == 1) {
+        fieldRec1->f10 *= 2;
+        if (decState->fB0 != 0)
+            q87_9088(decState, fieldRec1);
         else
-            q87_8278(a, b);
-        b->f10 >>= 1;
-        q87_8508(a);
+            q87_8278(decState, fieldRec1);
+        fieldRec1->f10 >>= 1;
+        q87_8508(decState);
     }
 }
 #endif
@@ -8846,31 +8846,31 @@ void q8988(struct P_8988 *p) __asm__("func_00408988");
  * area D_00526FC0, the last one ending the chain, then with interrupts off sets the scratchpad address from the record
  * and starts the channel. Called by func_00403E00.
  *
- * @param p  the decoder's internal state
+ * @param decState  the decoder's internal state
  */
-void q8988(struct P_8988 *p) {
+void q8988(struct P_8988 *decState) {
     int i = 0;
-    unsigned long long *t = (unsigned long long *)(((unsigned)D_00526FC0 & 0x0FFFFFFF) | 0x20000000);
-    int n = p->e[p->idx].cnt;
-    int s;
+    unsigned long long *tag = (unsigned long long *)(((unsigned)D_00526FC0 & 0x0FFFFFFF) | 0x20000000);
+    int n = decState->e[decState->idx].cnt;
+    int intrEnabled;
     if (n > 0) {
         do {
-            unsigned a = p->e[p->idx].a[i] & 0x0FFFFFFF;
-            unsigned b = p->e[p->idx].b[i] & 0x0FFFFFFF;
+            unsigned firstAddr = decState->e[decState->idx].a[i] & 0x0FFFFFFF;
+            unsigned secondAddr = decState->e[decState->idx].b[i] & 0x0FFFFFFF;
             int last = (i == n - 1) ? 0 : 3;
             i++;
-            t[0] = ((unsigned long long)a << 32) | 0x30000030;
-            t[2] = ((unsigned long long)b << 32) | ((unsigned long long)last << 28) | 0x30;
-            t += 4;
+            tag[0] = ((unsigned long long)firstAddr << 32) | 0x30000030;
+            tag[2] = ((unsigned long long)secondAddr << 32) | ((unsigned long long)last << 28) | 0x30;
+            tag += 4;
         } while (i < n);
     }
-    s = q8988_C078();
+    intrEnabled = q8988_C078();
     __asm__ volatile("sync");
-    *(volatile int *)0x1000D480 = p->e[p->idx].f0;
+    *(volatile int *)0x1000D480 = decState->e[decState->idx].f0;
     *(volatile int *)0x1000D430 = (int)D_00526FC0;
     *(volatile int *)0x1000D420 = 0;
     *(volatile int *)0x1000D400 = 261;
-    if (s)
+    if (intrEnabled)
         q8988_C0C0();
 }
 #endif
@@ -9005,23 +9005,23 @@ void q8DF0(int *p, int addr, int size) __asm__("func_00408DF0");
  * the first chunk (0xFFC0 quadwords, CSC 0x3FF), raises callback 4 and spins until every chunk is done. A stop reports
  * "CSC handler error". Then waits for the IPU, disables and removes the handler.
  *
- * @param p  the decoder's internal state
+ * @param decState  the decoder's internal state
  * @param addr  the RGB32 output
  * @param size  the number of macroblocks
  */
-void q8DF0(int *p, int addr, int size) {
+void q8DF0(int *decState, int addr, int size) {
 
     int sp[8];
-    struct S408CA8 s; /* func_00408CA8's state: it counts the chunks and sets stop */
-    int h;
+    struct S408CA8 xferState; /* func_00408CA8's state: it counts the chunks and sets stop */
+    int handlerId;
     int i;
-    s.n = size / 1023 + 1;
-    s.rest = size;
-    s.addr = (addr + 0xFFC00) & 0x0FFFFFFF;
-    s.cnt = s.stop = 0;
+    xferState.n = size / 1023 + 1;
+    xferState.rest = size;
+    xferState.addr = (addr + 0xFFC00) & 0x0FFFFFFF;
+    xferState.cnt = xferState.stop = 0;
     while (*(volatile int *)0x10002010 < 0)
         ;
-    h = q8DF0_AddH(3, func_00408CA8, 0, &s);
+    handlerId = q8DF0_AddH(3, func_00408CA8, 0, &xferState);
     *(volatile int *)0x1000E010 = 8;
     q8DF0_En(3);
     i = q8DF0_C078();
@@ -9037,15 +9037,15 @@ void q8DF0(int *p, int addr, int size) {
         q8DF0_C0C0();
     *(volatile int *)0x10002000 = 0x700003FF;
     sp[0] = 4;
-    q8DF0_2C30(*(int **)((char *)p + 0x858), sp);
-    while (s.cnt < s.n)
+    q8DF0_2C30(*(int **)((char *)decState + 0x858), sp);
+    while (xferState.cnt < xferState.n)
         ;
-    if (s.stop)
-        q8DF0_34A8(p, (int)D_004980D8);
+    if (xferState.stop)
+        q8DF0_34A8(decState, (int)D_004980D8);
     while (*(volatile int *)0x10002010 < 0)
         ;
     q8DF0_Dis(3);
-    q8DF0_RemH(3, h);
+    q8DF0_RemH(3, handlerId);
 }
 #endif
 
@@ -9059,30 +9059,30 @@ struct S408FB0 { unsigned f0; int f4; };
  * Acknowledges the channel's interrupt (D_STAT bit 4). With quadwords left it starts the next chunk of at most 0xFFFF
  * from the saved address and advances it; returns with sync and ei. func_00409088 installs it.
  *
- * @param a  the DMA channel (unused)
- * @param s  the transfer state: quadwords left, next address
+ * @param channel  the DMA channel (unused)
+ * @param xferState  the transfer state: quadwords left, next address
  * @return 1 when nothing was left, else 0
  */
-int func_00408FB0(int a, struct S408FB0 *s) {
+int func_00408FB0(int channel, struct S408FB0 *xferState) {
     unsigned n;
     *(volatile int *)0x1000E010 = 0x10;
-    n = s->f0;
+    n = xferState->f0;
     if (n == 0) {
         SYNC_0810();
         EI_0810();
         return 1;
     }
     if (n > 0xFFFF) {
-        *(volatile int *)0x1000B410 = s->f4;
+        *(volatile int *)0x1000B410 = xferState->f4;
         *(volatile int *)0x1000B420 = 0xFFFF;
         *(volatile int *)0x1000B400 = 257;
-        s->f4 = (s->f4 + 0xFFFF0) & 0xFFFFFFF;
-        s->f0 = s->f0 - 0xFFFF;
+        xferState->f4 = (xferState->f4 + 0xFFFF0) & 0xFFFFFFF;
+        xferState->f0 = xferState->f0 - 0xFFFF;
     } else {
-        *(volatile int *)0x1000B410 = s->f4;
-        *(volatile int *)0x1000B420 = s->f0;
+        *(volatile int *)0x1000B410 = xferState->f4;
+        *(volatile int *)0x1000B420 = xferState->f0;
         *(volatile int *)0x1000B400 = 257;
-        s->f0 = 0;
+        xferState->f0 = 0;
     }
     SYNC_0810();
     EI_0810();
@@ -9255,7 +9255,7 @@ void q94E8(int *p) __asm__("func_004094E8");
  */
 void q94E8(int *savedRegs) {
     unsigned ipuBp = savedRegs[7];
-    int e = ipuBp & 0x7F;
+    int bitPointer = ipuBp & 0x7F;
     int n = ((ipuBp >> 16) & 3) + ((ipuBp >> 8) & 0xF);
     int toIpuMadr = savedRegs[0] - (n << 4);
     int toIpuQwc = savedRegs[2] + n;
@@ -9266,7 +9266,7 @@ void q94E8(int *savedRegs) {
     }
     while (*(volatile int *)0x10002010 < 0)
         ;
-    *(volatile int *)0x10002000 = e;
+    *(volatile int *)0x10002000 = bitPointer;
     while (*(volatile int *)0x10002010 < 0)
         ;
     if (toIpuMadr != 0 && toIpuQwc != 0) {
@@ -9414,18 +9414,18 @@ extern void Q_6408(int) __asm__("func_00426408");
  */
 // NOTE: the nops in retail's two wait loops are the assembler's R5900 short-loop padding, so the loops are plain C.
 int func_00409940(void) {
-    int s[6];
-    int r;
+    int semaParam[6];
+    int rpcResult;
     int i;
     if (D_004533C4 < 0) {
-        s[5] = 0;
-        s[2] = 1;
-        s[1] = 1;
-        D_004533C4 = Q_sema(s);
-        s[1] = 1;
-        s[2] = 0;
-        s[5] = 0;
-        D_004533C8 = Q_sema(s);
+        semaParam[5] = 0;
+        semaParam[2] = 1;
+        semaParam[1] = 1;
+        D_004533C4 = Q_sema(semaParam);
+        semaParam[1] = 1;
+        semaParam[2] = 0;
+        semaParam[5] = 0;
+        D_004533C8 = Q_sema(semaParam);
     }
     Q_A360(0, 0, 0);
     WaitSema(D_004533C4);
@@ -9443,11 +9443,11 @@ int func_00409940(void) {
             i--;
         } while (i != 0);
     }
-    r = sceSifCallRpc(&D_005271C0, 0xFE, 0, &D_00527240, 48, D_00528780, 12, 0, 0);
+    rpcResult = sceSifCallRpc(&D_005271C0, 0xFE, 0, &D_00527240, 48, D_00528780, 12, 0, 0);
     Q_sig(D_004533C4);
-    if (r < 0) {
+    if (rpcResult < 0) {
         D_005271C0.server = 0;
-        return r - 100;
+        return rpcResult - 100;
     }
     if (D_00528780[1] < 522) {
         Q_log(D_00498108);
@@ -9491,16 +9491,16 @@ INCLUDE_ASM("seg/seg_2FE810", func_00409B60);
 /**
  * Returns the memory-card client block and the addresses of its result and pending-call words.
  *
- * Stores the address of the RPC result buffer D_00528780 in *@p a and of the pending-call code D_004533C0 in *@p b, and
+ * Stores the address of the RPC result buffer D_00528780 in *@p recvBufOut and of the pending-call code D_004533C0 in *@p pendingCmdOut, and
  * copies the lock semaphore D_004533C4 into D_00528780[15]. No caller in the source.
  *
- * @param a  receives the result buffer's address
- * @param b  receives the pending-call word's address
+ * @param recvBufOut  receives the result buffer's address
+ * @param pendingCmdOut  receives the pending-call word's address
  * @return &D_005271C0, the client block
  */
-sSifClient *func_00409B60(int *a, int *b) {
-    *a = (int)D_00528780;
-    *b = (int)&D_004533C0;
+sSifClient *func_00409B60(int *recvBufOut, int *pendingCmdOut) {
+    *recvBufOut = (int)D_00528780;
+    *pendingCmdOut = (int)&D_004533C0;
     D_00528780[15] = D_004533C4;
     return &D_005271C0;
 }
@@ -9514,27 +9514,27 @@ extern void SignalSema(int);
 /**
  * Starts memory-card call 20 with one argument (asynchronous).
  *
- * Puts @p a into the origin field of the command block D_00527240. Fails with -100 when the library is not bound
+ * Puts @p callArg into the origin field of the command block D_00527240. Fails with -100 when the library is not bound
  * (D_005271C0.server is 0) and -200 when another call still holds the lock semaphore D_004533C4 (PollSema). On success
  * it records 20 as the pending call (D_004533C0) and keeps the lock until func_0040A360 sees the call finish; when
  * sceSifCallRpc fails it releases the lock.
  *
- * @param a  the call's argument
+ * @param callArg  the call's argument
  * @return 0 when the call started, -100 / -200 as above, otherwise sceSifCallRpc's error
  */
-int func_00409B90(int a) {
-    int r;
+int func_00409B90(int callArg) {
+    int rpcResult;
     if (D_005271C0.server == 0)
         return -100;
     if (PollSema(D_004533C4) < 0)
         return -200;
-    D_00527240.origin = a;
-    r = sceSifCallRpc(&D_005271C0, 20, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
-    if (r == 0)
+    D_00527240.origin = callArg;
+    rpcResult = sceSifCallRpc(&D_005271C0, 20, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
+    if (rpcResult == 0)
         D_004533C0 = 20;
     else
         SignalSema(D_004533C4);
-    return r;
+    return rpcResult;
 }
 #endif
 
@@ -9546,24 +9546,24 @@ extern void SignalSema(int);
 /**
  * Runs memory-card call 21 for a port synchronously and returns the server's result word.
  *
- * Puts @p a into the port field of D_00527240 and waits for the call (mode 0). Fails with -100 when the library is not
+ * Puts @p cardPort into the port field of D_00527240 and waits for the call (mode 0). Fails with -100 when the library is not
  * bound (D_005271C0.server is 0) and -200 when another call still holds the lock semaphore D_004533C4 (PollSema).
  * Releases the lock afterwards in both cases.
  *
- * @param a  the memory-card port
+ * @param cardPort  the memory-card port
  * @return D_00528780[0], or -100 / -200 / sceSifCallRpc's error
  */
-int func_00409C48(int a) {
-    int r;
+int func_00409C48(int cardPort) {
+    int rpcResult;
     if (D_005271C0.server == 0)
         return -100;
     if (PollSema(D_004533C4) < 0)
         return -200;
-    D_00527240.port = a;
-    r = sceSifCallRpc(&D_005271C0, 21, 0, &D_00527240, 48, D_00528780, 4, 0, 0);
-    if (r != 0) {
+    D_00527240.port = cardPort;
+    rpcResult = sceSifCallRpc(&D_005271C0, 21, 0, &D_00527240, 48, D_00528780, 4, 0, 0);
+    if (rpcResult != 0) {
         SignalSema(D_004533C4);
-        return r;
+        return rpcResult;
     }
     SignalSema(D_004533C4);
     return D_00528780[0];
@@ -9588,34 +9588,34 @@ extern char *strncpy(char *, const char *, int);
  *
  * cPS2MemCard's callers pass mode 515 (0x203) to write and 1 to read; func_00409E38 passes 0x40.
  *
- * @param a  the memory-card port
- * @param b  the slot
+ * @param cardPort  the memory-card port
+ * @param cardSlot  the slot
  * @param s_  the file path
- * @param c  the open mode bits
+ * @param openMode  the open mode bits
  * @return 0 when the call started, -100 / -200 / -210 as above, otherwise sceSifCallRpc's error
  */
-int func_00409D10(int a, int b, int s_, int c) {
-    char *s = (char *)s_;
-    int r;
+int func_00409D10(int cardPort, int cardSlot, int s_, int openMode) {
+    char *fileName = (char *)s_;
+    int rpcResult;
     if (D_005271C0.server == 0)
         return -100;
     if (PollSema(D_004533C4) < 0)
         return -200;
-    if (s == 0 || s[0] == 0) {
+    if (fileName == 0 || fileName[0] == 0) {
         SignalSema(D_004533C4);
         return -210;
     }
-    strncpy(D_00527270.name, s, 0x3FF);
-    D_00527270.port = a;
-    D_00527270.mode = c;
-    D_00527270.slot = b;
+    strncpy(D_00527270.name, fileName, 0x3FF);
+    D_00527270.port = cardPort;
+    D_00527270.mode = openMode;
+    D_00527270.slot = cardSlot;
     D_00527270.name[0x3FF] = 0;
-    r = sceSifCallRpc(&D_005271C0, 2, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
-    if (r == 0)
+    rpcResult = sceSifCallRpc(&D_005271C0, 2, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
+    if (rpcResult == 0)
         D_004533C0 = 2;
     else
         SignalSema(D_004533C4);
-    return r;
+    return rpcResult;
 }
 #endif
 
@@ -9629,17 +9629,17 @@ extern int func_00409D10(int, int, int, int);
  * Calls func_00409D10 with mode 0x40 and, when that started, changes the pending-call code D_004533C0 from 2 to 11 so
  * func_0040A360 reports it as a directory creation. cPS2MemCard calls it to make the save directory.
  *
- * @param a  the memory-card port
- * @param b  the slot
- * @param c  the directory path
+ * @param cardPort  the memory-card port
+ * @param cardSlot  the slot
+ * @param dirPath  the directory path
  * @return func_00409D10's result
  */
-int func_00409E38(int a, int b, int c) {
-    int r = func_00409D10(a, b, c, 0x40);
-    if (r == 0) {
+int func_00409E38(int cardPort, int cardSlot, int dirPath) {
+    int rpcResult = func_00409D10(cardPort, cardSlot, dirPath, 0x40);
+    if (rpcResult == 0) {
         D_004533C0 = 11;
     }
-    return r;
+    return rpcResult;
 }
 #endif
 
@@ -9651,27 +9651,27 @@ extern void SignalSema(int);
 /**
  * Starts closing a memory-card file (call 3, asynchronous).
  *
- * Puts @p a into the fd field of D_00527240. Fails with -100 when the library is not bound (D_005271C0.server is 0) and
+ * Puts @p fileDesc into the fd field of D_00527240. Fails with -100 when the library is not bound (D_005271C0.server is 0) and
  * -200 when another call still holds the lock semaphore D_004533C4 (PollSema). On success it records 3 as the pending
  * call (D_004533C0) and keeps the lock until func_0040A360 sees the call finish; when sceSifCallRpc fails it releases
  * the lock.
  *
- * @param a  the file descriptor
+ * @param fileDesc  the file descriptor
  * @return 0 when the call started, -100 / -200 as above, otherwise sceSifCallRpc's error
  */
-int func_00409E70(int a) {
-    int r;
+int func_00409E70(int fileDesc) {
+    int rpcResult;
     if (D_005271C0.server == 0)
         return -100;
     if (PollSema(D_004533C4) < 0)
         return -200;
-    D_00527240.fd = a;
-    r = sceSifCallRpc(&D_005271C0, 3, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
-    if (r == 0)
+    D_00527240.fd = fileDesc;
+    rpcResult = sceSifCallRpc(&D_005271C0, 3, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
+    if (rpcResult == 0)
         D_004533C0 = 3;
     else
         SignalSema(D_004533C4);
-    return r;
+    return rpcResult;
 }
 #endif
 
@@ -9688,26 +9688,26 @@ extern void SignalSema(int);
  * call (D_004533C0) and keeps the lock until func_0040A360 sees the call finish; when sceSifCallRpc fails it releases
  * the lock.
  *
- * @param a  the file descriptor
- * @param b  the offset
- * @param c  where the offset counts from
+ * @param fileDesc  the file descriptor
+ * @param seekOffset  the offset
+ * @param seekOrigin  where the offset counts from
  * @return 0 when the call started, -100 / -200 as above, otherwise sceSifCallRpc's error
  */
-int func_00409F28(int a, int b, int c) {
-    int r;
+int func_00409F28(int fileDesc, int seekOffset, int seekOrigin) {
+    int rpcResult;
     if (D_005271C0.server == 0)
         return -100;
     if (PollSema(D_004533C4) < 0)
         return -200;
-    D_00527240.fd = a;
-    D_00527240.offset = b;
-    D_00527240.origin = c;
-    r = sceSifCallRpc(&D_005271C0, 4, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
-    if (r == 0)
+    D_00527240.fd = fileDesc;
+    D_00527240.offset = seekOffset;
+    D_00527240.origin = seekOrigin;
+    rpcResult = sceSifCallRpc(&D_005271C0, 4, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
+    if (rpcResult == 0)
         D_004533C0 = 4;
     else
         SignalSema(D_004533C4);
-    return r;
+    return rpcResult;
 }
 #endif
 
@@ -9718,25 +9718,25 @@ struct S0A000 { int n0; int n1; char *d0; char *d1; char b0[0x40]; char b1[0x40]
 /**
  * End callback of the memory-card read: copies the unaligned head and tail bytes to the destination.
  *
- * Reads the 0xC0-byte block @p a through the uncached mirror (| 0x20000000): two counts, two destinations and two
+ * Reads the 0xC0-byte block @p fixupBuf through the uncached mirror (| 0x20000000): two counts, two destinations and two
  * 64-byte buffers. Copies the first count of bytes from the first buffer to the first destination and the second count
  * from the second buffer to the second destination. func_0040A090 registers it with D_005276C0.
  *
- * @param a  the block the server filled (D_005276C0)
+ * @param fixupBuf  the block the server filled (D_005276C0)
  */
-void func_0040A000(void *a) {
-    struct S0A000 *s = (struct S0A000 *)((unsigned)a | 0x20000000);
-    char *d;
+void func_0040A000(void *fixupBuf) {
+    struct S0A000 *fixupInfo = (struct S0A000 *)((unsigned)fixupBuf | 0x20000000);
+    char *destByte;
     int i;
-    if (s->n0 != 0) {
-        d = s->d0;
-        for (i = 0; i < s->n0; i++)
-            *d++ = s->b0[i];
+    if (fixupInfo->n0 != 0) {
+        destByte = fixupInfo->d0;
+        for (i = 0; i < fixupInfo->n0; i++)
+            *destByte++ = fixupInfo->b0[i];
     }
-    if (s->n1 != 0) {
-        d = s->d1;
-        for (i = 0; i < s->n1; i++)
-            *d++ = s->b1[i];
+    if (fixupInfo->n1 != 0) {
+        destByte = fixupInfo->d1;
+        for (i = 0; i < fixupInfo->n1; i++)
+            *destByte++ = fixupInfo->b1[i];
     }
 }
 #endif
@@ -9757,29 +9757,29 @@ extern void func_00426358(int, int);
  * the lock until func_0040A360 sees the call finish; when sceSifCallRpc fails it releases the lock. The byte count
  * arrives as func_0040A360's result.
  *
- * @param a  the file descriptor
- * @param b  the destination buffer
- * @param c  the number of bytes
+ * @param fileDesc  the file descriptor
+ * @param readBuf  the destination buffer
+ * @param readSize  the number of bytes
  * @return 0 when the call started, -100 / -200 as above, otherwise sceSifCallRpc's error
  */
-int func_0040A090(int a, int b, int c) {
-    int r;
+int func_0040A090(int fileDesc, int readBuf, int readSize) {
+    int rpcResult;
     if (D_005271C0.server == 0)
         return -100;
     if (PollSema(D_004533C4) < 0)
         return -200;
-    D_00527240.fd = a;
+    D_00527240.fd = fileDesc;
     D_00527240.param = (int)D_005276C0;
-    D_00527240.buffer = b;
-    D_00527240.size = c;
-    func_00426358(b, c);
+    D_00527240.buffer = readBuf;
+    D_00527240.size = readSize;
+    func_00426358(readBuf, readSize);
     func_00426358((int)D_005276C0, 0xC0);
-    r = sceSifCallRpc(&D_005271C0, 5, 1, &D_00527240, 48, D_00528780, 4, func_0040A000, D_005276C0);
-    if (r == 0)
+    rpcResult = sceSifCallRpc(&D_005271C0, 5, 1, &D_00527240, 48, D_00528780, 4, func_0040A000, D_005276C0);
+    if (rpcResult == 0)
         D_004533C0 = 5;
     else
         SignalSema(D_004533C4);
-    return r;
+    return rpcResult;
 }
 #endif
 
@@ -9799,38 +9799,38 @@ extern void FlushCache(int);
  * success it records 6 as the pending call (D_004533C0) and keeps the lock until func_0040A360 sees the call finish;
  * when sceSifCallRpc fails it releases the lock. The byte count arrives as func_0040A360's result.
  *
- * @param a  the file descriptor
- * @param p  the data
+ * @param fileDesc  the file descriptor
+ * @param writeData  the data
  * @param n  the number of bytes
  * @return 0 when the call started, -100 / -200 as above, otherwise sceSifCallRpc's error
  */
-int func_0040A1A8(int a, unsigned char *p, int n) {
-    int r;
+int func_0040A1A8(int fileDesc, unsigned char *writeData, int n) {
+    int rpcResult;
     unsigned i;
     if (D_005271C0.server == 0)
         return -100;
     if (PollSema(D_004533C4) < 0)
         return -200;
-    D_00527240.fd = a;
+    D_00527240.fd = fileDesc;
     if (n < 17) {
         D_00527240.origin = n;
         D_00527240.buffer = D_00527240.size = 0;
     } else {
-        int q = (int)p - 16;
-        int d = (((unsigned)p - 1) & 0xFFFFFFF0u) - q;
-        D_00527240.size = n - d;
-        D_00527240.origin = d;
-        D_00527240.buffer = (int)p + d;
+        int headBase = (int)writeData - 16;
+        int headBytes = (((unsigned)writeData - 1) & 0xFFFFFFF0u) - headBase;
+        D_00527240.size = n - headBytes;
+        D_00527240.origin = headBytes;
+        D_00527240.buffer = (int)writeData + headBytes;
     }
     for (i = 0; i < D_00527240.origin; i++)
-        D_00527240.data[i] = p[i];
+        D_00527240.data[i] = writeData[i];
     FlushCache(0);
-    r = sceSifCallRpc(&D_005271C0, 6, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
-    if (r == 0)
+    rpcResult = sceSifCallRpc(&D_005271C0, 6, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
+    if (rpcResult == 0)
         D_004533C0 = 6;
     else
         SignalSema(D_004533C4);
-    return r;
+    return rpcResult;
 }
 #endif
 
@@ -9864,10 +9864,10 @@ extern void WaitSema(int);
  * Sets an alarm (SetAlarm) that runs func_0040A320 with the sleep semaphore D_004533C8, then waits on that semaphore.
  * func_0040A360 sleeps 60 ticks between polls.
  *
- * @param a  the number of ticks
+ * @param alarmTicks  the number of ticks
  */
-void func_0040A328(unsigned short a) {
-    SetAlarm(a, func_0040A320, D_004533C8);
+void func_0040A328(unsigned short alarmTicks) {
+    SetAlarm(alarmTicks, func_0040A320, D_004533C8);
     WaitSema(D_004533C8);
 }
 #endif
@@ -9882,36 +9882,36 @@ extern void sleep_A328(int) __asm__("func_0040A328");
  *
  * Returns -1 when no call is pending (D_004533C0 is 0). Otherwise checks the RPC (sceSifCheckStatRpc); in mode 0 it
  * polls until the call is done, sleeping 60 ticks between polls (func_0040A328). Stores the pending call's code in *@p
- * p when @p p is set. When the call is done it clears D_004533C0, stores the result word D_00528780[0] in *@p q (when
+ * p when @p cmdOut is set. When the call is done it clears D_004533C0, stores the result word D_00528780[0] in *@p resultOut (when
  * set) and releases the lock D_004533C4. Any mode other than 0 only polls.
  *
  * cPS2MemCard_Update and cPS2MemCard_CleanUp poll it; func_00409940 waits with it before re-initialising.
  *
- * @param a  0 to wait, otherwise poll
- * @param p  receives the call's code, or 0
- * @param q  receives the call's result, or 0
+ * @param syncMode  0 to wait, otherwise poll
+ * @param cmdOut  receives the call's code, or 0
+ * @param resultOut  receives the call's result, or 0
  * @return 1 when the call has finished, 0 while it runs, -1 when nothing is pending
  */
-int func_0040A360(int a, int *p, int *q) {
-    int r;
+int func_0040A360(int syncMode, int *cmdOut, int *resultOut) {
+    int callDone;
     if (D_004533C0 == 0)
         return -1;
-    r = sceSifCheckStatRpc(&D_005271C0);
-    if (a == 0 && r != 0) {
+    callDone = sceSifCheckStatRpc(&D_005271C0);
+    if (syncMode == 0 && callDone != 0) {
         while (sceSifCheckStatRpc(&D_005271C0) != 0)
             sleep_A328(60);
-        r = 0;
+        callDone = 0;
     }
-    r = r == 0;
-    if (p)
-        *p = D_004533C0;
-    if (r) {
+    callDone = callDone == 0;
+    if (cmdOut)
+        *cmdOut = D_004533C0;
+    if (callDone) {
         D_004533C0 = 0;
-        if (q)
-            *q = D_00528780[0];
+        if (resultOut)
+            *resultOut = D_00528780[0];
         SignalSema(D_004533C4);
     }
-    return r;
+    return callDone;
 }
 #endif
 
@@ -9921,19 +9921,19 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040A440);
 /**
  * End callback of func_0040A498: copies the three card-information words to the caller's variables.
  *
- * Reads the server's block @p a through the uncached mirror (| 0x20000000) and stores word 0 in *D_005271E8, word 1 in
+ * Reads the server's block @p recvBlock through the uncached mirror (| 0x20000000) and stores word 0 in *D_005271E8, word 1 in
  * *D_005271EC and word 36 in *D_005271F0, each only when that pointer is set.
  *
- * @param a  the block the server filled (D_005276C0)
+ * @param recvBlock  the block the server filled (D_005276C0)
  */
-void func_0040A440(void *a) {
-    int *p = (int *)((unsigned)a | 0x20000000);
+void func_0040A440(void *recvBlock) {
+    int *infoWords = (int *)((unsigned)recvBlock | 0x20000000);
     if (D_005271E8)
-        *D_005271E8 = p[0];
+        *D_005271E8 = infoWords[0];
     if (D_005271EC)
-        *D_005271EC = p[1];
+        *D_005271EC = infoWords[1];
     if (D_005271F0)
-        *D_005271F0 = p[36];
+        *D_005271F0 = infoWords[36];
 }
 #endif
 
@@ -9955,44 +9955,44 @@ extern void func_00426358(int, int);
  *
  * cPS2MemCard's func_002C50E0 passes D_004A3938, D_004A393C and D_004A3944.
  *
- * @param a  the memory-card port
- * @param b  the slot
- * @param c  receives the card type, or 0
- * @param d  receives the free space, or 0
- * @param e  receives the format state, or 0
+ * @param cardPort  the memory-card port
+ * @param cardSlot  the slot
+ * @param typeOut  receives the card type, or 0
+ * @param freeOut  receives the free space, or 0
+ * @param formatOut  receives the format state, or 0
  * @return 0 when the call started, -100 / -200 as above, otherwise sceSifCallRpc's error
  */
-int func_0040A498(int a, int b, int *c, int *d, int *e) {
-    int r;
+int func_0040A498(int cardPort, int cardSlot, int *typeOut, int *freeOut, int *formatOut) {
+    int rpcResult;
     if (D_005271C0.server == 0)
         return -100;
     if (PollSema(D_004533C4) < 0)
         return -200;
-    D_00527240.port = a;
-    D_00527240.slot = b;
+    D_00527240.port = cardPort;
+    D_00527240.slot = cardSlot;
     D_00527240.param = (int)D_005276C0;
-    if (c != 0)
+    if (typeOut != 0)
         D_00527240.origin = 1;
     else
         D_00527240.origin = 0;
-    if (d != 0)
+    if (freeOut != 0)
         D_00527240.offset = 1;
     else
         D_00527240.offset = 0;
-    if (e != 0)
+    if (formatOut != 0)
         D_00527240.size = 1;
     else
         D_00527240.size = 0;
-    D_005271E8 = c;
-    D_005271EC = d;
-    D_005271F0 = e;
+    D_005271E8 = typeOut;
+    D_005271EC = freeOut;
+    D_005271F0 = formatOut;
     func_00426358((int)D_005276C0, 0xC0);
-    r = sceSifCallRpc(&D_005271C0, 1, 1, &D_00527240, 48, D_00528780, 4, func_0040A440, D_005276C0);
-    if (r == 0)
+    rpcResult = sceSifCallRpc(&D_005271C0, 1, 1, &D_00527240, 48, D_00528780, 4, func_0040A440, D_005276C0);
+    if (rpcResult == 0)
         D_004533C0 = 1;
     else
         SignalSema(D_004533C4);
-    return r;
+    return rpcResult;
 }
 #endif
 
@@ -10038,39 +10038,39 @@ extern void func_00426358(int, int);
  *
  * cPS2MemCard's func_002C4210 lists up to 6 entries and func_002C42B0 one entry.
  *
- * @param a  the memory-card port
- * @param b  the slot
- * @param s  the path or pattern
- * @param c  the listing mode
- * @param d  the maximum number of entries
- * @param e  the entry table (64 bytes per entry)
+ * @param cardPort  the memory-card port
+ * @param cardSlot  the slot
+ * @param dirPattern  the path or pattern
+ * @param listMode  the listing mode
+ * @param maxEntries  the maximum number of entries
+ * @param entryTable  the entry table (64 bytes per entry)
  * @return 0 when the call started, -100 / -200 / -210 as above, otherwise sceSifCallRpc's error
  */
-int func_0040A688(int a, int b, char *s, int c, int d, int e) {
-    int r;
+int func_0040A688(int cardPort, int cardSlot, char *dirPattern, int listMode, int maxEntries, int entryTable) {
+    int rpcResult;
     if (D_005271C0.server == 0)
         return -100;
     if (PollSema(D_004533C4) < 0)
         return -200;
-    if (s == 0 || s[0] == 0) {
+    if (dirPattern == 0 || dirPattern[0] == 0) {
         SignalSema(D_004533C4);
         return -210;
     }
-    D_00527270.port = a;
-    D_00527270.slot = b;
-    D_00527270.mode = c;
-    D_00527270.count = d;
-    D_00527270.buffer = e;
-    strncpy(D_00527270.name, s, 0x3FF);
+    D_00527270.port = cardPort;
+    D_00527270.slot = cardSlot;
+    D_00527270.mode = listMode;
+    D_00527270.count = maxEntries;
+    D_00527270.buffer = entryTable;
+    strncpy(D_00527270.name, dirPattern, 0x3FF);
     D_00527270.name[0x3FF] = 0;
-    if (d >= 0)
-        func_00426358(e, d << 6);
-    r = sceSifCallRpc(&D_005271C0, 13, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
-    if (r == 0)
+    if (maxEntries >= 0)
+        func_00426358(entryTable, maxEntries << 6);
+    rpcResult = sceSifCallRpc(&D_005271C0, 13, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
+    if (rpcResult == 0)
         D_004533C0 = 13;
     else
         SignalSema(D_004533C4);
-    return r;
+    return rpcResult;
 }
 #endif
 
@@ -10114,40 +10114,40 @@ extern void func_00426358(int, int);
  *
  * An empty or null name releases the lock and fails with -210. The name is copied into D_00527270.name (at most 1023
  * characters, always terminated). Fills port and slot of D_00527270 and points its buffer at D_00527780 (written back
- * from the cache, 0x400 bytes), where the server returns the current directory; func_0040A7D0 copies it to @p u when
+ * from the cache, 0x400 bytes), where the server returns the current directory; func_0040A7D0 copies it to @p curDirOut when
  * the call ends. Fails with -100 when the library is not bound (D_005271C0.server is 0) and -200 when another call
  * still holds the lock semaphore D_004533C4 (PollSema). On success it records 12 as the pending call (D_004533C0) and
  * keeps the lock until func_0040A360 sees the call finish; when sceSifCallRpc fails it releases the lock. No caller in
  * the source.
  *
- * @param a  the memory-card port
- * @param b  the slot
- * @param s  the new directory
- * @param u  receives the current directory, or 0
+ * @param cardPort  the memory-card port
+ * @param cardSlot  the slot
+ * @param newDir  the new directory
+ * @param curDirOut  receives the current directory, or 0
  * @return 0 when the call started, -100 / -200 / -210 as above, otherwise sceSifCallRpc's error
  */
-int func_0040A858(int a, int b, char *s, void *u) {
-    int r;
+int func_0040A858(int cardPort, int cardSlot, char *newDir, void *curDirOut) {
+    int rpcResult;
     if (D_005271C0.server == 0)
         return -100;
     if (PollSema(D_004533C4) < 0)
         return -200;
-    if (s == 0 || s[0] == 0) {
+    if (newDir == 0 || newDir[0] == 0) {
         SignalSema(D_004533C4);
         return -210;
     }
-    D_00527270.port = a;
+    D_00527270.port = cardPort;
     D_00527270.buffer = (int)D_00527780;
-    D_00527270.slot = b;
-    strncpy(D_00527270.name, s, 0x3FF);
+    D_00527270.slot = cardSlot;
+    strncpy(D_00527270.name, newDir, 0x3FF);
     D_00527270.name[0x3FF] = 0;
     func_00426358((int)D_00527780, 0x400);
-    r = sceSifCallRpc(&D_005271C0, 12, 1, &D_00527270, 1044, D_00528780, 4, func_0040A7D0, u);
-    if (r == 0)
+    rpcResult = sceSifCallRpc(&D_005271C0, 12, 1, &D_00527270, 1044, D_00528780, 4, func_0040A7D0, curDirOut);
+    if (rpcResult == 0)
         D_004533C0 = 12;
     else
         SignalSema(D_004533C4);
-    return r;
+    return rpcResult;
 }
 #endif
 
@@ -10164,24 +10164,24 @@ extern void SignalSema(int);
  * (D_004533C0) and keeps the lock until func_0040A360 sees the call finish; when sceSifCallRpc fails it releases the
  * lock.
  *
- * @param a  the memory-card port
- * @param b  the slot
+ * @param cardPort  the memory-card port
+ * @param cardSlot  the slot
  * @return 0 when the call started, -100 / -200 as above, otherwise sceSifCallRpc's error
  */
-int func_0040A998(int a, int b) {
-    int r;
+int func_0040A998(int cardPort, int cardSlot) {
+    int rpcResult;
     if (D_005271C0.server == 0)
         return -100;
     if (PollSema(D_004533C4) < 0)
         return -200;
-    D_00527240.port = a;
-    D_00527240.slot = b;
-    r = sceSifCallRpc(&D_005271C0, 16, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
-    if (r == 0)
+    D_00527240.port = cardPort;
+    D_00527240.slot = cardSlot;
+    rpcResult = sceSifCallRpc(&D_005271C0, 16, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
+    if (rpcResult == 0)
         D_004533C0 = 16;
     else
         SignalSema(D_004533C4);
-    return r;
+    return rpcResult;
 }
 #endif
 
@@ -10200,32 +10200,32 @@ extern char *strncpy(char *, const char *, int);
  * (PollSema). On success it records 15 as the pending call (D_004533C0) and keeps the lock until func_0040A360 sees the
  * call finish; when sceSifCallRpc fails it releases the lock.
  *
- * @param a  the memory-card port
- * @param b  the slot
- * @param s  the path
+ * @param cardPort  the memory-card port
+ * @param cardSlot  the slot
+ * @param filePath  the path
  * @return 0 when the call started, -100 / -200 / -210 as above, otherwise sceSifCallRpc's error
  */
-int func_0040AA68(int a, int b, char *s) {
-    int r;
+int func_0040AA68(int cardPort, int cardSlot, char *filePath) {
+    int rpcResult;
     if (D_005271C0.server == 0)
         return -100;
     if (PollSema(D_004533C4) < 0)
         return -200;
-    if (s == 0 || s[0] == 0) {
+    if (filePath == 0 || filePath[0] == 0) {
         SignalSema(D_004533C4);
         return -210;
     }
-    strncpy(D_00527270.name, s, 0x3FF);
-    D_00527270.port = a;
-    D_00527270.slot = b;
+    strncpy(D_00527270.name, filePath, 0x3FF);
+    D_00527270.port = cardPort;
+    D_00527270.slot = cardSlot;
     D_00527270.name[0x3FF] = 0;
     D_00527270.mode = 0;
-    r = sceSifCallRpc(&D_005271C0, 15, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
-    if (r == 0)
+    rpcResult = sceSifCallRpc(&D_005271C0, 15, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
+    if (rpcResult == 0)
         D_004533C0 = 15;
     else
         SignalSema(D_004533C4);
-    return r;
+    return rpcResult;
 }
 #endif
 
@@ -10237,27 +10237,27 @@ extern void SignalSema(int);
 /**
  * Starts flushing a memory-card file (call 10, asynchronous).
  *
- * Puts @p a into the fd field of D_00527240. Fails with -100 when the library is not bound (D_005271C0.server is 0) and
+ * Puts @p fileDesc into the fd field of D_00527240. Fails with -100 when the library is not bound (D_005271C0.server is 0) and
  * -200 when another call still holds the lock semaphore D_004533C4 (PollSema). On success it records 10 as the pending
  * call (D_004533C0) and keeps the lock until func_0040A360 sees the call finish; when sceSifCallRpc fails it releases
  * the lock.
  *
- * @param a  the file descriptor
+ * @param fileDesc  the file descriptor
  * @return 0 when the call started, -100 / -200 as above, otherwise sceSifCallRpc's error
  */
-int func_0040AB80(int a) {
-    int r;
+int func_0040AB80(int fileDesc) {
+    int rpcResult;
     if (D_005271C0.server == 0)
         return -100;
     if (PollSema(D_004533C4) < 0)
         return -200;
-    D_00527240.fd = a;
-    r = sceSifCallRpc(&D_005271C0, 10, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
-    if (r == 0)
+    D_00527240.fd = fileDesc;
+    rpcResult = sceSifCallRpc(&D_005271C0, 10, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
+    if (rpcResult == 0)
         D_004533C0 = 10;
     else
         SignalSema(D_004533C4);
-    return r;
+    return rpcResult;
 }
 #endif
 
@@ -10272,45 +10272,45 @@ extern char *strncpy(char *, const char *, int);
  * Starts changing a memory-card file's information record (call 14, asynchronous).
  *
  * An empty or null name releases the lock and fails with -210. The name is copied into D_00527270.name (at most 1023
- * characters, always terminated). Masks @p e to its low three bits and stores it as the mode, copies the 64-byte record
- * *@p c into D_00527200 and points the buffer at it, then flushes the cache. Fails with -100 when the library is not
+ * characters, always terminated). Masks @p validFlags to its low three bits and stores it as the mode, copies the 64-byte record
+ * *@p newInfo into D_00527200 and points the buffer at it, then flushes the cache. Fails with -100 when the library is not
  * bound (D_005271C0.server is 0) and -200 when another call still holds the lock semaphore D_004533C4 (PollSema). On
  * success it records 14 as the pending call (D_004533C0) and keeps the lock until func_0040A360 sees the call finish;
  * when sceSifCallRpc fails it releases the lock. No caller in the source.
  *
- * @param a  the memory-card port
- * @param b  the slot
- * @param s  the path
- * @param c  the new information record
- * @param e  which parts to change (bits 0..2)
+ * @param cardPort  the memory-card port
+ * @param cardSlot  the slot
+ * @param filePath  the path
+ * @param newInfo  the new information record
+ * @param validFlags  which parts to change (bits 0..2)
  * @return 0 when the call started, -100 / -200 / -210 as above, otherwise sceSifCallRpc's error
  */
-int func_0040AC38(int a, int b, char *s, sMcDirEntry *c, int e) {
-    int r;
-    sSifClient *h = &D_005271C0;
-    if (h->server == 0)
+int func_0040AC38(int cardPort, int cardSlot, char *filePath, sMcDirEntry *newInfo, int validFlags) {
+    int rpcResult;
+    sSifClient *mcClient = &D_005271C0;
+    if (mcClient->server == 0)
         return -100;
     if (R_3DF0(D_004533C4) < 0)
         return -200;
-    if (s == 0 || s[0] == 0) {
+    if (filePath == 0 || filePath[0] == 0) {
         R_3DC0(D_004533C4);
         return -210;
     }
-    e &= 7;
-    D_00527270.port = a;
-    D_00527270.slot = b;
-    D_00527270.mode = e;
-    D_00527200 = *c;
+    validFlags &= 7;
+    D_00527270.port = cardPort;
+    D_00527270.slot = cardSlot;
+    D_00527270.mode = validFlags;
+    D_00527200 = *newInfo;
     D_00527270.buffer = (int)&D_00527200;
-    strncpy(D_00527270.name, s, 0x3FF);
+    strncpy(D_00527270.name, filePath, 0x3FF);
     D_00527270.name[0x3FF] = 0;
     R_4020(0);
-    r = sceSifCallRpc(h, 14, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
-    if (r == 0)
+    rpcResult = sceSifCallRpc(mcClient, 14, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
+    if (rpcResult == 0)
         D_004533C0 = 14;
     else
         R_3DC0(D_004533C4);
-    return r;
+    return rpcResult;
 }
 #endif
 
@@ -10332,39 +10332,39 @@ extern void FlushCache(int);
  * call finish; when sceSifCallRpc fails it releases the lock. (19 rather than the call number). No caller in the
  * source.
  *
- * @param a  the memory-card port
- * @param b  the slot
- * @param s  the current path
- * @param t  the new name
+ * @param cardPort  the memory-card port
+ * @param cardSlot  the slot
+ * @param oldPath  the current path
+ * @param newName  the new name
  * @return 0 when the call started, -100 / -200 / -210 as above, otherwise sceSifCallRpc's error
  */
-int func_0040AE00(int a, int b, char *s, char *t) {
-    int r;
-    char *p;
+int func_0040AE00(int cardPort, int cardSlot, char *oldPath, char *newName) {
+    int rpcResult;
+    char *infoRecord;
     if (D_005271C0.server == 0)
         return -100;
     if (PollSema(D_004533C4) < 0)
         return -200;
-    if (s == 0 || s[0] == 0 || t == 0) {
+    if (oldPath == 0 || oldPath[0] == 0 || newName == 0) {
         SignalSema(D_004533C4);
         return -210;
     }
-    D_00527270.port = a;
-    D_00527270.slot = b;
+    D_00527270.port = cardPort;
+    D_00527270.slot = cardSlot;
     D_00527270.mode = 16;
-    strncpy(D_00527270.name, s, 0x3FF);
+    strncpy(D_00527270.name, oldPath, 0x3FF);
     D_00527270.name[0x3FF] = 0;
-    strncpy(D_00527220, t, 0x20);
-    p = D_00527220 - 0x20;
-    p[0x3F] = 0;
-    D_00527270.buffer = (int)p;
+    strncpy(D_00527220, newName, 0x20);
+    infoRecord = D_00527220 - 0x20;
+    infoRecord[0x3F] = 0;
+    D_00527270.buffer = (int)infoRecord;
     FlushCache(0);
-    r = sceSifCallRpc(&D_005271C0, 14, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
-    if (r == 0)
+    rpcResult = sceSifCallRpc(&D_005271C0, 14, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
+    if (rpcResult == 0)
         D_004533C0 = 19;
     else
         SignalSema(D_004533C4);
-    return r;
+    return rpcResult;
 }
 #endif
 
@@ -10381,24 +10381,24 @@ extern void SignalSema(int);
  * (D_004533C0) and keeps the lock until func_0040A360 sees the call finish; when sceSifCallRpc fails it releases the
  * lock. No caller in the source.
  *
- * @param a  the memory-card port
- * @param b  the slot
+ * @param cardPort  the memory-card port
+ * @param cardSlot  the slot
  * @return 0 when the call started, -100 / -200 as above, otherwise sceSifCallRpc's error
  */
-int func_0040AF58(int a, int b) {
-    int r;
+int func_0040AF58(int cardPort, int cardSlot) {
+    int rpcResult;
     if (D_005271C0.server == 0)
         return -100;
     if (PollSema(D_004533C4) < 0)
         return -200;
-    D_00527240.port = a;
-    D_00527240.slot = b;
-    r = sceSifCallRpc(&D_005271C0, 17, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
-    if (r == 0)
+    D_00527240.port = cardPort;
+    D_00527240.slot = cardSlot;
+    rpcResult = sceSifCallRpc(&D_005271C0, 17, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
+    if (rpcResult == 0)
         D_004533C0 = 17;
     else
         SignalSema(D_004533C4);
-    return r;
+    return rpcResult;
 }
 #endif
 
@@ -10417,31 +10417,31 @@ extern char *strncpy(char *, const char *, int);
  * it records 18 as the pending call (D_004533C0) and keeps the lock until func_0040A360 sees the call finish; when
  * sceSifCallRpc fails it releases the lock. No caller in the source.
  *
- * @param a  the memory-card port
- * @param b  the slot
- * @param s  the path
+ * @param cardPort  the memory-card port
+ * @param cardSlot  the slot
+ * @param dirPath  the path
  * @return 0 when the call started, -100 / -200 / -210 as above, otherwise sceSifCallRpc's error
  */
-int func_0040B028(int a, int b, char *s) {
-    int r;
+int func_0040B028(int cardPort, int cardSlot, char *dirPath) {
+    int rpcResult;
     if (D_005271C0.server == 0)
         return -100;
     if (PollSema(D_004533C4) < 0)
         return -200;
-    if (s == 0 || s[0] == 0) {
+    if (dirPath == 0 || dirPath[0] == 0) {
         SignalSema(D_004533C4);
         return -210;
     }
-    D_00527270.port = a;
-    D_00527270.slot = b;
-    strncpy(D_00527270.name, s, 0x3FF);
+    D_00527270.port = cardPort;
+    D_00527270.slot = cardSlot;
+    strncpy(D_00527270.name, dirPath, 0x3FF);
     D_00527270.name[0x3FF] = 0;
-    r = sceSifCallRpc(&D_005271C0, 18, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
-    if (r == 0)
+    rpcResult = sceSifCallRpc(&D_005271C0, 18, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
+    if (rpcResult == 0)
         D_004533C0 = 18;
     else
         SignalSema(D_004533C4);
-    return r;
+    return rpcResult;
 }
 #endif
 
@@ -10477,40 +10477,40 @@ struct E0B208 *f0B208(struct S0B208 *s) __asm__("func_0040B208");
  * counter's next value (+0x0) as the serial (+0x18); when that value is 1 the counter is advanced once more.
  * func_0040B2B0 frees a packet again.
  *
- * @param s  the pool: serial counter, packet table, packet count
+ * @param packetPool  the pool: serial counter, packet table, packet count
  * @return the packet, or 0 when all are in use
  */
-struct E0B208 *f0B208(struct S0B208 *s) {
-    struct E0B208 *e;
+struct E0B208 *f0B208(struct S0B208 *packetPool) {
+    struct E0B208 *packet;
     int i;
     int n;
-    int c;
+    int prevSerial;
     int id;
     int seq;
     DIntr_rq();
-    n = s->n;
+    n = packetPool->n;
     i = 0;
-    e = s->tab;
+    packet = packetPool->tab;
     while (i < n) {
-        if (!(e->f10 & 1)) {
-            e->f10 = (i << 16) | 5;
-            c = s->f0;
-            id = c + 1;
-            s->f0 = id;
+        if (!(packet->f10 & 1)) {
+            packet->f10 = (i << 16) | 5;
+            prevSerial = packetPool->f0;
+            id = prevSerial + 1;
+            packetPool->f0 = id;
             if (id == 1) {
-                s->f0 = c + 2;
+                packetPool->f0 = prevSerial + 2;
                 seq = 1;
             } else {
                 seq = id;
             }
             id = seq;
-            e->f14 = (int)e;
-            e->f18 = id;
+            packet->f14 = (int)packet;
+            packet->f18 = id;
             EIntr();
-            return e;
+            return packet;
         }
         i++;
-        e++;
+        packet++;
     }
     EIntr();
     return 0;
@@ -10525,11 +10525,11 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040B2B0);
  *
  * Clears its serial (+0x18) and the in-use bit 0 of its flags (+0x10).
  *
- * @param p  the packet
+ * @param packet  the packet
  */
-void func_0040B2B0(unsigned *p) {
-    p[6] = 0;
-    p[4] &= 0xFFFFFFFE;
+void func_0040B2B0(unsigned *packet) {
+    packet[6] = 0;
+    packet[4] &= 0xFFFFFFFE;
 }
 #endif
 
@@ -10550,37 +10550,37 @@ extern void func_0040B2B0(unsigned *);
  * semaphore (+0x8) when it is not negative, frees the request packet (func_0040B2B0) and clears the client's packet
  * pointer.
  *
- * @param e  the reply: client at +0x1C, code at +0x20, data words from +0x24
+ * @param reply  the reply: client at +0x1C, code at +0x20, data words from +0x24
  */
-void func_0040B2D0(struct E_B2D0 *e) {
-    struct C_B2D0 *c;
-    switch (e->code) {
+void func_0040B2D0(struct E_B2D0 *reply) {
+    struct C_B2D0 *clientData;
+    switch (reply->code) {
     case 0x8000001A:
-        c = e->ctx;
-        if (c->f1C)
-            c->f1C(c->f20);
-        iSignalSema(c->f28);
+        clientData = reply->ctx;
+        if (clientData->f1C)
+            clientData->f1C(clientData->f20);
+        iSignalSema(clientData->f28);
         break;
     case 0x80000019:
-        c = e->ctx;
-        c->f24 = e->f24;
-        c->f14 = e->f28;
-        c->f18 = e->f2C;
-        iSignalSema(c->f28);
+        clientData = reply->ctx;
+        clientData->f24 = reply->f24;
+        clientData->f14 = reply->f28;
+        clientData->f18 = reply->f2C;
+        iSignalSema(clientData->f28);
         break;
     case 0x8000001C:
         break;
     case 0x8000001D:
-        c = e->ctx;
-        c->f2C = e->f24;
-        iSignalSema(c->f28);
+        clientData = reply->ctx;
+        clientData->f2C = reply->f24;
+        iSignalSema(clientData->f28);
         break;
     }
-    c = e->ctx;
-    if (c->f8 >= 0)
-        iSignalSema(c->f8);
-    func_0040B2B0(c->f0);
-    c->f0 = 0;
+    clientData = reply->ctx;
+    if (clientData->f8 >= 0)
+        iSignalSema(clientData->f8);
+    func_0040B2B0(clientData->f0);
+    clientData->f0 = 0;
 }
 #endif
 
@@ -10593,13 +10593,13 @@ extern int func_0040B400(int, int, int, int, int, int);
  *
  * Calls func_0040B400 with them.
  *
- * @param a  the client block
- * @param b  the server's RPC number
- * @param c  the mode (must be 0)
+ * @param clientData  the client block
+ * @param rpcNumber  the server's RPC number
+ * @param bindMode  the mode (must be 0)
  * @return func_0040B400's result
  */
-int func_0040B3D8(int a, int b, int c) {
-    return func_0040B400(a, b, c, 0x800, 0x2000, 0x20);
+int func_0040B3D8(int clientData, int rpcNumber, int bindMode) {
+    return func_0040B400(clientData, rpcNumber, bindMode, 0x800, 0x2000, 0x20);
 }
 #endif
 
@@ -10620,7 +10620,7 @@ extern char D_00498178[];
  * Binds a multi-client RPC client to an IOP server and waits for the answer.
  *
  * A mode other than 0 prints "mode must be 0 in this version." and returns -1. Creates the client's lock semaphore
- * (+0x28, count 1) and takes it, stores the RPC number (+0x10), clears the server (+0x24) and keeps @p d, @p e and @p f
+ * (+0x28, count 1) and takes it, stores the RPC number (+0x10), clears the server (+0x24) and keeps @p bindParam1, @p bindParam2 and @p bindParam3
  * at +0x30..+0x38. Takes a packet from the pool D_00528FC0 (func_0040B208), records it and its serial (+0x0, +0x4) and
  * fills it with the number, the three parameters and the client. Creates a wait semaphore (+0x8), sends command
  * 0x80000019 with the 64-byte packet (func_004261B0) and waits until func_0040B2D0 has stored the reply. Deletes the
@@ -10630,68 +10630,68 @@ extern char D_00498178[];
  * DNAS import table func_003FD810 holds it.
  *
  * @param cc  the client block
- * @param a  the server's RPC number
+ * @param rpcNumber  the server's RPC number
  * @param flag  the mode (must be 0)
- * @param d  first bind parameter (0x800 by default)
- * @param e  second bind parameter (0x2000 by default)
- * @param f  third bind parameter (0x20 by default)
+ * @param bindParam1  first bind parameter (0x800 by default)
+ * @param bindParam2  second bind parameter (0x2000 by default)
+ * @param bindParam3  third bind parameter (0x20 by default)
  * @return 0 when the request was answered, -1 for a bad mode or no free packet, -2 when the command could not be sent,
  *   -3 when a semaphore could not be created
  */
-int func_0040B400(int cc, int a, int flag, int d, int e, int f) {
-    struct C_B400 *c = (struct C_B400 *)cc;
-    int s[6];
-    int h;
+int func_0040B400(int cc, int rpcNumber, int flag, int bindParam1, int bindParam2, int bindParam3) {
+    struct C_B400 *clientData = (struct C_B400 *)cc;
+    int semaParam[6];
+    int waitSema;
     struct N_B400 *n;
     if (flag != 0) {
         lg_B400(D_00498178);
         return -1;
     }
-    s[5] = 0;
-    s[2] = 1;
-    s[1] = 1;
-    c->f28 = CreateSema(s);
-    if (c->f28 < 0)
+    semaParam[5] = 0;
+    semaParam[2] = 1;
+    semaParam[1] = 1;
+    clientData->f28 = CreateSema(semaParam);
+    if (clientData->f28 < 0)
         return -3;
-    WaitSema(c->f28);
-    c->f10 = a;
-    c->f24 = 0;
-    c->f30 = d;
-    c->f34 = e;
-    c->f38 = f;
+    WaitSema(clientData->f28);
+    clientData->f10 = rpcNumber;
+    clientData->f24 = 0;
+    clientData->f30 = bindParam1;
+    clientData->f34 = bindParam2;
+    clientData->f38 = bindParam3;
     n = func_0040B208(D_00528FC0);
     if (n == 0) {
-        fr_B400(c->f28);
+        fr_B400(clientData->f28);
         return -1;
     }
-    c->f0 = n;
-    c->f4 = n->f18;
-    n->f20 = a;
-    n->f24 = d;
-    n->f28 = e;
-    n->f2C = f;
+    clientData->f0 = n;
+    clientData->f4 = n->f18;
+    n->f20 = rpcNumber;
+    n->f24 = bindParam1;
+    n->f28 = bindParam2;
+    n->f2C = bindParam3;
     n->f14 = n;
-    n->f1C = c;
-    s[1] = 1;
-    s[2] = 0;
-    s[5] = 0;
-    h = CreateSema(s);
-    c->f8 = h;
-    if (h < 0) {
+    n->f1C = clientData;
+    semaParam[1] = 1;
+    semaParam[2] = 0;
+    semaParam[5] = 0;
+    waitSema = CreateSema(semaParam);
+    clientData->f8 = waitSema;
+    if (waitSema < 0) {
         rl_B400(n);
-        fr_B400(c->f28);
+        fr_B400(clientData->f28);
         return -3;
     }
     if (func_004261B0(0x80000019, n, 0x40, 0, 0, 0) == 0) {
         rl_B400(n);
-        fr_B400(h);
-        fr_B400(c->f28);
+        fr_B400(waitSema);
+        fr_B400(clientData->f28);
         return -2;
     }
-    WaitSema(h);
-    fr_B400(h);
-    if (c->f24 == 0)
-        fr_B400(c->f28);
+    WaitSema(waitSema);
+    fr_B400(waitSema);
+    if (clientData->f24 == 0)
+        fr_B400(clientData->f28);
     return 0;
 }
 #endif
@@ -10718,47 +10718,47 @@ extern int b5_004261B0(int, struct O_B5B0 *, int, int, int, int) __asm__("func_0
  *
  * Likely bug: when no packet is free it returns -1 with the lock still taken, so later calls on the client block.
  *
- * @param a  the client block
- * @param b  the mode (must be 0)
+ * @param clientData  the client block
+ * @param termMode  the mode (must be 0)
  * @return the reply word (+0x2C), -1, -2 when the command could not be sent, or -3 when the semaphore could not be
  *   created
  */
-int func_0040B5B0(struct O_B5B0 *a, int b) {
-    struct O_B5B0 *t;
-    struct QSema s;
-    int h;
-    if (b) {
+int func_0040B5B0(struct O_B5B0 *clientData, int termMode) {
+    struct O_B5B0 *packet;
+    struct QSema semaParam;
+    int waitSema;
+    if (termMode) {
         b5_00425C60(D_00498178);
         return -1;
     }
-    b5_00423DE0(a->f28);
-    t = b5_0040B208(D_00528FC0);
-    if (t == 0)
+    b5_00423DE0(clientData->f28);
+    packet = b5_0040B208(D_00528FC0);
+    if (packet == 0)
         return -1;
-    a->f4 = t->f18;
-    a->f0 = (int)t;
-    t->f20 = a->f10;
-    t->f14 = (int)t;
-    t->f1C = (int)a;
-    t->f24 = a->f24;
-    s.max_count = 1;
-    s.init_count = 0;
-    s.option = 0;
-    h = b5_00423DA0(&s);
-    a->f8 = h;
-    if (h < 0) {
-        b5_0040B2B0(t);
+    clientData->f4 = packet->f18;
+    clientData->f0 = (int)packet;
+    packet->f20 = clientData->f10;
+    packet->f14 = (int)packet;
+    packet->f1C = (int)clientData;
+    packet->f24 = clientData->f24;
+    semaParam.max_count = 1;
+    semaParam.init_count = 0;
+    semaParam.option = 0;
+    waitSema = b5_00423DA0(&semaParam);
+    clientData->f8 = waitSema;
+    if (waitSema < 0) {
+        b5_0040B2B0(packet);
         return -3;
     }
-    if (b5_004261B0(0x8000001D, t, 0x40, 0, 0, 0) == 0) {
-        b5_0040B2B0(t);
-        b5_00423DB0(h);
+    if (b5_004261B0(0x8000001D, packet, 0x40, 0, 0, 0) == 0) {
+        b5_0040B2B0(packet);
+        b5_00423DB0(waitSema);
         return -2;
     }
-    b5_00423DE0(h);
-    b5_00423DB0(h);
-    b5_00423DB0(a->f28);
-    return a->f2C;
+    b5_00423DE0(waitSema);
+    b5_00423DB0(waitSema);
+    b5_00423DB0(clientData->f28);
+    return clientData->f2C;
 }
 #endif
 
@@ -10785,87 +10785,87 @@ extern char D_004981E8[];
  * A mode other than 0 prints "mode must be 0 in this version." and returns -1, which leaves the branch for mode bit 0
  * (no wait; packet +0x30 = whether an end function is set) unreachable. Takes the client's lock (+0x28); a send or
  * receive buffer that is not 64-byte aligned prints D_004981A0 / D_004981E8 (with D_004981D8) and returns -1. Takes a
- * packet from D_00528FC0, stores its serial (+0x4), @p h (+0x1C) and @p i (+0x20) in the client and the RPC number,
+ * packet from D_00528FC0, stores its serial (+0x4), @p endFunc (+0x1C) and @p i (+0x20) in the client and the RPC number,
  * send size, receive buffer and size, client and server in the packet. Writes the cache back over both buffers (once,
  * with the larger size, when they are the same). Creates a wait semaphore (+0x8), sends command 0x8000001A with the
- * packet and @p e bytes from @p d to the server's buffer (+0x14) (func_004261B0), waits for func_0040B2D0 and deletes
+ * packet and @p sendSize bytes from @p sendBuf to the server's buffer (+0x14) (func_004261B0), waits for func_0040B2D0 and deletes
  * the semaphore.
  *
  * Likely bug: the alignment and no-packet failures return with the client's lock still taken.
  *
- * @param c  the client block
- * @param a  the function number
+ * @param clientData  the client block
+ * @param funcNumber  the function number
  * @param flag  the mode (must be 0)
- * @param d  the send buffer (64-byte aligned)
- * @param e  the send size
- * @param f  the receive buffer (64-byte aligned)
- * @param g  the receive size
- * @param h  the end function, or 0
+ * @param sendBuf  the send buffer (64-byte aligned)
+ * @param sendSize  the send size
+ * @param recvBuf  the receive buffer (64-byte aligned)
+ * @param recvSize  the receive size
+ * @param endFunc  the end function, or 0
  * @param i  the end function's argument
  * @return 0, -1, -2 when the command could not be sent, or -3 when the semaphore could not be created
  */
-int func_0040B6D0(struct N_B6D0 *c, int a, int flag, int d, int e, int f, int g, int h, int i) {
-    int s[6];
+int func_0040B6D0(struct N_B6D0 *clientData, int funcNumber, int flag, int sendBuf, int sendSize, int recvBuf, int recvSize, int endFunc, int i) {
+    int semaParam[6];
     int sem;
     struct N_B6D0 *n;
     if (flag != 0) {
         lg1_B6D0(D_00498178);
         return -1;
     }
-    wt_B6D0(c->f28);
-    if (d & 0x3F) {
-        lg3_B6D0(D_004981A0, D_004981D8, d);
+    wt_B6D0(clientData->f28);
+    if (sendBuf & 0x3F) {
+        lg3_B6D0(D_004981A0, D_004981D8, sendBuf);
         return -1;
     }
-    if (f & 0x3F) {
-        lg3_B6D0(D_004981E8, D_004981D8, f);
+    if (recvBuf & 0x3F) {
+        lg3_B6D0(D_004981E8, D_004981D8, recvBuf);
         return -1;
     }
     n = al_B6D0(D_00528FC0);
     if (n == 0)
         return -1;
-    c->f4 = n->f18;
-    c->f20 = i;
-    c->f0 = (int)n;
-    c->f1C = h;
-    n->f20 = a;
+    clientData->f4 = n->f18;
+    clientData->f20 = i;
+    clientData->f0 = (int)n;
+    clientData->f1C = endFunc;
+    n->f20 = funcNumber;
     n->f14 = (int)n;
-    n->f24 = e;
-    n->f28 = f;
-    n->f2C = g;
-    n->f1C = (int)c;
-    n->f34 = c->f24;
-    if (d == f) {
-        sz_B6D0(d, e >= g ? e : g);
+    n->f24 = sendSize;
+    n->f28 = recvBuf;
+    n->f2C = recvSize;
+    n->f1C = (int)clientData;
+    n->f34 = clientData->f24;
+    if (sendBuf == recvBuf) {
+        sz_B6D0(sendBuf, sendSize >= recvSize ? sendSize : recvSize);
     } else {
-        if (e > 0)
-            sz_B6D0(d, e);
-        if (g > 0)
-            sz_B6D0(f, g);
+        if (sendSize > 0)
+            sz_B6D0(sendBuf, sendSize);
+        if (recvSize > 0)
+            sz_B6D0(recvBuf, recvSize);
     }
     if (flag & 1) {
-        if (h == 0)
+        if (endFunc == 0)
             n->f30 = 0;
         else
             n->f30 = 1;
-        c->f8 = -1;
-        if (st_B6D0(0x8000001A, n, 0x40, d, c->f14, e) == 0) {
+        clientData->f8 = -1;
+        if (st_B6D0(0x8000001A, n, 0x40, sendBuf, clientData->f14, sendSize) == 0) {
             rl_B6D0(n);
             return -2;
         }
         return 0;
     }
-    s[2] = 0;
-    s[1] = 1;
-    s[5] = 0;
-    sem = sm_B6D0(s);
-    c->f8 = sem;
+    semaParam[2] = 0;
+    semaParam[1] = 1;
+    semaParam[5] = 0;
+    sem = sm_B6D0(semaParam);
+    clientData->f8 = sem;
     if (sem < 0) {
         rl_B6D0(n);
         return -3;
     }
     n->f30 = 1;
-    if (st_B6D0(0x8000001A, n, 0x40, d, c->f14, e) == 0) {
+    if (st_B6D0(0x8000001A, n, 0x40, sendBuf, clientData->f14, sendSize) == 0) {
         rl_B6D0(n);
         fr_B6D0(sem);
         return -2;
@@ -10892,12 +10892,12 @@ extern char D_00498220[];
  * @return the address of D_00453400
  */
 int func_0040B938(void) {
-    int h;
+    int romverFd;
     if (D_00453400[0] == 0) {
-        h = sceOpen(D_00498220, 1);
-        if (h >= 0) {
-            sceRead(h, D_00453400, 14);
-            sceClose(h);
+        romverFd = sceOpen(D_00498220, 1);
+        if (romverFd >= 0) {
+            sceRead(romverFd, D_00453400, 14);
+            sceClose(romverFd);
         }
     }
     return (int)D_00453400;
@@ -10941,18 +10941,18 @@ extern void GetOsdConfigParam(unsigned *);
  */
 int func_0040B9E8(void) {
     unsigned buf[1];
-    int r;
+    int language;
     GetOsdConfigParam(buf);
     if (func_0040B9A8()) {
-        r = D_004533FC[0];
+        language = D_004533FC[0];
     } else {
         GetOsdConfigParam(buf);
         if (((buf[0] >> 13) & 7) == 0)
-            r = (buf[0] >> 4) & 1;
+            language = (buf[0] >> 4) & 1;
         else
-            r = (buf[0] >> 16) & 0x1F;
+            language = (buf[0] >> 16) & 0x1F;
     }
-    return r;
+    return language;
 }
 #endif
 
@@ -10962,14 +10962,14 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040BA48);
 /**
  * Sets the 8-byte console-setting record that T10000 development kits use instead of the OSD.
  *
- * Copies *@p p into D_004533F8: the time zone in minutes (+0x0, short), then one byte each for the aspect, date format,
+ * Copies *@p consoleConfig into D_004533F8: the time zone in minutes (+0x0, short), then one byte each for the aspect, date format,
  * language, S/PDIF, summer time and time notation (read by func_0040BAE8, func_0040BA68, func_0040BB38, func_0040B9E8,
  * func_0040BAA8, func_0040BBA0 and func_0040BC08). No caller in the source.
  *
- * @param p  the new settings
+ * @param consoleConfig  the new settings
  */
-void func_0040BA48(sSysConfig *p) {
-    D_004533F8 = *p;
+void func_0040BA48(sSysConfig *consoleConfig) {
+    D_004533F8 = *consoleConfig;
 }
 #endif
 
@@ -11033,14 +11033,14 @@ extern void GetOsdConfigParam(unsigned *);
  */
 int func_0040BAE8(void) {
     unsigned buf[1];
-    int r;
+    int zoneMinutes;
     if (func_0040B9A8()) {
-        r = D_004533F8.f0;
+        zoneMinutes = D_004533F8.f0;
     } else {
         GetOsdConfigParam(buf);
-        if (((buf[0] >> 13) & 7) == 0) r = 540; else r = (int)buf[0] >> 21;
+        if (((buf[0] >> 13) & 7) == 0) zoneMinutes = 540; else zoneMinutes = (int)buf[0] >> 21;
     }
-    return r;
+    return zoneMinutes;
 }
 #endif
 
@@ -11061,21 +11061,21 @@ extern int GetOsdConfigParam2(unsigned *, int, int);
  */
 int func_0040BB38(void) {
     unsigned buf[2];
-    unsigned char v;
-    int r;
+    unsigned char config2Byte;
+    int dateFormat;
     if (func_0040B9A8()) {
-        r = D_004533FB[0];
+        dateFormat = D_004533FB[0];
     } else {
         GetOsdConfigParam(buf);
         if (((buf[0] >> 13) & 7) == 0) {
-            r = 0;
+            dateFormat = 0;
         } else {
             GetOsdConfigParam2(&buf[1], 1, 1);
-            v = ((unsigned char *)buf)[4];
-            r = v >> 6;
+            config2Byte = ((unsigned char *)buf)[4];
+            dateFormat = config2Byte >> 6;
         }
     }
-    return r;
+    return dateFormat;
 }
 #endif
 
@@ -11096,21 +11096,21 @@ extern int GetOsdConfigParam2(unsigned *, int, int);
  */
 int func_0040BBA0(void) {
     unsigned buf[2];
-    unsigned char v;
-    int r;
+    unsigned char config2Byte;
+    int summerTime;
     if (func_0040B9A8()) {
-        r = D_004533FE[0];
+        summerTime = D_004533FE[0];
     } else {
         GetOsdConfigParam(buf);
         if (((buf[0] >> 13) & 7) == 0) {
-            r = 0;
+            summerTime = 0;
         } else {
             GetOsdConfigParam2(&buf[1], 1, 1);
-            v = ((unsigned char *)buf)[4];
-            r = (v >> 4) & 1;
+            config2Byte = ((unsigned char *)buf)[4];
+            summerTime = (config2Byte >> 4) & 1;
         }
     }
-    return r;
+    return summerTime;
 }
 #endif
 
@@ -11131,21 +11131,21 @@ extern int GetOsdConfigParam2(unsigned *, int, int);
  */
 int func_0040BC08(void) {
     unsigned buf[2];
-    unsigned char v;
-    int r;
+    unsigned char config2Byte;
+    int timeNotation;
     if (func_0040B9A8()) {
-        r = D_004533FF[0];
+        timeNotation = D_004533FF[0];
     } else {
         GetOsdConfigParam(buf);
         if (((buf[0] >> 13) & 7) == 0) {
-            r = 0;
+            timeNotation = 0;
         } else {
             GetOsdConfigParam2(&buf[1], 1, 1);
-            v = ((unsigned char *)buf)[4];
-            r = (v >> 5) & 1;
+            config2Byte = ((unsigned char *)buf)[4];
+            timeNotation = (config2Byte >> 5) & 1;
         }
     }
-    return r;
+    return timeNotation;
 }
 #endif
 
@@ -11173,9 +11173,9 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040BCA0);
  * @return the number
  */
 unsigned char func_0040BCA0(unsigned char bcd) {
-    unsigned char t = bcd >> 4;
-    t = t * 6;
-    return bcd - t;
+    unsigned char tensPart = bcd >> 4;
+    tensPart = tensPart * 6;
+    return bcd - tensPart;
 }
 #endif
 
@@ -11231,23 +11231,23 @@ extern sDaysTbl D_00498230;
  * Uses the month lengths in D_00498230, with February 29 in years divisible by 4 (two-digit year). Past the end of the
  * month it goes to day 1 of the next month, and after December to January of the next year (99 wraps to 0).
  *
- * @param a  the clock record (binary fields)
+ * @param clockBytes  the clock record (binary fields)
  */
-void func_0040BD90(unsigned char *a) {
-    sClk *c = (sClk *)a;
+void func_0040BD90(unsigned char *clockBytes) {
+    sClk *clock = (sClk *)clockBytes;
     sDaysTbl days = D_00498230;
-    c->day++;
-    if ((c->year % 4) == 0)
+    clock->day++;
+    if ((clock->year % 4) == 0)
         days.b[1] = 29;
-    if (days.b[c->month - 1] < c->day) {
-        c->day = 1;
-        c->month++;
-        if (c->month == 13) {
-            if (c->year == 99)
-                c->year = 0;
+    if (days.b[clock->month - 1] < clock->day) {
+        clock->day = 1;
+        clock->month++;
+        if (clock->month == 13) {
+            if (clock->year == 99)
+                clock->year = 0;
             else
-                c->year++;
-            c->month = 1;
+                clock->year++;
+            clock->month = 1;
         }
     }
 }
@@ -11262,24 +11262,24 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040BE48);
  * Before day 1 it goes to the last day of the previous month (month lengths in D_00498230, February 29 in years
  * divisible by 4), and before January to December of the previous year (0 wraps to 99).
  *
- * @param a  the clock record (binary fields)
+ * @param clockBytes  the clock record (binary fields)
  */
-void func_0040BE48(unsigned char *a) {
-    sClk *c = (sClk *)a;
+void func_0040BE48(unsigned char *clockBytes) {
+    sClk *clock = (sClk *)clockBytes;
     sDaysTbl days = D_00498230;
-    c->day--;
-    if ((c->year % 4) == 0)
+    clock->day--;
+    if ((clock->year % 4) == 0)
         days.b[1] = 29;
-    if (c->day == 0) {
-        c->month--;
-        if (c->month == 0) {
-            if (c->year == 0)
-                c->year = 99;
+    if (clock->day == 0) {
+        clock->month--;
+        if (clock->month == 0) {
+            if (clock->year == 0)
+                clock->year = 99;
             else
-                c->year--;
-            c->month = 12;
+                clock->year--;
+            clock->month = 12;
         }
-        c->day = days.b[c->month - 1];
+        clock->day = days.b[clock->month - 1];
     }
 }
 #endif
@@ -11432,7 +11432,7 @@ extern int func_0040CF88(void);
  */
 int func_0040C028(int *out) {
     struct KbInfo_C028 info;
-    struct QSema s;
+    struct QSema semaParam;
     int st;
     unsigned i;
     k_6408(0);
@@ -11446,9 +11446,9 @@ int func_0040C028(int *out) {
         i = 0x10000;
         while (i--);
     }
-    s.init_count = 1;
-    s.max_count = 1;
-    D_00453438 = k_sema(&s);
+    semaParam.init_count = 1;
+    semaParam.max_count = 1;
+    D_00453438 = k_sema(&semaParam);
     if (D_00453438 == -1) {
         k_log(D_00498258);
         return -1;
@@ -11530,14 +11530,14 @@ extern char D_004982A8[];
  */
 int func_0040C220(void) {
     int n = 0;
-    int s, r;
-    s = DIntr_0();
-    r = RemoveIntcHandler(3, D_0052909C);
-    if (r == 0)
+    int intrState, removeResult;
+    intrState = DIntr_0();
+    removeResult = RemoveIntcHandler(3, D_0052909C);
+    if (removeResult == 0)
         func_00424880(3);
-    if (s)
+    if (intrState)
         EIntr();
-    if (r < 0) {
+    if (removeResult < 0) {
         n = 1;
         func_0040A618_log(D_00498278);
     }
@@ -11751,25 +11751,25 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040C728);
 /**
  * Sets a keyboard's key-repeat delay and rate (in vertical blanks).
  *
- * Stores @p c as the rate and @p b as the delay of keyboard @p a's repeat state and clears its count; func_0040CF88
- * counts and func_0040C980 repeats. Unlike its neighbours it does not check @p a against the keyboard count.
+ * Stores @p repeatRate as the rate and @p repeatDelay as the delay of keyboard @p kbIndex's repeat state and clears its count; func_0040CF88
+ * counts and func_0040C980 repeats. Unlike its neighbours it does not check @p kbIndex against the keyboard count.
  * func_003F6358 sets 30 and 2.
  *
- * @param a  the keyboard number
- * @param b  vertical blanks before the first repeat
- * @param c  vertical blanks between repeats
+ * @param kbIndex  the keyboard number
+ * @param repeatDelay  vertical blanks before the first repeat
+ * @param repeatRate  vertical blanks between repeats
  * @return 0, -11 for a negative delay or -12 for a negative rate
  */
-int func_0040C728(int a, int b, int c) {
-    int r;
-    r = -11;
-    if (b < 0)
-        return r;
-    if (c < 0)
+int func_0040C728(int kbIndex, int repeatDelay, int repeatRate) {
+    int errCode;
+    errCode = -11;
+    if (repeatDelay < 0)
+        return errCode;
+    if (repeatRate < 0)
         return -12;
-    D_00529004[a].rep.rate = c;
-    D_00529004[a].rep.delay = b;
-    D_00529004[a].rep.count = 0;
+    D_00529004[kbIndex].rep.rate = repeatRate;
+    D_00529004[kbIndex].rep.delay = repeatDelay;
+    D_00529004[kbIndex].rep.count = 0;
     return 0;
 }
 #endif
@@ -11780,19 +11780,19 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040C770);
 /**
  * Turns a keyboard's key-code translation on or off.
  *
- * Stores @p b in the keyboard's code type (f04), which func_0040D118 reads. func_003F6358 sets 0.
+ * Stores @p codeType in the keyboard's code type (f04), which func_0040D118 reads. func_003F6358 sets 0.
  *
- * @param a  the keyboard number
- * @param b  0 raw codes, 1 translated
+ * @param kbIndex  the keyboard number
+ * @param codeType  0 raw codes, 1 translated
  * @return 0, -11 for a bad keyboard or -12 for a bad type
  */
-int func_0040C770(int a, unsigned b) {
+int func_0040C770(int kbIndex, unsigned codeType) {
 
-    if (a >= D_00529000.n)
+    if (kbIndex >= D_00529000.n)
         return -11;
-    if (b >= 2)
+    if (codeType >= 2)
         return -12;
-    D_00529000.port[a].f04 = b;
+    D_00529000.port[kbIndex].f04 = codeType;
     return 0;
 }
 #endif
@@ -11803,18 +11803,18 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040C7C0);
 /**
  * Selects a keyboard's key layout table (0..2).
  *
- * Stores @p b in the keyboard's arrangement (f08), which func_0040D268 reads. func_002668A8 sets 0.
+ * Stores @p layout in the keyboard's arrangement (f08), which func_0040D268 reads. func_002668A8 sets 0.
  *
- * @param a  the keyboard number
- * @param b  the layout (0..2)
+ * @param kbIndex  the keyboard number
+ * @param layout  the layout (0..2)
  * @return 0, -11 for a bad keyboard or -12 for a bad layout
  */
-int func_0040C7C0(int a, unsigned b) {
-    if (a >= D_00529000.n)
+int func_0040C7C0(int kbIndex, unsigned layout) {
+    if (kbIndex >= D_00529000.n)
         return -11;
-    if (b >= 3)
+    if (layout >= 3)
         return -12;
-    D_00529000.port[a].f08 = b;
+    D_00529000.port[kbIndex].f08 = layout;
     return 0;
 }
 #endif
@@ -11863,9 +11863,9 @@ extern void iSignalSema(int);
 /**
  * End callback of every USB keyboard RPC: signals the semaphore D_00453438 from interrupt context.
  *
- * @param arg  the end-function argument (always 0, unused)
+ * @param callbackArg  the end-function argument (always 0, unused)
  */
-void func_0040C8B0(void *arg) {
+void func_0040C8B0(void *callbackArg) {
     iSignalSema(D_00453438);
 }
 #endif
@@ -11883,13 +11883,13 @@ extern int (*D_00453420[])(void);
  * @return the handler's result, or 0
  */
 int func_0040C8C0(void) {
-    int r = 0;
-    unsigned s = D_00529000.cmd;
-    if (s - 1 < 5)
-        r = D_00453420[s]();
+    int handlerResult = 0;
+    unsigned pendingCmd = D_00529000.cmd;
+    if (pendingCmd - 1 < 5)
+        handlerResult = D_00453420[pendingCmd]();
     D_00529000.cmd = 0;
     D_00529000.out = 0;
-    return r;
+    return handlerResult;
 }
 #endif
 
@@ -11907,17 +11907,17 @@ struct S40C928 { int n; int m; unsigned char d[1]; };
  * @return 0
  */
 int func_0040C928(void) {
-    struct S40C928 *p = (struct S40C928 *)D_00529098;
-    unsigned char *s = D_00529140;
+    struct S40C928 *infoOut = (struct S40C928 *)D_00529098;
+    unsigned char *recvBytes = D_00529140;
     int i = 0;
-    int n = s[0];
-    p->n = n;
-    p->m = s[1];
+    int n = recvBytes[0];
+    infoOut->n = n;
+    infoOut->m = recvBytes[1];
     if (n != 0) {
         do {
-            p->d[i] = s[2 + i];
+            infoOut->d[i] = recvBytes[2 + i];
             i++;
-        } while (i < p->n);
+        } while (i < infoOut->n);
     }
     return 0;
 }
@@ -11950,25 +11950,25 @@ extern int func_0040D118(int, unsigned char, unsigned char, int, unsigned short 
  */
 int func_0040C980(void) {
     sKbData cur;
-    unsigned short tmp[64];
+    unsigned short heldKeys[64];
     unsigned short key;
-    unsigned char *s = D_00529140;
+    unsigned char *recvBytes = D_00529140;
     sKbData *out = D_00529000.out;
-    sKbPort *e = &D_00529000.port[D_00529000.arg];
-    sKbRepeat *r = &e->rep;
+    sKbPort *kbPort = &D_00529000.port[D_00529000.arg];
+    sKbRepeat *repeat = &kbPort->rep;
     int i, j, k;
-    if (s[1] == 0xFF)
+    if (recvBytes[1] == 0xFF)
         return -1;
-    if (e->f0C == 1) {
-        out->led = s[0];
-        out->n = s[1];
-        out->mod = s[2];
+    if (kbPort->f0C == 1) {
+        out->led = recvBytes[0];
+        out->n = recvBytes[1];
+        out->mod = recvBytes[2];
         if (out->n == 0)
             return 0;
         j = 0;
         for (i = 0; i < out->n; i++) {
-            if (s[4 + i])
-                out->keys[j++] = s[4 + i];
+            if (recvBytes[4 + i])
+                out->keys[j++] = recvBytes[4 + i];
         }
         out->n = j;
         if (j == 0) {
@@ -11978,31 +11978,31 @@ int func_0040C980(void) {
         func_0040D118(D_00529000.arg, out->mod, out->led, out->n, out->keys, out->keys);
         return 0;
     }
-    switch (r->state) {
+    switch (repeat->state) {
     case 1:
-        if (r->count >= r->delay) {
-            r->count = 0;
+        if (repeat->count >= repeat->delay) {
+            repeat->count = 0;
             func_0040D010(D_00529000.arg);
-            if (r->delay >= 2)
+            if (repeat->delay >= 2)
                 func_0040D040(D_00529000.arg, 0);
-            func_0040D040(D_00529000.arg, r->last);
-            if (r->rate >= 2)
+            func_0040D040(D_00529000.arg, repeat->last);
+            if (repeat->rate >= 2)
                 func_0040D040(D_00529000.arg, 0);
-            r->state = 2;
+            repeat->state = 2;
         }
         break;
     case 2:
-        if (r->count >= r->rate) {
-            r->count = 0;
-            func_0040D040(D_00529000.arg, r->last);
-            if (r->rate >= 2)
+        if (repeat->count >= repeat->rate) {
+            repeat->count = 0;
+            func_0040D040(D_00529000.arg, repeat->last);
+            if (repeat->rate >= 2)
                 func_0040D040(D_00529000.arg, 0);
         }
         break;
     case 0:
         break;
     }
-    if (s[1] == 0) {
+    if (recvBytes[1] == 0) {
         if (func_0040D0B0(D_00529000.arg, &key) == 0) {
             out->n = 1;
             out->keys[0] = key;
@@ -12013,28 +12013,28 @@ int func_0040C980(void) {
         }
         return 0;
     }
-    if (s[4] == 1) {
-        r->state = 0;
+    if (recvBytes[4] == 1) {
+        repeat->state = 0;
         out->n = 0;
         return 0;
     }
-    cur.led = s[0];
-    cur.n = s[1];
-    cur.mod = s[2];
+    cur.led = recvBytes[0];
+    cur.n = recvBytes[1];
+    cur.mod = recvBytes[2];
     j = 0;
     for (i = 0; i < cur.n; i++) {
-        if (s[4 + i])
-            cur.keys[j++] = s[4 + i];
+        if (recvBytes[4 + i])
+            cur.keys[j++] = recvBytes[4 + i];
     }
     cur.n = j;
     func_0040D010(D_00529000.arg);
     if (cur.keys[0] == 0 || cur.mod != D_00529000.prev.mod) {
         out->keys[0] = 0;
         out->n = 1;
-        r->last = 0;
+        repeat->last = 0;
         out->led = cur.led;
         out->mod = cur.mod;
-        r->state = 0;
+        repeat->state = 0;
     } else {
         if (D_00529000.prev.keys[0] != 0) {
             k = 0;
@@ -12054,15 +12054,15 @@ int func_0040C980(void) {
         out->mod = cur.mod;
         func_0040D118(D_00529000.arg, out->mod, out->led, out->n, out->keys, out->keys);
         if (out->n > 0) {
-            r->last = out->keys[out->n - 1];
-            if (r->delay > 0 && r->rate > 0)
-                r->state = 1;
+            repeat->last = out->keys[out->n - 1];
+            if (repeat->delay > 0 && repeat->rate > 0)
+                repeat->state = 1;
         } else {
-            func_0040D118(D_00529000.arg, cur.mod, cur.led, cur.n, cur.keys, tmp);
-            for (i = 0; i < cur.n && tmp[i] != r->last; i++)
+            func_0040D118(D_00529000.arg, cur.mod, cur.led, cur.n, cur.keys, heldKeys);
+            for (i = 0; i < cur.n && heldKeys[i] != repeat->last; i++)
                 ;
             if (i == cur.n) {
-                r->state = 0;
+                repeat->state = 0;
                 out->n = 1;
                 out->keys[0] = 0;
                 out->led = cur.led;
@@ -12092,14 +12092,14 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040CEF8);
  * @return 0, or -1 when the reply reports an error
  */
 int func_0040CEF8(void) {
-    unsigned char *s = D_00529140;
-    unsigned char *d = D_00529098;
+    unsigned char *recvBytes = D_00529140;
+    unsigned char *locationOut = D_00529098;
     int i;
-    if (s[6])
+    if (recvBytes[6])
         return -1;
     i = 6;
     do {
-        *d = *s; i--; s++; d++;
+        *locationOut = *recvBytes; i--; recvBytes++; locationOut++;
     } while (i >= 0);
     return 0;
 }
@@ -12150,9 +12150,9 @@ int func_0040CF88(void) {
     int i;
 
     for (i = 0; i < D_00529000.n; i++) {
-        sKbRepeat *v = &D_00529000.port[i].rep;
-        if (v->delay > 0 && v->rate > 0 && v->state != 0 && v->state >= 0 && v->state < 3)
-            v->count++;
+        sKbRepeat *repeat = &D_00529000.port[i].rep;
+        if (repeat->delay > 0 && repeat->rate > 0 && repeat->state != 0 && repeat->state >= 0 && repeat->state < 3)
+            repeat->count++;
     }
     SYNC_0810();
     EI_0810();
@@ -12170,11 +12170,11 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040D010);
  * @return 0
  */
 int func_0040D010(int i) {
-    sKbRepeat *p = &D_00529004[i].rep;
-    p->n = 0;
-    p->wr = 0;
-    p->rd = 0;
-    p->count = 0;
+    sKbRepeat *repeat = &D_00529004[i].rep;
+    repeat->n = 0;
+    repeat->wr = 0;
+    repeat->rd = 0;
+    repeat->count = 0;
     return 0;
 }
 #endif
@@ -12185,18 +12185,18 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040D040);
 /**
  * Queues a key code in a keyboard's 4-entry key ring.
  *
- * @param a  the keyboard number
- * @param b  the key code
+ * @param kbIndex  the keyboard number
+ * @param keyCode  the key code
  * @return 0, or -1 when the ring is full
  */
-int func_0040D040(int a, unsigned short b) {
-    sKbRepeat *q = &D_00529004[a].rep;
-    if (q->n >= 4)
+int func_0040D040(int kbIndex, unsigned short keyCode) {
+    sKbRepeat *repeat = &D_00529004[kbIndex].rep;
+    if (repeat->n >= 4)
         return -1;
-    q->ring[q->wr++] = b;
-    if (q->wr >= 4)
-        q->wr = 0;
-    q->n++;
+    repeat->ring[repeat->wr++] = keyCode;
+    if (repeat->wr >= 4)
+        repeat->wr = 0;
+    repeat->n++;
     return 0;
 }
 #endif
@@ -12207,18 +12207,18 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040D0B0);
 /**
  * Takes the oldest key code from a keyboard's 4-entry key ring.
  *
- * @param a  the keyboard number
+ * @param kbIndex  the keyboard number
  * @param out  receives the key code
  * @return 0, or -1 when the ring is empty
  */
-int func_0040D0B0(int a, unsigned short *out) {
-    sKbRepeat *q = &D_00529004[a].rep;
-    if (q->n <= 0)
+int func_0040D0B0(int kbIndex, unsigned short *out) {
+    sKbRepeat *repeat = &D_00529004[kbIndex].rep;
+    if (repeat->n <= 0)
         return -1;
-    *out = q->ring[q->rd++];
-    if (q->rd >= 4)
-        q->rd = 0;
-    q->n--;
+    *out = repeat->ring[repeat->rd++];
+    if (repeat->rd >= 4)
+        repeat->rd = 0;
+    repeat->n--;
     return 0;
 }
 #endif
@@ -12231,21 +12231,21 @@ extern short q_0040D268(int, int, int, unsigned short) __asm__("func_0040D268");
  * Copies a keyboard's raw key codes to an output list, converting them when its code type asks.
  *
  * Stops after @p n codes or at a 0 code. With code type 0 (f04) the codes are copied unchanged; with 1 each is
- * converted by func_0040D268 using the keyboard's arrangement (f08), @p b and @p c. Any other code type writes nothing.
+ * converted by func_0040D268 using the keyboard's arrangement (f08), @p modKeys and @p ledState. Any other code type writes nothing.
  *
  * @param idx  the keyboard number
- * @param b  the modifier-key bits
- * @param c  the LED state
+ * @param modKeys  the modifier-key bits
+ * @param ledState  the LED state
  * @param n  the number of codes
  * @param src  the raw codes
  * @param dst  receives the codes (may equal @p src)
  * @return the number of codes written
  */
-int func_0040D118(int idx, unsigned char b, unsigned char c, int n, unsigned short *src, unsigned short *dst) {
-    sKbPort *e = &D_00529004[idx];
+int func_0040D118(int idx, unsigned char modKeys, unsigned char ledState, int n, unsigned short *src, unsigned short *dst) {
+    sKbPort *kbPort = &D_00529004[idx];
     int i;
-    int r = 0;
-    switch (e->f04) {
+    int keyCount = 0;
+    switch (kbPort->f04) {
     case 0:
         i = 0;
         if (n > 0 && src[0] != 0) {
@@ -12254,20 +12254,20 @@ int func_0040D118(int idx, unsigned char b, unsigned char c, int n, unsigned sho
                 i++;
             } while (i < n && src[i] != 0);
         }
-        r = i;
+        keyCount = i;
         break;
     case 1:
         i = 0;
         if (n > 0 && src[0] != 0) {
             do {
-                dst[i] = q_0040D268(e->f08, b, c, src[i]);
+                dst[i] = q_0040D268(kbPort->f08, modKeys, ledState, src[i]);
                 i++;
             } while (i < n && src[i] != 0);
         }
-        r = i;
+        keyCount = i;
         break;
     }
-    return r;
+    return keyCount;
 }
 #endif
 
@@ -12284,22 +12284,22 @@ extern unsigned short u268_0040D3C0(int, int) __asm__("func_0040D3C0");
  * Converts one raw USB key code into a character code for a key layout.
  *
  * @p mode picks the table D_004983C8, D_004987C8 or D_00498BC8 (each 256 plain entries, then 256 for Shift, used when
- * @p a has a Shift bit, 0x02 or 0x20). Code 0 gives 0 and codes from 0x100 come back unchanged. A table value of 0x4000
+ * @p modKeys has a Shift bit, 0x02 or 0x20). Code 0 gives 0 and codes from 0x100 come back unchanged. A table value of 0x4000
  * marks a keypad key, converted by func_0040D3C0 with the LED state; 0x8000 returns the raw code with bit 15 set. With
  * Caps Lock (LED bit 1) lower-case letters turn upper-case, and back to lower-case when Shift is held too.
  *
  * Likely bug: another @p mode prints "Arrangement error!" and then reads the null table for codes 1..0xFF.
  *
  * @param mode  the layout (0..2)
- * @param a  the modifier-key bits
- * @param b  the LED state
+ * @param modKeys  the modifier-key bits
+ * @param ledState  the LED state
  * @param ch  the raw key code
  * @return the character code
  */
-unsigned short func_0040D268(int mode, int a, int b, unsigned short ch) {
+unsigned short func_0040D268(int mode, int modKeys, int ledState, unsigned short ch) {
     unsigned short *tbl = 0;
-    unsigned short v;
-    int up = (a & 0x22) != 0;
+    unsigned short charCode;
+    int up = (modKeys & 0x22) != 0;
     switch (mode) {
     case 0:
         tbl = (unsigned short *)(D_004983C8 + (up << 9));
@@ -12318,20 +12318,20 @@ unsigned short func_0040D268(int mode, int a, int b, unsigned short ch) {
         return 0;
     if (ch >= 0x100)
         return ch;
-    v = tbl[ch];
-    if (v == 0x4000)
-        v = u268_0040D3C0(b & 0xFF, ch & 0xFF);
-    if (v == 0x8000)
-        v = ch | 0x8000;
-    if ((unsigned short)(v - 97) < 26 && (b & 2))
-        v -= 0x20;
-    if ((unsigned short)(v - 65) < 26) {
-        if (b & 2) {
+    charCode = tbl[ch];
+    if (charCode == 0x4000)
+        charCode = u268_0040D3C0(ledState & 0xFF, ch & 0xFF);
+    if (charCode == 0x8000)
+        charCode = ch | 0x8000;
+    if ((unsigned short)(charCode - 97) < 26 && (ledState & 2))
+        charCode -= 0x20;
+    if ((unsigned short)(charCode - 65) < 26) {
+        if (ledState & 2) {
             if (up)
-                v += 0x20;
+                charCode += 0x20;
         }
     }
-    return v;
+    return charCode;
 }
 #endif
 
@@ -12343,23 +12343,23 @@ extern struct K_D3C0 D_00498FC8[2][21];
 /**
  * Converts a keypad key's raw code for the Num Lock state.
  *
- * Looks the code up in the 21-entry table D_00498FC8[@p a & 1] (Num Lock is LED bit 0) and returns the matching code
+ * Looks the code up in the 21-entry table D_00498FC8[@p ledState & 1] (Num Lock is LED bit 0) and returns the matching code
  * with bit 0x4000 set; codes not in the table come back unchanged.
  *
- * @param a  the LED state
- * @param b  the raw key code
+ * @param ledState  the LED state
+ * @param rawCode  the raw key code
  * @return the converted code
  */
-unsigned short func_0040D3C0(int a, unsigned char b) {
+unsigned short func_0040D3C0(int ledState, unsigned char rawCode) {
     unsigned i;
-    int r = b;
+    int keyCode = rawCode;
     for (i = 0; i < 21; i++) {
-        if (b == D_00498FC8[a & 1][i].k) {
-            r = D_00498FC8[a & 1][i].v | 0x4000;
+        if (rawCode == D_00498FC8[ledState & 1][i].k) {
+            keyCode = D_00498FC8[ledState & 1][i].v | 0x4000;
             break;
         }
     }
-    return r;
+    return keyCode;
 }
 #endif
 
@@ -12372,26 +12372,26 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040D430);
  * When the mode changes it clears the keyboard's repeat count, ring positions and repeated key and the previous
  * report's key count. func_0040C980 returns raw reports while the mode (f0C) is 1. func_002668A8 sets 0.
  *
- * @param a  the keyboard number
- * @param b  0 converted keys, 1 raw reports
+ * @param kbIndex  the keyboard number
+ * @param readMode  0 converted keys, 1 raw reports
  * @return 0, -11 for a bad keyboard or -12 for a bad mode
  */
-int func_0040D430(int a, unsigned b) {
-    sKbPort *e;
-    if (a >= D_00529000.n)
+int func_0040D430(int kbIndex, unsigned readMode) {
+    sKbPort *kbPort;
+    if (kbIndex >= D_00529000.n)
         return -11;
-    if (b >= 2)
+    if (readMode >= 2)
         return -12;
     /* int-arithmetic address (the typed &D_00529000.port[a] swaps the addu operands) */
-    e = (sKbPort *)((char *)(a * 0x38) + (int)D_00529000.port);
-    if (b != e->f0C) {
-        e->rep.count = 0;
-        e->rep.wr = 0;
-        e->rep.rd = 0;
+    kbPort = (sKbPort *)((char *)(kbIndex * 0x38) + (int)D_00529000.port);
+    if (readMode != kbPort->f0C) {
+        kbPort->rep.count = 0;
+        kbPort->rep.wr = 0;
+        kbPort->rep.rd = 0;
         D_00529000.prev.n = 0;
-        e->rep.last = 0;
+        kbPort->rep.last = 0;
     }
-    e->f0C = b;
+    kbPort->f0C = readMode;
     return 0;
 }
 #endif
@@ -12408,30 +12408,30 @@ extern void q_00425C60(char *, int) __asm__("func_00425C60");
  *
  * Quirks: a failed call prints the message of the read call (D_004982F8) and returns with the semaphore still taken.
  *
- * @param a  the keyboard number
+ * @param kbIndex  the keyboard number
  * @return 0, -1 before initialisation, -11 for a bad keyboard or -2 when the call failed
  */
-int func_0040D4A0(unsigned a) {
-    int r;
-    sKbPort *e;
+int func_0040D4A0(unsigned kbIndex) {
+    int rpcResult;
+    sKbPort *kbPort;
     if (D_00453438 == -1)
         return -1;
-    if (a >= D_00529000.n)
+    if (kbIndex >= D_00529000.n)
         return -11;
-    D_00529100[0] = a;
+    D_00529100[0] = kbIndex;
     WaitSema(D_00453438);
-    r = sceSifCallRpc(&D_005290A0, 6, 1, D_00529100, 16, D_00529140, 0, func_0040C8B0, 0);
-    if (r != 0) {
-        q_00425C60(D_004982F8, r);
+    rpcResult = sceSifCallRpc(&D_005290A0, 6, 1, D_00529100, 16, D_00529140, 0, func_0040C8B0, 0);
+    if (rpcResult != 0) {
+        q_00425C60(D_004982F8, rpcResult);
         return -2;
     }
-    e = &D_00529000.port[a];
-    e->rep.state = 0;
-    e->rep.count = 0;
-    e->rep.last = 0;
-    e->rep.wr = 0;
-    e->rep.rd = 0;
-    e->rep.n = 0;
+    kbPort = &D_00529000.port[kbIndex];
+    kbPort->rep.state = 0;
+    kbPort->rep.count = 0;
+    kbPort->rep.last = 0;
+    kbPort->rep.wr = 0;
+    kbPort->rep.rd = 0;
+    kbPort->rep.n = 0;
     return 0;
 }
 #endif
@@ -12497,35 +12497,35 @@ extern int *func_00415FB8(void);
  * @return the logarithm, or the error record's result
  */
 double func_0040D610(double x) {
-    struct E40D610 e;
+    struct E40D610 mathErr;
     double zero;
     double z = core_40D610(x);
     int ver = D_00499688[0];
     if (ver == -1 || isn_40D610(x) || (zero = 0.0, cmp_40D610(x, zero) > 0))
         return z;
-    e.err = 0;
-    e.name = D_00499070;
-    e.arg2 = e.arg1 = x;
+    mathErr.err = 0;
+    mathErr.name = D_00499070;
+    mathErr.arg2 = mathErr.arg1 = x;
     if (ver == 0)
-        e.retval = -3.4028234663852886e+38;
+        mathErr.retval = -3.4028234663852886e+38;
     else
-        e.retval = dpsub(zero, D_00499680[0]);
+        mathErr.retval = dpsub(zero, D_00499680[0]);
     if (cmp_40D610(x, 0.0) == 0) {
-        e.type = 2;
+        mathErr.type = 2;
         if (D_00499688[0] == 2)
             *func_00415FB8() = 34;
-        else if (!matherr_40D610(&e))
+        else if (!matherr_40D610(&mathErr))
             *func_00415FB8() = 33;
     } else {
-        e.type = 1;
+        mathErr.type = 1;
         if (D_00499688[0] == 2)
             *func_00415FB8() = 33;
-        else if (!matherr_40D610(&e))
+        else if (!matherr_40D610(&mathErr))
             *func_00415FB8() = 33;
     }
-    if (e.err != 0)
-        *func_00415FB8() = e.err;
-    return e.retval;
+    if (mathErr.err != 0)
+        *func_00415FB8() = mathErr.err;
+    return mathErr.retval;
 }
 #endif
 
@@ -12892,7 +12892,7 @@ P5_E048   =  4.1381369442e-08; /* 0x3331bb4c */
 	 */
 	float func_0040E048(float x)	/* default IEEE double exp */
 {
-	float y,hi,lo,c,t;
+	float y,hi,lo,polyCorr,t;
 	int k,xsb;
 	unsigned int hx;
 
@@ -12929,9 +12929,9 @@ P5_E048   =  4.1381369442e-08; /* 0x3331bb4c */
 
     /* x is now in primary range */
 	t  = x*x;
-	c  = x - t*(P1_E048+t*(P2_E048+t*(P3_E048+t*(P4_E048+t*P5_E048))));
-	if(k==0) 	return one_E048-((x*c)/(c-(float)2.0)-x);
-	else 		y = one_E048-((lo-(x*c)/((float)2.0-c))-hi);
+	polyCorr  = x - t*(P1_E048+t*(P2_E048+t*(P3_E048+t*(P4_E048+t*P5_E048))));
+	if(k==0) 	return one_E048-((x*polyCorr)/(polyCorr-(float)2.0)-x);
+	else 		y = one_E048-((lo-(x*polyCorr)/((float)2.0-polyCorr))-hi);
 	if(k >= -125) {
 	    unsigned int hy;
 	    GET_FLOAT_WORD_E048(hy,y);
@@ -13219,7 +13219,7 @@ pio2_3t_E878 =  6.1232342629e-17; /* 0x248d3132 */
 	 */
 	int func_0040E878(float x, float *y)
 {
-	float z,w,t,r,fn;
+	float z,w,reduceBase,remainder,fn;
 	float tx[3];
 	int i,j,n,ix,hx;
 	int e0,nx;
@@ -13254,37 +13254,37 @@ pio2_3t_E878 =  6.1232342629e-17; /* 0x248d3132 */
 	    }
 	}
 	if(ix<=0x43490f80) { /* |x| ~<= 2^7*(pi/2), medium size */
-	    t  = func_0040F8A0(x);
-	    n  = (int) (t*invpio2_E878+half_E878);
+	    reduceBase  = func_0040F8A0(x);
+	    n  = (int) (reduceBase*invpio2_E878+half_E878);
 	    fn = (float)n;
-	    r  = t-fn*pio2_1_E878;
+	    remainder  = reduceBase-fn*pio2_1_E878;
 	    w  = fn*pio2_1t_E878;	/* 1st round good to 40 bit */
 	    if(n<32&&(ix&0xffffff00)!=npio2_hw_E878[n-1]) {
-		y[0] = r-w;	/* quick check no cancellation */
+		y[0] = remainder-w;	/* quick check no cancellation */
 	    } else {
 	        unsigned int high;
 	        j  = ix>>23;
-	        y[0] = r-w;
+	        y[0] = remainder-w;
 		GET_FLOAT_WORD_E878(high,y[0]);
 	        i = j-((high>>23)&0xff);
 	        if(i>8) {  /* 2nd iteration needed, good to 57 */
-		    t  = r;
+		    reduceBase  = remainder;
 		    w  = fn*pio2_2_E878;
-		    r  = t-w;
-		    w  = fn*pio2_2t_E878-((t-r)-w);
-		    y[0] = r-w;
+		    remainder  = reduceBase-w;
+		    w  = fn*pio2_2t_E878-((reduceBase-remainder)-w);
+		    y[0] = remainder-w;
 		    GET_FLOAT_WORD_E878(high,y[0]);
 		    i = j-((high>>23)&0xff);
 		    if(i>25)  {	/* 3rd iteration need, 74 bits acc */
-		    	t  = r;	/* will cover all possible cases */
+		    	reduceBase  = remainder;	/* will cover all possible cases */
 		    	w  = fn*pio2_3_E878;
-		    	r  = t-w;
-		    	w  = fn*pio2_3t_E878-((t-r)-w);
-		    	y[0] = r-w;
+		    	remainder  = reduceBase-w;
+		    	w  = fn*pio2_3t_E878-((reduceBase-remainder)-w);
+		    	y[0] = remainder-w;
 		    }
 		}
 	    }
-	    y[1] = (r-y[0])-w;
+	    y[1] = (remainder-y[0])-w;
 	    if(hx<0) 	{y[0] = -y[0]; y[1] = -y[1]; return -n;}
 	    else	 return n;
 	}
@@ -13334,7 +13334,7 @@ twon8_EC58  =  3.9062500000e-03; /* 0x3b800000 */
 	/**
 	 * Reduces a huge float angle modulo pi/2 by multiplying it with enough bits of 2/pi.
 	 *
-	 * @p x holds the angle as @p nx 8-bit chunks with @p e0 the exponent of the first. It multiplies them with terms of @p
+	 * @p x holds the angle as @p nx 8-bit chunks with @p xExponent the exponent of the first. It multiplies them with terms of @p
 	 * ipio2 (as floats), distils the products into 8-bit integers, takes the integer part modulo 8 as the quadrant and
 	 * recomputes with more terms while the fraction has lost precision. The fraction goes to @p y in one, two or three
 	 * floats depending on @p prec (term counts D_004995E8, pi/2 pieces D_004995F8). Uses func_0040F9F8 and func_0040F8E8.
@@ -13342,16 +13342,16 @@ twon8_EC58  =  3.9062500000e-03; /* 0x3b800000 */
 	 *
 	 * @param x  the input chunks
 	 * @param y  receives the remainder
-	 * @param e0  the exponent of x[0]
+	 * @param xExponent  the exponent of x[0]
 	 * @param nx  the number of chunks
 	 * @param prec  the precision class (0..3)
 	 * @param ipio2  the integer bits of 2/pi
 	 * @return the quadrant (0..7)
 	 */
-	int func_0040EC58(float *x, float *y, int e0, int nx, int prec, const int *ipio2)
+	int func_0040EC58(float *x, float *y, int xExponent, int nx, int prec, const int *ipio2)
 {
-	int jz,jx,jv,jp,jk,carry,n,iq[20],i,j,k,m,q0,ih;
-	float z,fw,f[20],fq[20],q[20];
+	int jz,jx,jv,jp,jk,carry,n,iq[20],i,j,k,lastTerm,qExponent,ih;
+	float z,fw,piTerms[20],fq[20],products[20];
 
     /* initialize jk*/
 	jk = init_jk_EC58[prec];
@@ -13359,39 +13359,39 @@ twon8_EC58  =  3.9062500000e-03; /* 0x3b800000 */
 
     /* determine jx,jv,q0, note that 3>q0 */
 	jx =  nx-1;
-	jv = (e0-3)/8; if(jv<0) jv=0;
-	q0 =  e0-8*(jv+1);
+	jv = (xExponent-3)/8; if(jv<0) jv=0;
+	qExponent =  xExponent-8*(jv+1);
 
     /* set up f[0] to f[jx+jk] where f[jx+jk] = ipio2[jv+jk] */
-	j = jv-jx; m = jx+jk;
-	for(i=0;i<=m;i++,j++) f[i] = (j<0)? zero_EC58 : (float) ipio2[j];
+	j = jv-jx; lastTerm = jx+jk;
+	for(i=0;i<=lastTerm;i++,j++) piTerms[i] = (j<0)? zero_EC58 : (float) ipio2[j];
 
     /* compute q[0],q[1],...q[jk] */
 	for (i=0;i<=jk;i++) {
-	    for(j=0,fw=0.0;j<=jx;j++) fw += x[j]*f[jx+i-j]; q[i] = fw;
+	    for(j=0,fw=0.0;j<=jx;j++) fw += x[j]*piTerms[jx+i-j]; products[i] = fw;
 	}
 
 	jz = jk;
 recompute:
     /* distill q[] into iq[] reversingly */
-	for(i=0,j=jz,z=q[jz];j>0;i++,j--) {
+	for(i=0,j=jz,z=products[jz];j>0;i++,j--) {
 	    fw    =  (float)((int)(twon8_EC58* z));
 	    iq[i] =  (int)(z-two8_EC58*fw);
-	    z     =  q[j-1]+fw;
+	    z     =  products[j-1]+fw;
 	}
 
     /* compute n */
-	z  = scalbnf_EC58(z,(int)q0);	/* actual value of z */
+	z  = scalbnf_EC58(z,(int)qExponent);	/* actual value of z */
 	z -= (float)8.0*floorf_EC58(z*(float)0.125);	/* trim off integer >= 8 */
 	n  = (int) z;
 	z -= (float)n;
 	ih = 0;
-	if(q0>0) {	/* need iq[jz-1] to determine n */
-	    i  = (iq[jz-1]>>(8-q0)); n += i;
-	    iq[jz-1] -= i<<(8-q0);
-	    ih = iq[jz-1]>>(7-q0);
+	if(qExponent>0) {	/* need iq[jz-1] to determine n */
+	    i  = (iq[jz-1]>>(8-qExponent)); n += i;
+	    iq[jz-1] -= i<<(8-qExponent);
+	    ih = iq[jz-1]>>(7-qExponent);
 	} 
-	else if(q0==0) ih = iq[jz-1]>>8;
+	else if(qExponent==0) ih = iq[jz-1]>>8;
 	else if(z>=(float)0.5) ih=2;
 
 	if(ih>0) {	/* q > 0.5 */
@@ -13404,8 +13404,8 @@ recompute:
 		    }
 		} else  iq[i] = 0xff - j;
 	    }
-	    if(q0>0) {		/* rare case: chance is 1 in 12 */
-	        switch(q0) {
+	    if(qExponent>0) {		/* rare case: chance is 1 in 12 */
+	        switch(qExponent) {
 	        case 1:
 	    	   iq[jz-1] &= 0x7f; break;
 	    	case 2:
@@ -13414,7 +13414,7 @@ recompute:
 	    }
 	    if(ih==2) {
 		z = one_EC58 - z;
-		if(carry!=0) z -= scalbnf_EC58(one_EC58,(int)q0);
+		if(carry!=0) z -= scalbnf_EC58(one_EC58,(int)qExponent);
 	    }
 	}
 
@@ -13426,9 +13426,9 @@ recompute:
 		for(k=1;iq[jk-k]==0;k++);   /* k = no. of terms needed */
 
 		for(i=jz+1;i<=jz+k;i++) {   /* add q[jz+1] to q[jz+k] */
-		    f[jx+i] = (float) ipio2[jv+i];
-		    for(j=0,fw=0.0;j<=jx;j++) fw += x[j]*f[jx+i-j];
-		    q[i] = fw;
+		    piTerms[jx+i] = (float) ipio2[jv+i];
+		    for(j=0,fw=0.0;j<=jx;j++) fw += x[j]*piTerms[jx+i-j];
+		    products[i] = fw;
 		}
 		jz += k;
 		goto recompute;
@@ -13437,27 +13437,27 @@ recompute:
 
     /* chop off zero terms */
 	if(z==(float)0.0) {
-	    jz -= 1; q0 -= 8;
-	    while(iq[jz]==0) { jz--; q0-=8;}
+	    jz -= 1; qExponent -= 8;
+	    while(iq[jz]==0) { jz--; qExponent-=8;}
 	} else { /* break z into 8-bit if necessary */
-	    z = scalbnf_EC58(z,-(int)q0);
+	    z = scalbnf_EC58(z,-(int)qExponent);
 	    if(z>=two8_EC58) { 
 		fw = (float)((int)(twon8_EC58*z));
 		iq[jz] = (int)(z-two8_EC58*fw);
-		jz += 1; q0 += 8;
+		jz += 1; qExponent += 8;
 		iq[jz] = (int) fw;
 	    } else iq[jz] = (int) z ;
 	}
 
     /* convert integer "bit" chunk to floating-point value */
-	fw = scalbnf_EC58(one_EC58,(int)q0);
+	fw = scalbnf_EC58(one_EC58,(int)qExponent);
 	for(i=jz;i>=0;i--) {
-	    q[i] = fw*(float)iq[i]; fw*=twon8_EC58;
+	    products[i] = fw*(float)iq[i]; fw*=twon8_EC58;
 	}
 
     /* compute PIo2[0,...,jp]*q[jz,...,0] */
 	for(i=jz;i>=0;i--) {
-	    for(fw=0.0,k=0;k<=jp&&k<=jz-i;k++) fw += PIo2_EC58[k]*q[i+k];
+	    for(fw=0.0,k=0;k<=jp&&k<=jz-i;k++) fw += PIo2_EC58[k]*products[i+k];
 	    fq[jz-i] = fw;
 	}
 
@@ -13548,7 +13548,7 @@ pio4lo_F5A8=  3.7748947079e-08; /* 0x33222168 */
 	 */
 	float func_0040F5A8(float x, float y, int iy)
 {
-	float z,r,v,w,s;
+	float z,polyTail,v,w,s;
 	int ix,hx;
 	GET_FLOAT_WORD_F5A8(hx,x);
 	ix = hx&0x7fffffff;	/* high word of |x| */
@@ -13570,31 +13570,31 @@ pio4lo_F5A8=  3.7748947079e-08; /* 0x33222168 */
      *	  x^5(T[1]+x^4*T[3]+...+x^20*T[11]) +
      *	  x^5(x^2*(T[2]+x^4*T[4]+...+x^22*[T12]))
      */
-	r = T_F5A8[1]+w*(T_F5A8[3]+w*(T_F5A8[5]+w*(T_F5A8[7]+w*(T_F5A8[9]+w*T_F5A8[11]))));
+	polyTail = T_F5A8[1]+w*(T_F5A8[3]+w*(T_F5A8[5]+w*(T_F5A8[7]+w*(T_F5A8[9]+w*T_F5A8[11]))));
 	v = z*(T_F5A8[2]+w*(T_F5A8[4]+w*(T_F5A8[6]+w*(T_F5A8[8]+w*(T_F5A8[10]+w*T_F5A8[12])))));
 	s = z*x;
-	r = y + z*(s*(r+v)+y);
-	r += T_F5A8[0]*s;
-	w = x+r;
+	polyTail = y + z*(s*(polyTail+v)+y);
+	polyTail += T_F5A8[0]*s;
+	w = x+polyTail;
 	if(ix>=0x3f2ca140) {
 	    v = (float)iy;
-	    return (float)(1-((hx>>30)&2))*(v-(float)2.0*(x-(w*w/(w+v)-r)));
+	    return (float)(1-((hx>>30)&2))*(v-(float)2.0*(x-(w*w/(w+v)-polyTail)));
 	}
 	if(iy==1) return w;
 	else {		/* if allow error up to 2 ulp,
 			   simply return -1.0/(x+r) here */
      /*  compute -1.0/(x+r) accurately */
-	    float a,t;
+	    float negRecip,t;
 	    int i;
 	    z  = w;
 	    GET_FLOAT_WORD_F5A8(i,z);
 	    SET_FLOAT_WORD_F5A8(z,i&0xfffff000);
-	    v  = r-(z - x); 	/* z+v = r+x */
-	    t = a  = -(float)1.0/w;	/* a = -1.0/w */
+	    v  = polyTail-(z - x); 	/* z+v = r+x */
+	    t = negRecip  = -(float)1.0/w;	/* a = -1.0/w */
 	    GET_FLOAT_WORD_F5A8(i,t);
 	    SET_FLOAT_WORD_F5A8(t,i&0xfffff000);
 	    s  = (float)1.0+t*z;
-	    return t+a*(s+t*v);
+	    return t+negRecip*(s+t*v);
 	}
 }
 #endif
@@ -13869,15 +13869,15 @@ extern void (**D_0045343C[])(void);
  * The pointer walks a null-terminated list and is advanced before each call, so a destructor that ends the program does
  * not run twice. func_00411310 calls it first, passing its status, which is ignored.
  *
- * @param a  the status of the caller (unused)
+ * @param exitStatus  the status of the caller (unused)
  */
-void func_0040FB88(int a) {
-    void (**p)(void);
+void func_0040FB88(int exitStatus) {
+    void (**dtorSlot)(void);
     while (*D_0045343C[0]) {
-        p = D_0045343C[0];
-        p++;
-        D_0045343C[0] = p;
-        p[-1]();
+        dtorSlot = D_0045343C[0];
+        dtorSlot++;
+        D_0045343C[0] = dtorSlot;
+        dtorSlot[-1]();
     }
 }
 #endif

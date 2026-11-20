@@ -909,61 +909,61 @@ extern int D_0052ADD8[];
  * @return x / y
  */
 float func_004135E8(float x, float y) {
-    int a[4];
-    int b[4];
+    int dividend[4];
+    int divisor[4];
     float fx = x;
     float fy = y;
-    int *r;
-    unsigned n, d, q, bit;
-    int *p;
-    func_00413068(&fx, a);
-    func_00413068(&fy, b);
-    p = a;
-    if ((unsigned)a[0] < 2) {
-        r = a;
-    } else if ((unsigned)b[0] < 2) {
-        r = b;
+    int *result;
+    unsigned n, divisorFraction, quotient, bit;
+    int *quotientParts;
+    func_00413068(&fx, dividend);
+    func_00413068(&fy, divisor);
+    quotientParts = dividend;
+    if ((unsigned)dividend[0] < 2) {
+        result = dividend;
+    } else if ((unsigned)divisor[0] < 2) {
+        result = divisor;
     } else {
-        a[1] ^= b[1];
-        if ((a[0] ^ 4) == 0 || (a[0] ^ 2) == 0) {
-            r = a;
-            if (a[0] == b[0])
-                r = D_0052ADD8;
-        } else if ((b[0] ^ 4) == 0) {
-            a[3] = 0;
-            a[2] = 0;
-            r = a;
-        } else if ((b[0] ^ 2) == 0) {
-            a[0] = 4;
-            r = a;
+        dividend[1] ^= divisor[1];
+        if ((dividend[0] ^ 4) == 0 || (dividend[0] ^ 2) == 0) {
+            result = dividend;
+            if (dividend[0] == divisor[0])
+                result = D_0052ADD8;
+        } else if ((divisor[0] ^ 4) == 0) {
+            dividend[3] = 0;
+            dividend[2] = 0;
+            result = dividend;
+        } else if ((divisor[0] ^ 2) == 0) {
+            dividend[0] = 4;
+            result = dividend;
         } else {
-            a[2] = a[2] - b[2];
-            n = a[3];
-            d = b[3];
-            if (n < d) {
-                a[2]--;
+            dividend[2] = dividend[2] - divisor[2];
+            n = dividend[3];
+            divisorFraction = divisor[3];
+            if (n < divisorFraction) {
+                dividend[2]--;
                 n <<= 1;
             }
             bit = 0x40000000;
-            q = 0;
+            quotient = 0;
             for (; bit != 0; bit >>= 1) {
-                if (n >= d) {
-                    q |= bit;
-                    n -= d;
+                if (n >= divisorFraction) {
+                    quotient |= bit;
+                    n -= divisorFraction;
                 }
                 n <<= 1;
             }
-            if ((q & 0x7F) == 0x40) {
-                if (q & 0x80)
-                    q += 0x40;
+            if ((quotient & 0x7F) == 0x40) {
+                if (quotient & 0x80)
+                    quotient += 0x40;
                 else if (n != 0)
-                    q += 0x40;
+                    quotient += 0x40;
             }
-            p[3] = q;
-            r = p;
+            quotientParts[3] = quotient;
+            result = quotientParts;
         }
     }
-    return func_00412F58_f(r);
+    return func_00412F58_f(result);
 }
 #endif
 
@@ -1688,29 +1688,29 @@ extern int strlen(char *);
  * augmentation then skips its ULEB128-sized data block.
  *
  * @param cie  the FDE whose CIE is read
- * @param o    receives the CIE fields (augmentation string at +0)
+ * @param cieInfo    receives the CIE fields (augmentation string at +0)
  * @return the CIE's first call-frame instruction, or 0 for an unknown augmentation
  */
-unsigned char *func_00414230(int *cie, struct C14230 *o) {
-    char *s;
-    unsigned char *p;
-    unsigned tmp;
-    o->aug = (char *)cie - cie[1] + 13;
-    if (func_004165A8((int)o->aug, (int)D_004998F0) == 0 || func_004165A8((int)o->aug, (int)D_004998F8) == 0 || *o->aug == 'z') {
-        s = o->aug + strlen(o->aug);
-        p = (unsigned char *)s + 1;
-        if (func_004165A8((int)o->aug, (int)D_004998F8) == 0) {
-            o->f4 = ((struct U14230 *)p)->v;
-            p += 4;
+unsigned char *func_00414230(int *cie, struct C14230 *cieInfo) {
+    char *augmentationEnd;
+    unsigned char *cursor;
+    unsigned augDataLength;
+    cieInfo->aug = (char *)cie - cie[1] + 13;
+    if (func_004165A8((int)cieInfo->aug, (int)D_004998F0) == 0 || func_004165A8((int)cieInfo->aug, (int)D_004998F8) == 0 || *cieInfo->aug == 'z') {
+        augmentationEnd = cieInfo->aug + strlen(cieInfo->aug);
+        cursor = (unsigned char *)augmentationEnd + 1;
+        if (func_004165A8((int)cieInfo->aug, (int)D_004998F8) == 0) {
+            cieInfo->f4 = ((struct U14230 *)cursor)->v;
+            cursor += 4;
         } else {
-            o->f4 = 0;
+            cieInfo->f4 = 0;
         }
-        p = func_00413B38(p, &o->f8);
-        p = func_00413B80(p, &o->fC);
-        o->f10 = *p++;
-        if (*o->aug == 'z')
-            p = func_00413B38(p, &tmp) + tmp;
-        return p;
+        cursor = func_00413B38(cursor, &cieInfo->f8);
+        cursor = func_00413B80(cursor, &cieInfo->fC);
+        cieInfo->f10 = *cursor++;
+        if (*cieInfo->aug == 'z')
+            cursor = func_00413B38(cursor, &augDataLength) + augDataLength;
+        return cursor;
     }
     return 0;
 }
@@ -1871,17 +1871,17 @@ extern int *D_0052ADE8;
  * Sets the record's fde_begin (+8) to the section, clears pc_begin, pc_end, fde_array and count (the FDEs are sorted on
  * first lookup) and links it at the head of the object list D_0052ADE8.
  *
- * @param a  the first entry of the .eh_frame section
- * @param p  the 0x18-byte object record to fill and link
+ * @param begin  the first entry of the .eh_frame section
+ * @param frameObject  the 0x18-byte object record to fill and link
  */
-void func_004146D0(int a, int *p) {
-    p[2] = a;
-    p[5] = (int)D_0052ADE8;
-    D_0052ADE8 = p;
-    p[0] = 0;
-    p[3] = 0;
-    p[4] = 0;
-    p[1] = 0;
+void func_004146D0(int begin, int *frameObject) {
+    frameObject[2] = begin;
+    frameObject[5] = (int)D_0052ADE8;
+    D_0052ADE8 = frameObject;
+    frameObject[0] = 0;
+    frameObject[3] = 0;
+    frameObject[4] = 0;
+    frameObject[1] = 0;
 }
 #endif
 
@@ -1912,17 +1912,17 @@ extern int *D_0052ADE8;
  * Like func_004146D0 but also stores the table in fde_array (+0xC), so func_00414008 walks every listed section. crt0
  * (func_001001D0) calls it at startup with D_0043CE00 and the object D_004A5D48.
  *
- * @param a  the table of section pointers
- * @param p  the 0x18-byte object record to fill and link
+ * @param begin  the table of section pointers
+ * @param frameObject  the 0x18-byte object record to fill and link
  */
-void func_00414728(int a, int *p) {
-    p[2] = a;
-    p[5] = (int)D_0052ADE8;
-    D_0052ADE8 = p;
-    p[1] = 0;
-    p[0] = 0;
-    p[4] = 0;
-    p[3] = a;
+void func_00414728(int begin, int *frameObject) {
+    frameObject[2] = begin;
+    frameObject[5] = (int)D_0052ADE8;
+    D_0052ADE8 = frameObject;
+    frameObject[1] = 0;
+    frameObject[0] = 0;
+    frameObject[4] = 0;
+    frameObject[3] = begin;
 }
 #endif
 

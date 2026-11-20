@@ -57,13 +57,13 @@ void* set_terminate_828(void* f) __asm__("func_00412828");
 /**
  * Installs a new terminate handler in D_00453440 and returns the old one.
  *
- * @param f  the new handler
+ * @param newHandler  the new handler
  * @return the previous handler
  */
-void* set_terminate_828(void* f)
+void* set_terminate_828(void* newHandler)
 {
     void* old = D_00453440_p;
-    D_00453440_p = f;
+    D_00453440_p = newHandler;
     return old;
 }
 #endif
@@ -75,13 +75,13 @@ extern int D_00453A38[];
 /**
  * Installs a new unexpected-exception handler in D_00453A38 and returns the old one.
  *
- * @param v  the new handler
+ * @param newHandler  the new handler
  * @return the previous handler
  */
-int func_00412838(int v) {
-    int o = D_00453A38[0];
-    D_00453A38[0] = v;
-    return o;
+int func_00412838(int newHandler) {
+    int oldHandler = D_00453A38[0];
+    D_00453A38[0] = newHandler;
+    return oldHandler;
 }
 #endif
 
@@ -580,13 +580,13 @@ extern int operator_delete__FPi(int *);
  * g++ deleting-destructor shape: stores D_004998B8 (exception's vtable) and calls operator_delete__FPi on flag & 1. It
  * fills the destructor slot of bad_exception's vtable D_004998A0.
  *
- * @param p  the bad_exception object
- * @param f  destructor flags: bit 0 frees the storage
+ * @param excObject  the bad_exception object
+ * @param flags  destructor flags: bit 0 frees the storage
  * @return nothing meaningful (the C reconstruction declares int)
  */
-int func_00412E38(int **p, int f) {
-    *p = D_004998B8;
-    if (f & 1) return operator_delete__FPi((int *)p);
+int func_00412E38(int **excObject, int flags) {
+    *excObject = D_004998B8;
+    if (flags & 1) return operator_delete__FPi((int *)excObject);
 }
 #endif
 
@@ -597,12 +597,12 @@ extern char D_004998A0[];
 /**
  * Constructs a bad_exception: stores its vtable (D_004998A0) and returns the object.
  *
- * @param p  the object to construct
+ * @param excObject  the object to construct
  * @return the constructed object
  */
-void *func_00412E68(void **p) {
-    *p = D_004998A0;
-    return p;
+void *func_00412E68(void **excObject) {
+    *excObject = D_004998A0;
+    return excObject;
 }
 #endif
 
@@ -643,13 +643,13 @@ extern int operator_delete__FPi(int *);
  * g++ deleting-destructor shape: stores D_004998B8 and calls operator_delete__FPi on flag & 1. It fills the destructor
  * slot of exception's vtable D_004998B8.
  *
- * @param p     the exception object
+ * @param excObject     the exception object
  * @param flag  destructor flags: bit 0 frees the storage
  * @return nothing meaningful (the C reconstruction declares int)
  */
-int func_00412ED0(int **p, int flag) {
-    *p = D_004998B8;
-    if (flag & 1) return operator_delete__FPi((int *)p);
+int func_00412ED0(int **excObject, int flag) {
+    *excObject = D_004998B8;
+    if (flag & 1) return operator_delete__FPi((int *)excObject);
 }
 #endif
 
@@ -660,12 +660,12 @@ extern int D_004998B8[];
 /**
  * Constructs an exception object: stores exception's vtable (D_004998B8) and returns the object.
  *
- * @param p  the object to construct
+ * @param excObject  the object to construct
  * @return the constructed object
  */
-int *func_00412F00(int **p) {
-    *p = D_004998B8;
-    return (int*)p;
+int *func_00412F00(int **excObject) {
+    *excObject = D_004998B8;
+    return (int*)excObject;
 }
 #endif
 

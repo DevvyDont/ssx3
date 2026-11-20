@@ -275,20 +275,20 @@ extern int func_00425040(int, int);
  * or a channel that cannot be opened, return -1 without setting errno. func_0041FDD0 and the console buffers
  * func_0041B550 and func_0041C938 call it.
  *
- * @param a0  the descriptor
- * @param a1  the bytes
- * @param a2  the byte count
+ * @param fileDesc  the descriptor
+ * @param buffer  the bytes
+ * @param byteCount  the byte count
  * @return the bytes taken, or -1
  */
-int func_00424368(int a0, int a1, int a2) {
-    if (a0 == 1 || a0 == 2) {
+int func_00424368(int fileDesc, int buffer, int byteCount) {
+    if (fileDesc == 1 || fileDesc == 2) {
         if (D_00455168 == 0) {
             if (func_00425260() == 0) {
                 return -1;
             }
             D_00455168 = 1;
         }
-        return func_00425040(a1, a2);
+        return func_00425040(buffer, byteCount);
     }
     return -1;
 }
@@ -305,20 +305,20 @@ extern int func_00425190(int, int);
  * Opens the channel with func_00425260 on first use (flag D_00455168) and reads with func_00425190, which waits for
  * input and stops after a newline. Other descriptors return -1. func_0041FD10 calls it.
  *
- * @param a0  the descriptor
- * @param a1  the destination
- * @param a2  the maximum byte count
+ * @param fileDesc  the descriptor
+ * @param buffer  the destination
+ * @param byteCount  the maximum byte count
  * @return the bytes read, or -1
  */
-int func_004243E8(int a0, int a1, int a2) {
-    if (a0 == 0) {
+int func_004243E8(int fileDesc, int buffer, int byteCount) {
+    if (fileDesc == 0) {
         if (D_00455168 == 0) {
             if (func_00425260() == 0) {
                 return -1;
             }
             D_00455168 = 1;
         }
-        return func_00425190(a1, a2);
+        return func_00425190(buffer, byteCount);
     }
     return -1;
 }
@@ -874,27 +874,27 @@ extern void SuspendThread(int);
  * the id being a priority) or SuspendThread (type 2). Any other type prints "## internel error in libkernl.a!" (sic)
  * with func_00425C28. func_00424B78 starts it with D_0052B3A8.
  *
- * @param p  the request queue
+ * @param wakeQueue  the request queue
  */
-void func_00424AA0(unsigned *p) {
+void func_00424AA0(unsigned *wakeQueue) {
     unsigned i;
     unsigned j;
-    unsigned char *t = (unsigned char *)p + 8;
-    unsigned char *v = (unsigned char *)p + 9;
+    unsigned char *entryTypes = (unsigned char *)wakeQueue + 8;
+    unsigned char *entryThreads = (unsigned char *)wakeQueue + 9;
     for (;;) {
         WaitSema_i(D_0052B3A0);
-        i = *p & 0x1FF;
+        i = *wakeQueue & 0x1FF;
         j = i << 1;
-        *p = i + 1;
-        switch (*(t + j)) {
+        *wakeQueue = i + 1;
+        switch (*(entryTypes + j)) {
         case 0:
-            WakeupThread(*(v + j));
+            WakeupThread(*(entryThreads + j));
             break;
         case 1:
-            RotateThreadReadyQueue(*(v + j));
+            RotateThreadReadyQueue(*(entryThreads + j));
             break;
         case 2:
-            SuspendThread(*(v + j));
+            SuspendThread(*(entryThreads + j));
             break;
         default:
             func_00425C28((int)D_0049AAE0);
@@ -972,14 +972,14 @@ int func_00424C50_r(int a0) __asm__("func_00424C50");
  * thread (id below 0x100, helper running) it queues a type-0 entry in D_0052B3A8 and signals D_0052B3A0 with
  * iSignalSema. func_00426C88 calls it to wake an RPC server thread.
  *
- * @param a0  the thread id
+ * @param threadId  the thread id
  * @return the thread id or _iWakeupThread's result, or -1 when it cannot be queued
  */
-int func_00424C50_r(int a0) {
+int func_00424C50_r(int threadId) {
     int id;
     unsigned i;
     SYSCALL_RET_4C50(-47, id);
-    if (id != a0) return _iWakeupThread();
+    if (id != threadId) return _iWakeupThread();
     if ((unsigned)id >= 0x100 || D_00455170 == 0) return -1;
     i = D_0052B3A8.idx & 0x1FF;
     D_0052B3A8.idx = i + 1;
@@ -1000,20 +1000,20 @@ extern void iSignalSema(int);
  * Priorities from 0x80 up, or a missing helper thread, return -1. Otherwise it queues a type-1 entry and signals
  * D_0052B3A0 with iSignalSema. THREAD_yield and THREAD_yieldticks call it.
  *
- * @param a0  the priority
+ * @param priority  the priority
  * @return the priority, or -1
  */
-int func_00424CE8(unsigned a0) {
+int func_00424CE8(unsigned priority) {
     unsigned i;
-    if (a0 >= 0x80 || D_00455170 == 0) {
+    if (priority >= 0x80 || D_00455170 == 0) {
         return -1;
     }
     i = D_0052B3A8.idx & 0x1FF;
     D_0052B3A8.idx = i + 1;
     D_0052B3A8.e[i].a = 1;
-    D_0052B3A8.e[i].b = a0;
+    D_0052B3A8.e[i].b = priority;
     iSignalSema(D_0052B3A0);
-    return a0;
+    return priority;
 }
 #endif
 
@@ -1027,14 +1027,14 @@ int func_00424D68_r(int a0) __asm__("func_00424D68");
  *
  * Like func_00424C50 with _iSuspendThread and a type-2 entry. No code calls it.
  *
- * @param a0  the thread id
+ * @param threadId  the thread id
  * @return the thread id or _iSuspendThread's result, or -1 when it cannot be queued
  */
-int func_00424D68_r(int a0) {
+int func_00424D68_r(int threadId) {
     int id;
     unsigned i;
     SYSCALL_RET_4C50(-47, id);
-    if (id != a0) return _iSuspendThread();
+    if (id != threadId) return _iSuspendThread();
     if ((unsigned)id >= 0x100 || D_00455170 == 0) return -1;
     i = D_0052B3A8.idx & 0x1FF;
     D_0052B3A8.idx = i + 1;
@@ -1054,11 +1054,11 @@ INCLUDE_ASM("seg/seg_325220", func_00424E00);
  * Stores the data size, a zero count and read and write pointers at the start of the data (+0x10). The storage is
  * fixed, so every call returns the same ring. func_00425260 calls it with 0x100.
  *
- * @param a0  the data size in bytes
+ * @param dataSize  the data size in bytes
  * @return the ring
  */
-sRing *func_00424E00(int a0) {
-    D_0052B7C0[0] = a0;
+sRing *func_00424E00(int dataSize) {
+    D_0052B7C0[0] = dataSize;
     D_0052B7C0[1] = 0;
     D_0052B7C0[3] = (int)&D_0052B7C0[4];
     D_0052B7C0[2] = (int)&D_0052B7C0[4];
@@ -1121,46 +1121,46 @@ extern char D_0049AB08[], D_0049AB30[], D_0049AB48[], D_0049AB60[];
  *
  * @param cmd  the event code
  * @param n    the bytes pending (events 1 and 2)
- * @param s    the console state D_0052B8D0
+ * @param ttyState    the console state D_0052B8D0
  */
-void func_00424EA8(int cmd, int n, sTty *s) {
+void func_00424EA8(int cmd, int n, sTty *ttyState) {
     switch (cmd) {
     case 1:
     case 2:
         if (n != 0) {
-            if ((unsigned)(s->pos + n) > 320)
+            if ((unsigned)(ttyState->pos + n) > 320)
                 pf_4EA8(D_0049AB08);
             {
-                int pos = s->pos;
-                n = rd_4EA8(s->fd, s->buf + pos, n);
+                int pos = ttyState->pos;
+                n = rd_4EA8(ttyState->fd, ttyState->buf + pos, n);
             }
             if (n < 0)
                 pf_4EA8(D_0049AB30);
-            s->pos += n;
+            ttyState->pos += n;
         } else {
-            unsigned short *hdr = (unsigned short *)s->buf;
+            unsigned short *hdr = (unsigned short *)ttyState->buf;
             for (n = 12; n < *hdr; n++) {
-                *s->ring->wr = s->buf[n];
-                func_00424E28(s->ring);
+                *ttyState->ring->wr = ttyState->buf[n];
+                func_00424E28(ttyState->ring);
             }
-            s->pos = 0;
+            ttyState->pos = 0;
         }
         break;
     case 3: {
-        int r = wr_4EA8(s->fd, s->wp, s->wlen);
-        if (r < 0) {
-            pf_4EA8(D_0049AB48, r);
-            s->fC = 0;
+        int sentCount = wr_4EA8(ttyState->fd, ttyState->wp, ttyState->wlen);
+        if (sentCount < 0) {
+            pf_4EA8(D_0049AB48, sentCount);
+            ttyState->fC = 0;
             break;
         }
-        s->wp += r;
-        s->wlen -= r;
+        ttyState->wp += sentCount;
+        ttyState->wlen -= sentCount;
         break;
     }
     case 4:
-        if (s->wlen != 0)
-            pf_4EA8(D_0049AB60, s->wlen);
-        s->fC = 0;
+        if (ttyState->wlen != 0)
+            pf_4EA8(D_0049AB60, ttyState->wlen);
+        ttyState->fC = 0;
         break;
     }
 }
@@ -1189,7 +1189,7 @@ int func_00425040_d(char *buf, int len) __asm__("func_00425040");
  */
 int func_00425040_d(char *buf, int len) {
     struct Pkt_5040 *pkt;
-    char *p;
+    char *payloadCursor;
     int i = 0;
     int n = 0;
     if (D_0052B8D0.fC != 0)
@@ -1198,14 +1198,14 @@ int func_00425040_d(char *buf, int len) {
     pkt = (struct Pkt_5040 *)((int)D_0052B900 | 0x20000000);
     D_0052B8D0.fC = 1;
     D_0052B8D0.wp = (char *)pkt;
-    p = (char *)pkt + 12;
+    payloadCursor = (char *)pkt + 12;
     while (len-- != 0) {
         if (*buf == '\n') {
-            *p++ = '\r';
+            *payloadCursor++ = '\r';
             if (++i >= 256)
                 break;
         }
-        *p++ = *buf++;
+        *payloadCursor++ = *buf++;
         n++;
         if (++i >= 256)
             break;
@@ -1233,23 +1233,23 @@ INCLUDE_ASM("seg/seg_325220", func_00425190);
  * Busy-waits while the ring (D_0052B8E8) is empty, takes one byte at a time with func_00424E68, and stops after a '\n'
  * or '\r'. func_004243E8 calls it.
  *
- * @param a0  the destination
+ * @param bufAddr  the destination
  * @param n   the maximum byte count
  * @return the bytes read, including the line end
  */
-int func_00425190(int a0, int n) {
-    char *buf = (char *)a0;
+int func_00425190(int bufAddr, int n) {
+    char *buf = (char *)bufAddr;
     int i;
     int j;
-    char *p;
+    char *charSlot;
     for (i = 0; i < n; i = j) {
-        p = buf + i;
+        charSlot = buf + i;
         j = i + 1;
         while (D_0052B8E8->count == 0) {
         }
-        *p = *D_0052B8D0.ring->rd;
+        *charSlot = *D_0052B8D0.ring->rd;
         func_00424E68(D_0052B8D0.ring);
-        if (*p == '\n' || *p == '\r') {
+        if (*charSlot == '\n' || *charSlot == '\r') {
             return j;
         }
     }
@@ -1277,7 +1277,7 @@ extern int f5260_open(int, void *, void *) __asm__("sceDeci2Open");
  * @return 1 when open, else 0
  */
 int func_00425260(void) {
-    struct Pkt_5260 *p;
+    struct Pkt_5260 *sendPacket;
     FlushCache(0);
     D_0052B8D0.fd = f5260_open(528, &D_0052B8D0, func_00424EA8);
     if (D_0052B8D0.fd < 0) return 0;
@@ -1285,13 +1285,13 @@ int func_00425260(void) {
     D_0052B8D0.wlen = 0;
     D_0052B8D0.pos = 0;
     D_0052B8D0.buf = (unsigned char *)((int)D_0052BA40 | 0x20000000);
-    p = (struct Pkt_5260 *)((int)D_0052B900 | 0x20000000);
-    D_0052B8D0.wp = (char *)p;
-    p->f4 = 528;
-    p->f6 = 69;
-    p->f7 = 72;
-    p->f2 = 0;
-    p->f8 = 0;
+    sendPacket = (struct Pkt_5260 *)((int)D_0052B900 | 0x20000000);
+    D_0052B8D0.wp = (char *)sendPacket;
+    sendPacket->f4 = 528;
+    sendPacket->f6 = 69;
+    sendPacket->f7 = 72;
+    sendPacket->f2 = 0;
+    sendPacket->f8 = 0;
     D_0052B8D0.ring = func_00424E00(0x100);
     return 1;
 }
@@ -1332,9 +1332,9 @@ extern void func_0042CA58_v(char *) __asm__("func_0042CA58");
  * Likely bug: when 126 characters are waiting it terminates the buffer at index 127, so the byte at index 126 (left
  * from an earlier line) is printed too.
  *
- * @param c  the character
+ * @param outChar  the character
  */
-void func_00425358(int c) {
+void func_00425358(int outChar) {
     int idx;
     if (D_00455174 >= 0x7E) {
         D_00455174 = 0;
@@ -1342,14 +1342,14 @@ void func_00425358(int c) {
         func_0042CA58_v(D_0052BB80);
     }
     idx = D_00455174;
-    if (c == 10) {
+    if (outChar == 10) {
         D_00455174 = 0;
-        D_0052BB80[idx] = c;
+        D_0052BB80[idx] = outChar;
         D_0052BB80[idx + 1] = 0;
         func_0042CA58_v(D_0052BB80);
     } else {
         D_00455174 = idx + 1;
-        D_0052BB80[idx] = c;
+        D_0052BB80[idx] = outChar;
     }
 }
 #endif
@@ -1461,8 +1461,8 @@ void func_004254D0(double x) {
     }
     x = dpmul(x, 1000000.0);
     {
-        double r = func_00425440_d(__fixunsdfdi_d(x));
-        func_00425C28((int)D_0049AB80, r);
+        double scaledDigits = func_00425440_d(__fixunsdfdi_d(x));
+        func_00425C28((int)D_0049AB80, scaledDigits);
     }
     if (n >= 0)
         func_00425C28((int)D_0049AB88, n);
@@ -1502,14 +1502,14 @@ void func_00425638_f(char *fmt, char *ap) __asm__("func_00425638");
 void func_00425638_f(char *fmt, char *ap) {
     char buf[32];
     char *pad;
-    char *p;
+    char *printCursor;
     char *str;
     int lmod;
     int w;
-    int c;
-    long v;
-    unsigned long u;
-    float f;
+    int nextChar;
+    long signedValue;
+    unsigned long unsignedValue;
+    float floatValue;
     int st;
     st = DIntr_p();
     while (*fmt) {
@@ -1520,10 +1520,10 @@ void func_00425638_f(char *fmt, char *ap) {
             switch (*++fmt) {
             case '0':
                 w = fmt[1] - '0';
-                c = fmt[2];
+                nextChar = fmt[2];
                 if ((unsigned char)w < 10) {
-                    if ((unsigned)(c - '0') < 10) {
-                        w = w * 10 + (c - '0');
+                    if ((unsigned)(nextChar - '0') < 10) {
+                        w = w * 10 + (nextChar - '0');
                         if (w > 31)
                             w = 31;
                         fmt += 2;
@@ -1544,123 +1544,123 @@ void func_00425638_f(char *fmt, char *ap) {
             case 'o':
                 if (lmod == 'l') {
                     ap += 8;
-                    u = *(unsigned long *)(ap - 8);
+                    unsignedValue = *(unsigned long *)(ap - 8);
                 } else if (lmod == 'h') {
                     ap += 8;
-                    u = *(unsigned short *)(ap - 8);
+                    unsignedValue = *(unsigned short *)(ap - 8);
                 } else {
                     ap += 8;
-                    u = *(unsigned int *)(ap - 8);
+                    unsignedValue = *(unsigned int *)(ap - 8);
                 }
-                p = &buf[31];
-                *p = 0;
-                if (u == 0) {
-                    *--p = '0';
+                printCursor = &buf[31];
+                *printCursor = 0;
+                if (unsignedValue == 0) {
+                    *--printCursor = '0';
                 } else {
-                    while (u) {
-                        *--p = (u & 7) + '0';
-                        u >>= 3;
+                    while (unsignedValue) {
+                        *--printCursor = (unsignedValue & 7) + '0';
+                        unsignedValue >>= 3;
                     }
                 }
-                if (pad && pad < p)
-                    p = pad;
-                while (*p)
-                    D_00455178(*p++);
+                if (pad && pad < printCursor)
+                    printCursor = pad;
+                while (*printCursor)
+                    D_00455178(*printCursor++);
                 break;
             case 'x':
                 if (lmod == 'l') {
                     ap += 8;
-                    u = *(unsigned long *)(ap - 8);
+                    unsignedValue = *(unsigned long *)(ap - 8);
                 } else if (lmod == 'h') {
                     ap += 8;
-                    u = *(unsigned short *)(ap - 8);
+                    unsignedValue = *(unsigned short *)(ap - 8);
                 } else {
                     ap += 8;
-                    u = *(unsigned int *)(ap - 8);
+                    unsignedValue = *(unsigned int *)(ap - 8);
                 }
-                p = &buf[31];
-                *p = 0;
-                if (u == 0) {
-                    *--p = '0';
+                printCursor = &buf[31];
+                *printCursor = 0;
+                if (unsignedValue == 0) {
+                    *--printCursor = '0';
                 } else {
-                    while (u) {
-                        unsigned long d = u & 0xF;
-                        if (d < 10)
-                            *--p = d + '0';
+                    while (unsignedValue) {
+                        unsigned long hexDigit = unsignedValue & 0xF;
+                        if (hexDigit < 10)
+                            *--printCursor = hexDigit + '0';
                         else
-                            *--p = d + 'a' - 10;
-                        u >>= 4;
+                            *--printCursor = hexDigit + 'a' - 10;
+                        unsignedValue >>= 4;
                     }
                 }
-                if (pad && pad < p)
-                    p = pad;
-                while (*p)
-                    D_00455178(*p++);
+                if (pad && pad < printCursor)
+                    printCursor = pad;
+                while (*printCursor)
+                    D_00455178(*printCursor++);
                 break;
             case 'd':
                 if (lmod == 'l') {
                     ap += 8;
-                    v = *(long *)(ap - 8);
+                    signedValue = *(long *)(ap - 8);
                 } else if (lmod == 'h') {
                     ap += 8;
-                    v = *(short *)(ap - 8);
+                    signedValue = *(short *)(ap - 8);
                 } else {
                     ap += 8;
-                    v = *(int *)(ap - 8);
+                    signedValue = *(int *)(ap - 8);
                 }
-                p = &buf[31];
-                *p = 0;
-                if (v == 0) {
-                    *--p = '0';
+                printCursor = &buf[31];
+                *printCursor = 0;
+                if (signedValue == 0) {
+                    *--printCursor = '0';
                 } else {
-                    if (v < 0) {
-                        v = -v;
+                    if (signedValue < 0) {
+                        signedValue = -signedValue;
                         D_00455178('-');
                     }
-                    while (v) {
-                        *--p = __moddi3(v, 10) + '0';
-                        v = func_0040FCB0(v, 10);
+                    while (signedValue) {
+                        *--printCursor = __moddi3(signedValue, 10) + '0';
+                        signedValue = func_0040FCB0(signedValue, 10);
                     }
                 }
-                if (pad && pad < p)
-                    p = pad;
-                while (*p)
-                    D_00455178(*p++);
+                if (pad && pad < printCursor)
+                    printCursor = pad;
+                while (*printCursor)
+                    D_00455178(*printCursor++);
                 break;
             case 'u':
                 if (lmod == 'l') {
                     ap += 8;
-                    u = *(unsigned long *)(ap - 8);
+                    unsignedValue = *(unsigned long *)(ap - 8);
                 } else if (lmod == 'h') {
                     ap += 8;
-                    u = *(unsigned short *)(ap - 8);
+                    unsignedValue = *(unsigned short *)(ap - 8);
                 } else {
                     ap += 8;
-                    u = *(unsigned int *)(ap - 8);
+                    unsignedValue = *(unsigned int *)(ap - 8);
                 }
-                p = &buf[31];
-                *p = 0;
-                if (u == 0) {
-                    *--p = '0';
+                printCursor = &buf[31];
+                *printCursor = 0;
+                if (unsignedValue == 0) {
+                    *--printCursor = '0';
                 } else {
-                    while (u) {
-                        *--p = __umoddi3(u, 10) + '0';
-                        u = func_00411538(u, 10);
+                    while (unsignedValue) {
+                        *--printCursor = __umoddi3(unsignedValue, 10) + '0';
+                        unsignedValue = func_00411538(unsignedValue, 10);
                     }
                 }
-                if (pad && pad < p)
-                    p = pad;
-                while (*p)
-                    D_00455178(*p++);
+                if (pad && pad < printCursor)
+                    printCursor = pad;
+                while (*printCursor)
+                    D_00455178(*printCursor++);
                 break;
             case 'e':
             case 'f':
                 ap += 8;
-                f = *(float *)(ap - 8);
-                if (f == 0.0f)
+                floatValue = *(float *)(ap - 8);
+                if (floatValue == 0.0f)
                     D_00455178('0');
                 else
-                    func_004254D0(fptodp(f));
+                    func_004254D0(fptodp(floatValue));
                 break;
             case 's':
                 ap += 8;
@@ -1673,14 +1673,14 @@ void func_00425638_f(char *fmt, char *ap) {
                     D_00455178('l');
                     D_00455178(')');
                 } else {
-                    for (p = str; *p; p++)
-                        D_00455178(*p);
+                    for (printCursor = str; *printCursor; printCursor++)
+                        D_00455178(*printCursor);
                 }
                 break;
             case 'c':
                 ap += 8;
-                v = *(char *)(ap - 8);
-                D_00455178(v);
+                signedValue = *(char *)(ap - 8);
+                D_00455178(signedValue);
                 break;
             }
         } else {
@@ -1726,14 +1726,14 @@ extern void func_00425638(int a0, char *ap);
  * Swaps the output routine D_00455178 for func_00425358 while func_00425638 runs, then restores the old one. Callers
  * include sceGsSyncPath, sceUsbKbGetLocation and other Sony library code.
  *
- * @param a0  the format
+ * @param format  the format
  */
-void func_00425C60(int a0, ...) {
+void func_00425C60(int format, ...) {
     char *ap;
     void (*old)(int) = D_00455178;
     D_00455178 = func_00425358;
     ap = (char *)__builtin_next_arg() - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0);
-    func_00425638(a0, ap);
+    func_00425638(format, ap);
     D_00455178 = old;
 }
 #endif
@@ -1779,11 +1779,11 @@ INCLUDE_ASM("seg/seg_325220", func_00425CF0);
  *
  * No bounds check. func_0040B130 and the RPC set-up func_00426408 call it.
  *
- * @param a0  the register index
+ * @param regIndex  the register index
  * @return the register value
  */
-int func_00425CF0(int a0) {
-    return D_0052BE00[a0];
+int func_00425CF0(int regIndex) {
+    return D_0052BE00[regIndex];
 }
 #endif
 
@@ -1795,13 +1795,13 @@ INCLUDE_ASM("seg/seg_325220", func_00425D08);
  *
  * No bounds check. No code calls it.
  *
- * @param a0  the register index
- * @param a1  the value
+ * @param regIndex  the register index
+ * @param regValue  the value
  * @return the value
  */
-int func_00425D08(int a0, int a1) {
-    D_0052BE00[a0] = a1;
-    return a1;
+int func_00425D08(int regIndex, int regValue) {
+    D_0052BE00[regIndex] = regValue;
+    return regValue;
 }
 #endif
 
@@ -1945,14 +1945,14 @@ INCLUDE_ASM("seg/seg_325220", func_00425FF0);
  *
  * Stores the table and its entry count in the command data (+0x14, +0x18). SNDPLATFORM_init calls it.
  *
- * @param a0  the handler table
- * @param a1  the entry count
+ * @param handlerTable  the handler table
+ * @param handlerCount  the entry count
  * @return the previous table
  */
-int func_00425FF0(int a0, int a1) {
+int func_00425FF0(int handlerTable, int handlerCount) {
     int old = D_0052BCD8[5];
-    D_0052BCD8[5] = a0;
-    D_0052BCD8[6] = a1;
+    D_0052BCD8[5] = handlerTable;
+    D_0052BCD8[6] = handlerCount;
     return old;
 }
 #endif
@@ -1965,14 +1965,14 @@ INCLUDE_ASM("seg/seg_325220", func_00426008);
  *
  * Stores the table and its entry count in the command data (+0xC, +0x10). No code calls it.
  *
- * @param a0  the handler table
- * @param a1  the entry count
+ * @param handlerTable  the handler table
+ * @param handlerCount  the entry count
  * @return the previous table
  */
-int func_00426008(int a0, int a1) {
+int func_00426008(int handlerTable, int handlerCount) {
     int old = D_0052BCD8[3];
-    D_0052BCD8[3] = a0;
-    D_0052BCD8[4] = a1;
+    D_0052BCD8[3] = handlerTable;
+    D_0052BCD8[4] = handlerCount;
     return old;
 }
 #endif
@@ -1988,10 +1988,10 @@ INCLUDE_ASM("seg/seg_325220", func_00426020);
  * SNDPLATFORM_init and func_00427A90 add their own.
  *
  * @param a0  the command id
- * @param a1  the handler
- * @param a2  the handler's data
+ * @param handler  the handler
+ * @param handlerData  the handler's data
  */
-void func_00426020(int a0, int a1, int a2) {
+void func_00426020(int a0, int handler, int handlerData) {
     int off = a0 << 3;
     if (a0 < 0) {
         a0 = (int)D_0052BCE4;
@@ -1999,8 +1999,8 @@ void func_00426020(int a0, int a1, int a2) {
         a0 = (int)D_0052BCEC;
     }
     off += a0;
-    ((int *)off)[0] = a1;
-    ((int *)off)[1] = a2;
+    ((int *)off)[0] = handler;
+    ((int *)off)[1] = handlerData;
 }
 #endif
 
@@ -2042,46 +2042,46 @@ int func_00426078_d(int, int, int *, unsigned, int, int, int) __asm__("func_0042
  * to the IOP receive address D_0052BCE0 with attribute 0x44. Flag 1 queues both with isceSifSetDma (interrupt context),
  * otherwise sceSifSetDma.
  *
- * @param a0  the command id
- * @param a1  flags: 1 interrupt context, 4 write back the extra data
- * @param a2  the packet
- * @param a3  the packet size
- * @param a4  the extra data source
- * @param a5  the extra data destination on the IOP
- * @param a6  the extra data size (0 for none)
+ * @param cmdId  the command id
+ * @param sendFlags  flags: 1 interrupt context, 4 write back the extra data
+ * @param packet  the packet
+ * @param packetSize  the packet size
+ * @param extraSrc  the extra data source
+ * @param extraDest  the extra data destination on the IOP
+ * @param extraSize  the extra data size (0 for none)
  * @return the DMA id, or 0
  */
-int func_00426078_d(int a0, int a1, int *a2, unsigned a3, int a4, int a5, int a6) {
+int func_00426078_d(int cmdId, int sendFlags, int *packet, unsigned packetSize, int extraSrc, int extraDest, int extraSize) {
     sSifDmaData ent[2];
     int n;
-    if (a3 - 0x10 > 0x60) {
+    if (packetSize - 0x10 > 0x60) {
         return 0;
     }
     n = 0;
-    if (a6 > 0) {
-        ent[0].data = a4;
+    if (extraSize > 0) {
+        ent[0].data = extraSrc;
         n = 1;
-        ent[0].addr = a5;
-        a2[1] = a5;
-        a2[0] = *(unsigned char *)a2 | (a6 << 8);
-        ent[0].size = a6;
+        ent[0].addr = extraDest;
+        packet[1] = extraDest;
+        packet[0] = *(unsigned char *)packet | (extraSize << 8);
+        ent[0].size = extraSize;
         ent[0].attr = 0;
-        if (a1 & 4) {
-            func_00426358(a4, a6);
+        if (sendFlags & 4) {
+            func_00426358(extraSrc, extraSize);
         }
     } else {
-        a2[1] = 0;
-        a2[0] = *(unsigned char *)a2;
+        packet[1] = 0;
+        packet[0] = *(unsigned char *)packet;
     }
-    ent[n].data = (int)a2;
+    ent[n].data = (int)packet;
     ent[n].addr = D_0052BCE0;
-    ent[n].size = a3;
-    a2[2] = a0;
-    *(unsigned char *)a2 = a3;
+    ent[n].size = packetSize;
+    packet[2] = cmdId;
+    *(unsigned char *)packet = packetSize;
     ent[n].attr = 68;
-    func_00426358((int)a2, a3);
+    func_00426358((int)packet, packetSize);
     n++;
-    if (a1 & 1) {
+    if (sendFlags & 1) {
         return isceSifSetDma(ent, n);
     }
     return sceSifSetDma(ent, n);
@@ -2240,40 +2240,40 @@ sSifRpcPkt *f65D0(sSifRpcState *s) __asm__("func_004265D0");
  * hands out 1 and leaves the counter at 2, so id 2 is never used. sceSifCallRpc, func_00426B48 and func_004268F0 call
  * it.
  *
- * @param s  the RPC state D_0052D680
+ * @param rpcState  the RPC state D_0052D680
  * @return the packet, or null when all are in use
  */
-sSifRpcPkt *f65D0(sSifRpcState *s) {
-    sSifRpcPkt *e;
+sSifRpcPkt *f65D0(sSifRpcState *rpcState) {
+    sSifRpcPkt *packet;
     int i;
     int n;
-    int c;
+    int prevId;
     int id;
     int seq;
     DIntr_rq();
-    n = s->pkt_table_len;
+    n = rpcState->pkt_table_len;
     i = 0;
-    e = s->pkt_table;
+    packet = rpcState->pkt_table;
     while (i < n) {
-        if (!(e->f10 & 1)) {
-            e->f10 = (i << 16) | 5;
-            c = s->pid;
-            id = c + 1;
-            s->pid = id;
+        if (!(packet->f10 & 1)) {
+            packet->f10 = (i << 16) | 5;
+            prevId = rpcState->pid;
+            id = prevId + 1;
+            rpcState->pid = id;
             if (id == 1) {
-                s->pid = c + 2;
+                rpcState->pid = prevId + 2;
                 seq = 1;
             } else {
                 seq = id;
             }
             id = seq;
-            e->f14 = (int)e;
-            e->f18 = id;
+            packet->f14 = (int)packet;
+            packet->f18 = id;
             EIntr();
-            return e;
+            return packet;
         }
         i++;
-        e++;
+        packet++;
     }
     EIntr();
     return 0;
@@ -2349,32 +2349,32 @@ void f6708(struct A6708 *a) __asm__("func_00426708");
  * semaphore (rpcd[2]) when it has one, releases its packet with func_00426678 and clears the client's packet pointer.
  * func_00426408 installs it for command 0x80000008.
  *
- * @param a  the received end packet
+ * @param endRequest  the received end packet
  */
-void f6708(struct A6708 *a) {
-    struct Q6708 *q;
-    switch (a->f20) {
+void f6708(struct A6708 *endRequest) {
+    struct Q6708 *clientData;
+    switch (endRequest->f20) {
     case 0x8000000A:
-        q = a->q;
-        if (q->f1C != 0) {
-            ((void (*)(int))q->f1C)(q->f20);
+        clientData = endRequest->q;
+        if (clientData->f1C != 0) {
+            ((void (*)(int))clientData->f1C)(clientData->f20);
         }
         break;
     case 0x80000009:
-        q = a->q;
-        q->f24 = a->f24;
-        ((int *)q)[5] = a->f28;
-        ((int *)q)[6] = a->f2C;
+        clientData = endRequest->q;
+        clientData->f24 = endRequest->f24;
+        ((int *)clientData)[5] = endRequest->f28;
+        ((int *)clientData)[6] = endRequest->f2C;
         break;
     case 0x8000000B:
         break;
     }
-    q = a->q;
-    if (q->f8 >= 0) {
-        iSignalSema(q->f8);
+    clientData = endRequest->q;
+    if (clientData->f8 >= 0) {
+        iSignalSema(clientData->f8);
     }
-    func_00426678_k(q->f0);
-    q->f0 = 0;
+    func_00426678_k(clientData->f0);
+    clientData->f0 = 0;
 }
 #endif
 
@@ -2464,47 +2464,47 @@ int func_004268F0_d(struct S68F0 *, int, int, int, int) __asm__("func_004268F0")
  * then deletes it. A failed send releases the packet and returns -2. With bit 0 the semaphore field is -1 and it
  * returns at once.
  *
- * @param a0  the receive data
- * @param a1  the IOP source address
- * @param a2  the EE destination
- * @param a3  the byte count
- * @param a4  the mode (bit 0: do not wait)
+ * @param receiveData  the receive data
+ * @param srcAddr  the IOP source address
+ * @param destAddr  the EE destination
+ * @param byteCount  the byte count
+ * @param mode  the mode (bit 0: do not wait)
  * @return 0, -1 (no packet), -2 (send failed) or -3 (no semaphore)
  */
-int func_004268F0_d(struct S68F0 *a0, int a1, int a2, int a3, int a4) {
+int func_004268F0_d(struct S68F0 *receiveData, int srcAddr, int destAddr, int byteCount, int mode) {
     int buf[8];
-    struct S68F0 *t;
-    t = func_004265D0_p(&D_0052D680);
-    if (t == 0) {
+    struct S68F0 *packet;
+    packet = func_004265D0_p(&D_0052D680);
+    if (packet == 0) {
         return -1;
     }
-    a0->f0 = t;
-    a0->f4 = t->f18;
-    t->f20 = a1;
-    t->f24 = a2;
-    t->f28 = a3;
-    t->f14 = (int)t;
-    t->f1C = (int)a0;
-    if (!(a4 & 1)) {
+    receiveData->f0 = packet;
+    receiveData->f4 = packet->f18;
+    packet->f20 = srcAddr;
+    packet->f24 = destAddr;
+    packet->f28 = byteCount;
+    packet->f14 = (int)packet;
+    packet->f1C = (int)receiveData;
+    if (!(mode & 1)) {
         buf[1] = 1;
         buf[2] = 0;
-        a0->f8 = CreateSema_j(buf);
-        if (a0->f8 < 0) {
-            func_00426678_j(t);
+        receiveData->f8 = CreateSema_j(buf);
+        if (receiveData->f8 < 0) {
+            func_00426678_j(packet);
             return -3;
         }
-        if (func_004261B0_j(0x8000000C, (int)t, 0x40, 0, 0, 0) == 0) {
-            func_00426678_j(t);
-            DeleteSema(a0->f8);
+        if (func_004261B0_j(0x8000000C, (int)packet, 0x40, 0, 0, 0) == 0) {
+            func_00426678_j(packet);
+            DeleteSema(receiveData->f8);
             return -2;
         }
-        WaitSema_j(a0->f8);
-        DeleteSema(a0->f8);
+        WaitSema_j(receiveData->f8);
+        DeleteSema(receiveData->f8);
         return 0;
     }
-    a0->f8 = -1;
-    if (func_004261B0_j(0x8000000C, (int)t, 0x40, 0, 0, 0) == 0) {
-        func_00426678_j(t);
+    receiveData->f8 = -1;
+    if (func_004261B0_j(0x8000000C, (int)packet, 0x40, 0, 0, 0) == 0) {
+        func_00426678_j(packet);
         return -2;
     }
     return 0;
@@ -2594,45 +2594,45 @@ int func_00426B48_d(struct S6B48 *, int, int) __asm__("func_00426B48");
  * a failed send returns -2. The server field stays 0 when the IOP has no such server yet, so callers retry. Callers
  * include sceSifInitIopHeap and SNDPLATFORM_init.
  *
- * @param a0  the client data
- * @param a1  the server number
- * @param a2  the mode (bit 0: do not wait)
+ * @param client  the client data
+ * @param rpcNumber  the server number
+ * @param mode  the mode (bit 0: do not wait)
  * @return 0, -1 (no packet), -2 (send failed) or -3 (no semaphore)
  */
-int func_00426B48_d(struct S6B48 *a0, int a1, int a2) {
+int func_00426B48_d(struct S6B48 *client, int rpcNumber, int mode) {
     int buf[8];
-    struct S6B48 *t;
-    a0->f10 = 0;
-    a0->f24 = 0;
-    t = func_004265D0(&D_0052D680);
-    if (t == 0) {
+    struct S6B48 *packet;
+    client->f10 = 0;
+    client->f24 = 0;
+    packet = func_004265D0(&D_0052D680);
+    if (packet == 0) {
         return -1;
     }
-    a0->f0 = t;
-    a0->f4 = t->f18;
-    t->f20 = a1;
-    t->f14 = (int)t;
-    t->f1C = (int)a0;
-    if (!(a2 & 1)) {
+    client->f0 = packet;
+    client->f4 = packet->f18;
+    packet->f20 = rpcNumber;
+    packet->f14 = (int)packet;
+    packet->f1C = (int)client;
+    if (!(mode & 1)) {
         buf[1] = 1;
         buf[2] = 0;
-        a0->f8 = CreateSema(buf);
-        if (a0->f8 < 0) {
-            func_00426678_i(t);
+        client->f8 = CreateSema(buf);
+        if (client->f8 < 0) {
+            func_00426678_i(packet);
             return -3;
         }
-        if (func_004261B0(0x80000009, (int)t, 0x40, 0, 0, 0) == 0) {
-            func_00426678_i(t);
-            DeleteSema(a0->f8);
+        if (func_004261B0(0x80000009, (int)packet, 0x40, 0, 0, 0) == 0) {
+            func_00426678_i(packet);
+            DeleteSema(client->f8);
             return -2;
         }
-        WaitSema_i(a0->f8);
-        DeleteSema(a0->f8);
+        WaitSema_i(client->f8);
+        DeleteSema(client->f8);
         return 0;
     }
-    a0->f8 = -1;
-    if (func_004261B0(0x80000009, (int)t, 0x40, 0, 0, 0) == 0) {
-        func_00426678_i(t);
+    client->f8 = -1;
+    if (func_004261B0(0x80000009, (int)packet, 0x40, 0, 0, 0) == 0) {
+        func_00426678_i(packet);
         return -2;
     }
     return 0;
@@ -2686,31 +2686,31 @@ extern void func_00424C50(int);
  * queue's thread (+0) with func_00424C50 when the id is valid and the queue is not active (+4). func_00426408 installs
  * it for command 0x8000000A.
  *
- * @param a  the received call packet
+ * @param callRequest  the received call packet
  */
-void func_00426C88(struct A26C88 *a) {
-    struct E26C88 *e = a->e;
-    struct B26C88 *b = e->owner;
-    if (b->head == 0) {
-        b->head = (int)e;
+void func_00426C88(struct A26C88 *callRequest) {
+    struct E26C88 *serverData = callRequest->e;
+    struct B26C88 *rpcQueue = serverData->owner;
+    if (rpcQueue->head == 0) {
+        rpcQueue->head = (int)serverData;
     } else {
-        ((struct E26C88 *)b->tail)->next = (int)e;
+        ((struct E26C88 *)rpcQueue->tail)->next = (int)serverData;
     }
-    b->tail = (int)e;
+    rpcQueue->tail = (int)serverData;
     {
-        int t1 = a->f14;
-        int t2 = a->f1C;
-        e->f20 = t1;
-        e->f1C = t2;
+        int packetAddr = callRequest->f14;
+        int clientAddr = callRequest->f1C;
+        serverData->f20 = packetAddr;
+        serverData->f1C = clientAddr;
     }
-    e->f24 = a->f20;
-    e->fC = a->f24;
-    e->f28 = a->f28;
-    e->f2C = a->f2C;
-    e->f30 = a->f30;
-    e->f34 = a->f10;
-    if (b->f0 >= 0 && b->f4 == 0) {
-        func_00424C50(b->f0);
+    serverData->f24 = callRequest->f20;
+    serverData->fC = callRequest->f24;
+    serverData->f28 = callRequest->f28;
+    serverData->f2C = callRequest->f2C;
+    serverData->f30 = callRequest->f30;
+    serverData->f34 = callRequest->f10;
+    if (rpcQueue->f0 >= 0 && rpcQueue->f4 == 0) {
+        func_00424C50(rpcQueue->f0);
     }
 }
 #endif

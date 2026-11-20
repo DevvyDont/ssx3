@@ -134,9 +134,9 @@ extern int func_004104E0(void);
  * Without threads there is one static context, so the switch happens on the first call.
  */
 void func_004104B8(void) {
-    int (*fp)(void) = func_004104E0;
-    D_00453444[0] = fp;
-    fp();
+    int (*staticGetter)(void) = func_004104E0;
+    D_00453444[0] = staticGetter;
+    staticGetter();
 }
 #endif
 
@@ -199,19 +199,19 @@ void sjthrow_410570(void) {
     struct N570 node;
     int *eh;
     int **pchain;
-    int *q;
+    int *topHandler;
     int **pcl;
-    struct N570 *h;
+    struct N570 *tempHandler;
     eh = (int *)D_00453444[0]();
     pchain = (int **)&eh[1];
-    q = (int *)eh[1];
-    pcl = (int **)&q[1];
-    if (q[1] != 0) {
-        node.next = q;
+    topHandler = (int *)eh[1];
+    pcl = (int **)&topHandler[1];
+    if (topHandler[1] != 0) {
+        node.next = topHandler;
         node.cleanup = 0;
-        h = &node;
+        tempHandler = &node;
         if (__builtin_setjmp(node.jb) == 0) {
-            *pchain = (int *)h;
+            *pchain = (int *)tempHandler;
                         {
                 int *n;
                 while (*pcl != 0) {
@@ -220,7 +220,7 @@ void sjthrow_410570(void) {
                     ((void (*)(int, int))n[1])(n[2], 2);
                 }
             }
-            *pchain = h->next;
+            *pchain = tempHandler->next;
         } else {
             func_004103B0();
         }
@@ -228,9 +228,9 @@ void sjthrow_410570(void) {
     if (eh[2] == 0 || ((int *)*pchain)[0] == 0)
         func_004103B0();
     {
-        int *r = *pchain;
-        *pchain = (int *)r[0];
-        __builtin_longjmp((void **)&r[2], 1);
+        int *target = *pchain;
+        *pchain = (int *)target[0];
+        __builtin_longjmp((void **)&target[2], 1);
     }
 }
 __asm__(".globl D_00410628\n\t.type D_00410628,@function\n\tD_00410628 = func_00410570 + 0xB8\n");
@@ -253,20 +253,20 @@ struct N6E8 { int *next; int cleanup; void *jb[3]; char pad[0x62C]; };
 int func_004106E8(void) {
     struct N6E8 node;
     int *eh;
-    int *q;
+    int *topHandler;
     int **pchain;
     int **pcl;
-    struct N6E8 *h;
+    struct N6E8 *tempHandler;
     eh = (int *)D_00453444[0]();
     pchain = (int **)&eh[1];
-    q = (int *)eh[1];
-    pcl = (int **)&q[1];
-    if (q[1] != 0) {
-        node.next = q;
+    topHandler = (int *)eh[1];
+    pcl = (int **)&topHandler[1];
+    if (topHandler[1] != 0) {
+        node.next = topHandler;
         node.cleanup = 0;
-        h = &node;
+        tempHandler = &node;
         __builtin_setjmp(node.jb);
-        *pchain = (int *)h;
+        *pchain = (int *)tempHandler;
                 {
             int *n;
             while (*pcl != 0) {
@@ -275,7 +275,7 @@ int func_004106E8(void) {
                 ((void (*)(int, int))n[1])(n[2], 2);
             }
         }
-        *pchain = h->next;
+        *pchain = tempHandler->next;
     }
     *pchain = (int *)(*pchain)[0];
     return func_00410570();
@@ -677,7 +677,7 @@ extern void *func_00410C18(void *, int, void *, void *);
 void func_00410F48(void) {
     struct S410F48 ctx0;
     struct S410F48 buf;
-    struct S410F48 *a;
+    struct S410F48 *frameState;
     int *info;
     struct S410F48 *pb;
     void **pa;
@@ -685,23 +685,23 @@ void func_00410F48(void) {
     __builtin_unwind_init();
     info = (int *)D_00453444[0]();
     pb = &buf;
-    a = &ctx0;
+    frameState = &ctx0;
     if (info[2] == 0) {
         func_004103B0();
-        pa = (void **)&a;
+        pa = (void **)&frameState;
     } else {
-        pa = (void **)&a;
+        pa = (void **)&frameState;
     }
 lbl:
     pc = (void *)&&lbl;
-    a = get_410F48(pc, (void *)a);
-    if (a == 0)
+    frameState = get_410F48(pc, (void *)frameState);
+    if (frameState == 0)
         func_004103B0();
-    *(void **)a = __builtin_dwarf_cfa();
-    buf = *a;
+    *(void **)frameState = __builtin_dwarf_cfa();
+    buf = *frameState;
     {
-        void *h = func_00410C18(info, (int)__builtin_return_address(0) - 1, pb, pa);
-        __builtin_eh_return(info, *(int *)a - *(int *)pb, h);
+        void *handlerAddr = func_00410C18(info, (int)__builtin_return_address(0) - 1, pb, pa);
+        __builtin_eh_return(info, *(int *)frameState - *(int *)pb, handlerAddr);
     }
 }
 __asm__(".globl D_004110B8\n\t.type D_004110B8,@function\n\tD_004110B8 = func_00410F48 + 0x170\n");
@@ -725,7 +725,7 @@ extern void *func_00410C18(void *, int, void *, void *);
 void func_00411128(int val) {
     struct S411128 ctx0;
     struct S411128 buf;
-    struct S411128 *a;
+    struct S411128 *frameState;
     int *info;
     struct S411128 *pb;
     void **pa;
@@ -733,21 +733,21 @@ void func_00411128(int val) {
     __builtin_unwind_init();
     info = (int *)D_00453444[0]();
     pb = &buf;
-    a = &ctx0;
+    frameState = &ctx0;
     if (info[2] == 0)
         func_004103B0();
     info[3] = val;
-    pa = (void **)&a;
+    pa = (void **)&frameState;
 lbl:
     pc = (void *)&&lbl;
-    a = get_411128(pc, (void *)a);
-    if (a == 0)
+    frameState = get_411128(pc, (void *)frameState);
+    if (frameState == 0)
         func_004103B0();
-    *(void **)a = __builtin_dwarf_cfa();
-    buf = *a;
+    *(void **)frameState = __builtin_dwarf_cfa();
+    buf = *frameState;
     {
-        void *h = func_00410C18(info, (int)__builtin_return_address(0) - 1, pb, pa);
-        __builtin_eh_return(info, *(int *)a - *(int *)pb, h);
+        void *handlerAddr = func_00410C18(info, (int)__builtin_return_address(0) - 1, pb, pa);
+        __builtin_eh_return(info, *(int *)frameState - *(int *)pb, handlerAddr);
     }
 }
 __asm__(".globl D_004112A0\n\t.type D_004112A0,@function\n\tD_004112A0 = func_00411128 + 0x178\n");

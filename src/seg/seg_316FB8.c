@@ -1158,11 +1158,11 @@ extern void func_00416EB0(int, int, int);
  * Forwards to func_00416EB0 with D_00454944. The definition is declared void, but $v0 still holds the stream
  * func_00416EB0 returned.
  *
- * @param a  the path
- * @param b  the mode string
+ * @param fileName  the path
+ * @param mode  the mode string
  */
-void func_00416F90(int a, int b) {
-    func_00416EB0(D_00454944, a, b);
+void func_00416F90(int fileName, int mode) {
+    func_00416EB0(D_00454944, fileName, mode);
 }
 #endif
 
@@ -1510,11 +1510,11 @@ extern int func_0041B658(int, int, char *);
  */
 void func_004175C8(int fmt, ...) {
     char *ap;
-    int *g;
+    int *reent;
     func_004175C8_va_start(ap);
-    g = (int *)D_00454944;
-    ((int *)g[2])[0x54 / 4] = (int)g;
-    func_0041B658(g[2], fmt, ap);
+    reent = (int *)D_00454944;
+    ((int *)reent[2])[0x54 / 4] = (int)reent;
+    func_0041B658(reent[2], fmt, ap);
 }
 #endif
 
@@ -1776,17 +1776,17 @@ extern int func_00417AB8(struct F178B0 *, int, char *);
  */
 int func_004178B0(char *str, int fmt, ...) {
     char *ap;
-    struct F178B0 f;
-    f.flags = 4;
-    f.p = str;
-    f.base = str;
-    f.size = f.r = strlen(str);
-    f.read = func_004178A8;
-    f.ubbase = 0;
-    f.lbbase = 0;
-    f.ent = D_00454944;
+    struct F178B0 strStream;
+    strStream.flags = 4;
+    strStream.p = str;
+    strStream.base = str;
+    strStream.size = strStream.r = strlen(str);
+    strStream.read = func_004178A8;
+    strStream.ubbase = 0;
+    strStream.lbbase = 0;
+    strStream.ent = D_00454944;
     func_004178B0_va_start(ap);
-    return func_00417AB8(&f, fmt, ap);
+    return func_00417AB8(&strStream, fmt, ap);
 }
 #endif
 
@@ -1970,10 +1970,10 @@ func_00417AB8_(struct F7648 *fp, char *fmt0, char *ap)
   register u_char_00417AB8 *fmt = (u_char_00417AB8 *) fmt0;
   register int c;		/* character from format, or conversion */
   register unsigned int width;	/* field width, or 0 */
-  register char *p;		/* points into all kinds of strings */
+  register char *strPtr;		/* points into all kinds of strings */
   register int n;		/* handy integer */
   register int flags;		/* flags as defined above */
-  register char *p0;		/* saves original value of p when necessary */
+  register char *strStart;		/* saves original value of p when necessary */
   int nassigned;		/* number of fields assigned */
   int nread;			/* number of characters consumed from fp */
   int base = 0;			/* base argument to strtol/strtoul */
@@ -2245,11 +2245,11 @@ func_00417AB8_(struct F7648 *fp, char *fmt0, char *ap)
 	    }
 	  else
 	    {
-	      unsigned int r = func_00420260 ((void *) va_arg_00417AB8 (ap, char *), 1, width, (int *) fp);
+	      unsigned int charsRead = func_00420260 ((void *) va_arg_00417AB8 (ap, char *), 1, width, (int *) fp);
 
-	      if (r == 0)
+	      if (charsRead == 0)
 		goto input_failure;
-	      nread += r;
+	      nread += charsRead;
 	      nassigned++;
 	    }
 	  break;
@@ -2279,24 +2279,24 @@ func_00417AB8_(struct F7648 *fp, char *fmt0, char *ap)
 	    }
 	  else
 	    {
-	      p0 = p = va_arg_00417AB8 (ap, char *);
+	      strStart = strPtr = va_arg_00417AB8 (ap, char *);
 	      while (ccltab[*fp->p])
 		{
 		  fp->r--;
-		  *p++ = *fp->p++;
+		  *strPtr++ = *fp->p++;
 		  if (--width == 0)
 		    break;
 		  if (BufferEmpty_00417AB8)
 		    {
-		      if (p == p0)
+		      if (strPtr == strStart)
 			goto input_failure;
 		      break;
 		    }
 		}
-	      n = p - p0;
+	      n = strPtr - strStart;
 	      if (n == 0)
 		goto match_failure;
-	      *p = 0;
+	      *strPtr = 0;
 	      nassigned++;
 	    }
 	  nread += n;
@@ -2321,18 +2321,18 @@ func_00417AB8_(struct F7648 *fp, char *fmt0, char *ap)
 	    }
 	  else
 	    {
-	      p0 = p = va_arg_00417AB8 (ap, char *);
+	      strStart = strPtr = va_arg_00417AB8 (ap, char *);
 	      while (!isspace_00417AB8 (*fp->p))
 		{
 		  fp->r--;
-		  *p++ = *fp->p++;
+		  *strPtr++ = *fp->p++;
 		  if (--width == 0)
 		    break;
 		  if (BufferEmpty_00417AB8)
 		    break;
 		}
-	      *p = 0;
-	      nread += p - p0;
+	      *strPtr = 0;
+	      nread += strPtr - strStart;
 	      nassigned++;
 	    }
 	  continue;
@@ -2344,7 +2344,7 @@ func_00417AB8_(struct F7648 *fp, char *fmt0, char *ap)
 	    width = sizeof (buf) - 2;
 	  width++;
 	  flags |= SIGNOK | NDIGITS | NZDIGITS;
-	  for (p = buf; width; width--)
+	  for (strPtr = buf; width; width--)
 	    {
 	      c = *fp->p;
 	      /*
@@ -2418,7 +2418,7 @@ func_00417AB8_(struct F7648 *fp, char *fmt0, char *ap)
 		  /* x ok iff flag still set & 2nd char */
 		case 'x':
 		case 'X':
-		  if (flags & PFXOK && p == buf + 1)
+		  if (flags & PFXOK && strPtr == buf + 1)
 		    {
 		      base = 16;/* if %i */
 		      flags &= ~PFXOK;
@@ -2436,7 +2436,7 @@ func_00417AB8_(struct F7648 *fp, char *fmt0, char *ap)
 	      /*
 	       * c is legal: store it and look at the next.
 	       */
-	      *p++ = c;
+	      *strPtr++ = c;
 	      if (--fp->r > 0)
 		fp->p++;
 	      else
@@ -2450,21 +2450,21 @@ func_00417AB8_(struct F7648 *fp, char *fmt0, char *ap)
 	   */
 	  if (flags & NDIGITS)
 	    {
-	      if (p > buf)
-		(void) ungetc_7AB8 (*(u_char_00417AB8 *)-- p, fp);
+	      if (strPtr > buf)
+		(void) ungetc_7AB8 (*(u_char_00417AB8 *)-- strPtr, fp);
 	      goto match_failure;
 	    }
-	  c = ((u_char_00417AB8 *) p)[-1];
+	  c = ((u_char_00417AB8 *) strPtr)[-1];
 	  if (c == 'x' || c == 'X')
 	    {
-	      --p;
+	      --strPtr;
 	      /*(void)*/ ungetc_7AB8 (c, fp);
 	    }
 	  if ((flags & SUPPRESS) == 0)
 	    {
 	      u_long_00417AB8 res;
 
-	      *p = 0;
+	      *strPtr = 0;
 	      res = (*ccfn) (buf, (char **) 0, base);
 	      if (flags & POINTER)
 		*(va_arg_00417AB8 (ap, void **)) = (void *) (unsigned int) res;
@@ -2485,7 +2485,7 @@ func_00417AB8_(struct F7648 *fp, char *fmt0, char *ap)
 		}
 	      nassigned++;
 	    }
-	  nread += p - buf;
+	  nread += strPtr - buf;
 	  break;
 
 	case CT_FLOAT:
@@ -2495,7 +2495,7 @@ func_00417AB8_(struct F7648 *fp, char *fmt0, char *ap)
 	    width = sizeof (buf) - 2;
 	  width++;
 	  flags |= SIGNOK | NDIGITS | DPTOK | EXPOK;
-	  for (p = buf; width; width--)
+	  for (strPtr = buf; width; width--)
 	    {
 	      c = *fp->p;
 	      /*
@@ -2547,7 +2547,7 @@ func_00417AB8_(struct F7648 *fp, char *fmt0, char *ap)
 		}
 	      break;
 	    fok:
-	      *p++ = c;
+	      *strPtr++ = c;
 	      if (--fp->r > 0)
 		fp->p++;
 	      else
@@ -2564,16 +2564,16 @@ func_00417AB8_(struct F7648 *fp, char *fmt0, char *ap)
 	      if (flags & EXPOK)
 		{
 		  /* no digits at all */
-		  while (p > buf)
-		    ungetc_7AB8 (*(u_char_00417AB8 *)-- p, fp);
+		  while (strPtr > buf)
+		    ungetc_7AB8 (*(u_char_00417AB8 *)-- strPtr, fp);
 		  goto match_failure;
 		}
 	      /* just a bad exponent (e and maybe sign) */
-	      c = *(u_char_00417AB8 *)-- p;
+	      c = *(u_char_00417AB8 *)-- strPtr;
 	      if (c != 'e' && c != 'E')
 		{
 		  (void) ungetc_7AB8 (c, fp);	/* sign */
-		  c = *(u_char_00417AB8 *)-- p;
+		  c = *(u_char_00417AB8 *)-- strPtr;
 		}
 	      (void) ungetc_7AB8 (c, fp);
 	    }
@@ -2581,7 +2581,7 @@ func_00417AB8_(struct F7648 *fp, char *fmt0, char *ap)
 	    {
 	      double res;
 
-	      *p = 0;
+	      *strPtr = 0;
 	      res = g7AB8_atof (buf);
 	      if (flags & LONG)
 		{
@@ -2600,7 +2600,7 @@ func_00417AB8_(struct F7648 *fp, char *fmt0, char *ap)
 		}
 	      nassigned++;
 	    }
-	  nread += p - buf;
+	  nread += strPtr - buf;
 	  break;
 	}
     }
@@ -2694,15 +2694,15 @@ extern int func_0041B658(int, int, char *);
  * @param ap   the argument pointer
  */
 void func_004186C8(char *buf, int fmt, char *ap) {
-    struct Fvsprintf f;
-    f.p = buf;
-    f.w = 0x7FFFFFFF;
-    f.flags = 520;
-    f.base = buf;
-    f.size = 0x7FFFFFFF;
-    f.ent = D_00454944;
-    func_0041B658((int)&f, fmt, ap);
-    *f.p = 0;
+    struct Fvsprintf strStream;
+    strStream.p = buf;
+    strStream.w = 0x7FFFFFFF;
+    strStream.flags = 520;
+    strStream.base = buf;
+    strStream.size = 0x7FFFFFFF;
+    strStream.ent = D_00454944;
+    func_0041B658((int)&strStream, fmt, ap);
+    *strStream.p = 0;
 }
 #endif
 
@@ -2736,18 +2736,18 @@ extern int D_00454944;
  * @return the character count, or -1 when it is larger than n
  */
 int func_00418720(char *buf, unsigned n, int fmt, char *ap) {
-    struct F18720 f;
-    int r;
-    f.p = buf;
-    f.w = n;
-    f.flags = 520;
-    f.base = buf;
-    f.size = n;
-    f.ent = D_00454944;
-    r = func_0041B658((int)&f, fmt, ap);
-    if (n < (unsigned)r) r = -1;
-    *f.p = 0;
-    return r;
+    struct F18720 strStream;
+    int charCount;
+    strStream.p = buf;
+    strStream.w = n;
+    strStream.flags = 520;
+    strStream.base = buf;
+    strStream.size = n;
+    strStream.ent = D_00454944;
+    charCount = func_0041B658((int)&strStream, fmt, ap);
+    if (n < (unsigned)charCount) charCount = -1;
+    *strStream.p = 0;
+    return charCount;
 }
 #endif
 
@@ -2847,15 +2847,15 @@ extern int func_0041DBF8(int, int);
  * Takes the lock with func_00418CA8, allocates with func_0041DBF8 using D_00454944, and releases the lock with
  * func_00418D08.
  *
- * @param a  bytes wanted
+ * @param byteCount  bytes wanted
  * @return the block, or null
  */
-int func_004188C0(int a) {
-    int r;
+int func_004188C0(int byteCount) {
+    int block;
     func_00418CA8(D_00454944);
-    r = func_0041DBF8(D_00454944, a);
+    block = func_0041DBF8(D_00454944, byteCount);
     func_00418D08(D_00454944);
-    return r;
+    return block;
 }
 #endif
 
@@ -2872,11 +2872,11 @@ extern void func_0041E340(int, int);
  * Takes the lock with func_00418CA8, releases the block with func_0041E340 using D_00454944, and releases the lock with
  * func_00418D08.
  *
- * @param a  the block, or null
+ * @param block  the block, or null
  */
-void func_00418910(int a) {
+void func_00418910(int block) {
     func_00418CA8(D_00454944);
-    func_0041E340(D_00454944, a);
+    func_0041E340(D_00454944, block);
     func_00418D08(D_00454944);
 }
 #endif
@@ -3096,9 +3096,9 @@ extern int D_00455248;
  * When the current thread (GetThreadId) already owns it (D_00454CA8) the count D_00454CAC goes up; otherwise it waits
  * on the semaphore D_00455248, records the owner and counts 1.
  *
- * @param unused  the reentrancy struct (ignored)
+ * @param reent  the reentrancy struct (ignored)
  */
-void func_00418CA8(int unused) {
+void func_00418CA8(int reent) {
     int id = GetThreadId();
     if (D_00454CA8 == id) {
         D_00454CAC++;
@@ -3123,9 +3123,9 @@ extern int D_00455248;
  * Decrements the count D_00454CAC; when it reaches 0 it clears the owner D_00454CA8 to -1 and signals the semaphore
  * D_00455248.
  *
- * @param unused  the reentrancy struct (ignored)
+ * @param reent  the reentrancy struct (ignored)
  */
-void func_00418D08(int unused) {
+void func_00418D08(int reent) {
     if (--D_00454CAC == 0) {
         D_00454CA8 = -1;
         SignalSema(D_00455248);
@@ -3244,19 +3244,19 @@ extern int _gcvt(int, int, int, char *, int, int);
  * Writes '-' and drops one digit of precision when dpcmp says the value is below zero, then formats with _gcvt
  * (reentrancy struct D_00454944, type 'g', no forced point).
  *
- * @param a     the double, passed in the first (64-bit) argument register
+ * @param value     the double, passed in the first (64-bit) argument register
  * @param prec  significant digits
  * @param buf_  the output buffer
  * @return the buffer, or 0 if _gcvt failed
  */
-int gcvt(int a, int prec, int buf_) {
+int gcvt(int value, int prec, int buf_) {
     char *buf = (char *)buf_;
-    char *p = buf;
-    if (dpcmp(a, 0) < 0) {
-        *p++ = '-';
+    char *cursor = buf;
+    if (dpcmp(value, 0) < 0) {
+        *cursor++ = '-';
         prec--;
     }
-    return _gcvt(D_00454944, a, prec, p, 'g', 0) ? (int)buf : 0;
+    return _gcvt(D_00454944, value, prec, cursor, 'g', 0) ? (int)buf : 0;
 }
 #endif
 
@@ -4025,11 +4025,11 @@ extern void _strtod_r(int, int, int);
  * Passes D_00454944 (the current reentrancy struct) on. Declared void in C; the double comes back from _strtod_r in the
  * return registers untouched.
  *
- * @param a  the string
- * @param b  receives the end of the number, or null
+ * @param str  the string
+ * @param endPtr  receives the end of the number, or null
  */
-void strtod(int a, int b) {
-    _strtod_r(D_00454944, a, b);
+void strtod(int str, int endPtr) {
+    _strtod_r(D_00454944, str, endPtr);
 }
 #endif
 
@@ -4072,27 +4072,27 @@ unsigned long func_0041A840_(int *ptr, char *nptr, char **endptr, int base) __as
  * @return the value (64-bit), or all ones on overflow
  */
 unsigned long func_0041A840_(int *ptr, char *nptr, char **endptr, int base) {
-    char *s = nptr;
+    char *cursor = nptr;
     unsigned long acc, cutoff;
     int c, neg = 0, any, cutlim;
     do {
-        c = *s++;
+        c = *cursor++;
     } while (XCT(c) & 8);
     if (c == '-') {
         neg = 1;
-        c = *s++;
+        c = *cursor++;
     } else if (c == '+')
-        c = *s++;
-    if ((base == 0 || base == 16) && c == '0' && (*s == 'x' || *s == 'X')) {
-        c = s[1];
-        s += 2;
+        c = *cursor++;
+    if ((base == 0 || base == 16) && c == '0' && (*cursor == 'x' || *cursor == 'X')) {
+        c = cursor[1];
+        cursor += 2;
         base = 16;
     }
     if (base == 0)
         base = c == '0' ? 8 : 10;
     cutoff = func_00411538_div(-1, base);
     cutlim = __umoddi3_mod(-1, base);
-    for (acc = 0, any = 0;; c = *s++) {
+    for (acc = 0, any = 0;; c = *cursor++) {
         if (XCT(c) & 4)
             c -= '0';
         else if (XCT(c) & 3)
@@ -4115,7 +4115,7 @@ unsigned long func_0041A840_(int *ptr, char *nptr, char **endptr, int base) {
     } else if (neg)
         acc = -acc;
     if (endptr != 0)
-        *endptr = any ? s - 1 : nptr;
+        *endptr = any ? cursor - 1 : nptr;
     return acc;
 }
 #endif
@@ -4130,12 +4130,12 @@ extern void func_0041A840(int, int, int, int);
  *
  * Forwards to func_0041A840 with D_00454944. The definition is declared void, but $v0 still holds the value.
  *
- * @param a  the string
- * @param b  receives the end, or null
- * @param c  the base
+ * @param str  the string
+ * @param endPtr  receives the end, or null
+ * @param base  the base
  */
-void func_0041AA50(int a, int b, int c) {
-    func_0041A840(D_00454944, a, b, c);
+void func_0041AA50(int str, int endPtr, int base) {
+    func_0041A840(D_00454944, str, endPtr, base);
 }
 #endif
 
@@ -4426,16 +4426,16 @@ char *func_0041AEE8(int value, char *buf, unsigned int base)
 {
     int i;
     int neg = value < 0;
-    unsigned int v;
+    unsigned int remainingValue;
 
-    v = value;
+    remainingValue = value;
     if (neg && base == 10)
-        v = -value;
+        remainingValue = -value;
     i = 0;
     do {
-        buf[i++] = D_00454CB0[v % base];
-        v /= base;
-    } while (v != 0);
+        buf[i++] = D_00454CB0[remainingValue % base];
+        remainingValue /= base;
+    } while (remainingValue != 0);
     if (neg)
         buf[i++] = '-';
     buf[i] = 0;
@@ -4484,22 +4484,22 @@ int func_0041B550_(int fd, char *buf, unsigned n, int mode) __asm__("func_0041B5
  */
 int func_0041B550_(int fd, char *buf, unsigned n, int mode) {
     unsigned i;
-    int r;
+    int writeResult;
     if (mode == 1) {
-        r = func_00424368(fd, (int)D_0052AE98, D_00454CD8);
+        writeResult = func_00424368(fd, (int)D_0052AE98, D_00454CD8);
         D_00454CD8 = 0;
         D_00454CDC = D_0052AE98;
-        return r;
+        return writeResult;
     }
     for (i = 0; i < n; i++) {
         *D_00454CDC = buf[i];
         D_00454CDC++;
         D_00454CD8++;
         if (D_00454CD8 >= 128) {
-            r = func_00424368(fd, (int)D_0052AE98, D_00454CD8);
+            writeResult = func_00424368(fd, (int)D_0052AE98, D_00454CD8);
             D_00454CDC = D_0052AE98;
             D_00454CD8 = 0;
-            if (r == 0)
+            if (writeResult == 0)
                 return 0;
         }
     }
@@ -4639,22 +4639,22 @@ int func_0041C938_(int fd, char *buf, unsigned n, int mode) __asm__("func_0041C9
  */
 int func_0041C938_(int fd, char *buf, unsigned n, int mode) {
     unsigned i;
-    int r;
+    int writeResult;
     if (mode == 1) {
-        r = func_00424368(fd, (int)D_0052AF18, D_00454CE0);
+        writeResult = func_00424368(fd, (int)D_0052AF18, D_00454CE0);
         D_00454CE0 = 0;
         D_00454CE4 = D_0052AF18;
-        return r;
+        return writeResult;
     }
     for (i = 0; i < n; i++) {
         *D_00454CE4 = buf[i];
         D_00454CE4++;
         D_00454CE0++;
         if (D_00454CE0 >= 128) {
-            r = func_00424368(fd, (int)D_0052AF18, D_00454CE0);
+            writeResult = func_00424368(fd, (int)D_0052AF18, D_00454CE0);
             D_00454CE4 = D_0052AF18;
             D_00454CE0 = 0;
-            if (r == 0)
+            if (writeResult == 0)
                 return 0;
         }
     }
@@ -5281,10 +5281,10 @@ int func_0041E638_(int reent_ptr, unsigned int pad) __asm__("func_0041E638");
  * shrink fails it re-reads the break to resynchronise the top chunk.
  *
  * @param reent_ptr  the reentrancy struct
- * @param pad        bytes to keep above the top chunk's minimum
+ * @param retainBytes        bytes to keep above the top chunk's minimum
  * @return 1 when memory was released, else 0
  */
-int func_0041E638_(int reent_ptr, unsigned int pad)
+int func_0041E638_(int reent_ptr, unsigned int retainBytes)
 {
   long  top_size;        /* Amount of top-most memory */
   long  extra;           /* Amount to release */
@@ -5296,7 +5296,7 @@ int func_0041E638_(int reent_ptr, unsigned int pad)
   func_00418CA8_lock(reent_ptr);
 
   top_size = chunksize(top);
-  extra = func_004114D0_mul(func_00411538_div(top_size - pad - 16 + (pagesz-1), pagesz) - 1, pagesz);
+  extra = func_004114D0_mul(func_00411538_div(top_size - retainBytes - 16 + (pagesz-1), pagesz) - 1, pagesz);
 
   if (extra < (long)pagesz)  /* Not enough memory to release */
   {
@@ -5364,20 +5364,20 @@ long _strtol_r_(int *ptr, char *nptr, char **endptr, int base) __asm__("_strtol_
  * @return the parsed value
  */
 long _strtol_r_(int *ptr, char *nptr, char **endptr, int base) {
-    char *s = nptr;
+    char *cursor = nptr;
     unsigned long acc, cutoff;
     int c, neg = 0, any, cutlim;
     do {
-        c = *s++;
+        c = *cursor++;
     } while (XCT(c) & 8);
     if (c == '-') {
         neg = 1;
-        c = *s++;
+        c = *cursor++;
     } else if (c == '+')
-        c = *s++;
-    if ((base == 0 || base == 16) && c == '0' && (*s == 'x' || *s == 'X')) {
-        c = s[1];
-        s += 2;
+        c = *cursor++;
+    if ((base == 0 || base == 16) && c == '0' && (*cursor == 'x' || *cursor == 'X')) {
+        c = cursor[1];
+        cursor += 2;
         base = 16;
     }
     if (base == 0)
@@ -5385,7 +5385,7 @@ long _strtol_r_(int *ptr, char *nptr, char **endptr, int base) {
     cutoff = neg ? -(unsigned long)0x8000000000000000L : 0x7FFFFFFFFFFFFFFFL;
     cutlim = __umoddi3_mod(cutoff, base);
     cutoff = func_00411538_div(cutoff, base);
-    for (acc = 0, any = 0;; c = *s++) {
+    for (acc = 0, any = 0;; c = *cursor++) {
         if (XCT(c) & 4)
             c -= '0';
         else if (XCT(c) & 3)
@@ -5408,7 +5408,7 @@ long _strtol_r_(int *ptr, char *nptr, char **endptr, int base) {
     } else if (neg)
         acc = -acc;
     if (endptr != 0)
-        *endptr = any ? s - 1 : nptr;
+        *endptr = any ? cursor - 1 : nptr;
     return acc;
 }
 #endif
@@ -5421,13 +5421,13 @@ extern long _strtol_r(int, int, int, int);
 /**
  * Parses an integer in a given base from a string with the global reentrancy struct (_strtol_r).
  *
- * @param s     the string
+ * @param str     the string
  * @param end   receives the end of the number, or null
  * @param base  0 or 2..36
  * @return the parsed value (64-bit long)
  */
-long strtol(int s, int end, int base) {
-    return _strtol_r(D_00454944, s, end, base);
+long strtol(int str, int end, int base) {
+    return _strtol_r(D_00454944, str, end, base);
 }
 #endif
 
@@ -5440,11 +5440,11 @@ extern char D_00499C81[];
  *
  * Uses the upper-case bit (1) of the ctype table D_00499C81. strcasecmp and strncasecmp call it.
  *
- * @param a  the character
+ * @param charCode  the character
  * @return the lower-case character, or the argument
  */
-int func_0041EA18(int a) {
-    return (D_00499C81[a] & 1) ? a + 0x20 : a;
+int func_0041EA18(int charCode) {
+    return (D_00499C81[charCode] & 1) ? charCode + 0x20 : charCode;
 }
 #endif
 
@@ -5466,13 +5466,13 @@ char *func_0041EA38_(int *p, int category, char *locale) __asm__("func_0041EA38"
  * (D_00455140) to 8 for C-JIS, 2 for the other two-part names, else 1. A successful set records the category (+0x30)
  * and locale (+0x34) in the struct. The second "C" comparison in the LC_CTYPE test repeats the first, as in newlib.
  *
- * @param p         the reentrancy struct
+ * @param reent         the reentrancy struct
  * @param category  the locale category
  * @param locale    the new locale, or null to query
  * @return for LC_CTYPE the previous ctype locale name after a set or the current one after a query, else "C"; null for
  *         an unsupported locale
  */
-char *func_0041EA38_(int *p, int category, char *locale) {
+char *func_0041EA38_(int *reent, int category, char *locale) {
     if (locale) {
         if (category != 2) {
             if (func_004165A8_cmp(locale, D_0049A7D0) && func_004165A8_cmp(locale, D_0049A7C0))
@@ -5496,8 +5496,8 @@ char *func_0041EA38_(int *p, int category, char *locale) {
             else
                 *(int *)D_00455140 = 1;
         }
-        p[13] = (int)locale;
-        p[0xC] = category;
+        reent[13] = (int)locale;
+        reent[0xC] = category;
         return category == 2 ? D_00455150 : D_0049A7D0b;
     }
     return category == 2 ? D_00455148 : D_0049A7D0b;
@@ -5530,11 +5530,11 @@ extern void func_0041EA38(int, int, int);
  *
  * Forwards to func_0041EA38 with D_00454944. Declared void, but $v0 still holds the name.
  *
- * @param a  the locale category
- * @param b  the new locale, or null to query
+ * @param category  the locale category
+ * @param locale  the new locale, or null to query
  */
-void func_0041EC18(int a, int b) {
-    func_0041EA38(D_00454944, a, b);
+void func_0041EC18(int category, int locale) {
+    func_0041EA38(D_00454944, category, locale);
 }
 #endif
 
@@ -6112,16 +6112,16 @@ extern int func_00424488(int);
  * err. func_00424488 always returns -1 without setting errno, so nothing is stored.
  *
  * @param err  the reentrancy struct (its errno, the first field)
- * @param a    the descriptor
+ * @param fileDesc    the descriptor
  * @return func_00424488's result (-1)
  */
-int func_0041FB98(int err, int a) {
-    int r;
+int func_0041FB98(int err, int fileDesc) {
+    int closeResult;
     D_004A5BB8 = 0;
-    r = func_00424488(a);
-    if (r == -1 && D_004A5BB8)
+    closeResult = func_00424488(fileDesc);
+    if (closeResult == -1 && D_004A5BB8)
         *(int *)err = D_004A5BB8;
-    return r;
+    return closeResult;
 }
 #endif
 
@@ -6137,17 +6137,17 @@ extern int func_00424558(int, int);
  * set. func_00424558 reports every descriptor as a character device.
  *
  * @param err  receives errno on failure
- * @param a    the descriptor
- * @param b    the stat buffer
+ * @param fileDesc    the descriptor
+ * @param statBuf    the stat buffer
  * @return 0, or -1 on failure
  */
-int func_0041FBF0(int *err, int a, int b) {
-    int r;
+int func_0041FBF0(int *err, int fileDesc, int statBuf) {
+    int fstatResult;
     D_004A5BB8 = 0;
-    r = func_00424558(a, b);
-    if (r == -1 && D_004A5BB8)
+    fstatResult = func_00424558(fileDesc, statBuf);
+    if (fstatResult == -1 && D_004A5BB8)
         *err = D_004A5BB8;
-    return r;
+    return fstatResult;
 }
 #endif
 
@@ -6163,18 +6163,18 @@ extern int func_00424498(int, int, int);
  * set. func_00424498 always returns -1 without setting errno.
  *
  * @param err  receives errno on failure
- * @param a    the descriptor
- * @param b    the offset
- * @param c    the whence code
+ * @param fileDesc    the descriptor
+ * @param offset    the offset
+ * @param whence    the whence code
  * @return the new offset, here always -1
  */
-long func_0041FC50(int *err, int a, int b, int c) {
-    int r;
+long func_0041FC50(int *err, int fileDesc, int offset, int whence) {
+    int newOffset;
     D_004A5BB8 = 0;
-    r = func_00424498(a, b, c);
-    if (r == -1 && D_004A5BB8)
+    newOffset = func_00424498(fileDesc, offset, whence);
+    if (newOffset == -1 && D_004A5BB8)
         *err = D_004A5BB8;
-    return r;
+    return newOffset;
 }
 #endif
 
@@ -6190,18 +6190,18 @@ extern int func_00424460(int, int, int);
  * set. func_00424460 always fails (errno 5, EIO), so every open through stdio fails.
  *
  * @param err  receives errno on failure
- * @param a    the path
- * @param b    the open flags
- * @param c    the permission bits
+ * @param path    the path
+ * @param openFlags    the open flags
+ * @param permissions    the permission bits
  * @return the descriptor, here always -1
  */
-int func_0041FCB0(int *err, int a, int b, int c) {
-    int r;
+int func_0041FCB0(int *err, int path, int openFlags, int permissions) {
+    int fileDesc;
     D_004A5BB8 = 0;
-    r = func_00424460(a, b, c);
-    if (r == -1 && D_004A5BB8)
+    fileDesc = func_00424460(path, openFlags, permissions);
+    if (fileDesc == -1 && D_004A5BB8)
         *err = D_004A5BB8;
-    return r;
+    return fileDesc;
 }
 #endif
 
@@ -6217,18 +6217,18 @@ extern int func_004243E8(int, int, int);
  * when it returns -1 with errno set.
  *
  * @param err  receives errno on failure
- * @param a    the descriptor
- * @param b    the destination
- * @param c    bytes wanted
+ * @param fileDesc    the descriptor
+ * @param buffer    the destination
+ * @param byteCount    bytes wanted
  * @return the bytes read, or -1
  */
-long func_0041FD10(int *err, int a, int b, int c) {
-    int r;
+long func_0041FD10(int *err, int fileDesc, int buffer, int byteCount) {
+    int bytesRead;
     D_004A5BB8 = 0;
-    r = func_004243E8(a, b, c);
-    if (r == -1 && D_004A5BB8)
+    bytesRead = func_004243E8(fileDesc, buffer, byteCount);
+    if (bytesRead == -1 && D_004A5BB8)
         *err = D_004A5BB8;
-    return r;
+    return bytesRead;
 }
 #endif
 
@@ -6244,16 +6244,16 @@ extern unsigned func_004244A0(int);
  * errno set.
  *
  * @param err  receives errno on failure
- * @param a    the byte change (negative to shrink)
+ * @param increment    the byte change (negative to shrink)
  * @return the previous break, or 0xFFFFFFFF on failure
  */
-unsigned func_0041FD70(int *err, int a) {
-    unsigned r;
+unsigned func_0041FD70(int *err, int increment) {
+    unsigned oldBreak;
     D_004A5BB8 = 0;
-    r = func_004244A0(a);
-    if (r == 0xFFFFFFFF && D_004A5BB8)
+    oldBreak = func_004244A0(increment);
+    if (oldBreak == 0xFFFFFFFF && D_004A5BB8)
         *err = D_004A5BB8;
-    return r;
+    return oldBreak;
 }
 #endif
 
@@ -6269,18 +6269,18 @@ extern int func_00424368(int, int, int);
  * through err when it returns -1 with errno set.
  *
  * @param err  receives errno on failure
- * @param a    the descriptor
- * @param b    the data
- * @param c    the byte count
+ * @param fileDesc    the descriptor
+ * @param buffer    the data
+ * @param byteCount    the byte count
  * @return the bytes written, or -1
  */
-long func_0041FDD0(int *err, int a, int b, int c) {
-    int r;
+long func_0041FDD0(int *err, int fileDesc, int buffer, int byteCount) {
+    int bytesWritten;
     D_004A5BB8 = 0;
-    r = func_00424368(a, b, c);
-    if (r == -1 && D_004A5BB8)
+    bytesWritten = func_00424368(fileDesc, buffer, byteCount);
+    if (bytesWritten == -1 && D_004A5BB8)
         *err = D_004A5BB8;
-    return r;
+    return bytesWritten;
 }
 #endif
 
@@ -7312,36 +7312,36 @@ extern int D_0049A8E8[];
  * squaring with func_004209B0); each partial product frees the previous one with func_004205B8.
  *
  * @param ptr  the reentrancy struct
- * @param b    the Bigint (freed when replaced)
+ * @param number    the Bigint (freed when replaced)
  * @param k    the power of 5
  * @return the product
  */
-struct Bigint *func_00420BC8(int ptr, struct Bigint *b, int k) {
-    struct Bigint *b1, *p5, *p51;
+struct Bigint *func_00420BC8(int ptr, struct Bigint *number, int k) {
+    struct Bigint *product, *fivePower, *nextFivePower;
     int i;
     if ((i = k & 3))
-        b = func_004205F0(ptr, b, D_0049A8E8[i - 1], 0);
+        number = func_004205F0(ptr, number, D_0049A8E8[i - 1], 0);
     if (!(k >>= 2))
-        return b;
-    if (!(p5 = ((struct Bigint **)ptr)[0x48 / 4])) {
-        p5 = ((struct Bigint **)ptr)[0x48 / 4] = (struct Bigint *)func_00420978(ptr, 625);
-        p5->next = 0;
+        return number;
+    if (!(fivePower = ((struct Bigint **)ptr)[0x48 / 4])) {
+        fivePower = ((struct Bigint **)ptr)[0x48 / 4] = (struct Bigint *)func_00420978(ptr, 625);
+        fivePower->next = 0;
     }
     for (;;) {
         if (k & 1) {
-            b1 = func_004209B0(ptr, b, p5);
-            func_004205B8((int *)ptr, (int *)b);
-            b = b1;
+            product = func_004209B0(ptr, number, fivePower);
+            func_004205B8((int *)ptr, (int *)number);
+            number = product;
         }
         if (!(k >>= 1))
             break;
-        if (!(p51 = p5->next)) {
-            p51 = p5->next = func_004209B0(ptr, p5, p5);
-            p51->next = 0;
+        if (!(nextFivePower = fivePower->next)) {
+            nextFivePower = fivePower->next = func_004209B0(ptr, fivePower, fivePower);
+            nextFivePower->next = 0;
         }
-        p5 = p51;
+        fivePower = nextFivePower;
     }
-    return b;
+    return number;
 }
 #endif
 
@@ -7710,15 +7710,15 @@ extern double dpmul(double, double);
  * @return 10^n
  */
 double func_004214C0(int n) {
-    double r = 1.0;
+    double powerOfTen = 1.0;
     if (n < 24)
         return D_0049A8F8[n];
     if (n > 0) {
         do {
-            r = dpmul(r, 10.0);
+            powerOfTen = dpmul(powerOfTen, 10.0);
         } while (--n > 0);
     }
-    return r;
+    return powerOfTen;
 }
 #endif
 
@@ -7950,7 +7950,7 @@ char *ecvtbuf_(double value, int ndigit, int *decpt, int *sign, char *buf) __asm
  * @return the digit string, or 0 when the shared buffer could not grow
  */
 char *ecvtbuf_(double value, int ndigit, int *decpt, int *sign, char *buf) {
-    char *save, *p, *end;
+    char *save, *digitStr, *end;
     int i = 0;
     int newlen;
     if (buf == 0) {
@@ -7965,9 +7965,9 @@ char *ecvtbuf_(double value, int ndigit, int *decpt, int *sign, char *buf) {
         buf = REENT->cvtbuf;
     }
     save = buf;
-    p = _dtoa_r(REENT, value, 2, ndigit, decpt, sign, &end);
-    while (p < end) {
-        *buf++ = *p++;
+    digitStr = _dtoa_r(REENT, value, 2, ndigit, decpt, sign, &end);
+    while (digitStr < end) {
+        *buf++ = *digitStr++;
         i++;
     }
     if (i < ndigit) {

@@ -26,13 +26,13 @@ extern int operator_delete__FPi(int *);
  * g++ deleting-destructor shape; type_info keeps its vptr at +4, after the name pointer. Stores D_00499A48 and calls
  * operator_delete__FPi on flag & 1. The destructors of the derived type_info classes jump here.
  *
- * @param p     the type_info object
+ * @param typeInfo     the type_info object
  * @param flag  destructor flags: bit 0 frees the storage
  * @return nothing meaningful (the C reconstruction declares int)
  */
-int func_00414B68(int *p, int flag) {
-    p[1] = (int)D_00499A48;
-    if (flag & 1) return operator_delete__FPi(p);
+int func_00414B68(int *typeInfo, int flag) {
+    typeInfo[1] = (int)D_00499A48;
+    if (flag & 1) return operator_delete__FPi(typeInfo);
 }
 #endif
 
@@ -67,17 +67,17 @@ extern int D_004999D0[];
  *
  * Stores the name (+0), the __class_type_info vtable D_004999D0 (+4), the base list (+8) and the base count (+0xC).
  *
- * @param p  the storage, or null
- * @param a  the mangled class name
- * @param b  the base_info array
- * @param c  number of bases
+ * @param storage  the storage, or null
+ * @param typeName  the mangled class name
+ * @param baseList  the base_info array
+ * @param baseCount  number of bases
  */
-void func_00414BD8(int *p, int a, int b, int c) {
-    if (p != 0) {
-        p[3] = c;
-        p[0] = a;
-        p[2] = b;
-        p[1] = (int)D_004999D0;
+void func_00414BD8(int *storage, int typeName, int baseList, int baseCount) {
+    if (storage != 0) {
+        storage[3] = baseCount;
+        storage[0] = typeName;
+        storage[2] = baseList;
+        storage[1] = (int)D_004999D0;
     }
 }
 #endif
@@ -92,15 +92,15 @@ extern int D_004999E8[];
  * Stores the name (+0), the __si_type_info vtable D_004999E8 (+4) and the base's type_info (+8). The type_info
  * functions of single-inheritance classes call it on first use.
  *
- * @param p  the storage, or null
- * @param a  the mangled class name
- * @param b  the base class's type_info
+ * @param storage  the storage, or null
+ * @param typeName  the mangled class name
+ * @param baseType  the base class's type_info
  */
-void func_00414C00(int *p, int a, int b) {
-    if (p != 0) {
-        p[2] = b;
-        p[0] = a;
-        p[1] = (int)D_004999E8;
+void func_00414C00(int *storage, int typeName, int baseType) {
+    if (storage != 0) {
+        storage[2] = baseType;
+        storage[0] = typeName;
+        storage[1] = (int)D_004999E8;
     }
 }
 #endif
@@ -115,13 +115,13 @@ extern int D_00499A00[];
  * Stores the name (+0) and the __user_type_info vtable D_00499A00 (+4). The type_info functions of classes without
  * bases call it on first use.
  *
- * @param p  the storage, or null
- * @param a  the mangled class name
+ * @param storage  the storage, or null
+ * @param typeName  the mangled class name
  */
-void func_00414C20(int *p, int a) {
-    if (p != 0) {
-        p[0] = a;
-        p[1] = (int)D_00499A00;
+void func_00414C20(int *storage, int typeName) {
+    if (storage != 0) {
+        storage[0] = typeName;
+        storage[1] = (int)D_00499A00;
     }
 }
 #endif
@@ -275,18 +275,18 @@ extern int D_004999D0[];
 /**
  * Constructs a multiple-inheritance class type_info: name, vtable D_004999D0, base list and base count.
  *
- * @param p  the object
- * @param a  the mangled class name
- * @param b  the base_info array
- * @param c  number of bases
+ * @param typeInfo  the object
+ * @param typeName  the mangled class name
+ * @param baseList  the base_info array
+ * @param baseCount  number of bases
  * @return the object
  */
-int *func_00414EE0(int *p, int a, int b, int c) {
-    p[0] = a;
-    p[1] = (int)D_004999D0;
-    p[2] = b;
-    p[3] = c;
-    return p;
+int *func_00414EE0(int *typeInfo, int typeName, int baseList, int baseCount) {
+    typeInfo[0] = typeName;
+    typeInfo[1] = (int)D_004999D0;
+    typeInfo[2] = baseList;
+    typeInfo[3] = baseCount;
+    return typeInfo;
 }
 #endif
 
@@ -335,16 +335,16 @@ extern int D_004999E8[];
 /**
  * Constructs a single-inheritance class type_info: name, vtable D_004999E8 and base type_info.
  *
- * @param p  the object
- * @param a  the mangled class name
- * @param b  the base class's type_info
+ * @param typeInfo  the object
+ * @param typeName  the mangled class name
+ * @param baseType  the base class's type_info
  * @return the object
  */
-int *func_00414F70(int *p, int a, int b) {
-    p[0] = a;
-    p[1] = (int)D_004999E8;
-    p[2] = b;
-    return p;
+int *func_00414F70(int *typeInfo, int typeName, int baseType) {
+    typeInfo[0] = typeName;
+    typeInfo[1] = (int)D_004999E8;
+    typeInfo[2] = baseType;
+    return typeInfo;
 }
 #endif
 
@@ -393,14 +393,14 @@ extern int D_00499A00[];
 /**
  * Constructs the type_info of a class without bases: name and vtable D_00499A00.
  *
- * @param p  the object
- * @param a  the mangled class name
+ * @param typeInfo  the object
+ * @param typeName  the mangled class name
  * @return the object
  */
-int *func_00415000(int *p, int a) {
-    p[0] = a;
-    p[1] = (int)D_00499A00;
-    return p;
+int *func_00415000(int *typeInfo, int typeName) {
+    typeInfo[0] = typeName;
+    typeInfo[1] = (int)D_00499A00;
+    return typeInfo;
 }
 #endif
 
@@ -453,13 +453,13 @@ extern int operator_delete__FPi(int *);
  * g++ deleting-destructor shape: stores D_004998B8 (exception's vtable) and calls operator_delete__FPi on flag & 1.
  * Fills the destructor slot of bad_typeid's vtable D_00499A18.
  *
- * @param p     the bad_typeid object
+ * @param excObject     the bad_typeid object
  * @param flag  destructor flags: bit 0 frees the storage
  * @return nothing meaningful (the C reconstruction declares int)
  */
-int func_00415088(int **p, int flag) {
-    *p = D_004998B8;
-    if (flag & 1) return operator_delete__FPi((int *)p);
+int func_00415088(int **excObject, int flag) {
+    *excObject = D_004998B8;
+    if (flag & 1) return operator_delete__FPi((int *)excObject);
 }
 #endif
 
@@ -470,12 +470,12 @@ extern int D_00499A18[];
 /**
  * Constructs a bad_typeid: stores its vtable (D_00499A18) and returns the object.
  *
- * @param p  the object to construct
+ * @param excObject  the object to construct
  * @return the constructed object
  */
-int *func_004150B8(int **p) {
-    *p = D_00499A18;
-    return (int*)p;
+int *func_004150B8(int **excObject) {
+    *excObject = D_00499A18;
+    return (int*)excObject;
 }
 #endif
 
@@ -515,13 +515,13 @@ extern int operator_delete__FPi(int *);
  * g++ deleting-destructor shape: stores D_004998B8 (exception's vtable) and calls operator_delete__FPi on flag & 1.
  * Fills the destructor slot of bad_cast's vtable D_00499A30.
  *
- * @param p     the bad_cast object
+ * @param excObject     the bad_cast object
  * @param flag  destructor flags: bit 0 frees the storage
  * @return nothing meaningful (the C reconstruction declares int)
  */
-int func_00415120(int **p, int flag) {
-    *p = D_004998B8;
-    if (flag & 1) return operator_delete__FPi((int *)p);
+int func_00415120(int **excObject, int flag) {
+    *excObject = D_004998B8;
+    if (flag & 1) return operator_delete__FPi((int *)excObject);
 }
 #endif
 
@@ -532,12 +532,12 @@ extern int D_00499A30[];
 /**
  * Constructs a bad_cast: stores its vtable (D_00499A30) and returns the object.
  *
- * @param p  the object to construct
+ * @param excObject  the object to construct
  * @return the constructed object
  */
-int *func_00415150(int **p) {
-    *p = D_00499A30;
-    return (int*)p;
+int *func_00415150(int **excObject) {
+    *excObject = D_00499A30;
+    return (int*)excObject;
 }
 #endif
 
@@ -602,14 +602,14 @@ extern int D_00499A48[];
 /**
  * Constructs a type_info: stores the name and type_info's vtable (D_00499A48, at +4) and returns the object.
  *
- * @param p  the object
- * @param a  the mangled type name
+ * @param typeInfo  the object
+ * @param typeName  the mangled type name
  * @return the constructed object
  */
-int *func_004151E0(int *p, int a) {
-    p[0] = a;
-    p[1] = (int)D_00499A48;
-    return p;
+int *func_004151E0(int *typeInfo, int typeName) {
+    typeInfo[0] = typeName;
+    typeInfo[1] = (int)D_00499A48;
+    return typeInfo;
 }
 #endif
 
@@ -847,15 +847,15 @@ extern int D_00499BC8[];
  *
  * Stores the name (+0), the __pointer_type_info vtable D_00499BC8 (+4) and the pointed-to type (+8).
  *
- * @param p  the storage, or null
- * @param a  the mangled type name
- * @param b  the pointed-to type's type_info
+ * @param storage  the storage, or null
+ * @param typeName  the mangled type name
+ * @param pointeeType  the pointed-to type's type_info
  */
-void func_00415778(int *p, int a, int b) {
-    if (p != 0) {
-        p[2] = b;
-        p[0] = a;
-        p[1] = (int)D_00499BC8;
+void func_00415778(int *storage, int typeName, int pointeeType) {
+    if (storage != 0) {
+        storage[2] = pointeeType;
+        storage[0] = typeName;
+        storage[1] = (int)D_00499BC8;
     }
 }
 #endif
@@ -870,17 +870,17 @@ extern int D_00499BB8[];
  * Stores the name (+0), the __attr_type_info vtable D_00499BB8 (+4), the unqualified type (+8) and the qualifier bits
  * (+0xC: 1 const, 2 volatile).
  *
- * @param p  the storage, or null
- * @param a  the mangled type name
- * @param b  qualifier bits (1 const, 2 volatile)
- * @param c  the unqualified type's type_info
+ * @param storage  the storage, or null
+ * @param typeName  the mangled type name
+ * @param cvQualifiers  qualifier bits (1 const, 2 volatile)
+ * @param baseType  the unqualified type's type_info
  */
-void func_00415798(int *p, int a, int b, int c) {
-    if (p != 0) {
-        p[3] = b;
-        p[0] = a;
-        p[2] = c;
-        p[1] = (int)D_00499BB8;
+void func_00415798(int *storage, int typeName, int cvQualifiers, int baseType) {
+    if (storage != 0) {
+        storage[3] = cvQualifiers;
+        storage[0] = typeName;
+        storage[2] = baseType;
+        storage[1] = (int)D_00499BB8;
     }
 }
 #endif
@@ -894,13 +894,13 @@ extern int D_00499B98[];
  *
  * Stores the name (+0) and the __func_type_info vtable D_00499B98 (+4).
  *
- * @param p  the storage, or null
- * @param a  the mangled type name
+ * @param storage  the storage, or null
+ * @param typeName  the mangled type name
  */
-void func_004157C0(int *p, int a) {
-    if (p != 0) {
-        p[0] = a;
-        p[1] = (int)D_00499B98;
+void func_004157C0(int *storage, int typeName) {
+    if (storage != 0) {
+        storage[0] = typeName;
+        storage[1] = (int)D_00499B98;
     }
 }
 #endif
@@ -915,13 +915,13 @@ extern int D_00499B88[];
  *
  * Stores the name (+0) and the __ptmf_type_info vtable D_00499B88 (+4).
  *
- * @param p  the storage, or null
- * @param a  the mangled type name
+ * @param storage  the storage, or null
+ * @param typeName  the mangled type name
  */
-void func_004157E0(int *p, int a) {
-    if (p != 0) {
-        p[0] = a;
-        p[1] = (int)D_00499B88;
+void func_004157E0(int *storage, int typeName) {
+    if (storage != 0) {
+        storage[0] = typeName;
+        storage[1] = (int)D_00499B88;
     }
 }
 #endif
@@ -935,13 +935,13 @@ extern int D_00499B78[];
  *
  * Stores the name (+0) and the __ptmd_type_info vtable D_00499B78 (+4).
  *
- * @param p  the storage, or null
- * @param a  the mangled type name
+ * @param storage  the storage, or null
+ * @param typeName  the mangled type name
  */
-void func_00415800(int *p, int a) {
-    if (p != 0) {
-        p[0] = a;
-        p[1] = (int)D_00499B78;
+void func_00415800(int *storage, int typeName) {
+    if (storage != 0) {
+        storage[0] = typeName;
+        storage[1] = (int)D_00499B78;
     }
 }
 #endif
@@ -955,13 +955,13 @@ extern int D_00499B68[];
  *
  * Stores the name (+0) and the __array_type_info vtable D_00499B68 (+4).
  *
- * @param p  the storage, or null
- * @param a  the mangled type name
+ * @param storage  the storage, or null
+ * @param typeName  the mangled type name
  */
-void func_00415820(int *p, int a) {
-    if (p != 0) {
-        p[0] = a;
-        p[1] = (int)D_00499B68;
+void func_00415820(int *storage, int typeName) {
+    if (storage != 0) {
+        storage[0] = typeName;
+        storage[1] = (int)D_00499B68;
     }
 }
 #endif
