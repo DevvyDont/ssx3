@@ -21,9 +21,9 @@ typedef struct {
 } sDmaChan;
 
 extern int func_00426B48(sSifClient *cd, unsigned int rpc_number, int mode);
-extern int func_00426D18(sSifClient *cd, int fno, int mode, void *send, int ssize, void *recv, int rsize,
+extern int sceSifCallRpc(sSifClient *cd, int fno, int mode, void *send, int ssize, void *recv, int rsize,
                          void (*end_function)(void *), void *end_param);
-extern int func_00426F08(sSifClient *cd);
+extern int sceSifCheckStatRpc(sSifClient *cd);
 
 extern sSifClient D_00526200[2]; /* libpad */
 extern sSifClient D_005266C0;
@@ -321,12 +321,12 @@ void func_003FD810(void) {
         ".word SignalSema\n"
         ".word PollSema\n"
         ".word FlushCache\n"
-        ".word func_00426D18\n"
-        ".word func_00427D60\n"
-        ".word func_00427FE8\n"
-        ".word func_004283A0\n"
-        ".word func_00428600\n"
-        ".word func_00428168\n"
+        ".word sceSifCallRpc\n"
+        ".word sceOpen\n"
+        ".word sceClose\n"
+        ".word sceRead\n"
+        ".word sceWrite\n"
+        ".word sceLseek\n"
         ".word func_00424570\n"
         ".word func_004245A0\n"
         ".word func_00426B48\n"
@@ -966,8 +966,8 @@ int func_003FE590(sDmaChan *dmaChan, unsigned n, int mode, int x) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE5C8);
 #ifdef SKIP_ASM
-extern int func_0042C078();
-extern void func_0042C0C0(void);
+extern int DIntr();
+extern void EIntr(void);
 /**
  * Force-stops a DMA channel: with interrupts disabled, suspends all DMA through D_ENABLEW (bit 16) unless already
  * suspended, clears the channel's STR bit, restores D_ENABLEW and re-enables interrupts if they were on.
@@ -978,7 +978,7 @@ extern void func_0042C0C0(void);
 int func_003FE5C8(sDmaChan *dmaChan) {
     int x, enabler, intrState;
     unsigned oldChcr;
-    intrState = func_0042C078();
+    intrState = DIntr();
     enabler = *(volatile int *)0x1000F520;
     if ((enabler & 0x10000) == 0)
         *(volatile int *)0x1000F590 = enabler | 0x10000;
@@ -987,7 +987,7 @@ int func_003FE5C8(sDmaChan *dmaChan) {
     dmaChan->chcr = oldChcr & 0xFFFFFEFF;
     *(volatile int *)0x1000F590 = enabler;
     if (intrState)
-        func_0042C0C0();
+        EIntr();
     return oldChcr;
 }
 #endif
@@ -2219,7 +2219,7 @@ int func_003FF5E8(void) {
     }
     D_00526440[0] = 16;
     D_00526440[4] = 0;
-    if (func_00426D18(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
+    if (sceSifCallRpc(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
         return 0;
     return D_00526440[3];
 }
@@ -2236,7 +2236,7 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FF688);
 int func_003FF688(void) {
     int result;
     D_00526440[0] = 15;
-    if (func_00426D18(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
+    if (sceSifCallRpc(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
         return 0;
     result = D_00526440[3];
     if (result == 1)
@@ -2264,7 +2264,7 @@ int func_003FF8F0(int port, int slot) {
     D_00526440[1] = port;
     D_00526440[2] = slot;
     D_00526440[4] = 1;
-    if (func_00426D18(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
+    if (sceSifCallRpc(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
         return 0;
     D_00526250[port][slot].open = 0;
     return D_00526440[3];
@@ -2313,8 +2313,8 @@ int func_003FFA08(int port, int slot) {
 INCLUDE_ASM("seg/seg_2FE810", func_003FFA58);
 #ifdef SKIP_ASM
 struct B128 { char b[128]; };
-extern int func_0042C078();
-extern void func_0042C0C0();
+extern int DIntr();
+extern void EIntr();
 extern int func_0041605C_k() __asm__("func_0041605C");
 /**
  * Reads a port/slot's newest pad data: copies the newest frame with interrupts disabled, then its data (length at
@@ -2331,12 +2331,12 @@ int func_003FFA58(int port, int slot, int dataOut) {
     int intrState;
     if (!D_00526250[port][slot].open)
         return 0;
-    intrState = func_0042C078();
+    intrState = DIntr();
     frameWords = (int *)&frameCopy;
     frameCopy = *(struct B128 *)func_003FF9A8(port, slot);
     func_0041605C_k(dataOut, frameWords, frameWords[0x60 / 4]);
     if (intrState == 1)
-        func_0042C0C0();
+        EIntr();
     return frameWords[0x60 / 4];
 }
 #endif
@@ -2579,7 +2579,7 @@ int func_004000D8(int port, int slot, int modeIndex, int lockMode) {
     D_00526440[0] = 6;
     D_00526440[1] = port;
     D_00526440[2] = slot;
-    if (func_00426D18(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
+    if (sceSifCallRpc(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
         return 0;
     result = D_00526440[5];
     if (result == 1)
@@ -2643,7 +2643,7 @@ int func_00400250(int port, int slot, unsigned char *data) {
     alignBytes = (unsigned char *)&rpcBlock[3];
     for (i = 0; i < 6; i++)
         alignBytes[i] = data[i];
-    if (func_00426D18(D_00526200, 1, 0, rpcBlock, 128, rpcBlock, 128, 0, 0) < 0)
+    if (sceSifCallRpc(D_00526200, 1, 0, rpcBlock, 128, rpcBlock, 128, 0, 0) < 0)
         return 0;
     if (rpcBlock[5] == 1)
         func_003FFC70(port, slot, 2);
@@ -2695,7 +2695,7 @@ int func_004003E0(int port, int slot, int buttonMask) {
     D_00526440[0] = 10;
     D_00526440[1] = port;
     D_00526440[2] = slot;
-    if (func_00426D18(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
+    if (sceSifCallRpc(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
         return 0;
     result = D_00526440[4];
     if (result == 1)
@@ -2774,7 +2774,7 @@ int func_004005A0(int port, int slot, struct P12 *cmdBlock) {
     D_00526440[0] = 11;
     D_00526440[2] = slot;
     *(struct P12 *)&D_00526440[3] = *cmdBlock;
-    if (func_00426D18(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
+    if (sceSifCallRpc(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
         return 0;
     if (D_00526440[7] == 1)
         func_003FFC70(port, slot, 2);
@@ -2792,7 +2792,7 @@ INCLUDE_ASM("seg/seg_2FE810", func_00400670);
  */
 int func_00400670(void) {
     D_00526440[0] = 12;
-    if (func_00426D18(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
+    if (sceSifCallRpc(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
         return 0;
     return D_00526440[3];
 }
@@ -2810,7 +2810,7 @@ INCLUDE_ASM("seg/seg_2FE810", func_004006D8);
 int func_004006D8(int argWord) {
     D_00526440[1] = argWord;
     D_00526440[0] = 13;
-    if (func_00426D18(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
+    if (sceSifCallRpc(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
         return 0;
     return D_00526440[3];
 }
@@ -2826,7 +2826,7 @@ INCLUDE_ASM("seg/seg_2FE810", func_00400740);
  */
 int func_00400740(void) {
     D_00526440[0] = 18;
-    if (func_00426D18(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
+    if (sceSifCallRpc(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
         return 0;
     return D_00526440[3];
 }
@@ -2844,7 +2844,7 @@ INCLUDE_ASM("seg/seg_2FE810", func_004007A8);
 int func_004007A8(int argWord) {
     D_00526440[1] = argWord;
     D_00526440[0] = 20;
-    if (func_00426D18(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
+    if (sceSifCallRpc(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
         return 0;
     return D_00526440[2];
 }
@@ -2893,19 +2893,19 @@ void func_00400838(unsigned short ticks) {
 INCLUDE_ASM("seg/seg_2FE810", func_004008A0);
 #ifdef SKIP_ASM
 extern int func_004013E8(int);
-extern int func_0042C078();
-extern void func_0042C0C0(void);
+extern int DIntr();
+extern void EIntr(void);
 void (*func_004008A0(void (*cb)(int)))(int) {
     void (*old)(int);
     int s;
     if (func_004013E8(1) != 0)
         return 0;
-    s = func_0042C078();
+    s = DIntr();
     old = D_005264C0;
     D_005264C0 = cb;
     __asm__ volatile("sw $28,%0" : "=m"(D_005264C4)); /* the callback runs with this $gp */
     if (s != 0)
-        func_0042C0C0();
+        EIntr();
     return old;
 }
 #endif
@@ -3052,8 +3052,8 @@ INCLUDE_ASM("seg/seg_2FE810", func_00400CB8);
 extern int cb_DB0(int) __asm__("DeleteSema");
 extern void cb_DC0(int) __asm__("SignalSema");
 extern void func_00426050(int);
-extern int cb_078() __asm__("func_0042C078");
-extern void func_0042C0C0(void);
+extern int cb_078() __asm__("DIntr");
+extern void EIntr(void);
 void func_00400CB8(void) {
     int s;
     if (D_00451614 != 0) {
@@ -3067,28 +3067,28 @@ void func_00400CB8(void) {
     s = cb_078();
     func_00426050(0x80000012);
     if (s)
-        func_0042C0C0();
+        EIntr();
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00400D58);
 #ifdef SKIP_ASM
-extern int func_0042C078();
-extern void func_0042C0C0(void);
+extern int DIntr();
+extern void EIntr(void);
 extern int func_00400E30(void);
 void (*func_00400D58(void (*a)(int), int b))(int) {
     int s;
     void (*old)(int);
     if (D_00451640 < 0)
         func_00400E30();
-    s = func_0042C078();
+    s = DIntr();
     old = D_005264C8;
     D_005264D0 = b;
     D_005264C8 = a;
     __asm__ volatile("sw $28,%0" : "=m"(D_005264CC));
     if (s)
-        func_0042C0C0();
+        EIntr();
     return old;
 }
 #endif
@@ -3112,17 +3112,17 @@ void func_00400DD8(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00400E30);
 #ifdef SKIP_ASM
-extern int func_0042C078();
-extern void func_0042C0C0(void);
+extern int DIntr();
+extern void EIntr(void);
 extern void func_00400DD8(void);
 extern void func_00426020(int, void (*)(void), int);
 int func_00400E30(void) {
     int s;
     D_00451624 = 1;
-    s = func_0042C078();
+    s = DIntr();
     func_00426020(0x80000012, func_00400DD8, 0);
     if (s)
-        func_0042C0C0();
+        EIntr();
     D_00451624 = 0;
     D_00451640 = 1;
     return 1;
@@ -3189,7 +3189,7 @@ int f0EA8(char *out, char *name, int arg) {
     D_00526540.arg = arg;
     D_00526540.self = &D_00526540;
     func_00426358((int)&D_00526540, 300);
-    if (func_00426D18(&D_005266C0, 0, 0, &D_00526540, 300, D_00526680, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&D_005266C0, 0, 0, &D_00526540, 300, D_00526680, 4, 0, 0) < 0) {
         SignalSema(D_00451628);
         return 0;
     }
@@ -3271,7 +3271,7 @@ int func_00401350(void) {
     int v;
     if (func_004011E0(2) == 0)
         return 0;
-    if (func_00426D18(&D_004527D0, 14, 0, 0, 0, D_00451680, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&D_004527D0, 14, 0, 0, 0, D_00451680, 4, 0, 0) < 0) {
         SignalSema(D_00451628);
         return 0;
     }
@@ -3290,11 +3290,11 @@ int func_004013E8(int a) {
     if (a == 0) {
         if (D_00451610 > 0)
             func_00425C60(D_00497AB8);
-        while (D_00451634 || func_00426F08(&D_004527D0))
+        while (D_00451634 || sceSifCheckStatRpc(&D_004527D0))
             func_00400838(60);
         return 0;
     }
-    if (D_00451634 || func_00426F08(&D_004527D0))
+    if (D_00451634 || sceSifCheckStatRpc(&D_004527D0))
         return 1;
     return 0;
 }
@@ -3309,11 +3309,11 @@ int func_00401488(int a) {
     if (a == 0) {
         if (D_00451610 > 0)
             func_00425C60(D_00497AC8);
-        while (func_00426F08(&D_00453180))
+        while (sceSifCheckStatRpc(&D_00453180))
             func_00400838(60);
         return 0;
     }
-    return func_00426F08(&D_00453180);
+    return sceSifCheckStatRpc(&D_00453180);
 }
 #endif
 
@@ -3458,7 +3458,7 @@ int func_00401718(int mode)
             D_00451650 = 0;
             func_00426358((int)&D_00526740, 4);
             buf = D_00452800;
-            if (func_00426D18(&D_005266E8, 0, 0, &D_00526740, 4, buf, 0x10, 0, 0) < 0) {
+            if (sceSifCallRpc(&D_005266E8, 0, 0, &D_00526740, 4, buf, 0x10, 0, 0) < 0) {
                 D_00451624 = 0;
                 return 0;
             }
@@ -3543,7 +3543,7 @@ int func_004019F8(int a) {
     }
     D_00526750[0] = a;
     func_00426358((int)D_00526750, 4);
-    if (func_00426D18(&D_00526710, 0, 0, D_00526750, 4, D_00452800, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&D_00526710, 0, 0, D_00526750, 4, D_00452800, 4, 0, 0) < 0) {
         SignalSema(D_0045162C);
         return a != 8 ? 6 : -1;
     }
@@ -3607,7 +3607,7 @@ int func_00401BF0(int a) {
     }
     D_00526750[0] = a;
     b1_6358(D_00526750, 4);
-    if (func_00426D18(&D_00526710, 0, 0, D_00526750, 4, D_00453080, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&D_00526710, 0, 0, D_00526750, 4, D_00453080, 4, 0, 0) < 0) {
         b1_3DC0(semaId1BF0());
         return a != 8 ? 6 : -1;
     }
@@ -3668,7 +3668,7 @@ int func_00401DF8(int lsn, int sectors, int buf, unsigned char *mode) {
         func_00425C60(D_00497BB0);
     D_00451658 = 1;
     D_00451634 = 1;
-    if (func_00426D18(&D_004527D0, 1, 1, p, 0x18, 0, 0, func_00400B48, D_00452700) < 0) {
+    if (sceSifCallRpc(&D_004527D0, 1, 1, p, 0x18, 0, 0, func_00400B48, D_00452700) < 0) {
         D_00451658 = 0;
         D_00451634 = 0;
         SignalSema(D_00451628);
@@ -3695,7 +3695,7 @@ int func_00401FD8(char *dst) {
     func_00426358((int)D_00526780, 2064);
     func_00426358((int)p, 12);
     D_00451658 = 3;
-    if (func_00426D18(&D_004527D0, 4, 0, p, 12, D_00451680, 8, 0, 0) < 0) {
+    if (sceSifCallRpc(&D_004527D0, 4, 0, p, 12, D_00451680, 8, 0, 0) < 0) {
         D_00451658 = 0;
         SignalSema(D_00451628);
         return 0;
@@ -3720,7 +3720,7 @@ int func_00402268(void) {
     int v;
     if (func_004014F8(1) == 0)
         return 0;
-    if (func_00426D18(&D_00453180, 3, 0, 0, 0, D_00452800, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&D_00453180, 3, 0, 0, 0, D_00452800, 4, 0, 0) < 0) {
         SignalSema(D_0045162C);
         return 0;
     }
@@ -3739,7 +3739,7 @@ int func_00402300(void) {
     int v;
     if (func_004014F8(3) == 0)
         return -1;
-    if (func_00426D18(&D_00453180, 4, 0, 0, 0, D_00452800, 4, 0, 0) < 0) {
+    if (sceSifCallRpc(&D_00453180, 4, 0, 0, 0, D_00452800, 4, 0, 0) < 0) {
         SignalSema(D_0045162C);
         return -1;
     }
@@ -3758,7 +3758,7 @@ int func_00402398(int *out) {
     int v;
     if (func_004014F8(33) == 0)
         return 0;
-    if (func_00426D18(&D_00453180, 33, 0, 0, 0, D_00452800, 8, 0, 0) < 0) {
+    if (sceSifCallRpc(&D_00453180, 33, 0, 0, 0, D_00452800, 8, 0, 0) < 0) {
         SignalSema(D_0045162C);
         return 0;
     }
@@ -3782,7 +3782,7 @@ int func_00402450(int a) {
         return 0;
     D_00452C40[0] = a;
     func_00426358_p(p, 4);
-    if (func_00426D18(&D_00453180, D_004531A8, 0, p, D_004531AC, D_00452800, D_004531B0, 0, 0) < 0) {
+    if (sceSifCallRpc(&D_00453180, D_004531A8, 0, p, D_004531AC, D_00452800, D_004531B0, 0, 0) < 0) {
         SignalSema(D_0045162C);
         return 0;
     }
@@ -3807,7 +3807,7 @@ int func_00402520(struct P8 *a) {
         return 0;
     if (D_00451610 > 0)
         func_00425C60(D_00497BD8);
-    if (func_00426D18(&D_00453180, 1, 0, 0, 0, D_00452800, 16, 0, 0) < 0) {
+    if (sceSifCallRpc(&D_00453180, 1, 0, 0, 0, D_00452800, 16, 0, 0) < 0) {
         SignalSema(D_0045162C);
         return 0;
     }
@@ -3833,7 +3833,7 @@ int func_00402618(int a, int *out) {
         return -1;
     D_00452C40[0] = a;
     func_00426358_p(p, 4);
-    if (func_00426D18(&D_00453180, 5, 0, p, 4, D_00452800, 8, 0, 0) < 0) {
+    if (sceSifCallRpc(&D_00453180, 5, 0, p, 4, D_00452800, 8, 0, 0) < 0) {
         SignalSema(D_0045162C);
         return -1;
     }
@@ -3848,17 +3848,17 @@ int func_00402618(int a, int *out) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402708);
 #ifdef SKIP_ASM
-extern int func_0042C078();
-extern void func_0042C0C0(void);
+extern int DIntr();
+extern void EIntr(void);
 extern void func_00409708(void);
 int func_00402708(void) {
-    int intrState = func_0042C078();
+    int intrState = DIntr();
     *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 | 0x10000;
     *(volatile int *)0x1000B000 &= 0xFFFFFEFF;
     *(volatile int *)0x1000B400 &= 0xFFFFFEFF;
     *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 & 0xFFFEFFFF;
     if (intrState)
-        func_0042C0C0();
+        EIntr();
     *(volatile int *)0x1000B020 = 0;
     *(volatile int *)0x1000B420 = 0;
     func_00409708();
@@ -4532,21 +4532,21 @@ void func_00403338(int *mpegSys) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00403398);
 #ifdef SKIP_ASM
-extern int func_0042C078_0() __asm__("func_0042C078");
-extern void func_0042C0C0(void);
+extern int DIntr_0() __asm__("DIntr");
+extern void EIntr(void);
 extern void func_00409638_2(int, int) __asm__("func_00409638");
 void func_00403398(int *mpegSys) {
     int intrState;
     mpegSys[2072 / 4] = 1;
     mpegSys[432 / 4] = 0;
-    intrState = func_0042C078_0();
+    intrState = DIntr_0();
     *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 | 0x10000;
     *(volatile int *)0x1000B000 = 0;
     *(volatile int *)0x1000B400 = 0;
     *(volatile int *)0x1000D400 = 0;
     *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 & 0xFFFEFFFF;
     if (intrState)
-        func_0042C0C0();
+        EIntr();
     *(volatile int *)0x1000B020 = 0;
     *(volatile int *)0x1000B420 = 0;
     *(volatile int *)0x1000D420 = 0;
@@ -4599,8 +4599,8 @@ void func_004034A8(int *mpegSys, int message) {
 INCLUDE_ASM("seg/seg_2FE810", func_00403500);
 #ifdef SKIP_ASM
 extern void FlushCache(int) __asm__("FlushCache");
-extern int func_0042C078();
-extern void func_0042C0C0(void);
+extern int DIntr();
+extern void EIntr(void);
 void q3500(int base, unsigned addr, int n) __asm__("func_00403500");
 void q3500(int base, unsigned addr, int n) {
     unsigned tagBase = ((unsigned)(base + 2191) >> 4) << 4;
@@ -4618,12 +4618,12 @@ void q3500(int base, unsigned addr, int n) {
         tag += 2;
     }
     FlushCache(0);
-    ret = func_0042C078();
+    ret = DIntr();
     *(volatile int *)0x1000B430 = tagBase & 0xFFFFFFF;
     *(volatile int *)0x1000B420 = 0;
     *(volatile int *)0x1000B400 = 261;
     if (ret)
-        func_0042C0C0();
+        EIntr();
 }
 #endif
 
@@ -4712,8 +4712,8 @@ void func_004039F0(int *y0, int *uOut0, int *vOut0, int *y1, int *uOut1, int *vO
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00403AD0);
 #ifdef SKIP_ASM
-extern int f3AD0_DI() __asm__("func_0042C078");
-extern void f3AD0_EI(void) __asm__("func_0042C0C0");
+extern int f3AD0_DI() __asm__("DIntr");
+extern void f3AD0_EI(void) __asm__("EIntr");
 extern int f3AD0_2C30(int, int *) __asm__("func_00402C30");
 extern void f3AD0_6E20(int *) __asm__("func_00406E20");
 extern void f3AD0_6DF0(int *, int) __asm__("func_00406DF0");
@@ -6114,8 +6114,8 @@ INCLUDE_ASM("seg/seg_2FE810", func_00405B70);
 extern void func_00406E20(int);
 extern int func_00402C30(int *, int *);
 extern void func_004034A8(int *, int);
-extern int func_0042C078();
-extern void func_0042C0C0(void);
+extern int DIntr();
+extern void EIntr(void);
 extern char D_00497EB0[];
 struct M5B70 { char pad0[0x838]; int f838; int f83C; char pad840[0x18]; int *f858; char pad85C[0x10A0 - 0x85C]; int f10A0; };
 int f5B70(struct M5B70 *p) __asm__("func_00405B70");
@@ -6135,13 +6135,13 @@ int f5B70(struct M5B70 *p) {
         }
     }
     if (p->f10A0 != 0) {
-        st = func_0042C078();
+        st = DIntr();
         *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 | 0x10000;
         *(volatile int *)0x1000B400 = 0;
         *(volatile int *)0x1000B000 = 0;
         *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 & ~0x10000;
         if (st)
-            func_0042C0C0();
+            EIntr();
         *(volatile int *)0x1000B020 = 0;
         *(volatile int *)0x1000B420 = 0;
         *(volatile int *)0x10002010 = 0x40000000;
@@ -6166,12 +6166,12 @@ int f5B70(struct M5B70 *p) {
         *(int *)0x10002010 = 0x40000000;
         cmd2[0] = 3;
         func_00402C30(p->f858, cmd2);
-        st = func_0042C078();
+        st = DIntr();
         *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 | 0x10000;
         *(volatile int *)0x1000B000 = 0;
         *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 & ~0x10000;
         if (st)
-            func_0042C0C0();
+            EIntr();
         ret = 0;
         *(volatile int *)0x1000B020 = 0;
     }
@@ -7344,8 +7344,8 @@ INCLUDE_ASM("seg/seg_2FE810", func_00408278);
 #ifdef SKIP_ASM
 // Scratchpad DMA copy: per pass, move p[3] blocks of p[4]*0x180 bytes to the scratchpad (ch 9) and back out (ch 8).
 struct S8278 { char pad0[0xD8]; unsigned fD8; int padDC; int fE0; int fE4; char padE8[0x174 - 0xE8]; int f174; };
-extern int func_0042C078();
-extern void func_0042C0C0(void);
+extern int DIntr();
+extern void EIntr(void);
 void func_00408278(struct S8278 *s, unsigned *p) {
     int n;
     unsigned src = p[0] & 0x0FFFFFFF;
@@ -7370,22 +7370,22 @@ void func_00408278(struct S8278 *s, unsigned *p) {
     for (j = 0; j < n; j++) {
         d = dst;
         for (i = 0; i < (int)p[3]; i++) {
-            st = func_0042C078();
+            st = DIntr();
             *(volatile int *)0x1000D480 = 0;
             *(volatile int *)0x1000D410 = src;
             *(volatile int *)0x1000D420 = qwc;
             *(volatile int *)0x1000D400 = 257;
             if (st)
-                func_0042C0C0();
+                EIntr();
             while (*(volatile int *)0x1000D400 & 0x100)
                 ;
-            st = func_0042C078();
+            st = DIntr();
             *(volatile int *)0x1000D080 = 0;
             *(volatile int *)0x1000D010 = d;
             *(volatile int *)0x1000D020 = qwc;
             *(volatile int *)0x1000D000 = 0x100;
             if (st)
-                func_0042C0C0();
+                EIntr();
             while (*(volatile int *)0x1000D000 & 0x100)
                 ;
             while (*(volatile int *)0x1000D020 != 0)
@@ -7559,8 +7559,8 @@ INCLUDE_ASM("seg/seg_2FE810", func_00408988);
 struct Ent_8988 { int f0; int f4; unsigned a[4]; unsigned b[69]; int cnt; int pad[4]; };
 struct P_8988 { char pad[0x590]; struct Ent_8988 e[2]; int idx; };
 extern char D_00526FC0[];
-extern int q8988_C078() __asm__("func_0042C078");
-extern void q8988_C0C0(void) __asm__("func_0042C0C0");
+extern int q8988_C078() __asm__("DIntr");
+extern void q8988_C0C0(void) __asm__("EIntr");
 void q8988(struct P_8988 *p) __asm__("func_00408988");
 void q8988(struct P_8988 *p) {
     int i = 0;
@@ -7592,23 +7592,23 @@ void q8988(struct P_8988 *p) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00408AF8);
 #ifdef SKIP_ASM
-extern int func_0042C078();
-extern void func_0042C0C0(void);
+extern int DIntr();
+extern void EIntr(void);
 void func_00408AF8(unsigned dstAddr, int byteCount) {
-    int intrState = func_0042C078();
+    int intrState = DIntr();
     *(volatile unsigned *)0x1000B010 = (dstAddr & 0xFFFFFFF) | 0x80000000;
     *(volatile int *)0x1000B020 = byteCount >> 4;
     *(volatile int *)0x1000B000 = 0x100;
     if (intrState)
-        func_0042C0C0();
+        EIntr();
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00408B80);
 #ifdef SKIP_ASM
-extern int q8B80_C078() __asm__("func_0042C078");
-extern void q8B80_C0C0(void) __asm__("func_0042C0C0");
+extern int q8B80_C078() __asm__("DIntr");
+extern void q8B80_C0C0(void) __asm__("EIntr");
 extern void q8B80_6DF0(int *, int) __asm__("func_00406DF0");
 extern int q8B80_2C30(int *, int *) __asm__("func_00402C30");
 void q8B80(int *p, unsigned addr, int n) __asm__("func_00408B80");
@@ -7676,8 +7676,8 @@ extern int q8DF0_AddH(int, void *, int, void *) __asm__("func_00423AC0");
 extern int q8DF0_RemH(int, int) __asm__("RemoveDmacHandler");
 extern void q8DF0_En(int) __asm__("func_004249B8");
 extern void q8DF0_Dis(int) __asm__("func_00424950");
-extern int q8DF0_C078() __asm__("func_0042C078");
-extern void q8DF0_C0C0() __asm__("func_0042C0C0");
+extern int q8DF0_C078() __asm__("DIntr");
+extern void q8DF0_C0C0() __asm__("EIntr");
 extern int q8DF0_2C30(int *, int *) __asm__("func_00402C30");
 extern void q8DF0_34A8(int *, int) __asm__("func_004034A8");
 extern int func_00408CA8();
@@ -7763,8 +7763,8 @@ extern int E_AddH(int, void *, int, void *) __asm__("func_00423AC0");
 extern int E_RemH(int, int) __asm__("RemoveDmacHandler");
 extern void E_49B8(int) __asm__("func_004249B8");
 extern void E_4950(int) __asm__("func_00424950");
-extern int E_C078() __asm__("func_0042C078");
-extern void E_C0C0() __asm__("func_0042C0C0");
+extern int E_C078() __asm__("DIntr");
+extern void E_C0C0() __asm__("EIntr");
 extern void E_8B80(char *, int, int) __asm__("func_00408B80");
 extern void E_8DF0(char *, int, int) __asm__("func_00408DF0");
 extern void E_8FB0(void) __asm__("func_00408FB0");
@@ -7822,30 +7822,30 @@ void q9088(char *mpegSys, unsigned *picInfo) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00409310);
 #ifdef SKIP_ASM
-extern int func_0042C078();
-extern void func_0042C0C0(void);
+extern int DIntr();
+extern void EIntr(void);
 void func_00409310(int chcrValue) {
-    int intrState = func_0042C078();
+    int intrState = DIntr();
     *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 | 0x10000;
     *(volatile int *)0x1000B000 = chcrValue;
     *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 & 0xFFFEFFFF;
     if (intrState)
-        func_0042C0C0();
+        EIntr();
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00409388);
 #ifdef SKIP_ASM
-extern int func_0042C078();
-extern void func_0042C0C0(void);
+extern int DIntr();
+extern void EIntr(void);
 void func_00409388(int chcrValue) {
-    int intrState = func_0042C078();
+    int intrState = DIntr();
     *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 | 0x10000;
     *(volatile int *)0x1000B400 = chcrValue;
     *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 & 0xFFFEFFFF;
     if (intrState)
-        func_0042C0C0();
+        EIntr();
 }
 #endif
 
@@ -7930,14 +7930,14 @@ int func_00409638(int mode) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_004096A0);
 #ifdef SKIP_ASM
-extern int func_0042C078(int);
-extern void func_0042C0C0(void);
+extern int DIntr(int);
+extern void EIntr(void);
 void func_004096A0(int chcrValue) {
-    func_0042C078(chcrValue);
+    DIntr(chcrValue);
     *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 | 0x10000;
     *(volatile int *)0x1000B400 = chcrValue;
     *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 & 0xFFFEFFFF;
-    func_0042C0C0();
+    EIntr();
 }
 #endif
 
@@ -8027,7 +8027,7 @@ int func_00409940(void) {
             i--;
         } while (i != 0);
     }
-    r = func_00426D18(&D_005271C0, 0xFE, 0, &D_00527240, 48, D_00528780, 12, 0, 0);
+    r = sceSifCallRpc(&D_005271C0, 0xFE, 0, &D_00527240, 48, D_00528780, 12, 0, 0);
     Q_sig(D_004533C4);
     if (r < 0) {
         D_005271C0.server = 0;
@@ -8084,7 +8084,7 @@ int func_00409B90(int a) {
     if (PollSema(D_004533C4) < 0)
         return -200;
     D_00527240.origin = a;
-    r = func_00426D18(&D_005271C0, 20, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
+    r = sceSifCallRpc(&D_005271C0, 20, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
     if (r == 0)
         D_004533C0 = 20;
     else
@@ -8105,7 +8105,7 @@ int func_00409C48(int a) {
     if (PollSema(D_004533C4) < 0)
         return -200;
     D_00527240.port = a;
-    r = func_00426D18(&D_005271C0, 21, 0, &D_00527240, 48, D_00528780, 4, 0, 0);
+    r = sceSifCallRpc(&D_005271C0, 21, 0, &D_00527240, 48, D_00528780, 4, 0, 0);
     if (r != 0) {
         SignalSema(D_004533C4);
         return r;
@@ -8137,7 +8137,7 @@ int func_00409D10(int a, int b, int s_, int c) {
     D_00527270.mode = c;
     D_00527270.slot = b;
     D_00527270.name[0x3FF] = 0;
-    r = func_00426D18(&D_005271C0, 2, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
+    r = sceSifCallRpc(&D_005271C0, 2, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
     if (r == 0)
         D_004533C0 = 2;
     else
@@ -8171,7 +8171,7 @@ int func_00409E70(int a) {
     if (PollSema(D_004533C4) < 0)
         return -200;
     D_00527240.fd = a;
-    r = func_00426D18(&D_005271C0, 3, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
+    r = sceSifCallRpc(&D_005271C0, 3, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
     if (r == 0)
         D_004533C0 = 3;
     else
@@ -8194,7 +8194,7 @@ int func_00409F28(int a, int b, int c) {
     D_00527240.fd = a;
     D_00527240.offset = b;
     D_00527240.origin = c;
-    r = func_00426D18(&D_005271C0, 4, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
+    r = sceSifCallRpc(&D_005271C0, 4, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
     if (r == 0)
         D_004533C0 = 4;
     else
@@ -8242,7 +8242,7 @@ int func_0040A090(int a, int b, int c) {
     D_00527240.size = c;
     func_00426358(b, c);
     func_00426358((int)D_005276C0, 0xC0);
-    r = func_00426D18(&D_005271C0, 5, 1, &D_00527240, 48, D_00528780, 4, func_0040A000, D_005276C0);
+    r = sceSifCallRpc(&D_005271C0, 5, 1, &D_00527240, 48, D_00528780, 4, func_0040A000, D_005276C0);
     if (r == 0)
         D_004533C0 = 5;
     else
@@ -8278,7 +8278,7 @@ int func_0040A1A8(int a, unsigned char *p, int n) {
     for (i = 0; i < D_00527240.origin; i++)
         D_00527240.data[i] = p[i];
     FlushCache(0);
-    r = func_00426D18(&D_005271C0, 6, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
+    r = sceSifCallRpc(&D_005271C0, 6, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
     if (r == 0)
         D_004533C0 = 6;
     else
@@ -8317,9 +8317,9 @@ int func_0040A360(int a, int *p, int *q) {
     int r;
     if (D_004533C0 == 0)
         return -1;
-    r = func_00426F08(&D_005271C0);
+    r = sceSifCheckStatRpc(&D_005271C0);
     if (a == 0 && r != 0) {
-        while (func_00426F08(&D_005271C0) != 0)
+        while (sceSifCheckStatRpc(&D_005271C0) != 0)
             sleep_A328(60);
         r = 0;
     }
@@ -8381,7 +8381,7 @@ int func_0040A498(int a, int b, int *c, int *d, int *e) {
     D_005271EC = d;
     D_005271F0 = e;
     func_00426358((int)D_005276C0, 0xC0);
-    r = func_00426D18(&D_005271C0, 1, 1, &D_00527240, 48, D_00528780, 4, func_0040A440, D_005276C0);
+    r = sceSifCallRpc(&D_005271C0, 1, 1, &D_00527240, 48, D_00528780, 4, func_0040A440, D_005276C0);
     if (r == 0)
         D_004533C0 = 1;
     else
@@ -8396,7 +8396,7 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040A618);
 extern void func_0040A618_log(char *) __asm__("func_00425C60");
 extern char D_00498158[];
 int func_0040A618(void) {
-    if (func_00426D18(&D_005271C0, 53, 0, &D_00527240, 48, D_00528780, 4, 0, 0)) {
+    if (sceSifCallRpc(&D_005271C0, 53, 0, &D_00527240, 48, D_00528780, 4, 0, 0)) {
         func_0040A618_log(D_00498158);
         return -1;
     }
@@ -8430,7 +8430,7 @@ int func_0040A688(int a, int b, char *s, int c, int d, int e) {
     D_00527270.name[0x3FF] = 0;
     if (d >= 0)
         func_00426358(e, d << 6);
-    r = func_00426D18(&D_005271C0, 13, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
+    r = sceSifCallRpc(&D_005271C0, 13, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
     if (r == 0)
         D_004533C0 = 13;
     else
@@ -8482,7 +8482,7 @@ int func_0040A858(int a, int b, char *s, void *u) {
     strncpy(D_00527270.name, s, 0x3FF);
     D_00527270.name[0x3FF] = 0;
     func_00426358((int)D_00527780, 0x400);
-    r = func_00426D18(&D_005271C0, 12, 1, &D_00527270, 1044, D_00528780, 4, func_0040A7D0, u);
+    r = sceSifCallRpc(&D_005271C0, 12, 1, &D_00527270, 1044, D_00528780, 4, func_0040A7D0, u);
     if (r == 0)
         D_004533C0 = 12;
     else
@@ -8504,7 +8504,7 @@ int func_0040A998(int a, int b) {
         return -200;
     D_00527240.port = a;
     D_00527240.slot = b;
-    r = func_00426D18(&D_005271C0, 16, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
+    r = sceSifCallRpc(&D_005271C0, 16, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
     if (r == 0)
         D_004533C0 = 16;
     else
@@ -8534,7 +8534,7 @@ int func_0040AA68(int a, int b, char *s) {
     D_00527270.slot = b;
     D_00527270.name[0x3FF] = 0;
     D_00527270.mode = 0;
-    r = func_00426D18(&D_005271C0, 15, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
+    r = sceSifCallRpc(&D_005271C0, 15, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
     if (r == 0)
         D_004533C0 = 15;
     else
@@ -8555,7 +8555,7 @@ int func_0040AB80(int a) {
     if (PollSema(D_004533C4) < 0)
         return -200;
     D_00527240.fd = a;
-    r = func_00426D18(&D_005271C0, 10, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
+    r = sceSifCallRpc(&D_005271C0, 10, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
     if (r == 0)
         D_004533C0 = 10;
     else
@@ -8591,7 +8591,7 @@ int func_0040AC38(int a, int b, char *s, sMcDirEntry *c, int e) {
     strncpy(D_00527270.name, s, 0x3FF);
     D_00527270.name[0x3FF] = 0;
     R_4020(0);
-    r = func_00426D18(h, 14, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
+    r = sceSifCallRpc(h, 14, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
     if (r == 0)
         D_004533C0 = 14;
     else
@@ -8628,7 +8628,7 @@ int func_0040AE00(int a, int b, char *s, char *t) {
     p[0x3F] = 0;
     D_00527270.buffer = (int)p;
     FlushCache(0);
-    r = func_00426D18(&D_005271C0, 14, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
+    r = sceSifCallRpc(&D_005271C0, 14, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
     if (r == 0)
         D_004533C0 = 19;
     else
@@ -8650,7 +8650,7 @@ int func_0040AF58(int a, int b) {
         return -200;
     D_00527240.port = a;
     D_00527240.slot = b;
-    r = func_00426D18(&D_005271C0, 17, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
+    r = sceSifCallRpc(&D_005271C0, 17, 1, &D_00527240, 48, D_00528780, 4, 0, 0);
     if (r == 0)
         D_004533C0 = 17;
     else
@@ -8679,7 +8679,7 @@ int func_0040B028(int a, int b, char *s) {
     D_00527270.slot = b;
     strncpy(D_00527270.name, s, 0x3FF);
     D_00527270.name[0x3FF] = 0;
-    r = func_00426D18(&D_005271C0, 18, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
+    r = sceSifCallRpc(&D_005271C0, 18, 1, &D_00527270, 1044, D_00528780, 4, 0, 0);
     if (r == 0)
         D_004533C0 = 18;
     else
@@ -8704,8 +8704,8 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040B208);
 #ifdef SKIP_ASM
 struct E0B208 { char pad[0x10]; int f10; int f14; int f18; char pad2[0x24]; };
 struct S0B208 { int f0; struct E0B208 *tab; int n; };
-extern int func_0042C078_rq(void) __asm__("func_0042C078");
-extern void func_0042C0C0(void);
+extern int DIntr_rq(void) __asm__("DIntr");
+extern void EIntr(void);
 struct E0B208 *f0B208(struct S0B208 *s) __asm__("func_0040B208");
 struct E0B208 *f0B208(struct S0B208 *s) {
     struct E0B208 *e;
@@ -8714,7 +8714,7 @@ struct E0B208 *f0B208(struct S0B208 *s) {
     int c;
     int id;
     int seq;
-    func_0042C078_rq();
+    DIntr_rq();
     n = s->n;
     i = 0;
     e = s->tab;
@@ -8733,13 +8733,13 @@ struct E0B208 *f0B208(struct S0B208 *s) {
             id = seq;
             e->f14 = (int)e;
             e->f18 = id;
-            func_0042C0C0();
+            EIntr();
             return e;
         }
         i++;
         e++;
     }
-    func_0042C0C0();
+    EIntr();
     return 0;
 }
 #endif
@@ -9015,17 +9015,17 @@ int func_0040B6D0(struct N_B6D0 *c, int a, int flag, int d, int e, int f, int g,
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040B938);
 #ifdef SKIP_ASM
-extern int func_00427D60(char *, int);
-extern void func_004283A0(int, char *, int);
-extern void func_00427FE8(int);
+extern int sceOpen(char *, int);
+extern void sceRead(int, char *, int);
+extern void sceClose(int);
 extern char D_00498220[];
 int func_0040B938(void) {
     int h;
     if (D_00453400[0] == 0) {
-        h = func_00427D60(D_00498220, 1);
+        h = sceOpen(D_00498220, 1);
         if (h >= 0) {
-            func_004283A0(h, D_00453400, 14);
-            func_00427FE8(h);
+            sceRead(h, D_00453400, 14);
+            sceClose(h);
         }
     }
     return (int)D_00453400;
@@ -9465,8 +9465,8 @@ int func_0040C028(int *out) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040C220);
 #ifdef SKIP_ASM
-extern int func_0042C078_0() __asm__("func_0042C078");
-extern void func_0042C0C0(void);
+extern int DIntr_0() __asm__("DIntr");
+extern void EIntr(void);
 extern int RemoveIntcHandler(int, int);
 extern void func_00424880(int);
 extern int DeleteSema(int);
@@ -9475,12 +9475,12 @@ extern char D_004982A8[];
 int func_0040C220(void) {
     int n = 0;
     int s, r;
-    s = func_0042C078_0();
+    s = DIntr_0();
     r = RemoveIntcHandler(3, D_0052909C);
     if (r == 0)
         func_00424880(3);
     if (s)
-        func_0042C0C0();
+        EIntr();
     if (r < 0) {
         n = 1;
         func_0040A618_log(D_00498278);
@@ -9518,7 +9518,7 @@ int sceUsbKbGetInfo(void *info) {
     if (D_00453438 == -1)
         return -1;
     WaitSema(D_00453438);
-    result = func_00426D18(&D_005290A0, 1, 1, D_00529100, 16, D_00529140, 144, func_0040C8B0, 0);
+    result = sceSifCallRpc(&D_005290A0, 1, 1, D_00529100, 16, D_00529140, 144, func_0040C8B0, 0);
     if (result != 0) {
         func_00425C60(D_004982D0, result);
         return -2;
@@ -9554,7 +9554,7 @@ int sceUsbKbRead(unsigned kbdNo, void *data) {
     D_00529100[0] = kbdNo;
     WaitSema(D_00453438);
     {
-        int result = func_00426D18(&D_005290A0, 2, 1, D_00529100, 16, D_00529140, 80, func_0040C8B0, 0);
+        int result = sceSifCallRpc(&D_005290A0, 2, 1, D_00529100, 16, D_00529140, 80, func_0040C8B0, 0);
         if (result != 0) {
             func_00425C60(D_004982F8, result);
             return -2;
@@ -9593,7 +9593,7 @@ int sceUsbKbGetLocation(int kbdNo, void *location) {
     D_00529100[0] = kbdNo;
     WaitSema(D_00453438);
     {
-        int result = func_00426D18(&D_005290A0, 3, 1, D_00529100, 16, D_00529140, 0x10, func_0040C8B0, 0);
+        int result = sceSifCallRpc(&D_005290A0, 3, 1, D_00529100, 16, D_00529140, 0x10, func_0040C8B0, 0);
         if (result != 0) {
             func_00425C60(D_00498320, result);
             return -2;
@@ -9632,7 +9632,7 @@ int sceUsbKbSetLEDStatus(int kbdNo, unsigned char ledStatus) {
     D_00529100[1] = ledStatus;
     WaitSema(D_00453438);
     {
-        int result = func_00426D18(&D_005290A0, 4, 1, D_00529100, 16, D_00529140, 0x10, func_0040C8B0, 0);
+        int result = sceSifCallRpc(&D_005290A0, 4, 1, D_00529100, 16, D_00529140, 0x10, func_0040C8B0, 0);
         if (result != 0) {
             func_00425C60(D_00498350, result);
             return -2;
@@ -9676,7 +9676,7 @@ int sceUsbKbSetLEDMode(int kbdNo, unsigned mode) {
     D_00529100[1] = mode;
     WaitSema(semaId);
     {
-        int rpcResult = func_00426D18(&D_005290A0, 5, 1, D_00529100, 16, D_00529140, 0x10, func_0040C8B0, 0);
+        int rpcResult = sceSifCallRpc(&D_005290A0, 5, 1, D_00529100, 16, D_00529140, 0x10, func_0040C8B0, 0);
         if (rpcResult != 0) {
             func_00425C60(D_00498380, rpcResult);
             return -2;
@@ -9748,7 +9748,7 @@ int func_0040C810(int mode, int *out) {
         kb_signal4(D_00453438);
         return 0;
     case 1:
-        if (func_00426F08(&D_005290A0) == 0) {
+        if (sceSifCheckStatRpc(&D_005290A0) == 0) {
             *out = func_0040C8C0();
             return 0;
         }
@@ -10172,7 +10172,7 @@ int func_0040D4A0(unsigned a) {
         return -11;
     D_00529100[0] = a;
     WaitSema(D_00453438);
-    r = func_00426D18(&D_005290A0, 6, 1, D_00529100, 16, D_00529140, 0, func_0040C8B0, 0);
+    r = sceSifCallRpc(&D_005290A0, 6, 1, D_00529100, 16, D_00529140, 0, func_0040C8B0, 0);
     if (r != 0) {
         q_00425C60(D_004982F8, r);
         return -2;

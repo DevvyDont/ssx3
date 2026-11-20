@@ -1772,25 +1772,25 @@ extern "C" void cFEStateRewardGalleryBase_updateArrows(cFEStateRewardGalleryBase
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryPosters_cFEStateRewardGalleryPosters);
 #ifdef SKIP_ASM
-extern "C" void* func_001CEEA0(void* self, void* engine, signed char idx, int a3, int kind);
+extern "C" void* cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(void* self, void* engine, signed char idx, int a3, int kind);
 extern void* cFEStateRewardGalleryPosters_vtbl[];
 
 /**
  * Constructs the posters reward gallery (reward type 3), which cFECustom_getNextState allocates (2772 bytes) under the
  * tag "cFEStateRewardGalleryPosters".
  *
- * Runs the gallery base constructor func_001CEEA0() with type 3, installs vtable cFEStateRewardGalleryPosters_vtbl and clears the reward count
+ * Runs the gallery base constructor cFEStateRewardGalleryBase_cFEStateRewardGalleryBase() with type 3, installs vtable cFEStateRewardGalleryPosters_vtbl and clears the reward count
  * (+0x68), the list base (+0xA24) and the 43 list entries from +0xA28.
  *
  * @param engine  the UI engine
  * @param idx     user number
- * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); func_001CEEA0 then sets
+ * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); cFEStateRewardGalleryBase_cFEStateRewardGalleryBase then sets
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
 extern "C" void* cFEStateRewardGalleryPosters_cFEStateRewardGalleryPosters(void* self, void* engine, signed char idx, int inStore)
 {
-    func_001CEEA0(self, engine, idx, inStore, 3);
+    cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(self, engine, idx, inStore, 3);
     *(void***)((char*)self + 0x8) = cFEStateRewardGalleryPosters_vtbl;
     *(int*)((char*)self + 0x68) = 0;
     *(int*)((char*)self + 0xA24) = 0;
@@ -1903,25 +1903,25 @@ extern "C" void cFEStateRewardGalleryPosters_purgeRewards(void* self)
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryTradingCards_cFEStateRewardGalleryTradingCards);
 #ifdef SKIP_ASM
-extern "C" void* func_001CEEA0(void* self, void* engine, signed char idx, int a3, int kind);
+extern "C" void* cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(void* self, void* engine, signed char idx, int a3, int kind);
 extern void* cFEStateRewardGalleryTradingCards_vtbl[];
 
 /**
  * Constructs the trading-card reward gallery (reward type 4), which cFECustom_getNextState allocates (3064 bytes) under
  * the tag "cFEStateRewardGalleryTradingCards".
  *
- * Runs the gallery base constructor func_001CEEA0() with type 4, installs vtable cFEStateRewardGalleryTradingCards_vtbl and clears the list base
+ * Runs the gallery base constructor cFEStateRewardGalleryBase_cFEStateRewardGalleryBase() with type 4, installs vtable cFEStateRewardGalleryTradingCards_vtbl and clears the list base
  * (+0xA24) and the 116 list entries from +0xA28.
  *
  * @param engine  the UI engine
  * @param idx     user number
- * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); func_001CEEA0 then sets
+ * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); cFEStateRewardGalleryBase_cFEStateRewardGalleryBase then sets
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
 extern "C" void* cFEStateRewardGalleryTradingCards_cFEStateRewardGalleryTradingCards(void* self, void* engine, signed char idx, int inStore)
 {
-    func_001CEEA0(self, engine, idx, inStore, 4);
+    cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(self, engine, idx, inStore, 4);
     *(void***)((char*)self + 0x8) = cFEStateRewardGalleryTradingCards_vtbl;
     *(int*)((char*)self + 0xA24) = 0;
     for (int i = 115; i >= 0; i--) {
@@ -2033,25 +2033,25 @@ extern "C" void cFEStateRewardGalleryTradingCards_purgeRewards(void* self)
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryConceptArts_cFEStateRewardGalleryConceptArts);
 #ifdef SKIP_ASM
-extern "C" void* func_001CEEA0(void* self, void* engine, signed char idx, int a3, int kind);
+extern "C" void* cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(void* self, void* engine, signed char idx, int a3, int kind);
 extern void* cFEStateRewardGalleryConceptArts_vtbl[];
 
 /**
  * Constructs the art reward gallery (reward type 5), which cFECustom_getNextState allocates (3000 bytes) under the tag
  * "cFEStateRewardGalleryConceptArts".
  *
- * Runs the gallery base constructor func_001CEEA0() with type 5, installs vtable cFEStateRewardGalleryConceptArts_vtbl and clears the list base
+ * Runs the gallery base constructor cFEStateRewardGalleryBase_cFEStateRewardGalleryBase() with type 5, installs vtable cFEStateRewardGalleryConceptArts_vtbl and clears the list base
  * (+0xA24) and the 100 list entries from +0xA28.
  *
  * @param engine  the UI engine
  * @param idx     user number
- * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); func_001CEEA0 then sets
+ * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); cFEStateRewardGalleryBase_cFEStateRewardGalleryBase then sets
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
 extern "C" void* cFEStateRewardGalleryConceptArts_cFEStateRewardGalleryConceptArts(void* self, void* engine, signed char idx, int inStore)
 {
-    func_001CEEA0(self, engine, idx, inStore, 5);
+    cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(self, engine, idx, inStore, 5);
     *(void***)((char*)self + 0x8) = cFEStateRewardGalleryConceptArts_vtbl;
     *(int*)((char*)self + 0xA24) = 0;
     for (int i = 99; i >= 0; i--) {
@@ -2163,25 +2163,25 @@ extern "C" void cFEStateRewardGalleryConceptArts_purgeRewards(void* self)
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryVideos_cFEStateRewardGalleryVideos);
 #ifdef SKIP_ASM
-extern "C" void* func_001CEEA0(void* self, void* engine, signed char idx, int a3, int kind);
+extern "C" void* cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(void* self, void* engine, signed char idx, int a3, int kind);
 extern void* cFEStateRewardGalleryVideos_vtbl[];
 
 /**
  * Constructs the video reward gallery (reward type 6), which cFECustom_getNextState allocates (2608 bytes) under the
  * tag "cFEStateRewardGalleryVideos".
  *
- * Runs the gallery base constructor func_001CEEA0() with type 6, installs vtable cFEStateRewardGalleryVideos_vtbl and clears the list base
+ * Runs the gallery base constructor cFEStateRewardGalleryBase_cFEStateRewardGalleryBase() with type 6, installs vtable cFEStateRewardGalleryVideos_vtbl and clears the list base
  * (+0xA24) and the 2 list entries from +0xA28 (the object has room for only 2).
  *
  * @param engine  the UI engine
  * @param idx     user number
- * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); func_001CEEA0 then sets
+ * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); cFEStateRewardGalleryBase_cFEStateRewardGalleryBase then sets
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
 extern "C" void* cFEStateRewardGalleryVideos_cFEStateRewardGalleryVideos(void* self, void* engine, signed char idx, int inStore)
 {
-    func_001CEEA0(self, engine, idx, inStore, 6);
+    cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(self, engine, idx, inStore, 6);
     *(void***)((char*)self + 0x8) = cFEStateRewardGalleryVideos_vtbl;
     *(int*)((char*)self + 0xA24) = 0;
     for (int i = 1; i >= 0; i--) {
@@ -2293,25 +2293,25 @@ extern "C" void cFEStateRewardGalleryVideos_purgeRewards(void* self)
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryToys_cFEStateRewardGalleryToys);
 #ifdef SKIP_ASM
-extern "C" void* func_001CEEA0(void* self, void* engine, signed char idx, int a3, int kind);
+extern "C" void* cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(void* self, void* engine, signed char idx, int a3, int kind);
 extern void* cFEStateRewardGalleryToys_vtbl[];
 
 /**
  * Constructs the toy reward gallery (reward type 7), which cFECustom_getNextState allocates (2712 bytes) under the tag
  * "cFEStateRewardGalleryToys".
  *
- * Runs the gallery base constructor func_001CEEA0() with type 7, installs vtable cFEStateRewardGalleryToys_vtbl and clears the list base
+ * Runs the gallery base constructor cFEStateRewardGalleryBase_cFEStateRewardGalleryBase() with type 7, installs vtable cFEStateRewardGalleryToys_vtbl and clears the list base
  * (+0xA24) and the 28 list entries from +0xA28.
  *
  * @param engine  the UI engine
  * @param idx     user number
- * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); func_001CEEA0 then sets
+ * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); cFEStateRewardGalleryBase_cFEStateRewardGalleryBase then sets
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
 extern "C" void* cFEStateRewardGalleryToys_cFEStateRewardGalleryToys(void* self, void* engine, signed char idx, int inStore)
 {
-    func_001CEEA0(self, engine, idx, inStore, 7);
+    cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(self, engine, idx, inStore, 7);
     *(void***)((char*)self + 0x8) = cFEStateRewardGalleryToys_vtbl;
     *(int*)((char*)self + 0xA24) = 0;
     for (int i = 27; i >= 0; i--) {
@@ -2423,26 +2423,26 @@ extern "C" void cFEStateRewardGalleryToys_purgeRewards(void* self)
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryCheatChars_cFEStateRewardGalleryCheatChars);
 #ifdef SKIP_ASM
-extern "C" void* func_001CEEA0(void* self, void* engine, signed char idx, int a3, int kind);
+extern "C" void* cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(void* self, void* engine, signed char idx, int a3, int kind);
 extern void* cFEStateRewardGalleryCheatChars_vtbl[];
 
 /**
  * Constructs the cheat-character reward gallery (reward type 8), which cFECustom_getNextState allocates (2712 bytes)
  * under the tag "cFEStateRewardGalleryCheatChars".
  *
- * Runs the gallery base constructor func_001CEEA0() with type 8, installs vtable cFEStateRewardGalleryCheatChars_vtbl and clears the list base
+ * Runs the gallery base constructor cFEStateRewardGalleryBase_cFEStateRewardGalleryBase() with type 8, installs vtable cFEStateRewardGalleryCheatChars_vtbl and clears the list base
  * (+0xA24) and the 28 list entries from +0xA28. This gallery keeps the base icon-file and icon-id slots (no icon file)
  * and supplies texture elements instead (slot 27, cFEStateRewardGalleryCheatChars_getTextureElement).
  *
  * @param engine  the UI engine
  * @param idx     user number
- * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); func_001CEEA0 then sets
+ * @param inStore      nonzero when opened from the lodge (cFECustom_getNextState passes D_004A19D8); cFEStateRewardGalleryBase_cFEStateRewardGalleryBase then sets
  *                the store number (+0x8F0) from the player's last hub
  * @return @p self
  */
 extern "C" void* cFEStateRewardGalleryCheatChars_cFEStateRewardGalleryCheatChars(void* self, void* engine, signed char idx, int inStore)
 {
-    func_001CEEA0(self, engine, idx, inStore, 8);
+    cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(self, engine, idx, inStore, 8);
     *(void***)((char*)self + 0x8) = cFEStateRewardGalleryCheatChars_vtbl;
     *(int*)((char*)self + 0xA24) = 0;
     for (int i = 27; i >= 0; i--) {

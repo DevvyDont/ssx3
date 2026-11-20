@@ -5780,9 +5780,9 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1F48);
 extern char *D_00450C50_1F48[] __asm__("D_00450C50");
 extern int func_00416B18_1F48(char *, char *, int) __asm__("func_00416B18");
 extern void strcat_1F48(char *, char *) __asm__("strcat");
-extern int func_00427D60_1F48(char *, int) __asm__("func_00427D60");
-extern void func_00427FE8_1F48(int) __asm__("func_00427FE8");
-extern void func_00428600_1F48(int, char *, int) __asm__("func_00428600");
+extern int sceOpen_1F48(char *, int) __asm__("sceOpen");
+extern void sceClose_1F48(int) __asm__("sceClose");
+extern void sceWrite_1F48(int, char *, int) __asm__("sceWrite");
 
 /**
  * Writes @p len bytes to a host file (the host root D_00450C50 is prefixed unless the name has it), in 4 KB writes,
@@ -5801,19 +5801,19 @@ unsigned int func_003E1F48(char *name, char *data, int len) {
         strcpy(buf, D_00450C50_1F48[0]);
     }
     strcat_1F48(buf, name);
-    fd = func_00427D60_1F48(buf, 1538);
+    fd = sceOpen_1F48(buf, 1538);
     if (fd >= 0) {
         do {
             if (len > 0x1000) {
-                func_00428600_1F48(fd, data, 0x1000);
+                sceWrite_1F48(fd, data, 0x1000);
                 len -= 0x1000;
                 data += 0x1000;
             } else {
-                func_00428600_1F48(fd, data, len);
+                sceWrite_1F48(fd, data, len);
                 len = 0;
             }
         } while (len > 0);
-        func_00427FE8_1F48(fd);
+        sceClose_1F48(fd);
     }
     return (unsigned int)~fd >> 31;
 }
@@ -5826,9 +5826,9 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E2030);
 extern char *D_00450C50_2030[] __asm__("D_00450C50");
 extern int func_00416B18_2030(char *, char *, int) __asm__("func_00416B18");
 extern void strcat_2030(char *, char *) __asm__("strcat");
-extern int func_00427D60_2030(char *, int) __asm__("func_00427D60");
-extern int func_00427FE8_2030(int) __asm__("func_00427FE8");
-extern int func_00428600_2030(int, char *, int) __asm__("func_00428600");
+extern int sceOpen_2030(char *, int) __asm__("sceOpen");
+extern int sceClose_2030(int) __asm__("sceClose");
+extern int sceWrite_2030(int, char *, int) __asm__("sceWrite");
 
 /**
  * Writes @p len bytes to a host file like func_003E1F48, but returns 0 as soon as a write or the close fails.
@@ -5846,23 +5846,23 @@ unsigned int func_003E2030(char *name, char *data, int len) {
         strcpy(buf, D_00450C50_2030[0]);
     }
     strcat_2030(buf, name);
-    fd = func_00427D60_2030(buf, 1538);
+    fd = sceOpen_2030(buf, 1538);
     if (fd >= 0) {
         do {
             if (len > 0x1000) {
-                if (func_00428600_2030(fd, data, 0x1000) < 0) {
+                if (sceWrite_2030(fd, data, 0x1000) < 0) {
                     return 0;
                 }
                 len -= 0x1000;
                 data += 0x1000;
             } else {
-                if (func_00428600_2030(fd, data, len) < 0) {
+                if (sceWrite_2030(fd, data, len) < 0) {
                     return 0;
                 }
                 len = 0;
             }
         } while (len > 0);
-        if (func_00427FE8_2030(fd) < 0) {
+        if (sceClose_2030(fd) < 0) {
             return 0;
         }
     }
@@ -6700,7 +6700,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILEDEV_open);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void FILEDEV_resolvename(int, char *, int *);
 extern int func_003E4508_3208(char *, int, int *) __asm__("func_003E4508");
-extern int func_00427D60(char *, int);
+extern int sceOpen(char *, int);
 
 /**
  * Opens a file on its device; returns 1 with the device handle (device in the top byte, 1 disc or 2 host) in
@@ -6746,7 +6746,7 @@ int FILEDEV_open(int path, unsigned int flags, int *out) {
             *out = -1;
             return 0;
         }
-        fd = func_00427D60(buf, mode);
+        fd = sceOpen(buf, mode);
         *out = fd;
         if (fd >= 0) {
             *out = fd | (kind << 24);
@@ -6763,7 +6763,7 @@ int FILEDEV_open(int path, unsigned int flags, int *out) {
 INCLUDE_ASM("ealib/seg_2DCAE8", FILEDEV_close);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_00427FE8(int);
+extern void sceClose(int);
 extern int D_00450C40_0C40[] __asm__("D_00450C40");
 
 /**
@@ -6780,7 +6780,7 @@ int FILEDEV_close(int fsHandle) {
     temp_5 = fsHandle >> 0x18;
     fileDesc = fsHandle & 0xFFFFFF;
     if (temp_5 == 2) {
-        func_00427FE8(fileDesc);
+        sceClose(fileDesc);
         if (D_00450C40_0C40[0] == fileDesc) {
             D_00450C40_0C40[0] = -1;
         }
@@ -6830,7 +6830,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILEDEV_readexec);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_00450C40_33B0 __asm__("D_00450C40");
 extern int D_00450C4C_33B0 __asm__("D_00450C4C");
-extern int func_004283A0_33B0(int, int, int) __asm__("func_004283A0");
+extern int sceRead_33B0(int, int, int) __asm__("sceRead");
 extern void iFILESYS_CommandCompleteCallback_33B0(int) __asm__("iFILESYS_CommandCompleteCallback");
 
 int FILEDEV_readexec_i(void) __asm__("FILEDEV_readexec");
@@ -6846,9 +6846,9 @@ int FILEDEV_readexec_i(void) {
     int ok;
     if (D_00519C20_3350.a != 0) {
         if (D_00450C40_33B0 != D_00519C20_3350.b || D_00450C4C_33B0 != D_00519C20_3350.d) {
-            func_00428168(D_00519C20_3350.b, D_00519C20_3350.d, 0);
+            sceLseek(D_00519C20_3350.b, D_00519C20_3350.d, 0);
         }
-        bytesRead = func_004283A0_33B0(D_00519C20_3350.b, D_00519C20_3350.c, D_00519C20_3350.e);
+        bytesRead = sceRead_33B0(D_00519C20_3350.b, D_00519C20_3350.c, D_00519C20_3350.e);
         ok = bytesRead == D_00519C20_3350.e;
         D_00450C40_33B0 = D_00519C20_3350.b;
         D_00450C4C_33B0 = D_00519C20_3350.d + D_00519C20_3350.e;
@@ -6876,8 +6876,8 @@ INCLUDE_ASM("ealib/seg_2DCAE8", FILEDEV_write);
  */
 int FILEDEV_write(int handle, int buffer, int offset, int size) {
     int fileDesc = handle & 0xFFFFFF;
-    func_00428168(fileDesc, offset, 0);
-    func_00428600(fileDesc, buffer, size);
+    sceLseek(fileDesc, offset, 0);
+    sceWrite(fileDesc, buffer, size);
     iFILESYS_CommandCompleteCallback(1);
     return 0;
 }
@@ -6887,7 +6887,7 @@ int FILEDEV_write(int handle, int buffer, int offset, int size) {
 INCLUDE_ASM("ealib/seg_2DCAE8", FILEDEV_getsize);
 #ifdef SKIP_ASM
 extern void func_003E48D8(int, int, int, int);
-extern void func_00428168(int, int, int);
+extern void sceLseek(int, int, int);
 
 /**
  * Returns the size of an open file: a disc file's from the CD file table (func_003E48D8), a host file's by seeking to
@@ -6903,7 +6903,7 @@ void FILEDEV_getsize(int handle) {
         func_003E48D8(temp_4, 0, 0, 0);
         return;
     }
-    func_00428168(temp_4, 0, 2);
+    sceLseek(temp_4, 0, 2);
 }
 #endif
 

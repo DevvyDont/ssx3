@@ -236,26 +236,26 @@ INCLUDE_ASM("seg/seg_21A1C0", func_00319610);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_00426408(int a);
-extern "C" void func_0042AB18(void);
+extern "C" void sceSifInitIopHeap(void);
 extern "C" void func_00319820(void* self);
 extern "C" void func_00401718(int a);
 extern "C" void func_00402450(int a);
-extern "C" void func_00427D28(void);
+extern "C" void sceFsReset(void);
 
 /**
  * Prepares the IOP at start-up, rebooting it with the DNAS image.
  *
- * Calls func_00426408(0) and func_0042AB18, reboots the IOP with DNAS271.IMG (func_00319820), then calls
- * func_00401718(0), func_00402450(2) and func_00427D28. systemInit calls it; @p self is not used.
+ * Calls func_00426408(0) and sceSifInitIopHeap, reboots the IOP with DNAS271.IMG (func_00319820), then calls
+ * func_00401718(0), func_00402450(2) and sceFsReset. systemInit calls it; @p self is not used.
  */
 extern "C" void func_00319610(void* self)
 {
     func_00426408(0);
-    func_0042AB18();
+    sceSifInitIopHeap();
     func_00319820(self);
     func_00401718(0);
     func_00402450(2);
-    func_00427D28();
+    sceFsReset();
 }
 #endif
 
@@ -320,12 +320,12 @@ INCLUDE_ASM("seg/seg_21A1C0", func_00319718);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_00319690(void* self, char* out, const char* name);
-extern "C" int func_0042BA68(const char* path, int argLen, const char* args);
+extern "C" int sceSifLoadModule(const char* path, int argLen, const char* args);
 
 /**
  * Loads an IOP module, retrying while the load fails.
  *
- * Builds the path (func_00319690) and calls func_0042BA68(path, @p argLen, @p args) until it returns a non-negative
+ * Builds the path (func_00319690) and calls sceSifLoadModule(path, @p argLen, @p args) until it returns a non-negative
  * result; a failure is retried when it is -204 (IOP busy) or when @p retry is set, otherwise returned.
  *
  * @param name  the module file name
@@ -341,7 +341,7 @@ extern "C" int func_00319718(void* self, const char* name, int retry, int argLen
     int result;
     func_00319690(self, path, name);
     do {
-        result = func_0042BA68(path, argLen, args);
+        result = sceSifLoadModule(path, argLen, args);
     } while (result < 0 && (retry != 0 || result == -204));
     return result;
 }
@@ -351,11 +351,11 @@ extern "C" int func_00319718(void* self, const char* name, int retry, int argLen
 INCLUDE_ASM("seg/seg_21A1C0", func_00319790);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_0042B438(int fd, int a, int b, void* out);
-extern "C" void func_0042B640(int fd);
+extern "C" void sceSifStopModule(int fd, int a, int b, void* out);
+extern "C" void sceSifUnloadModule(int fd);
 
 /**
- * Calls func_0042B438(@p fd, 0, 0, a 16-byte scratch buffer) and then func_0042B640(@p fd).
+ * Calls sceSifStopModule(@p fd, 0, 0, a 16-byte scratch buffer) and then sceSifUnloadModule(@p fd).
  *
  * No retail code calls it; @p self is not used.
  *
@@ -364,8 +364,8 @@ extern "C" void func_0042B640(int fd);
 extern "C" void func_00319790(void* self, int fd)
 {
     char scratch[16];
-    func_0042B438(fd, 0, 0, scratch);
-    func_0042B640(fd);
+    sceSifStopModule(fd, 0, 0, scratch);
+    sceSifUnloadModule(fd);
 }
 #endif
 
@@ -414,17 +414,17 @@ extern "C" void func_00426408(int a);
 extern "C" void func_00401718(int a);
 extern "C" void func_00402450(int a);
 extern "C" void func_00319690(void* self, char* out, const char* name);
-extern "C" int func_0042BF68(const char* path);
-extern "C" int func_0042BF30(void);
-extern "C" void func_0042AB18(void);
+extern "C" int sceSifRebootIop(const char* path);
+extern "C" int sceSifSyncIop(void);
+extern "C" void sceSifInitIopHeap(void);
 extern char str_DNAS271_IMG[];
 
 /**
  * Reboots the IOP with the DNAS image DNAS271.IMG and waits until it is done.
  *
  * Calls func_00426408(0), func_00401718(0) and func_00402450(2), builds the image path (func_00319690), retries
- * func_0042BF68 (the IOP reboot through rom0:UDNL) until it succeeds, polls func_0042BF30 until it reports done, then
- * calls func_00426408(0) and func_0042AB18 again. func_00319610 calls it; @p self is not used.
+ * sceSifRebootIop (the IOP reboot through rom0:UDNL) until it succeeds, polls sceSifSyncIop until it reports done, then
+ * calls func_00426408(0) and sceSifInitIopHeap again. func_00319610 calls it; @p self is not used.
  */
 // Loads the DNAS image (DNAS271.IMG) and waits for it to finish.
 extern "C" void func_00319820(void* self)
@@ -434,12 +434,12 @@ extern "C" void func_00319820(void* self)
     func_00401718(0);
     func_00402450(2);
     func_00319690(self, path, str_DNAS271_IMG);
-    while (func_0042BF68(path) == 0)
+    while (sceSifRebootIop(path) == 0)
         ;
-    while (func_0042BF30() == 0)
+    while (sceSifSyncIop() == 0)
         ;
     func_00426408(0);
-    func_0042AB18();
+    sceSifInitIopHeap();
 }
 #endif
 
@@ -448,7 +448,7 @@ INCLUDE_ASM("seg/seg_21A1C0", func_003198A0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void WaitSema(int sema);
-extern "C" int func_0042A538(void* client, int cmd, int a, int b, int c, int d);
+extern "C" int sceDevctl(void* client, int cmd, int a, int b, int c, int d);
 extern "C" int func_00402398(int* status);
 extern char str_dev9x[];
 
@@ -456,7 +456,7 @@ extern char str_dev9x[];
  * Runs a worker thread that, on each semaphore signal, sends the "dev9x" request 0x4402 and then calls func_00402398
  * until both succeed.
  *
- * Loops forever: waits on @p sema (WaitSema), retries func_0042A538("dev9x", 0x4402, ...) until it succeeds, then
+ * Loops forever: waits on @p sema (WaitSema), retries sceDevctl("dev9x", 0x4402, ...) until it succeeds, then
  * retries func_00402398(&status) until it returns non-zero with status 0. func_00319930 starts it as a thread;
  * func_00319910 signals the semaphore. The shape is that of the usual PS2 power-off handler (dev9 shutdown, then
  * console power-off), but the callees are not named in this build.
@@ -468,7 +468,7 @@ extern "C" void func_003198A0(int sema)
 {
     for (;;) {
         WaitSema(sema);
-        while (func_0042A538(str_dev9x, 17410, 0, 0, 0, 0) < 0)
+        while (sceDevctl(str_dev9x, 17410, 0, 0, 0, 0) < 0)
             ;
         int status = 0;
         while (func_00402398(&status) == 0 || status != 0)
@@ -523,7 +523,7 @@ struct sSemaParam_9930 {
     unsigned int option;
 };
 
-extern "C" int func_0042B6D0(void* client);
+extern "C" int sceSifSearchModuleByName(void* client);
 extern "C" int CreateSema(sSemaParam_9930* p);
 extern "C" int CreateThread(sThreadParam_9930* p);
 extern "C" int StartThread(int thread, int arg);
@@ -539,7 +539,7 @@ extern int D_004A5B70;
 /**
  * Sets up a semaphore, a worker thread running func_003198A0 and a callback (func_00319910) that wakes it.
  *
- * Only when func_0042B6D0("dev9") succeeds: creates a semaphore (initial count 0, maximum 1; D_004A5B54), creates and
+ * Only when sceSifSearchModuleByName("dev9") succeeds: creates a semaphore (initial count 0, maximum 1; D_004A5B54), creates and
  * starts a thread (priority 1, 0x2000-byte stack D_00538B10, _gp; id in D_004A5B70) on func_003198A0 with the semaphore
  * as its argument, and registers func_00319910 with func_00400D58 as the callback, with the same argument. initOnline
  * calls it.
@@ -548,7 +548,7 @@ extern "C" void func_00319930(void)
 {
     sThreadParam_9930 tp;
     sSemaParam_9930 sema;
-    if (func_0042B6D0(str_dev9) >= 0) {
+    if (sceSifSearchModuleByName(str_dev9) >= 0) {
         sema.initCount = 0;
         sema.maxCount = 1;
         sema.option = 0;

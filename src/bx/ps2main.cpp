@@ -149,15 +149,15 @@ extern cAppManB008* D_004A5B64_B008 __asm__("cAppMan_TheAppMan");
 extern "C" void func_00402450(int);
 extern "C" void func_00401718(int);
 extern "C" void func_00425FB8(void);
-extern "C" void func_0042C6A0(int, int, int);
+extern "C" void LoadExecPS2(int, int, int);
 
 /**
- * Shuts the game's systems down and loads another executable with func_0042C6A0.
+ * Shuts the game's systems down and loads another executable with LoadExecPS2.
  *
  * Calls virtual slot 2 of cAppMan_TheAppMan (cAppMan_loadexecpurge in cAppMan_vtbl, which purges the execution
  * manager), then func_00402450(2), func_00401718(0) and func_00401718(5) (func_00401718 has the shape of libcdvd's
  * sceCdInit; mode 5 shuts the CD client down), func_00425FB8 (removes the DMAC 5 handler), and finally passes the
- * arguments to func_0042C6A0, which packs them with func_0042C510 and calls _LoadExecPS2.
+ * arguments to LoadExecPS2, which packs them with func_0042C510 and calls _LoadExecPS2.
  *
  * @param path  path of the executable to load
  * @param argc  argument count
@@ -170,7 +170,7 @@ extern "C" void func_0031B008(int path, int argc, int argv)
     func_00401718(0);
     func_00401718(5);
     func_00425FB8();
-    func_0042C6A0(path, argc, argv);
+    LoadExecPS2(path, argc, argv);
 }
 #endif
 

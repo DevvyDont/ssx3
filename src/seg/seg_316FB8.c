@@ -3625,7 +3625,7 @@ INCLUDE_ASM("seg/seg_316FB8", func_0041A840);
 extern char D_00499C81[];
 extern long func_00411538_div(long, long) __asm__("func_00411538");
 extern long func_004114D0_mul(long, long) __asm__("func_004114D0");
-extern long func_0042DAD8_mod(long, long) __asm__("func_0042DAD8");
+extern long __umoddi3_mod(long, long) __asm__("__umoddi3");
 #define XCT(c) (D_00499C81[(int)(c)])
 unsigned long func_0041A840_(int *ptr, char *nptr, char **endptr, int base) __asm__("func_0041A840");
 unsigned long func_0041A840_(int *ptr, char *nptr, char **endptr, int base) {
@@ -3648,7 +3648,7 @@ unsigned long func_0041A840_(int *ptr, char *nptr, char **endptr, int base) {
     if (base == 0)
         base = c == '0' ? 8 : 10;
     cutoff = func_00411538_div(-1, base);
-    cutlim = func_0042DAD8_mod(-1, base);
+    cutlim = __umoddi3_mod(-1, base);
     for (acc = 0, any = 0;; c = *s++) {
         if (XCT(c) & 4)
             c -= '0';
@@ -4729,7 +4729,7 @@ long _strtol_r_(int *ptr, char *nptr, char **endptr, int base) {
     if (base == 0)
         base = c == '0' ? 8 : 10;
     cutoff = neg ? -(unsigned long)0x8000000000000000L : 0x7FFFFFFFFFFFFFFFL;
-    cutlim = func_0042DAD8_mod(cutoff, base);
+    cutlim = __umoddi3_mod(cutoff, base);
     cutoff = func_00411538_div(cutoff, base);
     for (acc = 0, any = 0;; c = *s++) {
         if (XCT(c) & 4)

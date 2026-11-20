@@ -412,7 +412,7 @@ extern "C" void cBankMonitor_BANKMONITOR_Pause(cBankMonitor* self)
 //100%
 INCLUDE_ASM("sound/bankmonitor", cBankMonitor_BANKMONITOR_Resume);
 #ifdef SKIP_ASM
-extern "C" void func_002ACB30(void*);
+extern "C" void cBankMonitorInstance_Resume(void*);
 
 /**
  * Resumes every bank-sound instance and clears the monitor's paused flag (+0x8E8).
@@ -420,7 +420,7 @@ extern "C" void func_002ACB30(void*);
 extern "C" void cBankMonitor_BANKMONITOR_Resume(cBankMonitor* self)
 {
     for (int i = 0; i < 64; i++) {
-        func_002ACB30((char*)self->mBankMonitorInstance + i * 0xC0);
+        cBankMonitorInstance_Resume((char*)self->mBankMonitorInstance + i * 0xC0);
     }
     self->mBankMonitorPaused = 0;
 }
@@ -5168,7 +5168,7 @@ extern "C" void func_002B20C8(cSongInstance* mon, int a1, int a2);
 extern "C" void func_002B2160(cSongInstance* self, int v);
 extern "C" int func_002B2488(cSongInstance* self);
 extern "C" int func_002B4AA0(void* self, int force);
-int func_002B4AE8(void* self);
+int cMusicSys_GetMPFFile(void* self);
 extern "C" void SNDSYS_entercritical(void);
 extern "C" void SNDSYS_leavecritical(void);
 extern "C" void func_003B7E70(int h, int v);
@@ -5202,7 +5202,7 @@ extern "C" void func_002B21E0(cSongInstance* mon, int force)
         if (func_002B4AA0((void***)gMusicSys, force) == 0)
             return;
         (mon)->unk_2C = 1;
-        func_003D2350(func_002B4AE8((void***)gMusicSys));
+        func_003D2350(cMusicSys_GetMPFFile((void***)gMusicSys));
         char buf[256];
         sprintf(buf, str_pct_spct_s_c, ((char*)mon) + 0x60, *(char**)mon + 0x20);
         mon->unk_1C = func_003D25F0(0x11000001, buf, 500, ((char*)mon) + 4, 2, 150, mon->unk_24, 0x37000);
@@ -7461,7 +7461,7 @@ extern "C" int func_002B4AA0(void* self, int force)
 #endif
 
 //100%
-INCLUDE_ASM("sound/bankmonitor", func_002B4AE8__FPv);
+INCLUDE_ASM("sound/bankmonitor", cMusicSys_GetMPFFile__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns mMPFFile, the music system's MPF data buffer.
@@ -7470,7 +7470,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002B4AE8__FPv);
  *
  * @return mMPFFile
  */
-int func_002B4AE8(void* self)
+int cMusicSys_GetMPFFile(void* self)
 {
     return *(int*)((char*)self + 0x5434);
 }

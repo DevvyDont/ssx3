@@ -226,7 +226,7 @@ extern "C" void setChallengeStats(cUIText* text, int profileIndex, int character
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_CF758", func_001CED90);
+INCLUDE_ASM("seg/seg_CF758", getChallengeMedal);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
@@ -258,7 +258,7 @@ extern sReq_ED90 D_0045AAD8_ED90[][4][5] __asm__("D_0045AAD8");
  * @param trophyType  trophy type (0, 1 track challenges; 2 collectibles / big challenges; 3 earnings)
  * @param challengeIndex  challenge index within the trophy type
  */
-extern "C" void func_001CED90(int profileIndex, int charId, int peakNum, int trophyType, int challengeIndex)
+extern "C" void getChallengeMedal(int profileIndex, int charId, int peakNum, int trophyType, int challengeIndex)
 {
     void* rewardIface = cBE_getInterface_ED90(cBE_getBE(), 13);
     if (trophyType == 2)
@@ -283,7 +283,7 @@ extern "C" void func_001CED90(int profileIndex, int charId, int peakNum, int tro
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_CF758", func_001CEEA0);
+INCLUDE_ASM("seg/seg_CF758", cFEStateRewardGalleryBase_cFEStateRewardGalleryBase);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cUIState_cUIState(void* self, void* parent);
@@ -351,7 +351,7 @@ struct sChallenge_1CEEA0 {
  * @param rewardType  reward type (3-8 from the subclasses)
  * @return @p self
  */
-extern "C" sChallenge_1CEEA0* func_001CEEA0(sChallenge_1CEEA0* self, void* parent, signed char player, int rank, int rewardType)
+extern "C" sChallenge_1CEEA0* cFEStateRewardGalleryBase_cFEStateRewardGalleryBase(sChallenge_1CEEA0* self, void* parent, signed char player, int rank, int rewardType)
 {
     int i;
     int j;

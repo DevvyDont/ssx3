@@ -389,7 +389,7 @@ extern "C" void ASYNCFILE_release(int h, void* data, int* size);
 extern "C" int RCMP_DECODER_GetFrame(void* p, int a1);
 extern "C" unsigned int TIMER_gettick();
 extern "C" unsigned int TIMER_getfrequency();
-extern "C" void func_0042E508(void* timer);
+extern "C" void RCMP_AV_MS_TIMER_Update(void* timer);
 extern "C" void* func_003AE888(void*, int);
 
 static inline void* wsAlloc_AE450(sAlloc_AE450* a, int size)
@@ -460,7 +460,7 @@ extern "C" int func_003AE450(char* self, int framesToBuffer, int timeOffsetMs)
     msTimer->start = TIMER_gettick();
     msTimer->period = 0x1000;
     *(sTimer_AE450**)(self + 0x5C) = msTimer;
-    func_0042E508(msTimer);
+    RCMP_AV_MS_TIMER_Update(msTimer);
     unsigned int ms = (unsigned int)(msTimer->ticks * 1000) / TIMER_getfrequency();
     *(int*)(self + 0x40) = timeOffsetMs;
     *(int*)(self + 0x50) = 0;
@@ -691,7 +691,7 @@ extern "C" int SNDPROFILE_outputlatency();
 extern "C" int SNDSTRM_status(int id, void* out);
 extern "C" int SNDSTRM_requeststatus(int id, void* out);
 extern "C" unsigned int TIMER_getfrequency();
-extern "C" void func_0042E508(void* timer);
+extern "C" void RCMP_AV_MS_TIMER_Update(void* timer);
 
 // PORT: accum is a 64-bit ulong
 struct func_003AE9A0_sTimer {
@@ -726,7 +726,7 @@ struct func_003AE9A0_sSync {
 /**
  * Returns the movie player's playback time in ms, kept in step with the audio.
  *
- * Updates the timer (+0x5C, func_0042E508) and converts its tick count to ms (ticks * 1000 / TIMER_getfrequency), minus the
+ * Updates the timer (+0x5C, RCMP_AV_MS_TIMER_Update) and converts its tick count to ms (ticks * 1000 / TIMER_getfrequency), minus the
  * start time at +0x4C. With audio (+0x54) it reads the audio stream's current request (SNDSTRM_status on the audio
  * object's handle), its play position in ms (SNDSTRM_requeststatus) minus SNDPROFILE_outputlatency, all between SNDSYS_entercritical and
  * SNDSYS_leavecritical. When that position is newer than the last one (+0x50) it feeds the difference into a filtered drift
@@ -741,7 +741,7 @@ extern "C" int func_003AE9A0(func_003AE9A0_sSync* self)
     func_003AE9A0_sInfo requestStatus;
     func_003AE9A0_sInfo streamStatus;
     func_003AE9A0_sTimer* msTimer = self->timer;
-    func_0042E508(msTimer);
+    RCMP_AV_MS_TIMER_Update(msTimer);
     unsigned int ms = (unsigned int)(msTimer->accum * 1000) / TIMER_getfrequency();
     int res = ms - self->offset;
     if (self->enabled != 0) {
@@ -2245,7 +2245,7 @@ static inline char* func_003B07F8_data(char* p)
  * Sets the frame type (+0x0) to 2, the list links (+0x8, +0xC) to 3 and the reference count (+0x10) to 0, creates the
  * image with SHAPE_create(w, h, 32 bpp, ..., memory type D_00509438, ..., 0xF0) at +0x4, writes "240" into bytes 4..6
  * of the header func_003B3D40 returns, zeroes the pixels ((w/16) * (h/16) macroblocks of 1 KB) and sets the type byte
- * to 5. Called by the Sony codec's Init (PS2_SONY_CODEC_INTERNAL_Init) and func_0042E020.
+ * to 5. Called by the Sony codec's Init (PS2_SONY_CODEC_INTERNAL_Init) and PS2_SONY_CODEC_INTERNAL_CreateFrame.
  *
  * @param w  width in pixels
  * @param height  height in pixels

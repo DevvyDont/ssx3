@@ -2324,7 +2324,7 @@ extern "C" void cBankMonitorInstance_StopSound(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("sound/streamsys", func_002AC220);
+INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_RestartSound);
 #ifdef SKIP_ASM
 extern "C" void SNDSYS_entercritical();
 extern "C" void SNDSYS_leavecritical();
@@ -2367,8 +2367,8 @@ struct sSndPlayOpts_C220 {
 #define C220_MIN(a, b) ((a) < (b) ? (a) : (b))
 #define C220_MAX(a, b) ((a) < (b) ? (b) : (a))
 
-// PORT: the unit declares func_002AC220(void*) later; the real function also takes the play options
-extern "C" void func_002AC220_impl(void* self, sSndPlayOpts_C220* opts) __asm__("func_002AC220");
+// PORT: the unit declares cBankMonitorInstance_RestartSound(void*) later; the real function also takes the play options
+extern "C" void cBankMonitorInstance_RestartSound_impl(void* self, sSndPlayOpts_C220* opts) __asm__("cBankMonitorInstance_RestartSound");
 
 /**
  * Restarts an instance's bank or MIDI sound with fresh play options.
@@ -2384,7 +2384,7 @@ extern "C" void func_002AC220_impl(void* self, sSndPlayOpts_C220* opts) __asm__(
  *
  * @param opts  the cBankMonitor whose play-option stack (mDefault, mInst, mCurrent, ...) is used
  */
-extern "C" void func_002AC220_impl(void* self, sSndPlayOpts_C220* opts)
+extern "C" void cBankMonitorInstance_RestartSound_impl(void* self, sSndPlayOpts_C220* opts)
 {
     *(int*)((char*)self + 0x8) = 1;
     *(int*)((char*)self + 0x54) = 0;
@@ -2457,13 +2457,13 @@ extern "C" void func_002AC220_impl(void* self, sSndPlayOpts_C220* opts)
 INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_CheckActive);
 #ifdef SKIP_ASM
 extern "C" void cBankMonitorInstance_StopSound(void*);
-extern "C" void func_002AC220(void*);
+extern "C" void cBankMonitorInstance_RestartSound(void*);
 
 /**
  * Starts or stops an instance's sound as it crosses its audible distance.
  *
  * With no limit (+0x8C == 0) the sound is always active. A playing sound (+0x8 set) farther than the limit is stopped
- * (cBankMonitorInstance_StopSound, returns 0); a silent one within it is restarted (func_002AC220, returns 1).
+ * (cBankMonitorInstance_StopSound, returns 0); a silent one within it is restarted (cBankMonitorInstance_RestartSound, returns 1).
  *
  * @param radius  the current distance (On Tour Radius)
  * @return nonzero while the sound should play
@@ -2482,7 +2482,7 @@ extern "C" int cBankMonitorInstance_CheckActive(void* self, float radius)
         return 1;
     }
     if (radius < th) {
-        func_002AC220(self);
+        cBankMonitorInstance_RestartSound(self);
         return 1;
     }
     return 0;
@@ -2654,7 +2654,7 @@ extern "C" void cBankMonitorInstance_Pause(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("sound/streamsys", func_002ACB30);
+INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_Resume);
 #ifdef SKIP_ASM
 extern "C" int cBankMonitorInstance_IsFree(void* self);
 extern "C" void cBankMonitorInstance_PitchUpdate(void* self, int a1);
@@ -2668,7 +2668,7 @@ extern "C" void SNDseqresume(int h);
  * cBankMonitorInstance_Pause set to 0 is not restored here. cBankMonitor_BANKMONITOR_Resume calls it for all 64
  * instances.
  */
-extern "C" void func_002ACB30(void* self)
+extern "C" void cBankMonitorInstance_Resume(void* self)
 {
     if (cBankMonitorInstance_IsFree(self) == 0) {
         cBankMonitorInstance_PitchUpdate(self, 0x1000);

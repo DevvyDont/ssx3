@@ -1,7 +1,7 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("seg/seg_32F020", func_0042E020);
+INCLUDE_ASM("seg/seg_32F020", PS2_SONY_CODEC_INTERNAL_CreateFrame);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -19,7 +19,7 @@ extern int *func_003B07F8_x(int a0, int a1, int a2) __asm__("func_003B07F8");
  * @param frameWidth  frame width in pixels
  * @param frameHeight  frame height in pixels
  */
-void func_0042E020(int *sonyCodec, int frameWidth, int frameHeight) {
+void PS2_SONY_CODEC_INTERNAL_CreateFrame(int *sonyCodec, int frameWidth, int frameHeight) {
     int *n = func_003B07F8_x(D_00509430((int)D_004953E8, 20, 0, 0, ((int *)&D_00509430)[2]), frameWidth, frameHeight);
     int *node = n ? n + 2 : 0;
     int *head = (int *)sonyCodec[8];
@@ -33,11 +33,11 @@ void func_0042E020(int *sonyCodec, int frameWidth, int frameHeight) {
 /**
  * Does nothing (an empty placement array delete of the Sony codec class).
  */
-void func_0042E0B0(void) {
+void PS2_SONY_CODEC_INTERNAL_operator_delete_array(void) {
 }
 
 //100%
-INCLUDE_ASM("seg/seg_32F020", func_0042E0B8);
+INCLUDE_ASM("seg/seg_32F020", PS2_SONY_CODEC_INTERNAL_operator_new_array);
 #ifdef SKIP_ASM
 /**
  * Returns @p value unchanged (a placement array new of the Sony codec class: returns the given address).
@@ -48,7 +48,7 @@ INCLUDE_ASM("seg/seg_32F020", func_0042E0B8);
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-long func_0042E0B8(int allocSize, long value) {
+long PS2_SONY_CODEC_INTERNAL_operator_new_array(int allocSize, long value) {
     return value;
 }
 #endif
@@ -56,11 +56,11 @@ long func_0042E0B8(int allocSize, long value) {
 /**
  * Does nothing (an empty placement delete of the Sony codec class).
  */
-void func_0042E0C0(void) {
+void PS2_SONY_CODEC_INTERNAL_operator_delete(void) {
 }
 
 //100%
-INCLUDE_ASM("seg/seg_32F020", func_0042E0C8);
+INCLUDE_ASM("seg/seg_32F020", PS2_SONY_CODEC_INTERNAL_operator_new);
 #ifdef SKIP_ASM
 /**
  * Returns @p value unchanged (a placement new of the Sony codec class: returns the given address).
@@ -71,13 +71,13 @@ INCLUDE_ASM("seg/seg_32F020", func_0042E0C8);
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-long func_0042E0C8(int allocSize, long value) {
+long PS2_SONY_CODEC_INTERNAL_operator_new(int allocSize, long value) {
     return value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_32F020", func_0042E0D0);
+INCLUDE_ASM("seg/seg_32F020", PS2_SONY_CODEC_INTERNAL_operator_delete_array1);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int (*D_00509434[])(void);
@@ -87,13 +87,13 @@ extern int (*D_00509434[])(void);
  *
  * @return the free function's result
  */
-int func_0042E0D0(void) {
+int PS2_SONY_CODEC_INTERNAL_operator_delete_array1(void) {
     return D_00509434[0]();
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_32F020", func_0042E0F8);
+INCLUDE_ASM("seg/seg_32F020", PS2_SONY_CODEC_INTERNAL_operator_delete1);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int (*D_00509434[])(void);
@@ -103,13 +103,13 @@ extern int (*D_00509434[])(void);
  *
  * @return the free function's result
  */
-int func_0042E0F8(void) {
+int PS2_SONY_CODEC_INTERNAL_operator_delete1(void) {
     return D_00509434[0]();
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_32F020", func_0042E120);
+INCLUDE_ASM("seg/seg_32F020", PS2_SONY_CODEC_INTERNAL_operator_new_array1);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
@@ -125,13 +125,13 @@ extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
  * @param hdrSize  header bytes
  * @param memType  memory type and flags
  */
-void func_0042E120(int allocSize, int blockName, int alignment, int hdrSize, int memType) {
+void PS2_SONY_CODEC_INTERNAL_operator_new_array1(int allocSize, int blockName, int alignment, int hdrSize, int memType) {
     D_00509430(blockName, allocSize, alignment, hdrSize, memType);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_32F020", func_0042E150);
+INCLUDE_ASM("seg/seg_32F020", PS2_SONY_CODEC_INTERNAL_operator_new1);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
@@ -146,13 +146,13 @@ extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
  * @param hdrSize  header bytes
  * @param memType  memory type and flags
  */
-void func_0042E150(int allocSize, int blockName, int alignment, int hdrSize, int memType) {
+void PS2_SONY_CODEC_INTERNAL_operator_new1(int allocSize, int blockName, int alignment, int hdrSize, int memType) {
     D_00509430(blockName, allocSize, alignment, hdrSize, memType);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_32F020", func_0042E180);
+INCLUDE_ASM("seg/seg_32F020", PS2_SONY_CODEC_INTERNAL_operator_new_array2);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
@@ -163,13 +163,13 @@ extern char D_004953E8[];
  *
  * @param allocSize  bytes requested
  */
-void func_0042E180(int allocSize) {
+void PS2_SONY_CODEC_INTERNAL_operator_new_array2(int allocSize) {
     D_00509430((int)D_004953E8, allocSize, 0, 0, ((int *)&D_00509430)[2]);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_32F020", func_0042E1C0);
+INCLUDE_ASM("seg/seg_32F020", PS2_SONY_CODEC_INTERNAL_operator_new2);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
@@ -180,13 +180,13 @@ extern char D_004953E8[];
  *
  * @param allocSize  bytes requested
  */
-void func_0042E1C0(int allocSize) {
+void PS2_SONY_CODEC_INTERNAL_operator_new2(int allocSize) {
     D_00509430((int)D_004953E8, allocSize, 0, 0, ((int *)&D_00509430)[2]);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_32F020", func_0042E200);
+INCLUDE_ASM("seg/seg_32F020", __tf23PS2_SONY_CODEC_INTERNAL);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_0053EA00;
@@ -203,7 +203,7 @@ extern void func_00414C00(void *a0, void *a1, void *a2);
  *
  * @return &D_0053EA00
  */
-int *func_0042E200(void) {
+int *__tf23PS2_SONY_CODEC_INTERNAL(void) {
     if (D_0053EA00 == 0) {
         if (D_004A5BA0 == 0) {
             func_00414C20(&D_004A5BA0, str_Q24RCMP5CODEC);
@@ -215,7 +215,7 @@ int *func_0042E200(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_32F020", func_0042E278);
+INCLUDE_ASM("seg/seg_32F020", RCMP_CODEC__CODEC);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_00456810[];
@@ -227,7 +227,7 @@ extern int (*D_00509434[])(void);
  * @param codecObj  the codec object
  * @param dtorFlags  destructor flags (bit 0: free the object)
  */
-void func_0042E278(int *codecObj, int dtorFlags) {
+void RCMP_CODEC__CODEC(int *codecObj, int dtorFlags) {
     *codecObj = (int)D_00456810;
     if (dtorFlags & 1) {
         D_00509434[0]();
@@ -236,7 +236,7 @@ void func_0042E278(int *codecObj, int dtorFlags) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_32F020", func_0042E2B0);
+INCLUDE_ASM("seg/seg_32F020", __tfQ24RCMP5CODEC);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_004A5BA0;
@@ -248,7 +248,7 @@ extern void func_00414C20(void *a0, void *a1);
  *
  * @return &D_004A5BA0
  */
-int *func_0042E2B0(void) {
+int *__tfQ24RCMP5CODEC(void) {
     if (D_004A5BA0 == 0) {
         func_00414C20(&D_004A5BA0, str_Q24RCMP5CODEC);
     }
@@ -257,7 +257,7 @@ int *func_0042E2B0(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_32F020", func_0042E2F0);
+INCLUDE_ASM("seg/seg_32F020", RCMP_DECODER_GetCodecIData);
 #ifdef SKIP_ASM
 /**
  * Returns the address of a decoder's codec instance data (@p decoderObj + 4).
@@ -266,13 +266,13 @@ INCLUDE_ASM("seg/seg_32F020", func_0042E2F0);
  * @return @p decoderObj + 4
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_0042E2F0(int decoderObj) {
+int RCMP_DECODER_GetCodecIData(int decoderObj) {
     return decoderObj + 4;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_32F020", func_0042E2F8);
+INCLUDE_ASM("seg/seg_32F020", RCMP_DECODER_HasCodec);
 #ifdef SKIP_ASM
 /**
  * Returns whether a decoder has a codec chosen (word 5, +0x14, non-zero).
@@ -281,7 +281,7 @@ INCLUDE_ASM("seg/seg_32F020", func_0042E2F8);
  * @return 1 when a codec is set, else 0
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-int func_0042E2F8(int *decoderObj) {
+int RCMP_DECODER_HasCodec(int *decoderObj) {
     return decoderObj[5] != 0;
 }
 #endif
@@ -289,11 +289,11 @@ int func_0042E2F8(int *decoderObj) {
 /**
  * Does nothing (an empty placement array delete of RCMP::DECODER).
  */
-void func_0042E308(void) {
+void RCMP_DECODER_operator_delete_array(void) {
 }
 
 //100%
-INCLUDE_ASM("seg/seg_32F020", func_0042E310);
+INCLUDE_ASM("seg/seg_32F020", RCMP_DECODER_operator_new_array);
 #ifdef SKIP_ASM
 /**
  * Returns @p value unchanged (a placement array new of RCMP::DECODER: returns the given address).
@@ -304,7 +304,7 @@ INCLUDE_ASM("seg/seg_32F020", func_0042E310);
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-long func_0042E310(int allocSize, long value) {
+long RCMP_DECODER_operator_new_array(int allocSize, long value) {
     return value;
 }
 #endif
@@ -312,11 +312,11 @@ long func_0042E310(int allocSize, long value) {
 /**
  * Does nothing (an empty placement delete of RCMP::DECODER).
  */
-void func_0042E318(void) {
+void RCMP_DECODER_operator_delete(void) {
 }
 
 //100%
-INCLUDE_ASM("seg/seg_32F020", func_0042E320);
+INCLUDE_ASM("seg/seg_32F020", RCMP_DECODER_operator_new);
 #ifdef SKIP_ASM
 /**
  * Returns @p value unchanged (a placement new of RCMP::DECODER: returns the given address).
@@ -327,13 +327,13 @@ INCLUDE_ASM("seg/seg_32F020", func_0042E320);
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-long func_0042E320(int allocSize, long value) {
+long RCMP_DECODER_operator_new(int allocSize, long value) {
     return value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_32F020", func_0042E328);
+INCLUDE_ASM("seg/seg_32F020", RCMP_DECODER_operator_delete_array1);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int (*D_00509434[])(void);
@@ -343,13 +343,13 @@ extern int (*D_00509434[])(void);
  *
  * @return the free function's result
  */
-int func_0042E328(void) {
+int RCMP_DECODER_operator_delete_array1(void) {
     return D_00509434[0]();
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_32F020", func_0042E350);
+INCLUDE_ASM("seg/seg_32F020", RCMP_DECODER_operator_delete1);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int (*D_00509434[])(void);
@@ -359,13 +359,13 @@ extern int (*D_00509434[])(void);
  *
  * @return the free function's result
  */
-int func_0042E350(void) {
+int RCMP_DECODER_operator_delete1(void) {
     return D_00509434[0]();
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_32F020", func_0042E378);
+INCLUDE_ASM("seg/seg_32F020", RCMP_DECODER_operator_new_array1);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
@@ -380,13 +380,13 @@ extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
  * @param hdrSize  header bytes
  * @param memType  memory type and flags
  */
-void func_0042E378(int allocSize, int blockName, int alignment, int hdrSize, int memType) {
+void RCMP_DECODER_operator_new_array1(int allocSize, int blockName, int alignment, int hdrSize, int memType) {
     D_00509430(blockName, allocSize, alignment, hdrSize, memType);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_32F020", func_0042E3A8);
+INCLUDE_ASM("seg/seg_32F020", RCMP_DECODER_operator_new1);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
@@ -401,13 +401,13 @@ extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
  * @param hdrSize  header bytes
  * @param memType  memory type and flags
  */
-void func_0042E3A8(int allocSize, int blockName, int alignment, int hdrSize, int memType) {
+void RCMP_DECODER_operator_new1(int allocSize, int blockName, int alignment, int hdrSize, int memType) {
     D_00509430(blockName, allocSize, alignment, hdrSize, memType);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_32F020", func_0042E3D8);
+INCLUDE_ASM("seg/seg_32F020", RCMP_DECODER_operator_new_array2);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
@@ -418,13 +418,13 @@ extern char D_004953B8[];
  *
  * @param allocSize  bytes requested
  */
-void func_0042E3D8(int allocSize) {
+void RCMP_DECODER_operator_new_array2(int allocSize) {
     D_00509430((int)D_004953B8, allocSize, 0, 0, ((int *)&D_00509430)[2]);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_32F020", func_0042E418);
+INCLUDE_ASM("seg/seg_32F020", RCMP_DECODER_operator_new2);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int (*D_00509430)(int a0, int a1, int a2, int a3, int a4);
@@ -435,13 +435,13 @@ extern char D_004953B8[];
  *
  * @param allocSize  bytes requested
  */
-void func_0042E418(int allocSize) {
+void RCMP_DECODER_operator_new2(int allocSize) {
     D_00509430((int)D_004953B8, allocSize, 0, 0, ((int *)&D_00509430)[2]);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_32F020", func_0042E458);
+INCLUDE_ASM("seg/seg_32F020", __tfQ24RCMP7DECODER);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_004A5B90;
@@ -453,7 +453,7 @@ extern void func_00414C20(void *a0, void *a1);
  *
  * @return &D_004A5B90
  */
-int *func_0042E458(void) {
+int *__tfQ24RCMP7DECODER(void) {
     if (D_004A5B90 == 0) {
         func_00414C20(&D_004A5B90, str_Q24RCMP7DECODER);
     }
@@ -462,7 +462,7 @@ int *func_0042E458(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_32F020", func_0042E498);
+INCLUDE_ASM("seg/seg_32F020", RCMP_RCMP_SYSTEM__RCMP_SYSTEM);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_00456890[];
@@ -474,7 +474,7 @@ extern void operator_delete__FPi(int *a0);
  * @param rcmpSystem  the RCMP_SYSTEM object
  * @param dtorFlags  destructor flags (bit 0: free the object)
  */
-void func_0042E498(int *rcmpSystem, int dtorFlags) {
+void RCMP_RCMP_SYSTEM__RCMP_SYSTEM(int *rcmpSystem, int dtorFlags) {
     rcmpSystem[3] = (int)D_00456890;
     if (dtorFlags & 1) {
         operator_delete__FPi(rcmpSystem);
@@ -483,7 +483,7 @@ void func_0042E498(int *rcmpSystem, int dtorFlags) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_32F020", func_0042E4C8);
+INCLUDE_ASM("seg/seg_32F020", __tfQ24RCMP11RCMP_SYSTEM);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_004A5B98;
@@ -495,7 +495,7 @@ extern void func_00414C20(void *a0, void *a1);
  *
  * @return &D_004A5B98
  */
-int *func_0042E4C8(void) {
+int *__tfQ24RCMP11RCMP_SYSTEM(void) {
     if (D_004A5B98 == 0) {
         func_00414C20(&D_004A5B98, str_Q24RCMP11RCMP_SYSTEM);
     }
@@ -504,7 +504,7 @@ int *func_0042E4C8(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_32F020", func_0042E508);
+INCLUDE_ASM("seg/seg_32F020", RCMP_AV_MS_TIMER_Update);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -519,7 +519,7 @@ extern unsigned TIMER_gettick(void);
  *
  * @param clock  the timer (last tick, accumulated time, rate)
  */
-void func_0042E508(sClk *clock) {
+void RCMP_AV_MS_TIMER_Update(sClk *clock) {
     unsigned now = TIMER_gettick();
     if (clock->rate == 0x1000) {
         clock->acc += now - clock->last;

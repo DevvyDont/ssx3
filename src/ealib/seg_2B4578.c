@@ -11618,15 +11618,15 @@ struct sAD00_0B10 {
 extern struct sAD00_0B10 D_0050AD00_0B10 __asm__("D_0050AD00");
 
 extern void func_003C51E8(void *, void *, int);
-extern int func_00426F08(void *);
-extern void func_00426D18(void *, int, int, void *, int, int, int, int, int);
+extern int sceSifCheckStatRpc(void *);
+extern void sceSifCallRpc(void *, int, int, void *, int, int, int, int, int);
 
 /**
  * Sends a command to the IOP sound driver over SIF RPC.
  *
  * Copies @p sendSize bytes of @p sendData into the RPC send buffer (+0x000 of D_0050AD00, func_003C51E8) when the size is non-zero,
- * waits (10000-iteration delay loops) while the client +0xC80 is busy (func_00426F08), then calls the function with
- * func_00426D18 (sceSifCallRpc), no-wait mode for function 2. Used by the platform init SNDPLATFORM_init (function 0),
+ * waits (10000-iteration delay loops) while the client +0xC80 is busy (sceSifCheckStatRpc), then calls the function with
+ * sceSifCallRpc (sceSifCallRpc), no-wait mode for function 2. Used by the platform init SNDPLATFORM_init (function 0),
  * SNDPLATFORM_restore and func_003C3450.
  *
  * @param rpcFunction  the RPC function number
@@ -11639,11 +11639,11 @@ void func_003C0B10(int rpcFunction, void *sendData, int sendSize) {
     if (sendSize) {
         func_003C51E8(D_0050AD00_0B10.f000, sendData, sendSize);
     }
-    while (func_00426F08(D_0050AD00_0B10.fC80)) {
+    while (sceSifCheckStatRpc(D_0050AD00_0B10.fC80)) {
         for (i = 0; i < 10000; i++) {
         }
     }
-    func_00426D18(D_0050AD00_0B10.fC80, rpcFunction, two, D_0050AD00_0B10.f000, sendSize, 0, 0, 0, 0);
+    sceSifCallRpc(D_0050AD00_0B10.fC80, rpcFunction, two, D_0050AD00_0B10.f000, sendSize, 0, 0, 0, 0);
 }
 #endif
 
@@ -12632,9 +12632,9 @@ extern void func_00425FF0_1B80(void *, int) __asm__("func_00425FF0");
 extern void func_00426020_1B80(int, void *, void *) __asm__("func_00426020");
 extern void func_00426408_1B80(int) __asm__("func_00426408");
 extern int func_00426B48_1B80(void *, int, int) __asm__("func_00426B48");
-extern void func_0042AB18_1B80(void) __asm__("func_0042AB18");
-extern int func_0042ABA0_1B80(int) __asm__("func_0042ABA0");
-extern int func_0042BA68_1B80(char *, int, int) __asm__("func_0042BA68");
+extern void sceSifInitIopHeap_1B80(void) __asm__("sceSifInitIopHeap");
+extern int sceSifAllocIopHeap_1B80(int) __asm__("sceSifAllocIopHeap");
+extern int sceSifLoadModule_1B80(char *, int, int) __asm__("sceSifLoadModule");
 extern char func_003C0BE8_1B80[] __asm__("func_003C0BE8");
 extern char func_003C1578_1B80[] __asm__("func_003C1578");
 extern char func_003C1980_1B80[] __asm__("func_003C1980");
@@ -12729,24 +12729,24 @@ int SNDPLATFORM_init(void) {
     D_0050AD00_1B80.f1AA4 = CreateSema_1B80(&D_0050ACB0_1B80);
     if (D_0044DD40_1B80 == 0) {
         func_00426408_1B80(0);
-        func_0042AB18_1B80();
+        sceSifInitIopHeap_1B80();
     }
     if (D_0050A8E8_1B80.f3F != 0 && D_0044DD40_1B80 == 0) {
         path[0] = 0;
         func_003C15D8_1B80(path, D_0050A8E8_1B80.f6C);
         func_003C15D8_1B80(path, D_00495830_1B80);
-        if (func_0042BA68_1B80(path, 0, 0) < 0 && func_0042BA68_1B80(D_00495840_1B80, 0, 0) < 0) {
+        if (sceSifLoadModule_1B80(path, 0, 0) < 0 && sceSifLoadModule_1B80(D_00495840_1B80, 0, 0) < 0) {
             return -1;
         }
         path[0] = 0;
         func_003C15D8_1B80(path, D_0050A8E8_1B80.f6C);
         func_003C15D8_1B80(path, D_00495870_1B80);
-        if (func_0042BA68_1B80(path, 0, 0) < 0 && func_0042BA68_1B80(D_00495880_1B80, 0, 0) < 0) {
+        if (sceSifLoadModule_1B80(path, 0, 0) < 0 && sceSifLoadModule_1B80(D_00495880_1B80, 0, 0) < 0) {
             return -1;
         }
     }
     for (i = 0; i < 1; i++) {
-        D_0050AD00_1B80.v[i].h = func_0042ABA0_1B80(0x1000);
+        D_0050AD00_1B80.v[i].h = sceSifAllocIopHeap_1B80(0x1000);
         D_0050AD00_1B80.v[i].f8 = 0;
     }
     D_0050AC80_1B80.f4 = func_003C19A8_1B80;
@@ -14620,11 +14620,11 @@ struct G_4B70 {
 extern struct G_4B70 D_0050AD00_4B70 __asm__("D_0050AD00");
 extern unsigned short D_0050A910_4B70 __asm__("D_0050A910");
 extern void func_003C4AF8_4B70(int *start, int *len) __asm__("func_003C4AF8");
-extern int func_0042ABA0_4B70(int size) __asm__("func_0042ABA0");
+extern int sceSifAllocIopHeap_4B70(int size) __asm__("sceSifAllocIopHeap");
 /**
  * Allocates sound memory for a play location and returns its address.
  *
- * Play location 0x100 takes @p size + 0x40 bytes of IOP heap (func_0042ABA0). Otherwise, while fewer than D_0050A910
+ * Play location 0x100 takes @p size + 0x40 bytes of IOP heap (sceSifAllocIopHeap). Otherwise, while fewer than D_0050A910
  * segments are in use, it finds the first gap of the sorted segment table (+0x1AA0 of D_0050AD00, count +0x1A98)
  * between the low and high limits, clipped by func_003C4AF8, that holds the size in 64-byte units, inserts the segment
  * there and returns its byte address. Called by SNDbankadd.
@@ -14649,7 +14649,7 @@ int SNDPLATFORM_memalloc(int type, int size) {
     struct Blk_4B70 *prevSegment;
 
     i = 0;
-    if (type == 0x100) return func_0042ABA0_4B70(size + 0x40);
+    if (type == 0x100) return sceSifAllocIopHeap_4B70(size + 0x40);
     if (D_0050AD00_4B70.count >= D_0050A910_4B70) return 0;
     size += 0x3F;
     size >>= 6;

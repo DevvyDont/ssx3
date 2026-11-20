@@ -773,7 +773,7 @@ extern "C" void cFEStateMountainRoom_showPassFront(cFEStateMountainRoom* self)
 //100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_updateMarkers);
 #ifdef SKIP_ASM
-extern "C" int func_001CED90(int player, int charId, int mountain, int peak, int i);
+extern "C" int getChallengeMedal(int player, int charId, int mountain, int peak, int i);
 
 struct sPeakEvent_3340 {
     signed char track;          // widget list selector; < 0 ends the peak's list
@@ -831,7 +831,7 @@ static inline void wColour_3340(cWidget_3340* w, int col)
  * showing a done or not-done picture.
  *
  * For peaks 0-2 and challenge groups 0 and 1 (groups 2 and 3, collectibles / big challenges and earnings, are skipped)
- * it walks the peak's challenge table D_0045AAD8 until an entry's list selector is negative. func_001CED90 gives the
+ * it walks the peak's challenge table D_0045AAD8 until an entry's list selector is negative. getChallengeMedal gives the
  * entry's medal for the player (+0x44) and character (+0xB0); a value below 4 picks the done element (+0xA8), anything
  * else the not-done element (+0xAC). The selector picks the next free marker of one list: 0 -> +0x58 (5 markers), 1 ->
  * +0x6C, 2 -> +0x90, 3 -> +0x9C, 4 -> +0x78, 5 -> +0x84 (3 each). The marker gets the element (+0x7C, texture id +0x78
@@ -856,7 +856,7 @@ extern "C" void cFEStateMountainRoom_updateMarkers(cFEStateMountainRoom* mountai
                 int track = D_0045AAD8[mountain][peak][i].track;
                 if (track < 0)
                     break;
-                unsigned int st = func_001CED90(self->player, self->charId, mountain, peak, i);
+                unsigned int st = getChallengeMedal(self->player, self->charId, mountain, peak, i);
                 if (track == 0) {
                     WSET_3340(a, n0);
                 } else if (track == 1) {
@@ -1292,7 +1292,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv_3F80(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int func_001CE6F0(int mountain);
-extern "C" int func_001CED90(int player, int charId, int mountain, int peak, int i);
+extern "C" int getChallengeMedal(int player, int charId, int mountain, int peak, int i);
 extern "C" void setChallengeName(void* text, int mountain, int peak, int i);
 extern "C" char* cBERewardInterface_getMedal(void* iface, int peak, int ch);
 extern "C" int cUITextureBank_getElementByHashname(void* self, int id);
@@ -1335,7 +1335,7 @@ struct sRoom_3F80 {
  * First hides all six widget lists (+0x58 medal icons, +0x6C backgrounds, +0x80 names, +0x94 name backgrounds, +0xA8
  * check marks, +0xBC cross marks). func_001CE6F0 counts the group's entries in the challenge table for the peak
  * (+0xE0); it is declared here with one argument and gets the group from $a1, which still holds @p peak. For each
- * entry: func_001CED90 gives the medal for the player (+0x44) and character (+0xDC), setChallengeName labels the line,
+ * entry: getChallengeMedal gives the medal for the player (+0x44) and character (+0xDC), setChallengeName labels the line,
  * and the name, its background and the medal background are shown. With a medal (not -1) the icon takes the
  * texture-bank element (mpEngine + 0x58) named by the medal record's string (cBERewardInterface_getMedal on back-end
  * interface 13, record +0x8) and is shown with the check mark; without one the cross mark is shown.
@@ -1366,7 +1366,7 @@ extern "C" void cFEStatePeakRoom_updateMedalsList(cFEStatePeakRoom* vself, int p
     }
     iface = cBE_getInterface_Fv_3F80(cBE_getBE(), 13);
     for (i = 0; i < n; i++) {
-        int ch = func_001CED90(self->player, self->charId, self->mountain, peak, i);
+        int ch = getChallengeMedal(self->player, self->charId, self->mountain, peak, i);
         setChallengeName(name[i], self->mountain, peak, i);
         name[i]->show(1);
         bar[i]->show(1);

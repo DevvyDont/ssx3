@@ -22,8 +22,8 @@ INCLUDE_ASM("sce/crt0", func_00100008);
 // PORT: PS2-only. Sony crt0.s `_start`, the EE entry point (hand-written: MMI padduw/mthi1/mtlo1/mtsah register clears,
 // adda.s, sync.p, raw syscalls, ei). It zeroes every GPR/FPR/HI/LO/SA/ACC and FCSR, clears .bss (D_004A4C00 to
 // D_0053F115) with sq, calls SetupThread (syscall 0x3C: gp D_004A30F0, stack D_1FE0000, size D_20000, args D_004A5C00,
-// root func_001001D0) and takes the returned stack, SetupHeap (syscall 0x3D: D_0053F115, -1), then func_0042C300 and
-// FlushCache(0), enables interrupts, runs main(argc, argv) from the args block and exits with func_0042C6E8(ret).
+// root func_001001D0) and takes the returned stack, SetupHeap (syscall 0x3D: D_0053F115, -1), then _InitSys and
+// FlushCache(0), enables interrupts, runs main(argc, argv) from the args block and exits with Exit(ret).
 // A port replaces it with the platform's own startup.
 __asm__(
     ".set push\n.set noreorder\n.set noat\n"
@@ -129,7 +129,7 @@ __asm__(
     "addiu $5, $5, -0x1\n"
     "addiu $3, $0, 0x3D\n"
     "syscall 0\n"
-    "jal func_0042C300\n"
+    "jal _InitSys\n"
     "nop\n"
     "jal FlushCache\n"
     "daddu $4, $0, $0\n"
@@ -139,7 +139,7 @@ __asm__(
     "lw $4, 0x0($2)\n"
     "jal main\n"
     "addiu $5, $2, 0x4\n"
-    "j func_0042C6E8\n"
+    "j Exit\n"
     "daddu $4, $2, $0\n"
     ".size func_00100008, . - func_00100008\n"
     ".set pop\n");
@@ -148,11 +148,11 @@ __asm__(
 //100%
 INCLUDE_ASM("sce/crt0", func_001001C8);
 #ifdef SKIP_ASM
-// PORT: PS2-only. Sony crt0.s exit stub: func_0042C6E8(0). A port uses the platform's exit.
+// PORT: PS2-only. Sony crt0.s exit stub: Exit(0). A port uses the platform's exit.
 __asm__(
     ".set push\n.set noreorder\n.set noat\n"
     ".text\n.align 3\n.globl func_001001C8\n.type func_001001C8, @function\nfunc_001001C8:\n"
-    "j func_0042C6E8\n"
+    "j Exit\n"
     "daddu $4, $0, $0\n"
     ".size func_001001C8, . - func_001001C8\n"
     ".set pop\n");

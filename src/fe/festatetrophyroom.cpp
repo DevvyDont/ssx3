@@ -276,7 +276,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBERewardInterface_isTrophyOwned(void* self, int rider, int a, int b, int c);
-extern "C" int func_001CED90(int rider, int a, int b, int c, int index);
+extern "C" int getChallengeMedal(int rider, int a, int b, int c, int index);
 
 class cTrophyWidget_47A0 {
 public:
@@ -297,7 +297,7 @@ public:
  *
  * Row 0 is the trophy: its texture (+0x60[0]) is used when the character owns it (cBERewardInterface_isTrophyOwned on
  * reward interface 13 with mUserNum, character +0x50, peak +0x54 and trophy +0x58). Rows 1-4 are challenges:
- * func_001CED90 gives the medal earned in challenge row - 1 (-1 for none) and the texture is +0x60[medal + 1]. With a
+ * getChallengeMedal gives the medal earned in challenge row - 1 (-1 for none) and the texture is +0x60[medal + 1]. With a
  * texture the icon is shown (setVisible, vtable slot 9) and gets mTextureID = it and mpTextureElem = 0; a negative @p
  * index or no texture hides it.
  *
@@ -318,7 +318,7 @@ extern "C" void cFEStateTrophyRoom_updateBigArt(void* self, int index)
                 textureId = *(int*)((char*)self + 0x60);
             }
         } else {
-            int medal = func_001CED90(*(signed char*)((char*)self + 0x44),
+            int medal = getChallengeMedal(*(signed char*)((char*)self + 0x44),
                                   *(int*)((char*)self + 0x50), *(int*)((char*)self + 0x54),
                                   *(int*)((char*)self + 0x58), index - 1);
             if (medal != -1) {

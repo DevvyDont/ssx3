@@ -3616,8 +3616,6 @@ func_002A92F8 = 0x002A92F8; //type:func
 // --- src/sound/ps2soundman.cpp ---
 
 // --- src/sound/streamsys.cpp ---
-func_002AC220 = 0x002AC220; //type:func
-func_002ACB30 = 0x002ACB30; //type:func
 
 // --- src/sound/bankmonitor.cpp ---
 func_002AD998 = 0x002AD998; //type:func
@@ -3743,7 +3741,6 @@ func_002B49E0 = 0x002B49E0; //type:func
 func_002B4A08 = 0x002B4A08; //type:func
 func_002B4A20 = 0x002B4A20; //type:func
 func_002B4AA0 = 0x002B4AA0; //type:func
-func_002B4AE8__FPv = 0x002B4AE8; //type:func
 func_002B4AF0 = 0x002B4AF0; //type:func
 
 // --- src/sound/icepick/worldtriggermanager.cpp ---

@@ -1495,7 +1495,7 @@ struct sThreadParam_5000 { int status; void (*func)(void); void *stack; int stac
 extern void f5000_6210(void *, int, int) __asm__("func_00416210");
 /* func_004261B0 (sceSifSendCmd) returns its packet id; the unit declares it void. */
 extern int f5000_61B0(int, void *, int, int, int, int) __asm__("func_004261B0");
-extern int func_0042ABA0(int);
+extern int sceSifAllocIopHeap(int);
 extern int sceSifDmaStat(int);
 extern void func_00425D38(void);
 extern int CreateSema(struct sSemaParam_5000 *);
@@ -1510,7 +1510,7 @@ extern int func_003F4410(int, void *);
  *
  * Fails (-1) when the IOP does not answer (func_003F4F40). Zeroes the queue and lays out its uncached areas: service
  * directory (0x800 bytes), request ring and reply ring (0x200 each), payload area (0x4000), DMA-id words and the
- * completion ring. Allocates the IOP-side copy (func_0042ABA0, -2 on failure), DMAs a 0x40-byte header describing the
+ * completion ring. Allocates the IOP-side copy (sceSifAllocIopHeap, -2 on failure), DMAs a 0x40-byte header describing the
  * areas and then the request ring (sceSifSetDma, -3 / -4 on failure), initialises SIF commands (func_00425D38) and
  * sends command 1 with the IOP address. Creates the queue semaphore and the queue thread (func_003F44F8, priority 10,
  * 0x2000-byte stack D_00523F00; -5 on failure), installs the Count handler func_003F4410 on interrupt 2 and enables it,
@@ -1550,7 +1550,7 @@ int func_003F5000(void) {
     size += ((struct sSifRes *)queue->pad4DA4[0] - queue->b) * sizeof(struct sSifRes);
     size += queue->pad4DB0 - queue->base2;
     size += ((int *)queue->pad4DB8[1] - (int *)queue->pad4DB8[0]) * sizeof(int);
-    queue->pad4DB8[2] = func_0042ABA0(size);
+    queue->pad4DB8[2] = sceSifAllocIopHeap(size);
     if (queue->pad4DB8[2] == 0) return -2;
     iop = (queue->pad4DB8[2] & 0xFFFFFFF) | 0xA0000000;
     queue->pad4DB8[2] = iop;
@@ -2102,13 +2102,13 @@ extern struct sKb D_00525F80;
 
 extern char *strcpy(char *, const char *);
 extern char* strcat(char *, const char *);
-extern int fBA68(char *, int, const char *) __asm__("func_0042BA68");
+extern int fBA68(char *, int, const char *) __asm__("sceSifLoadModule");
 extern char D_00497038[], str_USBKB_IRX_b[];
 /**
  * Loads the USB driver modules USBD.IRX and USBKB.IRX from a directory.
  *
  * With @p name 0 it only marks both module ids in D_00525F80 as -1 and returns 0. Otherwise loads @p name + "USBD.IRX"
- * without arguments and @p name + "USBKB.IRX" with @p str as its argument text (func_0042BA68, the SIF module loader),
+ * without arguments and @p name + "USBKB.IRX" with @p str as its argument text (sceSifLoadModule, the SIF module loader),
  * keeping the ids in D_00525F80.fd[0] and fd[1]. Called by the USB keyboard setup func_003F61D0.
  *
  * @param name  directory prefix of the IRX files, or 0
@@ -2139,10 +2139,10 @@ fail:
 INCLUDE_ASM("seg/seg_2F41F8", func_003F5E90);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_0042B438(int, int, int, int *);
-extern int func_0042B640(int);
+extern int sceSifStopModule(int, int, int, int *);
+extern int sceSifUnloadModule(int);
 /**
- * Stops and unloads an IOP module by its id (func_0042B438, then func_0042B640).
+ * Stops and unloads an IOP module by its id (sceSifStopModule, then sceSifUnloadModule).
  *
  * @param handle  module id (nothing is done when negative)
  * @param errorValue  value to return when either call fails
@@ -2152,8 +2152,8 @@ int func_003F5E90(int handle, int errorValue) {
     int buf[4];
     int result = 0;
     if (handle >= 0) {
-        if (func_0042B438(handle, 0, 0, buf) < 0) result = errorValue;
-        if (func_0042B640(handle) < 0) result = errorValue;
+        if (sceSifStopModule(handle, 0, 0, buf) < 0) result = errorValue;
+        if (sceSifUnloadModule(handle) < 0) result = errorValue;
     }
     return result;
 }
@@ -2800,14 +2800,14 @@ struct sRpcSend { int a; int b; };
 
 extern struct sRpcSend D_00526080[];
 
-extern int f6F08(int *) __asm__("func_00426F08");
-extern int f6D18(int *, int, int, struct sRpcSend *, int, int, int, int, int) __asm__("func_00426D18");
+extern int f6F08(int *) __asm__("sceSifCheckStatRpc");
+extern int f6D18(int *, int, int, struct sRpcSend *, int, int, int, int, int) __asm__("sceSifCallRpc");
 void func_003F6960_impl(int a, int b, int c, int d, int e) __asm__("func_003F6960");
 /**
  * Calls the voice-chat IOP module (VOIPF) through its SIF RPC client.
  *
- * Only when bound (D_004A5B14): waits for the previous call to finish (func_00426F08), puts two words in the send
- * buffer D_00526080 and calls RPC function @p rpcFunc (func_00426D18 on the client D_00526100, 0x80-byte send buffer),
+ * Only when bound (D_004A5B14): waits for the previous call to finish (sceSifCheckStatRpc), puts two words in the send
+ * buffer D_00526080 and calls RPC function @p rpcFunc (sceSifCallRpc on the client D_00526100, 0x80-byte send buffer),
  * retrying until the call is accepted.
  *
  * @param rpcFunc  RPC function number
