@@ -1,4 +1,6 @@
 #include "common.h"
+#include "sound/bankmanager.h"
+#include "sound/asyncsys.h"
 #include "replay/frameptr.h"
 #include "sound/bankmonitor.h"
 #include "sound/ssxaudio.h"
@@ -1069,8 +1071,8 @@ INCLUDE_ASM("bx/seg_1BA100", cAsyncSys_ASYNCSYS_Busy);
  * @param asyncSys  the cAsyncSys
  * @return nonzero while a load is in progress
  */
-extern "C" int cAsyncSys_ASYNCSYS_Busy(void *asyncSys) {
-    return (*(int *)((char*)(asyncSys) + (4)));
+extern "C" int cAsyncSys_ASYNCSYS_Busy(cAsyncSys* asyncSys) {
+    return (asyncSys->mBusy);
 }
 #endif
 
@@ -1087,11 +1089,11 @@ struct Q_9E28 { int a; int *data; int tail; int head; };
  *
  * @return the user handle, or -1
  */
-extern "C" int cAsyncSys_ASYNCSYS_GetCurrOperationUserHandle(char *self) {
+extern "C" int cAsyncSys_ASYNCSYS_GetCurrOperationUserHandle(cAsyncSys* self) {
     int userHandle;
-    if (*(int *)(self + 4) != 0) {
-        Q_9E28 *handleQueue = (Q_9E28 *)(self + 0x18C);
-        if (*(int *)(self + 0x194) == *(int *)(self + 0x198)) userHandle = -1;
+    if (self->mBusy != 0) {
+        Q_9E28 *handleQueue = (Q_9E28 *)(((char*)self) + 0x18C);
+        if (self->mUserHandle.Head == self->mUserHandle.Tail) userHandle = -1;
         else userHandle = handleQueue->data[handleQueue->head];
     } else userHandle = -1;
     return userHandle;
@@ -1107,7 +1109,7 @@ extern "C" void cAsyncSys_DoCancel(void*, int);
  *
  * @param asyncSys  the cAsyncSys
  */
-extern "C" void cAsyncSys_ASYNCSYS_CancelCurrent(void *asyncSys) {
+extern "C" void cAsyncSys_ASYNCSYS_CancelCurrent(cAsyncSys* asyncSys) {
     cAsyncSys_DoCancel(asyncSys, 0);
 }
 #endif
@@ -1121,7 +1123,7 @@ extern "C" void cAsyncSys_DoCancel(void*, int);
  *
  * @param asyncSys  the cAsyncSys
  */
-extern "C" void cAsyncSys_ASYNCSYS_CancelAll(void *asyncSys) {
+extern "C" void cAsyncSys_ASYNCSYS_CancelAll(cAsyncSys* asyncSys) {
     cAsyncSys_DoCancel(asyncSys, 1);
 }
 #endif
@@ -1139,8 +1141,8 @@ struct S9EB0 { int a; char pad[0x5C]; };
  * @param bankId  the bank index
  * @return the bank status
  */
-extern "C" int cBankManager_BANK_Status(void *bankManager, int bankId) {
-    S9EB0 *base = *(S9EB0 **)((char *)bankManager + 0xACC);
+extern "C" int cBankManager_BANK_Status(cBankManager* bankManager, int bankId) {
+    S9EB0 *base = (S9EB0*)bankManager->mBank;
     return base[bankId].a;
 }
 #endif
@@ -1156,8 +1158,8 @@ struct S9EC8 { int a; char pad[0x5C]; };
  * @param bankId  the bank index
  * @return 1 when the bank's status is 1 (used), else 0
  */
-extern "C" int cBankManager_BANK_Used(void *bankManager, int bankId) {
-    S9EC8 *base = *(S9EC8 **)((char *)bankManager + 0xACC);
+extern "C" int cBankManager_BANK_Used(cBankManager* bankManager, int bankId) {
+    S9EC8 *base = (S9EC8*)bankManager->mBank;
     return base[bankId].a == 1;
 }
 #endif
@@ -1173,8 +1175,8 @@ struct S9EE8 { int a; char pad[0x5C]; };
  * @param bankId  the bank index
  * @return 1 when the bank's status is 2 (loading), else 0
  */
-extern "C" int cBankManager_BANK_Loading(void *bankManager, int bankId) {
-    S9EE8 *base = *(S9EE8 **)((char *)bankManager + 0xACC);
+extern "C" int cBankManager_BANK_Loading(cBankManager* bankManager, int bankId) {
+    S9EE8 *base = (S9EE8*)bankManager->mBank;
     return base[bankId].a == 2;
 }
 #endif
@@ -1182,7 +1184,7 @@ extern "C" int cBankManager_BANK_Loading(void *bankManager, int bankId) {
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cBankManager_BANK_InUse);
 #ifdef SKIP_ASM
-extern "C" int cBankManager_BANK_Handle(void *, int);
+extern "C" int cBankManager_BANK_Handle(cBankManager*, int);
 extern "C" void SNDSYS_entercritical();
 extern "C" void SNDSYS_leavecritical();
 extern "C" int SNDbankinuse(int);
@@ -1196,10 +1198,10 @@ extern "C" int SNDbankinuse(int);
  * @param idx  the bank index
  * @return 1 when the bank is loaded and SNDbankinuse reports 1, else 0
  */
-extern "C" int cBankManager_BANK_InUse(void *self, int idx) {
+extern "C" int cBankManager_BANK_InUse(cBankManager* self, int idx) {
     int ready = 0;
     SNDSYS_entercritical();
-    bool ok = *(int *)((char*)(*(int *)((char*)self + 0xACC)) + idx * 0x60) != 1;
+    bool ok = *(int *)((char*)((int)self->mBank) + idx * 0x60) != 1;
     if (!ok) {
         ready = SNDbankinuse(cBankManager_BANK_Handle(self, idx)) == 1;
     }
@@ -1219,8 +1221,8 @@ struct S9F88 { int a; int b; char pad[0x58]; };
  * @param bankId  the bank index
  * @return the bank handle, or -1 when its status is not 1 (used)
  */
-extern "C" int cBankManager_BANK_Handle(void *bankManager, int bankId) {
-    S9F88 *base = *(S9F88 **)((char *)bankManager + 0xACC);
+extern "C" int cBankManager_BANK_Handle(cBankManager* bankManager, int bankId) {
+    S9F88 *base = (S9F88*)bankManager->mBank;
     bool ne = base[bankId].a != 1;
     if (!ne) {
         return base[bankId].b;

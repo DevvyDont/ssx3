@@ -1619,8 +1619,8 @@ extern "C" void cController__cController(char* self, int flags)
 //100%
 INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_Update);
 #ifdef SKIP_ASM
-extern "C" int cBankMonitorInstance_IsFree(void* self);
-extern "C" void cBankMonitorInstance_Update3D(void* voice, cBankMonitor* bm, float v);
+extern "C" int cBankMonitorInstance_IsFree(cBankMonitorInstance* self);
+extern "C" void cBankMonitorInstance_Update3D(cBankMonitorInstance* voice, cBankMonitor* bm, float v);
 
 class cStrmCbOwner {
 public:
@@ -1645,7 +1645,7 @@ struct sStrmVoiceCb {
  */
 extern "C" void cBankMonitorInstance_Update(void* voice, void* self, float time)
 {
-    if (cBankMonitorInstance_IsFree(voice) == 0 && time > 0.0f) {
+    if (cBankMonitorInstance_IsFree((cBankMonitorInstance*)voice) == 0 && time > 0.0f) {
         sStrmVoiceCb* sv = (sStrmVoiceCb*)voice;
         if (sv->cb) {
             (((cStrmCbOwner*)self)->*(sv->cb))(voice, time);
@@ -1658,7 +1658,7 @@ extern "C" void cBankMonitorInstance_Update(void* voice, void* self, float time)
                 bm += 0x1D8;
             }
         }
-        cBankMonitorInstance_Update3D(voice, (cBankMonitor*)bm, time);
+        cBankMonitorInstance_Update3D((cBankMonitorInstance*)voice, (cBankMonitor*)bm, time);
     }
 }
 #endif
@@ -1793,16 +1793,16 @@ INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_cBankMonitorInstance);
  *
  * @return this
  */
-extern "C" void* cBankMonitorInstance_cBankMonitorInstance(void* self)
+extern "C" void* cBankMonitorInstance_cBankMonitorInstance(cBankMonitorInstance* self)
 {
-    *(int*)((char*)self + 0xB0) = 0x8000;
-    *(float*)((char*)self + 0x90) = -1.0f;
-    *(int*)((char*)self + 0xB4) = -1;
-    *(int*)((char*)self + 0xB8) = -30000;
-    *(int*)((char*)self + 0x0) = 0;
-    *(int*)((char*)self + 0x54) = 0;
-    *(int*)((char*)self + 0x58) = 0;
-    return self;
+    self->mLastPitch = 0x8000;
+    self->mVolMultiplier = -1.0f;
+    self->mLastVolume = -1;
+    self->mLastAzimuth = -30000;
+    self->mMonitorType = 0;
+    self->mFading = 0;
+    self->mCloseStateLocked = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -1841,26 +1841,26 @@ int SNDSTRM_requeststatus_st(int h, int* st) __asm__("SNDSTRM_requeststatus");
  *
  * @return nonzero when done
  */
-extern "C" int cBankMonitorInstance_DonePlaying(void* self)
+extern "C" int cBankMonitorInstance_DonePlaying(cBankMonitorInstance* self)
 {
     int type = *(int*)self;
     switch (type) {
     case 1: {
         SNDSYS_entercritical();
-        int result = SNDover(*(int*)((char*)self + 4)) != 0;
+        int result = SNDover(self->mHandle) != 0;
         SNDSYS_leavecritical();
         return result;
     }
     case 2: {
         SNDSYS_entercritical();
-        int result = SNDseqstatus(*(int*)((char*)self + 4));
+        int result = SNDseqstatus(self->mHandle);
         SNDSYS_leavecritical();
         return result == 2 || result < 0;
     }
     case 3: {
         int st[4];
         SNDSYS_entercritical();
-        if (SNDSTRM_requeststatus_st(*(int*)((char*)self + 4), st) >= 0) {
+        if (SNDSTRM_requeststatus_st(self->mHandle, st) >= 0) {
             SNDSYS_leavecritical();
             return st[0] == 3;
         }
@@ -1875,7 +1875,7 @@ extern "C" int cBankMonitorInstance_DonePlaying(void* self)
 //100%
 INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_Reset);
 #ifdef SKIP_ASM
-extern "C" void cBankMonitorInstance_StopSound(void*);
+extern "C" void cBankMonitorInstance_StopSound(cBankMonitorInstance*);
 
 /**
  * Stops an instance's sound and returns it to the free state.
@@ -1883,23 +1883,23 @@ extern "C" void cBankMonitorInstance_StopSound(void*);
  * Calls cBankMonitorInstance_StopSound, then sets the cached pitch (+0xB0) to 0x8000, the cached volume (+0xB4) to -1, the cached
  * position (+0xB8) to 0xFFFF and clears the type (+0), the stopping flag (+0x54) and +0x58.
  */
-extern "C" void cBankMonitorInstance_Reset(void* self)
+extern "C" void cBankMonitorInstance_Reset(cBankMonitorInstance* self)
 {
     cBankMonitorInstance_StopSound(self);
-    *(int*)((char*)self + 0xB0) = 0x8000;
-    *(int*)((char*)self + 0xB4) = -1;
-    *(int*)((char*)self + 0x0) = 0;
-    *(int*)((char*)self + 0x54) = 0;
-    *(int*)((char*)self + 0x58) = 0;
-    *(int*)((char*)self + 0xB8) = 0xFFFF;
+    self->mLastPitch = 0x8000;
+    self->mLastVolume = -1;
+    self->mMonitorType = 0;
+    self->mFading = 0;
+    self->mCloseStateLocked = 0;
+    self->mLastAzimuth = 0xFFFF;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_IsFree);
 #ifdef SKIP_ASM
-extern "C" int cBankMonitorInstance_DonePlaying(void* self);
-extern "C" void cBankMonitorInstance_Reset(void* self);
+extern "C" int cBankMonitorInstance_DonePlaying(cBankMonitorInstance* self);
+extern "C" void cBankMonitorInstance_Reset(cBankMonitorInstance* self);
 
 /**
  * Returns whether an instance is free, releasing it if its sound has finished.
@@ -1909,12 +1909,12 @@ extern "C" void cBankMonitorInstance_Reset(void* self);
  *
  * @return nonzero when free
  */
-extern "C" int cBankMonitorInstance_IsFree(void* self)
+extern "C" int cBankMonitorInstance_IsFree(cBankMonitorInstance* self)
 {
     if (*(int*)self == 0) {
         return 1;
     }
-    if (*(int*)((char*)self + 0x9C) == 0) {
+    if (self->mCloseOnEnd == 0) {
         return 0;
     }
     if (cBankMonitorInstance_DonePlaying(self) == 0) {
@@ -1935,7 +1935,7 @@ INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_DistSq);
  * @param posB  the second position
  * @return the squared distance
  */
-extern "C" float cBankMonitorInstance_DistSq(void* self, float* posA, float* posB)
+extern "C" float cBankMonitorInstance_DistSq(cBankMonitorInstance* self, float* posA, float* posB)
 {
     float dx = posA[0] - posB[0];
     float dy = posA[1] - posB[1];
@@ -2048,11 +2048,11 @@ extern "C" char* strcpy(char* dst, const char* src);
  * @param name  the file name
  * @param fileOffset  the offset in the file
  */
-extern "C" void cBankMonitorInstance_SetStream(void* self, int streamInst, const char* name, int fileOffset)
+extern "C" void cBankMonitorInstance_SetStream(cBankMonitorInstance* self, int streamInst, const char* name, int fileOffset)
 {
-    *(int*)((char*)self + 0xC) = streamInst;
+    self->mRestartInfo.bank.mBank = streamInst;
     strcpy((char*)self + 0x10, name);
-    *(int*)((char*)self + 0x50) = fileOffset;
+    self->mRestartInfo.stream.mOffset = fileOffset;
 }
 #endif
 
@@ -2093,14 +2093,14 @@ public:
  *
  * @param obj  the bank monitor
  */
-extern "C" void cBankMonitorInstance_SetLastDistance(void* self, cBankMonitorInstance_SetLastDistance_cObj* obj)
+extern "C" void cBankMonitorInstance_SetLastDistance(cBankMonitorInstance* self, cBankMonitorInstance_SetLastDistance_cObj* obj)
 {
     char buf[0x20];
     float distance;
     float distSq = obj->v06(self, buf);
     // PORT: sqrt.s (sqrtf without errno check)
     __asm__("sqrt.s %0, %1" : "=f"(distance) : "f"(distSq));
-    *(float*)((char*)self + 0x5C) = distance;
+    self->mLastDist = distance;
 }
 #endif
 
@@ -2122,26 +2122,26 @@ extern "C" void SNDMIDI_azimuth(int h, int pos);
  * @param pos  the azimuth (On Tour Azimuth)
  * @param elevation  the elevation (On Tour Elevation)
  */
-extern "C" void cBankMonitorInstance_PosUpdate(void* self, int pos, int elevation)
+extern "C" void cBankMonitorInstance_PosUpdate(cBankMonitorInstance* self, int pos, int elevation)
 {
-    int azimuthDiff = pos - *(int*)((char*)self + 0xB8);
+    int azimuthDiff = pos - self->mLastAzimuth;
     if (azimuthDiff >= -0x1FF && azimuthDiff <= 0x1FF) {
         return;
     }
-    *(int*)((char*)self + 0xB8) = pos;
+    self->mLastAzimuth = pos;
     switch (*(int*)self) {
     case 1:
         SNDSYS_entercritical();
-        SND3dpos(*(int*)((char*)self + 0x4), pos, elevation);
+        SND3dpos(self->mHandle, pos, elevation);
         SNDSYS_leavecritical();
         break;
     case 2:
         SNDSYS_entercritical();
-        SNDMIDI_azimuth(*(int*)((char*)self + 0x4), pos);
+        SNDMIDI_azimuth(self->mHandle, pos);
         SNDSYS_leavecritical();
         break;
     case 3:
-        cStreamInstance_Set3DPosition((cStreamInstance*)(*(void**)((char*)self + 0xC)), pos, elevation);
+        cStreamInstance_Set3DPosition((cStreamInstance*)(*(void**)&self->mRestartInfo), pos, elevation);
         break;
     }
 }
@@ -2165,7 +2165,7 @@ extern "C" void SNDMIDI_pitchmult(int h, int vol);
  *
  * @param vol  the pitch multiplier, 4.12 fixed point (On Tour Pitch)
  */
-extern "C" void cBankMonitorInstance_PitchUpdate(void* self, int vol)
+extern "C" void cBankMonitorInstance_PitchUpdate(cBankMonitorInstance* self, int vol)
 {
     if (vol > 0x3FFF) {
         vol = 0x3FFF;
@@ -2173,24 +2173,24 @@ extern "C" void cBankMonitorInstance_PitchUpdate(void* self, int vol)
     if (vol < 0) {
         vol = 0;
     }
-    int pitchDiff = vol - *(int*)((char*)self + 0xB0);
+    int pitchDiff = vol - self->mLastPitch;
     if (pitchDiff >= -0xFF && pitchDiff <= 0xFF) {
         return;
     }
-    *(int*)((char*)self + 0xB0) = vol;
+    self->mLastPitch = vol;
     switch (*(int*)self) {
     case 1:
         SNDSYS_entercritical();
-        SNDpitchmult(*(int*)((char*)self + 0x4), vol);
+        SNDpitchmult(self->mHandle, vol);
         SNDSYS_leavecritical();
         break;
     case 2:
         SNDSYS_entercritical();
-        SNDMIDI_pitchmult(*(int*)((char*)self + 0x4), vol);
+        SNDMIDI_pitchmult(self->mHandle, vol);
         SNDSYS_leavecritical();
         break;
     case 3:
-        cStreamInstance_SetPitch((cStreamInstance*)(*(void**)((char*)self + 0xC)), vol);
+        cStreamInstance_SetPitch((cStreamInstance*)(*(void**)&self->mRestartInfo), vol);
         break;
     }
 }
@@ -2217,72 +2217,72 @@ extern "C" void SNDseqvol(int h, int a);
  *
  * @param vol  the volume 0..127, or -1 to stop (On Tour Vol)
  */
-extern "C" void cBankMonitorInstance_VolUpdate(void* self, int vol)
+extern "C" void cBankMonitorInstance_VolUpdate(cBankMonitorInstance* self, int vol)
 {
     int orig = vol;
     switch (*(int*)self) {
     case 1: {
-        if (*(float*)((char*)self + 0x90) >= 0.0f)
-            vol = (int)(*(float*)((char*)self + 0x90) * (float)vol);
+        if (self->mVolMultiplier >= 0.0f)
+            vol = (int)(self->mVolMultiplier * (float)vol);
         if (vol > 127)
             vol = 127;
         int none = -1;
         if (vol <= none)
             vol = 0;
-        if (*(int*)((char*)self + 0xB4) >= 0) {
-            int volDiff = vol - *(int*)((char*)self + 0xB4);
+        if (self->mLastVolume >= 0) {
+            int volDiff = vol - self->mLastVolume;
             if (volDiff >= -4 && volDiff <= 4)
                 return;
         }
-        *(int*)((char*)self + 0xB4) = vol;
+        self->mLastVolume = vol;
         SNDSYS_entercritical();
         if (orig == none)
-            SNDstop(*(int*)((char*)self + 0x4));
+            SNDstop(self->mHandle);
         else
-            SNDvol(*(int*)((char*)self + 0x4), vol);
+            SNDvol(self->mHandle, vol);
         SNDSYS_leavecritical();
         break;
     }
     case 2: {
-        if (*(float*)((char*)self + 0x90) >= 0.0f)
-            vol = (int)(*(float*)((char*)self + 0x90) * (float)vol);
+        if (self->mVolMultiplier >= 0.0f)
+            vol = (int)(self->mVolMultiplier * (float)vol);
         if (vol > 127)
             vol = 127;
         int none = -1;
         if (vol <= none)
             vol = 0;
-        if (*(int*)((char*)self + 0xB4) >= 0) {
-            int volDiff = vol - *(int*)((char*)self + 0xB4);
+        if (self->mLastVolume >= 0) {
+            int volDiff = vol - self->mLastVolume;
             if (volDiff >= -4 && volDiff <= 4)
                 return;
         }
-        *(int*)((char*)self + 0xB4) = vol;
+        self->mLastVolume = vol;
         SNDSYS_entercritical();
         if (orig == none)
-            SNDseqstop(*(int*)((char*)self + 0x4));
+            SNDseqstop(self->mHandle);
         else
-            SNDseqvol(*(int*)((char*)self + 0x4), vol);
+            SNDseqvol(self->mHandle, vol);
         SNDSYS_leavecritical();
         break;
     }
     case 3: {
-        if (*(float*)((char*)self + 0x90) >= 0.0f)
-            vol = (int)(*(float*)((char*)self + 0x90) * (float)vol);
+        if (self->mVolMultiplier >= 0.0f)
+            vol = (int)(self->mVolMultiplier * (float)vol);
         if (vol > 127)
             vol = 127;
         int none = -1;
         if (vol <= none)
             vol = 0;
-        if (*(int*)((char*)self + 0xB4) >= 0) {
-            int volDiff = vol - *(int*)((char*)self + 0xB4);
+        if (self->mLastVolume >= 0) {
+            int volDiff = vol - self->mLastVolume;
             if (volDiff >= -4 && volDiff <= 4)
                 return;
         }
-        *(int*)((char*)self + 0xB4) = vol;
+        self->mLastVolume = vol;
         if (orig == none)
-            cStreamInstance_Purge(*(void**)((char*)self + 0xC));
+            cStreamInstance_Purge(*(void**)&self->mRestartInfo);
         else
-            cStreamInstance_SetBaseVolume(*(void**)((char*)self + 0xC), vol);
+            cStreamInstance_SetBaseVolume(*(void**)&self->mRestartInfo, vol);
         break;
     }
     }
@@ -2303,22 +2303,22 @@ extern "C" void SNDseqautovol(int h, int a, int b);
  * Does nothing when already stopping (+0x54). Otherwise clears +0x8, sets +0x54 and starts an automatic volume ramp
  * (0x19, -1) on the sample (SNDautovol) or sequence (SNDseqautovol).
  */
-extern "C" void cBankMonitorInstance_StopSound(void* self)
+extern "C" void cBankMonitorInstance_StopSound(cBankMonitorInstance* self)
 {
-    if (*(int*)((char*)self + 0x54) != 0) {
+    if (self->mFading != 0) {
         return;
     }
-    *(int*)((char*)self + 0x8) = 0;
-    *(int*)((char*)self + 0x54) = 1;
+    self->mActive = 0;
+    self->mFading = 1;
     switch (*(int*)self) {
     case 1:
         SNDSYS_entercritical();
-        SNDautovol(*(int*)((char*)self + 0x4), 25, -1);
+        SNDautovol(self->mHandle, 25, -1);
         SNDSYS_leavecritical();
         break;
     case 2:
         SNDSYS_entercritical();
-        SNDseqautovol(*(int*)((char*)self + 0x4), 25, -1);
+        SNDseqautovol(self->mHandle, 25, -1);
         SNDSYS_leavecritical();
         break;
     }
@@ -2458,7 +2458,7 @@ extern "C" void cBankMonitorInstance_RestartSound_impl(void* self, sSndPlayOpts_
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_CheckActive);
 #ifdef SKIP_ASM
-extern "C" void cBankMonitorInstance_StopSound(void*);
+extern "C" void cBankMonitorInstance_StopSound(cBankMonitorInstance*);
 extern "C" void cBankMonitorInstance_RestartSound(void*);
 
 /**
@@ -2470,13 +2470,13 @@ extern "C" void cBankMonitorInstance_RestartSound(void*);
  * @param radius  the current distance (On Tour Radius)
  * @return nonzero while the sound should play
  */
-extern "C" int cBankMonitorInstance_CheckActive(void* self, float radius)
+extern "C" int cBankMonitorInstance_CheckActive(cBankMonitorInstance* self, float radius)
 {
-    float th = *(float*)((char*)self + 0x8C);
+    float th = self->mRadius;
     if (th == 0.0f) {
         return 1;
     }
-    if (*(int*)((char*)self + 0x8) != 0) {
+    if (self->mActive != 0) {
         if (th < radius) {
             cBankMonitorInstance_StopSound(self);
             return 0;
@@ -2516,10 +2516,10 @@ extern "C" void SNDSYS_entercritical();
 extern "C" void SNDSYS_leavecritical();
 // PORT: the unit declares SNDSTRM_requeststatus(int, int); its second argument is a status buffer here.
 int SNDSTRM_requeststatus_st(int h, int* st) __asm__("SNDSTRM_requeststatus");
-extern "C" int cBankMonitorInstance_DonePlaying(void* self);
-extern "C" void cBankMonitorInstance_PosUpdate(void* self, int pos, int a2);
-extern "C" void cBankMonitorInstance_PitchUpdate(void* self, int a1);
-extern "C" void cBankMonitorInstance_VolUpdate(void* self, int a1);
+extern "C" int cBankMonitorInstance_DonePlaying(cBankMonitorInstance* self);
+extern "C" void cBankMonitorInstance_PosUpdate(cBankMonitorInstance* self, int pos, int a2);
+extern "C" void cBankMonitorInstance_PitchUpdate(cBankMonitorInstance* self, int a1);
+extern "C" void cBankMonitorInstance_VolUpdate(cBankMonitorInstance* self, int a1);
 // PORT: these callees are declared with fewer parameters elsewhere in the unit; the caller passes the extra registers.
 int cBankMonitorInstance_Dist2Vol_4(void* self, int vol, float dist, float range) __asm__("cBankMonitorInstance_Dist2Vol__FPvi");
 float cBankMonitorInstance_Doppler_3(void* self, float a, float b) __asm__("cBankMonitorInstance_Doppler");
@@ -2553,27 +2553,26 @@ static inline float Sqrt_C868(float x)
  * @param bm     the bank monitor (On Tour Monitor)
  * @param time   elapsed time (On Tour Time); reused for the Doppler factor
  */
-extern "C" void cBankMonitorInstance_Update3D(void* voice, cBankMonitor* bm, float time)
+extern "C" void cBankMonitorInstance_Update3D(cBankMonitorInstance* voice, cBankMonitor* bm, float time)
 {
-    char* inst = (char*)voice;
-    if (*(int*)inst == 0) {
+    if (*(int*)voice == 0) {
         return;
     }
     int st[4];
     sPos_C868 pos;
     int vol = 0;
-    if (*(int*)inst == 3) {
+    if (*(int*)voice == 3) {
         SNDSYS_entercritical();
-        int result = SNDSTRM_requeststatus_st(*(int*)(inst + 0x4), st);
+        int result = SNDSTRM_requeststatus_st(voice->mHandle, st);
         SNDSYS_leavecritical();
         if (result <= 0 && st[0] != 2) {
             return;
         }
     }
-    if (bm->mPositionalEnable != 0 && *(int*)(inst + 0x68) != 0) {
+    if (bm->mPositionalEnable != 0 && (int)voice->mPosition != 0) {
         float dist = Sqrt_C868(((cStreamBM_C868*)bm)->v06(voice, &pos));
-        if (*(int*)(inst + 0x94) != 0 || cBankMonitorInstance_CheckActive_3(voice, bm, dist) != 0) {
-            float prevDist = *(float*)(inst + 0x5C);
+        if (voice->mExternalVol != 0 || cBankMonitorInstance_CheckActive_3(voice, bm, dist) != 0) {
+            float prevDist = voice->mLastDist;
             if (prevDist != -1.0f && bm->mDopplerEnable != 0) {
                 time = cBankMonitorInstance_Doppler_3(voice, prevDist - dist, time);
             } else {
@@ -2581,16 +2580,16 @@ extern "C" void cBankMonitorInstance_Update3D(void* voice, cBankMonitor* bm, flo
             }
             cBankMonitorInstance_PosUpdate(voice, pos.pos, pos.pos2);
             cBankMonitorInstance_PitchUpdate(voice, (int)(time * 4096.0f));
-            if (*(int*)(inst + 0x94) != 0) {
-                vol = *(int*)(inst + 0x64);
+            if (voice->mExternalVol != 0) {
+                vol = voice->mBaseVol;
             } else {
-                float range = *(float*)(inst + 0x88);
+                float range = voice->mVanish;
                 if (range == 0.0f) {
-                    vol = cBankMonitorInstance_Dist2Vol_4(voice, *(int*)(inst + 0x64), dist, 30.0f);
+                    vol = cBankMonitorInstance_Dist2Vol_4(voice, voice->mBaseVol, dist, 30.0f);
                 } else {
-                    vol = cBankMonitorInstance_Dist2Vol_4(voice, *(int*)(inst + 0x64), dist, range);
+                    vol = cBankMonitorInstance_Dist2Vol_4(voice, voice->mBaseVol, dist, range);
                 }
-                int maxVol = *(int*)(inst + 0x98);
+                int maxVol = voice->mMapToMaxVol;
                 if (maxVol != 0x7F) {
                     vol = vol * 0x7F / maxVol;
                     if (vol > 0x7F) {
@@ -2608,12 +2607,12 @@ extern "C" void cBankMonitorInstance_Update3D(void* voice, cBankMonitor* bm, flo
         if (vol < 0) {
             vol = 0;
         }
-        *(float*)(inst + 0x5C) = dist;
+        voice->mLastDist = dist;
     } else {
-        vol = *(int*)(inst + 0x64);
+        vol = voice->mBaseVol;
     }
-    if (*(int*)(inst + 0x54) == 0) {
-        float* volControl = *(float**)(inst + 0x60);
+    if (voice->mFading == 0) {
+        float* volControl = voice->mVolControl;
         if (volControl != 0) {
             vol = (int)((float)vol * *volControl);
         }
@@ -2621,9 +2620,9 @@ extern "C" void cBankMonitorInstance_Update3D(void* voice, cBankMonitor* bm, flo
         return;
     }
     if (cBankMonitorInstance_DonePlaying(voice) != 0) {
-        *(int*)(inst + 0x8) = 0;
-        *(int*)(inst + 0x54) = 0;
-        *(int*)(inst + 0x4) = -1;
+        voice->mActive = 0;
+        voice->mFading = 0;
+        voice->mHandle = -1;
     }
 }
 #endif
@@ -2631,9 +2630,9 @@ extern "C" void cBankMonitorInstance_Update3D(void* voice, cBankMonitor* bm, flo
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_Pause);
 #ifdef SKIP_ASM
-extern "C" int cBankMonitorInstance_IsFree(void* self);
-extern "C" void cBankMonitorInstance_PitchUpdate(void* self, int a1);
-extern "C" void cBankMonitorInstance_VolUpdate(void* self, int a1);
+extern "C" int cBankMonitorInstance_IsFree(cBankMonitorInstance* self);
+extern "C" void cBankMonitorInstance_PitchUpdate(cBankMonitorInstance* self, int a1);
+extern "C" void cBankMonitorInstance_VolUpdate(cBankMonitorInstance* self, int a1);
 extern "C" void SNDseqpause(int h);
 
 /**
@@ -2642,13 +2641,13 @@ extern "C" void SNDseqpause(int h);
  * For a non-free instance that is not stopping: sets pitch and volume to 0 and, for a sequence (type 2), pauses it with
  * SNDseqpause.
  */
-extern "C" void cBankMonitorInstance_Pause(void* self)
+extern "C" void cBankMonitorInstance_Pause(cBankMonitorInstance* self)
 {
-    if (cBankMonitorInstance_IsFree(self) == 0 && *(int*)((char*)self + 0x54) == 0) {
+    if (cBankMonitorInstance_IsFree(self) == 0 && self->mFading == 0) {
         cBankMonitorInstance_PitchUpdate(self, 0);
         cBankMonitorInstance_VolUpdate(self, 0);
-        if (*(int*)((char*)self + 0x0) == 2) {
-            SNDseqpause(*(int*)((char*)self + 0x4));
+        if (self->mMonitorType == 2) {
+            SNDseqpause(self->mHandle);
         }
     }
 }
@@ -2657,8 +2656,8 @@ extern "C" void cBankMonitorInstance_Pause(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/streamsys", cBankMonitorInstance_Resume);
 #ifdef SKIP_ASM
-extern "C" int cBankMonitorInstance_IsFree(void* self);
-extern "C" void cBankMonitorInstance_PitchUpdate(void* self, int a1);
+extern "C" int cBankMonitorInstance_IsFree(cBankMonitorInstance* self);
+extern "C" void cBankMonitorInstance_PitchUpdate(cBankMonitorInstance* self, int a1);
 extern "C" void SNDseqresume(int h);
 
 /**
@@ -2669,12 +2668,12 @@ extern "C" void SNDseqresume(int h);
  * cBankMonitorInstance_Pause set to 0 is not restored here. cBankMonitor_BANKMONITOR_Resume calls it for all 64
  * instances.
  */
-extern "C" void cBankMonitorInstance_Resume(void* self)
+extern "C" void cBankMonitorInstance_Resume(cBankMonitorInstance* self)
 {
     if (cBankMonitorInstance_IsFree(self) == 0) {
         cBankMonitorInstance_PitchUpdate(self, 0x1000);
         if (*(int*)self == 2) {
-            SNDseqresume(*(int*)((char*)self + 0x4));
+            SNDseqresume(self->mHandle);
         }
     }
 }
@@ -2704,17 +2703,17 @@ void cStreamInstance_SetBaseVolume(void* self, int val);
  * @param resetMonitor  nonzero to release the instance afterwards (On Tour ResetMonitor)
  * @param duration  the fade time in seconds (On Tour Duration)
  */
-extern "C" void cBankMonitorInstance_Fade(void* self, int n, int resetMonitor, float duration)
+extern "C" void cBankMonitorInstance_Fade(cBankMonitorInstance* self, int n, int resetMonitor, float duration)
 {
     if (resetMonitor) {
-        *(int*)((char*)self + 0x58) = 1;
-        *(int*)((char*)self + 0x9C) = 1;
+        self->mCloseStateLocked = 1;
+        self->mCloseOnEnd = 1;
     }
-    if (*(int*)((char*)self + 0x54) != 0) {
+    if (self->mFading != 0) {
         return;
     }
     if (n == -1) {
-        *(int*)((char*)self + 0x54) = 1;
+        self->mFading = 1;
     } else {
         if (n > 127) {
             n = 127;
@@ -2727,26 +2726,26 @@ extern "C" void cBankMonitorInstance_Fade(void* self, int n, int resetMonitor, f
     case 1:
         SNDSYS_entercritical();
         if (duration != 0.0f) {
-            SNDautovol(*(int*)((char*)self + 0x4), (int)(duration * 100.0f), n);
+            SNDautovol(self->mHandle, (int)(duration * 100.0f), n);
         } else {
-            SNDvol(*(int*)((char*)self + 0x4), n);
+            SNDvol(self->mHandle, n);
         }
         SNDSYS_leavecritical();
         break;
     case 2:
         SNDSYS_entercritical();
         if (duration != 0.0f) {
-            SNDseqautovol(*(int*)((char*)self + 0x4), (int)(duration * 100.0f), n);
+            SNDseqautovol(self->mHandle, (int)(duration * 100.0f), n);
         } else {
-            SNDseqvol(*(int*)((char*)self + 0x4), n);
+            SNDseqvol(self->mHandle, n);
         }
         SNDSYS_leavecritical();
         break;
     case 3:
-        if (*(int*)((char*)self + 0x54) != 0) {
-            cStreamInstance_Purge(*(void**)((char*)self + 0xC));
+        if (self->mFading != 0) {
+            cStreamInstance_Purge(*(void**)&self->mRestartInfo);
         } else {
-            cStreamInstance_SetBaseVolume(*(void**)((char*)self + 0xC), n);
+            cStreamInstance_SetBaseVolume(*(void**)&self->mRestartInfo, n);
         }
         break;
     }

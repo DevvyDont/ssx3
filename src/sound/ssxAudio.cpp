@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/asyncsys.h"
 #include "sound/bankmonitor.h"
 #include "worldpainter/worldpainterquery.h"
 #include "ai/rider.h"
@@ -1324,7 +1325,7 @@ extern "C" void cSSXAudio_InGameDeInit(cSSXAudio* self)
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_InGamePurge);
 #ifdef SKIP_ASM
 extern "C" void func_002A6F38(void*);
-extern "C" void cAsyncSys_DoCancel(void*, int);
+extern "C" void cAsyncSys_DoCancel(cAsyncSys*, int);
 extern "C" void cBankManager_BANK_UnLoad(void*, int);
 extern "C" void cBankManager_BANK_DeallocMem(void*, int);
 extern "C" void cAsyncSys_ASYNCSYS_DeInit(void*);
@@ -1340,7 +1341,7 @@ extern "C" void cSSXAudio_InGamePurge(cSSXAudio* self)
 {
     int i;
     func_002A6F38(self);
-    cAsyncSys_DoCancel(*(void**)self->MusicSys.mpVStreamSys, 1);
+    cAsyncSys_DoCancel((cAsyncSys*)(*(void**)self->MusicSys.mpVStreamSys), 1);
     for (i = 0; i < 17; i++) {
         if (i != 13) {
             cBankManager_BANK_UnLoad(*(void**)self->MusicSys.mpVStreamSys, i);
@@ -4023,7 +4024,7 @@ struct sAsync289DF0 {
  *
  * @param flush  nonzero to cancel every queued request too
  */
-extern "C" void cAsyncSys_DoCancel(void* self, int flush)
+extern "C" void cAsyncSys_DoCancel(cAsyncSys* self, int flush)
 {
     sAsync289DF0* asyncSys = (sAsync289DF0*)self;
     int id = -1;
@@ -4115,31 +4116,31 @@ extern void* D_004A3610;
  *
  * @return this
  */
-extern "C" void* cAsyncSys_cAsyncSys(void* self)
+extern "C" void* cAsyncSys_cAsyncSys(cAsyncSys* self)
 {
-    *(int*)((char*)self + 0x18C) = 6;
-    *(int*)((char*)self + 0x4) = 0;
-    *(int*)((char*)self + 0x8) = 0;
-    *(int*)((char*)self + 0x194) = 0;
-    *(int*)((char*)self + 0x198) = 0;
-    *(void**)((char*)self + 0x1D4) = cAsyncSys_vtbl;
-    *(void**)((char*)self + 0x190) = operator_new_tag(0x18, str_CircFIFOBuff, 0, 0);
-    *(int*)((char*)self + 0x19C) = 6;
-    *(int*)((char*)self + 0x1A4) = 0;
-    *(int*)((char*)self + 0x1A8) = 0;
-    *(void**)((char*)self + 0x1A0) = operator_new_tag(0x18, str_CircFIFOBuff, 0, 0);
-    *(int*)((char*)self + 0x1AC) = 6;
-    *(int*)((char*)self + 0x1B4) = 0;
-    *(int*)((char*)self + 0x1B8) = 0;
-    *(void**)((char*)self + 0x1B0) = operator_new_tag(0x18, str_CircFIFOBuff, 0, 0);
-    *(int*)((char*)self + 0x1BC) = 6;
-    *(int*)((char*)self + 0x1C4) = 0;
-    *(int*)((char*)self + 0x1C8) = 0;
-    *(void**)((char*)self + 0x1C0) = operator_new_tag(0x18, str_CircFIFOBuff, 0, 0);
-    *(int*)((char*)self + 0x1CC) = 0;
-    *(int*)((char*)self + 0x1D0) = 0;
-    D_004A3610 = self;
-    return self;
+    self->mUserHandle.ArraySize = 6;
+    self->mBusy = 0;
+    self->mFileIndex = 0;
+    self->mUserHandle.Head = 0;
+    self->mUserHandle.Tail = 0;
+    self->mVtbl = (void**)cAsyncSys_vtbl;
+    self->mUserHandle.Array = (int*)operator_new_tag(0x18, str_CircFIFOBuff, 0, 0);
+    self->mFilenameIndex.ArraySize = 6;
+    self->mFilenameIndex.Head = 0;
+    self->mFilenameIndex.Tail = 0;
+    self->mFilenameIndex.Array = (int*)operator_new_tag(0x18, str_CircFIFOBuff, 0, 0);
+    self->mMemType.ArraySize = 6;
+    self->mMemType.Head = 0;
+    self->mMemType.Tail = 0;
+    self->mMemType.Array = (int*)operator_new_tag(0x18, str_CircFIFOBuff, 0, 0);
+    self->mMainMemFlags.ArraySize = 6;
+    self->mMainMemFlags.Head = 0;
+    self->mMainMemFlags.Tail = 0;
+    self->mMainMemFlags.Array = (int*)operator_new_tag(0x18, str_CircFIFOBuff, 0, 0);
+    self->mpBuffer = 0;
+    self->mBufferSize = 0;
+    D_004A3610 = ((void*)self);
+    return ((void*)self);
 }
 #endif
 
@@ -4173,22 +4174,22 @@ struct sAudioSys_A148 {
  *
  * @param flags  g++ 2.95 in-charge flags; bit 0 deletes the object
  */
-extern "C" void cAsyncSys__cAsyncSys(sAudioSys_A148* self, int flags)
+extern "C" void cAsyncSys__cAsyncSys(cAsyncSys* self, int flags)
 {
-    self->vtbl = cAsyncSys_vtbl;
-    cAsyncSys_ASYNCSYS_DeInit(self);
+    self->mVtbl = (void**)cAsyncSys_vtbl;
+    cAsyncSys_ASYNCSYS_DeInit(((sAudioSys_A148*)self));
     D_004A3610 = 0;
-    if (self->buf1C0 != 0) {
-        cMemMan_free(self->buf1C0);
+    if (self->mMainMemFlags.Array != 0) {
+        cMemMan_free(self->mMainMemFlags.Array);
     }
-    if (self->buf1B0 != 0) {
-        cMemMan_free(self->buf1B0);
+    if (self->mMemType.Array != 0) {
+        cMemMan_free(self->mMemType.Array);
     }
-    if (self->buf1A0 != 0) {
-        cMemMan_free(self->buf1A0);
+    if (self->mFilenameIndex.Array != 0) {
+        cMemMan_free(self->mFilenameIndex.Array);
     }
-    if (self->buf190 != 0) {
-        cMemMan_free(self->buf190);
+    if (self->mUserHandle.Array != 0) {
+        cMemMan_free(self->mUserHandle.Array);
     }
     if (flags & 1) {
         operator_delete((int*)self);

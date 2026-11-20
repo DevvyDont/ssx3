@@ -28,6 +28,7 @@
 //       mAudioMode. On Tour's bools are 1 byte, retail's are words. cMusicSys/cSpeechSys internals are left raw here.
 
 #include "layout.h"
+#include "sound/asyncsys.h" // cCircBuffer
 #include "bx/math3d.h"
 #include "sound/musicsys.h"
 #include "sound/speechsys.h"
@@ -37,14 +38,6 @@
 struct cBankManager;
 struct cStreamSys;
 struct cSoundSys;
-
-// cCircBuffer (On Tour class, 0x10): a FIFO of ints.
-struct cCircBuffer {
-    int ArraySize; // 0x0 [O]; [R] cSSXAudio ctor stores 200 into mPlayHistory's
-    int* Array;    // 0x4 [O]; [R] operator new(ArraySize * 4, "CircFIFOBuff")
-    int Head;      // 0x8 [O]
-    int Tail;      // 0xC [O]
-};
 
 // On Tour's tAttachSoundStruct (0x30), a sound attached to a world instance mesh.
 struct tAttachSoundStruct {
@@ -89,7 +82,6 @@ struct tAudioMix {
     float time;             // 0x24 [O]
 };
 
-CHECK_SIZE(cCircBuffer, 0x10);
 CHECK_OFFSET(tAttachSoundStruct, pos, 0x10);
 CHECK_OFFSET(tAttachSoundStruct, patch, 0x20);
 CHECK_OFFSET(tAttachSoundStruct, handle, 0x24);

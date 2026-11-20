@@ -1,4 +1,5 @@
 #include "common.h"
+#include "movie/movieplayer.h"
 #include "render/ps2graphicsman.h"
 #include "online/commchannel.h"
 
@@ -1848,17 +1849,17 @@ INCLUDE_ASM("mem/memstd", tMoviePlayOptions_SetDefaults);
  *
  * Callers (cVidEngine_ReadyVideo, cRealFE's movie start, the rewards video player) fill it in before cMoviePlayer_init.
  */
-extern "C" void tMoviePlayOptions_SetDefaults(void* self)
+extern "C" void tMoviePlayOptions_SetDefaults(cMoviePlayer* self)
 {
-    *(float*)((char*)self + 0x20) = 1.0f;
-    *(int*)((char*)self + 0x1c) = 31;
-    *(int*)((char*)self + 0x0) = 0;
-    *(int*)((char*)self + 0x4) = 0;
-    *(int*)((char*)self + 0xc) = 0;
-    *(int*)((char*)self + 0x8) = 0;
-    *(int*)((char*)self + 0x10) = 0;
-    *(int*)((char*)self + 0x14) = 0;
-    *(int*)((char*)self + 0x18) = 0;
+    *(float*)&self->m_PlayOp.bFullScreen = 1.0f;
+    self->m_PlayOp.bSoundOn = 31;
+    self->mbMovieFinished = 0;
+    self->mbReDraw = 0;
+    self->mpCurrFrame = 0;
+    self->mbPaused = 0;
+    *(int*)&self->m_fSpeed = 0;
+    *(int*)&self->m_PlayOp = 0;
+    self->m_PlayOp.sAudioFileName = 0;
 }
 #endif
 
@@ -1875,17 +1876,17 @@ extern "C" void cMoviePlayer_SetSSXREALDefaults();
  *
  * @return @p self
  */
-extern "C" void* cMoviePlayer_cMoviePlayer(void* self)
+extern "C" void* cMoviePlayer_cMoviePlayer(cMoviePlayer* self)
 {
     cMoviePlayer_SetSSXREALDefaults();
-    tMoviePlayOptions_SetDefaults((char*)self + 0x14);
-    *(float*)((char*)self + 0x10) = *(float*)((char*)self + 0x34);
-    *(int*)((char*)self + 0x38) = 0;
-    *(int*)((char*)self + 0x3C) = 0;
-    *(int*)((char*)self + 0xC) = 0;
-    *(int*)((char*)self + 0x40) = 0;
-    *(int*)((char*)self + 0x8) = 0;
-    return self;
+    tMoviePlayOptions_SetDefaults((cMoviePlayer*)((char*)self + 0x14));
+    self->m_fSpeed = self->m_PlayOp.fPlaySpeed;
+    self->m_pPlayer = 0;
+    self->m_pVd = 0;
+    self->mpCurrFrame = 0;
+    self->mbNewFrame = 0;
+    self->mbPaused = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -1893,14 +1894,14 @@ extern "C" void* cMoviePlayer_cMoviePlayer(void* self)
 INCLUDE_ASM("mem/memstd", cMoviePlayer__cMoviePlayer);
 #ifdef SKIP_ASM
 void operator_delete(int*);
-extern "C" void cMoviePlayer_purge(void* self);
+extern "C" void cMoviePlayer_purge(cMoviePlayer* self);
 
 /**
  * Destroys a movie player: releases everything (cMoviePlayer_purge) and frees the object when @p flags bit 0 is set.
  *
  * @param flags  bit 0 frees the memory (callers pass 3)
  */
-extern "C" void cMoviePlayer__cMoviePlayer(void* self, int flags)
+extern "C" void cMoviePlayer__cMoviePlayer(cMoviePlayer* self, int flags)
 {
     cMoviePlayer_purge(self);
     if (flags & 1) {
@@ -1925,11 +1926,11 @@ extern "C" void cMoviePlayer_init(void* self, void* info);
  *
  * @param videoFile  the video file name
  */
-extern "C" void cMoviePlayer_init1(void* self, int videoFile)
+extern "C" void cMoviePlayer_init1(cMoviePlayer* self, int videoFile)
 {
     cMoviePlayer_init1_sInfo info;
     cMoviePlayer_purge(self);
-    tMoviePlayOptions_SetDefaults(&info);
+    tMoviePlayOptions_SetDefaults((cMoviePlayer*)(&info));
     info.f0 = videoFile;
     cMoviePlayer_init(self, &info);
 }
@@ -1977,7 +1978,7 @@ extern "C" int cMoviePlayer_init_impl(void* self, sMemCfg_2534A8* cfg) __asm__("
  */
 extern "C" int cMoviePlayer_init_impl(void* self, sMemCfg_2534A8* cfg)
 {
-    cMoviePlayer_purge(self);
+    cMoviePlayer_purge((cMoviePlayer*)self);
     int soundOff = 1;
     *(sMemCfg_2534A8*)((char*)self + 0x14) = *cfg;
     int optionSet = 0;
@@ -2057,7 +2058,7 @@ struct sStream002535F8 {
  * driver is deleted (vtable slot 1, flags 3) and the active-player count D_004A2E9C decremented, the decoder is deleted
  * (func_003AE300, flags 3), and the finished, redraw, paused, frame and new-frame words are cleared.
  */
-extern "C" void cMoviePlayer_purge(void* self)
+extern "C" void cMoviePlayer_purge(cMoviePlayer* self)
 {
     sStream002535F8* moviePlayer = (sStream002535F8*)self;
     if (moviePlayer->f38 != 0 && moviePlayer->f3C != 0) {
@@ -2104,17 +2105,16 @@ int func_003AE958_i(void*) __asm__("func_003AE958__FPv");
  *
  * Clears the finished (+0x0) and redraw (+0x4) words first.
  */
-extern "C" void cMoviePlayer_startPlay(void* self)
+extern "C" void cMoviePlayer_startPlay(cMoviePlayer* self)
 {
-    char* moviePlayer = (char*)self;
-    *(int*)(moviePlayer + 0x0) = 0;
-    *(int*)(moviePlayer + 0x4) = 0;
-    *(int*)(moviePlayer + 0xC) = 0;
-    *(int*)(moviePlayer + 0xC) = func_003AE450(*(void**)(moviePlayer + 0x38), 1, 33);
-    *(int*)(moviePlayer + 0x40) = 1;
-    func_003AE938(*(void**)(moviePlayer + 0x38));
-    *(void**)(moviePlayer + 0x3C) = SSX_VD_create(*(void**)(*(char**)(moviePlayer + 0x38) + 0x64), *(int*)(moviePlayer + 0xC), (int)cGraphicsMan_TheGraphicsMan, *(int*)(moviePlayer + 0x30));
-    func_003AE958_i(*(void**)(moviePlayer + 0x38));
+    self->mbMovieFinished = 0;
+    self->mbReDraw = 0;
+    self->mpCurrFrame = 0;
+    self->mpCurrFrame = (void*)func_003AE450(self->m_pPlayer, 1, 33);
+    self->mbNewFrame = 1;
+    func_003AE938(self->m_pPlayer);
+    self->m_pVd = SSX_VD_create(*(void**)((char*)self->m_pPlayer + 0x64), (int)self->mpCurrFrame, (int)cGraphicsMan_TheGraphicsMan, self->m_PlayOp.iDrawLayer);
+    func_003AE958_i(self->m_pPlayer);
     D_004A2E9C++;
 }
 #endif
@@ -2155,11 +2155,11 @@ struct sWorld_253748 {
  * and fetches the next frame for the decoder's time (+0x48, func_003AE6C8). Without a frame it asks func_003AE860
  * whether the movie has finished. Clears the new-frame flag (+0x40) at the end.
  */
-extern "C" void cMoviePlayer_syncPlay(void* self)
+extern "C" void cMoviePlayer_syncPlay(cMoviePlayer* self)
 {
     sStream002535F8* moviePlayer = (sStream002535F8*)self;
     if (moviePlayer->f38 != 0) {
-        cMoviePlayer_startPlay(moviePlayer);
+        cMoviePlayer_startPlay((cMoviePlayer*)moviePlayer);
         do {
             if (moviePlayer->f4 != 0) {
                 char* videoDriver = (char*)moviePlayer->f3C;
@@ -2196,16 +2196,16 @@ extern "C" void cMoviePlayer_syncPlay(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("mem/memstd", cMoviePlayer_asyncPlay);
 #ifdef SKIP_ASM
-extern "C" void cMoviePlayer_startPlay(void* self);
+extern "C" void cMoviePlayer_startPlay(cMoviePlayer* self);
 
 /**
  * Starts asynchronous playback: when a decoder (+0x38) exists, starts it (cMoviePlayer_startPlay).
  *
  * @return 1 when started, 0 without a decoder
  */
-extern "C" int cMoviePlayer_asyncPlay(void* self)
+extern "C" int cMoviePlayer_asyncPlay(cMoviePlayer* self)
 {
-    if (*(void**)((char*)self + 0x38) == 0) {
+    if (self->m_pPlayer == 0) {
         return 0;
     }
     cMoviePlayer_startPlay(self);
@@ -2236,22 +2236,22 @@ public:
  *
  * @param force  nonzero to redraw the previous image
  */
-extern "C" void cMoviePlayer_asyncRender(void* self, int force)
+extern "C" void cMoviePlayer_asyncRender(cMoviePlayer* self, int force)
 {
-    if (*(void**)((char*)self + 0x38) == 0) {
+    if (self->m_pPlayer == 0) {
         return;
     }
-    cMemObj_253890* obj = *(cMemObj_253890**)((char*)self + 0x3C);
+    cMemObj_253890* obj = (cMemObj_253890*)self->m_pVd;
     if (obj == 0) {
         return;
     }
-    if (force != 0 || *(int*)((char*)self + 0x8) != 0
-        || (*(int*)((char*)self + 0x40) == 0 && *(int*)((char*)self + 0x4) != 0)
-        || *(int*)((char*)self + 0x0) != 0) {
-        (*(cMemObj_253890**)((char*)self + 0x3C))->v05();
+    if (force != 0 || self->mbPaused != 0
+        || (self->mbNewFrame == 0 && self->mbReDraw != 0)
+        || self->mbMovieFinished != 0) {
+        ((cMemObj_253890*)self->m_pVd)->v05();
     } else {
-        obj->v04(*(int*)((char*)self + 0xC));
-        *(int*)((char*)self + 0x40) = 0;
+        obj->v04((int)self->mpCurrFrame);
+        self->mbNewFrame = 0;
     }
 }
 #endif
@@ -2283,21 +2283,21 @@ public:
  * +0x4. When there is no frame and the movie is not finished (+0x0), clears the waiting flag and stores
  * func_003AE860's answer (audio finished) in +0x0.
  */
-extern "C" void cMoviePlayer_asyncUpdate(void* self)
+extern "C" void cMoviePlayer_asyncUpdate(cMoviePlayer* self)
 {
-    if (*(int*)((char*)self + 0x40) == 0 && func_003AE780(*(void**)((char*)self + 0x38)) != 0) {
-        (*(cMemObj_253938**)((char*)self + 0x3C))->v06();
-        void* decoder = *(void**)((char*)self + 0x38);
-        *(int*)((char*)self + 0xC) = func_003AE6C8(decoder, *(float*)((char*)decoder + 0x48));
-        *(int*)((char*)self + 0x40) = 1;
-        *(int*)((char*)self + 0x4) = 0;
+    if (self->mbNewFrame == 0 && func_003AE780(self->m_pPlayer) != 0) {
+        ((cMemObj_253938*)self->m_pVd)->v06();
+        void* decoder = self->m_pPlayer;
+        self->mpCurrFrame = (void*)func_003AE6C8(decoder, *(float*)((char*)decoder + 0x48));
+        self->mbNewFrame = 1;
+        self->mbReDraw = 0;
     } else {
-        *(int*)((char*)self + 0x4) = 1;
+        self->mbReDraw = 1;
     }
-    if (*(int*)((char*)self + 0xC) == 0 && *(int*)((char*)self + 0x0) == 0) {
-        *(int*)((char*)self + 0x40) = 0;
-        *(int*)((char*)self + 0x4) = 1;
-        *(int*)((char*)self + 0x0) = func_003AE860(*(void**)((char*)self + 0x38));
+    if ((int)self->mpCurrFrame == 0 && self->mbMovieFinished == 0) {
+        self->mbNewFrame = 0;
+        self->mbReDraw = 1;
+        self->mbMovieFinished = func_003AE860(self->m_pPlayer);
     }
 }
 #endif
@@ -2311,13 +2311,13 @@ int func_003AE938(void*);
  * Pauses the movie: when a decoder (+0x38) and a driver (+0x3C) exist and it is neither finished (+0x0) nor already
  * paused (+0x8), pauses the decoder (func_003AE938) and sets the paused word.
  */
-extern "C" void cMoviePlayer_asyncPause(void* self)
+extern "C" void cMoviePlayer_asyncPause(cMoviePlayer* self)
 {
-    void* handle = *(void**)((char*)self + 0x38);
-    if (handle != 0 && *(int*)((char*)self + 0x3C) != 0 && *(int*)((char*)self + 0x0) == 0
-        && *(int*)((char*)self + 0x8) == 0) {
+    void* handle = self->m_pPlayer;
+    if (handle != 0 && (int)self->m_pVd != 0 && self->mbMovieFinished == 0
+        && self->mbPaused == 0) {
         func_003AE938(handle);
-        *(int*)((char*)self + 0x8) = 1;
+        self->mbPaused = 1;
     }
 }
 #endif
@@ -2331,13 +2331,13 @@ void func_003AE958(void*);
  * Resumes a paused movie: when a decoder (+0x38) and a driver (+0x3C) exist, it has not finished (+0x0) and it is
  * paused (+0x8), resumes the decoder (func_003AE958) and clears the paused word.
  */
-extern "C" void cMoviePlayer_asyncResume(void* self)
+extern "C" void cMoviePlayer_asyncResume(cMoviePlayer* self)
 {
-    void* handle = *(void**)((char*)self + 0x38);
-    if (handle != 0 && *(int*)((char*)self + 0x3C) != 0 && *(int*)((char*)self + 0x0) == 0
-        && *(int*)((char*)self + 0x8) != 0) {
+    void* handle = self->m_pPlayer;
+    if (handle != 0 && (int)self->m_pVd != 0 && self->mbMovieFinished == 0
+        && self->mbPaused != 0) {
         func_003AE958(handle);
-        *(int*)((char*)self + 0x8) = 0;
+        self->mbPaused = 0;
     }
 }
 #endif

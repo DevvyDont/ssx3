@@ -1,15 +1,12 @@
 #include "common.h"
+#include "sound/bankmanager.h"
+#include "sound/asyncsys.h"
 #include "sound/ssxaudio.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
 void* operator_new(unsigned int size);
 
-struct cAsyncSys {
-    char pad_0x00[0x1CC];
-    void* field_0x1CC;
-    int field_0x1D0;
-};
 
 //100%
 INCLUDE_ASM("sound/asyncsys", cAsyncSys_ASYNCSYS_Init__FP9cAsyncSysUi);
@@ -31,8 +28,8 @@ void cAsyncSys_ASYNCSYS_Init(cAsyncSys* self, unsigned int x, int flags) __asm__
 void cAsyncSys_ASYNCSYS_Init(cAsyncSys* self, unsigned int x, int flags)
 {
     if (x != 0) {
-        self->field_0x1D0 = x;
-        self->field_0x1CC = operator_new_tag(x, str_AsyncSysBuffer, flags, 0);
+        self->mBufferSize = x;
+        (*(void**)&self->mpBuffer) = operator_new_tag(x, str_AsyncSysBuffer, flags, 0);
     }
 }
 #endif
@@ -53,14 +50,14 @@ void cMemMan_free(void* p);
 extern "C" void cAsyncSys_ASYNCSYS_DeInit(cAsyncSys* self)
 {
     cAsyncSys_DoCancel(self, 1);
-    while (*(int*)((char*)self + 4) != 0) {
+    while (self->mBusy != 0) {
         TIMER_waitticks(2);
         cAsyncSys_DoCancel(self, 1);
     }
-    if (self->field_0x1CC != 0) {
-        cMemMan_free(self->field_0x1CC);
-        self->field_0x1CC = 0;
-        self->field_0x1D0 = 0;
+    if (((void*)self->mpBuffer) != 0) {
+        cMemMan_free(((void*)self->mpBuffer));
+        (*(void**)&self->mpBuffer) = 0;
+        self->mBufferSize = 0;
     }
 }
 #endif
@@ -122,7 +119,7 @@ struct sAsync_A298 {
  *
  * The queues are only peeked here; cAsyncSys_ASYNCSYS_Update pops them when the load has ended.
  */
-extern "C" void cAsyncSys_ASYNCSYS_StartLoad(void* self)
+extern "C" void cAsyncSys_ASYNCSYS_StartLoad(cAsyncSys* self)
 {
     sAsync_A298* asyncSys = (sAsync_A298*)self;
     if (asyncSys->busy != 0) {
@@ -225,7 +222,7 @@ extern "C" void cAsyncSys_ASYNCSYS_StartLoad(void* self)
 INCLUDE_ASM("sound/asyncsys", cAsyncSys_ASYNCSYS_QueueLoad);
 #ifdef SKIP_ASM
 extern "C" char* strcpy(char* dst, const char* src);
-extern "C" void cAsyncSys_ASYNCSYS_StartLoad(void* self);
+extern "C" void cAsyncSys_ASYNCSYS_StartLoad(cAsyncSys* self);
 
 struct sRing28A558 {
     int size;
@@ -260,7 +257,7 @@ struct sAsync28A558 {
  * @param memType  where the bank goes: 0 dynamic (shared buffer), 1 main memory, 2 sound memory (On Tour eSoundMemLocation)
  * @param memFlags  main-memory allocation flags (On Tour allocMainMemFlags)
  */
-extern "C" void cAsyncSys_ASYNCSYS_QueueLoad(void* self, int bankId, const char* name, int memType, int memFlags)
+extern "C" void cAsyncSys_ASYNCSYS_QueueLoad(cAsyncSys* self, int bankId, const char* name, int memType, int memFlags)
 {
     sAsync28A558* asyncSys = (sAsync28A558*)self;
     {
@@ -313,7 +310,7 @@ INCLUDE_ASM("sound/asyncsys", cAsyncSys_ASYNCSYS_Cancel);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cAsyncSys_DoCancel(void* self, int a);
-extern "C" void cAsyncSys_ASYNCSYS_StartLoad(void* self);
+extern "C" void cAsyncSys_ASYNCSYS_StartLoad(cAsyncSys* self);
 
 struct sRing_A728 {
     int size;
@@ -469,7 +466,7 @@ static inline void Push1BC_A728(sAsync_A728* s, int v)
  *
  * @param id  the bank's user handle (On Tour bankID)
  */
-extern "C" void cAsyncSys_ASYNCSYS_Cancel(void* self, int id)
+extern "C" void cAsyncSys_ASYNCSYS_Cancel(cAsyncSys* self, int id)
 {
     sAsync_A728* asyncSys = (sAsync_A728*)self;
     if (asyncSys->busy != 0 && Peek18C_A728(asyncSys) == id) {
@@ -506,7 +503,7 @@ extern "C" int f_6548_AAF8(void* data, int id) __asm__("SNDbankheadercopy");
 extern "C" int ASYNCFILE_getstatus(int handle);
 extern "C" void MEM_copy(void* dst, void* src, int n);
 extern "C" int ASYNCFILE_release(int handle, int* buf, int* size);
-extern "C" void cAsyncSys_ASYNCSYS_StartLoad(void* self);
+extern "C" void cAsyncSys_ASYNCSYS_StartLoad(cAsyncSys* self);
 
 struct sRing_AAF8 {
     int size;
@@ -556,7 +553,7 @@ struct sAsync_AAF8 {
  *
  * cController_Update (the stream system's update) calls it.
  */
-extern "C" void cAsyncSys_ASYNCSYS_Update(void* self)
+extern "C" void cAsyncSys_ASYNCSYS_Update(cAsyncSys* self)
 {
     sAsync_AAF8* asyncSys = (sAsync_AAF8*)self;
     if (asyncSys->busy == 0) {
@@ -713,7 +710,7 @@ extern "C" void cAsyncSys_ASYNCSYS_Update(void* self)
                     asyncSys->q1BC.tail = 0;
                 }
             }
-            cAsyncSys_ASYNCSYS_StartLoad(asyncSys);
+            cAsyncSys_ASYNCSYS_StartLoad((cAsyncSys*)asyncSys);
             break;
         }
         case -1:
@@ -795,7 +792,7 @@ extern "C" void cAsyncSys_ASYNCSYS_Update(void* self)
                     asyncSys->q1BC.tail = 0;
                 }
             }
-            cAsyncSys_ASYNCSYS_StartLoad(asyncSys);
+            cAsyncSys_ASYNCSYS_StartLoad((cAsyncSys*)asyncSys);
             break;
         }
         case -1:
@@ -838,20 +835,20 @@ struct sAsync_0028B0F0 {
  *
  * @param size  the number of bytes wanted
  */
-extern "C" void cAsyncSys_ASYNCSYS_OnCurAsyncMainMemAlloc(sAsync_0028B0F0* self, int size)
+extern "C" void cAsyncSys_ASYNCSYS_OnCurAsyncMainMemAlloc(cAsyncSys* self, int size)
 {
-    sVE_0028B0F0* vtEntry = &(*(sVE_0028B0F0**)((char*)self + 0x1D4))[3];
+    sVE_0028B0F0* vtEntry = &((sVE_0028B0F0*)self->mVtbl)[3];
     void (**pf)(void*, int, int, int) = &vtEntry->fn;
     char* thisp = (char*)self + vtEntry->delta;
-    sRing_0028B0F0* handleQueue = &self->q1;
+    sRing_0028B0F0* handleQueue = &(*(sRing_0028B0F0*)&self->mUserHandle);
     int userHandle;
     int memFlags;
-    if (self->q1.tail == self->q1.head)
+    if (self->mUserHandle.Head == self->mUserHandle.Tail)
         userHandle = -1;
     else
         userHandle = handleQueue->data[handleQueue->head];
-    sRing_0028B0F0* flagsQueue = &self->q2;
-    if (self->q2.tail == self->q2.head)
+    sRing_0028B0F0* flagsQueue = &(*(sRing_0028B0F0*)&self->mMainMemFlags);
+    if (self->mMainMemFlags.Head == self->mMainMemFlags.Tail)
         memFlags = -1;
     else
         memFlags = flagsQueue->data[flagsQueue->head];
@@ -1056,18 +1053,18 @@ INCLUDE_ASM("sound/asyncsys", cBankInstance_cBankInstance);
  *
  * @return @p self
  */
-extern "C" void* cBankInstance_cBankInstance(void* self)
+extern "C" void* cBankInstance_cBankInstance(cBankInstance* self)
 {
-    *(int*)((char*)self + 0x0) = 0;
-    *(int*)((char*)self + 0x4) = -1;
-    *(int*)((char*)self + 0x8) = 0;
-    *(int*)((char*)self + 0xc) = -1;
-    *(int*)((char*)self + 0x10) = 0;
-    *(int*)((char*)self + 0x14) = 0;
-    *(int*)((char*)self + 0x18) = 0;
-    *(int*)((char*)self + 0x1c) = 0;
+    self->mBankStatus = 0;
+    self->mBankHandle = -1;
+    self->mAllocLocation = 0;
+    self->mSoundMemHandle = -1;
+    self->mpMainMemData = 0;
+    self->mMainMemDataSize = 0;
+    self->mpNext = 0;
+    self->mpPrev = 0;
     *(char*)((char*)self + 0x20) = 0;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -1075,7 +1072,7 @@ extern "C" void* cBankInstance_cBankInstance(void* self)
 INCLUDE_ASM("sound/asyncsys", cBankInstance__cBankInstance);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern "C" void cBankInstance_Unload(void* self);
+extern "C" void cBankInstance_Unload(cBankInstance* self);
 extern "C" void cBankInstance_UnshareBank(void* self);
 extern "C" void cBankInstance_DeallocMem(void* self);
 
@@ -1087,7 +1084,7 @@ extern "C" void cBankInstance_DeallocMem(void* self);
  *
  * @param flags  g++ destructor flags: bit 0 frees the object
  */
-extern "C" void cBankInstance__cBankInstance(void* self, int flags)
+extern "C" void cBankInstance__cBankInstance(cBankInstance* self, int flags)
 {
     cBankInstance_Unload(self);
     cBankInstance_UnshareBank(self);
@@ -1101,7 +1098,7 @@ extern "C" void cBankInstance__cBankInstance(void* self, int flags)
 //100%
 INCLUDE_ASM("sound/asyncsys", cBankInstance_SharedUnload);
 #ifdef SKIP_ASM
-extern "C" void cBankInstance_Unload(void* self);
+extern "C" void cBankInstance_Unload(cBankInstance* self);
 
 /**
  * Unloads every other instance sharing this bank: walks the share ring through +0x18 (On Tour mpNext) back to this
@@ -1109,11 +1106,11 @@ extern "C" void cBankInstance_Unload(void* self);
  *
  * Does nothing when the instance is not shared (+0x18 null).
  */
-extern "C" void cBankInstance_SharedUnload(void* self)
+extern "C" void cBankInstance_SharedUnload(cBankInstance* self)
 {
-    if (*(void**)((char*)self + 0x18) != 0) {
-        for (void* node = *(void**)((char*)self + 0x18); node != self; node = *(void**)((char*)node + 0x18)) {
-            cBankInstance_Unload(node);
+    if (self->mpNext != 0) {
+        for (void* node = self->mpNext; node != ((void*)self); node = *(void**)((char*)node + 0x18)) {
+            cBankInstance_Unload((cBankInstance*)node);
         }
     }
 }
@@ -1126,8 +1123,8 @@ extern "C" char* strcpy(char* dst, const char* src);
 extern "C" void* FILE_loadsizez(const char* name, int* size, int align);
 extern "C" void* MEM_free(void* self);
 extern "C" void* MEM_alloc(void* a0, int a1, int a2);
-extern "C" void cBankInstance_SharedUnload(void* self);
-extern "C" void cBankInstance_Unload(void* self);
+extern "C" void cBankInstance_SharedUnload(cBankInstance* self);
+extern "C" void cBankInstance_Unload(cBankInstance* self);
 extern "C" int SNDbankadd(void* sema, int a1);
 extern "C" int SNDbankheadersize(int id);
 extern "C" void SNDbankheadercopy(void* data, int id);
@@ -1167,13 +1164,13 @@ public:
  *               not an alignment
  */
 // PORT: data pointers are passed through int parameters of the semaphore/bank helpers
-extern "C" void cBankInstance_SyncLoad(void* self, const char* file, int align)
+extern "C" void cBankInstance_SyncLoad(cBankInstance* self, const char* file, int align)
 {
     void* data = 0;
     cBankInstance_Unload(self);
     cBankInstance_SharedUnload(self);
     int size = 0;
-    switch (*(int*)((char*)self + 0x8)) {
+    switch (self->mAllocLocation) {
     case 0:
         data = FILE_loadsizez(file, &size, align);
         if (data == 0) {
@@ -1187,40 +1184,40 @@ extern "C" void cBankInstance_SyncLoad(void* self, const char* file, int align)
         }
         break;
     case 1:
-        if (FILE_loadatz(file, *(void**)((char*)self + 0x10), *(int*)((char*)self + 0x14)) == 0) {
+        if (FILE_loadatz(file, self->mpMainMemData, self->mMainMemDataSize) == 0) {
             return;
         }
-        size = *(int*)((char*)self + 0x14);
-        data = *(void**)((char*)self + 0x10);
+        size = self->mMainMemDataSize;
+        data = (void*)self->mpMainMemData;
         break;
     }
-    if (*(int*)((char*)self + 0x8) == 2) {
-        (**(cSndStream_B320***)(gpBankManager + 0x1D8))->v6(*(int*)((char*)self + 0xC));
+    if (self->mAllocLocation == 2) {
+        (**(cSndStream_B320***)(gpBankManager + 0x1D8))->v6(self->mSoundMemHandle);
     }
     switch (SNDbankadd((char*)self + 0x4, (int)data)) {
     case 7: {
-        int headerSize = SNDbankheadersize(*(int*)((char*)self + 0x4));
-        if (*(int*)((char*)self + 0x8) == 2) {
-            SNDbankheadercopy(*(void**)((char*)self + 0x10), *(int*)((char*)self + 0x4));
+        int headerSize = SNDbankheadersize(self->mBankHandle);
+        if (self->mAllocLocation == 2) {
+            SNDbankheadercopy(self->mpMainMemData, self->mBankHandle);
         } else {
             void* headerMem = MEM_alloc((void*)file, headerSize, 0);
-            *(void**)((char*)self + 0x10) = headerMem;
-            SNDbankheadercopy(headerMem, *(int*)((char*)self + 0x4));
+            self->mpMainMemData = (char*)headerMem;
+            SNDbankheadercopy(headerMem, self->mBankHandle);
             MEM_free(data);
-            *(int*)((char*)self + 0x14) = headerSize;
+            self->mMainMemDataSize = headerSize;
         }
         *(int*)self = 1;
         break;
     }
     case 8:
-        if (*(int*)((char*)self + 0x8) == 0) {
-            *(void**)((char*)self + 0x10) = data;
-            *(int*)((char*)self + 0x14) = size;
+        if (self->mAllocLocation == 0) {
+            self->mpMainMemData = (char*)data;
+            self->mMainMemDataSize = size;
         }
         *(int*)self = 1;
         break;
     default:
-        if (*(int*)((char*)self + 0x8) != 1) {
+        if (self->mAllocLocation != 1) {
             MEM_free(data);
         }
         *(int*)self = 0;
@@ -1244,16 +1241,16 @@ extern "C" void* MEM_free(void* self);
  * mBankHandle, which becomes -1) and, for a dynamic bank (+0x8 mAllocLocation 0), frees +0x10 (mpMainMemData) with
  * MEM_free and clears it and +0x14 (mMainMemDataSize).
  */
-extern "C" void cBankInstance_Unload(void* self)
+extern "C" void cBankInstance_Unload(cBankInstance* self)
 {
     if (*(int*)self == 1) {
         *(int*)self = 0;
-        SNDbankremove(*(int*)((char*)self + 0x4));
-        *(int*)((char*)self + 0x4) = -1;
-        if (*(int*)((char*)self + 0x8) == 0) {
-            MEM_free(*(void**)((char*)self + 0x10));
-            *(int*)((char*)self + 0x10) = 0;
-            *(int*)((char*)self + 0x14) = 0;
+        SNDbankremove(self->mBankHandle);
+        self->mBankHandle = -1;
+        if (self->mAllocLocation == 0) {
+            MEM_free(self->mpMainMemData);
+            self->mpMainMemData = 0;
+            self->mMainMemDataSize = 0;
         }
     }
 }

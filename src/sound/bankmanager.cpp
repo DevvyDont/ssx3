@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/bankmanager.h"
 #include "be/beintnewrace.h"
 #include "main/ssxapp.h"
 #include "ai/ai.h"
@@ -33,21 +34,21 @@ public:
  * @return no meaningful value
  */
 // PORT: the unit declares this void* (a caller forwards its $v0), but no value is returned.
-extern "C" void* cBankInstance_AllocMem(void* self, int size, int extra, int tag)
+extern "C" void* cBankInstance_AllocMem(cBankInstance* self, int size, int extra, int tag)
 {
     if (size != 0 || extra != 0) {
-        *(int*)((char*)self + 0x8) = 1;
+        self->mAllocLocation = 1;
         if (extra != 0) {
             int id = (**(cSndStream_B588***)(gpBankManager + 0x1D8))->alloc(extra);
             if (id >= 0) {
-                *(int*)((char*)self + 0xC) = id;
-                *(int*)((char*)self + 0x8) = 2;
+                self->mSoundMemHandle = id;
+                self->mAllocLocation = 2;
             } else if (id == -3) {
                 size += extra;
             }
         }
-        *(int*)((char*)self + 0x14) = size;
-        *(void**)((char*)self + 0x10) = MEM_alloc(str_StaticSoundMem, size, tag);
+        self->mMainMemDataSize = size;
+        self->mpMainMemData = (char*)MEM_alloc(str_StaticSoundMem, size, tag);
     }
 }
 #endif
@@ -77,19 +78,19 @@ public:
  * data at +0x10 and zeroes the data pointer, the size at +0x14 and the location. Called by cBankInstance__cBankInstance
  * and, by bank index, by cBankManager_BANK_DeallocMem.
  */
-extern "C" void cBankInstance_DeallocMem(void* self)
+extern "C" void cBankInstance_DeallocMem(cBankInstance* self)
 {
     cBankInstance_Unload(self);
-    int state = *(int*)((char*)self + 0x8);
+    int state = self->mAllocLocation;
     if (state != 0) {
         if (state == 2) {
-            (**(cSndStream_B650***)(gpBankManager + 0x1D8))->stop(*(int*)((char*)self + 0xC));
-            *(int*)((char*)self + 0xC) = -1;
+            (**(cSndStream_B650***)(gpBankManager + 0x1D8))->stop(self->mSoundMemHandle);
+            self->mSoundMemHandle = -1;
         }
-        MEM_free(*(void**)((char*)self + 0x10));
-        *(int*)((char*)self + 0x10) = 0;
-        *(int*)((char*)self + 0x14) = 0;
-        *(int*)((char*)self + 0x8) = 0;
+        MEM_free(self->mpMainMemData);
+        self->mpMainMemData = 0;
+        self->mMainMemDataSize = 0;
+        self->mAllocLocation = 0;
     }
 }
 #endif
@@ -177,7 +178,7 @@ extern "C" void cBankInstance_UnshareBank(sBankNode* self)
 //100%
 INCLUDE_ASM("sound/bankmanager", cBankInstance_Attach);
 #ifdef SKIP_ASM
-extern "C" void cBankInstance_UnAttach(void*);
+extern "C" void cBankInstance_UnAttach(cBankInstance*);
 extern "C" int SNDbankadd(void* sema, int a1);
 
 /**
@@ -190,11 +191,11 @@ extern "C" int SNDbankadd(void* sema, int a1);
  * @param mainMemData  address of the bank image in main memory
  * @param mainMemSize  size of the image in bytes
  */
-extern "C" void cBankInstance_Attach(void* self, int mainMemData, int mainMemSize)
+extern "C" void cBankInstance_Attach(cBankInstance* self, int mainMemData, int mainMemSize)
 {
     cBankInstance_UnAttach(self);
-    *(int*)((char*)self + 0x10) = mainMemData;
-    *(int*)((char*)self + 0x14) = mainMemSize;
+    self->mpMainMemData = (char*)mainMemData;
+    self->mMainMemDataSize = mainMemSize;
     SNDbankadd((char*)self + 0x4, mainMemData);
     *(int*)self = 1;
 }
@@ -212,15 +213,15 @@ extern "C" int SNDbankremove(int id);
  * sets the handle to -1; then it zeroes the main-memory data (+0x10) and size (+0x14) without freeing them. Called by
  * cBankInstance_Attach and, by bank index, by cBankManager_BANK_UnAttach.
  */
-extern "C" void cBankInstance_UnAttach(void* self)
+extern "C" void cBankInstance_UnAttach(cBankInstance* self)
 {
     *(int*)self = 0;
-    if (*(int*)((char*)self + 0x4) != -1) {
-        SNDbankremove(*(int*)((char*)self + 0x4));
-        *(int*)((char*)self + 0x4) = -1;
+    if (self->mBankHandle != -1) {
+        SNDbankremove(self->mBankHandle);
+        self->mBankHandle = -1;
     }
-    *(int*)((char*)self + 0x10) = 0;
-    *(int*)((char*)self + 0x14) = 0;
+    self->mpMainMemData = 0;
+    self->mMainMemDataSize = 0;
 }
 #endif
 
@@ -238,7 +239,7 @@ extern "C" int func_004165A8(void*, void*);
  * @param name  file name to compare
  * @return 1 when the bank is loaded from @p name, else 0
  */
-extern "C" int cBankInstance_IsBankLoaded(void* self, void* name)
+extern "C" int cBankInstance_IsBankLoaded(cBankInstance* self, void* name)
 {
     int status = *(int*)self;
     if (status != 1) {
@@ -276,13 +277,13 @@ public:
  * virtual slot 6 of the bank manager's sound system (the cSoundSys virtual base reached through gpBankManager +0x1D8).
  * On Tour asserts the bank was not already loading and that the handle is valid; retail checks neither.
  */
-extern "C" void cBankInstance_OnBeginAsyncLoad(void* self)
+extern "C" void cBankInstance_OnBeginAsyncLoad(cBankInstance* self)
 {
     cBankInstance_Unload(self);
     cBankInstance_SharedUnload(self);
     *(int*)self = 2;
-    if (*(int*)((char*)self + 0x8) == 2) {
-        (**(cSndStream_B878***)(gpBankManager + 0x1D8))->v6(*(int*)((char*)self + 0xC));
+    if (self->mAllocLocation == 2) {
+        (**(cSndStream_B878***)(gpBankManager + 0x1D8))->v6(self->mSoundMemHandle);
     }
 }
 #endif
@@ -361,10 +362,10 @@ public:
  * @param dataSize  the number of bytes loaded (unused)
  */
 // PORT: name is passed as int (matches the unit's 6-int caller declaration); d, e unused.
-extern "C" void cBankInstance_OnEndAsyncLoad(void* self, int id, int flag, int name, int pBuffer, int dataSize)
+extern "C" void cBankInstance_OnEndAsyncLoad(cBankInstance* self, int id, int flag, int name, int pBuffer, int dataSize)
 {
     (**(cSndStream_B930***)(gpBankManager + 0x1D8))->v7();
-    *(int*)((char*)self + 0x4) = id;
+    self->mBankHandle = id;
     if (flag == 0) {
         *(int*)self = 1;
     } else {
@@ -505,32 +506,32 @@ struct sBankManagerBB10 {
  *
  * @param flags  g++ destructor flags; bit 0 frees the object's memory, bit 1 destroys the cSoundSys virtual base
  */
-extern "C" void cBankManager__cBankManager(sBankManagerBB10* self, int flags)
+extern "C" void cBankManager__cBankManager(cBankManager* self, int flags)
 {
-    self->vtbl2 = cBankMonitor_vtbl;
-    self->vtbl = cBankManager_vtbl;
-    *(const sBmVtblBB10**)(self->monitor + 4) = &D_00483AB8_BB10;
+    self->BankMonitor.mVtbl = cBankMonitor_vtbl;
+    self->mVtbl = cBankManager_vtbl;
+    *(const sBmVtblBB10**)(*(char**)&self->BankMonitor + 4) = &D_00483AB8_BB10;
     if (flags == 0) {
         // PORT: g++ 2.95 virtual-base this-adjust fix-up (copied vtable on the stack), written out by hand.
         sBmVtblBB10 vt = D_00483AB8_BB10;
-        *(sBmVtblBB10**)(self->monitor + 4) = &vt;
-        char* base = self->monitor - 0xAD0;
+        *(sBmVtblBB10**)(*(char**)&self->BankMonitor + 4) = &vt;
+        char* base = *(char**)&self->BankMonitor - 0xAD0;
         int soundSysAdjust = (char*)self - base;
         vt.e[1].delta = D_00483AB8_BB10.e[1].delta + soundSysAdjust;
     }
     gpBankManager = 0;
-    if (self->banks != 0) {
-        sBmBankBB10* bankInstance = self->banks + ((int*)self->banks)[-4];
-        while (self->banks != bankInstance) {
+    if ((sBmBankBB10*)self->mBank != 0) {
+        sBmBankBB10* bankInstance = (sBmBankBB10*)self->mBank + ((int*)(sBmBankBB10*)self->mBank)[-4];
+        while ((sBmBankBB10*)self->mBank != bankInstance) {
             bankInstance--;
             cBankInstance__cBankInstance(bankInstance, 0);
         }
-        cMemMan_free((char*)self->banks - 0x10);
+        cMemMan_free((char*)(sBmBankBB10*)self->mBank - 0x10);
     }
-    cBankMonitor__cBankMonitor(&self->monitor, 0);
-    cAsyncSys__cAsyncSys(self, 0);
+    cBankMonitor__cBankMonitor((char**)&self->BankMonitor, 0);
+    cAsyncSys__cAsyncSys(((sBankManagerBB10*)self), 0);
     if (flags & 2) {
-        cSoundSys__cSoundSys(self->monitor, 0);
+        cSoundSys__cSoundSys(*(char**)&self->BankMonitor, 0);
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -556,12 +557,12 @@ extern "C" void cBankInstance_SyncLoad(void* bank, void* id, int a3);
  * @param id  bank file name
  * @param mainMemFlag  passed to cBankInstance_SyncLoad (callers pass 0)
  */
-extern "C" void cBankManager_BANK_SyncLoad(void* self, int i, void* id, int mainMemFlag)
+extern "C" void cBankManager_BANK_SyncLoad(cBankManager* self, int i, void* id, int mainMemFlag)
 {
     int off = i * 0x60;
-    if (cBankInstance_IsBankLoaded((char*)*(void**)((char*)self + 0xACC) + off, id) == 0) {
+    if (cBankInstance_IsBankLoaded((cBankInstance*)((char*)self->mBank + off), id) == 0) {
         cAsyncSys_ASYNCSYS_Cancel(self, i);
-        cBankInstance_SyncLoad((char*)*(void**)((char*)self + 0xACC) + off, id, mainMemFlag);
+        cBankInstance_SyncLoad((char*)self->mBank + off, id, mainMemFlag);
     }
 }
 #endif
@@ -576,9 +577,9 @@ extern "C" void cBankInstance_Unload(void*);
  *
  * @param i  bank slot index
  */
-extern "C" void cBankManager_BANK_UnLoad(void* self, int i)
+extern "C" void cBankManager_BANK_UnLoad(cBankManager* self, int i)
 {
-    cBankInstance_Unload((char*)*(void**)((char*)self + 0xACC) + i * 0x60);
+    cBankInstance_Unload((char*)self->mBank + i * 0x60);
 }
 #endif
 
@@ -602,11 +603,11 @@ struct sBankInst60 { char pad0[8]; int f8; char pad1[0x60 - 0xC]; };
  * @param id  bank file name
  * @param mainMemFlag  main-memory allocation flags for the load
  */
-extern "C" void cBankManager_BANK_AsyncLoad(void* self, int i, void* id, int mainMemFlag)
+extern "C" void cBankManager_BANK_AsyncLoad(cBankManager* self, int i, void* id, int mainMemFlag)
 {
-    if (cBankInstance_IsBankLoaded((char*)*(void**)((char*)self + 0xACC) + i * 0x60, id) == 0) {
+    if (cBankInstance_IsBankLoaded((cBankInstance*)((char*)self->mBank + i * 0x60), id) == 0) {
         cAsyncSys_ASYNCSYS_Cancel(self, i);
-        cAsyncSys_ASYNCSYS_QueueLoad(self, i, id, (*(sBankInst60**)((char*)self + 0xACC))[i].f8, mainMemFlag);
+        cAsyncSys_ASYNCSYS_QueueLoad(self, i, id, ((sBankInst60*)self->mBank)[i].f8, mainMemFlag);
     }
 }
 #endif
@@ -614,7 +615,7 @@ extern "C" void cBankManager_BANK_AsyncLoad(void* self, int i, void* id, int mai
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmanager", cBankManager_BANK_AllocMem);
 #ifdef SKIP_ASM
-extern "C" void* cBankInstance_AllocMem(void* inst, int a, int b, int c);
+extern "C" void* cBankInstance_AllocMem(cBankInstance* inst, int a, int b, int c);
 
 /**
  * Allocates memory for bank slot @p i: forwards to cBankInstance_AllocMem on the 0x60-byte bank instance @p i of the
@@ -628,16 +629,16 @@ extern "C" void* cBankInstance_AllocMem(void* inst, int a, int b, int c);
  * @param memFlags  allocation flags
  * @return cBankInstance_AllocMem's result
  */
-extern "C" void* cBankManager_BANK_AllocMem(void* self, int i, int mainMemSize, int soundMemSize, int memFlags)
+extern "C" void* cBankManager_BANK_AllocMem(cBankManager* self, int i, int mainMemSize, int soundMemSize, int memFlags)
 {
-    return cBankInstance_AllocMem((char*)*(void**)((char*)self + 0xACC) + i * 0x60, mainMemSize, soundMemSize, memFlags);
+    return cBankInstance_AllocMem((cBankInstance*)((char*)self->mBank + i * 0x60), mainMemSize, soundMemSize, memFlags);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmanager", cBankManager_BANK_DeallocMem);
 #ifdef SKIP_ASM
-extern "C" void cBankInstance_DeallocMem(void*);
+extern "C" void cBankInstance_DeallocMem(cBankInstance*);
 
 /**
  * Frees the memory of bank slot @p i: calls cBankInstance_DeallocMem on the 0x60-byte bank instance @p i of the array at +0xACC.
@@ -646,9 +647,9 @@ extern "C" void cBankInstance_DeallocMem(void*);
  *
  * @param i  bank slot index
  */
-extern "C" void cBankManager_BANK_DeallocMem(void* self, int i)
+extern "C" void cBankManager_BANK_DeallocMem(cBankManager* self, int i)
 {
-    cBankInstance_DeallocMem((char*)*(void**)((char*)self + 0xACC) + i * 0x60);
+    cBankInstance_DeallocMem((cBankInstance*)((char*)self->mBank + i * 0x60));
 }
 #endif
 
@@ -664,9 +665,9 @@ extern "C" void cBankInstance_ShareBank(void* dst, void* src);
  * @param i  bank slot that shares
  * @param j  bank slot whose memory is shared
  */
-extern "C" void cBankManager_BANK_ShareBank(void* self, int i, int j)
+extern "C" void cBankManager_BANK_ShareBank(cBankManager* self, int i, int j)
 {
-    cBankInstance_ShareBank((char*)*(void**)((char*)self + 0xACC) + i * 0x60, (char*)*(void**)((char*)self + 0xACC) + j * 0x60);
+    cBankInstance_ShareBank((char*)self->mBank + i * 0x60, (char*)self->mBank + j * 0x60);
 }
 #endif
 //100%
@@ -678,16 +679,16 @@ INCLUDE_ASM("sound/bankmanager", cBankManager_BANK_UnshareBank);
  *
  * @param i  bank slot index
  */
-extern "C" void cBankManager_BANK_UnshareBank(void* self, int i)
+extern "C" void cBankManager_BANK_UnshareBank(cBankManager* self, int i)
 {
-    cBankInstance_UnshareBank((sBankNode*)((char*)*(void**)((char*)self + 0xACC) + i * 0x60));
+    cBankInstance_UnshareBank((sBankNode*)((char*)self->mBank + i * 0x60));
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmanager", cBankManager_BANK_Attach);
 #ifdef SKIP_ASM
-extern "C" void cBankInstance_Attach(void* inst, int a, int b);
+extern "C" void cBankInstance_Attach(cBankInstance* inst, int a, int b);
 
 /**
  * Attaches a bank image in main memory to bank slot @p i: calls cBankInstance_Attach on the 0x60-byte bank instance @p i of
@@ -699,16 +700,16 @@ extern "C" void cBankInstance_Attach(void* inst, int a, int b);
  * @param mainMemData  address of the bank image
  * @param mainMemSize  size of the image in bytes
  */
-extern "C" void cBankManager_BANK_Attach(void* self, int i, int mainMemData, int mainMemSize)
+extern "C" void cBankManager_BANK_Attach(cBankManager* self, int i, int mainMemData, int mainMemSize)
 {
-    cBankInstance_Attach((char*)*(void**)((char*)self + 0xACC) + i * 0x60, mainMemData, mainMemSize);
+    cBankInstance_Attach((cBankInstance*)((char*)self->mBank + i * 0x60), mainMemData, mainMemSize);
 }
 #endif
 
 //100%
 INCLUDE_ASM("sound/bankmanager", cBankManager_BANK_UnAttach);
 #ifdef SKIP_ASM
-extern "C" void cBankInstance_UnAttach(void*);
+extern "C" void cBankInstance_UnAttach(cBankInstance*);
 
 /**
  * Detaches the bank image from bank slot @p i: calls cBankInstance_UnAttach on the 0x60-byte bank instance @p i of the array at
@@ -718,16 +719,16 @@ extern "C" void cBankInstance_UnAttach(void*);
  *
  * @param i  bank slot index
  */
-extern "C" void cBankManager_BANK_UnAttach(void* self, int i)
+extern "C" void cBankManager_BANK_UnAttach(cBankManager* self, int i)
 {
-    cBankInstance_UnAttach((char*)*(void**)((char*)self + 0xACC) + i * 0x60);
+    cBankInstance_UnAttach((cBankInstance*)((char*)self->mBank + i * 0x60));
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmanager", cBankManager_ASYNCSYS_OnBeginAsyncLoad);
 #ifdef SKIP_ASM
-extern "C" void cBankInstance_OnBeginAsyncLoad(void*);
+extern "C" void cBankInstance_OnBeginAsyncLoad(cBankInstance*);
 
 /**
  * Async-loader callback for the start of a bank load: forwards it to that bank's instance.
@@ -737,9 +738,9 @@ extern "C" void cBankInstance_OnBeginAsyncLoad(void*);
  *
  * @param i  the user handle given to the loader: the bank number
  */
-extern "C" void cBankManager_ASYNCSYS_OnBeginAsyncLoad(void* self, int i)
+extern "C" void cBankManager_ASYNCSYS_OnBeginAsyncLoad(cBankManager* self, int i)
 {
-    cBankInstance_OnBeginAsyncLoad((char*)*(void**)((char*)self + 0xACC) + i * 0x60);
+    cBankInstance_OnBeginAsyncLoad((cBankInstance*)((char*)self->mBank + i * 0x60));
 }
 #endif
 
@@ -759,9 +760,9 @@ extern "C" void cBankInstance_OnAsyncMainMemAlloc(void* inst, int a, int b);
  * @param size  the buffer size in bytes
  * @param memflags  the allocation flags
  */
-extern "C" void cBankManager_ASYNCSYS_OnAsyncMainMemAlloc(void* self, int i, int size, int memflags)
+extern "C" void cBankManager_ASYNCSYS_OnAsyncMainMemAlloc(cBankManager* self, int i, int size, int memflags)
 {
-    cBankInstance_OnAsyncMainMemAlloc((char*)*(void**)((char*)self + 0xACC) + i * 0x60, size, memflags);
+    cBankInstance_OnAsyncMainMemAlloc((char*)self->mBank + i * 0x60, size, memflags);
 }
 #endif
 
@@ -778,16 +779,16 @@ int cBankInstance_OnAsyncMainMemSize(void*);
  *
  * @param i  the user handle given to the loader: the bank number
  */
-extern "C" void cBankManager_ASYNCSYS_OnAsyncMainMemSize(void* self, int i)
+extern "C" void cBankManager_ASYNCSYS_OnAsyncMainMemSize(cBankManager* self, int i)
 {
-    cBankInstance_OnAsyncMainMemSize((char*)*(void**)((char*)self + 0xACC) + i * 0x60);
+    cBankInstance_OnAsyncMainMemSize((char*)self->mBank + i * 0x60);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/bankmanager", cBankManager_ASYNCSYS_OnEndAsyncLoad);
 #ifdef SKIP_ASM
-extern "C" void cBankInstance_OnEndAsyncLoad(void* inst, int a, int b, int c, int d, int e);
+extern "C" void cBankInstance_OnEndAsyncLoad(cBankInstance* inst, int a, int b, int c, int d, int e);
 
 /**
  * Async-loader callback for the end of a bank load: forwards the outcome to that bank's instance.
@@ -802,9 +803,9 @@ extern "C" void cBankInstance_OnEndAsyncLoad(void* inst, int a, int b, int c, in
  * @param pBuffer  the load buffer
  * @param dataSize  the number of bytes loaded
  */
-extern "C" void cBankManager_ASYNCSYS_OnEndAsyncLoad(void* self, int i, int soundHandle, int endState, int pFilename, int pBuffer, int dataSize)
+extern "C" void cBankManager_ASYNCSYS_OnEndAsyncLoad(cBankManager* self, int i, int soundHandle, int endState, int pFilename, int pBuffer, int dataSize)
 {
-    cBankInstance_OnEndAsyncLoad((char*)*(void**)((char*)self + 0xACC) + i * 0x60, soundHandle, endState, pFilename, pBuffer, dataSize);
+    cBankInstance_OnEndAsyncLoad((cBankInstance*)((char*)self->mBank + i * 0x60), soundHandle, endState, pFilename, pBuffer, dataSize);
 }
 #endif
 
@@ -2905,7 +2906,7 @@ extern "C" void func_0028F678(void* self, int restartMusic)
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028F700);
 #ifdef SKIP_ASM
-extern "C" void cBankManager_BANK_SyncLoad(void* self, int i, void* id, int a3);
+extern "C" void cBankManager_BANK_SyncLoad(cBankManager* self, int i, void* id, int a3);
 extern void* D_004A3624;
 
 /**
@@ -2915,7 +2916,7 @@ extern void* D_004A3624;
  */
 extern "C" void func_0028F700(void* self)
 {
-    cBankManager_BANK_SyncLoad(**(void***)((char*)self + 0x118), 13, D_004A3624, 0);
+    cBankManager_BANK_SyncLoad((cBankManager*)(**(void***)((char*)self + 0x118)), 13, D_004A3624, 0);
 }
 #endif
 
@@ -2923,7 +2924,7 @@ extern "C" void func_0028F700(void* self)
 INCLUDE_ASM("sound/bankmanager", func_0028F730);
 #ifdef SKIP_ASM
 extern "C" void func_0028FA98(void* self, float v);
-extern "C" void cBankManager_BANK_UnLoad(void* self, int i);
+extern "C" void cBankManager_BANK_UnLoad(cBankManager* self, int i);
 
 /**
  * Stops the loading-screen sound at once (func_0028FA98(0)) and unloads bank 13 (cBankManager_BANK_UnLoad).
@@ -2933,7 +2934,7 @@ extern "C" void cBankManager_BANK_UnLoad(void* self, int i);
 extern "C" void func_0028F730(void* self)
 {
     func_0028FA98(self, 0.0f);
-    cBankManager_BANK_UnLoad(**(void***)((char*)self + 0x118), 0);
+    cBankManager_BANK_UnLoad((cBankManager*)(**(void***)((char*)self + 0x118)), 0);
 }
 #endif
 
