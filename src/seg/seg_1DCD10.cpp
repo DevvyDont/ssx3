@@ -210,10 +210,10 @@ extern "C" void cFXLoader__cFXLoader(int *self, int flags) {
 //100%
 INCLUDE_ASM("seg/seg_1DCD10", func_002DBF80);
 #ifdef SKIP_ASM
-extern char D_00488308[];
+extern char cFogParticleMan_vtbl[];
 extern "C" void *func_002DBF80(int *self) {
     self[0] = 0;
-    *(char**)((char*)self + 4) = D_00488308;
+    *(char**)((char*)self + 4) = cFogParticleMan_vtbl;
     return self;
 }
 #endif

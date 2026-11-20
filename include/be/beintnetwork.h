@@ -5,7 +5,7 @@
 // every BE interface it is a cBEInterface (three bools + vptr, 0x10 bytes), and its accessors read and write the
 // static tBENetworkDB networkOpt below (network game / ranked / host flags, port, latency, names, the two riders'
 // character IDs and stats). One instance, created on demand by cBENetworkInterface_getThis
-// (`cMemMan_alloc(0x10, "BENetworkInt", 0, 0)`, bIsActive = 0, vtable D_0045AD98) into cBENetworkInterface::instance
+// (`cMemMan_alloc(0x10, "BENetworkInt", 0, 0)`, bIsActive = 0, vtable cBENetworkInterface_vtbl) into cBENetworkInterface::instance
 // (retail cBENetworkInterface_instance); the rest of the game reaches it as cBE_getInterface(SSXApp->BE, 7). EA's source:
 // d:/ssx/code/source/be/beintnetwork.cpp (the preview build's assert string).
 //
@@ -86,7 +86,7 @@ struct cBENetworkInterface {
     int bIsActive;                   // 0x008 [O] cBEInterface::bIsActive; [R] getThis sets 0; [U] setNetworkActive
                                      //       (cBENetworkInterface_setNetworkActive, static: instance->bIsActive = arg); set 0/1 with every BE
                                      //       interface (cBEPostRaceState_onExit/cBEPostRaceState_onEnter/cBEPreRaceState_onExit/cBEPreRaceState_onEnter)
-    void** mVtbl;                    // 0x00C [R] D_0045AD98 (getThis, ctor cBENetworkInterface_cBENetworkInterface); [P] the preview ctor
+    void** mVtbl;                    // 0x00C [R] cBENetworkInterface_vtbl (getThis, ctor cBENetworkInterface_cBENetworkInterface); [P] the preview ctor
                                      //       __19cBENetworkInterface stores _vt$19cBENetworkInterface at 0xC;
                                      //       [U] func_00259098 calls slot 1 (submit) through it
 };

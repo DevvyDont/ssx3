@@ -121,7 +121,7 @@ struct sFrNode9220;
 extern "C" void cFloatRailNode_getPosition(void* self, sFrNode9220* node);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
-extern char D_0048FF30[];
+extern char cFloatRailNode_vtbl[];
 extern char str_FloatRailNodes[];
 
 struct sFrV_8D98 { float x, y, z, w; } __attribute__((aligned(16)));
@@ -145,7 +145,7 @@ struct sFlexRailElem_348D98 {
 /**
  * Constructs a float rail (node type 20) for a placed rail instance.
  *
- * Runs the flex-rail constructor cFlexRailNode_cFlexRailNode, installs D_0048FF30 and copies LSpring, LDamp and ForceScale (desc
+ * Runs the flex-rail constructor cFlexRailNode_cFlexRailNode, installs cFloatRailNode_vtbl and copies LSpring, LDamp and ForceScale (desc
  * +0x48..+0x50) to +0x60..+0x68. Allocates NumNodes 0x50-byte nodes ("FloatRailNodes", +0x70); each gets the next valid
  * instance id (desc +0x4) and mesh (desc +0x24), zero Vel and Force, and its Pos and OPos from the mesh position
  * (cFloatRailNode_getPosition). Then builds the segment matrices (cFloatRailNode_updateMats), BoundBox (cFloatRailNode_updateBoundBox) and the space hash entry
@@ -158,7 +158,7 @@ struct sFlexRailElem_348D98 {
 extern "C" void* cFloatRailNode_cFloatRailNode(char* self, void* instRecord, char* desc)
 {
     cFlexRailNode_cFlexRailNode(self, 20, instRecord, desc);
-    *(void**)(self + 0xC) = D_0048FF30;
+    *(void**)(self + 0xC) = cFloatRailNode_vtbl;
     *(float*)(self + 0x60) = *(float*)(desc + 0x48);
     *(float*)(self + 0x64) = *(float*)(desc + 0x4C);
     *(float*)(self + 0x68) = *(float*)(desc + 0x50);
@@ -202,7 +202,7 @@ extern "C" void cFloatRailNode_updateBoundBox(sFrBoxRail* self);
 extern "C" void cFlexRailNode_addSpaceHash(void* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
-extern char D_0048FF30[];
+extern char cFloatRailNode_vtbl[];
 extern char str_FloatRailNodes[];
 
 struct sFlexRailRef_348FA0 {
@@ -225,7 +225,7 @@ struct sFrStreamVEntry_348FA0 {
 /**
  * Constructs a float rail from a replay frame.
  *
- * Runs cFlexRailNode_cFlexRailNode1, installs D_0048FF30, reads LSpring/LDamp/ForceScale (+0x60, 0xC bytes) and the NumNodes * 0x50
+ * Runs cFlexRailNode_cFlexRailNode1, installs cFloatRailNode_vtbl, reads LSpring/LDamp/ForceScale (+0x60, 0xC bytes) and the NumNodes * 0x50
  * node array (allocated as "FloatRailNodes" at +0x70), then rebuilds the matrices (cFloatRailNode_updateMats), BoundBox
  * (cFloatRailNode_updateBoundBox) and space hash entry (cFlexRailNode_addSpaceHash).
  *
@@ -236,7 +236,7 @@ struct sFrStreamVEntry_348FA0 {
 extern "C" void* cFloatRailNode_cFloatRailNode1(char* self, void* bucket, void* stream)
 {
     cFlexRailNode_cFlexRailNode1(self, bucket, stream);
-    *(void**)(self + 0xC) = D_0048FF30;
+    *(void**)(self + 0xC) = cFloatRailNode_vtbl;
     sFrStreamVEntry_348FA0* vt = *(sFrStreamVEntry_348FA0**)stream;
     vt[2].fn((char*)stream + vt[2].delta, self + 0x60, 0xC);
     sFlexRailElem_348FA0** elems = (sFlexRailElem_348FA0**)(self + 0x70);
@@ -253,7 +253,7 @@ extern "C" void* cFloatRailNode_cFloatRailNode1(char* self, void* bucket, void* 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/flexrailnode", cFloatRailNode__cFloatRailNode);
 #ifdef SKIP_ASM
-extern char D_0048FF30[];
+extern char cFloatRailNode_vtbl[];
 void cMemMan_free(void*);
 extern "C" void cFlexRailNode_remSpaceHash(void* self);
 extern "C" void cFlexRailNode__cFlexRailNode(void* self, int flags);
@@ -261,14 +261,14 @@ extern "C" void cFlexRailNode__cFlexRailNode(void* self, int flags);
 /**
  * Destroys a float rail.
  *
- * Reinstalls D_0048FF30, removes the rail from the space hash (cFlexRailNode_remSpaceHash), frees the node array (+0x70) and runs
+ * Reinstalls cFloatRailNode_vtbl, removes the rail from the space hash (cFlexRailNode_remSpaceHash), frees the node array (+0x70) and runs
  * the flex-rail destructor cFlexRailNode__cFlexRailNode with flags.
  *
  * @param flags  destructor flags
  */
 extern "C" void cFloatRailNode__cFloatRailNode(void* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_0048FF30;
+    *(void**)((char*)self + 0xC) = cFloatRailNode_vtbl;
     cFlexRailNode_remSpaceHash(self);
     void* railNodes = *(void**)((char*)self + 0x70);
     if (railNodes != 0) {
@@ -797,7 +797,7 @@ struct sFrBoxRail60;
 extern "C" void cSpringRailNode_updateBoundBox(sFrBoxRail60* self);
 struct sFrNodeA028;
 extern "C" void cSpringRailNode_getPosition(void* self, sFrNodeA028* node);
-extern char D_0048FD90[];
+extern char cSpringRailNode_vtbl[];
 extern char str_SpringRailNodes[];
 
 struct sFrV_9B48 { float x, y, z, w; } __attribute__((aligned(16)));
@@ -836,7 +836,7 @@ struct sFlexElem_9B48 {
 /**
  * Constructs a spring rail (node type 21) for a placed rail instance.
  *
- * Runs the flex-rail constructor cFlexRailNode_cFlexRailNode, installs D_0048FD90 and copies ASpring, ADamp and TorqueScale (desc
+ * Runs the flex-rail constructor cFlexRailNode_cFlexRailNode, installs cSpringRailNode_vtbl and copies ASpring, ADamp and TorqueScale (desc
  * +0x48..+0x50) to +0x60..+0x68. Allocates NumNodes 0x60-byte nodes ("SpringRailNodes", +0x70); each gets the next
  * valid instance id and mesh, zero V/O/W/T and its P from the mesh position (cSpringRailNode_getPosition). V of each node becomes the
  * vector to the next node's P. Then builds the segment matrices (cSpringRailNode_updateMats), BoundBox (cSpringRailNode_updateBoundBox) and the space
@@ -849,7 +849,7 @@ struct sFlexElem_9B48 {
 extern "C" void* cSpringRailNode_cSpringRailNode(char* self, void* instRecord, char* desc)
 {
     cFlexRailNode_cFlexRailNode(self, 21, instRecord, desc);
-    *(void**)(self + 0xC) = D_0048FD90;
+    *(void**)(self + 0xC) = cSpringRailNode_vtbl;
     *(float*)(self + 0x60) = *(float*)(desc + 0x48);
     *(float*)(self + 0x64) = *(float*)(desc + 0x4C);
     *(float*)(self + 0x68) = *(float*)(desc + 0x50);
@@ -896,7 +896,7 @@ extern "C" void cSpringRailNode_updateMats(void* self);
 extern "C" void cFlexRailNode_addSpaceHash(void* self);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
-extern char D_0048FD90[];
+extern char cSpringRailNode_vtbl[];
 extern char str_SpringRailNodes[];
 
 struct sFlexRailElem_349DB0 {
@@ -915,7 +915,7 @@ struct sFrStreamVEntry_349DB0 {
 /**
  * Constructs a spring rail from a replay frame.
  *
- * Runs cFlexRailNode_cFlexRailNode1, installs D_0048FD90, reads ASpring/ADamp/TorqueScale (+0x60, 0xC bytes) and the NumNodes * 0x60
+ * Runs cFlexRailNode_cFlexRailNode1, installs cSpringRailNode_vtbl, reads ASpring/ADamp/TorqueScale (+0x60, 0xC bytes) and the NumNodes * 0x60
  * node array ("SpringRailNodes", +0x70), then rebuilds the matrices (cSpringRailNode_updateMats) and the space hash entry. Unlike
  * the float rail's replay ctor it does not recompute BoundBox (it comes back from the replay state).
  *
@@ -926,7 +926,7 @@ struct sFrStreamVEntry_349DB0 {
 extern "C" void* cSpringRailNode_cSpringRailNode1(char* self, void* bucket, void* stream)
 {
     cFlexRailNode_cFlexRailNode1(self, bucket, stream);
-    *(void**)(self + 0xC) = D_0048FD90;
+    *(void**)(self + 0xC) = cSpringRailNode_vtbl;
     sFrStreamVEntry_349DB0* vt = *(sFrStreamVEntry_349DB0**)stream;
     vt[2].fn((char*)stream + vt[2].delta, self + 0x60, 0xC);
     sFlexRailElem_349DB0** elems = (sFlexRailElem_349DB0**)(self + 0x70);
@@ -942,7 +942,7 @@ extern "C" void* cSpringRailNode_cSpringRailNode1(char* self, void* bucket, void
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/flexrailnode", cSpringRailNode__cSpringRailNode);
 #ifdef SKIP_ASM
-extern char D_0048FD90[];
+extern char cSpringRailNode_vtbl[];
 void cMemMan_free(void*);
 extern "C" void cFlexRailNode_remSpaceHash(void* self);
 extern "C" void cFlexRailNode__cFlexRailNode(void* self, int flags);
@@ -950,14 +950,14 @@ extern "C" void cFlexRailNode__cFlexRailNode(void* self, int flags);
 /**
  * Destroys a spring rail.
  *
- * Reinstalls D_0048FD90, removes the rail from the space hash (cFlexRailNode_remSpaceHash), frees the node array (+0x70) and runs
+ * Reinstalls cSpringRailNode_vtbl, removes the rail from the space hash (cFlexRailNode_remSpaceHash), frees the node array (+0x70) and runs
  * cFlexRailNode__cFlexRailNode with flags.
  *
  * @param flags  destructor flags
  */
 extern "C" void cSpringRailNode__cSpringRailNode(void* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_0048FD90;
+    *(void**)((char*)self + 0xC) = cSpringRailNode_vtbl;
     cFlexRailNode_remSpaceHash(self);
     void* railNodes = *(void**)((char*)self + 0x70);
     if (railNodes != 0) {
@@ -1888,7 +1888,7 @@ extern "C" void* tFlagSetState_tFlagSetState(void* self)
 INCLUDE_ASM("object/flexrailnode", cFlagSet_cFlagSet);
 #ifdef SKIP_ASM
 extern int D_004A4010;
-extern void* D_0048FBF8[];
+extern void* cFlagSet_vtbl[];
 
 struct sFlexRail_AF38 {
     char pad_0x0[0x60];
@@ -1904,7 +1904,7 @@ struct sFlexRail_AF38 {
 /**
  * Constructs an empty flag set.
  *
- * Runs tFlagSetState_tFlagSetState, nulls mGridMesh (+0x60) and mVerts (+0x74), installs D_0048FBF8 (vtable at +0x184), clears the 60
+ * Runs tFlagSetState_tFlagSetState, nulls mGridMesh (+0x60) and mVerts (+0x74), installs cFlagSet_vtbl (vtable at +0x184), clears the 60
  * mInstances (+0x94) and gives the set the current grid-update parity D_004A4010 (mFrameToUpdateGrid, +0x90), which
  * then alternates 0/1 for the next set.
  *
@@ -1917,7 +1917,7 @@ extern "C" void* cFlagSet_cFlagSet(void* self)
     tFlagSetState_tFlagSetState(self);
     flagSet->f60 = 0;
     flagSet->f74 = 0;
-    flagSet->vt = D_0048FBF8;
+    flagSet->vt = cFlagSet_vtbl;
     for (i = 0; i < 60; i++) {
         flagSet->slots[i] = 0;
     }
@@ -1934,17 +1934,17 @@ extern "C" void* cFlagSet_cFlagSet(void* self)
 //100%
 INCLUDE_ASM("object/flexrailnode", cFlagSet__cFlagSet);
 #ifdef SKIP_ASM
-extern void* D_0048FBF8[];
+extern void* cFlagSet_vtbl[];
 void operator_delete(int*);
 
 /**
- * Destroys a flag set: reinstalls its vtable D_0048FBF8 and deletes it when bit 0 of flags is set.
+ * Destroys a flag set: reinstalls its vtable cFlagSet_vtbl and deletes it when bit 0 of flags is set.
  *
  * @param flags  destructor flags
  */
 extern "C" void cFlagSet__cFlagSet(void* self, int flags)
 {
-    *(void***)((char*)self + 0x184) = D_0048FBF8;
+    *(void***)((char*)self + 0x184) = cFlagSet_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

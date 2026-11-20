@@ -3082,10 +3082,10 @@ INCLUDE_ASM("render/font", cGarbageMan__cGarbageMan);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_00493938[];
+extern char cGarbageMan_vtbl[];
 
 /**
- * Destructor body: stores the vtable D_00493938 at +4 and frees the object when bit 0 of @p flags is set.
+ * Destructor body: stores the vtable cGarbageMan_vtbl at +4 and frees the object when bit 0 of @p flags is set.
  *
  * It is the only slot (slot 1) of that one-entry vtable.
  *
@@ -3093,7 +3093,7 @@ extern char D_00493938[];
  */
 extern "C" void cGarbageMan__cGarbageMan(int* self, int flags)
 {
-    *(void**)((char*)self + 0x4) = D_00493938;
+    *(void**)((char*)self + 0x4) = cGarbageMan_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -3106,7 +3106,7 @@ INCLUDE_ASM("render/font", cGridMesh_SetScale__FPv);
 /**
  * Does nothing: the base-class body of slot 9 of the grid-mesh vtable D_004938E0.
  *
- * The derived vtable D_00493208 overrides the slot with cPS2GridMesh_SetScale.
+ * The derived vtable cPS2GridMesh_vtbl overrides the slot with cPS2GridMesh_SetScale.
  */
 void cGridMesh_SetScale(void* self)
 {
@@ -3132,7 +3132,7 @@ extern "C" int cBezierMan_getBezierMan(void) {
 INCLUDE_ASM("render/font", cBezierMan_Reset__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: the base-class body of slot 4 of the cBezierMan vtable D_00493820.
+ * Does nothing: the base-class body of slot 4 of the cBezierMan vtable cBezierMan_vtbl.
  *
  * cPS2BezierMan overrides the slot with cPS2BezierMan_Reset__FPv.
  */
@@ -3145,7 +3145,7 @@ void cBezierMan_Reset(void* self)
 INCLUDE_ASM("render/font", cBezierMan_UpdatePatchesCache__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: the base-class body of slot 5 of the cBezierMan vtable D_00493820.
+ * Does nothing: the base-class body of slot 5 of the cBezierMan vtable cBezierMan_vtbl.
  *
  * cPS2BezierMan keeps it.
  */
@@ -3221,7 +3221,7 @@ public:
 /**
  * Forwards all five arguments to the virtual in vtable entry 22 (offset 0xB0) of the Bezier manager.
  *
- * That entry is this function's own slot in the cBezierMan vtable D_00493820; cPS2BezierMan overrides it with
+ * That entry is this function's own slot in the cBezierMan vtable cBezierMan_vtbl; cPS2BezierMan overrides it with
  * func_0038B190, so the forward only reaches a derived implementation (on a plain cBezierMan it would call itself).
  *
  * @param patchRecord  the patch record (On Tour tPatchRecord* pPatch)
@@ -5316,7 +5316,7 @@ INCLUDE_ASM("render/font", cPS2GridMesh_IsOk__FPv);
 /**
  * Returns the grid mesh's word at +0x1C8.
  *
- * Slot 2 of the grid-mesh vtable D_00493208.
+ * Slot 2 of the grid-mesh vtable cPS2GridMesh_vtbl.
  *
  * @return the word at +0x1C8
  */
@@ -5332,7 +5332,7 @@ INCLUDE_ASM("render/font", cPS2GridMesh_SetScale);
 /**
  * Sets the grid mesh's range: +0x194 = @p range and +0x198 = 32767 / @p range.
  *
- * Slot 9 of the grid-mesh vtable D_00493208, overriding the empty cGridMesh_SetScale.
+ * Slot 9 of the grid-mesh vtable cPS2GridMesh_vtbl, overriding the empty cGridMesh_SetScale.
  *
  * @param range  the scale / range value
  */
@@ -5431,7 +5431,7 @@ extern char D_00488680[];
  * Destructor body for the visual effect allocated as "RenderToggles": stores the cVisualEffect base vtable D_00488680
  * and frees the object when bit 0 of @p flags is set.
  *
- * Slot 1 of vtable D_004931A8 (slot 2 is cRenderToggles_update), which cPS2VisualEffectsMan_cPS2VisualEffectsMan installs.
+ * Slot 1 of vtable cRenderToggles_vtbl (slot 2 is cRenderToggles_update), which cPS2VisualEffectsMan_cPS2VisualEffectsMan installs.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
@@ -6253,7 +6253,7 @@ extern char D_00488680[];
  * Destructor body for the visual effect allocated as "Plants": stores the cVisualEffect base vtable D_00488680 and
  * frees the object when bit 0 of @p flags is set.
  *
- * Slot 1 of vtable D_00493178 (slot 2 is cPlants_update), which cPS2VisualEffectsMan_cPS2VisualEffectsMan installs in
+ * Slot 1 of vtable cPlants_vtbl (slot 2 is cPlants_update), which cPS2VisualEffectsMan_cPS2VisualEffectsMan installs in
  * the object it allocates as "Plants".
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
@@ -6816,10 +6816,10 @@ extern "C" sFontWord_67D8 cDynamicColourEmitter_getSubEmitterColour(void* self, 
 //100%
 INCLUDE_ASM("render/font", cTube_cTube);
 #ifdef SKIP_ASM
-extern char D_004930A0[];
+extern char cTube_vtbl[];
 
 /**
- * Stores vtable D_004930A0 in @p self and returns it.
+ * Stores vtable cTube_vtbl in @p self and returns it.
  *
  * No caller: cPS2VisualEffectsMan_cPS2VisualEffectsMan writes the same vtable inline into the object it allocates as
  * "Tube".
@@ -6828,7 +6828,7 @@ extern char D_004930A0[];
  */
 extern "C" void* cTube_cTube(void** self)
 {
-    *self = D_004930A0;
+    *self = cTube_vtbl;
     return self;
 }
 #endif
@@ -6844,7 +6844,7 @@ extern char D_00488680[];
  * Destructor body for the visual effect allocated as "Tube": stores the cVisualEffect base vtable D_00488680 and frees
  * the object when bit 0 of @p flags is set.
  *
- * Slot 1 of vtable D_004930A0 (slot 2 cTube_update, slot 3 the empty cTube_render).
+ * Slot 1 of vtable cTube_vtbl (slot 2 cTube_update, slot 3 the empty cTube_render).
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
@@ -6962,7 +6962,7 @@ INCLUDE_ASM("render/font", cTube_render__FPv);
 /**
  * Does nothing.
  *
- * Slot 3 of vtable D_004930A0 (the "Tube" effect); D_00493068 overrides that slot with cSimpleTube_render, which draws the
+ * Slot 3 of vtable cTube_vtbl (the "Tube" effect); cSimpleTube_vtbl overrides that slot with cSimpleTube_render, which draws the
  * tube.
  */
 void cTube_render(void* self)
@@ -6976,7 +6976,7 @@ INCLUDE_ASM("render/font", func_003968D0);
 /**
  * Copies the 16-byte vector at @p src into entry @p index of the array at +0x8.
  *
- * Slot 5 of vtable D_00493068 (the object cSimpleTube_cSimpleTube builds; its destructor cSimpleTube__cSimpleTube frees the same +0x8
+ * Slot 5 of vtable cSimpleTube_vtbl (the object cSimpleTube_cSimpleTube builds; its destructor cSimpleTube__cSimpleTube frees the same +0x8
  * array). No bounds check.
  *
  * @param index  the entry
@@ -7000,7 +7000,7 @@ extern char D_00488680[];
  * Destructor body for the visual effect allocated as "PathArrow": stores the cVisualEffect base vtable D_00488680 and
  * frees the object when bit 0 of @p flags is set.
  *
- * Slot 1 of vtable D_00493038, which cPathArrow_cPathArrow installs (slots 2 and 3 are the empty cPathArrow_update and
+ * Slot 1 of vtable cPathArrow_vtbl, which cPathArrow_cPathArrow installs (slots 2 and 3 are the empty cPathArrow_update and
  * cPathArrow_render).
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
@@ -7020,7 +7020,7 @@ INCLUDE_ASM("render/font", cPathArrow_update__FPv);
 /**
  * Does nothing.
  *
- * Slot 2 of vtable D_00493038 (the "PathArrow" effect).
+ * Slot 2 of vtable cPathArrow_vtbl (the "PathArrow" effect).
  */
 void cPathArrow_update(void* self)
 {
@@ -7033,7 +7033,7 @@ INCLUDE_ASM("render/font", cPathArrow_render__FPv);
 /**
  * Does nothing.
  *
- * Slot 3 of vtable D_00493038 (the "PathArrow" effect).
+ * Slot 3 of vtable cPathArrow_vtbl (the "PathArrow" effect).
  */
 void cPathArrow_render(void* self)
 {
@@ -7051,7 +7051,7 @@ extern char D_00488680[];
  * Destructor body for the visual effect allocated as "DetailSystem": stores the cVisualEffect base vtable D_00488680
  * and frees the object when bit 0 of @p flags is set.
  *
- * Slot 1 of vtable D_00493000, which cDetailSystem_cDetailSystem installs (slot 2 cDetailSystem_update, slot 5 the empty cDetailSystem_addPatch).
+ * Slot 1 of vtable cDetailSystem_vtbl, which cDetailSystem_cDetailSystem installs (slot 2 cDetailSystem_update, slot 5 the empty cDetailSystem_addPatch).
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
@@ -7070,7 +7070,7 @@ INCLUDE_ASM("render/font", cDetailSystem_addPatch__FPv);
 /**
  * Does nothing.
  *
- * Slot 5 of vtable D_00493000 (the "DetailSystem" effect).
+ * Slot 5 of vtable cDetailSystem_vtbl (the "DetailSystem" effect).
  */
 void cDetailSystem_addPatch(void* self)
 {
@@ -7696,7 +7696,7 @@ extern char D_00488680[];
  * Destructor body for the visual effect allocated as "ScreenTint": stores the cVisualEffect base vtable D_00488680 and
  * frees the object when bit 0 of @p flags is set.
  *
- * Slot 1 of vtable D_00492FA0 (slot 2 cScreenTint_update, slot 3 cScreenTint_render), which
+ * Slot 1 of vtable cScreenTint_vtbl (slot 2 cScreenTint_update, slot 3 cScreenTint_render), which
  * cPS2VisualEffectsMan_cPS2VisualEffectsMan installs.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object

@@ -4,7 +4,7 @@
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cBEOptionInterface_revert(void* self);
 extern const char str_BEOptionInt[];
-extern void* D_0045ADC8[16];
+extern void* cBEOptionInterface_vtbl[16];
 extern void* cBEOptionInterface_instance;
 
 struct cBEOptionInterface {
@@ -28,7 +28,7 @@ void* cBEOptionInterface_getThis()
 {
     if (cBEOptionInterface_instance == 0) {
         cBEOptionInterface* mem = (cBEOptionInterface*)cMemMan_alloc(0x10, str_BEOptionInt, 0, 0);
-        mem->vtable = D_0045ADC8;
+        mem->vtable = cBEOptionInterface_vtbl;
         cBEOptionInterface_instance = mem;
         mem->field_0x8 = 0;
         cBEOptionInterface_revert(mem);

@@ -136,8 +136,8 @@ extern char str_AIVisualEffectsMan[];
 extern char str_VisualEffectsMan[];
 extern char str_SSXStatsMan[];
 extern void* cFEInput_vtbl[];
-extern void* D_0047CB60[];
-extern void* D_0047D070[];
+extern void* cAIVisualEffectsObjNode_vtbl[];
+extern void* cVisualEffectsObjNode_vtbl[];
 extern void* cSSXStatsObjNode_vtbl[];
 
 struct sVEntryGL {
@@ -385,13 +385,13 @@ extern "C" void cGame_load(cGame* self)
     }
     sNamedGL* objNode = (sNamedGL*)operator new(20, str_AIVisualEffectsMan, 0, 0);
     cObjNode_cObjNode1(objNode, 6);
-    objNode->vtbl = D_0047CB60;
+    objNode->vtbl = cAIVisualEffectsObjNode_vtbl;
     void* result = cAIVisualEffectsMan_construct();
     self->AIVisualEffectsMan = (cAIVisualEffectsObjNode*)objNode;
     objNode->obj = result;
     objNode = (sNamedGL*)operator new(20, str_VisualEffectsMan, 0, 0);
     cObjNode_cObjNode1(objNode, 3);
-    objNode->vtbl = D_0047D070;
+    objNode->vtbl = cVisualEffectsObjNode_vtbl;
     result = cVisualEffectsMan_construct();
     self->VisualEffectsMan = (cVisualEffectsObjNode*)objNode;
     objNode->obj = result;
@@ -2504,7 +2504,7 @@ extern char* cAppMan_TheAppMan;
  * Lets a load screen lose focus only when the app's progress value (cAppMan_TheAppMan + 0x38) is exactly 100.
  *
  * Then it returns cFadeScreen_loseFocus; otherwise 0. It fills the loseFocus slot (+0x24) of cFELoadScreen_vtbl and
- * D_0047D818. The tree now calls this function cLoadScreen_loseFocus.
+ * cLoadScreen_vtbl. The tree now calls this function cLoadScreen_loseFocus.
  *
  * @return cFadeScreen_loseFocus's result, or 0
  */
@@ -2525,7 +2525,7 @@ INCLUDE_ASM("main/gameload", cLoadScreen_update__FPv);
 /**
  * Updates a load screen: calls cFadeScreen_update.
  *
- * It fills the update slot (+0x34) of the load-screen vtable D_0047D818; cFELoadScreen_update and the pre-start
+ * It fills the update slot (+0x34) of the load-screen vtable cLoadScreen_vtbl; cFELoadScreen_update and the pre-start
  * screens' updates call it too.
  *
  * @return cFadeScreen_update's result
@@ -2539,10 +2539,10 @@ void* cLoadScreen_update(void* self)
 //100%
 INCLUDE_ASM("main/gameload", cFadeScreen_cFadeScreen);
 #ifdef SKIP_ASM
-extern char D_0047D980[];
+extern char cFadeScreen_vtbl[];
 
 /**
- * Constructs a screen fade: vtable D_0047D980, fade timer (+0x4) 0.2, ending flag (+0x8) 0.
+ * Constructs a screen fade: vtable cFadeScreen_vtbl, fade timer (+0x4) 0.2, ending flag (+0x8) 0.
  *
  * cGame_cGame, cFE_cFE, the debug front end and the load-screen constructors call it for their fade base.
  *
@@ -2550,7 +2550,7 @@ extern char D_0047D980[];
  */
 extern "C" void* cFadeScreen_cFadeScreen(void* self)
 {
-    *(void**)((char*)self + 0) = D_0047D980;
+    *(void**)((char*)self + 0) = cFadeScreen_vtbl;
     *(float*)((char*)self + 4) = 0.20000000298023224f;
     *(int*)((char*)self + 8) = 0;
     return self;

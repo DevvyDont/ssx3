@@ -1613,19 +1613,19 @@ extern "C" void cRealFE_loadStartState(sRealFE_1A2C40* self)
 INCLUDE_ASM("fe/fereal", cFESound_cFESound);
 #ifdef SKIP_ASM
 void* cUISoundInterface_cUISoundInterface(void* self);
-extern void* D_00469348[];
+extern void* cFESound_vtbl[];
 
 /**
  * Constructs the front end's sound interface.
  *
- * Runs the base constructor cUISoundInterface_cUISoundInterface, stores the vtable D_00469348 and zeroes +0x4.
+ * Runs the base constructor cUISoundInterface_cUISoundInterface, stores the vtable cFESound_vtbl and zeroes +0x4.
  *
  * @return @p self
  */
 extern "C" void* cFESound_cFESound(void* self)
 {
     cUISoundInterface_cUISoundInterface(self);
-    *(void***)self = D_00469348;
+    *(void***)self = cFESound_vtbl;
     *(int*)((char*)self + 0x4) = 0;
     return self;
 }
@@ -1638,7 +1638,7 @@ INCLUDE_ASM("fe/fereal", cFESound_playSound);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_MenuSound(void* snd, int a1);
 /**
- * Plays the front-end menu sound for a UI sound event (vtable D_00469348 entry 2, playSound).
+ * Plays the front-end menu sound for a UI sound event (vtable cFESound_vtbl entry 2, playSound).
  *
  * Event 1 plays menu sound 2, 2 plays 3, 3 plays 1, 4 plays 4 and 5 and 6 play 0 (cSSXAudio_MenuSound on
  * cAudioInterface_bxAudio()); other events are silent.

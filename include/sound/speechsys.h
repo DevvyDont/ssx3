@@ -10,7 +10,7 @@
 //   cSpeechSys : virtual cStreamSys (: virtual cBankManager : cAsyncSys, cBankMonitor, virtual cSoundSys)
 // Non-virtual part 0x1C0 [R]: in a complete cSpeechSys the ctor (inchrg != 0) puts cSoundSys at +0x1C0, cBankManager
 // at +0x1C8 and cStreamSys at +0xC98; in cSSXAudio the cController data starts at 0x5560 + 0x1C0 = 0x5720. Vtable
-// D_00483870 (cSpeechSys / cController), D_004836D8 (cSSXAudio). The struct below is the NON-VIRTUAL part.
+// cSpeechSys_vtbl (cSpeechSys / cController), D_004836D8 (cSSXAudio). The struct below is the NON-VIRTUAL part.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance. Evidence tags:
 //   [R] retail constructor cSpeechSys_cSpeechSys and destructor cSpeechSys__cSpeechSys;
@@ -46,7 +46,7 @@ struct cSpeechSys {
     char unk_014[0x4];                  // 0x014 no access found
     tSpeechRequest mRequest[10];        // 0x018 [R] ctor clears every used flag (func_002B1428); [U] func_002B1458/func_002B1520/func_002B16A0/func_002B1720
     char mBigFileName[5][0x14];         // 0x158 [R] ctor copies "audio/speech.big", "audio/english.big", "audio/french.big", "audio/german.big", "audio/spanish.big"; [U] retail accessor func_002BAD00 returns this + 0x158 + 20 * i
-    void** mVtbl;                       // 0x1BC [R] cSpeechSys vptr: D_00483870 (cSpeechSys ctor/dtor), D_004836D8 in cSSXAudio; [U] func_002B1268 calls slot 3 through it
+    void** mVtbl;                       // 0x1BC [R] cSpeechSys vptr: cSpeechSys_vtbl (cSpeechSys ctor/dtor), D_004836D8 in cSSXAudio; [U] func_002B1268 calls slot 3 through it
 };
 
 CHECK_OFFSET(tSpeechRequest, used, 0x00);

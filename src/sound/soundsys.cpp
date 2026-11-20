@@ -15673,12 +15673,12 @@ extern "C" int func_002A8B28(cMidiSys* midiSys, char* obj)
 //100%
 INCLUDE_ASM("sound/soundsys", cPS2SoundManager_cPS2SoundManager);
 #ifdef SKIP_ASM
-extern char D_004835F8[];
+extern char cPS2SoundManager_vtbl[];
 
 /**
  * Constructs the PS2 sound manager.
  *
- * Stores the vtable D_004835F8 and resets the state: no mSoundHeap, driver mode unk_008 0, mMainMemHighAddr -1, empty
+ * Stores the vtable cPS2SoundManager_vtbl and resets the state: no mSoundHeap, driver mode unk_008 0, mMainMemHighAddr -1, empty
  * unused-node and free-block lists (unk_310 / unk_318 -1) and load limits off (unk_31C 0). The nodes are set up later
  * by cPS2SoundManager_Init.
  *
@@ -15686,7 +15686,7 @@ extern char D_004835F8[];
  */
 extern "C" void* cPS2SoundManager_cPS2SoundManager(cPS2SoundManager* self)
 {
-    *(void**)self = D_004835F8;
+    *(void**)self = cPS2SoundManager_vtbl;
     self->mSoundHeap = 0;
     self->unk_008 = 0;
     self->mMainMemHighAddr = -1;
@@ -15706,14 +15706,14 @@ void operator_delete(int*);
 /**
  * Destroys the PS2 sound manager, freeing its sound heap.
  *
- * Restores the class vtable (D_004835F8), frees mSoundHeap with cMemMan_free when set, and deletes the object when bit
+ * Restores the class vtable (cPS2SoundManager_vtbl), frees mSoundHeap with cMemMan_free when set, and deletes the object when bit
  * 0 of @p flags is set.
  *
  * @param flags  g++ 2.95 in-charge flags; bit 0 deletes the object
  */
 extern "C" void cPS2SoundManager__cPS2SoundManager(cPS2SoundManager* self, int flags)
 {
-    *(void**)self = D_004835F8;
+    *(void**)self = cPS2SoundManager_vtbl;
     void* soundHeap = self->mSoundHeap;
     if (soundHeap != 0) {
         cMemMan_free(soundHeap);

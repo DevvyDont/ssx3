@@ -4319,20 +4319,20 @@ void cDeadFadeNode_signal(void* self)
 }
 #endif
 
-extern void* D_00491800[];
+extern void* cHideNode_vtbl[];
 extern "C" void* cInstanceNode__cInstanceNode(void*);
 
 //100%
 INCLUDE_ASM("object/railmodifier", cHideNode__cHideNode__FPv);
 #ifdef SKIP_ASM
 /**
- * Destroys a hide node: reinstalls D_00491800 and runs cInstanceNode__cInstanceNode (which forwards the delete flags).
+ * Destroys a hide node: reinstalls cHideNode_vtbl and runs cInstanceNode__cInstanceNode (which forwards the delete flags).
  *
  * @return cInstanceNode__cInstanceNode's result
  */
 void* cHideNode__cHideNode(void* self)
 {
-    *(int*)((char*)self + 0xc) = (int)(void*)D_00491800;
+    *(int*)((char*)self + 0xc) = (int)(void*)cHideNode_vtbl;
     return cInstanceNode__cInstanceNode(self);
 }
 #endif
@@ -4381,21 +4381,21 @@ void cHideNode_onCollide(void* self)
 }
 #endif
 
-extern void* D_00491680[];
+extern void* cRestoreNode_vtbl[];
 extern "C" void* cInstanceNode__cInstanceNode(void*);
 
 //100%
 INCLUDE_ASM("object/railmodifier", cRestoreNode__cRestoreNode__FPv);
 #ifdef SKIP_ASM
 /**
- * Destroys a restore node: reinstalls D_00491680 and runs cInstanceNode__cInstanceNode (which forwards the delete
+ * Destroys a restore node: reinstalls cRestoreNode_vtbl and runs cInstanceNode__cInstanceNode (which forwards the delete
  * flags).
  *
  * @return cInstanceNode__cInstanceNode's result
  */
 void* cRestoreNode__cRestoreNode(void* self)
 {
-    *(int*)((char*)self + 0xc) = (int)(void*)D_00491680;
+    *(int*)((char*)self + 0xc) = (int)(void*)cRestoreNode_vtbl;
     return cInstanceNode__cInstanceNode(self);
 }
 #endif
@@ -5174,7 +5174,7 @@ extern "C" void cMoveNode_updateRootTransform(cMoveNode* self)
 }
 #endif
 
-extern void* D_00490E80[];
+extern void* cObjectNode_vtbl[];
 extern "C" void* cMoveNode__cMoveNode(void*);
 
 //100%
@@ -5479,13 +5479,13 @@ extern "C" void cMoveNode_fadeEffectModifier(cMoveNode* moveNode) {
 INCLUDE_ASM("object/railmodifier", cObjectNode__cObjectNode__FPv);
 #ifdef SKIP_ASM
 /**
- * Destroys an object node: reinstalls D_00490E80 and runs cMoveNode__cMoveNode (which forwards the delete flags).
+ * Destroys an object node: reinstalls cObjectNode_vtbl and runs cMoveNode__cMoveNode (which forwards the delete flags).
  *
  * @return cMoveNode__cMoveNode's result
  */
 void* cObjectNode__cObjectNode(void* self)
 {
-    *(int*)((char*)self + 0xc) = (int)(void*)D_00490E80;
+    *(int*)((char*)self + 0xc) = (int)(void*)cObjectNode_vtbl;
     return cMoveNode__cMoveNode(self);
 }
 #endif
@@ -5842,11 +5842,11 @@ extern "C" int cMeshAnimFrame_getFrameMatrix(int frame) {
 INCLUDE_ASM("object/railmodifier", cCamAnimFrame_cCamAnimFrame1);
 #ifdef SKIP_ASM
 extern void* cAnimFrame_vtbl[];
-extern void* D_00490AB0[];
+extern void* cCamAnimFrame_vtbl[];
 extern "C" void cAnimFrame_init(void*);
 
 /**
- * Constructs an empty camera animation frame: the cAnimFrame part (cAnimFrame_vtbl, cAnimFrame_init), then D_00490AB0.
+ * Constructs an empty camera animation frame: the cAnimFrame part (cAnimFrame_vtbl, cAnimFrame_init), then cCamAnimFrame_vtbl.
  *
  * @return self
  */
@@ -5854,7 +5854,7 @@ extern "C" void* cCamAnimFrame_cCamAnimFrame1(void* self)
 {
     *(int*)((char*)self + 0x84) = (int)(void*)cAnimFrame_vtbl;
     cAnimFrame_init(self);
-    *(int*)((char*)self + 0x84) = (int)(void*)D_00490AB0;
+    *(int*)((char*)self + 0x84) = (int)(void*)cCamAnimFrame_vtbl;
     return self;
 }
 #endif
@@ -6094,21 +6094,21 @@ void cDebounceNode_onCollide(void* self)
 }
 #endif
 
-extern void* D_00490570[];
+extern void* cConveyorNode_vtbl[];
 extern "C" void* cInstanceNode__cInstanceNode(void*);
 
 //100%
 INCLUDE_ASM("object/railmodifier", cConveyorNode__cConveyorNode__FPv);
 #ifdef SKIP_ASM
 /**
- * Destroys a conveyor node: reinstalls D_00490570 and runs cInstanceNode__cInstanceNode (which forwards the delete
+ * Destroys a conveyor node: reinstalls cConveyorNode_vtbl and runs cInstanceNode__cInstanceNode (which forwards the delete
  * flags).
  *
  * @return cInstanceNode__cInstanceNode's result
  */
 void* cConveyorNode__cConveyorNode(void* self)
 {
-    *(int*)((char*)self + 0xc) = (int)(void*)D_00490570;
+    *(int*)((char*)self + 0xc) = (int)(void*)cConveyorNode_vtbl;
     return cInstanceNode__cInstanceNode(self);
 }
 #endif

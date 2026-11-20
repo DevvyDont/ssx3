@@ -2,7 +2,7 @@
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BEAggressionInt[];
-extern void* D_0045AC48[16];
+extern void* cBEAggressionInterface_vtbl[16];
 extern void* cBEAggressionInterface_instance;
 
 struct cBEAggressionInterface {
@@ -26,7 +26,7 @@ void* cBEAggressionInterface_getThis()
     if (cBEAggressionInterface_instance == 0) {
         cBEAggressionInterface* mem = (cBEAggressionInterface*)cMemMan_alloc(0x10, str_BEAggressionInt, 0, 0);
         mem->field_0x8 = 0;
-        mem->vtable = D_0045AC48;
+        mem->vtable = cBEAggressionInterface_vtbl;
         cBEAggressionInterface_instance = mem;
     }
     return cBEAggressionInterface_instance;
@@ -37,7 +37,7 @@ void* cBEAggressionInterface_getThis()
 INCLUDE_ASM("be/beintaggression", cBEAggressionInterface_submit__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: the aggression interface's submit (slot 1 of its vtable D_0045AC48).
+ * Does nothing: the aggression interface's submit (slot 1 of its vtable cBEAggressionInterface_vtbl).
  */
 void cBEAggressionInterface_submit(void* self)
 {
@@ -48,7 +48,7 @@ void cBEAggressionInterface_submit(void* self)
 INCLUDE_ASM("be/beintaggression", cBEAggressionInterface_discard__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: the aggression interface's discard (slot 2 of its vtable D_0045AC48).
+ * Does nothing: the aggression interface's discard (slot 2 of its vtable cBEAggressionInterface_vtbl).
  */
 void cBEAggressionInterface_discard(void* self)
 {

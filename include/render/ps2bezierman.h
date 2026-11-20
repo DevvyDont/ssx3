@@ -5,7 +5,7 @@
 // (4x4, 6x6, 8x8 tessellation, or mixed edges) and draws them through three VIF caches. Retail keeps On Tour's PSP
 // class name (cPS2BezierMan_cPS2BezierMan__FPv, vtables.tsv); the allocation tag says "PS2BezierMan".
 // Size 0x9C90: [R] cBezierMan_construct__Fv (render/bezierman) does cMemMan_alloc(0x9C90, "PS2BezierMan") + the ctor
-// cPS2BezierMan_cPS2BezierMan__FPv (render/ps2bezierman): cBezierMan ctor cBezierMan_cBezierMan (vtable D_00493820, stores
+// cPS2BezierMan_cPS2BezierMan__FPv (render/ps2bezierman): cBezierMan ctor cBezierMan_cBezierMan (vtable cBezierMan_vtbl, stores
 // TheBezierMan), vtable D_00493760, func_00372B30 on this + 0x10, then Init (cPS2BezierMan_Init). Dtor cPS2BezierMan__cPS2BezierMan (Purge,
 // then cBezierMan dtor cBezierMan__cBezierMan, which clears TheBezierMan).
 // Bases: cBezierMan (On Tour 0x8: m_currPatchDist 0x0, then its vptr at 0x4) <- cPS2BezierMan.
@@ -15,7 +15,7 @@
 // 10-12 EnableWireMode/EnableLightMaps/EnableShadows cPS2BezierMan_EnableWireMode/F0/F8__FPvi, 13-15 IsWireModeEnabled/
 // IsLightMapsEnabled/IsShadowsEnabled cPS2BezierMan_IsWireModeEnabled/08/10__FPv, 16 ClearPatches cPS2BezierMan_ClearPatches__FPv, 17 DrawPatches
 // cPS2BezierMan_DrawPatches, 18/19 SetPatchDist/GetPatchDist cBezierMan_SetPatchDist__FPvf / cBezierMan_GetPatchDist__FPv (cBezierMan's), 20 AddPatch
-// cPS2BezierMan_AddPatch, 21 func_0038B190 (queues one patch by its edge LODs). cBezierMan's own slots (D_00493820):
+// cPS2BezierMan_AddPatch, 21 func_0038B190 (queues one patch by its edge LODs). cBezierMan's own slots (cBezierMan_vtbl):
 // cBezierMan_Reset__FPv (3), cBezierMan_UpdatePatchesCache__FPv (4), cBezierMan_AddPatch (21: calls slot 20). Non-virtual accessors:
 // cPS2BezierMan_GetVifCache (cache pointer + slot), cPS2BezierMan_GetBezST (lw 0x1A0), cPS2BezierMan_GetBezdST (lw 0x320).
 // Instance global: cBezierMan_TheBezierMan (gp+0x1158) = cBezierMan::TheBezierMan (cBezierMan_cBezierMan stores it, cBezierMan__cBezierMan clears
@@ -60,7 +60,7 @@ CHECK_SIZE(tBezierMixedPatchEntry, 0x14);
 struct cPS2BezierMan {
     // --- cBezierMan
     float m_currPatchDist;           // 0x0000 [O]; [U] cBezierMan_SetPatchDist SetPatchDist (swc1), cBezierMan_GetPatchDist GetPatchDist (lwc1)
-    void** mVtbl;                    // 0x0004 [R] D_00493820 (cBezierMan ctor/dtor), D_00493760 (ctor, dtor cPS2BezierMan__cPS2BezierMan)
+    void** mVtbl;                    // 0x0004 [R] cBezierMan_vtbl (cBezierMan ctor/dtor), D_00493760 (ctor, dtor cPS2BezierMan__cPS2BezierMan)
     // --- cPS2BezierMan
     char unk_0008[0x8];              // 0x0008 (no retail access found)
     char mPatchCache[0x32C];         // 0x0010 [R] func_00372B30 / func_00372B78(this + 0x10, 900, 220, 140, ...) in the

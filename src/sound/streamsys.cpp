@@ -1452,7 +1452,7 @@ extern "C" void* func_002B28C0(void* self, int embedded, int a2, int a3, int hea
 extern "C" void* cSpeechSys_cSpeechSys(void* self, int embedded, int a2, int a3, int heap);
 extern void* D_004838F8[];
 extern void* D_004837F8[];
-extern void* D_00483870[];
+extern void* cSpeechSys_vtbl[];
 
 struct sSsVEntryB200 {
     short delta;
@@ -1480,7 +1480,7 @@ extern const sSsVtblCB200 D_004837A0_B200 __asm__("D_004837A0");
  * cBankManager (+0x5730) and cStreamSys (+0x6200). Then cCrowdSys_cCrowdSys, the music system (func_002B28C0 at +0x118)
  * and cSpeechSys_cSpeechSys (+0x5560) run, and the cController vtables D_004837D8, D_00483760 and D_004837A0 are
  * installed on the bases (temporary copies with adjusted deltas when not complete). Finally the primary vtables
- * D_004838F8, D_00483870 and D_004837F8 are stored and +0x5720 is cleared.
+ * D_004838F8, cSpeechSys_vtbl and D_004837F8 are stored and +0x5720 is cleared.
  *
  * @param embedded  nonzero to also construct the virtual bases (the in-charge flag)
  * @param maxBanks  the maximum number of banks
@@ -1524,7 +1524,7 @@ extern "C" char* cController_cController(char* self, int embedded, int maxBanks,
         bankMgrVtbl.e[1].delta = D_004837A0_B200.e[1].delta + bankMgrDelta;
     }
     *(void***)(self + 0x5558) = D_004838F8;
-    *(void***)(self + 0x571C) = D_00483870;
+    *(void***)(self + 0x571C) = cSpeechSys_vtbl;
     *(void***)(self + 0xC) = D_004837F8;
     *(int*)(self + 0x5720) = 0;
     return self;
@@ -1543,7 +1543,7 @@ extern "C" void cSpeechSys__cSpeechSys(char* self, int flags);
 extern "C" void func_002B3398(char* self, int flags);
 extern void* D_004838F8[];
 extern void* D_004837F8[];
-extern void* D_00483870[];
+extern void* cSpeechSys_vtbl[];
 
 struct sSsVEntryB478 {
     short delta;
@@ -1579,7 +1579,7 @@ extern "C" void cController__cController(char* self, int flags)
     char* mon = self + 0x118;
     char* bank = self + 0x5560;
     *(void***)(self + 0x5558) = D_004838F8;
-    *(void***)(self + 0x571C) = D_00483870;
+    *(void***)(self + 0x571C) = cSpeechSys_vtbl;
     *(void***)(self + 0xC) = D_004837F8;
     *(const sSsVtblAB478**)(*(char**)(**(char***)(self + 0x118) + 0x1D8) + 4) = &D_004837D8;
     *(const sSsVtblBB478**)(**(char***)(self + 0x118) + 0xAB0) = &D_00483760;

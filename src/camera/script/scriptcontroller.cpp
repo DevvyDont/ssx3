@@ -253,7 +253,7 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptAlgorithm_cScriptAlgorithm)
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void* D_0045BDE0[];
-extern void* D_0045C8B8[];
+extern void* cScriptAlgorithm_vtbl[];
 struct sVec4K9418 { float x, y, z, w; } __attribute__((aligned(16)));
 // Same object as the unit's later `extern cScriptManualAlgorithm_cScriptManualAlgorithm_sVec4 t4vect_Origin;` (that type is defined below this point).
 extern sVec4K9418 D_004FF130_K9418 __asm__("t4vect_Origin");
@@ -275,7 +275,7 @@ struct sCamCtlK9418 {
  * Constructs the generic script camera algorithm base: default view, script controller of the first view.
  *
  * Installs the cCameraAlgorithm vtable (D_0045BDE0) to read cCameraAlgorithm_getDefaultView, then the
- * cScriptAlgorithm vtable (D_0045C8B8) at +0x10; sets the type (+0xC) to 0x55 (On Tour SCRIPT_GENERIC), view,
+ * cScriptAlgorithm vtable (cScriptAlgorithm_vtbl) at +0x10; sets the type (+0xC) to 0x55 (On Tour SCRIPT_GENERIC), view,
  * near 10 and far 30000, clears the script object (+0x14), takes the controller (+0x18) from the first view
  * camera's script controller (+0xAC) and sets the target (+0x20) to t4vect_Origin.
  *
@@ -288,7 +288,7 @@ extern "C" void* cScriptAlgorithm_cScriptAlgorithm(void* object)
     self->vtbl = D_0045BDE0;
     float fov = cCameraAlgorithm_getDefaultView(self);
     self->type = 85;
-    self->vtbl = D_0045C8B8;
+    self->vtbl = cScriptAlgorithm_vtbl;
     self->fov = fov;
     self->nearZ = 10.0f;
     self->farZ = 30000.0f;

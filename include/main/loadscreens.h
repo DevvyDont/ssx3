@@ -26,7 +26,7 @@ CHECK_OFFSET(cInitLoadScreen, ending, 0x08);
 CHECK_SIZE(cInitLoadScreen, 0xC);
 
 struct cLoadScreen {
-    void** mVtbl;                   // 0x00 [R] ctor = its vtable (D_0047D818)
+    void** mVtbl;                   // 0x00 [R] ctor = its vtable (cLoadScreen_vtbl)
     char unk_004[0x8];              // 0x04 On Tour's base part; no retail access
     cUIEngine* mpUI;                // 0x0C [O]; [R] ctor
 };
@@ -52,7 +52,7 @@ CHECK_OFFSET(cPreGameLoadScreen, ending, 0x04);
 CHECK_SIZE(cPreGameLoadScreen, 0x8);
 
 struct cPreFELoadScreen {
-    void** mVtbl;                   // 0x00 [R] ctor = its vtable (D_0047D860)
+    void** mVtbl;                   // 0x00 [R] ctor = its vtable (cPreFELoadScreen_vtbl)
     int ending;                     // 0x04 [O] (On Tour bool); [U] loseFocus, update
 };
 

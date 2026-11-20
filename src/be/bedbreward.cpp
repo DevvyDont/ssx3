@@ -520,10 +520,10 @@ extern "C" void cBENewRaceInterface_setNewRaceActive(int isActive) {
 //100%
 INCLUDE_ASM("be/bedbreward", cBENewRaceInterface_cBENewRaceInterface);
 #ifdef SKIP_ASM
-extern char D_0045AE58[];
+extern char cBENewRaceInterface_vtbl[];
 
 /**
- * Constructs the new-race interface in place: stores its vtable D_0045AE58 at +0xC and returns @p self.
+ * Constructs the new-race interface in place: stores its vtable cBENewRaceInterface_vtbl at +0xC and returns @p self.
  *
  * The vtable's submit and discard (slots 1, 2) are cBENewRaceInterface_submit and cBENewRaceInterface_discard; the replay slots are
  * cBEInterface's.
@@ -532,7 +532,7 @@ extern char D_0045AE58[];
  */
 extern "C" void* cBENewRaceInterface_cBENewRaceInterface(void* self)
 {
-    *(char**)((char*)self + 0xC) = D_0045AE58;
+    *(char**)((char*)self + 0xC) = cBENewRaceInterface_vtbl;
     return self;
 }
 #endif
@@ -571,7 +571,7 @@ extern "C" void cBENewPlayerInterface_setNewPlayerActive(int isActive) {
 INCLUDE_ASM("be/bedbreward", cBEMissionInterface_submit__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: the mission interface's submit (slot 1 of its vtable D_0045ADF8).
+ * Does nothing: the mission interface's submit (slot 1 of its vtable cBEMissionInterface_vtbl).
  */
 void cBEMissionInterface_submit(void* self)
 {
@@ -582,7 +582,7 @@ void cBEMissionInterface_submit(void* self)
 INCLUDE_ASM("be/bedbreward", cBEMissionInterface_discard__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: the mission interface's discard (slot 2 of its vtable D_0045ADF8).
+ * Does nothing: the mission interface's discard (slot 2 of its vtable cBEMissionInterface_vtbl).
  */
 void cBEMissionInterface_discard(void* self)
 {
@@ -648,10 +648,10 @@ extern "C" void cBEMissionInterface_setMissionActive(int isActive) {
 //100%
 INCLUDE_ASM("be/bedbreward", cBEMissionInterface_cBEMissionInterface);
 #ifdef SKIP_ASM
-extern char D_0045ADF8[];
+extern char cBEMissionInterface_vtbl[];
 
 /**
- * Constructs the mission interface in place: stores its vtable D_0045ADF8 at +0xC and returns @p self.
+ * Constructs the mission interface in place: stores its vtable cBEMissionInterface_vtbl at +0xC and returns @p self.
  *
  * The vtable holds cBEMissionInterface_submit / cBEMissionInterface_discard (submit, discard) and cBEMissionInterface_writeToReplayFrame / cBEMissionInterface_readFromReplayFrame (replay write,
  * read).
@@ -660,7 +660,7 @@ extern char D_0045ADF8[];
  */
 extern "C" void* cBEMissionInterface_cBEMissionInterface(void* self)
 {
-    *(char**)((char*)self + 0xC) = D_0045ADF8;
+    *(char**)((char*)self + 0xC) = cBEMissionInterface_vtbl;
     return self;
 }
 #endif
@@ -1130,10 +1130,10 @@ extern "C" void cBEOptionInterface_setOptionActive(int isActive) {
 //100%
 INCLUDE_ASM("be/bedbreward", cBEOptionInterface_cBEOptionInterface);
 #ifdef SKIP_ASM
-extern char D_0045ADC8[];
+extern char cBEOptionInterface_vtbl[];
 
 /**
- * Constructs the option interface in place: stores its vtable D_0045ADC8 at +0xC and returns @p self.
+ * Constructs the option interface in place: stores its vtable cBEOptionInterface_vtbl at +0xC and returns @p self.
  *
  * The vtable's submit and discard are cBEOptionInterface_submit and cBEOptionInterface_discard; the replay slots are cBEInterface's.
  *
@@ -1141,7 +1141,7 @@ extern char D_0045ADC8[];
  */
 extern "C" void* cBEOptionInterface_cBEOptionInterface(void* self)
 {
-    *(char**)((char*)self + 0xC) = D_0045ADC8;
+    *(char**)((char*)self + 0xC) = cBEOptionInterface_vtbl;
     return self;
 }
 #endif
@@ -1667,10 +1667,10 @@ extern "C" int cBENetworkInterface_getOverallOpponentLevel(void)
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_cBENetworkInterface);
 #ifdef SKIP_ASM
-extern char D_0045AD98[];
+extern char cBENetworkInterface_vtbl[];
 
 /**
- * Constructs the network interface in place: stores its vtable D_0045AD98 at +0xC and returns @p self.
+ * Constructs the network interface in place: stores its vtable cBENetworkInterface_vtbl at +0xC and returns @p self.
  *
  * The vtable's submit and discard are cBENetworkInterface_submit / cBENetworkInterface_discard (copy networkOpt to and from the library).
  *
@@ -1678,7 +1678,7 @@ extern char D_0045AD98[];
  */
 extern "C" void* cBENetworkInterface_cBENetworkInterface(cBENetworkInterface* self)
 {
-    self->mVtbl = (void**)D_0045AD98;
+    self->mVtbl = (void**)cBENetworkInterface_vtbl;
     return ((void*)self);
 }
 #endif
@@ -1805,10 +1805,10 @@ extern "C" void cBEBAGTInterface_setBAGTActive(int isActive) {
 //100%
 INCLUDE_ASM("be/bedbreward", cBEBAGTInterface_cBEBAGTInterface);
 #ifdef SKIP_ASM
-extern char D_0045ACD8[];
+extern char cBEBAGTInterface_vtbl[];
 
 /**
- * Constructs the BAGT interface in place: stores its vtable D_0045ACD8 at +0xC and returns @p self.
+ * Constructs the BAGT interface in place: stores its vtable cBEBAGTInterface_vtbl at +0xC and returns @p self.
  *
  * The vtable's submit and discard are cBEBAGTInterface_submit and cBEBAGTInterface_discard.
  *
@@ -1816,7 +1816,7 @@ extern char D_0045ACD8[];
  */
 extern "C" void* cBEBAGTInterface_cBEBAGTInterface(void* self)
 {
-    *(char**)((char*)self + 0xC) = D_0045ACD8;
+    *(char**)((char*)self + 0xC) = cBEBAGTInterface_vtbl;
     return self;
 }
 #endif
@@ -1961,16 +1961,16 @@ extern "C" void cBEAggressionInterface_setAggressionActive(int isActive) {
 //100%
 INCLUDE_ASM("be/bedbreward", cBEAggressionInterface_cBEAggressionInterface);
 #ifdef SKIP_ASM
-extern char D_0045AC48[];
+extern char cBEAggressionInterface_vtbl[];
 
 /**
- * Constructs the aggression interface in place: stores its vtable D_0045AC48 at +0xC and returns @p self.
+ * Constructs the aggression interface in place: stores its vtable cBEAggressionInterface_vtbl at +0xC and returns @p self.
  *
  * @return @p self
  */
 extern "C" void* cBEAggressionInterface_cBEAggressionInterface(void* self)
 {
-    *(char**)((char*)self + 0xC) = D_0045AC48;
+    *(char**)((char*)self + 0xC) = cBEAggressionInterface_vtbl;
     return self;
 }
 #endif

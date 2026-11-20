@@ -231,12 +231,12 @@ extern char D_00472778[];
 extern char D_00472850[];
 extern char cOVState_PAUSE_ONLINE_ERROR_vtbl[];
 extern char cOVState_PAUSE_OPTIONS_vtbl[];
-extern char D_00472C60[];
-extern char D_00472D38[];
-extern char D_00472E10[];
-extern char D_00472EE8[];
-extern char D_00472FC0[];
-extern char D_00473098[];
+extern char cOVState_PAUSE_ONLINE_vtbl[];
+extern char cOVState_PAUSE_QUICKPLAY_vtbl[];
+extern char cOVState_PAUSE_SPOKE_vtbl[];
+extern char cOVState_PAUSE_FREERIDE_vtbl[];
+extern char cOVState_PAUSE_BIGCHAL_vtbl[];
+extern char cOVState_PAUSE_COMPETE_vtbl[];
 extern char D_00473248[];
 extern char cOVState_MAP_vtbl[];
 extern char D_004733F8[];
@@ -277,7 +277,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x1) {
         char* overlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = D_00473098;
+        *(void**)(overlay + 0x8) = cOVState_PAUSE_COMPETE_vtbl;
         *(unsigned short*)(overlay + 0x58) = D_004A2088[0];
         *(int*)(overlay + 0x98) = type;
         *(int*)(overlay + 0x48) = 0;
@@ -289,7 +289,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x2) {
         char* overlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = D_00472FC0;
+        *(void**)(overlay + 0x8) = cOVState_PAUSE_BIGCHAL_vtbl;
         *(unsigned short*)(overlay + 0x58) = D_004A2088[0];
         *(int*)(overlay + 0x98) = type;
         *(int*)(overlay + 0x48) = 0;
@@ -301,7 +301,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x3) {
         char* overlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = D_00472EE8;
+        *(void**)(overlay + 0x8) = cOVState_PAUSE_FREERIDE_vtbl;
         *(unsigned short*)(overlay + 0x58) = D_004A2088[0];
         *(int*)(overlay + 0x98) = type;
         *(int*)(overlay + 0x48) = 0;
@@ -313,7 +313,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x4) {
         char* overlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = D_00472E10;
+        *(void**)(overlay + 0x8) = cOVState_PAUSE_SPOKE_vtbl;
         *(unsigned short*)(overlay + 0x58) = D_004A2088[0];
         *(int*)(overlay + 0x98) = type;
         *(int*)(overlay + 0x48) = 0;
@@ -325,7 +325,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x5) {
         char* overlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = D_00472D38;
+        *(void**)(overlay + 0x8) = cOVState_PAUSE_QUICKPLAY_vtbl;
         *(unsigned short*)(overlay + 0x58) = D_004A2088[0];
         *(int*)(overlay + 0x98) = type;
         *(int*)(overlay + 0x48) = 0;
@@ -337,7 +337,7 @@ extern "C" void cOVStateManager_triggerOverlay(int type)
     if (type == 0x6) {
         char* overlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
         cUIState_cUIState(overlay, mgr);
-        *(void**)(overlay + 0x8) = D_00472C60;
+        *(void**)(overlay + 0x8) = cOVState_PAUSE_ONLINE_vtbl;
         *(unsigned short*)(overlay + 0x58) = D_004A2088[0];
         *(int*)(overlay + 0x98) = type;
         *(int*)(overlay + 0x48) = 0;
@@ -737,12 +737,12 @@ extern char D_00472778[];
 extern char D_00472850[];
 extern char cOVState_PAUSE_ONLINE_ERROR_vtbl[];
 extern char cOVState_PAUSE_OPTIONS_vtbl[];
-extern char D_00472C60[];
-extern char D_00472D38[];
-extern char D_00472E10[];
-extern char D_00472EE8[];
-extern char D_00472FC0[];
-extern char D_00473098[];
+extern char cOVState_PAUSE_ONLINE_vtbl[];
+extern char cOVState_PAUSE_QUICKPLAY_vtbl[];
+extern char cOVState_PAUSE_SPOKE_vtbl[];
+extern char cOVState_PAUSE_FREERIDE_vtbl[];
+extern char cOVState_PAUSE_BIGCHAL_vtbl[];
+extern char cOVState_PAUSE_COMPETE_vtbl[];
 extern char D_00473248[];
 extern char cOVState_MAP_vtbl[];
 extern char D_004733F8[];
@@ -791,7 +791,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 0x1) {
         char* newOverlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = D_00473098;
+        *(void**)(newOverlay + 0x8) = cOVState_PAUSE_COMPETE_vtbl;
         *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
         *(int*)(newOverlay + 0x98) = type;
         *(int*)(newOverlay + 0x48) = 0;
@@ -803,7 +803,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 0x2) {
         char* newOverlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = D_00472FC0;
+        *(void**)(newOverlay + 0x8) = cOVState_PAUSE_BIGCHAL_vtbl;
         *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
         *(int*)(newOverlay + 0x98) = type;
         *(int*)(newOverlay + 0x48) = 0;
@@ -815,7 +815,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 0x3) {
         char* newOverlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = D_00472EE8;
+        *(void**)(newOverlay + 0x8) = cOVState_PAUSE_FREERIDE_vtbl;
         *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
         *(int*)(newOverlay + 0x98) = type;
         *(int*)(newOverlay + 0x48) = 0;
@@ -827,7 +827,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 0x4) {
         char* newOverlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = D_00472E10;
+        *(void**)(newOverlay + 0x8) = cOVState_PAUSE_SPOKE_vtbl;
         *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
         *(int*)(newOverlay + 0x98) = type;
         *(int*)(newOverlay + 0x48) = 0;
@@ -839,7 +839,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 0x5) {
         char* newOverlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = D_00472D38;
+        *(void**)(newOverlay + 0x8) = cOVState_PAUSE_QUICKPLAY_vtbl;
         *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
         *(int*)(newOverlay + 0x98) = type;
         *(int*)(newOverlay + 0x48) = 0;
@@ -851,7 +851,7 @@ extern "C" void cOVStateManager_triggerPopup(int type)
     if (type == 0x6) {
         char* newOverlay = (char*)operator new(276, str_cOVStateOverlay, 0, 0);
         cUIState_cUIState(newOverlay, mgr);
-        *(void**)(newOverlay + 0x8) = D_00472C60;
+        *(void**)(newOverlay + 0x8) = cOVState_PAUSE_ONLINE_vtbl;
         *(unsigned short*)(newOverlay + 0x58) = D_004A2088[0];
         *(int*)(newOverlay + 0x98) = type;
         *(int*)(newOverlay + 0x48) = 0;

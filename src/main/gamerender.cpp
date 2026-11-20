@@ -368,16 +368,16 @@ INCLUDE_ASM("main/gamerender", cGame_cGame);
 extern char cGame_vtbl[];
 extern char cGFReplayStartState_vtbl[];
 extern char cGFPodiumState_vtbl[];
-extern char D_0047D218[];
-extern char D_0047D270[];
+extern char cGFPostEventState_vtbl[];
+extern char cGFPreEventState_vtbl[];
 extern char cGFSessionTeleportState_vtbl[];
 extern char cGFNextHeatState_vtbl[];
-extern char D_0047D480[];
+extern char cGFRidingState_vtbl[];
 extern char cGFGateState_vtbl[];
-extern char D_0047D588[];
+extern char cGFTransportWaitState_vtbl[];
 extern char D_0047D638[];
-extern char D_0047D690[];
-extern char D_0047D6E8[];
+extern char cGFEndState_vtbl[];
+extern char cGameState_vtbl[];
 extern char* cGameState_mpGame;
 extern int D_004A2A54;
 extern "C" void cFadeScreen_cFadeScreen(void* self);
@@ -397,7 +397,7 @@ struct sArr_22E968 {
 
 static inline void Base_22E968(char* s, int off)
 {
-    *(void**)(s + off + 0xC) = D_0047D6E8;
+    *(void**)(s + off + 0xC) = cGameState_vtbl;
     *(int*)(s + off + 0x0) = 0;
     cGameState_mpGame = 0;
 }
@@ -435,14 +435,14 @@ extern "C" char* cGame_cGame(cGame* self)
     func_00244240(0);
     *(int*)&self->ViewMan = 0;
     cGFEventStartState_cGFEventStartState(((char*)self) + 0xB0);
-    Init_22E968(((char*)self), 208, D_0047D270, 3);
+    Init_22E968(((char*)self), 208, cGFPreEventState_vtbl, 3);
     Init_22E968(((char*)self), 0xE0, cGFGateState_vtbl, 4);
-    Init_22E968(((char*)self), 0xF0, D_0047D480, 5);
+    Init_22E968(((char*)self), 0xF0, cGFRidingState_vtbl, 5);
     cGFFinishlineState_cGFFinishlineState(((char*)self) + 0x100);
-    Init_22E968(((char*)self), 280, D_0047D690, 8);
-    Init_22E968(((char*)self), 296, D_0047D218, 8);
+    Init_22E968(((char*)self), 280, cGFEndState_vtbl, 8);
+    Init_22E968(((char*)self), 296, cGFPostEventState_vtbl, 8);
     Init_22E968(((char*)self), 312, D_0047D638, 11);
-    Init_22E968(((char*)self), 328, D_0047D588, 10);
+    Init_22E968(((char*)self), 328, cGFTransportWaitState_vtbl, 10);
     cGFTrackStartState_cGFTrackStartState(((char*)self) + 0x158);
     cGFSectionLoadState_cGFSectionLoadState(((char*)self) + 0x178);
     Init_22E968(((char*)self), 396, cGFPodiumState_vtbl, 7);

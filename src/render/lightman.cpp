@@ -965,7 +965,7 @@ static inline void lmMulIn_EE78(void* m, const void* b)
  * Direction", degrees) to x and y, so a point moves in proportion to its height; R is a rotation by angle about
  * t4vect_ZAxis whose z column adds branch * (x sin + y cos) of D_004A4470 ("Branch Direction"). Note: D_004A4468
  * multiplies f rather than the time, so the outer branch sine moves only through its inner sine. Slot 2 of vtable
- * D_00493178 (the object allocated as "Plants").
+ * cPlants_vtbl (the object allocated as "Plants").
  */
 extern "C" void cPlants_update(void)
 {
@@ -1980,7 +1980,7 @@ struct sLmVEntry_0C20 {
  * Passes D_004A44C0 (menu "AI Frames per Render Frame") to vtable slot 16 (func_00394008) and clears D_004A44C8 (menu
  * "Reset Stats") when it is set.
  *
- * Slot 2 of vtable D_004931A8 (the object allocated as "RenderToggles").
+ * Slot 2 of vtable cRenderToggles_vtbl (the object allocated as "RenderToggles").
  */
 extern "C" void cRenderToggles_update()
 {
@@ -2055,7 +2055,7 @@ static inline float RandRange_0C60(float lo, float hi)
  * D_004A4630 (colour D_004A464C..54); after that the frame returns to -1 with the tint colour cScreenTint_m_ColourR/G/B
  * and brightness 0. Each step sets blend mode D_004A46AC = 5.
  *
- * Slot 2 of vtable D_00492FA0 (the object allocated as "ScreenTint").
+ * Slot 2 of vtable cScreenTint_vtbl (the object allocated as "ScreenTint").
  */
 // PORT: D_004A469C holds a float (declared int elsewhere in the unit).
 extern "C" void cScreenTint_update()
@@ -2251,7 +2251,7 @@ public:
  * (cPS2GraphicsMan_SetViewportOrthographic). The quad is 640 x 480, or the left or right 320-pixel half when mNumViews
  * is not 1 (mViewIndex picks the half). Its colour is brightness * D_004A46A0/A4/A8 * 255 with alpha brightness * 255,
  * drawn with slot 71 (cPS2GraphicsMan_RenderTriStrip); then PopView, PopViewport and the draw state is popped. Slot 3
- * of vtable D_00492FA0 (the object allocated as "ScreenTint").
+ * of vtable cScreenTint_vtbl (the object allocated as "ScreenTint").
  */
 extern "C" void cScreenTint_render()
 {

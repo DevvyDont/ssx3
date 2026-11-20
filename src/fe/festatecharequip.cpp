@@ -12,7 +12,7 @@ extern "C" void* cFERiderManager_cFERiderManager(void* self);
 extern "C" void* func_0019CDF0(void* self);
 // PORT: called with an extra int in $a1 here; cSimpleCamera_init's body is (self, x, y, z). Bound by asm label.
 void cSimpleCamera_init_i(void* self, int a1, float x, float y, float z) __asm__("cSimpleCamera_init");
-extern void* D_0046D878[];
+extern void* cFE_vtbl[];
 extern void* D_0046D8D8[];
 extern char str_UIEngine[];
 extern char str_FXLoader_FE[];
@@ -31,7 +31,7 @@ public:
 /**
  * Constructs the front end: its camera, rider manager, asynchronous files, UI engine and effects loader.
  *
- * Runs the base constructor cFadeScreen_cFadeScreen, stores the vtable D_0046D878, builds the camera at +0x10 (vtable
+ * Runs the base constructor cFadeScreen_cFadeScreen, stores the vtable cFE_vtbl, builds the camera at +0x10 (vtable
  * at +0xA0) and sets it up with cSimpleCamera_init (pi/4, 5, 5000), the rider manager at +0xB0 (On Tour
  * mRiderManager) and the object at +0x1A70, and allocates the UI engine ("UIEngine", +0xC) and an effects
  * loader ("FXLoader FE", +0xB5AA0).
@@ -41,7 +41,7 @@ public:
 extern "C" void* cFE_cFE(void* self)
 {
     cFadeScreen_cFadeScreen(self);
-    *(void***)((char*)self + 0x0) = D_0046D878;
+    *(void***)((char*)self + 0x0) = cFE_vtbl;
     cSimpleCamera_cSimpleCamera((char*)self + 0x10);
     *(void***)((char*)self + 0xA0) = D_0046D8D8;
     cFERiderManager_cFERiderManager((char*)self + 0xB0);
@@ -62,14 +62,14 @@ extern "C" void cGraphicsMan_PurgeTextures(void* p);
 extern "C" void cFXLoader__cFXLoader(void* p, int flags);
 extern "C" void func_0019CE20(void* p, int flags);
 extern "C" void cFERiderManager__cFERiderManager(void* p, int flags);
-extern void* D_0046D878[];
+extern void* cFE_vtbl[];
 extern void* D_0046D970[];
 extern void* cSimpleCamera_vtbl[];
 
 /**
  * Destroys the front-end module's base part, freeing it when asked.
  *
- * Stores the vtable D_0046D878, destroys the UI engine (+0xC, cUIEngine__cUIEngine with 3), purges the graphics manager's
+ * Stores the vtable cFE_vtbl, destroys the UI engine (+0xC, cUIEngine__cUIEngine with 3), purges the graphics manager's
  * textures, destroys the FX loader (+0xB5AA0) when present, then the file manager (+0x1A70, func_0019CE20) and the
  * rider manager (+0xB0, cFERiderManager__cFERiderManager), resets the camera's (+0x10) vtable word (+0xA0) to cSimpleCamera_vtbl and
  * stores the base vtable D_0046D970. Calls operator_delete when bit 0 of @p flags is set. cRealFE__cRealFE calls it as
@@ -79,7 +79,7 @@ extern void* cSimpleCamera_vtbl[];
  */
 extern "C" void cFE__cFE(void* self, int flags)
 {
-    *(void***)((char*)self + 0x0) = D_0046D878;
+    *(void***)((char*)self + 0x0) = cFE_vtbl;
     if (*(void**)((char*)self + 0xC) != 0) {
         cUIEngine__cUIEngine(*(void**)((char*)self + 0xC), 3);
     }
@@ -100,8 +100,8 @@ extern "C" void cFE__cFE(void* self, int flags)
 //100%
 INCLUDE_ASM("fe/festatecharequip", cFELocale_cFELocale);
 #ifdef SKIP_ASM
-extern void* D_0046BF98[];
-extern void* D_0046D848[];
+extern void* cFELocale_vtbl[];
+extern void* cUILocaleInterface_vtbl[];
 extern "C" void* tAttrLocale_tAttrLocale(void* p);
 extern "C" void func_00416210(void* dst, int value, int size);
 
@@ -119,10 +119,10 @@ extern "C" void* cFELocale_cFELocale(void* self)
     *(char*)((char*)self + 0x0) = 0;
     *(char*)((char*)self + 0x1) = 0;
     *(char*)((char*)self + 0x2) = 0;
-    *(void***)((char*)self + 0x4) = D_0046D848;
+    *(void***)((char*)self + 0x4) = cUILocaleInterface_vtbl;
     tAttrLocale_tAttrLocale((char*)self + 3);
     *(char*)((char*)self + 0x58) = 0;
-    *(void***)((char*)self + 0x4) = D_0046BF98;
+    *(void***)((char*)self + 0x4) = cFELocale_vtbl;
     *(char*)((char*)self + 0x2) = 4;
     func_00416210((char*)self + 8, 0, 80);
     return self;
@@ -132,24 +132,24 @@ extern "C" void* cFELocale_cFELocale(void* self)
 //100%
 INCLUDE_ASM("fe/festatecharequip", cFELocale__cFELocale);
 #ifdef SKIP_ASM
-extern void* D_0046BF98[];
-extern void* D_0046D848[];
+extern void* cFELocale_vtbl[];
+extern void* cUILocaleInterface_vtbl[];
 extern "C" void cFELocale_deleteAllFiles(void* self);
 void operator_delete(int* p);
 
 /**
  * Destroys the front-end locale, freeing it when asked.
  *
- * Stores the cFELocale vtable D_0046BF98 at +0x4, deletes all its string files (cFELocale_deleteAllFiles), stores the base vtable
- * D_0046D848 and calls operator_delete when bit 0 of @p flags is set.
+ * Stores the cFELocale vtable cFELocale_vtbl at +0x4, deletes all its string files (cFELocale_deleteAllFiles), stores the base vtable
+ * cUILocaleInterface_vtbl and calls operator_delete when bit 0 of @p flags is set.
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
 extern "C" void cFELocale__cFELocale(void* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = D_0046BF98;
+    *(void***)((char*)self + 0x4) = cFELocale_vtbl;
     cFELocale_deleteAllFiles(self);
-    *(void***)((char*)self + 0x4) = D_0046D848;
+    *(void***)((char*)self + 0x4) = cUILocaleInterface_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

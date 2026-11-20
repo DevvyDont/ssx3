@@ -3,7 +3,7 @@
 
 // cOVState: the base of the in-game overlay states (pause menu, map, replay, autosave, big-challenge screens ...;
 // cOVState_MAP, cOVState_REPLAY, ... derive from it). It is a cUIState with a few flags, a chat buffer and its
-// overlay id. Retail vtable _vt$8cOVState = D_00474E08 (slot 4 cOVState_onCreateScreen, slot 5
+// overlay id. Retail vtable _vt$8cOVState = cOVState_vtbl (slot 4 cOVState_onCreateScreen, slot 5
 // cOVState_onDestroyScreen); its constructor cOVState(cUIEngine*, tOVStateEnum) is cOVState_cOVState.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. Subclasses' own
@@ -28,7 +28,7 @@ struct cOVState {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;          // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;          // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;               // 0x008 [R] _vt$8cOVState D_00474E08, stored by cOVState_cOVState after the base ctor
+    void** mVtbl;               // 0x008 [R] _vt$8cOVState cOVState_vtbl, stored by cOVState_cOVState after the base ctor
     // --- cUIState (On Tour: size 0x48, same offsets)
     int mHashName;              // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] zeroed by the cUIState ctor
     cUIEngine* mpEngine;        // 0x010 [O]; [R] the ctor's engine argument; [U] cUIStateStack_findState(mpEngine + 0x18)

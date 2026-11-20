@@ -184,7 +184,7 @@ struct sDbgState_180EF0 {
  * acting it does the same for the new index with 1. Only the first matching input is handled, tested through @p in's
  * virtual slots (cFEInput's order): isLeft (19) cScreenKeyboard_kbMoveLeft(), isRight (20) cScreenKeyboard_kbMoveRight(), isUp (17)
  * cScreenKeyboard_kbMoveUp(), isDown (18) cScreenKeyboard_kbMoveDown() (cursor moves), isNext (5) cScreenKeyboard_pressKey() (types the key), isRShift2
- * (26) cScreenKeyboard_toggleShift() (toggles the +0xE4 flag). The object sits in vtable D_0046D1A0 next to
+ * (26) cScreenKeyboard_toggleShift() (toggles the +0xE4 flag). The object sits in vtable cScreenKeyboard_vtbl next to
  * cScreenKeyboard__cScreenKeyboard.
  *
  * @param in  the UI input to read

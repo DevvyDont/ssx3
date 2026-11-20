@@ -201,7 +201,7 @@ struct sVE_1849B0 {
  * (0, 660, 80) at (0, 0, 80) and sets its first float to 0.4363 (25 degrees). Looks up the "empty_box", "checkbox" and
  * "yell_dollar_sign" texture elements (mpEngine + 0x58) into +0x58, +0x54 and +0x5C (On Tour mpCheckbox, mpCheckmark,
  * mpDollarSign), sets the sound bank manager's mode 5 (func_0028F140 on cAudioInterface_bxAudio()) and hides the cost display
- * (cFEStateUberTrick_costVisible) and cFEStateUberTrick_previewVisible's objects. onCreateScreen slot (+0x24) of the vtable D_0046CCC0.
+ * (cFEStateUberTrick_costVisible) and cFEStateUberTrick_previewVisible's objects. onCreateScreen slot (+0x24) of the vtable cFEStateUberTrick_vtbl.
  */
 extern "C" void cFEStateUberTrick_onCreateScreen(cFEStateUberTrick* self)
 {
@@ -265,7 +265,7 @@ void* cUIState_onDestroyScreen(void* self);
  * Hides the user's FE rider when the uber-trick screen goes away, then runs cUIState_onDestroyScreen.
  *
  * The rider is hidden with cFERiderManager_setHumanVisible (user mUserNum, 0) on RealFE + 0xB0, skipped when there is no front end.
- * onDestroyScreen slot (+0x2C) of the vtable D_0046CCC0.
+ * onDestroyScreen slot (+0x2C) of the vtable cFEStateUberTrick_vtbl.
  */
 extern "C" void cFEStateUberTrick_onDestroyScreen(cFEStateUberTrick* self)
 {
@@ -285,7 +285,7 @@ extern "C" void cFEStateUberTrick_updateTrickMenu(void* self);
 /**
  * Refills the uber-trick screen's trick list (cFEStateUberTrick_updateTrickMenu) when @p on is set.
  *
- * onGainTransition slot (+0x3C) of the vtable D_0046CCC0.
+ * onGainTransition slot (+0x3C) of the vtable cFEStateUberTrick_vtbl.
  *
  * @param on  non-zero to refill the trick list
  * @return 0
@@ -320,7 +320,7 @@ extern "C" void cUIState_onGainFocus(void* self, int a1);
  * Gives the uber-trick screen's category menu the focus when the state gains focus.
  *
  * Runs cFEStateUberTrick_activateMainMenu, calls setFocus(1) on the category menu +0x4C and setFocus(0) on the trick menu +0x50 (vtable slot
- * 7; skipped when missing), then cUIState_onGainFocus. onGainFocus slot (+0x34) of the vtable D_0046CCC0.
+ * 7; skipped when missing), then cUIState_onGainFocus. onGainFocus slot (+0x34) of the vtable cFEStateUberTrick_vtbl.
  *
  * @param prevState  the state that had focus before, passed on to cUIState_onGainFocus
  */
@@ -404,7 +404,7 @@ static inline sQuat_184C60 AxisAngle_184C60(const sQuat_184C60& axis, float angl
  * rider's character (+0x0) is below 10 and +0xCB8 and +0xCB4 are both set, it sets the rider's +0xCCC, resets its
  * animation (+0xC, cRiderAnimBase_reset) and plays animation 436 (cRiderAnimBase_play, blend -1), places it at (-228,
  * -205, 63) turned 1.0821 rad (62 degrees) about Z (the X and Y turns are 0; fSinCos gives the sines) with
- * cFERider_setPose, shows it (cFERiderManager_setHumanVisible with 1) and sets +0x48. onUpdate slot (+0x64) of the vtable D_0046CCC0.
+ * cFERider_setPose, shows it (cFERiderManager_setHumanVisible with 1) and sets +0x48. onUpdate slot (+0x64) of the vtable cFEStateUberTrick_vtbl.
  */
 extern "C" void cFEStateUberTrick_onUpdate(cFEStateUberTrick* self)
 {
@@ -480,7 +480,7 @@ struct sVE_4F40 {
  * entry (the category menu's selected mMiscData) with func_0014FE08 on interface 6, calls that interface's vtable slot
  * 1, sets "helptext_custom" to "kT_66HELPCustomUber" and refreshes the cost numbers (cFEStateUberTrick_updateTrickMenuEntry). On event 22 the
  * trick list is refilled either way (cFEStateUberTrick_updateTrickMenu). Other events do nothing. onPopupEvent slot (+0x8C) of the
- * vtable D_0046CCC0.
+ * vtable cFEStateUberTrick_vtbl.
  *
  * @param item  the popup (the cUIStateBuyPopup)
  * @param msg  the popup event
@@ -713,7 +713,7 @@ static inline void Back_185268(char* self)
  * A widget's menu is its mpParent (+0x40): the category menu +0x4C or the trick menu +0x50 (On Tour mpMainMenu,
  * mpTrickMenu). The category and trick are the menus' selected items' (mpSelected, +0xA0) mMiscData (+0x18); the trick
  * table comes from func_0014FF90 on cBE interface 6. "Back" pushes the state that the custom front end (*mpEngine)
- * returns from its vtable slot 5 (cFECustom_getPrevState). onWidgetEvent slot (+0x9C) of the vtable D_0046CCC0.
+ * returns from its vtable slot 5 (cFECustom_getPrevState). onWidgetEvent slot (+0x9C) of the vtable cFEStateUberTrick_vtbl.
  * - 5 (accept) on the category menu: "done" goes back; another item gives the trick menu focus at row 0 (setFocus,
  *   vtable slot 7), runs cFEStateUberTrick_activateTrickMenu and shows the cost display (cFEStateUberTrick_costVisible) and cFEStateUberTrick_previewVisible's
  *   objects. On the trick menu: an unlocked trick (func_00150048) that is not for sale (func_0014FFB8) becomes the
@@ -886,7 +886,7 @@ INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_onWidgetMenu);
  * Answers the uber-trick screen's menu events: 0x100 for event 9 on the trick menu and for events 8 and 9 on the
  * category menu, otherwise 0x101.
  *
- * The trick menu is +0x50. onWidgetMenu slot (+0xA4) of the vtable D_0046CCC0.
+ * The trick menu is +0x50. onWidgetMenu slot (+0xA4) of the vtable cFEStateUberTrick_vtbl.
  *
  * @param menu  the menu that asks
  * @param event  the menu event
@@ -939,7 +939,7 @@ extern "C" void* cFEStateCredits_cFEStateCredits1(cFEStateCredits* self)
 }
 #endif
 
-extern void* D_0046D0D0[];
+extern void* cFEState_vtbl[];
 extern "C" void* cUIState__cUIState(void*);
 
 //100%
@@ -948,7 +948,7 @@ INCLUDE_ASM("fe/festatestore", cFEStateCredits__cFEStateCredits__FPv);
 /**
  * Destroys the credits front-end state through the cFEState and cUIState destructors.
  *
- * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor cUIState__cUIState(): the same
+ * Stores the base cFEState vtable (cFEState_vtbl), then calls the cUIState destructor cUIState__cUIState(): the same
  * body as cFEState's own destructor cFEState__cFEState, so the class tears down nothing of its own. The g++ delete
  * flags reach cUIState__cUIState() untouched in the second argument register.
  *
@@ -956,7 +956,7 @@ INCLUDE_ASM("fe/festatestore", cFEStateCredits__cFEStateCredits__FPv);
  */
 void* cFEStateCredits__cFEStateCredits(void* self)
 {
-    *(int*)((char*)self + 0x8) = (int)(void*)D_0046D0D0;
+    *(int*)((char*)self + 0x8) = (int)(void*)cFEState_vtbl;
     return cUIState__cUIState(self);
 }
 #endif

@@ -2867,10 +2867,10 @@ INCLUDE_ASM("ui/uivector", cUIState_cUIState2);
 #ifdef SKIP_ASM
 extern "C" void* cList_cList(void* p);
 extern "C" void* tAttrState_tAttrState(void* p);
-extern void* D_004946C8[];
+extern void* cUIState_vtbl[];
 
 /**
- * Constructs a bare cUIState: links the node to itself (mpPrev = mpNext = this), stores the cUIState vtable D_004946C8,
+ * Constructs a bare cUIState: links the node to itself (mpPrev = mpNext = this), stores the cUIState vtable cUIState_vtbl,
  * constructs the tAttrState word mAttrState with tAttrState_tAttrState (visible, first time, mode 2) and the screen list
  * mScreens with cList_cList.
  *
@@ -2883,7 +2883,7 @@ extern "C" void* cUIState_cUIState2(cUIState* self)
 {
     self->mpNext = (cListNode*)((char*)self);
     self->mpPrev = (cListNode*)((char*)self);
-    self->mVtbl = D_004946C8;
+    self->mVtbl = cUIState_vtbl;
     tAttrState_tAttrState(((char*)self) + 0x1C);
     cList_cList(((char*)self) + 0x24);
     return ((char*)self);

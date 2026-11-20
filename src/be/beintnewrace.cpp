@@ -3,7 +3,7 @@
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BENewRaceInt[];
-extern void* D_0045AE58[16];
+extern void* cBENewRaceInterface_vtbl[16];
 extern void* cBENewRaceInterface_instance;
 
 struct cBENewRaceInterface {
@@ -53,7 +53,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_getThis__Fv);
  * Returns the new-race interface singleton, creating it on first use.
  *
  * The first call allocates 0x10 bytes tagged "BENewRaceInt", clears the word at 0x8, stores the vtable
- * D_0045AE58 and keeps the object in cBENewRaceInterface_instance.
+ * cBENewRaceInterface_vtbl and keeps the object in cBENewRaceInterface_instance.
  *
  * @return the new-race interface
  */
@@ -62,7 +62,7 @@ void* cBENewRaceInterface_getThis()
     if (cBENewRaceInterface_instance == 0) {
         cBENewRaceInterface* mem = (cBENewRaceInterface*)cMemMan_alloc(0x10, str_BENewRaceInt, 0, 0);
         mem->field_0x8 = 0;
-        mem->vtable = D_0045AE58;
+        mem->vtable = cBENewRaceInterface_vtbl;
         cBENewRaceInterface_instance = mem;
     }
     return cBENewRaceInterface_instance;

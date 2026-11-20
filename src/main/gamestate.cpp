@@ -229,7 +229,7 @@ extern signed char D_00535C10[];
  *
  * Calls cAI_setAIState on the game's AI (mpGame + 0xC) with 5; unless the race's game mode (cGameMode, D_00535C10) is
  * 4, sets the AI's +0x14 to 1 and +0x8C to 0. Then cBE_setState(1) and, when no replay is playing (Replay state outside
- * 1-9), purges the UI's normal states (cUIStateStack_purgeNormalStates). Slot +0x2C (gainFocus) of D_0047D480.
+ * 1-9), purges the UI's normal states (cUIStateStack_purgeNormalStates). Slot +0x2C (gainFocus) of cGFRidingState_vtbl.
  */
 extern "C" void cGFRidingState_gainFocus(void)
 {
@@ -287,14 +287,14 @@ void* cGFRidingState_readFromReplayFrame(void* self)
 //100%
 INCLUDE_ASM("main/gamestate", cGFTrackStartState_cGFTrackStartState);
 #ifdef SKIP_ASM
-extern char D_0047D6E8[];
+extern char cGameState_vtbl[];
 extern char cGFTrackStartState_vtbl[];
 extern char* cGameState_mpGame;
 
 /**
  * Constructs the track-start game state.
  *
- * The cGameState part sets mNextState (+0x0) to 0, its vtable D_0047D6E8 at +0xC and clears the static
+ * The cGameState part sets mNextState (+0x0) to 0, its vtable cGameState_vtbl at +0xC and clears the static
  * cGameState_mpGame; then the class stores cGFTrackStartState_vtbl, mNextState 4, the preload state (+0x10) 5 and
  * clears mStartupFlag (+0x4), +0x14, +0x18 and +0x1C. cGame_cGame builds it at +0x158 of the game.
  *
@@ -303,7 +303,7 @@ extern char* cGameState_mpGame;
 extern "C" void* cGFTrackStartState_cGFTrackStartState(void* self)
 {
     *(int*)((char*)self + 0x0) = 0;
-    *(void**)((char*)self + 0xC) = D_0047D6E8;
+    *(void**)((char*)self + 0xC) = cGameState_vtbl;
     cGameState_mpGame = 0;
     *(void**)((char*)self + 0xC) = cGFTrackStartState_vtbl;
     *(int*)((char*)self + 0x0) = 4;
@@ -1310,14 +1310,14 @@ void* cGFSessionTeleportState_readFromReplayFrame(void* self)
 //100%
 INCLUDE_ASM("main/gamestate", cGFUserSelectState_cGFUserSelectState);
 #ifdef SKIP_ASM
-extern char D_0047D6E8[];
+extern char cGameState_vtbl[];
 extern char cGFUserSelectState_vtbl[];
 extern char* cGameState_mpGame;
 
 /**
  * Constructs the user-select game state.
  *
- * The cGameState part sets mNextState to 0, its vtable D_0047D6E8 and clears cGameState_mpGame; then the class stores
+ * The cGameState part sets mNextState to 0, its vtable cGameState_vtbl and clears cGameState_mpGame; then the class stores
  * cGFUserSelectState_vtbl, mNextState 4, the next location (+0x18) 23 and clears mStartupFlag (+0x4), the overlay-done
  * flag (+0x8) and +0x14. cGame_cGame builds it at +0x1B8 of the game.
  *
@@ -1326,7 +1326,7 @@ extern char* cGameState_mpGame;
 extern "C" void* cGFUserSelectState_cGFUserSelectState(void* self)
 {
     *(int*)((char*)self + 0x0) = 0;
-    *(void**)((char*)self + 0xC) = D_0047D6E8;
+    *(void**)((char*)self + 0xC) = cGameState_vtbl;
     cGameState_mpGame = 0;
     *(void**)((char*)self + 0xC) = cGFUserSelectState_vtbl;
     *(int*)((char*)self + 0x0) = 4;
@@ -1639,14 +1639,14 @@ extern "C" void cGFUserSelectState_readFromReplayFrame(void* self, void* stream)
 //100%
 INCLUDE_ASM("main/gamestate", cGFSectionLoadState_cGFSectionLoadState);
 #ifdef SKIP_ASM
-extern char D_0047D6E8[];
-extern char D_0047D2C8[];
+extern char cGameState_vtbl[];
+extern char cGFSectionLoadState_vtbl[];
 extern char* cGameState_mpGame;
 
 /**
- * Constructs the section-load game state (vtable D_0047D2C8).
+ * Constructs the section-load game state (vtable cGFSectionLoadState_vtbl).
  *
- * The cGameState part sets mNextState to 0, its vtable D_0047D6E8 and clears cGameState_mpGame; then stores D_0047D2C8,
+ * The cGameState part sets mNextState to 0, its vtable cGameState_vtbl and clears cGameState_mpGame; then stores cGFSectionLoadState_vtbl,
  * mNextState 10 and clears mStartupFlag (+0x4). cGame_cGame builds it at +0x178 of the game.
  *
  * @return @p self
@@ -1654,9 +1654,9 @@ extern char* cGameState_mpGame;
 extern "C" void* cGFSectionLoadState_cGFSectionLoadState(void* self)
 {
     *(int*)((char*)self + 0x0) = 0;
-    *(void**)((char*)self + 0xC) = D_0047D6E8;
+    *(void**)((char*)self + 0xC) = cGameState_vtbl;
     cGameState_mpGame = 0;
-    *(void**)((char*)self + 0xC) = D_0047D2C8;
+    *(void**)((char*)self + 0xC) = cGFSectionLoadState_vtbl;
     *(int*)((char*)self + 0x0) = 10;
     *(int*)((char*)self + 0x4) = 0;
     return self;
@@ -1686,7 +1686,7 @@ struct sRace002368A0 {
  *
  * Calls cBE_setState(0) and cReplay_reset on the game's replay; when the race's cGamePath is 0, calls
  * cBENewPlayerInterface_setIsFirstTimeWC(player interface, i, 0) for each of the race's iNumberRiders. Clears the sub-state (+0x10). Slot +0x2C
- * (gainFocus) of D_0047D2C8.
+ * (gainFocus) of cGFSectionLoadState_vtbl.
  */
 extern "C" void cGFSectionLoadState_gainFocus(void* self)
 {
@@ -1739,7 +1739,7 @@ extern "C" void cSSXScriptEngine_EndTransportSequence(void* p);
  * (cRider_GetNISEndPosition) with radius 45000 and goes to 1. Sub-state 1: waits until the test focus is at least 20000
  * away, the first transition manager (cGame_getTransitionMan) is idle and no NIS is in transition, then ends the transport
  * sequence (cSSXScriptEngine_EndTransportSequence), clears mWaitTransport, activates the location in mode 7
- * (cSectionMan_activate) and goes to 2. Slot +0x34 (update) of D_0047D2C8.
+ * (cSectionMan_activate) and goes to 2. Slot +0x34 (update) of cGFSectionLoadState_vtbl.
  */
 extern "C" void cGFSectionLoadState_update(void* self)
 {
@@ -1795,7 +1795,7 @@ extern "C" void cGFSectionLoadState_update(void* self)
 INCLUDE_ASM("main/gamestate", cGFSectionLoadState_loseFocus__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: the section-load game state's loseFocus (slot +0x3C of D_0047D2C8).
+ * Does nothing: the section-load game state's loseFocus (slot +0x3C of cGFSectionLoadState_vtbl).
  */
 void cGFSectionLoadState_loseFocus(void* self)
 {
@@ -1853,7 +1853,7 @@ extern char* cGameState_mpGame;
 /**
  * Ends the transport-wait game state: calls virtual slot 5 of the game's AI (mpGame + 0xC, vtable at +0xCC) with 3.
  *
- * Slot +0x3C (loseFocus) of D_0047D588.
+ * Slot +0x3C (loseFocus) of cGFTransportWaitState_vtbl.
  */
 extern "C" void cGFTransportWaitState_loseFocus(void)
 {
@@ -1927,7 +1927,7 @@ struct sGameState_6BB0 {
  * Clears the overlay-done flag (+0x8). When cGameComm_mGameComm reports an error it only forces the cut-scene
  * transition to regular mode and calls cBE_setState(0); otherwise it also calls cOVStateManager_gotoOverlay(2) and
  * pushes pause state 1 (D_005366E8[++D_004A2A54] = 1, cPauseState_Flags = D_004428F4). Slot +0x2C (gainFocus) of
- * D_0047D270.
+ * cGFPreEventState_vtbl.
  */
 extern "C" void cGFPreEventState_gainFocus(sGameState_6BB0* self)
 {
@@ -1954,7 +1954,7 @@ extern "C" void cGameState_gotoNextState(void* self);
  * Steps the pre-event game state: moves to the next state once the overlay is done (+0x8 is 1), unless the online
  * session has failed.
  *
- * Calls cGameState_gotoNextState. Slot +0x34 (update) of D_0047D270.
+ * Calls cGameState_gotoNextState. Slot +0x34 (update) of cGFPreEventState_vtbl.
  */
 extern "C" void cGFPreEventState_update(void* self)
 {
@@ -1979,7 +1979,7 @@ extern int D_004428F0[];
  * Ends the pre-event game state: pops the pause stack (restoring cPauseState_Flags) and resets the game state with
  * cGFPreEventState_ResetGameState.
  *
- * Slot +0x3C (loseFocus) of D_0047D270. The pause stack index is not checked.
+ * Slot +0x3C (loseFocus) of cGFPreEventState_vtbl. The pause stack index is not checked.
  */
 extern "C" void cGFPreEventState_loseFocus(void* self)
 {
@@ -2089,7 +2089,7 @@ struct sRace00236DA0 {
  *
  * When the race's cGamePath is 0, calls cBENewPlayerInterface_setIsFirstTimeWC(player interface, i, 0) for each rider; then
  * cSSXScriptEngine_ResetNISList(ScriptEngine, 0), clears the overlay-done flag (+0x8) and calls
- * cOVStateManager_gotoOverlay(7). Slot +0x2C (gainFocus) of D_0047D218.
+ * cOVStateManager_gotoOverlay(7). Slot +0x2C (gainFocus) of cGFPostEventState_vtbl.
  */
 extern "C" void cGFPostEventState_gainFocus(void* self)
 {
@@ -2116,7 +2116,7 @@ extern "C" void cGame_setState(void* self, int a, int b, int refresh);
  * Steps the post-event game state: once the overlay is done (+0x8 is 1) sets the game's state to 14 with
  * cGame_setState(game, 0xE, 2, 0).
  *
- * Slot +0x34 (update) of D_0047D218.
+ * Slot +0x34 (update) of cGFPostEventState_vtbl.
  */
 extern "C" void cGFPostEventState_update(void* self)
 {
@@ -2136,7 +2136,7 @@ extern char* cGameState_mpGame;
  * Ends the post-event game state: purges the UI's normal states (cUIStateStack_purgeNormalStates on the UI engine's
  * stack, mpGame + 0x48).
  *
- * Slot +0x3C (loseFocus) of D_0047D218.
+ * Slot +0x3C (loseFocus) of cGFPostEventState_vtbl.
  */
 extern "C" void cGFPostEventState_loseFocus(void)
 {

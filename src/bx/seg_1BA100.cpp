@@ -1764,7 +1764,7 @@ extern "C" int func_002BACE8(cMusicSys* musicSys) {
 INCLUDE_ASM("bx/seg_1BA100", cSpeechSys_GetSpeechVolumeIdentifier);
 #ifdef SKIP_ASM
 /**
- * Returns -1 (slot 2 of cSpeechSys's vtable D_00483870).
+ * Returns -1 (slot 2 of cSpeechSys's vtable cSpeechSys_vtbl).
  *
  * @return -1
  */
@@ -1777,7 +1777,7 @@ extern "C" int cSpeechSys_GetSpeechVolumeIdentifier(void) {
 INCLUDE_ASM("bx/seg_1BA100", cSpeechSys_UpdateSpeechVolume);
 #ifdef SKIP_ASM
 /**
- * Returns 0 (slot 3 of cSpeechSys's vtable D_00483870).
+ * Returns 0 (slot 3 of cSpeechSys's vtable cSpeechSys_vtbl).
  *
  * @return 0
  */

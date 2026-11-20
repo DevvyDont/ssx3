@@ -3038,19 +3038,19 @@ extern "C" void cPowerUpFXToggles__cPowerUpFXToggles(void* self, int flags)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cFogParticleMan__cFogParticleMan);
 #ifdef SKIP_ASM
-extern void* D_00488308[];
+extern void* cFogParticleMan_vtbl[];
 void operator_delete(int*);
 
 /**
  * Destroys the fog particle manager.
  *
- * Stores its vtable D_00488308 and frees the object when bit 0 of @p flags is set; there is nothing else to release.
+ * Stores its vtable cFogParticleMan_vtbl and frees the object when bit 0 of @p flags is set; there is nothing else to release.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cFogParticleMan__cFogParticleMan(cFogParticleMan* self, int flags)
 {
-    self->mVtbl = D_00488308;
+    self->mVtbl = cFogParticleMan_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -3060,20 +3060,20 @@ extern "C" void cFogParticleMan__cFogParticleMan(cFogParticleMan* self, int flag
 //100%
 INCLUDE_ASM("visualfx/worldlightman", cPS2FogParticleMan__cPS2FogParticleMan);
 #ifdef SKIP_ASM
-extern void* D_00488308[];
+extern void* cFogParticleMan_vtbl[];
 void operator_delete(int*);
 
 /**
  * Destroys the PS2 fog particle manager.
  *
- * The 256 sprites need no cleanup, so it only stores the base cFogParticleMan vtable D_00488308 back and frees the
+ * The 256 sprites need no cleanup, so it only stores the base cFogParticleMan vtable cFogParticleMan_vtbl back and frees the
  * object when bit 0 of @p flags is set.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cPS2FogParticleMan__cPS2FogParticleMan(cPS2FogParticleMan* self, int flags)
 {
-    self->mVtbl = D_00488308;
+    self->mVtbl = cFogParticleMan_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

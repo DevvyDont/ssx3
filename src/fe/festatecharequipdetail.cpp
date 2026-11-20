@@ -246,7 +246,7 @@ extern "C" void func_0019DC20(sEquipTable_DC20* self, int bank, int i);
 extern "C" void cFEStateCharEquip_cancelLargePreviewLoad(void* self);
 extern "C" void cUIState__cUIState(void* self, int flags);
 extern void* cFEStateCharEquip_vtbl[];
-extern void* D_0046D0D0[];
+extern void* cFEState_vtbl[];
 
 struct sVEntryK199148 {
     short delta;
@@ -268,7 +268,7 @@ static inline void releaseK199148(int id)
  *
  * Releases the icon file (0xA64) from the FE file cache and the texture ids at 0xA68, 0xA70 and 0xA74 through
  * the graphics manager (vtable slot 50), cancels a pending large-preview load (cFEStateCharEquip_cancelLargePreviewLoad), restores the
- * base vtable D_0046D0D0 and calls the cUIState destructor cUIState__cUIState().
+ * base vtable cFEState_vtbl and calls the cUIState destructor cUIState__cUIState().
  *
  * @param flags  g++ destructor flags, passed on to cUIState__cUIState(); bit 0 frees the object
  */
@@ -287,7 +287,7 @@ extern "C" void cFEStateCharEquip__cFEStateCharEquip(void* self, int flags)
     releaseK199148(*(int*)((char*)self + 0xA74));
     *(int*)((char*)self + 0xA70) = -1;
     *(int*)((char*)self + 0xA74) = -1;
-    *(void***)((char*)self + 0x8) = D_0046D0D0;
+    *(void***)((char*)self + 0x8) = cFEState_vtbl;
     cUIState__cUIState(self, flags);
 }
 #endif

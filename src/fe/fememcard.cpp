@@ -698,7 +698,7 @@ static inline int moviePlaying_K1874E8(void* mp)
 /**
  * Finishes the memory-card state's work: chains into the profile read after the settings read, or leaves the screen.
  *
- * The memory-card state's override of vtable slot +0x10C (cFEMemCard_updateDone in the base vtable D_0046C980). Does
+ * The memory-card state's override of vtable slot +0x10C (cFEMemCard_updateDone in the base vtable cFEMemCard_vtbl). Does
  * nothing once the done flag (+0x1AC) is set or while the manager has an unacknowledged card state change
  * (mCurrDeviceStateAck clear and mCurrDeviceStateLast set). When the stage D_004A14BC is 4 (settings file read) and the
  * first card has a profile (bit 0 of +0x238 clear), it returns the manager to device selection

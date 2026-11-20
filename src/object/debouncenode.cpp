@@ -236,13 +236,13 @@ struct sDebounce_3010 {
     int f44;
 };
 
-extern char D_00490570[];
+extern char cConveyorNode_vtbl[];
 extern "C" void* cInstanceNode_cInstanceNode1(void* self, void* a1, int type, void* a3);
 
 /**
  * Constructs a conveyor node (node type 0xF) for a placed instance from its make-data.
  *
- * Runs the record constructor cInstanceNode_cInstanceNode1, installs the conveyor vtable D_00490570, then fills the node state at
+ * Runs the record constructor cInstanceNode_cInstanceNode1, installs the conveyor vtable cConveyorNode_vtbl, then fills the node state at
  * +0x1C: Vel (+0x1C) from desc +0x4, UVScroll (+0x38) from desc +0x8/+0xC, UV (+0x40/+0x44) zeroed, and the first 8
  * Rotate flags (+0x20) from desc +0x10..+0x17 (entries 8 and up are left as they are). Finally clears bit 0x2 and sets
  * bit 0x4 in the instance record's flags.
@@ -255,7 +255,7 @@ extern "C" void* cInstanceNode_cInstanceNode1(void* self, void* a1, int type, vo
 extern "C" void* cConveyorNode_cConveyorNode(sDebounce_3010* self, void* bucket, void* instRecord, sDesc_3010* desc)
 {
     cInstanceNode_cInstanceNode1(self, bucket, 0xF, instRecord);
-    self->vt = D_00490570;
+    self->vt = cConveyorNode_vtbl;
     self->f1C = desc->f4;
     sVec2_3010 uvScroll;
     uvScroll.x = desc->f8;
@@ -281,12 +281,12 @@ struct sDebounceVEntry30D0 {
 };
 
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void*, void*);
-extern char D_00490570[];
+extern char cConveyorNode_vtbl[];
 
 /**
  * Constructs a conveyor node from a replay frame.
  *
- * Runs the replay constructor cInstanceNode_cInstanceNode, installs the conveyor vtable D_00490570 and reads the
+ * Runs the replay constructor cInstanceNode_cInstanceNode, installs the conveyor vtable cConveyorNode_vtbl and reads the
  * 44-byte node state (+0x1C..+0x47: Vel, Rotate flags, UVScroll, UV) through the stream's read slot (vtable entry 2).
  *
  * @param bucket  update bucket, passed on to cInstanceNode_cInstanceNode
@@ -296,7 +296,7 @@ extern char D_00490570[];
 extern "C" void* cConveyorNode_cConveyorNode1(void* self, void* bucket, void* stream)
 {
     cInstanceNode_cInstanceNode(self, bucket, stream);
-    *(void**)((char*)self + 0xC) = D_00490570;
+    *(void**)((char*)self + 0xC) = cConveyorNode_vtbl;
     sDebounceVEntry30D0* vt = *(sDebounceVEntry30D0**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x1C, 44);
     return self;

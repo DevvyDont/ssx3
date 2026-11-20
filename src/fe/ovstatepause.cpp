@@ -2395,13 +2395,13 @@ extern "C" void func_001FDB88(void* self, int widget, int event)
 INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEREPLAY_cOVState_SAVEREPLAY);
 #ifdef SKIP_ASM
 extern "C" void* func_001D5330(void* self, int a1, int a2, int a3);
-extern void* D_00472440[];
+extern void* cOVState_SAVEREPLAY_vtbl[];
 
 /**
  * Constructs the save-replay memory-card overlay.
  *
  * Runs the 4-argument cFEMemCard constructor func_001D5330 with iType 1 (replay), installs this class's vtable
- * D_00472440 and clears +0x22C (mIsHidden in On Tour, the hideActionButtons state). The overlay factory
+ * cOVState_SAVEREPLAY_vtbl and clears +0x22C (mIsHidden in On Tour, the hideActionButtons state). The overlay factory
  * (cOVStateManager_triggerOverlay, cOVStateManager_triggerPopup) builds it in 628 bytes for overlay type 18.
  *
  * @param engine  the UI engine (On Tour pEngine)
@@ -2411,7 +2411,7 @@ extern void* D_00472440[];
 extern "C" void* cOVState_SAVEREPLAY_cOVState_SAVEREPLAY(void* self, int engine, int ovStateId)
 {
     func_001D5330(self, engine, 1, ovStateId);
-    *(void***)((char*)self + 0x8) = D_00472440;
+    *(void***)((char*)self + 0x8) = cOVState_SAVEREPLAY_vtbl;
     *(int*)((char*)self + 0x22C) = 0;
     return self;
 }
@@ -3158,13 +3158,13 @@ extern "C" void cOVState_SAVEREPLAY_onPopupEvent(void* self, void* popup, int ke
 INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS);
 #ifdef SKIP_ASM
 extern "C" void* func_001D5330(void* self, int a1, int a2, int a3);
-extern void* D_004722B8[];
+extern void* cOVState_SAVEOPTIONS_vtbl[];
 
 /**
  * Constructs the save-records memory-card overlay.
  *
  * Runs the 4-argument cFEMemCard constructor func_001D5330 with iType 2 (settings), installs this class's vtable
- * D_004722B8 and clears +0x22C (mIsHidden in On Tour). The overlay factory (cOVStateManager_triggerOverlay,
+ * cOVState_SAVEOPTIONS_vtbl and clears +0x22C (mIsHidden in On Tour). The overlay factory (cOVStateManager_triggerOverlay,
  * cOVStateManager_triggerPopup) builds it in 628 bytes for overlay type 19.
  *
  * @param engine  the UI engine (On Tour pEngine)
@@ -3174,7 +3174,7 @@ extern void* D_004722B8[];
 extern "C" void* cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS(void* self, int engine, int ovStateId)
 {
     func_001D5330(self, engine, 2, ovStateId);
-    *(void***)((char*)self + 0x8) = D_004722B8;
+    *(void***)((char*)self + 0x8) = cOVState_SAVEOPTIONS_vtbl;
     *(int*)((char*)self + 0x22C) = 0;
     return self;
 }

@@ -1037,8 +1037,8 @@ INCLUDE_ASM("fe/festatetrophyroom", func_001D5330);
 #ifdef SKIP_ASM
 extern "C" void* cUIState_cUIState(void* self);
 extern "C" void cFEMemCard_initFEMemCard(void* self, int a1);
-extern void* D_00474E08[];
-extern void* D_0046C980[];
+extern void* cOVState_vtbl[];
+extern void* cFEMemCard_vtbl[];
 extern unsigned short D_004A1390[];
 
 /**
@@ -1046,8 +1046,8 @@ extern unsigned short D_004A1390[];
  * a3.
  *
  * Runs cUIState's constructor (cUIState_cUIState; @p engine reaches it untouched in the second argument register as the
- * engine), the inlined cOVState part (vtable D_00474E08; mDoneTransition, mAllowPauseMenu and mRemovePDA 0; mszChatBuff
- * " " from D_004A1390), stores cFEMemCard's vtable D_0046C980 and runs cFEMemCard_initFEMemCard with @p memCardType. cOVState_SAVEREPLAY_cOVState_SAVEREPLAY and
+ * engine), the inlined cOVState part (vtable cOVState_vtbl; mDoneTransition, mAllowPauseMenu and mRemovePDA 0; mszChatBuff
+ * " " from D_004A1390), stores cFEMemCard's vtable cFEMemCard_vtbl and runs cFEMemCard_initFEMemCard with @p memCardType. cOVState_SAVEREPLAY_cOVState_SAVEREPLAY and
  * cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS (fe/ovstatepause) call it with types 1 and 2.
  *
  * @param engine  the UI engine (only passed on to cUIState's constructor)
@@ -1059,12 +1059,12 @@ extern "C" void* func_001D5330(void* self, int engine, int memCardType, int over
 {
     cUIState_cUIState(self);
     *(int*)((char*)self + 0x98) = overlayId;
-    *(void***)((char*)self + 0x8) = D_00474E08;
+    *(void***)((char*)self + 0x8) = cOVState_vtbl;
     *(int*)((char*)self + 0x48) = 0;
     *(int*)((char*)self + 0x4C) = 0;
     *(int*)((char*)self + 0x54) = 0;
     *(unsigned short*)((char*)self + 0x58) = D_004A1390[0];
-    *(void***)((char*)self + 0x8) = D_0046C980;
+    *(void***)((char*)self + 0x8) = cFEMemCard_vtbl;
     cFEMemCard_initFEMemCard(self, memCardType);
     return self;
 }
@@ -1075,14 +1075,14 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_cFEMemCard);
 #ifdef SKIP_ASM
 extern "C" void* cUIState_cUIState(void* self);
 extern "C" void cFEMemCard_initFEMemCard(void* self, int a1);
-extern void* D_00474E08[];
-extern void* D_0046C980[];
+extern void* cOVState_vtbl[];
+extern void* cFEMemCard_vtbl[];
 extern unsigned short D_004A1390[];
 
 /**
  * Constructs the memory card screen base used by the profile, autosave and save screens.
  *
- * Runs the cUIState constructor, installs the cOVState vtable (D_00474E08) and then this class's (D_0046C980),
+ * Runs the cUIState constructor, installs the cOVState vtable (cOVState_vtbl) and then this class's (cFEMemCard_vtbl),
  * clears +0x48, +0x4C, +0x54 and +0x98, copies the empty string D_004A1390 into +0x58, and runs cFEMemCard_initFEMemCard
  * (On Tour initFEMemCard) with @p iType. The engine argument is not used.
  *
@@ -1094,12 +1094,12 @@ extern "C" void* cFEMemCard_cFEMemCard(void* self, int pEngine, int iType)
 {
     cUIState_cUIState(self);
     *(int*)((char*)self + 0x98) = 0;
-    *(void***)((char*)self + 0x8) = D_00474E08;
+    *(void***)((char*)self + 0x8) = cOVState_vtbl;
     *(int*)((char*)self + 0x48) = 0;
     *(int*)((char*)self + 0x4C) = 0;
     *(int*)((char*)self + 0x54) = 0;
     *(unsigned short*)((char*)self + 0x58) = D_004A1390[0];
-    *(void***)((char*)self + 0x8) = D_0046C980;
+    *(void***)((char*)self + 0x8) = cFEMemCard_vtbl;
     cFEMemCard_initFEMemCard(self, iType);
     return self;
 }
@@ -1108,25 +1108,25 @@ extern "C" void* cFEMemCard_cFEMemCard(void* self, int pEngine, int iType)
 //100%
 INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard__cFEMemCard);
 #ifdef SKIP_ASM
-extern void* D_0046C980[];
-extern void* D_00474E08[];
+extern void* cFEMemCard_vtbl[];
+extern void* cOVState_vtbl[];
 extern void* cFEMemCard_mInstance;
 extern "C" void cUIState__cUIState(void* self, int flags);
 
 /**
  * Destroys a memory-card state.
  *
- * Stores cFEMemCard's vtable D_0046C980, clears cFEMemCard_mInstance, stores cOVState's vtable D_00474E08 and runs
- * cUIState's destructor (cUIState__cUIState) with @p flags. Destructor slot (+0xC) of D_0046C980; the destructors of
+ * Stores cFEMemCard's vtable cFEMemCard_vtbl, clears cFEMemCard_mInstance, stores cOVState's vtable cOVState_vtbl and runs
+ * cUIState's destructor (cUIState__cUIState) with @p flags. Destructor slot (+0xC) of cFEMemCard_vtbl; the destructors of
  * cFEStateMemCard, cOVState_PROFILE, cOVState_AUTOSAVE, cFEStateProfileLoad and cFEStateOptionsDeviceSelect end in it.
  *
  * @param flags  the g++ delete flags, passed on to cUIState__cUIState
  */
 extern "C" void cFEMemCard__cFEMemCard(void* self, int flags)
 {
-    *(void***)((char*)self + 8) = D_0046C980;
+    *(void***)((char*)self + 8) = cFEMemCard_vtbl;
     cFEMemCard_mInstance = 0;
-    *(void***)((char*)self + 8) = D_00474E08;
+    *(void***)((char*)self + 8) = cOVState_vtbl;
     cUIState__cUIState(self, flags);
 }
 #endif
@@ -1137,8 +1137,8 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_onWidgetMenu);
 /**
  * Answers the memory-card screens' menu events: 0x100 for events 8 and 9, otherwise 0x101.
  *
- * onWidgetMenu slot (+0xA4) of cFEMemCard's vtable D_0046C980, also used by cOVState_AUTOSAVE_vtbl, D_004722B8 and
- * D_00472440.
+ * onWidgetMenu slot (+0xA4) of cFEMemCard's vtable cFEMemCard_vtbl, also used by cOVState_AUTOSAVE_vtbl, cOVState_SAVEOPTIONS_vtbl and
+ * cOVState_SAVEREPLAY_vtbl.
  *
  * @param menu  the menu that asks (not used)
  * @param key  the menu event

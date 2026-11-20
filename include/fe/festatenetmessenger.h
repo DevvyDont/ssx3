@@ -7,8 +7,8 @@
 //
 // Size 0x6FC: the cFEStateNet method func_001A9B58 allocates it with cMemMan_alloc(0x6FC, "cFEStateNetMessenger")
 // and constructs it with cFEStateNetMessenger_cFEStateNetMessenger(mem, mpEngine, self); the constructor stores up to 0x6F8.
-// Constructor cFEStateNetMessenger_cFEStateNetMessenger (cFEStateNet ctor cFEStateNet_cFEStateNet, then vtable D_00467F28, mHashName 0x46 and its members),
-// destructor cFEStateNetMessenger__cFEStateNetMessenger. Methods: fe/feasyncfile 0x1A3DC8-0x1A7390 (43 functions) and the slots of D_00467F28.
+// Constructor cFEStateNetMessenger_cFEStateNetMessenger (cFEStateNet ctor cFEStateNet_cFEStateNet, then vtable cFEStateNetMessenger_vtbl, mHashName 0x46 and its members),
+// destructor cFEStateNetMessenger__cFEStateNetMessenger. Methods: fe/feasyncfile 0x1A3DC8-0x1A7390 (43 functions) and the slots of cFEStateNetMessenger_vtbl.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. cListNode, cUIState and
 // cFEStateNet are written out inline (copied from fe/festatenet.h; keep the two in step). No EA member names exist
@@ -44,7 +44,7 @@ struct cFEStateNetMessenger {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_00467F28 (vtables.tsv; 35 slots), stored by cFEStateNetMessenger_cFEStateNetMessenger after the
+    void** mVtbl;                   // 0x008 [R] cFEStateNetMessenger_vtbl (vtables.tsv; 35 slots), stored by cFEStateNetMessenger_cFEStateNetMessenger after the
                                     //       cFEStateNet ctor and by the destructor cFEStateNetMessenger__cFEStateNetMessenger
     // --- cUIState (On Tour: size 0x48, same offsets; ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] cFEStateNetMessenger_cFEStateNetMessenger stores 0x46

@@ -1898,13 +1898,13 @@ struct sMoveFlags_6DB0 {
     unsigned int w;     // 0x8
 };
 
-extern void* D_00490E80[];
+extern void* cObjectNode_vtbl[];
 extern "C" void* cMoveNode_cMoveNode1(void* self, void* a1, int type, void* a3);
 
 /**
  * Constructs an object node (node type 17) for a placed instance.
  *
- * Runs the cMoveNode record constructor cMoveNode_cMoveNode1 and installs D_00490E80. When the instance is forced visible or
+ * Runs the cMoveNode record constructor cMoveNode_cMoveNode1 and installs cObjectNode_vtbl. When the instance is forced visible or
  * the record flags have both bits 0x1 and 0x2, the flags get 0x4 and lose 0x2; for a solid object they get 0x20 and
  * lose 0x40.
  *
@@ -1917,7 +1917,7 @@ extern "C" void* cMoveNode_cMoveNode1(void* self, void* a1, int type, void* a3);
 extern "C" void* cObjectNode_cObjectNode(void* self, void* bucket, void* instRecord, int isSolid, int forceVisible)
 {
     cMoveNode_cMoveNode1(self, bucket, 17, instRecord);
-    *(void***)((char*)self + 0xC) = D_00490E80;
+    *(void***)((char*)self + 0xC) = cObjectNode_vtbl;
     if (forceVisible != 0 || ((*(sMoveFlags_6DB0**)((char*)self + 0x18))->w & 3) == 3) {
         sMoveFlags_6DB0* recordFlags = *(sMoveFlags_6DB0**)((char*)self + 0x18);
         recordFlags->w = (recordFlags->w & ~2) | 4;
@@ -1934,17 +1934,17 @@ extern "C" void* cObjectNode_cObjectNode(void* self, void* bucket, void* instRec
 INCLUDE_ASM("object/movenode", cObjectNode_cObjectNode1);
 #ifdef SKIP_ASM
 extern "C" void* cMoveNode_cMoveNode(void* self);
-extern void* D_00490E80[];
+extern void* cObjectNode_vtbl[];
 
 /**
- * Constructs an object node from a replay frame: cMoveNode_cMoveNode, then installs D_00490E80.
+ * Constructs an object node from a replay frame: cMoveNode_cMoveNode, then installs cObjectNode_vtbl.
  *
  * @return self
  */
 extern "C" void* cObjectNode_cObjectNode1(void* self)
 {
     cMoveNode_cMoveNode(self);
-    *(void***)((char*)self + 0xC) = D_00490E80;
+    *(void***)((char*)self + 0xC) = cObjectNode_vtbl;
     return self;
 }
 #endif

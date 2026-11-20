@@ -329,7 +329,7 @@ extern char D_0046D970[];
 /**
  * Destroys a screen fade: resets the vtable to the root module vtable D_0046D970 and frees the object when asked.
  *
- * It is the destructor slot (+0xC) of D_0047D980, the vtable cFadeScreen_cFadeScreen (the fade constructor) installs
+ * It is the destructor slot (+0xC) of cFadeScreen_vtbl, the vtable cFadeScreen_cFadeScreen (the fade constructor) installs
  * and whose loseFocus and update slots are cFadeScreen_loseFocus and cFadeScreen_update.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
@@ -433,7 +433,7 @@ extern char D_0046D970[];
 /**
  * Destroys a plain load screen: resets the vtable to the root module vtable D_0046D970 and frees the object when asked.
  *
- * It is the destructor slot (+0xC) of D_0047D818, the vtable cLoadScreen_cLoadScreen installs (loseFocus is
+ * It is the destructor slot (+0xC) of cLoadScreen_vtbl, the vtable cLoadScreen_cLoadScreen installs (loseFocus is
  * cLoadScreen_loseFocus).
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
@@ -451,20 +451,20 @@ extern "C" void cLoadScreen__cLoadScreen(int* self, int flags)
 INCLUDE_ASM("main/ssxappdtor", cLoadScreen_cLoadScreen);
 #ifdef SKIP_ASM
 extern "C" void cFadeScreen_cFadeScreen(void *);
-extern char D_0047D818[];
+extern char cLoadScreen_vtbl[];
 
 /**
  * Constructs a plain load screen: runs the fade constructor cFadeScreen_cFadeScreen, clears the UI engine pointer
- * (+0xC) and installs vtable D_0047D818.
+ * (+0xC) and installs vtable cLoadScreen_vtbl.
  *
- * D_0047D818's loseFocus slot is cLoadScreen_loseFocus and its update slot is cLoadScreen_update.
+ * cLoadScreen_vtbl's loseFocus slot is cLoadScreen_loseFocus and its update slot is cLoadScreen_update.
  *
  * @return @p self
  */
 extern "C" void *cLoadScreen_cLoadScreen(cLoadScreen* self) {
     cFadeScreen_cFadeScreen(self);
     self->mpUI = 0;
-    self->mVtbl = (void**)D_0047D818;
+    self->mVtbl = (void**)cLoadScreen_vtbl;
     return ((void*)self);
 }
 #endif
@@ -615,20 +615,20 @@ INCLUDE_ASM("main/ssxappdtor", cGameState__cGameState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D6E8[];
+extern char cGameState_vtbl[];
 
 /**
- * Destroys a game-flow state: resets the vtable pointer (+0xC) to the base game-state vtable D_0047D6E8 and frees the
+ * Destroys a game-flow state: resets the vtable pointer (+0xC) to the base game-state vtable cGameState_vtbl and frees the
  * object when asked.
  *
- * D_0047D6E8 is the base vtable whose slots are the cGameState_* defaults (preloadInit, preloadUpdate, preloadCancel,
+ * cGameState_vtbl is the base vtable whose slots are the cGameState_* defaults (preloadInit, preloadUpdate, preloadCancel,
  * loseFocus, isPreloadComplete, onWidgetEvent).
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
 extern "C" void cGameState__cGameState(int* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_0047D6E8;
+    *(void**)((char*)self + 0xC) = cGameState_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -674,7 +674,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameState_gainFocus__FPv);
 /**
  * Does nothing: the base game state's gainFocus has an empty body.
  *
- * It fills slot +0x2C of the base game-state vtable D_0047D6E8 and of the states that keep the default (the end-wait
+ * It fills slot +0x2C of the base game-state vtable cGameState_vtbl and of the states that keep the default (the end-wait
  * and transport-wait states).
  */
 void cGameState_gainFocus(void* self)
@@ -688,7 +688,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameState_update__FPv);
 /**
  * Does nothing: the base game state's update has an empty body.
  *
- * It fills slot +0x34 of the base game-state vtable D_0047D6E8 and of the states without their own update (end,
+ * It fills slot +0x34 of the base game-state vtable cGameState_vtbl and of the states without their own update (end,
  * end-wait, transport-wait, riding).
  */
 void cGameState_update(void* self)
@@ -737,20 +737,20 @@ INCLUDE_ASM("main/ssxappdtor", cGFEndState__cGFEndState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D6E8[];
+extern char cGameState_vtbl[];
 
 /**
- * Destroys the end game-flow state: resets the vtable pointer (+0xC) to the base game-state vtable D_0047D6E8 and frees
+ * Destroys the end game-flow state: resets the vtable pointer (+0xC) to the base game-state vtable cGameState_vtbl and frees
  * the object when asked.
  *
- * It is the destructor slot of D_0047D690, the vtable cGFEndState_cGFEndState installs (gainFocus cGFEndState_gainFocus, loseFocus
+ * It is the destructor slot of cGFEndState_vtbl, the vtable cGFEndState_cGFEndState installs (gainFocus cGFEndState_gainFocus, loseFocus
  * cGFEndState_loseFocus).
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
 extern "C" void cGFEndState__cGFEndState(int* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_0047D6E8;
+    *(void**)((char*)self + 0xC) = cGameState_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -760,13 +760,13 @@ extern "C" void cGFEndState__cGFEndState(int* self, int flags)
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGFEndState_cGFEndState);
 #ifdef SKIP_ASM
-extern char D_0047D6E8[];
-extern char D_0047D690[];
+extern char cGameState_vtbl[];
+extern char cGFEndState_vtbl[];
 extern int cGameState_mpGame;
 
 /**
- * Constructs the end game-flow state: base game-state set-up (vtable D_0047D6E8, cGameState_mpGame cleared), then next
- * state 8 (+0x0), vtable D_0047D690 (+0xC) and startup flag 0 (+0x4).
+ * Constructs the end game-flow state: base game-state set-up (vtable cGameState_vtbl, cGameState_mpGame cleared), then next
+ * state 8 (+0x0), vtable cGFEndState_vtbl (+0xC) and startup flag 0 (+0x4).
  *
  * In On Tour's eGFState numbering 8 is kGFSM_EndWait, the state that follows the end state.
  *
@@ -774,10 +774,10 @@ extern int cGameState_mpGame;
  */
 extern "C" void *cGFEndState_cGFEndState(void *self) {
     *(int *)((char *)self + 0) = 0;
-    *(void **)((char *)self + 0xC) = D_0047D6E8;
+    *(void **)((char *)self + 0xC) = cGameState_vtbl;
     cGameState_mpGame = 0;
     *(int *)((char *)self + 0) = 8;
-    *(void **)((char *)self + 0xC) = D_0047D690;
+    *(void **)((char *)self + 0xC) = cGFEndState_vtbl;
     *(int *)((char *)self + 4) = 0;
     return self;
 }
@@ -788,10 +788,10 @@ INCLUDE_ASM("main/ssxappdtor", func_00243D58);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D6E8[];
+extern char cGameState_vtbl[];
 
 /**
- * Destroys the end-wait game-flow state: resets the vtable pointer (+0xC) to the base game-state vtable D_0047D6E8 and
+ * Destroys the end-wait game-flow state: resets the vtable pointer (+0xC) to the base game-state vtable cGameState_vtbl and
  * frees the object when asked.
  *
  * It is the destructor slot of D_0047D638, a vtable that keeps every other default (On Tour's cGFEndWaitState overrides
@@ -801,7 +801,7 @@ extern char D_0047D6E8[];
  */
 extern "C" void func_00243D58(int* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_0047D6E8;
+    *(void**)((char*)self + 0xC) = cGameState_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -813,20 +813,20 @@ INCLUDE_ASM("main/ssxappdtor", cGFFinishlineState__cGFFinishlineState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D6E8[];
+extern char cGameState_vtbl[];
 
 /**
- * Destroys the finish-line game-flow state: resets the vtable pointer (+0xC) to the base game-state vtable D_0047D6E8
+ * Destroys the finish-line game-flow state: resets the vtable pointer (+0xC) to the base game-state vtable cGameState_vtbl
  * and frees the object when asked.
  *
- * It is the destructor slot of D_0047D5E0, whose gainFocus, update and loseFocus (cGFFinishlineState_gainFocus, cGFFinishlineState_update,
+ * It is the destructor slot of cGFFinishlineState_vtbl, whose gainFocus, update and loseFocus (cGFFinishlineState_gainFocus, cGFFinishlineState_update,
  * cGFFinishlineState_loseFocus) sit right before cGFFinishlineState_writeToReplayFrame in fe/festateloadscreen.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
 extern "C" void cGFFinishlineState__cGFFinishlineState(int* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_0047D6E8;
+    *(void**)((char*)self + 0xC) = cGameState_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -838,19 +838,19 @@ INCLUDE_ASM("main/ssxappdtor", cGFTransportWaitState__cGFTransportWaitState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D6E8[];
+extern char cGameState_vtbl[];
 
 /**
  * Destroys the transport-wait game-flow state: resets the vtable pointer (+0xC) to the base game-state vtable
- * D_0047D6E8 and frees the object when asked.
+ * cGameState_vtbl and frees the object when asked.
  *
- * It is the destructor slot of D_0047D588, whose loseFocus slot is cGFTransportWaitState_loseFocus.
+ * It is the destructor slot of cGFTransportWaitState_vtbl, whose loseFocus slot is cGFTransportWaitState_loseFocus.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
 extern "C" void cGFTransportWaitState__cGFTransportWaitState(int* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_0047D6E8;
+    *(void**)((char*)self + 0xC) = cGameState_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -860,22 +860,22 @@ extern "C" void cGFTransportWaitState__cGFTransportWaitState(int* self, int flag
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGFTransportWaitState_cGFTransportWaitState);
 #ifdef SKIP_ASM
-extern char D_0047D6E8[];
-extern char D_0047D588[];
+extern char cGameState_vtbl[];
+extern char cGFTransportWaitState_vtbl[];
 extern int cGameState_mpGame;
 
 /**
- * Constructs the transport-wait game-flow state: base game-state set-up (vtable D_0047D6E8, cGameState_mpGame cleared),
- * then next state 10 (+0x0), vtable D_0047D588 (+0xC) and startup flag 0 (+0x4).
+ * Constructs the transport-wait game-flow state: base game-state set-up (vtable cGameState_vtbl, cGameState_mpGame cleared),
+ * then next state 10 (+0x0), vtable cGFTransportWaitState_vtbl (+0xC) and startup flag 0 (+0x4).
  *
  * @return @p self
  */
 extern "C" void *cGFTransportWaitState_cGFTransportWaitState(void *self) {
     *(int *)((char *)self + 0) = 0;
-    *(void **)((char *)self + 0xC) = D_0047D6E8;
+    *(void **)((char *)self + 0xC) = cGameState_vtbl;
     cGameState_mpGame = 0;
     *(int *)((char *)self + 0) = 10;
-    *(void **)((char *)self + 0xC) = D_0047D588;
+    *(void **)((char *)self + 0xC) = cGFTransportWaitState_vtbl;
     *(int *)((char *)self + 4) = 0;
     return self;
 }
@@ -886,17 +886,17 @@ INCLUDE_ASM("main/ssxappdtor", cGFEventStartState__cGFEventStartState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D6E8[];
+extern char cGameState_vtbl[];
 
 /**
- * Destroys a cGFEventStartState game-flow state: restores the base game-state vtable (D_0047D6E8), then frees
+ * Destroys a cGFEventStartState game-flow state: restores the base game-state vtable (cGameState_vtbl), then frees
  * the object when asked to.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cGFEventStartState__cGFEventStartState(int* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_0047D6E8;
+    *(void**)((char*)self + 0xC) = cGameState_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -908,17 +908,17 @@ INCLUDE_ASM("main/ssxappdtor", cGFGateState__cGFGateState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D6E8[];
+extern char cGameState_vtbl[];
 
 /**
- * Destroys a cGFGateState game-flow state: restores the base game-state vtable (D_0047D6E8), then frees the
+ * Destroys a cGFGateState game-flow state: restores the base game-state vtable (cGameState_vtbl), then frees the
  * object when asked to.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cGFGateState__cGFGateState(int* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_0047D6E8;
+    *(void**)((char*)self + 0xC) = cGameState_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -928,19 +928,19 @@ extern "C" void cGFGateState__cGFGateState(int* self, int flags)
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGFGateState_cGFGateState);
 #ifdef SKIP_ASM
-extern char D_0047D6E8[];
+extern char cGameState_vtbl[];
 extern char cGFGateState_vtbl[];
 extern int cGameState_mpGame;
 
 /**
- * Constructs the gate game-flow state: base game-state set-up (vtable D_0047D6E8, cGameState_mpGame cleared), then next
+ * Constructs the gate game-flow state: base game-state set-up (vtable cGameState_vtbl, cGameState_mpGame cleared), then next
  * state 4 (+0x0), cGFGateState_vtbl (+0xC) and startup flag 0 (+0x4).
  *
  * @return @p self
  */
 extern "C" void *cGFGateState_cGFGateState(void *self) {
     *(int *)((char *)self + 0) = 0;
-    *(void **)((char *)self + 0xC) = D_0047D6E8;
+    *(void **)((char *)self + 0xC) = cGameState_vtbl;
     cGameState_mpGame = 0;
     *(int *)((char *)self + 0) = 4;
     *(void **)((char *)self + 0xC) = cGFGateState_vtbl;
@@ -954,19 +954,19 @@ INCLUDE_ASM("main/ssxappdtor", cGFRidingState__cGFRidingState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D6E8[];
+extern char cGameState_vtbl[];
 
 /**
- * Destroys the riding game-flow state: resets the vtable pointer (+0xC) to the base game-state vtable D_0047D6E8 and
+ * Destroys the riding game-flow state: resets the vtable pointer (+0xC) to the base game-state vtable cGameState_vtbl and
  * frees the object when asked.
  *
- * It is the destructor slot of D_0047D480, whose gainFocus is cGFRidingState_gainFocus.
+ * It is the destructor slot of cGFRidingState_vtbl, whose gainFocus is cGFRidingState_gainFocus.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
 extern "C" void cGFRidingState__cGFRidingState(int* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_0047D6E8;
+    *(void**)((char*)self + 0xC) = cGameState_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -976,22 +976,22 @@ extern "C" void cGFRidingState__cGFRidingState(int* self, int flags)
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGFRidingState_cGFRidingState);
 #ifdef SKIP_ASM
-extern char D_0047D6E8[];
-extern char D_0047D480[];
+extern char cGameState_vtbl[];
+extern char cGFRidingState_vtbl[];
 extern int cGameState_mpGame;
 
 /**
- * Constructs the riding game-flow state: base game-state set-up (vtable D_0047D6E8, cGameState_mpGame cleared), then
- * next state 5 (+0x0), vtable D_0047D480 (+0xC) and startup flag 0 (+0x4).
+ * Constructs the riding game-flow state: base game-state set-up (vtable cGameState_vtbl, cGameState_mpGame cleared), then
+ * next state 5 (+0x0), vtable cGFRidingState_vtbl (+0xC) and startup flag 0 (+0x4).
  *
  * @return @p self
  */
 extern "C" void *cGFRidingState_cGFRidingState(void *self) {
     *(int *)((char *)self + 0) = 0;
-    *(void **)((char *)self + 0xC) = D_0047D6E8;
+    *(void **)((char *)self + 0xC) = cGameState_vtbl;
     cGameState_mpGame = 0;
     *(int *)((char *)self + 0) = 5;
-    *(void **)((char *)self + 0xC) = D_0047D480;
+    *(void **)((char *)self + 0xC) = cGFRidingState_vtbl;
     *(int *)((char *)self + 4) = 0;
     return self;
 }
@@ -1002,17 +1002,17 @@ INCLUDE_ASM("main/ssxappdtor", cGFTrackStartState__cGFTrackStartState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D6E8[];
+extern char cGameState_vtbl[];
 
 /**
- * Destroys a cGFTrackStartState game-flow state: restores the base game-state vtable (D_0047D6E8), then frees
+ * Destroys a cGFTrackStartState game-flow state: restores the base game-state vtable (cGameState_vtbl), then frees
  * the object when asked to.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cGFTrackStartState__cGFTrackStartState(int* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_0047D6E8;
+    *(void**)((char*)self + 0xC) = cGameState_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -1024,17 +1024,17 @@ INCLUDE_ASM("main/ssxappdtor", cGFNextHeatState__cGFNextHeatState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D6E8[];
+extern char cGameState_vtbl[];
 
 /**
- * Destroys a cGFNextHeatState game-flow state: restores the base game-state vtable (D_0047D6E8), then frees
+ * Destroys a cGFNextHeatState game-flow state: restores the base game-state vtable (cGameState_vtbl), then frees
  * the object when asked to.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cGFNextHeatState__cGFNextHeatState(int* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_0047D6E8;
+    *(void**)((char*)self + 0xC) = cGameState_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -1044,19 +1044,19 @@ extern "C" void cGFNextHeatState__cGFNextHeatState(int* self, int flags)
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGFNextHeatState_cGFNextHeatState);
 #ifdef SKIP_ASM
-extern char D_0047D6E8[];
+extern char cGameState_vtbl[];
 extern char cGFNextHeatState_vtbl[];
 extern int cGameState_mpGame;
 
 /**
- * Constructs the next-heat game-flow state: base game-state set-up (vtable D_0047D6E8, cGameState_mpGame cleared), then
+ * Constructs the next-heat game-flow state: base game-state set-up (vtable cGameState_vtbl, cGameState_mpGame cleared), then
  * cGFNextHeatState_vtbl (+0xC), next state 1 (+0x0), startup flag 3 (+0x4) and two cleared fields (+0x14, +0x18).
  *
  * @return @p self
  */
 extern "C" void *cGFNextHeatState_cGFNextHeatState(void *self) {
     *(int *)((char *)self + 0) = 0;
-    *(void **)((char *)self + 0xC) = D_0047D6E8;
+    *(void **)((char *)self + 0xC) = cGameState_vtbl;
     cGameState_mpGame = 0;
     *(void **)((char *)self + 0xC) = cGFNextHeatState_vtbl;
     *(int *)((char *)self + 0) = 1;
@@ -1072,17 +1072,17 @@ INCLUDE_ASM("main/ssxappdtor", cGFSessionTeleportState__cGFSessionTeleportState)
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D6E8[];
+extern char cGameState_vtbl[];
 
 /**
- * Destroys a cGFSessionTeleportState game-flow state: restores the base game-state vtable (D_0047D6E8), then
+ * Destroys a cGFSessionTeleportState game-flow state: restores the base game-state vtable (cGameState_vtbl), then
  * frees the object when asked to.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cGFSessionTeleportState__cGFSessionTeleportState(int* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_0047D6E8;
+    *(void**)((char*)self + 0xC) = cGameState_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -1092,19 +1092,19 @@ extern "C" void cGFSessionTeleportState__cGFSessionTeleportState(int* self, int 
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGFSessionTeleportState_cGFSessionTeleportState);
 #ifdef SKIP_ASM
-extern char D_0047D6E8[];
+extern char cGameState_vtbl[];
 extern char cGFSessionTeleportState_vtbl[];
 extern int cGameState_mpGame;
 
 /**
- * Constructs the session-teleport game-flow state: base game-state set-up (vtable D_0047D6E8, cGameState_mpGame
+ * Constructs the session-teleport game-flow state: base game-state set-up (vtable cGameState_vtbl, cGameState_mpGame
  * cleared), then next state 10 (+0x0), cGFSessionTeleportState_vtbl (+0xC) and startup flag 0 (+0x4).
  *
  * @return @p self
  */
 extern "C" void *cGFSessionTeleportState_cGFSessionTeleportState(void *self) {
     *(int *)((char *)self + 0) = 0;
-    *(void **)((char *)self + 0xC) = D_0047D6E8;
+    *(void **)((char *)self + 0xC) = cGameState_vtbl;
     cGameState_mpGame = 0;
     *(int *)((char *)self + 0) = 10;
     *(void **)((char *)self + 0xC) = cGFSessionTeleportState_vtbl;
@@ -1118,17 +1118,17 @@ INCLUDE_ASM("main/ssxappdtor", cGFUserSelectState__cGFUserSelectState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D6E8[];
+extern char cGameState_vtbl[];
 
 /**
- * Destroys a cGFUserSelectState game-flow state: restores the base game-state vtable (D_0047D6E8), then frees
+ * Destroys a cGFUserSelectState game-flow state: restores the base game-state vtable (cGameState_vtbl), then frees
  * the object when asked to.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cGFUserSelectState__cGFUserSelectState(int* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_0047D6E8;
+    *(void**)((char*)self + 0xC) = cGameState_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -1154,19 +1154,19 @@ INCLUDE_ASM("main/ssxappdtor", cGFSectionLoadState__cGFSectionLoadState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D6E8[];
+extern char cGameState_vtbl[];
 
 /**
- * Destroys the section-load game-flow state: resets the vtable pointer (+0xC) to the base game-state vtable D_0047D6E8
+ * Destroys the section-load game-flow state: resets the vtable pointer (+0xC) to the base game-state vtable cGameState_vtbl
  * and frees the object when asked.
  *
- * It is the destructor slot of D_0047D2C8, whose gainFocus/update/loseFocus are cGFSectionLoadState_*.
+ * It is the destructor slot of cGFSectionLoadState_vtbl, whose gainFocus/update/loseFocus are cGFSectionLoadState_*.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
 extern "C" void cGFSectionLoadState__cGFSectionLoadState(int* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_0047D6E8;
+    *(void**)((char*)self + 0xC) = cGameState_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -1178,19 +1178,19 @@ INCLUDE_ASM("main/ssxappdtor", cGFPreEventState__cGFPreEventState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D6E8[];
+extern char cGameState_vtbl[];
 
 /**
- * Destroys the pre-event game-flow state: resets the vtable pointer (+0xC) to the base game-state vtable D_0047D6E8 and
+ * Destroys the pre-event game-flow state: resets the vtable pointer (+0xC) to the base game-state vtable cGameState_vtbl and
  * frees the object when asked.
  *
- * It is the destructor slot of D_0047D270, whose gainFocus/update/loseFocus are cGFPreEventState_*.
+ * It is the destructor slot of cGFPreEventState_vtbl, whose gainFocus/update/loseFocus are cGFPreEventState_*.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
 extern "C" void cGFPreEventState__cGFPreEventState(int* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_0047D6E8;
+    *(void**)((char*)self + 0xC) = cGameState_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -1200,22 +1200,22 @@ extern "C" void cGFPreEventState__cGFPreEventState(int* self, int flags)
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGFPreEventState_cGFPreEventState);
 #ifdef SKIP_ASM
-extern char D_0047D6E8[];
-extern char D_0047D270[];
+extern char cGameState_vtbl[];
+extern char cGFPreEventState_vtbl[];
 extern int cGameState_mpGame;
 
 /**
- * Constructs the pre-event game-flow state: base game-state set-up (vtable D_0047D6E8, cGameState_mpGame cleared), then
- * next state 3 (+0x0), vtable D_0047D270 (+0xC) and startup flag 0 (+0x4).
+ * Constructs the pre-event game-flow state: base game-state set-up (vtable cGameState_vtbl, cGameState_mpGame cleared), then
+ * next state 3 (+0x0), vtable cGFPreEventState_vtbl (+0xC) and startup flag 0 (+0x4).
  *
  * @return @p self
  */
 extern "C" void *cGFPreEventState_cGFPreEventState(void *self) {
     *(int *)((char *)self + 0) = 0;
-    *(void **)((char *)self + 0xC) = D_0047D6E8;
+    *(void **)((char *)self + 0xC) = cGameState_vtbl;
     cGameState_mpGame = 0;
     *(int *)((char *)self + 0) = 3;
-    *(void **)((char *)self + 0xC) = D_0047D270;
+    *(void **)((char *)self + 0xC) = cGFPreEventState_vtbl;
     *(int *)((char *)self + 4) = 0;
     return self;
 }
@@ -1226,19 +1226,19 @@ INCLUDE_ASM("main/ssxappdtor", cGFPostEventState__cGFPostEventState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D6E8[];
+extern char cGameState_vtbl[];
 
 /**
- * Destroys the post-event game-flow state: resets the vtable pointer (+0xC) to the base game-state vtable D_0047D6E8
+ * Destroys the post-event game-flow state: resets the vtable pointer (+0xC) to the base game-state vtable cGameState_vtbl
  * and frees the object when asked.
  *
- * It is the destructor slot of D_0047D218, whose gainFocus/update/loseFocus are cGFPostEventState_*.
+ * It is the destructor slot of cGFPostEventState_vtbl, whose gainFocus/update/loseFocus are cGFPostEventState_*.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
 extern "C" void cGFPostEventState__cGFPostEventState(int* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_0047D6E8;
+    *(void**)((char*)self + 0xC) = cGameState_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -1248,22 +1248,22 @@ extern "C" void cGFPostEventState__cGFPostEventState(int* self, int flags)
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGFPostEventState_cGFPostEventState);
 #ifdef SKIP_ASM
-extern char D_0047D6E8[];
-extern char D_0047D218[];
+extern char cGameState_vtbl[];
+extern char cGFPostEventState_vtbl[];
 extern int cGameState_mpGame;
 
 /**
- * Constructs the post-event game-flow state: base game-state set-up (vtable D_0047D6E8, cGameState_mpGame cleared),
- * then next state 8 (+0x0), vtable D_0047D218 (+0xC) and startup flag 0 (+0x4).
+ * Constructs the post-event game-flow state: base game-state set-up (vtable cGameState_vtbl, cGameState_mpGame cleared),
+ * then next state 8 (+0x0), vtable cGFPostEventState_vtbl (+0xC) and startup flag 0 (+0x4).
  *
  * @return @p self
  */
 extern "C" void *cGFPostEventState_cGFPostEventState(void *self) {
     *(int *)((char *)self + 0) = 0;
-    *(void **)((char *)self + 0xC) = D_0047D6E8;
+    *(void **)((char *)self + 0xC) = cGameState_vtbl;
     cGameState_mpGame = 0;
     *(int *)((char *)self + 0) = 8;
-    *(void **)((char *)self + 0xC) = D_0047D218;
+    *(void **)((char *)self + 0xC) = cGFPostEventState_vtbl;
     *(int *)((char *)self + 4) = 0;
     return self;
 }
@@ -1274,17 +1274,17 @@ INCLUDE_ASM("main/ssxappdtor", cGFPodiumState__cGFPodiumState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D6E8[];
+extern char cGameState_vtbl[];
 
 /**
- * Destroys a cGFPodiumState game-flow state: restores the base game-state vtable (D_0047D6E8), then frees the
+ * Destroys a cGFPodiumState game-flow state: restores the base game-state vtable (cGameState_vtbl), then frees the
  * object when asked to.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cGFPodiumState__cGFPodiumState(int* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_0047D6E8;
+    *(void**)((char*)self + 0xC) = cGameState_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -1294,19 +1294,19 @@ extern "C" void cGFPodiumState__cGFPodiumState(int* self, int flags)
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGFPodiumState_cGFPodiumState);
 #ifdef SKIP_ASM
-extern char D_0047D6E8[];
+extern char cGameState_vtbl[];
 extern char cGFPodiumState_vtbl[];
 extern int cGameState_mpGame;
 
 /**
- * Constructs the podium game-flow state: base game-state set-up (vtable D_0047D6E8, cGameState_mpGame cleared), then
+ * Constructs the podium game-flow state: base game-state set-up (vtable cGameState_vtbl, cGameState_mpGame cleared), then
  * next state 7 (+0x0), cGFPodiumState_vtbl (+0xC) and startup flag 0 (+0x4).
  *
  * @return @p self
  */
 extern "C" void *cGFPodiumState_cGFPodiumState(void *self) {
     *(int *)((char *)self + 0) = 0;
-    *(void **)((char *)self + 0xC) = D_0047D6E8;
+    *(void **)((char *)self + 0xC) = cGameState_vtbl;
     cGameState_mpGame = 0;
     *(int *)((char *)self + 0) = 7;
     *(void **)((char *)self + 0xC) = cGFPodiumState_vtbl;
@@ -1320,17 +1320,17 @@ INCLUDE_ASM("main/ssxappdtor", cGFReplayStartState__cGFReplayStartState);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D6E8[];
+extern char cGameState_vtbl[];
 
 /**
- * Destroys a cGFReplayStartState game-flow state: restores the base game-state vtable (D_0047D6E8), then
+ * Destroys a cGFReplayStartState game-flow state: restores the base game-state vtable (cGameState_vtbl), then
  * frees the object when asked to.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cGFReplayStartState__cGFReplayStartState(int* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_0047D6E8;
+    *(void**)((char*)self + 0xC) = cGameState_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -1340,19 +1340,19 @@ extern "C" void cGFReplayStartState__cGFReplayStartState(int* self, int flags)
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGFReplayStartState_cGFReplayStartState);
 #ifdef SKIP_ASM
-extern char D_0047D6E8[];
+extern char cGameState_vtbl[];
 extern char cGFReplayStartState_vtbl[];
 extern int cGameState_mpGame;
 
 /**
- * Constructs the replay-start game-flow state: base game-state set-up (vtable D_0047D6E8, cGameState_mpGame cleared),
+ * Constructs the replay-start game-flow state: base game-state set-up (vtable cGameState_vtbl, cGameState_mpGame cleared),
  * then next state 4 (+0x0), cGFReplayStartState_vtbl (+0xC) and startup flag 0 (+0x4).
  *
  * @return @p self
  */
 extern "C" void *cGFReplayStartState_cGFReplayStartState(void *self) {
     *(int *)((char *)self + 0) = 0;
-    *(void **)((char *)self + 0xC) = D_0047D6E8;
+    *(void **)((char *)self + 0xC) = cGameState_vtbl;
     cGameState_mpGame = 0;
     *(int *)((char *)self + 0) = 4;
     *(void **)((char *)self + 0xC) = cGFReplayStartState_vtbl;
@@ -1954,7 +1954,7 @@ void cInput_setMap(void* self, int val)
 INCLUDE_ASM("main/ssxappdtor", cVisualEffectsObjNode__cVisualEffectsObjNode);
 #ifdef SKIP_ASM
 extern "C" void cObjNode__cObjNode(void* self, int flags);
-extern void* D_0047D070[];
+extern void* cVisualEffectsObjNode_vtbl[];
 struct sVEntry_cVisualEffectsObjNode__cVisualEffectsObjNode {
     short delta;
     short index;
@@ -1964,15 +1964,15 @@ struct sVEntry_cVisualEffectsObjNode__cVisualEffectsObjNode {
 /**
  * Destroys the visual-effects object node: deletes the cVisualEffectsMan it owns, then runs the cObjNode destructor.
  *
- * Installs D_0047D070 at +0xC, destroys the object at +0x10 (if any) through its virtual destructor (slot 1, vptr at
+ * Installs cVisualEffectsObjNode_vtbl at +0xC, destroys the object at +0x10 (if any) through its virtual destructor (slot 1, vptr at
  * +0x44, flags 3: destroy and free) and calls cObjNode__cObjNode with @p flags. cGame_load builds this node for
- * "VisualEffectsMan" with vtable D_0047D070.
+ * "VisualEffectsMan" with vtable cVisualEffectsObjNode_vtbl.
  *
  * @param flags  destructor flags, passed on to cObjNode__cObjNode
  */
 extern "C" void cVisualEffectsObjNode__cVisualEffectsObjNode(void* self, int flags)
 {
-    *(void***)((char*)self + 0xC) = D_0047D070;
+    *(void***)((char*)self + 0xC) = cVisualEffectsObjNode_vtbl;
     void* obj = *(void**)((char*)self + 0x10);
     if (obj != 0) {
         sVEntry_cVisualEffectsObjNode__cVisualEffectsObjNode* vt = *(sVEntry_cVisualEffectsObjNode__cVisualEffectsObjNode**)((char*)obj + 0x44);
@@ -1998,7 +1998,7 @@ public:
 /**
  * Updates the visual-effects object node: calls the owned cVisualEffectsMan's (+0x10) virtual slot 2 (vptr at +0x44).
  *
- * Slot +0x14 (update) of D_0047D070.
+ * Slot +0x14 (update) of cVisualEffectsObjNode_vtbl.
  */
 extern "C" void cVisualEffectsObjNode_update(void* self)
 {
@@ -2012,7 +2012,7 @@ INCLUDE_ASM("main/ssxappdtor", cVisualEffectsObjNode_render);
 /**
  * Renders the visual-effects object node: calls the owned cVisualEffectsMan's (+0x10) virtual slot 3 (vptr at +0x44).
  *
- * Slot +0x24 (render) of D_0047D070.
+ * Slot +0x24 (render) of cVisualEffectsObjNode_vtbl.
  */
 extern "C" void cVisualEffectsObjNode_render(void* self)
 {
@@ -2023,19 +2023,19 @@ extern "C" void cVisualEffectsObjNode_render(void* self)
 //100%
 INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_cGameModeHandler);
 #ifdef SKIP_ASM
-extern char D_0047D008[];
+extern char cGameModeHandler_vtbl[];
 
 /**
- * Constructs a game mode handler: installs the base handler vtable D_0047D008.
+ * Constructs a game mode handler: installs the base handler vtable cGameModeHandler_vtbl.
  *
- * D_0047D008's slots are the base cGameModeHandler methods (cGameModeHandler_purge, cleanRiderRanksPoints,
+ * cGameModeHandler_vtbl's slots are the base cGameModeHandler methods (cGameModeHandler_purge, cleanRiderRanksPoints,
  * cleanRiderRanksTime and the stubs after cGameModeHandler_setManager).
  *
  * @param handler  the handler
  * @return @p handler
  */
 extern "C" int **cGameModeHandler_cGameModeHandler(int **handler) {
-    *handler = &(*(int*)&D_0047D008);
+    *handler = &(*(int*)&cGameModeHandler_vtbl);
     return handler;
 }
 #endif
@@ -2045,19 +2045,19 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler__cGameModeHandler);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D008[];
+extern char cGameModeHandler_vtbl[];
 
 /**
- * Destroys a game mode handler: resets the vtable to the base handler vtable D_0047D008 and frees the object when
+ * Destroys a game mode handler: resets the vtable to the base handler vtable cGameModeHandler_vtbl and frees the object when
  * asked.
  *
- * It is the destructor slot of D_0047D008 itself.
+ * It is the destructor slot of cGameModeHandler_vtbl itself.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
 extern "C" void cGameModeHandler__cGameModeHandler(int* self, int flags)
 {
-    *(void**)self = D_0047D008;
+    *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -2084,7 +2084,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_init__FPv);
 /**
  * Does nothing: the base game mode handler's init.
  *
- * Slot +0x14 of the base handler vtable D_0047D008; the event handlers override it with their heat set-up (for example
+ * Slot +0x14 of the base handler vtable cGameModeHandler_vtbl; the event handlers override it with their heat set-up (for example
  * func_00238E20, func_0023A108).
  */
 void cGameModeHandler_init(void* self)
@@ -2098,7 +2098,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_riderCheckpointHit__FPv);
 /**
  * Returns 1: the base game mode handler's checkpoint handler accepts every checkpoint.
  *
- * Slot +0x34 of the base handler vtable D_0047D008 (and of the handlers that keep it); the overrides (for example
+ * Slot +0x34 of the base handler vtable cGameModeHandler_vtbl (and of the handlers that keep it); the overrides (for example
  * func_002398E8) take the rider and the seconds added.
  *
  * @return 1
@@ -2115,7 +2115,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_riderGateHit__FPv);
 /**
  * Does nothing: the base game mode handler's gate handler.
  *
- * Slot +0x3C of the base handler vtable D_0047D008 and of most event handlers.
+ * Slot +0x3C of the base handler vtable cGameModeHandler_vtbl and of most event handlers.
  */
 void cGameModeHandler_riderGateHit(void* self)
 {
@@ -2128,7 +2128,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_raceFinish__FPv);
 /**
  * Does nothing: the base game mode handler's race-finish handler.
  *
- * Slot +0x44 of the base handler vtable D_0047D008; the event handlers override it to record a rider's result (for
+ * Slot +0x44 of the base handler vtable cGameModeHandler_vtbl; the event handlers override it to record a rider's result (for
  * example func_00239230, func_0023A760).
  */
 void cGameModeHandler_raceFinish(void* self)
@@ -2142,7 +2142,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_getHeatScore__FPv);
 /**
  * Returns 0: the base game mode handler has no heat scores.
  *
- * Slot +0x4C of the base handler vtable D_0047D008; func_00239CE0 overrides it for the scored event.
+ * Slot +0x4C of the base handler vtable cGameModeHandler_vtbl; func_00239CE0 overrides it for the scored event.
  *
  * @return 0
  */
@@ -2158,7 +2158,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_writeToReplayFrame__FPv);
 /**
  * Does nothing: the base game mode handler saves nothing into a replay frame.
  *
- * Slot +0x54 of the base handler vtable D_0047D008; func_00239D18 overrides it for the scored event.
+ * Slot +0x54 of the base handler vtable cGameModeHandler_vtbl; func_00239D18 overrides it for the scored event.
  */
 void cGameModeHandler_writeToReplayFrame(void* self)
 {
@@ -2171,7 +2171,7 @@ INCLUDE_ASM("main/ssxappdtor", cGameModeHandler_readFromReplayFrame__FPv);
 /**
  * Does nothing: the base game mode handler restores nothing from a replay frame.
  *
- * Slot +0x5C of the base handler vtable D_0047D008; func_00239D50 overrides it for the scored event.
+ * Slot +0x5C of the base handler vtable cGameModeHandler_vtbl; func_00239D50 overrides it for the scored event.
  */
 void cGameModeHandler_readFromReplayFrame(void* self)
 {
@@ -2183,17 +2183,17 @@ INCLUDE_ASM("main/ssxappdtor", func_00244560);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D008[];
+extern char cGameModeHandler_vtbl[];
 
 /**
  * Destroys the scored three-heat event handler (handler 0, vtable D_0047CFA0): resets the vtable to the base handler
- * vtable D_0047D008 and frees the object when asked.
+ * vtable cGameModeHandler_vtbl and frees the object when asked.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
 extern "C" void func_00244560(int* self, int flags)
 {
-    *(void**)self = D_0047D008;
+    *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -2205,17 +2205,17 @@ INCLUDE_ASM("main/ssxappdtor", func_00244590);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D008[];
+extern char cGameModeHandler_vtbl[];
 
 /**
  * Destroys the timed three-heat event handler (handler 1, vtable D_0047CF38): resets the vtable to the base handler
- * vtable D_0047D008 and frees the object when asked.
+ * vtable cGameModeHandler_vtbl and frees the object when asked.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
 extern "C" void func_00244590(int* self, int flags)
 {
-    *(void**)self = D_0047D008;
+    *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -2227,17 +2227,17 @@ INCLUDE_ASM("main/ssxappdtor", func_002445C0);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D008[];
+extern char cGameModeHandler_vtbl[];
 
 /**
  * Destroys the online race handler (handler 8, vtable D_0047CED0): resets the vtable to the base handler vtable
- * D_0047D008 and frees the object when asked.
+ * cGameModeHandler_vtbl and frees the object when asked.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
 extern "C" void func_002445C0(int* self, int flags)
 {
-    *(void**)self = D_0047D008;
+    *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -2249,17 +2249,17 @@ INCLUDE_ASM("main/ssxappdtor", func_002445F0);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D008[];
+extern char cGameModeHandler_vtbl[];
 
 /**
  * Destroys the two-player online event handler (handler 9, vtable D_0047CE68): resets the vtable to the base handler
- * vtable D_0047D008 and frees the object when asked.
+ * vtable cGameModeHandler_vtbl and frees the object when asked.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
 extern "C" void func_002445F0(int* self, int flags)
 {
-    *(void**)self = D_0047D008;
+    *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -2297,17 +2297,17 @@ INCLUDE_ASM("main/ssxappdtor", func_00244630);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D008[];
+extern char cGameModeHandler_vtbl[];
 
 /**
- * Destroys the freeride handler (handler 2, vtable D_0047CE00): resets the vtable to the base handler vtable D_0047D008
+ * Destroys the freeride handler (handler 2, vtable D_0047CE00): resets the vtable to the base handler vtable cGameModeHandler_vtbl
  * and frees the object when asked.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
 extern "C" void func_00244630(int* self, int flags)
 {
-    *(void**)self = D_0047D008;
+    *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -2319,17 +2319,17 @@ INCLUDE_ASM("main/ssxappdtor", func_00244660);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D008[];
+extern char cGameModeHandler_vtbl[];
 
 /**
  * Destroys the located timed-event handler (handler 4, vtable D_0047CD98): resets the vtable to the base handler vtable
- * D_0047D008 and frees the object when asked.
+ * cGameModeHandler_vtbl and frees the object when asked.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
 extern "C" void func_00244660(int* self, int flags)
 {
-    *(void**)self = D_0047D008;
+    *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -2341,17 +2341,17 @@ INCLUDE_ASM("main/ssxappdtor", func_00244690);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D008[];
+extern char cGameModeHandler_vtbl[];
 
 /**
  * Destroys the head-to-head event handler (handler 5, vtable D_0047CD30): resets the vtable to the base handler vtable
- * D_0047D008 and frees the object when asked.
+ * cGameModeHandler_vtbl and frees the object when asked.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
 extern "C" void func_00244690(int* self, int flags)
 {
-    *(void**)self = D_0047D008;
+    *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -2363,17 +2363,17 @@ INCLUDE_ASM("main/ssxappdtor", func_002446C0);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D008[];
+extern char cGameModeHandler_vtbl[];
 
 /**
  * Destroys the head-to-head scored event handler (handler 6, vtable D_0047CCC8): resets the vtable to the base handler
- * vtable D_0047D008 and frees the object when asked.
+ * vtable cGameModeHandler_vtbl and frees the object when asked.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
 extern "C" void func_002446C0(int* self, int flags)
 {
-    *(void**)self = D_0047D008;
+    *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -2385,17 +2385,17 @@ INCLUDE_ASM("main/ssxappdtor", func_002446F0);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D008[];
+extern char cGameModeHandler_vtbl[];
 
 /**
  * Destroys the point-target event handler (handler 7, vtable D_0047CC60): resets the vtable to the base handler vtable
- * D_0047D008 and frees the object when asked.
+ * cGameModeHandler_vtbl and frees the object when asked.
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */
 extern "C" void func_002446F0(int* self, int flags)
 {
-    *(void**)self = D_0047D008;
+    *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -2407,10 +2407,10 @@ INCLUDE_ASM("main/ssxappdtor", func_00244720);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_0047D008[];
+extern char cGameModeHandler_vtbl[];
 
 /**
- * Destroys the single-heat random line-up handler: resets the vtable to the base handler vtable D_0047D008 and frees
+ * Destroys the single-heat random line-up handler: resets the vtable to the base handler vtable cGameModeHandler_vtbl and frees
  * the object when asked.
  *
  * Its vtable starts at cMCOverlayManager_vtbl + 0x20 (0x0047CBF8; the label covers both tables), with init
@@ -2420,7 +2420,7 @@ extern char D_0047D008[];
  */
 extern "C" void func_00244720(int* self, int flags)
 {
-    *(void**)self = D_0047D008;
+    *(void**)self = cGameModeHandler_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -2780,7 +2780,7 @@ extern "C" int cGame_updateStreamFocus(cGame* self) {
 INCLUDE_ASM("main/ssxappdtor", cAIVisualEffectsObjNode__cAIVisualEffectsObjNode);
 #ifdef SKIP_ASM
 extern "C" void cObjNode__cObjNode(void* self, int flags);
-extern void* D_0047CB60[];
+extern void* cAIVisualEffectsObjNode_vtbl[];
 struct sVEntry_cAIVisualEffectsObjNode__cAIVisualEffectsObjNode {
     short delta;
     short index;
@@ -2791,15 +2791,15 @@ struct sVEntry_cAIVisualEffectsObjNode__cAIVisualEffectsObjNode {
  * Destroys the AI visual-effects object node: deletes the cAIVisualEffectsMan it owns, then runs the cObjNode
  * destructor.
  *
- * Installs D_0047CB60 at +0xC, destroys the object at +0x10 (if any) through its virtual destructor (slot 1, vptr at
+ * Installs cAIVisualEffectsObjNode_vtbl at +0xC, destroys the object at +0x10 (if any) through its virtual destructor (slot 1, vptr at
  * +0x4, flags 3: destroy and free) and calls cObjNode__cObjNode with @p flags. cGame_load builds this node for
- * "AIVisualEffectsMan" with vtable D_0047CB60.
+ * "AIVisualEffectsMan" with vtable cAIVisualEffectsObjNode_vtbl.
  *
  * @param flags  destructor flags, passed on to cObjNode__cObjNode
  */
 extern "C" void cAIVisualEffectsObjNode__cAIVisualEffectsObjNode(void* self, int flags)
 {
-    *(void***)((char*)self + 0xC) = D_0047CB60;
+    *(void***)((char*)self + 0xC) = cAIVisualEffectsObjNode_vtbl;
     void* obj = *(void**)((char*)self + 0x10);
     if (obj != 0) {
         sVEntry_cAIVisualEffectsObjNode__cAIVisualEffectsObjNode* vt = *(sVEntry_cAIVisualEffectsObjNode__cAIVisualEffectsObjNode**)((char*)obj + 0x4);
@@ -2826,7 +2826,7 @@ public:
  * Updates the AI visual-effects object node: calls the owned cAIVisualEffectsMan's (+0x10) virtual slot 2 (vptr at
  * +0x4).
  *
- * Slot +0x14 (update) of D_0047CB60.
+ * Slot +0x14 (update) of cAIVisualEffectsObjNode_vtbl.
  */
 extern "C" void cAIVisualEffectsObjNode_update(void* self)
 {
@@ -2841,7 +2841,7 @@ INCLUDE_ASM("main/ssxappdtor", cAIVisualEffectsObjNode_render);
  * Renders the AI visual-effects object node: calls the owned cAIVisualEffectsMan's (+0x10) virtual slot 3 (vptr at
  * +0x4).
  *
- * Slot +0x24 (render) of D_0047CB60.
+ * Slot +0x24 (render) of cAIVisualEffectsObjNode_vtbl.
  */
 extern "C" void cAIVisualEffectsObjNode_render(void* self)
 {

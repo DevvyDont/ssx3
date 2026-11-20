@@ -10,7 +10,7 @@
 //   cPS2SoundManager : cSoundManager (On Tour: an interface with only a vptr, size 0x4; On Tour's PSP version is
 //   cPSPSoundManager, 0x8)
 // Size 0x320 [R]: cSoundManager::Construct (cSoundManager_Construct) = ctor cPS2SoundManager_cPS2SoundManager(cMemMan_alloc(0x320,
-// "PS2SoundManager")). Vtable D_004835F8: Init, SetMode, Shutdown, AllocSoundMem, DeallocSoundMem,
+// "PS2SoundManager")). Vtable cPS2SoundManager_vtbl: Init, SetMode, Shutdown, AllocSoundMem, DeallocSoundMem,
 // SetSoundMemLoadLimits, RestoreSoundMemLoadLimits, dtor (preview cPS2SoundManager::<virtual slot 1..8>, On Tour's
 // cSoundManager method order). The preview's offsets agree with retail (asserts at preview 0x27A37C..0x27AD4C).
 //
@@ -34,7 +34,7 @@ struct tPS2SoundMemNode {
 };
 
 struct cPS2SoundManager {
-    void** mVtbl;                     // 0x000 [R] D_004835F8 (_vt$16cPS2SoundManager), stored by the ctor and dtor (cSoundManager has no data: the vptr is first)
+    void** mVtbl;                     // 0x000 [R] cPS2SoundManager_vtbl (_vt$16cPS2SoundManager), stored by the ctor and dtor (cSoundManager has no data: the vptr is first)
     void* mSoundHeap;                 // 0x004 [P] "mSoundHeap == NULL" (preview dtor lw 4); [R] Init: operator new(0x32000, "mSoundHeap"), passed to the sound driver; Shutdown / dtor cMemMan_free() it
     int unk_008;                      // 0x008 [R] ctor 0; [U] the mode group cPS2SoundManager_SetMode applied (2 after mode 3, 1 after the others); it
                                       // refuses (returns 1) when the OTHER group is recorded, likely an inverted test

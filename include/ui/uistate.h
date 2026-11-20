@@ -8,7 +8,7 @@
 // put their own members from 0x48 on (cFEStateCharSelect_cFEStateCharSelect; ovstates allocates a 0x4C-byte popup), so cUIState is 0x48 bytes.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet.
-// Base class: cListNode (On Tour: mpPrev 0x0, mpNext 0x4; its vptr follows at 0x8). _vt$8cUIState (D_004946C8)
+// Base class: cListNode (On Tour: mpPrev 0x0, mpNext 0x4; its vptr follows at 0x8). _vt$8cUIState (cUIState_vtbl)
 // keeps cListNode's traverseFlat/traverseRecurse (cListNode_traverseFlat/cListNode_traverseRecurse) in slots 2-3.
 //
 // Member names are EA's, from SSX On Tour's PSP DWARF (class cUIState, size 0x48: the same offsets as retail),
@@ -35,7 +35,7 @@ struct cUIScreen;
 struct cUIState {
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the constructors self-link it
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked
-    void** mVtbl;                    // 0x008 [R] _vt$8cUIState (D_004946C8), stored by cUIState_cUIState/cUIState_cUIState1/cUIState_cUIState2
+    void** mVtbl;                    // 0x008 [R] _vt$8cUIState (cUIState_vtbl), stored by cUIState_cUIState/cUIState_cUIState1/cUIState_cUIState2
     int mHashName;                   // 0x00C [P] getHashName/setHashName (retail cUIState_getHashName/cUIState_setHashName); [R] = 0
                                      //       (derived states store their state id here, e.g. 9 in cFEStateCharSelect_cFEStateCharSelect)
     cUIEngine* mpEngine;             // 0x010 [P] getEngine (retail cUIState_getEngine); [R] = pEngine; [U] cUIState_onUpdate reads the

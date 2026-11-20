@@ -9,7 +9,7 @@ struct sVTableBAGT {
     char pad_0x12[2];
     void (*fn)(void*);
 };
-extern sVTableBAGT D_0045ACD8;
+extern sVTableBAGT cBEBAGTInterface_vtbl;
 
 struct cBEBAGTInterface {
     char pad_0x00[8];
@@ -24,7 +24,7 @@ INCLUDE_ASM("be/beintbagt", cBEBAGTInterface_getThis__Fv);
 /**
  * Returns the back end's BAGT interface singleton, creating it on first use.
  *
- * The first call allocates 0x10 bytes tagged "BEBAGTInt", stores the vtable D_0045ACD8, calls its virtual
+ * The first call allocates 0x10 bytes tagged "BEBAGTInt", stores the vtable cBEBAGTInterface_vtbl, calls its virtual
  * slot 2 (discard) and clears bIsActive (+0x8).
  *
  * @return the BAGT interface (cBEBAGTInterface_instance)
@@ -34,7 +34,7 @@ void* cBEBAGTInterface_getThis()
     if (cBEBAGTInterface_instance == 0) {
         cBEBAGTInterface* mem = (cBEBAGTInterface*)cMemMan_alloc(0x10, str_BEBAGTInt, 0, 0);
         cBEBAGTInterface_instance = mem;
-        sVTableBAGT* vt = &D_0045ACD8;
+        sVTableBAGT* vt = &cBEBAGTInterface_vtbl;
         short delta = vt->field_0x10;
         void (*fn)(void*) = vt->fn;
         mem->vtable = vt;

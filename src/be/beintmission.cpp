@@ -3,7 +3,7 @@
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BEMissionInt[];
-extern void* D_0045ADF8[16];
+extern void* cBEMissionInterface_vtbl[16];
 extern void* cBEMissionInterface_instance;
 
 struct cBEMissionInterface {
@@ -25,7 +25,7 @@ void* cBEMissionInterface_getThis()
     if (cBEMissionInterface_instance == 0) {
         cBEMissionInterface* mem = (cBEMissionInterface*)cMemMan_alloc(20, str_BEMissionInt, 0, 0);
         mem->field_0x8 = 0;
-        mem->vtable = D_0045ADF8;
+        mem->vtable = cBEMissionInterface_vtbl;
         cBEMissionInterface_instance = mem;
     }
     return cBEMissionInterface_instance;

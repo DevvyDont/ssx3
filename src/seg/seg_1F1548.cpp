@@ -35,11 +35,11 @@ extern char D_00487FA8[];
 extern char D_00488050[];
 extern char D_004882B0[];
 extern char D_00488330[];
-extern char D_00492FA0[];
+extern char cScreenTint_vtbl[];
 extern char cVisualEffectsTest_vtbl[];
-extern char D_004930A0[];
-extern char D_00493178[];
-extern char D_004931A8[];
+extern char cTube_vtbl[];
+extern char cPlants_vtbl[];
+extern char cRenderToggles_vtbl[];
 extern char str_Plants_b[];
 extern char str_Shadow_c[];
 extern char str_Flags_b[];
@@ -65,14 +65,14 @@ extern "C" sMgr_0548* cPS2VisualEffectsMan_cPS2VisualEffectsMan(sMgr_0548* self)
 {
     cVisualEffectsMan_cVisualEffectsMan(self);
     self->vptr = cPS2VisualEffectsMan_vtbl;
-    { void* effect = cMemMan_alloc(4, str_RenderToggles, 0, 0); *(char**)effect = D_004931A8; self->objs[0] = effect; }
+    { void* effect = cMemMan_alloc(4, str_RenderToggles, 0, 0); *(char**)effect = cRenderToggles_vtbl; self->objs[0] = effect; }
     { void* effect = cMemMan_alloc(4, str_VisualEffectsTest, 0, 0); *(char**)effect = cVisualEffectsTest_vtbl; self->objs[1] = effect; }
     { void* effect = cMemMan_alloc(4, str_LightGlow, 0, 0); *(char**)effect = D_00487EB8; self->objs[2] = effect; }
-    { void* effect = cMemMan_alloc(4, str_Plants_b, 0, 0); *(char**)effect = D_00493178; self->objs[3] = effect; }
+    { void* effect = cMemMan_alloc(4, str_Plants_b, 0, 0); *(char**)effect = cPlants_vtbl; self->objs[3] = effect; }
     { void* effect = cMemMan_alloc(4, str_DepthFog, 0, 0); *(char**)effect = D_00487E88; self->objs[4] = effect; }
     { void* effect = cMemMan_alloc(4, str_HeightFog, 0, 0); *(char**)effect = D_00487E58; self->objs[5] = effect; }
     self->objs[6] = cDetailSystem_cDetailSystem(cMemMan_alloc(4, str_DetailSystem, 0, 0));
-    { void* effect = cMemMan_alloc(4, str_ScreenTint, 0, 0); *(char**)effect = D_00492FA0; self->objs[7] = effect; }
+    { void* effect = cMemMan_alloc(4, str_ScreenTint, 0, 0); *(char**)effect = cScreenTint_vtbl; self->objs[7] = effect; }
     { void* effect = cMemMan_alloc(4, str_Shadow_c, 0, 0); *(char**)effect = D_00487E28; self->objs[8] = effect; }
     { void* effect = cMemMan_alloc(4, str_SnowSurface, 0, 0); *(char**)effect = D_00487DF8; self->objs[9] = effect; }
     { void* effect = cMemMan_alloc(4, str_BoardTrail, 0, 0); *(char**)effect = D_00487FA8; self->objs[10] = effect; }
@@ -80,7 +80,7 @@ extern "C" sMgr_0548* cPS2VisualEffectsMan_cPS2VisualEffectsMan(sMgr_0548* self)
     { void* effect = cMemMan_alloc(4, str_PowerUpFXToggles, 0, 0); *(char**)effect = D_00488330; self->objs[12] = effect; }
     { void* effect = cMemMan_alloc(4, str_SnowfallToggles, 0, 0); *(char**)effect = D_00488050; self->objs[13] = effect; }
     { void* effect = cMemMan_alloc(4, str_SplashToggles, 0, 0); *(char**)effect = D_004882B0; self->objs[14] = effect; }
-    { void* effect = cMemMan_alloc(4, str_Tube, 0, 0); *(char**)effect = D_004930A0; self->objs[15] = effect; }
+    { void* effect = cMemMan_alloc(4, str_Tube, 0, 0); *(char**)effect = cTube_vtbl; self->objs[15] = effect; }
     self->objs[16] = cPathArrow_cPathArrow(cMemMan_alloc(4, str_PathArrow, 0, 0));
     return self;
 }

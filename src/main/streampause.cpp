@@ -258,18 +258,18 @@ extern "C" void func_00242EB8(int init, int prio)
 INCLUDE_ASM("main/streampause", cGame__cGame);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
-extern void* D_0047D6E8[];
+extern void* cGameState_vtbl[];
 extern void* D_0046D970[];
 
 /**
  * Destroys the game object: restores its vtable and resets the 16 embedded game-flow states to the cGameState
- * base vtable (D_0047D6E8).
+ * base vtable (cGameState_vtbl).
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cGame__cGame(cGame* self, int flags)
 {
-    void** gameStateVtbl = D_0047D6E8;
+    void** gameStateVtbl = cGameState_vtbl;
     self->mVtbl = D_0046D970;
     *(void***)((char*)self + 0x1F8) = gameStateVtbl;
     *(void***)((char*)self + 0x1E8) = gameStateVtbl;

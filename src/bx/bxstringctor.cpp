@@ -48,20 +48,20 @@ INCLUDE_ASM("bx/bxstringctor", func_002688E0);
 #ifdef SKIP_ASM
 extern "C" void cBXString__cBXString(void* self, int flags);
 void operator_delete(int*);
-extern char D_0046D8C0[];
+extern char cPrivateMessage_vtbl[];
 
 /**
- * Destroys a private message: restores the vtable D_0046D8C0 at +0xC, destroys its three cBXStrings and frees it when
+ * Destroys a private message: restores the vtable cPrivateMessage_vtbl at +0xC, destroys its three cBXStrings and frees it when
  * asked.
  *
- * Same body as cPrivateMessage__cPrivateMessage, which is the destructor slot of D_0046D8C0; this copy is referenced by
+ * Same body as cPrivateMessage__cPrivateMessage, which is the destructor slot of cPrivateMessage_vtbl; this copy is referenced by
  * nothing.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void func_002688E0(void* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_0046D8C0;
+    *(void**)((char*)self + 0xC) = cPrivateMessage_vtbl;
     cBXString__cBXString((char*)self + 8, 2);
     cBXString__cBXString((char*)self + 4, 2);
     cBXString__cBXString(self, 2);
@@ -77,20 +77,20 @@ INCLUDE_ASM("bx/bxstringctor", cChallenger__cChallenger);
 #ifdef SKIP_ASM
 extern "C" void cBXString__cBXString(void* self, int flags);
 void operator_delete(int*);
-extern char D_004810E0[];
+extern char cChallenger_vtbl[];
 
 /**
- * Destroys a pending challenge: restores its vtable D_004810E0 at +0x3C, destroys its two cBXStrings and frees it when
+ * Destroys a pending challenge: restores its vtable cChallenger_vtbl at +0x3C, destroys its two cBXStrings and frees it when
  * asked.
  *
- * The strings at +0x0 and +0x4 hold the challenger's name and message text. It is slot 1 of D_004810E0, the vtable the
+ * The strings at +0x0 and +0x4 hold the challenger's name and message text. It is slot 1 of cChallenger_vtbl, the vtable the
  * challenge handler stores in each 0x40-byte object tagged "cChallenger" (BuddyMan's mChallengers).
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 extern "C" void cChallenger__cChallenger(void* self, int flags)
 {
-    *(void**)((char*)self + 0x3C) = D_004810E0;
+    *(void**)((char*)self + 0x3C) = cChallenger_vtbl;
     cBXString__cBXString((char*)self + 4, 2);
     cBXString__cBXString(self, 2);
     if (flags & 1)

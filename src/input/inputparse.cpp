@@ -3165,12 +3165,12 @@ extern "C" int cPadDevice_construct(void* inputPads, int n)
 INCLUDE_ASM("input/inputparse", cPS2PadDevice_cPS2PadDevice);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern void* D_0048E488[];
+extern void* cPS2PadDevice_vtbl[];
 
 /**
  * Constructs a PS2 pad device for a controller port and slot.
  *
- * Installs the vtable D_0048E488, stores @p port (+0x4) and @p slot (+0x8), zeroes 36 bytes at +0xC and the sampling state
+ * Installs the vtable cPS2PadDevice_vtbl, stores @p port (+0x4) and @p slot (+0x8), zeroes 36 bytes at +0xC and the sampling state
  * words +0x48..+0x5C (state 0: the port is opened on the next sample). Called by cPadDevice_construct.
  *
  * @param port  the controller port
@@ -3179,7 +3179,7 @@ extern void* D_0048E488[];
  */
 extern "C" void* cPS2PadDevice_cPS2PadDevice(void* self, int port, int slot)
 {
-    *(void***)self = D_0048E488;
+    *(void***)self = cPS2PadDevice_vtbl;
     *(int*)((char*)self + 0x4) = port;
     *(int*)((char*)self + 0x8) = slot;
     func_00416210((char*)self + 0xC, 0, 36);
@@ -3198,20 +3198,20 @@ INCLUDE_ASM("input/inputparse", cPS2PadDevice__cPS2PadDevice);
 #ifdef SKIP_ASM
 extern "C" int func_003FF8F0(int a, int b);
 void operator_delete(int* ptr);
-extern void* D_0048E488[];
+extern void* cPS2PadDevice_vtbl[];
 extern char cPadDevice_vtbl[];
 
 /**
  * Destroys a PS2 pad device: closes its controller port and frees the object when asked to.
  *
- * Reinstalls D_0048E488, closes the port (func_003FF8F0 with port +0x4 and slot +0x8), installs cPadDevice_vtbl and
- * calls operator delete when bit 0 of @p flags is set. Slot 1 of D_0048E488.
+ * Reinstalls cPS2PadDevice_vtbl, closes the port (func_003FF8F0 with port +0x4 and slot +0x8), installs cPadDevice_vtbl and
+ * calls operator delete when bit 0 of @p flags is set. Slot 1 of cPS2PadDevice_vtbl.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
 extern "C" void cPS2PadDevice__cPS2PadDevice(void* self, int flags)
 {
-    *(void***)self = D_0048E488;
+    *(void***)self = cPS2PadDevice_vtbl;
     func_003FF8F0(*(int*)((char*)self + 0x4), *(int*)((char*)self + 0x8));
     *(void**)self = cPadDevice_vtbl;
     if (flags & 1) {
@@ -3275,7 +3275,7 @@ static inline float Analog_326EB0(int v)
  * up, down), triangle, circle, cross, square, L1, R1, L2 and R2, as pressure / 255 in pressure mode, else 0 or 1; then
  * the four analogue stick axes (+0x58 set; else zeros) split into eight half-axis values 0..1, with a dead zone of
  * about 48 steps either side of the centre. In state 10 it also sends changed motor levels (+0x30, +0x38) with
- * func_00400190. Slot 2 of D_0048E488; cPadCache_cacheInput calls it for every pad.
+ * func_00400190. Slot 2 of cPS2PadDevice_vtbl; cPadCache_cacheInput calls it for every pad.
  *
  * @param out  receives up to 24 button values
  * @return 24 when the pad was read, otherwise 0
@@ -3475,7 +3475,7 @@ INCLUDE_ASM("input/inputparse", cPS2PadDevice_numActuators__FPv);
 /**
  * Returns 2: a PS2 pad has two vibration actuators.
  *
- * Slot 3 of D_0048E488, overriding cPadDevice_numActuators (0).
+ * Slot 3 of cPS2PadDevice_vtbl, overriding cPadDevice_numActuators (0).
  *
  * @return 2
  */
@@ -3505,7 +3505,7 @@ static inline int clamp_327740(int v, int lo, int hi)
  *
  * Actuator 1 is the on/off motor: +0x30 = (@p level != 0). Any other actuator sets the variable motor: +0x38 = level x
  * 205 + 50 clamped to 50..255, or 0 when @p level is 0. cPS2PadDevice_sampleButtons sends changed values to the pad. Slot 4 of
- * D_0048E488.
+ * cPS2PadDevice_vtbl.
  *
  * @param mode  the actuator index (On Tour act)
  * @param level  the strength, 0..1 (On Tour frequency)

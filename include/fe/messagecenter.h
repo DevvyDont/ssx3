@@ -9,7 +9,7 @@
 // (__22cOVState_MESSAGECENTERP9cUIEngine12tOVStateEnum, _$_22cOVState_MESSAGECENTER). Size 0x180: the overlay
 // factory (cOVStateManager_triggerOverlay, fe/ovtemplatedialog.cpp) does operator new(0x180, "cOVStateOverlay") and
 // calls the out-of-line constructor cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(this, pEngine, 0x22). Base cOVState (fe/ovstate.h, 0x9C), written
-// out flat below. Retail vtable D_00474318 (stored by cOVState_MESSAGECENTER_cOVState_MESSAGECENTER after cOVState's D_00474E08; destructor
+// out flat below. Retail vtable cOVState_MESSAGECENTER_vtbl (stored by cOVState_MESSAGECENTER_cOVState_MESSAGECENTER after cOVState's cOVState_vtbl; destructor
 // cOVState_MESSAGECENTER__cOVState_MESSAGECENTER in fe/all_in_one_fe).
 //
 // cOVState_ViewPopup: the popup that shows one message (screen "113ViewMessage"), pushed by
@@ -43,7 +43,7 @@ struct cOVState_MESSAGECENTER {
     // --- cListNode (On Tour: size 0xC, mpPrev/mpNext + vptr)
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
-    void** mVtbl;                   // 0x008 [R] D_00474318, stored by cOVState_MESSAGECENTER_cOVState_MESSAGECENTER (after cOVState's D_00474E08)
+    void** mVtbl;                   // 0x008 [R] cOVState_MESSAGECENTER_vtbl, stored by cOVState_MESSAGECENTER_cOVState_MESSAGECENTER (after cOVState's cOVState_vtbl)
     // --- cUIState (On Tour: size 0x48, same offsets; see ui/uistate.h)
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName; [R] zeroed by the cUIState ctor
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] cUIEngine_addScreenByHashName

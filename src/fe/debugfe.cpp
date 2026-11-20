@@ -432,7 +432,7 @@ extern "C" void func_0017D260(void* self, void* ev)
 //100%
 INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_cDebugLobbyScreen);
 #ifdef SKIP_ASM
-extern void* D_0046D350[];
+extern void* cDebugLobbyScreen_vtbl[];
 extern int cBXString_EmptyString;
 extern void* D_004A4E90;
 extern "C" void* cMenuSys_cMenuSys(void* self);
@@ -452,7 +452,7 @@ struct sDbgOwner17D298 {
 /**
  * Constructs the debug front end's lobby screen (cDebugLobbyScreen in the July 2003 preview) with its eight menus.
  *
- * Stores the vtable D_0046D350 (slots: destructor cDebugLobbyScreen__cDebugLobbyScreen, update cDebugLobbyScreen_update, draw cDebugLobbyScreen_draw), zeroes the
+ * Stores the vtable cDebugLobbyScreen_vtbl (slots: destructor cDebugLobbyScreen__cDebugLobbyScreen, update cDebugLobbyScreen_update, draw cDebugLobbyScreen_draw), zeroes the
  * state at +0x4 and builds the menu system at +0x8 (cMenuSys_cMenuSys). Each menu gets a one-pointer functor holding
  * this screen, which its command handler calls back: the account menu "Login Method" at +0x70 (func_001DA988, Create
  * Account and Login), the "Continue" menu at +0x604 (ContinueMenu_ContinueMenu), "Select Persona" at +0x74C (func_001DACB8, with
@@ -469,7 +469,7 @@ struct sDbgOwner17D298 {
  */
 extern "C" void* cDebugLobbyScreen_cDebugLobbyScreen(char* self)
 {
-    *(void***)self = D_0046D350;
+    *(void***)self = cDebugLobbyScreen_vtbl;
     *(int*)(self + 0x4) = 0;
     cMenuSys_cMenuSys(self + 0x8);
     sDbgOwner17D298 onCreate;
@@ -527,7 +527,7 @@ extern "C" void func_001DD0C8(void* self, int flags);
 extern "C" void func_001DCEA0(void* self, int flags);
 extern "C" void cMenuSys__cMenuSys(void* self, int flags);
 void operator_delete(int* ptr);
-extern void* D_0046D350[];
+extern void* cDebugLobbyScreen_vtbl[];
 extern void* cDebugScreen_vtbl[];
 extern void* D_004A4E90;
 
@@ -600,7 +600,7 @@ static inline void dtorF_17D3B0(char* sub)
  * Destroys the debug lobby screen: unregisters it, destroys its strings, menus and menu system, and frees it when
  * asked.
  *
- * Stores the vtable D_0046D350 again, clears the screen pointer D_004A4E90, destroys the cBXStrings at +0x1C0C, +0x1C08
+ * Stores the vtable cDebugLobbyScreen_vtbl again, clears the screen pointer D_004A4E90, destroys the cBXStrings at +0x1C0C, +0x1C08
  * and +0x1C04, then the menus in reverse order: Abort (+0x1AAC), You've been Challenged (+0x18C0), the chat menu
  * (+0x1534, its 14 line items through their virtual destructors), Room Occupants (+0x1044, 24 items), Select Room
  * (+0xD2C, 12 items), Select Persona (+0x74C, func_001DD0C8), Continue (+0x604) and Login Method (+0x70,
@@ -611,7 +611,7 @@ static inline void dtorF_17D3B0(char* sub)
  */
 extern "C" void cDebugLobbyScreen__cDebugLobbyScreen(char* self, int flags)
 {
-    *(void***)self = D_0046D350;
+    *(void***)self = cDebugLobbyScreen_vtbl;
     D_004A4E90 = 0;
     cBXString__cBXString(self + 0x1C0C, 2);
     cBXString__cBXString(self + 0x1C08, 2);
@@ -3049,7 +3049,7 @@ INCLUDE_ASM("fe/debugfe", func_00180508);
 extern "C" unsigned short* tAttrScreen_tAttrScreen(unsigned short* p);
 extern "C" int cList_cList(void* p);
 extern "C" int cUIThing_cUIThing(void* p, int a1, int a2);
-extern int D_0046D1A0[];
+extern int cScreenKeyboard_vtbl[];
 extern int cUIScreen_vtbl[];
 extern int cUIGroup_vtbl[];
 
@@ -3058,7 +3058,7 @@ extern int cUIGroup_vtbl[];
  *
  * Builds the cUIScreen part like cScreenKeyboard_cScreenKeyboard (list links, cUIScreen_vtbl, tAttrScreen_tAttrScreen
  * at +0x14, the lists at +0x18 and +0xB4, the root group cUIThing_cUIThing at +0x40 with cUIGroup_vtbl), stores @p parentState
- * at +0xD0 and the keyboard vtable D_0046D1A0, then sets the keyboard's fields (On Tour names): mIncludeNumbers
+ * at +0xD0 and the keyboard vtable cScreenKeyboard_vtbl, then sets the keyboard's fields (On Tour names): mIncludeNumbers
  * (+0xD8), mIncludeShift (+0xDC) and mIncludeSpace (+0xE0) 0, mShiftOn (+0xE4) and mFirstKey (+0xE8) 1, an empty input
  * text (+0xEC), mCursorPos (+0x16C) 0, mCurrentKey (+0x170) 10 (the "A" key) and mMaxChars (+0xD4) 45. No caller of it
  * is known (none in the C sources or the asm).
@@ -3082,7 +3082,7 @@ extern "C" void* func_00180508(char* self, int parentState)
     *(int**)(self + 0x48) = cUIGroup_vtbl;
     cList_cList(self + 0xB4);
     *(int*)(self + 0xD0) = parentState;
-    *(int**)(self + 8) = D_0046D1A0;
+    *(int**)(self + 8) = cScreenKeyboard_vtbl;
     *(int*)(self + 0xD8) = 0;
     *(int*)(self + 0xDC) = 0;
     *(int*)(self + 0xE0) = 0;

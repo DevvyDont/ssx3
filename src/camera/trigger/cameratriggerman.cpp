@@ -1289,7 +1289,7 @@ static inline sCtmV_E560 ctmNormalize_E560(const sCtmV_E560& v)
  * about Z, -roll about Y, -pitch about X, translate by -position). If its length is below 1 the point is left alone;
  * otherwise it is normalised, mapped back with the forward transform (translate, pitch, roll, heading, scale) and
  * written back with w = 1. This is a radial projection, not the closest surface point. Slot 6 (limitPoint) of the
- * ellipse bound-object vtable D_0045C2A8.
+ * ellipse bound-object vtable cCTBoundObjEllipse_vtbl.
  *
  * @param src  the ellipse bound object (this)
  * @param point  the world point to limit; overwritten when outside
@@ -1575,7 +1575,7 @@ extern t4Vector D_004C5450[3];      // static local: the three box axes
  * X by -pitch (rot[1]) and a translation by -position, and maps @p point into box space (w = 1). On each axis of the static
  * table D_004C5450 (X, Y and Z axes, filled once under the guard D_004A4DE8) the coordinate is clamped to [-size,
  * +size] (the scale at +0x18 is a half-extent). The result is mapped back (translate, pitch, roll, heading) and stored
- * in @p point with w = 1. Slot 6 (limitPoint) of the box bound-object vtable D_0045C268.
+ * in @p point with w = 1. Slot 6 (limitPoint) of the box bound-object vtable cCTBoundObjBox_vtbl.
  *
  * @param t  the box bound object (this): position, heading/pitch/roll and half-extents
  * @param point  the world point to limit; overwritten
@@ -1926,7 +1926,7 @@ static inline sCtmV_FBB8 ctmScale_FBB8(const sCtmV_FBB8& v, float s)
  * Transforms both end points (+0x2C, +0x38) to world space (translate by position, rotate by pitch about X, roll about
  * Y and heading about Z, scale), then sets @p point = end1 + d x t with d = end2 - end1 and t = dot(@p point - end1, d) /
  * dot(d, d). t is not clamped, so the point can land beyond either end (and a zero-length line divides by zero). Slot 6
- * (limitPoint) of the line bound-object vtable D_0045C228.
+ * (limitPoint) of the line bound-object vtable cCTBoundObjLine_vtbl.
  *
  * @param src  the line bound object (this)
  * @param point  the world point to limit; overwritten

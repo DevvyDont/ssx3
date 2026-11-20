@@ -3781,7 +3781,7 @@ extern "C" void* cBankManager_cBankManager(void* self, int embedded, int count, 
 extern "C" void* cStreamSys_cStreamSys(void* self, int inchrg, int banks, int count, int heap);
 struct sBankSlots;
 extern "C" void func_002B1428(cSpeechSys* self);
-extern void* D_00483870[];
+extern void* cSpeechSys_vtbl[];
 extern void* cBankMonitor_vtbl[];
 extern const char str_mSpeechInstance[];
 
@@ -3812,7 +3812,7 @@ extern const sBmonVtblB07F8 D_004838C0_07F8 __asm__("D_004838C0");
  * Constructs the speech system.
  *
  * When @p inchrg is set it builds the virtual bases first: cSoundSys at +0x1C0, cBankManager at +0x1C8 and cStreamSys
- * at +0xC98. Installs the cSpeechSys vtables (D_00483870 at mVtbl, D_004838A0 / D_004838C0 in the virtual bases,
+ * at +0xC98. Installs the cSpeechSys vtables (cSpeechSys_vtbl at mVtbl, D_004838A0 / D_004838C0 in the virtual bases,
  * adjusted on the stack when not in charge), sets mCallbackInstance -1, clears unk_008 and mCallback, stores itself in
  * D_004A37B4, allocates the two-entry mSpeechInstance array (both empty), clears the request table (func_002B1428) and
  * copies the five speech .big file names into mBigFileName.
@@ -3851,7 +3851,7 @@ extern "C" char* cSpeechSys_cSpeechSys(cSpeechSys* self, int inchrg, int maxBank
         int bankMgrAdjust = ((char*)self) - base2;
         bankMgrVtbl.e[1].delta = D_004838C0_07F8.e[1].delta + bankMgrAdjust;
     }
-    self->mVtbl = D_00483870;
+    self->mVtbl = cSpeechSys_vtbl;
     self->mCallbackInstance = -1;
     self->unk_008 = 0;
     self->mCallback = 0;
@@ -3877,7 +3877,7 @@ void operator_delete(int* ptr);
 extern "C" void cBankManager__cBankManager(void* self, int flags);
 extern "C" void cStreamSys__cStreamSys(void* self, int flags);
 extern "C" void cSoundSys__cSoundSys(cSoundSys* self, int flags);
-extern void* D_00483870[];
+extern void* cSpeechSys_vtbl[];
 extern void* cBankMonitor_vtbl[];
 
 struct sBmonVEntry0AE8 {
@@ -3906,7 +3906,7 @@ extern const sBmonVtblB0AE8 D_004838C0;
 // PORT: g++ 2.95 virtual-base destruction with stack vtable this-adjust fix-ups, written out by hand.
 extern "C" void cSpeechSys__cSpeechSys(cSpeechSys* self, int flags)
 {
-    self->mVtbl = D_00483870;
+    self->mVtbl = cSpeechSys_vtbl;
     *(const sBmonVtblA0AE8**)(*(char**)(**(char***)self + 0x1D8) + 4) = &D_004838A0;
     *(void***)(**(char***)self + 0xAB0) = cBankMonitor_vtbl;
     *(const sBmonVtblB0AE8**)(**(char***)self + 0x1D4) = &D_004838C0;

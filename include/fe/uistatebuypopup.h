@@ -12,9 +12,9 @@
 // userNum) at all 5 sites (fe/messagecenter, fe/festatecharequipdetail, fe/festatebuyattrib, fe/festatestore).
 // Constructors cUIStateBuyPopup_cUIStateBuyPopup (cUIState(pEngine, pParent) cUIState_cUIState1, vtable, mInfo.clear() twice, mUserNum,
 // mHashName 7, mCtrlBits) and the default cUIStateBuyPopup_cUIStateBuyPopup1; destructor cUIStateBuyPopup__cUIStateBuyPopup (stores
-// D_0046D0D0, then cUIState's cUIState__cUIState). Retail vtable cUIStateBuyPopup_vtbl = D_0046CB08 (24 slots: 1 dtor,
+// cFEState_vtbl, then cUIState's cUIState__cUIState). Retail vtable cUIStateBuyPopup_vtbl = D_0046CB08 (24 slots: 1 dtor,
 // 4 onCreateScreen, 6 cFEState_onGainFocus, 18 onWidgetCreate, 19 onWidgetEvent, 20 onWidgetMenu).
-// Bases: cFEState (no members; On Tour size 0x48: its vtable D_0046D0D0 is the one ~20 FE destructors restore, and
+// Bases: cFEState (no members; On Tour size 0x48: its vtable cFEState_vtbl is the one ~20 FE destructors restore, and
 // slot 6 is cFEState_onGainFocus), then cUIState (ui/uistate.h) and cListNode, written out flat below.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. Evidence tags:
@@ -37,7 +37,7 @@ struct cUIStateBuyPopup {
     cListNode* mpPrev;              // 0x000 [O] cListNode::mpPrev; [R] cUIState ctor links the node to itself
     cListNode* mpNext;              // 0x004 [O] cListNode::mpNext; [R] ditto
     void** mVtbl;                   // 0x008 [R] cUIStateBuyPopup_vtbl D_0046CB08, stored by cUIStateBuyPopup_cUIStateBuyPopup / cUIStateBuyPopup_cUIStateBuyPopup1;
-                                    //       the destructor stores cFEState's D_0046D0D0
+                                    //       the destructor stores cFEState's cFEState_vtbl
     // --- cUIState (On Tour: size 0x48, same offsets; see ui/uistate.h); cFEState adds no members
     int mHashName;                  // 0x00C [O]; [P] cUIState::getHashName; [R] cUIStateBuyPopup_cUIStateBuyPopup stores 7
     cUIEngine* mpEngine;            // 0x010 [O]; [R] the ctor's engine argument; [U] cUIEngine_addScreenByHashName

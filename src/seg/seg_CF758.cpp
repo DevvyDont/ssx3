@@ -276,7 +276,7 @@ signed char cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 int cBELibrary_getRiderIndex(int flag);
 extern "C" int cBENewPlayerInterface_getLastHub(void* self, int index);
 extern "C" int cBEEconInterface_getMoney(void* self, int a, int b);
-extern char D_0046A3C8[];
+extern char cFEStateRewardGalleryBase_vtbl[];
 
 struct sVEntry_1CEEA0 {
     short delta;
@@ -323,7 +323,7 @@ extern "C" sChallenge_1CEEA0* func_001CEEA0(sChallenge_1CEEA0* self, void* paren
     int j;
     cUIState_cUIState(self, parent);
     self->type = 47;
-    self->vtbl = D_0046A3C8;
+    self->vtbl = cFEStateRewardGalleryBase_vtbl;
     self->player = player;
     self->f15 = cFECustom_getPlayerCtrlMask(*self->mgr, player);
     self->f4C = a4;

@@ -7082,7 +7082,7 @@ extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
 extern char str_cPrivateMessage_b[];
-extern void* D_0046D8C0[];
+extern void* cPrivateMessage_vtbl[];
 extern "C" int func_00262360(BuddyMan* self, int a1);
 extern "C" int func_002623B0(BuddyMan* self, int a1);
 extern "C" int func_00262438(BuddyMan* self, int a1);
@@ -7155,7 +7155,7 @@ static inline void post_1CD0(char* owner, void* msg)
  * When the sender's roster entry has none of the flags 4, 0x200 and 0x100000 (func_00262360, func_002623B0,
  * func_00262438), it adds them with flag 0x100000 (func_002620D8 kind 2); if that fails because 10 such entries already
  * exist (error 2), it removes the first one (func_00262400 / func_00262EC0), retries and posts an online::Event of type
- * 264 on LobbyMan_mLobbyMan's mEventList. It then allocates a 0x10-byte cPrivateMessage (vtable D_0046D8C0 at +0xC;
+ * 264 on LobbyMan_mLobbyMan's mEventList. It then allocates a 0x10-byte cPrivateMessage (vtable cPrivateMessage_vtbl at +0xC;
  * cBXStrings name, text and date at +0x0/+0x4/+0x8) and appends it to mMessages (func_00267128 when the vector is
  * full).
  *
@@ -7188,7 +7188,7 @@ extern "C" void func_00261CD0(BuddyMan* self, char* name, char* text, char* date
         }
     }
     char* obj = (char*)cMemMan_alloc(0x10, str_cPrivateMessage_b, 0x20000000, 0);
-    *(void***)(obj + 0xC) = D_0046D8C0;
+    *(void***)(obj + 0xC) = cPrivateMessage_vtbl;
     cBXString_cBXString2(obj, name);
     cBXString_cBXString2(obj + 4, text);
     cBXString_cBXString2(obj + 8, date);
@@ -7972,7 +7972,7 @@ extern "C" void func_002672C8(sPtrVec72C8* self, void** pos, void* const& x);
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern char str_cChallenger[];
-extern char D_004810E0[];
+extern char cChallenger_vtbl[];
 extern void* online_Event_vtbl[];
 
 struct sMsgListNode_262AF0 {
@@ -8040,7 +8040,7 @@ static inline void push_back_262AF0(char* o, sObjVec_262AF0* v, void* const& x)
  * is added as a kind-2 entry with func_002620D8(); when those are full (error 2) it removes the first entry with bit 20
  * (func_00262EC0()), retries, and posts an online::Event of type 264 to LobbyMan's mEventList. A name on the roster
  * with the blocked flag (func_002623E0()) is ignored. Otherwise it allocates a 0x40-byte object (tag "cChallenger",
- * vtable D_004810E0 at +0x3C) holding @p name and @p messageText as cBXStrings and the numbers below, appends it to
+ * vtable cChallenger_vtbl at +0x3C) holding @p name and @p messageText as cBXStrings and the numbers below, appends it to
  * mChallengersStart..mChallengersFinish (func_002672C8 when full) and posts an event of type 236. The only caller,
  * LobbyMan_onchatmsg, passes the fields of a "challenge" private message.
  *
@@ -8096,7 +8096,7 @@ extern "C" void func_00262AF0(BuddyMan* self, char* name, int locationId, int ga
         return;
     }
     char* obj = (char*)operator new(0x40, str_cChallenger, 0x20000000, 0);
-    *(char**)(obj + 0x3C) = D_004810E0;
+    *(char**)(obj + 0x3C) = cChallenger_vtbl;
     cBXString_cBXString2(obj, name);
     cBXString_cBXString2(obj + 4, messageText);
     *(int*)(obj + 0x8) = locationId;

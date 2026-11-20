@@ -134,7 +134,7 @@ struct sVEntry001D28F8 {
 };
 
 extern void* cFEStateMountainRoom_vtbl[];
-extern void* D_0046D0D0[];
+extern void* cFEState_vtbl[];
 extern "C" void func_0019DC20(void* self, int bank, int i);
 extern "C" void cUIState__cUIState(void* self, int flags);
 
@@ -158,7 +158,7 @@ extern "C" void cFEStateMountainRoom__cFEStateMountainRoom(cFEStateMountainRoom*
         sVEntry001D28F8* vt = (sVEntry001D28F8*)ps2GraphicsMan->mVtbl;
         vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, id);
     }
-    self->mVtbl = D_0046D0D0;
+    self->mVtbl = cFEState_vtbl;
     cUIState__cUIState(self, flags);
 }
 #endif

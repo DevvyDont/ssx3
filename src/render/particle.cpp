@@ -1297,7 +1297,7 @@ INCLUDE_ASM("render/particle", cTube_update__FPv);
 /**
  * Updates a tube effect for the frame: refreshes the shared tube vertex colours (cSimpleTube_updateColours).
  *
- * It is the update slot (slot 2) of both tube vtables, D_004930A0 (the 4-byte "Tube" effect) and D_00493068 (the
+ * It is the update slot (slot 2) of both tube vtables, cTube_vtbl (the 4-byte "Tube" effect) and cSimpleTube_vtbl (the
  * segmented tube built by cSimpleTube_cSimpleTube). Declared as returning void* but returns nothing meaningful.
  */
 void* cTube_update(void* self)
@@ -1313,7 +1313,7 @@ extern int D_004A422C;
 extern int D_004A41E0;
 extern int D_004A41E4;
 extern int D_004A41E8;
-extern void* D_00493068[];
+extern void* cSimpleTube_vtbl[];
 
 struct sPtVert_2520 {
     float x;        // 0x0
@@ -1337,7 +1337,7 @@ struct sPtObj_2520 {
 /**
  * Constructs a segmented tube effect with @p owner segments and, the first time, fills the shared tube vertex array.
  *
- * Stores @p owner at +0x4, the tube vtable D_00493068 and a null point array at +0x8. While the flag D_004A422C is
+ * Stores @p owner at +0x4, the tube vtable cSimpleTube_vtbl and a null point array at +0x8. While the flag D_004A422C is
  * clear it sets up all 262 shared vertices of D_00501440: alpha 0xFF, red/green/blue from the tube colour D_004A41E0,
  * D_004A41E4 and D_004A41E8, position x 0, z 1 and w 0, and y alternating 0 (even) and 1 (odd); then sets the flag.
  * cFlexBridgeNode's constructors build one (0xC bytes, "Tube") with NumNodes * 8 - 9 segments.
@@ -1349,7 +1349,7 @@ extern "C" void* cSimpleTube_cSimpleTube(sPtObj_2520* self, void* owner)
 {
     int i;
     self->owner = owner;
-    self->vt = D_00493068;
+    self->vt = cSimpleTube_vtbl;
     self->f8 = 0;
     if (D_004A422C == 0) {
         sPtVert_2520* vertex = D_00501440;
@@ -1409,20 +1409,20 @@ INCLUDE_ASM("render/particle", cSimpleTube__cSimpleTube);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 void operator_delete(int* ptr);
-extern void* D_00493068[];
+extern void* cSimpleTube_vtbl[];
 extern void* D_00488680[];
 
 /**
  * Destroys a segmented tube effect: frees its point array and the object itself when asked.
  *
- * Re-installs the tube vtable D_00493068, frees the array at +0x8 with cMemMan_free when it is set, installs the base
- * visual-effect vtable D_00488680 and calls operator_delete when bit 0 of @p flags is set. Slot 1 of D_00493068.
+ * Re-installs the tube vtable cSimpleTube_vtbl, frees the array at +0x8 with cMemMan_free when it is set, installs the base
+ * visual-effect vtable D_00488680 and calls operator_delete when bit 0 of @p flags is set. Slot 1 of cSimpleTube_vtbl.
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
 extern "C" void cSimpleTube__cSimpleTube(void* self, int flags)
 {
-    *(void***)self = D_00493068;
+    *(void***)self = cSimpleTube_vtbl;
     if (*(void**)((char*)self + 0x8) != 0) {
         cMemMan_free(*(void**)((char*)self + 0x8));
     }
@@ -1593,7 +1593,7 @@ static inline sPtV4_26C8 Scale_26C8(const sPtV4_26C8& v, float s)
  * Pushes a copy of the current draw state and loads sDrawState_s_defaultDrawState, draws 4 * (n + 1) + 2 vertices
  * through cGraphicsMan_TheGraphicsMan's virtual slot 71 (cPS2GraphicsMan_RenderTriStrip), then copies the points into
  * the first n + 1 vertices and draws them through slot 73 (cPS2GraphicsMan_RenderLineStrip, a line strip), and pops the draw state. Slot
- * 3 (render) of D_00493068.
+ * 3 (render) of cSimpleTube_vtbl.
  */
 extern "C" void cSimpleTube_render(sPtTrail_26C8* self)
 {
@@ -1636,7 +1636,7 @@ extern int D_004A4208;
 extern int D_004A420C;
 extern int D_004A4210;
 extern int D_004A4214;
-extern void* D_00493038[];
+extern void* cPathArrow_vtbl[];
 
 struct sPtVert_2AA0 {
     float x;        // 0x0
@@ -1658,7 +1658,7 @@ struct sPtObj_2AA0 {
 /**
  * Constructs the path-arrow visual effect and, the first time, fills its 8 shared vertices.
  *
- * Stores the vtable D_00493038. While the flag D_004A423C is clear it sets each of the 8 vertices of D_00504560 to
+ * Stores the vtable cPathArrow_vtbl. While the flag D_004A423C is clear it sets each of the 8 vertices of D_00504560 to
  * red/green/blue/alpha D_004A4208, D_004A420C, D_004A4210 and D_004A4214, z 1 and x, y, w 0, then sets the flag.
  * cPS2VisualEffectsMan_cPS2VisualEffectsMan allocates it (4 bytes, "PathArrow") as its object 16.
  *
@@ -1667,7 +1667,7 @@ struct sPtObj_2AA0 {
 extern "C" void* cPathArrow_cPathArrow(sPtObj_2AA0* self)
 {
     int i;
-    self->vt = D_00493038;
+    self->vt = cPathArrow_vtbl;
     if (D_004A423C == 0) {
         for (i = 0; i < 8; i++) {
             D_00504560[i].a = D_004A4214;
@@ -2895,10 +2895,10 @@ extern "C" void func_00374B38(sPartLists* self)
 INCLUDE_ASM("render/particle", cBezierMan_cBezierMan);
 #ifdef SKIP_ASM
 extern void* cBezierMan_TheBezierMan;
-extern void* D_00493820[];
+extern void* cBezierMan_vtbl[];
 
 /**
- * Constructs the Bezier patch manager base: installs its vtable D_00493820 and registers the object as
+ * Constructs the Bezier patch manager base: installs its vtable cBezierMan_vtbl and registers the object as
  * cBezierMan_TheBezierMan.
  *
  * cPS2BezierMan_cPS2BezierMan__FPv calls it first.
@@ -2907,7 +2907,7 @@ extern void* D_00493820[];
  */
 extern "C" void* cBezierMan_cBezierMan(cPS2BezierMan* self)
 {
-    self->mVtbl = D_00493820;
+    self->mVtbl = cBezierMan_vtbl;
     cBezierMan_TheBezierMan = ((void*)self);
     return ((void*)self);
 }
@@ -2917,20 +2917,20 @@ extern "C" void* cBezierMan_cBezierMan(cPS2BezierMan* self)
 INCLUDE_ASM("render/particle", cBezierMan__cBezierMan);
 #ifdef SKIP_ASM
 extern void* cBezierMan_TheBezierMan;
-extern void* D_00493820[];
+extern void* cBezierMan_vtbl[];
 void operator_delete(int* ptr);
 
 /**
- * Destroys the Bezier patch manager base: re-installs its vtable D_00493820, clears cBezierMan_TheBezierMan and frees
+ * Destroys the Bezier patch manager base: re-installs its vtable cBezierMan_vtbl, clears cBezierMan_TheBezierMan and frees
  * the object when asked.
  *
- * Slot 1 of D_00493820; cPS2BezierMan__cPS2BezierMan chains to it.
+ * Slot 1 of cBezierMan_vtbl; cPS2BezierMan__cPS2BezierMan chains to it.
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
 extern "C" void cBezierMan__cBezierMan(cPS2BezierMan* self, int flags)
 {
-    self->mVtbl = D_00493820;
+    self->mVtbl = cBezierMan_vtbl;
     cBezierMan_TheBezierMan = 0;
     if (flags & 1) {
         operator_delete((int*)self);
@@ -3152,13 +3152,13 @@ extern "C" void func_00375990(void* self)
 }
 #endif
 
-extern void* D_00493000[];
+extern void* cDetailSystem_vtbl[];
 
 //100%
 INCLUDE_ASM("render/particle", cDetailSystem_cDetailSystem__FPv);
 #ifdef SKIP_ASM
 /**
- * Constructs the detail-system visual effect (the terrain sparkle effect): stores its vtable D_00493000.
+ * Constructs the detail-system visual effect (the terrain sparkle effect): stores its vtable cDetailSystem_vtbl.
  *
  * cPS2VisualEffectsMan_cPS2VisualEffectsMan allocates it (4 bytes, "DetailSystem") as its object 6.
  *
@@ -3166,7 +3166,7 @@ INCLUDE_ASM("render/particle", cDetailSystem_cDetailSystem__FPv);
  */
 void* cDetailSystem_cDetailSystem(void* self)
 {
-    *(int*)self = (int)(void*)D_00493000;
+    *(int*)self = (int)(void*)cDetailSystem_vtbl;
     return self;
 }
 #endif
@@ -3175,7 +3175,7 @@ void* cDetailSystem_cDetailSystem(void* self)
 INCLUDE_ASM("render/particle", cDetailSystem_update__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: the detail-system effect's per-frame update (slot 2 of D_00493000).
+ * Does nothing: the detail-system effect's per-frame update (slot 2 of cDetailSystem_vtbl).
  */
 void cDetailSystem_update(void* self)
 {
@@ -11573,7 +11573,7 @@ INCLUDE_ASM("render/particle", cPS2GridMesh_cPS2GridMesh);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern void* D_00493208[];
+extern void* cPS2GridMesh_vtbl[];
 extern char str_GridMeshMem[];
 extern "C" int func_00385EB0(void* self, int rows, int pitch);
 extern "C" void func_00386128(void* self, int rows, int pitch, char* dst, char* src);
@@ -11606,7 +11606,7 @@ extern "C" sPtSurf5138* cPS2GridMesh_cPS2GridMesh_impl(sPtSurf5138* self, int w,
  * Constructs a grid mesh of @p w x @p gridHeight vertices drawn as h - 1 strips, with two vertex buffers to update and draw in
  * turn.
  *
- * Sets the vtable D_00493208, the size (+0x190, +0x192), the strip count (+0x1BC = h - 1), the vertices per strip
+ * Sets the vtable cPS2GridMesh_vtbl, the size (+0x190, +0x192), the strip count (+0x1BC = h - 1), the vertices per strip
  * (+0x1C0 = 2w), @p graphicsMan (+0x1C4), the range 20000 (+0x194) and the position scale 32767 / 20000 (+0x198). func_00385EB0
  * gives one buffer's packet size; one allocation tagged "GridMeshMem" with @p allocFlags (+0x19C) holds the two buffers
  * (+0x1AC, +0x1B0) and two strip tables of 16 bytes per strip (+0x1B4, +0x1B8). On success it sets the OK flag +0x1C8
@@ -11624,7 +11624,7 @@ extern "C" sPtSurf5138* cPS2GridMesh_cPS2GridMesh_impl(sPtSurf5138* self, int w,
 {
     int pitch = w * 2;
     int rows = gridHeight - 1;
-    self->vtable = D_00493208;
+    self->vtable = cPS2GridMesh_vtbl;
     self->rows = rows;
     self->pitch = pitch;
     self->field_0x1C4 = graphicsMan;
@@ -11661,10 +11661,10 @@ INCLUDE_ASM("render/particle", cGridMesh__cGridMesh);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
-extern char D_00493938[];
+extern char cGarbageMan_vtbl[];
 
 /**
- * Destroys a grid mesh's base part: stores the base vtable D_00493938 (+0x4) and frees the object when bit 0 of
+ * Destroys a grid mesh's base part: stores the base vtable cGarbageMan_vtbl (+0x4) and frees the object when bit 0 of
  * @p flags is set.
  *
  * Slot 1 of the abstract grid-mesh vtable (whose other slots are pure virtual, apart from cGridMesh_SetScale__FPv);
@@ -11674,7 +11674,7 @@ extern char D_00493938[];
  */
 extern "C" void cGridMesh__cGridMesh(int* self, int flags)
 {
-    *(void**)((char*)self + 0x4) = D_00493938;
+    *(void**)((char*)self + 0x4) = cGarbageMan_vtbl;
     if (flags & 1) {
         operator_delete(self);
     }
@@ -11685,19 +11685,19 @@ extern "C" void cGridMesh__cGridMesh(int* self, int flags)
 INCLUDE_ASM("render/particle", cPS2GridMesh__cPS2GridMesh);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
-extern void* D_00493208[];
+extern void* cPS2GridMesh_vtbl[];
 
 /**
- * Destroys a grid mesh: stores its vtable D_00493208, frees its buffer (+0x19C, cMemMan_free) when it has one, then
+ * Destroys a grid mesh: stores its vtable cPS2GridMesh_vtbl, frees its buffer (+0x19C, cMemMan_free) when it has one, then
  * runs the base destructor cGridMesh__cGridMesh with @p flags.
  *
- * Slot 1 of the grid-mesh vtable D_00493208.
+ * Slot 1 of the grid-mesh vtable cPS2GridMesh_vtbl.
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
 extern "C" void cPS2GridMesh__cPS2GridMesh(void* self, int flags)
 {
-    *(void***)((char*)self + 0x4) = D_00493208;
+    *(void***)((char*)self + 0x4) = cPS2GridMesh_vtbl;
     if (*(void**)((char*)self + 0x19C) != 0) {
         cMemMan_free(*(void**)((char*)self + 0x19C));
     }
@@ -11739,7 +11739,7 @@ extern "C" void func_00385A38(void* self, short* out, int i, sPartVec3* v);
  *
  * For each strip i (the rows of vertices i and i + 1) of the strip table +0x1B4 / +0x1B8 picked by the buffer index
  * (+0x1A0; the other buffer), stores the positions of row i and row i + 1 alternately with func_00385A38 (scaled to
- * shorts). Sets the updated flag +0x1A4, so the next render swaps buffers. Slot 3 of the grid-mesh vtable D_00493208.
+ * shorts). Sets the updated flag +0x1A4, so the next render swaps buffers. Slot 3 of the grid-mesh vtable cPS2GridMesh_vtbl.
  *
  * @param verts  the grid positions, row by row (x, y, z floats)
  */
@@ -11805,7 +11805,7 @@ extern "C" void func_00385BA0(void* self, sShortUV* dst, int idx, float* src);
  * updated.
  *
  * For each strip i, picked as in cPS2GridMesh_Update, stores the u, v of row i and row i + 1 alternately with func_00385BA0
- * (fixed point, 4096 = 1.0). Sets the updated flag +0x1A4. Slot 4 of the grid-mesh vtable D_00493208.
+ * (fixed point, 4096 = 1.0). Sets the updated flag +0x1A4. Slot 4 of the grid-mesh vtable cPS2GridMesh_vtbl.
  *
  * @param uvs  the grid texture coordinates, row by row (u, v floats)
  */
@@ -11874,7 +11874,7 @@ struct sPartGrid5530 {
  * mesh updated.
  *
  * For each strip i, picked as in cPS2GridMesh_Update, stores the colour (func_00385AA0, 16-bit) and position (func_00385A38)
- * of row i and row i + 1 alternately. Sets the updated flag +0x1A4. Slot 5 of the grid-mesh vtable D_00493208.
+ * of row i and row i + 1 alternately. Sets the updated flag +0x1A4. Slot 5 of the grid-mesh vtable cPS2GridMesh_vtbl.
  *
  * @param pos  the grid positions, row by row (x, y, z floats)
  * @param col  the grid colours, row by row (a, r, g, b floats, 0..1)
@@ -11947,7 +11947,7 @@ struct sPartGrid_56B8 {
  * When the buffer index (+0x1A0) is still -1 it becomes 0 and the call counts as the first. For each strip of the
  * buffer not in use it stores, for row i and row i + 1 alternately, the uv (func_00385BA0), colour (func_00385AA0) and
  * position (func_00385A38); on the first call it then fills buffer 0's strips the same way. Sets the updated flag
- * +0x1A4. Slot 6 of the grid-mesh vtable D_00493208.
+ * +0x1A4. Slot 6 of the grid-mesh vtable cPS2GridMesh_vtbl.
  *
  * @param verts  the grid positions, row by row (x, y, z floats)
  * @param colors  the grid colours, row by row (a, r, g, b floats, 0..1)
@@ -12116,7 +12116,7 @@ public:
  * Draws the mesh with a material's texture: calls virtual slot 8 (cPS2GridMesh_Render1) with @p meshMatrix, the texture id (the first
  * short of the record that @p materialBlock's +0x4 points to) and @p texMatrix.
  *
- * Slot 7 of the grid-mesh vtable D_00493208.
+ * Slot 7 of the grid-mesh vtable cPS2GridMesh_vtbl.
  *
  * @param meshMatrix  the object matrix
  * @param materialBlock  the material record
@@ -12243,7 +12243,7 @@ extern "C" void func_0037E120_5C10(sPtGfx_5C10* gfx, sMat_5C10* m, sMat_5C10* hd
  * (+0x194) in x, y and z, the unscaled matrix, @p flag as the extra matrix, and flags 34 when @p flag is set else 32;
  * then a DMA call to the current buffer (+0x1AC or +0x1B0). Closes the packet (func_0038F668), adds a 0x80-byte defer
  * manager entry as func_00384E50 does (when fewer than 2600) and moves mVifCursor past it. Slot 8 of the grid-mesh
- * vtable D_00493208.
+ * vtable cPS2GridMesh_vtbl.
  *
  * @param mat  the object matrix
  * @param tex  the texture id

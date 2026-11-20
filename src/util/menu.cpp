@@ -2335,13 +2335,13 @@ extern "C" void cMenuSys_popMenu(cMenuSys* menuSys)
 //100%
 INCLUDE_ASM("util/menu", cBoolMenuItem_cBoolMenuItem);
 #ifdef SKIP_ASM
-extern void* D_00486E80[];
+extern void* cBoolMenuItem_vtbl[];
 
 /**
  * Constructs an on/off menu item: a caption plus the text shown for each state of an int flag.
  *
  * Runs the base cMenuItem_cMenuItem with @p text as the ID, then sets the caption (+0x14) = @p caption, on text (+0x18) =
- * @p onText, off text (+0x1C) = @p offText, flag pointer (+0x20) = @p flagPtr, and the vtable D_00486E80 (input cBoolMenuItem_input,
+ * @p onText, off text (+0x1C) = @p offText, flag pointer (+0x20) = @p flagPtr, and the vtable cBoolMenuItem_vtbl (input cBoolMenuItem_input,
  * preRender cBoolMenuItem_preRender, render cBoolMenuItem_render).
  *
  * @param text  the item's ID
@@ -2358,7 +2358,7 @@ extern "C" void* cBoolMenuItem_cBoolMenuItem(void* self, void* text, int flagPtr
     *(int*)((char*)self + 0x18) = onText;
     *(int*)((char*)self + 0x1C) = offText;
     *(int*)((char*)self + 0x20) = flagPtr;
-    *(void***)((char*)self + 0x10) = D_00486E80;
+    *(void***)((char*)self + 0x10) = cBoolMenuItem_vtbl;
     return self;
 }
 #endif
@@ -2469,12 +2469,12 @@ INCLUDE_ASM("util/menu", cEnumMenuItem_cEnumMenuItem);
 // PORT: the base ctor's 2nd arg is really an int (id/text handle; -1 = none).
 cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cMenuItem__FP9cMenuItemPv");
 
-extern void* D_00486E30[];
+extern void* cEnumMenuItem_vtbl[];
 
 /**
  * Constructs an empty list-choice item: ID -1, no caption (+0x14), no value pointer (+0x20), no entries (+0x18).
  *
- * Stores the vtable D_00486E30 (input cEnumMenuItem_input, preRender cEnumMenuItem_preRender, render cEnumMenuItem_render). The entry table
+ * Stores the vtable cEnumMenuItem_vtbl (input cEnumMenuItem_input, preRender cEnumMenuItem_preRender, render cEnumMenuItem_render). The entry table
  * pointer (+0x1C) is left unset.
  *
  * @return @p self
@@ -2483,7 +2483,7 @@ extern "C" void* cEnumMenuItem_cEnumMenuItem(void* self)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     *(int*)((char*)self + 0x14) = 0;
-    *(void***)((char*)self + 0x10) = D_00486E30;
+    *(void***)((char*)self + 0x10) = cEnumMenuItem_vtbl;
     *(int*)((char*)self + 0x20) = 0;
     *(int*)((char*)self + 0x18) = 0;
     return self;
@@ -2492,12 +2492,12 @@ extern "C" void* cEnumMenuItem_cEnumMenuItem(void* self)
 //100%
 INCLUDE_ASM("util/menu", cEnumMenuItem_cEnumMenuItem1);
 #ifdef SKIP_ASM
-extern void* D_00486E30[];
+extern void* cEnumMenuItem_vtbl[];
 
 /**
  * Constructs an empty list-choice item with an ID: like cEnumMenuItem_cEnumMenuItem, but @p text is the ID.
  *
- * Caption (+0x14), value pointer (+0x20) and entry count (+0x18) start at 0; vtable D_00486E30.
+ * Caption (+0x14), value pointer (+0x20) and entry count (+0x18) start at 0; vtable cEnumMenuItem_vtbl.
  *
  * @param text  the item's ID
  * @return @p self
@@ -2506,7 +2506,7 @@ extern "C" void* cEnumMenuItem_cEnumMenuItem1(void* self, void* text)
 {
     cMenuItem_cMenuItem((cMenuItem*)self, text);
     *(int*)((char*)self + 0x14) = 0;
-    *(void***)((char*)self + 0x10) = D_00486E30;
+    *(void***)((char*)self + 0x10) = cEnumMenuItem_vtbl;
     *(int*)((char*)self + 0x20) = 0;
     *(int*)((char*)self + 0x18) = 0;
     return self;
@@ -2515,12 +2515,12 @@ extern "C" void* cEnumMenuItem_cEnumMenuItem1(void* self, void* text)
 //100%
 INCLUDE_ASM("util/menu", cEnumMenuItem_cEnumMenuItem2);
 #ifdef SKIP_ASM
-extern void* D_00486E30[];
+extern void* cEnumMenuItem_vtbl[];
 
 /**
  * Constructs a list-choice item: a caption and an int that takes one of the values of a {name, value} table.
  *
- * Runs cMenuItem_cMenuItem with @p text as the ID, stores the vtable D_00486E30, the caption (+0x14) = @p caption, the value
+ * Runs cMenuItem_cMenuItem with @p text as the ID, stores the vtable cEnumMenuItem_vtbl, the caption (+0x14) = @p caption, the value
  * pointer (+0x20) = @p enumPtr, the entry count (+0x18) = @p numTags and the entry table (+0x1C) = @p tags.
  *
  * @param text  the item's ID
@@ -2533,7 +2533,7 @@ extern void* D_00486E30[];
 extern "C" void* cEnumMenuItem_cEnumMenuItem2(void* self, void* text, int enumPtr, int caption, int numTags, int tags)
 {
     cMenuItem_cMenuItem((cMenuItem*)self, text);
-    *(void***)((char*)self + 0x10) = D_00486E30;
+    *(void***)((char*)self + 0x10) = cEnumMenuItem_vtbl;
     *(int*)((char*)self + 0x14) = caption;
     *(int*)((char*)self + 0x20) = enumPtr;
     *(int*)((char*)self + 0x18) = numTags;
@@ -2837,7 +2837,7 @@ INCLUDE_ASM("util/menu", cPopMenuItem_cPopMenuItem);
 // PORT: the base ctor's 2nd arg is really an int (id/text handle; -1 = none).
 cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cMenuItem__FP9cMenuItemPv");
 
-extern void* D_00486D90[];
+extern void* cPopMenuItem_vtbl[];
 
 struct s2CCDF0Item {
     char pad_0x00[0x10];
@@ -2848,7 +2848,7 @@ struct s2CCDF0Item {
 /**
  * Constructs a "back" menu item with ID -1 and caption (+0x14) @p text; selecting it closes the menu (cPopMenuItem_input).
  *
- * Stores the vtable D_00486D90 (input cPopMenuItem_input, preRender cPopMenuItem_preRender, render cPopMenuItem_render). The help and debug
+ * Stores the vtable cPopMenuItem_vtbl (input cPopMenuItem_input, preRender cPopMenuItem_preRender, render cPopMenuItem_render). The help and debug
  * menus use it for their "Cancel" and "Continue" entries.
  *
  * @param text  caption
@@ -2858,7 +2858,7 @@ extern "C" s2CCDF0Item* cPopMenuItem_cPopMenuItem(s2CCDF0Item* self, void* text)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     self->field_0x14 = text;
-    self->vtable = D_00486D90;
+    self->vtable = cPopMenuItem_vtbl;
     return self;
 }
 #endif
@@ -2929,7 +2929,7 @@ INCLUDE_ASM("util/menu", cCommandMenuItem_cCommandMenuItem);
 // PORT: the base ctor's 2nd arg is really an int (id/text handle; -1 = none).
 cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cMenuItem__FP9cMenuItemPv");
 
-extern void* D_00486D40[];
+extern void* cCommandMenuItem_vtbl[];
 
 struct s2CCF08Item {
     char pad_0x00[0x10];
@@ -2943,7 +2943,7 @@ struct s2CCF08Item {
 /**
  * Constructs an empty command item: ID -1, no caption (+0x14), state text (+0x18), argument (+0x1C) or data (+0x20).
  *
- * Stores the vtable D_00486D40 (input cCommandMenuItem_input, preRender cCommandMenuItem_preRender, render cCommandMenuItem_render). The net help
+ * Stores the vtable cCommandMenuItem_vtbl (input cCommandMenuItem_input, preRender cCommandMenuItem_preRender, render cCommandMenuItem_render). The net help
  * popups build their persona, room and chat lists from these and fill them in later (cCommandMenuItem_init).
  *
  * @return @p self
@@ -2952,7 +2952,7 @@ extern "C" s2CCF08Item* cCommandMenuItem_cCommandMenuItem(s2CCF08Item* self)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     self->field_0x14 = 0;
-    self->vtable = D_00486D40;
+    self->vtable = cCommandMenuItem_vtbl;
     self->field_0x1C = 0;
     self->field_0x20 = 0;
     self->field_0x18 = 0;
@@ -2963,11 +2963,11 @@ extern "C" s2CCF08Item* cCommandMenuItem_cCommandMenuItem(s2CCF08Item* self)
 //100%
 INCLUDE_ASM("util/menu", cCommandMenuItem_cCommandMenuItem1);
 #ifdef SKIP_ASM
-extern void* D_00486D40[];
+extern void* cCommandMenuItem_vtbl[];
 
 /**
  * Constructs an empty command item with ID @p text: caption, state text, argument and data start at 0; vtable
- * D_00486D40.
+ * cCommandMenuItem_vtbl.
  *
  * @param text  the item's ID
  * @return @p self
@@ -2976,7 +2976,7 @@ extern "C" void* cCommandMenuItem_cCommandMenuItem1(void* self, void* text)
 {
     cMenuItem_cMenuItem((cMenuItem*)self, text);
     *(int*)((char*)self + 0x14) = 0;
-    *(void***)((char*)self + 0x10) = D_00486D40;
+    *(void***)((char*)self + 0x10) = cCommandMenuItem_vtbl;
     *(int*)((char*)self + 0x1C) = 0;
     *(int*)((char*)self + 0x20) = 0;
     *(int*)((char*)self + 0x18) = 0;
@@ -2987,7 +2987,7 @@ extern "C" void* cCommandMenuItem_cCommandMenuItem1(void* self, void* text)
 //100%
 INCLUDE_ASM("util/menu", cCommandMenuItem_cCommandMenuItem2);
 #ifdef SKIP_ASM
-extern void* D_00486D40[];
+extern void* cCommandMenuItem_vtbl[];
 
 struct cCommandMenuItem_cCommandMenuItem2_sItem {
     char pad_0x00[0x10];
@@ -3002,7 +3002,7 @@ struct cCommandMenuItem_cCommandMenuItem2_sItem {
  * Constructs a command item: ID @p text, caption (+0x14) @p caption and argument (+0x1C) @p commandArg, which selecting the item
  * passes to the menu's onCommand.
  *
- * State text (+0x18) and data (+0x20) start at 0; vtable D_00486D40. Used for "Abort", "Create", "Chat" and similar
+ * State text (+0x18) and data (+0x20) start at 0; vtable cCommandMenuItem_vtbl. Used for "Abort", "Create", "Chat" and similar
  * entries.
  *
  * @param text  the item's ID
@@ -3014,7 +3014,7 @@ extern "C" cCommandMenuItem_cCommandMenuItem2_sItem* cCommandMenuItem_cCommandMe
 {
     cMenuItem_cMenuItem((cMenuItem*)self, text);
     self->field_0x14 = caption;
-    self->vtable = D_00486D40;
+    self->vtable = cCommandMenuItem_vtbl;
     self->field_0x1C = commandArg;
     self->field_0x20 = 0;
     self->field_0x18 = 0;
@@ -3123,12 +3123,12 @@ INCLUDE_ASM("util/menu", cCallbackMenuItem_cCallbackMenuItem);
 // PORT: the base ctor's 2nd arg is really an int (id/text handle; -1 = none).
 cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cMenuItem__FP9cMenuItemPv");
 
-extern void* D_00486CF0[];
+extern void* cCallbackMenuItem_vtbl[];
 
 /**
  * Constructs an empty callback item: ID -1, no caption (+0x14) and no callback (+0x18).
  *
- * Stores the vtable D_00486CF0 (input cCallbackMenuItem_input, preRender cCallbackMenuItem_preRender, render cCallbackMenuItem_render).
+ * Stores the vtable cCallbackMenuItem_vtbl (input cCallbackMenuItem_input, preRender cCallbackMenuItem_preRender, render cCallbackMenuItem_render).
  *
  * @return @p self
  */
@@ -3136,7 +3136,7 @@ extern "C" void* cCallbackMenuItem_cCallbackMenuItem(void* self)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     *(int*)((char*)self + 0x14) = 0;
-    *(void***)((char*)self + 0x10) = D_00486CF0;
+    *(void***)((char*)self + 0x10) = cCallbackMenuItem_vtbl;
     *(int*)((char*)self + 0x18) = 0;
     return self;
 }
@@ -3144,13 +3144,13 @@ extern "C" void* cCallbackMenuItem_cCallbackMenuItem(void* self)
 //100%
 INCLUDE_ASM("util/menu", cCallbackMenuItem_cCallbackMenuItem1);
 #ifdef SKIP_ASM
-extern void* D_00486CF0[];
+extern void* cCallbackMenuItem_vtbl[];
 
 /**
  * Constructs a callback item: ID @p text, caption (+0x14) @p caption and the function (+0x18) @p callback that selecting the item
  * calls.
  *
- * Stores the vtable D_00486CF0.
+ * Stores the vtable cCallbackMenuItem_vtbl.
  *
  * @param text  the item's ID
  * @param caption  caption
@@ -3162,7 +3162,7 @@ extern "C" void* cCallbackMenuItem_cCallbackMenuItem1(void* self, void* text, in
     cMenuItem_cMenuItem((cMenuItem*)self, text);
     *(int*)((char*)self + 0x14) = caption;
     *(int*)((char*)self + 0x18) = callback;
-    *(void***)((char*)self + 0x10) = D_00486CF0;
+    *(void***)((char*)self + 0x10) = cCallbackMenuItem_vtbl;
     return self;
 }
 #endif
@@ -3423,13 +3423,13 @@ INCLUDE_ASM("util/menu", cCharMenuItem_cCharMenuItem);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cMenuItem__FP9cMenuItemPv");
-extern void* D_00486C00[];
+extern void* cCharMenuItem_vtbl[];
 
 /**
  * Constructs an empty signed-byte item: ID -1, no caption (+0x14) or value pointer (+0x18), range 0..0 (+0x1C, +0x1D),
  * and cleared acceleration state (+0x20, +0x24, +0x28).
  *
- * Stores the vtable D_00486C00 (input cCharMenuItem_input, preRender cCharMenuItem_preRender, render cCharMenuItem_render, zeroValue
+ * Stores the vtable cCharMenuItem_vtbl (input cCharMenuItem_input, preRender cCharMenuItem_preRender, render cCharMenuItem_render, zeroValue
  * cCharMenuItem_zeroValue).
  *
  * @return @p self
@@ -3438,7 +3438,7 @@ extern "C" void* cCharMenuItem_cCharMenuItem(void* self)
 {
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     *(int*)((char*)self + 0x14) = 0;
-    *(void***)((char*)self + 0x10) = D_00486C00;
+    *(void***)((char*)self + 0x10) = cCharMenuItem_vtbl;
     *(int*)((char*)self + 0x18) = 0;
     *(char*)((char*)self + 0x1C) = 0;
     *(char*)((char*)self + 0x1D) = 0;
@@ -3451,10 +3451,10 @@ extern "C" void* cCharMenuItem_cCharMenuItem(void* self)
 //100%
 INCLUDE_ASM("util/menu", cCharMenuItem_cCharMenuItem1);
 #ifdef SKIP_ASM
-extern void* D_00486C00[];
+extern void* cCharMenuItem_vtbl[];
 
 /**
- * Constructs an empty signed-byte item with ID @p text: the same zeroed fields as cCharMenuItem_cCharMenuItem; vtable D_00486C00.
+ * Constructs an empty signed-byte item with ID @p text: the same zeroed fields as cCharMenuItem_cCharMenuItem; vtable cCharMenuItem_vtbl.
  *
  * @param text  the item's ID
  * @return @p self
@@ -3463,7 +3463,7 @@ extern "C" void* cCharMenuItem_cCharMenuItem1(void* self, void* text)
 {
     cMenuItem_cMenuItem((cMenuItem*)self, text);
     *(int*)((char*)self + 0x14) = 0;
-    *(void***)((char*)self + 0x10) = D_00486C00;
+    *(void***)((char*)self + 0x10) = cCharMenuItem_vtbl;
     *(int*)((char*)self + 0x18) = 0;
     *(char*)((char*)self + 0x1C) = 0;
     *(char*)((char*)self + 0x1D) = 0;
@@ -3476,13 +3476,13 @@ extern "C" void* cCharMenuItem_cCharMenuItem1(void* self, void* text)
 //100%
 INCLUDE_ASM("util/menu", cCharMenuItem_cCharMenuItem2);
 #ifdef SKIP_ASM
-extern void* D_00486C00[];
+extern void* cCharMenuItem_vtbl[];
 
 /**
  * Constructs a signed-byte item that edits the byte at @p valuePtr within [@p minValue, @p maxValue].
  *
  * Runs cMenuItem_cMenuItem with @p text as the ID, then caption (+0x14) = @p caption, value pointer (+0x18) = @p valuePtr, minimum
- * (+0x1C) = @p minValue, maximum (+0x1D) = @p maxValue, vtable D_00486C00, and zeroes the held-frames counter (+0x20), direction
+ * (+0x1C) = @p minValue, maximum (+0x1D) = @p maxValue, vtable cCharMenuItem_vtbl, and zeroes the held-frames counter (+0x20), direction
  * (+0x24) and fraction (+0x28).
  *
  * @param text  the item's ID
@@ -3499,7 +3499,7 @@ extern "C" void* cCharMenuItem_cCharMenuItem2(void* self, void* text, int valueP
     *(int*)((char*)self + 0x18) = valuePtr;
     *(char*)((char*)self + 0x1C) = minValue;
     *(char*)((char*)self + 0x1D) = maxValue;
-    *(void***)((char*)self + 0x10) = D_00486C00;
+    *(void***)((char*)self + 0x10) = cCharMenuItem_vtbl;
     *(int*)((char*)self + 0x24) = 0;
     *(int*)((char*)self + 0x20) = 0;
     *(int*)((char*)self + 0x28) = 0;
@@ -3538,7 +3538,7 @@ INCLUDE_ASM("util/menu", cCharMenuItem_zeroValue);
 /**
  * Resets a signed-byte item's value: the byte at +0x18 becomes the minimum (+0x1C) when that is positive, else 0.
  *
- * Slot 8 (zeroValue) of the item's vtable D_00486C00.
+ * Slot 8 (zeroValue) of the item's vtable cCharMenuItem_vtbl.
  */
 extern "C" void cCharMenuItem_zeroValue(void* self)
 {
@@ -4456,7 +4456,7 @@ INCLUDE_ASM("util/menu", cTextMenuItem_cTextMenuItem);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cMenuItem__FP9cMenuItemPv");
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
-extern void* D_00486AC0[];
+extern void* cTextMenuItem_vtbl[];
 
 struct cTextMenuItem_cTextMenuItem_sItem {
     char pad_0x00[0x10];
@@ -4470,7 +4470,7 @@ struct cTextMenuItem_cTextMenuItem_sItem {
  * Constructs a text-entry item: ID -1, caption (+0x14) @p caption, the text (+0x18, 16 bytes) copied from @p name (at most
  * 15 characters, always terminated) and the cursor (+0x28) at 0.
  *
- * Stores the vtable D_00486AC0 (input cTextMenuItem_input, preRender cTextMenuItem_preRender, render cTextMenuItem_render). The net help
+ * Stores the vtable cTextMenuItem_vtbl (input cTextMenuItem_input, preRender cTextMenuItem_preRender, render cTextMenuItem_render). The net help
  * popups use it for "Login Name", "Password", "Persona Name" and "Enter Chat".
  *
  * @param caption  caption
@@ -4482,7 +4482,7 @@ extern "C" cTextMenuItem_cTextMenuItem_sItem* cTextMenuItem_cTextMenuItem(cTextM
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     self->field_0x14 = caption;
     self->field_0x28 = 0;
-    self->vtable = D_00486AC0;
+    self->vtable = cTextMenuItem_vtbl;
     strncpy(self->name, name, 0xF);
     self->name[0xF] = 0;
     return self;
@@ -6136,11 +6136,11 @@ INCLUDE_ASM("util/menu", cVectorTitleMenuItem_cVectorTitleMenuItem);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cMenuItem__FP9cMenuItemPv");
-extern void* D_004868B8[];
+extern void* cVectorTitleMenuItem_vtbl[];
 
 /**
  * Constructs a vector title item: ID -1, caption (+0x18) @p caption and the vector (+0x14) @p vector that it shows; vtable
- * D_004868B8.
+ * cVectorTitleMenuItem_vtbl.
  *
  * cVectorMenuItem_cVectorMenuItem builds its title row (+0x654) with it.
  *
@@ -6153,7 +6153,7 @@ extern "C" void* cVectorTitleMenuItem_cVectorTitleMenuItem(void* self, int capti
     cMenuItem_cMenuItem_id((cMenuItem*)self, -1);
     *(int*)((char*)self + 0x14) = vector;
     *(int*)((char*)self + 0x18) = caption;
-    *(void***)((char*)self + 0x10) = D_004868B8;
+    *(void***)((char*)self + 0x10) = cVectorTitleMenuItem_vtbl;
     return self;
 }
 #endif
@@ -6348,7 +6348,7 @@ INCLUDE_ASM("util/menu", cGraphMenuItem_cGraphMenuItem);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 cMenuItem* cMenuItem_cMenuItem_id(cMenuItem* self, int id) __asm__("cMenuItem_cMenuItem__FP9cMenuItemPv");
-extern void* D_00486808[];
+extern void* cGraphMenuItem_vtbl[];
 extern void* D_00486738[];
 
 struct sPair8_D0808 {
@@ -6361,7 +6361,7 @@ struct sPair8_D0808 {
  *
  * ID -1, caption (+0x14) "Hello there!" (D_00486738), point count (+0x18) = @p numPoints, x-lock bits (+0x1C) = @p xLockBits, y-lock
  * bits (+0x20) = @p yLockBits, slope rule (+0x3C) = @p slope, points (+0x28) = @p points, minimum point (+0x2C) = *@p minPoint, maximum
- * point (+0x34) = *@p maxPoint, current point (+0x24) and edit mode (+0x40) 0; vtable D_00486808 (input cGraphMenuItem_input,
+ * point (+0x34) = *@p maxPoint, current point (+0x24) and edit mode (+0x40) 0; vtable cGraphMenuItem_vtbl (input cGraphMenuItem_input,
  * preRender cGraphMenuItem_preRender, render cGraphMenuItem_render, gainFocus cGraphMenuItem_gainFocus).
  *
  * @param numPoints  number of points
@@ -6380,7 +6380,7 @@ extern "C" void* cGraphMenuItem_cGraphMenuItem(void* self, int numPoints, int xL
     *(int*)((char*)self + 0x28) = points;
     *(int*)((char*)self + 0x1C) = xLockBits;
     *(int*)((char*)self + 0x20) = yLockBits;
-    *(void***)((char*)self + 0x10) = D_00486808;
+    *(void***)((char*)self + 0x10) = cGraphMenuItem_vtbl;
     *(int*)((char*)self + 0x3C) = slope;
     *(sPair8_D0808*)((char*)self + 0x2C) = *minPoint;
     *(sPair8_D0808*)((char*)self + 0x34) = *maxPoint;

@@ -1664,12 +1664,12 @@ void* cUISoundInterface_cUISoundInterface(void* self)
 INCLUDE_ASM("ui/uiscreen", cUIState_cUIState);
 #ifdef SKIP_ASM
 extern "C" void* cList_cList(void* self);
-extern void* D_004946C8[];
+extern void* cUIState_vtbl[];
 
 /**
  * Constructs a UI state for an engine.
  *
- * Links the list node to itself, installs the vtable D_004946C8, clears the hash name (+0xC), stores @p engine (+0x10),
+ * Links the list node to itself, installs the vtable cUIState_vtbl, clears the hash name (+0xC), stores @p engine (+0x10),
  * sets the current controller to -1 (+0x14), the controller bits to 0xF (+0x15) and the attribute word (+0x1C) to 0x218
  * (visible, first time, mode 2), clears the parent (+0x20), constructs the screen list (+0x24), clears the screen
  * (+0x40) and sets the user number to -1 (+0x44).
@@ -1682,7 +1682,7 @@ extern "C" void* cUIState_cUIState(void* self, int engine)
     char* stateBytes = (char*)self;
     *(void**)(stateBytes + 0x4) = stateBytes;
     *(void**)(stateBytes + 0x0) = stateBytes;
-    *(void***)(stateBytes + 0x8) = D_004946C8;
+    *(void***)(stateBytes + 0x8) = cUIState_vtbl;
     *(int*)(stateBytes + 0xC) = 0;
     *(int*)(stateBytes + 0x10) = engine;
     *(signed char*)(stateBytes + 0x14) = -1;
@@ -1700,7 +1700,7 @@ extern "C" void* cUIState_cUIState(void* self, int engine)
 INCLUDE_ASM("ui/uiscreen", cUIState_cUIState1);
 #ifdef SKIP_ASM
 extern "C" void* cList_cList(void* self);
-extern void* D_004946C8[];
+extern void* cUIState_vtbl[];
 
 /**
  * Constructs a UI state for an engine with a parent state.
@@ -1716,7 +1716,7 @@ extern "C" void* cUIState_cUIState1(void* self, int engine, int parentState)
     char* stateBytes = (char*)self;
     *(void**)(stateBytes + 0x4) = stateBytes;
     *(void**)(stateBytes + 0x0) = stateBytes;
-    *(void***)(stateBytes + 0x8) = D_004946C8;
+    *(void***)(stateBytes + 0x8) = cUIState_vtbl;
     *(int*)(stateBytes + 0xC) = 0;
     *(int*)(stateBytes + 0x10) = engine;
     *(signed char*)(stateBytes + 0x14) = -1;
@@ -1737,20 +1737,20 @@ INCLUDE_ASM("ui/uiscreen", cUIState__cUIState);
 extern "C" void cList_destroyList_v(void*) __asm__("cList_destroyList");
 extern "C" void cListNode_destroyListNode(void*);
 void operator_delete(int*);
-extern void* D_004946C8[];
+extern void* cUIState_vtbl[];
 extern void* cList_vtbl[];
 extern void* cListNode_vtbl[];
 
 /**
  * Destroys a UI state: destroys its screen list and list nodes, then frees it when bit 0 of @p flags is set.
  *
- * It is a slot of the cUIState vtable D_004946C8.
+ * It is a slot of the cUIState vtable cUIState_vtbl.
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
 extern "C" void cUIState__cUIState(void* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = D_004946C8;
+    *(void***)((char*)self + 0x8) = cUIState_vtbl;
     cList_destroyList_v((char*)self + 0x24);
     *(void***)((char*)self + 0x3C) = cList_vtbl;
     cList_destroyList_v((char*)self + 0x24);

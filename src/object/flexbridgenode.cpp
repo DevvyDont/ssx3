@@ -1328,7 +1328,7 @@ extern "C" void* cSimpleTube_cSimpleTube(void* self, int n);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, unsigned int flags, int d) __asm__("operator_new__FUi");
-extern char D_004900D0[];
+extern char cFlexRailNode_vtbl[];
 extern char str_FlexNodeMats[];
 extern char str_Tube_b[];
 
@@ -1347,7 +1347,7 @@ struct sFlexDef_347D90 {
 /**
  * Constructs the flex-rail base of a float or spring rail (bucket 1) for a placed rail instance.
  *
- * Runs the record constructor cInstanceNode_cInstanceNode1, installs the flex-rail vtable D_004900D0, sets RailFlags (+0x24) from def
+ * Runs the record constructor cInstanceNode_cInstanceNode1, installs the flex-rail vtable cFlexRailNode_vtbl, sets RailFlags (+0x24) from def
  * +0x44 and NumNodes (+0x20) to the number of the 8 instance ids (def +0x4..+0x20) that are not -1. Allocates NumNodes
  * - 1 segment matrices ("FlexNodeMats", +0x50) and a "Tube" object (+0x58) built by cSimpleTube_cSimpleTube with NumNodes * 8 -
  * 9.
@@ -1360,7 +1360,7 @@ struct sFlexDef_347D90 {
 extern "C" void* cFlexRailNode_cFlexRailNode(char* self, void* nodeType, void* instRecord, sFlexDef_347D90* def)
 {
     cInstanceNode_cInstanceNode1(self, 1, nodeType, instRecord);
-    *(char**)(self + 0xC) = D_004900D0;
+    *(char**)(self + 0xC) = cFlexRailNode_vtbl;
     int len = def->f44;
     *(int*)(self + 0x20) = 0;
     *(int*)(self + 0x24) = len;
@@ -1390,7 +1390,7 @@ extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a, void* stream);
 /**
  * Constructs the flex-rail base of a float or spring rail from a replay frame.
  *
- * Runs the replay constructor cInstanceNode_cInstanceNode, installs D_004900D0, reads the 0x30-byte rail state at +0x20
+ * Runs the replay constructor cInstanceNode_cInstanceNode, installs cFlexRailNode_vtbl, reads the 0x30-byte rail state at +0x20
  * (NumNodes, RailFlags, BoundBox) through the stream's read slot (vtable entry 2) and allocates Mats and Tube as
  * cFlexRailNode_cFlexRailNode does.
  *
@@ -1402,7 +1402,7 @@ extern "C" void* cFlexRailNode_cFlexRailNode1(char* self, void* bucket, void* st
 {
     sFlexSeg_347D90** segs = (sFlexSeg_347D90**)(self + 0x50);
     cInstanceNode_cInstanceNode(self, bucket, stream);
-    *(char**)(self + 0xC) = D_004900D0;
+    *(char**)(self + 0xC) = cFlexRailNode_vtbl;
     sSerVEntry_00347EA8* readSlot = &(*(sSerVEntry_00347EA8**)stream)[2];
     readSlot->fn((char*)stream + readSlot->delta, self + 0x20, 0x30);
     *segs = new (str_FlexNodeMats, 0x20000000, 0) sFlexSeg_347D90[*(int*)(self + 0x20) - 1];
@@ -1422,19 +1422,19 @@ struct sFlexBridgeVEntry7F90 {
 
 void cMemMan_free(void*);
 extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
-extern char D_004900D0[];
+extern char cFlexRailNode_vtbl[];
 
 /**
  * Destroys the flex-rail base of a float or spring rail.
  *
- * Reinstalls D_004900D0, frees the segment matrices (+0x50), destroys the Tube object (+0x58, its vtable entry 1 with
+ * Reinstalls cFlexRailNode_vtbl, frees the segment matrices (+0x50), destroys the Tube object (+0x58, its vtable entry 1 with
  * flags 3) and runs cInstanceNode__cInstanceNode with flags.
  *
  * @param flags  destructor flags passed on to cInstanceNode__cInstanceNode
  */
 extern "C" void cFlexRailNode__cFlexRailNode(void* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = D_004900D0;
+    *(void**)((char*)self + 0xC) = cFlexRailNode_vtbl;
     void* buf = *(void**)((char*)self + 0x50);
     if (buf != 0) {
         cMemMan_free(buf);

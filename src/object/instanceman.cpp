@@ -525,14 +525,14 @@ extern "C" void* cAnimFrame_update(void* self);
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("object/instanceman", cCamAnimFrame_cCamAnimFrame);
 #ifdef SKIP_ASM
-extern void* D_00490AB0[];
+extern void* cCamAnimFrame_vtbl[];
 // PORT: cCamAnimFrame_update is defined later in the unit as (void*); bound by asm label with its real float argument.
 void cCamAnimFrame_update_vf(void* self, float f) __asm__("cCamAnimFrame_update__FPv");
 
 /**
  * Constructs a camera animation frame for an anim record at a start time.
  *
- * Runs the cAnimFrame constructor cAnimFrame_cAnimFrame, installs the camera-frame vtable D_00490AB0 and evaluates the frame
+ * Runs the cAnimFrame constructor cAnimFrame_cAnimFrame, installs the camera-frame vtable cCamAnimFrame_vtbl and evaluates the frame
  * (cCamAnimFrame_update).
  *
  * @param src  anim record
@@ -542,7 +542,7 @@ void cCamAnimFrame_update_vf(void* self, float f) __asm__("cCamAnimFrame_update_
 extern "C" void* cCamAnimFrame_cCamAnimFrame(void* self, float* src, float animTime)
 {
     cAnimFrame_cAnimFrame(self, src, animTime);
-    *(void***)((char*)self + 0x84) = D_00490AB0;
+    *(void***)((char*)self + 0x84) = cCamAnimFrame_vtbl;
     cCamAnimFrame_update_vf(self, animTime);
     return self;
 }

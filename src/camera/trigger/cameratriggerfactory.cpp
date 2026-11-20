@@ -272,9 +272,9 @@ struct sCTVec3G {
 
 extern sCTVec3G t3vect_Zero;     // zero vector
 extern void* cCTObject_vtbl[];      // cCTObject vtable (the base class; the July preview's _vt$9cCTObject)
-extern void* D_0045C2A8[];      // ellipse
-extern void* D_0045C268[];      // box
-extern void* D_0045C228[];      // line
+extern void* cCTBoundObjEllipse_vtbl[];      // ellipse
+extern void* cCTBoundObjBox_vtbl[];      // box
+extern void* cCTBoundObjLine_vtbl[];      // line
 extern void* cCTBoundObjPoint_vtbl[];      // point
 extern char str_Camera_Ellipse_BoundObj[];
 extern char str_Camera_Box_BoundObj[];
@@ -305,18 +305,18 @@ struct sCTBoundObjG {
 
 struct sCTBoundEllG : sCTBoundObjG {
     int type;           // 0x28
-    sCTBoundEllG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C2A8) { type = 0; }
+    sCTBoundEllG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), cCTBoundObjEllipse_vtbl) { type = 0; }
 };
 
 struct sCTBoundBoxG : sCTBoundObjG {
     int type;           // 0x28
-    sCTBoundBoxG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C268) { type = 1; }
+    sCTBoundBoxG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), cCTBoundObjBox_vtbl) { type = 1; }
 };
 
 struct sCTBoundLineG : sCTBoundObjG {
     int type;           // 0x28
     sCTVec3G pts[2];    // 0x2C
-    sCTBoundLineG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C228)
+    sCTBoundLineG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), cCTBoundObjLine_vtbl)
     {
         type = 2;
         pts[0] = t3vect_Zero;
@@ -728,8 +728,8 @@ static inline sVec4_171FA8 Center_171FA8(const sBox_171FA8& b)
  * It then halves the inside/outside bracket (int)func_0040DA10(length / @p step) + 1 times and returns the outside end.
  * When @p pos is already outside, the bracket is simply the centre and @p pos.
  *
- * It fills slot 8 of the cCTVolume vtable D_0045C3A0 and of both concrete volume vtables (ellipse D_0045C350, box
- * D_0045C300). Likely bug: func_0040DA10 is the natural logarithm, so the step count is ln(length / step) + 1 rather
+ * It fills slot 8 of the cCTVolume vtable D_0045C3A0 and of both concrete volume vtables (ellipse cCTVolumeEllipse_vtbl, box
+ * cCTVolumeBox_vtbl). Likely bug: func_0040DA10 is the natural logarithm, so the step count is ln(length / step) + 1 rather
  * than log2, and the final bracket can stay wider than @p step.
  *
  * @param obj  the trigger volume (this)
@@ -804,7 +804,7 @@ struct sCTBoxK2 {
  *
  * The box is Pos (+0x0) - m and Pos + m, both with w = 1, where m = GetMaxElement (the largest of the three scale
  * components at +0x18). This encloses the ellipsoid whatever its rotation. Slot 6 of the ellipse volume vtable
- * D_0045C350.
+ * cCTVolumeEllipse_vtbl.
  *
  * @param obj  the ellipse volume (this)
  * @return the bounding box (min, max), returned by value
@@ -1029,7 +1029,7 @@ static inline void RotAxis_172278(sM_172278* m, const sV_172278& axis, float ang
  * Builds the inverse of the volume's transform: t4mat_Identity scaled by 1 / scale (+0x18, +0x1C, +0x20), rotated about
  * t4vect_ZAxis by -heading (+0xC), about t4vect_YAxis by -roll (+0x14) and about t4vect_XAxis by -pitch (+0x10), then
  * translated by -position (+0x0). The point mapped into that unit-sphere space is inside when x*x + y*y + z*z <= 1.
- * Slot 7 of the ellipse volume vtable D_0045C350.
+ * Slot 7 of the ellipse volume vtable cCTVolumeEllipse_vtbl.
  *
  * @param point  the world point to test
  * @return 1 when the point is inside (or on) the ellipsoid, else 0
@@ -1086,7 +1086,7 @@ struct sCTBoxK2b {
  * Returns the bounding box of a box trigger volume: its position plus or minus its largest scale component.
  *
  * The same body as the ellipse version (cCTVolumeEllipse_boundBox): Pos (+0x0) -/+ GetMaxElement of the scale (+0x18), w = 1. Slot
- * 6 of the box volume vtable D_0045C300. For a box turned by its heading or pitch the corners reach up to sqrt(3) times
+ * 6 of the box volume vtable cCTVolumeBox_vtbl. For a box turned by its heading or pitch the corners reach up to sqrt(3) times
  * further than the largest half-extent, so such a box is not fully enclosed (likely bug).
  *
  * @param obj  the box volume (this)
@@ -1348,7 +1348,7 @@ extern t4Vector D_004C5480[3];      // static local: the three box axes
  * Y and Z axes, guarded by D_004A4DEC), it lies between -size and +size (the scale at +0x18 is a half-extent).
  *
  * Unlike the ellipse test (cCTVolumeEllipse_containsPoint) and the box bound object's limiter (cCTBoundObjBox_limitPoint), the roll (+0x14) is
- * ignored. Slot 7 of the box volume vtable D_0045C300.
+ * ignored. Slot 7 of the box volume vtable cCTVolumeBox_vtbl.
  *
  * @param t  the box volume (this): position, heading/pitch/roll and half-extents
  * @param pt  the world point to test
@@ -1403,19 +1403,19 @@ class cCTVolumeEllK2;
 class cCTVolumeBoxK2;
 extern "C" int get_cCTVolumeEllipse(void* reader, cCTVolumeEllK2* obj);
 extern "C" int get_cCTVolumeBox(void* reader, cCTVolumeBoxK2* obj);
-extern void* D_0045C350[];      // volume ellipse vtable
-extern void* D_0045C300[];      // volume box vtable
+extern void* cCTVolumeEllipse_vtbl[];      // volume ellipse vtable
+extern void* cCTVolumeBox_vtbl[];      // volume box vtable
 extern char str_Camera_Sphere_Trigger[];
 extern char str_Camera_Box_Trigger[];
 
 struct sCTVolEllG : sCTBoundObjG {
     int type;           // 0x28
-    sCTVolEllG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C350) { type = 0; }
+    sCTVolEllG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), cCTVolumeEllipse_vtbl) { type = 0; }
 };
 
 struct sCTVolBoxG : sCTBoundObjG {
     int type;           // 0x28
-    sCTVolBoxG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C300) { type = 1; }
+    sCTVolBoxG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), cCTVolumeBox_vtbl) { type = 1; }
 };
 
 /**
@@ -1569,7 +1569,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTriggerAlgorithm_cTriggerAlg
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cChaseAlgorithm_cChaseAlgorithm(void* self);
-extern void* D_0045C4C8[];
+extern void* cTriggerAlgorithm_vtbl[];
 struct sQuad_00173208 {
     int v[4];
 } __attribute__((aligned(16)));
@@ -1579,7 +1579,7 @@ extern sQuad_00173208 D_004FF130_00173208 __asm__("t4vect_Origin");
 /**
  * Constructs a trigger camera algorithm: a chase camera that follows the rider from a configurable distance and angle.
  *
- * Runs the cChaseAlgorithm_cChaseAlgorithm base constructor, installs the vtable D_0045C4C8 and sets AlgorithmType
+ * Runs the cChaseAlgorithm_cChaseAlgorithm base constructor, installs the vtable cTriggerAlgorithm_vtbl and sets AlgorithmType
  * (+0xC) to 90 (On Tour CAMERA_ALGORITHM_TRIGGER_GENERIC). The On Tour cTriggerAlgorithm members get their defaults:
  * Position (+0x40) = t4vect_Origin, Heading (+0x50) and Pitch (+0x54) 0, PitchMultiplier (+0x58) 0.8, HeadingAdjustRate
  * (+0x5C) 10.3, PitchAdjustRate (+0x60) 1.1, HeadingLookRate (+0x64) 5, PitchLookRate (+0x68) 10, HeightOffset (+0x6C)
@@ -1592,7 +1592,7 @@ extern sQuad_00173208 D_004FF130_00173208 __asm__("t4vect_Origin");
 extern "C" void* cTriggerAlgorithm_cTriggerAlgorithm(void* self)
 {
     cChaseAlgorithm_cChaseAlgorithm(self);
-    *(void***)((char*)self + 0x10) = D_0045C4C8;
+    *(void***)((char*)self + 0x10) = cTriggerAlgorithm_vtbl;
     *(float*)((char*)self + 0x58) = 0.800000011920929f;
     *(float*)((char*)self + 0x5C) = 10.300000190734863f;
     *(float*)((char*)self + 0x60) = 1.100000023841858f;
@@ -1624,7 +1624,7 @@ void cTriggerAlgorithm__cTriggerAlgorithm_impl(void* self, int flags) __asm__("c
  * Destroys a trigger camera algorithm: puts back the base camera-algorithm vtable and frees the object when asked.
  *
  * Stores cCameraAlgorithm's vtable D_0045BDE0 at +0x10 and calls operator_delete when bit 0 of @p flags is set. Slot 1
- * of the trigger algorithm vtable D_0045C4C8; the bounded algorithm's destructor cBoundedAlgorithm__cBoundedAlgorithm chains to it.
+ * of the trigger algorithm vtable cTriggerAlgorithm_vtbl; the bounded algorithm's destructor cBoundedAlgorithm__cBoundedAlgorithm chains to it.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
@@ -2214,7 +2214,7 @@ static inline void RotAxis_173E40(sM_173E40* m, const sV_173E40& axis, float ang
  *
  * Starts from t4mat_Identity translated to Position (+0x40), rotates it about t4vect_YAxis by -Pitch (+0x54) and about
  * t4vect_ZAxis by Heading (+0x50), and splits the matrix into a position and a rotation quaternion with tPose_tPose.
- * Slot 2 of both the trigger (D_0045C4C8) and the bounded (D_0045C458) algorithm vtables.
+ * Slot 2 of both the trigger (cTriggerAlgorithm_vtbl) and the bounded (cBoundedAlgorithm_vtbl) algorithm vtables.
  *
  * @param src  the trigger camera algorithm (this)
  * @return the pose: position and rotation quaternion (On Tour tPose), returned by value
@@ -2233,14 +2233,14 @@ extern "C" sPair_173E40 cTriggerAlgorithm_getPose(char* src)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm_cBoundedAlgorithm);
 #ifdef SKIP_ASM
-extern void* D_0045C458[];
+extern void* cBoundedAlgorithm_vtbl[];
 extern "C" void* cTriggerAlgorithm_cTriggerAlgorithm(void* self);
 
 /**
  * Constructs a bounded trigger camera: a trigger camera whose position is kept inside a bound object.
  *
  * Runs the trigger algorithm constructor cTriggerAlgorithm_cTriggerAlgorithm, then sets AlgorithmType (+0xC) to 91 (On Tour
- * CAMERA_ALGORITHM_TRIGGER_BOUNDED), installs the vtable D_0045C458 and zeroes BoundAction (+0x80) and LeadDistance
+ * CAMERA_ALGORITHM_TRIGGER_BOUNDED), installs the vtable cBoundedAlgorithm_vtbl and zeroes BoundAction (+0x80) and LeadDistance
  * (+0x74). cChaseCameraController_createChaseAlgorithmBlend allocates it (0x90 bytes) for a camera type 91 action and
  * stores the action in BoundAction.
  *
@@ -2250,30 +2250,30 @@ extern "C" void* cBoundedAlgorithm_cBoundedAlgorithm(void* self)
 {
     cTriggerAlgorithm_cTriggerAlgorithm(self);
     *(int*)((char*)self + 0xC) = 91;
-    *(void***)((char*)self + 0x10) = D_0045C458;
+    *(void***)((char*)self + 0x10) = cBoundedAlgorithm_vtbl;
     *(int*)((char*)self + 0x80) = 0;
     *(int*)((char*)self + 0x74) = 0;
     return self;
 }
 #endif
 
-extern void* D_0045C458[];
+extern void* cBoundedAlgorithm_vtbl[];
 extern "C" void* cTriggerAlgorithm__cTriggerAlgorithm(void*);
 
 //99.5%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm__cBoundedAlgorithm__FPv);
 #ifdef SKIP_ASM
 /**
- * Destroys a bounded trigger camera: re-installs its vtable D_0045C458 and chains to the trigger algorithm destructor.
+ * Destroys a bounded trigger camera: re-installs its vtable cBoundedAlgorithm_vtbl and chains to the trigger algorithm destructor.
  *
- * Stores D_0045C458 at +0x10 and calls cTriggerAlgorithm__cTriggerAlgorithm, which puts back the base vtable and frees the object when bit 0
+ * Stores cBoundedAlgorithm_vtbl at +0x10 and calls cTriggerAlgorithm__cTriggerAlgorithm, which puts back the base vtable and frees the object when bit 0
  * of the g++ destructor flags (passed through in $a1, not declared here) is set.
  *
  * @return cTriggerAlgorithm__cTriggerAlgorithm's result (the destructor returns nothing)
  */
 void* cBoundedAlgorithm__cBoundedAlgorithm(void* self)
 {
-    *(int*)((char*)self + 0x10) = (int)(void*)D_0045C458;
+    *(int*)((char*)self + 0x10) = (int)(void*)cBoundedAlgorithm_vtbl;
     return cTriggerAlgorithm__cTriggerAlgorithm(self);
 }
 #endif
@@ -3404,7 +3404,7 @@ void operator_delete(int* ptr);
  * Destroys a script camera algorithm base: restores cCameraAlgorithm's vtable and frees the object when asked.
  *
  * Stores D_0045BDE0 at +0x10 and calls operator_delete when bit 0 of @p flags is set. Slot 1 of the cScriptAlgorithm
- * vtable D_0045C8B8.
+ * vtable cScriptAlgorithm_vtbl.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
@@ -3427,7 +3427,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptAlgorithm_getTargetPos
  * Returns a script camera algorithm's target position.
  *
  * Copies the 16-byte vector at +0x20 of @p scriptAlgo (On Tour cScriptAlgorithm::Target) into @p self, the hidden
- * result slot. Slot 6 (getTargetPos) of cScriptAlgorithm's vtable D_0045C8B8 and of the four script algorithm vtables
+ * result slot. Slot 6 (getTargetPos) of cScriptAlgorithm's vtable cScriptAlgorithm_vtbl and of the four script algorithm vtables
  * (cScriptRelativeAlgorithm_vtbl, cScriptTargetAlgorithm_vtbl, cScriptPointAlgorithm_vtbl,
  * cScriptManualAlgorithm_vtbl).
  *
@@ -3684,7 +3684,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTVolumeEllipse_cCTVolumeEll
 /**
  * Constructs an ellipse trigger volume with default values.
  *
- * The cCTObject defaults (position and angles 0, scale 1), the ellipse volume vtable D_0045C350 at +0x24 and Type
+ * The cCTObject defaults (position and angles 0, scale 1), the ellipse volume vtable cCTVolumeEllipse_vtbl at +0x24 and Type
  * (+0x28) 0 (On Tour eCTVolumeEllipse). get_camvolume builds the same object inline for "Camera Sphere Trigger".
  * Nothing calls this copy.
  *
@@ -3701,7 +3701,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTVolumeBox_cCTVolumeBox);
 /**
  * Constructs a box trigger volume with default values.
  *
- * The cCTObject defaults (position and angles 0, scale 1), the box volume vtable D_0045C300 at +0x24 and Type (+0x28) 1
+ * The cCTObject defaults (position and angles 0, scale 1), the box volume vtable cCTVolumeBox_vtbl at +0x24 and Type (+0x28) 1
  * (On Tour eCTVolumeBox). get_camvolume builds the same object inline for "Camera Box Trigger". Nothing calls this
  * copy.
  *
@@ -3733,7 +3733,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTBoundObjEllipse_cCTBoundOb
 /**
  * Constructs an ellipse camera bound object with default values.
  *
- * The cCTObject defaults (position and angles 0, scale 1), the ellipse bound-object vtable D_0045C2A8 at +0x24 and Type
+ * The cCTObject defaults (position and angles 0, scale 1), the ellipse bound-object vtable cCTBoundObjEllipse_vtbl at +0x24 and Type
  * (+0x28) 0 (On Tour eCTBoundObjEllipse). get_camboundobj builds the same object inline for "Camera Ellipse BoundObj";
  * nothing calls this copy.
  *
@@ -3750,7 +3750,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTBoundObjBox_cCTBoundObjBox
 /**
  * Constructs a box camera bound object with default values.
  *
- * The cCTObject defaults (position and angles 0, scale 1), the box bound-object vtable D_0045C268 at +0x24 and Type
+ * The cCTObject defaults (position and angles 0, scale 1), the box bound-object vtable cCTBoundObjBox_vtbl at +0x24 and Type
  * (+0x28) 1 (On Tour eCTBoundObjBox). get_camboundobj builds the same object inline for "Camera Box BoundObj"; nothing
  * calls this copy.
  *
@@ -3774,11 +3774,11 @@ struct sCTBoundLineK : sCTBoundObjG {
 /**
  * Constructs a line camera bound object with default values.
  *
- * The cCTObject defaults (position and angles 0, scale 1), the line bound-object vtable D_0045C228 at +0x24, Type
+ * The cCTObject defaults (position and angles 0, scale 1), the line bound-object vtable cCTBoundObjLine_vtbl at +0x24, Type
  * (+0x28) 2 (On Tour eCTBoundObjLine) and both end points (+0x2C, +0x38) set to t3vect_Zero. get_camboundobj builds the
  * same object inline for "Camera Line BoundObj"; nothing calls this copy.
  */
-sCTBoundLineK::sCTBoundLineK() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C228)
+sCTBoundLineK::sCTBoundLineK() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), cCTBoundObjLine_vtbl)
 {
     type = 2;
     pts[0] = t3vect_Zero;

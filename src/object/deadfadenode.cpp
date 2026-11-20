@@ -491,13 +491,13 @@ void* cDeadFadeNode_writeToReplayFrame(void* self)
 INCLUDE_ASM("object/deadfadenode", cHideNode_cHideNode);
 #ifdef SKIP_ASM
 extern "C" void* cInstanceNode_cInstanceNode1(void* self, int a1, int type, void* a3);
-extern char D_00491800[];
+extern char cHideNode_vtbl[];
 
 /**
  * Constructs a hide node for an instance record (node type 16, bucket 1).
  *
  * Runs the cInstanceNode constructor cInstanceNode_cInstanceNode1 with bucket 1, type 0x10 and the instance record, installs the
- * vtable D_00491800, then in the record's flags (+0x8) clears bits 5 and 6 (0x60) and bit 1 and sets bit 2. The world
+ * vtable cHideNode_vtbl, then in the record's flags (+0x8) clears bits 5 and 6 (0x60) and bit 1 and sets bit 2. The world
  * script code (src/seg/seg_1FBE38.cpp) calls it on a cMemMan_alloc(0x1C) block.
  *
  * @param instRecord  the instance record to hide
@@ -506,7 +506,7 @@ extern char D_00491800[];
 extern "C" void* cHideNode_cHideNode(void* self, void* instRecord)
 {
     cInstanceNode_cInstanceNode1(self, 1, 0x10, instRecord);
-    *(void**)((char*)self + 0xC) = D_00491800;
+    *(void**)((char*)self + 0xC) = cHideNode_vtbl;
     unsigned int* recordFlags = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
     *recordFlags &= 0xFFFFFF9F;
     recordFlags = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
@@ -519,12 +519,12 @@ extern "C" void* cHideNode_cHideNode(void* self, void* instRecord)
 INCLUDE_ASM("object/deadfadenode", cHideNode_cHideNode1);
 #ifdef SKIP_ASM
 extern "C" void cInstanceNode_cInstanceNode(void* self);
-extern char D_00491800[];
+extern char cHideNode_vtbl[];
 
 /**
  * Reconstructs a hide node from a replay frame.
  *
- * Runs the replay cInstanceNode constructor (cInstanceNode_cInstanceNode) and installs the hide node vtable D_00491800.
+ * Runs the replay cInstanceNode constructor (cInstanceNode_cInstanceNode) and installs the hide node vtable cHideNode_vtbl.
  * The replay loader calls it for node type 16 on a cMemMan_alloc(0x1C, "Hide") block.
  *
  * @return @p self
@@ -532,7 +532,7 @@ extern char D_00491800[];
 extern "C" void* cHideNode_cHideNode1(void* self)
 {
     cInstanceNode_cInstanceNode(self);
-    *(void**)((char*)self + 0xC) = D_00491800;
+    *(void**)((char*)self + 0xC) = cHideNode_vtbl;
     return self;
 }
 #endif
@@ -543,7 +543,7 @@ INCLUDE_ASM("object/deadfadenode", cHideNode_writeToReplayFrame__FPv);
 /**
  * Writes the node to a replay frame by forwarding to cInstanceNode_writeToReplayFrame.
  *
- * It fills the writeToReplayFrame slot (word 25) of the hide node vtable D_00491800.
+ * It fills the writeToReplayFrame slot (word 25) of the hide node vtable cHideNode_vtbl.
  *
  * @return cInstanceNode_writeToReplayFrame()'s result
  */
@@ -557,13 +557,13 @@ void* cHideNode_writeToReplayFrame(void* self)
 INCLUDE_ASM("object/deadfadenode", cRestoreNode_cRestoreNode);
 #ifdef SKIP_ASM
 extern "C" void* cInstanceNode_cInstanceNode1(void* self, int a1, int type, void* a3);
-extern char D_00491680[];
+extern char cRestoreNode_vtbl[];
 
 /**
  * Constructs a restore node for an instance record (node type 19, bucket 1).
  *
  * Runs the cInstanceNode constructor cInstanceNode_cInstanceNode1 with bucket 1, type 19 and the instance record, installs the vtable
- * D_00491680, then in the record's flags (+0x8) clears bits 5 and 6 (0x60) and bit 1 and sets bit 2. World script code
+ * cRestoreNode_vtbl, then in the record's flags (+0x8) clears bits 5 and 6 (0x60) and bit 1 and sets bit 2. World script code
  * and the debounce node code call it on a cMemMan_alloc(0x1C, "RestoreNode") block.
  *
  * @param instRecord  the instance record to restore
@@ -572,7 +572,7 @@ extern char D_00491680[];
 extern "C" void* cRestoreNode_cRestoreNode(void* self, void* instRecord)
 {
     cInstanceNode_cInstanceNode1(self, 1, 19, instRecord);
-    *(void**)((char*)self + 0xC) = D_00491680;
+    *(void**)((char*)self + 0xC) = cRestoreNode_vtbl;
     unsigned int* recordFlags = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
     *recordFlags &= 0xFFFFFF9F;
     recordFlags = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
@@ -585,20 +585,20 @@ extern "C" void* cRestoreNode_cRestoreNode(void* self, void* instRecord)
 INCLUDE_ASM("object/deadfadenode", cRestoreNode_cRestoreNode1);
 #ifdef SKIP_ASM
 extern "C" void cInstanceNode_cInstanceNode(void* self);
-extern char D_00491680[];
+extern char cRestoreNode_vtbl[];
 
 /**
  * Reconstructs a restore node from a replay frame.
  *
  * Runs the replay cInstanceNode constructor (cInstanceNode_cInstanceNode) and installs the restore node vtable
- * D_00491680. The replay loader calls it for node type 19 on a cMemMan_alloc(0x1C, "Restore") block.
+ * cRestoreNode_vtbl. The replay loader calls it for node type 19 on a cMemMan_alloc(0x1C, "Restore") block.
  *
  * @return @p self
  */
 extern "C" void* cRestoreNode_cRestoreNode1(void* self)
 {
     cInstanceNode_cInstanceNode(self);
-    *(void**)((char*)self + 0xC) = D_00491680;
+    *(void**)((char*)self + 0xC) = cRestoreNode_vtbl;
     return self;
 }
 #endif
@@ -609,7 +609,7 @@ INCLUDE_ASM("object/deadfadenode", cRestoreNode_writeToReplayFrame__FPv);
 /**
  * Writes the node to a replay frame by forwarding to cInstanceNode_writeToReplayFrame.
  *
- * It fills the writeToReplayFrame slot (word 25) of the restore node vtable D_00491680.
+ * It fills the writeToReplayFrame slot (word 25) of the restore node vtable cRestoreNode_vtbl.
  *
  * @return cInstanceNode_writeToReplayFrame()'s result
  */

@@ -512,7 +512,7 @@ extern "C" void cGame_setState(void* self, int a, int b, int refresh);
 /**
  * Switches the game to game-flow state 10 at its next state update: cGame_setState(cGameState_mpGame, 10, 0, 0).
  *
- * It is the gainFocus slot of vtable D_0047D690, the game-flow state cGFEndState_cGFEndState constructs (mNextState 8).
+ * It is the gainFocus slot of vtable cGFEndState_vtbl, the game-flow state cGFEndState_cGFEndState constructs (mNextState 8).
  */
 extern "C" void cGFEndState_gainFocus(void)
 {
@@ -524,7 +524,7 @@ extern "C" void cGFEndState_gainFocus(void)
 INCLUDE_ASM("fe/festateloadscreen", cGFEndState_loseFocus__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: the loseFocus slot of vtable D_0047D690.
+ * Does nothing: the loseFocus slot of vtable cGFEndState_vtbl.
  */
 void cGFEndState_loseFocus(void* self)
 {
@@ -606,15 +606,15 @@ void* cGFEndWaitState_readFromReplayFrame(void* self)
 //100%
 INCLUDE_ASM("fe/festateloadscreen", cGFFinishlineState_cGFFinishlineState);
 #ifdef SKIP_ASM
-extern void* D_0047D6E8[];
-extern void* D_0047D5E0[];
+extern void* cGameState_vtbl[];
+extern void* cGFFinishlineState_vtbl[];
 extern void* cGameState_mpGame;
 
 /**
- * Constructs the finish-line game-flow state in place: base cGameState, vtable D_0047D5E0, next state 7.
+ * Constructs the finish-line game-flow state in place: base cGameState, vtable cGFFinishlineState_vtbl, next state 7.
  *
- * Runs the inlined cGameState constructor (mNextState 0, vtable D_0047D6E8 at +0xC, cGameState_mpGame cleared), then
- * stores D_0047D5E0, mNextState (+0x0) 7, mStartupFlag (+0x4) 0, the sub-state (+0x10) 2 and the results delay (+0x14)
+ * Runs the inlined cGameState constructor (mNextState 0, vtable cGameState_vtbl at +0xC, cGameState_mpGame cleared), then
+ * stores cGFFinishlineState_vtbl, mNextState (+0x0) 7, mStartupFlag (+0x4) 0, the sub-state (+0x10) 2 and the results delay (+0x14)
  * 0. cGame_cGame() builds it at +0x100 of the game.
  *
  * @return @p self
@@ -622,9 +622,9 @@ extern void* cGameState_mpGame;
 extern "C" void* cGFFinishlineState_cGFFinishlineState(void* self)
 {
     *(int*)self = 0;
-    *(void***)((char*)self + 0xC) = D_0047D6E8;
+    *(void***)((char*)self + 0xC) = cGameState_vtbl;
     cGameState_mpGame = 0;
-    *(void***)((char*)self + 0xC) = D_0047D5E0;
+    *(void***)((char*)self + 0xC) = cGFFinishlineState_vtbl;
     *(int*)self = 7;
     *(int*)((char*)self + 0x10) = 2;
     *(int*)((char*)self + 0x4) = 0;
@@ -650,7 +650,7 @@ void cGameComm_stopSyncInput(void* self);
  * Calls cReplay_endReplay() on the game's Replay, cUIStateStack_purgeNormalStates() on the game UI's state stack and
  * cSSXScriptEngine_ResetNISList() for list 0, sets the sub-state (+0x10) to 0 and the delay (+0x14) to 180, shows load
  * indicator bit 4 (cBXLoadIndicator_Show()) and, with a cGameComm_mGameComm, calls cGameComm_stopSyncInput() on it and sets its
- * unk_090 to 1. gainFocus slot of vtable D_0047D5E0.
+ * unk_090 to 1. gainFocus slot of vtable cGFFinishlineState_vtbl.
  */
 extern "C" void cGFFinishlineState_gainFocus(void* self)
 {
@@ -785,7 +785,7 @@ public:
  * cBEAggressionInterface_regressAggression() on the aggression interface in race mode 0, and moves to sub-state 1. Sub-state 1: once the NIS list
  * is no longer playing (state 1), calls "finishov"'s handleEvent with (1, 0), hides load indicator bit 4 and moves to
  * 2. Sub-state 2: calls cGameState_gotoNextState() when the race's mode (+0x48) is 4 and its +0x49 flag is clear.
- * update slot of vtable D_0047D5E0.
+ * update slot of vtable cGFFinishlineState_vtbl.
  */
 extern "C" void cGFFinishlineState_update(void* self)
 {
@@ -883,7 +883,7 @@ void cSSXScriptEngine_DisallowNISListSkip(void* self, int val);
  *
  * For each view of the game's ViewMan (count at +0x10) calls cChaseCameraController_switchCamera_EndPostRace() on the view's +0xA8 object, sets the
  * sub-state (+0x10) to 2, calls cSSXScriptEngine_PlayNISList(ScriptEngine, 0, 1, 0) and cSSXScriptEngine_DisallowNISListSkip(ScriptEngine, 1),
- * and stores mNextState (+0x0) 7. loseFocus slot of vtable D_0047D5E0.
+ * and stores mNextState (+0x0) 7. loseFocus slot of vtable cGFFinishlineState_vtbl.
  */
 extern "C" void cGFFinishlineState_loseFocus(sLoadScreen00234008* self)
 {
@@ -958,14 +958,14 @@ extern "C" void cGFFinishlineState_readFromReplayFrame(void* self, void* stream)
 //100%
 INCLUDE_ASM("fe/festateloadscreen", cGFEventStartState_cGFEventStartState);
 #ifdef SKIP_ASM
-extern void* D_0047D6E8[];
+extern void* cGameState_vtbl[];
 extern void* cGFEventStartState_vtbl[];
 extern void* cGameState_mpGame;
 
 /**
  * Constructs the event-start game-flow state in place: base cGameState, cGFEventStartState_vtbl, next state 2.
  *
- * Runs the inlined cGameState constructor (vtable D_0047D6E8, cGameState_mpGame cleared), then stores
+ * Runs the inlined cGameState constructor (vtable cGameState_vtbl, cGameState_mpGame cleared), then stores
  * cGFEventStartState_vtbl, mNextState (+0x0) 2, the sub-state (+0x14) 0, +0x1C 4 and clears mStartupFlag (+0x4), the
  * bytes at +0x10 and +0x8. cGame_cGame() builds it at +0xB0 of the game.
  *
@@ -974,7 +974,7 @@ extern void* cGameState_mpGame;
 extern "C" void* cGFEventStartState_cGFEventStartState(void* self)
 {
     *(int*)self = 0;
-    *(void***)((char*)self + 0xC) = D_0047D6E8;
+    *(void***)((char*)self + 0xC) = cGameState_vtbl;
     cGameState_mpGame = 0;
     *(void***)((char*)self + 0xC) = cGFEventStartState_vtbl;
     *(int*)self = 2;

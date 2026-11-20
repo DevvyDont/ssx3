@@ -3,7 +3,7 @@
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BENetworkInt[];
-extern void* D_0045AD98[16];
+extern void* cBENetworkInterface_vtbl[16];
 
 //99.58%
 INCLUDE_ASM("be/beintnetwork", cBENetworkInterface_getThis__Fv);
@@ -20,7 +20,7 @@ void* cBENetworkInterface_getThis()
     if (cBENetworkInterface_instance == 0) {
         cBENetworkInterface* mem = (cBENetworkInterface*)cMemMan_alloc(0x10, str_BENetworkInt, 0, 0);
         mem->bIsActive = 0;
-        mem->mVtbl = D_0045AD98;
+        mem->mVtbl = cBENetworkInterface_vtbl;
         cBENetworkInterface_instance = mem;
     }
     return cBENetworkInterface_instance;

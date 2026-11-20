@@ -367,7 +367,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" void cUIState_cUIState1(void* self, void* engine, void* owner);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char str_cFEPopupOptionReset[];
-extern void* D_0046B3D0[];
+extern void* cFEPopupOptionReset_vtbl[];
 extern int D_004A14D0;
 extern int D_004A14D4;
 extern int D_004A14D8;
@@ -378,7 +378,7 @@ extern int D_004A14E0;
  * Pushes the save-options popup (a cFEPopupOptionReset) over the options menu and clears every options-changed flag.
  *
  * Allocates the 76-byte popup (tag "cFEPopupOptionReset"), constructs it as a child of this state (cUIState_cUIState1 with
- * the engine at +0x10), stores its vtable D_0046B3D0, clears its byte at +0x48 and pushes it onto the engine's state
+ * the engine at +0x10), stores its vtable cFEPopupOptionReset_vtbl, clears its byte at +0x48 and pushes it onto the engine's state
  * stack (engine + 0x18) with cUIStateStack_pushPopup. cFEStateOptions_onPopupEvent sets the popup's question to
  * kT_FESaveOptionsQuesPS2 and handles the answer.
  *
@@ -390,7 +390,7 @@ extern "C" void cFEStateOptions_saveOptionPrompt(void* self)
 {
     char* savePopup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
     cUIState_cUIState1(savePopup, *(void**)((char*)self + 0x10), self);
-    *(void***)(savePopup + 8) = D_0046B3D0;
+    *(void***)(savePopup + 8) = cFEPopupOptionReset_vtbl;
     *(char*)(savePopup + 0x48) = 0;
     cUIStateStack_pushPopup(*(char**)((char*)self + 0x10) + 0x18, savePopup);
     D_004A14D8 = 0;
@@ -793,7 +793,7 @@ extern char str_cFEPopupScreenPos[];
 extern char str_cFEPopupVideoCalibration[];
 extern void* cFEPopupScreenPos_vtbl[];
 extern void* cFEPopupVideoCalibration_vtbl[];
-extern void* D_0046B3D0[];
+extern void* cFEPopupOptionReset_vtbl[];
 extern char D_004A1520[];
 extern char D_004A1528[];
 extern char* D_00440FD8[];
@@ -874,7 +874,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(cFEStateOptionsGame* self, cha
     case 7: {
         char* popup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
         cUIState_cUIState1(popup, (char*)self->mpEngine, ((sOptGame_189980*)self));
-        *(void***)(popup + 8) = D_0046B3D0;
+        *(void***)(popup + 8) = cFEPopupOptionReset_vtbl;
         popup[0x48] = 0;
         cUIStateStack_pushPopup(self->mpEngine->mStateStack, popup);
         break;
@@ -1306,7 +1306,7 @@ extern "C" void func_00287520(void* snd, int v);
 extern "C" void cSSXAudio_SetDJSpeech(void* snd, int v);
 extern "C" void cSSXAudio_SetArcadeSFX(void* snd, int v);
 extern char str_cFEPopupOptionReset[];
-extern void* D_0046B3D0[];
+extern void* cFEPopupOptionReset_vtbl[];
 extern char str_1lb[];
 extern char str_2sl[];
 extern char str_3sl[];
@@ -1362,7 +1362,7 @@ struct sOptSound_18A8D0 {
 /**
  * Handles a widget event on the sound options screen: the reset popup, leaving the screen and value changes.
  *
- * A null widget is ignored, and event 5 does nothing. Event 7 pushes a cFEPopupOptionReset popup (vtable D_0046B3D0)
+ * A null widget is ignored, and event 5 does nothing. Event 7 pushes a cFEPopupOptionReset popup (vtable cFEPopupOptionReset_vtbl)
  * onto the engine's state stack. Event 6 (back) calls virtual slot 1 of the option interface (cBE interface 4),
  * re-applies the effects, speech and music volumes and the two switches (`iUseDJSpeech` through cSSXAudio_SetDJSpeech, `iUseArcadeSFX`
  * through cSSXAudio_SetArcadeSFX), then pushes the state that virtual slot 5 of the engine's custom interface (engine + 0x0)
@@ -1388,7 +1388,7 @@ extern "C" void cFEStateOptionsSound_onWidgetEvent(cFEStateOptionsSound* self, c
     case 7: {
         char* resetPopup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
         cUIState_cUIState1(resetPopup, (char*)self->mpEngine, ((sOptSound_18A8D0*)self));
-        *(void***)(resetPopup + 8) = D_0046B3D0;
+        *(void***)(resetPopup + 8) = cFEPopupOptionReset_vtbl;
         resetPopup[0x48] = 0;
         cUIStateStack_pushPopup(self->mpEngine->mStateStack, resetPopup);
         break;
@@ -1713,7 +1713,7 @@ extern "C" void cFEStateOptionsSound_setSoundMode(cFEStateOptionsSound* self, un
 INCLUDE_ASM("fe/festateoptions", func_0018C0E8);
 #ifdef SKIP_ASM
 extern "C" void* cUIState_cUIState(void* self);
-extern void* D_0046C550[];
+extern void* cFEStateOptionsHUD_vtbl[];
 extern int D_004A14D8;
 
 /**
@@ -1721,7 +1721,7 @@ extern int D_004A14D8;
  * 30.
  *
  * Runs cUIState's constructor cUIState_cUIState (the engine pointer from the second argument register goes straight
- * through; it is not declared here), stores the vtable D_0046C550 in mVtbl (+0x8), sets mHashName (+0xC) to 0x1E and
+ * through; it is not declared here), stores the vtable cFEStateOptionsHUD_vtbl in mVtbl (+0x8), sets mHashName (+0xC) to 0x1E and
  * clears the HUD changed flag D_004A14D8. cFEStateOptionsHUD_cFEStateOptionsHUD is the variant built with a null
  * engine.
  *
@@ -1730,7 +1730,7 @@ extern int D_004A14D8;
 extern "C" void* func_0018C0E8(void* self)
 {
     cUIState_cUIState(self);
-    *(void***)((char*)self + 8) = D_0046C550;
+    *(void***)((char*)self + 8) = cFEStateOptionsHUD_vtbl;
     *(int*)((char*)self + 0xC) = 0x1E;
     D_004A14D8 = 0;
     return self;
@@ -1862,7 +1862,7 @@ extern "C" void cUIState_cUIState1(void* self, void* engine, void* owner);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern char str_cFEPopupOptionReset[];
-extern void* D_0046B3D0[];
+extern void* cFEPopupOptionReset_vtbl[];
 extern int D_004A14D8;
 
 struct sOptions_C2A0 {
@@ -1895,7 +1895,7 @@ static inline int Is_0018C2A0(int id, char* s) { return id == GetHashValue32(s);
 /**
  * Handles a widget event on the HUD options screen: the reset popup, leaving the screen and highlighting a HUD choice.
  *
- * A null widget is ignored. Event 7 pushes a cFEPopupOptionReset popup (vtable D_0046B3D0). Event 6 (back) calls
+ * A null widget is ignored. Event 7 pushes a cFEPopupOptionReset popup (vtable cFEPopupOptionReset_vtbl). Event 6 (back) calls
  * virtual slot 1 of the option interface (cBE interface 4) and pushes the state that virtual slot 5 of the engine's
  * custom interface (engine + 0x0) returns for the widget's mMiscData.
  *
@@ -1916,7 +1916,7 @@ extern "C" void cFEStateOptionsHUD_onWidgetEvent(cFEStateOptionsHUD* self, char*
     case 7: {
         char* resetPopup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
         cUIState_cUIState1(resetPopup, self->mpEngine, ((char*)self));
-        *(void***)(resetPopup + 8) = D_0046B3D0;
+        *(void***)(resetPopup + 8) = cFEPopupOptionReset_vtbl;
         *(char*)(resetPopup + 0x48) = 0;
         cUIStateStack_pushPopup(self->mpEngine->mStateStack, resetPopup);
         break;
@@ -2237,7 +2237,7 @@ extern "C" int cBENewPlayerInterface_getUseDualShock(void* iface, int a1);
 extern "C" void cFEStateOptionsController_displayPadConfig(void* self, int on);
 extern "C" void cFEStateOptionsController_vibratePad(void* self, int idx, float x, float y);
 extern char str_cFEPopupOptionReset[];
-extern void* D_0046B3D0[];
+extern void* cFEPopupOptionReset_vtbl[];
 extern char str_1lb[];
 extern char str_2lb[];
 extern char str_3lb[];
@@ -2261,7 +2261,7 @@ static inline int Is_0018CA10(int id, char* s) { return id == GetHashValue32(s);
 /**
  * Handles a widget event on the controller options screen: the reset popup, leaving the screen and setting changes.
  *
- * A null widget is ignored. Event 7 pushes a cFEPopupOptionReset popup (vtable D_0046B3D0). Event 6 (back) calls
+ * A null widget is ignored. Event 7 pushes a cFEPopupOptionReset popup (vtable cFEPopupOptionReset_vtbl). Event 6 (back) calls
  * virtual slot 1 of the player interface (cBE interface 1) and pushes the state that virtual slot 5 of the engine's
  * custom interface (engine + 0x0) returns for the widget's mMiscData.
  *
@@ -2284,7 +2284,7 @@ extern "C" void cFEStateOptionsController_onWidgetEvent(char* self, char* widget
     case 7: {
         char* resetPopup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
         cUIState_cUIState1(resetPopup, *(void**)(self + 0x10), self);
-        *(void***)(resetPopup + 8) = D_0046B3D0;
+        *(void***)(resetPopup + 8) = cFEPopupOptionReset_vtbl;
         *(char*)(resetPopup + 0x48) = 0;
         cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, resetPopup);
         break;

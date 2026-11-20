@@ -38,7 +38,7 @@ struct cPrivateMessage;
 // The conversation at 0x6D8: an EA STL vector of cPrivateMessage* (the preview instantiates
 // vector<const cPrivateMessage*, BXAllocator<..>>; online/buddyman.h keeps the received ones in the same kind of
 // vector). A cPrivateMessage is 0x10 bytes: three cBXStrings (sender, text, a third one shown in the "TextFromX"
-// line) and its vptr D_0046D8C0 at 0xC (cMemMan_alloc(0x10, "cPrivateMessage") in func_001A7ED8 / func_001A7F78).
+// line) and its vptr cPrivateMessage_vtbl at 0xC (cMemMan_alloc(0x10, "cPrivateMessage") in func_001A7ED8 / func_001A7F78).
 struct tFEPrivateMessageVector {
     int unk_00;                     // 0x0 never read or written directly; the vector's address (0x6D8) is what
                                     //     the vector helpers (func_001DB918 insert) take

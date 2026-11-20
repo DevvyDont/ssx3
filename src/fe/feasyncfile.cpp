@@ -461,13 +461,13 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNetMessenger_cFEStateNetMessenger);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void* cFEStateNet_cFEStateNet_3(void* self, int a1, int a2) __asm__("cFEStateNet_cFEStateNet");
-extern void* D_00467F28[];
+extern void* cFEStateNetMessenger_vtbl[];
 extern void* D_004A3E90_v __asm__("cBXString_EmptyString");
 
 /**
  * Constructs the online messenger (buddy list) screen state.
  *
- * Runs the cFEStateNet constructor cFEStateNet_cFEStateNet with @p pEngine and @p pParentState, then stores the messenger vtable D_00467F28 and
+ * Runs the cFEStateNet constructor cFEStateNet_cFEStateNet with @p pEngine and @p pParentState, then stores the messenger vtable cFEStateNetMessenger_vtbl and
  * sets mHashName to 70 (0x46). The cBXString members mszFoundName, mszSearchName and unk_6E0 start as the shared empty
  * string (cBXString_EmptyString), miSelectedIndex is -1, and mLastRefreshFrame, the mNames vector's three pointers and
  * miScrollOffset are zeroed. Its only caller, func_001A9B58, allocates the object with cMemMan_alloc(0x6FC,
@@ -483,7 +483,7 @@ extern "C" void* cFEStateNetMessenger_cFEStateNetMessenger(cFEStateNetMessenger*
     int framePad[4];
     cFEStateNet_cFEStateNet_3(self, (int)pEngine, (int)pParentState);
     void* empty = D_004A3E90_v;
-    self->mVtbl = D_00467F28;
+    self->mVtbl = cFEStateNetMessenger_vtbl;
     self->mszFoundName = (char*)empty;
     self->mszSearchName = (char*)empty;
     self->unk_6E0 = (char*)empty;
@@ -538,7 +538,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNetMessenger__cFEStateNetMessenger);
 extern "C" void cBXString__cBXString(void* self, int flags);
 void cMemMan_free(void* p);
 void operator_delete(int* ptr);
-extern void* D_00467F28[];
+extern void* cFEStateNetMessenger_vtbl[];
 struct sOwner1A5450;
 extern "C" void func_001A5450(cFEStateNetMessenger* self);
 extern "C" void cFEStateNet__cFEStateNet_dtor3EA0(void* self, int flags) __asm__("cFEStateNet__cFEStateNet");
@@ -575,7 +575,7 @@ static inline void Dealloc1A3EA0(void** p, int n)
  */
 extern "C" void cFEStateNetMessenger__cFEStateNetMessenger(cFEStateNetMessenger* self, int flags)
 {
-    self->mVtbl = (void**)D_00467F28;
+    self->mVtbl = (void**)cFEStateNetMessenger_vtbl;
     char* child = (char*)self->mpParentState;
     sVE1A3EA0* vt = *(sVE1A3EA0**)(child + 0x8);
     vt[32].fn(child + vt[32].delta);
@@ -3525,12 +3525,12 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
 extern "C" void func_001A7DD8(cFEStateReadMessagePopup* self, void* item);
 extern char str_cPrivateMessage[];
-extern void* D_0046D8C0[];
+extern void* cPrivateMessage_vtbl[];
 extern char D_004A1408[];
 
 static inline void* Init_001A7ED8(char* p, const char* a, const char* b, const char* c)
 {
-    *(void***)(p + 0xC) = D_0046D8C0;
+    *(void***)(p + 0xC) = cPrivateMessage_vtbl;
     cBXString_cBXString2(p, a);
     cBXString_cBXString2(p + 4, b);
     cBXString_cBXString2(p + 8, c);
@@ -3569,7 +3569,7 @@ extern "C" void* func_00263630(void* self, int a1);
 extern "C" int strcasecmp(const char* a, const char* b);
 extern char str_cPrivateMessage[];
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern void* D_0046D8C0[];
+extern void* cPrivateMessage_vtbl[];
 
 static inline void* GetSession_001A7F78()
 {
@@ -3587,7 +3587,7 @@ static inline void* GetSession_001A7F78()
 
 static inline void* Init_001A7F78(char* p, char* src)
 {
-    *(void***)(p + 0xC) = D_0046D8C0;
+    *(void***)(p + 0xC) = cPrivateMessage_vtbl;
     cBXString_cBXString1(p, src);
     cBXString_cBXString1(p + 4, src + 4);
     cBXString_cBXString1(p + 8, src + 8);

@@ -1587,11 +1587,11 @@ extern "C" void cScriptEntity_ResumeEntityScript(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/bxscriptengine", cScriptEntityCamera_cScriptEntityCamera);
 #ifdef SKIP_ASM
-extern void* D_004823E0[];
+extern void* cScriptEntityCamera_vtbl[];
 void* cScriptEntity_cScriptEntity(void* self);
 
 /**
- * Constructs a camera script entity: cScriptEntity_cScriptEntity, then the vtable D_004823E0, sub-type (+0xC) 9 and no
+ * Constructs a camera script entity: cScriptEntity_cScriptEntity, then the vtable cScriptEntityCamera_vtbl, sub-type (+0xC) 9 and no
  * camera manager (+0x10).
  *
  * @return @p self
@@ -1599,7 +1599,7 @@ void* cScriptEntity_cScriptEntity(void* self);
 extern "C" void* cScriptEntityCamera_cScriptEntityCamera(void* self)
 {
     cScriptEntity_cScriptEntity(self);
-    *(void***)self = D_004823E0;
+    *(void***)self = cScriptEntityCamera_vtbl;
     *(int*)((char*)self + 0xC) = 9;
     *(int*)((char*)self + 0x10) = 0;
     return self;

@@ -314,7 +314,7 @@ void cPreGameLoadScreen_load(void* self)
 INCLUDE_ASM("main/loadscreens_prestart", cPreFELoadScreen_load__FPv);
 #ifdef SKIP_ASM
 /**
- * Does nothing: the load slot (+0x14) of D_0047D860, the pre-front-end load screen's vtable.
+ * Does nothing: the load slot (+0x14) of cPreFELoadScreen_vtbl, the pre-front-end load screen's vtable.
  */
 void cPreFELoadScreen_load(void* self)
 {
@@ -339,13 +339,13 @@ void* cPreGameLoadScreen_cPreGameLoadScreen(void* self)
 }
 #endif
 
-extern void* D_0047D860[];
+extern void* cPreFELoadScreen_vtbl[];
 
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", cPreFELoadScreen_cPreFELoadScreen__FPv);
 #ifdef SKIP_ASM
 /**
- * Constructs the pre-front-end load screen: clears the ending flag (+0x4) and stores the vtable D_0047D860.
+ * Constructs the pre-front-end load screen: clears the ending flag (+0x4) and stores the vtable cPreFELoadScreen_vtbl.
  *
  * cFECustom_getNextState, cGame_exit and cDebugMenuScreen_update build it when they go back to the front end.
  *
@@ -354,7 +354,7 @@ INCLUDE_ASM("main/loadscreens_prestart", cPreFELoadScreen_cPreFELoadScreen__FPv)
 void* cPreFELoadScreen_cPreFELoadScreen(void* self)
 {
     *(int*)((char*)self + 0x4) = 0;
-    *(int*)self = (int)(void*)D_0047D860;
+    *(int*)self = (int)(void*)cPreFELoadScreen_vtbl;
     return self;
 }
 #endif
@@ -392,7 +392,7 @@ extern void* D_0046D970[];
  * Destroys the pre-front-end load screen: restores the base module vtable D_0046D970 and frees the object when bit 0
  * of @p flags is set.
  *
- * Destructor slot (+0xC) of D_0047D860.
+ * Destructor slot (+0xC) of cPreFELoadScreen_vtbl.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
@@ -440,7 +440,7 @@ struct sLoadScreen2327E8 {
  * Asks the pre-front-end load screen to finish: sets the ending flag (+0x4) and lets it lose focus once the load
  * indicator has faded out.
  *
- * LoseFocus slot (+0x24) of D_0047D860.
+ * LoseFocus slot (+0x24) of cPreFELoadScreen_vtbl.
  *
  * @return 1 when the load indicator's alpha (+0x4) is 0, otherwise 0
  */
@@ -541,7 +541,7 @@ extern "C" void cLoadIndicator_render(void* a);
  * Renders the pre-front-end load screen: clears to black and draws the load indicator once the renderer is ready.
  *
  * Same body as cPreStartScreen_render (IsRenderReady, SetScreenClearColour (0, 0, 0), cLoadIndicator_render, DrawFrame). Render slot
- * (+0x3C) of D_0047D860.
+ * (+0x3C) of cPreFELoadScreen_vtbl.
  *
  * @return 1 when a frame was drawn, otherwise 0
  */
