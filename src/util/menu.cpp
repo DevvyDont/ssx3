@@ -1217,7 +1217,7 @@ extern "C" void cMenu_drawBox(cMenu* self, float* rect, cMenuItem_textRender1_sC
     int old = cMenu_drawBox_getF8_5(((sRS_2CB498*)GrMan->m_pCurrentDrawState));
     cMenu_drawBox_setF8_5(((sRS_2CB498*)GrMan->m_pCurrentDrawState), old - 2);
     ((sRS_2CB498*)GrMan->m_pCurrentDrawState)->f4_2 = 5;
-    int id = *(int*)((char*)self->MenuSys + 0x60);
+    int id = self->MenuSys->BoxTexture;
     ((sRS_2CB498*)GrMan->m_pCurrentDrawState)->f10 = id;
     float pieceRect[4];
     float pieceUv[4];

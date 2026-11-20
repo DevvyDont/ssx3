@@ -741,7 +741,7 @@ extern "C" int cWorldCache_init(cWorldCache* self, const char* name, int pNash)
     *(char**)(hdr + 0x14) = hdr + 0x50;
     self->m_pSharedCacheTable = (cWorldCacheTable*)cWorldCacheTable_cWorldCacheTable((cWorldCacheTable*)cMemMan_alloc(232, str_SharedTable, 0, 0), (char*)self->mp_DataHeader + 0x18);
     self->m_pSectionCacheTable = (cWorldCacheTable**)((void**)operator_new_tag(*(int*)((char*)self->mp_DataHeader + 0x8) * 4, str_SectionTables, 0, 0));
-    for (unsigned int i = 0; i < *(unsigned int*)((char*)self->mp_DataHeader + 0x8); i++)
+    for (unsigned int i = 0; i < self->mp_DataHeader->m_uiNumSections; i++)
         ((void**)self->m_pSectionCacheTable)[i] = 0;
     char* x = (char*)cChunkResolve_construct();
     self->mp_ChunkResolve = (cChunkResolve*)x;

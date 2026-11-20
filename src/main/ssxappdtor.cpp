@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/sectionman.h"
 #include "be/beintnewrace.h"
 #include "main/loadscreens.h"
 #include "main/game.h"
@@ -2939,11 +2940,11 @@ extern "C" void cWorldCache_flushInActivePages(void *);
 extern "C" int cGame_updateStreamLoading(cGame* self) {
     void *vtbl;
 
-    if ((cGameViewMan_isStreamReady((int)self->ViewMan) == 0) || (*(int *)((char*)self->SectionMan + 0x1D0) == 0)) {
+    if ((cGameViewMan_isStreamReady((int)self->ViewMan) == 0) || (self->SectionMan->m_bStreamReady == 0)) {
         *(int *)(*(char**)self->World + 0x3D4) = 0;
         cWorld_update(self->World);
         cGameViewMan_updateAll((int)self->ViewMan);
-        if (*(int *)((char*)self->SectionMan + 0x1D0) == 0) {
+        if (self->SectionMan->m_bStreamReady == 0) {
             cGame_updateState(self);
             cSectionMan_update(self->SectionMan);
         }

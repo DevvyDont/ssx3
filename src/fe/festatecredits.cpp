@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uitextscroll.h"
 #include "ui/uiinput.h"
 #include "ui/uistate.h"
 #include "ui/uithing.h"
@@ -327,7 +328,7 @@ extern "C" void cFEStateCredits_onRender2D(cFEStateCredits* self)
                     ((cUIObj185F40*)self->mpDolbyIcon)->v09(0);
             }
             int total = count * rows;
-            int lim = *(unsigned short*)((char*)self->mpTextScroll + 0xC8) * rows + total;
+            int lim = self->mpTextScroll->mLineSize * rows + total;
             if (self->mPixelOffset < -total && self->mPixelDelta < 0)
                 self->mPixelOffset = lim;
             if (lim < self->mPixelOffset && self->mPixelDelta > 0)

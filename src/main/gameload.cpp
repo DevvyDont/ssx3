@@ -1,4 +1,7 @@
 #include "common.h"
+#include "util/menusys.h"
+#include "main/sectionman.h"
+#include "ai/ai.h"
 #include "be/beintnewrace.h"
 #include "main/loadscreens.h"
 #include "sound/ssxaudio.h"
@@ -293,7 +296,7 @@ extern "C" void cGame_load(cGame* self)
                     cAI_initAIActors(ai, 0);
                 else
                     cAI_initAIActors(ai, 2);
-                *(int*)((char*)self->AI + 0x8C) = 0;
+                self->AI->ComputerActorsActive = 0;
             }
         }
         while (!cAI_isAILoadedAndReady((char*)self->AI)) {
@@ -324,7 +327,7 @@ extern "C" void cGame_load(cGame* self)
         sVEntryGL* vt = (sVEntryGL*)ps2GraphicsMan->mVtbl;
         int result = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, file + *(int*)(file + 0x14), str_menu_b, 0, 1, -1);
         self->mBoxTextureID = result;
-        *(int*)((char*)self->MenuSys + 0x60) = result;
+        self->MenuSys->BoxTexture = result;
     }
     if (file != 0)
         cMemMan_free(file);
@@ -539,7 +542,7 @@ extern "C" void cGame_loadTrack(cGame* self)
     }
     int id = *(int*)cBENewRaceInterface_getLocation(iface);
     cSectionMan_activate(self->SectionMan, id, 0);
-    *(int*)((char*)self->SectionMan + 0x1A4) = 1;
+    self->SectionMan->m_bTriggerSkySwap = 1;
     while (!cSectionMan_isLoaded(self->SectionMan, id)) {
         cSectionMan_update(self->SectionMan);
         cWorld_update(self->World);

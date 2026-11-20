@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uianimation.h"
 #include "ui/uistatestack.h"
 #include "ui/uithing.h"
 
@@ -865,7 +866,7 @@ extern "C" void cUIThing_setFrameByPercent(cUIThing* self, float fraction)
     void* obj = self->mpAnim;
     if (obj != 0) {
         float frame = (float)cUIAnimation_getNumFrames(obj) * fraction;
-        *(short*)((char*)self->mpAnim + 0xA) = (short)frame;
+        self->mpAnim->mFrameNum = (short)frame;
     }
 }
 #endif

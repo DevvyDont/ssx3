@@ -4090,10 +4090,10 @@ extern "C" int cScriptPlayerEntity_ExecutePlay(cScriptPlayerEntity* self)
     if (obj != 0) {
         int eventBits = self->mSetupScriptInitialEventBits;
         if (eventBits != 0) {
-            obj->v03(self, *(unsigned char*)((char*)self->mpSystemHeader + 3), eventBits, 0.0f);
+            obj->v03(self, self->mpSystemHeader->type, eventBits, 0.0f);
         }
         ((cRcListener3D20*)self->mpEntityComm)->v04(self,
-            *(unsigned char*)((char*)self->mpSystemHeader + 3),
+            self->mpSystemHeader->type,
             self->mSetupScriptInitialEventBits, 0.0f, 0.0f);
     }
     self->mSetupScriptHasKeysLeft = 0;
@@ -4147,11 +4147,11 @@ extern "C" void cScriptPlayerEntity_Stop(cScriptPlayerEntity* self)
         return;
     cRcListener_3DC0* entityComm = (cRcListener_3DC0*)self->mpEntityComm;
     if (entityComm != 0)
-        entityComm->v02(self, *(unsigned char*)((char*)self->mpSystemHeader + 3));
+        entityComm->v02(self, self->mpSystemHeader->type);
     self->mpEntityComm = 0;
-    if (*(unsigned char*)((char*)self->mpSystemHeader + 2) != 0)
+    if (self->mpSystemHeader->numChannels != 0)
     {
-        for (int i = 0; i < *(unsigned char*)((char*)self->mpSystemHeader + 2); i++)
+        for (int i = 0; i < self->mpSystemHeader->numChannels; i++)
         {
             cRcObj_3DC0** objs = (cRcObj_3DC0**)self->mpChannelPlayers;
             objs[i]->v02();
@@ -4241,8 +4241,8 @@ extern "C" int cScriptPlayerEntity_Restart(cScriptPlayerEntity* self)
     if (entityComm == 0)
         return changed;
     if (mask)
-        entityComm->v03(self, *(unsigned char*)((char*)self->mpSystemHeader + 3), mask, 0.0f);
-    ((cRcListener3D20*)self->mpEntityComm)->v04(self, *(unsigned char*)((char*)self->mpSystemHeader + 3), mask, 0.0f, 0.0f);
+        entityComm->v03(self, self->mpSystemHeader->type, mask, 0.0f);
+    ((cRcListener3D20*)self->mpEntityComm)->v04(self, self->mpSystemHeader->type, mask, 0.0f, 0.0f);
     return changed;
 }
 #endif
@@ -4351,11 +4351,11 @@ extern "C" cRcListener4240* cScriptPlayerEntity_SetEntityComm(cScriptPlayerEntit
 {
     cRcListener4240* old = (cRcListener4240*)self->mpEntityComm;
     if (old != 0) {
-        old->v02(self, *(unsigned char*)((char*)self->mpSystemHeader + 3));
+        old->v02(self, self->mpSystemHeader->type);
     }
     self->mpEntityComm = (cInSeqCommEntity*)pEntityComm;
     if (pEntityComm != 0) {
-        pEntityComm->v01(self, *(unsigned char*)((char*)self->mpSystemHeader + 3));
+        pEntityComm->v01(self, self->mpSystemHeader->type);
     }
     return old;
 }
@@ -4984,7 +4984,7 @@ extern "C" void cScriptPlayerMain_Stop(cScriptPlayerMain* self)
         self->mDoStopInEntityUpdate = 1;
         return;
     }
-    for (int i = 0; i < *(unsigned char*)((char*)self->mpSystemHeader + 1); i++) {
+    for (int i = 0; i < self->mpSystemHeader->numEntities; i++) {
         cScriptPlayerEntity_Stop((cScriptPlayerEntity*)((char*)self->mpEntityPlayers + i * 0x3C));
     }
     self->mPlayState = 0;
@@ -5245,7 +5245,7 @@ extern "C" int cScriptPlayerMain_GetScriptLength(cScriptPlayerMain* self)
     if (scriptLength < 0) {
         int best = 0;
         int i;
-        for (i = 0; i < *(unsigned char*)((char*)self->mpSystemHeader + 1); i++) {
+        for (i = 0; i < self->mpSystemHeader->numEntities; i++) {
             int entityLength = cScriptPlayerEntity_GetScriptLength(&(self->mpEntityPlayers)[i]);
             if (best < entityLength) {
                 best = entityLength;

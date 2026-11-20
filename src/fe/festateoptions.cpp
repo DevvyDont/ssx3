@@ -272,7 +272,7 @@ extern "C" int cFEStateOptions_onWidgetMenu(void* self, cUIMenu* menu, unsigned 
         }
     }
     if (key == 6) {
-        int itemHash = *(int*)((char*)cList_getByIndex((char*)menu + 0x74, index) + 0x38);
+        int itemHash = *(int*)((char*)cList_getByIndex((char*)&menu->mList, index) + 0x38);
         if (itemHash == GetHashValue32(D_004A1530)) {
             goto check;
         }

@@ -904,7 +904,7 @@ extern "C" void cScreenPopup_handlePostPending(cScreenPopup* self, cPopupInfo* p
             sVec3_7040 textPos = *(sVec3_7040*)&self->mvPosTitle[0];
             textPos.y += self->mvCurSize[1];
             *(sVec3_7040*)(postText + 0x44) = textPos;
-            cScreenPopup_getTextBoxWrapSize(self, (char*)pInfo + 0x4C, (char*)&self->mvCurSize, 0, 10.0f);
+            cScreenPopup_getTextBoxWrapSize(self, (char*)&pInfo->mtPostPending, (char*)&self->mvCurSize, 0, 10.0f);
             if (self->mbCenterText != 0) {
                 cScreenPopup_changePivot(self, self->mpPostText, 17, 0.0f);
             }
@@ -1010,7 +1010,7 @@ extern "C" void cScreenPopup_setPopupMessage(cScreenPopup* self, cPopupInfo* pIn
         sVec3_7258 textPos = *(sVec3_7258*)&self->mvPosTitle[0];
         textPos.y += self->mvCurSize[1];
         *(sVec3_7258*)(messageText + 0x44) = textPos;
-        char* message = (char*)pInfo + 4;
+        char* message = (char*)&pInfo->mtMessage;
         if (self->mbCenterText != 0) {
             sVec3_7258 wrapSize = t3vect_Zero;
             cScreenPopup_getMessageLineWrapSize1(self, (int*)message, &wrapSize);

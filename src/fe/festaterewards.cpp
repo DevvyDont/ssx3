@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiicon.h"
 #include "ui/uiinput.h"
 #include "ui/uistate.h"
 #include "ui/uiengine.h"
@@ -620,7 +621,7 @@ extern "C" void cFEStateRewardGalleryBase_onPopupEvent(cFEStateRewardGalleryBase
         if (widget->mHashName == 7 && *(int*)((char*)widget + 0x6C) != 0) {
             sVE_FD18* vt = (sVE_FD18*)self->mVtbl;
             vt[30].fn((char*)self + vt[30].delta,
-                      self->mFirstVisibleRow * self->mMaxRewardColumns + *(int*)((char*)self->mpSelected + 0x18));
+                      self->mFirstVisibleRow * self->mMaxRewardColumns + self->mpSelected->mMiscData);
         }
         break;
     }

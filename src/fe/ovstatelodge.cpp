@@ -120,8 +120,8 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(cFEStateMountainRoom*
     room->fBC = -1;
     room->fC4 = -1;
     room->fC0 = item;
-    room->fAC = cUITextureBank_getElementByHashname((char*)ui + 0x58, GetHashValue32(str_dot_loc_arrow));
-    room->fA8 = cUITextureBank_getElementByHashname((char*)ui + 0x58, GetHashValue32(str_dot_visit_arrow));
+    room->fAC = cUITextureBank_getElementByHashname((char*)&ui->mTextureBank, GetHashValue32(str_dot_loc_arrow));
+    room->fA8 = cUITextureBank_getElementByHashname((char*)&ui->mTextureBank, GetHashValue32(str_dot_visit_arrow));
     cFEStateMountainRoom_loadPeakPass_Room(self);
     return ((void*)self);
 }
@@ -1229,7 +1229,7 @@ extern "C" int cFEStatePeakRoom_onWidgetMenu(cFEStatePeakRoom* self, cUIMenu* it
         return 0x100;
     case 6: {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 13);
-        void* entry = cList_getByIndex((char*)item + 0x74, id);
+        void* entry = cList_getByIndex((char*)&item->mList, id);
         if (cBERewardInterface_isTrophyOwned(iface, self->mUserNum, self->mCharID,
                           self->mPeakNum, *(int*)((char*)entry + 0x18)) == 0) {
             return 0x10;
