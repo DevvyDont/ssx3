@@ -968,8 +968,8 @@ INCLUDE_ASM("seg/seg_1D3510", cEnumMenuItem_getCaption);
  * @param menuItem  the list-choice item
  * @return the caption
  */
-extern "C" int cEnumMenuItem_getCaption(void *menuItem) {
-    return (*(int *)((char*)(menuItem) + (0x14)));
+extern "C" int cEnumMenuItem_getCaption(cEnumMenuItem* menuItem) {
+    return ((int)menuItem->Caption);
 }
 #endif
 
@@ -1012,8 +1012,8 @@ INCLUDE_ASM("seg/seg_1D3510", cSubMenuItem_getSubMenu);
  * @param menuItem  the sub-menu item
  * @return the sub-menu
  */
-extern "C" int cSubMenuItem_getSubMenu(void *menuItem) {
-    return (*(int *)((char*)(menuItem) + (0x18)));
+extern "C" int cSubMenuItem_getSubMenu(cSubMenuItem* menuItem) {
+    return ((int)menuItem->Sub);
 }
 #endif
 
@@ -1100,8 +1100,8 @@ INCLUDE_ASM("seg/seg_1D3510", cCommandMenuItem_getCaption);
  * @param menuItem  the command item
  * @return the caption
  */
-extern "C" int cCommandMenuItem_getCaption(void *menuItem) {
-    return (*(int *)((char*)(menuItem) + (0x14)));
+extern "C" int cCommandMenuItem_getCaption(cCommandMenuItem* menuItem) {
+    return ((int)menuItem->Caption);
 }
 #endif
 
@@ -1128,8 +1128,8 @@ INCLUDE_ASM("seg/seg_1D3510", cCommandMenuItem_getData);
  * @param menuItem  the command item
  * @return the data
  */
-extern "C" int cCommandMenuItem_getData(void *menuItem) {
-    return (*(int *)((char*)(menuItem) + (0x20)));
+extern "C" int cCommandMenuItem_getData(cCommandMenuItem* menuItem) {
+    return ((int)menuItem->Data);
 }
 #endif
 
@@ -1172,8 +1172,8 @@ INCLUDE_ASM("seg/seg_1D3510", cCallbackMenuItem_getCaption);
  * @param menuItem  the callback item
  * @return the caption
  */
-extern "C" int cCallbackMenuItem_getCaption(void *menuItem) {
-    return (*(int *)((char*)(menuItem) + (0x14)));
+extern "C" int cCallbackMenuItem_getCaption(cCallbackMenuItem* menuItem) {
+    return ((int)menuItem->Caption);
 }
 #endif
 
@@ -1361,9 +1361,9 @@ INCLUDE_ASM("seg/seg_1D3510", cFloatMenuItem_setMinMax);
  * @param fparg0  the minimum
  * @param fparg1  the maximum
  */
-extern "C" void cFloatMenuItem_setMinMax(void *menuItem, float fparg0, float fparg1) {
-    (*(float *)((char*)(menuItem) + (0x1C))) = fparg0;
-    (*(float *)((char*)(menuItem) + (0x20))) = fparg1;
+extern "C" void cFloatMenuItem_setMinMax(cFloatMenuItem* menuItem, float fparg0, float fparg1) {
+    (menuItem->Min) = fparg0;
+    (menuItem->Max) = fparg1;
 }
 #endif
 
@@ -1392,9 +1392,9 @@ INCLUDE_ASM("seg/seg_1D3510", cFloatMenuItem_setValueScale);
  * @param fparg0  the scale
  * @param fparg1  the offset
  */
-extern "C" void cFloatMenuItem_setValueScale(void *menuItem, float fparg0, float fparg1) {
-    (*(float *)((char*)(menuItem) + (0x24))) = fparg0;
-    (*(float *)((char*)(menuItem) + (0x28))) = fparg1;
+extern "C" void cFloatMenuItem_setValueScale(cFloatMenuItem* menuItem, float fparg0, float fparg1) {
+    (menuItem->ValueScale) = fparg0;
+    (menuItem->ValueOffset) = fparg1;
 }
 #endif
 
@@ -1409,8 +1409,8 @@ INCLUDE_ASM("seg/seg_1D3510", cFloatMenuItem_setValue1);
  * @param menuItem  the float item
  * @param fparg0  the new value
  */
-extern "C" void cFloatMenuItem_setValue1(void *menuItem, float fparg0) {
-    *(*(float **)((char*)(menuItem) + (0x18))) = fparg0;
+extern "C" void cFloatMenuItem_setValue1(cFloatMenuItem* menuItem, float fparg0) {
+    *(menuItem->Value) = fparg0;
 }
 #endif
 
@@ -1423,8 +1423,8 @@ INCLUDE_ASM("seg/seg_1D3510", cFloatMenuItem_getValue);
  * @param menuItem  the float item
  * @return the displayed value
  */
-extern "C" float cFloatMenuItem_getValue(void *menuItem) {
-    return ((*(float *)((char*)(menuItem) + (0x24))) * *(*(float **)((char*)(menuItem) + (0x18)))) + (*(float *)((char*)(menuItem) + (0x28)));
+extern "C" float cFloatMenuItem_getValue(cFloatMenuItem* menuItem) {
+    return ((menuItem->ValueScale) * *(menuItem->Value)) + (menuItem->ValueOffset);
 }
 #endif
 
@@ -1468,9 +1468,9 @@ INCLUDE_ASM("seg/seg_1D3510", cAngleMenuItem_setMinMax);
  * @param fparg0  the minimum
  * @param fparg1  the maximum
  */
-extern "C" void cAngleMenuItem_setMinMax(void *menuItem, float fparg0, float fparg1) {
-    (*(float *)((char*)(menuItem) + (0x1C))) = fparg0;
-    (*(float *)((char*)(menuItem) + (0x20))) = fparg1;
+extern "C" void cAngleMenuItem_setMinMax(cAngleMenuItem* menuItem, float fparg0, float fparg1) {
+    (menuItem->Min) = fparg0;
+    (menuItem->Max) = fparg1;
 }
 #endif
 
@@ -1531,8 +1531,8 @@ extern "C" int func_00416958_3D48(char*, int, int) __asm__("func_00416958");
  * @param text  the new text
  * @return what func_00416958 returns
  */
-extern "C" int cTextMenuItem_settext(char *menuItem, int text) {
-    char *textBuf = menuItem + 0x18;
+extern "C" int cTextMenuItem_settext(cTextMenuItem* menuItem, int text) {
+    char *textBuf = ((char*)menuItem) + 0x18;
     *textBuf = 0;
     return func_00416958_3D48(textBuf, text, 0xF);
 }

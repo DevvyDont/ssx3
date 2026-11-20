@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintaggression.h"
 #include "be/beintmission.h"
 #include "be/beintbagt.h"
 #include "be/beintoption.h"
@@ -1885,7 +1886,6 @@ void cBEEconInterface_discard(void* self)
 //100%
 INCLUDE_ASM("be/bedbreward", cBEAggressionInterface_purgeInterface);
 #ifdef SKIP_ASM
-extern void* cBEAggressionInterface_instance;
 void operator_delete(int* ptr);
 
 /**
@@ -1901,7 +1901,6 @@ extern "C" void cBEAggressionInterface_purgeInterface(void)
 //100%
 INCLUDE_ASM("be/bedbreward", cBEAggressionInterface_setAggressionActive);
 #ifdef SKIP_ASM
-extern void *cBEAggressionInterface_instance;
 
 /**
  * Sets bIsActive (+0x8) of the aggression interface singleton cBEAggressionInterface_instance to @p isActive.
@@ -1909,7 +1908,7 @@ extern void *cBEAggressionInterface_instance;
  * @param isActive  1 while the interface may be used, 0 otherwise
  */
 extern "C" void cBEAggressionInterface_setAggressionActive(int isActive) {
-    (*(int *)((char*)(cBEAggressionInterface_instance) + (8))) = isActive;
+    (cBEAggressionInterface_instance->bIsActive) = isActive;
 }
 #endif
 //100%
@@ -1922,10 +1921,10 @@ extern char cBEAggressionInterface_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cBEAggressionInterface_cBEAggressionInterface(void* self)
+extern "C" void* cBEAggressionInterface_cBEAggressionInterface(cBEAggressionInterface* self)
 {
-    *(char**)((char*)self + 0xC) = cBEAggressionInterface_vtbl;
-    return self;
+    self->mVtbl = (void**)cBEAggressionInterface_vtbl;
+    return ((void*)self);
 }
 #endif
 

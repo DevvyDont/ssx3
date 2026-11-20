@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/flagnode.h"
 #include "object/springrailnode.h"
 #include "object/floatrailnode.h"
 #include "object/flexrailnode.h"
@@ -1782,15 +1783,15 @@ extern "C" void cFlagManager_AddFlag(void* mgr, void* node, sFrRailDesc* desc);
  * @param src  flag make-data
  * @return self
  */
-extern "C" void* cFlagNode_cFlagNode1(void* self, void* bucket, void* node, void* src)
+extern "C" void* cFlagNode_cFlagNode1(cFlagNode* self, void* bucket, void* node, void* src)
 {
     sFrRailDesc desc;
     cInstanceNode_cInstanceNode1(self, bucket, 10, node);
-    *(void**)((char*)self + 0xC) = cFlagNode_vtbl;
+    self->mVtbl = (void**)cFlagNode_vtbl;
     *(unsigned int*)((char*)node + 0x8) = (*(unsigned int*)((char*)node + 0x8) & 0xFFFFFFFD) | 4;
     tFlagState_tFlagState(&desc, src);
     cFlagManager_AddFlag(cObjectInterface_getFlagManager(), node, &desc);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -1808,11 +1809,11 @@ extern char cFlagNode_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFlagNode_cFlagNode(void* self)
+extern "C" void* cFlagNode_cFlagNode(cFlagNode* self)
 {
     cInstanceNode_cInstanceNode(self);
-    *(void**)((char*)self + 0xC) = cFlagNode_vtbl;
-    return self;
+    self->mVtbl = (void**)cFlagNode_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -1832,10 +1833,10 @@ extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
  *
  * @param flags  g++ destructor flags, passed to cInstanceNode__cInstanceNode(); bit 0 set frees the object's memory
  */
-extern "C" void cFlagNode__cFlagNode(void* self, int flags)
+extern "C" void cFlagNode__cFlagNode(cFlagNode* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cFlagNode_vtbl;
-    cFlagManager_RemoveFlag(cObjectInterface_getFlagManager(), *(void**)((char*)self + 0x18));
+    self->mVtbl = (void**)cFlagNode_vtbl;
+    cFlagManager_RemoveFlag(cObjectInterface_getFlagManager(), self->Instance);
     cInstanceNode__cInstanceNode(self, flags);
 }
 #endif

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/meshanimnode.h"
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
 
@@ -622,7 +623,7 @@ INCLUDE_ASM("object/instanceman", cMeshAnimNode_cMeshAnimNode1);
 #ifdef SKIP_ASM
 extern "C" void* cInstanceNode_cInstanceNode1(void* self, void* a1, int type, void* def);
 extern "C" float cObjectInterface_getUpdateTime();
-extern "C" void cMeshAnimNode_init(void* self);
+extern "C" void cMeshAnimNode_init(cMeshAnimNode* self);
 
 extern void* cMeshAnimNode_vtbl[];
 
@@ -919,7 +920,7 @@ extern "C" sImInst* cMeshAnimNode_cMeshAnimNode1(sImInst* self, void* bucket, vo
     }
     self->model->flags = (self->model->flags & ~2u) | 4u;
     self->model->flags &= ~0x60u;
-    cMeshAnimNode_init(self);
+    cMeshAnimNode_init((cMeshAnimNode*)self);
     return self;
 }
 #endif
@@ -954,18 +955,18 @@ struct sInstElem2168 {
  * @param stream  replay frame to read from (On Tour cBxReplayFrame*)
  * @return @p self
  */
-extern "C" void* cMeshAnimNode_cMeshAnimNode(void* self, void* bucket, void* stream)
+extern "C" void* cMeshAnimNode_cMeshAnimNode(cMeshAnimNode* self, void* bucket, void* stream)
 {
     cInstanceNode_cInstanceNode(self, bucket, stream);
-    *(void***)((char*)self + 0xC) = cMeshAnimNode_vtbl;
+    self->mVtbl = cMeshAnimNode_vtbl;
     new ((char*)self + 0x30) sInstElem2168[24];
     new ((char*)self + 0x1B0) sInstElem2168[24];
     new ((char*)self + 0x330) sInstElem2168[24];
     new ((char*)self + 0x4B0) sInstElem2168[24];
     sInstManVEntry2168* vtEntry = &(*(sInstManVEntry2168**)stream)[2];
     vtEntry->fn((char*)stream + vtEntry->delta, (char*)self + 0x1C, 0xC);
-    *(float*)((char*)self + 0x1C) = -1.0f;
-    return self;
+    self->Life = -1.0f;
+    return ((void*)self);
 }
 #endif
 
@@ -1098,7 +1099,7 @@ static inline void AddEq_352230(sV4_352230& d, const sV4_352230& b)
  *
  * @param debris  the mesh-anim node
  */
-extern "C" void cMeshAnimNode_init(void* debris)
+extern "C" void cMeshAnimNode_init(cMeshAnimNode* debris)
 {
     sDebris_352230* self = (sDebris_352230*)debris;
     char* modelDef = *(char**)(self->model + 0x80);
@@ -1268,16 +1269,16 @@ extern "C" void cInstanceNode_makeThisDead(void* self);
  *
  * @param check  nonzero to give the instance's script the first chance (On Tour expire's runscript)
  */
-extern "C" void cMeshAnimNode_expire(void* self, int check)
+extern "C" void cMeshAnimNode_expire(cMeshAnimNode* self, int check)
 {
     if (check != 0 && cInstanceNode_runExpireScript(self) != 0) {
         return;
     }
-    if (*(int*)((char*)self + 0x6B0) == 0) {
+    if (self->Type == 0) {
         cInstanceNode_makeThisDead(self);
     }
-    if (*(int*)((char*)self + 0x6B0) == 2 && self != 0) {
-        sInstanceManVEntry2708* vt = *(sInstanceManVEntry2708**)((char*)self + 0xC);
+    if (self->Type == 2 && ((void*)self) != 0) {
+        sInstanceManVEntry2708* vt = (sInstanceManVEntry2708*)self->mVtbl;
         vt[1].fn((char*)self + vt[1].delta, 3);
     }
 }
@@ -1301,14 +1302,14 @@ struct sInstManVEntry2780 {
  * 8-9 and the upper half, copies the upper half down, sets bit 1) and deletes the node. Mode 0 replaces the
  * node with a new cDeadNode for the same instance (cInstanceNode_makeThisDead).
  */
-extern "C" void cMeshAnimNode_loseFocus(void* self)
+extern "C" void cMeshAnimNode_loseFocus(cMeshAnimNode* self)
 {
-    if (*(int*)((char*)self + 0x6B0) != 0) {
-        *(int*)(*(char**)((char*)self + 0x18) + 0x8) &= 0xFFFF0300;
-        *(int*)(*(char**)((char*)self + 0x18) + 0x8) |= *(int*)(*(char**)((char*)self + 0x18) + 0x8) >> 16;
-        *(int*)(*(char**)((char*)self + 0x18) + 0x8) |= 2;
-        if (self != 0) {
-            sInstManVEntry2780* vt = *(sInstManVEntry2780**)((char*)self + 0xC);
+    if (self->Type != 0) {
+        *(int*)((char*)self->Instance + 0x8) &= 0xFFFF0300;
+        *(int*)((char*)self->Instance + 0x8) |= *(int*)((char*)self->Instance + 0x8) >> 16;
+        *(int*)((char*)self->Instance + 0x8) |= 2;
+        if (((void*)self) != 0) {
+            sInstManVEntry2780* vt = (sInstManVEntry2780*)self->mVtbl;
             vt[1].fn((char*)self + vt[1].delta, 3);
         }
     } else {
@@ -1458,14 +1459,14 @@ static inline void setOffset_352810(sMat_352810& m, const sV4_352810& v)
  * graphics manager's slot 95 with an identity root and flags 0x420. The fade is 1, or Life itself (not Life /
  * FadeTime) when FadeTime (+0x24) is not negative and Life is at most FadeTime.
  */
-extern "C" void cMeshAnimNode_render(sDebris_352810* self)
+extern "C" void cMeshAnimNode_render(cMeshAnimNode* self)
 {
-    if (self->timer <= 0.0f) {
+    if (self->Life <= 0.0f) {
         return;
     }
-    int numMaterials = *(int*)*(char**)(*(char**)(self->model + 0x80) + 0xC);
+    int numMaterials = *(int*)*(char**)(*(char**)((char*)self->Instance + 0x80) + 0xC);
     for (int i = 0; i < numMaterials; i++) {
-        short* pMaterialRecord = ((short**)(*(char**)(self->model + 0x94) + 4))[i];
+        short* pMaterialRecord = ((short**)(*(char**)((char*)self->Instance + 0x94) + 4))[i];
         tResourceID_352810 resourceId;
         initRID_352810(&resourceId, 0xFF, *pMaterialRecord);
         if (!cacheValid_352810((cWorldCache_352810*)cWorld_m_pTheWorld->m_pWorldCache, 9, resourceId)) {
@@ -1473,17 +1474,17 @@ extern "C" void cMeshAnimNode_render(sDebris_352810* self)
         }
     }
     sMat_352810 animMats[24];
-    char* pModel = *(char**)(self->model + 0x80);
+    char* pModel = *(char**)((char*)self->Instance + 0x80);
     for (int i = 0; i < *(int*)(pModel + 4); i++) {
-        QuatToMat_352810(&animMats[i], self->rot[i]);
-        setOffset_352810(animMats[i], self->pos[i]);
+        QuatToMat_352810(&animMats[i], ((sV4_352810*)&self->Qrot[0])[i]);
+        setOffset_352810(animMats[i], ((sV4_352810*)&self->Pos[0])[i]);
     }
     float fade = 1.0f;
-    if (self->fade >= 0.0f && self->timer <= self->fade) {
-        fade = self->timer;
+    if (self->FadeTime >= 0.0f && self->Life <= self->FadeTime) {
+        fade = self->Life;
     }
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-    ((sVE_352810*)ps2GraphicsMan->mVtbl)[95].fn((char*)ps2GraphicsMan + ((sVE_352810*)ps2GraphicsMan->mVtbl)[95].delta, self->model, *(void**)(self->model + 0x94), D_004FF1A0_2810, animMats, 0, 1056, fade);
+    ((sVE_352810*)ps2GraphicsMan->mVtbl)[95].fn((char*)ps2GraphicsMan + ((sVE_352810*)ps2GraphicsMan->mVtbl)[95].delta, (char*)self->Instance, *(void**)((char*)self->Instance + 0x94), D_004FF1A0_2810, animMats, 0, 1056, fade);
 }
 #endif
 
@@ -1505,7 +1506,7 @@ extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  the replay frame stream to write to
  */
-extern "C" void cMeshAnimNode_writeToReplayFrame(void* self, void* stream)
+extern "C" void cMeshAnimNode_writeToReplayFrame(cMeshAnimNode* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     sSerVEntry_00352A58* vt = *(sSerVEntry_00352A58**)stream;

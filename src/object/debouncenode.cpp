@@ -1,4 +1,6 @@
 #include "common.h"
+#include "object/conveyornode.h"
+#include "object/counternode.h"
 #include "object/debouncenode.h"
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
@@ -294,13 +296,13 @@ extern char cConveyorNode_vtbl[];
  * @param stream  replay stream to read from
  * @return self
  */
-extern "C" void* cConveyorNode_cConveyorNode1(void* self, void* bucket, void* stream)
+extern "C" void* cConveyorNode_cConveyorNode1(cConveyorNode* self, void* bucket, void* stream)
 {
     cInstanceNode_cInstanceNode(self, bucket, stream);
-    *(void**)((char*)self + 0xC) = cConveyorNode_vtbl;
+    self->mVtbl = (void**)cConveyorNode_vtbl;
     sDebounceVEntry30D0* vt = *(sDebounceVEntry30D0**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x1C, 44);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -614,19 +616,19 @@ struct sDebounceScroll {
  *
  * Adds UVScroll (+0x38/+0x3C) to UV (+0x40/+0x44) and wraps each component back into -1..1 by one step.
  */
-extern "C" void cConveyorNode_update(sDebounceScroll* self)
+extern "C" void cConveyorNode_update(cConveyorNode* self)
 {
-    self->u += self->du;
-    self->v += self->dv;
-    if (self->u > 1.0f) {
-        self->u -= 1.0f;
-    } else if (self->u < -1.0f) {
-        self->u += 1.0f;
+    self->UV[0] += self->UVScroll[0];
+    self->UV[1] += self->UVScroll[1];
+    if (self->UV[0] > 1.0f) {
+        self->UV[0] -= 1.0f;
+    } else if (self->UV[0] < -1.0f) {
+        self->UV[0] += 1.0f;
     }
-    if (self->v > 1.0f) {
-        self->v -= 1.0f;
-    } else if (self->v < -1.0f) {
-        self->v += 1.0f;
+    if (self->UV[1] > 1.0f) {
+        self->UV[1] -= 1.0f;
+    } else if (self->UV[1] < -1.0f) {
+        self->UV[1] += 1.0f;
     }
 }
 #endif
@@ -728,7 +730,7 @@ static inline int Visible_343588(sDfCam_343588* cam, sDfObj_343588* obj)
  * puts UV (+0x40/+0x44) into its translation x/y and draws the instance through graphics-manager slot 96 with that
  * texture matrix and mode 2.
  */
-extern "C" void cConveyorNode_render(char* self)
+extern "C" void cConveyorNode_render(cConveyorNode* self)
 {
     sDfCam_343588* cam = (sDfCam_343588*)cWorld_m_pTheWorld->m_pWorldCache;
     if (!Visible_343588(cam, OBJ_343588(self))) {
@@ -754,8 +756,8 @@ extern "C" void cConveyorNode_render(char* self)
     }
     sDfMat_343588 xf;
     MatCopy_343588(&xf, &D_004FF1A0_343588);
-    xf.r[3].x = *(float*)(self + 0x40);
-    xf.r[3].y = *(float*)(self + 0x44);
+    xf.r[3].x = self->UV[0];
+    xf.r[3].y = self->UV[1];
     ((DfDrawFn_343588)((sDfGfxVt_343588*)gfx->mVtbl)[96].fn)((char*)gfx + ((sDfGfxVt_343588*)gfx->mVtbl)[96].delta, OBJ_343588(self), 0, &xf, 2);
 }
 #endif
@@ -779,7 +781,7 @@ extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cConveyorNode_writeToReplayFrame(void* self, void* stream)
+extern "C" void cConveyorNode_writeToReplayFrame(cConveyorNode* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     sDebounceVEntry* vt = *(sDebounceVEntry**)stream;
@@ -804,13 +806,13 @@ extern char cCounterNode_vtbl[];
  * @param counterData  counter make-data (StartCount at +0x4)
  * @return self
  */
-extern "C" void* cCounterNode_cCounterNode1(void* self, void* bucket, void* inst, void* counterData)
+extern "C" void* cCounterNode_cCounterNode1(cCounterNode* self, void* bucket, void* inst, void* counterData)
 {
     cInstanceNode_cInstanceNode1(self, bucket, 7, inst);
-    *(void**)((char*)self + 0xC) = cCounterNode_vtbl;
-    *(int*)((char*)self + 0x1C) = *(short*)((char*)counterData + 0x4);
-    *(int*)((char*)self + 0x20) = 0;
-    return self;
+    self->mVtbl = (void**)cCounterNode_vtbl;
+    self->Count = *(short*)((char*)counterData + 0x4);
+    self->Counted = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -836,13 +838,13 @@ extern char cCounterNode_vtbl[];
  * @param stream  the replay frame to read (On Tour cBxReplayFrame*)
  * @return self
  */
-extern "C" void* cCounterNode_cCounterNode(void* self, void* bucket, void* stream)
+extern "C" void* cCounterNode_cCounterNode(cCounterNode* self, void* bucket, void* stream)
 {
     cInstanceNode_cInstanceNode(self, bucket, stream);
-    *(void**)((char*)self + 0xC) = cCounterNode_vtbl;
+    self->mVtbl = (void**)cCounterNode_vtbl;
     sDebounceVEntry37C0* vt = *(sDebounceVEntry37C0**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x1C, 0x8);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -861,11 +863,11 @@ struct sDebounceVEntry1 {
  * When the count (offset 0x1C, decremented by cCounterNode_signal) is 0, sets it to -1 so this happens once, and
  * calls the node's expire virtual (slot 34, cInstanceNode_expire) with 1.
  */
-extern "C" void cCounterNode_update(void* self)
+extern "C" void cCounterNode_update(cCounterNode* self)
 {
-    if (*(int*)((char*)self + 0x1C) == 0) {
-        *(int*)((char*)self + 0x1C) = -1;
-        sDebounceVEntry1* vt = *(sDebounceVEntry1**)((char*)self + 0xC);
+    if (self->Count == 0) {
+        self->Count = -1;
+        sDebounceVEntry1* vt = (sDebounceVEntry1*)self->mVtbl;
         vt[34].fn((char*)self + vt[34].delta, 1);
     }
 }
@@ -885,7 +887,7 @@ INCLUDE_ASM("object/debouncenode", cCounterNode_signal);
  * @param msg    signal number (On Tour signal)
  * @param level  the signal's argument: the level 1-10 (On Tour arg)
  */
-extern "C" void cCounterNode_signal(void* self, int msg, float level)
+extern "C" void cCounterNode_signal(cCounterNode* self, int msg, float level)
 {
     int bit = 0;
     int fire = 0;
@@ -911,27 +913,27 @@ extern "C" void cCounterNode_signal(void* self, int msg, float level)
         bit = 0x200;
     if (msg == 500)
     {
-        int seenLevels = *(int*)((char*)self + 0x20);
+        int seenLevels = self->Counted;
         if ((seenLevels & bit) == 0)
         {
             fire = 1;
-            *(int*)((char*)self + 0x20) = seenLevels | bit;
+            self->Counted = seenLevels | bit;
         }
     }
     else if (msg == 501)
     {
-        int seenLevels = *(int*)((char*)self + 0x20);
+        int seenLevels = self->Counted;
         if ((seenLevels & bit) == 0)
         {
             if (level == 1.0f)
             {
                 fire = 1;
-                *(int*)((char*)self + 0x20) = seenLevels | 1;
+                self->Counted = seenLevels | 1;
             }
             else if (seenLevels & (bit >> 1))
             {
                 fire = 1;
-                *(int*)((char*)self + 0x20) = seenLevels | bit;
+                self->Counted = seenLevels | bit;
             }
         }
     }
@@ -941,9 +943,9 @@ extern "C" void cCounterNode_signal(void* self, int msg, float level)
     }
     if (fire)
     {
-        int remaining = *(int*)((char*)self + 0x1C);
+        int remaining = self->Count;
         if (remaining > 0)
-            *(int*)((char*)self + 0x1C) = remaining - 1;
+            self->Count = remaining - 1;
     }
 }
 #endif
@@ -967,7 +969,7 @@ extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cCounterNode_writeToReplayFrame(void* self, void* stream)
+extern "C" void cCounterNode_writeToReplayFrame(cCounterNode* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     sDebounceVEntryA18* vt = *(sDebounceVEntryA18**)stream;

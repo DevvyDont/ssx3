@@ -1,4 +1,7 @@
 #include "common.h"
+#include "object/deadfadenode.h"
+#include "object/restorenode.h"
+#include "object/hidenode.h"
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
 
@@ -254,13 +257,13 @@ extern char cDeadFadeNode_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cDeadFadeNode_cDeadFadeNode1(void* self)
+extern "C" void* cDeadFadeNode_cDeadFadeNode1(cDeadFadeNode* self)
 {
     cInstanceNode_ctor_v(self);
-    *(void**)((char*)self + 0xC) = cDeadFadeNode_vtbl;
-    *(unsigned int*)((char*)self + 0x1C) = 0xFFFFFFFFU;
-    *(int*)((char*)self + 0x38) = 0;
-    return self;
+    self->mVtbl = (void**)cDeadFadeNode_vtbl;
+    self->Data.InstId = 0xFFFFFFFFU;
+    self->AnimMats = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -276,10 +279,10 @@ extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
  *
  * @param flags  g++ destructor flags, passed on (bit 0 frees the object)
  */
-extern "C" void cDeadFadeNode__cDeadFadeNode(void* self, int flags)
+extern "C" void cDeadFadeNode__cDeadFadeNode(cDeadFadeNode* self, int flags)
 {
-    *(void**)((char*)self + 0xC) = cDeadFadeNode_vtbl;
-    void* partMats = *(void**)((char*)self + 0x38);
+    self->mVtbl = (void**)cDeadFadeNode_vtbl;
+    void* partMats = self->AnimMats;
     if (partMats != 0) {
         cMemMan_free(partMats);
     }
@@ -301,15 +304,15 @@ void* func_002D1CC0_2(void*, void*) __asm__("func_002D1CC0__FPv");
  * opacity has reached 0, func_002D1CC0() applies the fade data's follow-up event to the instance (event 0
  * turns it into a dead node, 3 into a restore node).
  */
-extern "C" void cDeadFadeNode_update(void* self)
+extern "C" void cDeadFadeNode_update(cDeadFadeNode* self)
 {
     float fade;
-    *(float*)((char*)self + 0x30) += *(float*)((char*)self + 0x34);
-    fade = *(float*)((char*)self + 0x28);
+    self->Dist += self->DistRate;
+    fade = self->Fade;
     if (fade > 0.0f) {
-        *(float*)((char*)self + 0x28) = fade - *(float*)((char*)self + 0x2C);
+        self->Fade = fade - self->FadeRate;
     } else {
-        func_002D1CC0_2(*(void**)((char*)self + 0x18), (char*)self + 0x1C);
+        func_002D1CC0_2(self->Instance, (char*)self + 0x1C);
     }
 }
 #endif
@@ -329,9 +332,9 @@ void* func_002D1CC0_2(void*, void*) __asm__("func_002D1CC0__FPv");
  * it with a new "DeadNode" (0) or with a "RestoreNode" (3); the update does the same once the fade timer runs
  * out.
  */
-extern "C" void cDeadFadeNode_loseFocus(void* self)
+extern "C" void cDeadFadeNode_loseFocus(cDeadFadeNode* self)
 {
-    func_002D1CC0_2(*(void**)((char*)self + 0x18), (char*)self + 0x1C);
+    func_002D1CC0_2(self->Instance, (char*)self + 0x1C);
 }
 #endif
 
@@ -432,7 +435,7 @@ static inline int Visible_350CB8(sDfCam_350CB8* cam, sDfObj_350CB8* obj)
  * by the depth (+0x30), the opacity (+0x28) and the saved part matrices (+0x38).
  */
 // Draws the fading corpse: culls its box, then draws it lowered by the fade depth at 0x30.
-extern "C" void cDeadFadeNode_render(char* self)
+extern "C" void cDeadFadeNode_render(cDeadFadeNode* self)
 {
     sDfCam_350CB8* cam = (sDfCam_350CB8*)cWorld_m_pTheWorld->m_pWorldCache;
     if (!Visible_350CB8(cam, OBJ_350CB8(self))) {
@@ -461,11 +464,11 @@ extern "C" void cDeadFadeNode_render(char* self)
     sDfVec_350CB8 offset;
     offset.x = 0.0f;
     offset.y = 0.0f;
-    offset.z = -*(float*)(self + 0x30);
+    offset.z = -self->Dist;
     offset.w = 1.0f;
     xf.r[3] = offset;
     ((DfDrawFn_350CB8)((sDfGfxVt_350CB8*)gfx->mVtbl)[95].fn)((char*)gfx + ((sDfGfxVt_350CB8*)gfx->mVtbl)[95].delta, OBJ_350CB8(self), OBJ_350CB8(self)->light, &xf,
-                                      *(float*)(self + 0x28), *(void**)(self + 0x38), 0, 0);
+                                      self->Fade, self->AnimMats, 0, 0);
 }
 #endif
 
@@ -503,15 +506,15 @@ extern char cHideNode_vtbl[];
  * @param instRecord  the instance record to hide
  * @return @p self
  */
-extern "C" void* cHideNode_cHideNode(void* self, void* instRecord)
+extern "C" void* cHideNode_cHideNode(cHideNode* self, void* instRecord)
 {
     cInstanceNode_cInstanceNode1(self, 1, 0x10, instRecord);
-    *(void**)((char*)self + 0xC) = cHideNode_vtbl;
-    unsigned int* recordFlags = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
+    self->mVtbl = (void**)cHideNode_vtbl;
+    unsigned int* recordFlags = (unsigned int*)((char*)self->Instance + 0x8);
     *recordFlags &= 0xFFFFFF9F;
-    recordFlags = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
+    recordFlags = (unsigned int*)((char*)self->Instance + 0x8);
     *recordFlags = (*recordFlags & 0xFFFFFFFD) | 4;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -529,11 +532,11 @@ extern char cHideNode_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cHideNode_cHideNode1(void* self)
+extern "C" void* cHideNode_cHideNode1(cHideNode* self)
 {
     cInstanceNode_cInstanceNode(self);
-    *(void**)((char*)self + 0xC) = cHideNode_vtbl;
-    return self;
+    self->mVtbl = (void**)cHideNode_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -569,15 +572,15 @@ extern char cRestoreNode_vtbl[];
  * @param instRecord  the instance record to restore
  * @return @p self
  */
-extern "C" void* cRestoreNode_cRestoreNode(void* self, void* instRecord)
+extern "C" void* cRestoreNode_cRestoreNode(cRestoreNode* self, void* instRecord)
 {
     cInstanceNode_cInstanceNode1(self, 1, 19, instRecord);
-    *(void**)((char*)self + 0xC) = cRestoreNode_vtbl;
-    unsigned int* recordFlags = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
+    self->mVtbl = (void**)cRestoreNode_vtbl;
+    unsigned int* recordFlags = (unsigned int*)((char*)self->Instance + 0x8);
     *recordFlags &= 0xFFFFFF9F;
-    recordFlags = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
+    recordFlags = (unsigned int*)((char*)self->Instance + 0x8);
     *recordFlags = (*recordFlags & 0xFFFFFFFD) | 4;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -595,11 +598,11 @@ extern char cRestoreNode_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cRestoreNode_cRestoreNode1(void* self)
+extern "C" void* cRestoreNode_cRestoreNode1(cRestoreNode* self)
 {
     cInstanceNode_cInstanceNode(self);
-    *(void**)((char*)self + 0xC) = cRestoreNode_vtbl;
-    return self;
+    self->mVtbl = (void**)cRestoreNode_vtbl;
+    return ((void*)self);
 }
 #endif
 

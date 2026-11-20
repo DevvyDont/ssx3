@@ -1,4 +1,6 @@
 #include "common.h"
+#include "be/beintsavefile.h"
+#include "be/beintaggression.h"
 #include "be/beintscore.h"
 #include "be/beintnewrace.h"
 #include "be/beintmission.h"
@@ -116,8 +118,6 @@ struct sStateObj153200 {
     int f8;
 };
 extern sStateObj153200* D_004A11C8;
-extern sStateObj153200* cBESaveInterface_instance;
-extern sStateObj153200* cBEAggressionInterface_instance;
 
 /**
  * Leaves the race back-end state: marks its interfaces inactive.
@@ -134,9 +134,9 @@ extern "C" void cBERaceState_onExit(void) {
     cBENewRaceInterface_instance->bIsActive = 0;
     cBEMissionInterface_instance->bIsActive = 0;
     cBEEconInterface_instance->bIsActive = 0;
-    cBEAggressionInterface_instance->f8 = 0;
+    cBEAggressionInterface_instance->bIsActive = 0;
     cBERewardInterface_instance->bIsActive = 0;
-    cBESaveInterface_instance->f8 = 0;
+    cBESaveInterface_instance->bIsActive = 0;
 }
 #endif
 
@@ -144,8 +144,6 @@ extern "C" void cBERaceState_onExit(void) {
 INCLUDE_ASM("be/bestate", cBERaceState_onEnter);
 #ifdef SKIP_ASM
 extern sStateObj153200* D_004A11C8;
-extern sStateObj153200* cBESaveInterface_instance;
-extern sStateObj153200* cBEAggressionInterface_instance;
 
 /**
  * Enters the race back-end state: marks its interfaces active.
@@ -159,9 +157,9 @@ extern "C" void cBERaceState_onEnter(void) {
     D_004A11C8->f8 = 1;
     cBEMissionInterface_instance->bIsActive = 1;
     cBEEconInterface_instance->bIsActive = 1;
-    cBEAggressionInterface_instance->f8 = 1;
+    cBEAggressionInterface_instance->bIsActive = 1;
     cBERewardInterface_instance->bIsActive = 1;
-    cBESaveInterface_instance->f8 = 1;
+    cBESaveInterface_instance->bIsActive = 1;
 }
 #endif
 

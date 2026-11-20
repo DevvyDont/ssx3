@@ -1,16 +1,11 @@
 #include "common.h"
+#include "be/beintaggression.h"
 #include "replay/frameptr.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BEAggressionInt[];
 extern void* cBEAggressionInterface_vtbl[16];
-extern void* cBEAggressionInterface_instance;
 
-struct cBEAggressionInterface {
-    char pad_0x00[8];
-    int field_0x8;
-    void* vtable;
-};
 
 //99.58%
 INCLUDE_ASM("be/beintaggression", cBEAggressionInterface_getThis__Fv);
@@ -26,9 +21,9 @@ void* cBEAggressionInterface_getThis()
 {
     if (cBEAggressionInterface_instance == 0) {
         cBEAggressionInterface* mem = (cBEAggressionInterface*)cMemMan_alloc(0x10, str_BEAggressionInt, 0, 0);
-        mem->field_0x8 = 0;
-        mem->vtable = cBEAggressionInterface_vtbl;
-        cBEAggressionInterface_instance = mem;
+        mem->bIsActive = 0;
+        (*(void**)&mem->mVtbl) = cBEAggressionInterface_vtbl;
+        cBEAggressionInterface_instance = (cBEAggressionInterface*)(mem);
     }
     return cBEAggressionInterface_instance;
 }
@@ -88,7 +83,7 @@ extern sAggrCharProfile cBELibrary_profileLib[][10];
  * @param rider  the rider whose feelings are read
  * @return the relation state (0-3; On Tour friend, neutral, rival, enemy)
  */
-extern "C" int cBEAggressionInterface_getState(void* self, int targetRider, int rider)
+extern "C" int cBEAggressionInterface_getState(cBEAggressionInterface* self, int targetRider, int rider)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int ca = cBELibrary_getCharacterID(targetRider);
@@ -120,7 +115,7 @@ extern sAggrCharProfile cBELibrary_profileLib[][10];
  * @param rider  the rider whose aggression is read
  * @return the aggression level (0-4; On Tour none, mild, moderate, hard, chase)
  */
-extern "C" int cBEAggressionInterface_getAggression(void* self, int targetRider, int rider)
+extern "C" int cBEAggressionInterface_getAggression(cBEAggressionInterface* self, int targetRider, int rider)
 {
     int profile = cBELibrary_getProfileIndex(rider);
     int ca = cBELibrary_getCharacterID(targetRider);
@@ -152,7 +147,7 @@ extern signed char D_005305F9[];
  * @param iRider2  the rider they are angry at (On Tour iRider2)
  * @param event  the contact (On Tour eBEAggBehaviors): 0 mild, 1 moderate, 2 hard, 3 Bertuzzi
  */
-extern "C" void cBEAggressionInterface_applyAggression(void* self, int iRider1, int iRider2, int event)
+extern "C" void cBEAggressionInterface_applyAggression(cBEAggressionInterface* self, int iRider1, int iRider2, int event)
 {
     int profile = cBELibrary_getProfileIndex(iRider1);
     int ca = cBELibrary_getCharacterID(iRider1);
@@ -322,7 +317,7 @@ struct sStreamVE_1560A0 { short delta; short index; void (*fn)(void*, void*, int
  *
  * @param stream  the replay frame stream
  */
-extern "C" void cBEAggressionInterface_writeToReplayFrame(void* self, cReplayFramePtr* stream)
+extern "C" void cBEAggressionInterface_writeToReplayFrame(cBEAggressionInterface* self, cReplayFramePtr* stream)
 {
     int n = D_005305E0[0];
     sStreamVE_1560A0* vt = *(sStreamVE_1560A0**)stream;
@@ -356,7 +351,7 @@ struct sStreamVE_1561B0 { short delta; short index; void (*fn)(void*, void*, int
  *
  * @param stream  the replay frame stream
  */
-extern "C" void cBEAggressionInterface_readFromReplayFrame(void* self, cReplayFramePtr* stream)
+extern "C" void cBEAggressionInterface_readFromReplayFrame(cBEAggressionInterface* self, cReplayFramePtr* stream)
 {
     int n;
     sStreamVE_1561B0* vt = *(sStreamVE_1561B0**)stream;

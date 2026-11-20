@@ -2,8 +2,9 @@
 #define OBJECT_INSTANCENODE_H
 
 // cInstanceNode: the scene node of one placed world instance (a tInstanceRecord). It sits in a cBucketMan bucket
-// list and is the base of cDeadNode, cMoveNode (-> cFloatingNode, cAnimNode, ...), cFlexRailNode and cFlexBridgeNode
-// (their ctors call cInstanceNode_cInstanceNode1 directly), the flag-set and debounce nodes.
+// list and is the base of cMoveNode (-> cFloatingNode, cAnimNode, cDebounceNode, ...), cFlexRailNode and
+// cFlexBridgeNode (their ctors call cInstanceNode_cInstanceNode1 directly), and of cHideNode, cRestoreNode, cDeadNode,
+// cFlagNode, cCounterNode, cConveyorNode, cBoostNode, cDeadFadeNode and cMeshAnimNode (object/*node.h).
 // Methods: src/object/instancenode.cpp, plus the one-line virtuals in src/object/railmodifier.cpp.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. The real chain is

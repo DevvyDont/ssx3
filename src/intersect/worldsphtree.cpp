@@ -1,4 +1,6 @@
 #include "common.h"
+#include "object/animteeternode.h"
+#include "object/boostnode.h"
 #include "object/animobject.h"
 #include "intersect/worldsphtree.h"
 #include "intersect/worldsphere.h"
@@ -5593,31 +5595,31 @@ static inline sVec4_341388 vu0Xform_341388(const sVec4_341388& v, const char* m)
  * @param def  the script's boost data (On Tour tMakeBoostData)
  * @return @p self
  */
-extern "C" sObj_341388* cBoostNode_cBoostNode1(sObj_341388* self, void* bucket, int nodeType, void* instance, sDef_341388* def)
+extern "C" sObj_341388* cBoostNode_cBoostNode1(cBoostNode* self, void* bucket, int nodeType, void* instance, sDef_341388* def)
 {
-    cInstanceNode_cInstanceNode1(self, bucket, nodeType, instance);
-    self->vt = cBoostNode_vtbl;
+    cInstanceNode_cInstanceNode1(((sObj_341388*)self), bucket, nodeType, instance);
+    self->mVtbl = cBoostNode_vtbl;
     int type = def->type;
-    self->type = type;
-    self->t38 = (int)(def->time * (float)*(int*)(cAppMan_TheAppMan + 0x10));
+    self->Type = type;
+    self->BoostTime = (int)(def->time * (float)*(int*)(cAppMan_TheAppMan + 0x10));
     if (def->x == 0.0f && def->y == 0.0f && def->z == 0.0f) {
         if (type == 2) {
-            self->pos = *D_004FF150_341388;
+            (*(sVec4_341388*)&self->Boost) = *D_004FF150_341388;
         } else {
-            self->pos = *D_004FF120_341388;
+            (*(sVec4_341388*)&self->Boost) = *D_004FF120_341388;
         }
     } else {
-        self->pos = vu0Normalize_341388(sVec4_341388(def->x, def->y, def->z, 0.0f));
+        (*(sVec4_341388*)&self->Boost) = vu0Normalize_341388(sVec4_341388(def->x, def->y, def->z, 0.0f));
     }
-    self->speed = def->f10 * 27.77777862548828f;
-    self->f34 = def->f0C;
-    self->t3C = self->type ? self->t38 : 0;
-    if (self->type == 2) {
-        char* instMatrix = self->mtx + 0x10;
-        self->pos = vu0Xform_341388(vu0Scale_341388(self->pos, -1.0f), instMatrix);
-        self->speed = -self->speed;
+    self->MaxSpeed = def->f10 * 27.77777862548828f;
+    self->Drag = def->f0C;
+    self->Time = self->Type ? self->BoostTime : 0;
+    if (self->Type == 2) {
+        char* instMatrix = (char*)self->Instance + 0x10;
+        (*(sVec4_341388*)&self->Boost) = vu0Xform_341388(vu0Scale_341388((*(sVec4_341388*)&self->Boost), -1.0f), instMatrix);
+        self->MaxSpeed = -self->MaxSpeed;
     }
-    return self;
+    return ((sObj_341388*)self);
 }
 #endif
 
@@ -5644,13 +5646,13 @@ struct sVEntry_cBoostNode_cBoostNode {
  * @param stream  the replay frame to read from (On Tour cBxReplayFrame* data)
  * @return @p self
  */
-extern "C" void* cBoostNode_cBoostNode(void* self, void* bucket, void* stream)
+extern "C" void* cBoostNode_cBoostNode(cBoostNode* self, void* bucket, void* stream)
 {
     cInstanceNode_cInstanceNode(self, bucket, stream);
-    *(void***)((char*)self + 0xC) = cBoostNode_vtbl;
+    self->mVtbl = cBoostNode_vtbl;
     sVEntry_cBoostNode_cBoostNode* vt = *(sVEntry_cBoostNode_cBoostNode**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x20, 0x30);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -5710,46 +5712,46 @@ struct sNode_003415D0 {
  * 1 node that no being touches and whose timer is out expires (slot 34, runscript 1); slots 49/50 (empty)
  * bracket the loop.
  */
-extern "C" void cBoostNode_update(sNode_003415D0* self)
+extern "C" void cBoostNode_update(cBoostNode* self)
 {
     int hit = 0;
-    if (self->type != 1) {
+    if (self->Type != 1) {
         hit = 1;
     }
-    int timeLeft = self->t3C;
+    int timeLeft = self->Time;
     if (timeLeft > 0) {
         int n = timeLeft - 1;
-        self->t3C = n;
+        self->Time = n;
         if (n > 0) {
             hit = 1;
         }
     }
-    sVEnt_003415D0* vt = self->vt;
+    sVEnt_003415D0* vt = (sVEnt_003415D0*)self->mVtbl;
     ((Fn0_003415D0)vt[49].fn)((char*)self + vt[49].delta);
-    if (self->type == 1 || self->t3C <= 0) {
+    if (self->Type == 1 || self->Time <= 0) {
         for (int i = 0; i < func_002D1AF0(); i++) {
             void** obj = cObjectInterface_getBeing(i);
-            if (self->type == 2) {
+            if (self->Type == 2) {
                 sVEnt_003415D0* ovt = (sVEnt_003415D0*)*obj;
                 if (((Test0_003415D0)ovt[9].fn)((char*)obj + ovt[9].delta) != 0) continue;
             }
             sVEnt_003415D0* ovt = (sVEnt_003415D0*)*obj;
-            if (((Test_003415D0)ovt[3].fn)((char*)obj + ovt[3].delta, self->a18) != 0) {
+            if (((Test_003415D0)ovt[3].fn)((char*)obj + ovt[3].delta, (int)self->Instance) != 0) {
                 hit = 1;
-                if (self->f34 < 0.0f) {
-                    sVEnt_003415D0* vtbl = self->vt;
+                if (self->Drag < 0.0f) {
+                    sVEnt_003415D0* vtbl = (sVEnt_003415D0*)self->mVtbl;
                     ((Fn1_003415D0)vtbl[48].fn)((char*)self + vtbl[48].delta, obj);
                 } else {
-                    sVEnt_003415D0* vtbl = self->vt;
+                    sVEnt_003415D0* vtbl = (sVEnt_003415D0*)self->mVtbl;
                     ((Fn1_003415D0)vtbl[47].fn)((char*)self + vtbl[47].delta, obj);
                 }
             }
         }
     }
-    sVEnt_003415D0* vtbl2 = self->vt;
+    sVEnt_003415D0* vtbl2 = (sVEnt_003415D0*)self->mVtbl;
     ((Fn0_003415D0)vtbl2[50].fn)((char*)self + vtbl2[50].delta);
     if (hit == 0) {
-        sVEnt_003415D0* vtbl3 = self->vt;
+        sVEnt_003415D0* vtbl3 = (sVEnt_003415D0*)self->mVtbl;
         ((FnI_003415D0)vtbl3[34].fn)((char*)self + vtbl3[34].delta, 1);
     }
 }
@@ -5797,9 +5799,9 @@ extern "C" float cObjectInterface_getUpdateTime();
  *
  * @param obj  the rider (cBeing)
  */
-extern "C" void cBoostNode_applyDrag(void* self, cMover_341770* obj)
+extern "C" void cBoostNode_applyDrag(cBoostNode* self, cMover_341770* obj)
 {
-    sVec4_341770 newVel = vu0Scale_341770(vu0Scale_341770(*obj->getVelocity(), *(float*)((char*)self + 0x34) + 1.0f), cObjectInterface_getUpdateTime());
+    sVec4_341770 newVel = vu0Scale_341770(vu0Scale_341770(*obj->getVelocity(), self->Drag + 1.0f), cObjectInterface_getUpdateTime());
     obj->applyBoost(&newVel);
 }
 #endif
@@ -5907,17 +5909,17 @@ static inline void push_341818(sParams_341818* p, cMover_341818* obj, const sVec
  *
  * @param obj  the rider (cBeing) being boosted
  */
-extern "C" void cBoostNode_applyBoost(sSph_341818* self, cMover_341818* obj)
+extern "C" void cBoostNode_applyBoost(cBoostNode* self, cMover_341818* obj)
 {
     sVec4_341818 vel = *obj->getVelocity();
-    sVec4_341818 dir = self->params.dir;
+    sVec4_341818 dir = (*(sVec4_341818*)&self->Boost);
     if (dir.x == 0.0f && dir.y == 0.0f && dir.z == 0.0f) {
         dir = vu0Normalize_341818(vel);
     }
     float alongSpeed = vu0Dot_341818(vel, dir);
-    float diff = self->params.speed - alongSpeed;
-    sParams_341818* boostParams = &self->params;
-    if (self->type == 2) {
+    float diff = self->MaxSpeed - alongSpeed;
+    sParams_341818* boostParams = &(*(sParams_341818*)&self->Boost);
+    if (self->Type == 2) {
         if (alongSpeed >= 0.0f) {
             sVec4_341818 newVel = vu0Scale_341818(vu0Scale_341818(vu0Scale_341818(dir, boostParams->speed), boostParams->scale), cObjectInterface_getUpdateTime());
             obj->applyBoost(&newVel);
@@ -5940,10 +5942,10 @@ INCLUDE_ASM("intersect/worldsphtree", cBoostNode_signal);
  *
  * @param signal  the signal number
  */
-extern "C" void cBoostNode_signal(void* self, int signal)
+extern "C" void cBoostNode_signal(cBoostNode* self, int signal)
 {
     if (signal == 1) {
-        *(int*)((char*)self + 0x3c) = *(int*)((char*)self + 0x38);
+        self->Time = self->BoostTime;
     }
 }
 #endif
@@ -5967,7 +5969,7 @@ extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cBoostNode_writeToReplayFrame(void* self, void* stream)
+extern "C" void cBoostNode_writeToReplayFrame(cBoostNode* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     sSerVEntry_00341A50* vt = *(sSerVEntry_00341A50**)stream;
@@ -6553,29 +6555,29 @@ static inline void setRateMax_003421A0(sFloat_003421A0* dst, float v, char* info
  * @param def  the script's teeter data (On Tour tMakeAnimTeeterData)
  * @return @p self
  */
-extern "C" void* cAnimTeeterNode_cAnimTeeterNode1(sSphCtl_003421A0* self, int bucket, char* obj, char* def)
+extern "C" void* cAnimTeeterNode_cAnimTeeterNode1(cAnimTeeterNode* self, int bucket, char* obj, char* def)
 {
     cAnimNode_cAnimNode((char*)self + 0x30, bucket, 4, obj, 0);
-    self->vt = D_004908F8;
+    self->mVtbl = D_004908F8;
     float animStart = 0.0f;
     char* info = *(char**)(obj + 0x80);
-    if (self->inst != 0) {
-        animStart = cAnimFrame_getStartTime(self->inst);
+    if (self->AnimFrames != 0) {
+        animStart = cAnimFrame_getStartTime(self->AnimFrames);
     }
-    setRate_003421A0((sFloat_003421A0*)&self->f10, *(float*)(def + 0x20), animStart);
-    setRateMax_003421A0((sFloat_003421A0*)&self->f14, *(float*)(def + 0x24), info);
-    self->f0C = *(float*)(def + 0x8);
-    self->f08 = *(float*)(def + 0x4) * 9.999999974752427e-07f;
-    self->f18 = *(float*)(def + 0xC) * 0.03333333507180214f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
-    self->f2C = *(int*)(def + 0x1C);
-    self->f24 = *(float*)(def + 0x14) * 0.03333333507180214f;
-    self->f1C = *(float*)(def + 0x18);
-    self->f20 = *(float*)(def + 0x10);
-    self->flags |= 1;
-    self->f00 = 0;
-    self->f04 = 0;
-    self->f28 = 0;
-    return self;
+    setRate_003421A0((sFloat_003421A0*)&self->FromTime, *(float*)(def + 0x20), animStart);
+    setRateMax_003421A0((sFloat_003421A0*)&self->ToTime, *(float*)(def + 0x24), info);
+    self->BounceFactor = *(float*)(def + 0x8);
+    self->TorqueScale = *(float*)(def + 0x4) * 9.999999974752427e-07f;
+    self->MaxAnimSpeed = *(float*)(def + 0xC) * 0.03333333507180214f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
+    self->AnimSign = *(int*)(def + 0x1C);
+    self->PivotTime = *(float*)(def + 0x14) * 0.03333333507180214f;
+    self->Damp = *(float*)(def + 0x18);
+    self->Spring = *(float*)(def + 0x10);
+    self->Flags |= 1;
+    *(int*)&self->TorqueSum = 0;
+    *(int*)&self->AnimSpeed = 0;
+    *(int*)&self->W = 0;
+    return ((sSphCtl_003421A0*)self);
 }
 #endif
 
@@ -6602,13 +6604,13 @@ extern void* D_004908F8[];
  * @param stream  the replay frame to read from (On Tour cBxReplayFrame* data)
  * @return @p self
  */
-extern "C" void* cAnimTeeterNode_cAnimTeeterNode(void* self, int bucket, sVEntry003422E8** stream)
+extern "C" void* cAnimTeeterNode_cAnimTeeterNode(cAnimTeeterNode* self, int bucket, sVEntry003422E8** stream)
 {
     cAnimNode_cAnimNode1((char*)self + 0x30, bucket, stream);
-    *(void***)((char*)self + 0x50) = D_004908F8;
+    self->mVtbl = D_004908F8;
     (*stream)[2].fn((char*)stream + (*stream)[2].delta, self, 0x30);
-    *(unsigned short*)((char*)self + 0x56) |= 1;
-    return self;
+    self->Flags |= 1;
+    return ((void*)self);
 }
 #endif
 
@@ -6662,56 +6664,56 @@ static inline float absf_00342358(float x)
  * @param spring  the teeter node
  * @return func_0034EBA0's result: 1 after a successful frame update, else 0
  */
-extern "C" int cAnimTeeterNode_updateNode(sSphCtl_00342358* spring)
+extern "C" int cAnimTeeterNode_updateNode(cAnimTeeterNode* spring)
 {
-    spring->prev = spring->pos;
+    spring->FrameStart = spring->CurrTime;
     float dt = cObjectInterface_getUpdateTime();
-    float force = spring->gain * spring->force;
-    if (spring->gain < 0.0f) {
+    float force = spring->TorqueScale * spring->TorqueSum;
+    if (spring->TorqueScale < 0.0f) {
         force = -force;
     }
-    float vel = spring->vel;
-    float maxStep = spring->maxStep;
+    float vel = spring->W;
+    float maxStep = spring->MaxAnimSpeed;
     float step = vel * dt;
-    float acc = -spring->stiffness * (spring->pos - spring->rest);
+    float acc = -spring->Spring * (spring->CurrTime - spring->PivotTime);
     acc += force;
-    acc += -spring->damping * vel;
-    spring->step = step;
+    acc += -spring->Damp * vel;
+    spring->AnimSpeed = step;
     if (maxStep < absf_00342358(step)) {
         if (step < 0.0f) {
-            spring->step = -maxStep;
+            spring->AnimSpeed = -maxStep;
         } else {
-            spring->step = maxStep;
+            spring->AnimSpeed = maxStep;
         }
     }
-    float pos = spring->pos + spring->step;
-    float nv = spring->vel + acc * dt;
-    spring->pos = pos;
-    spring->pos3C = pos;
-    spring->vel = nv;
-    if (pos < spring->min) {
-        spring->pos = spring->min;
+    float pos = spring->CurrTime + spring->AnimSpeed;
+    float nv = spring->W + acc * dt;
+    spring->CurrTime = pos;
+    spring->FrameEnd = pos;
+    spring->W = nv;
+    if (pos < spring->FromTime) {
+        spring->CurrTime = spring->FromTime;
         if (absf_00342358(nv) > 0.1f) {
-            spring->vel = nv * spring->bounce;
+            spring->W = nv * spring->BounceFactor;
         } else {
-            spring->step = 0.0f;
-            spring->vel = 0.0f;
+            spring->AnimSpeed = 0.0f;
+            spring->W = 0.0f;
         }
-    } else if (spring->max < pos) {
-        spring->pos = spring->max;
+    } else if (spring->ToTime < pos) {
+        spring->CurrTime = spring->ToTime;
         if (absf_00342358(nv) > 0.1f) {
-            spring->vel = nv * spring->bounce;
+            spring->W = nv * spring->BounceFactor;
         } else {
-            spring->step = 0.0f;
-            spring->vel = 0.0f;
+            spring->AnimSpeed = 0.0f;
+            spring->W = 0.0f;
         }
     }
-    spring->force = 0.0f;
-    spring->pos34 = spring->pos;
-    if (func_0034EBA0(&spring->pos) == 0) {
+    spring->TorqueSum = 0.0f;
+    spring->CacheTime = spring->CurrTime;
+    if (func_0034EBA0(&spring->CurrTime) == 0) {
         return 0;
     }
-    spring->flags |= 1;
+    spring->Flags |= 1;
     return 1;
 }
 #endif
@@ -6727,15 +6729,15 @@ INCLUDE_ASM("intersect/worldsphtree", cAnimTeeterNode_getAnimSpeed);
  *
  * @return the step per update, or 0
  */
-extern "C" float cAnimTeeterNode_getAnimSpeed(void* self)
+extern "C" float cAnimTeeterNode_getAnimSpeed(cAnimTeeterNode* self)
 {
-    if (*(float*)((char*)self + 0x30) <= *(float*)((char*)self + 0x10) && *(float*)((char*)self + 0x4) < 0.0f) {
+    if (self->CurrTime <= self->FromTime && self->AnimSpeed < 0.0f) {
         return 0.0f;
     }
-    if (*(float*)((char*)self + 0x30) >= *(float*)((char*)self + 0x14) && *(float*)((char*)self + 0x4) > 0.0f) {
+    if (self->CurrTime >= self->ToTime && self->AnimSpeed > 0.0f) {
         return 0.0f;
     }
-    return *(float*)((char*)self + 0x4);
+    return self->AnimSpeed;
 }
 #endif
 
@@ -6893,14 +6895,14 @@ static inline float vu0Dot_342538(const sVec4_342538& a, const sVec4_342538& b)
  * @param intInfo  the hit (On Tour tIntersectInfo: position at +0x0, mesh index at +0x5C)
  * @param force  the force vector
  */
-extern "C" void cAnimTeeterNode_applyForce(sSelf_342538* self, sObj_342538* intInfo, sVec4_342538* force)
+extern "C" void cAnimTeeterNode_applyForce(cAnimTeeterNode* self, sObj_342538* intInfo, sVec4_342538* force)
 {
     int idx = intInfo->idx;
     if (idx >= 0) {
         sSub_342538* sub = (sSub_342538*)((char*)self + 0x44);
         char* ents = sub->inf->tbl->ents;
         if (*(int*)(ents + idx * 16 + 8) != 0) {
-            sWsVtSlot* vt = *(sWsVtSlot**)((char*)self + 0x50);
+            sWsVtSlot* vt = (sWsVtSlot*)self->mVtbl;
             char* animMat = ((GetMat_342538)vt[29].fn)((char*)sub + vt[29].delta, idx);
             char* pivotMat = animMat;
             if (vu0Length_342538(*force) > 100.0f) {
@@ -6911,12 +6913,12 @@ extern "C" void cAnimTeeterNode_applyForce(sSelf_342538* self, sObj_342538* intI
                 a = *(sVec4_342538*)(animMat + 0x30);
                 vu0Sub_342538(vuResult, intInfo->pos, a);
                 leverArm = vuResult;
-                if (self->dir < 0.0f) {
+                if (self->TorqueScale < 0.0f) {
                     vu0Scale_342538(vuResult, leverArm, -1.0f);
                     a = vuResult;
                     leverArm = vuResult;
                 }
-                if ((self->mask >> intInfo->idx) & 1) {
+                if ((self->AnimSign >> intInfo->idx) & 1) {
                     vu0Scale_342538(vuResult, leverArm, -1.0f);
                     a = vuResult;
                     leverArm = vuResult;
@@ -6925,7 +6927,7 @@ extern "C" void cAnimTeeterNode_applyForce(sSelf_342538* self, sObj_342538* intI
                 a = vuResult;
                 vu0Cross_342538(torqueVec, leverArm, *force);
                 vuResult = torqueVec;
-                self->sum += vu0Dot_342538(a, vuResult);
+                self->TorqueSum += vu0Dot_342538(a, vuResult);
             }
         }
     }
@@ -6950,7 +6952,7 @@ struct sVEntry_cAnimTeeterNode_writeToReplayFrame {
  *
  * @param stream  the replay frame to write to (On Tour cBxReplayFrame* data)
  */
-extern "C" void cAnimTeeterNode_writeToReplayFrame(void* self, void* stream)
+extern "C" void cAnimTeeterNode_writeToReplayFrame(cAnimTeeterNode* self, void* stream)
 {
     cAnimNode_writeToReplayFrame((char*)self + 0x30, stream);
     sVEntry_cAnimTeeterNode_writeToReplayFrame* vt = *(sVEntry_cAnimTeeterNode_writeToReplayFrame**)stream;

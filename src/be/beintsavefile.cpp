@@ -1,17 +1,12 @@
 #include "common.h"
+#include "be/beintsavefile.h"
 #include "main/ssxapp.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern const char str_BESaveInt[];
 extern void* D_0045AD08[16];
-extern void* cBESaveInterface_instance;
 extern int cBESaveInterface_bDoReplay;
 
-struct cBESaveInterface {
-    char pad_0x00[8];
-    int field_0x8;
-    void* vtable;
-};
 
 //99.8%
 INCLUDE_ASM("be/beintsavefile", cBESaveInterface_getThis__Fv);
@@ -29,9 +24,9 @@ void* cBESaveInterface_getThis()
 {
     if (cBESaveInterface_instance == 0) {
         cBESaveInterface* mem = (cBESaveInterface*)cMemMan_alloc(0x10, str_BESaveInt, 0, 0);
-        mem->field_0x8 = 0;
-        mem->vtable = D_0045AD08;
-        cBESaveInterface_instance = mem;
+        mem->bIsActive = 0;
+        (*(void**)&mem->mVtbl) = D_0045AD08;
+        cBESaveInterface_instance = (cBESaveInterface*)(mem);
         cBESaveInterface_bDoReplay = 0;
     }
     return cBESaveInterface_instance;
@@ -150,7 +145,7 @@ struct sSaveBits6_2758 { sSaveBits_2758 e[6]; };
  *
  * @return the save buffer (cBESaveInterface_buffer)
  */
-extern "C" void* cBESaveInterface_generateSaveGame(void* self)
+extern "C" void* cBESaveInterface_generateSaveGame(cBESaveInterface* self)
 {
     int size = cBESaveInterface_getSaveGameSize(self);
     cBESaveInterface_releaseBuffer_s(self);
@@ -236,7 +231,7 @@ void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm
  * @return the new buffer (cBESaveInterface_buffer)
  */
 // Builds the save block of rider profile 'idx': name, profile, character flag, CRC.
-extern "C" void* cBESaveInterface_generateSaveProfile(void* self, int idx)
+extern "C" void* cBESaveInterface_generateSaveProfile(cBESaveInterface* self, int idx)
 {
     cBEIface_2950* iface;
     int size = cBESaveInterface_getSaveProfileSize_2950();
@@ -307,7 +302,7 @@ extern "C" void cSSXApp_activateBEOptions(void* app);
  * @param buf  the save data read from the memory card
  * @return 1 when loaded, 0 when the CRC is wrong
  */
-extern "C" int cBESaveInterface_loadSaveGame(void* self, char* buf)
+extern "C" int cBESaveInterface_loadSaveGame(cBESaveInterface* self, char* buf)
 {
     int size = cBESaveInterface_getSaveGameSize(self) - 4;
     int crc = MEM_crc16(buf, size, 64490);
@@ -367,7 +362,7 @@ extern sCharFlag_2DE0 D_00535B31[];
  * @param idx  the profile slot to load into (On Tour iProfile)
  * @return 1 when loaded, 0 when the CRC is wrong
  */
-extern "C" int cBESaveInterface_loadSaveProfile(void* self, char* buf, int idx)
+extern "C" int cBESaveInterface_loadSaveProfile(cBESaveInterface* self, char* buf, int idx)
 {
     int size = cBESaveInterface_getSaveProfileSize() - 4;
     int crc = MEM_crc16(buf, size, 64490);

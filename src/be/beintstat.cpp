@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintaggression.h"
 #include "be/beintscore.h"
 #include "be/beintnewrace.h"
 #include "be/beintmission.h"
@@ -508,7 +509,6 @@ INCLUDE_ASM("be/beintstat", cBELibrary__cBELibrary);
 void operator_delete(int*);
 extern "C" void cBESaveInterface_purgeInterface(void);
 extern int* D_004A11C8;
-extern int* cBEAggressionInterface_instance;
 
 /**
  * Destroys the BE library: frees every BE interface singleton, then the object itself when asked to.
@@ -543,7 +543,7 @@ extern "C" void cBELibrary__cBELibrary(void* self, int flags)
     cBEMissionInterface_instance = 0;
     operator_delete((int*)cBEEconInterface_instance);
     cBEEconInterface_instance = 0;
-    operator_delete(cBEAggressionInterface_instance);
+    operator_delete((int*)cBEAggressionInterface_instance);
     cBEAggressionInterface_instance = 0;
     operator_delete((int*)cBERewardInterface_instance);
     cBERewardInterface_instance = 0;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/deadnode.h"
 #include "object/instancenode.h"
 
 //100%
@@ -247,7 +248,7 @@ struct sInstNodeDtorVEntry {
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern char str_DeadNode_b[];
-extern "C" void* cDeadNode_cDeadNode(void* mem, int v);
+extern "C" void* cDeadNode_cDeadNode(cDeadNode* mem, int v);
 
 /**
  * Replaces an instance node by a dead node: deletes this node and creates a cDeadNode for the same record.
@@ -263,7 +264,7 @@ extern "C" void cInstanceNode_makeThisDead(cInstanceNode* self)
         sInstNodeDtorVEntry* vt = (sInstNodeDtorVEntry*)self->mVtbl;
         vt[1].fn((char*)self + vt[1].delta, 3);
     }
-    cDeadNode_cDeadNode(cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), instance);
+    cDeadNode_cDeadNode((cDeadNode*)cMemMan_alloc(0x1C, str_DeadNode_b, 0x20000000, 0), instance);
 }
 #endif
 
@@ -770,15 +771,15 @@ extern char cDeadNode_vtbl[];
  * @param pInst  the instance record (On Tour pInst)
  * @return the constructed node (self)
  */
-extern "C" void* cDeadNode_cDeadNode(void* self, int pInst)
+extern "C" void* cDeadNode_cDeadNode(cDeadNode* self, int pInst)
 {
     cInstanceNode_cInstanceNode1(self, 8, 6, pInst);
-    *(void**)((char*)self + 0xC) = cDeadNode_vtbl;
-    unsigned int* recordFlags = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
+    self->mVtbl = (void**)cDeadNode_vtbl;
+    unsigned int* recordFlags = (unsigned int*)((char*)self->Instance + 0x8);
     *recordFlags &= 0xFFFFFF9F;
-    recordFlags = (unsigned int*)(*(char**)((char*)self + 0x18) + 0x8);
+    recordFlags = (unsigned int*)((char*)self->Instance + 0x8);
     *recordFlags = (*recordFlags & 0xFFFFFFFD) | 4;
-    return self;
+    return ((void*)self);
 }
 #endif
 

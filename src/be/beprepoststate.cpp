@@ -1,4 +1,6 @@
 #include "common.h"
+#include "be/beintsavefile.h"
+#include "be/beintaggression.h"
 #include "be/beintnewrace.h"
 #include "be/beintcharacter.h"
 #include "be/beintbagt.h"
@@ -112,9 +114,7 @@ extern "C" void* cBEPostRaceState_getInterface(void* self, int kind)
 //100%
 INCLUDE_ASM("be/beprepoststate", cBEPostRaceState_onExit);
 #ifdef SKIP_ASM
-extern void* cBESaveInterface_instance;
 extern void* D_004A11C8;
-extern void* cBEAggressionInterface_instance;
 
 struct sBEIface_001564B0
 {
@@ -134,12 +134,12 @@ extern "C" void cBEPostRaceState_onExit(void)
     cBECharacterInterface_instance->bIsActive = 0;
     cBEStatInterface_instance->bIsActive = 0;
     cBEOptionInterface_instance->bIsActive = 0;
-    ((sBEIface_001564B0*)cBESaveInterface_instance)->active = 0;
+    cBESaveInterface_instance->bIsActive = 0;
     cBENetworkInterface_instance->bIsActive = 0;
     ((sBEIface_001564B0*)D_004A11C8)->active = 0;
     cBEBAGTInterface_instance->bIsActive = 0;
     cBEEconInterface_instance->bIsActive = 0;
-    ((sBEIface_001564B0*)cBEAggressionInterface_instance)->active = 0;
+    cBEAggressionInterface_instance->bIsActive = 0;
     ((sBEIface_001564B0*)cBERewardInterface_instance)->active = 0;
 }
 #endif
@@ -147,9 +147,7 @@ extern "C" void cBEPostRaceState_onExit(void)
 //100%
 INCLUDE_ASM("be/beprepoststate", cBEPostRaceState_onEnter);
 #ifdef SKIP_ASM
-extern void* cBESaveInterface_instance;
 extern void* D_004A11C8;
-extern void* cBEAggressionInterface_instance;
 
 struct sBEIface_00156510
 {
@@ -169,12 +167,12 @@ extern "C" void cBEPostRaceState_onEnter(void)
     cBECharacterInterface_instance->bIsActive = 1;
     cBEStatInterface_instance->bIsActive = 1;
     cBEOptionInterface_instance->bIsActive = 1;
-    ((sBEIface_00156510*)cBESaveInterface_instance)->active = 1;
+    cBESaveInterface_instance->bIsActive = 1;
     cBENetworkInterface_instance->bIsActive = 1;
     ((sBEIface_00156510*)D_004A11C8)->active = 1;
     cBEBAGTInterface_instance->bIsActive = 1;
     cBEEconInterface_instance->bIsActive = 1;
-    ((sBEIface_00156510*)cBEAggressionInterface_instance)->active = 1;
+    cBEAggressionInterface_instance->bIsActive = 1;
     ((sBEIface_00156510*)cBERewardInterface_instance)->active = 1;
 }
 #endif
@@ -272,9 +270,7 @@ extern "C" void* cBEPreRaceState_getInterface(void* self, int kind)
 //100%
 INCLUDE_ASM("be/beprepoststate", cBEPreRaceState_onExit);
 #ifdef SKIP_ASM
-extern void* cBESaveInterface_instance;
 extern void* D_004A11C8;
-extern void* cBEAggressionInterface_instance;
 
 struct sBEIface_001566E8
 {
@@ -295,12 +291,12 @@ extern "C" void cBEPreRaceState_onExit(void)
     cBECharacterInterface_instance->bIsActive = 0;
     cBEStatInterface_instance->bIsActive = 0;
     cBEOptionInterface_instance->bIsActive = 0;
-    ((sBEIface_001566E8*)cBESaveInterface_instance)->active = 0;
+    cBESaveInterface_instance->bIsActive = 0;
     cBENetworkInterface_instance->bIsActive = 0;
     ((sBEIface_001566E8*)D_004A11C8)->active = 0;
     cBEBAGTInterface_instance->bIsActive = 0;
     cBEEconInterface_instance->bIsActive = 0;
-    ((sBEIface_001566E8*)cBEAggressionInterface_instance)->active = 0;
+    cBEAggressionInterface_instance->bIsActive = 0;
     ((sBEIface_001566E8*)cBERewardInterface_instance)->active = 0;
 }
 #endif
@@ -308,9 +304,7 @@ extern "C" void cBEPreRaceState_onExit(void)
 //100%
 INCLUDE_ASM("be/beprepoststate", cBEPreRaceState_onEnter);
 #ifdef SKIP_ASM
-extern void* cBESaveInterface_instance;
 extern void* D_004A11C8;
-extern void* cBEAggressionInterface_instance;
 
 struct sBEIface_00156750
 {
@@ -332,12 +326,12 @@ extern "C" void cBEPreRaceState_onEnter(void)
     cBECharacterInterface_instance->bIsActive = 1;
     cBEStatInterface_instance->bIsActive = 1;
     cBEOptionInterface_instance->bIsActive = 1;
-    ((sBEIface_00156750*)cBESaveInterface_instance)->active = 1;
+    cBESaveInterface_instance->bIsActive = 1;
     cBENetworkInterface_instance->bIsActive = 1;
     ((sBEIface_00156750*)D_004A11C8)->active = 1;
     cBEBAGTInterface_instance->bIsActive = 1;
     cBEEconInterface_instance->bIsActive = 1;
-    ((sBEIface_00156750*)cBEAggressionInterface_instance)->active = 1;
+    cBEAggressionInterface_instance->bIsActive = 1;
     ((sBEIface_00156750*)cBERewardInterface_instance)->active = 1;
 }
 #endif

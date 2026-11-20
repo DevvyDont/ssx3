@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/animteeternode.h"
 #include "object/springrailnode.h"
 #include "object/floatrailnode.h"
 #include "object/animobject.h"
@@ -5972,9 +5973,9 @@ extern void* D_004908F8[];
  *
  * @param flags  destructor flags
  */
-extern "C" void cAnimTeeterNode__cAnimTeeterNode(void* self, int flags)
+extern "C" void cAnimTeeterNode__cAnimTeeterNode(cAnimTeeterNode* self, int flags)
 {
-    *(void***)((char*)self + 0x50) = D_004908F8;
+    self->mVtbl = D_004908F8;
     cAnimNode__cAnimNode((char*)self + 0x30, 0);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -6004,10 +6005,10 @@ INCLUDE_ASM("object/railmodifier", cAnimTeeterNode_getAnimDir);
  *
  * @return 1 or -1
  */
-extern "C" int cAnimTeeterNode_getAnimDir(void* self)
+extern "C" int cAnimTeeterNode_getAnimDir(cAnimTeeterNode* self)
 {
     int direction = -1;
-    if (*(float*)((char*)self + 0x4) >= 0.0f) {
+    if (self->AnimSpeed >= 0.0f) {
         direction = 1;
     }
     return direction;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/animdeltanode.h"
 #include "object/railmannode.h"
 #include "object/animcombonode.h"
 #include "object/multiparticle.h"
@@ -1382,13 +1383,13 @@ extern void* D_0048EA70[];
  * @param animData  anim delta make-data
  * @return self
  */
-extern "C" void* cAnimDeltaNode_cAnimDeltaNode1(void* self, int bucket, int instRecord, int animData)
+extern "C" void* cAnimDeltaNode_cAnimDeltaNode1(cAnimDeltaNode* self, int bucket, int instRecord, int animData)
 {
     cAnimObjectNode_cAnimObjectNode1(self, bucket, 2, instRecord, animData);
-    *(void***)((char*)self + 0x3C) = D_0048EA70;
-    *(int*)((char*)self + 0x6C) = 0;
-    *(int*)((char*)self + 0x4) = 0;
-    return self;
+    self->mVtbl = D_0048EA70;
+    *(int*)&self->Delta = 0;
+    self->AnimActive = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -1414,13 +1415,13 @@ extern void* D_0048EA70[];
  * @param stream  replay frame to read from (On Tour cBxReplayFrame*)
  * @return @p self
  */
-extern "C" void* cAnimDeltaNode_cAnimDeltaNode(void* self, void* bucket, void* stream)
+extern "C" void* cAnimDeltaNode_cAnimDeltaNode(cAnimDeltaNode* self, void* bucket, void* stream)
 {
     cAnimObjectNode_cAnimObjectNode(self, bucket, stream);
-    *(void***)((char*)self + 0x3C) = D_0048EA70;
+    self->mVtbl = D_0048EA70;
     sVEntry00359270* vt = *(sVEntry00359270**)stream;
     vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x6C, 4);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -1448,43 +1449,42 @@ struct sVEntry_3592D0 {
  *
  * @return 0 only from that dead expire branch, else 1
  */
-extern "C" int cAnimDeltaNode_updateNode(void* self)
+extern "C" int cAnimDeltaNode_updateNode(cAnimDeltaNode* self)
 {
-    char* deltaNode = (char*)self;
-    *(float*)(deltaNode + 0x24) = 10000000000.0f;
-    *(float*)(deltaNode + 0x28) = 10000000000.0f;
-    if (*(int*)(deltaNode + 0x8) == 0) {
-        float curDelta = *(float*)(deltaNode + 0x6C);
-        int countdown = *(int*)(deltaNode + 0xC);
+    self->FrameStart = 10000000000.0f;
+    self->FrameEnd = 10000000000.0f;
+    if (self->AnimComplete == 0) {
+        float curDelta = self->Delta;
+        int countdown = self->Delay;
         if (curDelta > 0.0f) {
             if (countdown >= 0) {
                 if (countdown == 0 && curDelta > 0.0f) {
-                    float newDelta = curDelta - __builtin_fabsf(*(float*)(deltaNode + 0x10));
-                    *(float*)(deltaNode + 0x6C) = newDelta;
+                    float newDelta = curDelta - __builtin_fabsf(self->AnimSpeed);
+                    self->Delta = newDelta;
                     if (newDelta < 0.0f) {
-                        *(float*)(deltaNode + 0x6C) = 0.0f;
+                        self->Delta = 0.0f;
                     }
                 }
-                cAnimObjectNode_updateNode(deltaNode);
-                if (*(float*)(deltaNode + 0x6C) > 0.0f) {
-                    *(int*)(deltaNode + 0x4) = 1;
+                cAnimObjectNode_updateNode(((char*)self));
+                if (self->Delta > 0.0f) {
+                    self->AnimActive = 1;
                 } else {
-                    *(int*)(deltaNode + 0x4) = 0;
+                    self->AnimActive = 0;
                 }
                 return 1;
             }
         } else {
             if (countdown > 0) {
-                *(int*)(deltaNode + 0xC) = countdown - 1;
+                self->Delay = countdown - 1;
             }
-            if (*(int*)(deltaNode + 0x8) != 0) {
-                char* obj = deltaNode + 0x30;
-                sVEntry_3592D0* vtEntry = &(*(sVEntry_3592D0**)(deltaNode + 0x3C))[34];
+            if (self->AnimComplete != 0) {
+                char* obj = ((char*)self) + 0x30;
+                sVEntry_3592D0* vtEntry = &((sVEntry_3592D0*)self->mVtbl)[34];
                 vtEntry->fn(obj + vtEntry->delta, 1);
                 return 0;
             }
         }
-        *(unsigned short*)(deltaNode + 0x42) |= 1;
+        self->Flags |= 1;
     }
     return 1;
 }
@@ -1502,10 +1502,10 @@ extern "C" void cAnimObjectNode_signal_set(void* self, int id, float v) __asm__(
  * @param id  signal id
  * @param signalArg  signal argument
  */
-extern "C" void cAnimDeltaNode_signal(void* self, int id, float signalArg)
+extern "C" void cAnimDeltaNode_signal(cAnimDeltaNode* self, int id, float signalArg)
 {
     if (id == 140) {
-        *(float*)((char*)self + 0x6C) += signalArg * 0.03333333507180214f;
+        self->Delta += signalArg * 0.03333333507180214f;
     } else {
         cAnimObjectNode_signal_set(self, id, signalArg);
     }
@@ -1528,7 +1528,7 @@ extern "C" void cAnimObjectNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  replay stream to write to
  */
-extern "C" void cAnimDeltaNode_writeToReplayFrame(void* self, void* stream)
+extern "C" void cAnimDeltaNode_writeToReplayFrame(cAnimDeltaNode* self, void* stream)
 {
     cAnimObjectNode_writeToReplayFrame(self, stream);
     sSerVEntry_00359410* vt = *(sSerVEntry_00359410**)stream;
