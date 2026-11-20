@@ -108,21 +108,21 @@ extern "C" void func_002ECAF0(sLensFx* self);
  * emitter index, item, kind) through func_002EC9D0 and func_002ECAF0. cRider_cRider builds it on 200 bytes with the
  * rider's mAttachedEmitterFX and stores it as mBoltOnFX.
  *
- * @param a1  the rider
- * @param a2  the attached-emitter owner the emitters are created in
+ * @param rider  the rider
+ * @param emitterOwner  the attached-emitter owner the emitters are created in
  * @return @p self
  */
-extern "C" void* func_002EC9E0(void* self, int a1, int a2)
+extern "C" void* func_002EC9E0(void* self, int rider, int emitterOwner)
 {
     *(void***)((char*)self + 0xC4) = D_00487EE8;
     *(int*)((char*)self + 0x0) = 1;
-    *(int*)((char*)self + 0x4) = a1;
-    *(int*)((char*)self + 0xC) = a2;
+    *(int*)((char*)self + 0x4) = rider;
+    *(int*)((char*)self + 0xC) = emitterOwner;
     *(int*)((char*)self + 0x8) = 0;
-    char* p = (char*)self + 0x10;
+    char* entry = (char*)self + 0x10;
     int i;
-    for (i = 14; i != -1; i--, p += 0xC) {
-        func_002EC9D0(p);
+    for (i = 14; i != -1; i--, entry += 0xC) {
+        func_002EC9D0(entry);
     }
     func_002ECAF0((sLensFx*)self);
     return self;
@@ -143,21 +143,21 @@ extern "C" void func_002ECAF0(sLensFx* self);
  * Same as func_002EC9E0 except that it stores a pointer to the character id (+0x8) and leaves the rider (+0x4) 0.
  * cFERider_init builds it on 200 bytes.
  *
- * @param a1  pointer to the character id
- * @param a2  the attached-emitter owner the emitters are created in
+ * @param charIdPtr  pointer to the character id
+ * @param emitterOwner  the attached-emitter owner the emitters are created in
  * @return @p self
  */
-extern "C" void* func_002ECA68(void* self, int a1, int a2)
+extern "C" void* func_002ECA68(void* self, int charIdPtr, int emitterOwner)
 {
     *(void***)((char*)self + 0xC4) = D_00487EE8;
     *(int*)((char*)self + 0x0) = 1;
-    *(int*)((char*)self + 0x8) = a1;
-    *(int*)((char*)self + 0xC) = a2;
+    *(int*)((char*)self + 0x8) = charIdPtr;
+    *(int*)((char*)self + 0xC) = emitterOwner;
     *(int*)((char*)self + 0x4) = 0;
-    char* p = (char*)self + 0x10;
+    char* entry = (char*)self + 0x10;
     int i;
-    for (i = 14; i != -1; i--, p += 0xC) {
-        func_002EC9D0(p);
+    for (i = 14; i != -1; i--, entry += 0xC) {
+        func_002EC9D0(entry);
     }
     func_002ECAF0((sLensFx*)self);
     return self;
@@ -731,39 +731,39 @@ static inline sV4_DB20 Sample_DB20(float u, float v, short tex)
  * Does nothing for a null patch or one whose texture page is not loaded (world cache checks). Of the patch's three
  * layers (3 type bits each at +0xC), a type-5 layer is sampled at the patch rectangle (+0x10..+0x1C) point given by @p
  * tx, @p ty clamped to 0..1, and a type-1 layer at the UV interpolated from the corner values (+0x20..+0x3C), wrapped
- * to 0..1; samples come from GrMan virtual slot 58 with the layer texture (+0x1A0). Then *@p o4 = (type-1 sample -
- * type-5 sample) * D_004FAB00 * (2 * type-5 sample.x) and *@p o5 = *@p o4 / type-1 sample, with both alphas (x) set to
+ * to 0..1; samples come from GrMan virtual slot 58 with the layer texture (+0x1A0). Then *@p baseColour = (type-1 sample -
+ * type-5 sample) * D_004FAB00 * (2 * type-5 sample.x) and *@p lightmapColour = *@p baseColour / type-1 sample, with both alphas (x) set to
  * 0.5. cRenderStateMan_update and tAvalancheNode_calculate call it.
  *
  * @param tx  u position on the patch, 0..1
  * @param ty  v position on the patch, 0..1
- * @param o4  receives the first colour
- * @param o5  receives the second colour
+ * @param baseColour  receives the first colour
+ * @param lightmapColour  receives the second colour
  */
-extern "C" void func_002EDB20(sLensSrc_DB20* self, float tx, float ty, sV4_DB20* o4, sV4_DB20* o5)
+extern "C" void func_002EDB20(sLensSrc_DB20* self, float tx, float ty, sV4_DB20* baseColour, sV4_DB20* lightmapColour)
 {
-    sV4_DB20 a(0.0f, 0.0f, 0.0f, 0.0f);
-    sV4_DB20 b(0.0f, 0.0f, 0.0f, 0.0f);
+    sV4_DB20 type5Sample(0.0f, 0.0f, 0.0f, 0.0f);
+    sV4_DB20 type1Sample(0.0f, 0.0f, 0.0f, 0.0f);
     if (self && IsLoaded_DB20(self)) {
         for (int i = 0; i < 3; i++) {
             if (((self->types >> (i * 3)) & 7) == 5) {
-                a = Sample_DB20(self->x0 + self->w0 * Clamp_DB20(tx, 0.0f, 1.0f), self->y0 + self->h0 * Clamp_DB20(ty, 0.0f, 1.0f), self->tex[i]);
+                type5Sample = Sample_DB20(self->x0 + self->w0 * Clamp_DB20(tx, 0.0f, 1.0f), self->y0 + self->h0 * Clamp_DB20(ty, 0.0f, 1.0f), self->tex[i]);
             }
             if (((self->types >> (i * 3)) & 7) == 1) {
                 float top = Lerp_DB20(self->c00, self->c10, tx);
                 float bot = Lerp_DB20(self->c02, self->c12, tx);
                 float lft = Lerp_DB20(self->c01, self->c03, ty);
                 float rgt = Lerp_DB20(self->c11, self->c13, ty);
-                float u = Lerp_DB20(top, bot, ty) + 1000.0f;
-                float v = Lerp_DB20(lft, rgt, tx) + 1000.0f;
-                b = Sample_DB20(u - (float)(int)u, v - (float)(int)v, self->tex[i]);
+                float texU = Lerp_DB20(top, bot, ty) + 1000.0f;
+                float texV = Lerp_DB20(lft, rgt, tx) + 1000.0f;
+                type1Sample = Sample_DB20(texU - (float)(int)texU, texV - (float)(int)texV, self->tex[i]);
             }
         }
-        float scale = a.x * 2.0f;
-        *o4 = (b - a) * D_004FAB00 * scale;
-        *o5 = *o4 / b;
-        o4->x = 0.5f;
-        o5->x = 0.5f;
+        float scale = type5Sample.x * 2.0f;
+        *baseColour = (type1Sample - type5Sample) * D_004FAB00 * scale;
+        *lightmapColour = *baseColour / type1Sample;
+        baseColour->x = 0.5f;
+        lightmapColour->x = 0.5f;
     }
 }
 #endif
@@ -923,8 +923,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float func_002EE070(int i)
 {
-    sLensFxSlot* s = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *s->p14;
+    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *renderState->p14;
     return *obj->vt[27].fn((char*)obj + obj->vt[27].delta);
 }
 #endif
@@ -945,8 +945,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float func_002EE0B8(int i)
 {
-    sLensFxSlot* s = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *s->p14;
+    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *renderState->p14;
     return *obj->vt[28].fn((char*)obj + obj->vt[28].delta);
 }
 #endif
@@ -967,8 +967,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float func_002EE100(int i)
 {
-    sLensFxSlot* s = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *s->p14;
+    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *renderState->p14;
     return *obj->vt[29].fn((char*)obj + obj->vt[29].delta);
 }
 #endif
@@ -989,8 +989,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float func_002EE148(int i)
 {
-    sLensFxSlot* s = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *s->p14;
+    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *renderState->p14;
     return *obj->vt[30].fn((char*)obj + obj->vt[30].delta);
 }
 #endif
@@ -1011,8 +1011,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float func_002EE190(int i)
 {
-    sLensFxSlot* s = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *s->p14;
+    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *renderState->p14;
     return *obj->vt[31].fn((char*)obj + obj->vt[31].delta);
 }
 #endif
@@ -1033,8 +1033,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float func_002EE1D8(int i)
 {
-    sLensFxSlot* s = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *s->p14;
+    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *renderState->p14;
     return *obj->vt[32].fn((char*)obj + obj->vt[32].delta);
 }
 #endif
@@ -1056,8 +1056,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" int func_002EE220(int i)
 {
-    sLensFxSlot* s = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *s->p14;
+    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *renderState->p14;
     return *(int*)obj->vt[33].fn((char*)obj + obj->vt[33].delta);
 }
 #endif
@@ -1078,8 +1078,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float func_002EE268(int i)
 {
-    sLensFxSlot* s = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *s->p14;
+    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *renderState->p14;
     return *obj->vt[34].fn((char*)obj + obj->vt[34].delta);
 }
 #endif
@@ -1100,8 +1100,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float func_002EE2B0(int i)
 {
-    sLensFxSlot* s = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *s->p14;
+    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *renderState->p14;
     return *obj->vt[35].fn((char*)obj + obj->vt[35].delta);
 }
 #endif
@@ -1233,8 +1233,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float func_002EE3B8(int i)
 {
-    sLensFxSlot* s = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *s->p0;
+    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *renderState->p0;
     return *obj->vt[6].fn((char*)obj + obj->vt[6].delta);
 }
 #endif
@@ -1256,8 +1256,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float func_002EE400(int i)
 {
-    sLensFxSlot* s = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *s->p10;
+    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *renderState->p10;
     return *obj->vt[26].fn((char*)obj + obj->vt[26].delta);
 }
 #endif
@@ -1280,9 +1280,9 @@ extern int D_004A3B60;
 extern "C" float func_002EE448(int i)
 {
     if (D_004A3B60 == 0) {
-        sLensFxSlot* s = &cRenderStateMan_m_state[i];
-        sLensFxObj* obj = *s->p20;
-        return *obj->vt[43].fn((char*)obj + obj->vt[43].delta) * (1.0f - *(float*)((char*)s + 0x24));
+        sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
+        sLensFxObj* obj = *renderState->p20;
+        return *obj->vt[43].fn((char*)obj + obj->vt[43].delta) * (1.0f - *(float*)((char*)renderState + 0x24));
     }
     return 0.0f;
 }
@@ -1304,8 +1304,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float func_002EE4C0(int i)
 {
-    sLensFxSlot* s = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *s->p20;
+    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *renderState->p20;
     return *obj->vt[44].fn((char*)obj + obj->vt[44].delta);
 }
 #endif
@@ -1327,9 +1327,9 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float func_002EE508(int i)
 {
-    sLensFxSlot* s = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *s->p20;
-    return *obj->vt[45].fn((char*)obj + obj->vt[45].delta) * (1.0f - *(float*)((char*)s + 0x24));
+    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *renderState->p20;
+    return *obj->vt[45].fn((char*)obj + obj->vt[45].delta) * (1.0f - *(float*)((char*)renderState + 0x24));
 }
 #endif
 
@@ -1350,8 +1350,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float func_002EE570(int i)
 {
-    sLensFxSlot* s = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *s->p20;
+    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *renderState->p20;
     return *obj->vt[46].fn((char*)obj + obj->vt[46].delta);
 }
 #endif
@@ -1373,8 +1373,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float func_002EE5B8(int i)
 {
-    sLensFxSlot* s = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *s->p20;
+    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *renderState->p20;
     return *obj->vt[49].fn((char*)obj + obj->vt[49].delta);
 }
 #endif
@@ -1397,8 +1397,8 @@ extern int D_004A3B60;
 extern "C" float func_002EE600(int i)
 {
     if (D_004A3B60 == 0) {
-        sLensFxSlot* s = &cRenderStateMan_m_state[i];
-        sLensFxObj* obj = *s->p20;
+        sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
+        sLensFxObj* obj = *renderState->p20;
         return *obj->vt[51].fn((char*)obj + obj->vt[51].delta);
     }
     return 0.0f;
@@ -1422,8 +1422,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float func_002EE660(int i)
 {
-    sLensFxSlot* s = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *s->p20;
+    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *renderState->p20;
     return *obj->vt[52].fn((char*)obj + obj->vt[52].delta);
 }
 #endif
@@ -1445,8 +1445,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float func_002EE6A8(int i)
 {
-    sLensFxSlot* s = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *s->p20;
+    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *renderState->p20;
     return *obj->vt[50].fn((char*)obj + obj->vt[50].delta);
 }
 #endif
@@ -1468,8 +1468,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float func_002EE6F0(int i)
 {
-    sLensFxSlot* s = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *s->p20;
+    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *renderState->p20;
     return *obj->vt[48].fn((char*)obj + obj->vt[48].delta);
 }
 #endif
@@ -1491,8 +1491,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float func_002EE738(int i)
 {
-    sLensFxSlot* s = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *s->p20;
+    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *renderState->p20;
     return *obj->vt[53].fn((char*)obj + obj->vt[53].delta);
 }
 #endif
@@ -1514,8 +1514,8 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  */
 extern "C" float func_002EE780(int i)
 {
-    sLensFxSlot* s = &cRenderStateMan_m_state[i];
-    sLensFxObj* obj = *s->p20;
+    sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
+    sLensFxObj* obj = *renderState->p20;
     return *obj->vt[54].fn((char*)obj + obj->vt[54].delta);
 }
 #endif

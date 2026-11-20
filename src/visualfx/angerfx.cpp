@@ -172,8 +172,8 @@ extern "C" void func_002D4C08(sAnger_2D4C08* self)
         return;
     }
     for (unsigned int i = 0; i < players_2D4C08()->count; i++) {
-        char* g = (char*)SSXApp->Game;
-        char* other = *(char**)(*(char**)(*(char**)((*(sPlayers_2D4C08**)(g + 0x84))->p[i] + 0xA8) + 0x20) + 4);
+        char* game = (char*)SSXApp->Game;
+        char* other = *(char**)(*(char**)(*(char**)((*(sPlayers_2D4C08**)(game + 0x84))->p[i] + 0xA8) + 0x20) + 4);
         if (other == 0) {
             continue;
         }
@@ -182,15 +182,15 @@ extern "C" void func_002D4C08(sAnger_2D4C08* self)
             st->level = 0;
             return;
         }
-        int n = **(int**)(g + 0x28);
+        int n = **(int**)(game + 0x28);
         int ok = n != 0 && n < 10;
         if (ok) {
             st->level = 0;
             return;
         }
         void* aggr = cBEAggressionInterface_getThis();
-        int a = riderV_2D4C08(self->rider, 7);
-        int lvl = cBEAggressionInterface_getAggression(aggr, a, riderV_2D4C08(other, 7));
+        int riderAIIndex = riderV_2D4C08(self->rider, 7);
+        int lvl = cBEAggressionInterface_getAggression(aggr, riderAIIndex, riderV_2D4C08(other, 7));
         int old = st->anger;
         st->anger = lvl;
         if (lvl >= 4) {
@@ -407,26 +407,26 @@ extern "C" void func_002D5048(sAnger_2D4C08* self)
     if (st->level == 0.0f) {
         return;
     }
-    sGfx_2D5048* g = (sGfx_2D5048*)GrMan_angerfx;
-    sM4_2D5048* m = ((sM4_2D5048* (*)(void*))g->vtable[35].fn)((char*)g + g->vtable[35].delta);
+    sGfx_2D5048* graphics = (sGfx_2D5048*)GrMan_angerfx;
+    sM4_2D5048* viewMatrix = ((sM4_2D5048* (*)(void*))graphics->vtable[35].fn)((char*)graphics + graphics->vtable[35].delta);
     sM4_2D5048* bm = &(*(sBones_2D5048**)(self->rider + 0x780))->mats[*(int*)(self->rider + 0x8A8)];
-    sV4_2D5048 p = bm->v[3];
-    sV4_2D5048 v = MatVec_2D5048(m, p);
-    float z = v.z;
+    sV4_2D5048 headPos = bm->v[3];
+    sV4_2D5048 viewPos = MatVec_2D5048(viewMatrix, headPos);
+    float z = viewPos.z;
     if (z <= 0.0f || 2000.0f <= z) {
         return;
     }
-    float s = z * 0.003f;
-    float b = st->glowA + s;
-    float a = st->glowB + s;
+    float distScale = z * 0.003f;
+    float widthScale = st->glowA + distScale;
+    float heightScale = st->glowB + distScale;
     if (1500.0f < z) {
         fade = (2000.0f - z) * 0.002f;
     }
-    sV4_2D5048 right(m->v[0].x, m->v[1].x, m->v[2].x, 0.0f);
-    sV4_2D5048 up(m->v[0].y, m->v[1].y, m->v[2].y, 0.0f);
-    sV4_2D5048 c0 = Add_2D5048(p, Scale_2D5048(up, 35.0f));
-    sV4_2D5048 c1 = Add_2D5048(c0, Scale_2D5048(up, a * 18.0f));
-    sV4_2D5048 rr = Scale_2D5048(right, b * 9.0f);
+    sV4_2D5048 right(viewMatrix->v[0].x, viewMatrix->v[1].x, viewMatrix->v[2].x, 0.0f);
+    sV4_2D5048 up(viewMatrix->v[0].y, viewMatrix->v[1].y, viewMatrix->v[2].y, 0.0f);
+    sV4_2D5048 baseCentre = Add_2D5048(headPos, Scale_2D5048(up, 35.0f));
+    sV4_2D5048 topCentre = Add_2D5048(baseCentre, Scale_2D5048(up, heightScale * 18.0f));
+    sV4_2D5048 rr = Scale_2D5048(right, widthScale * 9.0f);
 
     sGfx_2D5048* gx = (sGfx_2D5048*)GrMan_angerfx;
     gx->top[1] = gx->top[0];
@@ -443,34 +443,34 @@ extern "C" void func_002D5048(sAnger_2D4C08* self)
     col.r *= fade;
     sVtx_2D5048 vtx[4];
     {
-        sV4_2D5048 t0 = Sub_2D5048(c0, rr);
+        sV4_2D5048 bottomLeft = Sub_2D5048(baseCentre, rr);
         vtx[0].SetC((int)(col.g * 255.0f), (int)(col.b * 255.0f), (int)(col.a * 255.0f), (int)(col.r * 128.0f));
         vtx[0].q = 1.0f;
-        vtx[0].pos = t0;
+        vtx[0].pos = bottomLeft;
         vtx[0].u = 0.0f;
         vtx[0].v = 1.0f;
     }
     {
-        sV4_2D5048 t1 = Add_2D5048(c0, rr);
+        sV4_2D5048 bottomRight = Add_2D5048(baseCentre, rr);
         vtx[1].SetC((int)(col.g * 255.0f), (int)(col.b * 255.0f), (int)(col.a * 255.0f), (int)(col.r * 128.0f));
         vtx[1].q = 1.0f;
-        vtx[1].pos = t1;
+        vtx[1].pos = bottomRight;
         vtx[1].u = 1.0f;
         vtx[1].v = 1.0f;
     }
     {
-        sV4_2D5048 t2 = Sub_2D5048(c1, rr);
+        sV4_2D5048 topLeft = Sub_2D5048(topCentre, rr);
         vtx[2].SetC((int)(col.g * 255.0f), (int)(col.b * 255.0f), (int)(col.a * 255.0f), (int)(col.r * 128.0f));
         vtx[2].q = 1.0f;
-        vtx[2].pos = t2;
+        vtx[2].pos = topLeft;
         vtx[2].u = 0.0f;
         vtx[2].v = 0.0f;
     }
     {
-        sV4_2D5048 t3 = Add_2D5048(c1, rr);
+        sV4_2D5048 topRight = Add_2D5048(topCentre, rr);
         vtx[3].SetC((int)(col.g * 255.0f), (int)(col.b * 255.0f), (int)(col.a * 255.0f), (int)(col.r * 128.0f));
         vtx[3].q = 1.0f;
-        vtx[3].pos = t3;
+        vtx[3].pos = topRight;
         vtx[3].u = 1.0f;
         vtx[3].v = 0.0f;
     }
@@ -512,26 +512,26 @@ extern float D_004A3A38;
  * Scales each channel by 1.3 (D_004A3A38), clamps it to 0..1 and stores it times 255. tAvalancheNode_calculate is its
  * only caller.
  *
- * @param p  the record
- * @param r  red, 0..1 before scaling
- * @param g  green
- * @param b  blue
+ * @param record  the record
+ * @param red  red, 0..1 before scaling
+ * @param green  green
+ * @param blue  blue
  */
 // PORT: <? (g++ min operator)
-extern "C" void func_002D55C0(unsigned char* p, float r, float g, float b)
+extern "C" void func_002D55C0(unsigned char* record, float red, float green, float blue)
 {
     float zero = 0.0f;
     float one = 1.0f;
-    r *= D_004A3A38;
-    g *= D_004A3A38;
-    b *= D_004A3A38;
+    red *= D_004A3A38;
+    green *= D_004A3A38;
+    blue *= D_004A3A38;
     float cr, cg, cb;
-    if (r >= zero) cr = r <? one; else cr = zero;
-    if (g >= zero) cg = g <? one; else cg = zero;
-    if (b >= zero) cb = b <? one; else cb = zero;
-    p[3] = (int)(cr * 255.0f);
-    p[4] = (int)(cg * 255.0f);
-    p[5] = (int)(cb * 255.0f);
+    if (red >= zero) cr = red <? one; else cr = zero;
+    if (green >= zero) cg = green <? one; else cg = zero;
+    if (blue >= zero) cb = blue <? one; else cb = zero;
+    record[3] = (int)(cr * 255.0f);
+    record[4] = (int)(cg * 255.0f);
+    record[5] = (int)(cb * 255.0f);
 }
 #endif
 

@@ -109,10 +109,10 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float func_002EE8A0(int i)
 {
-    sRSMEntry* e = &cRenderStateMan_m_state[i];
-    sRSMObj* o = *e->p20;
-    sRSMVEntry* vt = o->vt;
-    return *vt[58].fn((char*)o + vt[58].delta);
+    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *renderState->p20;
+    sRSMVEntry* vt = stateQuery->vt;
+    return *vt[58].fn((char*)stateQuery + vt[58].delta);
 }
 #endif
 
@@ -132,10 +132,10 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float func_002EE8E8(int i)
 {
-    sRSMEntry* e = &cRenderStateMan_m_state[i];
-    sRSMObj* o = *e->p20;
-    sRSMVEntry* vt = o->vt;
-    return *vt[59].fn((char*)o + vt[59].delta);
+    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *renderState->p20;
+    sRSMVEntry* vt = stateQuery->vt;
+    return *vt[59].fn((char*)stateQuery + vt[59].delta);
 }
 #endif
 
@@ -155,10 +155,10 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float func_002EE930(int i)
 {
-    sRSMEntry* e = &cRenderStateMan_m_state[i];
-    sRSMObj* o = *e->p20;
-    sRSMVEntry* vt = o->vt;
-    return *vt[60].fn((char*)o + vt[60].delta);
+    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *renderState->p20;
+    sRSMVEntry* vt = stateQuery->vt;
+    return *vt[60].fn((char*)stateQuery + vt[60].delta);
 }
 #endif
 
@@ -178,10 +178,10 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float func_002EE978(int i)
 {
-    sRSMEntry* e = &cRenderStateMan_m_state[i];
-    sRSMObj* o = *e->p20;
-    sRSMVEntry* vt = o->vt;
-    return *vt[61].fn((char*)o + vt[61].delta);
+    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *renderState->p20;
+    sRSMVEntry* vt = stateQuery->vt;
+    return *vt[61].fn((char*)stateQuery + vt[61].delta);
 }
 #endif
 
@@ -202,10 +202,10 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float func_002EE9C0(int i)
 {
-    sRSMEntry* e = &cRenderStateMan_m_state[i];
-    sRSMObj* o = *e->p04;
-    sRSMVEntry* vt = o->vt;
-    return *vt[7].fn((char*)o + vt[7].delta);
+    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *renderState->p04;
+    sRSMVEntry* vt = stateQuery->vt;
+    return *vt[7].fn((char*)stateQuery + vt[7].delta);
 }
 #endif
 
@@ -226,10 +226,10 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float func_002EEA08(int i)
 {
-    sRSMEntry* e = &cRenderStateMan_m_state[i];
-    sRSMObj* o = *e->p04;
-    sRSMVEntry* vt = o->vt;
-    return *vt[8].fn((char*)o + vt[8].delta);
+    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *renderState->p04;
+    sRSMVEntry* vt = stateQuery->vt;
+    return *vt[8].fn((char*)stateQuery + vt[8].delta);
 }
 #endif
 
@@ -250,10 +250,10 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float func_002EEA50(int i)
 {
-    sRSMEntry* e = &cRenderStateMan_m_state[i];
-    sRSMObj* o = *e->p04;
-    sRSMVEntry* vt = o->vt;
-    return *vt[9].fn((char*)o + vt[9].delta);
+    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *renderState->p04;
+    sRSMVEntry* vt = stateQuery->vt;
+    return *vt[9].fn((char*)stateQuery + vt[9].delta);
 }
 #endif
 
@@ -274,10 +274,10 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float func_002EEA98(int i)
 {
-    sRSMEntry* e = &cRenderStateMan_m_state[i];
-    sRSMObj* o = *e->p04;
-    sRSMVEntry* vt = o->vt;
-    return *vt[10].fn((char*)o + vt[10].delta);
+    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *renderState->p04;
+    sRSMVEntry* vt = stateQuery->vt;
+    return *vt[10].fn((char*)stateQuery + vt[10].delta);
 }
 #endif
 
@@ -298,10 +298,10 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float func_002EEAE0(int i)
 {
-    sRSMEntry* e = &cRenderStateMan_m_state[i];
-    sRSMObj* o = *e->p04;
-    sRSMVEntry* vt = o->vt;
-    return *vt[11].fn((char*)o + vt[11].delta);
+    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *renderState->p04;
+    sRSMVEntry* vt = stateQuery->vt;
+    return *vt[11].fn((char*)stateQuery + vt[11].delta);
 }
 #endif
 
@@ -322,10 +322,10 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float func_002EEB28(int i)
 {
-    sRSMEntry* e = &cRenderStateMan_m_state[i];
-    sRSMObj* o = *e->p04;
-    sRSMVEntry* vt = o->vt;
-    return *vt[12].fn((char*)o + vt[12].delta);
+    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *renderState->p04;
+    sRSMVEntry* vt = stateQuery->vt;
+    return *vt[12].fn((char*)stateQuery + vt[12].delta);
 }
 #endif
 
@@ -348,10 +348,10 @@ extern int D_004A3B60;
 extern "C" float func_002EEB70(int i)
 {
     if (D_004A3B60 == 0) {
-        sRSMEntry* e = &cRenderStateMan_m_state[i];
-        sRSMObj* o = **(sRSMObj***)((char*)e + 0xC);
-        sRSMVEntry* vt = o->vt;
-        return *vt[20].fn((char*)o + vt[20].delta);
+        sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+        sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
+        sRSMVEntry* vt = stateQuery->vt;
+        return *vt[20].fn((char*)stateQuery + vt[20].delta);
     }
     return 1.0f;
 }
@@ -376,10 +376,10 @@ extern int D_004A3B60;
 extern "C" float func_002EEBD0(int i)
 {
     if (D_004A3B60 == 0) {
-        sRSMEntry* e = &cRenderStateMan_m_state[i];
-        sRSMObj* o = **(sRSMObj***)((char*)e + 0xC);
-        sRSMVEntry* vt = o->vt;
-        return *vt[21].fn((char*)o + vt[21].delta);
+        sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+        sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
+        sRSMVEntry* vt = stateQuery->vt;
+        return *vt[21].fn((char*)stateQuery + vt[21].delta);
     }
     return 1.0f;
 }
@@ -404,10 +404,10 @@ extern int D_004A3B60;
 extern "C" float func_002EEC30(int i)
 {
     if (D_004A3B60 == 0) {
-        sRSMEntry* e = &cRenderStateMan_m_state[i];
-        sRSMObj* o = **(sRSMObj***)((char*)e + 0xC);
-        sRSMVEntry* vt = o->vt;
-        return *vt[22].fn((char*)o + vt[22].delta);
+        sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+        sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
+        sRSMVEntry* vt = stateQuery->vt;
+        return *vt[22].fn((char*)stateQuery + vt[22].delta);
     }
     return 1.0f;
 }
@@ -432,10 +432,10 @@ extern int D_004A3B60;
 extern "C" float func_002EEC90(int i)
 {
     if (D_004A3B60 == 0) {
-        sRSMEntry* e = &cRenderStateMan_m_state[i];
-        sRSMObj* o = **(sRSMObj***)((char*)e + 0xC);
-        sRSMVEntry* vt = o->vt;
-        return *vt[23].fn((char*)o + vt[23].delta);
+        sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+        sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
+        sRSMVEntry* vt = stateQuery->vt;
+        return *vt[23].fn((char*)stateQuery + vt[23].delta);
     }
     return 0.0f;
 }
@@ -460,10 +460,10 @@ extern int D_004A3B60;
 extern "C" float func_002EECF0(int i)
 {
     if (D_004A3B60 == 0) {
-        sRSMEntry* e = &cRenderStateMan_m_state[i];
-        sRSMObj* o = **(sRSMObj***)((char*)e + 0xC);
-        sRSMVEntry* vt = o->vt;
-        return *vt[24].fn((char*)o + vt[24].delta);
+        sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+        sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
+        sRSMVEntry* vt = stateQuery->vt;
+        return *vt[24].fn((char*)stateQuery + vt[24].delta);
     }
     return 0.0f;
 }
@@ -488,10 +488,10 @@ extern int D_004A3B60;
 extern "C" float func_002EED50(int i)
 {
     if (D_004A3B60 == 0) {
-        sRSMEntry* e = &cRenderStateMan_m_state[i];
-        sRSMObj* o = **(sRSMObj***)((char*)e + 0xC);
-        sRSMVEntry* vt = o->vt;
-        return *vt[25].fn((char*)o + vt[25].delta);
+        sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+        sRSMObj* stateQuery = **(sRSMObj***)((char*)renderState + 0xC);
+        sRSMVEntry* vt = stateQuery->vt;
+        return *vt[25].fn((char*)stateQuery + vt[25].delta);
     }
     return 0.0f;
 }
@@ -514,10 +514,10 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float func_002EEDB0(int i)
 {
-    sRSMEntry* e = &cRenderStateMan_m_state[i];
-    sRSMObj* o = *e->p08;
-    sRSMVEntry* vt = o->vt;
-    return *vt[13].fn((char*)o + vt[13].delta);
+    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *renderState->p08;
+    sRSMVEntry* vt = stateQuery->vt;
+    return *vt[13].fn((char*)stateQuery + vt[13].delta);
 }
 #endif
 
@@ -538,10 +538,10 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float func_002EEDF8(int i)
 {
-    sRSMEntry* e = &cRenderStateMan_m_state[i];
-    sRSMObj* o = *e->p08;
-    sRSMVEntry* vt = o->vt;
-    return *vt[14].fn((char*)o + vt[14].delta);
+    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *renderState->p08;
+    sRSMVEntry* vt = stateQuery->vt;
+    return *vt[14].fn((char*)stateQuery + vt[14].delta);
 }
 #endif
 
@@ -562,10 +562,10 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float func_002EEE40(int i)
 {
-    sRSMEntry* e = &cRenderStateMan_m_state[i];
-    sRSMObj* o = *e->p08;
-    sRSMVEntry* vt = o->vt;
-    return *vt[15].fn((char*)o + vt[15].delta);
+    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *renderState->p08;
+    sRSMVEntry* vt = stateQuery->vt;
+    return *vt[15].fn((char*)stateQuery + vt[15].delta);
 }
 #endif
 
@@ -586,10 +586,10 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float func_002EEE88(int i)
 {
-    sRSMEntry* e = &cRenderStateMan_m_state[i];
-    sRSMObj* o = *e->p08;
-    sRSMVEntry* vt = o->vt;
-    return *vt[16].fn((char*)o + vt[16].delta);
+    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *renderState->p08;
+    sRSMVEntry* vt = stateQuery->vt;
+    return *vt[16].fn((char*)stateQuery + vt[16].delta);
 }
 #endif
 
@@ -610,10 +610,10 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float func_002EEED0(int i)
 {
-    sRSMEntry* e = &cRenderStateMan_m_state[i];
-    sRSMObj* o = *e->p08;
-    sRSMVEntry* vt = o->vt;
-    return *vt[17].fn((char*)o + vt[17].delta);
+    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *renderState->p08;
+    sRSMVEntry* vt = stateQuery->vt;
+    return *vt[17].fn((char*)stateQuery + vt[17].delta);
 }
 #endif
 
@@ -634,10 +634,10 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float func_002EEF18(int i)
 {
-    sRSMEntry* e = &cRenderStateMan_m_state[i];
-    sRSMObj* o = *e->p08;
-    sRSMVEntry* vt = o->vt;
-    return *vt[18].fn((char*)o + vt[18].delta);
+    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *renderState->p08;
+    sRSMVEntry* vt = stateQuery->vt;
+    return *vt[18].fn((char*)stateQuery + vt[18].delta);
 }
 #endif
 
@@ -658,10 +658,10 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float func_002EEF60(int i)
 {
-    sRSMEntry* e = &cRenderStateMan_m_state[i];
-    sRSMObj* o = *e->p08;
-    sRSMVEntry* vt = o->vt;
-    return *vt[19].fn((char*)o + vt[19].delta);
+    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *renderState->p08;
+    sRSMVEntry* vt = stateQuery->vt;
+    return *vt[19].fn((char*)stateQuery + vt[19].delta);
 }
 #endif
 
@@ -682,10 +682,10 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float func_002EEFA8(int i)
 {
-    sRSMEntry* e = &cRenderStateMan_m_state[i];
-    sRSMObj* o = *e->p1C;
-    sRSMVEntry* vt = o->vt;
-    return *vt[42].fn((char*)o + vt[42].delta);
+    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *renderState->p1C;
+    sRSMVEntry* vt = stateQuery->vt;
+    return *vt[42].fn((char*)stateQuery + vt[42].delta);
 }
 #endif
 
@@ -705,10 +705,10 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float func_002EEFF0(int i)
 {
-    sRSMEntry* e = &cRenderStateMan_m_state[i];
-    sRSMObj* o = *e->p1C;
-    sRSMVEntry* vt = o->vt;
-    return *vt[41].fn((char*)o + vt[41].delta);
+    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *renderState->p1C;
+    sRSMVEntry* vt = stateQuery->vt;
+    return *vt[41].fn((char*)stateQuery + vt[41].delta);
 }
 #endif
 
@@ -752,10 +752,10 @@ extern sRSMEntry cRenderStateMan_m_state[];
  */
 extern "C" float func_002EF0A0(int i)
 {
-    sRSMEntry* e = &cRenderStateMan_m_state[i];
-    sRSMObj* o = *e->p20;
-    sRSMVEntry* vt = o->vt;
-    return *vt[47].fn((char*)o + vt[47].delta);
+    sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+    sRSMObj* stateQuery = *renderState->p20;
+    sRSMVEntry* vt = stateQuery->vt;
+    return *vt[47].fn((char*)stateQuery + vt[47].delta);
 }
 #endif
 
@@ -781,10 +781,10 @@ extern "C" void* func_002EF0E8(int i)
         return &D_004A55B0;
     }
     {
-        sRSMEntry* e = &cRenderStateMan_m_state[i];
-        sRSMObj* o = *e->p1C;
-        sRSMVEntry* vt = o->vt;
-        return vt[37].fn((char*)o + vt[37].delta);
+        sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+        sRSMObj* stateQuery = *renderState->p1C;
+        sRSMVEntry* vt = stateQuery->vt;
+        return vt[37].fn((char*)stateQuery + vt[37].delta);
     }
 }
 #endif
@@ -811,10 +811,10 @@ extern "C" void* func_002EF140(int i)
         return &D_004A55B0;
     }
     {
-        sRSMEntry* e = &cRenderStateMan_m_state[i];
-        sRSMObj* o = *e->p1C;
-        sRSMVEntry* vt = o->vt;
-        return vt[38].fn((char*)o + vt[38].delta);
+        sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+        sRSMObj* stateQuery = *renderState->p1C;
+        sRSMVEntry* vt = stateQuery->vt;
+        return vt[38].fn((char*)stateQuery + vt[38].delta);
     }
 }
 #endif
@@ -841,10 +841,10 @@ extern "C" void* func_002EF198(int i)
         return &D_004A55B0;
     }
     {
-        sRSMEntry* e = &cRenderStateMan_m_state[i];
-        sRSMObj* o = *e->p1C;
-        sRSMVEntry* vt = o->vt;
-        return vt[39].fn((char*)o + vt[39].delta);
+        sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+        sRSMObj* stateQuery = *renderState->p1C;
+        sRSMVEntry* vt = stateQuery->vt;
+        return vt[39].fn((char*)stateQuery + vt[39].delta);
     }
 }
 #endif
@@ -871,10 +871,10 @@ extern "C" void* func_002EF1F0(int i)
         return &D_004A55B0;
     }
     {
-        sRSMEntry* e = &cRenderStateMan_m_state[i];
-        sRSMObj* o = *e->p1C;
-        sRSMVEntry* vt = o->vt;
-        return vt[40].fn((char*)o + vt[40].delta);
+        sRSMEntry* renderState = &cRenderStateMan_m_state[i];
+        sRSMObj* stateQuery = *renderState->p1C;
+        sRSMVEntry* vt = stateQuery->vt;
+        return vt[40].fn((char*)stateQuery + vt[40].delta);
     }
 }
 #endif

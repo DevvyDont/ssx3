@@ -664,12 +664,12 @@ extern "C" void func_003916C0(int h, int a);
 extern "C" void func_00398438(s3983F0* self)
 {
     for (int i = 0; i < self->count; i++) {
-        s3983F0Entry* e = &self->entries[i];
-        if (e->value != 0) {
-            func_003916C0(e->value, 3);
+        s3983F0Entry* fontEntry = &self->entries[i];
+        if (fontEntry->value != 0) {
+            func_003916C0(fontEntry->value, 3);
         }
-        e->unk4 = 0;
-        e->key = 0;
+        fontEntry->unk4 = 0;
+        fontEntry->key = 0;
     }
     self->count = 0;
 }

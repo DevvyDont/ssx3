@@ -895,36 +895,36 @@ static inline float wakeLenDD30(const sVecDD30& v)
 extern "C" void func_002DDD30(sWakeDD30* self, sVecDD30* pos, float width)
 {
     float w = self->f90 * (func_002D1928(3, self->phase) * 0.25f + 1.0f);
-    sElemDD30* e = &self->elems[self->head];
-    e->i64 = 0;
-    e->pts[0] = D_004FF120_DD30;
+    sElemDD30* wakeLine = &self->elems[self->head];
+    wakeLine->i64 = 0;
+    wakeLine->pts[0] = D_004FF120_DD30;
     sVecDD30 dir = wakeScaleDD30(wakeScaleDD30(self->v80, -1.0f), wakeLenDD30(*(sVecDD30*)(self->obj + 0x1E0)));
     sVecDD30 neg = wakeScaleDD30(*(sVecDD30*)(self->obj + 0x1E0), -1.0f);
     {
         sVecDD30 x = wakeScaleDD30(wakeSubDD30(dir, neg), 0.85f);
-        e->dir = x;
+        wakeLine->dir = x;
     }
     for (int i = 0; i < self->n; i++) {
-        float t = (float)i / (float)(self->n - 1);
-        float a = t * t;
+        float rowFrac = (float)i / (float)(self->n - 1);
+        float rowFracSq = rowFrac * rowFrac;
         if (i == self->n - 1) {
-            t *= 0.9f;
+            rowFrac *= 0.9f;
         }
-        sVecDD30 x = wakeScaleDD30(wakeAddDD30(wakeScaleDD30(wakeScaleDD30(self->v70, a), 0.75f), wakeScaleDD30(self->v60, t)), w);
-        e->pts[i] = x;
+        sVecDD30 x = wakeScaleDD30(wakeAddDD30(wakeScaleDD30(wakeScaleDD30(self->v70, rowFracSq), 0.75f), wakeScaleDD30(self->v60, rowFrac)), w);
+        wakeLine->pts[i] = x;
     }
     {
-        sSegDD30* r0 = self->rings[0];
-        sSegDD30* s = (sSegDD30*)(self->head * (int)sizeof(sSegDD30) + (int)r0); // PORT: pointer in int
+        sSegDD30* firstRow = self->rings[0];
+        sSegDD30* headEntry = (sSegDD30*)(self->head * (int)sizeof(sSegDD30) + (int)firstRow); // PORT: pointer in int
         sVecDD30 x = wakeSubDD30(*pos, wakeScaleDD30(*(sVecDD30*)(self->obj + 0x370), 5.0f));
-        s->pos = x;
+        headEntry->pos = x;
     }
     self->rings[0][self->head].f1C = (int)(self->f94 * 128.0f);
     for (int j = 1; j < self->n; j++) {
         self->rings[j][self->head].pos = self->rings[0][self->head].pos;
         self->rings[j][self->head].f1C = self->rings[0][self->head].f1C;
     }
-    e->width = width;
+    wakeLine->width = width;
 }
 #endif
 
@@ -1989,9 +1989,9 @@ extern "C" void func_002DF448(func_002DF448_sFx* self)
     int i;
     for (i = 0; i < 10; i++) {
         // PORT: pointer held in int (index-first address arithmetic)
-        func_002DF448_sElem* e = (func_002DF448_sElem*)(i * 0x210 + (int)self->elems);
-        sVEntry2DF448* vt = e->vt;
-        vt[3].fn((char*)e + vt[3].delta, self->data + i * 232, e->f58);
+        func_002DF448_sElem* emitter = (func_002DF448_sElem*)(i * 0x210 + (int)self->elems);
+        sVEntry2DF448* vt = emitter->vt;
+        vt[3].fn((char*)emitter + vt[3].delta, self->data + i * 232, emitter->f58);
     }
     self->f60 = 0;
 }
@@ -2233,8 +2233,8 @@ extern "C" void func_002DF920(sWakeFxF920* self)
     self->f12C = 0.0f;
     char* obj = self->obj;
     if (*(int*)(obj + 0x330) != 0) {
-        int s = cRiderAnimBase_getCurrentAnimID(*(void**)(obj + 0x784), 2);
-        if ((s >= 23 && s <= 28) || s == 37 || s == 38) {
+        int animId = cRiderAnimBase_getCurrentAnimID(*(void**)(obj + 0x784), 2);
+        if ((animId >= 23 && animId <= 28) || animId == 37 || animId == 38) {
             self->f12C = *(int*)(self->obj + 0x320) ? -1.0f : 1.0f;
         } else {
             self->f12C = *(int*)(self->obj + 0x320) ? 1.0f : -1.0f;
@@ -2260,38 +2260,38 @@ extern "C" void func_002DF920(sWakeFxF920* self)
     if (st == 1 || st == 2 || st == 4 || cRider_getControlState(self->obj) == 9) {
         self->iB0 = 0;
     } else {
-        char* o = self->obj;
-        if (*(int*)(o + 0xAC4) != 0) {
-            int t = *(int*)(o + 0xAD0) == 0 && *(int*)(o + 0xAFC) != 0;
-            if (!t || *(int*)(o + 0xB00) == 0) {
+        char* riderObj = self->obj;
+        if (*(int*)(riderObj + 0xAC4) != 0) {
+            int nisSpray = *(int*)(riderObj + 0xAD0) == 0 && *(int*)(riderObj + 0xAFC) != 0;
+            if (!nisSpray || *(int*)(riderObj + 0xB00) == 0) {
                 self->iB0 = 0;
             }
         }
     }
-    char* o = self->obj;
-    self->v50 = wakeRowF920(o, 0);
+    char* riderObj = self->obj;
+    self->v50 = wakeRowF920(riderObj, 0);
     float acc = (self->f74 - self->fB8) * 59.999996185302734f;
-    self->v30 = wakeRowF920(o, 1);
-    self->v40 = wakeRowF920(o, 2);
-    self->pos = wakeRowF920(o, 3);
-    self->pD0 = (char*)SSXApp->Game->SurfPropCache + *(int*)(o + 0x438) * 0xB0;
+    self->v30 = wakeRowF920(riderObj, 1);
+    self->v40 = wakeRowF920(riderObj, 2);
+    self->pos = wakeRowF920(riderObj, 3);
+    self->pD0 = (char*)SSXApp->Game->SurfPropCache + *(int*)(riderObj + 0x438) * 0xB0;
     int x = 0;
     if (555.5555419921875f < acc && 555.5555419921875f < self->fB8) {
-        x = cRider_getControlState(o) != 9;
+        x = cRider_getControlState(riderObj) != 9;
     }
-    float f = acc * 0.5f;
-    char* o2 = self->obj;
+    float burstStrength = acc * 0.5f;
+    char* nisRider = self->obj;
     int y = 0;
-    if (*(int*)(o2 + 0xAC4) != 0 && *(int*)(o2 + 0xAD0) == 0) {
-        y = *(int*)(o2 + 0xAFC) != 0;
+    if (*(int*)(nisRider + 0xAC4) != 0 && *(int*)(nisRider + 0xAD0) == 0) {
+        y = *(int*)(nisRider + 0xAFC) != 0;
     }
     if (y) {
         x = 27.77777862548828f <= acc;
-        f = acc;
+        burstStrength = acc;
     }
     if (self->iB0 != 0 && x) {
-        sWakeVecE398 p = wakeAddF920(self->pos, wakeScaleF920(*(sWakeVecE398*)(self->obj + 0x370), 10.0f));
-        func_002E23E0_F920(self, &p, self->obj + 0x370, *(int*)(self->obj + 0x438), 1, f);
+        sWakeVecE398 burstPos = wakeAddF920(self->pos, wakeScaleF920(*(sWakeVecE398*)(self->obj + 0x370), 10.0f));
+        func_002E23E0_F920(self, &burstPos, self->obj + 0x370, *(int*)(self->obj + 0x438), 1, burstStrength);
     }
     self->f74 = self->fB8;
     if (self->i128 != *(int*)(self->obj + 0x898)) {
@@ -2300,13 +2300,13 @@ extern "C" void func_002DF920(sWakeFxF920* self)
     char* sub2 = self->obj + 0x6C0;
     sWakeVtIF920* vt2 = *(sWakeVtIF920**)sub2;
     int idx = vt2[7].fn(sub2 + vt2[7].delta);
-    sEnt_E058* e = &((sEnt_E058*)(cRenderStateMan_m_state + 0x28))[idx];
-    sWakeVecE398 c;
-    c.x = e->col.r;
-    c.y = e->col.g;
-    c.z = e->col.b;
-    c.w = e->col.a;
-    self->col = c;
+    sEnt_E058* colourRow = &((sEnt_E058*)(cRenderStateMan_m_state + 0x28))[idx];
+    sWakeVecE398 groundColour;
+    groundColour.x = colourRow->col.r;
+    groundColour.y = colourRow->col.g;
+    groundColour.z = colourRow->col.b;
+    groundColour.w = colourRow->col.a;
+    self->col = groundColour;
     wakeScaleE398(self->col, self->col, 2.0f);
     self->col.w = 1.0f;
     if (*(int*)(self->p28 + 0x384)) func_002E02B8_F920(self);
@@ -2454,20 +2454,20 @@ extern "C" void func_002DFE88(sWakeFxFE88* self)
         sWakeVecE398 pos = wakeAddFE88(self->pos, wakeScaleFE88(self->dir, 15.0f));
         func_002DE398((char*)self, &pos);
         float k = wakeAbsE398(wakeDotFE88(*(sWakeVecE398*)(self->obj + 0x3B0), self->vC0)) * 1.5f;
-        float m;
+        float faceFactor;
         if (k < 1.0f) {
             if (self) {
-                m = k;
+                faceFactor = k;
             } else {
-                m = k;
+                faceFactor = k;
             }
         } else {
-            m = 1.0f;
+            faceFactor = 1.0f;
         }
-        float a = (wakeAbsE398(*(float*)(self->obj + 0x214)) - 0.2f) * 3.0f;
-        float u = (wakeAbsE398(self->fB4) - -0.2f) * 0.8f + m;
-        float s = wakeClampFE88(a, 0.0f, 1.0f) * 0.3f;
-        float w = s < wakeClampFE88(u, 0.0f, 1.0f) ? wakeClampFE88(u, 0.0f, 1.0f) : s;
+        float leanFactor = (wakeAbsE398(*(float*)(self->obj + 0x214)) - 0.2f) * 3.0f;
+        float carveFactor = (wakeAbsE398(self->fB4) - -0.2f) * 0.8f + faceFactor;
+        float leanChance = wakeClampFE88(leanFactor, 0.0f, 1.0f) * 0.3f;
+        float w = leanChance < wakeClampFE88(carveFactor, 0.0f, 1.0f) ? wakeClampFE88(carveFactor, 0.0f, 1.0f) : leanChance;
         float dt = 0.01666666753590107f;
         w *= wakeClampFE88((self->fB8 * 0.035999998450279236f - 20.0f) * dt, 0.0f, 1.0f);
         int alive = wakeRandE398() < w;
@@ -2478,10 +2478,10 @@ extern "C" void func_002DFE88(sWakeFxFE88* self)
         }
         char* sub = self->obj + 0x6C0;
         sWakeVtFE88* vt = *(sWakeVtFE88**)sub;
-        sWakeVecE398* v = vt[2].fn(sub + vt[2].delta);
+        sWakeVecE398* riderVel = vt[2].fn(sub + vt[2].delta);
         sWakeVecE398 vel = wakeAddFE88(
             wakeAddFE88(
-                wakeAddFE88(wakeScaleFE88(*v, *(float*)(self->p2C + 0x390)),
+                wakeAddFE88(wakeScaleFE88(*riderVel, *(float*)(self->p2C + 0x390)),
                             wakeScaleFE88(*(sWakeVecE398*)(self->obj + 0x370), *(float*)(self->p2C + 0x394))),
                 wakeScaleFE88(wakeScaleFE88(*(sWakeVecE398*)(self->obj + 0x370), *(float*)(self->p2C + 0x398)), self->fBC)),
             wakeScaleFE88(wakeScaleFE88(side, *(float*)(self->p2C + 0x39C)), self->fBC));
@@ -2576,9 +2576,9 @@ extern "C" void func_002E0EE8(sWakeFx0EE8* self)
         func_002DE398((char*)self, &pos);
         char* sub = self->obj + 0x6C0;
         sWakeVt0EE8* vt = *(sWakeVt0EE8**)sub;
-        sWakeVecE398* v = vt[2].fn(sub + vt[2].delta);
+        sWakeVecE398* riderVel = vt[2].fn(sub + vt[2].delta);
         sWakeVecE398 vel = wakeAdd0EE8(
-            wakeAdd0EE8(wakeScale0EE8(*v, *(float*)(self->p2C + 0xD8)),
+            wakeAdd0EE8(wakeScale0EE8(*riderVel, *(float*)(self->p2C + 0xD8)),
                         wakeScale0EE8(*(sWakeVecE398*)(self->obj + 0x370), *(float*)(self->p2C + 0xDC))),
             wakeScale0EE8(wakeScale0EE8(*(sWakeVecE398*)(self->obj + 0x370), *(float*)(self->p2C + 0xE0)), self->fBC));
         cDynamicColourEmitter_update(em, &pos, &vel, &self->col, 1, 0.01666666753590107f);
@@ -2816,13 +2816,13 @@ extern "C" void func_002E1120(sWakeFx1120* self)
         }
         char* sub = self->obj + 0x6C0;
         sWakeVtI1120* vi = *(sWakeVtI1120**)sub;
-        float r = func_002EE6F0(vi[7].fn(sub + vi[7].delta));
+        float stateValue = func_002EE6F0(vi[7].fn(sub + vi[7].delta));
         float zero = 0.0f;
         float one2 = 1.0f;
-        float c = wakeClamp1120((self->glow + 0.5f) * (one2 - (r + 5.0f) * 0.03999999910593033f), zero, 2.0f);
-        sVec1120 col(one2, one2, one2, c);
+        float puffAlpha = wakeClamp1120((self->glow + 0.5f) * (one2 - (stateValue + 5.0f) * 0.03999999910593033f), zero, 2.0f);
+        sVec1120 col(one2, one2, one2, puffAlpha);
         sVec1120* pcol = &col;
-        if (self->blink == 0 || !(0.019999999552965164f < c)) {
+        if (self->blink == 0 || !(0.019999999552965164f < puffAlpha)) {
             goto off;
         }
         {
@@ -2833,9 +2833,9 @@ extern "C" void func_002E1120(sWakeFx1120* self)
                 mat.v[3] = D_004FF130_1120;
                 char* sub2 = self->obj + 0x6C0;
                 sWakeVtV1120* vv = *(sWakeVtV1120**)sub2;
-                sVec1120* v = vv[2].fn(sub2 + vv[2].delta);
+                sVec1120* riderVel = vv[2].fn(sub2 + vv[2].delta);
                 sVec1120 vel = wakeAdd1120(
-                    wakeAdd1120(wakeScale1120(*v, *(float*)(self->p2C + 0x478)),
+                    wakeAdd1120(wakeScale1120(*riderVel, *(float*)(self->p2C + 0x478)),
                                 wakeScale1120(*(sVec1120*)(self->obj + 0x370), *(float*)(self->p2C + 0x47C))),
                     wakeScale1120(wakeScale1120(*(sVec1120*)(self->obj + 0x370), *(float*)(self->p2C + 0x480)), self->fBC));
                 wakeAddEq1120(vel, wakeMulMat1120(&mat, sVec1120(zero, zero, 150.0f, one2)));
@@ -2962,39 +2962,39 @@ extern "C" void func_002E1598(sWakeFx1598* self)
 {
     char* cfg = self->pD0;
     if (27.77777862548828f < self->fE0 && *(int*)(cfg + 0x60) != 0) {
-        int a = 6;
-        int b = 5;
+        int emitterIdx = 6;
+        int otherIdx = 5;
         if (*(int*)(cfg + 0x64) != 0 && 277.77777099609375f < self->fE0) {
-            a = 5;
-            b = 6;
+            emitterIdx = 5;
+            otherIdx = 6;
         }
-        if (a == 5 && *(int*)(self->obj + 0xAC4) == 0) {
+        if (emitterIdx == 5 && *(int*)(self->obj + 0xAC4) == 0) {
             func_002F4118(&self->vF0, self->fE0);
         }
         sWakeVecE398 pos = self->vF0;
         float k = 1.0f;
-        if (a == 6) {
+        if (emitterIdx == 6) {
             k = 0.5f;
             wakeAddE398(pos, wakeScale0EE8(self->dir, 20.0f));
         } else {
             wakeAddE398(pos, wakeScale0EE8(self->dir, 45.0f));
         }
         float lim = 3333.33349609375f;
-        float r = wakeClamp1598(self->fE0 / lim, 0.0f, 1.0f);
-        float f = self->f4;
-        if (f < 1.0f || a == 5) {
+        float strengthFrac = wakeClamp1598(self->fE0 / lim, 0.0f, 1.0f);
+        float level = self->f4;
+        if (level < 1.0f || emitterIdx == 5) {
             if (self->iD4 == 2) {
-                if (f < 2.0f) {
-                    float n = f + (r + r) * k;
+                if (level < 2.0f) {
+                    float n = level + (strengthFrac + strengthFrac) * k;
                     self->f4 = wakeMin1598(n, 2.0f);
                 }
             } else if (self->i114 == 0) {
-                if (f < 1.5f) {
-                    self->f4 = (f + r * (k * 1.5f)) <? 2.0f;
+                if (level < 1.5f) {
+                    self->f4 = (level + strengthFrac * (k * 1.5f)) <? 2.0f;
                 }
             } else {
-                if (f < 1.0f) {
-                    self->f4 = (f + r * k) <? 2.0f;
+                if (level < 1.0f) {
+                    self->f4 = (level + strengthFrac * k) <? 2.0f;
                 }
             }
         }
@@ -3027,8 +3027,8 @@ extern "C" void func_002E1598(sWakeFx1598* self)
         }
         sWakeVecE398 col = self->col;
         col.w = self->f120;
-        cDynamicColourEmitter_update(self->p28 + a * 528, &pos, &vel, &col, 1, 0.01666666753590107f);
-        cDynamicColourEmitter_update(self->p28 + b * 528, &self->vF0, 0, 0, 0, 0.01666666753590107f);
+        cDynamicColourEmitter_update(self->p28 + emitterIdx * 528, &pos, &vel, &col, 1, 0.01666666753590107f);
+        cDynamicColourEmitter_update(self->p28 + otherIdx * 528, &self->vF0, 0, 0, 0, 0.01666666753590107f);
         if (self->fE0 < 83.33333587646484f) {
             self->fE0 = 0.0f;
         } else {
@@ -3216,37 +3216,37 @@ static inline t4Vector* wakeVel1A80(sWakeFx1A80* self)
  */
 extern "C" void func_002E1A80(sWakeFx1A80* self)
 {
-    float d = fsAbs(vu0Dot_1A80(*(t4Vector*)(self->obj + 0x3B0), self->vC0));
-    d = d + d;
+    float facing = fsAbs(vu0Dot_1A80(*(t4Vector*)(self->obj + 0x3B0), self->vC0));
+    facing = facing + facing;
     char* em = self->em + 0xE70;
     float k = 1.0f;
-    if (d <= 1.0f)
-        k = d;
+    if (facing <= 1.0f)
+        k = facing;
     float ak = fsAbs(k);
-    float s = wakeRamp1A80(416.66668701171875f, 1250.0f, self->fB8);
-    float t = fsAbs(*(float*)(self->obj + 0x1F0)) + ak - 0.10000000149011612f;
-    float m = 1.0f;
-    if (s < 1.0f)
-        m = s;
-    m *= m;
-    float thr = t * m;
-    float r = wakeRand() * 0.4000000059604645f;
-    if (self->iB0 != 0 && r <= thr && *(int*)(self->pD0 + 0x50) != 0 && fsAbs(self->f12C) < 0.20000000298023224f) {
+    float speedRamp = wakeRamp1A80(416.66668701171875f, 1250.0f, self->fB8);
+    float leanSum = fsAbs(*(float*)(self->obj + 0x1F0)) + ak - 0.10000000149011612f;
+    float rampSq = 1.0f;
+    if (speedRamp < 1.0f)
+        rampSq = speedRamp;
+    rampSq *= rampSq;
+    float thr = leanSum * rampSq;
+    float roll = wakeRand() * 0.4000000059604645f;
+    if (self->iB0 != 0 && roll <= thr && *(int*)(self->pD0 + 0x50) != 0 && fsAbs(self->f12C) < 0.20000000298023224f) {
         t4Vector pos = self->pos;
         float spd = *(float*)(self->pD0 + 0x54);
-        float u = wakeRand() + 0.5f;
-        vu0AddEq_1A80(pos, vu0Sub_1A80(vu0Scale_1A80(*(t4Vector*)(self->obj + 0x370), u * spd),
-                             vu0Scale_1A80(vu0Scale_1A80(vu0Scale_1A80(*(t4Vector*)(self->obj + 0x1E0), 3.0f), 0.01666666753590107f), u)));
+        float lift = wakeRand() + 0.5f;
+        vu0AddEq_1A80(pos, vu0Sub_1A80(vu0Scale_1A80(*(t4Vector*)(self->obj + 0x370), lift * spd),
+                             vu0Scale_1A80(vu0Scale_1A80(vu0Scale_1A80(*(t4Vector*)(self->obj + 0x1E0), 3.0f), 0.01666666753590107f), lift)));
         t4Vector side = wakeCross1A80(self->v50, *(t4Vector*)(self->obj + 0x370));
         if (self->fB4 < 0.0f)
             side = vu0Scale_1A80(side, -1.0f);
         t4Vector n = *(int*)(self->obj + 0x320) != 0 ? vu0Scale_1A80(self->v50, -1.0f) : self->v50;
-        t4Vector a = vu0Scale_1A80(vu0Scale_1A80(n, -1.0f), self->fB8);
-        t4Vector b = vu0Scale_1A80(*(t4Vector*)(self->obj + 0x1E0), -1.0f);
-        t4Vector w = vu0Scale_1A80(vu0Sub_1A80(a, b), 0.30000001192092896f);
-        t4Vector* v = wakeVel1A80(self);
+        t4Vector boardBack = vu0Scale_1A80(vu0Scale_1A80(n, -1.0f), self->fB8);
+        t4Vector negVel = vu0Scale_1A80(*(t4Vector*)(self->obj + 0x1E0), -1.0f);
+        t4Vector w = vu0Scale_1A80(vu0Sub_1A80(boardBack, negVel), 0.30000001192092896f);
+        t4Vector* riderVel = wakeVel1A80(self);
         t4Vector vel = vu0Add(
-            vu0Add(vu0Add(vu0Add(vu0Scale_1A80(*v, *(float*)(self->p2C + 0x730)), vu0Scale_1A80(vu0Scale_1A80(side, self->fB8), 0.0f)),
+            vu0Add(vu0Add(vu0Add(vu0Scale_1A80(*riderVel, *(float*)(self->p2C + 0x730)), vu0Scale_1A80(vu0Scale_1A80(side, self->fB8), 0.0f)),
                           vu0Scale_1A80(*(t4Vector*)(self->obj + 0x370), *(float*)(self->p2C + 0x734))),
                    vu0Scale_1A80(vu0Scale_1A80(*(t4Vector*)(self->obj + 0x370), *(float*)(self->p2C + 0x738)), self->fBC)),
             w);
@@ -3333,15 +3333,15 @@ extern "C" void func_002E1F70(sWakeFx1F70* self)
     }
     sWakeVecE398 pos = self->pos;
     if (!done && 0.0f < self->f10) {
-        float a = wakeClamp1F70(self->f10 * 1.25f, 0.0f, 1.0f);
+        float alpha = wakeClamp1F70(self->f10 * 1.25f, 0.0f, 1.0f);
         if (wakeVel1F70(self)->z < 0.0f) {
-            a *= wakeClamp1F70((wakeVel1F70(self)->z + 3333.33349609375f) / 3333.33349609375f, 0.0f, 1.0f);
+            alpha *= wakeClamp1F70((wakeVel1F70(self)->z + 3333.33349609375f) / 3333.33349609375f, 0.0f, 1.0f);
         }
         sWakeVecE398 col = self->col;
-        col.w = a;
-        sWakeVecE398* v = wakeVel1F70(self);
+        col.w = alpha;
+        sWakeVecE398* riderVel = wakeVel1F70(self);
         sWakeVecE398 vel = wakeAdd0EE8(
-            wakeAdd0EE8(wakeScale0EE8(*v, *(float*)(self->p2C + 0x818)),
+            wakeAdd0EE8(wakeScale0EE8(*riderVel, *(float*)(self->p2C + 0x818)),
                         wakeScale0EE8(self->dir, *(float*)(self->p2C + 0x81C))),
             wakeScale0EE8(wakeScale0EE8(self->dir, *(float*)(self->p2C + 0x820)), self->fBC));
         func_002DE398((char*)self, &pos);
@@ -3407,24 +3407,24 @@ extern "C" void func_002E2260(sWakeFx2260* self)
     void* em = self->p28 + 0x1290;
     if (zero < self->f4 && wakeLimit2260() < self->fB8) {
         float dt;
-        float a;
+        float alpha;
         sWakeVecE398 col;
         sWakeVecE398 pos;
         sWakeVecE398 vel;
-        sWakeVecE398 tmp;
+        sWakeVecE398 scaledVel;
         char* obj;
-        sWakeMtx2260* m;
+        sWakeMtx2260* boneMats;
         int k;
-        a = wakeClamp2260(self->f4 * 1.5f, zero, 1.0f);
+        alpha = wakeClamp2260(self->f4 * 1.5f, zero, 1.0f);
         col = self->col;
-        col.w = a;
+        col.w = alpha;
         dt = 0.01666666753590107f;
         obj = self->obj;
         k = self->p7C[self->i78];
-        m = *(sWakeMtx2260**)(*(char**)(obj + 0x780) + 0x30);
-        pos = ((sWakeMtx2260*)((char*)m + (k << 6)))->row[3];
-        wakeScaleE398(tmp, *(sWakeVecE398*)(obj + 0x1E0), *(float*)(self->p2C + 0x900));
-        vel = tmp;
+        boneMats = *(sWakeMtx2260**)(*(char**)(obj + 0x780) + 0x30);
+        pos = ((sWakeMtx2260*)((char*)boneMats + (k << 6)))->row[3];
+        wakeScaleE398(scaledVel, *(sWakeVecE398*)(obj + 0x1E0), *(float*)(self->p2C + 0x900));
+        vel = scaledVel;
         cDynamicColourEmitter_update(em, &pos, &vel, &col, 1, dt);
         self->i78++;
         if (self->i78 >= 30) {
@@ -3436,8 +3436,8 @@ extern "C" void func_002E2260(sWakeFx2260* self)
     } else {
         char* obj = self->obj;
         int k = *(int*)(obj + 0x89C);
-        sWakeMtx2260* m = *(sWakeMtx2260**)(*(char**)(obj + 0x780) + 0x30);
-        sWakeVecE398 pos = ((sWakeMtx2260*)((char*)m + (k << 6)))->row[3];
+        sWakeMtx2260* boneMats = *(sWakeMtx2260**)(*(char**)(obj + 0x780) + 0x30);
+        sWakeVecE398 pos = ((sWakeMtx2260*)((char*)boneMats + (k << 6)))->row[3];
         cDynamicColourEmitter_update(em, &pos, 0, 0, 0, 0.01666666753590107f);
     }
 }
@@ -3526,33 +3526,33 @@ struct sWake_23E0 {
  *
  * Takes it when |@p speed| exceeds the stored strength (+0xE0) and the point is more than 180 units (100 for a player,
  * +0x124) from the stored point (+0xF0), or the rider is in the NIS state that allows a trail (mIsInNIS set, unk_AD0
- * clear, unk_AFC and unk_B00 set). It then stores the strength (doubled when @p b is 0), @p pos (+0xF0), @p dir
- * (+0x100), @p a (+0x110) and @p b (+0x114). func_002DF920 reports slow-downs with @p b = 1; func_00111AA0 (wipeout
+ * clear, unk_AFC and unk_B00 set). It then stores the strength (doubled when @p isSlowdown is 0), @p pos (+0xF0), @p dir
+ * (+0x100), @p surfaceType (+0x110) and @p isSlowdown (+0x114). func_002DF920 reports slow-downs with @p isSlowdown = 1; func_00111AA0 (wipeout
  * impacts) passes 0. func_002E1598 plays the burst.
  *
  * @param pos  the burst position
  * @param dir  the burst direction (the surface normal)
- * @param a  the surface type
- * @param b  1 for a slow-down spray, 0 for an impact
+ * @param surfaceType  the surface type
+ * @param isSlowdown  1 for a slow-down spray, 0 for an impact
  * @param speed  the burst strength
  */
-extern "C" void func_002E23E0(sWake_23E0* self, sV4_23E0* pos, sV4_23E0* dir, int a, int b, float speed)
+extern "C" void func_002E23E0(sWake_23E0* self, sV4_23E0* pos, sV4_23E0* dir, int surfaceType, int isSlowdown, float speed)
 {
-    float s = Abs_23E0(speed);
-    float d = Abs_23E0(Length_23E0(Sub_23E0(self->pos, *pos)));
+    float absSpeed = Abs_23E0(speed);
+    float distance = Abs_23E0(Length_23E0(Sub_23E0(self->pos, *pos)));
     float maxd = 180.0f;
     if (self->f124 != 0)
         maxd = 100.0f;
-    if (self->lastSpeed < s) {
-        if (maxd < d || (Carving_23E0(self->rider) && self->rider->fB00 != 0)) {
-            if (b == 0)
-                self->lastSpeed = s + s;
+    if (self->lastSpeed < absSpeed) {
+        if (maxd < distance || (Carving_23E0(self->rider) && self->rider->fB00 != 0)) {
+            if (isSlowdown == 0)
+                self->lastSpeed = absSpeed + absSpeed;
             else
-                self->lastSpeed = s;
+                self->lastSpeed = absSpeed;
             self->pos = *pos;
             self->dir = *dir;
-            self->f110 = a;
-            self->f114 = b;
+            self->f110 = surfaceType;
+            self->f114 = isSlowdown;
         }
     }
 }
@@ -3698,16 +3698,16 @@ extern "C" void func_002E26B8(void* vself)
         *(float*)(*(char**)(self + 0x2C) + 0x63C) = 39.0f;
     }
     {
-        char* b = *(char**)(self + 0x28);
-        char* o = b + 0xA50;
-        sWakeVt26B8* vt = *(sWakeVt26B8**)(b + 0xC48);
-        vt[3].fn(o + vt[3].delta, *(char**)(self + 0x2C) + 0x488, *(float*)(b + 0xAA8));
+        char* emitters = *(char**)(self + 0x28);
+        char* emitter = emitters + 0xA50;
+        sWakeVt26B8* vt = *(sWakeVt26B8**)(emitters + 0xC48);
+        vt[3].fn(emitter + vt[3].delta, *(char**)(self + 0x2C) + 0x488, *(float*)(emitters + 0xAA8));
     }
     {
-        char* b = *(char**)(self + 0x28);
-        char* o = b + 0xC60;
-        sWakeVt26B8* vt = *(sWakeVt26B8**)(b + 0xE58);
-        vt[3].fn(o + vt[3].delta, *(char**)(self + 0x2C) + 0x570, *(float*)(b + 0xCB8));
+        char* emitters = *(char**)(self + 0x28);
+        char* emitter = emitters + 0xC60;
+        sWakeVt26B8* vt = *(sWakeVt26B8**)(emitters + 0xE58);
+        vt[3].fn(emitter + vt[3].delta, *(char**)(self + 0x2C) + 0x570, *(float*)(emitters + 0xCB8));
     }
 }
 #endif
@@ -3928,10 +3928,10 @@ extern "C" void func_002E2868(sWake_2868* self, int idx)
         return;
     }
     sV3_2868 n;
-    sPart_2868* q = self->part;
-    float x = q->vel.x;
-    float y = q->vel.y;
-    float z = q->vel.z;
+    sPart_2868* haloRecord = self->part;
+    float x = haloRecord->vel.x;
+    float y = haloRecord->vel.y;
+    float z = haloRecord->vel.z;
     float len = Sqrt_2868(x * x + y * y + z * z);
     if (len != 0.0f) {
         float inv = 1.0f / len;
@@ -3939,9 +3939,9 @@ extern "C" void func_002E2868(sWake_2868* self, int idx)
         n.y = y * inv;
         n.z = z * inv;
     } else {
-        n.x = q->vel.x;
-        n.y = q->vel.y;
-        n.z = q->vel.z;
+        n.x = haloRecord->vel.x;
+        n.y = haloRecord->vel.y;
+        n.z = haloRecord->vel.z;
     }
     sCol_2868 col;
     col.d.x = n.x;
@@ -3977,8 +3977,8 @@ extern "C" void func_002E2868(sWake_2868* self, int idx)
         size = 350.0f;
         break;
     }
-    sPart_2868* p = self->part;
-    ctx->Draw(sV4_2868(p->pos.x, p->pos.y, p->pos.z, 1.0f), sV2_2868(size, size), sV2_2868(), sV2_2868(1.0f, 1.0f), col, self->rot, 2);
+    sPart_2868* drawRecord = self->part;
+    ctx->Draw(sV4_2868(drawRecord->pos.x, drawRecord->pos.y, drawRecord->pos.z, 1.0f), sV2_2868(size, size), sV2_2868(), sV2_2868(1.0f, 1.0f), col, self->rot, 2);
 }
 #endif
 
@@ -4060,53 +4060,53 @@ extern "C" void func_002E2B00(void* vself, void* vrect)
     } else {
         self->on = 1;
         t4Vector scr;
-        sVEntry<void(t4Vector*, void*, t4Vector*)>* e2 = &(*(sVEntry<void(t4Vector*, void*, t4Vector*)>**)(obj + 0x10D8))[92];
-        e2->fn(&scr, obj + e2->delta, &pos);
+        sVEntry<void(t4Vector*, void*, t4Vector*)>* projectSlot = &(*(sVEntry<void(t4Vector*, void*, t4Vector*)>**)(obj + 0x10D8))[92];
+        projectSlot->fn(&scr, obj + projectSlot->delta, &pos);
         float depth = scr.z * 5.960465188081798e-08f;
         if (depth <= 0.005f) {
             return;
         }
         {
             int w = (int)(depth * 800.0f);
-            int h = (int)(depth * 400.0f);
+            int pixelHeight = (int)(depth * 400.0f);
             self->vis = 1;
             int cw = clampI_2B00(w, 1, 16);
-            h = clampI_2B00(h, 1, 8);
+            pixelHeight = clampI_2B00(pixelHeight, 1, 8);
             self->x0 = scr.x - (float)(cw >> 1);
-            self->y0 = scr.y - (float)(h >> 1);
+            self->y0 = scr.y - (float)(pixelHeight >> 1);
             self->w = (float)cw;
-            self->h = (float)h;
+            self->h = (float)pixelHeight;
             self->x1 = scr.x - 8.0f;
             self->y1 = scr.y - 4.0f;
             self->f18 = 16.0f;
             self->f1C = 8.0f;
             self->x1 = wakeClampD0B8(self->x1, 0.0f, (rect[0] + rect[2]) - self->f18);
             self->y1 = wakeClampD0B8(self->y1, 0.0f, (rect[1] + rect[3]) - self->f1C);
-            float s = 0.0f;
+            float pullBack = 0.0f;
             switch ((unsigned int)(self->part->flags & 0x70)) {
             case 0x10:
-                s = 100.0f;
+                pullBack = 100.0f;
                 break;
             case 0x20:
-                s = 80.0f;
+                pullBack = 80.0f;
                 break;
             case 0x40:
-                s = 200.0f;
+                pullBack = 200.0f;
                 break;
             }
-            sV3_2868 d;
-            d.x = rect[6];
-            d.y = rect[10];
-            d.z = rect[14];
-            t4Vector lp = Sub_2B00(pos, sV4c_2B00(sV3c_2B00(d.x * s, d.y * s, d.z * s), 0.0f));
+            sV3_2868 viewDir;
+            viewDir.x = rect[6];
+            viewDir.y = rect[10];
+            viewDir.z = rect[14];
+            t4Vector lp = Sub_2B00(pos, sV4c_2B00(sV3c_2B00(viewDir.x * pullBack, viewDir.y * pullBack, viewDir.z * pullBack), 0.0f));
             t4Vector sc;
-            sVEntry<void(t4Vector*, void*, t4Vector*)>* e3 = &(*(sVEntry<void(t4Vector*, void*, t4Vector*)>**)(obj + 0x10D8))[92];
-            e3->fn(&sc, obj + e3->delta, &lp);
+            sVEntry<void(t4Vector*, void*, t4Vector*)>* projectSlot2 = &(*(sVEntry<void(t4Vector*, void*, t4Vector*)>**)(obj + 0x10D8))[92];
+            projectSlot2->fn(&sc, obj + projectSlot2->delta, &lp);
             self->f24 = sc.z;
             // screen x mapped to -1..1, then to an angle
-            float t = scr.x - rect[0];
-            t = (t + t) / rect[2] - 1.0f;
-            self->f28 = t * 1.5707964f;
+            float screenFrac = scr.x - rect[0];
+            screenFrac = (screenFrac + screenFrac) / rect[2] - 1.0f;
+            self->f28 = screenFrac * 1.5707964f;
         }
     }
 }
@@ -4238,17 +4238,17 @@ struct sWakeFx {
 /**
  * Adds a halo record to the lens manager's list for one view.
  *
- * Writes the next 0x30-byte halo of view @p i (count at +0x60 + 4 * @p i): its record (+0x20) is @p v and the on-screen
+ * Writes the next 0x30-byte halo of view @p i (count at +0x60 + 4 * @p i): its record (+0x20) is @p haloRecord and the on-screen
  * and sample flags and the word at +0x28 are cleared; then the count goes up. There is no bound check against the 256
  * slots. func_002E2FF8 calls it for each record.
  *
- * @param v  the halo record
+ * @param haloRecord  the halo record
  * @param i  the view index
  */
-extern "C" void func_002E2FA8(sWakeFx* self, int v, int i)
+extern "C" void func_002E2FA8(sWakeFx* self, int haloRecord, int i)
 {
     int n = self->counts[i];
-    self->points[i][n].a = v;
+    self->points[i][n].a = haloRecord;
     self->points[i][n].d = 0;
     self->points[i][n].e = 0;
     self->points[i][n].c = 0;
@@ -4421,29 +4421,29 @@ extern "C" void func_002E3130(void* selfp)
         // Double-buffered state with a bank dimension of one: bank 0 is current, the previous bank is !bufferId.
         int bufferId = 0;
         if (cLensFxMan_mbDrawSun != 0) {
-            for (int v = 0; v < self->viewCount; v++) {
+            for (int viewIdx = 0; viewIdx < self->viewCount; viewIdx++) {
                 int prev = !bufferId;
-                if (self->suns[bufferId][v].active != 0) {
-                    float t = 0;
+                if (self->suns[bufferId][viewIdx].active != 0) {
+                    float visibility = 0;
                     sVE3130* vEntry = &self->vt[4];
-                    if (vEntry->fn((char*)self + vEntry->delta, &self->suns[bufferId][v], &t)) {
-                        self->suns[bufferId][v].vis = t;
+                    if (vEntry->fn((char*)self + vEntry->delta, &self->suns[bufferId][viewIdx], &visibility)) {
+                        self->suns[bufferId][viewIdx].vis = visibility;
                     } else {
-                        self->suns[bufferId][v].vis = ((sLensSunBanks3130*)self)->suns[prev][v].vis;
+                        self->suns[bufferId][viewIdx].vis = ((sLensSunBanks3130*)self)->suns[prev][viewIdx].vis;
                     }
                 }
             }
         }
-        for (int v = 0; v < self->viewCount; v++) {
+        for (int viewIdx = 0; viewIdx < self->viewCount; viewIdx++) {
             int prev = !bufferId;
-            for (int i = 0; i < self->haloCount[bufferId][v]; i++) {
-                if (self->halos[bufferId][v][i].active != 0) {
-                    float t = 0;
+            for (int i = 0; i < self->haloCount[bufferId][viewIdx]; i++) {
+                if (self->halos[bufferId][viewIdx][i].active != 0) {
+                    float visibility = 0;
                     sVE3130* vEntry = &self->vt[4];
-                    if (vEntry->fn((char*)self + vEntry->delta, &self->halos[bufferId][v][i], &t)) {
-                        self->halos[bufferId][v][i].light->vis[v] = t;
+                    if (vEntry->fn((char*)self + vEntry->delta, &self->halos[bufferId][viewIdx][i], &visibility)) {
+                        self->halos[bufferId][viewIdx][i].light->vis[viewIdx] = visibility;
                     } else {
-                        self->halos[bufferId][v][i].light->vis[v] = ((sLensHaloBanks3130*)self)->halos[prev][v][i].light->vis[v];
+                        self->halos[bufferId][viewIdx][i].light->vis[viewIdx] = ((sLensHaloBanks3130*)self)->halos[prev][viewIdx][i].light->vis[viewIdx];
                     }
                 }
             }
@@ -4510,12 +4510,12 @@ extern "C" void func_002E3338(void* vself, int idx)
 {
     sWkFx3338* self = (sWkFx3338*)vself;
     char* ctx = cGraphicsMan_TheGraphicsMan_boardwakefx;
-    sWkRect3338 r;
+    sWkRect3338 viewRect;
     {
         sWkVtR3338* vt = *(sWkVtR3338**)(ctx + 0x10D8);
-        vt[28].fn(&r, ctx + vt[28].delta);
+        vt[28].fn(&viewRect, ctx + vt[28].delta);
     }
-    self->view = r;
+    self->view = viewRect;
     {
         sWkVtM3338* vt = *(sWkVtM3338**)(ctx + 0x10D8);
         vu0CopyMatrix3338(&self->mtx, vt[35].fn(ctx + vt[35].delta));
@@ -4529,11 +4529,11 @@ extern "C" void func_002E3338(void* vself, int idx)
     func_002F4DB8(&em[idx], self, idx);
     if (i < self->count[idx]) {
         sWkPart3338(*pp)[0x100] = self->parts;
-        sWkPart3338* p = pp[idx];
+        sWkPart3338* halo = pp[idx];
         do {
-            func_002E2B00(p, self);
+            func_002E2B00(halo, self);
             i++;
-            p++;
+            halo++;
         } while (i < self->count[idx]);
     }
 }
@@ -5368,14 +5368,14 @@ extern "C" void cTransitionMan_StartTransition(void* self, int a1, int a2, int a
  *
  * Nothing in the retail code references it.
  *
- * @param a1  the initiator
- * @param a2  the transition object to play in
- * @param f0  the in time
- * @param f1  the hold time
+ * @param initiator  the initiator
+ * @param transitionIn  the transition object to play in
+ * @param inTime  the in time
+ * @param holdTime  the hold time
  */
-extern "C" void func_002E44C8(void* self, int a1, int a2, float f0, float f1)
+extern "C" void func_002E44C8(void* self, int initiator, int transitionIn, float inTime, float holdTime)
 {
-    cTransitionMan_StartTransition(self, a1, a2, 0, f0, f1, 0, 0, 0.0f);
+    cTransitionMan_StartTransition(self, initiator, transitionIn, 0, inTime, holdTime, 0, 0, 0.0f);
 }
 #endif
 
@@ -6212,10 +6212,10 @@ extern "C" void func_002E4F50_4F50(cSnowBox_4F50* self, const tWorldPainterSnowf
     self->windTimer -= kTimeDiff;
     if (self->windTimer < 0.0f) {
         self->windPrev = self->wind;
-        float s;
-        float c;
-        sincos_4F50(deg2rad_4F50(params->f[5]), s, c);
-        t4Vec_4F50 windBaseRotated(self->windScale * c, self->windScale * s, 0.0f, 0.0f);
+        float windSin;
+        float windCos;
+        sincos_4F50(deg2rad_4F50(params->f[5]), windSin, windCos);
+        t4Vec_4F50 windBaseRotated(self->windScale * windCos, self->windScale * windSin, 0.0f, 0.0f);
         t4Vec_4F50 windBaseFlurries(windBaseRotated.x * (1.0f - params->f[6]) + params->f[6] * FXRand_4F50(-self->windScale, self->windScale),
                                     windBaseRotated.y * (1.0f - params->f[6]) + params->f[6] * FXRand_4F50(-self->windScale, self->windScale),
                                     params->f[6] * FXRand_4F50(-self->windScale, self->windScale), 0.0f);
@@ -6496,21 +6496,21 @@ static inline void wakeSubV55D8(sVec55D8& a, const sVec55D8& b)
 /**
  * Draws one snow box: builds its draw record and hands it to the graphics manager.
  *
- * Does nothing while the box is inactive (+0x8). The record holds @p m times the box matrix (+0x50), the offset (+0x20)
+ * Does nothing while the box is inactive (+0x8). The record holds @p snowMatrix times the box matrix (+0x50), the offset (+0x20)
  * divided by the size (+0xC) and shifted by one box toward the cell (@p x, @p y, @p z) to (x+1, y+1, z+1), minus 1.5;
  * the colour (+0xA4..+0xAC) and alpha (+0x18) times 128; the flake values +0x8, +0x98, +0x9C, +0xA0; and the cell
  * bounds with +0x14 and the size. Type 0 (+0x4) draws through GrMan virtual slot 85, type 1 through slot 86.
  * cSnowFall_render calls it for each box.
  *
- * @param p  the snow box
- * @param m  the snow matrix
+ * @param snowBox  the snow box
+ * @param snowMatrix  the snow matrix
  * @param x  minimum x of the cell
  * @param y  minimum y of the cell
  * @param z  minimum z of the cell
  */
-extern "C" void func_002E55D8(int* p, sMat_6008* m, float x, float y, float z)
+extern "C" void func_002E55D8(int* snowBox, sMat_6008* snowMatrix, float x, float y, float z)
 {
-    sCell55D8* self = (sCell55D8*)p;
+    sCell55D8* self = (sCell55D8*)snowBox;
     if (self->active == 0) {
         return;
     }
@@ -6518,30 +6518,30 @@ extern "C" void func_002E55D8(int* p, sMat_6008* m, float x, float y, float z)
     float y1 = y + 1.0f;
     float z1 = z + 1.0f;
     sCellInfo55D8 info;
-    info.mat = wakeMulMat55D8(*(sMat55D8*)m, self->mat);
-    sVec55D8 v = wakeDiv55D8(self->pos, self->size);
-    info.pos = v;
-    float r = self->colR * 128.0f;
-    float g = self->colG * 128.0f;
-    float b = self->colB * 128.0f;
-    float a = self->f18 * 128.0f;
-    v.y = g;
+    info.mat = wakeMulMat55D8(*(sMat55D8*)snowMatrix, self->mat);
+    sVec55D8 tempVec = wakeDiv55D8(self->pos, self->size);
+    info.pos = tempVec;
+    float red = self->colR * 128.0f;
+    float green = self->colG * 128.0f;
+    float blue = self->colB * 128.0f;
+    float alpha = self->f18 * 128.0f;
+    tempVec.y = green;
     info.i20 = self->active;
     info.i24 = self->i98;
     info.i28 = self->i9C;
     info.i2C = self->iA0;
     info.lo.w = self->f14;
     info.hi.w = self->size;
-    v.x = r;
-    v.z = b;
+    tempVec.x = red;
+    tempVec.z = blue;
     info.lo.x = x;
     info.lo.y = y;
     info.lo.z = z;
     info.hi.x = x1;
     info.hi.y = y1;
     info.hi.z = z1;
-    v.w = a;
-    info.col = v;
+    tempVec.w = alpha;
+    info.col = tempVec;
     if (info.pos.x < x + -0.5f) {
         wakeAddEq55D8(info.pos, t4vect_XAxis);
     }
@@ -6560,11 +6560,11 @@ extern "C" void func_002E55D8(int* p, sMat_6008* m, float x, float y, float z)
     if (z1 + 0.5f < info.pos.z) {
         wakeSubEq55D8(info.pos, t4vect_ZAxis);
     }
-    v.x = 1.5f;
-    v.y = 1.5f;
-    v.z = 1.5f;
-    v.w = 0.0f;
-    wakeSubV55D8(info.pos, v);
+    tempVec.x = 1.5f;
+    tempVec.y = 1.5f;
+    tempVec.z = 1.5f;
+    tempVec.w = 0.0f;
+    wakeSubV55D8(info.pos, tempVec);
     switch (self->type) {
     case 0: {
         sVt55D8* vt = *(sVt55D8**)(GrMan_boardwakefx + 0x10D8);
@@ -7558,11 +7558,11 @@ extern "C" void func_002E6C08(sTrailE6C08* self)
             char* sub = (char*)&self->rider->mVtbl;
             sVtE6C08* vt = *(sVtE6C08**)sub;
             t4Vector pos = *vt[5].fn(sub + vt[5].delta);
-            t4Vector p3 = wakeRowE6C08(self->rider, 3);
-            t4Vector p2 = wakeRowE6C08(self->rider, 2);
-            t4Vector p0 = wakeRowE6C08(self->rider, 0);
+            t4Vector boardPos = wakeRowE6C08(self->rider, 3);
+            t4Vector boardSide = wakeRowE6C08(self->rider, 2);
+            t4Vector boardFwd = wakeRowE6C08(self->rider, 0);
             if (self->rider->IsRidingFakie != 0) {
-                p0 = wakeScaleE6C08(p0, -1.0f);
+                boardFwd = wakeScaleE6C08(boardFwd, -1.0f);
             }
             float dist;
             if (self->count >= 2) {
@@ -7574,10 +7574,10 @@ extern "C" void func_002E6C08(sTrailE6C08* self)
             ring[self->head].len = 0.0f;
             ring[(self->head + 1) % 30].len = dist;
             self->total += dist;
-            t4Vector c0 = wakeSubE6C08(wakeAddE6C08(p3, wakeScaleE6C08(p0, 75.0f)), wakeScaleE6C08(p2, 17.5f));
-            t4Vector c1 = wakeAddE6C08(wakeAddE6C08(p3, wakeScaleE6C08(p0, 75.0f)), wakeScaleE6C08(p2, 17.5f));
-            t4Vector c2 = wakeSubE6C08(wakeSubE6C08(p3, wakeScaleE6C08(p0, 75.0f)), wakeScaleE6C08(p2, 17.5f));
-            t4Vector c3 = wakeAddE6C08(wakeSubE6C08(p3, wakeScaleE6C08(p0, 75.0f)), wakeScaleE6C08(p2, 17.5f));
+            t4Vector noseNeg = wakeSubE6C08(wakeAddE6C08(boardPos, wakeScaleE6C08(boardFwd, 75.0f)), wakeScaleE6C08(boardSide, 17.5f));
+            t4Vector nosePos = wakeAddE6C08(wakeAddE6C08(boardPos, wakeScaleE6C08(boardFwd, 75.0f)), wakeScaleE6C08(boardSide, 17.5f));
+            t4Vector tailNeg = wakeSubE6C08(wakeSubE6C08(boardPos, wakeScaleE6C08(boardFwd, 75.0f)), wakeScaleE6C08(boardSide, 17.5f));
+            t4Vector tailPos = wakeAddE6C08(wakeSubE6C08(boardPos, wakeScaleE6C08(boardFwd, 75.0f)), wakeScaleE6C08(boardSide, 17.5f));
             float lean = 0.0f;
             if (self->rider->PressMode != 0) {
                 int s = cRiderAnimBase_getCurrentAnimID(self->rider->mRiderAnim, 2);
@@ -7588,49 +7588,49 @@ extern "C" void func_002E6C08(sTrailE6C08* self)
                 }
             }
             if (0.0f < lean) {
-                wakeAddEqE6C08(c2, wakeScaleE6C08(wakeScaleE6C08(p0, 150.0f), lean));
-                wakeAddEqE6C08(c3, wakeScaleE6C08(wakeScaleE6C08(p0, 150.0f), lean));
+                wakeAddEqE6C08(tailNeg, wakeScaleE6C08(wakeScaleE6C08(boardFwd, 150.0f), lean));
+                wakeAddEqE6C08(tailPos, wakeScaleE6C08(wakeScaleE6C08(boardFwd, 150.0f), lean));
             } else if (lean < 0.0f) {
-                wakeAddEqE6C08(c0, wakeScaleE6C08(wakeScaleE6C08(p0, 150.0f), lean));
-                wakeAddEqE6C08(c1, wakeScaleE6C08(wakeScaleE6C08(p0, 150.0f), lean));
+                wakeAddEqE6C08(noseNeg, wakeScaleE6C08(wakeScaleE6C08(boardFwd, 150.0f), lean));
+                wakeAddEqE6C08(nosePos, wakeScaleE6C08(wakeScaleE6C08(boardFwd, 150.0f), lean));
             }
             t4Vector n = wakeCrossE6C08(self->rider->mVelocity, self->rider->mGroundNormal);
             if (wakeDotE6C08(n, self->side) < 0.0f) {
                 n = wakeScaleE6C08(n, -1.0f);
             }
             self->side = n;
-            t4Vector d0 = wakeSubE6C08(c0, self->rider->mGroundContactPoint);
-            t4Vector d1 = wakeSubE6C08(c1, self->rider->mGroundContactPoint);
-            t4Vector d2 = wakeSubE6C08(c2, self->rider->mGroundContactPoint);
-            t4Vector d3 = wakeSubE6C08(c3, self->rider->mGroundContactPoint);
-            float h0 = wakeDotE6C08(d0, n);
-            float h1 = wakeDotE6C08(d1, n);
-            float h2 = wakeDotE6C08(d2, n);
-            float h3 = wakeDotE6C08(d3, n);
+            t4Vector noseNegOff = wakeSubE6C08(noseNeg, self->rider->mGroundContactPoint);
+            t4Vector nosePosOff = wakeSubE6C08(nosePos, self->rider->mGroundContactPoint);
+            t4Vector tailNegOff = wakeSubE6C08(tailNeg, self->rider->mGroundContactPoint);
+            t4Vector tailPosOff = wakeSubE6C08(tailPos, self->rider->mGroundContactPoint);
+            float h0 = wakeDotE6C08(noseNegOff, n);
+            float h1 = wakeDotE6C08(nosePosOff, n);
+            float h2 = wakeDotE6C08(tailNegOff, n);
+            float h3 = wakeDotE6C08(tailPosOff, n);
             float s = 1.0f / WAKE_MAX_E6C08(wakeAbsE6C08(h0), WAKE_MAX_E6C08(wakeAbsE6C08(h1), WAKE_MAX_E6C08(wakeAbsE6C08(h2), wakeAbsE6C08(h3))));
-            float a = h0 * s;
-            float b = h1 * s;
-            float c = h2 * s;
-            float d = h3 * s;
+            float noseNegNorm = h0 * s;
+            float nosePosNorm = h1 * s;
+            float tailNegNorm = h2 * s;
+            float tailPosNorm = h3 * s;
             t4Vector lo;
             t4Vector hi;
-            if (a < b && a < c + 0.5f && a < d + 0.5f) {
-                lo = wakeDropE6C08(self, c0, d0);
-            } else if (b < a && b < c + 0.5f && b < d + 0.5f) {
-                lo = wakeDropE6C08(self, c1, d1);
-            } else if (c < a && c < b && c < d) {
-                lo = wakeDropE6C08(self, c2, d2);
+            if (noseNegNorm < nosePosNorm && noseNegNorm < tailNegNorm + 0.5f && noseNegNorm < tailPosNorm + 0.5f) {
+                lo = wakeDropE6C08(self, noseNeg, noseNegOff);
+            } else if (nosePosNorm < noseNegNorm && nosePosNorm < tailNegNorm + 0.5f && nosePosNorm < tailPosNorm + 0.5f) {
+                lo = wakeDropE6C08(self, nosePos, nosePosOff);
+            } else if (tailNegNorm < noseNegNorm && tailNegNorm < nosePosNorm && tailNegNorm < tailPosNorm) {
+                lo = wakeDropE6C08(self, tailNeg, tailNegOff);
             } else {
-                lo = wakeDropE6C08(self, c3, d3);
+                lo = wakeDropE6C08(self, tailPos, tailPosOff);
             }
-            if (b <= a && c - 0.5f <= a && d - 0.5f <= a) {
-                hi = wakeDropE6C08(self, c0, d0);
-            } else if (a <= b && c - 0.5f <= b && d - 0.5f <= b) {
-                hi = wakeDropE6C08(self, c1, d1);
-            } else if (a <= c && b <= c && d <= c) {
-                hi = wakeDropE6C08(self, c2, d2);
+            if (nosePosNorm <= noseNegNorm && tailNegNorm - 0.5f <= noseNegNorm && tailPosNorm - 0.5f <= noseNegNorm) {
+                hi = wakeDropE6C08(self, noseNeg, noseNegOff);
+            } else if (noseNegNorm <= nosePosNorm && tailNegNorm - 0.5f <= nosePosNorm && tailPosNorm - 0.5f <= nosePosNorm) {
+                hi = wakeDropE6C08(self, nosePos, nosePosOff);
+            } else if (noseNegNorm <= tailNegNorm && nosePosNorm <= tailNegNorm && tailPosNorm <= tailNegNorm) {
+                hi = wakeDropE6C08(self, tailNeg, tailNegOff);
             } else {
-                hi = wakeDropE6C08(self, c3, d3);
+                hi = wakeDropE6C08(self, tailPos, tailPosOff);
             }
             self->ring[self->head].lo = sV3E6C08(lo.x, lo.y, lo.z);
             self->ring[self->head].hi = sV3E6C08(hi.x, hi.y, hi.z);

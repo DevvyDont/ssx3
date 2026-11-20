@@ -402,13 +402,13 @@ static inline sVec4_6290 vScale_6290(const sVec4_6290& v, float s)
 extern "C" sVec4_6290 func_002D6290(void* self)
 {
     char* node = ((char**)cAvalanche_m_nodeList)[*(unsigned short*)((char*)self + 0x92) >> 8];
-    char* p = *(char**)(node + 0x114);
-    if (p != 0) {
-        return sVec4_6290(*(float*)(p + 0xCC), *(float*)(p + 0xC0), *(float*)(p + 0xC4), *(float*)(p + 0xC8));
+    char* activeNode = *(char**)(node + 0x114);
+    if (activeNode != 0) {
+        return sVec4_6290(*(float*)(activeNode + 0xCC), *(float*)(activeNode + 0xC0), *(float*)(activeNode + 0xC4), *(float*)(activeNode + 0xC8));
     }
-    unsigned char* c = *(unsigned char**)(node + 0xFC);
-    if (c != 0) {
-        return vScale_6290(sVec4_6290(1.0f, (float)c[3] * 0.0078125f, (float)c[4] * 0.0078125f, (float)c[5] * 0.0078125f), D_004A3AA8);
+    unsigned char* history = *(unsigned char**)(node + 0xFC);
+    if (history != 0) {
+        return vScale_6290(sVec4_6290(1.0f, (float)history[3] * 0.0078125f, (float)history[4] * 0.0078125f, (float)history[5] * 0.0078125f), D_004A3AA8);
     }
     return t4vect_Origin;
 }
@@ -586,19 +586,19 @@ static inline int isBad_64D8(const float* f)
 /**
  * Limits an avalanche node's velocity to 70 units and replaces a non-finite velocity with (10, 10, 10, 0).
  *
- * When the 4-component length of @p v exceeds D_004A3A94 (70), the vector is normalised and scaled to 70. Then, if any
+ * When the 4-component length of @p velocity exceeds D_004A3A94 (70), the vector is normalised and scaled to 70. Then, if any
  * component is +-infinity or a quiet NaN (bit patterns 0x7F800000, 0x7FC00000, 0xFF800000, 0xFFC00000), the whole
  * vector is reset. tAvalancheNode_calculate calls it.
  *
- * @param v  the velocity, changed in place
+ * @param velocity  the velocity, changed in place
  */
-extern "C" void func_002D64D8(void* self, sVec4_64D8* v)
+extern "C" void func_002D64D8(void* self, sVec4_64D8* velocity)
 {
-    if (D_004A3A94 < vLen_64D8(*v))
-        *v = vScale_64D8(vNorm_64D8(*v), D_004A3A94);
-    int bad = isBad_64D8(&v->x) || isBad_64D8(&v->y) || isBad_64D8(&v->z) || isBad_64D8(&v->w);
+    if (D_004A3A94 < vLen_64D8(*velocity))
+        *velocity = vScale_64D8(vNorm_64D8(*velocity), D_004A3A94);
+    int bad = isBad_64D8(&velocity->x) || isBad_64D8(&velocity->y) || isBad_64D8(&velocity->z) || isBad_64D8(&velocity->w);
     if (bad)
-        *v = sVec4_64D8(10.0f, 10.0f, 10.0f, 0.0f);
+        *velocity = sVec4_64D8(10.0f, 10.0f, 10.0f, 0.0f);
 }
 #endif
 
@@ -1051,17 +1051,17 @@ extern char str_buffer[];
  * packed history records.
  *
  * @param direct  nonzero to write the bytes unchanged; zero to byte-swap each unit
- * @param a  the file handle
- * @param b  the file offset to write at
+ * @param handle  the file handle
+ * @param offset  the file offset to write at
  * @param src  the data
  * @param stride  bytes per unit
  * @param rows  number of units
  * @return the number of bytes written (@p stride * @p rows)
  */
-extern "C" int func_002D82A0(int direct, void* a, void* b, char* src, int stride, int rows)
+extern "C" int func_002D82A0(int direct, void* handle, void* offset, char* src, int stride, int rows)
 {
     if (direct) {
-        FILESYS_writesync(a, b, src, stride * rows, 100);
+        FILESYS_writesync(handle, offset, src, stride * rows, 100);
     } else {
         char* buf = (char*)operator_new_tag(stride * rows, str_buffer, 0, 0);
         char* dstCursor = buf;
@@ -1073,7 +1073,7 @@ extern "C" int func_002D82A0(int direct, void* a, void* b, char* src, int stride
             }
             src = end;
         }
-        FILESYS_writesync(a, b, buf, stride * rows, 100);
+        FILESYS_writesync(handle, offset, buf, stride * rows, 100);
         if (buf != 0) {
             cMemMan_free(buf);
         }
@@ -2105,13 +2105,13 @@ struct sAv_9738 {
  * Records a ground collision in this avalanche's table: a time and the position of @p stop in the node list.
  *
  * Does nothing once the count (+0xE) reaches 64. Otherwise counts the nodes from the list head (+0x4) up to @p stop
- * (through +0xF4) and stores (@p a, that index) as the next 4-byte entry at +0x110. tAvalancheNode_calculate calls it;
+ * (through +0xF4) and stores (@p time, that index) as the next 4-byte entry at +0x110. tAvalancheNode_calculate calls it;
  * the entries are later sorted with func_002D5750.
  *
- * @param a  the time to record (stored as a short)
+ * @param time  the time to record (stored as a short)
  * @param stop  the node that hit the ground
  */
-extern "C" void func_002D9738(sAv_9738* self, int a, sAvNode_9738* stop)
+extern "C" void func_002D9738(sAv_9738* self, int time, sAvNode_9738* stop)
 {
     if (self->count < 64) {
         int depth = 0;
@@ -2120,7 +2120,7 @@ extern "C" void func_002D9738(sAv_9738* self, int a, sAvNode_9738* stop)
             depth++;
             node = node->next;
         }
-        self->ents[self->count].a = a;
+        self->ents[self->count].a = time;
         self->ents[self->count].depth = depth;
         self->count++;
     }
@@ -2845,7 +2845,7 @@ static inline void vDivEq_A1C0(sVec4_A1C0& v, float s)
  * count and whether any is a type-2 node.
  *
  * Walks each in-use slot of cAvalanche_m_activeAvalanches and its active-node list (slot +0x4, linked through +0x2E4),
- * skipping nodes without a source node (+0x2E0). Every node whose 4-component distance from (@p p, 1) is below
+ * skipping nodes without a source node (+0x2E0). Every node whose 4-component distance from (@p position, 1) is below
  * 225000000 is summed: position (+0x60) into +0x0, scale (+0xB0) into +0x10, count +0x18, and the type-2 flag (+0x1C,
  * source node +0xF0 == 2). +0x14 gets the smallest distance (999999 when none). The sums are then divided by the count.
  *
@@ -2853,39 +2853,39 @@ static inline void vDivEq_A1C0(sVec4_A1C0& v, float s)
  * divides by a zero count. Callers: cDangerMan_CalcAppliedDangerLevel (src/ai/control/handplantcontrol.cpp) and two
  * functions of src/sound/soundsys.cpp.
  *
- * @param p  the position to measure from
+ * @param position  the position to measure from
  * @return the 0x20-byte summary: average position, average scale, nearest distance, node count, type-2 flag
  */
 // PORT: g++ `<?` (min) operator.
-extern "C" sAvInfo_A1C0 func_002DA1C0(sVec3_A1C0 p)
+extern "C" sAvInfo_A1C0 func_002DA1C0(sVec3_A1C0 position)
 {
-    sAvInfo_A1C0 r;
-    r.center = t4vect_Zero;
-    r.minDist = 999999.0f;
-    r.count = 0;
-    r.total = 0.0f;
-    r.any = 0;
+    sAvInfo_A1C0 posData;
+    posData.center = t4vect_Zero;
+    posData.minDist = 999999.0f;
+    posData.count = 0;
+    posData.total = 0.0f;
+    posData.any = 0;
     for (int i = 0; i < 16; i++) {
-        sAvalancheSlot* s = &cAvalanche_m_activeAvalanches[i];
-        if (s->active == 0)
+        sAvalancheSlot* activeSlot = &cAvalanche_m_activeAvalanches[i];
+        if (activeSlot->active == 0)
             continue;
-        for (sAvNode_A1C0* n = *(sAvNode_A1C0**)s->pad; n != 0; n = n->next) {
+        for (sAvNode_A1C0* n = *(sAvNode_A1C0**)activeSlot->pad; n != 0; n = n->next) {
             if (n->src == 0)
                 continue;
-            sVec4_A1C0 d = vSub_A1C0(sVec4_A1C0(p.x, p.y, p.z, 1.0f), n->pos);
-            float dist = vLen_A1C0(d);
+            sVec4_A1C0 offset = vSub_A1C0(sVec4_A1C0(position.x, position.y, position.z, 1.0f), n->pos);
+            float dist = vLen_A1C0(offset);
             if (dist < 225000000.0f) {
-                vAddEq_A1C0(r.center, n->pos);
-                r.total += n->weight;
-                r.minDist = r.minDist <? dist;
-                r.any |= *(unsigned short*)(n->src + 0xF0) == 2;
-                r.count++;
+                vAddEq_A1C0(posData.center, n->pos);
+                posData.total += n->weight;
+                posData.minDist = posData.minDist <? dist;
+                posData.any |= *(unsigned short*)(n->src + 0xF0) == 2;
+                posData.count++;
             }
         }
     }
-    vDivEq_A1C0(r.center, (float)r.count);
-    r.total = r.total / (float)r.count;
-    return r;
+    vDivEq_A1C0(posData.center, (float)posData.count);
+    posData.total = posData.total / (float)posData.count;
+    return posData;
 }
 #endif
 

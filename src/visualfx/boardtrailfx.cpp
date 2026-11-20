@@ -272,14 +272,14 @@ static inline int boardTrailCanDraw_86F0(char* r)
  *
  * While the delay (+0xE0) is positive it counts it down and returns 0. Otherwise the trail samples when its state
  * (+0x94) is 1, when the rider's mGroundContactPoint has moved at least 110 units from the last sample (+0xB0; 30 units
- * when mIsInNIS is set, unk_AD0 is clear and unk_AFC is set), or when @p d is below 0.999. State 1 also sets the delay
+ * when mIsInNIS is set, unk_AD0 is clear and unk_AFC is set), or when @p dirDot is below 0.999. State 1 also sets the delay
  * to 2. On a sample it copies mGroundContactPoint to +0xB0. cBoardTrailFX_update calls it with the dot product of the
  * new and previous travel directions.
  *
- * @param d  dot product of this frame's and the last direction (1 = no turn)
+ * @param dirDot  dot product of this frame's and the last direction (1 = no turn)
  * @return 1 when a new sample is taken, otherwise 0
  */
-extern "C" int func_002E86F0(sBTrail_86F0* self, float d)
+extern "C" int func_002E86F0(sBTrail_86F0* self, float dirDot)
 {
     if (self->delay > 0) {
         self->delay--;
@@ -291,7 +291,7 @@ extern "C" int func_002E86F0(sBTrail_86F0* self, float d)
     if (boardTrailCanDraw_86F0(self->rider)) {
         maxLen = 30.0f;
     }
-    if (self->state == 1 || maxLen <= len || d < 0.999f) {
+    if (self->state == 1 || maxLen <= len || dirDot < 0.999f) {
         if (self->state == 1) {
             self->delay = 2;
         }
@@ -1019,11 +1019,11 @@ extern "C" void func_002EA538(char** trails, int n)
     push_A480((sRenderCtx_A480*)GrMan);
     if (n > 0) {
     do {
-        char* t = *trails;
-        int len = *(int*)(t + 0x90);
+        char* trail = *trails;
+        int len = *(int*)(trail + 0x90);
         if (len < 2) continue;
         int k = len - 57;
-        int start = *(int*)(t + 0x8C) - k;
+        int start = *(int*)(trail + 0x8C) - k;
         int cnt = len - 2;
         int over = len - 50;
         if (over > 0) {
@@ -1034,7 +1034,7 @@ extern "C" void func_002EA538(char** trails, int n)
         int st = start % 54;
         float sc = 1.0f / (float)D_004A45C8;
         if (count < 16) {
-            strips[count].pts = t + 0x10;
+            strips[count].pts = trail + 0x10;
             strips[count].start = st;
             strips[count].count = cnt;
             strips[count].fC = 0;
@@ -1737,14 +1737,14 @@ extern float D_004A3B44;
 extern "C" void func_002EB8F0(void)
 {
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
-    sBTVEntryR* e = &(((sBTVEntryR*)obj->mVtbl))[42];
-    float* r = e->fn((char*)obj + e->delta);
-    float a = r[1];
-    float w = r[2];
-    D_004A3B3C = a;
-    float b = w + a;
-    D_004A3B40 = b;
-    D_004A3B44 = b - a;
+    sBTVEntryR* vtEntry = &(((sBTVEntryR*)obj->mVtbl))[42];
+    float* screenRect = vtEntry->fn((char*)obj + vtEntry->delta);
+    float top = screenRect[1];
+    float w = screenRect[2];
+    D_004A3B3C = top;
+    float bottom = w + top;
+    D_004A3B40 = bottom;
+    D_004A3B44 = bottom - top;
 }
 #endif
 
@@ -1814,19 +1814,19 @@ struct func_002EBBA8_sObj {
  * directions (+0x14, +0x18), which cWipe_TObj_Draw uses to slide the rectangle in.
  * cSSXScriptEngine_MakeTransitionObject builds it on 0x1C bytes with (-1, 0), (1, 0), (0, -1) or (0, 1).
  *
- * @param v  the colour (alpha first)
- * @param a  horizontal direction: -1, 0 or 1
- * @param b  vertical direction: -1, 0 or 1
+ * @param colour  the colour (alpha first)
+ * @param horizontalDir  horizontal direction: -1, 0 or 1
+ * @param verticalDir  vertical direction: -1, 0 or 1
  * @return @p self
  */
-extern "C" func_002EBBA8_sObj* func_002EBBA8(func_002EBBA8_sObj* self, const func_002EBBA8_sVec4& v, int a, int b)
+extern "C" func_002EBBA8_sObj* func_002EBBA8(func_002EBBA8_sObj* self, const func_002EBBA8_sVec4& colour, int horizontalDir, int verticalDir)
 {
-    func_002EBBA8_sVec4 vecCopy = v;
+    func_002EBBA8_sVec4 vecCopy = colour;
     func_002E4D70(self);
     self->vtable = cWipe_TObj_vtbl;
     self->v = vecCopy;
-    self->a = a;
-    self->b = b;
+    self->a = horizontalDir;
+    self->b = verticalDir;
     return self;
 }
 #endif

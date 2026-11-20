@@ -571,10 +571,10 @@ extern "C" void func_003A1030(void* self, func_003A1030_sVec3* out)
     void* font = cUIText_getFont(self);
     int str = *(int*)((char*)self + 0xB4);
     if (str != 0 && font != 0) {
-        func_003A1030_sRect r;
-        func_003921F0(font, str, &r, 0, *(float*)((char*)self + 0x50), *(float*)((char*)self + 0x54));
-        out->x = r.x1;
-        out->y = r.y1;
+        func_003A1030_sRect textRect;
+        func_003921F0(font, str, &textRect, 0, *(float*)((char*)self + 0x50), *(float*)((char*)self + 0x54));
+        out->x = textRect.x1;
+        out->y = textRect.y1;
     } else {
         *out = t3vect_Zero;
     }
@@ -1453,51 +1453,51 @@ extern "C" void func_0038E200(int ctx, sQuadVtx_20A0* v, sRect_20A0* r);
  * element's UVs (+0xC..+0x18; flag 1 swaps u, flag 2 swaps v) and the colour scaled by 128, and submits them with
  * func_0038E200 when flag 4 is set, else func_0038E118. Nothing in the retail code references it.
  *
- * @param o  the texture element
- * @param r  the screen rectangle (x, y, w, h)
- * @param c  the colour (a, r, g, b), 0..1
+ * @param element  the texture element
+ * @param rect  the screen rectangle (x, y, w, h)
+ * @param colour  the colour (a, r, g, b), 0..1
  * @param flags  1 flip u, 2 flip v, 4 use func_0038E200
  */
-extern "C" void func_003A20A0(sSprite_20A0* o, sRect_20A0 r, sColor_20A0 c, int flags)
+extern "C" void func_003A20A0(sSprite_20A0* element, sRect_20A0 rect, sColor_20A0 colour, int flags)
 {
-    int tex = o->tex;
+    int tex = element->tex;
     if (tex < 0) {
         return;
     }
     (GrMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex;
-    float v0 = o->v0;
-    float v1 = o->v1;
-    float u0 = o->u0;
-    float u1 = o->u1;
+    float topV = element->v0;
+    float bottomV = element->v1;
+    float leftU = element->u0;
+    float rightU = element->u1;
     if (flags & 1) {
-        u0 = u1;
-        u1 = o->u0;
+        leftU = rightU;
+        rightU = element->u0;
     }
     if (flags & 2) {
-        v0 = v1;
-        v1 = o->v0;
+        topV = bottomV;
+        bottomV = element->v0;
     }
-    sQuadVtx_20A0 v[4];
+    sQuadVtx_20A0 quadVerts[4];
     for (int i = 0; i < 4; i++) {
-        sQuadVtx_20A0* p = &v[i];
-        p->a = (int)(c.a * 128.0f);
-        p->r = (int)(c.r * 128.0f);
-        p->g = (int)(c.g * 128.0f);
-        p->b = (int)(c.b * 128.0f);
-        p->q = 1.0f;
+        sQuadVtx_20A0* vertPtr = &quadVerts[i];
+        vertPtr->a = (int)(colour.a * 128.0f);
+        vertPtr->r = (int)(colour.r * 128.0f);
+        vertPtr->g = (int)(colour.g * 128.0f);
+        vertPtr->b = (int)(colour.b * 128.0f);
+        vertPtr->q = 1.0f;
     }
-    v[0].s = u0;
-    v[0].t = v0;
-    v[1].s = u1;
-    v[1].t = v0;
-    v[2].s = u0;
-    v[2].t = v1;
-    v[3].s = u1;
-    v[3].t = v1;
+    quadVerts[0].s = leftU;
+    quadVerts[0].t = topV;
+    quadVerts[1].s = rightU;
+    quadVerts[1].t = topV;
+    quadVerts[2].s = leftU;
+    quadVerts[2].t = bottomV;
+    quadVerts[3].s = rightU;
+    quadVerts[3].t = bottomV;
     if (flags & 4) {
-        func_0038E200(D_004A28AC_20A0, v, &r);
+        func_0038E200(D_004A28AC_20A0, quadVerts, &rect);
     } else {
-        func_0038E118(D_004A28AC_20A0, v, &r);
+        func_0038E118(D_004A28AC_20A0, quadVerts, &rect);
     }
 }
 #endif
@@ -1537,51 +1537,51 @@ extern void func_0038E118_2220(int ctx, sQuadVtx_2220* v, sRect_2220* r) __asm__
 extern void func_0038E200_2220(int ctx, sQuadVtx_2220* v, sRect_2220* r) __asm__("func_0038E200");
 
 /**
- * Draws the bottom @p t part of a texture element as a screen quad, like a fill gauge.
+ * Draws the bottom @p fillFraction part of a texture element as a screen quad, like a fill gauge.
  *
- * The rectangle and the top v are moved down by (1 - @p t) of their height, so only the bottom part shows. Unlike
+ * The rectangle and the top v are moved down by (1 - @p fillFraction) of their height, so only the bottom part shows. Unlike
  * func_003A20A0 it draws even a negative texture, ignores the flip flags and scales r, g, b by 255 (alpha by 128). Flag
  * 4 selects func_0038E200 over func_0038E118. Nothing in the retail code references it.
  *
- * @param o  the texture element
- * @param r  the screen rectangle (x, y, w, h)
- * @param c  the colour (a, r, g, b), 0..1
+ * @param element  the texture element
+ * @param rect  the screen rectangle (x, y, w, h)
+ * @param colour  the colour (a, r, g, b), 0..1
  * @param flags  4 uses func_0038E200
- * @param t  the shown fraction, 0..1
+ * @param fillFraction  the shown fraction, 0..1
  */
-extern "C" void func_003A2220(sSprite_2220* o, sRect_2220 r, sColor_2220 c, int flags, float t)
+extern "C" void func_003A2220(sSprite_2220* element, sRect_2220 rect, sColor_2220 colour, int flags, float fillFraction)
 {
-    float k = 1.0f - t;
-    int tex = o->tex;
+    float k = 1.0f - fillFraction;
+    int tex = element->tex;
     (GrMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex;
-    float v0 = o->v0;
-    float v1 = o->v1;
-    float u0 = o->u0;
-    float u1 = o->u1;
-    r.y += k * r.h;
-    r.h *= 1.0f - k;
-    v0 += k * (v1 - v0);
-    sQuadVtx_2220 v[4];
+    float topV = element->v0;
+    float bottomV = element->v1;
+    float leftU = element->u0;
+    float rightU = element->u1;
+    rect.y += k * rect.h;
+    rect.h *= 1.0f - k;
+    topV += k * (bottomV - topV);
+    sQuadVtx_2220 quadVerts[4];
     for (int i = 0; i < 4; i++) {
-        sQuadVtx_2220* p = &v[i];
-        p->a = (int)(c.a * 128.0f);
-        p->r = (int)(c.r * 255.0f);
-        p->g = (int)(c.g * 255.0f);
-        p->b = (int)(c.b * 255.0f);
-        p->q = 1.0f;
+        sQuadVtx_2220* vertPtr = &quadVerts[i];
+        vertPtr->a = (int)(colour.a * 128.0f);
+        vertPtr->r = (int)(colour.r * 255.0f);
+        vertPtr->g = (int)(colour.g * 255.0f);
+        vertPtr->b = (int)(colour.b * 255.0f);
+        vertPtr->q = 1.0f;
     }
-    v[0].s = u0;
-    v[0].t = v0;
-    v[1].s = u1;
-    v[1].t = v0;
-    v[2].s = u0;
-    v[2].t = v1;
-    v[3].s = u1;
-    v[3].t = v1;
+    quadVerts[0].s = leftU;
+    quadVerts[0].t = topV;
+    quadVerts[1].s = rightU;
+    quadVerts[1].t = topV;
+    quadVerts[2].s = leftU;
+    quadVerts[2].t = bottomV;
+    quadVerts[3].s = rightU;
+    quadVerts[3].t = bottomV;
     if (flags & 4) {
-        func_0038E200_2220(D_004A28AC_2220, v, &r);
+        func_0038E200_2220(D_004A28AC_2220, quadVerts, &rect);
     } else {
-        func_0038E118_2220(D_004A28AC_2220, v, &r);
+        func_0038E118_2220(D_004A28AC_2220, quadVerts, &rect);
     }
 }
 #endif

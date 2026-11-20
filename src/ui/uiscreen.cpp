@@ -1669,29 +1669,29 @@ extern void* D_004946C8[];
 /**
  * Constructs a UI state for an engine.
  *
- * Links the list node to itself, installs the vtable D_004946C8, clears the hash name (+0xC), stores @p a1 (+0x10),
+ * Links the list node to itself, installs the vtable D_004946C8, clears the hash name (+0xC), stores @p engine (+0x10),
  * sets the current controller to -1 (+0x14), the controller bits to 0xF (+0x15) and the attribute word (+0x1C) to 0x218
  * (visible, first time, mode 2), clears the parent (+0x20), constructs the screen list (+0x24), clears the screen
  * (+0x40) and sets the user number to -1 (+0x44).
  *
- * @param a1  the UI engine
+ * @param engine  the UI engine
  * @return @p self
  */
-extern "C" void* func_0039E2A0(void* self, int a1)
+extern "C" void* func_0039E2A0(void* self, int engine)
 {
-    char* s = (char*)self;
-    *(void**)(s + 0x4) = s;
-    *(void**)(s + 0x0) = s;
-    *(void***)(s + 0x8) = D_004946C8;
-    *(int*)(s + 0xC) = 0;
-    *(int*)(s + 0x10) = a1;
-    *(signed char*)(s + 0x14) = -1;
-    *(signed char*)(s + 0x15) = 0xF;
-    *(short*)(s + 0x1C) = 536;
-    *(int*)(s + 0x20) = 0;
-    cList_cList(s + 0x24);
-    *(int*)(s + 0x40) = 0;
-    *(signed char*)(s + 0x44) = -1;
+    char* stateBytes = (char*)self;
+    *(void**)(stateBytes + 0x4) = stateBytes;
+    *(void**)(stateBytes + 0x0) = stateBytes;
+    *(void***)(stateBytes + 0x8) = D_004946C8;
+    *(int*)(stateBytes + 0xC) = 0;
+    *(int*)(stateBytes + 0x10) = engine;
+    *(signed char*)(stateBytes + 0x14) = -1;
+    *(signed char*)(stateBytes + 0x15) = 0xF;
+    *(short*)(stateBytes + 0x1C) = 536;
+    *(int*)(stateBytes + 0x20) = 0;
+    cList_cList(stateBytes + 0x24);
+    *(int*)(stateBytes + 0x40) = 0;
+    *(signed char*)(stateBytes + 0x44) = -1;
     return self;
 }
 #endif
@@ -1705,27 +1705,27 @@ extern void* D_004946C8[];
 /**
  * Constructs a UI state for an engine with a parent state.
  *
- * The same as func_0039E2A0 except that the parent (+0x20) is @p a2.
+ * The same as func_0039E2A0 except that the parent (+0x20) is @p parentState.
  *
- * @param a1  the UI engine
- * @param a2  the parent state
+ * @param engine  the UI engine
+ * @param parentState  the parent state
  * @return @p self
  */
-extern "C" void* func_0039E318(void* self, int a1, int a2)
+extern "C" void* func_0039E318(void* self, int engine, int parentState)
 {
-    char* s = (char*)self;
-    *(void**)(s + 0x4) = s;
-    *(void**)(s + 0x0) = s;
-    *(void***)(s + 0x8) = D_004946C8;
-    *(int*)(s + 0xC) = 0;
-    *(int*)(s + 0x10) = a1;
-    *(signed char*)(s + 0x14) = -1;
-    *(signed char*)(s + 0x15) = 0xF;
-    *(short*)(s + 0x1C) = 536;
-    *(int*)(s + 0x20) = a2;
-    cList_cList(s + 0x24);
-    *(int*)(s + 0x40) = 0;
-    *(signed char*)(s + 0x44) = -1;
+    char* stateBytes = (char*)self;
+    *(void**)(stateBytes + 0x4) = stateBytes;
+    *(void**)(stateBytes + 0x0) = stateBytes;
+    *(void***)(stateBytes + 0x8) = D_004946C8;
+    *(int*)(stateBytes + 0xC) = 0;
+    *(int*)(stateBytes + 0x10) = engine;
+    *(signed char*)(stateBytes + 0x14) = -1;
+    *(signed char*)(stateBytes + 0x15) = 0xF;
+    *(short*)(stateBytes + 0x1C) = 536;
+    *(int*)(stateBytes + 0x20) = parentState;
+    cList_cList(stateBytes + 0x24);
+    *(int*)(stateBytes + 0x40) = 0;
+    *(signed char*)(stateBytes + 0x44) = -1;
     return self;
 }
 #endif
@@ -1776,15 +1776,15 @@ INCLUDE_ASM("ui/uiscreen", func_0039E438);
  *
  * Nothing in the retail code references it.
  *
- * @param arg0  the UI state
+ * @param uiState  the UI state
  * @param bit  the controller index, or -1 for all
  */
-extern "C" void func_0039E438(void *arg0, signed char bit) {
+extern "C" void func_0039E438(void *uiState, signed char bit) {
     if (bit < 0) {
-        (*(unsigned char *)((char*)(arg0) + (0x15))) = 0xFFU;
+        (*(unsigned char *)((char*)(uiState) + (0x15))) = 0xFFU;
         return;
     }
-    (*(unsigned char *)((char*)(arg0) + (0x15))) = (unsigned char) ((*(unsigned char *)((char*)(arg0) + (0x15))) | ((int) (0x01000000 << bit) >> 0x18));
+    (*(unsigned char *)((char*)(uiState) + (0x15))) = (unsigned char) ((*(unsigned char *)((char*)(uiState) + (0x15))) | ((int) (0x01000000 << bit) >> 0x18));
 }
 #endif
 //100%
