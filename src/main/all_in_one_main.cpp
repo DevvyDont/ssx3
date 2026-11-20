@@ -1,4 +1,7 @@
 #include "common.h"
+#include "fe/popupinfo.h"
+#include "fe/keyboardpopup.h"
+#include "fe/screenpopup.h"
 #include "fe/uistatebuypopup.h"
 #include "fe/festatenet.h"
 
@@ -2906,8 +2909,8 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setMiscData);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param miscData  the value to report back
  */
-extern "C" void cPopupInfo_setMiscData(void *popupInfo, int miscData) {
-    (*(int *)((char*)(popupInfo) + (0x94))) = miscData;
+extern "C" void cPopupInfo_setMiscData(cPopupInfo* popupInfo, int miscData) {
+    (popupInfo->miMiscData) = miscData;
 }
 #endif
 
@@ -2920,8 +2923,8 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getMiscData);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return miMiscData
  */
-extern "C" int cPopupInfo_getMiscData(void *popupInfo) {
-    return (*(int *)((char*)(popupInfo) + (0x94)));
+extern "C" int cPopupInfo_getMiscData(cPopupInfo* popupInfo) {
+    return (popupInfo->miMiscData);
 }
 #endif
 
@@ -2934,8 +2937,8 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setPassUpdate);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param passUpdate  non-zero to keep updating the parent state
  */
-extern "C" void cPopupInfo_setPassUpdate(void *popupInfo, int passUpdate) {
-    (*(int *)((char*)(popupInfo) + (0x98))) = passUpdate;
+extern "C" void cPopupInfo_setPassUpdate(cPopupInfo* popupInfo, int passUpdate) {
+    (popupInfo->mbPassUpdate) = passUpdate;
 }
 #endif
 
@@ -2948,8 +2951,8 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getPassUpdate);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return mbPassUpdate
  */
-extern "C" int cPopupInfo_getPassUpdate(void *popupInfo) {
-    return (*(int *)((char*)(popupInfo) + (0x98)));
+extern "C" int cPopupInfo_getPassUpdate(cPopupInfo* popupInfo) {
+    return (popupInfo->mbPassUpdate);
 }
 #endif
 
@@ -2962,8 +2965,8 @@ struct V3_D950 { float x, y, z; };
  *
  * @param offset  the offset (x, y, z)
  */
-extern "C" void cPopupInfo_setOffset(void *self, V3_D950 offset) {
-    *(V3_D950 *)((char *)self + 0x9C) = offset;
+extern "C" void cPopupInfo_setOffset(cPopupInfo* self, V3_D950 offset) {
+    *(V3_D950*)&self->mvOffset[0] = offset;
 }
 #endif
 
@@ -2995,8 +2998,8 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setDefaultOption);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param defaultOption  the option index (clear() sets -1)
  */
-extern "C" void cPopupInfo_setDefaultOption(void *popupInfo, int defaultOption) {
-    (*(int *)((char*)(popupInfo) + (0xAC))) = defaultOption;
+extern "C" void cPopupInfo_setDefaultOption(cPopupInfo* popupInfo, int defaultOption) {
+    (popupInfo->miDefaultOption) = defaultOption;
 }
 #endif
 
@@ -3009,8 +3012,8 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getDefaultOption);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return miDefaultOption
  */
-extern "C" int cPopupInfo_getDefaultOption(void *popupInfo) {
-    return (*(int *)((char*)(popupInfo) + (0xAC)));
+extern "C" int cPopupInfo_getDefaultOption(cPopupInfo* popupInfo) {
+    return (popupInfo->miDefaultOption);
 }
 #endif
 
@@ -3023,8 +3026,8 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setReceivePrevCommand);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param receivePrev  non-zero to receive the back command (clear() sets 1)
  */
-extern "C" void cPopupInfo_setReceivePrevCommand(void *popupInfo, int receivePrev) {
-    (*(int *)((char*)(popupInfo) + (0xA8))) = receivePrev;
+extern "C" void cPopupInfo_setReceivePrevCommand(cPopupInfo* popupInfo, int receivePrev) {
+    (popupInfo->mbReceivePrev) = receivePrev;
 }
 #endif
 
@@ -3037,8 +3040,8 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getReceivePrevCommand);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return mbReceivePrev
  */
-extern "C" int cPopupInfo_getReceivePrevCommand(void *popupInfo) {
-    return (*(int *)((char*)(popupInfo) + (0xA8)));
+extern "C" int cPopupInfo_getReceivePrevCommand(cPopupInfo* popupInfo) {
+    return (popupInfo->mbReceivePrev);
 }
 #endif
 
@@ -3051,8 +3054,8 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setLayerOffset);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param layerOffset  the layer offset
  */
-extern "C" void cPopupInfo_setLayerOffset(void *popupInfo, int layerOffset) {
-    (*(int *)((char*)(popupInfo) + (0x90))) = layerOffset;
+extern "C" void cPopupInfo_setLayerOffset(cPopupInfo* popupInfo, int layerOffset) {
+    (popupInfo->miLayerOffset) = layerOffset;
 }
 #endif
 
@@ -3065,8 +3068,8 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getLayerOffset);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return miLayerOffset
  */
-extern "C" int cPopupInfo_getLayerOffset(void *popupInfo) {
-    return (*(int *)((char*)(popupInfo) + (0x90)));
+extern "C" int cPopupInfo_getLayerOffset(cPopupInfo* popupInfo) {
+    return (popupInfo->miLayerOffset);
 }
 #endif
 
@@ -3079,8 +3082,8 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setBackgroundType);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param backgroundType  the background (0 online, 1 blue, 2 black)
  */
-extern "C" void cPopupInfo_setBackgroundType(void *popupInfo, int backgroundType) {
-    (*(int *)((char*)(popupInfo) + (0xC0))) = backgroundType;
+extern "C" void cPopupInfo_setBackgroundType(cPopupInfo* popupInfo, int backgroundType) {
+    (popupInfo->meBackgroundType) = backgroundType;
 }
 #endif
 
@@ -3093,8 +3096,8 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getBackgroundType);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return meBackgroundType
  */
-extern "C" int cPopupInfo_getBackgroundType(void *popupInfo) {
-    return (*(int *)((char*)(popupInfo) + (0xC0)));
+extern "C" int cPopupInfo_getBackgroundType(cPopupInfo* popupInfo) {
+    return (popupInfo->meBackgroundType);
 }
 #endif
 
@@ -3107,8 +3110,8 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setMaxCharacters);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param maxChars  the character limit
  */
-extern "C" void cPopupInfo_setMaxCharacters(void *popupInfo, int maxChars) {
-    (*(int *)((char*)(popupInfo) + (0xC4))) = maxChars;
+extern "C" void cPopupInfo_setMaxCharacters(cPopupInfo* popupInfo, int maxChars) {
+    (popupInfo->miMaxChars) = maxChars;
 }
 #endif
 
@@ -3121,8 +3124,8 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getMaxCharacters);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return miMaxChars
  */
-extern "C" int cPopupInfo_getMaxCharacters(void *popupInfo) {
-    return (*(int *)((char*)(popupInfo) + (0xC4)));
+extern "C" int cPopupInfo_getMaxCharacters(cPopupInfo* popupInfo) {
+    return (popupInfo->miMaxChars);
 }
 #endif
 
@@ -3135,8 +3138,8 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setMinBackgroundSize);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param fparg0  the minimum size
  */
-extern "C" void cPopupInfo_setMinBackgroundSize(void *popupInfo, float fparg0) {
-    (*(float *)((char*)(popupInfo) + (0xB0))) = fparg0;
+extern "C" void cPopupInfo_setMinBackgroundSize(cPopupInfo* popupInfo, float fparg0) {
+    (popupInfo->mfMinSize) = fparg0;
 }
 #endif
 
@@ -3149,8 +3152,8 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getMinBackgroundSize);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return mfMinSize
  */
-extern "C" float cPopupInfo_getMinBackgroundSize(void *popupInfo) {
-    return (*(float *)((char*)(popupInfo) + (0xB0)));
+extern "C" float cPopupInfo_getMinBackgroundSize(cPopupInfo* popupInfo) {
+    return (popupInfo->mfMinSize);
 }
 #endif
 
@@ -3163,8 +3166,8 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setUseCenterAlignedOptions);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param centerOptions  non-zero to centre the options
  */
-extern "C" void cPopupInfo_setUseCenterAlignedOptions(void *popupInfo, int centerOptions) {
-    (*(int *)((char*)(popupInfo) + (0xB8))) = centerOptions;
+extern "C" void cPopupInfo_setUseCenterAlignedOptions(cPopupInfo* popupInfo, int centerOptions) {
+    (popupInfo->mbCenterOptions) = centerOptions;
 }
 #endif
 
@@ -3177,8 +3180,8 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getUseCenterAlignedOptions);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return mbCenterOptions
  */
-extern "C" int cPopupInfo_getUseCenterAlignedOptions(void *popupInfo) {
-    return (*(int *)((char*)(popupInfo) + (0xB8)));
+extern "C" int cPopupInfo_getUseCenterAlignedOptions(cPopupInfo* popupInfo) {
+    return (popupInfo->mbCenterOptions);
 }
 #endif
 
@@ -3191,8 +3194,8 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_setUseCenterAlignedText);
  * @param popupInfo  the popup description (cPopupInfo)
  * @param centerText  non-zero to centre the text (clear() sets 1)
  */
-extern "C" void cPopupInfo_setUseCenterAlignedText(void *popupInfo, int centerText) {
-    (*(int *)((char*)(popupInfo) + (0xBC))) = centerText;
+extern "C" void cPopupInfo_setUseCenterAlignedText(cPopupInfo* popupInfo, int centerText) {
+    (popupInfo->mbCenterText) = centerText;
 }
 #endif
 
@@ -3205,8 +3208,8 @@ INCLUDE_ASM("main/all_in_one_main", cPopupInfo_getUseCenterAlignedText);
  * @param popupInfo  the popup description (cPopupInfo)
  * @return mbCenterText
  */
-extern "C" int cPopupInfo_getUseCenterAlignedText(void *popupInfo) {
-    return (*(int *)((char*)(popupInfo) + (0xBC)));
+extern "C" int cPopupInfo_getUseCenterAlignedText(cPopupInfo* popupInfo) {
+    return (popupInfo->mbCenterText);
 }
 #endif
 
@@ -3639,13 +3642,13 @@ struct S_DBD0 {
  *
  * @return @p self
  */
-extern "C" S_DBD0 *cScreenPopup_cScreenPopup1(S_DBD0 *self) {
-    func_0039E318_DBD0(self, 0, 0);
-    self->vt = cScreenPopup_vtbl;
+extern "C" S_DBD0 *cScreenPopup_cScreenPopup1(cScreenPopup* self) {
+    func_0039E318_DBD0(((S_DBD0*)self), 0, 0);
+    self->mVtbl = (void**)cScreenPopup_vtbl;
     cPopupInfo_cPopupInfo_DBD0((char *)self + 0xBC);
-    self->v2B0 = cBXString_EmptyString;
-    self->v2B4 = cBXString_EmptyString;
-    return self;
+    self->mszInputText = (char*)cBXString_EmptyString;
+    self->mszStaticText = (char*)cBXString_EmptyString;
+    return ((S_DBD0*)self);
 }
 #endif
 
@@ -3672,8 +3675,8 @@ INCLUDE_ASM("main/all_in_one_main", cScreenPopup_setPassUpdate);
  * @param screenPopup  the popup (cScreenPopup)
  * @param passUpdate  non-zero to keep updating the parent state
  */
-extern "C" void cScreenPopup_setPassUpdate(void *screenPopup, int passUpdate) {
-    (*(int *)((char*)(screenPopup) + (0x2C0))) = passUpdate;
+extern "C" void cScreenPopup_setPassUpdate(cScreenPopup* screenPopup, int passUpdate) {
+    (screenPopup->mbPassUpdate) = passUpdate;
 }
 #endif
 
@@ -3686,8 +3689,8 @@ INCLUDE_ASM("main/all_in_one_main", cScreenPopup_getPassUpdate);
  * @param screenPopup  the popup (cScreenPopup)
  * @return mbPassUpdate
  */
-extern "C" int cScreenPopup_getPassUpdate(void *screenPopup) {
-    return (*(int *)((char*)(screenPopup) + (0x2C0)));
+extern "C" int cScreenPopup_getPassUpdate(cScreenPopup* screenPopup) {
+    return (screenPopup->mbPassUpdate);
 }
 #endif
 
@@ -3700,8 +3703,8 @@ INCLUDE_ASM("main/all_in_one_main", cScreenPopup_getEntryBoxText);
  * @param screenPopup  the popup (cScreenPopup)
  * @return the input text
  */
-extern "C" int cScreenPopup_getEntryBoxText(void *screenPopup) {
-    return (*(int *)((char*)(screenPopup) + (0x2B0)));
+extern "C" int cScreenPopup_getEntryBoxText(cScreenPopup* screenPopup) {
+    return ((int)screenPopup->mszInputText);
 }
 #endif
 
@@ -3715,8 +3718,8 @@ INCLUDE_ASM("main/all_in_one_main", cScreenPopup_isShowing);
  * @param screenPopup  the popup (cScreenPopup)
  * @return mbShowing
  */
-extern "C" int cScreenPopup_isShowing(void *screenPopup) {
-    return (*(int *)((char*)(screenPopup) + (0x2B8)));
+extern "C" int cScreenPopup_isShowing(cScreenPopup* screenPopup) {
+    return (screenPopup->mbShowing);
 }
 #endif
 
@@ -4646,12 +4649,12 @@ struct S_E288 {
  *
  * @return @p self
  */
-extern "C" S_E288 *cKeyboardPopup_cKeyboardPopup1(S_E288 *self) {
-    func_0039E318_E288(self, 0, 0);
-    self->vt = cKeyboardPopup_vtbl;
-    self->v60 = 0x3F;
-    self->v424 = cBXString_EmptyString;
-    return self;
+extern "C" S_E288 *cKeyboardPopup_cKeyboardPopup1(cKeyboardPopup* self) {
+    func_0039E318_E288(((S_E288*)self), 0, 0);
+    self->mVtbl = (void**)cKeyboardPopup_vtbl;
+    self->miMaxCharacters = 0x3F;
+    self->mszStatic = (char*)cBXString_EmptyString;
+    return ((S_E288*)self);
 }
 #endif
 
@@ -4707,8 +4710,8 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_getCurrentKey);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @return miCurrentKey
  */
-extern "C" int cKeyboardPopup_getCurrentKey(void *keyboard) {
-    return (*(int *)((char*)(keyboard) + (0x140)));
+extern "C" int cKeyboardPopup_getCurrentKey(cKeyboardPopup* keyboard) {
+    return (keyboard->miCurrentKey);
 }
 #endif
 
@@ -4721,8 +4724,8 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setCurrentKey);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param currentKey  the key index (0..83)
  */
-extern "C" void cKeyboardPopup_setCurrentKey(void *keyboard, int currentKey) {
-    (*(int *)((char*)(keyboard) + (0x140))) = currentKey;
+extern "C" void cKeyboardPopup_setCurrentKey(cKeyboardPopup* keyboard, int currentKey) {
+    (keyboard->miCurrentKey) = currentKey;
 }
 #endif
 
@@ -4735,8 +4738,8 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setKeyboardType);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param keyboardType  the layout
  */
-extern "C" void cKeyboardPopup_setKeyboardType(void *keyboard, int keyboardType) {
-    (*(int *)((char*)(keyboard) + (0x43C))) = keyboardType;
+extern "C" void cKeyboardPopup_setKeyboardType(cKeyboardPopup* keyboard, int keyboardType) {
+    (keyboard->meType) = keyboardType;
 }
 #endif
 
@@ -4749,8 +4752,8 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_getKeyboardType);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @return meType
  */
-extern "C" int cKeyboardPopup_getKeyboardType(void *keyboard) {
-    return (*(int *)((char*)(keyboard) + (0x43C)));
+extern "C" int cKeyboardPopup_getKeyboardType(cKeyboardPopup* keyboard) {
+    return (keyboard->meType);
 }
 #endif
 
@@ -4763,8 +4766,8 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_getPopOnEnd);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @return mbPopOnEnd
  */
-extern "C" int cKeyboardPopup_getPopOnEnd(void *keyboard) {
-    return (*(int *)((char*)(keyboard) + (0x420)));
+extern "C" int cKeyboardPopup_getPopOnEnd(cKeyboardPopup* keyboard) {
+    return (keyboard->mbPopOnEnd);
 }
 #endif
 
@@ -4777,8 +4780,8 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setPopOnEnd);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param popOnEnd  non-zero to pop on accept
  */
-extern "C" void cKeyboardPopup_setPopOnEnd(void *keyboard, int popOnEnd) {
-    (*(int *)((char*)(keyboard) + (0x420))) = popOnEnd;
+extern "C" void cKeyboardPopup_setPopOnEnd(cKeyboardPopup* keyboard, int popOnEnd) {
+    (keyboard->mbPopOnEnd) = popOnEnd;
 }
 #endif
 
@@ -4791,8 +4794,8 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setPassword);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param password  non-zero to show '*' characters
  */
-extern "C" void cKeyboardPopup_setPassword(void *keyboard, int password) {
-    (*(int *)((char*)(keyboard) + (0x70))) = password;
+extern "C" void cKeyboardPopup_setPassword(cKeyboardPopup* keyboard, int password) {
+    (keyboard->mbPassword) = password;
 }
 #endif
 
@@ -4805,8 +4808,8 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setClearOnFirstCharacter);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param clearOnFirst  non-zero to clear on the first key
  */
-extern "C" void cKeyboardPopup_setClearOnFirstCharacter(void *keyboard, int clearOnFirst) {
-    (*(int *)((char*)(keyboard) + (0x54))) = clearOnFirst;
+extern "C" void cKeyboardPopup_setClearOnFirstCharacter(cKeyboardPopup* keyboard, int clearOnFirst) {
+    (keyboard->mbClearOnFirst) = clearOnFirst;
 }
 #endif
 
@@ -4819,8 +4822,8 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setDisableSpaceForFirst);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param disableForFirst  non-zero to disable space for the first character
  */
-extern "C" void cKeyboardPopup_setDisableSpaceForFirst(void *keyboard, int disableForFirst) {
-    (*(int *)((char*)(keyboard) + (0x58))) = disableForFirst;
+extern "C" void cKeyboardPopup_setDisableSpaceForFirst(cKeyboardPopup* keyboard, int disableForFirst) {
+    (keyboard->mbDisableForFirst) = disableForFirst;
 }
 #endif
 
@@ -4938,8 +4941,8 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_getMinCharacters);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @return miMinCharacters
  */
-extern "C" int cKeyboardPopup_getMinCharacters(void *keyboard) {
-    return (*(int *)((char*)(keyboard) + (0x64)));
+extern "C" int cKeyboardPopup_getMinCharacters(cKeyboardPopup* keyboard) {
+    return (keyboard->miMinCharacters);
 }
 #endif
 
@@ -4952,8 +4955,8 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_getMaxCharacters);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @return miMaxCharacters
  */
-extern "C" int cKeyboardPopup_getMaxCharacters(void *keyboard) {
-    return (*(int *)((char*)(keyboard) + (0x60)));
+extern "C" int cKeyboardPopup_getMaxCharacters(cKeyboardPopup* keyboard) {
+    return (keyboard->miMaxCharacters);
 }
 #endif
 
@@ -4966,8 +4969,8 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setReferEventsToParent);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param referEvents  non-zero to forward events (cKeyboardPopup_handleEvent)
  */
-extern "C" void cKeyboardPopup_setReferEventsToParent(void *keyboard, int referEvents) {
-    (*(int *)((char*)(keyboard) + (0x438))) = referEvents;
+extern "C" void cKeyboardPopup_setReferEventsToParent(cKeyboardPopup* keyboard, int referEvents) {
+    (keyboard->mbReferEventsToParent) = referEvents;
 }
 #endif
 
@@ -4980,8 +4983,8 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_getReferEventsToParent);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @return mbReferEventsToParent
  */
-extern "C" int cKeyboardPopup_getReferEventsToParent(void *keyboard) {
-    return (*(int *)((char*)(keyboard) + (0x438)));
+extern "C" int cKeyboardPopup_getReferEventsToParent(cKeyboardPopup* keyboard) {
+    return (keyboard->mbReferEventsToParent);
 }
 #endif
 
@@ -4994,8 +4997,8 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_setCallParentsUpdate);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @param callParentUpdate  non-zero to update the parent too (cKeyboardPopup_onUpdate)
  */
-extern "C" void cKeyboardPopup_setCallParentsUpdate(void *keyboard, int callParentUpdate) {
-    (*(int *)((char*)(keyboard) + (0x440))) = callParentUpdate;
+extern "C" void cKeyboardPopup_setCallParentsUpdate(cKeyboardPopup* keyboard, int callParentUpdate) {
+    (keyboard->mbCallParentsUpdate) = callParentUpdate;
 }
 #endif
 
@@ -5008,8 +5011,8 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_isAcceptText);
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  * @return mbAcceptText
  */
-extern "C" int cKeyboardPopup_isAcceptText(void *keyboard) {
-    return (*(int *)((char*)(keyboard) + (0x5C)));
+extern "C" int cKeyboardPopup_isAcceptText(cKeyboardPopup* keyboard) {
+    return (keyboard->mbAcceptText);
 }
 #endif
 
@@ -5023,12 +5026,12 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_cursorRight);
  *
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  */
-extern "C" void cKeyboardPopup_cursorRight(void *keyboard) {
+extern "C" void cKeyboardPopup_cursorRight(cKeyboardPopup* keyboard) {
     int temp_3;
 
-    temp_3 = (*(int *)((char*)(keyboard) + (0x134)));
-    if (temp_3 < ((*(int *)((char*)(keyboard) + (0x60))) - 1)) {
-        (*(int *)((char*)(keyboard) + (0x134))) = (int) (temp_3 + 1);
+    temp_3 = (keyboard->miCursorPos);
+    if (temp_3 < ((keyboard->miMaxCharacters) - 1)) {
+        (keyboard->miCursorPos) = (int) (temp_3 + 1);
     }
 }
 #endif
@@ -5043,12 +5046,12 @@ INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_cursorLeft);
  *
  * @param keyboard  the keyboard popup (cKeyboardPopup)
  */
-extern "C" void cKeyboardPopup_cursorLeft(void *keyboard) {
+extern "C" void cKeyboardPopup_cursorLeft(cKeyboardPopup* keyboard) {
     int temp_2;
 
-    temp_2 = (*(int *)((char*)(keyboard) + (0x134)));
+    temp_2 = (keyboard->miCursorPos);
     if (temp_2 > 0) {
-        (*(int *)((char*)(keyboard) + (0x134))) = (int) (temp_2 - 1);
+        (keyboard->miCursorPos) = (int) (temp_2 - 1);
     }
 }
 #endif

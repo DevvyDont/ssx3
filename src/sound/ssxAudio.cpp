@@ -427,7 +427,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBankMonitor_BANKMONITOR_Create(void* sub, int id, int vol, int a3);
 extern "C" int func_00288940(void* self, int id);
-extern "C" int cSSXAudio_ReplayMode(void* self);
+extern "C" int cSSXAudio_ReplayMode(cSSXAudio* self);
 extern "C" void func_002A9988(void* self, float a, float b);
 extern "C" int func_002AAD78(void* self, int i, int a, int b, int c);
 int func_002AB188(void* self, int a1);
@@ -731,7 +731,7 @@ extern "C" void func_00285BF8(char* self, float dt)
 //100%
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetFocusRider);
 #ifdef SKIP_ASM
-extern "C" int cSSXAudio_ReplayMode(void* self);
+extern "C" int cSSXAudio_ReplayMode(cSSXAudio* self);
 extern "C" char* cAudioInterface_getAI();
 
 static inline int isLocalHuman(cRider* rider)
@@ -752,7 +752,7 @@ static inline int isLocalHuman(cRider* rider)
  * @return the rider (cRider*)
  */
 // PORT: returns a rider pointer; the unit declares the return type as int.
-extern "C" int cSSXAudio_GetFocusRider(void* self, int which)
+extern "C" int cSSXAudio_GetFocusRider(cSSXAudio* self, int which)
 {
     if (cSSXAudio_ReplayMode(self) != 0) {
         cPlayer* player = ((cAI*)cAudioInterface_getAI())->Players[0];
@@ -1383,8 +1383,8 @@ INCLUDE_ASM("sound/ssxAudio", func_00286EA0);
 #ifdef SKIP_ASM
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" int cSSXAudio_GetFocusRider(void* self, int which);
-extern "C" int cSSXAudio_ReplayMode(void* self);
+extern "C" int cSSXAudio_GetFocusRider(cSSXAudio* self, int which);
+extern "C" int cSSXAudio_ReplayMode(cSSXAudio* self);
 extern "C" void func_002A73A8(void* p, int a1, int id);
 extern "C" void func_00296E20(void* self, int id);
 extern "C" void func_00297438(void* self, int id);
@@ -1409,9 +1409,9 @@ struct sSaVt6EA0 { short delta; short index; int (*fn)(void*, int); };
 // PORT: rider pointers passed through int parameters of some callees.
 extern "C" void func_00286EA0(char* self, char* rider)
 {
-    if (rider != (char*)cSSXAudio_GetFocusRider(self, *(int*)(rider + 0x870)))
+    if (rider != (char*)cSSXAudio_GetFocusRider((cSSXAudio*)self, *(int*)(rider + 0x870)))
         return;
-    func_002A73A8((char*)gSSXAudio, 2, cSSXAudio_ReplayMode(self) ? 0 : *(int*)(rider + 0x870));
+    func_002A73A8((char*)gSSXAudio, 2, cSSXAudio_ReplayMode((cSSXAudio*)self) ? 0 : *(int*)(rider + 0x870));
     int flag = 1;
     func_00296E20(self, (int)rider);
     func_00297438(self, (int)rider);
@@ -2656,7 +2656,7 @@ extern "C" void* cAudioInterface_getGame();
  *
  * @return 1 during replay playback, else 0
  */
-extern "C" int cSSXAudio_ReplayMode(void* self)
+extern "C" int cSSXAudio_ReplayMode(cSSXAudio* self)
 {
     if (cAudioInterface_isInGame() != 0) {
         if (*(int**)((char*)cAudioInterface_getGame() + 0x28) != 0) {
@@ -2724,7 +2724,7 @@ static inline float audVu0Dot(const sAudV4& a, const sAudV4& b)
  * @param radius  the distance, in units of 100 (On Tour Dist)
  * @return the view index, or -1 when no camera is in range
  */
-extern "C" int cSSXAudio_CameraInRange(void* self, sAudV4* pos, float radius)
+extern "C" int cSSXAudio_CameraInRange(cSSXAudio* self, sAudV4* pos, float radius)
 {
     float rangeSq = radius * 100.0f;
     rangeSq = rangeSq * rangeSq;
@@ -3483,7 +3483,7 @@ extern "C" int func_00289C18(void* self, void* src)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/ssxAudio", cSSXAudio_ReactToWPMixEvent);
 #ifdef SKIP_ASM
-extern "C" int cSSXAudio_GetFocusRider(void* self, int which);
+extern "C" int cSSXAudio_GetFocusRider(cSSXAudio* self, int which);
 extern "C" void cSSXAudio_MixVolume(cSSXAudio* self, int id);
 
 struct sSsxAudioVEntryP {

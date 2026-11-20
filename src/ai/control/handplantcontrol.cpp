@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/ai.h"
 #include "ai/riderhandler.h"
 #include "sound/ssxaudio.h"
 #include "ai/computer.h"
@@ -8012,8 +8013,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getDangerMan);
  * @param aiMan  the cAI
  * @return DangerMan
  */
-extern "C" int cAI_getDangerMan(void *aiMan) {
-    return (*(int *)((char*)(aiMan) + (0xA8)));
+extern "C" int cAI_getDangerMan(cAI* aiMan) {
+    return ((int)aiMan->DangerMan);
 }
 #endif
 //100%
@@ -8025,8 +8026,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getNumRiders);
  * @param aiMan  the cAI
  * @return NumberOfRidersAllocated
  */
-extern "C" int cAI_getNumRiders(void *aiMan) {
-    return (*(int *)((char*)(aiMan) + (0x78)));
+extern "C" int cAI_getNumRiders(cAI* aiMan) {
+    return (aiMan->NumberOfRidersAllocated);
 }
 #endif
 //100%
@@ -8038,8 +8039,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getNumPlayers);
  * @param aiMan  the cAI
  * @return NumberOfPlayersAllocated
  */
-extern "C" int cAI_getNumPlayers(void *aiMan) {
-    return (*(int *)((char*)(aiMan) + (0x7C)));
+extern "C" int cAI_getNumPlayers(cAI* aiMan) {
+    return (aiMan->NumberOfPlayersAllocated);
 }
 #endif
 //100%
@@ -8051,8 +8052,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getNumComputers);
  * @param aiMan  the cAI
  * @return NumberOfComputersAllocated
  */
-extern "C" int cAI_getNumComputers(void *aiMan) {
-    return (*(int *)((char*)(aiMan) + (0x80)));
+extern "C" int cAI_getNumComputers(cAI* aiMan) {
+    return (aiMan->NumberOfComputersAllocated);
 }
 #endif
 //100%
@@ -8064,8 +8065,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getNumActors);
  * @param aiMan  the cAI
  * @return NumberOfActorsAllocated
  */
-extern "C" int cAI_getNumActors(void *aiMan) {
-    return (*(int *)((char*)(aiMan) + (0x84)));
+extern "C" int cAI_getNumActors(cAI* aiMan) {
+    return (aiMan->NumberOfActorsAllocated);
 }
 #endif
 //100%
@@ -8077,8 +8078,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getNumMissionRiders);
  * @param aiMan  the cAI
  * @return NumberOfMissionRidersLoaded
  */
-extern "C" int cAI_getNumMissionRiders(void *aiMan) {
-    return (*(int *)((char*)(aiMan) + (0x88)));
+extern "C" int cAI_getNumMissionRiders(cAI* aiMan) {
+    return (aiMan->NumberOfMissionRidersLoaded);
 }
 #endif
 //100%
@@ -8090,7 +8091,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getRider);
  * @param index  the rider index
  * @return the cRider
  */
-extern "C" int cAI_getRider(void *self, int index) {
+extern "C" int cAI_getRider(cAI* self, int index) {
     return *(int *)((char *)self + (index << 2) + 0x28);
 }
 #endif
@@ -8103,7 +8104,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getPlayer);
  * @param index  the player index
  * @return the cPlayer
  */
-extern "C" int cAI_getPlayer(void *self, int index) {
+extern "C" int cAI_getPlayer(cAI* self, int index) {
     return *(int *)((char *)self + (index << 2) + 0x40);
 }
 #endif
@@ -8116,7 +8117,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getComputer);
  * @param index  the computer index
  * @return the cComputer
  */
-extern "C" int cAI_getComputer(void *self, int index) {
+extern "C" int cAI_getComputer(cAI* self, int index) {
     return *(int *)((char *)self + (index << 2) + 0x48);
 }
 #endif
@@ -8129,7 +8130,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getActor);
  * @param index  the actor index
  * @return the actor's cComputer
  */
-extern "C" int cAI_getActor(void *self, int index) {
+extern "C" int cAI_getActor(cAI* self, int index) {
     return *(int *)((char *)self + (index << 2) + 0x5C);
 }
 #endif
@@ -8142,7 +8143,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getMissionRider);
  * @param index  the mission rider index
  * @return the cMissionRider
  */
-extern "C" int cAI_getMissionRider(void *self, int index) {
+extern "C" int cAI_getMissionRider(cAI* self, int index) {
     return *(int *)((char *)self + (index << 2) + 0x70);
 }
 #endif
@@ -8155,8 +8156,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_setComputerRidersActive);
  * @param aiMan  the cAI
  * @param active  the new value
  */
-extern "C" void cAI_setComputerRidersActive(void *aiMan, int active) {
-    (*(int *)((char*)(aiMan) + (0x14))) = active;
+extern "C" void cAI_setComputerRidersActive(cAI* aiMan, int active) {
+    (aiMan->ComputerRidersActive) = active;
 }
 #endif
 //100%
@@ -8168,8 +8169,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_setComputerActorsActive);
  * @param aiMan  the cAI
  * @param active  the new value
  */
-extern "C" void cAI_setComputerActorsActive(void *aiMan, int active) {
-    (*(int *)((char*)(aiMan) + (0x8C))) = active;
+extern "C" void cAI_setComputerActorsActive(cAI* aiMan, int active) {
+    (aiMan->ComputerActorsActive) = active;
 }
 #endif
 //100%
@@ -8181,8 +8182,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getComputerActorsActive);
  * @param aiMan  the cAI
  * @return ComputerActorsActive
  */
-extern "C" int cAI_getComputerActorsActive(void *aiMan) {
-    return (*(int *)((char*)(aiMan) + (0x8C)));
+extern "C" int cAI_getComputerActorsActive(cAI* aiMan) {
+    return (aiMan->ComputerActorsActive);
 }
 #endif
 //100%
@@ -8194,8 +8195,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getAITick);
  * @param aiMan  the cAI
  * @return AITick
  */
-extern "C" int cAI_getAITick(void *aiMan) {
-    return (*(int *)((char*)(aiMan) + (8)));
+extern "C" int cAI_getAITick(cAI* aiMan) {
+    return (aiMan->AITick);
 }
 #endif
 //100%
@@ -8207,8 +8208,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_setAITick);
  * @param aiMan  the cAI
  * @param tick  the tick
  */
-extern "C" void cAI_setAITick(void *aiMan, int tick) {
-    (*(int *)((char*)(aiMan) + (8))) = tick;
+extern "C" void cAI_setAITick(cAI* aiMan, int tick) {
+    (aiMan->AITick) = tick;
 }
 #endif
 //100%
@@ -8220,8 +8221,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getEventTimerTick);
  * @param aiMan  the cAI
  * @return EventTimerTick
  */
-extern "C" int cAI_getEventTimerTick(void *aiMan) {
-    return (*(int *)((char*)(aiMan) + (0xC)));
+extern "C" int cAI_getEventTimerTick(cAI* aiMan) {
+    return (aiMan->EventTimerTick);
 }
 #endif
 //100%
@@ -8232,8 +8233,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_incrementEventTimerTick);
  *
  * @param aiMan  the cAI
  */
-extern "C" void cAI_incrementEventTimerTick(void *aiMan) {
-    (*(int *)((char*)(aiMan) + (0xC))) = (int) ((*(int *)((char*)(aiMan) + (0xC))) + 1);
+extern "C" void cAI_incrementEventTimerTick(cAI* aiMan) {
+    (aiMan->EventTimerTick) = (int) ((aiMan->EventTimerTick) + 1);
 }
 #endif
 //100%
@@ -8245,8 +8246,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_setEventTimerTick);
  * @param aiMan  the cAI
  * @param tick  the tick
  */
-extern "C" void cAI_setEventTimerTick(void *aiMan, int tick) {
-    (*(int *)((char*)(aiMan) + (0xC))) = tick;
+extern "C" void cAI_setEventTimerTick(cAI* aiMan, int tick) {
+    (aiMan->EventTimerTick) = tick;
 }
 #endif
 //100%
@@ -8257,9 +8258,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getRaceTimeElapsed);
  *
  * @return the seconds
  */
-extern "C" int cAI_getRaceTimeElapsed(char* self)
+extern "C" int cAI_getRaceTimeElapsed(cAI* self)
 {
-    return (int)((float)*(int*)(self + 0xC) * 0.01666666753590107f);
+    return (int)((float)self->EventTimerTick * 0.01666666753590107f);
 }
 #endif
 //100%
@@ -8284,8 +8285,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getCountdownTicksLeft);
  * @param aiMan  the cAI
  * @return CountdownTicksLeft
  */
-extern "C" int cAI_getCountdownTicksLeft(void *aiMan) {
-    return (*(int *)((char*)(aiMan) + (0x1C)));
+extern "C" int cAI_getCountdownTicksLeft(cAI* aiMan) {
+    return (aiMan->CountdownTicksLeft);
 }
 #endif
 //100%
@@ -8297,8 +8298,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_setCountdownTicksLeft);
  * @param aiMan  the cAI
  * @param ticksLeft  the ticks
  */
-extern "C" void cAI_setCountdownTicksLeft(void *aiMan, int ticksLeft) {
-    (*(int *)((char*)(aiMan) + (0x1C))) = ticksLeft;
+extern "C" void cAI_setCountdownTicksLeft(cAI* aiMan, int ticksLeft) {
+    (aiMan->CountdownTicksLeft) = ticksLeft;
 }
 #endif
 //100%
@@ -8310,7 +8311,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_setPodiumActor);
  * @param index  the podium slot
  * @param value  the character id
  */
-extern "C" void cAI_setPodiumActor(void *self, int index, int value) {
+extern "C" void cAI_setPodiumActor(cAI* self, int index, int value) {
     *(int *)((char *)self + (index << 2) + 0x20) = value;
 }
 #endif
@@ -8323,7 +8324,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getPodiumActor);
  * @param index  the podium slot
  * @return the character id
  */
-extern "C" int cAI_getPodiumActor(void *self, int index) {
+extern "C" int cAI_getPodiumActor(cAI* self, int index) {
     return *(int *)((char *)self + (index << 2) + 0x20);
 }
 #endif
@@ -8349,8 +8350,8 @@ INCLUDE_ASM("ai/control/handplantcontrol", cAI_getFocusMan);
  * @param aiMan  the cAI
  * @return FocusMan
  */
-extern "C" int cAI_getFocusMan(void *aiMan) {
-    return (*(int *)((char*)(aiMan) + (0xA4)));
+extern "C" int cAI_getFocusMan(cAI* aiMan) {
+    return ((int)aiMan->FocusMan);
 }
 #endif
 

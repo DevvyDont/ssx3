@@ -1,4 +1,6 @@
 #include "common.h"
+#include "main/game.h"
+#include "movie/mcoverlaymanager.h"
 #include "render/ps2graphicsman.h"
 #include "main/gamemode.h"
 #include "online/commsystem.h"
@@ -37,8 +39,8 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getBE);
  * @param ssxApp  the application object
  * @return BE (+0x78)
  */
-extern "C" int cSSXApp_getBE(void *ssxApp) {
-    return (*(int *)((char*)(ssxApp) + (0x78)));
+extern "C" int cSSXApp_getBE(cSSXApp* ssxApp) {
+    return ((int)ssxApp->BE);
 }
 #endif
 //100%
@@ -50,8 +52,8 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getRealFE);
  * @param ssxApp  the application object
  * @return RealFE (+0x7C)
  */
-extern "C" int cSSXApp_getRealFE(void *ssxApp) {
-    return (*(int *)((char*)(ssxApp) + (0x7C)));
+extern "C" int cSSXApp_getRealFE(cSSXApp* ssxApp) {
+    return ((int)ssxApp->RealFE);
 }
 #endif
 //100%
@@ -63,8 +65,8 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getDebugFE);
  * @param ssxApp  the application object
  * @return DebugFE (+0x80)
  */
-extern "C" int cSSXApp_getDebugFE(void *ssxApp) {
-    return (*(int *)((char*)(ssxApp) + (0x80)));
+extern "C" int cSSXApp_getDebugFE(cSSXApp* ssxApp) {
+    return ((int)ssxApp->DebugFE);
 }
 #endif
 //100%
@@ -76,8 +78,8 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getGame);
  * @param ssxApp  the application object
  * @return Game (+0x84); 0 outside a game
  */
-extern "C" int cSSXApp_getGame(void *ssxApp) {
-    return (*(int *)((char*)(ssxApp) + (0x84)));
+extern "C" int cSSXApp_getGame(cSSXApp* ssxApp) {
+    return ((int)ssxApp->Game);
 }
 #endif
 //100%
@@ -89,8 +91,8 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getFonts);
  * @param ssxApp  the application object
  * @return Fonts (+0x88)
  */
-extern "C" int cSSXApp_getFonts(void *ssxApp) {
-    return (*(int *)((char*)(ssxApp) + (0x88)));
+extern "C" int cSSXApp_getFonts(cSSXApp* ssxApp) {
+    return ((int)ssxApp->Fonts);
 }
 #endif
 //100%
@@ -102,8 +104,8 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getFELocale);
  * @param ssxApp  the application object
  * @return FELocale (+0x8C)
  */
-extern "C" int cSSXApp_getFELocale(void *ssxApp) {
-    return (*(int *)((char*)(ssxApp) + (0x8C)));
+extern "C" int cSSXApp_getFELocale(cSSXApp* ssxApp) {
+    return ((int)ssxApp->FELocale);
 }
 #endif
 //100%
@@ -115,7 +117,7 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getInput);
  * @param index  the player (0 or 1; not range-checked)
  * @return Inputs[@p index] (+0xB0)
  */
-extern "C" int cSSXApp_getInput(void *self, int index) {
+extern "C" int cSSXApp_getInput(cSSXApp* self, int index) {
     return *(int *)((char *)self + (index << 2) + 0xB0);
 }
 #endif
@@ -128,7 +130,7 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getInputMap);
  * @param index  the player (0 or 1; not range-checked)
  * @return InputMaps[@p index] (+0xB8)
  */
-extern "C" int cSSXApp_getInputMap(void *self, int index) {
+extern "C" int cSSXApp_getInputMap(cSSXApp* self, int index) {
     return *(int *)((char *)self + (index << 2) + 0xB8);
 }
 #endif
@@ -141,8 +143,8 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getGameManager);
  * @param ssxApp  the application object
  * @return GameModeMan (+0xC0)
  */
-extern "C" int cSSXApp_getGameManager(void *ssxApp) {
-    return (*(int *)((char*)(ssxApp) + (0xC0)));
+extern "C" int cSSXApp_getGameManager(cSSXApp* ssxApp) {
+    return ((int)ssxApp->GameModeMan);
 }
 #endif
 //100%
@@ -180,8 +182,8 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getNetMan);
  * @param ssxApp  the application object
  * @return NetMan (+0xD0)
  */
-extern "C" int cSSXApp_getNetMan(void *ssxApp) {
-    return (*(int *)((char*)(ssxApp) + (0xD0)));
+extern "C" int cSSXApp_getNetMan(cSSXApp* ssxApp) {
+    return ((int)ssxApp->NetMan);
 }
 #endif
 //100%
@@ -193,8 +195,8 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getConsoleConfig);
  * @param ssxApp  the application object
  * @return ConsoleConfig (+0x9C)
  */
-extern "C" int cSSXApp_getConsoleConfig(void *ssxApp) {
-    return (*(int *)((char*)(ssxApp) + (0x9C)));
+extern "C" int cSSXApp_getConsoleConfig(cSSXApp* ssxApp) {
+    return ((int)ssxApp->ConsoleConfig);
 }
 #endif
 //100%
@@ -206,8 +208,8 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getLoadIndicator);
  * @param ssxApp  the application object
  * @return LoadIndicator (+0xA4)
  */
-extern "C" int cSSXApp_getLoadIndicator(void *ssxApp) {
-    return (*(int *)((char*)(ssxApp) + (0xA4)));
+extern "C" int cSSXApp_getLoadIndicator(cSSXApp* ssxApp) {
+    return ((int)ssxApp->LoadIndicator);
 }
 #endif
 //100%
@@ -231,8 +233,8 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_getLoadIconTextureID);
  * @param ssxApp  the application object
  * @return LoadIconTextureID (+0xA0)
  */
-extern "C" int cSSXApp_getLoadIconTextureID(void *ssxApp) {
-    return (*(int *)((char*)(ssxApp) + (0xA0)));
+extern "C" int cSSXApp_getLoadIconTextureID(cSSXApp* ssxApp) {
+    return (ssxApp->LoadIconTextureID);
 }
 #endif
 //100%
@@ -244,8 +246,8 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_setLoadIconTextureID);
  * @param ssxApp  the application object
  * @param textureId  the new texture id
  */
-extern "C" void cSSXApp_setLoadIconTextureID(void *ssxApp, int textureId) {
-    (*(int *)((char*)(ssxApp) + (0xA0))) = textureId;
+extern "C" void cSSXApp_setLoadIconTextureID(cSSXApp* ssxApp, int textureId) {
+    (ssxApp->LoadIconTextureID) = textureId;
 }
 #endif
 //100%
@@ -254,9 +256,9 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_endFE);
 /**
  * Clears both front-end pointers, RealFE and DebugFE, marking the front end as ended.
  */
-extern "C" void cSSXApp_endFE(void *self) {
-    *(int *)((char *)self + 0x7C) = 0;
-    *(int *)((char *)self + 0x80) = 0;
+extern "C" void cSSXApp_endFE(cSSXApp* self) {
+    self->RealFE = 0;
+    self->DebugFE = 0;
 }
 #endif
 //100%
@@ -280,8 +282,8 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_InGame);
  * @param ssxApp  the application object
  * @return 1 when Game (+0x84) is non-null, else 0
  */
-extern "C" int cSSXApp_InGame(void *ssxApp) {
-    return (*(int *)((char*)(ssxApp) + (0x84))) != 0;
+extern "C" int cSSXApp_InGame(cSSXApp* ssxApp) {
+    return ((int)ssxApp->Game) != 0;
 }
 #endif
 //100%
@@ -293,11 +295,11 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_InFE);
  * @param ssxApp  the application object
  * @return 1 when RealFE (+0x7C) or DebugFE (+0x80) is non-null, else 0
  */
-extern "C" int cSSXApp_InFE(void *ssxApp) {
+extern "C" int cSSXApp_InFE(cSSXApp* ssxApp) {
     int var_3;
 
     var_3 = 0;
-    if (((*(int *)((char*)(ssxApp) + (0x7C))) != 0) || ((*(int *)((char*)(ssxApp) + (0x80))) != 0)) {
+    if ((((int)ssxApp->RealFE) != 0) || (((int)ssxApp->DebugFE) != 0)) {
         var_3 = 1;
     }
     return var_3;
@@ -312,8 +314,8 @@ INCLUDE_ASM("main/ssxappdtor", cSSXApp_GetFEAsyncManager);
  * @param ssxApp  the application object
  * @return mFEAsyncManager (+0x11C)
  */
-extern "C" int cSSXApp_GetFEAsyncManager(void *ssxApp) {
-    return (*(int *)((char*)(ssxApp) + (0x11C)));
+extern "C" int cSSXApp_GetFEAsyncManager(cSSXApp* ssxApp) {
+    return ((int)ssxApp->mFEAsyncManager);
 }
 #endif
 
@@ -1410,8 +1412,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getCurrentState);
  * @param game  the game
  * @return mCurrentStateID (+0x214)
  */
-extern "C" int cGame_getCurrentState(void *game) {
-    return (*(int *)((char*)(game) + (0x214)));
+extern "C" int cGame_getCurrentState(cGame* game) {
+    return (game->mCurrentStateID);
 }
 #endif
 //100%
@@ -1423,8 +1425,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getPreviousState);
  * @param game  the game
  * @return mPrevStateID (+0x218)
  */
-extern "C" int cGame_getPreviousState(void *game) {
-    return (*(int *)((char*)(game) + (0x218)));
+extern "C" int cGame_getPreviousState(cGame* game) {
+    return (game->mPrevStateID);
 }
 #endif
 //100%
@@ -1436,8 +1438,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getCurrentStateInstance);
  * @param game  the game
  * @return mCurrentState (+0x200)
  */
-extern "C" int cGame_getCurrentStateInstance(void *game) {
-    return (*(int *)((char*)(game) + (0x200)));
+extern "C" int cGame_getCurrentStateInstance(cGame* game) {
+    return ((int)game->mCurrentState);
 }
 #endif
 //100%
@@ -1449,8 +1451,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getNash);
  * @param game  the game
  * @return BXNash (+0x20)
  */
-extern "C" int cGame_getNash(void *game) {
-    return (*(int *)((char*)(game) + (0x20)));
+extern "C" int cGame_getNash(cGame* game) {
+    return ((int)game->BXNash);
 }
 #endif
 //100%
@@ -1462,8 +1464,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getWorld);
  * @param game  the game
  * @return World (+0x10)
  */
-extern "C" int cGame_getWorld(void *game) {
-    return (*(int *)((char*)(game) + (0x10)));
+extern "C" int cGame_getWorld(cGame* game) {
+    return ((int)game->World);
 }
 #endif
 //100%
@@ -1475,8 +1477,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getDebugFont);
  * @param game  the game
  * @return DebugFont (+0x24)
  */
-extern "C" int cGame_getDebugFont(void *game) {
-    return (*(int *)((char*)(game) + (0x24)));
+extern "C" int cGame_getDebugFont(cGame* game) {
+    return ((int)game->DebugFont);
 }
 #endif
 //100%
@@ -1488,8 +1490,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getMenuSys);
  * @param game  the game
  * @return MenuSys (+0xA4)
  */
-extern "C" int cGame_getMenuSys(void *game) {
-    return (*(int *)((char*)(game) + (0xA4)));
+extern "C" int cGame_getMenuSys(cGame* game) {
+    return ((int)game->MenuSys);
 }
 #endif
 //100%
@@ -1501,8 +1503,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getAI);
  * @param game  the game
  * @return AI (+0xC)
  */
-extern "C" int cGame_getAI(void *game) {
-    return (*(int *)((char*)(game) + (0xC)));
+extern "C" int cGame_getAI(cGame* game) {
+    return ((int)game->AI);
 }
 #endif
 //100%
@@ -1514,8 +1516,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getUI);
  * @param game  the game
  * @return UI (+0x48)
  */
-extern "C" int cGame_getUI(void *game) {
-    return (*(int *)((char*)(game) + (0x48)));
+extern "C" int cGame_getUI(cGame* game) {
+    return ((int)game->UI);
 }
 #endif
 //100%
@@ -1527,8 +1529,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getReplay);
  * @param game  the game
  * @return Replay (+0x28)
  */
-extern "C" int cGame_getReplay(void *game) {
-    return (*(int *)((char*)(game) + (0x28)));
+extern "C" int cGame_getReplay(cGame* game) {
+    return ((int)game->Replay);
 }
 #endif
 //100%
@@ -1540,8 +1542,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getFXLoader);
  * @param game  the game
  * @return FXLoader (+0x2C)
  */
-extern "C" int cGame_getFXLoader(void *game) {
-    return (*(int *)((char*)(game) + (0x2C)));
+extern "C" int cGame_getFXLoader(cGame* game) {
+    return ((int)game->FXLoader);
 }
 #endif
 //100%
@@ -1553,8 +1555,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getSurfPropCache);
  * @param game  the game
  * @return SurfPropCache (+0x44)
  */
-extern "C" int cGame_getSurfPropCache(void *game) {
-    return (*(int *)((char*)(game) + (0x44)));
+extern "C" int cGame_getSurfPropCache(cGame* game) {
+    return ((int)game->SurfPropCache);
 }
 #endif
 //100%
@@ -1566,8 +1568,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getWorldSound);
  * @param game  the game
  * @return WorldSound (+0x4C)
  */
-extern "C" int cGame_getWorldSound(void *game) {
-    return (*(int *)((char*)(game) + (0x4C)));
+extern "C" int cGame_getWorldSound(cGame* game) {
+    return ((int)game->WorldSound);
 }
 #endif
 //100%
@@ -1579,8 +1581,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getAIVisualEffectsObjNode);
  * @param game  the game
  * @return AIVisualEffectsMan (+0x50)
  */
-extern "C" int cGame_getAIVisualEffectsObjNode(void *game) {
-    return (*(int *)((char*)(game) + (0x50)));
+extern "C" int cGame_getAIVisualEffectsObjNode(cGame* game) {
+    return ((int)game->AIVisualEffectsMan);
 }
 #endif
 //100%
@@ -1592,8 +1594,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getVisualEffectsObjNode);
  * @param game  the game
  * @return VisualEffectsMan (+0x54)
  */
-extern "C" int cGame_getVisualEffectsObjNode(void *game) {
-    return (*(int *)((char*)(game) + (0x54)));
+extern "C" int cGame_getVisualEffectsObjNode(cGame* game) {
+    return ((int)game->VisualEffectsMan);
 }
 #endif
 //100%
@@ -1605,8 +1607,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getCutSceneTransitionman);
  * @param game  the game
  * @return CutSceneTransitionMan (+0x64)
  */
-extern "C" int cGame_getCutSceneTransitionman(void *game) {
-    return (*(int *)((char*)(game) + (0x64)));
+extern "C" int cGame_getCutSceneTransitionman(cGame* game) {
+    return ((int)game->CutSceneTransitionMan);
 }
 #endif
 //100%
@@ -1618,8 +1620,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getFlagManager);
  * @param game  the game
  * @return FlagManager (+0x70)
  */
-extern "C" int cGame_getFlagManager(void *game) {
-    return (*(int *)((char*)(game) + (0x70)));
+extern "C" int cGame_getFlagManager(cGame* game) {
+    return ((int)game->FlagManager);
 }
 #endif
 //100%
@@ -1631,8 +1633,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getSnowFall);
  * @param game  the game
  * @return SnowFall (+0x74)
  */
-extern "C" int cGame_getSnowFall(void *game) {
-    return (*(int *)((char*)(game) + (0x74)));
+extern "C" int cGame_getSnowFall(cGame* game) {
+    return ((int)game->SnowFall);
 }
 #endif
 //100%
@@ -1644,8 +1646,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getPlaybackMan);
  * @param game  the game
  * @return PlaybackMan (+0x34)
  */
-extern "C" int cGame_getPlaybackMan(void *game) {
-    return (*(int *)((char*)(game) + (0x34)));
+extern "C" int cGame_getPlaybackMan(cGame* game) {
+    return ((int)game->PlaybackMan);
 }
 #endif
 //100%
@@ -1657,8 +1659,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getSectionMan);
  * @param game  the game
  * @return SectionMan (+0x78)
  */
-extern "C" int cGame_getSectionMan(void *game) {
-    return (*(int *)((char*)(game) + (0x78)));
+extern "C" int cGame_getSectionMan(cGame* game) {
+    return ((int)game->SectionMan);
 }
 #endif
 //100%
@@ -1670,8 +1672,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getInputSync);
  * @param game  the game
  * @return InputSync (+0x7C)
  */
-extern "C" int cGame_getInputSync(void *game) {
-    return (*(int *)((char*)(game) + (0x7C)));
+extern "C" int cGame_getInputSync(cGame* game) {
+    return ((int)game->InputSync);
 }
 #endif
 //100%
@@ -1683,8 +1685,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getSkyBox);
  * @param game  the game
  * @return SkyBox (+0x14)
  */
-extern "C" int cGame_getSkyBox(void *game) {
-    return (*(int *)((char*)(game) + (0x14)));
+extern "C" int cGame_getSkyBox(cGame* game) {
+    return ((int)game->SkyBox);
 }
 #endif
 //100%
@@ -1696,8 +1698,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getCrowdMan2d);
  * @param game  the game
  * @return CrowdMan2d (+0x38)
  */
-extern "C" int cGame_getCrowdMan2d(void *game) {
-    return (*(int *)((char*)(game) + (0x38)));
+extern "C" int cGame_getCrowdMan2d(cGame* game) {
+    return ((int)game->CrowdMan2d);
 }
 #endif
 //100%
@@ -1709,8 +1711,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getCrowdMan3d);
  * @param game  the game
  * @return CrowdMan3d (+0x3C)
  */
-extern "C" int cGame_getCrowdMan3d(void *game) {
-    return (*(int *)((char*)(game) + (0x3C)));
+extern "C" int cGame_getCrowdMan3d(cGame* game) {
+    return ((int)game->CrowdMan3d);
 }
 #endif
 //100%
@@ -1722,8 +1724,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getMultiParticleMan);
  * @param game  the game
  * @return MultiParticleMan (+0x40)
  */
-extern "C" int cGame_getMultiParticleMan(void *game) {
-    return (*(int *)((char*)(game) + (0x40)));
+extern "C" int cGame_getMultiParticleMan(cGame* game) {
+    return ((int)game->MultiParticleMan);
 }
 #endif
 //100%
@@ -1735,8 +1737,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getInstanceMan);
  * @param game  the game
  * @return InstanceMan (+0x88)
  */
-extern "C" int cGame_getInstanceMan(void *game) {
-    return (*(int *)((char*)(game) + (0x88)));
+extern "C" int cGame_getInstanceMan(cGame* game) {
+    return ((int)game->InstanceMan);
 }
 #endif
 //100%
@@ -1748,8 +1750,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getOcclusionMan);
  * @param game  the game
  * @return OcclusionMan (+0x8C)
  */
-extern "C" int cGame_getOcclusionMan(void *game) {
-    return (*(int *)((char*)(game) + (0x8C)));
+extern "C" int cGame_getOcclusionMan(cGame* game) {
+    return ((int)game->OcclusionMan);
 }
 #endif
 //100%
@@ -1761,8 +1763,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getWorldLightMan);
  * @param game  the game
  * @return WorldLightMan (+0x90)
  */
-extern "C" int cGame_getWorldLightMan(void *game) {
-    return (*(int *)((char*)(game) + (0x90)));
+extern "C" int cGame_getWorldLightMan(cGame* game) {
+    return ((int)game->WorldLightMan);
 }
 #endif
 //100%
@@ -1774,8 +1776,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getLoadIndicator);
  * @param game  the game
  * @return LoadIndicator (+0x94)
  */
-extern "C" int cGame_getLoadIndicator(void *game) {
-    return (*(int *)((char*)(game) + (0x94)));
+extern "C" int cGame_getLoadIndicator(cGame* game) {
+    return ((int)game->LoadIndicator);
 }
 #endif
 //100%
@@ -1787,8 +1789,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getControllerUnplugged);
  * @param game  the game
  * @return ControllerUnplugged (+0x224)
  */
-extern "C" int cGame_getControllerUnplugged(void *game) {
-    return (*(int *)((char*)(game) + (0x224)));
+extern "C" int cGame_getControllerUnplugged(cGame* game) {
+    return (game->ControllerUnplugged);
 }
 #endif
 //100%
@@ -1800,8 +1802,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getViewMan);
  * @param game  the game
  * @return ViewMan (+0x84)
  */
-extern "C" int cGame_getViewMan(void *game) {
-    return (*(int *)((char*)(game) + (0x84)));
+extern "C" int cGame_getViewMan(cGame* game) {
+    return ((int)game->ViewMan);
 }
 #endif
 //100%
@@ -1813,8 +1815,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getGameView);
  * @param index  the view number (not range-checked)
  * @return the view's camera
  */
-extern "C" int cGame_getGameView(void *self, int index) {
-    return *(int *)((char *)(*(int *)((char *)self + 0x84)) + (index << 2) + 4);
+extern "C" int cGame_getGameView(cGame* self, int index) {
+    return *(int *)((char *)((int)self->ViewMan) + (index << 2) + 4);
 }
 #endif
 //100%
@@ -1826,8 +1828,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getNumGameView);
  * @param game  the game
  * @return the view count
  */
-extern "C" int cGame_getNumGameView(void *game) {
-    return (*(int *)((char*)((*(void **)((char*)(game) + (0x84)))) + (0x10)));
+extern "C" int cGame_getNumGameView(cGame* game) {
+    return (*(int *)((char*)((game->ViewMan)) + (0x10)));
 }
 #endif
 //100%
@@ -1838,8 +1840,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getCurrentRenderView);
  *
  * @return the current render view's camera
  */
-extern "C" int cGame_getCurrentRenderView(void *self) {
-    char *list = *(char **)((char *)self + 0x84);
+extern "C" int cGame_getCurrentRenderView(cGame* self) {
+    char *list = (char*)self->ViewMan;
     return *(int *)(list + (*(int *)(list + 0x14) << 2) + 4);
 }
 #endif
@@ -1852,8 +1854,8 @@ INCLUDE_ASM("main/ssxappdtor", cGame_getCurrentRenderViewNum);
  * @param game  the game
  * @return the current render view number
  */
-extern "C" int cGame_getCurrentRenderViewNum(void *game) {
-    return (*(int *)((char*)((*(void **)((char*)(game) + (0x84)))) + (0x14)));
+extern "C" int cGame_getCurrentRenderViewNum(cGame* game) {
+    return (*(int *)((char*)((game->ViewMan)) + (0x14)));
 }
 #endif
 
@@ -2433,8 +2435,8 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_getMemCard);
  * @param overlayManager  the cMCOverlayManager
  * @return mpMemCard (+0x434)
  */
-extern "C" int cMCOverlayManager_getMemCard(void *overlayManager) {
-    return (*(int *)((char*)(overlayManager) + (0x434)));
+extern "C" int cMCOverlayManager_getMemCard(cMCOverlayManager* overlayManager) {
+    return ((int)overlayManager->mpMemCard);
 }
 #endif
 //100%
@@ -2446,8 +2448,8 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_GetState);
  * @param overlayManager  the cMCOverlayManager
  * @return mState (+0x130)
  */
-extern "C" int cMCOverlayManager_GetState(void *overlayManager) {
-    return (*(int *)((char*)(overlayManager) + (0x130)));
+extern "C" int cMCOverlayManager_GetState(cMCOverlayManager* overlayManager) {
+    return (overlayManager->mState);
 }
 #endif
 //100%
@@ -2459,8 +2461,8 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_isInSaveOperation);
  * @param overlayManager  the cMCOverlayManager
  * @return mSave (+0xBC)
  */
-extern "C" int cMCOverlayManager_isInSaveOperation(void *overlayManager) {
-    return (*(int *)((char*)(overlayManager) + (0xBC)));
+extern "C" int cMCOverlayManager_isInSaveOperation(cMCOverlayManager* overlayManager) {
+    return (overlayManager->mSave);
 }
 #endif
 //100%
@@ -2472,8 +2474,8 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_isInDeleteOperation);
  * @param overlayManager  the cMCOverlayManager
  * @return mDelete (+0xC0)
  */
-extern "C" int cMCOverlayManager_isInDeleteOperation(void *overlayManager) {
-    return (*(int *)((char*)(overlayManager) + (0xC0)));
+extern "C" int cMCOverlayManager_isInDeleteOperation(cMCOverlayManager* overlayManager) {
+    return (overlayManager->mDelete);
 }
 #endif
 //100%
@@ -2499,12 +2501,12 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_isCardStatusErrorUnacknowledged
  * @param overlayManager  the cMCOverlayManager
  * @return 1 when mCurrDeviceStateAck (+0x440) is clear and mCurrDeviceStateLast (+0x43C) is non-zero, else 0
  */
-extern "C" int cMCOverlayManager_isCardStatusErrorUnacknowledged(void *overlayManager) {
+extern "C" int cMCOverlayManager_isCardStatusErrorUnacknowledged(cMCOverlayManager* overlayManager) {
     int var_3;
 
     var_3 = 0;
-    if ((*(int *)((char*)(overlayManager) + (0x440))) == 0) {
-        var_3 = (*(int *)((char*)(overlayManager) + (0x43C))) != 0;
+    if ((overlayManager->mCurrDeviceStateAck) == 0) {
+        var_3 = (overlayManager->mCurrDeviceStateLast) != 0;
     }
     return var_3;
 }
@@ -2518,8 +2520,8 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_hasCardStatusError);
  * @param overlayManager  the cMCOverlayManager
  * @return 1 when mCurrDeviceStateLast (+0x43C) is non-zero, else 0
  */
-extern "C" int cMCOverlayManager_hasCardStatusError(void *overlayManager) {
-    return (*(int *)((char*)(overlayManager) + (0x43C))) != 0;
+extern "C" int cMCOverlayManager_hasCardStatusError(cMCOverlayManager* overlayManager) {
+    return (overlayManager->mCurrDeviceStateLast) != 0;
 }
 #endif
 //100%
@@ -2531,8 +2533,8 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_getCardLastState);
  * @param overlayManager  the cMCOverlayManager
  * @return mCurrDeviceStateLast (+0x43C)
  */
-extern "C" int cMCOverlayManager_getCardLastState(void *overlayManager) {
-    return (*(int *)((char*)(overlayManager) + (0x43C)));
+extern "C" int cMCOverlayManager_getCardLastState(cMCOverlayManager* overlayManager) {
+    return (overlayManager->mCurrDeviceStateLast);
 }
 #endif
 //100%
@@ -2543,8 +2545,8 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_forceCardStatusAck);
  *
  * @param overlayManager  the cMCOverlayManager
  */
-extern "C" void cMCOverlayManager_forceCardStatusAck(void *overlayManager) {
-    (*(int *)((char*)(overlayManager) + (0x440))) = 1;
+extern "C" void cMCOverlayManager_forceCardStatusAck(cMCOverlayManager* overlayManager) {
+    (overlayManager->mCurrDeviceStateAck) = 1;
 }
 #endif
 //100%
@@ -2556,8 +2558,8 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_getFirstCorruptFile);
  * @param overlayManager  the cMCOverlayManager
  * @return the 4-bit field minus 1 (-1 when it is 0)
  */
-extern "C" int cMCOverlayManager_getFirstCorruptFile(void *overlayManager) {
-    return (((unsigned int) (*(unsigned int *)((char*)(overlayManager) + (0x43C))) >> 5) & 0xF) - 1;
+extern "C" int cMCOverlayManager_getFirstCorruptFile(cMCOverlayManager* overlayManager) {
+    return (((unsigned int) ((unsigned int)overlayManager->mCurrDeviceStateLast) >> 5) & 0xF) - 1;
 }
 #endif
 //100%
@@ -2614,8 +2616,8 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_PollForFullCard);
  * @param overlayManager  the cMCOverlayManager
  * @param pollFullCard  non-zero to poll
  */
-extern "C" void cMCOverlayManager_PollForFullCard(void *overlayManager, int pollFullCard) {
-    (*(int *)((char*)(overlayManager) + (0x11C))) = pollFullCard;
+extern "C" void cMCOverlayManager_PollForFullCard(cMCOverlayManager* overlayManager, int pollFullCard) {
+    (overlayManager->mPollForFullCard) = pollFullCard;
 }
 #endif
 //100%
@@ -2627,8 +2629,8 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_PollForUnformatted);
  * @param overlayManager  the cMCOverlayManager
  * @param pollUnformatted  non-zero to poll
  */
-extern "C" void cMCOverlayManager_PollForUnformatted(void *overlayManager, int pollUnformatted) {
-    (*(int *)((char*)(overlayManager) + (0x120))) = pollUnformatted;
+extern "C" void cMCOverlayManager_PollForUnformatted(cMCOverlayManager* overlayManager, int pollUnformatted) {
+    (overlayManager->mPollForUnformatted) = pollUnformatted;
 }
 #endif
 //100%
@@ -2640,8 +2642,8 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_PollForNoCard);
  * @param overlayManager  the cMCOverlayManager
  * @param pollNoCard  non-zero to poll
  */
-extern "C" void cMCOverlayManager_PollForNoCard(void *overlayManager, int pollNoCard) {
-    (*(int *)((char*)(overlayManager) + (0x124))) = pollNoCard;
+extern "C" void cMCOverlayManager_PollForNoCard(cMCOverlayManager* overlayManager, int pollNoCard) {
+    (overlayManager->mPollForNoCard) = pollNoCard;
 }
 #endif
 //100%
@@ -2653,8 +2655,8 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_ShowCardChangeNotify);
  * @param overlayManager  the cMCOverlayManager
  * @param showCardChange  non-zero to show it
  */
-extern "C" void cMCOverlayManager_ShowCardChangeNotify(void *overlayManager, int showCardChange) {
-    (*(int *)((char*)(overlayManager) + (0x128))) = showCardChange;
+extern "C" void cMCOverlayManager_ShowCardChangeNotify(cMCOverlayManager* overlayManager, int showCardChange) {
+    (overlayManager->mShowCardChangeNotify) = showCardChange;
 }
 #endif
 //100%
@@ -2666,8 +2668,8 @@ INCLUDE_ASM("main/ssxappdtor", cMCOverlayManager_RetryToInit);
  * @param overlayManager  the cMCOverlayManager
  * @param retryToInit  the new flag value
  */
-extern "C" void cMCOverlayManager_RetryToInit(void *overlayManager, int retryToInit) {
-    (*(int *)((char*)(overlayManager) + (0x12C))) = retryToInit;
+extern "C" void cMCOverlayManager_RetryToInit(cMCOverlayManager* overlayManager, int retryToInit) {
+    (overlayManager->mRetryToInit) = retryToInit;
 }
 #endif
 
@@ -2759,14 +2761,14 @@ extern "C" int cGameViewMan_isStreamReady(int);
  *
  * @return 1 when the stream is ready and not paused, else 0
  */
-extern "C" int cGame_updateStreamFocus(void *self) {
-    cGameViewMan_updateStreamFocus(*(int *)((char*)self + 0x84));
-    if (*(int *)((char*)self + 0x9C) != 0) {
+extern "C" int cGame_updateStreamFocus(cGame* self) {
+    cGameViewMan_updateStreamFocus((int)self->ViewMan);
+    if (self->IsStreamPaused != 0) {
         return 0;
     }
-    if (cGameViewMan_isStreamReady(*(int *)((char*)self + 0x84)) == 0) {
-        *(int *)((char*)self + 0x9C) = 1;
-        *(int *)((char*)self + 0xA0) = 1;
+    if (cGameViewMan_isStreamReady((int)self->ViewMan) == 0) {
+        self->IsStreamPaused = 1;
+        self->m_bFlushStreamer = 1;
         return 0;
     }
     return 1;
@@ -2932,35 +2934,35 @@ extern "C" void cWorldCache_flushInActivePages(void *);
  *
  * @return 0 while waiting on the stream, 1 when the game can update
  */
-extern "C" int cGame_updateStreamLoading(void *self) {
+extern "C" int cGame_updateStreamLoading(cGame* self) {
     void *vtbl;
 
-    if ((cGameViewMan_isStreamReady(*(int *)((char*)self + 0x84)) == 0) || (*(int *)(*(char **)((char*)self + 0x78) + 0x1D0) == 0)) {
-        *(int *)(**(char ***)((char*)self + 0x10) + 0x3D4) = 0;
-        cWorld_update(*(void **)((char*)self + 0x10));
-        cGameViewMan_updateAll(*(int *)((char*)self + 0x84));
-        if (*(int *)(*(char **)((char*)self + 0x78) + 0x1D0) == 0) {
+    if ((cGameViewMan_isStreamReady((int)self->ViewMan) == 0) || (*(int *)((char*)self->SectionMan + 0x1D0) == 0)) {
+        *(int *)(*(char**)self->World + 0x3D4) = 0;
+        cWorld_update(self->World);
+        cGameViewMan_updateAll((int)self->ViewMan);
+        if (*(int *)((char*)self->SectionMan + 0x1D0) == 0) {
             cGame_updateState(self);
-            cSectionMan_update(*(void **)((char*)self + 0x78));
+            cSectionMan_update(self->SectionMan);
         }
-        if ((*(int *)((char*)self + 0x9C) == 0) && (cGameViewMan_isStreamReady(*(int *)((char*)self + 0x84)) == 0)) {
-            *(int *)((char*)self + 0xA0) = 1;
+        if ((self->IsStreamPaused == 0) && (cGameViewMan_isStreamReady((int)self->ViewMan) == 0)) {
+            self->m_bFlushStreamer = 1;
         }
-        *(int *)((char*)self + 0x9C) = 1;
-        if (*(int *)((char*)self + 0xA0) != 0) {
+        self->IsStreamPaused = 1;
+        if (self->m_bFlushStreamer != 0) {
             vtbl = (void*)GrMan->mVtbl;
             (*(void (**)(void *))((char*)vtbl + 0x9C))((char*)GrMan + *(short *)((char*)vtbl + 0x98));
-            cGameViewMan_updateStreamFocus(*(int *)((char*)self + 0x84));
-            cWorldCache_flushInActivePages(**(void ***)((char*)self + 0x10));
-            *(int *)((char*)self + 0xA0) = 0;
+            cGameViewMan_updateStreamFocus((int)self->ViewMan);
+            cWorldCache_flushInActivePages(*(void**)self->World);
+            self->m_bFlushStreamer = 0;
         }
         return 0;
     }
-    *(int *)(**(char ***)((char*)self + 0x10) + 0x3D4) = 1;
-    *(int *)((char*)self + 0x9C) = 0;
-    *(int *)((char*)self + 0xA0) = 0;
-    cWorld_update(*(void **)((char*)self + 0x10));
-    cSectionMan_update(*(void **)((char*)self + 0x78));
+    *(int *)(*(char**)self->World + 0x3D4) = 1;
+    self->IsStreamPaused = 0;
+    self->m_bFlushStreamer = 0;
+    cWorld_update(self->World);
+    cSectionMan_update(self->SectionMan);
     return 1;
 }
 #endif
@@ -3196,13 +3198,12 @@ struct sApp_244E60 { char pad0[0x4C]; int f4C; char pad1[0x84-0x50]; sList_244E6
  * bucket 4, cGameViewMan_updateAll (except in replay mode 3), mUpdateTick (+0xAC) is counted and
  * cWorldSound_TriggerWorldAudio runs for each view camera (+0x20 of it). cGame_update has the same code inline.
  */
-extern "C" void cGame_updateAI(void* self)
+extern "C" void cGame_updateAI(cGame* self)
 {
-    char* game = (char*)self;
     char* obj;
     int skip;
-    if (*(int*)(game + 0x7C) == 0 || cInputSync_aiinputready(*(int*)(game + 0x7C)) != 0) {
-        if (*(int*)(game + 0x214) == 3) {
+    if ((int)self->InputSync == 0 || cInputSync_aiinputready((int)self->InputSync) != 0) {
+        if (self->mCurrentStateID == 3) {
             obj = gBucketMan;
             cGame_updateState(self);
             cBucketMan_mergeBucket(obj, 1);
@@ -3211,19 +3212,19 @@ extern "C" void cGame_updateAI(void* self)
             cGame_updateState(self);
         }
         if ((cPauseState_Flags & 1) == 0)
-            cReplay_update(*(int*)(game + 0x28));
-        if (cReplay_isPauseAI(*(int*)(game + 0x28)) == 0 && (cPauseState_Flags & 8) == 0) {
+            cReplay_update((int)self->Replay);
+        if (cReplay_isPauseAI((int)self->Replay) == 0 && (cPauseState_Flags & 8) == 0) {
             sVE_244E60* vt = (sVE_244E60*)ScriptEngine->mVtbl;
             ((void (*)(void*))vt[5].fn)((char*)ScriptEngine + vt[5].delta);
         }
     }
     obj = gBucketMan;
     skip = 0;
-    if ((cPauseState_Flags & 1) != 0 || cReplay_isPauseAI(*(int*)(game + 0x28)) != 0)
+    if ((cPauseState_Flags & 1) != 0 || cReplay_isPauseAI((int)self->Replay) != 0)
         skip = 1;
     if (skip == 0) {
-        if (*(int*)(game + 0x7C) == 0 || cInputSync_aiupdate(*(int*)(game + 0x7C)) != 0) {
-            if (cPlaybackMan_isPauseAI(*(int*)(game + 0x34)) != 0)
+        if ((int)self->InputSync == 0 || cInputSync_aiupdate((int)self->InputSync) != 0) {
+            if (cPlaybackMan_isPauseAI((int)self->PlaybackMan) != 0)
                 goto setskip;
         } else {
             setskip:
@@ -3238,7 +3239,7 @@ extern "C" void cGame_updateAI(void* self)
         if ((cPauseState_Flags & 2) == 0)
             cBucketMan_applyBucket(obj, 1);
         {
-            char* aiMan = *(char**)(game + 0xC);
+            char* aiMan = (char*)self->AI;
             sVE_244E60* vt = *(sVE_244E60**)(aiMan + 0xCC);
             ((void (*)(void*))vt[3].fn)(aiMan + vt[3].delta);
         }
@@ -3246,10 +3247,10 @@ extern "C" void cGame_updateAI(void* self)
             cBucketMan_updateBucket(obj, 2);
         if ((cPauseState_Flags & 4) == 0)
             cBucketMan_updateBucket(obj, 3);
-        cWScriptMan_update(*(int*)(game + 0x30));
-        func_002294C8(*(int*)(game + 0x38));
-        func_003440C8(*(int*)(game + 0x3C));
-        cMultiParticleMan_update(*(int*)(game + 0x40));
+        cWScriptMan_update((int)self->WScriptMan);
+        func_002294C8((int)self->CrowdMan2d);
+        func_003440C8((int)self->CrowdMan3d);
+        cMultiParticleMan_update((int)self->MultiParticleMan);
         cBucketMan_mergeBucket(obj, 1);
     } else {
         cBucketMan_updateBucket(obj, 5);
@@ -3258,21 +3259,21 @@ extern "C" void cGame_updateAI(void* self)
     }
     cBucketMan_updateBucket(obj, 4);
     {
-        int replayMode = **(int**)(game + 0x28);
+        int replayMode = *(int*)self->Replay;
         int ok = replayMode != 0 && replayMode < 10;
         int x3 = replayMode ^ 3;
         if (!ok || x3 != 0)
-            cGameViewMan_updateAll(*(int*)(game + 0x84));
+            cGameViewMan_updateAll((int)self->ViewMan);
     }
-    *(int*)(game + 0xAC) = *(int*)(game + 0xAC) + 1;
+    self->mUpdateTick = self->mUpdateTick + 1;
     {
-        sList_244E60* viewMan = *(sList_244E60**)(game + 0x84);
+        sList_244E60* viewMan = (sList_244E60*)self->ViewMan;
         if (viewMan->count != 0) {
             unsigned int i = 0;
             do {
-                cWorldSound_TriggerWorldAudio(*(int*)(game + 0x4C), ((sApp_244E60*)game)->list->items[i] + 0x20, i);
+                cWorldSound_TriggerWorldAudio((int)self->WorldSound, ((sApp_244E60*)self)->list->items[i] + 0x20, i);
                 i++;
-            } while (i < ((sList_244E60*)*(char**)(game + 0x84))->count);
+            } while (i < ((sList_244E60*)(char*)self->ViewMan)->count);
         }
     }
 }
@@ -3318,10 +3319,10 @@ extern "C" void cFadeScreen_update(void *);
  *
  * @return 1 when the game may update, 0 when it is ending
  */
-extern "C" int cGame_updateScreenFade(void *self) {
+extern "C" int cGame_updateScreenFade(cGame* self) {
     cFadeScreen_update(self);
     if (*(int *)((char*)SSXApp + 4) != 0) {
-        *(int *)((char *)self + 8) = 1;
+        self->unk_08 = 1;
         return 0;
     }
     return 1;

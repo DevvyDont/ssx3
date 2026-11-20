@@ -82,11 +82,11 @@ extern "C" void* cOVStateHUD1P_cOVStateHUD1P(void* p, void* ui, int a);
 extern "C" void cUIStateStack_pushExplicit(void* stack, void* state);
 void func_0026F898(void* p, int a);
 void cGame_setPreloadState(void* self, int val);
-extern "C" void cGame_updateState(void* self);
+extern "C" void cGame_updateState(cGame* self);
 extern "C" void func_003E5398(int a);
-extern "C" int cGame_isPreloadedStateReady(void* self);
+extern "C" int cGame_isPreloadedStateReady(cGame* self);
 extern "C" void cGameComm_syncWait(void* comm);
-extern "C" void cGame_setState(void* self, int a, int b, int refresh);
+extern "C" void cGame_setState(cGame* self, int a, int b, int refresh);
 extern "C" void* cObjNode_cObjNode1(void* p, int a);
 extern "C" void* cAIVisualEffectsMan_construct();
 extern "C" void* cVisualEffectsMan_construct();
@@ -956,7 +956,7 @@ INCLUDE_ASM("main/gameload", cGame_restart);
 #ifdef SKIP_ASM
 extern "C" void cGame_partialRestart(cGame* self);
 extern "C" void cGameModeMan_restartHeat(void* gm);
-extern "C" void cGame_setState(void* self, int a, int b, int refresh);
+extern "C" void cGame_setState(cGame* self, int a, int b, int refresh);
 extern "C" void* cAudioInterface_bxAudio(void);
 extern "C" void cSSXAudio_RestartEvent(void* mgr);
 
@@ -999,9 +999,9 @@ INCLUDE_ASM("main/gameload", cGame_sectionLoaded);
  * When the AI (+0xC) and its focus manager (+0xA4, On Tour FocusMan) exist, sets the manager's +0xD0 to -1. The
  * loaded section's id, passed by cSectionMan_update, is not used.
  */
-extern "C" void cGame_sectionLoaded(void* self)
+extern "C" void cGame_sectionLoaded(cGame* self)
 {
-    void* gameAI = *(void**)((char*)self + 0xC);
+    void* gameAI = self->AI;
     if (gameAI != 0) {
         void* focusMan = *(void**)((char*)gameAI + 0xA4);
         if (focusMan != 0) {
@@ -1094,7 +1094,7 @@ static inline bool isSectionLoaded_0430(sScriptCache_0430* c, int sectionId)
  *
  * @param sectionId  the world section
  */
-extern "C" void cGame_loadWScriptManSection(void* self, int sectionId)
+extern "C" void cGame_loadWScriptManSection(cGame* self, int sectionId)
 {
     if (isSectionLoaded_0430((sScriptCache_0430*)cWorld_m_pTheWorld->m_pWScriptCache, sectionId)) {
         func_00308B58_2(cWScriptMan_TheWScriptMan, sectionId);
@@ -1197,11 +1197,11 @@ extern int D_004428F0[];
  * (cMenuSys::popMenu) on the menu system (+0xA4), then pops the pause stack (D_004A2A54 index into D_005366E8)
  * and restores cPauseState_Flags from D_004428F0. The stack index is not checked (On Tour asserts it is > 0).
  */
-extern "C" void cGame_stopReplay(void* self)
+extern "C" void cGame_stopReplay(cGame* self)
 {
-    cReplay_stopReplay(*(void**)((char*)self + 0x28));
-    func_002CC0B8(*(void**)((char*)self + 0xA4), 1);
-    func_002CC460(*(void**)((char*)self + 0xA4));
+    cReplay_stopReplay(self->Replay);
+    func_002CC0B8(self->MenuSys, 1);
+    func_002CC460(self->MenuSys);
     cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
 }
 #endif
@@ -1267,7 +1267,7 @@ extern "C" void cGameComm_update(void* p);
 extern "C" void cSSXScriptEngine_UpdateLoad(void* p);
 extern "C" int cGameViewMan_isStreamReady(void* p);
 extern "C" void cGameViewMan_updateAll(void* p);
-extern "C" void cGame_updateState(void* self);
+extern "C" void cGame_updateState(cGame* self);
 extern "C" void cGameViewMan_updateStreamFocus(void* p);
 extern "C" void cWorldCache_flushInActivePages(void* p);
 extern "C" void cInputSync_preupdate(void* p);
@@ -1758,7 +1758,7 @@ struct sGameLoad_0F40 {
  * @param self_  the game (cGame, this)
  */
 // Game load state machine: runs the current state and switches to the requested one.
-extern "C" void cGame_updateState(void* self_)
+extern "C" void cGame_updateState(cGame* self_)
 {
     sGameLoad_0F40* self = (sGameLoad_0F40*)self_;
     cBE_getInterface_Fv(SSXApp->BE, 7);
@@ -1915,7 +1915,7 @@ extern "C" void cGame_updateState(void* self_)
 //100%
 INCLUDE_ASM("main/gameload", cGame_setState);
 #ifdef SKIP_ASM
-extern "C" void cGame_updateState(void* self);
+extern "C" void cGame_updateState(cGame* self);
 
 /**
  * Requests a change of game-flow state, optionally switching at once.
@@ -1926,10 +1926,10 @@ extern "C" void cGame_updateState(void* self);
  * @param startupFlag        the state's startup flag
  * @param refresh  nonzero to switch now (On Tour bForce)
  */
-extern "C" void cGame_setState(void* self, int iNextState, int startupFlag, int refresh)
+extern "C" void cGame_setState(cGame* self, int iNextState, int startupFlag, int refresh)
 {
-    *(int*)((char*)self + 0x210) = iNextState;
-    *(int*)((char*)self + 0x21C) = startupFlag;
+    self->mPendingStateID = iNextState;
+    self->mPendingStateStartupFlag = startupFlag;
     if (refresh != 0) {
         cGame_updateState(self);
     }
@@ -1996,12 +1996,12 @@ struct sVEntry_002312D8 {
  *
  * @return nonzero when ready
  */
-extern "C" int cGame_isPreloadedStateReady(void* self)
+extern "C" int cGame_isPreloadedStateReady(cGame* self)
 {
-    if (*(int*)((char*)self + 0x208) != 0) {
+    if (self->mPendingPreloadStateID != 0) {
         return 0;
     }
-    void* preloadingState = *(void**)((char*)self + 0x204);
+    void* preloadingState = self->mPreloadingState;
     if (preloadingState == 0) {
         return 1;
     }
@@ -2019,9 +2019,9 @@ extern "C" void cGameState_gotoNextState(void* p);
  * Moves the game to its next state: calls cGameState_gotoNextState on the current state (mCurrentState, +0x200) when
  * there is one.
  */
-extern "C" void cGame_doNextState(void* self)
+extern "C" void cGame_doNextState(cGame* self)
 {
-    void* gameState = *(void**)((char*)self + 0x200);
+    void* gameState = self->mCurrentState;
     if (gameState != 0) {
         cGameState_gotoNextState(gameState);
     }
@@ -2311,7 +2311,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getRiderCtrlID(void* iface, int i);
-extern "C" int cGame_canUserActivatePauseMenu(void* self);
+extern "C" int cGame_canUserActivatePauseMenu(cGame* self);
 int cInput_getState(void* obj, int a1);
 
 static inline void** PlayerObj_1840(int p)
@@ -2345,14 +2345,14 @@ static inline char* At_1840(char* self, int i)
  *
  * @return 1 when the pause menu should open
  */
-extern "C" int cGame_activatePauseMenu(char* self)
+extern "C" int cGame_activatePauseMenu(cGame* self)
 {
     if (cGameComm_mGameComm != 0 && cGameComm_mGameComm->mDisplayError > 0) {
         return 0;
     }
     int mask = 0;
     void* bi = cBE_getInterface_Fv(cBE_getBE(), 1);
-    char* replay = *(char**)(self + 0x28);
+    char* replay = (char*)self->Replay;
     int sel = -1;
     if (*(int*)(replay + 0x608)) {
         int ctrlId = *(int*)(replay + 0x28);
@@ -2366,8 +2366,8 @@ extern "C" int cGame_activatePauseMenu(char* self)
         }
     } else {
         int i;
-        for (i = 0; i < Count_1840(self); i++) {
-            char* rider = At_1840(self, i);
+        for (i = 0; i < Count_1840(((char*)self)); i++) {
+            char* rider = At_1840(((char*)self), i);
             if (*(int*)(*(char**)(rider + 0x18) + 0x87C)) {
                 int ctrlId = cBENewPlayerInterface_getRiderCtrlID(bi, i);
                 void** controller = PlayerObj_1840(ctrlId);
@@ -2381,13 +2381,13 @@ extern "C" int cGame_activatePauseMenu(char* self)
             }
         }
     }
-    *(int*)(self + 0x224) = mask;
+    self->ControllerUnplugged = mask;
     if (mask) {
         if (sel < 0) {
             int i;
             sel = 0;
-            for (i = 0; i < Count_1840(self); i++) {
-                char* rider = At_1840(self, i);
+            for (i = 0; i < Count_1840(((char*)self)); i++) {
+                char* rider = At_1840(((char*)self), i);
                 if (*(int*)(*(char**)(rider + 0x18) + 0x87C)) {
                     int ctrlId = cBENewPlayerInterface_getRiderCtrlID(bi, i);
                     if (IsReady_1840(PlayerObj_1840(ctrlId))) {
@@ -2397,13 +2397,13 @@ extern "C" int cGame_activatePauseMenu(char* self)
                 }
             }
         }
-        *(int*)(self + 0x228) = sel;
+        self->PauseOwner = sel;
         return 1;
     }
     if (sel >= 0) {
         cBE_getInterface_Fv(cBE_getBE(), 7);
         if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 || cGame_canUserActivatePauseMenu(self)) {
-            *(int*)(self + 0x228) = sel;
+            self->PauseOwner = sel;
             return 1;
         }
     }
@@ -2424,9 +2424,9 @@ extern "C" int cSSXScriptEngine_IsPauseMenuAllowed(void* a);
  *
  * @return 1 when the pause menu may open, otherwise 0
  */
-extern "C" int cGame_canUserActivatePauseMenu(void* self)
+extern "C" int cGame_canUserActivatePauseMenu(cGame* self)
 {
-    int mode = *(int*)((char*)self + 0x210);
+    int mode = self->mPendingStateID;
     if (mode != 0) {
         if (mode == 5 || mode == 14 || mode == 1 || mode == 10) {
             return 0;
@@ -2434,7 +2434,7 @@ extern "C" int cGame_canUserActivatePauseMenu(void* self)
     }
     int allowed = 0;
     if (cSSXScriptEngine_IsPauseMenuAllowed(ScriptEngine) != 0) {
-        int currentStateId = *(int*)((char*)self + 0x214);
+        int currentStateId = self->mCurrentStateID;
         allowed = currentStateId != 5 && currentStateId != 14 && currentStateId != 1 && currentStateId != 10;
     }
     return allowed;

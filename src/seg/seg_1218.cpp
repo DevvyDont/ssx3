@@ -6718,13 +6718,13 @@ public:
  *
  * @param data  the replay frame stream read from (On Tour cReplayFramePtr* data)
  */
-extern "C" void cComputer_readFromReplayFrame(char* self, cStream_A8E8* data)
+extern "C" void cComputer_readFromReplayFrame(cComputer* self, cStream_A8E8* data)
 {
-    cRiderHandler_readFromReplayFrame(self, data);
-    data->read(self + 0xDF0, 336);
-    short state = *(short*)(self + 0xF38);
-    *(Fn_A8E8*)(self + 0xF44) = D_0043CF20_A8E8[state];
-    *(short*)(self + 0xF38) = state;
+    cRiderHandler_readFromReplayFrame(((char*)self), data);
+    data->read(((char*)self) + 0xDF0, 336);
+    short state = self->mCruiseLogicID;
+    *(Fn_A8E8*)&self->cruiseLogic = D_0043CF20_A8E8[state];
+    self->mCruiseLogicID = state;
 }
 #endif
 

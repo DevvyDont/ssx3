@@ -335,14 +335,13 @@ static inline void Call9_5E58(char* o, int a)
  *
  * @param visible  nonzero to show, 0 to hide
  */
-extern "C" void cScreenPopup_SetTextObjectsVisibility(void* self, int visible)
+extern "C" void cScreenPopup_SetTextObjectsVisibility(cScreenPopup* self, int visible)
 {
-    char* obj = (char*)self;
-    Call9_5E58(*(char**)(obj + 0x70), visible);
-    Call9_5E58(*(char**)(obj + 0x74), visible);
-    Call9_5E58(*(char**)(obj + 0x78), visible);
-    Call9_5E58(*(char**)(obj + 0x7C), visible);
-    Call9_5E58(*(char**)(obj + 0x88), visible);
+    Call9_5E58((char*)self->mpButtonGroup, visible);
+    Call9_5E58((char*)self->mpMessageText, visible);
+    Call9_5E58((char*)self->mpPostText, visible);
+    Call9_5E58((char*)self->mpTitleText, visible);
+    Call9_5E58((char*)self->mpTextBoxPair, visible);
 }
 #endif
 
@@ -544,8 +543,8 @@ extern "C" void cScreenPopup_FillObjectPointers(cScreenPopup* self)
 INCLUDE_ASM("fe/fepopup", cScreenPopup_setupBackgroundType);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cScreenPopup_hideWidgetSafe(void* self, void* obj);
-extern "C" void cScreenPopup_showWidgetSafe(void* self, void* obj);
+extern "C" void cScreenPopup_hideWidgetSafe(cScreenPopup* self, void* obj);
+extern "C" void cScreenPopup_showWidgetSafe(cScreenPopup* self, void* obj);
 extern sQuad_58E8 D_004C67A8;
 
 struct sVEp_C66E8 {
@@ -575,15 +574,15 @@ extern "C" void cScreenPopup_setupBackgroundType_impl(char* self)
 {
     switch (*(int*)(self + 0x31C)) {
     case 0:
-        cScreenPopup_showWidgetSafe(self, *(void**)(self + 0x64));
-        cScreenPopup_showWidgetSafe(self, *(void**)(self + 0x48));
-        cScreenPopup_showWidgetSafe(self, *(void**)(self + 0x4C));
-        cScreenPopup_hideWidgetSafe(self, *(void**)(self + 0x50));
-        cScreenPopup_hideWidgetSafe(self, *(void**)(self + 0x54));
-        cScreenPopup_hideWidgetSafe(self, *(void**)(self + 0x58));
-        cScreenPopup_hideWidgetSafe(self, *(void**)(self + 0x5C));
-        cScreenPopup_hideWidgetSafe(self, *(void**)(self + 0x60));
-        cScreenPopup_hideWidgetSafe(self, *(void**)(self + 0x68));
+        cScreenPopup_showWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x64));
+        cScreenPopup_showWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x48));
+        cScreenPopup_showWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x4C));
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x50));
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x54));
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x58));
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x5C));
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x60));
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x68));
         {
             char* frameWidget = *(char**)(self + 0x74);
             if (frameWidget != 0) {
@@ -616,15 +615,15 @@ extern "C" void cScreenPopup_setupBackgroundType_impl(char* self)
         *(sQuad_58E8*)(self + 0x33C) = gPopupBlack;
         break;
     case 1:
-        cScreenPopup_showWidgetSafe(self, *(void**)(self + 0x64));
-        cScreenPopup_showWidgetSafe(self, *(void**)(self + 0x50));
-        cScreenPopup_showWidgetSafe(self, *(void**)(self + 0x54));
-        cScreenPopup_showWidgetSafe(self, *(void**)(self + 0x58));
-        cScreenPopup_showWidgetSafe(self, *(void**)(self + 0x5C));
-        cScreenPopup_showWidgetSafe(self, *(void**)(self + 0x60));
-        cScreenPopup_hideWidgetSafe(self, *(void**)(self + 0x48));
-        cScreenPopup_hideWidgetSafe(self, *(void**)(self + 0x4C));
-        cScreenPopup_hideWidgetSafe(self, *(void**)(self + 0x68));
+        cScreenPopup_showWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x64));
+        cScreenPopup_showWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x50));
+        cScreenPopup_showWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x54));
+        cScreenPopup_showWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x58));
+        cScreenPopup_showWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x5C));
+        cScreenPopup_showWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x60));
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x48));
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x4C));
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x68));
         {
             char* frameWidget = *(char**)(self + 0x74);
             if (frameWidget != 0) {
@@ -657,15 +656,15 @@ extern "C" void cScreenPopup_setupBackgroundType_impl(char* self)
         *(sQuad_58E8*)(self + 0x33C) = gPopupBlack;
         break;
     case 2:
-        cScreenPopup_hideWidgetSafe(self, *(void**)(self + 0x48));
-        cScreenPopup_hideWidgetSafe(self, *(void**)(self + 0x4C));
-        cScreenPopup_hideWidgetSafe(self, *(void**)(self + 0x50));
-        cScreenPopup_hideWidgetSafe(self, *(void**)(self + 0x54));
-        cScreenPopup_hideWidgetSafe(self, *(void**)(self + 0x58));
-        cScreenPopup_hideWidgetSafe(self, *(void**)(self + 0x5C));
-        cScreenPopup_hideWidgetSafe(self, *(void**)(self + 0x60));
-        cScreenPopup_hideWidgetSafe(self, *(void**)(self + 0x64));
-        cScreenPopup_showWidgetSafe(self, *(void**)(self + 0x68));
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x48));
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x4C));
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x50));
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x54));
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x58));
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x5C));
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x60));
+        cScreenPopup_hideWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x64));
+        cScreenPopup_showWidgetSafe((cScreenPopup*)self, *(void**)(self + 0x68));
         {
             char* frameWidget = *(char**)(self + 0x74);
             if (frameWidget != 0) {
@@ -720,7 +719,7 @@ extern "C" void cScreenPopup_adjustButtonPosition(cScreenPopup* self);
 extern "C" void cScreenPopup_handlePostPending(cScreenPopup* self, void* a1);
 extern "C" void cScreenPopup_adjustLayer(void* self, int v);
 extern "C" void cScreenPopup_setupBackgroundType(void* self, int v);
-extern "C" void cScreenPopup_centerPopup(void* self);
+extern "C" void cScreenPopup_centerPopup(cScreenPopup* self);
 extern "C" void cScreenPopup_FillTextEntryBox(cScreenPopup* self);
 extern "C" void cScreenPopup_checkAndFixTextEntry(cScreenPopup* self, cUIText* text, const char* str);
 
@@ -801,10 +800,10 @@ public:
 };
 extern sVec3_6D30 D_004FF0D8_6D30 __asm__("t3vect_Zero");
 extern "C" void cScreenPopup_setTextString1(cScreenPopup* self, void* dst, int* info);
-extern "C" void cScreenPopup_setTextString2(void* self, cUIText* text, int* info);
-extern "C" void cScreenPopup_getStringSize3(void* self, void* obj, void* out);
-extern "C" void cScreenPopup_getStringSize(void* self, cUIText* text, int* info, float* out);
-extern "C" void cScreenPopup_increaseBoxSize(void* self, float* size, float* item);
+extern "C" void cScreenPopup_setTextString2(cScreenPopup* self, cUIText* text, int* info);
+extern "C" void cScreenPopup_getStringSize3(cScreenPopup* self, void* obj, void* out);
+extern "C" void cScreenPopup_getStringSize(cScreenPopup* self, cUIText* text, int* info, float* out);
+extern "C" void cScreenPopup_increaseBoxSize(cScreenPopup* self, float* size, float* item);
 
 /**
  * Shows or hides the popup's text-entry widgets, depending on whether the popup is a text-entry popup.
@@ -881,7 +880,7 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_handlePostPending);
 #ifdef SKIP_ASM
 struct sVec3_7040 { float x, y, z; };
 extern "C" void cScreenPopup_getTextBoxWrapSize(cScreenPopup* self, void* a, void* b, int which, float t);
-extern "C" void cScreenPopup_changePivot(void* self, void* obj, unsigned char state, float t);
+extern "C" void cScreenPopup_changePivot(cScreenPopup* self, void* obj, unsigned char state, float t);
 
 /**
  * Places and sizes the popup's post-pending text below the title when the popup description has one.
@@ -988,7 +987,7 @@ extern sVec3_7258 t3vect_Zero;
 extern "C" void cScreenPopup_setTextObjectSize(cScreenPopup* self, sVec3_7258* v);
 extern "C" void cScreenPopup_getMessageLineWrapSize1(cScreenPopup* self, int* msg, void* out);
 extern "C" void cScreenPopup_getTextBoxWrapSize(cScreenPopup* self, void* a, void* b, int which, float t);
-extern "C" void cScreenPopup_changePivot(void* self, void* obj, unsigned char state, float t);
+extern "C" void cScreenPopup_changePivot(cScreenPopup* self, void* obj, unsigned char state, float t);
 
 /**
  * Places and fills the popup's message text below the title and records the size reached.
@@ -1045,10 +1044,10 @@ struct sPopup_7388 {
 };
 extern "C" int cScreenPopup_handleEntryBox(cScreenPopup* self, void* info);
 extern "C" int* cPopupInfo_getPopupOptionNames(void* info, int i);
-extern "C" void cScreenPopup_setTextString2(void* self, cUIText* text, int* info);
-extern "C" void cScreenPopup_getStringSize3(void* self, void* obj, void* out);
-extern "C" void cScreenPopup_getStringSize(void* self, cUIText* text, int* info, float* out);
-extern "C" void cScreenPopup_increaseBoxSize(void* self, float* size, float* item);
+extern "C" void cScreenPopup_setTextString2(cScreenPopup* self, cUIText* text, int* info);
+extern "C" void cScreenPopup_getStringSize3(cScreenPopup* self, void* obj, void* out);
+extern "C" void cScreenPopup_getStringSize(cScreenPopup* self, cUIText* text, int* info, float* out);
+extern "C" void cScreenPopup_increaseBoxSize(cScreenPopup* self, float* size, float* item);
 
 /**
  * Fills the popup's option texts from its description and hides the unused ones.
@@ -1167,21 +1166,20 @@ extern "C" double dpmul(double a, double b);
  * @param pos  the content size (On Tour vSize)
  */
 // Converts a screen position into the popup's normalised scroll position for the current layout.
-extern "C" void cScreenPopup_determineAndSetScaling(void* self, t3Vector pos)
+extern "C" void cScreenPopup_determineAndSetScaling(cScreenPopup* self, t3Vector pos)
 {
-    char* selfBytes = (char*)self;
-    switch (*(int*)(selfBytes + 0x31C)) {
+    switch (self->meBackgroundType) {
     case 0:
-        *(float*)(selfBytes + 0x278) = (pos.x + 15.0f) / *(float*)(selfBytes + 0x1F4);
-        *(float*)(selfBytes + 0x27C) = (pos.y + 10.0f) / *(float*)(selfBytes + 0x1F8);
+        self->mvCurrentScale[0] = (pos.x + 15.0f) / self->mvSizeBackWhite[0];
+        self->mvCurrentScale[1] = (pos.y + 10.0f) / self->mvSizeBackWhite[1];
         break;
     case 1:
-        *(float*)(selfBytes + 0x278) = dptofp(dpmul(fptodp((pos.x + 20.0f) / *(float*)(selfBytes + 0x218)), 1.05));
-        *(float*)(selfBytes + 0x27C) = (pos.y + 15.0f) / *(float*)(selfBytes + 0x21C);
+        self->mvCurrentScale[0] = dptofp(dpmul(fptodp((pos.x + 20.0f) / self->mvSizeBackSmall[0]), 1.05));
+        self->mvCurrentScale[1] = (pos.y + 15.0f) / self->mvSizeBackSmall[1];
         break;
     case 2:
-        *(float*)(selfBytes + 0x278) = 1.0f;
-        *(float*)(selfBytes + 0x27C) = 1.0f;
+        self->mvCurrentScale[0] = 1.0f;
+        self->mvCurrentScale[1] = 1.0f;
         break;
     }
 }
@@ -1282,61 +1280,60 @@ extern "C" float dptofp(double d);
  * @param fXOffset  horizontal offset
  * @param fYOffset  vertical offset
  */
-extern "C" void cScreenPopup_resizeBackground(void* self, sVec3_78C0 vSize, float fXOffset, float fYOffset)
+extern "C" void cScreenPopup_resizeBackground(cScreenPopup* self, sVec3_78C0 vSize, float fXOffset, float fYOffset)
 {
-    char* selfBytes = (char*)self;
     float y = 0.0f;
-    switch (*(int*)(selfBytes + 0x31C)) {
+    switch (self->meBackgroundType) {
     case 0:
-        if (*(char**)(selfBytes + 0x48) != 0) {
-            sVec3_78C0 piecePos = *(sVec3_78C0*)(selfBytes + 0x188);
-            y = *(float*)(selfBytes + 0x1BC) + fYOffset + vSize.y * 0.5f - 5.0f;
+        if ((char*)self->mpBackGroundWhite != 0) {
+            sVec3_78C0 piecePos = *(sVec3_78C0*)&self->mvPosBackWhite[0];
+            y = self->mvPosTitle[1] + fYOffset + vSize.y * 0.5f - 5.0f;
             piecePos.x += fXOffset;
             piecePos.y = y;
-            *(sVec3_78C0*)(*(char**)(selfBytes + 0x48) + 0x44) = piecePos;
+            *(sVec3_78C0*)((char*)self->mpBackGroundWhite + 0x44) = piecePos;
         }
-        if (*(char**)(selfBytes + 0x4C) != 0) {
-            sVec3_78C0 piecePos = *(sVec3_78C0*)(selfBytes + 0x194);
+        if ((char*)self->mpBackGroundRed != 0) {
+            sVec3_78C0 piecePos = *(sVec3_78C0*)&self->mvPosBackRed[0];
             piecePos.y = y;
             piecePos.x += fXOffset;
-            *(sVec3_78C0*)(*(char**)(selfBytes + 0x4C) + 0x44) = piecePos;
+            *(sVec3_78C0*)((char*)self->mpBackGroundRed + 0x44) = piecePos;
         }
         break;
     case 1:
-        if (*(char**)(selfBytes + 0x58) != 0) {
-            sVec3_78C0 piecePos = *(sVec3_78C0*)(selfBytes + 0x23C);
-            y = dptofp(dpsub(fptodp(*(float*)(selfBytes + 0x1BC) + fYOffset + vSize.y * 0.5f), 7.5));
+        if ((char*)self->mpBackGroundSmall != 0) {
+            sVec3_78C0 piecePos = *(sVec3_78C0*)&self->mvPosBackSmall[0];
+            y = dptofp(dpsub(fptodp(self->mvPosTitle[1] + fYOffset + vSize.y * 0.5f), 7.5));
             piecePos.x += fXOffset;
             piecePos.y = y;
-            *(sVec3_78C0*)(*(char**)(selfBytes + 0x58) + 0x44) = piecePos;
+            *(sVec3_78C0*)((char*)self->mpBackGroundSmall + 0x44) = piecePos;
         }
-        if (*(char**)(selfBytes + 0x5C) != 0) {
-            sVec3_78C0 piecePos = *(sVec3_78C0*)(selfBytes + 0x248);
+        if ((char*)self->mpBackGroundSmallOutline != 0) {
+            sVec3_78C0 piecePos = *(sVec3_78C0*)&self->mvPosBackSmallOutline[0];
             piecePos.y = y;
             piecePos.x += fXOffset;
-            *(sVec3_78C0*)(*(char**)(selfBytes + 0x5C) + 0x44) = piecePos;
+            *(sVec3_78C0*)((char*)self->mpBackGroundSmallOutline + 0x44) = piecePos;
         }
-        if (*(char**)(selfBytes + 0x50) != 0) {
-            sVec3_78C0 piecePos = *(sVec3_78C0*)(selfBytes + 0x224);
+        if ((char*)self->mpBackGroundLarge != 0) {
+            sVec3_78C0 piecePos = *(sVec3_78C0*)&self->mvPosBackLarge[0];
             piecePos.y = y;
             piecePos.x += fXOffset;
-            *(sVec3_78C0*)(*(char**)(selfBytes + 0x50) + 0x44) = piecePos;
+            *(sVec3_78C0*)((char*)self->mpBackGroundLarge + 0x44) = piecePos;
         }
-        if (*(char**)(selfBytes + 0x54) != 0) {
-            sVec3_78C0 piecePos = *(sVec3_78C0*)(selfBytes + 0x230);
+        if ((char*)self->mpBackGroundLargeOutline != 0) {
+            sVec3_78C0 piecePos = *(sVec3_78C0*)&self->mvPosBackLargeOutline[0];
             piecePos.y = y;
             piecePos.x += fXOffset;
-            *(sVec3_78C0*)(*(char**)(selfBytes + 0x54) + 0x44) = piecePos;
+            *(sVec3_78C0*)((char*)self->mpBackGroundLargeOutline + 0x44) = piecePos;
         }
-        if (*(char**)(selfBytes + 0x60) != 0) {
-            sVec3_78C0 piecePos = *(sVec3_78C0*)(selfBytes + 0x254);
+        if ((char*)self->mpBackGroundShadow != 0) {
+            sVec3_78C0 piecePos = *(sVec3_78C0*)&self->mvPosBackShadow[0];
             piecePos.y = y;
             piecePos.x += fXOffset;
-            *(sVec3_78C0*)(*(char**)(selfBytes + 0x60) + 0x44) = piecePos;
+            *(sVec3_78C0*)((char*)self->mpBackGroundShadow + 0x44) = piecePos;
         }
         break;
     case 2:
-        *(float*)(selfBytes + 0x27C) = *(float*)(selfBytes + 0x278) = 1.0f;
+        self->mvCurrentScale[1] = self->mvCurrentScale[0] = 1.0f;
         break;
     }
 }
@@ -1375,56 +1372,55 @@ void cScreenPopup_resizeBackground_7C20(void* self, sVec3_7C20 v, float a, float
  * scales (cScreenPopup_determineAndSetScaling) and places (cScreenPopup_resizeBackground) the background for the content size (+0x260), then moves
  * the title, message, option and button widgets by the same offsets.
  */
-extern "C" void cScreenPopup_centerPopup(void* self)
+extern "C" void cScreenPopup_centerPopup(cScreenPopup* self)
 {
-    char* selfBytes = (char*)self;
-    float x = cScreenPopup_centerOffset((cScreenPopup*)self) + *(float*)(selfBytes + 0x26C);
-    float y = *(float*)(selfBytes + 0x270);
-    cScreenPopup_determineAndSetScaling_7C20(self, *(sVec3_7C20*)(selfBytes + 0x260));
-    cScreenPopup_resizeBackground_7C20(self, *(sVec3_7C20*)(selfBytes + 0x260), *(float*)(selfBytes + 0x26C), y);
-    char* widget = *(char**)(selfBytes + 0x6C);
+    float x = cScreenPopup_centerOffset((cScreenPopup*)self) + self->mvOffset[0];
+    float y = self->mvOffset[1];
+    cScreenPopup_determineAndSetScaling_7C20(self, *(sVec3_7C20*)&self->mvCurSize[0]);
+    cScreenPopup_resizeBackground_7C20(self, *(sVec3_7C20*)&self->mvCurSize[0], self->mvOffset[0], y);
+    char* widget = (char*)self->mpMenu;
     if (widget != 0) {
         sVec3_7C20 widgetPos = *(sVec3_7C20*)(widget + 0x44);
-        widgetPos.x += *(float*)(selfBytes + 0x26C);
+        widgetPos.x += self->mvOffset[0];
         widgetPos.y += y;
         *(sVec3_7C20*)(widget + 0x44) = widgetPos;
     }
-    widget = *(char**)(selfBytes + 0x70);
+    widget = (char*)self->mpButtonGroup;
     if (widget != 0) {
         sVec3_7C20 widgetPos = *(sVec3_7C20*)(widget + 0x44);
-        widgetPos.x += *(float*)(selfBytes + 0x26C);
+        widgetPos.x += self->mvOffset[0];
         widgetPos.y += y;
         *(sVec3_7C20*)(widget + 0x44) = widgetPos;
     }
-    if (*(char**)(selfBytes + 0x74) != 0) {
-        sVec3_7C20 widgetPos = *(sVec3_7C20*)(*(char**)(selfBytes + 0x74) + 0x44);
-        if (*(int*)(selfBytes + 0x2CC) != 0) {
+    if ((char*)self->mpMessageText != 0) {
+        sVec3_7C20 widgetPos = *(sVec3_7C20*)((char*)self->mpMessageText + 0x44);
+        if (self->mbCenterText != 0) {
             widgetPos.x = x + 320.0f;
         } else {
             widgetPos.x += x;
         }
         widgetPos.y += y;
-        *(sVec3_7C20*)(*(char**)(selfBytes + 0x74) + 0x44) = widgetPos;
+        *(sVec3_7C20*)((char*)self->mpMessageText + 0x44) = widgetPos;
     }
-    if (*(char**)(selfBytes + 0x7C) != 0) {
-        sVec3_7C20 widgetPos = *(sVec3_7C20*)(*(char**)(selfBytes + 0x7C) + 0x44);
-        if (*(int*)(selfBytes + 0x2CC) != 0) {
+    if ((char*)self->mpTitleText != 0) {
+        sVec3_7C20 widgetPos = *(sVec3_7C20*)((char*)self->mpTitleText + 0x44);
+        if (self->mbCenterText != 0) {
             widgetPos.x = x + 320.0f;
         } else {
             widgetPos.x += x;
         }
         widgetPos.y += y;
-        *(sVec3_7C20*)(*(char**)(selfBytes + 0x7C) + 0x44) = widgetPos;
+        *(sVec3_7C20*)((char*)self->mpTitleText + 0x44) = widgetPos;
     }
-    if (*(char**)(selfBytes + 0x78) != 0) {
-        sVec3_7C20 widgetPos = *(sVec3_7C20*)(*(char**)(selfBytes + 0x78) + 0x44);
-        if (*(int*)(selfBytes + 0x2CC) != 0) {
+    if ((char*)self->mpPostText != 0) {
+        sVec3_7C20 widgetPos = *(sVec3_7C20*)((char*)self->mpPostText + 0x44);
+        if (self->mbCenterText != 0) {
             widgetPos.x = x + 320.0f;
         } else {
             widgetPos.x += x;
         }
         widgetPos.y += y;
-        *(sVec3_7C20*)(*(char**)(selfBytes + 0x78) + 0x44) = widgetPos;
+        *(sVec3_7C20*)((char*)self->mpPostText + 0x44) = widgetPos;
     }
 }
 #endif
@@ -1499,7 +1495,7 @@ extern char D_004A1408[];
  * @param text  the text widget to fill
  * @param info  the string element: eType at [0], the string or id at [1]
  */
-extern "C" void cScreenPopup_setTextString2(void* self, cUIText* text, int* info)
+extern "C" void cScreenPopup_setTextString2(cScreenPopup* self, cUIText* text, int* info)
 {
     switch (info[0]) {
     case 1:
@@ -1663,7 +1659,7 @@ struct sVEntry_8320 {
  * @param info  the string element: eType at [0], the string or id at [1]
  * @param out   the result rectangle (four floats, written by the font's extent function)
  */
-extern "C" void cScreenPopup_getStringSize(void* self, cUIText* text, int* info, float* out)
+extern "C" void cScreenPopup_getStringSize(cScreenPopup* self, cUIText* text, int* info, float* out)
 {
     sVec3_8320 textScale = *(sVec3_8320*)((char*)text + 0x50);
     char* scaledFont = (char*)cUIText_getFont(text);
@@ -1722,7 +1718,7 @@ extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n,
  * @param str   the ascii string
  * @param out   the result rectangle (four floats)
  */
-extern "C" void cScreenPopup_getStringSize1(void* self, void* text, const char* str, void* out)
+extern "C" void cScreenPopup_getStringSize1(cScreenPopup* self, void* text, const char* str, void* out)
 {
     sVec3_84A8 scale = *(sVec3_84A8*)((char*)text + 0x50);
     char* font = (char*)cUIText_getFont(text);
@@ -1754,7 +1750,7 @@ extern "C" float func_003921F0(void* self, const char* str, void* out, int n, fl
  * @param str   the unicode string
  * @param out   the result rectangle (four floats)
  */
-extern "C" void cScreenPopup_getStringSize2(void* self, void* text, const char* str, void* out)
+extern "C" void cScreenPopup_getStringSize2(cScreenPopup* self, void* text, const char* str, void* out)
 {
     sVec3_8568 scale = *(sVec3_8568*)((char*)text + 0x50);
     char* font = (char*)cUIText_getFont(text);
@@ -1788,7 +1784,7 @@ struct sVEntry001C8628 {
  * @param obj  the widget
  * @param out  the result rectangle (four floats)
  */
-extern "C" void cScreenPopup_getStringSize3(void* self, void* obj, void* out)
+extern "C" void cScreenPopup_getStringSize3(cScreenPopup* self, void* obj, void* out)
 {
     sVec2_8628 widgetSize;
     sVEntry001C8628* vt = *(sVEntry001C8628**)((char*)obj + 8);
@@ -1807,10 +1803,10 @@ struct sVE8678 {
     short index;
     void (*fn)(void*, int);
 };
-extern "C" void cScreenPopup_setTextString2(void* self, cUIText* text, int* info);
-extern "C" void cScreenPopup_getStringSize(void* self, cUIText* text, int* info, float* out);
-extern "C" void cScreenPopup_increaseBoxSize(void* self, float* size, float* item);
-extern "C" void cScreenPopup_changePivot(void* self, void* obj, unsigned char state, float t);
+extern "C" void cScreenPopup_setTextString2(cScreenPopup* self, cUIText* text, int* info);
+extern "C" void cScreenPopup_getStringSize(cScreenPopup* self, cUIText* text, int* info, float* out);
+extern "C" void cScreenPopup_increaseBoxSize(cScreenPopup* self, float* size, float* item);
+extern "C" void cScreenPopup_changePivot(cScreenPopup* self, void* obj, unsigned char state, float t);
 
 /**
  * Shows and sizes the popup's title bar from the popup description, or hides it when there is no title.
@@ -1852,7 +1848,7 @@ extern "C" void cScreenPopup_createTitleBar(cScreenPopup* self, void* pInfo)
 INCLUDE_ASM("fe/fepopup", cScreenPopup_adjustMenuPosition);
 #ifdef SKIP_ASM
 struct sVec3_8758 { float x, y, z; };
-extern "C" void cScreenPopup_changePivot(void* self, void* obj, unsigned char state, float t);
+extern "C" void cScreenPopup_changePivot(cScreenPopup* self, void* obj, unsigned char state, float t);
 
 /**
  * Centres the popup's option menu below the text and remembers the shift for the buttons.
@@ -1937,7 +1933,7 @@ struct sVEntryK8930 {
  * @param state  the new pivot (On Tour ucPivot)
  * @param fOffset      the horizontal offset to apply, or 0 for half the text width
  */
-extern "C" void cScreenPopup_changePivot(void* self, void* obj, unsigned char state, float fOffset)
+extern "C" void cScreenPopup_changePivot(cScreenPopup* self, void* obj, unsigned char state, float fOffset)
 {
     sObjBitsK8930* pivotBits = (sObjBitsK8930*)((char*)obj + 0x14);
     if (pivotBits->state == state)
@@ -1975,7 +1971,7 @@ struct sVec3_8A38 {
 struct sVec3_7258;
 extern sVec3_8A38 D_004FF0D8_8A38 __asm__("t3vect_Zero");
 extern "C" void cScreenPopup_setTextObjectSize(cScreenPopup* self, sVec3_7258* v);
-extern "C" void cScreenPopup_changePivot(void* self, void* obj, unsigned char state, float t);
+extern "C" void cScreenPopup_changePivot(cScreenPopup* self, void* obj, unsigned char state, float t);
 extern "C" void cScreenPopup_adjustLayer(void* self, int v);
 
 #define OBJ_8A38(off) (*(char**)((char*)self + (off)))
@@ -2077,7 +2073,7 @@ extern "C" void cScreenPopup_restoreElements(cScreenPopup* self)
 INCLUDE_ASM("fe/fepopup", cScreenPopup_getTextBoxSize);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cScreenPopup_getTextBoxSize1(void* self, void* text, unsigned short* str, float* size);
+extern "C" void cScreenPopup_getTextBoxSize1(cScreenPopup* self, void* text, unsigned short* str, float* size);
 extern "C" void cScreenPopup_getTextBoxSize2_s(void* self, void* text, const char* str, float* size) __asm__("cScreenPopup_getTextBoxSize2");
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_String_pct_08x[];
@@ -2102,36 +2098,35 @@ struct sVEntry_8EF0 {
  * @param flag   nonzero to measure with the message text, 0 with the post text
  * @param extra  gap added to the height
  */
-extern "C" void cScreenPopup_getTextBoxSize(void* vself, int* item, float* size, int flag, float extra)
+extern "C" void cScreenPopup_getTextBoxSize(cScreenPopup* vself, int* item, float* size, int flag, float extra)
 {
-    char* self = (char*)vself;
     void* text;
     if (flag != 0)
-        text = *(void**)(self + 0x74);
+        text = (void*)vself->mpMessageText;
     else
-        text = *(void**)(self + 0x78);
+        text = (void*)vself->mpPostText;
     if (text == 0)
         return;
     switch (item[0]) {
     case 0:
         break;
     case 2:
-        cScreenPopup_getTextBoxSize2_s(self, text, (const char*)item[1], size);
+        cScreenPopup_getTextBoxSize2_s(((char*)vself), text, (const char*)item[1], size);
         goto add;
     case 1:
-        cScreenPopup_getTextBoxSize1(self, text, (unsigned short*)item[1], size);
+        cScreenPopup_getTextBoxSize1(vself, text, (unsigned short*)item[1], size);
         goto add;
     case 3: {
         char* locale = (char*)SSXApp->FELocale;
         sVEntry_8EF0* vt = *(sVEntry_8EF0**)(locale + 4);
         unsigned short* str = vt[4].fn(locale + vt[4].delta, item[1]);
         if (str) {
-            cScreenPopup_getTextBoxSize1(self, text, str, size);
+            cScreenPopup_getTextBoxSize1(vself, text, str, size);
             goto add;
         } else {
             char buf[0x40];
             sprintf(buf, str_String_pct_08x, item[1]);
-            cScreenPopup_getTextBoxSize2_s(self, text, buf, size);
+            cScreenPopup_getTextBoxSize2_s(((char*)vself), text, buf, size);
         }
         break;
     }
@@ -2150,8 +2145,8 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_getTextBoxSize1);
 extern "C" int USTR_length(unsigned short* s);
 void cMemMan_free(void* ptr);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" void cScreenPopup_getStringSize2(void* self, void* text, const char* str, void* out);
-extern "C" void cScreenPopup_increaseBoxSize(void* self, float* size, float* item);
+extern "C" void cScreenPopup_getStringSize2(cScreenPopup* self, void* text, const char* str, void* out);
+extern "C" void cScreenPopup_increaseBoxSize(cScreenPopup* self, float* size, float* item);
 extern char str_getTextBoxSize[];
 extern char D_004A1C38;
 
@@ -2166,7 +2161,7 @@ extern char D_004A1C38;
  * @param str   the unicode string
  * @param size  the box size (t3Vector) to grow
  */
-extern "C" void cScreenPopup_getTextBoxSize1(void* self, void* text, unsigned short* str, float* size)
+extern "C" void cScreenPopup_getTextBoxSize1(cScreenPopup* self, void* text, unsigned short* str, float* size)
 {
     int j = 0;
     int i = 0;
@@ -2215,8 +2210,8 @@ struct cUIText;
 extern "C" int strlen(const char* s);
 void cMemMan_free(void* ptr);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" void cScreenPopup_getStringSize1(void* self, void* text, const char* str, void* out);
-extern "C" void cScreenPopup_increaseBoxSize(void* self, float* size, float* item);
+extern "C" void cScreenPopup_getStringSize1(cScreenPopup* self, void* text, const char* str, void* out);
+extern "C" void cScreenPopup_increaseBoxSize(cScreenPopup* self, float* size, float* item);
 extern char str_getTextBoxSize[];
 
 /**
@@ -2231,7 +2226,7 @@ extern char str_getTextBoxSize[];
  * @param sizePtr  the box size (a float* to a t3Vector, declared int)
  */
 // PORT: a3 is the float* size out pointer (the unit declares it int)
-extern "C" void cScreenPopup_getTextBoxSize2(void* self, cUIText* text, const char* str, int sizePtr)
+extern "C" void cScreenPopup_getTextBoxSize2(cScreenPopup* self, cUIText* text, const char* str, int sizePtr)
 {
     float* size = (float*)sizePtr;
     int j = 0;
@@ -2278,7 +2273,7 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_getMessageLineWrapSize1);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cScreenPopup_getMessageLineWrapSize(cScreenPopup* self, void* text, const char* str, void* out);
-extern "C" void cScreenPopup_getMessageLineWrapSize2(void* self, void* text, void* str, void* out);
+extern "C" void cScreenPopup_getMessageLineWrapSize2(cScreenPopup* self, void* text, void* str, void* out);
 extern char str_String_pct_08x[];
 
 struct sVEntryK93B0 {
@@ -2359,7 +2354,7 @@ extern char D_004A1C38;
  * @param strp  the unicode string
  * @param outp  receives the width (float)
  */
-extern "C" void cScreenPopup_getMessageLineWrapSize2(void* self, void* text, void* strp, void* outp)
+extern "C" void cScreenPopup_getMessageLineWrapSize2(cScreenPopup* self, void* text, void* strp, void* outp)
 {
     unsigned short* str = (unsigned short*)strp;
     float* out = (float*)outp;
@@ -2480,10 +2475,10 @@ extern "C" void cScreenPopup_getMessageLineWrapSize(cScreenPopup* self, void* pT
 INCLUDE_ASM("fe/fepopup", cScreenPopup_getTextBoxWrapSize);
 #ifdef SKIP_ASM
 struct cUIText;
-extern "C" void cScreenPopup_setTextString2(void* self, cUIText* text, int* info);
-extern "C" void cScreenPopup_getTextBoxWrapSize1(void* self, cUIText* text, void* str, float* out);
+extern "C" void cScreenPopup_setTextString2(cScreenPopup* self, cUIText* text, int* info);
+extern "C" void cScreenPopup_getTextBoxWrapSize1(cScreenPopup* self, cUIText* text, void* str, float* out);
 // PORT: cScreenPopup_getTextBoxWrapSize2's 4th parameter is the out pointer (declared int in the unit)
-extern "C" void cScreenPopup_getTextBoxWrapSize2(void* self, cUIText* text, const char* str, int a3);
+extern "C" void cScreenPopup_getTextBoxWrapSize2(cScreenPopup* self, cUIText* text, const char* str, int a3);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_String_pct_08x[];
 
@@ -2563,7 +2558,7 @@ extern "C" float func_00392C60(void* font, int c);
 extern "C" int USTR_length(unsigned short* s);
 extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
 extern "C" void cUIText_setUnicodeString(cUIText* text, void* p);
-extern "C" void cScreenPopup_getTextBoxSize1(void* self, void* text, unsigned short* str, float* size);
+extern "C" void cScreenPopup_getTextBoxSize1(cScreenPopup* self, void* text, unsigned short* str, float* size);
 void cMemMan_free(void* ptr);
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_UITEXTTEMP[];
@@ -2581,7 +2576,7 @@ extern char D_004A1C38;
  * @param strp  the unicode string
  * @param out   the box size (t3Vector) to grow
  */
-extern "C" void cScreenPopup_getTextBoxWrapSize1(void* self, cUIText* text, void* strp, float* out)
+extern "C" void cScreenPopup_getTextBoxWrapSize1(cScreenPopup* self, cUIText* text, void* strp, float* out)
 {
     unsigned short* str = (unsigned short*)strp;
     *(int*)((char*)text + 0x14) |= 0x80;
@@ -2635,7 +2630,7 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_getTextBoxWrapSize2);
 #ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
-extern "C" void cScreenPopup_getTextBoxSize2(void* self, cUIText* text, const char* str, int a3);
+extern "C" void cScreenPopup_getTextBoxSize2(cScreenPopup* self, cUIText* text, const char* str, int a3);
 
 /**
  * Grows a box size to fit an ascii string and puts the string in the text widget.
@@ -2646,7 +2641,7 @@ extern "C" void cScreenPopup_getTextBoxSize2(void* self, cUIText* text, const ch
  * @param str      the ascii string
  * @param sizePtr  the box size (a float* to a t3Vector, declared int)
  */
-extern "C" void cScreenPopup_getTextBoxWrapSize2(void* self, cUIText* text, const char* str, int sizePtr)
+extern "C" void cScreenPopup_getTextBoxWrapSize2(cScreenPopup* self, cUIText* text, const char* str, int sizePtr)
 {
     cScreenPopup_getTextBoxSize2(self, text, str, sizePtr);
     cUIText_setAsciiString(text, str);
@@ -2665,7 +2660,7 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_increaseBoxSize);
  * @param size  the box size being accumulated (On Tour vBox)
  * @param item  the line's rectangle (On Tour rectString)
  */
-extern "C" void cScreenPopup_increaseBoxSize(void* self, float* size, float* item)
+extern "C" void cScreenPopup_increaseBoxSize(cScreenPopup* self, float* size, float* item)
 {
     float w = item[2];
     if (size[0] < w) {
@@ -3013,7 +3008,7 @@ struct sVEntry_cScreenPopup_hideWidgetSafe {
  *
  * @param obj  the widget, or null
  */
-extern "C" void cScreenPopup_hideWidgetSafe(void* self, void* obj)
+extern "C" void cScreenPopup_hideWidgetSafe(cScreenPopup* self, void* obj)
 {
     if (obj != 0) {
         sVEntry_cScreenPopup_hideWidgetSafe* vt = *(sVEntry_cScreenPopup_hideWidgetSafe**)((char*)obj + 0x8);
@@ -3038,7 +3033,7 @@ struct sVEntry_cScreenPopup_showWidgetSafe {
  *
  * @param obj  the widget, or null
  */
-extern "C" void cScreenPopup_showWidgetSafe(void* self, void* obj)
+extern "C" void cScreenPopup_showWidgetSafe(cScreenPopup* self, void* obj)
 {
     if (obj != 0) {
         sVEntry_cScreenPopup_showWidgetSafe* vt = *(sVEntry_cScreenPopup_showWidgetSafe**)((char*)obj + 0x8);
@@ -6189,7 +6184,7 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, char* ev)
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_fillSelectableKeys);
 #ifdef SKIP_ASM
 extern "C" void cKeyboardPopup_setIncludeKey(cKeyboardPopup* self, int i, int v, int mode);
-extern "C" void cKeyboardPopup_setIncludeQuickKeyRow(void* self, int a1);
+extern "C" void cKeyboardPopup_setIncludeQuickKeyRow(cKeyboardPopup* self, int a1);
 extern "C" int strlen(const char* s);
 extern signed char D_00441390[];
 
@@ -6253,7 +6248,7 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_setDisableShiftNumbers);
  *
  * @param on  nonzero to disable the keys in the alternate set, 0 to enable them
  */
-extern "C" void cKeyboardPopup_setDisableShiftNumbers(void* self, bool on)
+extern "C" void cKeyboardPopup_setDisableShiftNumbers(cKeyboardPopup* self, bool on)
 {
     int i;
     for (i = 0xF; i < 25; i++) {
@@ -6273,7 +6268,7 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup_setIncludeQuickKeyRow);
  *
  * @param included  nonzero to make the keys selectable
  */
-extern "C" void cKeyboardPopup_setIncludeQuickKeyRow(void* self, int included)
+extern "C" void cKeyboardPopup_setIncludeQuickKeyRow(cKeyboardPopup* self, int included)
 {
     int i;
     for (i = 0; i < 0xE; i++) {

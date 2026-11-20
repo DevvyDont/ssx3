@@ -1454,13 +1454,14 @@ extern "C" void* cRider_getHipPosition(void* dst, void* self);
  *
  * cRider_getHipPosition of the rider at +0x4 of the target.
  *
- * @param target  the camera target (this); @p self is the hidden result buffer
- * @return @p self, holding the position
+ * @param result  the hidden result buffer
+ * @param target  the camera target (this)
+ * @return @p result, holding the position
  */
-extern "C" void* cRiderCameraTarget_getPosition(void* self, void* target)
+extern "C" void* cRiderCameraTarget_getPosition(void* result, cRiderCameraTarget* target)
 {
-    cRider_getHipPosition(self, *(void**)((char*)target + 0x4));
-    return self;
+    cRider_getHipPosition(result, target->Rider);
+    return result;
 }
 #endif
 
@@ -1472,14 +1473,15 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getRotation);
  *
  * Copies the 16 bytes at +0x120 of the rider (+0x4 of the target).
  *
- * @param target  the camera target (this); @p self is the hidden result buffer
- * @return @p self, holding the rotation
+ * @param result  the hidden result buffer
+ * @param target  the camera target (this)
+ * @return @p result, holding the rotation
  */
-extern "C" void* cRiderCameraTarget_getRotation(void* self, void* target)
+extern "C" void* cRiderCameraTarget_getRotation(void* result, cRiderCameraTarget* target)
 {
-    void* rider = *(void**)((char*)target + 0x4);
-    *(cQuad128*)self = *(cQuad128*)((char*)rider + 0x120);
-    return self;
+    void* rider = target->Rider;
+    *(cQuad128*)result = *(cQuad128*)((char*)rider + 0x120);
+    return result;
 }
 #endif
 
@@ -1502,14 +1504,15 @@ public:
  *
  * Calls virtual slot 2 (getVelocity) of the rider's cBeing part (+0x6C0) and copies the result.
  *
- * @param target  the camera target (this); @p self is the hidden result buffer
- * @return @p self, holding the velocity
+ * @param result  the hidden result buffer
+ * @param target  the camera target (this)
+ * @return @p result, holding the velocity
  */
-extern "C" void* cRiderCameraTarget_getVelocity(void* self, void* target)
+extern "C" void* cRiderCameraTarget_getVelocity(void* result, cRiderCameraTarget* target)
 {
-    char* rider = *(char**)((char*)target + 0x4);
-    *(sQuad_0015F5B0*)self = *((cCamVObj_0015F5B0*)(rider + 0x6C0))->v02();
-    return self;
+    char* rider = (char*)target->Rider;
+    *(sQuad_0015F5B0*)result = *((cCamVObj_0015F5B0*)(rider + 0x6C0))->v02();
+    return result;
 }
 #endif
 
@@ -1521,14 +1524,15 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getFront);
  *
  * Copies the 16 bytes at +0x1B0 of the rider, the front row of its orientation matrix (side +0x1A0, up +0x1C0).
  *
- * @param target  the camera target (this); @p self is the hidden result buffer
- * @return @p self, holding the front vector
+ * @param result  the hidden result buffer
+ * @param target  the camera target (this)
+ * @return @p result, holding the front vector
  */
-extern "C" void* cRiderCameraTarget_getFront(void* self, void* target)
+extern "C" void* cRiderCameraTarget_getFront(void* result, cRiderCameraTarget* target)
 {
-    void* rider = *(void**)((char*)target + 0x4);
-    *(cQuad128*)self = *(cQuad128*)((char*)rider + 0x1b0);
-    return self;
+    void* rider = target->Rider;
+    *(cQuad128*)result = *(cQuad128*)((char*)rider + 0x1b0);
+    return result;
 }
 #endif
 
@@ -1540,14 +1544,15 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getSide);
  *
  * Copies the 16 bytes at +0x1A0 of the rider.
  *
- * @param target  the camera target (this); @p self is the hidden result buffer
- * @return @p self, holding the side vector
+ * @param result  the hidden result buffer
+ * @param target  the camera target (this)
+ * @return @p result, holding the side vector
  */
-extern "C" void* cRiderCameraTarget_getSide(void* self, void* target)
+extern "C" void* cRiderCameraTarget_getSide(void* result, cRiderCameraTarget* target)
 {
-    void* rider = *(void**)((char*)target + 0x4);
-    *(cQuad128*)self = *(cQuad128*)((char*)rider + 0x1a0);
-    return self;
+    void* rider = target->Rider;
+    *(cQuad128*)result = *(cQuad128*)((char*)rider + 0x1a0);
+    return result;
 }
 #endif
 
@@ -1559,14 +1564,15 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getUp);
  *
  * Copies the 16 bytes at +0x1C0 of the rider.
  *
- * @param target  the camera target (this); @p self is the hidden result buffer
- * @return @p self, holding the up vector
+ * @param result  the hidden result buffer
+ * @param target  the camera target (this)
+ * @return @p result, holding the up vector
  */
-extern "C" void* cRiderCameraTarget_getUp(void* self, void* target)
+extern "C" void* cRiderCameraTarget_getUp(void* result, cRiderCameraTarget* target)
 {
-    void* rider = *(void**)((char*)target + 0x4);
-    *(cQuad128*)self = *(cQuad128*)((char*)rider + 0x1c0);
-    return self;
+    void* rider = target->Rider;
+    *(cQuad128*)result = *(cQuad128*)((char*)rider + 0x1c0);
+    return result;
 }
 #endif
 
@@ -1594,14 +1600,15 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getNormal);
  *
  * Copies the 16 bytes at +0x370 of the rider; the last ground normal follows at +0x380.
  *
- * @param target  the camera target (this); @p self is the hidden result buffer
- * @return @p self, holding the normal
+ * @param result  the hidden result buffer
+ * @param target  the camera target (this)
+ * @return @p result, holding the normal
  */
-extern "C" void* cRiderCameraTarget_getNormal(void* self, void* target)
+extern "C" void* cRiderCameraTarget_getNormal(void* result, cRiderCameraTarget* target)
 {
-    void* rider = *(void**)((char*)target + 0x4);
-    *(cQuad128*)self = *(cQuad128*)((char*)rider + 0x370);
-    return self;
+    void* rider = target->Rider;
+    *(cQuad128*)result = *(cQuad128*)((char*)rider + 0x370);
+    return result;
 }
 #endif
 
@@ -1613,14 +1620,15 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getLastGroundNormal);
  *
  * Copies the 16 bytes at +0x380 of the rider.
  *
- * @param target  the camera target (this); @p self is the hidden result buffer
- * @return @p self, holding the normal
+ * @param result  the hidden result buffer
+ * @param target  the camera target (this)
+ * @return @p result, holding the normal
  */
-extern "C" void* cRiderCameraTarget_getLastGroundNormal(void* self, void* target)
+extern "C" void* cRiderCameraTarget_getLastGroundNormal(void* result, cRiderCameraTarget* target)
 {
-    void* rider = *(void**)((char*)target + 0x4);
-    *(cQuad128*)self = *(cQuad128*)((char*)rider + 0x380);
-    return self;
+    void* rider = target->Rider;
+    *(cQuad128*)result = *(cQuad128*)((char*)rider + 0x380);
+    return result;
 }
 #endif
 
@@ -9070,14 +9078,15 @@ INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_getPose);
  *
  * Copies the two 16-byte halves at +0x60 and +0x70 of the algorithm.
  *
- * @param algorithm  the algorithm (this); @p self is the hidden result buffer
- * @return @p self, holding the pose
+ * @param pose  the hidden result buffer
+ * @param algorithm  the algorithm (this)
+ * @return @p pose, holding the pose
  */
-extern "C" void* cLookAtChaseAlgorithm_getPose(void* self, void* algorithm)
+extern "C" void* cLookAtChaseAlgorithm_getPose(void* pose, void* algorithm)
 {
-    *(cQuad128*)self = *(cQuad128*)((char*)algorithm + 0x60);
-    *(cQuad128*)((char*)self + 0x10) = *(cQuad128*)((char*)algorithm + 0x70);
-    return self;
+    *(cQuad128*)pose = *(cQuad128*)((char*)algorithm + 0x60);
+    *(cQuad128*)((char*)pose + 0x10) = *(cQuad128*)((char*)algorithm + 0x70);
+    return pose;
 }
 #endif
 

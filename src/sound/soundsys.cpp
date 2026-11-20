@@ -2751,7 +2751,7 @@ struct sVEnt_294F78 { short delta; short index; int (*fn)(void*, int, int); };
  *
  * @param cue  the menu sound type (On Tour eMenuSoundType type)
  */
-extern "C" void cSSXAudio_MenuSound(void* self, int cue)
+extern "C" void cSSXAudio_MenuSound(cSSXAudio* self, int cue)
 {
     int id = -1;
     switch (cue) {
@@ -2787,7 +2787,7 @@ extern "C" void cSSXAudio_MenuSound(void* self, int cue)
         break;
     }
     if (id != -1) {
-        sVEnt_294F78* vt = *(sVEnt_294F78**)((char*)self + 0xC);
+        sVEnt_294F78* vt = (sVEnt_294F78*)self->mVtbl;
         vt[1].fn((char*)self + vt[1].delta, 0, id);
     }
 }
@@ -7393,7 +7393,7 @@ extern "C" void func_0029D8E0(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("sound/soundsys", cSSXAudio_BigChallengeFailed);
 #ifdef SKIP_ASM
-extern "C" void cSSXAudio_MenuSound(void* self, int id);
+extern "C" void cSSXAudio_MenuSound(cSSXAudio* self, int id);
 extern "C" void func_00296E20(void* self, void* obj);
 extern "C" void func_00297438(void* self, void* obj);
 extern "C" void cSSXAudio_EndUberSpin(cSSXAudio* self, void* obj);
@@ -7413,7 +7413,7 @@ extern "C" void cSSXAudio_BigChallengeFailed(void* self, int keep)
 {
     if (*(int*)((char*)self + 0x5FD4) != 0) {
         if (keep == 0) {
-            cSSXAudio_MenuSound(self, 0xE);
+            cSSXAudio_MenuSound((cSSXAudio*)self, 0xE);
         }
         func_00296E20(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
         func_00297438(self, ((cAI*)cAudioInterface_getAI())->Riders[0]);

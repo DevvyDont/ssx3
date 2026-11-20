@@ -998,7 +998,7 @@ extern "C" int cComputer_myOpponentIndex(cComputer* self)
 //100%
 INCLUDE_ASM("ai/computer", cComputer_isFarBehind);
 #ifdef SKIP_ASM
-extern "C" int cComputer_getRival(void* self);
+extern "C" int cComputer_getRival(cComputer* self);
 float cRider_getDistanceLeft(void* self);
 
 /**
@@ -1025,7 +1025,7 @@ extern "C" int cComputer_isFarBehind(cComputer* self)
 //100%
 INCLUDE_ASM("ai/computer", cComputer_isFarAhead);
 #ifdef SKIP_ASM
-extern "C" int cComputer_getRival(void* self);
+extern "C" int cComputer_getRival(cComputer* self);
 float cRider_getDistanceLeft(void* self);
 
 /**
@@ -1212,7 +1212,7 @@ static inline bool isAggr_0010DBF0(void* agg, int a, int b)
  */
 // Taunt check: finds a close rider beside us (30..150 degrees off our heading) that we're aggressive towards,
 // at most every 120 frames; *side tells which side it is on.
-extern "C" int cComputer_checkForPunching(char* self, int* side)
+extern "C" int cComputer_checkForPunching(cComputer* self, int* side)
 {
     if (AITick() % 6 != 0)
         return 0;
@@ -1223,27 +1223,27 @@ extern "C" int cComputer_checkForPunching(char* self, int* side)
         float pi = 3.1415927410125732f;
         float lo = 0.5235988497734070f;
         float hi = 2.6179940700531006f;
-        if (i == id_0010DBF0(self))
+        if (i == id_0010DBF0(((char*)self)))
             continue;
-        sRider_0010DBF0* rider = *(sRider_0010DBF0**)(self + 0x18);
+        sRider_0010DBF0* rider = (sRider_0010DBF0*)self->mRider;
         if (!(rider->ent[i].dist < 200.0f))
             continue;
         sVec_0010DBF0 velForY = rider->vel;
         sVec_0010DBF0 velForX = rider->vel;
         float ang = atan2_0010DBF0(velForY.y, velForX.x, pi);
-        float angleDiff = wrap_0010DBF0(ang - (*(sRider_0010DBF0**)(self + 0x18))->ent[i].angle);
+        float angleDiff = wrap_0010DBF0(ang - ((sRider_0010DBF0*)self->mRider)->ent[i].angle);
         float ad = __builtin_fabsf(angleDiff);
         if (!(lo < ad))
             continue;
         if (!(ad < hi))
             continue;
         void* agg = cBEAggressionInterface_getThis();
-        if (!isAggr_0010DBF0(agg, id_0010DBF0(self), i))
+        if (!isAggr_0010DBF0(agg, id_0010DBF0(((char*)self)), i))
             continue;
-        if (!((*(sRider_0010DBF0**)(self + 0x18))->lastTaunt + 120 < AITick()))
+        if (!(((sRider_0010DBF0*)self->mRider)->lastTaunt + 120 < AITick()))
             continue;
         *side = 0.0f < angleDiff;
-        (*(sRider_0010DBF0**)(self + 0x18))->lastTaunt = AITick();
+        ((sRider_0010DBF0*)self->mRider)->lastTaunt = AITick();
         return 1;
     }
     return 0;
@@ -1261,7 +1261,7 @@ INCLUDE_ASM("ai/computer", cComputer_getRival);
  *
  * @return the opponent's cRider, or 0
  */
-extern "C" int cComputer_getRival(void* self)
+extern "C" int cComputer_getRival(cComputer* self)
 {
     int i = cComputer_myOpponentIndex((cComputer*)self);
     if (i < 0)
@@ -1291,19 +1291,19 @@ extern signed char D_00535C11[];
  *
  * @return the desired time scale for cRider_updateTimeWarp
  */
-extern "C" float cComputer_setupWarp(void* self)
+extern "C" float cComputer_setupWarp(cComputer* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     // PORT: cComputer_getRival returns a pointer as int (unit declaration).
     int rival = cComputer_getRival(self);
     if (rival == 0) return 1.0f;
-    char* rider = *(char**)((char*)self + 0x18);
+    char* rider = (char*)self->mRider;
     if (*(int*)(rider + 0xE4) == 0) return 1.0f;
     if (D_00535C11[0] == 2) return 1.0f;
     if (*(float*)(rider + 0x4D0) < 50000.0f) return 1.0f;
     float warpVal;
-    float relDist = cRider_getDistanceLeft((void*)rival) - *(float*)(*(char**)((char*)self + 0x18) + 0x4D0);
-    char* rider2 = *(char**)((char*)self + 0x18);
+    float relDist = cRider_getDistanceLeft((void*)rival) - *(float*)((char*)self->mRider + 0x4D0);
+    char* rider2 = (char*)self->mRider;
     float k = *(float*)(rider2 + 0xDC);
     if (relDist < k && (*(int*)(rider2 + 0xE4) == 2 || *(int*)(rider2 + 0xE4) == 3))
     {
@@ -1311,7 +1311,7 @@ extern "C" float cComputer_setupWarp(void* self)
     }
     else
     {
-        char* rider3 = *(char**)((char*)self + 0x18);
+        char* rider3 = (char*)self->mRider;
         float rubberAhead = *(float*)(rider3 + 0xE0);
         if (rubberAhead < relDist && (*(int*)(rider3 + 0xE4) == 1 || *(int*)(rider3 + 0xE4) == 3))
         {
@@ -2334,7 +2334,7 @@ extern "C" int cBEAggressionInterface_getAggression(void* agg, int a, int b);
 extern "C" float func_0031C228(float x);
 struct sComputer_0010F878;
 extern "C" void cAI_UpdateAggression(sComputer_0010F878* self);
-extern "C" void cAI_UpdateRankingPlacement(void* self);
+extern "C" void cAI_UpdateRankingPlacement(cAI* self);
 
 struct sVec_0010F560 {
     float x, y, z, w;
@@ -2449,7 +2449,7 @@ extern "C" void cAI_UpdateGroupAI(sComputer_0010F560* self)
     if (self->frame % 6 != 0) {
         return;
     }
-    cAI_UpdateRankingPlacement(self);
+    cAI_UpdateRankingPlacement((cAI*)self);
     int n = self->count - self->skip;
     if (n < 2) {
         return;
@@ -2551,7 +2551,7 @@ float cRider_getDistanceLeft(void* self);
  *
  * @param aiObj  the cAI (this)
  */
-extern "C" void cAI_UpdateRankingPlacement(void* aiObj)
+extern "C" void cAI_UpdateRankingPlacement(cAI* aiObj)
 {
     sAI_0010F998* self = (sAI_0010F998*)aiObj;
     if (self->mode == 0)
@@ -2620,11 +2620,11 @@ INCLUDE_ASM("ai/computer", cAI_ridersOnPath);
  * @param value  the value to look for (cComputer_scorePath passes a path pointer to the similar cAI_aiRidersOnPath)
  * @return the number of matching riders
  */
-extern "C" int cAI_ridersOnPath(char* self, int value)
+extern "C" int cAI_ridersOnPath(cAI* self, int value)
 {
     int count = 0;
-    for (int i = 0; i < *(int*)(self + 0x78); i++) {
-        cRider* rider = *(cRider**)(self + 0x28 + i * 4);
+    for (int i = 0; i < self->NumberOfRidersAllocated; i++) {
+        cRider* rider = *(cRider**)(((char*)self) + 0x28 + i * 4);
         if (*(int*)((char*)rider + 0xAB8) == value) {
             count++;
         }

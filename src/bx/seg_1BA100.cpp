@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/ssxaudio.h"
 #include "sound/crowdsys.h"
 #include "sound/banksys.h"
 #include "worldpainter/worldpainterquery.h"
@@ -1913,8 +1914,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetRadioPlayList);
  * @return mRadioPlayList
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long cSSXAudio_GetRadioPlayList(void *audio) {
-    return (*(long *)((char*)(audio) + (0x6098)));
+extern "C" long cSSXAudio_GetRadioPlayList(cSSXAudio* audio) {
+    return ((long)audio->mRadioPlayList);
 }
 #endif
 
@@ -1942,9 +1943,9 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetPlayListName);
  * @param i  the playlist index
  * @return the playlist name
  */
-extern "C" char* cSSXAudio_GetPlayListName(char *audio, int i) {
+extern "C" char* cSSXAudio_GetPlayListName(cSSXAudio* audio, int i) {
     int off = i * 20 + 24740;
-    return audio + off;
+    return ((char*)audio) + off;
 }
 #endif
 
@@ -1957,7 +1958,7 @@ INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetPlayListIndex);
  * @param audio  the cSSXAudio
  * @return mPlayListIndex
  */
-extern "C" int cSSXAudio_GetPlayListIndex(void *audio) {
+extern "C" int cSSXAudio_GetPlayListIndex(cSSXAudio* audio) {
     return (*(int *)((char*)(audio) + (0x6238)));
 }
 #endif
