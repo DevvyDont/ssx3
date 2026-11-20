@@ -34,14 +34,14 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequence_fadeOutAndExpire);
  *
  * @param time  the fade-out time in seconds (On Tour time)
  */
-extern "C" void cAnimSequence_fadeOutAndExpire(void* self, float time)
+extern "C" void cAnimSequence_fadeOutAndExpire(cAnimSequence* self, float time)
 {
-    if (*(float*)((char*)self + 0x98) != 0.0f || *(float*)((char*)self + 0x9C) == 0.0f || time < *(float*)((char*)self + 0x9C))
+    if (self->TargetWeight != 0.0f || self->WeightTimer == 0.0f || time < self->WeightTimer)
     {
-        *(float*)((char*)self + 0x9C) = time;
+        self->WeightTimer = time;
     }
-    *(float*)((char*)self + 0x98) = 0.0f;
-    *(int*)((char*)self + 0xA0) = 1;
+    self->TargetWeight = 0.0f;
+    self->IsFadeOutExpire = 1;
 }
 #endif
 
@@ -67,11 +67,11 @@ struct sSeqNode313A70
  * @param key  the trigger's event id (On Tour id)
  * @param weight  the time it fires at (On Tour time); the current name is misleading
  */
-extern "C" void cAnimSequence_addTrigger(void* self, int key, float weight)
+extern "C" void cAnimSequence_addTrigger(cAnimSequence* self, int key, float weight)
 {
     sSeqNode313A70* n = (sSeqNode313A70*)cMemMan_alloc(0x10, str_AnimTrigger, 0x20000000, 0);
-    sSeqNode313A70* old = *(sSeqNode313A70**)((char*)self + 0xAC);
-    *(sSeqNode313A70**)((char*)self + 0xAC) = n;
+    sSeqNode313A70* old = (sSeqNode313A70*)self->Triggers;
+    self->Triggers = (tTrigger*)n;
     n->key = key;
     n->weight = weight;
     n->next = old;
@@ -100,11 +100,11 @@ struct sSeqNode313AD8
  *
  * @param key  the trigger's event id (On Tour id)
  */
-extern "C" void cAnimSequence_addEndTrigger(void* self, int key)
+extern "C" void cAnimSequence_addEndTrigger(cAnimSequence* self, int key)
 {
     sSeqNode313AD8* n = (sSeqNode313AD8*)cMemMan_alloc(0x10, str_AnimTrigger, 0x20000000, 0);
-    sSeqNode313AD8* old = *(sSeqNode313AD8**)((char*)self + 0xAC);
-    *(sSeqNode313AD8**)((char*)self + 0xAC) = n;
+    sSeqNode313AD8* old = (sSeqNode313AD8*)self->Triggers;
+    self->Triggers = (tTrigger*)n;
     n->key = key;
     n->active = 1;
     n->next = old;
@@ -194,12 +194,12 @@ void operator_delete(int* ptr);
  *
  * Pops and deletes nodes from the list at +0xAC until it is empty.
  */
-extern "C" void cAnimSequence_removeAllTriggers(char* self)
+extern "C" void cAnimSequence_removeAllTriggers(cAnimSequence* self)
 {
-    while (*(char**)(self + 0xAC) != 0)
+    while ((char*)self->Triggers != 0)
     {
-        char* node = *(char**)(self + 0xAC);
-        *(char**)(self + 0xAC) = *(char**)(node + 0xC);
+        char* node = (char*)self->Triggers;
+        self->Triggers = (tTrigger*)(*(char**)(node + 0xC));
         operator_delete((int*)node);
     }
 }
@@ -275,7 +275,7 @@ extern "C" void cAnimSequence_setSubAnimTime(cAnimSequence* self, int index, flo
 {
     char* slot = (char*)self + index * 0x1c;
     *(float*)(slot + 0x8) = val;
-    *(int*)((char*)self + 0xc4) = 1;
+    self->CheckTriggersAtCurrentFrame = 1;
 }
 #endif
 
@@ -842,7 +842,7 @@ extern "C" void cAnimSequencer_expire(sSequencer_003145F8* self, sSeqNode_003145
             *pp = n->next;
             if (n != 0)
             {
-                cAnimSequence_removeAllTriggers((char*)n);
+                cAnimSequence_removeAllTriggers((cAnimSequence*)((char*)n));
                 operator_delete((int*)n);
             }
             self->mCount--;
@@ -879,7 +879,7 @@ extern "C" void cAnimSequencer_expireAll(sSequencer_00314668* self)
         self->mFirstSequence = n->next;
         if (n != 0)
         {
-            cAnimSequence_removeAllTriggers((char*)n);
+            cAnimSequence_removeAllTriggers((cAnimSequence*)((char*)n));
             operator_delete((int*)n);
         }
         self->mCount--;
@@ -901,7 +901,7 @@ extern "C" void cAnimSequencer_fadeOutAndExpireAll(void* self, float time)
 {
     for (char* node = *(char**)((char*)self + 0x4); node != 0; node = *(char**)(node + 0xC8))
     {
-        cAnimSequence_fadeOutAndExpire(node, time);
+        cAnimSequence_fadeOutAndExpire((cAnimSequence*)node, time);
     }
 }
 #endif

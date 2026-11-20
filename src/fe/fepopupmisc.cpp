@@ -3045,9 +3045,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_isSongOwned);
  * @return 1 when owned, else 0
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" int cFEStateRequestLine_isSongOwned(void* self, int bit)
+extern "C" int cFEStateRequestLine_isSongOwned(cFEStateRequestLine* self, int bit)
 {
-    return (*(unsigned long*)((char*)self + 0x160) >> bit) & 1;
+    return (*(unsigned long*)&self->mOwnedSong >> bit) & 1;
 }
 #endif
 //100%
@@ -3059,9 +3059,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_ownSong);
  * @param bit  the song index (0..63)
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void cFEStateRequestLine_ownSong(void* self, int bit)
+extern "C" void cFEStateRequestLine_ownSong(cFEStateRequestLine* self, int bit)
 {
-    *(long*)((char*)self + 0x160) |= 1L << bit;
+    *(long*)&self->mOwnedSong |= 1L << bit;
 }
 #endif
 //100%

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "animation/animmodel.h"
 #include "replay/frameptr.h"
 #include "wscript/wscriptprocess.h"
 #include "wscript/wscriptman.h"
@@ -4590,31 +4591,31 @@ struct sWSSlot8 {
  *
  * @return @p self
  */
-extern "C" void* cAnimModel_cAnimModel(void* self)
+extern "C" void* cAnimModel_cAnimModel(cAnimModel* self)
 {
     sWSVec4 ones;
-    *(int*)((char*)self + 0x38) = 0;
-    *(int*)((char*)self + 0x30) = 0;
-    *(int*)((char*)self + 0x34) = 0;
+    self->unk_038 = 0;
+    self->unk_030 = 0;
+    self->unk_034 = 0;
     ones.x = 1.0f;
     ones.y = 1.0f;
     ones.z = 1.0f;
     ones.w = 1.0f;
-    *(sWSVec4*)((char*)self + 0x140) = ones;
-    *(int*)((char*)self + 0x2C) = 0;
-    *(int*)((char*)self + 0xC) = 0;
-    *(int*)((char*)self + 0x1C) = 0;
-    *(int*)((char*)self + 0x3C) = 0;
-    *(int*)((char*)self + 0x8) = 0;
+    *(sWSVec4*)&self->unk_140 = ones;
+    self->bones = 0;
+    self->parts = 0;
+    self->partIndex = 0;
+    self->unk_03C = 0;
+    self->numParts = 0;
     *(int*)((char*)self + 0x12C) = 0;
     *(int*)((char*)self + 0x130) = 0;
-    *(int*)((char*)self + 0x24) = 0;
-    *(int*)((char*)self + 0x28) = 0;
-    *(int*)((char*)self + 0x20) = 0;
+    self->localPos = 0;
+    self->localRot = 0;
+    self->boneChannelIndex = 0;
     for (int i = 3; i >= 0; i--) {
         ((sWSSlot8*)((char*)self + 0x44))[i].a = 0;
     }
-    return self;
+    return ((void*)self);
 }
 #endif
 

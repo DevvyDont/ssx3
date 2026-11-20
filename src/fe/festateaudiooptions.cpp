@@ -515,24 +515,24 @@ struct sVEntry00196DB0 {
  *
  * Then makes the song menu scrollable over the song count (+0x14C).
  */
-extern "C" void cFEStateRequestLine_onCreateScreen(void* self)
+extern "C" void cFEStateRequestLine_onCreateScreen(cFEStateRequestLine* self)
 {
     char* name = str_16radio;
     if ((void*)SSXApp->Game != 0) {
         name = str_143radio_pda;
-        void* list = *(char**)((char*)self + 0x10) + 0x18;
+        void* list = (char*)self->mpEngine + 0x18;
         char* obj = (char*)cUIStateStack_findState(list, GetHashValue32(str_hud));
         if (obj != 0) {
             sVEntry00196DB0* vt = *(sVEntry00196DB0**)(obj + 8);
             vt[24].fn(obj + vt[24].delta, 3, 0);
         }
     }
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(name), 0);
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cUIMenu_setScrollableMenu(*(void**)((char*)self + 0x170), *(unsigned char*)((char*)self + 0x14C));
+    cUIMenu_setScrollableMenu(self->mpRadioMenu, *(unsigned char*)&self->mNumSongs);
 }
 #endif
 

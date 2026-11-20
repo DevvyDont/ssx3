@@ -4498,9 +4498,9 @@ static inline float clamp_5580(float x, float hi)
  *
  * @param x  the requested brightness
  */
-extern "C" void cPS2GraphicsMan_SetScreenBrightness(void* self, float x)
+extern "C" void cPS2GraphicsMan_SetScreenBrightness(cPS2GraphicsMan* self, float x)
 {
-    *(float*)((char*)self + 0x59FC) = clamp_5580(x, 2.0f);
+    self->mScreenBrightness = clamp_5580(x, 2.0f);
 }
 #endif
 //100%
@@ -7595,27 +7595,27 @@ struct sRS_6B40 {
  * microprogram at D_1150. cPS2GraphicsMan_DrawCharModel calls it through slot 124 with a scale of 1.0, which this code
  * ignores.
  */
-extern "C" void cPS2GraphicsMan_InitCharMatrices(char* self)
+extern "C" void cPS2GraphicsMan_InitCharMatrices(cPS2GraphicsMan* self)
 {
-    sRS_6B40* rs = *(sRS_6B40**)(self + 0xE84);
+    sRS_6B40* rs = (sRS_6B40*)self->m_pCurrentDrawState;
     unsigned int addrMask = 0x3FFFFFFF;
     rs->f0 = (rs->f0 & ~0x3C0) | 0x180;
-    sRS_6B40* rs2 = *(sRS_6B40**)(self + 0xE84);
-    rs2->fC = (rs2->fC & 0xC0000000) | (*(unsigned int*)(self + 0x5A00) & addrMask);
-    unsigned long* packet = (unsigned long*)(*(unsigned int*)(self + 0x5A00) | 0x30000000);
+    sRS_6B40* rs2 = (sRS_6B40*)self->m_pCurrentDrawState;
+    rs2->fC = (rs2->fC & 0xC0000000) | (self->mVifCursor & addrMask);
+    unsigned long* packet = (unsigned long*)(self->mVifCursor | 0x30000000);
     packet[0] = 0x6000000C;
     packet[2] = (unsigned long)0x8000 << 45;
     packet[3] = 0x6C0A000701000101;
     packet[1] = 0;
     packet += 4;
-    cQuad128_6B40* src = (cQuad128_6B40*)(self + 0x6BB0);
+    cQuad128_6B40* src = (cQuad128_6B40*)(((char*)self) + 0x6BB0);
     for (int i = 0; i < 10; i++) {
         ((cQuad128_6B40*)packet)[i] = src[i];
     }
     packet[20] = 0;
     packet[21] = (unsigned long)(((unsigned int)D_1150 >> 3) | 0x14000000) << 32;
     packet += 22;
-    *(unsigned int*)(self + 0x5A00) = (unsigned int)packet & 0x0FFFFFFF;
+    self->mVifCursor = (unsigned int)packet & 0x0FFFFFFF;
 }
 #endif
 

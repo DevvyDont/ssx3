@@ -3240,19 +3240,19 @@ extern char D_005059D8[];
  * deletes the defer manager (mpDeferMan), purges and deletes the texture manager (func_00367360, mpTextureMan), and
  * finally calls func_00361F40 on the render queue D_005059D8.
  */
-extern "C" void cPS2GraphicsMan_Purge(void* self)
+extern "C" void cPS2GraphicsMan_Purge(cPS2GraphicsMan* self)
 {
     DisableIntc(2);
-    RemoveIntcHandler(2, *(int*)((char*)self + 0x5AC0));
+    RemoveIntcHandler(2, self->mIntcHandlerId);
     DisableDmac(1);
-    RemoveDmacHandler(0, *(int*)((char*)self + 0x5AC4));
-    TerminateThread(*(int*)((char*)self + 0x5AD0));
-    DeleteThread(*(int*)((char*)self + 0x5AD0));
-    DeleteSema(*(int*)((char*)self + 0x5AC8));
-    DeleteSema(*(int*)((char*)self + 0x5ACC));
-    operator_delete(*(int**)((char*)self + 0x18F0));
-    func_00367360(*(void**)((char*)self + 0x18F4));
-    operator_delete(*(int**)((char*)self + 0x18F4));
+    RemoveDmacHandler(0, self->mDmacHandlerId);
+    TerminateThread(self->mKickThreadId);
+    DeleteThread(self->mKickThreadId);
+    DeleteSema(self->mKickSema);
+    DeleteSema(self->mQueueMutex);
+    operator_delete((int*)self->mpDeferMan);
+    func_00367360(self->mpTextureMan);
+    operator_delete((int*)self->mpTextureMan);
     func_00361F40(D_005059D8);
 }
 #endif
@@ -6682,9 +6682,9 @@ static inline void CopyMat_BA50(void* dst, const void* src)
  * @param sscale  the shadow scale
  * @param strans  the shadow translation
  */
-extern "C" void cPS2GraphicsMan_SetShadowCharMatrices(char* self, void* mat, cQuad128_BA50* sscale, cQuad128_BA50* strans)
+extern "C" void cPS2GraphicsMan_SetShadowCharMatrices(cPS2GraphicsMan* self, void* mat, cQuad128_BA50* sscale, cQuad128_BA50* strans)
 {
-    unsigned int buf = *(unsigned int*)(self + 0x5A00);
+    unsigned int buf = self->mVifCursor;
     unsigned long* packet = (unsigned long*)(buf | 0x30000000);
     packet[0] = 0x60000007;
     packet[2] = (unsigned long)0x8000 << 45;
@@ -6694,10 +6694,10 @@ extern "C" void cPS2GraphicsMan_SetShadowCharMatrices(char* self, void* mat, cQu
     ((cQuad128_BA50*)packet)[6] = *sscale;
     ((cQuad128_BA50*)packet)[7] = *strans;
     packet += 16;
-    *(unsigned int*)(self + 0x5A00) = (unsigned int)packet & 0x0FFFFFFF;
-    sRS_BA50* rs = *(sRS_BA50**)(self + 0xE84);
+    self->mVifCursor = (unsigned int)packet & 0x0FFFFFFF;
+    sRS_BA50* rs = (sRS_BA50*)self->m_pCurrentDrawState;
     rs->f0 = (rs->f0 & ~0x3C0) | 0x1C0;
-    sRS_BA50* rs2 = *(sRS_BA50**)(self + 0xE84);
+    sRS_BA50* rs2 = (sRS_BA50*)self->m_pCurrentDrawState;
     rs2->fC = (rs2->fC & 0xC0000000) | (buf & 0x3FFFFFFF);
 }
 #endif
@@ -13692,12 +13692,12 @@ extern "C" void RemoveDmacHandler(int, int);
  * Calls DisableIntc(2) and removes the INTC 2 handler (+0x5AC0), then DisableDmac(1) and removes the DMAC 0 handler
  * (+0x5AC4): the same first steps as cPS2GraphicsMan_Purge, leaving the threads and memory alone.
  */
-extern "C" void cPS2GraphicsMan_loadexecpurge(void* self)
+extern "C" void cPS2GraphicsMan_loadexecpurge(cPS2GraphicsMan* self)
 {
     DisableIntc(2);
-    RemoveIntcHandler(2, *(int*)((char*)self + 0x5AC0));
+    RemoveIntcHandler(2, self->mIntcHandlerId);
     DisableDmac(1);
-    RemoveDmacHandler(0, *(int*)((char*)self + 0x5AC4));
+    RemoveDmacHandler(0, self->mDmacHandlerId);
 }
 #endif
 

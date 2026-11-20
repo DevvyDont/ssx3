@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatebigradio.h"
 #include "ui/uimenu.h"
 #include "ui/uistate.h"
 #include "ui/uithing.h"
@@ -224,12 +225,12 @@ INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_onWidgetEvent);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cFEStateRequestLine_updatePlayListCheckMarks(void* self);
-extern "C" void cFEStateRequestLine_updatePlayListCounter(void* self);
+extern "C" void cFEStateRequestLine_updatePlayListCheckMarks(cFEStateRequestLine* self);
+extern "C" void cFEStateRequestLine_updatePlayListCounter(cFEStateRequestLine* self);
 extern "C" void cFEStateRequestLine_showBuyPopup_7500(void* self, int idx) __asm__("cFEStateRequestLine_showBuyPopup");
-extern "C" void cFEStateRequestLine_updateHilightedSongInfo(void* self, int idx);
-extern "C" void cFEStateRequestLine_updateHelpText(void* self, int idx);
-extern "C" void cFEStateRequestLine_updateButtonsText(void* self, int idx);
+extern "C" void cFEStateRequestLine_updateHilightedSongInfo(cFEStateRequestLine* self, int idx);
+extern "C" void cFEStateRequestLine_updateHelpText(cFEStateRequestLine* self, int idx);
+extern "C" void cFEStateRequestLine_updateButtonsText(cFEStateRequestLine* self, int idx);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBERewardInterface_setPlayList(void* iface, int a, int b, unsigned long m);
@@ -330,11 +331,11 @@ extern "C" void cFEStateRequestLine_onWidgetEvent(void* requestLine, cUIThing* i
                 } else {
                     self->done = done | ((unsigned long)1 << idx);
                 }
-                cFEStateRequestLine_updatePlayListCheckMarks(self);
-                cFEStateRequestLine_updatePlayListCounter(self);
+                cFEStateRequestLine_updatePlayListCheckMarks((cFEStateRequestLine*)self);
+                cFEStateRequestLine_updatePlayListCounter((cFEStateRequestLine*)self);
             }
         }
-        cFEStateRequestLine_updateButtonsText(self, idx);
+        cFEStateRequestLine_updateButtonsText((cFEStateRequestLine*)self, idx);
         break;
     }
     case 6: {
@@ -360,9 +361,9 @@ extern "C" void cFEStateRequestLine_onWidgetEvent(void* requestLine, cUIThing* i
     }
     case 1: {
         int idx = self->list[self->top + item->mMiscData];
-        cFEStateRequestLine_updateHilightedSongInfo(self, idx);
-        cFEStateRequestLine_updateHelpText(self, idx);
-        cFEStateRequestLine_updateButtonsText(self, idx);
+        cFEStateRequestLine_updateHilightedSongInfo((cFEStateRequestLine*)self, idx);
+        cFEStateRequestLine_updateHelpText((cFEStateRequestLine*)self, idx);
+        cFEStateRequestLine_updateButtonsText((cFEStateRequestLine*)self, idx);
         break;
     }
     }
@@ -457,13 +458,13 @@ extern "C" int cFEStateRequestLine_onWidgetMenu(void* requestLine, cUIMenu* item
 //100%
 INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_onPopupEvent);
 #ifdef SKIP_ASM
-extern "C" void cFEStateRequestLine_buySong(void* self, int idx);
-extern "C" void cFEStateRequestLine_updatePlayList(void* self);
-extern "C" void cFEStateRequestLine_updateHilightedSongInfo(void* self, int a1);
+extern "C" void cFEStateRequestLine_buySong(cFEStateRequestLine* self, int idx);
+extern "C" void cFEStateRequestLine_updatePlayList(cFEStateRequestLine* self);
+extern "C" void cFEStateRequestLine_updateHilightedSongInfo(cFEStateRequestLine* self, int a1);
 extern "C" void cFEStateRequestLine_updateCash(void* self);
-extern "C" void cFEStateRequestLine_updateFreeSongMarkers(void* self);
-extern "C" void cFEStateRequestLine_updateButtonsText(void* self, int a1);
-extern "C" void cFEStateRequestLine_updateHelpText(void* self, int a1);
+extern "C" void cFEStateRequestLine_updateFreeSongMarkers(cFEStateRequestLine* self);
+extern "C" void cFEStateRequestLine_updateButtonsText(cFEStateRequestLine* self, int a1);
+extern "C" void cFEStateRequestLine_updateHelpText(cFEStateRequestLine* self, int a1);
 
 struct sMsgCenter_979D8 {
     char pad_0x0[0x1C];
@@ -500,13 +501,13 @@ extern "C" void cFEStateRequestLine_onPopupEvent(sMsgCenter_979D8* self, cUIStat
         }
         if (item->mHashName == 7 && *(int*)((char*)item + 0x6C) != 0) {
             int song = self->list[self->top + *(int*)(*(char**)(self->menu + 0xA0) + 0x18)];
-            cFEStateRequestLine_buySong(self, song);
-            cFEStateRequestLine_updatePlayList(self);
-            cFEStateRequestLine_updateHilightedSongInfo(self, song);
+            cFEStateRequestLine_buySong((cFEStateRequestLine*)self, song);
+            cFEStateRequestLine_updatePlayList((cFEStateRequestLine*)self);
+            cFEStateRequestLine_updateHilightedSongInfo((cFEStateRequestLine*)self, song);
             cFEStateRequestLine_updateCash(self);
-            cFEStateRequestLine_updateFreeSongMarkers(self);
-            cFEStateRequestLine_updateButtonsText(self, song);
-            cFEStateRequestLine_updateHelpText(self, song);
+            cFEStateRequestLine_updateFreeSongMarkers((cFEStateRequestLine*)self);
+            cFEStateRequestLine_updateButtonsText((cFEStateRequestLine*)self, song);
+            cFEStateRequestLine_updateHelpText((cFEStateRequestLine*)self, song);
         }
         break;
     }
@@ -531,7 +532,7 @@ struct sMsgCenter_97AD8 {
  * Walks songs 0 to mNumSongs (+0x14C) twice, writing into mSongOrder (+0x4C): first every song whose bit is set in the
  * owned-songs mask (+0x160), then every song whose bit is clear.
  */
-extern "C" void cFEStateRequestLine_generatePlayList(void* self)
+extern "C" void cFEStateRequestLine_generatePlayList(cFEStateRequestLine* self)
 {
     sMsgCenter_97AD8* msgCenter = (sMsgCenter_97AD8*)self;
     int i;
@@ -553,15 +554,15 @@ extern "C" void cFEStateRequestLine_generatePlayList(void* self)
 //100%
 INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_updatePlayList);
 #ifdef SKIP_ASM
-extern "C" void cFEStateRequestLine_updatePlayListSongTitles(void* self);
-extern "C" void cFEStateRequestLine_updatePlayListCheckMarks(void* self);
-extern "C" void cFEStateRequestLine_updatePlayListArrows(void* self);
-extern "C" void cFEStateRequestLine_updatePlayListCounter(void* self);
+extern "C" void cFEStateRequestLine_updatePlayListSongTitles(cFEStateRequestLine* self);
+extern "C" void cFEStateRequestLine_updatePlayListCheckMarks(cFEStateRequestLine* self);
+extern "C" void cFEStateRequestLine_updatePlayListArrows(cFEStateRequestLine* self);
+extern "C" void cFEStateRequestLine_updatePlayListCounter(cFEStateRequestLine* self);
 
 /**
  * Refreshes the request-line play list: song titles, check marks, arrows and counter, in that order.
  */
-extern "C" void cFEStateRequestLine_updatePlayList(void* self)
+extern "C" void cFEStateRequestLine_updatePlayList(cFEStateRequestLine* self)
 {
     cFEStateRequestLine_updatePlayListSongTitles(self);
     cFEStateRequestLine_updatePlayListCheckMarks(self);
@@ -575,7 +576,7 @@ INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_updatePlayListSongTitles);
 #ifdef SKIP_ASM
 struct cUIText;
 void cUIText_setAsciiString(cUIText* self, const char* str);
-extern "C" void* cFEStateRequestLine_getSongTitle(void* self, int i);
+extern "C" void* cFEStateRequestLine_getSongTitle(cFEStateRequestLine* self, int i);
 
 class cMsgWidget_97BC8 {
 public:
@@ -605,7 +606,7 @@ struct sMsgCenter_97BC8 {
  *
  * Row i shows the title of list[top + i] (getSongTitle) and is hidden past the end of the list.
  */
-extern "C" void cFEStateRequestLine_updatePlayListSongTitles(void* self)
+extern "C" void cFEStateRequestLine_updatePlayListSongTitles(cFEStateRequestLine* self)
 {
     sMsgCenter_97BC8* requestLine = (sMsgCenter_97BC8*)self;
     int i;
@@ -682,7 +683,7 @@ static inline void setVisible_97CA0(cMsgWidget_97CA0* w, int v)
  * A song in the playlist (+0x158) gets the colour at +0x204, an owned one (+0x160) the colour at +0x208, any
  * other the colour at +0x20C; rows past the end are hidden.
  */
-extern "C" void cFEStateRequestLine_updatePlayListCheckMarks(void* self)
+extern "C" void cFEStateRequestLine_updatePlayListCheckMarks(cFEStateRequestLine* self)
 {
     sMsgCenter_97CA0* requestLine = (sMsgCenter_97CA0*)self;
     int i;
@@ -727,17 +728,17 @@ public:
  * The up arrow (+0x1EC) shows when the list is scrolled (+0x150 above 0); the down arrow (+0x1F0) shows while
  * more than 8 rows lie below the scroll position (+0x150 + 8 below the count at +0x14C).
  */
-extern "C" void cFEStateRequestLine_updatePlayListArrows(void* self)
+extern "C" void cFEStateRequestLine_updatePlayListArrows(cFEStateRequestLine* self)
 {
-    if (*(int*)((char*)self + 0x150) == 0) {
-        (*(cMsgWidget_97DB8**)((char*)self + 0x1EC))->show(0);
+    if (self->mFirstVisibleSong == 0) {
+        ((cMsgWidget_97DB8*)self->mpArrowUp)->show(0);
     } else {
-        (*(cMsgWidget_97DB8**)((char*)self + 0x1EC))->show(1);
+        ((cMsgWidget_97DB8*)self->mpArrowUp)->show(1);
     }
-    if (*(int*)((char*)self + 0x150) + 8 >= *(int*)((char*)self + 0x14C)) {
-        (*(cMsgWidget_97DB8**)((char*)self + 0x1F0))->show(0);
+    if (self->mFirstVisibleSong + 8 >= self->mNumSongs) {
+        ((cMsgWidget_97DB8*)self->mpArrowDown)->show(0);
     } else {
-        (*(cMsgWidget_97DB8**)((char*)self + 0x1F0))->show(1);
+        ((cMsgWidget_97DB8*)self->mpArrowDown)->show(1);
     }
 }
 #endif
@@ -798,7 +799,7 @@ struct sReqLine_197E70 {
  *
  * @param vself  the request-line state (this)
  */
-extern "C" void cFEStateRequestLine_updateCurrentlyPlaying(void* vself)
+extern "C" void cFEStateRequestLine_updateCurrentlyPlaying(cFEStateRequestLine* vself)
 {
     sReqLine_197E70* self = (sReqLine_197E70*)vself;
     if (self->title == 0 || self->artist == 0) {
@@ -880,7 +881,7 @@ struct sMsgCenter_00198118 {
  *
  * @param requestLine  the cFEStateRequestLine (raw pointer)
  */
-extern "C" void cFEStateRequestLine_updatePlayListCounter(void* requestLine)
+extern "C" void cFEStateRequestLine_updatePlayListCounter(cFEStateRequestLine* requestLine)
 {
     sMsgCenter_00198118* self = (sMsgCenter_00198118*)requestLine;
     char* db = (char*)SSXApp->FELocale;
@@ -947,7 +948,7 @@ static inline int countSel_001981F8(sReqLine_001981F8* self)
  * @param requestLine  the cFEStateRequestLine (raw pointer)
  * @param idx  song index
  */
-extern "C" void cFEStateRequestLine_updateHelpText(void* requestLine, int idx)
+extern "C" void cFEStateRequestLine_updateHelpText(cFEStateRequestLine* requestLine, int idx)
 {
     sReqLine_001981F8* self = (sReqLine_001981F8*)requestLine;
     if (self->text == 0) {
@@ -1046,7 +1047,7 @@ static inline int countSel_UBT(sReqLine_UBT* self)
  * @param idx  the song index (bit number in the masks)
  */
 // Updates the action button label of the selected request line and shows or hides the buttons.
-extern "C" void cFEStateRequestLine_updateButtonsText(void* requestLine, int idx)
+extern "C" void cFEStateRequestLine_updateButtonsText(cFEStateRequestLine* requestLine, int idx)
 {
     sReqLine_UBT* self = (sReqLine_UBT*)requestLine;
     if (self->text != 0) {
@@ -1143,7 +1144,7 @@ struct sMsgCenter_985F0 {
  *
  * Marker i is shown in the store while fewer than 6 - i songs are owned (6 songs are free).
  */
-extern "C" void cFEStateRequestLine_updateFreeSongMarkers(void* self)
+extern "C" void cFEStateRequestLine_updateFreeSongMarkers(cFEStateRequestLine* self)
 {
     sMsgCenter_985F0* requestLine = (sMsgCenter_985F0*)self;
     int n = 0;
@@ -1174,7 +1175,7 @@ void cMemMan_free(void* p);
 extern "C" void sprintf1(unsigned short* dst, unsigned short* fmt, int n);
 extern "C" void cUIText_setUnicodeString(void* text, void* p);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" void* cFEStateRequestLine_getSongArtist(void* self, int i);
+extern "C" void* cFEStateRequestLine_getSongArtist(cFEStateRequestLine* self, int i);
 // PORT: cFEStateRequestLine_getSongCost__FPv is called with (self, idx) here; bind the 2-arg form to that symbol.
 int cFEStateRequestLine_getSongCost_2(void* self, int idx) __asm__("cFEStateRequestLine_getSongCost__FPv");
 extern "C" const char* getDollarString(void* a0);
@@ -1228,14 +1229,14 @@ struct sReqLine_1986D0 {
  * @param vself  the cFEStateRequestLine
  * @param idx  song index
  */
-extern "C" void cFEStateRequestLine_updateHilightedSongInfo(void* vself, int idx)
+extern "C" void cFEStateRequestLine_updateHilightedSongInfo(cFEStateRequestLine* vself, int idx)
 {
     sReqLine_1986D0* self = (sReqLine_1986D0*)vself;
     if (self->title != 0) {
         char* db = (char*)SSXApp->FELocale;
         sVtEntry_001986D0* vt = *(sVtEntry_001986D0**)(db + 4);
         unsigned short* fmt = vt[4].fn(db + vt[4].delta, GetHashValue32(str_kT_OVRCMNSongBy));
-        char* name = (char*)cFEStateRequestLine_getSongArtist(self, idx);
+        char* name = (char*)cFEStateRequestLine_getSongArtist((cFEStateRequestLine*)self, idx);
         int len = USTR_length(fmt) + strlen(name) + 1;
         unsigned short* buf = (unsigned short*)operator_new_tag(len * 2, str_disconnected_from_serverErrorString, 0x100, 0);
         // PORT: the format argument is a string pointer passed through an int parameter
@@ -1305,7 +1306,7 @@ struct sMsgCenter_988D8 {
  *
  * @param idx  the song index (bit number in both masks)
  */
-extern "C" void cFEStateRequestLine_buySong(void* self, int idx)
+extern "C" void cFEStateRequestLine_buySong(cFEStateRequestLine* self, int idx)
 {
     sMsgCenter_988D8* requestLine = (sMsgCenter_988D8*)self;
     int n = 0;
@@ -1326,7 +1327,7 @@ INCLUDE_ASM("fe/messagecenter", cFEStateRequestLine_showBuyPopup);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(void* self, void* engine, void* owner, signed char idx);
-extern "C" void* cFEStateRequestLine_getSongTitle(void* self, int i);
+extern "C" void* cFEStateRequestLine_getSongTitle(cFEStateRequestLine* self, int i);
 // PORT: cFEStateRequestLine_getSongCost__FPv is called with (self, idx) here; bind the 2-arg form to that symbol.
 int cFEStateRequestLine_getSongCost_2(void* self, int idx) __asm__("cFEStateRequestLine_getSongCost__FPv");
 extern "C" void cBuyPopupInfo_initBuySong(int* self, int a1, int a2, int a3);
@@ -1360,7 +1361,7 @@ extern "C" void cFEStateRequestLine_showBuyPopup(sMsgCenter_98988* self, int idx
     for (int i = 0; i < 64; i++) {
         n += (int)((self->mask >> i) & 1);
     }
-    int song = (int)cFEStateRequestLine_getSongTitle(self, idx);
+    int song = (int)cFEStateRequestLine_getSongTitle((cFEStateRequestLine*)self, idx);
     if (n >= 6) {
         int cost = cFEStateRequestLine_getSongCost_2(self, idx);
         cBuyPopupInfo_initBuySong((int*)(popup + 0x48), song, cost, self->price);
@@ -1383,7 +1384,7 @@ extern "C" void* func_002B40F0(void* self, int i);
  * @param i  the song index
  * @return the song title
  */
-extern "C" void* cFEStateRequestLine_getSongTitle(void* self, int i)
+extern "C" void* cFEStateRequestLine_getSongTitle(cFEStateRequestLine* self, int i)
 {
     return func_002B40F0((char*)cAudioInterface_bxAudio() + 0x118, i);
 }
@@ -1402,7 +1403,7 @@ extern "C" void* func_002B4120(void* self, int i);
  * @param i  the song index
  * @return the artist string
  */
-extern "C" void* cFEStateRequestLine_getSongArtist(void* self, int i)
+extern "C" void* cFEStateRequestLine_getSongArtist(cFEStateRequestLine* self, int i)
 {
     return func_002B4120((char*)cAudioInterface_bxAudio() + 0x118, i);
 }
