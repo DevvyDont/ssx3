@@ -571,6 +571,18 @@ static inline int overlapBox_3309D8(const sBox_3309D8* b, const sBox_3309D8* o)
     return r;
 }
 
+/**
+ * Collects the instances of an octree cell whose bounds overlap a query box.
+ *
+ * Walks the cell's instance list (@p tree +0x20). An instance flagged 0x20 is tested with its stored box (+0x60 min,
+ * +0x6C max); one flagged 0x40 asks its object (+0xC) through virtual slot 44 whether it takes part and through slot 45
+ * for its box. Each overlapping instance is appended at @p ctx list[*count] (+0x0, +0x4) and the count incremented. The
+ * maximum (+0x8) is never checked, so a full list overflows. Called by the octree walkers (func_00331450,
+ * func_00332DB8, func_003378C0 and others) as their cell callback.
+ *
+ * @param ctx  the callback: instance list, count pointer, maximum, query box (On Tour OverlapInstancesCallback, this)
+ * @param tree  the octree cell (On Tour const Cell& cell)
+ */
 extern "C" void func_003309D8(sCtx_3309D8* ctx, void* tree)
 {
     for (sNode_3309D8* node = *(sNode_3309D8**)((char*)tree + 0x20); node != 0; node = node->next) {

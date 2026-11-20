@@ -140,6 +140,15 @@ extern "C" tIdentifier* cInputMapParser_lookupIdentifierName(cInputMapParser* se
 //100%
 INCLUDE_ASM("input/inputparse", func_00321AD0);
 #ifdef SKIP_ASM
+/**
+ * Converts a config index into an input register number: index + 0x40.
+ *
+ * Registers 0x40..0x5F are the config values that func_00325260 reads through func_00325430. The index is declared as a
+ * pointer but is a plain number.
+ *
+ * @param varIndex  the config index (On Tour config)
+ * @return the register number
+ */
 extern "C" void* func_00321AD0(void* self, void* varIndex)
 {
     return (char*)varIndex + 0x40;
@@ -149,6 +158,16 @@ extern "C" void* func_00321AD0(void* self, void* varIndex)
 //100%
 INCLUDE_ASM("input/inputparse", func_00321AD8);
 #ifdef SKIP_ASM
+/**
+ * Converts a button and button modifier into an input register number: 0x60 + button x 6 + modifier.
+ *
+ * func_00325260 decodes these registers back into (button, modifier) for func_003252F8; the 6 is On Tour's
+ * kButtonModifier_Num.
+ *
+ * @param inputIndex  the button index (On Tour button)
+ * @param modifier  the button modifier, 0..5 (On Tour eButtonModifiers)
+ * @return the register number
+ */
 extern "C" int func_00321AD8(void* self, int inputIndex, int modifier)
 {
     return inputIndex * 6 + modifier + 0x60;
@@ -1940,6 +1959,14 @@ extern "C" int cInputMapParser_compileUnaryNode(cInputMapParser* self, void* nod
 //100%
 INCLUDE_ASM("input/inputparse", func_00325250__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs an input map evaluator: sets its default button modifier (+0x0) to 0.
+ *
+ * cInputMap_getValue, cInputMap_getState and their modifier overloads build a 0x190-byte evaluator on the stack with it
+ * before running func_00325450.
+ *
+ * @return @p self
+ */
 void* func_00325250(void* self)
 {
     *(int*)self = 0;
@@ -1957,6 +1984,15 @@ struct sInputParse_325260 {
 extern "C" float func_003252F8(void* self, int idx, int sel);
 extern "C" float func_00325430(void* self, int a1);
 
+/**
+ * Reads an input register: a temporary, a config value or a button.
+ *
+ * Registers 0..0x3F are the temporaries (+0x8), 0x40..0x5F the config values (func_00325430) and 0x60.. buttons: id -
+ * 0x60 is split into button = n / 6 and modifier = n % 6 for func_003252F8. Numbers from 0x60 + 924 up read as 0.
+ *
+ * @param id  the register number
+ * @return the register's value
+ */
 extern "C" float func_00325260(sInputParse_325260* self, unsigned int id)
 {
     if (id < 0x40) {
@@ -1981,6 +2017,14 @@ struct sInputParse_003252E8 {
     int a[1];
 };
 
+/**
+ * Returns the address of one of an input map evaluator's temporary registers.
+ *
+ * Temporaries are 64 floats from +0x8; no range check.
+ *
+ * @param i  the temporary register index
+ * @return the register's address
+ */
 extern "C" void* func_003252E8(void* self, int i)
 {
     return &((sInputParse_003252E8*)self)->a[i];
@@ -2045,7 +2089,18 @@ static inline unsigned int GetD3252F8(sInputList3252F8* l, int idx)
 // PORT: the unit declares func_003252F8 as (void*, int, int); the definition takes an unsigned kind.
 float func_003252F8_impl(sInputParse3252F8* self, int idx, unsigned int kind) __asm__("func_003252F8");
 
-// Reads one input value (axis, or a button counter as float) for entry idx; kind 5 uses the default kind.
+/**
+ * Reads one button of the pad being evaluated, as its analogue value or as one of its state flags.
+ *
+ * @p kind (On Tour eButtonModifiers) picks the field of button @p idx of the pad (+0x4): 0 the value, 1 held (+0xC), 2
+ * pressed (+0x4), 3 released (+0x8), 4 repeated (+0x10), the flags converted to 0.0 / 1.0. 5 (default) uses the
+ * evaluator's default modifier (+0x0) instead; if that is itself 5 it recurses forever. A button past the pad's count,
+ * or an unknown kind, reads 0.
+ *
+ * @param idx  the button index
+ * @param kind  the button modifier, 0..5
+ * @return the value
+ */
 float func_003252F8_impl(sInputParse3252F8* self, int idx, unsigned int kind)
 {
     switch (kind) {
@@ -2072,6 +2127,14 @@ float func_003252F8_impl(sInputParse3252F8* self, int idx, unsigned int kind)
 //100%
 INCLUDE_ASM("input/inputparse", func_00325430);
 #ifdef SKIP_ASM
+/**
+ * Returns one of an input map evaluator's config values; config 0 always reads 0.
+ *
+ * The values are floats from +0x108. func_00321010 and func_00321188 fill configs 1..8.
+ *
+ * @param varIndex  the config index
+ * @return the value, or 0.0 for config 0
+ */
 extern "C" float func_00325430(void* self, int varIndex)
 {
     if (varIndex == 0) {
@@ -2094,6 +2157,21 @@ struct sInputVM_325450 {
 // PORT: func_00325260 is declared with its own self struct earlier in the unit.
 extern "C" float func_00325260_vm(sInputVM_325450* self, unsigned int id) __asm__("func_00325260");
 
+/**
+ * Runs a compiled input map statement against a controller pad and returns its result.
+ *
+ * Stores @p list as the evaluator's pad (+0x4) and steps through the op-codes from @p code until op 32 (End). The op
+ * numbers are On Tour's eInputOpCodes: 0 Load (the next word is a float constant), 1 Move, 2 BranchFalse and 3 Branch
+ * (relative jumps), 4 Or, 5 And, 6..11 the comparisons (>, >=, <, <=, ==, !=) giving 1.0 or 0.0, 12..15 + - x /, 16
+ * Max, 17 Min, 18 Pow (computed as exp(log(x) x y), so a negative base gives NaN), 19 Atan2, 20 Atan, 21 Sin, 22 Cos,
+ * 23 Exp, 24 Log, 25 Floor, 26 Ceil, 27 Abs, 28 Sqrt, 29 MinRadian (wraps an angle into [-pi, pi)), 30 Neg and 31 Not.
+ * Operands are read with func_00325260 and results written through func_003252E8. Unknown op-codes are skipped. The
+ * encoder is cInputMapParser_compileParseNode.
+ *
+ * @param list  the controller pad to read (On Tour cInputPad*)
+ * @param code  the statement's op-codes (On Tour program)
+ * @return the value of register 0 when End is reached
+ */
 // Runs one compiled input expression (see cInputMapParser_compileParseNode for the encoder); returns register 0.
 extern "C" float func_00325450(sInputVM_325450* self, void* list, sInsn_324678* code)
 {
@@ -2781,6 +2859,12 @@ extern "C" void cInputPreProcessor_readCmdLine(void* self, sParseStream* isrc, i
 //100%
 INCLUDE_ASM("input/inputparse", func_00326A20__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the input preprocessor's error report, compiled out of this build.
+ *
+ * cInputPreProcessor_skipCComment, cInputPreProcessor_skipCppComment and cInputPreProcessor_readCmdLine call it with
+ * the input source, path, file name and a message such as "unexpected EOF in comment"; the arguments are ignored.
+ */
 void func_00326A20(void* self)
 {
 }
@@ -2791,6 +2875,12 @@ INCLUDE_ASM("input/inputparse", func_00326A28);
 #ifdef SKIP_ASM
 extern "C" int func_00326D60(void* p, int n);
 
+/**
+ * Initialises the pad cache: creates the pad devices and resets the ring buffer positions.
+ *
+ * Stores the count func_00326D60 returns for the device array (+0x2EEC, up to 4) in +0x2EE8, sets the read position
+ * (+0x2EE0) to 29 and the write position (+0x2EE4) to 0. Called by cSSXApp_init.
+ */
 extern "C" void func_00326A28(void* self)
 {
     *(int*)((char*)self + 0x2EE8) = func_00326D60((char*)self + 0x2EEC, 4);
@@ -2818,6 +2908,12 @@ struct sOwner00326A68 {
     sObj00326A68* objs[1];
 };
 
+/**
+ * Destroys every pad device of the pad cache.
+ *
+ * Calls each non-null device's virtual destructor (slot 1) with flags 3, which frees it. The array entries and the
+ * count (+0x2EE8) are left as they were. Called by cSSXApp_purge.
+ */
 extern "C" void func_00326A68(sOwner00326A68* self)
 {
     int i;
@@ -2835,6 +2931,11 @@ INCLUDE_ASM("input/inputparse", func_00326AE0);
 #ifdef SKIP_ASM
 extern "C" void func_00326CF0(void* p);
 
+/**
+ * Stops the vibration of every pad device of the pad cache.
+ *
+ * Calls func_00326CF0 on each device. Called by cGame_update and cGame_updateUI.
+ */
 extern "C" void func_00326AE0(void* self)
 {
     int i;
@@ -2858,6 +2959,15 @@ struct sInputParse_00326B48 {
     unsigned int tail;
 };
 
+/**
+ * Advances the pad cache's read position to the next cached input frame, if there is one.
+ *
+ * Moves the read position (+0x2EE0) one step round the 30-line ring unless that would reach the write position
+ * (+0x2EE4). Called once per game tick by cSSXApp_preUpdate.
+ *
+ * @param controllerCache  the pad cache (this)
+ * @return 1 when it advanced, 0 when no newer frame is cached
+ */
 extern "C" int func_00326B48(sInputParse_00326B48* controllerCache)
 {
     unsigned int next = (controllerCache->head + 1) % 30;
@@ -2945,6 +3055,15 @@ struct sInputParse_00326CA0 {
     int bank;
 };
 
+/**
+ * Returns how many button values a pad delivered in the pad cache's current input frame.
+ *
+ * Reads the count word of line (read position +0x2EE0), pad @p i. Called by cSSXApp_preUpdate and
+ * cPreStartScreen_update together with func_00326CC8.
+ *
+ * @param i  the pad index (On Tour pad)
+ * @return the number of button values
+ */
 extern "C" int func_00326CA0(void* self, int i)
 {
     sInputParse_00326CA0* controllerCache = (sInputParse_00326CA0*)self;
@@ -2965,6 +3084,14 @@ struct sInputParse_00326CC8 {
     int bank;
 };
 
+/**
+ * Returns the button values a pad delivered in the pad cache's current input frame.
+ *
+ * The values (up to 24 floats) of line (read position +0x2EE0), pad @p i.
+ *
+ * @param i  the pad index (On Tour pad)
+ * @return the address of the values
+ */
 extern "C" void* func_00326CC8(void* self, int i)
 {
     sInputParse_00326CC8* controllerCache = (sInputParse_00326CC8*)self;
@@ -2984,6 +3111,14 @@ struct sVEntry00326CF0 {
 typedef int (*CountFn00326CF0)(void*);
 typedef void (*SetFn00326CF0)(void*, int, float);
 
+/**
+ * Stops a pad device's vibration: sets every actuator to 0.
+ *
+ * Calls the device's virtual setActuator (slot 4) with level 0.0 for each actuator it reports through slot 3. Called by
+ * func_00326AE0 and func_00125B18.
+ *
+ * @param inputPad  the pad device (this)
+ */
 extern "C" void func_00326CF0(void* inputPad)
 {
     sVEntry00326CF0** self = (sVEntry00326CF0**)inputPad;
@@ -3001,6 +3136,16 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* func_00326DF0(void* self, int a1, int a2);
 extern char str_PS2Pad[];
 
+/**
+ * Creates the PS2 pad devices: one per controller port, at most two.
+ *
+ * Clamps @p n to 2 and fills @p inputPads[i] with a 0x180-byte "PS2Pad" allocation constructed by func_00326DF0 for
+ * port i, slot 0.
+ *
+ * @param inputPads  the array to fill (On Tour pads)
+ * @param n  its capacity (On Tour maxpads)
+ * @return the number of devices created
+ */
 extern "C" int func_00326D60(void* inputPads, int n)
 {
     void** arr = (void**)inputPads;
@@ -3021,6 +3166,16 @@ INCLUDE_ASM("input/inputparse", func_00326DF0);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern void* D_0048E488[];
 
+/**
+ * Constructs a PS2 pad device for a controller port and slot.
+ *
+ * Installs the vtable D_0048E488, stores @p a1 (+0x4) and @p a2 (+0x8), zeroes 36 bytes at +0xC and the sampling state
+ * words +0x48..+0x5C (state 0: the port is opened on the next sample). Called by func_00326D60.
+ *
+ * @param a1  the controller port
+ * @param a2  the multitap slot
+ * @return @p self
+ */
 extern "C" void* func_00326DF0(void* self, int a1, int a2)
 {
     *(void***)self = D_0048E488;
@@ -3045,6 +3200,14 @@ void operator_delete(int* ptr);
 extern void* D_0048E488[];
 extern char cPadDevice_vtbl[];
 
+/**
+ * Destroys a PS2 pad device: closes its controller port and frees the object when asked to.
+ *
+ * Reinstalls D_0048E488, closes the port (func_003FF8F0 with port +0x4 and slot +0x8), installs cPadDevice_vtbl and
+ * calls operator delete when bit 0 of @p flags is set. Slot 1 of D_0048E488.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object
+ */
 extern "C" void func_00326E50(void* self, int flags)
 {
     *(void***)self = D_0048E488;
@@ -3099,6 +3262,23 @@ static inline float Analog_326EB0(int v)
     return v * 0.003921568859368563f;
 }
 
+/**
+ * Samples a PS2 controller into button values, stepping the pad's connection state machine once per call.
+ *
+ * Opens the port when needed and follows the usual libpad setup sequence over the state word +0x48: wait for a stable
+ * pad, read its type (digital or analogue), switch an analogue pad to locked analogue mode, enter pressure-sensitive
+ * mode (+0x54 set when that works), align the actuators (+0x5C) and finally read (state 10). A lost or reset pad goes
+ * back to state 1.
+ *
+ * Once a read succeeds it fills 24 values in @p out: Select, Start, L3 and R3 as 0 or 1; then the d-pad (right, left,
+ * up, down), triangle, circle, cross, square, L1, R1, L2 and R2, as pressure / 255 in pressure mode, else 0 or 1; then
+ * the four analogue stick axes (+0x58 set; else zeros) split into eight half-axis values 0..1, with a dead zone of
+ * about 48 steps either side of the centre. In state 10 it also sends changed motor levels (+0x30, +0x38) with
+ * func_00400190. Slot 2 of D_0048E488; cPadCache_cacheInput calls it for every pad.
+ *
+ * @param out  receives up to 24 button values
+ * @return 24 when the pad was read, otherwise 0
+ */
 extern "C" int func_00326EB0(sPad_326EB0* self, float* out)
 {
     unsigned char data[32];
@@ -3291,6 +3471,13 @@ extern "C" int func_00326EB0(sPad_326EB0* self, float* out)
 //100%
 INCLUDE_ASM("input/inputparse", func_00327738__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 2: a PS2 pad has two vibration actuators.
+ *
+ * Slot 3 of D_0048E488, overriding cPadDevice_numActuators (0).
+ *
+ * @return 2
+ */
 int func_00327738(void* self)
 {
     return 0x2;
@@ -3312,6 +3499,16 @@ static inline int clamp_327740(int v, int lo, int hi)
     return v;
 }
 
+/**
+ * Sets one of a PS2 pad's vibration motors.
+ *
+ * Actuator 1 is the on/off motor: +0x30 = (@p level != 0). Any other actuator sets the variable motor: +0x38 = level x
+ * 205 + 50 clamped to 50..255, or 0 when @p level is 0. func_00326EB0 sends changed values to the pad. Slot 4 of
+ * D_0048E488.
+ *
+ * @param mode  the actuator index (On Tour act)
+ * @param level  the strength, 0..1 (On Tour frequency)
+ */
 extern "C" void func_00327740(void* self, int mode, float level)
 {
     if (mode == 1) {
@@ -3402,6 +3599,14 @@ INCLUDE_ASM("input/inputparse", func_00327828);
 void cMemMan_free(void* ptr);
 void operator_delete(int* ptr);
 
+/**
+ * Destroys an AI forward-difference cache: frees its node array and hash table and, when asked, the cache itself.
+ *
+ * Frees the words at +0x0 and +0x8 with cMemMan_free when set, then calls operator delete when bit 0 of @p flags is
+ * set. Called by cBXNash_purgeTheAIFwdDiffCache.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object
+ */
 extern "C" void func_00327828(void* self, int flags)
 {
     if (*(void**)self != 0) {

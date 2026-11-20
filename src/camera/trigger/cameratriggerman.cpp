@@ -35,6 +35,9 @@ extern "C" void cCameraTriggerMan_cleanupOnExit(void* self)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CA08);
 #ifdef SKIP_ASM
+/**
+ * Does nothing; nothing calls it or stores its address.
+ */
 extern "C" void func_0016CA08(void) {
 
 }
@@ -138,6 +141,22 @@ static inline void remove_CA18(char* w, void* item, const sCtBox_CA18* box)
 }
 
 extern "C" void func_0016CA18_impl(void* vself) __asm__("func_0016CA18");
+/**
+ * Takes every camera trigger out of the world's space hash and resets the trigger list, both trigger stacks and the
+ * chase camera switches.
+ *
+ * For each trigger in the list (array +0x0, count +0x4) it gets the bounds of the trigger's Volume (+0x8, virtual slot
+ * 6), bumps the counter at +0xA0 of SSXApp->Game->BXNash, finds the box's cell key (nash_Nash_findkey), picks the root
+ * octant by the signs of its x, y and z, removes the trigger's space node (+0x14) from node list 2 of that root cell
+ * (nash_Cell_remnode) and frees the root cell when it is left empty. Then both trigger stacks (+0x1C, +0x3C) are
+ * emptied (cCameraTriggerStack_init), the list is reset (cCameraTriggerList_reset; its array is kept) and
+ * cCamera_resetChaseControllerSwitches runs.
+ *
+ * Unlike cCameraTriggerMan_purge it does not check the registration word (+0x20) before removing a trigger and leaves
+ * the active lists alone. Its only caller is func_0016CEA8.
+ *
+ * @param vself  the camera trigger manager (this)
+ */
 extern "C" void func_0016CA18_impl(void* vself)
 {
     sCtMan_CA18* self = (sCtMan_CA18*)vself;
@@ -335,6 +354,12 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CEA8);
 #ifdef SKIP_ASM
 extern "C" void func_0016CA18();
 
+/**
+ * Resets the camera trigger manager in its argument register: a plain call of func_0016CA18.
+ *
+ * The manager pointer passes through untouched in $a0 (the declaration leaves it out). Nothing calls it or stores its
+ * address.
+ */
 extern "C" void func_0016CEA8(void) {
     func_0016CA18();
 }
@@ -388,6 +413,13 @@ INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CF18);
 // PORT: func_0016CF40__FPv is mangled as (void*), but this caller passes two args.
 void func_0016CF40_2(void* mgr, void* self) __asm__("func_0016CF40__FPv");
 
+/**
+ * Stream-unresolve hook for camera trigger chunks: hands the chunk to the global camera trigger manager.
+ *
+ * Calls func_0016CF40 (an empty method) with gCamTriggerMan and @p self. Despite its name, @p self is not an object:
+ * cPS2ChunkResolve_unresolve passes the chunk's resource id for stream data type 17, the counterpart of
+ * gCamTriggerMan_resolve.
+ */
 extern "C" void func_0016CF18(void* self)
 {
     func_0016CF40_2((void*)gCamTriggerMan, self);
@@ -397,6 +429,12 @@ extern "C" void func_0016CF18(void* self)
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016CF40__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the camera trigger manager's handler for a trigger chunk being unloaded.
+ *
+ * func_0016CF18 calls it with gCamTriggerMan and the chunk's resource id (a second argument the declaration leaves
+ * out); the triggers are only cleared when new ones stream in (cCameraTriggerMan_streamIn).
+ */
 void func_0016CF40(void* self)
 {
 }
@@ -573,6 +611,14 @@ struct cCameraTriggerStack {
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016D1F8);
 #ifdef SKIP_ASM
+/**
+ * Returns its argument: the camera trigger manager's trigger list, which sits at offset 0.
+ *
+ * Nothing calls it.
+ *
+ * @param arg0  the camera trigger manager (this)
+ * @return @p arg0, the address of the trigger list
+ */
 extern "C" int func_0016D1F8(int arg0) {
     return arg0;
 }
@@ -611,6 +657,14 @@ extern "C" cCameraTriggerStack* cCameraTriggerStack_cCameraTriggerStack(cCameraT
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerman", func_0016D238__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Pushes a trigger id onto a camera trigger stack and records it as the last entered trigger.
+ *
+ * Stores @p triggerId at TriggerIDStack[count] (+0x8 + 4 x count), in the last-entered word (+0x4) and increments the
+ * count (+0x0). There is no check against the six slots. Called by func_0016D320 when the rider enters a trigger.
+ *
+ * @param triggerId  the entered trigger's id (On Tour triggerID)
+ */
 void func_0016D238(void* self, int triggerId)
 {
     *(int*)((char*)self + (*(int*)self << 2) + 0x8) = triggerId;
@@ -628,6 +682,21 @@ struct sCamTrigStack {
     int items[1]; // 0x8
 };
 
+/**
+ * Removes an exited trigger from a camera trigger stack and says which trigger, if any, should now take over.
+ *
+ * Deletes the first entry equal to @p key, closing the gap. If entries remain, the top one is compared with the last
+ * entered trigger (+0x4): when they differ *@p changed = 1 and *@p out = the top id, otherwise *@p changed = 0; either
+ * way it returns 0. When the stack is empty *@p changed = 0 and it returns 1.
+ *
+ * func_0016D320 runs the exited trigger's exit action on 1, and the new top trigger's enter action when @p changed is
+ * set.
+ *
+ * @param key  the exited trigger's id (On Tour triggerID)
+ * @param changed  receives 1 when another trigger's enter action should be played (On Tour playEnter_outArg)
+ * @param out  receives that trigger's id (On Tour enterToPlay_outArg)
+ * @return 1 when the stack is now empty, else 0
+ */
 extern "C" int func_0016D260(sCamTrigStack* self, int key, int* changed, int* out)
 {
     unsigned int i;
@@ -751,6 +820,25 @@ static inline int active_D320(char* rider)
     return *(int*)(rider + 0x874) != 0 && *(int*)(rider + 0x87C) != 0;
 }
 
+/**
+ * Updates which camera triggers a human rider is inside and plays the enter and exit camera actions.
+ *
+ * Only for riders with mIsHuman (+0x874) and mIsLocal (+0x87C) set. Uses the active trigger list and trigger stack of
+ * the rider's view (mViewIndex +0x870: lists at +0x14, stacks at +0x1C, 0x20 bytes each). Clears the list's flags
+ * (cActiveTriggerList_clearFlags), then queries the eight root cells of SSXApp->Game->BXNash with a box at the rider's
+ * position (rider +0x6C0 slot 5): func_00328360 decides per root whether the cell lies inside the box (0: walk it all
+ * with the collision callback and func_00176890) or crosses it (2: func_00174848; because of that test's quirks it
+ * practically always answers 2 here); each trigger whose volume contains the position is flagged or added.
+ *
+ * Then every node not flagged this frame is a trigger the rider left: func_0016D260 updates the stack, and its exit
+ * action (+0x10) runs through func_0016E1D8 when the stack became empty, or the enter action (+0xC) of the new top
+ * trigger (found with func_0016C6E0) when the top changed; the node is removed (cActiveTriggerList_remove). Finally
+ * each node still marked new (+0x8) is pushed onto the stack (func_0016D238) and its enter action runs.
+ *
+ * Called by cRider_checkObjectCollisions on gCamTriggerMan.
+ *
+ * @param rider  the rider (On Tour cRider&)
+ */
 extern "C" void func_0016D320(char* self, char* rider)
 {
     if (active_D320(rider)) {
@@ -833,6 +921,20 @@ struct sCams_E1D8 {
     char* cam[1];
 };
 
+/**
+ * Plays a camera trigger action for a rider: switches the rider's chase camera to the camera the action names.
+ *
+ * The chase controller is +0xA8 of the camera SSXApp->Game->ViewMan lists for the rider's mViewIndex (+0x870). The
+ * blend rate is 1 / (BlendTime (+0xC) x 60) per frame, or 1 (a cut) when BlendTime is 0. By the action's Type (+0x0, On
+ * Tour eCTActionType): 0 (switch) maps the action's SwitchType (+0x8, eCTSwitchType 1..75) to a camera algorithm type
+ * (mostly the same number; 0, 43 and unknown values give 0) and calls cChaseCameraController_switchCamera_Volume(type,
+ * 0, rate); 1 (bounded) and 2 (spline) call it with type 91 or 92 and the action itself. Type 3 (none) does nothing.
+ *
+ * Called by func_0016D320 with a trigger's enter or exit action.
+ *
+ * @param evt  the camera trigger action (On Tour cCTAction*)
+ * @param rider  the rider whose camera to switch (On Tour cRider&)
+ */
 extern "C" void func_0016E1D8(sCamEvt_E1D8* evt, char* rider)
 {
     sCams_E1D8* cams = (sCams_E1D8*)SSXApp->Game->ViewMan;
@@ -1179,6 +1281,19 @@ static inline sCtmV_E560 ctmNormalize_E560(const sCtmV_E560& v)
     return r;
 }
 
+/**
+ * Keeps a point inside an ellipse camera bound object: a point outside is pulled onto the ellipsoid's surface along the
+ * line to its centre.
+ *
+ * Maps the point into unit-sphere space with the inverse transform (scale by 1 / scale +0x18..+0x20, rotate by -heading
+ * about Z, -roll about Y, -pitch about X, translate by -position). If its length is below 1 the point is left alone;
+ * otherwise it is normalised, mapped back with the forward transform (translate, pitch, roll, heading, scale) and
+ * written back with w = 1. This is a radial projection, not the closest surface point. Slot 6 (limitPoint) of the
+ * ellipse bound-object vtable D_0045C2A8.
+ *
+ * @param src  the ellipse bound object (this)
+ * @param p  the world point to limit; overwritten when outside
+ */
 // Pushes *p out to the surface of the trigger's ellipsoid when it lies inside: into trigger space
 // (inverse of func_00170240's transform), normalize, and back to world space.
 extern "C" void func_0016E560(char* src, sCtmV_E560* p)
@@ -1453,6 +1568,18 @@ struct sXform_F068 {
 extern int D_004A4DE8;              // guard of the static axis table below
 extern t4Vector D_004C5450[3];      // static local: the three box axes
 
+/**
+ * Keeps a point inside a box camera bound object: a point outside is moved to the nearest point of the box.
+ *
+ * Starts from t4mat_Identity, multiplies in rotations about Z by -heading (rot[0]), about Y by -roll (rot[2]) and about
+ * X by -pitch (rot[1]) and a translation by -position, and maps @p p into box space (w = 1). On each axis of the static
+ * table D_004C5450 (X, Y and Z axes, filled once under the guard D_004A4DE8) the coordinate is clamped to [-size,
+ * +size] (the scale at +0x18 is a half-extent). The result is mapped back (translate, pitch, roll, heading) and stored
+ * in @p p with w = 1. Slot 6 (limitPoint) of the box bound-object vtable D_0045C268.
+ *
+ * @param t  the box bound object (this): position, heading/pitch/roll and half-extents
+ * @param p  the world point to limit; overwritten
+ */
 // cCTBoundObjBox: move p to the closest point of the (rotated) box.
 extern "C" void func_0016F068(const sXform_F068* t, t4Vector* p)
 {
@@ -1793,6 +1920,17 @@ static inline sCtmV_FBB8 ctmScale_FBB8(const sCtmV_FBB8& v, float s)
     return r;
 }
 
+/**
+ * Keeps a point on a line camera bound object: moves it to its perpendicular projection onto the line.
+ *
+ * Transforms both end points (+0x2C, +0x38) to world space (translate by position, rotate by pitch about X, roll about
+ * Y and heading about Z, scale), then sets @p p = end1 + d x t with d = end2 - end1 and t = dot(@p p - end1, d) /
+ * dot(d, d). t is not clamped, so the point can land beyond either end (and a zero-length line divides by zero). Slot 6
+ * (limitPoint) of the line bound-object vtable D_0045C228.
+ *
+ * @param src  the line bound object (this)
+ * @param p  the world point to limit; overwritten
+ */
 // Projects *p onto the line through the transformed points src+0x2C and src+0x38
 // (transform as in func_00170240).
 extern "C" void func_0016FBB8(char* src, sCtmV_FBB8* p)
@@ -2017,6 +2155,16 @@ static inline void ctmRotAxis(sCtmM* m, const sCtmV& axis, float angle)
     ctmMulMtx(m, m, &r);
 }
 
+/**
+ * Returns a line bound object's first end point in world space.
+ *
+ * Transforms Point[0] (+0x2C, w = 1) by translate(position +0x0), rotations by pitch (+0x10) about X, roll (+0x14)
+ * about Y and heading (+0xC) about Z, and scale (+0x18). cChaseCameraController_createChaseAlgorithmBlend uses it with
+ * func_001707B0 to build the superpipe camera from a line bound object.
+ *
+ * @param src  the line bound object (this)
+ * @return the world-space point, returned by value
+ */
 // World position of the point at src+0x2C: translate(src+0x0) * rotations(0x10, 0x14, 0xC) * scale(src+0x18).
 extern "C" sCtmV func_00170240(char* src)
 {
@@ -2040,6 +2188,15 @@ extern sCtmV t4vect_YAxis;
 extern sCtmV t4vect_ZAxis;
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 
+/**
+ * Returns a line bound object's second end point in world space.
+ *
+ * Same transform as func_00170240, applied to Point[1] (+0x38). Used by
+ * cChaseCameraController_createChaseAlgorithmBlend for the superpipe camera.
+ *
+ * @param src  the line bound object (this)
+ * @return the world-space point, returned by value
+ */
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply, dst = a * b).
 // PORT: PS2-only VU0 inline asm (row 3 of m = m * v).
 // PORT: PS2-only VU0 inline asm (scale the rows of m by v: dst.row[i] = m.row[i] * v[i]).
@@ -2272,6 +2429,17 @@ struct sCtmSrc_0D20 {
 };
 
 
+/**
+ * Returns one of a camera spline's four control points in world space.
+ *
+ * Transforms Point[@p corner] (+0x28 + 12 x @p corner, w = 1) by translate(position), rotations by pitch about X, roll
+ * about Y and heading about Z, and scale. cChaseCameraController_createChaseAlgorithmBlend calls it for points 0..3 of
+ * a spline action's spline to build a cSplineCamAlgorithm.
+ *
+ * @param src  the camera spline (this, On Tour cCTSpline)
+ * @param corner  which control point, 0..3 (On Tour i)
+ * @return the world-space point, returned by value
+ */
 // World position of corner `corner` (the 3-float points at src+0x28): translate(src+0x0) * rotations(0x10, 0x14, 0xC) * scale(src+0x18).
 extern "C" sCtmV_0D20 func_00170D20(char* src, int corner)
 {

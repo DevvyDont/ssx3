@@ -40,6 +40,14 @@ INCLUDE_ASM("intersect/riderspheretree", func_00329938);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_00329A28_v(void* self) __asm__("func_00329A28");
 
+/**
+ * Copy-constructs a rider sphere tree: builds its sphere list and assigns the source tree to it.
+ *
+ * Runs the (empty) constructor over the 20 sphere entries and calls func_00329A28 with the source, which arrives
+ * untouched in $a1 (the declaration leaves it out). Nothing calls it.
+ *
+ * @return @p self
+ */
 // NOTE: the array's offset is unconstrained by the target: the empty-ctor loop is deleted
 // (vec_mark), leaving only the dead `li 0x13; li -1` pair. 0x30 = sSphereNode children[].
 extern "C" void* func_00329938(void* self)
@@ -71,6 +79,15 @@ extern "C" void cRiderSphereTree__cRiderSphereTree(void* self, int flags)
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_00329998);
 #ifdef SKIP_ASM
+/**
+ * Sets a rider sphere tree up as a single sphere of the given radius with no bones (a cursor).
+ *
+ * Sets the sphere mask (+0x28) to all ones, the sphere count (+0x2C) to 1, the bounding radius (+0x20) and sphere 0's
+ * radius (+0x40) to @p radius, the bound bone (+0x24) and sphere 0's bone (+0x44) to -1 and the pose array (+0x0) to 0.
+ * Nothing calls it.
+ *
+ * @param radius  the sphere's radius (On Tour cursorRadius)
+ */
 extern "C" void func_00329998(void* self, float radius)
 {
     *(unsigned int*)((char*)self + 0x28) = 0xFFFFFFFF;
@@ -144,6 +161,16 @@ struct sSphereNode_9A28 {
 
 extern "C" void MEM_copy(void* dst, void* src, int size);
 
+/**
+ * Copies a rider sphere tree into this one.
+ *
+ * Copies the pose array pointer (+0x0), bounding sphere (+0x10, +0x20), bound bone (+0x24), sphere mask (+0x28), count
+ * (+0x2C) and the count x 0x20 bytes of the sphere list (+0x30, MEM_copy). Called by func_00329938 and
+ * cWorldRider_Transform.
+ *
+ * @param src  the tree to copy (On Tour copy)
+ * @return @p self
+ */
 extern "C" sSphereNode_9A28* func_00329A28(sSphereNode_9A28* self, sSphereNode_9A28* src)
 {
     self->type = src->type;
@@ -180,6 +207,19 @@ struct sSphereTreeNode {
     sSphereChild children[1]; // 0x30
 };
 
+/**
+ * Sets a rider sphere tree's spheres and bounding sphere from explicit centres and radii.
+ *
+ * Stores @p n as the count (+0x2C), copies each centre and radius into the sphere list (+0x30, 0x20 bytes each) and
+ * sets the bounding sphere (+0x10, +0x20). Bones are not touched. Called by cWipeoutMotion_updateBoardSphereTree.
+ *
+ * @param node  the rider sphere tree (this)
+ * @param n  number of spheres (On Tour numSphere)
+ * @param pos  the sphere centres (On Tour sphCenter)
+ * @param radii  the sphere radii (On Tour sphRadius)
+ * @param center  the bounding sphere's centre (On Tour boundCenter)
+ * @param radius  its radius (On Tour boundRadius)
+ */
 extern "C" void func_00329A90(sSphereTreeNode* node, int n, sSphereVec4* pos, float* radii,
                               sSphereVec4* center, float radius)
 {
@@ -201,6 +241,15 @@ struct sSphereSrc_9AE0 {
     int pad[4];
 };
 
+/**
+ * Moves a rider sphere tree's spheres to the current positions of their bones.
+ *
+ * Each listed sphere's centre becomes the position of its bone (+0x14 in the 0x20-byte entry) in the pose array (+0x0,
+ * 0x20 bytes per bone, position first), and the bounding centre (+0x10) that of the bound bone (+0x24). The sphere mask
+ * is ignored. Called by cRider_updateCollideInfo.
+ *
+ * @param s  the rider sphere tree (this)
+ */
 extern "C" void func_00329AE0(sSphereTreeNode* s)
 {
     sSphereSrc_9AE0** table = (sSphereSrc_9AE0**)s;
@@ -229,6 +278,14 @@ static inline void sphereVecAdd(sSphereVec4* dst, sSphereVec4* v)
         : "m"(*dst), "m"(*v));
 }
 
+/**
+ * Moves a rider sphere tree by an offset: its bounding centre and every sphere centre.
+ *
+ * Called by cRider_reactToCollision and func_00137138.
+ *
+ * @param node  the rider sphere tree (this)
+ * @param offset  the offset to add (On Tour offset)
+ */
 // self->center += *v, then every child's pos += *v
 extern "C" void func_00329B40(sSphereTreeNode* node, sSphereVec4* offset)
 {
@@ -312,6 +369,14 @@ struct sSphereBox_9CE0 {
     sSphereVec4 mx;
 };
 
+/**
+ * Computes the bounding box of all of a rider sphere tree's spheres.
+ *
+ * Starts the box at the bounding centre (+0x10) and grows it by every listed sphere's centre +/- radius, ignoring the
+ * sphere mask (cRiderSphereTree_GetMaskBoundBox honours it). Nothing calls it.
+ *
+ * @param box  receives the box: min at +0x0, max at +0x10 (On Tour bb)
+ */
 // Bounding box of all child spheres, seeded with the node's own center.
 extern "C" void func_00329CE0(sSphereTreeNode* self, sSphereBox_9CE0* box)
 {
@@ -538,6 +603,22 @@ static inline float Sqrt_9F98(float v)
     return r;
 }
 
+/**
+ * Tests two rider sphere trees against each other and returns the first overlapping pair of spheres.
+ *
+ * Returns 0 when the bounding spheres are apart. Otherwise each sphere of @p nodeA that reaches @p nodeB's bounding
+ * sphere is tested against each of @p nodeB's spheres; the first overlapping pair sets *@p outA = n x overlap (n the
+ * unit vector from A's sphere to B's, overlap = rA + rB - distance) and *@p outB = A's centre - n x (rA - overlap), and
+ * returns 1. That contact point lies on the side of A's sphere away from B, apparently a sign slip (func_0032CDB0's
+ * equivalent moves towards the other body). Sphere masks are ignored and the first hit wins, not the deepest. Called by
+ * cRider_checkOpponentCollisions.
+ *
+ * @param nodeA  this rider's sphere tree (this)
+ * @param nodeB  the other rider's tree (On Tour oppBoarder)
+ * @param outA  out: the overlap vector (On Tour overlap)
+ * @param outB  out: the contact point (On Tour loc)
+ * @return 1 on contact, else 0
+ */
 extern "C" int func_00329F98(sNode_9F98* nodeA, sNode_9F98* nodeB, sSphereVec4* outA, sSphereVec4* outB)
 {
     sSphereVec4 delta;
@@ -1009,6 +1090,21 @@ static inline sSphereVec4 Scale_B2B8(const sSphereVec4& v, float s)
 
 struct sSphereHit_32FAC0;
 
+/**
+ * Tests a rider sphere tree against an axis-aligned box.
+ *
+ * Tests the bounding sphere (+0x10, +0x20) with func_00329590; a miss returns 0. With an empty sphere mask (+0x28) that
+ * result is final: *@p outPos = face normal x depth and *@p hit = the contact point. Otherwise, for each masked sphere
+ * index it keeps the deepest result, but every iteration re-tests the bounding sphere rather than the indexed sphere
+ * (+0x30 list), so the listed spheres are never looked at: likely a bug. Called by cWorldRider_IsBoxInt.
+ *
+ * @param tree  the rider sphere tree (this)
+ * @param boxMin  the box minimum (On Tour bMin)
+ * @param boxMax  the box maximum (On Tour bMax)
+ * @param outPos  out: the push-out vector (On Tour overlap)
+ * @param hit  out: the contact point (On Tour loc)
+ * @return 1 on contact, else 0
+ */
 extern "C" int func_0032B2B8(void* tree, void* boxMin, void* boxMax, sSphereVec4* outPos, sSphereHit_32FAC0* hit)
 {
     sSphereHit_B2B8* self = (sSphereHit_B2B8*)tree;
@@ -1041,6 +1137,9 @@ extern "C" int func_0032B2B8(void* tree, void* boxMin, void* boxMax, sSphereVec4
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032B460);
 #ifdef SKIP_ASM
+/**
+ * Does nothing; nothing calls it or stores its address.
+ */
 extern "C" void func_0032B460(void) {
 
 }
@@ -1053,6 +1152,19 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032B468);
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 extern "C" void MEM_fill(void* dst, int c, int n);
 
+/**
+ * Run-length encodes a byte buffer in the format func_0032B620 decodes.
+ *
+ * Writes literal blocks as a count byte -n followed by n bytes and repeated runs (at least max(2, @p minRun) bytes) as
+ * n - 1 followed by the byte, both at most 0x7F long, then a 0 terminator. A run that reaches the end of the input is
+ * shortened by one. Looking for a run it reads one byte past the end of @p in. Nothing calls it.
+ *
+ * @param start  the output buffer
+ * @param in  the input bytes
+ * @param len  the number of input bytes
+ * @param minRun  the shortest repeat to encode as a run; values below 2 mean 2
+ * @return the number of bytes written, terminator included
+ */
 extern "C" int func_0032B468(unsigned char* start, unsigned char* in, int len, int minRun)
 {
     unsigned char* out = start;
@@ -1117,6 +1229,16 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032B620);
 // repeats the next byte n+1 times, 0 terminates. Returns the number of bytes written.
 // PORT: the unit declares it later as void*(void*, void*); defined under its own name bound to the symbol.
 extern "C" int func_0032B620_impl(char* dst, signed char* src) __asm__("func_0032B620");
+/**
+ * Decodes run-length encoded sphere tree data.
+ *
+ * Each count byte c is followed by -c literal bytes when negative, or by one byte to repeat c + 1 times when positive;
+ * 0 ends the data. A null @p src gives 0. SphereTree_AllocBuf calls it to unpack compressed trees.
+ *
+ * @param dst  the output buffer (On Tour dest)
+ * @param src  the encoded data, or 0
+ * @return the number of bytes written
+ */
 extern "C" int func_0032B620_impl(char* dst, signed char* src)
 {
     if (src == 0)
@@ -1150,6 +1272,20 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032B6A8);
 // VU0 microprogram entry (micro-memory address 0x6E0; resolved via undefined_syms_auto.txt)
 extern char D_6E0[];
 
+/**
+ * Tells whether a point lies inside a triangle, using a VU0 micro-program.
+ *
+ * Loads the four vectors into vf10..vf13, runs the VU0 micro-program at micro address 0x6E0 and returns whether it left
+ * vi2 nonzero. A tolerance some callers pass in $f12 (func_0032D440 passes 1e-4) is not read. Called by the triangle
+ * tests (cRiderSphereTree_IsTriCollision and its 2-sided form, cWorldLine_IsTriInt, cWorldSphere_IsTriInt and its
+ * 2-sided form) and func_0032D440.
+ *
+ * @param a  first corner (On Tour p1)
+ * @param b  second corner (On Tour p2)
+ * @param c  third corner (On Tour p3)
+ * @param d  the point to test (On Tour cen)
+ * @return 1 when the point is inside, else 0
+ */
 // Loads four vectors into vf10-vf13, runs the VU0 microprogram at D_6E0 and
 // returns whether it left a nonzero result in vi2.
 // PORT: PS2-only VU0 microprogram call (ctc2/vcallmsr/cfc2); the PC port needs a C version
@@ -1297,6 +1433,29 @@ static inline sSphereVec4& CellNormal_B6E0(sCell_B6E0* cell, int k, const sSpher
 // then every cell whose bounds overlap the query box; returns the hit cell's uv in uvOut
 extern "C" int func_0032B6E0_typed(sQuery_B6E0* q, void* obj, sPatch_B6E0* patch, void* a3, void* a4,
                                    void* a5, float* uvOut, sHitCache_B6E0* cache) __asm__("func_0032B6E0");
+/**
+ * Intersects a world query with a tessellated terrain patch, trying the cell remembered in a hint first.
+ *
+ * Low precision (query +0x0 = 0) walks the 3 x 3 coarse cells (+0x1A90 of @p patch, every third vertex); otherwise the
+ * 9 x 9 fine cells (+0x650). Each cell's bounds and its two triangles' normals are computed on first use (1e10 marks
+ * "not yet", a normal flagged 99999997952 a degenerate triangle). A cell whose bounds overlap the query box (+0x30 min,
+ * +0x20 max) has its triangles tested with the query's virtual triangle test (slot 4), skipping triangles whose normal
+ * points along the reject normal (+0x10, dot > 0.8) when the reject flag (+0x8) is set.
+ *
+ * On a hit the uv is the cell centre (refined by virtual slot 8 at high precision, 2), and the hint remembers patch,
+ * cell and triangle. When the hinted cell misses, the hint is cleared and all cells are walked. Called by func_00333EF8
+ * and func_00335960 once func_003279D0 has fetched the tessellation.
+ *
+ * @param query  the world intersection query (this)
+ * @param obj  the terrain patch record (On Tour pPatch)
+ * @param patch  its tessellation (On Tour pFwdDiff)
+ * @param a3  out: the hit position (On Tour ipos)
+ * @param a4  out: the hit normal (On Tour inorm)
+ * @param a5  out: the hit parameter (On Tour param)
+ * @param uvOut  out: the hit's patch u, v (On Tour uv)
+ * @param cache  the hint, or 0 (On Tour tIntHint* hint)
+ * @return 1 on a hit, else 0
+ */
 extern "C" int func_0032B6E0_typed(sQuery_B6E0* query, void* obj, sPatch_B6E0* patch, void* a3, void* a4,
                                    void* a5, float* uvOut, sHitCache_B6E0* cache)
 {
@@ -1687,6 +1846,14 @@ extern "C" void SphereTree_init(void* self)
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_0032C590);
 #ifdef SKIP_ASM
+/**
+ * Returns a sphere tree's radius: its root level's radius times its scale.
+ *
+ * Reads the first level radius of the tree info (+0x98, levels at +0x20) and multiplies by the scale (+0x90). Called by
+ * bxSphereTree_Is2SidedTriCollision and the cWorldSphTree functions.
+ *
+ * @return the radius
+ */
 extern "C" float func_0032C590(void* self)
 {
     void* tree = *(void**)((char*)self + 0x98);
@@ -1743,6 +1910,14 @@ static inline sSphereVec4_C5E0 Add_C5E0(const sSphereVec4_C5E0& a, const sSphere
     return r;
 }
 
+/**
+ * Places a sphere tree at its stored root centre plus an offset.
+ *
+ * Sets the centre (+0x80) to the tree info's root centre (info +0x14, w = 1) + @p offset, unlike SphereTree_MoveOffset,
+ * which adds to the current centre. Nothing calls it.
+ *
+ * @param offset  the offset (On Tour offset)
+ */
 extern "C" void func_0032C5E0(void* self, sSphereVec4_C5E0* offset)
 {
     float* n = *(float**)((char*)self + 0x98);
@@ -1904,6 +2079,18 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032C898);
 extern "C" int SphereTree_AllocBuf(void* self);
 extern "C" int func_0032CDB0(void* self, void* a1, float f, void* pos, int a4, int a5, void* a6, void* a7);
 
+/**
+ * Tests a sphere tree against a sphere.
+ *
+ * Unpacks the tree data when needed (SphereTree_AllocBuf) and runs func_0032CDB0 from the root (centre +0x80, level 0,
+ * index 0). Called by cWorldSphere_IsSphTreeInt.
+ *
+ * @param spherePos  the sphere's centre (On Tour aCen)
+ * @param sphereRadius  its radius (On Tour aRad)
+ * @param outPush  out: the overlap vector (On Tour overlap)
+ * @param outContact  out: the contact point (On Tour loc)
+ * @return 1 on contact, else 0
+ */
 extern "C" int func_0032C898(void* self, void* spherePos, float sphereRadius, void* outPush, void* outContact)
 {
     void* tree = *(void**)((char*)self + 0x98);
@@ -1920,6 +2107,17 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032C928);
 extern "C" int SphereTree_AllocBuf(void* self);
 extern "C" int func_0032D028(void* self, void* a1, void* a2, void* pos, int a4, int a5, void* a6, void* a7);
 
+/**
+ * Tests a sphere tree against an axis-aligned box.
+ *
+ * Unpacks the tree data when needed and runs func_0032D028 from the root. Called by cWorldSphTree_IsBoxInt.
+ *
+ * @param boxMin  the box minimum (On Tour bMin)
+ * @param boxMax  the box maximum (On Tour bMax)
+ * @param outPos  out: the push-out vector (On Tour overlap)
+ * @param outNormal  out: the contact point (On Tour loc), despite the name
+ * @return 1 on contact, else 0
+ */
 extern "C" int func_0032C928(void* self, void* boxMin, void* boxMax, void* outPos, void* outNormal)
 {
     void* tree = *(void**)((char*)self + 0x98);
@@ -1951,6 +2149,17 @@ static inline sVecArg_C9B8 zeroW_C9B8(const sVecArg_C9B8& in)
 extern "C" void SphereTree_populateSortAxis_v(void* self, sVecArg_C9B8 v) __asm__("SphereTree_populateSortAxis");
 extern "C" void func_0032D208(void* self, void* a1, void* pos, int a3, int a4, void* a5, void* a6);
 
+/**
+ * Tests a sphere tree against a plane and returns the deepest penetration.
+ *
+ * Unpacks the tree data when needed, orders the child axes along the plane normal (SphereTree_populateSortAxis with w
+ * cleared), resets the best depth (+0x94) to 0 and runs func_0032D208 from the root. Nothing calls it.
+ *
+ * @param plane  the plane: normal, offset in w (On Tour aPlane)
+ * @param outPush  out: the push-out vector (On Tour overlap)
+ * @param outContact  out: the contact point (On Tour loc)
+ * @return 1 when some leaf sphere crosses the plane (best depth below 0), else 0
+ */
 extern "C" int func_0032C9B8(void* self, sVecArg_C9B8* plane, void* outPush, void* outContact)
 {
     void* tree = *(void**)((char*)self + 0x98);
@@ -2010,6 +2219,17 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032CB58);
 extern "C" int SphereTree_AllocBuf(void* self);
 extern "C" int func_0032CBF8(void* self, void* other, void* pos, int a3, int a4, void* a5, void* a6);
 
+/**
+ * Tests a sphere tree against another sphere tree.
+ *
+ * Unpacks both trees' data when needed and runs func_0032CBF8 from this tree's root. Called by
+ * cWorldSphTree_IsSphTreeInt.
+ *
+ * @param other  the other tree (On Tour aTree)
+ * @param outPush  out: the overlap vector (On Tour overlap)
+ * @param outContact  out: the contact point (On Tour loc)
+ * @return 1 on contact, else 0
+ */
 extern "C" int func_0032CB58(void* self, void* other, void* outPush, void* outContact)
 {
     void* tree = *(void**)((char*)self + 0x98);
@@ -2085,6 +2305,23 @@ static inline sSphereVec4 Add_CBF8(const sSphereVec4& a, const sSphereVec4& b)
     return r;
 }
 
+/**
+ * Recursively tests one sphere tree's nodes against another sphere tree.
+ *
+ * Each child set in this node's occupancy byte (info +0x28, index @p base) is placed at @p posp + axis i x the next
+ * level's offset and tested as a sphere against @p other with func_0032CDB0, using this level's radius x scale; a hit
+ * recurses one level down. Returns 1 at the tree's depth, at level 4 (deeper levels are never tested) or for a node
+ * with no children; otherwise 1 only when some child path hits.
+ *
+ * @param selfp  this sphere tree (this)
+ * @param other  the other tree (On Tour aTree)
+ * @param posp  this node's centre (On Tour center)
+ * @param depth  this node's level (On Tour level)
+ * @param base  this node's index (On Tour index)
+ * @param outPush  out: the overlap vector (On Tour overlap)
+ * @param outContact  out: the contact point (On Tour loc)
+ * @return 1 on contact, else 0
+ */
 extern "C" int func_0032CBF8(void* selfp, void* other, void* posp, int depth, int base, void* outPush, void* outContact)
 {
     sSphereOct_CBF8* self = (sSphereOct_CBF8*)selfp;
@@ -2234,6 +2471,25 @@ static inline float Sqrt_CDB0(float v)
     return r;
 }
 
+/**
+ * Recursively tests a sphere tree node against a sphere.
+ *
+ * Returns 0 when the sphere misses this node's sphere (level radius x scale around @p pos). Inner nodes recurse into
+ * each child in the occupancy byte (placed at pos + axis i x the next level's offset) and return 1 at the first hit. A
+ * leaf (at the tree's depth, or without children) sets *@p outA = n x overlap and *@p outB = the sphere centre - n x
+ * (radius - overlap), n pointing from the node to the sphere, and returns 1. Called by func_00327F18, func_0032C898,
+ * func_0032CBF8 and itself.
+ *
+ * @param selfp  the sphere tree (this)
+ * @param spherePos  the sphere's centre (On Tour aCen)
+ * @param sphereRadius  its radius (On Tour aRad)
+ * @param pos  this node's centre (On Tour center)
+ * @param depth  this node's level (On Tour level)
+ * @param base  this node's index (On Tour index)
+ * @param outA  out: the overlap vector (On Tour overlap)
+ * @param outB  out: the contact point (On Tour loc)
+ * @return 1 on contact, else 0
+ */
 extern "C" int func_0032CDB0(void* selfp, void* spherePos, float sphereRadius, void* pos, int depth, int base, void* outA, void* outB)
 {
     sSphereOct_CDB0* self = (sSphereOct_CDB0*)selfp;
@@ -2324,6 +2580,23 @@ static inline sSphereVec4 Add_D028(const sSphereVec4& a, const sSphereVec4& b)
     return r;
 }
 
+/**
+ * Recursively tests a sphere tree node against an axis-aligned box.
+ *
+ * Tests this node's sphere (level radius x scale at @p pos) with func_00329590; a miss returns 0. Inner nodes recurse
+ * into their children and return 1 at the first hit; a leaf stores the contact point in *@p outNormal and face normal x
+ * depth in *@p outPos and returns 1. Called by func_0032C928 and itself.
+ *
+ * @param selfp  the sphere tree (this)
+ * @param boxMin  the box minimum (On Tour bMin)
+ * @param boxMax  the box maximum (On Tour bMax)
+ * @param pos  this node's centre (On Tour center)
+ * @param depth  this node's level (On Tour level)
+ * @param base  this node's index (On Tour index)
+ * @param outPos  out: the push-out vector (On Tour overlap)
+ * @param outNormal  out: the contact point (On Tour loc), despite the name
+ * @return 1 on contact, else 0
+ */
 extern "C" int func_0032D028(void* selfp, void* boxMin, void* boxMax, void* pos, int depth, int base, void* outPos, void* outNormal)
 {
     sSphereOct_D028* self = (sSphereOct_D028*)selfp;
@@ -2453,8 +2726,23 @@ static inline sSphereVec4 ZeroW_D208(const sSphereVec4& in)
     return r;
 }
 
-// Sphere tree against the plane through the origin with normal *a1: records the deepest
-// penetration below self->best (*outA = push-out vector, *outB = contact point).
+/**
+ * Recursively finds a sphere tree's deepest penetration of a plane.
+ *
+ * The node's signed distance is the 4-component dot of @p plane with @p pos (the plane's w acting as its offset). Nodes
+ * farther than their radius (level radius x scale) plus the best depth so far (+0x94) are skipped. Inner nodes visit
+ * their children in the sorted order (+0x9C); a leaf whose distance - radius beats the best stores the plane normal x
+ * that depth in *@p outA, the centre moved onto the plane in *@p outB, and the depth in +0x94. Called by func_0032C9B8
+ * and itself.
+ *
+ * @param selfp  the sphere tree (this)
+ * @param plane  the plane (On Tour aPlane)
+ * @param pos  this node's centre (On Tour center)
+ * @param depth  this node's level (On Tour level)
+ * @param base  this node's index (On Tour index)
+ * @param outA  out: the push-out vector (On Tour overlap)
+ * @param outB  out: the contact point (On Tour loc)
+ */
 extern "C" void func_0032D208(void* selfp, void* plane, void* pos, int depth, int base, void* outA, void* outB)
 {
     sSphereOct_D208* self = (sSphereOct_D208*)selfp;
@@ -2492,6 +2780,17 @@ INCLUDE_ASM("intersect/riderspheretree", func_0032D440);
 // bind the 5-arg form to the same symbol.
 extern "C" int func_0032B6A8_tol(sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* d, float tol) __asm__("func_0032B6A8");
 
+/**
+ * Tells whether a sphere's centre lies inside a triangle: forwards to func_0032B6A8 with tolerance 1e-4.
+ *
+ * A radius the caller may pass in $f12 is replaced by the tolerance. Called by SphereTree_checkTriCollision.
+ *
+ * @param a  first corner (On Tour p1)
+ * @param b  second corner (On Tour p2)
+ * @param c  third corner (On Tour p3)
+ * @param d  the sphere's centre (On Tour center)
+ * @return 1 when the centre is inside, else 0
+ */
 extern "C" int func_0032D440(void* self, sSphereVec4* a, sSphereVec4* b, sSphereVec4* c, sSphereVec4* d)
 {
     return func_0032B6A8_tol(a, b, c, d, 9.999999747378752e-05f);
@@ -3151,6 +3450,20 @@ struct sRiderCapsule_E100 {
     float radius;       // 0xA0
 };
 
+/**
+ * Constructs a world line query from two end points.
+ *
+ * Installs cWorldLine_vtbl (+0x50), stores @p state as the precision (+0x0), clears the flag words (+0x4, +0x8), sets
+ * the start (+0x60 and +0x80) to @p p0 and the direction (+0x70 and +0x90) to @p p1 - @p p0, stores @p r at +0xA0 and
+ * builds the bounding box (+0x20 max, +0x30 min, w = 1) and its centre (+0x40). Called by the rider ground and air code
+ * (cGroundMotion_setupGroundVectors, cAirPredictor_simStep, cRider_putAt and others).
+ *
+ * @param p0  the start point (On Tour ap0)
+ * @param p1  the end point (On Tour ap1)
+ * @param state  the precision, 0..2 (On Tour tIntPrecision)
+ * @param r  the preferred hit parameter (On Tour aIdealParam)
+ * @return @p self
+ */
 extern "C" sRiderCapsule_E100* func_0032E100(sRiderCapsule_E100* self, sSphereVec4* p0, sSphereVec4* p1,
                                              int state, float r)
 {
@@ -4333,6 +4646,18 @@ struct sRiderSphere_FB48 {
     float radius0;          // 0x90
 };
 
+/**
+ * Constructs a world sphere query.
+ *
+ * Installs cWorldSphere_vtbl (+0x50), clears the flag words (+0x4, +0x8), sets the precision (+0x0) to 0 (low) when @p
+ * flag is set, else 1, stores the centre (+0x60, +0x80) and radius (+0x70, +0x90), and builds the bounding box (centre
+ * +/- radius, w = 1) with the centre as its centre (+0x40). Called by tAvalancheNode_calculate.
+ *
+ * @param p  the centre (On Tour acen)
+ * @param flag  nonzero for low precision (On Tour isLow)
+ * @param r  the radius (On Tour arad)
+ * @return @p self
+ */
 extern "C" sRiderSphere_FB48* func_0032FB48(sRiderSphere_FB48* self, sSphereVec4* p, int flag, float r)
 {
     sSphereVec4 t;
@@ -4710,6 +5035,16 @@ extern "C" int cWorldSphere_Is2SidedTriInt(void* self, sSphereVec4* vertA, sSphe
 //100%
 INCLUDE_ASM("intersect/riderspheretree", func_003300F8);
 #ifdef SKIP_ASM
+/**
+ * Returns the plane constant of the plane through a point: -dot(@p lhs, @p rhs).
+ *
+ * A 4-component dot product on VU0. func_00330360 adds it to the normal's dot with a sphere centre to get the signed
+ * distance.
+ *
+ * @param lhs  the plane normal (On Tour norm)
+ * @param rhs  a point on the plane (On Tour point)
+ * @return the negated dot product
+ */
 // Returns -dot(*a, *b) (4-component dot product on VU0, macro mode).
 // PORT: PS2-only VU0 inline asm; the PC port needs a C fallback (-(ax*bx + ay*by + az*bz + aw*bw)).
 extern "C" float func_003300F8(sSphereVec4* lhs, sSphereVec4* rhs)
@@ -4740,6 +5075,17 @@ INCLUDE_ASM("intersect/riderspheretree", func_00330128);
 // PORT: callers use this as a by-value struct return (hidden out pointer in $4).
 sSphereVec4 func_00330128_def(sSphereVec4* a, sSphereVec4* b, sSphereVec4* p) __asm__("func_00330128");
 
+/**
+ * Returns the point of a line segment closest to a test point.
+ *
+ * Projects @p p - @p a onto the unit direction of @p b - @p a: at or before 0 gives @p a, at or beyond the segment's
+ * length gives @p b, otherwise the projected point. Returned by value; called by func_00330250.
+ *
+ * @param a  the segment's first end (On Tour lPoint1)
+ * @param b  its second end (On Tour lPoint2)
+ * @param p  the test point (On Tour testPoint)
+ * @return the closest point
+ */
 sSphereVec4 func_00330128_def(sSphereVec4* a, sSphereVec4* b, sSphereVec4* p)
 {
     sSphereVec4 d = Sub_CDB0(*p, *a);
@@ -4800,6 +5146,17 @@ static inline float vu0Length_30250(const sSphereVec4& v)
     return r;
 }
 
+/**
+ * Tells whether a world sphere query touches any edge of a triangle.
+ *
+ * For each edge, finds the point closest to the sphere's centre (+0x60) with func_00330128 and returns 1 when it is
+ * nearer than the radius (+0x70). Called by cWorldSphere_IsTriInt and cWorldSphere_Is2SidedTriInt.
+ *
+ * @param vert0  first corner (On Tour a)
+ * @param vert1  second corner (On Tour b)
+ * @param vert2  third corner (On Tour c)
+ * @return 1 when an edge is within the radius, else 0
+ */
 // does the sphere at self+0x60 (radius self+0x70) touch any edge of triangle a,b,c?
 extern "C" int func_00330250(void* self, sSphereVec4* vert0, sSphereVec4* vert1, sSphereVec4* vert2)
 {
@@ -4850,6 +5207,17 @@ static inline float sphereAbs_330360(float x)
     return r;
 }
 
+/**
+ * Tells whether a world sphere query crosses a plane, and returns its signed distance.
+ *
+ * *@p out = dot(@p plane, centre +0x60) + func_003300F8(@p plane, @p point), the plane constant; it returns whether
+ * |distance| < radius (+0x70). Called by cWorldSphere_IsTriInt and cWorldSphere_Is2SidedTriInt.
+ *
+ * @param plane  the plane normal (On Tour pNorm)
+ * @param point  a point on the plane (On Tour pPoint)
+ * @param out  out: the centre's signed distance (On Tour dist)
+ * @return 1 when the sphere crosses the plane, else 0
+ */
 extern "C" int func_00330360(void* self, sSphereVec4* plane, sSphereVec4* point, float* out)
 {
     float planeConst = func_003300F8(plane, point);

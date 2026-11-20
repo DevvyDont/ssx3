@@ -78,6 +78,17 @@ struct sCache_279D0 {
 
 static inline int func_003279D0_less(unsigned int a, unsigned int b) { return a < b; }
 
+/**
+ * Returns the forward-difference tessellation of a terrain patch from the AI cache, building it when it is not cached.
+ *
+ * Looks the patch's key (+0x150) up in its hash bucket (key modulo the bucket count +0xC; chains are sorted by key). On
+ * a hit the node is moved to the tail of the age queue (func_00327AC0). On a miss the oldest node (+0x4) is reused: it
+ * is taken out of the hash (func_00327B30), given the key, hashed again (func_00327BB0), the age queue head moves on,
+ * and the patch is tessellated into it (func_00327C00). Called by func_00333EF8 and func_00335960.
+ *
+ * @param src  the terrain patch record (On Tour const tPatchRecord&)
+ * @param out  receives the cache node (On Tour ppFwdDiff)
+ */
 extern "C" void func_003279D0(sCache_279D0* self, void* src, sCacheNode_279D0** out)
 {
     unsigned int key = *(unsigned int*)((char*)src + 0x150);
@@ -114,6 +125,15 @@ struct sFwdDiffList {
     sFwdDiffLink* head;   // 0x4
 };
 
+/**
+ * Moves an AI forward-difference cache node to the tail of the age queue, making it the most recently used.
+ *
+ * The queue is circular with its head (oldest) at +0x4: if the node is the head the head just moves on, if it is
+ * already the tail (head->prev) nothing changes, otherwise it is unlinked and reinserted before the head.
+ *
+ * @param list  the cache (this)
+ * @param n  the node (On Tour node)
+ */
 extern "C" void func_00327AC0(sFwdDiffList* list, sFwdDiffLink* n)
 {
     if (list->head == n) {
@@ -154,6 +174,14 @@ struct sCache_7B30 {
 static inline int less_7B30(unsigned int a, unsigned int b) { return a < b; }
 
 extern "C" void func_00327B30_7B30(sCache_7B30* self, sCacheNode_7B30* node) __asm__("func_00327B30");
+/**
+ * Removes an AI forward-difference cache node from the patch hash table.
+ *
+ * Does nothing for an unused node (key 0xFFFFFFFF). Otherwise walks the node's bucket (key modulo +0xC; the chain is
+ * sorted by key, so the walk stops at a larger key) and unlinks the entry with the node's key.
+ *
+ * @param node  the node (On Tour node)
+ */
 extern "C" void func_00327B30_7B30(sCache_7B30* self, sCacheNode_7B30* node)
 {
     unsigned int key = node->key;
@@ -191,6 +219,14 @@ struct sFwdDiffTable {
     unsigned int count;
 };
 
+/**
+ * Adds an AI forward-difference cache node to the patch hash table, keeping its bucket sorted by key.
+ *
+ * The bucket is the node's key modulo the bucket count (+0xC); the node goes before the first entry with a larger key.
+ *
+ * @param table  the cache (this)
+ * @param node  the node (On Tour anode)
+ */
 extern "C" void func_00327BB0(sFwdDiffTable* table, sFwdDiffNode* node)
 {
     unsigned int key = node->key;
@@ -217,6 +253,17 @@ extern "C" void func_00391480(void* t, void* a);
 struct sGp2930 { int a, b; };
 extern sGp2930 D_004A5A20; // placeholder: target is a raw $gp+0x2930 reference
 
+/**
+ * Tessellates a terrain patch into an AI forward-difference cache node on VU0.
+ *
+ * Loads the patch's 16 control points (+0x40) into VU0 and starts its micro-program (func_00391418), resets the node's
+ * cached face data (func_00327C68) while VU0 runs, waits for it (func_003914F8) and copies the 10 x 10 evaluated
+ * vertices from VU0 memory into the node (+0x10, func_00391480). The object at $gp+0x2930 passed to the VU0 helpers is
+ * not used by them. Called by func_003279D0 on a cache miss.
+ *
+ * @param a1  the terrain patch record (On Tour const tPatchRecord&)
+ * @param a2  the cache node to fill (On Tour node)
+ */
 extern "C" void func_00327C00(void* self, void* a1, void* a2)
 {
     sGp2930* t = &D_004A5A20;
@@ -230,6 +277,14 @@ extern "C" void func_00327C00(void* self, void* a1, void* a2)
 //100%
 INCLUDE_ASM("intersect/aifwddiff", func_00327C68);
 #ifdef SKIP_ASM
+/**
+ * Clears the face data of an AI forward-difference cache node: marks every entry as not yet computed.
+ *
+ * Sets the first float of each of the three leading vectors of the 81 entries at +0x650 and the 9 entries at +0x1A90
+ * (0x40 bytes each) to 1e10. Called by func_00327C00 before the patch is evaluated.
+ *
+ * @param patch  the cache node (On Tour node; despite the name not a patch)
+ */
 extern "C" void func_00327C68(void* self, void* patch)
 {
     float* cell = (float*)((char*)patch + 0x650);
@@ -271,6 +326,16 @@ struct sFwdDiff_27CC8 {
     sBlock_27CC8 blk;       // 0xC0
 };
 
+/**
+ * Copies a sphere tree's placement and static info into this one.
+ *
+ * Copies the eight axis vectors (+0x0..+0x7F), the centre (+0x80) and the 0x80-byte static info (+0xC0), then points
+ * the info pointer (+0x98) at this tree's own copy. The scale (+0x90), worst case (+0x94) and sort axes (+0x9C) are not
+ * copied. Called by cRollerModifier_cRollerModifier, cWorldSphTree_Transform and func_0035DF70.
+ *
+ * @param src  the tree to copy (On Tour aTree)
+ * @return @p self
+ */
 extern "C" sFwdDiff_27CC8* func_00327CC8(sFwdDiff_27CC8* self, sFwdDiff_27CC8* src)
 {
     int i;
@@ -363,6 +428,20 @@ struct sShape_27F18 {
     sSphere_27F18 subs[1];  // 0x30
 };
 
+/**
+ * Tests a sphere tree against a rider's spheres.
+ *
+ * Makes sure the tree's data buffer is loaded (SphereTree_AllocBuf when the info word +0x8 is set; the buffer goes to
+ * info +0x28), then tests the rider's bounding sphere (+0x10, radius +0x20) with func_0032CDB0 from the root (centre
+ * +0x80). A miss returns 0. A hit returns 1 when the rider has no sphere list (+0x2C = 0); otherwise each listed sphere
+ * (from +0x30, 0x20 bytes each) is tested and the first hit returns 1. The push-out and contact outputs are filled by
+ * func_0032CDB0. Called by cWorldRider_IsSphTreeInt.
+ *
+ * @param shape  the rider's sphere tree (On Tour const cRiderSphereTree*)
+ * @param outPush  out: how far to push apart (On Tour overlap)
+ * @param outContact  out: the contact point (On Tour loc)
+ * @return 1 on contact, else 0
+ */
 extern "C" int func_00327F18(void* self, sShape_27F18* shape, int outPush, int outContact)
 {
     void* tree = *(void**)((char*)self + 0x98);
@@ -482,6 +561,14 @@ INCLUDE_ASM("intersect/aifwddiff", func_00328170);
 #ifdef SKIP_ASM
 extern "C" void func_003281D0(void *, int, void *, int, int);
 
+/**
+ * Debug-draws a sphere tree's occupied leaf cells.
+ *
+ * Makes sure the tree's data buffer is loaded (as func_00327F18 does) and calls func_003281D0 from the root: centre
+ * +0x80, level 0, index 0, down to the depth stored at info +0xC. Nothing calls it.
+ *
+ * @param octree  the sphere tree (this)
+ */
 extern "C" void func_00328170(void *octree) {
     void *temp_4;
 
@@ -550,6 +637,20 @@ static inline void vu0Add_281D0(sVec4_281D0& r, const sVec4_281D0& a, const sVec
 
 
 extern "C" void func_281D0(sAI_281D0* self, int end, sVec4_281D0* pos, int level, int off) __asm__("func_003281D0");
+/**
+ * Recursively draws the occupied leaf cells of a sphere tree as magenta boxes.
+ *
+ * Above the target level each set bit i of the occupancy byte at @p off (buffer at info +0x28) selects child i: its
+ * centre is @p pos plus axis vector i (+0x0 + 16i) scaled by the level's offset (level table at info +0x20, 12 bytes
+ * per level, float +0x10 from the entry), and its index is off + (i + 1) x the level's stride (+0x8). At the target
+ * level it draws a box of size level scale x the tree's scale (+0x90) at @p pos in colour (1, 0, 1, 0) through virtual
+ * slot 87 of cGraphicsMan_TheGraphicsMan. Called by func_00328170 and itself.
+ *
+ * @param end  the level whose cells are drawn (On Tour desLevel)
+ * @param pos  this cell's centre (On Tour center)
+ * @param level  this cell's level
+ * @param off  this cell's index into the occupancy bytes (On Tour index)
+ */
 extern "C" void func_281D0(sAI_281D0* self, int end, sVec4_281D0* pos, int level, int off)
 {
     if (level < end) {
@@ -594,6 +695,23 @@ struct sBox_00328360 {
     float maxx, maxy, maxz;
 };
 
+/**
+ * Classifies an octree cell against a bounding box: outside (1), crossing (2) or inside (0).
+ *
+ * The cell spans [x - 0.2, x + 1.2] x 2^level on each axis (level, x, y, z from @p cell). It returns 1 when the box
+ * misses that span on any axis. The remaining tests are likely buggy: it returns 2 when the box's maximum exceeds the
+ * cell's upper bound on an axis, or when the box's minimum is below the cell's UPPER bound (x, then y twice; z is never
+ * tested), which holds for practically every box that is not outside. 0 therefore only comes back when the box's
+ * minimum sits exactly on the upper corner. Callers walk a 0 cell whole (for camera triggers func_00176890) and a 2
+ * cell child by child (func_00174848), so in practice every overlapping cell takes the crossing path.
+ *
+ * Called by func_0016D320 (camera triggers), func_003309D8 and the other octree queries (func_00331450, func_00332DB8,
+ * func_00335D78, func_00336F30, func_003378C0), once per root cell.
+ *
+ * @param cell  the cell key: level, x, y, z (On Tour CellKey, this)
+ * @param box  the query box: min at +0x0, max at +0x10
+ * @return 1 outside, 2 crossing, 0 inside (On Tour ProximityResult)
+ */
 extern "C" int func_00328360(sCell_00328360* cell, sBox_00328360* box)
 {
     union {
@@ -1181,6 +1299,26 @@ static inline sVec4_29590 vu0Scale_29590(const sVec4_29590& v, float s)
     return r;
 }
 
+/**
+ * Tests a sphere against an axis-aligned box face by face and returns the shallowest face contact.
+ *
+ * For each axis whose cross-section (the other two axes within [@p mn, @p mx]) contains the centre @p point, the depths
+ * past the low and high faces are (point - mn) + margin and (mx - point) + margin; when both are non-negative the
+ * shallower face that beats the best so far sets @p hp (the centre moved onto that face), @p nrm (the face's outward
+ * axis, from t4vect_XAxis/YAxis/ZAxis) and *@p outDist. Contacts at the box's edges or corners, where the centre lies
+ * outside every cross-section, are not found.
+ *
+ * Called by cWorldSphere_IsBoxInt, func_0032B2B8 and func_0032D028.
+ *
+ * @param margin  the sphere's radius (On Tour rad)
+ * @param mn  the box minimum (On Tour bMin)
+ * @param mx  the box maximum (On Tour bMax)
+ * @param point  the sphere's centre (On Tour cen)
+ * @param hp  out: the contact point (On Tour ipos)
+ * @param nrm  out: the face normal (On Tour inorm)
+ * @param outDist  out: the depth, 1e30 when there is none (On Tour param)
+ * @return 1 when a face was found, else 0
+ */
 extern "C" int func_00329590(float margin, sVec4_29590* mn, sVec4_29590* mx, sVec4_29590* point, sVec4_29590* hp, sVec4_29590* nrm, float* outDist)
 {
     *outDist = 1e30f;

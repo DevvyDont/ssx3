@@ -124,6 +124,17 @@ struct sHash128_17710 {
 // harness-only: sHash128 is defined later in the unit (func_00317798's block)
 sHash128_17710 func_00317710_impl(sHash128_17710* out, char* str) __asm__("func_00317710");
 
+/**
+ * Hashes a string to 128 bits: its full MD5 digest.
+ *
+ * Runs md5_init, md5_append over the strlen() bytes of @p str and md5_finish, copies the 16-byte digest to *@p out and
+ * returns it by value. The 128-bit counterpart of tHashName64_getHashValue, which keeps only the first 8 bytes. Only
+ * func_00317798 calls it.
+ *
+ * @param out  receives the digest
+ * @param str  NUL-terminated string to hash
+ * @return the digest (the value stored in *@p out)
+ */
 sHash128_17710 func_00317710_impl(sHash128_17710* out, char* str)
 {
     md5_ctx ctx;
@@ -148,6 +159,14 @@ struct sHash128 {
 
 extern "C" sHash128 func_00317710(sHash128* out, char* str);
 
+/**
+ * Returns the 128-bit (MD5) hash of a string.
+ *
+ * Calls func_00317710 with a scratch output, as GetHashValue64 does for the 64-bit hash. Nothing calls it.
+ *
+ * @param str  NUL-terminated string to hash
+ * @return the 16-byte MD5 digest
+ */
 extern "C" sHash128 func_00317798(char* str)
 {
     sHash128 digest;

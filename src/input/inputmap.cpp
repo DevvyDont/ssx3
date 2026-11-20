@@ -33,6 +33,12 @@ INCLUDE_ASM("input/inputmap", func_00320D08);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 
+/**
+ * Frees an input map's statement offset table and op-code buffer.
+ *
+ * Frees MapOffset (+0x4) and the op-code buffer (+0x14) with cMemMan_free when they are set. The pointers are not
+ * cleared afterwards. Nothing calls it.
+ */
 extern "C" void func_00320D08(void *self)
 {
     void *buffer = *(void **)((char *)self + 4);
@@ -53,6 +59,14 @@ void cInputMap_loadMapFile_vvi(void* self, void* data, int size) __asm__("cInput
 void cMemMan_free(void* p);
 extern "C" void* func_003E1A10(const char* path, int* size, int a2);
 
+/**
+ * Loads an input map script from a file and compiles it into the map.
+ *
+ * Reads the whole file with func_003E1A10 (flag 0x100), passes the text and its size to cInputMap_loadMapFile and then
+ * frees the buffer. Nothing calls it.
+ *
+ * @param path  the map file's path (On Tour fn)
+ */
 extern "C" void func_00320D50(void* self, const char* path)
 {
     int size;
@@ -203,6 +217,26 @@ struct sParser_1010 {
     char pad12C[0x190 - 0x12C];
 };
 
+/**
+ * Evaluates one compiled map statement against a controller pad with a default button modifier and eight config values.
+ *
+ * Like cInputMap_getValue, but before running the statement through func_00325450 it stores @p a3 as the evaluator's
+ * default button modifier (+0x0) and @p f0..@p f7 as its config values 1..8 (+0x10C..+0x128; config 0 always reads 0).
+ * Called by func_00320C18, the cInput wrapper beside cInput_getValue.
+ *
+ * @param a1  the controller pad to read (On Tour cInputPad*)
+ * @param a2  statement slot (input state id) to evaluate
+ * @param a3  the button modifier used for buttons the script leaves unqualified (On Tour eButtonModifiers)
+ * @param f0  config value 1 (On Tour c0)
+ * @param f1  config value 2
+ * @param f2  config value 3
+ * @param f3  config value 4
+ * @param f4  config value 5
+ * @param f5  config value 6
+ * @param f6  config value 7
+ * @param f7  config value 8 (On Tour c7)
+ * @return the statement's value
+ */
 extern "C" float func_00321010(void* self, void* a1, int a2, int a3, float f0, float f1, float f2, float f3, float f4, float f5, float f6, float f7)
 {
     sParser_1010 parser;
@@ -256,6 +290,26 @@ struct sParser_1188 {
     char pad12C[0x190 - 0x12C];
 };
 
+/**
+ * Tells whether one compiled map statement is nonzero for a controller pad, with a default button modifier and eight
+ * config values.
+ *
+ * Same evaluation as func_00321010 (modifier into +0x0, config values 1..8 into +0x10C..), compared with 0.0 like
+ * cInputMap_getState. Called by func_00320C70, the cInput wrapper beside cInput_getState.
+ *
+ * @param a1  the controller pad to read (On Tour cInputPad*)
+ * @param a2  statement slot (input state id) to evaluate
+ * @param a3  the button modifier used for buttons the script leaves unqualified (On Tour eButtonModifiers)
+ * @param f0  config value 1 (On Tour c0)
+ * @param f1  config value 2
+ * @param f2  config value 3
+ * @param f3  config value 4
+ * @param f4  config value 5
+ * @param f5  config value 6
+ * @param f6  config value 7
+ * @param f7  config value 8 (On Tour c7)
+ * @return 1 when the statement's value is not 0.0, otherwise 0
+ */
 extern "C" int func_00321188(void* self, void* a1, int a2, int a3, float f0, float f1, float f2, float f3, float f4, float f5, float f6, float f7)
 {
     sParser_1188 parser;
@@ -475,6 +529,15 @@ INCLUDE_ASM("input/inputmap", func_003215F8);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 
+/**
+ * Takes a parse node from the input map parser's free node list and returns it cleared.
+ *
+ * Pops the head of FreeParseNodes (+0xE0, linked through each node's +0x4) and zeroes the node's 16 bytes
+ * (func_00416210). There is no check for an empty list: once the 0x800-node pool is used up it reads through the list's
+ * null end. The parse functions (parseOr, parseAnd, parseTerm and the others) call it for every node they build.
+ *
+ * @return the new node
+ */
 extern "C" void* func_003215F8(void* self)
 {
     void* freeNode = *(void**)((char*)self + 0xE0);

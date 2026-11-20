@@ -53,6 +53,14 @@ extern "C" void cActiveTriggerList_clearFlags(cActiveTriggerList* self)
 //100%
 INCLUDE_ASM("camera/trigger/triggeralgorithms", func_0016C6B0);
 #ifdef SKIP_ASM
+/**
+ * Finds the node of an active camera-trigger list that holds a given trigger.
+ *
+ * Walks the list from the head (+0x0) and returns the first node whose trigger (node +0x0) equals @p key.
+ *
+ * @param key  the camera trigger to look for (On Tour tCameraTrigger*)
+ * @return the node, or 0 when the trigger is not listed
+ */
 extern "C" sTriggerNode* func_0016C6B0(cActiveTriggerList* self, void* key)
 {
     sTriggerNode* node = self->head;
@@ -71,6 +79,14 @@ extern "C" sTriggerNode* func_0016C6B0(cActiveTriggerList* self, void* key)
 //100%
 INCLUDE_ASM("camera/trigger/triggeralgorithms", func_0016C6E0);
 #ifdef SKIP_ASM
+/**
+ * Finds the trigger with a given id in an active camera-trigger list.
+ *
+ * Walks the list from the head and returns the first node's trigger whose first word (TriggerID) equals @p key.
+ *
+ * @param key  the trigger id to look for (On Tour triggerID)
+ * @return the trigger, or 0 when none is listed with that id
+ */
 extern "C" void* func_0016C6E0(cActiveTriggerList* self, void* key)
 {
     sTriggerNode* node = self->head;
@@ -151,6 +167,15 @@ void* func_0016BEE8(void* self);
 void* func_0016C5D0(void* self);
 extern "C" void* cCameraTriggerStack_cCameraTriggerStack(void* self);
 
+/**
+ * Constructs the camera trigger manager: its trigger list, two active trigger lists and two trigger stacks.
+ *
+ * Runs func_0016BEE8 on the trigger list (+0x0), func_0016C5D0 on the active lists at +0x14 and +0x18 and
+ * cCameraTriggerStack_cCameraTriggerStack on the stacks at +0x1C and +0x3C. The unit's static initializer func_00175A20
+ * calls it on gCamTriggerMan.
+ *
+ * @return @p self
+ */
 extern "C" void* func_0016C800(void* self)
 {
     char* cursor;
