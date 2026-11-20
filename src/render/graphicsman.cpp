@@ -93,7 +93,28 @@ static inline int iabs_9A78(int v)
     return v < 0 ? -v : v;
 }
 
-// Compares two entries' keys; type 3 (and inexact 1/2) allow position tolerances and swapped ends.
+/**
+ * Returns 1 when two blended matrices name the same matrices with weights within the given tolerances, else 0.
+ *
+ * Each argument points at an 0xC-byte record laid out like On Tour's tMdfBlendedMatrix: a component count at +0 and a
+ * pointer at +4 to up to three 4-byte components (a short weight, then the matrix id). The counts and the first ids
+ * must be equal. Count 1 matches at once when the first weights are equal; count 2 when the first weights, second ids
+ * and second weights are equal; counts other than 1 to 3 never match.
+ *
+ * Otherwise (count 3, or an inexact count 1 or 2) it compares second and third components: with the ids in the same
+ * order every weight difference must be within @p tol0, @p tol1, @p tol2; with the second and third ids swapped the
+ * weights are compared crosswise. Possible bug: an inexact count 1 or 2 falls into this test and reads components such
+ * a record does not have (the third, and for count 1 also the second).
+ *
+ * Callers: cGraphicsMan_AddBlendedMatrix (10, 20, 20) and cPS2GraphicsMan_ResolveCharModel (0, 0, 0).
+ *
+ * @param ap  the first blended-matrix record
+ * @param bp  the second blended-matrix record
+ * @param tol0  largest allowed difference of the first weights
+ * @param tol1  largest allowed difference of the second weights
+ * @param tol2  largest allowed difference of the third weights
+ * @return 1 when the two records are treated as the same blended matrix, else 0
+ */
 extern "C" int func_00369A78(void* ap, void* bp, int tol0, int tol1, int tol2)
 {
     sEnt_9A78* lhs = (sEnt_9A78*)ap;
@@ -187,6 +208,17 @@ struct sGfxVEntry95 {
     void (*fn)(void*, void*, int, void*, int, int, int, float);
 };
 
+/**
+ * Draws a model instance through vtable slot 95 (cPS2GraphicsMan_RenderModel) with a scale of 1.0.
+ *
+ * Passes @p obj, the word at @p obj + 0x94, the address @p obj + 0x10, then @p a2, @p a3, @p a4 and 1.0f. Slot 96 of
+ * both cGraphicsMan_vtbl and cPS2GraphicsMan_vtbl.
+ *
+ * @param obj  the instance record handed to slot 95
+ * @param a2  passed through to slot 95 (animation matrices)
+ * @param a3  passed through to slot 95 (texture matrix)
+ * @param a4  passed through to slot 95 (render flags)
+ */
 extern "C" void func_00369CB0(cPS2GraphicsMan* self, void* obj, int a2, int a3, int a4)
 {
     sGfxVEntry95* vt = (sGfxVEntry95*)self->mVtbl;
@@ -253,8 +285,6 @@ struct sGmVE_369CF8 {
  * @param Color  the vertex colours (a, r, g, b floats)
  * @param Offset  a translation added to every position
  */
-// cGraphicsMan::RenderIndexedTriList(int NumTris, int NumVerts, const unsigned char* Indices,
-//     const t3Vector* P, const t2Vector* UV, const tARGB* Color, const t3Vector& Offset)
 extern "C" void cGraphicsMan_RenderIndexedTriList(cPS2GraphicsMan* self, int NumTris, int NumVerts, unsigned char* Indices, sGmV3_369CF8* Positions,
                               sGmUV_369CF8* UV, sGmV4_369CF8* Color, sGmV3_369CF8* Offset)
 {
@@ -302,6 +332,11 @@ extern "C" void cGraphicsMan_RenderIndexedTriList(cPS2GraphicsMan* self, int Num
 //100%
 INCLUDE_ASM("render/graphicsman", func_00369FF0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * cPS2GraphicsMan_update calls it.
+ */
 void func_00369FF0(void* self)
 {
 }
@@ -387,7 +422,6 @@ static inline sV4_A048 vu0MtxMul_A048(const sV4_A048* m, const sV4_A048& v)
  * @param color  the colour as four floats a, r, g, b in 0..1
  * @param n  the number of points (On Tour NumPoints); at most 20
  */
-// Evaluates the cubic (t^3, t^2, t, 1) * m at n evenly spaced t in [0, 1] and draws the points as one strip.
 extern "C" void cGraphicsMan_RenderSpline(cPS2GraphicsMan* self, sV4_A048* BezMat, float* color, int n)
 {
     float step = 1.0f / ((float)n - 1.0f);
@@ -421,6 +455,14 @@ extern "C" void* func_0036A1C0(int);
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036A190__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Queues a grid mesh for deferred deletion: calls func_0036A1C0(@p gridMesh).
+ *
+ * Slot 77 of cPS2GraphicsMan_vtbl, after CreateGridMesh at slot 76.
+ *
+ * @param gridMesh  the grid mesh object (a garbage-can node) to queue
+ * @return whatever func_0036A1C0 leaves in v0; that callee has no return statement, so the value is meaningless
+ */
 void* func_0036A190(void* self, int gridMesh)
 {
     return func_0036A1C0(gridMesh);
@@ -454,6 +496,15 @@ INCLUDE_ASM("render/graphicsman", func_0036A1C0);
 extern int D_004A5B88;
 extern void* D_0053AB40[];
 
+/**
+ * Pushes node @p n onto the current deferred-delete list D_0053AB40[D_004A5B88].
+ *
+ * Stores the old list head in the node's first word and makes the node the head. The node's second word is its vtable:
+ * func_0036A1E8 later deletes it through the virtual destructor. No return statement although declared to return void*.
+ *
+ * @param n  the node to queue (a pointer passed as int)
+ * @return nothing defined (no return statement)
+ */
 // PORT: the unit declares this (int) returning void*; the arg is a list node pointer.
 extern "C" void* func_0036A1C0(int n)
 {
@@ -476,6 +527,13 @@ public:
     virtual ~cGmNode_A1E8();
 };
 
+/**
+ * Advances to the next of the four deferred-delete lists and deletes every object on it.
+ *
+ * D_004A5B88 = (D_004A5B88 + 1) % 4; each node of D_0053AB40[D_004A5B88] is deleted through its virtual destructor
+ * (next pointer at +0, vtable at +4), then the list is cleared. An object queued by func_0036A1C0 is therefore deleted
+ * on the fourth call after it was queued. cGame_render calls it once per frame.
+ */
 extern "C" void func_0036A1E8()
 {
     D_004A5B88 = (D_004A5B88 + 1) % 4;
@@ -494,6 +552,11 @@ INCLUDE_ASM("render/graphicsman", func_0036A290);
 #ifdef SKIP_ASM
 extern "C" void func_0036A1E8();
 
+/**
+ * Empties all four deferred-delete lists by calling func_0036A1E8 four times.
+ *
+ * cGame_purge calls it.
+ */
 extern "C" void func_0036A290()
 {
     int i;
@@ -596,6 +659,12 @@ extern "C" void cGraphicsMan_DeformMeshMatrix(cPS2GraphicsMan* self, sGmMtx_A2C0
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036A3B0);
 #ifdef SKIP_ASM
+/**
+ * Spreads the low 8 bits of @p value to the even bit positions (bit i goes to bit 2i).
+ *
+ * @param value  the value whose low byte is spread
+ * @return the spread value, at most 0x5555
+ */
 extern "C" int func_0036A3B0(int value) {
     int temp_2;
     int temp_2_2;
@@ -612,6 +681,15 @@ INCLUDE_ASM("render/graphicsman", func_0036A3E0);
 #ifdef SKIP_ASM
 extern "C" int func_0036A3B0(int);
 
+/**
+ * Interleaves the low bytes of two values into a 16-bit Morton code.
+ *
+ * Returns func_0036A3B0(@p evenValue) | (func_0036A3B0(@p oddValue) << 1). No caller.
+ *
+ * @param evenValue  the value whose bits go to the even positions
+ * @param oddValue  the value whose bits go to the odd positions
+ * @return the interleaved 16-bit code
+ */
 extern "C" int func_0036A3E0(unsigned short evenValue, unsigned short oddValue)
 {
     return func_0036A3B0(evenValue) | (func_0036A3B0(oddValue) << 1);
@@ -623,6 +701,19 @@ INCLUDE_ASM("render/graphicsman", func_0036A428);
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036AA60);
 #ifdef SKIP_ASM
+/**
+ * Writes a DMA packet that uploads a 16x16 32-bit image from main memory into GS memory, then flushes the texture
+ * cache.
+ *
+ * The packet (0xB0 bytes at *@p pp) is: a cnt DMA tag with a GIF A+D list setting BITBLTBUF (destination base @p y,
+ * width 1 block, PSMCT32), TRXPOS 0, TRXREG 16x16 and TRXDIR 0 (host to local), followed by an IMAGE GIF tag of 64
+ * qwords; a ref DMA tag pointing the 64 qwords at @p x; and a cnt tag with an A+D write of TEXFLUSH. Advances *@p pp by
+ * 0xB0. @p self is unused. Caller: func_0036AC00.
+ *
+ * @param x  main-memory address of the 1 KB image (the DMA ref address)
+ * @param y  GS destination base pointer (BITBLTBUF DBP)
+ * @param pp  in/out: the packet write pointer
+ */
 // PORT: ulong is 64-bit here (GIF/DMA packet words); cQuad128 is a 128-bit GPR quadword.
 extern "C" void func_0036AA60(void* self, int x, int y, char** pp)
 {
@@ -675,6 +766,15 @@ struct sGmOwner_ABA0 {
     sGmEntry_ABA0 entries[1];
 };
 
+/**
+ * Copies the depth-fog tweak values into the graphics manager's fog entry for view @p idx.
+ *
+ * Writes cDepthFog_m_NearPlane, cDepthFog_m_FarPlane, cDepthFog_m_Exponent, cDepthFog_m_Density and the 16-byte
+ * cDepthFog_m_Colour into the 0x20-byte entry at unk_6C64 + @p idx * 0x20. Callers: func_0036AC00 (when
+ * cDepthFog_m_OverrideWP is set) and cPS2GraphicsMan_UpdateFullScreenEffects.
+ *
+ * @param idx  the view index
+ */
 extern "C" void func_0036ABA0(void* self, int idx)
 {
     char* entry = (char*)&((sGmOwner_ABA0*)self)->entries[idx];
@@ -723,6 +823,24 @@ struct sGmVEntry_AC00 {
     int (*fn)(void*);
 };
 
+/**
+ * Queues the depth-fog full-screen pass for view @p idx on the scratchpad DMA ring.
+ *
+ * Returns at once unless cDepthFog_m_Enable. When cDepthFog_m_OverrideWP is set it first refreshes the view's fog entry
+ * (func_0036ABA0); it skips the view when the entry's density is 0.0 and its exponent is non-zero. func_0036A428 fills
+ * the 1 KB table at D_00507B80 + @p idx * 0x400; func_00366CE0 on mpTextureMan + 0x1F60 reserves 0x400 bytes of GS
+ * memory, whose address is the record word at *(mpTextureMan + 0x3F50) + slot * 0x1C, shifted right 8.
+ *
+ * Three packets then go out through D_004A4474 (each opened with func_0038F460 and closed with func_0038F668, which
+ * updates *@p handle): func_0036AA60 uploads the table, func_0036AE20 runs over mCurrentZBufferPage and
+ * mCurrentFrameBufferPage with twice the slot 11 GetScreenHeight value, and func_0036B158 finishes with the uploaded
+ * table. Finally func_003663D8 releases the GS slot and func_00368138(mpTextureMan, @p pkt2) runs. Caller:
+ * func_00363490.
+ *
+ * @param idx  the view index
+ * @param pkt2  passed to func_00368138
+ * @param handle  in/out: the DMA ring's current main-memory address
+ */
 extern "C" void func_0036AC00(char* self, int idx, void* pkt2, int* handle)
 {
     if (cDepthFog_m_Enable == 0) {
@@ -775,6 +893,24 @@ static inline unsigned int gmCall_AE20(char* self, int slot)
     return vt[slot].fn(self + vt[slot].delta);
 }
 
+/**
+ * Appends a GS packet that reads the Z buffer as a 16-bit texture and copies it in 8-pixel strips into the frame
+ * buffer, every 16 pixels.
+ *
+ * Sets FRAME_1 to @p frameBase (width = slot 10 GetScreenWidth / 64, PSMCT16, FBMSK 0x3FFF), ZBUF to
+ * mCurrentZBufferPage (PSMZ24, no write), TEST to depth test ALWAYS, XYOFFSET to centre the screen in the 4096 space,
+ * SCISSOR to mFBWidth x 2 * mFBHeight, then TEXFLUSH, TEXA (TA1 = 0x80) and TEX1 0. TEX0 is @p texBase << 5 as a PSMZ16
+ * 1024x1024 texture with TCC and DECAL. With PRIM 0x116 (textured sprite, UV coordinates) and RGBAQ 0x80808080 (Q = 1)
+ * it draws one sprite per 16 pixels: texels [16k, 16k + 8) to x [16k + 8, 16k + 16), @p n rows tall. @p idx is unused.
+ * Caller: func_0036AC00.
+ *
+ * @param vself  the graphics manager (cPS2GraphicsMan)
+ * @param idx  the view index (unused)
+ * @param texBase  the Z buffer page read as the texture
+ * @param frameBase  the frame buffer page drawn into
+ * @param n  the strip height in rows
+ * @param pp  in/out: the packet write pointer
+ */
 extern "C" void func_0036AE20(void* vself, int idx, int texBase, int frameBase, int n, char** pp)
 {
     char* self = (char*)vself;
@@ -879,9 +1015,19 @@ static inline unsigned int gmVCall_B5E8(sGmMan_B5E8* self, int slot)
     return vt[slot].fn((char*)self + vt[slot].delta);
 }
 
-// Clears view idx's saved scissor rectangle with its fill colour: sets FRAME/ZBUF/XYOFFSET and
-// TEST/ALPHA states, draws the rectangle as 32-pixel-wide sprite strips, then restores
-// FRAME/XYOFFSET/SCISSOR for the full screen.
+/**
+ * Appends a GS packet that blends the depth-fog colour over view @p idx's rectangle where the depth test passes, then
+ * restores the frame, offset and scissor.
+ *
+ * Sets FRAME_1 (32-bit), ZBUF without writes, TEST 0x70000 (depth test GREATER), XYOFFSET from the view, ALPHA_1 17
+ * ((Cd - Cs) * Ad + Cs) and PRIM 70 (sprite with blending). RGBAQ is the fog entry's floats at +0x14, +0x18 and +0x1C
+ * times 256 with alpha 0x80; a value of 1.0 gives 256 and spills into the next byte. It draws 32-pixel-wide strips at Z
+ * 0x7FFF over the saved view rectangle unk_59B0[@p idx] (a width remainder below 32 is not drawn), then restores FRAME,
+ * XYOFFSET and SCISSOR from mScissor. No caller.
+ *
+ * @param idx  the view index
+ * @param pp  in/out: the packet write pointer
+ */
 extern "C" void func_0036B5E8(sGmMan_B5E8* self, int idx, char** pp)
 {
     sGmFill_B5E8* fill = &self->fill[idx];
@@ -950,6 +1096,34 @@ extern "C" void func_0036B5E8(sGmMan_B5E8* self, int idx, char** pp)
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036B9D8);
 #ifdef SKIP_ASM
+/**
+ * Queues a multi-pass offset blur: draws a texture region into a frame-buffer area once per pass, each pass shifted by
+ * @p off and added to the previous ones.
+ *
+ * FRAME_1 is @p fbp >> 5 with width @p w / 64 (at least 1), PSMCT24, alpha masked; ZBUF without writes; TEST ALWAYS;
+ * ALPHA 0x68 with FIX 0x80 (Cs + Cd); SCISSOR @p w x @p h; TEX1 bilinear; TEX0 @p tbp, width @p tw / 64, PSMCT24,
+ * MODULATE; CLAMP REGION_CLAMP to [@p u, @p u + @p uw - 1] x [@p v, @p v + @p vh - 1]. The colour is @p intensity / @p
+ * passes as grey. Pass 1 uses PRIM 0x116 (overwrite) and passes 2 to 4 PRIM 0x156 (blend), offset by (-off, -off),
+ * (+off, +off), (+off, -off), (-off, +off) in 1/16 pixels.
+ *
+ * Likely bug: the GIF tag's NLOOP is cols * 4 * passes + 13, but only four offsets exist, so @p passes above 4 would
+ * describe more data than is written. Caller: func_0036C790 (1 pass to downsample, 4 to blur).
+ *
+ * @param vself  the graphics manager (cPS2GraphicsMan)
+ * @param tbp  the source texture's GS base pointer
+ * @param tw  the source texture width
+ * @param u  the source region's left texel
+ * @param v  the source region's top texel
+ * @param uw  the source region width
+ * @param vh  the source region height
+ * @param fbp  the destination frame-buffer address (>> 5 gives FBP)
+ * @param intensity  the summed brightness
+ * @param w  the destination width
+ * @param h  the destination height
+ * @param off  the per-pass offset in 1/16 pixels
+ * @param passes  the number of passes, 1 to 4
+ * @param handle  in/out: the DMA ring's current main-memory address
+ */
 // PORT: ulong is 64-bit here (GIF/DMA packet words).
 // Multi-pass offset blur: draws the source region `passes` times as column sprites, each pass
 // shifted diagonally by +-off texels, with the vertex colour scaled by intensity / passes.
@@ -1103,6 +1277,22 @@ extern "C" void func_0036B9D8(void* vself, int tbp, int tw, int u, int v, int uw
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036C188);
 #ifdef SKIP_ASM
+/**
+ * Queues a GS pass that subtracts a grey level from a frame-buffer area and scales the rest: (Cd - grey) * @p alpha /
+ * 128.
+ *
+ * FRAME_1 is @p x >> 5, width @p w / 64 (at least 1), PSMCT24 with alpha masked; XYOFFSET 0; ALPHA 0xA1 ((Cd - Cs) *
+ * FIX) with FIX = @p alpha; PRIM 0x146 (untextured sprites with blending) in colour @p grey. It draws @p w / 32 sprites
+ * covering @p w x @p y. Likely bug: a width below 32 makes the strip count 0 and the step computation divides by zero;
+ * func_0036C790 passes 1 << D_004A43D0, which its menu lets drop to 16. Caller: func_0036C790.
+ *
+ * @param x  the frame-buffer address of the area (>> 5 gives FBP)
+ * @param w  the area width
+ * @param y  the area height
+ * @param grey  the grey level subtracted (0 to 255)
+ * @param alpha  the scale, 128 = 1.0
+ * @param handle  in/out: the DMA ring's current main-memory address
+ */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // PORT: ulong is 64-bit here (GIF/DMA packet words).
 extern "C" void func_0036C188(void* self, int x, int w, int y, int grey, int alpha, int* handle)
@@ -1150,6 +1340,27 @@ extern "C" void func_0036C188(void* self, int x, int w, int y, int grey, int alp
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036C398);
 #ifdef SKIP_ASM
+/**
+ * Queues a GS pass that adds a texture, scaled by @p alpha / 128, onto the view rectangle @p x, @p y, @p w, @p h.
+ *
+ * FRAME_1 is @p fbp >> 5 with the slot 10 screen width / 64 (width 1 when that is 0), PSMCT24, alpha masked; ZBUF
+ * mCurrentZBufferPage without writes; TEST ALWAYS; ALPHA 0x29 (Cs + Cd * FIX) with FIX = @p alpha; SCISSOR to the
+ * rectangle; TEX0 @p tbp, PSMCT24, with CLAMP REGION_CLAMP to @p tw x @p th; PRIM 0x156; colour @p grey in all four
+ * channels. It draws @p w / 32 columns, each mapping a 1/cols slice of the texture. Caller: func_0036C790.
+ *
+ * @param vself  the graphics manager (cPS2GraphicsMan)
+ * @param tbp  the texture's GS base pointer
+ * @param tw  the texture width
+ * @param th  the texture height
+ * @param fbp  the destination frame-buffer address (>> 5 gives FBP)
+ * @param x  the rectangle's left edge
+ * @param y  the rectangle's top edge
+ * @param w  the rectangle width
+ * @param h  the rectangle height
+ * @param grey  the vertex colour (texture modulation)
+ * @param alpha  the destination scale, 128 = 1.0
+ * @param handle  in/out: the DMA ring's current main-memory address
+ */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // PORT: ulong is 64-bit here (GIF/DMA packet words).
 extern "C" void func_0036C398(void* vself, int tbp, int tw, int th, int fbp, int x, int y, int w, int h,
@@ -1241,6 +1452,15 @@ struct sGmOwner_C740 {
     sGmEntry_C740 entries[1];
 };
 
+/**
+ * Copies the seven cLightGlow PS2 tweak values into the graphics manager's glow entry for view @p idx.
+ *
+ * Writes cLightGlow_m_PS2MinIntensity, _m_PS2ModIntensity, _m_PS2CopyIntensity, _m_PS2FrameSrcScale,
+ * _m_PS2FrameDstScale, _m_PS2IntensityTex2 and _m_PS2IntensityTex3 to unk_6CD4 + @p idx * 28. Caller: func_0036C790
+ * (when cLightGlow_m_OverrideWP is set).
+ *
+ * @param idx  the view index
+ */
 extern "C" void func_0036C740(void* self, int idx)
 {
     char* entry = (char*)&((sGmOwner_C740*)self)->entries[idx];
@@ -1283,8 +1503,27 @@ struct sGmViews_C790 {
     sGmView_C790 views[2];
 };
 
-// PS2GraphicsMan_RenderBloom: downsample the view into the two bloom buffers (in the Z buffer area),
-// blend-fill, blur three levels (compositing each level whose alpha is set), then restore FRAME/XYOFFSET.
+/**
+ * Queues the light-glow pass for view @p idx: downsamples the view into a buffer in the Z-buffer area, cuts it off,
+ * then blurs and composites it back at three levels.
+ *
+ * Returns at once unless cLightGlow_m_Enable; when cLightGlow_m_OverrideWP is set it first refreshes the view's entry
+ * (func_0036C740). The four composite strengths are D_004A43E8 and D_004A43EC (menu "PS2 Blend Texture 0" and "1") and
+ * the entry's IntensityTex2/IntensityTex3 values, each times 127.5; when all are 0 it does nothing. The buffers are at
+ * mCurrentZBufferPage << 5 and 0x400 above it, 1 << D_004A43D0 ("PS2 Capture Size (2^x)") texels square.
+ *
+ * func_0036B9D8 downsamples the view (unk_59B0[@p idx]) from mCurrentFrameBufferPage with the FrameSrcScale value;
+ * func_0036C188 subtracts the MinIntensity value and scales by cLightGlow_m_PS2ModIntensity (the global, not the
+ * entry). For three levels it composites the current buffer with func_0036C398 when that level's strength is set
+ * (FrameDstScale as the scale), then blurs it into the other buffer at half size with four passes of func_0036B9D8
+ * (CopyIntensity, offset D_004A43F8 "PS2 Texture Jitter" * 16). The fourth strength composites the last level. It then
+ * restores FRAME and XYOFFSET for the screen and calls func_00368138(mpTextureMan, @p pkt2). Caller: func_00363490.
+ *
+ * @param vself  the graphics manager (cPS2GraphicsMan)
+ * @param idx  the view index
+ * @param pkt2  passed to func_00368138
+ * @param handle  in/out: the DMA ring's current main-memory address
+ */
 // PORT: ulong is 64-bit here (GIF packet words); the packet is written through the uncached mirror.
 extern "C" void func_0036C790(void* vself, int idx, void* pkt2, int* handle)
 {
@@ -1488,6 +1727,13 @@ extern "C" void tParticleEmitter_setLife(tParticleEmitter* self, float minlife, 
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036CE48);
 #ifdef SKIP_ASM
+/**
+ * Makes @p particleEmitter's particles live forever: LifeR = 0 and Life0 = 1e20.
+ *
+ * No caller.
+ *
+ * @param particleEmitter  the emitter
+ */
 extern "C" void func_0036CE48(tParticleEmitter* particleEmitter) {
     (*(int*)&particleEmitter->LifeR) = 0;
     (particleEmitter->Life0) = 1e20f;
@@ -1496,7 +1742,16 @@ extern "C" void func_0036CE48(tParticleEmitter* particleEmitter) {
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036CE58);
 #ifdef SKIP_ASM
-// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+/**
+ * Makes @p particleEmitter emit from a single point: X0 = *@p point and Xr0 = Xr1 = t4vect_Zero.
+ *
+ * Copies the 16-byte vectors as 128-bit quadwords. No caller.
+ *
+ * @param particleEmitter  the emitter
+ * @param point  the emission point (a 16-byte vector)
+ */
+// PORT: `long long` is 128-bit on the EE (one lq/sq copy); off-PS2 the same C copies only 8 bytes, so use a
+// 16-byte type.
 extern "C" void func_0036CE58(tParticleEmitter* particleEmitter, long long *point) {
     (*(long long*)&particleEmitter->X0) = (long long) *point;
     (*(long long*)&particleEmitter->Xr0) = (long long) t4vect_Zero;
@@ -1806,6 +2061,17 @@ static inline sGmVec4_D020 gmNormalizeD020(const sGmVec4_D020& v)
     return r;
 }
 
+/**
+ * Sets the emitter's velocity from a direction and a spread: a cone around @p dir.
+ *
+ * V0 = @p dir / Damp; with len = |V0| and n = normalize(@p dir x axis) (axis = t4vect_YAxis when dir.x != 0, else
+ * t4vect_XAxis), Vr0 = n * spread * len, Vr1 = (V0 x n) * spread, Vr2 = 0, and finally V0 -= 1.5 * (Vr0 + Vr1 + Vr2),
+ * so the three random terms are centred on the base velocity. On Tour's matching overload is setVelocity(const
+ * t4Vector& v0, float spread). No caller here.
+ *
+ * @param dir  the base velocity (direction and speed)
+ * @param spread  the cone spread, relative to the speed
+ */
 extern "C" void tParticleEmitter_setVelocity(tParticleEmitter* self, const sGmVec4_D020* dir, float spread)
 {
     (*(sGmVec4_D020*)&self->V0) = gmDivD020(*dir, self->Damp);
@@ -1899,6 +2165,17 @@ static inline sGmVec4 gmScaleD1F0(const sGmVec4& v, float s)
     return r;
 }
 
+/**
+ * Sets the emitter's base velocity and its three random velocity terms.
+ *
+ * Each input is divided by Damp: Vr0..Vr2 = @p randVel0..2 / Damp, V0 = @p baseVel / Damp - 1.5 * (Vr0 + Vr1 + Vr2)
+ * (centring the random terms). Called by cBoardSparkFX_update.
+ *
+ * @param baseVel  the base velocity (On Tour v0)
+ * @param randVel0  random term 0 (vr0)
+ * @param randVel1  random term 1 (vr1)
+ * @param randVel2  random term 2 (vr2)
+ */
 extern "C" void tParticleEmitter_setVelocity1(tParticleEmitter* self, const sGmVec4* baseVel, const sGmVec4* randVel0,
                               const sGmVec4* randVel1, const sGmVec4* randVel2)
 {
@@ -1970,6 +2247,13 @@ extern "C" void tParticleEmitter_step(tParticleEmitter* self, float deltaTime)
 //100%
 INCLUDE_ASM("render/graphicsman", func_0036D400);
 #ifdef SKIP_ASM
+/**
+ * Advances the VU0 random generator seeded from *@p seed and stores the next value back.
+ *
+ * Runs vrinit then vrnext on the VU0 R register.
+ *
+ * @param seed  in/out: the seed
+ */
 // PORT: PS2-only VU0 random-number unit (R register); the PC port needs a C PRNG.
 extern "C" void func_0036D400(float* seed)
 {
@@ -2029,6 +2313,16 @@ static inline void gmVecAddEq_D428(sGmVec4_D428& a, const sGmVec4_D428& b)
 }
 
 extern "C" void func_0036D428_impl(sGmAnim_D428* self, float dt) __asm__("func_0036D428");
+/**
+ * Steps a particle emitter by @p dt, then moves its emission point along its motion for each whole time step that has
+ * passed.
+ *
+ * Calls tParticleEmitter_step; while NumParticles * TimeStep < EndTime it takes TimeStep off EndTime, adds Xi to X0 and
+ * advances the seeds SeedX0, SeedX1, SeedV0, SeedV1, SeedV2, SeedC0, SeedC1, SeedSize and SeedLife with func_0036D400
+ * (skipping Damp). Callers: cStaticEmitter_update and cBoardSparkFX_update.
+ *
+ * @param dt  the frame time
+ */
 extern "C" void func_0036D428_impl(sGmAnim_D428* self, float dt)
 {
     tParticleEmitter_step((tParticleEmitter*)self, dt);
@@ -2348,7 +2642,6 @@ static inline void vu0SubInGM_0058(sGmV4_0058& d, const sGmV4_0058& b)
  * @param boundBox  receives the emitter's bounding box
  * @param seed  the random seed; negative picks a random one
  */
-// Sets up the view from the camera parameters p (frustum planes transformed by m).
 extern "C" void tParticleEmitter_setupEmitter(tParticleEmitter* self, void* transform, void* particleData, void* boundBox, float seed)
 {
     tParticleEmitter_setSize(self, *(float*)((char*)particleData + 0x10), *(float*)((char*)particleData + 0xCC), *(float*)((char*)particleData + 0x18));
@@ -2427,6 +2720,15 @@ INCLUDE_ASM("render/graphicsman", func_00370708);
 #ifdef SKIP_ASM
 extern "C" void tParticleEmitter_setTime(tParticleEmitter*, float);
 
+/**
+ * Sets the emitter's Duration to @p duration (unless it is 0) and its particle system's time with
+ * tParticleEmitter_setTime.
+ *
+ * The emitter starts at @p self and its tParticleEmitter at +0x10. A zero @p duration leaves Duration as it is and
+ * calls tParticleEmitter_setTime(..., 0).
+ *
+ * @param duration  the new duration; 0 resets only the particle time
+ */
 extern "C" void func_00370708(float *self, float duration)
 {
     if (duration == 0.0f) {

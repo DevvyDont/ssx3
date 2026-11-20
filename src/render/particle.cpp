@@ -265,6 +265,24 @@ static inline float randUnit10D0()
 
 // PORT: the unit's callers use a 4-arg declaration; bind the real 5-arg body by asm label.
 extern "C" void func_003710D0_impl(char* self, sPtQ10D0* pos, sPtQ10D0* vel, int rnd, float dt) __asm__("func_003710D0");
+/**
+ * Records a dynamic emitter's new sub-emitter position and velocity for this frame and advances its ring index and
+ * texture flip frame.
+ *
+ * Returns at once unless m_enabled. m_enabledCount goes down when the entry at m_subEmitterId was enabled (velocity .w
+ * > 0) and @p rnd is 0, and up in the opposite case. @p pos and @p vel, when given, replace m_currPosition and
+ * m_currVelocity (else those are used). The entry m_positions[m_subEmitterId] gets the position with w = 0 and
+ * m_velocities[m_subEmitterId] the velocity with w = 1 + a random value in [0, 1) when @p rnd is set, else 0.
+ * m_subEmitterId then steps down, wrapping to m_numSubEmitters - 1, and mCurrentFlipTexture advances by
+ * mFlipTextureRate * @p dt, back to 0 at mNumFlipTextures.
+ *
+ * Callers: cDynamicColourEmitter_update, cDynamicParticleModifier_update and func_002F1A08.
+ *
+ * @param pos  the new position, or null to reuse m_currPosition
+ * @param vel  the new velocity, or null to reuse m_currVelocity
+ * @param rnd  non-zero when the sub-emitter is enabled this frame
+ * @param dt  the frame time
+ */
 extern "C" void func_003710D0_impl(char* self, sPtQ10D0* pos, sPtQ10D0* vel, int rnd, float dt)
 {
     if (*(int*)(self + 0x174) == 0) {
@@ -711,7 +729,12 @@ extern "C" void cDynamicColourEmitter_update(sPtObj17C0* self, int position, int
 //100%
 INCLUDE_ASM("render/particle", func_003718E8);
 #ifdef SKIP_ASM
-// PORT: PS2 hardware registers (D2 = GIF DMA channel CHCR, 0x10003010 = VIF1 area register).
+/**
+ * Waits until the GIF DMA channel (D2, CHCR 0x1000A000) is idle, then writes 4 to 0x10003010.
+ *
+ * 0x10003010 is GIF_MODE (4 sets IMT, intermittent mode). No caller.
+ */
+// PORT: PS2 hardware registers (D2 = GIF DMA channel CHCR, 0x10003010 = GIF_MODE).
 extern "C" void func_003718E8(void)
 {
     while (*(volatile int*)0x1000A000 & 0x100) {
@@ -729,6 +752,18 @@ struct sGifQuad {
 
 extern sGifQuad D_0044B430;
 
+/**
+ * Starts a normal-mode GIF DMA (D2) of @p qwc quadwords from @p madr.
+ *
+ * Writes the quadword D_0044B430 to the VIF1 FIFO (0x10005000) and 4 (intermittent mode) to GIF_MODE first. An address
+ * above 0x6FFFFFFF (the scratchpad) is turned into (address & 0x3FF0) | 0x80000000, the DMA's scratchpad form. CHCR
+ * 0x101 (start, from memory). @p flags & 4 waits for the channel to be idle first and @p flags & 2 waits for the
+ * transfer to finish. Callers: func_00382AF0 and cPS2LensFxMan_sampleZBuffer.
+ *
+ * @param madr  the source address
+ * @param qwc  the quadword count
+ * @param flags  4: wait before; 2: wait after
+ */
 // PORT: PS2 hardware registers (D2 = GIF DMA channel, VIF1 FIFO, GIF_MODE).
 extern "C" void func_00371940(unsigned int madr, int qwc, int flags)
 {
@@ -755,6 +790,17 @@ extern "C" void func_00371940(unsigned int madr, int qwc, int flags)
 //100%
 INCLUDE_ASM("render/particle", func_00371A58);
 #ifdef SKIP_ASM
+/**
+ * Starts a normal-mode VIF0 DMA (D0, 0x10008000) of @p qwc quadwords at @p madr with CHCR 0x100.
+ *
+ * An address above 0x6FFFFFFF (the scratchpad) is turned into (address & 0x3FF0) | 0x80000000, the DMA's scratchpad
+ * form. @p flags & 4 waits for the channel to be idle first and @p flags & 2 waits for the transfer to finish. No
+ * caller.
+ *
+ * @param madr  the memory address
+ * @param qwc  the quadword count
+ * @param flags  4: wait before; 2: wait after
+ */
 // PORT: PS2 hardware registers (D0 = VIF0 DMA channel).
 extern "C" void func_00371A58(unsigned int madr, int qwc, int flags)
 {
@@ -778,6 +824,17 @@ extern "C" void func_00371A58(unsigned int madr, int qwc, int flags)
 //100%
 INCLUDE_ASM("render/particle", func_00371B40);
 #ifdef SKIP_ASM
+/**
+ * Starts a normal-mode VIF1 DMA (D1, 0x10009000) of @p qwc quadwords from @p madr (CHCR 0x101, from memory).
+ *
+ * An address above 0x6FFFFFFF (the scratchpad) is turned into (address & 0x3FF0) | 0x80000000, the DMA's scratchpad
+ * form. @p flags & 4 waits for the channel to be idle first and @p flags & 2 waits for the transfer to finish. No
+ * caller.
+ *
+ * @param madr  the source address
+ * @param qwc  the quadword count
+ * @param flags  4: wait before; 2: wait after
+ */
 // PORT: PS2 hardware registers (D1 = VIF1 DMA channel).
 extern "C" void func_00371B40(unsigned int madr, int qwc, int flags)
 {
@@ -801,6 +858,18 @@ extern "C" void func_00371B40(unsigned int madr, int qwc, int flags)
 //100%
 INCLUDE_ASM("render/particle", func_00371C28);
 #ifdef SKIP_ASM
+/**
+ * Starts a normal-mode VIF1 DMA (D1, 0x10009000) of @p qwc quadwords to @p madr (CHCR 0x100, direction bit clear: to
+ * memory).
+ *
+ * An address above 0x6FFFFFFF (the scratchpad) is turned into (address & 0x3FF0) | 0x80000000, the DMA's scratchpad
+ * form. @p flags & 4 waits for the channel to be idle first and @p flags & 2 waits for the transfer to finish. No
+ * caller.
+ *
+ * @param madr  the memory address
+ * @param qwc  the quadword count
+ * @param flags  4: wait before; 2: wait after
+ */
 // PORT: PS2 hardware registers (D1 = VIF1 DMA channel).
 extern "C" void func_00371C28(unsigned int madr, int qwc, int flags)
 {
@@ -825,6 +894,17 @@ extern "C" void func_00371C28(unsigned int madr, int qwc, int flags)
 //100%
 INCLUDE_ASM("render/particle", func_00371D10);
 #ifdef SKIP_ASM
+/**
+ * Copies @p qwc quadwords from main memory @p madr to scratchpad offset @p sadr by toSPR DMA (D9, 0x1000D400).
+ *
+ * SADR is @p sadr & 0x3FFF. @p flags & 4 waits for the channel to be idle first and @p flags & 2 waits for the transfer
+ * to finish. Callers: func_0038F4F8 and func_0038F708.
+ *
+ * @param madr  the main-memory source
+ * @param sadr  the scratchpad destination
+ * @param qwc  the quadword count
+ * @param flags  4: wait before; 2: wait after
+ */
 extern "C" void func_00371D10(unsigned int madr, int sadr, int qwc, int flags)
 {
     if (flags & 4) {
@@ -845,6 +925,17 @@ extern "C" void func_00371D10(unsigned int madr, int sadr, int qwc, int flags)
 //100%
 INCLUDE_ASM("render/particle", func_00371DD8);
 #ifdef SKIP_ASM
+/**
+ * Copies @p qwc quadwords from scratchpad offset @p sadr to main memory @p madr by fromSPR DMA (D8, 0x1000D000).
+ *
+ * SADR is @p sadr & 0x3FFF. @p flags & 4 waits for the channel to be idle first and @p flags & 2 waits for the transfer
+ * to finish. Callers: func_0038F598 and func_0038F738.
+ *
+ * @param sadr  the scratchpad source
+ * @param madr  the main-memory destination
+ * @param qwc  the quadword count
+ * @param flags  4: wait before; 2: wait after
+ */
 extern "C" void func_00371DD8(int sadr, unsigned int madr, int qwc, int flags)
 {
     if (flags & 4) {
@@ -867,6 +958,16 @@ extern "C" void* func_003725B0(void* self);
 //100%
 INCLUDE_ASM("render/particle", func_00371EA0);
 #ifdef SKIP_ASM
+/**
+ * Starts a chain-mode VIF1 DMA (D1) from the tag at @p tadr.
+ *
+ * An address above 0x6FFFFFFF (the scratchpad) is turned into (address & 0x3FF0) | 0x80000000, the DMA's scratchpad
+ * form. QWC is zeroed; CHCR is 0x145 (chain, tag transfer) when @p flags & 1 is set, else 0x105. @p flags & 4 waits for
+ * the channel to be idle first and @p flags & 2 waits for the transfer to finish. No caller.
+ *
+ * @param tadr  the first DMA tag
+ * @param flags  1: transfer tags; 4: wait before; 2: wait after
+ */
 // PORT: PS2 hardware registers (D1 = VIF1 DMA channel, chain mode via TADR).
 extern "C" void func_00371EA0(unsigned int tadr, int flags)
 {
@@ -894,6 +995,17 @@ extern "C" void func_00371EA0(unsigned int tadr, int flags)
 //100%
 INCLUDE_ASM("render/particle", func_00371F98);
 #ifdef SKIP_ASM
+/**
+ * Starts a chain-mode GIF DMA (D2) from the tag at @p tadr after setting GIF_MODE to 4.
+ *
+ * An address above 0x6FFFFFFF (the scratchpad) is turned into (address & 0x3FF0) | 0x80000000, the DMA's scratchpad
+ * form. CHCR is 0x144 (chain, tag transfer) when @p flags & 1 is set, else 0x104; unlike func_00371EA0 it leaves QWC
+ * alone. @p flags & 4 waits for the channel to be idle first and @p flags & 2 waits for the transfer to finish. Caller:
+ * func_00383808.
+ *
+ * @param tadr  the first DMA tag
+ * @param flags  1: transfer tags; 4: wait before; 2: wait after
+ */
 // PORT: PS2 hardware registers (D2 = GIF DMA channel, chain mode via TADR; GIF_MODE).
 extern "C" void func_00371F98(unsigned int tadr, int flags)
 {
@@ -921,6 +1033,13 @@ extern "C" void func_00371F98(unsigned int tadr, int flags)
 //100%
 INCLUDE_ASM("render/particle", func_00372098);
 #ifdef SKIP_ASM
+/**
+ * Turns DMA on or off: sets or clears bit 0 of D_CTRL (0x1000E000).
+ *
+ * When enabling it also reads D_PCR (0x1000E020) and writes 1 to it. No caller.
+ *
+ * @param enable  non-zero to enable
+ */
 // PORT: PS2 hardware registers (0x1000E000 = D_CTRL, 0x1000E020 = D_PCR).
 extern "C" void func_00372098(int enable)
 {
@@ -936,6 +1055,15 @@ extern "C" void func_00372098(int enable)
 //100%
 INCLUDE_ASM("render/particle", func_003720F0);
 #ifdef SKIP_ASM
+/**
+ * Walks a DMA chain and rebases every ref tag's address onto @p chain, stopping after the ret tag.
+ *
+ * Tag ids: 1 (cnt) and 6 (ret) carry QWC quadwords of data, 3 (ref) points elsewhere. Likely bug: ids 0, 2, 4, 5 and 7
+ * do not advance the walk, so a chain containing one never ends. No caller.
+ *
+ * @param chain  the first tag of the chain
+ * @return the address just past the ret tag's data
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Walks a DMA chain, rebasing REF tag addresses onto the chain start; returns the address past the RET tag.
@@ -980,11 +1108,25 @@ INCLUDE_ASM("render/particle", func_00372198);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-// Walks a DMA chain, rebasing REF tag addresses onto the chain start; returns the address past the RET tag.
-
 
 extern "C" void* MEM_copy(void*, void*, int);
 
+/**
+ * Flattens a DMA chain in place into one block: copies the cnt payloads after the first quadword, replaces selected ref
+ * tags, and writes the total size into the first tag.
+ *
+ * Ref tags pointing at @p addrA or @p addrB become a zero quadword; one pointing at @p addrC becomes the quadword
+ * 0x3000000005000001 (low dword first). The ret tag and its data are copied last. The first tag keeps bits 16-31 of its
+ * low word, gets the copied quadword count as QWC, and loses its address word. Tag ids: 1 (cnt) and 6 (ret) carry QWC
+ * quadwords of data, 3 (ref) points elsewhere. Likely bug: ids 0, 2, 4, 5 and 7 do not advance the walk, so a chain
+ * containing one never ends. A ref tag whose address matches none of the three leaves the walk stuck the same way. No
+ * caller.
+ *
+ * @param buf  the chain, rewritten in place
+ * @param addrA  a ref address to blank
+ * @param addrB  a ref address to blank
+ * @param addrC  the ref address to replace with the fixed quadword
+ */
 extern "C" void func_00372198(char* buf, int addrA, int addrB, int addrC)
 {
     char* dst = buf + 0x10;
@@ -1062,6 +1204,22 @@ INCLUDE_ASM("render/particle", func_00372348);
 // Repacks a DMA chain in place: copies CNT payloads, blanks REF tags to addrA/addrB, rebases a REF to addrC, stops after RET.
 extern "C" void* MEM_copy(void*, void*, int);
 
+/**
+ * Rewrites a DMA chain in place as cnt blocks: copies the cnt payloads, blanks some ref tags and keeps the ref to @p
+ * addrC as a rebased ref between blocks.
+ *
+ * Ref tags pointing at @p addrA or @p addrB become a zero quadword inside the current block. A ref to @p addrC closes
+ * the block (its header becomes a cnt tag with the block's quadword count), is written as a ref with address @p buf +
+ * @p addrC and the source tag's low word, and opens a new block header after it. At the ret tag the open block is
+ * closed if non-empty and the ret tag with its data is copied. Tag ids: 1 (cnt) and 6 (ret) carry QWC quadwords of
+ * data, 3 (ref) points elsewhere. Likely bug: ids 0, 2, 4, 5 and 7 do not advance the walk, so a chain containing one
+ * never ends. A ref tag whose address matches none of the three leaves the walk stuck the same way. No caller.
+ *
+ * @param buf  the chain, rewritten in place
+ * @param addrA  a ref address to blank
+ * @param addrB  a ref address to blank
+ * @param addrC  the ref address kept as a block boundary
+ */
 extern "C" void func_00372348(char* buf, int addrA, int addrB, int addrC)
 {
     char* src = buf;
@@ -2929,6 +3087,16 @@ int func_0037BD98_3764C0(void* self, unsigned int a1, unsigned int a2, unsigned 
                          unsigned int psm, unsigned int psm2, unsigned int zpsm, short s0, short s1, short s2,
                          int flag) __asm__("func_0037BD98");
 
+/**
+ * Switches the display to mode @p idx of DisplayModes unless it is already CurrentDisplayMode.
+ *
+ * Calls func_0037BD98 with the mode record's words at +0x80 to +0x98 (two addresses, width, height and three pixel
+ * formats), 0, the +0x9C flag and its inverse, and the id at +0xA0, then stores @p idx in CurrentDisplayMode. Slot 4 of
+ * cPS2GraphicsMan_vtbl.
+ *
+ * @param idx  the display-mode index (records of 0xA4 bytes)
+ * @return 1, always
+ */
 extern "C" int cPS2GraphicsMan_SetDisplayMode(sPartTexCache_3764C0* self, int idx)
 {
     if (self->cur == idx) {
@@ -3265,6 +3433,19 @@ struct sPtGfx6A70 {
 extern "C" void func_00376938(cPS2GraphicsMan* self, float x, float y, float w, float h);
 extern "C" void func_00364B88(void* table, void* key);
 
+/**
+ * Sets the current viewport rectangle, kept inside the TV safe band, and updates the scissor.
+ *
+ * When mTVDisplayFormat.mDisplayFormat is 0 to 2, @p y is raised to at least mfTVYOffset * the slot 11 screen height
+ * and @p rectHeight is limited to mfTVYScale * that height (the height, not the bottom edge, so a raised top moves the
+ * bottom down). Stores the rectangle in mViewportStack[mViewportDepth], then calls func_00376938 and
+ * func_00364B88(mpDeferMan, mScissor). Slot 23 of cPS2GraphicsMan_vtbl.
+ *
+ * @param x  the left edge
+ * @param y  the top edge
+ * @param w  the width
+ * @param rectHeight  the height
+ */
 extern "C" void cPS2GraphicsMan_SetViewportWindow(sPtGfx6A70* self, float x, float y, float w, float rectHeight)
 {
     sPtVEntryI6A70* vtEntry = &self->vtable[11];
@@ -3462,6 +3643,25 @@ static inline void ClampScale6C58(sPtGfx6C58* self, float& x, float& y)
     }
 }
 
+/**
+ * Sets a perspective projection with field-of-view angle @p fov for the current viewport.
+ *
+ * Marks the stack entry perspective (+0x20 = 0) and stores @p zNear, @p zFar and @p fov in it and in unk_590C/unk_5908.
+ * The viewport rectangle comes from mViewportStack[mViewportDepth] (x, y, w, h); the depth range is 2^24 - 1 when
+ * mCurrentZBFormat is 0x31 (24-bit Z), else 65535, and offX/offY = 32768 - 8 * the slot 10/11 screen width/height place
+ * the screen in the GS's 4096 space (1/16 pixels). The horizontal scale is (w / 2) / tan(@p fov) and the vertical one
+ * that times the screen's height * 4/3 / width; when mTVDisplayFormat.mDisplayFormat is 0 to 2 both are multiplied by
+ * mfXAspectAdjust and mfYAspectAdjust.
+ *
+ * It writes mScreenMatrix (with the entry's depth bias at +0x1C in the z offset), the screen bounds unk_6B70/unk_6B80
+ * (w = 1 / zNear and 1 / zFar), mViewProj, mScreenScale/mScreenOffset and the guard-band
+ * mView/mGuardScale/mGuardOffset, clears mMatricesValid, sets the scissor (func_00376938), unk_5910 = 40000 and
+ * unk_5920 = (1023, ..., 1023 / 40000). Slot 25 of cPS2GraphicsMan_vtbl.
+ *
+ * @param fov  the field-of-view angle (radians) whose tangent sets the scale
+ * @param zNear  the near plane
+ * @param zFar  the far plane
+ */
 extern "C" void cPS2GraphicsMan_SetViewportPerspective(sPtGfx6C58* self, float fov, float zNear, float zFar)
 {
     sPtView6C58* v = &self->views[self->curView];
@@ -3773,7 +3973,27 @@ static inline void ZScale7458(sPtGfx6C58* self, float& zscale)
     }
 }
 
-// Orthographic counterpart of cPS2GraphicsMan_SetViewportPerspective: view-to-screen, projection and clip matrices for an off-centre box.
+/**
+ * Sets an orthographic projection mapping the box from (@p cx, @p cy), @p fx wide and @p fy high, onto the current
+ * viewport.
+ *
+ * Marks the stack entry orthographic (+0x20 = 1) and stores @p zNear and @p zFar in it. The viewport rectangle comes
+ * from mViewportStack[mViewportDepth] (x, y, w, h); the depth range is 2^24 - 1 when mCurrentZBFormat is 0x31 (24-bit
+ * Z), else 65535, and offX/offY = 32768 - 8 * the slot 10/11 screen width/height place the screen in the GS's 4096
+ * space (1/16 pixels). It writes mScreenMatrix (scale w / @p fx * 16 and h / @p fy * 16, depth -range / (zFar -
+ * zNear)), the screen bounds unk_6B70/unk_6B80, mViewProj (2 / @p fx, 2 / @p fy, offset -1), mScreenScale and
+ * mScreenOffset, and the guard-band mView, mGuardScale and mGuardOffset, and clears mMatricesValid.
+ *
+ * Then func_00376938 sets the scissor to the viewport, unk_5910 = 40000 and unk_5920 = (1023, 0, 0, 1023 / 40000). Slot
+ * 26 of cPS2GraphicsMan_vtbl.
+ *
+ * @param cx  the box's left edge
+ * @param cy  the box's top edge
+ * @param fx  the box width
+ * @param fy  the box height
+ * @param zNear  the near depth
+ * @param zFar  the far depth
+ */
 extern "C" void cPS2GraphicsMan_SetViewportOrthographic(sPtGfx6C58* self, float cx, float cy, float fx, float fy, float zNear, float zFar)
 {
     sPtView6C58* v = &self->views[self->curView];
@@ -4687,6 +4907,33 @@ static inline sGlyph8808* Find8808(sFontRes8808* f, int c)
     return f->def;
 }
 
+/**
+ * Draws string @p s in @p font as one textured sprite per glyph, queued as a single GS packet.
+ *
+ * Rebuilds the matrices first (func_0037D968) when mMatricesValid is 0. Each character's glyph is found by code (direct
+ * index from FirstCode to LastLinearCode, then a binary search, else MissingGlyph). When the current viewport is
+ * orthographic (word +0x20 of mViewportStack[mViewportDepth] non-zero) the corners are scaled and offset by
+ * mScreenMatrix directly; otherwise each glyph's centre goes through mScreenWorld with a perspective divide and the
+ * half-size is scaled by 1/w. UVs are the glyph's u/v times @p su and @p sv, and @p x advances by the glyph advance
+ * times @p sx.
+ *
+ * The packet at mVifCursor (uncached) holds a DMA cnt tag, a VIF DIRECT code, PRIM 0x56 (sprite, textured, blended)
+ * with RGBAQ R, G, B = color[1..3] * 204, A = color[0] * 128, Q = 1, and a REGLIST GIF tag of ST/XYZ2 pairs. Then,
+ * while mpDeferMan holds fewer than 2600 entries, a 0x80-byte entry is appended to it with the current draw state
+ * (*m_pCurrentDrawState, low 5 bits of its third word from the manager's +0x69CC4), the packet's start and end and the
+ * sort key at +0x69CC0. mVifCursor moves past the packet. Slot 80 of cPS2GraphicsMan_vtbl.
+ *
+ * @param font  the font (cFont layout)
+ * @param s  the zero-terminated string
+ * @param color  the colour {a, r, g, b} in 0..1
+ * @param x  the left edge
+ * @param y  the top edge
+ * @param sx  horizontal scale
+ * @param sy  vertical scale
+ * @param su  texture u scale
+ * @param sv  texture v scale
+ * @param z  the depth
+ */
 // PORT: PS2-only GS packet build and VU0 inline asm; uncached (0x30000000) pointers.
 extern "C" void cPS2GraphicsMan_DrawString3D(sGfx8808* self, sFontRes8808* font, char* s, float* color,
                               float x, float y, float sx, float sy, float su, float sv, float z)
@@ -6047,7 +6294,6 @@ static inline void CopyMat_BA50(void* dst, const void* src)
  * @param sscale  the shadow scale
  * @param strans  the shadow translation
  */
-// Emits a particle-batch header packet: GIF tag, the batch matrix and two parameter qwords.
 extern "C" void cPS2GraphicsMan_SetShadowCharMatrices(char* self, void* mat, cQuad128_BA50* sscale, cQuad128_BA50* strans)
 {
     unsigned int buf = *(unsigned int*)(self + 0x5A00);
@@ -6575,6 +6821,27 @@ static inline int clampW_C8C0(int v, int lo, int hi)
 {
     return v < lo ? lo : (v <= hi ? v : hi);
 }
+/**
+ * Registers a texture from an EA shape record: works out its texel and CLUT formats and passes it on to vtable slot 47
+ * (cPS2GraphicsMan_AddTexture1).
+ *
+ * The record is On Tour's SHAPE: f0's low byte is the type and its upper 24 bits the offset to the next record (the
+ * palette); s4/s6 are width and height; fC bit 0x1000 means the texels sit at the offset in f10 (else right after the
+ * 16-byte header), bit 0x2000 picks the swizzled format, and its top four bits are the mipmap count. Type 1 gives texel
+ * format 11 (12 when swizzled) and type 2 gives 9 (10), both with CLUT format 1 and the palette record's texels; type 3
+ * gives 2 and type 5 gives 0, without a CLUT. A palettised record whose offset is 0 would make the palette record null
+ * and be dereferenced.
+ *
+ * For a mipmapped record with a non-zero s8 it then computes k = -16 * log2(240 / (s8 / 16384)), clamped to
+ * -2047..-135, and calls func_0037D090(self, id, 5, 1, 0, k). Slot 46 of cPS2GraphicsMan_vtbl.
+ *
+ * @param src  the shape record
+ * @param a2  the texture name, passed through
+ * @param a3  the lock type, passed through
+ * @param a4  the copy-memory flag, passed through
+ * @param a5  the bind id, passed through
+ * @return the texture id slot 47 returns
+ */
 extern "C" int cPS2GraphicsMan_AddTexture(cPS2GraphicsMan* self, sTexHdr_C8C0* src, int a2, int a3, int a4, int a5)
 {
     int fmt = 0;
@@ -6640,6 +6907,25 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_AddTexture1);
 extern "C" int func_00367440(void* mgr, int a1, int a2, int a3, int a4, int a5, int a6, int a7,
                              int a8, int a9, int a10, int a11);
 
+/**
+ * Creates a texture in the texture manager (func_00367440 on mpTextureMan) and marks its id in unk_3838.
+ *
+ * All eleven arguments go through unchanged; unk_3838[id] is set to 1. Slot 47 of cPS2GraphicsMan_vtbl;
+ * cPS2GraphicsMan_AddTexture calls it through the vtable.
+ *
+ * @param pixels  the texel data
+ * @param name  the texture name
+ * @param width  the width in texels
+ * @param height  the height in texels
+ * @param a5  the mipmap count
+ * @param a6  the texel format
+ * @param a7  the CLUT format
+ * @param a8  the CLUT data
+ * @param a9  the lock type
+ * @param a10  the copy-memory flag
+ * @param a11  the bind id
+ * @return the new texture id
+ */
 extern "C" int cPS2GraphicsMan_AddTexture1(cPS2GraphicsMan* self, int pixels, int name, int width, int height, int a5, int a6, int a7,
                               int a8, int a9, int a10, int a11)
 {
@@ -6962,6 +7248,23 @@ extern "C" int MEM_move(void* dst, void* src, int n);
 extern "C" unsigned int unpack(void* src, void* dst);
 extern "C" void* MEM_free(void* p);
 
+/**
+ * Replaces the texels of texture @p a1 with an EA shape record's, unpacking a compressed record first.
+ *
+ * Formats as in cPS2GraphicsMan_AddTexture: type 1 gives texel format 11 (12 swizzled), type 2 gives 9 (10), both with
+ * CLUT format 1 and the next record's palette; type 3 gives 2 and type 5 gives 0. When the bytes after the header start
+ * 0x10 0xFB (a packed stream whose 24-bit size follows) it allocates size + 0x10 bytes (label str_unpack), copies the
+ * header, unpacks the data with unpack, clears bit 7 of the type byte and uses the copy, freeing it with MEM_free
+ * afterwards.
+ *
+ * Calls vtable slot 49 (func_0037D318) with (@p a1, texels, width, height, mipmap count, texel format, CLUT format,
+ * palette, @p a3). Slot 48 of cPS2GraphicsMan_vtbl.
+ *
+ * @param selfp  the graphics manager
+ * @param a1  the texture id
+ * @param objp  the shape record
+ * @param a3  the copy-memory flag, passed through
+ */
 extern "C" void cPS2GraphicsMan_SetNewTextureData(cPS2GraphicsMan* selfp, int a1, void* objp, int a3)
 {
     cPS2GraphicsMan* self = selfp;
@@ -8090,7 +8393,6 @@ static inline void CopyQuads_0518(unsigned long** pp, const void* srcp, int n)
  *
  * @param obj  the particle emitter (tParticleEmitter)
  */
-// Sends obj's 0x15 quads to the VU1 program at address 0 under a pushed render state.
 extern "C" void cPS2GraphicsMan_RenderParticleEmitter(sPtGfx_0518* self, sQuad_0518* obj)
 {
     if (D_004A44F8 != 0)
@@ -8219,6 +8521,25 @@ static inline void CopyQuads_07A0(unsigned long** pp, const void* srcp, int n)
     *pp = (unsigned long*)d;
 }
 
+/**
+ * Uploads a dynamic emitter's sub-emitter trail to VU1 in blocks of 64 and queues each block for drawing.
+ *
+ * Returns at once when D_004A44FC (menu "Disable Dynamic Emitters") is set. Sets bits 6-9 of the draw state's first
+ * word to 4 and keeps only the top two bits of its fourth, rebuilding the matrices first (func_0037D968) when
+ * mMatricesValid is 0. For each block of up to 64 of the m_numSubEmitters entries (n / 64 + 1 blocks) it claims a
+ * scratchpad ring buffer (func_0038F460 at mVifCursor) and writes a DMA/VIF header, the 21 quadwords of m_emitter, a
+ * block header {count, NumParticles / m_numSubEmitters, its float, that float * first index * TimeStep}, the block's
+ * m_positions entries (oldest first from m_subEmitterId + 1, wrapping) plus the next entry, padding to 64, the same for
+ * m_velocities, and a VIF MSCAL of the microprogram at D_510.
+ *
+ * It flushes the buffer (func_0038F668) and stores the result in mVifCursor; while mpDeferMan holds fewer than 2600
+ * entries, a 0x80-byte entry is appended to it with the current draw state (*m_pCurrentDrawState, low 5 bits of its
+ * third word from the manager's +0x69CC4), the packet's start and end and the sort key at +0x69CC0; and it advances
+ * mVifCursor by 0x10. Finally it clears the draw-state bits it set. When m_numSubEmitters is a multiple of 64 the last
+ * block is empty but still sent. Slot 83 of cPS2GraphicsMan_vtbl.
+ *
+ * @param obj  the emitter (cBaseClass_DynamicEmitter layout)
+ */
 // PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int; 64-bit GS words are `ulong`.
 extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter(sPtGfx_07A0* self, sTrail_07A0* obj)
 {
@@ -8444,6 +8765,22 @@ struct sTrail_0CE0 {
 extern char D_A00[];
 extern char D_F10[];
 
+/**
+ * Uploads a coloured dynamic emitter's sub-emitter trail to VU1 in blocks of 43 and queues each block for drawing.
+ *
+ * Returns at once when D_004A44FC (menu "Disable Dynamic Emitters") is set. Sets bits 6-9 of the draw state's first
+ * word to 4 and keeps only the top two bits of its fourth, rebuilding the matrices first (func_0037D968) when
+ * mMatricesValid is 0. Works like cPS2GraphicsMan_RenderDynamicParticleEmitter with blocks of 43 entries (n / 43 + 1
+ * blocks) and, after the positions and velocities, a VIF code and the block's 4-byte m_colours entries (wrapping, plus
+ * the next one) as 11 quadwords. The microprogram is D_F10 when m_IsAvalanche is set, else D_A00.
+ *
+ * Each block is flushed (func_0038F668) into mVifCursor and, while mpDeferMan holds fewer than 2600 entries, a
+ * 0x80-byte entry is appended to it with the current draw state (*m_pCurrentDrawState, low 5 bits of its third word
+ * from the manager's +0x69CC4), the packet's start and end and the sort key at +0x69CC0. Slot 84 of
+ * cPS2GraphicsMan_vtbl.
+ *
+ * @param obj  the emitter (cDynamicColourEmitter layout)
+ */
 // PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int; 64-bit GS words are `ulong`.
 extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter1(sPS2GfxView_0CE0* self, sTrail_0CE0* obj)
 {
@@ -11162,7 +11499,6 @@ struct sPartPair {
  *
  * @param i  the view index (On Tour View)
  */
-// Pushes the current matrix (self+0x6AF0) and the pair at self+0x5900 onto slot i.
 // PORT: PS2-only VU0 asm (lqc2/sqc2 matrix copy).
 extern "C" void cPS2GraphicsMan_RenderFullScreenEffects(cPS2GraphicsMan* self, int i)
 {

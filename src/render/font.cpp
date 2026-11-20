@@ -1800,6 +1800,16 @@ extern "C" float func_003941D0(cPS2GraphicsMan* base, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_003941E0);
 #ifdef SKIP_ASM
+/**
+ * Stores the red tint scale for one view: m_ScreenTintScaleR[@p idx] = @p value.
+ *
+ * One of the per-view render-state set/get pairs (the eight-entry arrays cVisualEffectsMan_commonUpdate fills each
+ * frame). No range check on @p idx. No caller in C; the out-of-line copy of an inline accessor.
+ *
+ * @param base  the graphics manager
+ * @param idx  the view / render-state query index (0-7)
+ * @param value  the new red tint scale
+ */
 extern "C" void func_003941E0(cPS2GraphicsMan* base, int idx, float value) {
     *(float*)(((char*)base) + (idx << 2) + 0x1AC) = value;
 }
@@ -1807,6 +1817,15 @@ extern "C" void func_003941E0(cPS2GraphicsMan* base, int idx, float value) {
 //100%
 INCLUDE_ASM("render/font", func_003941F0);
 #ifdef SKIP_ASM
+/**
+ * Returns the red tint scale for one view: m_ScreenTintScaleR[@p idx].
+ *
+ * The getter paired with the setter just before it. No range check on @p idx.
+ *
+ * @param base  the graphics manager
+ * @param idx  the view / render-state query index (0-7)
+ * @return the red tint scale
+ */
 extern "C" float func_003941F0(cPS2GraphicsMan* base, int idx) {
     return *(float*)(((char*)base) + (idx << 2) + 0x1AC);
 }
@@ -1814,6 +1833,16 @@ extern "C" float func_003941F0(cPS2GraphicsMan* base, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_00394200);
 #ifdef SKIP_ASM
+/**
+ * Stores the green tint scale for one view: m_ScreenTintScaleG[@p idx] = @p value.
+ *
+ * One of the per-view render-state set/get pairs (the eight-entry arrays cVisualEffectsMan_commonUpdate fills each
+ * frame). No range check on @p idx. No caller in C; the out-of-line copy of an inline accessor.
+ *
+ * @param base  the graphics manager
+ * @param idx  the view / render-state query index (0-7)
+ * @param value  the new green tint scale
+ */
 extern "C" void func_00394200(cPS2GraphicsMan* base, int idx, float value) {
     *(float*)(((char*)base) + (idx << 2) + 0x1CC) = value;
 }
@@ -1821,6 +1850,15 @@ extern "C" void func_00394200(cPS2GraphicsMan* base, int idx, float value) {
 //100%
 INCLUDE_ASM("render/font", func_00394210);
 #ifdef SKIP_ASM
+/**
+ * Returns the green tint scale for one view: m_ScreenTintScaleG[@p idx].
+ *
+ * The getter paired with the setter just before it. No range check on @p idx.
+ *
+ * @param base  the graphics manager
+ * @param idx  the view / render-state query index (0-7)
+ * @return the green tint scale
+ */
 extern "C" float func_00394210(cPS2GraphicsMan* base, int idx) {
     return *(float*)(((char*)base) + (idx << 2) + 0x1CC);
 }
@@ -1828,6 +1866,16 @@ extern "C" float func_00394210(cPS2GraphicsMan* base, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_00394220);
 #ifdef SKIP_ASM
+/**
+ * Stores the blue tint scale for one view: m_ScreenTintScaleB[@p idx] = @p value.
+ *
+ * One of the per-view render-state set/get pairs (the eight-entry arrays cVisualEffectsMan_commonUpdate fills each
+ * frame). No range check on @p idx. No caller in C; the out-of-line copy of an inline accessor.
+ *
+ * @param base  the graphics manager
+ * @param idx  the view / render-state query index (0-7)
+ * @param value  the new blue tint scale
+ */
 extern "C" void func_00394220(cPS2GraphicsMan* base, int idx, float value) {
     *(float*)(((char*)base) + (idx << 2) + 0x1EC) = value;
 }
@@ -1835,6 +1883,15 @@ extern "C" void func_00394220(cPS2GraphicsMan* base, int idx, float value) {
 //100%
 INCLUDE_ASM("render/font", func_00394230);
 #ifdef SKIP_ASM
+/**
+ * Returns the blue tint scale for one view: m_ScreenTintScaleB[@p idx].
+ *
+ * The getter paired with the setter just before it. No range check on @p idx.
+ *
+ * @param base  the graphics manager
+ * @param idx  the view / render-state query index (0-7)
+ * @return the blue tint scale
+ */
 extern "C" float func_00394230(cPS2GraphicsMan* base, int idx) {
     return *(float*)(((char*)base) + (idx << 2) + 0x1EC);
 }
@@ -1842,6 +1899,16 @@ extern "C" float func_00394230(cPS2GraphicsMan* base, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_00394240);
 #ifdef SKIP_ASM
+/**
+ * Stores the red tint offset for one view: m_ScreenTintOffsetR[@p idx] = @p value.
+ *
+ * One of the per-view render-state set/get pairs (the eight-entry arrays cVisualEffectsMan_commonUpdate fills each
+ * frame). No range check on @p idx. No caller in C; the out-of-line copy of an inline accessor.
+ *
+ * @param base  the graphics manager
+ * @param idx  the view / render-state query index (0-7)
+ * @param value  the new red tint offset
+ */
 extern "C" void func_00394240(cPS2GraphicsMan* base, int idx, float value) {
     *(float*)(((char*)base) + (idx << 2) + 0x20C) = value;
 }
@@ -1849,6 +1916,15 @@ extern "C" void func_00394240(cPS2GraphicsMan* base, int idx, float value) {
 //100%
 INCLUDE_ASM("render/font", func_00394250);
 #ifdef SKIP_ASM
+/**
+ * Returns the red tint offset for one view: m_ScreenTintOffsetR[@p idx].
+ *
+ * The getter paired with the setter just before it. No range check on @p idx.
+ *
+ * @param base  the graphics manager
+ * @param idx  the view / render-state query index (0-7)
+ * @return the red tint offset
+ */
 extern "C" float func_00394250(cPS2GraphicsMan* base, int idx) {
     return *(float*)(((char*)base) + (idx << 2) + 0x20C);
 }
@@ -1856,6 +1932,16 @@ extern "C" float func_00394250(cPS2GraphicsMan* base, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_00394260);
 #ifdef SKIP_ASM
+/**
+ * Stores the green tint offset for one view: m_ScreenTintOffsetG[@p idx] = @p value.
+ *
+ * One of the per-view render-state set/get pairs (the eight-entry arrays cVisualEffectsMan_commonUpdate fills each
+ * frame). No range check on @p idx. No caller in C; the out-of-line copy of an inline accessor.
+ *
+ * @param base  the graphics manager
+ * @param idx  the view / render-state query index (0-7)
+ * @param value  the new green tint offset
+ */
 extern "C" void func_00394260(cPS2GraphicsMan* base, int idx, float value) {
     *(float*)(((char*)base) + (idx << 2) + 0x22C) = value;
 }
@@ -1863,6 +1949,15 @@ extern "C" void func_00394260(cPS2GraphicsMan* base, int idx, float value) {
 //100%
 INCLUDE_ASM("render/font", func_00394270);
 #ifdef SKIP_ASM
+/**
+ * Returns the green tint offset for one view: m_ScreenTintOffsetG[@p idx].
+ *
+ * The getter paired with the setter just before it. No range check on @p idx.
+ *
+ * @param base  the graphics manager
+ * @param idx  the view / render-state query index (0-7)
+ * @return the green tint offset
+ */
 extern "C" float func_00394270(cPS2GraphicsMan* base, int idx) {
     return *(float*)(((char*)base) + (idx << 2) + 0x22C);
 }
@@ -1870,6 +1965,16 @@ extern "C" float func_00394270(cPS2GraphicsMan* base, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_00394280);
 #ifdef SKIP_ASM
+/**
+ * Stores the blue tint offset for one view: m_ScreenTintOffsetB[@p idx] = @p value.
+ *
+ * One of the per-view render-state set/get pairs (the eight-entry arrays cVisualEffectsMan_commonUpdate fills each
+ * frame). No range check on @p idx. No caller in C; the out-of-line copy of an inline accessor.
+ *
+ * @param base  the graphics manager
+ * @param idx  the view / render-state query index (0-7)
+ * @param value  the new blue tint offset
+ */
 extern "C" void func_00394280(cPS2GraphicsMan* base, int idx, float value) {
     *(float*)(((char*)base) + (idx << 2) + 0x24C) = value;
 }
@@ -1877,6 +1982,15 @@ extern "C" void func_00394280(cPS2GraphicsMan* base, int idx, float value) {
 //100%
 INCLUDE_ASM("render/font", func_00394290);
 #ifdef SKIP_ASM
+/**
+ * Returns the blue tint offset for one view: m_ScreenTintOffsetB[@p idx].
+ *
+ * The getter paired with the setter just before it. No range check on @p idx.
+ *
+ * @param base  the graphics manager
+ * @param idx  the view / render-state query index (0-7)
+ * @return the blue tint offset
+ */
 extern "C" float func_00394290(cPS2GraphicsMan* base, int idx) {
     return *(float*)(((char*)base) + (idx << 2) + 0x24C);
 }
@@ -1932,6 +2046,11 @@ void cGraphicsMan_TakeScreenGrab(void* self)
 //100%
 INCLUDE_ASM("render/font", func_003942D0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base-class body of cGraphicsMan vtable slot 62.
+ *
+ * cPS2GraphicsMan does not override the slot, so the call is a no-op on PS2.
+ */
 void func_003942D0(void* self)
 {
 }
@@ -1940,6 +2059,14 @@ void func_003942D0(void* self)
 //100%
 INCLUDE_ASM("render/font", func_003942D8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of the graphics manager's active draw state (&m_activeDrawState, +0xED8).
+ *
+ * cGraphicsMan vtable slot 64 (cPS2GraphicsMan keeps it). func_003947D8 calls it through the vtable to compare the
+ * current draw state with this one.
+ *
+ * @return a pointer to m_activeDrawState
+ */
 void* func_003942D8(void* self)
 {
     return (char*)self + 0xED8;
@@ -1949,6 +2076,11 @@ void* func_003942D8(void* self)
 //100%
 INCLUDE_ASM("render/font", func_003942E0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base-class body of cGraphicsMan vtable slot 65.
+ *
+ * cPS2GraphicsMan does not override the slot.
+ */
 void func_003942E0(void* self)
 {
 }
@@ -1986,6 +2118,14 @@ extern "C" void cGraphicsMan_SetDrawState(cPS2GraphicsMan* self, sDrawState* src
 //100%
 INCLUDE_ASM("render/font", func_00394358);
 #ifdef SKIP_ASM
+/**
+ * Returns the graphics manager's current draw state pointer (m_pCurrentDrawState).
+ *
+ * Identical to func_00394360.
+ *
+ * @param ps2GraphicsMan  the graphics manager
+ * @return m_pCurrentDrawState (as an int)
+ */
 extern "C" int func_00394358(cPS2GraphicsMan* ps2GraphicsMan) {
     return ((int)ps2GraphicsMan->m_pCurrentDrawState);
 }
@@ -1993,6 +2133,14 @@ extern "C" int func_00394358(cPS2GraphicsMan* ps2GraphicsMan) {
 //100%
 INCLUDE_ASM("render/font", func_00394360);
 #ifdef SKIP_ASM
+/**
+ * Returns the graphics manager's current draw state pointer (m_pCurrentDrawState).
+ *
+ * Identical to func_00394358.
+ *
+ * @param ps2GraphicsMan  the graphics manager
+ * @return m_pCurrentDrawState (as an int)
+ */
 extern "C" int func_00394360(cPS2GraphicsMan* ps2GraphicsMan) {
     return ((int)ps2GraphicsMan->m_pCurrentDrawState);
 }
@@ -2000,6 +2148,14 @@ extern "C" int func_00394360(cPS2GraphicsMan* ps2GraphicsMan) {
 //100%
 INCLUDE_ASM("render/font", func_00394368);
 #ifdef SKIP_ASM
+/**
+ * Sets the depth-mask bit (bit 22 of word 1) of the current draw state (*m_pCurrentDrawState).
+ *
+ * Only bit 0 of @p enable is used.
+ *
+ * @param ps2GraphicsMan  the graphics manager
+ * @param enable  the depth mask mode (On Tour eGMDepthMaskMode); bit 0 is stored
+ */
 extern "C" void func_00394368(cPS2GraphicsMan* ps2GraphicsMan, int enable) {
     int *drawState = (int*)ps2GraphicsMan->m_pCurrentDrawState;
     int bit = (enable << 22) & 0x400000;
@@ -2009,6 +2165,14 @@ extern "C" void func_00394368(cPS2GraphicsMan* ps2GraphicsMan, int enable) {
 //100%
 INCLUDE_ASM("render/font", func_00394398);
 #ifdef SKIP_ASM
+/**
+ * Sets the draw layer field (bits 5-9 of word 2) of the current draw state (*m_pCurrentDrawState).
+ *
+ * func_00394558 reads the field back.
+ *
+ * @param ps2GraphicsMan  the graphics manager
+ * @param value  the draw layer (On Tour eGMDrawLayer; 5 bits)
+ */
 extern "C" void func_00394398(cPS2GraphicsMan* ps2GraphicsMan, int value) {
     void *temp_6;
 
@@ -2039,6 +2203,17 @@ extern "C" void cGraphicsMan_SetConstantColour(cPS2GraphicsMan* self, sFontV4 co
 //100%
 INCLUDE_ASM("render/font", func_00394418);
 #ifdef SKIP_ASM
+/**
+ * Returns constant colour @p idx of the graphics manager (m_constantColours[idx], 16 bytes) by value.
+ *
+ * The result goes through the hidden return buffer. The second argument, a 16-byte colour passed by value, is copied to
+ * the stack and never used: the getter has the same parameter list as cGraphicsMan_SetConstantColour, which stores the
+ * colour there. No range check on @p idx (two entries).
+ *
+ * @param v  a colour argument the body ignores
+ * @param idx  the constant colour slot (On Tour eGMConstantColourId; 0 or 1)
+ * @return the colour in m_constantColours[@p idx]
+ */
 extern "C" sFontV4 func_00394418(cPS2GraphicsMan* self, sFontV4 v, int idx)
 {
     // PORT: pointer arithmetic via int (index-first addu)
@@ -2048,6 +2223,14 @@ extern "C" sFontV4 func_00394418(cPS2GraphicsMan* self, sFontV4 v, int idx)
 //100%
 INCLUDE_ASM("render/font", func_00394470);
 #ifdef SKIP_ASM
+/**
+ * Sets the blend mode of one GS context in the current draw state (*m_pCurrentDrawState): 5 bits of word 1 at bit 2 + 5
+ * * @p context.
+ *
+ * @param ps2GraphicsMan  the graphics manager
+ * @param mode  the blend mode (On Tour eGMBlendMode)
+ * @param context  the GS context (0 or 1)
+ */
 extern "C" void func_00394470(cPS2GraphicsMan* ps2GraphicsMan, int mode, int context) {
     int temp_2;
     int temp_4;
@@ -2062,6 +2245,16 @@ extern "C" void func_00394470(cPS2GraphicsMan* ps2GraphicsMan, int mode, int con
 //100%
 INCLUDE_ASM("render/font", func_003944A8);
 #ifdef SKIP_ASM
+/**
+ * Sets the alpha-sort mode and sort key of the current draw state (*m_pCurrentDrawState).
+ *
+ * The mode goes in bits 0-1 of word 1, the key in bits 10-28 of word 2 (19 bits); func_00394588 and func_00394598 read
+ * them back.
+ *
+ * @param ps2GraphicsMan  the graphics manager
+ * @param arg1  the alpha sort mode (On Tour eGMAlphaSort; 2 bits)
+ * @param arg2  the sort key (19 bits)
+ */
 extern "C" void func_003944A8(cPS2GraphicsMan* ps2GraphicsMan, int arg1, int arg2) {
     void *temp_3;
     void *temp_8;
@@ -2075,6 +2268,14 @@ extern "C" void func_003944A8(cPS2GraphicsMan* ps2GraphicsMan, int arg1, int arg
 //100%
 INCLUDE_ASM("render/font", func_003944F8);
 #ifdef SKIP_ASM
+/**
+ * Sets the texture clamp mode of one GS context in the current draw state (*m_pCurrentDrawState): 2 bits of word 0 at
+ * bit 2 + 2 * @p context.
+ *
+ * @param ps2GraphicsMan  the graphics manager
+ * @param mode  the clamp mode (On Tour eGMClampMode)
+ * @param context  the GS context (0 or 1)
+ */
 extern "C" void func_003944F8(cPS2GraphicsMan* ps2GraphicsMan, int mode, int context) {
     int *temp_7;
     int temp_4;
@@ -2089,6 +2290,13 @@ extern "C" void func_003944F8(cPS2GraphicsMan* ps2GraphicsMan, int mode, int con
 //100%
 INCLUDE_ASM("render/font", func_00394530);
 #ifdef SKIP_ASM
+/**
+ * Stores the low 30 bits of @p value in word 3 of the current draw state (*m_pCurrentDrawState), keeping its top two
+ * bits.
+ *
+ * @param ps2GraphicsMan  the graphics manager
+ * @param value  the DMA data pointer / offset to record (30 bits)
+ */
 extern "C" void func_00394530(cPS2GraphicsMan* ps2GraphicsMan, int value) {
     int *drawState = (int*)ps2GraphicsMan->m_pCurrentDrawState;
     int masked = value & 0x3FFFFFFF;
@@ -2098,6 +2306,14 @@ extern "C" void func_00394530(cPS2GraphicsMan* ps2GraphicsMan, int value) {
 //100%
 INCLUDE_ASM("render/font", func_00394558);
 #ifdef SKIP_ASM
+/**
+ * Returns the draw layer field (bits 5-9 of word 2) of the current draw state (*m_pCurrentDrawState).
+ *
+ * func_00394398 sets it.
+ *
+ * @param ps2GraphicsMan  the graphics manager
+ * @return the draw layer (0-31)
+ */
 extern "C" unsigned int func_00394558(cPS2GraphicsMan* ps2GraphicsMan) {
     return (unsigned int) ((*(int *)((char*)((ps2GraphicsMan->m_pCurrentDrawState)) + (8))) & 0x3E0) >> 5;
 }
@@ -2105,6 +2321,14 @@ extern "C" unsigned int func_00394558(cPS2GraphicsMan* ps2GraphicsMan) {
 //100%
 INCLUDE_ASM("render/font", func_00394570);
 #ifdef SKIP_ASM
+/**
+ * Returns the context-0 blend mode (bits 2-6 of word 1) of the current draw state (*m_pCurrentDrawState).
+ *
+ * func_00394470 sets it.
+ *
+ * @param ps2GraphicsMan  the graphics manager
+ * @return the blend mode (0-31)
+ */
 extern "C" unsigned int func_00394570(cPS2GraphicsMan* ps2GraphicsMan) {
     return (unsigned int) ((*(int *)((char*)((ps2GraphicsMan->m_pCurrentDrawState)) + (4))) & 0x7C) >> 2;
 }
@@ -2112,6 +2336,14 @@ extern "C" unsigned int func_00394570(cPS2GraphicsMan* ps2GraphicsMan) {
 //100%
 INCLUDE_ASM("render/font", func_00394588);
 #ifdef SKIP_ASM
+/**
+ * Returns the alpha-sort mode (bits 0-1 of word 1) of the current draw state (*m_pCurrentDrawState).
+ *
+ * func_003944A8 sets it.
+ *
+ * @param ps2GraphicsMan  the graphics manager
+ * @return the alpha sort mode (0-3)
+ */
 extern "C" int func_00394588(cPS2GraphicsMan* ps2GraphicsMan) {
     return (*(int *)((char*)((ps2GraphicsMan->m_pCurrentDrawState)) + (4))) & 3;
 }
@@ -2119,6 +2351,14 @@ extern "C" int func_00394588(cPS2GraphicsMan* ps2GraphicsMan) {
 //100%
 INCLUDE_ASM("render/font", func_00394598);
 #ifdef SKIP_ASM
+/**
+ * Returns the alpha-sort key (bits 10-28 of word 2) of the current draw state (*m_pCurrentDrawState).
+ *
+ * func_003944A8 sets it.
+ *
+ * @param ps2GraphicsMan  the graphics manager
+ * @return the sort key
+ */
 extern "C" unsigned int func_00394598(cPS2GraphicsMan* ps2GraphicsMan) {
     return (unsigned int) ((*(int *)((char*)((ps2GraphicsMan->m_pCurrentDrawState)) + (8))) & 0x1FFFFC00) >> 10;
 }
@@ -2152,6 +2392,11 @@ void cGraphicsMan_AddProjectiveTexture(void* self)
 //100%
 INCLUDE_ASM("render/font", func_003945C8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base-class body of cGraphicsMan vtable slot 74.
+ *
+ * cPS2GraphicsMan does not override the slot, so the call is a no-op on PS2.
+ */
 void func_003945C8(void* self)
 {
 }
@@ -2160,6 +2405,11 @@ void func_003945C8(void* self)
 //100%
 INCLUDE_ASM("render/font", func_003945D0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base-class body of cGraphicsMan vtable slot 88.
+ *
+ * cPS2GraphicsMan does not override the slot (it overrides the next one, 89, with func_00386E78).
+ */
 void func_003945D0(void* self)
 {
 }
@@ -2168,6 +2418,11 @@ void func_003945D0(void* self)
 //100%
 INCLUDE_ASM("render/font", func_003945D8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base-class body of cGraphicsMan vtable slot 89.
+ *
+ * cPS2GraphicsMan overrides the slot with func_00386E78.
+ */
 void func_003945D8(void* self)
 {
 }
@@ -2202,6 +2457,12 @@ void cGraphicsMan_SetShinyBoarder(void* self)
 //100%
 INCLUDE_ASM("render/font", func_003945F0);
 #ifdef SKIP_ASM
+/**
+ * Returns the number of texture references (mNumTexRefs).
+ *
+ * @param ps2GraphicsMan  the graphics manager
+ * @return mNumTexRefs
+ */
 extern "C" int func_003945F0(cPS2GraphicsMan* ps2GraphicsMan) {
     return (ps2GraphicsMan->mNumTexRefs);
 }
@@ -2209,6 +2470,15 @@ extern "C" int func_003945F0(cPS2GraphicsMan* ps2GraphicsMan) {
 //100%
 INCLUDE_ASM("render/font", func_003945F8);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of texture reference @p idx (&mTexRefs[idx], 12 bytes each).
+ *
+ * No range check (the preview's version asserted the index).
+ *
+ * @param base  the graphics manager
+ * @param idx  the texture reference index
+ * @return a pointer to mTexRefs[@p idx]
+ */
 extern "C" char* func_003945F8(cPS2GraphicsMan* base, int idx)
 {
     return ((char*)base) + 0x280 + idx * 0xC;
@@ -2231,6 +2501,11 @@ void cGraphicsMan_DrawCharShadowModel(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00394618__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base-class body of cGraphicsMan vtable slot 102.
+ *
+ * cPS2GraphicsMan does not override the slot, so the call is a no-op on PS2.
+ */
 void func_00394618(void* self)
 {
 }
@@ -2239,6 +2514,11 @@ void func_00394618(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00394620__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base-class body of cGraphicsMan vtable slot 103.
+ *
+ * cPS2GraphicsMan does not override the slot, so the call is a no-op on PS2.
+ */
 void func_00394620(void* self)
 {
 }
@@ -2247,6 +2527,11 @@ void func_00394620(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00394628__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base-class body of cGraphicsMan vtable slot 104.
+ *
+ * cPS2GraphicsMan does not override the slot, so the call is a no-op on PS2.
+ */
 void func_00394628(void* self)
 {
 }
@@ -2255,6 +2540,11 @@ void func_00394628(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00394630__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base-class body of cGraphicsMan vtable slot 105.
+ *
+ * cPS2GraphicsMan does not override the slot, so the call is a no-op on PS2.
+ */
 void func_00394630(void* self)
 {
 }
@@ -2263,6 +2553,11 @@ void func_00394630(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00394638__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base-class body of cGraphicsMan vtable slot 106.
+ *
+ * cPS2GraphicsMan does not override the slot, so the call is a no-op on PS2.
+ */
 void func_00394638(void* self)
 {
 }
@@ -2271,6 +2566,11 @@ void func_00394638(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00394640__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base-class body of cGraphicsMan vtable slot 107.
+ *
+ * cPS2GraphicsMan does not override the slot, so the call is a no-op on PS2.
+ */
 void func_00394640(void* self)
 {
 }
@@ -2279,6 +2579,11 @@ void func_00394640(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00394648__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base-class body of cGraphicsMan vtable slot 108.
+ *
+ * cPS2GraphicsMan does not override the slot, so the call is a no-op on PS2.
+ */
 void func_00394648(void* self)
 {
 }
@@ -2326,6 +2631,11 @@ void cGraphicsMan_GenerateBlendedMatrices(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00394668__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base-class body of cGraphicsMan vtable slot 112.
+ *
+ * cPS2GraphicsMan does not override the slot, so the call is a no-op on PS2.
+ */
 void func_00394668(void* self)
 {
 }
@@ -2334,6 +2644,11 @@ void func_00394668(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00394670__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base-class body of cGraphicsMan vtable slot 113.
+ *
+ * cPS2GraphicsMan does not override the slot, so the call is a no-op on PS2.
+ */
 void func_00394670(void* self)
 {
 }
@@ -2359,6 +2674,11 @@ int cGraphicsMan_getCurrentFrameCount(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00394680__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base-class body of cGraphicsMan vtable slot 115.
+ *
+ * cPS2GraphicsMan overrides the slot with cPS2GraphicsMan_UpdateFullScreenEffects.
+ */
 void func_00394680(void* self)
 {
 }
@@ -2367,6 +2687,11 @@ void func_00394680(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00394688__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base-class body of cGraphicsMan vtable slot 116.
+ *
+ * cPS2GraphicsMan overrides the slot with cPS2GraphicsMan_RenderFullScreenEffects.
+ */
 void func_00394688(void* self)
 {
 }
@@ -2375,6 +2700,11 @@ void func_00394688(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00394690);
 #ifdef SKIP_ASM
+/**
+ * Returns the graphics manager singleton (cGraphicsMan_TheGraphicsMan).
+ *
+ * @return cGraphicsMan_TheGraphicsMan (as an int)
+ */
 extern "C" int func_00394690(void) {
     return (*(int*)&cGraphicsMan_TheGraphicsMan);
 }
@@ -2382,6 +2712,12 @@ extern "C" int func_00394690(void) {
 //100%
 INCLUDE_ASM("render/font", func_00394698);
 #ifdef SKIP_ASM
+/**
+ * Sets the specular texture id (mSpecTexID).
+ *
+ * @param ps2GraphicsMan  the graphics manager
+ * @param texId  the texture id
+ */
 extern "C" void func_00394698(cPS2GraphicsMan* ps2GraphicsMan, int texId) {
     (ps2GraphicsMan->mSpecTexID) = texId;
 }
@@ -2389,6 +2725,12 @@ extern "C" void func_00394698(cPS2GraphicsMan* ps2GraphicsMan, int texId) {
 //100%
 INCLUDE_ASM("render/font", func_003946A0);
 #ifdef SKIP_ASM
+/**
+ * Returns the specular texture id (mSpecTexID).
+ *
+ * @param ps2GraphicsMan  the graphics manager
+ * @return mSpecTexID
+ */
 extern "C" int func_003946A0(cPS2GraphicsMan* ps2GraphicsMan) {
     return (ps2GraphicsMan->mSpecTexID);
 }
@@ -2396,6 +2738,15 @@ extern "C" int func_003946A0(cPS2GraphicsMan* ps2GraphicsMan) {
 //100%
 INCLUDE_ASM("render/font", func_003946A8);
 #ifdef SKIP_ASM
+/**
+ * Stores character specular texture id @p idx: mCharSpecTexID[idx] = @p value.
+ *
+ * No range check (ten entries). Retail-only; the preview has no such accessor.
+ *
+ * @param base  the graphics manager
+ * @param idx  the character slot (0-9)
+ * @param value  the texture id
+ */
 extern "C" void func_003946A8(cPS2GraphicsMan* base, int idx, int value) {
     *(int*)(((char*)base) + (idx << 2) + 0x10B0) = value;
 }
@@ -2403,6 +2754,15 @@ extern "C" void func_003946A8(cPS2GraphicsMan* base, int idx, int value) {
 //100%
 INCLUDE_ASM("render/font", func_003946B8);
 #ifdef SKIP_ASM
+/**
+ * Returns character specular texture id @p idx (mCharSpecTexID[idx]).
+ *
+ * No range check (ten entries).
+ *
+ * @param base  the graphics manager
+ * @param idx  the character slot (0-9)
+ * @return the texture id
+ */
 extern "C" int func_003946B8(cPS2GraphicsMan* base, int idx) {
     return *(int*)(((char*)base) + (idx << 2) + 0x10B0);
 }
@@ -2410,6 +2770,12 @@ extern "C" int func_003946B8(cPS2GraphicsMan* base, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_003946C8);
 #ifdef SKIP_ASM
+/**
+ * Sets the patch specular texture id (mPatchSpecTexID).
+ *
+ * @param ps2GraphicsMan  the graphics manager
+ * @param texId  the texture id
+ */
 extern "C" void func_003946C8(cPS2GraphicsMan* ps2GraphicsMan, int texId) {
     (ps2GraphicsMan->mPatchSpecTexID) = texId;
 }
@@ -2417,6 +2783,12 @@ extern "C" void func_003946C8(cPS2GraphicsMan* ps2GraphicsMan, int texId) {
 //100%
 INCLUDE_ASM("render/font", func_003946D0);
 #ifdef SKIP_ASM
+/**
+ * Returns the patch specular texture id (mPatchSpecTexID).
+ *
+ * @param ps2GraphicsMan  the graphics manager
+ * @return mPatchSpecTexID
+ */
 extern "C" int func_003946D0(cPS2GraphicsMan* ps2GraphicsMan) {
     return (ps2GraphicsMan->mPatchSpecTexID);
 }
@@ -2424,6 +2796,11 @@ extern "C" int func_003946D0(cPS2GraphicsMan* ps2GraphicsMan) {
 //100%
 INCLUDE_ASM("render/font", func_003946D8);
 #ifdef SKIP_ASM
+/**
+ * Requests that the next page flip be skipped: sets mSkipNextPageFlip to 1.
+ *
+ * @param ps2GraphicsMan  the graphics manager
+ */
 extern "C" void func_003946D8(cPS2GraphicsMan* ps2GraphicsMan) {
     (ps2GraphicsMan->mSkipNextPageFlip) = 1;
 }
@@ -2496,6 +2873,13 @@ extern "C" void cGraphicsMan_PushDrawState(cPS2GraphicsMan* self)
 //100%
 INCLUDE_ASM("render/font", func_003947C8);
 #ifdef SKIP_ASM
+/**
+ * Pops the draw-state stack: moves m_pCurrentDrawState back one sDrawState (20 bytes).
+ *
+ * No underflow check; the preview's version asserted that the pointer was above m_drawStateStack.
+ *
+ * @param graphicsMan  the graphics manager
+ */
 extern "C" void func_003947C8(void *graphicsMan) {
     (*(int *)((char*)(graphicsMan) + (0xE84))) = (int) ((*(int *)((char*)(graphicsMan) + (0xE84))) - 20);
 }
@@ -2510,6 +2894,14 @@ static inline short* sFontRS_shorts_47D8(char* st)
     return (short*)(st + 0x10);
 }
 
+/**
+ * Reports whether the current draw state differs from the active one.
+ *
+ * Compares the four state words of *m_pCurrentDrawState, then its two texture ids, with the draw state that vtable slot
+ * 64 (func_003942D8, &m_activeDrawState) returns; the virtual is called again for every word.
+ *
+ * @return 1 at the first difference, else 0
+ */
 extern "C" int func_003947D8(cPS2GraphicsMan* self)
 {
     int i;
@@ -2532,6 +2924,15 @@ extern "C" int func_003947D8(cPS2GraphicsMan* self)
 //100%
 INCLUDE_ASM("render/font", func_003948B0);
 #ifdef SKIP_ASM
+/**
+ * Stores effect texture map entry @p idx: _EffectTexMap[idx] = @p value.
+ *
+ * No range check (86 entries); the preview's version asserted the index.
+ *
+ * @param base  the graphics manager
+ * @param idx  the effect id
+ * @param value  the texture id
+ */
 extern "C" void func_003948B0(cPS2GraphicsMan* base, int idx, int value) {
     *(int*)(((char*)base) + (idx << 2) + 0xF50) = value;
 }
@@ -2539,6 +2940,15 @@ extern "C" void func_003948B0(cPS2GraphicsMan* base, int idx, int value) {
 //100%
 INCLUDE_ASM("render/font", func_003948C0);
 #ifdef SKIP_ASM
+/**
+ * Returns effect texture map entry @p idx (_EffectTexMap[idx]).
+ *
+ * No range check (86 entries).
+ *
+ * @param base  the graphics manager
+ * @param idx  the effect id
+ * @return the texture id (-1 when unset)
+ */
 extern "C" int func_003948C0(cPS2GraphicsMan* base, int idx) {
     return *(int*)(((char*)base) + (idx << 2) + 0xF50);
 }
@@ -2546,6 +2956,16 @@ extern "C" int func_003948C0(cPS2GraphicsMan* base, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_003948D0);
 #ifdef SKIP_ASM
+/**
+ * Returns a distance falloff factor that is 1 within 100 units and falls off as 1/d, 1/d^2 or 1/d^3.
+ *
+ * @p mode 1: 100 / d; 2: 10000 / d^2; 3: 1000000 / d^3, each only once @p distance reaches 100; any other mode returns
+ * 1. No caller in C or asm (an out-of-line copy of an inline helper).
+ *
+ * @param mode  the falloff order (1-3)
+ * @param distance  the distance
+ * @return the factor, 1 at most
+ */
 extern "C" float func_003948D0(int mode, float distance)
 {
     switch (mode) {
@@ -2565,6 +2985,15 @@ extern "C" float func_003948D0(int mode, float distance)
 //100%
 INCLUDE_ASM("render/font", func_003949A0);
 #ifdef SKIP_ASM
+/**
+ * Returns a near-range ramp: (100x)^n while 100x is below 1, else 1.
+ *
+ * @p mode 1, 2 or 3 picks the power n; any other mode returns 1. No caller in C or asm.
+ *
+ * @param mode  the ramp order (1-3)
+ * @param x  the value, scaled by 100 first
+ * @return the ramp value, 1 at most
+ */
 extern "C" float func_003949A0(int mode, float x)
 {
     float scaled = x * 100.0f;
@@ -2581,6 +3010,16 @@ extern "C" float func_003949A0(int mode, float x)
 //100%
 INCLUDE_ASM("render/font", func_00394A20);
 #ifdef SKIP_ASM
+/**
+ * Raises @p x to the integer power @p n.
+ *
+ * Powers 0-4 are multiplied out; any other power uses square-and-multiply, with a negative power inverting @p x first;
+ * 0 raised to such a power returns 0. No caller in C or asm.
+ *
+ * @param n  the exponent
+ * @param x  the base
+ * @return x^n
+ */
 extern "C" float func_00394A20(int n, float x) {
     float result;
 
@@ -2618,6 +3057,15 @@ extern "C" float func_00394A20(int n, float x) {
 //100%
 INCLUDE_ASM("render/font", func_00394AD8);
 #ifdef SKIP_ASM
+/**
+ * Returns a fade factor: 1, unless @p a is at least 5000 and @p b is above 3750, then 1 - (b - 3750) * 0.0008.
+ *
+ * The factor reaches 0 at @p b = 5000 and goes negative beyond it (no clamp). No caller in C or asm.
+ *
+ * @param a  a distance compared with 5000
+ * @param b  the distance that drives the fade
+ * @return the fade factor
+ */
 extern "C" float func_00394AD8(float a, float b)
 {
     float factor;
@@ -2635,6 +3083,13 @@ void operator_delete(int* ptr);
 
 extern char D_00493938[];
 
+/**
+ * Destructor body: stores the vtable D_00493938 at +4 and frees the object when bit 0 of @p flags is set.
+ *
+ * It is the only slot (slot 1) of that one-entry vtable.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object
+ */
 extern "C" void func_00394B38(int* self, int flags)
 {
     *(void**)((char*)self + 0x4) = D_00493938;
@@ -2647,6 +3102,11 @@ extern "C" void func_00394B38(int* self, int flags)
 //100%
 INCLUDE_ASM("render/font", func_00394B68__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base-class body of slot 9 of the grid-mesh vtable D_004938E0.
+ *
+ * The derived vtable D_00493208 overrides the slot with func_00396110.
+ */
 void func_00394B68(void* self)
 {
 }
@@ -2657,6 +3117,11 @@ INCLUDE_ASM("render/font", func_00394B70);
 #ifdef SKIP_ASM
 extern int cBezierMan_TheBezierMan;
 
+/**
+ * Returns the Bezier patch manager singleton (cBezierMan_TheBezierMan).
+ *
+ * @return cBezierMan_TheBezierMan
+ */
 extern "C" int func_00394B70(void) {
     return cBezierMan_TheBezierMan;
 }
@@ -2665,6 +3130,11 @@ extern "C" int func_00394B70(void) {
 //100%
 INCLUDE_ASM("render/font", func_00394B78__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base-class body of slot 4 of the cBezierMan vtable D_00493820.
+ *
+ * cPS2BezierMan overrides the slot with cPS2BezierMan_Reset__FPv.
+ */
 void func_00394B78(void* self)
 {
 }
@@ -2673,6 +3143,11 @@ void func_00394B78(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00394B80__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base-class body of slot 5 of the cBezierMan vtable D_00493820.
+ *
+ * cPS2BezierMan keeps it.
+ */
 void func_00394B80(void* self)
 {
 }
@@ -2681,6 +3156,13 @@ void func_00394B80(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00394B88__FPvf);
 #ifdef SKIP_ASM
+/**
+ * Sets the current patch distance (m_currPatchDist, +0x0).
+ *
+ * Slot 19 of the cBezierMan vtable (cPS2BezierMan keeps it).
+ *
+ * @param val  the patch distance
+ */
 void func_00394B88(void* self, float val)
 {
     *(float*)((char*)self + 0x0) = val;
@@ -2690,6 +3172,13 @@ void func_00394B88(void* self, float val)
 //100%
 INCLUDE_ASM("render/font", func_00394B90__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the current patch distance (m_currPatchDist, +0x0).
+ *
+ * Slot 20 of the cBezierMan vtable (cPS2BezierMan keeps it).
+ *
+ * @return m_currPatchDist
+ */
 float func_00394B90(void* self)
 {
     return *(float*)((char*)self + 0x0);
@@ -2728,6 +3217,18 @@ public:
     virtual void v22(int, int, int, int, int);
 };
 
+/**
+ * Forwards all five arguments to the virtual in vtable entry 22 (offset 0xB0) of the Bezier manager.
+ *
+ * That entry is this function's own slot in the cBezierMan vtable D_00493820; cPS2BezierMan overrides it with
+ * func_0038B190, so the forward only reaches a derived implementation (on a plain cBezierMan it would call itself).
+ *
+ * @param a  the patch record (On Tour tPatchRecord* pPatch)
+ * @param b  the edge LOD bytes (On Tour edges)
+ * @param c  the texture ids (On Tour texid)
+ * @param d  the clip flag (On Tour clip)
+ * @param e  the light matrices (preview tLightMats*)
+ */
 extern "C" void func_00394B98(cPS2BezierMan* self, int a, int b, int c, int d, int e)
 {
     ((cFontVirt*)self)->v22(a, b, c, d, e);
@@ -2913,6 +3414,14 @@ int cPS2BezierMan_IsShadowsEnabled(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00394C18);
 #ifdef SKIP_ASM
+/**
+ * Returns VIF cache cursor @p idx advanced by @p shift quadword blocks: mVifCachePos[idx] + (shift << 8).
+ *
+ * @param base  the Bezier patch manager
+ * @param shift  the number of 256-byte blocks to skip
+ * @param idx  the VIF cache (0: 4x4, 1: 6x6, 2: 8x8)
+ * @return the cache address
+ */
 extern "C" int func_00394C18(cPS2BezierMan* base, int shift, int idx) {
     return *(int*)(((char*)base) + (idx << 2) + 0x44C) + (shift << 8);
 }
@@ -2920,6 +3429,12 @@ extern "C" int func_00394C18(cPS2BezierMan* base, int shift, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_00394C30);
 #ifdef SKIP_ASM
+/**
+ * Returns the word at +0x1A0 of the Bezier manager (inside the patch cache at +0x10).
+ *
+ * @param bezierMan  the Bezier patch manager
+ * @return the word at +0x1A0
+ */
 extern "C" int func_00394C30(cPS2BezierMan* bezierMan) {
     return (*(int *)((char*)(bezierMan) + (0x1A0)));
 }
@@ -2927,6 +3442,12 @@ extern "C" int func_00394C30(cPS2BezierMan* bezierMan) {
 //100%
 INCLUDE_ASM("render/font", func_00394C38);
 #ifdef SKIP_ASM
+/**
+ * Returns the word at +0x320 of the Bezier manager (inside the patch cache at +0x10).
+ *
+ * @param bezierMan  the Bezier patch manager
+ * @return the word at +0x320
+ */
 extern "C" int func_00394C38(cPS2BezierMan* bezierMan) {
     return (*(int *)((char*)(bezierMan) + (0x320)));
 }
@@ -2936,6 +3457,11 @@ INCLUDE_ASM("render/font", func_00394C40);
 #ifdef SKIP_ASM
 extern int cLightMan_TheLightMan;
 
+/**
+ * Returns the light manager singleton (cLightMan_TheLightMan).
+ *
+ * @return cLightMan_TheLightMan
+ */
 extern "C" int func_00394C40(void) {
     return cLightMan_TheLightMan;
 }
@@ -3013,6 +3539,14 @@ void* cPS2LightMan__cPS2LightMan(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00394C88__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of light slot @p index in the light table (&m_pLights[index]).
+ *
+ * Slot 2 of the cPS2LightMan vtable D_00493650.
+ *
+ * @param index  the light index
+ * @return a pointer to m_pLights[@p index]
+ */
 void* func_00394C88(void* self, int index)
 {
     return ((char*)*(void**)((char*)self + 0x4) + index * 4);
@@ -3104,6 +3638,11 @@ void cPS2LightMan_SetAmbient(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00394D38__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cPS2LightMan's body for vtable slot 13.
+ *
+ * Slot 13 of the cPS2LightMan vtable D_00493650; it overrides cLightMan_LoadLight__FPv, which is empty too.
+ */
 void func_00394D38(void* self)
 {
 }
@@ -3112,6 +3651,11 @@ void func_00394D38(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00394D40__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cPS2LightMan's body for vtable slot 14.
+ *
+ * Slot 14 of the cPS2LightMan vtable D_00493650; it overrides cLightMan_SetChannel__FPv, which is empty too.
+ */
 void func_00394D40(void* self)
 {
 }
@@ -3120,6 +3664,11 @@ void func_00394D40(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00394D48__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: cPS2LightMan's body for vtable slot 15.
+ *
+ * Slot 15 of the cPS2LightMan vtable D_00493650; it overrides cLightMan_ClearChannel__FPv, which is empty too.
+ */
 void func_00394D48(void* self)
 {
 }
@@ -3176,6 +3725,17 @@ struct sFontCache {
 
 inline void* operator new(unsigned int, void* p) { return p; }
 
+/**
+ * Constructs the deferred-draw manager in place and returns it.
+ *
+ * Runs the element constructors of its tables: 2600 (0xA28) 0x80-byte draw records from +0x80 and 1024 0x18-byte state
+ * entries from +0x51484, each with a zeroed 16-byte state and both texture ids -1; the state at +0x69CA8 likewise; 2048
+ * words from +0x57484 and twelve from +0x69CBC with empty constructors. Neither count (+0x0 for the draw records,
+ * +0x51480 for the state entries) is set here. Called from cPS2GraphicsMan_Init. The C's struct names (sFontCache,
+ * sFontGlyph80, ...) are placeholders: the object is the one mpDeferMan points to.
+ *
+ * @return @p self
+ */
 extern "C" void* func_00394D50(void* self)
 {
     new (self) sFontCache;
@@ -3215,6 +3775,18 @@ static inline int glyphKeyEq(const int* a, const int* b)
     return 1;
 }
 
+/**
+ * Finds or adds the defer manager's shared state entry for a draw state, by hash bucket.
+ *
+ * Walks the chain of bucket @p hash (heads at +0x674A0) comparing the four state words (not the texture-id word @p key
+ * carries); a hit is moved to the front of its chain and returned. On a miss it copies @p key into the next free entry
+ * (+0x51484, count at +0x51480), pushes it on the chain and returns it. There is no capacity check on the 1024-entry
+ * table. Callers: cPS2BezierMan_DrawPatches and the bucket builder func_00362DE8.
+ *
+ * @param key  the draw state to look up (four state words + the texture-id word)
+ * @param hash  the bucket index (an 8-bit hash of the state words)
+ * @return the matching or new state entry
+ */
 extern "C" sGlyphEntry* func_00394ED0(sGlyphCache* self, sGlyphKey* key, unsigned char hash)
 {
     sGlyphEntry** pp = &self->buckets[hash];
@@ -3258,6 +3830,19 @@ struct sCache5000 {
     sNode5000* buckets[256];
 };
 
+/**
+ * Looks up the defer manager's draw bucket for a (state, texture key, matrix) triple.
+ *
+ * Walks the chain of bucket @p hash (heads at +0x678A0), skipping nodes whose busy word (+0x14) is set, and compares
+ * state, texture key and matrix index. A hit is moved to the front of its chain and returned; a miss returns 0 (the
+ * callers then add a bucket). Callers: cPS2BezierMan_DrawPatches, cPS2GraphicsMan_RenderModel and func_00362DE8.
+ *
+ * @param a  the state entry (from func_00394ED0)
+ * @param b  the texture key (both texture ids)
+ * @param hash  the bucket index
+ * @param c  the matrix index
+ * @return the bucket, or 0 if none matches
+ */
 extern "C" sNode5000* func_00395000(sCache5000* self, int a, int b, unsigned char hash, int c)
 {
     sNode5000** pp = &self->buckets[hash];
@@ -3331,7 +3916,16 @@ struct sFontState50C0 {
     int i228;
 };
 
-// Compiler-generated member-wise assignment of the font render state.
+/**
+ * Copies one pushed viewport state (sViewportStack, 0x230 bytes) member by member and returns @p self.
+ *
+ * The compiler-generated assignment: floats and ints word by word, vectors and matrices with VU0 quadword copies.
+ * cPS2GraphicsMan_PushViewport uses it. (The line comment above it calls it the font render state; it is the viewport
+ * stack entry.)
+ *
+ * @param other  the entry to copy
+ * @return @p self
+ */
 extern "C" sFontState50C0* func_003950C0(sFontState50C0* self, const sFontState50C0* other)
 {
     *self = *other;
@@ -3521,7 +4115,15 @@ INCLUDE_ASM("render/font", func_003953B8);
 #ifdef SKIP_ASM
 extern "C" void func_003956B0(cPS2GraphicsMan* self);
 
-// Fetch the current (combined) matrix into out and return out.
+/**
+ * Copies the graphics manager's combined matrix (mNetMatrix) into @p out, recomputing it first if stale.
+ *
+ * Calls func_003956B0 (recompute when mMatricesValid is 0), then copies the 64-byte matrix with VU0. Returns through
+ * the hidden result pointer, hence @p out comes first. cPS2GraphicsMan vtable slot 43.
+ *
+ * @param out  receives the matrix
+ * @return @p out
+ */
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
 extern "C" void* func_003953B8(void* out, void* self)
 {
@@ -3547,6 +4149,12 @@ extern "C" void* func_003953B8(void* out, void* self)
 //100%
 INCLUDE_ASM("render/font", func_00395418);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of the guard-band matrix (&mGuardBandMatrix, +0x5800).
+ *
+ * @param graphicsMan  the graphics manager
+ * @return a pointer to mGuardBandMatrix (as an int)
+ */
 extern "C" int func_00395418(int graphicsMan) {
     return graphicsMan + 22528;
 }
@@ -3569,6 +4177,12 @@ void cPS2GraphicsMan_ClearProjTextures(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00395428);
 #ifdef SKIP_ASM
+/**
+ * Returns the number of projective textures (mNumProjTextures).
+ *
+ * @param pS2GraphicsMan  the graphics manager
+ * @return mNumProjTextures
+ */
 extern "C" int func_00395428(cPS2GraphicsMan* pS2GraphicsMan) {
     return (pS2GraphicsMan->mNumProjTextures);
 }
@@ -3576,6 +4190,15 @@ extern "C" int func_00395428(cPS2GraphicsMan* pS2GraphicsMan) {
 //100%
 INCLUDE_ASM("render/font", func_00395430);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of projective texture @p idx (&mProjTextures[idx], 0xA0 bytes each).
+ *
+ * No range check (eight entries); the preview's version asserted the index.
+ *
+ * @param base  the graphics manager
+ * @param idx  the projective texture index
+ * @return a pointer to the entry
+ */
 extern "C" char* func_00395430(cPS2GraphicsMan* base, int idx)
 {
     return ((char*)base) + 0x13F0 + idx * 160;
@@ -3584,6 +4207,12 @@ extern "C" char* func_00395430(cPS2GraphicsMan* base, int idx)
 //100%
 INCLUDE_ASM("render/font", func_00395448);
 #ifdef SKIP_ASM
+/**
+ * Sets bits 6-9 of word 0 of the current draw state (*m_pCurrentDrawState) (the VIF code state).
+ *
+ * @param ps2GraphicsMan  the graphics manager
+ * @param value  the VIF code state (preview VifCodeState; 4 bits)
+ */
 extern "C" void func_00395448(cPS2GraphicsMan* ps2GraphicsMan, int value) {
     int *temp_6;
 
@@ -3594,6 +4223,12 @@ extern "C" void func_00395448(cPS2GraphicsMan* ps2GraphicsMan, int value) {
 //100%
 INCLUDE_ASM("render/font", func_00395470);
 #ifdef SKIP_ASM
+/**
+ * Sets bits 10-11 of word 0 of the current draw state (*m_pCurrentDrawState) (the VU code init type).
+ *
+ * @param ps2GraphicsMan  the graphics manager
+ * @param value  the VU code init type (preview VUCodeInitType; 2 bits)
+ */
 extern "C" void func_00395470(cPS2GraphicsMan* ps2GraphicsMan, int value) {
     int *temp_6;
 
@@ -3604,6 +4239,14 @@ extern "C" void func_00395470(cPS2GraphicsMan* ps2GraphicsMan, int value) {
 //100%
 INCLUDE_ASM("render/font", func_00395498);
 #ifdef SKIP_ASM
+/**
+ * Sets the fixed alpha of one GS context in the current draw state (*m_pCurrentDrawState): 8 bits of word 0 at bit 12 +
+ * 8 * @p context.
+ *
+ * @param ps2GraphicsMan  the graphics manager
+ * @param alpha  the fixed alpha (0-255)
+ * @param context  the GS context (0 or 1)
+ */
 extern "C" void func_00395498(cPS2GraphicsMan* ps2GraphicsMan, int alpha, int context) {
     int *temp_7;
     int temp_3;
@@ -3683,6 +4326,12 @@ int cPS2GraphicsMan_getCurrentFrameCount(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00395518);
 #ifdef SKIP_ASM
+/**
+ * Returns the current frame-buffer page (mCurrentFrameBufferPage).
+ *
+ * @param graphicsMan  the graphics manager
+ * @return mCurrentFrameBufferPage
+ */
 extern "C" int func_00395518(void *graphicsMan) {
     return (*(int *)((char*)(graphicsMan) + (0x5A84)));
 }
@@ -3690,6 +4339,12 @@ extern "C" int func_00395518(void *graphicsMan) {
 //100%
 INCLUDE_ASM("render/font", func_00395520);
 #ifdef SKIP_ASM
+/**
+ * Returns the current Z-buffer page (mCurrentZBufferPage).
+ *
+ * @param graphicsMan  the graphics manager
+ * @return mCurrentZBufferPage
+ */
 extern "C" int func_00395520(void *graphicsMan) {
     return (*(int *)((char*)(graphicsMan) + (0x5A80)));
 }
@@ -3697,6 +4352,12 @@ extern "C" int func_00395520(void *graphicsMan) {
 //100%
 INCLUDE_ASM("render/font", func_00395528);
 #ifdef SKIP_ASM
+/**
+ * Returns the current frame-buffer pixel format (mCurrentFBFormat).
+ *
+ * @param graphicsMan  the graphics manager
+ * @return mCurrentFBFormat
+ */
 extern "C" int func_00395528(void *graphicsMan) {
     return (*(int *)((char*)(graphicsMan) + (0x5A3C)));
 }
@@ -3704,6 +4365,12 @@ extern "C" int func_00395528(void *graphicsMan) {
 //100%
 INCLUDE_ASM("render/font", func_00395530);
 #ifdef SKIP_ASM
+/**
+ * Returns the current Z-buffer format (mCurrentZBFormat).
+ *
+ * @param graphicsMan  the graphics manager
+ * @return mCurrentZBFormat
+ */
 extern "C" int func_00395530(void *graphicsMan) {
     return (*(int *)((char*)(graphicsMan) + (0x5A40)));
 }
@@ -3711,6 +4378,12 @@ extern "C" int func_00395530(void *graphicsMan) {
 //100%
 INCLUDE_ASM("render/font", func_00395538);
 #ifdef SKIP_ASM
+/**
+ * Returns the texture manager (mpTextureMan).
+ *
+ * @param pS2GraphicsMan  the graphics manager
+ * @return mpTextureMan
+ */
 extern "C" int func_00395538(cPS2GraphicsMan* pS2GraphicsMan) {
     return ((int)pS2GraphicsMan->mpTextureMan);
 }
@@ -3718,6 +4391,12 @@ extern "C" int func_00395538(cPS2GraphicsMan* pS2GraphicsMan) {
 //100%
 INCLUDE_ASM("render/font", func_00395540);
 #ifdef SKIP_ASM
+/**
+ * Sets the minimum number of vblanks between page flips (mMinFlipWait).
+ *
+ * @param graphicsMan  the graphics manager
+ * @param minWait  the vblank count
+ */
 extern "C" void func_00395540(void *graphicsMan, int minWait) {
     (*(int *)((char*)(graphicsMan) + (0x5AB8))) = minWait;
 }
@@ -3725,6 +4404,12 @@ extern "C" void func_00395540(void *graphicsMan, int minWait) {
 //100%
 INCLUDE_ASM("render/font", func_00395548);
 #ifdef SKIP_ASM
+/**
+ * Returns the display buffer address (mDisplayBufferAddress).
+ *
+ * @param graphicsMan  the graphics manager
+ * @return mDisplayBufferAddress
+ */
 extern "C" int func_00395548(void *graphicsMan) {
     return (*(int *)((char*)(graphicsMan) + (0x5A88)));
 }
@@ -3732,6 +4417,15 @@ extern "C" int func_00395548(void *graphicsMan) {
 //100%
 INCLUDE_ASM("render/font", func_00395550);
 #ifdef SKIP_ASM
+/**
+ * Returns the graphics manager's word at +0x5A5C (unk_5A5C).
+ *
+ * A retail-only accessor: the preview's run of out-of-line accessors has nothing between the display-buffer and
+ * frame-buffer-width ones.
+ *
+ * @param graphicsMan  the graphics manager
+ * @return unk_5A5C
+ */
 extern "C" int func_00395550(void *graphicsMan) {
     return (*(int *)((char*)(graphicsMan) + (0x5A5C)));
 }
@@ -3739,6 +4433,12 @@ extern "C" int func_00395550(void *graphicsMan) {
 //100%
 INCLUDE_ASM("render/font", func_00395558);
 #ifdef SKIP_ASM
+/**
+ * Returns the frame-buffer width (mFrameBufferWidth).
+ *
+ * @param graphicsMan  the graphics manager
+ * @return mFrameBufferWidth
+ */
 extern "C" int func_00395558(void *graphicsMan) {
     return (*(int *)((char*)(graphicsMan) + (0x5A50)));
 }
@@ -3746,6 +4446,12 @@ extern "C" int func_00395558(void *graphicsMan) {
 //100%
 INCLUDE_ASM("render/font", func_00395560);
 #ifdef SKIP_ASM
+/**
+ * Returns the current frame-buffer pixel format (mCurrentFBFormat), like func_00395528.
+ *
+ * @param graphicsMan  the graphics manager
+ * @return mCurrentFBFormat
+ */
 extern "C" int func_00395560(void *graphicsMan) {
     return (*(int *)((char*)(graphicsMan) + (0x5A3C)));
 }
@@ -3753,6 +4459,11 @@ extern "C" int func_00395560(void *graphicsMan) {
 //100%
 INCLUDE_ASM("render/font", func_00395568);
 #ifdef SKIP_ASM
+/**
+ * Enables the display filter: sets mFilterEnabled to 1.
+ *
+ * @param graphicsMan  the graphics manager
+ */
 extern "C" void func_00395568(void *graphicsMan) {
     (*(int *)((char*)(graphicsMan) + (0x59E8))) = 1;
 }
@@ -3760,6 +4471,11 @@ extern "C" void func_00395568(void *graphicsMan) {
 //100%
 INCLUDE_ASM("render/font", func_00395578);
 #ifdef SKIP_ASM
+/**
+ * Disables the display filter: sets mFilterEnabled to 0.
+ *
+ * @param graphicsMan  the graphics manager
+ */
 extern "C" void func_00395578(void *graphicsMan) {
     (*(int *)((char*)(graphicsMan) + (0x59E8))) = 0;
 }
@@ -3773,6 +4489,13 @@ static inline float clamp_5580(float x, float hi)
     return x >= 0.0f ? (x <? hi) : 0.0f;
 }
 
+/**
+ * Sets the screen brightness (mScreenBrightness), clamped to 0..2.
+ *
+ * Values below 0 (and NaN) store 0; values above 2 store 2.
+ *
+ * @param x  the requested brightness
+ */
 extern "C" void func_00395580(void* self, float x)
 {
     *(float*)((char*)self + 0x59FC) = clamp_5580(x, 2.0f);
@@ -3781,6 +4504,12 @@ extern "C" void func_00395580(void* self, float x)
 //100%
 INCLUDE_ASM("render/font", func_003955A8);
 #ifdef SKIP_ASM
+/**
+ * Returns the screen brightness (mScreenBrightness).
+ *
+ * @param graphicsMan  the graphics manager
+ * @return mScreenBrightness
+ */
 extern "C" float func_003955A8(void *graphicsMan) {
     return (*(float *)((char*)(graphicsMan) + (0x59FC)));
 }
@@ -3808,7 +4537,19 @@ struct sGfx_55B0 {
     sRing_55B0* ring;               // 0x18F0
 };
 
-// Queues a draw entry with the current render state in the uncached ring.
+/**
+ * Queues a DMA chain as a deferred draw record carrying the current draw state.
+ *
+ * Does nothing once the defer manager (mpDeferMan) holds 2600 records. Otherwise it copies the low 5 bits of the defer
+ * manager's word at +0x69CC4 into the low 5 bits of word 2 of the current draw state, then appends a 0x80-byte record
+ * through the uncached alias (| 0x30000000): the draw state, @p buf, @p next, the defer manager's word at +0x69CC0 as a
+ * 16-bit key, and @p flag.
+ *
+ * @param gfx  the graphics manager
+ * @param buf  the start of the DMA chain
+ * @param next  the chain's end / next pointer
+ * @param flag  a flag stored with the record (preview: bool)
+ */
 extern "C" void func_003955B0(cPS2GraphicsMan* gfx, unsigned int buf, unsigned int next, int flag)
 {
     sDrawState* rs = gfx->m_pCurrentDrawState;
@@ -3828,6 +4569,12 @@ extern "C" void func_003955B0(cPS2GraphicsMan* gfx, unsigned int buf, unsigned i
 //100%
 INCLUDE_ASM("render/font", func_00395658);
 #ifdef SKIP_ASM
+/**
+ * Returns the deferred-draw manager (mpDeferMan).
+ *
+ * @param pS2GraphicsMan  the graphics manager
+ * @return mpDeferMan (as an int)
+ */
 extern "C" int func_00395658(cPS2GraphicsMan* pS2GraphicsMan) {
     return ((int)pS2GraphicsMan->mpDeferMan);
 }
@@ -3835,6 +4582,11 @@ extern "C" int func_00395658(cPS2GraphicsMan* pS2GraphicsMan) {
 //100%
 INCLUDE_ASM("render/font", func_00395660);
 #ifdef SKIP_ASM
+/**
+ * Returns the GS revision: bits 16-23 of the GS CSR register (0x12001000).
+ *
+ * @return the revision byte
+ */
 // PORT: 64-bit `long` (8 bytes on EE); GS CSR hardware register.
 extern "C" int func_00395660(void)
 {
@@ -3844,6 +4596,11 @@ extern "C" int func_00395660(void)
 //100%
 INCLUDE_ASM("render/font", func_00395688);
 #ifdef SKIP_ASM
+/**
+ * Returns the GS id: bits 24-31 of the GS CSR register (0x12001000).
+ *
+ * @return the id byte
+ */
 // PORT: 64-bit `long` (8 bytes on EE); GS CSR hardware register.
 extern "C" int func_00395688(void)
 {
@@ -3856,6 +4613,11 @@ INCLUDE_ASM("render/font", func_003956B0);
 #ifdef SKIP_ASM
 extern "C" void func_0037D968(void* self);
 
+/**
+ * Recomputes the combined matrices with func_0037D968 when mMatricesValid is 0.
+ *
+ * Called by func_003953B8 before it copies mNetMatrix.
+ */
 extern "C" void func_003956B0(cPS2GraphicsMan* self)
 {
     if (self->mMatricesValid == 0) {
@@ -3867,6 +4629,14 @@ extern "C" void func_003956B0(cPS2GraphicsMan* self)
 //100%
 INCLUDE_ASM("render/font", func_003956D8);
 #ifdef SKIP_ASM
+/**
+ * Returns the graphics manager's word at +0x59C0 (unk_59C0).
+ *
+ * func_00363490 uses the field as a loop count. A retail-only accessor (the preview's run has no counterpart).
+ *
+ * @param pS2GraphicsMan  the graphics manager
+ * @return unk_59C0
+ */
 extern "C" int func_003956D8(cPS2GraphicsMan* pS2GraphicsMan) {
     return (pS2GraphicsMan->unk_59C0);
 }
@@ -4362,6 +5132,15 @@ extern "C" void* func_003826E0(void* self);
 //100%
 INCLUDE_ASM("render/font", func_00395ED8);
 #ifdef SKIP_ASM
+/**
+ * Returns the integer depth-sort key of a point.
+ *
+ * Recomputes the matrices first when mMatricesValid is 0 (func_0037D968). With VU0 it transforms @p vec by mNetMatrix,
+ * multiplies the result's w by unk_5920.w, clamps it to 0..unk_5920.x and converts it to an integer.
+ *
+ * @param vec  the point (t4Vector)
+ * @return the clamped, scaled w as an integer
+ */
 // PORT: PS2-only VU0 inline asm (matrix * vector, clamp, clip flags read back from vi1).
 extern "C" int func_00395ED8(cPS2GraphicsMan* self, void* vec)
 {
@@ -4441,6 +5220,15 @@ void cPS2GraphicsMan_SetLightMats(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00395FA8);
 #ifdef SKIP_ASM
+/**
+ * Returns the clip out-code of a projected point against the bounds unk_6B70 (min) and unk_6B80 (max).
+ *
+ * Bits: 2 x below min.x, 1 x above max.x, 8 y below min.y, 4 y above max.y. If w is negative it returns those bits XOR
+ * 0x2F at once; otherwise it adds 0x20 when z is above unk_6B70.z and 0x10 when z is below unk_6B80.z.
+ *
+ * @param vec  the point (x, y, z, w)
+ * @return the out-code bits
+ */
 extern "C" int func_00395FA8(cPS2GraphicsMan* self, char* vec) {
     float x = *(float*)(vec + 0);
     int flags = 0;
@@ -4473,6 +5261,11 @@ extern "C" int func_00395FA8(cPS2GraphicsMan* self, char* vec) {
 //100%
 INCLUDE_ASM("render/font", func_00396058);
 #ifdef SKIP_ASM
+/**
+ * Returns the current video field: bit 13 (FIELD) of the GS CSR register.
+ *
+ * @return 0 or 1
+ */
 // PORT: 64-bit `long` (8 bytes on EE); GS CSR hardware register.
 extern "C" int func_00396058(void)
 {
@@ -4484,6 +5277,13 @@ INCLUDE_ASM("render/font", func_00396080);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 #define GS_CSR (*(volatile unsigned long*)0x12001000)
+/**
+ * Waits for the next vertical sync and returns the current field.
+ *
+ * Writes 8 to the GS CSR (clears the VSINT flag), spins until bit 3 is set again, then returns CSR bit 13.
+ *
+ * @return the field bit (0 or 1)
+ */
 extern "C" int func_00396080(void)
 {
     GS_CSR = 8;
@@ -4499,6 +5299,11 @@ INCLUDE_ASM("render/font", func_003960E8);
 #ifdef SKIP_ASM
 extern "C" void func_00382AF0(void* self, int arg1, int arg2);
 
+/**
+ * Flips the frame: calls func_00382AF0(@p self, @p arg1, 1).
+ *
+ * @param arg1  passed through as func_00382AF0's second argument (preview: a bool)
+ */
 extern "C" void func_003960E8(void* self, int arg1) {
     func_00382AF0(self, arg1, 1);
 }
@@ -4507,6 +5312,13 @@ extern "C" void func_003960E8(void* self, int arg1) {
 //100%
 INCLUDE_ASM("render/font", func_00396108__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the grid mesh's word at +0x1C8.
+ *
+ * Slot 2 of the grid-mesh vtable D_00493208.
+ *
+ * @return the word at +0x1C8
+ */
 int func_00396108(void* self)
 {
     return *(int*)((char*)self + 0x1C8);
@@ -4516,6 +5328,13 @@ int func_00396108(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00396110);
 #ifdef SKIP_ASM
+/**
+ * Sets the grid mesh's range: +0x194 = @p range and +0x198 = 32767 / @p range.
+ *
+ * Slot 9 of the grid-mesh vtable D_00493208, overriding the empty func_00394B68.
+ *
+ * @param range  the scale / range value
+ */
 extern "C" void func_00396110(void* self, float range)
 {
     *(float*)((char*)self + 0x194) = range;
@@ -4526,6 +5345,11 @@ extern "C" void func_00396110(void* self, float range)
 //100%
 INCLUDE_ASM("render/font", func_00396128);
 #ifdef SKIP_ASM
+/**
+ * Resets three cached ids of the texture manager to -1: the words at +0x1F4C, +0x1F50 and +0x1F54.
+ *
+ * The first two in a two-pass loop. func_00363490 calls it on mpTextureMan before building the frame's chains.
+ */
 extern "C" void func_00396128(void* self)
 {
     int i;
@@ -4543,6 +5367,13 @@ void operator_delete(int* ptr);
 
 extern char D_00488680[];
 
+/**
+ * Destructor body: stores the cVisualEffect base vtable D_00488680 and frees the object when bit 0 of @p flags is set.
+ *
+ * Same body as the visual-effect destructors after it; nothing references this copy (no vtable, no call).
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object
+ */
 extern "C" void func_00396160(int* self, int flags)
 {
     *(void**)self = D_00488680;
@@ -4554,6 +5385,11 @@ extern "C" void func_00396160(int* self, int flags)
 //100%
 INCLUDE_ASM("render/font", func_00396190);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * Nothing references it (no call, no vtable entry).
+ */
 extern "C" void func_00396190(void) {
 
 }
@@ -4561,6 +5397,11 @@ extern "C" void func_00396190(void) {
 //100%
 INCLUDE_ASM("render/font", func_00396198);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * Nothing references it (no call, no vtable entry).
+ */
 extern "C" void func_00396198(void) {
 
 }
@@ -4568,6 +5409,11 @@ extern "C" void func_00396198(void) {
 //100%
 INCLUDE_ASM("render/font", func_003961A0);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * Nothing references it (no call, no vtable entry).
+ */
 extern "C" void func_003961A0(void) {
 
 }
@@ -4580,6 +5426,14 @@ void operator_delete(int* ptr);
 
 extern char D_00488680[];
 
+/**
+ * Destructor body for the visual effect allocated as "RenderToggles": stores the cVisualEffect base vtable D_00488680
+ * and frees the object when bit 0 of @p flags is set.
+ *
+ * Slot 1 of vtable D_004931A8 (slot 2 is func_00390C20), which cPS2VisualEffectsMan_cPS2VisualEffectsMan installs.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object
+ */
 extern "C" void func_003961A8(int* self, int flags)
 {
     *(void**)self = D_00488680;
@@ -4594,6 +5448,14 @@ INCLUDE_ASM("render/font", func_003961D8);
 #ifdef SKIP_ASM
 extern int D_004A44C0;
 
+/**
+ * Returns &D_004A44C0, the int that item 0 of cRenderTogglesMenu_cRenderTogglesMenu edits as "AI Frames per Render
+ * Frame" (0 to 60).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A44C0
+ */
 extern "C" int *func_003961D8(void) {
     return &D_004A44C0;
 }
@@ -4603,6 +5465,14 @@ INCLUDE_ASM("render/font", func_003961E8);
 #ifdef SKIP_ASM
 extern int D_004A44C4;
 
+/**
+ * Returns &D_004A44C4, the int that item 1 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Display Render Stats" (0
+ * to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A44C4
+ */
 extern "C" int *func_003961E8(void) {
     return &D_004A44C4;
 }
@@ -4612,6 +5482,13 @@ INCLUDE_ASM("render/font", func_003961F8);
 #ifdef SKIP_ASM
 extern int D_004A44C8;
 
+/**
+ * Returns &D_004A44C8, the int that item 2 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Reset Stats" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A44C8
+ */
 extern "C" int *func_003961F8(void) {
     return &D_004A44C8;
 }
@@ -4621,6 +5498,14 @@ INCLUDE_ASM("render/font", func_00396208);
 #ifdef SKIP_ASM
 extern int D_004A44CC;
 
+/**
+ * Returns &D_004A44CC, the int that item 3 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Use Small Texture 0" (0
+ * to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A44CC
+ */
 extern "C" int *func_00396208(void) {
     return &D_004A44CC;
 }
@@ -4630,6 +5515,14 @@ INCLUDE_ASM("render/font", func_00396218);
 #ifdef SKIP_ASM
 extern int D_004A44D0;
 
+/**
+ * Returns &D_004A44D0, the int that item 4 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Use Small Texture 1" (0
+ * to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A44D0
+ */
 extern "C" int *func_00396218(void) {
     return &D_004A44D0;
 }
@@ -4639,6 +5532,14 @@ INCLUDE_ASM("render/font", func_00396228);
 #ifdef SKIP_ASM
 extern int D_004A44D4;
 
+/**
+ * Returns &D_004A44D4, the int that item 5 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Patches" (0 to
+ * 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A44D4
+ */
 extern "C" int *func_00396228(void) {
     return &D_004A44D4;
 }
@@ -4648,6 +5549,14 @@ INCLUDE_ASM("render/font", func_00396238);
 #ifdef SKIP_ASM
 extern int D_004A44D8;
 
+/**
+ * Returns &D_004A44D8, the int that item 6 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Patch Reflection"
+ * (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A44D8
+ */
 extern "C" int *func_00396238(void) {
     return &D_004A44D8;
 }
@@ -4657,6 +5566,14 @@ INCLUDE_ASM("render/font", func_00396248);
 #ifdef SKIP_ASM
 extern int D_004A44DC;
 
+/**
+ * Returns &D_004A44DC, the int that item 7 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Patch Shadows" (0
+ * to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A44DC
+ */
 extern "C" int *func_00396248(void) {
     return &D_004A44DC;
 }
@@ -4666,6 +5583,14 @@ INCLUDE_ASM("render/font", func_00396258);
 #ifdef SKIP_ASM
 extern int D_004A44E0;
 
+/**
+ * Returns &D_004A44E0, the int that item 8 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Sparkles" (0 to
+ * 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A44E0
+ */
 extern "C" int *func_00396258(void) {
     return &D_004A44E0;
 }
@@ -4675,6 +5600,14 @@ INCLUDE_ASM("render/font", func_00396268);
 #ifdef SKIP_ASM
 extern int D_004A44E4;
 
+/**
+ * Returns &D_004A44E4, the int that item 9 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Line Strips" (0
+ * to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A44E4
+ */
 extern "C" int *func_00396268(void) {
     return &D_004A44E4;
 }
@@ -4684,6 +5617,14 @@ INCLUDE_ASM("render/font", func_00396278);
 #ifdef SKIP_ASM
 extern int D_004A44E8;
 
+/**
+ * Returns &D_004A44E8, the int that item 10 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Tri Strips" (0
+ * to 3).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A44E8
+ */
 extern "C" int *func_00396278(void) {
     return &D_004A44E8;
 }
@@ -4693,6 +5634,14 @@ INCLUDE_ASM("render/font", func_00396288);
 #ifdef SKIP_ASM
 extern int D_004A44EC;
 
+/**
+ * Returns &D_004A44EC, the int that item 11 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Transform
+ * Strips" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A44EC
+ */
 extern "C" int *func_00396288(void) {
     return &D_004A44EC;
 }
@@ -4702,6 +5651,14 @@ INCLUDE_ASM("render/font", func_00396298);
 #ifdef SKIP_ASM
 extern int D_004A44F0;
 
+/**
+ * Returns &D_004A44F0, the int that item 12 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Meshes" (0 to
+ * 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A44F0
+ */
 extern "C" int *func_00396298(void) {
     return &D_004A44F0;
 }
@@ -4711,6 +5668,14 @@ INCLUDE_ASM("render/font", func_003962A8);
 #ifdef SKIP_ASM
 extern int D_004A44F4;
 
+/**
+ * Returns &D_004A44F4, the int that item 13 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Mesh Reflection"
+ * (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A44F4
+ */
 extern "C" int *func_003962A8(void) {
     return &D_004A44F4;
 }
@@ -4720,6 +5685,14 @@ INCLUDE_ASM("render/font", func_003962B8);
 #ifdef SKIP_ASM
 extern int D_004A44F8;
 
+/**
+ * Returns &D_004A44F8, the int that item 14 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Static Emitters"
+ * (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A44F8
+ */
 extern "C" int *func_003962B8(void) {
     return &D_004A44F8;
 }
@@ -4729,6 +5702,14 @@ INCLUDE_ASM("render/font", func_003962C8);
 #ifdef SKIP_ASM
 extern int D_004A44FC;
 
+/**
+ * Returns &D_004A44FC, the int that item 15 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Dynamic
+ * Emitters" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A44FC
+ */
 extern "C" int *func_003962C8(void) {
     return &D_004A44FC;
 }
@@ -4738,6 +5719,14 @@ INCLUDE_ASM("render/font", func_003962D8);
 #ifdef SKIP_ASM
 extern int D_004A4500;
 
+/**
+ * Returns &D_004A4500, the int that item 16 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Dynamic Colour
+ * Emitters" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4500
+ */
 extern "C" int *func_003962D8(void) {
     return &D_004A4500;
 }
@@ -4747,6 +5736,14 @@ INCLUDE_ASM("render/font", func_003962E8);
 #ifdef SKIP_ASM
 extern int D_004A4504;
 
+/**
+ * Returns &D_004A4504, the int that item 17 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Sprites" (0 to
+ * 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4504
+ */
 extern "C" int *func_003962E8(void) {
     return &D_004A4504;
 }
@@ -4756,6 +5753,14 @@ INCLUDE_ASM("render/font", func_003962F8);
 #ifdef SKIP_ASM
 extern int D_004A4508;
 
+/**
+ * Returns &D_004A4508, the int that item 18 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable 3D Sprites" (0
+ * to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4508
+ */
 extern "C" int *func_003962F8(void) {
     return &D_004A4508;
 }
@@ -4765,6 +5770,14 @@ INCLUDE_ASM("render/font", func_00396308);
 #ifdef SKIP_ASM
 extern int D_004A450C;
 
+/**
+ * Returns &D_004A450C, the int that item 19 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Texture Rects"
+ * (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A450C
+ */
 extern "C" int *func_00396308(void) {
     return &D_004A450C;
 }
@@ -4774,6 +5787,14 @@ INCLUDE_ASM("render/font", func_00396318);
 #ifdef SKIP_ASM
 extern int D_004A4510;
 
+/**
+ * Returns &D_004A4510, the int that item 20 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Player Strips"
+ * (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4510
+ */
 extern "C" int *func_00396318(void) {
     return &D_004A4510;
 }
@@ -4783,6 +5804,14 @@ INCLUDE_ASM("render/font", func_00396328);
 #ifdef SKIP_ASM
 extern int D_004A4514;
 
+/**
+ * Returns &D_004A4514, the int that item 21 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Shadows" (0 to
+ * 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4514
+ */
 extern "C" int *func_00396328(void) {
     return &D_004A4514;
 }
@@ -4792,6 +5821,14 @@ INCLUDE_ASM("render/font", func_00396338);
 #ifdef SKIP_ASM
 extern int D_004A4518;
 
+/**
+ * Returns &D_004A4518, the int that item 22 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Board Trail" (0
+ * to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4518
+ */
 extern "C" int *func_00396338(void) {
     return &D_004A4518;
 }
@@ -4801,6 +5838,14 @@ INCLUDE_ASM("render/font", func_00396348);
 #ifdef SKIP_ASM
 extern int D_004A451C;
 
+/**
+ * Returns &D_004A451C, the int that item 23 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable AI Board Trail"
+ * (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A451C
+ */
 extern "C" int *func_00396348(void) {
     return &D_004A451C;
 }
@@ -4810,6 +5855,14 @@ INCLUDE_ASM("render/font", func_00396358);
 #ifdef SKIP_ASM
 extern int D_004A4520;
 
+/**
+ * Returns &D_004A4520, the int that item 24 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable Visibility
+ * Rects" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4520
+ */
 extern "C" int *func_00396358(void) {
     return &D_004A4520;
 }
@@ -4819,6 +5872,14 @@ INCLUDE_ASM("render/font", func_00396368);
 #ifdef SKIP_ASM
 extern int cRenderToggles_m_DisableSnowFall;
 
+/**
+ * Returns &cRenderToggles_m_DisableSnowFall, the int that item 25 of cRenderTogglesMenu_cRenderTogglesMenu edits as
+ * "Disable Snowfall" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &cRenderToggles_m_DisableSnowFall
+ */
 extern "C" int *func_00396368(void) {
     return &cRenderToggles_m_DisableSnowFall;
 }
@@ -4828,6 +5889,14 @@ INCLUDE_ASM("render/font", func_00396378);
 #ifdef SKIP_ASM
 extern int cRenderToggles_m_DisableBoardWake;
 
+/**
+ * Returns &cRenderToggles_m_DisableBoardWake, the int that item 26 of cRenderTogglesMenu_cRenderTogglesMenu edits as
+ * "Disable Board Wake" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &cRenderToggles_m_DisableBoardWake
+ */
 extern "C" int *func_00396378(void) {
     return &cRenderToggles_m_DisableBoardWake;
 }
@@ -4837,6 +5906,14 @@ INCLUDE_ASM("render/font", func_00396388);
 #ifdef SKIP_ASM
 extern int cRenderToggles_m_DisableSkyBox;
 
+/**
+ * Returns &cRenderToggles_m_DisableSkyBox, the int that item 27 of cRenderTogglesMenu_cRenderTogglesMenu edits as
+ * "Disable Sky Box" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &cRenderToggles_m_DisableSkyBox
+ */
 extern "C" int *func_00396388(void) {
     return &cRenderToggles_m_DisableSkyBox;
 }
@@ -4846,6 +5923,14 @@ INCLUDE_ASM("render/font", func_00396398);
 #ifdef SKIP_ASM
 extern int cRenderToggles_m_DisableCharacterSpecular;
 
+/**
+ * Returns &cRenderToggles_m_DisableCharacterSpecular, the int that item 28 of cRenderTogglesMenu_cRenderTogglesMenu
+ * edits as "Disable Character Specular" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &cRenderToggles_m_DisableCharacterSpecular
+ */
 extern "C" int *func_00396398(void) {
     return &cRenderToggles_m_DisableCharacterSpecular;
 }
@@ -4855,6 +5940,14 @@ INCLUDE_ASM("render/font", func_003963A8);
 #ifdef SKIP_ASM
 extern int cRenderToggles_m_DisableAIVisualFX;
 
+/**
+ * Returns &cRenderToggles_m_DisableAIVisualFX, the int that item 29 of cRenderTogglesMenu_cRenderTogglesMenu edits as
+ * "Disable AI Visual FX" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &cRenderToggles_m_DisableAIVisualFX
+ */
 extern "C" int *func_003963A8(void) {
     return &cRenderToggles_m_DisableAIVisualFX;
 }
@@ -4864,6 +5957,14 @@ INCLUDE_ASM("render/font", func_003963B8);
 #ifdef SKIP_ASM
 extern int cRenderToggles_m_DisableBoundingBoxes;
 
+/**
+ * Returns &cRenderToggles_m_DisableBoundingBoxes, the int that item 30 of cRenderTogglesMenu_cRenderTogglesMenu edits
+ * as "Disable Bounding Boxes" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &cRenderToggles_m_DisableBoundingBoxes
+ */
 extern "C" int *func_003963B8(void) {
     return &cRenderToggles_m_DisableBoundingBoxes;
 }
@@ -4873,6 +5974,14 @@ INCLUDE_ASM("render/font", func_003963C8);
 #ifdef SKIP_ASM
 extern int cRenderToggles_m_UseReflectionVector;
 
+/**
+ * Returns &cRenderToggles_m_UseReflectionVector, the int that item 31 of cRenderTogglesMenu_cRenderTogglesMenu edits as
+ * "Use Reflection Vector for Sphere Map" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &cRenderToggles_m_UseReflectionVector
+ */
 extern "C" int *func_003963C8(void) {
     return &cRenderToggles_m_UseReflectionVector;
 }
@@ -4882,6 +5991,14 @@ INCLUDE_ASM("render/font", func_003963D8);
 #ifdef SKIP_ASM
 extern int cRenderToggles_m_DisableHUD;
 
+/**
+ * Returns &cRenderToggles_m_DisableHUD, the int that item 32 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Disable
+ * HUD elements" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &cRenderToggles_m_DisableHUD
+ */
 extern "C" int *func_003963D8(void) {
     return &cRenderToggles_m_DisableHUD;
 }
@@ -4891,6 +6008,13 @@ INCLUDE_ASM("render/font", func_003963E8);
 #ifdef SKIP_ASM
 extern int D_004A4544;
 
+/**
+ * Returns &D_004A4544, the int that item 33 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Test Tunnel" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4544
+ */
 extern "C" int *func_003963E8(void) {
     return &D_004A4544;
 }
@@ -4900,6 +6024,15 @@ INCLUDE_ASM("render/font", func_003963F8);
 #ifdef SKIP_ASM
 extern int D_004A4548;
 
+/**
+ * Returns &D_004A4548, the float that item 34 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Particle Size Scale"
+ * (1 to 2000).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4548
+ */
 extern "C" int *func_003963F8(void) {
     return &D_004A4548;
 }
@@ -4909,6 +6042,14 @@ INCLUDE_ASM("render/font", func_00396408);
 #ifdef SKIP_ASM
 extern int D_004A454C;
 
+/**
+ * Returns &D_004A454C, the int that item 35 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Test Surface Types" (0
+ * to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A454C
+ */
 extern "C" int *func_00396408(void) {
     return &D_004A454C;
 }
@@ -4918,6 +6059,14 @@ INCLUDE_ASM("render/font", func_00396418);
 #ifdef SKIP_ASM
 extern int D_004A4550;
 
+/**
+ * Returns &D_004A4550, the int that item 36 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Software Based Dynamic
+ * Systems" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4550
+ */
 extern "C" int *func_00396418(void) {
     return &D_004A4550;
 }
@@ -4927,6 +6076,13 @@ INCLUDE_ASM("render/font", func_00396428);
 #ifdef SKIP_ASM
 extern int D_004A4554;
 
+/**
+ * Returns &D_004A4554, the int that item 37 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Temp Int" (0 to 20).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4554
+ */
 extern "C" int *func_00396428(void) {
     return &D_004A4554;
 }
@@ -4936,6 +6092,14 @@ INCLUDE_ASM("render/font", func_00396438);
 #ifdef SKIP_ASM
 extern int D_004A4558;
 
+/**
+ * Returns &D_004A4558, the float that item 38 of cRenderTogglesMenu_cRenderTogglesMenu edits as "PROG2 x" (-10 to 10).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4558
+ */
 extern "C" int *func_00396438(void) {
     return &D_004A4558;
 }
@@ -4945,6 +6109,14 @@ INCLUDE_ASM("render/font", func_00396448);
 #ifdef SKIP_ASM
 extern int D_004A455C;
 
+/**
+ * Returns &D_004A455C, the float that item 39 of cRenderTogglesMenu_cRenderTogglesMenu edits as "PROG2 y" (-10 to 10).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A455C
+ */
 extern "C" int *func_00396448(void) {
     return &D_004A455C;
 }
@@ -4954,6 +6126,14 @@ INCLUDE_ASM("render/font", func_00396458);
 #ifdef SKIP_ASM
 extern int D_004A4560;
 
+/**
+ * Returns &D_004A4560, the float that item 40 of cRenderTogglesMenu_cRenderTogglesMenu edits as "PROG2 z" (-10 to 10).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4560
+ */
 extern "C" int *func_00396458(void) {
     return &D_004A4560;
 }
@@ -4963,6 +6143,14 @@ INCLUDE_ASM("render/font", func_00396468);
 #ifdef SKIP_ASM
 extern int D_004A4564;
 
+/**
+ * Returns &D_004A4564, the float that item 41 of cRenderTogglesMenu_cRenderTogglesMenu edits as "PROG2 w" (-10 to 10).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4564
+ */
 extern "C" int *func_00396468(void) {
     return &D_004A4564;
 }
@@ -4972,6 +6160,14 @@ INCLUDE_ASM("render/font", func_00396478);
 #ifdef SKIP_ASM
 extern int D_004A4568;
 
+/**
+ * Returns &D_004A4568, the int that item 42 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Enable Build Info" (0 to
+ * 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4568
+ */
 extern "C" int *func_00396478(void) {
     return &D_004A4568;
 }
@@ -4981,6 +6177,14 @@ INCLUDE_ASM("render/font", func_00396488);
 #ifdef SKIP_ASM
 extern int D_004A456C;
 
+/**
+ * Returns &D_004A456C, the int that item 43 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Enable NIS Mem Usage
+ * Info" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A456C
+ */
 extern "C" int *func_00396488(void) {
     return &D_004A456C;
 }
@@ -4990,6 +6194,14 @@ INCLUDE_ASM("render/font", func_00396498);
 #ifdef SKIP_ASM
 extern int D_004A4570;
 
+/**
+ * Returns &D_004A4570, the int that item 44 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Enable Gameflow Info" (0
+ * to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4570
+ */
 extern "C" int *func_00396498(void) {
     return &D_004A4570;
 }
@@ -4999,6 +6211,14 @@ INCLUDE_ASM("render/font", func_003964A8);
 #ifdef SKIP_ASM
 extern int D_004A4574;
 
+/**
+ * Returns &D_004A4574, the int that item 45 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Profile Individual
+ * Effects" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4574
+ */
 extern "C" int *func_003964A8(void) {
     return &D_004A4574;
 }
@@ -5008,6 +6228,14 @@ INCLUDE_ASM("render/font", func_003964B8);
 #ifdef SKIP_ASM
 extern int D_004A4578;
 
+/**
+ * Returns &D_004A4578, the int that item 46 of cRenderTogglesMenu_cRenderTogglesMenu edits as "Show Surface Types" (0
+ * to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4578
+ */
 extern "C" int *func_003964B8(void) {
     return &D_004A4578;
 }
@@ -5020,6 +6248,15 @@ void operator_delete(int* ptr);
 
 extern char D_00488680[];
 
+/**
+ * Destructor body for the visual effect allocated as "Plants": stores the cVisualEffect base vtable D_00488680 and
+ * frees the object when bit 0 of @p flags is set.
+ *
+ * Slot 1 of vtable D_00493178 (slot 2 is func_0038EE78), which cPS2VisualEffectsMan_cPS2VisualEffectsMan installs in
+ * the object it allocates as "Plants".
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object
+ */
 extern "C" void func_003964C8(int* self, int flags)
 {
     *(void**)self = D_00488680;
@@ -5034,6 +6271,13 @@ INCLUDE_ASM("render/font", func_003964F8);
 #ifdef SKIP_ASM
 extern int cPlants_m_Enable;
 
+/**
+ * Returns &cPlants_m_Enable, the int that item 0 of cPlantsMenu_cPlantsMenu edits as "Enable" (0 to 2).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &cPlants_m_Enable
+ */
 extern "C" int *func_003964F8(void) {
     return &cPlants_m_Enable;
 }
@@ -5043,6 +6287,14 @@ INCLUDE_ASM("render/font", func_00396508);
 #ifdef SKIP_ASM
 extern int D_004A4448;
 
+/**
+ * Returns &D_004A4448, the float that item 1 of cPlantsMenu_cPlantsMenu edits as "Sway Amplitude" (0 to 2).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4448
+ */
 extern "C" int *func_00396508(void) {
     return &D_004A4448;
 }
@@ -5052,6 +6304,14 @@ INCLUDE_ASM("render/font", func_00396518);
 #ifdef SKIP_ASM
 extern int D_004A444C;
 
+/**
+ * Returns &D_004A444C, the float that item 2 of cPlantsMenu_cPlantsMenu edits as "Sway Offset" (-5 to 5).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A444C
+ */
 extern "C" int *func_00396518(void) {
     return &D_004A444C;
 }
@@ -5061,6 +6321,14 @@ INCLUDE_ASM("render/font", func_00396528);
 #ifdef SKIP_ASM
 extern int D_004A4450;
 
+/**
+ * Returns &D_004A4450, the float that item 3 of cPlantsMenu_cPlantsMenu edits as "Branch Amplitude" (0 to 2).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4450
+ */
 extern "C" int *func_00396528(void) {
     return &D_004A4450;
 }
@@ -5070,6 +6338,14 @@ INCLUDE_ASM("render/font", func_00396538);
 #ifdef SKIP_ASM
 extern int D_004A4454;
 
+/**
+ * Returns &D_004A4454, the float that item 4 of cPlantsMenu_cPlantsMenu edits as "Rotation Amplitude" (0 to 2).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4454
+ */
 extern "C" int *func_00396538(void) {
     return &D_004A4454;
 }
@@ -5079,6 +6355,14 @@ INCLUDE_ASM("render/font", func_00396548);
 #ifdef SKIP_ASM
 extern int D_004A4458;
 
+/**
+ * Returns &D_004A4458, the float that item 5 of cPlantsMenu_cPlantsMenu edits as "Position Scale" (0 to 1000).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4458
+ */
 extern "C" int *func_00396548(void) {
     return &D_004A4458;
 }
@@ -5088,6 +6372,13 @@ INCLUDE_ASM("render/font", func_00396558);
 #ifdef SKIP_ASM
 extern int D_004A445C;
 
+/**
+ * Returns &D_004A445C, the int that item 6 of cPlantsMenu_cPlantsMenu edits as "Sway Frequency (x/600)Hz" (0 to 6000).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A445C
+ */
 extern "C" int *func_00396558(void) {
     return &D_004A445C;
 }
@@ -5097,6 +6388,14 @@ INCLUDE_ASM("render/font", func_00396568);
 #ifdef SKIP_ASM
 extern int D_004A4460;
 
+/**
+ * Returns &D_004A4460, the float that item 7 of cPlantsMenu_cPlantsMenu edits as "Rotation Frequency" (0 to 6000).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4460
+ */
 extern "C" int *func_00396568(void) {
     return &D_004A4460;
 }
@@ -5106,6 +6405,15 @@ INCLUDE_ASM("render/font", func_00396578);
 #ifdef SKIP_ASM
 extern int D_004A4464;
 
+/**
+ * Returns &D_004A4464, the float that item 8 of cPlantsMenu_cPlantsMenu edits as "Branch Frequency (x/600)Hz" (0 to
+ * 6000).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4464
+ */
 extern "C" int *func_00396578(void) {
     return &D_004A4464;
 }
@@ -5115,6 +6423,15 @@ INCLUDE_ASM("render/font", func_00396588);
 #ifdef SKIP_ASM
 extern int D_004A4468;
 
+/**
+ * Returns &D_004A4468, the float that item 9 of cPlantsMenu_cPlantsMenu edits as "Branch Frequency 2 (x/600)Hz" (0 to
+ * 6000).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4468
+ */
 extern "C" int *func_00396588(void) {
     return &D_004A4468;
 }
@@ -5124,6 +6441,14 @@ INCLUDE_ASM("render/font", func_00396598);
 #ifdef SKIP_ASM
 extern int D_004A446C;
 
+/**
+ * Returns &D_004A446C, the float that item 10 of cPlantsMenu_cPlantsMenu edits as "Sway Direction" (0 to 360).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A446C
+ */
 extern "C" int *func_00396598(void) {
     return &D_004A446C;
 }
@@ -5133,6 +6458,14 @@ INCLUDE_ASM("render/font", func_003965A8);
 #ifdef SKIP_ASM
 extern int D_004A4470;
 
+/**
+ * Returns &D_004A4470, the float that item 11 of cPlantsMenu_cPlantsMenu edits as "Branch Direction" (0 to 360).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4470
+ */
 extern "C" int *func_003965A8(void) {
     return &D_004A4470;
 }
@@ -5140,6 +6473,15 @@ extern "C" int *func_003965A8(void) {
 //100%
 INCLUDE_ASM("render/font", func_003965B8);
 #ifdef SKIP_ASM
+/**
+ * Returns @p arg0 unchanged.
+ *
+ * An 8-byte accessor between the cPlants and cBaseClass_DynamicEmitter accessor runs, with no preview counterpart and
+ * no caller.
+ *
+ * @param arg0  an object pointer
+ * @return @p arg0
+ */
 extern "C" int func_003965B8(int arg0) {
     return arg0;
 }
@@ -5147,6 +6489,14 @@ extern "C" int func_003965B8(int arg0) {
 //100%
 INCLUDE_ASM("render/font", func_003965C0);
 #ifdef SKIP_ASM
+/**
+ * Returns @p arg0 + 0x160: in cStaticEmitter's layout, the address of BoundBox.
+ *
+ * No caller.
+ *
+ * @param arg0  the emitter (cStaticEmitter)
+ * @return the address of the bound box
+ */
 extern "C" int func_003965C0(int arg0) {
     return arg0 + 352;
 }
@@ -5154,6 +6504,14 @@ extern "C" int func_003965C0(int arg0) {
 //100%
 INCLUDE_ASM("render/font", func_003965C8);
 #ifdef SKIP_ASM
+/**
+ * Returns @p arg0 + 0xC0: in cStaticEmitter's layout, the address of Emitter.X0 (the emitter position).
+ *
+ * No caller. cStaticEmitter's render(bbox, pos) overload stores its position there.
+ *
+ * @param arg0  the emitter (cStaticEmitter)
+ * @return the address of the position
+ */
 extern "C" int func_003965C8(int arg0) {
     return arg0 + 0xC0;
 }
@@ -5161,7 +6519,16 @@ extern "C" int func_003965C8(int arg0) {
 //100%
 INCLUDE_ASM("render/font", func_003965D0);
 #ifdef SKIP_ASM
-// PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
+/**
+ * Copies the 16-byte vector at @p arg1 to @p arg0 + 0xC0 (in cStaticEmitter's layout, Emitter.X0).
+ *
+ * One lq/sq pair: long long is 128-bit on ee-gcc, so the copy is 16 bytes. No caller.
+ *
+ * @param arg0  the emitter (cStaticEmitter)
+ * @param arg1  the new position
+ */
+// PORT: `long long` is 128-bit on the EE (one lq/sq copy); off-PS2 the same C copies only 8 bytes, so use a
+// 16-byte type.
 extern "C" void func_003965D0(void *arg0, long long *arg1) {
     (*(long long *)((char*)(arg0) + (0xC0))) = (long long) *arg1;
 }
@@ -5169,6 +6536,14 @@ extern "C" void func_003965D0(void *arg0, long long *arg1) {
 //100%
 INCLUDE_ASM("render/font", func_003965E0);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of the emitter's particle system (m_emitter, +0x20).
+ *
+ * No caller.
+ *
+ * @param arg0  the dynamic emitter
+ * @return &m_emitter
+ */
 extern "C" int func_003965E0(int arg0) {
     return arg0 + 0x20;
 }
@@ -5176,6 +6551,14 @@ extern "C" int func_003965E0(int arg0) {
 //100%
 INCLUDE_ASM("render/font", func_003965E8);
 #ifdef SKIP_ASM
+/**
+ * Stores @p fparg0 as the particle system's position seed (m_emitter.SeedX0, +0x58).
+ *
+ * No caller.
+ *
+ * @param arg0  the dynamic emitter
+ * @param fparg0  the seed
+ */
 extern "C" void func_003965E8(void *arg0, float fparg0) {
     (*(float *)((char*)(arg0) + (0x58))) = fparg0;
 }
@@ -5183,6 +6566,14 @@ extern "C" void func_003965E8(void *arg0, float fparg0) {
 //100%
 INCLUDE_ASM("render/font", func_003965F0);
 #ifdef SKIP_ASM
+/**
+ * Returns the number of sub-emitters (m_numSubEmitters, +0x178).
+ *
+ * No caller.
+ *
+ * @param arg0  the dynamic emitter
+ * @return m_numSubEmitters
+ */
 extern "C" int func_003965F0(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x178)));
 }
@@ -5190,6 +6581,14 @@ extern "C" int func_003965F0(void *arg0) {
 //100%
 INCLUDE_ASM("render/font", func_003965F8);
 #ifdef SKIP_ASM
+/**
+ * Returns the current sub-emitter ring index (m_subEmitterId, +0x17C).
+ *
+ * No caller.
+ *
+ * @param arg0  the dynamic emitter
+ * @return m_subEmitterId
+ */
 extern "C" int func_003965F8(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x17C)));
 }
@@ -5197,6 +6596,14 @@ extern "C" int func_003965F8(void *arg0) {
 //100%
 INCLUDE_ASM("render/font", func_00396600);
 #ifdef SKIP_ASM
+/**
+ * Returns the enabled flag (m_enabled, +0x174).
+ *
+ * No caller.
+ *
+ * @param arg0  the dynamic emitter
+ * @return m_enabled
+ */
 extern "C" int func_00396600(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x174)));
 }
@@ -5204,6 +6611,14 @@ extern "C" int func_00396600(void *arg0) {
 //100%
 INCLUDE_ASM("render/font", func_00396608);
 #ifdef SKIP_ASM
+/**
+ * Sets the enabled flag (m_enabled, +0x174).
+ *
+ * No caller.
+ *
+ * @param arg0  the dynamic emitter
+ * @param arg1  nonzero to enable
+ */
 extern "C" void func_00396608(void *arg0, int arg1) {
     (*(int *)((char*)(arg0) + (0x174))) = arg1;
 }
@@ -5211,6 +6626,14 @@ extern "C" void func_00396608(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("render/font", func_00396610);
 #ifdef SKIP_ASM
+/**
+ * Returns the number of enabled sub-emitters (m_enabledCount, +0x1E0).
+ *
+ * No caller.
+ *
+ * @param arg0  the dynamic emitter
+ * @return m_enabledCount
+ */
 extern "C" int func_00396610(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x1E0)));
 }
@@ -5222,6 +6645,15 @@ struct sFontQuad_6618 {
     int v[4];
 } __attribute__((aligned(16)));
 
+/**
+ * Returns a copy of sub-emitter @p idx's position (m_positions entry, 16 bytes).
+ *
+ * The ring slot is (@p idx + m_subEmitterId + 1) % m_numSubEmitters, so @p idx 0 is the oldest entry. The preview's
+ * version asserted (unsigned)id < (unsigned)m_numSubEmitters; this one does not check. No caller.
+ *
+ * @param idx  the sub-emitter, counted from the oldest
+ * @return the position
+ */
 extern "C" sFontQuad_6618 func_00396618(void* self, int idx)
 {
     int next = *(int*)((char*)self + 0x17C) + 1;
@@ -5235,6 +6667,15 @@ struct sFontQuad_6658 {
     int v[4];
 } __attribute__((aligned(16)));
 
+/**
+ * Returns a copy of sub-emitter @p idx's velocity (m_velocities entry, 16 bytes).
+ *
+ * The ring slot is (@p idx + m_subEmitterId + 1) % m_numSubEmitters, so @p idx 0 is the oldest entry. The preview's
+ * version asserted (unsigned)id < (unsigned)m_numSubEmitters; this one does not check. No caller.
+ *
+ * @param idx  the sub-emitter, counted from the oldest
+ * @return the velocity
+ */
 extern "C" sFontQuad_6658 func_00396658(void* self, int idx)
 {
     int next = *(int*)((char*)self + 0x17C) + 1;
@@ -5244,6 +6685,16 @@ extern "C" sFontQuad_6658 func_00396658(void* self, int idx)
 //100%
 INCLUDE_ASM("render/font", func_00396698);
 #ifdef SKIP_ASM
+/**
+ * Points @p outA and @p outB at sub-emitter @p idx's position and velocity entries.
+ *
+ * The ring slot is (@p idx + m_subEmitterId + 1) % m_numSubEmitters, so @p idx 0 is the oldest entry. The preview's
+ * version asserted (unsigned)id < (unsigned)m_numSubEmitters; this one does not check. No caller.
+ *
+ * @param idx  the sub-emitter, counted from the oldest
+ * @param outA  receives &m_positions[slot]
+ * @param outB  receives &m_velocities[slot]
+ */
 extern "C" void func_00396698(void* self, int idx, int** outA, int** outB)
 {
     int next = *(int*)((char*)self + 0x17C) + 1;
@@ -5259,6 +6710,16 @@ struct sFontQuad_66D8 {
     int v[4];
 } __attribute__((aligned(16)));
 
+/**
+ * Copies sub-emitter @p idx's position and velocity into @p outA and @p outB.
+ *
+ * The ring slot is (@p idx + m_subEmitterId + 1) % m_numSubEmitters, so @p idx 0 is the oldest entry. The preview's
+ * version asserted (unsigned)id < (unsigned)m_numSubEmitters; this one does not check. No caller.
+ *
+ * @param idx  the sub-emitter, counted from the oldest
+ * @param outA  receives the position
+ * @param outB  receives the velocity
+ */
 extern "C" void func_003966D8(void* self, int idx, sFontQuad_66D8* outA, sFontQuad_66D8* outB)
 {
     int next = *(int*)((char*)self + 0x17C) + 1;
@@ -5270,6 +6731,18 @@ extern "C" void func_003966D8(void* self, int idx, sFontQuad_66D8* outA, sFontQu
 //100%
 INCLUDE_ASM("render/font", func_00396720);
 #ifdef SKIP_ASM
+/**
+ * Points @p outA, @p outB and @p outC at sub-emitter @p idx's position, velocity and colour entries.
+ *
+ * The ring slot is (@p idx + m_subEmitterId + 1) % m_numSubEmitters, so @p idx 0 is the oldest entry. The preview's
+ * version asserted (unsigned)id < (unsigned)m_numSubEmitters; this one does not check. No caller. The colours are the
+ * 4-byte m_colours entries (+0x204).
+ *
+ * @param idx  the sub-emitter, counted from the oldest
+ * @param outA  receives &m_positions[slot]
+ * @param outB  receives &m_velocities[slot]
+ * @param outC  receives &m_colours[slot]
+ */
 extern "C" void func_00396720(void* self, int idx, int** outA, int** outB, int** outC)
 {
     int next = *(int*)((char*)self + 0x17C) + 1;
@@ -5291,6 +6764,18 @@ struct sFontRGBA {
     char r, g, b, a;
 };
 
+/**
+ * Copies sub-emitter @p idx's position, velocity and colour into @p out0, @p out1 and @p out2.
+ *
+ * The ring slot is (@p idx + m_subEmitterId + 1) % m_numSubEmitters, so @p idx 0 is the oldest entry. The preview's
+ * version asserted (unsigned)id < (unsigned)m_numSubEmitters; this one does not check. No caller. The colour is the
+ * 4-byte m_colours entry (+0x204).
+ *
+ * @param idx  the sub-emitter, counted from the oldest
+ * @param out0  receives the position
+ * @param out1  receives the velocity
+ * @param out2  receives the packed colour
+ */
 extern "C" void func_00396770(char* self, int idx, sFontQ4* out0, sFontQ4* out1, sFontRGBA* out2)
 {
     int i = (idx + 1 + *(int*)(self + 0x17C)) % *(int*)(self + 0x178);
@@ -5312,6 +6797,15 @@ struct sFontWord_67D8 {
     sFontWord_67D8(const sFontWord_67D8& o) : p(o.p) {}
 };
 
+/**
+ * Returns sub-emitter @p idx's packed colour (the 4-byte m_colours entry, +0x204).
+ *
+ * The ring slot is (@p idx + m_subEmitterId + 1) % m_numSubEmitters, so @p idx 0 is the oldest entry. The preview's
+ * version asserted (unsigned)id < (unsigned)m_numSubEmitters; this one does not check. No caller.
+ *
+ * @param idx  the sub-emitter, counted from the oldest
+ * @return the colour
+ */
 extern "C" sFontWord_67D8 func_003967D8(void* self, int idx)
 {
     int next = *(int*)((char*)self + 0x17C) + 1;
@@ -5323,6 +6817,14 @@ INCLUDE_ASM("render/font", func_00396820);
 #ifdef SKIP_ASM
 extern char D_004930A0[];
 
+/**
+ * Stores vtable D_004930A0 in @p self and returns it.
+ *
+ * No caller: cPS2VisualEffectsMan_cPS2VisualEffectsMan writes the same vtable inline into the object it allocates as
+ * "Tube".
+ *
+ * @return @p self
+ */
 extern "C" void* func_00396820(void** self)
 {
     *self = D_004930A0;
@@ -5337,6 +6839,14 @@ void operator_delete(int* ptr);
 
 extern char D_00488680[];
 
+/**
+ * Destructor body for the visual effect allocated as "Tube": stores the cVisualEffect base vtable D_00488680 and frees
+ * the object when bit 0 of @p flags is set.
+ *
+ * Slot 1 of vtable D_004930A0 (slot 2 func_00372500, slot 3 the empty func_003968C8).
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object
+ */
 extern "C" void func_00396838(int* self, int flags)
 {
     *(void**)self = D_00488680;
@@ -5351,6 +6861,13 @@ INCLUDE_ASM("render/font", func_00396868);
 #ifdef SKIP_ASM
 extern int D_004A41D4;
 
+/**
+ * Returns &D_004A41D4, the int that item 0 of cTubeMenu_cTubeMenu edits as "Enable" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A41D4
+ */
 extern "C" int *func_00396868(void) {
     return &D_004A41D4;
 }
@@ -5360,6 +6877,14 @@ INCLUDE_ASM("render/font", func_00396878);
 #ifdef SKIP_ASM
 extern int D_004A41D8;
 
+/**
+ * Returns &D_004A41D8, the float that item 1 of cTubeMenu_cTubeMenu edits as "Scale Width" (0 to 1000).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A41D8
+ */
 extern "C" int *func_00396878(void) {
     return &D_004A41D8;
 }
@@ -5369,6 +6894,14 @@ INCLUDE_ASM("render/font", func_00396888);
 #ifdef SKIP_ASM
 extern int D_004A41DC;
 
+/**
+ * Returns &D_004A41DC, the float that item 2 of cTubeMenu_cTubeMenu edits as "Scale Height" (0 to 1000).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A41DC
+ */
 extern "C" int *func_00396888(void) {
     return &D_004A41DC;
 }
@@ -5378,6 +6911,13 @@ INCLUDE_ASM("render/font", func_00396898);
 #ifdef SKIP_ASM
 extern int D_004A41E0;
 
+/**
+ * Returns &D_004A41E0, the int that item 3 of cTubeMenu_cTubeMenu edits as "R" (0 to 255).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A41E0
+ */
 extern "C" int *func_00396898(void) {
     return &D_004A41E0;
 }
@@ -5387,6 +6927,13 @@ INCLUDE_ASM("render/font", func_003968A8);
 #ifdef SKIP_ASM
 extern int D_004A41E4;
 
+/**
+ * Returns &D_004A41E4, the int that item 4 of cTubeMenu_cTubeMenu edits as "G" (0 to 255).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A41E4
+ */
 extern "C" int *func_003968A8(void) {
     return &D_004A41E4;
 }
@@ -5396,6 +6943,13 @@ INCLUDE_ASM("render/font", func_003968B8);
 #ifdef SKIP_ASM
 extern int D_004A41E8;
 
+/**
+ * Returns &D_004A41E8, the int that item 5 of cTubeMenu_cTubeMenu edits as "B" (0 to 255).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A41E8
+ */
 extern "C" int *func_003968B8(void) {
     return &D_004A41E8;
 }
@@ -5404,6 +6958,12 @@ extern "C" int *func_003968B8(void) {
 //100%
 INCLUDE_ASM("render/font", func_003968C8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * Slot 3 of vtable D_004930A0 (the "Tube" effect); D_00493068 overrides that slot with func_003726C8, which draws the
+ * tube.
+ */
 void func_003968C8(void* self)
 {
 }
@@ -5412,6 +6972,15 @@ void func_003968C8(void* self)
 //100%
 INCLUDE_ASM("render/font", func_003968D0);
 #ifdef SKIP_ASM
+/**
+ * Copies the 16-byte vector at @p src into entry @p index of the array at +0x8.
+ *
+ * Slot 5 of vtable D_00493068 (the object func_00372520 builds; its destructor func_00372660 frees the same +0x8
+ * array). No bounds check.
+ *
+ * @param index  the entry
+ * @param src  the vector to store
+ */
 extern "C" void func_003968D0(void* self, int index, void* src)
 {
     cQuad128* quads = *(cQuad128**)((char*)self + 0x8);
@@ -5426,6 +6995,15 @@ void operator_delete(int* ptr);
 
 extern char D_00488680[];
 
+/**
+ * Destructor body for the visual effect allocated as "PathArrow": stores the cVisualEffect base vtable D_00488680 and
+ * frees the object when bit 0 of @p flags is set.
+ *
+ * Slot 1 of vtable D_00493038, which func_00372AA0 installs (slots 2 and 3 are the empty func_00396918 and
+ * func_00396920).
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object
+ */
 extern "C" void func_003968E8(int* self, int flags)
 {
     *(void**)self = D_00488680;
@@ -5438,6 +7016,11 @@ extern "C" void func_003968E8(int* self, int flags)
 //100%
 INCLUDE_ASM("render/font", func_00396918__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * Slot 2 of vtable D_00493038 (the "PathArrow" effect).
+ */
 void func_00396918(void* self)
 {
 }
@@ -5446,6 +7029,11 @@ void func_00396918(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00396920__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * Slot 3 of vtable D_00493038 (the "PathArrow" effect).
+ */
 void func_00396920(void* self)
 {
 }
@@ -5458,6 +7046,14 @@ void operator_delete(int* ptr);
 
 extern char D_00488680[];
 
+/**
+ * Destructor body for the visual effect allocated as "DetailSystem": stores the cVisualEffect base vtable D_00488680
+ * and frees the object when bit 0 of @p flags is set.
+ *
+ * Slot 1 of vtable D_00493000, which func_003759E8 installs (slot 2 func_00375A00, slot 5 the empty func_00396958).
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object
+ */
 extern "C" void func_00396928(int* self, int flags)
 {
     *(void**)self = D_00488680;
@@ -5470,6 +7066,11 @@ extern "C" void func_00396928(int* self, int flags)
 //100%
 INCLUDE_ASM("render/font", func_00396958__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * Slot 5 of vtable D_00493000 (the "DetailSystem" effect).
+ */
 void func_00396958(void* self)
 {
 }
@@ -5480,6 +7081,13 @@ INCLUDE_ASM("render/font", func_00396960);
 #ifdef SKIP_ASM
 extern int D_004A4340;
 
+/**
+ * Returns &D_004A4340, the int that item 0 of cDetailSystemMenu_cDetailSystemMenu edits as "Enable" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4340
+ */
 extern "C" int *func_00396960(void) {
     return &D_004A4340;
 }
@@ -5489,6 +7097,15 @@ INCLUDE_ASM("render/font", func_00396970);
 #ifdef SKIP_ASM
 extern int D_004A4344;
 
+/**
+ * Returns &D_004A4344, the float that item 1 of cDetailSystemMenu_cDetailSystemMenu edits as "Sparkle Spin Scale" (-1
+ * to 1).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4344
+ */
 extern "C" int *func_00396970(void) {
     return &D_004A4344;
 }
@@ -5498,6 +7115,15 @@ INCLUDE_ASM("render/font", func_00396980);
 #ifdef SKIP_ASM
 extern int D_004A4348;
 
+/**
+ * Returns &D_004A4348, the float that item 2 of cDetailSystemMenu_cDetailSystemMenu edits as "PS2 Sparkle Count" (0 to
+ * 20).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4348
+ */
 extern "C" int *func_00396980(void) {
     return &D_004A4348;
 }
@@ -5507,6 +7133,15 @@ INCLUDE_ASM("render/font", func_00396990);
 #ifdef SKIP_ASM
 extern int D_004A434C;
 
+/**
+ * Returns &D_004A434C, the float that item 3 of cDetailSystemMenu_cDetailSystemMenu edits as "PS2 Sparkle World Size"
+ * (0 to 500).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A434C
+ */
 extern "C" int *func_00396990(void) {
     return &D_004A434C;
 }
@@ -5516,6 +7151,15 @@ INCLUDE_ASM("render/font", func_003969A0);
 #ifdef SKIP_ASM
 extern int D_004A4350;
 
+/**
+ * Returns &D_004A4350, the float that item 4 of cDetailSystemMenu_cDetailSystemMenu edits as "PS2 Min Sparkle Screen
+ * Size" (0 to 100).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4350
+ */
 extern "C" int *func_003969A0(void) {
     return &D_004A4350;
 }
@@ -5525,6 +7169,15 @@ INCLUDE_ASM("render/font", func_003969B0);
 #ifdef SKIP_ASM
 extern int D_004A4354;
 
+/**
+ * Returns &D_004A4354, the float that item 5 of cDetailSystemMenu_cDetailSystemMenu edits as "PS2 Max Sparkle Screen
+ * Size" (0 to 100).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4354
+ */
 extern "C" int *func_003969B0(void) {
     return &D_004A4354;
 }
@@ -5534,6 +7187,15 @@ INCLUDE_ASM("render/font", func_003969C0);
 #ifdef SKIP_ASM
 extern int D_004A4358;
 
+/**
+ * Returns &D_004A4358, the float that item 6 of cDetailSystemMenu_cDetailSystemMenu edits as "XBox Sparkle Count" (1 to
+ * 300).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4358
+ */
 extern "C" int *func_003969C0(void) {
     return &D_004A4358;
 }
@@ -5543,6 +7205,15 @@ INCLUDE_ASM("render/font", func_003969D0);
 #ifdef SKIP_ASM
 extern int D_004A435C;
 
+/**
+ * Returns &D_004A435C, the float that item 7 of cDetailSystemMenu_cDetailSystemMenu edits as "XBox - World Size" (0 to
+ * 500).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A435C
+ */
 extern "C" int *func_003969D0(void) {
     return &D_004A435C;
 }
@@ -5552,6 +7223,15 @@ INCLUDE_ASM("render/font", func_003969E0);
 #ifdef SKIP_ASM
 extern int D_004A4360;
 
+/**
+ * Returns &D_004A4360, the float that item 8 of cDetailSystemMenu_cDetailSystemMenu edits as "XBox - Min Screen Size"
+ * (0 to 100).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4360
+ */
 extern "C" int *func_003969E0(void) {
     return &D_004A4360;
 }
@@ -5561,6 +7241,15 @@ INCLUDE_ASM("render/font", func_003969F0);
 #ifdef SKIP_ASM
 extern int D_004A4364;
 
+/**
+ * Returns &D_004A4364, the float that item 9 of cDetailSystemMenu_cDetailSystemMenu edits as "XBox - Max Screen Size"
+ * (0 to 100).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4364
+ */
 extern "C" int *func_003969F0(void) {
     return &D_004A4364;
 }
@@ -5596,6 +7285,14 @@ INCLUDE_ASM("render/font", func_00396A30);
 #ifdef SKIP_ASM
 extern int D_004A4478;
 
+/**
+ * Returns &D_004A4478, the int that item 0 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Show All HUD
+ * Graphics" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4478
+ */
 extern "C" int *func_00396A30(void) {
     return &D_004A4478;
 }
@@ -5605,6 +7302,14 @@ INCLUDE_ASM("render/font", func_00396A40);
 #ifdef SKIP_ASM
 extern int D_004A447C;
 
+/**
+ * Returns &D_004A447C, the int that item 1 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Show Current
+ * Element" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A447C
+ */
 extern "C" int *func_00396A40(void) {
     return &D_004A447C;
 }
@@ -5614,6 +7319,14 @@ INCLUDE_ASM("render/font", func_00396A50);
 #ifdef SKIP_ASM
 extern int D_004A4480;
 
+/**
+ * Returns &D_004A4480, the int that item 2 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Output HUD Data"
+ * (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4480
+ */
 extern "C" int *func_00396A50(void) {
     return &D_004A4480;
 }
@@ -5623,6 +7336,14 @@ INCLUDE_ASM("render/font", func_00396A60);
 #ifdef SKIP_ASM
 extern int D_004A4484;
 
+/**
+ * Returns &D_004A4484, the int that item 3 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Current Element
+ * Id" (0 to 1000).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4484
+ */
 extern "C" int *func_00396A60(void) {
     return &D_004A4484;
 }
@@ -5632,6 +7353,14 @@ INCLUDE_ASM("render/font", func_00396A70);
 #ifdef SKIP_ASM
 extern int D_004A4488;
 
+/**
+ * Returns &D_004A4488, the int that item 4 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Position X" (-640
+ * to 640).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4488
+ */
 extern "C" int *func_00396A70(void) {
     return &D_004A4488;
 }
@@ -5641,6 +7370,14 @@ INCLUDE_ASM("render/font", func_00396A80);
 #ifdef SKIP_ASM
 extern int D_004A448C;
 
+/**
+ * Returns &D_004A448C, the int that item 5 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Position Y" (-480
+ * to 480).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A448C
+ */
 extern "C" int *func_00396A80(void) {
     return &D_004A448C;
 }
@@ -5650,6 +7387,14 @@ INCLUDE_ASM("render/font", func_00396A90);
 #ifdef SKIP_ASM
 extern int D_004A4490;
 
+/**
+ * Returns &D_004A4490, the int that item 6 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Size X" (-640 to
+ * 640).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4490
+ */
 extern "C" int *func_00396A90(void) {
     return &D_004A4490;
 }
@@ -5659,6 +7404,14 @@ INCLUDE_ASM("render/font", func_00396AA0);
 #ifdef SKIP_ASM
 extern int D_004A4494;
 
+/**
+ * Returns &D_004A4494, the int that item 7 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Size Y" (-640 to
+ * 640).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4494
+ */
 extern "C" int *func_00396AA0(void) {
     return &D_004A4494;
 }
@@ -5668,6 +7421,14 @@ INCLUDE_ASM("render/font", func_00396AB0);
 #ifdef SKIP_ASM
 extern int D_004A4498;
 
+/**
+ * Returns &D_004A4498, the int that item 8 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Scale X" (-1 to
+ * 1000).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4498
+ */
 extern "C" int *func_00396AB0(void) {
     return &D_004A4498;
 }
@@ -5677,6 +7438,14 @@ INCLUDE_ASM("render/font", func_00396AC0);
 #ifdef SKIP_ASM
 extern int D_004A449C;
 
+/**
+ * Returns &D_004A449C, the int that item 9 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Scale Y" (-1 to
+ * 1000).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A449C
+ */
 extern "C" int *func_00396AC0(void) {
     return &D_004A449C;
 }
@@ -5686,6 +7455,14 @@ INCLUDE_ASM("render/font", func_00396AD0);
 #ifdef SKIP_ASM
 extern int D_004A44A0;
 
+/**
+ * Returns &D_004A44A0, the int that item 10 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Alpha" (-255 to
+ * 0x).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A44A0
+ */
 extern "C" int *func_00396AD0(void) {
     return &D_004A44A0;
 }
@@ -5695,6 +7472,14 @@ INCLUDE_ASM("render/font", func_00396AE0);
 #ifdef SKIP_ASM
 extern int D_004A44A4;
 
+/**
+ * Returns &D_004A44A4, the int that item 11 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Red" (-255 to
+ * 0x).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A44A4
+ */
 extern "C" int *func_00396AE0(void) {
     return &D_004A44A4;
 }
@@ -5704,6 +7489,14 @@ INCLUDE_ASM("render/font", func_00396AF0);
 #ifdef SKIP_ASM
 extern int D_004A44A8;
 
+/**
+ * Returns &D_004A44A8, the int that item 12 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Green" (-255 to
+ * 0x).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A44A8
+ */
 extern "C" int *func_00396AF0(void) {
     return &D_004A44A8;
 }
@@ -5713,6 +7506,14 @@ INCLUDE_ASM("render/font", func_00396B00);
 #ifdef SKIP_ASM
 extern int D_004A44AC;
 
+/**
+ * Returns &D_004A44AC, the int that item 13 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Blue" (-255 to
+ * 0x).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A44AC
+ */
 extern "C" int *func_00396B00(void) {
     return &D_004A44AC;
 }
@@ -5722,6 +7523,14 @@ INCLUDE_ASM("render/font", func_00396B10);
 #ifdef SKIP_ASM
 extern int D_004A44B0;
 
+/**
+ * Returns &D_004A44B0, the int that item 14 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as "Layer Offset"
+ * (-16 to 16).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A44B0
+ */
 extern "C" int *func_00396B10(void) {
     return &D_004A44B0;
 }
@@ -5731,6 +7540,14 @@ INCLUDE_ASM("render/font", func_00396B20);
 #ifdef SKIP_ASM
 extern int cVisualEffectsTest_m_Enable;
 
+/**
+ * Returns &cVisualEffectsTest_m_Enable, the int that item 15 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as
+ * "World Painter Display Enable" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &cVisualEffectsTest_m_Enable
+ */
 extern "C" int *func_00396B20(void) {
     return &cVisualEffectsTest_m_Enable;
 }
@@ -5740,6 +7557,14 @@ INCLUDE_ASM("render/font", func_00396B30);
 #ifdef SKIP_ASM
 extern int cVisualEffectsTest_m_LayerId;
 
+/**
+ * Returns &cVisualEffectsTest_m_LayerId, the int that item 16 of cVisualEffectsTestMenu_cVisualEffectsTestMenu edits as
+ * "World Painter LayerId" (0 to 100).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &cVisualEffectsTest_m_LayerId
+ */
 extern "C" int *func_00396B30(void) {
     return &cVisualEffectsTest_m_LayerId;
 }
@@ -5768,7 +7593,6 @@ struct sRS_6B40 {
  * microprogram at D_1150. cPS2GraphicsMan_DrawCharModel (DrawCharModel) calls it through slot 124 with a scale of 1.0, which this code
  * ignores.
  */
-// Emits the font's GS setup packet (register set + the 10 cached qwords) and a VU call for the glyph program.
 extern "C" void cPS2GraphicsMan_InitCharMatrices(char* self)
 {
     sRS_6B40* rs = *(sRS_6B40**)(self + 0xE84);
@@ -5826,7 +7650,19 @@ static inline void vu0CopyMtx_6C30(void* dst, const void* src)
         : "memory");
 }
 
-// Emits a DMA chain that uploads count 4x4 matrices (selected by index) and then a closing tag.
+/**
+ * Appends a VIF packet that uploads selected 4x4 matrices to the packet at *@p cur, and advances *@p cur.
+ *
+ * Header (4 doublewords): DMA cnt tag 0x10000002 | count << 2 (4 * count + 2 qwords), then the VIF codes NOP, FLUSHE,
+ * STCYCL 0x01000101 and UNPACK V4-32 0x6C000011 | count << 18 (4 * count qwords to VU address 0x11). Then matrix @p
+ * mats[@p list->index[i]] for each i, copied with VU0 (lqc2/sqc2). Tail: UNPACK S-32 0x600103FF with the count as its
+ * data (to VU address 0x3FF), then two MSCAL codes (0x14000000 | addr >> 3) for the microprogram addresses D_80 and
+ * D_70. @p self is unused. No caller (particle.cpp carries an inline copy).
+ *
+ * @param list  the matrix count and the index array
+ * @param mats  the matrix array
+ * @param cur  the packet write pointer, advanced past the packet
+ */
 extern "C" void func_00396C30(void* self, sMtxList_6C30* list, sMtx_6C30* mats, unsigned long** cur)
 {
     int n = list->count;
@@ -5855,6 +7691,15 @@ void operator_delete(int* ptr);
 
 extern char D_00488680[];
 
+/**
+ * Destructor body for the visual effect allocated as "ScreenTint": stores the cVisualEffect base vtable D_00488680 and
+ * frees the object when bit 0 of @p flags is set.
+ *
+ * Slot 1 of vtable D_00492FA0 (slot 2 func_00390C60, slot 3 func_00390F20), which
+ * cPS2VisualEffectsMan_cPS2VisualEffectsMan installs.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object
+ */
 extern "C" void func_00396D30(int* self, int flags)
 {
     *(void**)self = D_00488680;
@@ -5871,6 +7716,13 @@ INCLUDE_ASM("render/font", func_00396D60);
 #ifdef SKIP_ASM
 extern int cScreenTint_m_Enable;
 
+/**
+ * Returns &cScreenTint_m_Enable, the int that item 0 of cScreenTintMenu_cScreenTintMenu edits as "Enable" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &cScreenTint_m_Enable
+ */
 extern "C" int *func_00396D60(void) {
     return &cScreenTint_m_Enable;
 }
@@ -5880,6 +7732,14 @@ INCLUDE_ASM("render/font", func_00396D70);
 #ifdef SKIP_ASM
 extern int cScreenTint_m_OverrideWP;
 
+/**
+ * Returns &cScreenTint_m_OverrideWP, the int that item 1 of cScreenTintMenu_cScreenTintMenu edits as "Override World
+ * Painter" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &cScreenTint_m_OverrideWP
+ */
 extern "C" int *func_00396D70(void) {
     return &cScreenTint_m_OverrideWP;
 }
@@ -5889,6 +7749,14 @@ INCLUDE_ASM("render/font", func_00396D80);
 #ifdef SKIP_ASM
 extern int cScreenTint_m_DisplayValues;
 
+/**
+ * Returns &cScreenTint_m_DisplayValues, the int that item 2 of cScreenTintMenu_cScreenTintMenu edits as "Display
+ * Values" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &cScreenTint_m_DisplayValues
+ */
 extern "C" int *func_00396D80(void) {
     return &cScreenTint_m_DisplayValues;
 }
@@ -5898,6 +7766,15 @@ INCLUDE_ASM("render/font", func_00396D90);
 #ifdef SKIP_ASM
 extern int cScreenTint_m_ColourR;
 
+/**
+ * Returns &cScreenTint_m_ColourR, the float that item 3 of cScreenTintMenu_cScreenTintMenu edits as "Tint Red" (0 to
+ * 2).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &cScreenTint_m_ColourR
+ */
 extern "C" int *func_00396D90(void) {
     return &cScreenTint_m_ColourR;
 }
@@ -5907,6 +7784,15 @@ INCLUDE_ASM("render/font", func_00396DA0);
 #ifdef SKIP_ASM
 extern int cScreenTint_m_ColourG;
 
+/**
+ * Returns &cScreenTint_m_ColourG, the float that item 4 of cScreenTintMenu_cScreenTintMenu edits as "Tint Green" (0 to
+ * 2).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &cScreenTint_m_ColourG
+ */
 extern "C" int *func_00396DA0(void) {
     return &cScreenTint_m_ColourG;
 }
@@ -5916,6 +7802,15 @@ INCLUDE_ASM("render/font", func_00396DB0);
 #ifdef SKIP_ASM
 extern int cScreenTint_m_ColourB;
 
+/**
+ * Returns &cScreenTint_m_ColourB, the float that item 5 of cScreenTintMenu_cScreenTintMenu edits as "Tint Blue" (0 to
+ * 2).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &cScreenTint_m_ColourB
+ */
 extern "C" int *func_00396DB0(void) {
     return &cScreenTint_m_ColourB;
 }
@@ -5925,6 +7820,14 @@ INCLUDE_ASM("render/font", func_00396DC0);
 #ifdef SKIP_ASM
 extern int cScreenTint_m_FillR;
 
+/**
+ * Returns &cScreenTint_m_FillR, the float that item 6 of cScreenTintMenu_cScreenTintMenu edits as "Fill Red" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &cScreenTint_m_FillR
+ */
 extern "C" int *func_00396DC0(void) {
     return &cScreenTint_m_FillR;
 }
@@ -5934,6 +7837,15 @@ INCLUDE_ASM("render/font", func_00396DD0);
 #ifdef SKIP_ASM
 extern int cScreenTint_m_FillG;
 
+/**
+ * Returns &cScreenTint_m_FillG, the float that item 7 of cScreenTintMenu_cScreenTintMenu edits as "Fill Green" (0 to
+ * 1).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &cScreenTint_m_FillG
+ */
 extern "C" int *func_00396DD0(void) {
     return &cScreenTint_m_FillG;
 }
@@ -5943,6 +7855,14 @@ INCLUDE_ASM("render/font", func_00396DE0);
 #ifdef SKIP_ASM
 extern int cScreenTint_m_FillB;
 
+/**
+ * Returns &cScreenTint_m_FillB, the float that item 8 of cScreenTintMenu_cScreenTintMenu edits as "Fill Blue" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &cScreenTint_m_FillB
+ */
 extern "C" int *func_00396DE0(void) {
     return &cScreenTint_m_FillB;
 }
@@ -5952,6 +7872,15 @@ INCLUDE_ASM("render/font", func_00396DF0);
 #ifdef SKIP_ASM
 extern int cScreenTint_m_XNColourR;
 
+/**
+ * Returns &cScreenTint_m_XNColourR, the float that item 9 of cScreenTintMenu_cScreenTintMenu edits as "XN Tint Red" (0
+ * to 2).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &cScreenTint_m_XNColourR
+ */
 extern "C" int *func_00396DF0(void) {
     return &cScreenTint_m_XNColourR;
 }
@@ -5961,6 +7890,15 @@ INCLUDE_ASM("render/font", func_00396E00);
 #ifdef SKIP_ASM
 extern int cScreenTint_m_XNColourG;
 
+/**
+ * Returns &cScreenTint_m_XNColourG, the float that item 10 of cScreenTintMenu_cScreenTintMenu edits as "XN Tint Green"
+ * (0 to 2).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &cScreenTint_m_XNColourG
+ */
 extern "C" int *func_00396E00(void) {
     return &cScreenTint_m_XNColourG;
 }
@@ -5970,6 +7908,15 @@ INCLUDE_ASM("render/font", func_00396E10);
 #ifdef SKIP_ASM
 extern int cScreenTint_m_XNColourB;
 
+/**
+ * Returns &cScreenTint_m_XNColourB, the float that item 11 of cScreenTintMenu_cScreenTintMenu edits as "XN Tint Blue"
+ * (0 to 2).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &cScreenTint_m_XNColourB
+ */
 extern "C" int *func_00396E10(void) {
     return &cScreenTint_m_XNColourB;
 }
@@ -5979,6 +7926,14 @@ INCLUDE_ASM("render/font", func_00396E20);
 #ifdef SKIP_ASM
 extern int D_004A4608;
 
+/**
+ * Returns &D_004A4608, the float that item 12 of cScreenTintMenu_cScreenTintMenu edits as "XN Lerp" (0 to 2).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4608
+ */
 extern "C" int *func_00396E20(void) {
     return &D_004A4608;
 }
@@ -5988,6 +7943,14 @@ INCLUDE_ASM("render/font", func_00396E30);
 #ifdef SKIP_ASM
 extern int cScreenTint_m_LightningEnable;
 
+/**
+ * Returns &cScreenTint_m_LightningEnable, the int that item 13 of cScreenTintMenu_cScreenTintMenu edits as "Enable
+ * Lightning" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &cScreenTint_m_LightningEnable
+ */
 extern "C" int *func_00396E30(void) {
     return &cScreenTint_m_LightningEnable;
 }
@@ -5997,6 +7960,13 @@ INCLUDE_ASM("render/font", func_00396E40);
 #ifdef SKIP_ASM
 extern int D_004A4610;
 
+/**
+ * Returns &D_004A4610, the int that item 14 of cScreenTintMenu_cScreenTintMenu edits as "Frame Id" (-1 to 1000).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4610
+ */
 extern "C" int *func_00396E40(void) {
     return &D_004A4610;
 }
@@ -6006,6 +7976,15 @@ INCLUDE_ASM("render/font", func_00396E50);
 #ifdef SKIP_ASM
 extern int cScreenTint_m_LightningChance;
 
+/**
+ * Returns &cScreenTint_m_LightningChance, the float that item 15 of cScreenTintMenu_cScreenTintMenu edits as "Lightning
+ * Chance" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &cScreenTint_m_LightningChance
+ */
 extern "C" int *func_00396E50(void) {
     return &cScreenTint_m_LightningChance;
 }
@@ -6015,6 +7994,13 @@ INCLUDE_ASM("render/font", func_00396E60);
 #ifdef SKIP_ASM
 extern int D_004A4618;
 
+/**
+ * Returns &D_004A4618, the int that item 16 of cScreenTintMenu_cScreenTintMenu edits as "Flash Fade In" (0 to 600).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4618
+ */
 extern "C" int *func_00396E60(void) {
     return &D_004A4618;
 }
@@ -6024,6 +8010,13 @@ INCLUDE_ASM("render/font", func_00396E70);
 #ifdef SKIP_ASM
 extern int D_004A461C;
 
+/**
+ * Returns &D_004A461C, the int that item 17 of cScreenTintMenu_cScreenTintMenu edits as "Flash Sustain" (0 to 600).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A461C
+ */
 extern "C" int *func_00396E70(void) {
     return &D_004A461C;
 }
@@ -6033,6 +8026,13 @@ INCLUDE_ASM("render/font", func_00396E80);
 #ifdef SKIP_ASM
 extern int D_004A4620;
 
+/**
+ * Returns &D_004A4620, the int that item 18 of cScreenTintMenu_cScreenTintMenu edits as "Inverse Duration" (0 to 600).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4620
+ */
 extern "C" int *func_00396E80(void) {
     return &D_004A4620;
 }
@@ -6042,6 +8042,13 @@ INCLUDE_ASM("render/font", func_00396E90);
 #ifdef SKIP_ASM
 extern int D_004A4624;
 
+/**
+ * Returns &D_004A4624, the int that item 19 of cScreenTintMenu_cScreenTintMenu edits as "Recover Fade In" (0 to 600).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4624
+ */
 extern "C" int *func_00396E90(void) {
     return &D_004A4624;
 }
@@ -6051,6 +8058,14 @@ INCLUDE_ASM("render/font", func_00396EA0);
 #ifdef SKIP_ASM
 extern int D_004A4628;
 
+/**
+ * Returns &D_004A4628, the float that item 20 of cScreenTintMenu_cScreenTintMenu edits as "Flash Scale" (0 to 2).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4628
+ */
 extern "C" int *func_00396EA0(void) {
     return &D_004A4628;
 }
@@ -6060,6 +8075,14 @@ INCLUDE_ASM("render/font", func_00396EB0);
 #ifdef SKIP_ASM
 extern int D_004A462C;
 
+/**
+ * Returns &D_004A462C, the float that item 21 of cScreenTintMenu_cScreenTintMenu edits as "Inverse Scale" (0 to 2).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A462C
+ */
 extern "C" int *func_00396EB0(void) {
     return &D_004A462C;
 }
@@ -6069,6 +8092,14 @@ INCLUDE_ASM("render/font", func_00396EC0);
 #ifdef SKIP_ASM
 extern int D_004A4630;
 
+/**
+ * Returns &D_004A4630, the float that item 22 of cScreenTintMenu_cScreenTintMenu edits as "Recover Scale" (0 to 2).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4630
+ */
 extern "C" int *func_00396EC0(void) {
     return &D_004A4630;
 }
@@ -6078,6 +8109,14 @@ INCLUDE_ASM("render/font", func_00396ED0);
 #ifdef SKIP_ASM
 extern int D_004A4634;
 
+/**
+ * Returns &D_004A4634, the float that item 23 of cScreenTintMenu_cScreenTintMenu edits as "Flash Tint Red" (0 to 2).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4634
+ */
 extern "C" int *func_00396ED0(void) {
     return &D_004A4634;
 }
@@ -6087,6 +8126,14 @@ INCLUDE_ASM("render/font", func_00396EE0);
 #ifdef SKIP_ASM
 extern int D_004A4638;
 
+/**
+ * Returns &D_004A4638, the float that item 24 of cScreenTintMenu_cScreenTintMenu edits as "Flash Tint Green" (0 to 2).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4638
+ */
 extern "C" int *func_00396EE0(void) {
     return &D_004A4638;
 }
@@ -6096,6 +8143,14 @@ INCLUDE_ASM("render/font", func_00396EF0);
 #ifdef SKIP_ASM
 extern int D_004A463C;
 
+/**
+ * Returns &D_004A463C, the float that item 25 of cScreenTintMenu_cScreenTintMenu edits as "Flash Tint Blue" (0 to 2).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A463C
+ */
 extern "C" int *func_00396EF0(void) {
     return &D_004A463C;
 }
@@ -6105,6 +8160,14 @@ INCLUDE_ASM("render/font", func_00396F00);
 #ifdef SKIP_ASM
 extern int D_004A4640;
 
+/**
+ * Returns &D_004A4640, the float that item 26 of cScreenTintMenu_cScreenTintMenu edits as "Inverse Tint Red" (0 to 2).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4640
+ */
 extern "C" int *func_00396F00(void) {
     return &D_004A4640;
 }
@@ -6114,6 +8177,15 @@ INCLUDE_ASM("render/font", func_00396F10);
 #ifdef SKIP_ASM
 extern int D_004A4644;
 
+/**
+ * Returns &D_004A4644, the float that item 27 of cScreenTintMenu_cScreenTintMenu edits as "Inverse Tint Green" (0 to
+ * 2).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4644
+ */
 extern "C" int *func_00396F10(void) {
     return &D_004A4644;
 }
@@ -6123,6 +8195,14 @@ INCLUDE_ASM("render/font", func_00396F20);
 #ifdef SKIP_ASM
 extern int D_004A4648;
 
+/**
+ * Returns &D_004A4648, the float that item 28 of cScreenTintMenu_cScreenTintMenu edits as "Inverse Tint Blue" (0 to 2).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4648
+ */
 extern "C" int *func_00396F20(void) {
     return &D_004A4648;
 }
@@ -6132,6 +8212,14 @@ INCLUDE_ASM("render/font", func_00396F30);
 #ifdef SKIP_ASM
 extern int D_004A464C;
 
+/**
+ * Returns &D_004A464C, the float that item 29 of cScreenTintMenu_cScreenTintMenu edits as "Recover Tint Red" (0 to 2).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A464C
+ */
 extern "C" int *func_00396F30(void) {
     return &D_004A464C;
 }
@@ -6141,6 +8229,15 @@ INCLUDE_ASM("render/font", func_00396F40);
 #ifdef SKIP_ASM
 extern int D_004A4650;
 
+/**
+ * Returns &D_004A4650, the float that item 30 of cScreenTintMenu_cScreenTintMenu edits as "Recover Tint Green" (0 to
+ * 2).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4650
+ */
 extern "C" int *func_00396F40(void) {
     return &D_004A4650;
 }
@@ -6150,6 +8247,14 @@ INCLUDE_ASM("render/font", func_00396F50);
 #ifdef SKIP_ASM
 extern int D_004A4654;
 
+/**
+ * Returns &D_004A4654, the float that item 31 of cScreenTintMenu_cScreenTintMenu edits as "Recover Tint Blue" (0 to 2).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4654
+ */
 extern "C" int *func_00396F50(void) {
     return &D_004A4654;
 }
@@ -6159,6 +8264,13 @@ INCLUDE_ASM("render/font", func_00396F60);
 #ifdef SKIP_ASM
 extern int D_004A4658;
 
+/**
+ * Returns &D_004A4658, the int that item 32 of cScreenTintMenu_cScreenTintMenu edits as "Gamma Enable" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself.
+ *
+ * @return &D_004A4658
+ */
 extern "C" int *func_00396F60(void) {
     return &D_004A4658;
 }
@@ -6168,6 +8280,14 @@ INCLUDE_ASM("render/font", func_00396F70);
 #ifdef SKIP_ASM
 extern int D_004A465C;
 
+/**
+ * Returns &D_004A465C, the float that item 33 of cScreenTintMenu_cScreenTintMenu edits as "Gamma Power" (0 to 2).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A465C
+ */
 extern "C" int *func_00396F70(void) {
     return &D_004A465C;
 }
@@ -6177,6 +8297,14 @@ INCLUDE_ASM("render/font", func_00396F80);
 #ifdef SKIP_ASM
 extern int D_004A4660;
 
+/**
+ * Returns &D_004A4660, the float that item 34 of cScreenTintMenu_cScreenTintMenu edits as "Gamma Tint Red" (0 to 2).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4660
+ */
 extern "C" int *func_00396F80(void) {
     return &D_004A4660;
 }
@@ -6186,6 +8314,14 @@ INCLUDE_ASM("render/font", func_00396F90);
 #ifdef SKIP_ASM
 extern int D_004A4664;
 
+/**
+ * Returns &D_004A4664, the float that item 35 of cScreenTintMenu_cScreenTintMenu edits as "Gamma Tint Green" (0 to 2).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4664
+ */
 extern "C" int *func_00396F90(void) {
     return &D_004A4664;
 }
@@ -6195,6 +8331,14 @@ INCLUDE_ASM("render/font", func_00396FA0);
 #ifdef SKIP_ASM
 extern int D_004A4668;
 
+/**
+ * Returns &D_004A4668, the float that item 36 of cScreenTintMenu_cScreenTintMenu edits as "Gamma Tint Blue" (0 to 2).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4668
+ */
 extern "C" int *func_00396FA0(void) {
     return &D_004A4668;
 }
@@ -6204,6 +8348,14 @@ INCLUDE_ASM("render/font", func_00396FB0);
 #ifdef SKIP_ASM
 extern int D_004A466C;
 
+/**
+ * Returns &D_004A466C, the float that item 37 of cScreenTintMenu_cScreenTintMenu edits as "Gamma Fill Red" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A466C
+ */
 extern "C" int *func_00396FB0(void) {
     return &D_004A466C;
 }
@@ -6213,6 +8365,14 @@ INCLUDE_ASM("render/font", func_00396FC0);
 #ifdef SKIP_ASM
 extern int D_004A4670;
 
+/**
+ * Returns &D_004A4670, the float that item 38 of cScreenTintMenu_cScreenTintMenu edits as "Gamma Fill Green" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4670
+ */
 extern "C" int *func_00396FC0(void) {
     return &D_004A4670;
 }
@@ -6222,6 +8382,14 @@ INCLUDE_ASM("render/font", func_00396FD0);
 #ifdef SKIP_ASM
 extern int D_004A4674;
 
+/**
+ * Returns &D_004A4674, the float that item 39 of cScreenTintMenu_cScreenTintMenu edits as "Gamma Fill Blue" (0 to 1).
+ *
+ * No caller: the menu takes the variable's address itself. The C declares the result int* although the menu edits the
+ * value as a float.
+ *
+ * @return &D_004A4674
+ */
 extern "C" int *func_00396FD0(void) {
     return &D_004A4674;
 }
@@ -6234,6 +8402,15 @@ extern float colR __asm__("cScreenTint_m_ColourR");
 extern float colG __asm__("cScreenTint_m_ColourG");
 extern float colB __asm__("cScreenTint_m_ColourB");
 
+/**
+ * Returns the screen tint colour as a packed 0xAARRGGBB word: alpha 0xFF, each channel (int)(cScreenTint_m_ColourR/G/B
+ * * 255).
+ *
+ * No clamp: the menu lets the colours reach 2.0, which gives channel values up to 510 that spill into the neighbouring
+ * byte. No caller.
+ *
+ * @return the packed colour
+ */
 extern "C" int func_00396FE0(void)
 {
     int red = (int)(colR * 255.0f);
@@ -6248,6 +8425,14 @@ INCLUDE_ASM("render/font", func_00397038);
 extern float D_004A469C;
 extern float D_004A46A0;
 
+/**
+ * Returns D_004A469C * D_004A46A0.
+ *
+ * func_00390C60 and func_00390F20 use these globals; On Tour's cScreenTint statics m_lightningBrightness, m_redColour,
+ * m_greenColour, m_blueColour fit this layout. No caller.
+ *
+ * @return the product (a float)
+ */
 extern "C" float func_00397038(void) {
     return D_004A469C * D_004A46A0;
 }
@@ -6258,6 +8443,14 @@ INCLUDE_ASM("render/font", func_00397048);
 extern float D_004A469C;
 extern float D_004A46A4;
 
+/**
+ * Returns D_004A469C * D_004A46A4.
+ *
+ * func_00390C60 and func_00390F20 use these globals; On Tour's cScreenTint statics m_lightningBrightness, m_redColour,
+ * m_greenColour, m_blueColour fit this layout. No caller.
+ *
+ * @return the product (a float)
+ */
 extern "C" float func_00397048(void) {
     return D_004A469C * D_004A46A4;
 }
@@ -6268,6 +8461,14 @@ INCLUDE_ASM("render/font", func_00397058);
 extern float D_004A469C;
 extern float D_004A46A8;
 
+/**
+ * Returns D_004A469C * D_004A46A8.
+ *
+ * func_00390C60 and func_00390F20 use these globals; On Tour's cScreenTint statics m_lightningBrightness, m_redColour,
+ * m_greenColour, m_blueColour fit this layout. No caller.
+ *
+ * @return the product (a float)
+ */
 extern "C" float func_00397058(void) {
     return D_004A469C * D_004A46A8;
 }
@@ -6275,6 +8476,13 @@ extern "C" float func_00397058(void) {
 //100%
 INCLUDE_ASM("render/font", func_00397068);
 #ifdef SKIP_ASM
+/**
+ * Sets all three fill components (cScreenTint_m_FillR, FillG, FillB) to @p value.
+ *
+ * No caller.
+ *
+ * @param value  the fill level
+ */
 extern "C" void func_00397068(float value) {
     *(float*)&cScreenTint_m_FillB = value;
     *(float*)&cScreenTint_m_FillG = value;
@@ -6286,6 +8494,13 @@ INCLUDE_ASM("render/font", func_00397078);
 #ifdef SKIP_ASM
 extern int D_004A4678;
 
+/**
+ * Returns &D_004A4678.
+ *
+ * No caller, and no debug-menu item edits the variable.
+ *
+ * @return &D_004A4678
+ */
 extern "C" int *func_00397078(void) {
     return &D_004A4678;
 }
@@ -6295,6 +8510,13 @@ INCLUDE_ASM("render/font", func_00397088);
 #ifdef SKIP_ASM
 extern int D_004A467C;
 
+/**
+ * Returns &D_004A467C.
+ *
+ * No caller, and no debug-menu item edits the variable.
+ *
+ * @return &D_004A467C
+ */
 extern "C" int *func_00397088(void) {
     return &D_004A467C;
 }
@@ -6304,6 +8526,13 @@ INCLUDE_ASM("render/font", func_00397098);
 #ifdef SKIP_ASM
 extern int D_004A4680;
 
+/**
+ * Returns &D_004A4680.
+ *
+ * No caller, and no debug-menu item edits the variable.
+ *
+ * @return &D_004A4680
+ */
 extern "C" int *func_00397098(void) {
     return &D_004A4680;
 }
@@ -6313,6 +8542,13 @@ INCLUDE_ASM("render/font", func_003970A8);
 #ifdef SKIP_ASM
 extern int D_004A4684;
 
+/**
+ * Returns &D_004A4684.
+ *
+ * No caller, and no debug-menu item edits the variable.
+ *
+ * @return &D_004A4684
+ */
 extern "C" int *func_003970A8(void) {
     return &D_004A4684;
 }
@@ -6322,6 +8558,13 @@ INCLUDE_ASM("render/font", func_003970B8);
 #ifdef SKIP_ASM
 extern int D_004A4688;
 
+/**
+ * Returns &D_004A4688.
+ *
+ * No caller, and no debug-menu item edits the variable.
+ *
+ * @return &D_004A4688
+ */
 extern "C" int *func_003970B8(void) {
     return &D_004A4688;
 }
@@ -6331,6 +8574,13 @@ INCLUDE_ASM("render/font", func_003970C8);
 #ifdef SKIP_ASM
 extern int D_004A468C;
 
+/**
+ * Returns &D_004A468C.
+ *
+ * No caller, and no debug-menu item edits the variable.
+ *
+ * @return &D_004A468C
+ */
 extern "C" int *func_003970C8(void) {
     return &D_004A468C;
 }
@@ -6340,6 +8590,13 @@ INCLUDE_ASM("render/font", func_003970D8);
 #ifdef SKIP_ASM
 extern int D_004A4690;
 
+/**
+ * Returns &D_004A4690.
+ *
+ * No caller, and no debug-menu item edits the variable.
+ *
+ * @return &D_004A4690
+ */
 extern "C" int *func_003970D8(void) {
     return &D_004A4690;
 }
@@ -6349,6 +8606,13 @@ INCLUDE_ASM("render/font", func_003970E8);
 #ifdef SKIP_ASM
 extern int D_004A4694;
 
+/**
+ * Returns &D_004A4694.
+ *
+ * No caller, and no debug-menu item edits the variable.
+ *
+ * @return &D_004A4694
+ */
 extern "C" int *func_003970E8(void) {
     return &D_004A4694;
 }
@@ -6357,6 +8621,13 @@ extern "C" int *func_003970E8(void) {
 //99.38%
 INCLUDE_ASM("render/font", func_003970F8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs the render unit's static initialisers: __sti__all_in_one_render_cpp(1, 0xffff).
+ *
+ * Listed in the global constructor table D_0043CE38 (count 0x27, then one function per unit); @p self is ignored.
+ *
+ * @return whatever __sti__all_in_one_render_cpp returns
+ */
 void* func_003970F8(void* self)
 {
     return __sti__all_in_one_render_cpp(1, 0xffff);
@@ -6368,6 +8639,13 @@ extern "C" void* __sti__all_in_one_render_cpp(int, int);
 //99.38%
 INCLUDE_ASM("render/font", func_00397118__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs the render unit's static destructors: __sti__all_in_one_render_cpp(0, 0xffff).
+ *
+ * Listed in the global destructor table that starts at D_0043CEE0 (count 0xD); @p self is ignored.
+ *
+ * @return whatever __sti__all_in_one_render_cpp returns
+ */
 void* func_00397118(void* self)
 {
     return __sti__all_in_one_render_cpp(0, 0xffff);

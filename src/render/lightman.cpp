@@ -33,6 +33,11 @@ void* cLightMan_construct()
 //100%
 INCLUDE_ASM("render/lightman", func_0038DC20);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * No caller.
+ */
 extern "C" void func_0038DC20(void) {
 
 }
@@ -40,6 +45,11 @@ extern "C" void func_0038DC20(void) {
 //100%
 INCLUDE_ASM("render/lightman", func_0038DC28);
 #ifdef SKIP_ASM
+/**
+ * Sets the four words at @p self to -1.
+ *
+ * No caller.
+ */
 extern "C" void func_0038DC28(void* self)
 {
     *(unsigned int*)((char*)self + 0x0) = 0xFFFFFFFF;
@@ -51,6 +61,11 @@ extern "C" void func_0038DC28(void* self)
 //100%
 INCLUDE_ASM("render/lightman", func_0038DC48);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * No caller.
+ */
 extern "C" void func_0038DC48(void) {
 
 }
@@ -59,6 +74,11 @@ extern "C" void func_0038DC48(void) {
 //100%
 INCLUDE_ASM("render/lightman", func_0038DC50__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * No caller.
+ */
 void func_0038DC50(void* self)
 {
 }
@@ -67,6 +87,11 @@ void func_0038DC50(void* self)
 //100%
 INCLUDE_ASM("render/lightman", func_0038DC58__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * No caller.
+ */
 void func_0038DC58(void* self)
 {
 }
@@ -75,6 +100,11 @@ void func_0038DC58(void* self)
 //100%
 INCLUDE_ASM("render/lightman", func_0038DC60__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * No caller.
+ */
 void func_0038DC60(void* self)
 {
 }
@@ -83,6 +113,11 @@ void func_0038DC60(void* self)
 //100%
 INCLUDE_ASM("render/lightman", func_0038DC68__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * No caller.
+ */
 void func_0038DC68(void* self)
 {
 }
@@ -334,8 +369,16 @@ struct sLmQuadVec4_E118 {
     sLmQuadVec4_E118(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 } __attribute__((aligned(16)));
 
-// Transforms the 2D point p by the 3x3 row-vector matrix m (rows at +0, +0xC, +0x18).
-// Returned by value: the caller passes the hidden result pointer in a0.
+/**
+ * Transforms a 2D point by a 3x3 matrix and returns it as a 4-vector with z = 0 and w = 1.
+ *
+ * x' = m[0] x + m[3] y + m[6]; y' = m[1] x + m[4] y + m[7] (rows at +0, +0xC, +0x18). Callers: the matrix variants
+ * func_0038E2E8, func_0038E468, func_0038E880, func_0038EA60.
+ *
+ * @param point  the point {x, y}
+ * @param mat  the 3x3 matrix (nine floats)
+ * @return {x', y', 0, 1}, through the hidden result pointer
+ */
 extern "C" sLmQuadVec4_E118 func_0038E0A8(float* point, float* mat)
 {
     sLmQuadVec4_E118 result;
@@ -373,7 +416,17 @@ struct sLmQuadCtx_E118 {
 };
 
 
-// Fills the four corner positions of a quad from a rect {x, y, w, h}, then submits it.
+/**
+ * Fills the four vertex positions of a quad from @p rect {x, y, w, h} and draws it.
+ *
+ * Corners in strip order: top-left, top-right, bottom-left, bottom-right, at z 0, w 1; the caller sets colours and UVs.
+ * @p self is unused. Callers: func_003A20A0 and func_003A2220.
+ *
+ * Submits the four vertices as a triangle strip through vtable slot 71 (cPS2GraphicsMan_RenderTriStrip).
+ *
+ * @param verts  the four vertices
+ * @param rect  the rectangle {x, y, w, h}
+ */
 extern "C" void func_0038E118(void* self, sLmQuadVtx_E118* verts, float* rect)
 {
     verts[0].pos = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
@@ -390,7 +443,17 @@ INCLUDE_ASM("render/lightman", func_0038E200);
 #ifdef SKIP_ASM
 // PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
 
-// Fills the four corner positions of a vertically flipped quad from a rect {x, y, w, h}, then submits it.
+/**
+ * Fills the four vertex positions of a quad from @p rect with the corners turned a quarter turn, and draws it.
+ *
+ * Vertex 0 gets the bottom-left corner, 1 the top-left, 2 the bottom-right and 3 the top-right, so colours and UVs the
+ * caller set per vertex appear rotated by 90 degrees. Callers: func_003A20A0 and func_003A2220.
+ *
+ * Submits the four vertices as a triangle strip through vtable slot 71 (cPS2GraphicsMan_RenderTriStrip).
+ *
+ * @param verts  the four vertices
+ * @param rect  the rectangle {x, y, w, h}
+ */
 extern "C" void func_0038E200(void* self, sLmQuadVtx_E118* verts, float* rect)
 {
     verts[1].pos = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
@@ -409,7 +472,17 @@ INCLUDE_ASM("render/lightman", func_0038E2E8);
 
 extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
 
-// Builds the four corner positions of a quad from a rect {x, y, w, h}, transforms each by the 3x3 matrix m, then submits it.
+/**
+ * Fills the four vertex positions of a quad from @p rect, transforms them by @p mat, and draws it.
+ *
+ * Same corner order as func_0038E118; each corner goes through func_0038E0A8. Caller: func_003A2A00.
+ *
+ * Submits the four vertices as a triangle strip through vtable slot 71 (cPS2GraphicsMan_RenderTriStrip).
+ *
+ * @param verts  the four vertices
+ * @param rect  the rectangle {x, y, w, h}
+ * @param mat  the 3x3 transform
+ */
 extern "C" void func_0038E2E8(void* self, sLmQuadVtx_E118* verts, float* rect, float* mat)
 {
     sLmQuadVec4_E118* corner0 = &verts[0].pos;
@@ -436,7 +509,18 @@ INCLUDE_ASM("render/lightman", func_0038E468);
 
 extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
 
-// Builds the four corner positions of a vertically flipped quad from a rect {x, y, w, h}, transforms each by the 3x3 matrix m, then submits it.
+/**
+ * Fills the four vertex positions of a quad from @p rect with the corners turned a quarter turn, transforms them by @p
+ * mat, and draws it.
+ *
+ * Same corner order as func_0038E200; each corner goes through func_0038E0A8. Caller: func_003A2A00.
+ *
+ * Submits the four vertices as a triangle strip through vtable slot 71 (cPS2GraphicsMan_RenderTriStrip).
+ *
+ * @param verts  the four vertices
+ * @param rect  the rectangle {x, y, w, h}
+ * @param mat  the 3x3 transform
+ */
 extern "C" void func_0038E468(void* self, sLmQuadVtx_E118* verts, float* rect, float* mat)
 {
     sLmQuadVec4_E118* corner0 = &verts[0].pos;
@@ -461,7 +545,18 @@ INCLUDE_ASM("render/lightman", func_0038E5E8);
 #ifdef SKIP_ASM
 // PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
 
-// Fills the four corner positions (from rect {x, y, w, h}) and texture coords (from rect uv {u, v, w, h}) of a quad, then submits it.
+/**
+ * Fills the four vertex positions from @p rect and their UVs from @p uv, and draws the quad.
+ *
+ * Corners top-left, top-right, bottom-left, bottom-right, with the matching corners of the UV rectangle. Caller:
+ * func_003A23B8.
+ *
+ * Submits the four vertices as a triangle strip through vtable slot 71 (cPS2GraphicsMan_RenderTriStrip).
+ *
+ * @param vtx  the four vertices
+ * @param rect  the rectangle {x, y, w, h}
+ * @param uv  the UV rectangle {u, v, w, h}
+ */
 extern "C" void func_0038E5E8(void* self, sLmQuadVtx_E118* vtx, float* rect, float* uv)
 {
     vtx[0].pos = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
@@ -486,7 +581,18 @@ INCLUDE_ASM("render/lightman", func_0038E738);
 #ifdef SKIP_ASM
 // PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
 
-// Fills the four corner positions (from rect {x, y, w, h}) and texture coords (from rect uv {u, v, w, h}) of a quad, (rotated mapping), then submits it.
+/**
+ * Fills the four vertex positions from @p rect and their UVs from @p uv turned a quarter turn, and draws the quad.
+ *
+ * Positions as in func_0038E5E8; the UVs go top-left (u + w, v), top-right (u + w, v + h), bottom-left (u, v),
+ * bottom-right (u, v + h), so the texture appears rotated by 90 degrees. Caller: func_003A23B8.
+ *
+ * Submits the four vertices as a triangle strip through vtable slot 71 (cPS2GraphicsMan_RenderTriStrip).
+ *
+ * @param vtx  the four vertices
+ * @param rect  the rectangle {x, y, w, h}
+ * @param uv  the UV rectangle {u, v, w, h}
+ */
 extern "C" void func_0038E738(void* self, sLmQuadVtx_E118* vtx, float* rect, float* uv)
 {
     vtx[0].pos = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
@@ -513,7 +619,19 @@ INCLUDE_ASM("render/lightman", func_0038E880);
 
 extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
 
-// Fills the four corner positions (from rect {x, y, w, h}) and texture coords (from rect uv {u, v, w, h}) of a quad, transforms each position by the 3x3 matrix m, then submits it.
+/**
+ * Fills the four vertex positions from @p rect and their UVs from @p uv, transforms the positions by @p mat, and draws
+ * the quad.
+ *
+ * Layout as in func_0038E5E8; each position goes through func_0038E0A8. Caller: func_003A2BC8.
+ *
+ * Submits the four vertices as a triangle strip through vtable slot 71 (cPS2GraphicsMan_RenderTriStrip).
+ *
+ * @param vtx  the four vertices
+ * @param rect  the rectangle {x, y, w, h}
+ * @param uv  the UV rectangle {u, v, w, h}
+ * @param mat  the 3x3 transform
+ */
 extern "C" void func_0038E880(void* self, sLmQuadVtx_E118* vtx, float* rect, float* uv, float* mat)
 {
     sLmQuadVec4_E118* corner0 = &vtx[0].pos;
@@ -548,7 +666,19 @@ INCLUDE_ASM("render/lightman", func_0038EA60);
 
 extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
 
-// Fills the four corner positions (from rect {x, y, w, h}) and texture coords (from rect uv {u, v, w, h}) of a quad (rotated mapping), transforms each position by the 3x3 matrix m, then submits it.
+/**
+ * Fills the four vertex positions from @p rect and their UVs from @p uv turned a quarter turn, transforms the positions
+ * by @p mat, and draws the quad.
+ *
+ * Layout as in func_0038E738; each position goes through func_0038E0A8. Caller: func_003A2BC8.
+ *
+ * Submits the four vertices as a triangle strip through vtable slot 71 (cPS2GraphicsMan_RenderTriStrip).
+ *
+ * @param vtx  the four vertices
+ * @param rect  the rectangle {x, y, w, h}
+ * @param uv  the UV rectangle {u, v, w, h}
+ * @param mat  the 3x3 transform
+ */
 extern "C" void func_0038EA60(void* self, sLmQuadVtx_E118* vtx, float* rect, float* uv, float* mat)
 {
     sLmQuadVec4_E118* corner0 = &vtx[0].pos;
@@ -608,6 +738,18 @@ struct sLmQuadCtx {
 };
 
 
+/**
+ * Draws a solid-colour rectangle from @p topLeft to @p bottomRight at depth @p z.
+ *
+ * Builds four vertices with colour R, G, B = col[1..3] * 255 and A = col[0] * 128, UVs (0, 0) to (1, 1) and Q = 1, and
+ * submits them through vtable slot 71 (cPS2GraphicsMan_RenderTriStrip). Callers: cHeartBeat_draw and
+ * cFadeScreen_drawFade.
+ *
+ * @param topLeft  the top-left corner {x, y}
+ * @param bottomRight  the bottom-right corner {x, y}
+ * @param col  the colour {a, r, g, b} in 0..1
+ * @param z  the depth
+ */
 extern "C" void func_0038EC40(void* self, float* topLeft, float* bottomRight, float* col, float z)
 {
     sLmQuadVtx verts[4];
@@ -645,7 +787,16 @@ INCLUDE_ASM("render/lightman", func_0038ED90);
 #ifdef SKIP_ASM
 // PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
 
-// Submits two coloured points/vertices at the positions *p0 and *p1; col is {alpha, r, g, b} in 0..1.
+/**
+ * Draws a line from @p start to @p end in colour @p col.
+ *
+ * Both vertices get R, G, B = col[1..3] * 255 and A = col[0] * 128 and go to vtable slot 73 (func_00381AD0) with a
+ * count of 2. No caller.
+ *
+ * @param start  the first end point
+ * @param end  the second end point
+ * @param col  the colour {a, r, g, b} in 0..1
+ */
 extern "C" void func_0038ED90(void* self, sLmQuadVec4_E118* start, sLmQuadVec4_E118* end, float* col)
 {
     sLmQuadVtx_E118 verts[2];
@@ -803,6 +954,19 @@ static inline void lmMulIn_EE78(void* m, const void* b)
         : "memory");
 }
 
+/**
+ * Rebuilds the eight plant sway matrices D_00504D80[0..7] from the cPlants tweak values and the frame count.
+ *
+ * With t = vtable slot 114 (getCurrentFrameCount) and f = i / 8 for matrix i: sway = D_004A4448 ("Sway Amplitude") *
+ * sin(f + t * D_004A445C / 600) + D_004A444C; branch = D_004A4450 * sin(f * D_004A4468 / 600 + sin(f + t * D_004A4464 /
+ * 600)); angle = D_004A4454 * sin(f + t * D_004A4460 / 600).
+ *
+ * Each matrix is S * R (row vectors): S is an identity whose z row adds sway * (sin, cos) of D_004A446C ("Sway
+ * Direction", degrees) to x and y, so a point moves in proportion to its height; R is a rotation by angle about
+ * t4vect_ZAxis whose z column adds branch * (x sin + y cos) of D_004A4470 ("Branch Direction"). Note: D_004A4468
+ * multiplies f rather than the time, so the outer branch sine moves only through its inner sine. Slot 2 of vtable
+ * D_00493178 (the object allocated as "Plants").
+ */
 extern "C" void func_0038EE78(void)
 {
     sLmMat_EE78 m0;
@@ -873,6 +1037,14 @@ struct sLmCell_F2A8 {
 };
 extern sLmCell_F2A8 D_00504D80[];
 
+/**
+ * Picks the plant sway matrix for a position: D_00504D80[(int)(D_004A4458 * sqrt(x * x + y * y)) % 8].
+ *
+ * D_004A4458 is the "Position Scale" tweak. Caller: cGraphicsMan_DeformMeshMatrix.
+ *
+ * @param pos  the position (x and y are used)
+ * @return the address of one of the eight matrices func_0038EE78 builds
+ */
 extern "C" sLmCell_F2A8* func_0038F2A8(float* pos)
 {
     float d2 = pos[0] * pos[0] + pos[1] * pos[1];
@@ -904,6 +1076,20 @@ struct sLightBufs_F300 {
     int f2C[3];      // 0x2C
 };
 
+/**
+ * Splits the scratchpad into the buffers of the DMA ring for @p mode.
+ *
+ * Does nothing when the mode is unchanged. Modes 1 to 7 give 1, 2, 2, 2, 2, 3, 3 buffers of 0x400, 0x200, 0x1C0, 0x180,
+ * 0x100, 320, 0x100 qwords at 0x70000000 + i * size * 16; both indices and all addresses and sizes are reset.
+ * D_004A5B84 gets the scratchpad space after the buffers, or 0 when none is left. Then it waits for both scratchpad DMA
+ * channels (func_0038F768, func_0038F7B0). The ring object (D_004A4474): mode +0, buffer count +4, next buffer +8,
+ * current buffer +0xC, default size in qwords +0x10, scratchpad buffers +0x14[3], main-memory addresses +0x20[3], sizes
+ * +0x2C[3].
+ *
+ * Callers: __sti__all_in_one_render_cpp and func_00363490.
+ *
+ * @param mode  the layout, 1 to 7
+ */
 extern "C" void func_0038F300(sLightBufs_F300* self, int mode)
 {
     int i;
@@ -967,6 +1153,17 @@ struct sLightRing {
 
 extern "C" void func_0038F768(void);
 
+/**
+ * Claims the ring's next scratchpad buffer for data that will go to main-memory address @p addr.
+ *
+ * Records @p addr and the size (in qwords; the default size when @p size is negative) for the buffer and advances the
+ * next index. With @p flags & 4 it first waits for the fromSPR channel (func_0038F768).
+ *
+ * @param addr  the main-memory address the buffer will be copied to
+ * @param size  the size in bytes, or -1
+ * @param flags  4: wait for the fromSPR channel first
+ * @return the scratchpad address of the claimed buffer
+ */
 extern "C" int func_0038F460(void* self, unsigned int addr, int size, int flags)
 {
     sLightRing* ring = (sLightRing*)self;
@@ -992,6 +1189,16 @@ INCLUDE_ASM("render/lightman", func_0038F4F8);
 extern "C" int func_0038F460(void* self, unsigned int addr, int size, int flags);
 extern "C" void func_00371D10(unsigned int madr, int sadr, int qwc, int flags);
 
+/**
+ * Claims the ring's next scratchpad buffer (func_0038F460) and fills it from @p addr by toSPR DMA.
+ *
+ * The copy is func_00371D10(@p addr, buffer, @p size >> 4, @p flags).
+ *
+ * @param addr  the main-memory source
+ * @param size  the size in bytes
+ * @param flags  func_00371D10's wait flags
+ * @return the scratchpad address of the claimed buffer
+ */
 extern "C" int func_0038F4F8(void* self, unsigned int addr, int size, int flags)
 {
     int slot = func_0038F460(self, addr, size, 0);
@@ -1017,6 +1224,12 @@ struct sLightDma_F560 {
 // PORT: func_0038F598 takes (self, size, flags) and returns the buffer address.
 unsigned int func_0038F598_f560(sLightDma_F560* self, int size, int flags) __asm__("func_0038F598");
 
+/**
+ * Flushes the ring's current buffer with the size recorded for it (func_0038F598).
+ *
+ * @param flags  func_0038F598's wait flags
+ * @return func_0038F598's result: the main-memory address after the copied data
+ */
 extern "C" unsigned int func_0038F560(sLightDma_F560* self, int flags)
 {
     return func_0038F598_f560(self, self->size[self->cur] << 4, flags);
@@ -1044,6 +1257,18 @@ extern "C" void func_00371DD8(int sadr, unsigned int madr, int qwc, int flags);
 // (self, size, flags) and returns the buffer address, so it is bound by asm label.
 unsigned int func_0038F598_impl(sLightDma_F598* self, int size, int flags) __asm__("func_0038F598");
 
+/**
+ * Copies @p size bytes of the ring's current scratchpad buffer to its main-memory address by fromSPR DMA and moves to
+ * the next buffer.
+ *
+ * With @p size 0 it only waits for the fromSPR channel (when @p flags & 6 is non-zero), returns the recorded address
+ * and advances (func_0038F6A8). Otherwise it runs sync, calls func_00371DD8(buffer, address, @p size >> 4, @p flags)
+ * and advances the current index.
+ *
+ * @param size  the byte count (a multiple of 16), or 0
+ * @param flags  func_00371DD8's wait flags
+ * @return the main-memory address just past the copied data
+ */
 unsigned int func_0038F598_impl(sLightDma_F598* self, int size, int flags)
 {
     if (size == 0) {
@@ -1078,6 +1303,15 @@ struct sLmStack {
 
 extern "C" void func_0038F598(sLmStack* self, int size, int arg, int base);
 
+/**
+ * Flushes the ring's current buffer up to @p end, rounded up to 16 bytes, through func_0038F598.
+ *
+ * Declared void, but it tail-calls func_0038F598 and leaves that result (the main-memory address after the data) in v0;
+ * its callers bind an int-returning view to read it. Passes the buffer start as a fourth, unused argument.
+ *
+ * @param end  the scratchpad write pointer at the end of the data
+ * @param flags  func_0038F598's wait flags
+ */
 extern "C" void func_0038F668(sLmStack* self, int end, int flags)
 {
     int base = self->marks[self->depth];
@@ -1089,6 +1323,9 @@ extern "C" void func_0038F668(sLmStack* self, int end, int flags)
 //100%
 INCLUDE_ASM("render/lightman", func_0038F6A8);
 #ifdef SKIP_ASM
+/**
+ * Advances the ring's current-buffer index: (+0xC + 1) % the buffer count at +0x4.
+ */
 extern "C" void func_0038F6A8(void* self)
 {
     *(int*)((char*)self + 0xC) = (*(int*)((char*)self + 0xC) + 1) % *(int*)((char*)self + 0x4);
@@ -1108,6 +1345,12 @@ struct sLightDma_F6D0 {
     unsigned int addr[3];   // 0x20
 };
 
+/**
+ * Maps a scratchpad write pointer in the current buffer to the main-memory address it will be copied to.
+ *
+ * @param end  a scratchpad address inside the current buffer
+ * @return the buffer's main-memory address plus the offset of @p end rounded up to 16 bytes
+ */
 extern "C" unsigned int func_0038F6D0(sLightDma_F6D0* self, int end)
 {
     int cur = self->cur;
@@ -1122,6 +1365,16 @@ INCLUDE_ASM("render/lightman", func_0038F708);
 extern int D_004A5B84;
 extern "C" void func_00371D10(unsigned int madr, int sadr, int qwc, int flags);
 
+/**
+ * Copies @p size bytes from main memory into the spare scratchpad area D_004A5B84 by toSPR DMA.
+ *
+ * func_00371D10(@p madr, D_004A5B84, @p size >> 4, @p flags).
+ *
+ * @param madr  the main-memory source
+ * @param size  the byte count
+ * @param flags  func_00371D10's wait flags
+ * @return D_004A5B84
+ */
 extern "C" int func_0038F708(unsigned int madr, int size, int flags)
 {
     func_00371D10(madr, D_004A5B84, size >> 4, flags);
@@ -1135,6 +1388,15 @@ INCLUDE_ASM("render/lightman", func_0038F738);
 extern int D_004A5B84;
 extern "C" void func_00371DD8(int sadr, unsigned int madr, int qwc, int flags);
 
+/**
+ * Copies @p size bytes from the spare scratchpad area D_004A5B84 to main memory by fromSPR DMA.
+ *
+ * func_00371DD8(D_004A5B84, @p madr, @p size >> 4, @p flags).
+ *
+ * @param madr  the main-memory destination
+ * @param size  the byte count
+ * @param flags  func_00371DD8's wait flags
+ */
 extern "C" void func_0038F738(unsigned int madr, int size, int flags)
 {
     func_00371DD8(D_004A5B84, madr, size >> 4, flags);
@@ -1144,6 +1406,9 @@ extern "C" void func_0038F738(unsigned int madr, int size, int flags)
 //100%
 INCLUDE_ASM("render/lightman", func_0038F768);
 #ifdef SKIP_ASM
+/**
+ * Waits until the fromSPR DMA channel (D8, CHCR 0x1000D000) is idle.
+ */
 // PORT: polls PS2 hardware register 0x1000D000 directly; needs a platform shim.
 extern "C" void func_0038F768(void)
 {
@@ -1155,6 +1420,9 @@ extern "C" void func_0038F768(void)
 //100%
 INCLUDE_ASM("render/lightman", func_0038F7B0);
 #ifdef SKIP_ASM
+/**
+ * Waits until the toSPR DMA channel (D9, CHCR 0x1000D400) is idle.
+ */
 // PORT: polls PS2 hardware register 0x1000D400 directly; needs a platform shim.
 extern "C" void func_0038F7B0(void)
 {
@@ -1200,6 +1468,16 @@ INCLUDE_ASM("render/lightman", func_0038F820);
 #include "fakematch.h"
 extern unsigned int D_0044B9E0[];
 
+/**
+ * Reorders one 256-byte block of 4-bit texels by the nibble table D_0044B9E0.
+ *
+ * Four passes of 64 source bytes; each output byte packs two nibbles picked by table entries (bit 0 = which nibble, the
+ * rest = byte index), and odd passes use the table's second half. @p self is unused. Caller: func_0038F9C0.
+ *
+ * @param src  the source block
+ * @param dst  the 256-byte output
+ * @return 0
+ */
 // FAKEMATCH: variable reuse (`a` holds both table entries, `x` both byte indices, so each second value shares its
 // first value's register and sched1 keeps the second load after the first value's last use) plus a register pin
 // `register unsigned char* d FM_REG("$16") = dst;` (fakematch.h; global-alloc tie between dst and the outer i+1);
@@ -1242,6 +1520,15 @@ INCLUDE_ASM("render/lightman", func_0038F930);
 #ifdef SKIP_ASM
 extern int D_0044BDE0[];
 
+/**
+ * Reorders one 256-byte block of 8-bit texels by the index table D_0044BDE0.
+ *
+ * Four passes of 64 source bytes, odd passes using the table's second half. @p self is unused. Caller: func_0038FC48.
+ *
+ * @param src  the source block
+ * @param dst  the 256-byte output
+ * @return 0
+ */
 extern "C" int func_0038F930(void* self, unsigned char* src, unsigned char* dst)
 {
     unsigned int n = 0;
@@ -1280,6 +1567,20 @@ struct sRow32_F9C0 {
     unsigned char b[32];
 };
 
+/**
+ * Rearranges a 4-bit texture block by block: each 32x16 block is reordered with func_0038F820 and placed where the
+ * tables D_0044BFE0 and D_0044C060 say.
+ *
+ * Reads @p w / 32 by @p h / 16 blocks from @p src (row pitch 0x40 bytes) and writes 8 rows of 32 bytes per block to @p
+ * dst (row pitch 0x100). The pitches are fixed, so it only fits 128-texel-wide images. Caller: func_0038FED0 (128x128
+ * tiles).
+ *
+ * @param w  the width in texels
+ * @param h  the height in texels
+ * @param src  the source texels
+ * @param dst  the output
+ * @return 0
+ */
 extern "C" int func_0038F9C0(void* self, int w, int h, unsigned char* src, unsigned char* dst)
 {
     int xmap[32];
@@ -1342,6 +1643,19 @@ extern int D_0044C160[];
 extern int D_0044C0E0[];
 extern "C" void* func_00416210(void* dst, int c, int n);
 
+/**
+ * Rearranges an 8-bit texture block by block: each 16x16 block is reordered with func_0038F930 and placed where the
+ * tables D_0044C0E0 and D_0044C160 say.
+ *
+ * Reads @p w / 16 by @p h / 16 blocks from @p src (row pitch 0x80 bytes) and writes 8 rows of 32 bytes per block to @p
+ * dst (row pitch 0x100). Caller: func_00390198 (128x64 tiles).
+ *
+ * @param w  the width in texels
+ * @param h  the height in texels
+ * @param src  the source texels
+ * @param dst  the output
+ * @return 0
+ */
 extern "C" int func_0038FC48(void* self, int w, int h, unsigned char* src, unsigned char* dst)
 {
     int xmap[32];
@@ -1394,7 +1708,18 @@ INCLUDE_ASM("render/lightman", func_0038FED0);
 #ifdef SKIP_ASM
 extern "C" void* func_0041605C(void* dst, const void* src, int n);
 
-// Swizzles a w x h 4-bit texture in 128 x 128 tiles through func_0038F9C0.
+/**
+ * Rearranges a 4-bit texture whose sides are powers of two from 1 to 1024, in 128x128 tiles through func_0038F9C0.
+ *
+ * Each tile is gathered into a buffer at pitch 0x40, rearranged, and copied out at half the rows and twice the pitch.
+ * No caller.
+ *
+ * @param w  the width in texels
+ * @param height  the height in texels
+ * @param src  the source texels
+ * @param dst  the output
+ * @return 0, or -1 when a side is not a power of two up to 1024
+ */
 extern "C" int func_0038FED0(void* self, int w, int height, unsigned char* src, unsigned char* dst)
 {
     unsigned char tile[0x2000];
@@ -1473,6 +1798,18 @@ extern "C" int func_0038FC48_0198(void* self, int w, int h, unsigned char* src, 
 extern "C" void* func_0041605C_0198(void* dst, void* src, int n) __asm__("func_0041605C");
 extern "C" void* func_00416210(void* dst, int c, int n);
 
+/**
+ * Rearranges an 8-bit texture whose sides are powers of two from 1 to 1024, in 128x64 tiles through func_0038FC48.
+ *
+ * Each tile is gathered into a buffer at pitch 0x80, rearranged, and copied out at half the rows and twice the pitch.
+ * Caller: func_00366E90.
+ *
+ * @param w  the width in texels
+ * @param height  the height in texels
+ * @param src  the source texels
+ * @param dst  the output
+ * @return 0, or -1 when a side is not a power of two up to 1024
+ */
 extern "C" int func_00390198(void* self, int w, int height, unsigned char* src, unsigned char* dst)
 {
     unsigned char bufA[0x2000];
@@ -1560,6 +1897,14 @@ struct sLmOwner_0458 {
     sLmEntry_0458 entries[1];
 };
 
+/**
+ * Copies the screen-tint colour and fill tweak values into the graphics manager's tint entry for view @p idx.
+ *
+ * Writes cScreenTint_m_ColourR/G/B and cScreenTint_m_FillR/G/B to the 0x18-byte entry at +0x6CA4 + @p idx * 0x18.
+ * Callers: func_003904A0 (when cScreenTint_m_OverrideWP is set) and cPS2GraphicsMan_UpdateFullScreenEffects.
+ *
+ * @param idx  the view index
+ */
 extern "C" void func_00390458(void* self, int idx)
 {
     char* entry = (char*)&((sLmOwner_0458*)self)->entries[idx];
@@ -1585,6 +1930,18 @@ extern "C" void func_003905E8(void* self, int idx, int* mark);
 extern "C" int func_0038F668_r(void* self, int end, int arg) __asm__("func_0038F668");
 extern "C" void func_00368138(void* self, void* pkt);
 
+/**
+ * Queues the screen-tint full-screen pass for view @p idx on the scratchpad DMA ring.
+ *
+ * Returns at once unless cScreenTint_m_Enable; refreshes the entry first (func_00390458) when cScreenTint_m_OverrideWP
+ * is set, and skips the neutral setting colour (1, 1, 1) with fill (0, 0, 0). Otherwise it claims a buffer
+ * (func_0038F460), lets func_003905E8 write the pass, flushes it (func_0038F668, result into *@p addr) and calls
+ * func_00368138(mpTextureMan, @p pkt). Caller: func_00363490.
+ *
+ * @param idx  the view index
+ * @param pkt  passed to func_00368138
+ * @param addr  in/out: the DMA ring's current main-memory address
+ */
 extern "C" void func_003904A0(void* self, int idx, void* pkt, int* addr)
 {
     if (cScreenTint_m_Enable == 0) {
@@ -1619,6 +1976,12 @@ struct sLmVEntry_0C20 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Passes D_004A44C0 (menu "AI Frames per Render Frame") to vtable slot 16 (func_00394008) and clears D_004A44C8 (menu
+ * "Reset Stats") when it is set.
+ *
+ * Slot 2 of vtable D_004931A8 (the object allocated as "RenderToggles").
+ */
 extern "C" void func_00390C20()
 {
     cPS2GraphicsMan* mgr = cGraphicsMan_TheGraphicsMan;
@@ -1680,6 +2043,20 @@ static inline float RandRange_0C60(float lo, float hi)
     return RandF_0C60() * (hi - lo) + lo;
 }
 
+/**
+ * Runs the lightning flash: counts down to thunder, may start a new flash, and sets the flash brightness and colour for
+ * the current frame.
+ *
+ * Does nothing unless cScreenTint_m_LightningEnable. D_004A46B4 (frames until thunder) counts down to 0. While no flash
+ * runs (D_004A4698 < 0) a random draw below cScreenTint_m_LightningChance squared starts one through func_00390EC8 with
+ * a random distance of 2000 to 200000. Otherwise the frame advances (or holds at D_004A4610 when that is a valid frame)
+ * and picks the phase: fade in over D_004A4618 frames to brightness D_004A4628 (colour D_004A4634..3C), hold for
+ * D_004A461C, an inverse phase of D_004A4620 at D_004A462C (colour D_004A4640..48), and fade out over D_004A4624 from
+ * D_004A4630 (colour D_004A464C..54); after that the frame returns to -1 with the tint colour cScreenTint_m_ColourR/G/B
+ * and brightness 0. Each step sets blend mode D_004A46AC = 5.
+ *
+ * Slot 2 of vtable D_00492FA0 (the object allocated as "ScreenTint").
+ */
 // PORT: D_004A469C holds a float (declared int elsewhere in the unit).
 extern "C" void func_00390C60()
 {
@@ -1748,6 +2125,14 @@ extern int D_004A469C;
 extern float D_004A46B0;
 extern int D_004A46B4;
 
+/**
+ * Starts a lightning flash at distance @p t when lightning is enabled.
+ *
+ * Sets the flash frame D_004A4698 and brightness D_004A469C to 0, stores @p t in D_004A46B0 and sets the thunder
+ * countdown D_004A46B4 to (int)(@p t * 0.0018072289). Callers: func_00390C60 and func_00305660.
+ *
+ * @param t  the flash distance; larger values delay the thunder
+ */
 extern "C" void func_00390EC8(float t)
 {
     if (cScreenTint_m_LightningEnable != 0) {
@@ -1765,6 +2150,14 @@ INCLUDE_ASM("render/lightman", func_00390EF8);
 extern int cScreenTint_m_LightningEnable;
 extern int D_004A46B4;
 
+/**
+ * Reports once that the thunder of the last lightning flash is due.
+ *
+ * When cScreenTint_m_LightningEnable is set and the countdown D_004A46B4 has reached 0, sets it to -1 and returns 1.
+ * Caller: func_00285BF8 (audio).
+ *
+ * @return 1 on the frame the thunder is due, else 0
+ */
 extern "C" int func_00390EF8()
 {
     if (cScreenTint_m_LightningEnable != 0 && D_004A46B4 == 0) {
@@ -1850,6 +2243,16 @@ public:
     virtual void v70(int, sHudVert_0F20*, int);
 };
 
+/**
+ * Draws the lightning flash as a full-screen quad when lightning is enabled and the flash brightness is non-zero.
+ *
+ * Pushes a draw state copied from sDrawState_s_defaultDrawState with blend mode D_004A46AC and no texture, then
+ * PushViewport, PushView and IdentityView, and an orthographic viewport through slot 26
+ * (cPS2GraphicsMan_SetViewportOrthographic). The quad is 640 x 480, or the left or right 320-pixel half when mNumViews
+ * is not 1 (mViewIndex picks the half). Its colour is brightness * D_004A46A0/A4/A8 * 255 with alpha brightness * 255,
+ * drawn with slot 71 (cPS2GraphicsMan_RenderTriStrip); then PopView, PopViewport and the draw state is popped. Slot 3
+ * of vtable D_00492FA0 (the object allocated as "ScreenTint").
+ */
 extern "C" void func_00390F20()
 {
     int flag = 0;
@@ -1932,6 +2335,12 @@ INCLUDE_ASM("render/lightman", func_003912A8);
 extern char D_0043BD00[];
 extern "C" void FlushCache(int);
 
+/**
+ * Uploads the VU0 microprogram chain at D_0043BD00 through the VIF0 DMA channel and waits for it.
+ *
+ * Waits for VIF0 DMA (0x10008000) to be idle, starts it in chain mode from D_0043BD00 (CHCR 260), waits again and calls
+ * FlushCache(0). Caller: cPS2GraphicsMan_Init.
+ */
 // PORT: kicks a DMA chain on channel 0 (VIF0) through the PS2 hardware registers at
 // 0x10008000 (CHCR), 0x10008020 (QWC) and 0x10008030 (TADR); needs a platform shim.
 extern "C" void func_003912A8(void)
@@ -1953,6 +2362,11 @@ INCLUDE_ASM("render/lightman", func_00391360);
 extern char D_0043CCA0[];
 extern "C" void FlushCache(int);
 
+/**
+ * Uploads the VU0 microprogram chain at D_0043CCA0 through the VIF0 DMA channel and waits for it.
+ *
+ * Same sequence as func_003912A8 with the chain at D_0043CCA0. Caller: cPS2GraphicsMan_Init.
+ */
 // PORT: kicks a DMA chain on channel 0 (VIF0) through the PS2 hardware registers at
 // 0x10008000 (CHCR), 0x10008020 (QWC) and 0x10008030 (TADR); needs a platform shim.
 extern "C" void func_00391360(void)
@@ -1971,6 +2385,13 @@ extern "C" void func_00391360(void)
 //100%
 INCLUDE_ASM("render/lightman", func_00391418);
 #ifdef SKIP_ASM
+/**
+ * Loads 16 quadwords from @p mats into VU0 registers vf1-vf16 and starts the VU0 microprogram at address 0.
+ *
+ * @p self is unused. Caller: cAIFwdDiffCache_TesselatePatch.
+ *
+ * @param mats  16 quadwords (four 4x4 matrices)
+ */
 // PORT: PS2-only VU0 inline asm (lqc2 x16 into vf1-vf16, then vcallmsr of the
 // microprogram at VU0 micro-memory address 0); the PC port needs a C version.
 extern "C" void func_00391418(void* self, void* mats)
@@ -2015,6 +2436,13 @@ struct sQuad16 {
     int w[4];
 } __attribute__((aligned(16)));
 
+/**
+ * Copies 100 quadwords from VU0 data memory (0x11004200) to @p dst.
+ *
+ * @p self is unused. Caller: cAIFwdDiffCache_TesselatePatch.
+ *
+ * @param dst  the 1600-byte destination
+ */
 extern "C" void func_00391480(void* self, sQuad16* dst)
 {
     sQuad16* src = (sQuad16*)0x11004200;
@@ -2039,6 +2467,13 @@ extern "C" void func_00391480(void* self, sQuad16* dst)
 //100%
 INCLUDE_ASM("render/lightman", func_003914F8);
 #ifdef SKIP_ASM
+/**
+ * Reads VU0 integer register vi1, waiting for the running microprogram to finish (cfc2.i).
+ *
+ * Caller: cAIFwdDiffCache_TesselatePatch.
+ *
+ * @return the value of vi1
+ */
 // PORT: PS2-only VU0 integer register read (vi1); the PC port needs a C fallback.
 extern "C" int func_003914F8(void)
 {
@@ -2062,6 +2497,15 @@ struct sV4_1508 {
     sV4_1508(float ax, float ay, float az, float aw) : x(ax), y(ay), z(az), w(aw) {}
 };
 
+/**
+ * Initialises a font object to its defaults without loading anything.
+ *
+ * Zeroes NumGlyphs, Glyphs, MissingGlyph, FirstCode, LastLinearCode and MaxCharHeight; sets ShadowOffset (0, 0),
+ * BaseScale (1, 1), Scale = BaseScale, Color (1, 1, 1, 1), ShadowColor (1, 0, 0, 0), TextureID -1 and FontName to an
+ * empty string. Offset and UVScale are left as they are. No caller.
+ *
+ * @return @p self
+ */
 extern "C" void* func_00391508(char* self)
 {
     *(sV2_1508*)(self + 0x28) = sV2_1508(0.0f, 0.0f);
@@ -2165,6 +2609,13 @@ INCLUDE_ASM("render/lightman", func_003916C0);
 extern "C" void cFont_purge(void* self);
 void operator_delete(int* ptr);
 
+/**
+ * Destroys a font: calls cFont_purge and frees the object when bit 0 of @p flags is set.
+ *
+ * Callers: cDebugFE_purge, cGame_purge and func_00398438.
+ *
+ * @param flags  g++ destructor flags; bit 0 set frees the object
+ */
 extern "C" void func_003916C0(int* self, int flags)
 {
     cFont_purge(self);

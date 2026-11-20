@@ -51,6 +51,12 @@ INCLUDE_ASM("render/irradiance", func_0038ADB0);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 
+/**
+ * Frees the irradiance database's loaded arrays when it holds any items.
+ *
+ * When the word at +0x4 is non-zero it frees the blocks at +0xC and +0x8 with cMemMan_free, then zeroes +0xC, +0x8 and
+ * +0x4. Callers: cRealFE_purge and cGame_purge.
+ */
 extern "C" void func_0038ADB0(void* self)
 {
     if (*(int*)((char*)self + 0x4) != 0) {
