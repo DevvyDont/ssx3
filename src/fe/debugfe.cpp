@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/heartbeat.h"
 #include "fe/feinput.h"
 #include "online/lobbyman.h"
 #include "render/ps2graphicsman.h"
@@ -1925,7 +1926,7 @@ static inline float wrap_17F2D0(float x)
  *
  * @param heartBeat  the heartbeat (this)
  */
-extern "C" void cHeartBeat_update(void* heartBeat)
+extern "C" void cHeartBeat_update(cHeartBeat* heartBeat)
 {
     sFirefly_17F2D0* self = (sFirefly_17F2D0*)heartBeat;
     for (int i = 0; i < 2; i++) {
@@ -2001,7 +2002,7 @@ static inline void set1_17F500(char* m, unsigned int mask, int shift, unsigned i
  * @param p_  the heartbeat (cHeartBeat_update advances it)
  * @param tex  texture id to draw with
  */
-extern "C" void cHeartBeat_draw(void* p_, int tex)
+extern "C" void cHeartBeat_draw(cHeartBeat* p_, int tex)
 {
     sFirefly_17F2D0* self = (sFirefly_17F2D0*)p_;
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
@@ -2290,7 +2291,7 @@ public:
     virtual void v02();
 };
 extern "C" void cFadeScreen_update(void* self);
-extern "C" void cHeartBeat_update(void* p);
+extern "C" void cHeartBeat_update(cHeartBeat* p);
 
 /**
  * Runs one frame of the debug front end: the fade, the active screen and the heartbeat.
@@ -2303,7 +2304,7 @@ extern "C" void cDebugFE_update(void* self)
     cFadeScreen_update(self);
     if (*(int*)((char*)SSXApp + 4) == 0)
         (*(cFEObjK17FB98**)((char*)self + 0x14))->v02();
-    cHeartBeat_update((char*)self + 0x24);
+    cHeartBeat_update((cHeartBeat*)((char*)self + 0x24));
 }
 #endif
 
@@ -2312,7 +2313,7 @@ INCLUDE_ASM("fe/debugfe", cDebugFE_render);
 #ifdef SKIP_ASM
 extern char t4mat_Identity[];
 extern "C" int cFadeScreen_drawFade(void* self);
-extern "C" void cHeartBeat_draw(void* self, int a1);
+extern "C" void cHeartBeat_draw(cHeartBeat* self, int a1);
 
 struct sVEnt_17FBF0 { short delta; short index; void* fn; };
 typedef int (*FnI_17FBF0)(void*);
@@ -2391,7 +2392,7 @@ extern "C" int cDebugFE_render(char* self)
         setB12_17FBF0(rs_17FBF0((char*)graphicsMan4), 13);
         setB2_17FBF0(rs_17FBF0((char*)graphicsMan4), 5);
         setB22_17FBF0(rs_17FBF0((char*)graphicsMan4), 1);
-        cHeartBeat_draw(self + 0x24, *(int*)(self + 0x1C));
+        cHeartBeat_draw((cHeartBeat*)(self + 0x24), *(int*)(self + 0x1C));
         setC5_17FBF0(rs_17FBF0((char*)GrMan), 9);
         void* menu = *(void**)(self + 0x14);
         sVEnt_17FBF0* mvt = *(sVEnt_17FBF0**)menu;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "input/inputmap.h"
 #include "input/inputparse.h"
 
 //100%
@@ -17,14 +18,14 @@ extern char str_InputMapTable[];
  *
  * @param count  number of statement slots (input state ids)
  */
-extern "C" void cInputMap_init(void* self, int count)
+extern "C" void cInputMap_init(cInputMap* self, int count)
 {
-    *(int*)((char*)self + 0x0) = count;
-    *(void**)((char*)self + 0x4) = operator_new_tag(count * 4, str_InputMapTable, 0, 0);
-    MEM_fill(*(void**)((char*)self + 0x4), 0xFFFFFFFF, *(int*)((char*)self + 0x0) * 4);
-    *(int*)((char*)self + 0x14) = 0;
-    *(int*)((char*)self + 0xC) = 0;
-    *(int*)((char*)self + 0x10) = 0;
+    self->MaxMaps = count;
+    self->MapOffset = (int*)operator_new_tag(count * 4, str_InputMapTable, 0, 0);
+    MEM_fill(self->MapOffset, 0xFFFFFFFF, self->MaxMaps * 4);
+    self->OpCodeBuf = 0;
+    self->OpCodeLen = 0;
+    self->OpCodeTop = 0;
 }
 #endif
 
@@ -39,13 +40,13 @@ void cMemMan_free(void* p);
  * Frees MapOffset (+0x4) and the op-code buffer (+0x14) with cMemMan_free when they are set. The pointers are not
  * cleared afterwards. Nothing calls it.
  */
-extern "C" void cInputMap_purge(void *self)
+extern "C" void cInputMap_purge(cInputMap* self)
 {
-    void *buffer = *(void **)((char *)self + 4);
+    void *buffer = self->MapOffset;
     if (buffer != 0) {
         cMemMan_free(buffer);
     }
-    buffer = *(void **)((char *)self + 0x14);
+    buffer = (void*)self->OpCodeBuf;
     if (buffer != 0) {
         cMemMan_free(buffer);
     }
@@ -67,7 +68,7 @@ extern "C" void* func_003E1A10(const char* path, int* size, int a2);
  *
  * @param path  the map file's path (On Tour fn)
  */
-extern "C" void cInputMap_loadMapFile1(void* self, const char* path)
+extern "C" void cInputMap_loadMapFile1(cInputMap* self, const char* path)
 {
     int size;
     void* data = func_003E1A10(path, &size, 0x100);
@@ -94,9 +95,9 @@ extern char str_InputParser[];
  * @param mem  the map file's text
  * @param len  the text's length in bytes
  */
-extern "C" void cInputMap_loadMapFile(void* self, void* mem, void* len)
+extern "C" void cInputMap_loadMapFile(cInputMap* self, void* mem, void* len)
 {
-    *(void**)((char*)self + 0x8) = cInputMapParser_cInputMapParser((cInputMapParser*)cMemMan_alloc(0x109EC, str_InputParser, 0x100, 0), mem, len);
+    self->Parser = (cInputMapParser*)cInputMapParser_cInputMapParser((cInputMapParser*)cMemMan_alloc(0x109EC, str_InputParser, 0x100, 0), mem, len);
 }
 #endif
 
@@ -129,22 +130,22 @@ struct sInputMap_0E18 {
  * @param idx  statement slot (input state id) that receives the code
  * @param src  name of the statement in the map file
  */
-extern "C" void cInputMap_compileMap(sInputMap_0E18* self, int idx, char* src)
+extern "C" void cInputMap_compileMap(cInputMap* self, int idx, char* src)
 {
-    if (self->cap - self->used < 0x100) {
-        int newCap = self->cap + 0x400;
+    if (self->OpCodeLen - self->OpCodeTop < 0x100) {
+        int newCap = self->OpCodeLen + 0x400;
         int* buf = (int*)operator_new_tag(newCap * 4, str_TempOpCodes, 0x100, 0);
-        if (self->code != 0) {
-            MEM_copy(buf, self->code, self->cap * 4);
-            if (self->code != 0) {
-                cMemMan_free(self->code);
+        if ((int*)self->OpCodeBuf != 0) {
+            MEM_copy(buf, (int*)self->OpCodeBuf, self->OpCodeLen * 4);
+            if ((int*)self->OpCodeBuf != 0) {
+                cMemMan_free((int*)self->OpCodeBuf);
             }
         }
-        self->code = buf;
-        self->cap = newCap;
+        self->OpCodeBuf = (tInputOpCode*)buf;
+        self->OpCodeLen = newCap;
     }
-    self->offsets[idx] = self->used;
-    self->used += cInputMapParser_compileStatement(self->parser, src, self->code + self->used, self->cap - self->used, 5);
+    self->MapOffset[idx] = self->OpCodeTop;
+    self->OpCodeTop += cInputMapParser_compileStatement(self->Parser, src, (int*)self->OpCodeBuf + self->OpCodeTop, self->OpCodeLen - self->OpCodeTop, 5);
 }
 #endif
 
@@ -164,19 +165,19 @@ extern char str_InputOpCodes[];
  * Deletes the parser (+0x8), copies the used words into a new buffer of exactly that size ("InputOpCodes"),
  * frees the old one and sets the capacity to the used size.
  */
-extern "C" void cInputMap_purgeMapFile(void* self)
+extern "C" void cInputMap_purgeMapFile(cInputMap* self)
 {
-    if (*(int**)((char*)self + 0x8) != 0) {
-        operator_delete(*(int**)((char*)self + 0x8));
+    if ((int*)self->Parser != 0) {
+        operator_delete((int*)self->Parser);
     }
-    *(int**)((char*)self + 0x8) = 0;
-    void* copy = operator_new_tag(*(int*)((char*)self + 0x10) << 2, str_InputOpCodes, 0, 0);
-    MEM_copy(copy, *(void**)((char*)self + 0x14), *(int*)((char*)self + 0x10) << 2);
-    if (*(void**)((char*)self + 0x14) != 0) {
-        cMemMan_free(*(void**)((char*)self + 0x14));
+    self->Parser = 0;
+    void* copy = operator_new_tag(self->OpCodeTop << 2, str_InputOpCodes, 0, 0);
+    MEM_copy(copy, self->OpCodeBuf, self->OpCodeTop << 2);
+    if (self->OpCodeBuf != 0) {
+        cMemMan_free(self->OpCodeBuf);
     }
-    *(void**)((char*)self + 0x14) = copy;
-    *(int*)((char*)self + 0xC) = *(int*)((char*)self + 0x10);
+    self->OpCodeBuf = (tInputOpCode*)copy;
+    self->OpCodeLen = self->OpCodeTop;
 }
 #endif
 
@@ -196,11 +197,11 @@ extern "C" float cInputExec_execute(void* parser, void* a1, void* a2);
  * @param id  statement slot (input state id) to evaluate
  * @return the statement's value
  */
-extern "C" float cInputMap_getValue(void* self, void* inputPad, int id)
+extern "C" float cInputMap_getValue(cInputMap* self, void* inputPad, int id)
 {
     char parser[400];
     cInputExec_cInputExec(parser);
-    return cInputExec_execute(parser, inputPad, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[id] << 2));
+    return cInputExec_execute(parser, inputPad, (char*)self->OpCodeBuf + ((self->MapOffset)[id] << 2));
 }
 #endif
 
@@ -237,7 +238,7 @@ struct sParser_1010 {
  * @param config7  config value 8 (On Tour c7)
  * @return the statement's value
  */
-extern "C" float cInputMap_getValue1(void* self, void* inputPad, int stateId, int modifier, float config0, float config1, float config2, float config3, float config4, float config5, float config6, float config7)
+extern "C" float cInputMap_getValue1(cInputMap* self, void* inputPad, int stateId, int modifier, float config0, float config1, float config2, float config3, float config4, float config5, float config6, float config7)
 {
     sParser_1010 parser;
     cInputExec_cInputExec(&parser);
@@ -250,7 +251,7 @@ extern "C" float cInputMap_getValue1(void* self, void* inputPad, int stateId, in
     parser.v[5] = config5;
     parser.v[6] = config6;
     parser.v[7] = config7;
-    return cInputExec_execute(&parser, inputPad, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[stateId] << 2));
+    return cInputExec_execute(&parser, inputPad, (char*)self->OpCodeBuf + ((self->MapOffset)[stateId] << 2));
 }
 #endif
 
@@ -269,11 +270,11 @@ extern "C" float cInputExec_execute(void* parser, void* a1, void* a2);
  * @param id  statement slot (input state id) to evaluate
  * @return 1 when the statement's value is not 0.0, otherwise 0
  */
-extern "C" int cInputMap_getState(void* self, void* inputPad, int id)
+extern "C" int cInputMap_getState(cInputMap* self, void* inputPad, int id)
 {
     char parser[400];
     cInputExec_cInputExec(parser);
-    return cInputExec_execute(parser, inputPad, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[id] << 2)) != 0.0f;
+    return cInputExec_execute(parser, inputPad, (char*)self->OpCodeBuf + ((self->MapOffset)[id] << 2)) != 0.0f;
 }
 #endif
 
@@ -310,7 +311,7 @@ struct sParser_1188 {
  * @param config7  config value 8 (On Tour c7)
  * @return 1 when the statement's value is not 0.0, otherwise 0
  */
-extern "C" int cInputMap_getState1(void* self, void* inputPad, int stateId, int modifier, float config0, float config1, float config2, float config3, float config4, float config5, float config6, float config7)
+extern "C" int cInputMap_getState1(cInputMap* self, void* inputPad, int stateId, int modifier, float config0, float config1, float config2, float config3, float config4, float config5, float config6, float config7)
 {
     sParser_1188 parser;
     cInputExec_cInputExec(&parser);
@@ -323,7 +324,7 @@ extern "C" int cInputMap_getState1(void* self, void* inputPad, int stateId, int 
     parser.v[5] = config5;
     parser.v[6] = config6;
     parser.v[7] = config7;
-    return cInputExec_execute(&parser, inputPad, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[stateId] << 2)) != 0.0f;
+    return cInputExec_execute(&parser, inputPad, (char*)self->OpCodeBuf + ((self->MapOffset)[stateId] << 2)) != 0.0f;
 }
 #endif
 

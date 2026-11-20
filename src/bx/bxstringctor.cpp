@@ -1,4 +1,5 @@
 #include "common.h"
+#include "path/pathsys.h"
 #include "online/lobbyman.h"
 
 extern void* cBXString_EmptyString;
@@ -3448,7 +3449,7 @@ extern "C" int cPath_isPathInBox(sBXBox2* self, float* lo, float* hi)
 //100%
 INCLUDE_ASM("bx/bxstringctor", cPathSys_loadInjectedPaths);
 #ifdef SKIP_ASM
-extern "C" void cPathSys_resolvePaths(void* self);
+extern "C" void cPathSys_resolvePaths(cPathSys* self);
 
 /**
  * Installs path data that is already in memory: stores it (+0x48), marks the path file loaded (+0x4C) and parses it
@@ -3459,10 +3460,10 @@ extern "C" void cPathSys_resolvePaths(void* self);
  * @param data  the path data
  * @return 1
  */
-extern "C" int cPathSys_loadInjectedPaths(void* self, int data)
+extern "C" int cPathSys_loadInjectedPaths(cPathSys* self, int data)
 {
-    *(int*)((char*)self + 0x48) = data;
-    *(int*)((char*)self + 0x4C) = 1;
+    self->Data = (char*)data;
+    self->m_bIsFileLoaded = 1;
     cPathSys_resolvePaths(self);
     return 1;
 }
@@ -3497,7 +3498,7 @@ extern "C" int FILE_loadpack(int, int);
 extern "C" void cPathSys_loadPaths(void *pathSys, int name) {
     (*(int *)((char*)(pathSys) + (0x48))) = FILE_loadpack(name, 0);
     (*(int *)((char*)(pathSys) + (0x4C))) = 1;
-    cPathSys_resolvePaths(pathSys);
+    cPathSys_resolvePaths((cPathSys*)pathSys);
 }
 #endif
 //100%
@@ -3511,8 +3512,8 @@ INCLUDE_ASM("bx/bxstringctor", cPathSys_isPathfileLoaded);
  * @param pathSys  the path system
  * @return non-zero when a path file is loaded
  */
-extern "C" int cPathSys_isPathfileLoaded(void *pathSys) {
-    return (*(int *)((char*)(pathSys) + (0x4C)));
+extern "C" int cPathSys_isPathfileLoaded(cPathSys* pathSys) {
+    return (pathSys->m_bIsFileLoaded);
 }
 #endif
 
@@ -3533,13 +3534,13 @@ extern "C" void cPathSys_loadStartpoints(void* self, char* p);
  * cPathSys_loadAIPaths, cPathSys_loadTrackPaths, cPathSys_loadCheckpoints and cPathSys_loadStartpoints in turn, each starting where the
  * previous one stopped. cPathSys_loadInjectedPaths and cPathSys_loadPaths call it.
  */
-extern "C" void cPathSys_resolvePaths(void* self)
+extern "C" void cPathSys_resolvePaths(cPathSys* self)
 {
     int header;
-    char* cursor = *(char**)((char*)self + 0x48);
-    *(int*)((char*)self + 0x8) = 0;
-    *(int*)((char*)self + 0x10) = 0;
-    *(int*)((char*)self + 0x0) = 0;
+    char* cursor = self->Data;
+    self->NumAIPaths = 0;
+    self->NumTrackPaths = 0;
+    self->NumStartpoints = 0;
     pathREAD_tInt32_2(&header, cursor);
     cursor += 4;
     cursor += cPathSys_loadAIPaths(self, cursor);
@@ -3569,18 +3570,18 @@ extern "C" int cPathSys_loadTrackPaths(void* self, char* p);
  *
  * @param name  the path file name (passed as an int)
  */
-extern "C" void cPathSys_appendPaths(void* self, int name)
+extern "C" void cPathSys_appendPaths(cPathSys* self, int name)
 {
     int header;
-    void* old = *(void**)((char*)self + 0x48);
+    void* old = self->Data;
     if (old != 0) {
         cMemMan_free(old);
     } else {
         cPathSys_loadPaths(self, name);
     }
-    *(int*)((char*)self + 0x48) = 0;
+    self->Data = 0;
     char* cursor = (char*)FILE_loadpack(name, 0);
-    *(char**)((char*)self + 0x48) = cursor;
+    self->Data = cursor;
     pathREAD_tInt32_3(&header, cursor);
     cursor += 4;
     cursor += cPathSys_loadAIPaths(self, cursor);
@@ -3599,18 +3600,18 @@ void cMemMan_free(void*);
  * Deletes the arrays at +0xC and +0x14 if present and the one at +0x48 if present and owned (+0x4C), then nulls them
  * and clears +0x4C.
  */
-extern "C" void cPathSys_purgePaths(void* self)
+extern "C" void cPathSys_purgePaths(cPathSys* self)
 {
-    if (*(void**)((char*)self + 0xC) != 0)
-        cMemMan_free(*(void**)((char*)self + 0xC));
-    *(void**)((char*)self + 0xC) = 0;
-    if (*(void**)((char*)self + 0x14) != 0)
-        cMemMan_free(*(void**)((char*)self + 0x14));
-    *(void**)((char*)self + 0x14) = 0;
-    if (*(void**)((char*)self + 0x48) != 0 && *(int*)((char*)self + 0x4C) != 0)
-        cMemMan_free(*(void**)((char*)self + 0x48));
-    *(void**)((char*)self + 0x48) = 0;
-    *(int*)((char*)self + 0x4C) = 0;
+    if (self->AIPaths != 0)
+        cMemMan_free(self->AIPaths);
+    self->AIPaths = 0;
+    if (self->TrackPaths != 0)
+        cMemMan_free(self->TrackPaths);
+    self->TrackPaths = 0;
+    if (self->Data != 0 && self->m_bIsFileLoaded != 0)
+        cMemMan_free(self->Data);
+    self->Data = 0;
+    self->m_bIsFileLoaded = 0;
 }
 #endif
 
@@ -3625,9 +3626,9 @@ INCLUDE_ASM("bx/bxstringctor", cPathSys_getTrackPath);
  * @param pathIndex  the track path index
  * @return the track path
  */
-extern "C" int cPathSys_getTrackPath(void* self, int pathIndex)
+extern "C" int cPathSys_getTrackPath(cPathSys* self, int pathIndex)
 {
-    return *(int*)((char*)self + 0x14) + pathIndex * 0x3c;
+    return (int)self->TrackPaths + pathIndex * 0x3c;
 }
 #endif
 
@@ -3642,9 +3643,9 @@ INCLUDE_ASM("bx/bxstringctor", cPathSys_getAIPath);
  * @param index  the AI path index
  * @return the AI path
  */
-extern "C" int cPathSys_getAIPath(void* self, int index)
+extern "C" int cPathSys_getAIPath(cPathSys* self, int index)
 {
-    return *(int*)((char*)self + 0xc) + (index << 6);
+    return (int)self->AIPaths + (index << 6);
 }
 #endif
 

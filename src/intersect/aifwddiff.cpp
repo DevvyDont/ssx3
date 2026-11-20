@@ -1,4 +1,5 @@
 #include "common.h"
+#include "intersect/aifwddiff.h"
 #include "render/ps2graphicsman.h"
 
 //100%
@@ -60,7 +61,7 @@ struct sFwdDiffNode;
 extern "C" void cAIFwdDiffCache_MoveToAgeQueueTail(sFwdDiffList* list, sFwdDiffLink* n);
 extern "C" void cAIFwdDiffCache_RemoveFromHash(void* self, void* node);
 extern "C" void cAIFwdDiffCache_AddToHash(sFwdDiffTable* table, sFwdDiffNode* node);
-extern "C" void cAIFwdDiffCache_TesselatePatch(void* self, void* src, void* node);
+extern "C" void cAIFwdDiffCache_TesselatePatch(cAIFwdDiffCache* self, void* src, void* node);
 
 struct sCacheNode_279D0 {
     unsigned int key;           // 0x0
@@ -106,7 +107,7 @@ extern "C" void cAIFwdDiffCache_GetFwdDiff(sCache_279D0* self, void* src, sCache
     n->key = key;
     cAIFwdDiffCache_AddToHash((sFwdDiffTable*)self, (sFwdDiffNode*)n);
     self->lru = n->lruNext;
-    cAIFwdDiffCache_TesselatePatch(self, src, n);
+    cAIFwdDiffCache_TesselatePatch((cAIFwdDiffCache*)self, src, n);
     *out = n;
 }
 #endif
@@ -247,7 +248,7 @@ extern "C" void cAIFwdDiffCache_AddToHash(sFwdDiffTable* table, sFwdDiffNode* no
 INCLUDE_ASM("intersect/aifwddiff", cAIFwdDiffCache_TesselatePatch);
 #ifdef SKIP_ASM
 extern "C" void func_00391418(void* t, void* a);
-extern "C" void cAIFwdDiffCache_InitializeCache(void* self, void* a);
+extern "C" void cAIFwdDiffCache_InitializeCache(cAIFwdDiffCache* self, void* a);
 extern "C" void func_003914F8(void* t);
 extern "C" void func_00391480(void* t, void* a);
 struct sGp2930 { int a, b; };
@@ -264,7 +265,7 @@ extern sGp2930 D_004A5A20; // placeholder: target is a raw $gp+0x2930 reference
  * @param patch  the terrain patch record (On Tour const tPatchRecord&)
  * @param fwdDiff  the cache node to fill (On Tour node)
  */
-extern "C" void cAIFwdDiffCache_TesselatePatch(void* self, void* patch, void* fwdDiff)
+extern "C" void cAIFwdDiffCache_TesselatePatch(cAIFwdDiffCache* self, void* patch, void* fwdDiff)
 {
     sGp2930* patchEval = &D_004A5A20;
     func_00391418(patchEval, (char*)patch + 0x40);
@@ -285,7 +286,7 @@ INCLUDE_ASM("intersect/aifwddiff", cAIFwdDiffCache_InitializeCache);
  *
  * @param patch  the cache node (On Tour node; despite the name not a patch)
  */
-extern "C" void cAIFwdDiffCache_InitializeCache(void* self, void* patch)
+extern "C" void cAIFwdDiffCache_InitializeCache(cAIFwdDiffCache* self, void* patch)
 {
     float* cell = (float*)((char*)patch + 0x650);
     int n = 80;

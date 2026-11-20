@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/berewarddb.h"
 #include "be/beintnetwork.h"
 #include "main/ssxapp.h"
 
@@ -77,37 +78,37 @@ struct sBEDB_0015AE00
  * func_0019DC20 and func_0019D4B8. The file buffer (+0x4) is freed with cMemMan_free. Then +0x0 becomes -1 and the
  * other words up to +0x4C become 0, except +0x28, which is left as it was (likely an oversight).
  */
-extern "C" void cBERewardDB_purge(sBEDB_0015AE00* self)
+extern "C" void cBERewardDB_purge(cBERewardDB* self)
 {
-    if (self->handle >= 0)
+    if (self->mRewardFileIndex >= 0)
     {
         char* snd = (char*)SSXApp->RealFE + 0x1A70;
-        func_0019DC20(snd, 0, self->handle);
-        func_0019D4B8(snd, 0, self->handle);
+        func_0019DC20(snd, 0, self->mRewardFileIndex);
+        func_0019D4B8(snd, 0, self->mRewardFileIndex);
     }
-    if (self->data != 0)
+    if (self->mpRewardsFile != 0)
     {
-        cMemMan_free(self->data);
+        cMemMan_free(self->mpRewardsFile);
     }
-    self->handle = -1;
-    self->data = 0;
-    self->f8 = 0;
-    self->fC = 0;
-    self->f10 = 0;
-    self->f14 = 0;
-    self->f18 = 0;
-    self->f1C = 0;
-    self->f20 = 0;
-    self->f24 = 0;
-    self->f2C = 0;
-    self->f30 = 0;
-    self->f34 = 0;
-    self->f38 = 0;
-    self->f3C = 0;
-    self->f40 = 0;
-    self->f44 = 0;
-    self->f48 = 0;
-    self->f4C = 0;
+    self->mRewardFileIndex = -1;
+    self->mpRewardsFile = 0;
+    self->mpTrophies = 0;
+    self->mpMedals = 0;
+    self->mpPeakPasses = 0;
+    self->mpPosters = 0;
+    self->mpTradingCards = 0;
+    self->mpConceptArts = 0;
+    self->mpToys = 0;
+    self->mpVideos = 0;
+    self->mpStrings = 0;
+    self->mNumTrophies = 0;
+    self->mNumMedals = 0;
+    self->mNumPeakPasses = 0;
+    self->mNumPosters = 0;
+    self->mNumTradingCards = 0;
+    self->mNumConceptArts = 0;
+    self->mNumToys = 0;
+    self->mNumVideos = 0;
 }
 #endif
 
@@ -171,18 +172,18 @@ struct sRewardDB_AF40 {
  * @return the record's first word
  */
 // Returns the id of entry idx in the reward table of the given type.
-extern "C" int cBERewardDB_getRewardName(sRewardDB_AF40* self, int type, int idx)
+extern "C" int cBERewardDB_getRewardName(cBERewardDB* self, int type, int idx)
 {
     switch (type) {
-    case 0: { int off = idx * 12; return *(int*)((char*)self->t0 + off); }
-    case 1: { int off = idx * 12; return *(int*)((char*)self->t1 + off); }
-    case 2: { int off = idx * 8; return *(int*)((char*)self->t2 + off); }
-    case 3: { int off = idx * 16; return *(int*)((char*)self->t3 + off); }
-    case 4: { int off = idx * 16; return *(int*)((char*)self->t4 + off); }
-    case 5: { int off = idx * 16; return *(int*)((char*)self->t5 + off); }
-    case 6: { int off = idx * 16; return *(int*)((char*)self->t6 + off); }
-    case 7: { int off = idx * 16; return *(int*)((char*)self->t7 + off); }
-    case 8: { int off = idx * 16; return *(int*)((char*)self->t8 + off); }
+    case 0: { int off = idx * 12; return *(int*)((char*)(sRec12_AF40*)self->mpTrophies + off); }
+    case 1: { int off = idx * 12; return *(int*)((char*)(sRec12_AF40*)self->mpMedals + off); }
+    case 2: { int off = idx * 8; return *(int*)((char*)(sRec8_AF40*)self->mpPeakPasses + off); }
+    case 3: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)self->mpPosters + off); }
+    case 4: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)self->mpTradingCards + off); }
+    case 5: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)self->mpConceptArts + off); }
+    case 6: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)self->mpVideos + off); }
+    case 7: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)self->mpToys + off); }
+    case 8: { int off = idx * 16; return *(int*)((char*)(sRec16_AF40*)self->mpCheatChars + off); }
     case 9: break;
     }
     return 0;

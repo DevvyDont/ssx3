@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uistatestack.h"
 #include "ui/uistate.h"
 
 //100%
@@ -101,20 +102,20 @@ extern void* cListNode_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void cUIStateStack__cUIStateStack(void* self, int flags)
+extern "C" void cUIStateStack__cUIStateStack(cUIStateStack* self, int flags)
 {
     cUIStateStack_destroyStates(self);
-    *(void***)((char*)self + 0x34) = cList_vtbl;
+    self->mExplicitStack.mVtbl = cList_vtbl;
     cList_destroyList((char*)self + 0x1C);
-    *(void***)((char*)self + 0x30) = cListNode_vtbl;
+    self->mExplicitStack.mEnd.mVtbl = cListNode_vtbl;
     cListNode_destroyListNode((char*)self + 0x28);
-    *(void***)((char*)self + 0x24) = cListNode_vtbl;
+    self->mExplicitStack.mStart.mVtbl = cListNode_vtbl;
     cListNode_destroyListNode((char*)self + 0x1C);
-    *(void***)((char*)self + 0x18) = cList_vtbl;
+    self->mStack.mVtbl = cList_vtbl;
     cList_destroyList(self);
-    *(void***)((char*)self + 0x14) = cListNode_vtbl;
+    self->mStack.mEnd.mVtbl = cListNode_vtbl;
     cListNode_destroyListNode((char*)self + 0xC);
-    *(void***)((char*)self + 0x8) = cListNode_vtbl;
+    self->mStack.mStart.mVtbl = cListNode_vtbl;
     cListNode_destroyListNode(self);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -163,9 +164,9 @@ static inline void cUIStateStack_enableState_setB4(cUIStateStack_enableState_nod
  * @param id  the mode to look for
  * @return 1 when a state was enabled, else 0
  */
-extern "C" int cUIStateStack_enableState(cList* list, signed char id)
+extern "C" int cUIStateStack_enableState(cUIStateStack* list, signed char id)
 {
-    cUIStateStack_enableState_node* n = (cUIStateStack_enableState_node*)cList_first(list);
+    cUIStateStack_enableState_node* n = (cUIStateStack_enableState_node*)cList_first(((cList*)list));
     if (n != 0) {
         do {
             if ((((unsigned int)n->flags >> 8) & 0x3F) == id && ((n->flags >> 6) & 1) == 0) {
@@ -206,9 +207,9 @@ struct cUIStateStack_checkForState_node {
  * @param id  the mode to look for
  * @return 1 when one exists, else 0
  */
-extern "C" int cUIStateStack_checkForState(cList* list, signed char id)
+extern "C" int cUIStateStack_checkForState(cUIStateStack* list, signed char id)
 {
-    cUIStateStack_checkForState_node* n = (cUIStateStack_checkForState_node*)cList_first(list);
+    cUIStateStack_checkForState_node* n = (cUIStateStack_checkForState_node*)cList_first(((cList*)list));
     if (n != 0) {
         do {
             if ((((unsigned int)n->flags >> 8) & 0x3F) == id && ((n->flags >> 6) & 1) == 0) {
@@ -235,7 +236,7 @@ struct cUIStateStack_render2D_sVEntry {
  *
  * Visible is bit 3 of a state's attribute word (+0x1C). cUIEngine_render2D calls it on the engine's state stack.
  */
-extern "C" void cUIStateStack_render2D(void* self)
+extern "C" void cUIStateStack_render2D(cUIStateStack* self)
 {
     char* n = (char*)cList_first((cList*)self);
     if (n != 0) {
@@ -335,7 +336,7 @@ struct cUIStateStack_updateLoop_sVEntryV {
  *
  * @return nonzero when a state finished closing and none started in this pass (cUIStateStack_update then runs another pass)
  */
-extern "C" int cUIStateStack_updateLoop(void* self)
+extern "C" int cUIStateStack_updateLoop(cUIStateStack* self)
 {
     int popped = 0;
     int any = 0;
@@ -400,7 +401,7 @@ extern "C" int cUIStateStack_updateLoop(void* self)
                         cUIStateStack_updateLoop_node* o = n->owner;
                         popped = 0;
                         if (((n->flags >> 14) & 1) == 0) {
-                            found = cUIStateStack_checkForState((cList*)self, 1);
+                            found = cUIStateStack_checkForState(self, 1);
                         } else {
                             found = 0;
                         }
@@ -426,8 +427,8 @@ extern "C" int cUIStateStack_updateLoop(void* self)
                         }
                     }
                     if (top == 0 || found != 0) {
-                        if (cUIStateStack_getCurrentState(self) == 0 && cUIStateStack_enableState((cList*)self, 1) == 0) {
-                            cUIStateStack_enableState((cList*)self, 8);
+                        if (cUIStateStack_getCurrentState(self) == 0 && cUIStateStack_enableState(self, 1) == 0) {
+                            cUIStateStack_enableState(self, 8);
                         }
                     }
                     break;
@@ -447,7 +448,7 @@ extern "C" int cUIStateStack_updateLoop(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("ui/uistate", cUIStateStack_update);
 #ifdef SKIP_ASM
-extern "C" int cUIStateStack_updateLoop(void* self);
+extern "C" int cUIStateStack_updateLoop(cUIStateStack* self);
 extern "C" void cUIState_updateScreens(void* self);
 
 struct sVEntry39F100 {
@@ -463,7 +464,7 @@ struct sVEntry39F100 {
  * Every state of the explicit list (+0x1C) gets virtual slot 12 when enabled and cUIState_updateScreens. The UI engine
  * update cUIEngine_update calls it.
  */
-extern "C" void cUIStateStack_update(void* self)
+extern "C" void cUIStateStack_update(cUIStateStack* self)
 {
     if (cUIStateStack_updateLoop(self) != 0) {
         cUIStateStack_updateLoop(self);
@@ -511,9 +512,9 @@ static inline void cUIStateStack_pop_setB7(cUIStateStack_pop_node* n, int v) { n
  * @param count  how many states to close
  * @return the state below the closed ones, or null
  */
-extern "C" cUIStateStack_pop_node* cUIStateStack_pop(cList* list, int count)
+extern "C" cUIStateStack_pop_node* cUIStateStack_pop(cUIStateStack* list, int count)
 {
-    cUIStateStack_pop_node* n = (cUIStateStack_pop_node*)cList_first(list);
+    cUIStateStack_pop_node* n = (cUIStateStack_pop_node*)cList_first(((cList*)list));
     int i;
     for (i = 0; i < count; i++) {
         if (n == 0) {
@@ -539,7 +540,7 @@ INCLUDE_ASM("ui/uistate", cUIStateStack_pop1);
  *
  * @param node  the state to close
  */
-extern "C" void cUIStateStack_pop1(void* self, char* node)
+extern "C" void cUIStateStack_pop1(cUIStateStack* self, char* node)
 {
     int flags = *(int*)(node + 0x1C);
     if (((flags >> 5) & 1) && (((unsigned int)flags >> 8) & 0x3F) == 5) {

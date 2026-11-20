@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/hudfx.h"
 #include "ai/ridermetrix.h"
 #include "ai/ai.h"
 #include "online/gamecomm.h"
@@ -2264,14 +2265,14 @@ INCLUDE_ASM("seg/seg_14B10", cHUDFX_update);
  * (+0x8) grows by 1/60 and the slot becomes empty (ID 0x34) once it reaches MaxDecay. Called for each slot by
  * cRiderMetrix_update (the rider metrics update).
  */
-extern "C" void cHUDFX_update(void *self) {
-    if (*(int *)((char*)self + 0) != 52) {
-        float lim = *(float *)((char*)self + 4);
+extern "C" void cHUDFX_update(cHUDFX* self) {
+    if (self->ID != 52) {
+        float lim = self->MaxDecay;
         if (lim != -1.0f) {
-            float curDecay = *(float *)((char*)self + 8) + 0.01666666753590107f;
-            *(float *)((char*)self + 8) = curDecay;
+            float curDecay = self->CurDecay + 0.01666666753590107f;
+            self->CurDecay = curDecay;
             if (lim <= curDecay)
-                *(int *)((char*)self + 0) = 52;
+                self->ID = 52;
         }
     }
 }
@@ -2285,9 +2286,9 @@ INCLUDE_ASM("seg/seg_14B10", cHUDFX_copyDispStr);
  *
  * @param str  the string, or 0 (On Tour s)
  */
-extern "C" void cHUDFX_copyDispStr(char *self, signed char *str) {
+extern "C" void cHUDFX_copyDispStr(cHUDFX* self, signed char *str) {
     signed char *src = str;
-    unsigned char *dst = (unsigned char*)(self + 0x18);
+    unsigned char *dst = (unsigned char*)(((char*)self) + 0x18);
     if (src != 0) {
         while (*src != 0) {
             *dst = *src;
@@ -2302,7 +2303,7 @@ extern "C" void cHUDFX_copyDispStr(char *self, signed char *str) {
 //100%
 INCLUDE_ASM("seg/seg_14B10", cHUDFX_set);
 #ifdef SKIP_ASM
-extern "C" void cHUDFX_copyDispStr(char *, signed char *);
+extern "C" void cHUDFX_copyDispStr(cHUDFX*, signed char *);
 
 /**
  * Starts a HUD effect showing a string.
@@ -2316,13 +2317,13 @@ extern "C" void cHUDFX_copyDispStr(char *, signed char *);
  * @param decayTime  the effect's data (On Tour int data)
  * @param fparg0  how long the effect lasts (On Tour float decayTime)
  */
-extern "C" void cHUDFX_set(char *self, int id, signed char *displayStr, int decayTime, float fparg0) {
+extern "C" void cHUDFX_set(cHUDFX* self, int id, signed char *displayStr, int decayTime, float fparg0) {
     cHUDFX_copyDispStr(self, displayStr);
-    *(int *)(self + 0) = id;
-    *(float *)(self + 4) = fparg0;
-    *(int *)(self + 0xC) = decayTime;
-    *(int *)(self + 8) = 0;
-    *(int *)(self + 0x14) = 0;
+    self->ID = id;
+    self->MaxDecay = fparg0;
+    self->Data = decayTime;
+    *(int*)&self->CurDecay = 0;
+    self->DisplayInt = 0;
 }
 #endif
 
@@ -2330,7 +2331,7 @@ extern "C" void cHUDFX_set(char *self, int id, signed char *displayStr, int deca
 INCLUDE_ASM("seg/seg_14B10", cHUDFX_set1);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void cHUDFX_copyDispStr(char *, signed char *);
+extern "C" void cHUDFX_copyDispStr(cHUDFX*, signed char *);
 extern signed char D_004A5E20[];
 extern char str_pct_d[];
 
@@ -2343,24 +2344,24 @@ extern char str_pct_d[];
  * @param data  the effect's data
  */
 // Variant of cHUDFX_set that names the entry from a number (formatted into a shared buffer).
-extern "C" void cHUDFX_set1(char *self, int id, int displayInt, float fparg0, int data) {
+extern "C" void cHUDFX_set1(cHUDFX* self, int id, int displayInt, float fparg0, int data) {
     sprintf((char*)D_004A5E20, str_pct_d, displayInt);
     cHUDFX_copyDispStr(self, D_004A5E20);
-    *(int *)(self + 0x14) = displayInt;
-    *(int *)(self + 0) = id;
-    *(float *)(self + 4) = fparg0;
-    *(int *)(self + 0xC) = data;
-    *(int *)(self + 8) = 0;
+    self->DisplayInt = displayInt;
+    self->ID = id;
+    self->MaxDecay = fparg0;
+    self->Data = data;
+    *(int*)&self->CurDecay = 0;
 }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_14B10", func_00117138);
 #ifdef SKIP_ASM
-extern "C" void cHUDFX_copyDispStr(char *, signed char *);
+extern "C" void cHUDFX_copyDispStr(cHUDFX*, signed char *);
 
 extern "C" void func_00117138(char *hudFx, int fxId, signed char *displayStr, int data, float fparg0) {
-    cHUDFX_copyDispStr(hudFx, displayStr);
+    cHUDFX_copyDispStr((cHUDFX*)hudFx, displayStr);
     *(int *)(hudFx + 0) = fxId;
     *(int *)(hudFx + 0xC) = data;
     *(float *)(hudFx + 8) = -fparg0;
@@ -2373,14 +2374,14 @@ extern "C" void func_00117138(char *hudFx, int fxId, signed char *displayStr, in
 INCLUDE_ASM("seg/seg_14B10", func_001171A8);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void cHUDFX_copyDispStr(char *, signed char *);
+extern "C" void cHUDFX_copyDispStr(cHUDFX*, signed char *);
 extern signed char D_004A5E20[];
 extern char str_pct_d[];
 
 // Variant of func_00117138 that names the entry from a number (formatted into a shared buffer).
 extern "C" void func_001171A8(char *arg0, int arg1, int arg2, float fparg0, int arg3) {
     sprintf((char*)D_004A5E20, str_pct_d, arg2);
-    cHUDFX_copyDispStr(arg0, D_004A5E20);
+    cHUDFX_copyDispStr((cHUDFX*)arg0, D_004A5E20);
     *(int *)(arg0 + 0x14) = arg2;
     *(int *)(arg0 + 0) = arg1;
     *(float *)(arg0 + 8) = -fparg0;

@@ -1,3 +1,4 @@
+#include "visualfx/crowdanim2d.h"
 #include "render/ps2graphicsman.h"
 #include "visualfx/crowdrender2d.h"
 #include <stdint.h>
@@ -208,7 +209,7 @@ INCLUDE_ASM("visualfx/crowdrender2d", cCrowdAnim2D_advanceFrame);
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
 // Steps a crowd animation frame for the current play mode and returns the new frame.
-extern "C" int cCrowdAnim2D_advanceFrame(void* self, int frame, int n, int* mode)
+extern "C" int cCrowdAnim2D_advanceFrame(cCrowdAnim2D* self, int frame, int n, int* mode)
 {
     switch (*mode) {
     case 0:
@@ -276,7 +277,7 @@ struct sCrowdTrans_BAC0 {
 extern sCrowdAnimDef_BAC0 D_00445D38[];
 extern sCrowdTrans_BAC0 D_00445E10[];
 extern int D_00445E20[];
-extern "C" int cCrowdAnim2D_advanceFrame(void* self, int frame, int count, int* dir);
+extern "C" int cCrowdAnim2D_advanceFrame(cCrowdAnim2D* self, int frame, int count, int* dir);
 
 struct sCrowdAnim2D_BAC0 {
     int type;               // 0x0
@@ -296,65 +297,65 @@ struct sCrowdAnim2D_BAC0 {
  * The table (D_00445E10, by type and current animation) gives the next animation. Kind 0 switches when back
  * at frame 0, kind 1 at the last frame, kind 2 at once; then the frame's texture is stored.
  */
-extern "C" void cCrowdAnim2D_update(sCrowdAnim2D_BAC0* self)
+extern "C" void cCrowdAnim2D_update(cCrowdAnim2D* self)
 {
     int now = *(int*)(cAppMan_TheAppMan + 0x1C);
-    if (now - self->last < self->delay) {
+    if (now - self->m_iLastTick < self->m_iUpdateTick) {
         return;
     }
-    self->last = now;
-    sCrowdTrans_BAC0* base = &D_00445E10[D_00445E20[self->type]];
+    self->m_iLastTick = now;
+    sCrowdTrans_BAC0* base = &D_00445E10[D_00445E20[self->m_TargetState]];
     // PORT: int arithmetic on the table address (matches the original operand order).
-    sCrowdTrans_BAC0* tr = (sCrowdTrans_BAC0*)(self->anim * (int)sizeof(sCrowdTrans_BAC0) + (int)base);
-    if (tr->anim == self->anim) {
-        self->frame = cCrowdAnim2D_advanceFrame(self, self->frame, D_00445D38[tr->anim].count, &self->dir);
+    sCrowdTrans_BAC0* tr = (sCrowdTrans_BAC0*)(self->m_CurrentAnimation * (int)sizeof(sCrowdTrans_BAC0) + (int)base);
+    if (tr->anim == self->m_CurrentAnimation) {
+        self->m_iCurrentFrame = cCrowdAnim2D_advanceFrame(self, self->m_iCurrentFrame, D_00445D38[tr->anim].count, &self->m_CurrentPlayType);
     } else {
         switch (tr->kind) {
         case 0: {
-            int* dir = &self->dir;
+            int* dir = &self->m_CurrentPlayType;
             if (*dir == 0) {
                 *dir = 1;
             }
-            if (self->frame == 0) {
-                self->anim = tr->anim;
-                self->dir = tr->mode;
-                if (self->dir == 1) {
-                    self->frame = D_00445D38[self->anim].count - 1;
+            if (self->m_iCurrentFrame == 0) {
+                self->m_CurrentAnimation = tr->anim;
+                self->m_CurrentPlayType = tr->mode;
+                if (self->m_CurrentPlayType == 1) {
+                    self->m_iCurrentFrame = D_00445D38[self->m_CurrentAnimation].count - 1;
                 } else {
-                    self->frame = 0;
+                    self->m_iCurrentFrame = 0;
                 }
             } else {
-                self->frame = cCrowdAnim2D_advanceFrame(self, self->frame, D_00445D38[self->anim].count, dir);
+                self->m_iCurrentFrame = cCrowdAnim2D_advanceFrame(self, self->m_iCurrentFrame, D_00445D38[self->m_CurrentAnimation].count, dir);
             }
             break;
         }
         case 1: {
-            int* dir = &self->dir;
+            int* dir = &self->m_CurrentPlayType;
             if (*dir == 1) {
                 *dir = 0;
             }
-            int cnt = D_00445D38[self->anim].count;
-            if (self->frame == cnt - 1) {
-                self->anim = tr->anim;
-                self->dir = tr->mode;
-                if (self->dir == 1) {
-                    self->frame = D_00445D38[self->anim].count - 1;
+            int cnt = D_00445D38[self->m_CurrentAnimation].count;
+            if (self->m_iCurrentFrame == cnt - 1) {
+                self->m_CurrentAnimation = tr->anim;
+                self->m_CurrentPlayType = tr->mode;
+                if (self->m_CurrentPlayType == 1) {
+                    self->m_iCurrentFrame = D_00445D38[self->m_CurrentAnimation].count - 1;
                 } else {
-                    self->frame = 0;
+                    self->m_iCurrentFrame = 0;
                 }
             } else {
-                self->frame = cCrowdAnim2D_advanceFrame(self, self->frame, cnt, dir);
+                self->m_iCurrentFrame = cCrowdAnim2D_advanceFrame(self, self->m_iCurrentFrame, cnt, dir);
             }
             break;
         }
         case 2:
-            self->anim = tr->anim;
-            self->dir = tr->mode;
-            self->frame = cCrowdAnim2D_advanceFrame(self, self->frame, D_00445D38[self->anim].count, &self->dir);
+            self->m_CurrentAnimation = tr->anim;
+            self->m_CurrentPlayType = tr->mode;
+            self->m_iCurrentFrame = cCrowdAnim2D_advanceFrame(self, self->m_iCurrentFrame, D_00445D38[self->m_CurrentAnimation].count, &self->m_CurrentPlayType);
             break;
         }
     }
-    self->tex = D_00445D38[self->anim].frames[self->frame];
+    self->m_iCurrentFrameTexID = D_00445D38[self->m_CurrentAnimation].frames[self->m_iCurrentFrame];
 }
 #endif
 

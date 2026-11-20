@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/circularbuffer.h"
 #include "render/ps2graphicsman.h"
 #include "main/ssxapp.h"
 
@@ -254,10 +255,10 @@ void cCircularBuffer_Reset(void*);
  *
  * @return @p self
  */
-extern "C" void* cCircularBuffer_cCircularBuffer(void* self)
+extern "C" void* cCircularBuffer_cCircularBuffer(cCircularBuffer* self)
 {
     cCircularBuffer_Reset(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -284,7 +285,7 @@ INCLUDE_ASM("scripter/videngine", cCircularBuffer_IncBufferIndex);
  * @param index  the index (0-4)
  * @return the next index
  */
-extern "C" int cCircularBuffer_IncBufferIndex(void* self, int index)
+extern "C" int cCircularBuffer_IncBufferIndex(cCircularBuffer* self, int index)
 {
     if (index == 4) {
         return 0;
@@ -297,7 +298,7 @@ extern "C" int cCircularBuffer_IncBufferIndex(void* self, int index)
 INCLUDE_ASM("scripter/videngine", cCircularBuffer_AddToTail);
 #ifdef SKIP_ASM
 int cCircularBuffer_IsFull(void*);
-extern "C" int cCircularBuffer_IncBufferIndex(void* self, int a1);
+extern "C" int cCircularBuffer_IncBufferIndex(cCircularBuffer* self, int a1);
 
 struct sVidCmd3C80 {
     int v[7];
@@ -310,13 +311,13 @@ struct sVidCmd3C80 {
  * @param cmd  the entry to copy
  * @return 1, or 0 when the buffer was full
  */
-extern "C" int cCircularBuffer_AddToTail(void* self, sVidCmd3C80* cmd)
+extern "C" int cCircularBuffer_AddToTail(cCircularBuffer* self, sVidCmd3C80* cmd)
 {
     if (cCircularBuffer_IsFull(self) != 0) return 0;
-    ((sVidCmd3C80*)self)[*(int*)((char*)self + 0x90)] = *cmd;
-    *(int*)((char*)self + 0x90) = cCircularBuffer_IncBufferIndex(self, *(int*)((char*)self + 0x90));
-    if (*(int*)((char*)self + 0x90) == *(int*)((char*)self + 0x8C)) {
-        *(int*)((char*)self + 0x94) = 1;
+    ((sVidCmd3C80*)self)[self->mTailIndex] = *cmd;
+    self->mTailIndex = cCircularBuffer_IncBufferIndex(self, self->mTailIndex);
+    if (self->mTailIndex == self->mHeadIndex) {
+        self->mIsFull = 1;
     }
     return 1;
 }
@@ -333,13 +334,13 @@ int cCircularBuffer_IsFull(void*);
  *
  * @return the entry count (0-5)
  */
-extern "C" int cCircularBuffer_GetNumEntries(void* self)
+extern "C" int cCircularBuffer_GetNumEntries(cCircularBuffer* self)
 {
     int n;
     if (cCircularBuffer_IsFull(self) != 0) {
         return 5;
     }
-    n = *(int*)((char*)self + 0x90) - *(int*)((char*)self + 0x8c);
+    n = self->mTailIndex - self->mHeadIndex;
     if (n < 0) {
         n += 5;
     }
@@ -357,9 +358,9 @@ INCLUDE_ASM("scripter/videngine", cCircularBuffer_operatorIndex);
  * @param index  the position from the head
  * @return the entry
  */
-extern "C" void* cCircularBuffer_operatorIndex(void* self, int index)
+extern "C" void* cCircularBuffer_operatorIndex(cCircularBuffer* self, int index)
 {
-    return (char*)self + ((*(int*)((char*)self + 0x8c) + index) % 5) * 0x1c;
+    return (char*)self + ((self->mHeadIndex + index) % 5) * 0x1c;
 }
 #endif
 
@@ -372,11 +373,11 @@ INCLUDE_ASM("scripter/videngine", cCircularBuffer_IsEmpty);
  *
  * @return 1 when empty, else 0
  */
-extern "C" int cCircularBuffer_IsEmpty(void* self)
+extern "C" int cCircularBuffer_IsEmpty(cCircularBuffer* self)
 {
     int isEmpty = 0;
-    if (*(int*)((char*)self + 0x90) == *(int*)((char*)self + 0x8c)) {
-        isEmpty = *(int*)((char*)self + 0x94) == 0;
+    if (self->mTailIndex == self->mHeadIndex) {
+        isEmpty = self->mIsFull == 0;
     }
     return isEmpty;
 }
@@ -385,8 +386,8 @@ extern "C" int cCircularBuffer_IsEmpty(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/videngine", cCircularBuffer_RemoveFromHead);
 #ifdef SKIP_ASM
-extern "C" int cCircularBuffer_IsEmpty(void* self);
-extern "C" int cCircularBuffer_IncBufferIndex(void* self, int a1);
+extern "C" int cCircularBuffer_IsEmpty(cCircularBuffer* self);
+extern "C" int cCircularBuffer_IncBufferIndex(cCircularBuffer* self, int a1);
 
 struct sVidEntry1C { int v[7]; };
 
@@ -397,16 +398,16 @@ struct sVidEntry1C { int v[7]; };
  * @param out  receives the 0x1C-byte entry, or 0
  * @return 1, or 0 when the buffer was empty
  */
-extern "C" int cCircularBuffer_RemoveFromHead(void* self, sVidEntry1C* out)
+extern "C" int cCircularBuffer_RemoveFromHead(cCircularBuffer* self, sVidEntry1C* out)
 {
     if (cCircularBuffer_IsEmpty(self) != 0) {
         return 0;
     }
-    *(int*)((char*)self + 0x94) = 0;
+    self->mIsFull = 0;
     if (out != 0) {
-        *out = ((sVidEntry1C*)self)[*(int*)((char*)self + 0x8c)];
+        *out = ((sVidEntry1C*)self)[self->mHeadIndex];
     }
-    *(int*)((char*)self + 0x8c) = cCircularBuffer_IncBufferIndex(self, *(int*)((char*)self + 0x8c));
+    self->mHeadIndex = cCircularBuffer_IncBufferIndex(self, self->mHeadIndex);
     return 1;
 }
 #endif

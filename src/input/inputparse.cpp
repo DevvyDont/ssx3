@@ -1,4 +1,5 @@
 #include "common.h"
+#include "intersect/aifwddiff.h"
 #include "input/inputparse.h"
 
 //100%
@@ -3607,13 +3608,13 @@ void operator_delete(int* ptr);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void cAIFwdDiffCache__cAIFwdDiffCache(void* self, int flags)
+extern "C" void cAIFwdDiffCache__cAIFwdDiffCache(cAIFwdDiffCache* self, int flags)
 {
     if (*(void**)self != 0) {
         cMemMan_free(*(void**)self);
     }
-    if (*(void**)((char*)self + 0x8) != 0) {
-        cMemMan_free(*(void**)((char*)self + 0x8));
+    if (self->mPatchHash != 0) {
+        cMemMan_free(self->mPatchHash);
     }
     if (flags & 1) {
         operator_delete((int*)self);

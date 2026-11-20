@@ -1,4 +1,6 @@
 #include "common.h"
+#include "be/beuserawards.h"
+#include "be/berewarddb.h"
 #include "be/beintreward.h"
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -2335,7 +2337,7 @@ extern void* gNextEarningsLimit;
 extern int gNextCollectiblesLimit[];
 extern int gNextBigChallengesLimit[];
 extern void* cBELibrary_userAwards[];
-extern "C" void cBEUserAwards_clear(void* self);
+extern "C" void cBEUserAwards_clear(cBEUserAwards* self);
 
 /**
  * Clears the awards log and caches the next earnings, collectibles and big-challenge targets.
@@ -2346,7 +2348,7 @@ extern "C" void cBEUserAwards_clear(void* self);
  */
 extern "C" void cBERewardInterface_clearUserAwards(cBERewardInterface* self)
 {
-    cBEUserAwards_clear(cBELibrary_userAwards);
+    cBEUserAwards_clear((cBEUserAwards*)cBELibrary_userAwards);
     int charID = cBELibrary_getCharacterID(cBELibrary_getRiderIndex(0));
     gNextEarningsLimit = cBERewardInterface_calculateNextEarningsLevel(self, 0, charID);
     for (int i = 0; i < 3; i++)
@@ -3282,7 +3284,7 @@ void* cBERewardInterface_getDB(cBERewardInterface* self)
 //100%
 INCLUDE_ASM("be/beintreward", cBEUserAwards_cBEUserAwards);
 #ifdef SKIP_ASM
-extern "C" void cBEUserAwards_clear(void* self);
+extern "C" void cBEUserAwards_clear(cBEUserAwards* self);
 
 struct sRewardStrings_0015A488 {
     char pad_0x000[0x174];
@@ -3297,20 +3299,19 @@ struct sRewardStrings_0015A488 {
  *
  * @return @p self
  */
-extern "C" void* cBEUserAwards_cBEUserAwards(sRewardStrings_0015A488* self)
+extern "C" void* cBEUserAwards_cBEUserAwards(cBEUserAwards* self)
 {
     for (int i = 0; i < 10; i++)
-        self->mStrings[i] = 0;
-    char* base = (char*)self;
-    self->mStrings[0] = base + 0x146;
-    self->mStrings[2] = base + 0x170;
-    self->mStrings[3] = base + 0x147;
-    self->mStrings[4] = base + 0x14D;
-    self->mStrings[5] = base + 0x15C;
-    self->mStrings[7] = base + 0x169;
-    self->mStrings[8] = base + 0x16D;
+        ((char**)&self->mpAwardBits[0])[i] = 0;
+    ((char**)&self->mpAwardBits[0])[0] = ((char*)self) + 0x146;
+    ((char**)&self->mpAwardBits[0])[2] = ((char*)self) + 0x170;
+    ((char**)&self->mpAwardBits[0])[3] = ((char*)self) + 0x147;
+    ((char**)&self->mpAwardBits[0])[4] = ((char*)self) + 0x14D;
+    ((char**)&self->mpAwardBits[0])[5] = ((char*)self) + 0x15C;
+    ((char**)&self->mpAwardBits[0])[7] = ((char*)self) + 0x169;
+    ((char**)&self->mpAwardBits[0])[8] = ((char*)self) + 0x16D;
     cBEUserAwards_clear(self);
-    return self;
+    return ((sRewardStrings_0015A488*)self);
 }
 #endif
 
@@ -3322,7 +3323,7 @@ extern "C" void MEM_fill(void* dst, int c, int n);
 /**
  * Clears the awards log: zeroes its first 0x174 bytes and sets the short at +0x4 to -1.
  */
-extern "C" void cBEUserAwards_clear(void* self)
+extern "C" void cBEUserAwards_clear(cBEUserAwards* self)
 {
     MEM_fill(self, 0, 372);
     *(short*)((char*)self + 0x4) = -1;
@@ -3341,7 +3342,7 @@ INCLUDE_ASM("be/beintreward", cBEUserAwards_coutBits);
  * @param bits  the bit array (On Tour pBitsArray)
  * @return the number of set bits
  */
-extern "C" int cBEUserAwards_coutBits(void* self, int n, unsigned char* bits)
+extern "C" int cBEUserAwards_coutBits(cBEUserAwards* self, int n, unsigned char* bits)
 {
     int i = 0;
     int bi = 0;
@@ -3370,7 +3371,7 @@ INCLUDE_ASM("be/beintreward", cBEUserAwards_setBit);
  * @param bit  bit index (On Tour bitIndex)
  * @param bits  the bit array (On Tour pBitsArray)
  */
-extern "C" void cBEUserAwards_setBit(void* self, int bit, unsigned char* bits)
+extern "C" void cBEUserAwards_setBit(cBEUserAwards* self, int bit, unsigned char* bits)
 {
     int shift = bit % 8;
     bits[(unsigned int)bit / 8] |= 1 << shift;
@@ -3389,7 +3390,7 @@ INCLUDE_ASM("be/beintreward", cBEUserAwards_isBitSet);
  * @param bits  the bit array (On Tour pBitsArray)
  * @return 1 when set, else 0
  */
-extern "C" int cBEUserAwards_isBitSet(void* self, int bit, unsigned char* bits)
+extern "C" int cBEUserAwards_isBitSet(cBEUserAwards* self, int bit, unsigned char* bits)
 {
     int shift = bit % 8;
     return (bits[(unsigned int)bit / 8] >> shift) & 1;
@@ -3439,7 +3440,7 @@ extern "C" void cBEUserAwards_setAward(sReward_0015A628* self, int row, int col,
     case 5:
     case 6:
     case 7:
-        cBEUserAwards_setBit(self, value, self->mBits[col]);
+        cBEUserAwards_setBit((cBEUserAwards*)self, value, self->mBits[col]);
         self->mRows[row].counts[col]++;
         break;
     case 8:
@@ -3500,7 +3501,7 @@ INCLUDE_ASM("be/beintreward", cBEUserAwards_getNumAwards);
  * @param column  the reward type (On Tour rewardType)
  * @return the count
  */
-extern "C" signed char cBEUserAwards_getNumAwards(void* self, int row, int column)
+extern "C" signed char cBEUserAwards_getNumAwards(cBEUserAwards* self, int row, int column)
 {
     return *(signed char*)((char*)self + (row * 0xa + column) + 0x6);
 }
@@ -3533,28 +3534,28 @@ INCLUDE_ASM("be/beintreward", cBERewardDB_cBERewardDB);
  *
  * @return @p self
  */
-extern "C" void* cBERewardDB_cBERewardDB(void* self)
+extern "C" void* cBERewardDB_cBERewardDB(cBERewardDB* self)
 {
-    *(int*)((char*)self + 0x4) = 0;
-    *(int*)((char*)self + 0x0) = -1;
-    *(int*)((char*)self + 0x8) = 0;
-    *(int*)((char*)self + 0xC) = 0;
-    *(int*)((char*)self + 0x10) = 0;
-    *(int*)((char*)self + 0x14) = 0;
-    *(int*)((char*)self + 0x18) = 0;
-    *(int*)((char*)self + 0x1C) = 0;
-    *(int*)((char*)self + 0x20) = 0;
-    *(int*)((char*)self + 0x24) = 0;
-    *(int*)((char*)self + 0x2C) = 0;
-    *(int*)((char*)self + 0x30) = 0;
-    *(int*)((char*)self + 0x34) = 0;
-    *(int*)((char*)self + 0x38) = 0;
-    *(int*)((char*)self + 0x3C) = 0;
-    *(int*)((char*)self + 0x40) = 0;
-    *(int*)((char*)self + 0x44) = 0;
-    *(int*)((char*)self + 0x48) = 0;
-    *(int*)((char*)self + 0x4C) = 0;
-    return self;
+    self->mpRewardsFile = 0;
+    self->mRewardFileIndex = -1;
+    self->mpTrophies = 0;
+    self->mpMedals = 0;
+    self->mpPeakPasses = 0;
+    self->mpPosters = 0;
+    self->mpTradingCards = 0;
+    self->mpConceptArts = 0;
+    self->mpToys = 0;
+    self->mpVideos = 0;
+    self->mpStrings = 0;
+    self->mNumTrophies = 0;
+    self->mNumMedals = 0;
+    self->mNumPeakPasses = 0;
+    self->mNumPosters = 0;
+    self->mNumTradingCards = 0;
+    self->mNumConceptArts = 0;
+    self->mNumToys = 0;
+    self->mNumVideos = 0;
+    return ((void*)self);
 }
 #endif
 

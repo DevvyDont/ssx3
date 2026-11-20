@@ -1,4 +1,5 @@
 #include "common.h"
+#include "path/pathsys.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
 
@@ -253,14 +254,14 @@ INCLUDE_ASM("path/pathsys", cPathSys_getStartpointByIndex);
  * @param index  the startpoint index
  * @return the startpoint, or 0
  */
-extern "C" int cPathSys_getStartpointByIndex(void *list, int index) {
+extern "C" int cPathSys_getStartpointByIndex(cPathSys* list, int index) {
     int temp_2;
 
-    temp_2 = (*(int *)((char*)(list) + (0)));
+    temp_2 = (list->NumStartpoints);
     if ((temp_2 <= 0) || (index >= temp_2) || (index < 0)) {
         return 0;
     }
-    return (*(int *)((char*)(list) + (4))) + (index * 40);
+    return ((int)list->Startpoints) + (index * 40);
 }
 #endif
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/appman.h"
 
 struct cExecutionMan {
     int field_0x0;
@@ -59,8 +60,8 @@ INCLUDE_ASM("bx/execman", cAppMan_isLoading);
  * @param appMan  the application manager
  * @return 1 while a module is loading, else 0
  */
-extern "C" int cAppMan_isLoading(void *appMan) {
-    return (*(int *)((char*)(appMan) + (4))) != 0;
+extern "C" int cAppMan_isLoading(cAppMan* appMan) {
+    return ((int)appMan->LoadingModule) != 0;
 }
 #endif
 //100%
@@ -74,8 +75,8 @@ INCLUDE_ASM("bx/execman", cAppMan_setGameRate);
  * @param appMan  the application manager
  * @param fparg0  the new game rate
  */
-extern "C" void cAppMan_setGameRate(void *appMan, float fparg0) {
-    (*(float *)((char*)(appMan) + (0x24))) = fparg0;
+extern "C" void cAppMan_setGameRate(cAppMan* appMan, float fparg0) {
+    (appMan->GameRate) = fparg0;
 }
 #endif
 //100%
@@ -89,8 +90,8 @@ INCLUDE_ASM("bx/execman", cAppMan_getTimerHz);
  * @param appMan  the application manager
  * @return the timer rate in Hz
  */
-extern "C" int cAppMan_getTimerHz(void *appMan) {
-    return (*(int *)((char*)(appMan) + (0x10)));
+extern "C" int cAppMan_getTimerHz(cAppMan* appMan) {
+    return (appMan->TimerHz);
 }
 #endif
 //100%
@@ -104,8 +105,8 @@ INCLUDE_ASM("bx/execman", cAppMan_getTimerPeriod);
  * @param appMan  the application manager
  * @return the timer period
  */
-extern "C" float cAppMan_getTimerPeriod(void *appMan) {
-    return (*(float *)((char*)(appMan) + (0x14)));
+extern "C" float cAppMan_getTimerPeriod(cAppMan* appMan) {
+    return (appMan->TimerPeriod);
 }
 #endif
 //100%
@@ -119,8 +120,8 @@ INCLUDE_ASM("bx/execman", cAppMan_getGameRate);
  * @param appMan  the application manager
  * @return the game rate
  */
-extern "C" float cAppMan_getGameRate(void *appMan) {
-    return (*(float *)((char*)(appMan) + (0x24)));
+extern "C" float cAppMan_getGameRate(cAppMan* appMan) {
+    return (appMan->GameRate);
 }
 #endif
 //100%
@@ -134,8 +135,8 @@ INCLUDE_ASM("bx/execman", cAppMan_getFrameRate);
  * @param appMan  the application manager
  * @return the frame rate
  */
-extern "C" float cAppMan_getFrameRate(void *appMan) {
-    return (*(float *)((char*)(appMan) + (0x2C)));
+extern "C" float cAppMan_getFrameRate(cAppMan* appMan) {
+    return (appMan->FrameRate);
 }
 #endif
 //100%
@@ -149,8 +150,8 @@ INCLUDE_ASM("bx/execman", cAppMan_getTick);
  * @param appMan  the application manager
  * @return the tick count
  */
-extern "C" int cAppMan_getTick(void *appMan) {
-    return (*(int *)((char*)(appMan) + (0x1C)));
+extern "C" int cAppMan_getTick(cAppMan* appMan) {
+    return (appMan->Tick);
 }
 #endif
 //100%
@@ -164,8 +165,8 @@ INCLUDE_ASM("bx/execman", cAppMan_getTimerTick);
  * @param appMan  the application manager
  * @return the timer tick count
  */
-extern "C" int cAppMan_getTimerTick(void *appMan) {
-    return (*(int *)((char*)(appMan) + (0x18)));
+extern "C" int cAppMan_getTimerTick(cAppMan* appMan) {
+    return (appMan->TimerTick);
 }
 #endif
 //100%
@@ -179,8 +180,8 @@ INCLUDE_ASM("bx/execman", cAppMan_getAIUpdatesPerRender);
  * @param appMan  the application manager
  * @return the AI updates per render
  */
-extern "C" int cAppMan_getAIUpdatesPerRender(void *appMan) {
-    return (*(int *)((char*)(appMan) + (0xC)));
+extern "C" int cAppMan_getAIUpdatesPerRender(cAppMan* appMan) {
+    return (appMan->m_AIUpdatesPerRender);
 }
 #endif
 //100%
@@ -194,8 +195,8 @@ INCLUDE_ASM("bx/execman", cAppMan_setAIUpdatesPerRender);
  * @param appMan  the application manager
  * @param value  the new count
  */
-extern "C" void cAppMan_setAIUpdatesPerRender(void *appMan, int value) {
-    (*(int *)((char*)(appMan) + (0xC))) = value;
+extern "C" void cAppMan_setAIUpdatesPerRender(cAppMan* appMan, int value) {
+    (appMan->m_AIUpdatesPerRender) = value;
 }
 #endif
 //100%
@@ -239,8 +240,8 @@ public:
  *
  * Nothing in the C calls it.
  */
-extern "C" void cAppMan_wakeup(cExecutionMan *self) {
-    ((cExecObj *)self->field_0x8)->v4();
+extern "C" void cAppMan_wakeup(cAppMan* self) {
+    ((cExecObj *)self->ExecutionMan)->v4();
 }
 #endif
 //100%
@@ -251,8 +252,8 @@ INCLUDE_ASM("bx/execman", cAppMan_wait);
  *
  * cAppMan_mainLoop calls the same entry when a frame has nothing to render. Nothing in the C calls this copy.
  */
-extern "C" void cAppMan_wait(cExecutionMan *self) {
-    ((cExecObj *)self->field_0x8)->v3();
+extern "C" void cAppMan_wait(cAppMan* self) {
+    ((cExecObj *)self->ExecutionMan)->v3();
 }
 #endif
 //100%
@@ -266,8 +267,8 @@ INCLUDE_ASM("bx/execman", cAppMan_getCurrentThreadId);
  *
  * @return the thread id, or 0xFFFFFFFF
  */
-extern "C" unsigned int cAppMan_getCurrentThreadId(cExecutionMan *self) {
-    cExecObj *obj = (cExecObj *)self->field_0x8;
+extern "C" unsigned int cAppMan_getCurrentThreadId(cAppMan* self) {
+    cExecObj *obj = (cExecObj *)self->ExecutionMan;
     if (obj != 0) {
         return obj->v5();
     }
@@ -282,8 +283,8 @@ INCLUDE_ASM("bx/execman", cAppMan_prepause);
  *
  * Nothing in the C calls it.
  */
-extern "C" void cAppMan_prepause(cExecutionMan *self) {
-    ((cExecObj *)self->field_0x8)->v10();
+extern "C" void cAppMan_prepause(cAppMan* self) {
+    ((cExecObj *)self->ExecutionMan)->v10();
 }
 #endif
 //100%
@@ -294,8 +295,8 @@ INCLUDE_ASM("bx/execman", cAppMan_postpause);
  *
  * Nothing in the C calls it.
  */
-extern "C" void cAppMan_postpause(cExecutionMan *self) {
-    ((cExecObj *)self->field_0x8)->v11();
+extern "C" void cAppMan_postpause(cAppMan* self) {
+    ((cExecObj *)self->ExecutionMan)->v11();
 }
 #endif
 //100%
@@ -340,8 +341,8 @@ INCLUDE_ASM("bx/execman", cAppMan_lockThirtyFps);
  * @param appMan  the application manager
  * @param value  non-zero to lock to 30 fps
  */
-extern "C" void cAppMan_lockThirtyFps(void *appMan, int value) {
-    (*(int *)((char*)(appMan) + (0x34))) = value;
+extern "C" void cAppMan_lockThirtyFps(cAppMan* appMan, int value) {
+    (appMan->mLock30Fps) = value;
 }
 #endif
 

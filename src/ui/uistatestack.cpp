@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uistatestack.h"
 #include "ui/uithing.h"
 
 //100%
@@ -26,7 +27,7 @@ public:
  *
  * @param state  the state to add (On Tour pPushState)
  */
-extern "C" void cUIStateStack_pushExplicit(void* self, cUIStateStack_pushExplicit_cState* state)
+extern "C" void cUIStateStack_pushExplicit(cUIStateStack* self, cUIStateStack_pushExplicit_cState* state)
 {
     *(int*)((char*)state + 0x1C) |= 0x60;
     state->v04();
@@ -69,20 +70,20 @@ static inline void cUIStateStack_pushPopup_cover(cUIStateStack_pushPopup_sState*
  *
  * @param st  the popup state to push (On Tour pPushState)
  */
-extern "C" void cUIStateStack_pushPopup(cList* self, cUIStateStack_pushPopup_sState* st)
+extern "C" void cUIStateStack_pushPopup(cUIStateStack* self, cUIStateStack_pushPopup_sState* st)
 {
     cUIStateStack_pushPopup_sState* top = st->parent;
     if (top != 0) {
         cUIStateStack_pushPopup_cover(top);
     } else {
-        top = (cUIStateStack_pushPopup_sState*)cList_first(self);
+        top = (cUIStateStack_pushPopup_sState*)cList_first(((cList*)self));
         if (top != 0) {
             cUIStateStack_pushPopup_cover(top);
         }
     }
     st->b0 = 1;
     st->b5 = 1;
-    cList_addToFront(self, (cListNode*)st);
+    cList_addToFront(((cList*)self), (cListNode*)st);
 }
 #endif
 
@@ -107,7 +108,7 @@ struct cUIStateStack_sState {
 
 static inline int cUIStateStack_stateId(cUIStateStack_sState* s) { return s->id; }
 
-extern "C" void* cUIStateStack_getCurrentState(void* self);
+extern "C" void* cUIStateStack_getCurrentState(cUIStateStack* self);
 
 /**
  * Pushes a state onto the front of the stack, choosing whether it starts enabled and whether the current one
@@ -121,7 +122,7 @@ extern "C" void* cUIStateStack_getCurrentState(void* self);
  * @param bEnable          whether the pushed state starts enabled
  * @param bDestroyCurrent  stored as the current state's mPendingDelete when it is in mode 5
  */
-extern "C" void cUIStateStack_pushSpecial(cList* self, cUIStateStack_sState* st, int bEnable, int bDestroyCurrent)
+extern "C" void cUIStateStack_pushSpecial(cUIStateStack* self, cUIStateStack_sState* st, int bEnable, int bDestroyCurrent)
 {
     cUIStateStack_sState* cur = (cUIStateStack_sState*)cUIStateStack_getCurrentState(self);
     if (cur != 0) {
@@ -133,7 +134,7 @@ extern "C" void cUIStateStack_pushSpecial(cList* self, cUIStateStack_sState* st,
         bEnable = 1;
         st->id = 2;
     }
-    cList_addToFront(self, (cListNode*)st);
+    cList_addToFront(((cList*)self), (cListNode*)st);
     st->b5 = bEnable;
 }
 #endif
@@ -170,10 +171,10 @@ static inline int cUIStateStack_push_stateId(cUIStateStack_push_sState* s) { ret
  *
  * @param st  the state to push (On Tour pPushState)
  */
-extern "C" void cUIStateStack_push(cList* self, cUIStateStack_push_sState* st)
+extern "C" void cUIStateStack_push(cUIStateStack* self, cUIStateStack_push_sState* st)
 {
     int covered = 0;
-    cUIStateStack_push_sState* top = (cUIStateStack_push_sState*)cList_first(self);
+    cUIStateStack_push_sState* top = (cUIStateStack_push_sState*)cList_first(((cList*)self));
     if (top != 0) {
         int attrBits = *(int*)((char*)top + 0x1C);
         if (((attrBits >> 5) & 1) && ((attrBits >> 6) & 1) == 0 && cUIStateStack_push_stateId(top) < 6) {
@@ -189,7 +190,7 @@ extern "C" void cUIStateStack_push(cList* self, cUIStateStack_push_sState* st)
         st->id = 2;
         st->b5 = 1;
     }
-    cList_addToFront(self, (cListNode*)st);
+    cList_addToFront(((cList*)self), (cListNode*)st);
 }
 #endif
 
@@ -235,11 +236,11 @@ static inline int cUIStateStack_pushCheck_stateId(cUIStateStack_pushCheck_sState
  *
  * @param st  the state to push (On Tour pPushState)
  */
-extern "C" void cUIStateStack_pushCheck(cList* self, cUIStateStack_pushCheck_sState* st)
+extern "C" void cUIStateStack_pushCheck(cUIStateStack* self, cUIStateStack_pushCheck_sState* st)
 {
     int covered = 0;
     int skipped = 0;
-    cUIStateStack_pushCheck_sState* top = (cUIStateStack_pushCheck_sState*)cList_first(self);
+    cUIStateStack_pushCheck_sState* top = (cUIStateStack_pushCheck_sState*)cList_first(((cList*)self));
     if (top != 0) {
         while (top->b0) {
             ASSERT_F4C0(top != 0);
@@ -268,7 +269,7 @@ extern "C" void cUIStateStack_pushCheck(cList* self, cUIStateStack_pushCheck_sSt
         st->id = 2;
         st->b5 = 1;
     }
-    cList_addToFront(self, (cListNode*)st);
+    cList_addToFront(((cList*)self), (cListNode*)st);
 }
 #endif
 
@@ -303,9 +304,9 @@ static inline void cUIStateStack_popToFloor_setB7(cUIStateStack_popToFloor_node*
  * @param list  the state stack (its main list)
  * @return the first non-popup or pop-floor state, or null
  */
-extern "C" cUIStateStack_popToFloor_node* cUIStateStack_popToFloor(cList* list)
+extern "C" cUIStateStack_popToFloor_node* cUIStateStack_popToFloor(cUIStateStack* list)
 {
-    cUIStateStack_popToFloor_node* n = (cUIStateStack_popToFloor_node*)cList_first(list);
+    cUIStateStack_popToFloor_node* n = (cUIStateStack_popToFloor_node*)cList_first(((cList*)list));
     if (n != 0) {
         while (n->b0) {
             if ((*(int*)((char*)n + 0x1C) >> 15) & 1) {
@@ -351,9 +352,9 @@ static inline void cUIStateStack_popToState_setB7(cUIStateStack_popToState_node*
  * @param list  the state stack (its main list)
  * @return the first non-popup state, or null
  */
-extern "C" cUIStateStack_popToState_node* cUIStateStack_popToState(cList* list)
+extern "C" cUIStateStack_popToState_node* cUIStateStack_popToState(cUIStateStack* list)
 {
-    cUIStateStack_popToState_node* n = (cUIStateStack_popToState_node*)cList_first(list);
+    cUIStateStack_popToState_node* n = (cUIStateStack_popToState_node*)cList_first(((cList*)list));
     if (n != 0) {
         if (n->b0) {
             do {
@@ -398,9 +399,9 @@ static inline void cUIStateStack_popToStateInclusive_setB7(cUIStateStack_popToSt
  * @param list  the state stack (its main list)
  * @return the next state down, or null
  */
-extern "C" cUIStateStack_popToStateInclusive_node* cUIStateStack_popToStateInclusive(cList* list)
+extern "C" cUIStateStack_popToStateInclusive_node* cUIStateStack_popToStateInclusive(cUIStateStack* list)
 {
-    cUIStateStack_popToStateInclusive_node* n = (cUIStateStack_popToStateInclusive_node*)cList_first(list);
+    cUIStateStack_popToStateInclusive_node* n = (cUIStateStack_popToStateInclusive_node*)cList_first(((cList*)list));
     if (n != 0) {
         if (n->b0) {
             do {
@@ -453,7 +454,7 @@ static inline void Set39F7B8(sUIState39F7B8* s, int on)
  * @param on  1 to show, 0 to hide
  * @param last  nonzero to include the state without a parent
  */
-extern "C" void cUIStateStack_setVisibleToChain(void* self, sUIState39F7B8* state, int on, int last)
+extern "C" void cUIStateStack_setVisibleToChain(cUIStateStack* self, sUIState39F7B8* state, int on, int last)
 {
     if (state == 0) {
         return;
@@ -502,9 +503,9 @@ static inline void cUIStateStack_purgeNormalStates_setB5(cUIStateStack_purgeNorm
  *
  * @param list  the state list
  */
-extern "C" void cUIStateStack_purgeNormalStates(cList* list)
+extern "C" void cUIStateStack_purgeNormalStates(cUIStateStack* list)
 {
-    cUIStateStack_purgeNormalStates_node* n = (cUIStateStack_purgeNormalStates_node*)cList_first(list);
+    cUIStateStack_purgeNormalStates_node* n = (cUIStateStack_purgeNormalStates_node*)cList_first(((cList*)list));
     if (n != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
             cUIStateStack_purgeNormalStates_node* next = n->next;
@@ -553,9 +554,9 @@ static inline void cUIStateStack_destroyStates_purge(cList* list)
  * Each state without the explicit bit (6) gets virtual slot 5, then is deleted through slot 1 with 3. cUIStateStack__cUIStateStack
  * calls it first.
  */
-extern "C" void cUIStateStack_destroyStates(cList* self)
+extern "C" void cUIStateStack_destroyStates(cUIStateStack* self)
 {
-    cUIStateStack_destroyStates_purge(self);
+    cUIStateStack_destroyStates_purge(((cList*)self));
     cUIStateStack_destroyStates_purge((cList*)((char*)self + 0x1C));
 }
 #endif
@@ -572,7 +573,7 @@ int cListNode_isSentinel(cListNode*);
  * @param id  the state's hash name (mHashName, On Tour hashName)
  * @return the first state with that hash name, or 0 when there is none
  */
-extern "C" void* cUIStateStack_findState(void* self, int id)
+extern "C" void* cUIStateStack_findState(cUIStateStack* self, int id)
 {
     char* n = (char*)cList_first((cList*)self);
     if (n != 0) {
@@ -609,7 +610,7 @@ int cListNode_isSentinel(cListNode*);
  *
  * @return that state, or 0 when no state on the stack is enabled
  */
-extern "C" void* cUIStateStack_getCurrentState(void* self)
+extern "C" void* cUIStateStack_getCurrentState(cUIStateStack* self)
 {
     void* n = cList_first((cList*)self);
     if (n != 0) {
@@ -637,7 +638,7 @@ INCLUDE_ASM("ui/uistatestack", cUIStateStack_getTopState);
  *
  * @return the top state, or null
  */
-extern "C" void* cUIStateStack_getTopState(void* self)
+extern "C" void* cUIStateStack_getTopState(cUIStateStack* self)
 {
     return cList_first((cList*)self);
 }

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uitexturebank.h"
 #include "ui/uithing.h"
 #include "ui/uilistbox.h"
 #include "ui/uiicon.h"
@@ -66,7 +67,7 @@ INCLUDE_ASM("ui/uiengine", cUIEngine__cUIEngine);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int*);
-extern "C" void cUITextureBank__cUITextureBank(void* self, int flags);
+extern "C" void cUITextureBank__cUITextureBank(cUITextureBank* self, int flags);
 extern "C" void cUIStateStack__cUIStateStack(void* self, int flags);
 
 class cUIEngOwnA {
@@ -115,7 +116,7 @@ extern "C" void cUIEngine__cUIEngine(void* self, int flags)
     }
     delete fields->b;
     delete fields->c;
-    cUITextureBank__cUITextureBank((char*)self + 0x58, 2);
+    cUITextureBank__cUITextureBank((cUITextureBank*)((char*)self + 0x58), 2);
     cUIStateStack__cUIStateStack((char*)self + 0x18, 2);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -129,7 +130,7 @@ INCLUDE_ASM("ui/uiengine", cUIEngine_loadFile);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* FILE_load(const char* name, int flags);
 void cUIAnimationBank_setData(void* self, int val);
-extern "C" void cUITextureBank_setData(void* bank, int id, void* data);
+extern "C" void cUITextureBank_setData(cUITextureBank* bank, int id, void* data);
 extern const char str_pct_s_lui[];
 
 /**
@@ -150,7 +151,7 @@ extern "C" int cUIEngine_loadFile(void* self, int id)
     // PORT: the font setter stores the data pointer in an int.
     cUIAnimationBank_setData((char*)self + 0x50, (int)(file + *(int*)(file + 0x8)));
     file = *(char**)((char*)self + 0x4);
-    cUITextureBank_setData((char*)self + 0x58, id, file + *(int*)(file + 0x10));
+    cUITextureBank_setData((cUITextureBank*)((char*)self + 0x58), id, file + *(int*)(file + 0x10));
     return 1;
 }
 #endif
@@ -406,19 +407,19 @@ extern void* GrMan_uiengine __asm__("GrMan");
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void cUITextureBank__cUITextureBank(void* self, int flags)
+extern "C" void cUITextureBank__cUITextureBank(cUITextureBank* self, int flags)
 {
     int i;
-    for (i = 0; i < *(int*)((char*)self + 0x8); i++) {
+    for (i = 0; i < self->mNumTextureIDs; i++) {
         char* obj = (char*)GrMan_uiengine;
         sVEntry398078* vt = *(sVEntry398078**)(obj + 0x10D8);
-        vt[50].fn(obj + vt[50].delta, (*(int**)((char*)self + 0x4))[i]);
+        vt[50].fn(obj + vt[50].delta, (self->mpTexturesIDs)[i]);
     }
-    if (*(void**)((char*)self + 0x4) != 0) {
-        cMemMan_free(*(void**)((char*)self + 0x4));
+    if (self->mpTexturesIDs != 0) {
+        cMemMan_free(self->mpTexturesIDs);
     }
-    if (*(void**)((char*)self + 0xC) != 0) {
-        cMemMan_free(*(void**)((char*)self + 0xC));
+    if (self->mpElements != 0) {
+        cMemMan_free(self->mpElements);
     }
     if (flags & 1) {
         operator_delete((int*)self);
@@ -514,7 +515,7 @@ void* operator new[](unsigned int size, const char* tag, unsigned int flags, int
  * @param id  base name of the texture sheet (char*, passed as int; On Tour pShapeName)
  * @param vdata  the UI file's texture-element block (On Tour pData)
  */
-extern "C" void cUITextureBank_setData(void* vbank, int id, void* vdata)
+extern "C" void cUITextureBank_setData(cUITextureBank* vbank, int id, void* vdata)
 {
     sUITexBank8138* self = (sUITexBank8138*)vbank;
     sUITexData8138* data = (sUITexData8138*)vdata;
@@ -569,11 +570,11 @@ struct s398380Item {
  * @param id  hashed element name (On Tour hashname)
  * @return the element (On Tour cTextureElement), or 0
  */
-extern "C" s398380Item* cUITextureBank_getElementByHashname(void* self, int id)
+extern "C" s398380Item* cUITextureBank_getElementByHashname(cUITextureBank* self, int id)
 {
     int i;
-    for (i = 0; i < *(int*)((char*)self + 0x10); i++) {
-        s398380Item* item = &(*(s398380Item**)((char*)self + 0xC))[i];
+    for (i = 0; i < self->mNumElements; i++) {
+        s398380Item* item = &((s398380Item*)self->mpElements)[i];
         if (item->id == id) {
             return item;
         }
@@ -600,11 +601,11 @@ struct sUiEntry_83B8 {
  * @param key  the element hash name
  * @return the texture, or 0 when not found
  */
-extern "C" int cUITextureBank_getTextureByHashname(char* self, int key)
+extern "C" int cUITextureBank_getTextureByHashname(cUITextureBank* self, int key)
 {
-    int count = *(int*)(self + 0x10);
+    int count = self->mNumElements;
     for (int i = 0; i < count; i++) {
-        sUiEntry_83B8* entry = &(*(sUiEntry_83B8**)(self + 0xC))[i];
+        sUiEntry_83B8* entry = &((sUiEntry_83B8*)self->mpElements)[i];
         if (entry->key == key) {
             return entry->value;
         }
@@ -1068,7 +1069,7 @@ extern "C" void cUIIcon_setUIData(cUIIcon* self, sUIData8998* data)
     cUIThing_setUIData_8998(((sUIObj8998*)self), data);
     ((sUIObj8998*)self)->clip = data->clip;
     ((sUIObj8998*)self)->align = data->align;
-    self->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x58, data->id);
+    self->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname((cUITextureBank*)(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x58), data->id);
     (*(sUISize8998*)&self->mTileUV[0]) = sUISize8998(data->w * 0.01f, data->h * 0.01f);
 }
 #endif
@@ -1383,7 +1384,7 @@ extern "C" void cUIIcon_setTextureByHashValue(cUIIcon* self, int id)
     void* screen = self->mpScreen;
     void* state = *(void**)((char*)screen + 0xD0);
     void* engine = *(void**)((char*)state + 0x10);
-    self->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname((char*)engine + 0x58, id);
+    self->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname((cUITextureBank*)((char*)engine + 0x58), id);
 }
 #endif
 
