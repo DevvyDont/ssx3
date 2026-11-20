@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/execman.h"
 
 //100%
 INCLUDE_ASM("bx/appman", cAppMan_cAppMan);
@@ -401,11 +402,6 @@ extern "C" void cAppMan_loadexecpurge(void* self)
 }
 #endif
 
-struct cExecutionMan {
-    int field_0x0;
-    int field_0x4;
-    void* field_0x8;
-};
 
 extern void* cExecutionMan_vtbl[16];
 
@@ -422,9 +418,9 @@ INCLUDE_ASM("bx/appman", cExecutionMan_cExecutionMan__FP13cExecutionMan);
  */
 cExecutionMan* cExecutionMan_cExecutionMan(cExecutionMan* self)
 {
-    self->field_0x0 = 0;
-    self->field_0x8 = cExecutionMan_vtbl;
-    self->field_0x4 = 0;
+    (*(int*)&self->HaltCallback) = 0;
+    (*(void**)&self->mVtbl) = cExecutionMan_vtbl;
+    (*(int*)&self->HaltData) = 0;
     return self;
 }
 #endif
@@ -453,9 +449,9 @@ extern "C" void cExecutionMan_halt_impl(cExecutionMan* self, int a1, int a2) __a
  */
 extern "C" void cExecutionMan_halt_impl(cExecutionMan* self, int callback, int data)
 {
-    self->field_0x4 = data;
-    sVEntry00317478* vt = (sVEntry00317478*)self->field_0x8;
-    self->field_0x0 = callback;
+    (*(int*)&self->HaltData) = data;
+    sVEntry00317478* vt = (sVEntry00317478*)((void*)self->mVtbl);
+    (*(int*)&self->HaltCallback) = callback;
     vt[13].fn((char*)self + vt[13].delta);
 }
 #endif

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/chunkresolve.h"
 #include "wscript/wscriptcache.h"
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
@@ -819,11 +820,11 @@ public:
  * @return always 1
  */
 // PORT: stores a pointer in an int field (offset -> pointer fixup); not 64-bit safe.
-extern "C" int cChunkResolve_resolveModel(cChunkResolve_resolveModel_cObj* self, void* pModel)
+extern "C" int cChunkResolve_resolveModel(cChunkResolve* self, void* pModel)
 {
     *(int*)((char*)pModel + 0x8) += (int)pModel;
     *(int*)((char*)pModel + 0xC) += (int)pModel;
-    self->v06(pModel);
+    ((cChunkResolve_resolveModel_cObj*)self)->v06(pModel);
     return 1;
 }
 #endif
@@ -868,7 +869,7 @@ extern char t4mat_Identity[];
  * @return 1
  */
 // PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
-extern "C" int cChunkResolve_resolveModelHeirarchy(cChunkResolve_resolveModelHeirarchy_cObj* self, void* pModel)
+extern "C" int cChunkResolve_resolveModelHeirarchy(cChunkResolve* self, void* pModel)
 {
     int n = *(int*)((char*)pModel + 0x4);
     cChunkResolve_resolveModelHeirarchy_sEnt* meshHierarchy = *(cChunkResolve_resolveModelHeirarchy_sEnt**)((char*)pModel + 0x8);
@@ -876,7 +877,7 @@ extern "C" int cChunkResolve_resolveModelHeirarchy(cChunkResolve_resolveModelHei
     for (i = 0; i < n; i++, meshHierarchy++) {
         if (meshHierarchy->f4 != 0) {
             meshHierarchy->f4 += (int)pModel;
-            self->v07((void*)meshHierarchy->f4, pModel);
+            ((cChunkResolve_resolveModelHeirarchy_cObj*)self)->v07((void*)meshHierarchy->f4, pModel);
         }
         if (meshHierarchy->fC == 0xFFFFFFFF) {
             meshHierarchy->fC = (unsigned int)t4mat_Identity;
@@ -885,7 +886,7 @@ extern "C" int cChunkResolve_resolveModelHeirarchy(cChunkResolve_resolveModelHei
         }
         if (meshHierarchy->f8 != 0) {
             meshHierarchy->f8 += (int)pModel;
-            self->v11((void*)meshHierarchy->f8, pModel);
+            ((cChunkResolve_resolveModelHeirarchy_cObj*)self)->v11((void*)meshHierarchy->f8, pModel);
         }
     }
     return 1;
@@ -920,13 +921,13 @@ public:
  * @return 1
  */
 // PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
-extern "C" int cChunkResolve_resolveMesh(cChunkResolve_resolveMesh_cObj* self, void* pMesh, int base)
+extern "C" int cChunkResolve_resolveMesh(cChunkResolve* self, void* pMesh, int base)
 {
     int i = 0;
     int* contextEntry = (int*)(*(int*)((char*)pMesh + 0x20) += base);
     for (; i < *(int*)((char*)pMesh + 0x1C); i++) {
         *contextEntry += base;
-        self->v08((void*)*contextEntry++, base);
+        ((cChunkResolve_resolveMesh_cObj*)self)->v08((void*)*contextEntry++, base);
     }
     return 1;
 }
@@ -965,10 +966,10 @@ public:
  * @return 1
  */
 // PORT: stores a pointer in an int field (offset -> pointer fixup); not 64-bit safe.
-extern "C" int cChunkResolve_resolveParticleModel(cChunkResolve_resolveParticleModel_cObj* self, void* pModel)
+extern "C" int cChunkResolve_resolveParticleModel(cChunkResolve* self, void* pModel)
 {
     *(int*)((char*)pModel + 0x8) += (int)pModel;
-    self->v15(pModel);
+    ((cChunkResolve_resolveParticleModel_cObj*)self)->v15(pModel);
     return 1;
 }
 #endif
@@ -1018,7 +1019,7 @@ extern char t4mat_Identity[];
  * @return 1
  */
 // PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
-extern "C" int cChunkResolve_resolveParticleModelHeirarchy(cChunkResolve_resolveParticleModelHeirarchy_cObj* self, void* pModel)
+extern "C" int cChunkResolve_resolveParticleModelHeirarchy(cChunkResolve* self, void* pModel)
 {
     int n = *(int*)((char*)pModel + 0x4);
     cChunkResolve_resolveParticleModelHeirarchy_sEnt* meshHierarchy = *(cChunkResolve_resolveParticleModelHeirarchy_sEnt**)((char*)pModel + 0x8);
@@ -1026,7 +1027,7 @@ extern "C" int cChunkResolve_resolveParticleModelHeirarchy(cChunkResolve_resolve
     for (i = 0; i < n; i++, meshHierarchy++) {
         if (meshHierarchy->f4 != 0) {
             meshHierarchy->f4 += (int)pModel;
-            self->v16((void*)meshHierarchy->f4);
+            ((cChunkResolve_resolveParticleModelHeirarchy_cObj*)self)->v16((void*)meshHierarchy->f4);
         }
         if (meshHierarchy->fC == 0xFFFFFFFF) {
             meshHierarchy->fC = (unsigned int)t4mat_Identity;
@@ -1035,7 +1036,7 @@ extern "C" int cChunkResolve_resolveParticleModelHeirarchy(cChunkResolve_resolve
         }
         if (meshHierarchy->f8 != 0) {
             meshHierarchy->f8 += (int)pModel;
-            self->v11((void*)meshHierarchy->f8, 0);
+            ((cChunkResolve_resolveParticleModelHeirarchy_cObj*)self)->v11((void*)meshHierarchy->f8, 0);
         }
     }
     return 1;
@@ -1053,7 +1054,7 @@ INCLUDE_ASM("world/worldview", cChunkResolve_resolveParticleMesh);
  * @param pMesh  the particle mesh record (On Tour pMesh)
  * @return 1
  */
-extern "C" int cChunkResolve_resolveParticleMesh(void* self, void* pMesh)
+extern "C" int cChunkResolve_resolveParticleMesh(cChunkResolve* self, void* pMesh)
 {
     *(int*)((char*)pMesh + 0x20) += (int)pMesh;
     return 1;
@@ -1073,7 +1074,7 @@ INCLUDE_ASM("world/worldview", cChunkResolve_resolveParticleInstance);
  * @return 1
  */
 // PORT: decodes an int handle into a pointer ((void*)(i << 2)); not 64-bit safe.
-extern "C" int cChunkResolve_resolveParticleInstance(void* self, void* pInstance)
+extern "C" int cChunkResolve_resolveParticleInstance(cChunkResolve* self, void* pInstance)
 {
     unsigned int resourceId = *(unsigned int*)((char*)pInstance + 0x64);
     char* sec = (*(char***)(**(char***)self + 8))[resourceId & 0xFF];
@@ -1102,7 +1103,7 @@ INCLUDE_ASM("world/worldview", cChunkResolve_resolveMaterial);
  * @return 1
  */
 // PORT: stores a pointer in an int field (int typing needed to match); not 64-bit safe.
-extern "C" int cChunkResolve_resolveMaterial(void* self, void* pMaterial)
+extern "C" int cChunkResolve_resolveMaterial(cChunkResolve* self, void* pMaterial)
 {
     if (*(int*)((char*)pMaterial + 0x10) == -1) {
         *(int*)((char*)pMaterial + 0x10) = 0;
@@ -1128,7 +1129,7 @@ INCLUDE_ASM("world/worldview", cChunkResolve_resolveMaterialBlocks);
  * @return 1
  */
 // PORT: decodes int handles into pointers ((void*)(i << 2)); not 64-bit safe.
-extern "C" int cChunkResolve_resolveMaterialBlocks(void* self, int n, int* data)
+extern "C" int cChunkResolve_resolveMaterialBlocks(cChunkResolve* self, int n, int* data)
 {
     int blockIndex;
     for (blockIndex = 0; blockIndex < n; blockIndex++) {
@@ -1184,13 +1185,13 @@ public:
  * @return 1
  */
 // PORT: stores pointers in int fields (offset -> pointer fixup); not 64-bit safe.
-extern "C" int cChunkResolve_resolveAnimation(cChunkResolve_resolveAnimation_cObj* self, void* pAnimation, int base)
+extern "C" int cChunkResolve_resolveAnimation(cChunkResolve* self, void* pAnimation, int base)
 {
     int i = 0;
     int* channelId = (int*)(*(int*)((char*)pAnimation + 0x20) += base);
     for (; i < *(int*)((char*)pAnimation + 0x1C); i++) {
         *channelId += base;
-        self->v12((void*)*channelId++, base);
+        ((cChunkResolve_resolveAnimation_cObj*)self)->v12((void*)*channelId++, base);
     }
     return 1;
 }
@@ -1208,7 +1209,7 @@ INCLUDE_ASM("world/worldview", cChunkResolve_resolveChannel);
  * @param pBase  address the offset is relative to (On Tour pBase)
  * @return 1
  */
-extern "C" int cChunkResolve_resolveChannel(void* self, void* pChannel, int pBase)
+extern "C" int cChunkResolve_resolveChannel(cChunkResolve* self, void* pChannel, int pBase)
 {
     *(int*)((char*)pChannel + 0x4) += pBase;
     return 1;
@@ -1273,7 +1274,7 @@ struct cChunkResolve_resolveSpline_sNode {
  * @return 1
  */
 // PORT: stores pointers in int fields (int typing needed to match); not 64-bit safe.
-extern "C" int cChunkResolve_resolveSpline(void* self, void* list)
+extern "C" int cChunkResolve_resolveSpline(cChunkResolve* self, void* list)
 {
     int i;
     int count = *(int*)((char*)list + 0x20);
@@ -1346,7 +1347,7 @@ struct sChunk_3AAA08 {
  * @param pCollideModel  the collision model record (On Tour pCollideModel)
  * @return 1
  */
-extern "C" int cChunkResolve_resolveCollideModel(void* self, void* ctx, sChunk_3AAA08* pCollideModel)
+extern "C" int cChunkResolve_resolveCollideModel(cChunkResolve* self, void* ctx, sChunk_3AAA08* pCollideModel)
 {
     if ((int)pCollideModel->data == -1) {
         pCollideModel->data = 0;
@@ -1422,7 +1423,7 @@ struct cChunkResolve_resolveHalo_sObj {
  * @param obj  the halo record (On Tour pLightHalo)
  * @return 1
  */
-extern "C" int cChunkResolve_resolveHalo(void* self, cChunkResolve_resolveHalo_sObj* obj)
+extern "C" int cChunkResolve_resolveHalo(cChunkResolve* self, cChunkResolve_resolveHalo_sObj* obj)
 {
     float haloRadius = func_003AD230_f(obj->flags & 0x70);
     obj->field_0x44 = 0;
@@ -1449,7 +1450,7 @@ INCLUDE_ASM("world/worldview", cChunkResolve_resolveLight);
  * @param obj  the light record (On Tour pRTLight)
  * @return 1 when the light is used, else 0
  */
-extern "C" int cChunkResolve_resolveLight(void* self, void* obj)
+extern "C" int cChunkResolve_resolveLight(cChunkResolve* self, void* obj)
 {
     if (*(int*)((char*)obj + 0xC) & 0x100) {
         return 0;
@@ -1476,7 +1477,7 @@ INCLUDE_ASM("world/worldview", cChunkResolve_unresolveLight);
  * @param pRTLight  the light record (On Tour pRTLight)
  * @return 1 for a light of type 1 or 2 without flag 0x100, else 0
  */
-extern "C" int cChunkResolve_unresolveLight(void* self, void* pRTLight)
+extern "C" int cChunkResolve_unresolveLight(cChunkResolve* self, void* pRTLight)
 {
     if (*(int*)((char*)pRTLight + 0xC) & 0x100) {
         return 0;
@@ -1507,7 +1508,7 @@ extern "C" float logf(float);
  * @param divisor  the threshold strength
  * @return the distance
  */
-extern "C" float cChunkResolve_calcMaxLightDistance(void* self, void* light, float divisor)
+extern "C" float cChunkResolve_calcMaxLightDistance(cChunkResolve* self, void* light, float divisor)
 {
     float prod = *(float*)((char*)light + 0x14) * *(float*)((char*)light + 0x18);
     float ratio = prod / divisor;

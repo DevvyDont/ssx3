@@ -1,12 +1,7 @@
 #include "common.h"
 #include "animation/mdfarchive.h"
+#include "animation/animsequencer.h"
 
-struct cAnimSequence {
-    char pad_0x00[0x98];
-    float TargetWeight;   // 0x98 (On Tour names)
-    float WeightTimer;    // 0x9C
-    int IsFadeOutExpire;  // 0xA0 (a bool in On Tour; cleared here as a whole word)
-};
 
 //100%
 INCLUDE_ASM("animation/animsequencer", cAnimSequence_fadeWeight__FP13cAnimSequenceff);
@@ -138,9 +133,9 @@ struct sNode_00313B38 {
  * @param id  the trigger's event id
  * @param time  the time the trigger fires at
  */
-extern "C" void cAnimSequence_removeTrigger(char* self, int id, float time) {
+extern "C" void cAnimSequence_removeTrigger(cAnimSequence* self, int id, float time) {
     sNode_00313B38** link;
-    for (link = (sNode_00313B38**)(self + 0xAC); *link != 0; link = &(*link)->next) {
+    for (link = (sNode_00313B38**)(((char*)self) + 0xAC); *link != 0; link = &(*link)->next) {
         sNode_00313B38* n = *link;
         if (n->id == id && n->time == time && n->refs == 0) {
             *link = n->next;
@@ -170,7 +165,7 @@ struct sSeqNode313BA8
  *
  * @param key  the trigger's event id (On Tour id)
  */
-extern "C" void cAnimSequence_removeEndTrigger(void* self, int key)
+extern "C" void cAnimSequence_removeEndTrigger(cAnimSequence* self, int key)
 {
     sSeqNode313BA8** pp;
     for (pp = (sSeqNode313BA8**)((char*)self + 0xAC); *pp != 0; pp = &(*pp)->next)
@@ -244,7 +239,7 @@ struct sSeq_00313C50
  * @param i  the sub-animation slot (On Tour sub)
  * @param anim  the animation: bank in the low byte, clip above it (On Tour tAnimID)
  */
-extern "C" void cAnimSequence_setSubAnim(void* self, int i, int anim)
+extern "C" void cAnimSequence_setSubAnim(cAnimSequence* self, int i, int anim)
 {
     sSeq_00313C50* sequence = (sSeq_00313C50*)self;
     (sequence->e + i)->anim = anim;
@@ -276,7 +271,7 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequence_setSubAnimTime);
  * @param index  the sub-animation slot
  * @param val  the time in seconds
  */
-extern "C" void cAnimSequence_setSubAnimTime(void* self, int index, float val)
+extern "C" void cAnimSequence_setSubAnimTime(cAnimSequence* self, int index, float val)
 {
     char* slot = (char*)self + index * 0x1c;
     *(float*)(slot + 0x8) = val;
@@ -314,7 +309,7 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequence_setSubAnimWeight);
  * @param index  the sub-animation slot
  * @param val  the weight, normally 0-1
  */
-extern "C" void cAnimSequence_setSubAnimWeight(void* self, int index, float val)
+extern "C" void cAnimSequence_setSubAnimWeight(cAnimSequence* self, int index, float val)
 {
     char* slot = (char*)self + index * 0x1c;
     *(float*)(slot + 0x14) = val;
@@ -333,7 +328,7 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequence_setSubAnimType);
  * @param index  the sub-animation slot
  * @param val  the play type (0 hold, 1 loop)
  */
-extern "C" void cAnimSequence_setSubAnimType(void* self, int index, int val)
+extern "C" void cAnimSequence_setSubAnimType(cAnimSequence* self, int index, int val)
 {
     char* slot = (char*)self + index * 0x1c;
     *(int*)(slot + 0x1c) = val;
@@ -765,7 +760,7 @@ extern "C" int cAnimSequencer_getAnimBlendFrames(void* self, sSeqState_314418* o
 INCLUDE_ASM("animation/animsequencer", cAnimSequencer_playAndHold);
 #ifdef SKIP_ASM
 extern "C" void* cAnimSequencer_newSequence(void* seq, int arg);
-extern "C" void cAnimSequence_setSubAnim(void* self, int i, int anim);
+extern "C" void cAnimSequence_setSubAnim(cAnimSequence* self, int i, int anim);
 
 /**
  * Starts a new sequence that plays an animation once and holds its last frame.
@@ -781,9 +776,9 @@ extern "C" void cAnimSequence_setSubAnim(void* self, int i, int anim);
 extern "C" void* cAnimSequencer_playAndHold(void* self, int sequenceID, int anim, float val)
 {
     void* node = cAnimSequencer_newSequence(self, sequenceID);
-    cAnimSequence_setSubAnim(node, 0, anim);
-    cAnimSequence_setSubAnimTime(node, 0, val);
-    cAnimSequence_setSubAnimType(node, 0, 0);
+    cAnimSequence_setSubAnim((cAnimSequence*)node, 0, anim);
+    cAnimSequence_setSubAnimTime((cAnimSequence*)node, 0, val);
+    cAnimSequence_setSubAnimType((cAnimSequence*)node, 0, 0);
     return node;
 }
 #endif
@@ -792,7 +787,7 @@ extern "C" void* cAnimSequencer_playAndHold(void* self, int sequenceID, int anim
 INCLUDE_ASM("animation/animsequencer", cAnimSequencer_playAndLoop);
 #ifdef SKIP_ASM
 extern "C" void* cAnimSequencer_newSequence(void* seq, int arg);
-extern "C" void cAnimSequence_setSubAnim(void* self, int i, int anim);
+extern "C" void cAnimSequence_setSubAnim(cAnimSequence* self, int i, int anim);
 
 /**
  * Starts a new sequence that loops an animation.
@@ -808,9 +803,9 @@ extern "C" void cAnimSequence_setSubAnim(void* self, int i, int anim);
 extern "C" void* cAnimSequencer_playAndLoop(void* self, int sequenceID, int anim, float val)
 {
     void* node = cAnimSequencer_newSequence(self, sequenceID);
-    cAnimSequence_setSubAnim(node, 0, anim);
-    cAnimSequence_setSubAnimTime(node, 0, val);
-    cAnimSequence_setSubAnimType(node, 0, 1);
+    cAnimSequence_setSubAnim((cAnimSequence*)node, 0, anim);
+    cAnimSequence_setSubAnimTime((cAnimSequence*)node, 0, val);
+    cAnimSequence_setSubAnimType((cAnimSequence*)node, 0, 1);
     return node;
 }
 #endif
@@ -914,7 +909,7 @@ extern "C" void cAnimSequencer_fadeOutAndExpireAll(void* self, float time)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/animsequencer", cAnimSequencer_removeAllEndTriggers);
 #ifdef SKIP_ASM
-extern "C" void cAnimSequence_removeEndTrigger(void* self, int v);
+extern "C" void cAnimSequence_removeEndTrigger(cAnimSequence* self, int v);
 
 /**
  * Removes the given end trigger from every sequence of the sequencer.
@@ -927,7 +922,7 @@ extern "C" void cAnimSequencer_removeAllEndTriggers(void* self, int trig)
 {
     for (char* node = *(char**)((char*)self + 0x4); node != 0; node = *(char**)(node + 0xC8))
     {
-        cAnimSequence_removeEndTrigger(node, trig);
+        cAnimSequence_removeEndTrigger((cAnimSequence*)node, trig);
     }
 }
 #endif

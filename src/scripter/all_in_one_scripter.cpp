@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/scriptobjcammgr.h"
 #include "scripter/bxscriptengine.h"
 #include "scripter/scriptobjcamera.h"
 #include "scripter/ssxscriptengine.h"
@@ -441,9 +442,9 @@ extern char cScriptObjCameraManager_vtbl[];
  *
  * @param manager  the camera manager being destroyed (this)
  */
-extern "C" void cScriptObjCameraManager__cScriptObjCameraManager(void *manager) {
-    *(char **)((char*)manager + 0x10) = D_00482360;
-    *(char **)((char*)manager + 0xC) = cScriptObjCameraManager_vtbl;
+extern "C" void cScriptObjCameraManager__cScriptObjCameraManager(cScriptObjCameraManager* manager) {
+    manager->mEntityVtbl = (void**)D_00482360;
+    manager->mVtbl = (void**)cScriptObjCameraManager_vtbl;
     cScriptObject__cScriptObject_48A0(manager);
 }
 #endif
@@ -457,8 +458,8 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cScriptObjCameraManager_GetViewIndex
  * @param camManager  the camera manager
  * @return its view index
  */
-extern "C" int cScriptObjCameraManager_GetViewIndex(void *camManager) {
-    return (*(int *)((char*)(camManager) + (0xF8)));
+extern "C" int cScriptObjCameraManager_GetViewIndex(cScriptObjCameraManager* camManager) {
+    return (camManager->mViewIndex);
 }
 #endif
 

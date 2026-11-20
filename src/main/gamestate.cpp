@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main/gamestate.h"
 #include "replay/frameptr.h"
 #include "be/beintnewrace.h"
 #include "main/gamemode.h"
@@ -298,19 +299,19 @@ extern char* cGameState_mpGame;
  *
  * @return @p self
  */
-extern "C" void* cGFTrackStartState_cGFTrackStartState(void* self)
+extern "C" void* cGFTrackStartState_cGFTrackStartState(cGFTrackStartState* self)
 {
-    *(int*)((char*)self + 0x0) = 0;
-    *(void**)((char*)self + 0xC) = cGameState_vtbl;
+    self->mNextState = 0;
+    self->mVtbl = (void**)cGameState_vtbl;
     cGameState_mpGame = 0;
-    *(void**)((char*)self + 0xC) = cGFTrackStartState_vtbl;
-    *(int*)((char*)self + 0x0) = 4;
-    *(int*)((char*)self + 0x10) = 5;
-    *(int*)((char*)self + 0x4) = 0;
-    *(int*)((char*)self + 0x14) = 0;
-    *(int*)((char*)self + 0x18) = 0;
-    *(int*)((char*)self + 0x1C) = 0;
-    return self;
+    self->mVtbl = (void**)cGFTrackStartState_vtbl;
+    self->mNextState = 4;
+    self->mPreLoadState = 5;
+    self->mStartupFlag = 0;
+    self->mPlayFirstTimeBCVideo = 0;
+    self->mPreLoadTicks = 0;
+    self->mCheckTransportEnd = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -352,15 +353,15 @@ struct sState_234F40 {
  * otherwise
  * the start sequence is appended to the NIS list.
  */
-extern "C" void cGFTrackStartState_preloadInit(sState_234F40* self)
+extern "C" void cGFTrackStartState_preloadInit(cGFTrackStartState* self)
 {
-    self->f18 = 0;
+    self->mPreLoadTicks = 0;
     cReplay_reset(*(void**)(cGameState_mpGame + 0x28));
     cSSXScriptEngine_ResetNISList(ScriptEngine, 0);
     cSSXScriptEngine_PurgeTrack(ScriptEngine);
     cSSXScriptEngine_AsyncLoadTrack(ScriptEngine);
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    self->f14 = 0;
+    self->mPlayFirstTimeBCVideo = 0;
     int gamePath = cBENewRaceInterface_newRace.cGamePath;
     cAI_prepareToPurgeComputerRiders(*(void**)(cGameState_mpGame + 0xC));
     cAI_prepareToPurgeComputerActors(*(void**)(cGameState_mpGame + 0xC));
@@ -375,13 +376,13 @@ extern "C" void cGFTrackStartState_preloadInit(sState_234F40* self)
                 *(int*)(audio + 0x5790) = 0;
                 *(int*)(audio + 0x578C) = 1;
                 *(int*)(audio + 0x6254) = 1;
-                self->f14 = 1;
+                self->mPlayFirstTimeBCVideo = 1;
             }
         }
     } else {
         cSSXScriptEngine_AppendStartSequence(ScriptEngine, 0);
     }
-    self->f10 = 0;
+    self->mPreLoadState = 0;
 }
 #endif
 
@@ -511,10 +512,10 @@ static inline int isOne_235080(int v)
  * 180
  * frames.
  */
-extern "C" void cGFTrackStartState_preloadUpdate(void* self)
+extern "C" void cGFTrackStartState_preloadUpdate(cGFTrackStartState* self)
 {
-    *(int*)((char*)self + 0x18) += 1;
-    switch (*(int*)((char*)self + 0x10)) {
+    self->mPreLoadTicks += 1;
+    switch (self->mPreLoadState) {
     case 0: {
         if (cSSXScriptEngine_IsLoadTrackComplete(ScriptEngine) == 0)
             break;
@@ -522,7 +523,7 @@ extern "C" void cGFTrackStartState_preloadUpdate(void* self)
         char* sectionMan = D_004A28A8_date->game->f78;
         int locationId = *(int*)(sectionMan + 0x1BC);
         int range = locationId >= 14 && locationId <= 16;
-        if (*(int*)((char*)self + 0x14) != 0) {
+        if (self->mPlayFirstTimeBCVideo != 0) {
             if (locationId == 14) {
                 cSSXScriptEngine_AddToNISListByVideoCategory(ScriptEngine, 1, 29, 3);
                 func_0028CD48(cAudioInterface_bxAudio());
@@ -539,7 +540,7 @@ extern "C" void cGFTrackStartState_preloadUpdate(void* self)
             cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 0x10, 3, 0, -1, -1, -1);
             cSSXScriptEngine_AddToNISListByScriptCategory(ScriptEngine, 1, 17, 3, 0, -1, -1, -1);
         }
-        *(int*)((char*)self + 0x10) = 1;
+        self->mPreLoadState = 1;
         break;
     }
     case 1: {
@@ -549,7 +550,7 @@ extern "C" void cGFTrackStartState_preloadUpdate(void* self)
                 done = 1;
         }
         if (done)
-            *(int*)((char*)self + 0x10) = 2;
+            self->mPreLoadState = 2;
         break;
     }
     case 2: {
@@ -595,7 +596,7 @@ extern "C" void cGFTrackStartState_preloadUpdate(void* self)
             else
                 cAI_initAIActors(D_004A2C68_date->race, 2);
         }
-        *(int*)((char*)self + 0x10) = 3;
+        self->mPreLoadState = 3;
         break;
     }
     case 3: {
@@ -615,16 +616,16 @@ extern "C" void cGFTrackStartState_preloadUpdate(void* self)
                 if (raceDB->cGamePath == 0)
                     cAI_initFreeride(D_004A2C68_date->race);
             }
-            *(int*)((char*)self + 0x10) = 4;
+            self->mPreLoadState = 4;
         } else {
             cAI_loadRiders(D_004A2C68_date->race);
         }
         break;
     }
     case 4:
-        if (*(int*)((char*)self + 0x14) != 0 && *(int*)((char*)self + 0x18) < 180)
+        if (self->mPlayFirstTimeBCVideo != 0 && self->mPreLoadTicks < 180)
             break;
-        *(int*)((char*)self + 0x10) = 5;
+        self->mPreLoadState = 5;
         break;
     case 5:
         break;
@@ -644,11 +645,11 @@ extern "C" void cSSXScriptEngine_ResetNISList(void* a, int b);
  * Calls cSSXScriptEngine_PurgeTrack() and cSSXScriptEngine_ResetNISList(ScriptEngine, 1), then sets the preload
  * state (+0x10, On Tour mPreLoadState) to 5, the value cGFTrackStartState_isPreloadComplete() tests.
  */
-extern "C" void cGFTrackStartState_preloadCancel(void* self)
+extern "C" void cGFTrackStartState_preloadCancel(cGFTrackStartState* self)
 {
     cSSXScriptEngine_PurgeTrack(ScriptEngine);
     cSSXScriptEngine_ResetNISList(ScriptEngine, 1);
-    *(int*)((char*)self + 0x10) = 5;
+    self->mPreLoadState = 5;
 }
 #endif
 
@@ -660,9 +661,9 @@ INCLUDE_ASM("main/gamestate", cGFTrackStartState_isPreloadComplete);
  *
  * @return 1 when the preload is complete, otherwise 0
  */
-extern "C" int cGFTrackStartState_isPreloadComplete(void* self)
+extern "C" int cGFTrackStartState_isPreloadComplete(cGFTrackStartState* self)
 {
-    return *(int*)((char*)self + 0x10) == 5;
+    return self->mPreLoadState == 5;
 }
 #endif
 
@@ -719,22 +720,22 @@ static inline int isMode2_2355C0(void* s)
  * state 3
  * and disables its countdown flag. A location visited for the first time is recorded for player 1.
  */
-extern "C" void cGFTrackStartState_gainFocus(void* self)
+extern "C" void cGFTrackStartState_gainFocus(cGFTrackStartState* self)
 {
-    *(int*)((char*)self + 0x1C) = 0;
+    self->mCheckTransportEnd = 0;
     if (cSSXScriptEngine_IsInTransportSequence(ScriptEngine))
-        *(int*)((char*)self + 0x1C) = 1;
+        self->mCheckTransportEnd = 1;
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     cBERewardInterface_clearUserAwards(cBE_getInterface_Fv(cBE_getBE(), 13));
     cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
     int flag = beRaceDB->cGamePath;
     int mode = beRaceDB->cGameMode;
     if (flag == 0 && !inRange_2355C0(*(int*)((char*)SSXApp->Game->SectionMan + 0x1BC))) {
-        *(int*)((char*)self + 0x4) = 0;
-        *(int*)((char*)self + 0x0) = 4;
+        self->mStartupFlag = 0;
+        self->mNextState = 4;
     } else {
-        *(int*)((char*)self + 0x0) = 1;
-        *(int*)((char*)self + 0x4) = flag == 0;
+        self->mNextState = 1;
+        self->mStartupFlag = flag == 0;
     }
     if (mode == 4)
         cAI_setAIState(*(void**)(cGameState_mpGame + 0xC), 3);
@@ -750,14 +751,14 @@ extern "C" void cGFTrackStartState_gainFocus(void* self)
     (*(sRaceMan_2355C0**)(cGameState_mpGame + 0xC))->f14 = mode != 4;
     cBXLoadIndicator_Hide(SSXApp->Game->LoadIndicator, 0);
     if (flag) {
-        *(int*)((char*)self + 0x0) = 1;
-        *(int*)((char*)self + 0x4) = 0;
+        self->mNextState = 1;
+        self->mStartupFlag = 0;
         if (isMode2_2355C0(ScriptEngine)) {
             cSSXScriptEngine_PlayNISList(ScriptEngine, 1, 0, 1);
             if (isMode2_2355C0(ScriptEngine))
                 cSSXScriptEngine_PlayNISList(ScriptEngine, 0, 0, 1);
         }
-    } else if (*(int*)((char*)self + 0x14)) {
+    } else if (self->mPlayFirstTimeBCVideo) {
         cSSXScriptEngine_PlayNISList(ScriptEngine, 1, 1, 0);
     }
     func_002B3A98((char*)cAudioInterface_bxAudio() + 0x118);
@@ -779,11 +780,11 @@ extern "C" void cGameState_gotoNextState(void* self);
  * its transport sequence, sets the word at SectionMan + 0x1A4 and clears the flag. Calls
  * cGameState_gotoNextState() once NIS list 1 reports play state 0.
  */
-extern "C" void cGFTrackStartState_update(void* self)
+extern "C" void cGFTrackStartState_update(cGFTrackStartState* self)
 {
-    if (*(int*)((char*)self + 0x1C) != 0 && cSSXScriptEngine_IsInTransportSequence(ScriptEngine) == 0) {
+    if (self->mCheckTransportEnd != 0 && cSSXScriptEngine_IsInTransportSequence(ScriptEngine) == 0) {
         *(int*)((char*)SSXApp->Game->SectionMan + 0x1A4) = 1;
-        *(int*)((char*)self + 0x1C) = 0;
+        self->mCheckTransportEnd = 0;
     }
     if (cSSXScriptEngine_GetNISListPlayState(ScriptEngine, 1) == 0) {
         cGameState_gotoNextState(self);
@@ -822,14 +823,14 @@ static inline int otherSide_235868(char* p)
  * Offline it records the location as visited for player 1; game modes 5 and 6 reset the heat in the game mode
  * manager; a split-screen game clears the other view's cache flag.
  */
-extern "C" void cGFTrackStartState_loseFocus(void* self)
+extern "C" void cGFTrackStartState_loseFocus(cGFTrackStartState* self)
 {
     cWScriptMan_purgeMissions(cWScriptMan_TheWScriptMan);
     cWScriptMan_setupMissions(cWScriptMan_TheWScriptMan);
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     cReplay_reset(*(void**)(cGameState_mpGame + 0x28));
     cReplay_startRace(*(void**)(cGameState_mpGame + 0x28));
-    *(int*)((char*)self + 0x14) = 0;
+    self->mPlayFirstTimeBCVideo = 0;
     cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
     if (beRaceDB->cGamePath == 0) {
         void* player = cBE_getInterface_Fv(cBE_getBE(), 1);
@@ -872,7 +873,7 @@ void* cGameState_writeToReplayFrame_2(void* self, void* obj) __asm__("cGameState
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFTrackStartState_writeToReplayFrame(void* self, cReplayFramePtr* stream)
+extern "C" void cGFTrackStartState_writeToReplayFrame(cGFTrackStartState* self, cReplayFramePtr* stream)
 {
     cGameState_writeToReplayFrame_2(self, stream);
     sVEntry_cGFTrackStartState_writeToReplayFrame* writeSlot = &(*(sVEntry_cGFTrackStartState_writeToReplayFrame**)stream)[1];
@@ -904,7 +905,7 @@ void* cGameState_readFromReplayFrame_2(void* self, void* obj) __asm__("cGameStat
  *
  * @param stream  the replay frame stream (On Tour cReplayFramePtr)
  */
-extern "C" void cGFTrackStartState_readFromReplayFrame(void* self, cReplayFramePtr* stream)
+extern "C" void cGFTrackStartState_readFromReplayFrame(cGFTrackStartState* self, cReplayFramePtr* stream)
 {
     cGameState_readFromReplayFrame_2(self, stream);
     sVEntry_cGFTrackStartState_readFromReplayFrame* readSlot = &(*(sVEntry_cGFTrackStartState_readFromReplayFrame**)stream)[2];

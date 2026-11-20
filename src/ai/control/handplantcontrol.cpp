@@ -1,4 +1,5 @@
 #include "common.h"
+#include "replay/playbackman.h"
 #include "replay/frameptr.h"
 #include "ai/ai.h"
 #include "ai/riderhandler.h"
@@ -8759,9 +8760,9 @@ INCLUDE_ASM("ai/control/handplantcontrol", cPlaybackMan_isRecord);
  *
  * @return 1 when the mode is 3, else 0
  */
-extern "C" int cPlaybackMan_isRecord(void* self)
+extern "C" int cPlaybackMan_isRecord(cPlaybackMan* self)
 {
-    return *(int*)((char*)self + 0x70) == 3;
+    return self->State == 3;
 }
 #endif
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "world/chunkresolve.h"
 #include "wscript/wscriptcache.h"
 #include "world/world.h"
 #include "main/game.h"
@@ -1000,9 +1001,9 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cChunkResolve__cChunkResolve(void* self, int flags)
+extern "C" void cChunkResolve__cChunkResolve(cChunkResolve* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = cChunkResolve_vtbl;
+    self->mVtbl = cChunkResolve_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

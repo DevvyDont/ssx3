@@ -1,12 +1,8 @@
 #include "common.h"
+#include "bx/execman.h"
 #include "input/input.h"
 #include "bx/appman.h"
 
-struct cExecutionMan {
-    int field_0x0;
-    int field_0x4;
-    void* field_0x8;
-};
 
 extern void* cExecutionMan_vtbl[16];
 void operator_delete(int* ptr);
@@ -21,7 +17,7 @@ INCLUDE_ASM("bx/execman", cExecutionMan__cExecutionMan__FP13cExecutionMani);
  */
 void cExecutionMan__cExecutionMan(cExecutionMan* self, int flags)
 {
-    self->field_0x8 = cExecutionMan_vtbl;
+    (*(void**)&self->mVtbl) = cExecutionMan_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -358,9 +354,9 @@ INCLUDE_ASM("bx/execman", cPS2ExecutionMan__cPS2ExecutionMan);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cPS2ExecutionMan__cPS2ExecutionMan(cExecutionMan* self, int flags)
+extern "C" void cPS2ExecutionMan__cPS2ExecutionMan(cPS2ExecutionMan* self, int flags)
 {
-    self->field_0x8 = cExecutionMan_vtbl;
+    (*(void**)&self->mVtbl) = cExecutionMan_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }

@@ -1,0 +1,51 @@
+#ifndef WORLD_CHUNKRESOLVE_H
+#define WORLD_CHUNKRESOLVE_H
+
+// cChunkResolve: fixes up streamed world chunks after loading: turns the offsets in model / mesh / material /
+// animation / instance / particle / spline / collision / halo / light records into pointers (the resolve* virtuals).
+// Abstract-ish base of cPS2ChunkResolve (the only class instantiated: cChunkResolve_construct, called by
+// cWorldCache_init, does cMemMan_alloc(0x14, "cPS2ChunkResolve"), runs cChunkResolve_cChunkResolve and stores
+// cPS2ChunkResolve_vtbl at +0x8; cWorldCache::mp_ChunkResolve keeps it).
+//
+// Size 0xC: [R] the constructor stores the vptr at 0x8, after the two data words, and cPS2ChunkResolve's own members
+// start at 0xC (its init / resolve / unresolve use 0xC and 0x10; 0x14 allocated) - the same as On Tour's size 0xC.
+// No base class; the class declares the virtuals, so g++ 2.95 puts the vptr after its data (0x8).
+// EA's source: d:/ssx/code/source/world/chunkresolve.cpp (cPS2ChunkResolve: world/ps2chunkresolve.cpp), both in the
+// preview's strings. Retail methods: unit world/worldview 0x003AA2F0-0x003AADE4 and unit world/wscriptcache
+// (cChunkResolve__cChunkResolve, cChunkResolve_resolveMeshContext__FPv).
+//
+// Vtable cChunkResolve_vtbl (0x00495150, 22 slots, On Tour's method order): 1 dtor, 2-4 init / resolve / unresolve
+// (the shared empty stub func_00411530), 5 resolveModel, 6 resolveModelHeirarchy, 7 resolveMesh, 8 resolveMeshContext,
+// 9 resolveMaterial, 10 resolveMaterialBlocks, 11 resolveAnimation, 12 resolveChannel, 13 resolveInstance,
+// 14 resolveParticleModel, 15 resolveParticleModelHeirarchy, 16 resolveParticleMesh, 17 resolveParticleInstance,
+// 18 resolveSpline, 19 resolveCollideModel, 20 resolveHalo, 21 resolveLight, 22 unresolveLight.
+//
+// A FLAT layout, like main/game.h. Member names and types are EA's, from SSX On Tour's PSP DWARF ([O] class
+// cChunkResolve, same offsets).
+
+#include "layout.h"
+
+struct cWorld;
+struct tCollideRecord;      // retail: 0x130 bytes (the ctor MEM_fill's the static dummy record)
+
+struct cChunkResolve {
+    cWorld* mp_World;                       // 0x0 [O]; [R] the ctor zeroes it; [U] cPS2ChunkResolve_init stores it;
+                                            //     resolveInstance / resolveMaterialBlocks / resolveParticleInstance
+                                            //     read it
+    tCollideRecord* m_pDummyCollideRecord;  // 0x4 [O]; [R] the ctor points it at the static D_00508F50 and
+                                            //     initialises that record (0x130 bytes); [U]
+                                            //       cPS2ChunkResolve_resolveInstance
+                                            //     stores it in each instance record (+0x88)
+    void** mVtbl;                           // 0x8 [R] the ctor / dtor store cChunkResolve_vtbl, cChunkResolve_construct
+                                            //     cPS2ChunkResolve_vtbl; [U] resolveModel, resolveModelHeirarchy,
+                                            //       resolveMesh,
+                                            //     resolveAnimation and the particle resolvers make virtual calls
+                                            //       through it
+};
+
+CHECK_OFFSET(cChunkResolve, mp_World, 0x0);
+CHECK_OFFSET(cChunkResolve, m_pDummyCollideRecord, 0x4);
+CHECK_OFFSET(cChunkResolve, mVtbl, 0x8);
+CHECK_SIZE(cChunkResolve, 0xC);
+
+#endif /* WORLD_CHUNKRESOLVE_H */

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "replay/playbackman.h"
 #include "replay/replay.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -94,7 +95,7 @@ INCLUDE_ASM("replay/playbackman", cPlaybackMan__cPlaybackMan);
 struct cBigFile;
 void cBigFile__cBigFile(cBigFile* self, int flags);
 void operator_delete(int* ptr);
-extern "C" void cPlaybackMan_purgeLocation(void* self);
+extern "C" void cPlaybackMan_purgeLocation(cPlaybackMan* self);
 extern void* cReplayFramePtr_vtbl[];
 
 /**
@@ -107,14 +108,14 @@ extern void* cReplayFramePtr_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cPlaybackMan__cPlaybackMan(void* self, int flags)
+extern "C" void cPlaybackMan__cPlaybackMan(cPlaybackMan* self, int flags)
 {
     cBigFile* bf = *(cBigFile**)self;
     if (bf != 0) {
         cBigFile__cBigFile(bf, 3);
     }
-    operator_delete(*(int**)((char*)self + 0x6C));
-    operator_delete(*(int**)((char*)self + 0x68));
+    operator_delete((int*)self->Input);
+    operator_delete((int*)self->InputPad);
     cPlaybackMan_purgeLocation(self);
     *(void***)((char*)self + 0x14) = cReplayFramePtr_vtbl;
     if (flags & 1) {
@@ -291,7 +292,7 @@ struct cPlaybackManC898 {
  *
  * @param playbackMan  the playback manager (this)
  */
-extern "C" void cPlaybackMan_purgeLocation(void* playbackMan)
+extern "C" void cPlaybackMan_purgeLocation(cPlaybackMan* playbackMan)
 {
     cPlaybackManC898* self = (cPlaybackManC898*)playbackMan;
     if (self->handle != -1) {
@@ -339,13 +340,13 @@ extern "C" int cPlaybackMan_findFileById();
  * @param fileId  the playback file id
  * @return 1 when the file is loaded or no load is pending, 0 otherwise
  */
-extern "C" int cPlaybackMan_isLoaded(void* self, int fileId)
+extern "C" int cPlaybackMan_isLoaded(cPlaybackMan* self, int fileId)
 {
     int idx = cPlaybackMan_findFileById();
     if (idx >= 0) {
-        if (*(int*)(*(char**)((char*)self + 0x58) + idx * 0xC + 4) != 0)
+        if (*(int*)((char*)self->PlaybackFiles + idx * 0xC + 4) != 0)
             return 1;
-        if (*(int*)((char*)self + 0x78) < 0)
+        if (self->AsyncHandle < 0)
             return 1;
     }
     return 0;
@@ -390,7 +391,7 @@ struct sPb_26C9F0 {
  * @param key  the playback file id
  * @return 1 when loaded or the load started, 0 for an unknown id or a failed start
  */
-extern "C" int cPlaybackMan_load(void* self_, int key)
+extern "C" int cPlaybackMan_load(cPlaybackMan* self_, int key)
 {
     sPb_26C9F0* self = (sPb_26C9F0*)self_;
     char path[0x100];
@@ -416,7 +417,7 @@ extern "C" int cPlaybackMan_load(void* self_, int key)
 //100%
 INCLUDE_ASM("replay/playbackman", cPlaybackMan_restart);
 #ifdef SKIP_ASM
-extern "C" void cPlaybackMan_stop(void* self);
+extern "C" void cPlaybackMan_stop(cPlaybackMan* self);
 extern "C" void MEM_fill(void* dst, int c, int n);
 
 /**
@@ -426,12 +427,12 @@ extern "C" void MEM_fill(void* dst, int c, int n);
  * CurrentFrame buffer at +0x4 exists, its 0x1C22C bytes are cleared and its header rewritten (0xDBAC0101,
  * 0x1C200), as cPlaybackMan_initLocation() does. cGame_resetWorld() and cGame_partialRestart() call it.
  */
-extern "C" void cPlaybackMan_restart(void* self)
+extern "C" void cPlaybackMan_restart(cPlaybackMan* self)
 {
     cPlaybackMan_stop(self);
-    unsigned int* buf = *(unsigned int**)((char*)self + 0x4);
-    *(int*)((char*)self + 0x10) = 0;
-    *(int*)((char*)self + 0x70) = 0;
+    unsigned int* buf = (unsigned int*)self->CurrentFrame;
+    self->SaveFrame = 0;
+    self->State = 0;
     if (buf != 0) {
         MEM_fill(buf, 0, 0x1C22C);
         buf[0] = 0xDBAC0101;
@@ -445,10 +446,10 @@ INCLUDE_ASM("replay/playbackman", cPlaybackMan_setupPreview);
 #ifdef SKIP_ASM
 extern "C" void SYNCTASK_run(int);
 extern "C" void THREAD_yieldticks(int);
-extern "C" int cPlaybackMan_isLoaded(void* self, int a1);
-extern "C" int cPlaybackMan_load(void* self, int a1);
+extern "C" int cPlaybackMan_isLoaded(cPlaybackMan* self, int a1);
+extern "C" int cPlaybackMan_load(cPlaybackMan* self, int a1);
 extern "C" int cPlaybackMan_findFileById();
-extern "C" int cPlaybackMan_setupFile(void* self, int idx);
+extern "C" int cPlaybackMan_setupFile(cPlaybackMan* self, int idx);
 
 /**
  * Loads playback file @p fileId and unpacks it into the current frame, waiting for the load; returns 1 if it holds input.
@@ -461,17 +462,17 @@ extern "C" int cPlaybackMan_setupFile(void* self, int idx);
  * @param fileId  the playback file id
  * @return 1 when the file was unpacked and its recorded input end (current frame +0xC) is above 0, else 0
  */
-extern "C" int cPlaybackMan_setupPreview(void* self, int fileId)
+extern "C" int cPlaybackMan_setupPreview(cPlaybackMan* self, int fileId)
 {
     int idx;
-    if (*(int*)((char*)self + 0x70) == 0 && (idx = cPlaybackMan_findFileById()) >= 0 && cPlaybackMan_load(self, fileId) != 0) {
+    if (self->State == 0 && (idx = cPlaybackMan_findFileById()) >= 0 && cPlaybackMan_load(self, fileId) != 0) {
         while (cPlaybackMan_isLoaded(self, fileId) == 0) {
             cPlaybackMan_update((cPlaybackMan_C5F8*)self);
             SYNCTASK_run(0);
             THREAD_yieldticks(1);
         }
         if (cPlaybackMan_setupFile(self, idx) != 0) {
-            if (*(int*)(*(char**)((char*)self + 4) + 0xC) > 0)
+            if (*(int*)((char*)self->CurrentFrame + 0xC) > 0)
                 return 1;
         }
     }
@@ -512,17 +513,17 @@ struct sFrameDesc26CBB8 {
  * Unless the saved-frame flag (+0x10) is already set, calls cReplay_saveFrame1 (On Tour cReplay::saveFrame(frame, type)) on
  * Game->Replay (+0x5C, +0x28) with the frame at +0x14 and a type-1 descriptor, then sets the flag.
  */
-extern "C" void cPlaybackMan_saveFrame(void* self)
+extern "C" void cPlaybackMan_saveFrame(cPlaybackMan* self)
 {
-    if (*(int*)((char*)self + 0x10) == 0) {
+    if (self->SaveFrame == 0) {
         int one = 1;
         sFrameDesc26CBB8 desc;
         desc.type = one;
         desc.a = 0;
         desc.b = 0;
-        cReplay_saveFrame1((cReplay*)(*(void**)(*(char**)((char*)self + 0x5C) + 0x28)), (char*)self + 0x14,
+        cReplay_saveFrame1((cReplay*)(*(void**)((char*)self->Game + 0x28)), (char*)self + 0x14,
                       (sPbBytes4*)&desc);
-        *(int*)((char*)self + 0x10) = one;
+        self->SaveFrame = one;
     }
 }
 #endif
@@ -542,10 +543,10 @@ extern "C" void cReplay_restoreFrame1_2(void* replay, void* frame) __asm__("cRep
  *
  * @return nothing meaningful: declared void* in this unit, the body returns no value
  */
-extern "C" void* cPlaybackMan_restoreFrame(void* self)
+extern "C" void* cPlaybackMan_restoreFrame(cPlaybackMan* self)
 {
-    if (*(int*)((char*)self + 0x10)) {
-        cReplay_restoreFrame1_2(*(void**)(*(char**)((char*)self + 0x5C) + 0x28), (char*)self + 0x14);
+    if (self->SaveFrame) {
+        cReplay_restoreFrame1_2(*(void**)((char*)self->Game + 0x28), (char*)self + 0x14);
     }
 }
 #endif
@@ -557,7 +558,7 @@ extern "C" void cAI_purgeMissionRiders(void*);
 extern "C" void cAI_reinitMissionRiders(void* self);
 extern "C" void cCamera_switchChaseControllerTargetRider(void* self, int value);
 void cReplay_setReplayState(void* self, int val);
-extern "C" void cPlaybackMan_saveFrame(void* self);
+extern "C" void cPlaybackMan_saveFrame(cPlaybackMan* self);
 void AIsetseed(void* self);
 
 /**
@@ -569,22 +570,22 @@ void AIsetseed(void* self);
  * 0x1C214; AI + 0x8 = the word at buffer + 0x1C210), sets mode 1 and switches the chase camera's target
  * (cCamera_switchChaseControllerTargetRider) to the AI's mission rider (+0x70).
  */
-extern "C" void cPlaybackMan_startPreview(void* self)
+extern "C" void cPlaybackMan_startPreview(cPlaybackMan* self)
 {
-    if (*(int*)((char*)self + 0x70) == 0 && *(int*)(*(char**)((char*)self + 0x4) + 0xC) > 0) {
-        cAI_purgeMissionRiders(*(void**)((char*)self + 0x60));
-        cAI_reinitMissionRiders(*(void**)((char*)self + 0x60));
-        void* replay = *(void**)(*(char**)((char*)self + 0x5C) + 0x28);
+    if (self->State == 0 && *(int*)((char*)self->CurrentFrame + 0xC) > 0) {
+        cAI_purgeMissionRiders(self->AI);
+        cAI_reinitMissionRiders(self->AI);
+        void* replay = *(void**)((char*)self->Game + 0x28);
         *(int*)((char*)replay + 0x4) = *(int*)replay;
         cReplay_setReplayState(replay, 14);
         cPlaybackMan_saveFrame(self);
-        *(int*)(*(char**)((char*)self + 0x4) + 0x8) = 0;
-        AIsetseed(*(char**)((char*)self + 0x4) + 0x1C214);
-        *(int*)(*(char**)((char*)self + 0x60) + 0x8) = *(int*)(*(char**)((char*)self + 0x4) + 0x1C210);
-        *(int*)((char*)self + 0x70) = 1;
-        char* x = *(char**)(*(char**)((char*)self + 0x60) + 0x70);
+        *(int*)((char*)self->CurrentFrame + 0x8) = 0;
+        AIsetseed((char*)self->CurrentFrame + 0x1C214);
+        *(int*)((char*)self->AI + 0x8) = *(int*)((char*)self->CurrentFrame + 0x1C210);
+        self->State = 1;
+        char* x = *(char**)((char*)self->AI + 0x70);
         int targetRider = x ? *(int*)(x + 0x18) : 0;
-        cCamera_switchChaseControllerTargetRider(*(void**)(*(char**)(*(char**)((char*)self + 0x5C) + 0x84) + 0x4), targetRider);
+        cCamera_switchChaseControllerTargetRider(*(void**)(*(char**)((char*)self->Game + 0x84) + 0x4), targetRider);
     }
 }
 #endif
@@ -604,22 +605,22 @@ void cReplay_setReplayState(void* self, int val);
  * restores the frame (cPlaybackMan_restoreFrame), sets mode 0 and switches the chase camera back to the first rider (AI
  * + 0x28).
  */
-extern "C" void cPlaybackMan_stopPreview(void* self)
+extern "C" void cPlaybackMan_stopPreview(cPlaybackMan* self)
 {
-    if (*(int*)((char*)self + 0x70) == 1) {
-        cAI_purgeMissionRiders(*(void**)((char*)self + 0x60));
-        cAI_reinitMissionRiders(*(void**)((char*)self + 0x60));
-        void* replay = *(void**)(*(char**)((char*)self + 0x5C) + 0x28);
+    if (self->State == 1) {
+        cAI_purgeMissionRiders(self->AI);
+        cAI_reinitMissionRiders(self->AI);
+        void* replay = *(void**)((char*)self->Game + 0x28);
         cReplay_setReplayState(replay, *(int*)((char*)replay + 0x4));
         cPlaybackMan_restoreFrame(self);
-        *(int*)((char*)self + 0x70) = 0;
-        int targetRider = *(int*)(*(char**)((char*)self + 0x60) + 0x28);
-        cCamera_switchChaseControllerTargetRider(*(void**)(*(char**)(*(char**)((char*)self + 0x5C) + 0x84) + 0x4), targetRider);
+        self->State = 0;
+        int targetRider = *(int*)((char*)self->AI + 0x28);
+        cCamera_switchChaseControllerTargetRider(*(void**)(*(char**)((char*)self->Game + 0x84) + 0x4), targetRider);
     }
 }
 #endif
 
-extern "C" void* cPlaybackMan_restoreFrame(void*);
+extern "C" void* cPlaybackMan_restoreFrame(cPlaybackMan*);
 
 //100%
 INCLUDE_ASM("replay/playbackman", cPlaybackMan_startPerform);
@@ -631,11 +632,11 @@ INCLUDE_ASM("replay/playbackman", cPlaybackMan_startPerform);
  * cPlaybackMan_stop ends with cPlaybackMan_stopPerform. Unlike cPlaybackMan_startPreview it checks no mode and does not
  * reseed the AI. No retail caller was found.
  */
-extern "C" void cPlaybackMan_startPerform(void *self)
+extern "C" void cPlaybackMan_startPerform(cPlaybackMan* self)
 {
     cPlaybackMan_saveFrame(self);
-    *(int *)(*(char **)((char *)self + 4) + 8) = 0;
-    *(int *)((char *)self + 0x70) = 2;
+    *(int *)((char*)self->CurrentFrame + 8) = 0;
+    self->State = 2;
 }
 #endif
 
@@ -649,7 +650,7 @@ INCLUDE_ASM("replay/playbackman", cPlaybackMan_stopPerform__FPv);
  */
 void cPlaybackMan_stopPerform(void* self)
 {
-    cPlaybackMan_restoreFrame(self);
+    cPlaybackMan_restoreFrame((cPlaybackMan*)self);
     *(int*)((char*)self + 0x70) = 0;
 }
 #endif
@@ -657,7 +658,7 @@ void cPlaybackMan_stopPerform(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("replay/playbackman", cPlaybackMan_stop);
 #ifdef SKIP_ASM
-extern "C" void cPlaybackMan_stopPreview(void* self);
+extern "C" void cPlaybackMan_stopPreview(cPlaybackMan* self);
 void cPlaybackMan_stopPerform(void* self);
 
 /**
@@ -666,9 +667,9 @@ void cPlaybackMan_stopPerform(void* self);
  * Mode (+0x70) 1 calls cPlaybackMan_stopPreview, mode 2 cPlaybackMan_stopPerform; other modes do nothing. Called by
  * cPlaybackMan_restart and the mission scripts.
  */
-extern "C" void cPlaybackMan_stop(void* self)
+extern "C" void cPlaybackMan_stop(cPlaybackMan* self)
 {
-    switch (*(int*)((char*)self + 0x70)) {
+    switch (self->State) {
     case 0:
     default:
         break;
@@ -718,30 +719,30 @@ struct sPbAxes_26CE50 {
  */
 // Replay channel step: mode 1 plays back one packed frame of axis values, mode 3 records one.
 // Returns 1 when the buffer is exhausted (or full), 0 otherwise.
-extern "C" int cPlaybackMan_isPauseAI(void* self)
+extern "C" int cPlaybackMan_isPauseAI(cPlaybackMan* self)
 {
     float vals[24];
-    if (*(int*)((char*)self + 0x70) == 1) {
-        sPbBuf_26CE50* buf = *(sPbBuf_26CE50**)((char*)self + 0x4);
+    if (self->State == 1) {
+        sPbBuf_26CE50* buf = (sPbBuf_26CE50*)self->CurrentFrame;
         if (buf->pos < buf->end) {
             unsigned char* cursor = &buf->data[buf->pos];
             int n = *cursor++;
             for (int i = 0; i < n; i++)
                 vals[i] = *cursor++ * 0.003921568859368563f;
-            (*(sPbBuf_26CE50**)((char*)self + 0x4))->pos += 1 + n;
-            cInputPad_update(*(void**)((char*)self + 0x68), n, vals);
+            ((sPbBuf_26CE50*)self->CurrentFrame)->pos += 1 + n;
+            cInputPad_update(self->InputPad, n, vals);
             return 0;
         } else {
             return 1;
         }
-    } else if (*(int*)((char*)self + 0x70) == 3) {
-        sPbBuf_26CE50* buf = *(sPbBuf_26CE50**)((char*)self + 0x4);
+    } else if (self->State == 3) {
+        sPbBuf_26CE50* buf = (sPbBuf_26CE50*)self->CurrentFrame;
         if (buf->pos < buf->size - 0x18) {
             unsigned char* cursor = &buf->data[buf->pos];
-            int n = (*(sPbAxes_26CE50**)((char*)self + 0x64))->count;
+            int n = ((sPbAxes_26CE50*)self->RealInputPad)->count;
             *cursor++ = n;
             for (int i = 0; i < n; i++) {
-                sPbAxes_26CE50* axes = *(sPbAxes_26CE50**)((char*)self + 0x64);
+                sPbAxes_26CE50* axes = (sPbAxes_26CE50*)self->RealInputPad;
                 float axisValue;
                 if (i < axes->count)
                     axisValue = axes->items[i].value;
@@ -750,9 +751,9 @@ extern "C" int cPlaybackMan_isPauseAI(void* self)
                 *cursor = (int)(axisValue * 255.0f);
                 vals[i] = *cursor++ * 0.003921568859368563f;
             }
-            (*(sPbBuf_26CE50**)((char*)self + 0x4))->pos += 1 + n;
-            (*(sPbBuf_26CE50**)((char*)self + 0x4))->end += 1 + n;
-            cInputPad_update(*(void**)((char*)self + 0x68), n, vals);
+            ((sPbBuf_26CE50*)self->CurrentFrame)->pos += 1 + n;
+            ((sPbBuf_26CE50*)self->CurrentFrame)->end += 1 + n;
+            cInputPad_update(self->InputPad, n, vals);
             return 0;
         } else {
             return 1;
@@ -780,11 +781,11 @@ struct sPbEntry_0026CFE8 {
  * @param id  the playback file id
  * @return the entry index, or -1 when no entry has that id
  */
-extern "C" int cPlaybackMan_findFileById(void *self, int id)
+extern "C" int cPlaybackMan_findFileById(cPlaybackMan* self, int id)
 {
-    int count = *(int *)((char *)self + 0x50);
+    int count = self->NumPlaybackFiles;
     for (int i = 0; i < count; i++) {
-        sPbEntry_0026CFE8 *entries = *(sPbEntry_0026CFE8 **)((char *)self + 0x58);
+        sPbEntry_0026CFE8 *entries = (sPbEntry_0026CFE8*)self->PlaybackFiles;
         if (entries[i].id == id) {
             return i;
         }
@@ -808,15 +809,15 @@ extern "C" void MEM_fill(void* dst, int c, int n);
  * @param idx  the index in the playback file table (+0x58)
  * @return 1 when the file's data was unpacked, 0 when the frame was reset instead
  */
-extern "C" int cPlaybackMan_setupFile(void* self, int idx)
+extern "C" int cPlaybackMan_setupFile(cPlaybackMan* self, int idx)
 {
-    char* entry = (char*)(idx * 0xC + *(int*)((char*)self + 0x58)); // PORT: pointer held as int
+    char* entry = (char*)(idx * 0xC + (int)self->PlaybackFiles); // PORT: pointer held as int
     int data = *(int*)(entry + 4);
     if (data != 0) {
-        HUFF_decode((void*)data, 0, (int)*(void**)((char*)self + 4));
+        HUFF_decode((void*)data, 0, (int)self->CurrentFrame);
         return 1;
     }
-    char* buf = *(char**)((char*)self + 4);
+    char* buf = (char*)self->CurrentFrame;
     MEM_fill(buf, 0, 0x1C22C);
     *(int*)(buf + 0) = 0xDBAC0101;
     *(int*)(buf + 4) = 0x1C200;

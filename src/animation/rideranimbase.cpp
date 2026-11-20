@@ -1,4 +1,5 @@
 #include "common.h"
+#include "animation/animsequencer.h"
 #include "animation/rideranimbase.h"
 
 //100%
@@ -1417,9 +1418,9 @@ inline sRiderAnim_00313508::sRiderAnim_00313508(int o)
  * @param owner  the sequence id (the AI anim id for rider sequences)
  * @return @p self
  */
-extern "C" sRiderAnim_00313508* cAnimSequence_cAnimSequence(sRiderAnim_00313508* self, int owner)
+extern "C" sRiderAnim_00313508* cAnimSequence_cAnimSequence(cAnimSequence* self, int owner)
 {
-    return new (self) sRiderAnim_00313508(owner);
+    return new (((sRiderAnim_00313508*)self)) sRiderAnim_00313508(owner);
 }
 #endif
 

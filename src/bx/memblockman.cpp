@@ -1,4 +1,5 @@
 #include "common.h"
+#include "bx/execman.h"
 
 //100%
 INCLUDE_ASM("bx/memblockman", cMemMan_initialize);
@@ -1052,24 +1053,24 @@ extern "C" void DeleteSema(int);
  * thread (+0x4030) and the loader thread (+0x14040), then deletes the timer, loader, sync (+0x18) and halt (+0xC)
  * semaphores.
  */
-extern "C" void cPS2ExecutionMan_purge(void* self)
+extern "C" void cPS2ExecutionMan_purge(cPS2ExecutionMan* self)
 {
     DisableIntc(3);
-    RemoveIntcHandler(3, *(int*)((char*)self + 0x14290));
+    RemoveIntcHandler(3, self->mIntcHandlerId);
     EnableIntc(3);
-    *(volatile int*)((char*)self + 0x20) = 1;
-    SignalSema(*(int*)((char*)self + 0x14044));
-    SignalSema(*(int*)((char*)self + 0x4034));
+    self->mQuit = (int)1;
+    SignalSema(self->mLoadSema);
+    SignalSema(self->mTimerSema);
     SleepThread();
     SleepThread();
-    TerminateThread(*(int*)((char*)self + 0x4030));
-    DeleteThread(*(int*)((char*)self + 0x4030));
-    TerminateThread(*(int*)((char*)self + 0x14040));
-    DeleteThread(*(int*)((char*)self + 0x14040));
-    DeleteSema(*(int*)((char*)self + 0x4034));
-    DeleteSema(*(int*)((char*)self + 0x14044));
-    DeleteSema(*(int*)((char*)self + 0x18));
-    DeleteSema(*(int*)((char*)self + 0xC));
+    TerminateThread(self->mTimerThreadId);
+    DeleteThread(self->mTimerThreadId);
+    TerminateThread(self->mLoadThreadId);
+    DeleteThread(self->mLoadThreadId);
+    DeleteSema(self->mTimerSema);
+    DeleteSema(self->mLoadSema);
+    DeleteSema(self->mSyncSema);
+    DeleteSema(self->mHaltSema);
 }
 #endif
 
@@ -1084,9 +1085,9 @@ extern "C" void func_0031A3C0(void* buf);
  * Slot 11 of the PS2 execution manager vtable D_0048DB68 (cExecutionMan_prepause in the base vtable); cPS2ExecutionMan_wait
  * calls it before it blocks on the sync semaphore.
  */
-extern "C" void cPS2ExecutionMan_prepause(void* self)
+extern "C" void cPS2ExecutionMan_prepause(cPS2ExecutionMan* self)
 {
-    if (*(int*)((char*)self + 0x14048) != 0) {
+    if ((int)self->mpLoadModule != 0) {
         func_0031A3C0((char*)self + 0x14080);
     }
 }
@@ -1101,9 +1102,9 @@ INCLUDE_ASM("bx/memblockman", cPS2ExecutionMan_postpause);
  * Slot 12 of the PS2 execution manager vtable D_0048DB68 (cExecutionMan_postpause in the base vtable); cPS2ExecutionMan_wait
  * calls it after its wait on the sync semaphore ends.
  */
-extern "C" void cPS2ExecutionMan_postpause(void* self)
+extern "C" void cPS2ExecutionMan_postpause(cPS2ExecutionMan* self)
 {
-    if (*(int*)((char*)self + 0x14048) != 0) {
+    if ((int)self->mpLoadModule != 0) {
         func_0031A308((char*)self + 0x14080);
     }
 }
@@ -1133,17 +1134,17 @@ struct sMemBlkVEntryB {
  * (+0x18), clears the waiting flag, drains any extra signals with PollSema (it loops while PollSema returns the
  * semaphore id), and calls vtable slot 12 (cPS2ExecutionMan_postpause).
  */
-extern "C" void cPS2ExecutionMan_wait(void* self)
+extern "C" void cPS2ExecutionMan_wait(cPS2ExecutionMan* self)
 {
-    *(int*)((char*)self + 0x1C) = 1;
-    sMemBlkVEntryA* vt = *(sMemBlkVEntryA**)((char*)self + 0x8);
+    self->mIsWaiting = 1;
+    sMemBlkVEntryA* vt = (sMemBlkVEntryA*)self->mVtbl;
     vt[11].fn((char*)self + vt[11].delta);
-    WaitSema(*(int*)((char*)self + 0x18));
-    *(int*)((char*)self + 0x1C) = 0;
-    while (PollSema(*(int*)((char*)self + 0x18)) == *(int*)((char*)self + 0x18))
+    WaitSema(self->mSyncSema);
+    self->mIsWaiting = 0;
+    while (PollSema(self->mSyncSema) == self->mSyncSema)
     {
     }
-    sMemBlkVEntryB* vt2 = *(sMemBlkVEntryB**)((char*)self + 0x8);
+    sMemBlkVEntryB* vt2 = (sMemBlkVEntryB*)self->mVtbl;
     vt2[12].fn((char*)self + vt2[12].delta);
 }
 #endif
@@ -1156,10 +1157,10 @@ extern "C" void SignalSema(int);
 /**
  * Wakes a thread blocked in cPS2ExecutionMan_wait: signals the sync semaphore (+0x18) when the waiting flag (+0x1C) is set.
  */
-extern "C" void cPS2ExecutionMan_sync(void* self)
+extern "C" void cPS2ExecutionMan_sync(cPS2ExecutionMan* self)
 {
-    if (*(int*)((char*)self + 0x1C) != 0) {
-        SignalSema(*(int*)((char*)self + 0x18));
+    if (self->mIsWaiting != 0) {
+        SignalSema(self->mSyncSema);
     }
 }
 #endif
@@ -1190,9 +1191,9 @@ INCLUDE_ASM("bx/memblockman", cPS2ExecutionMan_signalHalt);
  * callback when its flag is set (cAppMan_checkHalt passes 1). Never returns.
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void cPS2ExecutionMan_signalHalt(void* self)
+extern "C" void cPS2ExecutionMan_signalHalt(cPS2ExecutionMan* self)
 {
-    SignalSema(*(int*)((char*)self + 0xC));
+    SignalSema(self->mHaltSema);
     for (;;) {
         SleepThread();
     }
@@ -1309,13 +1310,13 @@ int cExecutionMan_timerFunction_1(void* self) __asm__("cExecutionMan_timerFuncti
  * (+0x20) is still clear, calls cExecutionMan_timerFunction (which runs cAppMan_timerFunction on cAppMan_TheAppMan, the per-tick update).
  * Once the quit flag is set, wakes the main thread (+0x10) and sleeps.
  */
-extern "C" void func_0031AC08(void* self)
+extern "C" void func_0031AC08(cPS2ExecutionMan* self)
 {
-    while (WaitSema(*(int*)((char*)self + 0x4034)), *(volatile int*)((char*)self + 0x20) == 0)
+    while (WaitSema(self->mTimerSema), (volatile int)self->mQuit == 0)
     {
         cExecutionMan_timerFunction_1(self);
     }
-    WakeupThread(*(int*)((char*)self + 0x10));
+    WakeupThread(self->mMainThreadId);
     SleepThread();
 }
 #endif
@@ -1362,10 +1363,10 @@ extern "C" void SignalSema(int);
  *
  * @param module  the job object
  */
-extern "C" void cPS2ExecutionMan_load(void* self, int module)
+extern "C" void cPS2ExecutionMan_load(cPS2ExecutionMan* self, int module)
 {
-    *(int*)((char*)self + 0x14048) = module;
-    SignalSema(*(int*)((char*)self + 0x14044));
+    self->mpLoadModule = (cAppModule*)module;
+    SignalSema(self->mLoadSema);
 }
 #endif
 
@@ -1377,9 +1378,9 @@ INCLUDE_ASM("bx/memblockman", cPS2ExecutionMan_isLoadDone);
  *
  * @return 1 when no job is pending, else 0
  */
-extern "C" int cPS2ExecutionMan_isLoadDone(void* self)
+extern "C" int cPS2ExecutionMan_isLoadDone(cPS2ExecutionMan* self)
 {
-    return *(int*)((char*)self + 0x14048) == 0;
+    return (int)self->mpLoadModule == 0;
 }
 #endif
 
