@@ -180,7 +180,7 @@ INCLUDE_ASM("util/menu", cMenuItem_lock);
  * @param enable  nonzero to lock
  */
 extern "C" void cMenuItem_lock(cMenuItem* self, int enable) {
-    int *flags = (int *)((char *)self + 4);
+    int *flags = (int *)((char*)&self->Flags);
 
     if (enable != 0) {
         *flags |= 8;

@@ -32,7 +32,7 @@ extern "C" void cUIStateStack_pushExplicit(cUIStateStack* self, cUIStateStack_pu
 {
     *(int*)((char*)state + 0x1C) |= 0x60;
     state->v04();
-    cList_addToEnd((cList*)((char*)self + 0x1C), (cListNode*)state);
+    cList_addToEnd((cList*)((char*)&self->mExplicitStack), (cListNode*)state);
 }
 #endif
 
@@ -558,7 +558,7 @@ static inline void cUIStateStack_destroyStates_purge(cList* list)
 extern "C" void cUIStateStack_destroyStates(cUIStateStack* self)
 {
     cUIStateStack_destroyStates_purge(((cList*)self));
-    cUIStateStack_destroyStates_purge((cList*)((char*)self + 0x1C));
+    cUIStateStack_destroyStates_purge((cList*)((char*)&self->mExplicitStack));
 }
 #endif
 
@@ -585,7 +585,7 @@ extern "C" void* cUIStateStack_findState(cUIStateStack* self, int id)
             n = *(char**)(n + 4);
         }
     }
-    n = (char*)cList_first((cList*)((char*)self + 0x1C));
+    n = (char*)cList_first((cList*)((char*)&self->mExplicitStack));
     if (n != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
             if (*(int*)(n + 0xC) == id) {
@@ -840,7 +840,7 @@ struct sVEntry39FD38 {
  */
 extern "C" void cUIThing_deleteAnimation(cUIThing* self)
 {
-    void* obj = self->mpAnim;
+    cUIAnimation* obj = self->mpAnim;
     if (obj != 0) {
         sVEntry39FD38* vt = *(sVEntry39FD38**)((char*)obj + 0x10);
         vt[1].fn((char*)obj + vt[1].delta, 3);

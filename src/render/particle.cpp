@@ -12478,7 +12478,7 @@ extern "C" void cPS2GraphicsMan_RenderFullScreenEffects(cPS2GraphicsMan* self, i
         "sqc2      $vf3, 0x20(%1)\n"
         "sqc2      $vf4, 0x30(%1)\n"
         :
-        : "r"((char*)self + 0x6AF0), "r"((char*)((i << 6) + (int)self) + 0x5930)
+        : "r"((char*)&self->mScreenMatrix), "r"((char*)((i << 6) + (int)self) + 0x5930)
         : "memory");
     ((sPartPair*)((char*)self + 0x59B0))[i] = *(sPartPair*)&self->mScissor[0];
     self->unk_59C0 = i + 1;

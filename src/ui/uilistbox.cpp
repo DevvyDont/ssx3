@@ -409,7 +409,7 @@ extern "C" void cUIMenu_setInputMap(cUIMenu* self, char a1);
 extern "C" void cUIMenu_setUIData(cUIMenu* self)
 {
     cUIThing_setUIData(self);
-    char count = cList_size((char*)self + 0x74);
+    char count = cList_size((char*)&self->mList);
     *(char*)&self->mScrollItemNumVisible = count;
     *(char*)&self->mScrollItemNum = count;
     cUIMenu_setInputMap(self, 0);

@@ -36,7 +36,7 @@ extern "C" void cWScriptCache_init(cWScriptCache* self, int count)
         cMemMan_free((char*)self->mpCache - 0x10);
     }
     self->mNumSections = (unsigned int)count;
-    char** slot = (char**)((char*)self + 0x4);
+    char** slot = (char**)((char*)&self->mpCache);
     char* mem = (char*)operator_new_tag(count * 0xC + 0x10, str_tWScriptCache, 0x20000000, 0);
     char* arr = mem + 0x10;
     *(int*)mem = count;

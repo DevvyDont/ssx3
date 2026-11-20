@@ -390,7 +390,7 @@ extern "C" void cStaticEmitter_render1(void*);
 extern "C" void cParticleModifier_render(cParticleModifier* self)
 {
     if (self->Complete == 0) {
-        cStaticEmitter_render1((char*)self + 0x50);
+        cStaticEmitter_render1((char*)&self->Emitter);
     }
 }
 #endif

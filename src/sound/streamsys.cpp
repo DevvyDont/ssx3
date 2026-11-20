@@ -589,7 +589,7 @@ extern "C" int cStreamInstance_Queue(cStreamInstance* self, int holdTime, int bu
     if (self->mBigHeader != 0) {
         int n;
         BIG_locateentry(self->mBigHeader, buf, 0, &n, 0);
-        return SNDSTRM_queuefile(self->mHandle, holdTime, (int)((char*)self + 0x14), off + n);
+        return SNDSTRM_queuefile(self->mHandle, holdTime, (int)((char*)&self->mBigFileName), off + n);
     }
     return SNDSTRM_queuefile(self->mHandle, holdTime, buf, off);
 }
@@ -614,7 +614,7 @@ extern "C" int cStreamInstance_Queue1(cStreamInstance* self, int holdTime, int e
     if (dec != 0) {
         int n;
         BIG_locateentry(dec, 0, element, &n, 0);
-        return SNDSTRM_queuefile(self->mHandle, holdTime, (int)((char*)self + 0x14), off + n);
+        return SNDSTRM_queuefile(self->mHandle, holdTime, (int)((char*)&self->mBigFileName), off + n);
     }
     return 0;
 }

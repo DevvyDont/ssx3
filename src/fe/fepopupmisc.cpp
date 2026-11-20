@@ -237,9 +237,9 @@ extern "C" void cFEPopupScreenPos_onCreateScreen(cFEPopupScreenPos* self)
     }
     void* be = cBE_getBE();
     cBE_getInterface_Fv(be, 4);
-    int* offsetX = (int*)((char*)self + 0x48);
+    int* offsetX = (int*)((char*)&self->mX);
     *offsetX = optB6_EE10(D_00535610_EE10);
-    int* p4C = (int*)((char*)self + 0x4C);
+    int* p4C = (int*)((char*)&self->mY);
     *p4C = optB5_EE10(D_00535610_EE10);
 }
 #endif
@@ -7796,7 +7796,7 @@ extern "C" void cOVState_MESSAGECENTER_onWidgetEvent(cOVState_MESSAGECENTER* sel
     case 1: {
         int i;
         for (i = 0; i < 8; i++) {
-            void* subjectText = ((void**)((char*)self + 0xFC))[i];
+            void* subjectText = ((void**)((char*)&self->mpSubject))[i];
             sVEntry001E4200* vt = *(sVEntry001E4200**)((char*)subjectText + 8);
             vt[5].fn((char*)subjectText + vt[5].delta, 0);
         }

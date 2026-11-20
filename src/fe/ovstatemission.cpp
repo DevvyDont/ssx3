@@ -237,7 +237,7 @@ extern char str_data_ui_mapgfx_big[];
 extern "C" void* cFEAsyncManager_cFEAsyncManager(cFEAsyncManager* self)
 {
     if (BXFILE_exists(str_data_ui_mapgfx_big) != 0) {
-        FILESYS_addbigsync(str_data_ui_mapgfx_big, 0, 100, (char*)self + 0x58C);
+        FILESYS_addbigsync(str_data_ui_mapgfx_big, 0, 100, (char*)&self->mMapGfxBigFile);
     }
     return ((void*)self);
 }

@@ -2645,7 +2645,7 @@ INCLUDE_ASM("fe/ovstatehud", cBXLoadIndicator_Update);
 extern "C" void cBXLoadIndicator_Update(cBXLoadIndicator* self)
 {
     if ((int)self->mLoadIndicators != 0) {
-        float* animFrame = (float*)((char*)self + 8);
+        float* animFrame = (float*)((char*)&self->mAnimFrame);
         float two = 2.0f;
         *animFrame += 0.01666666753590107f;
         while (*animFrame > two) {

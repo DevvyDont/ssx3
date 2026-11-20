@@ -25,7 +25,7 @@ struct sRiderSphere_329910 {
  */
 cRiderSphereTree* cRiderSphereTree_cRiderSphereTree(cRiderSphereTree* self)
 {
-    new ((char*)self + 0x2C) sRiderSphere_329910[20];
+    new ((char*)&self->listLen) sRiderSphere_329910[20];
     self->boundBone = -1;
     self->sphMask = 0xFFFFFFFF;
     return self;

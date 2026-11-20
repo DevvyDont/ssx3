@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uithing.h"
 #include "ui/uiinput.h"
 #include "ui/uiengine.h"
 #include "ui/uislider.h"
@@ -659,9 +660,9 @@ struct sUIFlags1C {
  */
 extern "C" void cUIScreen_parseScreenFocusGain(cUIScreen* self)
 {
-    void* state = self->mpState;
+    cUIState* state = self->mpState;
     if (state != 0) {
-        ((sUIFlags1C*)((char*)state + 0x1c))->mode = 3;
+        ((sUIFlags1C*)((char*)&state->mAttrState))->mode = 3;
     }
 }
 #endif
@@ -677,9 +678,9 @@ extern "C" void cUIGroup_setFocus(void*, int);
 extern "C" void cUIScreen_parseScreenFocusLose(cUIScreen* self)
 {
     cUIGroup_setFocus(&self->mRootGroup, 0);
-    void* state = self->mpState;
+    cUIState* state = self->mpState;
     if (state != 0) {
-        ((sUIFlags1C*)((char*)state + 0x1c))->mode = 6;
+        ((sUIFlags1C*)((char*)&state->mAttrState))->mode = 6;
     }
 }
 #endif
@@ -711,9 +712,9 @@ INCLUDE_ASM("ui/uiscreen", cUIScreen_parseScreenEnd);
 extern "C" void cUIScreen_parseScreenEnd(cUIScreen* self, void* pFrame, void* pKCP, void* pThread)
 {
     *(unsigned int*)((char*)pThread + 0x10) &= 0xFEFFFFFFU;
-    void* state = self->mpState;
+    cUIState* state = self->mpState;
     if (state != 0) {
-        ((sUIFlags1C*)((char*)state + 0x1c))->mode = 7;
+        ((sUIFlags1C*)((char*)&state->mAttrState))->mode = 7;
     }
 }
 #endif
@@ -1134,7 +1135,7 @@ extern "C" void cUIScreen_update(cUIScreen* self)
     if (thread != 0) {
         frame = *(unsigned short*)((char*)thread + 0xC);
     } else {
-        thread = cList_first((cList*)((char*)self + 0x18));
+        thread = cList_first((cList*)((char*)&self->mThreads));
         if (thread != 0) {
             frame = *(unsigned short*)((char*)thread + 0xC);
         }
@@ -1182,12 +1183,12 @@ extern void* cUIScrollBar_vtbl[];
 extern "C" void cUIScrollBar__cUIScrollBar(cUIScrollBar* self, int flags)
 {
     self->mVtbl = cUIScrollBar_vtbl;
-    void* background = self->mpObjBackground;
+    cUIThing* background = self->mpObjBackground;
     if (background != 0) {
         sDeleteTarget* dtorEntry = *(sDeleteTarget**)((char*)background + 0x8);
         dtorEntry->fn((char*)background + dtorEntry->field_0x8, 3);
     }
-    void* knob = self->mpObjKnob;
+    cUIThing* knob = self->mpObjKnob;
     if (knob != 0) {
         sDeleteTarget* dtorEntry = *(sDeleteTarget**)((char*)knob + 0x8);
         dtorEntry->fn((char*)knob + dtorEntry->field_0x8, 3);
@@ -1479,12 +1480,12 @@ extern void* cUISlider_vtbl[];
 extern "C" void cUISlider__cUISlider(cUISlider* self, int flags)
 {
     self->mVtbl = cUISlider_vtbl;
-    void* background = self->mpObjBackground;
+    cUIThing* background = self->mpObjBackground;
     if (background != 0) {
         sDeleteTarget* dtorEntry = *(sDeleteTarget**)((char*)background + 0x8);
         dtorEntry->fn((char*)background + dtorEntry->field_0x8, 3);
     }
-    void* knob = self->mpObjKnob;
+    cUIThing* knob = self->mpObjKnob;
     if (knob != 0) {
         sDeleteTarget* dtorEntry = *(sDeleteTarget**)((char*)knob + 0x8);
         dtorEntry->fn((char*)knob + dtorEntry->field_0x8, 3);
@@ -1750,13 +1751,13 @@ extern void* cListNode_vtbl[];
 extern "C" void cUIState__cUIState(cUIState* self, int flags)
 {
     self->mVtbl = cUIState_vtbl;
-    cList_destroyList_v((char*)self + 0x24);
+    cList_destroyList_v((char*)&self->mScreens);
     *(void***)((char*)self + 0x3C) = cList_vtbl;
-    cList_destroyList_v((char*)self + 0x24);
+    cList_destroyList_v((char*)&self->mScreens);
     *(void***)((char*)self + 0x38) = cListNode_vtbl;
     cListNode_destroyListNode((char*)self + 0x30);
     *(void***)((char*)self + 0x2C) = cListNode_vtbl;
-    cListNode_destroyListNode((char*)self + 0x24);
+    cListNode_destroyListNode((char*)&self->mScreens);
     self->mVtbl = cListNode_vtbl;
     cListNode_destroyListNode(self);
     if (flags & 1) {
@@ -1836,7 +1837,7 @@ struct sVEntry39E4C0 {
  */
 extern "C" void cUIState_onGainFocus(cUIState* self)
 {
-    void* n = cList_first((cList*)((char*)self + 0x24));
+    void* n = cList_first((cList*)((char*)&self->mScreens));
     if (n != 0) {
         sVEntry39E4C0* vt = (sVEntry39E4C0*)self->mVtbl;
         vt[13].fn((char*)self + vt[0xD].delta, (char*)n + 0x40);
@@ -1989,7 +1990,7 @@ struct sVEntry39E6B8b {
  */
 extern "C" void cUIState_onRender2D(cUIState* self)
 {
-    void* n = cList_first((cList*)((char*)self + 0x24));
+    void* n = cList_first((cList*)((char*)&self->mScreens));
     if (n != 0) {
         sVEntry39E6B8a* vt = (sVEntry39E6B8a*)self->mVtbl;
         vt[0xE].fn((char*)self + vt[0xE].delta);
@@ -2019,7 +2020,7 @@ INCLUDE_ASM("ui/uiscreen", cUIState_addScreen);
  */
 extern "C" void cUIState_addScreen(cUIState* self, cListNode* node)
 {
-    cList_addToEnd((cList*)((char*)self + 0x24), node);
+    cList_addToEnd((cList*)((char*)&self->mScreens), node);
 }
 #endif
 
@@ -2045,7 +2046,7 @@ struct sVEntry_cUIState_hideScreens {
  */
 extern "C" void cUIState_hideScreens(cUIState* self)
 {
-    void* n = cList_first((cList*)((char*)self + 0x24));
+    void* n = cList_first((cList*)((char*)&self->mScreens));
     if (n != 0) {
         do {
             char* obj = (char*)n + 0x40;
@@ -2080,7 +2081,7 @@ struct sVEntry_cUIState_showScreens {
  */
 extern "C" void cUIState_showScreens(cUIState* self)
 {
-    void* n = cList_first((cList*)((char*)self + 0x24));
+    void* n = cList_first((cList*)((char*)&self->mScreens));
     if (n != 0) {
         do {
             char* obj = (char*)n + 0x40;
@@ -2108,7 +2109,7 @@ extern "C" void cUIScreen_update(cUIScreen*);
  */
 extern "C" void cUIState_updateScreens(cUIState* self)
 {
-    void* n = cList_first((cList*)((char*)self + 0x24));
+    void* n = cList_first((cList*)((char*)&self->mScreens));
     if (n != 0) {
         do {
             cUIScreen_update((cUIScreen*)n);

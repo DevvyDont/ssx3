@@ -1396,7 +1396,7 @@ extern "C" void cGameLoadScreen_purge(cGameLoadScreen* self)
     }
     int i;
     for (i = 0; i < 2; i++) {
-        void* textureId = ((void**)((char*)self + 0x10))[i];
+        void* textureId = ((void**)((char*)&self->mTexID))[i];
         if (textureId != 0) {
             ((cWorld002332E8*)GrMan)->v50(textureId);
         }

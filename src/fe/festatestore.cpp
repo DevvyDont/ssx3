@@ -43,7 +43,7 @@ public:
  */
 extern "C" void cFEStateUberTrick_costVisible(cFEStateUberTrick* self, int on)
 {
-    void* screen = cList_first((cList*)((char*)self + 0x24));
+    void* screen = cList_first((cList*)((char*)&self->mScreens));
     cWidget_00184668* costNum = (cWidget_00184668*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cost_num));
     if (costNum) {
         costNum->setVisible(on);
@@ -100,7 +100,7 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
  */
 extern "C" void cFEStateUberTrick_previewVisible(cFEStateUberTrick* self, int on)
 {
-    void* screen = cList_first((cList*)((char*)self + 0x24));
+    void* screen = cList_first((cList*)((char*)&self->mScreens));
     cWidget_00184780* w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_btext5));
     if (w) {
         w->v09(on);
@@ -134,7 +134,7 @@ extern char str_InstBtn2[];
  */
 extern "C" void cFEStateUberTrick_trickVisible(cFEStateUberTrick* self, int on)
 {
-    void* screen = cList_first((cList*)((char*)self + 0x24));
+    void* screen = cList_first((cList*)((char*)&self->mScreens));
     cWidget_00184780* w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_To_Execute_info));
     if (w) {
         w->v09(on);

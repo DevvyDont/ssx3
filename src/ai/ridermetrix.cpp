@@ -2598,10 +2598,10 @@ extern "C" float cRiderMetrix_earnNameAndPoints(cRiderMetrix* self, int stance, 
         self->Totals.NumUberTricks += self->CurTrickNumUbers;
         self->Totals.NumSuperUberTricks += self->CurTrickNumSuperUbers;
         self->Totals.NumUberGrindTricks += self->CurTrickNumUberGrinds;
-        self->Totals.BiggestAirTime = MAX(*(float*)((char*)self + 0x30), *(float*)((char*)self + 332));
-        self->Totals.BiggestGrabTime = MAX(*(float*)((char*)self + 72), *(float*)((char*)self + 336));
-        self->Totals.BiggestRailDist = MAX(*(float*)((char*)self + 36), *(float*)((char*)self + 340));
-        self->Totals.BiggestHandplantTime = MAX(*(float*)((char*)self + 0x78), *(float*)((char*)self + 344));
+        self->Totals.BiggestAirTime = MAX(self->CurTrickAirSec, *(float*)((char*)self + 332));
+        self->Totals.BiggestGrabTime = MAX(self->CurTrickMaxGrabHoldSec, *(float*)((char*)self + 336));
+        self->Totals.BiggestRailDist = MAX(self->CurTrickRailslideDist, *(float*)((char*)self + 340));
+        self->Totals.BiggestHandplantTime = MAX(self->CurTrickHandplantHoldSec, *(float*)((char*)self + 344));
         self->Totals.TotalPoints += self->CurTrickBonusPoints;
         total = points + self->CurTrickBonusPoints + inverted;
 

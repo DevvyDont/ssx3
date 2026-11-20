@@ -1,4 +1,5 @@
 #include "common.h"
+#include "visualfx/fog.h"
 #include "sound/ssxaudio.h"
 #include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
@@ -387,14 +388,14 @@ extern "C" void cGame_renderFogVolumes(cGame* self, void* world)
     void* fog = (char*)world + 0x78B8;
     int n = *(int*)((char*)world + 0x78B4);
     if (n != 0) {
-        void* fogMan = self->FogMan;
+        cFogParticleMan* fogMan = self->FogMan;
         sVEntry_renderFog* vt = *(sVEntry_renderFog**)((char*)fogMan + 0x4);
         vt[2].fn((char*)fogMan + vt[2].delta, fog, n, 0);
     }
     fog = (char*)world + 0x7AC0;
     n = *(int*)((char*)world + 0x7ABC);
     if (n != 0) {
-        void* fogMan = self->FogMan;
+        cFogParticleMan* fogMan = self->FogMan;
         sVEntry_renderFog* vt = *(sVEntry_renderFog**)((char*)fogMan + 0x4);
         vt[2].fn((char*)fogMan + vt[2].delta, fog, n, 2);
     }

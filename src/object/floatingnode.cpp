@@ -668,7 +668,7 @@ extern "C" void cFloatingNode_updateIntersectInfo(cFloatingNode* self, sV4_F790*
     cMoveNode_updateIntersectInfo((self), intInfo);
     sFlVE_F790* vt = (sFlVE_F790*)self->mVtbl;
     sV4_F790* transform = vt[24].fn((char*)self + vt[24].delta);
-    sFlBase_F790* base = (sFlBase_F790*)((char*)self + 0x2C);
+    sFlBase_F790* base = (sFlBase_F790*)((char*)&self->ZSpring);
     sV4_F790 arm = vu0Sub_F790(intInfo[0], pos_F790(transform));
     sV4_F790 axisX = vu0MtxMul_F790(transform, &D_004FF140_F790[0]);
     sV4_F790 axisY = vu0MtxMul_F790(transform, &D_004FF150_F790[0]);

@@ -2510,7 +2510,7 @@ void tParticleEmitter_tParticleEmitter(void*);
 extern "C" void* cStaticEmitter_cStaticEmitter(cStaticEmitter* self)
 {
     self->mVtbl = (void**)cStaticEmitter_vtbl;
-    tParticleEmitter_tParticleEmitter((char*)self + 0x10);
+    tParticleEmitter_tParticleEmitter((char*)&self->Emitter);
     self->m_initialized = 0;
     *(int*)&self->mCurrentFlipTexture = 0;
     return ((void*)self);
@@ -2976,7 +2976,7 @@ extern "C" void cStaticEmitter_readFromReplayFrame(cStaticEmitter* self, cStream
     stream->v02(&buf, 0xC);
     self->Duration = buf.a;
     self->Emitter.EndTime = buf.b;
-    tParticleEmitter_calcBoundBox((char*)&self->Emitter, (char*)self + 0x160);
+    tParticleEmitter_calcBoundBox((char*)&self->Emitter, (char*)&self->BoundBox);
     self->m_initialized = buf.c;
 }
 #endif
@@ -3003,7 +3003,7 @@ extern "C" cBaseClass_DynamicEmitter* cBaseClass_DynamicEmitter_cBaseClass_Dynam
     *(int*)&self->mCurrentFlipTexture = 0;
     *(int*)&self->mFlipTextureRate = 0;
     self->mVtbl = cBaseClass_DynamicEmitter_vtbl;
-    tParticleEmitter_tParticleEmitter((char*)self + 0x20);
+    tParticleEmitter_tParticleEmitter((char*)&self->m_emitter);
     self->m_initialized = 0;
     self->m_enabled = 1;
     self->m_numSubEmitters = -1;

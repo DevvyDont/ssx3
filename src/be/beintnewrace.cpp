@@ -554,7 +554,7 @@ INCLUDE_ASM("be/beintnewrace", cBENewRaceInterface_setGamePath);
 extern "C" void cBENewRaceInterface_setGamePath(void* self, int mode)
 {
     cBERaceDB* beRaceDB = &(*(&cBENewRaceInterface_newRace));
-    *((char*)beRaceDB + 0x49) = mode;
+    *((char*)&beRaceDB->cGamePath) = mode;
     switch (mode)
     {
     case 0:

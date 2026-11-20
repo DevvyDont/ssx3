@@ -476,7 +476,7 @@ extern "C" int cSSXScriptEngine_ForcePlayUpdate(cSSXScriptEngine* self, int key)
 {
     int result = cBXScriptEngine_ForcePlayUpdate(self, key);
     if (result != 0) {
-        sScrSlot8AD0* slot = (sScrSlot8AD0*)((char*)self + 0x6D0);
+        sScrSlot8AD0* slot = (sScrSlot8AD0*)((char*)&self->mObjectCameraManager);
         for (int i = 0; i < 2; i++, slot++) {
             sSsxVEntry8AD0* vt = (sSsxVEntry8AD0*)self->mVtbl;
             int id = slot->id;
@@ -4883,7 +4883,7 @@ extern "C" void* cScriptObjCamera_cScriptObjCamera(cScriptObjCamera* self, int v
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)self + 0x30), "r"(t4mat_Identity)
+        : "r"((char*)&self->mBaseTransform), "r"(t4mat_Identity)
         : "memory");
     self->mViewIndex = viewIndex;
     *(int*)&self->mBaseRotX = 0;

@@ -691,7 +691,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_SetAudioUpdateState);
  */
 extern "C" void cSSXAudio_SetAudioUpdateState(cSSXAudio* self, int State)
 {
-    int* updateState = (int*)((char*)self + 0x6474);
+    int* updateState = (int*)((char*)&self->mAudioUpdateState);
     if (*updateState != State) {
         *updateState = State;
     }
@@ -1014,7 +1014,7 @@ extern "C" void cBankManager_BANK_UnLoad(void*, int);
 extern "C" void cSSXAudio_FrontEndPurge(cSSXAudio* self)
 {
     if (self->unk_608C == 2 || self->unk_6090 == 2) {
-        func_002B3AC0((char*)self + 0x118);
+        func_002B3AC0((char*)&self->MusicSys);
     } else {
         func_002B3D48((char*)&self->MusicSys, 1.0f);
     }
@@ -1299,15 +1299,15 @@ extern "C" void cSSXAudio_InGameDeInit(cSSXAudio* self)
 {
     cSSXAudio_ResumeAudio(self);
     cSSXAudio_SetAudioUpdateState(self, 0);
-    func_002B3AC0((char*)self + 0x118);
+    func_002B3AC0((char*)&self->MusicSys);
     cSSXAudio_StopTone(self, 0.0f);
     func_002A4550(self);
     cSSXAudio_StopAllRiderSounds(self);
     saDeleteObj((void**)((char*)self + 0x625C));
     saDeleteObj((void**)((char*)self + 0x6260));
-    saDeleteObj((void**)((char*)self + 0x5FA0));
+    saDeleteObj((void**)((char*)&self->mpAmbienceQuery));
     saDeleteObj((void**)((char*)self + 0x5FA4));
-    saDeleteObj((void**)((char*)self + 0x6C80));
+    saDeleteObj((void**)((char*)&self->mpMixQuery));
     saDeleteObj((void**)((char*)self + 0x6C84));
     cSSXAudio_ResetAttachedSounds(self);
     cSSXAudio_MixVolume(self, 0);
@@ -3390,7 +3390,7 @@ extern "C" void func_00289520(cSSXAudio* self, const char* name)
 {
     char parser[2064];
     char buf[0x40];
-    func_002B3EB0((char*)self + 0x118);
+    func_002B3EB0((char*)&self->MusicSys);
     FileParser_FileParser(parser, str_x_H, 0x100);
     if (FileParser_FindPartialSection(parser, name) != 0) {
         FileParser_SkipSectionNames(parser);
@@ -3402,14 +3402,14 @@ extern "C" void func_00289520(cSSXAudio* self, const char* name)
             }
         }
     }
-    *(int*)((char*)self + 0x6238) = 20;
+    self->mPlayListIndex = 20;
     for (int i = 0; i < 20; i++) {
         if (func_004165A8(((sAudio_9470*)self)->names[i], name) == 0) {
-            *(int*)((char*)self + 0x6238) = i;
+            self->mPlayListIndex = i;
             break;
         }
     }
-    func_002B4060((char*)self + 0x118);
+    func_002B4060((char*)&self->MusicSys);
     *(long*)((char*)self + 0x518) = (long)self->MusicSys.mActiveMap;
     FileParser__FileParser(parser, 2);
 }
@@ -3773,7 +3773,7 @@ extern "C" void cSSXAudio_PauseAudio(cSSXAudio* self)
 {
     if (self->mAudioPaused == 0) {
         cSSXAudio_PauseSFX(self);
-        func_002B3A70((char*)self + 0x118);
+        func_002B3A70((char*)&self->MusicSys);
         self->mAudioPaused = 1;
     }
 }

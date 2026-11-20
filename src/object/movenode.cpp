@@ -1,4 +1,6 @@
 #include "common.h"
+#include "render/particle.h"
+#include "object/modifierblock.h"
 #include "object/instancenode.h"
 #include "object/railmodifier.h"
 #include "object/physicsmodifier.h"
@@ -2007,7 +2009,7 @@ extern "C" void* cPositionModifier_cPositionModifier(cPositionModifier* self, sM
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)self + 0x50), "r"(t4mat_Identity)
+        : "r"((char*)&self->Transform), "r"(t4mat_Identity)
         : "memory");
     self->RootTransformDirty = 1;
     *(sMoveQuad*)&self->Transform.row[3] = *(sMoveQuad*)&self->Offset;
@@ -2051,7 +2053,7 @@ extern "C" void* cPositionModifier_cPositionModifier1(cPositionModifier* self, v
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)self + 0x50), "r"(src)
+        : "r"((char*)&self->Transform), "r"(src)
         : "memory");
     self->RootTransformDirty = 1;
     return ((void*)self);
@@ -2704,7 +2706,7 @@ extern "C" void* cAvaSplineModifier_cAvaSplineModifier(cAvaSplineModifier* self,
         "sqc2      $vf4, 0x30(%0)\n"
         ".set reorder\n"
         :
-        : "r"((char*)self + 0x40), "r"((char*)src + 0x10)
+        : "r"((char*)&self->Transform), "r"((char*)src + 0x10)
         : "memory");
     return ((void*)self);
 }
@@ -2746,7 +2748,7 @@ extern "C" void* cAvaSplineModifier_cAvaSplineModifier1(cAvaSplineModifier* self
     self->Instance = (tInstanceRecord*)readInstFn->fn((char*)stream + readInstFn->delta);
     sMnVEntrySer7798* readFn = &(*(sMnVEntrySer7798**)stream)[2];
     readFn->fn((char*)stream + readFn->delta, payload, 0x30);
-    cObjectInterface_getAvaSplineTransform_2(self->Instance, (char*)self + 0x40);
+    cObjectInterface_getAvaSplineTransform_2(self->Instance, (char*)&self->Transform);
     return ((void*)self);
 }
 #endif
@@ -2764,7 +2766,7 @@ void* cObjectInterface_getAvaSplineTransform_2(void*, void*) __asm__("cObjectInt
  */
 extern "C" void cAvaSplineModifier_update(cAvaSplineModifier* self)
 {
-    cObjectInterface_getAvaSplineTransform_2(self->Instance, (char*)self + 0x40);
+    cObjectInterface_getAvaSplineTransform_2(self->Instance, (char*)&self->Transform);
 }
 #endif
 
@@ -2869,7 +2871,7 @@ extern "C" void cMoveNode_update(cMoveNode* self);
 extern "C" void cParticleNode_update(cParticleNode* self)
 {
     cMoveNode_update((cMoveNode*)self);
-    void* mb = self->ModifierBlock;
+    tModifierBlock* mb = self->ModifierBlock;
     if (mb != 0 && *(int*)((char*)mb + 0x10) != 0) {
         return;
     }
@@ -3295,7 +3297,7 @@ extern "C" void cMultiParticle__cMultiParticle(cMultiParticle* self, int flags)
     if (buf != 0) {
         cMemMan_free(buf);
     }
-    void* obj = self->Emitter;
+    cStaticEmitter* obj = self->Emitter;
     if (obj != 0) {
         sMnDtorVEntry7FA0* vt = *(sMnDtorVEntry7FA0**)((char*)obj + 0x18C);
         vt[1].fn((char*)obj + vt[1].delta, 3);

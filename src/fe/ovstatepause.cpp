@@ -2788,8 +2788,8 @@ extern "C" void cOVState_SAVEREPLAY_displayStatus(cOVState_SAVEREPLAY* self)
         for (int i = 1; i < 5; i++) {
             sprintf(name, str_pct_dmemory_card_b, i);
             widget = getObj_DF40(((cState_DF40*)self), name);
-            (*(cMCSub_DF40**)(mp + 0x434))->v14(i - 1, (char*)self + 0x230);
-            cUIText_setUnicodeString(widget, (unsigned short*)((char*)self + 0x230));
+            (*(cMCSub_DF40**)(mp + 0x434))->v14(i - 1, (char*)&self->mTitle);
+            cUIText_setUnicodeString(widget, (unsigned short*)((char*)&self->mTitle));
             if (!(*(cMCSub_DF40**)(mp + 0x434))->v67(i - 1) && !(*(cMCSub_DF40**)(mp + 0x434))->v66(i - 1)
                 && (*(cMCSub_DF40**)(mp + 0x434))->v55()) {
                 if (sel == 0) {
@@ -3527,8 +3527,8 @@ extern "C" void cOVState_SAVEOPTIONS_displayStatus(cOVState_SAVEOPTIONS* self)
         vt[4].fn(localeThis, GetHashValue32(str_kT_MEMEmpty_b));
         sprintf(name, str_pct_dmemory_card_b, 1);
         widget = getObj_ECA0(((cState_ECA0*)self), name);
-        (*(cMCSub_ECA0**)(mp + 0x434))->v14(0, (char*)self + 0x230);
-        cUIText_setUnicodeString(widget, (unsigned short*)((char*)self + 0x230));
+        (*(cMCSub_ECA0**)(mp + 0x434))->v14(0, (char*)&self->mTitle);
+        cUIText_setUnicodeString(widget, (unsigned short*)((char*)&self->mTitle));
         if (!(*(cMCSub_ECA0**)(mp + 0x434))->v67(0) && !(*(cMCSub_ECA0**)(mp + 0x434))->v66(0)
             && (*(cMCSub_ECA0**)(mp + 0x434))->v55()) {
             widget->v25(0);

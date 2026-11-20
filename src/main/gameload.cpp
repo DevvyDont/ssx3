@@ -1004,7 +1004,7 @@ INCLUDE_ASM("main/gameload", cGame_sectionLoaded);
  */
 extern "C" void cGame_sectionLoaded(cGame* self)
 {
-    void* gameAI = self->AI;
+    cAI* gameAI = self->AI;
     if (gameAI != 0) {
         void* focusMan = *(void**)((char*)gameAI + 0xA4);
         if (focusMan != 0) {
@@ -1046,7 +1046,7 @@ extern "C" void cGame_sectionUnloading(cGame* self, int id)
     cBucketMan_mergeBucket(bm, 1);
     cBucketMan_purgeBucket1(bm, 1, id);
     cBucketMan_purgeBucket1(bm, 8, id);
-    void* gameAI = self->AI;
+    cAI* gameAI = self->AI;
     if (gameAI != 0) {
         void* focusMan = *(void**)((char*)gameAI + 0xA4);
         if (focusMan != 0) {
@@ -1759,7 +1759,7 @@ extern "C" void cGame_updateState(cGame* self_)
     if (self->mPendingPreloadStateID != 0) {
         switch (self->mPendingPreloadStateID) {
     case 1:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)((char*)self + 0xB0);
+        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)((char*)&self->mStates);
         break;
     case 2:
         (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)((char*)self + 0xD0);
@@ -1823,7 +1823,7 @@ extern "C" void cGame_updateState(cGame* self_)
     (*(cGameState_0F40**)&self->mPrevState) = ((cGameState_0F40*)self->mCurrentState);
     switch (next) {
     case 1:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)((char*)self + 0xB0);
+        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)((char*)&self->mStates);
         self->mCurrentStateID = 1;
         break;
     case 2:
@@ -2161,7 +2161,7 @@ extern "C" void cGame_readFromReplayFrame(cGame* self_, cStream_14D0* stream)
     stream->read(&self->mPrevStateID, 4);
     stream->read(&self->mPendingStateID, 4);
     stream->read(&self->mPendingStateStartupFlag, 4);
-    cGFEventStartState_readFromReplayFrame((char*)self + 0xB0, stream);
+    cGFEventStartState_readFromReplayFrame((char*)&self->mStates, stream);
     cGFPreEventState_readFromReplayFrame_14D0((char*)self + 0xD0, stream);
     cGFGateState_readFromReplayFrame_14D0((char*)self + 0xE0, stream);
     cGFRidingState_readFromReplayFrame_14D0((char*)self + 0xF0, stream);
@@ -2181,7 +2181,7 @@ extern "C" void cGame_readFromReplayFrame(cGame* self_, cStream_14D0* stream)
         (*(cGameState_14D0**)&self->mCurrentState) = 0;
         break;
     case 1:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0xB0);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)&self->mStates);
         break;
     case 2:
         (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0xD0);
@@ -2235,7 +2235,7 @@ extern "C" void cGame_readFromReplayFrame(cGame* self_, cStream_14D0* stream)
     }
     switch (self->mPrevStateID) {
     case 1:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0xB0);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)&self->mStates);
         break;
     case 2:
         (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0xD0);

@@ -410,7 +410,7 @@ extern "C" void cInstanceNode_buildMeshMat(void* model, int bone, sRmMat44C5A0* 
 extern "C" void cRailModifier_getInvMat(cRailModifier* self, sRmMat44C5A0* mat)
 {
     cInstanceNode_buildMeshMat(self->Instance, self->Mesh, mat);
-    sRmMat44C5A0* src = (sRmMat44C5A0*)((char*)self + 0x50);
+    sRmMat44C5A0* src = (sRmMat44C5A0*)((char*)&self->XForm);
     sRmMat44C5A0 copy;
     sRmMat44C5A0 product;
     vu0MulMatC5A0(&product, mat, src);
@@ -2364,8 +2364,8 @@ extern "C" void cRollerModifier_collide(cRollerModifier* self)
     char tree[0x70];
     cWorldSphTree_cWorldSphTree(tree, (char*)&self->SphTree, 1);
     float zeroF = 0.0f;
-    float overlap = cBXNash_terrainIntersect1_EDC8(cObjectInterface_getNash(), tree, &hit, (char*)self + 0x2C0);
-    overlap -= SphereTree_GetResolution((char*)self + 0xE0);
+    float overlap = cBXNash_terrainIntersect1_EDC8(cObjectInterface_getNash(), tree, &hit, (char*)&self->RollerHint);
+    overlap -= SphereTree_GetResolution((char*)&self->SphTree);
     if (zeroF < overlap) {
         sRmVec4 push = vu0ScaleEDC8(hit.normal, overlap + 2.0f);
         cRollerModifier_translateMe((sRmBody*)self, &push);
@@ -5170,7 +5170,7 @@ INCLUDE_ASM("object/railmodifier", cMoveNode_updateRootTransform);
  */
 extern "C" void cMoveNode_updateRootTransform(cMoveNode* self)
 {
-    unsigned short* nodeFlags = (unsigned short*)((char*)self + 0x12);
+    unsigned short* nodeFlags = (unsigned short*)((char*)&self->Flags);
     *nodeFlags &= 0xFFFE;
 }
 #endif

@@ -1001,7 +1001,7 @@ extern "C" void cGFNextHeatState_gainFocus(void* self)
         cSSXScriptEngine_PlayTransportSequence(sc, 1, 0);
     }
     cSSXScriptEngine_ResetNISList(ScriptEngine, 0);
-    cSSXScriptEngine_AppendStartSequence(ScriptEngine, *(int*)((char*)gm + 0x98) ? 3 : 2);
+    cSSXScriptEngine_AppendStartSequence(ScriptEngine, gm->bIsLastHeat ? 3 : 2);
     cSSXScriptEngine_ReadyNISList(ScriptEngine, 0);
     cBXLoadIndicator_Show(SSXApp->Game->LoadIndicator, 3);
     *(int*)((char*)self + 0x14) = 0;

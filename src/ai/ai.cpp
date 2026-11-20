@@ -71,7 +71,7 @@ extern "C" void* cAI_cAI(cAI* self)
     *(void**)&self->mRaceHandler = cAIStateHandler_vtbl;
     *(void**)&self->mEndRaceHandler = D_00458500;
     *(void**)&self->mShutdownHandler = cShutdownHandler_vtbl;
-    sAIState_1286A0** slot = (sAIState_1286A0**)((char*)self + 0xA4);
+    sAIState_1286A0** slot = (sAIState_1286A0**)((char*)&self->FocusMan);
     *slot = new (str_FocusMan, 0, 0) sAIState_1286A0;
     self->DangerMan = (cDangerMan*)(new (str_DangerMan, 0, 0) sAIObj_1286A0(self));
     self->RaceRankType = 0;
@@ -1704,7 +1704,7 @@ extern "C" void func_0012A998(cAI* self)
 {
     for (int i = 0; i < self->NumberOfComputersAllocated; i++)
     {
-        char** list = (char**)((char*)self + 0x48);
+        char** list = (char**)((char*)&self->Computers);
         cRider* rider = *(cRider**)(list[i] + 0x18);
         if (rider->mRenderFlag != 0)
         {
@@ -1935,7 +1935,7 @@ extern "C" void cAI_prepareToPurgeMissionRiders(cAI* self)
 {
     for (int i = 0; i < self->NumberOfMissionRidersLoaded; i++)
     {
-        char* obj = ((char**)((char*)self + 0x70))[i];
+        char* obj = ((char**)((char*)&self->MissionRiders))[i];
         cRider* rider = *(cRider**)(obj + 0x18);
         if (rider->mRenderFlag != 0)
         {
@@ -2620,7 +2620,7 @@ INCLUDE_ASM("ai/ai", cAI_setPodiumActorList);
  */
 extern "C" void cAI_setPodiumActorList(cAI* self, int* src)
 {
-    int* dst = (int*)((char*)self + 0x20);
+    int* dst = (int*)((char*)&self->PodiumActorList);
     for (int i = 0; i < 2; i++)
     {
         dst[i] = src[i];
@@ -2638,7 +2638,7 @@ INCLUDE_ASM("ai/ai", cAI_getPodiumActorList);
  */
 extern "C" void cAI_getPodiumActorList(cAI* self, int* dst)
 {
-    int* src = (int*)((char*)self + 0x20);
+    int* src = (int*)((char*)&self->PodiumActorList);
     for (int i = 0; i < 2; i++)
     {
         dst[i] = src[i];
@@ -5364,7 +5364,7 @@ static inline sFx_12F230* initFx_12F230(sFx_12F230* p, const sColor_12F230& col)
  */
 extern "C" void cResetControl_gainFocus(cResetControl* self)
 {
-    int* flag = (int*)((char*)self + 4);
+    int* flag = (int*)((char*)&self->FadePercent);
     *flag = 0;
     *(int*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = 0;
     if (cResetControl_shouldTransition(self))
@@ -5477,7 +5477,7 @@ INCLUDE_ASM("ai/ai", cResetControl_shouldTransition);
  */
 extern "C" int cResetControl_shouldTransition(cResetControl* self)
 {
-    void* rider = self->mRider;
+    cRider* rider = self->mRider;
     return *(int*)((char*)rider + 0x87C) != 0 && *(int*)((char*)rider + 0x870) >= 0;
 }
 #endif
@@ -6920,7 +6920,7 @@ extern "C" void cBoardPressControl_forceExit(cBoardPressControl* self)
 {
     cBoardPressControl_autoCompletePivot(self);
     cBoardPressControl_blendOutOfPivot(self);
-    void* rider = self->mRider;
+    cRider* rider = self->mRider;
     int pressType = *(int*)((char*)rider + 0x330);
     if (pressType >= 1 && pressType <= 2)
     {

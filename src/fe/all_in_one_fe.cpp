@@ -3530,7 +3530,7 @@ extern "C" void *func_00221228(cOVState_TRANSPORT* ovState, int engine, int over
     unsigned short chatInit = str_sp_b[0];
     ((char*)ovState->mVtbl) = D_004733F8;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
-    cUITemplate_MAP_init((char*)ovState + 0x9C);
+    cUITemplate_MAP_init((char*)&ovState->mMap);
     return ((void*)ovState);
 }
 #endif
@@ -3595,7 +3595,7 @@ extern "C" void *func_002212C8(cOVState_MAP* ovState) {
     unsigned short chatInit = str_sp_b[0];
     ((char*)ovState->mVtbl) = cOVState_MAP_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
-    new ((char*)ovState + 0x9C) Elem[8];
+    new ((char*)&ovState->mbSessionUnlocked) Elem[8];
     return ((void*)ovState);
 }
 #endif
@@ -3634,7 +3634,7 @@ extern "C" void *cOVState_MAP_cOVState_MAP(cOVState_MAP* ovState, int engine, in
     unsigned short chatInit = str_sp_b[0];
     ((char*)ovState->mVtbl) = cOVState_MAP_vtbl;
     (*(unsigned short *)ovState->mszChatBuff) = chatInit;
-    new ((char*)ovState + 0x9C) Elem[8];
+    new ((char*)&ovState->mbSessionUnlocked) Elem[8];
     return ((void*)ovState);
 }
 #endif

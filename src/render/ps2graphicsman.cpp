@@ -1649,7 +1649,7 @@ extern "C" void cGraphicsMan_ForceActiveDrawState(cGraphicsMan* self, int* mask)
     int i;
     unsigned int j;
     for (i = 0; i < 4; i++) {
-        ((int*)((char*)self + 0xED8))[i] = ~mask[i];
+        ((int*)((char*)&self->m_activeDrawState))[i] = ~mask[i];
     }
     for (j = 0; j < 2; j++) {
         ((short*)((char*)self + 0xEE8))[j] = 0x7FFF;

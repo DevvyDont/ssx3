@@ -12821,7 +12821,7 @@ extern "C" void func_002B11B0(void*, int);
  */
 extern "C" void func_002A4B68(cSSXAudio* self)
 {
-    if (func_002B49E0((char*)self + 0x118) == 401) {
+    if (func_002B49E0((char*)&self->MusicSys) == 401) {
         func_002B11B0((char*)&self->SpeechSys, 0);
     }
 }
@@ -13854,7 +13854,7 @@ extern "C" void func_002A6648(cCrowdInstance* vself, int idx)
     tCrowdData* crowdData = &((&D_004A36F8->mCrowdData[0]))[idx];
     vself->mAmbientCheerIntensity = idx;
     vself->unk_188 = crowdData->mAttack + crowdData->mDecay;
-    int cheerSample = func_002A4CA0((sSndRandList*)((char*)crowdData + 0x18));
+    int cheerSample = func_002A4CA0((sSndRandList*)((char*)&crowdData->mFall));
     if (cheerSample == 0) return;
     func_002A8450((char**)D_004A36F8, vself->unk_0D8, cheerSample);
     sSnd6648Mgr* posMgr = (sSnd6648Mgr*)D_004A36F8->mpVBankManager;

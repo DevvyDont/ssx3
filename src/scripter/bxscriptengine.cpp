@@ -35,7 +35,7 @@ extern "C" void cBXScriptEngine_SetupBXEngine(cBXScriptEngine* self, int count, 
 {
     self->mpInSeqHeap = (char*)operator_new_tag(size, str_InSeqHeap, 0, 0);
     self->mpInSeq = (cInSeq*)cInSeq_cInSeq(cMemMan_alloc(0x20, str_InSeq, 0, 0),
-        self->mpInSeqHeap, size, maxUniqueAnimPlayers, (char*)self + 0x2AC);
+        self->mpInSeqHeap, size, maxUniqueAnimPlayers, (char*)&self->mInSeqCommVtbl);
     self->mScriptDatabaseSize = count;
     self->mpScriptDatabase = (tBXScriptState*)((sBXSlot*)operator_new_tag(count * 8, str_BXScriptDatabase, 0, 0));
     for (int i = 0; i < self->mScriptDatabaseSize; i++) {

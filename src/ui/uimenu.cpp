@@ -359,7 +359,7 @@ extern "C" void cUIMenu_render2D(cUIMenu* self, float x, float y)
     if (scrollBar != 0) {
         cUIScrollBar_setValues(scrollBar, self->mScrollItemOffset, self->mScrollItemNumVisible, self->mScrollItemNum);
     }
-    void* n = cList_first((cList*)((char*)self + 0x74));
+    void* n = cList_first((cList*)((char*)&self->mList));
     if (n != 0) {
         do {
             if ((*(int*)((char*)n + 0x14) >> 6) & 1) {
@@ -388,7 +388,7 @@ extern "C" void cUIMenu_setScrollableMenu(cUIMenu* self, char NumItems)
     *(char*)&self->mScrollItemCurrent = 0;
     *(char*)&self->mScrollItemNum = NumItems;
     *(int*)&self->mAttrMenu |= 4;
-    *(char*)&self->mScrollItemNumVisible = cList_size((char*)self + 0x74);
+    *(char*)&self->mScrollItemNumVisible = cList_size((char*)&self->mList);
     *(char*)&self->mScrollItemOffset = 0;
 }
 #endif
@@ -614,13 +614,13 @@ struct cUIPair_setVisible_sVEntry {
  */
 extern "C" void cUIPair_setVisible(cUIPair* self, int on)
 {
-    ((cUIPair_setVisible_sFlags*)((char*)self + 0x14))->on = (on != 0);
-    void* entry = self->mpEntry;
+    ((cUIPair_setVisible_sFlags*)((char*)&self->mAttr))->on = (on != 0);
+    cUIThing* entry = self->mpEntry;
     if (entry != 0) {
         cUIPair_setVisible_sVEntry* vt = *(cUIPair_setVisible_sVEntry**)((char*)entry + 8);
         vt[9].fn((char*)entry + vt[9].delta, on);
     }
-    void* widget = self->mpWidget;
+    cUIThing* widget = self->mpWidget;
     if (widget != 0) {
         cUIPair_setVisible_sVEntry* vt = *(cUIPair_setVisible_sVEntry**)((char*)widget + 8);
         vt[9].fn((char*)widget + vt[9].delta, on);
@@ -958,12 +958,12 @@ struct cUIPair_render2D_sVEntry {
  */
 extern "C" void cUIPair_render2D(cUIPair* self, float x, float y)
 {
-    void* entry = self->mpEntry;
+    cUIThing* entry = self->mpEntry;
     if (entry != 0) {
         cUIPair_render2D_sVEntry* vtEntry = &(*(cUIPair_render2D_sVEntry**)((char*)entry + 8))[17];
         vtEntry->fn((char*)entry + vtEntry->delta, x + self->mPosition.x, y + self->mPosition.y);
     }
-    void* widget = self->mpWidget;
+    cUIThing* widget = self->mpWidget;
     if (widget != 0) {
         cUIPair_render2D_sVEntry* vtEntry = &(*(cUIPair_render2D_sVEntry**)((char*)widget + 8))[17];
         vtEntry->fn((char*)widget + vtEntry->delta, x + self->mPosition.x, y + self->mPosition.y);
@@ -1040,12 +1040,12 @@ struct cUIProgress__cUIProgress_sVEntry {
 extern "C" void cUIProgress__cUIProgress(cUIProgress* self, int flags)
 {
     self->mVtbl = cUIProgress_vtbl;
-    void* background = self->mpObjBackground;
+    cUIThing* background = self->mpObjBackground;
     if (background != 0) {
         cUIProgress__cUIProgress_sVEntry* vt = *(cUIProgress__cUIProgress_sVEntry**)((char*)background + 8);
         vt[1].fn((char*)background + vt[1].delta, 3);
     }
-    void* knob = self->mpObjKnob;
+    cUIThing* knob = self->mpObjKnob;
     if (knob != 0) {
         cUIProgress__cUIProgress_sVEntry* vt = *(cUIProgress__cUIProgress_sVEntry**)((char*)knob + 8);
         vt[1].fn((char*)knob + vt[1].delta, 3);
@@ -1089,13 +1089,13 @@ struct cUIProgress_render2D_sVEntry {
  */
 extern "C" void cUIProgress_render2D(cUIProgress* self, float x, float y)
 {
-    void* background = self->mpObjBackground;
+    cUIThing* background = self->mpObjBackground;
     if (background != 0 && self->mpObjKnob != 0) {
         float px = x + self->mPosition.x;
         float py = y + self->mPosition.y;
         cUIProgress_render2D_sVEntry* vt = *(cUIProgress_render2D_sVEntry**)((char*)background + 8);
         vt[17].fn((char*)background + vt[17].delta, px, py);
-        void* knob = self->mpObjKnob;
+        cUIThing* knob = self->mpObjKnob;
         cUIProgress_render2D_sVEntry* vt2 = *(cUIProgress_render2D_sVEntry**)((char*)knob + 8);
         vt2[17].fn((char*)knob + vt2[17].delta, px, py);
     }
@@ -1125,12 +1125,12 @@ extern "C" void cUIProgress_update(cUIProgress* self, unsigned short ev)
         cUIAnimation_updateThing(self->mpAnim, self, self->mAnimPlaybackStatus, ev);
         cUIAnimation_updateFrame(self->mpAnim, self->mAnimPlaybackStatus);
     }
-    void* knob = self->mpObjKnob;
+    cUIThing* knob = self->mpObjKnob;
     if (knob != 0) {
         cUIProgress_update_sVEntry* vt = *(cUIProgress_update_sVEntry**)((char*)knob + 8);
         vt[19].fn((char*)knob + vt[19].delta, ev);
     }
-    void* background = self->mpObjBackground;
+    cUIThing* background = self->mpObjBackground;
     if (background != 0) {
         cUIProgress_update_sVEntry* vt = *(cUIProgress_update_sVEntry**)((char*)background + 8);
         vt[19].fn((char*)background + vt[19].delta, ev);

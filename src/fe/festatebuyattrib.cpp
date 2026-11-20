@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uimenu.h"
 #include "ui/uiinput.h"
 #include "ui/uistate.h"
 #include "ui/uithing.h"
@@ -134,7 +135,7 @@ extern "C" void cFEState_onGainFocus(void* self);
 extern "C" void cFEStateBuyAttrib_onGainFocus(cFEStateBuyAttrib* self)
 {
     cFEState_onGainFocus(self);
-    void* obj = self->pAttribMenu;
+    cUIMenu* obj = self->pAttribMenu;
     sVEntry001F49F8* vt = *(sVEntry001F49F8**)((char*)obj + 8);
     vt[7].fn((char*)obj + vt[7].delta, 1);
 }
@@ -459,7 +460,7 @@ extern "C" void cFEStateBuyAttrib_updateCostPerLevel(cFEStateBuyAttrib* self)
 {
     char buf[32];
     int i;
-    int* levels = (int*)((char*)self + 0x68);
+    int* levels = (int*)((char*)&self->mExperienceLevel);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 11);
     for (i = 0; i < 7; i++, levels++) {
         sprintf(buf, str_costpct_d, i);

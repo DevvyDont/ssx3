@@ -602,8 +602,8 @@ extern "C" void* cReplay_cReplay(cReplay* self)
         cReplayFrame_cReplayFrame(frame);
     }
     char* highlight = (char*)&self->Highlight;
-    cReplayFrameList_cReplayFrameList((char*)self + 0x3B0);
-    cReplayFrameList_cReplayFrameList((char*)self + 0x3BC);
+    cReplayFrameList_cReplayFrameList((char*)&self->FrameList);
+    cReplayFrameList_cReplayFrameList((char*)&self->FreeFrameList);
     for (int i = 1; i != -1; i--, highlight += 0xB4) {
         cReplayHighlight_reset(highlight);
     }
@@ -851,8 +851,8 @@ extern "C" void cReplay_purge(cReplay* self)
     for (i = 0; i < self->MaxFrames; i++) {
         cReplayFramePtr_purgeBlock((cReplayFramePtr*)(&((sFpEntry26F428*)&self->Frames[0])[i]));
     }
-    cReplayFrameList_reset((char*)self + 0x3B0);
-    cReplayFrameList_reset((char*)self + 0x3BC);
+    cReplayFrameList_reset((char*)&self->FrameList);
+    cReplayFrameList_reset((char*)&self->FreeFrameList);
 }
 #endif
 

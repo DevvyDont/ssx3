@@ -1,4 +1,6 @@
 #include "common.h"
+#include "camera/cameraalgolist.h"
+#include "ai/rider.h"
 #include "camera/race/racealgorithms.h"
 #include "camera/camerajitterer.h"
 #include "camera/cameraalgorithms.h"
@@ -70,7 +72,7 @@ extern "C" void* cCamera_cCamera(cCamera* self, int idx)
 {
     cSimpleCamera_cSimpleCamera(self);
     self->mVtbl = cCamera_vtbl;
-    cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm((char*)self + 0xC0);
+    cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm((char*)&self->ResultAlgorithm);
     self->ManualController = (cManualCameraController*)cManualCameraController_cManualCameraController(cMemMan_alloc(0x20, str_Manual_Cam_Controller, 0, 0), self);
     self->ChaseController = (cChaseCameraController*)cChaseCameraController_cChaseCameraController((cChaseCameraController*)cMemMan_alloc(68, str_Chase_Cam_Controller, 0, 0), idx, (int)self);
     self->ScriptController = (cScriptCameraController*)cScriptCameraController_cScriptCameraController(cMemMan_alloc(0x20, str_Script_Cam_Controller, 0, 0), idx, self);
@@ -1479,7 +1481,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getRotation);
  */
 extern "C" void* cRiderCameraTarget_getRotation(void* result, cRiderCameraTarget* target)
 {
-    void* rider = target->Rider;
+    cRider* rider = target->Rider;
     *(cQuad128*)result = *(cQuad128*)((char*)rider + 0x120);
     return result;
 }
@@ -1530,7 +1532,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getFront);
  */
 extern "C" void* cRiderCameraTarget_getFront(void* result, cRiderCameraTarget* target)
 {
-    void* rider = target->Rider;
+    cRider* rider = target->Rider;
     *(cQuad128*)result = *(cQuad128*)((char*)rider + 0x1b0);
     return result;
 }
@@ -1550,7 +1552,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getSide);
  */
 extern "C" void* cRiderCameraTarget_getSide(void* result, cRiderCameraTarget* target)
 {
-    void* rider = target->Rider;
+    cRider* rider = target->Rider;
     *(cQuad128*)result = *(cQuad128*)((char*)rider + 0x1a0);
     return result;
 }
@@ -1570,7 +1572,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getUp);
  */
 extern "C" void* cRiderCameraTarget_getUp(void* result, cRiderCameraTarget* target)
 {
-    void* rider = target->Rider;
+    cRider* rider = target->Rider;
     *(cQuad128*)result = *(cQuad128*)((char*)rider + 0x1c0);
     return result;
 }
@@ -1606,7 +1608,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getNormal);
  */
 extern "C" void* cRiderCameraTarget_getNormal(void* result, cRiderCameraTarget* target)
 {
-    void* rider = target->Rider;
+    cRider* rider = target->Rider;
     *(cQuad128*)result = *(cQuad128*)((char*)rider + 0x370);
     return result;
 }
@@ -1626,7 +1628,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getLastGroundNormal);
  */
 extern "C" void* cRiderCameraTarget_getLastGroundNormal(void* result, cRiderCameraTarget* target)
 {
-    void* rider = target->Rider;
+    cRider* rider = target->Rider;
     *(cQuad128*)result = *(cQuad128*)((char*)rider + 0x380);
     return result;
 }
@@ -1693,7 +1695,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getRemainingAirTime);
  */
 extern "C" float cRiderCameraTarget_getRemainingAirTime(cRiderCameraTarget* self)
 {
-    void* rider = self->Rider;
+    cRider* rider = self->Rider;
     void* airPredictor = *(void**)((char*)rider + 0x788);
     return *(float*)((char*)airPredictor + 0x98) - *(float*)((char*)airPredictor + 0xa0);
 }
@@ -1712,7 +1714,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_getApexTime);
  */
 extern "C" float cRiderCameraTarget_getApexTime(cRiderCameraTarget* self)
 {
-    void* rider = self->Rider;
+    cRider* rider = self->Rider;
     void* airPredictor = *(void**)((char*)rider + 0x788);
     return *(float*)((char*)airPredictor + 0x9c) - *(float*)((char*)airPredictor + 0xa0);
 }
@@ -1792,7 +1794,7 @@ INCLUDE_ASM("camera/camera", cRiderCameraTarget_isAirPredictorDone);
  */
 extern "C" int cRiderCameraTarget_isAirPredictorDone(cRiderCameraTarget* self)
 {
-    void* rider = self->Rider;
+    cRider* rider = self->Rider;
     void* airPredictor = *(void**)((char*)rider + 0x788);
     int simState = *(int*)((char*)airPredictor + 0xAC);
     int done = 0;
@@ -4348,8 +4350,8 @@ extern "C" void cCameraAlgoList_removeAll(void* list);
 extern "C" void cChaseCameraController_addAlgorithm(cChaseCameraController* self, cCameraAlgorithm* algo, float w)
 {
     self->LatestAlgoType = algo->AlgorithmType;
-    void* list = self->AlgorithmList;
-    if (*(int*)((char*)list + 0x4) == 0) {
+    cCameraAlgoList* list = self->AlgorithmList;
+    if (list->Length == 0) {
         cCameraAlgoList_insert(list, algo, 1, 1.0f);
         return;
     }
@@ -5159,7 +5161,7 @@ extern "C" void cLookAtChaseAlgorithm_setupHalfPipeCam(cLookAtChaseAlgorithm* se
                 Normalize_162A20(dir);
                 if (dir.z > 0.8500000238418579f)
                 {
-                    void* obj = self->Target;
+                    cRiderCameraTarget* obj = self->Target;
                     sVEntry_162A20* vt = *(sVEntry_162A20**)obj;
                     sVec4_162A20 groundNormal = vt[9].fn((char*)obj + vt[9].delta);
                     if (groundNormal.z < 0.10000000149011612f)

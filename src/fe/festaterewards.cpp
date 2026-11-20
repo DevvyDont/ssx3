@@ -1758,12 +1758,12 @@ struct sVEntry001D10A8 {
  */
 extern "C" void cFEStateRewardGalleryBase_updateArrows(cFEStateRewardGalleryBase* self)
 {
-    void* obj = self->mpArrowUp;
+    cUIIcon* obj = self->mpArrowUp;
     if (obj != 0) {
         sVEntry001D10A8* vt = *(sVEntry001D10A8**)((char*)obj + 8);
         vt[9].fn((char*)obj + vt[9].delta, self->mFirstVisibleRow > 0);
     }
-    void* obj2 = self->mpArrowDown;
+    cUIIcon* obj2 = self->mpArrowDown;
     if (obj2 != 0) {
         sVEntry001D10A8* vt = *(sVEntry001D10A8**)((char*)obj2 + 8);
         vt[9].fn((char*)obj2 + vt[9].delta,
@@ -2911,7 +2911,7 @@ extern "C" int cFEStatePreviewReward_onInputBegin(cFEStatePreviewReward* self, c
     }
     int i;
     for (i = 0; i < 3; i++) {
-        char* bitmap = ((char**)((char*)self + 0x48))[i];
+        char* bitmap = ((char**)((char*)&self->mpIcon))[i];
         if (bitmap != 0) {
             sVE_1FF0b* vt2 = *(sVE_1FF0b**)(bitmap + 8);
             vt2[9].fn(bitmap + vt2[9].delta, 0);

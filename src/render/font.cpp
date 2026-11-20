@@ -3979,7 +3979,7 @@ extern "C" void* cPS2GraphicsMan_cPS2GraphicsMan(cPS2GraphicsMan* self)
 {
     cGraphicsMan_cGraphicsMan(self);
     self->mVtbl = cPS2GraphicsMan_vtbl;
-    new ((char*)self + 0x10E0) sRenderSlot5288[12];
+    new ((char*)&self->mViewStack) sRenderSlot5288[12];
     new ((char*)self + 0x11A0) sRenderSlot5288[8];
     new ((char*)self + 0x1220) sRenderSlot5288[2];
     new ((char*)self + 0x1240) sRenderSlot5288[2];
@@ -5168,7 +5168,7 @@ extern "C" int cPS2GraphicsMan_CalcSortZ(cPS2GraphicsMan* self, void* vec)
         "vmtir      $vi1, $vf11w\n"
         "cfc2.ni    %0, $vi1\n"
         : "=&r"(sortZ)
-        : "r"(((void*)self)), "r"(vec), "r"((char*)self + 0x58A0)
+        : "r"(((void*)self)), "r"(vec), "r"((char*)&self->mNetMatrix)
         : "memory");
     return (int)sortZ;
 }

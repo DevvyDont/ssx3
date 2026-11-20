@@ -1808,7 +1808,7 @@ extern "C" void* cMultiSplineModifier_updateNodes(cMultiSplineModifier* multiSpl
     for (int k = 1; k < self->NumModels; k++) {
         offsets[k] = offsets[k - 1] + step;
     }
-    char* sub = (char*)self + 0x4;
+    char* sub = (char*)&self->NumModels;
     for (int k = 0; k < self->NumModels; k++) {
         if (offsets[k] < 0.0f) {
             offsets[k] = offsets[k] + self->Spline.Length;
@@ -1824,7 +1824,7 @@ extern "C" void* cMultiSplineModifier_updateNodes(cMultiSplineModifier* multiSpl
         float rx = 0.0f;
         float ry = rx;
         float rz = rx;
-        cSpline_getPos_AC20((char*)self + 0x48, &pt->pos, &pt->dir, &pt->f20, offsets[i]);
+        cSpline_getPos_AC20((char*)&self->Spline, &pt->pos, &pt->dir, &pt->f20, offsets[i]);
         pt->f50 = pt->dir.x * pt->dir.x;
         pt->f54 = pt->dir.y * pt->dir.y;
         if (self->OrientType == 2 || self->OrientType == 3) {

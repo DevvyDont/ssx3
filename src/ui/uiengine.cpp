@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiscreen.h"
 #include "ui/uiinput.h"
 #include "ui/uistate.h"
 #include "ui/uiengine.h"
@@ -52,7 +53,7 @@ extern "C" void* cUIEngine_cUIEngine(cUIEngine* self)
     self->mpInput = 0;
     self->mpLocaleInterface = 0;
     self->mpSound = 0;
-    cList_cList((char*)self + 0x18);
+    cList_cList((char*)&self->mStateStack);
     cList_cList((char*)self + 0x34);
     *(int*)((char*)self + 0x58) = 0;
     *(int*)((char*)self + 0x5C) = 0;
@@ -111,7 +112,7 @@ extern "C" void cUIEngine__cUIEngine(cUIEngine* self, int flags)
     }
     delete ((cUIEngOwnB*)fields->mpInput);
     delete ((cUIEngOwnC*)fields->mpSound);
-    cUITextureBank__cUITextureBank((cUITextureBank*)((char*)self + 0x58), 2);
+    cUITextureBank__cUITextureBank((cUITextureBank*)((char*)&self->mTextureBank), 2);
     cUIStateStack__cUIStateStack((char*)&self->mStateStack, 2);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -146,7 +147,7 @@ extern "C" int cUIEngine_loadFile(cUIEngine* self, int id)
     // PORT: the font setter stores the data pointer in an int.
     cUIAnimationBank_setData((char*)&self->mAnimBank, (int)(file + *(int*)(file + 0x8)));
     file = self->mpData;
-    cUITextureBank_setData((cUITextureBank*)((char*)self + 0x58), id, file + *(int*)(file + 0x10));
+    cUITextureBank_setData((cUITextureBank*)((char*)&self->mTextureBank), id, file + *(int*)(file + 0x10));
     return 1;
 }
 #endif
@@ -335,7 +336,7 @@ extern "C" void cUIEngine_render2D(cUIEngine* self)
     setF4_12_7DF8(D_004A289C_7df8->top, 20);
     setF4_2_7DF8(D_004A289C_7df8->top, 5);
     D_004A289C_7df8->top->f0_2 = 3;
-    cUIStateStack_render2D((char*)self + 0x18);
+    cUIStateStack_render2D((char*)&self->mStateStack);
     D_004A289C_7df8->v22();
     D_004A289C_7df8->v32();
     D_004A289C_7df8->top--;
@@ -354,7 +355,7 @@ INCLUDE_ASM("ui/uiengine", cUIEngine_render3D);
  */
 extern "C" void cUIEngine_render3D(cUIEngine* self)
 {
-    cUIStateStack_render3D((char*)self + 0x18);
+    cUIStateStack_render3D((char*)&self->mStateStack);
 }
 #endif
 
@@ -377,10 +378,10 @@ extern "C" void cUIStateStack_update(void*);
  */
 extern "C" void cUIEngine_update(cUIEngine* self)
 {
-    void* obj = self->mpInput;
+    cUIInput* obj = self->mpInput;
     sVEntry398038* vt = *(sVEntry398038**)((char*)obj + 8);
     vt[46].fn((char*)obj + vt[0x2E].delta);
-    cUIStateStack_update((char*)self + 0x18);
+    cUIStateStack_update((char*)&self->mStateStack);
 }
 #endif
 
@@ -813,7 +814,7 @@ extern "C" void cUIGroup_setFocus(cUIGroup* self, int on)
     focusOp.arg = on;
     cList_traverseFlat_f((char*)&self->mList, &focusOp);
     focusOp.vt = cListOperator_vtbl;
-    ((cUIGroup_setFocus_sFlags*)((char*)self + 0x14))->on = (on != 0);
+    ((cUIGroup_setFocus_sFlags*)((char*)&self->mAttr))->on = (on != 0);
 }
 #endif
 
@@ -844,7 +845,7 @@ extern "C" void* cUIGroup_getObjectByHashName(cUIGroup* self, int id)
     if (cUIThing_getObjectByHashName(self, id) != 0) {
         return ((void*)self);
     }
-    void* n = cList_first((cList*)((char*)self + 0x74));
+    void* n = cList_first((cList*)((char*)&self->mList));
     if (n != 0) {
         do {
             cUIGroup_getObjectByHashName_sVEntry* vtEntry = &(*(cUIGroup_getObjectByHashName_sVEntry**)((char*)n + 8))[14];
@@ -880,7 +881,7 @@ struct cUIGroup_updateLocale_sVEntry {
  */
 extern "C" void cUIGroup_updateLocale(cUIGroup* self)
 {
-    void* n = cList_first((cList*)((char*)self + 0x74));
+    void* n = cList_first((cList*)((char*)&self->mList));
     if (n != 0) {
         do {
             cUIGroup_updateLocale_sVEntry* vt = *(cUIGroup_updateLocale_sVEntry**)((char*)n + 8);
@@ -942,7 +943,7 @@ struct cUIGroup_render3D_sVEntry {
  */
 extern "C" void cUIGroup_render3D(cUIGroup* self, int pRenCon)
 {
-    void* n = cList_first((cList*)((char*)self + 0x74));
+    void* n = cList_first((cList*)((char*)&self->mList));
     if (n != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
             cUIGroup_render3D_sVEntry* vt = *(cUIGroup_render3D_sVEntry**)((char*)n + 8);
@@ -970,7 +971,7 @@ struct cUIGroup_render2D_sVEntry {
  */
 extern "C" void cUIGroup_render2D(cUIGroup* self, float x, float y)
 {
-    void* n = cList_first((cList*)((char*)self + 0x74));
+    void* n = cList_first((cList*)((char*)&self->mList));
     if (n != 0) {
         do {
             if ((*(int*)((char*)n + 0x14) >> 6) & 1) {
@@ -1007,7 +1008,7 @@ struct cUIGroup_update_sVEntry {
  */
 extern "C" void cUIGroup_update(cUIGroup* self, unsigned short ev)
 {
-    void* n = cList_first((cList*)((char*)self + 0x74));
+    void* n = cList_first((cList*)((char*)&self->mList));
     if (n != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
             cUIGroup_update_sVEntry* vt = *(cUIGroup_update_sVEntry**)((char*)n + 8);
@@ -1376,7 +1377,7 @@ INCLUDE_ASM("ui/uiengine", cUIIcon_setTextureByHashValue);
  */
 extern "C" void cUIIcon_setTextureByHashValue(cUIIcon* self, int id)
 {
-    void* screen = self->mpScreen;
+    cUIScreen* screen = self->mpScreen;
     void* state = *(void**)((char*)screen + 0xD0);
     void* engine = *(void**)((char*)state + 0x10);
     self->mpTextureElem = (const cTextureElement*)cUITextureBank_getElementByHashname((cUITextureBank*)((char*)engine + 0x58), id);
@@ -1685,7 +1686,7 @@ struct cUIListBox_setUnicodePrivate_sEntry {
  */
 extern "C" void cUIListBox_setUnicodePrivate(cUIListBox* self, unsigned char idx, unsigned short* str)
 {
-    void* screen = self->mpScreen;
+    cUIScreen* screen = self->mpScreen;
     void* state = *(void**)((char*)screen + 0xD0);
     void* engine = *(void**)((char*)state + 0x10);
     if (*(void**)((char*)engine + 0x10) != 0) {

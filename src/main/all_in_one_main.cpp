@@ -3659,7 +3659,7 @@ struct S_DBD0 {
 extern "C" S_DBD0 *cScreenPopup_cScreenPopup1(cScreenPopup* self) {
     cUIState_cUIState1_DBD0(((S_DBD0*)self), 0, 0);
     self->mVtbl = (void**)cScreenPopup_vtbl;
-    cPopupInfo_cPopupInfo_DBD0((char *)self + 0xBC);
+    cPopupInfo_cPopupInfo_DBD0((char*)&self->info);
     self->mszInputText = (char*)cBXString_EmptyString;
     self->mszStaticText = (char*)cBXString_EmptyString;
     return ((S_DBD0*)self);
@@ -3756,7 +3756,7 @@ extern int cUIStateBuyPopup_vtbl[];
 extern "C" void *cUIStateBuyPopup_cUIStateBuyPopup1(cUIStateBuyPopup* self) {
     cUIState_cUIState1_DC48(self, 0, 0);
     self->mVtbl = (void**)cUIStateBuyPopup_vtbl;
-    cBuyPopupInfo_clear_DC48((char *)self + 0x48);
+    cBuyPopupInfo_clear_DC48((char*)&self->mInfo);
     return ((void*)self);
 }
 #endif

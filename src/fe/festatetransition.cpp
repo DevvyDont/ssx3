@@ -94,14 +94,14 @@ extern "C" void cSSXAudio_MenuSound(void*, int);
 extern "C" int cFEStateTransition_handleEvent(cFEStateTransition* self, int which)
 {
     if (which == 0) {
-        void* screen = self->mpSnow;
+        cUIScreen* screen = self->mpSnow;
         if (screen != 0) {
             *(int*)((char*)screen + 0x54) |= 0x40;
             cUIScreen_playFrame(self->mpSnow, 0, 0);
             cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 0xF);
         }
     } else if (which == 1) {
-        void* screen = self->mpWhite;
+        cUIScreen* screen = self->mpWhite;
         if (screen != 0) {
             *(int*)((char*)screen + 0x54) |= 0x40;
             cUIScreen_playFrame(self->mpWhite, 0, 0);

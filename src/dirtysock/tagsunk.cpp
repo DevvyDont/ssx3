@@ -1111,7 +1111,7 @@ extern "C" void func_003E8688(void* ctx, int kind, void* p);
 extern "C" void func_0025A850(LobbyMan* self)
 {
     int i;
-    void** arr = (void**)((char*)self + 0x1EC);
+    void** arr = (void**)((char*)&self->mRankSnapshot);
     for (i = 0; i < 29; i++) {
         if (arr[i] != 0) {
             func_003E8688(self->mpLobbyApi, 4, arr[i]);
@@ -6219,7 +6219,7 @@ extern "C" void cBXString_Reset(void* self);
  */
 extern "C" void func_00260F10(LobbyMan* self)
 {
-    cBXString_Reset((char*)self + 0x260);
+    cBXString_Reset((char*)&self->mNewAccount);
     cBXString_Reset((char*)self + 0x264);
     cBXString_Reset((char*)self + 0x268);
     cBXString_Reset((char*)self + 0x26C);
@@ -8280,7 +8280,7 @@ extern "C" void func_00263018(BuddyMan* self, void* name)
     int idx = func_00262E20(self, name);
     if (idx >= 0) {
         func_0025FC28_v(LobbyMan_mLobbyMan, (int)name);
-        sTagsUnkObjVec18* challengers = (sTagsUnkObjVec18*)((char*)self + 0xB8);
+        sTagsUnkObjVec18* challengers = (sTagsUnkObjVec18*)((char*)&self->mChallengersAlloc);
         void** pos = (void**)self->mChallengersStart + idx;
         char* obj = (char*)*pos;
         if (pos + 1 != (void**)self->mChallengersFinish) {
@@ -8615,7 +8615,7 @@ static inline void** sTagsUnkObjVec_copy(void** first, void** last, void** resul
  */
 extern "C" void func_002635A8(BuddyMan* self, int idx)
 {
-    sTagsUnkObjVec* messages = (sTagsUnkObjVec*)((char*)self + 0xA8);
+    sTagsUnkObjVec* messages = (sTagsUnkObjVec*)((char*)&self->mMessagesAlloc);
     void** pos = (void**)self->mMessagesStart + idx;
     char* obj = (char*)*pos;
     if (pos + 1 != (void**)self->mMessagesFinish) {

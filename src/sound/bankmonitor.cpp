@@ -4587,7 +4587,7 @@ struct sSlot16A0 {
  */
 extern "C" void func_002B16A0(cSpeechSys* self, int idx, int key)
 {
-    sSlot16A0* slots = (sSlot16A0*)((char*)self + 0x18);
+    sSlot16A0* slots = (sSlot16A0*)((char*)&self->mRequest);
     for (int i = 0; i < 10; i++) {
         if (slots[i].active != 0 && slots[i].idx == idx && slots[i].key == key) {
             self->mCallback = 0;
@@ -4791,7 +4791,7 @@ extern "C" void* cSongConfiguration_cSongConfiguration(cSongConfiguration* self)
     self->mSongBig = 1;
     *(unsigned char*)((char*)self + 0x0) = D_004A35A8[0];
     *(unsigned char*)((char*)self + 0x20) = D_004A35A8[0];
-    cSongConfiguration_cSongConfiguration_sElem20* bankData = (cSongConfiguration_cSongConfiguration_sElem20*)((char*)self + 0x44);
+    cSongConfiguration_cSongConfiguration_sElem20* bankData = (cSongConfiguration_cSongConfiguration_sElem20*)((char*)&self->mBankData);
     for (int i = 0; i >= 0; i--, bankData++) {
         bankData->b = D_004A35A8[0];
     }
@@ -6564,7 +6564,7 @@ extern "C" void func_002B3EB0(cMusicSys* self)
     self->mActiveMap = 0;
     self->mNumActiveSongs = 0;
     for (int i = 4; i >= 0; i--) {
-        ((int*)((char*)self + 0x920))[i] = 0;
+        ((int*)((char*)&self->mCategoryCount))[i] = 0;
     }
 }
 #endif

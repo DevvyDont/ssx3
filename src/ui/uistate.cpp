@@ -28,7 +28,7 @@ struct sVEntry39E8B8 {
  */
 extern "C" void cUIState_hideObjSafe(cUIState* self, char* name)
 {
-    cListNode* n = cList_first((cList*)((char*)self + 0x24));
+    cListNode* n = cList_first((cList*)((char*)&self->mScreens));
     if (n != 0) {
         do {
             void* obj = cUIScreen_getObjectByHashName(n, GetHashValue32(name));
@@ -69,7 +69,7 @@ struct sVEntry39E948 {
  */
 extern "C" void cUIState_showObjSafe(cUIState* self, char* name)
 {
-    cListNode* n = cList_first((cList*)((char*)self + 0x24));
+    cListNode* n = cList_first((cList*)((char*)&self->mScreens));
     if (n != 0) {
         do {
             void* obj = cUIScreen_getObjectByHashName(n, GetHashValue32(name));
@@ -106,11 +106,11 @@ extern "C" void cUIStateStack__cUIStateStack(cUIStateStack* self, int flags)
 {
     cUIStateStack_destroyStates(self);
     self->mExplicitStack.mVtbl = cList_vtbl;
-    cList_destroyList((char*)self + 0x1C);
+    cList_destroyList((char*)&self->mExplicitStack);
     self->mExplicitStack.mEnd.mVtbl = cListNode_vtbl;
     cListNode_destroyListNode((char*)self + 0x28);
     self->mExplicitStack.mStart.mVtbl = cListNode_vtbl;
-    cListNode_destroyListNode((char*)self + 0x1C);
+    cListNode_destroyListNode((char*)&self->mExplicitStack);
     self->mStack.mVtbl = cList_vtbl;
     cList_destroyList(self);
     self->mStack.mEnd.mVtbl = cListNode_vtbl;
@@ -248,7 +248,7 @@ extern "C" void cUIStateStack_render2D(cUIStateStack* self)
             n = *(char**)(n + 4);
         } while (!cListNode_isSentinel((cListNode*)n));
     }
-    n = (char*)cList_first((cList*)((char*)self + 0x1C));
+    n = (char*)cList_first((cList*)((char*)&self->mExplicitStack));
     if (n != 0) {
         do {
             if ((*(int*)(n + 0x1C) >> 3) & 1) {
@@ -469,7 +469,7 @@ extern "C" void cUIStateStack_update(cUIStateStack* self)
     if (cUIStateStack_updateLoop(self) != 0) {
         cUIStateStack_updateLoop(self);
     }
-    cListNode* n = cList_first((cList*)((char*)self + 0x1C));
+    cListNode* n = cList_first((cList*)((char*)&self->mExplicitStack));
     if (n != 0) {
         do {
             if ((*(int*)((char*)n + 0x1C) >> 5) & 1) {

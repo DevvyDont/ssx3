@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uigroup.h"
 #include "ui/uimenu.h"
 #include "ui/uiinput.h"
 #include "ui/uithing.h"
@@ -761,12 +762,12 @@ struct sVEntry_cFEStateMountainRoom_showPassFront {
 extern "C" void cFEStateMountainRoom_showPassFront(cFEStateMountainRoom* self)
 {
     {
-        void* obj = self->mpPassGroup;
+        cUIGroup* obj = self->mpPassGroup;
         sVEntry_cFEStateMountainRoom_showPassFront* vt = *(sVEntry_cFEStateMountainRoom_showPassFront**)((char*)obj + 0x8);
         vt[9].fn((char*)obj + vt[9].delta, 1);
     }
     if (self->mFrontTextureID >= 0) {
-        void* obj = self->mpPassFrontGroup;
+        cUIGroup* obj = self->mpPassFrontGroup;
         sVEntry_cFEStateMountainRoom_showPassFront* vt = *(sVEntry_cFEStateMountainRoom_showPassFront**)((char*)obj + 0x8);
         vt[9].fn((char*)obj + vt[9].delta, 1);
     }
@@ -1181,7 +1182,7 @@ extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, cUIThing*
     case 6: {
         int id = (self->mPeakNum << 16) | item->mMiscData;
         for (int i = 0; i < 4; i++) {
-            sItem_001D3C80* listItem = ((sItem_001D3C80**)((char*)self + 0x48))[i];
+            sItem_001D3C80* listItem = ((sItem_001D3C80**)((char*)&self->mpTrophyIcons))[i];
             if (listItem != 0) {
                 listItem->vt[9].fn((char*)listItem + listItem->vt[9].delta, 0);
             }

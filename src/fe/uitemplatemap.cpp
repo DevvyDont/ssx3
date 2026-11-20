@@ -3100,7 +3100,7 @@ extern "C" void cUITemplate_MAP_onGainFocus(void* self);
 extern "C" void cOVState_TRANSPORT_onGainFocus(cOVState_TRANSPORT* self)
 {
     cUIState_onGainFocus(self);
-    cUITemplate_MAP_onGainFocus((char*)self + 0x9C);
+    cUITemplate_MAP_onGainFocus((char*)&self->mMap);
 }
 #endif
 
@@ -3116,7 +3116,7 @@ extern "C" void cOVState_onDestroyScreen(void* self);
  */
 extern "C" void cOVState_TRANSPORT_onDestroyScreen(cOVState_TRANSPORT* self)
 {
-    cUITemplate_MAP_onDestroyScreen((char*)self + 0x9C);
+    cUITemplate_MAP_onDestroyScreen((char*)&self->mMap);
     cOVState_onDestroyScreen(self);
 }
 #endif
@@ -3174,7 +3174,7 @@ INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onInputBegin);
  */
 extern "C" void cOVState_TRANSPORT_onInputBegin(cOVState_TRANSPORT* self)
 {
-    cUITemplate_MAP_onInputBegin((char*)self + 0x9c);
+    cUITemplate_MAP_onInputBegin((char*)&self->mMap);
 }
 #endif
 
@@ -3208,7 +3208,7 @@ extern "C" void cUITemplate_MAP_onUpdate(void* self);
 extern "C" void cOVState_TRANSPORT_onUpdate(cOVState_TRANSPORT* self)
 {
     cOVState_onUpdate(self);
-    cUITemplate_MAP_onUpdate((char*)self + 0x9C);
+    cUITemplate_MAP_onUpdate((char*)&self->mMap);
 }
 #endif
 

@@ -2042,7 +2042,7 @@ extern "C" void cFEMemCard_SetLoadPressed(cFEMemCard* self, int on)
         char* mcManager = (char*)cSSXApp_getMCManager(SSXApp);
         char* obj = *(char**)(mcManager + 0x434);
         sVEntry001D9308* vt = *(sVEntry001D9308**)obj;
-        vt[14].fn(obj + vt[14].delta, *(void**)(mcManager + 0xF8), (char*)self + 0x9C);
+        vt[14].fn(obj + vt[14].delta, *(void**)(mcManager + 0xF8), (char*)&self->mLastLoadFileName);
     } else {
         *(short*)&self->mLastLoadFileName[0] = 0;
     }

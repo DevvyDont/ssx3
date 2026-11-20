@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/physicsmodifier.h"
 #include "object/effectlink.h"
 #include "render/ps2graphicsman.h"
 #include "object/modifierblock.h"
@@ -611,7 +612,7 @@ struct sMbVEntryDel2 {
  */
 extern "C" void tModifierBlock_remPhysicsModifier(tModifierBlock* self)
 {
-    void* obj = self->Physics;
+    cPhysicsModifier* obj = self->Physics;
     if (obj != 0) {
         sMbVEntryDel2* vt = *(sMbVEntryDel2**)((char*)obj + 0x4);
         vt[1].fn((char*)obj + vt[1].delta, 3);

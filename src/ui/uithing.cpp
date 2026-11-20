@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiscreen.h"
 #include "ui/uitext.h"
 #include "ui/uithing.h"
 
@@ -442,7 +443,7 @@ extern "C" void cUIText_updateLocale(cUIText* self)
 {
     int id = self->mStringID;
     if (id != 0) {
-        void* screen = self->mpScreen;
+        cUIScreen* screen = self->mpScreen;
         void* state = *(void**)((char*)screen + 0xD0);
         void* engine = *(void**)((char*)state + 0x10);
         char* loc = *(char**)((char*)engine + 0x10);

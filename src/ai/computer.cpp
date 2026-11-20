@@ -1061,7 +1061,7 @@ INCLUDE_ASM("ai/computer", cComputer_checkForAttack);
  */
 extern "C" int cComputer_checkForAttack(cComputer* self, int oppID)
 {
-    void* rider = self->mRider;
+    cRider* rider = self->mRider;
     int shouldAttack = 0;
     if (*(int*)((char*)rider + 0xf0) != 0) {
         shouldAttack = *(int*)((char*)rider + 0xf8) == oppID;
@@ -2890,19 +2890,19 @@ extern "C" void cRiderHandler_stepMotion(cRiderHandler* self)
         cGroundMotion_step(self);
         break;
     case 1:
-        cAirMotion_step((char*)self + 0x20);
+        cAirMotion_step((char*)&self->AirMotion);
         break;
     case 2:
-        cWipeoutMotion_step((char*)self + 0x30);
+        cWipeoutMotion_step((char*)&self->WipeoutMotion);
         break;
     case 3:
-        cStaticMotion_step((char*)self + 0xA0);
+        cStaticMotion_step((char*)&self->StaticMotion);
         break;
     case 4:
-        cRailslideMotion_step((char*)self + 0xB0);
+        cRailslideMotion_step((char*)&self->RailslideMotion);
         break;
     case 5:
-        cHandplantMotion_step((char*)self + 0x110);
+        cHandplantMotion_step((char*)&self->HandplantMotion);
         break;
     }
 }
@@ -2929,19 +2929,19 @@ extern "C" void cRiderHandler_resolveMotion(cRiderHandler* self)
         cGroundMotion_resolve(self);
         break;
     case 1:
-        cAirMotion_resolve((char*)self + 0x20);
+        cAirMotion_resolve((char*)&self->AirMotion);
         break;
     case 2:
-        cWipeoutMotion_resolve((char*)self + 0x30);
+        cWipeoutMotion_resolve((char*)&self->WipeoutMotion);
         break;
     case 3:
-        cStaticMotion_resolve((char*)self + 0xA0);
+        cStaticMotion_resolve((char*)&self->StaticMotion);
         break;
     case 4:
-        cRailslideMotion_resolve((char*)self + 0xB0);
+        cRailslideMotion_resolve((char*)&self->RailslideMotion);
         break;
     case 5:
-        cHandplantMotion_resolve((char*)self + 0x110);
+        cHandplantMotion_resolve((char*)&self->HandplantMotion);
         break;
     }
 }
@@ -3056,10 +3056,10 @@ extern "C" void cRiderHandler_gainControlState(cRiderHandler* self, int prev)
 {
     switch (self->ControlState) {
     case 0:
-        cCruiseControl_gainFocus((char*)self + 0x1C0);
+        cCruiseControl_gainFocus((char*)&self->CruiseControl);
         break;
     case 1:
-        cBoardPressControl_gainFocus((char*)self + 0x1D0);
+        cBoardPressControl_gainFocus((char*)&self->BoardPressControl);
         break;
     case 2:
         cPrewindControl_gainFocus((char*)&self->PrewindControl, prev);
@@ -3310,18 +3310,18 @@ extern "C" void cRiderHandler_updateRiderFX(cRiderHandler* self)
         if (isComputerSlot->fn(riderBeing + isComputerSlot->delta) != 0)
             return;
     }
-    cPlayerLights_Clear((char*)self + 0xD30);
-    cBoardWakeFX_update((char*)self + 0x3B0);
-    cBoardSparkFX_update((char*)self + 0x470);
-    cBoardTrailFX_update((char*)self + 0x520);
-    cSpeedBoostFX_update((char*)self + 0x610);
-    cTrickBoostFX_update((char*)self + 0x9C0);
-    cAirStreamerFX_update((char*)self + 0xAD0);
-    func_002D4C08((char*)self + 0xAF0);
-    cPlayerIndicatorFX_update((char*)self + 0xB00);
-    func_002DF920((char*)self + 0xB40);
-    cPunchFX_update((char*)self + 0xC70);
-    cCheatFX_update((char*)self + 0xD20);
+    cPlayerLights_Clear((char*)&self->PlayerLights);
+    cBoardWakeFX_update((char*)&self->BoardWakeFX);
+    cBoardSparkFX_update((char*)&self->BoardSparkFX);
+    cBoardTrailFX_update((char*)&self->BoardTrailFX);
+    cSpeedBoostFX_update((char*)&self->SpeedBoostFX);
+    cTrickBoostFX_update((char*)&self->TrickBoostFX);
+    cAirStreamerFX_update((char*)&self->AirStreamerFX);
+    func_002D4C08((char*)&self->AngerFX);
+    cPlayerIndicatorFX_update((char*)&self->PlayerIndicatorFX);
+    func_002DF920((char*)&self->DynamicSprayFX);
+    cPunchFX_update((char*)&self->PunchFX);
+    cCheatFX_update((char*)&self->CheatFX);
 }
 #endif
 //100%
@@ -3356,17 +3356,17 @@ extern "C" void cRiderHandler_renderRiderFX(cRiderHandler* self)
         if (isComputerSlot->fn(riderBeing + isComputerSlot->delta) != 0)
             return;
     }
-    cBoardWakeFX_render((char*)self + 0x3B0);
-    cBoardSparkFX_render((char*)self + 0x470);
-    cBoardTrailFX_render((char*)self + 0x520);
-    cSpeedBoostFX_render((char*)self + 0x610);
-    cTrickBoostFX_render((char*)self + 0x9C0);
-    cAirStreamerFX_render((char*)self + 0xAD0);
-    func_002D5048((char*)self + 0xAF0);
-    cPlayerIndicatorFX_render((char*)self + 0xB00);
-    func_002E24D0((char*)self + 0xB40);
-    cPunchFX_render((char*)self + 0xC70);
-    cCheatFX_render((char*)self + 0xD20);
+    cBoardWakeFX_render((char*)&self->BoardWakeFX);
+    cBoardSparkFX_render((char*)&self->BoardSparkFX);
+    cBoardTrailFX_render((char*)&self->BoardTrailFX);
+    cSpeedBoostFX_render((char*)&self->SpeedBoostFX);
+    cTrickBoostFX_render((char*)&self->TrickBoostFX);
+    cAirStreamerFX_render((char*)&self->AirStreamerFX);
+    func_002D5048((char*)&self->AngerFX);
+    cPlayerIndicatorFX_render((char*)&self->PlayerIndicatorFX);
+    func_002E24D0((char*)&self->DynamicSprayFX);
+    cPunchFX_render((char*)&self->PunchFX);
+    cCheatFX_render((char*)&self->CheatFX);
 }
 #endif
 

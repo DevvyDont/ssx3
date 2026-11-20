@@ -1671,7 +1671,7 @@ struct sVEntry0030AEB8 {
  */
 extern "C" void* cWScriptMan_getCurrentMission(cWScriptMan* self)
 {
-    void* obj = self->CurrentProcess;
+    cWScriptProcess* obj = self->CurrentProcess;
     if (obj != 0) {
         sVEntry0030AEB8* vt = *(sVEntry0030AEB8**)((char*)obj + 0x5C);
         if (vt[3].fn((char*)obj + vt[3].delta) != 0) {
