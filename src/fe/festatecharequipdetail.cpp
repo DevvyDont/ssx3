@@ -1,4 +1,6 @@
 #include "common.h"
+#include "fe/ferider.h"
+#include "fe/festatecharequip.h"
 #include "ui/uistate.h"
 #include "ui/uiengine.h"
 #include "ui/uithing.h"
@@ -130,7 +132,7 @@ static inline int Find_8DB8(char* mgr, int hash)
  * @param canSwitchMode  nonzero when the option button may switch between the two modes (kept at 0xAE4)
  * @return the constructed state
  */
-extern "C" void* cFEStateCharEquip_cFEStateCharEquip(void* mem, cUIEngine* owner, signed char team, int inStore, int canSwitchMode)
+extern "C" void* cFEStateCharEquip_cFEStateCharEquip(cFEStateCharEquip* mem, cUIEngine* owner, signed char team, int inStore, int canSwitchMode)
 {
     sCharEquip_8DB8* self = (sCharEquip_8DB8*)mem;
     cUIState_cUIState(self);
@@ -275,22 +277,22 @@ static inline void releaseK199148(int id)
  *
  * @param flags  g++ destructor flags, passed on to cUIState__cUIState(); bit 0 frees the object
  */
-extern "C" void cFEStateCharEquip__cFEStateCharEquip(void* self, int flags)
+extern "C" void cFEStateCharEquip__cFEStateCharEquip(cFEStateCharEquip* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = cFEStateCharEquip_vtbl;
-    if (*(int*)((char*)self + 0xA64) >= 0) {
-        func_0019DC20((sEquipTable_DC20*)((char*)SSXApp->RealFE + 0x1A70), *(int*)((char*)self + 0xBC),
-                      *(int*)((char*)self + 0xA64));
-        *(int*)((char*)self + 0xA64) = -1;
+    self->mVtbl = cFEStateCharEquip_vtbl;
+    if (self->mIconsFileIndex >= 0) {
+        func_0019DC20((sEquipTable_DC20*)((char*)SSXApp->RealFE + 0x1A70), self->mCharID,
+                      self->mIconsFileIndex);
+        self->mIconsFileIndex = -1;
     }
-    releaseK199148(*(int*)((char*)self + 0xA68));
-    *(int*)((char*)self + 0xA68) = -1;
+    releaseK199148(self->mIconTextureID);
+    self->mIconTextureID = -1;
     cFEStateCharEquip_cancelLargePreviewLoad(self);
-    releaseK199148(*(int*)((char*)self + 0xA70));
-    releaseK199148(*(int*)((char*)self + 0xA74));
-    *(int*)((char*)self + 0xA70) = -1;
-    *(int*)((char*)self + 0xA74) = -1;
-    *(void***)((char*)self + 0x8) = cFEState_vtbl;
+    releaseK199148(self->mPreviewTextureID);
+    releaseK199148(self->mOldPreviewTextureID);
+    self->mPreviewTextureID = -1;
+    self->mOldPreviewTextureID = -1;
+    self->mVtbl = cFEState_vtbl;
     cUIState__cUIState(self, flags);
 }
 #endif
@@ -317,14 +319,14 @@ extern char str_12equ_char[];
  * and turn (0xAAC) to 0 and the pan (0xAA8) to -1, places the camera and models (cFEStateCharEquip_update3DPositions) and switches
  * the front-end sound-bank mode to 2.
  */
-extern "C" void cFEStateCharEquip_onCreateScreen(void* self)
+extern "C" void cFEStateCharEquip_onCreateScreen(cFEStateCharEquip* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_12equ_char), 0);
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    char* feRider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
+    char* feRider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum);
     *(int*)(feRider + 0xC2C) = 17;
     *(int*)(feRider + 0xCCC) = 0;
     int ok = *(unsigned int*)feRider < 10 && *(int*)(feRider + 0xCB8) != 0 && *(int*)(feRider + 0xCB4) != 0;
@@ -335,9 +337,9 @@ extern "C" void cFEStateCharEquip_onCreateScreen(void* self)
             cRiderAnimBase_play(anim, 434, 0, -1.0f);
         }
     }
-    *(int*)((char*)self + 0xAA4) = 0;
-    *(int*)((char*)self + 0xAAC) = 0;
-    *(float*)((char*)self + 0xAA8) = -1.0f;
+    *(int*)&self->mZoom = 0;
+    *(int*)&self->mPlayerRotation = 0;
+    self->mPan = -1.0f;
     cFEStateCharEquip_update3DPositions(self);
     func_0028F140(cAudioInterface_bxAudio(), 2);
 }
@@ -354,11 +356,11 @@ void* cUIState_onDestroyScreen(void* self);
  *
  * The rider is left alone when SSXApp->RealFE is null; cUIState_onDestroyScreen() does the rest.
  */
-extern "C" void cFEStateCharEquip_onDestroyScreen(void* self)
+extern "C" void cFEStateCharEquip_onDestroyScreen(cFEStateCharEquip* self)
 {
     char* mgr = (char*)SSXApp->RealFE;
     if (mgr != 0) {
-        char* feRider = (char*)cFERiderManager_getHuman1(mgr + 0xB0, *(signed char*)((char*)self + 0x44));
+        char* feRider = (char*)cFERiderManager_getHuman1(mgr + 0xB0, self->mUserNum);
         *(unsigned int*)(feRider + 0xC2C) = 0xFFFFFFFF;
     }
     cUIState_onDestroyScreen(self);
@@ -370,9 +372,9 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onGainFocus);
 #ifdef SKIP_ASM
 extern "C" void cFEStateCharEquip_initStorePreview(void* self);
 extern "C" void cFEStateCharEquip_initInventoryPreview(void* self);
-extern "C" void cFEStateCharEquip_updatePolyBar(void* self);
-extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(void* self, int a1);
-extern "C" void func_0019B618(void* self, int a1, int a2);
+extern "C" void cFEStateCharEquip_updatePolyBar(cFEStateCharEquip* self);
+extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(cFEStateCharEquip* self, int a1);
+extern "C" void func_0019B618(cFEStateCharEquip* self, int a1, int a2);
 extern "C" void cFEState_onGainFocus(void* self, int a1);
 
 /**
@@ -385,9 +387,9 @@ extern "C" void cFEState_onGainFocus(void* self, int a1);
  *
  * @param pPrevState  the state that had focus before, passed on to cFEState_onGainFocus()
  */
-extern "C" void cFEStateCharEquip_onGainFocus(void* self, int pPrevState)
+extern "C" void cFEStateCharEquip_onGainFocus(cFEStateCharEquip* self, int pPrevState)
 {
-    bool off = !*(bool*)((char*)self + 0xC8);
+    bool off = !*(bool*)&self->mEquipMode;
     if (!off) {
         cFEStateCharEquip_initStorePreview(self);
     } else {
@@ -404,7 +406,7 @@ extern "C" void cFEStateCharEquip_onGainFocus(void* self, int pPrevState)
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onLoseFocus);
 #ifdef SKIP_ASM
 extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
-extern "C" void cFERider_setVisible(void* rider, int a1);
+extern "C" void cFERider_setVisible(cFERider* rider, int a1);
 
 /**
  * Clears two flags of the front-end rider record this equip screen works on when the screen loses focus.
@@ -412,9 +414,9 @@ extern "C" void cFERider_setVisible(void* rider, int a1);
  * The record is entry @p self+0x44 (a signed char rider index) of the 0xCE0-byte records at SSXApp->RealFE +
  * 0xB0 (cFERiderManager_getHuman1); cFERider_setVisible(record, 0) zeroes its words at +0xCC4 and +0xCC8.
  */
-extern "C" void cFEStateCharEquip_onLoseFocus(void* self)
+extern "C" void cFEStateCharEquip_onLoseFocus(cFEStateCharEquip* self)
 {
-    cFERider_setVisible(cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
+    cFERider_setVisible((cFERider*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum), 0);
 }
 #endif
 
@@ -624,11 +626,11 @@ extern "C" void cFEStateCharEquip_onWidgetCreate(sCharEquip_FE* self, cUIThing* 
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onPopupEvent);
 #ifdef SKIP_ASM
-extern "C" void func_0019BE80(void* self);
+extern "C" void func_0019BE80(cFEStateCharEquip* self);
 extern "C" void cFEStateCharEquip_updateBankWidget(void* self);
 struct sEquipDetail;
 extern "C" int func_0019B458(sEquipDetail* self, int idx);
-extern "C" void func_0019B618(void* self, int a1, int a2);
+extern "C" void func_0019B618(cFEStateCharEquip* self, int a1, int a2);
 
 /**
  * Hides the equip-gear state behind popups and buys the selected item when the buy popup closes with a yes.
@@ -641,22 +643,22 @@ extern "C" void func_0019B618(void* self, int a1, int a2);
  * @param widget  the popup state that sent the event
  * @param msg  the popup event (0x15 opened, 0x16 closed)
  */
-extern "C" void cFEStateCharEquip_onPopupEvent(void* self, cUIState* widget, int msg)
+extern "C" void cFEStateCharEquip_onPopupEvent(cFEStateCharEquip* self, cUIState* widget, int msg)
 {
     switch (msg) {
     case 21:
         if (widget->mHashName != 7) {
-            *(int*)((char*)self + 0x1C) &= ~8;
+            self->mAttrState &= ~8;
         }
         break;
     case 22:
-        if (((*(int*)((char*)self + 0x1C) >> 3) & 1) == 0) {
-            *(int*)((char*)self + 0x1C) |= 8;
+        if (((self->mAttrState >> 3) & 1) == 0) {
+            self->mAttrState |= 8;
         }
         if (widget->mHashName == 7 && *(int*)((char*)widget + 0x6C) != 0) {
             func_0019BE80(self);
             cFEStateCharEquip_updateBankWidget(self);
-            if (func_0019B458((sEquipDetail*)self, *(unsigned char*)(*(char**)((char*)self + 0x5C) + 0x95))) {
+            if (func_0019B458((sEquipDetail*)self, *(unsigned char*)((char*)self->mpMenu + 0x95))) {
                 func_0019B618(self, 0, 1);
             }
         }
@@ -826,16 +828,16 @@ extern "C" int cFEStateCharEquip_onInputBegin(void* self, cPad_9A38* in)
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_onWidgetEvent);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void cFEStateCharEquip_updateHeading(void* self, int id);
+extern "C" void cFEStateCharEquip_updateHeading(cFEStateCharEquip* self, int id);
 extern "C" void func_0019B180(void* self, int id);
-extern "C" void func_0019B618(void* self, int a1, int a2);
+extern "C" void func_0019B618(cFEStateCharEquip* self, int a1, int a2);
 extern "C" void cFEStateCharEquip_startLargePreviewLoad(void* self, int a1);
 extern "C" void func_0019A9B8(void* self);
 extern "C" void func_0019ACA0(void* self);
-extern "C" int func_0019BEE8(void* self);
-extern "C" void func_0019C7E8(void* self, void* item);
-extern "C" void cFEStateCharEquip_updatePolyBar(void* self);
-extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(void* self, int a1);
+extern "C" int func_0019BEE8(cFEStateCharEquip* self);
+extern "C" void func_0019C7E8(cFEStateCharEquip* self, void* item);
+extern "C" void cFEStateCharEquip_updatePolyBar(cFEStateCharEquip* self);
+extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(cFEStateCharEquip* self, int a1);
 extern "C" int func_0014B478(void* self, int a1, int a2);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void* cBE_getBE();
@@ -924,10 +926,10 @@ extern "C" void cFEStateCharEquip_onWidgetEvent(void* selfv, cUIThing* w, unsign
         int id = item->id;
         if (item->flags & 0x20) {
             self->depth++;
-            cFEStateCharEquip_updateHeading(self, id);
+            cFEStateCharEquip_updateHeading((cFEStateCharEquip*)self, id);
             self->stack[self->depth] = id;
             func_0019B180(self, id);
-            func_0019B618(self, 1, 1);
+            func_0019B618((cFEStateCharEquip*)self, 1, 1);
             if (id == D_004A11E0)
                 self->state = 3;
             return;
@@ -940,19 +942,19 @@ extern "C" void cFEStateCharEquip_onWidgetEvent(void* selfv, cUIThing* w, unsign
                 cost *= 10;
             if (self->money < cost)
                 return;
-            func_0019C7E8(self, item);
+            func_0019C7E8((cFEStateCharEquip*)self, item);
             return;
         }
         int* vals = self->vals;
         void* iface = cBE_getInterface(cBE_getBE(), 9);
         if (D_004A18D8 < *(int*)((char*)vals + (w->mMiscData << 2)) + self->spent)
             return;
-        if (!func_0019BEE8(self))
+        if (!func_0019BEE8((cFEStateCharEquip*)self))
             return;
         self->spent = func_0014B478(iface, self->team, self->slot);
-        func_0019B618(self, 0, 1);
-        cFEStateCharEquip_updatePolyBar(self);
-        cFEStateCharEquip_updatePolyEquipPreviewBar(self, *(int*)((char*)vals + (w->mMiscData << 2)));
+        func_0019B618((cFEStateCharEquip*)self, 0, 1);
+        cFEStateCharEquip_updatePolyBar((cFEStateCharEquip*)self);
+        cFEStateCharEquip_updatePolyEquipPreviewBar((cFEStateCharEquip*)self, *(int*)((char*)vals + (w->mMiscData << 2)));
         func_0019ACA0(self);
         return;
     }
@@ -961,9 +963,9 @@ extern "C" void cFEStateCharEquip_onWidgetEvent(void* selfv, cUIThing* w, unsign
             int* stack = self->stack;
             if (*(int*)((char*)stack + (self->depth << 2)) == D_004A11E0)
                 self->state = 4;
-            cFEStateCharEquip_updateHeading(self, *(int*)((char*)stack + ((self->depth - 1) << 2)));
+            cFEStateCharEquip_updateHeading((cFEStateCharEquip*)self, *(int*)((char*)stack + ((self->depth - 1) << 2)));
             func_0019B180(self, *(int*)((char*)stack + ((self->depth - 1) << 2)));
-            func_0019B618(self, 1, 1);
+            func_0019B618((cFEStateCharEquip*)self, 1, 1);
         } else {
             char* feRider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->team);
             *(int*)(feRider + 0xC20) = 0;
@@ -1044,7 +1046,7 @@ extern "C" int cFEStateCharEquip_onWidgetMenu(sEquipDetail_9F20* self, int pMenu
     switch (kind) {
     case 2:
     case 3:
-        func_0019B618(self, 0, 0);
+        func_0019B618((cFEStateCharEquip*)self, 0, 0);
         return 1;
     case 0:
         if (idx < self->count) {
@@ -1234,7 +1236,7 @@ extern "C" void cFEStateCharEquip_initInventoryPreview(void* self)
         sVEntry0019A238* vt = *(sVEntry0019A238**)(widget + 8);
         vt[9].fn(widget + vt[9].delta, 1);
     }
-    cFERider_setVisible(cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 1);
+    cFERider_setVisible((cFERider*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 1);
     *(int*)((char*)self + 0xAE0) = 1;
 }
 #endif
@@ -1274,7 +1276,7 @@ extern "C" void cFEStateCharEquip_initStorePreview(void* self)
         sVEntry0019A308* vt = *(sVEntry0019A308**)(widget + 8);
         vt[9].fn(widget + vt[9].delta, 0);
     }
-    cFERider_setVisible(cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
+    cFERider_setVisible((cFERider*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
     widget = *(char**)((char*)self + 0x60);
     if (widget != 0) {
         sVEntry0019A308* vt = *(sVEntry0019A308**)(widget + 8);
@@ -1290,7 +1292,7 @@ struct cUIText;
 int GetHashValue32(char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void MEM_fill(void* dst, unsigned int value, int size);
-extern "C" void cFEStateCharEquip_updateHeading(void* self, int id);
+extern "C" void cFEStateCharEquip_updateHeading(cFEStateCharEquip* self, int id);
 extern "C" void func_0019B180(void* self, int id);
 extern int D_004A11D0;
 extern char str_kT_CMNBuyGear[];
@@ -1331,9 +1333,9 @@ extern "C" void cFEStateCharEquip_switchEquipMode(void* self)
     }
     ((sEquipDetailK19A3D0*)self)->f120 = 0;
     MEM_fill((char*)self + 0xD0, D_004A11D0, 80);
-    cFEStateCharEquip_updateHeading(self, D_004A11D0);
+    cFEStateCharEquip_updateHeading((cFEStateCharEquip*)self, D_004A11D0);
     func_0019B180(self, D_004A11D0);
-    func_0019B618(self, 1, 1);
+    func_0019B618((cFEStateCharEquip*)self, 1, 1);
 }
 #endif
 
@@ -1661,7 +1663,7 @@ extern "C" void func_0019A9B8(void* self)
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019AA08);
 #ifdef SKIP_ASM
 extern "C" int cFEStateCharEquip_getIconID(void* self, const char* name);
-extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(void* self, int a1);
+extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(cFEStateCharEquip* self, int a1);
 
 struct sVEK19AA08 {
     short delta;
@@ -1717,7 +1719,7 @@ extern "C" void func_0019AA08(void* self)
             }
         }
     }
-    cFEStateCharEquip_updatePolyEquipPreviewBar(self, rowValue);
+    cFEStateCharEquip_updatePolyEquipPreviewBar((cFEStateCharEquip*)self, rowValue);
 }
 #endif
 
@@ -1804,10 +1806,10 @@ extern "C" void func_0019ACA0(void* self)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019AD18);
 #ifdef SKIP_ASM
-extern "C" int func_0019B518(void* self);
-extern "C" int func_0019B598(void* self);
-extern "C" void func_0019B7E0(void* self, int idx);
-extern "C" void func_0019BA60(void* self, int idx);
+extern "C" int func_0019B518(cFEStateCharEquip* self);
+extern "C" int func_0019B598(cFEStateCharEquip* self);
+extern "C" void func_0019B7E0(cFEStateCharEquip* self, int idx);
+extern "C" void func_0019BA60(cFEStateCharEquip* self, int idx);
 extern "C" void* cUIText_getUnicodeString(void* item);
 extern "C" void cUIText_setUnicodeString(void* item, void* value);
 
@@ -1866,9 +1868,9 @@ extern "C" void func_0019AD18(sCharEquipDetail_19AD18* self, int n)
     }
     if (n < -6 || n > 6) {
         if (isMode1_19AD18(self)) {
-            func_0019B598(self);
+            func_0019B598((cFEStateCharEquip*)self);
         } else {
-            func_0019B518(self);
+            func_0019B518((cFEStateCharEquip*)self);
         }
         return;
     }
@@ -1880,12 +1882,12 @@ extern "C" void func_0019AD18(sCharEquipDetail_19AD18* self, int n)
         if (isMode1_19AD18(self)) {
             int j;
             for (j = 0; j < -n; j++) {
-                func_0019BA60(self, j);
+                func_0019BA60((cFEStateCharEquip*)self, j);
             }
         } else {
             int j;
             for (j = 0; j < -n; j++) {
-                func_0019B7E0(self, j);
+                func_0019B7E0((cFEStateCharEquip*)self, j);
             }
         }
     } else if (n > 0) {
@@ -1896,12 +1898,12 @@ extern "C" void func_0019AD18(sCharEquipDetail_19AD18* self, int n)
         if (isMode1_19AD18(self)) {
             int j;
             for (j = 6 - n; j < 6; j++) {
-                func_0019BA60(self, j);
+                func_0019BA60((cFEStateCharEquip*)self, j);
             }
         } else {
             int j;
             for (j = 6 - n; j < 6; j++) {
-                func_0019B7E0(self, j);
+                func_0019B7E0((cFEStateCharEquip*)self, j);
             }
         }
     }
@@ -2220,18 +2222,18 @@ extern "C" int func_0019B458(sEquipDetail* self, int idx)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019B518);
 #ifdef SKIP_ASM
-extern "C" void func_0019B7E0(void* self, int idx);
+extern "C" void func_0019B7E0(cFEStateCharEquip* self, int idx);
 
 /**
  * Draws the inventory rows from the menu's top row (func_0019B7E0), up to six or the end of the list.
  *
  * @return the number of rows drawn
  */
-extern "C" int func_0019B518(void* self)
+extern "C" int func_0019B518(cFEStateCharEquip* self)
 {
-    int j = *(unsigned char*)(*(char**)((char*)self + 0x5C) + 0x98);
+    int j = *(unsigned char*)((char*)self->mpMenu + 0x98);
     int i = 0;
-    while (i < 6 && j < *(int*)((char*)self + 0x958)) {
+    while (i < 6 && j < self->mNumItems) {
         func_0019B7E0(self, i);
         i++;
         j++;
@@ -2243,18 +2245,18 @@ extern "C" int func_0019B518(void* self)
 //100%
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019B598);
 #ifdef SKIP_ASM
-extern "C" void func_0019BA60(void* self, int idx);
+extern "C" void func_0019BA60(cFEStateCharEquip* self, int idx);
 
 /**
  * Draws the store rows from the menu's top row (func_0019BA60), up to six or the end of the list.
  *
  * @return the number of rows drawn
  */
-extern "C" int func_0019B598(void* self)
+extern "C" int func_0019B598(cFEStateCharEquip* self)
 {
-    int j = *(unsigned char*)(*(char**)((char*)self + 0x5C) + 0x98);
+    int j = *(unsigned char*)((char*)self->mpMenu + 0x98);
     int i = 0;
-    while (i < 6 && j < *(int*)((char*)self + 0x958)) {
+    while (i < 6 && j < self->mNumItems) {
         func_0019BA60(self, i);
         i++;
         j++;
@@ -2292,8 +2294,8 @@ struct sList_B618 {
 int GetHashValue32(char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
-extern "C" int func_0019B518(void* self);
-extern "C" int func_0019B598(void* self);
+extern "C" int func_0019B518(cFEStateCharEquip* self);
+extern "C" int func_0019B598(cFEStateCharEquip* self);
 extern "C" void cUIMenu_setScrollableMenu(void* menu, int n);
 extern char D_004C6708[];
 extern char str_kT_FEEmpty[];
@@ -2314,9 +2316,9 @@ static inline int isMode1_B618(void* self)
  * @param reset   nonzero to reset the menu to the top of a new list
  * @param select  nonzero to select the visible row
  */
-extern "C" void func_0019B618(void* self, int reset, int select)
+extern "C" void func_0019B618(cFEStateCharEquip* self, int reset, int select)
 {
-    if (*(void**)((char*)self + 0x5C) == 0)
+    if (self->mpMenu == 0)
         return;
     cUIObj_B618** nameWidgets = (cUIObj_B618**)((char*)self + 0x8C);
     cUIObj_B618** checkWidgets = (cUIObj_B618**)((char*)self + 0xA4);
@@ -2325,10 +2327,10 @@ extern "C" void func_0019B618(void* self, int reset, int select)
         checkWidgets[i]->setVisible(0);
     }
     if (reset) {
-        if (*(int*)((char*)self + 0x958) == 0)
-            cUIMenu_setScrollableMenu(*(void**)((char*)self + 0x5C), 1);
+        if (self->mNumItems == 0)
+            cUIMenu_setScrollableMenu(self->mpMenu, 1);
         else
-            cUIMenu_setScrollableMenu(*(void**)((char*)self + 0x5C), *(unsigned char*)((char*)self + 0x958));
+            cUIMenu_setScrollableMenu(self->mpMenu, *(unsigned char*)&self->mNumItems);
     }
     int n;
     if (isMode1_B618(self))
@@ -2337,15 +2339,15 @@ extern "C" void func_0019B618(void* self, int reset, int select)
         n = func_0019B518(self);
     int visibleRow;
     if (n == 0) {
-        (*(cUIObj_B618**)((char*)self + 0x8C))->setVisible(1);
-        (*(cUIObj_B618**)((char*)self + 0x8C))->setColor(D_004C6708);
-        cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x8C), GetHashValue32(str_kT_FEEmpty));
-        (*(sList_B618**)((char*)self + 0x5C))->count = 1;
-        (*(sList_B618**)((char*)self + 0x5C))->top = 0;
+        ((cUIObj_B618*)self->mpBoltNameWidgets[0])->setVisible(1);
+        ((cUIObj_B618*)self->mpBoltNameWidgets[0])->setColor(D_004C6708);
+        cUIText_setUnicodeStringByID(self->mpBoltNameWidgets[0], GetHashValue32(str_kT_FEEmpty));
+        ((sList_B618*)self->mpMenu)->count = 1;
+        ((sList_B618*)self->mpMenu)->top = 0;
         visibleRow = 0;
         n = 1;
     } else {
-        sList_B618* scrollList = *(sList_B618**)((char*)self + 0x5C);
+        sList_B618* scrollList = (sList_B618*)self->mpMenu;
         visibleRow = scrollList->sel - scrollList->top;
     }
     if (visibleRow >= n)
@@ -2355,7 +2357,7 @@ extern "C" void func_0019B618(void* self, int reset, int select)
     if (reset)
         visibleRow = 0;
     if (select) {
-        sList_B618* scrollList = *(sList_B618**)((char*)self + 0x5C);
+        sList_B618* scrollList = (sList_B618*)self->mpMenu;
         cUIMenu_setSelectedByIndex(scrollList, scrollList->top + visibleRow);
     }
 }
@@ -2436,7 +2438,7 @@ struct sCharEquip_19B7E0 {
  * @param selfv  the equip state
  * @param i  the row (0-5)
  */
-extern "C" void func_0019B7E0(void* selfv, int i)
+extern "C" void func_0019B7E0(cFEStateCharEquip* selfv, int i)
 {
     sCharEquip_19B7E0* self = (sCharEquip_19B7E0*)selfv;
     sList_B618* scrollList = self->list;
@@ -2524,7 +2526,7 @@ struct sCharEquipK19BA60 {
  * @param equipState  the equip state
  * @param i  the row (0-5)
  */
-extern "C" void func_0019BA60(void* equipState, int i)
+extern "C" void func_0019BA60(cFEStateCharEquip* equipState, int i)
 {
     sCharEquipK19BA60* self = (sCharEquipK19BA60*)equipState;
     char* menu = self->menu;
@@ -2622,14 +2624,14 @@ static inline sBEEntry38K19BBE0* findEntryK19BBE0(sBETableK19BBE0* t, int g, int
  *
  * @param id  the category id, or -1 for the root
  */
-extern "C" void cFEStateCharEquip_updateHeading(void* self, int id)
+extern "C" void cFEStateCharEquip_updateHeading(cFEStateCharEquip* self, int id)
 {
-    if (*(cUIText**)((char*)self + 0x58) != 0) {
+    if (self->mpHeading != 0) {
         if (id == D_004A11D0) {
-            cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x58), GetHashValue32(str_kT_FECategories));
+            cUIText_setUnicodeStringByID(self->mpHeading, GetHashValue32(str_kT_FECategories));
         } else {
-            sBEEntry38K19BBE0* entry = findEntryK19BBE0((sBETableK19BBE0*)func_0014BDB8_noarg(), *(int*)((char*)self + 0xBC), id);
-            cUIText_setUnicodeStringByID(*(cUIText**)((char*)self + 0x58), GetHashValue32(entry->name));
+            sBEEntry38K19BBE0* entry = findEntryK19BBE0((sBETableK19BBE0*)func_0014BDB8_noarg(), self->mCharID, id);
+            cUIText_setUnicodeStringByID(self->mpHeading, GetHashValue32(entry->name));
         }
     }
 }
@@ -2657,17 +2659,17 @@ struct sVec3K19BC90 {
  * The bar's scale (+0x50) becomes (1, -t, 1) with t = (points - 1500) / (D_004A18D8 - 1500), not below 0 (there is no
  * upper clamp).
  */
-extern "C" void cFEStateCharEquip_updatePolyBar(void* self)
+extern "C" void cFEStateCharEquip_updatePolyBar(cFEStateCharEquip* self)
 {
-    char* pointsBar = *(char**)((char*)self + 0x70);
+    char* pointsBar = (char*)self->mpPointsBar;
     if (pointsBar != 0) {
-        float fillRatio = (float)(*(int*)((char*)self + 0xC4) - 1500) / (float)(D_004A18D8 - 1500);
+        float fillRatio = (float)(self->mCurrentPolyCount - 1500) / (float)(D_004A18D8 - 1500);
         if (fillRatio < 0.0f) {
             fillRatio = 0.0f;
         }
         sVEntry0019BC90* vt = *(sVEntry0019BC90**)(pointsBar + 8);
         vt[9].fn(pointsBar + vt[9].delta, 1);
-        *(sVec3K19BC90*)(*(char**)((char*)self + 0x70) + 0x50) = sVec3K19BC90(1.0f, -fillRatio, 1.0f);
+        *(sVec3K19BC90*)((char*)self->mpPointsBar + 0x50) = sVec3K19BC90(1.0f, -fillRatio, 1.0f);
     }
 }
 #endif
@@ -2704,30 +2706,30 @@ struct sVEntryIK19BD48 {
  *
  * @param delta  the selected item's points
  */
-extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(void* self, int delta)
+extern "C" void cFEStateCharEquip_updatePolyEquipPreviewBar(cFEStateCharEquip* self, int delta)
 {
-    if (*(void**)((char*)self + 0x74) == 0)
+    if (self->mpPointsEquipBar == 0)
         return;
-    float fillRatio = (float)(*(int*)((char*)self + 0xC4) + delta - 1500) / (float)(D_004A18D8 - 1500);
+    float fillRatio = (float)(self->mCurrentPolyCount + delta - 1500) / (float)(D_004A18D8 - 1500);
     if (fillRatio > 1.0f)
         fillRatio = 1.0f;
     else if (fillRatio < 0.0f)
         fillRatio = 0.0f;
-    if (D_004A18D8 < *(int*)((char*)self + 0xC4) + delta) {
-        char* equipBar = *(char**)((char*)self + 0x74);
+    if (D_004A18D8 < self->mCurrentPolyCount + delta) {
+        char* equipBar = (char*)self->mpPointsEquipBar;
         sVEntryK19BD48* vt = *(sVEntryK19BD48**)(equipBar + 8);
         vt[11].fn(equipBar + vt[11].delta, D_004C66E8);
     } else {
-        char* equipBar = *(char**)((char*)self + 0x74);
+        char* equipBar = (char*)self->mpPointsEquipBar;
         sVEntryK19BD48* vt = *(sVEntryK19BD48**)(equipBar + 8);
         vt[11].fn(equipBar + vt[11].delta, D_004C66F8);
     }
     {
-        char* equipBar = *(char**)((char*)self + 0x74);
+        char* equipBar = (char*)self->mpPointsEquipBar;
         sVEntryIK19BD48* vt = *(sVEntryIK19BD48**)(equipBar + 8);
         vt[9].fn(equipBar + vt[9].delta, 1);
     }
-    *(sVec3K19BD48*)(*(char**)((char*)self + 0x74) + 0x50) = sVec3K19BD48(1.0f, -fillRatio, 1.0f);
+    *(sVec3K19BD48*)((char*)self->mpPointsEquipBar + 0x50) = sVec3K19BD48(1.0f, -fillRatio, 1.0f);
 }
 #endif
 
@@ -2745,12 +2747,12 @@ extern "C" void* func_0014B560(void* iface, int a1, int a2, int a3, int a4);
  *
  * cFEStateCharEquip_onPopupEvent calls it when the buy popup closes with a yes.
  */
-extern "C" void func_0019BE80(void* self)
+extern "C" void func_0019BE80(cFEStateCharEquip* self)
 {
-    int idx = *(unsigned char*)(*(char**)((char*)self + 0x5C) + 0x95);
+    int idx = *(unsigned char*)((char*)self->mpMenu + 0x95);
     char* item = *(char**)((char*)self + (idx << 2) + 0x124);
-    *(void**)((char*)self + 0xC0) = func_0014B560(cBE_getInterface_Fv(cBE_getBE(), 9),
-        *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0xBC), *(short*)(item + 4), 1);
+    self->mMoneyAvailable = (int)func_0014B560(cBE_getInterface_Fv(cBE_getBE(), 9),
+        self->mUserNum, self->mCharID, *(short*)(item + 4), 1);
 }
 #endif
 
@@ -2791,21 +2793,21 @@ static inline sItemK19BEE8* getItemK19BEE8(sItemListK19BEE8* l, int id)
  *
  * @return 1 when the item changed, else 0
  */
-extern "C" int func_0019BEE8(void* self)
+extern "C" int func_0019BEE8(cFEStateCharEquip* self)
 {
-    if (*(int*)((char*)self + 0x958) <= 0)
+    if (self->mNumItems <= 0)
         return 0;
-    char* item = *(char**)((char*)self + (*(unsigned char*)(*(char**)((char*)self + 0x5C) + 0x95) << 2) + 0x124);
+    char* item = *(char**)((char*)self + (*(unsigned char*)((char*)self->mpMenu + 0x95) << 2) + 0x124);
     if (!(*(int*)(item + 0x34) & 4))
         return 0;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
-    sItemListK19BEE8* list = (sItemListK19BEE8*)func_0014AD28(iface, *(signed char*)((char*)self + 0x44),
-                                                              *(int*)((char*)self + 0xBC));
+    sItemListK19BEE8* list = (sItemListK19BEE8*)func_0014AD28(iface, self->mUserNum,
+                                                              self->mCharID);
     sItemK19BEE8* entry = getItemK19BEE8(list, *(short*)(item + 4));
     int mask = 4;
-    if (func_0014AFB0(iface, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0xBC), *(short*)(item + 4),
+    if (func_0014AFB0(iface, self->mUserNum, self->mCharID, *(short*)(item + 4),
                       (entry->flags & mask) == 0)) {
-        func_0014AEA8(iface, *(signed char*)((char*)self + 0x44), *(int*)((char*)self + 0xBC));
+        func_0014AEA8(iface, self->mUserNum, self->mCharID);
         return 1;
     }
     return 0;
@@ -3094,16 +3096,16 @@ extern char str_cUIStateBuyPopup[];
  *
  * @param item  the item
  */
-extern "C" void func_0019C7E8(void* self, void* item)
+extern "C" void func_0019C7E8(cFEStateCharEquip* self, void* item)
 {
-    void* popup = cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, str_cUIStateBuyPopup, 0, 0), *(void**)((char*)self + 0x10), self, *(signed char*)((char*)self + 0x44));
+    void* popup = cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, str_cUIStateBuyPopup, 0, 0), self->mpEngine, self, self->mUserNum);
     int price = *(short*)((char*)item + 0xE);
     int id = *(int*)((char*)item + 0x14);
     if (price > 0) {
         price *= 10;
     }
-    cBuyPopupInfo_initBuyBolt((int*)((char*)popup + 0x48), id, price, *(int*)((char*)self + 0xC0));
-    cUIStateStack_pushPopup(*(char**)((char*)self + 0x10) + 0x18, popup);
+    cBuyPopupInfo_initBuyBolt((int*)((char*)popup + 0x48), id, price, self->mMoneyAvailable);
+    cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, popup);
 }
 #endif
 
@@ -4792,7 +4794,7 @@ struct sRiderSlotCE {
  * Constructs a front-end rider (0xCE0 bytes; the rider manager holds two).
  *
  * Sets the character id (+0x0), the profile index (+0x4), the requested character (+0xC24), the reload frame (+0xCD4)
- * and the 256 texture entries' ids (+0x1C, 8 bytes each) to -1 and their flags to 0; +0xC2C to 0xFFFFFFFF; both poses
+ * and the 256 texture entries' ids (+0x1C, 0xC bytes each) to -1 and their flags to 0; +0xC2C to 0xFFFFFFFF; both poses
  * (+0xC30, +0xC50) to tPose_Identity; and clears +0x8 to +0x18, +0xC1C, +0xC20, +0xC28, +0xC70 to +0xC78, the
  * load-stage flags +0xCB4 to +0xCC0, +0xCC4 (show once loaded), +0xCC8 (visible) and +0xCCC.
  *
@@ -4865,7 +4867,7 @@ void operator_delete(int* p);
  *
  * @param flags  deleting-destructor flags; bit 0 frees the object
  */
-extern "C" void cFERider__cFERider(void* self, int flags)
+extern "C" void cFERider__cFERider(cFERider* self, int flags)
 {
     sSlot0019E498* slot = (sSlot0019E498*)((char*)self + 0x1C);
     cFERider_purge(self);
@@ -4898,18 +4900,18 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFERider_setVisible);
  *
  * @param enable  nonzero to show, 0 to hide
  */
-extern "C" void cFERider_setVisible(void* self, int enable)
+extern "C" void cFERider_setVisible(cFERider* self, int enable)
 {
     if (enable != 0) {
-        if (*(int*)((char*)self + 0xcc0) != 0 && *(int*)((char*)self + 0xcb8) != 0 &&
-            *(int*)((char*)self + 0xcb4) != 0 && *(int*)((char*)self + 0xcd4) < 0) {
-            *(int*)((char*)self + 0xcc8) = 1;
+        if (self->mDoneUpdatingModelParts != 0 && self->mDoneLoadingTextures != 0 &&
+            self->mCompiledModel != 0 && self->mSafeRenderCount < 0) {
+            self->mVisible = 1;
         } else {
-            *(int*)((char*)self + 0xcc4) = 1;
+            self->mSetVisible = 1;
         }
     } else {
-        *(int*)((char*)self + 0xcc8) = 0;
-        *(int*)((char*)self + 0xcc4) = 0;
+        self->mVisible = 0;
+        self->mSetVisible = 0;
     }
 }
 #endif
@@ -4954,35 +4956,35 @@ struct sRider_E588 {
  * @param item  the character id
  * @param flag  stored at +0xC28 and passed to cFERider_init as its last argument
  */
-extern "C" void cFERider_setCharID(sRider_E588* self, unsigned int item, int flag)
+extern "C" void cFERider_setCharID(cFERider* self, unsigned int item, int flag)
 {
-    self->reqItem = item;
-    self->reqFlag = flag;
+    self->mNewCharID = item;
+    self->mNewLoadAll = flag;
     // The three-way flag test (equivalent to f10 != 0 || flag == 0) is kept as written for codegen.
-    if (self->item == item
-        && ((self->f10 != 0 && flag != 0) || (self->f10 == 0 && flag == 0) || !(self->f10 == 0 || flag != 0))) {
+    if ((unsigned int)self->mCharID == item
+        && ((self->mLoadAll != 0 && flag != 0) || (self->mLoadAll == 0 && flag == 0) || !(self->mLoadAll == 0 || flag != 0))) {
         int ok = 0;
-        if (self->item < 10 && self->fCB8 != 0) {
-            ok = self->fCB4 != 0;
+        if ((unsigned int)self->mCharID < 10 && self->mDoneLoadingTextures != 0) {
+            ok = self->mCompiledModel != 0;
         }
         if (ok) {
-            self->timer = -1;
-            int* visibleField = &self->fCC8;
+            self->mSafeRenderCount = -1;
+            int* visibleField = &self->mVisible;
             int showNow = 0;
-            if (*visibleField != 0 || self->fCC4 != 0) {
+            if (*visibleField != 0 || self->mSetVisible != 0) {
                 showNow = 1;
             }
             *visibleField = showNow;
-            self->fCC4 = 0;
+            self->mSetVisible = 0;
         }
         return;
     }
-    if (self->timer < 0) {
+    if (self->mSafeRenderCount < 0) {
         cPS2GraphicsMan* w = GrMan;
         sVE_E588* vt = (sVE_E588*)w->mVtbl;
-        self->timer = vt[114].fn((char*)w + vt[114].delta) + 4;
-        self->fCC4 = self->fCC8;
-        self->fCC8 = 0;
+        self->mSafeRenderCount = vt[114].fn((char*)w + vt[114].delta) + 4;
+        self->mSetVisible = self->mVisible;
+        self->mVisible = 0;
     }
 }
 #endif

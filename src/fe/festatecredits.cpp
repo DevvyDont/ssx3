@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festateload.h"
 #include "ui/uitextscroll.h"
 #include "ui/uiinput.h"
 #include "ui/uistate.h"
@@ -537,13 +538,13 @@ extern void* cFEStateEventSelect_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateEventSelect_cFEStateEventSelect1(void* self)
+extern "C" void* cFEStateEventSelect_cFEStateEventSelect1(cFEStateEventSelect* self)
 {
     cUIState_cUIState(self);
-    *(int*)((char*)self + 0xC) = 19;
-    *(void***)((char*)self + 0x8) = cFEStateEventSelect_vtbl;
+    self->mHashName = 19;
+    self->mVtbl = cFEStateEventSelect_vtbl;
     cUITemplate_MAP_init((char*)self + 0x48);
-    return self;
+    return ((void*)self);
 }
 #endif
 

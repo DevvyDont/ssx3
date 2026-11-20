@@ -1,4 +1,5 @@
 #include "common.h"
+#include "util/locale.h"
 #include "ui/uiengine.h"
 #include "main/ssxapp.h"
 
@@ -34,7 +35,7 @@ struct cFELocale_sFiles {
  *
  * @param lang  language index (0 English, 1 French, 2 German, 3 Spanish)
  */
-extern "C" void cFELocale_addFile(void* self, int lang)
+extern "C" void cFELocale_addFile(cFELocale* self, int lang)
 {
     signed char i = lang;
     if (i >= 0) {
@@ -66,7 +67,7 @@ struct s195A50Arr {
  *
  * @param i  the file entry index (0 .. 19)
  */
-extern "C" void cFELocale_deleteFile(void* self, signed char i)
+extern "C" void cFELocale_deleteFile(cFELocale* self, signed char i)
 {
     s195A50Arr* arr = (s195A50Arr*)((char*)self + 8);
     if (arr->items[i] != 0) {
@@ -91,9 +92,9 @@ extern "C" void func_00195A98(void) {
 INCLUDE_ASM("util/locale", cFELocale_setLanguage);
 #ifdef SKIP_ASM
 extern "C" void cFELocale_deleteAllFiles(void* self);
-extern "C" void cFELocale_loadFE(void* self);
-extern "C" void cFELocale_loadOV(void* self);
-extern "C" void cFELocale_addFile(void* self, int lang);
+extern "C" void cFELocale_loadFE(cFELocale* self);
+extern "C" void cFELocale_loadOV(cFELocale* self);
+extern "C" void cFELocale_addFile(cFELocale* self, int lang);
 
 /**
  * Switches the front-end locale to another language and reloads its string files.
@@ -105,11 +106,11 @@ extern "C" void cFELocale_addFile(void* self, int lang);
  *
  * @param lang  the language index (0 English, 1 French, 2 German, 3 Spanish)
  */
-extern "C" void cFELocale_setLanguage(void* self, signed char lang)
+extern "C" void cFELocale_setLanguage(cFELocale* self, signed char lang)
 {
-    if (*(signed char*)((char*)self + 0x1) != lang) {
-        *(signed char*)((char*)self + 0x1) = lang;
-        int flags = *(signed char*)((char*)self + 0x3);
+    if (self->mLanguage != lang) {
+        self->mLanguage = lang;
+        int flags = *(signed char*)&self->mAttrLocale;
         if ((flags & 1) == 0) {
             cFELocale_deleteAllFiles(self);
             int langIndex = -1;
@@ -128,7 +129,7 @@ extern "C" void cFELocale_setLanguage(void* self, signed char lang)
                 break;
             }
             cFELocale_addFile(self, langIndex);
-            if (*(signed char*)((char*)self + 0x58) == 1) {
+            if (self->mModule == 1) {
                 cFELocale_loadFE(self);
             } else {
                 cFELocale_loadOV(self);
@@ -141,7 +142,7 @@ extern "C" void cFELocale_setLanguage(void* self, signed char lang)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/locale", cFELocale_loadCommon);
 #ifdef SKIP_ASM
-extern "C" void cFELocale_addFile(void* self, int lang);
+extern "C" void cFELocale_addFile(cFELocale* self, int lang);
 
 /**
  * Loads the string file shared by every front-end screen for the current language.
@@ -149,10 +150,10 @@ extern "C" void cFELocale_addFile(void* self, int lang);
  * Maps the language at +0x1 (0 to 3) to the matching file entry, or -1 for any other value, and passes it to
  * cFELocale_addFile.
  */
-extern "C" void cFELocale_loadCommon(void* self)
+extern "C" void cFELocale_loadCommon(cFELocale* self)
 {
     int lang = -1;
-    switch (*(signed char*)((char*)self + 0x1)) {
+    switch (self->mLanguage) {
     case 0:
         lang = 0;
         break;
@@ -173,7 +174,7 @@ extern "C" void cFELocale_loadCommon(void* self)
 //100%
 INCLUDE_ASM("util/locale", cFELocale_loadFE);
 #ifdef SKIP_ASM
-extern "C" void cFELocale_addFile(void* self, int lang);
+extern "C" void cFELocale_addFile(cFELocale* self, int lang);
 
 /**
  * Loads the front-end string files for the current language: sets the module byte (+0x58) to 1 and adds file entries
@@ -182,12 +183,11 @@ extern "C" void cFELocale_addFile(void* self, int lang);
  *
  * @param locale  the cFELocale
  */
-extern "C" void cFELocale_loadFE(void* locale)
+extern "C" void cFELocale_loadFE(cFELocale* locale)
 {
-    char* self = (char*)locale;
     int id = -1;
-    *(char*)(self + 0x58) = 1;
-    switch (*(signed char*)(self + 1)) {
+    *(char*)&locale->mModule = 1;
+    switch (locale->mLanguage) {
     case 0:
         id = 4;
         break;
@@ -201,8 +201,8 @@ extern "C" void cFELocale_loadFE(void* locale)
         id = 7;
         break;
     }
-    cFELocale_addFile(self, id);
-    switch (*(signed char*)(self + 1)) {
+    cFELocale_addFile(locale, id);
+    switch (locale->mLanguage) {
     case 0:
         id = 8;
         break;
@@ -216,9 +216,9 @@ extern "C" void cFELocale_loadFE(void* locale)
         id = 11;
         break;
     }
-    cFELocale_addFile(self, id);
+    cFELocale_addFile(locale, id);
     id = -1;
-    switch (*(signed char*)(self + 1)) {
+    switch (locale->mLanguage) {
     case 0:
         id = 0x10;
         break;
@@ -232,23 +232,23 @@ extern "C" void cFELocale_loadFE(void* locale)
         id = 19;
         break;
     }
-    cFELocale_addFile(self, id);
+    cFELocale_addFile(locale, id);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/locale", cFELocale_unloadFE);
 #ifdef SKIP_ASM
-extern "C" void cFELocale_deleteFile(void* self, signed char i);
+extern "C" void cFELocale_deleteFile(cFELocale* self, signed char i);
 
 /**
  * Unloads the front-end string files: unless bit 0 of the locale flags (+0x3, mLocaleTest) is set, deletes file entries
  * 4-7 and 16-19 with cFELocale_deleteFile. Entries 8-11, which cFELocale_loadFE also loads, stay loaded, and the module byte is
  * not changed.
  */
-extern "C" void cFELocale_unloadFE(void* self)
+extern "C" void cFELocale_unloadFE(cFELocale* self)
 {
-    int flags = *(signed char*)((char*)self + 0x3);
+    int flags = *(signed char*)&self->mAttrLocale;
     if ((flags & 1) == 0) {
         cFELocale_deleteFile(self, 4);
         cFELocale_deleteFile(self, 5);
@@ -265,17 +265,17 @@ extern "C" void cFELocale_unloadFE(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/locale", cFELocale_loadOV);
 #ifdef SKIP_ASM
-extern "C" void cFELocale_addFile(void* self, int lang);
+extern "C" void cFELocale_addFile(cFELocale* self, int lang);
 
 /**
  * Loads the in-game string file for the current language: sets the module byte (+0x58) to 2 and adds file entry 12-15,
  * the one matching the language (+0x1, 0-3), with cFELocale_addFile (-1, nothing, for any other language).
  */
-extern "C" void cFELocale_loadOV(void* self)
+extern "C" void cFELocale_loadOV(cFELocale* self)
 {
     int file = -1;
-    *(signed char*)((char*)self + 0x58) = 2;
-    switch (*(signed char*)((char*)self + 0x1)) {
+    self->mModule = 2;
+    switch (self->mLanguage) {
     case 0:
         file = 0xC;
         break;
@@ -296,15 +296,15 @@ extern "C" void cFELocale_loadOV(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("util/locale", cFELocale_unloadOV);
 #ifdef SKIP_ASM
-extern "C" void cFELocale_deleteFile(void* self, signed char i);
+extern "C" void cFELocale_deleteFile(cFELocale* self, signed char i);
 
 /**
  * Unloads the in-game string files: unless bit 0 of the locale flags (+0x3, mLocaleTest) is set, deletes file entries
  * 12-15 with cFELocale_deleteFile.
  */
-extern "C" void cFELocale_unloadOV(void* self)
+extern "C" void cFELocale_unloadOV(cFELocale* self)
 {
-    int flags = *(signed char*)((char*)self + 3);
+    int flags = *(signed char*)&self->mAttrLocale;
     if ((flags & 1) == 0) {
         cFELocale_deleteFile(self, 0xC);
         cFELocale_deleteFile(self, 13);
@@ -339,12 +339,12 @@ struct cFELocale_getStringByHash_sLocale {
  * @param key  the string's hash (GetHashValue32 of its id)
  * @return the string, or the buffer at +0x5A
  */
-extern "C" const char* cFELocale_getStringByHash(cFELocale_getStringByHash_sLocale* self, int key)
+extern "C" const char* cFELocale_getStringByHash(cFELocale* self, int key)
 {
-    if (self->useDefault == 0) {
+    if (self->mDisplayMode == 0) {
         for (signed char i = 0; i < 20; i++) {
-            signed char* localeFile = self->files[i];
-            if (localeFile != 0 && *localeFile == self->lang) {
+            signed char* localeFile = ((signed char**)&self->mpLocaleFile[0])[i];
+            if (localeFile != 0 && *localeFile == self->mLanguage) {
                 const char* foundString = cLocaleFile_getStringByHash(localeFile, key);
                 if (foundString != 0) {
                     return foundString;
@@ -378,7 +378,7 @@ struct cFELocale_getStringByIndex_sArr {
  * @param stringIndex  the string index
  * @return the string, or 0
  */
-extern "C" void* cFELocale_getStringByIndex(void* self, void* stringIndex)
+extern "C" void* cFELocale_getStringByIndex(cFELocale* self, void* stringIndex)
 {
     cFELocale_getStringByIndex_sArr* arr = (cFELocale_getStringByIndex_sArr*)((char*)self + 8);
     signed char i;

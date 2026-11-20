@@ -1,4 +1,6 @@
 #include "common.h"
+#include "fe/festateload.h"
+#include "fe/festateprofile.h"
 #include "ui/uithing.h"
 #include "fe/fememcard.h"
 #include "fe/feinput.h"
@@ -4593,8 +4595,8 @@ extern void* cFEStateProfileLoad_vtbl[];
  *
  * @return no meaningful value (cFEMemCard__cFEMemCard returns nothing)
  */
-extern "C" void* cFEStateProfileLoad__cFEStateProfileLoad(void *self) {
-    *(void***)((char*)self + 8) = cFEStateProfileLoad_vtbl;
+extern "C" void* cFEStateProfileLoad__cFEStateProfileLoad(cFEStateProfileLoad* self) {
+    self->mVtbl = cFEStateProfileLoad_vtbl;
     return cFEMemCard__cFEMemCard_E218(self);
 }
 #endif
@@ -4614,10 +4616,10 @@ extern int D_0046BFD0_E240[] __asm__("cFEStateProfileLoad_vtbl");
  *
  * @return @p self
  */
-extern "C" void *func_001DE240(void *self) {
+extern "C" void *func_001DE240(cFEStateProfileLoad* self) {
     cFEMemCard_cFEMemCard_E240(self, 0, 0);
-    *(int **)((char *)self + 8) = D_0046BFD0_E240;
-    return self;
+    self->mVtbl = (void**)D_0046BFD0_E240;
+    return ((void*)self);
 }
 #endif
 
@@ -4634,8 +4636,8 @@ INCLUDE_ASM("main/all_in_one_main", func_001DE280);
  * @param profileLoadState  the profile load state (cFEStateProfileLoad)
  * @param action  the action: 0, 1 or 2
  */
-extern "C" void func_001DE280(void *profileLoadState, int action) {
-    (*(int *)((char*)(profileLoadState) + (0x27C))) = action;
+extern "C" void func_001DE280(cFEStateProfileLoad* profileLoadState, int action) {
+    (profileLoadState->mTypeOfQuit) = action;
 }
 #endif
 
@@ -5106,11 +5108,11 @@ extern int cFEStateEventSelect_vtbl[];
  *
  * @return @p self
  */
-extern "C" void *cFEStateEventSelect_cFEStateEventSelect(void *self) {
+extern "C" void *cFEStateEventSelect_cFEStateEventSelect(cFEStateEventSelect* self) {
     cUIState_cUIState_E4E8(self, 0);
-    *(int **)((char *)self + 8) = cFEStateEventSelect_vtbl;
+    self->mVtbl = (void**)cFEStateEventSelect_vtbl;
     cUITemplate_MAP_init_E4E8((char *)self + 0x48);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -5130,8 +5132,8 @@ extern void* cFEState_vtbl[];
  *
  * @return nothing meaningful (whatever cUIState__cUIState leaves)
  */
-extern "C" void* cFEStateEventSelect__cFEStateEventSelect(void *self) {
-    *(void***)((char*)self + 8) = cFEState_vtbl;
+extern "C" void* cFEStateEventSelect__cFEStateEventSelect(cFEStateEventSelect* self) {
+    self->mVtbl = cFEState_vtbl;
     return cUIState__cUIState_E528(self);
 }
 #endif

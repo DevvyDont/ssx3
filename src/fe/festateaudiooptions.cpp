@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatebigradio.h"
 #include "ui/uithing.h"
 #include "main/ssxapp.h"
 
@@ -116,7 +117,7 @@ void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern "C" void cBERewardInterface_setRadioMode(void* iface, int player, int a2, int a3);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028BF78(void* audio, int a1);
-extern "C" void* cFEStateRequestLine_cFEStateRequestLine(void* p, int a1, signed char idx, int a3);
+extern "C" void* cFEStateRequestLine_cFEStateRequestLine(cFEStateRequestLine* p, int a1, signed char idx, int a3);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 extern "C" void cUIStateStack_pop(void* stack, int a1);
 extern "C" void cUIStateStack_push(void* stack, void* state);
@@ -241,7 +242,7 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
             return;
         if (self->f74 == 0 && self->f7C == 0)
             return;
-        char* popup = (char*)cFEStateRequestLine_cFEStateRequestLine(cMemMan_alloc(528, str_cFEStateRequestLine, 0, 0), (int)self->owner, self->player, self->f74);
+        char* popup = (char*)cFEStateRequestLine_cFEStateRequestLine((cFEStateRequestLine*)cMemMan_alloc(528, str_cFEStateRequestLine, 0, 0), (int)self->owner, self->player, self->f74);
         if (online_AOWE()) {
             *(int*)(popup + 0x1C) = (*(int*)(popup + 0x1C) & ~0x3F00) | 0x100;
             cUIStateStack_pushSpecial(self->owner + 0x18, popup, 0, 0);
@@ -431,7 +432,7 @@ static inline int Find_196B90(char* mgr, int hash)
  * @param inStore   nonzero when opened from the store (cFECustom_getNextState passes D_004A19D8)
  * @return @p requestLine
  */
-extern "C" void* cFEStateRequestLine_cFEStateRequestLine(void* requestLine, int uiEngine, signed char idx, int inStore)
+extern "C" void* cFEStateRequestLine_cFEStateRequestLine(cFEStateRequestLine* requestLine, int uiEngine, signed char idx, int inStore)
 {
     sAudioState_196B90* self = (sAudioState_196B90*)requestLine;
     cUIState_cUIState(self);
@@ -552,10 +553,10 @@ extern char str_hud[];
 /**
  * Destroys the request-line screen, first telling the in-game HUD to come back (4) when a game is running.
  */
-extern "C" void cFEStateRequestLine_onDestroyScreen(void* self)
+extern "C" void cFEStateRequestLine_onDestroyScreen(cFEStateRequestLine* self)
 {
     if ((int)SSXApp->Game != 0) {
-        void* obj = cUIStateStack_findState(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(str_hud));
+        void* obj = cUIStateStack_findState((char*)self->mpEngine + 0x18, GetHashValue32(str_hud));
         if (obj != 0) {
             sVEntry00196E80* vtEntry = &(*(sVEntry00196E80**)((char*)obj + 8))[24];
             vtEntry->fn((char*)obj + vtEntry->delta, 4, 0);
@@ -580,10 +581,10 @@ extern "C" void cFEStateRequestLine_updateHelpText(void* self, int a1);
  * Runs the base cFEState_onGainFocus(), resets the list's first visible song (0x150) to 0, then refreshes the
  * play list, the now-playing title and artist texts (cFEStateRequestLine_updateCurrentlyPlaying()), the button texts and the help text.
  */
-extern "C" void cFEStateRequestLine_onGainFocus(void* self)
+extern "C" void cFEStateRequestLine_onGainFocus(cFEStateRequestLine* self)
 {
     cFEState_onGainFocus(self);
-    *(int*)((char*)self + 0x150) = 0;
+    self->mFirstVisibleSong = 0;
     cFEStateRequestLine_updatePlayList(self);
     cFEStateRequestLine_updateCurrentlyPlaying(self);
     cFEStateRequestLine_updateButtonsText(self, 0);
@@ -606,7 +607,7 @@ extern "C" void cFEStateRequestLine_updateHelpText(void* self, int a1);
  * @param bFirstTime  the state's first-time flag as passed by the state stack; nonzero on the transition's first call
  * @return always 0
  */
-extern "C" int cFEStateRequestLine_onGainTransition(void* self, int bFirstTime)
+extern "C" int cFEStateRequestLine_onGainTransition(cFEStateRequestLine* self, int bFirstTime)
 {
     if (bFirstTime != 0) {
         cFEStateRequestLine_updatePlayListArrows(self);

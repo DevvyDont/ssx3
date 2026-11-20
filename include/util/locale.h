@@ -1,0 +1,73 @@
+#ifndef UTIL_LOCALE_H
+#define UTIL_LOCALE_H
+
+// cFELocale: the game's string table (one per app: SSXApp->FELocale, which cSSXApp_initLocale creates and points at
+// the options' language). It keeps up to 20 loaded cLocaleFiles (data/locale/*.loc: the common file per language,
+// the front-end set or the in-game set) and answers string lookups by hash or index for the UI
+// (cUILocaleInterface, the UI engine's mpLocaleInterface).
+// EA's source is util/locale.cpp (the July 2003 preview's assert strings; retail unit util/locale). Retail code: the
+// ctor, dtor and deleteAllFiles in fe/festatecharequip (0x00195880 ... 0x00195948), the rest in util/locale
+// (0x001959A8 ... 0x00195F70); the base cUILocaleInterface's out-of-line methods in main/all_in_one_main
+// (0x001DCBD8 ... 0x001DCC58).
+//
+// Size 0xC0:
+//   [R] cMemMan_alloc(0xC0, "FELocale") + cFELocale_cFELocale(mem) in cSSXApp_initLocale; the highest use is the
+//       string buffer at 0x5A (getStringByHash), 50 chars up to 0xBE, then 2 bytes of padding.
+//   [O] On Tour 0x88 = cUILocaleInterface 0x8 + cLocaleFile* mpLocaleFile[6] + char mModule + unsigned short
+//       TempString[50]; retail has 20 file slots (the ctor clears 80 bytes at 0x8; every loop runs to 20): 0x88 +
+//       14 * 4 = 0xC0.
+// Base: cUILocaleInterface (On Tour 0x8: four chars, then the vptr at 0x4; vtable cUILocaleInterface_vtbl
+// 0x0046D848, 4 slots). The ctor stores cUILocaleInterface_vtbl, runs tAttrLocale_tAttrLocale on byte 3, then stores
+// cFELocale_vtbl (0x0046BF98, 5 slots: 1 dtor, 2 cUILocaleInterface_setDisplayMode, 3 setLanguage, 4 getStringByHash,
+// 5 getStringByIndex). No cUIState: this is not a screen.
+//
+// A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet.
+// Evidence tags:
+//   [R] retail's constructor cFELocale_cFELocale / destructor cFELocale__cFELocale and the allocation size;
+//   [P] the July 2003 preview (layout_xlate: the vptr at 0x4 in ~cUILocaleInterface);
+//   [U] how retail code uses the field;
+//   [O] SSX On Tour's DWARF (class cFELocale, cUILocaleInterface, struct tAttrLocale): names, types and order.
+
+#include "layout.h"
+
+struct cLocaleFile;
+
+struct cFELocale {
+    // --- cUILocaleInterface (On Tour: size 0x8)
+    signed char mDisplayMode;       // 0x000 [O] char; [R] 0; [U] cUILocaleInterface_setDisplayMode stores it;
+                                    //       getStringByHash returns the blank buffer unless it is 0
+    signed char mLanguage;          // 0x001 [O] char; [R] 0; [U] setLanguage compares and stores it; loadCommon /
+                                    //       loadFE / loadOV switch on it; getStringByHash matches files on it
+    signed char mNumLanguages;      // 0x002 [O] char; [R] the base part stores 0, cFELocale's ctor 4
+    unsigned char mAttrLocale;      // 0x003 [O] tAttrLocale (1 byte, LSB first: mLocaleTest:1 mObjPivot:1 mTextBox:1
+                                    //       mTextNumChar:1 mTextRefresh:1); [R] tAttrLocale_tAttrLocale clears the low
+                                    //       5 bits; [U] setLanguage / unloadFE / unloadOV keep the files while bit 0
+                                    //       (mLocaleTest) is set
+    void** mVtbl;                   // 0x004 [R] cUILocaleInterface_vtbl, then cFELocale_vtbl (ctor); the dtor stores
+                                    //       them in reverse; [P] preview ~cUILocaleInterface
+    // --- cFELocale
+    cLocaleFile* mpLocaleFile[20];  // 0x008 [O] ([6] in On Tour); [R] the ctor clears 80 bytes; [U] addFile creates
+                                    //       entries 0-3 (cLocaleFile_loadFile into a 0x14-byte "LocaleFile"),
+                                    //       loadFE / loadOV add 4-19, deleteFile / deleteAllFiles free them,
+                                    //       getStringByHash / getStringByIndex search all 20
+    signed char mModule;            // 0x058 [O] char; [R] 0; [U] loadFE sets 1, loadOV 2; setLanguage reloads the
+                                    //       front-end set when it is 1, else the in-game set
+    char unk_059[0x1];              // 0x059 padding
+    unsigned short TempString[50];  // 0x05A [O]; [U] getStringByHash's fallback: sprintf2 writes " " here and returns
+                                    //       it
+    char unk_0BE[0x2];              // 0x0BE tail padding
+};
+
+CHECK_OFFSET(cFELocale, mDisplayMode, 0x000);
+CHECK_OFFSET(cFELocale, mLanguage, 0x001);
+CHECK_OFFSET(cFELocale, mNumLanguages, 0x002);
+CHECK_OFFSET(cFELocale, mAttrLocale, 0x003);
+CHECK_OFFSET(cFELocale, mVtbl, 0x004);
+CHECK_OFFSET(cFELocale, mpLocaleFile, 0x008);
+CHECK_OFFSET(cFELocale, mModule, 0x058);
+CHECK_OFFSET(cFELocale, unk_059, 0x059);
+CHECK_OFFSET(cFELocale, TempString, 0x05A);
+CHECK_OFFSET(cFELocale, unk_0BE, 0x0BE);
+CHECK_SIZE(cFELocale, 0xC0);
+
+#endif /* UTIL_LOCALE_H */

@@ -1,4 +1,7 @@
 #include "common.h"
+#include "fe/festatevideoplayer.h"
+#include "fe/festatebigradio.h"
+#include "fe/festatecharequip.h"
 #include "ui/uiinput.h"
 #include "ui/uiengine.h"
 #include "fe/festaterewardsroom.h"
@@ -1143,8 +1146,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateCharEquip_isInStore);
  * @param charEquip  the equip-gear state
  * @return 1 in store mode, else 0
  */
-extern "C" int cFEStateCharEquip_isInStore(void *charEquip) {
-    return (*(int *)((char*)(charEquip) + (0xC8))) == 1;
+extern "C" int cFEStateCharEquip_isInStore(cFEStateCharEquip* charEquip) {
+    return (charEquip->mEquipMode) == 1;
 }
 #endif
 //100%
@@ -1159,8 +1162,8 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF9C0);
  * @param charEquip  the equip-gear state
  * @return nonzero once the icons are loaded
  */
-extern "C" int func_001DF9C0(void *charEquip) {
-    return (*(int *)((char*)(charEquip) + (0xA60)));
+extern "C" int func_001DF9C0(cFEStateCharEquip* charEquip) {
+    return (charEquip->mIconsLoaded);
 }
 #endif
 //100%
@@ -1175,8 +1178,8 @@ INCLUDE_ASM("fe/fepopupmisc", func_001DF9C8);
  * @param charEquip   the equip-gear state
  * @param value  nonzero to allow switching
  */
-extern "C" void func_001DF9C8(void *charEquip, int value) {
-    (*(int *)((char*)(charEquip) + (0xAE4))) = value;
+extern "C" void func_001DF9C8(cFEStateCharEquip* charEquip, int value) {
+    (charEquip->mCanSwitchMode) = value;
 }
 #endif
 //100%
@@ -1190,8 +1193,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateCharEquip_canSwitchEquipMode);
  * @param charEquip  the equip-gear state
  * @return the stored flag
  */
-extern "C" int cFEStateCharEquip_canSwitchEquipMode(void *charEquip) {
-    return (*(int *)((char*)(charEquip) + (0xAE4)));
+extern "C" int cFEStateCharEquip_canSwitchEquipMode(cFEStateCharEquip* charEquip) {
+    return (charEquip->mCanSwitchMode);
 }
 #endif
 //100%
@@ -2276,8 +2279,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateVideoPlayer_setInterruptible);
  * @param videoPlayer   the video-player state
  * @param value  nonzero to let input stop the movie
  */
-extern "C" void cFEStateVideoPlayer_setInterruptible(void *videoPlayer, int value) {
-    (*(int *)((char*)(videoPlayer) + (0x270))) = value;
+extern "C" void cFEStateVideoPlayer_setInterruptible(cFEStateVideoPlayer* videoPlayer, int value) {
+    (videoPlayer->mInterruptible) = value;
 }
 #endif
 //100%
@@ -2291,8 +2294,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateVideoPlayer_setFullScreen);
  * @param videoPlayer   the video-player state
  * @param value  nonzero for full screen
  */
-extern "C" void cFEStateVideoPlayer_setFullScreen(void *videoPlayer, int value) {
-    (*(int *)((char*)(videoPlayer) + (0x258))) = value;
+extern "C" void cFEStateVideoPlayer_setFullScreen(cFEStateVideoPlayer* videoPlayer, int value) {
+    (videoPlayer->mOptions.bFullScreen) = value;
 }
 #endif
 //100%
@@ -2306,8 +2309,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateVideoPlayer_setSound);
  * @param videoPlayer   the video-player state
  * @param value  nonzero to play the movie's sound
  */
-extern "C" void cFEStateVideoPlayer_setSound(void *videoPlayer, int value) {
-    (*(int *)((char*)(videoPlayer) + (0x254))) = value;
+extern "C" void cFEStateVideoPlayer_setSound(cFEStateVideoPlayer* videoPlayer, int value) {
+    (videoPlayer->mOptions.bSoundOn) = value;
 }
 #endif
 //100%
@@ -2325,9 +2328,9 @@ struct sBlock24 {
  *
  * @param src  the options to copy (nine words)
  */
-extern "C" void cFEStateVideoPlayer_setOptions(void* self, void* src)
+extern "C" void cFEStateVideoPlayer_setOptions(cFEStateVideoPlayer* self, void* src)
 {
-    *(sBlock24*)((char*)self + 0x24C) = *(sBlock24*)src;
+    *(sBlock24*)&self->mOptions = *(sBlock24*)src;
 }
 #endif
 //100%
@@ -2865,11 +2868,11 @@ extern void* cFEStateRequestLine_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateRequestLine_cFEStateRequestLine1(void* self)
+extern "C" void* cFEStateRequestLine_cFEStateRequestLine1(cFEStateRequestLine* self)
 {
     cUIState_cUIState(self, 0);
-    *(void***)((char*)self + 0x8) = cFEStateRequestLine_vtbl;
-    return self;
+    self->mVtbl = cFEStateRequestLine_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -2918,7 +2921,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_countBits);
  * @return the number of bits set (0..64)
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" int cFEStateRequestLine_countBits(void* requestLine, unsigned long bits) {
+extern "C" int cFEStateRequestLine_countBits(cFEStateRequestLine* requestLine, unsigned long bits) {
     int count;
     int i;
     int bit;
@@ -2942,9 +2945,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_selectSong);
  * @param bit  the song index (0..63)
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void cFEStateRequestLine_selectSong(void* self, int bit)
+extern "C" void cFEStateRequestLine_selectSong(cFEStateRequestLine* self, int bit)
 {
-    *(long*)((char*)self + 0x158) |= 1L << bit;
+    *(long*)&self->mPlaylist |= 1L << bit;
 }
 #endif
 //100%
@@ -2956,9 +2959,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_unselectSong);
  * @param bit  the song index (0..63)
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void cFEStateRequestLine_unselectSong(void* self, int bit)
+extern "C" void cFEStateRequestLine_unselectSong(cFEStateRequestLine* self, int bit)
 {
-    *(long*)((char*)self + 0x158) &= ~(1L << bit);
+    *(long*)&self->mPlaylist &= ~(1L << bit);
 }
 #endif
 //100%
@@ -2971,8 +2974,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_isEmptyPlaylist);
  * @return 1 when no song is selected, else 0
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" int cFEStateRequestLine_isEmptyPlaylist(void *requestLine) {
-    return (*(long *)((char*)(requestLine) + (0x158))) == 0;
+extern "C" int cFEStateRequestLine_isEmptyPlaylist(cFEStateRequestLine* requestLine) {
+    return ((long)requestLine->mPlaylist) == 0;
 }
 #endif
 //100%
@@ -2987,9 +2990,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_isOnlySongInPlaylist);
  * @return 1 when no other song is selected, else 0
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" int cFEStateRequestLine_isOnlySongInPlaylist(void* self, int bit)
+extern "C" int cFEStateRequestLine_isOnlySongInPlaylist(cFEStateRequestLine* self, int bit)
 {
-    return (*(long*)((char*)self + 0x158) & ~(1L << bit)) == 0;
+    return ((long)self->mPlaylist & ~(1L << bit)) == 0;
 }
 #endif
 //100%
@@ -3002,9 +3005,9 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_isSongSelected);
  * @return 1 when selected, else 0
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" int cFEStateRequestLine_isSongSelected(void* self, int bit)
+extern "C" int cFEStateRequestLine_isSongSelected(cFEStateRequestLine* self, int bit)
 {
-    return (*(unsigned long*)((char*)self + 0x158) >> bit) & 1;
+    return (self->mPlaylist >> bit) & 1;
 }
 #endif
 //100%
@@ -3017,7 +3020,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_getNumSongsInPlaylist);
  * @return the number of selected songs
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" int cFEStateRequestLine_getNumSongsInPlaylist(void *requestLine) {
+extern "C" int cFEStateRequestLine_getNumSongsInPlaylist(cFEStateRequestLine* requestLine) {
     int temp_2;
     int var_4;
     int var_5;
@@ -3025,7 +3028,7 @@ extern "C" int cFEStateRequestLine_getNumSongsInPlaylist(void *requestLine) {
     var_5 = 0;
     var_4 = 0;
     do {
-        temp_2 = ((unsigned long) (*(unsigned long *)((char*)(requestLine) + (0x158))) >> var_4) & 1;
+        temp_2 = ((unsigned long) (requestLine->mPlaylist) >> var_4) & 1;
         var_4 += 1;
         var_5 += temp_2;
     } while (var_4 < 0x40);

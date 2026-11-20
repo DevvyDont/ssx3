@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatevideoplayer.h"
 #include "ui/uiicon.h"
 #include "ui/uiinput.h"
 #include "ui/uistate.h"
@@ -1095,8 +1096,8 @@ INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_showReward);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cFEStatePreviewReward_cFEStatePreviewReward(cFEStatePreviewReward* self, cUIEngine* engine, cUIState* owner, int player);
 extern "C" void cFEStatePreviewReward_setReward(cFEStatePreviewReward* self, int kind, void* data);
-extern "C" void* cFEStateVideoPlayer_cFEStateVideoPlayer(void* self, cUIEngine* engine, cUIState* owner, signed char idx);
-extern "C" void cFEStateVideoPlayer_setVideoSourceFiles(void* self, const char* a, const char* b);
+extern "C" void* cFEStateVideoPlayer_cFEStateVideoPlayer(cFEStateVideoPlayer* self, cUIEngine* engine, cUIState* owner, signed char idx);
+extern "C" void cFEStateVideoPlayer_setVideoSourceFiles(cFEStateVideoPlayer* self, const char* a, const char* b);
 extern "C" void cUIStateStack_pushPopup(void* stack, void* state);
 extern char str_cFEStatePreviewReward[];
 extern char str_cFEStateVideoPlayer[];
@@ -1130,9 +1131,9 @@ extern "C" void cFEStateRewardGalleryBase_showReward(cFEStateRewardGalleryBase* 
         cFEStatePreviewReward_setReward((cFEStatePreviewReward*)nextState, self->mRewardType, data);
         break;
     case 6:
-        nextState = cFEStateVideoPlayer_cFEStateVideoPlayer(cMemMan_alloc(640, str_cFEStateVideoPlayer, 0, 0), self->mpEngine, (cUIState*)self,
+        nextState = cFEStateVideoPlayer_cFEStateVideoPlayer((cFEStateVideoPlayer*)cMemMan_alloc(640, str_cFEStateVideoPlayer, 0, 0), self->mpEngine, (cUIState*)self,
                           self->mUserNum);
-        cFEStateVideoPlayer_setVideoSourceFiles(nextState, *(const char**)((char*)data + 4), 0);
+        cFEStateVideoPlayer_setVideoSourceFiles((cFEStateVideoPlayer*)nextState, *(const char**)((char*)data + 4), 0);
         break;
     }
     if (nextState != 0) {
@@ -3071,26 +3072,25 @@ extern void* cFEStateVideoPlayer_vtbl[];
  * @param player  user number
  * @return @p vself
  */
-extern "C" void* cFEStateVideoPlayer_cFEStateVideoPlayer(void* vself, cUIEngine* engine, cUIState* owner, signed char player)
+extern "C" void* cFEStateVideoPlayer_cFEStateVideoPlayer(cFEStateVideoPlayer* vself, cUIEngine* engine, cUIState* owner, signed char player)
 {
-    char* self = (char*)vself;
-    cUIState_cUIState1(self, engine, owner);
-    char* title = self + 0x48;
-    char* body = self + 0x148;
-    *(signed char*)(self + 0x44) = player;
+    cUIState_cUIState1(((char*)vself), engine, owner);
+    char* title = ((char*)vself) + 0x48;
+    char* body = ((char*)vself) + 0x148;
+    vself->mUserNum = player;
     title[0] = 0;
     body[0] = 0;
-    *(int*)(self + 0x274) = 0;
-    *(int*)(self + 0x278) = 0;
-    *(int*)(self + 0x27C) = 0;
-    *(int*)(self + 0x248) = 0;
-    *(void***)(self + 0x8) = cFEStateVideoPlayer_vtbl;
-    *(int*)(self + 0xC) = 6;
-    *(int*)(self + 0x270) = 1;
-    tMoviePlayOptions_SetDefaults(self + 0x24C);
-    *(char**)(self + 0x24C) = title;
-    *(char**)(self + 0x250) = body;
-    return self;
+    vself->mUpdatedOnce = 0;
+    vself->mRenderOnce = 0;
+    vself->mStopPending = 0;
+    vself->mpMoviePlayer = 0;
+    vself->mVtbl = cFEStateVideoPlayer_vtbl;
+    vself->mHashName = 6;
+    vself->mInterruptible = 1;
+    tMoviePlayOptions_SetDefaults(((char*)vself) + 0x24C);
+    *(char**)&vself->mOptions = title;
+    vself->mOptions.sAudioFileName = (const char*)body;
+    return ((char*)vself);
 }
 #endif
 
@@ -3110,13 +3110,13 @@ extern void* cFEState_vtbl[];
  *
  * @param flags  g++ destructor flags, passed on to cUIState__cUIState (bit 0 frees the object's memory)
  */
-extern "C" void cFEStateVideoPlayer__cFEStateVideoPlayer(void* self, int flags)
+extern "C" void cFEStateVideoPlayer__cFEStateVideoPlayer(cFEStateVideoPlayer* self, int flags)
 {
-    *(void***)((char*)self + 8) = cFEStateVideoPlayer_vtbl;
-    if (*(void**)((char*)self + 0x248) != 0) {
-        cMoviePlayer__cMoviePlayer(*(void**)((char*)self + 0x248), 3);
+    self->mVtbl = cFEStateVideoPlayer_vtbl;
+    if (self->mpMoviePlayer != 0) {
+        cMoviePlayer__cMoviePlayer(self->mpMoviePlayer, 3);
     }
-    *(void***)((char*)self + 8) = cFEState_vtbl;
+    self->mVtbl = cFEState_vtbl;
     cUIState__cUIState(self, flags);
 }
 #endif
@@ -3126,7 +3126,7 @@ INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer_onCreateScreen);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cMoviePlayer_cMoviePlayer(void* mem);
-extern "C" void cFEStateVideoPlayer_Start(void* self);
+extern "C" void cFEStateVideoPlayer_Start(cFEStateVideoPlayer* self);
 extern char str_MoviePlayer[];
 
 /**
@@ -3135,9 +3135,9 @@ extern char str_MoviePlayer[];
  * Vtable slot 4 of cFEStateVideoPlayer_vtbl (the create-screen slot; no screen is created). Allocates 68 bytes under the tag
  * "MoviePlayer", constructs them with cMoviePlayer_cMoviePlayer() into +0x248 and calls cFEStateVideoPlayer_Start().
  */
-extern "C" void cFEStateVideoPlayer_onCreateScreen(void* self)
+extern "C" void cFEStateVideoPlayer_onCreateScreen(cFEStateVideoPlayer* self)
 {
-    *(void**)((char*)self + 0x248) = cMoviePlayer_cMoviePlayer(cMemMan_alloc(68, str_MoviePlayer, 0, 0));
+    self->mpMoviePlayer = (cMoviePlayer*)cMoviePlayer_cMoviePlayer(cMemMan_alloc(68, str_MoviePlayer, 0, 0));
     cFEStateVideoPlayer_Start(self);
 }
 #endif
@@ -3153,13 +3153,13 @@ extern "C" void cMoviePlayer__cMoviePlayer(void* p, int a1);
  *
  * Vtable slot 5 of cFEStateVideoPlayer_vtbl.
  */
-extern "C" void cFEStateVideoPlayer_onDestroyScreen(void* self)
+extern "C" void cFEStateVideoPlayer_onDestroyScreen(cFEStateVideoPlayer* self)
 {
-    void* moviePlayer = *(void**)((char*)self + 0x248);
+    void* moviePlayer = self->mpMoviePlayer;
     if (moviePlayer != 0) {
         cMoviePlayer__cMoviePlayer(moviePlayer, 3);
     }
-    *(void**)((char*)self + 0x248) = 0;
+    self->mpMoviePlayer = 0;
 }
 #endif
 
@@ -3175,11 +3175,11 @@ extern "C" void* cUIState_onRender2D(void* self);
  *
  * Vtable slot 15 of cFEStateVideoPlayer_vtbl.
  */
-extern "C" void cFEStateVideoPlayer_onRender2D(void* self)
+extern "C" void cFEStateVideoPlayer_onRender2D(cFEStateVideoPlayer* self)
 {
-    void* moviePlayer = *(void**)((char*)self + 0x248);
+    void* moviePlayer = self->mpMoviePlayer;
     if (moviePlayer != 0) {
-        *(int*)((char*)self + 0x278) = 1;
+        self->mRenderOnce = 1;
         cMoviePlayer_asyncRender(moviePlayer, 0);
     }
     cUIState_onRender2D(self);
@@ -3190,7 +3190,7 @@ extern "C" void cFEStateVideoPlayer_onRender2D(void* self)
 INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void cMoviePlayer_asyncUpdate(void* p);
-extern "C" void cFEStateVideoPlayer_Stop(void* self);
+extern "C" void cFEStateVideoPlayer_Stop(cFEStateVideoPlayer* self);
 extern "C" void* cUIState_onUpdate(void* self);
 
 /**
@@ -3201,14 +3201,14 @@ extern "C" void* cUIState_onUpdate(void* self);
  * since playback started (+0x278), or when the player's first word (its status) is nonzero. Then runs
  * cUIState_onUpdate().
  */
-extern "C" void cFEStateVideoPlayer_onUpdate(void* self)
+extern "C" void cFEStateVideoPlayer_onUpdate(cFEStateVideoPlayer* self)
 {
-    void* moviePlayer = *(void**)((char*)self + 0x248);
+    void* moviePlayer = self->mpMoviePlayer;
     if (moviePlayer != 0) {
-        *(int*)((char*)self + 0x274) = 1;
+        self->mUpdatedOnce = 1;
         cMoviePlayer_asyncUpdate(moviePlayer);
-        if ((*(int*)((char*)self + 0x27C) != 0 && *(int*)((char*)self + 0x278) != 0)
-            || **(int**)((char*)self + 0x248) != 0) {
+        if ((self->mStopPending != 0 && self->mRenderOnce != 0)
+            || *(int*)self->mpMoviePlayer != 0) {
             cFEStateVideoPlayer_Stop(self);
         }
     }
@@ -3240,11 +3240,11 @@ static inline int vcall001D2518(void* obj, int slot)
  * @param obj  the input object
  * @return 1 when a stop was requested, otherwise 0
  */
-extern "C" int cFEStateVideoPlayer_onInputBegin(void* self, cUIInput* obj)
+extern "C" int cFEStateVideoPlayer_onInputBegin(cFEStateVideoPlayer* self, cUIInput* obj)
 {
-    if (*(int*)((char*)self + 0x270) != 0) {
+    if (self->mInterruptible != 0) {
         if (vcall001D2518(obj, 5) != 0 || vcall001D2518(obj, 6) != 0) {
-            *(int*)((char*)self + 0x27C) = 1;
+            self->mStopPending = 1;
             return 1;
         }
     }
@@ -3267,7 +3267,7 @@ extern "C" char* strcpy(char* dst, const char* src);
  * @param videoFile  the video file name
  * @param audioFile  the audio file name, or 0 for none
  */
-extern "C" void cFEStateVideoPlayer_setVideoSourceFiles(void* self, const char* videoFile, const char* audioFile)
+extern "C" void cFEStateVideoPlayer_setVideoSourceFiles(cFEStateVideoPlayer* self, const char* videoFile, const char* audioFile)
 {
     strcpy((char*)self + 0x48, videoFile);
     if (audioFile != 0) {
@@ -3293,14 +3293,14 @@ extern "C" void cMoviePlayer_asyncPlay(void* p);
  * the settings block to 1, opens the movie with cMoviePlayer_init() and the settings block (+0x24C), starts it with
  * cMoviePlayer_asyncPlay(), and clears the rendered (+0x278) and updated (+0x274) flags. Called by cFEStateVideoPlayer_onCreateScreen.
  */
-extern "C" void cFEStateVideoPlayer_Start(void* self)
+extern "C" void cFEStateVideoPlayer_Start(cFEStateVideoPlayer* self)
 {
     func_002B3A70((char*)cAudioInterface_bxAudio() + 0x118);
-    *(int*)((char*)self + 0x254) = 1;
-    cMoviePlayer_init(*(void**)((char*)self + 0x248), (char*)self + 0x24C);
-    cMoviePlayer_asyncPlay(*(void**)((char*)self + 0x248));
-    *(int*)((char*)self + 0x278) = 0;
-    *(int*)((char*)self + 0x274) = 0;
+    self->mOptions.bSoundOn = 1;
+    cMoviePlayer_init(self->mpMoviePlayer, (char*)self + 0x24C);
+    cMoviePlayer_asyncPlay(self->mpMoviePlayer);
+    self->mRenderOnce = 0;
+    self->mUpdatedOnce = 0;
 }
 #endif
 
@@ -3318,11 +3318,11 @@ extern "C" void cUIStateStack_pop(void* self, int a1);
  * request (+0x27C), and marks the front state on the engine's state stack (mpEngine + 0x18) pending delete in mode 6
  * with cUIStateStack_pop(stack, 1). Called by cFEStateVideoPlayer_onUpdate.
  */
-extern "C" void cFEStateVideoPlayer_Stop(void* self)
+extern "C" void cFEStateVideoPlayer_Stop(cFEStateVideoPlayer* self)
 {
     func_002B3A98((char*)cAudioInterface_bxAudio() + 0x118);
-    *(int*)((char*)self + 0x27C) = 0;
-    cUIStateStack_pop(*(char**)((char*)self + 0x10) + 0x18, 1);
+    self->mStopPending = 0;
+    cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
 }
 #endif
 

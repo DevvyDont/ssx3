@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festateload.h"
 #include "ui/uithing.h"
 #include "main/ssxapp.h"
 
@@ -19,20 +20,20 @@ extern "C" void cUITemplate_MAP_onCreateScreen(void* tmpl, void* screen, void* o
  * Only "Map" is kept in the state's screen pointer. Clears cUITemplate_MAP_mMapStyle, then runs
  * cUITemplate_MAP_onCreateScreen() on the template at +0x48.
  */
-extern "C" void cFEStateEventSelect_onCreateScreen(void* self)
+extern "C" void cFEStateEventSelect_onCreateScreen(cFEStateEventSelect* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_Map), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    engine = *(void**)((char*)self + 0x10);
+    engine = (void*)self->mpEngine;
     screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_femap_template), 0);
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    void* main = *(void**)((char*)self + 0x40);
+    void* main = self->mpScreen;
     cUITemplate_MAP_mMapStyle = 0;
     cUITemplate_MAP_onCreateScreen((char*)self + 0x48, main, self);
 }
@@ -82,7 +83,7 @@ extern "C" void cUITemplate_MAP_onGainFocus(void* tmpl);
 /**
  * Gives focus to the event select state: runs cUIState_onGainFocus(), then the map template's (+0x48) handler.
  */
-extern "C" void cFEStateEventSelect_onGainFocus(void* self)
+extern "C" void cFEStateEventSelect_onGainFocus(cFEStateEventSelect* self)
 {
     cUIState_onGainFocus(self);
     cUITemplate_MAP_onGainFocus((char*)self + 0x48);
@@ -101,7 +102,7 @@ extern "C" void cUITemplate_MAP_onDestroyScreen(void* tmpl);
  * After cUIState_onDestroyScreen(), cUITemplate_MAP_onDestroyScreen() unloads the template's async file, removes the PDA template
  * in map states 1, 3 and 4, and calls func_0028F678() on the audio object with 0.
  */
-extern "C" void cFEStateEventSelect_onDestroyScreen(void* self)
+extern "C" void cFEStateEventSelect_onDestroyScreen(cFEStateEventSelect* self)
 {
     cUIState_onDestroyScreen(self);
     cUITemplate_MAP_onDestroyScreen((char*)self + 0x48);
@@ -197,15 +198,15 @@ static inline void Opened1867A8(void* self, void* item)
  * @param obj  the widget
  * @param msg  the widget event (5 accept, 6 back)
  */
-extern "C" void cFEStateEventSelect_onWidgetEvent(void* self, cUIThing* obj, int msg)
+extern "C" void cFEStateEventSelect_onWidgetEvent(cFEStateEventSelect* self, cUIThing* obj, int msg)
 {
     if (msg == 5) {
         if (cUITemplate_MAP_onWidgetEvent((char*)self + 0x48, obj, 5) == 1) {
             if (IsQuick1867A8()) {
                 PlayIntro1867A8(self);
-                cUIStateStack_pop(*(char**)((char*)self + 0x10) + 0x18, 1);
+                cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
             } else {
-                cMgr1867A8* feCustom = **(cMgr1867A8***)((char*)self + 0x10);
+                cMgr1867A8* feCustom = *(cMgr1867A8**)self->mpEngine;
                 Opened1867A8(self, feCustom->v04(self, obj->mMiscData));
             }
         }
@@ -213,9 +214,9 @@ extern "C" void cFEStateEventSelect_onWidgetEvent(void* self, cUIThing* obj, int
         if (cUITemplate_MAP_onWidgetEvent((char*)self + 0x48, obj, 6) == 1) {
             if (IsQuick1867A8()) {
                 PlayIntro1867A8(self);
-                cUIStateStack_pop(*(char**)((char*)self + 0x10) + 0x18, 1);
+                cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
             } else {
-                cMgr1867A8* feCustom = **(cMgr1867A8***)((char*)self + 0x10);
+                cMgr1867A8* feCustom = *(cMgr1867A8**)self->mpEngine;
                 Opened1867A8(self, feCustom->v05(self, obj->mMiscData));
             }
         }
@@ -239,7 +240,7 @@ extern "C" int cUITemplate_MAP_onWidgetMenu(void* self, int a1, int a2);
  * @param event  the menu event
  * @return 257 (0x101) when cUITemplate_MAP_onWidgetMenu() returns non-zero, else 0
  */
-extern "C" int cFEStateEventSelect_onWidgetMenu(void* self, int menu, int event)
+extern "C" int cFEStateEventSelect_onWidgetMenu(cFEStateEventSelect* self, int menu, int event)
 {
     if (cUITemplate_MAP_onWidgetMenu((char*)self + 0x48, menu, event) != 0) {
         return 257;
@@ -256,7 +257,7 @@ INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onInputBegin);
 /**
  * Passes the start of input handling to the map template (+0x48) through cUITemplate_MAP_onInputBegin(), which returns 0.
  */
-extern "C" void cFEStateEventSelect_onInputBegin(void* self)
+extern "C" void cFEStateEventSelect_onInputBegin(cFEStateEventSelect* self)
 {
     cUITemplate_MAP_onInputBegin((char*)self + 0x48);
 }
@@ -274,7 +275,7 @@ void cUIState_onInputAlways_2(void* self, int a1) __asm__("cUIState_onInputAlway
  *
  * @param pInput  the input object
  */
-extern "C" void cFEStateEventSelect_onInputAlways(void* self, int pInput)
+extern "C" void cFEStateEventSelect_onInputAlways(cFEStateEventSelect* self, int pInput)
 {
     cUITemplate_MAP_onInputAlways((char*)self + 0x48, pInput);
     cUIState_onInputAlways_2(self, pInput);
@@ -292,7 +293,7 @@ extern "C" void cUITemplate_MAP_onUpdate(void* tmpl);
  *
  * Calls cUIState_onUpdate() and then cUITemplate_MAP_onUpdate() on the template embedded at +0x48.
  */
-extern "C" void cFEStateEventSelect_onUpdate(void* self)
+extern "C" void cFEStateEventSelect_onUpdate(cFEStateEventSelect* self)
 {
     cUIState_onUpdate(self);
     cUITemplate_MAP_onUpdate((char*)self + 0x48);
