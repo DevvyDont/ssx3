@@ -22618,75 +22618,75 @@ extern void decodemut_DE68(void *) __asm__("decodemut");
  *
  * The decoder (0xD68 bytes, made by CMTBLKDecf_CMTBLKDecf and fed by CMTBLKDecf_Feed) keeps one decoded 432-sample frame at
  * +0x684; +0xD44 counts the samples of it not yet handed out and +0xD54 the samples left in the whole fed block.
- * Returns 0 when +0xD54 is 0. Otherwise copies min(max, +0xD54) floats out (func_0041605C, a memcpy) to *@p arg1
+ * Returns 0 when +0xD54 is 0. Otherwise copies min(max, +0xD54) floats out (func_0041605C, a memcpy) to *@p dstBuf
  * (+0xD4C is the write cursor), decoding the next frame with decodemut whenever the current one runs out. With
  * codec version 1 (+0xD64, set by func_003CE0D8) the stream is the revision with raw PCM patches: after each frame the
  * bit reader is backed up one byte, and when the previous frame's marker byte was 0xEE (+0xD60) a big-endian offset
  * (+0xD52) and count (+0xD50) follow, then that many big-endian 16-bit samples that overwrite the decoded frame from
- * that offset; the next byte is checked for 0xEE again and the bit reader restarts after it. Quirk: *@p arg1 itself is
+ * that offset; the next byte is checked for 0xEE again and the bit reader restarts after it. Quirk: *@p dstBuf itself is
  * not advanced; the caller adds the returned count.
  *
- * @param s  the decoder
- * @param arg1  points to the float output pointer (read once into +0xD4C)
+ * @param decoder  the decoder
+ * @param dstBuf  points to the float output pointer (read once into +0xD4C)
  * @param max  the most samples to produce
  * @return the number of samples written (0 at the end of the fed data)
  */
-int func_003CDE68(struct S_DE68 *s, char **arg1, int max) {
-    int chunk = s->cnt;
+int func_003CDE68(struct S_DE68 *decoder, char **dstBuf, int max) {
+    int chunk = decoder->cnt;
     int n, rem;
-    if (s->rem == 0) {
+    if (decoder->rem == 0) {
         return 0;
     }
-    n = s->rem;
+    n = decoder->rem;
     if (max < n) n = max;
-    s->out = *arg1;
+    decoder->out = *dstBuf;
     rem = n;
     while (rem > 0) {
         int bytes;
         if (rem < chunk) chunk = rem;
         bytes = chunk * 4;
         rem -= chunk;
-        func_0041605C_DE68(s->out, (char *)((0x1B0 - s->cnt) * 4 + (int)s) + 0x684, bytes);
-        s->out += bytes;
-        s->cnt -= chunk;
+        func_0041605C_DE68(decoder->out, (char *)((0x1B0 - decoder->cnt) * 4 + (int)decoder) + 0x684, bytes);
+        decoder->out += bytes;
+        decoder->cnt -= chunk;
         if (rem > 0) {
-            decodemut_DE68(s);
-            s->cnt = 432;
+            decodemut_DE68(decoder);
+            decoder->cnt = 432;
             chunk = 432;
-            if (s->mode == 1) {
-                unsigned char *src = s->src;
-                unsigned char *p;
-                p = s->p48 = src - 1;
-                if (s->flag != 0) {
-                    unsigned char *pi = (unsigned char *)&s->idx;
-                    unsigned char *pn = (unsigned char *)&s->n;
-                    float *fp;
+            if (decoder->mode == 1) {
+                unsigned char *src = decoder->src;
+                unsigned char *pcmSrc;
+                pcmSrc = decoder->p48 = src - 1;
+                if (decoder->flag != 0) {
+                    unsigned char *pi = (unsigned char *)&decoder->idx;
+                    unsigned char *pn = (unsigned char *)&decoder->n;
+                    float *pcmDst;
                     short j;
-                    char b[2];
-                    pi[0] = p[1];
-                    pi[1] = p[0];
+                    char swapped[2];
+                    pi[0] = pcmSrc[1];
+                    pi[1] = pcmSrc[0];
                     pn[0] = src[2];
                     pn[1] = src[1];
-                    p += 4;
-                    s->p48 = s->p48 + s->n * 2 + 4;
-                    fp = &s->buf[s->idx];
-                    s->src = s->p48 + 1;
-                    for (j = 0; j < s->n; j++) {
-                        b[0] = p[1];
-                        b[1] = p[0];
-                        p += 2;
-                        *fp++ = (float)*(short *)b;
+                    pcmSrc += 4;
+                    decoder->p48 = decoder->p48 + decoder->n * 2 + 4;
+                    pcmDst = &decoder->buf[decoder->idx];
+                    decoder->src = decoder->p48 + 1;
+                    for (j = 0; j < decoder->n; j++) {
+                        swapped[0] = pcmSrc[1];
+                        swapped[1] = pcmSrc[0];
+                        pcmSrc += 2;
+                        *pcmDst++ = (float)*(short *)swapped;
                     }
-                    s->flag = 0;
+                    decoder->flag = 0;
                 }
-                if (*s->p48 == 238) s->flag = 1;
-                s->w8 = 8;
-                s->w4 = *s->src;
-                s->src++;
+                if (*decoder->p48 == 238) decoder->flag = 1;
+                decoder->w8 = 8;
+                decoder->w4 = *decoder->src;
+                decoder->src++;
             }
         }
     }
-    s->rem -= n;
+    decoder->rem -= n;
     return n;
 }
 #endif
@@ -22742,10 +22742,10 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CE0D8);
  * SFILTER_unpackmtfinit passes 0 for stream revisions below 3 and 1 otherwise; CMTBLKDecf_CMTBLKDecf defaults it to 1.
  *
  * @param decoder  the decoder
- * @param arg1  the codec version (0 or 1)
+ * @param codecVersion  the codec version (0 or 1)
  */
-void func_003CE0D8(void *decoder, int arg1) {
-    (*(int *)((char*)(decoder) + (0xD64))) = arg1;
+void func_003CE0D8(void *decoder, int codecVersion) {
+    (*(int *)((char*)(decoder) + (0xD64))) = codecVersion;
 }
 #endif
 
@@ -22760,20 +22760,20 @@ typedef struct { R_E0E0 arr[100]; } W_E0E0;
 /**
  * Returns the master voice of a voice: the channel's link (+0x28) when it has one, else the voice itself.
  *
- * The channel is entry @p arg0 + D_0050A8E8 +0x2F + D_0050A8E8 +0x30 of the driver's channel table (D_0050A8E8 +0x1F0,
+ * The channel is entry @p voice + D_0050A8E8 +0x2F + D_0050A8E8 +0x30 of the driver's channel table (D_0050A8E8 +0x1F0,
  * 0x8C bytes each); a link of -1 means the voice is its own master. Used by the unpack setup callbacks (SFILTER_unpackmtpfinit,
  * SFILTER_unpackxapfinit) before func_003CE378.
  *
- * @param arg0  the voice number
+ * @param voice  the voice number
  * @return the channel index of the master voice (biased by the two reserved counts)
  */
-int func_003CE0E0(int arg0) {
-    char *p = D_0050A8E8_E0E0;
+int func_003CE0E0(int voice) {
+    char *driverState = D_0050A8E8_E0E0;
     int temp_2;
     int temp_4;
 
-    temp_4 = arg0 + *(unsigned char *)(p + 0x30) + *(unsigned char *)(p + 0x2F);
-    temp_2 = (*(W_E0E0 **)(p + 0x1F0))->arr[temp_4].f;
+    temp_4 = voice + *(unsigned char *)(driverState + 0x30) + *(unsigned char *)(driverState + 0x2F);
+    temp_2 = (*(W_E0E0 **)(driverState + 0x1F0))->arr[temp_4].f;
     return (temp_2 == -1) ? temp_4 : temp_2;
 }
 #endif
@@ -22791,26 +22791,26 @@ int func_003CE118_impl(int arg0) __asm__("func_003CE118");
 /**
  * Returns which sample channel (1-5) of its master voice a voice is, or 0 when it has no master.
  *
- * Looks up the voice's channel entry (index @p arg0 + D_0050A8E8 +0x2F + +0x30 in the table at D_0050A8E8 +0x1F0); when
+ * Looks up the voice's channel entry (index @p voice + D_0050A8E8 +0x2F + +0x30 in the table at D_0050A8E8 +0x1F0); when
  * its master link (+0x28) is set, scans the master's member list (shorts at +0x6..+0xE) for this channel and returns
  * the 1-based slot. Quirk: the master's own channel (slot 0) also returns 0.
  *
- * @param arg0  the voice number
+ * @param voice  the voice number
  * @return the sample channel within the group, 0 for the master or an unlinked voice
  */
-int func_003CE118_impl(int arg0) {
+int func_003CE118_impl(int voice) {
     short *var_3;
     int temp_2;
     int temp_4;
     int var_5;
-    char *b = D_0050A8E8_E118;
+    char *driverState = D_0050A8E8_E118;
 
-    temp_4 = arg0 + *(unsigned char *)(b + 0x30) + *(unsigned char *)(b + 0x2F);
-    temp_2 = ((struct R_E118 *)*(char **)(b + 0x1F0))->e[temp_4].f28;
+    temp_4 = voice + *(unsigned char *)(driverState + 0x30) + *(unsigned char *)(driverState + 0x2F);
+    temp_2 = ((struct R_E118 *)*(char **)(driverState + 0x1F0))->e[temp_4].f28;
     if (temp_2 == -1) {
         return 0;
     }
-    var_3 = (short *)(temp_2 * 0x8C + *(int *)(b + 0x1F0) + 6);
+    var_3 = (short *)(temp_2 * 0x8C + *(int *)(driverState + 0x1F0) + 6);
     for (var_5 = 1; var_5 < 6; var_5++, var_3++) {
         if (*var_3 == temp_4) {
             return var_5;
@@ -22905,41 +22905,41 @@ extern void MIX_play_E1B0(int) __asm__("MIX_play");
  *
  * Only for a mixer voice: the channel entry (D_0050A8E8 +0x1F0, index @p idx) must lack flag 8 and have flag 4 in
  * +0x24. For each of its +0x23 channels (shorts at +0x4, biased by D_0050A8E8 +0x2F/+0x30) MIX_playinit prepares the
- * mixer voice from the sample representation (@p arg6 +3), the channel's sample pointer (@p arg7 +0x18 + 4*i), the
- * channel count, +0x14 and the attribute byte @p arg7 +7. Then, on the first channel, SNDPLATFORM_setpitch (pitch),
+ * mixer voice from the sample representation (@p sampleFormat +3), the channel's sample pointer (@p sampleAttr +0x18 + 4*i), the
+ * channel count, +0x14 and the attribute byte @p sampleAttr +7. Then, on the first channel, SNDPLATFORM_setpitch (pitch),
  * func_003C38E0 (azimuth), SNDPLATFORM_setfxlevel (send, 0), and SNDPLATFORM_timemult, func_003C30C8, SNDPLATFORM_lowpass and SNDPLATFORM_highpass
  * with the four option values; finally MIX_play starts each channel. The packet handle is unused.
  *
- * @param arg0  the packet player handle (unused)
+ * @param pktChan  the packet player handle (unused)
  * @param idx  the voice
- * @param arg2  the time multiplier (play options +0xE)
+ * @param timeMult  the time multiplier (play options +0xE)
  * @param arg3  the play option at +0x12
- * @param arg4  the low-pass cutoff (play options +0x14)
- * @param arg5  the high-pass cutoff (play options +0x16)
- * @param arg6  the sample format (+3: sample representation)
- * @param arg7  the sample attributes (+7: platform version, +0x18: per-channel sample data)
+ * @param lowpassCutoff  the low-pass cutoff (play options +0x14)
+ * @param highpassCutoff  the high-pass cutoff (play options +0x16)
+ * @param sampleFormat  the sample format (+3: sample representation)
+ * @param sampleAttr  the sample attributes (+7: platform version, +0x18: per-channel sample data)
  * @return 0
  */
-int func_003CE1B0(int arg0, int idx, int arg2, int arg3, int arg4, int arg5, A6_E1B0 *arg6, A7_E1B0 *arg7) {
-    E_E1B0 *e;
+int func_003CE1B0(int pktChan, int idx, int timeMult, int arg3, int lowpassCutoff, int highpassCutoff, A6_E1B0 *sampleFormat, A7_E1B0 *sampleAttr) {
+    E_E1B0 *chanEntry;
     int i;
 
-    e = &D_0050A8E8_E1B0.ents[idx];
-    if (!(e->f24 & 8)) {
-    if (e->f24 & 4) {
-    for (i = 0; i < e->f23; i++) {
-        MIX_playinit_E1B0(e->h[i] - (D_0050A8E8_E1B0.f30 + D_0050A8E8_E1B0.f2F), arg6->b3, 0, 0, 0xFFFFFFFF,
-                           arg7->arr[i], e->f23, e->f14, -1, -1, 0, 0, arg7->b7, i);
+    chanEntry = &D_0050A8E8_E1B0.ents[idx];
+    if (!(chanEntry->f24 & 8)) {
+    if (chanEntry->f24 & 4) {
+    for (i = 0; i < chanEntry->f23; i++) {
+        MIX_playinit_E1B0(chanEntry->h[i] - (D_0050A8E8_E1B0.f30 + D_0050A8E8_E1B0.f2F), sampleFormat->b3, 0, 0, 0xFFFFFFFF,
+                           sampleAttr->arr[i], chanEntry->f23, chanEntry->f14, -1, -1, 0, 0, sampleAttr->b7, i);
     }
-    SNDPLATFORM_setpitch_E1B0(e->h[0]);
-    func_003C38E0_E1B0(e->h[0]);
-    SNDPLATFORM_setfxlevel_E1B0(e->h[0], 0);
-    SNDPLATFORM_timemult_E1B0(e->h[0], arg2);
-    func_003C30C8_E1B0(e->h[0], arg3);
-    SNDPLATFORM_lowpass_E1B0(e->h[0], arg4);
-    SNDPLATFORM_highpass_E1B0(e->h[0], arg5);
-    for (i = 0; i < e->f23; i++) {
-        MIX_play_E1B0(e->h[i] - (D_0050A8E8_E1B0.f30 + D_0050A8E8_E1B0.f2F));
+    SNDPLATFORM_setpitch_E1B0(chanEntry->h[0]);
+    func_003C38E0_E1B0(chanEntry->h[0]);
+    SNDPLATFORM_setfxlevel_E1B0(chanEntry->h[0], 0);
+    SNDPLATFORM_timemult_E1B0(chanEntry->h[0], timeMult);
+    func_003C30C8_E1B0(chanEntry->h[0], arg3);
+    SNDPLATFORM_lowpass_E1B0(chanEntry->h[0], lowpassCutoff);
+    SNDPLATFORM_highpass_E1B0(chanEntry->h[0], highpassCutoff);
+    for (i = 0; i < chanEntry->f23; i++) {
+        MIX_play_E1B0(chanEntry->h[i] - (D_0050A8E8_E1B0.f30 + D_0050A8E8_E1B0.f2F));
     }
     }
     }
@@ -22973,8 +22973,8 @@ int SNDVOICEI_get_E378(int arg0) __asm__("SNDVOICEI_get");
 int func_003CE378(int key) {
     int i;
     for (i = 0; i < D_0050A8E8.setup.cfg.f26; i++) {
-        struct s7B8Queue *q = D_005157B8.f304[i];
-        if (q != 0 && SNDVOICEI_get_E378(q->f00) == key) return i;
+        struct s7B8Queue *pktChan = D_005157B8.f304[i];
+        if (pktChan != 0 && SNDVOICEI_get_E378(pktChan->f00) == key) return i;
     }
     return -1;
 }
@@ -23251,41 +23251,41 @@ typedef struct {
  * sum). Sets +0xFC (dirty) first. Its callers SFILTER_modifyHPFFIR8, func_003CEED0 and func_003CEFF8 set the cutoffs from
  * fixed-point ratios and pass 3, 2 or 4 respectively.
  *
- * @param p  the filter state (+0xE0 coefficients, +0xF4 low cutoff, +0xF8 high cutoff, +0xFC dirty)
+ * @param firState  the filter state (+0xE0 coefficients, +0xF4 low cutoff, +0xF8 high cutoff, +0xFC dirty)
  * @param type  2 low-pass, 3 high-pass, 4 band-pass
  */
-void func_003CE7C0(sFir_E7C0 *p, int type) {
+void func_003CE7C0(sFir_E7C0 *firState, int type) {
     /* order stays in $19: the target tests it with slti/beqz and folds order & 1 only via nonzero_bits */
     int order = 4;
     int i;
     float angle, sum;
 
-    p->dirty = 1;
-    if ((unsigned)(type - 3) < 2 && p->f1 > 0.8f) {
-        p->f1 = 0.8f;
+    firState->dirty = 1;
+    if ((unsigned)(type - 3) < 2 && firState->f1 > 0.8f) {
+        firState->f1 = 0.8f;
     }
     switch (type) {
     case 2:
-        p->c[order] = p->f2;
+        firState->c[order] = firState->f2;
         for (i = 1; i <= order; i++) {
             angle = (float)i * 3.1415927f;
-            p->c[order - i] = SNDI_sin(p->f2 * angle) / angle;
+            firState->c[order - i] = SNDI_sin(firState->f2 * angle) / angle;
         }
         break;
     case 3:
-        p->c[order] = p->f1;
+        firState->c[order] = firState->f1;
         for (i = 1; i <= order; i++) {
             angle = (float)i * 3.1415927f;
-            p->c[order - i] = SNDI_sin(p->f1 * angle) / angle;
+            firState->c[order - i] = SNDI_sin(firState->f1 * angle) / angle;
         }
         break;
     case 4:
-        p->c[order] = p->f2 - p->f1;
+        firState->c[order] = firState->f2 - firState->f1;
         for (i = 1; i <= order; i++) {
-            float s;
+            float sinVal;
             angle = (float)i * 3.1415927f;
-            s = SNDI_sin((p->f2 - p->f1) * 0.5f * angle);
-            p->c[order - i] = (s + s) * SNDI_cos((p->f2 + p->f1) * 0.5f * angle) / angle;
+            sinVal = SNDI_sin((firState->f2 - firState->f1) * 0.5f * angle);
+            firState->c[order - i] = (sinVal + sinVal) * SNDI_cos((firState->f2 + firState->f1) * 0.5f * angle) / angle;
         }
         break;
     }
@@ -23294,33 +23294,33 @@ void func_003CE7C0(sFir_E7C0 *p, int type) {
     sum = 0.0f;
     for (i = 0; i <= order; i++) {
         if (type == 2 || type == 4) {
-            float v = p->c[i] * (0.54f - SNDI_cos(angle * (float)i) * 0.46f);
-            p->c[i] = v;
-            sum += v;
+            float windowed = firState->c[i] * (0.54f - SNDI_cos(angle * (float)i) * 0.46f);
+            firState->c[i] = windowed;
+            sum += windowed;
         } else if (type == 3) {
-            float v = p->c[i] * -(0.54f - SNDI_cos(angle * (float)i) * 0.46f);
-            p->c[i] = v;
+            float windowed = firState->c[i] * -(0.54f - SNDI_cos(angle * (float)i) * 0.46f);
+            firState->c[i] = windowed;
             if ((i & 1) == 0) {
-                sum += v;
+                sum += windowed;
             } else {
-                sum -= v;
+                sum -= windowed;
             }
         }
     }
     if (type == 3) {
         sum += 1.0f;
-        p->c[order] += 1.0f;
+        firState->c[order] += 1.0f;
     }
     if (order & 1) {
         sum = sum + sum;
     } else {
-        sum = sum + sum - p->c[order];
+        sum = sum + sum - firState->c[order];
     }
     if (sum < 0.0f) {
         sum = -sum;
     }
     for (i = 0; i <= order; i++) {
-        p->c[i] /= sum;
+        firState->c[i] /= sum;
     }
 }
 #endif
@@ -23336,29 +23336,29 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CEB90);
  * outside the band (+0x4..+0xC, +0x18, +0x1C, +0x2C, +0x90, +0xA0, +0xA4, +0xB0..+0xB8). Called by the FIR node
  * constructors SFILTER_createHPFFIR8, func_003CEE88 and func_003CEFB0.
  *
- * @param arg0  the FIR state
+ * @param firState  the FIR state
  */
-void func_003CEB90(void *arg0) {
-    (*(int *)((char*)(arg0) + (0xC0))) = 0;
-    (*(int *)((char*)(arg0) + (0xC4))) = 0;
-    (*(int *)((char*)(arg0) + (0xC8))) = 0;
-    (*(int *)((char*)(arg0) + (0xCC))) = 0;
-    (*(int *)((char*)(arg0) + (0xD0))) = 0;
-    (*(int *)((char*)(arg0) + (0xD4))) = 0;
-    (*(int *)((char*)(arg0) + (0xD8))) = 0;
-    (*(int *)((char*)(arg0) + (0xDC))) = 0;
-    (*(int *)((char*)(arg0) + (4))) = 0;
-    (*(int *)((char*)(arg0) + (8))) = 0;
-    (*(int *)((char*)(arg0) + (0xC))) = 0;
-    (*(int *)((char*)(arg0) + (0x18))) = 0;
-    (*(int *)((char*)(arg0) + (0x1C))) = 0;
-    (*(int *)((char*)(arg0) + (0x2C))) = 0;
-    (*(int *)((char*)(arg0) + (0x90))) = 0;
-    (*(int *)((char*)(arg0) + (0xA0))) = 0;
-    (*(int *)((char*)(arg0) + (0xA4))) = 0;
-    (*(int *)((char*)(arg0) + (0xB0))) = 0;
-    (*(int *)((char*)(arg0) + (0xB4))) = 0;
-    (*(int *)((char*)(arg0) + (0xB8))) = 0;
+void func_003CEB90(void *firState) {
+    (*(int *)((char*)(firState) + (0xC0))) = 0;
+    (*(int *)((char*)(firState) + (0xC4))) = 0;
+    (*(int *)((char*)(firState) + (0xC8))) = 0;
+    (*(int *)((char*)(firState) + (0xCC))) = 0;
+    (*(int *)((char*)(firState) + (0xD0))) = 0;
+    (*(int *)((char*)(firState) + (0xD4))) = 0;
+    (*(int *)((char*)(firState) + (0xD8))) = 0;
+    (*(int *)((char*)(firState) + (0xDC))) = 0;
+    (*(int *)((char*)(firState) + (4))) = 0;
+    (*(int *)((char*)(firState) + (8))) = 0;
+    (*(int *)((char*)(firState) + (0xC))) = 0;
+    (*(int *)((char*)(firState) + (0x18))) = 0;
+    (*(int *)((char*)(firState) + (0x1C))) = 0;
+    (*(int *)((char*)(firState) + (0x2C))) = 0;
+    (*(int *)((char*)(firState) + (0x90))) = 0;
+    (*(int *)((char*)(firState) + (0xA0))) = 0;
+    (*(int *)((char*)(firState) + (0xA4))) = 0;
+    (*(int *)((char*)(firState) + (0xB0))) = 0;
+    (*(int *)((char*)(firState) + (0xB4))) = 0;
+    (*(int *)((char*)(firState) + (0xB8))) = 0;
 }
 #endif
 
@@ -23799,31 +23799,31 @@ extern void ff_F178(void *) __asm__("SNDMEMI_free");
 extern void *fa_F178(int) __asm__("func_003B5C60");
 int func_003CF178_C(struct S3CF178 *self, int n, int a2, float *a3) __asm__("func_003CF178");
 /**
- * Filter-graph callback of the mixer node: sums its two input nodes into @p a3.
+ * Filter-graph callback of the mixer node: sums its two input nodes into @p dstBuf.
  *
  * First grows the scratch buffer (+0x1C, capacity +0x20 frames) to @p n floats (SNDMEMI_free, func_003B5C60). The first
- * input (+0x8) is called with requester 1 and writes @p n frames into @p a3; the second (+0xC) with requester 2 into
+ * input (+0x8) is called with requester 1 and writes @p n frames into @p dstBuf; the second (+0xC) with requester 2 into
  * the scratch buffer; a result of 0 or less from either is returned at once. A VU0 loop then adds the scratch buffer
- * into @p a3, 16 floats per pass. Installed by func_003CF2C0; func_003CF298 frees the buffer.
+ * into @p dstBuf, 16 floats per pass. Installed by func_003CF2C0; func_003CF298 frees the buffer.
  *
  * @param n  the number of frames
- * @param a2  the source buffer, passed through to both inputs
- * @param a3  the output buffer
+ * @param srcBuf  the source buffer, passed through to both inputs
+ * @param dstBuf  the output buffer
  * @return @p n, or an input's result when it is 0 or less
  */
 // PORT: hand-written VU0 loop (trapping add/addi have no gcc 2.95 pattern; the block moves its operands into fixed
 // $4/$5/$6 itself): a3[k] += self->f1C[k] over n floats, 16 per pass. A port replaces it with the C loop.
-int func_003CF178_C(struct S3CF178 *self, int n, int a2, float *a3) {
-    int r;
+int func_003CF178_C(struct S3CF178 *self, int n, int srcBuf, float *dstBuf) {
+    int inputResult;
     if (self->f20 < n) {
         if (self->f1C) ff_F178(self->f1C);
         self->f20 = n;
         self->f1C = fa_F178(n << 2);
     }
-    r = ((int (*)(int *, int, int, float *, int))*self->f8)(self->f8, n, a2, a3, 1);
-    if (r <= 0) return r;
-    r = ((int (*)(int *, int, int, void *, int))*self->fC)(self->fC, n, a2, self->f1C, 2);
-    if (r <= 0) return r;
+    inputResult = ((int (*)(int *, int, int, float *, int))*self->f8)(self->f8, n, srcBuf, dstBuf, 1);
+    if (inputResult <= 0) return inputResult;
+    inputResult = ((int (*)(int *, int, int, void *, int))*self->fC)(self->fC, n, srcBuf, self->f1C, 2);
+    if (inputResult <= 0) return inputResult;
     {
             // PORT: PS2-only VU0 hand-written loop (add a scratch buffer into the destination, 4x4 floats per step).
             __asm__ volatile(
@@ -23856,7 +23856,7 @@ int func_003CF178_C(struct S3CF178 *self, int n, int a2, float *a3) {
                 "bne $4, $5, 1b\n\t"
                 "addi $6, $6, 0x40\n\t"
                 ".set pop\n"
-                : : "r"(n), "r"(self->f1C), "r"(a3)
+                : : "r"(n), "r"(self->f1C), "r"(dstBuf)
                 : "$4", "$5", "$6", "memory");
     }
     return n;
@@ -23933,31 +23933,31 @@ struct S_F300 { char p0[0x1C]; int f1C; float f20; float f24; float f28; float f
  * @param out_  the output floats
  */
 void func_003CF300(void *sv, int n, int in_, int out_) {
-    struct S_F300 *s = (struct S_F300 *)sv;
+    struct S_F300 *resonState = (struct S_F300 *)sv;
     float *in = (float *)in_;
     float *out = (float *)out_;
-    int h = s->f1C;
-    float t, a, b, v;
-    if (s->f24 < (2.0f * (float)h) / 3.1415927f && (t = s->f20, t > 0.0f) && t < (float)(h >> 1)) {
+    int sampleRate = resonState->f1C;
+    float t, radius, scaledIn, sample;
+    if (resonState->f24 < (2.0f * (float)sampleRate) / 3.1415927f && (t = resonState->f20, t > 0.0f) && t < (float)(sampleRate >> 1)) {
         if (n > 0) {
             do {
-                a = s->f28;
+                radius = resonState->f28;
                 n -= 1;
-                b = s->f30 * (*in + 1e-20f);
+                scaledIn = resonState->f30 * (*in + 1e-20f);
                 in += 1;
-                *out = (b + (2.0f * a * s->f2C * s->f38)) - (a * a * s->f3C);
-                s->f3C = s->f38;
+                *out = (scaledIn + (2.0f * radius * resonState->f2C * resonState->f38)) - (radius * radius * resonState->f3C);
+                resonState->f3C = resonState->f38;
                 t = *out;
                 out += 1;
-                s->f38 = t;
+                resonState->f38 = t;
             } while (n != 0);
         }
     } else if (n > 0) {
         do {
-            v = *in;
+            sample = *in;
             n -= 1;
             in += 1;
-            *out = v;
+            *out = sample;
             out += 1;
         } while (n != 0);
     }
@@ -23972,28 +23972,28 @@ extern void func_003CF300(void *, int, int, int);
 /**
  * Filter-graph callback of the resonator node: pulls up to @p count frames from its input node and resonates them.
  *
- * The input node (+0x8) is called as (node, count, arg3, arg2, requester +0x1A) and fills @p arg2; its result (or
- * @p count without an input) is how many frames func_003CF300 processes into @p arg3. Installed by func_003CF498.
+ * The input node (+0x8) is called as (node, count, arg3, arg2, requester +0x1A) and fills @p srcBuf; its result (or
+ * @p count without an input) is how many frames func_003CF300 processes into @p dstBuf. Installed by func_003CF498.
  *
  * @param node  the resonator node
  * @param count  the number of frames wanted
- * @param arg2  the buffer the input fills
- * @param arg3  the output buffer
+ * @param srcBuf  the buffer the input fills
+ * @param dstBuf  the output buffer
  * @return the frames produced, or the input's result when it is 0 or less
  */
-int func_003CF408(char *node, int count, int arg2, int arg3) {
+int func_003CF408(char *node, int count, int srcBuf, int dstBuf) {
     int (**obj)(void *, int, int, int, int);
     int n;
     obj = *(int (***)(void *, int, int, int, int))(node + 8);
     if (obj != 0) {
-        n = (*obj)(obj, count, arg3, arg2, *(unsigned char *)(node + 0x1A));
+        n = (*obj)(obj, count, dstBuf, srcBuf, *(unsigned char *)(node + 0x1A));
         if (n <= 0) {
             return n;
         }
     } else {
         n = count;
     }
-    func_003CF300(node, n, arg2, arg3);
+    func_003CF300(node, n, srcBuf, dstBuf);
     return n;
 }
 #endif
@@ -24252,31 +24252,31 @@ int func_003CF7D0_C(struct S3CF7D0 *self, int n, float *a2, float *a3) __asm__("
 /**
  * Filter-graph callback of the echo node: pulls frames from its input and runs them through a feedback delay line.
  *
- * The input node (+0x8) is called as (node, n, a3, a2, requester +0x1A) and fills @p a2 (a result of 0 or less is
+ * The input node (+0x8) is called as (node, n, a3, a2, requester +0x1A) and fills @p srcBuf (a result of 0 or less is
  * returned). Then, in chunks that stop at the end of the circular delay line (+0x1C, length +0x28, position +0x24), a
  * VU0 loop computes per sample d' = d * k.x + in, out = d' * k.y + d with k the quad at +0x30 (feedback, negative
- * feedback from func_003CF9D8, so an all-pass), writing d' back into the line and out to @p a3. Quirk: it processes the
+ * feedback from func_003CF9D8, so an all-pass), writing d' back into the line and out to @p dstBuf. Quirk: it processes the
  * full @p n even when the input produced fewer frames; chunks must be multiples of 16. Installed by func_003CF998.
  *
  * @param n  the number of frames
- * @param a2  the buffer the input fills
- * @param a3  the output buffer
+ * @param srcBuf  the buffer the input fills
+ * @param dstBuf  the output buffer
  * @return @p n, or the input's result when it is 0 or less
  */
 // PORT: hand-written VU0 loop (trapping add/addi have no gcc 2.95 pattern; the block moves its operands into fixed
 // $4..$8 itself): per chunk, a delay-line step d' = d * f.x + in, out = d' * f.y + d with f = self->f30, d' written back
 // to the delay line at self->f1C + pos and out to dst, 16 floats per pass. A port replaces it with the C loop.
-int func_003CF7D0_C(struct S3CF7D0 *self, int n, float *a2, float *a3) {
+int func_003CF7D0_C(struct S3CF7D0 *self, int n, float *srcBuf, float *dstBuf) {
     float *src;
     float *dst;
     int rem;
     int chunk;
     if (self->obj) {
-        chunk = ((int (*)(int *, int, float *, float *, int))*self->obj)(self->obj, n, a3, a2, self->f1A);
+        chunk = ((int (*)(int *, int, float *, float *, int))*self->obj)(self->obj, n, dstBuf, srcBuf, self->f1A);
         if (chunk <= 0) return chunk;
     }
-    src = a2;
-    dst = a3;
+    src = srcBuf;
+    dst = dstBuf;
     rem = n;
     if (rem > 0) {
         int size = self->f28;
@@ -24601,26 +24601,26 @@ void func_003D0B78_impl(char *base, int n, char *lim) __asm__("func_003D0B78");
  */
 void func_003D0B78_impl(char *base, int n, char *lim) {
     int depth = 0;
-    char *e = base + 0x10;
-    while (e <= lim && n >= 0) {
-        if (((unsigned char *)e)[9] == 1) {
-            unsigned m = *(unsigned *)(e + 8) & 0x300000;
-            if (m == 0x100000) {
+    char *item = base + 0x10;
+    while (item <= lim && n >= 0) {
+        if (((unsigned char *)item)[9] == 1) {
+            unsigned blockBits = *(unsigned *)(item + 8) & 0x300000;
+            if (blockBits == 0x100000) {
                 depth++;
-            } else if (m == 0x300000) {
+            } else if (blockBits == 0x300000) {
                 if (depth-- < 1) {
                     n--;
                 }
-            } else if (m == 0x200000) {
+            } else if (blockBits == 0x200000) {
                 if (depth-- < 1) {
                     n--;
                 }
             }
         }
         if (n < 1) {
-            *(unsigned *)(e + 8) |= 0x4000000;
+            *(unsigned *)(item + 8) |= 0x4000000;
         }
-        e += 0x10;
+        item += 0x10;
     }
 }
 #endif
@@ -24698,38 +24698,38 @@ int func_003D0CC8_0CC8(char *arg0) __asm__("func_003D0CC8");
  * voice with a current node (+0x36 >= 0) is 7, or 5 when func_003D32B8 fills its timing and the voice's position
  * (+0x24) plus the selected player's +0xC has reached the node's end (field 6 of that result). Everything else is 2.
  *
- * @param arg0  the path voice (sPathVoice), or 0
+ * @param pathVoice  the path voice (sPathVoice), or 0
  * @return the state, 1 for a null voice
  */
-int func_003D0CC8_0CC8(char *arg0) {
+int func_003D0CC8_0CC8(char *pathVoice) {
     int buf[8];
-    unsigned int t;
-    int r;
-    if (arg0 == 0) {
+    unsigned int startTick;
+    int state;
+    if (pathVoice == 0) {
         return 1;
     }
     {
-        t = *(unsigned int *)(arg0 + 0x4C);
-        *(int *)(arg0 + 0x100) = 2;
-        if (t != 0) {
-            if ((unsigned int)D_0044F438_0CC8[0] >= t) {
-                *(int *)(arg0 + 0x100) = 4;
+        startTick = *(unsigned int *)(pathVoice + 0x4C);
+        *(int *)(pathVoice + 0x100) = 2;
+        if (startTick != 0) {
+            if ((unsigned int)D_0044F438_0CC8[0] >= startTick) {
+                *(int *)(pathVoice + 0x100) = 4;
             } else {
-                *(int *)(arg0 + 0x100) = 3;
+                *(int *)(pathVoice + 0x100) = 3;
             }
             goto done;
         }
-        if (*(short *)(arg0 + 0x36) >= 0) {
-            *(int *)(arg0 + 0x100) = 7;
-            if (func_003D32B8_0CC8(arg0, buf) >= 0
-                && (unsigned int)(*(int *)(arg0 + 0x24) + *(int *)(D_0044F420_0CC8[0] + 0xC)) >= (unsigned int)buf[6]) {
-                *(int *)(arg0 + 0x100) = 5;
+        if (*(short *)(pathVoice + 0x36) >= 0) {
+            *(int *)(pathVoice + 0x100) = 7;
+            if (func_003D32B8_0CC8(pathVoice, buf) >= 0
+                && (unsigned int)(*(int *)(pathVoice + 0x24) + *(int *)(D_0044F420_0CC8[0] + 0xC)) >= (unsigned int)buf[6]) {
+                *(int *)(pathVoice + 0x100) = 5;
             }
         }
 done:
-        r = *(int *)(arg0 + 0x100);
+        state = *(int *)(pathVoice + 0x100);
     }
-    return r;
+    return state;
 }
 #endif
 
@@ -24770,18 +24770,18 @@ int func_003D0D70(unsigned int mask, unsigned int val) {
     }
     if (val < 0x80) {
         for (i = 0; i < 4; i++) {
-            unsigned int v;
+            unsigned int playerMask;
             if (D_00517610_0D70[i].f34 == 0) continue;
-            v = D_00517610_0D70[i].f30;
-            if (has_0D70(v & 0xF0000000, mask) == 0) continue;
-            if (has_0D70(v & 0x0F000000, mask) == 0) continue;
+            playerMask = D_00517610_0D70[i].f30;
+            if (has_0D70(playerMask & 0xF0000000, mask) == 0) continue;
+            if (has_0D70(playerMask & 0x0F000000, mask) == 0) continue;
             if (func_003D5450_0D70(i & 0xFF) == 0) continue;
             for (j = 0; j < 24; j++) {
-                struct E_0D70 *e = D_0044F420_0D70->list[j];
-                if (e != 0) {
-                    unsigned char t = e->b1;
-                    e->b1 = val;
-                    e->b2 = t;
+                struct E_0D70 *pathVoice = D_0044F420_0D70->list[j];
+                if (pathVoice != 0) {
+                    unsigned char oldValue = pathVoice->b1;
+                    pathVoice->b1 = val;
+                    pathVoice->b2 = oldValue;
                 }
             }
         }
@@ -24826,28 +24826,28 @@ static inline unsigned int has_0ED0(unsigned int a, unsigned int b) { return a &
  * @return 0, or -18 when the system is not ready
  */
 int func_003D0ED0(unsigned int mask, int val) {
-    struct B_0ED0 b;
-    struct A_0ED0 a;
+    struct B_0ED0 item;
+    struct A_0ED0 eventHeader;
     unsigned int i;
     if (D_0044F42C_0ED0 == 0 || D_0044F430_0ED0 != 0 || func_003D5450_0ED0(-1) == 0) {
         return -18;
     }
-    func_00416210_0ED0(&a, 0, 16);
-    func_00416210_0ED0(&b, 0, 16);
-    b.b9 = 4;
-    b.f0 = mask;
-    b.b8 = -1;
-    b.bE = -1;
-    b.hC = val;
-    func_003D0B18_0ED0(&a, &b);
+    func_00416210_0ED0(&eventHeader, 0, 16);
+    func_00416210_0ED0(&item, 0, 16);
+    item.b9 = 4;
+    item.f0 = mask;
+    item.b8 = -1;
+    item.bE = -1;
+    item.hC = val;
+    func_003D0B18_0ED0(&eventHeader, &item);
     for (i = 0; i < 4; i++) {
-        unsigned int v;
+        unsigned int playerMask;
         if (D_00517610_0ED0[i].f34 == 0) continue;
-        v = D_00517610_0ED0[i].f30;
-        if (has_0ED0(v & 0xF0000000, mask) == 0) continue;
-        if (has_0ED0(v & 0x0F000000, mask) == 0) continue;
+        playerMask = D_00517610_0ED0[i].f30;
+        if (has_0ED0(playerMask & 0xF0000000, mask) == 0) continue;
+        if (has_0ED0(playerMask & 0x0F000000, mask) == 0) continue;
         if (func_003D5450_0ED0(i & 0xFF) == 0) continue;
-        func_003D1F80_0ED0(mask, func_003D2068_0ED0(&a));
+        func_003D1F80_0ED0(mask, func_003D2068_0ED0(&eventHeader));
     }
     D_0044F430_0ED0 = 0;
     D_0044F420_0ED0 = 0;
@@ -24891,17 +24891,17 @@ void func_003D1038(unsigned int mask, unsigned char val) {
     if (func_003D5450_1038(-1) == 0) return;
     if (mask == 0xFFFFFFFF) D_0044F42D_1038 = val;
     for (i = 0; i < 4; i++) {
-        unsigned int v;
+        unsigned int playerMask;
         if (D_00517610_1038[i].f34 == 0) continue;
-        v = D_00517610_1038[i].f30;
-        if (has_1038(v & 0xF0000000, mask) == 0) continue;
-        if (has_1038(v & 0x0F000000, mask) == 0) continue;
+        playerMask = D_00517610_1038[i].f30;
+        if (has_1038(playerMask & 0xF0000000, mask) == 0) continue;
+        if (has_1038(playerMask & 0x0F000000, mask) == 0) continue;
         if (func_003D5450_1038(i & 0xFF) == 0) continue;
         for (j = 0; j < 24; j++) {
-            struct E_1038 *e = D_0044F420_1038->list[j];
-            if (e != 0 && (((mask >> j) ^ 1) & 1) == 0) {
-                func_002AF7A0_1038(e->f54, val);
-                e->b3 = val;
+            struct E_1038 *pathVoice = D_0044F420_1038->list[j];
+            if (pathVoice != 0 && (((mask >> j) ^ 1) & 1) == 0) {
+                func_002AF7A0_1038(pathVoice->f54, val);
+                pathVoice->b3 = val;
             }
         }
     }
@@ -24984,12 +24984,12 @@ int func_003D11B8_impl(unsigned int id, struct Info_11B8 *info) __asm__("func_00
  */
 int func_003D11B8_impl(unsigned int id, struct Info_11B8 *info) {
     int ret;
-    struct S_11B8 *s;
-    struct G_11B8 *g;
-    struct Rec_11B8 *r;
+    struct S_11B8 *pathVoice;
+    struct G_11B8 *pathPlayer;
+    struct Rec_11B8 *nodeFormat;
     unsigned int i;
     unsigned int total;
-    unsigned int q;
+    unsigned int perChannel;
     int off;
     int len;
 
@@ -25008,34 +25008,34 @@ int func_003D11B8_impl(unsigned int id, struct Info_11B8 *info) {
     info->f1C = 0;
     info->f24 = -1;
     info->f28 = -1;
-    s = f_5290_11B8(id);
-    if (s == 0) {
+    pathVoice = f_5290_11B8(id);
+    if (pathVoice == 0) {
         goto done;
     }
     if (f_4BB0_11B8(id & 0xFF000000) != 0) {
-        ret = f_F2F0_11B8(s->f54, &off, &len, 0);
+        ret = f_F2F0_11B8(pathVoice->f54, &off, &len, 0);
         if (ret >= 0) {
             info->len = len;
             info->total = off + len;
-            info->f24 = s->f36;
-            for (i = 0; i < s->n; i++) {
-                if (s->tbl[i].key == ret) {
-                    g = D_0044F420_11B8;
-                    info->a = s->tbl[i].a;
+            info->f24 = pathVoice->f36;
+            for (i = 0; i < pathVoice->n; i++) {
+                if (pathVoice->tbl[i].key == ret) {
+                    pathPlayer = D_0044F420_11B8;
+                    info->a = pathVoice->tbl[i].a;
                     total = info->total;
-                    info->c = s->tbl[i].c;
-                    r = (struct Rec_11B8 *)(g->hdr + g->a[info->a] * 4);
-                    q = total;
-                    if (r->w & 0xF00000) {
-                        info->f10 = total / ((r->w >> 20) & 0xF);
-                        q = total / ((r->w >> 20) & 0xF);
-                        if (r->w & 0xF000000) {
-                            info->f14 = total / (((r->w >> 24) & 0xF) * ((r->w >> 20) & 0xF));
-                            total = total / (((r->w >> 24) & 0xF) * ((r->w >> 20) & 0xF));
+                    info->c = pathVoice->tbl[i].c;
+                    nodeFormat = (struct Rec_11B8 *)(pathPlayer->hdr + pathPlayer->a[info->a] * 4);
+                    perChannel = total;
+                    if (nodeFormat->w & 0xF00000) {
+                        info->f10 = total / ((nodeFormat->w >> 20) & 0xF);
+                        perChannel = total / ((nodeFormat->w >> 20) & 0xF);
+                        if (nodeFormat->w & 0xF000000) {
+                            info->f14 = total / (((nodeFormat->w >> 24) & 0xF) * ((nodeFormat->w >> 20) & 0xF));
+                            total = total / (((nodeFormat->w >> 24) & 0xF) * ((nodeFormat->w >> 20) & 0xF));
                         }
                     }
-                    if (q != 0) {
-                        info->f1C = info->len % q;
+                    if (perChannel != 0) {
+                        info->f1C = info->len % perChannel;
                     } else {
                         info->f1C = 0;
                     }
@@ -25048,7 +25048,7 @@ int func_003D11B8_impl(unsigned int id, struct Info_11B8 *info) {
                 }
             }
             if (D_0044F43C_11B8 & 0x100) {
-                f_1658_11B8(D_00495B10_11B8, s->name, ret);
+                f_1658_11B8(D_00495B10_11B8, pathVoice->name, ret);
             }
         }
     }
@@ -25091,17 +25091,17 @@ void func_003D1470(unsigned int mask) {
     if (D_0044F430_1470 != 0) return;
     if (func_003D5450_1470(-1) == 0) return;
     for (i = 0; i < 4; i++) {
-        unsigned int v;
+        unsigned int playerMask;
         if (D_00517610_1470[i].f34 == 0) continue;
-        v = D_00517610_1470[i].f30;
-        if (has_1470(v & 0xF0000000, mask) == 0) continue;
-        if (has_1470(v & 0x0F000000, mask) == 0) continue;
+        playerMask = D_00517610_1470[i].f30;
+        if (has_1470(playerMask & 0xF0000000, mask) == 0) continue;
+        if (has_1470(playerMask & 0x0F000000, mask) == 0) continue;
         if (func_003D5450_1470(i) == 0) continue;
         for (j = 0; j < 24; j++) {
-            struct E_1470 *e = D_0044F420_1470->list[j];
-            if (e != 0) {
-                func_002AF838_1470(e->f54);
-                e->h36 = -1;
+            struct E_1470 *pathVoice = D_0044F420_1470->list[j];
+            if (pathVoice != 0) {
+                func_002AF838_1470(pathVoice->f54);
+                pathVoice->h36 = -1;
             }
         }
     }
@@ -25144,9 +25144,9 @@ extern void func_00411310_1608(int, ...) __asm__("func_00411310") __attribute__(
  * Fatal-error handler of the path library: sets D_0044F430 to -1 (busy, so every entry point refuses) and calls
  * func_00411310(0), which exits. The printf-style arguments are ignored.
  *
- * @param a  the format string (ignored)
+ * @param format  the format string (ignored)
  */
-void func_003D1608(int a, ...) {
+void func_003D1608(int format, ...) {
     D_0044F430_1608[0] = 0xFFFFFFFF;
     func_00411310_1608(0);
 }
@@ -25172,9 +25172,9 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D1690);
 /**
  * Does nothing: a second compiled-out printf-style debug hook of the path library.
  *
- * @param a  the format string (ignored)
+ * @param format  the format string (ignored)
  */
-void func_003D1690(int a, ...) {
+void func_003D1690(int format, ...) {
 }
 #endif
 
@@ -25259,7 +25259,7 @@ static inline unsigned int has_16F0(unsigned int a, unsigned int b) { return a &
  * @return 0, -8 when nothing was queued, -13 for a bad event or a full list, -18 when the system is not ready
  */
 int func_003D16F0(unsigned int mask, short prog) {
-    int r = 0;
+    int result = 0;
     unsigned int bit;
     unsigned int i;
     if (D_0044F42C_16F0 == 0 || D_0044F430_16F0 != 0 || func_003D5450_16F0(-1) == 0) {
@@ -25268,24 +25268,24 @@ int func_003D16F0(unsigned int mask, short prog) {
     bit = 0x1000000 << ((prog & 0xF00) >> 8);
     prog &= 0xFF;
     for (i = 0; i < 4; i++) {
-        unsigned int v;
+        unsigned int playerMask;
         struct Hdr_16F0 *hdr;
-        struct E_16F0 *e;
-        struct H_16F0 *h;
+        struct E_16F0 *event;
+        struct H_16F0 *pending;
         unsigned int top;
         int k, err;
         if (D_00517610_16F0[i].f34 == 0) continue;
-        v = D_00517610_16F0[i].f30;
-        if (has_16F0(v, bit) == 0) continue;
-        if (has_16F0(v & 0x0F000000, mask) == 0) continue;
-        if (has_16F0(v & 0xF0000000, mask) == 0) continue;
+        playerMask = D_00517610_16F0[i].f30;
+        if (has_16F0(playerMask, bit) == 0) continue;
+        if (has_16F0(playerMask & 0x0F000000, mask) == 0) continue;
+        if (has_16F0(playerMask & 0xF0000000, mask) == 0) continue;
         if (func_003D5450_16F0(i & 0xFF) == 0) continue;
         hdr = D_0044F420_16F0->hdr;
-        if (prog >= hdr->bF) { r = -13; break; }
-        e = (struct E_16F0 *)((char *)hdr + D_0044F420_16F0->idx[prog] * 4);
-        if (e->wC & 0x20000000) continue;
+        if (prog >= hdr->bF) { result = -13; break; }
+        event = (struct E_16F0 *)((char *)hdr + D_0044F420_16F0->idx[prog] * 4);
+        if (event->wC & 0x20000000) continue;
         err = -8;
-        e = (struct E_16F0 *)func_003D2068_16F0(e);
+        event = (struct E_16F0 *)func_003D2068_16F0(event);
         top = D_00517610_16F0[i].f30;
         top &= 0xFF000000;
         for (k = 0; k < 4; k++) {
@@ -25293,20 +25293,20 @@ int func_003D16F0(unsigned int mask, short prog) {
             if (D_00517610_16F0[k].f34 == 0) continue;
             if ((D_00517610_16F0[k].f30 & top) != top) continue;
             n = D_00517610_16F0[k].n;
-            if (n >= 16) { r = -13; goto next; }
+            if (n >= 16) { result = -13; goto next; }
             err = 0;
-            h = (struct H_16F0 *)e;
-            h->f0 = h->f8 = func_002AF370_16F0();
-            D_00517610_16F0[k].list[n] = h;
+            pending = (struct H_16F0 *)event;
+            pending->f0 = pending->f8 = func_002AF370_16F0();
+            D_00517610_16F0[k].list[n] = pending;
             n++;
             D_00517610_16F0[k].n = n;
         }
-        r = err;
+        result = err;
     next:;
     }
     D_0044F430_16F0 = 0;
     D_0044F420_16F0 = 0;
-    return r;
+    return result;
 }
 #endif
 
@@ -25334,15 +25334,15 @@ struct P_1940 { char pad[0xDC]; int a[16]; };
  */
 void func_003D1940(unsigned int mask) {
     int i, j;
-    unsigned int fl, t, u;
+    unsigned int fl, classBits, groupBits;
     if (D_0044F42C_1940[0] != 0) {
         if (D_0044F430_1940[0] == 0) {
             if (func_003D5450_1940(-1) != 0) {
                 for (i = 0; i < 4; i++) {
                     if (*(int *)(D_00517610_1940 + 0x34 + i * 0x928) != 0) {
                         fl = *(unsigned int *)(D_00517610_1940 + 0x30 + i * 0x928);
-                        t = fl & 0xF0000000;
-                        if ((t & mask) != 0 && (u = fl & 0x0F000000, (u & mask) != 0)) {
+                        classBits = fl & 0xF0000000;
+                        if ((classBits & mask) != 0 && (groupBits = fl & 0x0F000000, (groupBits & mask) != 0)) {
                             if (func_003D5450_1940(i & 0xFF) != 0) {
                                 for (j = 0; j < 0x10; j++) {
                                     if (((struct P_1940 *)D_0044F420_1940[0])->a[j] != 0) {
@@ -25431,27 +25431,27 @@ extern void func_0041605C_1BA8(void *, void *, int) __asm__("func_0041605C");
  * @param mode  why it ends, passed to the release hook (1 timed out, 2 cancelled, 3 finished)
  */
 void func_003D1BA8(int idx, int mode) {
-    struct H_1BA8 *v = D_0044F420_1BA8->slots[idx];
-    int size = (v->hE & 0x3F) * 16 + 16;
+    struct H_1BA8 *event = D_0044F420_1BA8->slots[idx];
+    int size = (event->hE & 0x3F) * 16 + 16;
     struct H_1BA8 save;
     char *end;
-    struct G_1BA8 *g;
+    struct G_1BA8 *pathPlayer;
     unsigned int i;
-    save = *v; /* dead copy, kept: retail copies the header to the stack */
+    save = *event; /* dead copy, kept: retail copies the header to the stack */
     end = (char *)D_0044F420_1BA8 + 0x91C;
-    if ((char *)v >= (char *)D_0044F420_1BA8 + 0x11C && (char *)v < end) {
-        func_0041605C_1BA8(v, (char *)v + size, end - (char *)v);
+    if ((char *)event >= (char *)D_0044F420_1BA8 + 0x11C && (char *)event < end) {
+        func_0041605C_1BA8(event, (char *)event + size, end - (char *)event);
         for (i = 0; i < 17; i++) {
-            struct H_1BA8 *p = D_0044F420_1BA8->slots[i];
-            if (p > v && (char *)p < end)
-                D_0044F420_1BA8->slots[i] = (struct H_1BA8 *)((char *)p - size);
+            struct H_1BA8 *slotEvent = D_0044F420_1BA8->slots[i];
+            if (slotEvent > event && (char *)slotEvent < end)
+                D_0044F420_1BA8->slots[i] = (struct H_1BA8 *)((char *)slotEvent - size);
         }
     } else if (D_0044F428_1BA8) {
-        D_0044F428_1BA8(v, mode);
+        D_0044F428_1BA8(event, mode);
     }
-    g = D_0044F420_1BA8;
-    g->slots[idx] = 0;
-    for (idx++; idx < 16; idx++) g->slots[idx - 1] = g->slots[idx];
+    pathPlayer = D_0044F420_1BA8;
+    pathPlayer->slots[idx] = 0;
+    for (idx++; idx < 16; idx++) pathPlayer->slots[idx - 1] = pathPlayer->slots[idx];
     D_0044F420_1BA8->n91C--;
 }
 #endif
@@ -25484,25 +25484,25 @@ extern int func_003CFC30_1D28(struct E_1D28 *, struct P_1D28 *) __asm__("func_00
  * @return the number of items executed or skipped
  */
 int func_003D1D28(int n) {
-    struct E_1D28 *e = D_0044F420_1D28->arr[n];
-    unsigned int i = e->idx;
+    struct E_1D28 *event = D_0044F420_1D28->arr[n];
+    unsigned int i = event->idx;
     int ret = 0;
-    struct P_1D28 *p;
-    if (i < e->cnt) {
+    struct P_1D28 *item;
+    if (i < event->cnt) {
         do {
-            p = &e->p[i];
-            if (p->f4 != 0) {
-                if (p->f4 < e->f0) p->f4 += D_0044F438_1D28;
-                if (p->f4 < D_0044F438_1D28) p->f8 |= 0x4000000;
+            item = &event->p[i];
+            if (item->f4 != 0) {
+                if (item->f4 < event->f0) item->f4 += D_0044F438_1D28;
+                if (item->f4 < D_0044F438_1D28) item->f8 |= 0x4000000;
             }
-            if (!(p->f8 & 0x4000000)) {
-                if (!func_003CFC30_1D28(e, p)) break;
+            if (!(item->f8 & 0x4000000)) {
+                if (!func_003CFC30_1D28(event, item)) break;
             }
             ret++;
             i++;
-            e->f8 = D_0044F438_1D28;
-            e->idx++;
-        } while (i < e->cnt);
+            event->f8 = D_0044F438_1D28;
+            event->idx++;
+        } while (i < event->cnt);
     }
     return ret;
 }
@@ -25622,20 +25622,20 @@ int func_003D1E80_impl(void) __asm__("func_003D1E80");
 int func_003D1E80_impl(void) {
     int i;
     int sum = 0;
-    struct sPathEvent *o;
+    struct sPathEvent *event;
     int st;
-    unsigned int v;
+    unsigned int itemCounts;
     for (i = 0; i < 16; i++) {
         if (i >= D_0044F420->f91C) {
             D_0044F420->f0DC[i] = 0;
             continue;
         }
-        o = D_0044F420->f0DC[i];
-        if (o == 0) break;
-        v = o->f0C.w;
-        st = ((v >> 22) & 0x3F) < ((v >> 16) & 0x3F) ? 0 : 3;
-        if (o->f04 != 0) {
-            if (o->f00 + o->f04 < D_0044F438) st = 1;
+        event = D_0044F420->f0DC[i];
+        if (event == 0) break;
+        itemCounts = event->f0C.w;
+        st = ((itemCounts >> 22) & 0x3F) < ((itemCounts >> 16) & 0x3F) ? 0 : 3;
+        if (event->f04 != 0) {
+            if (event->f00 + event->f04 < D_0044F438) st = 1;
         }
         if (st != 0) {
             f_1BA8_1E80(i, st);
@@ -25675,9 +25675,9 @@ int func_003D1F80(unsigned int mask, char *entry) {
             if (slot >= 0x10) return -13;
             ret = 0;
             {
-                int t = f2AF370_1F80();
-                *(int *)(entry + 8) = t;
-                *(int *)entry = t;
+                int nowTime = f2AF370_1F80();
+                *(int *)(entry + 8) = nowTime;
+                *(int *)entry = nowTime;
             }
             D_7610_1F80[i].ptrs[slot] = entry;
             slot++;
@@ -25749,24 +25749,24 @@ extern struct E2138 **D_0044F420_2138[] __asm__("D_0044F420");
 /**
  * Returns the skip bit of the first item of a given type in the selected player's pending events of the same number.
  *
- * Looks through the 16 pending slots for an event whose number (byte +0xC) matches @p arg0's and whose items include
- * one of type @p arg1 (byte +0x9); returns bit 26 (0x4000000, skipped) of that item's +0x8, else 0.
+ * Looks through the 16 pending slots for an event whose number (byte +0xC) matches @p event's and whose items include
+ * one of type @p itemType (byte +0x9); returns bit 26 (0x4000000, skipped) of that item's +0x8, else 0.
  *
- * @param arg0  an event (its number at +0xC)
- * @param arg1  the item type to look for
+ * @param event  an event (its number at +0xC)
+ * @param itemType  the item type to look for
  * @return 1 when that item is skipped, 0 otherwise or when not found
  */
-int func_003D2138(char *arg0, int arg1) {
+int func_003D2138(char *event, int itemType) {
     int i;
     unsigned int j;
-    struct E2138 *e;
+    struct E2138 *pending;
     struct I2138 *it;
     for (i = 0; i < 16; i++) {
-        e = *(struct E2138 **)((char *)D_0044F420_2138[0] + 0xDC + i * 4);
-        if (e != 0 && e->b == *(unsigned char *)(arg0 + 0xC)) {
-            for (j = 0; j < (e->h & 0x3F); j++) {
-                it = &e->items[j];
-                if (((unsigned char *)it)[9] == arg1) {
+        pending = *(struct E2138 **)((char *)D_0044F420_2138[0] + 0xDC + i * 4);
+        if (pending != 0 && pending->b == *(unsigned char *)(event + 0xC)) {
+            for (j = 0; j < (pending->h & 0x3F); j++) {
+                it = &pending->items[j];
+                if (((unsigned char *)it)[9] == itemType) {
                     return (it->w8 >> 26) & 1;
                 }
             }
@@ -25784,19 +25784,19 @@ extern char *D_0044F420_f420[] __asm__("D_0044F420");
 
 /**
  * Enables or disables an event definition in the selected player's path data: sets bit 29 (0x20000000) of its +0xC to
- * @p arg1 & 1.
+ * @p disable & 1.
  *
- * The definition is found through the event number at @p arg0 +0xC: path data (+0x34) plus 4 times the event's offset
+ * The definition is found through the event number at @p event +0xC: path data (+0x34) plus 4 times the event's offset
  * (+0x40 table). func_003D16F0 skips disabled events; func_003D2218 re-enables them all.
  *
- * @param arg0  an event (its number at +0xC)
- * @param arg1  1 to disable, 0 to enable
+ * @param event  an event (its number at +0xC)
+ * @param disable  1 to disable, 0 to enable
  */
-void func_003D21C0(char *arg0, int arg1) {
-    char *g = D_0044F420_f420[0];
-    char *p = *(char **)(g + 0x34) + (*(short *)(*(char **)(g + 0x40) + *(unsigned char *)(arg0 + 0xC) * 2) * 4);
-    if (p != 0) {
-        *(unsigned *)(p + 0xC) = (*(unsigned *)(p + 0xC) & 0xDFFFFFFF) | ((arg1 & 1) << 29);
+void func_003D21C0(char *event, int disable) {
+    char *pathPlayer = D_0044F420_f420[0];
+    char *eventDef = *(char **)(pathPlayer + 0x34) + (*(short *)(*(char **)(pathPlayer + 0x40) + *(unsigned char *)(event + 0xC) * 2) * 4);
+    if (eventDef != 0) {
+        *(unsigned *)(eventDef + 0xC) = (*(unsigned *)(eventDef + 0xC) & 0xDFFFFFFF) | ((disable & 1) << 29);
     }
 }
 #endif
@@ -25818,9 +25818,9 @@ struct E_2218 { int w0; int w4; int w8; unsigned int wC; };
 void func_003D2218(void) {
     int i;
     for (i = 0; i < ((unsigned char *)D_0044F420->f34)[0xF]; i++) {
-        struct E_2218 *p = (struct E_2218 *)(D_0044F420->f34 + D_0044F420->f40[i]);
-        if (p != 0) {
-            p->wC &= 0xDFFFFFFF;
+        struct E_2218 *eventDef = (struct E_2218 *)(D_0044F420->f34 + D_0044F420->f40[i]);
+        if (eventDef != 0) {
+            eventDef->wC &= 0xDFFFFFFF;
         }
     }
 }
@@ -25914,9 +25914,9 @@ struct sPathVoice *func_003D2A68_impl(unsigned int mask) __asm__("func_003D2A68"
  * @return the closed voice, or 0
  */
 struct sPathVoice *func_003D2A68_impl(unsigned int mask) {
-    struct sPathVoice *e = 0;
+    struct sPathVoice *pathVoice = 0;
     int i, j;
-    unsigned int fl, t, u;
+    unsigned int fl, classBits, groupBits;
     int st;
     if (D_0044F42C == 0) return 0;
     if (D_0044F430 != 0) return 0;
@@ -25924,15 +25924,15 @@ struct sPathVoice *func_003D2A68_impl(unsigned int mask) {
     for (i = 0; i < 4; i++) {
         if (D_00517610[i].f34 != 0) {
             fl = D_00517610[i].f30;
-            t = fl & 0xF0000000;
-            if ((t & mask) != 0) {
-                u = fl & 0x0F000000;
-                if ((u & mask) != 0 && f5450_2A68(i & 0xFF) != 0) {
+            classBits = fl & 0xF0000000;
+            if ((classBits & mask) != 0) {
+                groupBits = fl & 0x0F000000;
+                if ((groupBits & mask) != 0 && f5450_2A68(i & 0xFF) != 0) {
                     for (j = 0; j < 24; j++) {
                         int handle;
-                        e = D_0044F420->f58[j];
-                        if (e == 0 || isOff_2A68(mask, j)) continue;
-                        handle = e->f54;
+                        pathVoice = D_0044F420->f58[j];
+                        if (pathVoice == 0 || isOff_2A68(mask, j)) continue;
+                        handle = pathVoice->f54;
                         D_0044F420->f58[j] = 0;
                         fAE690_2A68(handle);
                         goto done;
@@ -25948,13 +25948,13 @@ done:
         func_003D4C40();
     }
     st = func_003D5330(0x0F000000);
-    if (D_0044F42C != 0 && st == 0 && e != 0) {
+    if (D_0044F42C != 0 && st == 0 && pathVoice != 0) {
         fAE100_2A68();
         D_0044F42C = 0;
     }
     D_0044F430 = 0;
     D_0044F420 = 0;
-    return e;
+    return pathVoice;
 }
 #endif
 
@@ -25977,55 +25977,55 @@ static inline int bitclear_2C20(int x) {
 }
 
 /**
- * Returns a rounded scale of a path voice's last stream-segment ratio: (int)(ratio * @p arg1 + 0.5).
+ * Returns a rounded scale of a path voice's last stream-segment ratio: (int)(ratio * @p multiplier + 0.5).
  *
- * Returns -18 unless the path system is up and idle. func_003D4BB0 selects the player with exactly @p m's top byte
- * (else 0). The voice is the lowest set bit of @p m's low 24 bits; past the data's voice count (byte +0xD of the path
+ * Returns -18 unless the path system is up and idle. func_003D4BB0 selects the player with exactly @p pathId's top byte
+ * (else 0). The voice is the lowest set bit of @p pathId's low 24 bits; past the data's voice count (byte +0xD of the path
  * data +0x34) it returns 0. For each entry pair of the voice's table (player +0x4C) the ratio is ((e[2] - e[0]) << 7) /
  * e[1]. Likely bug: the largest ratio is tracked but the last one is scaled; also both early returns of 0 leave the
  * busy flag D_0044F430 set, so later calls get -18.
  *
- * @param m  the path id
- * @param arg1  the multiplier
+ * @param pathId  the path id
+ * @param multiplier  the multiplier
  * @return the rounded product, 0 when the player or voice is missing, -18 when the system is not ready
  */
-int func_003D2C20(int m, int arg1) {
+int func_003D2C20(int pathId, int multiplier) {
     float ratio, max;
     unsigned int i;
-    char *g;
+    char *pathPlayer;
     int *base;
     int *tab;
-    int *e;
-    int r;
+    int *segment;
+    int rounded;
 
     ratio = 0.0f;
     max = 0.0f;
     if (D_0044F42C_2C20[0] == 0 || D_0044F430_2C20[0] != 0 || func_003D5450_2C20(-1) == 0) {
         return -18;
     }
-    if (func_003D4BB0_2C20(m & 0xFF000000) == 0) {
+    if (func_003D4BB0_2C20(pathId & 0xFF000000) == 0) {
         return 0;
     }
     i = 0;
-    while (i < 24 && bitclear_2C20((long)m >> i)) {
+    while (i < 24 && bitclear_2C20((long)pathId >> i)) {
         i++;
     }
-    g = D_0044F420_2C20[0];
-    base = *(int **)(g + 0x34);
+    pathPlayer = D_0044F420_2C20[0];
+    base = *(int **)(pathPlayer + 0x34);
     if (*((unsigned char *)base + 0xD) < i) {
         return 0;
     }
-    tab = *(int **)(g + 0x4C);
-    for (e = base + tab[i]; e < base + tab[i + 1] - 2; e += 2) {
-        ratio = (float)((unsigned int)(e[2] - e[0]) << 7) / (float)(unsigned int)e[1];
+    tab = *(int **)(pathPlayer + 0x4C);
+    for (segment = base + tab[i]; segment < base + tab[i + 1] - 2; segment += 2) {
+        ratio = (float)((unsigned int)(segment[2] - segment[0]) << 7) / (float)(unsigned int)segment[1];
         if (max < ratio) {
             max = ratio;
         }
     }
-    r = func_004126A0_2C20(func_00411F18_2C20(func_00413AF8_2C20(ratio * arg1), 0.5));
+    rounded = func_004126A0_2C20(func_00411F18_2C20(func_00413AF8_2C20(ratio * multiplier), 0.5));
     D_0044F430_2C20[0] = 0;
     D_0044F420_2C20[0] = 0;
-    return r;
+    return rounded;
 }
 #endif
 
@@ -26054,18 +26054,18 @@ extern int D_0044F430_2DF8[] __asm__("D_0044F430");
  * the voice's totals (+0x104, +0x108) plus the part's sizes against the limits: policy 1 releases the entry with the
  * smallest first word (func_003D3140) unless that is @p idx itself (then it returns 0), policy 0 lets func_002AE3A8
  * free the oldest. Then func_002AE298 records the request on the voice's sound (+0x54) with +0x5C, @p idx and
- * @p arg2. Likely bug: the early return for a self-eviction leaves the busy flag D_0044F430 set.
+ * @p userHandle. Likely bug: the early return for a self-eviction leaves the busy flag D_0044F430 set.
  *
- * @param h  the path id
+ * @param pathId  the path id
  * @param idx  the part to request
- * @param arg2  the caller's handle, stored with the request
+ * @param userHandle  the caller's handle, stored with the request
  * @return func_002AE298's result, 0 when nothing was requested, -18 when the system is not ready
  */
-int func_003D2DF8(int h, int idx, int arg2) {
+int func_003D2DF8(int pathId, int idx, int userHandle) {
     int ret = 0;
-    struct T_2DF8 *t;
-    struct R_2DF8 *r;
-    struct E_2DF8 *e;
+    struct T_2DF8 *pathVoice;
+    struct R_2DF8 *reqTable;
+    struct E_2DF8 *reqEntry;
 
     if (D_0044F42C_2DF8[0] != 0) {
         if (D_0044F430_2DF8[0] != 0) {
@@ -26077,34 +26077,34 @@ int func_003D2DF8(int h, int idx, int arg2) {
     }
     return -18;
 ok:
-    t = func_003D5290_2DF8(h);
-    if (t != 0) {
-        r = func_003D4A50_2DF8(h);
-        e = (struct E_2DF8 *)(r + 1);
-        e += idx;
-        if (r != 0 && r->type != 2) {
-            if (r->f4 < t->f104 + e->f4 || r->f8 < t->f108 + e->f8) {
-                if (r->type == 1) {
+    pathVoice = func_003D5290_2DF8(pathId);
+    if (pathVoice != 0) {
+        reqTable = func_003D4A50_2DF8(pathId);
+        reqEntry = (struct E_2DF8 *)(reqTable + 1);
+        reqEntry += idx;
+        if (reqTable != 0 && reqTable->type != 2) {
+            if (reqTable->f4 < pathVoice->f104 + reqEntry->f4 || reqTable->f8 < pathVoice->f108 + reqEntry->f8) {
+                if (reqTable->type == 1) {
                     unsigned int min = 0x7FFFFFFF;
                     int sel = -1;
                     int i;
-                    e = (struct E_2DF8 *)(r + 1);
-                    for (i = 0; i < r->n; i++, e++) {
-                        if (e->f0 <= min) {
-                            min = e->f0;
+                    reqEntry = (struct E_2DF8 *)(reqTable + 1);
+                    for (i = 0; i < reqTable->n; i++, reqEntry++) {
+                        if (reqEntry->f0 <= min) {
+                            min = reqEntry->f0;
                             sel = i;
                         }
                     }
                     if (sel == idx) {
                         return 0;
                     }
-                    func_003D3140_2DF8(h, sel);
-                } else if (r->type == 0) {
-                    func_002AE3A8_2DF8(h);
+                    func_003D3140_2DF8(pathId, sel);
+                } else if (reqTable->type == 0) {
+                    func_002AE3A8_2DF8(pathId);
                 }
             }
         }
-        ret = func_002AE298_2DF8(t->f54, t->f5C, idx, arg2);
+        ret = func_002AE298_2DF8(pathVoice->f54, pathVoice->f5C, idx, userHandle);
     }
     D_0044F430_2DF8[0] = 0;
     D_0044F420_2DF8[0] = 0;
@@ -26175,12 +26175,12 @@ extern int D_0044F428_3018[4] __asm__("D_0044F428");
  * selected id and the new node) and the event release callback (D_0044F428, called by func_003D1BA8 for events outside
  * the player's buffer).
  *
- * @param arg0  the node-change callback, or 0
- * @param arg1  the event release callback, or 0
+ * @param nodeCallback  the node-change callback, or 0
+ * @param releaseCallback  the event release callback, or 0
  */
-void func_003D3018(int arg0, int arg1) {
-    D_0044F424_3018[0] = arg0;
-    D_0044F428_3018[0] = arg1;
+void func_003D3018(int nodeCallback, int releaseCallback) {
+    D_0044F424_3018[0] = nodeCallback;
+    D_0044F428_3018[0] = releaseCallback;
 }
 #endif
 
@@ -26241,28 +26241,28 @@ extern unsigned char D_0044F42C_30A8[] __asm__("D_0044F42C");
 extern int D_0044F430_30A8[] __asm__("D_0044F430");
 
 /**
- * Gives a path voice's sound monitor a memory-resident copy of its data: func_002AE768(monitor index, @p arg1,
- * @p arg2).
+ * Gives a path voice's sound monitor a memory-resident copy of its data: func_002AE768(monitor index, @p memBuffer,
+ * @p memLimit).
  *
  * The monitor index is the voice's +0x54 (-8 when func_003D5290 finds no voice, which func_002AE768 rejects). Stream
  * requests below the limit are then read from the buffer instead of the file. Does nothing unless the path system is up
  * and idle; clears the selection at the end.
  *
- * @param arg0  the path id
- * @param arg1  the buffer
- * @param arg2  the stream offset limit the buffer covers (in the monitor's units)
+ * @param pathId  the path id
+ * @param memBuffer  the buffer
+ * @param memLimit  the stream offset limit the buffer covers (in the monitor's units)
  */
-void func_003D30A8(int arg0, int arg1, int arg2) {
+void func_003D30A8(int pathId, int memBuffer, int memLimit) {
     int var_4;
     void *temp_2;
 
     if ((D_0044F42C_30A8[0] != 0) && (D_0044F430_30A8[0] == 0) && (func_003D5450_30A8(-1) != 0)) {
-        temp_2 = func_003D5290_30A8(arg0);
+        temp_2 = func_003D5290_30A8(pathId);
         var_4 = -8;
         if (temp_2 != 0) {
             var_4 = (*(int *)((char*)(temp_2) + (0x54)));
         }
-        func_002AE768_30A8(var_4, arg1, arg2);
+        func_002AE768_30A8(var_4, memBuffer, memLimit);
         D_0044F430_30A8[0] = 0;
         D_0044F420_30A8[0] = 0;
     }
@@ -26282,18 +26282,18 @@ extern int D_0044F430_3140[] __asm__("D_0044F430");
 int func_003D3140_3140(int arg0, int arg1) __asm__("func_003D3140");
 
 /**
- * Releases request @p arg1 of a path voice's sound monitor (func_002AE328 on the voice's +0x54).
+ * Releases request @p requestIndex of a path voice's sound monitor (func_002AE328 on the voice's +0x54).
  *
  * Returns -18 unless the path system is up and idle; clears the selection at the end.
  *
- * @param arg0  the path id
- * @param arg1  the request index
+ * @param pathId  the path id
+ * @param requestIndex  the request index
  * @return func_002AE328's result, 0 when no voice matches, -18 when the system is not ready
  */
-int func_003D3140_3140(int arg0, int arg1) {
-    int r;
-    char *t;
-    r = 0;
+int func_003D3140_3140(int pathId, int requestIndex) {
+    int result;
+    char *pathVoice;
+    result = 0;
     if (D_0044F42C_3140[0] != 0) {
         if (D_0044F430_3140[0] != 0) {
             return -18;
@@ -26304,13 +26304,13 @@ int func_003D3140_3140(int arg0, int arg1) {
     }
     return -18;
 ok:
-    t = func_003D5290_3140(arg0);
-    if (t != 0) {
-        r = func_002AE328_3140(*(int *)(t + 0x54), arg1);
+    pathVoice = func_003D5290_3140(pathId);
+    if (pathVoice != 0) {
+        result = func_002AE328_3140(*(int *)(pathVoice + 0x54), requestIndex);
     }
     D_0044F430_3140[0] = 0;
     D_0044F420_3140[0] = 0;
-    return r;
+    return result;
 }
 #endif
 
@@ -26325,24 +26325,24 @@ extern int D_0044F430_31E8[] __asm__("D_0044F430");
 extern int D_0044F420_31E8[] __asm__("D_0044F420");
 
 /**
- * Sets the two look-ahead times of every path player in use whose group bits overlap @p a: +0xC (used by the normal
+ * Sets the two look-ahead times of every path player in use whose group bits overlap @p pathMask: +0xC (used by the normal
  * service pass) and +0x10 (used by the 'B' pass of func_003D4F10).
  *
  * Does nothing unless the path system is up and idle; clears the selection at the end.
  *
- * @param a  the path id mask (only the group bits 0x0F000000 count)
- * @param b  the look-ahead for +0xC
- * @param c  the look-ahead for +0x10
+ * @param pathMask  the path id mask (only the group bits 0x0F000000 count)
+ * @param lookAhead  the look-ahead for +0xC
+ * @param lookAheadB  the look-ahead for +0x10
  */
-void func_003D31E8(unsigned int a, int b, int c) {
+void func_003D31E8(unsigned int pathMask, int lookAhead, int lookAheadB) {
     int i;
     if (D_0044F42C_31E8[0] != 0 && D_0044F430_31E8[0] == 0) {
         if (func_003D5450(-1)) {
-            a &= 0x0F000000;
+            pathMask &= 0x0F000000;
             for (i = 0; i < 4; i++) {
-                if (D_00517610_31E8[i].f34 != 0 && (D_00517610_31E8[i].f30 & a) != 0) {
-                    D_00517610_31E8[i].f0c = b;
-                    D_00517610_31E8[i].f10 = c;
+                if (D_00517610_31E8[i].f34 != 0 && (D_00517610_31E8[i].f30 & pathMask) != 0) {
+                    D_00517610_31E8[i].f0c = lookAhead;
+                    D_00517610_31E8[i].f10 = lookAheadB;
                 }
             }
             D_0044F430_31E8[0] = 0;
@@ -26424,59 +26424,59 @@ int func_003D32B8_32B8(struct V_32B8 *v, struct O_32B8 *o) __asm__("func_003D32B
  * node's channel count times multiplier (bits 24-27 and 20-23 of record +0x4) when the multiplier is set; the
  * per-channel length divides by bits 20-23 only. func_002AEC58 gives the voice's stream positions (+0x54). For a voice
  * on a channel (+0x20 bits 4-8 > 0) of a node with flag 2 (+0xC) the start is offset by +0x40 per remaining channel and
- * the end is length - start. @p o gets the multiplier (bits 0-3), record +0x8 bits 4-7, the segment index (bits 8-15),
+ * the end is length - start. @p timing gets the multiplier (bits 0-3), record +0x8 bits 4-7, the segment index (bits 8-15),
  * the segment length (+0x4), per-channel length (+0x8), total (+0xC), the distance to the next segment boundary
  * (+0x10), per-channel length minus the end position (+0x14) and the start (+0x18).
  *
- * @param v  the path voice
- * @param o  the timing to fill, or 0
+ * @param pathVoice  the path voice
+ * @param timing  the timing to fill, or 0
  * @return the index of the segment the voice is in
  */
-int func_003D32B8_32B8(struct V_32B8 *v, struct O_32B8 *o) {
-    struct E_32B8 *e;
-    struct T_32B8 t;
+int func_003D32B8_32B8(struct V_32B8 *pathVoice, struct O_32B8 *timing) {
+    struct E_32B8 *nodeRec;
+    struct T_32B8 lenEntry;
     unsigned int end;
     unsigned int start;
     float len;
     float rate;
-    float a;
-    float b;
+    float startPos;
+    float endPos;
     float x;
     float p;
     float q;
-    float r;
+    float toNextSeg;
     int n;
 
-    e = (struct E_32B8 *)(D_0044F420_32B8->hdr + D_0044F420_32B8->a[v->h36] * 4);
-    t = D_0044F420_32B8->tab[e->h0 - 1];
-    len = t.len;
-    if (e->w4 & 0x0F000000) {
-        len /= (unsigned int)(((e->w4 >> 24) & 0xF) * ((e->w4 >> 20) & 0xF));
+    nodeRec = (struct E_32B8 *)(D_0044F420_32B8->hdr + D_0044F420_32B8->a[pathVoice->h36] * 4);
+    lenEntry = D_0044F420_32B8->tab[nodeRec->h0 - 1];
+    len = lenEntry.len;
+    if (nodeRec->w4 & 0x0F000000) {
+        len /= (unsigned int)(((nodeRec->w4 >> 24) & 0xF) * ((nodeRec->w4 >> 20) & 0xF));
     }
-    rate = (float)t.len / (float)((e->w4 >> 20) & 0xF);
-    fAEC58_32B8(v->x54, &end, &start);
-    if (v->ch > 0 && (e->wC & 2)) {
-        a = (float)start + (float)v->x40 * (float)(unsigned int)(((e->w4 >> 24) & 0xF) * ((e->w4 >> 20) & 0xF) + (1 - v->ch));
-        b = (float)t.len - a;
+    rate = (float)lenEntry.len / (float)((nodeRec->w4 >> 20) & 0xF);
+    fAEC58_32B8(pathVoice->x54, &end, &start);
+    if (pathVoice->ch > 0 && (nodeRec->wC & 2)) {
+        startPos = (float)start + (float)pathVoice->x40 * (float)(unsigned int)(((nodeRec->w4 >> 24) & 0xF) * ((nodeRec->w4 >> 20) & 0xF) + (1 - pathVoice->ch));
+        endPos = (float)lenEntry.len - startPos;
     } else {
-        a = start;
-        b = end;
+        startPos = start;
+        endPos = end;
     }
-    x = b / len;
+    x = endPos / len;
     n = (int)x;
     p = x * len;
     q = rate - p;
-    r = (float)(n + 1) * len - p;
-    if (o != 0) {
-        o->lo = (e->w4 >> 24) & 0xF;
-        o->f4 = (e->w8 >> 4) & 0xF;
-        o->w18 = (int)a;
-        o->wC = t.len;
-        o->w4 = (int)len;
-        o->w8 = (int)rate;
-        o->w14 = (int)q;
-        o->w10 = (int)r;
-        o->n = n;
+    toNextSeg = (float)(n + 1) * len - p;
+    if (timing != 0) {
+        timing->lo = (nodeRec->w4 >> 24) & 0xF;
+        timing->f4 = (nodeRec->w8 >> 4) & 0xF;
+        timing->w18 = (int)startPos;
+        timing->wC = lenEntry.len;
+        timing->w4 = (int)len;
+        timing->w8 = (int)rate;
+        timing->w14 = (int)q;
+        timing->w10 = (int)toNextSeg;
+        timing->n = n;
     }
     return n;
 }
@@ -26494,7 +26494,7 @@ extern struct sPath *D_0044F420;
 
 struct R_37A0 { signed char lo; signed char hi; short v; };
 /**
- * Picks the node that follows path node @p arg0 for a selector value, from the node's branch table.
+ * Picks the node that follows path node @p node for a selector value, from the node's branch table.
  *
  * The node record (selected player's data +0x34 at its +0x38 offset) names its voice (bits 16-20 of word 0). When that
  * voice is repeating this node (+0x2C), the selector becomes the voice's remaining repeat count (+0x20 low bits), which
@@ -26502,56 +26502,56 @@ struct R_37A0 { signed char lo; signed char hi; short v; };
  * branches (4 bytes each from record +0x10, count in bits 12-16 of word 1) hold a selector range and a target: the
  * first range containing the selector wins, else the branch with the nearest range edge.
  *
- * @param arg0  the current node
- * @param arg1  the selector value (0..127)
+ * @param node  the current node
+ * @param selector  the selector value (0..127)
  * @return the next node, or -1 when the node has no branches
  */
-int func_003D37A0(int arg0, int arg1) {
-    struct sPath *g = D_0044F420;
-    int r = -1;
-    unsigned int *e = g->f34 + g->f38[arg0];
-    unsigned int w0 = e[0];
-    struct sPathVoice *s = g->f58[(w0 >> 16) & 0x1F];
-    struct R_37A0 *p = (struct R_37A0 *)(e + 4);
+int func_003D37A0(int node, int selector) {
+    struct sPath *pathPlayer = D_0044F420;
+    int nextNode = -1;
+    unsigned int *nodeRec = pathPlayer->f34 + pathPlayer->f38[node];
+    unsigned int w0 = nodeRec[0];
+    struct sPathVoice *pathVoice = pathPlayer->f58[(w0 >> 16) & 0x1F];
+    struct R_37A0 *branch = (struct R_37A0 *)(nodeRec + 4);
     unsigned int i;
-    if (s->f2C == arg0) {
-        arg1 = s->lo & 0x7F;
+    if (pathVoice->f2C == node) {
+        selector = pathVoice->lo & 0x7F;
         if ((int)w0 >> 28 > 0) {
-            if (--s->lo == -1) {
-                s->f2C = -1;
+            if (--pathVoice->lo == -1) {
+                pathVoice->f2C = -1;
             }
         }
     }
-    for (i = 0; i < ((e[1] >> 12) & 0x1F); i++) {
-        if (arg1 >= p[i].lo && p[i].hi >= arg1) {
-            r = p[i].v;
+    for (i = 0; i < ((nodeRec[1] >> 12) & 0x1F); i++) {
+        if (selector >= branch[i].lo && branch[i].hi >= selector) {
+            nextNode = branch[i].v;
             break;
         }
     }
-    if (r < 0) {
-        int n = (e[1] >> 12) & 0x1F;
+    if (nextNode < 0) {
+        int n = (nodeRec[1] >> 12) & 0x1F;
         if (n <= 0) {
-            r = -1;
+            nextNode = -1;
         } else {
-            struct R_37A0 *best = p;
+            struct R_37A0 *best = branch;
             int bd = 0x7F;
             int k;
             for (k = 0; k < n; k++) {
-                int a = p[k].lo - arg1;
-                int b = p[k].hi - arg1;
-                int m;
-                if (a < 0) a = -a;
-                if (b < 0) b = -b;
-                m = a < b ? a : b;
-                if (m < bd) {
-                    bd = m;
-                    best = &p[k];
+                int loDist = branch[k].lo - selector;
+                int hiDist = branch[k].hi - selector;
+                int nearDist;
+                if (loDist < 0) loDist = -loDist;
+                if (hiDist < 0) hiDist = -hiDist;
+                nearDist = loDist < hiDist ? loDist : hiDist;
+                if (nearDist < bd) {
+                    bd = nearDist;
+                    best = &branch[k];
                 }
             }
-            r = (unsigned short)best->v;
+            nextNode = (unsigned short)best->v;
         }
     }
-    return r;
+    return nextNode;
 }
 #endif
 
@@ -26638,9 +26638,9 @@ extern int f1F80_3900(unsigned int, char *) __asm__("func_003D1F80");
  */
 int func_003D3900(int id, int start, int vel) {
     struct Ev_3900 ev;
-    struct Q_3900 q;
-    struct E_3900 *e;
-    struct V_3900 *v;
+    struct Q_3900 eventHeader;
+    struct E_3900 *nodeRec;
+    struct V_3900 *pathVoice;
     unsigned int t;
     unsigned int w;
     short k;
@@ -26649,16 +26649,16 @@ int func_003D3900(int id, int start, int vel) {
 
     save = vel;
     k = f3C90_3900(id, start);
-    e = (struct E_3900 *)(D_0044F420_3900->hdr + D_0044F420_3900->a[k] * 4);
-    v = D_0044F420_3900->voices[e->h2 & 0x1F];
-    while (e->type <= 0) {
-        type = e->type;
+    nodeRec = (struct E_3900 *)(D_0044F420_3900->hdr + D_0044F420_3900->a[k] * 4);
+    pathVoice = D_0044F420_3900->voices[nodeRec->h2 & 0x1F];
+    while (nodeRec->type <= 0) {
+        type = nodeRec->type;
         if (type == 0) {
-            v->cur = e;
-            if (e->w8 & 0x7C00) {
-                f6210_3900(&q, 0, 0x10);
+            pathVoice->cur = nodeRec;
+            if (nodeRec->w8 & 0x7C00) {
+                f6210_3900(&eventHeader, 0, 0x10);
                 f6210_3900(&ev, 0, 0x10);
-                t = D_0044F420_3900->tab54[((e->w8 >> 10) & 0x1F) - 1];
+                t = D_0044F420_3900->tab54[((nodeRec->w8 >> 10) & 0x1F) - 1];
                 if (t & 0x80) {
                     ev.bC = 100;
                 } else {
@@ -26667,38 +26667,38 @@ int func_003D3900(int id, int start, int vel) {
                 ev.f1 = (t >> 7) & 1;
                 ev.b9 = 6;
                 ev.hE = 9632;
-                ev.f7 = ((e->w8 >> 10) & 0x1F) - 1;
+                ev.f7 = ((nodeRec->w8 >> 10) & 0x1F) - 1;
                 ev.b8 = -1;
-                q.p1 = ev.hE;
+                eventHeader.p1 = ev.hE;
                 ev.w4 = D_0044F438_3900 + ev.hE;
                 ev.w0 = 0x1F000001;
-                q.b = 0;
-                f0B18_3900(&q, &ev);
-                f1F80_3900(D_00517610_3900[0].x30, fcopy_3900(&q));
+                eventHeader.b = 0;
+                f0B18_3900(&eventHeader, &ev);
+                f1F80_3900(D_00517610_3900[0].x30, fcopy_3900(&eventHeader));
             }
-            if ((e->w4 & 0xE0000) == 0x20000) {
+            if ((nodeRec->w4 & 0xE0000) == 0x20000) {
                 vel = (D_0044F438_3900 / 23) & 0x7F;
             }
             if (D_0044F424_3900 != 0) {
                 D_0044F424_3900(D_0044F430_3900, k);
             }
         } else if (type == -1) {
-            w = *(unsigned int *)e;
+            w = *(unsigned int *)nodeRec;
             if (w & 0xF0000000) {
-                if (k != v->h2C) {
-                    v->h2C = k;
-                    v->lo = w >> 28;
+                if (k != pathVoice->h2C) {
+                    pathVoice->h2C = k;
+                    pathVoice->lo = w >> 28;
                 }
             }
         } else if (type == -2) {
             vel = (D_0044F438_3900 / 23) & 0x7F;
         } else if (type == -3) {
-            f1F80_3900(D_0044F420_3900->x30, (D_0044F420_3900->hdr + D_0044F420_3900->b[(e->wC >> 2) & 0xFFF] * 4));
+            f1F80_3900(D_0044F420_3900->x30, (D_0044F420_3900->hdr + D_0044F420_3900->b[(nodeRec->wC >> 2) & 0xFFF] * 4));
         }
         t = f37A0_3900(k, vel);
         vel = save;
         k = f3C90_3900(id, t);
-        e = (struct E_3900 *)(D_0044F420_3900->hdr + D_0044F420_3900->a[k] * 4);
+        nodeRec = (struct E_3900 *)(D_0044F420_3900->hdr + D_0044F420_3900->a[k] * 4);
     }
     return (short)f3C90_3900(id, k);
 }
@@ -26724,27 +26724,27 @@ extern struct T_3C90 *D_0044F420_3C90 __asm__("D_0044F420");
  * @return the remapped node number
  */
 int func_003D3C90(int id, int value) {
-    struct T_3C90 *t;
+    struct T_3C90 *pathPlayer;
     int *words;
     int k, start, n, w, i;
-    int *p;
-    int r = value;
+    int *remapList;
+    int mapped = value;
     if (id < 0)
-        return r;
-    t = D_0044F420_3C90;
-    words = t->words;
-    k = *((unsigned char *)&words[t->index[id]] + 4);
+        return mapped;
+    pathPlayer = D_0044F420_3C90;
+    words = pathPlayer->words;
+    k = *((unsigned char *)&words[pathPlayer->index[id]] + 4);
     if (k == 0)
-        return r;
-    start = t->ranges[k - 1];
-    n = t->ranges[k] - start;
-    p = &words[start];
+        return mapped;
+    start = pathPlayer->ranges[k - 1];
+    n = pathPlayer->ranges[k] - start;
+    remapList = &words[start];
     for (i = 0; i < n; i++) {
-        w = p[i];
-        if (r == (w >> 16))
-            r = w & 0xFFFF;
+        w = remapList[i];
+        if (mapped == (w >> 16))
+            mapped = w & 0xFFFF;
     }
-    return r;
+    return mapped;
 }
 #endif
 
@@ -26794,52 +26794,52 @@ extern int f_41A8_3D20(struct V_3D20 *) __asm__("func_003D41A8");
  */
 void func_003D3D20(int idx) {
     struct V_3D20 save;
-    struct V_3D20 *v;
+    struct V_3D20 *pathVoice;
     struct V_3D20 *w;
-    struct E_3D20 *e;
+    struct E_3D20 *nodeRec;
     int old;
     int ch;
     int sel;
     int n;
     int k;
-    int r;
+    int queueResult;
 
     sel = -1;
     old = D_0044F420_3D20->x91C;
-    v = D_0044F420_3D20->voices[idx];
-    save = *v;
+    pathVoice = D_0044F420_3D20->voices[idx];
+    save = *pathVoice;
     ch = -1;
-    k = v->h36;
-    e = (struct E_3D20 *)(D_0044F420_3D20->hdr + D_0044F420_3D20->a[k] * 4);
-    n = v->ch;
-    if (v->b2F) {
+    k = pathVoice->h36;
+    nodeRec = (struct E_3D20 *)(D_0044F420_3D20->hdr + D_0044F420_3D20->a[k] * 4);
+    n = pathVoice->ch;
+    if (pathVoice->b2F) {
         ch = 1;
     }
-    if (n > 0 && (e->wC & 2) && (int)(((e->w4 >> 24) & 0xF) * ((e->w4 >> 20) & 0xF)) >= n) {
+    if (n > 0 && (nodeRec->wC & 2) && (int)(((nodeRec->w4 >> 24) & 0xF) * ((nodeRec->w4 >> 20) & 0xF)) >= n) {
         sel = k;
         ch = n;
-    } else if (v->h36 >= 0) {
-        sel = f_37A0_3D20(v->h36, v->b1);
+    } else if (pathVoice->h36 >= 0) {
+        sel = f_37A0_3D20(pathVoice->h36, pathVoice->b1);
     }
     if (sel >= 0) {
-        sel = f_3900_3D20(v->h36, sel, v->b1);
+        sel = f_3900_3D20(pathVoice->h36, sel, pathVoice->b1);
     }
-    e = (struct E_3D20 *)(D_0044F420_3D20->hdr + D_0044F420_3D20->a[sel] * 4);
-    w = D_0044F420_3D20->voices[e->h2 & 0x1F];
-    if (w != 0 && w != v) {
-        v->h36 = -1;
-        v->ch = ch;
+    nodeRec = (struct E_3D20 *)(D_0044F420_3D20->hdr + D_0044F420_3D20->a[sel] * 4);
+    w = D_0044F420_3D20->voices[nodeRec->h2 & 0x1F];
+    if (w != 0 && w != pathVoice) {
+        pathVoice->h36 = -1;
+        pathVoice->ch = ch;
         f_4050_3D20(sel);
         return;
     }
-    v->h36 = sel;
-    v->ch = ch;
-    r = f_41A8_3D20(v);
-    if (r >= 0 || r == -9999) {
+    pathVoice->h36 = sel;
+    pathVoice->ch = ch;
+    queueResult = f_41A8_3D20(pathVoice);
+    if (queueResult >= 0 || queueResult == -9999) {
         return;
     }
     D_0044F420_3D20->x91C = old;
-    *v = save;
+    *pathVoice = save;
 }
 #endif
 
@@ -26878,37 +26878,37 @@ struct B_4050 { char pad[0x18]; int w18; char rest[4]; };
  * @return the queued copy, or 0
  */
 int func_003D4050(int idx) {
-    struct M_4050 m;
-    struct M_4050 a;
+    struct M_4050 item;
+    struct M_4050 eventHeader;
     struct B_4050 buf;
-    char *g = D_0044F420_4050[0];
-    char *e = *(char **)(g + 0x34) + *(short *)(*(char **)(g + 0x38) + idx * 2) * 4;
-    int r = 0;
-    int k, h;
-    if (e != 0) {
-        k = *(unsigned short *)(e + 2) & 0x1F;
-        if (((struct G_4050 *)g)->a[k] != 0) {
-            h = (int)((1L << k) | 0x11000000);
-            func_00416210_4050(&a, 0, 0x10);
-            func_00416210_4050(&m, 0, 0x10);
+    char *pathPlayer = D_0044F420_4050[0];
+    char *nodeRec = *(char **)(pathPlayer + 0x34) + *(short *)(*(char **)(pathPlayer + 0x38) + idx * 2) * 4;
+    int eventCopy = 0;
+    int k, voiceMask;
+    if (nodeRec != 0) {
+        k = *(unsigned short *)(nodeRec + 2) & 0x1F;
+        if (((struct G_4050 *)pathPlayer)->a[k] != 0) {
+            voiceMask = (int)((1L << k) | 0x11000000);
+            func_00416210_4050(&eventHeader, 0, 0x10);
+            func_00416210_4050(&item, 0, 0x10);
             if (*(int *)D_0044F420_4050[0] >= 0) {
                 func_003D32B8_4050(((struct G_4050 *)D_0044F420_4050[0])->a[*(int *)D_0044F420_4050[0]], &buf);
-                m.b9 = 2;
-                m.w0 = h;
-                *(int *)&m.sc = buf.w18 - 10;
-                func_003D0B18_4050(&a, &m);
+                item.b9 = 2;
+                item.w0 = voiceMask;
+                *(int *)&item.sc = buf.w18 - 10;
+                func_003D0B18_4050(&eventHeader, &item);
             }
-            m.b9 = 4;
-            m.w0 = h;
-            m.b8 = (*(unsigned int *)e >> 21) & 0x3F;
-            m.sc = idx;
-            m.be = -1;
-            func_003D0B18_4050(&a, &m);
-            r = func_003D2068_4050(&a);
-            func_003D1F80_4050(h, r);
+            item.b9 = 4;
+            item.w0 = voiceMask;
+            item.b8 = (*(unsigned int *)nodeRec >> 21) & 0x3F;
+            item.sc = idx;
+            item.be = -1;
+            func_003D0B18_4050(&eventHeader, &item);
+            eventCopy = func_003D2068_4050(&eventHeader);
+            func_003D1F80_4050(voiceMask, eventCopy);
         }
     }
-    return r;
+    return eventCopy;
 }
 #endif
 
@@ -26928,28 +26928,28 @@ static inline int get_4898(char *arr, int i) {
 }
 
 /**
- * Returns the first word of path node @p arg0's length entry, or 0.
+ * Returns the first word of path node @p node's length entry, or 0.
  *
  * Valid nodes are below the path data's node count (+0x12); the record's +0x0 is the 1-based index into the player's
  * length table (+0x50, 8 bytes per entry), 0 meaning none.
  *
- * @param arg0  the node
+ * @param node  the node
  * @return the entry's first word, 0 for an invalid node or no entry
  */
-int func_003D4898(int arg0) {
+int func_003D4898(int node) {
     int var_7;
-    A_4898 *a;
-    B_4898 *b;
-    short t;
+    A_4898 *pathPlayer;
+    B_4898 *pathData;
+    short lenIndex;
 
     var_7 = 0;
-    if (arg0 < 0) return 0;
-    a = D_0044F420_F420[0];
-    b = a->b;
-    if (arg0 >= *(unsigned short *)((char *)b + 0x12)) return 0;
-    t = b->ent[a->idx[arg0]].v;
-    if (t > 0) {
-        var_7 = get_4898(a->arr, t - 1);
+    if (node < 0) return 0;
+    pathPlayer = D_0044F420_F420[0];
+    pathData = pathPlayer->b;
+    if (node >= *(unsigned short *)((char *)pathData + 0x12)) return 0;
+    lenIndex = pathData->ent[pathPlayer->idx[node]].v;
+    if (lenIndex > 0) {
+        var_7 = get_4898(pathPlayer->arr, lenIndex - 1);
     }
     return var_7;
 }
@@ -26975,21 +26975,21 @@ extern int func_003D32B8(int, struct S_4900 *);
  *
  * Uses func_003D32B8's timing; a negative result there would give length 0 and -1.
  *
- * @param a0  the path voice
- * @param a1  receives the segment length, or 0
+ * @param pathVoice  the path voice
+ * @param segLenOut  receives the segment length, or 0
  * @return the distance to the next segment boundary
  */
-int func_003D4900(int a0, int *a1) {
-    struct S_4900 s;
+int func_003D4900(int pathVoice, int *segLenOut) {
+    struct S_4900 timing;
 
-    if (func_003D32B8(a0, &s) < 0) {
-        s.a4 = 0;
-        s.a10 = 0xFFFFFFFF;
+    if (func_003D32B8(pathVoice, &timing) < 0) {
+        timing.a4 = 0;
+        timing.a10 = 0xFFFFFFFF;
     }
-    if (a1 != 0) {
-        *a1 = s.a4;
+    if (segLenOut != 0) {
+        *segLenOut = timing.a4;
     }
-    return s.a10;
+    return timing.a10;
 }
 #endif
 
@@ -27002,16 +27002,16 @@ extern int func_002AEAA8(int, unsigned int);
  * Returns the total amount a path voice has queued on its sound monitor: the sum of func_002AEAA8 over the voice's
  * request entries (+0x20 bits 14-18), skipping negative results.
  *
- * @param arg0  the path voice
+ * @param pathVoice  the path voice
  * @return the total
  */
-int func_003D4950(char *arg0) {
+int func_003D4950(char *pathVoice) {
     int temp_2;
     int total = 0;
     unsigned int i;
 
-    for (i = 0; i < ((*(unsigned int *)(arg0 + 0x20) >> 0xE) & 0x1F); i++) {
-        temp_2 = func_002AEAA8(*(int *)(arg0 + 0x54), i);
+    for (i = 0; i < ((*(unsigned int *)(pathVoice + 0x20) >> 0xE) & 0x1F); i++) {
+        temp_2 = func_002AEAA8(*(int *)(pathVoice + 0x54), i);
         if (temp_2 >= 0) {
             total += temp_2;
         }
@@ -27069,23 +27069,23 @@ extern struct E_4A50 D_00517610_4A50[] __asm__("D_00517610");
 
 /**
  * Returns the request table of the path voice an id names: player +0x924 [voice] for the lowest voice bit of
- * @p arg0, in the first player with tables, in use, sharing class and group bits.
+ * @p pathId, in the first player with tables, in use, sharing class and group bits.
  *
- * @param arg0  the path id
+ * @param pathId  the path id
  * @return the voice's request table, or 0
  */
-int func_003D4A50(unsigned arg0) {
-    unsigned i, b;
-    unsigned hi = arg0 & 0xF0000000;
-    unsigned mid = arg0 & 0x0F000000;
-    unsigned m = arg0 & 0xFFFFFF;
+int func_003D4A50(unsigned pathId) {
+    unsigned i, voiceBit;
+    unsigned hi = pathId & 0xF0000000;
+    unsigned mid = pathId & 0x0F000000;
+    unsigned voiceBits = pathId & 0xFFFFFF;
     for (i = 0; i < 4; i++) {
         unsigned mk = D_00517610_4A50[i].mask;
         if (D_00517610_4A50[i].tab != 0 && D_00517610_4A50[i].w34 != 0 &&
             (mk & hi) && (mk & mid)) {
-            for (b = 0; b < 0x18; b++) {
-                if ((m >> b) & 1)
-                    return D_00517610_4A50[i].tab[b];
+            for (voiceBit = 0; voiceBit < 0x18; voiceBit++) {
+                if ((voiceBits >> voiceBit) & 1)
+                    return D_00517610_4A50[i].tab[voiceBit];
             }
         }
     }
@@ -27116,11 +27116,11 @@ void func_003D4B00(void) {
     D_0044F420->f04 = 0;
     D_0044F420->f08 = 0;
     for (i = 0; i < 24; i++) {
-        struct sPathVoice *e = D_0044F420->f58[i];
-        if (e != 0 && e->f03 == 0 && valid_4B00(e) && D_0044F420->f04 < e->f24) {
-            D_0044F420->f04 = e->f24;
+        struct sPathVoice *pathVoice = D_0044F420->f58[i];
+        if (pathVoice != 0 && pathVoice->f03 == 0 && valid_4B00(pathVoice) && D_0044F420->f04 < pathVoice->f24) {
+            D_0044F420->f04 = pathVoice->f24;
             D_0044F420->f00 = i;
-            D_0044F420->f08 = (*e->f30 >> 21) & 0x3F;
+            D_0044F420->f08 = (*pathVoice->f30 >> 21) & 0x3F;
         }
     }
 }
@@ -27180,7 +27180,7 @@ extern struct E_4C40 D_00517610_4C40[4] __asm__("D_00517610");
  * swapping whole records. Players without data stay where they are. Called by func_003D2A68 when a player empties.
  */
 void func_003D4C40(void) {
-    struct E_4C40 tmp;
+    struct E_4C40 swapRec;
     int i;
     int j;
 
@@ -27188,9 +27188,9 @@ void func_003D4C40(void) {
         if (D_00517610_4C40[i].hdr != 0) {
             for (j = i + 1; j < 4; j++) {
                 if (D_00517610_4C40[j].hdr != 0 && D_00517610_4C40[j].mask < D_00517610_4C40[i].mask) {
-                    tmp = D_00517610_4C40[i];
+                    swapRec = D_00517610_4C40[i];
                     D_00517610_4C40[i] = D_00517610_4C40[j];
-                    D_00517610_4C40[j] = tmp;
+                    D_00517610_4C40[j] = swapRec;
                 }
             }
         }
@@ -27262,10 +27262,10 @@ void func_003D4F10(void) {
     int isB = D_0044F434_4F10 == 'B';
     unsigned int step;
     unsigned int i;
-    struct Str_4F10 *s;
+    struct Str_4F10 *pathVoice;
     unsigned int end;
     int ok;
-    int r;
+    int queued;
     int skip;
 
     if (isB) {
@@ -27277,45 +27277,45 @@ void func_003D4F10(void) {
         func_003D1E80_4F10();
     }
     for (i = 0; i < 24; i++) {
-        s = D_0044F420_4F10->slot[i];
-        if (s == 0 || s->f3 != 0) {
+        pathVoice = D_0044F420_4F10->slot[i];
+        if (pathVoice == 0 || pathVoice->f3 != 0) {
             continue;
         }
         ok = 0;
-        end = D_0044F438_4F10 + s->f24;
-        if (s->f36 >= 0) {
-            ok = s->f30 != 0;
+        end = D_0044F438_4F10 + pathVoice->f24;
+        if (pathVoice->f36 >= 0) {
+            ok = pathVoice->f30 != 0;
         }
         if (ok) {
-            if (s->fD >= 0) {
-                func_003D5A98_4F10(s);
+            if (pathVoice->fD >= 0) {
+                func_003D5A98_4F10(pathVoice);
             }
-            if (s->f15 >= 0) {
-                func_003D5CC0_4F10(s);
+            if (pathVoice->f15 >= 0) {
+                func_003D5CC0_4F10(pathVoice);
             }
-            if (s->f1D >= 0) {
-                func_003D5EE8_4F10(s);
+            if (pathVoice->f1D >= 0) {
+                func_003D5EE8_4F10(pathVoice);
             }
         }
-        if ((s->f2F != 0) != isB || !ok) {
+        if ((pathVoice->f2F != 0) != isB || !ok) {
             continue;
         }
-        if (s->f4C != 0) {
-            if (D_0044F438_4F10 + (step >> 1) >= s->f4C) {
-                func_002AE9F8_4F10(s->f54, 0);
-                s->f4C = 0;
+        if (pathVoice->f4C != 0) {
+            if (D_0044F438_4F10 + (step >> 1) >= pathVoice->f4C) {
+                func_002AE9F8_4F10(pathVoice->f54, 0);
+                pathVoice->f4C = 0;
             }
-        } else if (func_002AEBD0_4F10(s->f54) != 0) {
-            r = func_003D4950_4F10(s);
-            if (s->f48 != 0) {
+        } else if (func_002AEBD0_4F10(pathVoice->f54) != 0) {
+            queued = func_003D4950_4F10(pathVoice);
+            if (pathVoice->f48 != 0) {
                 end += step;
-                skip = end < s->f48;
+                skip = end < pathVoice->f48;
             } else {
-                skip = s->f24 < r;
+                skip = pathVoice->f24 < queued;
             }
             if (!skip) {
-                if (s->fE == 0 && func_002AF428_4F10(s->f54) == 0) {
-                    s->fE = -1;
+                if (pathVoice->fE == 0 && func_002AF428_4F10(pathVoice->f54) == 0) {
+                    pathVoice->fE = -1;
                 }
                 func_003D3D20_4F10(i);
             }
@@ -27399,25 +27399,25 @@ extern struct sPath D_00517610[4];
 
 /**
  * Returns the path voice an id names: in the first player in use whose id shares a class bit (0xF0000000) and a group
- * bit (0x0F000000) with @p arg0, the voice (+0x58) for the lowest set bit of the low 24 bits.
+ * bit (0x0F000000) with @p pathId, the voice (+0x58) for the lowest set bit of the low 24 bits.
  *
  * Quirk: once a player matches, an empty slot for that bit returns 0 without trying other players.
  *
- * @param arg0  the path id
+ * @param pathId  the path id
  * @return the voice (sPathVoice), or 0
  */
-int func_003D5290(unsigned arg0) {
-    unsigned i, b;
-    unsigned hi = arg0 & 0xF0000000;
-    unsigned mid = arg0 & 0x0F000000;
-    unsigned m = arg0 & 0xFFFFFF;
+int func_003D5290(unsigned pathId) {
+    unsigned i, voiceBit;
+    unsigned hi = pathId & 0xF0000000;
+    unsigned mid = pathId & 0x0F000000;
+    unsigned voiceBits = pathId & 0xFFFFFF;
     for (i = 0; i < 4; i++) {
         unsigned mk = D_00517610[i].f30;
         if (D_00517610[i].f34 != 0 &&
             (mk & hi) && (mk & mid)) {
-            for (b = 0; b < 0x18; b++) {
-                if ((m >> b) & 1)
-                    return (int)D_00517610[i].f58[b];
+            for (voiceBit = 0; voiceBit < 0x18; voiceBit++) {
+                if ((voiceBits >> voiceBit) & 1)
+                    return (int)D_00517610[i].f58[voiceBit];
             }
         }
     }
@@ -27590,16 +27590,16 @@ void func_003D5508(unsigned int mask, signed char val) {
     if (val < 0) val = 0;
     if (mask == 0xFFFFFFFF) D_0044F42E_5508 = val;
     for (i = 0; i < 4; i++) {
-        unsigned int v;
+        unsigned int playerMask;
         if (D_00517610_5508[i].f34 == 0) continue;
-        v = D_00517610_5508[i].f30;
-        if (has_5508(v & 0xF0000000, mask) == 0) continue;
-        if (has_5508(v & 0x0F000000, mask) == 0) continue;
+        playerMask = D_00517610_5508[i].f30;
+        if (has_5508(playerMask & 0xF0000000, mask) == 0) continue;
+        if (has_5508(playerMask & 0x0F000000, mask) == 0) continue;
         if (func_003D5450_5508(i) == 0) continue;
         for (j = 0; j < 24; j++) {
-            void *e = D_0044F420_5508->list[j];
-            if (e != 0 && (((mask >> j) ^ 1) & 1) == 0) {
-                func_003D62C8_5508(e, val);
+            void *pathVoice = D_0044F420_5508->list[j];
+            if (pathVoice != 0 && (((mask >> j) ^ 1) & 1) == 0) {
+                func_003D62C8_5508(pathVoice, val);
             }
         }
     }
@@ -27628,29 +27628,29 @@ static inline unsigned int has_5698(unsigned int a, unsigned int b) { return a &
  * Fades the voices a path id mask selects to a volume over a time (func_003D6318 on each).
  *
  * Does nothing unless the path system is up and idle. For each player in use sharing class and group bits with
- * @p mask, every voice whose bit is set gets func_003D6318(voice, @p a, @p b, player +0x18) (the fourth value is
+ * @p mask, every voice whose bit is set gets func_003D6318(voice, @p targetVol, @p fadeMs, player +0x18) (the fourth value is
  * ignored there). Clears the selection at the end.
  *
  * @param mask  the path id mask
- * @param a  the target volume (0..127)
- * @param b  the fade time in ms
+ * @param targetVol  the target volume (0..127)
+ * @param fadeMs  the fade time in ms
  */
-void func_003D5698(unsigned int mask, int a, int b) {
+void func_003D5698(unsigned int mask, int targetVol, int fadeMs) {
     int i, j;
     if (D_0044F42C_5698 == 0) return;
     if (D_0044F430_5698 != 0) return;
     if (func_003D5450_5698(-1) == 0) return;
     for (i = 0; i < 4; i++) {
-        unsigned int v;
+        unsigned int playerMask;
         if (D_00517610_5698[i].f34 == 0) continue;
-        v = D_00517610_5698[i].f30;
-        if (has_5698(v & 0xF0000000, mask) == 0) continue;
-        if (has_5698(v & 0x0F000000, mask) == 0) continue;
+        playerMask = D_00517610_5698[i].f30;
+        if (has_5698(playerMask & 0xF0000000, mask) == 0) continue;
+        if (has_5698(playerMask & 0x0F000000, mask) == 0) continue;
         if (func_003D5450_5698(i) == 0) continue;
         for (j = 0; j < 24; j++) {
-            void *e = D_0044F420_5698->list[j];
-            if (e != 0 && (((mask >> j) ^ 1) & 1) == 0) {
-                func_003D6318_5698(e, a, b, D_0044F420_5698->f18);
+            void *pathVoice = D_0044F420_5698->list[j];
+            if (pathVoice != 0 && (((mask >> j) ^ 1) & 1) == 0) {
+                func_003D6318_5698(pathVoice, targetVol, fadeMs, D_0044F420_5698->f18);
             }
         }
     }
@@ -27678,30 +27678,30 @@ static inline unsigned int has_5800(unsigned int a, unsigned int b) { return a &
 /**
  * Sets the effect-send target of the voices a path id mask selects (func_003D6360 on each).
  *
- * Does nothing unless the path system is up and idle. Each selected voice gets func_003D6360(voice, @p a, @p b, player
- * +0x18): the send target +0x16 = @p a and, when the player's +0x18 is not negative, +0x15 = that value;
+ * Does nothing unless the path system is up and idle. Each selected voice gets func_003D6360(voice, @p sendTarget, @p b, player
+ * +0x18): the send target +0x16 = @p sendTarget and, when the player's +0x18 is not negative, +0x15 = that value;
  * @p b is not used. Clears the selection at the end.
  *
  * @param mask  the path id mask
- * @param a  the send target
+ * @param sendTarget  the send target
  * @param b  unused by the callee
  */
-void func_003D5800(unsigned int mask, int a, int b) {
+void func_003D5800(unsigned int mask, int sendTarget, int b) {
     int i, j;
     if (D_0044F42C_5800 == 0) return;
     if (D_0044F430_5800 != 0) return;
     if (func_003D5450_5800(-1) == 0) return;
     for (i = 0; i < 4; i++) {
-        unsigned int v;
+        unsigned int playerMask;
         if (D_00517610_5800[i].f34 == 0) continue;
-        v = D_00517610_5800[i].f30;
-        if (has_5800(v & 0xF0000000, mask) == 0) continue;
-        if (has_5800(v & 0x0F000000, mask) == 0) continue;
+        playerMask = D_00517610_5800[i].f30;
+        if (has_5800(playerMask & 0xF0000000, mask) == 0) continue;
+        if (has_5800(playerMask & 0x0F000000, mask) == 0) continue;
         if (func_003D5450_5800(i) == 0) continue;
         for (j = 0; j < 24; j++) {
-            void *e = D_0044F420_5800->list[j];
-            if (e != 0 && (((mask >> j) ^ 1) & 1) == 0) {
-                func_003D6360_5800(e, a, b, D_0044F420_5800->f18);
+            void *pathVoice = D_0044F420_5800->list[j];
+            if (pathVoice != 0 && (((mask >> j) ^ 1) & 1) == 0) {
+                func_003D6360_5800(pathVoice, sendTarget, b, D_0044F420_5800->f18);
             }
         }
     }
@@ -27733,16 +27733,16 @@ extern int D_0044F420_5968[] __asm__("D_0044F420");
 void func_003D5968(unsigned int mask) {
     int i;
     for (i = 0; i < 0x18; i++) {
-        char *o = *(char **)((char *)D_0044F420_5968[0] + (i << 2) + 0x58);
-        if (o != 0 && !(((mask >> i) ^ 1) & 1) && *(short *)(o + 0x36) >= 0) {
-            int t18 = *(signed char *)(o + 0x34) * *(signed char *)(o + 4) / 100;
-            signed char b = *(signed char *)(o + 0xE);
-            if (b >= 0) {
-                int t16 = b * *(signed char *)(o + 4) / 100;
-                if (t16 == func_002AF428_5968(*(int *)(o + 0x54))) {
-                    if (*(signed char *)(o + 0xE) == 0) {
-                        func_002AF838_5968(*(int *)(o + 0x54));
-                        *(short *)(o + 0x36) = -1;
+        char *pathVoice = *(char **)((char *)D_0044F420_5968[0] + (i << 2) + 0x58);
+        if (pathVoice != 0 && !(((mask >> i) ^ 1) & 1) && *(short *)(pathVoice + 0x36) >= 0) {
+            int nodeVol = *(signed char *)(pathVoice + 0x34) * *(signed char *)(pathVoice + 4) / 100;
+            signed char fadeTarget = *(signed char *)(pathVoice + 0xE);
+            if (fadeTarget >= 0) {
+                int scaledTarget = fadeTarget * *(signed char *)(pathVoice + 4) / 100;
+                if (scaledTarget == func_002AF428_5968(*(int *)(pathVoice + 0x54))) {
+                    if (*(signed char *)(pathVoice + 0xE) == 0) {
+                        func_002AF838_5968(*(int *)(pathVoice + 0x54));
+                        *(short *)(pathVoice + 0x36) = -1;
                     } else {
                         goto b8;
                     }
@@ -27750,11 +27750,11 @@ void func_003D5968(unsigned int mask) {
                 }
             } else {
 b8:
-                if (t18 >= 0) {
-                    func_002AF6C0_5968(*(int *)(o + 0x54), t18);
+                if (nodeVol >= 0) {
+                    func_002AF6C0_5968(*(int *)(pathVoice + 0x54), nodeVol);
                 }
 b10:
-                *(signed char *)(o + 0xE) = -1;
+                *(signed char *)(pathVoice + 0xE) = -1;
             }
         }
     }
@@ -27784,66 +27784,66 @@ void func_003D5A98_impl(struct sPathVoice *v) __asm__("func_003D5A98");
  * (mode 1: 1 - t, 2: 1 - t^2, 3: 1 / t / 25; t is mirrored for a rising ramp) gives min(start, end) + |end - start| *
  * value, applied only when the value is within 0..1.
  *
- * @param v  the path voice
+ * @param pathVoice  the path voice
  */
-void func_003D5A98_impl(struct sPathVoice *v) {
+void func_003D5A98_impl(struct sPathVoice *pathVoice) {
     struct {
         unsigned mode : 7;
         int neg : 1;
         unsigned mid : 8;
         unsigned dur : 16;
-    } l;
-    float r = -1.0f;
+    } rampSetting;
+    float curve = -1.0f;
     float diff;
-    float t;
-    float m;
+    float elapsed;
+    float lowLevel;
     int pos;
     int none;
     unsigned sel;
-    diff = (float)v->f0E - (float)v->f0C;
-    l.dur = D_0044F420->f14[0].dur;
-    l.mode = D_0044F420->f14[0].mode;
+    diff = (float)pathVoice->f0E - (float)pathVoice->f0C;
+    rampSetting.dur = D_0044F420->f14[0].dur;
+    rampSetting.mode = D_0044F420->f14[0].mode;
     pos = 1;
     if (diff < 0.0f) {
         pos = 0;
     }
-    l.neg = pos;
-    t = (float)(unsigned)(D_0044F438 - v->f08) / (float)l.dur;
-    if (t >= 1.0f) {
-        func_002AF6C0_5A98(v->f54, v->f34);
+    rampSetting.neg = pos;
+    elapsed = (float)(unsigned)(D_0044F438 - pathVoice->f08) / (float)rampSetting.dur;
+    if (elapsed >= 1.0f) {
+        func_002AF6C0_5A98(pathVoice->f54, pathVoice->f34);
         none = -1;
-        v->f0C = none;
+        pathVoice->f0C = none;
         sel = none;
-        v->f0D = v->f0E = sel;
-        v->f08 = 0;
-        v->f34 = sel;
+        pathVoice->f0D = pathVoice->f0E = sel;
+        pathVoice->f08 = 0;
+        pathVoice->f34 = sel;
         return;
     }
-    if (l.neg) {
-        t = 1.0f - t;
+    if (rampSetting.neg) {
+        elapsed = 1.0f - elapsed;
     }
-    sel = l.mode;
+    sel = rampSetting.mode;
     switch (sel) {
     case 1:
-        r = 1.0f - t;
+        curve = 1.0f - elapsed;
         break;
     case 2:
-        r = 1.0f - t * t;
+        curve = 1.0f - elapsed * elapsed;
         break;
     case 3:
-        r = 1.0f / t / 25.0f;
+        curve = 1.0f / elapsed / 25.0f;
         break;
     }
-    m = v->f0C;
-    if (v->f0E < v->f0C) {
-        m = v->f0E;
+    lowLevel = pathVoice->f0C;
+    if (pathVoice->f0E < pathVoice->f0C) {
+        lowLevel = pathVoice->f0E;
     }
     if (diff < 0.0f) {
         diff = -diff;
     }
-    if (r >= 0.0f && r <= 1.0f) {
-        r = m + diff * r;
-        func_002AF6C0_5A98(v->f54, (int)r);
+    if (curve >= 0.0f && curve <= 1.0f) {
+        curve = lowLevel + diff * curve;
+        func_002AF6C0_5A98(pathVoice->f54, (int)curve);
     }
 }
 #endif
@@ -27868,64 +27868,64 @@ void func_003D5CC0_impl(struct sPathVoice *v) __asm__("func_003D5CC0");
  *
  * When the ramp has run out the target +0x16 is applied and +0x14..+0x16 are cleared to -1, +0x10 to 0.
  *
- * @param v  the path voice
+ * @param pathVoice  the path voice
  */
-void func_003D5CC0_impl(struct sPathVoice *v) {
+void func_003D5CC0_impl(struct sPathVoice *pathVoice) {
     struct {
         unsigned mode : 7;
         int neg : 1;
         unsigned mid : 8;
         unsigned dur : 16;
-    } l;
-    float r = -1.0f;
+    } rampSetting;
+    float curve = -1.0f;
     float diff;
-    float t;
-    float m;
+    float elapsed;
+    float lowLevel;
     int pos;
     int none;
     unsigned sel;
-    diff = (float)v->f16 - (float)v->f14;
-    l.dur = D_0044F420->f14[1].dur;
-    l.mode = D_0044F420->f14[1].mode;
+    diff = (float)pathVoice->f16 - (float)pathVoice->f14;
+    rampSetting.dur = D_0044F420->f14[1].dur;
+    rampSetting.mode = D_0044F420->f14[1].mode;
     pos = 1;
     if (diff < 0.0f) {
         pos = 0;
     }
-    l.neg = pos;
-    t = (float)(unsigned)(D_0044F438 - v->f10) / (float)l.dur;
-    if (t >= 1.0f) {
-        func_002AF4E0(v->f54, 0, v->f16);
+    rampSetting.neg = pos;
+    elapsed = (float)(unsigned)(D_0044F438 - pathVoice->f10) / (float)rampSetting.dur;
+    if (elapsed >= 1.0f) {
+        func_002AF4E0(pathVoice->f54, 0, pathVoice->f16);
         none = -1;
-        v->f14 = none;
-        v->f15 = v->f16 = none;
-        v->f10 = 0;
+        pathVoice->f14 = none;
+        pathVoice->f15 = pathVoice->f16 = none;
+        pathVoice->f10 = 0;
         return;
     }
-    if (l.neg) {
-        t = 1.0f - t;
+    if (rampSetting.neg) {
+        elapsed = 1.0f - elapsed;
     }
-    sel = l.mode;
+    sel = rampSetting.mode;
     switch (sel) {
     case 1:
-        r = 1.0f - t;
+        curve = 1.0f - elapsed;
         break;
     case 2:
-        r = 1.0f - t * t;
+        curve = 1.0f - elapsed * elapsed;
         break;
     case 3:
-        r = 1.0f / t / 25.0f;
+        curve = 1.0f / elapsed / 25.0f;
         break;
     }
-    m = v->f14;
-    if (v->f16 < v->f14) {
-        m = v->f16;
+    lowLevel = pathVoice->f14;
+    if (pathVoice->f16 < pathVoice->f14) {
+        lowLevel = pathVoice->f16;
     }
     if (diff < 0.0f) {
         diff = -diff;
     }
-    if (r >= 0.0f && r <= 1.0f) {
-        r = m + diff * r;
-        func_002AF4E0(v->f54, 0, (int)r);
+    if (curve >= 0.0f && curve <= 1.0f) {
+        curve = lowLevel + diff * curve;
+        func_002AF4E0(pathVoice->f54, 0, (int)curve);
     }
 }
 #endif
@@ -27950,64 +27950,64 @@ void func_003D5EE8_impl(struct sPathVoice *v) __asm__("func_003D5EE8");
  *
  * When the ramp has run out the target +0x1E is applied and +0x1C..+0x1E are cleared to -1, +0x18 to 0.
  *
- * @param v  the path voice
+ * @param pathVoice  the path voice
  */
-void func_003D5EE8_impl(struct sPathVoice *v) {
+void func_003D5EE8_impl(struct sPathVoice *pathVoice) {
     struct {
         unsigned mode : 7;
         int neg : 1;
         unsigned mid : 8;
         unsigned dur : 16;
-    } l;
-    float r = -1.0f;
+    } rampSetting;
+    float curve = -1.0f;
     float diff;
-    float t;
-    float m;
+    float elapsed;
+    float lowLevel;
     int pos;
     int none;
     unsigned sel;
-    diff = (float)v->f1E - (float)v->f1C;
-    l.dur = D_0044F420->f14[2].dur;
-    l.mode = D_0044F420->f14[2].mode;
+    diff = (float)pathVoice->f1E - (float)pathVoice->f1C;
+    rampSetting.dur = D_0044F420->f14[2].dur;
+    rampSetting.mode = D_0044F420->f14[2].mode;
     pos = 1;
     if (diff < 0.0f) {
         pos = 0;
     }
-    l.neg = pos;
-    t = (float)(unsigned)(D_0044F438 - v->f18) / (float)l.dur;
-    if (t >= 1.0f) {
-        func_002AF580(v->f54, v->f1E);
+    rampSetting.neg = pos;
+    elapsed = (float)(unsigned)(D_0044F438 - pathVoice->f18) / (float)rampSetting.dur;
+    if (elapsed >= 1.0f) {
+        func_002AF580(pathVoice->f54, pathVoice->f1E);
         none = -1;
-        v->f1C = none;
-        v->f1D = v->f1E = none;
-        v->f18 = 0;
+        pathVoice->f1C = none;
+        pathVoice->f1D = pathVoice->f1E = none;
+        pathVoice->f18 = 0;
         return;
     }
-    if (l.neg) {
-        t = 1.0f - t;
+    if (rampSetting.neg) {
+        elapsed = 1.0f - elapsed;
     }
-    sel = l.mode;
+    sel = rampSetting.mode;
     switch (sel) {
     case 1:
-        r = 1.0f - t;
+        curve = 1.0f - elapsed;
         break;
     case 2:
-        r = 1.0f - t * t;
+        curve = 1.0f - elapsed * elapsed;
         break;
     case 3:
-        r = 1.0f / t / 25.0f;
+        curve = 1.0f / elapsed / 25.0f;
         break;
     }
-    m = v->f1C;
-    if (v->f1E < v->f1C) {
-        m = v->f1E;
+    lowLevel = pathVoice->f1C;
+    if (pathVoice->f1E < pathVoice->f1C) {
+        lowLevel = pathVoice->f1E;
     }
     if (diff < 0.0f) {
         diff = -diff;
     }
-    if (r >= 0.0f && r <= 1.0f) {
-        r = m + diff * r;
-        func_002AF580(v->f54, (int)r);
+    if (curve >= 0.0f && curve <= 1.0f) {
+        curve = lowLevel + diff * curve;
+        func_002AF580(pathVoice->f54, (int)curve);
     }
 }
 #endif
@@ -28126,17 +28126,17 @@ void func_003D6318(char *self, int level, int w) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003D6360);
 #ifdef SKIP_ASM
 /**
- * Sets a path voice's effect-send target (+0x16) to @p arg1 and, when @p arg3 is not negative, +0x15 to @p arg3.
+ * Sets a path voice's effect-send target (+0x16) to @p sendTarget and, when @p rampFlag is not negative, +0x15 to @p rampFlag.
  *
  * @param channel  the path voice
- * @param arg1  the send target
+ * @param sendTarget  the send target
  * @param arg2  unused
- * @param arg3  the value for +0x15, ignored when negative (func_003D5800 passes the player's +0x18)
+ * @param rampFlag  the value for +0x15, ignored when negative (func_003D5800 passes the player's +0x18)
  */
-void func_003D6360(void *channel, int arg1, int arg2, int arg3) {
-    *(signed char *)((char *)channel + 0x16) = arg1;
-    if (arg3 >= 0) {
-        *(signed char *)((char *)channel + 0x15) = arg3;
+void func_003D6360(void *channel, int sendTarget, int arg2, int rampFlag) {
+    *(signed char *)((char *)channel + 0x16) = sendTarget;
+    if (rampFlag >= 0) {
+        *(signed char *)((char *)channel + 0x15) = rampFlag;
     }
 }
 #endif
@@ -28150,24 +28150,24 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D6378);
 extern int func_002AF428(int);
 
 /**
- * Starts a volume ramp on a path voice from its current volume to @p a.
+ * Starts a volume ramp on a path voice from its current volume to @p targetVol.
  *
- * Stamps the start tick (+0x8 = D_0044F438), stores @p b at +0xD, the current volume (func_002AF428) at +0xC and
- * @p a as the target (+0xE) and node volume (+0x34). func_003D5A98 then steps it.
+ * Stamps the start tick (+0x8 = D_0044F438), stores @p rampFlag at +0xD, the current volume (func_002AF428) at +0xC and
+ * @p targetVol as the target (+0xE) and node volume (+0x34). func_003D5A98 then steps it.
  *
- * @param a  the target volume
- * @param b  the ramp flag kept at +0xD
+ * @param targetVol  the target volume
+ * @param rampFlag  the ramp flag kept at +0xD
  */
-void func_003D6378(char *self, int a, int b) {
-    int t;
+void func_003D6378(char *self, int targetVol, int rampFlag) {
+    int curVol;
     int q;
     *(int *)(self + 8) = D_0044F438;
-    self[0xD] = b;
-    t = func_002AF428(*(int *)(self + 0x54));
-    self[0xC] = (int)(float)t;
-    self[0xE] = a;
-    self[0x34] = (int)(float)a;
-    q = a / 0x7F;
+    self[0xD] = rampFlag;
+    curVol = func_002AF428(*(int *)(self + 0x54));
+    self[0xC] = (int)(float)curVol;
+    self[0xE] = targetVol;
+    self[0x34] = (int)(float)targetVol;
+    q = targetVol / 0x7F;
 }
 #endif
 
@@ -28179,21 +28179,21 @@ extern int D_0044F438_63F8[] __asm__("D_0044F438");
 extern signed char f_63F8_cb(int) __asm__("func_002AF4B0");
 
 /**
- * Starts an effect-send ramp on a path voice from its current send level (func_002AF4B0) to @p a.
+ * Starts an effect-send ramp on a path voice from its current send level (func_002AF4B0) to @p targetLevel.
  *
- * Stamps the start tick (+0x10), stores @p b at +0x15, the current level at +0x14 and the target at +0x16;
+ * Stamps the start tick (+0x10), stores @p rampFlag at +0x15, the current level at +0x14 and the target at +0x16;
  * func_003D5CC0 steps it.
  *
- * @param a  the target send level
- * @param b  the ramp flag kept at +0x15
+ * @param targetLevel  the target send level
+ * @param rampFlag  the ramp flag kept at +0x15
  */
-void func_003D63F8(char *self, int a, int b) {
-    signed char t;
+void func_003D63F8(char *self, int targetLevel, int rampFlag) {
+    signed char curLevel;
     *(int *)(self + 0x10) = D_0044F438_63F8[0];
-    self[0x15] = b;
-    t = f_63F8_cb(*(int *)(self + 0x54));
-    self[0x16] = a;
-    self[0x14] = t;
+    self[0x15] = rampFlag;
+    curLevel = f_63F8_cb(*(int *)(self + 0x54));
+    self[0x16] = targetLevel;
+    self[0x14] = curLevel;
 }
 #endif
 
@@ -28205,20 +28205,20 @@ extern int D_0044F438_6448[] __asm__("D_0044F438");
 extern signed char f_6448_cb(int) __asm__("func_002AF480");
 
 /**
- * Starts a dry-level ramp on a path voice from its current dry level (func_002AF480) to @p a.
+ * Starts a dry-level ramp on a path voice from its current dry level (func_002AF480) to @p targetLevel.
  *
- * Stamps the start tick (+0x18), stores @p b at +0x1D, the current level at +0x1C and the target at +0x1E;
+ * Stamps the start tick (+0x18), stores @p rampFlag at +0x1D, the current level at +0x1C and the target at +0x1E;
  * func_003D5EE8 steps it.
  *
- * @param a  the target dry level
- * @param b  the ramp flag kept at +0x1D
+ * @param targetLevel  the target dry level
+ * @param rampFlag  the ramp flag kept at +0x1D
  */
-void func_003D6448(char *self, int a, int b) {
-    signed char t;
+void func_003D6448(char *self, int targetLevel, int rampFlag) {
+    signed char curLevel;
     *(int *)(self + 0x18) = D_0044F438_6448[0];
-    self[0x1D] = b;
-    t = f_6448_cb(*(int *)(self + 0x54));
-    self[0x1E] = a;
-    self[0x1C] = t;
+    self[0x1D] = rampFlag;
+    curLevel = f_6448_cb(*(int *)(self + 0x54));
+    self[0x1E] = targetLevel;
+    self[0x1C] = curLevel;
 }
 #endif

@@ -1009,20 +1009,20 @@ extern char *D_00519AD8_CE90[] __asm__("D_00519AD8");
  * Returns the status (+0x8) of a file operation, or -3 when the handle is stale (its low 20 bits no longer match the
  * slot named by its low byte).
  *
- * @param h  the operation handle
+ * @param opHandle  the operation handle
  * @return the status, or -3
  */
-int func_003DCE90(struct H_CE90 h) {
-    struct H_CE90 c;
-    unsigned int u = h.v;
+int func_003DCE90(struct H_CE90 opHandle) {
+    struct H_CE90 handleCopy;
+    unsigned int handleBits = opHandle.v;
     int ok = 0;
-    c.v = u;
-    if (u != 0) {
-        ok = ((*(unsigned int *)(((unsigned char *)&c)[3] * 0x30 + D_00519AD8_CE90[0]) ^ u) & 0xFFFFF) == 0;
+    handleCopy.v = handleBits;
+    if (handleBits != 0) {
+        ok = ((*(unsigned int *)(((unsigned char *)&handleCopy)[3] * 0x30 + D_00519AD8_CE90[0]) ^ handleBits) & 0xFFFFF) == 0;
     }
     if (ok == 0) return -3;
     // volatile (table entry, not a global): retail keeps this load out of the b delay slot
-    return *(volatile int *)(((unsigned char *)&h)[3] * 0x30 + D_00519AD8_CE90[0] + 8);
+    return *(volatile int *)(((unsigned char *)&opHandle)[3] * 0x30 + D_00519AD8_CE90[0] + 8);
 }
 #endif
 
@@ -1036,11 +1036,11 @@ typedef struct { unsigned char a, b, c, d; } T_CF10;
 /**
  * Returns the error code (+0xC) of a file operation (no handle check).
  *
- * @param arg0  the operation handle
+ * @param opHandle  the operation handle
  * @return the error code
  */
-int func_003DCF10(T_CF10 arg0) {
-    return *(int *)((char*)(D_00519AD8_CF10[0]) + arg0.d * 0x30 + 0xC);
+int func_003DCF10(T_CF10 opHandle) {
+    return *(int *)((char*)(D_00519AD8_CF10[0]) + opHandle.d * 0x30 + 0xC);
 }
 #endif
 
@@ -1054,11 +1054,11 @@ typedef struct { unsigned char a, b, c, d; } T_CF40;
 /**
  * Returns the user data (+0x14) of a file operation (no handle check).
  *
- * @param arg0  the operation handle
+ * @param opHandle  the operation handle
  * @return the user data
  */
-int func_003DCF40(T_CF40 arg0) {
-    return *(int *)((char*)(D_00519AD8_CF40[0]) + arg0.d * 0x30 + 0x14);
+int func_003DCF40(T_CF40 opHandle) {
+    return *(int *)((char*)(D_00519AD8_CF40[0]) + opHandle.d * 0x30 + 0x14);
 }
 #endif
 
@@ -1124,37 +1124,37 @@ void func_003DCFC0_impl(struct H_CFC0 h, int prio) __asm__("func_003DCFC0");
  * Does nothing for a stale handle. The queue is re-sorted only when two or more operations are queued, the operation is
  * not the running one, it is not busy (+0x8) and the priority changed. Runs under the file system's mutex.
  *
- * @param h  the operation handle
+ * @param opHandle  the operation handle
  * @param prio  the new priority
  */
-void func_003DCFC0_impl(struct H_CFC0 h, int prio) {
-    struct H_CFC0 c;
-    Ent_CFC0 *e;
-    Ent_CFC0 *p;
+void func_003DCFC0_impl(struct H_CFC0 opHandle, int prio) {
+    struct H_CFC0 handleCopy;
+    Ent_CFC0 *fileOp;
+    Ent_CFC0 *listOp;
     Ent_CFC0 *prev;
     int old;
-    unsigned int u = h.v;
+    unsigned int handleBits = opHandle.v;
     int ok = 0;
 
-    e = (Ent_CFC0 *)(D_00519AB0_CFC0.table + ((unsigned char *)&h)[3] * 0x30);
-    c.v = u;
-    if (u != 0) {
-        unsigned int x = (*(unsigned int *)(((unsigned char *)&c)[3] * 0x30 + D_00519AB0_CFC0.table) ^ u) & 0xFFFFF;
+    fileOp = (Ent_CFC0 *)(D_00519AB0_CFC0.table + ((unsigned char *)&opHandle)[3] * 0x30);
+    handleCopy.v = handleBits;
+    if (handleBits != 0) {
+        unsigned int x = (*(unsigned int *)(((unsigned char *)&handleCopy)[3] * 0x30 + D_00519AB0_CFC0.table) ^ handleBits) & 0xFFFFF;
         ok = x == 0;
     }
     if (ok == 0) return;
     MUTEX_lock_CFC0(D_00519AB0_CFC0.mutex);
-    old = e->prio;
-    e->prio = prio;
-    if (D_00519AB0_CFC0.count >= 2 && e != D_00519AB0_CFC0.cur && e->busy == 0 && old != prio) {
+    old = fileOp->prio;
+    fileOp->prio = prio;
+    if (D_00519AB0_CFC0.count >= 2 && fileOp != D_00519AB0_CFC0.cur && fileOp->busy == 0 && old != prio) {
         prev = 0;
-        for (p = D_00519AB0_CFC0.head; p != 0 && p != e; p = p->next) prev = p;
-        if (prev != 0) prev->next = e->next;
-        else D_00519AB0_CFC0.head = e->next;
+        for (listOp = D_00519AB0_CFC0.head; listOp != 0 && listOp != fileOp; listOp = listOp->next) prev = listOp;
+        if (prev != 0) prev->next = fileOp->next;
+        else D_00519AB0_CFC0.head = fileOp->next;
         prev = 0;
-        for (e->next = D_00519AB0_CFC0.head; e->next != 0 && !(e->prio < e->next->prio); e->next = prev->next) prev = e->next;
-        if (prev != 0) prev->next = e;
-        else D_00519AB0_CFC0.head = e;
+        for (fileOp->next = D_00519AB0_CFC0.head; fileOp->next != 0 && !(fileOp->prio < fileOp->next->prio); fileOp->next = prev->next) prev = fileOp->next;
+        if (prev != 0) prev->next = fileOp;
+        else D_00519AB0_CFC0.head = fileOp;
     }
     MUTEX_unlock_CFC0(D_00519AC4_CFC0);
 }
@@ -1411,25 +1411,25 @@ struct R_D438 { unsigned flags; int pad4, pad8; int wC; int w10; int w14; int w1
  * Takes an operation (func_003DE670) and a handle slot (func_003DE800) for the name; without a free slot the error is
  * set to 2 (func_003DE668). The name is copied into the slot and the operation is run (iFILESYS_ExecCommand).
  *
- * @param arg0  the path
- * @param arg1  the priority
- * @param arg2  the user data
+ * @param fileName  the path
+ * @param priority  the priority
+ * @param userData  the user data
  * @return the operation handle
  */
-int func_003DD438(char *arg0, int arg1, int arg2) {
-    struct R_D438 *r = (struct R_D438 *)f_E670_D438();
-    r->w14 = arg2;
-    r->w10 = arg1;
-    r->flags = (r->flags & 0xFF0FFFFF) | 0x800000;
-    r->w18 = 1;
-    r->w24 = (char *)f_E800_D438();
-    if (r->w24 == 0) {
-        r->wC = 2;
-        f_E668_D438((int *)r);
+int func_003DD438(char *fileName, int priority, int userData) {
+    struct R_D438 *fileOp = (struct R_D438 *)f_E670_D438();
+    fileOp->w14 = userData;
+    fileOp->w10 = priority;
+    fileOp->flags = (fileOp->flags & 0xFF0FFFFF) | 0x800000;
+    fileOp->w18 = 1;
+    fileOp->w24 = (char *)f_E800_D438();
+    if (fileOp->w24 == 0) {
+        fileOp->wC = 2;
+        f_E668_D438((int *)fileOp);
     }
-    f_strncpy_D438(r->w24 + 0x10, arg0, 0x100);
-    f_Exec_D438((int *)r);
-    return r->flags;
+    f_strncpy_D438(fileOp->w24 + 0x10, fileName, 0x100);
+    f_Exec_D438((int *)fileOp);
+    return fileOp->flags;
 }
 #endif
 
@@ -1641,12 +1641,12 @@ extern void iFILESYS_ExecCommand(int);
  * Queues an operation of type 7 that carries no file and no data (a no-op that completes in queue order); returns its
  * handle. The first argument is not used.
  *
- * @param a0  unused (a file device)
+ * @param fileDevice  unused (a file device)
  * @param priority  the priority
  * @param userData  the user data
  * @return the operation handle
  */
-int func_003DD878(int a0, int priority, int userData) {
+int func_003DD878(int fileDevice, int priority, int userData) {
     int *cmd = func_003DE670();
     cmd[5] = userData;
     cmd[4] = priority;
@@ -1698,35 +1698,35 @@ extern char func_003DD8E8_D8E8[] __asm__("func_003DD8E8");
  * A buffer that does not hold a BIG header (BIG_typeofheader 0) is freed. A larger header gets a new buffer of
  * BIG_sizeofheader bytes and another FILESYS_read with this callback.
  *
- * @param a0  the read operation's handle
- * @param a1  its status
- * @param s  the archive record
+ * @param opHandle  the read operation's handle
+ * @param opStatus  its status
+ * @param bigNode  the archive record
  */
-void func_003DD8E8(int a0, int a1, struct sFsNode *s) {
+void func_003DD8E8(int opHandle, int opStatus, struct sFsNode *bigNode) {
     int n, k;
-    struct sFsHd *t;
+    struct sFsHd *fileHd;
     struct sC10 *fs;
-    struct sFsCmd *e = &D_00519AB0.f28[((unsigned char *)&a0)[3]];
-    t = e->f24;
-    k = e->f10;
-    s->f0C = t;
-    s->f10->f24 = t;
-    FILESYS_completeop_D8E8(a0);
-    if (BIG_typeofheader_D8E8(s->f00) == 0) {
-        D_00450C18((void *)s->f00);
+    struct sFsCmd *fileCmd = &D_00519AB0.f28[((unsigned char *)&opHandle)[3]];
+    fileHd = fileCmd->f24;
+    k = fileCmd->f10;
+    bigNode->f0C = fileHd;
+    bigNode->f10->f24 = fileHd;
+    FILESYS_completeop_D8E8(opHandle);
+    if (BIG_typeofheader_D8E8(bigNode->f00) == 0) {
+        D_00450C18((void *)bigNode->f00);
     }
-    n = BIG_sizeofheader_D8E8(s->f00);
-    if (s->f04 < n) {
+    n = BIG_sizeofheader_D8E8(bigNode->f00);
+    if (bigNode->f04 < n) {
         fs = &gFileSysOpts;
-        fs->f08((void *)s->f00);
-        s->f04 = n;
-        s->f00 = (int)fs->f04(D_00495D68_D8E8, n, s->f08);
-        a0 = FILESYS_read(s->f0C, 0, s->f00, n, k, s);
-        FILESYS_callbackop(a0, func_003DD8E8_D8E8);
+        fs->f08((void *)bigNode->f00);
+        bigNode->f04 = n;
+        bigNode->f00 = (int)fs->f04(D_00495D68_D8E8, n, bigNode->f08);
+        opHandle = FILESYS_read(bigNode->f0C, 0, bigNode->f00, n, k, bigNode);
+        FILESYS_callbackop(opHandle, func_003DD8E8_D8E8);
     } else {
-        s->f14 = D_00519AB0.f34;
-        D_00519AB0.f34 = s;
-        iFILESYS_ExecCommand_D8E8(s->f10);
+        bigNode->f14 = D_00519AB0.f34;
+        D_00519AB0.f34 = bigNode;
+        iFILESYS_ExecCommand_D8E8(bigNode->f10);
     }
 }
 #endif
@@ -1748,19 +1748,19 @@ extern char func_003DD8E8_DA10[] __asm__("func_003DD8E8");
  * Open callback of adding an archive: on success reads the first 0x800 bytes into the record's buffer with callback
  * func_003DD8E8; on failure sets error 4 on the add operation and runs it.
  *
- * @param h  the open operation's handle
- * @param a  its status (1 = opened)
- * @param b  the archive record
+ * @param opHandle  the open operation's handle
+ * @param opStatus  its status (1 = opened)
+ * @param bigRec  the archive record
  */
-void func_003DDA10(struct H_DA10 h, int a, int *b) {
-    int x = *(int *)(((unsigned char *)&h)[3] * 0x30 + D_00519AD8_DA10[0] + 0x10);
-    int r = FILESYS_completeop_DA10(h.v);
-    if (a != 1) {
-        *(int *)(b[4] + 0xC) = 4;
-        iFILESYS_ExecCommand_DA10(b[4]);
+void func_003DDA10(struct H_DA10 opHandle, int opStatus, int *bigRec) {
+    int x = *(int *)(((unsigned char *)&opHandle)[3] * 0x30 + D_00519AD8_DA10[0] + 0x10);
+    int fileHandle = FILESYS_completeop_DA10(opHandle.v);
+    if (opStatus != 1) {
+        *(int *)(bigRec[4] + 0xC) = 4;
+        iFILESYS_ExecCommand_DA10(bigRec[4]);
     } else {
-        h.v = FILESYS_read_DA10(r, 0, b[0], 0x800, x, b);
-        FILESYS_callbackop_DA10(h.v, func_003DD8E8_DA10);
+        opHandle.v = FILESYS_read_DA10(fileHandle, 0, bigRec[0], 0x800, x, bigRec);
+        FILESYS_callbackop_DA10(opHandle.v, func_003DD8E8_DA10);
     }
 }
 #endif
@@ -1791,32 +1791,32 @@ extern char func_003DDA10_DAC0[] __asm__("func_003DDA10");
  * are allocated (gFileSysOpts alloc) and the file is opened with callback func_003DDA10.
  *
  * @param name  the archive path
- * @param b  the memory flags
- * @param c  the priority
- * @param d  the user data
+ * @param memFlags  the memory flags
+ * @param priority  the priority
+ * @param userData  the user data
  * @return the operation handle
  */
-int func_003DDAC0(char *name, int b, int c, int d) {
-    Q_DAC0 *q = D_00519AE4_DAC0;
-    C_DAC0 *p = func_003DE670_DAC0();
-    R_DAC0 *r;
-    p->f = 9;
-    p->e = d;
-    p->d = c;
-    for (; q != 0; q = q->next) {
-        if (func_00416B18_DAC0(name, q->name + 0x10, 0x100) == 0) {
-            p->i = (int)q->name;
-            iFILESYS_ExecCommand_DAC0(p);
-            return (int)p;
+int func_003DDAC0(char *name, int memFlags, int priority, int userData) {
+    Q_DAC0 *bigNode = D_00519AE4_DAC0;
+    C_DAC0 *fileOp = func_003DE670_DAC0();
+    R_DAC0 *bigRec;
+    fileOp->f = 9;
+    fileOp->e = userData;
+    fileOp->d = priority;
+    for (; bigNode != 0; bigNode = bigNode->next) {
+        if (func_00416B18_DAC0(name, bigNode->name + 0x10, 0x100) == 0) {
+            fileOp->i = (int)bigNode->name;
+            iFILESYS_ExecCommand_DAC0(fileOp);
+            return (int)fileOp;
         }
     }
-    q = D_00450C10_DAC0[1](name, 0x18, b);
-    ((R_DAC0 *)q)->cmd = p;
-    ((R_DAC0 *)q)->size = 0x800;
-    ((R_DAC0 *)q)->b = b;
-    ((R_DAC0 *)q)->buf = (int)D_00450C10_DAC0[1](D_00495D68_DAC0, 0x800, b);
-    fCF70_DAC0(FILESYS_open_DAC0(name, 1, c, (R_DAC0 *)q), func_003DDA10_DAC0);
-    return *(int *)p;
+    bigNode = D_00450C10_DAC0[1](name, 0x18, memFlags);
+    ((R_DAC0 *)bigNode)->cmd = fileOp;
+    ((R_DAC0 *)bigNode)->size = 0x800;
+    ((R_DAC0 *)bigNode)->b = memFlags;
+    ((R_DAC0 *)bigNode)->buf = (int)D_00450C10_DAC0[1](D_00495D68_DAC0, 0x800, memFlags);
+    fCF70_DAC0(FILESYS_open_DAC0(name, 1, priority, (R_DAC0 *)bigNode), func_003DDA10_DAC0);
+    return *(int *)fileOp;
 }
 #endif
 
@@ -1861,41 +1861,41 @@ extern int (*D_00450C10_DC30[])(void *) __asm__("gFileSysOpts");
  * it is not in the archive list. The record and its buffer are freed and the file closed with callback func_003DDC00.
  * Quirk: an archive missing from the list still has its (null) node unlinked and freed.
  *
- * @param a0  the archive handle
- * @param a1  the priority
- * @param a2  the user data
+ * @param bigHandle  the archive handle
+ * @param priority  the priority
+ * @param userData  the user data
  * @return the operation handle
  */
-int func_003DDC30(char *a0, int a1, int a2) {
+int func_003DDC30(char *bigHandle, int priority, int userData) {
     N_DC30 *prev;
     N_DC30 *n;
-    R_DC30 *r;
-    E_DC30 *e;
+    R_DC30 *fileOp;
+    E_DC30 *openFile;
     int i;
 
     prev = 0;
     n = D_00519AB0_DC30.head;
-    r = func_003DE670_DC30();
-    e = D_00519AB0_DC30.arr;
-    r->e = a2;
-    r->d = a1;
-    r->f = 10;
-    if (*(int *)(a0 + 8) != 0) {
-        r->c = 7;
+    fileOp = func_003DE670_DC30();
+    openFile = D_00519AB0_DC30.arr;
+    fileOp->e = userData;
+    fileOp->d = priority;
+    fileOp->f = 10;
+    if (*(int *)(bigHandle + 8) != 0) {
+        fileOp->c = 7;
     }
-    for (i = 0; i < D_00519AB0_DC30.count; i++, e++) {
-        if (e != 0 && e->f8 != 0 && *(char **)(e->owner + 0xC) == a0) {
-            r->b = -2;
-            r->c = 8;
+    for (i = 0; i < D_00519AB0_DC30.count; i++, openFile++) {
+        if (openFile != 0 && openFile->f8 != 0 && *(char **)(openFile->owner + 0xC) == bigHandle) {
+            fileOp->b = -2;
+            fileOp->c = 8;
             break;
         }
     }
-    while (n != 0 && n->key != a0) {
+    while (n != 0 && n->key != bigHandle) {
         prev = n;
         n = n->next;
     }
     if (n == 0) {
-        r->c = 5;
+        fileOp->c = 5;
     }
     if (prev != 0) {
         prev->next = n->next;
@@ -1904,8 +1904,8 @@ int func_003DDC30(char *a0, int a1, int a2) {
     }
     D_00450C10_DC30[2]((void *)n->f0);
     D_00450C10_DC30[2](n);
-    FILESYS_callbackop_DC30(FILESYS_close_DC30(a0, a1, r), func_003DDC00_DC30);
-    return *(int *)r;
+    FILESYS_callbackop_DC30(FILESYS_close_DC30(bigHandle, priority, fileOp), func_003DDC00_DC30);
+    return *(int *)fileOp;
 }
 #endif
 
@@ -1953,10 +1953,10 @@ void iFILESYS_ExecCommand_DE50(int) __asm__("iFILESYS_ExecCommand");
  * Sets the file system's run limit (D_00519AB0 +0x8: queued operations run only while their priority is at most this)
  * and restarts the queue (iFILESYS_ExecCommand(0)).
  *
- * @param a  the priority limit
+ * @param priorityLimit  the priority limit
  */
-void func_003DDE50(int a) {
-    D_00519AB8_DE50[0] = a;
+void func_003DDE50(int priorityLimit) {
+    D_00519AB8_DE50[0] = priorityLimit;
     iFILESYS_ExecCommand_DE50(0);
 }
 #endif
@@ -1977,28 +1977,28 @@ extern char D_00519AF0_DE78[] __asm__("D_00519AF0");
 extern char D_00495D78_DE78[] __asm__("D_00495D78");
 
 /**
- * Sets the file system's current path (D_00519AF0) from @p a.
+ * Sets the file system's current path (D_00519AF0) from @p path.
  *
  * With the 3-character device prefix (D_00450C08) the call is ignored when the device mode (D_00450C48 & 3) is 2, else
  * device 1 is selected (D_00450C44) and the prefix skipped; with the host root prefix (D_00450C50) it is ignored unless
  * mode bit 2 is set, else device 2 is selected. The rest is copied and, when it fits, ends with '/'. ps2main passes
  * "cd:".
  *
- * @param a  the path
+ * @param path  the path
  */
-void func_003DDE78(char *a) {
+void func_003DDE78(char *path) {
     int n, len;
     n = strlen_DE78(D_00450C50_DE78[0]);
-    if (func_00416B18_DE78(a, D_00450C08_DE78[0], 3) == 0) {
+    if (func_00416B18_DE78(path, D_00450C08_DE78[0], 3) == 0) {
         if ((D_00450C48_DE78[0] & 3) == 2) return;
         D_00450C44_DE78[0] = 1;
-        a += 3;
-    } else if (func_00416B18_DE78(a, D_00450C50_DE78[0], n) == 0) {
+        path += 3;
+    } else if (func_00416B18_DE78(path, D_00450C50_DE78[0], n) == 0) {
         if (!(D_00450C48_DE78[0] & 2)) return;
         D_00450C44_DE78[0] = 2;
-        a += n;
+        path += n;
     }
-    strcpy_DE78(D_00519AF0_DE78, a);
+    strcpy_DE78(D_00519AF0_DE78, path);
     if (D_00519AF0_DE78[0xFF] == 0) {
         len = strlen_DE78(D_00519AF0_DE78);
         if (len > 0 && D_00519AF0_DE78[len - 1] != 47) {
@@ -2340,16 +2340,16 @@ struct sFsCmd *func_003DE670_impl(void) __asm__("func_003DE670");
  */
 struct sFsCmd *func_003DE670_impl(void) {
     int i = 0;
-    int t;
+    int nextId;
     MUTEX_lock(D_00519AB0.f14);
     for (; i < D_00519AB0.f00; i++) {
         if (D_00519AB0.f28[i].f00.b.type == 0) {
             D_00519AB0.f28[i].f00.b.type = 1;
             D_00519AB0.f28[i].f00.b.idx = i;
-            t = D_00450C0C_E670;
-            D_00519AB0.f28[i].f00.b.id = t;
-            D_00450C0C_E670 = t + 1;
-            if (t + 1 > 0xFFFFF) {
+            nextId = D_00450C0C_E670;
+            D_00519AB0.f28[i].f00.b.id = nextId;
+            D_00450C0C_E670 = nextId + 1;
+            if (nextId + 1 > 0xFFFFF) {
                 D_00450C0C_E670 = 1;
             }
             break;
@@ -2449,12 +2449,12 @@ extern int D_00450C10_E910[4] __asm__("gFileSysOpts");
 /**
  * Sets the file system's allocate and free callbacks (gFileSysOpts +0x4 and +0x8).
  *
- * @param arg0  the allocate function
- * @param arg1  the free function
+ * @param mallocFn  the allocate function
+ * @param freeFn  the free function
  */
-void func_003DE910(int arg0, int arg1) {
-    D_00450C10_E910[1] = arg0;
-    D_00450C10_E910[2] = arg1;
+void func_003DE910(int mallocFn, int freeFn) {
+    D_00450C10_E910[1] = mallocFn;
+    D_00450C10_E910[2] = freeFn;
 }
 #endif
 
@@ -2474,19 +2474,19 @@ extern void MEM_copy_E928(int *, void *, int) __asm__("MEM_copy");
  * Copies the file system's options (gFileSysOpts) to the caller's record, whose first word is its size; a record of 37
  * bytes or more is cleared first. Refreshes the copied fields from the live settings first.
  *
- * @param arg0  the options record (size first)
+ * @param opts  the options record (size first)
  * @return 1
  */
-int func_003DE928(int *arg0) {
-    int n = *arg0;
+int func_003DE928(int *opts) {
+    int n = *opts;
     if (n >= 37) {
-        MEM_clear_E928(arg0, n);
+        MEM_clear_E928(opts, n);
     }
     D_00450C10_E928.f18 = D_00450C58_E928.f0;
     D_00450C10_E928.f10 = D_00450C58_E928.f4;
     D_00450C10_E928.f14 = D_00450C58_E928.fC != 0;
     D_00450C10_E928.f1C = D_00450C50_E928[0];
-    MEM_copy_E928(arg0, &D_00450C10_E928, n);
+    MEM_copy_E928(opts, &D_00450C10_E928, n);
     return 1;
 }
 #endif
@@ -2507,14 +2507,14 @@ extern void MEM_copy_E9B8(void *, int *, int) __asm__("MEM_copy");
  * Takes the file system's options from the caller's record (size first; a short record clears the 36-byte options
  * first) and applies them to the live settings (D_00450C58, D_00450C50).
  *
- * @param arg0  the options record (size first)
+ * @param opts  the options record (size first)
  * @return 1
  */
-int func_003DE9B8(int *arg0) {
-    if (*arg0 < 36) {
+int func_003DE9B8(int *opts) {
+    if (*opts < 36) {
         MEM_clear_E9B8(&D_00450C10_E9B8, 36);
     }
-    MEM_copy_E9B8(&D_00450C10_E9B8, arg0, *arg0);
+    MEM_copy_E9B8(&D_00450C10_E9B8, opts, *opts);
     D_00450C58_E9B8.f0 = D_00450C10_E9B8.f18;
     D_00450C58_E9B8.f4 = D_00450C10_E9B8.f10;
     D_00450C58_E9B8.f8 = D_00450C10_E9B8.pC;
@@ -3061,13 +3061,13 @@ void func_003DF0B8_impl(int arg0, int arg1, struct sReq *s) __asm__("func_003DF0
 /**
  * Close callback of an asynchronous file load: completes the close and finishes the request (finishrequest).
  *
- * @param arg0  the close operation's handle
- * @param arg1  its status
- * @param s  the load request
+ * @param opHandle  the close operation's handle
+ * @param opStatus  its status
+ * @param request  the load request
  */
-void func_003DF0B8_impl(int arg0, int arg1, struct sReq *s) {
-    FILESYS_completeop_F0B8(s->f1C);
-    finishrequest(s);
+void func_003DF0B8_impl(int opHandle, int opStatus, struct sReq *request) {
+    FILESYS_completeop_F0B8(request->f1C);
+    finishrequest(request);
 }
 #endif
 
@@ -3172,32 +3172,32 @@ extern char loadfilesizecallback_F2C0[] __asm__("loadfilesizecallback");
  * A cancelled request (+0x10) closes the file (func_003DF0B8); a load into a given address (+0x14 clear) reads the
  * first chunk (func_003DF0F0); otherwise it asks for the file size first (func_003DD7E0, then loadfilesizecallback).
  *
- * @param a  the open operation's handle
- * @param b  its status
- * @param s  the load request
+ * @param opHandle  the open operation's handle
+ * @param opStatus  its status
+ * @param request  the load request
  */
-void func_003DF2C0(int a, int b, struct sReq *s) {
-    int n = FILESYS_completeop_F2C0(s->f1C);
-    s->f20 = n;
+void func_003DF2C0(int opHandle, int opStatus, struct sReq *request) {
+    int n = FILESYS_completeop_F2C0(request->f1C);
+    request->f20 = n;
     if (n == 0) {
-        finishrequest(s);
+        finishrequest(request);
         return;
     }
-    if (s->f10 != 0) {
-        s->f1C = FILESYS_close(n, 99, s);
-        if (s->f1C != 0) {
-            FILESYS_callbackop(s->f1C, func_003DF0B8_F2C0);
+    if (request->f10 != 0) {
+        request->f1C = FILESYS_close(n, 99, request);
+        if (request->f1C != 0) {
+            FILESYS_callbackop(request->f1C, func_003DF0B8_F2C0);
         }
-    } else if (s->f14 == 0) {
-        int m = s->f28;
-        s->f1C = FILESYS_read(n, s->f24, s->f2C, m <= 0x8000 ? m : 0x8000, 99, s);
-        if (s->f1C != 0) {
-            FILESYS_callbackop(s->f1C, func_003DF0F0_F2C0);
+    } else if (request->f14 == 0) {
+        int remaining = request->f28;
+        request->f1C = FILESYS_read(n, request->f24, request->f2C, remaining <= 0x8000 ? remaining : 0x8000, 99, request);
+        if (request->f1C != 0) {
+            FILESYS_callbackop(request->f1C, func_003DF0F0_F2C0);
         }
     } else {
-        s->f1C = func_003DD7E0_F2C0(n, 99, s);
-        if (s->f1C != 0) {
-            FILESYS_callbackop(s->f1C, loadfilesizecallback_F2C0);
+        request->f1C = func_003DD7E0_F2C0(n, 99, request);
+        if (request->f1C != 0) {
+            FILESYS_callbackop(request->f1C, loadfilesizecallback_F2C0);
         }
     }
 }
@@ -3215,27 +3215,27 @@ struct Q_F3C0 { int w0; int p1; int f8; int pc; int f10; int p14; int p18; volat
  * reads the next chunk (at most 0x8000 bytes, priority 99) with this callback; a short chunk or a cancel (+0x10)
  * finishes the request instead. The file stays open.
  *
- * @param a  the read operation's handle
- * @param b  its status
- * @param s  the read request
+ * @param opHandle  the read operation's handle
+ * @param opStatus  its status
+ * @param request  the read request
  */
-void func_003DF3C0(int a, int b, struct Q_F3C0 *s) {
-    int n = FILESYS_completeop_F3C0(s->h);
+void func_003DF3C0(int opHandle, int opStatus, struct Q_F3C0 *request) {
+    int n = FILESYS_completeop_F3C0(request->h);
     int x;
-    int m;
-    s->f8 += n;
-    s->f2c += n;
-    if (n <= 0x7FFF || s->f10 != 0) {
-        finishrequest(s);
+    int chunkSize;
+    request->f8 += n;
+    request->f2c += n;
+    if (n <= 0x7FFF || request->f10 != 0) {
+        finishrequest(request);
         return;
     }
-    x = s->f28 - n;
-    m = x > 0x8000 ? 0x8000 : x;
-    s->f24 += n;
-    s->f28 = x;
-    s->h = FILESYS_read(s->f20, s->f24, s->f2c, m, 99, s);
-    if (s->h != 0) {
-        FILESYS_callbackop(s->h, func_003DF3C0);
+    x = request->f28 - n;
+    chunkSize = x > 0x8000 ? 0x8000 : x;
+    request->f24 += n;
+    request->f28 = x;
+    request->h = FILESYS_read(request->f20, request->f24, request->f2c, chunkSize, 99, request);
+    if (request->h != 0) {
+        FILESYS_callbackop(request->h, func_003DF3C0);
     }
 }
 #endif
@@ -3382,27 +3382,27 @@ struct Q_F748 { int w0; int p1[1]; int f8; int fc; int f10; int f14; int f18; vo
  * Takes a free request (queuefetch, newrequestid), clears its state, sets the destination and size limit and opens the
  * file (priority 100) with callback func_003DF2C0.
  *
- * @param a  the path
- * @param b  the destination
- * @param c  the destination size
+ * @param fileName  the path
+ * @param address  the destination
+ * @param maxSize  the destination size
  * @return the request id, or 0
  */
-int func_003DF748(int a, int b, int c) {
-    struct Q_F748 *p = (struct Q_F748 *)queuefetch((void **)D_00519BF8_F748);
-    if (p == 0) return 0;
-    newrequestid(p);
-    p->f28 = c;
-    p->f2c = b;
-    p->f8 = 0;
-    p->fc = 0;
-    p->f10 = 0;
-    p->f14 = 0;
-    p->f18 = 0;
-    p->f24 = 0;
-    p->h = FILESYS_open(a, 1, 100, p);
-    if (p->h == 0) return 0;
-    FILESYS_callbackop(p->h, func_003DF2C0_F748);
-    return p->w0;
+int func_003DF748(int fileName, int address, int maxSize) {
+    struct Q_F748 *request = (struct Q_F748 *)queuefetch((void **)D_00519BF8_F748);
+    if (request == 0) return 0;
+    newrequestid(request);
+    request->f28 = maxSize;
+    request->f2c = address;
+    request->f8 = 0;
+    request->fc = 0;
+    request->f10 = 0;
+    request->f14 = 0;
+    request->f18 = 0;
+    request->f24 = 0;
+    request->h = FILESYS_open(fileName, 1, 100, request);
+    if (request->h == 0) return 0;
+    FILESYS_callbackop(request->h, func_003DF2C0_F748);
+    return request->w0;
 }
 #endif
 
@@ -3464,21 +3464,21 @@ void func_003DF8E8_impl(int h, void (*fn)(int)) __asm__("func_003DF8E8");
  * Sets the done callback (+0x18) of an asynchronous file request; calls it at once when the request has already
  * finished (no operation pending). Does nothing for an unknown request or one that already has a callback.
  *
- * @param h  the request id
+ * @param reqId  the request id
  * @param fn  the callback, given the request id
  */
-void func_003DF8E8_impl(int h, void (*fn)(int)) {
-    char *e = locaterequest_F8E8(h);
+void func_003DF8E8_impl(int reqId, void (*fn)(int)) {
+    char *request = locaterequest_F8E8(reqId);
     int done;
-    if (e == 0 || *(int *)(e + 0x18) != 0) {
+    if (request == 0 || *(int *)(request + 0x18) != 0) {
         return;
     }
     MUTEX_lock(D_00519C08_9C08);
-    done = *(volatile int *)(e + 0x1C) == 0;
-    *(void (**)(int))(e + 0x18) = fn;
+    done = *(volatile int *)(request + 0x1C) == 0;
+    *(void (**)(int))(request + 0x18) = fn;
     MUTEX_unlock_F8E8(D_00519C08_9C08);
     if (done) {
-        fn(h);
+        fn(reqId);
     }
 }
 #endif
@@ -4190,23 +4190,23 @@ extern void FILESYS_callbackop_03D0(int, void (*)(int, int, struct S_03D0 *)) __
  * requests whose data has been consumed. With less than a read block (+0x17C) free at the end, the unread data is moved
  * to the buffer start (MEM_copy, 64-byte aligned) and a wrap marker left; when even that leaves no room the state
  * (+0x38) becomes 2 (stalled). A memory request (+0x10 == 1) is copied in and its read callback (func_003E0170) called
- * directly; a file request reads a block at @p arg1 priority with that callback.
+ * directly; a file request reads a block at @p priority priority with that callback.
  *
- * @param arg1  the read priority
+ * @param priority  the read priority
  */
-void func_003E03D0(struct S_03D0 *self, int arg1) {
-    int *p;
+void func_003E03D0(struct S_03D0 *self, int priority) {
+    int *chunk;
     char *rd;
     char *wr;
     int avail;
     struct Q_03D0 *cur;
 
     while (self->f50 != self->f54) {
-        p = (int *)self->f50;
-        if (*p == -1) {
+        chunk = (int *)self->f50;
+        if (*chunk == -1) {
             self->f50 = self->f30;
-        } else if (*p == -2) {
-            self->f50 = (char *)p + p[1];
+        } else if (*chunk == -2) {
+            self->f50 = (char *)chunk + chunk[1];
         } else {
             break;
         }
@@ -4214,8 +4214,8 @@ void func_003E03D0(struct S_03D0 *self, int arg1) {
     MUTEX_lock(self->f4);
     for (;;) {
         struct Q_03D0 *n = self->f5C;
-        struct Q_03D0 *q = n->fC;
-        if (q == 0 || q->f4 == 1 || func_003DFC08((unsigned int)self->f50, (unsigned int)self->f58, q->f120 - 1)) {
+        struct Q_03D0 *nextReq = n->fC;
+        if (nextReq == 0 || nextReq->f4 == 1 || func_003DFC08((unsigned int)self->f50, (unsigned int)self->f58, nextReq->f120 - 1)) {
             break;
         }
         func_003DFE18_03D0(self, n);
@@ -4247,9 +4247,9 @@ void func_003E03D0(struct S_03D0 *self, int arg1) {
             self->f30 = self->f2C - (used % 0x40 - 0x40);
         }
         MEM_copy_03D0(self->f30, self->f54, used);
-        p = (int *)self->f54;
-        p[0] = -1;
-        p[1] = 8;
+        chunk = (int *)self->f54;
+        chunk[0] = -1;
+        chunk[1] = 8;
         self->f54 = self->f30;
         self->f58 = self->f30 + used;
         if (*(int *)self->f50 == -1) {
@@ -4276,7 +4276,7 @@ fill:
         func_003E0170_03D0(0, 0, self);
     } else {
         self->f178 = self->f17C;
-        self->f174 = FILESYS_read_03D0(self->f16C, self->f170, self->f58, self->f17C, arg1, self);
+        self->f174 = FILESYS_read_03D0(self->f16C, self->f170, self->f58, self->f17C, priority, self);
         if (self->f174 != 0) {
             FILESYS_callbackop_03D0(self->f174, func_003E0170_03D0);
         }
@@ -4426,27 +4426,27 @@ struct T_0948 { int a, b, c; };
 extern int fFBD0_0948(int, void *, void *) __asm__("validatehandle");
 
 /**
- * Sets filter @p channel (1-based) of an idle stream: chunks whose type & @p a2 equals @p a3 go to tap @p a4 (-1 and -2
+ * Sets filter @p channel (1-based) of an idle stream: chunks whose type & @p typeMask equals @p typeValue go to tap @p tapNum (-1 and -2
  * are special targets). The last filter may only be the catch-all (mask and value 0). Ignored unless the stream is idle
  * (state 0) and the tap is valid.
  *
  * @param handle  the stream handle
  * @param channel  the filter number
- * @param a2  the type mask
- * @param a3  the type value
- * @param a4  the tap number
+ * @param typeMask  the type mask
+ * @param typeValue  the type value
+ * @param tapNum  the tap number
  */
-void func_003E0948(int handle, int channel, int a2, int a3, int a4) {
+void func_003E0948(int handle, int channel, int typeMask, int typeValue, int tapNum) {
     char *stream;
     int entry;
     if (fFBD0_0948(handle, &stream, &entry) == 0 && channel > 0) {
         int count = *(int *)(stream + 0x20);
-        if (count >= channel && (channel != count || (a2 | a3) == 0) && (a4 > 0 || a4 == -1 || a4 == -2)
-            && *(int *)(stream + 0x28) >= a4 && *(volatile int *)(stream + 0x38) == 0) {
+        if (count >= channel && (channel != count || (typeMask | typeValue) == 0) && (tapNum > 0 || tapNum == -1 || tapNum == -2)
+            && *(int *)(stream + 0x28) >= tapNum && *(volatile int *)(stream + 0x38) == 0) {
             struct T_0948 *chanInfo = &(*(struct T_0948 **)(stream + 0x1C))[channel - 1];
-            chanInfo->a = a2;
-            chanInfo->b = a3;
-            chanInfo->c = a4;
+            chanInfo->a = typeMask;
+            chanInfo->b = typeValue;
+            chanInfo->c = tapNum;
         }
     }
 }
@@ -4552,18 +4552,18 @@ extern void func_003DCFC0(int, int);
  * Sets a stream's greedy state (+0x48); turning it on while the stream reads (state 1) raises its pending read to the
  * high priority (func_003DCFC0 with +0x40).
  *
- * @param arg0  the stream handle
- * @param arg1  the greedy state
+ * @param streamHandle  the stream handle
+ * @param greedyState  the greedy state
  */
-void func_003E0B98(int arg0, int arg1) {
-    O_0B98 *o;
+void func_003E0B98(int streamHandle, int greedyState) {
+    O_0B98 *stream;
     int x;
 
-    if (validatehandle(arg0, &o, &x) == 0) {
-        o->f48 = arg1;
-        if (arg1 != 0) {
-            if (o->s38 == 1) {
-                func_003DCFC0(o->f174, o->f40);
+    if (validatehandle(streamHandle, &stream, &x) == 0) {
+        stream->f48 = greedyState;
+        if (greedyState != 0) {
+            if (stream->s38 == 1) {
+                func_003DCFC0(stream->f174, stream->f40);
             }
         }
     }
@@ -4755,7 +4755,7 @@ extern void func_003E13E8_0E90(char *, int) __asm__("func_003E13E8");
  */
 void func_003E0E90(int hnd, int id) {
     char *st;
-    char *q;
+    char *tap;
     int *head;
     int *from;
     int *to;
@@ -4767,7 +4767,7 @@ void func_003E0E90(int hnd, int id) {
     from = 0;
     to = 0;
     head = 0;
-    if (validatehandle(hnd, &st, &q) != 0) {
+    if (validatehandle(hnd, &st, &tap) != 0) {
         return;
     }
     MUTEX_lock(st + 4);
@@ -4798,13 +4798,13 @@ void func_003E0E90(int hnd, int id) {
         return;
     }
     for (i = 0; i < *(int *)(st + 0x28); i++) {
-        q = *(char **)(st + 0x24) + i * 0x10;
-        if (*(int *)(q + 8) <= 0) {
+        tap = *(char **)(st + 0x24) + i * 0x10;
+        if (*(int *)(tap + 8) <= 0) {
             continue;
         }
-        if (func_003DFC08((unsigned int)head, (unsigned int)from, *(unsigned int *)(q + 0xC))) {
+        if (func_003DFC08((unsigned int)head, (unsigned int)from, *(unsigned int *)(tap + 0xC))) {
             int *chunk = from;
-            int tag = *(int *)(q + 4) << 24;
+            int tag = *(int *)(tap + 4) << 24;
             int len;
 
             while (chunk != to) {
@@ -4814,7 +4814,7 @@ void func_003E0E90(int hnd, int id) {
                     len = chunk[1] & 0xFFFFFF;
                     if ((chunk[1] & 0xFF000000) == tag) {
                         MUTEX_lock(st + 4);
-                        *(int *)(q + 8) -= len;
+                        *(int *)(tap + 8) -= len;
                         MUTEX_unlock_0E90(st + 4);
                         func_003DFC48(st, len);
                         chunk[0] = -2;
@@ -4823,11 +4823,11 @@ void func_003E0E90(int hnd, int id) {
                     chunk = (int *)((char *)chunk + len);
                 }
             }
-        } else if (func_003DFC08((unsigned int)from, (unsigned int)to, *(unsigned int *)(q + 0xC))) {
+        } else if (func_003DFC08((unsigned int)from, (unsigned int)to, *(unsigned int *)(tap + 0xC))) {
             do {
-                int n = func_003E12E0_0E90(q);
-                func_003E13E8_0E90(q, n);
-            } while (*(int *)(q + 8) > 0 && func_003DFC08((unsigned int)from, (unsigned int)to, *(unsigned int *)(q + 0xC)));
+                int n = func_003E12E0_0E90(tap);
+                func_003E13E8_0E90(tap, n);
+            } while (*(int *)(tap + 8) > 0 && func_003DFC08((unsigned int)from, (unsigned int)to, *(unsigned int *)(tap + 0xC)));
         }
     }
 }
@@ -4869,17 +4869,17 @@ extern void func_003E0E90_1110(int, int) __asm__("func_003E0E90");
  * empties every tap, gives back the whole buffer usage and marks every buffered chunk released. A stalled stream (state
  * 2) gets its buffer reset (or the tail padded to 64 bytes) and goes idle.
  *
- * @param arg0  the stream handle
+ * @param streamHandle  the stream handle
  */
-void func_003E1110(int arg0) {
+void func_003E1110(int streamHandle) {
     volatile HEAP_1110 *heap;
     int other;
     JOB_1110 *j;
-    BLK_1110 *b;
+    BLK_1110 *chunk;
     int i, sz, pad;
 
     sz = 0;
-    if (validatehandle_1110(arg0, &heap, &other) != 0) {
+    if (validatehandle_1110(streamHandle, &heap, &other) != 0) {
         return;
     }
     j = heap->f64;
@@ -4887,7 +4887,7 @@ void func_003E1110(int arg0) {
         return;
     }
     while ((unsigned int)(j->f4 - 1) < 2) {
-        func_003E0E90_1110(arg0, j->f0);
+        func_003E0E90_1110(streamHandle, j->f0);
         j = heap->f64;
     }
     while (heap->f5C != (int)heap->f60) {
@@ -4898,28 +4898,28 @@ void func_003E1110(int arg0) {
         heap->f24[i].f8 = 0;
     }
     func_003DFC48_1110(heap, heap->f4C);
-    b = (BLK_1110 *)heap->f50;
-    while ((char *)b != heap->f54) {
-        if (b->f0 == -1) {
-            b = (BLK_1110 *)heap->f30;
+    chunk = (BLK_1110 *)heap->f50;
+    while ((char *)chunk != heap->f54) {
+        if (chunk->f0 == -1) {
+            chunk = (BLK_1110 *)heap->f30;
         } else {
-            sz = b->f4 & 0xFFFFFF;
-            b->f0 = -2;
-            b->f4 = sz;
-            b = (BLK_1110 *)((char *)b + sz);
+            sz = chunk->f4 & 0xFFFFFF;
+            chunk->f0 = -2;
+            chunk->f4 = sz;
+            chunk = (BLK_1110 *)((char *)chunk + sz);
         }
     }
     if (heap->f38 == 2) {
-        if ((char *)b == heap->f30) {
+        if ((char *)chunk == heap->f30) {
             heap->f30 = heap->f54 = heap->f2C;
         } else {
             pad = 0x40 - ((int)heap->f54 & 0x3F);
             if (pad == 0x40) {
                 pad = 0;
             }
-            b = (BLK_1110 *)(heap->f54 - sz);
+            chunk = (BLK_1110 *)(heap->f54 - sz);
             sz += pad;
-            b->f4 = sz;
+            chunk->f4 = sz;
             heap->f54 += pad;
         }
         heap->f38 = 0;
@@ -4943,40 +4943,40 @@ extern void MUTEX_unlock_12E0(void *) __asm__("MUTEX_unlock");
  * its size, lowers the tap's count (+0x8) and, while data is left, finds the next chunk tagged for the tap (following
  * wrap markers). Returns 0 for a bad handle or an empty tap.
  *
- * @param a0  the tap handle
+ * @param tapHandle  the tap handle
  * @return the chunk, or 0
  */
-B_12E0 *func_003E12E0(int a0) {
-    M_12E0 *m;
-    H_12E0 *h;
-    B_12E0 *p;
-    B_12E0 *q;
+B_12E0 *func_003E12E0(int tapHandle) {
+    M_12E0 *stream;
+    H_12E0 *tap;
+    B_12E0 *chunk;
+    B_12E0 *nextChunk;
     int n;
     int rem;
     int tag;
-    if (validatehandle_12E0(a0, &m, &h) != 0) return 0;
-    if (h->f8 == 0) return 0;
-    p = h->fC;
-    n = p->f4 & 0xFFFFFF;
-    p->f4 = n;
-    MUTEX_lock_12E0(m->mtx);
-    rem = h->f8 - n;
-    h->f8 = rem;
-    MUTEX_unlock_12E0(m->mtx);
+    if (validatehandle_12E0(tapHandle, &stream, &tap) != 0) return 0;
+    if (tap->f8 == 0) return 0;
+    chunk = tap->fC;
+    n = chunk->f4 & 0xFFFFFF;
+    chunk->f4 = n;
+    MUTEX_lock_12E0(stream->mtx);
+    rem = tap->f8 - n;
+    tap->f8 = rem;
+    MUTEX_unlock_12E0(stream->mtx);
     if (rem > 0) {
-        q = (B_12E0 *)((char *)p + n);
-        tag = h->f4 << 24;
-        while ((q->f4 & 0xFF000000) != tag) {
-            if (q->f0 == -1) {
-                q = m->f30;
+        nextChunk = (B_12E0 *)((char *)chunk + n);
+        tag = tap->f4 << 24;
+        while ((nextChunk->f4 & 0xFF000000) != tag) {
+            if (nextChunk->f0 == -1) {
+                nextChunk = stream->f30;
             } else {
-                n = q->f4 & 0xFFFFFF;
-                q = (B_12E0 *)((char *)q + n);
+                n = nextChunk->f4 & 0xFFFFFF;
+                nextChunk = (B_12E0 *)((char *)nextChunk + n);
             }
         }
-        h->fC = q;
+        tap->fC = nextChunk;
     }
-    return p;
+    return chunk;
 }
 #endif
 
@@ -5138,28 +5138,28 @@ extern int func_003DFC08();
  * Returns the id of the request a tap is currently reading: the queued request whose data range holds the tap's read
  * position, found under the mutex. 0 for a bad handle or an empty tap.
  *
- * @param a  the tap handle
+ * @param tapHandle  the tap handle
  * @return the request id, or 0
  */
-int func_003E15E8(int a) {
-    struct R_15E8 r;
+int func_003E15E8(int tapHandle) {
+    struct R_15E8 lookup;
     struct LL_15E8 *cur;
-    int n, id, q;
-    struct P_15E8 *p;
-    if (validatehandle(a, &r.g, &r.s)) return 0;
-    if (r.s[2] == 0) return 0;
-    MUTEX_lock((char *)r.g + 4);
-    cur = (struct LL_15E8 *)r.g->f5c;
-    n = r.g->f50;
-    id = r.s[3];
-    while ((p = cur->next) != 0) {
-        if (p->f4 == 1) break;
-        q = p->f120;
-        if (func_003DFC08(n, q, id)) break;
+    int n, id, reqStart;
+    struct P_15E8 *request;
+    if (validatehandle(tapHandle, &lookup.g, &lookup.s)) return 0;
+    if (lookup.s[2] == 0) return 0;
+    MUTEX_lock((char *)lookup.g + 4);
+    cur = (struct LL_15E8 *)lookup.g->f5c;
+    n = lookup.g->f50;
+    id = lookup.s[3];
+    while ((request = cur->next) != 0) {
+        if (request->f4 == 1) break;
+        reqStart = request->f120;
+        if (func_003DFC08(n, reqStart, id)) break;
         cur = cur->next;
-        n = q;
+        n = reqStart;
     }
-    MUTEX_unlock((int *)((char *)r.g + 4));
+    MUTEX_unlock((int *)((char *)lookup.g + 4));
     return cur->w0;
 }
 #endif
@@ -5201,10 +5201,10 @@ void func_003DEE18_1700(int, int) __asm__("func_003DEE18");
  * Returns whether a file exists: func_003DEE18 at the synchronous priority (sync_priority). Declared void; the result is
  * left in the return register.
  *
- * @param a  the path
+ * @param fileName  the path
  */
-void func_003E1700(int a) {
-    func_003DEE18_1700(a, D_00450C38_1700[0]);
+void func_003E1700(int fileName) {
+    func_003DEE18_1700(fileName, D_00450C38_1700[0]);
 }
 #endif
 
@@ -5245,12 +5245,12 @@ extern int D_00450C38_1798[] __asm__("sync_priority");
  * Returns a file's size through FILESYS_atomic (func_003E1728, sync priority), with 1 in the argument block's fourth
  * word. Declared void; the result is left in the return register.
  *
- * @param arg0  the path
+ * @param fileName  the path
  */
-void func_003E1798(int arg0) {
+void func_003E1798(int fileName) {
     int buf[8];
 
-    buf[0] = arg0;
+    buf[0] = fileName;
     buf[3] = 1;
     FILESYS_atomic_1798(func_003E1728_1798, 0, D_00450C38_1798[0], buf);
 }
@@ -5268,12 +5268,12 @@ extern int D_00450C38_17D8[] __asm__("sync_priority");
  * Returns a file's size through FILESYS_atomic (func_003E1728, sync priority), with 0 in the argument block's fourth
  * word. Declared void; the result is left in the return register.
  *
- * @param arg0  the path
+ * @param fileName  the path
  */
-void func_003E17D8(int arg0) {
+void func_003E17D8(int fileName) {
     int buf[8];
 
-    buf[0] = arg0;
+    buf[0] = fileName;
     buf[3] = 0;
     FILESYS_atomic_17D8(func_003E1728_17D8, 0, D_00450C38_17D8[0], buf);
 }
@@ -5289,23 +5289,23 @@ extern int (*D_00450C14_1810[])(int, int, int) __asm__("D_00450C14");
  * Whole-file load step for FILESYS_atomic: opens the file, allocates its size through the allocate callback
  * (D_00450C14, with the flags in word 4), reads it and closes it; returns the buffer, or 0.
  *
- * @param a  the priority (the rest runs one below it)
- * @param b  the argument block: path, then flags at word 4
+ * @param priority  the priority (the rest runs one below it)
+ * @param loadArgs  the argument block: path, then flags at word 4
  * @return the loaded data, or 0
  */
-int func_003E1810(int a, int *b) {
-    int sp0;
-    int r, c;
-    if (func_003DEBF0(b[0], 1, a, &sp0)) {
-        int m = a - 1;
-        r = func_003DECF8(sp0, m);
-        c = D_00450C14_1810[0](b[0], r, b[4]);
-        if (c) {
-            FILESYS_readsync(sp0, 0, c, r, m);
-            FILESYS_closesync(sp0, m);
-            return c;
+int func_003E1810(int priority, int *loadArgs) {
+    int fileHandle;
+    int fileSize, buffer;
+    if (func_003DEBF0(loadArgs[0], 1, priority, &fileHandle)) {
+        int subPriority = priority - 1;
+        fileSize = func_003DECF8(fileHandle, subPriority);
+        buffer = D_00450C14_1810[0](loadArgs[0], fileSize, loadArgs[4]);
+        if (buffer) {
+            FILESYS_readsync(fileHandle, 0, buffer, fileSize, subPriority);
+            FILESYS_closesync(fileHandle, subPriority);
+            return buffer;
         }
-        FILESYS_closesync(sp0, m);
+        FILESYS_closesync(fileHandle, subPriority);
     }
     return 0;
 }
@@ -5379,24 +5379,24 @@ extern int (*D_00450C14_1948[])(int, int, int) __asm__("D_00450C14");
  * Whole-file load step for FILESYS_atomic that also reports the size: like func_003E1810, storing the size in word 2 of
  * the argument block.
  *
- * @param a  the priority
- * @param b  the argument block: path, size out at word 2, flags at word 4
+ * @param priority  the priority
+ * @param loadArgs  the argument block: path, size out at word 2, flags at word 4
  * @return the loaded data, or 0
  */
-int func_003E1948(int a, int *b) {
-    int sp0;
-    int r, c;
-    if (func_003DEBF0(b[0], 1, a, &sp0)) {
-        int m = a - 1;
-        r = func_003DECF8(sp0, m);
-        c = D_00450C14_1948[0](b[0], r, b[4]);
-        if (c) {
-            FILESYS_readsync(sp0, 0, c, r, m);
-            FILESYS_closesync(sp0, m);
-            b[2] = r;
-            return c;
+int func_003E1948(int priority, int *loadArgs) {
+    int fileHandle;
+    int fileSize, buffer;
+    if (func_003DEBF0(loadArgs[0], 1, priority, &fileHandle)) {
+        int subPriority = priority - 1;
+        fileSize = func_003DECF8(fileHandle, subPriority);
+        buffer = D_00450C14_1948[0](loadArgs[0], fileSize, loadArgs[4]);
+        if (buffer) {
+            FILESYS_readsync(fileHandle, 0, buffer, fileSize, subPriority);
+            FILESYS_closesync(fileHandle, subPriority);
+            loadArgs[2] = fileSize;
+            return buffer;
         }
-        FILESYS_closesync(sp0, m);
+        FILESYS_closesync(fileHandle, subPriority);
     }
     return 0;
 }
@@ -5415,23 +5415,23 @@ extern void func_003E1948_1948(void) __asm__("func_003E1948");
  * Loads a whole file into allocated memory and reports its size: runs func_003E1948 through FILESYS_atomic at the sync
  * priority (fourth word 1, flags in word 4).
  *
- * @param arg0  the path
- * @param arg1  receives the size, or 0
- * @param arg2  the allocation flags
+ * @param fileName  the path
+ * @param sizeOut  receives the size, or 0
+ * @param memFlags  the allocation flags
  * @return the data, or 0
  */
-int func_003E1A10(int arg0, int *arg1, int arg2) {
-    FLS_args_1A10 s;
-    int r;
+int func_003E1A10(int fileName, int *sizeOut, int memFlags) {
+    FLS_args_1A10 loadArgs;
+    int data;
 
-    s.a = arg0;
-    s.c = 1;
-    s.d = arg2;
-    r = FILESYS_atomic_1A10(func_003E1948_1948, 0, D_00450C38_0C38[0], &s);
-    if (arg1 != 0) {
-        *arg1 = s.sz;
+    loadArgs.a = fileName;
+    loadArgs.c = 1;
+    loadArgs.d = memFlags;
+    data = FILESYS_atomic_1A10(func_003E1948_1948, 0, D_00450C38_0C38[0], &loadArgs);
+    if (sizeOut != 0) {
+        *sizeOut = loadArgs.sz;
     }
-    return r;
+    return data;
 }
 #endif
 
@@ -5571,11 +5571,11 @@ extern int FILE_loadz_1C00(int, int) __asm__("FILE_loadz");
  * Batch load step for FILESYS_atomic: loads each name of the batch with FILE_loadz (batch flags at +0xC) into its
  * buffer slot; returns 1 when all loaded. The first argument (the priority) is not used.
  *
- * @param arg0  the priority (unused)
+ * @param priority  the priority (unused)
  * @param batch  {count, names, buffers, flags}
  * @return 1 when every file loaded, else 0
  */
-int func_003E1C00(void *arg0, void *batch) {
+int func_003E1C00(void *priority, void *batch) {
     int offset;
     int index;
     int allOk;
@@ -5607,21 +5607,21 @@ extern int D_00450C38_0C38[] __asm__("sync_priority");
  * Loads several files into allocated memory in one FILESYS_atomic run (func_003E1C00), fifth word 1; returns 1 when all
  * loaded, 0 for a count of 0 or less.
  *
- * @param arg0  the number of files
- * @param arg1  the names
- * @param arg2  receives the buffers
- * @param arg3  the allocation flags
+ * @param fileCount  the number of files
+ * @param names  the names
+ * @param buffers  receives the buffers
+ * @param memFlags  the allocation flags
  * @return 1 on success, else 0
  */
-int func_003E1C98(int arg0, int arg1, int arg2, int arg3) {
+int func_003E1C98(int fileCount, int names, int buffers, int memFlags) {
     Args_1C98 args;
 
-    if (arg0 <= 0) return 0;
+    if (fileCount <= 0) return 0;
     {
-        args.a0 = arg0;
-        args.a1 = arg1;
-        args.a2 = arg2;
-        args.a3 = arg3;
+        args.a0 = fileCount;
+        args.a1 = names;
+        args.a2 = buffers;
+        args.a3 = memFlags;
         args.a4 = 1;
         return FILESYS_atomic_1C98(cb_1C98, 0, D_00450C38_0C38[0], &args) == 1;
     }
@@ -5641,21 +5641,21 @@ extern int D_00450C38_0C38[] __asm__("sync_priority");
  * Loads several files in one FILESYS_atomic run (func_003E1C00), fifth word 0; otherwise as func_003E1C98. The batch
  * step ignores that word, so both behave the same.
  *
- * @param arg0  the number of files
- * @param arg1  the names
- * @param arg2  receives the buffers
- * @param arg3  the allocation flags
+ * @param fileCount  the number of files
+ * @param names  the names
+ * @param buffers  receives the buffers
+ * @param memFlags  the allocation flags
  * @return 1 on success, else 0
  */
-int func_003E1D00(int arg0, int arg1, int arg2, int arg3) {
+int func_003E1D00(int fileCount, int names, int buffers, int memFlags) {
     Args_1D00 args;
 
-    if (arg0 <= 0) return 0;
+    if (fileCount <= 0) return 0;
     {
-        args.a0 = arg0;
-        args.a1 = arg1;
-        args.a2 = arg2;
-        args.a3 = arg3;
+        args.a0 = fileCount;
+        args.a1 = names;
+        args.a2 = buffers;
+        args.a3 = memFlags;
         args.a4 = 0;
         return FILESYS_atomic_1D00(cb_1D00, 0, D_00450C38_0C38[0], &args) == 1;
     }
@@ -5684,40 +5684,40 @@ extern void MEM_copy_1D68(char *, char *, int) __asm__("MEM_copy");
  * header is larger (BIG_sizeofheader), reallocates and reads the rest; returns the header, or 0 when the file does not
  * open, the memory runs out or it is not a BIG file (BIG_typeofheader 0).
  *
- * @param a  the priority
- * @param b  the argument block: path, flags at word 2
+ * @param priority  the priority
+ * @param loadArgs  the argument block: path, flags at word 2
  * @return the header, or 0
  */
-int func_003E1D68(int a, int *b) {
-    int sp0;
-    if (func_003DEBF0(b[0], 1, a, &sp0)) {
-        char *hdr = gFileSysOpts.f04((char *)b[0], 2704, b[2]);
+int func_003E1D68(int priority, int *loadArgs) {
+    int fileHandle;
+    if (func_003DEBF0(loadArgs[0], 1, priority, &fileHandle)) {
+        char *hdr = gFileSysOpts.f04((char *)loadArgs[0], 2704, loadArgs[2]);
         if (hdr) {
-            FILESYS_readsync(sp0, 0, (int)hdr, 2704, a - 1);
+            FILESYS_readsync(fileHandle, 0, (int)hdr, 2704, priority - 1);
             if (BIG_typeofheader_1D68(hdr) == 0) {
                 gFileSysOpts.f08(hdr);
-                FILESYS_closesync(sp0, a - 1);
+                FILESYS_closesync(fileHandle, priority - 1);
                 return 0;
             }
             {
                 int size = BIG_sizeofheader_1D68(hdr);
                 if (size > 2704) {
-                    char *buf = gFileSysOpts.f04((char *)b[0], size, b[2]);
+                    char *buf = gFileSysOpts.f04((char *)loadArgs[0], size, loadArgs[2]);
                     if (buf == 0) {
                         gFileSysOpts.f08(hdr);
-                        FILESYS_closesync(sp0, a - 1);
+                        FILESYS_closesync(fileHandle, priority - 1);
                         return 0;
                     }
                     MEM_copy_1D68(buf, hdr, 2704);
                     gFileSysOpts.f08(hdr);
                     hdr = buf;
-                    FILESYS_readsync(sp0, 2704, (int)(hdr + 0xA90), size - 2704, a - 1);
+                    FILESYS_readsync(fileHandle, 2704, (int)(hdr + 0xA90), size - 2704, priority - 1);
                 }
             }
-            FILESYS_closesync(sp0, a - 1);
+            FILESYS_closesync(fileHandle, priority - 1);
             return (int)hdr;
         }
-        FILESYS_closesync(sp0, a - 1);
+        FILESYS_closesync(fileHandle, priority - 1);
         return 0;
     }
     return 0;
@@ -5736,14 +5736,14 @@ extern int D_00450C38_1EC8[] __asm__("sync_priority");
  * Loads a BIG archive's header through FILESYS_atomic (func_003E1D68, sync priority), fourth word 1. Declared void; the
  * header is left in the return register.
  *
- * @param arg0  the archive path
- * @param arg1  the allocation flags
+ * @param fileName  the archive path
+ * @param memFlags  the allocation flags
  */
-void func_003E1EC8(int arg0, int arg1) {
+void func_003E1EC8(int fileName, int memFlags) {
     int buf[8];
 
-    buf[0] = arg0;
-    buf[2] = arg1;
+    buf[0] = fileName;
+    buf[2] = memFlags;
     buf[3] = 1;
     FILESYS_atomic_1EC8(func_003E1D68_1EC8, 0, D_00450C38_1EC8[0], buf);
 }
@@ -5760,15 +5760,15 @@ extern int D_00450C38_1F08[] __asm__("sync_priority");
 /**
  * Loads a BIG archive's header through FILESYS_atomic (func_003E1D68, sync priority), fourth word 0. Declared void.
  *
- * @param arg0  the archive path
- * @param arg1  the allocation flags
+ * @param fileName  the archive path
+ * @param memFlags  the allocation flags
  */
-void func_003E1F08(int arg0, int arg1) {
+void func_003E1F08(int fileName, int memFlags) {
     int buf[8];
 
-    buf[0] = arg0;
+    buf[0] = fileName;
     buf[3] = 0;
-    buf[2] = arg1;
+    buf[2] = memFlags;
     FILESYS_atomic_1F08(func_003E1D68_1F08, 0, D_00450C38_1F08[0], buf);
 }
 #endif
@@ -5881,14 +5881,14 @@ int unpacksizez_2130(void *) __asm__("unpacksizez");
  * Returns a packed file's unpacked size: loads its first 0x80 bytes (FILE_loadatz) and reads the size from the pack
  * header (unpacksizez); 0 when the load fails.
  *
- * @param arg0  the path
+ * @param fileName  the path
  * @return the unpacked size, or 0
  */
-int func_003E2130(int arg0) {
+int func_003E2130(int fileName) {
     char buf[0x80];
     int var_2;
 
-    if (FILE_loadatz_2130(arg0, buf, 0x80) != 0) {
+    if (FILE_loadatz_2130(fileName, buf, 0x80) != 0) {
         var_2 = unpacksizez_2130(buf);
     } else {
         var_2 = 0;
@@ -5907,11 +5907,11 @@ void unpacksizez_2168(char *) __asm__("unpacksizez");
  * Returns a packed file's unpacked size like func_003E2130, without checking the load. Declared void; the size is left
  * in the return register.
  *
- * @param a  the path
+ * @param fileName  the path
  */
-void func_003E2168(int a) {
+void func_003E2168(int fileName) {
     char buf[0x80];
-    FILE_loadatz_2168(a, buf, 0x80);
+    FILE_loadatz_2168(fileName, buf, 0x80);
     unpacksizez_2168(buf);
 }
 #endif
@@ -6093,24 +6093,24 @@ static inline int low_2490(unsigned char *t, int c) {
  * Compares two strings ignoring case (upper-case letters per the ctype table D_00499C81 fold to lower case); returns
  * the difference at the first mismatch, 0 when equal.
  *
- * @param a  the first string
- * @param b  the second string
+ * @param lhs  the first string
+ * @param rhs  the second string
  * @return the difference
  */
-int func_003E2490(signed char *a, signed char *b) {
-    unsigned char *t = D_00499C81_2490;
-    signed char *p = a;
-    signed char *q = b;
-    signed char c1 = *p;
-    signed char c2 = *q;
-    int d;
-    while ((d = low_2490(t, c1) - low_2490(t, c2)) == 0 && c1 != 0) {
-        q++;
-        p++;
-        c1 = *p;
-        c2 = *q;
+int func_003E2490(signed char *lhs, signed char *rhs) {
+    unsigned char *ctypeTable = D_00499C81_2490;
+    signed char *lhsPtr = lhs;
+    signed char *rhsPtr = rhs;
+    signed char lhsChar = *lhsPtr;
+    signed char rhsChar = *rhsPtr;
+    int diff;
+    while ((diff = low_2490(ctypeTable, lhsChar) - low_2490(ctypeTable, rhsChar)) == 0 && lhsChar != 0) {
+        rhsPtr++;
+        lhsPtr++;
+        lhsChar = *lhsPtr;
+        rhsChar = *rhsPtr;
     }
-    return d;
+    return diff;
 }
 #endif
 
@@ -6608,17 +6608,17 @@ extern int D_00450C48_3020[] __asm__("D_00450C48");
  * task and marks the host device available (flag 2); with a disc it also marks the disc (flag 1) and makes it the
  * default device (D_00450C44 = 1), otherwise the host is the default (2). The first argument is not used.
  *
- * @param arg0  the maximum open files (unused)
- * @param arg1  nonzero when the CD file table was built
+ * @param maxOpenFiles  the maximum open files (unused)
+ * @param discAvail  nonzero when the CD file table was built
  */
-void func_003E3020(int arg0, int arg1) {
+void func_003E3020(int maxOpenFiles, int discAvail) {
     int temp_3;
 
     D_00450C48_3020[0] = 0;
     SYNCTASK_add(func_003E33B0, 0, 0);
     temp_3 = D_00450C48_3020[0];
     D_00450C48_3020[0] = temp_3 | 2;
-    if (arg1 != 0) {
+    if (discAvail != 0) {
         D_00450C48_3020[0] = temp_3 | 3;
         D_00450C44_3020[0] = 1;
         return;
@@ -6770,18 +6770,18 @@ extern int D_00450C40_0C40[] __asm__("D_00450C40");
  * Closes a device handle: a host file is closed (forgetting it as the last-read file D_00450C40); disc handles need
  * nothing. Returns 0.
  *
- * @param arg0  the device handle
+ * @param fsHandle  the device handle
  * @return 0
  */
-int func_003E32F8(int arg0) {
-    int temp_16;
+int func_003E32F8(int fsHandle) {
+    int fileDesc;
     int temp_5;
 
-    temp_5 = arg0 >> 0x18;
-    temp_16 = arg0 & 0xFFFFFF;
+    temp_5 = fsHandle >> 0x18;
+    fileDesc = fsHandle & 0xFFFFFF;
     if (temp_5 == 2) {
-        func_00427FE8(temp_16);
-        if (D_00450C40_0C40[0] == temp_16) {
+        func_00427FE8(fileDesc);
+        if (D_00450C40_0C40[0] == fileDesc) {
             D_00450C40_0C40[0] = -1;
         }
     }
@@ -6803,22 +6803,22 @@ extern int func_003E4648(int);
  * registers) and its result is returned. A host read is only recorded (D_00519C20) for the sync task func_003E33B0,
  * which does it and completes the command; returns 1.
  *
- * @param arg0  the device handle
- * @param arg1  the destination
- * @param arg2  the file offset
- * @param arg3  the byte count
+ * @param fsHandle  the device handle
+ * @param buffer  the destination
+ * @param fileOffset  the file offset
+ * @param byteCount  the byte count
  * @return 1 for a host read, else the disc read's result
  */
-int func_003E3350(int arg0, int arg1, int arg2, int arg3) {
-    int lo = arg0 & 0xFFFFFF;
-    if ((arg0 >> 24) == 1) {
+int func_003E3350(int fsHandle, int buffer, int fileOffset, int byteCount) {
+    int lo = fsHandle & 0xFFFFFF;
+    if ((fsHandle >> 24) == 1) {
         return func_003E4648(lo);
     }
     D_00519C20_3350.a = 1;
     D_00519C20_3350.b = lo;
-    D_00519C20_3350.c = arg1;
-    D_00519C20_3350.d = arg2;
-    D_00519C20_3350.e = arg3;
+    D_00519C20_3350.c = buffer;
+    D_00519C20_3350.d = fileOffset;
+    D_00519C20_3350.e = byteCount;
     return 1;
 }
 #endif
@@ -6842,14 +6842,14 @@ int func_003E33B0_i(void) __asm__("func_003E33B0");
  * @return 0
  */
 int func_003E33B0_i(void) {
-    int r;
+    int bytesRead;
     int ok;
     if (D_00519C20_3350.a != 0) {
         if (D_00450C40_33B0 != D_00519C20_3350.b || D_00450C4C_33B0 != D_00519C20_3350.d) {
             func_00428168(D_00519C20_3350.b, D_00519C20_3350.d, 0);
         }
-        r = func_004283A0_33B0(D_00519C20_3350.b, D_00519C20_3350.c, D_00519C20_3350.e);
-        ok = r == D_00519C20_3350.e;
+        bytesRead = func_004283A0_33B0(D_00519C20_3350.b, D_00519C20_3350.c, D_00519C20_3350.e);
+        ok = bytesRead == D_00519C20_3350.e;
         D_00450C40_33B0 = D_00519C20_3350.b;
         D_00450C4C_33B0 = D_00519C20_3350.d + D_00519C20_3350.e;
         D_00519C20_3350.a = 0;
@@ -6917,15 +6917,15 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3538);
  * @return the sector, or 0
  */
 int func_003E3538(int handle) {
-    int sp0;
+    int startSector;
     int idx = handle & 0xFFFFFF;
 
     if ((handle >> 24) == 1) {
-        func_003E48D8(idx, 0, 0, &sp0);
+        func_003E48D8(idx, 0, 0, &startSector);
     } else {
-        sp0 = 0;
+        startSector = 0;
     }
-    return sp0;
+    return startSector;
 }
 #endif
 
@@ -6936,12 +6936,12 @@ void iSignalSema_3588(int) __asm__("iSignalSema");
 /**
  * Alarm handler of func_003E35B0: signals the waiting semaphore and re-enables interrupts.
  *
- * @param a  the alarm id
- * @param b  the alarm time
- * @param c  the semaphore
+ * @param alarmId  the alarm id
+ * @param alarmTime  the alarm time
+ * @param semaId  the semaphore
  */
-void func_003E3588(int a, int b, int c) {
-    iSignalSema_3588(c);
+void func_003E3588(int alarmId, int alarmTime, int semaId) {
+    iSignalSema_3588(semaId);
     // PORT: MIPS sync + EE ei (no C equivalent)
     __asm__ volatile("sync\n\tei");
 }
@@ -6957,20 +6957,20 @@ extern void SetAlarm_35B0(int, void (*)(void), int) __asm__("SetAlarm");
 extern int CreateSema_35B0(Cfg_35B0 *) __asm__("CreateSema");
 
 /**
- * Sleeps the calling thread for @p arg0 alarm ticks (H-sync periods): sets an alarm (handler func_003E3588) that
+ * Sleeps the calling thread for @p hsyncTicks alarm ticks (H-sync periods): sets an alarm (handler func_003E3588) that
  * signals a new semaphore, waits on it and deletes it.
  *
- * @param arg0  the delay in H-sync periods
+ * @param hsyncTicks  the delay in H-sync periods
  */
-void func_003E35B0(unsigned short arg0) {
-    Cfg_35B0 c;
+void func_003E35B0(unsigned short hsyncTicks) {
+    Cfg_35B0 semaParam;
     int temp_2;
 
-    c.f4 = 1;
-    c.f8 = 0;
-    c.f14 = 0;
-    temp_2 = CreateSema_35B0(&c);
-    SetAlarm_35B0(arg0, cb_35B0, temp_2);
+    semaParam.f4 = 1;
+    semaParam.f8 = 0;
+    semaParam.f14 = 0;
+    temp_2 = CreateSema_35B0(&semaParam);
+    SetAlarm_35B0(hsyncTicks, cb_35B0, temp_2);
     WaitSema(temp_2);
     DeleteSema(temp_2);
 }
@@ -6999,7 +6999,7 @@ extern int func_00402300_3618(void) __asm__("func_00402300");
  */
 char *func_003E3618(void) {
     int n = 10;
-    int r;
+    int syncBusy;
     int done;
     do {
         if (n == 0) {
@@ -7012,9 +7012,9 @@ char *func_003E3618(void) {
             func_003E35B0(0x1E0);
         }
         do {
-            r = func_004013E8_3618(1);
+            syncBusy = func_004013E8_3618(1);
             func_003E35B0(0x1E0);
-        } while (r != 0);
+        } while (syncBusy != 0);
         done = func_00402300_3618() == 0;
         if (!done) n--;
     } while (!done);
@@ -7061,14 +7061,14 @@ extern int D_0051ED80_3968[] __asm__("D_0051ED80");
  * Sort comparator of the CD file table: orders entries by their first word (the name hash), unsigned; equal hashes
  * return 0 and count a collision in D_0051ED80.
  *
- * @param a  the first entry
- * @param b  the second entry
+ * @param lhs  the first entry
+ * @param rhs  the second entry
  * @return -1, 0 or 1
  */
-int func_003E3968(unsigned int *a, unsigned int *b) {
-    long d = (long)*a - (long)*b;
-    if (d < 0) return -1;
-    if (d > 0) return 1;
+int func_003E3968(unsigned int *lhs, unsigned int *rhs) {
+    long diff = (long)*lhs - (long)*rhs;
+    if (diff < 0) return -1;
+    if (diff > 0) return 1;
     D_0051ED80_3968[0]++;
     return 0;
 }
@@ -7101,25 +7101,25 @@ extern int D_0051ED80_39A8[] __asm__("D_0051ED80");
  */
 int func_003E39A8(char *src, char *dst, int n, int seed) {
     int done = 0;
-    char *d;
+    char *dstEntry;
     do {
-        char *s;
-        d = dst;
-        s = src;
+        char *srcEntry;
+        dstEntry = dst;
+        srcEntry = src;
         if (n > 0) {
             int i = n;
             do {
                 int sz;
-                *(int *)d = func_003E36F8_39A8(s, seed);
-                *(int *)(d + 4) = *(int *)(s + 0x100);
-                *(int *)(d + 8) = *(int *)(s + 0x104);
+                *(int *)dstEntry = func_003E36F8_39A8(srcEntry, seed);
+                *(int *)(dstEntry + 4) = *(int *)(srcEntry + 0x100);
+                *(int *)(dstEntry + 8) = *(int *)(srcEntry + 0x104);
                 if (D_00450C58_39A8[1] > 0) {
-                    strcpy_39A8(d + 0xC, s);
+                    strcpy_39A8(dstEntry + 0xC, srcEntry);
                 }
                 sz = D_00450C58_39A8[1];
                 i--;
-                s += 0x108;
-                d += sz + 0xC;
+                srcEntry += 0x108;
+                dstEntry += sz + 0xC;
             } while (i != 0);
         }
         D_0051ED80_39A8[0] = 0;
@@ -7162,19 +7162,19 @@ extern void func_004013E8_3B00(int) __asm__("func_004013E8");
  * flag 2 (reading) on success or flags 2 and 4 (failed, for the recovery in func_003E4000) otherwise.
  */
 void func_003E3B00(void) {
-    int *q = &D_00519C40_3B00[8];
-    int *p = D_00519C40_3B00;
-    int arg;
+    int *readState = &D_00519C40_3B00[8];
+    int *cdState = D_00519C40_3B00;
+    int readBuf;
     int ok;
     int i;
-    if (p[0] & 1) {
-        arg = p[15];
+    if (cdState[0] & 1) {
+        readBuf = cdState[15];
     } else {
-        arg = q[5];
+        readBuf = readState[5];
     }
     ok = 0;
     for (i = 0; i < 3; i++) {
-        if (func_00401DF8_3B00(q[3], q[4], arg, &D_00519C40_3B00[7]) != 0) {
+        if (func_00401DF8_3B00(readState[3], readState[4], readBuf, &D_00519C40_3B00[7]) != 0) {
             D_00519C40_3B00[0] |= 2;
             ok = 1;
             break;
@@ -7238,7 +7238,7 @@ void func_003E3BE0_impl(void) __asm__("func_003E3BE0");
  * (iFILESYS_CommandCompleteCallback(1)). Never returns.
  */
 void func_003E3BE0_impl(void) {
-    struct sC40Read *s = &D_00519C40.f20;
+    struct sC40Read *curRead = &D_00519C40.f20;
 
     while (1) {
         int fl;
@@ -7257,28 +7257,28 @@ void func_003E3BE0_impl(void) {
         }
         if (D_00519C40.f00 & 1) {
             D_00519C40.f00 &= ~1;
-            D_00519C40.f14 = s->f0C;
-            MEM_copy_2190(s->f14, (int)D_00519C40.f20.f1C + s->f08, s->f00);
+            D_00519C40.f14 = curRead->f0C;
+            MEM_copy_2190(curRead->f14, (int)D_00519C40.f20.f1C + curRead->f08, curRead->f00);
         }
-        if (s->f04 > 0) {
-            s->f14 += s->f00;
-            s->f08 = 0;
-            s->f0C += s->f10;
-            if (s->f04 < 0x800) {
-                s->f00 = s->f04;
+        if (curRead->f04 > 0) {
+            curRead->f14 += curRead->f00;
+            curRead->f08 = 0;
+            curRead->f0C += curRead->f10;
+            if (curRead->f04 < 0x800) {
+                curRead->f00 = curRead->f04;
                 D_00519C40.f00 |= 1;
-                s->f10 = 1;
-            } else if ((s->f14 & 0x3F) != 0) {
-                s->f00 = 0x800;
+                curRead->f10 = 1;
+            } else if ((curRead->f14 & 0x3F) != 0) {
+                curRead->f00 = 0x800;
                 D_00519C40.f00 |= 1;
-                s->f10 = 1;
+                curRead->f10 = 1;
             } else {
-                int k = s->f04 & -0x800;
+                int k = curRead->f04 & -0x800;
                 D_00519C40.f00 &= ~1;
-                s->f10 = k >> 11;
-                s->f00 = k;
+                curRead->f10 = k >> 11;
+                curRead->f00 = k;
             }
-            s->f04 -= s->f00;
+            curRead->f04 -= curRead->f00;
             func_003E3B00_3BE0();
         } else {
             D_00519C40.f00 &= ~2;
@@ -7395,9 +7395,9 @@ void func_003E3D78_4000(void) __asm__("func_003E3D78");
  * @return 0
  */
 int func_003E4000(void) {
-    int t = D_00519C40_4000[0];
-    if ((t & 6) == 6) {
-        D_00519C40_4000[0] = t & ~6;
+    int cdFlags = D_00519C40_4000[0];
+    if ((cdFlags & 6) == 6) {
+        D_00519C40_4000[0] = cdFlags & ~6;
         func_003E3D78_4000();
     }
     return 0;
@@ -7522,9 +7522,9 @@ unsigned int func_003E4040(unsigned int n, void *files) {
     char path[0x100];
     char name[0x10];
     int ok;
-    struct EmbFile_4040 *e;
-    struct IsoEntry_4040 *t;
-    char *q;
+    struct EmbFile_4040 *builtinFile;
+    struct IsoEntry_4040 *dirEntry;
+    char *pathChar;
     struct IsoPvd_4040 *pvd;
     struct IsoDirRec_4040 *rec;
 
@@ -7552,24 +7552,24 @@ unsigned int func_003E4040(unsigned int n, void *files) {
     D_00450C68 = D_00450C10_4040.alloc(str_Named_Dir, n * 264, 0);
     MEM_clear_4040(D_00450C68, n * 264);
     if (D_00450C10_4040.files != 0) {
-        e = D_00450C10_4040.files;
-        t = D_00450C68;
-        while (*e->name != 0) {
-            strcpy(path, e->path + 7);
-            for (q = path; *q != 0; q++) {
-                if (*q == '\\') {
-                    *q = '/';
+        builtinFile = D_00450C10_4040.files;
+        dirEntry = D_00450C68;
+        while (*builtinFile->name != 0) {
+            strcpy(path, builtinFile->path + 7);
+            for (pathChar = path; *pathChar != 0; pathChar++) {
+                if (*pathChar == '\\') {
+                    *pathChar = '/';
                 }
             }
-            strcpy(name, e->name);
-            name[strlen(e->name) - 2] = 0;
+            strcpy(name, builtinFile->name);
+            name[strlen(builtinFile->name) - 2] = 0;
             strcat_4040(path, name);
-            strcpy(t->path, path);
-            t->lba = e->lba;
-            t->size = e->size;
+            strcpy(dirEntry->path, path);
+            dirEntry->lba = builtinFile->lba;
+            dirEntry->size = builtinFile->size;
             D_00450C6C++;
-            t++;
-            e++;
+            dirEntry++;
+            builtinFile++;
         }
     } else {
         pvd = (struct IsoPvd_4040 *)func_003E3618_4040();
