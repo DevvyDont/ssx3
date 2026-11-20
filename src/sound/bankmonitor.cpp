@@ -5980,9 +5980,9 @@ struct sBmonVcall3398 { short delta; short index; void (*fn)(void*, int); };
  * @param flags  g++ 2.95 destructor flags (bit 1: destroy the virtual bases, bit 0: operator delete)
  */
 // PORT: g++ 2.95 virtual-base destruction with stack vtable this-adjust fix-ups, written out by hand.
-extern "C" void func_002B3398(char* self, int flags)
+extern "C" void func_002B3398(cMusicSys* self, int flags)
 {
-    *(void***)(self + 0x5440) = D_004838F8;
+    self->mVtbl = D_004838F8;
     *(const sBmonVtblA3398**)(*(char**)(**(char***)self + 0x1D8) + 4) = &D_00483928;
     *(void***)(**(char***)self + 0xAB0) = cBankMonitor_vtbl;
     *(const sBmonVtblB3398**)(**(char***)self + 0x1D4) = &D_00483948;
@@ -5990,26 +5990,26 @@ extern "C" void func_002B3398(char* self, int flags)
         sBmonVtblA3398 soundSysVtbl = D_00483928;
         *(sBmonVtblA3398**)(*(char**)(**(char***)self + 0x1D8) + 4) = &soundSysVtbl;
         char* base1 = *(char**)(**(char***)self + 0x1D8) - 0x5448;
-        int soundSysDelta = self - base1;
+        int soundSysDelta = ((char*)self) - base1;
         soundSysVtbl.e[1].delta = D_00483928.e[1].delta + soundSysDelta;
         sBmonVtblB3398 bankManagerVtbl = D_00483948;
         *(sBmonVtblB3398**)(**(char***)self + 0x1D4) = &bankManagerVtbl;
         char* base2 = **(char***)self - 0x5450;
-        int bankManagerDelta = self - base2;
+        int bankManagerDelta = ((char*)self) - base2;
         bankManagerVtbl.e[1].delta = D_00483948.e[1].delta + bankManagerDelta;
     }
-    for (int i = 0; i < *(int*)(self + 0x3E4); i++) {
-        char* songConfig = ((char**)(self + 4))[i];
+    for (int i = 0; i < self->mNumSongs; i++) {
+        char* songConfig = ((char**)(((char*)self) + 4))[i];
         if (songConfig != 0) {
             sBmonVcall3398* dtorSlot = &(*(sBmonVcall3398**)(songConfig + 0xA8))[1];
             dtorSlot->fn(songConfig + dtorSlot->delta, 3);
         }
     }
-    if (*(void**)(self + 0x5434) != 0) {
-        cMemMan_free(*(void**)(self + 0x5434));
+    if (self->mMPFFile != 0) {
+        cMemMan_free(self->mMPFFile);
     }
-    if (*(void**)(self + 0x408) != 0) {
-        func_002B1F78((cSongInstance*)(*(void**)(self + 0x408)), 3);
+    if (self->mCurrent != 0) {
+        func_002B1F78((cSongInstance*)(self->mCurrent), 3);
     }
     gMusicSys = 0;
     if (flags & 2) {
@@ -6594,16 +6594,16 @@ struct sBankMonFind {
  *
  * @param name  the text to look for
  */
-extern "C" void func_002B3EE8(sBankMonFind* self, const char* name)
+extern "C" void func_002B3EE8(cMusicSys* self, const char* name)
 {
-    if (self->count < 64) {
-        for (int i = 0; i < self->nnames; i++) {
-            if (strstr(self->names[i], name) != 0) {
-                self->mask |= (ulong)1 << i;
-                self->count++;
+    if (self->mNumActiveSongs < 64) {
+        for (int i = 0; i < self->mNumSongs; i++) {
+            if (strstr(self->mSongName[i], name) != 0) {
+                self->mActiveMap |= (ulong)1 << i;
+                self->mNumActiveSongs++;
                 for (int j = 0; j < 5; j++) {
-                    if (self->grid[i][j] != 0) {
-                        self->totals[j]++;
+                    if (self->mCategory[i][j] != 0) {
+                        self->mCategoryCount[j]++;
                     }
                 }
                 return;
@@ -6632,14 +6632,14 @@ struct sBankMonUse {
  *
  * @param idx  the song index
  */
-extern "C" void func_002B3FE8(sBankMonUse* self, int idx)
+extern "C" void func_002B3FE8(cMusicSys* self, int idx)
 {
-    if (self->count < 64) {
-        self->count++;
-        self->mask |= (ulong)1 << idx;
+    if (self->mNumActiveSongs < 64) {
+        self->mNumActiveSongs++;
+        self->mActiveMap |= (ulong)1 << idx;
         for (int i = 0; i < 5; i++) {
-            if (self->grid[idx][i] != 0) {
-                self->totals[i]++;
+            if (self->mCategory[idx][i] != 0) {
+                self->mCategoryCount[i]++;
             }
         }
     }
@@ -6678,7 +6678,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002B4070);
 // PORT: 64-bit `long` mask (8 bytes on EE); use uint64_t off-PS2.
 struct sBankMonUse;
 extern "C" void func_002B3EB0(cMusicSys* self);
-extern "C" void func_002B3FE8(sBankMonUse* self, int idx);
+extern "C" void func_002B3FE8(cMusicSys* self, int idx);
 void func_002B4060(void* self);
 
 /**
@@ -6694,7 +6694,7 @@ extern "C" void func_002B4070(cMusicSys* self, ulong mask)
     for (int i = 0; i < self->mNumFESongs; i++) {
         int bit = (mask >> i) & 1;
         if (bit) {
-            func_002B3FE8((sBankMonUse*)self, i);
+            func_002B3FE8((cMusicSys*)((sBankMonUse*)self), i);
         }
     }
     func_002B4060(self);
@@ -6723,15 +6723,15 @@ struct sBankMonitor934 {
  * @param i  the song index, or < 0 for mCurrentSongNum
  * @return the title
  */
-extern "C" sBankEntry64* func_002B40F0(sBankMonitor934* self, int i)
+extern "C" sBankEntry64* func_002B40F0(cMusicSys* self, int i)
 {
     if (i < 0) {
-        i = self->current;
+        i = self->mCurrentSongNum;
         if (i < 0) {
             return 0;
         }
     }
-    return &self->a[i];
+    return &((sBankEntry64*)&self->mTitle[0])[i];
 }
 #endif
 
@@ -6744,15 +6744,15 @@ INCLUDE_ASM("sound/bankmonitor", func_002B4120);
  * @param i  the song index, or < 0 for mCurrentSongNum
  * @return the artist
  */
-extern "C" sBankEntry64* func_002B4120(sBankMonitor934* self, int i)
+extern "C" sBankEntry64* func_002B4120(cMusicSys* self, int i)
 {
     if (i < 0) {
-        i = self->current;
+        i = self->mCurrentSongNum;
         if (i < 0) {
             return 0;
         }
     }
-    return &self->b[i];
+    return &((sBankEntry64*)&self->mArtist[0])[i];
 }
 #endif
 
@@ -6765,15 +6765,15 @@ INCLUDE_ASM("sound/bankmonitor", func_002B4150);
  * @param i  the song index, or < 0 for mCurrentSongNum
  * @return the album
  */
-extern "C" sBankEntry64* func_002B4150(sBankMonitor934* self, int i)
+extern "C" sBankEntry64* func_002B4150(cMusicSys* self, int i)
 {
     if (i < 0) {
-        i = self->current;
+        i = self->mCurrentSongNum;
         if (i < 0) {
             return 0;
         }
     }
-    return &self->c[i];
+    return &((sBankEntry64*)&self->mAlbum[0])[i];
 }
 #endif
 

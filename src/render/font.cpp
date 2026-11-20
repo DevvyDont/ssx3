@@ -4428,8 +4428,8 @@ INCLUDE_ASM("render/font", func_00395550);
  * @param graphicsMan  the graphics manager
  * @return unk_5A5C
  */
-extern "C" int func_00395550(void *graphicsMan) {
-    return (*(int *)((char*)(graphicsMan) + (0x5A5C)));
+extern "C" int func_00395550(cPS2GraphicsMan* graphicsMan) {
+    return (graphicsMan->unk_5A5C);
 }
 #endif
 //100%

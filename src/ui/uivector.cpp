@@ -1554,10 +1554,10 @@ struct sVEntry3A4D00 {
  * @param obj  list node (a UI thing) to try
  * @return @p obj when it handled the input, 0 otherwise
  */
-extern "C" void* cListOpOnInput_onListNode(void* self, cListNode* obj)
+extern "C" void* cListOpOnInput_onListNode(cList* self, cListNode* obj)
 {
     sVEntry3A4D00* vt = (sVEntry3A4D00*)obj->mVtbl;
-    if (vt[0xF].fn((char*)obj + vt[0xF].delta, *(void**)((char*)self + 4)) == 0) {
+    if (vt[0xF].fn((char*)obj + vt[0xF].delta, self->mStart.mpNext) == 0) {
         return 0;
     }
     return ((void*)obj);

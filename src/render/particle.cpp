@@ -6811,7 +6811,7 @@ extern "C" void FlushCache(int);
 extern "C" void func_00367078(int gs);
 void* func_00367340(void* self, int a1, int a2);
 extern "C" int func_003673D8(int gs, int size);
-extern "C" void func_00382AF0(void* self, int arg1, int arg2);
+extern "C" void func_00382AF0(cPS2GraphicsMan* self, int arg1, int arg2);
 extern "C" void func_003E6690(int a);
 extern "C" void func_003FD910(int a, int b, int c, int d);
 
@@ -6879,103 +6879,103 @@ struct sParticleTarget_37BD98 {
  * @param flag  nonzero for output mode 80 (0x50) instead of 2 and func_003E6690(3) instead of 1; kept in unk_5A4C
  * @return 1 when the mode was set, 0 when the draw and z formats do not go together
  */
-extern "C" int func_0037BD98(sParticleTarget_37BD98* self, unsigned int displayWidth, unsigned int displayHeight, unsigned int w, unsigned int bufferHeight,
+extern "C" int func_0037BD98(cPS2GraphicsMan* self, unsigned int displayWidth, unsigned int displayHeight, unsigned int w, unsigned int bufferHeight,
                              unsigned int psm, unsigned int psm2, unsigned int zpsm, short resetMode, short interlaceMode, short fieldMode, int flag)
 {
-    if (!func_0037BD38(self, psm2, zpsm))
+    if (!func_0037BD38(((sParticleTarget_37BD98*)self), psm2, zpsm))
         return 0;
 
-    self->f5A58 = displayHeight;
-    self->width = w;
-    self->height = bufferHeight;
-    self->psm2 = psm2;
-    self->psm = psm;
-    self->zpsm = zpsm;
-    self->f5A44 = interlaceMode;
-    self->f5A46 = fieldMode;
-    self->f5A74 = 0;
-    self->f5A54 = displayWidth;
-    self->f5A48 = 2;
-    self->f5A4C = flag;
-    self->f5A60 = 0;
+    self->unk_5A58 = (int)displayHeight;
+    self->mFBWidth = (int)w;
+    self->mFBHeight = (int)bufferHeight;
+    self->mCurrentFBFormat = (int)psm2;
+    self->unk_5A38 = (int)psm;
+    self->mCurrentZBFormat = (int)zpsm;
+    self->unk_5A44 = interlaceMode;
+    self->unk_5A46 = fieldMode;
+    self->mCurrentFrameCount = 0;
+    self->unk_5A54 = (int)displayWidth;
+    self->unk_5A48 = 2;
+    self->unk_5A4C = flag;
+    self->unk_5A60 = 0;
 
     switch (displayWidth) {
     case 0x100:
-        self->f5A64 = 9;
+        self->unk_5A64 = 9;
         break;
     case 320:
-        self->f5A64 = 7;
+        self->unk_5A64 = 7;
         break;
     case 0x180:
-        self->f5A64 = 6;
+        self->unk_5A64 = 6;
         break;
     case 0x200:
-        self->f5A64 = 4;
+        self->unk_5A64 = 4;
         break;
     case 640:
-        self->f5A64 = 3;
+        self->unk_5A64 = 3;
         break;
     }
 
-    self->f5A50 = (self->width + 0x3F) >> 6;
-    self->f5A5C = (self->f5A54 + 0x3F) >> 6;
+    self->mFrameBufferWidth = (int)(((unsigned int)self->mFBWidth + 0x3F) >> 6);
+    self->unk_5A5C = (int)(((unsigned int)self->unk_5A54 + 0x3F) >> 6);
 
-    switch (self->psm) {
+    switch ((unsigned int)self->unk_5A38) {
     case 0:
     case 1:
     case 0x30:
     case 49:
-        self->f59D0 = 0;
-        self->f5A68 = self->f5A5C * ((self->f5A58 + 0x1F) >> 5);
+        self->unk_59D0 = 0;
+        self->unk_5A68 = (unsigned int)self->unk_5A5C * (((unsigned int)self->unk_5A58 + 0x1F) >> 5);
         break;
     case 2:
     case 10:
     case 50:
     case 58:
-        self->f59D0 = 1;
-        self->f5A68 = self->f5A5C * ((self->f5A58 + 0x3F) >> 6);
+        self->unk_59D0 = 1;
+        self->unk_5A68 = (unsigned int)self->unk_5A5C * (((unsigned int)self->unk_5A58 + 0x3F) >> 6);
         break;
     }
 
-    switch (self->psm2) {
+    switch ((unsigned int)self->mCurrentFBFormat) {
     case 0:
     case 1:
     case 0x30:
     case 49:
-        self->f5A6C = self->f5A50 * ((self->height + 0x1F) >> 5);
+        self->unk_5A6C = (unsigned int)self->mFrameBufferWidth * (((unsigned int)self->mFBHeight + 0x1F) >> 5);
         break;
     case 2:
     case 10:
     case 50:
     case 58:
-        self->f5A6C = self->f5A50 * ((self->height + 0x3F) >> 6);
+        self->unk_5A6C = (unsigned int)self->mFrameBufferWidth * (((unsigned int)self->mFBHeight + 0x3F) >> 6);
         break;
     }
 
-    switch (self->zpsm) {
+    switch ((unsigned int)self->mCurrentZBFormat) {
     case 0x30:
     case 49:
-        self->f5A70 = self->f5A50 * ((self->height + 0x1F) >> 5);
+        self->unk_5A70 = (unsigned int)self->mFrameBufferWidth * (((unsigned int)self->mFBHeight + 0x1F) >> 5);
         break;
     case 50:
     case 58:
-        self->f5A70 = self->f5A50 * ((self->height + 0x3F) >> 6);
+        self->unk_5A70 = (unsigned int)self->mFrameBufferWidth * (((unsigned int)self->mFBHeight + 0x3F) >> 6);
         break;
     }
 
-    int gs = self->gs;
+    int gs = (int)self->mpTextureMan;
     func_00367078(gs);
-    self->f5A78 = func_003673D8(gs, self->f5A6C << 13);
-    self->f5A7C = func_003673D8(gs, self->f5A68 << 13);
-    self->f5A80 = func_003673D8(gs, self->f5A70 << 13);
+    self->unk_5A78 = func_003673D8(gs, self->unk_5A6C << 13);
+    self->unk_5A7C = func_003673D8(gs, self->unk_5A68 << 13);
+    self->mCurrentZBufferPage = func_003673D8(gs, self->unk_5A70 << 13);
 
     // PORT: reads psm and psm2 as one 64-bit word.
-    if (*(long*)&self->psm == 0x100000001L)
-        func_00367340((void*)self->gs, self->f5A78 << 11, self->f5A54 * self->f5A58 + self->width * self->height * 2);
-    else if (self->psm == 1)
-        func_00367340((void*)self->gs, self->f5A7C << 11, self->f5A54 * self->f5A58 + self->width * self->height);
+    if (*(long*)(unsigned int*)&self->unk_5A38 == 0x100000001L)
+        func_00367340((void*)(int)self->mpTextureMan, self->unk_5A78 << 11, (unsigned int)self->unk_5A54 * (unsigned int)self->unk_5A58 + (unsigned int)self->mFBWidth * (unsigned int)self->mFBHeight * 2);
+    else if ((unsigned int)self->unk_5A38 == 1)
+        func_00367340((void*)(int)self->mpTextureMan, self->unk_5A7C << 11, (unsigned int)self->unk_5A54 * (unsigned int)self->unk_5A58 + (unsigned int)self->mFBWidth * (unsigned int)self->mFBHeight);
     else
-        func_00367340((void*)self->gs, self->f5A80 << 11, self->width * self->height);
+        func_00367340((void*)(int)self->mpTextureMan, self->mCurrentZBufferPage << 11, (unsigned int)self->mFBWidth * (unsigned int)self->mFBHeight);
 
     FlushCache(0);
     *(volatile long*)0x12001000 = 8;
@@ -6983,7 +6983,7 @@ extern "C" int func_0037BD98(sParticleTarget_37BD98* self, unsigned int displayW
     }
     *(volatile long*)0x12001000;
 
-    func_003FD910(resetMode, self->f5A44, flag ? 80 : self->f5A48, self->f5A46);
+    func_003FD910(resetMode, self->unk_5A44, flag ? 80 : self->unk_5A48, self->unk_5A46);
     func_003E6690(flag ? 3 : 1);
     func_00382AF0(self, 0, 1);
     return 1;
@@ -7103,12 +7103,12 @@ struct sPartColour_C570 {
  *
  * @param colour  the brightness per channel (1.0 = full)
  */
-extern "C" void func_0037C570(void* self, sPartColour_C570* colour)
+extern "C" void func_0037C570(cPS2GraphicsMan* self, sPartColour_C570* colour)
 {
     float one = 1.0f;
-    *(int*)((char*)self + 0x59EC) = fptoui(clamp_C570(colour->r, one) * 128.0f);
-    *(int*)((char*)self + 0x59F0) = fptoui(clamp_C570(colour->g, one) * 128.0f);
-    *(int*)((char*)self + 0x59F4) = fptoui(clamp_C570(colour->b, one) * 128.0f);
+    self->unk_59EC[0] = fptoui(clamp_C570(colour->r, one) * 128.0f);
+    self->unk_59EC[1] = fptoui(clamp_C570(colour->g, one) * 128.0f);
+    self->unk_59EC[2] = fptoui(clamp_C570(colour->b, one) * 128.0f);
 }
 #endif
 
@@ -7153,9 +7153,9 @@ static inline float clamp_C720(float x, float hi)
  *
  * @param alpha  the amount to fade the screen (0 = none, 1 = full)
  */
-extern "C" void func_0037C720(void* self, float alpha)
+extern "C" void func_0037C720(cPS2GraphicsMan* self, float alpha)
 {
-    *(int*)((char*)self + 0x59F8) = fptoui((1.0f - clamp_C720(alpha, 1.0f)) * 128.0f);
+    self->unk_59F8 = fptoui((1.0f - clamp_C720(alpha, 1.0f)) * 128.0f);
 }
 #endif
 
@@ -7167,9 +7167,9 @@ INCLUDE_ASM("render/particle", func_0037C770);
  *
  * @return the fade amount (0 = none)
  */
-extern "C" float func_0037C770(void* self)
+extern "C" float func_0037C770(cPS2GraphicsMan* self)
 {
-    unsigned int rawAlpha = *(unsigned int*)((char*)self + 0x59F8);
+    unsigned int rawAlpha = (unsigned int)self->unk_59F8;
     return 1.0f - (float)rawAlpha * 0.0078125f;
 }
 #endif
@@ -8070,7 +8070,7 @@ struct sPtGfx_D668 {
  * @param frameMask  the FBMSK bits (1 = do not write that bit)
  * @param mode  0 for context 1, 1 for context 2
  */
-extern "C" void func_0037D668(sPtGfx_D668* self, ulong** pp, int frameMask, int mode)
+extern "C" void func_0037D668(cPS2GraphicsMan* self, ulong** pp, int frameMask, int mode)
 {
     ulong* packet = *pp;
     switch (mode) {
@@ -8079,7 +8079,7 @@ extern "C" void func_0037D668(sPtGfx_D668* self, ulong** pp, int frameMask, int 
         packet[2] = ((ulong)0x10000000 << 32) | 0x8001;
         packet[3] = 0xE;
         packet[0] = 0;
-        packet[4] = (ulong)self->fbp | ((ulong)self->fbw << 16) | ((ulong)self->psm << 24) | ((ulong)frameMask << 32);
+        packet[4] = (ulong)(unsigned int)self->mCurrentFrameBufferPage | ((ulong)(unsigned int)self->mFrameBufferWidth << 16) | ((ulong)(unsigned int)self->mCurrentFBFormat << 24) | ((ulong)frameMask << 32);
         packet[5] = 76;
         break;
     case 1:
@@ -8087,7 +8087,7 @@ extern "C" void func_0037D668(sPtGfx_D668* self, ulong** pp, int frameMask, int 
         packet[2] = ((ulong)0x10000000 << 32) | 0x8001;
         packet[3] = 0xE;
         packet[0] = 0;
-        packet[4] = (ulong)self->fbp | ((ulong)self->fbw << 16) | ((ulong)self->psm << 24) | ((ulong)frameMask << 32);
+        packet[4] = (ulong)(unsigned int)self->mCurrentFrameBufferPage | ((ulong)(unsigned int)self->mFrameBufferWidth << 16) | ((ulong)(unsigned int)self->mCurrentFBFormat << 24) | ((ulong)frameMask << 32);
         packet[5] = 77;
         break;
     default:
@@ -10442,7 +10442,7 @@ extern "C" void cPS2GraphicsMan_DrawSphere(cPS2GraphicsMan* mgr, sPt2170* pos, f
 //100%
 INCLUDE_ASM("render/particle", func_003825C0);
 #ifdef SKIP_ASM
-extern "C" void func_003825F8(void* arg);
+extern "C" void func_003825F8(cPS2GraphicsMan* arg);
 
 /**
  * Handles the VBlank-start interrupt: runs func_003825F8 on the graphics manager and returns 1.
@@ -10461,7 +10461,7 @@ extern "C" int func_003825C0(int cause, void* graphicsMan)
         // PORT: PS2-only debug trap (assert).
         __asm__ __volatile__("break 0");
     }
-    func_003825F8(graphicsMan);
+    func_003825F8((cPS2GraphicsMan*)graphicsMan);
     // PORT: PS2-only: re-enable interrupts (EI).
     __asm__ __volatile__("sync.l\n\tei");
     return 1;
@@ -10480,14 +10480,14 @@ extern "C" void iSignalSema(int sema);
  * mKickState to 5, clears the counter and signals mKickSema (iSignalSema). Called from the VBlank handler
  * func_003825C0.
  */
-extern "C" void func_003825F8(void* self)
+extern "C" void func_003825F8(cPS2GraphicsMan* self)
 {
-    int vblanks = ++*(int*)((char*)self + 0x5ABC);
-    if (*(volatile int*)((char*)self + 0x5A8C) == 4) {
-        if (vblanks >= *(int*)((char*)self + 0x5AB8)) {
-            *(volatile int*)((char*)self + 0x5A8C) = 5;
-            *(int*)((char*)self + 0x5ABC) = 0;
-            iSignalSema(*(int*)((char*)self + 0x5AC8));
+    int vblanks = ++self->mVblankCounter;
+    if (self->mKickState == 4) {
+        if (vblanks >= self->mMinFlipWait) {
+            self->mKickState = 5;
+            self->mVblankCounter = 0;
+            iSignalSema(self->mKickSema);
         }
     }
 }
@@ -10496,7 +10496,7 @@ extern "C" void func_003825F8(void* self)
 //100%
 INCLUDE_ASM("render/particle", func_00382650);
 #ifdef SKIP_ASM
-extern "C" void func_00382688(void* arg);
+extern "C" void func_00382688(cPS2GraphicsMan* arg);
 
 /**
  * Handles the end of a VIF1 DMA transfer: runs func_00382688 on the graphics manager and returns 1.
@@ -10515,7 +10515,7 @@ extern "C" int func_00382650(int cause, void* graphicsMan)
         // PORT: PS2-only debug trap (assert).
         __asm__ __volatile__("break 0");
     }
-    func_00382688(graphicsMan);
+    func_00382688((cPS2GraphicsMan*)graphicsMan);
     // PORT: PS2-only: re-enable interrupts (EI).
     __asm__ __volatile__("sync.l\n\tei");
     return 1;
@@ -10534,13 +10534,13 @@ extern "C" void iSignalSema(int sema);
  * second phase; 3 (second phase sent) becomes 4, after which func_003825F8 waits for the flip. Called from the VIF1 DMA
  * handler func_00382650.
  */
-extern "C" void func_00382688(void* self)
+extern "C" void func_00382688(cPS2GraphicsMan* self)
 {
-    if (*(volatile int*)((char*)self + 0x5A8C) == 1) {
-        *(volatile int*)((char*)self + 0x5A8C) = 2;
-        iSignalSema(*(int*)((char*)self + 0x5AC8));
-    } else if (*(volatile int*)((char*)self + 0x5A8C) == 3) {
-        *(volatile int*)((char*)self + 0x5A8C) = 4;
+    if (self->mKickState == 1) {
+        self->mKickState = 2;
+        iSignalSema(self->mKickSema);
+    } else if (self->mKickState == 3) {
+        self->mKickState = 4;
     }
 }
 #endif
@@ -10556,10 +10556,10 @@ INCLUDE_ASM("render/particle", func_003826E0);
  *
  * @return 1 when rendering into the buffer may start, else 0
  */
-extern "C" int func_003826E0(void* self)
+extern "C" int func_003826E0(cPS2GraphicsMan* self)
 {
     volatile int* arr = (volatile int*)((char*)self + 0x5a90);
-    volatile int* bufState = &arr[*(int*)((char*)self + 0x5a10)];
+    volatile int* bufState = &arr[self->mBuildIndex];
     if (*bufState == 0 || *bufState == 1) {
         if (*bufState == 0) {
             *bufState = 1;
@@ -10580,9 +10580,9 @@ INCLUDE_ASM("render/particle", func_00382730);
  *
  * @return 1 when the DMA kick state is idle
  */
-extern "C" int func_00382730(void* self)
+extern "C" int func_00382730(cPS2GraphicsMan* self)
 {
-    return *(volatile unsigned int*)((char*)self + 0x5a8c) == 0;
+    return (volatile unsigned int)self->mKickState == 0;
 }
 #endif
 
@@ -10636,7 +10636,7 @@ extern sPtQuad_2760 D_0044B9C0;
 extern "C" void* WaitSema(int sema);
 extern "C" void SignalSema(int sema);
 extern "C" void FlushCache(int);
-extern "C" void func_00382AF0(void* self, int a, int b);
+extern "C" void func_00382AF0(cPS2GraphicsMan* self, int a, int b);
 
 /**
  * Runs the DMA kick thread: sends each queued frame to the GS in two VIF1 + GIF DMA phases and flips the display when
@@ -10666,7 +10666,7 @@ extern "C" void* func_00382760(cPS2GraphicsMan* selfp)
         if (self->kickState == 5) {
             self->bufState[self->inFlightIndex] = 0;
             self->kickState = 0;
-            func_00382AF0(self, 1, 0);
+            func_00382AF0((cPS2GraphicsMan*)self, 1, 0);
         }
         if (self->kickState == 0 && self->bufState[self->queuedIndex] == 2) {
             while (*(volatile int*)0x10009000 & 0x100) {
@@ -10768,22 +10768,21 @@ static inline int gsCoord_382AF0(int v)
  * @param waitVsync  nonzero to wait for a vertical sync before writing the registers
  */
 // Renderer_SetDisplayRegs in REF structs/render.md.
-extern "C" void func_00382AF0(void* vself, int en1, int waitVsync)
+extern "C" void func_00382AF0(cPS2GraphicsMan* vself, int en1, int waitVsync)
 {
-    char* self = (char*)vself;
     ulong* gsPacket;
     int count;
 
-    count = ++*(int*)(self + 0x5A74);
-    if (*(int*)(self + 0xF44) != 0) {
-        *(int*)(self + 0xF44) = 0;
+    count = ++vself->mCurrentFrameCount;
+    if (vself->mSkipNextPageFlip != 0) {
+        vself->mSkipNextPageFlip = 0;
     } else {
-        if (*(int*)(self + 0x59E8) == 0 && (count & 1) == 0) {
-            *(unsigned int*)(self + 0x5A84) = *(unsigned int*)(self + 0x5A7C);
-            *(unsigned int*)(self + 0x5A88) = *(unsigned int*)(self + 0x5A78);
+        if (vself->mFilterEnabled == 0 && (count & 1) == 0) {
+            vself->mCurrentFrameBufferPage = (int)((unsigned int)vself->unk_5A7C);
+            vself->mDisplayBufferAddress = (int)((unsigned int)vself->unk_5A78);
         } else {
-            *(unsigned int*)(self + 0x5A84) = *(unsigned int*)(self + 0x5A78);
-            *(unsigned int*)(self + 0x5A88) = *(unsigned int*)(self + 0x5A7C);
+            vself->mCurrentFrameBufferPage = (int)((unsigned int)vself->unk_5A78);
+            vself->mDisplayBufferAddress = (int)((unsigned int)vself->unk_5A7C);
         }
     }
 
@@ -10810,90 +10809,90 @@ extern "C" void func_00382AF0(void* vself, int en1, int waitVsync)
         *(volatile ulong*)0x12000000 = pmode | ((ulong)1 << 5) | ((ulong)0xFF << 8);
     }
     // SMODE2: INT, FFMD
-    *(volatile ulong*)0x12000020 = (ulong)*(short*)(self + 0x5A44) | ((ulong)*(short*)(self + 0x5A46) << 1);
+    *(volatile ulong*)0x12000020 = (ulong)vself->unk_5A44 | ((ulong)vself->unk_5A46 << 1);
     // DISPFB1: FBP, FBW, PSM
-    *(volatile ulong*)0x12000070 = (ulong)*(unsigned int*)(self + 0x5A88)
-                                 | ((ulong)*(unsigned int*)(self + 0x5A5C) << 9)
-                                 | ((ulong)*(unsigned int*)(self + 0x5A38) << 15);
+    *(volatile ulong*)0x12000070 = (ulong)(unsigned int)vself->mDisplayBufferAddress
+                                 | ((ulong)(unsigned int)vself->unk_5A5C << 9)
+                                 | ((ulong)(unsigned int)vself->unk_5A38 << 15);
     // DISPLAY1: DX, DY, MAGH, MAGV, DW, DH
-    if (*(int*)(self + 0x5A4C) != 0) {
-        int w = *(unsigned int*)(self + 0x5A54);
-        int displayHeight = *(unsigned int*)(self + 0x5A58);
-        *(volatile ulong*)0x12000080 = (ulong)((int)(*(float*)(self + 0x0) * 4.0f + -43.0f) + 344)
-                                     | ((ulong)((int)(12.0f - *(float*)(self + 0x4) * 2.0f) + 35) << 12)
+    if (vself->unk_5A4C != 0) {
+        int w = (unsigned int)vself->unk_5A54;
+        int displayHeight = (unsigned int)vself->unk_5A58;
+        *(volatile ulong*)0x12000080 = (ulong)((int)(vself->m_screenOffset[0] * 4.0f + -43.0f) + 344)
+                                     | ((ulong)((int)(12.0f - vself->m_screenOffset[1] * 2.0f) + 35) << 12)
                                      | ((ulong)(1550 / w - 1) << 23)
                                      | ((ulong)(w * (1550 / w) - 1) << 32)
                                      | ((ulong)(displayHeight - 1) << 44);
     } else {
         int fieldMul = 1;
-        if (*(short*)(self + 0x5A44) != 0) {
-            fieldMul = *(short*)(self + 0x5A46) == 1 ? 2 : 1;
+        if (vself->unk_5A44 != 0) {
+            fieldMul = vself->unk_5A46 == 1 ? 2 : 1;
         }
-        *(volatile ulong*)0x12000080 = (ulong)(*(float*)(self + 0x0) * 8.0f + 5.0f + 636.0f)
-                                     | ((ulong)(50.0f - *(float*)(self + 0x4) * 2.0f) << 12)
-                                     | ((ulong)*(unsigned int*)(self + 0x5A64) << 23)
-                                     | ((ulong)*(unsigned int*)(self + 0x5A60) << 27)
+        *(volatile ulong*)0x12000080 = (ulong)(vself->m_screenOffset[0] * 8.0f + 5.0f + 636.0f)
+                                     | ((ulong)(50.0f - vself->m_screenOffset[1] * 2.0f) << 12)
+                                     | ((ulong)(unsigned int)vself->unk_5A64 << 23)
+                                     | ((ulong)(unsigned int)vself->unk_5A60 << 27)
                                      | ((ulong)2560 << 32)
-                                     | ((ulong)((*(unsigned int*)(self + 0x5A34) - 1) * fieldMul) << 44);
+                                     | ((ulong)(((unsigned int)vself->mFBHeight - 1) * fieldMul) << 44);
     }
     // BGCOLOR
     *(volatile ulong*)0x120000E0 = 0;
 
     gsPacket = (ulong*)((unsigned int)D_004FFCC0 | 0x30000000);
 
-    if (*(int*)(self + 0x59E8) != 0) {
+    if (vself->mFilterEnabled != 0) {
         // Copy the draw buffer into the display buffer: GIFtag (11 x A+D)
         gsPacket[0] = ((ulong)1 << 60) | 11;
         gsPacket[1] = 0xE;
-        gsPacket[2] = (ulong)*(unsigned int*)(self + 0x5A88) | ((ulong)*(unsigned int*)(self + 0x5A5C) << 16)
-             | ((ulong)*(unsigned int*)(self + 0x5A38) << 24) | ((ulong)0xFF000000 << 32);
+        gsPacket[2] = (ulong)(unsigned int)vself->mDisplayBufferAddress | ((ulong)(unsigned int)vself->unk_5A5C << 16)
+             | ((ulong)(unsigned int)vself->unk_5A38 << 24) | ((ulong)0xFF000000 << 32);
         gsPacket[3] = 76; // FRAME_1 (display buffer)
         gsPacket[4] = 97;
         gsPacket[5] = 20; // TEX1_1
-        gsPacket[6] = (ulong)(*(unsigned int*)(self + 0x5A84) << 5) | ((ulong)*(unsigned int*)(self + 0x5A50) << 14)
-             | ((ulong)*(unsigned int*)(self + 0x5A3C) << 20) | ((ulong)10 << 26) | ((ulong)9 << 30);
+        gsPacket[6] = (ulong)((unsigned int)vself->mCurrentFrameBufferPage << 5) | ((ulong)(unsigned int)vself->mFrameBufferWidth << 14)
+             | ((ulong)(unsigned int)vself->mCurrentFBFormat << 20) | ((ulong)10 << 26) | ((ulong)9 << 30);
         gsPacket[7] = 6; // TEX0_1 (draw buffer)
         gsPacket[8] = ((ulong)0x80 << 32) | 0x64;
         gsPacket[9] = 66; // ALPHA_1
         gsPacket[10] = 5;
         gsPacket[11] = 8; // CLAMP_1
-        gsPacket[12] = ((ulong)(*(unsigned int*)(self + 0x5A54) - 1) << 16) | ((ulong)(*(unsigned int*)(self + 0x5A58) - 1) << 48);
+        gsPacket[12] = ((ulong)((unsigned int)vself->unk_5A54 - 1) << 16) | ((ulong)((unsigned int)vself->unk_5A58 - 1) << 48);
         gsPacket[13] = 0x40; // SCISSOR_1
-        gsPacket[14] = ((ulong)(*(unsigned int*)(self + 0x5A54) - 1) << 16) | ((ulong)(*(unsigned int*)(self + 0x5A58) - 1) << 48);
+        gsPacket[14] = ((ulong)((unsigned int)vself->unk_5A54 - 1) << 16) | ((ulong)((unsigned int)vself->unk_5A58 - 1) << 48);
         gsPacket[15] = 65; // SCISSOR_2
-        gsPacket[16] = (ulong)((0x800 - (*(unsigned int*)(self + 0x5A54) >> 1)) << 4)
-              | ((ulong)((0x800 - (*(unsigned int*)(self + 0x5A58) >> 1)) << 4) << 32);
+        gsPacket[16] = (ulong)((0x800 - ((unsigned int)vself->unk_5A54 >> 1)) << 4)
+              | ((ulong)((0x800 - ((unsigned int)vself->unk_5A58 >> 1)) << 4) << 32);
         gsPacket[17] = 0x18; // XYOFFSET_1
-        gsPacket[18] = (ulong)*(unsigned int*)(self + 0x5A80) | ((ulong)(*(unsigned int*)(self + 0x5A40) - 0x30) << 24) | ((ulong)1 << 32);
+        gsPacket[18] = (ulong)(unsigned int)vself->mCurrentZBufferPage | ((ulong)((unsigned int)vself->mCurrentZBFormat - 0x30) << 24) | ((ulong)1 << 32);
         gsPacket[19] = 78; // ZBUF_1
         gsPacket[20] = 0x30000;
         gsPacket[21] = 71; // TEST_1
         gsPacket[22] = 0;
         gsPacket[23] = 0x3F; // TEXFLUSH
         {
-            int abe = *(unsigned int*)(self + 0x59F8) != 0x80;
+            int abe = (unsigned int)vself->unk_59F8 != 0x80;
             // GIFtag: 1 loop, REGLIST {PRIM, RGBAQ}
             gsPacket[24] = ((ulong)2 << 60) | ((ulong)1 << 58) | 1;
             gsPacket[25] = 0x10;
             gsPacket[26] = ((ulong)abe << 6) | 0x11E; // sprite, IIP, TME, FST
         }
         {
-            int scaledRed = clamp_382AF0((int)((float)*(unsigned int*)(self + 0x59EC) * *(float*)(self + 0x59FC)), 0, 255);
-            int scaledGreen = clamp_382AF0((int)((float)*(unsigned int*)(self + 0x59F0) * *(float*)(self + 0x59FC)), 0, 255);
-            int scaledBlue = clamp_382AF0((int)((float)*(unsigned int*)(self + 0x59F4) * *(float*)(self + 0x59FC)), 0, 255);
+            int scaledRed = clamp_382AF0((int)((float)(unsigned int)vself->unk_59EC[0] * vself->mScreenBrightness), 0, 255);
+            int scaledGreen = clamp_382AF0((int)((float)(unsigned int)vself->unk_59EC[1] * vself->mScreenBrightness), 0, 255);
+            int scaledBlue = clamp_382AF0((int)((float)(unsigned int)vself->unk_59EC[2] * vself->mScreenBrightness), 0, 255);
             union { float f; int i; } unitQ;
             unitQ.f = 1.0f;
-            gsPacket[27] = (ulong)scaledRed | ((ulong)scaledGreen << 8) | ((ulong)scaledBlue << 16) | ((ulong)*(unsigned int*)(self + 0x59F8) << 24)
+            gsPacket[27] = (ulong)scaledRed | ((ulong)scaledGreen << 8) | ((ulong)scaledBlue << 16) | ((ulong)(unsigned int)vself->unk_59F8 << 24)
                   | ((ulong)unitQ.i << 32);
         }
         {
             // Vertical sprite strips, 32 pixels wide.
-            unsigned int w = *(unsigned int*)(self + 0x5A54);
+            unsigned int w = (unsigned int)vself->unk_5A54;
             int stripW = 32;
             int n = w / stripW;
-            int du = (*(unsigned int*)(self + 0x5A30) / n) << 4;
+            int du = ((unsigned int)vself->mFBWidth / n) << 4;
             int x0 = gsCoord_382AF0(-(w >> 1));
-            int ybase = 0x8000 - ((*(unsigned int*)(self + 0x5A58) >> 1) << 4);
+            int ybase = 0x8000 - (((unsigned int)vself->unk_5A58 >> 1) << 4);
             int y0;
             int uoff;
             int xoff;
@@ -10904,7 +10903,7 @@ extern "C" void func_00382AF0(void* vself, int en1, int waitVsync)
             int stripV1;
             int y1;
             int i;
-            if (*(int*)(self + 0x5A4C) != 0) {
+            if (vself->unk_5A4C != 0) {
                 uoff = 8;
                 xoff = 0;
                 yoff = 0;
@@ -10915,8 +10914,8 @@ extern "C" void func_00382AF0(void* vself, int en1, int waitVsync)
             }
             y0 = yoff + ybase;
             x = xoff + x0;
-            stripV1 = ((*(unsigned int*)(self + 0x5A34) - 1) << 4) + 8;
-            y1 = y0 + ((*(unsigned int*)(self + 0x5A58) - 1) << 4);
+            stripV1 = (((unsigned int)vself->mFBHeight - 1) << 4) + 8;
+            y1 = y0 + (((unsigned int)vself->unk_5A58 - 1) << 4);
             stripU0 = uoff;
             stripU1 = stripU0 + du;
             // GIFtag: n + 1 loops, REGLIST {UV, XYZ2, UV, XYZ2}
@@ -10933,12 +10932,12 @@ extern "C" void func_00382AF0(void* vself, int en1, int waitVsync)
                 stripU1 += du;
                 gsPacket += 4;
             }
-            gsPacket[0] = (ulong)uoff | ((ulong)((*(unsigned int*)(self + 0x5A34) << 4) - 8) << 16);
-            gsPacket[1] = (ulong)(unsigned int)gsCoord_382AF0(-(*(unsigned int*)(self + 0x5A54) >> 1))
-                 | ((ulong)(((*(unsigned int*)(self + 0x5A58) >> 1) << 4) + 32744) << 16) | ((ulong)0x8000 << 32);
-            gsPacket[2] = (ulong)(*(unsigned int*)(self + 0x5A30) << 4) | ((ulong)((*(unsigned int*)(self + 0x5A34) << 4) - 8) << 16);
-            gsPacket[3] = (ulong)(((*(unsigned int*)(self + 0x5A54) >> 1) << 4) + 0x8000)
-                 | ((ulong)(((*(unsigned int*)(self + 0x5A58) >> 1) << 4) + 0x7FF8) << 16) | ((ulong)0x8000 << 32);
+            gsPacket[0] = (ulong)uoff | ((ulong)(((unsigned int)vself->mFBHeight << 4) - 8) << 16);
+            gsPacket[1] = (ulong)(unsigned int)gsCoord_382AF0(-((unsigned int)vself->unk_5A54 >> 1))
+                 | ((ulong)((((unsigned int)vself->unk_5A58 >> 1) << 4) + 32744) << 16) | ((ulong)0x8000 << 32);
+            gsPacket[2] = (ulong)((unsigned int)vself->mFBWidth << 4) | ((ulong)(((unsigned int)vself->mFBHeight << 4) - 8) << 16);
+            gsPacket[3] = (ulong)((((unsigned int)vself->unk_5A54 >> 1) << 4) + 0x8000)
+                 | ((ulong)((((unsigned int)vself->unk_5A58 >> 1) << 4) + 0x7FF8) << 16) | ((ulong)0x8000 << 32);
             gsPacket += 4;
         }
     }
@@ -10946,21 +10945,21 @@ extern "C" void func_00382AF0(void* vself, int en1, int waitVsync)
     // Draw context: GIFtag (16 x A+D, EOP)
     gsPacket[0] = ((ulong)1 << 60) | 0x8000 | 16;
     gsPacket[1] = 0xE;
-    gsPacket[2] = (ulong)*(unsigned int*)(self + 0x5A84) | ((ulong)*(unsigned int*)(self + 0x5A50) << 16)
-         | ((ulong)*(unsigned int*)(self + 0x5A3C) << 24);
+    gsPacket[2] = (ulong)(unsigned int)vself->mCurrentFrameBufferPage | ((ulong)(unsigned int)vself->mFrameBufferWidth << 16)
+         | ((ulong)(unsigned int)vself->mCurrentFBFormat << 24);
     gsPacket[3] = 76; // FRAME_1
-    gsPacket[4] = (ulong)*(unsigned int*)(self + 0x5A84) | ((ulong)*(unsigned int*)(self + 0x5A50) << 16)
-         | ((ulong)*(unsigned int*)(self + 0x5A3C) << 24) | ((ulong)0xFF000000 << 32);
+    gsPacket[4] = (ulong)(unsigned int)vself->mCurrentFrameBufferPage | ((ulong)(unsigned int)vself->mFrameBufferWidth << 16)
+         | ((ulong)(unsigned int)vself->mCurrentFBFormat << 24) | ((ulong)0xFF000000 << 32);
     gsPacket[5] = 77; // FRAME_2
-    gsPacket[6] = (ulong)*(unsigned int*)(self + 0x5A80) | ((ulong)(*(unsigned int*)(self + 0x5A40) - 0x30) << 24);
+    gsPacket[6] = (ulong)(unsigned int)vself->mCurrentZBufferPage | ((ulong)((unsigned int)vself->mCurrentZBFormat - 0x30) << 24);
     gsPacket[7] = 78; // ZBUF_1
-    gsPacket[8] = (ulong)*(unsigned int*)(self + 0x5A80) | ((ulong)(*(unsigned int*)(self + 0x5A40) - 0x30) << 24);
+    gsPacket[8] = (ulong)(unsigned int)vself->mCurrentZBufferPage | ((ulong)((unsigned int)vself->mCurrentZBFormat - 0x30) << 24);
     gsPacket[9] = 79; // ZBUF_2
-    gsPacket[10] = (ulong)((0x800 - (*(unsigned int*)(self + 0x5A30) >> 1)) << 4)
-          | ((ulong)((0x800 - (*(unsigned int*)(self + 0x5A34) >> 1)) << 4) << 32);
+    gsPacket[10] = (ulong)((0x800 - ((unsigned int)vself->mFBWidth >> 1)) << 4)
+          | ((ulong)((0x800 - ((unsigned int)vself->mFBHeight >> 1)) << 4) << 32);
     gsPacket[11] = 0x18; // XYOFFSET_1
-    gsPacket[12] = (ulong)((0x800 - (*(unsigned int*)(self + 0x5A30) >> 1)) << 4)
-          | ((ulong)((0x800 - (*(unsigned int*)(self + 0x5A34) >> 1)) << 4) << 32);
+    gsPacket[12] = (ulong)((0x800 - ((unsigned int)vself->mFBWidth >> 1)) << 4)
+          | ((ulong)((0x800 - ((unsigned int)vself->mFBHeight >> 1)) << 4) << 32);
     gsPacket[13] = 25; // XYOFFSET_2
     gsPacket[14] = 0;
     gsPacket[15] = 74; // FBA_1
@@ -10972,9 +10971,9 @@ extern "C" void func_00382AF0(void* vself, int en1, int waitVsync)
     gsPacket[21] = 26; // PRMODECONT
     gsPacket[22] = 1;
     gsPacket[23] = 70; // COLCLAMP
-    gsPacket[24] = *(unsigned int*)(self + 0x59D0);
+    gsPacket[24] = (unsigned int)vself->unk_59D0;
     gsPacket[25] = 69; // DTHE
-    gsPacket[26] = *(ulong*)(self + 0x59E0);
+    gsPacket[26] = vself->unk_59E0;
     gsPacket[27] = 68; // DIMX
     gsPacket[28] = 0;
     gsPacket[29] = 73; // PABE
@@ -10985,8 +10984,8 @@ extern "C" void func_00382AF0(void* vself, int en1, int waitVsync)
     gsPacket += 34;
     {
         // Brightness pass: sprite strips over the frame, 32 pixels wide.
-        unsigned int tw = *(unsigned int*)(self + 0x5A30);
-        unsigned int th = *(unsigned int*)(self + 0x5A34);
+        unsigned int tw = (unsigned int)vself->mFBWidth;
+        unsigned int th = (unsigned int)vself->mFBHeight;
         int n = tw >> 5;
         int oy = 0x800 - (th >> 1);
         int x = (0x800 - (tw >> 1)) << 4;
@@ -10999,7 +10998,7 @@ extern "C" void func_00382AF0(void* vself, int en1, int waitVsync)
         gsPacket[3] = 71; // TEST_1
         gsPacket[4] = 6;
         gsPacket[5] = 0; // PRIM: sprite
-        gsPacket[6] = (ulong)(*(unsigned int*)(self + 0x6AE0) | 0x80000000) | ((ulong)0x3F800000 << 32);
+        gsPacket[6] = (ulong)(vself->mClearColour | 0x80000000) | ((ulong)0x3F800000 << 32);
         gsPacket[7] = 1; // RGBAQ
         gsPacket += 8;
         for (; n != 0; n--) {
@@ -11017,15 +11016,15 @@ extern "C" void func_00382AF0(void* vself, int en1, int waitVsync)
     // GIFtag (2 x A+D, EOP): SCISSOR_1/2 from the scissor rect
     gsPacket[0] = ((ulong)1 << 60) | 0x8000 | 2;
     gsPacket[1] = 0xE;
-    gsPacket[2] = (ulong)*(unsigned short*)(self + 0x5900)
-         | ((ulong)(*(unsigned short*)(self + 0x5900) + (*(unsigned short*)(self + 0x5904) - 1)) << 16)
-         | ((ulong)*(unsigned short*)(self + 0x5902) << 32)
-         | ((ulong)(*(unsigned short*)(self + 0x5902) + (*(unsigned short*)(self + 0x5906) - 1)) << 48);
+    gsPacket[2] = (ulong)vself->mScissor[0]
+         | ((ulong)(vself->mScissor[0] + (vself->mScissor[2] - 1)) << 16)
+         | ((ulong)vself->mScissor[1] << 32)
+         | ((ulong)(vself->mScissor[1] + (vself->mScissor[3] - 1)) << 48);
     gsPacket[3] = 0x40;
-    gsPacket[4] = (ulong)*(unsigned short*)(self + 0x5900)
-         | ((ulong)(*(unsigned short*)(self + 0x5900) + (*(unsigned short*)(self + 0x5904) - 1)) << 16)
-         | ((ulong)*(unsigned short*)(self + 0x5902) << 32)
-         | ((ulong)(*(unsigned short*)(self + 0x5902) + (*(unsigned short*)(self + 0x5906) - 1)) << 48);
+    gsPacket[4] = (ulong)vself->mScissor[0]
+         | ((ulong)(vself->mScissor[0] + (vself->mScissor[2] - 1)) << 16)
+         | ((ulong)vself->mScissor[1] << 32)
+         | ((ulong)(vself->mScissor[1] + (vself->mScissor[3] - 1)) << 48);
     gsPacket[5] = 65;
     gsPacket += 6;
     {
@@ -11056,9 +11055,9 @@ extern "C" void FlushCache(int);
  * @param src  address of the pixels
  * @return 1
  */
-extern "C" int func_00383770(void *graphicsMan, int destX, int destY, int width, int height, int src) {
+extern "C" int func_00383770(cPS2GraphicsMan* graphicsMan, int destX, int destY, int width, int height, int src) {
     FlushCache(0);
-    func_00383808(graphicsMan, src, (*(int *)((char*)(graphicsMan) + (0x5A84))) << 5, width, height, (*(int *)((char*)(graphicsMan) + (0x5A30))), (*(int *)((char*)(graphicsMan) + (0x5A3C))), destX, destY);
+    func_00383808(graphicsMan, src, (graphicsMan->mCurrentFrameBufferPage) << 5, width, height, (graphicsMan->mFBWidth), (graphicsMan->mCurrentFBFormat), destX, destY);
     return 1;
 }
 #endif

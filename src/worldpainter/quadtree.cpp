@@ -1745,11 +1745,11 @@ struct sQTState {
  * Clears the current port's card-changed flag (unk_10 of unk_17C[mDevice]) and turns a last libmc result (unk_08) of -1
  * into 0. Card vtable slot 47.
  */
-extern "C" void func_002C44E0(sQTState* self)
+extern "C" void func_002C44E0(cPS2MemCard* self)
 {
-    self->levels[self->level].unk_10 = 0;
-    if (self->levels[self->level].unk_08 == -1) {
-        self->levels[self->level].unk_08 = 0;
+    self->unk_17C[self->mDevice].unk_10 = 0;
+    if (self->unk_17C[self->mDevice].unk_08 == -1) {
+        self->unk_17C[self->mDevice].unk_08 = 0;
     }
 }
 #endif

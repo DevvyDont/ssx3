@@ -73,7 +73,7 @@ extern "C" void* operator_new__FUi(unsigned int size, const char* tag, int flags
 // PORT: cSSXAudio_SetCurrVolume's real parameter order is (self, int, float).
 void cSSXAudio_SetCurrVolume_4C68(void*, int, float) __asm__("cSSXAudio_SetCurrVolume");
 extern "C" void cSSXAudio_SetPreset(cSSXAudio* self, int mode);
-extern "C" void func_00289470(void* self);
+extern "C" void func_00289470(cSSXAudio* self);
 extern "C" void func_00289520(cSSXAudio* self, const char* name);
 void cSSXAudio_LoadMixes_4C68(void* self) __asm__("cSSXAudio_LoadMixes");
 extern "C" void cSSXAudio_InitAttachedSounds(void* self);
@@ -351,12 +351,12 @@ extern const sSaVtbl7_285210 D_00483728_285210 __asm__("D_00483728");
  *
  * @param flags  g++ destructor flags: bit 1 destroys the virtual bases, bit 0 frees the object
  */
-extern "C" void cSSXAudio__cSSXAudio(void* self, int flags)
+extern "C" void cSSXAudio__cSSXAudio(cSSXAudio* self, int flags)
 {
     char* speechSys = S_285210 + 0x5560;
-    *(void***)(S_285210 + 0x5558) = D_00483688;
-    *(void***)(S_285210 + 0x571C) = D_004836D8;
-    *(void***)(S_285210 + 0xC) = cSSXAudio_vtbl;
+    self->MusicSys.mVtbl = D_00483688;
+    self->SpeechSys.mVtbl = D_004836D8;
+    self->mVtbl = cSSXAudio_vtbl;
     *(const sSaVtbl4_285210**)(*(char**)(BM_285210 + 0x1D8) + 4) = &D_00483708_285210;
     *(const sSaVtbl8_285210**)(BM_285210 + 0xAB0) = &D_00483648_285210;
     *(const sSaVtbl7_285210**)(BM_285210 + 0x1D4) = &D_00483728_285210;
@@ -384,13 +384,13 @@ extern "C" void cSSXAudio__cSSXAudio(void* self, int flags)
     func_0028F730(self);
     SNDSYS_removeuserdataclient(cSSXAudio_HandleUserChunk);
     func_002B0DA0(speechSys);
-    if (*(void**)(S_285210 + 0x5728))
-        FILESYS_delbigsync(*(void**)(S_285210 + 0x5728), 100);
-    if (*(void**)(S_285210 + 0x5980))
-        cMemMan_free(*(void**)(S_285210 + 0x5980));
+    if (self->unk_5728)
+        FILESYS_delbigsync(self->unk_5728, 100);
+    if (self->mPlayHistory.Array)
+        cMemMan_free(self->mPlayHistory.Array);
     cController__cController(self, 0);
     if (flags & 2) {
-        cStreamSys__cStreamSys(*(void**)(S_285210 + 0x118), 0);
+        cStreamSys__cStreamSys(*(void**)&self->MusicSys, 0);
         cBankManager__cBankManager(BM_285210, 0);
         cSoundSys__cSoundSys(*(void**)(BM_285210 + 0x1D8), 0);
     }
@@ -988,10 +988,10 @@ struct sSaVt61D0 { short delta; short index; int (*fn)(void*, int); };
 /**
  * Calls the music system's vtable slot 4 (set track) with 1; the retail image has no call or data reference to it.
  */
-extern "C" void func_002861D0(char* self)
+extern "C" void func_002861D0(cSSXAudio* self)
 {
-    char* mon = self + 0x118;
-    sSaVt61D0* vt = *(sSaVt61D0**)(self + 0x5558);
+    char* mon = ((char*)self) + 0x118;
+    sSaVt61D0* vt = (sSaVt61D0*)self->MusicSys.mVtbl;
     vt[4].fn(mon + vt[4].delta, 1);
 }
 #endif
@@ -1678,16 +1678,16 @@ struct sSaVt72A8 { short delta; short index; int (*fn)(void*, int); };
  * 0) at once, then queues the song announcement (unk_5774, unk_5778 = func_002B4908). The pre-event overlays in
  * fe/ovstatepause.cpp call it when they close.
  */
-extern "C" void func_002872A8(void* self)
+extern "C" void func_002872A8(cSSXAudio* self)
 {
-    *(int*)((char*)self + 0x582C) = *(int*)(*(char**)((char*)cAudioInterface_getGame() + 0xC) + 0x8);
+    self->mGruntCycle = *(int*)(*(char**)((char*)cAudioInterface_getGame() + 0xC) + 0x8);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     signed char* raceDb = (signed char*)&cBENewRaceInterface_newRace;
     int mode = raceDb[0x48];
     if (mode != 5 && mode != 6) return;
     char* mon = (char*)self + 0x118;
-    if (*(int*)((char*)self + 0x530) != 0) {
-        sSaVt72A8* vt = *(sSaVt72A8**)((char*)self + 0x5558);
+    if (self->MusicSys.mSongPlaying != 0) {
+        sSaVt72A8* vt = (sSaVt72A8*)self->MusicSys.mVtbl;
         vt[4].fn(mon + vt[4].delta, 0);
     } else {
         func_0028D488(self);
@@ -1698,14 +1698,14 @@ extern "C" void func_002872A8(void* self)
     int gameEvent = newRace[0x4A];
     if (gameEvent == 4 || gameEvent == 5) {
         if (newRace[0x49] != 2) {
-            *(int*)((char*)self + 0x5788) = 1;
+            self->unk_5788 = 1;
         } else {
             func_002A26F0(self, 0, 0);
             func_002B1758((char*)self + 0x5560, 0);
         }
     }
-    *(int*)((char*)self + 0x5774) = 1;
-    *(int*)((char*)self + 0x5778) = func_002B4908(mon);
+    self->unk_5774 = 1;
+    self->unk_5778 = func_002B4908(mon);
 }
 #endif
 
@@ -1749,12 +1749,12 @@ void cSSXAudio_SetCurrVolume_if(void*, int, float) __asm__("cSSXAudio_SetCurrVol
  * options screens, the pause options, the memory-card load and cSSXApp_initload call it. The setting is not a declared
  * parameter: it stays in $a1 for cSSXAudio_Volume2Float.
  */
-extern "C" void func_00287410(void* self)
+extern "C" void func_00287410(cSSXAudio* self)
 {
     float level = cSSXAudio_Volume2Float(self);
     cSSXAudio_SetCurrVolume_if(self, 1, level);
     cSSXAudio_SetCurrVolume_if(self, 8, level);
-    if (*(int*)((char*)self + 0x62B8) != 0 && *(int*)((char*)self + 0x608C) != 2) {
+    if (self->unk_62B8 != 0 && self->unk_608C != 2) {
         cSSXAudio_SetCurrVolume_if(self, 2, level);
     }
 }
@@ -3336,24 +3336,24 @@ struct sAudio_9470 { char pad[0x60A4]; char names[20][0x14]; };
  *
  * The cSSXAudio constructor calls it.
  */
-extern "C" void func_00289470(void* self)
+extern "C" void func_00289470(cSSXAudio* self)
 {
     if (BXFILE_exists(str_x_H) != 0) {
         char parser[2064];
         FileParser_FileParser(parser, str_x_H, 0x100);
-        *(int*)((char*)self + 0x6234) = 0;
-        while (*(int*)((char*)self + 0x6234) < 20) {
+        self->mNumPlayLists = 0;
+        while (self->mNumPlayLists < 20) {
             char* section = FileParser_FindNextSection(parser);
             if (section == 0) {
                 break;
             }
-            strcpy(((sAudio_9470*)self)->names[*(int*)((char*)self + 0x6234)], section);
-            *(int*)((char*)self + 0x6234) = *(int*)((char*)self + 0x6234) + 1;
+            strcpy(((sAudio_9470*)self)->names[self->mNumPlayLists], section);
+            self->mNumPlayLists = self->mNumPlayLists + 1;
         }
         FileParser__FileParser(parser, 2);
         return;
     }
-    *(int*)((char*)self + 0x6234) = 0;
+    self->mNumPlayLists = 0;
 }
 #endif
 

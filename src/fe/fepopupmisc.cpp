@@ -2908,8 +2908,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_isInStore);
  * @param requestLine  the request-line state
  * @return the in-store flag
  */
-extern "C" int cFEStateRequestLine_isInStore(void *requestLine) {
-    return (*(int *)((char*)(requestLine) + (0x16C)));
+extern "C" int cFEStateRequestLine_isInStore(cFEStateRequestLine* requestLine) {
+    return (requestLine->mInStore);
 }
 #endif
 //100%
@@ -3076,7 +3076,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_getNumOwnedSongs);
  * @return the number of owned songs
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" int cFEStateRequestLine_getNumOwnedSongs(void *requestLine) {
+extern "C" int cFEStateRequestLine_getNumOwnedSongs(cFEStateRequestLine* requestLine) {
     int temp_2;
     int var_4;
     int var_5;
@@ -3084,7 +3084,7 @@ extern "C" int cFEStateRequestLine_getNumOwnedSongs(void *requestLine) {
     var_5 = 0;
     var_4 = 0;
     do {
-        temp_2 = ((unsigned long) (*(unsigned long *)((char*)(requestLine) + (0x160))) >> var_4) & 1;
+        temp_2 = ((unsigned long) (*(unsigned long*)&requestLine->mOwnedSong) >> var_4) & 1;
         var_4 += 1;
         var_5 += temp_2;
     } while (var_4 < 0x40);

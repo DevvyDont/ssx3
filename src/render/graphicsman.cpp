@@ -801,7 +801,7 @@ extern "C" char* func_0038F460(void* self, unsigned int addr, int size, int flag
 extern "C" int func_0038F668(void* self, char* end, int arg);
 extern "C" int func_00366CE0(void* self, int size, int owner, int skipB, int level, int align);
 extern "C" void func_0036AA60(void* self, int x, int y, char** pp);
-extern "C" void func_0036AE20(void* self, int idx, int a, int b, int n, char** pp);
+extern "C" void func_0036AE20(cPS2GraphicsMan* self, int idx, int a, int b, int n, char** pp);
 extern "C" void func_0036B158(void* self, int idx, int y, char** pp);
 extern "C" void func_003663D8(void* self, int id);
 extern "C" void func_00368138(void* self, void* pkt);
@@ -843,39 +843,39 @@ struct sGmVEntry_AC00 {
  * @param pkt2  passed to func_00368138
  * @param handle  in/out: the DMA ring's current main-memory address
  */
-extern "C" void func_0036AC00(char* self, int idx, void* pkt2, int* handle)
+extern "C" void func_0036AC00(cPS2GraphicsMan* self, int idx, void* pkt2, int* handle)
 {
     if (cDepthFog_m_Enable == 0) {
         return;
     }
     if (cDepthFog_m_OverrideWP != 0) {
-        func_0036ABA0(self, idx);
+        func_0036ABA0(((char*)self), idx);
     }
     sGmEntry_AC00* fogEntry = &((sGmOwner_AC00*)self)->entries[idx];
     if (fogEntry->w == 0.0f && fogEntry->z != 0) {
         return;
     }
     char* mat = D_00507B80 + (idx << 10);
-    func_0036A428(self, mat, idx);
+    func_0036A428(((char*)self), mat, idx);
     void* dma = D_004A4474;
     char* pkt = func_0038F460(dma, *handle, -1, 0);
-    int slot = func_00366CE0(*(char**)(self + 0x18F4) + 0x1F60, 0x400, 0x7FFFFFFF, 0, 0, 1);
-    int* rec = (int*)(*(char**)(*(char**)(self + 0x18F4) + 0x3F50) + slot * 0x1C);
+    int slot = func_00366CE0((char*)self->mpTextureMan + 0x1F60, 0x400, 0x7FFFFFFF, 0, 0, 1);
+    int* rec = (int*)(*(char**)((char*)self->mpTextureMan + 0x3F50) + slot * 0x1C);
     // PORT: the packet builder takes the matrix block's address as an int.
-    func_0036AA60(self, (int)mat, *rec >> 8, &pkt);
+    func_0036AA60(((char*)self), (int)mat, *rec >> 8, &pkt);
     *handle = func_0038F668(dma, pkt, 4);
     pkt = func_0038F460(dma, *handle, -1, 0);
-    int zBufPage = *(int*)(self + 0x5A80);
-    int frameBufPage = *(int*)(self + 0x5A84);
-    sGmVEntry_AC00* vt = *(sGmVEntry_AC00**)(self + 0x10D8);
-    int n = vt[11].fn(self + vt[11].delta);
+    int zBufPage = self->mCurrentZBufferPage;
+    int frameBufPage = self->mCurrentFrameBufferPage;
+    sGmVEntry_AC00* vt = (sGmVEntry_AC00*)self->mVtbl;
+    int n = vt[11].fn(((char*)self) + vt[11].delta);
     func_0036AE20(self, idx, zBufPage, frameBufPage, n * 2, &pkt);
     *handle = func_0038F668(dma, pkt, 4);
     pkt = func_0038F460(dma, *handle, -1, 0);
-    func_0036B158(self, idx, *rec >> 8, &pkt);
+    func_0036B158(((char*)self), idx, *rec >> 8, &pkt);
     *handle = func_0038F668(dma, pkt, 4);
-    func_003663D8(*(char**)(self + 0x18F4) + 0x1F60, slot);
-    func_00368138(*(char**)(self + 0x18F4), pkt2);
+    func_003663D8((char*)self->mpTextureMan + 0x1F60, slot);
+    func_00368138((char*)self->mpTextureMan, pkt2);
 }
 #endif
 
@@ -913,21 +913,20 @@ static inline unsigned int gmCall_AE20(char* self, int slot)
  * @param n  the strip height in rows
  * @param pp  in/out: the packet write pointer
  */
-extern "C" void func_0036AE20(void* vself, int idx, int texBase, int frameBase, int n, char** pp)
+extern "C" void func_0036AE20(cPS2GraphicsMan* vself, int idx, int texBase, int frameBase, int n, char** pp)
 {
-    char* self = (char*)vself;
     unsigned int full = 0x1000;
-    int w = *(int*)(self + 0x5A30);
-    int height = *(int*)(self + 0x5A34);
-    int offX = ((full - gmCall_AE20(self, 10)) >> 1) << 4;
-    int offY = ((full - gmCall_AE20(self, 11)) >> 1) << 4;
+    int w = vself->mFBWidth;
+    int height = vself->mFBHeight;
+    int offX = ((full - gmCall_AE20(((char*)vself), 10)) >> 1) << 4;
+    int offY = ((full - gmCall_AE20(((char*)vself), 11)) >> 1) << 4;
     int cols = w / 8;
-    int zbp = *(int*)(self + 0x5A80);
+    int zbp = vself->mCurrentZBufferPage;
     ulong* packet = (ulong*)*pp;
     packet += 2;
     packet[0] = (cols * 2 + 11) | ((ulong)0x8000 << 45);
     packet[1] = 0xE;
-    unsigned int fbw = gmCall_AE20(self, 10) >> 6;
+    unsigned int fbw = gmCall_AE20(((char*)vself), 10) >> 6;
     packet[2] = frameBase | ((ulong)fbw << 16) | ((ulong)0x3FFF0200 << 16);
     packet[3] = 76;
     packet[4] = (ulong)(unsigned int)(zbp | 0x1000000) | ((ulong)0x8000 << 17);
@@ -944,7 +943,7 @@ extern "C" void func_0036AE20(void* vself, int idx, int texBase, int frameBase, 
     packet[15] = 59;
     packet[16] = 0;
     packet[17] = 20;
-    unsigned int tbw = gmCall_AE20(self, 10) >> 6;
+    unsigned int tbw = gmCall_AE20(((char*)vself), 10) >> 6;
     packet[18] = (texBase << 5) | ((ulong)tbw << 14) | ((ulong)60082 << 20);
     packet[19] = 6;
     packet[20] = 278;
@@ -1129,17 +1128,16 @@ INCLUDE_ASM("render/graphicsman", func_0036B9D8);
 // PORT: ulong is 64-bit here (GIF/DMA packet words).
 // Multi-pass offset blur: draws the source region `passes` times as column sprites, each pass
 // shifted diagonally by +-off texels, with the vertex colour scaled by intensity / passes.
-extern "C" void func_0036B9D8(void* vself, int tbp, int tw, int srcU, int srcV, int uw, int vh, int fbp,
+extern "C" void func_0036B9D8(cPS2GraphicsMan* vself, int tbp, int tw, int srcU, int srcV, int uw, int vh, int fbp,
                               float intensity, int w, int height, int off, int passes, int* handle)
 {
-    char* self = (char*)vself;
     int uStart = (srcU << 4) + 8 + off;
     int du = ((srcU + uw) << 4) + 8 - off - uStart;
     int vStart = (srcV << 4) + 8 + off;
     int vEnd = ((srcV + vh) << 4) + 8 - off;
     int cols = w / 32;
     void* dma = D_004A4474;
-    int zbp = *(int*)(self + 0x5A80);
+    int zbp = vself->mCurrentZBufferPage;
     int w16 = w << 4;
     int x0;
     int x1;
@@ -1365,14 +1363,13 @@ INCLUDE_ASM("render/graphicsman", func_0036C398);
  */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // PORT: ulong is 64-bit here (GIF/DMA packet words).
-extern "C" void func_0036C398(void* vself, int tbp, int tw, int th, int fbp, int x, int y, int w, int height,
+extern "C" void func_0036C398(cPS2GraphicsMan* vself, int tbp, int tw, int th, int fbp, int x, int y, int w, int height,
                               int grey, int alpha, int* handle)
 {
-    char* self = (char*)vself;
     int cols = w / 32;
     int step = (tw / cols) << 4;
     void* dma = D_004A4474;
-    int zbp = *(int*)(self + 0x5A80);
+    int zbp = vself->mCurrentZBufferPage;
     ulong* gsPacket = (ulong*)func_0038F460(dma, *handle, -1, 0);
     gsPacket[0] = (cols * 4 + 13) | 0x10000000;
     gsPacket[1] = 0;
@@ -1381,8 +1378,8 @@ extern "C" void func_0036C398(void* vself, int tbp, int tw, int th, int fbp, int
     gsPacket[1] = 0xE;
     ulong fr = fbp >> 5;
     ulong* frameWord = gsPacket + 2;
-    if (gmCall_AE20(self, 10) >> 6) {
-        fr = fr | ((ulong)(gmCall_AE20(self, 10) >> 6) << 16) | 0xFF00000001000000;
+    if (gmCall_AE20(((char*)vself), 10) >> 6) {
+        fr = fr | ((ulong)(gmCall_AE20(((char*)vself), 10) >> 6) << 16) | 0xFF00000001000000;
     } else {
         fr = fr | 0xFF00000001010000;
     }
@@ -1527,16 +1524,15 @@ struct sGmViews_C790 {
  * @param handle  in/out: the DMA ring's current main-memory address
  */
 // PORT: ulong is 64-bit here (GIF packet words); the packet is written through the uncached mirror.
-extern "C" void func_0036C790(void* vself, int idx, void* pkt2, int* handle)
+extern "C" void func_0036C790(cPS2GraphicsMan* vself, int idx, void* pkt2, int* handle)
 {
-    char* self = (char*)vself;
     if (cLightGlow_m_Enable == 0) {
         return;
     }
     if (cLightGlow_m_OverrideWP != 0) {
-        func_0036C740(self, idx);
+        func_0036C740(((char*)vself), idx);
     }
-    sGmBloom_C790* glowParams = (sGmBloom_C790*)(self + 0x6CD4) + idx;
+    sGmBloom_C790* glowParams = (sGmBloom_C790*)(((char*)vself) + 0x6CD4) + idx;
     int alpha[4] = {
         (int)(D_004A43E8 * 127.5f),
         (int)(D_004A43EC * 127.5f),
@@ -1546,7 +1542,7 @@ extern "C" void func_0036C790(void* vself, int idx, void* pkt2, int* handle)
     if (alpha[3] == 0 && alpha[2] == 0 && alpha[1] == 0 && alpha[0] == 0) {
         return;
     }
-    int buf0 = *(int*)(self + 0x5A80) << 5;
+    int buf0 = vself->mCurrentZBufferPage << 5;
     int bufs[2];
     bufs[0] = buf0;
     bufs[1] = buf0 + 0x400;
@@ -1554,18 +1550,18 @@ extern "C" void func_0036C790(void* vself, int idx, void* pkt2, int* handle)
     int src = buf0;
     int th = 1 << D_004A43D0;
     int tw = th;
-    int x0 = ((sGmViews_C790*)self)->views[idx].x;
-    int y0 = ((sGmViews_C790*)self)->views[idx].y;
-    int w = ((sGmViews_C790*)self)->views[idx].w;
-    int drawFbp = *(int*)(self + 0x5A84);
-    int viewHeight = ((sGmViews_C790*)self)->views[idx].h;
-    int width = gmCall_AE20(self, 10);
+    int x0 = ((sGmViews_C790*)vself)->views[idx].x;
+    int y0 = ((sGmViews_C790*)vself)->views[idx].y;
+    int w = ((sGmViews_C790*)vself)->views[idx].w;
+    int drawFbp = vself->mCurrentFrameBufferPage;
+    int viewHeight = ((sGmViews_C790*)vself)->views[idx].h;
+    int width = gmCall_AE20(((char*)vself), 10);
     int fbp32 = drawFbp << 5;
-    func_0036B9D8(self, fbp32, width, x0, y0, w, viewHeight, src, glowParams->v[3] * 127.5f, tw, th, 0, 1, handle);
-    func_0036C188(self, src, tw, th, (int)(glowParams->v[0] * 127.5f), (int)(cLightGlow_m_PS2ModIntensity * 127.5f), handle);
+    func_0036B9D8(vself, fbp32, width, x0, y0, w, viewHeight, src, glowParams->v[3] * 127.5f, tw, th, 0, 1, handle);
+    func_0036C188(((char*)vself), src, tw, th, (int)(glowParams->v[0] * 127.5f), (int)(cLightGlow_m_PS2ModIntensity * 127.5f), handle);
     for (int i = 0; i < 3; i++) {
         if (alpha[i] != 0) {
-            func_0036C398(self, src, tw, th, fbp32, x0, y0, w, viewHeight, alpha[i], (int)(glowParams->v[4] * 127.5f), handle);
+            func_0036C398(vself, src, tw, th, fbp32, x0, y0, w, viewHeight, alpha[i], (int)(glowParams->v[4] * 127.5f), handle);
         }
         int psrc = src;
         int pw = tw;
@@ -1573,26 +1569,26 @@ extern "C" void func_0036C790(void* vself, int idx, void* pkt2, int* handle)
         src = bufs[(i + 1) & 1];
         tw >>= 1;
         th >>= 1;
-        func_0036B9D8(self, psrc, pw, 0, 0, pw, ph, src, glowParams->v[2] * 127.5f, tw, th, offset, 4, handle);
+        func_0036B9D8(vself, psrc, pw, 0, 0, pw, ph, src, glowParams->v[2] * 127.5f, tw, th, offset, 4, handle);
     }
     if (alpha[3] != 0) {
-        func_0036C398(self, src, tw, th, fbp32, x0, y0, w, viewHeight, alpha[3], (int)(glowParams->v[4] * 127.5f), handle);
+        func_0036C398(vself, src, tw, th, fbp32, x0, y0, w, viewHeight, alpha[3], (int)(glowParams->v[4] * 127.5f), handle);
     }
     ulong* gsPacket = (ulong*)(*handle | 0x30000000);
     unsigned int full = 0x1000;
-    int offX = ((full - gmCall_AE20(self, 10)) >> 1) << 4;
-    int offY = ((full - gmCall_AE20(self, 11)) >> 1) << 4;
+    int offX = ((full - gmCall_AE20(((char*)vself), 10)) >> 1) << 4;
+    int offY = ((full - gmCall_AE20(((char*)vself), 11)) >> 1) << 4;
     gsPacket[0] = 0x10000003;
     gsPacket[1] = 0;
     gsPacket[2] = 0x1000000000008002;
     gsPacket[3] = 0xE;
-    gsPacket[4] = drawFbp | ((ulong)(gmCall_AE20(self, 10) >> 6) << 16);
+    gsPacket[4] = drawFbp | ((ulong)(gmCall_AE20(((char*)vself), 10) >> 6) << 16);
     gsPacket[5] = 76;
     gsPacket[6] = offX | ((ulong)offY << 32);
     gsPacket[7] = 0x18;
     gsPacket += 8;
     *handle = (int)gsPacket & 0x0FFFFFFF;
-    func_00368138(*(char**)(self + 0x18F4), pkt2);
+    func_00368138((char*)vself->mpTextureMan, pkt2);
 }
 #endif
 

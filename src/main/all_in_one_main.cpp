@@ -1,4 +1,5 @@
 #include "common.h"
+#include "util/locale.h"
 #include "fe/festateriderdetail.h"
 #include "fe/fecustom.h"
 #include "fe/festatecharsetup.h"
@@ -1683,8 +1684,8 @@ extern void* cUILocaleInterface_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cUILocaleInterface__cUILocaleInterface(void *self, int flags) {
-    *(void***)((char*)self + 4) = cUILocaleInterface_vtbl;
+extern "C" void cUILocaleInterface__cUILocaleInterface(cFELocale* self, int flags) {
+    self->mVtbl = cUILocaleInterface_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -1726,8 +1727,8 @@ INCLUDE_ASM("main/all_in_one_main", cUILocaleInterface_setLanguage);
  * @param self  the locale interface
  * @param language  the language index
  */
-extern "C" void cUILocaleInterface_setLanguage(void *self, signed char language) {
-    (*(signed char *)((char*)(self) + (1))) = language;
+extern "C" void cUILocaleInterface_setLanguage(cFELocale* self, signed char language) {
+    (self->mLanguage) = language;
 }
 #endif
 

@@ -1699,8 +1699,8 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BACC0);
  *
  * @param musicSys  the cMusicSys
  */
-extern "C" void func_002BACC0(void *musicSys) {
-    (*(int *)((char*)(musicSys) + (0x418))) = 0;
+extern "C" void func_002BACC0(cMusicSys* musicSys) {
+    (musicSys->mSongPlaying) = 0;
 }
 #endif
 
