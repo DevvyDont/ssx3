@@ -4167,10 +4167,6 @@ static inline float curveB_13D818(const sCurvePt_13D818* p, float x)
     return lerpB_13D818(p[0].x, p[0].y, p[1].x, p[1].y, x);
 }
 
-// cRider::unk_3F8 is char[4] in rider.h but holds a float (FIELD cRider 0x3F8 float). A struct-member
-// store (MEM_IN_STRUCT) is what lets the curve-table pointer load issue before it; with the FIELD applied
-// this becomes self->mRider->unk_3F8 = steer.
-struct sF_13D818 { float f; };
 
 // atan2(y, x) built on a single-argument atan.
 static inline float atan2_13D818(float y, float x)
@@ -4231,7 +4227,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
     float edge = cGroundMotion_getDigForce(self, (float*)snow, dS, dF, lean);
     if (self->mRider->mGroundNormal.z < 0.0f && push < 0.0f)
         push = 0.0f;
-    ((sF_13D818*)self->mRider->unk_3F8)->f = steer;
+    ((cGroundMotion*)self->mRider->unk_3F8)->ChatterTime = steer;
 
     float lo = curve_13D818(D_004A1148, spd * 0.035999998450279236f);
     float hi = curve_13D818(D_004A1150, spd * 0.035999998450279236f);

@@ -378,10 +378,6 @@ struct sScriptSlot2823F0 {
     int state;
 };
 
-struct sScriptEngine2823F0 {
-    char pad_0x000[0x2C0];
-    sScriptSlot2823F0 slots[16];
-};
 
 /**
  * Releases every script request that is still in use.
@@ -395,7 +391,7 @@ extern "C" void cBXScriptEngine_ReleaseRequestAll(cBXScriptEngine* self)
     for (int i = 0; i < 16; i++) {
         sScriptSlot2823F0* slot = &((sScriptSlot2823F0*)&self->mScriptRequests[0])[i];
         if (slot->state != 0) {
-            cBXScriptEngine_ReleaseRequest(((sScriptEngine2823F0*)self), slot->id);
+            cBXScriptEngine_ReleaseRequest((self), slot->id);
         }
     }
 }

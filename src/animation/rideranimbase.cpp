@@ -130,15 +130,6 @@ struct sRabQuad32 {
 
 extern sRabQuad32 tPose_Identity;
 
-struct sRiderAnimBase {
-    int mAnims[6];      // 0x00
-    int m18;            // 0x18
-    float m1C;          // 0x1C
-    long m20;           // 0x20 PORT: 64-bit long (sd)
-    int pad28[2];       // 0x28
-    sRabQuad32 m30;     // 0x30
-    char* mSequencers;  // 0x50
-};
 
 /**
  * Resets the animation player: expires all sequences and returns to the default playback state.
@@ -150,17 +141,17 @@ struct sRiderAnimBase {
  */
 extern "C" void cRiderAnimBase_reset(cRiderAnimBase* riderAnimBase)
 {
-    sRiderAnimBase* self = (sRiderAnimBase*)riderAnimBase;
+    cRiderAnimBase* self = riderAnimBase;
     for (int i = 0; i < 6; i++)
     {
-        cAnimSequencer_expireAll(self->mSequencers + (i << 3));
-        self->mAnims[i] = 438;
+        cAnimSequencer_expireAll(((char*)self->Sequencer) + (i << 3));
+        self->CurrentAnimID[i] = 438;
     }
     //START
-    self->m18 = 0;
-    self->m1C = 1.0f;
-    self->m30 = tPose_Identity;
-    self->m20 = -1;
+    self->IsFlipped = 0;
+    self->FrameRateFactor = 1.0f;
+    (*(sRabQuad32*)&self->OrientationOffset) = tPose_Identity;
+    self->GraftMask = -1;
     //END
 }
 #endif
@@ -531,7 +522,7 @@ static inline bool rabXformEq_1F00(const sRabXform_00311B48& a, const sRabXform_
 // playing the same thing (same anim, flags and offset transform) hands over its tracks and weight.
 extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* vself, void* vseq, int anim, int animid, int isDupSeqAllowed, int priority, float blend)
 {
-    sRiderAnimBase* self = (sRiderAnimBase*)vself;
+    cRiderAnimBase* self = vself;
     cAnimSequencer* seq = (cAnimSequencer*)vseq;
     char* node;
     if (blend == 0.0f)
@@ -547,10 +538,10 @@ extern "C" int cRiderAnimBase_onInput(cRiderAnimBase* vself, void* vseq, int ani
             cAnimSequence_addEndTrigger(node, 0x3F);
     }
     sSeqNode_1F00* nd = (sSeqNode_1F00*)node;
-    nd->m80 = self->m18;
-    nd->xform = self->m30;
-    nd->m88 = self->m20;
-    nd->m90 = self->m1C;
+    nd->m80 = self->IsFlipped;
+    nd->xform = (*(sRabQuad32*)&self->OrientationOffset);
+    nd->m88 = ((long)self->GraftMask);
+    nd->m90 = self->FrameRateFactor;
     nd->weight = nd->targetWeight = 1.0f;
     nd->blendIn = ((float*)cAIAnimEventMap_getAnimPlayAttr(anim))[6];
     nd->m84 = priority;

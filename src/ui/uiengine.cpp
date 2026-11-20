@@ -89,14 +89,6 @@ public:
     virtual ~cUIEngOwnC();
 };
 
-struct cUIEngine__cUIEngine_sSelf {
-    cUIEngOwnA* a;
-    void* buf;
-    int f8;
-    cUIEngOwnB* b;
-    int f10;
-    cUIEngOwnC* c;
-};
 
 /**
  * Destroys a UI engine: deletes its custom, input and sound interfaces, frees its data and destroys its texture bank
@@ -110,13 +102,13 @@ struct cUIEngine__cUIEngine_sSelf {
  */
 extern "C" void cUIEngine__cUIEngine(cUIEngine* self, int flags)
 {
-    cUIEngine__cUIEngine_sSelf* fields = (cUIEngine__cUIEngine_sSelf*)self;
-    delete fields->a;
-    if (fields->buf) {
-        cMemMan_free(fields->buf);
+    cUIEngine* fields = self;
+    delete ((cUIEngOwnA*)fields->mpCustom);
+    if (((void*)fields->mpData)) {
+        cMemMan_free(((void*)fields->mpData));
     }
-    delete fields->b;
-    delete fields->c;
+    delete ((cUIEngOwnB*)fields->mpInput);
+    delete ((cUIEngOwnC*)fields->mpSound);
     cUITextureBank__cUITextureBank((cUITextureBank*)((char*)self + 0x58), 2);
     cUIStateStack__cUIStateStack((char*)&self->mStateStack, 2);
     if (flags & 1) {

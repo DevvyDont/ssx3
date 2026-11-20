@@ -724,12 +724,6 @@ extern "C" void MEM_fill(void* dst, int c, int n);
 extern void* cFEStateBuyAttrib_vtbl[];
 extern const int D_004780B0[];
 
-struct sLodgeStats_4728 {
-    char pad0[0x4C];
-    int base[7];        // 0x4C
-    int level[7];       // 0x68
-    char pad84[0x1C];   // 0x84
-};
 
 /**
  * Constructs the lodge attribute-buying state: base cUIState, cFEStateBuyAttrib_vtbl, state id 41, and a copy of the
@@ -746,7 +740,7 @@ struct sLodgeStats_4728 {
  */
 extern "C" void* cFEStateBuyAttrib_cFEStateBuyAttrib(cFEStateBuyAttrib* stateMemory, int engine)
 {
-    sLodgeStats_4728* self = (sLodgeStats_4728*)stateMemory;
+    cFEStateBuyAttrib* self = stateMemory;
     cUIState_cUIState_4728(self, engine);
     stateMemory->mHashName = 41;
     stateMemory->mVtbl = cFEStateBuyAttrib_vtbl;
@@ -755,8 +749,8 @@ extern "C" void* cFEStateBuyAttrib_cFEStateBuyAttrib(cFEStateBuyAttrib* stateMem
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
     MEM_fill(((char*)stateMemory) + 0x84, 0, 0x1C);
     for (int i = 0; i < 7; i++) {
-        self->base[i] = cBEStatInterface_getStatFromProfile_4728(iface, 0, D_004780B0[i]);
-        self->level[i] = (signed char)(cBEStatInterface_getStatFromProfile_4728(iface, 0, D_004780B0[i]) / 5);
+        self->mExperience[i] = cBEStatInterface_getStatFromProfile_4728(iface, 0, D_004780B0[i]);
+        self->mExperienceLevel[i] = (signed char)(cBEStatInterface_getStatFromProfile_4728(iface, 0, D_004780B0[i]) / 5);
     }
     return ((void*)stateMemory);
 }

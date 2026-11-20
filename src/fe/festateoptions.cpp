@@ -1354,10 +1354,6 @@ static inline sSndCfg_18A8D0 Cfg_18A8D0()
     return D_00535610_18A8D0;
 }
 
-struct sOptSound_18A8D0 {
-    char pad0[0x10];
-    char* engine;                   // 0x10
-};
 
 /**
  * Handles a widget event on the sound options screen: the reset popup, leaving the screen and value changes.
@@ -1387,7 +1383,7 @@ extern "C" void cFEStateOptionsSound_onWidgetEvent(cFEStateOptionsSound* self, c
         break;
     case 7: {
         char* resetPopup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
-        cUIState_cUIState1(resetPopup, (char*)self->mpEngine, ((sOptSound_18A8D0*)self));
+        cUIState_cUIState1(resetPopup, (char*)self->mpEngine, (self));
         *(void***)(resetPopup + 8) = cFEPopupOptionReset_vtbl;
         resetPopup[0x48] = 0;
         cUIStateStack_pushPopup(self->mpEngine->mStateStack, resetPopup);
@@ -1405,7 +1401,7 @@ extern "C" void cFEStateOptionsSound_onWidgetEvent(cFEStateOptionsSound* self, c
         cSSXAudio_SetArcadeSFX(cAudioInterface_bxAudio(), Cfg_18A8D0().iUseArcadeSFX != 0);
         char* eng = *(char**)(char*)self->mpEngine;
         sVE_18A8D0c* vt = *(sVE_18A8D0c**)(eng + 4);
-        void* nextState = vt[5].fn(eng + vt[5].delta, ((sOptSound_18A8D0*)self), *(int*)(widget + 0x18));
+        void* nextState = vt[5].fn(eng + vt[5].delta, (self), *(int*)(widget + 0x18));
         if (nextState != 0)
             cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         break;

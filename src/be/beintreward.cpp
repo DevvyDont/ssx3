@@ -3286,10 +3286,6 @@ INCLUDE_ASM("be/beintreward", cBEUserAwards_cBEUserAwards);
 #ifdef SKIP_ASM
 extern "C" void cBEUserAwards_clear(cBEUserAwards* self);
 
-struct sRewardStrings_0015A488 {
-    char pad_0x000[0x174];
-    char* mStrings[10]; // 0x174
-};
 
 /**
  * Constructs the awards log: points its per-kind bit sets into its own storage, then clears it.
@@ -3311,7 +3307,7 @@ extern "C" void* cBEUserAwards_cBEUserAwards(cBEUserAwards* self)
     ((char**)&self->mpAwardBits[0])[7] = ((char*)self) + 0x169;
     ((char**)&self->mpAwardBits[0])[8] = ((char*)self) + 0x16D;
     cBEUserAwards_clear(self);
-    return ((sRewardStrings_0015A488*)self);
+    return (self);
 }
 #endif
 

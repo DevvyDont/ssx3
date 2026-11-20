@@ -3185,7 +3185,6 @@ extern "C" void cGame_updateState(void*);
 extern char gBucketMan[8];
 extern int cPauseState_Flags;
 struct sList_244E60 { int pad0; int items[3]; unsigned int count; };
-struct sApp_244E60 { char pad0[0x4C]; int f4C; char pad1[0x84-0x50]; sList_244E60* list; };
 
 /**
  * Updates the game simulation for one frame: game state, replay, scripts, AI, update buckets and views.
@@ -3272,7 +3271,7 @@ extern "C" void cGame_updateAI(cGame* self)
         if (viewMan->count != 0) {
             unsigned int i = 0;
             do {
-                cWorldSound_TriggerWorldAudio((int)self->WorldSound, ((sApp_244E60*)self)->list->items[i] + 0x20, i);
+                cWorldSound_TriggerWorldAudio((int)self->WorldSound, ((sList_244E60*)(self)->ViewMan)->items[i] + 0x20, i);
                 i++;
             } while (i < ((sList_244E60*)(char*)self->ViewMan)->count);
         }

@@ -42,11 +42,6 @@ struct sTrig_16BF40
     sTrigPart_16BF40* f10;
 };
 
-struct sTrigList_16BF40
-{
-    sTrig_16BF40** arr;
-    int count;
-};
 
 /**
  * Frees every camera trigger and its parts, then re-initialises the header.
@@ -58,31 +53,31 @@ struct sTrigList_16BF40
  */
 extern "C" void cCameraTriggerList_reset(cCameraTriggerList* self_)
 {
-    sTrigList_16BF40* self = (sTrigList_16BF40*)self_;
-    for (int i = 0; i < self->count; i++)
+    cCameraTriggerList* self = self_;
+    for (int i = 0; i < self->NumTriggers; i++)
     {
-        if (self->arr[i]->f8)
+        if (((sTrig_16BF40**)self->Triggers)[i]->f8)
         {
-            operator_delete(self->arr[i]->f8);
-            self->arr[i]->f8 = 0;
+            operator_delete(((sTrig_16BF40**)self->Triggers)[i]->f8);
+            ((sTrig_16BF40**)self->Triggers)[i]->f8 = 0;
         }
-        if (self->arr[i]->fC)
+        if (((sTrig_16BF40**)self->Triggers)[i]->fC)
         {
-            sTrigPart_16BF40* part = self->arr[i]->fC;
+            sTrigPart_16BF40* part = ((sTrig_16BF40**)self->Triggers)[i]->fC;
             part->vt[1].fn((char*)part + part->vt[1].delta);
-            operator_delete((int*)self->arr[i]->fC);
-            self->arr[i]->fC = 0;
+            operator_delete((int*)((sTrig_16BF40**)self->Triggers)[i]->fC);
+            ((sTrig_16BF40**)self->Triggers)[i]->fC = 0;
         }
-        if (self->arr[i]->f10)
+        if (((sTrig_16BF40**)self->Triggers)[i]->f10)
         {
-            sTrigPart_16BF40* part = self->arr[i]->f10;
+            sTrigPart_16BF40* part = ((sTrig_16BF40**)self->Triggers)[i]->f10;
             part->vt[1].fn((char*)part + part->vt[1].delta);
-            operator_delete((int*)self->arr[i]->f10);
-            self->arr[i]->f10 = 0;
+            operator_delete((int*)((sTrig_16BF40**)self->Triggers)[i]->f10);
+            ((sTrig_16BF40**)self->Triggers)[i]->f10 = 0;
         }
-        if (self->arr[i])
-            tCameraTrigger__tCameraTrigger(self->arr[i], 3);
-        self->arr[i] = 0;
+        if (((sTrig_16BF40**)self->Triggers)[i])
+            tCameraTrigger__tCameraTrigger(((sTrig_16BF40**)self->Triggers)[i], 3);
+        ((sTrig_16BF40**)self->Triggers)[i] = 0;
     }
     cCameraTriggerList_initHeader((cCameraTriggerList*)self);
 }

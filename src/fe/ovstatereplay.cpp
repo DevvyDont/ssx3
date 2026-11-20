@@ -313,17 +313,6 @@ struct sVec3_0020E530 {
     float x, y, z;
 };
 
-struct sReplay_0020E530 {
-    char pad_0x0[0x40];
-    void* screen;       // 0x40
-    char pad_0x44[0x58];
-    int paused;         // 0x9C
-    char pad_0xA0[0x4];
-    int pos;            // 0xA4
-    int speed;          // 0xA8
-    int start;          // 0xAC
-    int end;            // 0xB0
-};
 
 /**
  * Updates the replay overlay: slides the help panel, shows the matching hints, and refreshes the camera name
@@ -337,36 +326,36 @@ struct sReplay_0020E530 {
  */
 extern "C" void cOVState_REPLAY_onUpdate(cOVState_REPLAY* vself)
 {
-    sReplay_0020E530* self = (sReplay_0020E530*)vself;
+    cOVState_REPLAY* self = vself;
     cOVState_onUpdate((cOVState*)self);
-    self->pos += self->speed;
-    if (self->pos <= self->start) {
-        self->pos = self->start;
-        self->speed = 0;
-    } else if (self->pos >= self->end) {
-        self->pos = self->end;
-        self->speed = 0;
+    self->mBottom_y += self->mBottom_ydiff;
+    if (self->mBottom_y <= self->mMinBottom_y) {
+        self->mBottom_y = self->mMinBottom_y;
+        self->mBottom_ydiff = 0;
+    } else if (self->mBottom_y >= self->mMaxBottom_y) {
+        self->mBottom_y = self->mMaxBottom_y;
+        self->mBottom_ydiff = 0;
     }
-    if (self->pos == self->start) {
+    if (self->mBottom_y == self->mMinBottom_y) {
         cUIState_showObjSafe(self, str_hidehelp);
         cUIState_hideObjSafe(self, str_showhelp);
-    } else if (self->pos == self->end) {
+    } else if (self->mBottom_y == self->mMaxBottom_y) {
         cUIState_hideObjSafe(self, str_hidehelp);
         cUIState_showObjSafe(self, str_showhelp);
     } else {
         cUIState_hideObjSafe(self, str_hidehelp);
         cUIState_hideObjSafe(self, str_showhelp);
     }
-    char* obj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_bottom));
+    char* obj = (char*)cUIScreen_getObjectByHashName(((void*)self->mpScreen), GetHashValue32(str_bottom));
     sVec3_0020E530 bottomPos = *(sVec3_0020E530*)(obj + 0x44);
-    bottomPos.y = (float)self->pos;
+    bottomPos.y = (float)self->mBottom_y;
     *(sVec3_0020E530*)(obj + 0x44) = bottomPos;
-    if (self->paused != 0) {
+    if (self->mShowPopupMenu != 0) {
         cUIState_showObjSafe(self, str_ReplayMenuPopup);
     } else {
         cUIState_hideObjSafe(self, str_ReplayMenuPopup);
     }
-    if (self->paused == 0) {
+    if (self->mShowPopupMenu == 0) {
         cReplay_updateCameraSelect(SSXApp->Game->Replay);
     }
     cOVState_REPLAY_setupCameraName((cOVState_REPLAY*)self);

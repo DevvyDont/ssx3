@@ -60,21 +60,6 @@ extern char str_cOVTemplate_PauseMenu[];
 extern char str_31paus_freeride[];
 extern char* str_H_J[];
 
-struct sPauseMenu_PM {
-    char pad0[0xC];
-    int f0C;                    // 0xC
-    void* engine;               // 0x10
-    char pad14[0x88];
-    int a9C[8];                 // 0x9C
-    int fBC;                    // 0xBC
-    void* screen;               // 0xC0
-    char padC4[4];
-    int fC8;
-    float fCC;
-    int fD0;
-    int fD4;
-    int aD8[14];                // 0xD8
-};
 
 /**
  * Creates the pause menu ("31paus_freeride"): labels its up-to-8 option rows, decides which options are
@@ -91,12 +76,12 @@ struct sPauseMenu_PM {
  */
 extern "C" void cOVTemplate_PauseMenu_onCreateScreen(cOVTemplate_PauseMenu* state)
 {
-    sPauseMenu_PM* self = (sPauseMenu_PM*)state;
+    cOVTemplate_PauseMenu* self = state;
     char name[2];
-    self->f0C = GetHashValue32(str_cOVTemplate_PauseMenu);
-    void* engine = self->engine;
+    self->mHashName = GetHashValue32(str_cOVTemplate_PauseMenu);
+    void* engine = ((void*)self->mpEngine);
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_31paus_freeride), 0);
-    self->screen = screen;
+    (*(void**)&self->mpPauseScreen) = screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -105,48 +90,48 @@ extern "C" void cOVTemplate_PauseMenu_onCreateScreen(cOVTemplate_PauseMenu* stat
     func_00416210(name, 0, 2);
     for (int i = 0; i < 8; i++) {
         name[0] = '0' + i;
-        char* textObj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(name));
+        char* textObj = (char*)cUIScreen_getObjectByHashName(((void*)self->mpPauseScreen), GetHashValue32(name));
         if (textObj != 0) {
-            if (i < self->fBC) {
-                int nameHash = GetHashValue32(str_H_J[self->a9C[i]]);
-                char* mgr = *(char**)((char*)self->engine + 0x10);
+            if (i < self->mPauseMenuNumOptions) {
+                int nameHash = GetHashValue32(str_H_J[self->mPauseMenuOptions[i]]);
+                char* mgr = *(char**)((char*)((void*)self->mpEngine) + 0x10);
                 sVEntry<void*(void*, int)>* vt = *(sVEntry<void*(void*, int)>**)(mgr + 4);
                 if (vt[4].fn(mgr + vt[4].delta, nameHash) != 0) {
                     cUIText_setUnicodeStringByID((cUIText*)textObj, nameHash);
                 } else {
-                    cUIText_setAsciiString((cUIText*)textObj, str_H_J[self->a9C[i]]);
+                    cUIText_setAsciiString((cUIText*)textObj, str_H_J[self->mPauseMenuOptions[i]]);
                 }
-                *(int*)(textObj + 0x18) = self->a9C[i];
+                *(int*)(textObj + 0x18) = self->mPauseMenuOptions[i];
             } else {
                 ((cUIThing*)textObj)->setVisible(0);
                 ((cUIThing*)textObj)->setStatic(1);
             }
         }
     }
-    self->fD4 = 1;
-    self->fCC = 0.05f;
-    self->fC8 = 0;
-    self->fD0 = 0;
+    self->mMoveIcons = 1;
+    self->mNewMailAlphaDiff = 0.05f;
+    (*(int*)&self->mNewMailAlpha) = 0;
+    self->mScreenExiting = 0;
     int i;
     for (i = 0; i < 14; i++) {
-        self->aD8[i] = 1;
+        self->mPauseOptionUnlocked[i] = 1;
     }
     if (SSXApp->Game->mCurrentStateID == 11) {
-        self->aD8[6] = 0;
+        self->mPauseOptionUnlocked[6] = 0;
     }
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame == 0) {
         void* game = SSXApp->Game;
         if (cGame_canUserActivatePauseMenu(game) == 0 || SSXApp->Game->ControllerUnplugged != 0) {
             for (i = 0; i < 14; i++) {
-                self->aD8[i] = 0;
+                self->mPauseOptionUnlocked[i] = 0;
                 if (i == 1) {
-                    self->aD8[i] = 1;
+                    self->mPauseOptionUnlocked[i] = 1;
                 }
             }
         }
     }
-    void* menu = cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_Menu_b));
+    void* menu = cUIScreen_getObjectByHashName(((void*)self->mpPauseScreen), GetHashValue32(str_Menu_b));
     if (menu != 0) {
         cUIMenu_setSelectedByIndex(menu, D_004A2468);
     }

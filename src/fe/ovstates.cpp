@@ -103,10 +103,6 @@ struct sApp_1948A8 {
     char pad[0xB0];
     sList_1948A8** lists[2];
 };
-struct sSelf_1948A8 {
-    char pad[0x48];
-    int timer;
-};
 
 static inline int isActive_1948A8(sList_1948A8* l, int j)
 {
@@ -125,7 +121,7 @@ static inline int isActive_1948A8(sList_1948A8* l, int j)
  */
 extern "C" void cFEStateTitle_onUpdate(cFEStateTitle* self)
 {
-    cUIState_onUpdate(((sSelf_1948A8*)self));
+    cUIState_onUpdate((self));
     self->mNumTicksIdle += 1;
     if (self->mNumTicksIdle > 1800) {
         self->mNumTicksIdle = 0;

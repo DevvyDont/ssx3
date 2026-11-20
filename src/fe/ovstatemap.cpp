@@ -154,10 +154,6 @@ public:
     virtual sV4_87F0* v05();
 };
 
-struct sMapF_87F0 {
-    char pad_0x0[0x9C];
-    int flags[8];               // 0x9C
-};
 
 typedef void (*VIntFn_87F0)(void*, int);
 typedef void (*VPtrFn_87F0)(void*, void*);
@@ -214,7 +210,7 @@ extern "C" int cOVState_MAP_onGainTransition(cOVState_MAP* selfp, int on)
             sprintf(buf, str_SessionPointpct_d, i);
             menuItem = (sUIObj_87F0*)cUIScreen_getObjectByHashName(selfp->mpMapScreen, GetHashValue32(buf));
             if (i < n) {
-                ((sMapF_87F0*)selfp)->flags[i] = 1;
+                (selfp)->mbSessionUnlocked[i] = 1;
                 sStrMgr_87F0* locale = (sStrMgr_87F0*)SSXApp->FELocale;
                 sVE_87F0* vt = locale->vt;
                 void* str = ((VGetFn_87F0)vt[4].fn)((char*)locale + vt[4].delta, GetHashValue32(str_kT_MAPSessionPt));
@@ -234,7 +230,7 @@ extern "C" int cOVState_MAP_onGainTransition(cOVState_MAP* selfp, int on)
                 }
                 menuItem->f18 = i + 1;
             } else {
-                ((sMapF_87F0*)selfp)->flags[i] = 0;
+                (selfp)->mbSessionUnlocked[i] = 0;
                 ((VIntFn_87F0)menuItem->vt[9].fn)((char*)menuItem + menuItem->vt[9].delta, 0);
                 ((VIntFn_87F0)menuItem->vt[8].fn)((char*)menuItem + menuItem->vt[8].delta, 1);
             }
@@ -971,13 +967,6 @@ public:
     virtual sV4_96A8* v05();
 };
 
-struct sMapSt_96A8 {
-    char pad_0x0[0xD0];
-    cFEObj_96A8* img;           // 0xD0
-    char* screen;               // 0xD4
-    char pad_0xD8[0x8];
-    cFEObj_96A8* ind;           // 0xE0
-};
 
 struct cList;
 struct cListNode;
@@ -1010,10 +999,10 @@ static inline float Absf_96A8(float v)
  */
 extern "C" void cOVState_MAP_setupPlayerIndicator(cOVState_MAP* selfp)
 {
-    sMapSt_96A8* self = (sMapSt_96A8*)selfp;
+    cOVState_MAP* self = selfp;
     void* ifMap = cBE_getInterface_Fv(cBE_getBE(), 10);
     void* ifGame = cBE_getInterface_Fv(cBE_getBE(), 0);
-    sV3_96A8 mapPos = ((sFEObjData_96A8*)self->img)->pos;
+    sV3_96A8 mapPos = ((sFEObjData_96A8*)((cFEObj_96A8*)self->mpMap))->pos;
     char* rider = (char*)SSXApp->Game->AI->Riders[0];
     sV4_96A8 pp = *((cRiderSub_96A8*)(rider + 0x6C0))->v05();
     sBounds_96A8 bounds;
@@ -1023,22 +1012,22 @@ extern "C" void cOVState_MAP_setupPlayerIndicator(cOVState_MAP* selfp)
     float fy = Absf_96A8((pp.y - bounds.minY) / (bounds.maxY - bounds.minY));
     int py = (int)(fy * 266.0f);
     char* ind = (char*)cMemMan_alloc(136, str_Player_Indicator_Icon, 0x20000000, 0);
-    cUIThing_cUIThing(ind, self->screen, 0);
+    cUIThing_cUIThing(ind, ((char*)self->mpMapScreen), 0);
     *(void***)(ind + 0x8) = cUIIcon_vtbl;
     func_0021CCC8(ind + 0x74);
     *(int*)(ind + 0x78) = -1;
-    self->ind = (cFEObj_96A8*)ind;
+    (*(cFEObj_96A8**)&self->mpPlayerIcon) = (cFEObj_96A8*)ind;
     *(int*)(ind + 0x7C) = 0;
     {
         sV3_96A8 indicatorPos((float)(unsigned int)(px + 0xFC) - 5.0f, (float)(unsigned int)(py + 97) - 5.0f, mapPos.z);
-        ((sFEObjData_96A8*)self->ind)->pos = indicatorPos;
+        ((sFEObjData_96A8*)((cFEObj_96A8*)self->mpPlayerIcon))->pos = indicatorPos;
     }
-    self->ind->SetScale(sV3_96A8(17.0f, 17.0f));
-    cUIIcon_setTextureByHashValue(self->ind, GetHashValue32(str_location));
-    self->ind->SetVisible(0);
-    sFEObjData_96A8* indicatorData = (sFEObjData_96A8*)self->ind;
+    ((cFEObj_96A8*)self->mpPlayerIcon)->SetScale(sV3_96A8(17.0f, 17.0f));
+    cUIIcon_setTextureByHashValue(((cFEObj_96A8*)self->mpPlayerIcon), GetHashValue32(str_location));
+    ((cFEObj_96A8*)self->mpPlayerIcon)->SetVisible(0);
+    sFEObjData_96A8* indicatorData = (sFEObjData_96A8*)((cFEObj_96A8*)self->mpPlayerIcon);
     indicatorData->flags = (indicatorData->flags & ~0x1F00) | 0xD00;
-    cList_addToEnd((cList*)(self->screen + 0xB4), (cListNode*)self->ind);
+    cList_addToEnd((cList*)(((char*)self->mpMapScreen) + 0xB4), (cListNode*)((cFEObj_96A8*)self->mpPlayerIcon));
 }
 #endif
 
