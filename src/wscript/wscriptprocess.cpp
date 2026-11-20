@@ -1,4 +1,5 @@
 #include "common.h"
+#include "wscript/wscriptman.h"
 #include "world/world.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -1402,7 +1403,7 @@ extern "C" void tMissionMenuQueue_tMissionMenuQueue(void* p);
 void cProcessList_cProcessList(void* p);
 extern "C" void cCollectPool_init(void* p);
 extern "C" void MEM_fill(void* dst, int value, int size);
-extern "C" void cWScriptMan_init(void* self);
+extern "C" void cWScriptMan_init(cWScriptMan* self);
 extern char cWScriptMan_vtbl[];
 // cWScriptMan_TheWScriptMan is declared `int` later in the unit; it holds the current process.
 extern void* cWScriptMan_cWScriptMan_current __asm__("cWScriptMan_TheWScriptMan");
@@ -1417,15 +1418,15 @@ extern void* cWScriptMan_cWScriptMan_current __asm__("cWScriptMan_TheWScriptMan"
  *
  * @return this
  */
-extern "C" void* cWScriptMan_cWScriptMan(void* self)
+extern "C" void* cWScriptMan_cWScriptMan(cWScriptMan* self)
 {
-    *(unsigned int*)((char*)self + 0x2C) = 0xFFFFFFFF;
-    tMissionMenuQueue_tMissionMenuQueue((char*)self + 0x1C4);
-    *(void**)((char*)self + 0x494) = cWScriptMan_vtbl;
-    cProcessList_cProcessList((char*)self + 0x2B4);
-    cProcessList_cProcessList((char*)self + 0x2B8);
-    cProcessList_cProcessList((char*)self + 0x2BC);
-    char* collectPool = (char*)self + 0x2C0;
+    self->MissionHeightInstId = 0xFFFFFFFF;
+    tMissionMenuQueue_tMissionMenuQueue(self->MissionMenuQueue);
+    self->mVtbl = cWScriptMan_vtbl;
+    cProcessList_cProcessList((char*)&self->IdleList);
+    cProcessList_cProcessList((char*)&self->ActiveList);
+    cProcessList_cProcessList((char*)&self->AddList);
+    char* collectPool = self->CollectPools[0];
     int i;
     for (i = 0; i != -1; i--) {
         char* next = collectPool + 0x10C;
@@ -1437,18 +1438,18 @@ extern "C" void* cWScriptMan_cWScriptMan(void* self)
         cCollectPool_init(collectPool);
         collectPool = next;
     }
-    cWScriptMan_cWScriptMan_current = self;
-    *(char**)((char*)self + 0x28C) = (char*)cWorld_m_pTheWorld;
-    MEM_fill((char*)self + 0x3CC, 0, 200);
+    cWScriptMan_cWScriptMan_current = ((void*)self);
+    self->World = (cWorld*)((char*)cWorld_m_pTheWorld);
+    MEM_fill((char*)self->GlobalTables, 0, 200);
     cWScriptMan_init(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan__cWScriptMan);
 #ifdef SKIP_ASM
-extern "C" void cWScriptMan_purgeGlobalTables(void* self);
+extern "C" void cWScriptMan_purgeGlobalTables(cWScriptMan* self);
 extern "C" void cProcessList__cProcessList(void* self, int flags);
 void operator_delete(int* p);
 extern char cWScriptMan_vtbl[];
@@ -1462,20 +1463,20 @@ extern int cWScriptMan_TheWScriptMan;
  *
  * @param flags  g++ in-charge flags; bit 0 deletes the object
  */
-extern "C" void cWScriptMan__cWScriptMan(void* self, int flags)
+extern "C" void cWScriptMan__cWScriptMan(cWScriptMan* self, int flags)
 {
-    *(void**)((char*)self + 0x494) = cWScriptMan_vtbl;
+    self->mVtbl = cWScriptMan_vtbl;
     cWScriptMan_purgeGlobalTables(self);
     cWScriptMan_TheWScriptMan = 0;
-    if ((char*)self + 0x2C0 != 0) {
-        char* collectPool = (char*)self + 0x2C0 + 0x10C;
-        while ((char*)self + 0x2C0 != collectPool) {
+    if (self->CollectPools[0] != 0) {
+        char* collectPool = self->CollectPools[0] + 0x10C;
+        while (self->CollectPools[0] != collectPool) {
             collectPool -= 0x10C;
         }
     }
-    cProcessList__cProcessList((char*)self + 0x2BC, 2);
-    cProcessList__cProcessList((char*)self + 0x2B8, 2);
-    cProcessList__cProcessList((char*)self + 0x2B4, 2);
+    cProcessList__cProcessList((char*)&self->AddList, 2);
+    cProcessList__cProcessList((char*)&self->ActiveList, 2);
+    cProcessList__cProcessList((char*)&self->IdleList, 2);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -1487,7 +1488,7 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_init);
 #ifdef SKIP_ASM
 extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" void tMissionMenuQueue_init(void* p);
-extern "C" void cWScriptMan_rebuildGlobalTables(void* self);
+extern "C" void cWScriptMan_rebuildGlobalTables(cWScriptMan* self);
 
 #define WSP308988_I(off) (*(int*)((char*)self + (off)))
 #define WSP308988_U(off) (*(unsigned int*)((char*)self + (off)))
@@ -1499,7 +1500,7 @@ extern "C" void cWScriptMan_rebuildGlobalTables(void* self);
  * +0x2B0) and several counters to -1, empties the menu queue (tMissionMenuQueue_init) and the event list at +0x44, and runs
  * cWScriptMan_rebuildGlobalTables.
  */
-extern "C" void cWScriptMan_init(void* self)
+extern "C" void cWScriptMan_init(cWScriptMan* self)
 {
     WSP308988_I(656) = 0;
     WSP308988_I(0x0) = 0;
@@ -1524,8 +1525,8 @@ extern "C" void cWScriptMan_init(void* self)
     WSP308988_I(0xC) = -1;
     WSP308988_I(36) = -1;
     WSP308988_U(44) = 0xFFFFFFFF;
-    MEM_fill((char*)self + 0x38, 0, 8);
-    tMissionMenuQueue_init((char*)self + 0x1C4);
+    MEM_fill((char*)self->MissionTrick, 0, 8);
+    tMissionMenuQueue_init(self->MissionMenuQueue);
     WSP308988_I(0x40) = 0;
     MEM_fill((char*)self + 0x44, 0, 0x180);
     cWScriptMan_rebuildGlobalTables(self);
@@ -1545,9 +1546,9 @@ extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
  *
  * Destroys and clears each non-null table pointer among the 50 at +0x3CC.
  */
-extern "C" void cWScriptMan_purgeGlobalTables(void* self)
+extern "C" void cWScriptMan_purgeGlobalTables(cWScriptMan* self)
 {
-    void** objs = (void**)((char*)self + 0x3CC);
+    void** objs = (void**)((char*)self->GlobalTables);
     int i;
     for (i = 0; i < 50; i++) {
         if (objs[i] != 0) {
@@ -1563,7 +1564,7 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_rebuildGlobalTables);
 #ifdef SKIP_ASM
 struct cWorldView;
 int cWorldView_getNumSections(cWorldView* view);
-extern "C" void cWScriptMan_purgeGlobalTables(void* self);
+extern "C" void cWScriptMan_purgeGlobalTables(cWScriptMan* self);
 // PORT: the unit declares cWScriptMan_allocateGlobalTable as (void* self); the body also takes the slot index
 void* cWScriptMan_allocateGlobalTable_impl(void* self, int i) __asm__("cWScriptMan_allocateGlobalTable");
 
@@ -1580,13 +1581,13 @@ struct cWScriptMan_rebuildGlobalTables_sSection {
  * Runs cWScriptMan_purgeGlobalTables, then for every section of the world view whose script cache entry has reached state 2 and has
  * data, calls cWScriptMan_allocateGlobalTable with the section index.
  */
-extern "C" void cWScriptMan_rebuildGlobalTables(void* self)
+extern "C" void cWScriptMan_rebuildGlobalTables(cWScriptMan* self)
 {
     int i = 0;
     cWScriptMan_purgeGlobalTables(self);
-    int n = cWorldView_getNumSections((cWorldView*)(**(char***)((char*)self + 0x28C) + 0x10));
+    int n = cWorldView_getNumSections((cWorldView*)(*(char**)self->World + 0x10));
     for (; i < n; i++) {
-        cWScriptMan_rebuildGlobalTables_sSection* tbl = *(cWScriptMan_rebuildGlobalTables_sSection**)(*(char**)(*(char**)((char*)self + 0x28C) + 0x4) + 0x4);
+        cWScriptMan_rebuildGlobalTables_sSection* tbl = *(cWScriptMan_rebuildGlobalTables_sSection**)(*(char**)((char*)self->World + 0x4) + 0x4);
         int ok = tbl[i].type >= 2 && tbl[i].f8 != 0;
         if (ok) {
             cWScriptMan_allocateGlobalTable_impl(self, i);
@@ -1665,10 +1666,10 @@ struct cWScriptMan_activeSection_sDef {
  *
  * @param section  world section id
  */
-extern "C" void cWScriptMan_activeSection(void* self, int section)
+extern "C" void cWScriptMan_activeSection(cWScriptMan* self, int section)
 {
-    int n = cWorld_getNumProcessScripts(*(void**)((char*)self + 0x28C), section);
-    cWScriptMan_activeSection_sDef* defs = (cWScriptMan_activeSection_sDef*)cWorld_getProcessScripts(*(void**)((char*)self + 0x28C), section);
+    int n = cWorld_getNumProcessScripts(self->World, section);
+    cWScriptMan_activeSection_sDef* defs = (cWScriptMan_activeSection_sDef*)cWorld_getProcessScripts(self->World, section);
     int i;
     for (i = 0; i < n; i++) {
         cWScriptMan_addProcess(self, section, &defs[i], 0);
@@ -1693,7 +1694,7 @@ extern "C" void* cWorld_getMissionScripts(void* world, int i);
 extern "C" void cWScriptMan_addProcess1(void* self, int section, void* def, int id, int flags);
 extern "C" char* cBENewRaceInterface_getLocation(void* iface);
 extern "C" void cPlaybackMan_initLocation(void* pb, void* loc);
-extern "C" void cWScriptMan_updateWorld(void* self);
+extern "C" void cWScriptMan_updateWorld(cWScriptMan* self);
 
 static inline void* wsPlayback8C60()
 {
@@ -1710,17 +1711,17 @@ static inline void* wsPlayback8C60()
  * location's data (+0x34). cWScriptMan_updateWorld() always runs last: it runs each mission script's code at +0x4C and
  * clears the manager's mission state.
  */
-extern "C" void cWScriptMan_setupMissions(void* self)
+extern "C" void cWScriptMan_setupMissions(cWScriptMan* self)
 {
     void* iface;
     cPlaybackMan_purgeLocation(wsPlayback8C60());
     iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     if (D_00535C10[0] == 4 && SSXApp->Game->AI->NumberOfPlayersAllocated == 1) {
         int i = 0;
-        int n = cWorldView_getNumSections((cWorldView*)(**(char***)((char*)self + 0x28C) + 0x10));
+        int n = cWorldView_getNumSections((cWorldView*)(*(char**)self->World + 0x10));
         for (; i < n; i++) {
-            int cnt = cWorld_getNumMissionScripts(*(void**)((char*)self + 0x28C), i);
-            sWSPDef8C60* defs = (sWSPDef8C60*)cWorld_getMissionScripts(*(void**)((char*)self + 0x28C), i);
+            int cnt = cWorld_getNumMissionScripts(self->World, i);
+            sWSPDef8C60* defs = (sWSPDef8C60*)cWorld_getMissionScripts(self->World, i);
             int j;
             for (j = 0; j < cnt; j++) {
                 cWScriptMan_addProcess1(self, i, &defs[j], (i << 16) + i, 0);
@@ -1771,16 +1772,16 @@ extern "C" void luno_cLunoVar__cLunoVar(cWScriptMan_isFunc_sValue* self, int fla
  * 8-slot local table, runs the code for the mission's +0x4C script id in it if there is any, and destroys the table.
  * Then clears the current instance, infos, process and task.
  */
-extern "C" void cWScriptMan_updateWorld(void* self)
+extern "C" void cWScriptMan_updateWorld(cWScriptMan* self)
 {
     int i = 0;
-    int n = cWorldView_getNumSections((cWorldView*)(**(char***)((char*)self + 0x28C) + 0x10));
+    int n = cWorldView_getNumSections((cWorldView*)(*(char**)self->World + 0x10));
     for (; i < n; i++) {
-        int cnt = cWorld_getNumMissionScripts(*(void**)((char*)self + 0x28C), i);
-        sWSPDef8DB8* defs = (sWSPDef8DB8*)cWorld_getMissionScripts(*(void**)((char*)self + 0x28C), i);
+        int cnt = cWorld_getNumMissionScripts(self->World, i);
+        sWSPDef8DB8* defs = (sWSPDef8DB8*)cWorld_getMissionScripts(self->World, i);
         int j;
         for (j = 0; j < cnt; j++) {
-            if (defs[j].f0 != *(int*)((char*)self + 0x2A0)) {
+            if (defs[j].f0 != (int)self->LocalMissionId) {
                 void* table = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, str_SetupLocalTable, 0x20000000, 0), 8);
                 int scriptCode = cWScriptMan_getScriptCode_2(self, defs[j].f4C);
                 if (scriptCode != 0) {
@@ -1800,11 +1801,11 @@ extern "C" void cWScriptMan_updateWorld(void* self)
             }
         }
     }
-    *(int*)((char*)self + 0x290) = 0;
-    *(int*)((char*)self + 0x294) = 0;
-    *(int*)((char*)self + 0x298) = 0;
-    *(int*)((char*)self + 0x2A4) = 0;
-    *(int*)((char*)self + 0x2A8) = 0;
+    self->Inst = 0;
+    self->CollideInfo = 0;
+    self->IntersectInfo = 0;
+    self->CurrentProcess = 0;
+    self->CurrentTask = 0;
 }
 #endif
 
@@ -1818,11 +1819,11 @@ extern "C" void cProcessList_deleteAll(void*);
  *
  * Runs cProcessList_deleteAll on the active (+0x2B8), pending (+0x2BC) and idle (+0x2B4) process lists.
  */
-extern "C" void cWScriptMan_purgeMissions(void* self)
+extern "C" void cWScriptMan_purgeMissions(cWScriptMan* self)
 {
-    cProcessList_deleteAll((char*)self + 0x2B8);
-    cProcessList_deleteAll((char*)self + 0x2BC);
-    cProcessList_deleteAll((char*)self + 0x2B4);
+    cProcessList_deleteAll((char*)&self->ActiveList);
+    cProcessList_deleteAll((char*)&self->AddList);
+    cProcessList_deleteAll((char*)&self->IdleList);
 }
 #endif
 
@@ -1840,13 +1841,13 @@ extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
  *
  * @param section  world section id
  */
-extern "C" void cWScriptMan_purgeSection(void* self, int section)
+extern "C" void cWScriptMan_purgeSection(cWScriptMan* self, int section)
 {
-    cProcessList_unloadSection((char*)self + 0x2B4, section);
-    cProcessList_unloadSection((char*)self + 0x2B8, section);
-    cProcessList_unloadSection((char*)self + 0x2BC, section);
+    cProcessList_unloadSection((char*)&self->IdleList, section);
+    cProcessList_unloadSection((char*)&self->ActiveList, section);
+    cProcessList_unloadSection((char*)&self->AddList, section);
     int off = section << 2;
-    char* base = (char*)self + 0x3CC;
+    char* base = (char*)self->GlobalTables;
     void** slot = (void**)(base + off);
     if (*slot != 0) {
         luno_cLunoTable__cLunoTable(*slot, 3);
@@ -1862,7 +1863,7 @@ struct cWScriptMan_unloadSection_sEntry {
     char pad[0xC];
 };
 
-extern "C" void cWScriptMan_purgeSection(void* self, int i);
+extern "C" void cWScriptMan_purgeSection(cWScriptMan* self, int i);
 extern "C" void cWScriptCacheEntry_unload(void* entry);
 
 /**
@@ -1874,11 +1875,11 @@ extern "C" void cWScriptCacheEntry_unload(void* entry);
  *
  * @param i  world section id
  */
-extern "C" void cWScriptMan_unloadSection(void* self, int i)
+extern "C" void cWScriptMan_unloadSection(cWScriptMan* self, int i)
 {
     cWScriptMan_purgeSection(self, i);
     cWScriptMan_unloadSection_sEntry* items =
-        *(cWScriptMan_unloadSection_sEntry**)(*(char**)(*(char**)((char*)self + 0x28C) + 4) + 4);
+        *(cWScriptMan_unloadSection_sEntry**)(*(char**)((char*)self->World + 4) + 4);
     cWScriptCacheEntry_unload(&items[i]);
 }
 #endif
@@ -1889,9 +1890,9 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_initMissions);
 struct cWorldView;
 int cWorldView_getNumSections(cWorldView* view);
 extern "C" void cProcessList_deleteAll(void*);
-extern "C" void cWScriptMan_init(void* self);
-extern "C" void cWScriptMan_activeSection(void* self, int section);
-extern "C" void cWScriptMan_purgeSection(void* self, int section);
+extern "C" void cWScriptMan_init(cWScriptMan* self);
+extern "C" void cWScriptMan_activeSection(cWScriptMan* self, int section);
+extern "C" void cWScriptMan_purgeSection(cWScriptMan* self, int section);
 
 struct cWScriptMan_initMissions_sSection {
     short type;
@@ -1909,16 +1910,16 @@ struct cWScriptMan_initMissions_sSection {
  * entry in the world's cWScriptCache has a state of 2 or more and a data word (+0x8), otherwise
  * cWScriptMan_purgeSection().
  */
-extern "C" void cWScriptMan_initMissions(void* self)
+extern "C" void cWScriptMan_initMissions(cWScriptMan* self)
 {
     int i = 0;
-    cProcessList_deleteAll((char*)self + 0x2B8);
-    cProcessList_deleteAll((char*)self + 0x2BC);
-    cProcessList_deleteAll((char*)self + 0x2B4);
+    cProcessList_deleteAll((char*)&self->ActiveList);
+    cProcessList_deleteAll((char*)&self->AddList);
+    cProcessList_deleteAll((char*)&self->IdleList);
     cWScriptMan_init(self);
-    int n = cWorldView_getNumSections((cWorldView*)(**(char***)((char*)self + 0x28C) + 0x10));
+    int n = cWorldView_getNumSections((cWorldView*)(*(char**)self->World + 0x10));
     for (; i < n; i++) {
-        cWScriptMan_initMissions_sSection* tbl = *(cWScriptMan_initMissions_sSection**)(*(char**)(*(char**)((char*)self + 0x28C) + 0x4) + 0x4);
+        cWScriptMan_initMissions_sSection* tbl = *(cWScriptMan_initMissions_sSection**)(*(char**)((char*)self->World + 0x4) + 0x4);
         int ok = tbl[i].type >= 2 && tbl[i].f8 != 0;
         if (ok) {
             cWScriptMan_activeSection(self, i);
@@ -1933,7 +1934,7 @@ extern "C" void cWScriptMan_initMissions(void* self)
 INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_processLocalMissionCmd);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void cWScriptMan_updateWorld(void* self);
+extern "C" void cWScriptMan_updateWorld(cWScriptMan* self);
 extern "C" void cWScriptMan_doMissionCmd(void* self, int id, int a2, int a3);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0029D6E0(void* snd, int a1);
@@ -1955,41 +1956,40 @@ extern "C" void cPlaybackMan_startPreview(void* p);
  * @param vself  the world script manager (this)
  */
 // Runs the pending gate action (replay, sounds, camera) and clears it.
-extern "C" void cWScriptMan_processLocalMissionCmd(void* vself)
+extern "C" void cWScriptMan_processLocalMissionCmd(cWScriptMan* vself)
 {
-    char* self = (char*)vself;
-    switch (*(int*)(self + 0x2AC)) {
+    switch (vself->LocalMissionCmd) {
     case 1:
-        cWScriptMan_updateWorld(self);
-        cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 1, 0);
-        func_0029D6E0(cAudioInterface_bxAudio(), *(int*)(self + 0x2A0));
+        cWScriptMan_updateWorld(vself);
+        cWScriptMan_doMissionCmd(((char*)vself), (int)vself->LocalMissionCmdId, 1, 0);
+        func_0029D6E0(cAudioInterface_bxAudio(), (int)vself->LocalMissionId);
         cReplay_startRace(SSXApp->Game->Replay);
         break;
     case 2:
-        cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 3, 0);
+        cWScriptMan_doMissionCmd(((char*)vself), (int)vself->LocalMissionCmdId, 3, 0);
         break;
     case 3:
-        cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 18, 0);
-        cWScriptMan_updateWorld(self);
+        cWScriptMan_doMissionCmd(((char*)vself), (int)vself->LocalMissionCmdId, 18, 0);
+        cWScriptMan_updateWorld(vself);
         cSSXAudio_BigChallengeFailed(cAudioInterface_bxAudio(), 1);
         break;
     case 4:
-        cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 5, 0);
-        cWScriptMan_updateWorld(self);
+        cWScriptMan_doMissionCmd(((char*)vself), (int)vself->LocalMissionCmdId, 5, 0);
+        cWScriptMan_updateWorld(vself);
         cSSXAudio_BigChallengeFailed(cAudioInterface_bxAudio(), 1);
         break;
     case 5:
         cPlaybackMan_startPreview(SSXApp->Game->PlaybackMan);
-        cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 1, 1);
-        cWScriptMan_updateWorld(self);
+        cWScriptMan_doMissionCmd(((char*)vself), (int)vself->LocalMissionCmdId, 1, 1);
+        cWScriptMan_updateWorld(vself);
         break;
     case 6:
-        cWScriptMan_doMissionCmd(self, *(int*)(self + 0x2B0), 18, 0);
-        cWScriptMan_updateWorld(self);
+        cWScriptMan_doMissionCmd(((char*)vself), (int)vself->LocalMissionCmdId, 18, 0);
+        cWScriptMan_updateWorld(vself);
         break;
     }
-    *(int*)(self + 0x2AC) = 0;
-    *(unsigned int*)(self + 0x2B0) = 0xFFFFFFFF;
+    vself->LocalMissionCmd = 0;
+    vself->LocalMissionCmdId = 0xFFFFFFFF;
 }
 #endif
 
@@ -2001,7 +2001,7 @@ struct cWScriptProcList;
 extern "C" void cWScriptProcess_update(cWScriptProcess_update_cProc* self);
 extern "C" void cWScriptProcess_dispatchProcessEvent(void* proc, void* cmd);
 extern "C" void cWScriptProcess_dispatchTaskEvent(cWScriptProcList* self, int a1);
-extern "C" void cWScriptMan_processLocalMissionCmd(void* self);
+extern "C" void cWScriptMan_processLocalMissionCmd(cWScriptMan* self);
 extern "C" void cWScriptMan_startProcess(void* self, void* p);
 extern "C" void* cProcessList_removeHead(void* self);
 int cProcessList_addProcess(void* self, void* a1);
@@ -2055,46 +2055,46 @@ static inline void* lookup_309270(sRefWorld_309270* w, unsigned int id)
  * cWScriptProcess_dispatchTaskEvent for task events (0x10000). Finally every active process is updated with cWScriptProcess_update, each made
  * current in turn.
  */
-extern "C" void cWScriptMan_update(void* self)
+extern "C" void cWScriptMan_update(cWScriptMan* self)
 {
     cWScriptMan_processLocalMissionCmd(self);
-    *(int*)((char*)self + 0x4) = 0;
-    *(int*)((char*)self + 0x10) = 0;
-    *(int*)((char*)self + 0x1C) = 0;
-    *(int*)((char*)self + 0x28) = 0;
-    *(int*)((char*)self + 0x34) = 0;
+    self->MissionPointsEnable = 0;
+    self->MissionCountEnable = 0;
+    self->MissionTicksEnable = 0;
+    self->MissionHeightEnable = 0;
+    self->MissionTrickEnable = 0;
     void* process;
-    while ((process = cProcessList_removeHead((char*)self + 0x2BC)) != 0) {
-        cProcessList_addProcess((char*)self + 0x2B4, process);
+    while ((process = cProcessList_removeHead((char*)&self->AddList)) != 0) {
+        cProcessList_addProcess((char*)&self->IdleList, process);
         cWScriptMan_startProcess(self, process);
     }
-    sCmdList_309270 list = *(sCmdList_309270*)((char*)self + 0x40);
-    *(int*)((char*)self + 0x40) = 0;
+    sCmdList_309270 list = *(sCmdList_309270*)(self->Events);
+    *(int*)(self->Events) = 0;
     for (int i = 0; i < list.count; i++) {
         sCmd_309270* event = &list.e[i];
         if ((unsigned short)event->flags == 0)
-            *(void**)((char*)self + 0x290) = lookup_309270(**(sRefWorld_309270***)((char*)self + 0x28C), event->id);
-        char* next = *(char**)((char*)self + 0x2B8);
+            self->Inst = (tInstanceRecord*)lookup_309270(*(sRefWorld_309270**)self->World, event->id);
+        char* next = *(char**)&self->ActiveList;
         while (next != 0) {
             char* proc = next;
             next = *(char**)(proc + 0x18);
-            *(char**)((char*)self + 0x2A4) = proc;
+            self->CurrentProcess = (cWScriptProcess*)proc;
             if (event->flags & 0x20000)
                 cWScriptProcess_dispatchProcessEvent(proc, event);
             if (event->flags & 0x10000)
                 cWScriptProcess_dispatchTaskEvent((cWScriptProcList*)proc, (int)event);
         }
-        *(int*)((char*)self + 0x290) = 0;
-        *(int*)((char*)self + 0x2A4) = 0;
+        self->Inst = 0;
+        self->CurrentProcess = 0;
     }
-    char* next = *(char**)((char*)self + 0x2B8);
+    char* next = *(char**)&self->ActiveList;
     while (next != 0) {
         char* proc = next;
         next = *(char**)(proc + 0x18);
-        *(char**)((char*)self + 0x2A4) = proc;
+        self->CurrentProcess = (cWScriptProcess*)proc;
         cWScriptProcess_update((cWScriptProcess_update_cProc*)proc);
     }
-    *(int*)((char*)self + 0x2A4) = 0;
+    self->CurrentProcess = 0;
 }
 #endif
 

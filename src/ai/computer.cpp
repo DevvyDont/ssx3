@@ -1146,7 +1146,6 @@ struct sRider_0010DBF0 {
     char padF8[0x1B0 - 0xF8];
     sVec_0010DBF0 vel;              // 0x1B0
 };
-struct sAI_0010DBF0 { char pad[0x28]; char* riders[20]; int count; };
 
 static inline int id_0010DBF0(char* self)
 {
@@ -1216,9 +1215,9 @@ extern "C" int cComputer_checkForPunching(cComputer* self, int* side)
 {
     if (AITick() % 6 != 0)
         return 0;
-    sAI_0010DBF0* ai = (sAI_0010DBF0*)SSXApp->Game->AI;
+    cAI* ai = SSXApp->Game->AI;
     int i;
-    for (i = 0; i < ai->count; i++)
+    for (i = 0; i < ai->NumberOfRidersAllocated; i++)
     {
         float pi = 3.1415927410125732f;
         float lo = 0.5235988497734070f;
