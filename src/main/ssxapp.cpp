@@ -844,7 +844,7 @@ void operator_delete(int* p);
 extern "C" void cUIFontInterface_purgeFonts(void* p);
 extern "C" void cPadCache_purge(void* p);
 extern "C" void cSSXScriptEngine_DeInitOnce(void* p);
-extern "C" void func_003DEDC0(void* handle, int arg);
+extern "C" void FILESYS_delbigsync(void* handle, int arg);
 // PORT: WORLDTRIGGERMANAGER_DeInit is declared (void*) but never reads it; this caller passes nothing.
 extern "C" void WORLDTRIGGERMANAGER_DeInit_noarg() __asm__("WORLDTRIGGERMANAGER_DeInit");
 extern "C" void SSXAUDIO_DeInit();
@@ -936,20 +936,20 @@ extern "C" void cSSXApp_purge(sSSXAppPurge* self)
         }
     }
     GrMan = 0;
-    if (self->fE4) func_003DEDC0(self->fE4, 100);
-    if (self->fE8) func_003DEDC0(self->fE8, 100);
+    if (self->fE4) FILESYS_delbigsync(self->fE4, 100);
+    if (self->fE8) FILESYS_delbigsync(self->fE8, 100);
     for (i = 0; i < 11; i++) {
         if (self->fEC[i]) {
-            func_003DEDC0(self->fEC[i], 100);
+            FILESYS_delbigsync(self->fEC[i], 100);
         }
     }
-    if (self->f118) func_003DEDC0(self->f118, 100);
+    if (self->f118) FILESYS_delbigsync(self->f118, 100);
     WORLDTRIGGERMANAGER_DeInit_noarg();
     SSXAUDIO_DeInit();
-    if (self->fD4) func_003DEDC0(self->fD4, 100);
-    if (self->fD8) func_003DEDC0(self->fD8, 100);
-    if (self->fDC) func_003DEDC0(self->fDC, 100);
-    if (self->fE0) func_003DEDC0(self->fE0, 100);
+    if (self->fD4) FILESYS_delbigsync(self->fD4, 100);
+    if (self->fD8) FILESYS_delbigsync(self->fD8, 100);
+    if (self->fDC) FILESYS_delbigsync(self->fDC, 100);
+    if (self->fE0) FILESYS_delbigsync(self->fE0, 100);
     if (self->f78) cBE_purgeBE(self->f78);
     cGameModeMan_purgeGM(self->fC0);
     if (self->f11C) cFEAsyncManager__cFEAsyncManager(self->f11C, 3);
@@ -1023,7 +1023,7 @@ INCLUDE_ASM("main/ssxapp", cSSXApp_initload);
 #ifdef SKIP_ASM
 extern "C" void initOnline();
 extern "C" int BXFILE_exists(const char* name);
-extern "C" int func_003DED50(const char* name, int a1, int a2, void* out);
+extern "C" int FILESYS_addbigsync(const char* name, int a1, int a2, void* out);
 extern "C" void func_00256188();
 extern "C" void* cSSXScriptEngine_cSSXScriptEngine(void* self);
 extern "C" void cSSXScriptEngine_InitOnce(void* self);
@@ -1158,17 +1158,17 @@ struct sSSXApp_82D0 {
 extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
 {
     initOnline();
-    if (BXFILE_exists(str_data_audio_music_big)) func_003DED50(str_data_audio_music_big, 0, 100, &self->fD8);
-    if (BXFILE_exists(str_data_audio_music2_big)) func_003DED50(str_data_audio_music2_big, 0, 100, &self->fDC);
-    if (BXFILE_exists(str_data_audio_audio_big)) func_003DED50(str_data_audio_audio_big, 0, 100, &self->fD4);
-    if (BXFILE_exists(str_data_audio_speech_big)) func_003DED50(str_data_audio_speech_big, 0, 100, &self->fE0);
+    if (BXFILE_exists(str_data_audio_music_big)) FILESYS_addbigsync(str_data_audio_music_big, 0, 100, &self->fD8);
+    if (BXFILE_exists(str_data_audio_music2_big)) FILESYS_addbigsync(str_data_audio_music2_big, 0, 100, &self->fDC);
+    if (BXFILE_exists(str_data_audio_audio_big)) FILESYS_addbigsync(str_data_audio_audio_big, 0, 100, &self->fD4);
+    if (BXFILE_exists(str_data_audio_speech_big)) FILESYS_addbigsync(str_data_audio_speech_big, 0, 100, &self->fE0);
     func_00256188();
-    func_003DED50(str_data_scripts_scdat_big, 0, 100, &self->fE4);
-    func_003DED50(D_004A29C8, 0, 100, &self->fE8);
+    FILESYS_addbigsync(str_data_scripts_scdat_big, 0, 100, &self->fE4);
+    FILESYS_addbigsync(D_004A29C8, 0, 100, &self->fE8);
     for (int i = 0; i < 11; i++) {
-        func_003DED50(D_00442100[i], 0, 100, &self->fEC[i]);
+        FILESYS_addbigsync(D_00442100[i], 0, 100, &self->fEC[i]);
     }
-    func_003DED50(D_004A29CC, 0, 100, &self->f118);
+    FILESYS_addbigsync(D_004A29CC, 0, 100, &self->f118);
     cSSXScriptEngine* sm = (cSSXScriptEngine*)cSSXScriptEngine_cSSXScriptEngine(cMemMan_alloc(2640, str_ScriptEngine, 0, 0));
     ScriptEngine = sm;
     cSSXScriptEngine_InitOnce(sm);

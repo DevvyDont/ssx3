@@ -1094,7 +1094,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewRaceInterface_getLocationID(void* iface);
 extern "C" char* cBENewRaceInterface_getLocationFile(void* iface, int i);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" int func_003DEBF0(char* name, int mode, int prio, int* fd);
+extern "C" int FILESYS_opensync(char* name, int mode, int prio, int* fd);
 extern "C" void FILESYS_closesync(int fd, int prio);
 extern "C" int cAvalanche_writeData(int direct, void* a, void* b, char* src, int stride, int rows);
 
@@ -1151,7 +1151,7 @@ extern "C" void cAvalanche_SaveData1(int direct, char* name)
     char buf[0x100];
     sprintf(buf, str_pct_s_pct_s_j, cBENewRaceInterface_getLocationFile(iface, cBENewRaceInterface_getLocationID(iface)), name);
     int fd;
-    if (func_003DEBF0(buf, 38, 100, &fd)) {
+    if (FILESYS_opensync(buf, 38, 100, &fd)) {
         sAvGroup_83B8* avalanche;
         for (avalanche = (sAvGroup_83B8*)cAvalanche_m_avalancheList; avalanche != 0; avalanche = avalanche->next) {
             for (sAvPart_83B8* node = avalanche->parts; node != 0; node = node->next) {
@@ -1229,7 +1229,7 @@ extern "C" void cAvalanche_LoadData(void)
     cAvalanche_m_resolved = 0;
     cAvalanche_m_badCookie = 1;
     int fd;
-    if (func_003DEBF0(buf, 1, 100, &fd)) {
+    if (FILESYS_opensync(buf, 1, 100, &fd)) {
         cAvalanche_end();
         if (cAvalanche_m_filedata != 0 && cAvalanche_m_fileDataDeleteable != 0) {
             cMemMan_free(cAvalanche_m_filedata);

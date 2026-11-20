@@ -118,7 +118,7 @@ struct cSSXAudio {
     int unk_5720;                       // 0x5720 [R] cController ctor 0
     char unk_5724[0x4];                 // 0x5724 padding (cController's non-virtual part ends 8-aligned)
     // --- cSSXAudio (own fields 0x5728..0x6C90; fields from mGruntCycle on follow On Tour's cSSXAudio member order, retail-only fields before it)
-    void* unk_5728;                     // 0x5728 [R] ctor 0; dtor closes it with func_003DEDC0(h, 100); [U] func_0029ED90 opens a language stream file into it
+    void* unk_5728;                     // 0x5728 [R] ctor 0; dtor closes it with FILESYS_delbigsync(h, 100); [U] func_0029ED90 opens a language stream file into it
     int unk_572C;                       // 0x572C [R] ctor -1; [U] func_0029ED90: language mode of the stream in unk_5728
     float unk_5730;                     // 0x5730 [R] ctor 1.0f; [U] cSSXAudio_UpdateSpeechVolume returns &it as the volume control of speech type 0xB
     int unk_5734;                       // 0x5734 [R] ctor 0; [U] cSSXAudio_PlayGrunt

@@ -527,12 +527,12 @@ extern "C" void func_002560B0(void) {
 INCLUDE_ASM("seg/seg_156860", func_00256188);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_003DED50_6188(void *, int, int, void *) __asm__("func_003DED50");
+extern "C" void FILESYS_addbigsync_6188(void *, int, int, void *) __asm__("FILESYS_addbigsync");
 extern char str_data_config_slusovf_big[];
 extern int D_004A2ED4;
 
 extern "C" void func_00256188(void) {
-    func_003DED50_6188(str_data_config_slusovf_big, 0, 100, &D_004A2ED4);
+    FILESYS_addbigsync_6188(str_data_config_slusovf_big, 0, 100, &D_004A2ED4);
 }
 #endif
 
@@ -583,7 +583,7 @@ extern "C" void func_00256250(void) {
 INCLUDE_ASM("seg/seg_156860", func_00256258);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_003DF748(int *, int, int);
+extern "C" int ASYNCFILE_loadat(int *, int, int);
 extern int D_004803E8[];
 extern int D_004A2EE0[];
 extern "C" void *operator_new__FUi_6258(unsigned int, int *, int, int) __asm__("operator_new__FUi");
@@ -595,7 +595,7 @@ extern "C" void func_00256258(char *self, int arg1) {
     *(int *)(self + 0) = 1;
     void *mem = operator_new__FUi_6258(0x195000, D_004A2EE0, 0x04000100, 0);
     *(void **)(self + 4) = mem;
-    *(int *)(self + 0x18) = func_003DF748(D_004803E8, (int)mem, 0x195000);
+    *(int *)(self + 0x18) = ASYNCFILE_loadat(D_004803E8, (int)mem, 0x195000);
 }
 #endif
 
@@ -690,7 +690,7 @@ extern "C" int ASYNCFILE_getstatus_6460(int) __asm__("ASYNCFILE_getstatus");
 extern "C" void ASYNCFILE_release_6460(int, int, void *) __asm__("ASYNCFILE_release");
 extern "C" int func_003FCFD8_6460(int, int) __asm__("func_003FCFD8");
 extern "C" void *operator_new__FUi_6460(unsigned int, char *, int, int) __asm__("operator_new__FUi");
-extern "C" int func_003DF748_6460(char *, void *, int) __asm__("func_003DF748");
+extern "C" int ASYNCFILE_loadat_6460(char *, void *, int) __asm__("ASYNCFILE_loadat");
 extern char str_AuthData[];
 extern char str_CONFIG_DAT[];
 
@@ -704,7 +704,7 @@ extern "C" void func_00256460(char *self) {
             if (readSize > 0 && func_003FCFD8_6460(readBuffer, readSize) >= 0) {
                 void *authData = operator_new__FUi_6460(0x10000, str_AuthData, 0x04000100, 0);
                 *(void **)(self + 0xC) = authData;
-                *(int *)(self + 0x18) = func_003DF748_6460(str_CONFIG_DAT, authData, 0x10000);
+                *(int *)(self + 0x18) = ASYNCFILE_loadat_6460(str_CONFIG_DAT, authData, 0x10000);
                 *(int *)(self + 0) = 2;
             }
         }

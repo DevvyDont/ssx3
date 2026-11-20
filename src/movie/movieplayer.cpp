@@ -2364,7 +2364,7 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateSave);
 extern "C" void cMCOverlayManager_TriggerPollNoCardError(cMCOverlayManager* self);
 extern "C" int cMCOverlayManager_updateDeviceStateMonitor(cMCOverlayManager* self);
 extern "C" void cMCOverlayManager_RecheckCard(cMCOverlayManager* self);
-extern "C" int func_003DBDB0(void* a, void* b);
+extern "C" int USTR_compare(void* a, void* b);
 
 struct sMovieVEntryF698 {
     short delta;
@@ -2481,7 +2481,7 @@ extern "C" void cMCOverlayManager_UpdateSave(cMCOverlayManager* self)
                     if (ovCallI_F698(((char*)self), 67, i)) {
                         char buf[0x200];
                         ovCallIP_F698(((char*)self), 14, i, buf);
-                        if (func_003DBDB0(((char*)self) + 0x276, buf) == 0 && i != self->mFileCursor) {
+                        if (USTR_compare(((char*)self) + 0x276, buf) == 0 && i != self->mFileCursor) {
                             post_F698(((char*)self), 55);
                             return;
                         }

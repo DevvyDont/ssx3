@@ -2559,7 +2559,7 @@ extern "C" void func_002AEFA8(int a0);
 /**
  * Returns a Pathfinder player slot's play position and status, refreshing the slots first when it is dirty.
  *
- * Called by the Pathfinder library (func_003D11B8).
+ * Called by the Pathfinder library (PATH_status).
  *
  * @param idx  the player-slot index
  * @param elapsedOut  receives the elapsed time (slot +0x48)
@@ -3335,8 +3335,8 @@ struct sBankList {
 extern char str_pct_spct_s_c[];
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
 extern "C" void* FILE_loadz(const char* name, int flags);
-extern "C" void* func_003E2DF0(void* big, char* name);
-extern "C" int func_003E2EE0(void* big);
+extern "C" void* BIG_locate(void* big, char* name);
+extern "C" int BIG_count(void* big);
 extern "C" void func_003D66C0(void* h, int a);
 char* BIG_locateentryz_2AFD40(void* big, char* name, int index, int* offset, int* size) __asm__("BIG_locateentryz");
 extern char str_pct_seventdat_events_evt[];
@@ -3388,7 +3388,7 @@ extern "C" int func_002AFD40(cSpeechInstance* selfp, int isHeaders, char* name, 
                     break;
                 }
             }
-            self->voices[self->voiceCount].handle = func_003E2DF0(self->pairs[self->voiceCount].p[sel], entryName);
+            self->voices[self->voiceCount].handle = BIG_locate(self->pairs[self->voiceCount].p[sel], entryName);
             self->voices[self->voiceCount].active = 0;
             if (self->voices[self->voiceCount].handle == 0) {
                 MEM_free(self->pairs[self->voiceCount].p[sel]);
@@ -3400,7 +3400,7 @@ extern "C" int func_002AFD40(cSpeechInstance* selfp, int isHeaders, char* name, 
             buf[1] = 0;
             buf[0] = 0x7C;
         }
-        int n = func_003E2EE0(self->pairs[self->voiceCount].p[sel]);
+        int n = BIG_count(self->pairs[self->voiceCount].p[sel]);
         for (int i = 0; i < n; i++) {
             char* nm = BIG_locateentryz_2AFD40(self->pairs[self->voiceCount].p[sel], 0, i, &off, 0);
             char* entryData = (char*)self->pairs[self->voiceCount].p[sel] + off;
@@ -5351,10 +5351,10 @@ extern "C" int func_002B2500(cSongInstance* self)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B2550);
 #ifdef SKIP_ASM
-extern "C" void func_003D11B8(int, void*);
+extern "C" void PATH_status(int, void*);
 
 /**
- * Returns word 9 of the main path stream's status (func_003D11B8(0x11000001)).
+ * Returns word 9 of the main path stream's status (PATH_status(0x11000001)).
  *
  * func_0028E088 treats -1 as no playing stream.
  *
@@ -5363,7 +5363,7 @@ extern "C" void func_003D11B8(int, void*);
 extern "C" int func_002B2550(void)
 {
     int buf[10];
-    func_003D11B8(0x11000001, buf);
+    PATH_status(0x11000001, buf);
     return buf[9];
 }
 #endif
@@ -7410,11 +7410,11 @@ INCLUDE_ASM("sound/bankmonitor", func_002B4A20);
 #ifdef SKIP_ASM
 extern "C" void ASYNCFILE_cancel(void* f);
 extern "C" void ASYNCFILE_release(void* f, int a, int b);
-extern "C" void* func_003DF748(void* name, void* buf, int size);
+extern "C" void* ASYNCFILE_loadat(void* name, void* buf, int size);
 extern "C" void FILE_loadat(void* name, void* buf, int size);
 
 /**
- * Loads an MPF file into mMPFFile (25600 bytes), asynchronously (func_003DF748) or at once (FILE_loadat).
+ * Loads an MPF file into mMPFFile (25600 bytes), asynchronously (ASYNCFILE_loadat) or at once (FILE_loadat).
  *
  * A pending async load (unk_5438) is cancelled and released first; an async load's handle is kept in unk_5438.
  *
@@ -7428,7 +7428,7 @@ extern "C" void func_002B4A20(void* self, void* name, int sync)
         ASYNCFILE_release(*(void**)((char*)self + 0x5438), 0, 0);
     }
     if (sync == 0) {
-        *(void**)((char*)self + 0x5438) = func_003DF748(name, *(void**)((char*)self + 0x5434), 25600);
+        *(void**)((char*)self + 0x5438) = ASYNCFILE_loadat(name, *(void**)((char*)self + 0x5434), 25600);
     } else {
         FILE_loadat(name, *(void**)((char*)self + 0x5434), 25600);
     }

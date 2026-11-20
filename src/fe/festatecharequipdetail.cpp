@@ -4155,7 +4155,7 @@ struct sEquipTable_DC20;
 // PORT: operator_new really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" int BXFILE_sizez(const char* name);
-extern "C" int func_003DF748(const char* name, void* data, int size);
+extern "C" int ASYNCFILE_loadat(const char* name, void* data, int size);
 extern "C" int FILE_loadatz(const char* name, void* data, int size);
 extern "C" void func_0019D578(sEquipTable_DC20* self, int bank, int size);
 extern "C" void func_0019D738(sEquipTable_DC20* self, int bank, int size);
@@ -4182,7 +4182,7 @@ struct sSlotK19D8B8 {
  * Reads the file size (BXFILE_sizez), makes room (func_0019D578) and allocates the data (operator new, tag "Bolt
  * FileData", flags 0x60000000), and while that fails it locks and unlocks cMemMan_m_mutex, evicts that many bytes
  * (func_0019D738) and retries; used grows by the size. With pending set the load is asynchronous: state 2, handle from
- * func_003DF748 (an async load request) and nPending incremented. Otherwise FILE_loadatz() loads it at once and the
+ * ASYNCFILE_loadat (an async load request) and nPending incremented. Otherwise FILE_loadatz() loads it at once and the
  * state becomes 1 (loaded).
  *
  * Quirk: a synchronous load is not unpacked; only completed asynchronous loads go through func_0019D000.
@@ -4206,7 +4206,7 @@ extern "C" void func_0019D8B8(sEquipTable_DC20* self, int bank, int i)
     if (slot->pending != 0) {
         slot->size = size;
         slot->state = 2;
-        slot->handle = func_003DF748(slot->name, slot->data, size);
+        slot->handle = ASYNCFILE_loadat(slot->name, slot->data, size);
         *(int*)((char*)self + 0xB4004) += 1;
     } else {
         slot->size = size;

@@ -4640,20 +4640,20 @@ extern "C" void cLocaleFile__cLocaleFile(void* self, int flags)
 }
 #endif
 
-extern "C" void* func_003DBB68(int);
+extern "C" void* LOCALE_getstr(int);
 
 //100%
 INCLUDE_ASM("worldpainter/quadtree", cLocaleFile_getStringByIndex__FPv);
 #ifdef SKIP_ASM
 /**
- * Returns the string at an index of the loaded locale data: func_003DBB68 on the file data (+0x4), with the index the
+ * Returns the string at an index of the loaded locale data: LOCALE_getstr on the file data (+0x4), with the index the
  * caller passes in the second argument register going through untouched.
  *
- * @return func_003DBB68's result (the string, or 0)
+ * @return LOCALE_getstr's result (the string, or 0)
  */
 void* cLocaleFile_getStringByIndex(void* self)
 {
-    return func_003DBB68(*(int*)((char*)self + 0x4));
+    return LOCALE_getstr(*(int*)((char*)self + 0x4));
 }
 #endif
 
@@ -4714,7 +4714,7 @@ extern "C" int cLocaleFile_getStringByHash(cLocaleFile_getStringByHash_sMap* sel
 INCLUDE_ASM("worldpainter/quadtree", cLocaleFile_loadFile);
 #ifdef SKIP_ASM
 extern "C" void* FILE_load(const char* name, int flags);
-extern "C" unsigned int func_003DB9D8(void* p, int a);
+extern "C" unsigned int LOCALE_getstate(void* p, int a);
 extern "C" int func_00416B18(const void* a, const void* b, int n);
 // PORT: cLocaleFile_getStringByIndex is declared (void*) but called with a second argument; bound by asm label
 void* cLocaleFile_getStringByIndex_2(void* self, int v) __asm__("cLocaleFile_getStringByIndex__FPv");
@@ -4740,7 +4740,7 @@ struct cLocaleFile_loadFile_sFile {
  * Loads a locale (.loc) file into this entry.
  *
  * Stores @p kind (the language) at +0x0, loads the file with FILE_load into +0x4 and counts its strings with
- * func_003DB9D8(data, 2) into +0x8. The chunk after the first one (data + its size) must be "LOCT"; otherwise +0xC is
+ * LOCALE_getstate(data, 2) into +0x8. The chunk after the first one (data + its size) must be "LOCT"; otherwise +0xC is
  * set to 0 and the function returns. Then +0xC points at that chunk, +0x10 at the {hash, index} table after it, and
  * each entry's index is replaced by its string pointer (cLocaleFile_getStringByIndex__FPv).
  *
@@ -4753,7 +4753,7 @@ extern "C" void cLocaleFile_loadFile(cLocaleFile_loadFile_sFile* self, const cha
     int size;
     self->kind = kind;
     self->data = (cLocaleFile_loadFile_sChunk*)FILE_load(name, 0);
-    self->count = func_003DB9D8(self->data, 2);
+    self->count = LOCALE_getstate(self->data, 2);
     size = self->data->size;
     self->hdr = (cLocaleFile_loadFile_sChunk*)((char*)self->data + size);
     if (func_00416B18(self->hdr, str_LOCT, 4) != 0) {

@@ -8592,8 +8592,8 @@ extern "C" int BXFILE_exists(const char* name);
 extern "C" void SPCH_Init(void* self);
 extern "C" void func_002B0DA0(void* self);
 extern "C" void func_002B0E60(void* self, int a, int b, char* name, int c, int d, int e);
-extern "C" void func_003DED50(const char* name, int a, int b, void** h);
-extern "C" void func_003DEDC0(void* h, int a);
+extern "C" void FILESYS_addbigsync(const char* name, int a, int b, void** h);
+extern "C" void FILESYS_delbigsync(void* h, int a);
 extern char str_data_audio_french_big[];
 extern char str_data_audio_german_big[];
 extern char str_data_audio_spanish_big[];
@@ -8603,7 +8603,7 @@ extern char str_CHAR[];
 static inline void sndStreamLoad(const char* name, void** h)
 {
     if (BXFILE_exists(name)) {
-        func_003DED50(name, 0, 100, h);
+        FILESYS_addbigsync(name, 0, 100, h);
     }
 }
 
@@ -8612,8 +8612,8 @@ static inline void sndStreamLoad(const char* name, void** h)
  *
  * Takes the language from func_0029F198 and returns when it equals unk_572C (the language already open). With
  * @p restart set it first calls func_002B0DA0 on the speech system (SpeechSys, frees its bank buffer). The open stream
- * in unk_5728 is closed (func_003DEDC0(h, 100)), then "data/audio/french.big" (2), "german.big" (4), "spanish.big" (8)
- * or "english.big" (otherwise) is opened into unk_5728 through func_003DED50 when BXFILE_exists finds it, and the
+ * in unk_5728 is closed (FILESYS_delbigsync(h, 100)), then "data/audio/french.big" (2), "german.big" (4), "spanish.big" (8)
+ * or "english.big" (otherwise) is opened into unk_5728 through FILESYS_addbigsync when BXFILE_exists finds it, and the
  * language is recorded in unk_572C. With @p restart set it then re-initialises the speech system (SPCH_Init) and starts
  * speech instance 0 on "CHAR" with the Character volume control cSSXAudio_GetCurrAppliedVolumePtr(self, 4, 0) (func_002B0E60).
  *
@@ -8630,7 +8630,7 @@ extern "C" void func_0029ED90(char* self, int restart)
     }
     void** streamHandle = (void**)(self + 0x5728);
     if (*streamHandle) {
-        func_003DEDC0(*streamHandle, 100);
+        FILESYS_delbigsync(*streamHandle, 100);
     }
     if (mode == 2) {
         sndStreamLoad(str_data_audio_french_big, streamHandle);

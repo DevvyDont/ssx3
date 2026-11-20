@@ -1446,8 +1446,8 @@ noh:
 //100%
 INCLUDE_ASM("fe/fereal", cRealFE_loadCharAnimations);
 #ifdef SKIP_ASM
-extern "C" void func_003DED50(char* name, int a1, int a2, void* out);
-extern "C" void func_003DEDC0(void* handle, int arg);
+extern "C" void FILESYS_addbigsync(char* name, int a1, int a2, void* out);
+extern "C" void FILESYS_delbigsync(void* handle, int arg);
 extern "C" void* cAdfDataSource_cAdfDataSource(void* self, void* src);
 extern "C" void cGameAnimMap_addSource(void* self, int kind, void* list);
 // PORT: cGameAnimMap_testResolve__Fv is called with the map in $a0; bind the 1-arg form to that symbol.
@@ -1472,14 +1472,14 @@ extern "C" void cRealFE_loadCharAnimations(void)
 {
     void* handle;
     int i;
-    func_003DED50(str_data_char_anm_big_b, 0, 100, &handle);
+    FILESYS_addbigsync(str_data_char_anm_big_b, 0, 100, &handle);
     for (i = 0; i < 1; i++) {
         void* anim = cAdfDataSource_cAdfDataSource(cMemMan_alloc(0x18, str_AdfDataSourceFE, 0, 0), D_004A19C0[i]);
         D_004A3DF8_K1A2B00->anims[(unsigned char)i] = anim;
         cGameAnimMap_addSource(cGameAnimMap_TheGameAnimMap, i, anim);
     }
     cGameAnimMap_testResolve_p(cGameAnimMap_TheGameAnimMap);
-    func_003DEDC0(handle, 100);
+    FILESYS_delbigsync(handle, 100);
 }
 #endif
 

@@ -225,7 +225,7 @@ extern "C" unsigned int cFEStateMPCircuit_getTopUnlockedPeakNum(void)
 INCLUDE_ASM("fe/ovstatemission", cFEAsyncManager_cFEAsyncManager);
 #ifdef SKIP_ASM
 extern "C" int BXFILE_exists(char* name);
-extern "C" void func_003DED50(char* name, int a1, int a2, void* out);
+extern "C" void FILESYS_addbigsync(char* name, int a1, int a2, void* out);
 extern char str_data_ui_mapgfx_big[];
 
 /**
@@ -236,7 +236,7 @@ extern char str_data_ui_mapgfx_big[];
 extern "C" void* cFEAsyncManager_cFEAsyncManager(cFEAsyncManager* self)
 {
     if (BXFILE_exists(str_data_ui_mapgfx_big) != 0) {
-        func_003DED50(str_data_ui_mapgfx_big, 0, 100, (char*)self + 0x58C);
+        FILESYS_addbigsync(str_data_ui_mapgfx_big, 0, 100, (char*)self + 0x58C);
     }
     return ((void*)self);
 }
@@ -246,7 +246,7 @@ extern "C" void* cFEAsyncManager_cFEAsyncManager(cFEAsyncManager* self)
 INCLUDE_ASM("fe/ovstatemission", cFEAsyncManager__cFEAsyncManager);
 #ifdef SKIP_ASM
 extern "C" int BXFILE_exists(char* name);
-extern "C" void func_003DEDC0(void* handle, int arg);
+extern "C" void FILESYS_delbigsync(void* handle, int arg);
 void operator_delete(int* p);
 extern char str_data_ui_mapgfx_big[];
 
@@ -258,7 +258,7 @@ extern char str_data_ui_mapgfx_big[];
 extern "C" void cFEAsyncManager__cFEAsyncManager(void* self, int flags)
 {
     if (BXFILE_exists(str_data_ui_mapgfx_big) != 0) {
-        func_003DEDC0(*(void**)((char*)self + 0x58C), 100);
+        FILESYS_delbigsync(*(void**)((char*)self + 0x58C), 100);
     }
     if (flags & 1) {
         operator_delete((int*)self);

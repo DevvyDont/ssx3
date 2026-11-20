@@ -68,7 +68,7 @@ extern "C" void cAsyncSys_ASYNCSYS_DeInit(cAsyncSys* self)
 //100%
 INCLUDE_ASM("sound/asyncsys", cAsyncSys_ASYNCSYS_StartLoad);
 #ifdef SKIP_ASM
-extern "C" int func_003DF748(char* name, int a1, int a2);
+extern "C" int ASYNCFILE_loadat(char* name, int a1, int a2);
 extern "C" int ASYNCFILE_load(char* name, int a1);
 
 struct sRing_A298 {
@@ -114,9 +114,9 @@ struct sAsync_A298 {
  * (cBankManager_ASYNCSYS_OnBeginAsyncLoad; vtable at +0x1D4) with the front user handle (queue mUserHandle, +0x18C).
  * Then by the front memory type (queue mMemType, +0x1AC; On Tour eSoundMemLocation 0 dynamic, 1 main, 2 sound): 0 and 2
  * load the front file name (mFilename slot from queue mFilenameIndex, +0x19C) into the shared buffer mpBuffer (+0x1CC)
- * of mBufferSize (+0x1D0) bytes with func_003DF748; 1 asks the owner for main memory through slots 3
+ * of mBufferSize (+0x1D0) bytes with ASYNCFILE_loadat; 1 asks the owner for main memory through slots 3
  * (cBankManager_ASYNCSYS_OnAsyncMainMemAlloc, size -1 and the front flags of queue mMainMemFlags, +0x1BC) and 4
- * (cBankManager_ASYNCSYS_OnAsyncMainMemSize) and loads there with func_003DF748, or with ASYNCFILE_load and those flags
+ * (cBankManager_ASYNCSYS_OnAsyncMainMemSize) and loads there with ASYNCFILE_loadat, or with ASYNCFILE_load and those flags
  * when no memory came back. The file handle goes to mHandle (+0x0). Any other memory type starts nothing but leaves
  * mBusy set.
  *
@@ -152,7 +152,7 @@ extern "C" void cAsyncSys_ASYNCSYS_StartLoad(void* self)
         } else {
             idx = peekQueue->data[peekQueue->tail];
         }
-        asyncSys->result = func_003DF748(asyncSys->names[idx], (int)asyncSys->buf, asyncSys->bufSize);
+        asyncSys->result = ASYNCFILE_loadat(asyncSys->names[idx], (int)asyncSys->buf, asyncSys->bufSize);
         break;
     }
     case 2: {
@@ -163,7 +163,7 @@ extern "C" void cAsyncSys_ASYNCSYS_StartLoad(void* self)
         } else {
             idx = peekQueue->data[peekQueue->tail];
         }
-        asyncSys->result = func_003DF748(asyncSys->names[idx], (int)asyncSys->buf, asyncSys->bufSize);
+        asyncSys->result = ASYNCFILE_loadat(asyncSys->names[idx], (int)asyncSys->buf, asyncSys->bufSize);
         break;
     }
     case 1: {
@@ -205,7 +205,7 @@ extern "C" void cAsyncSys_ASYNCSYS_StartLoad(void* self)
         }
         int allocSize = ((int (*)(void*, int))*pf2)(thisp2, sizeHandle);
         if (allocBuffer != 0) {
-            asyncSys->result = func_003DF748(name, allocBuffer, allocSize);
+            asyncSys->result = ASYNCFILE_loadat(name, allocBuffer, allocSize);
         } else {
             int loadFlags;
             if (asyncSys->q1BC.head == asyncSys->q1BC.tail) {

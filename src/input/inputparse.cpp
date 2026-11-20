@@ -2441,7 +2441,7 @@ struct sParseStream;
 extern "C" void cInputPreProcessor_readChar(void* self, sParseStream* s);
 extern "C" void cInputPreProcessor_writeTagLine(void* self, int a1, int a2);
 extern "C" int cInputPreProcessor_copyLine(void* self, sParseStream* s, int a2, int a3);
-extern "C" unsigned char* func_003E1A10(const char* name, int* size, int flags);
+extern "C" unsigned char* FILE_loadsize(const char* name, int* size, int flags);
 extern char D_004A3FA0[];
 
 struct sParseStream_326078 {
@@ -2462,7 +2462,7 @@ extern "C" void cInputPreProcessor_readFile(void* self, int path, int fn)
     char name[160];
     sParseStream_326078 st;
     sprintf(name, D_004A3FA0, path, fn);
-    unsigned char* fileData = func_003E1A10(name, &st.size, 0);
+    unsigned char* fileData = FILE_loadsize(name, &st.size, 0);
     st.cur = st.base = fileData;
     st.line = 1;
     cInputPreProcessor_readChar(self, (sParseStream*)&st);

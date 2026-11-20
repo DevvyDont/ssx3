@@ -4268,7 +4268,7 @@ int func_003DB9A0(void) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2D7498", func_003DB9D8);
+INCLUDE_ASM("ealib/seg_2D7498", LOCALE_getstate);
 #ifdef SKIP_ASM
 static __inline__ int get32_B9D8(unsigned char *q) {
     return (q[3] << 24) | (q[2] << 16) | (q[1] << 8) | q[0];
@@ -4283,7 +4283,7 @@ static __inline__ int get32_B9D8(unsigned char *q) {
  * @param sel  the state
  * @return the value
  */
-int func_003DB9D8(unsigned char *table, int sel) {
+int LOCALE_getstate(unsigned char *table, int sel) {
     unsigned char *block;
 
     switch (sel) {
@@ -4302,7 +4302,7 @@ int func_003DB9D8(unsigned char *table, int sel) {
 #endif
 
 //100%
-INCLUDE_ASM("ealib/seg_2D7498", func_003DBAA8);
+INCLUDE_ASM("ealib/seg_2D7498", LOCALE_setstate);
 #ifdef SKIP_ASM
 /**
  * Sets a value of a locale file's header: only state 0, the current language id (+0xE, little-endian), is writable.
@@ -4311,7 +4311,7 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DBAA8);
  * @param which  the state
  * @param value  the new value
  */
-void func_003DBAA8(void *table, int which, unsigned int value) {
+void LOCALE_setstate(void *table, int which, unsigned int value) {
     if (which == 0) {
         *(unsigned short *)((char *)table + 0xE) = value;
         *(unsigned char *)((char *)table + 0xE) = value;
@@ -4325,7 +4325,7 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DBAC8);
 #ifdef SKIP_ASM
 /**
  * Compares a string id with a locale index entry's little-endian id halfword (the binary search's comparator in
- * func_003DBAE8).
+ * getstringidbyindex).
  *
  * @param key  the string id
  * @param entry  the index entry

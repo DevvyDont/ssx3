@@ -133,12 +133,12 @@ extern char str_AV_AudioStreamBuffer[];
 extern "C" signed char func_003B5440();
 extern "C" void func_003E62B0();
 extern "C" void MEM_fill(void* dst, int value, int size);
-extern "C" void func_003E0AD8(int h, int a, int b);
-extern "C" int func_003E0D80(int h, int a, int b, int c);
+extern "C" void STREAM_setpriority(int h, int a, int b);
+extern "C" int STREAM_queuemem(int h, int a, int b, int c);
 extern "C" int ASYNCFILE_load(int a, int flags);
 extern "C" int STREAM_create(int a, int b, int c, void* buf, int size);
-extern "C" void func_003E0948(int h, int a, int b, int c, int d);
-extern "C" int func_003E0BF8(int h, int a);
+extern "C" void STREAM_setfilter(int h, int a, int b, int c, int d);
+extern "C" int STREAM_taphandle(int h, int a);
 extern "C" int STREAM_queuefile(int h, int a, int b, int c);
 
 static inline bool wsCanAlloc_ADEC8(sAlloc_ADEC8* a)
@@ -154,12 +154,12 @@ static inline bool wsCanAlloc_ADEC8(sAlloc_ADEC8* a)
  * (a debug break) and stops.
  *
  * With an audio source it sets the separate-audio flag (+0x14), allocates "AV_VideoStreamBuffer" and
- * "AV_AudioStreamBuffer", creates one STREAM on each (STREAM_create), sets their filters with func_003E0948 (video
+ * "AV_AudioStreamBuffer", creates one STREAM on each (STREAM_create), sets their filters with STREAM_setfilter (video
  * chunks tagged 0x4D under mask 0xFF, audio 0x4353 under 0xFFFF; with no audio the audio filter gets -1), then opens
- * both sources by type: 1 ASYNCFILE_load (+0x24/+0x2C), 0 STREAM_queuefile (+0x38/+0x3C), 2 func_003E0D80 on the
- * memory. Without one it makes a single interleaved stream and takes the audio STREAM from it with func_003E0BF8.
+ * both sources by type: 1 ASYNCFILE_load (+0x24/+0x2C), 0 STREAM_queuefile (+0x38/+0x3C), 2 STREAM_queuemem on the
+ * memory. Without one it makes a single interleaved stream and takes the audio STREAM from it with STREAM_taphandle.
  *
- * func_003E0AD8(stream, 152, 52) is called on both streams first; func_003AE450 later calls it with 151, 51.
+ * STREAM_setpriority(stream, 152, 52) is called on both streams first; func_003AE450 later calls it with 151, 51.
  *
  * @param selfp  the player object
  * @param videoSource  the video file name or data address
@@ -202,16 +202,16 @@ extern "C" void func_003ADEC8(void* selfp, int videoSource, int videoDataSize, i
         *(void**)(self + 0x8) = D_00509430_ADEC8.alloc(str_AV_AudioStreamBuffer, audioBufferSize, 0, 0, D_00509430_ADEC8.flags);
         *(int*)(self + 0x30) = STREAM_create(2, 2, 1, *(void**)(self + 0x4), videoBufferSize);
         *(int*)(self + 0x34) = STREAM_create(2, 2, 1, *(void**)(self + 0x8), audioBufferSize);
-        func_003E0AD8(*(int*)(self + 0x34), 152, 52);
-        func_003E0AD8(*(int*)(self + 0x30), 152, 52);
-        func_003E0948(*(int*)(self + 0x30), 1, 0xFF, 77, 1);
-        func_003E0948(*(int*)(self + 0x30), 2, 0, 0, -2);
+        STREAM_setpriority(*(int*)(self + 0x34), 152, 52);
+        STREAM_setpriority(*(int*)(self + 0x30), 152, 52);
+        STREAM_setfilter(*(int*)(self + 0x30), 1, 0xFF, 77, 1);
+        STREAM_setfilter(*(int*)(self + 0x30), 2, 0, 0, -2);
         if (*(int*)(self + 0x1C) == 0) {
-            func_003E0948(*(int*)(self + 0x34), 1, 0xFFFF, 17235, 1);
+            STREAM_setfilter(*(int*)(self + 0x34), 1, 0xFFFF, 17235, 1);
         } else {
-            func_003E0948(*(int*)(self + 0x34), 1, 0xFFFF, 17235, -1);
+            STREAM_setfilter(*(int*)(self + 0x34), 1, 0xFFFF, 17235, -1);
         }
-        func_003E0948(*(int*)(self + 0x34), 2, 0, 0, -2);
+        STREAM_setfilter(*(int*)(self + 0x34), 2, 0, 0, -2);
         int type = *(int*)(self + 0x18);
         if (type == 1) {
             *(int*)(self + 0x2C) = ASYNCFILE_load(audioSource, D_00509430_ADEC8.flags);
@@ -220,23 +220,23 @@ extern "C" void func_003ADEC8(void* selfp, int videoSource, int videoDataSize, i
             *(int*)(self + 0x3C) = STREAM_queuefile(*(int*)(self + 0x34), audioSource, 0, 0);
             *(int*)(self + 0x38) = STREAM_queuefile(*(int*)(self + 0x30), videoSource, 0, 0);
         } else if (type == 2) {
-            *(int*)(self + 0x38) = func_003E0D80(*(int*)(self + 0x30), *(int*)(self + 0xC), videoDataSize, 0);
-            *(int*)(self + 0x3C) = func_003E0D80(*(int*)(self + 0x34), *(int*)(self + 0x10), audioDataSize, 0);
+            *(int*)(self + 0x38) = STREAM_queuemem(*(int*)(self + 0x30), *(int*)(self + 0xC), videoDataSize, 0);
+            *(int*)(self + 0x3C) = STREAM_queuemem(*(int*)(self + 0x34), *(int*)(self + 0x10), audioDataSize, 0);
         }
     } else {
         *(int*)(self + 0x14) = 0;
         *(void**)(self + 0x4) = D_00509430_ADEC8.alloc(str_AV_VideoStreamBuffer, videoBufferSize, 0, 0, D_00509430_ADEC8.flags);
         *(void**)(self + 0x8) = 0;
         *(int*)(self + 0x30) = STREAM_create(2, 3, 2, *(void**)(self + 0x4), videoBufferSize);
-        *(int*)(self + 0x34) = func_003E0BF8(*(int*)(self + 0x30), 2);
-        func_003E0AD8(*(int*)(self + 0x34), 152, 52);
-        func_003E0AD8(*(int*)(self + 0x30), 152, 52);
-        func_003E0948(*(int*)(self + 0x30), 1, 0xFF, 77, 1);
-        func_003E0948(*(int*)(self + 0x30), 3, 0, 0, -2);
+        *(int*)(self + 0x34) = STREAM_taphandle(*(int*)(self + 0x30), 2);
+        STREAM_setpriority(*(int*)(self + 0x34), 152, 52);
+        STREAM_setpriority(*(int*)(self + 0x30), 152, 52);
+        STREAM_setfilter(*(int*)(self + 0x30), 1, 0xFF, 77, 1);
+        STREAM_setfilter(*(int*)(self + 0x30), 3, 0, 0, -2);
         if (*(int*)(self + 0x1C) == 0) {
-            func_003E0948(*(int*)(self + 0x30), 2, 0xFFFF, 17235, 2);
+            STREAM_setfilter(*(int*)(self + 0x30), 2, 0xFFFF, 17235, 2);
         } else {
-            func_003E0948(*(int*)(self + 0x30), 2, 0xFFFF, 17235, -1);
+            STREAM_setfilter(*(int*)(self + 0x30), 2, 0xFFFF, 17235, -1);
         }
         int type = *(int*)(self + 0x18);
         if (type == 1) {
@@ -244,7 +244,7 @@ extern "C" void func_003ADEC8(void* selfp, int videoSource, int videoDataSize, i
         } else if (type == 0) {
             *(int*)(self + 0x38) = STREAM_queuefile(*(int*)(self + 0x30), videoSource, 0, 0);
         } else if (type == 2) {
-            *(int*)(self + 0x38) = func_003E0D80(*(int*)(self + 0x30), *(int*)(self + 0xC), videoDataSize, 0);
+            *(int*)(self + 0x38) = STREAM_queuemem(*(int*)(self + 0x30), *(int*)(self + 0xC), videoDataSize, 0);
         }
     }
 }
@@ -275,7 +275,7 @@ struct sWSVtE300 {
     void (*fn)(void*, int);
 };
 
-// Memory interface record filled by func_003DE928 (size field first).
+// Memory interface record filled by FILESYS_getopts (size field first).
 struct sWSMemIfE300 {
     int size;                   // 0x0
     int f4;                     // 0x4
@@ -285,7 +285,7 @@ struct sWSMemIfE300 {
 
 extern void* (*D_00509434[])(void*);
 extern "C" void func_003AEE30(void* self, int flags);
-extern "C" int func_003DE928(sWSMemIfE300* mi);
+extern "C" int FILESYS_getopts(sWSMemIfE300* mi);
 extern "C" void STREAM_destroy(void* p);
 
 /**
@@ -293,7 +293,7 @@ extern "C" void STREAM_destroy(void* p);
  *
  * Deletes the decoder (+0x64) through its slot-1 destructor with flags 3, the audio object (+0x0) with func_003AEE30,
  * frees the timer (+0x5C), destroys the video STREAM (+0x30) and, with separate audio, the audio STREAM (+0x34). Loaded
- * file data (+0x20, +0x28) is released through the memory interface func_003DE928 fills; the stream buffers (+0x4,
+ * file data (+0x20, +0x28) is released through the memory interface FILESYS_getopts fills; the stream buffers (+0x4,
  * +0x8) and, when flags bit 0 is set, the player itself go to the RCMP free function (D_00509434).
  *
  * @param flags  bit 0 frees the player itself
@@ -325,7 +325,7 @@ extern "C" void func_003AE300(char* self, int flags)
         if (fileData != 0) {
             sWSMemIfE300 mi;
             mi.size = 0x20;
-            func_003DE928(&mi);
+            FILESYS_getopts(&mi);
             mi.release(fileData);
             *(void**)(self + 0x20) = 0;
         }
@@ -335,7 +335,7 @@ extern "C" void func_003AE300(char* self, int flags)
         if (fileData != 0) {
             sWSMemIfE300 mi;
             mi.size = 0x20;
-            func_003DE928(&mi);
+            FILESYS_getopts(&mi);
             mi.release(fileData);
             *(void**)(self + 0x28) = 0;
         }
@@ -383,8 +383,8 @@ void* func_003AECB8(void* self, void* a1);
 void* func_003AED20(void* self, void* a1, int a2);
 extern "C" void* func_003AED40(void* self, int a1, int a2);
 extern "C" int func_003AEEF8(void* self);
-extern "C" void func_003E0AD8(int h, int a, int b);
-extern "C" int func_003E0D80(int h, int a, int b, int c);
+extern "C" void STREAM_setpriority(int h, int a, int b);
+extern "C" int STREAM_queuemem(int h, int a, int b, int c);
 extern "C" void ASYNCFILE_release(int h, void* data, int* size);
 extern "C" int RCMP_DECODER_GetFrame(void* p, int a1);
 extern "C" unsigned int func_003E4E98();
@@ -405,8 +405,8 @@ static inline bool wsCanAlloc_AE450(sAlloc_AE450* a)
 /**
  * Starts a movie player: finishes loading, creates its decoder, audio and timer, and decodes the first frame.
  *
- * Calls func_003E0AD8(stream, 151, 51) on both streams. Async loads (+0x24, +0x2C) are released with ASYNCFILE_release
- * and handed to their STREAMs with func_003E0D80. Without separate audio the audio handle (+0x3C) is the video one.
+ * Calls STREAM_setpriority(stream, 151, 51) on both streams. Async loads (+0x24, +0x2C) are released with ASYNCFILE_release
+ * and handed to their STREAMs with STREAM_queuemem. Without separate audio the audio handle (+0x3C) is the video one.
  * Unless no-audio is set it allocates the 20-byte audio object (func_003AED40) at +0x0, and +0x54 records whether its
  * stream opened.
  *
@@ -425,17 +425,17 @@ static inline bool wsCanAlloc_AE450(sAlloc_AE450* a)
 // PORT: 64-bit long tick counter
 extern "C" int func_003AE450(char* self, int framesToBuffer, int timeOffsetMs)
 {
-    func_003E0AD8(*(int*)(self + 0x34), 151, 51);
-    func_003E0AD8(*(int*)(self + 0x30), 151, 51);
+    STREAM_setpriority(*(int*)(self + 0x34), 151, 51);
+    STREAM_setpriority(*(int*)(self + 0x30), 151, 51);
     if (*(int*)(self + 0x24) != 0) {
         int size;
         ASYNCFILE_release(*(int*)(self + 0x24), self + 0x20, &size);
-        *(int*)(self + 0x38) = func_003E0D80(*(int*)(self + 0x30), *(int*)(self + 0x20), size, 0);
+        *(int*)(self + 0x38) = STREAM_queuemem(*(int*)(self + 0x30), *(int*)(self + 0x20), size, 0);
     }
     if (*(int*)(self + 0x2C) != 0) {
         int size;
         ASYNCFILE_release(*(int*)(self + 0x2C), self + 0x28, &size);
-        *(int*)(self + 0x3C) = func_003E0D80(*(int*)(self + 0x34), *(int*)(self + 0x28), size, 0);
+        *(int*)(self + 0x3C) = STREAM_queuemem(*(int*)(self + 0x34), *(int*)(self + 0x28), size, 0);
     }
     if (*(int*)(self + 0x14) == 0) {
         *(int*)(self + 0x3C) = *(int*)(self + 0x38);
@@ -778,7 +778,7 @@ struct sAlloc_AEAD0 {
 extern sAlloc_AEAD0 D_00509430_AEAD0 __asm__("D_00509430");
 extern char D_00495210[];
 
-extern "C" unsigned char* func_003E12E0(void* q);
+extern "C" unsigned char* STREAM_get(void* q);
 extern "C" void SYNCTASK_run(int a);
 extern "C" int func_003B11F0(int v);
 void* RCMP_CHUNK_CHUNK(void* self);
@@ -786,8 +786,8 @@ extern "C" void* func_003B11A0();
 // PORT: RCMP_DECODER_ChooseCodec returns its vcall's int result; the unit defines it void.
 extern "C" int RCMP_DECODER_ChooseCodec_i(void* self, void* obj, void* item) __asm__("RCMP_DECODER_ChooseCodec");
 extern "C" void RCMP_DECODER_FreeChosenCodec(void* self);
-extern "C" void* func_003E13E8(void* p, int a1);
-extern "C" int func_003E1530(void* q);
+extern "C" void* STREAM_release(void* p, int a1);
+extern "C" int STREAM_isendofstream(void* q);
 
 struct sChunk_AEAD0 {
     unsigned char* data;    // 0x0
@@ -807,8 +807,8 @@ extern "C" void func_003AEAD0_impl(char* self, char* ctx, sChunk_AEAD0** out) __
  * Fetches the next video chunk from the movie player's stream for the decoder.
  *
  * The decoder's get-data function (reached through func_003AECB8). It pulls blocks from the video STREAM (+0x30) with
- * func_003E12E0, running SYNCTASK_run(0) between tries, until one whose big-endian tag func_003B11F0 accepts; other
- * blocks go back with func_003E13E8, and it gives up when func_003E1530 says the stream is done. For a match it
+ * STREAM_get, running SYNCTASK_run(0) between tries, until one whose big-endian tag func_003B11F0 accepts; other
+ * blocks go back with STREAM_release, and it gives up when STREAM_isendofstream says the stream is done. For a match it
  * allocates a 12-byte CHUNK (RCMP_CHUNK_CHUNK) holding the block, its data after the 8-byte header and the little-endian
  * size at +4.
  *
@@ -825,7 +825,7 @@ extern "C" void func_003AEAD0_impl(char* self, char* ctx, sChunk_AEAD0** out)
     void* videoStream = *(void**)(self + 0x30);
     *out = 0;
     for (;;) {
-        unsigned char* blockData = func_003E12E0(videoStream);
+        unsigned char* blockData = STREAM_get(videoStream);
         SYNCTASK_run(0);
         if (blockData != 0) {
             unsigned int tag = (blockData[0] << 24) | (blockData[1] << 16) | (blockData[2] << 8) | blockData[3];
@@ -855,9 +855,9 @@ extern "C" void func_003AEAD0_impl(char* self, char* ctx, sChunk_AEAD0** out)
             char name[8];
             *(unsigned int*)name = tag;
             name[4] = 0;
-            func_003E13E8(videoStream, (int)blockData);
+            STREAM_release(videoStream, (int)blockData);
         }
-        if (func_003E1530(videoStream))
+        if (STREAM_isendofstream(videoStream))
             return;
     }
 }
@@ -887,13 +887,13 @@ void* func_003AECB8(void* self, void* context)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003AECE0);
 #ifdef SKIP_ASM
-extern "C" void* func_003E13E8(void* p, int a1);
+extern "C" void* STREAM_release(void* p, int a1);
 extern void* (*D_00509434[])(void*);
 
 /**
  * Releases a video chunk: returns its block to the stream and frees the CHUNK.
  *
- * Hands the CHUNK's block (m_UserChunkData) back to the video STREAM (+0x30) with func_003E13E8, then frees the CHUNK
+ * Hands the CHUNK's block (m_UserChunkData) back to the video STREAM (+0x30) with STREAM_release, then frees the CHUNK
  * with the RCMP free function (D_00509434). Likely bug: it reads the CHUNK before checking it for null.
  *
  * @param chunkAddr  the CHUNK
@@ -902,7 +902,7 @@ extern void* (*D_00509434[])(void*);
 extern "C" void* func_003AECE0(int self, int chunkAddr)
 {
     int* obj = (int*)chunkAddr;
-    void* lastResult = func_003E13E8(*(void**)(self + 0x30), *obj);
+    void* lastResult = STREAM_release(*(void**)(self + 0x30), *obj);
     if (obj != 0) {
         lastResult = D_00509434[0](obj);
     }

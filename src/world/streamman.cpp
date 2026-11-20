@@ -197,18 +197,18 @@ extern "C" int cStreamMan_addStreamRequest(cStreamMan* self, int uiHullID, int u
 //100%
 INCLUDE_ASM("world/streamman", cStreamMan_cancelStreamRequest);
 #ifdef SKIP_ASM
-extern "C" void func_003E0E90(int, int);
+extern "C" void STREAM_cancelrequest(int, int);
 
 /**
  * Cancels the active hull stream request, if there is one, and marks the streamer idle.
  *
- * Passes m_streamRequest to the EA stream's cancel (func_003E0E90), clears m_bActive and sets m_ActiveHull to
+ * Passes m_streamRequest to the EA stream's cancel (STREAM_cancelrequest), clears m_bActive and sets m_ActiveHull to
  * -1. On Tour's version takes the hull ID (and only asserts on it); this one takes none.
  */
 extern "C" void cStreamMan_cancelStreamRequest(cStreamMan* self)
 {
     if (self->m_bActive != 0) {
-        func_003E0E90(self->m_streamHandle, self->m_streamRequest);
+        STREAM_cancelrequest(self->m_streamHandle, self->m_streamRequest);
         self->m_bActive = 0;
         self->m_ActiveHull = -1;
     }
@@ -268,18 +268,18 @@ extern char* cAppMan_TheAppMan;
 void* cStreamMan_decompressChunk(void* self, int a1, int a2, int a3);
 extern "C" int cStreamMan_processChunk(void* self, void* a, void* b);
 extern "C" void cWorldCache_signalPageLoadComplete(void* self, int a1);
-extern "C" unsigned char* func_003E12E0(void* cache);
-extern "C" void func_003E13E8(void* cache, void* p);
-extern "C" int func_003E1530(void* cache);
+extern "C" unsigned char* STREAM_get(void* cache);
+extern "C" void STREAM_release(void* cache, void* p);
+extern "C" int STREAM_isendofstream(void* cache);
 
 /**
  * Feeds newly streamed world data from the disc stream into the world cache.
  *
  * Does nothing while inactive (+0x90). A chunk left half processed (+0xAC) is retried first. When throttled (+0xD4),
  * the countdown at +0xE0 drops by the app ticks passed and nothing more happens while it is positive. Then each chunk
- * func_003E12E0 returns resets the countdown, is decompressed (cStreamMan_decompressChunk) into the buffer at +0x8C, released
- * (func_003E13E8) and handed to cStreamMan_processChunk; if that cannot finish, the chunk is marked pending. Only one chunk is
- * taken per call while throttled. Once func_003E1530 reports the end of the stream, the world cache is told page +0x94
+ * STREAM_get returns resets the countdown, is decompressed (cStreamMan_decompressChunk) into the buffer at +0x8C, released
+ * (STREAM_release) and handed to cStreamMan_processChunk; if that cannot finish, the chunk is marked pending. Only one chunk is
+ * taken per call while throttled. Once STREAM_isendofstream reports the end of the stream, the world cache is told page +0x94
  * is loaded, the manager goes inactive and the page becomes -1.
  */
 extern "C" void cStreamMan_update(sStreamMan7098* self)
@@ -303,14 +303,14 @@ extern "C" void cStreamMan_update(sStreamMan7098* self)
             return;
         }
     }
-    chunk = func_003E12E0(self->cache);
+    chunk = STREAM_get(self->cache);
     while (chunk != 0) {
         int size;
         self->fE0 = self->fDC;
         size = (chunk[7] << 24) | (chunk[6] << 16) | (chunk[5] << 8) | chunk[4];
         // PORT: the payload pointer is passed as an int.
         self->fB0 = cStreamMan_decompressChunk(self, self->f8C, size - 8, (int)(chunk + 8));
-        func_003E13E8(self->cache, chunk);
+        STREAM_release(self->cache, chunk);
         self->fB4 = self->f8C;
         if (cStreamMan_processChunk(self, &self->fB0, &self->fB4) == 0) {
             self->pending = 1;
@@ -319,9 +319,9 @@ extern "C" void cStreamMan_update(sStreamMan7098* self)
         if (self->fD4 != 0) {
             break;
         }
-        chunk = func_003E12E0(self->cache);
+        chunk = STREAM_get(self->cache);
     }
-    if (func_003E1530(self->cache) == 0) {
+    if (STREAM_isendofstream(self->cache) == 0) {
         return;
     }
     cWorldCache_signalPageLoadComplete(self->f0, self->f94);

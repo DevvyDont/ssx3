@@ -47,7 +47,7 @@ struct cStreamMan {
     unsigned int m_uiNumHullChunk;  // 0x098 [O]; [R] reset = 0; [U] addStreamRequest stores the chunk count,
                                     //       processChunk counts it down
     int m_streamRequest;            // 0x09C [O]; [R] ctor = 0; [U] addStreamRequest stores the request id,
-                                    //       cancelStreamRequest passes it to func_003E0E90
+                                    //       cancelStreamRequest passes it to STREAM_cancelrequest
     int m_iCarrySize;               // 0x0A0 [O]; [U] processChunk: bytes of a split 8-byte chunk header carried over
     char m_sCarryData[8];           // 0x0A4 [O]; [U] processChunk copies the carried header bytes here (lbu/sb)
     int m_bAllocFailed;             // 0x0AC [O] (a bool); [R] reset = 0; [U] update sets it when processChunk

@@ -155,11 +155,11 @@ extern "C" void cStreamInstance__cStreamInstance(void* self, int flags)
 INCLUDE_ASM("sound/streamsys", cStreamInstance_SetBigFile);
 #ifdef SKIP_ASM
 extern "C" int BXFILE_exists(const char* name);
-extern "C" int func_003E1EC8(const char* name, int a1);
+extern "C" int FILE_loadbigheader(const char* name, int a1);
 
 /**
  * Uses a big file for the stream's requests: when it exists, keeps its name (+0x14) and loads its directory (+0x74,
- * func_003E1EC8 with the instance's memory type).
+ * FILE_loadbigheader with the instance's memory type).
  *
  * @param name  the big-file name
  */
@@ -168,7 +168,7 @@ extern "C" void cStreamInstance_SetBigFile(void* self, int name)
 {
     if (BXFILE_exists((const char*)name) != 0) {
         strcpy((char*)self + 0x14, (const char*)name);
-        *(int*)((char*)self + 0x74) = func_003E1EC8((char*)self + 0x14, *(int*)((char*)self + 0x7C));
+        *(int*)((char*)self + 0x74) = FILE_loadbigheader((char*)self + 0x14, *(int*)((char*)self + 0x7C));
     }
 }
 #endif
@@ -569,7 +569,7 @@ extern "C" void cStreamInstance_Resume(void *stream) {
 INCLUDE_ASM("sound/streamsys", cStreamInstance_Queue);
 #ifdef SKIP_ASM
 extern "C" int SNDSTRM_queuefile(int h, int a, int buf, int off);
-extern "C" void func_003E2CE0(void* dec, int src, int a, int* out, int b);
+extern "C" void BIG_locateentry(void* dec, int src, int a, int* out, int b);
 
 /**
  * Queues a file on the stream: through the big file when one is set (its entry for @p buf adds its offset), else the
@@ -585,7 +585,7 @@ extern "C" int cStreamInstance_Queue(void* self, int holdTime, int buf, int off)
 {
     if (*(void**)((char*)self + 0x74) != 0) {
         int n;
-        func_003E2CE0(*(void**)((char*)self + 0x74), buf, 0, &n, 0);
+        BIG_locateentry(*(void**)((char*)self + 0x74), buf, 0, &n, 0);
         return SNDSTRM_queuefile(*(int*)((char*)self + 0x8), holdTime, (int)((char*)self + 0x14), off + n);
     }
     return SNDSTRM_queuefile(*(int*)((char*)self + 0x8), holdTime, buf, off);
@@ -598,7 +598,7 @@ extern "C" void* SNDSTRM_purge(int);
 INCLUDE_ASM("sound/streamsys", cStreamInstance_Queue1);
 #ifdef SKIP_ASM
 /**
- * Queues a big-file element on the stream (by index, func_003E2CE0); 0 when no big file is set.
+ * Queues a big-file element on the stream (by index, BIG_locateentry); 0 when no big file is set.
  *
  * @param holdTime  the hold time of the request
  * @param element  the element index in the big file
@@ -610,7 +610,7 @@ extern "C" int cStreamInstance_Queue1(void* self, int holdTime, int element, int
     void* dec = *(void**)((char*)self + 0x74);
     if (dec != 0) {
         int n;
-        func_003E2CE0(dec, 0, element, &n, 0);
+        BIG_locateentry(dec, 0, element, &n, 0);
         return SNDSTRM_queuefile(*(int*)((char*)self + 0x8), holdTime, (int)((char*)self + 0x14), off + n);
     }
     return 0;

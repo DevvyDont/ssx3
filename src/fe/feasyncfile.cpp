@@ -423,14 +423,14 @@ struct sFEAsyncFiles {
 extern char str_FE_Async_Texture[];
 // PORT: operator_new__FUi really takes (size, tag, flags, d)
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-extern "C" int func_003DF748(void* file, void* data, int size);
+extern "C" int ASYNCFILE_loadat(void* file, void* data, int size);
 extern "C" void FILE_loadatz(void* file, void* data, int size);
 
 /**
  * Starts reading a slot's file into a new buffer of a fixed 0x109A0 bytes (tag "FE Async Texture").
  *
  * Sets the status to 2 (loading). With the slot's async flag (+0x108) it starts an asynchronous read
- * (func_003DF748) and keeps the handle at +0x104; otherwise it reads synchronously (FILE_loadatz) and sets
+ * (ASYNCFILE_loadat) and keeps the handle at +0x104; otherwise it reads synchronously (FILE_loadatz) and sets
  * status 3 directly, skipping the texture step that cFEAsyncManager_Update() runs only for asynchronous
  * loads.
  *
@@ -448,7 +448,7 @@ extern "C" void cFEAsyncManager_LoadDataFile(cFEAsyncManager* self, int idx)
     cFEAsyncManager_SetFileStatus(self, idx, 2);
     if (asyncMan->files[idx].async != 0) {
         cFEAsyncManager_SetFileStatus(self, idx, 2);
-        asyncMan->files[idx].handle = func_003DF748(&asyncMan->files[idx], *pData, asyncMan->files[idx].size);
+        asyncMan->files[idx].handle = ASYNCFILE_loadat(&asyncMan->files[idx], *pData, asyncMan->files[idx].size);
     } else {
         FILE_loadatz(&asyncMan->files[idx], *pData, asyncMan->files[idx].size);
         cFEAsyncManager_SetFileStatus(self, idx, 3);

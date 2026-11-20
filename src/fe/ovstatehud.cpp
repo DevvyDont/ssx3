@@ -687,7 +687,7 @@ extern "C" void* cUITextureBank_getElementByHashname(void* self, int id);
 extern "C" int cUIFontInterface_getFontByHashName(void* self, int key);
 extern "C" void cOVStateHUD1P_calcElemPos_reen(void* self, float* out, float* pos, float* size, float* scale, int alignX, int alignY, int flags) __asm__("cOVStateHUD1P_calcElemPos");
 extern "C" void func_0020EB50(void* self, void* screen, void* rect);
-extern "C" void func_003DCA40(unsigned short* dst, const char* src);
+extern "C" void USTR_strcpyA(unsigned short* dst, const char* src);
 extern "C" void USTR_sprintf(unsigned short* dst, const unsigned short* fmt, ...);
 unsigned int BXrand();
 extern char D_004A2108[];
@@ -1161,7 +1161,7 @@ extern "C" void cOVStateHUD1P_onCreateScreen(void* vself)
     func_001E94E0_reen(self->box6AC, D_004A21D8, self->bank428, &D_004A4F50);
     func_001E94E0_reen(self->box7F8, D_004A21D8, self->bank428, &D_004A4F50);
     unsigned short fmt[32];
-    func_003DCA40(fmt, str_pct_s_at_skip_pct_s);
+    USTR_strcpyA(fmt, str_pct_s_at_skip_pct_s);
     unsigned short* name = getLocString_9AD0(str_kT_OVRCMNPress);
     unsigned short* skip = getLocString_9AD0(str_kT_OVRCMNToSkip);
     unsigned short buf[32];

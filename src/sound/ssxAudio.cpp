@@ -305,7 +305,7 @@ extern "C" void cSSXAudio_HandleUserChunk(void* msg);
 extern "C" void func_0028F730(void* self);
 extern "C" void SNDSYS_removeuserdataclient(void (*cb)(void*));
 extern "C" void func_002B0DA0(void* p);
-extern "C" void func_003DEDC0(void* h, int a);
+extern "C" void FILESYS_delbigsync(void* h, int a);
 extern "C" void cController__cController(void* self, int flags);
 extern "C" void cStreamSys__cStreamSys(void* self, int flags);
 extern "C" void cBankManager__cBankManager(void* self, int flags);
@@ -339,7 +339,7 @@ extern const sSaVtbl7_285210 D_00483728_285210 __asm__("D_00483728");
  * Destroys the audio system: shuts down its parts, frees the "CircFIFOBuff" and runs the base destructors.
  *
  * It restores the base vtables first, then calls func_0028F730, unregisters the cSSXAudio_HandleUserChunk callback and
- * calls func_002B0DA0 on the speech system. It also releases +0x5728 (func_003DEDC0) and runs the base part's
+ * calls func_002B0DA0 on the speech system. It also releases +0x5728 (FILESYS_delbigsync) and runs the base part's
  * destructor (cController__cController). With bit 1 of @p flags it also destroys the virtual bases (stream system, bank
  * manager, cSoundSys).
  *
@@ -379,7 +379,7 @@ extern "C" void cSSXAudio__cSSXAudio(void* self, int flags)
     SNDSYS_removeuserdataclient(cSSXAudio_HandleUserChunk);
     func_002B0DA0(speechSys);
     if (*(void**)(S_285210 + 0x5728))
-        func_003DEDC0(*(void**)(S_285210 + 0x5728), 100);
+        FILESYS_delbigsync(*(void**)(S_285210 + 0x5728), 100);
     if (*(void**)(S_285210 + 0x5980))
         cMemMan_free(*(void**)(S_285210 + 0x5980));
     cController__cController(self, 0);

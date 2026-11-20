@@ -361,7 +361,7 @@ extern "C" const char* cFELocale_getStringByHash(cFELocale_getStringByHash_sLoca
 INCLUDE_ASM("util/locale", cFELocale_getStringByIndex);
 #ifdef SKIP_ASM
 // PORT: cLocaleFile_getStringByIndex__FPv really takes a second argument (it passes $5 through to
-// func_003DBB68); bind the 2-arg view to the 1-arg mangled symbol.
+// LOCALE_getstr); bind the 2-arg view to the 1-arg mangled symbol.
 void* cLocaleFile_getStringByIndex_2(void* self, void* arg) __asm__("cLocaleFile_getStringByIndex__FPv");
 
 struct cFELocale_getStringByIndex_sArr {

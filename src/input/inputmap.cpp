@@ -58,12 +58,12 @@ INCLUDE_ASM("input/inputmap", cInputMap_loadMapFile1);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void cInputMap_loadMapFile_vvi(void* self, void* data, int size) __asm__("cInputMap_loadMapFile");
 void cMemMan_free(void* p);
-extern "C" void* func_003E1A10(const char* path, int* size, int a2);
+extern "C" void* FILE_loadsize(const char* path, int* size, int a2);
 
 /**
  * Loads an input map script from a file and compiles it into the map.
  *
- * Reads the whole file with func_003E1A10 (flag 0x100), passes the text and its size to cInputMap_loadMapFile and then
+ * Reads the whole file with FILE_loadsize (flag 0x100), passes the text and its size to cInputMap_loadMapFile and then
  * frees the buffer. Nothing calls it.
  *
  * @param path  the map file's path (On Tour fn)
@@ -71,7 +71,7 @@ extern "C" void* func_003E1A10(const char* path, int* size, int a2);
 extern "C" void cInputMap_loadMapFile1(cInputMap* self, const char* path)
 {
     int size;
-    void* data = func_003E1A10(path, &size, 0x100);
+    void* data = FILE_loadsize(path, &size, 0x100);
     cInputMap_loadMapFile_vvi(self, data, size);
     if (data != 0) {
         cMemMan_free(data);

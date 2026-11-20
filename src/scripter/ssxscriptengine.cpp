@@ -2773,7 +2773,7 @@ extern "C" void cSSXScriptEngine_SyncLoadScriptBank(cSSXScriptEngine* self, int 
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_AsyncLoadScriptBank);
 #ifdef SKIP_ASM
-extern "C" void* func_003DF748(const char* name, int a, int b);
+extern "C" void* ASYNCFILE_loadat(const char* name, int a, int b);
 extern "C" void* ASYNCFILE_load(const char* name, int flags, int b);
 void tSSXScriptBankInfo_Clear(void* slot);
 
@@ -2792,7 +2792,7 @@ extern "C" void cSSXScriptEngine_AsyncLoadScriptBank(cSSXScriptEngine* self, int
     char* slot = (char*)self + (i * 16 + 0x628);
     *(int*)(slot + 0x4) = key;
     if (pMem != 0) {
-        *(void**)(slot + 0x8) = func_003DF748(name, pMem, memSize);
+        *(void**)(slot + 0x8) = ASYNCFILE_loadat(name, pMem, memSize);
         *(int*)(slot + 0xC) = 0;
     } else {
         *(void**)(slot + 0x8) = ASYNCFILE_load(name, flags, memSize);

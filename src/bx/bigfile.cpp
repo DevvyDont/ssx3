@@ -63,17 +63,17 @@ void cBigFile__cBigFile(cBigFile* self, int flags)
 }
 #endif
 
-extern "C" void func_003DEDC0(void* handle, int arg);
+extern "C" void FILESYS_delbigsync(void* handle, int arg);
 
 //100%
 INCLUDE_ASM("bx/bigfile", cBigFile_close__FP8cBigFile);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// The unit declares func_003DEDC0 as returning void; it returns int (the result is tested).
-int func_003DEDC0_ret(int handle, int arg) __asm__("func_003DEDC0");
+// The unit declares FILESYS_delbigsync as returning void; it returns int (the result is tested).
+int FILESYS_delbigsync_ret(int handle, int arg) __asm__("FILESYS_delbigsync");
 
 /**
- * Closes the big file if it is open (func_003DEDC0 with 100) and marks it closed.
+ * Closes the big file if it is open (FILESYS_delbigsync with 100) and marks it closed.
  *
  * @return 1 when it was not open or closed cleanly, otherwise 0
  */
@@ -81,7 +81,7 @@ int cBigFile_close(cBigFile* self)
 {
     int result = 1;
     if (self->field_0x4 != 0) {
-        result = func_003DEDC0_ret(self->field_0x0, 100) != 0;
+        result = FILESYS_delbigsync_ret(self->field_0x0, 100) != 0;
     }
     self->field_0x4 = 0;
     return result;
@@ -92,8 +92,8 @@ int cBigFile_close(cBigFile* self)
 INCLUDE_ASM("bx/bigfile", cBigFile_open);
 #ifdef SKIP_ASM
 extern int D_004A2E78;
-extern "C" int func_003DEE18(const char* name, int a1);
-extern "C" int func_003DED50(const char* name, int memclass, int a2, cBigFile* out);
+extern "C" int FILESYS_existssync(const char* name, int a1);
+extern "C" int FILESYS_addbigsync(const char* name, int memclass, int a2, cBigFile* out);
 
 // PORT: the unit declares cBigFile_open(cBigFile*) returning void; the body takes
 // (self, name, memclass) and returns field_0x4. Bound by asm label.
@@ -102,7 +102,7 @@ int cBigFile_open_impl(cBigFile* self, const char* name, int memclass) __asm__("
 /**
  * Opens a big (archive) file in a memory class, if it exists.
  *
- * The memory class is set in D_004A2E78 for the duration of the open (func_003DED50) and then restored.
+ * The memory class is set in D_004A2E78 for the duration of the open (FILESYS_addbigsync) and then restored.
  *
  * @param name  the big file's path (On Tour bigname)
  * @param memclass  memory class for its data (On Tour memtype)
@@ -110,12 +110,12 @@ int cBigFile_open_impl(cBigFile* self, const char* name, int memclass) __asm__("
  */
 int cBigFile_open_impl(cBigFile* self, const char* name, int memclass)
 {
-    if (func_003DEE18(name, 100) == 0) {
+    if (FILESYS_existssync(name, 100) == 0) {
         return 0;
     }
     int saved = D_004A2E78;
     D_004A2E78 = memclass;
-    if (func_003DED50(name, memclass, 100, self) != 0) {
+    if (FILESYS_addbigsync(name, memclass, 100, self) != 0) {
         self->field_0x4 = 1;
     }
     D_004A2E78 = saved;

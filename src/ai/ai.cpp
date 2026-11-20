@@ -2244,8 +2244,8 @@ extern "C" void cAI_purgeAnims(cAI* self)
 //100%
 INCLUDE_ASM("ai/ai", cAI_loadAnims);
 #ifdef SKIP_ASM
-extern "C" void func_003DED50(char* name, int a1, int a2, void* out);
-extern "C" void func_003DEDC0(void* handle, int arg);
+extern "C" void FILESYS_addbigsync(char* name, int a1, int a2, void* out);
+extern "C" void FILESYS_delbigsync(void* handle, int arg);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cAdfDataSource_cAdfDataSource(void* mem, char* name);
 extern "C" void cGameAnimMap_addSource(void* map, int i, void* anim);
@@ -2259,15 +2259,15 @@ extern char* kAnimBankName[1];
 /**
  * Loads the riders' basic animation file and registers its animations in the game anim map.
  *
- * Opens "data/char/anm.big" (func_003DED50), reads "data/char/anm.big|data/char/basic.afl" into a new
+ * Opens "data/char/anm.big" (FILESYS_addbigsync), reads "data/char/anm.big|data/char/basic.afl" into a new
  * "AdfDataSource" kept in the anim table cAnimDataBase_TheAnimDataBase, adds its animations to the map cGameAnimMap_TheGameAnimMap as kind 0,
- * resolves the map (cGameAnimMap_testResolve) and releases the archive handle (func_003DEDC0).
+ * resolves the map (cGameAnimMap_testResolve) and releases the archive handle (FILESYS_delbigsync).
  */
 extern "C" void cAI_loadAnims(void)
 {
     void* handle;
     int i;
-    func_003DED50(str_data_char_anm_big, 0, 100, &handle);
+    FILESYS_addbigsync(str_data_char_anm_big, 0, 100, &handle);
     for (i = 0; i < 1; i++)
     {
         void* bank = cAdfDataSource_cAdfDataSource(cMemMan_alloc(0x18, str_AdfDataSource, 0, 0), kAnimBankName[i]);
@@ -2275,7 +2275,7 @@ extern "C" void cAI_loadAnims(void)
         cGameAnimMap_addSource(cGameAnimMap_TheGameAnimMap, i, bank);
     }
     cGameAnimMap_testResolve_impl(cGameAnimMap_TheGameAnimMap);
-    func_003DEDC0(handle, 100);
+    FILESYS_delbigsync(handle, 100);
 }
 #endif
 
