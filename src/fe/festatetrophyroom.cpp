@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiengine.h"
 #include "fe/festaterewardsroom.h"
 #include "online/lobbyman.h"
 #include "render/ps2graphicsman.h"
@@ -765,7 +766,7 @@ extern "C" void cFEStateRewardsRoom_onWidgetEvent(cFEStateRewardsRoom* self, voi
         void* obj = *(void**)self->mpEngine;
         sVEntry001D4EA8* vt = *(sVEntry001D4EA8**)((char*)obj + 4);
         void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, *(int*)((char*)item + 0x18));
-        cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+        cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         break;
     }
     case 6: {
@@ -773,7 +774,7 @@ extern "C" void cFEStateRewardsRoom_onWidgetEvent(cFEStateRewardsRoom* self, voi
         sVEntry001D4EA8* vt = *(sVEntry001D4EA8**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
         if (nextState != 0) {
-            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+            cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         }
         break;
     }

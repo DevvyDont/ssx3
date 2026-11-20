@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiengine.h"
 #include "ui/uislider.h"
 #include "ui/uiscrollbar.h"
 #include "ui/uistate.h"
@@ -1842,7 +1843,7 @@ static inline int cUIState_onUpdate_padTest(char* pad, int slot)
 extern "C" void cUIState_onUpdate(cUIState* self)
 {
     int mask = *(signed char*)&self->mCtrlBits;
-    char* input = *(char**)((char*)self->mpEngine + 0xC);
+    char* input = *(char**)&self->mpEngine->mpInput;
     self->mCurrentCtrl = 0;
     do {
         cUIState_onUpdate_sVEntryC* vc = *(cUIState_onUpdate_sVEntryC**)(input + 8);

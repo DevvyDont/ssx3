@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiengine.h"
 #include "fe/festateubertrick.h"
 #include "main/ssxapp.h"
 
@@ -779,7 +780,7 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, char* i
                     if (points >= tbl[bi].cost) {
                         void* popup = cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, str_UITRICKBUY, 0x100, 0), self->mpEngine, ((char*)self), self->mUserNum);
                         cUIStateBuyPopup_initBuyTrick(popup, trick, tbl[bi].cost, points);
-                        cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, popup);
+                        cUIStateStack_pushPopup(self->mpEngine->mStateStack, popup);
                     } else {
                         PlaySound_185268(((char*)self), 4);
                     }

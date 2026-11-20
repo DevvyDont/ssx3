@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiengine.h"
 #include "fe/festaterewardsroom.h"
 #include "fe/festatepeakroom.h"
 #include "fe/festatempcircuit.h"
@@ -159,7 +160,7 @@ extern "C" int cFEPopupVideoCalibration_onInputBegin(cFEPopupVideoCalibration* s
         } else {
             self->mAttrState = ((self->mAttrState | 0x80) & ~0x3F00) | 0x700;
         }
-        sDefObj_EC68* uiSound = *(sDefObj_EC68**)((char*)self->mpEngine + 0x14);
+        sDefObj_EC68* uiSound = *(sDefObj_EC68**)&self->mpEngine->mpSound;
         if (uiSound == 0)
             uiSound = &D_004A5A58_EC68;
         if (uiSound != 0)
@@ -363,7 +364,7 @@ static inline int clamp_F050(int v, int lo, int hi)
  */
 extern "C" void cFEPopupScreenPos_onUpdate(cFEPopupScreenPos* self)
 {
-    char* in = *(char**)((char*)self->mpEngine + 0xC);
+    char* in = *(char**)&self->mpEngine->mpInput;
     for (int i = 0; i < 2; i++) {
         sVEs_F050* vt = *(sVEs_F050**)(in + 8);
         vt[44].fn(in + vt[44].delta, i);
@@ -374,12 +375,12 @@ extern "C" void cFEPopupScreenPos_onUpdate(cFEPopupScreenPos* self)
             sound_F050(((sPopup_F050*)self), 6);
             *(signed char*)&self->mAccept = 1;
             self->mAttrState |= 0x80;
-            func_0039F190((char*)self->mpEngine + 0x18, 1);
+            func_0039F190(self->mpEngine->mStateStack, 1);
         } else if (padCall_F050(in, 6)) {
             sound_F050(((sPopup_F050*)self), 3);
             *(signed char*)&self->mAccept = 0;
             self->mAttrState |= 0x80;
-            func_0039F190((char*)self->mpEngine + 0x18, 1);
+            func_0039F190(self->mpEngine->mStateStack, 1);
         } else if (padCall_F050(in, 19)) {
             self->mX--;
             playFrame_F050(((sPopup_F050*)self), str_hl_left);
@@ -7635,7 +7636,7 @@ extern "C" void cOVState_MESSAGECENTER_onWidgetEvent(cOVState_MESSAGECENTER* sel
         if (outFrame != 0xFFFF) {
             cUIScreen_playFrame(self->mpMessageScreen, outFrame, 1);
         }
-        func_0039F190((char*)self->mpEngine + 0x18, 1);
+        func_0039F190(self->mpEngine->mStateStack, 1);
         D_004A20C0 = 0;
         break;
     }
@@ -7781,7 +7782,7 @@ extern "C" void cOVState_MESSAGECENTER_onPopupEvent(cOVState_MESSAGECENTER* self
     if (event == 20) {
         func_001E48B0(self);
         func_001E4758(self);
-        func_0039F190((char*)self->mpEngine + 0x18, 1);
+        func_0039F190(self->mpEngine->mStateStack, 1);
     }
 }
 #endif

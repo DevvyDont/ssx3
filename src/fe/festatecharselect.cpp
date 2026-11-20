@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiengine.h"
 #include "fe/festatecharselect.h"
 #include "main/ssxapp.h"
 
@@ -484,7 +485,7 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(cFEStateCharSelect* self, sObj_
         cFECustom_setPlayerCtrlMask(*(void**)(char*)self->mpEngine, self->mUserNum, mask);
         void* st = (*(cStateFactory_17E8**)(char*)self->mpEngine)->onSelect(((sCharSel_17E8*)self), widget->id);
         if (st != 0)
-            cUIStateStack_push((char*)self->mpEngine + 0x18, st);
+            cUIStateStack_push(self->mpEngine->mStateStack, st);
         cFERider_setVisible(riderSlot_17E8(((sCharSel_17E8*)self)), 0);
         self->mbDraw3D = 0;
         break;
@@ -492,7 +493,7 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(cFEStateCharSelect* self, sObj_
     case 6: {
         void* st = (*(cStateFactory_17E8**)(char*)self->mpEngine)->onBack(((sCharSel_17E8*)self), widget->id);
         if (st != 0) {
-            cUIStateStack_push((char*)self->mpEngine + 0x18, st);
+            cUIStateStack_push(self->mpEngine->mStateStack, st);
             cFERider_setVisible(riderSlot_17E8(((sCharSel_17E8*)self)), 0);
             self->mbDraw3D = 0;
         }
@@ -524,7 +525,7 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(cFEStateCharSelect* self, sObj_
         refresh_17E8(iface);
         char* st = (char*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), (char*)self->mpEngine, 1);
         *(int*)(st + 0x1C) = (*(int*)(st + 0x1C) & ~0x3F00) | 0x100;
-        cUIStateStack_pushSpecial((char*)self->mpEngine + 0x18, st, 0, 0);
+        cUIStateStack_pushSpecial(self->mpEngine->mStateStack, st, 0, 0);
         cFERider_setVisible(riderSlot_17E8(((sCharSel_17E8*)self)), 0);
         self->mbDraw3D = 0;
         break;
@@ -534,7 +535,7 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(cFEStateCharSelect* self, sObj_
         cBENewPlayerInterface_setPlayerCtrlID(iface, self->mUserNum, self->mCurrentCtrl);
         refresh_17E8(iface);
         void* st = cFEStateProfileLoad_cFEStateProfileLoad(cMemMan_alloc(640, str_cFEStateProfileLoad, 0x100, 0), (char*)self->mpEngine, 2, 1 << self->mCurrentCtrl);
-        cUIStateStack_push((char*)self->mpEngine + 0x18, st);
+        cUIStateStack_push(self->mpEngine->mStateStack, st);
         char* top = *(char**)(char*)self->mpEngine;
         if (top != 0)
             *(int*)(top + 0xC) = 9;

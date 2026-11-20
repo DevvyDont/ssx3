@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiengine.h"
 #include "fe/festateruleselect.h"
 
 //100%
@@ -412,7 +413,7 @@ extern "C" void cFEStateRuleSelect_onWidgetEvent(cFEStateRuleSelect* self, sMsg_
             sVE_1C68* vt = *(sVE_1C68**)(custom + 0x4);
             void* st = vt[4].fn(custom + vt[4].delta, ((char*)self), msg->id);
             if (st) {
-                cUIStateStack_push((char*)self->mpEngine + 0x18, st);
+                cUIStateStack_push(self->mpEngine->mStateStack, st);
             }
         }
         break;
@@ -421,7 +422,7 @@ extern "C" void cFEStateRuleSelect_onWidgetEvent(cFEStateRuleSelect* self, sMsg_
         sVE_1C68* vt = *(sVE_1C68**)(custom + 0x4);
         void* st = vt[5].fn(custom + vt[5].delta, ((char*)self), msg->id);
         if (st) {
-            cUIStateStack_push((char*)self->mpEngine + 0x18, st);
+            cUIStateStack_push(self->mpEngine->mStateStack, st);
         }
         MEM_fill(D_005308B8, 0, 0x20);
         break;
@@ -435,7 +436,7 @@ extern "C" void cFEStateRuleSelect_onWidgetEvent(cFEStateRuleSelect* self, sMsg_
     case 7: {
         char* st = (char*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), self->mpEngine, 1);
         *(int*)(st + 0x1C) = (*(int*)(st + 0x1C) & ~0x3F00) | 0x100;
-        cUIStateStack_pushSpecial((char*)self->mpEngine + 0x18, st, 0, 0);
+        cUIStateStack_pushSpecial(self->mpEngine->mStateStack, st, 0, 0);
         break;
     }
     }

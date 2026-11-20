@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiengine.h"
 #include "fe/buypopupinfo.h"
 #include "fe/uistatebuypopup.h"
 #include "online/gamecomm.h"
@@ -3170,15 +3171,15 @@ extern "C" void cScreenPopup_onPopupEvent(cScreenPopup* self, void* child, int m
         }
         break;
     case 0xF:
-        func_0039F190_i((char*)self->mpEngine + 0x18, 1);
+        func_0039F190_i(self->mpEngine->mStateStack, 1);
         self->miConfimationReturnCode = self->miActiveConfirmation + 0xF;
         break;
     case 0x10: case 20:
         self->miConfimationReturnCode = -1;
-        func_0039F190_i((char*)self->mpEngine + 0x18, 1);
+        func_0039F190_i(self->mpEngine->mStateStack, 1);
         break;
     case 17: case 18: case 19:
-        func_0039F190_i((char*)self->mpEngine + 0x18, 1);
+        func_0039F190_i(self->mpEngine->mStateStack, 1);
         break;
     case 22:
         if (child == (void*)self->mpKeyboard) {
@@ -3870,7 +3871,7 @@ extern "C" void cKeyboardPopup_onUpdate(cKeyboardPopup* self)
 {
     cUIState_onUpdate(self);
     if (cGameComm_mGameComm != 0 && cGameComm_mGameComm->mOverlayTimeout == 0 && (int)SSXApp->Game != 0) {
-        func_0039F190((char*)self->mpEngine + 0x18, 1);
+        func_0039F190(self->mpEngine->mStateStack, 1);
     }
     if (self->mbCallParentsUpdate != 0) {
         void* obj = self->mpParentState;
@@ -3898,7 +3899,7 @@ extern "C" void cKeyboardPopup_onWidgetEvent(cKeyboardPopup* self, void* pWidget
     switch (Event) {
     case 5:
     case 6:
-        func_0039F190((char*)self->mpEngine + 0x18, 1);
+        func_0039F190(self->mpEngine->mStateStack, 1);
         break;
     }
 }
@@ -6071,14 +6072,14 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, char* ev)
                     cFEStateNetHelpPopup_setOption(popup, 3, GetHashValue32(str_kT_HELPKeyboardShift), 6);
                     cFEStateNetHelpPopup_setOption(popup, 4, GetHashValue32(str_kT_HELPKeyboardSelectCharacter), 0);
                     cFEStateNetHelpPopup_setOption(popup, 5, GetHashValue32(str_kT_HELPKeyboardCancel), 1);
-                    cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, popup);
+                    cUIStateStack_pushPopup(self->mpEngine->mStateStack, popup);
                 }
                 sound = 5;
             }
         } else if (InputK1CDB98(ev, 6)) {
             changed = 1;
             sound = 6;
-            func_0039F190((char*)self->mpEngine + 0x18, 1);
+            func_0039F190(self->mpEngine->mStateStack, 1);
             char* o = (char*)self->mpParentState;
             sVEntryK1CDB98* vt = *(sVEntryK1CDB98**)(o + 8);
             ((void (*)(void*, int, int))vt[19].fn)(o + vt[19].delta, 0, 0xE);
@@ -6170,7 +6171,7 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, char* ev)
                 o->SetColor(sColorK1CDB98(1.0f, 0.0f, 0.0f, 0.0f));
             }
         }
-        sSndK1CDB98* snd = *(sSndK1CDB98**)((char*)self->mpEngine + 0x14);
+        sSndK1CDB98* snd = *(sSndK1CDB98**)&self->mpEngine->mpSound;
         if (snd == 0)
             snd = &gUISoundNull;
         if (changed && snd != 0)

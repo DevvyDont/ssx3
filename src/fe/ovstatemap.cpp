@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiengine.h"
 #include "be/beintnetwork.h"
 #include "online/gamecomm.h"
 #include "fe/ovstate.h"
@@ -1415,7 +1416,7 @@ extern "C" void cOVState_onCreateScreen(cOVState* self)
             }
         }
     }
-    char* obj = (char*)cUIStateStack_findState((char*)self->mpEngine + 0x18, GetHashValue32(str_hud_b));
+    char* obj = (char*)cUIStateStack_findState(self->mpEngine->mStateStack, GetHashValue32(str_hud_b));
     if (obj != 0) {
         sVEntry0020A380* vtEntry = &(*(sVEntry0020A380**)(obj + 8))[24];
         vtEntry->fn(obj + vtEntry->delta, 3, 0);
@@ -1453,7 +1454,7 @@ extern "C" void cOVState_onDestroyScreen(cOVState* self)
             self->mRestoreCutSceneMode = 0;
         }
     }
-    char* obj = (char*)cUIStateStack_findState((char*)self->mpEngine + 0x18, GetHashValue32(str_hud_b));
+    char* obj = (char*)cUIStateStack_findState(self->mpEngine->mStateStack, GetHashValue32(str_hud_b));
     if (obj != 0) {
         sVEntry0020A430* vtEntry = &(*(sVEntry0020A430**)(obj + 8))[24];
         vtEntry->fn(obj + vtEntry->delta, 4, 0);
@@ -1599,7 +1600,7 @@ extern "C" void cOVState_triggerTextFade(cOVState* self, char* objName, char* an
 {
     void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(objName));
     if (obj != 0) {
-        void* bank = (char*)self->mpEngine + 0x50;
+        void* bank = self->mpEngine->mAnimBank;
         void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(animName));
         if (anim != 0) {
             cUIThing_playAnimation(obj, anim, 3, 0, 0);

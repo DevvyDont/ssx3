@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiengine.h"
 #include "fe/festatepeakroom.h"
 #include "fe/festatemountainroom.h"
 #include "render/ps2graphicsman.h"
@@ -471,7 +472,7 @@ extern "C" int cFEStateMountainRoom_onInputBegin(cFEStateMountainRoom* self, cha
     if (IsShown1D2EA0(((char*)self))) {
     sVEi1D2EA0* wvt = *(sVEi1D2EA0**)(widget + 8);
     if (wvt[6].fn(widget + wvt[6].delta)) {
-        char* snd = *(char**)((char*)self->mpEngine + 0x14);
+        char* snd = *(char**)&self->mpEngine->mpSound;
         if (snd == 0) {
             snd = &gUISoundNull;
         }
@@ -573,7 +574,7 @@ extern "C" void cFEStateMountainRoom_onWidgetEvent(cFEStateMountainRoom* self, c
         }
         sFactory_MR* factory = *(sFactory_MR**)self->mpEngine;
         void* nextState = factory->vt[4].fn((char*)factory + factory->vt[4].delta, ((char*)self), idx - 1);
-        cUIStateStack_push_MR((char*)self->mpEngine + 0x18, nextState);
+        cUIStateStack_push_MR(self->mpEngine->mStateStack, nextState);
         break;
     }
     case 6: {
@@ -582,7 +583,7 @@ extern "C" void cFEStateMountainRoom_onWidgetEvent(cFEStateMountainRoom* self, c
         if (nextState == 0) {
             break;
         }
-        cUIStateStack_push_MR((char*)self->mpEngine + 0x18, nextState);
+        cUIStateStack_push_MR(self->mpEngine->mStateStack, nextState);
         break;
     }
     case 1: {
@@ -1171,7 +1172,7 @@ extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, void* ite
             void* obj = *(void**)self->mpEngine;
             sVEntA_001D3C80* vt = *(sVEntA_001D3C80**)((char*)obj + 4);
             void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, (self->mPeakNum << 16) | *(int*)((char*)item + 0x18));
-            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+            cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         }
         break;
     case 6: {
@@ -1186,7 +1187,7 @@ extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, void* ite
         sVEntA_001D3C80* vt = *(sVEntA_001D3C80**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, id);
         if (nextState != 0) {
-            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+            cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         }
         break;
     }

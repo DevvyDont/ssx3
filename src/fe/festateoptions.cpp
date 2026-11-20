@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiengine.h"
 #include "fe/festateoptionssound.h"
 #include "fe/festateoptionshud.h"
 #include "fe/festateoptionsgame.h"
@@ -875,7 +876,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(cFEStateOptionsGame* self, cha
         func_0039E318(popup, (char*)self->mpEngine, ((sOptGame_189980*)self));
         *(void***)(popup + 8) = D_0046B3D0;
         popup[0x48] = 0;
-        cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, popup);
+        cUIStateStack_pushPopup(self->mpEngine->mStateStack, popup);
         break;
     }
     case 5:
@@ -886,13 +887,13 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(cFEStateOptionsGame* self, cha
             *(int*)(popup + 0x4C) = 0;
             *(int*)(popup + 0x48) = 0;
             popup[0x50] = 0;
-            cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, popup);
+            cUIStateStack_pushPopup(self->mpEngine->mStateStack, popup);
         } else if (Is_189980(*(int*)(widget + 0x38), D_004A1528)) {
             char* popup = (char*)operator new(76, str_cFEPopupVideoCalibration, 0x100, 0);
             func_0039E318(popup, (char*)self->mpEngine, ((sOptGame_189980*)self));
             *(void***)(popup + 8) = cFEPopupVideoCalibration_vtbl;
             *(int*)(popup + 0xC) = 27;
-            cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, popup);
+            cUIStateStack_pushPopup(self->mpEngine->mStateStack, popup);
         }
         break;
     case 6: {
@@ -911,7 +912,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(cFEStateOptionsGame* self, cha
         sVE_189980c* vt = *(sVE_189980c**)(eng + 4);
         void* nextState = vt[5].fn(eng + vt[5].delta, ((sOptGame_189980*)self), *(int*)(widget + 0x18));
         if (nextState != 0) {
-            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+            cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         }
         break;
     }
@@ -1389,7 +1390,7 @@ extern "C" void cFEStateOptionsSound_onWidgetEvent(cFEStateOptionsSound* self, c
         func_0039E318(resetPopup, (char*)self->mpEngine, ((sOptSound_18A8D0*)self));
         *(void***)(resetPopup + 8) = D_0046B3D0;
         resetPopup[0x48] = 0;
-        cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, resetPopup);
+        cUIStateStack_pushPopup(self->mpEngine->mStateStack, resetPopup);
         break;
     }
     case 6: {
@@ -1406,7 +1407,7 @@ extern "C" void cFEStateOptionsSound_onWidgetEvent(cFEStateOptionsSound* self, c
         sVE_18A8D0c* vt = *(sVE_18A8D0c**)(eng + 4);
         void* nextState = vt[5].fn(eng + vt[5].delta, ((sOptSound_18A8D0*)self), *(int*)(widget + 0x18));
         if (nextState != 0)
-            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+            cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         break;
     }
     case 9:
@@ -1917,7 +1918,7 @@ extern "C" void cFEStateOptionsHUD_onWidgetEvent(cFEStateOptionsHUD* self, char*
         func_0039E318(resetPopup, self->mpEngine, ((char*)self));
         *(void***)(resetPopup + 8) = D_0046B3D0;
         *(char*)(resetPopup + 0x48) = 0;
-        cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, resetPopup);
+        cUIStateStack_pushPopup(self->mpEngine->mStateStack, resetPopup);
         break;
     }
     case 6: {
@@ -1927,7 +1928,7 @@ extern "C" void cFEStateOptionsHUD_onWidgetEvent(cFEStateOptionsHUD* self, char*
         sVE_18C2A0p* vt2 = *(sVE_18C2A0p**)(obj + 4);
         void* nextState = vt2[5].fn(obj + vt2[5].delta, ((char*)self), *(int*)(widget + 0x18));
         if (nextState != 0) {
-            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+            cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         }
         break;
     }

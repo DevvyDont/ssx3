@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiengine.h"
 #include "fe/festatebonusmaterial.h"
 
 //100%
@@ -128,7 +129,7 @@ extern "C" void cFEStateBonusMaterial_onWidgetEvent(cFEStateBonusMaterial* self,
         void* popup = cFEStateVideoPlayer_cFEStateVideoPlayer(cMemMan_alloc(640, str_cFEStateVideoPlayer, 0, 0), self->mpEngine, self,
                                 self->mUserNum);
         cFEStateVideoPlayer_setVideoSourceFiles(popup, D_00441128[*(int*)((char*)item + 0x18)], 0);
-        cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, popup);
+        cUIStateStack_pushPopup(self->mpEngine->mStateStack, popup);
         break;
     }
     case 6: {
@@ -136,7 +137,7 @@ extern "C" void cFEStateBonusMaterial_onWidgetEvent(cFEStateBonusMaterial* self,
         sVEntryK195600* vt = *(sVEntryK195600**)(factory + 4);
         void* nextState = vt[5].fn(factory + vt[5].delta, self, *(int*)((char*)item + 0x18));
         if (nextState != 0)
-            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+            cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         break;
     }
     }

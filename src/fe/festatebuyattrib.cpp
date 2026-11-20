@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiengine.h"
 #include "fe/festatebuyattrib.h"
 #include "fe/festatecareerstats.h"
 
@@ -243,9 +244,9 @@ extern "C" void cFEStateBuyAttrib_onWidgetEvent(cFEStateBuyAttrib* self, char* o
         if (self->mBank >= self->mTotalCost && self->mTotalCost > 0) {
             void* o = cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, str_UITRICKBUY_b, 0x100, 0), self->mpEngine, ((char*)self), self->mUserNum);
             cUIStateBuyPopup_initBuyAttributes(o, 0, self->mTotalCost, self->mBank);
-            cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, o);
+            cUIStateStack_pushPopup(self->mpEngine->mStateStack, o);
         } else {
-            sDefObj_4A90* sound = *(sDefObj_4A90**)((char*)self->mpEngine + 0x14);
+            sDefObj_4A90* sound = *(sDefObj_4A90**)&self->mpEngine->mpSound;
             if (sound == 0)
                 sound = &gUISoundNull;
             if (sound != 0)
@@ -267,7 +268,7 @@ extern "C" void cFEStateBuyAttrib_onWidgetEvent(cFEStateBuyAttrib* self, char* o
                 int frame = cUIScreen_getFrameByLabel(self->mpAttribScreen, GetHashValue32(str_TransitionOut_b));
                 if (frame != 0xFFFF)
                     cUIScreen_playFrame(self->mpAttribScreen, frame, 1);
-                cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+                cUIStateStack_push(self->mpEngine->mStateStack, nextState);
             }
         }
         break;
@@ -867,7 +868,7 @@ extern "C" void cFEStateCareerStats_onWidgetEvent(cFEStateCareerStats* self, voi
         sVEntry001F5650* vt = *(sVEntry001F5650**)((char*)obj + 4);
         void* nextState = vt[5].fn((char*)obj + vt[5].delta, self, *(int*)((char*)item + 0x18));
         if (nextState != 0) {
-            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+            cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         }
         break;
     }
@@ -1028,7 +1029,7 @@ extern "C" int cFEStateCareerStats_onInputBegin(cFEStateCareerStats* self, char*
             }
         }
     }
-    sDefObj_4A90* sound = *(sDefObj_4A90**)((char*)self->mpEngine + 0x14);
+    sDefObj_4A90* sound = *(sDefObj_4A90**)&self->mpEngine->mpSound;
     if (sound == 0)
         sound = &gUISoundNull;
     if (sound != 0)

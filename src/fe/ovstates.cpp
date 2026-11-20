@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiengine.h"
 #include "fe/festatetitle.h"
 #include "fe/festatemainmenu.h"
 #include "fe/festatebonusmaterial.h"
@@ -211,7 +212,7 @@ extern "C" void cFEStateTitle_onWidgetEvent(cFEStateTitle* self, void* msg, int 
         sVEntry_cFEStateTitle_onWidgetEvent* vt = *(sVEntry_cFEStateTitle_onWidgetEvent**)((char*)obj + 0x4);
         void* nextState = vt[4].fn((char*)obj + vt[4].delta, self, *(int*)((char*)msg + 0x18));
         if (nextState != 0) {
-            cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
+            cUIStateStack_push(self->mpEngine->mStateStack, nextState);
         }
     }
 }
@@ -305,7 +306,7 @@ extern "C" void cFEStateMainMenu_onCreateScreen(cFEStateMainMenu* self)
     sVEnt0_00194AA8* vt0 = *(sVEnt0_00194AA8**)((char*)iface + 0xC);
     vt0[1].fn((char*)iface + vt0[1].delta);
     func_0028F140(cAudioInterface_bxAudio(), 1);
-    char* obj = *(char**)((char*)self->mpEngine + 0xC);
+    char* obj = *(char**)&self->mpEngine->mpInput;
     *(unsigned char*)&self->mNumOfCtrl = 0;
     for (int i = 0; i < 2; i++) {
         sVEnt1_00194AA8* vt1 = *(sVEnt1_00194AA8**)(obj + 8);
@@ -508,7 +509,7 @@ extern "C" void cFEStateMainMenu_onUpdate(cFEStateMainMenu* self)
 {
     int i = 0;
     cUIState_onUpdate(self);
-    cProfileMan_194DD0* pm = *(cProfileMan_194DD0**)((char*)self->mpEngine + 0xC);
+    cProfileMan_194DD0* pm = *(cProfileMan_194DD0**)&self->mpEngine->mpInput;
     *(signed char*)&self->mNumOfCtrl = 0;
     for (; i < 2; i++) {
         pm->select(i);
@@ -648,7 +649,7 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(cFEStateMainMenu* self_, void* it
             bit <<= self_->mSaveCurrentCtrl;
             *(char*)(popup + 0x15) = bit;
             *(char*)(popup + 0x48) = 0;
-            cUIStateStack_pushPopup((char*)self_->mpEngine + 0x18, popup);
+            cUIStateStack_pushPopup(self_->mpEngine->mStateStack, popup);
             self_->mpSelectMultiModeWidget = (cUIThing*)item;
             setWidgetHidden_194EB0(((char*)self_), str_hl);
             setWidgetHidden_194EB0(((char*)self_), str_3_help_multi);
@@ -659,20 +660,20 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(cFEStateMainMenu* self_, void* it
         sObj_194EB0* obj = *(sObj_194EB0**)self_->mpEngine;
         void* nextState = ((void* (*)(void*, void*, int))obj->vt[4].fn)((char*)obj + obj->vt[4].delta, ((char*)self_), *(int*)(item + 0x18));
         if (nextState != 0)
-            cUIStateStack_push((char*)self_->mpEngine + 0x18, nextState);
+            cUIStateStack_push(self_->mpEngine->mStateStack, nextState);
         break;
     }
     case 6: {
         sObj_194EB0* obj = *(sObj_194EB0**)self_->mpEngine;
         void* nextState = ((void* (*)(void*, void*, int))obj->vt[5].fn)((char*)obj + obj->vt[5].delta, ((char*)self_), *(int*)(item + 0x18));
         if (nextState != 0)
-            cUIStateStack_push((char*)self_->mpEngine + 0x18, nextState);
+            cUIStateStack_push(self_->mpEngine->mStateStack, nextState);
         break;
     }
     case 7: {
         char* optionsState = (char*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), self_->mpEngine, 1);
         *(int*)(optionsState + 0x1C) = (*(int*)(optionsState + 0x1C) & ~0x3F00) | 0x100;
-        cUIStateStack_pushSpecial((char*)self_->mpEngine + 0x18, optionsState, 0, 0);
+        cUIStateStack_pushSpecial(self_->mpEngine->mStateStack, optionsState, 0, 0);
         break;
     }
     case 8:

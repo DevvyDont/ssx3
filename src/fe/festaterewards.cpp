@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ui/uiengine.h"
 #include "fe/festatepreviewreward.h"
 #include "fe/festaterewards.h"
 #include "render/ps2graphicsman.h"
@@ -219,8 +220,8 @@ struct sGallery_F270 {
 extern "C" int cFEStateRewardGalleryBase_onInputBegin(cFEStateRewardGalleryBase* self, char* in)
 {
     sSnd_F270* snd = &D_004A5A58_F270;
-    if (*(sSnd_F270**)((char*)self->mpEngine + 0x14) != 0) {
-        snd = *(sSnd_F270**)((char*)self->mpEngine + 0x14);
+    if (*(sSnd_F270**)&self->mpEngine->mpSound != 0) {
+        snd = *(sSnd_F270**)&self->mpEngine->mpSound;
     }
     if (Test_F270(in, 6)) {
         Play_F270(snd, 3);
@@ -239,7 +240,7 @@ extern "C" int cFEStateRewardGalleryBase_onInputBegin(cFEStateRewardGalleryBase*
         char* mgr = *(char**)self->mpEngine;
         sVEr_F270* vt = *(sVEr_F270**)(mgr + 4);
         void* backState = vt[5].fn(mgr + vt[5].delta, ((char*)self), self->mStoreNum >= 0);
-        cUIStateStack_push((char*)self->mpEngine + 0x18, backState);
+        cUIStateStack_push(self->mpEngine->mStateStack, backState);
         return 1;
     }
     char* cur = (char*)self->mpSelected;
@@ -1132,7 +1133,7 @@ extern "C" void cFEStateRewardGalleryBase_showReward(cFEStateRewardGalleryBase* 
         break;
     }
     if (nextState != 0) {
-        cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, nextState);
+        cUIStateStack_pushPopup(self->mpEngine->mStateStack, nextState);
     }
 }
 #endif
@@ -1177,7 +1178,7 @@ extern "C" void cFEStateRewardGalleryBase_showBuyPopup(cFEStateRewardGalleryBase
     sVE_0510b* vt3 = (sVE_0510b*)self->mVtbl;
     int cost = vt3[35].fn((char*)self + vt3[35].delta, sel);
     cBuyPopupInfo_initBuyReward(popup + 0x48, self->mRewardType, rewardName, cost, self->mMoney);
-    cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, popup);
+    cUIStateStack_pushPopup(self->mpEngine->mStateStack, popup);
 }
 #endif
 
@@ -2898,7 +2899,7 @@ extern "C" int cFEStatePreviewReward_onInputBegin(cFEStatePreviewReward* self, v
 {
     sVE_1FF0a* vt = *(sVE_1FF0a**)((char*)obj + 8);
     if (vt[6].fn((char*)obj + vt[6].delta) != 0) {
-    sDefObj_1FF0* sound = *(sDefObj_1FF0**)((char*)self->mpEngine + 0x14);
+    sDefObj_1FF0* sound = *(sDefObj_1FF0**)&self->mpEngine->mpSound;
     if (sound == 0) {
         sound = &gUISoundNull;
     }
@@ -2914,7 +2915,7 @@ extern "C" int cFEStatePreviewReward_onInputBegin(cFEStatePreviewReward* self, v
         }
     }
     cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut)), 1);
-    func_0039F190((char*)self->mpEngine + 0x18, 1);
+    func_0039F190(self->mpEngine->mStateStack, 1);
     return 1;
     }
     return 0;
