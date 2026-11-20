@@ -6,7 +6,7 @@
 INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_cFEStateCharEquip);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E2A0(void* self);
+extern "C" void* cUIState_cUIState(void* self);
 extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, signed char a1);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -130,7 +130,7 @@ static inline int Find_8DB8(char* mgr, int hash)
 extern "C" void* cFEStateCharEquip_cFEStateCharEquip(void* mem, void* owner, signed char team, int inStore, int canSwitchMode)
 {
     sCharEquip_8DB8* self = (sCharEquip_8DB8*)mem;
-    func_0039E2A0(self);
+    cUIState_cUIState(self);
     self->vtbl = cFEStateCharEquip_vtbl;
     self->camPos.x = -105.0f;
     self->camPos.y = -100.0f;
@@ -244,7 +244,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip__cFEStateCharEquip);
 struct sEquipTable_DC20;
 extern "C" void func_0019DC20(sEquipTable_DC20* self, int bank, int i);
 extern "C" void cFEStateCharEquip_cancelLargePreviewLoad(void* self);
-extern "C" void func_0039E390(void* self, int flags);
+extern "C" void cUIState__cUIState(void* self, int flags);
 extern void* cFEStateCharEquip_vtbl[];
 extern void* D_0046D0D0[];
 
@@ -268,9 +268,9 @@ static inline void releaseK199148(int id)
  *
  * Releases the icon file (0xA64) from the FE file cache and the texture ids at 0xA68, 0xA70 and 0xA74 through
  * the graphics manager (vtable slot 50), cancels a pending large-preview load (cFEStateCharEquip_cancelLargePreviewLoad), restores the
- * base vtable D_0046D0D0 and calls the cUIState destructor func_0039E390().
+ * base vtable D_0046D0D0 and calls the cUIState destructor cUIState__cUIState().
  *
- * @param flags  g++ destructor flags, passed on to func_0039E390(); bit 0 frees the object
+ * @param flags  g++ destructor flags, passed on to cUIState__cUIState(); bit 0 frees the object
  */
 extern "C" void cFEStateCharEquip__cFEStateCharEquip(void* self, int flags)
 {
@@ -288,7 +288,7 @@ extern "C" void cFEStateCharEquip__cFEStateCharEquip(void* self, int flags)
     *(int*)((char*)self + 0xA70) = -1;
     *(int*)((char*)self + 0xA74) = -1;
     *(void***)((char*)self + 0x8) = D_0046D0D0;
-    func_0039E390(self, flags);
+    cUIState__cUIState(self, flags);
 }
 #endif
 

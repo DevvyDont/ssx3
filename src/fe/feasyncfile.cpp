@@ -2814,7 +2814,7 @@ extern "C" void strcpy1(void* str, int a1);
 extern "C" void func_002C2688(void* str, unsigned short* s);
 // PORT: sprintf1 is a varargs formatter (dst, fmt, ...); the unit declares a 3-arg view
 extern "C" void sprintf1_1A7390(void* str, int fmt, ...) __asm__("sprintf1");
-extern "C" unsigned short* func_00392680(void* f, float sx, float width, const unsigned short* str, unsigned short* dst, int max);
+extern "C" unsigned short* cFont_textSmartLimit1(void* f, float sx, float width, const unsigned short* str, unsigned short* dst, int max);
 extern "C" char* cUIText_getFont(void* text);
 extern "C" void cUIText_setUnicodeString(cUIText* text, char* str);
 extern "C" void func_003EFA48(unsigned short* dst, int n, const char* src);
@@ -2872,7 +2872,7 @@ static inline int Loc1A7390(char* name)
  * Shows a buddy's presence in "TextBuddyLocation" from the roster entry's LOCID/SZ1 presence tags.
  *
  * Reads LOCID, SSX3ID and SZ1..SZ3 from the entry's tag text (+0x54). With @p mode 0 it shows "name tags" wrapped over
- * the name and location texts (func_00392680). Otherwise LOCID selects the text: 0 Online, 1 Offline, 2 Lobby, 3 Room
+ * the name and location texts (cFont_textSmartLimit1). Otherwise LOCID selects the text: 0 Online, 1 Offline, 2 Lobby, 3 Room
  * ("kT_279PresenceRoom" + room name from SZ1, func_001B25E0), 4 News, 5 Stats, 6 Selecting, 7 Challenging %s, 8
  * BeingChallenged %s, 9 Racing %s (SZ1), 10 Messenger. Other values leave the text unchanged.
  *
@@ -2912,7 +2912,7 @@ extern "C" void func_001A7390(cFEStateNet* self, const char* name, int mode)
         sVEntryP_001A7390* vt = *(sVEntryP_001A7390**)((char*)uiText + 8);
         vt[20].fn((char*)uiText + vt[20].delta, size);
         sVec3_001A7390 scale = *(sVec3_001A7390*)((char*)uiText + 0x50);
-        unsigned short* rest = func_00392680(cUIText_getFont(uiText), scale.x, size[0], wide, wrapped, 0x30);
+        unsigned short* rest = cFont_textSmartLimit1(cUIText_getFont(uiText), scale.x, size[0], wide, wrapped, 0x30);
         cUIText_setUnicodeString(uiText, (char*)wrapped);
         if (rest != 0) {
             cUIText_setUnicodeString(locationText, (char*)rest);
@@ -3789,7 +3789,7 @@ extern "C" void func_001A83D8(sList1A83D8* list, int keep, unsigned int sel, int
 //100%
 INCLUDE_ASM("fe/feasyncfile", cFEStateNet_cFEStateNet);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E318(void* self, void* engine, void* owner);
+extern "C" void* cUIState_cUIState1(void* self, void* engine, void* owner);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
 extern void* cFEStateNet_vtbl[];
@@ -3813,7 +3813,7 @@ extern "C" void* cFEStateNet_cFEStateNet_impl(void* self, void* engine, void* ow
 /**
  * Constructs the cFEStateNet part of an online front-end state.
  *
- * Runs the cUIState constructor func_0039E318(self, engine, owner), zeroes unk_048..unk_058, mpKeyboard, mpPopup,
+ * Runs the cUIState constructor cUIState_cUIState1(self, engine, owner), zeroes unk_048..unk_058, mpKeyboard, mpPopup,
  * mpKeyboardText, unk_6AC..unk_6B8 and unk_6C4, sets unk_6A8 to 1 and unk_6BC to 2, stores the vtable cFEStateNet_vtbl,
  * builds unk_6C0 as cBXString " ", allocates mMsgList's sentinel node (cMemMan_alloc(0xC, "StlBlock")) linked to itself
  * and sets mUserNum to 0. An unused 16-byte local keeps the retail stack frame.
@@ -3827,7 +3827,7 @@ extern "C" void* cFEStateNet_cFEStateNet_impl(void* self, void* engine, void* ow
     // An unused 16-byte local is needed to reproduce the 0x40-byte frame.
     int framePad[4];
     char* selfBytes = (char*)self;
-    func_0039E318(self, engine, owner);
+    cUIState_cUIState1(self, engine, owner);
     sList_8500* msgList = (sList_8500*)(selfBytes + 0x6C8);
     *(int*)(selfBytes + 0x48) = 0;
     *(int*)(selfBytes + 0x4C) = 0;
@@ -3860,7 +3860,7 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateNet__cFEStateNet);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_001DB718(void* self);
-extern "C" void func_0039E390(void* self, int flags);
+extern "C" void cUIState__cUIState(void* self, int flags);
 void operator_delete(int*);
 
 struct cObj_1A85D0 {
@@ -3905,9 +3905,9 @@ extern "C" void f_1A85D0(char* self, int flags) __asm__("cFEStateNet__cFEStateNe
  *
  * Restores the vtable cFEStateNet_vtbl, deletes every queued event in mMsgList (each through its virtual destructor), frees
  * the unk_6B8 text buffer, clears the list (func_001DB718) and frees its sentinel, destroys the unk_6C0 string and runs
- * the cUIState destructor func_0039E390 with @p flags.
+ * the cUIState destructor cUIState__cUIState with @p flags.
  *
- * @param flags  g++ destructor flags, passed on to func_0039E390 (bit 0 frees the object)
+ * @param flags  g++ destructor flags, passed on to cUIState__cUIState (bit 0 frees the object)
  */
 extern "C" void f_1A85D0(char* self, int flags)
 {
@@ -3927,7 +3927,7 @@ extern "C" void f_1A85D0(char* self, int flags)
     func_001DB718(msgList);
     operator_delete((int*)msgList->node);
     cBXString__cBXString(self + 0x6C0, 2);
-    func_0039E390(self, flags);
+    cUIState__cUIState(self, flags);
 }
 #endif
 
@@ -4896,14 +4896,14 @@ extern "C" void func_001A92D8(cFEStateNet* self, int popup, unsigned int kind)
 INCLUDE_ASM("fe/feasyncfile", func_001A93D0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void func_0039F190(void* self, int a1);
+extern "C" void cUIStateStack_pop(void* self, int a1);
 
 // PORT: the unit declares this with a 4th arg; defined under an asm label with its real type
 extern "C" void func_001A93D0_impl(void* self, int id, int event) __asm__("func_001A93D0");
 /**
  * Default popup-event handling of an online state: pops the popup on a choice and forgets mpPopup when it is gone.
  *
- * Events 15-18 and 20 mark the top state of the engine's stack for removal (func_0039F190(mpEngine + 0x18, 1)); 22
+ * Events 15-18 and 20 mark the top state of the engine's stack for removal (cUIStateStack_pop(mpEngine + 0x18, 1)); 22
  * clears mpPopup when it is @p id; 19 and 21 are ignored.
  *
  * @param id  the popup state
@@ -4913,7 +4913,7 @@ extern "C" void func_001A93D0_impl(void* self, int id, int event)
 {
     switch (event) {
     case 15: case 16: case 17: case 18: case 20:
-        func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
+        cUIStateStack_pop(*(char**)((char*)self + 0x10) + 0x18, 1);
         break;
     case 22:
         if (id == *(int*)((char*)self + 0x6A0)) {
@@ -5159,14 +5159,14 @@ void func_001A93D0_3(void* self, int a1, int a2) __asm__("func_001A93D0");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cFEStateLogin_cFEStateLogin(cFEStateLogin* mem, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
-extern "C" int func_0039F698(void* p);
+extern "C" int cUIStateStack_popToState(void* p);
 extern "C" void* cUIStateStack_getCurrentState(void* stack);
 extern const char str_cFEStateLogin[];
 
 /**
  * Handles popup id 2109 (disconnected, account errors): on OK or back closes every popup and opens the login screen.
  *
- * On 15 or 20: func_001A93D0, closes the stack's popups (func_0039F698), sets unk_058 (the onInputBegin override then
+ * On 15 or 20: func_001A93D0, closes the stack's popups (cUIStateStack_popToState), sets unk_058 (the onInputBegin override then
  * swallows input), sets bit 0x80 of the current state's mAttrState, pushes a new cFEStateLogin (func_001A8A40) and
  * clears unk_6AC. Also used by cFEStateRelogin_onPopupEvent.
  *
@@ -5177,7 +5177,7 @@ extern "C" void func_001A9668(cFEStateNet* self, int popup, int event)
 {
     if (event == 0xF || event == 20) {
         func_001A93D0_3(self, popup, event);
-        func_0039F698((char*)self->mpEngine + 0x18);
+        cUIStateStack_popToState((char*)self->mpEngine + 0x18);
         self->unk_058 = 1;
         void* st = cUIStateStack_getCurrentState((char*)self->mpEngine + 0x18);
         *(int*)((char*)st + 0x1C) |= 0x80;
@@ -5198,7 +5198,7 @@ void func_001A93D0_3(void* self, int a1, int a2) __asm__("func_001A93D0");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cFEStateNetConfig_cFEStateNetConfig(cFEStateNetConfig* mem, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
-extern "C" int func_0039F698(void* p);
+extern "C" int cUIStateStack_popToState(void* p);
 extern "C" void* cUIStateStack_getCurrentState(void* stack);
 extern const char str_cFEStateNetConfig[];
 
@@ -5215,7 +5215,7 @@ extern "C" void func_001A9710(cFEStateNet* self, int popup, int event)
 {
     if (event == 0xF || event == 20) {
         func_001A93D0_3(self, popup, event);
-        func_0039F698((char*)self->mpEngine + 0x18);
+        cUIStateStack_popToState((char*)self->mpEngine + 0x18);
         self->unk_058 = 1;
         void* st = cUIStateStack_getCurrentState((char*)self->mpEngine + 0x18);
         *(int*)((char*)st + 0x1C) |= 0x80;
@@ -5358,7 +5358,7 @@ extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 extern "C" void* func_001A9C50(cFEStateNet* self);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" int* func_002591B8();
-extern "C" int func_0039F698(void* p);
+extern "C" int cUIStateStack_popToState(void* p);
 extern char str_kT_BTNOK[];
 extern char str_kT_POPUPCMNNetInterrupted[];
 extern char str_kT_POPUPCMNDisconnected[];
@@ -5366,7 +5366,7 @@ extern char str_kT_POPUPCMNDisconnected[];
 /**
  * Shows the "disconnected" or "network interrupted" popup once, closing all other popups.
  *
- * Only while unk_6AC is clear; sets it, closes the stack's popups (func_0039F698) and shows a one-OK popup
+ * Only while unk_6AC is clear; sets it, closes the stack's popups (cUIStateStack_popToState) and shows a one-OK popup
  * (mbDeferEventsFlag 1, mbReceivePrev 0, layer 6): "kT_POPUPCMNNetInterrupted" with id 2110 when the word at
  * func_002591B8() is 0, else "kT_POPUPCMNDisconnected" with id 2109.
  */
@@ -5375,7 +5375,7 @@ extern "C" void func_001A9930(cFEStateNet* self)
     if (self->unk_6AC == 0) {
         int one = 1;
         self->unk_6AC = one;
-        func_0039F698((char*)self->mpEngine + 0x18);
+        cUIStateStack_popToState((char*)self->mpEngine + 0x18);
         void* popup = func_001A9C50(self);
         char* sub = (char*)popup + 0xBC;
         *(int*)((char*)popup + 0xBC) = one;
@@ -5505,7 +5505,7 @@ extern "C" void func_001A9B58(cFEStateNet* self)
 //100%
 INCLUDE_ASM("fe/feasyncfile", func_001A9BC0);
 #ifdef SKIP_ASM
-extern "C" void* func_0039FAE8(void* list);
+extern "C" void* cUIStateStack_getTopState(void* list);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cScreenPopup_redrawPopup(void* self);
 
@@ -5519,7 +5519,7 @@ extern "C" void cScreenPopup_redrawPopup(void* self);
  */
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup)
 {
-    void* top = func_0039FAE8(*(char**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18);
+    void* top = cUIStateStack_getTopState(*(char**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18);
     if (*(int*)((char*)popup + 0x2B8) == 0) {
         if (popup != top) {
             cUIStateStack_pushPopup(*(char**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x18, popup);
@@ -8420,7 +8420,7 @@ extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void* cFEStateOnlineMainMenu_cFEStateOnlineMainMenu(cFEStateNet* mem, int a1);
-extern "C" void func_0039F190(void* self, int a1);
+extern "C" void cUIStateStack_pop(void* self, int a1);
 extern "C" void func_001ADC30(cFEStateSelectPersona* self, int a2);
 extern "C" void* func_001A9C50(cFEStateNet* self);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
@@ -8447,7 +8447,7 @@ struct sVE1ADA30 {
  *
  * 217 shows the button-less "kT_POPUP220SelectingPersona" popup (id 2071). 260 disconnects BuddyMan and the lobby and
  * shows "kT_POPUPCMNErrorEAMessenger" (OK, id 2073), then falls through (likely missing break) into 214, which pops the
- * top state (func_0039F190), and 216, which re-runs onWidgetCreate (vtable entry 18) on "PersonaMenu". 258 errors go to
+ * top state (cUIStateStack_pop), and 216, which re-runs onWidgetCreate (vtable entry 18) on "PersonaMenu". 258 errors go to
  * func_001ADC30, 273 pushes cFEStateOnlineMainMenu, 225 is ignored; anything else goes to func_001A8E40.
  *
  * @param msgId  event type
@@ -8490,7 +8490,7 @@ extern "C" int func_001ADA30(cFEStateSelectPersona* self, int msgId, int data)
         func_001A9BC0(((cFEStateNet*)self), popup);
     }
     case 214:
-        func_0039F190((char*)self->mpEngine + 0x18, 1);
+        cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
     case 216:
         {
             sVE1ADA30* vt = (sVE1ADA30*)self->mVtbl;
@@ -9093,7 +9093,7 @@ extern "C" void func_001AF568_E7A0(void* self) __asm__("func_001AF568");
 extern "C" int cUIListBox_getCurrentEntryData_E7A0(void* item) __asm__("cUIListBox_getCurrentEntryData");
 extern "C" void func_0025F4C0_E7A0(void* self, int a1, int a2) __asm__("func_0025F4C0");
 extern "C" void func_0025F628_E7A0(void* self, int a1, int a2) __asm__("func_0025F628");
-extern "C" void func_0039F600_E7A0(void* list) __asm__("func_0039F600");
+extern "C" void cUIStateStack_popToFloor_E7A0(void* list) __asm__("cUIStateStack_popToFloor");
 extern "C" void* cFEStateEventSelect_cFEStateEventSelect1_E7A0(void* mem, int a1, int a2) __asm__("cFEStateEventSelect_cFEStateEventSelect1");
 extern "C" void cUIStateStack_pushSpecial_E7A0(void* stack, void* state, int a2, int a3) __asm__("cUIStateStack_pushSpecial");
 extern "C" void func_001AF098_E7A0(void* self, int on) __asm__("func_001AF098");
@@ -9136,7 +9136,7 @@ static inline void commit_E7A0(char* iface)
  * options, marks the challenge sent (func_001AF568), stores the ranked flag in the network options, sets the race
  * options (all on with no AI riders when ranked, else from the multiplier, power-up, point-icon and CPU-rider boxes)
  * and sends the challenge to mOpponent (func_0025F4C0); 10 cancels a sent challenge (func_0025F628(0, 1)) and pops
- * the popup (func_0039F600). Event 6 cancels (func_0025F628(0, mbChallengeSent)) and pops. Event 9 (a list box
+ * the popup (cUIStateStack_popToFloor). Event 6 cancels (func_0025F628(0, mbChallengeSent)) and pops. Event 9 (a list box
  * changed) applies that box's value at once; events 1 and 2 call func_001AF208 with 1 / 0; event 7 is ignored; the
  * rest go to the cFEStateNet handler.
  *
@@ -9192,13 +9192,13 @@ extern "C" void cFEStateChallengePopup_onWidgetEvent(cFEStateChallengePopup* sel
             if (self->mbChallengeSent) {
                 func_0025F628_E7A0(LobbyMan_mLobbyMan, 0, 1);
             }
-            func_0039F600_E7A0((char*)self->mpEngine + 0x18);
+            cUIStateStack_popToFloor_E7A0((char*)self->mpEngine + 0x18);
             break;
         }
         break;
     case 6:
         func_0025F628_E7A0(LobbyMan_mLobbyMan, 0, self->mbChallengeSent);
-        func_0039F600_E7A0((char*)self->mpEngine + 0x18);
+        cUIStateStack_popToFloor_E7A0((char*)self->mpEngine + 0x18);
         break;
     case 9:
         if (pWidget == (void*)self->mpLBRankedGame) {
@@ -9547,24 +9547,24 @@ extern "C" void func_001AF208(cFEStateChallengePopup* self, cUIText* item, int o
 INCLUDE_ASM("fe/feasyncfile", func_001AF3E0);
 #ifdef SKIP_ASM
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
-extern "C" int func_0039F698(void* p);
+extern "C" int cUIStateStack_popToState(void* p);
 
 /**
  * Handles the challenge popup's error popup (id 2101): OK or back closes every popup on the state stack.
  *
  * cFEStateChallengePopup's vtable entry 33 (cFEStateChallengePopup_onPopupEvent sends it popup 2101, func_001AB178's
- * error popup). On 15 or 20 returns func_0039F698(mpEngine + 0x18), which marks the stack's popups for removal (this
+ * error popup). On 15 or 20 returns cUIStateStack_popToState(mpEngine + 0x18), which marks the stack's popups for removal (this
  * state included); other events go to cFEStateNet_onPopupEvent.
  *
  * @param popup  the popup state
  * @param event  popup event (15 + chosen option, 20 back, 22 the popup is gone)
- * @return func_0039F698's result (a state-stack node) for OK/back, else the value left by cFEStateNet_onPopupEvent, which returns
+ * @return cUIStateStack_popToState's result (a state-stack node) for OK/back, else the value left by cFEStateNet_onPopupEvent, which returns
  *     nothing
  */
 extern "C" int func_001AF3E0(cFEStateChallengePopup* self, void* popup, int event)
 {
     if (event == 0xF || event == 20) {
-        return func_0039F698((char*)self->mpEngine + 0x18);
+        return cUIStateStack_popToState((char*)self->mpEngine + 0x18);
     }
     return cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, event);
 }
@@ -10534,23 +10534,23 @@ extern "C" void cFEStateChallengeReceivedPopup_onPopupEvent(cFEStateChallengeRec
 INCLUDE_ASM("fe/feasyncfile", func_001B0628);
 #ifdef SKIP_ASM
 extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
-extern "C" int func_0039F698(void* p);
+extern "C" int cUIStateStack_popToState(void* p);
 
 /**
  * Handles the received-challenge popup's error popup (id 2101): OK or back closes every popup on the stack.
  *
  * cFEStateChallengeReceivedPopup's vtable entry 33, the same body as func_001AF3E0: on 15 or 20 returns
- * func_0039F698(mpEngine + 0x18), otherwise cFEStateNet_onPopupEvent.
+ * cUIStateStack_popToState(mpEngine + 0x18), otherwise cFEStateNet_onPopupEvent.
  *
  * @param popup  the popup state
  * @param event  popup event (15 + chosen option, 20 back, 22 the popup is gone)
- * @return func_0039F698's result (a state-stack node) for OK/back, else the value left by cFEStateNet_onPopupEvent, which returns
+ * @return cUIStateStack_popToState's result (a state-stack node) for OK/back, else the value left by cFEStateNet_onPopupEvent, which returns
  *     nothing
  */
 extern "C" int func_001B0628(cFEStateChallengeReceivedPopup* self, void* popup, int event)
 {
     if (event == 0xF || event == 20) {
-        return func_0039F698((char*)self->mpEngine + 0x18);
+        return cUIStateStack_popToState((char*)self->mpEngine + 0x18);
     }
     return cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, event);
 }
@@ -13014,13 +13014,13 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect(cFEStateOnlineCharacterSelect* self, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
-extern "C" void func_0039F600(void* p);
+extern "C" void cUIStateStack_popToFloor(void* p);
 extern const char str_cFEStateOnlineCharacterSelect[];
 
 /**
  * Handles events from the challenge setup popup (id 2048) in the chat room: 15 opens rider select.
  *
- * On 15 marks the popups on the engine's state stack for removal (func_0039F600, stopping at a state with bit 15 of
+ * On 15 marks the popups on the engine's state stack for removal (cUIStateStack_popToFloor, stopping at a state with bit 15 of
  * mAttrState set) and pushes a new cFEStateOnlineCharacterSelect; other events go to cFEStateNet_onPopupEvent. func_001B37D8 has
  * the same body.
  *
@@ -13030,7 +13030,7 @@ extern const char str_cFEStateOnlineCharacterSelect[];
 extern "C" void func_001B3760(cFEStateChatRoom* self, void* popup, int event)
 {
     if (event == 0xF) {
-        func_0039F600((char*)self->mpEngine + 0x18);
+        cUIStateStack_popToFloor((char*)self->mpEngine + 0x18);
         func_001A8A40(((cFEStateNet*)self), cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect((cFEStateOnlineCharacterSelect*)cMemMan_alloc(1764, str_cFEStateOnlineCharacterSelect, 0x100, 0), (int)self->mpEngine));
     } else {
         cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, event);
@@ -13045,13 +13045,13 @@ extern "C" int cFEStateNet_onPopupEvent(void* self, void* a1, int a2);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect(cFEStateOnlineCharacterSelect* self, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
-extern "C" void func_0039F600(void* p);
+extern "C" void cUIStateStack_popToFloor(void* p);
 extern const char str_cFEStateOnlineCharacterSelect[];
 
 /**
  * Handles events from the received-challenge popup (id 2049) in the chat room: 15 opens rider select.
  *
- * Same body as func_001B3760: on 15 func_0039F600 on the engine's state stack and a new cFEStateOnlineCharacterSelect;
+ * Same body as func_001B3760: on 15 cUIStateStack_popToFloor on the engine's state stack and a new cFEStateOnlineCharacterSelect;
  * other events go to cFEStateNet_onPopupEvent.
  *
  * @param popup  the popup state
@@ -13060,7 +13060,7 @@ extern const char str_cFEStateOnlineCharacterSelect[];
 extern "C" void func_001B37D8(cFEStateChatRoom* self, void* popup, int event)
 {
     if (event == 0xF) {
-        func_0039F600((char*)self->mpEngine + 0x18);
+        cUIStateStack_popToFloor((char*)self->mpEngine + 0x18);
         func_001A8A40(((cFEStateNet*)self), cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect((cFEStateOnlineCharacterSelect*)cMemMan_alloc(1764, str_cFEStateOnlineCharacterSelect, 0x100, 0), (int)self->mpEngine));
     } else {
         cFEStateNet_onPopupEvent(((cFEStateNet*)self), popup, event);
@@ -13626,7 +13626,7 @@ extern "C" void func_001B5068(cFEStateNetConfig* self, int a1);
 extern "C" void func_001B43A8(cFEStateNetConfig* self);
 extern "C" void func_001B4470(cFEStateNetConfig* self);
 extern "C" void func_001B45E8(void* self);
-extern "C" int func_0039F698(void* p);
+extern "C" int cUIStateStack_popToState(void* p);
 void func_002C67E8(void* self, int a1);
 extern char* D_004A1B78_p __asm__("D_004A1B78");
 extern int D_004A1B80;
@@ -13657,7 +13657,7 @@ static inline int VCall1B41A8(int slot)
  * Calls D_004A1B78's slot 3 each frame, then by miState: 1 -> 2; 2 (slot 11 idle) func_002C67E8(obj, D_004A1B80),
  * -> 3; 3 (idle) func_001B4470; 4 func_001B43A8; 5 counts miWaitFrames down and, when it runs out, either reports
  * error popup 0x842 (slot 53 returns 0: func_001B5068(self, -1), func_001B4888(self, 0x842, 0x18, D_004A1B80)) or
- * pops the state stack (func_0039F698 on mpEngine + 0x18), then returns to 0; while still waiting it falls through
+ * pops the state stack (cUIStateStack_popToState on mpEngine + 0x18), then returns to 0; while still waiting it falls through
  * to state 0, which (idle) calls the object's slot 5 with D_004A1B80. States 6 -> 7, 7 (idle) func_002C67E8, -> 8,
  * 8 (idle) func_001B45E8 (connect with the chosen setting). Ends with the cFEStateNet update (cFEStateNet_onUpdate).
  */
@@ -13692,7 +13692,7 @@ extern "C" void cFEStateNetConfig_onUpdate(cFEStateNetConfig* self)
                 func_001B5068(self, -1);
                 func_001B4888(self, 2114, 0x18, D_004A1B80);
             } else {
-                func_0039F698((char*)self->mpEngine + 0x18);
+                cUIStateStack_popToState((char*)self->mpEngine + 0x18);
             }
             self->miState = 0;
             break;
@@ -14358,7 +14358,7 @@ extern "C" void func_001B4CD8(cFEStateNetConfig* self)
             char* rec = cCommSystem_mNetConns[i].name4;
             func_003EFA48(name, 0x40, nm);
             UIAsciiToUnicode(line, buf);
-            func_00392680(cUIListBox_getFont(self->mpLBSettings), scale.x, w, name, line + len, 0x40 - len);
+            cFont_textSmartLimit1(cUIListBox_getFont(self->mpLBSettings), scale.x, w, name, line + len, 0x40 - len);
             cUIListBox_addEntryByUnicodeString(self->mpLBSettings, line, i + 20);
             if (func_004165A8(D_004A1B7C, rec) == 0) {
                 cUIListBox_addEntryByAsciiString(self->mpLBAdapters, rec, i + 0x1E);
@@ -14378,13 +14378,13 @@ INCLUDE_ASM("fe/feasyncfile", func_001B4FA0);
 #ifdef SKIP_ASM
 extern "C" void func_001B4888(cFEStateNetConfig* self, int a1, int a2, int a3);
 extern "C" void func_001B5068(cFEStateNetConfig* self, int a1);
-extern "C" int func_0039F698(void* p);
+extern "C" int cUIStateStack_popToState(void* p);
 extern int D_004A1B80;
 
 /**
  * Reports the result of loading the network configurations, then shows the no-configuration view.
  *
- * 0 closes the popups on the state stack (func_0039F698); -21..-16 and -14..-1 show popup 2114 "corrupt" (error 24) for
+ * 0 closes the popups on the state stack (cUIStateStack_popToState); -21..-16 and -14..-1 show popup 2114 "corrupt" (error 24) for
  * slot D_004A1B80; -15 popup 2113 "different PS2" (error 6); -200 popup 2113 "not formatted" (error 20, slot 1). Always
  * ends with func_001B5068(.., -1).
  *
@@ -14394,7 +14394,7 @@ extern "C" void func_001B4FA0(cFEStateNetConfig* self, int err)
 {
     switch (err) {
     case 0:
-        func_0039F698((char*)self->mpEngine + 0x18);
+        cUIStateStack_popToState((char*)self->mpEngine + 0x18);
         break;
     // PORT: GNU case ranges
     case -21 ... -16:
@@ -14416,7 +14416,7 @@ extern "C" void func_001B4FA0(cFEStateNetConfig* self, int err)
 INCLUDE_ASM("fe/feasyncfile", func_001B5068);
 #ifdef SKIP_ASM
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
-extern "C" void func_0039A670(void* self);
+extern "C" void cUIListBox_deleteAllEntries(void* self);
 
 struct sCol1B5068 {
     float r, g, b, a;
@@ -14443,7 +14443,7 @@ public:
 /**
  * Switches the network-configuration screen between the configuration lists and "NoConfiguration".
  *
- * @p configCount <= 0: clears both list boxes (func_0039A670), makes mpLBSettings, mpLBAdapters and mpPairSettings static, hides
+ * @p configCount <= 0: clears both list boxes (cUIListBox_deleteAllEntries), makes mpLBSettings, mpLBAdapters and mpPairSettings static, hides
  * the lists and mpConfigRectangle, shows mpNoConfiguration (colour D_004C66C8) and selects row 0 of mpMenuConfig.
  * Otherwise the reverse, selecting row 1.
  *
@@ -14452,8 +14452,8 @@ public:
 extern "C" void func_001B5068(cFEStateNetConfig* self, int configCount)
 {
     if (configCount <= 0) {
-        func_0039A670(((cFEVObj_001B5068*)self->mpLBAdapters));
-        func_0039A670(((cFEVObj_001B5068*)self->mpLBSettings));
+        cUIListBox_deleteAllEntries(((cFEVObj_001B5068*)self->mpLBAdapters));
+        cUIListBox_deleteAllEntries(((cFEVObj_001B5068*)self->mpLBSettings));
         ((cFEVObj_001B5068*)self->mpLBSettings)->v08(1);
         ((cFEVObj_001B5068*)self->mpLBAdapters)->v08(1);
         ((cFEVObj_001B5068*)self->mpPairSettings)->v08(1);
@@ -14481,7 +14481,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001B5268);
 #ifdef SKIP_ASM
 extern int D_004A1B80;
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
-extern "C" void func_0039A670(void* self);
+extern "C" void cUIListBox_deleteAllEntries(void* self);
 extern "C" void func_001B47C0(cFEStateNetConfig* self, int a1);
 
 
@@ -14489,7 +14489,7 @@ extern "C" void func_001B47C0(cFEStateNetConfig* self, int a1);
  * Restarts the network-configuration scan: clears the lists and checks the card in slot 1 again.
  *
  * Selects row 0 of mpMenuConfig, sets D_004A1B80 to 0 and miResult to 1, clears mpLBAdapters and mpLBSettings
- * (func_0039A670), shows the "checking" popup for slot 1 (func_001B47C0) and sets miState 1.
+ * (cUIListBox_deleteAllEntries), shows the "checking" popup for slot 1 (func_001B47C0) and sets miState 1.
  *
  * @param obj  the network-configuration state (this)
  * @param ignored  unused
@@ -14500,8 +14500,8 @@ extern "C" void func_001B5268(cFEStateNetConfig* obj, int ignored)
     cUIMenu_setSelectedByIndex(((void*)self->mpMenuConfig), 0);
     D_004A1B80 = 0;
     self->miResult = 1;
-    func_0039A670(((void*)self->mpLBAdapters));
-    func_0039A670(((void*)self->mpLBSettings));
+    cUIListBox_deleteAllEntries(((void*)self->mpLBAdapters));
+    cUIListBox_deleteAllEntries(((void*)self->mpLBSettings));
     func_001B47C0(obj, 1);
     self->miState = 1;
 }
@@ -15017,7 +15017,7 @@ struct sFlags1B5BD8 {
  *
  * On 15 closes the popup, purges the front end's audio (cSSXAudio_FrontEndPurge), runs func_00256088
  * (cdrom0:\NETGUI\NTGUI.ELF), disables "TextCreateConfig" (vtable entry 6) and greys it, and sets its own state-stack
- * mode (bits 8-13 of mAttrState) to 7, as func_0039F698 does to the popups it closes. Other events go to cFEStateNet_onPopupEvent.
+ * mode (bits 8-13 of mAttrState) to 7, as cUIStateStack_popToState does to the popups it closes. Other events go to cFEStateNet_onPopupEvent.
  *
  * @param popup  the popup state
  * @param kind  popup event (15 + chosen option, 20 back, 22 the popup is gone)
@@ -15147,7 +15147,7 @@ extern "C" void* func_001A9C50(cFEStateNet* self);
 extern "C" int func_001AAF90(cFEStateNet* self, void* msg);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void strcpy1(void* dst, int src);
-extern "C" void func_0039F190(void* self, int a1);
+extern "C" void cUIStateStack_pop(void* self, int a1);
 // PORT: operator_new__FUi really takes (size, tag, flags, d)
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" int func_001A8E40_3i(void* self, int a1, int a2) __asm__("func_001A8E40");
@@ -15172,7 +15172,7 @@ static inline int Loc1B5E28(char* name)
 /**
  * Handles online events on the network-configuration screen (cFEStateNetConfig's vtable entry 31).
  *
- * 261 pops the top state (func_0039F190(mpEngine + 0x18, 1)) when bit 1 or 2 of mAttrState is set. 277 and 278
+ * 261 pops the top state (cUIStateStack_pop(mpEngine + 0x18, 1)) when bit 1 or 2 of mAttrState is set. 277 and 278
  * (connection errors) with a non-zero code (+0x8) show an OK popup (id 2076) whose text is a new heap copy in
  * mpustrPopupText (the old one is freed): func_001AAF90's text for the code, or, when it has none,
  * "kT_POPUP200WarningProblemISP". The "kT_POPUP200WarningCommProblem" chosen for '-dev', '-ath', '-cfg', '-ini', '-dif'
@@ -15188,7 +15188,7 @@ extern "C" int func_001B5E28(cFEStateNetConfig* self, int id, int msgPtr)
     char* msg = (char*)msgPtr;
     if (id == 261) {
         if (self->mAttrState & 6) {
-            func_0039F190((char*)self->mpEngine + 0x18, 1);
+            cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
         }
     } else {
         if (id >= 261) {
@@ -16352,7 +16352,7 @@ extern "C" void strcpy1(void* str, int a1);
 // PORT: sprintf1 is a varargs formatter (dst, fmt, ...); the unit declares a 3-arg view
 extern "C" void sprintf1_1B70D0(void* str, int fmt, ...) __asm__("sprintf1");
 extern "C" void usprintf(char* buf, const char* fmt, int a2);
-extern "C" void func_0039F190(void* self, int a1);
+extern "C" void cUIStateStack_pop(void* self, int a1);
 extern int* D_004A33D0;
 extern char str_pct_d_b[];
 extern char str_kT_CMNYes[];
@@ -16406,7 +16406,7 @@ extern "C" void func_001B70D0_v(void* self, int state) __asm__("func_001B70D0");
  * "kT_POPUPTITLEDeleteAccount" Yes/No (id 22). 22: deletes (func_00265E20, "kT_MEMDeletingPS2"). 25:
  * "kT_MEMOVDamagedDataPS2" Yes/No (id 26). 26: func_00265E20 with the saving text. 27: like 16 without the space check.
  * 3, 9, 15, 17, 23 (after copying the names) and 28 show the result popup func_001B7E40 for miError. 4, 10, 18, 24, 29
- * pop this popup (func_0039F190). 8, 22 and 26 jump to 9, 23 and 28 when unk_6D8 (card error) is set; mbCardBusy is 1
+ * pop this popup (cUIStateStack_pop). 8, 22 and 26 jump to 9, 23 and 28 when unk_6D8 (card error) is set; mbCardBusy is 1
  * while a request runs. 0, 5, 11 and 19 clear unk_6D8 and mbCardBusy, 2 only mbCardBusy. The Yes/No popups' ids are the
  * next step (default option 1).
  *
@@ -16587,7 +16587,7 @@ extern "C" void func_001B70D0_v(void* vself, int state)
     case 18:
     case 24:
     case 29:
-        func_0039F190(self->f10 + 0x18, 1);
+        cUIStateStack_pop(self->f10 + 0x18, 1);
         break;
     case 28:
         func_001B7E40((char*)self, self->f6D4);
@@ -19997,7 +19997,7 @@ public:
 
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cUIListBox_setEntryByAsciiString(void* box, int index, const char* str, int a3);
-extern "C" void func_0039A670(void* self);
+extern "C" void cUIListBox_deleteAllEntries(void* self);
 extern "C" void cUIListBox_setCallbackListBox(void* self, int count);
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern char str_pct_d_b[];
@@ -20005,7 +20005,7 @@ extern char str_pct_d_b[];
 /**
  * Sets up the year list box as a callback list of 103 entries and selects a year.
  *
- * Resets the box (func_0039A670), clears bit 0 and sets 0x80 in its flags word (+0x14), makes it a callback list box of
+ * Resets the box (cUIListBox_deleteAllEntries), clears bit 0 and sets 0x80 in its flags word (+0x14), makes it a callback list box of
  * 103 entries (cUIListBox_setCallbackListBox), writes @p value printed by "%d" into entry 0 and makes entry (unsigned
  * char)(value - 108) current, which is value - 1900 modulo 256. Then calls the box's virtual slot 9 with 1.
  *
@@ -20015,7 +20015,7 @@ extern char str_pct_d_b[];
 extern "C" void func_001BB798(cFEStateCreateStep2* self, void* box, int value)
 {
     char buf[16];
-    func_0039A670(box);
+    cUIListBox_deleteAllEntries(box);
     *(int*)((char*)box + 0x14) = (*(int*)((char*)box + 0x14) & ~1) | 0x80;
     cUIListBox_setCallbackListBox(box, 103);
     sprintf(buf, str_pct_d_b, value);
@@ -20030,7 +20030,7 @@ INCLUDE_ASM("fe/feasyncfile", func_001BB840);
 #ifdef SKIP_ASM
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int func_001BB9B0(cFEStateCreateStep2* self, int month, int year);
-extern "C" void func_0039A670(void* self);
+extern "C" void cUIListBox_deleteAllEntries(void* self);
 extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern "C" unsigned char cUIListBox_addEntryByAsciiString(void* self, const char* text, int data);
@@ -20055,7 +20055,7 @@ public:
 /**
  * Refills the day list box with the days of a month and selects one, clamping it to the month's length.
  *
- * Gets the month's length from func_001BB9B0, resets the box (func_0039A670), clears bit 0 and sets 0x80 in its flags
+ * Gets the month's length from func_001BB9B0, resets the box (cUIListBox_deleteAllEntries), clears bit 0 and sets 0x80 in its flags
  * word (+0x14) and adds entries "1".."n" with data 1..n. When @p sel is past the end it becomes n and is also stored in
  * mpAccount->mBornDay. The entry with data sel is made current and the box's virtual slot 9 is called with 1. Used on
  * creation (month 1, 1985, day 1) and when cFEStateCreateStep2_onWidgetEvent sees the month or year change.
@@ -20070,7 +20070,7 @@ extern "C" void func_001BB840(cFEStateCreateStep2* self, void* box, int month, i
     char buf[16];
     unsigned char idx;
     int n = func_001BB9B0(self, month, year);
-    func_0039A670(box);
+    cUIListBox_deleteAllEntries(box);
     *(int*)((char*)box + 0x14) = (*(int*)((char*)box + 0x14) & ~1) | 0x80;
     int i;
     for (i = 1; i < n + 1; i++) {
@@ -20712,7 +20712,7 @@ extern "C" void* cFEStateSelectPersona_cFEStateSelectPersona(cFEStateSelectPerso
 extern "C" void func_001BC400(cFEStateCreateDuplicate* self);
 void func_001C57C0(void* self, int a1, int a2);
 extern "C" void func_00260F10(void* self);
-extern "C" void func_0039F190(void* self, int a1);
+extern "C" void cUIStateStack_pop(void* self, int a1);
 extern "C" int func_001A8E40_3i(void* self, int a1, int a2) __asm__("func_001A8E40");
 extern const char str_cFEStateSelectPersona[];
 extern char str_kT_POPUP211Congratulations2[];
@@ -20725,7 +20725,7 @@ extern char str_kT_CMNNo[];
  * 203 (account created) shows the yes/no popup "kT_POPUP211Congratulations2" (miMiscData 0x81F, mbReceivePrev 0). 212
  * (logged in) resets the new-account form (func_00260F10) and falls through to 214, which switches to a new
  * cFEStateSelectPersona (cMemMan_alloc 0x6D8, func_001A8A40). 258 with status 'dupl' (the name is still taken) closes
- * the top popup (func_0039F190 on the engine's state stack) when the open popup is the 0x820 or 0x815 "submitting" one,
+ * the top popup (cUIStateStack_pop on the engine's state stack) when the open popup is the 0x820 or 0x815 "submitting" one,
  * then shows the new suggestions (func_001BC400); other 258 codes go to func_001A8E40. Any other id returns
  * func_001A8E40's result.
  *
@@ -20761,7 +20761,7 @@ extern "C" int func_001BC4F0(cFEStateCreateDuplicate* self, int id, int data)
             if (openPopup != 0) {
                 int popupId = *(int*)(openPopup + 0x18);
                 if (popupId == 2080 || popupId == 2069) {
-                    func_0039F190((char*)self->mpEngine + 0x18, 1);
+                    cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
                 }
             }
             func_001BC400(self);
@@ -22295,7 +22295,7 @@ extern "C" int func_0025F120(void* self);
 extern "C" const char* func_0025F150(void* self, int a1);
 extern "C" int func_0025F180(void* self, int idx);
 extern "C" void cBXString_right(void* ret, void* src, int n);
-extern "C" void func_0039A670(void* self);
+extern "C" void cUIListBox_deleteAllEntries(void* self);
 extern "C" int func_004165A8(const char* a, const char* b);
 extern char* D_004A3E90_p __asm__("cBXString_EmptyString");
 extern const char* D_004A1A60;
@@ -22333,7 +22333,7 @@ public:
 /**
  * Rebuilds the four channel room lists from LobbyMan's room list.
  *
- * Clears the four mpChannelList boxes (func_0039A670). For each of LobbyMan's rooms (count func_0025F120, name
+ * Clears the four mpChannelList boxes (cUIListBox_deleteAllEntries). For each of LobbyMan's rooms (count func_0025F120, name
  * func_0025F150) the name is split at its last '.': the part before it picks the channel by comparing (func_004165A8)
  * with D_004A1A6C (list 0, beginner), D_004A1A68 (1, voice), D_004A1A64 (2, advanced) and D_004A1A60 (3, expert); rooms
  * matching none are skipped. The part after the dot is added to that list with the room index as data, and the list's
@@ -22352,7 +22352,7 @@ extern "C" void func_001BE0A8(cFEStateLobbyMenu* self)
     sBXStr_001BE0A8 ext;
     int counts[4];
     for (int k = 0; k < 4; k++) {
-        func_0039A670(lists[k]);
+        cUIListBox_deleteAllEntries(lists[k]);
     }
     for (int i = 0; i < n; i++) {
         cBXString_operatorE1(&name, func_0025F150(mgr, i));
@@ -25212,7 +25212,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void* cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect(cFEStateOnlineCharacterSelect* self, int a1);
 extern "C" void func_001A8A40(void* self, void* obj);
 extern "C" void func_001AB178(cFEStateNet* self, int err);
-extern "C" int func_0039F698(void* p);
+extern "C" int cUIStateStack_popToState(void* p);
 extern "C" void* func_001A9C50(cFEStateNet* self);
 extern "C" void func_001A9BC0(cFEStateNet* self, void* popup);
 void func_001C57C0(void* self, int a1, int a2);
@@ -25245,7 +25245,7 @@ struct cFEObj_001C19C8 {
 /**
  * Handles the lobby events of the quick-match popup (cFEStateNetQuickPlayPopup's vtable slot 31).
  *
- * 0xE6 sets unk_6F0. 268 and 274 close the popups on the engine's state stack (func_0039F698) and show the network
+ * 0xE6 sets unk_6F0. 268 and 274 close the popups on the engine's state stack (cUIStateStack_popToState) and show the network
  * error popup for that event (func_001AB178). 0xE7 opens "kT_POPUP233QuickMatchTimeout" (one "kT_BTNOK" option,
  * miLayerOffset 6, miMiscData 0x82F) when unk_6F0 is set, otherwise clears mbSearching and reports event 0x14 to
  * mpParentState (virtual slot 17, onPopupEvent). 243 switches to a new cFEStateOnlineCharacterSelect (cMemMan_alloc
@@ -25262,7 +25262,7 @@ extern "C" void* func_001C19C8(cFEStateNetQuickPlayPopup* self, int netEvent, in
         self->unk_6F0 = 1;
         break;
     case 268: case 274:
-        func_0039F698((char*)self->mpEngine + 0x18);
+        cUIStateStack_popToState((char*)self->mpEngine + 0x18);
         func_001AB178((cFEStateNet*)self, netEvent);
         break;
     case 231:
@@ -27300,7 +27300,7 @@ extern "C" int cUIListBox_addEntryByStringID(void* box, int id, int a2);
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" const char* cBENewRaceInterface_getModeName1(void* iface, int id);
 extern "C" void func_001C49C8(cFEStateStats* self);
-extern "C" void func_0039A670(void* self);
+extern "C" void cUIListBox_deleteAllEntries(void* self);
 extern char str_EventList[];
 extern char str_kT_CMNBackCountry[];
 extern int D_0046DB98[];
@@ -27323,7 +27323,7 @@ public:
 /**
  * Refills the high-score screen's "EventList" box with the events of the current mode.
  *
- * Does nothing when the box is missing. Mode 0 clears it (func_0039A670) and calls slot 8 with 1. Mode 1 clears it,
+ * Does nothing when the box is missing. Mode 0 clears it (cUIListBox_deleteAllEntries) and calls slot 8 with 1. Mode 1 clears it,
  * calls slot 8 with 0 and adds the 2 event ids of D_0046DB98; mode 2 does the same with the 4 ids of D_0046DB88. Id 4
  * is added as "kT_CMNBackCountry" by string id, the others by the name cBENewRaceInterface_getModeName1 returns from cBE_getInterface kind
  * 0; each entry's data is its id. Modes 1 and 2 then call func_001C49C8.
@@ -27337,11 +27337,11 @@ extern "C" void func_001C47A8(cFEStateStats* self)
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
     switch (self->miMode) {
     case 0:
-        func_0039A670(box);
+        cUIListBox_deleteAllEntries(box);
         box->v08(1);
         break;
     case 1:
-        func_0039A670(box);
+        cUIListBox_deleteAllEntries(box);
         box->v08(0);
         for (int i = 0; i < 2; i++) {
             int id = D_0046DB98[i];
@@ -27354,7 +27354,7 @@ extern "C" void func_001C47A8(cFEStateStats* self)
         func_001C49C8(self);
         break;
     case 2:
-        func_0039A670(box);
+        cUIListBox_deleteAllEntries(box);
         box->v08(0);
         for (int j = 0; j < 4; j++) {
             int id = D_0046DB88[j];
@@ -27384,7 +27384,7 @@ extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 extern "C" const char* cBENewRaceInterface_getLocationName(void* iface, int id);
 extern "C" void func_001C3310(cFEStateStats* self);
 extern "C" void func_001C4B78(cFEStateStats* self, int idx);
-extern "C" void func_0039A670(void* self);
+extern "C" void cUIListBox_deleteAllEntries(void* self);
 extern "C" int cUIListBox_getCurrentEntryData(void* a);
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int a1);
 extern char str_EventList[];
@@ -27403,7 +27403,7 @@ extern sEntry1C49C8 D_0046D9B8[];
  * Refills the high-score screen's "CourseList" with the courses of the selected event and asks for the first one's
  * results.
  *
- * Reads the selected "EventList" entry's data (the event key), clears "CourseList" (func_0039A670) and walks the 29
+ * Reads the selected "EventList" entry's data (the event key), clears "CourseList" (cUIListBox_deleteAllEntries) and walks the 29
  * entries {data, name, key, mode} of D_0046D9B8: each with that key and miMode is added with its location name
  * (cBENewRaceInterface_getLocationName on cBE_getInterface kind 0) and its data. When the first match's data is in
  * 0..28 it requests those results (func_001C4B78), selects course 0 and row 0 of "ResultsMenu". Finally redraws the
@@ -27422,7 +27422,7 @@ extern "C" void func_001C49C8(cFEStateStats* self)
     if (box == 0) {
         return;
     }
-    func_0039A670(box);
+    cUIListBox_deleteAllEntries(box);
     int found = 0;
     sEntry1C49C8 first;
     int i;

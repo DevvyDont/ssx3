@@ -1220,7 +1220,7 @@ extern "C" void cRider_cleanupAfterPutAt(void* self, int notify);
 void* cGame_getTransitionMan(void* self, int id);
 // PORT: cTransitionObj_operator_new is the wake pool's allocator; it ignores the size the caller passes
 extern "C" void* cTransitionObj_operator_new_sz(int size) __asm__("cTransitionObj_operator_new");
-void* func_002E4D70(void* self);
+void* cTransitionObj_cTransitionObj(void* self);
 extern "C" void cTransitionMan_StartTransition(void* self, int a1, int a2, void* a3, float f0, float f1, int a4, int a5, float f2);
 extern void* cFade_TObj_vtbl[];
 
@@ -1249,7 +1249,7 @@ extern "C" void cGFSessionTeleportState_gainFocus(void* self)
     colour.g = one;
     colour.b = one;
     colour.a = one;
-    func_002E4D70(fade);
+    cTransitionObj_cTransitionObj(fade);
     *(void***)fade = cFade_TObj_vtbl;
     *(sColor_236058*)(fade + 4) = colour;
     cTransitionMan_StartTransition(transitionMan, 1, 0, fade, 0.0f, 0.0f, 0, 0, one);

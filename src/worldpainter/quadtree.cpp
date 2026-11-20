@@ -77,7 +77,7 @@ extern "C" void cQuadTree_setFreeNodes(cQuadTree* self, unsigned short nodeid0, 
 }
 #endif
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C1950);
+INCLUDE_ASM("worldpainter/quadtree", cQuadTree_setData);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_002C1A00(void* self, void* node, unsigned short x, unsigned short z, int size, int a5, int a6);
@@ -96,7 +96,7 @@ extern "C" void func_002C1A00(void* self, void* node, unsigned short x, unsigned
  * @param fz  the area's minimum y (the tree's second axis) in world units
  * @param fsize  the area's width in world units
  */
-extern "C" void func_002C1950(cQuadTree* self, int leafKey, int leafData, float fx, float fz, float fsize)
+extern "C" void cQuadTree_setData(cQuadTree* self, int leafKey, int leafData, float fx, float fz, float fsize)
 {
     int x = (int)((fx - self->m_offsetX) * *(float*)self);
     int z = (int)((fz - self->m_offsetY) * *(float*)self);
@@ -2583,11 +2583,11 @@ extern "C" int cPS2MemCard_DidFormatFail(cPS2MemCard* self)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C51D0);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetLastError);
 #ifdef SKIP_ASM
-// PORT: the unit declares this as `extern "C" void* func_002C51D0(void*, int)`
+// PORT: the unit declares this as `extern "C" void* cPS2MemCard_GetLastError(void*, int)`
 // for its callers; the body returns an int code, bound with an asm label.
-extern "C" int func_002C51D0_impl(sQTState* self, int i) __asm__("func_002C51D0");
+extern "C" int cPS2MemCard_GetLastError_impl(sQTState* self, int i) __asm__("cPS2MemCard_GetLastError");
 
 /**
  * Returns the last libmc result of a port (unk_08 of device record unk_17C[@p i]) when it is one of the codes the
@@ -2599,7 +2599,7 @@ extern "C" int func_002C51D0_impl(sQTState* self, int i) __asm__("func_002C51D0"
  * @param i  the memory-card port (0 or 1)
  * @return the result code, or -10
  */
-extern "C" int func_002C51D0_impl(sQTState* self, int i)
+extern "C" int cPS2MemCard_GetLastError_impl(sQTState* self, int i)
 {
     switch (self->levels[i].unk_08) {
     case -10002:
@@ -2622,20 +2622,20 @@ extern "C" int func_002C51D0_impl(sQTState* self, int i)
 }
 #endif
 
-extern "C" void* func_002C51D0(void*, int);
+extern "C" void* cPS2MemCard_GetLastError(void*, int);
 
 //99.38%
 INCLUDE_ASM("worldpainter/quadtree", func_002C5230__FPv);
 #ifdef SKIP_ASM
 /**
- * Returns whether the current port (mDevice) has an error: func_002C51D0 for it is nonzero. Card vtable slot 73;
+ * Returns whether the current port (mDevice) has an error: cPS2MemCard_GetLastError for it is nonzero. Card vtable slot 73;
  * cPS2MemCard_Update checks it before starting a create, write or read.
  *
- * @return 1 when func_002C51D0 returns nonzero, else 0
+ * @return 1 when cPS2MemCard_GetLastError returns nonzero, else 0
  */
 int func_002C5230(void* self)
 {
-    return (func_002C51D0(self, *(int*)((char*)self + 0xc)) != 0);
+    return (cPS2MemCard_GetLastError(self, *(int*)((char*)self + 0xc)) != 0);
 }
 #endif
 
@@ -2800,7 +2800,7 @@ extern "C" int cPS2MemCard_CardChanged(cPS2MemCard* self, int device)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C53E0);
+INCLUDE_ASM("worldpainter/quadtree", cPS2MemCard_GetStatus);
 #ifdef SKIP_ASM
 int GetHashValue32(char*);
 extern "C" unsigned short* func_002C2540(unsigned short* dst, char* src);
@@ -2823,7 +2823,7 @@ struct sQT_53E0 {
     sQTEntry_53E0 entries[1];
 };
 
-struct func_002C53E0_sVEntry {
+struct cPS2MemCard_GetStatus_sVEntry {
     short delta;
     short index;
     unsigned short* (*fn)(void*, int);
@@ -2840,7 +2840,7 @@ struct func_002C53E0_sVEntry {
  * @param idx  the memory-card port (0 or 1)
  * @param dst  the 16-bit output buffer
  */
-extern "C" void func_002C53E0(sQT_53E0* self, int idx, unsigned short* dst)
+extern "C" void cPS2MemCard_GetStatus(sQT_53E0* self, int idx, unsigned short* dst)
 {
     if (self->entries[idx].data == 0) {
         func_002C2540(dst, D_004A3968);
@@ -2854,7 +2854,7 @@ extern "C" void func_002C53E0(sQT_53E0* self, int idx, unsigned short* dst)
         // PORT: g++ `>?` (max) operator, removed in GCC 4.3.
         int freeClusters = cPS2MemCard_GetFreeSpace1_i(self, idx) >? 0;
         char* obj = (char*)SSXApp->FELocale;
-        func_002C53E0_sVEntry* vt = *(func_002C53E0_sVEntry**)(obj + 4);
+        cPS2MemCard_GetStatus_sVEntry* vt = *(cPS2MemCard_GetStatus_sVEntry**)(obj + 4);
         char* thisp = obj + vt[4].delta;
         sprintf1(dst, vt[4].fn(thisp, GetHashValue32(str_kT_MEMFreePS2)), freeClusters);
         break;
@@ -3071,7 +3071,7 @@ typedef int (*fn2_55D8)(void*, int);
 typedef void (*fn2v_55D8)(void*, int);
 // PORT: the unit declares these later with other signatures; bound by asm label.
 extern "C" int func_0040A360_i(int a0, int* a1, int* out) __asm__("func_0040A360");
-extern "C" int func_002C51D0_i(void* self, int i) __asm__("func_002C51D0");
+extern "C" int cPS2MemCard_GetLastError_i(void* self, int i) __asm__("cPS2MemCard_GetLastError");
 extern "C" void func_002C6280_v(void* self) __asm__("func_002C6280");
 extern "C" int func_002C63E8(cPS2MemCard* self, unsigned int a1);
 extern "C" int ASYNCFILE_getstatus(int h);
@@ -3474,10 +3474,10 @@ extern "C" void cPS2MemCard_Update(sMC_55D8* self)
         self->state = 0;
         break;
     }
-    if (func_002C51D0_i(self, self->port) == -10 || func_002C51D0_i(self, self->port) == -1) {
+    if (cPS2MemCard_GetLastError_i(self, self->port) == -10 || cPS2MemCard_GetLastError_i(self, self->port) == -1) {
         func_002C5250((cPS2MemCard*)((sQTState*)self));
     }
-    if (func_002C51D0_i(self, self->port) == -10 || func_002C51D0_i(self, self->port) == -2) {
+    if (cPS2MemCard_GetLastError_i(self, self->port) == -10 || cPS2MemCard_GetLastError_i(self, self->port) == -2) {
         func_002C5278((cPS2MemCard*)self);
     }
     if (self->state != 0) {
@@ -3523,7 +3523,7 @@ extern char str_kT_MEMNoFreeSpace[];
 static inline unsigned short* qtLoc6128(char* key)
 {
     char* obj = (char*)SSXApp->FELocale;
-    func_002C53E0_sVEntry* vt = *(func_002C53E0_sVEntry**)(obj + 4);
+    cPS2MemCard_GetStatus_sVEntry* vt = *(cPS2MemCard_GetStatus_sVEntry**)(obj + 4);
     char* thisp = obj + vt[4].delta;
     return vt[4].fn(thisp, GetHashValue32(key));
 }
@@ -4617,7 +4617,7 @@ extern "C" void func_002C6D18(cPS2MemCard* self)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C6D70);
+INCLUDE_ASM("worldpainter/quadtree", cLocaleFile__cLocaleFile);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 extern "C" void MEM_free(void* p);
@@ -4628,7 +4628,7 @@ extern "C" void MEM_free(void* p);
  *
  * @param flags  bit 0 set: also free the object
  */
-extern "C" void func_002C6D70(void* self, int flags)
+extern "C" void cLocaleFile__cLocaleFile(void* self, int flags)
 {
     void* buffer = *(void**)((char*)self + 0x4);
     if (buffer != 0) {
@@ -4643,7 +4643,7 @@ extern "C" void func_002C6D70(void* self, int flags)
 extern "C" void* func_003DBB68(int);
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C6DC0__FPv);
+INCLUDE_ASM("worldpainter/quadtree", cLocaleFile_getStringByIndex__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns the string at an index of the loaded locale data: func_003DBB68 on the file data (+0x4), with the index the
@@ -4651,26 +4651,26 @@ INCLUDE_ASM("worldpainter/quadtree", func_002C6DC0__FPv);
  *
  * @return func_003DBB68's result (the string, or 0)
  */
-void* func_002C6DC0(void* self)
+void* cLocaleFile_getStringByIndex(void* self)
 {
     return func_003DBB68(*(int*)((char*)self + 0x4));
 }
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C6DE0);
+INCLUDE_ASM("worldpainter/quadtree", cLocaleFile_getStringByHash);
 #ifdef SKIP_ASM
-struct func_002C6DE0_sEntry {
+struct cLocaleFile_getStringByHash_sEntry {
     unsigned int key;
     int value;
 };
 
-struct func_002C6DE0_sMap {
+struct cLocaleFile_getStringByHash_sMap {
     int pad0;
     int pad4;
     int last;
     int count;
-    func_002C6DE0_sEntry* entries;
+    cLocaleFile_getStringByHash_sEntry* entries;
 };
 
 /**
@@ -4678,12 +4678,12 @@ struct func_002C6DE0_sMap {
  *
  * Returns 0 when the file has no "LOCT" table (+0xC is 0), when the key lies outside the first and last keys, or when
  * the binary search does not find it. The range check and the search start at entry [+0x8], one past the entries
- * func_002C6E98 converts (likely bug, unless the table ends with a sentinel).
+ * cLocaleFile_loadFile converts (likely bug, unless the table ends with a sentinel).
  *
  * @param key  the string's hash (GetHashValue32 of its id)
  * @return the string, or 0
  */
-extern "C" int func_002C6DE0(func_002C6DE0_sMap* self, unsigned int key)
+extern "C" int cLocaleFile_getStringByHash(cLocaleFile_getStringByHash_sMap* self, unsigned int key)
 {
     int lo = 0;
     int hi = self->last;
@@ -4711,29 +4711,29 @@ extern "C" int func_002C6DE0(func_002C6DE0_sMap* self, unsigned int key)
 #endif
 
 //100%
-INCLUDE_ASM("worldpainter/quadtree", func_002C6E98);
+INCLUDE_ASM("worldpainter/quadtree", cLocaleFile_loadFile);
 #ifdef SKIP_ASM
 extern "C" void* FILE_load(const char* name, int flags);
 extern "C" unsigned int func_003DB9D8(void* p, int a);
 extern "C" int func_00416B18(const void* a, const void* b, int n);
-// PORT: func_002C6DC0 is declared (void*) but called with a second argument; bound by asm label
-void* func_002C6DC0_2(void* self, int v) __asm__("func_002C6DC0__FPv");
+// PORT: cLocaleFile_getStringByIndex is declared (void*) but called with a second argument; bound by asm label
+void* cLocaleFile_getStringByIndex_2(void* self, int v) __asm__("cLocaleFile_getStringByIndex__FPv");
 extern char str_LOCT[];
 
-struct func_002C6E98_sEnt {
+struct cLocaleFile_loadFile_sEnt {
     int f0;
     int f4;
 };
-struct func_002C6E98_sChunk {
+struct cLocaleFile_loadFile_sChunk {
     int id;
     int size;
 };
-struct func_002C6E98_sFile {
+struct cLocaleFile_loadFile_sFile {
     char kind;
-    func_002C6E98_sChunk* data;
+    cLocaleFile_loadFile_sChunk* data;
     int count;
-    func_002C6E98_sChunk* hdr;
-    func_002C6E98_sEnt* ents;
+    cLocaleFile_loadFile_sChunk* hdr;
+    cLocaleFile_loadFile_sEnt* ents;
 };
 
 /**
@@ -4742,28 +4742,28 @@ struct func_002C6E98_sFile {
  * Stores @p kind (the language) at +0x0, loads the file with FILE_load into +0x4 and counts its strings with
  * func_003DB9D8(data, 2) into +0x8. The chunk after the first one (data + its size) must be "LOCT"; otherwise +0xC is
  * set to 0 and the function returns. Then +0xC points at that chunk, +0x10 at the {hash, index} table after it, and
- * each entry's index is replaced by its string pointer (func_002C6DC0__FPv).
+ * each entry's index is replaced by its string pointer (cLocaleFile_getStringByIndex__FPv).
  *
  * @param name  the file path
  * @param kind  the language byte stored at +0x0 (cFELocale_addFile passes the file's D_00441188 entry)
  */
-extern "C" void func_002C6E98(func_002C6E98_sFile* self, const char* name, char kind)
+extern "C" void cLocaleFile_loadFile(cLocaleFile_loadFile_sFile* self, const char* name, char kind)
 {
     unsigned int i;
     int size;
     self->kind = kind;
-    self->data = (func_002C6E98_sChunk*)FILE_load(name, 0);
+    self->data = (cLocaleFile_loadFile_sChunk*)FILE_load(name, 0);
     self->count = func_003DB9D8(self->data, 2);
     size = self->data->size;
-    self->hdr = (func_002C6E98_sChunk*)((char*)self->data + size);
+    self->hdr = (cLocaleFile_loadFile_sChunk*)((char*)self->data + size);
     if (func_00416B18(self->hdr, str_LOCT, 4) != 0) {
         self->hdr = 0;
         return;
     }
     size = self->hdr->size;
-    self->ents = (func_002C6E98_sEnt*)((char*)self->hdr + size);
+    self->ents = (cLocaleFile_loadFile_sEnt*)((char*)self->hdr + size);
     for (i = 0; i < self->count; i++) {
-        self->ents[i].f4 = (int)func_002C6DC0_2(self, self->ents[i].f4);
+        self->ents[i].f4 = (int)cLocaleFile_getStringByIndex_2(self, self->ents[i].f4);
     }
 }
 #endif

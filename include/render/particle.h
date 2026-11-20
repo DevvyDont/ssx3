@@ -6,7 +6,7 @@
 // cBaseClass_DynamicEmitter::getSubEmitterPositionVelocity). One header for the five classes, as EA keeps them:
 //   tParticleEmitter          the particle system itself (no vtable). Size 0x150: cMemMan_alloc(0x150, "Board Spark
 //                             Emitter") +
-//                             ctor func_002F7A68 (empty) in cBoardSparkFX's ctor; embedded at +0x10 / +0x20 below.
+//                             ctor tParticleEmitter_tParticleEmitter (empty) in cBoardSparkFX's ctor; embedded at +0x10 / +0x20 below.
 //   cStaticEmitter            a fixed emitter (cParticleModifier, cMultiParticle). Size 0x190: cMemMan_alloc(0x190,
 //                             "Emitter") + ctor cStaticEmitter_cStaticEmitter in cMultiParticle_setupMultiParticle. Vtable cStaticEmitter_vtbl.
 //   cBaseClass_DynamicEmitter an emitter that follows a moving source and keeps a ring of sub-emitter positions.
@@ -144,7 +144,7 @@ CHECK_SIZE(tParticleEmitter, 0x150);
 // A fixed emitter (On Tour class cStaticEmitter, 0x190).
 struct cStaticEmitter {
     float Duration;                 // 0x000 [O]; [R] setupEmitter (cStaticEmitter_setupEmitter); [U] update counts it down by one app
-                                    //       tick (negative = endless, 0 = stopped), setTime func_00370708, replay
+                                    //       tick (negative = endless, 0 = stopped), setTime cStaticEmitter_setTime, replay
                                     //       record; cParticleModifier_update watches it
     int TextureId;                  // 0x004 [O]; [R] setupEmitter (particle data +0xC4); [U] render: the effect texture
                                     //       is TheGraphicsMan->texIds[TextureId + (int)mCurrentFlipTexture]
@@ -152,7 +152,7 @@ struct cStaticEmitter {
                                     //       to the draw layer
     int m_initialized;              // 0x00C [O] bool (retail 4 bytes); [R] ctor cStaticEmitter_cStaticEmitter zeroes it; [U] update
                                     //       sets 1, render returns while 0, replay record
-    tParticleEmitter Emitter;       // 0x010 [O]; [R] ctor func_002F7A68(this + 0x10); [U] setupEmitter (init +
+    tParticleEmitter Emitter;       // 0x010 [O]; [R] ctor tParticleEmitter_tParticleEmitter(this + 0x10); [U] setupEmitter (init +
                                     //       setupEmitter), update (step / stepContinous), render (cPS2GraphicsMan slot
                                     //       82)
     tBoundBox BoundBox;             // 0x160 [O]; [U] setupEmitter fills it (calcBoundBox), render(bbox, pos) stores it,
@@ -190,7 +190,7 @@ struct cBaseClass_DynamicEmitter {
                                     //       render
     float mFlipTextureRate;         // 0x014 [O]; [R] ctor (sw 0); [U] setupEmitter (data +0xD4), updateBASE
     char unk_018[0x8];              // 0x018 padding (m_emitter is 16-aligned)
-    tParticleEmitter m_emitter;     // 0x020 [O]; [R] ctor func_002F7A68(this + 0x20); [U] setupEmitter (init,
+    tParticleEmitter m_emitter;     // 0x020 [O]; [R] ctor tParticleEmitter_tParticleEmitter(this + 0x20); [U] setupEmitter (init,
                                     //       setupEmitter), setTime; [P] getBaseEmitter
     int m_initialized;              // 0x170 [O] bool (retail 4 bytes); [R] ctor 0; [U] setupEmitter sets 1,
                                     //       purge(resetEmitter) clears it, replay record
@@ -263,7 +263,7 @@ struct cDynamicEmitter {
                                     //       render
     float mFlipTextureRate;         // 0x014 [O]; [R] ctor (sw 0); [U] setupEmitter (data +0xD4), updateBASE
     char unk_018[0x8];              // 0x018 padding (m_emitter is 16-aligned)
-    tParticleEmitter m_emitter;     // 0x020 [O]; [R] ctor func_002F7A68(this + 0x20); [U] setupEmitter (init,
+    tParticleEmitter m_emitter;     // 0x020 [O]; [R] ctor tParticleEmitter_tParticleEmitter(this + 0x20); [U] setupEmitter (init,
                                     //       setupEmitter), setTime; [P] getBaseEmitter
     int m_initialized;              // 0x170 [O] bool (retail 4 bytes); [R] ctor 0; [U] setupEmitter sets 1,
                                     //       purge(resetEmitter) clears it, replay record
@@ -336,7 +336,7 @@ struct cDynamicColourEmitter {
                                     //       render
     float mFlipTextureRate;         // 0x014 [O]; [R] ctor (sw 0); [U] setupEmitter (data +0xD4), updateBASE
     char unk_018[0x8];              // 0x018 padding (m_emitter is 16-aligned)
-    tParticleEmitter m_emitter;     // 0x020 [O]; [R] ctor func_002F7A68(this + 0x20); [U] setupEmitter (init,
+    tParticleEmitter m_emitter;     // 0x020 [O]; [R] ctor tParticleEmitter_tParticleEmitter(this + 0x20); [U] setupEmitter (init,
                                     //       setupEmitter), setTime; [P] getBaseEmitter
     int m_initialized;              // 0x170 [O] bool (retail 4 bytes); [R] ctor 0; [U] setupEmitter sets 1,
                                     //       purge(resetEmitter) clears it, replay record

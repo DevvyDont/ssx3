@@ -10,8 +10,8 @@
 // fields start at 0x9C (e.g. the mission id at 0x9C in ovstateenterlodge.cpp), so this header covers the base only:
 // retype a subclass method (cOVState_MAP_*, cOVState_REPLAY_*, ...) only with that subclass's own header.
 // Evidence tags:
-//   [R] retail's constructors: cUIState(cUIEngine*) = func_0039E2A0 / cUIState(cUIEngine*, cUIState*) =
-//       func_0039E318 (ui/uiscreen.cpp) and cOVState(cUIEngine*, tOVStateEnum) = cOVState_cOVState;
+//   [R] retail's constructors: cUIState(cUIEngine*) = cUIState_cUIState / cUIState(cUIEngine*, cUIState*) =
+//       cUIState_cUIState1 (ui/uiscreen.cpp) and cOVState(cUIEngine*, tOVStateEnum) = cOVState_cOVState;
 //   [P] the July 2003 preview's cOVState::allowPauseMenu (lw 0x48), carried to retail 0x4C by tools/layout_xlate.py;
 //   [U] how matched retail code uses the field;
 //   [O] SSX On Tour's DWARF (class cListNode / cUIState / cOVState: same member order; On Tour's bools are
@@ -33,13 +33,13 @@ struct cOVState {
     int mHashName;              // 0x00C [O]; [P] cUIState::getHashName (ui/uistate.h); [R] zeroed by the cUIState ctor
     cUIEngine* mpEngine;        // 0x010 [O]; [R] the ctor's engine argument; [U] cUIStateStack_findState(mpEngine + 0x18)
     signed char mCurrentCtrl;   // 0x014 [O]; [R] ctor stores -1
-    unsigned char mCtrlBits;    // 0x015 [O]; [R] ctor stores 0xF; [U] masks in func_0039E438 / cFEState_setControllerFilter
+    unsigned char mCtrlBits;    // 0x015 [O]; [R] ctor stores 0xF; [U] masks in cUIState_setCtrlBitsByCtrlIndex / cFEState_setControllerFilter
     char unk_016[0x2];          // 0x016 padding
     int miMiscData;             // 0x018 [O]; [P] cUIState::getMiscData lw/sw (ui/uistate.h)
     int mAttrState;             // 0x01C [O] tAttrState (EA: 2 bytes); [P] cUIState's accessors lw/sw the word (ui/uistate.h); [R] ctor sh 0x218
-    cUIState* mpParentState;    // 0x020 [O]; [R] the 2-argument ctor's parent argument (func_0039E318)
+    cUIState* mpParentState;    // 0x020 [O]; [R] the 2-argument ctor's parent argument (cUIState_cUIState1)
     char mScreens[0x1C];        // 0x024 [O] cList mScreens (two cListNodes + the list's vptr at 0x3C);
-                                //       [R] constructed by cList_cList(self + 0x24), destroyed in func_0039E390
+                                //       [R] constructed by cList_cList(self + 0x24), destroyed in cUIState__cUIState
     cUIScreen* mpScreen;        // 0x040 [O]; [R] ctor zeroes it; [U] cUIScreen_getObjectByHashName(mpScreen, ...)
     signed char mUserNum;       // 0x044 [O]; [R] ctor stores -1
     char unk_045[0x3];          // 0x045 padding

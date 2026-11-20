@@ -8,7 +8,7 @@
 // feasyncfile.cpp); cFEPopupConfirm (fememcardcallbacks.cpp) derives from it.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. Evidence tags:
-//   [R] retail's constructors: cUIState(cUIEngine*, cUIState*) = func_0039E318 (ui/uiscreen.cpp),
+//   [R] retail's constructors: cUIState(cUIEngine*, cUIState*) = cUIState_cUIState1 (ui/uiscreen.cpp),
 //       cScreenPopup_cScreenPopup, the destructor cScreenPopup__cScreenPopup, and the allocation size above;
 //   [P] the July 2003 preview's inline accessors, carried to retail by tools/layout_xlate.py ("seen" pairs);
 //   [U] how matched retail code uses the field; widget fields name the UI object cScreenPopup_FillObjectPointers

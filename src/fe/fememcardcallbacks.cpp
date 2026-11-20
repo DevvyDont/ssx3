@@ -1073,7 +1073,7 @@ extern "C" int cFEMemCard_callbackDeleteFailed(void)
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_callbackCardsChecked);
 #ifdef SKIP_ASM
-void func_0023FB18(void* mp, int a);
+void cMCOverlayManager_selectDevice(void* mp, int a);
 extern "C" void cMCOverlayManager_setSelectedDevice(void* mp);
 extern "C" void cMCOverlayManager_OnHighlightNextDevice(void* mp);
 
@@ -1105,7 +1105,7 @@ public:
  * Moves the card check to the next device, or picks the device to use once every device is checked.
  *
  * Callback for the memory-card manager's callbackCardsChecked slot (0x90), installed by cFEMemCard_initFEMemCard. While
- * mSelectedDevice + 1 is below mMaxDevices it selects that device (func_0023FB18) and goes to InitCardsCheck (49,
+ * mSelectedDevice + 1 is below mMaxDevices it selects that device (cMCOverlayManager_selectDevice) and goes to InitCardsCheck (49,
  * SetState through vtable slot 1). Otherwise it selects device 0; when the card's IsAvailable (slot 52) says device 0
  * has no card, an auto-save screen (+0x208 of cFEMemCard_mInstance set) gets screen state 6 and the manager
  * CheckCardsWait (2), and any other screen moves the highlight to the next device with a card
@@ -1116,11 +1116,11 @@ extern "C" void cFEMemCard_callbackCardsChecked(void)
     cMoviePlayerK1D8160* mp = (cMoviePlayerK1D8160*)cSSXApp_getMCManager(SSXApp);
     int next = *(int*)((char*)mp + 0x428) + 1;
     if (next < *(int*)((char*)mp + 0x424)) {
-        func_0023FB18(mp, next);
+        cMCOverlayManager_selectDevice(mp, next);
         mp->v01(49);
         return;
     }
-    func_0023FB18(mp, 0);
+    cMCOverlayManager_selectDevice(mp, 0);
     if ((*(cMovieStreamK1D8160**)((char*)mp + 0x434))->v52(0) == 0) {
         char* fe = (char*)cFEMemCard_mInstance;
         if (*(int*)(fe + 0x208) != 0) {
@@ -1439,7 +1439,7 @@ extern void* cFEMemCard_mInstance;
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void cFEMemCard_SetLoadPressed(void*, int);
 extern "C" void cFEMemCard_callbackSaveFileCorrupt(void);
-extern "C" void func_0039F190(void* list, int a1);
+extern "C" void cUIStateStack_pop(void* list, int a1);
 
 struct sVEntryK1D8700 {
     short delta;
@@ -1480,7 +1480,7 @@ static inline void notifyK1D8700(char* self, char* mp)
  *   cancels, finishes.
  * - 8, 23, 24: cancel.
  *
- * Unless the popup id is 22, func_0039F190 then flags the top state of the engine's state stack (+0x18) to close;
+ * Unless the popup id is 22, cUIStateStack_pop then flags the top state of the engine's state stack (+0x18) to close;
  * +0x210 is cleared. Event 22 (popup closed) clears the words +0x1A4 and +0x1A0 when +0x1A0 is set; otherwise it clears
  * +0x210 (popup id 22 only) and the instance's popup pointer (+0x218).
  *
@@ -1634,7 +1634,7 @@ extern "C" void cFEMemCard_onPopupEvent(void* self_, int popup, int button)
             break;
         }
         if (*(int*)(self + 0x19C) != 22) {
-            func_0039F190(*(char**)((char*)cFEMemCard_mInstance + 0x10) + 0x18, 1);
+            cUIStateStack_pop(*(char**)((char*)cFEMemCard_mInstance + 0x10) + 0x18, 1);
         }
         *(int*)(self + 0x210) = 0;
     } else if (button == 22) {
@@ -1795,7 +1795,7 @@ extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" void cMCOverlayManager_GetMessage(void*, unsigned short*, int);
 extern "C" void cOVState_onUpdate(void);
 extern "C" void cUIState_onUpdate(void*);
-extern "C" void func_00241380(void*);
+extern "C" void cMCOverlayManager_ManagerStart(void*);
 extern "C" int cMCOverlayManager_isManagerDone(void*);
 extern "C" void cMCOverlayManager_update(void*);
 extern void* cFEMemCard_mInstance;
@@ -1882,7 +1882,7 @@ struct sVEntryK1D8DE0 {
  * status display.
  *
  * Without a popup (+0x218) and with +0x1A4 clear it runs the base update: cOVState_onUpdate in game (SSXApp->Game set),
- * cUIState_onUpdate otherwise. The first time (+0x1D8 clear) it starts the manager (func_00241380), sets +0x1D8,
+ * cUIState_onUpdate otherwise. The first time (+0x1D8 clear) it starts the manager (cMCOverlayManager_ManagerStart), sets +0x1D8,
  * display state 1 (+0x214 and triggerDisplayState, slot 35) and InitCardsCheck (49). cMCOverlayManager_update runs
  * unless the screen state (+0x1C0) is 6 and the card work is over; busy means +0x1B0 is 1 and
  * cMCOverlayManager_isManagerDone is false, or +0x1B0 is 0 and the card's IsBusy (slot 11) is true. The screen state
@@ -1908,7 +1908,7 @@ extern "C" void cFEMemCard_onUpdate(cMemCardK1D8DE0* card)
     }
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
     if (*(int*)(self + 0x1D8) == 0) {
-        func_00241380(mp);
+        cMCOverlayManager_ManagerStart(mp);
         *(int*)(self + 0x1D8) = 1;
         *(int*)(self + 0x214) = 1;
         VCALL_K1D8DE0(self, 8, 35), 1);
@@ -2681,7 +2681,7 @@ extern "C" void cFEPopupConfirm_setDefaultButton(void* self, int uiButton)
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", cFEStateNetHelpPopup_cFEStateNetHelpPopup);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E318(void* self, void* engine, void* owner);
+extern "C" void* cUIState_cUIState1(void* self, void* engine, void* owner);
 extern "C" void cFEStateNetHelpPopup_clear(void* self);
 extern char cFEStateNetHelpPopup_vtbl[];
 
@@ -2695,7 +2695,7 @@ struct sMcSlot9D48 {
 /**
  * Constructs a network help popup state owned by another state.
  *
- * Runs the cUIState constructor func_0039E318(self, engine, owner), stores cFEStateNetHelpPopup_vtbl, runs the empty
+ * Runs the cUIState constructor cUIState_cUIState1(self, engine, owner), stores cFEStateNetHelpPopup_vtbl, runs the empty
  * constructor of a 7-element array at +0x54 (8-byte elements), clears +0x4C and +0x50 (the flag that makes
  * cFEStateNetHelpPopup_handleEvent forward events to the owner), sets mHashName (+0xC) to 76 and clears the popup's
  * texts and options with cFEStateNetHelpPopup_clear().
@@ -2706,7 +2706,7 @@ struct sMcSlot9D48 {
  */
 extern "C" void* cFEStateNetHelpPopup_cFEStateNetHelpPopup(void* self, void* engine, void* owner)
 {
-    func_0039E318(self, engine, owner);
+    cUIState_cUIState1(self, engine, owner);
     *(void**)((char*)self + 0x8) = cFEStateNetHelpPopup_vtbl;
     new ((char*)self + 0x54) sMcSlot9D48[7];
     *(int*)((char*)self + 0x4C) = 0;

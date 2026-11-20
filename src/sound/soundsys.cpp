@@ -3304,7 +3304,7 @@ struct sSSXAudioView : public sSndSys69A0 {  // a view of cSSXAudio (sound/ssxau
     char pad603C[0x6040 - 0x603C];
     int users;               // 0x6040
     char pad6044[0x6050 - 0x6044];
-    sSndQuad2 xf;            // 0x6050 rider transform pair (func_002DA1C0 output)
+    sSndQuad2 xf;            // 0x6050 rider transform pair (cAvalanche_getAvalancheDataByPosition output)
     int idx;                 // 0x6070 rider index (cBeing::getAIIndex)
 };
 
@@ -7592,7 +7592,7 @@ struct sV3DEF0 {
 struct sOutDEF0 {
     sQDEF0 q[2];
 };
-extern "C" void func_002DA1C0_c(sOutDEF0* out, sV3DEF0* in) __asm__("func_002DA1C0");
+extern "C" void cAvalanche_getAvalancheDataByPosition_c(sOutDEF0* out, sV3DEF0* in) __asm__("cAvalanche_getAvalancheDataByPosition");
 
 extern sSndCallback D_004A36D0_cb[] __asm__("D_004A36D0");
 // Grind/ride loop sound: reference-counted start (pushes the voice at the rider's position) and stop.
@@ -7614,7 +7614,7 @@ extern "C" void func_0029DEF0(cSSXAudio* vself, int on)
                 pos.x = p->x;
                 pos.y = p->y;
                 pos.z = p->z;
-                func_002DA1C0_c(&out, &pos);
+                cAvalanche_getAvalancheDataByPosition_c(&out, &pos);
                 *(sOutDEF0*)&self->xf = out;
             }
             sndBeginVoice(self, 8, 2);
@@ -7679,7 +7679,7 @@ extern "C" int func_0029E438(void* self, void* snd_)
 INCLUDE_ASM("sound/soundsys", func_0029E4A0);
 #ifdef SKIP_ASM
 extern "C" int func_0029E438(void *, void *);
-extern "C" void func_002DA1C0(void *, float *);
+extern "C" void cAvalanche_getAvalancheDataByPosition(void *, float *);
 
 struct sVEntryP_29E4A0 { short delta; short index; float* (*fn)(void*); };
 
@@ -7695,7 +7695,7 @@ extern "C" void func_0029E4A0(cSSXAudio* ssxAudio, void *voice) {
         riderPos[0] = pos[0];
         riderPos[1] = pos[1];
         riderPos[2] = pos[2];
-        func_002DA1C0(&positional, riderPos);
+        cAvalanche_getAvalancheDataByPosition(&positional, riderPos);
         (*(&ssxAudio->mAvalancheData)) = positional;
         *(int *)((char*)voice + 0x64) = func_0029E438((ssxAudio), dst);
     }

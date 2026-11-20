@@ -84,9 +84,9 @@ extern "C" void cUIState_showObjSafe(cUIState* self, char* name)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uistate", func_0039E9D8);
+INCLUDE_ASM("ui/uistate", cUIStateStack__cUIStateStack);
 #ifdef SKIP_ASM
-extern "C" void func_0039F8C8(void* self);
+extern "C" void cUIStateStack_destroyStates(void* self);
 extern "C" void cList_destroyList(void*);
 extern "C" void cListNode_destroyListNode(void* self);
 void operator_delete(int*);
@@ -94,16 +94,16 @@ extern void* cList_vtbl[];
 extern void* cListNode_vtbl[];
 
 /**
- * Destroys a UI state stack: destroys its states (func_0039F8C8), then its two lists.
+ * Destroys a UI state stack: destroys its states (cUIStateStack_destroyStates), then its two lists.
  *
  * The lists are the main stack (+0x0) and the explicit stack (+0x1C); bit 0 of @p flags frees the object. The UI engine
- * destructor func_00397B70 runs it on its +0x18.
+ * destructor cUIEngine__cUIEngine runs it on its +0x18.
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_0039E9D8(void* self, int flags)
+extern "C" void cUIStateStack__cUIStateStack(void* self, int flags)
 {
-    func_0039F8C8(self);
+    cUIStateStack_destroyStates(self);
     *(void***)((char*)self + 0x34) = cList_vtbl;
     cList_destroyList((char*)self + 0x1C);
     *(void***)((char*)self + 0x30) = cListNode_vtbl;
@@ -123,9 +123,9 @@ extern "C" void func_0039E9D8(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uistate", func_0039EA90);
+INCLUDE_ASM("ui/uistate", cUIStateStack_enableState);
 #ifdef SKIP_ASM
-struct func_0039EA90_sFlags {
+struct cUIStateStack_enableState_sFlags {
     unsigned int b0 : 1;
     unsigned int b1 : 1;
     unsigned int b2 : 1;
@@ -137,42 +137,42 @@ struct func_0039EA90_sFlags {
     unsigned int id : 6;
 };
 
-struct func_0039EA90_node {
+struct cUIStateStack_enableState_node {
     char pad0[0x4];
-    func_0039EA90_node* next; // 0x4
+    cUIStateStack_enableState_node* next; // 0x4
     char pad8[0x1C - 0x8];
     union {
         int flags; // 0x1C
-        func_0039EA90_sFlags bits;
+        cUIStateStack_enableState_sFlags bits;
     };
 };
 
-static inline void func_0039EA90_setB3(func_0039EA90_node* n, int v) { n->bits.b3 = v; }
-static inline void func_0039EA90_setB5(func_0039EA90_node* n, int v) { n->bits.b5 = v; }
-static inline void func_0039EA90_setId(func_0039EA90_node* n, int v) { n->bits.id = v; }
-static inline void func_0039EA90_setB4(func_0039EA90_node* n, int v) { n->bits.b4 = v; }
+static inline void cUIStateStack_enableState_setB3(cUIStateStack_enableState_node* n, int v) { n->bits.b3 = v; }
+static inline void cUIStateStack_enableState_setB5(cUIStateStack_enableState_node* n, int v) { n->bits.b5 = v; }
+static inline void cUIStateStack_enableState_setId(cUIStateStack_enableState_node* n, int v) { n->bits.id = v; }
+static inline void cUIStateStack_enableState_setB4(cUIStateStack_enableState_node* n, int v) { n->bits.b4 = v; }
 
 /**
  * Enables the first non-explicit state of mode @p id on a state stack: sets it visible, enabled and first-time, mode 2
  * (starting).
  *
- * Modes are bits 8..13 of the state's attribute word (+0x1C); explicit states (bit 6) are skipped. func_0039ECB0 uses
+ * Modes are bits 8..13 of the state's attribute word (+0x1C); explicit states (bit 6) are skipped. cUIStateStack_updateLoop uses
  * it to bring up a mode-1 or mode-8 state when nothing is current.
  *
  * @param list  the state stack (its main list)
  * @param id  the mode to look for
  * @return 1 when a state was enabled, else 0
  */
-extern "C" int func_0039EA90(cList* list, signed char id)
+extern "C" int cUIStateStack_enableState(cList* list, signed char id)
 {
-    func_0039EA90_node* n = (func_0039EA90_node*)cList_first(list);
+    cUIStateStack_enableState_node* n = (cUIStateStack_enableState_node*)cList_first(list);
     if (n != 0) {
         do {
             if ((((unsigned int)n->flags >> 8) & 0x3F) == id && ((n->flags >> 6) & 1) == 0) {
-                func_0039EA90_setB3(n, 1);
-                func_0039EA90_setB5(n, 1);
-                func_0039EA90_setId(n, 2);
-                func_0039EA90_setB4(n, 1);
+                cUIStateStack_enableState_setB3(n, 1);
+                cUIStateStack_enableState_setB5(n, 1);
+                cUIStateStack_enableState_setId(n, 2);
+                cUIStateStack_enableState_setB4(n, 1);
                 return 1;
             }
             n = n->next;
@@ -183,16 +183,16 @@ extern "C" int func_0039EA90(cList* list, signed char id)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uistate", func_0039EB60);
+INCLUDE_ASM("ui/uistate", cUIStateStack_checkForState);
 #ifdef SKIP_ASM
 struct cList;
 struct cListNode;
 cListNode* cList_first(cList*);
 int cListNode_isSentinel(cListNode*);
 
-struct func_0039EB60_node {
+struct cUIStateStack_checkForState_node {
     char pad0[0x4];
-    func_0039EB60_node* next; // 0x4
+    cUIStateStack_checkForState_node* next; // 0x4
     char pad8[0x1C - 0x8];
     int flags; // 0x1C
 };
@@ -200,15 +200,15 @@ struct func_0039EB60_node {
 /**
  * Returns whether a state stack holds a non-explicit state of mode @p id.
  *
- * func_0039ECB0 uses it with mode 1 when a popup closes.
+ * cUIStateStack_updateLoop uses it with mode 1 when a popup closes.
  *
  * @param list  the state stack (its main list)
  * @param id  the mode to look for
  * @return 1 when one exists, else 0
  */
-extern "C" int func_0039EB60(cList* list, signed char id)
+extern "C" int cUIStateStack_checkForState(cList* list, signed char id)
 {
-    func_0039EB60_node* n = (func_0039EB60_node*)cList_first(list);
+    cUIStateStack_checkForState_node* n = (cUIStateStack_checkForState_node*)cList_first(list);
     if (n != 0) {
         do {
             if ((((unsigned int)n->flags >> 8) & 0x3F) == id && ((n->flags >> 6) & 1) == 0) {
@@ -222,9 +222,9 @@ extern "C" int func_0039EB60(cList* list, signed char id)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uistate", func_0039EBE0);
+INCLUDE_ASM("ui/uistate", cUIStateStack_render2D);
 #ifdef SKIP_ASM
-struct func_0039EBE0_sVEntry {
+struct cUIStateStack_render2D_sVEntry {
     short delta;
     short index;
     void (*fn)(void*);
@@ -233,15 +233,15 @@ struct func_0039EBE0_sVEntry {
 /**
  * Draws a state stack: calls virtual slot 15 (2D render) on every visible state of the main and explicit lists.
  *
- * Visible is bit 3 of a state's attribute word (+0x1C). func_00397DF8 calls it on the engine's state stack.
+ * Visible is bit 3 of a state's attribute word (+0x1C). cUIEngine_render2D calls it on the engine's state stack.
  */
-extern "C" void func_0039EBE0(void* self)
+extern "C" void cUIStateStack_render2D(void* self)
 {
     char* n = (char*)cList_first((cList*)self);
     if (n != 0) {
         do {
             if ((*(int*)(n + 0x1C) >> 3) & 1) {
-                func_0039EBE0_sVEntry* vt = *(func_0039EBE0_sVEntry**)(n + 8);
+                cUIStateStack_render2D_sVEntry* vt = *(cUIStateStack_render2D_sVEntry**)(n + 8);
                 vt[15].fn(n + vt[15].delta);
             }
             n = *(char**)(n + 4);
@@ -251,7 +251,7 @@ extern "C" void func_0039EBE0(void* self)
     if (n != 0) {
         do {
             if ((*(int*)(n + 0x1C) >> 3) & 1) {
-                func_0039EBE0_sVEntry* vt = *(func_0039EBE0_sVEntry**)(n + 8);
+                cUIStateStack_render2D_sVEntry* vt = *(cUIStateStack_render2D_sVEntry**)(n + 8);
                 vt[15].fn(n + vt[15].delta);
             }
             n = *(char**)(n + 4);
@@ -261,28 +261,28 @@ extern "C" void func_0039EBE0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uistate", func_0039ECA8__FPv);
+INCLUDE_ASM("ui/uistate", cUIStateStack_render3D__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the state stack's 3D render.
  *
- * func_00398018 calls it on the engine's state stack.
+ * cUIEngine_render3D calls it on the engine's state stack.
  */
-void func_0039ECA8(void* self)
+void cUIStateStack_render3D(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uistate", func_0039ECB0);
+INCLUDE_ASM("ui/uistate", cUIStateStack_updateLoop);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" void cUIState_updateScreens(void* self);
-extern "C" void func_0039F7B8(void* self, void* st, int a2, int a3);
+extern "C" void cUIStateStack_setVisibleToChain(void* self, void* st, int a2, int a3);
 extern "C" void cListNode_removeFromList(void* self);
 extern "C" void* cUIStateStack_getCurrentState(void* self);
 
-struct func_0039ECB0_sFlags {
+struct cUIStateStack_updateLoop_sFlags {
     unsigned int b0 : 1;
     unsigned int cnt : 2;
     unsigned int b3 : 1;
@@ -293,25 +293,25 @@ struct func_0039ECB0_sFlags {
     unsigned int id : 6;
 };
 
-struct func_0039ECB0_sVEntry {
+struct cUIStateStack_updateLoop_sVEntry {
     short delta;
     short index;
     int (*fn)(void*, ...);
 };
 
-struct func_0039ECB0_node {
-    func_0039ECB0_sVEntry* pad0;
-    func_0039ECB0_node* next; // 0x4
-    func_0039ECB0_sVEntry* vt; // 0x8
+struct cUIStateStack_updateLoop_node {
+    cUIStateStack_updateLoop_sVEntry* pad0;
+    cUIStateStack_updateLoop_node* next; // 0x4
+    cUIStateStack_updateLoop_sVEntry* vt; // 0x8
     char padC[0x1C - 0xC];
     union {
         int flags; // 0x1C
-        func_0039ECB0_sFlags bits;
+        cUIStateStack_updateLoop_sFlags bits;
     };
-    func_0039ECB0_node* owner; // 0x20
+    cUIStateStack_updateLoop_node* owner; // 0x20
 };
 
-struct func_0039ECB0_sVEntryV {
+struct cUIStateStack_updateLoop_sVEntryV {
     short delta;
     short index;
     void (*fn)(void*, ...);
@@ -319,30 +319,30 @@ struct func_0039ECB0_sVEntryV {
 
 // g++ 2.95 virtual call through a {delta, index, fn} vtable entry; the V form discards the result.
 #define VCALL_ECB0(n, i, args...) (n)->vt[i].fn((char*)(n) + (n)->vt[i].delta , ## args)
-#define VCALLV_ECB0(n, i, args...) ((func_0039ECB0_sVEntryV*)(n)->vt)[i].fn((char*)(n) + (n)->vt[i].delta , ## args)
+#define VCALLV_ECB0(n, i, args...) ((cUIStateStack_updateLoop_sVEntryV*)(n)->vt)[i].fn((char*)(n) + (n)->vt[i].delta , ## args)
 
 /**
  * Runs one pass of the UI state life cycle over the enabled states of a state stack's main list.
  *
  * By mode (attribute bits 8..13): 2 calls virtual slot 4 and becomes 4 (a popup also shows its parent chain with
- * func_0039F7B8 and sends the parent event 0x15 through slot 17); 4 waits for slot 7 (passed the first-time bit) to
+ * cUIStateStack_setVisibleToChain and sends the parent event 0x15 through slot 17); 4 waits for slot 7 (passed the first-time bit) to
  * return nonzero, then 3; 3 calls slot 6 and becomes 5; 5 calls slot 12 each pass; 6 waits for slot 10, then 7; 7 calls
  * slots 11 and 5, becomes 8 and is disabled. A closing popup is marked pending delete, lowers its parent's popup count
  * (re-enabling the parent at 0) and sends it event 0x16; but when a mode-1 state exists (checked unless the push-check
  * bit 14 is set) it only hides its parent chain. A pending-delete state is unlinked and deleted (slot 1 with 3), others
- * are hidden. When nothing is current afterwards, a mode-1 state (or else a mode-8 one) is enabled with func_0039EA90.
+ * are hidden. When nothing is current afterwards, a mode-1 state (or else a mode-8 one) is enabled with cUIStateStack_enableState.
  * Changed states run cUIState_updateScreens.
  *
- * @return nonzero when a state finished closing and none started in this pass (func_0039F100 then runs another pass)
+ * @return nonzero when a state finished closing and none started in this pass (cUIStateStack_update then runs another pass)
  */
-extern "C" int func_0039ECB0(void* self)
+extern "C" int cUIStateStack_updateLoop(void* self)
 {
     int popped = 0;
     int any = 0;
-    func_0039ECB0_node* n = (func_0039ECB0_node*)cList_first((cList*)self);
+    cUIStateStack_updateLoop_node* n = (cUIStateStack_updateLoop_node*)cList_first((cList*)self);
     if (n != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
-            func_0039ECB0_node* next = n->next;
+            cUIStateStack_updateLoop_node* next = n->next;
             if ((n->flags >> 5) & 1) {
                 switch ((signed char)n->bits.id) {
                 case 2:
@@ -351,9 +351,9 @@ extern "C" int func_0039ECB0(void* self)
                     n->bits.id = 4;
                     cUIState_updateScreens(n);
                     if (n->flags & 1) {
-                        func_0039ECB0_node* o = n->owner;
+                        cUIStateStack_updateLoop_node* o = n->owner;
                         if (o != 0) {
-                            func_0039F7B8(self, o, 1, 1);
+                            cUIStateStack_setVisibleToChain(self, o, 1, 1);
                             VCALLV_ECB0(o, 17, n, 0x15);
                         }
                     }
@@ -397,10 +397,10 @@ extern "C" int func_0039ECB0(void* self)
                     }
                     top = n->flags & 1;
                     if (top) {
-                        func_0039ECB0_node* o = n->owner;
+                        cUIStateStack_updateLoop_node* o = n->owner;
                         popped = 0;
                         if (((n->flags >> 14) & 1) == 0) {
-                            found = func_0039EB60((cList*)self, 1);
+                            found = cUIStateStack_checkForState((cList*)self, 1);
                         } else {
                             found = 0;
                         }
@@ -414,7 +414,7 @@ extern "C" int func_0039ECB0(void* self)
                                 VCALLV_ECB0(o, 17, n, 0x16);
                             }
                         } else if (o != 0) {
-                            func_0039F7B8(self, o, 0, 1);
+                            cUIStateStack_setVisibleToChain(self, o, 0, 1);
                         }
                     }
                     if (n != 0) {
@@ -426,8 +426,8 @@ extern "C" int func_0039ECB0(void* self)
                         }
                     }
                     if (top == 0 || found != 0) {
-                        if (cUIStateStack_getCurrentState(self) == 0 && func_0039EA90((cList*)self, 1) == 0) {
-                            func_0039EA90((cList*)self, 8);
+                        if (cUIStateStack_getCurrentState(self) == 0 && cUIStateStack_enableState((cList*)self, 1) == 0) {
+                            cUIStateStack_enableState((cList*)self, 8);
                         }
                     }
                     break;
@@ -445,9 +445,9 @@ extern "C" int func_0039ECB0(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ui/uistate", func_0039F100);
+INCLUDE_ASM("ui/uistate", cUIStateStack_update);
 #ifdef SKIP_ASM
-extern "C" int func_0039ECB0(void* self);
+extern "C" int cUIStateStack_updateLoop(void* self);
 extern "C" void cUIState_updateScreens(void* self);
 
 struct sVEntry39F100 {
@@ -457,16 +457,16 @@ struct sVEntry39F100 {
 };
 
 /**
- * Updates a state stack: runs func_0039ECB0 (a second pass when the first returns nonzero), then updates the explicit
+ * Updates a state stack: runs cUIStateStack_updateLoop (a second pass when the first returns nonzero), then updates the explicit
  * states.
  *
  * Every state of the explicit list (+0x1C) gets virtual slot 12 when enabled and cUIState_updateScreens. The UI engine
- * update func_00398038 calls it.
+ * update cUIEngine_update calls it.
  */
-extern "C" void func_0039F100(void* self)
+extern "C" void cUIStateStack_update(void* self)
 {
-    if (func_0039ECB0(self) != 0) {
-        func_0039ECB0(self);
+    if (cUIStateStack_updateLoop(self) != 0) {
+        cUIStateStack_updateLoop(self);
     }
     cListNode* n = cList_first((cList*)((char*)self + 0x1C));
     if (n != 0) {
@@ -483,15 +483,15 @@ extern "C" void func_0039F100(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uistate", func_0039F190);
+INCLUDE_ASM("ui/uistate", cUIStateStack_pop);
 #ifdef SKIP_ASM
 struct cList;
 struct cListNode;
 cListNode* cList_first(cList*);
 
-struct func_0039F190_node {
+struct cUIStateStack_pop_node {
     char pad0[0x4];
-    func_0039F190_node* next; // 0x4
+    cUIStateStack_pop_node* next; // 0x4
     char pad8[0x1C - 0x8];
     unsigned int b0 : 6;
     unsigned int b6 : 1;
@@ -499,28 +499,28 @@ struct func_0039F190_node {
     unsigned int id : 6;
 };
 
-static inline void func_0039F190_setId(func_0039F190_node* n, int v) { n->id = v; }
-static inline void func_0039F190_setB7(func_0039F190_node* n, int v) { n->b7 = v; }
+static inline void cUIStateStack_pop_setId(cUIStateStack_pop_node* n, int v) { n->id = v; }
+static inline void cUIStateStack_pop_setB7(cUIStateStack_pop_node* n, int v) { n->b7 = v; }
 
 /**
  * Closes the top @p count states of a state stack: sets each to mode 6 (losing) and pending delete.
  *
- * Popups and front-end states call it with 1 to close themselves; the states then leave through func_0039ECB0.
+ * Popups and front-end states call it with 1 to close themselves; the states then leave through cUIStateStack_updateLoop.
  *
  * @param list  the state stack (its main list)
  * @param count  how many states to close
  * @return the state below the closed ones, or null
  */
-extern "C" func_0039F190_node* func_0039F190(cList* list, int count)
+extern "C" cUIStateStack_pop_node* cUIStateStack_pop(cList* list, int count)
 {
-    func_0039F190_node* n = (func_0039F190_node*)cList_first(list);
+    cUIStateStack_pop_node* n = (cUIStateStack_pop_node*)cList_first(list);
     int i;
     for (i = 0; i < count; i++) {
         if (n == 0) {
             goto done;
         }
-        func_0039F190_setId(n, 6);
-        func_0039F190_setB7(n, 1);
+        cUIStateStack_pop_setId(n, 6);
+        cUIStateStack_pop_setB7(n, 1);
         n = n->next;
     }
 done:
@@ -530,7 +530,7 @@ done:
 
 
 //100%
-INCLUDE_ASM("ui/uistate", func_0039F200);
+INCLUDE_ASM("ui/uistate", cUIStateStack_pop1);
 #ifdef SKIP_ASM
 /**
  * Closes one active state: when @p node is enabled and in mode 5 it becomes mode 6 (losing) and pending delete.
@@ -539,7 +539,7 @@ INCLUDE_ASM("ui/uistate", func_0039F200);
  *
  * @param node  the state to close
  */
-extern "C" void func_0039F200(void* self, char* node)
+extern "C" void cUIStateStack_pop1(void* self, char* node)
 {
     int flags = *(int*)(node + 0x1C);
     if (((flags >> 5) & 1) && (((unsigned int)flags >> 8) & 0x3F) == 5) {

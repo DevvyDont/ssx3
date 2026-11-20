@@ -23,7 +23,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 void cMemMan_free(void* p);
 void cLoadTimer_startload(void* bar, float v);
 void cLoadTimer_setnextpercent(void* bar, float v);
-extern "C" void func_00195DE0(void* p);
+extern "C" void cFELocale_loadOV(void* p);
 extern "C" void cSSXScriptEngine_Load(void* eng);
 extern "C" void* cFont_cFont(void* p, const char* name, int a);
 extern "C" void cGameComm_syncGame(void* comm);
@@ -75,7 +75,7 @@ extern "C" void* cCutSceneTransitionMan_cCutSceneTransitionMan(void* p, int a);
 extern "C" void* cFlagManager_cFlagManager(void* p, int a);
 extern "C" void* cSnowFall_cSnowFall(void* p, int a);
 extern "C" void cSSXAudio_InGameLoad(void* p);
-extern "C" void* func_00397B08(void* p);
+extern "C" void* cUIEngine_cUIEngine(void* p);
 extern "C" void cUIEngine_loadFile(void* ui, char* name);
 extern "C" void* cOVSound_cOVSound(void* p);
 extern "C" void* cOVStateHUD1P_cOVStateHUD1P(void* p, void* ui, int a);
@@ -90,7 +90,7 @@ extern "C" void cGame_setState(cGame* self, int a, int b, int refresh);
 extern "C" void* cObjNode_cObjNode1(void* p, int a);
 extern "C" void* cAIVisualEffectsMan_construct();
 extern "C" void* cVisualEffectsMan_construct();
-extern "C" void* func_002D2100();
+extern "C" void* cSSXStatsMan_construct();
 extern char* cAppMan_TheAppMan;
 extern int cBESaveInterface_bDoReplay;
 extern int D_004A3484;
@@ -220,7 +220,7 @@ extern "C" void cGame_load(cGame* self)
     void** lights = ((void**)&self->SplashManager[0]);
     cLoadTimer_startload(cAppMan_TheAppMan + 0x38, 13.199999809265137f);
     cLoadTimer_setnextpercent(cAppMan_TheAppMan + 0x38, 43.5f);
-    func_00195DE0(SSXApp->FELocale);
+    cFELocale_loadOV(SSXApp->FELocale);
     {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVEntryVoidGL* vt = (sVEntryVoidGL*)ps2GraphicsMan->mVtbl;
@@ -338,7 +338,7 @@ extern "C" void cGame_load(cGame* self)
     self->mUpdateTick = 0;
     cSSXAudio_InGameLoad(gSSXAudio);
     cLoadTimer_setnextpercent(cAppMan_TheAppMan + 0x38, 99.0f);
-    sUIGL* ui = (sUIGL*)func_00397B08(operator new(0x70, str_UIEngine_b, 0, 0));
+    sUIGL* ui = (sUIGL*)cUIEngine_cUIEngine(operator new(0x70, str_UIEngine_b, 0, 0));
     self->UI = (cUIEngine*)ui;
     ui->p10 = (void*)SSXApp->FELocale;
     sName11GL name = D_0047B6A8;
@@ -397,7 +397,7 @@ extern "C" void cGame_load(cGame* self)
     objNode = (sNamedGL*)operator new(20, str_SSXStatsMan, 0, 0);
     cObjNode_cObjNode1(objNode, 4);
     objNode->vtbl = cSSXStatsObjNode_vtbl;
-    result = func_002D2100();
+    result = cSSXStatsMan_construct();
     objNode->obj = result;
     self->SSXStatsMan = (cSSXStatsObjNode*)objNode;
 }
@@ -573,7 +573,7 @@ extern "C" void cCameraTriggerMan_cleanupOnExit(void* self);
 extern "C" void cCameraTriggerMan_purge(void* self);
 extern "C" void cFEAsyncManager_FlushFEAsyncTextures(void* p);
 extern "C" void cSSXScriptEngine_ForceEndScriptsAll(void* p);
-extern "C" void func_00397B70(void* p, int flags);
+extern "C" void cUIEngine__cUIEngine(void* p, int flags);
 extern "C" void cInputSync__cInputSync(void* p, int flags);
 extern "C" void cCutSceneTransitionMan_ForceToRegularMode(void* p);
 void cSurfPropCache_purge(void* p);
@@ -595,18 +595,18 @@ extern "C" void cSectionMan__cSectionMan(void* p, int flags);
 extern "C" void cFXLoader__cFXLoader(void* p, int flags);
 extern "C" void cWorldLightMan__cWorldLightMan(void* p, int flags);
 extern "C" void cWorld__cWorld(void* p, int flags);
-extern "C" void func_00242518(void* p, int flags);
+extern "C" void cOcclusionMan__cOcclusionMan(void* p, int flags);
 struct cBigFile;
 void cBigFile__cBigFile(cBigFile* self, int flags);
-extern "C" void func_003916C0(void* p, int flags);
+extern "C" void cFont__cFont(void* p, int flags);
 extern "C" void cGraphicsMan_PurgeTextures(void* p);
-extern "C" void func_0038ADB0(void* p);
+extern "C" void cIrradianceDataBase_Purge(void* p);
 extern "C" void func_002B6AE0(void* p, int flags);
 extern "C" void cWorldTriggerManager_Reset(void* a);
 extern "C" void cSSXAudio_InGameDeInit(void* p);
 extern "C" void cSSXAudio_InGamePurge(void* p);
 extern "C" void cSSXScriptEngine_Purge(void* p);
-extern "C" void func_0036A290(void);
+extern "C" void cGarbageMan_Purge(void);
 
 extern void* gWorldTriggerManager;
 extern int D_004A2A54;
@@ -692,7 +692,7 @@ struct sObj20_FA98 {
  * MultiParticleMan, PlaybackMan and InstanceMan, purges the camera triggers and render states, and deletes ViewMan,
  * AI, Replay, StreamPause, SectionMan, FXLoader, WorldLightMan, World, OcclusionMan, the track BigFile,
  * LoadIndicator (freed only), DebugFont and BXNash. Finally GrMan slots 113 and 50 (the box texture mBoxTextureID),
- * cGraphicsMan_PurgeTextures and func_0038ADB0, SSXApp->Game = 0, WorldSound deleted, the world triggers reset, the in-game
+ * cGraphicsMan_PurgeTextures and cIrradianceDataBase_Purge, SSXApp->Game = 0, WorldSound deleted, the world triggers reset, the in-game
  * audio de-initialised and purged, the script engine purged, and D_004A2A54 and the word at cAppMan_TheAppMan + 0x34
  * cleared.
  */
@@ -716,7 +716,7 @@ extern "C" void cGame_purge(char* self)
     }
     cFEAsyncManager_FlushFEAsyncTextures(SSXApp->mFEAsyncManager);
     cSSXScriptEngine_ForceEndScriptsAll(ScriptEngine);
-    if (*(void**)(self + 0x48) != 0) func_00397B70(*(void**)(self + 0x48), 3);
+    if (*(void**)(self + 0x48) != 0) cUIEngine__cUIEngine(*(void**)(self + 0x48), 3);
     if (*(void**)(self + 0x7C) != 0) cInputSync__cInputSync(*(void**)(self + 0x7C), 3);
     cCutSceneTransitionMan_ForceToRegularMode(*(void**)(self + 0x64));
     cSurfPropCache_purge(*(void**)(self + 0x44));
@@ -746,10 +746,10 @@ extern "C" void cGame_purge(char* self)
     if (*(void**)(self + 0x2C) != 0) cFXLoader__cFXLoader(*(void**)(self + 0x2C), 3);
     if (*(void**)(self + 0x90) != 0) cWorldLightMan__cWorldLightMan(*(void**)(self + 0x90), 3);
     if (*(void**)(self + 0x10) != 0) cWorld__cWorld(*(void**)(self + 0x10), 3);
-    if (*(void**)(self + 0x8C) != 0) func_00242518(*(void**)(self + 0x8C), 3);
+    if (*(void**)(self + 0x8C) != 0) cOcclusionMan__cOcclusionMan(*(void**)(self + 0x8C), 3);
     if (*(cBigFile**)(self + 0xA8) != 0) cBigFile__cBigFile(*(cBigFile**)(self + 0xA8), 3);
     operator_delete(*(int**)(self + 0x94));
-    if (*(void**)(self + 0x24) != 0) func_003916C0(*(void**)(self + 0x24), 3);
+    if (*(void**)(self + 0x24) != 0) cFont__cFont(*(void**)(self + 0x24), 3);
     {
         sObj20_FA98* nash = *(sObj20_FA98**)(self + 0x20);
         if (nash != 0) {
@@ -768,14 +768,14 @@ extern "C" void cGame_purge(char* self)
         vtEntry->fn((char*)be + vtEntry->delta, *(void**)(self + 0x220));
     }
     cGraphicsMan_PurgeTextures(GrMan);
-    func_0038ADB0(D_005047F8);
+    cIrradianceDataBase_Purge(D_005047F8);
     *(void**)&SSXApp->Game = 0;
     if (*(void**)(self + 0x4C) != 0) func_002B6AE0(*(void**)(self + 0x4C), 3);
     cWorldTriggerManager_Reset(gWorldTriggerManager);
     cSSXAudio_InGameDeInit(gSSXAudio);
     cSSXAudio_InGamePurge(gSSXAudio);
     cSSXScriptEngine_Purge(ScriptEngine);
-    func_0036A290();
+    cGarbageMan_Purge();
     D_004A2A54 = 0;
     *(int*)(cAppMan_TheAppMan + 0x34) = 0;
 }
@@ -805,7 +805,7 @@ public:
     virtual void v16();
     virtual void v17();
 };
-extern "C" void func_00195D50(void* a);
+extern "C" void cFELocale_unloadFE(void* a);
 extern "C" void cBXLoadIndicator_Init(void* a);
 void cSSXScriptEngine_Init(void* a);
 extern "C" void cGraphicsMan_UploadTextures(void* a);
@@ -828,7 +828,7 @@ extern int cScreenTint_m_Enable;
  */
 extern "C" void cGame_gainFocus(cGame* self)
 {
-    func_00195D50(SSXApp->FELocale);
+    cFELocale_unloadFE(SSXApp->FELocale);
     void* loadIndicator = self->LoadIndicator;
     cOVStateManager_mpPDATemplate = 0;
     cBXLoadIndicator_Init(loadIndicator);
@@ -1150,7 +1150,7 @@ INCLUDE_ASM("main/gameload", func_00230558);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cReplay_startReplay(void* a, int b, int c, int d);
-void func_002CC0B8(void* a, int b);
+void cMenuSys_activate(void* a, int b);
 extern int D_004A2A54;
 extern int cPauseState_Flags;
 extern int D_005366E8[];
@@ -1168,14 +1168,14 @@ struct sGameLoad_0558 {
  *
  * Pushes pause state 8 (D_005366E8[++D_004A2A54] = 8) and sets cPauseState_Flags to that state's flags (D_00442910,
  * entry 8 of the table D_004428F0), starts the replay (+0x28) with cReplay_startReplay(replay, 0, 0, 0) and calls
- * func_002CC0B8 (On Tour cMenuSys::activate) with 0 on the menu system (+0xA4). The pause stack index is not checked.
+ * cMenuSys_activate (On Tour cMenuSys::activate) with 0 on the menu system (+0xA4). The pause stack index is not checked.
  */
 extern "C" void func_00230558(sGameLoad_0558* self)
 {
     D_005366E8[++D_004A2A54] = 8;
     cPauseState_Flags = D_00442910[0];
     cReplay_startReplay(self->field_0x28, 0, 0, 0);
-    func_002CC0B8(self->field_0xA4, 0);
+    cMenuSys_activate(self->field_0xA4, 0);
 }
 #endif
 
@@ -1183,8 +1183,8 @@ extern "C" void func_00230558(sGameLoad_0558* self)
 INCLUDE_ASM("main/gameload", cGame_stopReplay);
 #ifdef SKIP_ASM
 extern "C" void cReplay_stopReplay(void* a);
-void func_002CC0B8(void* a, int b);
-extern "C" void func_002CC460(void* a);
+void cMenuSys_activate(void* a, int b);
+extern "C" void cMenuSys_popMenu(void* a);
 extern int D_004A2A54;
 extern int cPauseState_Flags;
 extern int D_005366E8[];
@@ -1193,15 +1193,15 @@ extern int D_004428F0[];
 /**
  * Ends replay playback and returns to the pause menu state that was active before it.
  *
- * Stops the replay (+0x28), calls func_002CC0B8 (On Tour cMenuSys::activate) with 1 and func_002CC460
+ * Stops the replay (+0x28), calls cMenuSys_activate (On Tour cMenuSys::activate) with 1 and cMenuSys_popMenu
  * (cMenuSys::popMenu) on the menu system (+0xA4), then pops the pause stack (D_004A2A54 index into D_005366E8)
  * and restores cPauseState_Flags from D_004428F0. The stack index is not checked (On Tour asserts it is > 0).
  */
 extern "C" void cGame_stopReplay(cGame* self)
 {
     cReplay_stopReplay(self->Replay);
-    func_002CC0B8(self->MenuSys, 1);
-    func_002CC460(self->MenuSys);
+    cMenuSys_activate(self->MenuSys, 1);
+    cMenuSys_popMenu(self->MenuSys);
     cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
 }
 #endif
@@ -1262,7 +1262,7 @@ int cGame_getSplashManager(void* self, int i)
 //100%
 INCLUDE_ASM("main/gameload", cGame_update);
 #ifdef SKIP_ASM
-extern "C" float func_002EE400(int id);
+extern "C" float cRenderStateMan_SkyBoxRotation(int id);
 extern "C" void cGameComm_update(void* p);
 extern "C" void cSSXScriptEngine_UpdateLoad(void* p);
 extern "C" int cGameViewMan_isStreamReady(void* p);
@@ -1273,12 +1273,12 @@ extern "C" void cWorldCache_flushInActivePages(void* p);
 extern "C" void cInputSync_preupdate(void* p);
 extern "C" void cOVStateManager_update(void);
 extern "C" int cMenuSys_isActive(void* p);
-extern "C" void func_002CC0C0(void* p);
+extern "C" void cMenuSys_input(void* p);
 extern "C" int* tMissionMenuQueue_getEntry(void* p);
 extern "C" void cOVStateManager_triggerOverlay(int id);
 extern "C" void cSSXAudio_PlayIconSound(void* p, int a, int b, float c);
 extern "C" void cWScriptMan_doMissionCmd(void* p, int a, int b, int c);
-extern "C" void func_00398038(void* p);
+extern "C" void cUIEngine_update(void* p);
 extern "C" void tMissionMenuQueue_getNextEntry(void* p);
 extern "C" void func_0029ED18(void* p);
 // PORT: the unit defines cGame_activatePauseMenu(char* self); this caller passes a second argument (a1 = 0).
@@ -1449,7 +1449,7 @@ static inline int updateState_2306B8(cGame* self)
                 if (cUIStateStack_findState(((char*)self->UI) + 0x18, GetHashValue32(str_90bc_fail_b)) == 0) {
                     cOVStateManager_triggerOverlay(0x1E);
                     pushState_2306B8(3);
-                    func_00398038(((char*)self->UI));
+                    cUIEngine_update(((char*)self->UI));
                 } else {
                     tMissionMenuQueue_getNextEntry((char*)cWScriptMan_TheWScriptMan + 0x1C4);
                 }
@@ -1465,8 +1465,8 @@ static inline int updateState_2306B8(cGame* self)
         return 0;
     }
     if (cMenuSys_isActive(((char*)self->MenuSys)) != 0) {
-        func_00398038(((char*)self->UI));
-        func_002CC0C0(((char*)self->MenuSys));
+        cUIEngine_update(((char*)self->UI));
+        cMenuSys_input(((char*)self->MenuSys));
         return 0;
     }
     if (cGame_activatePauseMenu_pi(self, 0) != 0 && !inRace_2306B8(*((int*)((char*)self->Replay)))
@@ -1485,7 +1485,7 @@ static inline int updateState_2306B8(cGame* self)
     }
     {
         int wasPaused = paused_2306B8();
-        func_00398038(((char*)self->UI));
+        cUIEngine_update(((char*)self->UI));
         if (cOVStateManager_pauseOverlayActive() == 0) {
             cPlaybackMan_update(((char*)self->PlaybackMan));
             if (cMenuSys_isActive(((char*)self->MenuSys)) != 0) {
@@ -1514,7 +1514,7 @@ extern "C" void cGame_update(cGame* self)
     if (*(unsigned int*)((char*)self->ViewMan + 0x10) >= 2) {
         *(int*)(cAppMan_TheAppMan + 0x34) = 1;
     } else {
-        *(int*)(cAppMan_TheAppMan + 0x34) = func_002EE400(6) > 0.9f;
+        *(int*)(cAppMan_TheAppMan + 0x34) = cRenderStateMan_SkyBoxRotation(6) > 0.9f;
     }
     if (cGameComm_mGameComm != 0) {
         cGameComm_update(cGameComm_mGameComm);
@@ -2602,7 +2602,7 @@ extern "C" void* cFadeScreen_update(void* self)
 //100%
 INCLUDE_ASM("main/gameload", cFadeScreen_drawFade);
 #ifdef SKIP_ASM
-extern "C" void func_0038EC40(void* self, float* p0, float* p1, float* col, float z);
+extern "C" void c2DRender_drawRect4(void* self, float* p0, float* p1, float* col, float z);
 extern int D_004A28AC;
 extern char t4mat_Identity[];
 
@@ -2682,7 +2682,7 @@ static inline float Clamp231D60(float v, float lo, float hi)
  *
  * Does nothing and returns 0 while the timer (+0x4) is 0 or less. Otherwise pushes a copy of the draw state, resets it
  * to sDrawState_s_defaultDrawState, sets the full-screen viewport and the identity matrix and the blend bits, draws a
- * quad from (-1, -1) to (1, 1) with colour {alpha, 0, 0, 0} through func_0038EC40 (D_004A28AC), and pops the draw
+ * quad from (-1, -1) to (1, 1) with colour {alpha, 0, 0, 0} through c2DRender_drawRect4 (D_004A28AC), and pops the draw
  * state. cGame_render, cRealFE_render, cDebugFE_render and cFELoadScreen_render call it.
  *
  * @return 1 once the fade is fully opaque (alpha >= 1), otherwise 0
@@ -2712,7 +2712,7 @@ extern "C" int cFadeScreen_drawFade(void* self)
     col[1] = 0.0f;
     col[2] = 0.0f;
     col[3] = 0.0f;
-    func_0038EC40((void*)D_004A28AC, minCorner, maxCorner, col, 0.0f);
+    c2DRender_drawRect4((void*)D_004A28AC, minCorner, maxCorner, col, 0.0f);
     *(int*)&GrMan->m_pCurrentDrawState -= 20;
     return alpha >= 1.0f;
     }

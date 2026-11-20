@@ -11976,7 +11976,7 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00266358);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int func_00266578(int err);
 extern int D_004A3940;
-extern "C" int func_002C51D0(void* self, int id);
+extern "C" int cPS2MemCard_GetLastError(void* self, int id);
 void func_002C67E8(void* self, int a1);
 extern "C" void func_002C68C8(void* self, int i, char* out);
 extern "C" int func_003FA360(char* name);
@@ -12008,7 +12008,7 @@ struct cDsObj266358 {
  * Memory-card callback 15 of the network-account library: polls the card operation started by the other callbacks.
  *
  * Operations 3, 15 and 16 report done (status 2) at once, operation 10 reports done with 0x800. Otherwise, while the
- * card D_004A33D8 is busy (slot 11) the status is 1; when it is idle the status is 2, and a card error (func_002C51D0
+ * card D_004A33D8 is busy (slot 11) the status is 1; when it is idle the status is 2, and a card error (cPS2MemCard_GetLastError
  * for the current port) is returned through func_00266578. Per operation D_004A33D4: 1 re-runs the card check while the
  * retry count D_004A33E4 lasts (status stays 1), then sets D_004A33E0; 2 copies each directory entry (mNumDirTable at
  * +0x54, func_002C68C8) into D_00537190 and reports 1 for the first one func_003FA360 accepts; 5, 6 and 14 report the
@@ -12038,8 +12038,8 @@ extern "C" int func_00266358(int* status, int* out)
         return 0;
     }
     *status = 2;
-    if (func_002C51D0(D_004A33D8, *(int*)((char*)D_004A33D8 + 0xC))) {
-        return func_00266578(func_002C51D0(D_004A33D8, *(int*)((char*)D_004A33D8 + 0xC)));
+    if (cPS2MemCard_GetLastError(D_004A33D8, *(int*)((char*)D_004A33D8 + 0xC))) {
+        return func_00266578(cPS2MemCard_GetLastError(D_004A33D8, *(int*)((char*)D_004A33D8 + 0xC)));
     }
     switch (D_004A33D4) {
     case 0:
@@ -12508,7 +12508,7 @@ struct sChanSet_266BA8 {
  * Takes the next key pair from a USB keyboard slot's ring.
  *
  * Both outputs start at -1 and a zero byte leaves its output at -1. Does nothing when the reader is disabled or @p ch
- * is not below the connect count (func_003F6348). cFEInput_update and func_002CC0C0 call it.
+ * is not below the connect count (func_003F6348). cFEInput_update and cMenuSys_input call it.
  *
  * @param ch         the keyboard slot
  * @param firstOut   receives the pair's first byte, or -1

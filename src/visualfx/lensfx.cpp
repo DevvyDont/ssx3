@@ -559,7 +559,7 @@ extern "C" void cRenderStateMan_init(void)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002ED1D0);
+INCLUDE_ASM("visualfx/lensfx", tRenderState_blendToColour);
 #ifdef SKIP_ASM
 struct sLerpV4_D1D0 {
     float x, y, z, w;
@@ -592,7 +592,7 @@ struct sLensLerp_D1D0 {
  * @param targetB  the target for the colour at +0x38
  * @param full  nonzero to jump straight to the targets
  */
-extern "C" void func_002ED1D0(sLensLerp_D1D0* self, const sLerpV4_D1D0* targetA, const sLerpV4_D1D0* targetB, int full)
+extern "C" void tRenderState_blendToColour(sLensLerp_D1D0* self, const sLerpV4_D1D0* targetA, const sLerpV4_D1D0* targetB, int full)
 {
     float weight = 0.8999999761581421f;
     float keep;
@@ -606,7 +606,7 @@ extern "C" void func_002ED1D0(sLensLerp_D1D0* self, const sLerpV4_D1D0* targetA,
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002ED338);
+INCLUDE_ASM("visualfx/lensfx", tRenderState_blendToColour1);
 #ifdef SKIP_ASM
 struct sLerpV4 {
     float x, y, z, w;
@@ -639,7 +639,7 @@ struct sLensLerp {
  * @param targetB  the target for the colour at +0x38
  * @param weight  the blend weight, 0..1
  */
-extern "C" void func_002ED338(sLensLerp* self, const sLerpV4* targetA, const sLerpV4* targetB, float weight)
+extern "C" void tRenderState_blendToColour1(sLensLerp* self, const sLerpV4* targetA, const sLerpV4* targetB, float weight)
 {
     float keep = 1.0f - weight;
     self->a = sLerpV4(self->a.x * keep, self->a.y * keep, self->a.z * keep, self->a.w * keep) + *targetA * weight;
@@ -650,7 +650,7 @@ extern "C" void func_002ED338(sLensLerp* self, const sLerpV4* targetA, const sLe
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_update);
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EDB20);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_calculatePatchColour);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sV4_DB20 {
@@ -740,7 +740,7 @@ static inline sV4_DB20 Sample_DB20(float u, float v, short tex)
  * @param baseColour  receives the first colour
  * @param lightmapColour  receives the second colour
  */
-extern "C" void func_002EDB20(sLensSrc_DB20* self, float tx, float ty, sV4_DB20* baseColour, sV4_DB20* lightmapColour)
+extern "C" void cRenderStateMan_calculatePatchColour(sLensSrc_DB20* self, float tx, float ty, sV4_DB20* baseColour, sV4_DB20* lightmapColour)
 {
     sV4_DB20 type5Sample(0.0f, 0.0f, 0.0f, 0.0f);
     sV4_DB20 type1Sample(0.0f, 0.0f, 0.0f, 0.0f);
@@ -769,7 +769,7 @@ extern "C" void func_002EDB20(sLensSrc_DB20* self, float tx, float ty, sV4_DB20*
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EDF00);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_calculateIrradianceBlend);
 #ifdef SKIP_ASM
 extern "C" float func_0040DA10(float x);
 extern "C" float func_0040D758(float x);
@@ -799,7 +799,7 @@ static inline float clamp_DF00(float f, float lo, float hi)
  *
  * @return the factor, 0..1
  */
-extern "C" float func_002EDF00(void* self)
+extern "C" float cRenderStateMan_calculateIrradianceBlend(void* self)
 {
     float lum = *(float*)((char*)self + 0x4) * 0.29899999499320984f
               + *(float*)((char*)self + 0x8) * 0.5870000123977661f
@@ -820,7 +820,7 @@ extern "C" float func_002EDF00(void* self)
 extern char D_lensTable_DFB8[] __asm__("cRenderStateMan_m_state");
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EDFB8);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_getIrradiance);
 #ifdef SKIP_ASM
 /**
  * Returns the irradiance of render state @p index: the address of its row's +0x50 in cRenderStateMan_m_state.
@@ -830,14 +830,14 @@ INCLUDE_ASM("visualfx/lensfx", func_002EDFB8);
  * @param index  the render state (view) index
  * @return pointer to the row's irradiance block
  */
-extern "C" void* func_002EDFB8(int index)
+extern "C" void* cRenderStateMan_getIrradiance(int index)
 {
     return D_lensTable_DFB8 + 0x50 + index * 0xf0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EDFD0);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_resolveIrradianceName);
 #ifdef SKIP_ASM
 extern char D_005047F8[];
 extern "C" int cIrradianceDataBase_GetIDByName(void*, void*);
@@ -846,10 +846,10 @@ extern "C" int cIrradianceDataBase_GetIDByName(void*, void*);
  * Resolves an irradiance name field in place: replaces its first word with the name's id and sets +0x4 to 0x123400 to
  * mark it resolved.
  *
- * Looks the name up with cIrradianceDataBase_GetIDByName in the irradiance database D_005047F8. func_002EE010 calls it
+ * Looks the name up with cIrradianceDataBase_GetIDByName in the irradiance database D_005047F8. cRenderStateMan_Irradiance calls it
  * on first use.
  */
-extern "C" void func_002EDFD0(void* self)
+extern "C" void cRenderStateMan_resolveIrradianceName(void* self)
 {
     *(int*)self = cIrradianceDataBase_GetIDByName(D_005047F8, self);
     *(int*)((char*)self + 4) = 0x123400;
@@ -857,29 +857,29 @@ extern "C" void func_002EDFD0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EE010);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_Irradiance);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* func_0038ABF8(void* self, int i);
 extern int D_004A43C4;
 
-extern "C" void* func_002EE010_r(void* self) __asm__("func_002EE010");
+extern "C" void* cRenderStateMan_Irradiance_r(void* self) __asm__("cRenderStateMan_Irradiance");
 /**
  * Returns the irradiance record for an irradiance name field, resolving the name on first use.
  *
- * A field not yet tagged 0x123400 at +0x4 is resolved with func_002EDFD0, or, when its name is empty, gives the default
- * id D_004A43C4. The record comes from func_0038ABF8 on the irradiance database D_005047F8. func_002EE2F8,
- * func_002EE318, func_002EE340, func_002EE368 and func_002EE390 call it.
+ * A field not yet tagged 0x123400 at +0x4 is resolved with cRenderStateMan_resolveIrradianceName, or, when its name is empty, gives the default
+ * id D_004A43C4. The record comes from func_0038ABF8 on the irradiance database D_005047F8. cRenderStateMan_getCustomIrradiance,
+ * cRenderStateMan_LightIrradiance, cRenderStateMan_ShadowIrradiance, cRenderStateMan_TunnelIrradiance and cRenderStateMan_ObjectIrradiance call it.
  *
  * @return the irradiance record
  */
-extern "C" void* func_002EE010_r(void* self)
+extern "C" void* cRenderStateMan_Irradiance_r(void* self)
 {
     if (*(int*)((char*)self + 4) != 0x123400) {
         if (*(signed char*)self == 0) {
             return func_0038ABF8(D_005047F8, D_004A43C4);
         }
-        func_002EDFD0(self);
+        cRenderStateMan_resolveIrradianceName(self);
         return func_0038ABF8(D_005047F8, *(int*)self);
     }
     return func_0038ABF8(D_005047F8, *(int*)self);
@@ -887,7 +887,7 @@ extern "C" void* func_002EE010_r(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EE070);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SunPitchOffset);
 #ifdef SKIP_ASM
 struct sLensFxVEntry {
     short delta;
@@ -921,7 +921,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EE070(int i)
+extern "C" float cRenderStateMan_SunPitchOffset(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p14;
@@ -930,7 +930,7 @@ extern "C" float func_002EE070(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EE0B8);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SunYawOffset);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
@@ -943,7 +943,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EE0B8(int i)
+extern "C" float cRenderStateMan_SunYawOffset(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p14;
@@ -952,7 +952,7 @@ extern "C" float func_002EE0B8(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EE100);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SunColorR);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
@@ -965,7 +965,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EE100(int i)
+extern "C" float cRenderStateMan_SunColorR(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p14;
@@ -974,7 +974,7 @@ extern "C" float func_002EE100(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EE148);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SunColorG);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
@@ -987,7 +987,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EE148(int i)
+extern "C" float cRenderStateMan_SunColorG(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p14;
@@ -996,7 +996,7 @@ extern "C" float func_002EE148(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EE190);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SunColorB);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
@@ -1009,7 +1009,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EE190(int i)
+extern "C" float cRenderStateMan_SunColorB(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p14;
@@ -1018,7 +1018,7 @@ extern "C" float func_002EE190(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EE1D8);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SunIntensity);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
@@ -1031,7 +1031,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EE1D8(int i)
+extern "C" float cRenderStateMan_SunIntensity(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p14;
@@ -1040,7 +1040,7 @@ extern "C" float func_002EE1D8(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EE220);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SunType);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
@@ -1054,7 +1054,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the sun type
  */
-extern "C" int func_002EE220(int i)
+extern "C" int cRenderStateMan_SunType(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p14;
@@ -1063,7 +1063,7 @@ extern "C" int func_002EE220(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EE268);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_LensIntensity);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
@@ -1076,7 +1076,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EE268(int i)
+extern "C" float cRenderStateMan_LensIntensity(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p14;
@@ -1085,7 +1085,7 @@ extern "C" float func_002EE268(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EE2B0);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SunRadius);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
@@ -1098,7 +1098,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EE2B0(int i)
+extern "C" float cRenderStateMan_SunRadius(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p14;
@@ -1107,117 +1107,117 @@ extern "C" float func_002EE2B0(int i)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/lensfx", func_002EE2F8);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_getCustomIrradiance);
 #ifdef SKIP_ASM
-extern "C" void func_002EE010(void* p);
+extern "C" void cRenderStateMan_Irradiance(void* p);
 
 // $gp-relative object at gp+0x24C0 (no symbol in the target)
 extern int D_004A55B0;
 
 /**
- * Returns the irradiance record for the custom irradiance name (the name field D_004A55B0), through func_002EE010.
+ * Returns the irradiance record for the custom irradiance name (the name field D_004A55B0), through cRenderStateMan_Irradiance.
  *
- * The name is the one cRenderStateMan_setCustomIrradiance sets. The world light code (func_002F5400) uses the result as
+ * The name is the one cRenderStateMan_setCustomIrradiance sets. The world light code (cWorldLightMan_getRealTimeLights) uses the result as
  * a light target. The C declaration says void; the record is passed through in the return register.
  *
  * @return the irradiance record
  */
-extern "C" void func_002EE2F8(void)
+extern "C" void cRenderStateMan_getCustomIrradiance(void)
 {
-    func_002EE010(&D_004A55B0);
+    cRenderStateMan_Irradiance(&D_004A55B0);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/lensfx", func_002EE318);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_LightIrradiance);
 #ifdef SKIP_ASM
-extern "C" void func_002EE010(void* p);
-extern "C" void* func_002EF0E8(void);
+extern "C" void cRenderStateMan_Irradiance(void* p);
+extern "C" void* cRenderStateMan_LightIrradianceName(void);
 
 /**
- * Returns the light irradiance record for a render state: the record for the name field func_002EF0E8 returns, through
- * func_002EE010.
+ * Returns the light irradiance record for a render state: the record for the name field cRenderStateMan_LightIrradianceName returns, through
+ * cRenderStateMan_Irradiance.
  *
- * func_002EF0E8 reads query accessor slot 37 (the light irradiance name in On Tour's accessor order), or gives the
+ * cRenderStateMan_LightIrradianceName reads query accessor slot 37 (the light irradiance name in On Tour's accessor order), or gives the
  * custom name D_004A55B0 while D_004A3B64 is set. The C definition declares no parameters and a void result: the render
- * state index in a0 reaches func_002EF0E8 untouched and the record comes back in v0. cRenderStateMan_update calls it.
+ * state index in a0 reaches cRenderStateMan_LightIrradianceName untouched and the record comes back in v0. cRenderStateMan_update calls it.
  *
  * @return the irradiance record
  */
-extern "C" void func_002EE318(void)
+extern "C" void cRenderStateMan_LightIrradiance(void)
 {
-    func_002EE010(func_002EF0E8());
+    cRenderStateMan_Irradiance(cRenderStateMan_LightIrradianceName());
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/lensfx", func_002EE340);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_ShadowIrradiance);
 #ifdef SKIP_ASM
-extern "C" void func_002EE010(void* p);
-extern "C" void* func_002EF140(void);
+extern "C" void cRenderStateMan_Irradiance(void* p);
+extern "C" void* cRenderStateMan_ShadowIrradianceName(void);
 
 /**
- * Returns the shadow irradiance record for a render state: the record for the name field func_002EF140 returns, through
- * func_002EE010.
+ * Returns the shadow irradiance record for a render state: the record for the name field cRenderStateMan_ShadowIrradianceName returns, through
+ * cRenderStateMan_Irradiance.
  *
- * func_002EF140 reads query accessor slot 38 (the shadow irradiance name in On Tour's accessor order), or gives the
+ * cRenderStateMan_ShadowIrradianceName reads query accessor slot 38 (the shadow irradiance name in On Tour's accessor order), or gives the
  * custom name D_004A55B0 while D_004A3B64 is set. The C definition declares no parameters and a void result: the render
- * state index in a0 reaches func_002EF140 untouched and the record comes back in v0. cRenderStateMan_update calls it.
+ * state index in a0 reaches cRenderStateMan_ShadowIrradianceName untouched and the record comes back in v0. cRenderStateMan_update calls it.
  *
  * @return the irradiance record
  */
-extern "C" void func_002EE340(void)
+extern "C" void cRenderStateMan_ShadowIrradiance(void)
 {
-    func_002EE010(func_002EF140());
+    cRenderStateMan_Irradiance(cRenderStateMan_ShadowIrradianceName());
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/lensfx", func_002EE368);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_TunnelIrradiance);
 #ifdef SKIP_ASM
-extern "C" void func_002EE010(void* p);
-extern "C" void* func_002EF198(void);
+extern "C" void cRenderStateMan_Irradiance(void* p);
+extern "C" void* cRenderStateMan_TunnelIrradianceName(void);
 
 /**
- * Returns the tunnel irradiance record for a render state: the record for the name field func_002EF198 returns, through
- * func_002EE010.
+ * Returns the tunnel irradiance record for a render state: the record for the name field cRenderStateMan_TunnelIrradianceName returns, through
+ * cRenderStateMan_Irradiance.
  *
- * func_002EF198 reads query accessor slot 39 (the tunnel irradiance name in On Tour's accessor order), or gives the
+ * cRenderStateMan_TunnelIrradianceName reads query accessor slot 39 (the tunnel irradiance name in On Tour's accessor order), or gives the
  * custom name D_004A55B0 while D_004A3B64 is set. The C definition declares no parameters and a void result: the render
- * state index in a0 reaches func_002EF198 untouched and the record comes back in v0. cRenderStateMan_update calls it.
+ * state index in a0 reaches cRenderStateMan_TunnelIrradianceName untouched and the record comes back in v0. cRenderStateMan_update calls it.
  *
  * @return the irradiance record
  */
-extern "C" void func_002EE368(void)
+extern "C" void cRenderStateMan_TunnelIrradiance(void)
 {
-    func_002EE010(func_002EF198());
+    cRenderStateMan_Irradiance(cRenderStateMan_TunnelIrradianceName());
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EE390);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_ObjectIrradiance);
 #ifdef SKIP_ASM
-extern "C" void* func_002EF1F0();
+extern "C" void* cRenderStateMan_ObjectIrradianceName();
 
 /**
- * Returns the object irradiance record for a render state: the record for the name field func_002EF1F0 returns, through
- * func_002EE010.
+ * Returns the object irradiance record for a render state: the record for the name field cRenderStateMan_ObjectIrradianceName returns, through
+ * cRenderStateMan_Irradiance.
  *
- * func_002EF1F0 reads query accessor slot 40 (the object irradiance name in On Tour's accessor order), or gives the
+ * cRenderStateMan_ObjectIrradianceName reads query accessor slot 40 (the object irradiance name in On Tour's accessor order), or gives the
  * custom name D_004A55B0 while D_004A3B64 is set. The C definition declares no parameters and a void result: the render
- * state index in a0 reaches func_002EF1F0 untouched and the record comes back in v0. Nothing in the retail code
+ * state index in a0 reaches cRenderStateMan_ObjectIrradianceName untouched and the record comes back in v0. Nothing in the retail code
  * references it.
  *
  * @return the irradiance record
  */
-extern "C" void func_002EE390(void)
+extern "C" void cRenderStateMan_ObjectIrradiance(void)
 {
-    func_002EE010(func_002EF1F0());
+    cRenderStateMan_Irradiance(cRenderStateMan_ObjectIrradianceName());
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EE3B8);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_DrawDistance);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
@@ -1231,7 +1231,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EE3B8(int i)
+extern "C" float cRenderStateMan_DrawDistance(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p0;
@@ -1240,7 +1240,7 @@ extern "C" float func_002EE3B8(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EE400);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SkyBoxRotation);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
@@ -1254,7 +1254,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EE400(int i)
+extern "C" float cRenderStateMan_SkyBoxRotation(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p10;
@@ -1263,7 +1263,7 @@ extern "C" float func_002EE400(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EE448);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SnowIntensity);
 #ifdef SKIP_ASM
 extern int D_004A3B60;
 
@@ -1277,7 +1277,7 @@ extern int D_004A3B60;
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EE448(int i)
+extern "C" float cRenderStateMan_SnowIntensity(int i)
 {
     if (D_004A3B60 == 0) {
         sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
@@ -1289,7 +1289,7 @@ extern "C" float func_002EE448(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EE4C0);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_FlakeSize);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
@@ -1302,7 +1302,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EE4C0(int i)
+extern "C" float cRenderStateMan_FlakeSize(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p20;
@@ -1311,7 +1311,7 @@ extern "C" float func_002EE4C0(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EE508);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_WindIntensity);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
@@ -1325,7 +1325,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EE508(int i)
+extern "C" float cRenderStateMan_WindIntensity(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p20;
@@ -1334,7 +1334,7 @@ extern "C" float func_002EE508(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EE570);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_WindRotation);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
@@ -1348,7 +1348,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EE570(int i)
+extern "C" float cRenderStateMan_WindRotation(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p20;
@@ -1357,7 +1357,7 @@ extern "C" float func_002EE570(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EE5B8);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SnowFlurries);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
@@ -1371,7 +1371,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EE5B8(int i)
+extern "C" float cRenderStateMan_SnowFlurries(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p20;
@@ -1380,7 +1380,7 @@ extern "C" float func_002EE5B8(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EE600);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SnowFluffItensity);
 #ifdef SKIP_ASM
 extern int D_004A3B60;
 
@@ -1394,7 +1394,7 @@ extern int D_004A3B60;
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EE600(int i)
+extern "C" float cRenderStateMan_SnowFluffItensity(int i)
 {
     if (D_004A3B60 == 0) {
         sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
@@ -1406,7 +1406,7 @@ extern "C" float func_002EE600(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EE660);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SnowFluffWindIntensity);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
@@ -1420,7 +1420,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EE660(int i)
+extern "C" float cRenderStateMan_SnowFluffWindIntensity(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p20;
@@ -1429,7 +1429,7 @@ extern "C" float func_002EE660(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EE6A8);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SnowGravityMultiplier);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
@@ -1443,7 +1443,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EE6A8(int i)
+extern "C" float cRenderStateMan_SnowGravityMultiplier(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p20;
@@ -1452,7 +1452,7 @@ extern "C" float func_002EE6A8(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EE6F0);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_Temperature);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
@@ -1466,7 +1466,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EE6F0(int i)
+extern "C" float cRenderStateMan_Temperature(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p20;
@@ -1475,7 +1475,7 @@ extern "C" float func_002EE6F0(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EE738);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_LightningChance);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
@@ -1489,7 +1489,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EE738(int i)
+extern "C" float cRenderStateMan_LightningChance(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p20;
@@ -1498,7 +1498,7 @@ extern "C" float func_002EE738(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/lensfx", func_002EE780);
+INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_SnowFlakeColourA);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
@@ -1512,7 +1512,7 @@ extern sLensFxSlot cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EE780(int i)
+extern "C" float cRenderStateMan_SnowFlakeColourA(int i)
 {
     sLensFxSlot* renderState = &cRenderStateMan_m_state[i];
     sLensFxObj* obj = *renderState->p20;

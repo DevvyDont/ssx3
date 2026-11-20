@@ -313,7 +313,7 @@ extern "C" void cVidEngine__cVidEngine(void* self, int flags)
 //100%
 INCLUDE_ASM("scripter/scsndmgr", cVidEngine_ResetVideoEngine);
 #ifdef SKIP_ASM
-extern "C" void func_00253418(void* p, int flags);
+extern "C" void cMoviePlayer__cMoviePlayer(void* p, int flags);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_ResumeSFX(void* p);
 extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(void* p);
@@ -371,7 +371,7 @@ public:
 /**
  * Stops and deletes the video player and undoes the game-state changes made when playback started.
  *
- * When a player exists it is destroyed (func_00253418, flags 3). If it was playing (+0x4), the pause-mode
+ * When a player exists it is destroyed (cMoviePlayer__cMoviePlayer, flags 3). If it was playing (+0x4), the pause-mode
  * stack (D_005366E8, top D_004A2A54) is popped and cPauseState_Flags reloaded from D_004428F0, sound effects resume,
  * the graphics manager's virtual slot 40 gets the value saved at +0x10, and when +0x14 is set it is cleared
  * and cCutSceneTransitionMan_ForceToCutSceneMode() is called on the cutscene transition manager. The first four words are then cleared.
@@ -380,7 +380,7 @@ extern "C" void cVidEngine_ResetVideoEngine(void* self)
 {
     char* vidEngine = (char*)self;
     if (*(void**)(vidEngine + 0x0) != 0) {
-        func_00253418(*(void**)(vidEngine + 0x0), 3);
+        cMoviePlayer__cMoviePlayer(*(void**)(vidEngine + 0x0), 3);
         if (*(int*)(vidEngine + 0x4) != 0) {
             cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
             cSSXAudio_ResumeSFX(cAudioInterface_bxAudio());

@@ -7046,7 +7046,7 @@ extern Rec_5F40 D_4FBE58_5F40 __asm__("D_004FBE58");
 extern int D_587C_5F40 __asm__("D_004A587C");
 extern const int D_004467A0_5F40[] __asm__("D_004467A0");
 extern "C" void* MEM_copy_5F40(void*, void*, int) __asm__("MEM_copy");
-extern "C" void func_002D9538_5F40(char*, Rec_5F40*) __asm__("func_002D9538");
+extern "C" void cAvalanche_setAvalancheNodeEmitterData_5F40(char*, Rec_5F40*) __asm__("cAvalanche_setAvalancheNodeEmitterData");
 static inline char *refToPtr_5F40(unsigned i) { return (char*)(i << 2); }
 static inline char *conv_5F40(unsigned i) { if (i == 0) return 0; return refToPtr_5F40(i); }
 struct Ent_5F40 { int idx; int val; int pad; int type; };
@@ -7136,7 +7136,7 @@ extern "C" V3_5F40 func_00305F40(int n, Ent_5F40 *e) {
             obj = 0;
         else
             obj = conv_5F40(((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8);
-        func_002D9538_5F40(obj, buf);
+        cAvalanche_setAvalancheNodeEmitterData_5F40(obj, buf);
     }
     return D_004C9098_5F40;
 }

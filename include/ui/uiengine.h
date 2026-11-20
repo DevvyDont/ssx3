@@ -8,7 +8,7 @@
 //
 // Size 0x70 (On Tour 0x70). A FLAT layout, like main/game.h. Member names are EA's, from SSX On Tour's PSP DWARF
 // (class cUIEngine), placed by:
-//   [R] retail's constructor func_00397B08 (ui/uiengine): zeroes 0x0-0x14, builds the two cLists of the state
+//   [R] retail's constructor cUIEngine_cUIEngine (ui/uiengine): zeroes 0x0-0x14, builds the two cLists of the state
 //       stack (0x18, 0x34), zeroes the banks and stores itself into both banks' mpEngine (0x54, 0x6C);
 //   [U] how retail code uses the field;
 //   [O] On Tour's member order.

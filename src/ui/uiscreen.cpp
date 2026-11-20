@@ -768,7 +768,7 @@ extern "C" void cUIScreen_createAllObjects(cUIScreen* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039D008);
+INCLUDE_ASM("ui/uiscreen", cUIScreen_createObjectByHashName);
 #ifdef SKIP_ASM
 struct sObjRec_0039D008 {
     short pad0;
@@ -785,7 +785,7 @@ struct sObjRec_0039D008 {
  * @param key  the object hash name
  * @return the new object, or 0 when no record matches
  */
-extern "C" void* func_0039D008(void* self, int key)
+extern "C" void* cUIScreen_createObjectByHashName(void* self, int key)
 {
     sObjRec_0039D008* record = (sObjRec_0039D008*)(*(char**)((char*)self + 0x38) + 4);
     unsigned int i;
@@ -810,10 +810,10 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" void* cUIThing_cUIThing(void* self, void* screen, int a2);
 extern "C" void* func_0021CCC8(void* self);
 extern "C" void* cList_cList(void* self);
-extern "C" void* func_003A5338(void* self);
-extern "C" void* func_003A5508(void* self);
+extern "C" void* tAttrMenu_tAttrMenu(void* self);
+extern "C" void* tAttrPair_tAttrPair(void* self);
 extern "C" void* cUIListBox_cUIListBox(void* mem, void* screen, int a2);
-extern "C" void* func_003A0348(void* mem, void* screen, int a2);
+extern "C" void* cUIText_cUIText(void* mem, void* screen, int a2);
 extern "C" void* cUITextScroll_cUITextScroll(void* mem, void* screen, int a2);
 extern "C" void* cUIVector_cUIVector(void* mem, void* screen, int a2);
 extern char str_UIIcon[];
@@ -908,7 +908,7 @@ extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, char* rec)
         *(void***)(created + 8) = cUIGroup_vtbl;
         cList_cList(created + 0x74);
         *(void***)(created + 8) = cUIMenu_vtbl;
-        func_003A5338(created + 0x90);
+        tAttrMenu_tAttrMenu(created + 0x90);
         *(unsigned char*)(created + 0xA4) = 0xFF;
         *(char*)(created + 0x95) = 0;
         *(char*)(created + 0x96) = 0;
@@ -933,7 +933,7 @@ extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, char* rec)
         int* hashes = (int*)(rec + 0x20);
         cUIThing_cUIThing(created, self, 0);
         *(void***)(created + 8) = cUIPair_vtbl;
-        func_003A5508(created + 0x74);
+        tAttrPair_tAttrPair(created + 0x74);
         *(int*)(created + 0x14) |= 2;
         *(int*)(created + 0x78) = 0;
         *(int*)(created + 0x7C) = 0;
@@ -1051,7 +1051,7 @@ extern "C" char* cUIScreen_createObjectByStruct(cUIScreen* self, char* rec)
         return created;
     }
     case 23: {
-        char* created = (char*)func_003A0348(alloc_D078(188, str_UIText), self, 0);
+        char* created = (char*)cUIText_cUIText(alloc_D078(188, str_UIText), self, 0);
         initFromRec_D078(created, rec);
         return created;
     }
@@ -1644,7 +1644,7 @@ extern "C" void cUISlider_render2D(cUISlider* self, float dx, float dy)
 extern void* D_0046DD60[];
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039E288__FPv);
+INCLUDE_ASM("ui/uiscreen", cUISoundInterface_cUISoundInterface__FPv);
 #ifdef SKIP_ASM
 /**
  * Constructs a UI sound interface: installs the base sound-interface vtable D_0046DD60.
@@ -1653,7 +1653,7 @@ INCLUDE_ASM("ui/uiscreen", func_0039E288__FPv);
  *
  * @return @p self
  */
-void* func_0039E288(void* self)
+void* cUISoundInterface_cUISoundInterface(void* self)
 {
     *(int*)self = (int)(void*)D_0046DD60;
     return self;
@@ -1661,7 +1661,7 @@ void* func_0039E288(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039E2A0);
+INCLUDE_ASM("ui/uiscreen", cUIState_cUIState);
 #ifdef SKIP_ASM
 extern "C" void* cList_cList(void* self);
 extern void* D_004946C8[];
@@ -1677,7 +1677,7 @@ extern void* D_004946C8[];
  * @param engine  the UI engine
  * @return @p self
  */
-extern "C" void* func_0039E2A0(void* self, int engine)
+extern "C" void* cUIState_cUIState(void* self, int engine)
 {
     char* stateBytes = (char*)self;
     *(void**)(stateBytes + 0x4) = stateBytes;
@@ -1697,7 +1697,7 @@ extern "C" void* func_0039E2A0(void* self, int engine)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039E318);
+INCLUDE_ASM("ui/uiscreen", cUIState_cUIState1);
 #ifdef SKIP_ASM
 extern "C" void* cList_cList(void* self);
 extern void* D_004946C8[];
@@ -1705,13 +1705,13 @@ extern void* D_004946C8[];
 /**
  * Constructs a UI state for an engine with a parent state.
  *
- * The same as func_0039E2A0 except that the parent (+0x20) is @p parentState.
+ * The same as cUIState_cUIState except that the parent (+0x20) is @p parentState.
  *
  * @param engine  the UI engine
  * @param parentState  the parent state
  * @return @p self
  */
-extern "C" void* func_0039E318(void* self, int engine, int parentState)
+extern "C" void* cUIState_cUIState1(void* self, int engine, int parentState)
 {
     char* stateBytes = (char*)self;
     *(void**)(stateBytes + 0x4) = stateBytes;
@@ -1731,7 +1731,7 @@ extern "C" void* func_0039E318(void* self, int engine, int parentState)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039E390);
+INCLUDE_ASM("ui/uiscreen", cUIState__cUIState);
 #ifdef SKIP_ASM
 // PORT: unit declares cList_destroyList as returning void*; called here as void (bound by asm label).
 extern "C" void cList_destroyList_v(void*) __asm__("cList_destroyList");
@@ -1748,7 +1748,7 @@ extern void* cListNode_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_0039E390(void* self, int flags)
+extern "C" void cUIState__cUIState(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_004946C8;
     cList_destroyList_v((char*)self + 0x24);
@@ -1769,7 +1769,7 @@ extern "C" void func_0039E390(void* self, int flags)
 extern "C" void* cList_destroyList(void*);
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039E438);
+INCLUDE_ASM("ui/uiscreen", cUIState_setCtrlBitsByCtrlIndex);
 #ifdef SKIP_ASM
 /**
  * Sets controller bit @p bit of a UI state's controller mask (+0x15), or all 8 bits when @p bit is negative.
@@ -1779,7 +1779,7 @@ INCLUDE_ASM("ui/uiscreen", func_0039E438);
  * @param uiState  the UI state
  * @param bit  the controller index, or -1 for all
  */
-extern "C" void func_0039E438(void *uiState, signed char bit) {
+extern "C" void cUIState_setCtrlBitsByCtrlIndex(void *uiState, signed char bit) {
     if (bit < 0) {
         (*(unsigned char *)((char*)(uiState) + (0x15))) = 0xFFU;
         return;
@@ -1788,7 +1788,7 @@ extern "C" void func_0039E438(void *uiState, signed char bit) {
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039E470);
+INCLUDE_ASM("ui/uiscreen", cUIState_clearCtrlBits);
 #ifdef SKIP_ASM
 /**
  * Clears controller bit @p bit of a UI state's controller mask (+0x15).
@@ -1797,7 +1797,7 @@ INCLUDE_ASM("ui/uiscreen", func_0039E470);
  *
  * @param bit  the controller index
  */
-extern "C" void func_0039E470(void* self, signed char bit)
+extern "C" void cUIState_clearCtrlBits(void* self, signed char bit)
 {
     signed char mask = ~(1 << bit);
     *(unsigned char*)((char*)self + 0x15) &= mask;
@@ -2025,14 +2025,14 @@ extern "C" void cUIState_addScreen(cUIState* self, cListNode* node)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039E778);
+INCLUDE_ASM("ui/uiscreen", cUIState_hideScreens);
 #ifdef SKIP_ASM
 struct cList;
 struct cListNode;
 void* cList_first(cList*);
 int cListNode_isSentinel(cListNode*);
 
-struct sVEntry_func_0039E778 {
+struct sVEntry_cUIState_hideScreens {
     short delta;
     short index;
     void (*fn)(void*, int);
@@ -2044,14 +2044,14 @@ struct sVEntry_func_0039E778 {
  *
  * Nothing in the retail code references it.
  */
-extern "C" void func_0039E778(void* self)
+extern "C" void cUIState_hideScreens(void* self)
 {
     void* n = cList_first((cList*)((char*)self + 0x24));
     if (n != 0) {
         do {
             char* obj = (char*)n + 0x40;
             if ((*(int*)((char*)n + 0x54) >> 6) & 1) {
-                sVEntry_func_0039E778* vt = *(sVEntry_func_0039E778**)((char*)n + 0x48);
+                sVEntry_cUIState_hideScreens* vt = *(sVEntry_cUIState_hideScreens**)((char*)n + 0x48);
                 vt[9].fn(obj + vt[9].delta, 0);
             }
             n = *(void**)((char*)n + 4);
@@ -2060,14 +2060,14 @@ extern "C" void func_0039E778(void* self)
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uiscreen", func_0039E7F0);
+INCLUDE_ASM("ui/uiscreen", cUIState_showScreens);
 #ifdef SKIP_ASM
 struct cList;
 struct cListNode;
 void* cList_first(cList*);
 int cListNode_isSentinel(cListNode*);
 
-struct sVEntry_func_0039E7F0 {
+struct sVEntry_cUIState_showScreens {
     short delta;
     short index;
     void (*fn)(void*, int);
@@ -2079,14 +2079,14 @@ struct sVEntry_func_0039E7F0 {
  *
  * Nothing in the retail code references it.
  */
-extern "C" void func_0039E7F0(void* self)
+extern "C" void cUIState_showScreens(void* self)
 {
     void* n = cList_first((cList*)((char*)self + 0x24));
     if (n != 0) {
         do {
             char* obj = (char*)n + 0x40;
             if ((*(int*)((char*)n + 0x54) >> 6) & 1) {
-                sVEntry_func_0039E7F0* vt = *(sVEntry_func_0039E7F0**)((char*)n + 0x48);
+                sVEntry_cUIState_showScreens* vt = *(sVEntry_cUIState_showScreens**)((char*)n + 0x48);
                 vt[9].fn(obj + vt[9].delta, 1);
             }
             n = *(void**)((char*)n + 4);

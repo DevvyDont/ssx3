@@ -1309,7 +1309,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002AE048);
 extern "C" void REAL_abortmessage();
 extern "C" void func_004175C8();
 extern "C" void* MEM_alloc(void* a0, int a1, int a2);
-extern "C" void* func_002526B8(void* block, int size);
+extern "C" void* resizeBlock(void* block, int size);
 extern "C" void SYNCTASK_add(int (*fn)(), int a, int b);
 extern int D_004A379C;
 extern void (*D_004A3780)();
@@ -1349,7 +1349,7 @@ extern "C" void func_002AE048(void (*cb)(), int id)
     D_004A3780 = REAL_abortmessage;
     D_004A3784 = func_004175C8;
     D_004A378C = MEM_alloc;
-    D_004A3790 = func_002526B8;
+    D_004A3790 = resizeBlock;
     D_004A3794 = func_002AE000;
 }
 #endif

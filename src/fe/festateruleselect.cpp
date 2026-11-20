@@ -13,7 +13,7 @@ int cUIScreen_getFrameByLabel(cUIScreen* self, int hash);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-extern "C" void func_0039A670(void* self);
+extern "C" void cUIListBox_deleteAllEntries(void* self);
 extern "C" unsigned char cUIListBox_addEntryByStringID(void* box, int id, int idx);
 // The entry data is unsigned here: the negative time steps are passed as 0xFFFFFFFD etc.
 extern "C" unsigned char cUIListBox_addEntryByAsciiString(void* box, const char* str, unsigned int data);
@@ -116,7 +116,7 @@ extern "C" void cFEStateRuleSelect_setupMenu(cFEStateRuleSelect* self_, signed c
             int rule = self->rules[row];
             int kind = D_00441008[rule];
             cUIText_setUnicodeStringByID(txt, GetHashValue32(D_00441018[rule]));
-            func_0039A670(lb);
+            cUIListBox_deleteAllEntries(lb);
             *(int*)(lb + 0x18) = rule;
             switch (kind) {
             case 0:

@@ -109,7 +109,7 @@ extern "C" unsigned short cUIAnimationChannel_getAnimChanType(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uianimation", func_00397298__FPvi);
+INCLUDE_ASM("ui/uianimation", cUIAnimationChannel_setAnimChanData__FPvi);
 #ifdef SKIP_ASM
 /**
  * Points an animation channel at its channel data record (stores @p val at +0x0).
@@ -118,7 +118,7 @@ INCLUDE_ASM("ui/uianimation", func_00397298__FPvi);
  *
  * @param val  the channel data record
  */
-void func_00397298(void* self, int val)
+void cUIAnimationChannel_setAnimChanData(void* self, int val)
 {
     *(int*)((char*)self + 0x0) = val;
 }
@@ -129,7 +129,7 @@ INCLUDE_ASM("ui/uianimation", cUIAnimation_cUIAnimation);
 #ifdef SKIP_ASM
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
-void func_00397298(void* self, int val);
+void cUIAnimationChannel_setAnimChanData(void* self, int val);
 extern char str_UIAnimChan[];
 extern void* cUIAnimation_vtbl[];
 
@@ -166,7 +166,7 @@ extern "C" void* cUIAnimation_cUIAnimation(void* self, void* data)
         char* chanData = *(char**)self + 0x10;
         for (unsigned int i = 0; i < *(unsigned int*)(*(char**)self + 4); i++) {
             // PORT: the entry pointer is passed as int
-            func_00397298(*(char**)((char*)self + 0x4) + (i << 2), (int)chanData);
+            cUIAnimationChannel_setAnimChanData(*(char**)((char*)self + 0x4) + (i << 2), (int)chanData);
             chanData += *(unsigned short*)(chanData + 4);
         }
     }

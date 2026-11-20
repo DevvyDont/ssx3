@@ -124,7 +124,7 @@ extern "C" void cWorldLightMan_purgeLightCache(cWorldLightMan_purgeLightCache_sM
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F5400);
+INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_getRealTimeLights);
 #ifdef SKIP_ASM
 extern char D_005047F8[];
 extern int D_004A43C4;
@@ -206,13 +206,13 @@ struct sVEr_5400 {
     sLightRef_5400* (*fn)(void*);
 };
 
-// The unit defines func_002F59D0 later with its own node type.
-extern "C" sNode_5400* func_002F59D0_n(sMan_5400* self, int priority) __asm__("func_002F59D0");
-extern "C" sBox_5400* func_002F5A70(sMan_5400* self, int priority);
-extern "C" void func_002F5AF0(void* self, void* a1, void* a2, void* a3, int count);
+// The unit defines cWorldLightMan_evictHashTableEntry later with its own node type.
+extern "C" sNode_5400* cWorldLightMan_evictHashTableEntry_n(sMan_5400* self, int priority) __asm__("cWorldLightMan_evictHashTableEntry");
+extern "C" sBox_5400* cWorldLightMan_evictOverlapNode(sMan_5400* self, int priority);
+extern "C" void cWorldLightMan_IntersectLights1(void* self, void* a1, void* a2, void* a3, int count);
 extern "C" void cInstanceNode_buildMeshMat(void* obj, int a1, sMat_5400* out);
 extern "C" void cOverlapList_gettyped(void* cell, sAABox_5400* box);
-extern "C" sLightSet_5400* func_002EE2F8(void);
+extern "C" sLightSet_5400* cRenderStateMan_getCustomIrradiance(void);
 extern "C" int cIrradianceDataBase_GetIDByName(void*, void*);
 extern "C" sLightSet_5400* func_0038ABF8(void* self, int i);
 
@@ -308,23 +308,23 @@ static inline sLightRef_5400* GetRef_5400(char* o, int slot)
  * instance is new or has moved.
  *
  * The entry is looked up by the instance id (+0x78) in the 32-chain hash at +0x3210 (chain (id >> 8) & 0x1F); a new one
- * comes from the 32 entries at +0x210 (count +0x3290) or, when they are used up, from func_002F59D0, the least recently
+ * comes from the 32 entries at +0x210 (count +0x3290) or, when they are used up, from cWorldLightMan_evictHashTableEntry, the least recently
  * used. Its tick (+0x4) becomes cAppMan_TheAppMan +0x18. The position is the translation of cInstanceNode_buildMeshMat
  * when the instance has a mesh node (+0xC), else the instance's +0x40; with @p force it is re-read for a known entry,
  * which relights after a move of more than 10 and reloads its irradiance after more than 500.
  *
- * On a relight the entry's overlap node (+0xC0, taken from func_002F5A70 unless it still belongs to this entry) gets a
+ * On a relight the entry's overlap node (+0xC0, taken from cWorldLightMan_evictOverlapNode unless it still belongs to this entry) gets a
  * 2000-unit box around the position, rebuilt with cOverlapList_gettyped when new or left. A reload sets the target
- * irradiance (+0xD0) to func_002EE2F8's custom one while D_004A3B64 is set; otherwise it queries the world painter
+ * irradiance (+0xD0) to cRenderStateMan_getCustomIrradiance's custom one while D_004A3B64 is set; otherwise it queries the world painter
  * (+0x4) at the position and uses the object irradiance name (accessor 40), else the light irradiance name (37), else
  * the default D_004A43C4. The current set (+0x10) is then the target plus the 4 strongest lights of the overlap list
- * (func_002F5AF0). func_002F5148 calls it with bit 12 of the instance's +0x8 as @p force.
+ * (cWorldLightMan_IntersectLights1). func_002F5148 calls it with bit 12 of the instance's +0x8 as @p force.
  *
  * @param obj  the instance record
  * @param force  nonzero for a moving instance: re-check its position
  * @return the entry's current light set (+0x10)
  */
-extern "C" sLightSet_5400* func_002F5400(sMan_5400* self, char* obj, int force)
+extern "C" sLightSet_5400* cWorldLightMan_getRealTimeLights(sMan_5400* self, char* obj, int force)
 {
     unsigned int key = *(unsigned int*)(obj + 0x78);
     int slot = (key >> 8) & 0x1F;
@@ -341,7 +341,7 @@ extern "C" sLightSet_5400* func_002F5400(sMan_5400* self, char* obj, int force)
         if (self->count < 32) {
             node = &self->nodes[self->count++];
         } else {
-            node = func_002F59D0_n(self, prio);
+            node = cWorldLightMan_evictHashTableEntry_n(self, prio);
         }
         node->id = *(unsigned int*)(obj + 0x78);
         Link_5400(self->heads, slot, node);
@@ -376,7 +376,7 @@ extern "C" sLightSet_5400* func_002F5400(sMan_5400* self, char* obj, int force)
         node->pos = pos;
         int rebuild = 0;
         if (node->box == 0 || node->box->id != node->id) {
-            node->box = func_002F5A70(self, node->priority);
+            node->box = cWorldLightMan_evictOverlapNode(self, node->priority);
             node->box->id = node->id;
             rebuild = 1;
         }
@@ -398,7 +398,7 @@ extern "C" sLightSet_5400* func_002F5400(sMan_5400* self, char* obj, int force)
         }
         if (reload) {
             if (D_004A3B64 != 0) {
-                node->target = *func_002EE2F8();
+                node->target = *cRenderStateMan_getCustomIrradiance();
             } else {
                 char* world = self->world;
                 sVEf_5400* vt = *(sVEf_5400**)(world + 4);
@@ -417,14 +417,14 @@ extern "C" sLightSet_5400* func_002F5400(sMan_5400* self, char* obj, int force)
             }
         }
         node->cur = node->target;
-        func_002F5AF0(self, &node->pos, node->box->cell, &node->cur, 4);
+        cWorldLightMan_IntersectLights1(self, &node->pos, node->box->cell, &node->cur, 4);
     }
     return &node->cur;
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F5998);
+INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_flushOverlapCache);
 #ifdef SKIP_ASM
 struct sWorldLight {
     char pad00[0x10];
@@ -440,7 +440,7 @@ struct sWorldLight {
  *
  * @param lights  the world light manager (this), walked as 0x40-byte overlap nodes
  */
-extern "C" void func_002F5998(sWorldLight* lights)
+extern "C" void cWorldLightMan_flushOverlapCache(sWorldLight* lights)
 {
     unsigned int i;
     for (i = 0; i < 8; i++) {
@@ -450,7 +450,7 @@ extern "C" void func_002F5998(sWorldLight* lights)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F59D0);
+INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_evictHashTableEntry);
 #ifdef SKIP_ASM
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 struct sWorldLightNode {
@@ -472,13 +472,13 @@ struct sWorldLightMan {
  * hash chain.
  *
  * Entries with a tick (+0x4) of @p priority or more are never picked. The chain is (id >> 8) & 0x1F of the entry's
- * first word; the entry is unlinked through its next (+0x170) and prev (+0x174) links. func_002F5400 calls it when all
+ * first word; the entry is unlinked through its next (+0x170) and prev (+0x174) links. cWorldLightMan_getRealTimeLights calls it when all
  * 32 entries are in use.
  *
  * @param priority  the current tick (cAppMan_TheAppMan +0x18)
  * @return the entry, or null when every tick is at least @p priority
  */
-extern "C" sWorldLightNode* func_002F59D0(sWorldLightMan* self, int priority)
+extern "C" sWorldLightNode* cWorldLightMan_evictHashTableEntry(sWorldLightMan* self, int priority)
 {
     sWorldLightNode* best = 0;
     int min = priority + 1;
@@ -509,7 +509,7 @@ extern "C" sWorldLightNode* func_002F59D0(sWorldLightMan* self, int priority)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F5A70);
+INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_evictOverlapNode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // cWorldLightMan::evictOverlapNode(int iCurrentTick) (SSX On Tour DWARF): returns the first free overlap node,
@@ -535,12 +535,12 @@ struct cWorldLightMan_5A70 {
     tOverlapListNode_5A70 OverlapNodeList[8];
 };
 
-// The unit declares this function as `sBox_5400* func_002F5A70(sMan_5400*, int)` (line ~198); define it under its own types.
-extern "C" tOverlapListNode_5A70* cWorldLightMan_evictOverlapNode_5A70(cWorldLightMan_5A70* self, int iCurrentTick) __asm__("func_002F5A70");
+// The unit declares this function as `sBox_5400* cWorldLightMan_evictOverlapNode(sMan_5400*, int)` (line ~198); define it under its own types.
+extern "C" tOverlapListNode_5A70* cWorldLightMan_evictOverlapNode_5A70(cWorldLightMan_5A70* self, int iCurrentTick) __asm__("cWorldLightMan_evictOverlapNode");
 /**
  * Takes an overlap node for reuse: the first free one (id -1) of the 8, else the one with the oldest tick.
  *
- * Nodes with a tick of @p iCurrentTick or more are never picked. func_002F5400 calls it when an entry needs an overlap
+ * Nodes with a tick of @p iCurrentTick or more are never picked. cWorldLightMan_getRealTimeLights calls it when an entry needs an overlap
  * node.
  *
  * @param iCurrentTick  the current tick (cAppMan_TheAppMan +0x18)
@@ -566,27 +566,27 @@ extern "C" tOverlapListNode_5A70* cWorldLightMan_evictOverlapNode_5A70(cWorldLig
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F5AF0);
+INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_IntersectLights1);
 #ifdef SKIP_ASM
-extern "C" void func_002F5B68(void* self, void* a1, void* a2, void** out, int count);
+extern "C" void cWorldLightMan_IntersectLights(void* self, void* a1, void* a2, void** out, int count);
 extern "C" void func_0038A6A8(void* a, void* b, void* c);
 
 /**
  * Adds the strongest lights of an overlap list at a point to a light set.
  *
- * func_002F5B68 picks up to @p count lights (at most 32) by intensity at @p pos; each found one is added to @p
- * particleSys with func_0038A6A8. func_002F5400 calls it with 4 lights and the cache entry's light set.
+ * cWorldLightMan_IntersectLights picks up to @p count lights (at most 32) by intensity at @p pos; each found one is added to @p
+ * particleSys with func_0038A6A8. cWorldLightMan_getRealTimeLights calls it with 4 lights and the cache entry's light set.
  *
  * @param pos  the point to light
  * @param overlapList  the overlap list to search
  * @param particleSys  the light set (irradiance) to add the lights to
  * @param count  the maximum number of lights
  */
-extern "C" void func_002F5AF0(void* self, void* pos, void* overlapList, void* particleSys, int count)
+extern "C" void cWorldLightMan_IntersectLights1(void* self, void* pos, void* overlapList, void* particleSys, int count)
 {
     void* buf[32];
     int i;
-    func_002F5B68(self, pos, overlapList, buf, count);
+    cWorldLightMan_IntersectLights(self, pos, overlapList, buf, count);
     for (i = 0; i < count; i++) {
         if (buf[i] != 0) {
             func_0038A6A8(particleSys, pos, buf[i]);
@@ -596,9 +596,9 @@ extern "C" void func_002F5AF0(void* self, void* pos, void* overlapList, void* pa
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F5B68);
+INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_IntersectLights);
 #ifdef SKIP_ASM
-extern "C" float func_002F5D30(void* a, void* b, void* light);
+extern "C" float cWorldLightMan_GetIntensity(void* a, void* b, void* light);
 
 struct sLight_5B68 {
     char pad_0x0[0x8];
@@ -615,17 +615,17 @@ struct sLightMgr_5B68 {
  * Picks the up to @p max strongest lights of an overlap list at a point, best first.
  *
  * Walks the list's records (count +0x210, pointers from +0x214) of resource type 6 (+0x8), scores each with
- * func_002F5D30 and keeps the best @p max in @p outp in descending order (cleared to null first); a light must beat the
- * weakest kept score, and scores of 0 or less never count. Called by func_002F5AF0 and cRider_updateActiveLights (8
+ * cWorldLightMan_GetIntensity and keeps the best @p max in @p outp in descending order (cleared to null first); a light must beat the
+ * weakest kept score, and scores of 0 or less never count. Called by cWorldLightMan_IntersectLights1 and cRider_updateActiveLights (8
  * lights at the rider's hips).
  *
- * @param lightMan  the world light manager (passed on to func_002F5D30)
+ * @param lightMan  the world light manager (passed on to cWorldLightMan_GetIntensity)
  * @param point  the point to light
  * @param mgrp  the overlap list
  * @param outp  receives the lights; @p max entries
  * @param max  how many lights to keep, at most 32
  */
-extern "C" void func_002F5B68(void* lightMan, void* point, void* mgrp, void** outp, int max)
+extern "C" void cWorldLightMan_IntersectLights(void* lightMan, void* point, void* mgrp, void** outp, int max)
 {
     sLightMgr_5B68* mgr = (sLightMgr_5B68*)mgrp;
     sLight_5B68** out = (sLight_5B68**)outp;
@@ -641,7 +641,7 @@ extern "C" void func_002F5B68(void* lightMan, void* point, void* mgrp, void** ou
     for (unsigned int j = 0; j < n; j++) {
         sLight_5B68* lightRec = mgr->lights[j];
         if (lightRec->type == 6) {
-            float lightScore = func_002F5D30(lightMan, point, lightRec);
+            float lightScore = cWorldLightMan_GetIntensity(lightMan, point, lightRec);
             if (minScore < lightScore) {
                 int k;
                 for (k = 0; k < count && lightScore < score[k]; k++) {
@@ -663,14 +663,14 @@ extern "C" void func_002F5B68(void* lightMan, void* point, void* mgrp, void** ou
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F5D30);
+INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_GetIntensity);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" float func_002F5D30(void* a, void* b, void* light);
+extern "C" float cWorldLightMan_GetIntensity(void* a, void* b, void* light);
 
-struct func_002F6168_sVec3;
-struct func_002F6168_sLight;
-extern "C" int func_002F6168(void* self, func_002F6168_sVec3* p, func_002F6168_sLight* light,
+struct cWorldLightMan_CalcLightDist_sVec3;
+struct cWorldLightMan_CalcLightDist_sLight;
+extern "C" int cWorldLightMan_CalcLightDist(void* self, cWorldLightMan_CalcLightDist_sVec3* p, cWorldLightMan_CalcLightDist_sLight* light,
                              float* outDist, float* outInvDist, float* outDot);
 
 struct sLight_5D30 {
@@ -752,19 +752,19 @@ static inline float Pow_5D30(float x, int n)
 /**
  * Returns a light's intensity at a point, by light type: 0 ambient, 1 spot, 2 point, 3 none.
  *
- * Type (+0x10) 0 returns the scale (+0x18). Type 1 and 2 need the point within the radius (+0x1C, func_002F6168); the
+ * Type (+0x10) 0 returns the scale (+0x18). Type 1 and 2 need the point within the radius (+0x1C, cWorldLightMan_CalcLightDist); the
  * result is scale * intensity (+0x14) * the falloff (with s = 100 / distance below 1: s, s^2 or s^3 for falloff 1, 2 or
  * 3 at +0x64, else 1) * the distance fade (1, or 1 - (distance - 3750) * 0.0008 for a radius of 5000 or more past
  * 3750). A spot (type 1) also needs the cosine to the light direction at least the outer value (+0x60) and multiplies
  * by cosine^n (n = +0x65) inside the inner value (+0x5C), else by inner^n scaled linearly between outer and inner.
  * Anything else gives 0. Likely bug: for a radius above 5000 the fade turns negative past a distance of 5000.
  *
- * @param lightMan  the world light manager (passed on to func_002F6168)
+ * @param lightMan  the world light manager (passed on to cWorldLightMan_CalcLightDist)
  * @param point  the point to light
  * @param lp  the light record
  * @return the intensity
  */
-extern "C" float func_002F5D30(void* lightMan, void* point, void* lp)
+extern "C" float cWorldLightMan_GetIntensity(void* lightMan, void* point, void* lp)
 {
     sLight_5D30* light = (sLight_5D30*)lp;
     float dist;
@@ -776,7 +776,7 @@ extern "C" float func_002F5D30(void* lightMan, void* point, void* lp)
     case 0:
         return light->scale;
     case 1:
-        if (func_002F6168(lightMan, (func_002F6168_sVec3*)point, (func_002F6168_sLight*)light, &dist, &inv, &dot)) {
+        if (cWorldLightMan_CalcLightDist(lightMan, (cWorldLightMan_CalcLightDist_sVec3*)point, (cWorldLightMan_CalcLightDist_sLight*)light, &dist, &inv, &dot)) {
             if (dot >= light->outer) {
                 att = Atten_5D30(light, dist);
                 amount = Fall_5D30(light, inv) * light->intensity * att;
@@ -791,7 +791,7 @@ extern "C" float func_002F5D30(void* lightMan, void* point, void* lp)
         }
         break;
     case 2:
-        if (func_002F6168(lightMan, (func_002F6168_sVec3*)point, (func_002F6168_sLight*)light, &dist, &inv, 0)) {
+        if (cWorldLightMan_CalcLightDist(lightMan, (cWorldLightMan_CalcLightDist_sVec3*)point, (cWorldLightMan_CalcLightDist_sLight*)light, &dist, &inv, 0)) {
             att = Atten_5D30(light, dist);
             amount = Fall_5D30(light, inv) * light->intensity * att;
             return light->scale * amount;
@@ -805,20 +805,20 @@ extern "C" float func_002F5D30(void* lightMan, void* point, void* lp)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F6168);
+INCLUDE_ASM("visualfx/worldlightman", cWorldLightMan_CalcLightDist);
 #ifdef SKIP_ASM
-struct func_002F6168_sVec3 {
+struct cWorldLightMan_CalcLightDist_sVec3 {
     float x;
     float y;
     float z;
 };
 
-struct func_002F6168_sLight {
+struct cWorldLightMan_CalcLightDist_sLight {
     char pad[0x1C];
     float radius;               // 0x1C
     char pad20[0x2C - 0x20];
-    func_002F6168_sVec3 dir;    // 0x2C
-    func_002F6168_sVec3 pos;    // 0x38
+    cWorldLightMan_CalcLightDist_sVec3 dir;    // 0x2C
+    cWorldLightMan_CalcLightDist_sVec3 pos;    // 0x38
 };
 
 /**
@@ -835,7 +835,7 @@ struct func_002F6168_sLight {
  * @param outDot  receives the cosine, or null
  * @return 1 when the point is within the radius, else 0
  */
-extern "C" int func_002F6168(void* self, func_002F6168_sVec3* point, func_002F6168_sLight* light,
+extern "C" int cWorldLightMan_CalcLightDist(void* self, cWorldLightMan_CalcLightDist_sVec3* point, cWorldLightMan_CalcLightDist_sLight* light,
                              float* outDist, float* outInvDist, float* outDot)
 {
     float dx = light->pos.x - point->x;
@@ -989,7 +989,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: called for effect only; bound by asm label so the call has no value
 void cCheatFX_resetStates_v(void* self) __asm__("cCheatFX_resetStates__FPv");
 struct sWLCode6910;
-extern "C" void func_002F6910(sWLCode6910* self);
+extern "C" void cCheatFX_updateState(sWLCode6910* self);
 extern int D_004A3BC0;
 
 struct sVec6518 {
@@ -1147,7 +1147,7 @@ extern "C" void cCheatFX_update(sWLCode6518* self)
         cCheatFX_resetStates_v(self);
         D_004A3BC0--;
     }
-    func_002F6910((sWLCode6910*)self);
+    cCheatFX_updateState((sWLCode6910*)self);
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0) {
         self->state = 0;
@@ -1216,7 +1216,7 @@ void cCheatFX_render(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F6910);
+INCLUDE_ASM("visualfx/worldlightman", cCheatFX_updateState);
 #ifdef SKIP_ASM
 struct sWLCode6910 {
     char pad0[4];
@@ -1228,23 +1228,23 @@ struct sWLCode6910 {
 
 extern signed char D_00445E30[];
 extern int D_004A3BC0;
-extern "C" void func_002F6B28(void* self);
-extern "C" int func_002F6B38(void* self);
+extern "C" void cCheatFX_clearInput(void* self);
+extern "C" int cCheatFX_getInput(void* self);
 
 /**
  * Advances a cheat effect's code state machine (m_cheatState) by this frame's cheat input, then clears the input.
  *
- * The input is func_002F6B38's bits 0x10, 0x20 and 0x40 of m_misc (set by cCheatFX_setCheatInput), cleared by
- * func_002F6B28. With no input it clears the held bit 0 of m_misc; while bit 0 is set further input is ignored, so each
+ * The input is cCheatFX_getInput's bits 0x10, 0x20 and 0x40 of m_misc (set by cCheatFX_setCheatInput), cleared by
+ * cCheatFX_clearInput. With no input it clears the held bit 0 of m_misc; while bit 0 is set further input is ignored, so each
  * press counts once. State -1 (off): 0x40 starts the code (state, index, count and misc 0). State 0: 0x10 counts up
  * m_count; 0x20 compares m_count with D_00445E30[m_index] and either advances m_index (after 9 steps state 1) or drops
  * back to -1. State 1: exactly 0x60 sets D_004A3BC0 to 8; otherwise 0x40 toggles bit 1 of m_misc. cCheatFX_update calls
  * it.
  */
-extern "C" void func_002F6910(sWLCode6910* self)
+extern "C" void cCheatFX_updateState(sWLCode6910* self)
 {
-    int cheatInput = func_002F6B38(self);
-    func_002F6B28(self);
+    int cheatInput = cCheatFX_getInput(self);
+    cCheatFX_clearInput(self);
     if (cheatInput == 0) {
         self->flags &= ~1;
         return;
@@ -1354,14 +1354,14 @@ extern "C" void cCheatFX_setCheatInput(cCheatFX* self, int type)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F6B28);
+INCLUDE_ASM("visualfx/worldlightman", cCheatFX_clearInput);
 #ifdef SKIP_ASM
 /**
  * Clears a cheat effect's pending cheat input (bits 0x10, 0x20, 0x40 of m_cheatState.m_misc).
  *
- * func_002F6910 calls it after reading the input.
+ * cCheatFX_updateState calls it after reading the input.
  */
-extern "C" void func_002F6B28(void* self)
+extern "C" void cCheatFX_clearInput(void* self)
 {
     unsigned char* flagByte = (unsigned char*)((char*)self + 0x7);
     *flagByte &= 0x8f;
@@ -1369,16 +1369,16 @@ extern "C" void func_002F6B28(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F6B38);
+INCLUDE_ASM("visualfx/worldlightman", cCheatFX_getInput);
 #ifdef SKIP_ASM
 /**
  * Returns a cheat effect's pending cheat input: bits 0x10, 0x20 and 0x40 of m_cheatState.m_misc.
  *
- * func_002F6910 reads it.
+ * cCheatFX_updateState reads it.
  *
  * @return the input bits
  */
-extern "C" int func_002F6B38(void* self)
+extern "C" int cCheatFX_getInput(void* self)
 {
     return *(unsigned char*)((char*)self + 0x7) & 0x70;
 }
@@ -1949,7 +1949,7 @@ extern "C" void func_002F7A60(void) {
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7A68__FPv);
+INCLUDE_ASM("visualfx/worldlightman", tParticleEmitter_tParticleEmitter__FPv);
 #ifdef SKIP_ASM
 /**
  * Constructs a particle emitter in place; there is nothing to initialise, so it returns @p self.
@@ -1959,7 +1959,7 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7A68__FPv);
  *
  * @return @p self
  */
-void* func_002F7A68(void* self)
+void* tParticleEmitter_tParticleEmitter(void* self)
 {
     return self;
 }
@@ -2210,7 +2210,7 @@ extern "C" int func_002F7BC8(int arg0) {
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7BD0);
+INCLUDE_ASM("visualfx/worldlightman", cLensFxMan_SetNumViews);
 #ifdef SKIP_ASM
 /**
  * Sets the lens effect manager's view count (+0x6490).
@@ -2220,12 +2220,12 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7BD0);
  * @param lensMan  the lens effect manager
  * @param numViews  the number of views
  */
-extern "C" void func_002F7BD0(void *lensMan, int numViews) {
+extern "C" void cLensFxMan_SetNumViews(void *lensMan, int numViews) {
     (*(int *)((char*)(lensMan) + (0x6490))) = numViews;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7BD8);
+INCLUDE_ASM("visualfx/worldlightman", cLensFxMan_Lock);
 #ifdef SKIP_ASM
 /**
  * Sets the lens effect manager's lock flag (+0x6494).
@@ -2236,7 +2236,7 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7BD8);
  * @param lensMan  the lens effect manager
  * @param locked  the flag
  */
-extern "C" void func_002F7BD8(void *lensMan, int locked) {
+extern "C" void cLensFxMan_Lock(void *lensMan, int locked) {
     (*(int *)((char*)(lensMan) + (0x6494))) = locked;
 }
 #endif
@@ -2259,7 +2259,7 @@ extern "C" int func_002F7BE0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7BF0);
+INCLUDE_ASM("visualfx/worldlightman", cVisualEffect__cVisualEffect);
 #ifdef SKIP_ASM
 extern void* D_00488680[];
 void operator_delete(int*);
@@ -2267,12 +2267,12 @@ void operator_delete(int*);
 /**
  * Destroys a visual effect: re-installs the base vtable D_00488680 and frees the object when bit 0 of @p flags is set.
  *
- * It is the destructor slot of D_00488680, whose next slots are func_002F7C20__FPv, func_002F7C28__FPv and
+ * It is the destructor slot of D_00488680, whose next slots are cVisualEffect_update__FPv, cVisualEffect_render__FPv and
  * cVisualEffect_deferredRender__FPv.
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_002F7BF0(void* self, int flags)
+extern "C" void cVisualEffect__cVisualEffect(void* self, int flags)
 {
     *(void***)self = D_00488680;
     if (flags & 1) {
@@ -2282,27 +2282,27 @@ extern "C" void func_002F7BF0(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7C20__FPv);
+INCLUDE_ASM("visualfx/worldlightman", cVisualEffect_update__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the base visual effect's per-frame update.
  *
  * It is the slot after the destructor in D_00488680 and in the effect vtables built on it (D_00487EB8 and others).
  */
-void func_002F7C20(void* self)
+void cVisualEffect_update(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7C28__FPv);
+INCLUDE_ASM("visualfx/worldlightman", cVisualEffect_render__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the base visual effect's render.
  *
- * It is the slot after func_002F7C20__FPv in D_00488680 and in the effect vtables built on it.
+ * It is the slot after cVisualEffect_update__FPv in D_00488680 and in the effect vtables built on it.
  */
-void func_002F7C28(void* self)
+void cVisualEffect_render(void* self)
 {
 }
 #endif
@@ -2319,7 +2319,7 @@ void cVisualEffect_deferredRender(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7C38);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_cAvalanche);
 #ifdef SKIP_ASM
 extern void* cAvalanche_vtbl[];
 extern "C" void* cAvalanche_init(void* self);
@@ -2331,7 +2331,7 @@ extern "C" void* cAvalanche_init(void* self);
  *
  * @return @p self
  */
-extern "C" void* func_002F7C38(void* self)
+extern "C" void* cAvalanche_cAvalanche(void* self)
 {
     *(void***)self = cAvalanche_vtbl;
     cAvalanche_init(self);
@@ -2339,7 +2339,7 @@ extern "C" void* func_002F7C38(void* self)
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7C70);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_Enable);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_Enable;
 
@@ -2351,12 +2351,12 @@ extern int cAvalanche_m_Enable;
  *
  * @return pointer to cAvalanche_m_Enable
  */
-extern "C" int *func_002F7C70(void) {
+extern "C" int *cAvalanche_Enable(void) {
     return &cAvalanche_m_Enable;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7C80);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_Recalc);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_Recalc;
 
@@ -2368,12 +2368,12 @@ extern int cAvalanche_m_Recalc;
  *
  * @return pointer to cAvalanche_m_Recalc
  */
-extern "C" int *func_002F7C80(void) {
+extern "C" int *cAvalanche_Recalc(void) {
     return &cAvalanche_m_Recalc;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7C90);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_Brightness);
 #ifdef SKIP_ASM
 extern int D_004A3A38;
 
@@ -2385,12 +2385,12 @@ extern int D_004A3A38;
  *
  * @return pointer to D_004A3A38
  */
-extern "C" int *func_002F7C90(void) {
+extern "C" int *cAvalanche_Brightness(void) {
     return &D_004A3A38;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7CA0);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_UseLightMapColour);
 #ifdef SKIP_ASM
 extern int D_004A3A3C;
 
@@ -2402,12 +2402,12 @@ extern int D_004A3A3C;
  *
  * @return pointer to D_004A3A3C
  */
-extern "C" int *func_002F7CA0(void) {
+extern "C" int *cAvalanche_UseLightMapColour(void) {
     return &D_004A3A3C;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7CB0);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_UseEndColour);
 #ifdef SKIP_ASM
 extern int D_004A3A40;
 
@@ -2419,12 +2419,12 @@ extern int D_004A3A40;
  *
  * @return pointer to D_004A3A40
  */
-extern "C" int *func_002F7CB0(void) {
+extern "C" int *cAvalanche_UseEndColour(void) {
     return &D_004A3A40;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7CC0);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_SquareLerp);
 #ifdef SKIP_ASM
 extern int D_004A3A44;
 
@@ -2436,12 +2436,12 @@ extern int D_004A3A44;
  *
  * @return pointer to D_004A3A44
  */
-extern "C" int *func_002F7CC0(void) {
+extern "C" int *cAvalanche_SquareLerp(void) {
     return &D_004A3A44;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7CD0);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_Save);
 #ifdef SKIP_ASM
 extern int D_004A3A48;
 
@@ -2453,12 +2453,12 @@ extern int D_004A3A48;
  *
  * @return pointer to D_004A3A48
  */
-extern "C" int *func_002F7CD0(void) {
+extern "C" int *cAvalanche_Save(void) {
     return &D_004A3A48;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7CE0);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_Load);
 #ifdef SKIP_ASM
 extern int D_004A3A4C;
 
@@ -2470,12 +2470,12 @@ extern int D_004A3A4C;
  *
  * @return pointer to D_004A3A4C
  */
-extern "C" int *func_002F7CE0(void) {
+extern "C" int *cAvalanche_Load(void) {
     return &D_004A3A4C;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7CF0);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_MinImpactVelocity);
 #ifdef SKIP_ASM
 extern int D_004A3A50;
 
@@ -2487,12 +2487,12 @@ extern int D_004A3A50;
  *
  * @return pointer to D_004A3A50
  */
-extern "C" int *func_002F7CF0(void) {
+extern "C" int *cAvalanche_MinImpactVelocity(void) {
     return &D_004A3A50;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7D00);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_RenderEmitters);
 #ifdef SKIP_ASM
 extern int D_004A3A54;
 
@@ -2504,12 +2504,12 @@ extern int D_004A3A54;
  *
  * @return pointer to D_004A3A54
  */
-extern "C" int *func_002F7D00(void) {
+extern "C" int *cAvalanche_RenderEmitters(void) {
     return &D_004A3A54;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7D10);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_RenderLines);
 #ifdef SKIP_ASM
 extern int D_004A3A58;
 
@@ -2521,12 +2521,12 @@ extern int D_004A3A58;
  *
  * @return pointer to D_004A3A58
  */
-extern "C" int *func_002F7D10(void) {
+extern "C" int *cAvalanche_RenderLines(void) {
     return &D_004A3A58;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7D20);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_Trigger);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_Trigger;
 
@@ -2538,12 +2538,12 @@ extern int cAvalanche_m_Trigger;
  *
  * @return pointer to cAvalanche_m_Trigger
  */
-extern "C" int *func_002F7D20(void) {
+extern "C" int *cAvalanche_Trigger(void) {
     return &cAvalanche_m_Trigger;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7D30);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_Update);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_Update;
 
@@ -2555,12 +2555,12 @@ extern int cAvalanche_m_Update;
  *
  * @return pointer to cAvalanche_m_Update
  */
-extern "C" int *func_002F7D30(void) {
+extern "C" int *cAvalanche_Update(void) {
     return &cAvalanche_m_Update;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7D40);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_UpdateTimeStep);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_UpdateTimeStep;
 
@@ -2572,12 +2572,12 @@ extern int cAvalanche_m_UpdateTimeStep;
  *
  * @return pointer to cAvalanche_m_UpdateTimeStep
  */
-extern "C" int *func_002F7D40(void) {
+extern "C" int *cAvalanche_UpdateTimeStep(void) {
     return &cAvalanche_m_UpdateTimeStep;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7D50);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_RotationalVelocityScale);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_RotationalVelocityScale;
 
@@ -2589,12 +2589,12 @@ extern int cAvalanche_m_RotationalVelocityScale;
  *
  * @return pointer to cAvalanche_m_RotationalVelocityScale
  */
-extern "C" int *func_002F7D50(void) {
+extern "C" int *cAvalanche_RotationalVelocityScale(void) {
     return &cAvalanche_m_RotationalVelocityScale;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7D60);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_RandomBounceChance);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_RandomBounceChance;
 
@@ -2606,12 +2606,12 @@ extern int cAvalanche_m_RandomBounceChance;
  *
  * @return pointer to cAvalanche_m_RandomBounceChance
  */
-extern "C" int *func_002F7D60(void) {
+extern "C" int *cAvalanche_RandomBounceChance(void) {
     return &cAvalanche_m_RandomBounceChance;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7D70);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_RandomBounceVelocityScaleXY);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_RandomBounceVelocityScaleXY;
 
@@ -2623,12 +2623,12 @@ extern int cAvalanche_m_RandomBounceVelocityScaleXY;
  *
  * @return pointer to cAvalanche_m_RandomBounceVelocityScaleXY
  */
-extern "C" int *func_002F7D70(void) {
+extern "C" int *cAvalanche_RandomBounceVelocityScaleXY(void) {
     return &cAvalanche_m_RandomBounceVelocityScaleXY;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7D80);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_RandomBounceVelocityScaleZ);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_RandomBounceVelocityScaleZ;
 
@@ -2640,12 +2640,12 @@ extern int cAvalanche_m_RandomBounceVelocityScaleZ;
  *
  * @return pointer to cAvalanche_m_RandomBounceVelocityScaleZ
  */
-extern "C" int *func_002F7D80(void) {
+extern "C" int *cAvalanche_RandomBounceVelocityScaleZ(void) {
     return &cAvalanche_m_RandomBounceVelocityScaleZ;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7D90);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_RandomBounceVelocityScale);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_RandomBounceVelocityScale;
 
@@ -2657,12 +2657,12 @@ extern int cAvalanche_m_RandomBounceVelocityScale;
  *
  * @return pointer to cAvalanche_m_RandomBounceVelocityScale
  */
-extern "C" int *func_002F7D90(void) {
+extern "C" int *cAvalanche_RandomBounceVelocityScale(void) {
     return &cAvalanche_m_RandomBounceVelocityScale;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7DA0);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_AvalancheId);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_AvalancheId;
 
@@ -2674,12 +2674,12 @@ extern int cAvalanche_m_AvalancheId;
  *
  * @return pointer to cAvalanche_m_AvalancheId
  */
-extern "C" int *func_002F7DA0(void) {
+extern "C" int *cAvalanche_AvalancheId(void) {
     return &cAvalanche_m_AvalancheId;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7DB0);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_Gravity);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_Gravity;
 
@@ -2691,12 +2691,12 @@ extern int cAvalanche_m_Gravity;
  *
  * @return pointer to cAvalanche_m_Gravity
  */
-extern "C" int *func_002F7DB0(void) {
+extern "C" int *cAvalanche_Gravity(void) {
     return &cAvalanche_m_Gravity;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7DC0);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_VelocityDamping);
 #ifdef SKIP_ASM
 extern int D_004A3A84;
 
@@ -2709,12 +2709,12 @@ extern int D_004A3A84;
  *
  * @return pointer to D_004A3A84
  */
-extern "C" int *func_002F7DC0(void) {
+extern "C" int *cAvalanche_VelocityDamping(void) {
     return &D_004A3A84;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7DD0);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_NormalVelocityScale);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_NormalVelocityScale;
 
@@ -2726,12 +2726,12 @@ extern int cAvalanche_m_NormalVelocityScale;
  *
  * @return pointer to cAvalanche_m_NormalVelocityScale
  */
-extern "C" int *func_002F7DD0(void) {
+extern "C" int *cAvalanche_NormalVelocityScale(void) {
     return &cAvalanche_m_NormalVelocityScale;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7DE0);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_ForwardVelocityScale);
 #ifdef SKIP_ASM
 extern int D_004A3A8C;
 
@@ -2743,12 +2743,12 @@ extern int D_004A3A8C;
  *
  * @return pointer to D_004A3A8C
  */
-extern "C" int *func_002F7DE0(void) {
+extern "C" int *cAvalanche_ForwardVelocityScale(void) {
     return &D_004A3A8C;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7DF0);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_NormalToForwardScale);
 #ifdef SKIP_ASM
 extern int D_004A3A90;
 
@@ -2760,12 +2760,12 @@ extern int D_004A3A90;
  *
  * @return pointer to D_004A3A90
  */
-extern "C" int *func_002F7DF0(void) {
+extern "C" int *cAvalanche_NormalToForwardScale(void) {
     return &D_004A3A90;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7E00);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_MaxVelocity);
 #ifdef SKIP_ASM
 extern int D_004A3A94;
 
@@ -2777,12 +2777,12 @@ extern int D_004A3A94;
  *
  * @return pointer to D_004A3A94
  */
-extern "C" int *func_002F7E00(void) {
+extern "C" int *cAvalanche_MaxVelocity(void) {
     return &D_004A3A94;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7E10);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_Damping);
 #ifdef SKIP_ASM
 extern int D_004A3A98;
 
@@ -2794,12 +2794,12 @@ extern int D_004A3A98;
  *
  * @return pointer to D_004A3A98
  */
-extern "C" int *func_002F7E10(void) {
+extern "C" int *cAvalanche_Damping(void) {
     return &D_004A3A98;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7E20);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_NumParticles);
 #ifdef SKIP_ASM
 extern int D_004A3A9C;
 
@@ -2811,12 +2811,12 @@ extern int D_004A3A9C;
  *
  * @return pointer to D_004A3A9C
  */
-extern "C" int *func_002F7E20(void) {
+extern "C" int *cAvalanche_NumParticles(void) {
     return &D_004A3A9C;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7E30);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_DefaultSize);
 #ifdef SKIP_ASM
 extern int D_004A3AA0;
 
@@ -2828,12 +2828,12 @@ extern int D_004A3AA0;
  *
  * @return pointer to D_004A3AA0
  */
-extern "C" int *func_002F7E30(void) {
+extern "C" int *cAvalanche_DefaultSize(void) {
     return &D_004A3AA0;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7E40);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_PatchColourScale);
 #ifdef SKIP_ASM
 extern int D_004A3AA4;
 
@@ -2845,12 +2845,12 @@ extern int D_004A3AA4;
  *
  * @return pointer to D_004A3AA4
  */
-extern "C" int *func_002F7E40(void) {
+extern "C" int *cAvalanche_PatchColourScale(void) {
     return &D_004A3AA4;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7E50);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_PatchColourScale2);
 #ifdef SKIP_ASM
 extern int D_004A3AA8;
 
@@ -2862,12 +2862,12 @@ extern int D_004A3AA8;
  *
  * @return pointer to D_004A3AA8
  */
-extern "C" int *func_002F7E50(void) {
+extern "C" int *cAvalanche_PatchColourScale2(void) {
     return &D_004A3AA8;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7E60);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_Seed);
 #ifdef SKIP_ASM
 extern int D_004A3AAC;
 
@@ -2879,7 +2879,7 @@ extern int D_004A3AAC;
  *
  * @return pointer to D_004A3AAC
  */
-extern "C" int *func_002F7E60(void) {
+extern "C" int *cAvalanche_Seed(void) {
     return &D_004A3AAC;
 }
 #endif
@@ -2898,7 +2898,7 @@ extern "C" void func_002F7E70(void) {
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7E90);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_fileDataDeleteable);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_fileDataDeleteable;
 
@@ -2909,12 +2909,12 @@ extern int cAvalanche_m_fileDataDeleteable;
  *
  * @return the flag
  */
-extern "C" int func_002F7E90(void) {
+extern "C" int cAvalanche_fileDataDeleteable(void) {
     return cAvalanche_m_fileDataDeleteable;
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7E98);
+INCLUDE_ASM("visualfx/worldlightman", cAvalanche_isBadCookie);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_badCookie;
 
@@ -2925,7 +2925,7 @@ extern int cAvalanche_m_badCookie;
  *
  * @return the flag
  */
-extern "C" int func_002F7E98(void) {
+extern "C" int cAvalanche_isBadCookie(void) {
     return cAvalanche_m_badCookie;
 }
 #endif
@@ -3011,7 +3011,7 @@ extern "C" void func_002F7EF8(void) {
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7F00);
+INCLUDE_ASM("visualfx/worldlightman", cPowerUpFXToggles__cPowerUpFXToggles);
 #ifdef SKIP_ASM
 extern void* D_00488680[];
 void operator_delete(int*);
@@ -3025,7 +3025,7 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_002F7F00(void* self, int flags)
+extern "C" void cPowerUpFXToggles__cPowerUpFXToggles(void* self, int flags)
 {
     *(void***)self = D_00488680;
     if (flags & 1) {
@@ -3080,7 +3080,7 @@ extern "C" void cPS2FogParticleMan__cPS2FogParticleMan(cPS2FogParticleMan* self,
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7F90);
+INCLUDE_ASM("visualfx/worldlightman", cSplashToggles__cSplashToggles);
 #ifdef SKIP_ASM
 extern void* D_00488680[];
 void operator_delete(int*);
@@ -3094,7 +3094,7 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_002F7F90(void* self, int flags)
+extern "C" void cSplashToggles__cSplashToggles(void* self, int flags)
 {
     *(void***)self = D_00488680;
     if (flags & 1) {
@@ -3143,7 +3143,7 @@ extern "C" void func_002F7FD0(void) {
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7FD8);
+INCLUDE_ASM("visualfx/worldlightman", cTransitionMan_IsTransitionActive);
 #ifdef SKIP_ASM
 /**
  * Returns whether a transition is playing (+0x44) of a screen transition manager.
@@ -3154,12 +3154,12 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7FD8);
  * @param transitionMan  the transition manager
  * @return the playing flag
  */
-extern "C" int func_002F7FD8(void *transitionMan) {
+extern "C" int cTransitionMan_IsTransitionActive(void *transitionMan) {
     return (*(int *)((char*)(transitionMan) + (0x44)));
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7FE0);
+INCLUDE_ASM("visualfx/worldlightman", cTransitionMan_IsWaitingForScreenGrab);
 #ifdef SKIP_ASM
 /**
  * Returns whether the manager is still requesting its screen grab (+0x64) of a screen transition manager.
@@ -3170,12 +3170,12 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7FE0);
  * @param transitionMan  the transition manager
  * @return the requesting flag
  */
-extern "C" int func_002F7FE0(void *transitionMan) {
+extern "C" int cTransitionMan_IsWaitingForScreenGrab(void *transitionMan) {
     return (*(int *)((char*)(transitionMan) + (0x64)));
 }
 #endif
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7FE8);
+INCLUDE_ASM("visualfx/worldlightman", cTransitionMan_GetTransitionInitiator);
 #ifdef SKIP_ASM
 /**
  * Returns the initiator of the current transition (+0x78) of a screen transition manager.
@@ -3185,30 +3185,30 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7FE8);
  * @param transitionMan  the transition manager
  * @return the initiator
  */
-extern "C" int func_002F7FE8(void *transitionMan) {
+extern "C" int cTransitionMan_GetTransitionInitiator(void *transitionMan) {
     return (*(int *)((char*)(transitionMan) + (0x78)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7FF0__FPv);
+INCLUDE_ASM("visualfx/worldlightman", cTransitionMan_GetViewIndex__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns the view index the manager serves (+0x74) of a screen transition manager.
  *
- * It reads the view index cTransitionMan_cTransitionMan stores. It is the slot after func_002E4C90 in the
+ * It reads the view index cTransitionMan_cTransitionMan stores. It is the slot after cTransitionMan_IsTransitionPending in the
  * cTransitionMan script-object vtable D_00488100.
  *
  * @return the view index
  */
-int func_002F7FF0(void* self)
+int cTransitionMan_GetViewIndex(void* self)
 {
     return *(int*)((char*)self + 0x74);
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F7FF8);
+INCLUDE_ASM("visualfx/worldlightman", cTransitionMan_IsUsingTexture);
 #ifdef SKIP_ASM
 /**
  * Returns whether the transition uses the screen grab texture (+0x60) of a screen transition manager.
@@ -3218,7 +3218,7 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7FF8);
  * @param transitionMan  the transition manager
  * @return the flag
  */
-extern "C" int func_002F7FF8(void *transitionMan) {
+extern "C" int cTransitionMan_IsUsingTexture(void *transitionMan) {
     return (*(int *)((char*)(transitionMan) + (0x60)));
 }
 #endif
@@ -3270,25 +3270,25 @@ extern "C" void cFade_TObj__cFade_TObj(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F8060);
+INCLUDE_ASM("visualfx/worldlightman", cFade_TObj_cFade_TObj);
 #ifdef SKIP_ASM
 struct sLightVec_002F8060 { float x, y, z, w; };
 
 extern void* cFade_TObj_vtbl[];
-void func_002E4D70(void* self);
+void cTransitionObj_cTransitionObj(void* self);
 
 /**
  * Constructs a fade transition object of a colour.
  *
- * Runs the transition object constructor func_002E4D70, installs cFade_TObj_vtbl and stores @p colour (a, r, g, b) at +0x4.
+ * Runs the transition object constructor cTransitionObj_cTransitionObj, installs cFade_TObj_vtbl and stores @p colour (a, r, g, b) at +0x4.
  * Nothing in the retail code references it.
  *
  * @param colour  the fade colour
  * @return @p self
  */
-extern "C" void* func_002F8060(void* self, sLightVec_002F8060 colour)
+extern "C" void* cFade_TObj_cFade_TObj(void* self, sLightVec_002F8060 colour)
 {
-    func_002E4D70(self);
+    cTransitionObj_cTransitionObj(self);
     *(void***)self = cFade_TObj_vtbl;
     *(sLightVec_002F8060*)((char*)self + 4) = colour;
     return self;
@@ -3343,7 +3343,7 @@ extern "C" void cCircle_TObj__cCircle_TObj(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F8138);
+INCLUDE_ASM("visualfx/worldlightman", cSnowfallToggles__cSnowfallToggles);
 #ifdef SKIP_ASM
 extern void* D_00488680[];
 void operator_delete(int*);
@@ -3357,7 +3357,7 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_002F8138(void* self, int flags)
+extern "C" void cSnowfallToggles__cSnowfallToggles(void* self, int flags)
 {
     *(void***)self = D_00488680;
     if (flags & 1) {
@@ -3398,7 +3398,7 @@ extern "C" int func_002F8170(unsigned long* bits, int n)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F8188);
+INCLUDE_ASM("visualfx/worldlightman", cBoardTrail__cBoardTrail);
 #ifdef SKIP_ASM
 extern void* D_00488680[];
 void operator_delete(int*);
@@ -3412,7 +3412,7 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_002F8188(void* self, int flags)
+extern "C" void cBoardTrail__cBoardTrail(void* self, int flags)
 {
     *(void***)self = D_00488680;
     if (flags & 1) {
@@ -3441,7 +3441,7 @@ void* cCutSceneTransitionMan__cCutSceneTransitionMan(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F81D8);
+INCLUDE_ASM("visualfx/worldlightman", cCutSceneTransitionMan_GetCurrentState);
 #ifdef SKIP_ASM
 /**
  * Returns the state (+0x10) of a cut-scene transition manager.
@@ -3452,7 +3452,7 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F81D8);
  * @param cutSceneMan  the cut-scene transition manager
  * @return the state
  */
-extern "C" int func_002F81D8(void *cutSceneMan) {
+extern "C" int cCutSceneTransitionMan_GetCurrentState(void *cutSceneMan) {
     return (*(int *)((char*)(cutSceneMan) + (0x10)));
 }
 #endif
@@ -3472,7 +3472,7 @@ extern "C" void func_002F81E0(int *arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F81F0);
+INCLUDE_ASM("visualfx/worldlightman", cLightGlow__cLightGlow);
 #ifdef SKIP_ASM
 extern void* D_00488680[];
 void operator_delete(int*);
@@ -3486,7 +3486,7 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_002F81F0(void* self, int flags)
+extern "C" void cLightGlow__cLightGlow(void* self, int flags)
 {
     *(void***)self = D_00488680;
     if (flags & 1) {
@@ -3496,7 +3496,7 @@ extern "C" void func_002F81F0(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F8220);
+INCLUDE_ASM("visualfx/worldlightman", cDepthFog__cDepthFog);
 #ifdef SKIP_ASM
 extern void* D_00488680[];
 void operator_delete(int*);
@@ -3510,7 +3510,7 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_002F8220(void* self, int flags)
+extern "C" void cDepthFog__cDepthFog(void* self, int flags)
 {
     *(void***)self = D_00488680;
     if (flags & 1) {
@@ -3520,7 +3520,7 @@ extern "C" void func_002F8220(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F8250);
+INCLUDE_ASM("visualfx/worldlightman", cHeightFog__cHeightFog);
 #ifdef SKIP_ASM
 extern void* D_00488680[];
 void operator_delete(int*);
@@ -3534,7 +3534,7 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_002F8250(void* self, int flags)
+extern "C" void cHeightFog__cHeightFog(void* self, int flags)
 {
     *(void***)self = D_00488680;
     if (flags & 1) {
@@ -3544,7 +3544,7 @@ extern "C" void func_002F8250(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F8280);
+INCLUDE_ASM("visualfx/worldlightman", cShadow__cShadow);
 #ifdef SKIP_ASM
 extern void* D_00488680[];
 void operator_delete(int*);
@@ -3558,7 +3558,7 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_002F8280(void* self, int flags)
+extern "C" void cShadow__cShadow(void* self, int flags)
 {
     *(void***)self = D_00488680;
     if (flags & 1) {
@@ -3568,7 +3568,7 @@ extern "C" void func_002F8280(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F82B0);
+INCLUDE_ASM("visualfx/worldlightman", cSnowSurface__cSnowSurface);
 #ifdef SKIP_ASM
 extern void* D_00488680[];
 void operator_delete(int*);
@@ -3582,7 +3582,7 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_002F82B0(void* self, int flags)
+extern "C" void cSnowSurface__cSnowSurface(void* self, int flags)
 {
     *(void***)self = D_00488680;
     if (flags & 1) {
@@ -3592,7 +3592,7 @@ extern "C" void func_002F82B0(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/worldlightman", func_002F82E0);
+INCLUDE_ASM("visualfx/worldlightman", cFlags__cFlags);
 #ifdef SKIP_ASM
 extern void* D_00488680[];
 void operator_delete(int*);
@@ -3606,7 +3606,7 @@ void operator_delete(int*);
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_002F82E0(void* self, int flags)
+extern "C" void cFlags__cFlags(void* self, int flags)
 {
     *(void***)self = D_00488680;
     if (flags & 1) {

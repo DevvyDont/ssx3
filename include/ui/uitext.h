@@ -3,7 +3,7 @@
 
 // cUIText: a text object on a UI screen (object type 0x17: getType, cUIText_getType, returns 0x17).
 // cUIScreen_createObjectByStruct allocates it with `cMemMan_alloc(0xBC, "UIText", ...)` and runs its constructor
-// func_003A0348, which calls the cUIThing constructor and stores _vt$7cUIText (cUIText_vtbl): 0xBC bytes.
+// cUIText_cUIText, which calls the cUIThing constructor and stores _vt$7cUIText (cUIText_vtbl): 0xBC bytes.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet.
 // Base class: cUIThing (0x00-0x74, written out below with the names and evidence of ui/uithing.h; cUIThing's own base
@@ -12,9 +12,9 @@
 // Member names are EA's, from SSX On Tour's PSP DWARF (class cUIText), placed at retail offsets by:
 //   [P] the July 2003 preview's inline accessors (setFontIndex/hasShadow/isUnicode lw 0x6C, setShadowColour 0x70,
 //       setStaticColour 0x80). Retail keeps their out-of-line copies in the same order (cUIText_getType getType ...
-//       func_003A5F58 in ui/uivector), which places each one: retail = preview + 8 (cUIThing grew from 0x6C to 0x74),
+//       cUIText_getStringID in ui/uivector), which places each one: retail = preview + 8 (cUIThing grew from 0x6C to 0x74),
 //       and + 0x18 after mStaticColour (retail added mDisabledColour, as On Tour has);
-//   [R] retail's constructor cUIThing_cUIThing + func_003A0348;
+//   [R] retail's constructor cUIThing_cUIThing + cUIText_cUIText;
 //   [U] how retail code uses the field;
 //   [O] On Tour's member order alone, where the fields on both sides of it are placed by [P] or [R].
 // Retail = On Tour - 0xC (mAttrText) / - 0x18 (the rest): On Tour aligns tARGB to 16 bytes.
@@ -30,7 +30,7 @@ struct cUIText {
     // --- cUIThing (see ui/uithing.h for the evidence of each member) ---
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext
-    void** mVtbl;                    // 0x008 [R] _vt$7cUIText (cUIText_vtbl), stored by func_003A0348/func_003A5D60
+    void** mVtbl;                    // 0x008 [R] _vt$7cUIText (cUIText_vtbl), stored by cUIText_cUIText/cUIText_cUIText1
     cUIAnimation* mpAnim;            // 0x00C [P] cUIThing::getAnimation
     unsigned char mAnimPlaybackStatus; // 0x010 [O] cUIThing
     char unk_011[0x3];               // 0x011 padding
@@ -48,7 +48,7 @@ struct cUIText {
     int mSound[2];                   // 0x06C [O] cUIThing
     // --- cUIText ---
     int mAttrText;                   // 0x074 [P] tAttrText: setFontIndex (bits 0-1), hasShadow (2), isUnicode (3), getUseStaticColour (4)
-                                     //       (preview lw 0x6C; retail func_003A5DF8..cUIText_setEllipses, which in On Tour's order also have
+                                     //       (preview lw 0x6C; retail cUIText_setFontIndex..cUIText_setEllipses, which in On Tour's order also have
                                      //       get/setUseDisabledColour (5) and isEllipses/setEllipses (6)); [R] ctor sets bit 2, clears 3-6;
                                      //       [U] font index in cUIText_getFont, bit 3 in cUIText_getAsciiString/getUnicodeString
     tARGB mShadowColour;             // 0x078 [P] setShadowColour (preview 0x70; retail cUIText_setShadowColour); [U] cUIText_setUIData (setUIData)
@@ -61,7 +61,7 @@ struct cUIText {
                                      //       cUIText_render2D loops over it; func_003A10F0 returns it
     unsigned short** mpLineOffset;   // 0x0AC [O]; [R] = 0; [U] line start pointers (cUIText_setUnicodeStringPrivate), freed by cUIText_deleteText
     int mStringID;                   // 0x0B0 [O]; [R] = 0; [U] cUIText_setUnicodeStringByID stores the id, cUIText_updateLocale looks it
-                                     //       up, setAsciiString/setUnicodeString clear it; getStringID (On Tour order) = retail func_003A5F58
+                                     //       up, setAsciiString/setUnicodeString clear it; getStringID (On Tour order) = retail cUIText_getStringID
     unsigned short* mpString;        // 0x0B4 [O]; [R] = 0; [U] the UCS-2 copy (cUIText_setUnicodeStringPrivate), returned by
                                      //       cUIText_getAsciiString/getUnicodeString, freed by cUIText_deleteText
     unsigned short mStringSize;      // 0x0B8 [O]; [R] = 0; [U] = length + 1 (cUIText_setUnicodeStringPrivate)

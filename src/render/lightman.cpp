@@ -182,7 +182,7 @@ static inline sV3_DC70 Normalize_DC70(float x, float y, float z)
 /**
  * Creates the light instances for a block of light records (directional, spot, point or ambient).
  *
- * For each record i, fetches light @p base + i through vtable slot 2 (func_00394C88), stores the record pointer in its
+ * For each record i, fetches light @p base + i through vtable slot 2 (cPS2LightMan_GetLightObj), stores the record pointer in its
  * first word and builds an ARGB colour (alpha 1.0, rgb from +0x20). The record type (+0x10) picks the cLightInst
  * creator: 0 directional (func_0038DC58, normalised direction +0x2C), 2 point (func_0038DC60, position +0x38, decay
  * byte +0x64), 1 spot (func_0038DC68, cone angle pi/2 - func_0031C128(+0x5C), decay and dropoff bytes +0x64/+0x65), 3
@@ -244,7 +244,7 @@ void func_0038DC50_3(void* p, int b, float f) __asm__("func_0038DC50__FPv");
 /**
  * Makes one light an ambient light of the given colour and intensity.
  *
- * Fetches light @p light through vtable slot 2 (func_00394C88: entry @p light of the light array at +0x4) and passes the rest
+ * Fetches light @p light through vtable slot 2 (cPS2LightMan_GetLightObj: entry @p light of the light array at +0x4) and passes the rest
  * to the cLightInst creator func_0038DC50, an empty stub on the PS2. Vtable slot 9 of vt_00493650.
  *
  * @param obj  the light manager (this)
@@ -275,7 +275,7 @@ void func_0038DC58_4(void* p, int b, int c, float f) __asm__("func_0038DC58__FPv
 /**
  * Makes one light a directional light of the given colour, direction and intensity.
  *
- * Fetches light @p light through vtable slot 2 (func_00394C88: entry @p light of the light array at +0x4) and passes the rest
+ * Fetches light @p light through vtable slot 2 (cPS2LightMan_GetLightObj: entry @p light of the light array at +0x4) and passes the rest
  * to the cLightInst creator func_0038DC58, an empty stub on the PS2. Vtable slot 10 of vt_00493650.
  *
  * @param obj  the light manager (this)
@@ -307,7 +307,7 @@ void func_0038DC60_5(void* p, int b, int c, float f, int d) __asm__("func_0038DC
 /**
  * Makes one light a point light of the given colour, position, intensity and decay.
  *
- * Fetches light @p light through vtable slot 2 (func_00394C88: entry @p light of the light array at +0x4) and passes the rest
+ * Fetches light @p light through vtable slot 2 (cPS2LightMan_GetLightObj: entry @p light of the light array at +0x4) and passes the rest
  * to the cLightInst creator func_0038DC60, an empty stub on the PS2. Vtable slot 11 of vt_00493650.
  *
  * @param obj  the light manager (this)
@@ -340,7 +340,7 @@ void func_0038DC68_8(void* p, int b, int c, int d, float x, float y, int e, floa
 /**
  * Makes one light a spot light of the given colour, position, direction, angle, intensity, decay and dropoff.
  *
- * Fetches light @p light through vtable slot 2 (func_00394C88: entry @p light of the light array at +0x4) and passes the rest
+ * Fetches light @p light through vtable slot 2 (cPS2LightMan_GetLightObj: entry @p light of the light array at +0x4) and passes the rest
  * to the cLightInst creator func_0038DC68, an empty stub on the PS2. Vtable slot 12 of vt_00493650.
  *
  * @param obj  the light manager (this)
@@ -373,7 +373,7 @@ struct sLmQuadVec4_E118 {
  * Transforms a 2D point by a 3x3 matrix and returns it as a 4-vector with z = 0 and w = 1.
  *
  * x' = m[0] x + m[3] y + m[6]; y' = m[1] x + m[4] y + m[7] (rows at +0, +0xC, +0x18). Callers: the matrix variants
- * func_0038E2E8, func_0038E468, func_0038E880, func_0038EA60.
+ * c2DRender_drawRect1, c2DRender_drawRotRect1, c2DRender_drawRect3, c2DRender_drawRotRect3.
  *
  * @param point  the point {x, y}
  * @param mat  the 3x3 matrix (nine floats)
@@ -392,7 +392,7 @@ extern "C" sLmQuadVec4_E118 func_0038E0A8(float* point, float* mat)
 }
 #endif
 //100%
-INCLUDE_ASM("render/lightman", func_0038E118);
+INCLUDE_ASM("render/lightman", c2DRender_drawRect);
 #ifdef SKIP_ASM
 // PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
 struct sLmQuadVtx_E118 {
@@ -427,7 +427,7 @@ struct sLmQuadCtx_E118 {
  * @param verts  the four vertices
  * @param rect  the rectangle {x, y, w, h}
  */
-extern "C" void func_0038E118(void* self, sLmQuadVtx_E118* verts, float* rect)
+extern "C" void c2DRender_drawRect(void* self, sLmQuadVtx_E118* verts, float* rect)
 {
     verts[0].pos = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
     verts[1].pos = sLmQuadVec4_E118(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
@@ -439,7 +439,7 @@ extern "C" void func_0038E118(void* self, sLmQuadVtx_E118* verts, float* rect)
 }
 #endif
 //100%
-INCLUDE_ASM("render/lightman", func_0038E200);
+INCLUDE_ASM("render/lightman", c2DRender_drawRotRect);
 #ifdef SKIP_ASM
 // PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
 
@@ -454,7 +454,7 @@ INCLUDE_ASM("render/lightman", func_0038E200);
  * @param verts  the four vertices
  * @param rect  the rectangle {x, y, w, h}
  */
-extern "C" void func_0038E200(void* self, sLmQuadVtx_E118* verts, float* rect)
+extern "C" void c2DRender_drawRotRect(void* self, sLmQuadVtx_E118* verts, float* rect)
 {
     verts[1].pos = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
     verts[3].pos = sLmQuadVec4_E118(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
@@ -466,7 +466,7 @@ extern "C" void func_0038E200(void* self, sLmQuadVtx_E118* verts, float* rect)
 }
 #endif
 //100%
-INCLUDE_ASM("render/lightman", func_0038E2E8);
+INCLUDE_ASM("render/lightman", c2DRender_drawRect1);
 #ifdef SKIP_ASM
 // PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
 
@@ -475,7 +475,7 @@ extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
 /**
  * Fills the four vertex positions of a quad from @p rect, transforms them by @p mat, and draws it.
  *
- * Same corner order as func_0038E118; each corner goes through func_0038E0A8. Caller: func_003A2A00.
+ * Same corner order as c2DRender_drawRect; each corner goes through func_0038E0A8. Caller: cTextureElement_renderRot.
  *
  * Submits the four vertices as a triangle strip through vtable slot 71 (cPS2GraphicsMan_RenderTriStrip).
  *
@@ -483,7 +483,7 @@ extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
  * @param rect  the rectangle {x, y, w, h}
  * @param mat  the 3x3 transform
  */
-extern "C" void func_0038E2E8(void* self, sLmQuadVtx_E118* verts, float* rect, float* mat)
+extern "C" void c2DRender_drawRect1(void* self, sLmQuadVtx_E118* verts, float* rect, float* mat)
 {
     sLmQuadVec4_E118* corner0 = &verts[0].pos;
     sLmQuadVec4_E118* corner1 = &verts[1].pos;
@@ -503,7 +503,7 @@ extern "C" void func_0038E2E8(void* self, sLmQuadVtx_E118* verts, float* rect, f
 }
 #endif
 //100%
-INCLUDE_ASM("render/lightman", func_0038E468);
+INCLUDE_ASM("render/lightman", c2DRender_drawRotRect1);
 #ifdef SKIP_ASM
 // PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
 
@@ -513,7 +513,7 @@ extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
  * Fills the four vertex positions of a quad from @p rect with the corners turned a quarter turn, transforms them by @p
  * mat, and draws it.
  *
- * Same corner order as func_0038E200; each corner goes through func_0038E0A8. Caller: func_003A2A00.
+ * Same corner order as c2DRender_drawRotRect; each corner goes through func_0038E0A8. Caller: cTextureElement_renderRot.
  *
  * Submits the four vertices as a triangle strip through vtable slot 71 (cPS2GraphicsMan_RenderTriStrip).
  *
@@ -521,7 +521,7 @@ extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
  * @param rect  the rectangle {x, y, w, h}
  * @param mat  the 3x3 transform
  */
-extern "C" void func_0038E468(void* self, sLmQuadVtx_E118* verts, float* rect, float* mat)
+extern "C" void c2DRender_drawRotRect1(void* self, sLmQuadVtx_E118* verts, float* rect, float* mat)
 {
     sLmQuadVec4_E118* corner0 = &verts[0].pos;
     sLmQuadVec4_E118* corner1 = &verts[1].pos;
@@ -541,7 +541,7 @@ extern "C" void func_0038E468(void* self, sLmQuadVtx_E118* verts, float* rect, f
 }
 #endif
 //100%
-INCLUDE_ASM("render/lightman", func_0038E5E8);
+INCLUDE_ASM("render/lightman", c2DRender_drawRect2);
 #ifdef SKIP_ASM
 // PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
 
@@ -549,7 +549,7 @@ INCLUDE_ASM("render/lightman", func_0038E5E8);
  * Fills the four vertex positions from @p rect and their UVs from @p uv, and draws the quad.
  *
  * Corners top-left, top-right, bottom-left, bottom-right, with the matching corners of the UV rectangle. Caller:
- * func_003A23B8.
+ * cTextureElement_renderTiled.
  *
  * Submits the four vertices as a triangle strip through vtable slot 71 (cPS2GraphicsMan_RenderTriStrip).
  *
@@ -557,7 +557,7 @@ INCLUDE_ASM("render/lightman", func_0038E5E8);
  * @param rect  the rectangle {x, y, w, h}
  * @param uv  the UV rectangle {u, v, w, h}
  */
-extern "C" void func_0038E5E8(void* self, sLmQuadVtx_E118* vtx, float* rect, float* uv)
+extern "C" void c2DRender_drawRect2(void* self, sLmQuadVtx_E118* vtx, float* rect, float* uv)
 {
     vtx[0].pos = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
     vtx[0].s = uv[0];
@@ -577,15 +577,15 @@ extern "C" void func_0038E5E8(void* self, sLmQuadVtx_E118* vtx, float* rect, flo
 }
 #endif
 //100%
-INCLUDE_ASM("render/lightman", func_0038E738);
+INCLUDE_ASM("render/lightman", c2DRender_drawRotRect2);
 #ifdef SKIP_ASM
 // PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
 
 /**
  * Fills the four vertex positions from @p rect and their UVs from @p uv turned a quarter turn, and draws the quad.
  *
- * Positions as in func_0038E5E8; the UVs go top-left (u + w, v), top-right (u + w, v + h), bottom-left (u, v),
- * bottom-right (u, v + h), so the texture appears rotated by 90 degrees. Caller: func_003A23B8.
+ * Positions as in c2DRender_drawRect2; the UVs go top-left (u + w, v), top-right (u + w, v + h), bottom-left (u, v),
+ * bottom-right (u, v + h), so the texture appears rotated by 90 degrees. Caller: cTextureElement_renderTiled.
  *
  * Submits the four vertices as a triangle strip through vtable slot 71 (cPS2GraphicsMan_RenderTriStrip).
  *
@@ -593,7 +593,7 @@ INCLUDE_ASM("render/lightman", func_0038E738);
  * @param rect  the rectangle {x, y, w, h}
  * @param uv  the UV rectangle {u, v, w, h}
  */
-extern "C" void func_0038E738(void* self, sLmQuadVtx_E118* vtx, float* rect, float* uv)
+extern "C" void c2DRender_drawRotRect2(void* self, sLmQuadVtx_E118* vtx, float* rect, float* uv)
 {
     vtx[0].pos = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
     vtx[0].s = uv[0] + uv[2];
@@ -613,7 +613,7 @@ extern "C" void func_0038E738(void* self, sLmQuadVtx_E118* vtx, float* rect, flo
 }
 #endif
 //100%
-INCLUDE_ASM("render/lightman", func_0038E880);
+INCLUDE_ASM("render/lightman", c2DRender_drawRect3);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 
@@ -623,7 +623,7 @@ extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
  * Fills the four vertex positions from @p rect and their UVs from @p uv, transforms the positions by @p mat, and draws
  * the quad.
  *
- * Layout as in func_0038E5E8; each position goes through func_0038E0A8. Caller: func_003A2BC8.
+ * Layout as in c2DRender_drawRect2; each position goes through func_0038E0A8. Caller: cTextureElement_renderRotTiled.
  *
  * Submits the four vertices as a triangle strip through vtable slot 71 (cPS2GraphicsMan_RenderTriStrip).
  *
@@ -632,7 +632,7 @@ extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
  * @param uv  the UV rectangle {u, v, w, h}
  * @param mat  the 3x3 transform
  */
-extern "C" void func_0038E880(void* self, sLmQuadVtx_E118* vtx, float* rect, float* uv, float* mat)
+extern "C" void c2DRender_drawRect3(void* self, sLmQuadVtx_E118* vtx, float* rect, float* uv, float* mat)
 {
     sLmQuadVec4_E118* corner0 = &vtx[0].pos;
     sLmQuadVec4_E118* corner1 = &vtx[1].pos;
@@ -660,7 +660,7 @@ extern "C" void func_0038E880(void* self, sLmQuadVtx_E118* vtx, float* rect, flo
 }
 #endif
 //100%
-INCLUDE_ASM("render/lightman", func_0038EA60);
+INCLUDE_ASM("render/lightman", c2DRender_drawRotRect3);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 
@@ -670,7 +670,7 @@ extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
  * Fills the four vertex positions from @p rect and their UVs from @p uv turned a quarter turn, transforms the positions
  * by @p mat, and draws the quad.
  *
- * Layout as in func_0038E738; each position goes through func_0038E0A8. Caller: func_003A2BC8.
+ * Layout as in c2DRender_drawRotRect2; each position goes through func_0038E0A8. Caller: cTextureElement_renderRotTiled.
  *
  * Submits the four vertices as a triangle strip through vtable slot 71 (cPS2GraphicsMan_RenderTriStrip).
  *
@@ -679,7 +679,7 @@ extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
  * @param uv  the UV rectangle {u, v, w, h}
  * @param mat  the 3x3 transform
  */
-extern "C" void func_0038EA60(void* self, sLmQuadVtx_E118* vtx, float* rect, float* uv, float* mat)
+extern "C" void c2DRender_drawRotRect3(void* self, sLmQuadVtx_E118* vtx, float* rect, float* uv, float* mat)
 {
     sLmQuadVec4_E118* corner0 = &vtx[0].pos;
     sLmQuadVec4_E118* corner1 = &vtx[1].pos;
@@ -708,7 +708,7 @@ extern "C" void func_0038EA60(void* self, sLmQuadVtx_E118* vtx, float* rect, flo
 #endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038EC40);
+INCLUDE_ASM("render/lightman", c2DRender_drawRect4);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sLmQuadVec4 {
@@ -750,7 +750,7 @@ struct sLmQuadCtx {
  * @param col  the colour {a, r, g, b} in 0..1
  * @param z  the depth
  */
-extern "C" void func_0038EC40(void* self, float* topLeft, float* bottomRight, float* col, float z)
+extern "C" void c2DRender_drawRect4(void* self, float* topLeft, float* bottomRight, float* col, float z)
 {
     sLmQuadVtx verts[4];
     float zero = 0.0f;
@@ -783,7 +783,7 @@ extern "C" void func_0038EC40(void* self, float* topLeft, float* bottomRight, fl
 #endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038ED90);
+INCLUDE_ASM("render/lightman", c2DRender_drawLine);
 #ifdef SKIP_ASM
 // PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
 
@@ -797,7 +797,7 @@ INCLUDE_ASM("render/lightman", func_0038ED90);
  * @param end  the second end point
  * @param col  the colour {a, r, g, b} in 0..1
  */
-extern "C" void func_0038ED90(void* self, sLmQuadVec4_E118* start, sLmQuadVec4_E118* end, float* col)
+extern "C" void c2DRender_drawLine(void* self, sLmQuadVec4_E118* start, sLmQuadVec4_E118* end, float* col)
 {
     sLmQuadVtx_E118 verts[2];
     int red = (int)(col[1] * 255.0f);
@@ -821,7 +821,7 @@ extern "C" void func_0038ED90(void* self, sLmQuadVec4_E118* start, sLmQuadVec4_E
 #endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038EE78);
+INCLUDE_ASM("render/lightman", cPlants_update);
 #ifdef SKIP_ASM
 extern "C" float fSin(float a);
 extern "C" float fCos(float a);
@@ -967,7 +967,7 @@ static inline void lmMulIn_EE78(void* m, const void* b)
  * multiplies f rather than the time, so the outer branch sine moves only through its inner sine. Slot 2 of vtable
  * D_00493178 (the object allocated as "Plants").
  */
-extern "C" void func_0038EE78(void)
+extern "C" void cPlants_update(void)
 {
     sLmMat_EE78 branchMat;
     sLmMat_EE78 rotMat;
@@ -1028,7 +1028,7 @@ extern "C" void func_0038EE78(void)
 #endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_0038F2A8);
+INCLUDE_ASM("render/lightman", cPlants_getDeformationMatrix);
 #ifdef SKIP_ASM
 extern float D_004A4458;
 
@@ -1043,9 +1043,9 @@ extern sLmCell_F2A8 D_00504D80[];
  * D_004A4458 is the "Position Scale" tweak. Caller: cGraphicsMan_DeformMeshMatrix.
  *
  * @param pos  the position (x and y are used)
- * @return the address of one of the eight matrices func_0038EE78 builds
+ * @return the address of one of the eight matrices cPlants_update builds
  */
-extern "C" sLmCell_F2A8* func_0038F2A8(float* pos)
+extern "C" sLmCell_F2A8* cPlants_getDeformationMatrix(float* pos)
 {
     float distSq = pos[0] * pos[0] + pos[1] * pos[1];
     float dist;
@@ -1965,7 +1965,7 @@ extern "C" void func_003904A0(void* self, int idx, void* pkt, int* addr)
 INCLUDE_ASM("render/lightman", func_003905E8);
 
 //100%
-INCLUDE_ASM("render/lightman", func_00390C20);
+INCLUDE_ASM("render/lightman", cRenderToggles_update);
 #ifdef SKIP_ASM
 extern int D_004A44C0;
 extern int D_004A44C8;
@@ -1982,7 +1982,7 @@ struct sLmVEntry_0C20 {
  *
  * Slot 2 of vtable D_004931A8 (the object allocated as "RenderToggles").
  */
-extern "C" void func_00390C20()
+extern "C" void cRenderToggles_update()
 {
     cPS2GraphicsMan* mgr = cGraphicsMan_TheGraphicsMan;
     sLmVEntry_0C20* vt = (sLmVEntry_0C20*)mgr->mVtbl;
@@ -1994,7 +1994,7 @@ extern "C" void func_00390C20()
 #endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_00390C60);
+INCLUDE_ASM("render/lightman", cScreenTint_update);
 #ifdef SKIP_ASM
 extern int cScreenTint_m_LightningEnable;
 extern int D_004A46B4;
@@ -2058,7 +2058,7 @@ static inline float RandRange_0C60(float lo, float hi)
  * Slot 2 of vtable D_00492FA0 (the object allocated as "ScreenTint").
  */
 // PORT: D_004A469C holds a float (declared int elsewhere in the unit).
-extern "C" void func_00390C60()
+extern "C" void cScreenTint_update()
 {
     if (cScreenTint_m_LightningEnable == 0) {
         return;
@@ -2129,7 +2129,7 @@ extern int D_004A46B4;
  * Starts a lightning flash at distance @p flashDistance when lightning is enabled.
  *
  * Sets the flash frame D_004A4698 and brightness D_004A469C to 0, stores @p flashDistance in D_004A46B0 and sets the thunder
- * countdown D_004A46B4 to (int)(@p flashDistance * 0.0018072289). Callers: func_00390C60 and func_00305660.
+ * countdown D_004A46B4 to (int)(@p flashDistance * 0.0018072289). Callers: cScreenTint_update and func_00305660.
  *
  * @param flashDistance  the flash distance; larger values delay the thunder
  */
@@ -2169,7 +2169,7 @@ extern "C" int func_00390EF8()
 #endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_00390F20);
+INCLUDE_ASM("render/lightman", cScreenTint_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -2253,7 +2253,7 @@ public:
  * drawn with slot 71 (cPS2GraphicsMan_RenderTriStrip); then PopView, PopViewport and the draw state is popped. Slot 3
  * of vtable D_00492FA0 (the object allocated as "ScreenTint").
  */
-extern "C" void func_00390F20()
+extern "C" void cScreenTint_render()
 {
     int flag = 0;
     if (D_004A460C_i != 0) {
@@ -2484,7 +2484,7 @@ extern "C" int func_003914F8(void)
 #endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_00391508);
+INCLUDE_ASM("render/lightman", cFont_cFont1);
 #ifdef SKIP_ASM
 struct sV2_1508 {
     float x, y;
@@ -2506,7 +2506,7 @@ struct sV4_1508 {
  *
  * @return @p self
  */
-extern "C" void* func_00391508(char* self)
+extern "C" void* cFont_cFont1(char* self)
 {
     *(sV2_1508*)(self + 0x28) = sV2_1508(0.0f, 0.0f);
     *(sV2_1508*)(self + 0x30) = sV2_1508(1.0f, 1.0f);
@@ -2604,7 +2604,7 @@ extern "C" sLmLight_15E8* cFont_cFont(sLmLight_15E8* self, const char* name, int
 #endif
 
 //100%
-INCLUDE_ASM("render/lightman", func_003916C0);
+INCLUDE_ASM("render/lightman", cFont__cFont);
 #ifdef SKIP_ASM
 extern "C" void cFont_purge(void* self);
 void operator_delete(int* ptr);
@@ -2612,11 +2612,11 @@ void operator_delete(int* ptr);
 /**
  * Destroys a font: calls cFont_purge and frees the object when bit 0 of @p flags is set.
  *
- * Callers: cDebugFE_purge, cGame_purge and func_00398438.
+ * Callers: cDebugFE_purge, cGame_purge and cUIFontInterface_purgeFonts.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void func_003916C0(int* self, int flags)
+extern "C" void cFont__cFont(int* self, int flags)
 {
     cFont_purge(self);
     if (flags & 1) {
@@ -2638,7 +2638,7 @@ extern const char str_font_pct_24s[];
  * Loads a font file and builds the font's glyph table and texture from it.
  *
  * Writes "font:%24s" with @p name into FontName, loads the whole file with FILE_load() (flags with bit 0x100
- * flipped; memstd's allocator func_00252A10 treats that bit as a "back" flag), builds the font with
+ * flipped; memstd's allocator _MEM_allocaligna treats that bit as a "back" flag), builds the font with
  * cFont_linkFont() and frees the file buffer. %24s is a minimum width, not a limit, so a name longer than 26
  * characters would overrun the 32-byte FontName.
  *

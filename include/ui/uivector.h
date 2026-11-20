@@ -4,17 +4,17 @@
 // cUIVector: a UI object drawn as a coloured polygon / polyline (the background shapes, outlines and bars of the FE and
 // overlay screens: cScreenPopup's "whitefg" / "Big shape" ..., cKeyboardPopup's boxes). EA's source is
 // d:/ssx/code/source/ui/uivector.cpp (preview assert path). Retail keeps its methods in ui/uivector
-// (cUIVector_setUIData .. cUIVector_setSize, the default constructor func_003A64F8, getType) and ui/uitext (the
+// (cUIVector_setUIData .. cUIVector_setSize, the default constructor cUIVector_cUIVector1, getType) and ui/uitext (the
 // constructor cUIVector_cUIVector, the destructor cUIVector__cUIVector, cUIVector_setColour).
 //
 // Size 0x90: cUIScreen_createObjectByStruct does operator new(0x90, "UIVector") + cUIVector_cUIVector(this, pScreen, 0).
-// Retail vtable _vt$9cUIVector = D_004941B8 (cUIVector_vtbl; stored by cUIVector_cUIVector, func_003A64F8 and the destructor).
+// Retail vtable _vt$9cUIVector = D_004941B8 (cUIVector_vtbl; stored by cUIVector_cUIVector, cUIVector_cUIVector1 and the destructor).
 // Base: cUIThing (ui/uithing.h, 0x74) <- cListNode, written out flat below; the vptr is cUIThing's (0x8).
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals.
 // Member names and types are EA's, from SSX On Tour's PSP DWARF (class cUIVector, size 0xA0: its cUIThing is 0x80, so
 // every cUIVector member sits exactly 0xC later there), placed at retail offsets by:
-//   [R] retail's constructors cUIVector_cUIVector (stores 0x74 bits and every pointer) / func_003A64F8, the destructor
+//   [R] retail's constructors cUIVector_cUIVector (stores 0x74 bits and every pointer) / cUIVector_cUIVector1, the destructor
 //       cUIVector__cUIVector (frees 0x7C..0x8C) and the 0x90 allocation;
 //   [U] how retail code uses the field: cUIVector_setUIData allocates the arrays with their tags ("UIVectorClr" 16-byte
 //       tARGB, "UIVectorVtx" / "UIVectorVtxRdr" 12-byte t3Vector, "UIVectorLine" 0x30-byte tBxVertex);
@@ -34,7 +34,7 @@ struct cListNode;
 struct t2Vector;
 struct tBxVertex;
 
-// EA's tAttrVector (On Tour DWARF: struct tAttrVector, size 0x4). Retail: tAttrVector::tAttrVector() is func_003A6618
+// EA's tAttrVector (On Tour DWARF: struct tAttrVector, size 0x4). Retail: tAttrVector::tAttrVector() is tAttrVector_tAttrVector
 // (clears mFill, mLoop, mNumVertices).
 struct tAttrVector {
     unsigned int mFill : 1;             // bit 0 [U] cUIVector_setUIData (record flag 1); render2D draws filled when set
@@ -50,7 +50,7 @@ struct cUIVector {
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the cUIThing ctor self-links it
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked
     void** mVtbl;                    // 0x008 [R] _vt$9cUIVector D_004941B8 (cUIVector_vtbl), stored by cUIVector_cUIVector,
-                                     //       func_003A64F8 and cUIVector__cUIVector
+                                     //       cUIVector_cUIVector1 and cUIVector__cUIVector
     cUIAnimation* mpAnim;            // 0x00C [P] cUIThing::getAnimation (ui/uithing.h); [U] cUIVector_update
     unsigned char mAnimPlaybackStatus; // 0x010 [O]; [R] = 0 (cUIThing ctor); [U] cUIVector_update passes it on
     char unk_011[0x3];               // 0x011 padding
@@ -68,7 +68,7 @@ struct cUIVector {
     int mSound[2];                   // 0x06C [O]; [R] = {4, 6} (cUIThing ctor)
     // --- cUIVector
     tAttrVector mAttrVector;         // 0x074 [O] tAttrVector (mFill:1 mLoop:1 mNumTriangles:15 mNumVertices:15); [R] the
-                                     //       ctors clear mFill, mLoop, mNumVertices (func_003A6618 on this + 0x74);
+                                     //       ctors clear mFill, mLoop, mNumVertices (tAttrVector_tAttrVector on this + 0x74);
                                      //       [U] cUIVector_setUIData fills it; render2D / getSize / setChannelData(KCP) /
                                      //       setColour read the counts (lw)
     unsigned char* mpTriangles;      // 0x078 [O]; [R] = 0; [U] cUIVector_setUIData points it after the record's header

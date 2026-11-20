@@ -223,14 +223,14 @@ extern "C" int cScreenKeyboard_onInput(sDbgState_180EF0* self, sDbgInput_180EF0*
 //100%
 INCLUDE_ASM("fe/festatedebug", cFEStateCharSelect_cFEStateCharSelect);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self, void* owner);
+extern "C" void* cUIState_cUIState(void* self, void* owner);
 extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, signed char a1);
 extern void* cFEStateCharSelect_vtbl[];
 
 /**
  * Constructs the character-select state for one rider slot: base cUIState, cFEStateCharSelect_vtbl, state id 9.
  *
- * Runs the cUIState constructor func_0039E2A0(), stores cFEStateCharSelect_vtbl and mHashName 9, sets +0x54 to 1,
+ * Runs the cUIState constructor cUIState_cUIState(), stores cFEStateCharSelect_vtbl and mHashName 9, sets +0x54 to 1,
  * mUserNum (+0x44) to @p count and clears +0x48 and +0x4C. mCtrlBits (+0x15) starts at 0xFF with the controller mask of
  * every earlier rider slot (0 .. @p count - 1, cFECustom_getPlayerCtrlMask() on the engine's FE custom object) removed, so a
  * controller that already picked a character cannot drive this one. cFECustom_getNextState() and cFECustom_getPrevState()
@@ -245,7 +245,7 @@ extern "C" void* cFEStateCharSelect_cFEStateCharSelect(cFEStateCharSelect* self,
     signed char n = count;
     int i = 0;
     unsigned char mask = 0xFF;
-    func_0039E2A0(self, owner);
+    cUIState_cUIState(self, owner);
     self->mVtbl = cFEStateCharSelect_vtbl;
     self->mHashName = 9;
     self->mbIsFirst = 1;

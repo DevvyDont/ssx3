@@ -170,27 +170,27 @@ extern "C" int cFEPopupVideoCalibration_onInputBegin(cFEPopupVideoCalibration* s
 }
 
 extern void* cFEPopupScreenPos_vtbl[];
-extern "C" void* func_0039E390(void*);
+extern "C" void* cUIState__cUIState(void*);
 #endif
 
 extern void* cFEPopupScreenPos_vtbl[];
-extern "C" void* func_0039E390(void*);
+extern "C" void* cUIState__cUIState(void*);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEPopupScreenPos__cFEPopupScreenPos__FPv);
 #ifdef SKIP_ASM
 /**
- * Destroys the screen-position popup through the UI-state destructor func_0039E390().
+ * Destroys the screen-position popup through the UI-state destructor cUIState__cUIState().
  *
  * Restores cFEPopupScreenPos_vtbl first. Only @p self is declared: the destructor flags the caller passed in the
- * second argument register reach func_0039E390() unchanged.
+ * second argument register reach cUIState__cUIState() unchanged.
  *
- * @return no meaningful value (func_0039E390() returns nothing)
+ * @return no meaningful value (cUIState__cUIState() returns nothing)
  */
 void* cFEPopupScreenPos__cFEPopupScreenPos(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEPopupScreenPos_vtbl;
-    return func_0039E390(self);
+    return cUIState__cUIState(self);
 }
 #endif
 
@@ -272,7 +272,7 @@ struct cUIScreen;
 // PORT: the unit declares cUIScreen_getFrameByLabel as returning int; the frame id is an unsigned short.
 unsigned short cUIScreen_getFrameByLabel_us(cUIScreen* screen, int hash) __asm__("cUIScreen_getFrameByLabel__FP9cUIScreeni");
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void func_0039F190(void* self, int a1);
+extern "C" void cUIStateStack_pop(void* self, int a1);
 extern char str_hl_left[];
 extern char str_hl_up[];
 extern char str_hl_down[];
@@ -375,12 +375,12 @@ extern "C" void cFEPopupScreenPos_onUpdate(cFEPopupScreenPos* self)
             sound_F050(((sPopup_F050*)self), 6);
             *(signed char*)&self->mAccept = 1;
             self->mAttrState |= 0x80;
-            func_0039F190(self->mpEngine->mStateStack, 1);
+            cUIStateStack_pop(self->mpEngine->mStateStack, 1);
         } else if (padCall_F050(in, 6)) {
             sound_F050(((sPopup_F050*)self), 3);
             *(signed char*)&self->mAccept = 0;
             self->mAttrState |= 0x80;
-            func_0039F190(self->mpEngine->mStateStack, 1);
+            cUIStateStack_pop(self->mpEngine->mStateStack, 1);
         } else if (padCall_F050(in, 19)) {
             self->mX--;
             playFrame_F050(((sPopup_F050*)self), str_hl_left);
@@ -412,7 +412,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEPopupScreenPos_onLoseTransition__FPv);
 /**
  * Ends the screen-position popup's lose transition at once.
  *
- * The state stack update func_0039ECB0() ends a state's lose transition once this returns nonzero.
+ * The state stack update cUIStateStack_updateLoop() ends a state's lose transition once this returns nonzero.
  *
  * @return always 1 (transition finished)
  */
@@ -423,25 +423,25 @@ int cFEPopupScreenPos_onLoseTransition(void* self)
 #endif
 
 extern void* D_0046D0D0[];
-extern "C" void* func_0039E390(void*);
+extern "C" void* cUIState__cUIState(void*);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRiderBio_cFEStateRiderBio1);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern void* cFEStateRiderBio_vtbl[];
 
 /**
  * Constructs a rider-bio state with no engine (the default-constructor copy).
  *
- * Runs the cUIState constructor func_0039E2A0(self, 0) and stores cFEStateRiderBio_vtbl; nothing else is set (the full
+ * Runs the cUIState constructor cUIState_cUIState(self, 0) and stores cFEStateRiderBio_vtbl; nothing else is set (the full
  * constructor cFEStateRiderBio_cFEStateRiderBio also stores the user number and controller bits).
  *
  * @return @p self
  */
 extern "C" void* cFEStateRiderBio_cFEStateRiderBio1(cFEStateRiderBio* self)
 {
-    func_0039E2A0(self, 0);
+    cUIState_cUIState(self, 0);
     self->mVtbl = cFEStateRiderBio_vtbl;
     return ((void*)self);
 }
@@ -453,7 +453,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRiderBio__cFEStateRiderBio__FPv);
 /**
  * Destroys the rider-bio front-end state through the cFEState and cUIState destructors.
  *
- * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(); the g++
+ * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor cUIState__cUIState(); the g++
  * delete
  * flags reach it untouched in the second argument register.
  *
@@ -462,29 +462,29 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRiderBio__cFEStateRiderBio__FPv);
 void* cFEStateRiderBio__cFEStateRiderBio(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)D_0046D0D0;
-    return func_0039E390(self);
+    return cUIState__cUIState(self);
 }
 #endif
 
-extern "C" void* func_0039E390(void*);
+extern "C" void* cUIState__cUIState(void*);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRuleSelect_cFEStateRuleSelect1);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern void* cFEStateRuleSelect_vtbl[];
 
 /**
  * Constructs a rule-select state with no engine (the default-constructor copy).
  *
- * Runs the cUIState constructor func_0039E2A0(self, 0) and stores cFEStateRuleSelect_vtbl; nothing else is set (the
+ * Runs the cUIState constructor cUIState_cUIState(self, 0) and stores cFEStateRuleSelect_vtbl; nothing else is set (the
  * full constructor is cFEStateRuleSelect_cFEStateRuleSelect).
  *
  * @return @p self
  */
 extern "C" void* cFEStateRuleSelect_cFEStateRuleSelect1(cFEStateRuleSelect* self)
 {
-    func_0039E2A0(self, 0);
+    cUIState_cUIState(self, 0);
     self->mVtbl = cFEStateRuleSelect_vtbl;
     return ((void*)self);
 }
@@ -496,7 +496,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRuleSelect__cFEStateRuleSelect__FPv);
 /**
  * Destroys the rule-select front-end state through the cFEState and cUIState destructors.
  *
- * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(); the g++
+ * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor cUIState__cUIState(); the g++
  * delete
  * flags reach it untouched in the second argument register.
  *
@@ -505,7 +505,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRuleSelect__cFEStateRuleSelect__FPv);
 void* cFEStateRuleSelect__cFEStateRuleSelect(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)D_0046D0D0;
-    return func_0039E390(self);
+    return cUIState__cUIState(self);
 }
 #endif
 
@@ -963,7 +963,7 @@ int cFEStateNetCreateRoomPopup_onLoseTransition(void* self)
 #endif
 
 extern void* cFEStateNetHelpPopup_vtbl[];
-extern "C" void* func_0039E390(void*);
+extern "C" void* cUIState__cUIState(void*);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetCreateRoomPopup_getRoomName);
@@ -1008,7 +1008,7 @@ extern "C" int cFEStateNetCreateRoomPopup_getPassword(void *roomPopup) {
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetHelpPopup_cFEStateNetHelpPopup1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern void* cFEStateNetHelpPopup_vtbl[];
 
 // Element type of an inline-constructed array; its empty constructor leaves only the loop counters.
@@ -1020,14 +1020,14 @@ struct sSlot_F900 {
 /**
  * Constructs a network help popup with no engine or parent (the default-constructor copy).
  *
- * Runs the cUIState constructor func_0039E2A0(self, 0), stores cFEStateNetHelpPopup_vtbl and runs the empty constructor
+ * Runs the cUIState constructor cUIState_cUIState(self, 0), stores cFEStateNetHelpPopup_vtbl and runs the empty constructor
  * of a 7-element array at +0x20 (only the loop is left). The full constructor is cFEStateNetHelpPopup_cFEStateNetHelpPopup.
  *
  * @return @p self
  */
 extern "C" void* cFEStateNetHelpPopup_cFEStateNetHelpPopup1(void* self)
 {
-    func_0039E2A0(self, 0);
+    cUIState_cUIState(self, 0);
     *(void***)((char*)self + 0x8) = cFEStateNetHelpPopup_vtbl;
     new ((char*)self + 0x20) sSlot_F900[7];
     return self;
@@ -1038,17 +1038,17 @@ extern "C" void* cFEStateNetHelpPopup_cFEStateNetHelpPopup1(void* self)
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetHelpPopup__cFEStateNetHelpPopup__FPv);
 #ifdef SKIP_ASM
 /**
- * Destroys the network help popup through the UI-state destructor func_0039E390().
+ * Destroys the network help popup through the UI-state destructor cUIState__cUIState().
  *
  * Restores cFEStateNetHelpPopup_vtbl first. Only @p self is declared: the destructor flags the caller passed in
- * the second argument register reach func_0039E390() unchanged.
+ * the second argument register reach cUIState__cUIState() unchanged.
  *
- * @return no meaningful value (func_0039E390() returns nothing)
+ * @return no meaningful value (cUIState__cUIState() returns nothing)
  */
 void* cFEStateNetHelpPopup__cFEStateNetHelpPopup(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEStateNetHelpPopup_vtbl;
-    return func_0039E390(self);
+    return cUIState__cUIState(self);
 }
 #endif
 
@@ -1058,7 +1058,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetHelpPopup_onLoseTransition__FPv);
 /**
  * Ends the network help popup's lose transition at once.
  *
- * The state stack update func_0039ECB0() ends a state's lose transition once this returns nonzero.
+ * The state stack update cUIStateStack_updateLoop() ends a state's lose transition once this returns nonzero.
  *
  * @return always 1 (transition finished)
  */
@@ -1196,19 +1196,19 @@ extern "C" int cFEStateCharEquip_canSwitchEquipMode(void *charEquip) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_cFEStateRewardGalleryBase1);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern void* D_0046A3C8[];
 
 /**
  * Constructs a reward-gallery base state with no engine (the default-constructor copy).
  *
- * Runs the cUIState constructor func_0039E2A0(self, 0) and stores the reward-gallery base vtable D_0046A3C8.
+ * Runs the cUIState constructor cUIState_cUIState(self, 0) and stores the reward-gallery base vtable D_0046A3C8.
  *
  * @return @p self
  */
 extern "C" void* cFEStateRewardGalleryBase_cFEStateRewardGalleryBase1(cFEStateRewardGalleryBase* self)
 {
-    func_0039E2A0(self, 0);
+    cUIState_cUIState(self, 0);
     self->mVtbl = D_0046A3C8;
     return ((void*)self);
 }
@@ -1221,14 +1221,14 @@ extern void* D_0046A3C8[];
 extern void* D_0046D0D0[];
 void cFEStateRewardGalleryBase_purgeRewards(void* self);
 extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
-// PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
-extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
+// PORT: unit declares cUIState__cUIState with one arg; the body takes (self, flags)
+extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState__cUIState");
 
 /**
  * Destroys a reward-gallery state through the base classes.
  *
  * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (cFEStateRewardGalleryBase_purgeRewards, empty) and releases the icon
- * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor func_0039E390
+ * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor cUIState__cUIState
  * with @p flags.
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
@@ -1239,7 +1239,7 @@ extern "C" void cFEStateRewardGalleryBase__cFEStateRewardGalleryBase(cFEStateRew
     cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
     self->mVtbl = D_0046D0D0;
-    func_0039E390_dtor(self, flags);
+    cUIState__cUIState_dtor(self, flags);
 }
 #endif
 
@@ -1443,20 +1443,20 @@ int cFEStateRewardGalleryBase_getRewardName(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryPosters_cFEStateRewardGalleryPosters1);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern void* D_0046A248[];
 
 /**
  * Constructs the posters gallery state with no engine (the default-constructor copy).
  *
- * Runs the cUIState constructor func_0039E2A0(self, 0) and stores the posters gallery's vtable D_0046A248; the full
+ * Runs the cUIState constructor cUIState_cUIState(self, 0) and stores the posters gallery's vtable D_0046A248; the full
  * constructor (cFEStateRewardGalleryPosters_cFEStateRewardGalleryPosters, reward kind 3) also builds the gallery base and clears the reward list.
  *
  * @return @p self
  */
 extern "C" void* cFEStateRewardGalleryPosters_cFEStateRewardGalleryPosters1(void* self)
 {
-    func_0039E2A0(self, 0);
+    cUIState_cUIState(self, 0);
     *(void***)((char*)self + 0x8) = D_0046A248;
     return self;
 }
@@ -1469,14 +1469,14 @@ extern void* D_0046A3C8[];
 extern void* D_0046D0D0[];
 void cFEStateRewardGalleryBase_purgeRewards(void* self);
 extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
-// PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
-extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
+// PORT: unit declares cUIState__cUIState with one arg; the body takes (self, flags)
+extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState__cUIState");
 
 /**
  * Destroys the posters gallery state through the gallery base and its bases.
  *
  * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (cFEStateRewardGalleryBase_purgeRewards, empty) and releases the icon
- * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor func_0039E390
+ * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor cUIState__cUIState
  * with @p flags. The same code as cFEStateRewardGalleryBase__cFEStateRewardGalleryBase (the base destructor inlined).
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
@@ -1487,7 +1487,7 @@ extern "C" void cFEStateRewardGalleryPosters__cFEStateRewardGalleryPosters(void*
     cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
     *(void***)((char*)self + 0x8) = D_0046D0D0;
-    func_0039E390_dtor(self, flags);
+    cUIState__cUIState_dtor(self, flags);
 }
 #endif
 
@@ -1564,20 +1564,20 @@ int cFEStateRewardGalleryPosters_getRewardName(void* self, void* other)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryTradingCards_cFEStateRewardGalleryTradingCards1);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern void* D_0046A0C8[];
 
 /**
  * Constructs the trading-card gallery state with no engine (the default-constructor copy).
  *
- * Runs the cUIState constructor func_0039E2A0(self, 0) and stores the trading-card gallery's vtable D_0046A0C8; the
+ * Runs the cUIState constructor cUIState_cUIState(self, 0) and stores the trading-card gallery's vtable D_0046A0C8; the
  * full constructor (cFEStateRewardGalleryTradingCards_cFEStateRewardGalleryTradingCards, reward kind 4) also builds the gallery base and clears the reward list.
  *
  * @return @p self
  */
 extern "C" void* cFEStateRewardGalleryTradingCards_cFEStateRewardGalleryTradingCards1(void* self)
 {
-    func_0039E2A0(self, 0);
+    cUIState_cUIState(self, 0);
     *(void***)((char*)self + 0x8) = D_0046A0C8;
     return self;
 }
@@ -1590,14 +1590,14 @@ extern void* D_0046A3C8[];
 extern void* D_0046D0D0[];
 void cFEStateRewardGalleryBase_purgeRewards(void* self);
 extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
-// PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
-extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
+// PORT: unit declares cUIState__cUIState with one arg; the body takes (self, flags)
+extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState__cUIState");
 
 /**
  * Destroys the trading-card gallery state through the gallery base and its bases.
  *
  * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (cFEStateRewardGalleryBase_purgeRewards, empty) and releases the icon
- * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor func_0039E390
+ * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor cUIState__cUIState
  * with @p flags. The same code as cFEStateRewardGalleryBase__cFEStateRewardGalleryBase (the base destructor inlined).
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
@@ -1608,7 +1608,7 @@ extern "C" void cFEStateRewardGalleryTradingCards__cFEStateRewardGalleryTradingC
     cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
     *(void***)((char*)self + 0x8) = D_0046D0D0;
-    func_0039E390_dtor(self, flags);
+    cUIState__cUIState_dtor(self, flags);
 }
 #endif
 
@@ -1685,20 +1685,20 @@ int cFEStateRewardGalleryTradingCards_getRewardName(void* self, void* other)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryConceptArts_cFEStateRewardGalleryConceptArts1);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern void* D_00469F48[];
 
 /**
  * Constructs the concept-art gallery state with no engine (the default-constructor copy).
  *
- * Runs the cUIState constructor func_0039E2A0(self, 0) and stores the concept-art gallery's vtable D_00469F48; the full
+ * Runs the cUIState constructor cUIState_cUIState(self, 0) and stores the concept-art gallery's vtable D_00469F48; the full
  * constructor (cFEStateRewardGalleryConceptArts_cFEStateRewardGalleryConceptArts, reward kind 5) also builds the gallery base and clears the reward list.
  *
  * @return @p self
  */
 extern "C" void* cFEStateRewardGalleryConceptArts_cFEStateRewardGalleryConceptArts1(void* self)
 {
-    func_0039E2A0(self, 0);
+    cUIState_cUIState(self, 0);
     *(void***)((char*)self + 0x8) = D_00469F48;
     return self;
 }
@@ -1711,14 +1711,14 @@ extern void* D_0046A3C8[];
 extern void* D_0046D0D0[];
 void cFEStateRewardGalleryBase_purgeRewards(void* self);
 extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
-// PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
-extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
+// PORT: unit declares cUIState__cUIState with one arg; the body takes (self, flags)
+extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState__cUIState");
 
 /**
  * Destroys the concept-art gallery state through the gallery base and its bases.
  *
  * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (cFEStateRewardGalleryBase_purgeRewards, empty) and releases the icon
- * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor func_0039E390
+ * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor cUIState__cUIState
  * with @p flags. The same code as cFEStateRewardGalleryBase__cFEStateRewardGalleryBase (the base destructor inlined).
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
@@ -1729,7 +1729,7 @@ extern "C" void cFEStateRewardGalleryConceptArts__cFEStateRewardGalleryConceptAr
     cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
     *(void***)((char*)self + 0x8) = D_0046D0D0;
-    func_0039E390_dtor(self, flags);
+    cUIState__cUIState_dtor(self, flags);
 }
 #endif
 
@@ -1806,20 +1806,20 @@ int cFEStateRewardGalleryConceptArts_getRewardName(void* self, void* other)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryVideos_cFEStateRewardGalleryVideos1);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern void* D_00469DC8[];
 
 /**
  * Constructs the video gallery state with no engine (the default-constructor copy).
  *
- * Runs the cUIState constructor func_0039E2A0(self, 0) and stores the video gallery's vtable D_00469DC8; the full
+ * Runs the cUIState constructor cUIState_cUIState(self, 0) and stores the video gallery's vtable D_00469DC8; the full
  * constructor (cFEStateRewardGalleryVideos_cFEStateRewardGalleryVideos, reward kind 6) also builds the gallery base and clears the reward list.
  *
  * @return @p self
  */
 extern "C" void* cFEStateRewardGalleryVideos_cFEStateRewardGalleryVideos1(void* self)
 {
-    func_0039E2A0(self, 0);
+    cUIState_cUIState(self, 0);
     *(void***)((char*)self + 0x8) = D_00469DC8;
     return self;
 }
@@ -1832,14 +1832,14 @@ extern void* D_0046A3C8[];
 extern void* D_0046D0D0[];
 void cFEStateRewardGalleryBase_purgeRewards(void* self);
 extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
-// PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
-extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
+// PORT: unit declares cUIState__cUIState with one arg; the body takes (self, flags)
+extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState__cUIState");
 
 /**
  * Destroys the video gallery state through the gallery base and its bases.
  *
  * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (cFEStateRewardGalleryBase_purgeRewards, empty) and releases the icon
- * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor func_0039E390
+ * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor cUIState__cUIState
  * with @p flags. The same code as cFEStateRewardGalleryBase__cFEStateRewardGalleryBase (the base destructor inlined).
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
@@ -1850,7 +1850,7 @@ extern "C" void cFEStateRewardGalleryVideos__cFEStateRewardGalleryVideos(void* s
     cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
     *(void***)((char*)self + 0x8) = D_0046D0D0;
-    func_0039E390_dtor(self, flags);
+    cUIState__cUIState_dtor(self, flags);
 }
 #endif
 
@@ -1927,20 +1927,20 @@ int cFEStateRewardGalleryVideos_getRewardName(void* self, void* other)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryToys_cFEStateRewardGalleryToys1);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern void* D_00469C48[];
 
 /**
  * Constructs the toy gallery state with no engine (the default-constructor copy).
  *
- * Runs the cUIState constructor func_0039E2A0(self, 0) and stores the toy gallery's vtable D_00469C48; the full
+ * Runs the cUIState constructor cUIState_cUIState(self, 0) and stores the toy gallery's vtable D_00469C48; the full
  * constructor (cFEStateRewardGalleryToys_cFEStateRewardGalleryToys, reward kind 7) also builds the gallery base and clears the reward list.
  *
  * @return @p self
  */
 extern "C" void* cFEStateRewardGalleryToys_cFEStateRewardGalleryToys1(void* self)
 {
-    func_0039E2A0(self, 0);
+    cUIState_cUIState(self, 0);
     *(void***)((char*)self + 0x8) = D_00469C48;
     return self;
 }
@@ -1953,14 +1953,14 @@ extern void* D_0046A3C8[];
 extern void* D_0046D0D0[];
 void cFEStateRewardGalleryBase_purgeRewards(void* self);
 extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
-// PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
-extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
+// PORT: unit declares cUIState__cUIState with one arg; the body takes (self, flags)
+extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState__cUIState");
 
 /**
  * Destroys the toy gallery state through the gallery base and its bases.
  *
  * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (cFEStateRewardGalleryBase_purgeRewards, empty) and releases the icon
- * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor func_0039E390
+ * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor cUIState__cUIState
  * with @p flags. The same code as cFEStateRewardGalleryBase__cFEStateRewardGalleryBase (the base destructor inlined).
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
@@ -1971,7 +1971,7 @@ extern "C" void cFEStateRewardGalleryToys__cFEStateRewardGalleryToys(void* self,
     cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
     *(void***)((char*)self + 0x8) = D_0046D0D0;
-    func_0039E390_dtor(self, flags);
+    cUIState__cUIState_dtor(self, flags);
 }
 #endif
 
@@ -2048,20 +2048,20 @@ int cFEStateRewardGalleryToys_getRewardName(void* self, void* other)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryCheatChars_cFEStateRewardGalleryCheatChars1);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern void* D_00469AC8[];
 
 /**
  * Constructs the cheat-character gallery state with no engine (the default-constructor copy).
  *
- * Runs the cUIState constructor func_0039E2A0(self, 0) and stores the cheat-character gallery's vtable D_00469AC8; the
+ * Runs the cUIState constructor cUIState_cUIState(self, 0) and stores the cheat-character gallery's vtable D_00469AC8; the
  * full constructor (cFEStateRewardGalleryCheatChars_cFEStateRewardGalleryCheatChars, reward kind 8) also builds the gallery base and clears the reward list.
  *
  * @return @p self
  */
 extern "C" void* cFEStateRewardGalleryCheatChars_cFEStateRewardGalleryCheatChars1(void* self)
 {
-    func_0039E2A0(self, 0);
+    cUIState_cUIState(self, 0);
     *(void***)((char*)self + 0x8) = D_00469AC8;
     return self;
 }
@@ -2074,14 +2074,14 @@ extern void* D_0046A3C8[];
 extern void* D_0046D0D0[];
 void cFEStateRewardGalleryBase_purgeRewards(void* self);
 extern "C" void cFEStateRewardGalleryBase_purgeIcons(void* self);
-// PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
-extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
+// PORT: unit declares cUIState__cUIState with one arg; the body takes (self, flags)
+extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState__cUIState");
 
 /**
  * Destroys the cheat-character gallery state through the gallery base and its bases.
  *
  * Stores the gallery base vtable D_0046A3C8, runs the base's purgeRewards (cFEStateRewardGalleryBase_purgeRewards, empty) and releases the icon
- * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor func_0039E390
+ * textures (cFEStateRewardGalleryBase_purgeIcons), then stores the cFEState vtable D_0046D0D0 and calls the cUIState destructor cUIState__cUIState
  * with @p flags. The same code as cFEStateRewardGalleryBase__cFEStateRewardGalleryBase (the base destructor inlined).
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
@@ -2092,7 +2092,7 @@ extern "C" void cFEStateRewardGalleryCheatChars__cFEStateRewardGalleryCheatChars
     cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
     *(void***)((char*)self + 0x8) = D_0046D0D0;
-    func_0039E390_dtor(self, flags);
+    cUIState__cUIState_dtor(self, flags);
 }
 #endif
 
@@ -2169,20 +2169,20 @@ int cFEStateRewardGalleryCheatChars_getRewardName(void* self, void* other)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStatePreviewReward_cFEStatePreviewReward1);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern void* cFEStatePreviewReward_vtbl[];
 
 /**
  * Constructs a reward-preview state with no engine (the default-constructor copy).
  *
- * Runs the cUIState constructor func_0039E2A0(self, 0) and stores cFEStatePreviewReward_vtbl. The full constructor is
+ * Runs the cUIState constructor cUIState_cUIState(self, 0) and stores cFEStatePreviewReward_vtbl. The full constructor is
  * cFEStatePreviewReward_cFEStatePreviewReward.
  *
  * @return @p self
  */
 extern "C" void* cFEStatePreviewReward_cFEStatePreviewReward1(cFEStatePreviewReward* self)
 {
-    func_0039E2A0(self, 0);
+    cUIState_cUIState(self, 0);
     self->mVtbl = cFEStatePreviewReward_vtbl;
     return ((void*)self);
 }
@@ -2332,20 +2332,20 @@ extern "C" void cFEStateVideoPlayer_setOptions(void* self, void* src)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateMountainRoom_cFEStateMountainRoom1);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern void* cFEStateMountainRoom_vtbl[];
 
 /**
  * Constructs a mountain-room state with no engine (the default-constructor copy).
  *
- * Runs the cUIState constructor func_0039E2A0(self, 0) and stores cFEStateMountainRoom_vtbl; the full constructor is
+ * Runs the cUIState constructor cUIState_cUIState(self, 0) and stores cFEStateMountainRoom_vtbl; the full constructor is
  * cFEStateMountainRoom_cFEStateMountainRoom.
  *
  * @return @p self
  */
 extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom1(cFEStateMountainRoom* self)
 {
-    func_0039E2A0(self, 0);
+    cUIState_cUIState(self, 0);
     self->mVtbl = cFEStateMountainRoom_vtbl;
     return ((void*)self);
 }
@@ -2456,19 +2456,19 @@ extern "C" int func_001E0130(void *mountainRoom) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStatePeakRoom_cFEStatePeakRoom1);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern void* cFEStatePeakRoom_vtbl[];
 
 /**
  * Constructs a peak-room state with no engine (the default-constructor copy).
  *
- * Runs the cUIState constructor func_0039E2A0(self, 0) and stores cFEStatePeakRoom_vtbl.
+ * Runs the cUIState constructor cUIState_cUIState(self, 0) and stores cFEStatePeakRoom_vtbl.
  *
  * @return @p self
  */
 extern "C" void* cFEStatePeakRoom_cFEStatePeakRoom1(cFEStatePeakRoom* self)
 {
-    func_0039E2A0(self, 0);
+    cUIState_cUIState(self, 0);
     self->mVtbl = cFEStatePeakRoom_vtbl;
     return ((void*)self);
 }
@@ -2480,7 +2480,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStatePeakRoom__cFEStatePeakRoom__FPv);
 /**
  * Destroys the peak-room front-end state through the cFEState and cUIState destructors.
  *
- * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(); the g++
+ * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor cUIState__cUIState(); the g++
  * delete
  * flags reach it untouched in the second argument register.
  *
@@ -2489,26 +2489,26 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStatePeakRoom__cFEStatePeakRoom__FPv);
 void* cFEStatePeakRoom__cFEStatePeakRoom(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)D_0046D0D0;
-    return func_0039E390(self);
+    return cUIState__cUIState(self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateTrophyRoom_cFEStateTrophyRoom1);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern void* cFEStateTrophyRoom_vtbl[];
 
 /**
  * Constructs a trophy-room state with no engine (the default-constructor copy).
  *
- * Runs the cUIState constructor func_0039E2A0(self, 0) and stores cFEStateTrophyRoom_vtbl.
+ * Runs the cUIState constructor cUIState_cUIState(self, 0) and stores cFEStateTrophyRoom_vtbl.
  *
  * @return @p self
  */
 extern "C" void* cFEStateTrophyRoom_cFEStateTrophyRoom1(void* self)
 {
-    func_0039E2A0(self, 0);
+    cUIState_cUIState(self, 0);
     *(void***)((char*)self + 0x8) = cFEStateTrophyRoom_vtbl;
     return self;
 }
@@ -2520,8 +2520,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateTrophyRoom__cFEStateTrophyRoom);
 extern void* cFEStateTrophyRoom_vtbl[];
 extern void* D_0046D0D0[];
 extern "C" void cFEStateTrophyRoom_purgeTextures(void* self);
-// PORT: unit declares func_0039E390 with one arg; the body takes (self, flags)
-extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390");
+// PORT: unit declares cUIState__cUIState with one arg; the body takes (self, flags)
+extern "C" void cUIState__cUIState_dtor(void* self, int flags) __asm__("cUIState__cUIState");
 
 /**
  * Destroys the trophy-room front-end state: releases its five loaded images (cFEStateTrophyRoom_purgeTextures), then the base
@@ -2534,27 +2534,27 @@ extern "C" void cFEStateTrophyRoom__cFEStateTrophyRoom(void* self, int flags)
     *(void***)((char*)self + 0x8) = cFEStateTrophyRoom_vtbl;
     cFEStateTrophyRoom_purgeTextures(self);
     *(void***)((char*)self + 0x8) = D_0046D0D0;
-    func_0039E390_dtor(self, flags);
+    cUIState__cUIState_dtor(self, flags);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardsRoom_cFEStateRewardsRoom1);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern void* cFEStateRewardsRoom_vtbl[];
 
 /**
  * Constructs a rewards-room state with no engine (the default-constructor copy).
  *
- * Runs the cUIState constructor func_0039E2A0(self, 0) and stores cFEStateRewardsRoom_vtbl. The full constructor is
+ * Runs the cUIState constructor cUIState_cUIState(self, 0) and stores cFEStateRewardsRoom_vtbl. The full constructor is
  * cFEStateRewardsRoom_cFEStateRewardsRoom.
  *
  * @return @p self
  */
 extern "C" void* cFEStateRewardsRoom_cFEStateRewardsRoom1(cFEStateRewardsRoom* self)
 {
-    func_0039E2A0(self, 0);
+    cUIState_cUIState(self, 0);
     self->mVtbl = cFEStateRewardsRoom_vtbl;
     return ((void*)self);
 }
@@ -2566,7 +2566,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardsRoom__cFEStateRewardsRoom__FPv);
 /**
  * Destroys the rewards-room front-end state through the cFEState and cUIState destructors.
  *
- * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(); the g++
+ * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor cUIState__cUIState(); the g++
  * delete
  * flags reach it untouched in the second argument register.
  *
@@ -2575,12 +2575,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardsRoom__cFEStateRewardsRoom__FPv);
 void* cFEStateRewardsRoom__cFEStateRewardsRoom(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)D_0046D0D0;
-    return func_0039E390(self);
+    return cUIState__cUIState(self);
 }
 #endif
 
 extern void* cFEPopupSelectMultiplayerMode_vtbl[];
-extern "C" void* func_0039E390(void*);
+extern "C" void* cUIState__cUIState(void*);
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardsRoom_isInStore);
@@ -2602,17 +2602,17 @@ extern "C" int cFEStateRewardsRoom_isInStore(cFEStateRewardsRoom* rewardsRoom) {
 INCLUDE_ASM("fe/fepopupmisc", cFEPopupSelectMultiplayerMode__cFEPopupSelectMultiplayerMode__FPv);
 #ifdef SKIP_ASM
 /**
- * Destroys the multiplayer-mode selection popup through the UI-state destructor func_0039E390().
+ * Destroys the multiplayer-mode selection popup through the UI-state destructor cUIState__cUIState().
  *
  * Restores cFEPopupSelectMultiplayerMode_vtbl first. Only @p self is declared: the destructor flags the caller
- * passed in the second argument register reach func_0039E390() unchanged.
+ * passed in the second argument register reach cUIState__cUIState() unchanged.
  *
- * @return no meaningful value (func_0039E390() returns nothing)
+ * @return no meaningful value (cUIState__cUIState() returns nothing)
  */
 void* cFEPopupSelectMultiplayerMode__cFEPopupSelectMultiplayerMode(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEPopupSelectMultiplayerMode_vtbl;
-    return func_0039E390(self);
+    return cUIState__cUIState(self);
 }
 #endif
 
@@ -2679,7 +2679,7 @@ extern "C" void cFEPopupSelectMultiplayerMode_onWidgetCreate(cFEPopupSelectMulti
 INCLUDE_ASM("fe/fepopupmisc", cFEPopupSelectMultiplayerMode_onWidgetEvent);
 #ifdef SKIP_ASM
 extern int D_004A19D4;
-extern "C" void func_0039F190(void* self, int a1);
+extern "C" void cUIStateStack_pop(void* self, int a1);
 
 /**
  * Closes the multiplayer-mode popup: select (5) records the chosen mode, back (6) cancels.
@@ -2697,13 +2697,13 @@ extern "C" void cFEPopupSelectMultiplayerMode_onWidgetEvent(cFEPopupSelectMultip
         char* engine = (char*)self->mpEngine;
         self->mMultiMode = 1;
         D_004A19D4 = *(int*)((char*)pWidget + 0x18) != 0;
-        func_0039F190(engine + 0x18, 1);
+        cUIStateStack_pop(engine + 0x18, 1);
         break;
     }
     case 6: {
         char* engine = (char*)self->mpEngine;
         self->mMultiMode = 0;
-        func_0039F190(engine + 0x18, 1);
+        cUIStateStack_pop(engine + 0x18, 1);
         break;
     }
     }
@@ -2769,7 +2769,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEPopupSelectMultiplayerMode_onGainTransition__FP
 /**
  * Ends the multiplayer-mode selection popup's gain transition at once.
  *
- * The state stack update func_0039ECB0() ends a state's gain transition once this returns nonzero.
+ * The state stack update cUIStateStack_updateLoop() ends a state's gain transition once this returns nonzero.
  *
  * @return always 1 (transition finished)
  */
@@ -2785,7 +2785,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEPopupSelectMultiplayerMode_onLoseTransition__FP
 /**
  * Ends the multiplayer-mode selection popup's lose transition at once.
  *
- * The state stack update func_0039ECB0() ends a state's lose transition once this returns nonzero.
+ * The state stack update cUIStateStack_updateLoop() ends a state's lose transition once this returns nonzero.
  *
  * @return always 1 (transition finished)
  */
@@ -2798,20 +2798,20 @@ int cFEPopupSelectMultiplayerMode_onLoseTransition(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateAudioOptions_cFEStateAudioOptions1);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern void* cFEStateAudioOptions_vtbl[];
 
 /**
  * Constructs an audio-options state with no engine (the default-constructor copy).
  *
- * Runs the cUIState constructor func_0039E2A0(self, 0) and stores cFEStateAudioOptions_vtbl; the full constructor is
+ * Runs the cUIState constructor cUIState_cUIState(self, 0) and stores cFEStateAudioOptions_vtbl; the full constructor is
  * cFEStateAudioOptions_cFEStateAudioOptions.
  *
  * @return @p self
  */
 extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions1(void* self)
 {
-    func_0039E2A0(self, 0);
+    cUIState_cUIState(self, 0);
     *(void***)((char*)self + 0x8) = cFEStateAudioOptions_vtbl;
     return self;
 }
@@ -2823,7 +2823,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateAudioOptions__cFEStateAudioOptions__FPv);
 /**
  * Destroys the audio-options front-end state through the cFEState and cUIState destructors.
  *
- * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(); the g++
+ * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor cUIState__cUIState(); the g++
  * delete
  * flags reach it untouched in the second argument register.
  *
@@ -2832,7 +2832,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateAudioOptions__cFEStateAudioOptions__FPv);
 void* cFEStateAudioOptions__cFEStateAudioOptions(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)D_0046D0D0;
-    return func_0039E390(self);
+    return cUIState__cUIState(self);
 }
 #endif
 
@@ -2854,19 +2854,19 @@ extern "C" int cFEStateAudioOptions_isInStore(void *audioOptions) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine_cFEStateRequestLine1);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern void* cFEStateRequestLine_vtbl[];
 
 /**
  * Constructs a request-line (radio playlist) state with no engine (the default-constructor copy).
  *
- * Runs the cUIState constructor func_0039E2A0(self, 0) and stores cFEStateRequestLine_vtbl.
+ * Runs the cUIState constructor cUIState_cUIState(self, 0) and stores cFEStateRequestLine_vtbl.
  *
  * @return @p self
  */
 extern "C" void* cFEStateRequestLine_cFEStateRequestLine1(void* self)
 {
-    func_0039E2A0(self, 0);
+    cUIState_cUIState(self, 0);
     *(void***)((char*)self + 0x8) = cFEStateRequestLine_vtbl;
     return self;
 }
@@ -2878,7 +2878,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine__cFEStateRequestLine__FPv);
 /**
  * Destroys the request-line front-end state through the cFEState and cUIState destructors.
  *
- * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(); the g++
+ * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor cUIState__cUIState(); the g++
  * delete
  * flags reach it untouched in the second argument register.
  *
@@ -2887,7 +2887,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRequestLine__cFEStateRequestLine__FPv);
 void* cFEStateRequestLine__cFEStateRequestLine(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)D_0046D0D0;
-    return func_0039E390(self);
+    return cUIState__cUIState(self);
 }
 #endif
 
@@ -3185,19 +3185,19 @@ void cOVSound_soundShutdown(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateSelectMultiplayerMode_cFEStateSelectMultiplayerMode1);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern void* cFEStateSelectMultiplayerMode_vtbl[];
 
 /**
  * Constructs a select-multiplayer-mode state with no engine (the default-constructor copy).
  *
- * Runs the cUIState constructor func_0039E2A0(self, 0) and stores cFEStateSelectMultiplayerMode_vtbl.
+ * Runs the cUIState constructor cUIState_cUIState(self, 0) and stores cFEStateSelectMultiplayerMode_vtbl.
  *
  * @return @p self
  */
 extern "C" void* cFEStateSelectMultiplayerMode_cFEStateSelectMultiplayerMode1(void* self)
 {
-    func_0039E2A0(self, 0);
+    cUIState_cUIState(self, 0);
     *(void***)((char*)self + 0x8) = cFEStateSelectMultiplayerMode_vtbl;
     return self;
 }
@@ -3209,7 +3209,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateSelectMultiplayerMode__cFEStateSelectMulti
 /**
  * Destroys the select-multiplayer-mode front-end state through the cFEState and cUIState destructors.
  *
- * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(); the g++
+ * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor cUIState__cUIState(); the g++
  * delete
  * flags reach it untouched in the second argument register.
  *
@@ -3218,26 +3218,26 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateSelectMultiplayerMode__cFEStateSelectMulti
 void* cFEStateSelectMultiplayerMode__cFEStateSelectMultiplayerMode(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)D_0046D0D0;
-    return func_0039E390(self);
+    return cUIState__cUIState(self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateMPCircuit_cFEStateMPCircuit1);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern void* cFEStateMPCircuit_vtbl[];
 
 /**
  * Constructs a multiplayer-circuit state with no engine (the default-constructor copy).
  *
- * Runs the cUIState constructor func_0039E2A0(self, 0) and stores cFEStateMPCircuit_vtbl.
+ * Runs the cUIState constructor cUIState_cUIState(self, 0) and stores cFEStateMPCircuit_vtbl.
  *
  * @return @p self
  */
 extern "C" void* cFEStateMPCircuit_cFEStateMPCircuit1(cFEStateMPCircuit* self)
 {
-    func_0039E2A0(self, 0);
+    cUIState_cUIState(self, 0);
     self->mVtbl = cFEStateMPCircuit_vtbl;
     return ((void*)self);
 }
@@ -3249,7 +3249,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateMPCircuit__cFEStateMPCircuit__FPv);
 /**
  * Destroys the multiplayer-circuit front-end state through the cFEState and cUIState destructors.
  *
- * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(); the g++
+ * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor cUIState__cUIState(); the g++
  * delete
  * flags reach it untouched in the second argument register.
  *
@@ -3258,7 +3258,7 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateMPCircuit__cFEStateMPCircuit__FPv);
 void* cFEStateMPCircuit__cFEStateMPCircuit(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)D_0046D0D0;
-    return func_0039E390(self);
+    return cUIState__cUIState(self);
 }
 #endif
 
@@ -7330,7 +7330,7 @@ extern "C" void func_001E3AC8(int idx, float x, float y)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_cOVState_MESSAGECENTER);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern "C" int cUITextureBank_getElementByHashname(void* self, int hash);
 extern "C" int func_001E3A30(void* self);
 extern "C" void func_001E3A78(int a, int b);
@@ -7359,7 +7359,7 @@ struct sObj_3C00 {
 /**
  * Constructs the in-game message center overlay: clears its widget tables and looks up its folder icons.
  *
- * Runs the cUIState constructor (func_0039E2A0), then the inlined cOVState part (mOVID = @p id, vtable D_00474E08,
+ * Runs the cUIState constructor (cUIState_cUIState), then the inlined cOVState part (mOVID = @p id, vtable D_00474E08,
  * mDoneTransition, mAllowPauseMenu and mRemovePDA 0, chat buffer " "), stores D_00474318, zeroes the eight-row
  * widget tables (unread mail, FAQ icon, from, subject, number) and the labels, menu, buttons and arrows (not
  * mpNoMessage), and looks up the "folder", "minus folder" and "questmark" textures in the engine's texture bank
@@ -7373,7 +7373,7 @@ struct sObj_3C00 {
 extern "C" void* cOVState_MESSAGECENTER_cOVState_MESSAGECENTER(cOVState_MESSAGECENTER* self, void* engine, int id)
 {
     sObj_3C00* stateView = (sObj_3C00*)self;
-    func_0039E2A0(self, engine);
+    cUIState_cUIState(self, engine);
     self->mOVID = id;
     self->mVtbl = D_00474E08;
     self->mDoneTransition = 0;
@@ -7735,7 +7735,7 @@ extern "C" void func_001E5148(cOVState_MESSAGECENTER* self, int idx);
  * on a FAQ row either toggles the folder (when the row is a folder's first message: flips the group's message flag and
  * refreshes rows, arrows and buttons) or opens the view popup. Event 7: clears mbMessageDeleted and, on a queued row,
  * deletes that message (func_001E5148) and sets mbMessageDeleted, then refreshes the buttons. Event 6: plays the
- * screen's "TransitionOut" frame, calls func_0039F190(mpEngine + 0x18, 1) and clears D_004A20C0. Event 1: calls vtable
+ * screen's "TransitionOut" frame, calls cUIStateStack_pop(mpEngine + 0x18, 1) and clears D_004A20C0. Event 1: calls vtable
  * entry 5 with 0 on the eight subject texts. Ignores a null @p widget.
  *
  * @param widget  the widget (a row's From text holds its message index at +0x18)
@@ -7789,7 +7789,7 @@ extern "C" void cOVState_MESSAGECENTER_onWidgetEvent(cOVState_MESSAGECENTER* sel
         if (outFrame != 0xFFFF) {
             cUIScreen_playFrame(self->mpMessageScreen, outFrame, 1);
         }
-        func_0039F190(self->mpEngine->mStateStack, 1);
+        cUIStateStack_pop(self->mpEngine->mStateStack, 1);
         D_004A20C0 = 0;
         break;
     }
@@ -7919,13 +7919,13 @@ INCLUDE_ASM("fe/fepopupmisc", cOVState_MESSAGECENTER_onPopupEvent);
 #ifdef SKIP_ASM
 extern "C" void func_001E48B0(cOVState_MESSAGECENTER*);
 extern "C" void func_001E4758(cOVState_MESSAGECENTER*);
-extern "C" void func_0039F190(void* self, int a1);
+extern "C" void cUIStateStack_pop(void* self, int a1);
 
 /**
  * Refreshes the message center when its view popup closes (vtable entry 17, onPopupEvent).
  *
  * On event 20 (sent by the view popup) refreshes the rows and the count labels (func_001E48B0, func_001E4758) and calls
- * func_0039F190(mpEngine + 0x18, 1).
+ * cUIStateStack_pop(mpEngine + 0x18, 1).
  *
  * @param popup  the popup
  * @param event  the popup event
@@ -7935,7 +7935,7 @@ extern "C" void cOVState_MESSAGECENTER_onPopupEvent(cOVState_MESSAGECENTER* self
     if (event == 20) {
         func_001E48B0(self);
         func_001E4758(self);
-        func_0039F190(self->mpEngine->mStateStack, 1);
+        cUIStateStack_pop(self->mpEngine->mStateStack, 1);
     }
 }
 #endif
@@ -8544,13 +8544,13 @@ extern "C" void func_001E5148(cOVState_MESSAGECENTER* self, int idx)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cOVState_ViewPopup_cOVState_ViewPopup);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E318(void* self, void* engine, void* owner);
+extern "C" void* cUIState_cUIState1(void* self, void* engine, void* owner);
 extern void* cOVState_ViewPopup_vtbl[];
 
 /**
  * Constructs the popup that shows one saved message (screen "113ViewMessage").
  *
- * Runs the cUIState constructor (func_0039E318), stores the message index and number, cOVState_ViewPopup_vtbl, and
+ * Runs the cUIState constructor (cUIState_cUIState1), stores the message index and number, cOVState_ViewPopup_vtbl, and
  * zeroes every widget pointer.
  *
  * @param engine  the UI engine (the message center's mpEngine)
@@ -8561,7 +8561,7 @@ extern void* cOVState_ViewPopup_vtbl[];
  */
 extern "C" void* cOVState_ViewPopup_cOVState_ViewPopup(cOVState_ViewPopup* self, void* engine, void* owner, int message, int number)
 {
-    func_0039E318(self, engine, owner);
+    cUIState_cUIState1(self, engine, owner);
     self->miMessage = message;
     self->miNumber = number;
     self->mVtbl = cOVState_ViewPopup_vtbl;

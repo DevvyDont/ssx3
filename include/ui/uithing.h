@@ -13,7 +13,7 @@
 //
 // Member names are EA's, from SSX On Tour's PSP DWARF (class cUIThing), placed at retail offsets by:
 //   [P] the July 2003 preview's inline accessors (getAnimation lw 0xC ... getScreen lw 0x68). Retail keeps their
-//       out-of-line copies in the same order as the preview (func_003A4940 isPlayingAnimation ... func_003A4CB0 setSize,
+//       out-of-line copies in the same order as the preview (cUIThing_isPlayingAnimation isPlayingAnimation ... func_003A4CB0 setSize,
 //       in ui/uivector), which places each one: unshifted up to mScale, then mpScreen moved in front of mSize;
 //   [R] retail's constructor cUIThing_cUIThing (stores every field; pScreen -> 0x5C, pParent -> 0x40);
 //   [U] how retail code uses the field;
@@ -45,30 +45,30 @@ struct tARGB {
 struct cUIThing {
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the constructor self-links it
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked; [U] walked by the cList code
-    void** mVtbl;                    // 0x008 [R] _vt$8cUIThing (cUIThing_vtbl), stored by cUIThing_cUIThing and func_003A4900
-    cUIAnimation* mpAnim;            // 0x00C [P] getAnimation/isPlayingAnimation (lw 0xC; retail func_003A4950/func_003A4940);
+    void** mVtbl;                    // 0x008 [R] _vt$8cUIThing (cUIThing_vtbl), stored by cUIThing_cUIThing and cUIThing_cUIThing1
+    cUIAnimation* mpAnim;            // 0x00C [P] getAnimation/isPlayingAnimation (lw 0xC; retail cUIThing_getAnimation/cUIThing_isPlayingAnimation);
                                      //       [U] cUIThing_playAnimation stores it, cUIThing_deleteAnimation deletes it
     unsigned char mAnimPlaybackStatus; // 0x010 [O]; [R] = 0; [U] cUIThing_playAnimation stores the playback mode, cUIThing_update passes it on
     char unk_011[0x3];               // 0x011 padding
     int mAttr;                       // 0x014 [P] tAttrThing: isActive..isWrap, get/setDrawLayer, get/setPivot (lw/sw 0x14;
-                                     //       retail func_003A4958..func_003A4BB8, cUIThing_setActive..setVisible); [R] ctor sets it
-    int mMiscData;                   // 0x018 [P] getMiscData/setMiscData (lw/sw 0x18; retail func_003A4AC8/func_003A4AD0); [R] = 0
-    tARGB mColour;                   // 0x01C [P] setColour/getColour (0x1C; retail cUIThing_setColour, func_003A4B20/func_003A4B28);
+                                     //       retail cUIThing_isHorizontal..cUIThing_getPivot, cUIThing_setActive..setVisible); [R] ctor sets it
+    int mMiscData;                   // 0x018 [P] getMiscData/setMiscData (lw/sw 0x18; retail cUIThing_getMiscData/cUIThing_setMiscData); [R] = 0
+    tARGB mColour;                   // 0x01C [P] setColour/getColour (0x1C; retail cUIThing_setColour, cUIThing_getColour/cUIThing_getColour1);
                                      //       [R] = {1,1,1,1}; [U] keyframe channels 13-16 (x 1/255) in cUIThing_setChannelData
-    t3Vector mAngle;                 // 0x02C [O]; [P] getRadAngle/setRadAngle = mAngle.z (lwc1/swc1 0x34; retail func_003A4B58/func_003A4B50);
+    t3Vector mAngle;                 // 0x02C [O]; [P] getRadAngle/setRadAngle = mAngle.z (lwc1/swc1 0x34; retail cUIThing_getRadAngle/cUIThing_setRadAngle);
                                      //       [R] = t3vect_Zero; [U] channels 3-5 (degrees -> radians)
-    int mHashName;                   // 0x038 [P] getHashName/setHashName (lw/sw 0x38; retail func_003A4BD0/func_003A4BC8);
+    int mHashName;                   // 0x038 [P] getHashName/setHashName (lw/sw 0x38; retail cUIThing_getHashName/cUIThing_setHashName);
                                      //       [U] compared by cUIThing_getObjectByHashName; set from the object record (cUIScreen_createAllObjects)
     unsigned short* mpEvents;        // 0x03C [O]; [R] = 0; [U] keyframer event per index, 0xFFFF = none (cUIThing_getKeyframerEvent);
                                      //       cUIThing_setUIData points it after the object record
-    cUIThing* mpParent;              // 0x040 [P] getParent/setParent (lw/sw 0x40; retail func_003A4C00/func_003A4BF8); [R] = pParent;
+    cUIThing* mpParent;              // 0x040 [P] getParent/setParent (lw/sw 0x40; retail cUIThing_getParent/cUIThing_setParent); [R] = pParent;
                                      //       [U] func_003A0290 sums mPosition up the parent chain
     t3Vector mPosition;              // 0x044 [P] getPosition/setPosition (retail cUIThing_getPosition/cUIThing_setPosition); [U] channels 0-1
     t3Vector mScale;                 // 0x050 [P] getScale/setScale (retail cUIThing_getScale/cUIThing_setScale); [R] = {1,1,1}; [U] channels 9-10 (x 0.01)
-    cUIScreen* mpScreen;             // 0x05C [P] getScreen (preview lw 0x68; retail func_003A4C88 lw 0x5C); [R] = pScreen
+    cUIScreen* mpScreen;             // 0x05C [P] getScreen (preview lw 0x68; retail cUIThing_getScreen lw 0x5C); [R] = pScreen
     t3Vector mSize;                  // 0x060 [P] getSize/setSize (preview 0x5C; retail cUIThing_getSize/setSize, vtable slots 20/21);
                                      //       [U] channels 6-7; cUIText wraps at mSize.x
-    int mSound[2];                   // 0x06C [O] (On Tour: int mSound[2]); [R] = {4, 6}; [U] func_003A0318/func_003A0330 get/set by index
+    int mSound[2];                   // 0x06C [O] (On Tour: int mSound[2]); [R] = {4, 6}; [U] cUIThing_getSound/cUIThing_setSound get/set by index
 };
 
 CHECK_OFFSET(cUIThing, mpPrev, 0x000);

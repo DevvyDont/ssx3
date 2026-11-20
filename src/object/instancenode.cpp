@@ -97,20 +97,20 @@ extern "C" void cInstanceNode_clearActiveNode(void* self, void* inst)
 }
 #endif
 
-extern "C" void* func_002D19E8(int);
+extern "C" void* cObjectInterface_runExpireScript(int);
 
 //100%
 INCLUDE_ASM("object/instancenode", cInstanceNode_runInitScript);
 #ifdef SKIP_ASM
-extern "C" void func_002D1A78(int);
+extern "C" void cObjectInterface_runInitScript(int);
 
 /**
- * Runs the init world script (type 0) of the node's instance (func_002D1A78 on Instance).
+ * Runs the init world script (type 0) of the node's instance (cObjectInterface_runInitScript on Instance).
  *
  * @param instanceNode  the instance node
  */
 extern "C" void cInstanceNode_runInitScript(cInstanceNode* instanceNode) {
-    func_002D1A78(((int)instanceNode->Instance));
+    cObjectInterface_runInitScript(((int)instanceNode->Instance));
 }
 #endif
 
@@ -118,13 +118,13 @@ extern "C" void cInstanceNode_runInitScript(cInstanceNode* instanceNode) {
 INCLUDE_ASM("object/instancenode", cInstanceNode_runExpireScript__FPv);
 #ifdef SKIP_ASM
 /**
- * Runs the expire world script (type 4) of the node's instance through func_002D19E8.
+ * Runs the expire world script (type 4) of the node's instance through cObjectInterface_runExpireScript.
  *
- * @return func_002D19E8's result (nonzero when a script ran)
+ * @return cObjectInterface_runExpireScript's result (nonzero when a script ran)
  */
 void* cInstanceNode_runExpireScript(void* self)
 {
-    return func_002D19E8(*(int*)((char*)self + 0x18));
+    return cObjectInterface_runExpireScript(*(int*)((char*)self + 0x18));
 }
 #endif
 

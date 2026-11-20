@@ -189,8 +189,8 @@ extern "C" void cFlagSet_PurgeMesh(void* self)
 INCLUDE_ASM("object/flagset", cFlagSet_update);
 #ifdef SKIP_ASM
 extern int D_004A4240;
-extern "C" void* func_002D1CB0();
-extern "C" int func_002D1C98();
+extern "C" void* cObjectInterface_getFlagManager();
+extern "C" int cObjectInterface_getAITick();
 extern "C" void cFlagSet_updateGrid(void* self, void* verts);
 
 struct sFlagVert_B818 {
@@ -230,9 +230,9 @@ struct sFlagElem_B818 {
  * Updates a flag set: advances its wave clocks, regenerates the cloth every other frame and scrolls its texture.
  *
  * Returns when flag updates are off (D_004A4240), the set is empty (+0x5C) or has no grid mesh (+0x60). The wind blend
- * is mMinWindFactor (+0x4C) + the flag manager's wind factor (func_002D1CB0() +0x10) * (1 - mMinWindFactor); each of
+ * is mMinWindFactor (+0x4C) + the flag manager's wind factor (cObjectInterface_getFlagManager() +0x10) * (1 - mMinWindFactor); each of
  * the 4 clocks mFlagTime (+0x78) advances by mSpeed[i] (+0x4) times that and wraps at 1. On frames whose parity
- * (func_002D1C98() % 2) equals mFrameToUpdateGrid (+0x90) it builds up to 50 vertices with cFlagSet_updateGrid and hands them
+ * (cObjectInterface_getAITick() % 2) equals mFrameToUpdateGrid (+0x90) it builds up to 50 vertices with cFlagSet_updateGrid and hands them
  * to the mesh's vtable entry 3. When either scroll rate (+0x50, +0x54) exceeds 0.001 it adds them to mScrollU/V (+0x88,
  * +0x8C), wrapping at 1.
  *
@@ -250,7 +250,7 @@ extern "C" void cFlagSet_update(void* elem)
     if (self->mesh == 0) {
         return;
     }
-    char* wind = (char*)func_002D1CB0();
+    char* wind = (char*)cObjectInterface_getFlagManager();
     float k = self->blend;
     float windBlend = k + *(float*)(wind + 0x10) * (1.0f - k);
     int i;
@@ -260,7 +260,7 @@ extern "C" void cFlagSet_update(void* elem)
             self->phase[i] -= 1.0f;
         }
     }
-    if (func_002D1C98() % 2 == self->parity) {
+    if (cObjectInterface_getAITick() % 2 == self->parity) {
         sFlagVert_B818 verts[50];
         cFlagSet_updateGrid(self, verts);
         sFlagMesh_B818* gridMesh = self->mesh;
@@ -494,7 +494,7 @@ extern "C" void cFlagSet_updateGrid(void* vself, void* vout)
     sFsV3_CM* out = (sFsV3_CM*)vout;
     int bothHeld = self->b0 != 0 && self->mode != 0;
     int neitherHeld = self->b0 == 0 && self->mode == 0;
-    float windRatio = self->blend + *(float*)((char*)func_002D1CB0() + 0x10) * (1.0f - self->blend);
+    float windRatio = self->blend + *(float*)((char*)cObjectInterface_getFlagManager() + 0x10) * (1.0f - self->blend);
     float aTime[4];
     float mag[4];
     int i;
@@ -861,7 +861,7 @@ struct sFlagSet_C668 {
     sFlagSetElem_C668 elems[15]; // 0x20
 };
 
-extern "C" int func_002D1BA0();
+extern "C" int cObjectInterface_getPeakNumber();
 extern "C" void cFlagSet_update(void* elem);
 unsigned int BXrand();
 extern char* cAppMan_TheAppMan;
@@ -880,13 +880,13 @@ static inline float randf_34C668()
 /**
  * Varies the wind once a second by a random step and updates every active flag set.
  *
- * The step's range is 0.15, 0.3 or 0.45 by a per-location level read from the new-race BE (func_002D1BA0,
+ * The step's range is 0.15, 0.3 or 0.45 by a per-location level read from the new-race BE (cObjectInterface_getPeakNumber,
  * probably the location's wind); the wind is kept within 0..1 and interpolated over the second.
  */
 extern "C" void cFlagManager_update(sFlagSet_C668* self)
 {
     float amp = 0.15f;
-    switch (func_002D1BA0()) {
+    switch (cObjectInterface_getPeakNumber()) {
     case 1:
         break;
     case 2:

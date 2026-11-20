@@ -8420,14 +8420,14 @@ struct sHpCtl_41B8 {
     sHpLevel_41B8 levels[4];// 0x70C
 };
 
-extern "C" void func_002DA1C0(sHpGround_41B8* out, sHpVec3_41B8* pos);
+extern "C" void cAvalanche_getAvalancheDataByPosition(sHpGround_41B8* out, sHpVec3_41B8* pos);
 
 /**
  * Works out the danger level that applies to rider @p pl: its base level raised by its height band or capped by the
  * danger zones.
  *
  * Returns 0 when the rider's level (+0x70C + pl * 12) is 0. With height checks on (+0x708) the ground height under the
- * rider (func_002DA1C0 at its position, virtual slot 5) gives band 3 below 1200.4, 2 below 2999.7, else 1, and a higher
+ * rider (cAvalanche_getAvalancheDataByPosition at its position, virtual slot 5) gives band 3 below 1200.4, 2 below 2999.7, else 1, and a higher
  * band is returned. Otherwise levels below 2, or no zones, give 1; level 2 and up are returned only while the rider is
  * inside one of the active zones (type other than 2, sphere of its radius around its centre), else 1.
  *
@@ -8452,7 +8452,7 @@ extern "C" int cDangerMan_CalcAppliedDangerLevel(sHpCtl_41B8* self, int pl)
         probe.x = pos[0];
         probe.y = pos[1];
         probe.z = pos[2];
-        func_002DA1C0(&ground, &probe);
+        cAvalanche_getAvalancheDataByPosition(&ground, &probe);
         int band = 1;
         if (ground.height < 1200.446f) {
             band = 3;

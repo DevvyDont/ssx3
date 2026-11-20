@@ -13,7 +13,7 @@ INCLUDE_ASM("render/ps2lightman", cLightMan_cLightMan__FP12cPSPLightMan);
 #ifdef SKIP_ASM
 /**
  * The cLightMan base constructor: stores the abstract base vtable (cLightMan_vtbl) and registers the object as the
- * global light manager (cLightMan_TheLightMan, returned by func_00394C40()). cLightMan_construct__Fv then installs
+ * global light manager (cLightMan_TheLightMan, returned by cLightMan_getTheLightMan()). cLightMan_construct__Fv then installs
  * the PS2 vtable. (It was once named after On Tour's cPSPLightMan constructor; the parameter type keeps that name.)
  *
  * @return @p self

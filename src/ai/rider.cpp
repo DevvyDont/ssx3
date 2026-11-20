@@ -3964,19 +3964,19 @@ extern "C" void func_00122048()
 //100%
 INCLUDE_ASM("ai/rider", cRider_updateActiveLights);
 #ifdef SKIP_ASM
-extern "C" void func_002F5B68(void* a, void* q, void* b, void* c, int d);
+extern "C" void cWorldLightMan_IntersectLights(void* a, void* q, void* b, void* c, int d);
 
 /**
  * Picks the world lights that light the rider into its active-light list (unk_794).
  *
- * func_002F5B68 keeps the 8 best-scoring lights of type 6 among those of the overlap list, scored from the
+ * cWorldLightMan_IntersectLights keeps the 8 best-scoring lights of type 6 among those of the overlap list, scored from the
  * rider's hip position.
  */
 extern "C" void cRider_updateActiveLights(cRider* self)
 {
     cQuad128 hipPos;
     cRider_getHipPosition(&hipPos, self);
-    func_002F5B68(SSXApp->Game->WorldLightMan, &hipPos, self->mOverlapList, self->unk_794, 8);
+    cWorldLightMan_IntersectLights(SSXApp->Game->WorldLightMan, &hipPos, self->mOverlapList, self->unk_794, 8);
 }
 #endif
 
@@ -4006,8 +4006,8 @@ struct sPath_20D8 {
     sQ_20D8 q[5];
 };
 extern "C" void func_00389260(void* p);
-extern "C" void* func_002EDFB8(void* p);
-extern "C" float func_002EEFA8(void* p);
+extern "C" void* cRenderStateMan_getIrradiance(void* p);
+extern "C" float cRenderStateMan_RimLightIntensityOffset(void* p);
 extern "C" void* cRider_getHipPosition(void* dst, cRider* self);
 extern "C" void func_00389CB8(void* m, void* q, float f);
 extern "C" void func_0038A6A8(void* m, void* q, void* p);
@@ -4017,8 +4017,8 @@ extern "C" void func_00389520(void* m, sQ_20D8* q, sV3_20D8* v);
 /**
  * Builds the rider's light block (unk_7C0) from its environment, active world lights and handler lights.
  *
- * Clears the 10-quadword block, copies the rider's lens-table entry (func_002EDFB8) to its start, adds
- * func_00389CB8's term at the hip position with func_002EEFA8's value, adds each active light of unk_794
+ * Clears the 10-quadword block, copies the rider's lens-table entry (cRenderStateMan_getIrradiance) to its start, adds
+ * func_00389CB8's term at the hip position with cRenderStateMan_RimLightIntensityOffset's value, adds each active light of unk_794
  * (func_0038A6A8), then the handler cPlayerLights' extra ambient (func_00389558) and each of its directional
  * lights (func_00389520).
  */
@@ -4029,14 +4029,14 @@ extern "C" void cRider_SetRiderLights(cRider* self)
     {
         char* obj = (char*)&self->mVtbl;
         sVE_20D8* vt = *(sVE_20D8**)obj;
-        *(sXf_20D8*)&self->unk_7C0[0] = *(sXf_20D8*)func_002EDFB8(vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta));
+        *(sXf_20D8*)&self->unk_7C0[0] = *(sXf_20D8*)cRenderStateMan_getIrradiance(vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta));
     }
     cRider_getHipPosition(&hipPos, self);
     char* lightState = self->unk_7C0;
     {
         char* obj = (char*)&self->mVtbl;
         sVE_20D8* vt = *(sVE_20D8**)obj;
-        func_00389CB8(lightState, &hipPos, func_002EEFA8(vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta)));
+        func_00389CB8(lightState, &hipPos, cRenderStateMan_RimLightIntensityOffset(vt[kRiderVt_getAIIndex].fn(obj + vt[kRiderVt_getAIIndex].delta)));
     }
     for (int i = 0; i < 8; i++) {
         void* light = self->unk_794[i];
@@ -6503,13 +6503,13 @@ extern "C" void cRider_DoInSeqAnimUpdate_typed(cRider* self, sAnimEvent_124788* 
 INCLUDE_ASM("ai/rider", cRider_cancelRiderTransitions);
 #ifdef SKIP_ASM
 void* cGame_getTransitionMan(void* self, int id);
-extern "C" void func_002E4578(void* p);
+extern "C" void cTransitionMan_EndTransition(void* p);
 
 /**
  * Cancels a camera transition in progress on the rider's view.
  *
  * When the game has a view manager and the rider a view, and Game->TransitionMan[mViewIndex] is in state 1,
- * resets that transition manager with func_002E4578.
+ * resets that transition manager with cTransitionMan_EndTransition.
  */
 extern "C" void cRider_cancelRiderTransitions(cRider* self)
 {
@@ -6517,7 +6517,7 @@ extern "C" void cRider_cancelRiderTransitions(cRider* self)
     if (*(void**)((char*)w + 0x84) != 0 && self->mViewIndex >= 0)
     {
         if (*(int*)((char*)cGame_getTransitionMan(w, self->mViewIndex) + 0x78) == 1)
-            func_002E4578(cGame_getTransitionMan(SSXApp->Game, self->mViewIndex));
+            cTransitionMan_EndTransition(cGame_getTransitionMan(SSXApp->Game, self->mViewIndex));
     }
 }
 #endif
@@ -6917,8 +6917,8 @@ extern "C" void cRider_setUbersAllowed(cRider* self, int uberAllowedFlags)
 //100%
 INCLUDE_ASM("ai/rider", cRider_updateWind);
 #ifdef SKIP_ASM
-extern "C" float func_002EF0A0(int rider);
-extern "C" float func_002EE570(int rider);
+extern "C" float cRenderStateMan_PlayerWindIntensity(int rider);
+extern "C" float cRenderStateMan_WindRotation(int rider);
 extern float D_00504FB8[];
 
 struct sVec4_125970
@@ -6968,7 +6968,7 @@ static inline sVec4_125970 Scale_125970(const sVec4_125970& v, float s)
 /**
  * Pushes a human rider along the wind of its environment.
  *
- * The wind speed (func_002EF0A0 x 27.78, capped at 1388.9) and direction (func_002EE570, in degrees) come
+ * The wind speed (cRenderStateMan_PlayerWindIntensity x 27.78, capped at 1388.9) and direction (cRenderStateMan_WindRotation, in degrees) come
  * from the rider's environment entry; below 277.78 nothing happens. When the rider's velocity along the wind
  * is lower than the wind speed, the applyBoost virtual gets the wind direction times the difference times
  * 0.015.
@@ -6978,12 +6978,12 @@ extern "C" void cRider_updateWind(cRider* self)
     if (self->mIsHuman == 0)
         return;
     float maxSpeed = 1388.888916015625f;
-    float speed = func_002EF0A0(self->mAIIndex) * 27.77777862548828f;
+    float speed = cRenderStateMan_PlayerWindIntensity(self->mAIIndex) * 27.77777862548828f;
     if (speed > maxSpeed)
         speed = maxSpeed;
     if (speed >= 277.77777099609375f)
     {
-        float ang = func_002EE570(self->mAIIndex) * 0.01745329424738884f;
+        float ang = cRenderStateMan_WindRotation(self->mAIIndex) * 0.01745329424738884f;
         sVec4_125970 dir;
         dir.z = 0.0f;
         dir.w = 0.0f;

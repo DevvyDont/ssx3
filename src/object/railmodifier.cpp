@@ -8692,8 +8692,8 @@ struct sRmBatch_2DE8 {
 };
 
 // REF n2-render-layer.md: InternState, FindBucket, AppendPacket (0x362978).
-extern "C" unsigned int* func_00394ED0(sRmBatch_2DE8* self, sRmEntry_2DE8* e, int hash);
-extern "C" sRmNode_2DE8* func_00395000(sRmBatch_2DE8* self, unsigned int* state, int key, int hash, int mtxIndex);
+extern "C" unsigned int* cPS2DeferManager_Find(sRmBatch_2DE8* self, sRmEntry_2DE8* e, int hash);
+extern "C" sRmNode_2DE8* cPS2DeferManager_Find1(sRmBatch_2DE8* self, unsigned int* state, int key, int hash, int mtxIndex);
 extern "C" void func_00362978(void* self, int packet, int tail);
 
 union sRmTexKey_2DE8 {
@@ -8734,7 +8734,7 @@ static inline sRmNode_2DE8* newNode_2DE8(sRmBatch_2DE8* self, unsigned int* stat
 static inline unsigned int* findState_2DE8(sRmBatch_2DE8* self, sRmEntry_2DE8* e)
 {
     int x = e->w[0] ^ e->w[1] ^ e->w[2] ^ e->w[3];
-    return func_00394ED0(self, e, hash8_2DE8(x));
+    return cPS2DeferManager_Find(self, e, hash8_2DE8(x));
 }
 
 static inline void addEntry_2DE8(sRmBatch_2DE8* self, sRmEntry_2DE8* e, unsigned int* state, int key)
@@ -8743,7 +8743,7 @@ static inline void addEntry_2DE8(sRmBatch_2DE8* self, sRmEntry_2DE8* e, unsigned
     if (e->continuation != 0)
         node = 0;
     else
-        node = func_00395000(self, state, key, nodeHash_2DE8(state, key), e->mtxIndex);
+        node = cPS2DeferManager_Find1(self, state, key, nodeHash_2DE8(state, key), e->mtxIndex);
     if (node == 0) {
         sRmNode_2DE8* n = newNode_2DE8(self, state, key, e->mtxIndex);
         node = n;
@@ -8773,8 +8773,8 @@ static inline void addEntry_2DE8(sRmBatch_2DE8* self, sRmEntry_2DE8* e, unsigned
  * Files the frame's deferred draw records into buckets by draw state, textures and matrix.
  *
  * Streams the 0x80-byte records (+0x80, count +0x0) through the scratchpad ring D_004A4474 in chunks. For each it finds
- * the shared state (func_00394ED0) and, unless it continues the previous record, the bucket with the same state,
- * texture pair and matrix index (func_00395000). A new bucket is added to the hash and gets a sort item with the key
+ * the shared state (cPS2DeferManager_Find) and, unless it continues the previous record, the bucket with the same state,
+ * texture pair and matrix index (cPS2DeferManager_Find1). A new bucket is added to the hash and gets a sort item with the key
  * from func_00364240; continuation records are chained to the previous bucket. The record's packet is appended to the
  * bucket with func_00362978.
  *

@@ -936,7 +936,7 @@ void cFEStateProfileLoad_onDestroyScreen(void* self)
 INCLUDE_ASM("fe/festateprofile", func_0018FC98);
 #ifdef SKIP_ASM
 extern "C" void* cSSXApp_getMCManager(void* app);
-extern "C" void func_0023CAE8(void* app, int a1, int a2);
+extern "C" void cMCOverlayManager_writeSetFileType(void* app, int a1, int a2);
 extern "C" void cMCOverlayManager_GetMessage(void*, unsigned short*, int);
 void cMemMan_free(void* p);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
@@ -987,7 +987,7 @@ struct cSelf_FC98 {
 /**
  * Starts saving the profile to the selected card slot when the save button is active.
  *
- * Only with the main button active (+0x224): starts a save of file type 1 for the player (+0x1CC) with func_0023CAE8,
+ * Only with the main button active (+0x224): starts a save of file type 1 for the player (+0x1CC) with cMCOverlayManager_writeSetFileType,
  * sets the state (+0x1C0) to 3, the busy flag (+0x1A8) and +0x1DC. Unless the status popup is already up (+0x210) or
  * +0x204 is set, it sets the popup type (+0x19C) to 22, fetches the card manager's message
  * (cMCOverlayManager_GetMessage, 800 characters into a 1600-byte "Temp String" buffer), shows it in the status popup
@@ -1000,7 +1000,7 @@ extern "C" void func_0018FC98(void* vself)
 {
     cSelf_FC98* self = (cSelf_FC98*)vself;
     if (*(int*)((char*)self + 0x224) != 0) {
-        func_0023CAE8(cSSXApp_getMCManager(SSXApp), 1, *(int*)((char*)self + 0x1CC));
+        cMCOverlayManager_writeSetFileType(cSSXApp_getMCManager(SSXApp), 1, *(int*)((char*)self + 0x1CC));
         *(int*)((char*)self + 0x1C0) = 3;
         *(int*)((char*)self + 0x1A8) = 1;
         *(int*)((char*)self + 0x1DC) = 1;
@@ -1039,7 +1039,7 @@ extern "C" void cKeyboardPopup_setMinCharacters(void* kb, int a1);
 extern "C" void cKeyboardPopup_setIncludeKey(void* kb, int key, int a2, int a3);
 extern "C" void cKeyboardPopup_setDisableShiftNumbers(void* kb, int a1);
 extern "C" void cKeyboardPopup_setStatic(void* kb, void* text);
-extern "C" void func_0023C8F0(void* mp, int a1);
+extern "C" void cMCOverlayManager_readSetFileType(void* mp, int a1);
 extern "C" void cMCOverlayManager_SetAction(void* mp, int a1);
 extern "C" void func_002C2540(void* dst, char* src);
 extern "C" void strcpy2(char* dst, void* src);
@@ -1117,7 +1117,7 @@ static inline void* GetText_K18FD90(char* key)
  * mbDisableForFirst set, keys 0xF-0x18 excluded from the alternate set (cKeyboardPopup_setDisableShiftNumbers) and keys 14, 25, 26, 39, 40, 52,
  * 53, 64, 65 and 66 from both; each time it sets the "kT_KEYUserName" label, mbClearOnFirst and the player's current
  * name, pushes it as a popup on the engine's state stack (cUIStateStack_pushPopup) and sets +0x1A0 and clears +0x19C.
- * On the load screen (2) with the main button active it starts a load of file type 1 (func_0023C8F0) and calls this
+ * On the load screen (2) with the main button active it starts a load of file type 1 (cMCOverlayManager_readSetFileType) and calls this
  * state's vtable slot 44 (cFEMemCard_confirmLoad).
  *
  * Event 13 (the keyboard is done): stores the entered name (mszEditString) as the player's name (cBENewPlayerInterface_setPlayerName, for the
@@ -1199,7 +1199,7 @@ extern "C" void cFEStateProfileLoad_onWidgetEvent(void* vself, char* item, int e
             break;
         case 2:
             if (self->f224 != 0) {
-                func_0023C8F0(mp, 1);
+                cMCOverlayManager_readSetFileType(mp, 1);
                 VCALLV_K18FD90(self, 8, 44));
             }
             break;
@@ -1463,13 +1463,13 @@ extern "C" void cFEStateProfileLoad_initSaveScreen(void* self)
 INCLUDE_ASM("fe/festateprofile", cFEStateRiderBio_cFEStateRiderBio);
 #ifdef SKIP_ASM
 extern void* cFEStateRiderBio_vtbl[];
-extern "C" void* func_0039E2A0(void* self);
+extern "C" void* cUIState_cUIState(void* self);
 extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 
 /**
  * Constructs the rider bio state (state id 0xF) for a user.
  *
- * Runs the cUIState constructor (func_0039E2A0) on @p engine, installs cFEStateRiderBio_vtbl, stores @p userNum (as a
+ * Runs the cUIState constructor (cUIState_cUIState) on @p engine, installs cFEStateRiderBio_vtbl, stores @p userNum (as a
  * signed char) at +0x44 and the user's controller bits at +0x15 (cFECustom_getPlayerCtrlMask on the engine's owner).
  * cFECustom_getNextState allocates it as "cFEStateRiderBio" (80 bytes) with the current state's user number.
  *
@@ -1480,7 +1480,7 @@ extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 extern "C" void* cFEStateRiderBio_cFEStateRiderBio(cFEStateRiderBio* self, int engine, int userNum)
 {
     signed char idx = userNum;
-    func_0039E2A0(self);
+    cUIState_cUIState(self);
     self->mVtbl = cFEStateRiderBio_vtbl;
     self->mHashName = 0xF;
     self->mUserNum = idx;

@@ -273,14 +273,14 @@ extern "C" void cUIStateStack_pushCheck(cList* self, cUIStateStack_pushCheck_sSt
 #endif
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039F600);
+INCLUDE_ASM("ui/uistatestack", cUIStateStack_popToFloor);
 #ifdef SKIP_ASM
 struct cList;
 void* cList_first(cList*);
 
-struct func_0039F600_node {
+struct cUIStateStack_popToFloor_node {
     char pad0[0x4];
-    func_0039F600_node* next; // 0x4
+    cUIStateStack_popToFloor_node* next; // 0x4
     char pad8[0x1C - 0x8];
     unsigned int b0 : 1;
     unsigned int b1 : 5;
@@ -291,8 +291,8 @@ struct func_0039F600_node {
     unsigned int b15 : 1;
 };
 
-static inline void func_0039F600_setId(func_0039F600_node* n, int v) { n->id = v; }
-static inline void func_0039F600_setB7(func_0039F600_node* n, int v) { n->b7 = v; }
+static inline void cUIStateStack_popToFloor_setId(cUIStateStack_popToFloor_node* n, int v) { n->id = v; }
+static inline void cUIStateStack_popToFloor_setB7(cUIStateStack_popToFloor_node* n, int v) { n->b7 = v; }
 
 /**
  * Closes the popups on top of a state stack down to a pop floor; returns the state where it stopped.
@@ -303,17 +303,17 @@ static inline void func_0039F600_setB7(func_0039F600_node* n, int v) { n->b7 = v
  * @param list  the state stack (its main list)
  * @return the first non-popup or pop-floor state, or null
  */
-extern "C" func_0039F600_node* func_0039F600(cList* list)
+extern "C" cUIStateStack_popToFloor_node* cUIStateStack_popToFloor(cList* list)
 {
-    func_0039F600_node* n = (func_0039F600_node*)cList_first(list);
+    cUIStateStack_popToFloor_node* n = (cUIStateStack_popToFloor_node*)cList_first(list);
     if (n != 0) {
         while (n->b0) {
             if ((*(int*)((char*)n + 0x1C) >> 15) & 1) {
                 break;
             }
             if (n->id < 6) {
-                func_0039F600_setId(n, 7);
-                func_0039F600_setB7(n, 1);
+                cUIStateStack_popToFloor_setId(n, 7);
+                cUIStateStack_popToFloor_setB7(n, 1);
             }
             n = n->next;
         }
@@ -324,14 +324,14 @@ extern "C" func_0039F600_node* func_0039F600(cList* list)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039F698);
+INCLUDE_ASM("ui/uistatestack", cUIStateStack_popToState);
 #ifdef SKIP_ASM
 struct cList;
 void* cList_first(cList*);
 
-struct func_0039F698_node {
+struct cUIStateStack_popToState_node {
     char pad0[0x4];
-    func_0039F698_node* next; // 0x4
+    cUIStateStack_popToState_node* next; // 0x4
     char pad8[0x1C - 0x8];
     unsigned int b0 : 1;
     unsigned int b1 : 5;
@@ -340,8 +340,8 @@ struct func_0039F698_node {
     unsigned int id : 6;
 };
 
-static inline void func_0039F698_setId(func_0039F698_node* n, int v) { n->id = v; }
-static inline void func_0039F698_setB7(func_0039F698_node* n, int v) { n->b7 = v; }
+static inline void cUIStateStack_popToState_setId(cUIStateStack_popToState_node* n, int v) { n->id = v; }
+static inline void cUIStateStack_popToState_setB7(cUIStateStack_popToState_node* n, int v) { n->b7 = v; }
 
 /**
  * Closes all popups on top of a state stack; returns the first non-popup state.
@@ -351,15 +351,15 @@ static inline void func_0039F698_setB7(func_0039F698_node* n, int v) { n->b7 = v
  * @param list  the state stack (its main list)
  * @return the first non-popup state, or null
  */
-extern "C" func_0039F698_node* func_0039F698(cList* list)
+extern "C" cUIStateStack_popToState_node* cUIStateStack_popToState(cList* list)
 {
-    func_0039F698_node* n = (func_0039F698_node*)cList_first(list);
+    cUIStateStack_popToState_node* n = (cUIStateStack_popToState_node*)cList_first(list);
     if (n != 0) {
         if (n->b0) {
             do {
                 if (n->id < 6) {
-                    func_0039F698_setId(n, 7);
-                    func_0039F698_setB7(n, 1);
+                    cUIStateStack_popToState_setId(n, 7);
+                    cUIStateStack_popToState_setB7(n, 1);
                 }
                 n = n->next;
             } while (n->b0);
@@ -371,14 +371,14 @@ extern "C" func_0039F698_node* func_0039F698(cList* list)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039F718);
+INCLUDE_ASM("ui/uistatestack", cUIStateStack_popToStateInclusive);
 #ifdef SKIP_ASM
 struct cList;
 void* cList_first(cList*);
 
-struct func_0039F718_node {
+struct cUIStateStack_popToStateInclusive_node {
     char pad0[0x4];
-    func_0039F718_node* next; // 0x4
+    cUIStateStack_popToStateInclusive_node* next; // 0x4
     char pad8[0x1C - 0x8];
     unsigned int b0 : 1;
     unsigned int b1 : 5;
@@ -387,8 +387,8 @@ struct func_0039F718_node {
     unsigned int id : 6;
 };
 
-static inline void func_0039F718_setId(func_0039F718_node* n, int v) { n->id = v; }
-static inline void func_0039F718_setB7(func_0039F718_node* n, int v) { n->b7 = v; }
+static inline void cUIStateStack_popToStateInclusive_setId(cUIStateStack_popToStateInclusive_node* n, int v) { n->id = v; }
+static inline void cUIStateStack_popToStateInclusive_setB7(cUIStateStack_popToStateInclusive_node* n, int v) { n->b7 = v; }
 
 /**
  * Closes all popups on top of a state stack and the state under them; returns the state below that.
@@ -398,15 +398,15 @@ static inline void func_0039F718_setB7(func_0039F718_node* n, int v) { n->b7 = v
  * @param list  the state stack (its main list)
  * @return the next state down, or null
  */
-extern "C" func_0039F718_node* func_0039F718(cList* list)
+extern "C" cUIStateStack_popToStateInclusive_node* cUIStateStack_popToStateInclusive(cList* list)
 {
-    func_0039F718_node* n = (func_0039F718_node*)cList_first(list);
+    cUIStateStack_popToStateInclusive_node* n = (cUIStateStack_popToStateInclusive_node*)cList_first(list);
     if (n != 0) {
         if (n->b0) {
             do {
                 if (n->id < 6) {
-                    func_0039F718_setId(n, 7);
-                    func_0039F718_setB7(n, 1);
+                    cUIStateStack_popToStateInclusive_setId(n, 7);
+                    cUIStateStack_popToStateInclusive_setB7(n, 1);
                 }
                 n = n->next;
             } while (n->b0);
@@ -422,7 +422,7 @@ extern "C" func_0039F718_node* func_0039F718(cList* list)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039F7B8);
+INCLUDE_ASM("ui/uistatestack", cUIStateStack_setVisibleToChain);
 #ifdef SKIP_ASM
 struct sUIState39F7B8 {
     char pad0[0x4];
@@ -447,13 +447,13 @@ static inline void Set39F7B8(sUIState39F7B8* s, int on)
  * Sets the visible bit of a chain of states, from @p state down through the states that have a parent.
  *
  * Walks next links while the state's parent (+0x20) is set, then also the last one when @p last is nonzero; states in
- * mode 6 or above are left alone. func_0039ECB0 uses it on a popup's parent chain.
+ * mode 6 or above are left alone. cUIStateStack_updateLoop uses it on a popup's parent chain.
  *
  * @param state  the first state of the chain
  * @param on  1 to show, 0 to hide
  * @param last  nonzero to include the state without a parent
  */
-extern "C" void func_0039F7B8(void* self, sUIState39F7B8* state, int on, int last)
+extern "C" void cUIStateStack_setVisibleToChain(void* self, sUIState39F7B8* state, int on, int last)
 {
     if (state == 0) {
         return;
@@ -518,7 +518,7 @@ extern "C" void cUIStateStack_purgeNormalStates(cList* list)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039F8C8);
+INCLUDE_ASM("ui/uistatestack", cUIStateStack_destroyStates);
 #ifdef SKIP_ASM
 struct cList;
 struct cListNode;
@@ -528,7 +528,7 @@ int cListNode_isSentinel(cListNode*);
 struct sUIStVtF8C8 { short delta; short index; void (*fn)(void*, int); };
 struct sUIStVtF8C8a { short delta; short index; void (*fn)(void*); };
 
-static inline void func_0039F8C8_purge(cList* list)
+static inline void cUIStateStack_destroyStates_purge(cList* list)
 {
     char* n = (char*)cList_first(list);
     if (n != 0) {
@@ -550,13 +550,13 @@ static inline void func_0039F8C8_purge(cList* list)
 /**
  * Destroys the non-explicit states of a state stack's main and explicit lists.
  *
- * Each state without the explicit bit (6) gets virtual slot 5, then is deleted through slot 1 with 3. func_0039E9D8
+ * Each state without the explicit bit (6) gets virtual slot 5, then is deleted through slot 1 with 3. cUIStateStack__cUIStateStack
  * calls it first.
  */
-extern "C" void func_0039F8C8(cList* self)
+extern "C" void cUIStateStack_destroyStates(cList* self)
 {
-    func_0039F8C8_purge(self);
-    func_0039F8C8_purge((cList*)((char*)self + 0x1C));
+    cUIStateStack_destroyStates_purge(self);
+    cUIStateStack_destroyStates_purge((cList*)((char*)self + 0x1C));
 }
 #endif
 
@@ -628,7 +628,7 @@ struct cList;
 void* cList_first(cList*);
 
 //100%
-INCLUDE_ASM("ui/uistatestack", func_0039FAE8);
+INCLUDE_ASM("ui/uistatestack", cUIStateStack_getTopState);
 #ifdef SKIP_ASM
 /**
  * Returns the top state of a state stack (the first node of its main list).
@@ -637,7 +637,7 @@ INCLUDE_ASM("ui/uistatestack", func_0039FAE8);
  *
  * @return the top state, or null
  */
-extern "C" void* func_0039FAE8(void* self)
+extern "C" void* cUIStateStack_getTopState(void* self)
 {
     return cList_first((cList*)self);
 }

@@ -32,7 +32,7 @@ struct cUIScreen;
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void cUIState_onUpdate(void* self);
-extern "C" void func_0039F190(void* list, int a1);
+extern "C" void cUIStateStack_pop(void* list, int a1);
 
 /**
  * Shows the autosave notice for 240 frames, then plays "TransitionOut" and closes it.
@@ -45,7 +45,7 @@ extern "C" void cFEStateLegal_onUpdate(void* self)
         if (frame != 0xFFFF) {
             cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame, 1);
         }
-        func_0039F190((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
+        cUIStateStack_pop((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
     }
 }
 #endif
@@ -274,14 +274,14 @@ struct sFlowState_887A0 {
 // NOTE: placeholder for the object at $gp+0x1D90 (no symbol in the target)
 extern sFlowState_887A0 D_004A4E80;
 extern void* cFEStateOptions_vtbl[];
-extern "C" void* func_0039E2A0(void* self);
+extern "C" void* cUIState_cUIState(void* self);
 extern "C" void cFEFlowState_setValue(void* self, int a1, int a2);
 
 /**
  * Constructs the options state: base cUIState, cFEStateOptions_vtbl, state id 0x18, optionally resetting its flow
  * entry.
  *
- * Runs the cUIState constructor func_0039E2A0(), stores mHashName 0x18 and cFEStateOptions_vtbl. When @p reset is
+ * Runs the cUIState constructor cUIState_cUIState(), stores mHashName 0x18 and cFEStateOptions_vtbl. When @p reset is
  * non-zero, writes 0 to entry 0x18 of the flow-state table D_004A4E80 (cFEFlowState_setValue()). Callers allocate 84 bytes
  * ("cFEStateOptions" or "FEOptions").
  *
@@ -291,7 +291,7 @@ extern "C" void cFEFlowState_setValue(void* self, int a1, int a2);
  */
 extern "C" void* func_001887A0(void* self, int engine, int reset)
 {
-    func_0039E2A0(self);
+    cUIState_cUIState(self);
     *(int*)((char*)self + 0xC) = 0x18;
     *(void***)((char*)self + 0x8) = cFEStateOptions_vtbl;
     if (reset != 0) {

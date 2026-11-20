@@ -23,7 +23,7 @@ struct cSpaceMenuItem;
 
 void cMenu_cMenu(void*);
 extern "C" void cMenu_addItem(void *, char*, int);
-extern "C" void func_002CCF98(char*, int, int *, int);
+extern "C" void cCommandMenuItem_cCommandMenuItem2(char*, int, int *, int);
 void cNullMenuItem_cNullMenuItem(cNullMenuItem* self, void* label);
 void cSpaceMenuItem_cSpaceMenuItem(cSpaceMenuItem* self, void* height);
 
@@ -61,8 +61,8 @@ extern "C" char* __sti__all_in_one_main_cpp(char* self, int* acceptOwner, int* d
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)item1, str_by);
     cNullMenuItem_cNullMenuItem((cNullMenuItem*)item2, D_00467DC8);
     cSpaceMenuItem_cSpaceMenuItem((cSpaceMenuItem*)item3, (void*)0xE);
-    func_002CCF98(item4, 0, D_00467DD0, 0);
-    func_002CCF98(item5, 1, D_00467DD8, 0);
+    cCommandMenuItem_cCommandMenuItem2(item4, 0, D_00467DD0, 0);
+    cCommandMenuItem_cCommandMenuItem2(item5, 1, D_00467DD8, 0);
     cMenu_addItem(self, item0, -1);
     cMenu_addItem(self, item1, -1);
     cMenu_addItem(self, item2, -1);
@@ -77,7 +77,7 @@ extern "C" char* __sti__all_in_one_main_cpp(char* self, int* acceptOwner, int* d
 INCLUDE_ASM("main/all_in_one_main", func_001DB2B0);
 #ifdef SKIP_ASM
 void cMenu_cMenu(void*);
-extern "C" void func_002CCF98(char*, int, int *, int);
+extern "C" void cCommandMenuItem_cCommandMenuItem2(char*, int, int *, int);
 extern "C" void cMenu_addItem(void *, char*, int);
 extern int D_00467DE0[];
 extern int D_0046D378[];
@@ -86,7 +86,7 @@ extern int D_0046D378[];
  * Constructs the debug online front end's "Abort" menu: a cMenu with one command item.
  *
  * Runs cMenu_cMenu, stores the menu's vtable D_0046D378 at +0x12C and the owner's first word at +0x130, builds a
- * command item (func_002CCF98) at +0x134 with ID 0 and caption "Abort", and adds it with cMenu_addItem. Selecting it
+ * command item (cCommandMenuItem_cCommandMenuItem2) at +0x134 with ID 0 and caption "Abort", and adds it with cMenu_addItem. Selecting it
  * runs func_001DBAB8. cDebugLobbyScreen_cDebugLobbyScreen builds it at +0x1AAC of the debug front end.
  *
  * @param menu  the menu to construct
@@ -98,7 +98,7 @@ extern "C" void *func_001DB2B0(char *menu, int *owner) {
     char *abortItem = menu + 0x134;
     *(int **)(menu + 0x12C) = D_0046D378;
     *(int *)(menu + 0x130) = *owner;
-    func_002CCF98(abortItem, 0, D_00467DE0, 0);
+    cCommandMenuItem_cCommandMenuItem2(abortItem, 0, D_00467DE0, 0);
     cMenu_addItem(menu, abortItem, -1);
     return menu;
 }
@@ -108,7 +108,7 @@ extern "C" void *func_001DB2B0(char *menu, int *owner) {
 INCLUDE_ASM("main/all_in_one_main", func_001DB330);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_002CA388(void* item, int enable);
+extern "C" void cMenuItem_activate(void* item, int enable);
 
 // Separate inline accessor: its own `i * 0x24` (not CSE'd with the call's address).
 static inline void setItemData_B330(char* row, int value) { *(int*)(row + 0x17C) = value; }
@@ -118,7 +118,7 @@ extern "C" void func_001DB330_impl(char *self, char *src) __asm__("func_001DB330
  * Fills the debug "Delete Persona" menu with every persona except the first.
  *
  * For each persona i from 1 to LobbyMan::mNumPersonas - 1 it uses command item i - 1 (items of 0x24 bytes from +0x168):
- * the caption (+0x14 of the item) becomes mPersonas[i], the item is activated (func_002CA388 with 1) and its ID (+0x8)
+ * the caption (+0x14 of the item) becomes mPersonas[i], the item is activated (cMenuItem_activate with 1) and its ID (+0x8)
  * is set to i. The remaining items up to 4 are deactivated. Persona 0 is never offered for deletion.
  *
  * The object is the Delete Persona menu (built by func_001DABD0).
@@ -131,12 +131,12 @@ extern "C" void func_001DB330_impl(char *self, char *src) {
     while (i < *(int*)(src + 0x6C) - 1) {
         next = i + 1;
         setItemData_B330(self + i * 36, *(int*)(src + next * 4 + 0x70));
-        func_002CA388(self + (i * 36 + 360), 1);
+        cMenuItem_activate(self + (i * 36 + 360), 1);
         *(int*)(self + i * 0x24 + 0x170) = next;
         i = next;
     }
     while (i < 4) {
-        func_002CA388(self + i * 36 + 0x168, 0);
+        cMenuItem_activate(self + i * 36 + 0x168, 0);
         i++;
     }
 }
@@ -167,14 +167,14 @@ struct Src_B418 {
     int ids[4];         // 0x70
 };
 
-extern "C" void func_002CA388(void* item, int enable);
+extern "C" void cMenuItem_activate(void* item, int enable);
 extern "C" void func_001DB330(void* sub, Src_B418* src);
 
 /**
  * Fills the debug "Select Persona" menu from the lobby manager's persona list.
  *
  * For each of LobbyMan::mNumPersonas personas, the command item at +0x518 + i * 0x24 gets the persona name as its
- * caption, is activated (func_002CA388) and gets ID i; the remaining items up to 4 are deactivated. It then refreshes
+ * caption, is activated (cMenuItem_activate) and gets ID i; the remaining items up to 4 are deactivated. It then refreshes
  * the Delete Persona submenu at +0x2E8 (func_001DB330), enables the "Delete Persona" item (+0x5C4) only when there are
  * at least 2 personas, and the "Create Persona" item (+0x5A8) only while there are fewer than 4.
  *
@@ -189,15 +189,15 @@ extern "C" void func_001DB418(Menu_B418* self, Src_B418* src)
         int id = src->ids[i];
         MenuItem_B418* it = &self->items[i];
         it->data = id;
-        func_002CA388(it, 1);
+        cMenuItem_activate(it, 1);
         it->index = i;
     }
     for (; i < 4; i++) {
-        func_002CA388(&self->items[i], 0);
+        cMenuItem_activate(&self->items[i], 0);
     }
     func_001DB330(self->sub2E8, src);
-    func_002CA388(self->item5C4, src->count >= 2);
-    func_002CA388(self->item5A8, src->count < 4);
+    cMenuItem_activate(self->item5C4, src->count >= 2);
+    cMenuItem_activate(self->item5A8, src->count < 4);
 }
 #endif
 
@@ -219,7 +219,7 @@ struct Menu_B528 {
 
 extern "C" int func_0025F120(void* src);
 extern "C" void* func_0025F150(void* src, int i);
-extern "C" void func_002CA388(void* item, int enable);
+extern "C" void cMenuItem_activate(void* item, int enable);
 extern char str_Receiving_Room_List[];
 
 /**
@@ -240,17 +240,17 @@ extern "C" void func_001DB528(Menu_B528* self, void* src)
     for (; i < n; i++) {
         MenuItem_B528* it = &self->items[i];
         it->data = func_0025F150(src, i);
-        func_002CA388(it, 1);
+        cMenuItem_activate(it, 1);
         it->index = i;
     }
     if (i == 0) {
         self->items[0].data = str_Receiving_Room_List;
         i = 1;
-        func_002CA388(&self->items[0], 1);
+        cMenuItem_activate(&self->items[0], 1);
         self->items[0].index = -1;
     }
     for (; i < 12; i++) {
-        func_002CA388(&self->items[i], 0);
+        cMenuItem_activate(&self->items[i], 0);
     }
 }
 #endif
@@ -273,7 +273,7 @@ struct Menu_B620 {
 
 extern "C" int func_0025F1B0(void* src);
 extern "C" void* func_0025F1E0(void* src, int i, int flags);
-extern "C" void func_002CA388(void* item, int enable);
+extern "C" void cMenuItem_activate(void* item, int enable);
 extern char str_No_users_in_room[];
 
 /**
@@ -294,17 +294,17 @@ extern "C" void func_001DB620(Menu_B620* self, void* src)
     for (; i < n; i++) {
         MenuItem_B620* it = &self->items[i];
         it->data = func_0025F1E0(src, i, 0);
-        func_002CA388(it, 1);
+        cMenuItem_activate(it, 1);
         it->index = i;
     }
     if (i == 0) {
         self->items[0].data = str_No_users_in_room;
         i = 1;
-        func_002CA388(&self->items[0], 1);
+        cMenuItem_activate(&self->items[0], 1);
         self->items[0].index = -1;
     }
     for (; i < 24; i++) {
-        func_002CA388(&self->items[i], 0);
+        cMenuItem_activate(&self->items[i], 0);
     }
 }
 #endif
@@ -1710,7 +1710,7 @@ INCLUDE_ASM("main/all_in_one_main", cUILocaleInterface_setLanguage);
 /**
  * Sets the locale's language: the byte at +0x1.
  *
- * The base locale's version (vtable D_0046D848, slot 0x1C); the front-end locale overrides it with func_00195AA0, which
+ * The base locale's version (vtable D_0046D848, slot 0x1C); the front-end locale overrides it with cFELocale_setLanguage, which
  * also reloads the language files.
  *
  * @param self  the locale interface
@@ -2620,17 +2620,17 @@ extern "C" void cScreenKeyboard_cursorLeft(void *screen) {
 INCLUDE_ASM("main/all_in_one_main", func_001DD6A8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0039E2A0_D6A8(void*, int) __asm__("func_0039E2A0");
+extern "C" void cUIState_cUIState_D6A8(void*, int) __asm__("cUIState_cUIState");
 extern void* D_0046D0D0[];
 
 /**
- * Constructs a front-end state with no UI engine: runs cUIState's constructor (func_0039E2A0) with a null engine, then
+ * Constructs a front-end state with no UI engine: runs cUIState's constructor (cUIState_cUIState) with a null engine, then
  * stores cFEState's vtable D_0046D0D0 at +0x8.
  *
  * @return @p self
  */
 extern "C" void* func_001DD6A8(void *self) {
-    func_0039E2A0_D6A8(self, 0);
+    cUIState_cUIState_D6A8(self, 0);
     *(void***)((char*)self + 8) = D_0046D0D0;
     return self;
 }
@@ -2640,11 +2640,11 @@ extern "C" void* func_001DD6A8(void *self) {
 INCLUDE_ASM("main/all_in_one_main", func_001DD6E0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0039E2A0_D6E0(void*) __asm__("func_0039E2A0");
+extern "C" void cUIState_cUIState_D6E0(void*) __asm__("cUIState_cUIState");
 extern void* D_0046D0D0[];
 
 /**
- * Constructs a front-end state for a UI engine: runs cUIState's one-argument constructor (func_0039E2A0), then stores
+ * Constructs a front-end state for a UI engine: runs cUIState's one-argument constructor (cUIState_cUIState), then stores
  * cFEState's vtable D_0046D0D0 at +0x8.
  *
  * The engine argument passes through untouched in the second argument register.
@@ -2652,7 +2652,7 @@ extern void* D_0046D0D0[];
  * @return @p self
  */
 extern "C" void* func_001DD6E0(void *self) {
-    func_0039E2A0_D6E0(self);
+    cUIState_cUIState_D6E0(self);
     *(void***)((char*)self + 8) = D_0046D0D0;
     return self;
 }
@@ -2662,19 +2662,19 @@ extern "C" void* func_001DD6E0(void *self) {
 INCLUDE_ASM("main/all_in_one_main", func_001DD718);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0039E318_D718(void*) __asm__("func_0039E318");
+extern "C" void cUIState_cUIState1_D718(void*) __asm__("cUIState_cUIState1");
 extern void* D_0046D0D0[];
 
 /**
  * Constructs a front-end state for a UI engine and a parent state: runs cUIState's two-argument constructor
- * (func_0039E318), then stores cFEState's vtable D_0046D0D0 at +0x8.
+ * (cUIState_cUIState1), then stores cFEState's vtable D_0046D0D0 at +0x8.
  *
  * The engine and parent arguments pass through untouched in the argument registers.
  *
  * @return @p self
  */
 extern "C" void* func_001DD718(void *self) {
-    func_0039E318_D718(self);
+    cUIState_cUIState1_D718(self);
     *(void***)((char*)self + 8) = D_0046D0D0;
     return self;
 }
@@ -2684,19 +2684,19 @@ extern "C" void* func_001DD718(void *self) {
 INCLUDE_ASM("main/all_in_one_main", cFEState__cFEState);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E390_DD750(void*) __asm__("func_0039E390");
+extern "C" void* cUIState__cUIState_DD750(void*) __asm__("cUIState__cUIState");
 extern void* D_0046D0D0[];
 
 /**
  * Destroys a front-end state: restores cFEState's vtable D_0046D0D0 at +0x8 and runs cUIState's destructor
- * (func_0039E390).
+ * (cUIState__cUIState).
  *
  * The g++ delete flags pass through in the second argument register. cFEStateLodge, cFEStateLodgeRiderDetail,
  * cFEStateBuyAttrib, cFEStateCareerStats and cFEStateCredits destructors call it as their base destructor.
  */
 extern "C" void cFEState__cFEState(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
-    func_0039E390_DD750(self);
+    cUIState__cUIState_DD750(self);
 }
 #endif
 
@@ -2752,19 +2752,19 @@ extern "C" void cFEState_setControllerMask(void *feState, signed char userNum, s
 INCLUDE_ASM("main/all_in_one_main", cFEStateCharSelect__cFEStateCharSelect);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E390_DD840(void*) __asm__("func_0039E390");
+extern "C" void* cUIState__cUIState_DD840(void*) __asm__("cUIState__cUIState");
 extern void* D_0046D0D0[];
 
 /**
  * Destroys the character select front-end state: restores cFEState's vtable (D_0046D0D0) and runs cUIState's
  * destructor.
  *
- * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
  * (bit 0 frees).
  */
 extern "C" void cFEStateCharSelect__cFEStateCharSelect(cFEStateCharSelect* self) {
     self->mVtbl = D_0046D0D0;
-    func_0039E390_DD840(self);
+    cUIState__cUIState_DD840(self);
 }
 #endif
 
@@ -2772,19 +2772,19 @@ extern "C" void cFEStateCharSelect__cFEStateCharSelect(cFEStateCharSelect* self)
 INCLUDE_ASM("main/all_in_one_main", cFEStateCheatCharSelect__cFEStateCheatCharSelect);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E390_DD868(void*) __asm__("func_0039E390");
+extern "C" void* cUIState__cUIState_DD868(void*) __asm__("cUIState__cUIState");
 extern void* D_0046D0D0[];
 
 /**
  * Destroys the cheat character select front-end state: restores cFEState's vtable (D_0046D0D0) and runs
  * cUIState's destructor.
  *
- * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
  * (bit 0 frees).
  */
 extern "C" void cFEStateCheatCharSelect__cFEStateCheatCharSelect(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
-    func_0039E390_DD868(self);
+    cUIState__cUIState_DD868(self);
 }
 #endif
 
@@ -2820,19 +2820,19 @@ extern "C" int cFEStateCheatCharSelect_getCheatCharID(void *cheatCharSelect) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateCharSetup__cFEStateCharSetup);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E390_DD8A0(void*) __asm__("func_0039E390");
+extern "C" void* cUIState__cUIState_DD8A0(void*) __asm__("cUIState__cUIState");
 extern void* D_0046D0D0[];
 
 /**
  * Destroys the character setup front-end state: restores cFEState's vtable (D_0046D0D0) and runs cUIState's
  * destructor.
  *
- * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
  * (bit 0 frees).
  */
 extern "C" void cFEStateCharSetup__cFEStateCharSetup(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
-    func_0039E390_DD8A0(self);
+    cUIState__cUIState_DD8A0(self);
 }
 #endif
 
@@ -2840,19 +2840,19 @@ extern "C" void cFEStateCharSetup__cFEStateCharSetup(void *self) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateRiderDetail__cFEStateRiderDetail);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E390_DD8C8(void*) __asm__("func_0039E390");
+extern "C" void* cUIState__cUIState_DD8C8(void*) __asm__("cUIState__cUIState");
 extern void* D_0046D0D0[];
 
 /**
  * Destroys the rider detail front-end state: restores cFEState's vtable (D_0046D0D0) and runs cUIState's
  * destructor.
  *
- * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
  * (bit 0 frees).
  */
 extern "C" void cFEStateRiderDetail__cFEStateRiderDetail(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
-    func_0039E390_DD8C8(self);
+    cUIState__cUIState_DD8C8(self);
 }
 #endif
 
@@ -2860,19 +2860,19 @@ extern "C" void cFEStateRiderDetail__cFEStateRiderDetail(void *self) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateUberTrick__cFEStateUberTrick);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E390_DD8F0(void*) __asm__("func_0039E390");
+extern "C" void* cUIState__cUIState_DD8F0(void*) __asm__("cUIState__cUIState");
 extern void* D_0046D0D0[];
 
 /**
  * Destroys the uber-trick front-end state (vtable D_0046CCC0): restores cFEState's vtable D_0046D0D0 and runs
- * cUIState's destructor (func_0039E390).
+ * cUIState's destructor (cUIState__cUIState).
  *
  * The g++ delete flags pass through in the second argument register. D_0046CCC0 is the vtable cFEStateUberTrick_cFEStateUberTrick stores in
  * the state allocated as "cFEStateUberTrick".
  */
 extern "C" void cFEStateUberTrick__cFEStateUberTrick(cFEStateUberTrick* self) {
     self->mVtbl = D_0046D0D0;
-    func_0039E390_DD8F0(self);
+    cUIState__cUIState_DD8F0(self);
 }
 #endif
 
@@ -3631,7 +3631,7 @@ extern "C" int func_001DDBC8(void *popupInfo) {
 INCLUDE_ASM("main/all_in_one_main", cScreenPopup_cScreenPopup1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *func_0039E318_DBD0(void *, int, int) __asm__("func_0039E318");
+extern "C" void *cUIState_cUIState1_DBD0(void *, int, int) __asm__("cUIState_cUIState1");
 extern "C" void cPopupInfo_cPopupInfo_DBD0(void *) __asm__("cPopupInfo_cPopupInfo");
 extern int cScreenPopup_vtbl[];
 extern int cBXString_EmptyString;
@@ -3646,14 +3646,14 @@ struct S_DBD0 {
 /**
  * Constructs a screen popup with no engine and no parent (the default constructor).
  *
- * Runs cUIState's two-argument constructor (func_0039E318) with null engine and parent, stores cScreenPopup_vtbl at
+ * Runs cUIState's two-argument constructor (cUIState_cUIState1) with null engine and parent, stores cScreenPopup_vtbl at
  * +0x8, constructs the popup description at +0xBC (cPopupInfo_cPopupInfo) and sets the input and static text strings
  * (+0x2B0, +0x2B4) to the empty cBXString.
  *
  * @return @p self
  */
 extern "C" S_DBD0 *cScreenPopup_cScreenPopup1(cScreenPopup* self) {
-    func_0039E318_DBD0(((S_DBD0*)self), 0, 0);
+    cUIState_cUIState1_DBD0(((S_DBD0*)self), 0, 0);
     self->mVtbl = (void**)cScreenPopup_vtbl;
     cPopupInfo_cPopupInfo_DBD0((char *)self + 0xBC);
     self->mszInputText = (char*)cBXString_EmptyString;
@@ -3737,20 +3737,20 @@ extern "C" int cScreenPopup_isShowing(cScreenPopup* screenPopup) {
 INCLUDE_ASM("main/all_in_one_main", cUIStateBuyPopup_cUIStateBuyPopup1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *func_0039E318_DC48(void *, int, int) __asm__("func_0039E318");
+extern "C" void *cUIState_cUIState1_DC48(void *, int, int) __asm__("cUIState_cUIState1");
 extern "C" void cBuyPopupInfo_clear_DC48(void *) __asm__("cBuyPopupInfo_clear");
 extern int cUIStateBuyPopup_vtbl[];
 
 /**
  * Constructs a buy popup with no engine and no parent (the default constructor).
  *
- * Runs cUIState's two-argument constructor (func_0039E318) with null engine and parent, stores cUIStateBuyPopup_vtbl
+ * Runs cUIState's two-argument constructor (cUIState_cUIState1) with null engine and parent, stores cUIStateBuyPopup_vtbl
  * and clears the purchase description at +0x48 with cBuyPopupInfo_clear.
  *
  * @return @p self
  */
 extern "C" void *cUIStateBuyPopup_cUIStateBuyPopup1(cUIStateBuyPopup* self) {
-    func_0039E318_DC48(self, 0, 0);
+    cUIState_cUIState1_DC48(self, 0, 0);
     self->mVtbl = (void**)cUIStateBuyPopup_vtbl;
     cBuyPopupInfo_clear_DC48((char *)self + 0x48);
     return ((void*)self);
@@ -3761,19 +3761,19 @@ extern "C" void *cUIStateBuyPopup_cUIStateBuyPopup1(cUIStateBuyPopup* self) {
 INCLUDE_ASM("main/all_in_one_main", cUIStateBuyPopup__cUIStateBuyPopup);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E390_DDC90(void*) __asm__("func_0039E390");
+extern "C" void* cUIState__cUIState_DDC90(void*) __asm__("cUIState__cUIState");
 extern void* D_0046D0D0[];
 
 /**
  * Destroys the buy popup front-end state: restores cFEState's vtable (D_0046D0D0) and runs cUIState's
  * destructor.
  *
- * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
  * (bit 0 frees).
  */
 extern "C" void cUIStateBuyPopup__cUIStateBuyPopup(cUIStateBuyPopup* self) {
     self->mVtbl = D_0046D0D0;
-    func_0039E390_DDC90(self);
+    cUIState__cUIState_DDC90(self);
 }
 #endif
 
@@ -4139,7 +4139,7 @@ extern "C" void cFEMemCard_hideMainButton(void) {
 INCLUDE_ASM("main/all_in_one_main", cFEMemCard_cFEMemCard1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *func_0039E2A0_DE18(void *, int) __asm__("func_0039E2A0");
+extern "C" void *cUIState_cUIState_DE18(void *, int) __asm__("cUIState_cUIState");
 extern int D_0046C980[];
 extern int D_00474E08[];
 extern unsigned short D_004A1390[];
@@ -4147,7 +4147,7 @@ extern unsigned short D_004A1390[];
 /**
  * Constructs a memory-card screen base with no engine (the default constructor).
  *
- * Runs cUIState's constructor (func_0039E2A0) with a null engine, stores the cOVState vtable D_00474E08 and then
+ * Runs cUIState's constructor (cUIState_cUIState) with a null engine, stores the cOVState vtable D_00474E08 and then
  * D_0046C980 at +0x8, clears +0x48, +0x4C, +0x54 and +0x98 and copies the empty string D_004A1390 into +0x58. Unlike
  * the constructor that takes an engine and a type, it does not run cFEMemCard_initFEMemCard, so cFEMemCard_mInstance is left
  * alone.
@@ -4155,7 +4155,7 @@ extern unsigned short D_004A1390[];
  * @return @p self
  */
 extern "C" void *cFEMemCard_cFEMemCard1(void *self) {
-    func_0039E2A0_DE18(self, 0);
+    cUIState_cUIState_DE18(self, 0);
     *(int *)((char *)self + 0x98) = 0;
     *(int *)((char *)self + 0x48) = 0;
     *(int **)((char *)self + 8) = D_00474E08;
@@ -4227,17 +4227,17 @@ extern "C" void cFEPopupConfirm_setUsePreFE(int usePreFe) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateOptions_cFEStateOptions);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0039E2A0_DEE8(void*, int) __asm__("func_0039E2A0");
+extern "C" void cUIState_cUIState_DEE8(void*, int) __asm__("cUIState_cUIState");
 extern void* cFEStateOptions_vtbl[];
 
 /**
- * Constructs the options menu state with no engine: runs cUIState's constructor (func_0039E2A0) with a null engine,
+ * Constructs the options menu state with no engine: runs cUIState's constructor (cUIState_cUIState) with a null engine,
  * then stores cFEStateOptions_vtbl at +0x8.
  *
  * @return @p self
  */
 extern "C" void* cFEStateOptions_cFEStateOptions(void *self) {
-    func_0039E2A0_DEE8(self, 0);
+    cUIState_cUIState_DEE8(self, 0);
     *(void***)((char*)self + 8) = cFEStateOptions_vtbl;
     return self;
 }
@@ -4247,19 +4247,19 @@ extern "C" void* cFEStateOptions_cFEStateOptions(void *self) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateOptions__cFEStateOptions);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E390_DDF20(void*) __asm__("func_0039E390");
+extern "C" void* cUIState__cUIState_DDF20(void*) __asm__("cUIState__cUIState");
 extern void* D_0046D0D0[];
 
 /**
  * Destroys the options front-end state: restores cFEState's vtable (D_0046D0D0) and runs cUIState's
  * destructor.
  *
- * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
  * (bit 0 frees).
  */
 extern "C" void cFEStateOptions__cFEStateOptions(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
-    func_0039E390_DDF20(self);
+    cUIState__cUIState_DDF20(self);
 }
 #endif
 
@@ -4267,17 +4267,17 @@ extern "C" void cFEStateOptions__cFEStateOptions(void *self) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsGame_cFEStateOptionsGame);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0039E2A0_DF48(void*, int) __asm__("func_0039E2A0");
+extern "C" void cUIState_cUIState_DF48(void*, int) __asm__("cUIState_cUIState");
 extern void* cFEStateOptionsGame_vtbl[];
 
 /**
- * Constructs the game options state with no engine: runs cUIState's constructor (func_0039E2A0) with a null engine,
+ * Constructs the game options state with no engine: runs cUIState's constructor (cUIState_cUIState) with a null engine,
  * then stores cFEStateOptionsGame_vtbl at +0x8.
  *
  * @return @p self
  */
 extern "C" void* cFEStateOptionsGame_cFEStateOptionsGame(cFEStateOptionsGame* self) {
-    func_0039E2A0_DF48(self, 0);
+    cUIState_cUIState_DF48(self, 0);
     self->mVtbl = cFEStateOptionsGame_vtbl;
     return ((void*)self);
 }
@@ -4287,19 +4287,19 @@ extern "C" void* cFEStateOptionsGame_cFEStateOptionsGame(cFEStateOptionsGame* se
 INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsGame__cFEStateOptionsGame);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E390_DDF80(void*) __asm__("func_0039E390");
+extern "C" void* cUIState__cUIState_DDF80(void*) __asm__("cUIState__cUIState");
 extern void* D_0046D0D0[];
 
 /**
  * Destroys the game options front-end state: restores cFEState's vtable (D_0046D0D0) and runs cUIState's
  * destructor.
  *
- * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
  * (bit 0 frees).
  */
 extern "C" void cFEStateOptionsGame__cFEStateOptionsGame(cFEStateOptionsGame* self) {
     self->mVtbl = D_0046D0D0;
-    func_0039E390_DDF80(self);
+    cUIState__cUIState_DDF80(self);
 }
 #endif
 
@@ -4313,17 +4313,17 @@ extern "C" void func_001DDFA8(void) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsSound_cFEStateOptionsSound);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0039E2A0_DFB0(void*, int) __asm__("func_0039E2A0");
+extern "C" void cUIState_cUIState_DFB0(void*, int) __asm__("cUIState_cUIState");
 extern void* cFEStateOptionsSound_vtbl[];
 
 /**
- * Constructs the sound options state with no engine: runs cUIState's constructor (func_0039E2A0) with a null engine,
+ * Constructs the sound options state with no engine: runs cUIState's constructor (cUIState_cUIState) with a null engine,
  * then stores cFEStateOptionsSound_vtbl at +0x8.
  *
  * @return @p self
  */
 extern "C" void* cFEStateOptionsSound_cFEStateOptionsSound(cFEStateOptionsSound* self) {
-    func_0039E2A0_DFB0(self, 0);
+    cUIState_cUIState_DFB0(self, 0);
     self->mVtbl = cFEStateOptionsSound_vtbl;
     return ((void*)self);
 }
@@ -4333,19 +4333,19 @@ extern "C" void* cFEStateOptionsSound_cFEStateOptionsSound(cFEStateOptionsSound*
 INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsSound__cFEStateOptionsSound);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E390_DDFE8(void*) __asm__("func_0039E390");
+extern "C" void* cUIState__cUIState_DDFE8(void*) __asm__("cUIState__cUIState");
 extern void* D_0046D0D0[];
 
 /**
  * Destroys the sound options front-end state: restores cFEState's vtable (D_0046D0D0) and runs cUIState's
  * destructor.
  *
- * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
  * (bit 0 frees).
  */
 extern "C" void cFEStateOptionsSound__cFEStateOptionsSound(cFEStateOptionsSound* self) {
     self->mVtbl = D_0046D0D0;
-    func_0039E390_DDFE8(self);
+    cUIState__cUIState_DDFE8(self);
 }
 #endif
 
@@ -4359,11 +4359,11 @@ extern "C" void func_001DE010(void) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsHUD_cFEStateOptionsHUD);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0039E2A0_E018(void*, int) __asm__("func_0039E2A0");
+extern "C" void cUIState_cUIState_E018(void*, int) __asm__("cUIState_cUIState");
 extern void* D_0046C550[];
 
 /**
- * Constructs the HUD options state with no engine: runs cUIState's constructor (func_0039E2A0) with a null engine, then
+ * Constructs the HUD options state with no engine: runs cUIState's constructor (cUIState_cUIState) with a null engine, then
  * stores its vtable D_0046C550 at +0x8.
  *
  * D_0046C550 is the vtable func_0018C0E8 stores in the state fereal.cpp allocates as "cFEStateOptionsHUD".
@@ -4371,7 +4371,7 @@ extern void* D_0046C550[];
  * @return @p self
  */
 extern "C" void* cFEStateOptionsHUD_cFEStateOptionsHUD(cFEStateOptionsHUD* self) {
-    func_0039E2A0_E018(self, 0);
+    cUIState_cUIState_E018(self, 0);
     self->mVtbl = D_0046C550;
     return ((void*)self);
 }
@@ -4381,18 +4381,18 @@ extern "C" void* cFEStateOptionsHUD_cFEStateOptionsHUD(cFEStateOptionsHUD* self)
 INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsHUD__cFEStateOptionsHUD);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E390_DE050(void*) __asm__("func_0039E390");
+extern "C" void* cUIState__cUIState_DE050(void*) __asm__("cUIState__cUIState");
 extern void* D_0046D0D0[];
 
 /**
  * Destroys the HUD options state (vtable D_0046C550): restores cFEState's vtable D_0046D0D0 at +0x8 and runs cUIState's
- * destructor (func_0039E390).
+ * destructor (cUIState__cUIState).
  *
  * The g++ delete flags pass through in the second argument register.
  */
 extern "C" void cFEStateOptionsHUD__cFEStateOptionsHUD(cFEStateOptionsHUD* self) {
     self->mVtbl = D_0046D0D0;
-    func_0039E390_DE050(self);
+    cUIState__cUIState_DE050(self);
 }
 #endif
 
@@ -4406,19 +4406,19 @@ extern "C" void func_001DE078(void) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsController_cFEStateOptionsController);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *func_0039E2A0_E080(void *, int) __asm__("func_0039E2A0");
+extern "C" void *cUIState_cUIState_E080(void *, int) __asm__("cUIState_cUIState");
 extern int cFEStateOptionsController_vtbl[];
 
 /**
  * Constructs the controller options state with no engine.
  *
- * Runs cUIState's constructor (func_0039E2A0) with a null engine, stores cFEStateOptionsController_vtbl at +0x8 and
+ * Runs cUIState's constructor (cUIState_cUIState) with a null engine, stores cFEStateOptionsController_vtbl at +0x8 and
  * clears the byte at +0x50 (On Tour's mVibrateOn).
  *
  * @return @p self
  */
 extern "C" void *cFEStateOptionsController_cFEStateOptionsController(void *self) {
-    func_0039E2A0_E080(self, 0);
+    cUIState_cUIState_E080(self, 0);
     *(int **)((char *)self + 8) = cFEStateOptionsController_vtbl;
     *((char *)self + 0x50) = 0;
     return self;
@@ -4429,19 +4429,19 @@ extern "C" void *cFEStateOptionsController_cFEStateOptionsController(void *self)
 INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsController__cFEStateOptionsController);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E390_DE0C0(void*) __asm__("func_0039E390");
+extern "C" void* cUIState__cUIState_DE0C0(void*) __asm__("cUIState__cUIState");
 extern void* D_0046D0D0[];
 
 /**
  * Destroys the controller options front-end state: restores cFEState's vtable (D_0046D0D0) and runs
  * cUIState's destructor.
  *
- * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
  * (bit 0 frees).
  */
 extern "C" void cFEStateOptionsController__cFEStateOptionsController(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
-    func_0039E390_DE0C0(self);
+    cUIState__cUIState_DE0C0(self);
 }
 #endif
 
@@ -4455,17 +4455,17 @@ extern "C" void func_001DE0E8(void) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *func_0039E2A0_E0F0(void *, int) __asm__("func_0039E2A0");
+extern "C" void *cUIState_cUIState_E0F0(void *, int) __asm__("cUIState_cUIState");
 extern int cFEStateOptionsSaveLoad_vtbl[];
 
 /**
- * Constructs the save/load options state with no engine: runs cUIState's constructor (func_0039E2A0) with a null
+ * Constructs the save/load options state with no engine: runs cUIState's constructor (cUIState_cUIState) with a null
  * engine, then stores cFEStateOptionsSaveLoad_vtbl at +0x8.
  *
  * @return @p self
  */
 extern "C" void *cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad(void *self) {
-    func_0039E2A0_E0F0(self, 0);
+    cUIState_cUIState_E0F0(self, 0);
     *(int **)((char *)self + 8) = cFEStateOptionsSaveLoad_vtbl;
     return self;
 }
@@ -4475,19 +4475,19 @@ extern "C" void *cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad(void *self) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateOptionsSaveLoad__cFEStateOptionsSaveLoad);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E390_DE128(void*) __asm__("func_0039E390");
+extern "C" void* cUIState__cUIState_DE128(void*) __asm__("cUIState__cUIState");
 extern void* D_0046D0D0[];
 
 /**
  * Destroys the save/load options front-end state: restores cFEState's vtable (D_0046D0D0) and runs cUIState's
  * destructor.
  *
- * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
  * (bit 0 frees).
  */
 extern "C" void cFEStateOptionsSaveLoad__cFEStateOptionsSaveLoad(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
-    func_0039E390_DE128(self);
+    cUIState__cUIState_DE128(self);
 }
 #endif
 
@@ -4501,7 +4501,7 @@ extern void* cFEStateOptionsDeviceSelect_vtbl[];
 /**
  * Destroys the options device-select state: stores its vtable at +0x8, then runs the base destructor.
  *
- * The base, cFEMemCard__cFEMemCard(), clears the global cFEMemCard_mInstance and runs the cUIState destructor (func_0039E390). The
+ * The base, cFEMemCard__cFEMemCard(), clears the global cFEMemCard_mInstance and runs the cUIState destructor (cUIState__cUIState). The
  * g++ delete flags in the second argument register pass through untouched.
  *
  * @return no meaningful value (cFEMemCard__cFEMemCard returns nothing)
@@ -4536,17 +4536,17 @@ extern "C" void *cFEStateOptionsDeviceSelect_cFEStateOptionsDeviceSelect(void *s
 INCLUDE_ASM("main/all_in_one_main", cFEStateProfileSelect_cFEStateProfileSelect);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *func_0039E2A0_E1B8(void *, int) __asm__("func_0039E2A0");
+extern "C" void *cUIState_cUIState_E1B8(void *, int) __asm__("cUIState_cUIState");
 extern int cFEStateProfileSelect_vtbl[];
 
 /**
- * Constructs the profile select state with no engine: runs cUIState's constructor (func_0039E2A0) with a null engine,
+ * Constructs the profile select state with no engine: runs cUIState's constructor (cUIState_cUIState) with a null engine,
  * then stores cFEStateProfileSelect_vtbl at +0x8.
  *
  * @return @p self
  */
 extern "C" void *cFEStateProfileSelect_cFEStateProfileSelect(void *self) {
-    func_0039E2A0_E1B8(self, 0);
+    cUIState_cUIState_E1B8(self, 0);
     *(int **)((char *)self + 8) = cFEStateProfileSelect_vtbl;
     return self;
 }
@@ -4556,21 +4556,21 @@ extern "C" void *cFEStateProfileSelect_cFEStateProfileSelect(void *self) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateProfileSelect__cFEStateProfileSelect);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E390_E1F0(void*) __asm__("func_0039E390");
+extern "C" void* cUIState__cUIState_E1F0(void*) __asm__("cUIState__cUIState");
 extern void* D_0046D0D0[];
 
 /**
  * Destroys the profile select front-end state: restores cFEState's vtable (D_0046D0D0) and runs cUIState's
  * destructor.
  *
- * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
  * (bit 0 frees).
  *
- * @return nothing meaningful (whatever func_0039E390 leaves)
+ * @return nothing meaningful (whatever cUIState__cUIState leaves)
  */
 extern "C" void* cFEStateProfileSelect__cFEStateProfileSelect(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
-    return func_0039E390_E1F0(self);
+    return cUIState__cUIState_E1F0(self);
 }
 #endif
 
@@ -4584,7 +4584,7 @@ extern void* cFEStateProfileLoad_vtbl[];
 /**
  * Destroys the profile-load state: stores its vtable at +0x8, then runs the base destructor.
  *
- * The base, cFEMemCard__cFEMemCard(), clears the global cFEMemCard_mInstance and runs the cUIState destructor (func_0039E390). The
+ * The base, cFEMemCard__cFEMemCard(), clears the global cFEMemCard_mInstance and runs the cUIState destructor (cUIState__cUIState). The
  * g++ delete flags in the second argument register pass through untouched.
  *
  * @return no meaningful value (cFEMemCard__cFEMemCard returns nothing)
@@ -4639,7 +4639,7 @@ extern "C" void func_001DE280(void *profileLoadState, int action) {
 INCLUDE_ASM("main/all_in_one_main", cKeyboardPopup_cKeyboardPopup1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *func_0039E318_E288(void *, int, int) __asm__("func_0039E318");
+extern "C" void *cUIState_cUIState1_E288(void *, int, int) __asm__("cUIState_cUIState1");
 extern int cKeyboardPopup_vtbl[];
 extern int cBXString_EmptyString;
 
@@ -4654,13 +4654,13 @@ struct S_E288 {
 /**
  * Constructs an on-screen keyboard popup with no engine and no parent (the default constructor).
  *
- * Runs cUIState's two-argument constructor (func_0039E318) with null engine and parent, stores cKeyboardPopup_vtbl,
+ * Runs cUIState's two-argument constructor (cUIState_cUIState1) with null engine and parent, stores cKeyboardPopup_vtbl,
  * sets miMaxCharacters (+0x60) to 63 and mszStatic (+0x424) to the empty cBXString.
  *
  * @return @p self
  */
 extern "C" S_E288 *cKeyboardPopup_cKeyboardPopup1(cKeyboardPopup* self) {
-    func_0039E318_E288(((S_E288*)self), 0, 0);
+    cUIState_cUIState1_E288(((S_E288*)self), 0, 0);
     self->mVtbl = (void**)cKeyboardPopup_vtbl;
     self->miMaxCharacters = 0x3F;
     self->mszStatic = (char*)cBXString_EmptyString;
@@ -5070,17 +5070,17 @@ extern "C" void cKeyboardPopup_cursorLeft(cKeyboardPopup* keyboard) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateCredits_cFEStateCredits);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *func_0039E2A0_E4B0(void *, int) __asm__("func_0039E2A0");
+extern "C" void *cUIState_cUIState_E4B0(void *, int) __asm__("cUIState_cUIState");
 extern int cFEStateCredits_vtbl[];
 
 /**
- * Constructs the credits state with no engine: runs cUIState's constructor (func_0039E2A0) with a null engine, then
+ * Constructs the credits state with no engine: runs cUIState's constructor (cUIState_cUIState) with a null engine, then
  * stores cFEStateCredits_vtbl at +0x8.
  *
  * @return @p self
  */
 extern "C" void *cFEStateCredits_cFEStateCredits(void *self) {
-    func_0039E2A0_E4B0(self, 0);
+    cUIState_cUIState_E4B0(self, 0);
     *(int **)((char *)self + 8) = cFEStateCredits_vtbl;
     return self;
 }
@@ -5090,20 +5090,20 @@ extern "C" void *cFEStateCredits_cFEStateCredits(void *self) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateEventSelect_cFEStateEventSelect);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *func_0039E2A0_E4E8(void *, int) __asm__("func_0039E2A0");
+extern "C" void *cUIState_cUIState_E4E8(void *, int) __asm__("cUIState_cUIState");
 extern "C" void cUITemplate_MAP_init_E4E8(void *) __asm__("cUITemplate_MAP_init");
 extern int cFEStateEventSelect_vtbl[];
 
 /**
  * Constructs the event select state with no engine.
  *
- * Runs cUIState's constructor (func_0039E2A0) with a null engine, stores cFEStateEventSelect_vtbl at +0x8 and
+ * Runs cUIState's constructor (cUIState_cUIState) with a null engine, stores cFEStateEventSelect_vtbl at +0x8 and
  * constructs the member at +0x48 with cUITemplate_MAP_init (On Tour keeps its cUITemplate_MAP mMap there).
  *
  * @return @p self
  */
 extern "C" void *cFEStateEventSelect_cFEStateEventSelect(void *self) {
-    func_0039E2A0_E4E8(self, 0);
+    cUIState_cUIState_E4E8(self, 0);
     *(int **)((char *)self + 8) = cFEStateEventSelect_vtbl;
     cUITemplate_MAP_init_E4E8((char *)self + 0x48);
     return self;
@@ -5114,21 +5114,21 @@ extern "C" void *cFEStateEventSelect_cFEStateEventSelect(void *self) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateEventSelect__cFEStateEventSelect);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E390_E528(void*) __asm__("func_0039E390");
+extern "C" void* cUIState__cUIState_E528(void*) __asm__("cUIState__cUIState");
 extern void* D_0046D0D0[];
 
 /**
  * Destroys the event select front-end state: restores cFEState's vtable (D_0046D0D0) and runs cUIState's
  * destructor.
  *
- * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
  * (bit 0 frees).
  *
- * @return nothing meaningful (whatever func_0039E390 leaves)
+ * @return nothing meaningful (whatever cUIState__cUIState leaves)
  */
 extern "C" void* cFEStateEventSelect__cFEStateEventSelect(void *self) {
     *(void***)((char*)self + 8) = D_0046D0D0;
-    return func_0039E390_E528(self);
+    return cUIState__cUIState_E528(self);
 }
 #endif
 
@@ -5142,17 +5142,17 @@ extern "C" void cFEStateEventSelect_onMenuGainFocus(void) {
 INCLUDE_ASM("main/all_in_one_main", func_001DE558);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *func_0039E2A0_E558(void *, int) __asm__("func_0039E2A0");
+extern "C" void *cUIState_cUIState_E558(void *, int) __asm__("cUIState_cUIState");
 extern int D_0046BC58_E558[] __asm__("cFEStateBackground_vtbl");
 
 /**
  * Constructs the front-end background state with no engine (the default constructor): runs cUIState's constructor
- * (func_0039E2A0) with a null engine, then stores cFEStateBackground_vtbl at +0x8.
+ * (cUIState_cUIState) with a null engine, then stores cFEStateBackground_vtbl at +0x8.
  *
  * @return @p self
  */
 extern "C" void *func_001DE558(void *self) {
-    func_0039E2A0_E558(self, 0);
+    cUIState_cUIState_E558(self, 0);
     *(int **)((char *)self + 8) = D_0046BC58_E558;
     return self;
 }
@@ -5162,11 +5162,11 @@ extern "C" void *func_001DE558(void *self) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateBackground_cFEStateBackground);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0039E2A0_E590(void*) __asm__("func_0039E2A0");
+extern "C" void cUIState_cUIState_E590(void*) __asm__("cUIState_cUIState");
 extern void* cFEStateBackground_vtbl[];
 
 /**
- * Constructs the front-end background state for a UI engine: runs cUIState's constructor (func_0039E2A0) with the
+ * Constructs the front-end background state for a UI engine: runs cUIState's constructor (cUIState_cUIState) with the
  * engine, then stores cFEStateBackground_vtbl at +0x8.
  *
  * The engine argument passes through untouched in the second argument register.
@@ -5174,7 +5174,7 @@ extern void* cFEStateBackground_vtbl[];
  * @return @p self
  */
 extern "C" void* cFEStateBackground_cFEStateBackground(void *self) {
-    func_0039E2A0_E590(self);
+    cUIState_cUIState_E590(self);
     *(void***)((char*)self + 8) = cFEStateBackground_vtbl;
     return self;
 }
@@ -5184,20 +5184,20 @@ extern "C" void* cFEStateBackground_cFEStateBackground(void *self) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateBackground__cFEStateBackground);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E390_E5C8(void*) __asm__("func_0039E390");
+extern "C" void* cUIState__cUIState_E5C8(void*) __asm__("cUIState__cUIState");
 extern void* cFEStateBackground_vtbl[];
 
 /**
  * Destroys the front-end background state: stores its vtable at +0x8, then runs the cUIState destructor.
  *
- * The cUIState destructor (func_0039E390) gets the g++ delete flags from the second argument register,
+ * The cUIState destructor (cUIState__cUIState) gets the g++ delete flags from the second argument register,
  * untouched.
  *
- * @return no meaningful value (func_0039E390 returns nothing)
+ * @return no meaningful value (cUIState__cUIState returns nothing)
  */
 extern "C" void* cFEStateBackground__cFEStateBackground(void *self) {
     *(void***)((char*)self + 8) = cFEStateBackground_vtbl;
-    return func_0039E390_E5C8(self);
+    return cUIState__cUIState_E5C8(self);
 }
 #endif
 
@@ -5205,19 +5205,19 @@ extern "C" void* cFEStateBackground__cFEStateBackground(void *self) {
 INCLUDE_ASM("main/all_in_one_main", func_001DE5F0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *func_0039E2A0_E5F0(void *, int) __asm__("func_0039E2A0");
+extern "C" void *cUIState_cUIState_E5F0(void *, int) __asm__("cUIState_cUIState");
 extern int D_0046BB88_E5F0[] __asm__("cFEStateTransition_vtbl");
 
 /**
  * Constructs the screen transition state with no engine (the default constructor): runs cUIState's constructor
- * (func_0039E2A0) with a null engine, then stores cFEStateTransition_vtbl at +0x8.
+ * (cUIState_cUIState) with a null engine, then stores cFEStateTransition_vtbl at +0x8.
  *
  * Unlike cFEStateTransition_cFEStateTransition it leaves the two screen pointers (+0x48, +0x4C) unset.
  *
  * @return @p self
  */
 extern "C" void *func_001DE5F0(void *self) {
-    func_0039E2A0_E5F0(self, 0);
+    cUIState_cUIState_E5F0(self, 0);
     *(int **)((char *)self + 8) = D_0046BB88_E5F0;
     return self;
 }
@@ -5227,19 +5227,19 @@ extern "C" void *func_001DE5F0(void *self) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateTransition_cFEStateTransition);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *func_0039E2A0_E628(void *) __asm__("func_0039E2A0");
+extern "C" void *cUIState_cUIState_E628(void *) __asm__("cUIState_cUIState");
 extern int D_0046BB88_E628[] __asm__("cFEStateTransition_vtbl");
 
 /**
  * Constructs the screen transition state for a UI engine.
  *
- * Runs cUIState's constructor (func_0039E2A0) with the engine (passed through in the second argument register), stores
+ * Runs cUIState's constructor (cUIState_cUIState) with the engine (passed through in the second argument register), stores
  * cFEStateTransition_vtbl at +0x8 and clears the two screen pointers at +0x48 and +0x4C (On Tour's mpSnow and mpWhite).
  *
  * @return @p self
  */
 extern "C" void *cFEStateTransition_cFEStateTransition(cFEStateTransition* self) {
-    func_0039E2A0_E628(self);
+    cUIState_cUIState_E628(self);
     self->mVtbl = (void**)D_0046BB88_E628;
     self->mpSnow = 0;
     self->mpWhite = 0;
@@ -5251,20 +5251,20 @@ extern "C" void *cFEStateTransition_cFEStateTransition(cFEStateTransition* self)
 INCLUDE_ASM("main/all_in_one_main", cFEStateTransition__cFEStateTransition);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E390_E668(void*) __asm__("func_0039E390");
+extern "C" void* cUIState__cUIState_E668(void*) __asm__("cUIState__cUIState");
 extern void* cFEStateTransition_vtbl[];
 
 /**
  * Destroys the front-end transition state: stores its vtable at +0x8, then runs the cUIState destructor.
  *
- * The cUIState destructor (func_0039E390) gets the g++ delete flags from the second argument register,
+ * The cUIState destructor (cUIState__cUIState) gets the g++ delete flags from the second argument register,
  * untouched.
  *
- * @return no meaningful value (func_0039E390 returns nothing)
+ * @return no meaningful value (cUIState__cUIState returns nothing)
  */
 extern "C" void* cFEStateTransition__cFEStateTransition(cFEStateTransition* self) {
     self->mVtbl = cFEStateTransition_vtbl;
-    return func_0039E390_E668(self);
+    return cUIState__cUIState_E668(self);
 }
 #endif
 
@@ -5272,17 +5272,17 @@ extern "C" void* cFEStateTransition__cFEStateTransition(cFEStateTransition* self
 INCLUDE_ASM("main/all_in_one_main", cFEStateTitle_cFEStateTitle);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *func_0039E2A0_E690(void *, int) __asm__("func_0039E2A0");
+extern "C" void *cUIState_cUIState_E690(void *, int) __asm__("cUIState_cUIState");
 extern int cFEStateTitle_vtbl[];
 
 /**
- * Constructs the title screen state with no engine: runs cUIState's constructor (func_0039E2A0) with a null engine,
+ * Constructs the title screen state with no engine: runs cUIState's constructor (cUIState_cUIState) with a null engine,
  * then stores cFEStateTitle_vtbl at +0x8.
  *
  * @return @p self
  */
 extern "C" void *cFEStateTitle_cFEStateTitle(cFEStateTitle* self) {
-    func_0039E2A0_E690(self, 0);
+    cUIState_cUIState_E690(self, 0);
     self->mVtbl = (void**)cFEStateTitle_vtbl;
     return ((void*)self);
 }
@@ -5292,20 +5292,20 @@ extern "C" void *cFEStateTitle_cFEStateTitle(cFEStateTitle* self) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateTitle__cFEStateTitle);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E390_E6C8(void*) __asm__("func_0039E390");
+extern "C" void* cUIState__cUIState_E6C8(void*) __asm__("cUIState__cUIState");
 extern void* D_0046D0D0[];
 
 /**
  * Destroys the title front-end state: restores cFEState's vtable (D_0046D0D0) and runs cUIState's destructor.
  *
- * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
  * (bit 0 frees).
  *
- * @return nothing meaningful (whatever func_0039E390 leaves)
+ * @return nothing meaningful (whatever cUIState__cUIState leaves)
  */
 extern "C" void* cFEStateTitle__cFEStateTitle(cFEStateTitle* self) {
     self->mVtbl = D_0046D0D0;
-    return func_0039E390_E6C8(self);
+    return cUIState__cUIState_E6C8(self);
 }
 #endif
 
@@ -5313,17 +5313,17 @@ extern "C" void* cFEStateTitle__cFEStateTitle(cFEStateTitle* self) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateMainMenu_cFEStateMainMenu);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *func_0039E2A0_E6F0(void *, int) __asm__("func_0039E2A0");
+extern "C" void *cUIState_cUIState_E6F0(void *, int) __asm__("cUIState_cUIState");
 extern int cFEStateMainMenu_vtbl[];
 
 /**
- * Constructs the main menu state with no engine: runs cUIState's constructor (func_0039E2A0) with a null engine, then
+ * Constructs the main menu state with no engine: runs cUIState's constructor (cUIState_cUIState) with a null engine, then
  * stores cFEStateMainMenu_vtbl at +0x8.
  *
  * @return @p self
  */
 extern "C" void *cFEStateMainMenu_cFEStateMainMenu(cFEStateMainMenu* self) {
-    func_0039E2A0_E6F0(self, 0);
+    cUIState_cUIState_E6F0(self, 0);
     self->mVtbl = (void**)cFEStateMainMenu_vtbl;
     return ((void*)self);
 }
@@ -5333,21 +5333,21 @@ extern "C" void *cFEStateMainMenu_cFEStateMainMenu(cFEStateMainMenu* self) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateMainMenu__cFEStateMainMenu);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E390_E728(void*) __asm__("func_0039E390");
+extern "C" void* cUIState__cUIState_E728(void*) __asm__("cUIState__cUIState");
 extern void* D_0046D0D0[];
 
 /**
  * Destroys the main menu front-end state: restores cFEState's vtable (D_0046D0D0) and runs cUIState's
  * destructor.
  *
- * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
  * (bit 0 frees).
  *
- * @return nothing meaningful (whatever func_0039E390 leaves)
+ * @return nothing meaningful (whatever cUIState__cUIState leaves)
  */
 extern "C" void* cFEStateMainMenu__cFEStateMainMenu(cFEStateMainMenu* self) {
     self->mVtbl = D_0046D0D0;
-    return func_0039E390_E728(self);
+    return cUIState__cUIState_E728(self);
 }
 #endif
 
@@ -5355,17 +5355,17 @@ extern "C" void* cFEStateMainMenu__cFEStateMainMenu(cFEStateMainMenu* self) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateBonusMaterial_cFEStateBonusMaterial);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *func_0039E2A0_E750(void *, int) __asm__("func_0039E2A0");
+extern "C" void *cUIState_cUIState_E750(void *, int) __asm__("cUIState_cUIState");
 extern int cFEStateBonusMaterial_vtbl[];
 
 /**
- * Constructs the bonus material state with no engine: runs cUIState's constructor (func_0039E2A0) with a null engine,
+ * Constructs the bonus material state with no engine: runs cUIState's constructor (cUIState_cUIState) with a null engine,
  * then stores cFEStateBonusMaterial_vtbl at +0x8.
  *
  * @return @p self
  */
 extern "C" void *cFEStateBonusMaterial_cFEStateBonusMaterial(cFEStateBonusMaterial* self) {
-    func_0039E2A0_E750(self, 0);
+    cUIState_cUIState_E750(self, 0);
     self->mVtbl = (void**)cFEStateBonusMaterial_vtbl;
     return ((void*)self);
 }
@@ -5375,21 +5375,21 @@ extern "C" void *cFEStateBonusMaterial_cFEStateBonusMaterial(cFEStateBonusMateri
 INCLUDE_ASM("main/all_in_one_main", cFEStateBonusMaterial__cFEStateBonusMaterial);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E390_E788(void*) __asm__("func_0039E390");
+extern "C" void* cUIState__cUIState_E788(void*) __asm__("cUIState__cUIState");
 extern void* D_0046D0D0[];
 
 /**
  * Destroys the bonus material front-end state: restores cFEState's vtable (D_0046D0D0) and runs cUIState's
  * destructor.
  *
- * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
+ * The g++ destructor flags are not declared here; they stay in the second argument register for cUIState__cUIState
  * (bit 0 frees).
  *
- * @return nothing meaningful (whatever func_0039E390 leaves)
+ * @return nothing meaningful (whatever cUIState__cUIState leaves)
  */
 extern "C" void* cFEStateBonusMaterial__cFEStateBonusMaterial(cFEStateBonusMaterial* self) {
     self->mVtbl = D_0046D0D0;
-    return func_0039E390_E788(self);
+    return cUIState__cUIState_E788(self);
 }
 #endif
 
@@ -5397,7 +5397,7 @@ extern "C" void* cFEStateBonusMaterial__cFEStateBonusMaterial(cFEStateBonusMater
 INCLUDE_ASM("main/all_in_one_main", cFEStateNet_cFEStateNet1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E318_E7B0(void* self, int a1, int a2) __asm__("func_0039E318");
+extern "C" void* cUIState_cUIState1_E7B0(void* self, int a1, int a2) __asm__("cUIState_cUIState1");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cBXString_cBXString2(void* self, const char* str);
 extern void* cFEStateNet_vtbl[];
@@ -5418,7 +5418,7 @@ struct sList_E7B0 {
 /**
  * Constructs an online front-end state with no engine and no parent (the default constructor).
  *
- * Runs cUIState's two-argument constructor (func_0039E318) with null engine and parent, clears unk_048, unk_058,
+ * Runs cUIState's two-argument constructor (cUIState_cUIState1) with null engine and parent, clears unk_048, unk_058,
  * mpKeyboard, mpKeyboardText, unk_6AC, unk_6B0 and unk_6B8, sets unk_6BC to 2, stores the cFEStateNet vtable
  * cFEStateNet_vtbl, builds the string at +0x6C0 from the empty string D_004A1390 (cBXString_cBXString2) and allocates the
  * pending-message list's sentinel node (cMemMan_alloc(0xC, "StlBlock")), linking it to itself.
@@ -5429,7 +5429,7 @@ extern "C" void* cFEStateNet_cFEStateNet1(cFEStateNet* self)
 {
     // An unused 16-byte local is needed to reproduce the 0x40-byte frame.
     int framePad[4];
-    func_0039E318_E7B0(self, 0, 0);
+    cUIState_cUIState1_E7B0(self, 0, 0);
     sList_E7B0* msgList = (sList_E7B0*)(((char*)self) + 0x6C8);
     self->unk_048 = 0;
     self->unk_058 = 0;
@@ -5665,17 +5665,17 @@ extern "C" void *cFEStateMemCard_cFEStateMemCard(void *self) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateLegal_cFEStateLegal);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *func_0039E2A0_E990(void *, int) __asm__("func_0039E2A0");
+extern "C" void *cUIState_cUIState_E990(void *, int) __asm__("cUIState_cUIState");
 extern int D_0046B4A0_E990[] __asm__("cFEStateLegal_vtbl");
 
 /**
- * Constructs the legal screen state with no engine: runs cUIState's constructor (func_0039E2A0) with a null engine,
+ * Constructs the legal screen state with no engine: runs cUIState's constructor (cUIState_cUIState) with a null engine,
  * then stores cFEStateLegal_vtbl at +0x8.
  *
  * @return @p self
  */
 extern "C" void *cFEStateLegal_cFEStateLegal(void *self) {
-    func_0039E2A0_E990(self, 0);
+    cUIState_cUIState_E990(self, 0);
     *(int **)((char *)self + 8) = D_0046B4A0_E990;
     return self;
 }
@@ -5685,20 +5685,20 @@ extern "C" void *cFEStateLegal_cFEStateLegal(void *self) {
 INCLUDE_ASM("main/all_in_one_main", cFEStateLegal__cFEStateLegal);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E390_E9C8(void*) __asm__("func_0039E390");
+extern "C" void* cUIState__cUIState_E9C8(void*) __asm__("cUIState__cUIState");
 extern void* cFEStateLegal_vtbl[];
 
 /**
  * Destroys the legal-screen state: stores its vtable at +0x8, then runs the cUIState destructor.
  *
- * The cUIState destructor (func_0039E390) gets the g++ delete flags from the second argument register,
+ * The cUIState destructor (cUIState__cUIState) gets the g++ delete flags from the second argument register,
  * untouched.
  *
- * @return no meaningful value (func_0039E390 returns nothing)
+ * @return no meaningful value (cUIState__cUIState returns nothing)
  */
 extern "C" void* cFEStateLegal__cFEStateLegal(void *self) {
     *(void***)((char*)self + 8) = cFEStateLegal_vtbl;
-    return func_0039E390_E9C8(self);
+    return cUIState__cUIState_E9C8(self);
 }
 #endif
 
@@ -5708,7 +5708,7 @@ INCLUDE_ASM("main/all_in_one_main", cFEStateLegal_onGainTransition);
 /**
  * Ends the legal screen's gain transition at once.
  *
- * Declared without parameters. The state stack update func_0039ECB0() ends a state's gain transition once this
+ * Declared without parameters. The state stack update cUIStateStack_updateLoop() ends a state's gain transition once this
  * returns nonzero.
  *
  * @return always 1 (transition finished)
@@ -5722,21 +5722,21 @@ extern "C" int cFEStateLegal_onGainTransition(void) {
 INCLUDE_ASM("main/all_in_one_main", cFEPopupOptionReset__cFEPopupOptionReset);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E390_E9F8(void*) __asm__("func_0039E390");
+extern "C" void* cUIState__cUIState_E9F8(void*) __asm__("cUIState__cUIState");
 extern void* D_0046B3D0[];
 
 /**
  * Destroys the options-reset popup (vtable D_0046B3D0): stores D_0046B3D0 at +0x8 and runs cUIState's destructor
- * (func_0039E390).
+ * (cUIState__cUIState).
  *
  * D_0046B3D0 is the vtable festateoptions.cpp stores in the popup it allocates as "cFEPopupOptionReset". The g++ delete
  * flags pass through in the second argument register.
  *
- * @return the result of func_0039E390
+ * @return the result of cUIState__cUIState
  */
 extern "C" void* cFEPopupOptionReset__cFEPopupOptionReset(void *self) {
     *(void***)((char*)self + 8) = D_0046B3D0;
-    return func_0039E390_E9F8(self);
+    return cUIState__cUIState_E9F8(self);
 }
 #endif
 
@@ -5796,7 +5796,7 @@ extern "C" int func_001DEA80(void* self, int menu, unsigned int key)
 INCLUDE_ASM("main/all_in_one_main", cFEPopupOptionReset_onWidgetEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char*);
-extern "C" void func_0039F190(int, int);
+extern "C" void cUIStateStack_pop(int, int);
 extern char str_yes[];
 extern char str_no[];
 
@@ -5804,7 +5804,7 @@ extern char str_no[];
  * Handles a button press on the options-reset popup: "yes" accepts, "no" declines, and either closes the popup.
  *
  * On event 5 from a widget, compares the widget's hash (+0x38) with GetHashValue32("yes") and ("no"); sets the accept
- * byte (+0x48) to 1 or 0 and pops the state stack with func_0039F190(engine + 0x18, 1). Other events and other widgets
+ * byte (+0x48) to 1 or 0 and pops the state stack with cUIStateStack_pop(engine + 0x18, 1). Other events and other widgets
  * are ignored.
  *
  * @param widget  the widget (may be null)
@@ -5816,12 +5816,12 @@ extern "C" void cFEPopupOptionReset_onWidgetEvent(char *self, char *widget, int 
             int yesCheckHash = *(int*)(widget + 0x38);
             if (yesCheckHash == GetHashValue32(str_yes)) {
                 *(char*)(self + 0x48) = 1;
-                func_0039F190(*(int*)(self + 0x10) + 0x18, 1);
+                cUIStateStack_pop(*(int*)(self + 0x10) + 0x18, 1);
             } else {
                 int noCheckHash = *(int*)(widget + 0x38);
                 if (noCheckHash == GetHashValue32(str_no)) {
                     *(char*)(self + 0x48) = 0;
-                    func_0039F190(*(int*)(self + 0x10) + 0x18, 1);
+                    cUIStateStack_pop(*(int*)(self + 0x10) + 0x18, 1);
                 }
             }
         }
@@ -5847,20 +5847,20 @@ extern "C" signed char cFEPopupOptionReset_getData(void *resetPopup) {
 INCLUDE_ASM("main/all_in_one_main", cFEPopupVideoCalibration__cFEPopupVideoCalibration);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E390_EB58(void*) __asm__("func_0039E390");
+extern "C" void* cUIState__cUIState_EB58(void*) __asm__("cUIState__cUIState");
 extern void* cFEPopupVideoCalibration_vtbl[];
 
 /**
  * Destroys the video calibration popup: stores its vtable at +0x8, then runs the cUIState destructor.
  *
- * The cUIState destructor (func_0039E390) gets the g++ delete flags from the second argument register,
+ * The cUIState destructor (cUIState__cUIState) gets the g++ delete flags from the second argument register,
  * untouched.
  *
- * @return no meaningful value (func_0039E390 returns nothing)
+ * @return no meaningful value (cUIState__cUIState returns nothing)
  */
 extern "C" void* cFEPopupVideoCalibration__cFEPopupVideoCalibration(cFEPopupVideoCalibration* self) {
     self->mVtbl = cFEPopupVideoCalibration_vtbl;
-    return func_0039E390_EB58(self);
+    return cUIState__cUIState_EB58(self);
 }
 #endif
 
@@ -5870,7 +5870,7 @@ INCLUDE_ASM("main/all_in_one_main", cFEPopupVideoCalibration_onGainTransition);
 /**
  * Ends the video-calibration popup's gain transition at once.
  *
- * Declared without parameters. The state stack update func_0039ECB0() ends a state's gain transition once this
+ * Declared without parameters. The state stack update cUIStateStack_updateLoop() ends a state's gain transition once this
  * returns nonzero.
  *
  * @return always 1 (transition finished)
@@ -5886,7 +5886,7 @@ INCLUDE_ASM("main/all_in_one_main", cFEPopupVideoCalibration_onLoseTransition);
 /**
  * Ends the video-calibration popup's lose transition at once.
  *
- * Declared without parameters. The state stack update func_0039ECB0() ends a state's lose transition once this
+ * Declared without parameters. The state stack update cUIStateStack_updateLoop() ends a state's lose transition once this
  * returns nonzero.
  *
  * @return always 1 (transition finished)

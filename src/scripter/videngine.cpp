@@ -6,10 +6,10 @@
 INCLUDE_ASM("scripter/videngine", cVidEngine_ReadyVideo);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_002533C8(void* mem);
-extern "C" void func_00253390(void* self);
-extern "C" int func_002534A8(void* p, void* q);
-extern "C" void func_00253418(void* p, int a1);
+extern "C" void* cMoviePlayer_cMoviePlayer(void* mem);
+extern "C" void tMoviePlayOptions_SetDefaults(void* self);
+extern "C" int cMoviePlayer_init(void* p, void* q);
+extern "C" void cMoviePlayer__cMoviePlayer(void* p, int a1);
 extern const char str_VidEnginePlayer[];
 
 struct sVidParams38E8 {
@@ -28,8 +28,8 @@ struct sVidParams38E8 {
  * Creates the video player and prepares a video for playback, unless a player already exists.
  *
  * Allocates and constructs the 0x44-byte "VidEnginePlayer" at +0x0, fills a parameter block from the defaults
- * (func_00253390), sets @p file and the words +0x8 = 1, +0x18 = 0x100 and +0x1C = 9 in it and hands it to
- * func_002534A8. Its failure branch (destroy the player, return 0) is dead: func_002534A8 always returns 1.
+ * (tMoviePlayOptions_SetDefaults), sets @p file and the words +0x8 = 1, +0x18 = 0x100 and +0x1C = 9 in it and hands it to
+ * cMoviePlayer_init. Its failure branch (destroy the player, return 0) is dead: cMoviePlayer_init always returns 1.
  *
  * @param file  the video to play (On Tour pVideoFileName)
  * @return 1 when the player was created, 0 when one already existed
@@ -37,9 +37,9 @@ struct sVidParams38E8 {
 extern "C" int cVidEngine_ReadyVideo(void** self, int file)
 {
     if (*self != 0) return 0;
-    *self = func_002533C8(cMemMan_alloc(68, str_VidEnginePlayer, 0x100, 0));
+    *self = cMoviePlayer_cMoviePlayer(cMemMan_alloc(68, str_VidEnginePlayer, 0x100, 0));
     sVidParams38E8 params;
-    func_00253390(&params);
+    tMoviePlayOptions_SetDefaults(&params);
     //S
     params.file = file;
     params.f8 = 1;
@@ -48,8 +48,8 @@ extern "C" int cVidEngine_ReadyVideo(void** self, int file)
     params.fC = 0;
     params.f10 = 0;
     //E
-    if (func_002534A8(*self, &params) == 0) {
-        if (*self != 0) func_00253418(*self, 3);
+    if (cMoviePlayer_init(*self, &params) == 0) {
+        if (*self != 0) cMoviePlayer__cMoviePlayer(*self, 3);
         *self = 0;
         return 0;
     }
@@ -60,7 +60,7 @@ extern "C" int cVidEngine_ReadyVideo(void** self, int file)
 //100%
 INCLUDE_ASM("scripter/videngine", cVidEngine_PlayVideo);
 #ifdef SKIP_ASM
-extern "C" int func_00253860(void*);
+extern "C" int cMoviePlayer_asyncPlay(void*);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_PauseSFX(void*);
 extern "C" void cCutSceneTransitionMan_ForceToRegularMode(void*);
@@ -79,7 +79,7 @@ struct sVtEnt { short delta; short index; void* fn; };
  * Starts the readied video: pauses the game for it, saves part of the render state and pauses the sound effects.
  *
  * Returns 0 without a movie player (+0x0, On Tour mpPlayer) and 1 when already playing (+0x4, mIsPlaying). Otherwise
- * starts the player with func_00253860 (On Tour cMoviePlayer::asyncPlay), marks it playing and pushes pause state 10:
+ * starts the player with cMoviePlayer_asyncPlay (On Tour cMoviePlayer::asyncPlay), marks it playing and pushes pause state 10:
  * D_005366E8[++D_004A2A54] = 10 and cPauseState_Flags = D_00442918 (the flags table's entry 10). On Tour asserts the
  * pause stack has room; retail does not. It then records in +0x14 whether the state (+0x10) of the game's +0x64 object
  * is neither 0 nor 2, calls cCutSceneTransitionMan_ForceToRegularMode on that object, saves GrMan's virtual slot 42 result in +0x10, calls GrMan's
@@ -92,7 +92,7 @@ extern "C" int cVidEngine_PlayVideo(sVidPlayer* self)
     void* player = self->p;
     if (player == 0) return 0;
     if (self->active != 0) return 1;
-    func_00253860(player);
+    cMoviePlayer_asyncPlay(player);
     int n = D_004A2A54 + 1;
     self->active = 1;
     D_005366E8[n] = 10;
@@ -143,15 +143,15 @@ extern "C" void cVidEngine_UpdateVideo(void* self)
 //100%
 INCLUDE_ASM("scripter/videngine", cVidEngine_RenderVideo);
 #ifdef SKIP_ASM
-extern "C" void func_00253890(void* p, int a1);
-extern "C" void func_002539E0(void* self);
-extern "C" void func_00253A40(void* self);
+extern "C" void cMoviePlayer_asyncRender(void* p, int a1);
+extern "C" void cMoviePlayer_asyncPause(void* self);
+extern "C" void cMoviePlayer_asyncResume(void* self);
 
 /**
  * Renders the video for this frame, holding the movie paused on frames the engine did not update.
  *
  * Only with a movie player (mpPlayer) that is playing (mIsPlaying): when mFrameUpdated is set the player is resumed if
- * paused (func_00253A40), otherwise it is paused if running (func_002539E0); then func_00253890(mpPlayer,
+ * paused (cMoviePlayer_asyncResume), otherwise it is paused if running (cMoviePlayer_asyncPause); then cMoviePlayer_asyncRender(mpPlayer,
  * !mFrameUpdated) and mFrameUpdated is cleared.
  */
 extern "C" void cVidEngine_RenderVideo(void* self)
@@ -160,14 +160,14 @@ extern "C" void cVidEngine_RenderVideo(void* self)
     if (videoPlayer != 0 && *(int*)((char*)self + 0x4) != 0) {
         if (*(int*)((char*)self + 0x8) != 0) {
             if (*(int*)((char*)videoPlayer + 0x8) != 0) {
-                func_00253A40(videoPlayer);
+                cMoviePlayer_asyncResume(videoPlayer);
             }
         } else {
             if (*(int*)((char*)videoPlayer + 0x8) == 0) {
-                func_002539E0(videoPlayer);
+                cMoviePlayer_asyncPause(videoPlayer);
             }
         }
-        func_00253890(*(void**)((char*)self + 0x0), *(int*)((char*)self + 0x8) ^ 1);
+        cMoviePlayer_asyncRender(*(void**)((char*)self + 0x0), *(int*)((char*)self + 0x8) ^ 1);
         *(int*)((char*)self + 0x8) = 0;
     }
 }

@@ -10,7 +10,7 @@
 //100%
 INCLUDE_ASM("fe/fepopup", cScreenPopup_cScreenPopup);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E318(void* self, void* engine, void* owner);
+extern "C" void* cUIState_cUIState1(void* self, void* engine, void* owner);
 extern "C" void cPopupInfo_cPopupInfo(void* self);
 extern "C" void func_00416210(void* dst, int c, int n);
 extern void* cScreenPopup_vtbl[];
@@ -26,7 +26,7 @@ extern sQuad_58E8 gPopupBlack;
 /**
  * Constructs a message/confirmation popup state with empty widgets and default layout settings.
  *
- * Runs the cUIState constructor (func_0039E318), stores cScreenPopup_vtbl, constructs the embedded cPopupInfo
+ * Runs the cUIState constructor (cUIState_cUIState1), stores cScreenPopup_vtbl, constructs the embedded cPopupInfo
  * (cPopupInfo_cPopupInfo at +0xBC) and points mszInputText and mszStaticText at the empty string cBXString_EmptyString. Every
  * widget pointer, mpKeyboard, the five options and the five confirmations are cleared; miDefaultOption is -1,
  * mbReceivePrev 1, mvCurrentScale (1, 1, 1), the highlight colours come from gPopupWhite / gPopupBlack and
@@ -38,7 +38,7 @@ extern sQuad_58E8 gPopupBlack;
  */
 extern "C" void* cScreenPopup_cScreenPopup(cScreenPopup* self, void* engine, void* owner)
 {
-    func_0039E318(self, engine, owner);
+    cUIState_cUIState1(self, engine, owner);
     self->mVtbl = cScreenPopup_vtbl;
     cPopupInfo_cPopupInfo((char*)self + 0xBC);
     int defaultStr = cBXString_EmptyString;
@@ -91,13 +91,13 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup__cScreenPopup);
 extern void* cScreenPopup_vtbl[];
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void cPopupInfo__cPopupInfo(void* self, int flags);
-extern "C" void func_0039E390(void* self, int flags);
+extern "C" void cUIState__cUIState(void* self, int flags);
 
 /**
  * Destroys a screen popup: its two strings and popup info, then the cUIState base.
  *
  * Restores cScreenPopup_vtbl, destroys mszStaticText and mszInputText (cBXString destructor, flags 2) and the
- * embedded cPopupInfo (cPopupInfo__cPopupInfo, flags 2), then calls the cUIState destructor func_0039E390(self, flags).
+ * embedded cPopupInfo (cPopupInfo__cPopupInfo, flags 2), then calls the cUIState destructor cUIState__cUIState(self, flags).
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
@@ -107,7 +107,7 @@ extern "C" void cScreenPopup__cScreenPopup(cScreenPopup* self, int flags)
     cBXString__cBXString((char*)self + 0x2B4, 2);
     cBXString__cBXString((char*)self + 0x2B0, 2);
     cPopupInfo__cPopupInfo((char*)self + 0xBC, 2);
-    func_0039E390(self, flags);
+    cUIState__cUIState(self, flags);
 }
 #endif
 
@@ -1638,7 +1638,7 @@ struct cUIText;
 struct sVec3_8320 { float x, y, z; };
 extern "C" void* cUIText_getFont(void* self);
 extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
-extern "C" float func_003921F0(void* self, const char* str, void* out, int n, float sx, float sy);
+extern "C" float cFont_textExtent1(void* self, const char* str, void* out, int n, float sx, float sy);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_String_pct_08x[];
 
@@ -1652,7 +1652,7 @@ struct sVEntry_8320 {
  * Measures a popup string element as a text widget would draw it.
  *
  * Scales the widget's font by the widget's mScale (font +0x38/+0x3C = font +0x30/+0x34 times mScale.x/.y), then by @p
- * info's eType: 1 measures the unicode string (func_003921F0), 2 the ascii string (cFont_textExtent); 3 looks the id up
+ * info's eType: 1 measures the unicode string (cFont_textExtent1), 2 the ascii string (cFont_textExtent); 3 looks the id up
  * through SSXApp->FELocale's virtual slot 4 and measures that unicode string, or, when it is missing, the text "String
  * %08x" of the id (64-byte stack buffer) as ascii. Type 0 sets @p out[2] and @p out[3] (width and height) to 0.
  *
@@ -1672,7 +1672,7 @@ extern "C" void cScreenPopup_getStringSize(cScreenPopup* self, cUIText* text, in
     switch (info[0]) {
     case 1:
         measureFont = (char*)cUIText_getFont(text);
-        func_003921F0(measureFont, (const char*)info[1], out, 0, *(float*)(measureFont + 0x38), *(float*)(measureFont + 0x3C));
+        cFont_textExtent1(measureFont, (const char*)info[1], out, 0, *(float*)(measureFont + 0x38), *(float*)(measureFont + 0x3C));
         break;
     case 2:
         measureFont = (char*)cUIText_getFont(text);
@@ -1684,7 +1684,7 @@ extern "C" void cScreenPopup_getStringSize(cScreenPopup* self, cUIText* text, in
         char* str = vt[4].fn(feLocale + vt[4].delta, info[1]);
         if (str) {
             measureFont = (char*)cUIText_getFont(text);
-            func_003921F0(measureFont, str, out, 0, *(float*)(measureFont + 0x38), *(float*)(measureFont + 0x3C));
+            cFont_textExtent1(measureFont, str, out, 0, *(float*)(measureFont + 0x38), *(float*)(measureFont + 0x3C));
         } else {
             char buf[0x40];
             sprintf(buf, str_String_pct_08x, info[1]);
@@ -1739,12 +1739,12 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_getStringSize2);
 #ifdef SKIP_ASM
 struct sVec3_8568 { float x, y, z; };
 extern "C" void* cUIText_getFont(void* self);
-extern "C" float func_003921F0(void* self, const char* str, void* out, int n, float sx, float sy);
+extern "C" float cFont_textExtent1(void* self, const char* str, void* out, int n, float sx, float sy);
 
 /**
  * Measures a unicode string as a text widget would draw it, including the line height.
  *
- * Same as cScreenPopup_getStringSize1() but measures with the unicode extent function func_003921F0 (@p str is passed through as a
+ * Same as cScreenPopup_getStringSize1() but measures with the unicode extent function cFont_textExtent1 (@p str is passed through as a
  * char pointer).
  *
  * @param text  the text widget whose font and scale are used
@@ -1760,7 +1760,7 @@ extern "C" void cScreenPopup_getStringSize2(cScreenPopup* self, void* text, cons
     *(float*)(font + 0x38) = sx;
     *(float*)(font + 0x3C) = sy;
     font = (char*)cUIText_getFont(text);
-    func_003921F0(font, str, out, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
+    cFont_textExtent1(font, str, out, 0, *(float*)(font + 0x38), *(float*)(font + 0x3C));
     font = (char*)cUIText_getFont(text);
     *(float*)((char*)out + 0xC) = scale.y * ((float)*(int*)(font + 0x14) * *(float*)(font + 0x34));
 }
@@ -2335,7 +2335,7 @@ struct sVEntry_94B0 {
     void (*fn)(void*, sVec2_94B0*);
 };
 extern "C" void* cUIText_getFont(void* self);
-extern "C" float func_00392C60(void* font, int c);
+extern "C" float cFont_charAdvance1(void* font, int c);
 extern "C" int USTR_length(unsigned short* s);
 extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
 void cMemMan_free(void* ptr);
@@ -2347,7 +2347,7 @@ extern char D_004A1C38;
  * Measures how wide the first line of a unicode string gets before it would overflow the text widget.
  *
  * Sets bit 7 of the widget's mAttr, then walks a copy of @p strp (allocated "UITEXTTEMP") adding each character's width
- * (func_00392C60 times mScale.x); a pair of backslashes (D_004A1C38) restarts the width at 0. Stops at the first
+ * (cFont_charAdvance1 times mScale.x); a pair of backslashes (D_004A1C38) restarts the width at 0. Stops at the first
  * character that makes the width exceed the widget's width (getSize, vtable slot 20) and stores the width before it in
  * @p outp; otherwise stores the full width. Returns early, without writing, when the widget has no font.
  *
@@ -2379,7 +2379,7 @@ extern "C" void cScreenPopup_getMessageLineWrapSize2(cScreenPopup* self, void* t
             w = 0.0f;
             i += 2;
         } else {
-            float cw = func_00392C60(font, buf[i]) * textScale.x;
+            float cw = cFont_charAdvance1(font, buf[i]) * textScale.x;
             w += cw;
             if (size.x < w) {
                 done = 1;
@@ -2408,7 +2408,7 @@ struct sVEntry_9648 {
     void (*fn)(void*, t3Vector_9648*);
 };
 extern "C" void* cUIText_getFont(void* self);
-extern "C" float func_00392BA8(void* font, int c);  // cFont::charAdvance(char) const
+extern "C" float cFont_charAdvance(void* font, int c);  // cFont::charAdvance(char) const
 extern "C" int strlen(const char* s);
 extern "C" char* strcpy(char* dst, const char* src);
 void cMemMan_free(void* ptr);
@@ -2455,7 +2455,7 @@ extern "C" void cScreenPopup_getMessageLineWrapSize(cScreenPopup* self, void* pT
             Pixels = 0.0f;
             j++;
         } else {
-            float advance = func_00392BA8(pFont, pTempString[j]) * vScale.x;
+            float advance = cFont_charAdvance(pFont, pTempString[j]) * vScale.x;
             Pixels += advance;
             if (vTextSize.x < Pixels) {
                 bFound = true;
@@ -2555,7 +2555,7 @@ struct sVEntry_9938 {
     void (*fn)(void*, sVec2_9938*);
 };
 extern "C" void* cUIText_getFont(void* self);
-extern "C" float func_00392C60(void* font, int c);
+extern "C" float cFont_charAdvance1(void* font, int c);
 extern "C" int USTR_length(unsigned short* s);
 extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
 extern "C" void cUIText_setUnicodeString(cUIText* text, void* p);
@@ -2569,7 +2569,7 @@ extern char D_004A1C38;
  * Word-wraps a unicode string to a text widget's width, grows a box size to fit it, and puts it in the widget.
  *
  * Sets bit 7 of the widget's mAttr; returns when the widget has no font. On a copy of @p strp (allocated "UITEXTTEMP")
- * it adds character widths (func_00392C60 times mScale.x), restarting at backslash pairs and '\r'; when the width
+ * it adds character widths (cFont_charAdvance1 times mScale.x), restarting at backslash pairs and '\r'; when the width
  * passes the widget's width (getSize) after a space was seen, that space becomes '\r' and scanning resumes after it.
  * The wrapped copy is measured into @p out with cScreenPopup_getTextBoxSize1() and set with cUIText_setUnicodeString(), then freed.
  *
@@ -2605,7 +2605,7 @@ extern "C" void cScreenPopup_getTextBoxWrapSize1(cScreenPopup* self, cUIText* te
                 w = 0.0f;
                 last = -1;
             } else {
-                float cw = func_00392C60(font, buf[i]) * textScale.x;
+                float cw = cFont_charAdvance1(font, buf[i]) * textScale.x;
                 if (buf[i] == ' ')
                     last = i;
                 w += cw;
@@ -2729,7 +2729,7 @@ extern char str_ps2x[];
 
 struct sUIObj_C9CD0 {
     char pad_0x0[0x14];
-    int flags; // 0x14: bits 8..12 = layer (out-of-line copies: func_003A4B60 get, func_003A4B70 set)
+    int flags; // 0x14: bits 8..12 = layer (out-of-line copies: cUIThing_getDrawLayer get, cUIThing_setDrawLayer set)
     int getLayer() { return ((unsigned int)flags >> 8) & 0x1F; }
     void setLayer(int l) { flags = (flags & ~0x1F00) | ((l & 0x1F) << 8); }
 };
@@ -3140,8 +3140,8 @@ INCLUDE_ASM("fe/fepopup", cScreenPopup_onPopupEvent);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cKeyboardPopup_setInputText(cKeyboardPopup* popup, const char* a1);
 extern "C" void cKeyboardPopup_setStatic2(cKeyboardPopup* popup, const char* a1);
-// PORT: the unit declares func_0039F190 as void; it returns a value this caller ignores.
-extern "C" int func_0039F190_i(void* self, int a1) __asm__("func_0039F190");
+// PORT: the unit declares cUIStateStack_pop as void; it returns a value this caller ignores.
+extern "C" int cUIStateStack_pop_i(void* self, int a1) __asm__("cUIStateStack_pop");
 
 struct sVE1CA598 {
     short delta;
@@ -3171,15 +3171,15 @@ extern "C" void cScreenPopup_onPopupEvent(cScreenPopup* self, void* child, int m
         }
         break;
     case 0xF:
-        func_0039F190_i(self->mpEngine->mStateStack, 1);
+        cUIStateStack_pop_i(self->mpEngine->mStateStack, 1);
         self->miConfimationReturnCode = self->miActiveConfirmation + 0xF;
         break;
     case 0x10: case 20:
         self->miConfimationReturnCode = -1;
-        func_0039F190_i(self->mpEngine->mStateStack, 1);
+        cUIStateStack_pop_i(self->mpEngine->mStateStack, 1);
         break;
     case 17: case 18: case 19:
-        func_0039F190_i(self->mpEngine->mStateStack, 1);
+        cUIStateStack_pop_i(self->mpEngine->mStateStack, 1);
         break;
     case 22:
         if (child == (void*)self->mpKeyboard) {
@@ -3461,7 +3461,7 @@ extern "C" void cBuyPopupInfo_initBuyBolt(int* self, int boltName, int cost, int
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/fepopup", cUIStateBuyPopup_cUIStateBuyPopup);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E318(void* self, void* engine, void* owner);
+extern "C" void* cUIState_cUIState1(void* self, void* engine, void* owner);
 extern "C" void cBuyPopupInfo_clear(cBuyPopupInfo* self);
 extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, signed char a1);
 extern void* cUIStateBuyPopup_vtbl[];
@@ -3469,7 +3469,7 @@ extern void* cUIStateBuyPopup_vtbl[];
 /**
  * Constructs the buy-confirmation popup state for one user.
  *
- * Runs the cUIState constructor (func_0039E318), stores cUIStateBuyPopup_vtbl, clears the embedded cBuyPopupInfo
+ * Runs the cUIState constructor (cUIState_cUIState1), stores cUIStateBuyPopup_vtbl, clears the embedded cBuyPopupInfo
  * (+0x48, cBuyPopupInfo_clear) twice (before and after the other stores), stores @p idx as mUserNum and mHashName 7, and
  * when the engine's first word is set takes mCtrlBits from cFECustom_getPlayerCtrlMask(that word, idx).
  *
@@ -3480,7 +3480,7 @@ extern void* cUIStateBuyPopup_vtbl[];
  */
 extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(cUIStateBuyPopup* self, void* engine, void* owner, signed char idx)
 {
-    func_0039E318(self, engine, owner);
+    cUIState_cUIState1(self, engine, owner);
     self->mVtbl = cUIStateBuyPopup_vtbl;
     cBuyPopupInfo_clear((cBuyPopupInfo*)((char*)self + 0x48));
     self->mUserNum = idx;
@@ -3730,7 +3730,7 @@ extern "C" void cUIStateBuyPopup_initBuyAttributes(cUIStateBuyPopup* self, int p
 //100%
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_cKeyboardPopup);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E318(void* self, void* engine, void* owner);
+extern "C" void* cUIState_cUIState1(void* self, void* engine, void* owner);
 extern "C" void cBXString_Reset(void* self);
 extern "C" void cKeyboardPopup_fillSelectableKeys(cKeyboardPopup* self);
 extern int cBXString_EmptyString;
@@ -3740,7 +3740,7 @@ extern void* cKeyboardPopup_vtbl[];
 /**
  * Constructs the on-screen keyboard popup: caps on, cursor at key 29, a 63-character limit and the default key set.
  *
- * Runs the cUIState constructor (func_0039E318), stores @p CtrlBits in mCtrlBits and @p Password in mbPassword, clears the edit
+ * Runs the cUIState constructor (cUIState_cUIState1), stores @p CtrlBits in mCtrlBits and @p Password in mbPassword, clears the edit
  * string (+0x74), cursor, view range and flags (mbPopOnEnd 1, mbCapsOn 1), stores cKeyboardPopup_vtbl, miCurrentKey
  * 0x1D, mszStatic = the empty string, miMaxCharacters 63, meSkipState 2 (both), miLastKey 0x2B and meType 1
  * (compact); resets the cBXString at +0x424 and clears the static texts and the three backgrounds. When D_004A33F0
@@ -3754,7 +3754,7 @@ extern void* cKeyboardPopup_vtbl[];
  */
 extern "C" void* cKeyboardPopup_cKeyboardPopup(cKeyboardPopup* self, void* engine, void* owner, int Password, unsigned char CtrlBits)
 {
-    func_0039E318(self, engine, owner);
+    cUIState_cUIState1(self, engine, owner);
     int defaultStr = cBXString_EmptyString;
     self->mCtrlBits = CtrlBits;
     self->mbPassword = Password;
@@ -3801,15 +3801,15 @@ INCLUDE_ASM("fe/fepopup", cKeyboardPopup__cKeyboardPopup);
 extern void* cKeyboardPopup_vtbl[];
 void cMemMan_free(void* ptr);
 extern "C" void cBXString__cBXString(void* self, int flags);
-extern "C" void func_0039E390(void* self, int flags);
+extern "C" void cUIState__cUIState(void* self, int flags);
 
 /**
  * Destroys the on-screen keyboard: frees its pending unicode static text and its static string.
  *
  * Stores the class vtable, frees mpustrStatic when set, destroys the mszStatic cBXString and runs the
- * cUIState destructor (func_0039E390), which also frees the object when the flags ask for it.
+ * cUIState destructor (cUIState__cUIState), which also frees the object when the flags ask for it.
  *
- * @param flags  destructor flags, passed on to func_0039E390
+ * @param flags  destructor flags, passed on to cUIState__cUIState
  */
 extern "C" void cKeyboardPopup__cKeyboardPopup(cKeyboardPopup* self, int flags)
 {
@@ -3820,7 +3820,7 @@ extern "C" void cKeyboardPopup__cKeyboardPopup(cKeyboardPopup* self, int flags)
         self->mpustrStatic = 0;
     }
     cBXString__cBXString((char*)self + 0x424, 2);
-    func_0039E390(self, flags);
+    cUIState__cUIState(self, flags);
 }
 #endif
 
@@ -3858,20 +3858,20 @@ struct sVEntry001CB208 {
 };
 
 extern "C" void cUIState_onUpdate(void*);
-extern "C" void func_0039F190(void* self, int a1);
+extern "C" void cUIStateStack_pop(void* self, int a1);
 
 /**
  * Updates the on-screen keyboard and closes it when the online overlay timeout runs out in a game.
  *
  * Runs the base UI-state update cUIState_onUpdate(). When cGameComm exists, its mOverlayTimeout is 0 and a game is
- * running, pops the top state off the UI state stack (func_0039F190(stack, 1)). When mbCallParentsUpdate is set,
+ * running, pops the top state off the UI state stack (cUIStateStack_pop(stack, 1)). When mbCallParentsUpdate is set,
  * also calls the parent state's onUpdate (vtable slot 12).
  */
 extern "C" void cKeyboardPopup_onUpdate(cKeyboardPopup* self)
 {
     cUIState_onUpdate(self);
     if (cGameComm_mGameComm != 0 && cGameComm_mGameComm->mOverlayTimeout == 0 && (int)SSXApp->Game != 0) {
-        func_0039F190(self->mpEngine->mStateStack, 1);
+        cUIStateStack_pop(self->mpEngine->mStateStack, 1);
     }
     if (self->mbCallParentsUpdate != 0) {
         void* obj = self->mpParentState;
@@ -3886,7 +3886,7 @@ extern "C" void cKeyboardPopup_onUpdate(cKeyboardPopup* self)
 //100%
 INCLUDE_ASM("fe/fepopup", cKeyboardPopup_onWidgetEvent);
 #ifdef SKIP_ASM
-extern "C" void func_0039F190(void* self, int a1);
+extern "C" void cUIStateStack_pop(void* self, int a1);
 
 /**
  * Closes the keyboard on widget events 5 and 6 by popping the top state of the engine's stack.
@@ -3899,7 +3899,7 @@ extern "C" void cKeyboardPopup_onWidgetEvent(cKeyboardPopup* self, void* pWidget
     switch (Event) {
     case 5:
     case 6:
-        func_0039F190(self->mpEngine->mStateStack, 1);
+        cUIStateStack_pop(self->mpEngine->mStateStack, 1);
         break;
     }
 }
@@ -4754,8 +4754,8 @@ extern "C" void cKeyboardPopup_handleQuickKeyPress(cKeyboardPopup* self, int dig
 extern "C" void cKeyboardPopup_pressKey(cKeyboardPopup* self, int a1);
 // PORT: cKeyboardPopup_allowSelection's third parameter is an int* out-param; the unit declares it (void*, int, int).
 int cKeyboardPopup_allowSelection_out(void* self, int idx, int* out) __asm__("cKeyboardPopup_allowSelection");
-// func_0039F190 returns its last list node in $v0; the unit declares it void.
-void* func_0039F190_r(void* self, int a1) __asm__("func_0039F190");
+// cUIStateStack_pop returns its last list node in $v0; the unit declares it void.
+void* cUIStateStack_pop_r(void* self, int a1) __asm__("cUIStateStack_pop");
 
 struct sVE_C1E0 {
     short delta;
@@ -4896,7 +4896,7 @@ extern "C" void cKeyboardPopup_pressKey(cKeyboardPopup* self_, int flag)
         }
         case 55:
             if (self->closeOnAccept != 0)
-                func_0039F190_r(self->owner + 0x18, 1);
+                cUIStateStack_pop_r(self->owner + 0x18, 1);
             self->done = 1;
             self->parent->vt[19].fn((char*)self->parent + self->parent->vt[19].delta, 0, 13);
             break;
@@ -4905,7 +4905,7 @@ extern "C" void cKeyboardPopup_pressKey(cKeyboardPopup* self_, int flag)
                 cKeyboardPopup_AddCharacterEdit((cKeyboardPopup*)self);
             break;
         case 0:
-            func_0039F190_r(self->owner + 0x18, 1);
+            cUIStateStack_pop_r(self->owner + 0x18, 1);
             self->parent->vt[19].fn((char*)self->parent + self->parent->vt[19].delta, 0, 0xE);
             break;
         case 4:
@@ -5962,7 +5962,7 @@ extern "C" void* cFEStateNetHelpPopup_cFEStateNetHelpPopup(void* mem, void* engi
 void cFEStateNetHelpPopup_setOption(void* self, int i, int a, int b);
 void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int val);
 void cFEStateNetHelpPopup_setDescription(void* self, int i, int value);
-extern "C" void func_0039F190(void* self, int a1);
+extern "C" void cUIStateStack_pop(void* self, int a1);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern int D_004A1A70;
 extern char str_cFEStateNetHelpPopup[];
@@ -6079,7 +6079,7 @@ extern "C" int cKeyboardPopup_onInputBegin(cKeyboardPopup* self, char* ev)
         } else if (InputK1CDB98(ev, 6)) {
             changed = 1;
             sound = 6;
-            func_0039F190(self->mpEngine->mStateStack, 1);
+            cUIStateStack_pop(self->mpEngine->mStateStack, 1);
             char* o = (char*)self->mpParentState;
             sVEntryK1CDB98* vt = *(sVEntryK1CDB98**)(o + 8);
             ((void (*)(void*, int, int))vt[19].fn)(o + vt[19].delta, 0, 0xE);

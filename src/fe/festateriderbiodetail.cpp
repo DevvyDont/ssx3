@@ -365,14 +365,14 @@ extern "C" void cFEStateRiderBio_onWidgetEvent(cFEStateRiderBio* self, void* ite
 //100%
 INCLUDE_ASM("fe/festateriderbiodetail", cFEStateRuleSelect_cFEStateRuleSelect);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self);
+extern "C" void* cUIState_cUIState(void* self);
 extern "C" char cFECustom_getPlayerCtrlMask(void* p, int a);
 extern void* cFEStateRuleSelect_vtbl[];
 
 /**
  * Constructs the custom race rules state (allocated as "cFEStateRuleSelect", 156 bytes).
  *
- * Runs cUIState's constructor (func_0039E2A0; the engine argument reaches it untouched in the second argument
+ * Runs cUIState's constructor (cUIState_cUIState; the engine argument reaches it untouched in the second argument
  * register), stores cFEStateRuleSelect_vtbl, clears +0x48 (On Tour mpGameEventMapping), sets mUserNum to 0 and
  * mCtrlBits to user 0's controller bits (cFECustom_getPlayerCtrlMask on the engine's front end) and mHashName to 20. It lives in the
  * rider-bio unit.
@@ -381,7 +381,7 @@ extern void* cFEStateRuleSelect_vtbl[];
  */
 extern "C" void* cFEStateRuleSelect_cFEStateRuleSelect(cFEStateRuleSelect* self)
 {
-    func_0039E2A0(self);
+    cUIState_cUIState(self);
     self->mVtbl = cFEStateRuleSelect_vtbl;
     self->mpGameEventMapping = 0;
     *(char*)&self->mUserNum = 0;

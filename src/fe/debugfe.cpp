@@ -60,8 +60,8 @@ extern "C" void cFont_righttextf(void* self, float x, float y, const char* fmt, 
 extern "C" void func_00256038(void* comm, int* info);
 extern "C" char* cAudioInterface_bxAudio();
 extern "C" void cFont_text(void* self, float x, float y, const char* str);
-extern "C" void func_00392908(void* self, float x, float y, const char* str);
-extern "C" void func_00392A60(void* self, const char* str, float x, float y);
+extern "C" void cFont_centertext(void* self, float x, float y, const char* str);
+extern "C" void cFont_righttext(void* self, const char* str, float x, float y);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 
 // tARGB (On Tour layout: A, R, G, B floats).
@@ -142,15 +142,15 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
     __SIZE_TYPE__ hi = (__SIZE_TYPE__)self + 0x8000;
     font->setColor(*(int*)(hi + 0xc1c) == 0 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Game_Path);
-    func_00392A60(font, cBENewRaceInterface_getPathName(newRace), 580.0f, y);
+    cFont_righttext(font, cBENewRaceInterface_getPathName(newRace), 580.0f, y);
     y += lineheight;
     font->setColor(self->cursor == 1 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Game_Mode);
-    func_00392A60(font, cBENewRaceInterface_getModeName(newRace), 580.0f, y);
+    cFont_righttext(font, cBENewRaceInterface_getModeName(newRace), 580.0f, y);
     y += lineheight;
     font->setColor(self->cursor == 2 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Game_Event);
-    func_00392A60(font, cBENewRaceInterface_getEventName(newRace), 580.0f, y);
+    cFont_righttext(font, cBENewRaceInterface_getEventName(newRace), 580.0f, y);
     y += lineheight;
     font->setColor(self->cursor == 3 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_1st_Time_WC_Flag);
@@ -162,11 +162,11 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
         sprintf(buf, str_pct_s_pct_s_b, cBENewRaceInterface_getLocation(newRace) + 0x34, cBENewRaceInterface_getLocation(newRace) + 0x34);
     font->setColor(self->cursor == 4 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Track);
-    func_00392A60(font, buf, 580.0f, y);
+    cFont_righttext(font, buf, 580.0f, y);
     y += lineheight;
     font->setColor(self->cursor == 5 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Character);
-    func_00392A60(font, cBECharacterInterface_getName(character, 0), 580.0f, y);
+    cFont_righttext(font, cBECharacterInterface_getName(character, 0), 580.0f, y);
     y += lineheight;
     font->setColor(self->cursor == 6 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Control_Map);
@@ -174,7 +174,7 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
     y += lineheight;
     font->setColor(self->cursor == 7 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Board);
-    func_00392A60(font, D_004A12E0[self->optFlag], 580.0f, y);
+    cFont_righttext(font, D_004A12E0[self->optFlag], 580.0f, y);
     y += lineheight;
     font->setColor(self->cursor == 8 ? selectColor : normalColor);
     cFont_text(font, 60.0f, y, str_Number_of_AI_riders);
@@ -221,7 +221,7 @@ extern "C" void cDebugMenuScreen_draw(sDebugMenuScreen* self)
         promptColour.G = 0.9f;
         promptColour.B = 0.0f;
         font->setColor(promptColour);
-        func_00392908(font, 320.0f, 420.0f, str_press_start_to_play);
+        cFont_centertext(font, 320.0f, 420.0f, str_press_start_to_play);
     }
     tARGB animCountColour;
     animCountColour.A = 1.0f;
@@ -381,14 +381,14 @@ INCLUDE_ASM("fe/debugfe", ContinueMenu_ContinueMenu);
 extern void* D_0046D740[];
 extern char str_Continue[];
 void* cMenu_cMenu(void* self);
-extern "C" void* func_002CCDF0(void* self, void* text);
+extern "C" void* cPopMenuItem_cPopMenuItem(void* self, void* text);
 extern "C" void cMenu_addItem(void* menu, void* item, int index);
 
 /**
  * Constructs the debug lobby's "Continue" menu: a cMenu with a single "Continue" command item.
  *
  * Runs cMenu_cMenu, stores the menu's vtable D_0046D740 at +0x12C (its destructor is func_001DCD58), builds the item at
- * +0x130 with func_002CCDF0 and str_Continue and appends it (cMenu_addItem, index -1). The debug lobby screen
+ * +0x130 with cPopMenuItem_cPopMenuItem and str_Continue and appends it (cMenu_addItem, index -1). The debug lobby screen
  * (cDebugLobbyScreen_cDebugLobbyScreen) keeps it at +0x604 and pushes it under every error and "declined" message.
  *
  * @return @p self
@@ -397,7 +397,7 @@ extern "C" void* ContinueMenu_ContinueMenu(void* self)
 {
     cMenu_cMenu(self);
     *(void***)((char*)self + 0x12C) = D_0046D740;
-    func_002CCDF0((char*)self + 0x130, str_Continue);
+    cPopMenuItem_cPopMenuItem((char*)self + 0x130, str_Continue);
     cMenu_addItem(self, (char*)self + 0x130, -1);
     return self;
 }
@@ -634,7 +634,7 @@ INCLUDE_ASM("fe/debugfe", cDebugLobbyScreen_update);
 #ifdef SKIP_ASM
 extern "C" void func_00255A20(void*);
 extern "C" void func_0025AC50(void*);
-extern "C" void func_002CC0C0(void* stack);
+extern "C" void cMenuSys_input(void* stack);
 extern "C" void func_0017DB18(void* self);
 
 struct sMenuStack17D688 {
@@ -659,7 +659,7 @@ static inline void* sMenuStack17D688_top(sMenuStack17D688* self)
  *
  * Calls the comm system update func_00255A20 (cCommSystem_mCommSystem) and the lobby manager update func_0025AC50
  * (LobbyMan_mLobbyMan), which delivers queued lobby events to func_0017D6F0 through func_0017D260. When the menu system
- * at +0x8 has a menu open it runs its input (func_002CC0C0), then func_0017DB18 advances the state. cDebugFE_update
+ * at +0x8 has a menu open it runs its input (cMenuSys_input), then func_0017DB18 advances the state. cDebugFE_update
  * calls it through the active screen's virtual slot 2.
  */
 extern "C" void cDebugLobbyScreen_update(sDebugFE17D688* self)
@@ -667,7 +667,7 @@ extern "C" void cDebugLobbyScreen_update(sDebugFE17D688* self)
     func_00255A20(cCommSystem_mCommSystem);
     func_0025AC50(LobbyMan_mLobbyMan);
     if (sMenuStack17D688_top(&self->stack) != 0)
-        func_002CC0C0(&self->stack);
+        cMenuSys_input(&self->stack);
     func_0017DB18(self);
 }
 #endif
@@ -678,8 +678,8 @@ INCLUDE_ASM("fe/debugfe", func_0017D6F0);
 extern char str_A_West[];
 extern "C" void* cBXString_operatorE1(void* self, const char* str);
 extern "C" void* cBXString_operatorE(void* self, void* other);
-extern "C" void func_002CC3B8(void* menu, void* items);
-extern "C" void func_002CC460(void* list);
+extern "C" void cMenuSys_pushMenu(void* menu, void* items);
+extern "C" void cMenuSys_popMenu(void* list);
 extern "C" void func_0025C610(void* net);
 extern "C" void func_0017DA30(void* self, int a1);
 extern "C" void func_0017DE70(char* self);
@@ -713,14 +713,14 @@ struct sDebugFE17D6F0 {
 static inline void ClearMenu0017D6F0(int* list)
 {
     while (*list != 0) {
-        func_002CC460(list);
+        cMenuSys_popMenu(list);
     }
 }
 
 static inline void SetMenu0017D6F0(int* menu, void* items)
 {
     ClearMenu0017D6F0(menu);
-    func_002CC3B8(menu, items);
+    cMenuSys_pushMenu(menu, items);
 }
 
 /**
@@ -728,7 +728,7 @@ static inline void SetMenu0017D6F0(int* menu, void* items)
  *
  * The event type is at +0x0 of @p ev and its argument at +0x8. SSXApp->unk_74 set (automatic lobby login) skips the
  * menus. By type:
- * - 277 (disconnected): closes all menus (func_002CC460 until the stack is empty); automatic mode restarts at state 0,
+ * - 277 (disconnected): closes all menus (cMenuSys_popMenu until the stack is empty); automatic mode restarts at state 0,
  *   otherwise state 19 with the Continue menu (+0x604).
  * - 258 (error): func_0017DA30 with the error code.
  * - 201 (connected to the lobby server): automatic mode copies SSXApp->UserName and Password into LobbyMan's mUserName
@@ -760,13 +760,13 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
     case 277: {
         int* list = self->menu;
         while (*list != 0) {
-            func_002CC460(list);
+            cMenuSys_popMenu(list);
         }
         if (SSXApp->unk_74 != 0) {
             self->state = 0;
         } else {
             self->state = 19;
-            func_002CC3B8(self->menu, self->items604);
+            cMenuSys_pushMenu(self->menu, self->items604);
         }
         break;
     }
@@ -781,7 +781,7 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
             self->state = 5;
         } else {
             self->state = 3;
-            func_002CC3B8(self->menu, self->items70);
+            cMenuSys_pushMenu(self->menu, self->items70);
         }
         break;
     case 203:
@@ -796,7 +796,7 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
             func_0025CD28(LobbyMan_mLobbyMan, 0);
         } else {
             func_001DB418(self->items74C, LobbyMan_mLobbyMan);
-            func_002CC3B8(self->menu, self->items74C);
+            cMenuSys_pushMenu(self->menu, self->items74C);
             self->state = 6;
         }
         break;
@@ -810,22 +810,22 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
                 }
             }
         } else {
-            func_002CC3B8(self->menu, self->itemsD2C);
+            cMenuSys_pushMenu(self->menu, self->itemsD2C);
             self->state = 10;
         }
         break;
     case 214:
     case 216:
         func_001DB418(self->items74C, LobbyMan_mLobbyMan);
-        func_002CC3B8(self->menu, self->items74C);
+        cMenuSys_pushMenu(self->menu, self->items74C);
         self->state = 6;
         break;
     case 220:
         if (func_0025F430(LobbyMan_mLobbyMan) != 0) {
-            func_002CC3B8(self->menu, self->items1044);
+            cMenuSys_pushMenu(self->menu, self->items1044);
             self->state = 0xC;
         } else {
-            func_002CC3B8(self->menu, self->itemsD2C);
+            cMenuSys_pushMenu(self->menu, self->itemsD2C);
             self->state = 10;
         }
         break;
@@ -835,9 +835,9 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
         self->state = 17;
         int* list = self->menu;
         while (*list != 0) {
-            func_002CC460(list);
+            cMenuSys_popMenu(list);
         }
-        func_002CC3B8(self->menu, self->items604);
+        cMenuSys_pushMenu(self->menu, self->items604);
         break;
     }
     case 239:
@@ -848,12 +848,12 @@ extern "C" void func_0017D6F0(void* vself, void* ev)
         if (self->state == 0xC) {
             int* list = self->menu;
             while (*list != 0) {
-                func_002CC460(list);
+                cMenuSys_popMenu(list);
             }
             self->state = 0xF;
             cBXString_operatorE(&self->text, (char*)ev + 8);
             self->f1A44 = self->text;
-            func_002CC3B8(self->menu, self->items18C0);
+            cMenuSys_pushMenu(self->menu, self->items18C0);
         } else {
             func_0025FC28(LobbyMan_mLobbyMan, *(int*)((char*)ev + 8));
         }
@@ -867,12 +867,12 @@ INCLUDE_ASM("fe/debugfe", func_0017DA30);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* cBXString_operatorE1(void* self, const char* str);
-extern "C" void func_002CC3B8(void* menu, void* items);
+extern "C" void cMenuSys_pushMenu(void* menu, void* items);
 extern "C" void func_0025C610(void* net);
 static inline void SetMode0017DA30(void* self, int mode)
 {
     *(int*)((char*)self + 0x4) = mode;
-    func_002CC3B8((char*)self + 0x8, (char*)self + 0x604);
+    cMenuSys_pushMenu((char*)self + 0x8, (char*)self + 0x604);
 }
 /**
  * Shows the error screen that fits the debug lobby screen's current step after a lobby error event.
@@ -933,7 +933,7 @@ INCLUDE_ASM("fe/debugfe", func_0017DB18);
 extern void* D_004A33F4;
 extern char str_cPreGameLoadScreen[];
 struct cAppMan;
-extern "C" void func_002CC3B8(void* menu, void* items);
+extern "C" void cMenuSys_pushMenu(void* menu, void* items);
 extern "C" int cMenuSys_isActive(void* menu);
 extern "C" void func_00255F50(void* comm, int a1);
 extern "C" void func_0025B6D8(void* net, int a1);
@@ -970,7 +970,7 @@ struct sDebugFE17DB18 {
  *   state 1.
  * - 1: once mNetConnState is neither 3 nor 4, starts connecting to the lobby server (func_0025B6D8) and sets state 2.
  * - 3, 6, 10, 15: reopens Login Method (+0x70), Select Persona (+0x74C), Select Room (+0xD2C) or the challenge menu
- *   (+0x18C0) when no menu is open (func_002CC3B8); state 10 also refreshes the room list (func_001DB528) every pass.
+ *   (+0x18C0) when no menu is open (cMenuSys_pushMenu); state 10 also refreshes the room list (func_001DB528) every pass.
  * - 12: with no menu open it joins the empty-named room (func_0025D800 with index -1) and sets state 11; otherwise it
  *   refreshes the occupant list (func_001DB620).
  * - 13: opens the Abort menu (+0x1AAC) when the menu system is inactive (cMenuSys_isActive).
@@ -1011,31 +1011,31 @@ extern "C" void func_0017DB18(void* vself)
             break;
         case 13:
             if (cMenuSys_isActive(self->menu) == 0) {
-                func_002CC3B8(self->menu, self->items1AAC);
+                cMenuSys_pushMenu(self->menu, self->items1AAC);
             }
             break;
         case 17:
             if (cMenuSys_isActive(self->menu) == 0) {
                 self->state = 0xC;
-                func_002CC3B8(self->menu, self->items1044);
+                cMenuSys_pushMenu(self->menu, self->items1044);
             }
             break;
         case 24:
             if (cMenuSys_isActive(self->menu) == 0) {
-                func_002CC3B8(self->menu, self->items1044);
+                cMenuSys_pushMenu(self->menu, self->items1044);
                 self->state = 0xC;
             }
             break;
         case 21:
             if (cMenuSys_isActive(self->menu) == 0) {
                 self->state = 3;
-                func_002CC3B8(self->menu, self->items70);
+                cMenuSys_pushMenu(self->menu, self->items70);
             }
             break;
         case 20:
             if (cMenuSys_isActive(self->menu) == 0) {
                 self->state = 3;
-                func_002CC3B8(self->menu, self->items70);
+                cMenuSys_pushMenu(self->menu, self->items70);
             }
             break;
         case 18:
@@ -1047,27 +1047,27 @@ extern "C" void func_0017DB18(void* vself)
         case 22:
             if (cMenuSys_isActive(self->menu) == 0) {
                 func_001DB418(self->items74C, LobbyMan_mLobbyMan);
-                func_002CC3B8(self->menu, self->items74C);
+                cMenuSys_pushMenu(self->menu, self->items74C);
                 self->state = 6;
             }
             break;
         case 23:
             if (cMenuSys_isActive(self->menu) == 0) {
-                func_002CC3B8(self->menu, self->itemsD2C);
+                cMenuSys_pushMenu(self->menu, self->itemsD2C);
                 self->state = 10;
             }
             break;
         case 15: {
             int* menu = self->menu;
             if (*menu == 0) {
-                func_002CC3B8(menu, self->items18C0);
+                cMenuSys_pushMenu(menu, self->items18C0);
             }
             break;
         }
         case 6: {
             int* menu = self->menu;
             if (*menu == 0) {
-                func_002CC3B8(menu, self->items74C);
+                cMenuSys_pushMenu(menu, self->items74C);
             }
             break;
         }
@@ -1075,7 +1075,7 @@ extern "C" void func_0017DB18(void* vself)
             int* menu = self->menu;
             char* items = self->itemsD2C;
             if (*menu == 0) {
-                func_002CC3B8(menu, items);
+                cMenuSys_pushMenu(menu, items);
             }
             func_001DB528(items, LobbyMan_mLobbyMan);
             break;
@@ -1091,7 +1091,7 @@ extern "C" void func_0017DB18(void* vself)
         case 3: {
             int* menu = self->menu;
             if (*menu == 0) {
-                func_002CC3B8(menu, self->items70);
+                cMenuSys_pushMenu(menu, self->items70);
             }
             break;
         }
@@ -1099,7 +1099,7 @@ extern "C" void func_0017DB18(void* vself)
             int* menu = self->menu;
             if (*menu == 0) {
                 self->state = 0xC;
-                func_002CC3B8(menu, self->items1044);
+                cMenuSys_pushMenu(menu, self->items1044);
             }
             break;
         }
@@ -1202,7 +1202,7 @@ extern "C" void func_0017DE70(char* self)
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017E030);
 #ifdef SKIP_ASM
-extern "C" void func_002CC460(void* list);
+extern "C" void cMenuSys_popMenu(void* list);
 extern "C" void* cBXString_operatorE1(void* self, const char* str);
 extern "C" void func_0025B9C8(void* mgr, void* req);
 extern char str_pleaseat_get_lost[];
@@ -1232,7 +1232,7 @@ struct sDsReq17E030 {
  * Creates a lobby account from the debug "Create Account" menu: keeps the typed name and password and sends the
  * request.
  *
- * Closes all menus (func_002CC460 until the stack is empty), copies @p userName and @p password into the screen's strings at +0x1C04
+ * Closes all menus (cMenuSys_popMenu until the stack is empty), copies @p userName and @p password into the screen's strings at +0x1C04
  * and +0x1C08 and sets state 4 ("Creating account"). Fills LobbyMan's mNewAccount form: mName @p userName, mPassword and
  * unk_08 @p password, mMail "please@get.lost", born 1950-01-01 (mBornYear, mBornMonth, mBornDay), mGender 1 (sent as 'F'),
  * both mSpam flags 0, and sends it with func_0025B9C8. On event 203 func_0017D6F0 then logs in with the same name and
@@ -1245,7 +1245,7 @@ extern "C" void func_0017E030(sDebugFEState17E030* self, const char* userName, c
 {
     int* list = &self->list;
     while (*list != 0) {
-        func_002CC460(list);
+        cMenuSys_popMenu(list);
     }
     cBXString_operatorE1((char*)self + 0x1C04, userName);
     cBXString_operatorE1((char*)self + 0x1C08, password);
@@ -1268,7 +1268,7 @@ extern "C" void func_0017E030(sDebugFEState17E030* self, const char* userName, c
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017E118);
 #ifdef SKIP_ASM
-extern "C" void func_002CC460(void* list);
+extern "C" void cMenuSys_popMenu(void* list);
 extern "C" void* cBXString_operatorE1(void* self, const char* str);
 extern "C" void func_0025C610(void* mgr);
 
@@ -1295,7 +1295,7 @@ extern "C" void func_0017E118(sDebugFEState17E118* self, const char* userName, c
 {
     int* list = &self->list;
     while (*list != 0) {
-        func_002CC460(list);
+        cMenuSys_popMenu(list);
     }
     cBXString_operatorE1(&self->user, userName);
     cBXString_operatorE1(&self->pass, password);
@@ -1314,7 +1314,7 @@ struct sDebugFEState17E1C0 {
     int state; // 0x4
     int list;  // 0x8
 };
-extern "C" void func_002CC460(void* list);
+extern "C" void cMenuSys_popMenu(void* list);
 extern "C" void func_0025D1B8(void* a, int b);
 
 /**
@@ -1329,7 +1329,7 @@ extern "C" void func_0017E1C0(sDebugFEState17E1C0* self, int persona)
 {
     int* list = &self->list;
     while (*list != 0) {
-        func_002CC460(list);
+        cMenuSys_popMenu(list);
     }
     self->state = 0x8;
     func_0025D1B8(LobbyMan_mLobbyMan, persona);
@@ -1344,7 +1344,7 @@ struct sDebugFEState17E228 {
     int state; // 0x4
     int list;  // 0x8
 };
-extern "C" void func_002CC460(void* list);
+extern "C" void cMenuSys_popMenu(void* list);
 extern "C" void func_0025D428(void* a, int b);
 
 /**
@@ -1359,7 +1359,7 @@ extern "C" void func_0017E228(sDebugFEState17E228* self, int persona)
 {
     int* list = &self->list;
     while (*list != 0) {
-        func_002CC460(list);
+        cMenuSys_popMenu(list);
     }
     self->state = 0x9;
     func_0025D428(LobbyMan_mLobbyMan, persona);
@@ -1374,7 +1374,7 @@ struct sDebugFEState17E290 {
     int state; // 0x4
     int list;  // 0x8
 };
-extern "C" void func_002CC460(void* list);
+extern "C" void cMenuSys_popMenu(void* list);
 void func_0025CD28(void* a, int b);
 
 /**
@@ -1389,7 +1389,7 @@ extern "C" void func_0017E290(sDebugFEState17E290* self, int persona)
 {
     int* list = &self->list;
     while (*list != 0) {
-        func_002CC460(list);
+        cMenuSys_popMenu(list);
     }
     self->state = 0x7;
     func_0025CD28(LobbyMan_mLobbyMan, persona);
@@ -1404,7 +1404,7 @@ struct sDebugFEState17E2F8 {
     int state; // 0x4
     int list;  // 0x8
 };
-extern "C" void func_002CC460(void* list);
+extern "C" void cMenuSys_popMenu(void* list);
 extern "C" void func_0025D800(void* a, int b, int c);
 
 /**
@@ -1419,7 +1419,7 @@ extern "C" void func_0017E2F8(sDebugFEState17E2F8* self, int room)
 {
     int* list = &self->list;
     while (*list != 0) {
-        func_002CC460(list);
+        cMenuSys_popMenu(list);
     }
     self->state = 11;
     func_0025D800(LobbyMan_mLobbyMan, room, 0);
@@ -1429,7 +1429,7 @@ extern "C" void func_0017E2F8(sDebugFEState17E2F8* self, int room)
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017E368);
 #ifdef SKIP_ASM
-extern "C" void func_002CC460(void* list);
+extern "C" void cMenuSys_popMenu(void* list);
 
 /**
  * Handles picking a user in the debug "Room Occupants" menu: closes all menus and sets state 13 ("Waiting for
@@ -1443,7 +1443,7 @@ extern "C" void func_0017E368(void* self)
 {
     int* list = (int*)((char*)self + 0x8);
     while (*list != 0) {
-        func_002CC460(list);
+        cMenuSys_popMenu(list);
     }
     *(int*)((char*)self + 0x4) = 13;
 }
@@ -1452,8 +1452,8 @@ extern "C" void func_0017E368(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", func_0017E3B8);
 #ifdef SKIP_ASM
-extern "C" void func_002CC460(void* list);
-extern "C" void func_002CC3B8(void* list, void* item);
+extern "C" void cMenuSys_popMenu(void* list);
+extern "C" void cMenuSys_pushMenu(void* list, void* item);
 
 /**
  * Opens the debug chat menu from "Room Occupants": closes all menus, sets state 14 and pushes the chat menu (+0x1534).
@@ -1462,10 +1462,10 @@ extern "C" void func_0017E3B8(void* self)
 {
     int* list = (int*)((char*)self + 0x8);
     while (*list != 0) {
-        func_002CC460(list);
+        cMenuSys_popMenu(list);
     }
     *(int*)((char*)self + 0x4) = 0xE;
-    func_002CC3B8((char*)self + 0x8, (char*)self + 0x1534);
+    cMenuSys_pushMenu((char*)self + 0x8, (char*)self + 0x1534);
 }
 #endif
 
@@ -1477,8 +1477,8 @@ struct sDebugFEState17E418 {
     int state; // 0x4
     int list;  // 0x8
 };
-extern "C" void func_002CC460(void* list);
-extern "C" void func_002CC3B8(void* list, void* item);
+extern "C" void cMenuSys_popMenu(void* list);
+extern "C" void cMenuSys_pushMenu(void* list, void* item);
 extern "C" void func_0025AAE0(void* a, int b);
 
 /**
@@ -1493,9 +1493,9 @@ extern "C" void func_0017E418(sDebugFEState17E418* self, int messageText)
 {
     int* list = &self->list;
     while (*list != 0) {
-        func_002CC460(list);
+        cMenuSys_popMenu(list);
     }
-    func_002CC3B8((char*)self + 0x8, (char*)self + 0x1044);
+    cMenuSys_pushMenu((char*)self + 0x8, (char*)self + 0x1044);
     self->state = 0xC;
     func_0025AAE0(LobbyMan_mLobbyMan, messageText);
 }
@@ -1509,7 +1509,7 @@ struct sDebugFEState17E490 {
     int state; // 0x4
     int list;  // 0x8
 };
-extern "C" void func_002CC460(void* list);
+extern "C" void cMenuSys_popMenu(void* list);
 extern "C" void func_0025FB58(void* a, int b, int c);
 
 /**
@@ -1523,7 +1523,7 @@ extern "C" void func_0017E490(sDebugFEState17E490* self)
 {
     int* list = &self->list;
     while (*list != 0) {
-        func_002CC460(list);
+        cMenuSys_popMenu(list);
     }
     self->state = 13;
     func_0025FB58(LobbyMan_mLobbyMan, *(int*)((char*)self + 0x1C0C), 0);
@@ -1538,8 +1538,8 @@ struct sDebugFEState17E4F0 {
     int state; // 0x4
     int list;  // 0x8
 };
-extern "C" void func_002CC460(void* list);
-extern "C" void func_002CC3B8(void* list, void* item);
+extern "C" void cMenuSys_popMenu(void* list);
+extern "C" void cMenuSys_pushMenu(void* list, void* item);
 void func_0025FC28(void* a, int b);
 
 /**
@@ -1552,9 +1552,9 @@ extern "C" void func_0017E4F0(sDebugFEState17E4F0* self)
 {
     int* list = &self->list;
     while (*list != 0) {
-        func_002CC460(list);
+        cMenuSys_popMenu(list);
     }
-    func_002CC3B8((char*)self + 0x8, (char*)self + 0x1044);
+    cMenuSys_pushMenu((char*)self + 0x8, (char*)self + 0x1044);
     self->state = 0xC;
     func_0025FC28(LobbyMan_mLobbyMan, *(int*)((char*)self + 0x1C0C));
 }
@@ -1568,8 +1568,8 @@ struct sDebugFEState17E558 {
     int state; // 0x4
     int list;  // 0x8
 };
-extern "C" void func_002CC460(void* list);
-extern "C" void func_002CC3B8(void* list, void* item);
+extern "C" void cMenuSys_popMenu(void* list);
+extern "C" void cMenuSys_pushMenu(void* list, void* item);
 extern "C" void func_0025F628(void* a, int b, int c);
 
 /**
@@ -1583,9 +1583,9 @@ extern "C" void func_0017E558(sDebugFEState17E558* self)
 {
     int* list = &self->list;
     while (*list != 0) {
-        func_002CC460(list);
+        cMenuSys_popMenu(list);
     }
-    func_002CC3B8((char*)self + 0x8, (char*)self + 0x1044);
+    cMenuSys_pushMenu((char*)self + 0x8, (char*)self + 0x1044);
     self->state = 0xC;
     func_0025F628(LobbyMan_mLobbyMan, 1, 0);
 }
@@ -1624,12 +1624,12 @@ extern char D_004A12F8[];
 extern char D_004A1330[];
 extern char str_Seed[];
 extern char str_pct_d_b[];
-extern "C" void func_00392908(void* self, float x, float y, const char* str);
-extern "C" void func_00392A60(void* self, const char* str, float x, float y);
+extern "C" void cFont_centertext(void* self, float x, float y, const char* str);
+extern "C" void cFont_righttext(void* self, const char* str, float x, float y);
 extern "C" void cFont_text(void* self, float x, float y, const char* str);
 extern "C" void cFont_righttextf(void* self, float x, float y, const char* fmt, ...);
 extern "C" void cFont_centertextf(void* self, float x, float y, const char* fmt, ...);
-extern "C" void func_002CC350(void* self);
+extern "C" void cMenuSys_render(void* self);
 extern "C" void func_00256038(void* comm, int* out);
 extern "C" void cBXString__cBXString(void* self, int flags);
 
@@ -1679,7 +1679,7 @@ static inline void* top17E5C8(sDebugFE17E5C8* self)
 // constants after it are loaded again instead of being shared.
 static inline void onOff17E5C8(void* font, int on, float x, float y)
 {
-    func_00392A60(font, on ? D_004A12F8 : D_004A1330, x, y);
+    cFont_righttext(font, on ? D_004A12F8 : D_004A1330, x, y);
 }
 
 static inline int isEq17E5C8(int a, int b) { return a == b; }
@@ -1689,7 +1689,7 @@ static inline int isEq17E5C8(int a, int b) { return a == b; }
  * console's address.
  *
  * Uses the debug front end's font (SSXApp->DebugFE +0x18), setting its Scale to BaseScale times a factor and its Color
- * (tARGB) before each part. By the state at +0x4 it centres a red (0.9, 0.2, 0.2) line at scale 1.5 (func_00392908):
+ * (tARGB) before each part. By the state at +0x4 it centres a red (0.9, 0.2, 0.2) line at scale 1.5 (cFont_centertext):
  * "Connecting to network" (0, 1), "Connecting to lobby" (2), "Creating account" (4), "Authenticating account" (5),
  * "Selecting Persona" (7), "Creating Persona" (8), "Deleting Persona" (9) and "Selecting Room" (11) at (320, 200);
  * "Waiting for reponse" (13) and "Challenge Declined!" (17) at (320, 100). The error states 18 "Error Connecting!", 19
@@ -1698,7 +1698,7 @@ static inline int isEq17E5C8(int a, int b) { return a == b; }
  * func_00260E50 builds for the error code at +0x1C14. State 16 shows "Play Game!" and, at scale 0.7 in pale yellow,
  * rows 20 apart from y 200 with labels at x 110 and values right-aligned at x 530: Game (LobbyMan mGameName), Opponent
  * (mOpponent), Host/Client ("Host" or "Client" by mIsHost), Host Address (mHostAddr) and Client Address (mOppoAddr) in
- * dotted form, and Seed (mSeed). Then, at scale 0.9, the menu system renders its top menu (func_002CC350) when one is
+ * dotted form, and Seed (mSeed). Then, at scale 0.9, the menu system renders its top menu (cMenuSys_render) when one is
  * open, and while the comm system is connected (mNetConnState 5) this console's address (func_00256038) is centred in
  * yellow at (320, 420), scale 0.8. cDebugFE_render calls it through the active screen's virtual slot 3.
  */
@@ -1710,128 +1710,128 @@ extern "C" void cDebugLobbyScreen_draw(sDebugFE17E5C8* self)
     case 1:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 200.0f, str_Connecting_to_network);
+        cFont_centertext(font, 320.0f, 200.0f, str_Connecting_to_network);
         break;
     case 2:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 200.0f, str_Connecting_to_lobby);
+        cFont_centertext(font, 320.0f, 200.0f, str_Connecting_to_lobby);
         break;
     case 4:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 200.0f, str_Creating_account);
+        cFont_centertext(font, 320.0f, 200.0f, str_Creating_account);
         break;
     case 5:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 200.0f, str_Authenticating_account);
+        cFont_centertext(font, 320.0f, 200.0f, str_Authenticating_account);
         break;
     case 8:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 200.0f, str_Creating_Persona);
+        cFont_centertext(font, 320.0f, 200.0f, str_Creating_Persona);
         break;
     case 9:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 200.0f, str_Deleting_Persona);
+        cFont_centertext(font, 320.0f, 200.0f, str_Deleting_Persona);
         break;
     case 7:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 200.0f, str_Selecting_Persona);
+        cFont_centertext(font, 320.0f, 200.0f, str_Selecting_Persona);
         break;
     case 11:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 200.0f, str_Selecting_Room);
+        cFont_centertext(font, 320.0f, 200.0f, str_Selecting_Room);
         break;
     case 13:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 100.0f, str_Waiting_for_reponse);
+        cFont_centertext(font, 320.0f, 100.0f, str_Waiting_for_reponse);
         break;
     case 17:
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 100.0f, str_Challenge_Declined);
+        cFont_centertext(font, 320.0f, 100.0f, str_Challenge_Declined);
         break;
     case 18: {
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 100.0f, str_Error_Connecting);
+        cFont_centertext(font, 320.0f, 100.0f, str_Error_Connecting);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
+        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
         break;
     }
     case 19: {
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 100.0f, str_Disconnected_from_server);
+        cFont_centertext(font, 320.0f, 100.0f, str_Disconnected_from_server);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
+        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
         break;
     }
     case 20: {
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 100.0f, str_Error_Creating_Account);
+        cFont_centertext(font, 320.0f, 100.0f, str_Error_Creating_Account);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
+        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
         break;
     }
     case 22: {
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 100.0f, str_Persona_Error);
+        cFont_centertext(font, 320.0f, 100.0f, str_Persona_Error);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
+        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
         break;
     }
     case 21: {
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 100.0f, str_Error_Authenticating_Account);
+        cFont_centertext(font, 320.0f, 100.0f, str_Error_Authenticating_Account);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
+        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
         break;
     }
     case 23: {
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 100.0f, str_Error_Entering_room);
+        cFont_centertext(font, 320.0f, 100.0f, str_Error_Entering_room);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
+        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
         break;
     }
     case 24: {
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 100.0f, str_Error_Issueing_Challenge);
+        cFont_centertext(font, 320.0f, 100.0f, str_Error_Issueing_Challenge);
         scale17E5C8(font, 0.8f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.9f);
-        func_00392908(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
+        cFont_centertext(font, 320.0f, 150.0f, getStr17E5C8(LobbyMan_mLobbyMan, self->tag).p);
         break;
     }
     case 16: {
         scale17E5C8(font, 1.5f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.2f, 0.2f);
-        func_00392908(font, 320.0f, 100.0f, str_Play_Game);
+        cFont_centertext(font, 320.0f, 100.0f, str_Play_Game);
         scale17E5C8(font, 0.7f);
         font->color = sColor17E5C8(1.0f, 0.9f, 0.9f, 0.6f);
         float y = 200.0f;
         cFont_text(font, 110.0f, y, str_Game);
-        func_00392A60(font, LobbyMan_mLobbyMan->mGameName, 530.0f, y);
+        cFont_righttext(font, LobbyMan_mLobbyMan->mGameName, 530.0f, y);
         y += 20.0f;
         cFont_text(font, 110.0f, y, str_Opponent);
-        func_00392A60(font, LobbyMan_mLobbyMan->mOpponent, 530.0f, y);
+        cFont_righttext(font, LobbyMan_mLobbyMan->mOpponent, 530.0f, y);
         y += 20.0f;
         cFont_text(font, 110.0f, y, str_Host_Client);
         onOff17E5C8(font, LobbyMan_mLobbyMan->mIsHost, 530.0f, y);
@@ -1851,7 +1851,7 @@ extern "C" void cDebugLobbyScreen_draw(sDebugFE17E5C8* self)
     }
     scale17E5C8(font, 0.9f);
     if (top17E5C8(self) != 0)
-        func_002CC350(&self->count);
+        cMenuSys_render(&self->count);
     if (isEq17E5C8(cCommSystem_mCommSystem->mNetConnState, 5)) {
         unsigned int ip;
         func_00256038(cCommSystem_mCommSystem, (int*)&ip);
@@ -1956,7 +1956,7 @@ INCLUDE_ASM("fe/debugfe", cHeartBeat_draw);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void* D_004A28AC;
-extern "C" void func_0038EC40(void* self, float* p0, float* p1, float* col, float z);
+extern "C" void c2DRender_drawRect4(void* self, float* p0, float* p1, float* col, float z);
 
 
 struct sV2_17F500 {
@@ -1977,7 +1977,7 @@ struct sCol_17F500 {
 };
 
 // The quad routine takes its corners and colour by reference (pointers on the EE).
-void func_0038EC40_r(void* self, const sV2_17F500& p0, const sV2_17F500& p1, const sCol_17F500& c, float z) __asm__("func_0038EC40");
+void c2DRender_drawRect4_r(void* self, const sV2_17F500& p0, const sV2_17F500& p1, const sCol_17F500& c, float z) __asm__("c2DRender_drawRect4");
 
 static inline void set1_17F500(char* m, unsigned int mask, int shift, unsigned int v)
 {
@@ -1993,7 +1993,7 @@ static inline void set1_17F500(char* m, unsigned int mask, int shift, unsigned i
  * Sets the same draw-state bits on GrMan's current draw state (+0xE84) as cDebugFE_render does and makes @p tex its
  * texture 0. For i = 1..63 it takes trail point (head + i) mod 64 (the History array at +0x10, head index at +0x210),
  * so the oldest point comes first, and with f = i/64 draws a 6x6 quad centred on it through the 2D renderer D_004A28AC
- * (func_0038EC40, z 0) in colour (0.15 f^2, 0.5, 0.3 + 0.2 f, 0.5 f^2) in the code's a, r, g, b order. The head point
+ * (c2DRender_drawRect4, z 0) in colour (0.15 f^2, 0.5, 0.3 + 0.2 f, 0.5 f^2) in the code's a, r, g, b order. The head point
  * gets a 12x12 quad in (0.5, 0.25, 0.25, 0.5). cDebugFE_render calls it on the heartbeat at +0x24 with the particle
  * texture (+0x1C).
  *
@@ -2014,12 +2014,12 @@ extern "C" void cHeartBeat_draw(void* p_, int tex)
     for (int i = 1; i < 64; i++) {
         sVec2_17F2D0& pt = self->trail[(self->head + i) % 64];
         float recency = (float)i * 0.015625f;
-        func_0038EC40_r(D_004A28AC, pt - size * 0.5f, pt + size * 0.5f, sCol_17F500(recency * recency * 0.15f, 0.5f, recency * 0.2f + 0.3f, recency * (recency * 0.5f)), 0.0f);
+        c2DRender_drawRect4_r(D_004A28AC, pt - size * 0.5f, pt + size * 0.5f, sCol_17F500(recency * recency * 0.15f, 0.5f, recency * 0.2f + 0.3f, recency * (recency * 0.5f)), 0.0f);
     }
     // Head marker colour; named locals (not literals) so the inlined ctor stores sp-relative (CHEATSHEET).
     float hi = 0.5f;
     float lo = 0.25f;
-    func_0038EC40_r(D_004A28AC, self->trail[self->head] - size, self->trail[self->head] + size, sCol_17F500(hi, lo, lo, hi), 0.0f);
+    c2DRender_drawRect4_r(D_004A28AC, self->trail[self->head] - size, self->trail[self->head] + size, sCol_17F500(hi, lo, lo, hi), 0.0f);
 }
 #endif
 
@@ -2224,7 +2224,7 @@ int cDebugFE_loseFocus(void* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cDebugFE_purge);
 #ifdef SKIP_ASM
-extern "C" void func_003916C0(void* p, int flags);
+extern "C" void cFont__cFont(void* p, int flags);
 
 struct sVEi_0017FAD0 {
     short delta;
@@ -2246,7 +2246,7 @@ struct sDebugFE_0017FAD0 {
  *
  * Deletes the two screens (+0xC, +0x10: debug menu and lobby menu) through their destructor virtual (slot 1, flags
  * 3), zeroes SSXApp->RealFE and SSXApp->DebugFE, frees the two texture ids loaded by cDebugFE_load (+0x20, +0x1C,
- * when >= 0) through GrMan slot 50, and deletes the font (+0x18) with func_003916C0(font, 3). The local view calls
+ * when >= 0) through GrMan slot 50, and deletes the font (+0x18) with cFont__cFont(font, 3). The local view calls
  * the texture ids snd1C/snd20; they are On Tour's ParticleTID and BoxTID.
  */
 extern "C" void cDebugFE_purge(sDebugFE_0017FAD0* self)
@@ -2276,7 +2276,7 @@ extern "C" void cDebugFE_purge(sDebugFE_0017FAD0* self)
         vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, self->snd1C);
     }
     if (self->font != 0)
-        func_003916C0(self->font, 3);
+        cFont__cFont(self->font, 3);
 }
 #endif
 

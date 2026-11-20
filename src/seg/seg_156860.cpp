@@ -777,11 +777,11 @@ extern "C" void func_002565E0(char *self) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00256698);
 #ifdef SKIP_ASM
-void func_002557E0(void *);
+void cCommChannel_cCommChannel(void *);
 extern char cDSockChannel_vtbl[];
 
 extern "C" void *func_00256698(void *channel) {
-    func_002557E0(channel);
+    cCommChannel_cCommChannel(channel);
     (*(char **)((char*)(channel) + (8))) = cDSockChannel_vtbl;
     (*(float *)((char*)(channel) + (0x10))) = 0.10000000149011612f;
     (*(int *)((char*)(channel) + (0xC))) = 0;
@@ -891,7 +891,7 @@ extern "C" int cDSockChannel_writePacket(cDSockChannel* self, int data, int len)
 INCLUDE_ASM("seg/seg_156860", cDSockChannel_listen);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_00255830__FPv_6860(void *) __asm__("func_00255830__FPv");
+extern "C" void cCommChannel_channelOpen__FPv_6860(void *) __asm__("cCommChannel_channelOpen__FPv");
 extern "C" int func_003E6E08_6860() __asm__("func_003E6E08");
 extern "C" int func_003E6F40_6860(int, int, void *) __asm__("func_003E6F40");
 extern "C" int sprintf_6860(char *, const char *, ...) __asm__("sprintf");
@@ -900,7 +900,7 @@ extern char str_pct_s_pct_d_pct_d[];
 /**
  * Starts listening for the peer's game connection on "addr:port:port".
  *
- * Disconnects first (virtual slot 2), opens the channel (func_00255830, channelOpen), creates a NetGameUtil
+ * Disconnects first (virtual slot 2), opens the channel (cCommChannel_channelOpen, channelOpen), creates a NetGameUtil
  * (func_003E6E08) into mGameUtil and, if that worked, starts it in mode 0x101 (On Tour's listen) on the
  * formatted address and sets mState to 1 (connecting). Unlike connect, it leaves mError as it was.
  *
@@ -912,7 +912,7 @@ extern "C" void cDSockChannel_listen(cDSockChannel* self, int addr, int port) {
     char buf[0x100];
     char *vt = (char*)self->mVtbl;
     (*(void (**)(void *))(vt + 0x14))(((char*)self) + *(short *)(vt + 0x10));
-    func_00255830__FPv_6860(((char*)self));
+    cCommChannel_channelOpen__FPv_6860(((char*)self));
     int gameUtil = func_003E6E08_6860();
     self->mGameUtil = (NetGameUtilRefT*)gameUtil;
     if (gameUtil != 0) {
@@ -927,7 +927,7 @@ extern "C" void cDSockChannel_listen(cDSockChannel* self, int addr, int port) {
 INCLUDE_ASM("seg/seg_156860", cDSockChannel_connect);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_00255830__FPv_68F8(void *) __asm__("func_00255830__FPv");
+extern "C" void cCommChannel_channelOpen__FPv_68F8(void *) __asm__("cCommChannel_channelOpen__FPv");
 extern "C" int func_003E6E08_68F8() __asm__("func_003E6E08");
 extern "C" int func_003E6F40_68F8(int, int, void *) __asm__("func_003E6F40");
 extern "C" int sprintf_68F8(char *, const char *, ...) __asm__("sprintf");
@@ -936,7 +936,7 @@ extern char str_pct_s_pct_d_pct_d[];
 /**
  * Starts connecting to the peer's game link at "addr:port:port".
  *
- * Clears mError, disconnects (virtual slot 2), opens the channel (func_00255830, channelOpen), creates a
+ * Clears mError, disconnects (virtual slot 2), opens the channel (cCommChannel_channelOpen, channelOpen), creates a
  * NetGameUtil (func_003E6E08) into mGameUtil and, if that worked, starts it in mode 0x102 (On Tour's connect)
  * on the formatted address and sets mState to 1 (connecting).
  *
@@ -949,7 +949,7 @@ extern "C" void cDSockChannel_connect(cDSockChannel* self, int addr, int port) {
     self->mError = 0;
     char *vt = (char*)self->mVtbl;
     (*(void (**)(void *))(vt + 0x14))(((char*)self) + *(short *)(vt + 0x10));
-    func_00255830__FPv_68F8(((char*)self));
+    cCommChannel_channelOpen__FPv_68F8(((char*)self));
     int gameUtil = func_003E6E08_68F8();
     self->mGameUtil = (NetGameUtilRefT*)gameUtil;
     if (gameUtil != 0) {
@@ -3149,12 +3149,12 @@ extern "C" void func_00259210(int buffer) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00259230);
 #ifdef SKIP_ASM
-extern "C" void *func_0039FAE8(int);
+extern "C" void *cUIStateStack_getTopState(int);
 
 extern "C" void func_00259230(int *event) {
     void *obj = SSXApp->RealFE;
     if (obj != 0) {
-        char *topState = (char *)func_0039FAE8(*(int *)((char*)obj + 0xC) + 0x18);
+        char *topState = (char *)cUIStateStack_getTopState(*(int *)((char*)obj + 0xC) + 0x18);
         char *vt = *(char **)(topState + 8);
         void (*fn)(void *, int, int *) = *(void (**)(void *, int, int *))(vt + 0xC4);
         fn(topState + *(short *)(vt + 0xC0), *event, event);

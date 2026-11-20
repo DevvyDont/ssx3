@@ -105,7 +105,7 @@ INCLUDE_ASM("fe/ovstateenterlodge", cOVState_ENTERLODGE_onWidgetEvent);
 #ifdef SKIP_ASM
 extern int cRealFE_mStartState;
 extern "C" void cGame_exit(void* game, int a);
-extern "C" void func_0039F190(void*, int);
+extern "C" void cUIStateStack_pop(void*, int);
 struct sFlag001F72E0 {
     int f0;
     int f4;
@@ -149,14 +149,14 @@ extern "C" void cOVState_ENTERLODGE_onWidgetEvent(sSelf001F72E0* self, void* wid
                 break;
             case 1:
                 self->done = 1;
-                func_0039F190(self->mgr + 0x18, 1);
+                cUIStateStack_pop(self->mgr + 0x18, 1);
                 break;
             }
             break;
         case 6:
             self->done = 1;
             ((sGame001F72E0*)SSXApp->Game)->flag->active = 1;
-            func_0039F190(self->mgr + 0x18, 1);
+            cUIStateStack_pop(self->mgr + 0x18, 1);
             break;
         }
     }
@@ -463,8 +463,8 @@ extern "C" int cOVState_BIGCHALLENGE_FAIL_onWidgetMenu(void* self, int menu, int
 INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_FAIL_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void cOVStateManager_triggerOverlay(int id);
-// PORT: func_0039F190 returns the last node; the unit declares it void.
-void* func_0039F190_r(void* self, int a1) __asm__("func_0039F190");
+// PORT: cUIStateStack_pop returns the last node; the unit declares it void.
+void* cUIStateStack_pop_r(void* self, int a1) __asm__("cUIStateStack_pop");
 struct cUIScreen;
 int cUIScreen_getFrameByLabel(cUIScreen* screen, int hash);
 extern char str_TransitionOut_b[];
@@ -475,7 +475,7 @@ extern char str_TransitionOut_b[];
  *
  * Ignored for a null @p item. Event 5 (select) on "yes_b" (misc data 0) puts the mission id (+0x9C) into
  * cWScriptMan_TheWScriptMan + 0x2A0, restarts it (cWScriptMan_restartLocalMission), pops this state from mpEngine's
- * state stack (func_0039F190), pops the pause-mode stack (D_005366E8 / D_004A2A54) into cPauseState_Flags and calls
+ * state stack (cUIStateStack_pop), pops the pause-mode stack (D_005366E8 / D_004A2A54) into cPauseState_Flags and calls
  * func_0029D6D0 on the audio object. On "info" (misc data 2) it opens overlay 29 (cOVStateManager_triggerOverlay) and
  * stays. Event 6 (back) first plays mpScreen's "TransitionOut_b" frame when it has one. Event 6, and event 5 on any
  * other widget, then cancel the challenge (cWScriptMan_cancelLocalMission), pop the state and restore cPauseState_Flags
@@ -495,7 +495,7 @@ extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetEvent(void* self, void* item,
         if (choice == 0) {
             ((sMgr_75A0*)cWScriptMan_TheWScriptMan)->f2A0 = *(int*)((char*)self + 0x9C);
             cWScriptMan_restartLocalMission(cWScriptMan_TheWScriptMan);
-            func_0039F190_r((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
+            cUIStateStack_pop_r((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
             cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
             func_0029D6D0(cAudioInterface_bxAudio());
             return;
@@ -517,7 +517,7 @@ extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetEvent(void* self, void* item,
         return;
     }
     cWScriptMan_cancelLocalMission(cWScriptMan_TheWScriptMan);
-    func_0039F190_r((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
+    cUIStateStack_pop_r((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
     cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
 }
 #endif

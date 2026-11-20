@@ -700,13 +700,13 @@ extern "C" void func_001F54A8(void) {
 INCLUDE_ASM("fe/festatebuyattrib", cFEStateCareerStats_cFEStateCareerStats);
 #ifdef SKIP_ASM
 extern void* cFEStateCareerStats_vtbl[];
-extern "C" void* func_0039E2A0(void* self);
+extern "C" void* cUIState_cUIState(void* self);
 extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 
 /**
  * Constructs a career-stats state.
  *
- * Runs the cUIState constructor func_0039E2A0 (the engine reaches it in the second argument register), stores
+ * Runs the cUIState constructor cUIState_cUIState (the engine reaches it in the second argument register), stores
  * cFEStateCareerStats_vtbl, sets the state id (+0xC) to 42 and the user (+0x44) to 0, and copies player 0's control
  * mask from the custom interface (cFECustom_getPlayerCtrlMask) into +0x15, without checking that the interface exists.
  *
@@ -714,7 +714,7 @@ extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
  */
 extern "C" void* cFEStateCareerStats_cFEStateCareerStats(cFEStateCareerStats* self)
 {
-    func_0039E2A0(self);
+    cUIState_cUIState(self);
     self->mVtbl = cFEStateCareerStats_vtbl;
     self->mHashName = 42;
     *(char*)&self->mUserNum = 0;

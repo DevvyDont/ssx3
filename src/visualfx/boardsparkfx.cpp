@@ -32,7 +32,7 @@ extern char str_Board_Spark_Emitter[];
 extern "C" void cRider_cRider(void* self);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cDynamicColourEmitter_cDynamicColourEmitter(void* self);
-void* func_002F7A68(void* self);
+void* tParticleEmitter_tParticleEmitter(void* self);
 extern "C" void tParticleEmitter_randomize(void* self);
 extern "C" void tParticleEmitter_setSize(void* self, float a, float b, float c);
 extern "C" void tParticleEmitter_setLife(void* self, float a, float b);
@@ -181,7 +181,7 @@ extern "C" void* cBoardSparkFX_cBoardSparkFX(sBoardSparkFXView* self, int inChrg
     float zeroF = 0.0f;
     self->emitter = (sBsEmitter*)cDynamicColourEmitter_cDynamicColourEmitter(cMemMan_alloc(528, str_mEmitter, 0, 0));
     self->params = (sBsParams*)cMemMan_alloc(216, str_mEmitterData, 0, 0);
-    self->gfx = func_002F7A68(cMemMan_alloc(336, str_Board_Spark_Emitter, 0, 0));
+    self->gfx = tParticleEmitter_tParticleEmitter(cMemMan_alloc(336, str_Board_Spark_Emitter, 0, 0));
     tParticleEmitter_randomize(self->gfx);
     sBsVec4 force;
     force.x = zeroF;
@@ -412,7 +412,7 @@ extern int D_004A3AFC;
 // cRenderStateMan_m_state: the lens/surface table, 8 rows of 0xF0 bytes (config size 0x780); sEnt_ABC8 views a row from its +0x28 field
 extern char cRenderStateMan_m_state[];
 
-extern "C" void func_0036D428(void* self, float val);
+extern "C" void tParticleEmitter_stepContinous(void* self, float val);
 int cRider_getMotionState(void* self);
 extern "C" void cDynamicColourEmitter_update(void* em, void* pos, void* d, void* vel, int alive, float dt);
 extern "C" void tParticleEmitter_setColour(void* self, sV4_ABC8* a, sV4_ABC8* b, sV4_ABC8* c, sV4_ABC8* d, float t);
@@ -541,7 +541,7 @@ extern "C" void cBoardSparkFX_update(sSparkFx_ABC8* self)
     char* rider = self->rider;
     float dt = 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
     char* surfaceData = (char*)SSXApp->Game->SurfPropCache + *(int*)(rider + 0x438) * 0xB0;
-    func_0036D428(self->gfx, dt);
+    tParticleEmitter_stepContinous(self->gfx, dt);
     if (self->active) {
         sEmitter_ABC8* em = self->emitter;
         em->vt[3].fn((char*)em + em->vt[3].delta, self->params, em->rate);

@@ -4,7 +4,7 @@
 // cUIState: one state (page/popup) of the UI state machine. The UI engine owns a cUIStateStack of them; each state
 // owns a cList of cUIScreens (cUIState_addScreen, cUIEngine_addScreenByHashName). The FE and in-game states
 // (cFEState*, cOVState*, cGameLoadState, popups ...) derive from it: they call the cUIState constructor
-// func_0039E2A0(this, pEngine) or func_0039E318(this, pEngine, pParentState), store their own vtable at 0x8, and
+// cUIState_cUIState(this, pEngine) or cUIState_cUIState1(this, pEngine, pParentState), store their own vtable at 0x8, and
 // put their own members from 0x48 on (cFEStateCharSelect_cFEStateCharSelect; ovstates allocates a 0x4C-byte popup), so cUIState is 0x48 bytes.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals yet.
@@ -14,10 +14,10 @@
 // Member names are EA's, from SSX On Tour's PSP DWARF (class cUIState, size 0x48: the same offsets as retail),
 // placed at retail offsets by:
 //   [P] the July 2003 preview's inline accessors; retail keeps out-of-line copies of them in On Tour's declaration
-//       order in ui/uivector (func_003A5800 setHashName ... func_003A5A88 setVisible, func_003A5AE0 ...
-//       func_003A5B00 getUserNum), which places each one. The preview itself packed the bytes differently
+//       order in ui/uivector (cUIState_setHashName setHashName ... cUIState_setVisible setVisible, cUIState_setParentState ...
+//       cUIState_getUserNum getUserNum), which places each one. The preview itself packed the bytes differently
 //       (tAttrState at 0x16, miMiscData last), so preview offsets are not used directly;
-//   [R] retail's constructors func_0039E2A0/func_0039E318 and the destructor func_0039E390;
+//   [R] retail's constructors cUIState_cUIState/cUIState_cUIState1 and the destructor cUIState__cUIState;
 //   [U] how retail code uses the field;
 //   [O] On Tour's member order alone, where the fields on both sides of it are placed by [P] or [R].
 //
@@ -35,26 +35,26 @@ struct cUIScreen;
 struct cUIState {
     cListNode* mpPrev;               // 0x000 [O] cListNode::mpPrev; [R] the constructors self-link it
     cListNode* mpNext;               // 0x004 [O] cListNode::mpNext; [R] self-linked
-    void** mVtbl;                    // 0x008 [R] _vt$8cUIState (D_004946C8), stored by func_0039E2A0/func_0039E318/func_003A57B8
-    int mHashName;                   // 0x00C [P] getHashName/setHashName (retail func_003A5808/func_003A5800); [R] = 0
+    void** mVtbl;                    // 0x008 [R] _vt$8cUIState (D_004946C8), stored by cUIState_cUIState/cUIState_cUIState1/cUIState_cUIState2
+    int mHashName;                   // 0x00C [P] getHashName/setHashName (retail cUIState_getHashName/cUIState_setHashName); [R] = 0
                                      //       (derived states store their state id here, e.g. 9 in cFEStateCharSelect_cFEStateCharSelect)
-    cUIEngine* mpEngine;             // 0x010 [P] getEngine (retail func_003A5810); [R] = pEngine; [U] cUIState_onUpdate reads the
+    cUIEngine* mpEngine;             // 0x010 [P] getEngine (retail cUIState_getEngine); [R] = pEngine; [U] cUIState_onUpdate reads the
                                      //       engine's input object through it
-    signed char mCurrentCtrl;        // 0x014 [P] getCurrentCtrl/setCurrentCtrl (lb/sb; retail func_003A5820/func_003A5818);
+    signed char mCurrentCtrl;        // 0x014 [P] getCurrentCtrl/setCurrentCtrl (lb/sb; retail cUIState_getCurrentCtrl/cUIState_setCurrentCtrl);
                                      //       [R] = -1; [U] controller loop counter in cUIState_onUpdate (On Tour: char)
-    unsigned char mCtrlBits;         // 0x015 [P] getCtrlBitMask/setAllCtrlBits (lbu/sb; retail func_003A5830/func_003A5828);
-                                     //       [R] = 0xF; [U] setCtrlBitsByCtrlIndex/clearCtrlBits (func_0039E438/func_0039E470)
+    unsigned char mCtrlBits;         // 0x015 [P] getCtrlBitMask/setAllCtrlBits (lbu/sb; retail cUIState_getCtrlBitMask/cUIState_setAllCtrlBits);
+                                     //       [R] = 0xF; [U] setCtrlBitsByCtrlIndex/clearCtrlBits (cUIState_setCtrlBitsByCtrlIndex/cUIState_clearCtrlBits)
     char unk_016[0x2];               // 0x016 padding
-    int miMiscData;                  // 0x018 [P] getMiscData/setMiscData (lw/sw 0x18; retail func_003A5838/func_003A5840,
+    int miMiscData;                  // 0x018 [P] getMiscData/setMiscData (lw/sw 0x18; retail cUIState_getMiscData/cUIState_setMiscData,
                                      //       between getCtrlBitMask and getMode in On Tour's order); not set by the constructors
     int mAttrState;                  // 0x01C [P] tAttrState: getMode (lbu 0x1D), isFirstTime ... setVisible (lw/sw 0x1C; retail
-                                     //       func_003A5848..func_003A5A88); [R] sh 0x218 in the constructors
-    cUIState* mpParentState;         // 0x020 [P] getParentState (retail func_003A5AE8; setter func_003A5AE0); [R] = pParentState
-                                     //       (func_0039E318), 0 (func_0039E2A0)
+                                     //       cUIState_getMode..cUIState_setVisible); [R] sh 0x218 in the constructors
+    cUIState* mpParentState;         // 0x020 [P] getParentState (retail cUIState_getParentState; setter cUIState_setParentState); [R] = pParentState
+                                     //       (cUIState_cUIState1), 0 (cUIState_cUIState)
     char mScreens[0x1C];             // 0x024 [O] cList of cUIScreen; [U] cUIState_addScreen appends, cUIState_updateScreens walks it,
                                      //       cUIState_onDestroyScreen destroys it; [R] the destructor tears down its 3 vptrs (0x2C/0x38/0x3C)
-    cUIScreen* mpScreen;             // 0x040 [P] getScreen (retail func_003A5AF0); [R] = 0
-    signed char mUserNum;            // 0x044 [P] getUserNum/setUserNum (lb/sb; retail func_003A5B00/func_003A5AF8); [R] = -1 (On Tour: char)
+    cUIScreen* mpScreen;             // 0x040 [P] getScreen (retail cUIState_getScreen); [R] = 0
+    signed char mUserNum;            // 0x044 [P] getUserNum/setUserNum (lb/sb; retail cUIState_getUserNum/cUIState_setUserNum); [R] = -1 (On Tour: char)
     char unk_045[0x3];               // 0x045 padding
 };
 

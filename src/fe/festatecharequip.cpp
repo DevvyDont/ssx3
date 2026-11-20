@@ -21,7 +21,7 @@ extern char str_FXLoader_FE[];
 class cFEObjK1956F8_70 {
 public:
     char pad_0x000[0x70];
-    cFEObjK1956F8_70() __asm__("func_00397B08");
+    cFEObjK1956F8_70() __asm__("cUIEngine_cUIEngine");
 };
 class cFEObjK1956F8_1 {
 public:
@@ -57,7 +57,7 @@ extern "C" void* cFE_cFE(void* self)
 INCLUDE_ASM("fe/festatecharequip", cFE__cFE);
 #ifdef SKIP_ASM
 void operator_delete(int* p);
-extern "C" void func_00397B70(void* p, int flags);
+extern "C" void cUIEngine__cUIEngine(void* p, int flags);
 extern "C" void cGraphicsMan_PurgeTextures(void* p);
 extern "C" void cFXLoader__cFXLoader(void* p, int flags);
 extern "C" void func_0019CE20(void* p, int flags);
@@ -69,7 +69,7 @@ extern void* cSimpleCamera_vtbl[];
 /**
  * Destroys the front-end module's base part, freeing it when asked.
  *
- * Stores the vtable D_0046D878, destroys the UI engine (+0xC, func_00397B70 with 3), purges the graphics manager's
+ * Stores the vtable D_0046D878, destroys the UI engine (+0xC, cUIEngine__cUIEngine with 3), purges the graphics manager's
  * textures, destroys the FX loader (+0xB5AA0) when present, then the file manager (+0x1A70, func_0019CE20) and the
  * rider manager (+0xB0, cFERiderManager__cFERiderManager), resets the camera's (+0x10) vtable word (+0xA0) to cSimpleCamera_vtbl and
  * stores the base vtable D_0046D970. Calls operator_delete when bit 0 of @p flags is set. cRealFE__cRealFE calls it as
@@ -81,7 +81,7 @@ extern "C" void cFE__cFE(void* self, int flags)
 {
     *(void***)((char*)self + 0x0) = D_0046D878;
     if (*(void**)((char*)self + 0xC) != 0) {
-        func_00397B70(*(void**)((char*)self + 0xC), 3);
+        cUIEngine__cUIEngine(*(void**)((char*)self + 0xC), 3);
     }
     cGraphicsMan_PurgeTextures(GrMan);
     if (*(void**)((char*)self + 0xB5AA0) != 0) {
@@ -159,16 +159,16 @@ extern "C" void cFELocale__cFELocale(void* self, int flags)
 //100%
 INCLUDE_ASM("fe/festatecharequip", cFELocale_deleteAllFiles);
 #ifdef SKIP_ASM
-extern "C" void func_00195A50(void* self, int i);
+extern "C" void cFELocale_deleteFile(void* self, int i);
 
 /**
- * Deletes all 20 string files of the front-end locale (func_00195A50 for each index).
+ * Deletes all 20 string files of the front-end locale (cFELocale_deleteFile for each index).
  */
 extern "C" void cFELocale_deleteAllFiles(void* self)
 {
     signed char i;
     for (i = 0; i < 20; i++) {
-        func_00195A50(self, i);
+        cFELocale_deleteFile(self, i);
     }
 }
 #endif

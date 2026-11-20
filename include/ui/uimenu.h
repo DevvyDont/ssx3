@@ -5,11 +5,11 @@
 // screens). EA's source is d:/ssx/code/source/ui/uimenu.cpp (preview assert path). Retail spreads its code over
 // ui/uilistbox (cUIMenu_setFocus .. cUIMenu_getNext, cUIMenu_getPrev), ui/uimenu (cUIMenu_setSelected ..
 // cUIMenu_setSelectedByIndex) and ui/uivector (the constructor cUIMenu_cUIMenu, the destructor cUIMenu__cUIMenu, getType
-// and the out-of-line inline accessors func_003A5338 .. func_003A5418).
+// and the out-of-line inline accessors tAttrMenu_tAttrMenu .. cUIMenu_getSelectedIndex).
 //
 // Size 0xA8: cUIScreen_createObjectByStruct (record type 0x13) does operator new(0xA8, "UIMenu") and builds it inline
 // (cUIThing ctor cUIThing_cUIThing, cUIGroup's vtable, cList ctor cList_cList at 0x74, cUIMenu's vtable, tAttrMenu ctor
-// func_003A5338 at 0x90, then the stores below); cUIMenu_cUIMenu is the same constructor out of line. Retail vtable
+// tAttrMenu_tAttrMenu at 0x90, then the stores below); cUIMenu_cUIMenu is the same constructor out of line. Retail vtable
 // _vt$7cUIMenu = D_00494928 (cUIMenu_vtbl).
 // Bases: cUIGroup (0x90 bytes: cUIThing 0x74 + cList mList 0x1C; ui/uithing.h, tag "cUIGroup" 0x90) <- cUIThing <-
 // cListNode, written out flat below. The vptr is cUIThing's (0x8).
@@ -20,19 +20,19 @@
 //   [P] the July 2003 preview's inline accessors (linkonce names isFlipInput / setFlipInput / getScrollIndex /
 //       getScrollOffset / getScrollNum / setScrollIndex / setScrollNum / setScrollOffset / getSelected /
 //       getSelectedIndex, in that declaration order). Retail keeps out-of-line copies of them in the same order in
-//       ui/uivector (func_003A5350 .. func_003A5418), which places each one; retail adds get/set pairs for two more
-//       tAttrMenu bits (func_003A5380/cUIMenu_setDisableDirSound bit 3, func_003A53B0/func_003A53C0 bit 0);
+//       ui/uivector (cUIMenu_isFlipInput .. cUIMenu_getSelectedIndex), which places each one; retail adds get/set pairs for two more
+//       tAttrMenu bits (cUIMenu_isDisableDirSound/cUIMenu_setDisableDirSound bit 3, cUIMenu_isCreateThead/cUIMenu_setCreateThread bit 0);
 //   [R] retail's constructors (cUIMenu_cUIMenu and the inlined copy in cUIScreen_createObjectByStruct), the destructor
 //       cUIMenu__cUIMenu and the 0xA8 allocation;
 //   [U] how retail code uses the field;
 //   [O] On Tour's member order and types alone, where the fields on both sides of it are placed by [P] or [R].
 //
 // mAttrMenu is EA's tAttrMenu (On Tour: 1 byte, unsigned char bitfields, LSB first), defined below. Its constructor
-// func_003A5338 clears the 4 bits with a byte access (lbu/andi 0xF0/sb), while every accessor and the menu code
+// tAttrMenu_tAttrMenu clears the 4 bits with a byte access (lbu/andi 0xF0/sb), while every accessor and the menu code
 // read-modify-write the aligned word at 0x90 (lw/sw): g++ 2.95 does exactly that for a 1-byte bitfield struct
 // embedded in a word-aligned object (SLOW_BYTE_ACCESS). Checked with ee-gcc 2.95.3 -O2: `p->mFlipInput = 0 ...` on a
-// tAttrMenu* gives lbu/andi 0xf0/sb, `self->mAttrMenu.mFlipInput = enable != 0` gives retail func_003A5360's
-// lw/sltu/li -3/sll/and/or/sw, and a bool getter gives lw/sra/andi (func_003A5350). mInputMap follows at 0x91.
+// tAttrMenu* gives lbu/andi 0xf0/sb, `self->mAttrMenu.mFlipInput = enable != 0` gives retail cUIMenu_setFlipInput's
+// lw/sltu/li -3/sll/and/or/sw, and a bool getter gives lw/sra/andi (cUIMenu_isFlipInput). mInputMap follows at 0x91.
 
 #include "layout.h"
 #include "ui/uithing.h"
@@ -42,13 +42,13 @@ struct cUIScreen;
 struct cListNode;
 struct cUIScrollBar;
 
-// EA's tAttrMenu (On Tour DWARF: struct tAttrMenu, size 0x1). Retail: tAttrMenu::tAttrMenu() is func_003A5338.
+// EA's tAttrMenu (On Tour DWARF: struct tAttrMenu, size 0x1). Retail: tAttrMenu::tAttrMenu() is tAttrMenu_tAttrMenu.
 struct tAttrMenu {
-    unsigned char mCreateThread : 1;    // bit 0 [U] func_003A53B0/func_003A53C0; passed to cUIMenu_setSelected by onInputChangeItem
-    unsigned char mFlipInput : 1;       // bit 1 [P] isFlipInput/setFlipInput (func_003A5350/func_003A5360)
+    unsigned char mCreateThread : 1;    // bit 0 [U] cUIMenu_isCreateThead/cUIMenu_setCreateThread; passed to cUIMenu_setSelected by onInputChangeItem
+    unsigned char mFlipInput : 1;       // bit 1 [P] isFlipInput/setFlipInput (cUIMenu_isFlipInput/cUIMenu_setFlipInput)
     unsigned char mScrollMenu : 1;      // bit 2 [O]; [U] cUIMenu_setScrollableMenu sets it; getNext / cUIMenu_getPrev /
                                         //       cUIMenu_findFirstHighlightable / cUIMenu_reverseFindFirstHighlightable / onInputChangeItem test it
-    unsigned char mDisableDirSound : 1; // bit 3 [O]; [U] func_003A5380/cUIMenu_setDisableDirSound; cUIMenu_onInput tests it
+    unsigned char mDisableDirSound : 1; // bit 3 [O]; [U] cUIMenu_isDisableDirSound/cUIMenu_setDisableDirSound; cUIMenu_onInput tests it
 };
 
 CHECK_SIZE(tAttrMenu, 0x1);
@@ -83,22 +83,22 @@ struct cUIMenu {
                                      //       [U] cList_size(this + 0x74) in cUIMenu_setScrollableMenu / setUIData
     // --- cUIMenu
     tAttrMenu mAttrMenu;             // 0x090 [O] tAttrMenu; [P] isFlipInput/setFlipInput (bit 1, lw/sw the word at 0x90;
-                                     //       retail func_003A5350/func_003A5360); [R] tAttrMenu() func_003A5338 clears
+                                     //       retail cUIMenu_isFlipInput/cUIMenu_setFlipInput); [R] tAttrMenu() tAttrMenu_tAttrMenu clears
                                      //       bits 0-3 (byte); [U] cUIMenu_getNext / onInput / setScrollableMenu (bit 2)
     signed char mInputMap[4];        // 0x091 [O] char mInputMap[4]; [U] cUIMenu_setInputMap stores 4 bytes (sb 0x91..0x94),
                                      //       cUIMenu_onInput reads them (lb)
     unsigned char mScrollItemCurrent; // 0x095 [P] getScrollIndex/setScrollIndex/getSelectedIndex (lbu/sb 0x95; retail
-                                     //       func_003A53E0/func_003A53F8/func_003A5418); [R] = 0; [U] the selected row
+                                     //       cUIMenu_getScrollIndex/cUIMenu_setScrollIndex/cUIMenu_getSelectedIndex); [R] = 0; [U] the selected row
                                      //       (fe/fepopupmisc reads/writes menu + 0x95)
-    unsigned char mScrollItemNum;    // 0x096 [P] getScrollNum/setScrollNum (lbu/sb 0x96; retail func_003A53F0/func_003A5400);
+    unsigned char mScrollItemNum;    // 0x096 [P] getScrollNum/setScrollNum (lbu/sb 0x96; retail cUIMenu_getScrollNum/cUIMenu_setScrollNum);
                                      //       [R] = 0; [U] cUIMenu_setUIData / setScrollableMenu store the item count
     unsigned char mScrollItemNumVisible; // 0x097 [O]; [R] = 0; [U] cUIMenu_setUIData / setScrollableMenu store it,
                                      //       cUIMenu_render2D / onInputChangeItem / setSelectedByIndex read it
-    unsigned char mScrollItemOffset; // 0x098 [P] getScrollOffset/setScrollOffset (lbu/sb 0x98; retail func_003A53E8/
-                                     //       func_003A5408); [R] = 0
+    unsigned char mScrollItemOffset; // 0x098 [P] getScrollOffset/setScrollOffset (lbu/sb 0x98; retail cUIMenu_getScrollOffset/
+                                     //       cUIMenu_setScrollOffset); [R] = 0
     char unk_099[0x3];               // 0x099 padding
-    cUIScrollBar* mpScrollBar;       // 0x09C [O]; [R] = 0; [U] func_0039B7A8 stores it, cUIMenu_render2D reads it
-    cUIThing* mpSelected;            // 0x0A0 [P] getSelected (lw 0xA0; retail func_003A5410); [R] = 0; [U] cUIMenu_setSelected
+    cUIScrollBar* mpScrollBar;       // 0x09C [O]; [R] = 0; [U] cUIMenu_setScrollBar stores it, cUIMenu_render2D reads it
+    cUIThing* mpSelected;            // 0x0A0 [P] getSelected (lw 0xA0; retail cUIMenu_getSelected); [R] = 0; [U] cUIMenu_setSelected
                                      //       stores the item, cUIMenu_setFocus / onInput read it
     unsigned char mStoredIndex;      // 0x0A4 [O]; [R] = 0xFF; [U] cUIMenu_setSelected / setSelectedByIndex store it (sb),
                                      //       cUIMenu_setFocus reads it (lbu)

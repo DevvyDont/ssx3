@@ -205,7 +205,7 @@ extern "C" void cBoardTrailFX_reset(cBoardTrailFX_reset_sTrail* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002E86F0);
+INCLUDE_ASM("visualfx/boardtrailfx", cBoardTrailFX_shouldSample);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sBTV4_86F0 {
@@ -259,7 +259,7 @@ static inline float btLength_86F0(const sBTV4_86F0& v)
     return r;
 }
 
-// Same test as func_002E87E8's boardTrailCanDraw.
+// Same test as cBoardTrailFX_shouldPlow's boardTrailCanDraw.
 static inline int boardTrailCanDraw_86F0(char* r)
 {
     int ok = 0;
@@ -279,7 +279,7 @@ static inline int boardTrailCanDraw_86F0(char* r)
  * @param dirDot  dot product of this frame's and the last direction (1 = no turn)
  * @return 1 when a new sample is taken, otherwise 0
  */
-extern "C" int func_002E86F0(sBTrail_86F0* self, float dirDot)
+extern "C" int cBoardTrailFX_shouldSample(sBTrail_86F0* self, float dirDot)
 {
     if (self->delay > 0) {
         self->delay--;
@@ -303,7 +303,7 @@ extern "C" int func_002E86F0(sBTrail_86F0* self, float dirDot)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002E87E8);
+INCLUDE_ASM("visualfx/boardtrailfx", cBoardTrailFX_shouldPlow);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 int cRider_getMotionState(void* self);
@@ -334,7 +334,7 @@ static inline int boardTrailCanDraw(char* r)
  *
  * @return 1 when a trail is laid, otherwise 0
  */
-extern "C" int func_002E87E8(char** self)
+extern "C" int cBoardTrailFX_shouldPlow(char** self)
 {
     if (cRider_getMotionState(self[0]) == 2) {
         if (*(int*)(*(char**)(self[0] + 0x77C) + 0x30) != 0) {
@@ -445,7 +445,7 @@ extern float D_004A3B2C;
 extern int D_004A3AFC;
 extern "C" float func_0031C228(float);
 // Decides whether the trail starts a new segment this frame.
-extern "C" int func_002E86F0_8938(sBTrail_8938* self, float d) __asm__("func_002E86F0");
+extern "C" int cBoardTrailFX_shouldSample_8938(sBTrail_8938* self, float d) __asm__("cBoardTrailFX_shouldSample");
 
 // PORT: PS2-only VU0 inline asm (vector * scalar).
 static inline sBTV4_8938 btScale(const sBTV4_8938& v, float s)
@@ -692,16 +692,16 @@ static inline void btGrow(sBTrail_8938* self)
 /**
  * Adds this frame's segment to the board trail ring (6 strips of 54 vertices).
  *
- * When func_002E87E8 says no trail, the trail is closed (faded to alpha 0 or rewound). Otherwise it takes the
+ * When cBoardTrailFX_shouldPlow says no trail, the trail is closed (faded to alpha 0 or rewound). Otherwise it takes the
  * board's outermost edges across the travel direction (board bone, or bone positions off the ground),
  * projects them to the ground contact, builds the six strip points (random flare widths +0x04/+0x08, lift
- * +0xA0) coloured from the rider's surface, and advances the head when func_002E86F0 (probably shouldSample)
+ * +0xA0) coloured from the rider's surface, and advances the head when cBoardTrailFX_shouldSample (probably shouldSample)
  * agrees. A new trail starts with 3 segments.
  */
 extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
 {
     int prev = (self->head + kTrailNumSeg - 1) % kTrailNumSeg;
-    if (func_002E87E8((char**)self) == 0) {
+    if (cBoardTrailFX_shouldPlow((char**)self) == 0) {
         if (self->state == 0) return;
         if (self->state == 1) {
             self->head = (self->head + kTrailNumSeg - 3) % kTrailNumSeg;
@@ -904,7 +904,7 @@ extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
         btGrow(self);
         self->state = 1;
     }
-    if (func_002E86F0_8938(self, btDot(dir, self->lastDir))) {
+    if (cBoardTrailFX_shouldSample_8938(self, btDot(dir, self->lastDir))) {
         int h = self->head;
         self->side = across;
         self->w1 = btRandScale(D_004A45AC) + 1.0f;
@@ -1128,7 +1128,7 @@ extern "C" void cCutSceneTransitionMan_StartCutScene(cCutSceneTransitionMan_Star
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EA780);
+INCLUDE_ASM("visualfx/boardtrailfx", cCutSceneTransitionMan_EndCutScene);
 #ifdef SKIP_ASM
 struct sTrailFade {
     char pad[0x10];
@@ -1147,7 +1147,7 @@ struct sTrailFade {
  *
  * @param fadeTime  transition length
  */
-extern "C" void func_002EA780(sTrailFade* self, float fadeTime)
+extern "C" void cCutSceneTransitionMan_EndCutScene(sTrailFade* self, float fadeTime)
 {
     switch (self->state) {
     case 0:
@@ -1219,7 +1219,7 @@ extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EA8B8);
+INCLUDE_ASM("visualfx/boardtrailfx", cCutSceneTransitionMan_Pause);
 #ifdef SKIP_ASM
 /**
  * Counts a pause or resume request for the cut-scene transition.
@@ -1230,7 +1230,7 @@ INCLUDE_ASM("visualfx/boardtrailfx", func_002EA8B8);
  *
  * @param up  nonzero to pause, zero to resume
  */
-extern "C" void func_002EA8B8(void* self, int up)
+extern "C" void cCutSceneTransitionMan_Pause(void* self, int up)
 {
     int state = *(int*)((char*)self + 0x10);
     if (state == 2 || state == 3) {
@@ -1443,7 +1443,7 @@ void cTrickBoostFX_reset(void* self)
 INCLUDE_ASM("visualfx/boardtrailfx", cTrickBoostFX_update);
 #ifdef SKIP_ASM
 int cRider_getMotionState(void* self);
-void func_00392DE8(void* self, int val);
+void cPlayerLights_BoardIsAdditive(void* self, int val);
 extern "C" void cPlayerLights_AddDirectional(void* self, void* q, void* v);
 extern int cPowerUpFXToggles_m_TestTrickBoost;
 
@@ -1533,7 +1533,7 @@ static inline sV4_2EADD0 Scale_2EADD0(const sV4_2EADD0& v, float s)
  * Records the board outline for the trick boost effect while the rider's trick power-up runs.
  *
  * While mPowerUpTrickTimer (+0x2EC) is positive (or cPowerUpFXToggles_m_TestTrickBoost is set) it drives an
- * effect in the rider handler at +0xD30 (func_00392DE8, cPlayerLights_AddDirectional; blue, size 2). In the air (motion
+ * effect in the rider handler at +0xD30 (cPlayerLights_BoardIsAdditive, cPlayerLights_AddDirectional; blue, size 2). In the air (motion
  * state 1) it stores a 140 x 36 quad around the board bone in a ring of 3 (up to 3 kept), plus two points 12
  * to each side; otherwise the count drops to 0.
  */
@@ -1545,7 +1545,7 @@ extern "C" void cTrickBoostFX_update(sTrail_2EADD0* self)
     float zeroF = 0.0f;
     if (zeroF < speed)
     {
-        func_00392DE8(*(char**)(self->rider + 0x77C) + 0xD30, 1);
+        cPlayerLights_BoardIsAdditive(*(char**)(self->rider + 0x77C) + 0xD30, 1);
         char* riderBase = self->rider;
         sV3_2EADD0 sz;
         sz.x = 2.0f;
@@ -1715,7 +1715,7 @@ extern "C" void cTrickBoostFX_render(sTrail_2EADD0* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EB8F0);
+INCLUDE_ASM("visualfx/boardtrailfx", FigureOutTransitionUVs);
 #ifdef SKIP_ASM
 struct sBTVEntryR {
     short delta;
@@ -1734,7 +1734,7 @@ extern float D_004A3B44;
  * D_004A3B40 = r[1] + r[2] and D_004A3B44 = r[2]. cFade_TObj_Draw, cWipe_TObj_Draw and cCircle_TObj_Draw use these as
  * the texture rectangle; cTransitionMan_render calls it before drawing.
  */
-extern "C" void func_002EB8F0(void)
+extern "C" void FigureOutTransitionUVs(void)
 {
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
     sBTVEntryR* vtEntry = &(((sBTVEntryR*)obj->mVtbl))[42];
@@ -1791,18 +1791,18 @@ extern "C" void cFade_TObj_Draw(void* self, float amount)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EBBA8);
+INCLUDE_ASM("visualfx/boardtrailfx", cWipe_TObj_cWipe_TObj);
 #ifdef SKIP_ASM
-void func_002E4D70(void* self);
+void cTransitionObj_cTransitionObj(void* self);
 extern void* cWipe_TObj_vtbl[];
 
-struct func_002EBBA8_sVec4 {
+struct cWipe_TObj_cWipe_TObj_sVec4 {
     float x, y, z, w;
 };
 
-struct func_002EBBA8_sObj {
+struct cWipe_TObj_cWipe_TObj_sObj {
     void** vtable;               // 0x0
-    func_002EBBA8_sVec4 v;       // 0x4
+    cWipe_TObj_cWipe_TObj_sVec4 v;       // 0x4
     int a;                       // 0x14
     int b;                       // 0x18
 };
@@ -1810,7 +1810,7 @@ struct func_002EBBA8_sObj {
 /**
  * Constructs a wipe transition object with a colour and a horizontal and vertical direction.
  *
- * Runs the cTransitionObj base constructor func_002E4D70, installs cWipe_TObj_vtbl and stores the colour (+0x4) and the
+ * Runs the cTransitionObj base constructor cTransitionObj_cTransitionObj, installs cWipe_TObj_vtbl and stores the colour (+0x4) and the
  * directions (+0x14, +0x18), which cWipe_TObj_Draw uses to slide the rectangle in.
  * cSSXScriptEngine_MakeTransitionObject builds it on 0x1C bytes with (-1, 0), (1, 0), (0, -1) or (0, 1).
  *
@@ -1819,10 +1819,10 @@ struct func_002EBBA8_sObj {
  * @param verticalDir  vertical direction: -1, 0 or 1
  * @return @p self
  */
-extern "C" func_002EBBA8_sObj* func_002EBBA8(func_002EBBA8_sObj* self, const func_002EBBA8_sVec4& colour, int horizontalDir, int verticalDir)
+extern "C" cWipe_TObj_cWipe_TObj_sObj* cWipe_TObj_cWipe_TObj(cWipe_TObj_cWipe_TObj_sObj* self, const cWipe_TObj_cWipe_TObj_sVec4& colour, int horizontalDir, int verticalDir)
 {
-    func_002EBBA8_sVec4 vecCopy = colour;
-    func_002E4D70(self);
+    cWipe_TObj_cWipe_TObj_sVec4 vecCopy = colour;
+    cTransitionObj_cTransitionObj(self);
     self->vtable = cWipe_TObj_vtbl;
     self->v = vecCopy;
     self->a = horizontalDir;
@@ -1905,9 +1905,9 @@ extern void* cCircle_TObj_vtbl[];
 /**
  * Constructs a circle transition object with a colour and an explicit circle centre.
  *
- * Runs the cTransitionObj base constructor func_002E4D70, installs cCircle_TObj_vtbl and stores the colour (+0x4) and
+ * Runs the cTransitionObj base constructor cTransitionObj_cTransitionObj, installs cCircle_TObj_vtbl and stores the colour (+0x4) and
  * the centre (+0x14, +0x18) that cCircle_TObj_Draw closes the circle around. Nothing in the retail code references it;
- * func_002EBE20 is the variant with a random centre.
+ * cCircle_TObj_cCircle_TObj is the variant with a random centre.
  *
  * @param rect  the colour (alpha first)
  * @param posX  centre x in screen units (0..640)
@@ -1916,7 +1916,7 @@ extern void* cCircle_TObj_vtbl[];
  */
 extern "C" void* func_002EBD88(void* self, sTrailVec_002EBD88 rect, float posX, float posY)
 {
-    func_002E4D70(self);
+    cTransitionObj_cTransitionObj(self);
     *(void***)self = cCircle_TObj_vtbl;
     *(sTrailVec_002EBD88*)((char*)self + 4) = rect;
     *(float*)((char*)self + 0x14) = posX;
@@ -1926,12 +1926,12 @@ extern "C" void* func_002EBD88(void* self, sTrailVec_002EBD88 rect, float posX, 
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardtrailfx", func_002EBE20);
+INCLUDE_ASM("visualfx/boardtrailfx", cCircle_TObj_cCircle_TObj);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 unsigned int BXrand();
 // base ctor returns this; the unit declares it void
-void* func_002E4D70_r(void* self) __asm__("func_002E4D70__FPv");
+void* cTransitionObj_cTransitionObj_r(void* self) __asm__("cTransitionObj_cTransitionObj__FPv");
 extern void* cCircle_TObj_vtbl[];
 
 struct sBtRectBE20 { float x, y, w, h; };
@@ -1939,16 +1939,16 @@ struct sBtRectBE20 { float x, y, w, h; };
 /**
  * Constructs a circle transition object with a colour and a random circle centre.
  *
- * Runs the cTransitionObj base constructor func_002E4D70, installs cCircle_TObj_vtbl, stores the colour (+0x4) and
+ * Runs the cTransitionObj base constructor cTransitionObj_cTransitionObj, installs cCircle_TObj_vtbl, stores the colour (+0x4) and
  * picks the centre with BXrand: x = (rand % 1000) * 0.64 (+0x14) and y = (rand % 1000) * 0.48 (+0x18), so within the
  * 640x480 screen. cSSXScriptEngine_MakeTransitionObject builds it on 0x1C bytes.
  *
  * @param rect  the colour (alpha first)
  * @return @p self
  */
-extern "C" void* func_002EBE20(void* self, sBtRectBE20 rect)
+extern "C" void* cCircle_TObj_cCircle_TObj(void* self, sBtRectBE20 rect)
 {
-    func_002E4D70_r(self);
+    cTransitionObj_cTransitionObj_r(self);
     *(void***)self = cCircle_TObj_vtbl;
     *(sBtRectBE20*)((char*)self + 0x4) = rect;
     unsigned int randX = BXrand() % 1000;

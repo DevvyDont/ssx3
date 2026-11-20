@@ -168,7 +168,7 @@ INCLUDE_ASM("fe/ovstatetrophy", func_0020EB50);
 int GetHashValue32(char* str);
 extern "C" void func_0020EC18(void* self, sRect20EAA0* a, sRect20EAA0* r);
 extern "C" int cUITextureBank_getElementByHashname(void* bank, int name);
-extern "C" int func_003983F0(void* bank, int hash);
+extern "C" int cUIFontInterface_getFontByHashName(void* bank, int hash);
 extern int D_004A2764;
 extern int D_004A2768;
 extern char str_fefont[];
@@ -185,7 +185,7 @@ extern sTex_20EB50 D_004C8C58[];
  *
  * On the first call after the last tracker was destroyed (D_004A2768 clear) it looks up the 11 icon records of
  * D_004C8C58 (name hash, width, height, texture) in the UI texture bank (SSXApp->Game->UI + 0x58,
- * cUITextureBank_getElementByHashname) and the "fefont" font in the UI's font bank (func_003983F0 on UI + 0x8) into
+ * cUITextureBank_getElementByHashname) and the "fefont" font in the UI's font bank (cUIFontInterface_getFontByHashName on UI + 0x8) into
  * D_004A2764, and sets D_004A2768. Then func_0020EC18 does the layout. cOVStateHUD1P_onCreateScreen calls it for both
  * panels' trackers.
  *
@@ -201,7 +201,7 @@ extern "C" void func_0020EB50(void* self, sRect20EAA0* screenRect, sRect20EAA0* 
             D_004C8C58[i].handle = cUITextureBank_getElementByHashname(res + 0x58, D_004C8C58[i].name);
         }
         void* bank = *(void**)(res + 8);
-        D_004A2764 = func_003983F0(bank, GetHashValue32(str_fefont));
+        D_004A2764 = cUIFontInterface_getFontByHashName(bank, GetHashValue32(str_fefont));
         D_004A2768 = 1;
     }
     func_0020EC18(self, screenRect, area);
@@ -465,7 +465,7 @@ extern sColour_EDA0 D_004C6878;
 extern sV2_EDA0 D_004A4EC0;
 extern char str_pct_dpct_pct[];
 extern "C" int sprintf(char* buf, const char* fmt, ...);
-extern "C" void func_00392908(void* font, float x, float y, const char* str);
+extern "C" void cFont_centertext(void* font, float x, float y, const char* str);
 
 extern int D_004A275C;
 extern char* D_004A2758;
@@ -501,7 +501,7 @@ static inline float limitStep_EDA0(float v, float prev, float lim)
  * invalidated when the viewer changed since the last draw (+0x34). The drawing runs inside cPS2GraphicsMan_PushView and
  * a pushed draw state reset to sDrawState_s_defaultDrawState with an identity view (cPS2GraphicsMan_SetView1):
  * - "%d%%" of the course done (distance / course length, D_004A2750 + 0x10), centred at the text position
- *   (func_00392908) in the shared font at 0.6667 scale, white with a black shadow offset by (2, 2);
+ *   (cFont_centertext) in the shared font at 0.6667 scale, white with a black shadow offset by (2, 2);
  * - an arrow (icon 4) at the top for each racer ahead of the window and at the bottom for each one behind it, shifted
  *   sideways by -offset * 0.005;
  * - the bar (icon 0, 11 px wide), cut where the window passes the start or the finish, and a red untextured strip over
@@ -595,7 +595,7 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
     D_004A2764_EDA0->color2 = D_004C6878;
     D_004A2764_EDA0->scale = D_004A4EC0;
     ((cGfx_EDA0*)GrMan)->stateTop->SetPrim(10);
-    func_00392908(D_004A2764_EDA0, self->x, self->y, buf);
+    cFont_centertext(D_004A2764_EDA0, self->x, self->y, buf);
     D_004A2764_EDA0->SetScale(1.0f, 1.0f);
 
     sIcon_EDA0* arrow = &D_004C8C58_EDA0[4];
@@ -1794,7 +1794,7 @@ INCLUDE_ASM("fe/ovstatetrophy", func_00210D20);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cOVState_onUpdate(void* self);
-extern "C" void* func_0039F698(void* list);
+extern "C" void* cUIStateStack_popToState(void* list);
 extern "C" int func_00258160(int a, char* name, int len);
 extern "C" void func_00210BD8(void* self, char* name, int a);
 
@@ -1802,7 +1802,7 @@ extern "C" void func_00210BD8(void* self, char* name, int a);
  * Updates the chat overlay each frame: closes it when the online pause runs out and shows incoming messages.
  *
  * After cOVState_onUpdate, if cGameComm_mGameComm exists and its mPauseTimeout or mOverlayTimeout has reached 0, it
- * closes the engine's popups (func_0039F698 on the state stack) and sets this state's mAttrState to mode 7 with
+ * closes the engine's popups (cUIStateStack_popToState on the state stack) and sets this state's mAttrState to mode 7 with
  * mPendingDelete. While the screen exists it then reads an incoming chat packet into +0x9C (func_00258160, up to 65
  * bytes) and appends it as the opponent's line (func_00210BD8).
  */
@@ -1813,7 +1813,7 @@ extern "C" void func_00210D20(void* self)
     if (gameComm != 0) {
         int ok = gameComm->mPauseTimeout == 0 || gameComm->mOverlayTimeout == 0;
         if (ok) {
-            func_0039F698(*(char**)((char*)self + 0x10) + 0x18);
+            cUIStateStack_popToState(*(char**)((char*)self + 0x10) + 0x18);
             *(int*)((char*)self + 0x1C) = (*(int*)((char*)self + 0x1C) & ~0x3F00) | 0x780;
         }
     }
@@ -1852,14 +1852,14 @@ extern char D_004A2560[];
 extern "C" void cKeyboardPopup_setIncludeKey(void* self, int i, int v, int mode);
 extern "C" void cOVState_onWidgetEvent(void* self);
 extern "C" void func_00258C50(int a, char* name);
-// PORT: func_0039F190 returns the last node it touched; bound with its value return.
-void* func_0039F190_r(void* list, int a1) __asm__("func_0039F190");
+// PORT: cUIStateStack_pop returns the last node it touched; bound with its value return.
+void* cUIStateStack_pop_r(void* list, int a1) __asm__("cUIStateStack_pop");
 extern "C" int strlen(const char* s);
 
 /**
  * Handles the chat overlay's widget events: closing it, opening the keyboard and sending the typed message.
  *
- * Ignored without a screen. Event 6, while no keyboard is open, pops the top state (func_0039F190 on the engine's
+ * Ignored without a screen. Event 6, while no keyboard is open, pops the top state (cUIStateStack_pop on the engine's
  * stack) and sets this state's mAttrState to mode 7 with mPendingDelete. Event 5, while no keyboard is open, opens the
  * keyboard (func_00210F40, empty texts, 61 characters) and calls cKeyboardPopup_setIncludeKey(75, 1, 2) on it. Event 13
  * first shows any incoming message (func_00258160, func_00210BD8), then sends the keyboard's mszEditString (+0x74) when
@@ -1877,7 +1877,7 @@ extern "C" void func_00210DF0(void* self, void* item, unsigned int key)
     switch (key) {
     case 6:
         if (*(int*)((char*)self + 0xE0) == 0) {
-            func_0039F190_r(*(char**)((char*)self + 0x10) + 0x18, 1);
+            cUIStateStack_pop_r(*(char**)((char*)self + 0x10) + 0x18, 1);
             *(int*)((char*)self + 0x1C) = (*(int*)((char*)self + 0x1C) & ~0x3F00) | 0x780;
         }
         break;

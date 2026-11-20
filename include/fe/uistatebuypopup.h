@@ -10,9 +10,9 @@
 //
 // Size 0x70: cMemMan_alloc(0x70, "cUIStateBuyPopup" / "UITRICKBUY") + cUIStateBuyPopup_cUIStateBuyPopup(mem, pEngine, pParent,
 // userNum) at all 5 sites (fe/messagecenter, fe/festatecharequipdetail, fe/festatebuyattrib, fe/festatestore).
-// Constructors cUIStateBuyPopup_cUIStateBuyPopup (cUIState(pEngine, pParent) func_0039E318, vtable, mInfo.clear() twice, mUserNum,
+// Constructors cUIStateBuyPopup_cUIStateBuyPopup (cUIState(pEngine, pParent) cUIState_cUIState1, vtable, mInfo.clear() twice, mUserNum,
 // mHashName 7, mCtrlBits) and the default cUIStateBuyPopup_cUIStateBuyPopup1; destructor cUIStateBuyPopup__cUIStateBuyPopup (stores
-// D_0046D0D0, then cUIState's func_0039E390). Retail vtable cUIStateBuyPopup_vtbl = D_0046CB08 (24 slots: 1 dtor,
+// D_0046D0D0, then cUIState's cUIState__cUIState). Retail vtable cUIStateBuyPopup_vtbl = D_0046CB08 (24 slots: 1 dtor,
 // 4 onCreateScreen, 6 cFEState_onGainFocus, 18 onWidgetCreate, 19 onWidgetEvent, 20 onWidgetMenu).
 // Bases: cFEState (no members; On Tour size 0x48: its vtable D_0046D0D0 is the one ~20 FE destructors restore, and
 // slot 6 is cFEState_onGainFocus), then cUIState (ui/uistate.h) and cListNode, written out flat below.

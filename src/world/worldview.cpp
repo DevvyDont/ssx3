@@ -1648,7 +1648,7 @@ extern "C" void nash_Octant_addnode(sHashCell_AE68* cell, int type, void* node, 
 extern char str_strm_tex[];
 extern char str_strm_lpg[];
 extern "C" void* func_003AD198();
-extern "C" void func_00242540(void* self, void* obj);
+extern "C" void cOcclusionMan_addVisCurtain(void* self, void* obj);
 // PORT: the unit declares this later returning void*; bind this char* view by symbol.
 char* cAudioInterface_getGame_AE68() __asm__("cAudioInterface_getGame");
 extern "C" void func_002B6B08(void* self, void* obj, unsigned int arg);
@@ -1800,7 +1800,7 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int RID,
         func_002105D0(obj);
         break;
     case 11:
-        func_00242540(func_003AD198(), obj);
+        cOcclusionMan_addVisCurtain(func_003AD198(), obj);
         break;
     case 14:
         if (!cAI_swaploadInjectedPathFile(*(void**)(*(char**)(D_004A28A8_AE68 + 0x84) + 0xC), RID & 0xFF, RID >> 8, obj)) {
@@ -1829,7 +1829,7 @@ extern "C" void cAI_removeInjectedFile(void* p, unsigned char id);
 void cBEMissionInterface_remStreamData_2(void* iface, unsigned char id) __asm__("cBEMissionInterface_remStreamData__FPv");
 extern "C" void func_0016CF18(unsigned int param);
 extern "C" void func_00210608(void* data);
-extern "C" void func_00242570(void* p, void* data);
+extern "C" void cOcclusionMan_removeVisCurtain(void* p, void* data);
 extern "C" void cSSXScriptEngine_DetachAnchorDataTable(void* p, unsigned char id);
 extern "C" void cSSXAudio_UnAttachAudioBank(void* p, unsigned int param, void* data);
 extern "C" void* cAudioInterface_bxAudio();
@@ -1915,7 +1915,7 @@ static inline void update_B498(char* w, int idx, void* item, const sWVBox_B498* 
  * Dispatches on @p msg: spatial types take their nodes out of the world's spatial hash (nash_Nash_findkey, nash_Cell_remnode)
  * and free them; type 13 purges a world audio file (func_002B6B30), 15 unloads a world-painter section (cWorldPainterSection_unload),
  * 18 detaches a script anchor table, 20 unattaches an audio bank, 19 removes mission stream data through BE interface
- * 10, 11 removes an occlusion curtain (func_00242570), 14 drops an AI file (cAI_removeInjectedFile) and 22 resets the avalanche;
+ * 10, 11 removes an occlusion curtain (cOcclusionMan_removeVisCurtain), 14 drops an AI file (cAI_removeInjectedFile) and 22 resets the avalanche;
  * types 17 and 21 go to func_0016CF18 and func_00210608. Other types need nothing.
  *
  * @param msg  stream data type of the chunk (On Tour eBxStreamDataType type)
@@ -2016,7 +2016,7 @@ extern "C" void* cPS2ChunkResolve_unresolve(char* self, unsigned int msg, unsign
         func_00210608(data);
         break;
     case 11:
-        func_00242570(func_003AD198(), data);
+        cOcclusionMan_removeVisCurtain(func_003AD198(), data);
         break;
     case 14:
         data = 0;

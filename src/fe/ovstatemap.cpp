@@ -376,7 +376,7 @@ extern "C" void func_0028FAE0(void* self);
 extern "C" void cGame_setState(void* self, int a, int b, int refresh);
 extern "C" void cOVState_MAP_setWidgetHiliteColor(void* self, void* obj, int on);
 extern "C" void cOVState_MAP_setWidgetUnHiliteColor(void* self, void* obj, int on);
-void* func_0039F190_8C28(void* self, int a1) __asm__("func_0039F190");
+void* cUIStateStack_pop_8C28(void* self, int a1) __asm__("cUIStateStack_pop");
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern int D_004A2A54;
@@ -458,7 +458,7 @@ extern "C" void cOVState_MAP_onWidgetEvent(void* selfp, void* pWidget, int Event
         } else {
             cOVState_MAP_cleanupIndicators(self);
             cOVState_MAP_setupScreenExit(self);
-            func_0039F190_8C28(*(char**)(self + 0x10) + 0x18, 1);
+            cUIStateStack_pop_8C28(*(char**)(self + 0x10) + 0x18, 1);
             *(int*)(self + 0x1C) = (*(int*)(self + 0x1C) & ~0x3F00) | 0x780;
         }
         break;

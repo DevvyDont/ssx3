@@ -251,7 +251,7 @@ INCLUDE_ASM("fe/festatelodge", cFEStateLodge_onPopupEvent);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cFEPopupConfirm_cFEPopupConfirm(void* self, void* engine, void* owner, unsigned short* text, int a4, int a5, int a6, int a7, int a8);
 extern "C" void* cFEStateProfileLoad_cFEStateProfileLoad(void* self, void* engine, int a2, unsigned char mask);
-extern "C" void func_0039F190(void* list, int a1);
+extern "C" void cUIStateStack_pop(void* list, int a1);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_pushCheck(void* list, void* item);
 extern "C" void cUIStateStack_pushSpecial(void* list, void* item, int a2, int a3);
@@ -300,12 +300,12 @@ extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, char* msg, unsig
     case 0xF:
         self->mbIsYesOrNo = 1;
         if (self->mPathToSaveProfile == 6 || self->mPathToSaveProfile == 0x10 || self->mPathToSaveProfile == 17) {
-            func_0039F190(self->mpEngine->mStateStack, 1);
+            cUIStateStack_pop(self->mpEngine->mStateStack, 1);
         }
         break;
     case 0x10:
         self->mbIsYesOrNo = 0;
-        func_0039F190(self->mpEngine->mStateStack, 1);
+        cUIStateStack_pop(self->mpEngine->mStateStack, 1);
         switch (self->mPathToSaveProfile) {
         case 0x10: {
             self->bToNextState = 1;
@@ -372,13 +372,13 @@ extern "C" void cFEStateLodge_onPopupEvent(cFEStateLodge* self, char* msg, unsig
 INCLUDE_ASM("fe/festatelodge", cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail);
 #ifdef SKIP_ASM
 extern void* cFEStateLodgeRiderDetail_vtbl[];
-extern "C" void* func_0039E2A0(void* self);
+extern "C" void* cUIState_cUIState(void* self);
 extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 
 /**
  * Constructs the lodge rider-detail state: base cUIState, cFEStateLodgeRiderDetail_vtbl, state id 40, user 0.
  *
- * Runs the cUIState constructor func_0039E2A0() (the engine passes through in the second argument register), stores the
+ * Runs the cUIState constructor cUIState_cUIState() (the engine passes through in the second argument register), stores the
  * vtable and mHashName 40, sets mUserNum (+0x44) to 0 and mCtrlBits (+0x15) to rider slot 0's controller mask
  * (cFECustom_getPlayerCtrlMask() on the engine's FE custom object). cFECustom_getNextState() and cFECustom_getPrevState() create it.
  *
@@ -386,7 +386,7 @@ extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
  */
 extern "C" void* cFEStateLodgeRiderDetail_cFEStateLodgeRiderDetail(cFEStateLodgeRiderDetail* self)
 {
-    func_0039E2A0(self);
+    cUIState_cUIState(self);
     self->mVtbl = cFEStateLodgeRiderDetail_vtbl;
     self->mHashName = 40;
     *(char*)&self->mUserNum = 0;
@@ -715,7 +715,7 @@ extern "C" void cFEStateLodgeRiderDetail_onWidgetEvent(cFEStateLodgeRiderDetail*
 INCLUDE_ASM("fe/festatelodge", cFEStateBuyAttrib_cFEStateBuyAttrib);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E2A0_4728(void* self, int a1) __asm__("func_0039E2A0");
+extern "C" void* cUIState_cUIState_4728(void* self, int a1) __asm__("cUIState_cUIState");
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" unsigned char cFECustom_getPlayerCtrlMask_4728(void* p, int a1) __asm__("cFECustom_getPlayerCtrlMask");
@@ -735,7 +735,7 @@ struct sLodgeStats_4728 {
  * Constructs the lodge attribute-buying state: base cUIState, cFEStateBuyAttrib_vtbl, state id 41, and a copy of the
  * rider's seven attribute values.
  *
- * Runs the cUIState constructor func_0039E2A0() on @p engine, stores mHashName 41 and the vtable, sets mUserNum (+0x44) to
+ * Runs the cUIState constructor cUIState_cUIState() on @p engine, stores mHashName 41 and the vtable, sets mUserNum (+0x44) to
  * 0 and mCtrlBits (+0x15) to rider slot 0's controller mask (cFECustom_getPlayerCtrlMask()), and clears the 0x1C bytes at +0x84. For
  * each of the seven attributes listed in D_004780B0 it stores cBEStatInterface_getStatFromProfile() (player interface, rider 0) at +0x4C[i]
  * and that value / 5 (the level) at +0x68[i]. cFECustom_getNextState() creates it.
@@ -747,7 +747,7 @@ struct sLodgeStats_4728 {
 extern "C" void* cFEStateBuyAttrib_cFEStateBuyAttrib(cFEStateBuyAttrib* stateMemory, int engine)
 {
     sLodgeStats_4728* self = (sLodgeStats_4728*)stateMemory;
-    func_0039E2A0_4728(self, engine);
+    cUIState_cUIState_4728(self, engine);
     stateMemory->mHashName = 41;
     stateMemory->mVtbl = cFEStateBuyAttrib_vtbl;
     stateMemory->mUserNum = 0;

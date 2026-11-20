@@ -14,9 +14,9 @@ INCLUDE_ASM("fe/festateloadscreen", cFELoadScreen_load);
 void* cBE_getInterface_3438(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cBE_getBE();
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_00397B08(void* mem);
+extern "C" void* cUIEngine_cUIEngine(void* mem);
 extern "C" void cUIEngine_loadFile(void* engine, const char* name);
-extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern "C" void func_00233640(void* self, int type);
 extern "C" void cUIStateStack_push(void* list, void* screen);
 extern int cRealFE_mStartState;
@@ -58,7 +58,7 @@ struct sObj_233438 {
 static inline char* newScreenA_233438(void* self)
 {
     char* p = (char*)cMemMan_alloc(0x48, D_0047BFD0, 0, 0);
-    func_0039E2A0(p, *(void**)((char*)self + 0xC));
+    cUIState_cUIState(p, *(void**)((char*)self + 0xC));
     *(void***)(p + 8) = cFELoadStateInLodge_vtbl;
     return p;
 }
@@ -66,7 +66,7 @@ static inline char* newScreenA_233438(void* self)
 static inline char* newScreenB_233438(void* self)
 {
     char* p = (char*)cMemMan_alloc(0x4C, D_0047BFE8, 0, 0);
-    func_0039E2A0(p, *(void**)((char*)self + 0xC));
+    cUIState_cUIState(p, *(void**)((char*)self + 0xC));
     *(int*)(p + 0x48) = 0;
     *(void***)(p + 8) = cFELoadHintState_vtbl;
     return p;
@@ -75,7 +75,7 @@ static inline char* newScreenB_233438(void* self)
 static inline char* newScreenC_233438(void* self)
 {
     char* p = (char*)cMemMan_alloc(0x4C, D_0047C000, 0, 0);
-    func_0039E2A0(p, *(void**)((char*)self + 0xC));
+    cUIState_cUIState(p, *(void**)((char*)self + 0xC));
     *(int*)(p + 0x48) = 0;
     *(void***)(p + 8) = cFELoadState_vtbl;
     return p;
@@ -98,7 +98,7 @@ extern "C" void cFELoadScreen_load(void* self)
         sVE_233438* vt = (sVE_233438*)ps2GraphicsMan->mVtbl;
         vt[44].fn((char*)ps2GraphicsMan + vt[44].delta, 0x100);
     }
-    void* eng = func_00397B08(cMemMan_alloc(0x70, str_UIEngine_b, 0x100, 0));
+    void* eng = cUIEngine_cUIEngine(cMemMan_alloc(0x70, str_UIEngine_b, 0x100, 0));
     *(void**)((char*)self + 0xC) = eng;
     cUIEngine_loadFile(eng, str_data_ui_fl);
     (*(sEngine_233438**)((char*)self + 0xC))->f8 = (int)SSXApp->Fonts;
@@ -320,7 +320,7 @@ struct cGame00233930 {
     virtual void v50(int id);
 };
 
-extern "C" void func_00397B70(void* self, int a1);
+extern "C" void cUIEngine__cUIEngine(void* self, int a1);
 extern "C" void cGraphicsMan_PurgeTextures(void* self);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028FA98(void* self, float f);
@@ -329,7 +329,7 @@ extern "C" void func_0028FA98(void* self, float f);
  * Unloads the front-end load screen's textures and UI object.
  *
  * Flushes the renderer (graphics manager slot 19), removes the texture id at +0x18 when it is >= 0 (slot 50,
- * RemoveTexture), destroys the object at +0xC (func_00397B70 with flags 3), removes the texture ids at +0x10 and +0x14
+ * RemoveTexture), destroys the object at +0xC (cUIEngine__cUIEngine with flags 3), removes the texture ids at +0x10 and +0x14
  * when non-zero, purges the textures (cGraphicsMan_PurgeTextures()) and calls func_0028FA98 on the audio object with
  * 1.0.
  */
@@ -342,7 +342,7 @@ extern "C" void cFELoadScreen_purge(void* self)
     }
     void* uiObject = *(void**)((char*)self + 0xC);
     if (uiObject != 0) {
-        func_00397B70(uiObject, 3);
+        cUIEngine__cUIEngine(uiObject, 3);
     }
     int i;
     for (i = 0; i < 2; i++) {
@@ -371,13 +371,13 @@ struct sVEntryV002339F8 {
 };
 
 extern "C" int cFadeScreen_drawFade(void* self);
-extern "C" void func_00397DF8(void* engine);
+extern "C" void cUIEngine_render2D(void* engine);
 
 /**
  * Draws the front-end load screen.
  *
  * Returns 0 when the graphics manager's slot 17 (IsRenderReady) says no. Unless cFadeScreen_drawFade (the base fade) draws
- * this frame, the UI object at +0xC is drawn (func_00397DF8); then the frame is flipped (slot 20) and 1 returned.
+ * this frame, the UI object at +0xC is drawn (cUIEngine_render2D); then the frame is flipped (slot 20) and 1 returned.
  *
  * @return 1 when a frame was drawn, 0 when the renderer was not ready
  */
@@ -389,7 +389,7 @@ extern "C" int cFELoadScreen_render(void* self)
         return 0;
     }
     if (cFadeScreen_drawFade(self) == 0) {
-        func_00397DF8(*(void**)((char*)self + 0xC));
+        cUIEngine_render2D(*(void**)((char*)self + 0xC));
     }
     graphicsMan = (char*)GrMan;
     sVEntryV002339F8* vt2 = *(sVEntryV002339F8**)(graphicsMan + 0x10D8);
@@ -401,16 +401,16 @@ extern "C" int cFELoadScreen_render(void* self)
 //100%
 INCLUDE_ASM("fe/festateloadscreen", cFELoadScreen_update);
 #ifdef SKIP_ASM
-extern "C" void func_00398038(void*);
+extern "C" void cUIEngine_update(void*);
 void cLoadScreen_update(void*);
 
 /**
- * Per-frame update of the front-end load screen: updates its UI object (+0xC, func_00398038), then runs the base
+ * Per-frame update of the front-end load screen: updates its UI object (+0xC, cUIEngine_update), then runs the base
  * update cLoadScreen_update (which calls cFadeScreen_update()).
  */
 extern "C" void cFELoadScreen_update(void* self)
 {
-    func_00398038(*(void**)((char*)self + 0xC));
+    cUIEngine_update(*(void**)((char*)self + 0xC));
     cLoadScreen_update(self);
 }
 #endif

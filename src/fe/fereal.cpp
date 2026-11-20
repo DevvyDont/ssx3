@@ -15,7 +15,7 @@ struct sVE0720 {
     int (*fn)(void*);
 };
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_0039E2A0(void* self, void* owner);
+extern "C" void* cUIState_cUIState(void* self, void* owner);
 extern "C" void cUIStateStack_pushExplicit(void* stack, void* state);
 extern char str_cFEStateTransition[];
 extern void* cFECustom_vtbl[];
@@ -37,7 +37,7 @@ extern "C" void* cFECustom_cFECustom(void* self, void* owner)
     *(void**)((char*)self + 0x10) = 0;
     *(void***)((char*)self + 0x4) = cFECustom_vtbl;
     char* transition = (char*)cMemMan_alloc(80, str_cFEStateTransition, 0, 0);
-    func_0039E2A0(transition, *(void**)((char*)self + 0x0));
+    cUIState_cUIState(transition, *(void**)((char*)self + 0x0));
     *(int*)(transition + 0x48) = 0;
     *(int*)(transition + 0x4C) = 0;
     *(sVE0720**)(transition + 0x8) = cFEStateTransition_vtbl;
@@ -802,7 +802,7 @@ extern "C" void cBE_newProfile(void* be, int b);
 extern "C" void* MEM_fill(void* p, int c, int n);
 extern "C" void cBE_setState(int state);
 extern "C" void cGraphicsMan_UploadTextures(void* p);
-extern "C" void func_00195E58(void* p);
+extern "C" void cFELocale_unloadOV(void* p);
 extern "C" void cFEFlowState_setNumStates(void* flow, int n);
 extern char D_004A4E80;
 extern char D_005308B8[];
@@ -823,7 +823,7 @@ typedef void (*tVoid_1A1DC0)(void*);
  *
  * If gWeHaveToClearTheBackEnd is set, it resets back-end entries 0-2 (cBE_newProfile), zeroes the 0x20 bytes at
  * D_005308B8 and clears the flag. It then clears +0xB5AD8 and +0xB5ADC, sets back-end state 0 (cBE_setState()),
- * uploads the textures (cGraphicsMan_UploadTextures()), calls func_00195E58 on the front-end locale, turns off depth
+ * uploads the textures (cGraphicsMan_UploadTextures()), calls cFELocale_unloadOV on the front-end locale, turns off depth
  * fog, screen tint and light glow, sets the graphics manager's clear colour to black (slot 15 with (0, 0, 0)), gives
  * the front-end flow state D_004A4E80 86 states and finally calls its own virtual slot 8 (cRealFE_loadStartState()).
  */
@@ -842,7 +842,7 @@ extern "C" void cRealFE_gainFocus(char* self)
     *(int*)(self + 0xB5ADC) = 0;
     cBE_setState(0);
     cGraphicsMan_UploadTextures(GrMan);
-    func_00195E58(SSXApp->FELocale);
+    cFELocale_unloadOV(SSXApp->FELocale);
     cDepthFog_m_Enable = 0;
     cScreenTint_m_Enable = 0;
     cLightGlow_m_Enable = 0;
@@ -863,7 +863,7 @@ void cLoadTimer_startload(void* self, float t);
 void cLoadTimer_setnextpercent(void* self, float t);
 void func_0014BD78(void* iface);
 extern "C" void func_0014AF10(void* iface);
-extern "C" void func_00195BE0(void* self);
+extern "C" void cFELocale_loadFE(void* self);
 extern "C" void cUIEngine_loadFile(void* engine, const char* path);
 // PORT: the unit declares cRealFE_loadCharAnimations without parameters; this caller passes self.
 extern "C" void cRealFE_loadCharAnimations_1(void* self) __asm__("cRealFE_loadCharAnimations");
@@ -927,7 +927,7 @@ static inline void progress_1E80(float t)
  * Loads the front end: UI files, character animations, riders, camera, input and sound.
  *
  * Advances the loading bar (20, 50, 75, 99) as it goes. It calls func_0014BD78 and func_0014AF10 on BE
- * interface 9 and func_00195BE0 on the front-end locale, calls the graphics manager's slot 44 with 0, loads
+ * interface 9 and cFELocale_loadFE on the front-end locale, calls the graphics manager's slot 44 with 0, loads
  * "data/ui/fe" into the UI engine and the character animations, and calls func_0019CE68 on +0x1A70 and
  * cFERiderManager_init on the rider manager (+0xB0). The camera gets (0, 0, -195) and (0, 1, 0) and is updated. The
  * engine gets a cFEInput ("FEUIInput"), a cFECustom ("FEUICustom"), a sound object ("FEUISound"), the app's
@@ -941,7 +941,7 @@ extern "C" void cRealFE_load(sRealFE_1E80* self)
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 9);
     func_0014BD78(iface);
     func_0014AF10(iface);
-    func_00195BE0(SSXApp->FELocale);
+    cFELocale_loadFE(SSXApp->FELocale);
     progress_1E80(50.0f);
     {
         cPS2GraphicsMan* g = GrMan;
@@ -1001,7 +1001,7 @@ extern "C" void cRealFE_load(sRealFE_1E80* self)
 INCLUDE_ASM("fe/fereal", cRealFE_loseFocus);
 #ifdef SKIP_ASM
 extern "C" void* cFadeScreen_loseFocus(void* self);
-extern "C" void func_00253418(void* p, int a1);
+extern "C" void cMoviePlayer__cMoviePlayer(void* p, int a1);
 extern "C" void cFEFlowState_purge(void* flow);
 extern int cRealFE_mMovieList;
 extern char D_004A4E80;
@@ -1010,7 +1010,7 @@ extern char D_004A4E80;
  * Lets the front end lose focus once the base fade allows it, stopping any movie that is playing.
  *
  * Returns 0 while cFadeScreen_loseFocus() still refuses. Otherwise it destroys the movie player at +0xB5AD4 (On Tour
- * mpMoviePlayer; func_00253418 with flags 3) and clears it, clears +0xB5AD8, cRealFE_mMovieList and +0xB5ADC, calls
+ * mpMoviePlayer; cMoviePlayer__cMoviePlayer with flags 3) and clears it, clears +0xB5AD8, cRealFE_mMovieList and +0xB5ADC, calls
  * cFEFlowState_purge on the front-end flow state D_004A4E80 and returns 1.
  *
  * @return 1 when focus may move on, 0 to keep it
@@ -1022,7 +1022,7 @@ extern "C" int cRealFE_loseFocus(void* self)
     }
     void* moviePlayer = *(void**)((char*)self + 0xB5AD4);
     if (moviePlayer != 0) {
-        func_00253418(moviePlayer, 3);
+        cMoviePlayer__cMoviePlayer(moviePlayer, 3);
         *(void**)((char*)self + 0xB5AD4) = 0;
     }
     *(int*)((char*)self + 0xB5AD8) = 0;
@@ -1046,7 +1046,7 @@ extern char D_005047F8[];
 extern "C" void cRealFE_purgeCharAnimations(void* self);
 extern "C" void cFERiderManager_purge(void* p);
 extern "C" void func_0019CF40(void* p);
-extern "C" void func_0038ADB0(void* p);
+extern "C" void cIrradianceDataBase_Purge(void* p);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_FrontEndPurge(void* p);
 
@@ -1055,7 +1055,7 @@ extern "C" void cSSXAudio_FrontEndPurge(void* p);
  *
  * Calls the graphics manager's slot 19 (cGraphicsMan_FlushRenderer) first, then cRealFE_purgeCharAnimations (releases the animation
  * data sources that cRealFE_loadCharAnimations() registered), cFERiderManager_purge on the rider manager (+0xB0),
- * func_0019CF40 on +0x1A70 and func_0038ADB0 on D_005047F8, clears the app's words at +0x7C and +0x80 and finally
+ * func_0019CF40 on +0x1A70 and cIrradianceDataBase_Purge on D_005047F8, clears the app's words at +0x7C and +0x80 and finally
  * calls cSSXAudio_FrontEndPurge() on the audio object.
  */
 extern "C" void cRealFE_purge(void* self)
@@ -1066,7 +1066,7 @@ extern "C" void cRealFE_purge(void* self)
     cRealFE_purgeCharAnimations(self);
     cFERiderManager_purge((char*)self + 0xB0);
     func_0019CF40((char*)self + 0x1A70);
-    func_0038ADB0(D_005047F8);
+    cIrradianceDataBase_Purge(D_005047F8);
     char* st = (char*)SSXApp;
     *(int*)(st + 0x7C) = 0;
     *(int*)(st + 0x80) = 0;
@@ -1078,10 +1078,10 @@ extern "C" void cRealFE_purge(void* self)
 INCLUDE_ASM("fe/fereal", cRealFE_render);
 #ifdef SKIP_ASM
 extern "C" int cFadeScreen_drawFade(void* self);
-extern "C" void func_00253890(void* h, int a1);
-extern "C" void func_00398018(void* ui);
+extern "C" void cMoviePlayer_asyncRender(void* h, int a1);
+extern "C" void cUIEngine_render3D(void* ui);
 extern "C" void cFERiderManager_render(void* p);
-extern "C" void func_00397DF8(void* ui);
+extern "C" void cUIEngine_render2D(void* ui);
 extern "C" void func_00285BF8(void* snd, int a1, float t);
 extern "C" void* cAudioInterface_bxAudio();
 extern int cRealFE_mMovieList;
@@ -1158,11 +1158,11 @@ static inline unsigned int feCallU(int slot)
  * Draws the front end: a black backdrop while a movie is queued, otherwise the 3D scene and the UI.
  *
  * Returns 0 when the graphics manager's slot 17 (IsRenderReady) says no. Counts +0xB5ADC down. If cFadeScreen_drawFade (the
- * base fade) returns non-zero, or a movie player exists (+0xB5AD4; drawn with func_00253890), it flips the frame (slot
+ * base fade) returns non-zero, or a movie player exists (+0xB5AD4; drawn with cMoviePlayer_asyncRender), it flips the frame (slot
  * 20) and returns 1. While cRealFE_mMovieList is non-zero it draws a full-screen black quad in an orthographic viewport
  * (slot 26) as a 4-vertex tri strip (slot 71). Otherwise it sets the perspective from the camera (+0x10, +0x14, +0x18
- * to slot 25) and the view matrix (+0x50 to slot 34), draws the scene with a fixed draw state (func_00398018 on the UI
- * engine at +0xC, cFERiderManager_render on the rider manager at +0xB0), then the UI (func_00397DF8), flips the frame and calls
+ * to slot 25) and the view matrix (+0x50 to slot 34), draws the scene with a fixed draw state (cUIEngine_render3D on the UI
+ * engine at +0xC, cFERiderManager_render on the rider manager at +0xB0), then the UI (cUIEngine_render2D), flips the frame and calls
  * func_00285BF8 on the audio object with 0.02.
  *
  * @return 1 when a frame was drawn, 0 when the renderer was not ready
@@ -1181,7 +1181,7 @@ extern "C" int cRealFE_render(void* self)
     }
     void* moviePlayer = *(void**)((char*)self + 0xB5AD4);
     if (moviePlayer != 0) {
-        func_00253890(moviePlayer, 0);
+        cMoviePlayer_asyncRender(moviePlayer, 0);
         feCall(20);
         return 1;
     }
@@ -1273,12 +1273,12 @@ extern "C" int cRealFE_render(void* self)
     feW()->top->setG12(13);
     feW()->top->setAlpha(21);
     feW()->top->setG2(5);
-    func_00398018(*(void**)((char*)self + 0xC));
+    cUIEngine_render3D(*(void**)((char*)self + 0xC));
     cFERiderManager_render((char*)self + 0xB0);
     feW()->top--;
     feCall(32);
     feCall(22);
-    func_00397DF8(*(void**)((char*)self + 0xC));
+    cUIEngine_render2D(*(void**)((char*)self + 0xC));
     feCall(20);
     func_00285BF8(cAudioInterface_bxAudio(), 0, 0.019999999552965164f);
     return 1;
@@ -1293,18 +1293,18 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cFadeScreen_update(void* self);
-extern "C" void* func_002533C8(void* mem);
+extern "C" void* cMoviePlayer_cMoviePlayer(void* mem);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_002B3A70(void* p);
 extern "C" void func_002B3A98(void* p);
-extern "C" void func_00253390(void* self);
-extern "C" int func_002534A8(void* p, void* q);
-extern "C" int func_00253860(void* self);
+extern "C" void tMoviePlayOptions_SetDefaults(void* self);
+extern "C" int cMoviePlayer_init(void* p, void* q);
+extern "C" int cMoviePlayer_asyncPlay(void* self);
 extern "C" void cMoviePlayer_asyncUpdate(void* self);
-extern "C" void func_00253418(void* p, int a1);
+extern "C" void cMoviePlayer__cMoviePlayer(void* p, int a1);
 int func_00289DE0(void* self);
 void* cInput_getState(void* self, int a1);
-extern "C" void func_00398038(void* self);
+extern "C" void cUIEngine_update(void* self);
 extern "C" void func_0019D250(void* p);
 extern "C" void cFERiderManager_update(void* p);
 extern "C" void cFEAsyncManager_Update(void* p);
@@ -1345,7 +1345,7 @@ struct sVE_27A0 {
  * skippable (+0xB5AD8). While a movie plays it runs cMoviePlayer_asyncUpdate() and, when skippable, ends it on a
  * press of input 0x70 or 122 on either pad; when it ends the player is destroyed, +0xB5ADC is set to 1 and, if no
  * movie is left, func_002B3A98 is called on the audio object (+0x118). Without a movie it updates the UI engine (+0xC,
- * func_00398038; or sets +0x8 when SSXApp +0x4 is set), the camera at +0x10 (its virtual slot 3), func_0019D250 on
+ * cUIEngine_update; or sets +0x8 when SSXApp +0x4 is set), the camera at +0x10 (its virtual slot 3), func_0019D250 on
  * +0x1A70, the rider manager (+0xB0, cFERiderManager_update) and the async file manager, and, when D_004A29EC is set, the
  * online members at +0xB5AB0 and +0xB5ABC and the lobby manager.
  */
@@ -1355,10 +1355,10 @@ extern "C" void cRealFE_update(char* self)
     cFadeScreen_update(self);
     if (*(void**)(self + 0xB5AD4) == 0) {
         if (cRealFE_mMovieList != 0) {
-            *(void**)(self + 0xB5AD4) = func_002533C8(cMemMan_alloc(68, str_MoviePlayer, 0x100, 0));
+            *(void**)(self + 0xB5AD4) = cMoviePlayer_cMoviePlayer(cMemMan_alloc(68, str_MoviePlayer, 0x100, 0));
             func_002B3A70((char*)cAudioInterface_bxAudio() + 0x118);
             sVidInfo_27A0 info;
-            func_00253390(&info);
+            tMoviePlayOptions_SetDefaults(&info);
             int movieBits = cRealFE_mMovieList;
             *(int*)(self + 0xB5AD8) = 0;
             if (movieBits & 1) {
@@ -1383,8 +1383,8 @@ extern "C" void cRealFE_update(char* self)
                 *(int*)(self + 0xB5AD8) = 1;
             }
             info.c = 1;
-            func_002534A8(*(void**)(self + 0xB5AD4), &info);
-            func_00253860(*(void**)(self + 0xB5AD4));
+            cMoviePlayer_init(*(void**)(self + 0xB5AD4), &info);
+            cMoviePlayer_asyncPlay(*(void**)(self + 0xB5AD4));
         }
         if (*(void**)(self + 0xB5AD4) == 0) goto noh;
     }
@@ -1408,7 +1408,7 @@ extern "C" void cRealFE_update(char* self)
         if (done == 0) return;
     }
     if (*(void**)(self + 0xB5AD4) != 0) {
-        func_00253418(*(void**)(self + 0xB5AD4), 3);
+        cMoviePlayer__cMoviePlayer(*(void**)(self + 0xB5AD4), 3);
     }
     int movieBits = cRealFE_mMovieList;
     *(int*)(self + 0xB5ADC) = 1;
@@ -1421,7 +1421,7 @@ extern "C" void cRealFE_update(char* self)
     }
 noh:
         if (*(int*)((char*)SSXApp + 4) == 0) {
-            func_00398038(*(void**)(self + 0xC));
+            cUIEngine_update(*(void**)(self + 0xC));
         } else {
             *(int*)(self + 8) = 1;
         }
@@ -1520,7 +1520,7 @@ extern "C" void cRealFE_purgeCharAnimations(void* self)
 INCLUDE_ASM("fe/fereal", cRealFE_loadStartState);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_0039E2A0(void* self, void* owner);
+extern "C" void* cUIState_cUIState(void* self, void* owner);
 extern "C" void cUIStateStack_pushExplicit(void* stack, void* state);
 extern "C" void cUIStateStack_push(void* stack, void* state);
 extern "C" void* cFEStateTitle_cFEStateTitle1(void* self, void* owner);
@@ -1573,7 +1573,7 @@ struct sRealFE_1A2C40 {
 extern "C" void cRealFE_loadStartState(sRealFE_1A2C40* self)
 {
     sStartState_1A2C40* backState = new (str_cFEStateBackground, 0, 0) sStartState_1A2C40;
-    func_0039E2A0(backState, self->ui);
+    cUIState_cUIState(backState, self->ui);
     backState->vt = (sVEnt_1A2C40*)cFEStateBackground_vtbl;
     backState->vt[4].fn((char*)backState + backState->vt[4].delta);
     cUIStateStack_pushExplicit(self->ui + 0x18, backState);
@@ -1612,19 +1612,19 @@ extern "C" void cRealFE_loadStartState(sRealFE_1A2C40* self)
 //100%
 INCLUDE_ASM("fe/fereal", cFESound_cFESound);
 #ifdef SKIP_ASM
-void* func_0039E288(void* self);
+void* cUISoundInterface_cUISoundInterface(void* self);
 extern void* D_00469348[];
 
 /**
  * Constructs the front end's sound interface.
  *
- * Runs the base constructor func_0039E288, stores the vtable D_00469348 and zeroes +0x4.
+ * Runs the base constructor cUISoundInterface_cUISoundInterface, stores the vtable D_00469348 and zeroes +0x4.
  *
  * @return @p self
  */
 extern "C" void* cFESound_cFESound(void* self)
 {
-    func_0039E288(self);
+    cUISoundInterface_cUISoundInterface(self);
     *(void***)self = D_00469348;
     *(int*)((char*)self + 0x4) = 0;
     return self;
@@ -1673,19 +1673,19 @@ extern "C" void cFESound_playSound(void* self, int sel)
 //100%
 INCLUDE_ASM("fe/fereal", cOVSound_cOVSound);
 #ifdef SKIP_ASM
-void* func_0039E288(void* self);
+void* cUISoundInterface_cUISoundInterface(void* self);
 extern void* cOVSound_vtbl[];
 
 /**
  * Constructs the overlay sound interface.
  *
- * Runs func_0039E288 (the UI sound interface base), installs cOVSound_vtbl at +0x0 and clears +0x4.
+ * Runs cUISoundInterface_cUISoundInterface (the UI sound interface base), installs cOVSound_vtbl at +0x0 and clears +0x4.
  *
  * @return @p self
  */
 extern "C" void* cOVSound_cOVSound(void* self)
 {
-    func_0039E288(self);
+    cUISoundInterface_cUISoundInterface(self);
     *(void***)self = cOVSound_vtbl;
     *(int*)((char*)self + 0x4) = 0;
     return self;
@@ -1740,7 +1740,7 @@ extern void* cFEStateSelectMultiplayerMode_vtbl[];
 /**
  * Constructs a select-multiplayer-mode state.
  *
- * Runs the cUIState constructor func_0039E2A0(self, owner), sets the state id (+0xC) to 22 and stores
+ * Runs the cUIState constructor cUIState_cUIState(self, owner), sets the state id (+0xC) to 22 and stores
  * cFEStateSelectMultiplayerMode_vtbl.
  *
  * @param owner  the UI engine
@@ -1748,7 +1748,7 @@ extern void* cFEStateSelectMultiplayerMode_vtbl[];
  */
 extern "C" void* cFEStateSelectMultiplayerMode_cFEStateSelectMultiplayerMode(void* self, void* owner)
 {
-    func_0039E2A0(self, owner);
+    cUIState_cUIState(self, owner);
     *(int*)((char*)self + 0xC) = 22;
     *(void***)((char*)self + 0x8) = cFEStateSelectMultiplayerMode_vtbl;
     return self;

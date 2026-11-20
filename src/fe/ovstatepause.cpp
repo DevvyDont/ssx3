@@ -407,7 +407,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cOVState_PROFILE_cOVState_PROFILE(void* self, void* engine, unsigned char a2, int a3);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
-extern "C" void func_0039F190(void* self, int a1);
+extern "C" void cUIStateStack_pop(void* self, int a1);
 extern "C" int cUIListBox_getCurrentEntryData(void* obj);
 extern "C" void cChaseCameraController_switchCamera_UserChange(void* a0, int a1, void* a2);
 extern "C" void* cAudioInterface_bxAudio();
@@ -481,7 +481,7 @@ static inline void* Sound_A238(int slot)
  * value is stored and applied at once.
  *
  * Cross (5) on "save" pushes a new 0x27C-byte "Save Profile" state (cOVState_PROFILE_cOVState_PROFILE, kind 0x2A) as a special
- * state; Triangle (6) closes this state (func_0039F190).
+ * state; Triangle (6) closes this state (cUIStateStack_pop).
  * A value change (9) writes the widget's value into the settings word cBEOptionInterface_mOption and applies it: HUD mode,
  * player 1 / 2 camera (cChaseCameraController_switchCamera_UserChange on game view 1 / 2), music / effects /
  * speech volume, DJ and arcade audio; in a network game EATalksl sets the voice level (value x 10). The
@@ -508,7 +508,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(void* self, char* obj, unsi
         }
         break;
     case 6:
-        func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
+        cUIStateStack_pop(*(char**)((char*)self + 0x10) + 0x18, 1);
         break;
     case 9:
         if (IsId_A238(obj, str_0lb)) {
@@ -564,14 +564,14 @@ int GetHashValue32(char* str);
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void* cOVState_onUpdate(void* self);
-extern "C" void func_0039F190(void* self, int a1);
+extern "C" void cUIStateStack_pop(void* self, int a1);
 extern char str_TransitionOut_b[];
 
 /**
  * Closes the in-game options when an online pause or overlay timeout runs out.
  *
  * After cOVState_onUpdate(), if a cGameComm exists and its mPauseTimeout or mOverlayTimeout is 0, plays the
- * screen's "TransitionOut" frame and closes the state (func_0039F190).
+ * screen's "TransitionOut" frame and closes the state (cUIStateStack_pop).
  */
 extern "C" void cOVState_PAUSE_OPTIONS_onUpdate(void* self)
 {
@@ -584,7 +584,7 @@ extern "C" void cOVState_PAUSE_OPTIONS_onUpdate(void* self)
             if (frame != 0xFFFF) {
                 cUIScreen_playFrame(*(void**)((char*)self + 0x40), (unsigned short)frame, 1);
             }
-            func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
+            cUIStateStack_pop(*(char**)((char*)self + 0x10) + 0x18, 1);
         }
     }
 }
@@ -820,7 +820,7 @@ INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_onGainTransition__FPv
 /**
  * Ends the online-error pause overlay's gain transition at once.
  *
- * The state stack update func_0039ECB0() ends a state's gain transition once this returns nonzero.
+ * The state stack update cUIStateStack_updateLoop() ends a state's gain transition once this returns nonzero.
  *
  * @return always 1 (transition finished)
  */
@@ -1060,8 +1060,8 @@ INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_doContinueCancel);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cGame_exit(void* game, int a);
 extern "C" void cAI_finishRemotePlayer(void* p);
-// func_0039F190 returns its last list node in $v0; the unit declares it void.
-void* func_0039F190_r(void* self, int a1) __asm__("func_0039F190");
+// cUIStateStack_pop returns its last list node in $v0; the unit declares it void.
+void* cUIStateStack_pop_r(void* self, int a1) __asm__("cUIStateStack_pop");
 extern int cPauseState_Flags;
 extern int D_004A2A54;
 extern int D_005366E8[];
@@ -1079,7 +1079,7 @@ extern int D_004428F0[];
  */
 extern "C" void cOVState_PAUSE_ONLINE_ERROR_doContinueCancel(void* self, void* item, int msg)
 {
-    func_0039F190_r(*(char**)((char*)self + 0x10) + 0x18, 1);
+    cUIStateStack_pop_r(*(char**)((char*)self + 0x10) + 0x18, 1);
     *(int*)((char*)self + 0x1C) = (*(int*)((char*)self + 0x1C) & ~0x3F00) | 0x780;
     switch (*(int*)((char*)item + 0x18)) {
     case 4:
@@ -2375,7 +2375,7 @@ extern "C" void func_002872A8(void* snd);
  * On event 5 (select) with a widget: sets cOVStateManager_mStatus to 3 (close the overlay), sets the word at +0x8 of
  * the current game state (SSXApp->Game->mCurrentState) to 1 as the overlay manager does to let the game state continue,
  * calls func_002872A8 on the sound system (cAudioInterface_bxAudio()) and pops the top state of the engine's state stack
- * (func_0039F190(mpEngine + 0x18, 1)).
+ * (cUIStateStack_pop(mpEngine + 0x18, 1)).
  *
  * @param widget  the widget the event is for; nothing happens when it is null
  * @param event  the widget event
@@ -2386,7 +2386,7 @@ extern "C" void func_001FDB88(void* self, int widget, int event)
         cOVStateManager_mStatus = 3;
         ((sPauseMgr_DB88*)((SSXApp)->Game)->mCurrentState)->f8 = 1;
         func_002872A8(cAudioInterface_bxAudio());
-        func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
+        cUIStateStack_pop(*(char**)((char*)self + 0x10) + 0x18, 1);
     }
 }
 #endif
@@ -2540,18 +2540,18 @@ extern "C" void cOVState_SAVEREPLAY_onDestroyScreen(void* self)
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEREPLAY_updateDone);
 #ifdef SKIP_ASM
-extern "C" void func_0039F718(void* self);
+extern "C" void cUIStateStack_popToStateInclusive(void* self);
 
 /**
  * Finishes the save-replay overlay once: pops the UI state stack down to it.
  *
- * When +0x1AC (On Tour mIsDone) is still 0 it calls func_0039F718(mpEngine + 0x18) (On Tour
+ * When +0x1AC (On Tour mIsDone) is still 0 it calls cUIStateStack_popToStateInclusive(mpEngine + 0x18) (On Tour
  * cUIStateStack::popToStateInclusive); then sets +0x1AC to 1.
  */
 extern "C" void cOVState_SAVEREPLAY_updateDone(void* self)
 {
     if (*(int*)((char*)self + 0x1AC) == 0) {
-        func_0039F718(*(char**)((char*)self + 0x10) + 0x18);
+        cUIStateStack_popToStateInclusive(*(char**)((char*)self + 0x10) + 0x18);
     }
     *(int*)((char*)self + 0x1AC) = 1;
 }
@@ -2957,7 +2957,7 @@ extern "C" void cOVState_SAVEREPLAY_hideMainButton(void* self, int loadBlocked, 
 INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEREPLAY_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cSSXApp_getMCManager(void* self);
-extern "C" void func_0023CAE8(void* self, int a, int b);
+extern "C" void cMCOverlayManager_writeSetFileType(void* self, int a, int b);
 void cReplay_purgeSave(void* self);
 // PORT: the unit declares cMCOverlayManager_SetAction as returning void*; this caller ignores the result (void view by asm label).
 extern "C" void cMCOverlayManager_SetAction_v(void* self, int mode) __asm__("cMCOverlayManager_SetAction");
@@ -3045,7 +3045,7 @@ public:
  * Ignores events without a widget or while busy (+0x1A8, mIsProcessing). Event 5 (select), when the screen is not
  * leaving (mState +0x1C0 != 6) and the display state (+0x214) is 3: stores the widget's slot (miMiscData) in +0x1C4
  * (mSlot) and the manager's mFileCursor, releases a held replay buffer (+0x1C8, cReplay_purgeSave on the replay), starts
- * the replay save with func_0023CAE8(manager, 0, -1) (On Tour writeSetFileType, file type 0 = replay), and sets
+ * the replay save with cMCOverlayManager_writeSetFileType(manager, 0, -1) (On Tour writeSetFileType, file type 0 = replay), and sets
  * mIsProcessing, mIsSavePressed (+0x1DC) and mState 3. Event 6 (back) sets mIsCancelPressed (+0x1E4), resets the
  * manager to state 0 (vtable slot 1, cMCOverlayManager_SetState) when mState is 0-2, and sets mState 6. Event 7, on a
  * usable device (mpMemCard slot 54) in mState 1 for a slot holding a save (cPS2MemCard_HasFileName): mIsProcessing,
@@ -3080,7 +3080,7 @@ extern "C" void cOVState_SAVEREPLAY_onWidgetEvent(void* self, void* msg, unsigne
             cReplay_purgeSave(SSXApp->Game->Replay);
             *(int*)((char*)self + 0x1C8) = 0;
         }
-        func_0023CAE8(mp, 0, -1);
+        cMCOverlayManager_writeSetFileType(mp, 0, -1);
         *(int*)((char*)self + 0x1DC) = one;
         *(int*)((char*)self + 0x1A8) = one;
         *(int*)((char*)self + 0x1C0) = st;
@@ -3285,18 +3285,18 @@ void* cOVState_SAVEOPTIONS_onDestroyScreen(void* self)
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEOPTIONS_updateDone);
 #ifdef SKIP_ASM
-extern "C" void func_0039F718(void* self);
+extern "C" void cUIStateStack_popToStateInclusive(void* self);
 
 /**
  * Finishes the save-records overlay once: pops the UI state stack down to it.
  *
- * When +0x1AC (On Tour mIsDone) is still 0 it calls func_0039F718(mpEngine + 0x18) (On Tour
+ * When +0x1AC (On Tour mIsDone) is still 0 it calls cUIStateStack_popToStateInclusive(mpEngine + 0x18) (On Tour
  * cUIStateStack::popToStateInclusive); then sets +0x1AC to 1.
  */
 extern "C" void cOVState_SAVEOPTIONS_updateDone(void* self)
 {
     if (*(int*)((char*)self + 0x1AC) == 0) {
-        func_0039F718(*(char**)((char*)self + 0x10) + 0x18);
+        cUIStateStack_popToStateInclusive(*(char**)((char*)self + 0x10) + 0x18);
     }
     *(int*)((char*)self + 0x1AC) = 1;
 }
@@ -3686,7 +3686,7 @@ extern "C" void cOVState_SAVEOPTIONS_hideMainButton(void* self, int loadBlocked,
 INCLUDE_ASM("fe/ovstatepause", cOVState_SAVEOPTIONS_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cSSXApp_getMCManager(void* self);
-extern "C" void func_0023CAE8(void* self, int a, int b);
+extern "C" void cMCOverlayManager_writeSetFileType(void* self, int a, int b);
 // PORT: the unit declares cMCOverlayManager_SetAction as returning void*; this caller ignores the result (void view by asm label).
 extern "C" void cMCOverlayManager_SetAction_v(void* self, int mode) __asm__("cMCOverlayManager_SetAction");
 
@@ -3773,7 +3773,7 @@ public:
  * Same as cOVState_SAVEREPLAY_onWidgetEvent without the replay buffer. Ignores events without a widget or while busy (+0x1A8,
  * mIsProcessing). Event 5 (select), when mState (+0x1C0) is not 6 and the display state (+0x214) is 3: stores the
  * widget's slot (miMiscData) in +0x1C4 (mSlot) and the manager's mFileCursor, starts the save with
- * func_0023CAE8(manager, 2, -1) (On Tour writeSetFileType, file type 2 = settings) and sets mIsProcessing,
+ * cMCOverlayManager_writeSetFileType(manager, 2, -1) (On Tour writeSetFileType, file type 2 = settings) and sets mIsProcessing,
  * mIsSavePressed (+0x1DC) and mState 3. Event 6 (back) sets mIsCancelPressed (+0x1E4), resets the manager to state 0
  * (vtable slot 1, cMCOverlayManager_SetState) when mState is 0-2, and sets mState 6. Event 7, on a usable device
  * (mpMemCard slot 54) in mState 1 for a slot holding a save (cPS2MemCard_HasFileName): mIsProcessing, mState 4,
@@ -3803,7 +3803,7 @@ extern "C" void cOVState_SAVEOPTIONS_onWidgetEvent(void* self, void* msg, unsign
         *(int*)((char*)self + 0x1C4) = fileSlot;
         *(int*)(mp + 0xF8) = fileSlot;
         *(int*)((char*)self + 0x1A8) = one;
-        func_0023CAE8(mp, 2, -1);
+        cMCOverlayManager_writeSetFileType(mp, 2, -1);
         *(int*)((char*)self + 0x1DC) = one;
         *(int*)((char*)self + 0x1A8) = one;
         *(int*)((char*)self + 0x1C0) = st;

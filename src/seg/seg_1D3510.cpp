@@ -408,9 +408,9 @@ extern "C" void func_002D3930(cPS2MemCard* pS2MemCard) {
 INCLUDE_ASM("seg/seg_1D3510", func_002D3950);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_002C53E0_3950(void*, int, int) __asm__("func_002C53E0");
+extern "C" void cPS2MemCard_GetStatus_3950(void*, int, int) __asm__("cPS2MemCard_GetStatus");
 extern "C" void func_002D3950(cPS2MemCard* pS2MemCard, int outText) {
-    func_002C53E0_3950(pS2MemCard, (pS2MemCard->mDevice), outText);
+    cPS2MemCard_GetStatus_3950(pS2MemCard, (pS2MemCard->mDevice), outText);
 }
 #endif
 
@@ -460,9 +460,9 @@ extern "C" int func_002D39B0(cPS2MemCard* pS2MemCard) {
 INCLUDE_ASM("seg/seg_1D3510", func_002D39B8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_002C51D0_39B8(void*, int) __asm__("func_002C51D0");
+extern "C" void cPS2MemCard_GetLastError_39B8(void*, int) __asm__("cPS2MemCard_GetLastError");
 extern "C" void func_002D39B8(void *memCard) {
-    func_002C51D0_39B8(memCard, (*(int *)((char*)(memCard) + (0xC))));
+    cPS2MemCard_GetLastError_39B8(memCard, (*(int *)((char*)(memCard) + (0xC))));
 }
 #endif
 

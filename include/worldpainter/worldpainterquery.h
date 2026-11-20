@@ -326,9 +326,9 @@ struct tWPInGameData_MusicTrigger {
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_MusicTrigger_tWPInGameData_MusicTrigger stores -99999.0f
     void** mVtbl;                    // 0x04 [R] tWPInGameData_MusicTrigger_tWPInGameData_MusicTrigger stores the vtable D_00485AF8
     // --- tWPInGameData_MusicTrigger (alloc tag "tWPIGD_MusicTrigger", 0x18 bytes)
-    int m_Type;                      // 0x08 [O]; [R] ctor default; [U] getter vtable slot 1 (func_002C1490) returns this + 0x8
+    int m_Type;                      // 0x08 [O]; [R] ctor default; [U] getter vtable slot 1 (tWPInGameData_MusicTrigger_Type) returns this + 0x8
     int m_lastType;                  // 0x0C [O]; [R] ctor default; [U] blend stores the target
-    int m_Value;                     // 0x10 [O]; [R] ctor default; [U] getter vtable slot 2 (func_002C1498) returns this + 0x10
+    int m_Value;                     // 0x10 [O]; [R] ctor default; [U] getter vtable slot 2 (tWPInGameData_MusicTrigger_Value) returns this + 0x10
     int m_lastValue;                 // 0x14 [O]; [R] ctor default; [U] blend stores the target
 };
 
@@ -345,7 +345,7 @@ struct tWPInGameData_Mix {
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_Mix_tWPInGameData_Mix stores -99999.0f
     void** mVtbl;                    // 0x04 [R] tWPInGameData_Mix_tWPInGameData_Mix stores the vtable D_004858C0
     // --- tWPInGameData_Mix (alloc tag "tWPIGD_Mix", 0x10 bytes)
-    int m_MixPreset;                 // 0x08 [O]; [R] ctor default; [U] getter vtable slot 3 (func_002C14A0) returns this + 0x8
+    int m_MixPreset;                 // 0x08 [O]; [R] ctor default; [U] getter vtable slot 3 (tWPInGameData_Mix_MixPreset) returns this + 0x8
     int m_lastMixPreset;             // 0x0C [O]; [R] ctor default; [U] blend stores the target
 };
 
@@ -360,7 +360,7 @@ struct tWPInGameData_Ambience {
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_Ambience_tWPInGameData_Ambience stores -99999.0f
     void** mVtbl;                    // 0x04 [R] tWPInGameData_Ambience_tWPInGameData_Ambience stores the vtable D_00485688
     // --- tWPInGameData_Ambience (alloc tag "tWPIGD_Ambience", 0x10 bytes)
-    int m_BankID;                    // 0x08 [O]; [R] ctor default; [U] getter vtable slot 4 (func_002C14A8) returns this + 0x8
+    int m_BankID;                    // 0x08 [O]; [R] ctor default; [U] getter vtable slot 4 (tWPInGameData_Ambience_BankID) returns this + 0x8
     int m_lastBankID;                // 0x0C [O]; [R] ctor default; [U] blend stores the target
 };
 
@@ -375,7 +375,7 @@ struct tWPInGameData_Speech {
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_Speech_tWPInGameData_Speech stores -99999.0f
     void** mVtbl;                    // 0x04 [R] tWPInGameData_Speech_tWPInGameData_Speech stores the vtable D_00485450
     // --- tWPInGameData_Speech (alloc tag "tWPIGD_Speech", 0x10 bytes)
-    int m_SpeechID;                  // 0x08 [O]; [R] ctor default; [U] getter vtable slot 5 (func_002C14B0) returns this + 0x8
+    int m_SpeechID;                  // 0x08 [O]; [R] ctor default; [U] getter vtable slot 5 (tWPInGameData_Speech_SpeechID) returns this + 0x8
     int m_lastSpeechID;              // 0x0C [O]; [R] ctor default; [U] blend stores the target
 };
 
@@ -390,7 +390,7 @@ struct tWPInGameData_Camera {
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_Camera_tWPInGameData_Camera stores -99999.0f
     void** mVtbl;                    // 0x04 [R] tWPInGameData_Camera_tWPInGameData_Camera stores the vtable D_00485218
     // --- tWPInGameData_Camera (alloc tag "tWPIGD_Camera", 0x10 bytes)
-    float m_DrawDistance;            // 0x08 [O]; [R] ctor default; [U] getter vtable slot 6 (func_002C14B8) returns this + 0x8
+    float m_DrawDistance;            // 0x08 [O]; [R] ctor default; [U] getter vtable slot 6 (tWPInGameData_Camera_DrawDistance) returns this + 0x8
     float m_lastDrawDistance;        // 0x0C [O]; [R] ctor default; [U] blend stores the target
 };
 
@@ -405,17 +405,17 @@ struct tWPInGameData_Fog {
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_Fog_tWPInGameData_Fog stores -99999.0f
     void** mVtbl;                    // 0x04 [R] tWPInGameData_Fog_tWPInGameData_Fog stores the vtable D_00484FE0
     // --- tWPInGameData_Fog (alloc tag "tWPIGD_Fog", 0x38 bytes)
-    float m_FogDensity;              // 0x08 [O]; [R] ctor default; [U] getter vtable slot 7 (func_002C14C0) returns this + 0x8
+    float m_FogDensity;              // 0x08 [O]; [R] ctor default; [U] getter vtable slot 7 (tWPInGameData_Fog_FogDensity) returns this + 0x8
     float m_lastFogDensity;          // 0x0C [O]; [R] ctor default; [U] blend stores the target
-    float m_FogNear;                 // 0x10 [O]; [R] ctor default; [U] getter vtable slot 8 (func_002C14C8) returns this + 0x10
+    float m_FogNear;                 // 0x10 [O]; [R] ctor default; [U] getter vtable slot 8 (tWPInGameData_Fog_FogNear) returns this + 0x10
     float m_lastFogNear;             // 0x14 [O]; [R] ctor default; [U] blend stores the target
-    float m_FogFar;                  // 0x18 [O]; [R] ctor default; [U] getter vtable slot 9 (func_002C14D0) returns this + 0x18
+    float m_FogFar;                  // 0x18 [O]; [R] ctor default; [U] getter vtable slot 9 (tWPInGameData_Fog_FogFar) returns this + 0x18
     float m_lastFogFar;              // 0x1C [O]; [R] ctor default; [U] blend stores the target
-    float m_FogColourR;              // 0x20 [O]; [R] ctor default; [U] getter vtable slot 10 (func_002C14D8) returns this + 0x20
+    float m_FogColourR;              // 0x20 [O]; [R] ctor default; [U] getter vtable slot 10 (tWPInGameData_Fog_FogColourR) returns this + 0x20
     float m_lastFogColourR;          // 0x24 [O]; [R] ctor default; [U] blend stores the target
-    float m_FogColourG;              // 0x28 [O]; [R] ctor default; [U] getter vtable slot 11 (func_002C14E0) returns this + 0x28
+    float m_FogColourG;              // 0x28 [O]; [R] ctor default; [U] getter vtable slot 11 (tWPInGameData_Fog_FogColourG) returns this + 0x28
     float m_lastFogColourG;          // 0x2C [O]; [R] ctor default; [U] blend stores the target
-    float m_FogColourB;              // 0x30 [O]; [R] ctor default; [U] getter vtable slot 12 (func_002C14E8) returns this + 0x30
+    float m_FogColourB;              // 0x30 [O]; [R] ctor default; [U] getter vtable slot 12 (tWPInGameData_Fog_FogColourB) returns this + 0x30
     float m_lastFogColourB;          // 0x34 [O]; [R] ctor default; [U] blend stores the target
 };
 
@@ -440,19 +440,19 @@ struct tWPInGameData_LightGlow {
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_LightGlow_tWPInGameData_LightGlow stores -99999.0f
     void** mVtbl;                    // 0x04 [R] tWPInGameData_LightGlow_tWPInGameData_LightGlow stores the vtable D_00484DA8
     // --- tWPInGameData_LightGlow (alloc tag "tWPIGD_LightGlow", 0x40 bytes)
-    float m_LightGlowCutoff;         // 0x08 [O]; [R] ctor default; [U] getter vtable slot 13 (func_002C14F0) returns this + 0x8
+    float m_LightGlowCutoff;         // 0x08 [O]; [R] ctor default; [U] getter vtable slot 13 (tWPInGameData_LightGlow_LightGlowCutoff) returns this + 0x8
     float m_lastLightGlowCutoff;     // 0x0C [O]; [R] ctor default; [U] blend stores the target
-    float m_LightGlowCutoffScale;    // 0x10 [O]; [R] ctor default; [U] getter vtable slot 14 (func_002C14F8) returns this + 0x10
+    float m_LightGlowCutoffScale;    // 0x10 [O]; [R] ctor default; [U] getter vtable slot 14 (tWPInGameData_LightGlow_LightGlowCutoffScale) returns this + 0x10
     float m_lastLightGlowCutoffScale; // 0x14 [O]; [R] ctor default; [U] blend stores the target
-    float m_LightGlowCopyIntensity;  // 0x18 [O]; [R] ctor default; [U] getter vtable slot 15 (func_002C1500) returns this + 0x18
+    float m_LightGlowCopyIntensity;  // 0x18 [O]; [R] ctor default; [U] getter vtable slot 15 (tWPInGameData_LightGlow_LightGlowCopyIntensity) returns this + 0x18
     float m_lastLightGlowCopyIntensity; // 0x1C [O]; [R] ctor default; [U] blend stores the target
-    float m_LightGlowSourceIntensity; // 0x20 [O]; [R] ctor default; [U] getter vtable slot 16 (func_002C1508) returns this + 0x20
+    float m_LightGlowSourceIntensity; // 0x20 [O]; [R] ctor default; [U] getter vtable slot 16 (tWPInGameData_LightGlow_LightGlowSourceIntensity) returns this + 0x20
     float m_lastLightGlowSourceIntensity; // 0x24 [O]; [R] ctor default; [U] blend stores the target
-    float m_LightGlowFrameIntensity; // 0x28 [O]; [R] ctor default; [U] getter vtable slot 17 (func_002C1510) returns this + 0x28
+    float m_LightGlowFrameIntensity; // 0x28 [O]; [R] ctor default; [U] getter vtable slot 17 (tWPInGameData_LightGlow_LightGlowFrameIntensity) returns this + 0x28
     float m_lastLightGlowFrameIntensity; // 0x2C [O]; [R] ctor default; [U] blend stores the target
-    float m_LightGlowBlend2;         // 0x30 [O]; [R] ctor default; [U] getter vtable slot 18 (func_002C1518) returns this + 0x30
+    float m_LightGlowBlend2;         // 0x30 [O]; [R] ctor default; [U] getter vtable slot 18 (tWPInGameData_LightGlow_LightGlowBlend2) returns this + 0x30
     float m_lastLightGlowBlend2;     // 0x34 [O]; [R] ctor default; [U] blend stores the target
-    float m_LightGlowBlend3;         // 0x38 [O]; [R] ctor default; [U] getter vtable slot 19 (func_002C1520) returns this + 0x38
+    float m_LightGlowBlend3;         // 0x38 [O]; [R] ctor default; [U] getter vtable slot 19 (tWPInGameData_LightGlow_LightGlowBlend3) returns this + 0x38
     float m_lastLightGlowBlend3;     // 0x3C [O]; [R] ctor default; [U] blend stores the target
 };
 
@@ -479,17 +479,17 @@ struct tWPInGameData_ScreenTint {
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_ScreenTint_tWPInGameData_ScreenTint stores -99999.0f
     void** mVtbl;                    // 0x04 [R] tWPInGameData_ScreenTint_tWPInGameData_ScreenTint stores the vtable D_00484B70
     // --- tWPInGameData_ScreenTint (alloc tag "tWPIGD_ScreenTint", 0x38 bytes)
-    float m_ScreenTintScaleR;        // 0x08 [O]; [R] ctor default; [U] getter vtable slot 20 (func_002C1528) returns this + 0x8
+    float m_ScreenTintScaleR;        // 0x08 [O]; [R] ctor default; [U] getter vtable slot 20 (tWPInGameData_ScreenTint_ScreenTintScaleR) returns this + 0x8
     float m_lastScreenTintScaleR;    // 0x0C [O]; [R] ctor default; [U] blend stores the target
-    float m_ScreenTintScaleG;        // 0x10 [O]; [R] ctor default; [U] getter vtable slot 21 (func_002C1530) returns this + 0x10
+    float m_ScreenTintScaleG;        // 0x10 [O]; [R] ctor default; [U] getter vtable slot 21 (tWPInGameData_ScreenTint_ScreenTintScaleG) returns this + 0x10
     float m_lastScreenTintScaleG;    // 0x14 [O]; [R] ctor default; [U] blend stores the target
-    float m_ScreenTintScaleB;        // 0x18 [O]; [R] ctor default; [U] getter vtable slot 22 (func_002C1538) returns this + 0x18
+    float m_ScreenTintScaleB;        // 0x18 [O]; [R] ctor default; [U] getter vtable slot 22 (tWPInGameData_ScreenTint_ScreenTintScaleB) returns this + 0x18
     float m_lastScreenTintScaleB;    // 0x1C [O]; [R] ctor default; [U] blend stores the target
-    float m_ScreenTintOffsetR;       // 0x20 [O]; [R] ctor default; [U] getter vtable slot 23 (func_002C1540) returns this + 0x20
+    float m_ScreenTintOffsetR;       // 0x20 [O]; [R] ctor default; [U] getter vtable slot 23 (tWPInGameData_ScreenTint_ScreenTintOffsetR) returns this + 0x20
     float m_lastScreenTintOffsetR;   // 0x24 [O]; [R] ctor default; [U] blend stores the target
-    float m_ScreenTintOffsetG;       // 0x28 [O]; [R] ctor default; [U] getter vtable slot 24 (func_002C1548) returns this + 0x28
+    float m_ScreenTintOffsetG;       // 0x28 [O]; [R] ctor default; [U] getter vtable slot 24 (tWPInGameData_ScreenTint_ScreenTintOffsetG) returns this + 0x28
     float m_lastScreenTintOffsetG;   // 0x2C [O]; [R] ctor default; [U] blend stores the target
-    float m_ScreenTintOffsetB;       // 0x30 [O]; [R] ctor default; [U] getter vtable slot 25 (func_002C1550) returns this + 0x30
+    float m_ScreenTintOffsetB;       // 0x30 [O]; [R] ctor default; [U] getter vtable slot 25 (tWPInGameData_ScreenTint_ScreenTintOffsetB) returns this + 0x30
     float m_lastScreenTintOffsetB;   // 0x34 [O]; [R] ctor default; [U] blend stores the target
 };
 
@@ -514,7 +514,7 @@ struct tWPInGameData_SkyBox {
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_SkyBox_tWPInGameData_SkyBox stores -99999.0f
     void** mVtbl;                    // 0x04 [R] tWPInGameData_SkyBox_tWPInGameData_SkyBox stores the vtable D_00484938
     // --- tWPInGameData_SkyBox (alloc tag "tWPIGD_SkyBox", 0x10 bytes)
-    float m_SkyBoxRotation;          // 0x08 [O]; [R] ctor default; [U] getter vtable slot 26 (func_002C1558) returns this + 0x8
+    float m_SkyBoxRotation;          // 0x08 [O]; [R] ctor default; [U] getter vtable slot 26 (tWPInGameData_SkyBox_SkyBoxRotation) returns this + 0x8
     float m_lastSkyBoxRotation;      // 0x0C [O]; [R] ctor default; [U] blend stores the target
 };
 
@@ -529,23 +529,23 @@ struct tWPInGameData_Sun {
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_Sun_tWPInGameData_Sun stores -99999.0f
     void** mVtbl;                    // 0x04 [R] tWPInGameData_Sun_tWPInGameData_Sun stores the vtable D_00484700
     // --- tWPInGameData_Sun (alloc tag "tWPIGD_Sun", 0x50 bytes)
-    float m_SunPitchOffset;          // 0x08 [O]; [R] ctor default; [U] getter vtable slot 27 (func_002C1560) returns this + 0x8
+    float m_SunPitchOffset;          // 0x08 [O]; [R] ctor default; [U] getter vtable slot 27 (tWPInGameData_Sun_SunPitchOffset) returns this + 0x8
     float m_lastSunPitchOffset;      // 0x0C [O]; [R] ctor default; [U] blend stores the target
-    float m_SunYawOffset;            // 0x10 [O]; [R] ctor default; [U] getter vtable slot 28 (func_002C1568) returns this + 0x10
+    float m_SunYawOffset;            // 0x10 [O]; [R] ctor default; [U] getter vtable slot 28 (tWPInGameData_Sun_SunYawOffset) returns this + 0x10
     float m_lastSunYawOffset;        // 0x14 [O]; [R] ctor default; [U] blend stores the target
-    float m_SunColorR;               // 0x18 [O]; [R] ctor default; [U] getter vtable slot 29 (func_002C1570) returns this + 0x18
+    float m_SunColorR;               // 0x18 [O]; [R] ctor default; [U] getter vtable slot 29 (tWPInGameData_Sun_SunColorR) returns this + 0x18
     float m_lastSunColorR;           // 0x1C [O]; [R] ctor default; [U] blend stores the target
-    float m_SunColorG;               // 0x20 [O]; [R] ctor default; [U] getter vtable slot 30 (func_002C1578) returns this + 0x20
+    float m_SunColorG;               // 0x20 [O]; [R] ctor default; [U] getter vtable slot 30 (tWPInGameData_Sun_SunColorG) returns this + 0x20
     float m_lastSunColorG;           // 0x24 [O]; [R] ctor default; [U] blend stores the target
-    float m_SunColorB;               // 0x28 [O]; [R] ctor default; [U] getter vtable slot 31 (func_002C1580) returns this + 0x28
+    float m_SunColorB;               // 0x28 [O]; [R] ctor default; [U] getter vtable slot 31 (tWPInGameData_Sun_SunColorB) returns this + 0x28
     float m_lastSunColorB;           // 0x2C [O]; [R] ctor default; [U] blend stores the target
-    float m_SunIntensity;            // 0x30 [O]; [R] ctor default; [U] getter vtable slot 32 (func_002C1588) returns this + 0x30
+    float m_SunIntensity;            // 0x30 [O]; [R] ctor default; [U] getter vtable slot 32 (tWPInGameData_Sun_SunIntensity) returns this + 0x30
     float m_lastSunIntensity;        // 0x34 [O]; [R] ctor default; [U] blend stores the target
-    int m_SunType;                   // 0x38 [O]; [R] ctor default; [U] getter vtable slot 33 (func_002C1590) returns this + 0x38
+    int m_SunType;                   // 0x38 [O]; [R] ctor default; [U] getter vtable slot 33 (tWPInGameData_Sun_SunType) returns this + 0x38
     int m_lastSunType;               // 0x3C [O]; [R] ctor default; [U] blend stores the target
-    float m_LensIntensity;           // 0x40 [O]; [R] ctor default; [U] getter vtable slot 34 (func_002C1598) returns this + 0x40
+    float m_LensIntensity;           // 0x40 [O]; [R] ctor default; [U] getter vtable slot 34 (tWPInGameData_Sun_LensIntensity) returns this + 0x40
     float m_lastLensIntensity;       // 0x44 [O]; [R] ctor default; [U] blend stores the target
-    float m_SunRadius;               // 0x48 [O]; [R] ctor default; [U] getter vtable slot 35 (func_002C15A0) returns this + 0x48
+    float m_SunRadius;               // 0x48 [O]; [R] ctor default; [U] getter vtable slot 35 (tWPInGameData_Sun_SunRadius) returns this + 0x48
     float m_lastSunRadius;           // 0x4C [O]; [R] ctor default; [U] blend stores the target
 };
 
@@ -576,7 +576,7 @@ struct tWPInGameData_Surface {
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_Surface_tWPInGameData_Surface stores -99999.0f
     void** mVtbl;                    // 0x04 [R] tWPInGameData_Surface_tWPInGameData_Surface stores the vtable D_004844C8
     // --- tWPInGameData_Surface (alloc tag "tWPIGD_Surface", 0x10 bytes)
-    float m_SnowSparkleDensity;      // 0x08 [O]; [R] ctor default; [U] getter vtable slot 36 (func_002C15A8) returns this + 0x8
+    float m_SnowSparkleDensity;      // 0x08 [O]; [R] ctor default; [U] getter vtable slot 36 (tWPInGameData_Surface_SnowSparkleDensity) returns this + 0x8
     float m_lastSnowSparkleDensity;  // 0x0C [O]; [R] ctor default; [U] blend stores the target
 };
 
@@ -591,17 +591,17 @@ struct tWPInGameData_Lighting {
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_Lighting_tWPInGameData_Lighting stores -99999.0f
     void** mVtbl;                    // 0x04 [R] tWPInGameData_Lighting_tWPInGameData_Lighting stores the vtable D_00484290
     // --- tWPInGameData_Lighting (alloc tag "tWPIGD_Lighting", 0x58 bytes)
-    tWPNameField m_LightIrradianceName; // 0x08 [O]; [R] ctor default; [U] getter vtable slot 37 (func_002C15B0) returns this + 0x8
+    tWPNameField m_LightIrradianceName; // 0x08 [O]; [R] ctor default; [U] getter vtable slot 37 (tWPInGameData_Lighting_LightIrradianceName) returns this + 0x8
     tWPNameField m_lastLightIrradianceName; // 0x10 [O]; [R] ctor default; [U] blend stores the target
-    tWPNameField m_ShadowIrradianceName; // 0x18 [O]; [R] ctor default; [U] getter vtable slot 38 (func_002C15B8) returns this + 0x18
+    tWPNameField m_ShadowIrradianceName; // 0x18 [O]; [R] ctor default; [U] getter vtable slot 38 (tWPInGameData_Lighting_ShadowIrradianceName) returns this + 0x18
     tWPNameField m_lastShadowIrradianceName; // 0x20 [O]; [R] ctor default; [U] blend stores the target
-    tWPNameField m_TunnelIrradianceName; // 0x28 [O]; [R] ctor default; [U] getter vtable slot 39 (func_002C15C0) returns this + 0x28
+    tWPNameField m_TunnelIrradianceName; // 0x28 [O]; [R] ctor default; [U] getter vtable slot 39 (tWPInGameData_Lighting_TunnelIrradianceName) returns this + 0x28
     tWPNameField m_lastTunnelIrradianceName; // 0x30 [O]; [R] ctor default; [U] blend stores the target
-    tWPNameField m_ObjectIrradianceName; // 0x38 [O]; [R] ctor default; [U] getter vtable slot 40 (func_002C15C8) returns this + 0x38
+    tWPNameField m_ObjectIrradianceName; // 0x38 [O]; [R] ctor default; [U] getter vtable slot 40 (tWPInGameData_Lighting_ObjectIrradianceName) returns this + 0x38
     tWPNameField m_lastObjectIrradianceName; // 0x40 [O]; [R] ctor default; [U] blend stores the target
-    float m_AmbientLightIntensityOffset; // 0x48 [O]; [R] ctor default; [U] getter vtable slot 41 (func_002C15D0) returns this + 0x48
+    float m_AmbientLightIntensityOffset; // 0x48 [O]; [R] ctor default; [U] getter vtable slot 41 (tWPInGameData_Lighting_AmbientLightIntensityOffset) returns this + 0x48
     float m_lastAmbientLightIntensityOffset; // 0x4C [O]; [R] ctor default; [U] blend stores the target
-    float m_RimLightIntensityOffset; // 0x50 [O]; [R] ctor default; [U] getter vtable slot 42 (func_002C15D8) returns this + 0x50
+    float m_RimLightIntensityOffset; // 0x50 [O]; [R] ctor default; [U] getter vtable slot 42 (tWPInGameData_Lighting_RimLightIntensityOffset) returns this + 0x50
     float m_lastRimLightIntensityOffset; // 0x54 [O]; [R] ctor default; [U] blend stores the target
 };
 
@@ -626,43 +626,43 @@ struct tWPInGameData_Weather {
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_Weather_tWPInGameData_Weather stores -99999.0f
     void** mVtbl;                    // 0x04 [R] tWPInGameData_Weather_tWPInGameData_Weather stores the vtable D_00484058
     // --- tWPInGameData_Weather (alloc tag "tWPIGD_Weather", 0xA0 bytes)
-    float m_SnowIntensity;           // 0x08 [O]; [R] ctor default; [U] getter vtable slot 43 (func_002C15E0) returns this + 0x8
+    float m_SnowIntensity;           // 0x08 [O]; [R] ctor default; [U] getter vtable slot 43 (tWPInGameData_Weather_SnowIntensity) returns this + 0x8
     float m_lastSnowIntensity;       // 0x0C [O]; [R] ctor default; [U] blend stores the target
-    float m_FlakeSize;               // 0x10 [O]; [R] ctor default; [U] getter vtable slot 44 (func_002C15E8) returns this + 0x10
+    float m_FlakeSize;               // 0x10 [O]; [R] ctor default; [U] getter vtable slot 44 (tWPInGameData_Weather_FlakeSize) returns this + 0x10
     float m_lastFlakeSize;           // 0x14 [O]; [R] ctor default; [U] blend stores the target
-    float m_WindIntensity;           // 0x18 [O]; [R] ctor default; [U] getter vtable slot 45 (func_002C15F0) returns this + 0x18
+    float m_WindIntensity;           // 0x18 [O]; [R] ctor default; [U] getter vtable slot 45 (tWPInGameData_Weather_WindIntensity) returns this + 0x18
     float m_lastWindIntensity;       // 0x1C [O]; [R] ctor default; [U] blend stores the target
-    float m_WindRotation;            // 0x20 [O]; [R] ctor default; [U] getter vtable slot 46 (func_002C15F8) returns this + 0x20
+    float m_WindRotation;            // 0x20 [O]; [R] ctor default; [U] getter vtable slot 46 (tWPInGameData_Weather_WindRotation) returns this + 0x20
     float m_lastWindRotation;        // 0x24 [O]; [R] ctor default; [U] blend stores the target
-    float m_PlayerWindIntensity;     // 0x28 [O]; [R] ctor default; [U] getter vtable slot 47 (func_002C1600) returns this + 0x28
+    float m_PlayerWindIntensity;     // 0x28 [O]; [R] ctor default; [U] getter vtable slot 47 (tWPInGameData_Weather_PlayerWindIntensity) returns this + 0x28
     float m_lastPlayerWindIntensity; // 0x2C [O]; [R] ctor default; [U] blend stores the target
-    float m_Temperature;             // 0x30 [O]; [R] ctor default; [U] getter vtable slot 48 (func_002C1608) returns this + 0x30
+    float m_Temperature;             // 0x30 [O]; [R] ctor default; [U] getter vtable slot 48 (tWPInGameData_Weather_Temperature) returns this + 0x30
     float m_lastTemperature;         // 0x34 [O]; [R] ctor default; [U] blend stores the target
-    float m_SnowFlurries;            // 0x38 [O]; [R] ctor default; [U] getter vtable slot 49 (func_002C1610) returns this + 0x38
+    float m_SnowFlurries;            // 0x38 [O]; [R] ctor default; [U] getter vtable slot 49 (tWPInGameData_Weather_SnowFlurries) returns this + 0x38
     float m_lastSnowFlurries;        // 0x3C [O]; [R] ctor default; [U] blend stores the target
-    float m_SnowGravityMultiplier;   // 0x40 [O]; [R] ctor default; [U] getter vtable slot 50 (func_002C1618) returns this + 0x40
+    float m_SnowGravityMultiplier;   // 0x40 [O]; [R] ctor default; [U] getter vtable slot 50 (tWPInGameData_Weather_SnowGravityMultiplier) returns this + 0x40
     float m_lastSnowGravityMultiplier; // 0x44 [O]; [R] ctor default; [U] blend stores the target
-    float m_SnowFluffItensity;       // 0x48 [O]; [R] ctor default; [U] getter vtable slot 51 (func_002C1620) returns this + 0x48
+    float m_SnowFluffItensity;       // 0x48 [O]; [R] ctor default; [U] getter vtable slot 51 (tWPInGameData_Weather_SnowFluffItensity) returns this + 0x48
     float m_lastSnowFluffItensity;   // 0x4C [O]; [R] ctor default; [U] blend stores the target
-    float m_SnowFluffWindIntensity;  // 0x50 [O]; [R] ctor default; [U] getter vtable slot 52 (func_002C1628) returns this + 0x50
+    float m_SnowFluffWindIntensity;  // 0x50 [O]; [R] ctor default; [U] getter vtable slot 52 (tWPInGameData_Weather_SnowFluffWindIntensity) returns this + 0x50
     float m_lastSnowFluffWindIntensity; // 0x54 [O]; [R] ctor default; [U] blend stores the target
-    float m_LightningChance;         // 0x58 [O]; [R] ctor default; [U] getter vtable slot 53 (func_002C1630) returns this + 0x58
+    float m_LightningChance;         // 0x58 [O]; [R] ctor default; [U] getter vtable slot 53 (tWPInGameData_Weather_LightningChance) returns this + 0x58
     float m_lastLightningChance;     // 0x5C [O]; [R] ctor default; [U] blend stores the target
-    float m_SnowFlakeColourA;        // 0x60 [O]; [R] ctor default; [U] getter vtable slot 54 (func_002C1638) returns this + 0x60
+    float m_SnowFlakeColourA;        // 0x60 [O]; [R] ctor default; [U] getter vtable slot 54 (tWPInGameData_Weather_SnowFlakeColourA) returns this + 0x60
     float m_lastSnowFlakeColourA;    // 0x64 [O]; [R] ctor default; [U] blend stores the target
-    float m_SnowFlakeColourR;        // 0x68 [O]; [R] ctor default; [U] getter vtable slot 55 (func_002C1640) returns this + 0x68
+    float m_SnowFlakeColourR;        // 0x68 [O]; [R] ctor default; [U] getter vtable slot 55 (tWPInGameData_Weather_SnowFlakeColourR) returns this + 0x68
     float m_lastSnowFlakeColourR;    // 0x6C [O]; [R] ctor default; [U] blend stores the target
-    float m_SnowFlakeColourG;        // 0x70 [O]; [R] ctor default; [U] getter vtable slot 56 (func_002C1648) returns this + 0x70
+    float m_SnowFlakeColourG;        // 0x70 [O]; [R] ctor default; [U] getter vtable slot 56 (tWPInGameData_Weather_SnowFlakeColourG) returns this + 0x70
     float m_lastSnowFlakeColourG;    // 0x74 [O]; [R] ctor default; [U] blend stores the target
-    float m_SnowFlakeColourB;        // 0x78 [O]; [R] ctor default; [U] getter vtable slot 57 (func_002C1650) returns this + 0x78
+    float m_SnowFlakeColourB;        // 0x78 [O]; [R] ctor default; [U] getter vtable slot 57 (tWPInGameData_Weather_SnowFlakeColourB) returns this + 0x78
     float m_lastSnowFlakeColourB;    // 0x7C [O]; [R] ctor default; [U] blend stores the target
-    float m_SnowFluffColourA;        // 0x80 [O]; [R] ctor default; [U] getter vtable slot 58 (func_002C1658) returns this + 0x80
+    float m_SnowFluffColourA;        // 0x80 [O]; [R] ctor default; [U] getter vtable slot 58 (tWPInGameData_Weather_SnowFluffColourA) returns this + 0x80
     float m_lastSnowFluffColourA;    // 0x84 [O]; [R] ctor default; [U] blend stores the target
-    float m_SnowFluffColourR;        // 0x88 [O]; [R] ctor default; [U] getter vtable slot 59 (func_002C1660) returns this + 0x88
+    float m_SnowFluffColourR;        // 0x88 [O]; [R] ctor default; [U] getter vtable slot 59 (tWPInGameData_Weather_SnowFluffColourR) returns this + 0x88
     float m_lastSnowFluffColourR;    // 0x8C [O]; [R] ctor default; [U] blend stores the target
-    float m_SnowFluffColourG;        // 0x90 [O]; [R] ctor default; [U] getter vtable slot 60 (func_002C1668) returns this + 0x90
+    float m_SnowFluffColourG;        // 0x90 [O]; [R] ctor default; [U] getter vtable slot 60 (tWPInGameData_Weather_SnowFluffColourG) returns this + 0x90
     float m_lastSnowFluffColourG;    // 0x94 [O]; [R] ctor default; [U] blend stores the target
-    float m_SnowFluffColourB;        // 0x98 [O]; [R] ctor default; [U] getter vtable slot 61 (func_002C1670) returns this + 0x98
+    float m_SnowFluffColourB;        // 0x98 [O]; [R] ctor default; [U] getter vtable slot 61 (tWPInGameData_Weather_SnowFluffColourB) returns this + 0x98
     float m_lastSnowFluffColourB;    // 0x9C [O]; [R] ctor default; [U] blend stores the target
 };
 
@@ -713,9 +713,9 @@ struct tWPInGameData_Danger {
     float m_wpTravelDistance;        // 0x00 [O]; [R] tWPInGameData_Danger_tWPInGameData_Danger stores -99999.0f
     void** mVtbl;                    // 0x04 [R] tWPInGameData_Danger_tWPInGameData_Danger stores the vtable D_00483E20
     // --- tWPInGameData_Danger (alloc tag "tWPIGD_Danger", 0x18 bytes)
-    int m_Level;                     // 0x08 [O]; [R] ctor default; [U] getter vtable slot 62 (func_002C1678) returns this + 0x8
+    int m_Level;                     // 0x08 [O]; [R] ctor default; [U] getter vtable slot 62 (tWPInGameData_Danger_Level) returns this + 0x8
     int m_lastLevel;                 // 0x0C [O]; [R] ctor default; [U] blend stores the target
-    float m_PointRate;               // 0x10 [O]; [R] ctor default; [U] getter vtable slot 63 (func_002C1680) returns this + 0x10
+    float m_PointRate;               // 0x10 [O]; [R] ctor default; [U] getter vtable slot 63 (tWPInGameData_Danger_PointRate) returns this + 0x10
     float m_lastPointRate;           // 0x14 [O]; [R] ctor default; [U] blend stores the target
 };
 

@@ -1490,7 +1490,7 @@ int cReplayFramePtr_writeRewind(void* self);
 void* AIgetseed(void* self);
 extern "C" void* cBE_getBE();
 extern "C" void cBE_writeToReplayFrame(void* self, cPbStream* s);
-extern "C" void func_002D9CB0(cPbStream* s);
+extern "C" void cAvalanche_writeToReplayFrame(cPbStream* s);
 extern "C" void cWScriptMan_writeToReplayFrame(void* self, cPbStream* s);
 extern "C" void func_00229E20(void* self, cPbStream* s);
 extern "C" void func_003441A8(void* self, cPbStream* s);
@@ -1516,7 +1516,7 @@ static inline cPbWorld* pbWorld(cPbObjSys* o)
  * Writes one replay key frame: the state of every game system that a restore needs.
  *
  * In order: the frame start (cReplayFramePtr_writeRewind), a 0x18-byte time block (AIgetseed), the object-id counters
- * cSortObjNode_ObjNodeSortIndex and cSortObjNode_ObjNodeNoSortIndex, the BE state, the game and its AI (their save virtuals), func_002D9CB0 (where
+ * cSortObjNode_ObjNodeSortIndex and cSortObjNode_ObjNodeNoSortIndex, the BE state, the game and its AI (their save virtuals), cAvalanche_writeToReplayFrame (where
  * the restore reads the avalanche), the world-script manager, D_004A2A00, D_004A3FF0, the multi-particle
  * manager, the object buckets (cReplay_saveBucket with 1, cReplay_saveDeadBucket) and the AI's focus manager.
  * cReplay_restoreFrame() reads them back in the same order.
@@ -1538,7 +1538,7 @@ extern "C" void cReplay_saveFrame(cReplay* self, void* stream)
     cBE_writeToReplayFrame(cBE_getBE(), out);
     D_004A28A8_D818->objs->save(out);
     pbWorld(D_004A28A8_D818->objs)->save(out);
-    func_002D9CB0(out);
+    cAvalanche_writeToReplayFrame(out);
     cWScriptMan_writeToReplayFrame(cWScriptMan_TheWScriptMan, out);
     func_00229E20(D_004A2A00_D818, out);
     func_003441A8(D_004A3FF0, out);

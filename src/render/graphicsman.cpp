@@ -31,12 +31,12 @@ struct sGfxManBlend {
     int nBlend;             // 0xF4C
 };
 
-extern "C" int func_00369A78(void* a, void* b, int tol0, int tol1, int tol2);
+extern "C" int areBlendedMatricesEqual(void* a, void* b, int tol0, int tol1, int tol2);
 
 /**
  * Adds a skinning blend matrix to the shared history, or reuses a near-identical one already there.
  *
- * The 512-entry "BlendedMatrixHistory" is allocated on first use. A match within func_00369A78's tolerances
+ * The 512-entry "BlendedMatrixHistory" is allocated on first use. A match within areBlendedMatricesEqual's tolerances
  * copies the stored bone indices into @p blendedMatrix; otherwise it is appended, with no check against the
  * 512
  * entries.
@@ -56,7 +56,7 @@ extern "C" void cGraphicsMan_AddBlendedMatrix(sGfxManBlend* self, sBlendMatrix* 
     }
     sBlendMatrix* existing = self->blend;
     for (int i = 0; i < self->nBlend; i++, existing++) {
-        if (func_00369A78(existing, blendedMatrix, 10, 20, 20)) {
+        if (areBlendedMatricesEqual(existing, blendedMatrix, 10, 20, 20)) {
             for (int j = 0; j < existing->count; j++) {
                 blendedMatrix->weights[j].bone = existing->weights[j].bone;
             }
@@ -72,7 +72,7 @@ extern "C" void cGraphicsMan_AddBlendedMatrix(sGfxManBlend* self, sBlendMatrix* 
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_00369A78);
+INCLUDE_ASM("render/graphicsman", areBlendedMatricesEqual);
 #ifdef SKIP_ASM
 struct sKey_9A78 {
     short x;                        // 0x0
@@ -115,7 +115,7 @@ static inline int iabs_9A78(int v)
  * @param tol2  largest allowed difference of the third weights
  * @return 1 when the two records are treated as the same blended matrix, else 0
  */
-extern "C" int func_00369A78(void* ap, void* bp, int tol0, int tol1, int tol2)
+extern "C" int areBlendedMatricesEqual(void* ap, void* bp, int tol0, int tol1, int tol2)
 {
     sEnt_9A78* lhs = (sEnt_9A78*)ap;
     sEnt_9A78* rhs = (sEnt_9A78*)bp;
@@ -200,7 +200,7 @@ extern "C" void cGraphicsMan_FlushRenderer(cPS2GraphicsMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_00369CB0);
+INCLUDE_ASM("render/graphicsman", cGraphicsMan_RenderModel);
 #ifdef SKIP_ASM
 struct sGfxVEntry95 {
     short delta;
@@ -219,7 +219,7 @@ struct sGfxVEntry95 {
  * @param texMat  passed through to slot 95 (texture matrix)
  * @param renderFlags  passed through to slot 95 (render flags)
  */
-extern "C" void func_00369CB0(cPS2GraphicsMan* self, void* obj, int animMats, int texMat, int renderFlags)
+extern "C" void cGraphicsMan_RenderModel(cPS2GraphicsMan* self, void* obj, int animMats, int texMat, int renderFlags)
 {
     sGfxVEntry95* vt = (sGfxVEntry95*)self->mVtbl;
     vt[95].fn((char*)self + vt[95].delta, obj, *(int*)((char*)obj + 0x94), (char*)obj + 0x10, animMats, texMat, renderFlags, 1.0f);
@@ -330,14 +330,14 @@ extern "C" void cGraphicsMan_RenderIndexedTriList(cPS2GraphicsMan* self, int Num
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_00369FF0__FPv);
+INCLUDE_ASM("render/graphicsman", cGraphicsMan_update__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing.
  *
  * cPS2GraphicsMan_update calls it.
  */
-void func_00369FF0(void* self)
+void cGraphicsMan_update(void* self)
 {
 }
 #endif
@@ -450,22 +450,22 @@ extern "C" void cGraphicsMan_RenderSpline(cPS2GraphicsMan* self, sV4_A048* BezMa
 }
 #endif
 
-extern "C" void* func_0036A1C0(int);
+extern "C" void* cGarbageMan_Trash(int);
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036A190__FPvi);
+INCLUDE_ASM("render/graphicsman", cGraphicsMan_DeleteGridMesh__FPvi);
 #ifdef SKIP_ASM
 /**
- * Queues a grid mesh for deferred deletion: calls func_0036A1C0(@p gridMesh).
+ * Queues a grid mesh for deferred deletion: calls cGarbageMan_Trash(@p gridMesh).
  *
  * Slot 77 of cPS2GraphicsMan_vtbl, after CreateGridMesh at slot 76.
  *
  * @param gridMesh  the grid mesh object (a garbage-can node) to queue
- * @return whatever func_0036A1C0 leaves in v0; that callee has no return statement, so the value is meaningless
+ * @return whatever cGarbageMan_Trash leaves in v0; that callee has no return statement, so the value is meaningless
  */
-void* func_0036A190(void* self, int gridMesh)
+void* cGraphicsMan_DeleteGridMesh(void* self, int gridMesh)
 {
-    return func_0036A1C0(gridMesh);
+    return cGarbageMan_Trash(gridMesh);
 }
 #endif
 
@@ -491,7 +491,7 @@ int cGraphicsMan_CreateScreenGrabTexture(void* self, void* screenGrabHandle)
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036A1C0);
+INCLUDE_ASM("render/graphicsman", cGarbageMan_Trash);
 #ifdef SKIP_ASM
 extern int D_004A5B88;
 extern void* D_0053AB40[];
@@ -500,13 +500,13 @@ extern void* D_0053AB40[];
  * Pushes node @p n onto the current deferred-delete list D_0053AB40[D_004A5B88].
  *
  * Stores the old list head in the node's first word and makes the node the head. The node's second word is its vtable:
- * func_0036A1E8 later deletes it through the virtual destructor. No return statement although declared to return void*.
+ * cGarbageMan_Update later deletes it through the virtual destructor. No return statement although declared to return void*.
  *
  * @param n  the node to queue (a pointer passed as int)
  * @return nothing defined (no return statement)
  */
 // PORT: the unit declares this (int) returning void*; the arg is a list node pointer.
-extern "C" void* func_0036A1C0(int n)
+extern "C" void* cGarbageMan_Trash(int n)
 {
     void** node = (void**)n;
     void** head = &D_0053AB40[D_004A5B88];
@@ -516,7 +516,7 @@ extern "C" void* func_0036A1C0(int n)
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036A1E8);
+INCLUDE_ASM("render/graphicsman", cGarbageMan_Update);
 #ifdef SKIP_ASM
 extern int D_004A5B88;
 extern void* D_0053AB40[];
@@ -531,10 +531,10 @@ public:
  * Advances to the next of the four deferred-delete lists and deletes every object on it.
  *
  * D_004A5B88 = (D_004A5B88 + 1) % 4; each node of D_0053AB40[D_004A5B88] is deleted through its virtual destructor
- * (next pointer at +0, vtable at +4), then the list is cleared. An object queued by func_0036A1C0 is therefore deleted
+ * (next pointer at +0, vtable at +4), then the list is cleared. An object queued by cGarbageMan_Trash is therefore deleted
  * on the fourth call after it was queued. cGame_render calls it once per frame.
  */
-extern "C" void func_0036A1E8()
+extern "C" void cGarbageMan_Update()
 {
     D_004A5B88 = (D_004A5B88 + 1) % 4;
     cGmNode_A1E8* n = (cGmNode_A1E8*)D_0053AB40[D_004A5B88];
@@ -548,20 +548,20 @@ extern "C" void func_0036A1E8()
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("render/graphicsman", func_0036A290);
+INCLUDE_ASM("render/graphicsman", cGarbageMan_Purge);
 #ifdef SKIP_ASM
-extern "C" void func_0036A1E8();
+extern "C" void cGarbageMan_Update();
 
 /**
- * Empties all four deferred-delete lists by calling func_0036A1E8 four times.
+ * Empties all four deferred-delete lists by calling cGarbageMan_Update four times.
  *
  * cGame_purge calls it.
  */
-extern "C" void func_0036A290()
+extern "C" void cGarbageMan_Purge()
 {
     int i;
     for (i = 0; i < 4; i++)
-        func_0036A1E8();
+        cGarbageMan_Update();
 }
 #endif
 
@@ -576,7 +576,7 @@ struct sGmMtx_A2C0 {
     sGmVec4_A2C0 r[4];
 };
 
-extern "C" sGmMtx_A2C0* func_0038F2A8(sGmVec4_A2C0* pos);
+extern "C" sGmMtx_A2C0* cPlants_getDeformationMatrix(sGmVec4_A2C0* pos);
 
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply out = a * b); the PC port needs a plain multiply.
 static inline void gmMtxMul_A2C0(sGmMtx_A2C0* out, sGmMtx_A2C0* a, sGmMtx_A2C0* b)
@@ -638,7 +638,7 @@ static inline void gmMtxCopy_A2C0(sGmMtx_A2C0* dst, sGmMtx_A2C0* src)
 
 /**
  * Applies the NIS deformation to a mesh matrix: when m_isInNIS[6] is set, multiplies @p mat by the deformation matrix
- * that func_0038F2A8 returns for the matrix's translation.
+ * that cPlants_getDeformationMatrix returns for the matrix's translation.
  *
  * @param mat  the mesh matrix, updated in place
  */
@@ -648,7 +648,7 @@ extern "C" void cGraphicsMan_DeformMeshMatrix(cPS2GraphicsMan* self, sGmMtx_A2C0
         sGmMtx_A2C0 result;
         sGmVec4_A2C0 pos = mat->r[3];
         sGmMtx_A2C0 product;
-        sGmMtx_A2C0* deform = func_0038F2A8(&pos);
+        sGmMtx_A2C0* deform = cPlants_getDeformationMatrix(&pos);
         gmMtxMul_A2C0(&product, mat, deform);
         gmMtxCopy_A2C0(&result, &product);
         gmMtxCopy_A2C0(mat, &result);
@@ -1725,7 +1725,7 @@ extern "C" void tParticleEmitter_setLife(tParticleEmitter* self, float minlife, 
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036CE48);
+INCLUDE_ASM("render/graphicsman", tParticleEmitter_setEternal);
 #ifdef SKIP_ASM
 /**
  * Makes @p particleEmitter's particles live forever: LifeR = 0 and Life0 = 1e20.
@@ -1734,13 +1734,13 @@ INCLUDE_ASM("render/graphicsman", func_0036CE48);
  *
  * @param particleEmitter  the emitter
  */
-extern "C" void func_0036CE48(tParticleEmitter* particleEmitter) {
+extern "C" void tParticleEmitter_setEternal(tParticleEmitter* particleEmitter) {
     (*(int*)&particleEmitter->LifeR) = 0;
     (particleEmitter->Life0) = 1e20f;
 }
 #endif
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036CE58);
+INCLUDE_ASM("render/graphicsman", tParticleEmitter_setPoint);
 #ifdef SKIP_ASM
 /**
  * Makes @p particleEmitter emit from a single point: X0 = *@p point and Xr0 = Xr1 = t4vect_Zero.
@@ -1752,7 +1752,7 @@ INCLUDE_ASM("render/graphicsman", func_0036CE58);
  */
 // PORT: `long long` is 128-bit on the EE (one lq/sq copy); off-PS2 the same C copies only 8 bytes, so use a
 // 16-byte type.
-extern "C" void func_0036CE58(tParticleEmitter* particleEmitter, long long *point) {
+extern "C" void tParticleEmitter_setPoint(tParticleEmitter* particleEmitter, long long *point) {
     (*(long long*)&particleEmitter->X0) = (long long) *point;
     (*(long long*)&particleEmitter->Xr0) = (long long) t4vect_Zero;
     (*(long long*)&particleEmitter->Xr1) = (long long) t4vect_Zero;
@@ -2270,7 +2270,7 @@ extern "C" void func_0036D400(float* seed)
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_0036D428);
+INCLUDE_ASM("render/graphicsman", tParticleEmitter_stepContinous);
 #ifdef SKIP_ASM
 struct sGmVec4_D428 {
     float x, y, z, w;
@@ -2312,7 +2312,7 @@ static inline void gmVecAddEq_D428(sGmVec4_D428& a, const sGmVec4_D428& b)
         : "memory");
 }
 
-extern "C" void func_0036D428_impl(sGmAnim_D428* self, float dt) __asm__("func_0036D428");
+extern "C" void tParticleEmitter_stepContinous_impl(sGmAnim_D428* self, float dt) __asm__("tParticleEmitter_stepContinous");
 /**
  * Steps a particle emitter by @p dt, then moves its emission point along its motion for each whole time step that has
  * passed.
@@ -2323,7 +2323,7 @@ extern "C" void func_0036D428_impl(sGmAnim_D428* self, float dt) __asm__("func_0
  *
  * @param dt  the frame time
  */
-extern "C" void func_0036D428_impl(sGmAnim_D428* self, float dt)
+extern "C" void tParticleEmitter_stepContinous_impl(sGmAnim_D428* self, float dt)
 {
     tParticleEmitter_step((tParticleEmitter*)self, dt);
     for (;;) {
@@ -2497,10 +2497,10 @@ extern "C" void tParticleEmitter_calcBoundBox_D500(sGmEmit_D500* e, sGmBox_D500*
 INCLUDE_ASM("render/graphicsman", cStaticEmitter_cStaticEmitter);
 #ifdef SKIP_ASM
 extern char cStaticEmitter_vtbl[];
-void func_002F7A68(void*);
+void tParticleEmitter_tParticleEmitter(void*);
 
 /**
- * Constructs a static particle emitter: vtable cStaticEmitter_vtbl, the embedded tParticleEmitter at +0x10 (func_002F7A68),
+ * Constructs a static particle emitter: vtable cStaticEmitter_vtbl, the embedded tParticleEmitter at +0x10 (tParticleEmitter_tParticleEmitter),
  * m_initialized 0 and mCurrentFlipTexture 0.
  *
  * @return @p self
@@ -2508,7 +2508,7 @@ void func_002F7A68(void*);
 extern "C" void* cStaticEmitter_cStaticEmitter(cStaticEmitter* self)
 {
     self->mVtbl = (void**)cStaticEmitter_vtbl;
-    func_002F7A68((char*)self + 0x10);
+    tParticleEmitter_tParticleEmitter((char*)self + 0x10);
     self->m_initialized = 0;
     *(int*)&self->mCurrentFlipTexture = 0;
     return ((void*)self);
@@ -2716,7 +2716,7 @@ extern "C" void cStaticEmitter_setupEmitter(cStaticEmitter* self, void* transfor
 #endif
 
 //100%
-INCLUDE_ASM("render/graphicsman", func_00370708);
+INCLUDE_ASM("render/graphicsman", cStaticEmitter_setTime);
 #ifdef SKIP_ASM
 extern "C" void tParticleEmitter_setTime(tParticleEmitter*, float);
 
@@ -2729,7 +2729,7 @@ extern "C" void tParticleEmitter_setTime(tParticleEmitter*, float);
  *
  * @param duration  the new duration; 0 resets only the particle time
  */
-extern "C" void func_00370708(float *self, float duration)
+extern "C" void cStaticEmitter_setTime(float *self, float duration)
 {
     if (duration == 0.0f) {
         tParticleEmitter_setTime((tParticleEmitter*)((char *)self + 0x10), 0.0f);
@@ -2768,7 +2768,7 @@ extern "C" void cStaticEmitter__cStaticEmitter(int* self, int flags)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("render/graphicsman", cStaticEmitter_update);
 #ifdef SKIP_ASM
-extern "C" void func_0036D428(void* self, float val);
+extern "C" void tParticleEmitter_stepContinous(void* self, float val);
 
 /**
  * Advances a static particle emitter: emits while its timer runs (or forever when negative) and steps its
@@ -2787,7 +2787,7 @@ extern "C" void cStaticEmitter_update(cStaticEmitter* self, float dt)
         return;
     }
     if (timer < 0.0f) {
-        func_0036D428(((char*)self) + 0x10, 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
+        tParticleEmitter_stepContinous(((char*)self) + 0x10, 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
     } else {
         tParticleEmitter_step((tParticleEmitter*)(((char*)self) + 0x10), 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10));
         self->Duration -= 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
@@ -2982,14 +2982,14 @@ extern "C" void cStaticEmitter_readFromReplayFrame(cStaticEmitter* self, cStream
 //100%
 INCLUDE_ASM("render/graphicsman", cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter);
 #ifdef SKIP_ASM
-void func_002F7A68(void*);
+void tParticleEmitter_tParticleEmitter(void*);
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern void* cBaseClass_DynamicEmitter_vtbl[];
 
 
 /**
  * Constructs the dynamic particle emitter base: no flip textures, cBaseClass_DynamicEmitter_vtbl, the embedded
- * tParticleEmitter at +0x20 (func_002F7A68), m_initialized 0, m_enabled 1, m_numSubEmitters -1, m_subEmitterId 0, no
+ * tParticleEmitter at +0x20 (tParticleEmitter_tParticleEmitter), m_initialized 0, m_enabled 1, m_numSubEmitters -1, m_subEmitterId 0, no
  * position or velocity buffers, m_enabledCount 0, and a draw state whose 16 flag bytes are zeroed (memset) and whose
  * two texture ids (m_textureState, +0x10) are -1.
  *
@@ -3001,7 +3001,7 @@ extern "C" cBaseClass_DynamicEmitter* cBaseClass_DynamicEmitter_cBaseClass_Dynam
     *(int*)&self->mCurrentFlipTexture = 0;
     *(int*)&self->mFlipTextureRate = 0;
     self->mVtbl = cBaseClass_DynamicEmitter_vtbl;
-    func_002F7A68((char*)self + 0x20);
+    tParticleEmitter_tParticleEmitter((char*)self + 0x20);
     self->m_initialized = 0;
     self->m_enabled = 1;
     self->m_numSubEmitters = -1;

@@ -263,7 +263,7 @@ extern "C" void func_003A0290(sUIThingPos* self, sUIVec3* out)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uithing", func_003A0318);
+INCLUDE_ASM("ui/uithing", cUIThing_getSound);
 #ifdef SKIP_ASM
 /**
  * Returns the UI thing's sound id number @p soundIndex (mSound[soundIndex]; the index is taken as a signed char).
@@ -274,7 +274,7 @@ INCLUDE_ASM("ui/uithing", func_003A0318);
  * @param soundIndex  which of the two sounds (0 or 1)
  * @return the sound id stored there (the cUIThing constructor stores 4 and 6)
  */
-extern "C" int func_003A0318(void* self, int soundIndex)
+extern "C" int cUIThing_getSound(void* self, int soundIndex)
 {
     self = (char*)self + ((signed char)soundIndex << 2);
     return *(int*)((char*)self + 0x6c);
@@ -282,7 +282,7 @@ extern "C" int func_003A0318(void* self, int soundIndex)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uithing", func_003A0330);
+INCLUDE_ASM("ui/uithing", cUIThing_setSound);
 #ifdef SKIP_ASM
 /**
  * Stores @p sound as the UI thing's sound number @p soundIndex (mSound[soundIndex]; the index is taken as a signed
@@ -293,7 +293,7 @@ INCLUDE_ASM("ui/uithing", func_003A0330);
  * @param soundIndex  which of the two sounds (0 or 1)
  * @param sound  the sound id to store
  */
-extern "C" void func_003A0330(void* self, int soundIndex, int sound)
+extern "C" void cUIThing_setSound(void* self, int soundIndex, int sound)
 {
     self = (char*)self + ((signed char)soundIndex << 2);
     *(int*)((char*)self + 0x6c) = sound;
@@ -301,22 +301,22 @@ extern "C" void func_003A0330(void* self, int soundIndex, int sound)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uithing", func_003A0348);
+INCLUDE_ASM("ui/uithing", cUIText_cUIText);
 #ifdef SKIP_ASM
 extern "C" void* cUIThing_cUIThing(void* self);
 extern void* cUIText_vtbl[];
 
-struct func_003A0348_sQuad {
+struct cUIText_cUIText_sQuad {
     int a, b, c, d;
 };
-extern func_003A0348_sQuad D_004C66C8;
+extern cUIText_cUIText_sQuad D_004C66C8;
 
-struct func_003A0348_sObj {
+struct cUIText_cUIText_sObj {
     char base[0x74];
     unsigned char flags;
     char pad75[0x88 - 0x75];
-    func_003A0348_sQuad q88;
-    func_003A0348_sQuad q98;
+    cUIText_cUIText_sQuad q88;
+    cUIText_cUIText_sQuad q98;
     int fA8;
     int fAC;
     int fB0;
@@ -332,11 +332,11 @@ struct func_003A0348_sObj {
  * through), stores cUIText_vtbl, sets tAttrText's shadow bit (bit 2) and clears bits 3-6 (unicode, static colour,
  * disabled colour, ellipses), zeroes mNumLines, mpLineOffset, mStringID, mpString, mStringSize and mLineSize, and
  * copies the default colour D_004C66C8 into mStaticColour and mDisabledColour. cUIScreen_createObjectByStruct calls it
- * on a 0xBC-byte "UIText" allocation; func_003A5D60 is the default constructor.
+ * on a 0xBC-byte "UIText" allocation; cUIText_cUIText1 is the default constructor.
  *
  * @return the object
  */
-extern "C" func_003A0348_sObj* func_003A0348(func_003A0348_sObj* self)
+extern "C" cUIText_cUIText_sObj* cUIText_cUIText(cUIText_cUIText_sObj* self)
 {
     cUIThing_cUIThing(self);
     *(void***)((char*)self + 8) = cUIText_vtbl;

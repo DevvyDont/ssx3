@@ -10,10 +10,10 @@
 INCLUDE_ASM("ui/uitext", cUIText_render2D);
 #ifdef SKIP_ASM
 extern "C" void* cUIText_getFont(void* self);
-extern "C" float func_00392BA8(void* font, int ch);
+extern "C" float cFont_charAdvance(void* font, int ch);
 // The unit declares these with the string as int; bind pointer-typed views.
-extern "C" float func_003921F0_s(void* font, unsigned short* str, void* out, int flags, float sx, float sy) __asm__("func_003921F0");
-extern "C" void func_00391E30_s(void* font, float x, float y, unsigned short* str) __asm__("func_00391E30");
+extern "C" float cFont_textExtent1_s(void* font, unsigned short* str, void* out, int flags, float sx, float sy) __asm__("cFont_textExtent1");
+extern "C" void cFont_text1_s(void* font, float x, float y, unsigned short* str) __asm__("cFont_text1");
 extern "C" void cUIThing_applyPivot(void* self, void* pos, void* size);
 extern "C" void usprintf(unsigned short* dst, unsigned short* fmt, unsigned short* str);
 extern "C" int USTR_length(unsigned short* s);
@@ -113,7 +113,7 @@ extern "C" void cUIText_render2D(sText_05E8* self, float x, float y)
         if (font == 0) {
             return;
         }
-        int n = (int)(self->width / (func_00392BA8(font, 'W') * self->sx));
+        int n = (int)(self->width / (cFont_charAdvance(font, 'W') * self->sx));
         int i = 0;
         if (n < 0x400) {
             for (i = 0; i < n; i++) {
@@ -165,25 +165,25 @@ extern "C" void cUIText_render2D(sText_05E8* self, float x, float y)
             unsigned short* buf = (unsigned short*)operator_new_tag((USTR_length(str) + 5) * 2, str_UITEXTTEMP_b, 0x100, 0);
             usprintf(buf, D_004A47B0, str);
             sRect_05E8 textBounds;
-            func_003921F0_s(font, buf, &textBounds, 0, textScale.x, textScale.y);
+            cFont_textExtent1_s(font, buf, &textBounds, 0, textScale.x, textScale.y);
             sV3_05E8 size(textBounds.x1, self->sy * ((float)font->height * font->scale.y), 0.0f);
             sV3_05E8 drawPos = pos;
             cUIThing_applyPivot(self, &drawPos, &size);
             pos.y += (float)font->height * font->scale.y * textScale.y + 3.0f;
-            func_00391E30_s(font, drawPos.x, drawPos.y, buf);
+            cFont_text1_s(font, drawPos.x, drawPos.y, buf);
             if (buf != 0) {
                 cMemMan_free(buf);
             }
             return;
         }
         sRect_05E8 textBounds;
-        func_003921F0_s(font, str, &textBounds, 0, textScale.x, textScale.y);
+        cFont_textExtent1_s(font, str, &textBounds, 0, textScale.x, textScale.y);
         i++;
         sV3_05E8 size(textBounds.x1, self->sy * ((float)font->height * font->scale.y), 0.0f);
         sV3_05E8 drawPos = pos;
         cUIThing_applyPivot(self, &drawPos, &size);
         pos.y += (float)font->height * font->scale.y * textScale.y + 3.0f;
-        func_00391E30_s(font, drawPos.x, drawPos.y, str);
+        cFont_text1_s(font, drawPos.x, drawPos.y, str);
     } while (i < self->numLines);
 }
 #endif
@@ -368,7 +368,7 @@ extern "C" void cUIText_setAsciiStringPrivate(cUIText* self, const char* str)
 INCLUDE_ASM("ui/uitext", cUIText_setUnicodeStringWrap);
 #ifdef SKIP_ASM
 extern "C" void* cUIText_getFont(void* self);
-extern "C" float func_00392C60(void* font, unsigned short ch);
+extern "C" float cFont_charAdvance1(void* font, unsigned short ch);
 extern "C" int USTR_length(unsigned short* s);
 extern "C" void USTR_copy(unsigned short* dst, unsigned short* src);
 extern "C" void cUIText_setUnicodeStringPrivate(cUIText* self, const unsigned short* str);
@@ -406,7 +406,7 @@ extern "C" void cUIText_setUnicodeStringWrap(cUIText* self, unsigned short* str)
             w = 0.0f;
             i += 2;
         } else {
-            w += func_00392C60(font, buf[i]) * self->mScale.x;
+            w += cFont_charAdvance1(font, buf[i]) * self->mScale.x;
             if (buf[i] == 0x20) {
                 last = i;
             }
@@ -530,7 +530,7 @@ void cUIText_setUnicodeStringByID(cUIText* self, int id)
 INCLUDE_ASM("ui/uitext", func_003A1030);
 #ifdef SKIP_ASM
 extern "C" void* cUIText_getFont(void* self);
-extern "C" float func_003921F0(void* font, int str, void* out, int flags, float sx, float sy);
+extern "C" float cFont_textExtent1(void* font, int str, void* out, int flags, float sx, float sy);
 
 struct func_003A1030_sVec3 {
     float x;
@@ -556,7 +556,7 @@ struct func_003A1030_sVEntry {
  * Returns the size of a UI text's string at its font and scale.
  *
  * Refreshes the text first (virtual slot 16) when it has no string (+0xB4) or bit 2 of +0x14 is clear; then measures
- * the string with func_003921F0 using cUIText_getFont and mScale and returns the measured rectangle's far corner (+0x8,
+ * the string with cFont_textExtent1 using cUIText_getFont and mScale and returns the measured rectangle's far corner (+0x8,
  * +0xC) as x and y. Without a string or font it returns t3vect_Zero. cFEStateUberTrick_updateTrickMenu uses it to size
  * the trick menu.
  *
@@ -572,7 +572,7 @@ extern "C" void func_003A1030(void* self, func_003A1030_sVec3* out)
     int str = *(int*)((char*)self + 0xB4);
     if (str != 0 && font != 0) {
         func_003A1030_sRect textRect;
-        func_003921F0(font, str, &textRect, 0, *(float*)((char*)self + 0x50), *(float*)((char*)self + 0x54));
+        cFont_textExtent1(font, str, &textRect, 0, *(float*)((char*)self + 0x50), *(float*)((char*)self + 0x54));
         out->x = textRect.x1;
         out->y = textRect.y1;
     } else {
@@ -891,9 +891,9 @@ extern "C" int cUITextScroll_onInput(sUIText13E0* self, char* input)
 INCLUDE_ASM("ui/uitext", cUITextScroll_render2D);
 #ifdef SKIP_ASM
 extern "C" int cUITextScroll_getFont(cUITextScroll* self);
-extern "C" float func_003921F0(void* font, int str, void* out, int flags, float sx, float sy);
+extern "C" float cFont_textExtent1(void* font, int str, void* out, int flags, float sx, float sy);
 extern "C" void cUIThing_applyPivot(void* self, void* pos, void* size);
-extern "C" void func_00391E30(void* font, float x, float y, int str);
+extern "C" void cFont_text1(void* font, float x, float y, int str);
 extern "C" void cUIScrollBar_setValues(void* sb, int top, int rows, int count);
 
 struct sV2_1588 {
@@ -1015,12 +1015,12 @@ extern "C" void cUITextScroll_render2D(sText_1588* self, float x, float y)
         int str = self->strs[i + self->top];
         i++;
         sRect_1588 textBounds;
-        func_003921F0(font, str, &textBounds, 0, self->sx, self->sy);
+        cFont_textExtent1(font, str, &textBounds, 0, self->sx, self->sy);
         sV3_1588 size(textBounds.x1, self->sy * ((float)font->height * font->scale.y), 0.0f);
         sV3_1588 drawPos = pos;
         cUIThing_applyPivot(self, &drawPos, &size);
         pos.y += lineH;
-        func_00391E30(font, drawPos.x, drawPos.y + self->yofs, str);
+        cFont_text1(font, drawPos.x, drawPos.y + self->yofs, str);
     } while (i < rows);
     if (self->scroll != 0) {
         cUIScrollBar_setValues(self->scroll, self->top, rows, self->count);
@@ -1142,7 +1142,7 @@ extern "C" void cUITextScroll_addAsciiString(cUITextScroll* self, char* str)
             w = 0.0f;
             start = i;
         } else {
-            w += func_00392C60(font, buf[i]) * self->mScale.x;
+            w += cFont_charAdvance1(font, buf[i]) * self->mScale.x;
             if (buf[i] == 0x20) {
                 last = i;
             }
@@ -1280,7 +1280,7 @@ extern "C" void cUITextScroll_addUnicodeStringWrap(cUITextScroll* self, void* vs
             w = 0.0f;
             start = i;
         } else {
-            w += func_00392C60(font, buf[i]) * self->mScale.x;
+            w += cFont_charAdvance1(font, buf[i]) * self->mScale.x;
             if (buf[i] == 0x20) {
                 last = i;
             }
@@ -1443,20 +1443,20 @@ struct sSprite_20A0 {
 };
 // The unit declares GrMan as char*; typed view by asm label.
 extern int D_004A28AC_20A0 __asm__("D_004A28AC");
-extern "C" void func_0038E118(int ctx, sQuadVtx_20A0* v, sRect_20A0* r);
-extern "C" void func_0038E200(int ctx, sQuadVtx_20A0* v, sRect_20A0* r);
+extern "C" void c2DRender_drawRect(int ctx, sQuadVtx_20A0* v, sRect_20A0* r);
+extern "C" void c2DRender_drawRotRect(int ctx, sQuadVtx_20A0* v, sRect_20A0* r);
 
 /**
  * Draws a texture element as a screen quad in a rectangle with a colour.
  *
  * Does nothing for a negative texture (+0x0). Sets the current draw state's texture, builds 4 vertices with the
  * element's UVs (+0xC..+0x18; flag 1 swaps u, flag 2 swaps v) and the colour scaled by 128, and submits them with
- * func_0038E200 when flag 4 is set, else func_0038E118. Nothing in the retail code references it.
+ * c2DRender_drawRotRect when flag 4 is set, else c2DRender_drawRect. Nothing in the retail code references it.
  *
  * @param element  the texture element
  * @param rect  the screen rectangle (x, y, w, h)
  * @param colour  the colour (a, r, g, b), 0..1
- * @param flags  1 flip u, 2 flip v, 4 use func_0038E200
+ * @param flags  1 flip u, 2 flip v, 4 use c2DRender_drawRotRect
  */
 extern "C" void func_003A20A0(sSprite_20A0* element, sRect_20A0 rect, sColor_20A0 colour, int flags)
 {
@@ -1495,9 +1495,9 @@ extern "C" void func_003A20A0(sSprite_20A0* element, sRect_20A0 rect, sColor_20A
     quadVerts[3].s = rightU;
     quadVerts[3].t = bottomV;
     if (flags & 4) {
-        func_0038E200(D_004A28AC_20A0, quadVerts, &rect);
+        c2DRender_drawRotRect(D_004A28AC_20A0, quadVerts, &rect);
     } else {
-        func_0038E118(D_004A28AC_20A0, quadVerts, &rect);
+        c2DRender_drawRect(D_004A28AC_20A0, quadVerts, &rect);
     }
 }
 #endif
@@ -1533,20 +1533,20 @@ struct sSprite_2220 {
 };
 // The unit declares GrMan as char*; typed views by asm label.
 extern int D_004A28AC_2220 __asm__("D_004A28AC");
-extern void func_0038E118_2220(int ctx, sQuadVtx_2220* v, sRect_2220* r) __asm__("func_0038E118");
-extern void func_0038E200_2220(int ctx, sQuadVtx_2220* v, sRect_2220* r) __asm__("func_0038E200");
+extern void c2DRender_drawRect_2220(int ctx, sQuadVtx_2220* v, sRect_2220* r) __asm__("c2DRender_drawRect");
+extern void c2DRender_drawRotRect_2220(int ctx, sQuadVtx_2220* v, sRect_2220* r) __asm__("c2DRender_drawRotRect");
 
 /**
  * Draws the bottom @p fillFraction part of a texture element as a screen quad, like a fill gauge.
  *
  * The rectangle and the top v are moved down by (1 - @p fillFraction) of their height, so only the bottom part shows. Unlike
  * func_003A20A0 it draws even a negative texture, ignores the flip flags and scales r, g, b by 255 (alpha by 128). Flag
- * 4 selects func_0038E200 over func_0038E118. Nothing in the retail code references it.
+ * 4 selects c2DRender_drawRotRect over c2DRender_drawRect. Nothing in the retail code references it.
  *
  * @param element  the texture element
  * @param rect  the screen rectangle (x, y, w, h)
  * @param colour  the colour (a, r, g, b), 0..1
- * @param flags  4 uses func_0038E200
+ * @param flags  4 uses c2DRender_drawRotRect
  * @param fillFraction  the shown fraction, 0..1
  */
 extern "C" void func_003A2220(sSprite_2220* element, sRect_2220 rect, sColor_2220 colour, int flags, float fillFraction)
@@ -1579,14 +1579,14 @@ extern "C" void func_003A2220(sSprite_2220* element, sRect_2220 rect, sColor_222
     quadVerts[3].s = rightU;
     quadVerts[3].t = bottomV;
     if (flags & 4) {
-        func_0038E200_2220(D_004A28AC_2220, quadVerts, &rect);
+        c2DRender_drawRotRect_2220(D_004A28AC_2220, quadVerts, &rect);
     } else {
-        func_0038E118_2220(D_004A28AC_2220, quadVerts, &rect);
+        c2DRender_drawRect_2220(D_004A28AC_2220, quadVerts, &rect);
     }
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uitext", func_003A23B8);
+INCLUDE_ASM("ui/uitext", cTextureElement_renderTiled);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sRect_23B8 {
@@ -1618,8 +1618,8 @@ struct sSprite_23B8 {
     float v1;               // 0x18
 };
 extern int D_004A28AC_23B8 __asm__("D_004A28AC");
-extern "C" void func_0038E5E8(int ctx, sQuadVtx_23B8* v, sRect_23B8* dst, sRect_23B8* uv);
-extern "C" void func_0038E738(int ctx, sQuadVtx_23B8* v, sRect_23B8* dst, sRect_23B8* uv);
+extern "C" void c2DRender_drawRect2(int ctx, sQuadVtx_23B8* v, sRect_23B8* dst, sRect_23B8* uv);
+extern "C" void c2DRender_drawRotRect2(int ctx, sQuadVtx_23B8* v, sRect_23B8* dst, sRect_23B8* uv);
 
 /**
  * Draws the texture element @p element tiled @p tx times across and @p ty times down the rectangle @p destRect, cropping the last
@@ -1629,7 +1629,7 @@ extern "C" void func_0038E738(int ctx, sQuadVtx_23B8* v, sRect_23B8* dst, sRect_
  * @p ty is not positive. Each tile is r.w / tx by r.h / ty. For floor(ty) rows it draws floor(tx) full tiles plus, when
  * @p tx has a fraction, a last tile cut to the rectangle's right edge with its texture range cut to the same fraction;
  * when @p ty has a fraction a last row cut to the bottom edge follows. Every quad goes to the 2D renderer D_004A28AC
- * through func_0038E5E8, or func_0038E738 (texture turned 90 degrees, so the fractions crop the other axis) when flag
+ * through c2DRender_drawRect2, or c2DRender_drawRotRect2 (texture turned 90 degrees, so the fractions crop the other axis) when flag
  * bit 2 is set. Flag bit 0 swaps the left and right texture coordinates (u0/u1), bit 1 the top and bottom ones (v0/v1).
  *
  * The four vertices get alpha = c.a * 128 and red/green/blue = c * 255; func_003A20A0 scales all four by 128, so the
@@ -1642,7 +1642,7 @@ extern "C" void func_0038E738(int ctx, sQuadVtx_23B8* v, sRect_23B8* dst, sRect_
  * @param tx  how many times the texture repeats across (may be fractional)
  * @param ty  how many times the texture repeats down (may be fractional)
  */
-extern "C" void func_003A23B8(sSprite_23B8* element, sRect_23B8 destRect, sColor_23B8 colour, int flags, float tx, float ty)
+extern "C" void cTextureElement_renderTiled(sSprite_23B8* element, sRect_23B8 destRect, sColor_23B8 colour, int flags, float tx, float ty)
 {
     int tex = element->tex;
     (GrMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex;
@@ -1690,25 +1690,25 @@ extern "C" void func_003A23B8(sSprite_23B8* element, sRect_23B8 destRect, sColor
                 for (int i = 0; i < nx; i++) {
                     sRect_23B8 dst(x, y, w, tileHeight);
                     sRect_23B8 uv(leftU, topV, rightU - leftU, bottomV - topV);
-                    func_0038E738(D_004A28AC_23B8, quadVerts, &dst, &uv);
+                    c2DRender_drawRotRect2(D_004A28AC_23B8, quadVerts, &dst, &uv);
                     x += w;
                 }
                 if ((float)nx != tx) {
                     sRect_23B8 dst(x, y, (x0 + destRect.w) - x, tileHeight);
                     sRect_23B8 uv(leftU, topV, rightU - leftU, (topV + (bottomV - topV) * (tx - (float)nx)) - topV);
-                    func_0038E738(D_004A28AC_23B8, quadVerts, &dst, &uv);
+                    c2DRender_drawRotRect2(D_004A28AC_23B8, quadVerts, &dst, &uv);
                 }
             } else {
                 for (int i = 0; i < nx; i++) {
                     sRect_23B8 dst(x, y, w, tileHeight);
                     sRect_23B8 uv(leftU, topV, rightU - leftU, bottomV - topV);
-                    func_0038E5E8(D_004A28AC_23B8, quadVerts, &dst, &uv);
+                    c2DRender_drawRect2(D_004A28AC_23B8, quadVerts, &dst, &uv);
                     x += w;
                 }
                 if ((float)nx != tx) {
                     sRect_23B8 dst(x, y, (x0 + destRect.w) - x, tileHeight);
                     sRect_23B8 uv(leftU, topV, (leftU + (rightU - leftU) * (tx - (float)nx)) - leftU, bottomV - topV);
-                    func_0038E5E8(D_004A28AC_23B8, quadVerts, &dst, &uv);
+                    c2DRender_drawRect2(D_004A28AC_23B8, quadVerts, &dst, &uv);
                 }
             }
             y += tileHeight;
@@ -1722,13 +1722,13 @@ extern "C" void func_003A23B8(sSprite_23B8* element, sRect_23B8 destRect, sColor
             for (int i = 0; i < nx; i++) {
                 sRect_23B8 dst(x, y, w, hh);
                 sRect_23B8 uv(u0b, topV, rightU - u0b, bottomV - topV);
-                func_0038E738(D_004A28AC_23B8, quadVerts, &dst, &uv);
+                c2DRender_drawRotRect2(D_004A28AC_23B8, quadVerts, &dst, &uv);
                 x += w;
             }
             if ((float)nx != tx) {
                 sRect_23B8 dst(x, y, (x0 + destRect.w) - x, hh);
                 sRect_23B8 uv(u0b, topV, rightU - u0b, (topV + (bottomV - topV) * (tx - (float)nx)) - topV);
-                func_0038E738(D_004A28AC_23B8, quadVerts, &dst, &uv);
+                c2DRender_drawRotRect2(D_004A28AC_23B8, quadVerts, &dst, &uv);
             }
         } else {
             float v1b = topV + (bottomV - topV) * (ty - fny);
@@ -1736,20 +1736,20 @@ extern "C" void func_003A23B8(sSprite_23B8* element, sRect_23B8 destRect, sColor
             for (int i = 0; i < nx; i++) {
                 sRect_23B8 dst(x, y, w, hh);
                 sRect_23B8 uv(leftU, topV, rightU - leftU, v1b - topV);
-                func_0038E5E8(D_004A28AC_23B8, quadVerts, &dst, &uv);
+                c2DRender_drawRect2(D_004A28AC_23B8, quadVerts, &dst, &uv);
                 x += w;
             }
             if ((float)nx != tx) {
                 sRect_23B8 dst(x, y, (x0 + destRect.w) - x, hh);
                 sRect_23B8 uv(leftU, topV, (leftU + (rightU - leftU) * (tx - (float)nx)) - leftU, v1b - topV);
-                func_0038E5E8(D_004A28AC_23B8, quadVerts, &dst, &uv);
+                c2DRender_drawRect2(D_004A28AC_23B8, quadVerts, &dst, &uv);
             }
         }
     }
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uitext", func_003A2A00);
+INCLUDE_ASM("ui/uitext", cTextureElement_renderRot);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sRect_2A00 {
@@ -1783,8 +1783,8 @@ struct sSprite_2A00 {
 };
 // The unit declares GrMan as char*; typed views by asm label.
 extern int D_004A28AC_2A00 __asm__("D_004A28AC");
-extern "C" void func_0038E2E8(int ctx, sQuadVtx_2A00* v, sRect_2A00* r, sMat3_2A00* m);
-extern "C" void func_0038E468(int ctx, sQuadVtx_2A00* v, sRect_2A00* r, sMat3_2A00* m);
+extern "C" void c2DRender_drawRect1(int ctx, sQuadVtx_2A00* v, sRect_2A00* r, sMat3_2A00* m);
+extern "C" void c2DRender_drawRotRect1(int ctx, sQuadVtx_2A00* v, sRect_2A00* r, sMat3_2A00* m);
 
 /**
  * Draws the texture element @p element once over the rectangle @p destRect, with the corners transformed by the 3x3 matrix @p transform.
@@ -1792,7 +1792,7 @@ extern "C" void func_0038E468(int ctx, sQuadVtx_2A00* v, sRect_2A00* r, sMat3_2A
  * Selects the element's texture (tex) as texture 0 of GrMan's current draw state, sets the four vertices' texture
  * coordinates to the element's rectangle (u0/u1 swapped when flag bit 0 is set, v0/v1 when bit 1 is set) and their
  * colour to alpha = c.a * 128, red/green/blue = c * 255 (func_003A20A0 scales all four by 128), then hands the quad to
- * the 2D renderer D_004A28AC through func_0038E2E8, or func_0038E468 (corners in the order that turns the texture 90
+ * the 2D renderer D_004A28AC through c2DRender_drawRect1, or c2DRender_drawRotRect1 (corners in the order that turns the texture 90
  * degrees) when bit 2 is set; both transform each corner by @p transform (func_0038E0A8) before submitting. No caller in retail
  * references it.
  *
@@ -1802,7 +1802,7 @@ extern "C" void func_0038E468(int ctx, sQuadVtx_2A00* v, sRect_2A00* r, sMat3_2A
  * @param colour  the colour (a, r, g, b in 0..1)
  * @param flags  bit 0 mirror horizontally, bit 1 mirror vertically, bit 2 draw the texture turned 90 degrees
  */
-extern "C" void func_003A2A00(sSprite_2A00* element, sRect_2A00 destRect, sMat3_2A00 transform, sColor_2A00 colour, int flags)
+extern "C" void cTextureElement_renderRot(sSprite_2A00* element, sRect_2A00 destRect, sMat3_2A00 transform, sColor_2A00 colour, int flags)
 {
     int tex = element->tex;
     (GrMan->m_pCurrentDrawState)->m_textureState.m_texid[0] = tex;
@@ -1836,14 +1836,14 @@ extern "C" void func_003A2A00(sSprite_2A00* element, sRect_2A00 destRect, sMat3_
     quadVerts[3].s = rightU;
     quadVerts[3].t = bottomV;
     if (flags & 4) {
-        func_0038E468(D_004A28AC_2A00, quadVerts, &destRect, &transform);
+        c2DRender_drawRotRect1(D_004A28AC_2A00, quadVerts, &destRect, &transform);
     } else {
-        func_0038E2E8(D_004A28AC_2A00, quadVerts, &destRect, &transform);
+        c2DRender_drawRect1(D_004A28AC_2A00, quadVerts, &destRect, &transform);
     }
 }
 #endif
 //100%
-INCLUDE_ASM("ui/uitext", func_003A2BC8);
+INCLUDE_ASM("ui/uitext", cTextureElement_renderRotTiled);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sRect_2BC8 {
@@ -1878,17 +1878,17 @@ struct sSprite_2BC8 {
     float v1;               // 0x18
 };
 extern int D_004A28AC_2BC8 __asm__("D_004A28AC");
-extern "C" void func_0038E880(int ctx, sQuadVtx_2BC8* v, sRect_2BC8* dst, sRect_2BC8* uv, sMat3_2BC8* m);
-extern "C" void func_0038EA60(int ctx, sQuadVtx_2BC8* v, sRect_2BC8* dst, sRect_2BC8* uv, sMat3_2BC8* m);
+extern "C" void c2DRender_drawRect3(int ctx, sQuadVtx_2BC8* v, sRect_2BC8* dst, sRect_2BC8* uv, sMat3_2BC8* m);
+extern "C" void c2DRender_drawRotRect3(int ctx, sQuadVtx_2BC8* v, sRect_2BC8* dst, sRect_2BC8* uv, sMat3_2BC8* m);
 
 /**
- * Draws the texture element @p element tiled @p tx times across and @p ty times down the rectangle @p destRect, like func_003A23B8,
+ * Draws the texture element @p element tiled @p tx times across and @p ty times down the rectangle @p destRect, like cTextureElement_renderTiled,
  * with every tile's corners transformed by the 3x3 matrix @p transform.
  *
  * Selects the element's texture (tex) as texture 0 of GrMan's current draw state and returns if @p tx or @p ty is not
  * positive. Tiles are r.w / tx by r.h / ty: floor(ty) rows of floor(tx) full tiles, a cropped last tile per row when @p
  * tx has a fraction and a cropped last row when @p ty has one (texture ranges cut by the same fractions). Each quad
- * goes to the 2D renderer D_004A28AC through func_0038E880, or func_0038EA60 (texture turned 90 degrees) when flag bit
+ * goes to the 2D renderer D_004A28AC through c2DRender_drawRect3, or c2DRender_drawRotRect3 (texture turned 90 degrees) when flag bit
  * 2 is set; both transform the corners by @p transform. Flag bit 0 swaps the left and right texture coordinates, bit 1 the top
  * and bottom ones. Vertex colour: alpha = c.a * 128, red/green/blue = c * 255 (func_003A20A0 uses 128 for all four). No
  * caller in retail references it.
@@ -1901,7 +1901,7 @@ extern "C" void func_0038EA60(int ctx, sQuadVtx_2BC8* v, sRect_2BC8* dst, sRect_
  * @param tx  how many times the texture repeats across (may be fractional)
  * @param ty  how many times the texture repeats down (may be fractional)
  */
-extern "C" void func_003A2BC8(sSprite_2BC8* element, sRect_2BC8 destRect, sMat3_2BC8 transform, sColor_2BC8 colour, int flags, float tx, float ty)
+extern "C" void cTextureElement_renderRotTiled(sSprite_2BC8* element, sRect_2BC8 destRect, sMat3_2BC8 transform, sColor_2BC8 colour, int flags, float tx, float ty)
 {
     int j;
     float x;
@@ -1948,25 +1948,25 @@ extern "C" void func_003A2BC8(sSprite_2BC8* element, sRect_2BC8 destRect, sMat3_
                 for (int i = 0; i < nx; i++) {
                     sRect_2BC8 dst(x, y, w, tileHeight);
                     sRect_2BC8 uv(leftU, topV, rightU - leftU, bottomV - topV);
-                    func_0038EA60(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
+                    c2DRender_drawRotRect3(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
                     x += w;
                 }
                 if ((float)nx != tx) {
                     sRect_2BC8 dst(x, y, (x0 + destRect.w) - x, tileHeight);
                     sRect_2BC8 uv(leftU, topV, rightU - leftU, (topV + (bottomV - topV) * (tx - (float)nx)) - topV);
-                    func_0038EA60(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
+                    c2DRender_drawRotRect3(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
                 }
             } else {
                 for (int i = 0; i < nx; i++) {
                     sRect_2BC8 dst(x, y, w, tileHeight);
                     sRect_2BC8 uv(leftU, topV, rightU - leftU, bottomV - topV);
-                    func_0038E880(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
+                    c2DRender_drawRect3(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
                     x += w;
                 }
                 if ((float)nx != tx) {
                     sRect_2BC8 dst(x, y, (x0 + destRect.w) - x, tileHeight);
                     sRect_2BC8 uv(leftU, topV, (leftU + (rightU - leftU) * (tx - (float)nx)) - leftU, bottomV - topV);
-                    func_0038E880(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
+                    c2DRender_drawRect3(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
                 }
             }
             y += tileHeight;
@@ -1980,13 +1980,13 @@ extern "C" void func_003A2BC8(sSprite_2BC8* element, sRect_2BC8 destRect, sMat3_
             for (int i = 0; i < nx; i++) {
                 sRect_2BC8 dst(x, y, w, hh);
                 sRect_2BC8 uv(u0b, topV, rightU - u0b, bottomV - topV);
-                func_0038EA60(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
+                c2DRender_drawRotRect3(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
                 x += w;
             }
             if ((float)nx != tx) {
                 sRect_2BC8 dst(x, y, (x0 + destRect.w) - x, hh);
                 sRect_2BC8 uv(u0b, topV, rightU - u0b, (topV + (bottomV - topV) * (tx - (float)nx)) - topV);
-                func_0038EA60(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
+                c2DRender_drawRotRect3(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
             }
         } else {
             float v1b = topV + (bottomV - topV) * (ty - (float)ny);
@@ -1994,13 +1994,13 @@ extern "C" void func_003A2BC8(sSprite_2BC8* element, sRect_2BC8 destRect, sMat3_
             for (int i = 0; i < nx; i++) {
                 sRect_2BC8 dst(x, y, w, hh);
                 sRect_2BC8 uv(leftU, topV, rightU - leftU, v1b - topV);
-                func_0038E880(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
+                c2DRender_drawRect3(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
                 x += w;
             }
             if ((float)nx != tx) {
                 sRect_2BC8 dst(x, y, (x0 + destRect.w) - x, hh);
                 sRect_2BC8 uv(leftU, topV, (leftU + (rightU - leftU) * (tx - (float)nx)) - leftU, v1b - topV);
-                func_0038E880(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
+                c2DRender_drawRect3(D_004A28AC_2BC8, quadVerts, &dst, &uv, &transform);
             }
         }
     }

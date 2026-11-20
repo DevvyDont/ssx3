@@ -117,7 +117,7 @@ extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028BF78(void* audio, int a1);
 extern "C" void* cFEStateRequestLine_cFEStateRequestLine(void* p, int a1, signed char idx, int a3);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
-extern "C" void func_0039F190(void* stack, int a1);
+extern "C" void cUIStateStack_pop(void* stack, int a1);
 extern "C" void cUIStateStack_push(void* stack, void* state);
 extern char str_cFEStateRequestLine[];
 extern char str_helptext[];
@@ -252,7 +252,7 @@ extern "C" void cFEStateAudioOptions_onWidgetEvent(sAudioOptions_AOWE* self, sWi
     case 6:
         applyMode_AOWE(self);
         if (online_AOWE()) {
-            func_0039F190(self->owner + 0x18, 1);
+            cUIStateStack_pop(self->owner + 0x18, 1);
         } else {
             void* nextState = vcall_AOWE(self, 5, w);
             if (nextState != 0)
@@ -354,7 +354,7 @@ extern "C" int cFEStateAudioOptions_onWidgetMenu(void* self, int pMenu, int Even
 //100%
 INCLUDE_ASM("fe/festateaudiooptions", cFEStateRequestLine_cFEStateRequestLine);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self);
+extern "C" void* cUIState_cUIState(void* self);
 extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, signed char a1);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -416,7 +416,7 @@ static inline int Find_196B90(char* mgr, int hash)
 /**
  * Constructs a request-line (playlist) state for a user.
  *
- * Runs the cUIState constructor func_0039E2A0 (the engine reaches it in the second argument register), sets the state
+ * Runs the cUIState constructor cUIState_cUIState (the engine reaches it in the second argument register), sets the state
  * id (+0xC) to 17, stores cFEStateRequestLine_vtbl and the user (+0x44), and copies the user's control mask from the
  * custom interface (cFECustom_getPlayerCtrlMask) into +0x15 when there is one. Zeroes the 0x100-byte buffer at +0x4C and the fields
  * up to +0x200, keeps @p inStore at +0x16C, finds the "checkbox", "empty_box" and "yell_dollar_sign" texture elements
@@ -433,7 +433,7 @@ static inline int Find_196B90(char* mgr, int hash)
 extern "C" void* cFEStateRequestLine_cFEStateRequestLine(void* requestLine, int uiEngine, signed char idx, int inStore)
 {
     sAudioState_196B90* self = (sAudioState_196B90*)requestLine;
-    func_0039E2A0(self);
+    cUIState_cUIState(self);
     *(int*)((char*)self + 0xC) = 17;
     *(void***)((char*)self + 0x8) = cFEStateRequestLine_vtbl;
     *(signed char*)((char*)self + 0x44) = idx;

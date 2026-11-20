@@ -146,7 +146,7 @@ cListNode* cList_first(cList* list)
 #endif
 
 //100%
-INCLUDE_ASM("util/list", func_00397858);
+INCLUDE_ASM("util/list", cList_last);
 #ifdef SKIP_ASM
 /**
  * Returns the last node of a list: the end sentinel's mpPrev (mEnd.mpPrev, +0xC), or 0 when that node's mpPrev points
@@ -155,7 +155,7 @@ INCLUDE_ASM("util/list", func_00397858);
  * @param list  the cList
  * @return the last node, or 0 for an empty list
  */
-extern "C" int *func_00397858(void *list) {
+extern "C" int *cList_last(void *list) {
     int *temp_2;
 
     temp_2 = (*(int **)((char*)(list) + (0xC)));

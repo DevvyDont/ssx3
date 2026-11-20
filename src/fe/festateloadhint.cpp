@@ -114,20 +114,20 @@ void cFELoadHintState_onWidgetCreate(void* self)
 INCLUDE_ASM("fe/festateloadhint", cFELoadState__cFELoadState);
 #ifdef SKIP_ASM
 extern void* cFELoadState_vtbl[];
-extern "C" void* func_0039E390(void* self);
+extern "C" void* cUIState__cUIState(void* self);
 
 /**
  * Destroys the front-end load state: stores its vtable at +0x8, then runs the cUIState destructor.
  *
- * The cUIState destructor (func_0039E390) gets the g++ delete flags from the second argument register,
+ * The cUIState destructor (cUIState__cUIState) gets the g++ delete flags from the second argument register,
  * untouched.
  *
- * @return no meaningful value (func_0039E390 returns nothing)
+ * @return no meaningful value (cUIState__cUIState returns nothing)
  */
 extern "C" void* cFELoadState__cFELoadState(void* self)
 {
     *(void**)((char*)self + 0x8) = cFELoadState_vtbl;
-    return func_0039E390(self);
+    return cUIState__cUIState(self);
 }
 #endif
 
@@ -234,20 +234,20 @@ extern "C" void cFELoadState_onWidgetCreate(void* self, void* widget)
 INCLUDE_ASM("fe/festateloadhint", cFELoadStateInLodge__cFELoadStateInLodge);
 #ifdef SKIP_ASM
 extern void* cFELoadStateInLodge_vtbl[];
-extern "C" void* func_0039E390(void* self);
+extern "C" void* cUIState__cUIState(void* self);
 
 /**
  * Destroys the in-lodge load state: stores its vtable at +0x8, then runs the cUIState destructor.
  *
- * The cUIState destructor (func_0039E390) gets the g++ delete flags from the second argument register,
+ * The cUIState destructor (cUIState__cUIState) gets the g++ delete flags from the second argument register,
  * untouched.
  *
- * @return no meaningful value (func_0039E390 returns nothing)
+ * @return no meaningful value (cUIState__cUIState returns nothing)
  */
 extern "C" void* cFELoadStateInLodge__cFELoadStateInLodge(void* self)
 {
     *(void**)((char*)self + 0x8) = cFELoadStateInLodge_vtbl;
-    return func_0039E390(self);
+    return cUIState__cUIState(self);
 }
 #endif
 
@@ -413,21 +413,21 @@ extern "C" void func_00245F00(void* self, int flags)
 }
 #endif
 
-extern "C" void* func_0039E390(void* self);
+extern "C" void* cUIState__cUIState(void* self);
 
 //100%
 INCLUDE_ASM("fe/festateloadhint", func_00245F30__FPv);
 #ifdef SKIP_ASM
 /**
- * Destroys the display-mode popup state (vtable D_0047DA58) by running the cUIState destructor func_0039E390().
+ * Destroys the display-mode popup state (vtable D_0047DA58) by running the cUIState destructor cUIState__cUIState().
  *
  * The g++ delete flags pass through untouched in the second argument register.
  *
- * @return func_0039E390()'s return value
+ * @return cUIState__cUIState()'s return value
  */
 void* func_00245F30(void* self)
 {
-    return func_0039E390(self);
+    return cUIState__cUIState(self);
 }
 #endif
 

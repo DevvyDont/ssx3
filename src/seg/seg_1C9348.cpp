@@ -120,10 +120,10 @@ extern "C" void func_002C8550(unsigned char *compressed) {
 //100%
 INCLUDE_ASM("seg/seg_1C9348", func_002C85A0);
 #ifdef SKIP_ASM
-extern "C" int func_002C76C0(int, int);
+extern "C" int HUFF_decompress(int, int);
 
 extern "C" int func_002C85A0(int packBuf, int b, int unpackBuf) {
-    return func_002C76C0(packBuf, unpackBuf);
+    return HUFF_decompress(packBuf, unpackBuf);
 }
 #endif
 

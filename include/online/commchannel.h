@@ -5,8 +5,8 @@
 // only implementation. cCommSystem::mChannels holds them. EA's source: d:/ssx/code/source/online/commchannel.cpp
 // (the preview build's assert string). Size 0xC: two 4-byte bools, then the vptr (g++ 2.95 puts it after the data of the class
 // that declares the virtuals); cDSockChannel's first own field is at 0xC. Retail vtable D_00481320.
-// Retail methods: constructor func_002557E0 (stores the vtable, clears both flags), destructor cCommChannel__cCommChannel,
-// channelOpen func_00255830, channelClose cCommChannel_channelClose (all in mem/memstd), and the default virtuals in tagsunk
+// Retail methods: constructor cCommChannel_cCommChannel (stores the vtable, clears both flags), destructor cCommChannel__cCommChannel,
+// channelOpen cCommChannel_channelOpen, channelClose cCommChannel_channelClose (all in mem/memstd), and the default virtuals in tagsunk
 // (cCommChannel_disconnect = channelClose, update/isConnected/getChannelType/readPacket/writePacket return 0,
 // getLatency returns 1/60). Retail keeps out-of-line copies of the preview's inline isChannelOpen/setError/getError
 // (cCommChannel_isChannelOpen/setError/getError, 0x267D88..0x267DA0).

@@ -5321,8 +5321,8 @@ INCLUDE_ASM("ai/ai", cResetControl_gainFocus);
 extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" int cResetControl_shouldTransition(cResetControl* self);
 void* cGame_getTransitionMan(void* self, int id);
-extern "C" void func_002E4578(void* obj);
-void* func_002E4D70(void* self);
+extern "C" void cTransitionMan_EndTransition(void* obj);
+void* cTransitionObj_cTransitionObj(void* self);
 extern "C" void cTransitionMan_StartTransition(void* self, int a1, void* a2, void* a3, float f0, float f1, float f2, int a4, void* a5);
 extern void* cFade_TObj_vtbl[];
 
@@ -5344,7 +5344,7 @@ extern "C" void* cTransitionObj_operator_new_sz(unsigned size) __asm__("cTransit
 
 static inline sFx_12F230* initFx_12F230(sFx_12F230* p, const sColor_12F230& col)
 {
-    func_002E4D70(p);
+    cTransitionObj_cTransitionObj(p);
     p->vt = cFade_TObj_vtbl;
     p->c = col;
     return p;
@@ -5356,7 +5356,7 @@ static inline sFx_12F230* initFx_12F230(sFx_12F230* p, const sColor_12F230& col)
  *
  * FadePercent and the main-channel sequence rate (+0x90) are cleared (stored as integer 0). When
  * cResetControl_shouldTransition() allows it, a running effect on the rider's view (cGame_getTransitionMan with
- * mViewIndex) is stopped (func_002E4578), then two white cFade_TObj fades go to cTransitionMan_StartTransition (times 0.5, 0,
+ * mViewIndex) is stopped (cTransitionMan_EndTransition), then two white cFade_TObj fades go to cTransitionMan_StartTransition (times 0.5, 0,
  * 0.5) with a pointer to FadePercent, which drives the fade.
  */
 extern "C" void cResetControl_gainFocus(cResetControl* self)
@@ -5368,7 +5368,7 @@ extern "C" void cResetControl_gainFocus(cResetControl* self)
     {
         char* obj = (char*)cGame_getTransitionMan(SSXApp->Game, self->mRider->mViewIndex);
         if (*(int*)(obj + 0x44))
-            func_002E4578(obj);
+            cTransitionMan_EndTransition(obj);
         sFx_12F230* firstFade = (sFx_12F230*)cTransitionObj_operator_new_sz(20);
         sColor_12F230 ca;
         ca.r = 1.0f;
@@ -5396,7 +5396,7 @@ extern "C" void* cBE_getBE();
 extern "C" char* cRiderAnimBase_getCurrentAnimSequence(void*, int);
 extern "C" int cResetControl_shouldTransition(cResetControl* self);
 void* cGame_getTransitionMan(void* self, int id);
-extern "C" void func_002E4578(void* obj);
+extern "C" void cTransitionMan_EndTransition(void* obj);
 extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
 extern "C" float cRiderMetrix_evReset(void* self, int a1);
 extern "C" void cRiderMetrix_evTakeoff(void* p, int flip, int c);
@@ -5456,7 +5456,7 @@ extern "C" void cResetControl_update(cResetControl* self)
     if (self->FadePercent == 1.0f)
     {
         if (cResetControl_shouldTransition(self))
-            func_002E4578(cGame_getTransitionMan(SSXApp->Game, self->mRider->mViewIndex));
+            cTransitionMan_EndTransition(cGame_getTransitionMan(SSXApp->Game, self->mRider->mViewIndex));
         cRiderMetrix_evTakeoff(self->mRider->mMetrix, 0, 0);
         *(float*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = 1.0f;
         cRider_setControlState_impl(self->mRider, 4);

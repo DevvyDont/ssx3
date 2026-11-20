@@ -139,7 +139,7 @@ void* cPS2BezierMan_Reset(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/bezierman", func_0038B178__FPv);
+INCLUDE_ASM("render/bezierman", cPS2BezierMan_ClearPatches__FPv);
 #ifdef SKIP_ASM
 /**
  * Empties the four patch queues: zeroes mNum4x4Patches, mNum6x6Patches, mNum8x8Patches and mNumMixedPatches.
@@ -147,7 +147,7 @@ INCLUDE_ASM("render/bezierman", func_0038B178__FPv);
  * It sits in slot 17 of the cPS2BezierMan vtable (cPSPBezierMan_vtbl), between the shadow switches and
  * cPS2BezierMan_DrawPatches; func_0038D638 calls it through that slot from cPS2BezierMan_Init.
  */
-void func_0038B178(void* self)
+void cPS2BezierMan_ClearPatches(void* self)
 {
     *(int*)((char*)self + 0x458) = 0;
     *(int*)((char*)self + 0x3c9c) = 0;
@@ -635,8 +635,8 @@ extern "C" void func_0038C788(void* self, int type, int idx);
 extern "C" void func_0038CA70_B370(void* self, int kind, int sub, void* patch, unsigned int* handle) __asm__("func_0038CA70");
 extern "C" void func_0038CE20_B370(void* self, int sub, void* patch, void* ext, unsigned int* handle) __asm__("func_0038CE20");
 extern "C" void func_0038D968_B370(void* self, unsigned int* handle) __asm__("func_0038D968");
-extern "C" int func_00394ED0_B370(void* dm, void* st, int hash) __asm__("func_00394ED0");
-extern "C" sBucket_B370* func_00395000(void* dm, int state, int key, int hash, int matrix);
+extern "C" int cPS2DeferManager_Find_B370(void* dm, void* st, int hash) __asm__("cPS2DeferManager_Find");
+extern "C" sBucket_B370* cPS2DeferManager_Find1(void* dm, int state, int key, int hash, int matrix);
 extern "C" int func_00364240_B370(int state, int key) __asm__("func_00364240");
 extern "C" void func_00362978_B370(void* bucket, int start, int end) __asm__("func_00362978");
 
@@ -646,7 +646,7 @@ typedef sM4_B370* (*tGetMat_B370)(void*);
 static inline sBucket_B370* GetBucket_B370(sDefer2_B370* dm, int state, int key, int matrix)
 {
     int h = Hash8_B370(state ^ ((short)key | (((key >> 16) + 2) << 16))) & 0xFF;
-    sBucket_B370* b = func_00395000(dm, state, key, h, matrix);
+    sBucket_B370* b = cPS2DeferManager_Find1(dm, state, key, h, matrix);
     if (b != 0) {
         return b;
     }
@@ -759,7 +759,7 @@ static inline void Render_B370(sBezMan_B370* self)
     gm->top->fC &= 0xC0000000;
     gm->top->f8 = (gm->top->f8 & ~0x1F) | (*(int*)((char*)dm + 0x69CC4) & 0x1F);
     sRS_B370* s = gm->top;
-    int base = func_00394ED0_B370(dm, s, Hash8_B370(s->f0 ^ s->f4 ^ s->f8 ^ s->fC) & 0xFF);
+    int base = cPS2DeferManager_Find_B370(dm, s, Hash8_B370(s->f0 ^ s->f4 ^ s->f8 ^ s->fC) & 0xFF);
     for (int i = 0; i < self->n8; i++) {
         sPatch_B370* e = &self->list8[i];
         char* obj = e->obj;
@@ -1716,7 +1716,7 @@ public:
 };
 
 /**
- * Calls virtual slot 17 of the patch manager (func_0038B178, which empties the patch queues).
+ * Calls virtual slot 17 of the patch manager (cPS2BezierMan_ClearPatches, which empties the patch queues).
  *
  * cPS2BezierMan_Init calls it after setting up the caches.
  */

@@ -270,7 +270,7 @@ extern "C" void func_001CED90(int arg0, int arg1, int arg2, int arg3, int arg4)
 INCLUDE_ASM("seg/seg_CF758", func_001CEEA0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void* func_0039E2A0(void* self, void* parent);
+extern "C" void* cUIState_cUIState(void* self, void* parent);
 extern "C" signed char cFECustom_getPlayerCtrlMask(void* mgr, int player);
 signed char cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 int cBELibrary_getRiderIndex(int flag);
@@ -321,7 +321,7 @@ extern "C" sChallenge_1CEEA0* func_001CEEA0(sChallenge_1CEEA0* self, void* paren
 {
     int i;
     int j;
-    func_0039E2A0(self, parent);
+    cUIState_cUIState(self, parent);
     self->type = 47;
     self->vtbl = D_0046A3C8;
     self->player = player;

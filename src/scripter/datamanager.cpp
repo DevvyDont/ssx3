@@ -783,7 +783,7 @@ extern "C" void cTransitionMan_StartTransition(void* snd, int a1, int h, int h2,
 // PORT: real parameter order of cTransitionMan_StartTransition has the floats before the two trailing ints (cf. boardwakefx).
 void cTransitionMan_StartTransition_f(void* snd, int a1, int h, int h2, float t0, float t1, float t2, int a4, int a5) __asm__("cTransitionMan_StartTransition");
 extern "C" void cTransitionMan_StartTransitionScreenGrab(void* snd, int a1, int h, int a3, float t);
-extern "C" void func_002E4578(void* p);
+extern "C" void cTransitionMan_EndTransition(void* p);
 extern "C" void cCutSceneTransitionMan_StartCutScene(void* gm, float t);
 extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(void* gm);
 extern "C" void* cUIStateStack_findState(void* table, int hash);
@@ -841,7 +841,7 @@ int tNISList_Play_impl(char* self, int fade, int notify) __asm__("tNISList_Play"
  *
  * A script entry (tNISList_IsVideo, On Tour IsVideo, returns 0) is started with cSSXScriptEngine_PlayRequestScript (the
  * last flag is bit 3 of the entry's flags, +0x8). On the cut-scene list (+0x4) the running transition is ended
- * (func_002E4578), and the script header's in/hold/out frame counts (GetSSXScriptHeader of the request's player; 1/60 s
+ * (cTransitionMan_EndTransition), and the script header's in/hold/out frame counts (GetSSXScriptHeader of the request's player; 1/60 s
  * each) build the transition in: type 7 is a screen grab (cTransitionMan_StartTransitionScreenGrab), any other type a full transition
  * (cTransitionMan_StartTransition with two cSSXScriptEngine_MakeTransitionObject objects). When in+hold frames remain (+0xB8) the
  * request is paused (cBXScriptEngine_PauseScript, On Tour PauseScript), +0xAC and +0xB0 (On Tour mIsStartTransition,
@@ -878,7 +878,7 @@ int tNISList_Play_impl(char* self, int fade, int notify)
         if (*(int*)(self + 0x4) != 0) {
             void* snd = cGame_getTransitionMan(SSXApp->Game, 0);
             if (*(int*)((char*)snd + 0x44) != 0) {
-                func_002E4578(snd);
+                cTransitionMan_EndTransition(snd);
             }
             int tIn = 0;
             int tHold = 0;
@@ -1067,7 +1067,7 @@ INCLUDE_ASM("scripter/datamanager", tNISList_Reset);
 extern char str_hud_e[];
 int GetHashValue32(char* s);
 void* cGame_getTransitionMan(void* self, int a1);
-extern "C" void func_002E4578(void* p);
+extern "C" void cTransitionMan_EndTransition(void* p);
 extern "C" void cCutSceneTransitionMan_ForceToRegularMode(void* p);
 extern "C" void* cUIStateStack_findState(void* table, int hash);
 extern "C" void tNISList_RemoveFromHead(void* self, int index);
@@ -1085,7 +1085,7 @@ struct sDmVEntry6868 {
  * Undoes a pause on loading (tNISList_DoPause(self, 0, 1)) and any counted pauses (+0xC4 forced to 1, then
  * tNISList_DoPause(self, 0, 0)). When the cut-scene list (+0x4) is playing: with @p resetTransition, puts the game's
  * cut-scene transition manager back in regular mode (cCutSceneTransitionMan_ForceToRegularMode) and ends a running
- * script transition (+0xB0) with func_002E4578; then calls virtual slot 24 of the "hud" UI state
+ * script transition (+0xB0) with cTransitionMan_EndTransition; then calls virtual slot 24 of the "hud" UI state
  * (cUIStateStack_findState) with (1, 0). Last it drops all five entries (tNISList_RemoveFromHead) and clears the pending index
  * (-1), state and the flag and counter words at +0xAC-+0xC8.
  *
@@ -1107,7 +1107,7 @@ extern "C" void tNISList_Reset(void* nisList, int resetTransition)
         if (resetTransition != 0) {
             cCutSceneTransitionMan_ForceToRegularMode(gm);
             if (*(int*)(self + 0xB0) != 0) {
-                func_002E4578(cGame_getTransitionMan(SSXApp->Game, 0));
+                cTransitionMan_EndTransition(cGame_getTransitionMan(SSXApp->Game, 0));
             }
         }
         char* table = (char*)SSXApp->Game->UI + 0x18;
@@ -1336,7 +1336,7 @@ extern "C" int cBXScriptEngine_IsRequestPlaybackEnding(void* self, int a1);
 extern "C" int cVidEngine_PlayVideo(void* self);
 extern "C" int cVidEngine_IsVideoOnLastFrame(void* self);
 extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
-extern "C" void func_002E4578(void* p);
+extern "C" void cTransitionMan_EndTransition(void* p);
 
 /**
  * Advances a NIS list by one frame.
@@ -1348,7 +1348,7 @@ extern "C" void func_002E4578(void* p);
  * (cBXScriptEngine_ResumeScript or cVidEngine_PlayVideo). Once the game's transition manager (cGame_getTransitionMan, +0x44) is idle
  * and the wait is over, both flags clear. - While paused on loading (+0xA8), once the pending entry (+0xBC) is ready
  * the pause is undone (tNISList_DoPause(self, 0, 1)) and tNISList_PlayNextScript plays it. - A skip in progress (+0xC8) counts down;
- * at 0 it ends a running transition (func_002E4578) and starts the next script. - Otherwise the next script starts once
+ * at 0 it ends a running transition (cTransitionMan_EndTransition) and starts the next script. - Otherwise the next script starts once
  * the head script's request is back to ready (2) or ending (cBXScriptEngine_IsRequestPlaybackEnding), or the head video reports done
  * (cVidEngine_IsVideoOnLastFrame), after tNISList_DoTransitionToNext.
  */
@@ -1410,7 +1410,7 @@ extern "C" void tNISList_Update(char* self)
     if (*(int*)(self + 0xC8) != 0) {
         if (--*(int*)(self + 0xC8) == 0) {
             if (*(int*)(self + 0xB0) != 0) {
-                func_002E4578(cGame_getTransitionMan(SSXApp->Game, 0));
+                cTransitionMan_EndTransition(cGame_getTransitionMan(SSXApp->Game, 0));
                 *(int*)(self + 0xAC) = 0;
                 *(int*)(self + 0xB0) = 0;
                 *(int*)(self + 0xB8) = 0;
@@ -2020,8 +2020,8 @@ extern "C" int tNISList_IsVideo(void* self, void* a1);
 extern "C" void cSSXScriptEngine_PlayRequestScript(void* self, int val, int key, int b, int c);
 extern "C" int cVidEngine_PlayVideo(void* self);
 extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
-extern "C" float func_002E4678(void* self);
-extern "C" void func_002EA780(void* self, float t);
+extern "C" float cTransitionMan_GetTransitionTimeLeft(void* self);
+extern "C" void cCutSceneTransitionMan_EndCutScene(void* self, float t);
 
 struct sDmCmd7838 {
     int category;   // 0x0
@@ -2044,8 +2044,8 @@ struct sDmEngVEntry7838 {
  * (view index +0x8, bit 3 of its control bits) and the engine's virtual slot 6 (cSSXScriptEngine_ForcePlayUpdate), a
  * video with cVidEngine_PlayVideo. A running script transition (+0xB0) sets the start-transition flag (+0xAC); the next
  * entry is set up as pending. Otherwise the list is reset without transitions (tNISList_Reset) and, on the cut-scene
- * list (+0x4), the game's fade (+0x64 of the game) gets func_002EA780 with the transition manager's remaining time
- * (func_002E4678) when a script transition was running and the manager is busy, else 0.5.
+ * list (+0x4), the game's fade (+0x64 of the game) gets cCutSceneTransitionMan_EndCutScene with the transition manager's remaining time
+ * (cTransitionMan_GetTransitionTimeLeft) when a script transition was running and the manager is busy, else 0.5.
  *
  * @param selfp  the NIS list
  */
@@ -2078,9 +2078,9 @@ extern "C" void tNISList_PlayNextScript(void* selfp)
             void* fade = *(void**)((char*)app + 0x64);
             char* transitionMan = (char*)cGame_getTransitionMan(app, 0);
             if (wasOn != 0 && *(int*)(transitionMan + 0x44) != 0) {
-                func_002EA780(fade, func_002E4678(transitionMan));
+                cCutSceneTransitionMan_EndCutScene(fade, cTransitionMan_GetTransitionTimeLeft(transitionMan));
             } else {
-                func_002EA780(fade, 0.5f);
+                cCutSceneTransitionMan_EndCutScene(fade, 0.5f);
             }
         }
     }
@@ -2098,7 +2098,7 @@ struct sDmEnt7DE8;
 extern "C" sDmEnt7DE8* tNISList_GetVideoDBRecord(void* self, int* key);
 extern "C" void* cBXScriptEngine_GetRequestPlayerByReqHandle(void* self, int a1);
 extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
-extern "C" void func_002E4578(void* p);
+extern "C" void cTransitionMan_EndTransition(void* p);
 extern "C" int cSSXScriptEngine_MakeTransitionObject(void* self, int a1, int a2);
 extern "C" void cTransitionMan_StartTransition(void* snd, int a1, int h, int h2, int a4, int a5, float t0, float t1, float t2);
 extern "C" void cTransitionMan_StartTransitionOut(void* snd, int a1, int h, float t);
@@ -2127,7 +2127,7 @@ int tNISList_DoTransitionToNext_impl(char* self) __asm__("tNISList_DoTransitionT
  * Starts the transition from the current NIS entry into the next, or reports one already running.
  *
  * With a script transition running (+0xB0, On Tour mInScriptTransition) it returns 1, unless the start flag (+0xAC,
- * mIsStartTransition) is set: then it ends the transition (func_002E4578 on the game's transition manager,
+ * mIsStartTransition) is set: then it ends the transition (cTransitionMan_EndTransition on the game's transition manager,
  * cGame_getTransitionMan(Game, 0)) and returns 0. Otherwise it ends any transition and builds the next one. For a script head
  * entry it reads the next-transition record of the script header (GetSSXScriptHeader of the request's player: type +0x10,
  * colour +0x11, in/hold/out frame shorts +0x12..+0x16, 1/60 s each): type 7 is a screen grab (cTransitionMan_StartTransitionScreenGrab) with no
@@ -2142,7 +2142,7 @@ int tNISList_DoTransitionToNext_impl(char* self)
 {
     if (*(int*)(self + 0xB0) != 0) {
         if (*(int*)(self + 0xAC) != 0) {
-            func_002E4578(cGame_getTransitionMan(SSXApp->Game, 0));
+            cTransitionMan_EndTransition(cGame_getTransitionMan(SSXApp->Game, 0));
             return 0;
         }
         return 1;
@@ -2152,7 +2152,7 @@ int tNISList_DoTransitionToNext_impl(char* self)
         sDmFade_7980* transitionInfo = (sDmFade_7980*)GetSSXScriptHeader(cBXScriptEngine_GetRequestPlayerByReqHandle(ScriptEngine, *(int*)(item + 0xC)));
         void* snd = cGame_getTransitionMan(SSXApp->Game, 0);
         if (*(int*)((char*)snd + 0x44) != 0) {
-            func_002E4578(snd);
+            cTransitionMan_EndTransition(snd);
         }
         if (transitionInfo->tIn + transitionInfo->tHold + transitionInfo->tOut > 0) {
             if (transitionInfo->cat != 7) {
@@ -2177,7 +2177,7 @@ int tNISList_DoTransitionToNext_impl(char* self)
         sDmEnt_7980* videoInfo = (sDmEnt_7980*)tNISList_GetVideoDBRecord(self, (int*)item);
         void* snd = cGame_getTransitionMan(SSXApp->Game, 0);
         if (*(int*)((char*)snd + 0x44) != 0) {
-            func_002E4578(snd);
+            cTransitionMan_EndTransition(snd);
         }
         if (0.0f < videoInfo->t) {
             if (videoInfo->cat != 7) {
@@ -2206,8 +2206,8 @@ extern "C" void cBXScriptEngine_ResumeScript(void* self, int a1);
 extern "C" int cBXScriptEngine_GetRequestState(void* self, int a1);
 extern "C" void cVidEngine_PauseVideo(void* self, int on);
 extern "C" void* cCircularBuffer_operatorIndex(void* list, int i);
-extern "C" void func_002E4638(void* p, int on);
-extern "C" void func_002EA8B8(void* p, int on);
+extern "C" void cTransitionMan_PauseTransition(void* p, int on);
+extern "C" void cCutSceneTransitionMan_Pause(void* p, int on);
 
 struct sSeqItem_7C08 {
     char pad_0x0[0xC];
@@ -2236,7 +2236,7 @@ extern "C" void tNISList_DoPause_impl(sSeq_7C08* self, int on, int hard) __asm__
  * acts only when it changed and no counted pause is held. Acting pauses the head (a script request in states 3-5 with
  * cBXScriptEngine_PauseScript; a video with cVidEngine_PauseVideo) or resumes it (a paused request, state 5, with cBXScriptEngine_ResumeScript; a video with
  * cVidEngine_PauseVideo), and on the cut-scene list (+0x4) passes the same flag to the game's cut-scene transition manager
- * (func_002EA8B8) and, when busy (+0x44), to the transition manager (func_002E4638).
+ * (cCutSceneTransitionMan_Pause) and, when busy (+0x44), to the transition manager (cTransitionMan_PauseTransition).
  *
  * @param on  nonzero to pause, 0 to resume
  * @param hard  nonzero for the pause-on-loading flag, 0 for the pause count
@@ -2286,10 +2286,10 @@ extern "C" void tNISList_DoPause_impl(sSeq_7C08* self, int on, int hard)
             cVidEngine_PauseVideo(self->owner + 0x500, 1);
         }
         if (self->f4) {
-            func_002EA8B8(SSXApp->Game->CutSceneTransitionMan, 1);
+            cCutSceneTransitionMan_Pause(SSXApp->Game->CutSceneTransitionMan, 1);
             char* transitionMan = (char*)cGame_getTransitionMan(SSXApp->Game, 0);
             if (*(int*)(transitionMan + 0x44)) {
-                func_002E4638(transitionMan, 1);
+                cTransitionMan_PauseTransition(transitionMan, 1);
             }
         }
     } else {
@@ -2302,10 +2302,10 @@ extern "C" void tNISList_DoPause_impl(sSeq_7C08* self, int on, int hard)
             cVidEngine_PauseVideo(self->owner + 0x500, 0);
         }
         if (self->f4) {
-            func_002EA8B8(SSXApp->Game->CutSceneTransitionMan, 0);
+            cCutSceneTransitionMan_Pause(SSXApp->Game->CutSceneTransitionMan, 0);
             char* transitionMan = (char*)cGame_getTransitionMan(SSXApp->Game, 0);
             if (*(int*)(transitionMan + 0x44)) {
-                func_002E4638(transitionMan, 0);
+                cTransitionMan_PauseTransition(transitionMan, 0);
             }
         }
     }

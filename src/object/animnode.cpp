@@ -504,7 +504,7 @@ struct sAnimLinkList_EBA0 {
     sAnimLink_EBA0* head; // 0x0C
 };
 
-extern "C" void func_002D1AC8(sAnimLinkList_EBA0* list);
+extern "C" void cObjectInterface_runFrameUpdateScript(sAnimLinkList_EBA0* list);
 
 struct sAnimNode_EBA0 {
     char pad_0x00[0x14];
@@ -515,18 +515,18 @@ struct sAnimNode_EBA0 {
  * Runs the frame-update world script of the instance whose node sits 0x14 bytes into @p self, and returns whether that
  * node is still the instance's active node.
  *
- * Passes the instance record at @p self + 0x2C (the node's Instance) to func_002D1AC8, which runs the record's type-5
+ * Passes the instance record at @p self + 0x2C (the node's Instance) to cObjectInterface_runFrameUpdateScript, which runs the record's type-5
  * script through cWScriptMan_doOnFrameUpdateScript (the type cWScriptMan uses for frame-update scripts), then compares the record's
  * active-node pointer (+0xC) with @p self + 0x14. Its callers (cAnimObjectNode_updateNode, cAnimTeeterNode_updateNode, cAnimComboNode_updateNode) return 0
  * from their node update when it returns 0.
  *
  * @return 1 if the node at @p self + 0x14 is still the record's active node, otherwise 0
  */
-// is this node's link at the head of its list, after func_002D1AC8?
+// is this node's link at the head of its list, after cObjectInterface_runFrameUpdateScript?
 extern "C" int func_0034EBA0(sAnimNode_EBA0* self)
 {
     sAnimLink_EBA0* link = &self->link;
-    func_002D1AC8(self->link.list);
+    cObjectInterface_runFrameUpdateScript(self->link.list);
     return link->list->head == link;
 }
 #endif

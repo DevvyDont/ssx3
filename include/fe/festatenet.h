@@ -22,7 +22,7 @@
 // nothing past 0x6D0; otherwise use the subclass's own header (e.g. fe/festatenetmessenger.h).
 // Evidence tags:
 //   [R] retail's constructors cFEStateNet_cFEStateNet / cFEStateNet_cFEStateNet1 and destructor cFEStateNet__cFEStateNet (and the cUIState
-//       constructor func_0039E318 for the base);
+//       constructor cUIState_cUIState1 for the base);
 //   [P] the July 2003 preview: _vt$11cFEStateNet, its inline isProcessingEvents (lw 0x38 = preview mpScreen),
 //       getFEPath/fePathIsOnline (a global, D_004A1A70 in retail, not a member) and its default constructor
 //       __11cFEStateNet (a 0xAC-byte class; its list at 0xA4/0xA8 is retail 0x6C8/0x6CC, +0x624: the preview had no

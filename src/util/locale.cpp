@@ -7,7 +7,7 @@ INCLUDE_ASM("util/locale", cFELocale_addFile);
 // PORT: cMemMan_alloc is probably the game's overloaded operator new(size, tag, flags, align). Calling it as
 // operator new gives gcc's malloc-like (REG_NOALIAS) aliasing that the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" void func_002C6E98(void* file, const char* name, signed char lang);
+extern "C" void cLocaleFile_loadFile(void* file, const char* name, signed char lang);
 extern char str_LocaleFile[];
 extern const char* D_00441138[];
 extern signed char D_00441188[];
@@ -28,7 +28,7 @@ struct cFELocale_sFiles {
 /**
  * Loads the common string file for a language unless it is already loaded.
  *
- * For lang 0-3 this is data/locale/cmnamer, cmnfren, cmngrmn or cmnspan.loc, loaded by func_002C6E98() into a
+ * For lang 0-3 this is data/locale/cmnamer, cmnfren, cmngrmn or cmnspan.loc, loaded by cLocaleFile_loadFile() into a
  * new 0x14-byte entry ("LocaleFile") of the table at +0x8. A negative lang does nothing.
  *
  * @param lang  language index (0 English, 1 French, 2 German, 3 Spanish)
@@ -44,16 +44,16 @@ extern "C" void cFELocale_addFile(void* self, int lang)
             file->lang = -1;
             file->f4 = 0;
             file->fC = 0;
-            func_002C6E98(file, D_00441138[i], D_00441188[i]);
+            cLocaleFile_loadFile(file, D_00441138[i], D_00441188[i]);
         }
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("util/locale", func_00195A50);
+INCLUDE_ASM("util/locale", cFELocale_deleteFile);
 #ifdef SKIP_ASM
-extern "C" void func_002C6D70(void*, int);
+extern "C" void cLocaleFile__cLocaleFile(void*, int);
 
 struct s195A50Arr {
     void* items[4];
@@ -61,15 +61,15 @@ struct s195A50Arr {
 
 /**
  * Deletes the locale file of entry @p i: when the entry (the pointer table at +0x8) is set, destroys and frees it with
- * func_002C6D70(file, 3) and clears the entry.
+ * cLocaleFile__cLocaleFile(file, 3) and clears the entry.
  *
  * @param i  the file entry index (0 .. 19)
  */
-extern "C" void func_00195A50(void* self, signed char i)
+extern "C" void cFELocale_deleteFile(void* self, signed char i)
 {
     s195A50Arr* arr = (s195A50Arr*)((char*)self + 8);
     if (arr->items[i] != 0) {
-        func_002C6D70(arr->items[i], 3);
+        cLocaleFile__cLocaleFile(arr->items[i], 3);
         arr->items[i] = 0;
     }
 }
@@ -87,11 +87,11 @@ extern "C" void func_00195A98(void) {
 #endif
 
 //100%
-INCLUDE_ASM("util/locale", func_00195AA0);
+INCLUDE_ASM("util/locale", cFELocale_setLanguage);
 #ifdef SKIP_ASM
 extern "C" void cFELocale_deleteAllFiles(void* self);
-extern "C" void func_00195BE0(void* self);
-extern "C" void func_00195DE0(void* self);
+extern "C" void cFELocale_loadFE(void* self);
+extern "C" void cFELocale_loadOV(void* self);
 extern "C" void cFELocale_addFile(void* self, int lang);
 
 /**
@@ -100,11 +100,11 @@ extern "C" void cFELocale_addFile(void* self, int lang);
  * Does nothing when @p lang is already the language (+0x1). Otherwise it stores it and, unless bit 0 of the locale
  * flags (+0x3, On Tour's tAttrLocale mLocaleTest) is set, deletes every file (cFELocale_deleteAllFiles), loads the
  * common file for languages 0-3 (cFELocale_addFile; -1, which loads nothing, for any other value), then the front-end
- * set (func_00195BE0) when the module byte (+0x58) is 1, else the in-game set (func_00195DE0). Locale vtable slot 3.
+ * set (cFELocale_loadFE) when the module byte (+0x58) is 1, else the in-game set (cFELocale_loadOV). Locale vtable slot 3.
  *
  * @param lang  the language index (0 English, 1 French, 2 German, 3 Spanish)
  */
-extern "C" void func_00195AA0(void* self, signed char lang)
+extern "C" void cFELocale_setLanguage(void* self, signed char lang)
 {
     if (*(signed char*)((char*)self + 0x1) != lang) {
         *(signed char*)((char*)self + 0x1) = lang;
@@ -128,9 +128,9 @@ extern "C" void func_00195AA0(void* self, signed char lang)
             }
             cFELocale_addFile(self, langIndex);
             if (*(signed char*)((char*)self + 0x58) == 1) {
-                func_00195BE0(self);
+                cFELocale_loadFE(self);
             } else {
-                func_00195DE0(self);
+                cFELocale_loadOV(self);
             }
         }
     }
@@ -170,7 +170,7 @@ extern "C" void cFELocale_loadCommon(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("util/locale", func_00195BE0);
+INCLUDE_ASM("util/locale", cFELocale_loadFE);
 #ifdef SKIP_ASM
 extern "C" void cFELocale_addFile(void* self, int lang);
 
@@ -181,7 +181,7 @@ extern "C" void cFELocale_addFile(void* self, int lang);
  *
  * @param locale  the cFELocale
  */
-extern "C" void func_00195BE0(void* locale)
+extern "C" void cFELocale_loadFE(void* locale)
 {
     char* self = (char*)locale;
     int id = -1;
@@ -236,33 +236,33 @@ extern "C" void func_00195BE0(void* locale)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("util/locale", func_00195D50);
+INCLUDE_ASM("util/locale", cFELocale_unloadFE);
 #ifdef SKIP_ASM
-extern "C" void func_00195A50(void* self, signed char i);
+extern "C" void cFELocale_deleteFile(void* self, signed char i);
 
 /**
  * Unloads the front-end string files: unless bit 0 of the locale flags (+0x3, mLocaleTest) is set, deletes file entries
- * 4-7 and 16-19 with func_00195A50. Entries 8-11, which func_00195BE0 also loads, stay loaded, and the module byte is
+ * 4-7 and 16-19 with cFELocale_deleteFile. Entries 8-11, which cFELocale_loadFE also loads, stay loaded, and the module byte is
  * not changed.
  */
-extern "C" void func_00195D50(void* self)
+extern "C" void cFELocale_unloadFE(void* self)
 {
     int flags = *(signed char*)((char*)self + 0x3);
     if ((flags & 1) == 0) {
-        func_00195A50(self, 4);
-        func_00195A50(self, 5);
-        func_00195A50(self, 6);
-        func_00195A50(self, 7);
-        func_00195A50(self, 0x10);
-        func_00195A50(self, 17);
-        func_00195A50(self, 18);
-        func_00195A50(self, 19);
+        cFELocale_deleteFile(self, 4);
+        cFELocale_deleteFile(self, 5);
+        cFELocale_deleteFile(self, 6);
+        cFELocale_deleteFile(self, 7);
+        cFELocale_deleteFile(self, 0x10);
+        cFELocale_deleteFile(self, 17);
+        cFELocale_deleteFile(self, 18);
+        cFELocale_deleteFile(self, 19);
     }
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("util/locale", func_00195DE0);
+INCLUDE_ASM("util/locale", cFELocale_loadOV);
 #ifdef SKIP_ASM
 extern "C" void cFELocale_addFile(void* self, int lang);
 
@@ -270,7 +270,7 @@ extern "C" void cFELocale_addFile(void* self, int lang);
  * Loads the in-game string file for the current language: sets the module byte (+0x58) to 2 and adds file entry 12-15,
  * the one matching the language (+0x1, 0-3), with cFELocale_addFile (-1, nothing, for any other language).
  */
-extern "C" void func_00195DE0(void* self)
+extern "C" void cFELocale_loadOV(void* self)
 {
     int file = -1;
     *(signed char*)((char*)self + 0x58) = 2;
@@ -293,34 +293,34 @@ extern "C" void func_00195DE0(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("util/locale", func_00195E58);
+INCLUDE_ASM("util/locale", cFELocale_unloadOV);
 #ifdef SKIP_ASM
-extern "C" void func_00195A50(void* self, signed char i);
+extern "C" void cFELocale_deleteFile(void* self, signed char i);
 
 /**
  * Unloads the in-game string files: unless bit 0 of the locale flags (+0x3, mLocaleTest) is set, deletes file entries
- * 12-15 with func_00195A50.
+ * 12-15 with cFELocale_deleteFile.
  */
-extern "C" void func_00195E58(void* self)
+extern "C" void cFELocale_unloadOV(void* self)
 {
     int flags = *(signed char*)((char*)self + 3);
     if ((flags & 1) == 0) {
-        func_00195A50(self, 0xC);
-        func_00195A50(self, 13);
-        func_00195A50(self, 0xE);
-        func_00195A50(self, 0xF);
+        cFELocale_deleteFile(self, 0xC);
+        cFELocale_deleteFile(self, 13);
+        cFELocale_deleteFile(self, 0xE);
+        cFELocale_deleteFile(self, 0xF);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("util/locale", func_00195EB8);
+INCLUDE_ASM("util/locale", cFELocale_getStringByHash);
 #ifdef SKIP_ASM
-extern "C" const char* func_002C6DE0(void* file, int key);
+extern "C" const char* cLocaleFile_getStringByHash(void* file, int key);
 extern "C" void sprintf2(char* dst, const char* src);
 extern char D_004A1390[];
 
-struct func_00195EB8_sLocale {
+struct cFELocale_getStringByHash_sLocale {
     signed char useDefault;
     signed char lang;
     char pad2[6];
@@ -331,20 +331,20 @@ struct func_00195EB8_sLocale {
  * Returns the front-end string with a given hash.
  *
  * When the display mode (+0x0) is 0, searches the 20 file entries (+0x8) for loaded files whose language byte equals
- * the current language (+0x1) and returns the first func_002C6DE0 hit. Otherwise, or when no file has it, it writes
+ * the current language (+0x1) and returns the first cLocaleFile_getStringByHash hit. Otherwise, or when no file has it, it writes
  * D_004A1390 (a single space) into the 16-bit buffer at +0x5A with sprintf2 and returns that buffer. Locale vtable slot
  * 4.
  *
  * @param key  the string's hash (GetHashValue32 of its id)
  * @return the string, or the buffer at +0x5A
  */
-extern "C" const char* func_00195EB8(func_00195EB8_sLocale* self, int key)
+extern "C" const char* cFELocale_getStringByHash(cFELocale_getStringByHash_sLocale* self, int key)
 {
     if (self->useDefault == 0) {
         for (signed char i = 0; i < 20; i++) {
             signed char* localeFile = self->files[i];
             if (localeFile != 0 && *localeFile == self->lang) {
-                const char* foundString = func_002C6DE0(localeFile, key);
+                const char* foundString = cLocaleFile_getStringByHash(localeFile, key);
                 if (foundString != 0) {
                     return foundString;
                 }
@@ -358,32 +358,32 @@ extern "C" const char* func_00195EB8(func_00195EB8_sLocale* self, int key)
 #endif
 
 //100%
-INCLUDE_ASM("util/locale", func_00195F70);
+INCLUDE_ASM("util/locale", cFELocale_getStringByIndex);
 #ifdef SKIP_ASM
-// PORT: func_002C6DC0__FPv really takes a second argument (it passes $5 through to
+// PORT: cLocaleFile_getStringByIndex__FPv really takes a second argument (it passes $5 through to
 // func_003DBB68); bind the 2-arg view to the 1-arg mangled symbol.
-void* func_002C6DC0_2(void* self, void* arg) __asm__("func_002C6DC0__FPv");
+void* cLocaleFile_getStringByIndex_2(void* self, void* arg) __asm__("cLocaleFile_getStringByIndex__FPv");
 
-struct func_00195F70_sArr {
+struct cFELocale_getStringByIndex_sArr {
     void* items[20];
 };
 
 /**
- * Returns the string at an index from the first loaded locale file that has one: calls func_002C6DC0__FPv on each of
+ * Returns the string at an index from the first loaded locale file that has one: calls cLocaleFile_getStringByIndex__FPv on each of
  * the 20 file entries (+0x8) and returns the first nonzero result, or 0.
  *
- * Unlike func_00195EB8 it does not check the files' language. Locale vtable slot 5.
+ * Unlike cFELocale_getStringByHash it does not check the files' language. Locale vtable slot 5.
  *
  * @param stringIndex  the string index
  * @return the string, or 0
  */
-extern "C" void* func_00195F70(void* self, void* stringIndex)
+extern "C" void* cFELocale_getStringByIndex(void* self, void* stringIndex)
 {
-    func_00195F70_sArr* arr = (func_00195F70_sArr*)((char*)self + 8);
+    cFELocale_getStringByIndex_sArr* arr = (cFELocale_getStringByIndex_sArr*)((char*)self + 8);
     signed char i;
     for (i = 0; i < 20; i++) {
         if (arr->items[i] != 0) {
-            void* found = func_002C6DC0_2(arr->items[i], stringIndex);
+            void* found = cLocaleFile_getStringByIndex_2(arr->items[i], stringIndex);
             if (found != 0) {
                 return found;
             }
@@ -396,7 +396,7 @@ extern "C" void* func_00195F70(void* self, void* stringIndex)
 //100%
 INCLUDE_ASM("util/locale", cFEStateAudioOptions_cFEStateAudioOptions);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, signed char a1);
 extern "C" void* cUITextureBank_getElementByHashname(void* self, int id);
 extern "C" int cBERewardInterface_getRadioMode(void* self, int a1, int a2);
@@ -426,7 +426,7 @@ extern char str_empty_box[];
 extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* self, void* engine, signed char idx, int inStore)
 {
     char* selfBytes = (char*)self;
-    func_0039E2A0(self, engine);
+    cUIState_cUIState(self, engine);
     *(int*)(selfBytes + 0xC) = 0x10;
     *(void***)(selfBytes + 0x8) = cFEStateAudioOptions_vtbl;
     *(signed char*)(selfBytes + 0x44) = idx;

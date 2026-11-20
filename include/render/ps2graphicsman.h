@@ -72,7 +72,7 @@ struct tProjTexInfo {
     char unk_98[0x8];               // 0x98 padding to 16
 };
 
-// [P] cPS2GraphicsMan::sViewportStack (the preview's __as__Q215cPS2GraphicsMan14sViewportStack = func_003950C0):
+// [P] cPS2GraphicsMan::sViewportStack (the preview's __as__Q215cPS2GraphicsMan14sViewportStack = cPS2GraphicsMan_sViewportStack_operatorE):
 // one pushed viewport/projection state, 0x230 bytes. PushViewport (cPS2GraphicsMan_PushViewport) saves the live members listed
 // below into it, PopViewport (cPS2GraphicsMan_PopViewport) restores them.
 struct sViewportStack {
@@ -126,12 +126,12 @@ struct cPS2GraphicsMan {
     float m_ScreenTintOffsetG[8];   // 0x22C [O]; [U] ditto
     float m_ScreenTintOffsetB[8];   // 0x24C [O]; [U] ditto
     float mFarPlane;                // 0x26C [O]; [R] ctor stores 0
-    int mNumViews;                  // 0x270 [O]; [R] ctor stores 1; accessors func_00394020/func_00394028
-    int mViewIndex;                 // 0x274 [O]; [R] ctor stores 0; accessors func_00394030/func_00394038
+    int mNumViews;                  // 0x270 [O]; [R] ctor stores 1; accessors cGraphicsMan_SetNumViews/cGraphicsMan_GetNumViews
+    int mViewIndex;                 // 0x274 [O]; [R] ctor stores 0; accessors cGraphicsMan_SetViewIndex/cGraphicsMan_GetViewIndex
     int mNumTextureFiles;           // 0x278 [O]; [U] func_00369890 / cGraphicsMan_GetTextureID
     void** mTextureFiles;           // 0x27C [O] const char**; [U] cGraphicsMan_GetTextureID passes each to SHAPE_locatez
     tTextureRef mTexRefs[256];      // 0x280 [O]; [U] cGraphicsMan_GetTextureID
-    int mNumTexRefs;                // 0xE80 [O]; [P] GetNumTexRefs (func_003945F0)
+    int mNumTexRefs;                // 0xE80 [O]; [P] GetNumTexRefs (cGraphicsMan_GetNumTexRefs)
     sDrawState* m_pCurrentDrawState; // 0xE84 [O]; [P] CurrentDrawState; [R] ctor points it at the stack
     sDrawState m_drawStateStack[4]; // 0xE88 [O]; [R] ctor fills the default state (sDrawState_s_defaultDrawState)
     sDrawState m_activeDrawState;   // 0xED8 [O]; [P] ActiveDrawState returns its address; [U] cGraphicsMan_ForceActiveDrawState
@@ -140,12 +140,12 @@ struct cPS2GraphicsMan {
     sTextureState m_activeTextureState; // 0xF00 [O]
     float m_constantColours[2][4];  // 0xF04 [O] tARGB[2] (4-aligned in retail)
     float m_lastConstantColours[2][4]; // 0xF24 [O] tARGB[2]
-    int mSkipNextPageFlip;          // 0xF44 [O] bool; [P] SkipNextPageFlip stores 1 (func_003946D8); [X] forceDisplayFlip
+    int mSkipNextPageFlip;          // 0xF44 [O] bool; [P] SkipNextPageFlip stores 1 (cGraphicsMan_SkipNextPageFlip); [X] forceDisplayFlip
     tMdfBlendedMatrix* m_blendedMatrixHistory; // 0xF48 [O]; [R] ctor zeroes; [U] cGraphicsMan_AddBlendedMatrix
     int m_blendedMatrixHistorySize; // 0xF4C [O]; [U] cGraphicsMan_AddBlendedMatrix
     int _EffectTexMap[86];          // 0xF50 [O]; [R] ctor fills -1 (MEM_fill 0x158); [P] getEffectTexMap(i)
-    int mSpecTexID;                 // 0x10A8 [O]; [P] Get/SetSpecID (func_003946A0/func_00394698)
-    int mPatchSpecTexID;            // 0x10AC [O]; [P] Get/SetPatchSpecID (func_003946D0/func_003946C8)
+    int mSpecTexID;                 // 0x10A8 [O]; [P] Get/SetSpecID (cGraphicsMan_GetSpecID/cGraphicsMan_SetSpecID)
+    int mPatchSpecTexID;            // 0x10AC [O]; [P] Get/SetPatchSpecID (cGraphicsMan_GetPatchSpecID/cGraphicsMan_SetPatchSpecID)
     int mCharSpecTexID[10];         // 0x10B0 [O]; [U] indexed accessors func_003946A8/func_003946B8
     void** mVtbl;                   // 0x10D8 [R] cGraphicsMan cGraphicsMan_vtbl, cPS2GraphicsMan cPS2GraphicsMan_vtbl
     // --- cPS2GraphicsMan
@@ -156,18 +156,18 @@ struct cPS2GraphicsMan {
     void* mpScratchpad;             // 0x13E8 [R] Init stores 0x70000000; [X] spad
     int mNumProjTextures;           // 0x13EC [P] GetNumProjTextures / ClearProjTextures
     tProjTexInfo mProjTextures[8];  // 0x13F0 [P] GetProjTexInfo; [R] ctor's second array loop (8)
-    cPS2DeferManager* mpDeferMan;   // 0x18F0 [P] GetDeferMan (func_00395658); [X] "DEFER MAN" (0x6B100)
-    cTextureMan* mpTextureMan;      // 0x18F4 [P] GetTextureMan (func_00395538); [X] "TEX MAN" (0x6740)
+    cPS2DeferManager* mpDeferMan;   // 0x18F0 [P] GetDeferMan (cPS2GraphicsMan_GetDeferMan); [X] "DEFER MAN" (0x6B100)
+    cTextureMan* mpTextureMan;      // 0x18F4 [P] GetTextureMan (cPS2GraphicsMan_GetTextureMan); [X] "TEX MAN" (0x6740)
     int unk_18F8[2000];             // 0x18F8 [U] per texture id: cPS2GraphicsMan_PlatformPurgeTextures frees each non-zero one, cPS2GraphicsMan_RemoveTexture clears it
     int unk_3838[2000];             // 0x3838 [U] per texture id: cPS2GraphicsMan_AddTexture1 sets 1 after creating it
     char unk_5778[0x8];             // 0x5778 padding to 16
     t4Matrix mWorld;                // 0x5780 [X] world (copy of *mCurrentView); [U] cPS2GraphicsMan_PopViewport restores it
     t4Matrix mView;                 // 0x57C0 [X] view; [U] cPS2GraphicsMan_SetViewportPerspective / cPS2GraphicsMan_SetViewportOrthographic build it
-    t4Matrix mGuardBandMatrix;      // 0x5800 [P] GetGuardBandMatrix returns its address (func_00395418)
+    t4Matrix mGuardBandMatrix;      // 0x5800 [P] GetGuardBandMatrix returns its address (cPS2GraphicsMan_GetGuardBandMatrix)
     t4Vector mGuardScale;           // 0x5840 [X] guardScale (uploaded to VU1)
     t4Vector mGuardOffset;          // 0x5850 [X] guardOffset
     t4Matrix mViewProj;             // 0x5860 [X] viewProj
-    t4Matrix mNetMatrix;            // 0x58A0 [P] GetNetMatrix copies it after updateNetMat (func_003953B8)
+    t4Matrix mNetMatrix;            // 0x58A0 [P] GetNetMatrix copies it after updateNetMat (cPS2GraphicsMan_GetNetMatrix)
     t4Vector mScreenScale;          // 0x58E0 [X] screenScale
     t4Vector mScreenOffset;         // 0x58F0 [X] screenOffset
     unsigned short mScissor[4];     // 0x5900 [X] scissor x, y, w, h; [U] func_00376938, func_0036B158
@@ -175,7 +175,7 @@ struct cPS2GraphicsMan {
     float unk_590C;                 // 0x590C [U] saved by cPS2GraphicsMan_PushViewport
     float unk_5910;                 // 0x5910 [U] saved by cPS2GraphicsMan_PushViewport; [X] far
     char unk_5914[0xC];             // 0x5914 padding to 16
-    t4Vector unk_5920;              // 0x5920 [U] saved by cPS2GraphicsMan_PushViewport; func_00395ED8
+    t4Vector unk_5920;              // 0x5920 [U] saved by cPS2GraphicsMan_PushViewport; cPS2GraphicsMan_CalcSortZ
     t4Matrix unk_5930[2];           // 0x5930 [R] ctor's third array loop (2); [U] per view, func_0036A428; [X] viewMatrices
     unsigned short unk_59B0[2][4];  // 0x59B0 [R] ctor's fourth array loop (2); [U] per-view scissor, func_0036B158/func_0036C790
     int unk_59C0;                   // 0x59C0 [U] accessor func_003956D8; func_00363490 loop count; [X] numViews (split screen)
@@ -185,10 +185,10 @@ struct cPS2GraphicsMan {
     int unk_59D0;                   // 0x59D0 [R] Init; [U] func_0037BD98; [X] dither (DTHE)
     char unk_59D4[0xC];             // 0x59D4
     unsigned long unk_59E0;         // 0x59E0 (64-bit: EE long) [U] func_0037C198 ld/sd; [X] dimx (DIMX)
-    int mFilterEnabled;             // 0x59E8 [P] EnableFilter/DisableFilter (func_00395568/func_00395578); [X] blitToDisplay
+    int mFilterEnabled;             // 0x59E8 [P] EnableFilter/DisableFilter (cPS2GraphicsMan_EnableFilter/cPS2GraphicsMan_DisableFilter); [X] blitToDisplay
     int unk_59EC[3];                // 0x59EC [U] func_0037C570; [X] brightness r, g, b
     int unk_59F8;                   // 0x59F8 [U] func_0037C720 / func_0037C770; [X] alpha
-    float mScreenBrightness;        // 0x59FC [P] Get/SetScreenBrightness (func_003955A8/func_00395580)
+    float mScreenBrightness;        // 0x59FC [P] Get/SetScreenBrightness (cPS2GraphicsMan_GetScreenBrightness/cPS2GraphicsMan_SetScreenBrightness)
     unsigned int mVifCursor;        // 0x5A00 [X] vifCursor; [U] draw slots append packets here
     unsigned int mVifHalfStart;     // 0x5A04 [X]; [R] Init
     void* mpVifBuffRaw;             // 0x5A08 [X]; [R] Init: operator new(0x199940, "VifBuff")
@@ -204,14 +204,14 @@ struct cPS2GraphicsMan {
     int mFBWidth;                   // 0x5A30 [X] fbWidth; [U] func_0037BD98 (SetDisplayMode)
     int mFBHeight;                  // 0x5A34 [X] fbHeight
     int unk_5A38;                   // 0x5A38 [U] func_0037BD98; [X] displayPsm
-    int mCurrentFBFormat;           // 0x5A3C [P] GetCurrentFBFormat / GetPSMFormat (func_00395528, func_00395560)
-    int mCurrentZBFormat;           // 0x5A40 [P] GetCurrentZBFormat (func_00395530; layout_xlate "seen")
+    int mCurrentFBFormat;           // 0x5A3C [P] GetCurrentFBFormat / GetPSMFormat (cPS2GraphicsMan_GetCurrentFBFormat, cPS2GraphicsMan_GetPSMFormat)
+    int mCurrentZBFormat;           // 0x5A40 [P] GetCurrentZBFormat (cPS2GraphicsMan_GetCurrentZBFormat; layout_xlate "seen")
     short unk_5A44;                 // 0x5A44 [U] func_0037BD98 / func_00382AF0; [X] interlace
     short unk_5A46;                 // 0x5A46 [X] ffmd
     short unk_5A48;                 // 0x5A48 [X] omode
     char unk_5A4A[0x2];             // 0x5A4A padding
     int unk_5A4C;                   // 0x5A4C [U] accessor cPS2GraphicsMan_GetDTV; [X] progressive
-    int mFrameBufferWidth;          // 0x5A50 [P] GetFrameBufferWidth (func_00395558, by position; shift +0xC30); [X] fbw
+    int mFrameBufferWidth;          // 0x5A50 [P] GetFrameBufferWidth (cPS2GraphicsMan_GetFrameBufferWidth, by position; shift +0xC30); [X] fbw
     int unk_5A54;                   // 0x5A54 [X] dispWidth
     int unk_5A58;                   // 0x5A58 [X] dispHeight
     int unk_5A5C;                   // 0x5A5C [U] accessor func_00395550; [X] dispFbw
@@ -223,9 +223,9 @@ struct cPS2GraphicsMan {
     int mCurrentFrameCount;         // 0x5A74 [P] getCurrentFrameCount (cPS2GraphicsMan_getCurrentFrameCount); [X] vsyncFlipCount
     int unk_5A78;                   // 0x5A78 [X] fbp0
     int unk_5A7C;                   // 0x5A7C [X] fbp1
-    int mCurrentZBufferPage;        // 0x5A80 [P] GetCurrentZBufferPage (func_00395520)
-    int mCurrentFrameBufferPage;    // 0x5A84 [P] GetCurrentFrameBufferPage (func_00395518)
-    int mDisplayBufferAddress;      // 0x5A88 [P] GetDisplayBufferAddress (func_00395548)
+    int mCurrentZBufferPage;        // 0x5A80 [P] GetCurrentZBufferPage (cPS2GraphicsMan_GetCurrentZBufferPage)
+    int mCurrentFrameBufferPage;    // 0x5A84 [P] GetCurrentFrameBufferPage (cPS2GraphicsMan_GetCurrentFrameBufferPage)
+    int mDisplayBufferAddress;      // 0x5A88 [P] GetDisplayBufferAddress (cPS2GraphicsMan_GetDisplayBufferAddress)
     volatile int mKickState;        // 0x5A8C [X] kickState; [U] the DMA kick thread and IRQ handlers
     volatile int mBufState[2];      // 0x5A90 [X] bufState
     volatile int mInFlightIndex;    // 0x5A98 [X]
@@ -236,7 +236,7 @@ struct cPS2GraphicsMan {
     int mQueuedVif2;                // 0x5AAC [X]
     int mQueuedGif1;                // 0x5AB0 [X]
     int mQueuedGif2;                // 0x5AB4 [X]
-    int mMinFlipWait;               // 0x5AB8 [P] SetMinFlipWait (func_00395540; layout_xlate "seen"); [X] vblanksPerFlip
+    int mMinFlipWait;               // 0x5AB8 [P] SetMinFlipWait (cPS2GraphicsMan_SetMinFlipWait; layout_xlate "seen"); [X] vblanksPerFlip
     int mVblankCounter;             // 0x5ABC [X]; [U] func_003825F8
     int mIntcHandlerId;             // 0x5AC0 [X]; [U] cPS2GraphicsMan_Purge (vtable slot 3) removes it
     int mDmacHandlerId;             // 0x5AC4 [X]; [U] ditto
@@ -249,7 +249,7 @@ struct cPS2GraphicsMan {
     char unk_6AE4[0xC];             // 0x6AE4 padding to 16
     t4Matrix mScreenMatrix;         // 0x6AF0 [X] screenMatrix (clip -> GS coordinates)
     t4Matrix mScreenWorld;          // 0x6B30 [X] screenWorld; [U] the draw slots load it
-    t4Vector unk_6B70;              // 0x6B70 [U] saved by cPS2GraphicsMan_PushViewport; func_00395FA8; [X] screenOffset4
+    t4Vector unk_6B70;              // 0x6B70 [U] saved by cPS2GraphicsMan_PushViewport; cPS2GraphicsMan_projOutCode; [X] screenOffset4
     t4Vector unk_6B80;              // 0x6B80 [U] saved by cPS2GraphicsMan_PushViewport
     int mMatricesValid;             // 0x6B90 [P] updateNetMat recomputes when 0; [U] PopView clears it; [X] matricesValid
     tTVDisplayFormat mTVDisplayFormat; // 0x6B94 [P] GetTVDisplayFormat returns its address (cPS2GraphicsMan_GetTVDisplayFormat)

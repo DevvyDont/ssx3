@@ -17,7 +17,7 @@
 // UI object's vptr sits at 0x8 after cListNode's two links. On Tour's DWARF (cListNode 0xC, cList 0x1C, cListOperator 0x4,
 // cListOpOnInput 0x8, cListOpSetFocus 0x8) has the same members at the same offsets.
 // NOTE: src/util/list.cpp's local `struct cListNode { next 0x0; prev 0x4 }` swaps EA's names: cList::first (cList_first,
-// lw 0x4) returns mStart.mpNext, last (func_00397858, lw 0xC) returns mEnd.mpPrev, and clear() (cList_clear) stores
+// lw 0x4) returns mStart.mpNext, last (cList_last, lw 0xC) returns mEnd.mpPrev, and clear() (cList_clear) stores
 // mStart.mpPrev = &mStart, mStart.mpNext = &mEnd, mEnd.mpPrev = &mStart, mEnd.mpNext = &mEnd.
 //
 // FLAT layouts, like main/game.h (no C++ inheritance or virtuals; vptrs are `void** mVtbl` fields).
@@ -28,8 +28,8 @@ struct cUIInput;
 
 struct cListNode {
     cListNode* mpPrev;          // 0x0 [O]; [R] ctor cListNode_cListNode self-links it; [U] cListNode_removeFromList, clear()
-                                //     cList_clear; func_003A4848 prev() (lw 0x0), func_003A4858 setPrev() (sw 0x0)
-    cListNode* mpNext;          // 0x4 [O]; [R] self-linked; [U] func_003A4850 next() (lw 0x4), func_003A4860 setNext()
+                                //     cList_clear; cListNode_prev prev() (lw 0x0), cListNode_setPrev setPrev() (sw 0x0)
+    cListNode* mpNext;          // 0x4 [O]; [R] self-linked; [U] cListNode_next next() (lw 0x4), cListNode_setNext setNext()
                                 //     (sw 0x4); cList_first reads mStart.mpNext
     void** mVtbl;               // 0x8 [R] _vt$9cListNode cListNode_vtbl (ctor cListNode_cListNode, dtor cListNode__cListNode)
 };
@@ -42,7 +42,7 @@ CHECK_SIZE(cListNode, 0xC);
 struct cList {
     cListNode mStart;           // 0x00 [O] start sentinel; [R] ctor cList_cList / clear() cList_clear;
                                 //      [U] cList_first (lw 0x4), cList_addToFront (lw/sw 0x4), cList_size, traverse*
-    cListNode mEnd;             // 0x0C [O] end sentinel; [R] ditto; [U] func_00397858 last() (lw 0xC),
+    cListNode mEnd;             // 0x0C [O] end sentinel; [R] ditto; [U] cList_last last() (lw 0xC),
                                 //      cList_addToEnd (lw/sw 0xC)
     void** mVtbl;               // 0x18 [R] cList_vtbl D_00494C98 (ctor cList_cList, dtor cList__cList)
 };

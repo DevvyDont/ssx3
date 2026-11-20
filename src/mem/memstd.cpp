@@ -49,7 +49,7 @@ struct sMemClass_251718 {
  * @param name   class name (copied into the record and used in the sentinel names)
  * @param mem    start of the memory block
  * @param size   size of the block in bytes
- * @param sizeAlign    stored at class +0x28, which func_002523D0 uses to round allocation sizes (MEM_initadr: 0x40)
+ * @param sizeAlign    stored at class +0x28, which _MEM_free uses to round allocation sizes (MEM_initadr: 0x40)
  * @param align  alignment of the first free block's data (MEM_initadr: 0x80)
  * @param hdr    extra header bytes per block
  * @param endMarker     nonzero sets block flag 0x2000, which the block check uses to expect a "BEND" end marker
@@ -127,7 +127,7 @@ extern "C" int MEMCLASS_create(int id, char* name, char* mem, int size, int size
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00251998);
+INCLUDE_ASM("mem/memstd", MEMCLASS_remove);
 #ifdef SKIP_ASM
 extern "C" void func_003E56E0(void*);
 
@@ -140,7 +140,7 @@ extern "C" void func_003E56E0(void*);
  * @param id  memory class id
  * @return 1 when the class existed, else 0
  */
-extern "C" int func_00251998(int id)
+extern "C" int MEMCLASS_remove(int id)
 {
     void** slot = &D_004D2438[id & 0x3F];
     sMemClass_251718* cls = (sMemClass_251718*)*slot;
@@ -157,7 +157,7 @@ extern "C" int func_00251998(int id)
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_00251A08);
+INCLUDE_ASM("mem/memstd", MEMCLASS_purge);
 #ifdef SKIP_ASM
 extern "C" void* MEM_free(void* self);
 struct sMemNode_251A08 {
@@ -181,7 +181,7 @@ struct sMemClass_251A08 {
  * @param id  memory class id
  * @return 1, or the failing MEM_free's result
  */
-extern "C" void* func_00251A08(int id)
+extern "C" void* MEMCLASS_purge(int id)
 {
     sMemClass_251A08* cls = (sMemClass_251A08*)D_004D2438[id & 0x3F];
     void* freeResult = (void*)1;
@@ -194,14 +194,14 @@ extern "C" void* func_00251A08(int id)
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_00251A80);
+INCLUDE_ASM("mem/memstd", MEMCLASS_getfree);
 #ifdef SKIP_ASM
 /**
  * Returns the first unused memory class id: the first empty slot of D_004D2438 from 2 on (0x40 when all are used).
  *
  * @return a free class id, or 64
  */
-extern "C" int func_00251A80(void)
+extern "C" int MEMCLASS_getfree(void)
 {
     int i = 2;
     while (i < 0x40 && D_004D2438[i] != 0) {
@@ -211,7 +211,7 @@ extern "C" int func_00251A80(void)
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_00251AC0);
+INCLUDE_ASM("mem/memstd", MEM_largestunused);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -229,7 +229,7 @@ extern int D_004A2E78_1AC0 __asm__("D_004A2E78");
  * @param id  memory class id, or 0
  * @return the largest free block's size
  */
-extern "C" int func_00251AC0(int id)
+extern "C" int MEM_largestunused(int id)
 {
     if (id == 0) {
         id = D_004A2E78_1AC0;
@@ -253,7 +253,7 @@ extern "C" int func_00251AC0(int id)
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_00251B50);
+INCLUDE_ASM("mem/memstd", MEM_totalunused);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -272,7 +272,7 @@ extern int D_004A2E78_1B50 __asm__("D_004A2E78");
  * @param id  memory class id, or 0
  * @return the free bytes
  */
-extern "C" int func_00251B50(int id)
+extern "C" int MEM_totalunused(int id)
 {
     if (id == 0) {
         id = D_004A2E78_1B50;
@@ -289,7 +289,7 @@ extern "C" int func_00251B50(int id)
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_00251BB0);
+INCLUDE_ASM("mem/memstd", MEM_findcontaining);
 #ifdef SKIP_ASM
 struct sMemNode_251BB0 {
     unsigned short tag;
@@ -310,7 +310,7 @@ struct sMemClass_251BB0 {
  * @param addr  any address
  * @return the block's data pointer, or 0 when none holds it or the block is free or a sentinel (flags 0xC000)
  */
-extern "C" void* func_00251BB0(unsigned int addr)
+extern "C" void* MEM_findcontaining(unsigned int addr)
 {
     int i;
     for (i = 0; i < 0x40; i++) {
@@ -333,7 +333,7 @@ extern "C" void* func_00251BB0(unsigned int addr)
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_00251C38);
+INCLUDE_ASM("mem/memstd", MEM_find);
 #ifdef SKIP_ASM
 struct sMemNode_251C38 {
     unsigned short tag;
@@ -347,19 +347,19 @@ struct sMemClass_251C38 {
     sMemNode_251C38* first;     // 0x8
 };
 
-int func_00252658(void* self);
+int MEM_name(void* self);
 extern "C" int strcasecmp(int, int);
 
 /**
- * Finds a block by name: searches the block lists of every memory class for a block whose name (func_00252658) matches
+ * Finds a block by name: searches the block lists of every memory class for a block whose name (MEM_name) matches
  * @p name case-insensitively (strcasecmp).
  *
- * func_00252658 returns 0 in this build (no block names), so the search never matches.
+ * MEM_name returns 0 in this build (no block names), so the search never matches.
  *
  * @param name  the block name
  * @return the block's data pointer, or 0
  */
-extern "C" void* func_00251C38(int name)
+extern "C" void* MEM_find(int name)
 {
     int i;
     for (i = 0; i < 0x40; i++) {
@@ -368,7 +368,7 @@ extern "C" void* func_00251C38(int name)
             sMemNode_251C38* n = cls->first;
             void* data = (char*)n + 0x10;
             do {
-                int blockName = func_00252658(data);
+                int blockName = MEM_name(data);
                 if (blockName != 0 && strcasecmp(blockName, name) == 0) {
                     return data;
                 }
@@ -381,36 +381,36 @@ extern "C" void* func_00251C38(int name)
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_00251CF0);
+INCLUDE_ASM("mem/memstd", MEM_initsize);
 #ifdef SKIP_ASM
 /**
  * Returns 0; a stub in this build (the first of the three stubs before MEM_initadr).
  *
  * @return 0
  */
-extern "C" int func_00251CF0(void) {
+extern "C" int MEM_initsize(void) {
     return 0;
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_00251CF8);
+INCLUDE_ASM("mem/memstd", MEM_init);
 #ifdef SKIP_ASM
 /**
  * Returns 0; a stub in this build (the second of the three stubs before MEM_initadr).
  *
  * @return 0
  */
-extern "C" int func_00251CF8(void) {
+extern "C" int MEM_init(void) {
     return 0;
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_00251D00);
+INCLUDE_ASM("mem/memstd", MEM_restore);
 #ifdef SKIP_ASM
 /**
  * Does nothing (the last of the three stubs before MEM_initadr).
  */
-extern "C" void func_00251D00(void) {
+extern "C" void MEM_restore(void) {
 
 }
 #endif
@@ -592,10 +592,10 @@ void MEM_print()
 //100%
 INCLUDE_ASM("mem/memstd", MEM_printclassf);
 #ifdef SKIP_ASM
-int func_00252658(void* self);
-extern "C" int func_00252660(void* p);
+int MEM_name(void* self);
+extern "C" int MEM_comment(void* p);
 struct sMemBlock002522B0;
-extern "C" int func_002522B0(sMemBlock002522B0* blk);
+extern "C" int checksentinel(sMemBlock002522B0* blk);
 extern "C" int func_003E62D0(void* p, int size, int seed);
 extern char D_004800E0[];
 extern char D_00480140[];
@@ -627,7 +627,7 @@ extern void* D_004D2438[];
  * Prints a table of every block in a memory class through a printf-like callback.
  *
  * Prints a header, then one row per block: free blocks as "FREE" with "   SPACE " as the name, others as
- * "unknown" with the names from func_00252658/func_00252660; each row has the address, size, span, flags, a
+ * "unknown" with the names from MEM_name/MEM_comment; each row has the address, size, span, flags, a
  * CRC (func_003E62D0, seed 0xFBEA; 0 for sentinels) and the block check's status text. Ends with the total
  * free memory, or prints "Not initialized" if the class does not exist.
  *
@@ -649,10 +649,10 @@ extern "C" void MEM_printclassf(void* thing, const char* fmt, void (*cb)(const c
     }
     for (sMemNode_252010* blk = cls->first; blk != 0; blk = (sMemNode_252010*)blk->next) {
         char* data = (char*)blk + 0x10;
-        char* blockName = (char*)func_00252658(data);
+        char* blockName = (char*)MEM_name(data);
         if (blockName == 0)
             blockName = D_004A2E58;
-        char* comment = (char*)func_00252660(data);
+        char* comment = (char*)MEM_comment(data);
         if (comment == 0)
             comment = D_004A2E58;
         if (blk->flags & 0x4000) {
@@ -660,14 +660,14 @@ extern "C" void MEM_printclassf(void* thing, const char* fmt, void (*cb)(const c
             if (sz > 0x10 && !(blk->flags & 0x8000))
                 crc = func_003E62D0((char*)blk + 0x18, sz - 0x18, 64490);
             total += sz;
-            int st = func_002522B0((sMemBlock002522B0*)blk);
+            int st = checksentinel((sMemBlock002522B0*)blk);
             cb(fmt, str_FREE, str_SPACE, data, sz, blk->next - (char*)blk, blk->flags, crc, D_004801E8[st], D_004A2E58);
         } else {
             int sz = blk->size;
             crc = 0;
             if (sz != 0 && !(blk->flags & 0x8000))
                 crc = func_003E62D0(data, sz, 64490);
-            int st = func_002522B0((sMemBlock002522B0*)blk);
+            int st = checksentinel((sMemBlock002522B0*)blk);
             cb(fmt, str_unknown, blockName, data, blk->size, blk->next - (char*)blk, blk->flags, crc, D_004801E8[st], comment);
         }
         cb(D_004A2E70);
@@ -678,7 +678,7 @@ extern "C" void MEM_printclassf(void* thing, const char* fmt, void (*cb)(const c
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00252248);
+INCLUDE_ASM("mem/memstd", checkfree);
 #ifdef SKIP_ASM
 extern int D_004A2E74;
 extern "C" int func_003E6240(void* p, int size, int flags);
@@ -691,7 +691,7 @@ extern "C" int func_003E6240(void* p, int size, int flags);
  *
  * @return 1 when the link is valid, else 0
  */
-extern "C" int func_00252248(void* self)
+extern "C" int checkfree(void* self)
 {
     int ok = 0;
     if (func_003E6240(self, 0x18, 0) != 0) {
@@ -709,7 +709,7 @@ extern "C" int func_00252248(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_002522B0);
+INCLUDE_ASM("mem/memstd", checksentinel);
 #ifdef SKIP_ASM
 struct sMemBlock002522B0 {
     unsigned short tag;
@@ -730,14 +730,14 @@ static inline unsigned int readBE32_002522B0(unsigned char* p)
  * Checks one heap block's integrity by its tag and records the failure kind in D_004A2E74.
  *
  * A sentinel (0x4253) needs flag 0x8000 (else error 2); a free block (0x4246) with flag 0x4000 needs valid next and
- * previous links (func_00252248); an allocated block (0x424D) with flag 0x2000 needs the big-endian end marker "BEND"
+ * previous links (checkfree); an allocated block (0x424D) with flag 0x2000 needs the big-endian end marker "BEND"
  * just past its data (else error 3); any other tag is error 4. MEM_printclassf prints its result.
  *
  * @param blk  the block header
  * @return 1 when the block is consistent, else 0
  */
 // PORT: the block-end address is computed as size + (int)blk (pointer held in int) to get the target's addu operand order.
-extern "C" int func_002522B0(sMemBlock002522B0* blk)
+extern "C" int checksentinel(sMemBlock002522B0* blk)
 {
     int ok = 0;
     unsigned short tag = blk->tag;
@@ -749,9 +749,9 @@ extern "C" int func_002522B0(sMemBlock002522B0* blk)
         }
     } else if (tag == 16966) {
         if (blk->flags & 0x4000) {
-            ok = func_00252248(blk->a);
+            ok = checkfree(blk->a);
             if (ok) {
-                ok = func_00252248(blk->b);
+                ok = checkfree(blk->b);
             }
         }
     } else if (tag == 16973) {
@@ -768,14 +768,14 @@ extern "C" int func_002522B0(sMemBlock002522B0* blk)
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_002523A0);
+INCLUDE_ASM("mem/memstd", MEM_validate);
 #ifdef SKIP_ASM
 /**
  * Returns 1: the heap validation is a stub in this build.
  *
  * @return 1
  */
-extern "C" int func_002523A0(void) {
+extern "C" int MEM_validate(void) {
     return 1;
 }
 #endif
@@ -801,11 +801,11 @@ extern "C" void* MEM_free(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_002523D0);
+INCLUDE_ASM("mem/memstd", _MEM_free);
 #ifdef SKIP_ASM
 extern "C" void MUTEX_lock(void* mutex);
 extern "C" void MUTEX_unlock(void* mutex);
-extern "C" int func_00252960(int unused, int id);
+extern "C" int MEM_tailsize(int unused, int id);
 
 struct sMemNode_2523D0 {
     unsigned short tag;         // 0x0
@@ -841,15 +841,15 @@ static inline void Unlink_2523D0(sMemNode_2523D0* b)
  *
  * The class comes from the block's type word (data - 0xE, & 63). Under the class mutex when locked, it absorbs a free
  * previous block and a free next block (unlinking them and retagging them 0x424F), then re-places the start right after
- * the previous block's used size plus its tail (func_00252960), rounded up to the class's size alignment (+0x28), and
+ * the previous block's used size plus its tail (MEM_tailsize), rounded up to the class's size alignment (+0x28), and
  * inserts the block into the address-sorted free list, searching from whichever end is nearer. The block becomes tag
  * 0x4246 with flag 0x4000. A null @p mem does nothing.
  *
  * @param mem  the data pointer returned by the allocator
  * @return 1
  */
-// PORT: pointer arithmetic done in int (see func_00252660).
-extern "C" int func_002523D0(void* mem)
+// PORT: pointer arithmetic done in int (see MEM_comment).
+extern "C" int _MEM_free(void* mem)
 {
     sMemClass_2523D0* cls;
     sMemNode_2523D0* blk;
@@ -889,7 +889,7 @@ extern "C" int func_002523D0(void* mem)
             blk->end = fwd;
             fwd->back = blk;
         }
-        size = back->size + func_00252960(func_00252658(&back->next), back->flags);
+        size = back->size + MEM_tailsize(MEM_name(&back->next), back->flags);
         if (size <= 7) {
             size = 8;
         }
@@ -931,7 +931,7 @@ extern "C" int func_002523D0(void* mem)
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_002525F8);
+INCLUDE_ASM("mem/memstd", blockSize);
 #ifdef SKIP_ASM
 extern "C" void MUTEX_lock(void* mutex);
 extern "C" void MUTEX_unlock(void* mutex);
@@ -944,7 +944,7 @@ extern void* cMemMan_m_mutex[16];
  * @param memBlock  the block's data pointer
  * @return the block size
  */
-extern "C" int func_002525F8(int memBlock) {
+extern "C" int blockSize(int memBlock) {
     int result;
 
     MUTEX_lock(&cMemMan_m_mutex);
@@ -954,7 +954,7 @@ extern "C" int func_002525F8(int memBlock) {
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_00252648);
+INCLUDE_ASM("mem/memstd", _MEM_size);
 #ifdef SKIP_ASM
 /**
  * Returns an EA heap block's data size, the int stored at @p allocation - 0xC.
@@ -962,12 +962,12 @@ INCLUDE_ASM("mem/memstd", func_00252648);
  * @param allocation  the block's data pointer
  * @return the size in bytes
  */
-extern "C" int func_00252648(void *allocation) {
+extern "C" int _MEM_size(void *allocation) {
     return (*(int *)((char*)(allocation) + (-0xC)));
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_00252650);
+INCLUDE_ASM("mem/memstd", MEM_type);
 #ifdef SKIP_ASM
 /**
  * Returns an EA heap block's type word (class id and flags), the halfword at @p allocation - 0xE.
@@ -975,29 +975,29 @@ INCLUDE_ASM("mem/memstd", func_00252650);
  * @param allocation  the block's data pointer
  * @return the type word
  */
-extern "C" unsigned short func_00252650(void *allocation) {
+extern "C" unsigned short MEM_type(void *allocation) {
     return (*(unsigned short *)((char*)(allocation) + (-0xE)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00252658__FPv);
+INCLUDE_ASM("mem/memstd", MEM_name__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 0: block names are not stored in this build.
  *
- * MEM_find, MEM_printclassf and func_002523D0 ask it for a block's name.
+ * MEM_find, MEM_printclassf and _MEM_free ask it for a block's name.
  *
  * @return 0
  */
-int func_00252658(void* self)
+int MEM_name(void* self)
 {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00252660);
+INCLUDE_ASM("mem/memstd", MEM_comment);
 #ifdef SKIP_ASM
 struct sMemUnalignedInt {
     int value;
@@ -1014,7 +1014,7 @@ struct sMemUnalignedInt {
  */
 // PORT: pointer arithmetic done in int; a plain `(char*)p - 0xE` makes gcc 2.95
 // emit the offset as unsigned 0xFFFFFFF2 (addiu -0x8000 / 0x7ff2 split).
-extern "C" int func_00252660(void* allocation)
+extern "C" int MEM_comment(void* allocation)
 {
     int trailerValue = 0;
     if (*(unsigned short*)((int)allocation - 0xE) & 0x800) {
@@ -1025,7 +1025,7 @@ extern "C" int func_00252660(void* allocation)
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00252688);
+INCLUDE_ASM("mem/memstd", MEM_setcomment);
 #ifdef SKIP_ASM
 /**
  * Stores @p trailerValue in an EA heap block's comment slot (4 bytes past the end of its data), when its type word has
@@ -1035,8 +1035,8 @@ INCLUDE_ASM("mem/memstd", func_00252688);
  * @param trailerValue  the value to store
  * @return 1 when stored, else 0
  */
-// PORT: pointer arithmetic done in int (see func_00252660).
-extern "C" int func_00252688(void* allocation, int trailerValue)
+// PORT: pointer arithmetic done in int (see MEM_comment).
+extern "C" int MEM_setcomment(void* allocation, int trailerValue)
 {
     int written = 0;
     if (*(unsigned short*)((int)allocation - 0xE) & 0x800) {
@@ -1048,7 +1048,7 @@ extern "C" int func_00252688(void* allocation, int trailerValue)
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_002526B8);
+INCLUDE_ASM("mem/memstd", resizeBlock);
 #ifdef SKIP_ASM
 extern "C" void MUTEX_lock(void* mutex);
 extern "C" void MUTEX_unlock(void* mutex);
@@ -1064,7 +1064,7 @@ extern void* cMemMan_m_mutex[16];
  * @param size  the new size
  * @return the (possibly moved) block
  */
-extern "C" void* func_002526B8(void* block, int size)
+extern "C" void* resizeBlock(void* block, int size)
 {
     void* newBlock;
     MUTEX_lock(cMemMan_m_mutex);
@@ -1075,12 +1075,12 @@ extern "C" void* func_002526B8(void* block, int size)
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00252718);
+INCLUDE_ASM("mem/memstd", _MEM_resize);
 #ifdef SKIP_ASM
 extern "C" void MUTEX_lock(void* mutex);
 extern "C" void MUTEX_unlock(void* mutex);
 extern "C" void* MEM_initblock(void* self, const char* name, int size, int hdr, int flags, void* prev, void* next);
-extern "C" int func_00252960(int unused, int id);
+extern "C" int MEM_tailsize(int unused, int id);
 extern "C" void MEM_move(void* a, void* b);
 
 struct sMemNode_252718 {
@@ -1116,7 +1116,7 @@ static inline void Unlink_252718(sMemNode_252718* b)
  * Resizes an EA heap block in place, absorbing a free block after it and splitting off any large remainder.
  *
  * Under the class mutex when locked: a free next block is unlinked (tag 0x424F) and merged. The wanted size (8 at
- * least; -1 means 0x40000000, i.e. as much as possible) plus the class tail (func_00252960) is rounded to the class
+ * least; -1 means 0x40000000, i.e. as much as possible) plus the class tail (MEM_tailsize) is rounded to the class
  * alignment and capped at the space up to the next block. MEM_move moves the tail data to the new end, the block size
  * is updated, and a remainder of more than 0x40 bytes becomes a new free block (MEM_initblock) inserted into the
  * address-sorted free list. The data never moves.
@@ -1125,8 +1125,8 @@ static inline void Unlink_252718(sMemNode_252718* b)
  * @param size  the new size
  * @return @p mem
  */
-// PORT: pointer arithmetic done in int (see func_00252660).
-extern "C" void* func_00252718(void* mem, int size)
+// PORT: pointer arithmetic done in int (see MEM_comment).
+extern "C" void* _MEM_resize(void* mem, int size)
 {
     int id = *(unsigned short*)((int)mem - 0xE);
     sMemClass_252718* cls = (sMemClass_252718*)D_004D2438[id & 0x3F];
@@ -1160,7 +1160,7 @@ extern "C" void* func_00252718(void* mem, int size)
             want = 8;
         }
     }
-    hdr = func_00252960(0, id);
+    hdr = MEM_tailsize(0, id);
     avail = ((char*)fwd - (char*)blk) - 0x10;
     want = (((want + hdr + 0x10) + (cls->align - 1)) & -cls->align) - 0x10;
     if (avail < want) {
@@ -1203,7 +1203,7 @@ extern "C" void* func_00252718(void* mem, int size)
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_00252960);
+INCLUDE_ASM("mem/memstd", MEM_tailsize);
 #ifdef SKIP_ASM
 /**
  * Returns the per-block tail size of memory class @p id: the class record's int at +0x30 (MEMCLASS_create's hdr).
@@ -1212,7 +1212,7 @@ INCLUDE_ASM("mem/memstd", func_00252960);
  * @param id  memory class id (masked with 63)
  * @return the tail bytes each block of the class reserves
  */
-extern "C" int func_00252960(int ignoredName, int id)
+extern "C" int MEM_tailsize(int ignoredName, int id)
 {
     return *(int*)((char*)D_004D2438[id & 0x3F] + 0x30);
 }
@@ -1253,7 +1253,7 @@ void* MEM_allocaligna_6(void* tag, int size, int align, int hdrsize, int flags, 
 extern "C" void* MEM_allocaligna(void*);
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00252A10);
+INCLUDE_ASM("mem/memstd", _MEM_allocaligna);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -1381,13 +1381,13 @@ static inline void RemoveFree_2A10(sMemNode_2A10* blk)
 
 // Allocates size bytes from the class picked by flags, aligned so that (p + offset) is aligned;
 // retries while the out-of-memory callback asks for it.
-extern "C" char* func_00252A10_impl(void* name, int size, int align, int offset, int flags, int unused) __asm__("func_00252A10");
+extern "C" char* _MEM_allocaligna_impl(void* name, int size, int align, int offset, int flags, int unused) __asm__("_MEM_allocaligna");
 /**
  * Allocates @p size bytes from the EA heap class @p flags selects, aligned so that data + @p offset is aligned.
  *
  * Flags 0 means the default class D_004A2E78; bit 0x200 picks the largest fitting free block (func_00253170 style)
  * instead of the first (func_00253100 style), bit 0x100 searches and places from the top, bit 0x400 uses the class's
- * big alignment (+0x2C) when @p align is 0. The size grows by the class tail (func_00252960), 8 at least. The chosen
+ * big alignment (+0x2C) when @p align is 0. The size grows by the class tail (MEM_tailsize), 8 at least. The chosen
  * free block is unlinked, the data placed at its aligned start (or end, from the top), a remainder of more than
  * alignment + 0x30 becomes a new free block, and MEM_initblock writes the header with the class's header size (+0x30)
  * and @p flags. When nothing fits, the out-of-memory callback D_004A2E7C (0, size, flags) is asked and a result of 1
@@ -1401,7 +1401,7 @@ extern "C" char* func_00252A10_impl(void* name, int size, int align, int offset,
  * @param abortFlag  abort-on-failure flag, ignored here
  * @return the data pointer, or 0
  */
-extern "C" char* func_00252A10_impl(void* name, int size, int align, int offset, int flags, int abortFlag)
+extern "C" char* _MEM_allocaligna_impl(void* name, int size, int align, int offset, int flags, int abortFlag)
 {
     sMemHdr_2A10 save;
     char* allocation = 0;
@@ -1426,7 +1426,7 @@ extern "C" char* func_00252A10_impl(void* name, int size, int align, int offset,
         } else {
             mask = align - 1;
         }
-        int n = size + func_00252960(0, flags);
+        int n = size + MEM_tailsize(0, flags);
         if (n < 8)
             n = 8;
         int alignSlack = mask + 0x10;
@@ -1482,13 +1482,13 @@ extern "C" char* func_00252A10_impl(void* name, int size, int align, int offset,
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("mem/memstd", func_00252F60__FPv);
+INCLUDE_ASM("mem/memstd", MEM_allocalign__FPv);
 #ifdef SKIP_ASM
 void* MEM_allocaligna_6(void*, int, int, int, int, int) __asm__("MEM_allocaligna");
 
 // PORT: the project's symbol name says (void*), but callers pass and this
-// forwards 5 args (see func_00253AD0); the real body is bound by asm label.
-void* func_00252F60_impl(void* a0, int a1, int a2, int a3, int a4) __asm__("func_00252F60__FPv");
+// forwards 5 args (see cMoviePlayer_SSXAllocMemFunc); the real body is bound by asm label.
+void* MEM_allocalign_impl(void* a0, int a1, int a2, int a3, int a4) __asm__("MEM_allocalign__FPv");
 
 /**
  * Allocates an aligned block that aborts on failure: MEM_allocaligna(@p name, @p size, @p alignment, @p hdrSize,
@@ -1501,19 +1501,19 @@ void* func_00252F60_impl(void* a0, int a1, int a2, int a3, int a4) __asm__("func
  * @param memType  memory class and flags
  * @return MEM_allocaligna's result
  */
-void* func_00252F60_impl(void* name, int size, int alignment, int hdrSize, int memType)
+void* MEM_allocalign_impl(void* name, int size, int alignment, int hdrSize, int memType)
 {
     return MEM_allocaligna_6(name, size, alignment, hdrSize, memType, 1);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("mem/memstd", func_00252F80);
+INCLUDE_ASM("mem/memstd", _MEM_allocalign);
 #ifdef SKIP_ASM
-extern "C" void func_00252A10(int, int, int, int, int, int);
+extern "C" void _MEM_allocaligna(int, int, int, int, int, int);
 
 /**
- * Allocates an aligned block from the EA heap, aborting on failure: func_00252A10(@p name, @p size, @p alignment,
+ * Allocates an aligned block from the EA heap, aborting on failure: _MEM_allocaligna(@p name, @p size, @p alignment,
  * @p hdrSize, @p memType, 1).
  *
  * @param name  the block's name
@@ -1522,8 +1522,8 @@ extern "C" void func_00252A10(int, int, int, int, int, int);
  * @param hdrSize  aligned offset (header bytes)
  * @param memType  memory class and flags
  */
-extern "C" void func_00252F80(int name, int size, int alignment, int hdrSize, int memType) {
-    func_00252A10(name, size, alignment, hdrSize, memType, 1);
+extern "C" void _MEM_allocalign(int name, int size, int alignment, int hdrSize, int memType) {
+    _MEM_allocaligna(name, size, alignment, hdrSize, memType, 1);
 }
 #endif
 
@@ -1550,23 +1550,23 @@ extern "C" void* MEM_alloc(void* name, int size, int memtype)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("mem/memstd", func_00252FC8);
+INCLUDE_ASM("mem/memstd", _MEM_alloc);
 #ifdef SKIP_ASM
 /**
- * Allocates a block from the EA heap with 128-byte alignment, aborting on failure: func_00252A10(@p name, @p size,
+ * Allocates a block from the EA heap with 128-byte alignment, aborting on failure: _MEM_allocaligna(@p name, @p size,
  * 0x80, 0, @p memType, 1).
  *
  * @param name  the block's name
  * @param size  bytes wanted
  * @param memType  memory class and flags
  */
-extern "C" void func_00252FC8(int name, int size, int memType)
+extern "C" void _MEM_alloc(int name, int size, int memType)
 {
-    func_00252A10(name, size, 0x80, 0, memType, 1);
+    _MEM_allocaligna(name, size, 0x80, 0, memType, 1);
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_00252FF0);
+INCLUDE_ASM("mem/memstd", MEM_allocz);
 #ifdef SKIP_ASM
 /**
  * Allocates a block that returns 0 instead of aborting on failure: MEM_allocaligna(@p name, @p size, 0, 0,
@@ -1576,30 +1576,30 @@ INCLUDE_ASM("mem/memstd", func_00252FF0);
  * @param size  bytes wanted
  * @param memType  memory class and flags
  */
-extern "C" void func_00252FF0(void* name, int size, int memType)
+extern "C" void MEM_allocz(void* name, int size, int memType)
 {
     MEM_allocaligna_6(name, size, 0, 0, memType, 0);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("mem/memstd", func_00253018);
+INCLUDE_ASM("mem/memstd", _MEM_allocz);
 #ifdef SKIP_ASM
-extern "C" void func_00252A10(int, int, int, int, int, int);
+extern "C" void _MEM_allocaligna(int, int, int, int, int, int);
 
 /**
- * Allocates a block from the EA heap that returns 0 instead of aborting: func_00252A10(@p name, @p size, 0, 0,
+ * Allocates a block from the EA heap that returns 0 instead of aborting: _MEM_allocaligna(@p name, @p size, 0, 0,
  * @p memType, 0).
  *
  * @param name  the block's name
  * @param size  bytes wanted
  * @param memType  memory class and flags
  */
-extern "C" void func_00253018(int name, int size, int memType) {
-    func_00252A10(name, size, 0, 0, memType, 0);
+extern "C" void _MEM_allocz(int name, int size, int memType) {
+    _MEM_allocaligna(name, size, 0, 0, memType, 0);
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_00253040);
+INCLUDE_ASM("mem/memstd", MEM_allocsize);
 #ifdef SKIP_ASM
 /**
  * Allocates @p size bytes, unnamed, from the default class, aborting on failure: MEM_allocaligna(0, @p size, 0, 0, 0,
@@ -1607,28 +1607,28 @@ INCLUDE_ASM("mem/memstd", func_00253040);
  *
  * @param size  bytes wanted
  */
-extern "C" void func_00253040(int size)
+extern "C" void MEM_allocsize(int size)
 {
     MEM_allocaligna_6(0, size, 0, 0, 0, 1);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("mem/memstd", func_00253070);
+INCLUDE_ASM("mem/memstd", _MEM_allocsize);
 #ifdef SKIP_ASM
-extern "C" void func_00252A10(int, int, int, int, int, int);
+extern "C" void _MEM_allocaligna(int, int, int, int, int, int);
 
 /**
- * Allocates @p size bytes, unnamed, from the EA heap's default class, aborting on failure: func_00252A10(0, @p size, 0,
+ * Allocates @p size bytes, unnamed, from the EA heap's default class, aborting on failure: _MEM_allocaligna(0, @p size, 0,
  * 0, 0, 1).
  *
  * @param size  bytes wanted
  */
-extern "C" void func_00253070(int size) {
-    func_00252A10(0, size, 0, 0, 0, 1);
+extern "C" void _MEM_allocsize(int size) {
+    _MEM_allocaligna(0, size, 0, 0, 0, 1);
 }
 #endif
 //100%
-INCLUDE_ASM("mem/memstd", func_002530A0);
+INCLUDE_ASM("mem/memstd", MEM_allocsizez);
 #ifdef SKIP_ASM
 /**
  * Allocates @p size bytes, unnamed, from the default class, returning 0 instead of aborting: MEM_allocaligna(0,
@@ -1636,24 +1636,24 @@ INCLUDE_ASM("mem/memstd", func_002530A0);
  *
  * @param size  bytes wanted
  */
-extern "C" void func_002530A0(int size)
+extern "C" void MEM_allocsizez(int size)
 {
     MEM_allocaligna_6(0, size, 0, 0, 0, 0);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("mem/memstd", func_002530D0);
+INCLUDE_ASM("mem/memstd", _MEM_allocsizez);
 #ifdef SKIP_ASM
-extern "C" void func_00252A10(int, int, int, int, int, int);
+extern "C" void _MEM_allocaligna(int, int, int, int, int, int);
 
 /**
- * Allocates @p size bytes, unnamed, from the EA heap's default class, returning 0 instead of aborting: func_00252A10(0,
+ * Allocates @p size bytes, unnamed, from the EA heap's default class, returning 0 instead of aborting: _MEM_allocaligna(0,
  * @p size, 0, 0, 0, 0).
  *
  * @param size  bytes wanted
  */
-extern "C" void func_002530D0(int size) {
-    func_00252A10(0, size, 0, 0, 0, 0);
+extern "C" void _MEM_allocsizez(int size) {
+    _MEM_allocaligna(0, size, 0, 0, 0, 0);
 }
 #endif
 //100%
@@ -1663,7 +1663,7 @@ INCLUDE_ASM("mem/memstd", func_00253100);
  * Returns the first free block of the EA heap class @p cls that holds at least @p size bytes (size field, header
  * included), walking the free list from the head forwards, or backwards when @p back is nonzero.
  *
- * The sentinel (tag 0x4253) stops the walk; reaching it returns 0. func_00252A10 inlines the same search.
+ * The sentinel (tag 0x4253) stops the walk; reaching it returns 0. _MEM_allocaligna inlines the same search.
  *
  * @param cls  the memory class
  * @param size  minimum block size
@@ -1692,7 +1692,7 @@ INCLUDE_ASM("mem/memstd", func_00253170);
  * Returns the largest free block of the EA heap class @p cls whose data (size - 16) exceeds @p size - 1, walking the
  * free list forwards, or backwards when @p dir is nonzero, up to the sentinel (tag 0x4253).
  *
- * func_00252A10 inlines the same search for its best-fit mode (flag 0x200).
+ * _MEM_allocaligna inlines the same search for its best-fit mode (flag 0x200).
  *
  * @param cls  the memory class
  * @param size  minimum data size
@@ -1781,7 +1781,7 @@ INCLUDE_ASM("mem/memstd", func_002532B0);
  * Inserts block @p blk into the address-sorted free list of the EA heap class @p cls.
  *
  * Sets the block's size to the distance to the next block in memory (end), finds its place by walking from the list end
- * nearer to its address, links it in, and tags it free (0x4246, flag 0x4000). func_00252A10 inlines the same code.
+ * nearer to its address, links it in, and tags it free (0x4246, flag 0x4000). _MEM_allocaligna inlines the same code.
  *
  * @param cls  the memory class
  * @param blk  the block to insert
@@ -1840,15 +1840,15 @@ extern "C" void func_00253368(sMemBlock* blk) {
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00253390);
+INCLUDE_ASM("mem/memstd", tMoviePlayOptions_SetDefaults);
 #ifdef SKIP_ASM
 /**
  * Fills a movie play-options block with its defaults: play speed (+0x20) 1.0, draw layer (+0x1C) 31, and every other
  * word (video file +0x0, audio file +0x4, flags +0x8..+0x14, memory type +0x18) 0.
  *
- * Callers (cVidEngine_ReadyVideo, cRealFE's movie start, the rewards video player) fill it in before func_002534A8.
+ * Callers (cVidEngine_ReadyVideo, cRealFE's movie start, the rewards video player) fill it in before cMoviePlayer_init.
  */
-extern "C" void func_00253390(void* self)
+extern "C" void tMoviePlayOptions_SetDefaults(void* self)
 {
     *(float*)((char*)self + 0x20) = 1.0f;
     *(int*)((char*)self + 0x1c) = 31;
@@ -1863,22 +1863,22 @@ extern "C" void func_00253390(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("mem/memstd", func_002533C8);
+INCLUDE_ASM("mem/memstd", cMoviePlayer_cMoviePlayer);
 #ifdef SKIP_ASM
-extern "C" void func_00253AA0();
+extern "C" void cMoviePlayer_SetSSXREALDefaults();
 
 /**
- * Constructs a movie player (0x44 bytes): installs the movie memory callbacks (func_00253AA0), sets the play options
- * (+0x14) to their defaults (func_00253390), copies the default play speed (+0x34) to the speed (+0x10) and clears the
+ * Constructs a movie player (0x44 bytes): installs the movie memory callbacks (cMoviePlayer_SetSSXREALDefaults), sets the play options
+ * (+0x14) to their defaults (tMoviePlayOptions_SetDefaults), copies the default play speed (+0x34) to the speed (+0x10) and clears the
  * finished (+0x0), paused (+0x8) and frame (+0xC) words, the decoder (+0x38), the video driver (+0x3C) and the
  * new-frame flag (+0x40).
  *
  * @return @p self
  */
-extern "C" void* func_002533C8(void* self)
+extern "C" void* cMoviePlayer_cMoviePlayer(void* self)
 {
-    func_00253AA0();
-    func_00253390((char*)self + 0x14);
+    cMoviePlayer_SetSSXREALDefaults();
+    tMoviePlayOptions_SetDefaults((char*)self + 0x14);
     *(float*)((char*)self + 0x10) = *(float*)((char*)self + 0x34);
     *(int*)((char*)self + 0x38) = 0;
     *(int*)((char*)self + 0x3C) = 0;
@@ -1890,19 +1890,19 @@ extern "C" void* func_002533C8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00253418);
+INCLUDE_ASM("mem/memstd", cMoviePlayer__cMoviePlayer);
 #ifdef SKIP_ASM
 void operator_delete(int*);
-extern "C" void func_002535F8(void* self);
+extern "C" void cMoviePlayer_purge(void* self);
 
 /**
- * Destroys a movie player: releases everything (func_002535F8) and frees the object when @p flags bit 0 is set.
+ * Destroys a movie player: releases everything (cMoviePlayer_purge) and frees the object when @p flags bit 0 is set.
  *
  * @param flags  bit 0 frees the memory (callers pass 3)
  */
-extern "C" void func_00253418(void* self, int flags)
+extern "C" void cMoviePlayer__cMoviePlayer(void* self, int flags)
 {
-    func_002535F8(self);
+    cMoviePlayer_purge(self);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -1910,33 +1910,33 @@ extern "C" void func_00253418(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00253460);
+INCLUDE_ASM("mem/memstd", cMoviePlayer_init1);
 #ifdef SKIP_ASM
-struct func_00253460_sInfo {
+struct cMoviePlayer_init1_sInfo {
     int f0;
     char pad[0x20];
 };
 
-extern "C" void func_002534A8(void* self, void* info);
+extern "C" void cMoviePlayer_init(void* self, void* info);
 
 /**
- * Opens the movie @p videoFile with default play options: purges the player (func_002535F8), fills a play-options block with
- * defaults (func_00253390), sets its video file to @p videoFile and opens it (func_002534A8).
+ * Opens the movie @p videoFile with default play options: purges the player (cMoviePlayer_purge), fills a play-options block with
+ * defaults (tMoviePlayOptions_SetDefaults), sets its video file to @p videoFile and opens it (cMoviePlayer_init).
  *
  * @param videoFile  the video file name
  */
-extern "C" void func_00253460(void* self, int videoFile)
+extern "C" void cMoviePlayer_init1(void* self, int videoFile)
 {
-    func_00253460_sInfo info;
-    func_002535F8(self);
-    func_00253390(&info);
+    cMoviePlayer_init1_sInfo info;
+    cMoviePlayer_purge(self);
+    tMoviePlayOptions_SetDefaults(&info);
     info.f0 = videoFile;
-    func_002534A8(self, &info);
+    cMoviePlayer_init(self, &info);
 }
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_002534A8);
+INCLUDE_ASM("mem/memstd", cMoviePlayer_init);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sMemAllocFuncs_2534A8 {
@@ -1962,22 +1962,22 @@ struct sMemCfg_2534A8 {
     int f20;
 };
 
-extern "C" int func_002534A8_impl(void* self, sMemCfg_2534A8* cfg) __asm__("func_002534A8");
+extern "C" int cMoviePlayer_init_impl(void* self, sMemCfg_2534A8* cfg) __asm__("cMoviePlayer_init");
 /**
- * Opens a movie: purges the player (func_002535F8), copies the 0x24-byte play options @p cfg to +0x14 and creates the
+ * Opens a movie: purges the player (cMoviePlayer_purge), copies the 0x24-byte play options @p cfg to +0x14 and creates the
  * REAL decoder (+0x38).
  *
  * Copies the options' play speed (+0x34) to the speed (+0x10). The decoder memory (0x78 bytes) comes from the movie
  * allocator table D_00509430. With an audio file name (+0x18, non-empty) it builds the decoder with func_003ADE08
  * (video +0x14, 0x60000, audio file, 0x20000), else with func_003ADDC0 (video, 0x80000); both also get whether the
- * options word +0x24 is set and whether the word +0x1C is clear. Callers then start it with func_00253860.
+ * options word +0x24 is set and whether the word +0x1C is clear. Callers then start it with cMoviePlayer_asyncPlay.
  *
- * @param cfg  the play options (filled from func_00253390's defaults)
+ * @param cfg  the play options (filled from tMoviePlayOptions_SetDefaults's defaults)
  * @return 1 (always)
  */
-extern "C" int func_002534A8_impl(void* self, sMemCfg_2534A8* cfg)
+extern "C" int cMoviePlayer_init_impl(void* self, sMemCfg_2534A8* cfg)
 {
-    func_002535F8(self);
+    cMoviePlayer_purge(self);
     int soundOff = 1;
     *(sMemCfg_2534A8*)((char*)self + 0x14) = *cfg;
     int optionSet = 0;
@@ -2001,7 +2001,7 @@ extern "C" int func_002534A8_impl(void* self, sMemCfg_2534A8* cfg)
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_002535F8);
+INCLUDE_ASM("mem/memstd", cMoviePlayer_purge);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void RCMP_DECODER_ReleaseFrame(void*, void*);
@@ -2057,7 +2057,7 @@ struct sStream002535F8 {
  * driver is deleted (vtable slot 1, flags 3) and the active-player count D_004A2E9C decremented, the decoder is deleted
  * (func_003AE300, flags 3), and the finished, redraw, paused, frame and new-frame words are cleared.
  */
-extern "C" void func_002535F8(void* self)
+extern "C" void cMoviePlayer_purge(void* self)
 {
     sStream002535F8* moviePlayer = (sStream002535F8*)self;
     if (moviePlayer->f38 != 0 && moviePlayer->f3C != 0) {
@@ -2087,24 +2087,24 @@ extern "C" void func_002535F8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_002536C8);
+INCLUDE_ASM("mem/memstd", cMoviePlayer_startPlay);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004A2E9C;
 extern "C" int func_003AE450(void* p, int a, int b);
-extern "C" void* func_00254368(void* a0, int a1, int a2, int a3);
+extern "C" void* SSX_VD_create(void* a0, int a1, int a2, int a3);
 int func_003AE938(void*);
 int func_003AE958_i(void*) __asm__("func_003AE958__FPv");
 
 /**
  * Starts playback: fetches the first frame (func_003AE450(decoder, 1, 33)) into +0xC and sets the new-frame flag
- * (+0x40), pauses the decoder (func_003AE938), creates the video driver for that frame (func_00254368 with the
+ * (+0x40), pauses the decoder (func_003AE938), creates the video driver for that frame (SSX_VD_create with the
  * decoder's +0x64, the frame, cGraphicsMan_TheGraphicsMan and the draw layer +0x30) into +0x3C, resumes the decoder
  * (func_003AE958) and increments the active-player count D_004A2E9C.
  *
  * Clears the finished (+0x0) and redraw (+0x4) words first.
  */
-extern "C" void func_002536C8(void* self)
+extern "C" void cMoviePlayer_startPlay(void* self)
 {
     char* moviePlayer = (char*)self;
     *(int*)(moviePlayer + 0x0) = 0;
@@ -2113,14 +2113,14 @@ extern "C" void func_002536C8(void* self)
     *(int*)(moviePlayer + 0xC) = func_003AE450(*(void**)(moviePlayer + 0x38), 1, 33);
     *(int*)(moviePlayer + 0x40) = 1;
     func_003AE938(*(void**)(moviePlayer + 0x38));
-    *(void**)(moviePlayer + 0x3C) = func_00254368(*(void**)(*(char**)(moviePlayer + 0x38) + 0x64), *(int*)(moviePlayer + 0xC), (int)cGraphicsMan_TheGraphicsMan, *(int*)(moviePlayer + 0x30));
+    *(void**)(moviePlayer + 0x3C) = SSX_VD_create(*(void**)(*(char**)(moviePlayer + 0x38) + 0x64), *(int*)(moviePlayer + 0xC), (int)cGraphicsMan_TheGraphicsMan, *(int*)(moviePlayer + 0x30));
     func_003AE958_i(*(void**)(moviePlayer + 0x38));
     D_004A2E9C++;
 }
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00253748);
+INCLUDE_ASM("mem/memstd", cMoviePlayer_syncPlay);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_003AE6C8(void* p, float f);
@@ -2149,17 +2149,17 @@ struct sWorld_253748 {
 /**
  * Plays the whole movie before returning, when a decoder (+0x38) exists.
  *
- * Starts playback (func_002536C8), then until finished (+0x0): draws the frame (driver slot 5 when redraw +0x4 is set,
+ * Starts playback (cMoviePlayer_startPlay), then until finished (+0x0): draws the frame (driver slot 5 when redraw +0x4 is set,
  * else slot 4 with the frame +0xC), shows it (graphics manager slot 20, cPS2GraphicsMan_DrawFrame), runs
  * SYNCTASK_run(0) and func_003E5398(0), and when the decoder is due (func_003AE780) completes the draw (driver slot 6)
  * and fetches the next frame for the decoder's time (+0x48, func_003AE6C8). Without a frame it asks func_003AE860
  * whether the movie has finished. Clears the new-frame flag (+0x40) at the end.
  */
-extern "C" void func_00253748(void* self)
+extern "C" void cMoviePlayer_syncPlay(void* self)
 {
     sStream002535F8* moviePlayer = (sStream002535F8*)self;
     if (moviePlayer->f38 != 0) {
-        func_002536C8(moviePlayer);
+        cMoviePlayer_startPlay(moviePlayer);
         do {
             if (moviePlayer->f4 != 0) {
                 char* videoDriver = (char*)moviePlayer->f3C;
@@ -2194,27 +2194,27 @@ extern "C" void func_00253748(void* self)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("mem/memstd", func_00253860);
+INCLUDE_ASM("mem/memstd", cMoviePlayer_asyncPlay);
 #ifdef SKIP_ASM
-extern "C" void func_002536C8(void* self);
+extern "C" void cMoviePlayer_startPlay(void* self);
 
 /**
- * Starts asynchronous playback: when a decoder (+0x38) exists, starts it (func_002536C8).
+ * Starts asynchronous playback: when a decoder (+0x38) exists, starts it (cMoviePlayer_startPlay).
  *
  * @return 1 when started, 0 without a decoder
  */
-extern "C" int func_00253860(void* self)
+extern "C" int cMoviePlayer_asyncPlay(void* self)
 {
     if (*(void**)((char*)self + 0x38) == 0) {
         return 0;
     }
-    func_002536C8(self);
+    cMoviePlayer_startPlay(self);
     return 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00253890);
+INCLUDE_ASM("mem/memstd", cMoviePlayer_asyncRender);
 #ifdef SKIP_ASM
 class cMemObj_253890 {
 public:
@@ -2236,7 +2236,7 @@ public:
  *
  * @param force  nonzero to redraw the previous image
  */
-extern "C" void func_00253890(void* self, int force)
+extern "C" void cMoviePlayer_asyncRender(void* self, int force)
 {
     if (*(void**)((char*)self + 0x38) == 0) {
         return;
@@ -2303,7 +2303,7 @@ extern "C" void cMoviePlayer_asyncUpdate(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_002539E0);
+INCLUDE_ASM("mem/memstd", cMoviePlayer_asyncPause);
 #ifdef SKIP_ASM
 int func_003AE938(void*);
 
@@ -2311,7 +2311,7 @@ int func_003AE938(void*);
  * Pauses the movie: when a decoder (+0x38) and a driver (+0x3C) exist and it is neither finished (+0x0) nor already
  * paused (+0x8), pauses the decoder (func_003AE938) and sets the paused word.
  */
-extern "C" void func_002539E0(void* self)
+extern "C" void cMoviePlayer_asyncPause(void* self)
 {
     void* handle = *(void**)((char*)self + 0x38);
     if (handle != 0 && *(int*)((char*)self + 0x3C) != 0 && *(int*)((char*)self + 0x0) == 0
@@ -2323,7 +2323,7 @@ extern "C" void func_002539E0(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00253A40);
+INCLUDE_ASM("mem/memstd", cMoviePlayer_asyncResume);
 #ifdef SKIP_ASM
 void func_003AE958(void*);
 
@@ -2331,7 +2331,7 @@ void func_003AE958(void*);
  * Resumes a paused movie: when a decoder (+0x38) and a driver (+0x3C) exist, it has not finished (+0x0) and it is
  * paused (+0x8), resumes the decoder (func_003AE958) and clears the paused word.
  */
-extern "C" void func_00253A40(void* self)
+extern "C" void cMoviePlayer_asyncResume(void* self)
 {
     void* handle = *(void**)((char*)self + 0x38);
     if (handle != 0 && *(int*)((char*)self + 0x3C) != 0 && *(int*)((char*)self + 0x0) == 0
@@ -2343,10 +2343,10 @@ extern "C" void func_00253A40(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00253AA0);
+INCLUDE_ASM("mem/memstd", cMoviePlayer_SetSSXREALDefaults);
 #ifdef SKIP_ASM
-extern "C" void* func_00253AD0(int size);
-void* func_00253AF8(void* self);
+extern "C" void* cMoviePlayer_SSXAllocMemFunc(int size);
+void* cMoviePlayer_SSXFreeMemFunc(void* self);
 
 struct sMemAllocFuncs {
     void* (*alloc)(int);    // 0x0
@@ -2356,28 +2356,28 @@ struct sMemAllocFuncs {
 extern sMemAllocFuncs D_00509430;
 
 /**
- * Installs the movie memory callbacks in D_00509430: allocate func_00253AD0, free func_00253AF8, memory type 0x400.
+ * Installs the movie memory callbacks in D_00509430: allocate cMoviePlayer_SSXAllocMemFunc, free cMoviePlayer_SSXFreeMemFunc, memory type 0x400.
  *
  * The decoder and video driver code allocate through this table.
  */
-extern "C" void func_00253AA0()
+extern "C" void cMoviePlayer_SetSSXREALDefaults()
 {
-    D_00509430.alloc = func_00253AD0;
-    D_00509430.free = func_00253AF8;
+    D_00509430.alloc = cMoviePlayer_SSXAllocMemFunc;
+    D_00509430.free = cMoviePlayer_SSXFreeMemFunc;
     D_00509430.field_0x8 = 0x400;
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("mem/memstd", func_00253AD0);
+INCLUDE_ASM("mem/memstd", cMoviePlayer_SSXAllocMemFunc);
 #ifdef SKIP_ASM
-void* func_00252F60_5(void* a0, int a1, int a2, int a3, int a4) __asm__("func_00252F60__FPv");
+void* MEM_allocalign_5(void* a0, int a1, int a2, int a3, int a4) __asm__("MEM_allocalign__FPv");
 
 // PORT: the unit declares this as (int size); the body uses 5 args (prototype mismatch).
-void* func_00253AD0_impl(void* a0, int a1, int align, int a3, int a4) __asm__("func_00253AD0");
+void* cMoviePlayer_SSXAllocMemFunc_impl(void* a0, int a1, int align, int a3, int a4) __asm__("cMoviePlayer_SSXAllocMemFunc");
 
 /**
- * Movie allocation callback: allocates through func_00252F60 (MEM_allocaligna with abort) with at least 64-byte
+ * Movie allocation callback: allocates through MEM_allocalign (MEM_allocaligna with abort) with at least 64-byte
  * alignment.
  *
  * @param blockName  the block's name
@@ -2387,26 +2387,26 @@ void* func_00253AD0_impl(void* a0, int a1, int align, int a3, int a4) __asm__("f
  * @param memType  memory class and flags
  * @return the new block
  */
-void* func_00253AD0_impl(void* blockName, int byteCount, int align, int hdrSize, int memType)
+void* cMoviePlayer_SSXAllocMemFunc_impl(void* blockName, int byteCount, int align, int hdrSize, int memType)
 {
     if (align < 64) {
         align = 64;
     }
-    return func_00252F60_5(blockName, byteCount, align, hdrSize, memType);
+    return MEM_allocalign_5(blockName, byteCount, align, hdrSize, memType);
 }
 #endif
 
 extern "C" void* MEM_free(void* self);
 
 //99.29%
-INCLUDE_ASM("mem/memstd", func_00253AF8__FPv);
+INCLUDE_ASM("mem/memstd", cMoviePlayer_SSXFreeMemFunc__FPv);
 #ifdef SKIP_ASM
 /**
  * Movie free callback: releases the block @p self through MEM_free.
  *
  * @return MEM_free's result
  */
-void* func_00253AF8(void* self)
+void* cMoviePlayer_SSXFreeMemFunc(void* self)
 {
     return MEM_free(self);
 }
@@ -2549,13 +2549,13 @@ extern "C" int func_00254350(int x)
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00254368);
+INCLUDE_ASM("mem/memstd", SSX_VD_create);
 #ifdef SKIP_ASM
 extern char D_004A2EA0[];
 extern "C" void* func_00254410(void* self, void* a0, int a1, int a2, int a3);
 
 // PORT: the unit's sMemAllocFuncs declares alloc as `void* (*)(int)`; it really
-// takes (tag, size, align, d, flags) (see func_00252F60 / func_00253AD0).
+// takes (tag, size, align, d, flags) (see MEM_allocalign / cMoviePlayer_SSXAllocMemFunc).
 typedef void* (*tMemAlloc5_00254368)(void*, int, int, int, int);
 
 /**
@@ -2568,7 +2568,7 @@ typedef void* (*tMemAlloc5_00254368)(void*, int, int, int, int);
  * @param drawLayer  the draw layer
  * @return the new driver
  */
-extern "C" void* func_00254368(void* framesDecoder, int firstFrame, int graphicsMan, int drawLayer)
+extern "C" void* SSX_VD_create(void* framesDecoder, int firstFrame, int graphicsMan, int drawLayer)
 {
     void* driverMem = ((tMemAlloc5_00254368)D_00509430.alloc)(D_004A2EA0, 84, 0, 0, D_00509430.field_0x8);
     return func_00254410(driverMem, framesDecoder, firstFrame, graphicsMan, drawLayer);
@@ -3276,7 +3276,7 @@ extern "C" void func_00254E60_impl(int initialize, int priority)
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00255638);
+INCLUDE_ASM("mem/memstd", VIDEO_DRIVER__VIDEO_DRIVER);
 #ifdef SKIP_ASM
 extern void* D_004802B0[];
 void operator_delete(int*);
@@ -3287,7 +3287,7 @@ void operator_delete(int*);
  *
  * @param flags  bit 0 frees the memory
  */
-extern "C" void func_00255638(void* self, int flags)
+extern "C" void VIDEO_DRIVER__VIDEO_DRIVER(void* self, int flags)
 {
     *(void***)((char*)self + 0x4) = D_004802B0;
     if (flags & 1) {
@@ -3297,12 +3297,12 @@ extern "C" void func_00255638(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00255668__FPv);
+INCLUDE_ASM("mem/memstd", VIDEO_DRIVER_CompleteDraw__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the base video driver's default for vtable slot 6 of D_004802B0.
  */
-void func_00255668(void* self)
+void VIDEO_DRIVER_CompleteDraw(void* self)
 {
 }
 #endif
@@ -3458,14 +3458,14 @@ void* func_002557C0(void* self)
 extern void* cCommChannel_vtbl[];
 
 //100%
-INCLUDE_ASM("mem/memstd", func_002557E0__FPv);
+INCLUDE_ASM("mem/memstd", cCommChannel_cCommChannel__FPv);
 #ifdef SKIP_ASM
 /**
  * Constructs a comm channel: clears mChannelOpen and mError and installs cCommChannel_vtbl in mVtbl.
  *
  * @return @p self
  */
-void* func_002557E0(void* self)
+void* cCommChannel_cCommChannel(void* self)
 {
     int zero = 0;
     *(int*)self = zero;
@@ -3495,14 +3495,14 @@ extern "C" void cCommChannel__cCommChannel(cCommChannel* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("mem/memstd", func_00255830__FPv);
+INCLUDE_ASM("mem/memstd", cCommChannel_channelOpen__FPv);
 #ifdef SKIP_ASM
 /**
  * Opens the channel: clears mError and sets mChannelOpen to 1.
  *
  * @return 1
  */
-int func_00255830(void* self)
+int cCommChannel_channelOpen(void* self)
 {
     int one = 1;
     *(int*)((char*)self + 0x4) = 0;

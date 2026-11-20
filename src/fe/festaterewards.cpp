@@ -2537,7 +2537,7 @@ extern "C" void cFEStateRewardGalleryCheatChars_getTextureElement(void* self, in
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_cFEStatePreviewReward);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E318(void* self, void* engine, void* owner);
+extern "C" void* cUIState_cUIState1(void* self, void* engine, void* owner);
 extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, signed char a1);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -2553,7 +2553,7 @@ struct sRewardState_1AA0 {
 /**
  * Constructs the reward preview state (vtable cFEStatePreviewReward_vtbl, state id 0x30) for a user.
  *
- * Runs the cUIState constructor func_0039E318(), sets mHashName to 0x30, the vtable, mUserNum and mCtrlBits
+ * Runs the cUIState constructor cUIState_cUIState1(), sets mHashName to 0x30, the vtable, mUserNum and mCtrlBits
  * (cFECustom_getPlayerCtrlMask on *mpEngine); clears the three bitmap pointers (+0x48) and the three shape-frame pointers (+0x54) and
  * the reward (+0x60); stores the player's character id (cBENewPlayerInterface_getPlayerCharID, interface kind 1) in
  * +0x64; and sets the reward type (+0x68), the file slot (+0x6C), the texture handle (+0x70) and the shape index
@@ -2568,7 +2568,7 @@ extern "C" void* cFEStatePreviewReward_cFEStatePreviewReward(cFEStatePreviewRewa
 {
     signed char idx = player;
     int i;
-    func_0039E318(self, engine, owner);
+    cUIState_cUIState1(self, engine, owner);
     self->mHashName = 0x30;
     self->mVtbl = cFEStatePreviewReward_vtbl;
     self->mUserNum = idx;
@@ -2600,7 +2600,7 @@ struct sVEntry001D1B68 {
 extern void* cFEStatePreviewReward_vtbl[];
 extern void* D_0046D0D0[];
 extern "C" void func_0019DC20(void* self, int bank, int i);
-extern "C" void func_0039E390(void* self, int flags);
+extern "C" void cUIState__cUIState(void* self, int flags);
 
 /**
  * Destroys a reward preview: frees its texture and releases its file slot (func_0019DC20), then the base
@@ -2624,7 +2624,7 @@ extern "C" void cFEStatePreviewReward__cFEStatePreviewReward(cFEStatePreviewRewa
     self->mTextureFileIndex = -1;
     self->mTextureID = -1;
     self->mVtbl = D_0046D0D0;
-    func_0039E390(self, flags);
+    cUIState__cUIState(self, flags);
 }
 #endif
 
@@ -2870,7 +2870,7 @@ struct cUIScreen;
 int GetHashValue32(char* str);
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void func_0039F190(void* self, int a1);
+extern "C" void cUIStateStack_pop(void* self, int a1);
 extern char str_TransitionOut[];
 struct sVE_1FF0a {
     short delta;
@@ -2915,7 +2915,7 @@ extern "C" int cFEStatePreviewReward_onInputBegin(cFEStatePreviewReward* self, v
         }
     }
     cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut)), 1);
-    func_0039F190(self->mpEngine->mStateStack, 1);
+    cUIStateStack_pop(self->mpEngine->mStateStack, 1);
     return 1;
     }
     return 0;
@@ -3048,17 +3048,17 @@ extern "C" void cFEStatePreviewReward_updateTextureLoad(cFEStatePreviewReward* s
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer_cFEStateVideoPlayer);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E318(void* self, void* engine, void* owner);
-extern "C" void func_00253390(void* p);
+extern "C" void* cUIState_cUIState1(void* self, void* engine, void* owner);
+extern "C" void tMoviePlayOptions_SetDefaults(void* p);
 extern void* D_00469928[];
 
 /**
  * Constructs the full-screen video player state (state id 6, vtable D_00469928) used for reward videos and bonus
  * material.
  *
- * Runs the cUIState constructor func_0039E318(), sets mUserNum, empties the video (+0x48) and audio (+0x148) file
+ * Runs the cUIState constructor cUIState_cUIState1(), sets mUserNum, empties the video (+0x48) and audio (+0x148) file
  * names, clears the movie player (+0x248) and the updated, rendered and stop-request flags (+0x274, +0x278, +0x27C),
- * enables input (+0x270 = 1), sets mHashName to 6, initialises the movie settings block at +0x24C (func_00253390) and
+ * enables input (+0x270 = 1), sets mHashName to 6, initialises the movie settings block at +0x24C (tMoviePlayOptions_SetDefaults) and
  * points its first two words at the two file-name buffers. cFEStateRewardGalleryBase_showReward and
  * cFEStateBonusMaterial_onWidgetEvent allocate it (640 bytes) under the tag "cFEStateVideoPlayer".
  *
@@ -3071,7 +3071,7 @@ extern void* D_00469928[];
 extern "C" void* cFEStateVideoPlayer_cFEStateVideoPlayer(void* vself, void* engine, void* owner, signed char player)
 {
     char* self = (char*)vself;
-    func_0039E318(self, engine, owner);
+    cUIState_cUIState1(self, engine, owner);
     char* title = self + 0x48;
     char* body = self + 0x148;
     *(signed char*)(self + 0x44) = player;
@@ -3084,7 +3084,7 @@ extern "C" void* cFEStateVideoPlayer_cFEStateVideoPlayer(void* vself, void* engi
     *(void***)(self + 0x8) = D_00469928;
     *(int*)(self + 0xC) = 6;
     *(int*)(self + 0x270) = 1;
-    func_00253390(self + 0x24C);
+    tMoviePlayOptions_SetDefaults(self + 0x24C);
     *(char**)(self + 0x24C) = title;
     *(char**)(self + 0x250) = body;
     return self;
@@ -3094,27 +3094,27 @@ extern "C" void* cFEStateVideoPlayer_cFEStateVideoPlayer(void* vself, void* engi
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer__cFEStateVideoPlayer);
 #ifdef SKIP_ASM
-extern "C" void func_00253418(void* p, int a1);
-extern "C" void func_0039E390(void* self, int flags);
+extern "C" void cMoviePlayer__cMoviePlayer(void* p, int a1);
+extern "C" void cUIState__cUIState(void* self, int flags);
 extern void* D_00469928[];
 extern void* D_0046D0D0[];
 
 /**
  * Destroys the video player state: deletes its movie player, then runs the cUIState destructor.
  *
- * Vtable slot 1 of D_00469928. Reinstalls D_00469928, deletes the movie player (+0x248) with func_00253418(player, 3)
- * when there is one, installs cFEState's vtable D_0046D0D0 and calls func_0039E390() with @p flags.
+ * Vtable slot 1 of D_00469928. Reinstalls D_00469928, deletes the movie player (+0x248) with cMoviePlayer__cMoviePlayer(player, 3)
+ * when there is one, installs cFEState's vtable D_0046D0D0 and calls cUIState__cUIState() with @p flags.
  *
- * @param flags  g++ destructor flags, passed on to func_0039E390 (bit 0 frees the object's memory)
+ * @param flags  g++ destructor flags, passed on to cUIState__cUIState (bit 0 frees the object's memory)
  */
 extern "C" void cFEStateVideoPlayer__cFEStateVideoPlayer(void* self, int flags)
 {
     *(void***)((char*)self + 8) = D_00469928;
     if (*(void**)((char*)self + 0x248) != 0) {
-        func_00253418(*(void**)((char*)self + 0x248), 3);
+        cMoviePlayer__cMoviePlayer(*(void**)((char*)self + 0x248), 3);
     }
     *(void***)((char*)self + 8) = D_0046D0D0;
-    func_0039E390(self, flags);
+    cUIState__cUIState(self, flags);
 }
 #endif
 
@@ -3122,7 +3122,7 @@ extern "C" void cFEStateVideoPlayer__cFEStateVideoPlayer(void* self, int flags)
 INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer_onCreateScreen);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_002533C8(void* mem);
+extern "C" void* cMoviePlayer_cMoviePlayer(void* mem);
 extern "C" void cFEStateVideoPlayer_Start(void* self);
 extern char str_MoviePlayer[];
 
@@ -3130,11 +3130,11 @@ extern char str_MoviePlayer[];
  * Creates the video player's movie player and starts playback.
  *
  * Vtable slot 4 of D_00469928 (the create-screen slot; no screen is created). Allocates 68 bytes under the tag
- * "MoviePlayer", constructs them with func_002533C8() into +0x248 and calls cFEStateVideoPlayer_Start().
+ * "MoviePlayer", constructs them with cMoviePlayer_cMoviePlayer() into +0x248 and calls cFEStateVideoPlayer_Start().
  */
 extern "C" void cFEStateVideoPlayer_onCreateScreen(void* self)
 {
-    *(void**)((char*)self + 0x248) = func_002533C8(cMemMan_alloc(68, str_MoviePlayer, 0, 0));
+    *(void**)((char*)self + 0x248) = cMoviePlayer_cMoviePlayer(cMemMan_alloc(68, str_MoviePlayer, 0, 0));
     cFEStateVideoPlayer_Start(self);
 }
 #endif
@@ -3142,10 +3142,10 @@ extern "C" void cFEStateVideoPlayer_onCreateScreen(void* self)
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer_onDestroyScreen);
 #ifdef SKIP_ASM
-extern "C" void func_00253418(void* p, int a1);
+extern "C" void cMoviePlayer__cMoviePlayer(void* p, int a1);
 
 /**
- * Deletes the video player's movie player (+0x248) with func_00253418(player, 3), when there is one, and clears the
+ * Deletes the video player's movie player (+0x248) with cMoviePlayer__cMoviePlayer(player, 3), when there is one, and clears the
  * pointer.
  *
  * Vtable slot 5 of D_00469928.
@@ -3154,7 +3154,7 @@ extern "C" void cFEStateVideoPlayer_onDestroyScreen(void* self)
 {
     void* moviePlayer = *(void**)((char*)self + 0x248);
     if (moviePlayer != 0) {
-        func_00253418(moviePlayer, 3);
+        cMoviePlayer__cMoviePlayer(moviePlayer, 3);
     }
     *(void**)((char*)self + 0x248) = 0;
 }
@@ -3163,12 +3163,12 @@ extern "C" void cFEStateVideoPlayer_onDestroyScreen(void* self)
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer_onRender2D);
 #ifdef SKIP_ASM
-extern "C" void func_00253890(void* p, int a1);
+extern "C" void cMoviePlayer_asyncRender(void* p, int a1);
 extern "C" void* cUIState_onRender2D(void* self);
 
 /**
  * Draws the playing movie: with a movie player (+0x248), sets the rendered flag (+0x278) and calls
- * func_00253890(player, 0); then runs cUIState_onRender2D().
+ * cMoviePlayer_asyncRender(player, 0); then runs cUIState_onRender2D().
  *
  * Vtable slot 15 of D_00469928.
  */
@@ -3177,7 +3177,7 @@ extern "C" void cFEStateVideoPlayer_onRender2D(void* self)
     void* moviePlayer = *(void**)((char*)self + 0x248);
     if (moviePlayer != 0) {
         *(int*)((char*)self + 0x278) = 1;
-        func_00253890(moviePlayer, 0);
+        cMoviePlayer_asyncRender(moviePlayer, 0);
     }
     cUIState_onRender2D(self);
 }
@@ -3280,22 +3280,22 @@ INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer_Start);
 #ifdef SKIP_ASM
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_002B3A70(void* p);
-extern "C" int func_002534A8(void* p, void* q);
-extern "C" void func_00253860(void* p);
+extern "C" int cMoviePlayer_init(void* p, void* q);
+extern "C" void cMoviePlayer_asyncPlay(void* p);
 
 /**
  * Starts the movie: turns the current song down, then opens and starts the movie player with the source files.
  *
  * Calls func_002B3A70() on cAudioInterface_bxAudio() + 0x118 (it sets the current song's level to 0), sets the word at +0x254 of
- * the settings block to 1, opens the movie with func_002534A8() and the settings block (+0x24C), starts it with
- * func_00253860(), and clears the rendered (+0x278) and updated (+0x274) flags. Called by cFEStateVideoPlayer_onCreateScreen.
+ * the settings block to 1, opens the movie with cMoviePlayer_init() and the settings block (+0x24C), starts it with
+ * cMoviePlayer_asyncPlay(), and clears the rendered (+0x278) and updated (+0x274) flags. Called by cFEStateVideoPlayer_onCreateScreen.
  */
 extern "C" void cFEStateVideoPlayer_Start(void* self)
 {
     func_002B3A70((char*)cAudioInterface_bxAudio() + 0x118);
     *(int*)((char*)self + 0x254) = 1;
-    func_002534A8(*(void**)((char*)self + 0x248), (char*)self + 0x24C);
-    func_00253860(*(void**)((char*)self + 0x248));
+    cMoviePlayer_init(*(void**)((char*)self + 0x248), (char*)self + 0x24C);
+    cMoviePlayer_asyncPlay(*(void**)((char*)self + 0x248));
     *(int*)((char*)self + 0x278) = 0;
     *(int*)((char*)self + 0x274) = 0;
 }
@@ -3306,20 +3306,20 @@ INCLUDE_ASM("fe/festaterewards", cFEStateVideoPlayer_Stop);
 #ifdef SKIP_ASM
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_002B3A98(void* self);
-extern "C" void func_0039F190(void* self, int a1);
+extern "C" void cUIStateStack_pop(void* self, int a1);
 
 /**
  * Stops the video player: restores the current song and closes the front state.
  *
  * Calls func_002B3A98() on cAudioInterface_bxAudio() + 0x118 (it sets the current song's level back to 0x1000), clears the stop
  * request (+0x27C), and marks the front state on the engine's state stack (mpEngine + 0x18) pending delete in mode 6
- * with func_0039F190(stack, 1). Called by cFEStateVideoPlayer_onUpdate.
+ * with cUIStateStack_pop(stack, 1). Called by cFEStateVideoPlayer_onUpdate.
  */
 extern "C" void cFEStateVideoPlayer_Stop(void* self)
 {
     func_002B3A98((char*)cAudioInterface_bxAudio() + 0x118);
     *(int*)((char*)self + 0x27C) = 0;
-    func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
+    cUIStateStack_pop(*(char**)((char*)self + 0x10) + 0x18, 1);
 }
 #endif
 

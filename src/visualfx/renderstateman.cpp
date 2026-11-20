@@ -94,7 +94,7 @@ extern "C" float cRenderStateMan_SnowFlakeColourB(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EE8A0);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_SnowFluffColourA);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
@@ -107,7 +107,7 @@ extern sRSMEntry cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EE8A0(int i)
+extern "C" float cRenderStateMan_SnowFluffColourA(int i)
 {
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p20;
@@ -117,7 +117,7 @@ extern "C" float func_002EE8A0(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EE8E8);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_SnowFluffColourR);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
@@ -130,7 +130,7 @@ extern sRSMEntry cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EE8E8(int i)
+extern "C" float cRenderStateMan_SnowFluffColourR(int i)
 {
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p20;
@@ -140,7 +140,7 @@ extern "C" float func_002EE8E8(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EE930);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_SnowFluffColourG);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
@@ -153,7 +153,7 @@ extern sRSMEntry cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EE930(int i)
+extern "C" float cRenderStateMan_SnowFluffColourG(int i)
 {
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p20;
@@ -163,7 +163,7 @@ extern "C" float func_002EE930(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EE978);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_SnowFluffColourB);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
@@ -176,7 +176,7 @@ extern sRSMEntry cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EE978(int i)
+extern "C" float cRenderStateMan_SnowFluffColourB(int i)
 {
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p20;
@@ -186,7 +186,7 @@ extern "C" float func_002EE978(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EE9C0);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_FogDensity);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
@@ -200,7 +200,7 @@ extern sRSMEntry cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EE9C0(int i)
+extern "C" float cRenderStateMan_FogDensity(int i)
 {
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p04;
@@ -210,7 +210,7 @@ extern "C" float func_002EE9C0(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EEA08);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_FogNear);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
@@ -224,7 +224,7 @@ extern sRSMEntry cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EEA08(int i)
+extern "C" float cRenderStateMan_FogNear(int i)
 {
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p04;
@@ -234,7 +234,7 @@ extern "C" float func_002EEA08(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EEA50);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_FogFar);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
@@ -248,7 +248,7 @@ extern sRSMEntry cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EEA50(int i)
+extern "C" float cRenderStateMan_FogFar(int i)
 {
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p04;
@@ -258,7 +258,7 @@ extern "C" float func_002EEA50(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EEA98);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_FogColourR);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
@@ -272,7 +272,7 @@ extern sRSMEntry cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EEA98(int i)
+extern "C" float cRenderStateMan_FogColourR(int i)
 {
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p04;
@@ -282,7 +282,7 @@ extern "C" float func_002EEA98(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EEAE0);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_FogColourG);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
@@ -296,7 +296,7 @@ extern sRSMEntry cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EEAE0(int i)
+extern "C" float cRenderStateMan_FogColourG(int i)
 {
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p04;
@@ -306,7 +306,7 @@ extern "C" float func_002EEAE0(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EEB28);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_FogColourB);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
@@ -320,7 +320,7 @@ extern sRSMEntry cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EEB28(int i)
+extern "C" float cRenderStateMan_FogColourB(int i)
 {
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p04;
@@ -330,7 +330,7 @@ extern "C" float func_002EEB28(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EEB70);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_ScreenTintScaleR);
 #ifdef SKIP_ASM
 extern int D_004A3B60;
 
@@ -345,7 +345,7 @@ extern int D_004A3B60;
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EEB70(int i)
+extern "C" float cRenderStateMan_ScreenTintScaleR(int i)
 {
     if (D_004A3B60 == 0) {
         sRSMEntry* renderState = &cRenderStateMan_m_state[i];
@@ -358,7 +358,7 @@ extern "C" float func_002EEB70(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EEBD0);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_ScreenTintScaleG);
 #ifdef SKIP_ASM
 extern int D_004A3B60;
 
@@ -373,7 +373,7 @@ extern int D_004A3B60;
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EEBD0(int i)
+extern "C" float cRenderStateMan_ScreenTintScaleG(int i)
 {
     if (D_004A3B60 == 0) {
         sRSMEntry* renderState = &cRenderStateMan_m_state[i];
@@ -386,7 +386,7 @@ extern "C" float func_002EEBD0(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EEC30);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_ScreenTintScaleB);
 #ifdef SKIP_ASM
 extern int D_004A3B60;
 
@@ -401,7 +401,7 @@ extern int D_004A3B60;
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EEC30(int i)
+extern "C" float cRenderStateMan_ScreenTintScaleB(int i)
 {
     if (D_004A3B60 == 0) {
         sRSMEntry* renderState = &cRenderStateMan_m_state[i];
@@ -414,7 +414,7 @@ extern "C" float func_002EEC30(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EEC90);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_ScreenTintOffsetR);
 #ifdef SKIP_ASM
 extern int D_004A3B60;
 
@@ -429,7 +429,7 @@ extern int D_004A3B60;
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EEC90(int i)
+extern "C" float cRenderStateMan_ScreenTintOffsetR(int i)
 {
     if (D_004A3B60 == 0) {
         sRSMEntry* renderState = &cRenderStateMan_m_state[i];
@@ -442,7 +442,7 @@ extern "C" float func_002EEC90(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EECF0);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_ScreenTintOffsetG);
 #ifdef SKIP_ASM
 extern int D_004A3B60;
 
@@ -457,7 +457,7 @@ extern int D_004A3B60;
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EECF0(int i)
+extern "C" float cRenderStateMan_ScreenTintOffsetG(int i)
 {
     if (D_004A3B60 == 0) {
         sRSMEntry* renderState = &cRenderStateMan_m_state[i];
@@ -470,7 +470,7 @@ extern "C" float func_002EECF0(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EED50);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_ScreenTintOffsetB);
 #ifdef SKIP_ASM
 extern int D_004A3B60;
 
@@ -485,7 +485,7 @@ extern int D_004A3B60;
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EED50(int i)
+extern "C" float cRenderStateMan_ScreenTintOffsetB(int i)
 {
     if (D_004A3B60 == 0) {
         sRSMEntry* renderState = &cRenderStateMan_m_state[i];
@@ -498,7 +498,7 @@ extern "C" float func_002EED50(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EEDB0);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_LightGlowCutoff);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
@@ -512,7 +512,7 @@ extern sRSMEntry cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EEDB0(int i)
+extern "C" float cRenderStateMan_LightGlowCutoff(int i)
 {
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p08;
@@ -522,7 +522,7 @@ extern "C" float func_002EEDB0(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EEDF8);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_LightGlowCutoffScale);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
@@ -536,7 +536,7 @@ extern sRSMEntry cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EEDF8(int i)
+extern "C" float cRenderStateMan_LightGlowCutoffScale(int i)
 {
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p08;
@@ -546,7 +546,7 @@ extern "C" float func_002EEDF8(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EEE40);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_LightGlowCopyIntensity);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
@@ -560,7 +560,7 @@ extern sRSMEntry cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EEE40(int i)
+extern "C" float cRenderStateMan_LightGlowCopyIntensity(int i)
 {
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p08;
@@ -570,7 +570,7 @@ extern "C" float func_002EEE40(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EEE88);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_LightGlowSourceIntensity);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
@@ -584,7 +584,7 @@ extern sRSMEntry cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EEE88(int i)
+extern "C" float cRenderStateMan_LightGlowSourceIntensity(int i)
 {
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p08;
@@ -594,7 +594,7 @@ extern "C" float func_002EEE88(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EEED0);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_LightGlowFrameIntensity);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
@@ -608,7 +608,7 @@ extern sRSMEntry cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EEED0(int i)
+extern "C" float cRenderStateMan_LightGlowFrameIntensity(int i)
 {
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p08;
@@ -618,7 +618,7 @@ extern "C" float func_002EEED0(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EEF18);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_LightGlowBlend2);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
@@ -632,7 +632,7 @@ extern sRSMEntry cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EEF18(int i)
+extern "C" float cRenderStateMan_LightGlowBlend2(int i)
 {
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p08;
@@ -642,7 +642,7 @@ extern "C" float func_002EEF18(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EEF60);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_LightGlowBlend3);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
@@ -656,7 +656,7 @@ extern sRSMEntry cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EEF60(int i)
+extern "C" float cRenderStateMan_LightGlowBlend3(int i)
 {
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p08;
@@ -666,7 +666,7 @@ extern "C" float func_002EEF60(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EEFA8);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_RimLightIntensityOffset);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
@@ -680,7 +680,7 @@ extern sRSMEntry cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EEFA8(int i)
+extern "C" float cRenderStateMan_RimLightIntensityOffset(int i)
 {
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p1C;
@@ -690,7 +690,7 @@ extern "C" float func_002EEFA8(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EEFF0);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_AmbientLightIntensityOffset);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
@@ -703,7 +703,7 @@ extern sRSMEntry cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EEFF0(int i)
+extern "C" float cRenderStateMan_AmbientLightIntensityOffset(int i)
 {
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p1C;
@@ -713,7 +713,7 @@ extern "C" float func_002EEFF0(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EF038);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_SnowSparkleDensity);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
@@ -727,7 +727,7 @@ extern sRSMEntry cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EF038(int i)
+extern "C" float cRenderStateMan_SnowSparkleDensity(int i)
 {
     sRSMEntry* entry = &cRenderStateMan_m_state[i];
     sRSMObj* object = **(sRSMObj***)((char*)entry + 0x18);
@@ -737,7 +737,7 @@ extern "C" float func_002EF038(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EF0A0);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_PlayerWindIntensity);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
@@ -750,7 +750,7 @@ extern sRSMEntry cRenderStateMan_m_state[];
  * @param i  the render state (view) index
  * @return the value
  */
-extern "C" float func_002EF0A0(int i)
+extern "C" float cRenderStateMan_PlayerWindIntensity(int i)
 {
     sRSMEntry* renderState = &cRenderStateMan_m_state[i];
     sRSMObj* stateQuery = *renderState->p20;
@@ -760,7 +760,7 @@ extern "C" float func_002EF0A0(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EF0E8);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_LightIrradianceName);
 #ifdef SKIP_ASM
 extern int D_004A3B64;
 extern int D_004A55B0;
@@ -770,12 +770,12 @@ extern int D_004A55B0;
  *
  * While D_004A3B64 is set (cRenderStateMan_setCustomIrradiance) it returns the custom name field D_004A55B0; otherwise
  * it calls virtual slot 37 of the state's world-painter query object m_query[7] (+0x1C) of cRenderStateMan_m_state[@p
- * i] and returns the pointer it gives. func_002EE318 calls it.
+ * i] and returns the pointer it gives. cRenderStateMan_LightIrradiance calls it.
  *
  * @param i  the render state (view) index
  * @return the name field
  */
-extern "C" void* func_002EF0E8(int i)
+extern "C" void* cRenderStateMan_LightIrradianceName(int i)
 {
     if (D_004A3B64 != 0) {
         return &D_004A55B0;
@@ -790,7 +790,7 @@ extern "C" void* func_002EF0E8(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EF140);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_ShadowIrradianceName);
 #ifdef SKIP_ASM
 extern int D_004A3B64;
 extern int D_004A55B0;
@@ -800,12 +800,12 @@ extern int D_004A55B0;
  *
  * While D_004A3B64 is set (cRenderStateMan_setCustomIrradiance) it returns the custom name field D_004A55B0; otherwise
  * it calls virtual slot 38 of the state's world-painter query object m_query[7] (+0x1C) of cRenderStateMan_m_state[@p
- * i] and returns the pointer it gives. func_002EE340 calls it.
+ * i] and returns the pointer it gives. cRenderStateMan_ShadowIrradiance calls it.
  *
  * @param i  the render state (view) index
  * @return the name field
  */
-extern "C" void* func_002EF140(int i)
+extern "C" void* cRenderStateMan_ShadowIrradianceName(int i)
 {
     if (D_004A3B64 != 0) {
         return &D_004A55B0;
@@ -820,7 +820,7 @@ extern "C" void* func_002EF140(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EF198);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_TunnelIrradianceName);
 #ifdef SKIP_ASM
 extern int D_004A3B64;
 extern int D_004A55B0;
@@ -830,12 +830,12 @@ extern int D_004A55B0;
  *
  * While D_004A3B64 is set (cRenderStateMan_setCustomIrradiance) it returns the custom name field D_004A55B0; otherwise
  * it calls virtual slot 39 of the state's world-painter query object m_query[7] (+0x1C) of cRenderStateMan_m_state[@p
- * i] and returns the pointer it gives. func_002EE368 calls it.
+ * i] and returns the pointer it gives. cRenderStateMan_TunnelIrradiance calls it.
  *
  * @param i  the render state (view) index
  * @return the name field
  */
-extern "C" void* func_002EF198(int i)
+extern "C" void* cRenderStateMan_TunnelIrradianceName(int i)
 {
     if (D_004A3B64 != 0) {
         return &D_004A55B0;
@@ -850,7 +850,7 @@ extern "C" void* func_002EF198(int i)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EF1F0);
+INCLUDE_ASM("visualfx/renderstateman", cRenderStateMan_ObjectIrradianceName);
 #ifdef SKIP_ASM
 extern int D_004A3B64;
 extern int D_004A55B0;
@@ -860,12 +860,12 @@ extern int D_004A55B0;
  *
  * While D_004A3B64 is set (cRenderStateMan_setCustomIrradiance) it returns the custom name field D_004A55B0; otherwise
  * it calls virtual slot 40 of the state's world-painter query object m_query[7] (+0x1C) of cRenderStateMan_m_state[@p
- * i] and returns the pointer it gives. func_002EE390 calls it.
+ * i] and returns the pointer it gives. cRenderStateMan_ObjectIrradiance calls it.
  *
  * @param i  the render state (view) index
  * @return the name field
  */
-extern "C" void* func_002EF1F0(int i)
+extern "C" void* cRenderStateMan_ObjectIrradianceName(int i)
 {
     if (D_004A3B64 != 0) {
         return &D_004A55B0;
@@ -1580,7 +1580,7 @@ extern "C" void cAirStreamerFX_render(sTrail_EF950* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002EFF90);
+INCLUDE_ASM("visualfx/renderstateman", visualEffectsMan);
 #ifdef SKIP_ASM
 extern void* D_004A3B78;
 
@@ -1591,7 +1591,7 @@ extern void* D_004A3B78;
  *
  * @return the manager
  */
-extern "C" int func_002EFF90(void) {
+extern "C" int visualEffectsMan(void) {
     return (*(int*)&D_004A3B78);
 }
 #endif
@@ -1679,28 +1679,28 @@ extern "C" void* cVisualEffectsMan_cVisualEffectsMan(sRSMan_002EFF98* self)
 INCLUDE_ASM("visualfx/renderstateman", cVisualEffectsMan_commonUpdate);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" float func_002EE3B8(int i);
-extern "C" float func_002EE738(int i);
-extern "C" float func_002EE9C0(int i);
-extern "C" float func_002EEA08(int i);
-extern "C" float func_002EEA50(int i);
-extern "C" float func_002EEA98(int i);
-extern "C" float func_002EEAE0(int i);
-extern "C" float func_002EEB28(int i);
-extern "C" float func_002EEB70(int i);
-extern "C" float func_002EEBD0(int i);
-extern "C" float func_002EEC30(int i);
-extern "C" float func_002EEC90(int i);
-extern "C" float func_002EECF0(int i);
-extern "C" float func_002EED50(int i);
-extern "C" float func_002EEDB0(int i);
-extern "C" float func_002EEDF8(int i);
-extern "C" float func_002EEE40(int i);
-extern "C" float func_002EEE88(int i);
-extern "C" float func_002EEED0(int i);
-extern "C" float func_002EEF18(int i);
-extern "C" float func_002EEF60(int i);
-extern "C" float func_002EF038(int i);
+extern "C" float cRenderStateMan_DrawDistance(int i);
+extern "C" float cRenderStateMan_LightningChance(int i);
+extern "C" float cRenderStateMan_FogDensity(int i);
+extern "C" float cRenderStateMan_FogNear(int i);
+extern "C" float cRenderStateMan_FogFar(int i);
+extern "C" float cRenderStateMan_FogColourR(int i);
+extern "C" float cRenderStateMan_FogColourG(int i);
+extern "C" float cRenderStateMan_FogColourB(int i);
+extern "C" float cRenderStateMan_ScreenTintScaleR(int i);
+extern "C" float cRenderStateMan_ScreenTintScaleG(int i);
+extern "C" float cRenderStateMan_ScreenTintScaleB(int i);
+extern "C" float cRenderStateMan_ScreenTintOffsetR(int i);
+extern "C" float cRenderStateMan_ScreenTintOffsetG(int i);
+extern "C" float cRenderStateMan_ScreenTintOffsetB(int i);
+extern "C" float cRenderStateMan_LightGlowCutoff(int i);
+extern "C" float cRenderStateMan_LightGlowCutoffScale(int i);
+extern "C" float cRenderStateMan_LightGlowCopyIntensity(int i);
+extern "C" float cRenderStateMan_LightGlowSourceIntensity(int i);
+extern "C" float cRenderStateMan_LightGlowFrameIntensity(int i);
+extern "C" float cRenderStateMan_LightGlowBlend2(int i);
+extern "C" float cRenderStateMan_LightGlowBlend3(int i);
+extern "C" float cRenderStateMan_SnowSparkleDensity(int i);
 extern "C" int func_002F7BE0(void* p);
 extern void* cRenderStateMan_m_inNIS;
 extern int cDepthFog_m_OverrideWP;
@@ -1769,23 +1769,23 @@ extern "C" void cVisualEffectsMan_commonUpdate(void* self, int i)
     sRsCtx_F00A0* ctx = D_ctx_F00A0;
     if (cDepthFog_m_OverrideWP == 0) {
         sRsCol_F00A0* dst = &cDepthFog_m_Colour;
-        cDepthFog_m_Density = func_002EE9C0(i);
+        cDepthFog_m_Density = cRenderStateMan_FogDensity(i);
         cDepthFog_m_Exponent = 1;
-        cDepthFog_m_NearPlane = func_002EEA08(i);
-        cDepthFog_m_FarPlane = func_002EEA50(i);
-        float fogRed = func_002EEA98(i);
-        float fogGreen = func_002EEAE0(i);
-        float fogBlue = func_002EEB28(i);
+        cDepthFog_m_NearPlane = cRenderStateMan_FogNear(i);
+        cDepthFog_m_FarPlane = cRenderStateMan_FogFar(i);
+        float fogRed = cRenderStateMan_FogColourR(i);
+        float fogGreen = cRenderStateMan_FogColourG(i);
+        float fogBlue = cRenderStateMan_FogColourB(i);
         *dst = sRsCol_F00A0(1.0f, fogRed, fogGreen, fogBlue);
     }
     if (cScreenTint_m_OverrideWP == 0) {
-        cScreenTint_m_ColourR = func_002EEB70(i);
-        cScreenTint_m_ColourG = func_002EEBD0(i);
-        cScreenTint_m_ColourB = func_002EEC30(i);
-        cScreenTint_m_FillR = func_002EEC90(i);
-        cScreenTint_m_FillG = func_002EECF0(i);
-        cScreenTint_m_FillB = func_002EED50(i);
-        cScreenTint_m_LightningChance = func_002EE738(i);
+        cScreenTint_m_ColourR = cRenderStateMan_ScreenTintScaleR(i);
+        cScreenTint_m_ColourG = cRenderStateMan_ScreenTintScaleG(i);
+        cScreenTint_m_ColourB = cRenderStateMan_ScreenTintScaleB(i);
+        cScreenTint_m_FillR = cRenderStateMan_ScreenTintOffsetR(i);
+        cScreenTint_m_FillG = cRenderStateMan_ScreenTintOffsetG(i);
+        cScreenTint_m_FillB = cRenderStateMan_ScreenTintOffsetB(i);
+        cScreenTint_m_LightningChance = cRenderStateMan_LightningChance(i);
         int on = 0;
         int* st = *(int**)(*(char**)((char*)SSXApp + 0x84) + 0x28);
         if (*st == 1 || func_002F7BE0(st))
@@ -1793,34 +1793,34 @@ extern "C" void cVisualEffectsMan_commonUpdate(void* self, int i)
         cScreenTint_m_LightningEnable = on;
     }
     if (cLightGlow_m_OverrideWP == 0) {
-        cLightGlow_m_PS2MinIntensity = func_002EEDB0(i);
-        cLightGlow_m_PS2ModIntensity = func_002EEDF8(i);
-        cLightGlow_m_PS2CopyIntensity = func_002EEE40(i);
-        cLightGlow_m_PS2FrameSrcScale = func_002EEE88(i);
-        cLightGlow_m_PS2FrameDstScale = func_002EEED0(i);
-        cLightGlow_m_PS2IntensityTex2 = func_002EEF18(i);
-        cLightGlow_m_PS2IntensityTex3 = func_002EEF60(i);
+        cLightGlow_m_PS2MinIntensity = cRenderStateMan_LightGlowCutoff(i);
+        cLightGlow_m_PS2ModIntensity = cRenderStateMan_LightGlowCutoffScale(i);
+        cLightGlow_m_PS2CopyIntensity = cRenderStateMan_LightGlowCopyIntensity(i);
+        cLightGlow_m_PS2FrameSrcScale = cRenderStateMan_LightGlowSourceIntensity(i);
+        cLightGlow_m_PS2FrameDstScale = cRenderStateMan_LightGlowFrameIntensity(i);
+        cLightGlow_m_PS2IntensityTex2 = cRenderStateMan_LightGlowBlend2(i);
+        cLightGlow_m_PS2IntensityTex3 = cRenderStateMan_LightGlowBlend3(i);
     }
     ctx->a8C[i] = cRenderStateMan_m_inNIS;
-    ctx->aAC[i] = func_002EF038(i);
-    ctx->aCC[i] = func_002EE3B8(i);
-    ctx->aEC[i] = func_002EE9C0(i);
-    ctx->a10C[i] = func_002EEA98(i);
-    ctx->a12C[i] = func_002EEAE0(i);
-    ctx->a14C[i] = func_002EEB28(i);
-    ctx->a16C[i] = func_002EEA08(i);
-    ctx->a18C[i] = func_002EEA50(i);
-    ctx->a1AC[i] = func_002EEB70(i);
-    ctx->a1CC[i] = func_002EEBD0(i);
-    ctx->a1EC[i] = func_002EEC30(i);
-    ctx->a20C[i] = func_002EEC90(i);
-    ctx->a22C[i] = func_002EECF0(i);
-    ctx->a24C[i] = func_002EED50(i);
+    ctx->aAC[i] = cRenderStateMan_SnowSparkleDensity(i);
+    ctx->aCC[i] = cRenderStateMan_DrawDistance(i);
+    ctx->aEC[i] = cRenderStateMan_FogDensity(i);
+    ctx->a10C[i] = cRenderStateMan_FogColourR(i);
+    ctx->a12C[i] = cRenderStateMan_FogColourG(i);
+    ctx->a14C[i] = cRenderStateMan_FogColourB(i);
+    ctx->a16C[i] = cRenderStateMan_FogNear(i);
+    ctx->a18C[i] = cRenderStateMan_FogFar(i);
+    ctx->a1AC[i] = cRenderStateMan_ScreenTintScaleR(i);
+    ctx->a1CC[i] = cRenderStateMan_ScreenTintScaleG(i);
+    ctx->a1EC[i] = cRenderStateMan_ScreenTintScaleB(i);
+    ctx->a20C[i] = cRenderStateMan_ScreenTintOffsetR(i);
+    ctx->a22C[i] = cRenderStateMan_ScreenTintOffsetG(i);
+    ctx->a24C[i] = cRenderStateMan_ScreenTintOffsetB(i);
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/renderstateman", func_002F0360);
+INCLUDE_ASM("visualfx/renderstateman", aivisualEffectsMan);
 #ifdef SKIP_ASM
 extern void* D_004A3B80;
 
@@ -1831,7 +1831,7 @@ extern void* D_004A3B80;
  *
  * @return the manager
  */
-extern "C" int func_002F0360(void) {
+extern "C" int aivisualEffectsMan(void) {
     return (*(int*)&D_004A3B80);
 }
 #endif

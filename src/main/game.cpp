@@ -405,9 +405,9 @@ extern "C" void cGame_renderFogVolumes(cGame* self, void* world)
 //100%
 INCLUDE_ASM("main/game", cGame_renderLightHalos);
 #ifdef SKIP_ASM
-void func_002E2F98(void* self, int a1);
-extern "C" void func_002E2FF8(void* self, void* list, int n, int mode, int a4);
-extern "C" void func_002E30D0(void* self, int a1);
+void cLensFxMan_Reset(void* self, int a1);
+extern "C" void cLensFxMan_AddLightHalos(void* self, void* list, int n, int mode, int a4);
+extern "C" void cLensFxMan_render(void* self, int a1);
 
 /**
  * Draws the light halos of the frustum query's two light lists (types 0 and 2) for one view through the
@@ -419,18 +419,18 @@ extern "C" void func_002E30D0(void* self, int a1);
 extern "C" void cGame_renderLightHalos(cGame* self, void* world, int ViewID)
 {
     *(int*)((char*)self->LensFxMan + 0x6494) = 1;
-    func_002E2F98(self->LensFxMan, ViewID);
+    cLensFxMan_Reset(self->LensFxMan, ViewID);
     void* halos = (char*)world + 0x7BC4;
     int n = *(int*)((char*)world + 0x7BC0);
     if (n != 0) {
-        func_002E2FF8(self->LensFxMan, halos, n, 0, ViewID);
+        cLensFxMan_AddLightHalos(self->LensFxMan, halos, n, 0, ViewID);
     }
     halos = (char*)world + 0x7FC8;
     n = *(int*)((char*)world + 0x7FC4);
     if (n != 0) {
-        func_002E2FF8(self->LensFxMan, halos, n, 2, ViewID);
+        cLensFxMan_AddLightHalos(self->LensFxMan, halos, n, 2, ViewID);
     }
-    func_002E30D0(self->LensFxMan, ViewID);
+    cLensFxMan_render(self->LensFxMan, ViewID);
     *(int*)((char*)self->LensFxMan + 0x6494) = 0;
 }
 #endif
@@ -566,10 +566,10 @@ extern char t4mat_Identity[];
 extern int cDepthFog_m_Enable;
 extern "C" void cBucketMan_renderBucket(void* self, int index);
 void cSSXScriptEngine_Render(void* p);
-extern "C" void func_00397DF8(void* p);
+extern "C" void cUIEngine_render2D(void* p);
 extern "C" void cBXLoadIndicator_Render(void* p);
 extern "C" int cMenuSys_isActive(void* p);
-extern "C" void func_002CC350(void* p);
+extern "C" void cMenuSys_render(void* p);
 extern "C" void func_00285BF8(void* self, int a, float dt);
 extern "C" void func_002B5D78(void* p);
 
@@ -581,8 +581,8 @@ extern "C" void func_002B5D78(void* p);
  * position (slot 24), loads the camera's matrix, sets the layer and several GS state bits, and calls
  * cBucketMan_renderBucket(gBucketMan, 3). Then it resets the viewport to the full screen (slot 22 with GrMan's width
  * and height, then SetViewportOrthographic 640x480), loads t4mat_Identity, sets the debug font (+0x24) to scale 0.8, size 2 and
- * colour (1, 0.8, 0.8, 0), and draws the script engine (cSSXScriptEngine_Render(ScriptEngine)), the UI (func_00397DF8 on +0x48),
- * the load indicator (cBXLoadIndicator_Render on +0x94) and, when cMenuSys_isActive, the debug menu system (func_002CC350 on
+ * colour (1, 0.8, 0.8, 0), and draws the script engine (cSSXScriptEngine_Render(ScriptEngine)), the UI (cUIEngine_render2D on +0x48),
+ * the load indicator (cBXLoadIndicator_Render on +0x94) and, when cMenuSys_isActive, the debug menu system (cMenuSys_render on
  * +0xA4). It calls GrMan slot 14 with a zero vector and slot 19 with cDepthFog_m_Enable cleared for the call, then
  * advances the audio by mUpdateTick / 60 seconds (func_00285BF8(gSSXAudio, 1, ..)), runs
  * func_002B5D78(gWorldTriggerManager) and zeroes mUpdateTick (+0xAC). cGame_render calls it at the end of each of its
@@ -625,10 +625,10 @@ extern "C" void func_0022C830(sGame_C830* self)
     self->font->scale = sV2_C830(2.0f, 2.0f);
     self->font->color = sVec4_C830(1.0f, 0.8f, 0.8f, 0.0f);
     cSSXScriptEngine_Render(ScriptEngine);
-    func_00397DF8(self->f48);
+    cUIEngine_render2D(self->f48);
     cBXLoadIndicator_Render(self->hudTimer);
     if (cMenuSys_isActive(self->fA4) != 0) {
-        func_002CC350(self->fA4);
+        cMenuSys_render(self->fA4);
         self->font->scale = sV2_C830(2.0f, 2.0f);
         self->font->color = sVec4_C830(1.0f, 0.8f, 0.8f, 0.0f);
     }

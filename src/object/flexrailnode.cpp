@@ -1758,7 +1758,7 @@ extern "C" sFrRailDesc* tFlagState_tFlagState(sFrRailDesc* out, void* src)
 INCLUDE_ASM("object/flexrailnode", cFlagNode_cFlagNode1);
 #ifdef SKIP_ASM
 extern "C" void* cInstanceNode_cInstanceNode1(void* self, void* a1, int type, void* a3);
-extern "C" void* func_002D1CB0(void);
+extern "C" void* cObjectInterface_getFlagManager(void);
 extern char cFlagNode_vtbl[];
 
 struct sFrRailDesc {
@@ -1772,7 +1772,7 @@ extern "C" void cFlagManager_AddFlag(void* mgr, void* node, sFrRailDesc* desc);
  * Constructs a flag node (node type 10) and registers the flag with the flag manager.
  *
  * Runs the record constructor cInstanceNode_cInstanceNode1, installs cFlagNode_vtbl, sets the record flags to (flags & ~0x2) | 0x4,
- * converts src (tFlagState_tFlagState) and adds the instance to the flag manager (cFlagManager_AddFlag on func_002D1CB0()).
+ * converts src (tFlagState_tFlagState) and adds the instance to the flag manager (cFlagManager_AddFlag on cObjectInterface_getFlagManager()).
  *
  * @param bucket  update bucket
  * @param node  flag instance record
@@ -1786,7 +1786,7 @@ extern "C" void* cFlagNode_cFlagNode1(void* self, void* bucket, void* node, void
     *(void**)((char*)self + 0xC) = cFlagNode_vtbl;
     *(unsigned int*)((char*)node + 0x8) = (*(unsigned int*)((char*)node + 0x8) & 0xFFFFFFFD) | 4;
     tFlagState_tFlagState(&desc, src);
-    cFlagManager_AddFlag(func_002D1CB0(), node, &desc);
+    cFlagManager_AddFlag(cObjectInterface_getFlagManager(), node, &desc);
     return self;
 }
 #endif
@@ -1817,7 +1817,7 @@ extern "C" void* cFlagNode_cFlagNode(void* self)
 INCLUDE_ASM("object/flexrailnode", cFlagNode__cFlagNode);
 #ifdef SKIP_ASM
 extern char cFlagNode_vtbl[];
-extern "C" void* func_002D1CB0(void);
+extern "C" void* cObjectInterface_getFlagManager(void);
 extern "C" void cFlagManager_RemoveFlag(void* set, void* arg);
 extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 
@@ -1832,7 +1832,7 @@ extern "C" void cInstanceNode__cInstanceNode(void* self, int flags);
 extern "C" void cFlagNode__cFlagNode(void* self, int flags)
 {
     *(void**)((char*)self + 0xC) = cFlagNode_vtbl;
-    cFlagManager_RemoveFlag(func_002D1CB0(), *(void**)((char*)self + 0x18));
+    cFlagManager_RemoveFlag(cObjectInterface_getFlagManager(), *(void**)((char*)self + 0x18));
     cInstanceNode__cInstanceNode(self, flags);
 }
 #endif

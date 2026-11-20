@@ -119,7 +119,7 @@ extern char TheDynamicMemMan[];
  * Returns the usable size of a block: its pool's block size, or for a heap block its usable size in the dynamic heap.
  *
  * func_0031A130 gives 8 to 512 for an address inside one of the cMemBlockMan pools; otherwise cDynamicMemMan_dlmalloc_usable_size measures
- * the chunk in TheDynamicMemMan. The C declares it void, but the size is left in the return register: func_002525F8
+ * the chunk in TheDynamicMemMan. The C declares it void, but the size is left in the return register: blockSize
  * returns it under the cMemMan mutex and cMemMan_internalResizeBlock uses it for the old block.
  *
  * @return the block size (declared void)

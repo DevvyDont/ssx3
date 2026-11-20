@@ -44,7 +44,7 @@ extern "C" void cConsoleConfig_setTimeString(void* self, char* dst, int size, in
 #endif
 
 //100%
-INCLUDE_ASM("util/statemachine", func_002C7038);
+INCLUDE_ASM("util/statemachine", cConsoleConfig_setDateString);
 #ifdef SKIP_ASM
 extern char str_pct_04d_pct_02d_pct_02d[];
 extern char str_pct_02d_pct_02d_pct_04d[];
@@ -63,7 +63,7 @@ extern char str_pct_02d_pct_02d_pct_04d[];
  * @param year  year
  * @param mode  0 year first, 1 month first, 2 day first
  */
-extern "C" void func_002C7038(void* self, char* dst, int size, int day, int month, int year, int mode)
+extern "C" void cConsoleConfig_setDateString(void* self, char* dst, int size, int day, int month, int year, int mode)
 {
     char buf[0x40];
     switch (mode) {
@@ -81,47 +81,47 @@ extern "C" void func_002C7038(void* self, char* dst, int size, int day, int mont
 }
 #endif
 //100%
-INCLUDE_ASM("util/statemachine", func_002C7100);
+INCLUDE_ASM("util/statemachine", cConsoleConfig_getTime);
 #ifdef SKIP_ASM
-extern "C" void func_002C73C0(void*);
+extern "C" void cConsoleConfig_updateDateTime(void*);
 
 /**
- * Brings the console clock up to date (func_002C73C0) and returns the time: hour (+0x8), minute (+0xC) and second
+ * Brings the console clock up to date (cConsoleConfig_updateDateTime) and returns the time: hour (+0x8), minute (+0xC) and second
  * (+0x10).
  *
  * @param hour  receives the hour
  * @param minute  receives the minute
  * @param second  receives the second
  */
-extern "C" void func_002C7100(void *self, int *hour, int *minute, int *second) {
-    func_002C73C0(self);
+extern "C" void cConsoleConfig_getTime(void *self, int *hour, int *minute, int *second) {
+    cConsoleConfig_updateDateTime(self);
     *hour = (*(int *)((char*)(self) + (8)));
     *minute = (*(int *)((char*)(self) + (0xC)));
     *second = (*(int *)((char*)(self) + (0x10)));
 }
 #endif
 //100%
-INCLUDE_ASM("util/statemachine", func_002C7160);
+INCLUDE_ASM("util/statemachine", cConsoleConfig_getDate);
 #ifdef SKIP_ASM
-extern "C" void func_002C73C0(void*);
+extern "C" void cConsoleConfig_updateDateTime(void*);
 
 /**
- * Brings the console clock up to date (func_002C73C0) and returns the date: day (+0x1C), month (+0x18) and year
+ * Brings the console clock up to date (cConsoleConfig_updateDateTime) and returns the date: day (+0x1C), month (+0x18) and year
  * (+0x14).
  *
  * @param day  receives the day of the month
  * @param month  receives the month
  * @param year  receives the year
  */
-extern "C" void func_002C7160(void *self, int *day, int *month, int *year) {
-    func_002C73C0(self);
+extern "C" void cConsoleConfig_getDate(void *self, int *day, int *month, int *year) {
+    cConsoleConfig_updateDateTime(self);
     *day = (*(int *)((char*)(self) + (0x1C)));
     *month = (*(int *)((char*)(self) + (0x18)));
     *year = (*(int *)((char*)(self) + (0x14)));
 }
 #endif
 //100%
-INCLUDE_ASM("util/statemachine", func_002C71C0);
+INCLUDE_ASM("util/statemachine", cConsoleConfig_isLeapYear);
 #ifdef SKIP_ASM
 /**
  * Tells whether @p year is a Gregorian leap year: divisible by 4, and not by 100 unless also by 400.
@@ -129,7 +129,7 @@ INCLUDE_ASM("util/statemachine", func_002C71C0);
  * @param year  the year
  * @return 1 for a leap year, else 0
  */
-extern "C" int func_002C71C0(void* self, int year) {
+extern "C" int cConsoleConfig_isLeapYear(void* self, int year) {
     int leap;
 
     leap = 0;
@@ -143,39 +143,39 @@ extern "C" int func_002C71C0(void* self, int year) {
 }
 #endif
 //100%
-INCLUDE_ASM("util/statemachine", func_002C7208);
+INCLUDE_ASM("util/statemachine", cConsoleConfig_numberOfDays);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" int func_002C71C0(void* self, int a1);
+extern "C" int cConsoleConfig_isLeapYear(void* self, int a1);
 
 /**
- * Returns the number of days in @p month of @p year: 28 or 29 for February (func_002C71C0), otherwise 31 or 30 by the
+ * Returns the number of days in @p month of @p year: 28 or 29 for February (cConsoleConfig_isLeapYear), otherwise 31 or 30 by the
  * alternating rule shifted after July (31 for odd months up to 7 and even months from 8 on).
  *
  * @param month  month, 1-12
  * @param year  year, for February
  * @return days in that month
  */
-extern "C" int func_002C7208(int self, int month, int year)
+extern "C" int cConsoleConfig_numberOfDays(int self, int month, int year)
 {
     int m = month;
     if (month != 2) {
         if (m >= 8) m++;
         return (m & 1) ? 31 : 30;
     }
-    m = func_002C71C0((void*)self, year);
+    m = cConsoleConfig_isLeapYear((void*)self, year);
     return m == 0 ? 28 : 29;
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("util/statemachine", func_002C7260);
+INCLUDE_ASM("util/statemachine", cConsoleConfig_addDaysToDate);
 #ifdef SKIP_ASM
-extern "C" int func_002C7208(int, int, int);
+extern "C" int cConsoleConfig_numberOfDays(int, int, int);
 
 /**
  * Adds @p count days to the date @p day / @p month / @p year, carrying into the next month and year.
  *
- * Moves a month at a time (func_002C7208 gives each month's length), restarting at day 1 and wrapping month 13 to 1 of
+ * Moves a month at a time (cConsoleConfig_numberOfDays gives each month's length), restarting at day 1 and wrapping month 13 to 1 of
  * the next year. Does nothing for @p count <= 0.
  *
  * @param day  day of the month, updated
@@ -183,7 +183,7 @@ extern "C" int func_002C7208(int, int, int);
  * @param year  year, updated
  * @param count  days to add
  */
-extern "C" void func_002C7260(int self, int *day, int *month, int *year, int count) {
+extern "C" void cConsoleConfig_addDaysToDate(int self, int *day, int *month, int *year, int count) {
     int dim;
     int newMonth;
     int cur;
@@ -191,7 +191,7 @@ extern "C" void func_002C7260(int self, int *day, int *month, int *year, int cou
 
     if (count > 0) {
         do {
-            dim = func_002C7208(self, *month, *year);
+            dim = cConsoleConfig_numberOfDays(self, *month, *year);
             cur = *day;
             if (dim < cur + count) {
                 rest = count - 1;
@@ -212,7 +212,7 @@ extern "C" void func_002C7260(int self, int *day, int *month, int *year, int cou
 }
 #endif
 //100%
-INCLUDE_ASM("util/statemachine", func_002C7328);
+INCLUDE_ASM("util/statemachine", cConsoleConfig_addSecondsToTime);
 #ifdef SKIP_ASM
 /**
  * Adds @p add seconds to the time @p hour : @p min : @p sec and returns the whole days that overflowed.
@@ -226,7 +226,7 @@ INCLUDE_ASM("util/statemachine", func_002C7328);
  * @param add  seconds to add
  * @return the number of days carried
  */
-extern "C" int func_002C7328(void* self, int* sec, int* min, int* hour, int add) {
+extern "C" int cConsoleConfig_addSecondsToTime(void* self, int* sec, int* min, int* hour, int add) {
     int total;
     int rem;
     int days;
@@ -241,21 +241,21 @@ extern "C" int func_002C7328(void* self, int* sec, int* min, int* hour, int add)
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("util/statemachine", func_002C73C0);
+INCLUDE_ASM("util/statemachine", cConsoleConfig_updateDateTime);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" int func_002C7328_v(void*, int*, int*, int*, int) __asm__("func_002C7328");
-extern "C" void func_002C7260_v(void*, int*, int*, int*, int) __asm__("func_002C7260");
+extern "C" int cConsoleConfig_addSecondsToTime_v(void*, int*, int*, int*, int) __asm__("cConsoleConfig_addSecondsToTime");
+extern "C" void cConsoleConfig_addDaysToDate_v(void*, int*, int*, int*, int) __asm__("cConsoleConfig_addDaysToDate");
 
 /**
  * Advances the console clock by the whole seconds elapsed since the last advance.
  *
  * The elapsed seconds are (SSXApp + 0x18, the current tick - the start tick +0x20) / SSXApp + 0x10 (ticks per second).
  * When at least one has passed it sets the start tick to now (so the sub-second remainder is dropped and the clock
- * slowly falls behind), adds them to second/minute/hour (func_002C7328 on +0x10/+0xC/+0x8) and adds the carried days to
- * day/month/year (func_002C7260 on +0x1C/+0x18/+0x14).
+ * slowly falls behind), adds them to second/minute/hour (cConsoleConfig_addSecondsToTime on +0x10/+0xC/+0x8) and adds the carried days to
+ * day/month/year (cConsoleConfig_addDaysToDate on +0x1C/+0x18/+0x14).
  */
-extern "C" void func_002C73C0(void* self) {
+extern "C" void cConsoleConfig_updateDateTime(void* self) {
     int rem;
     int now;
     int ticks;
@@ -264,9 +264,9 @@ extern "C" void func_002C73C0(void* self) {
     ticks = (now - *(int*)((char*)self + 0x20)) / *(int*)((char*)SSXApp + 0x10);
     if (ticks != 0) {
         *(int*)((char*)self + 0x20) = now;
-        rem = func_002C7328_v(self, (int*)((char*)self + 0x10), (int*)((char*)self + 0xC), (int*)((char*)self + 8), ticks);
+        rem = cConsoleConfig_addSecondsToTime_v(self, (int*)((char*)self + 0x10), (int*)((char*)self + 0xC), (int*)((char*)self + 8), ticks);
         if (rem != 0) {
-            func_002C7260_v(self, (int*)((char*)self + 0x1C), (int*)((char*)self + 0x18), (int*)((char*)self + 0x14), rem);
+            cConsoleConfig_addDaysToDate_v(self, (int*)((char*)self + 0x1C), (int*)((char*)self + 0x18), (int*)((char*)self + 0x14), rem);
         }
     }
 }
@@ -418,7 +418,7 @@ extern "C" void* cPS2ConsoleConfig_cPS2ConsoleConfig(void* self_)
 #endif
 
 //100%
-INCLUDE_ASM("util/statemachine", func_002C76C0);
+INCLUDE_ASM("util/statemachine", HUFF_decompress);
 #ifdef SKIP_ASM
 // GPL-3.0: EA EAC HUFF_decompress. Its structure, macros and variable names follow huffdecode.cpp from EA's
 // Command & Conquer Generals Zero Hour source release (Electronic Arts, published under the GNU General Public
@@ -514,7 +514,7 @@ INCLUDE_ASM("util/statemachine", func_002C76C0);
 // is hoisted alone (savings 2), and cse2 folds the store value to a block-local `li 1` via the loop-exit jump equivalence.
 // Decodes a HUFF stream from packbuf into unpackbuf; returns the uncompressed length.
 // Same layout as EA's EAC HUFF_decompress, without the 4-byte size (0x8000) header form.
-extern "C" int func_002C76C0(unsigned char* packbuf, unsigned char* unpackbuf)
+extern "C" int HUFF_decompress(unsigned char* packbuf, unsigned char* unpackbuf)
 {
     unsigned int type;
     unsigned char clue;

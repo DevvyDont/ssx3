@@ -289,8 +289,8 @@ extern "C" int func_001E3408(void);
 extern "C" void cOVState_onUpdate(void* self);
 extern "C" void cGameComm_sendPauseCmd(void* self, int a1);
 extern "C" void cOVStateManager_removePDATemplate(void);
-// func_0039F190 returns its last list node in $v0; the unit declares it void.
-void* func_0039F190_r(void* self, int a1) __asm__("func_0039F190");
+// cUIStateStack_pop returns its last list node in $v0; the unit declares it void.
+void* cUIStateStack_pop_r(void* self, int a1) __asm__("cUIStateStack_pop");
 extern int cPauseState_Flags;
 extern int D_004A2A54;
 extern int D_005366E8[];
@@ -352,7 +352,7 @@ extern "C" void cOVTemplate_PauseMenu_onUpdate(void* self)
     cUIScreen_playFrame(*(void**)((char*)self + 0xC0), frame, 1);
     *(int*)((char*)self + 0xD0) = 1;
     cOVStateManager_removePDATemplate();
-    func_0039F190_r(*(char**)((char*)self + 0x10) + 0x18, 1);
+    cUIStateStack_pop_r(*(char**)((char*)self + 0x10) + 0x18, 1);
     cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
 }
 #endif
@@ -416,8 +416,8 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 extern "C" void cGameComm_sendPauseCmd(void* self, int a1);
 extern "C" void cOVStateManager_removePDATemplate(void);
-// func_0039F190 returns its last list node in $v0; the unit declares it void.
-void* func_0039F190_r(void* self, int a1) __asm__("func_0039F190");
+// cUIStateStack_pop returns its last list node in $v0; the unit declares it void.
+void* cUIStateStack_pop_r(void* self, int a1) __asm__("cUIStateStack_pop");
 extern "C" void cOVStateManager_triggerOverlay(int cmd);
 extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* mem, void* owner, int a2, int a3);
 extern "C" void* cAudioInterface_bxAudio();
@@ -520,7 +520,7 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(sPauseMenu_PMWE* self, sWidg
         case 1:
             stopReplay_PMWE();
             cOVStateManager_removePDATemplate();
-            func_0039F190_r(self->owner + 0x18, 1);
+            cUIStateStack_pop_r(self->owner + 0x18, 1);
             cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
             func_00289BB8(cAudioInterface_bxAudio());
             break;
@@ -571,7 +571,7 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(sPauseMenu_PMWE* self, sWidg
         stopReplay_PMWE();
         cOVStateManager_removePDATemplate();
         cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
-        func_0039F190_r(self->owner + 0x18, 1);
+        cUIStateStack_pop_r(self->owner + 0x18, 1);
         func_00289BB8(cAudioInterface_bxAudio());
         break;
     case 1: {

@@ -115,7 +115,7 @@ struct cUIScreen;
 int cUIScreen_getFrameByLabel(cUIScreen* self, int hash);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" int cUITemplate_MAP_onWidgetEvent(void* tmpl, void* obj, int msg);
-extern "C" void func_0039F190(void* list, int a1);
+extern "C" void cUIStateStack_pop(void* list, int a1);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern int D_004A1A70;
 
@@ -188,7 +188,7 @@ static inline void Opened1867A8(void* self, void* item)
  *
  * Every event first goes to the embedded map template's handler, cUITemplate_MAP_onWidgetEvent() on +0x48. For event 5
  * (accept) or 6 (back) that the template answers with 1: online (D_004A1A70 == 1) it plays the screen's "TransitionOut"
- * frame and pops this state (func_0039F190() with count 1 on the engine's state stack, mpEngine +0x18); otherwise it
+ * frame and pops this state (cUIStateStack_pop() with count 1 on the engine's state stack, mpEngine +0x18); otherwise it
  * asks the engine's FE custom object for a state (cFECustom_getNextState(), slot 4, for 5; cFECustom_getPrevState(), slot 5, for
  * 6) with the widget's id (+0x18) and, when one comes back, calls handleEvent (slot 24) with (1, 0) on the state at the
  * custom object's +0x10, plays "TransitionOut" and pushes the new state.
@@ -202,7 +202,7 @@ extern "C" void func_001867A8(void* self, void* obj, int msg)
         if (cUITemplate_MAP_onWidgetEvent((char*)self + 0x48, obj, 5) == 1) {
             if (IsQuick1867A8()) {
                 PlayIntro1867A8(self);
-                func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
+                cUIStateStack_pop(*(char**)((char*)self + 0x10) + 0x18, 1);
             } else {
                 cMgr1867A8* feCustom = **(cMgr1867A8***)((char*)self + 0x10);
                 Opened1867A8(self, feCustom->v04(self, *(int*)((char*)obj + 0x18)));
@@ -212,7 +212,7 @@ extern "C" void func_001867A8(void* self, void* obj, int msg)
         if (cUITemplate_MAP_onWidgetEvent((char*)self + 0x48, obj, 6) == 1) {
             if (IsQuick1867A8()) {
                 PlayIntro1867A8(self);
-                func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
+                cUIStateStack_pop(*(char**)((char*)self + 0x10) + 0x18, 1);
             } else {
                 cMgr1867A8* feCustom = **(cMgr1867A8***)((char*)self + 0x10);
                 Opened1867A8(self, feCustom->v05(self, *(int*)((char*)obj + 0x18)));

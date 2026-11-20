@@ -649,14 +649,14 @@ extern "C" void cOVState_PROFILE_hideMainButton(void* self, int loadBlocked, boo
 INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_updateDone);
 #ifdef SKIP_ASM
 extern "C" void cGame_exit(void* game, int a);
-extern "C" void func_0039F718(void* self);
+extern "C" void cUIStateStack_popToStateInclusive(void* self);
 
 /**
  * Leaves the profile overlay once its memory-card work is done: quits the game when it was opened for overlay 0x18,
  * otherwise pops the UI state stack.
  *
  * Runs only the first time (+0x1AC, On Tour mIsDone, clear): when +0x278 (the constructor's last argument, On Tour
- * tOVStateEnum ov) is 0x18 it calls cGame_exit(SSXApp->Game, 0), else func_0039F718 (On Tour
+ * tOVStateEnum ov) is 0x18 it calls cGame_exit(SSXApp->Game, 0), else cUIStateStack_popToStateInclusive (On Tour
  * cUIStateStack::popToStateInclusive) on mpEngine's state stack (+0x18). Then sets +0x1AC. It is the updateDone slot
  * (+0x10C) of cOVState_PROFILE_vtbl.
  */
@@ -666,7 +666,7 @@ extern "C" void cOVState_PROFILE_updateDone(void* self)
         if (*(int*)((char*)self + 0x278) == 0x18) {
             cGame_exit(SSXApp->Game, 0);
         } else {
-            func_0039F718(*(char**)((char*)self + 0x10) + 0x18);
+            cUIStateStack_popToStateInclusive(*(char**)((char*)self + 0x10) + 0x18);
         }
     }
     *(int*)((char*)self + 0x1AC) = 1;
@@ -794,7 +794,7 @@ extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int strlen(const char* s);
 extern "C" void cBENewPlayerInterface_setPlayerName(void* player, int idx, char* name);
 extern "C" void* cBENewPlayerInterface_getPlayerName(void* player, int idx);
-extern "C" void func_0023CAE8(void* app, int a1, int a2);
+extern "C" void cMCOverlayManager_writeSetFileType(void* app, int a1, int a2);
 extern "C" void* cKeyboardPopup_cKeyboardPopup(void* mem, void* engine, void* owner, int a3, int a4);
 extern "C" void cKeyboardPopup_setInputText(void* kb, void* name);
 extern "C" void cKeyboardPopup_setMaxCharacters(void* kb, int a1);
@@ -877,7 +877,7 @@ static inline void* GetText_K211BC8(char* key)
  * Event 13 (the keyboard finished): widens the typed name (+0x74 of the keyboard at +0x1A4) into the manager's
  * mNewFileName, gives the profile +0x1CC (On Tour mPlayerIdx) that name through cBENewPlayerInterface_setPlayerName on the player interface
  * (back-end interface 1), or, for an empty name, the localised "kT_MEMPlayerName" format with the profile number; then
- * calls the interface's virtual slot 1, starts the save with func_0023CAE8(manager, 1, profile), and sets +0x1A8
+ * calls the interface's virtual slot 1, starts the save with cMCOverlayManager_writeSetFileType(manager, 1, profile), and sets +0x1A8
  * (processing), +0x1DC (save pressed) and the card state +0x1C0 = 3.
  *
  * Event 5 (select) on an item, when not processing and in display state 3 (+0x214): the item's misc data becomes both
@@ -916,7 +916,7 @@ extern "C" void cOVState_PROFILE_onWidgetEvent(void* vself, char* item, int even
             cBENewPlayerInterface_setPlayerName(player, self->slot, buf);
         }
         VCALLV_K211BC8(player, 0xC, 1));
-        func_0023CAE8(cSSXApp_getMCManager(SSXApp), 1, self->slot);
+        cMCOverlayManager_writeSetFileType(cSSXApp_getMCManager(SSXApp), 1, self->slot);
         self->f1A8 = 1;
         self->f1DC = 1;
         self->state = 3;
@@ -1079,7 +1079,7 @@ extern "C" void cOVState_AUTOSAVE_onCreateScreen(void* self)
 INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_onUpdate);
 #ifdef SKIP_ASM
 extern "C" void* cSSXApp_getMCManager(void* app);
-extern "C" void func_0023CAE8(void* app, int a1, int a2);
+extern "C" void cMCOverlayManager_writeSetFileType(void* app, int a1, int a2);
 extern "C" void cFEMemCard_onUpdate(void* self);
 
 // On Tour: cMCOverlayManager::sdevice (bools are 4 bytes in SSX 3).
@@ -1103,7 +1103,7 @@ struct cMCOverlayManager_2208 {
  * Per-frame update of the autosave overlay: starts the save and watches the memory card while it runs.
  *
  * In state 1 (mState, +0x1C0) with nothing in progress (mIsProcessing, +0x1A8) it starts the save on the memory-card
- * overlay manager (func_0023CAE8(pMC, 1, 0)), sets mIsProcessing, mIsSavePressed (+0x1DC) and mIsOverwriteOK (+0x1F0)
+ * overlay manager (cMCOverlayManager_writeSetFileType(pMC, 1, 0)), sets mIsProcessing, mIsSavePressed (+0x1DC) and mIsOverwriteOK (+0x1F0)
  * and moves to state 3. In state 3, if the selected card is no longer plugged in, valid and formatted, it clears
  * mIsSavePressed, sets mIsCancelPressed (+0x1E4), clears mIsProcessing and moves to state 6. It always finishes with
  * the memory-card base update cFEMemCard_onUpdate.
@@ -1114,7 +1114,7 @@ extern "C" void cOVState_AUTOSAVE_onUpdate(void* self)
 {
     cMCOverlayManager_2208* pMC = (cMCOverlayManager_2208*)cSSXApp_getMCManager(SSXApp);
     if (*(int*)((char*)self + 0x1C0) == 1 && !*(int*)((char*)self + 0x1A8)) {
-        func_0023CAE8(pMC, 1, 0);
+        cMCOverlayManager_writeSetFileType(pMC, 1, 0);
         *(int*)((char*)self + 0x1A8) = 1;
         *(int*)((char*)self + 0x1DC) = 1;
         *(int*)((char*)self + 0x1F0) = 1;
@@ -1251,18 +1251,18 @@ extern "C" void cOVState_AUTOSAVE_displayOn(void* self)
 //100%
 INCLUDE_ASM("fe/ovstateprofile", cOVState_AUTOSAVE_updateDone);
 #ifdef SKIP_ASM
-extern "C" void func_0039F718(void* self);
+extern "C" void cUIStateStack_popToStateInclusive(void* self);
 
 /**
  * Leaves the autosave overlay once its memory-card work is done: pops the UI state stack the first time.
  *
- * When +0x1AC (On Tour mIsDone) is clear, calls func_0039F718 (On Tour cUIStateStack::popToStateInclusive) on
+ * When +0x1AC (On Tour mIsDone) is clear, calls cUIStateStack_popToStateInclusive (On Tour cUIStateStack::popToStateInclusive) on
  * mpEngine's state stack (+0x18); then sets +0x1AC. It is the updateDone slot (+0x10C) of cOVState_AUTOSAVE_vtbl.
  */
 extern "C" void cOVState_AUTOSAVE_updateDone(void* self)
 {
     if (*(int*)((char*)self + 0x1AC) == 0) {
-        func_0039F718(*(char**)((char*)self + 0x10) + 0x18);
+        cUIStateStack_popToStateInclusive(*(char**)((char*)self + 0x10) + 0x18);
     }
     *(int*)((char*)self + 0x1AC) = 1;
 }

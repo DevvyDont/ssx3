@@ -20,7 +20,7 @@
 
 // [O] tGlyph, 0xC bytes: one character of the glyph table.
 struct tGlyph {
-    unsigned short code;            // 0x0 [O]; [U] func_00392BA8 / func_00392C60 (find glyph by code)
+    unsigned short code;            // 0x0 [O]; [U] cFont_charAdvance / cFont_charAdvance1 (find glyph by code)
     unsigned char width;            // 0x2 [O]
     unsigned char height;           // 0x3 [O]
     unsigned short u;               // 0x4 [O]
@@ -32,11 +32,11 @@ struct tGlyph {
 };
 
 struct cFont {
-    int NumGlyphs;                  // 0x00 [O]; [U] cFont_linkFont, func_00392BA8
+    int NumGlyphs;                  // 0x00 [O]; [U] cFont_linkFont, cFont_charAdvance
     tGlyph* Glyphs;                 // 0x04 [O]; [U] ditto
-    tGlyph* MissingGlyph;           // 0x08 [O]; [R] ctor zeroes it; [U] func_00392BA8 falls back to it
-    int FirstCode;                  // 0x0C [O]; [U] func_00392BA8
-    int LastLinearCode;             // 0x10 [O]; [U] func_00392BA8
+    tGlyph* MissingGlyph;           // 0x08 [O]; [R] ctor zeroes it; [U] cFont_charAdvance falls back to it
+    int FirstCode;                  // 0x0C [O]; [U] cFont_charAdvance
+    int LastLinearCode;             // 0x10 [O]; [U] cFont_charAdvance
     int MaxCharHeight;              // 0x14 [O]; [U] cFont_linkFont
     float Offset[2];                // 0x18 [O] t2Vector; [U] cFont_linkFont
     float UVScale[2];               // 0x20 [O] t2Vector; [U] cFont_linkFont / cFont_downloadTexture

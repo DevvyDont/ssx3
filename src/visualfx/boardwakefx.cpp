@@ -164,7 +164,7 @@ struct sWakeDCF28 {
     float fBC;                    // 0xBC
 };
 
-extern "C" void func_002DE368(void* self);
+extern "C" void cWakeParams_Clear(void* self);
 
 /**
  * Resets a board wake effect; despite the name it reads no replay data (it takes no frame, like On Tour's
@@ -200,7 +200,7 @@ extern "C" void cBoardWakeFX_reset(sWakeDCF28* self)
     self->f8 = 0;
     self->f3C = 0;
     self->f40 = 0;
-    func_002DE368(self->sub60);
+    cWakeParams_Clear(self->sub60);
     if (old != self->count) {
         for (i = 0; i < 5; i++) {
             float heightFactor = 0.9900000095367432f - (float)i * (0.9800000190734863f / (float)(self->count - 1));
@@ -273,8 +273,8 @@ struct sWakeParamsD0B8 {
 };
 
 int cRider_getMotionState(void*);
-extern "C" void func_002DE058_D0B8(void* self, void* surf, t4Vector* pos) __asm__("func_002DE058");
-extern "C" void func_002DDD30_D0B8(void* self, t4Vector* pos, t4Vector* fwd, float width) __asm__("func_002DDD30");
+extern "C" void cBoardWakeFX_createSeg_D0B8(void* self, void* surf, t4Vector* pos) __asm__("cBoardWakeFX_createSeg");
+extern "C" void cBoardWakeFX_fillCurrentSeg_D0B8(void* self, t4Vector* pos, t4Vector* fwd, float width) __asm__("cBoardWakeFX_fillCurrentSeg");
 
 #define WAKE_MIN_D0B8(a, b) ((a) < (b) ? (a) : (b))
 #define WAKE_MAX_D0B8(a, b) ((a) >= (b) ? (a) : (b))
@@ -464,8 +464,8 @@ static inline float wakeMinStrengthD0B8()
  * Segments older than the life are dropped; the rest drift outwards and their lower rows sink. The new wake
  * strength comes from the rider's speed, lean and sideways slip and the surface's wake scale (+0x4C). There
  * is no wake off the ground, at a low strength, at a small lean or on a surface with little grip (+0x48). A
- * running wake adds a segment every 50 units (createSeg, func_002DE058) and refreshes the current one
- * (fillCurrentSeg, func_002DDD30). It ends when the grip or strength falls too low or the lean changes side.
+ * running wake adds a segment every 50 units (createSeg, cBoardWakeFX_createSeg) and refreshes the current one
+ * (fillCurrentSeg, cBoardWakeFX_fillCurrentSeg). It ends when the grip or strength falls too low or the lean changes side.
  */
 // PORT: g++ minimum/maximum operators (<?, >?).
 extern "C" void cBoardWakeFX_update(sWakeD0B8* self)
@@ -544,19 +544,19 @@ done:
             self->f90 = self->f90 * 0.8f + curParams.strength * 0.19999998807907104f;
             if (self->f94 > 0.05f && self->f90 > 55.55555725097656f) {
                 if (wakeLenD0B8(wakeSubD0B8(pos, self->v50)) > 50.0f) {
-                    func_002DE058_D0B8(self, surf, &pos);
+                    cBoardWakeFX_createSeg_D0B8(self, surf, &pos);
                     self->v50 = pos;
                 }
-                func_002DDD30_D0B8(self, &pos, &fwd, width);
+                cBoardWakeFX_fillCurrentSeg_D0B8(self, &pos, &fwd, width);
             } else {
                 self->f94 = 0.0f;
                 self->active = 0;
-                func_002DDD30_D0B8(self, &pos, &fwd, self->f94);
+                cBoardWakeFX_fillCurrentSeg_D0B8(self, &pos, &fwd, self->f94);
             }
         } else {
             self->f94 = 0.0f;
             self->active = 0;
-            func_002DDD30_D0B8(self, &pos, &fwd, self->f94);
+            cBoardWakeFX_fillCurrentSeg_D0B8(self, &pos, &fwd, self->f94);
         }
     } else if (ok) {
         self->f90 = 0.0f;
@@ -568,11 +568,11 @@ done:
         self->frame = 0;
         self->fB0 = width < lean;
         self->f94 = width;
-        func_002DE058_D0B8(self, surf, &pos);
-        func_002DDD30_D0B8(self, &pos, &fwd, width);
+        cBoardWakeFX_createSeg_D0B8(self, surf, &pos);
+        cBoardWakeFX_fillCurrentSeg_D0B8(self, &pos, &fwd, width);
         self->f94 = curParams.grip;
-        func_002DE058_D0B8(self, surf, &pos);
-        func_002DDD30_D0B8(self, &pos, &fwd, width);
+        cBoardWakeFX_createSeg_D0B8(self, surf, &pos);
+        cBoardWakeFX_fillCurrentSeg_D0B8(self, &pos, &fwd, width);
         self->active = 1;
     }
 }
@@ -767,7 +767,7 @@ extern "C" void cBoardWakeFX_render(sWake_DAB8* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002DDD30);
+INCLUDE_ASM("visualfx/boardwakefx", cBoardWakeFX_fillCurrentSeg);
 #ifdef SKIP_ASM
 struct sVecDD30 {
     float x, y, z, w;
@@ -805,7 +805,7 @@ struct sWakeDD30 {
 };
 
 extern sVecDD30 D_004FF120_DD30 __asm__("t4vect_Zero");
-extern "C" float func_002D1928(int n, float x);
+extern "C" float perlinNoise(int n, float x);
 
 // PORT: PS2-only VU0 inline asm (vector * scalar).
 static inline sVecDD30 wakeScaleDD30(const sVecDD30& v, float s)
@@ -882,7 +882,7 @@ static inline float wakeLenDD30(const sVecDD30& v)
  * The line is +0xC[head] (head +0x8). Its age (+0x64) and first point are zeroed and its direction (+0x50) becomes 0.85
  * * (mVelocity - forward * |mVelocity|), with forward the wake parameters' third vector (+0x80). Point i of the +0xB4
  * rows is (side (+0x70) * t * t * 0.75 + up (+0x60) * t) * w, where t = i / (rows - 1) (times 0.9 for the last row) and
- * w = the parameters' speed (+0x90) * (1 + 0.25 * func_002D1928(3, phase +0x38)). Row 0's entry at the head gets @p pos
+ * w = the parameters' speed (+0x90) * (1 + 0.25 * perlinNoise(3, phase +0x38)). Row 0's entry at the head gets @p pos
  * minus 5 * mGroundNormal and the alpha (+0x94) * 128 (+0x1C), copied to the other rows. @p width goes to the line's
  * +0x60.
  *
@@ -892,9 +892,9 @@ static inline float wakeLenDD30(const sVecDD30& v)
  * @param pos  the wake position
  * @param width  the value stored at the line's +0x60
  */
-extern "C" void func_002DDD30(sWakeDD30* self, sVecDD30* pos, float width)
+extern "C" void cBoardWakeFX_fillCurrentSeg(sWakeDD30* self, sVecDD30* pos, float width)
 {
-    float w = self->f90 * (func_002D1928(3, self->phase) * 0.25f + 1.0f);
+    float w = self->f90 * (perlinNoise(3, self->phase) * 0.25f + 1.0f);
     sElemDD30* wakeLine = &self->elems[self->head];
     wakeLine->i64 = 0;
     wakeLine->pts[0] = D_004FF120_DD30;
@@ -929,7 +929,7 @@ extern "C" void func_002DDD30(sWakeDD30* self, sVecDD30* pos, float width)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002DE058);
+INCLUDE_ASM("visualfx/boardwakefx", cBoardWakeFX_createSeg);
 #ifdef SKIP_ASM
 struct sCol_E058 {
     float a, r, g, b;
@@ -998,7 +998,7 @@ static inline float wakeClampE058(float v, float lo, float hi)
  *
  * cBoardWakeFX_update calls it with a surface record and a position, which this definition does not declare or use.
  */
-extern "C" void func_002DE058(sWake_E058* self)
+extern "C" void cBoardWakeFX_createSeg(sWake_E058* self)
 {
     self->phase += 0.03333333507180214f;
     if (self->phase >= 4.0f) {
@@ -1037,7 +1037,7 @@ extern "C" void func_002DE058(sWake_E058* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002DE368);
+INCLUDE_ASM("visualfx/boardwakefx", cWakeParams_Clear);
 #ifdef SKIP_ASM
 struct sVec4 {
     float x, y, z, w;
@@ -1051,7 +1051,7 @@ extern sVec4 t4vect_Zero;
  *
  * cBoardWakeFX_reset (the wake reset) calls it on cBoardWakeFX + 0x60.
  */
-extern "C" void func_002DE368(void* self)
+extern "C" void cWakeParams_Clear(void* self)
 {
     *(int*)((char*)self + 0x34) = 0;
     *(int*)((char*)self + 0x30) = 0;
@@ -2218,7 +2218,7 @@ static inline sWakeVecE398 wakeRowF920(char* o, int k)
  * the mBoneBoardChild matrix; +0xD0 the SurfPropCache record for mSurfaceType. A sharp slow-down (speed drop * 60 above
  * 555.6 at a speed above 555.6, or at least 27.8 in the NIS case) reports a burst through func_002E23E0. The emitters
  * are re-chosen (func_002E2550) when mLOD changed, the colour (+0x90) becomes the doubled table colour for the rider
- * (as in func_002DE058) with alpha 1, and every emitter whose enable word (+0x174) is set runs its update: 0
+ * (as in cBoardWakeFX_createSeg) with alpha 1, and every emitter whose enable word (+0x174) is set runs its update: 0
  * func_002E0EE8, 1 func_002E02B8, 3 func_002DFE88, 4 func_002E1120, 5 func_002E1598, 7 func_002E1A80, 8 func_002E1F70,
  * 9 func_002E2260. cRiderHandler_updateRiderFX and cAI_update call it on cRiderHandler + 0xB40.
  */
@@ -2627,7 +2627,7 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E1120);
 #ifdef SKIP_ASM
 extern "C" void cDynamicColourEmitter_update(void* em, void* pos, void* d, void* vel, int alive, float dt);
 extern "C" int cRiderAnimBase_getCurrentAnimCategory(void* self, int i);
-extern "C" float func_002EE6F0(int i);
+extern "C" float cRenderStateMan_Temperature(int i);
 
 struct sVec1120 {
     float x, y, z, w;
@@ -2775,7 +2775,7 @@ static inline float wakeClamp1120(float v, float lo, float hi)
  * nothing and clears the rate (+0x14). Otherwise the glow (+0x1C) jumps to 1 in animation category 30 (layer 2,
  * cRiderAnimBase_getCurrentAnimCategory) and decays by 0.1 a second otherwise; the blink flag (+0x18) toggles every
  * period (+0x24: 0.4 s on, 0.4 to 1.0 s off by the glow). The alpha is (glow + 0.5) * (1 - (value + 5) * 0.04), clamped
- * to 0..2, where value is func_002EE6F0 for the rider (kRiderVt_getAIIndex), so the puffs fade out as that value rises
+ * to 0..2, where value is cRenderStateMan_Temperature for the rider (kRiderVt_getAIIndex), so the puffs fade out as that value rises
  * to 20. While blinking on with alpha above 0.02 the rate grows by 18 to 24 a second and each whole unit emits one
  * white puff with settings set 4 (+0x2C, +0x478..+0x480) plus 150 units along the head's z axis.
  */
@@ -2816,7 +2816,7 @@ extern "C" void func_002E1120(sWakeFx1120* self)
         }
         char* sub = self->obj + 0x6C0;
         sWakeVtI1120* vi = *(sWakeVtI1120**)sub;
-        float stateValue = func_002EE6F0(vi[7].fn(sub + vi[7].delta));
+        float stateValue = cRenderStateMan_Temperature(vi[7].fn(sub + vi[7].delta));
         float zero = 0.0f;
         float one2 = 1.0f;
         float puffAlpha = wakeClamp1120((self->glow + 0.5f) * (one2 - (stateValue + 5.0f) * 0.03999999910593033f), zero, 2.0f);
@@ -3713,18 +3713,18 @@ extern "C" void func_002E26B8(void* vself)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E27E8);
+INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_getHaloRadius);
 #ifdef SKIP_ASM
 /**
  * Returns the radius of a light halo type: 180 for 0x10, 100 for 0x20, 350 for 0x40, otherwise 0.
  *
- * The halo resolver reaches it through func_003AD230 (cChunkResolve_resolveHalo); func_002E2868 draws the halos with
+ * The halo resolver reaches it through func_003AD230 (cChunkResolve_resolveHalo); cLightHalo_Render draws the halos with
  * the same sizes.
  *
  * @param type  the halo type bits (flags & 0x70)
  * @return the radius
  */
-extern "C" float func_002E27E8(int type)
+extern "C" float cLensFxMan_getHaloRadius(int type)
 {
     switch (type) {
     case 0x10:
@@ -3739,7 +3739,7 @@ extern "C" float func_002E27E8(int type)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E2860__FPv);
+INCLUDE_ASM("visualfx/boardwakefx", cHalo_cHalo__FPv);
 #ifdef SKIP_ASM
 /**
  * Constructs a halo: does nothing and returns @p self.
@@ -3749,14 +3749,14 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E2860__FPv);
  *
  * @return @p self
  */
-void* func_002E2860(void* self)
+void* cHalo_cHalo(void* self)
 {
     return self;
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E2868);
+INCLUDE_ASM("visualfx/boardwakefx", cLightHalo_Render);
 #ifdef SKIP_ASM
 struct sV3_2868 { float x, y, z; };
 struct sV4_2868 { float x, y, z, w; sV4_2868(const float& a, const float& b, const float& c, const float& d) { x = a; y = b; z = c; w = d; } };
@@ -3918,11 +3918,11 @@ static inline void rsSetA_2868(sRsCtx_2868* ctx, int mask, int shift, int v)
  * bits 23-24 = 1; bits 20-21 are cleared and bits 12-19 set to 20 either way. Skips a non-positive alpha. The halo type
  * (record flags & 0x70) picks the texture and size: 0x10 GrMan +0x1024 at 180, 0x20 GrMan +0x1028 at 100, 0x40 GrMan
  * +0x1024 at 350. Draws at the record's position (+0x1C) with UVs 0..1 and rotation +0x28 through GrMan virtual slot
- * 79. func_002E3478 calls it for every halo on screen.
+ * 79. cLensFxMan_DrawLens calls it for every halo on screen.
  *
  * @param idx  the view index
  */
-extern "C" void func_002E2868(sWake_2868* self, int idx)
+extern "C" void cLightHalo_Render(sWake_2868* self, int idx)
 {
     if (self->on == 0) {
         return;
@@ -3983,7 +3983,7 @@ extern "C" void func_002E2868(sWake_2868* self, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E2B00);
+INCLUDE_ASM("visualfx/boardwakefx", cLightHalo_Process);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
@@ -4037,13 +4037,13 @@ static inline int clampI_2B00(int v, int lo, int hi)
  * Else it sets +0x2E, the sample rectangle +0x0..+0xC (depth * 800 by depth * 400 pixels, clamped to 16 by 8, centred
  * on the point) and the 16 by 8 rectangle +0x10..+0x1C clamped inside the view rectangle (@p vrect +0x0..+0xC). +0x24
  * becomes the projected depth of the point moved toward the camera by 100, 80 or 200 units by type (along the view
- * matrix column at @p vrect +0x18, +0x28, +0x38), and +0x28 the angle (screen x mapped to -1..1) * pi/2. func_002E3338
+ * matrix column at @p vrect +0x18, +0x28, +0x38), and +0x28 the angle (screen x mapped to -1..1) * pi/2. cLensFxMan_ProcessLens
  * calls it for each halo of the view.
  *
  * @param vself  the halo
  * @param vrect  the view information: view rectangle at +0x0, view matrix from +0x10
  */
-extern "C" void func_002E2B00(void* vself, void* vrect)
+extern "C" void cLightHalo_Process(void* vself, void* vrect)
 {
     sWake_2B00* self = (sWake_2B00*)vself;
     float* rect = (float*)vrect;
@@ -4134,16 +4134,16 @@ struct sWakeMgr2E18 {
 extern void* cLensFxMan_vtbl[];
 extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
 extern int cLensFxMan_mbDrawSun;
-void* func_002E2860(void* self);
-void func_002E3110(void* self);
+void* cHalo_cHalo(void* self);
+void cLensFxMan__drawFrameCallBack(void* self);
 extern "C" void cSunHalo_cSunHalo(void* self);
 
 /**
  * Constructs the lens effects manager base: its element arrays, then registers its callback with the graphics
  * manager.
  *
- * It builds 2 x 256 elements of 0x30 bytes at +0x68 (func_002E2860) and two 0x210-byte objects at +0x6070
- * (cSunHalo_cSunHalo), sets +0x6494 to 1 and clears the pair at +0x60. It then passes func_002E3110 and itself to
+ * It builds 2 x 256 elements of 0x30 bytes at +0x68 (cHalo_cHalo) and two 0x210-byte objects at +0x6070
+ * (cSunHalo_cSunHalo), sets +0x6494 to 1 and clears the pair at +0x60. It then passes cLensFxMan__drawFrameCallBack and itself to
  * graphics manager slot 117 and sets cLensFxMan_mbDrawSun. The PS2 version's constructor (cPS2LensFxMan_cPS2LensFxMan) calls this.
  *
  * @return self
@@ -4162,7 +4162,7 @@ extern "C" void* cLensFxMan_cLensFxMan(void* self)
                 char* elemPtr = colPtr;
                 int elemsLeft = 0xFF;
                 do {
-                    func_002E2860(elemPtr);
+                    cHalo_cHalo(elemPtr);
                     elemPtr += 0x30;
                 } while (--elemsLeft != -1);
                 colPtr += 0x3000;
@@ -4194,7 +4194,7 @@ extern "C" void* cLensFxMan_cLensFxMan(void* self)
     {
         char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
         sBWVEntry2E18* setPhase2Slot = &(*(sBWVEntry2E18**)(obj + 0x10D8))[117];
-        setPhase2Slot->fn(obj + setPhase2Slot->delta, (void*)func_002E3110, self);
+        setPhase2Slot->fn(obj + setPhase2Slot->delta, (void*)cLensFxMan__drawFrameCallBack, self);
     }
     cLensFxMan_mbDrawSun = 1;
     return self;
@@ -4202,7 +4202,7 @@ extern "C" void* cLensFxMan_cLensFxMan(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E2F98__FPvi);
+INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_Reset__FPvi);
 #ifdef SKIP_ASM
 /**
  * Empties the lens manager's halo list for one view: sets its count (+0x60 + 4 * @p i) to 0.
@@ -4211,14 +4211,14 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E2F98__FPvi);
  *
  * @param i  the view index
  */
-void func_002E2F98(void* self, int i)
+void cLensFxMan_Reset(void* self, int i)
 {
     *(int*)((char*)self + (i << 2) + 0x60) = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E2FA8);
+INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_AddHalo);
 #ifdef SKIP_ASM
 struct sWakePoint {
     int a;
@@ -4240,12 +4240,12 @@ struct sWakeFx {
  *
  * Writes the next 0x30-byte halo of view @p i (count at +0x60 + 4 * @p i): its record (+0x20) is @p haloRecord and the on-screen
  * and sample flags and the word at +0x28 are cleared; then the count goes up. There is no bound check against the 256
- * slots. func_002E2FF8 calls it for each record.
+ * slots. cLensFxMan_AddLightHalos calls it for each record.
  *
  * @param haloRecord  the halo record
  * @param i  the view index
  */
-extern "C" void func_002E2FA8(sWakeFx* self, int haloRecord, int i)
+extern "C" void cLensFxMan_AddHalo(sWakeFx* self, int haloRecord, int i)
 {
     int n = self->counts[i];
     self->points[i][n].a = haloRecord;
@@ -4257,12 +4257,12 @@ extern "C" void func_002E2FA8(sWakeFx* self, int haloRecord, int i)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/boardwakefx", func_002E2FF8);
+INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_AddLightHalos);
 #ifdef SKIP_ASM
-extern "C" void func_002E2FA8(sWakeFx* self, int v, int i);
+extern "C" void cLensFxMan_AddHalo(sWakeFx* self, int v, int i);
 
 /**
- * Adds an array of halo records to the lens manager's list for one view (func_002E2FA8 for each).
+ * Adds an array of halo records to the lens manager's list for one view (cLensFxMan_AddHalo for each).
  *
  * cGame_renderLightHalos calls it twice, with clip codes 0 and 2.
  *
@@ -4271,11 +4271,11 @@ extern "C" void func_002E2FA8(sWakeFx* self, int v, int i);
  * @param ignored  the clip code, unused
  * @param i  the view index
  */
-extern "C" void func_002E2FF8(sWakeFx* self, int* vals, int count, int ignored, int i)
+extern "C" void cLensFxMan_AddLightHalos(sWakeFx* self, int* vals, int count, int ignored, int i)
 {
     int n;
     for (n = 0; n < count; n++) {
-        func_002E2FA8(self, vals[n], i);
+        cLensFxMan_AddHalo(self, vals[n], i);
     }
 }
 #endif
@@ -4314,43 +4314,43 @@ extern "C" void cLensFxMan__cLensFxMan(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E30D0);
+INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_render);
 #ifdef SKIP_ASM
-extern "C" void func_002E3338(void* self, int i);
-extern "C" void func_002E3478(void* self, int i);
+extern "C" void cLensFxMan_ProcessLens(void* self, int i);
+extern "C" void cLensFxMan_DrawLens(void* self, int i);
 
 /**
- * Renders the light halos of one view: processes them (func_002E3338), then draws them (func_002E3478).
+ * Renders the light halos of one view: processes them (cLensFxMan_ProcessLens), then draws them (cLensFxMan_DrawLens).
  *
  * cGame_renderLightHalos calls it on the game's LensFxMan.
  *
  * @param i  the view index
  */
-extern "C" void func_002E30D0(void* self, int i)
+extern "C" void cLensFxMan_render(void* self, int i)
 {
-    func_002E3338(self, i);
-    func_002E3478(self, i);
+    cLensFxMan_ProcessLens(self, i);
+    cLensFxMan_DrawLens(self, i);
 }
 #endif
 
-extern "C" void func_002E3130(void* self);
+extern "C" void cLensFxMan_SampleLens(void* self);
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E3110__FPv);
+INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan__drawFrameCallBack__FPv);
 #ifdef SKIP_ASM
 /**
- * Frame callback of the lens manager: runs func_002E3130 (the visibility sampling) on it.
+ * Frame callback of the lens manager: runs cLensFxMan_SampleLens (the visibility sampling) on it.
  *
  * cLensFxMan_cLensFxMan registers it with the graphics manager, passing the manager as the parameter.
  */
-void func_002E3110(void* self)
+void cLensFxMan__drawFrameCallBack(void* self)
 {
-    func_002E3130(self);
+    cLensFxMan_SampleLens(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E3130);
+INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_SampleLens);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sLight3130 {
@@ -4407,14 +4407,14 @@ struct sLensSunBanks3130 {
  * (+0x6070, 0x210 bytes each) is active (+0x2E), stores the value from the manager's virtual slot 4 (sun, &value) at
  * the sun's +0x204, keeping the previous bank's value when the slot returns 0. Each active halo of the view does the
  * same into its record's visibility for that view (record +0x40 + 4 * view). The arrays have one bank, so the
- * previous-bank read goes past it (see the code's note). func_002E3110 calls it once a frame.
+ * previous-bank read goes past it (see the code's note). cLensFxMan__drawFrameCallBack calls it once a frame.
  *
  * @param selfp  the lens manager (this)
  */
-// FAKEMATCH: the invented zero-valued bank index `int bufferId = 0;` (as landed func_002E3478's `bank`), so retail's
+// FAKEMATCH: the invented zero-valued bank index `int bufferId = 0;` (as landed cLensFxMan_DrawLens's `bank`), so retail's
 // zeroed register times 0x6000 is kept; plain form (constant bank 0, prev bank 1 through the same views) 79.77%.
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
-extern "C" void func_002E3130(void* selfp)
+extern "C" void cLensFxMan_SampleLens(void* selfp)
 {
     sLens3130* self = (sLens3130*)selfp;
     if (self->f6494 == 0) {
@@ -4453,9 +4453,9 @@ extern "C" void func_002E3130(void* selfp)
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("visualfx/boardwakefx", func_002E3338);
+INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_ProcessLens);
 #ifdef SKIP_ASM
-extern "C" void func_002E2B00(void* part, void* owner);
+extern "C" void cLightHalo_Process(void* part, void* owner);
 extern "C" void func_002F4DB8(void* emit, void* owner, int idx);
 
 struct sWkRect3338 { float x, y, w, h; };
@@ -4501,12 +4501,12 @@ static inline void vu0CopyMatrix3338(sWkMtx3338* dst, sWkMtx3338* src)
  *
  * Fills +0x0..+0xC from GrMan virtual slot 28 (the view rectangle), copies the matrix from slot 35 to +0x10 and gets
  * three floats into +0x50, +0x54, +0x58 from slot 30. Then processes view @p idx's sun (+0x6070 + @p idx * 0x210) with
- * func_002F4DB8 and each of its halos with func_002E2B00. func_002E30D0 calls it.
+ * func_002F4DB8 and each of its halos with cLightHalo_Process. cLensFxMan_render calls it.
  *
  * @param vself  the lens manager (this)
  * @param idx  the view index
  */
-extern "C" void func_002E3338(void* vself, int idx)
+extern "C" void cLensFxMan_ProcessLens(void* vself, int idx)
 {
     sWkFx3338* self = (sWkFx3338*)vself;
     char* ctx = cGraphicsMan_TheGraphicsMan_boardwakefx;
@@ -4531,7 +4531,7 @@ extern "C" void func_002E3338(void* vself, int idx)
         sWkPart3338(*pp)[0x100] = self->parts;
         sWkPart3338* halo = pp[idx];
         do {
-            func_002E2B00(halo, self);
+            cLightHalo_Process(halo, self);
             i++;
             halo++;
         } while (i < self->count[idx]);
@@ -4540,7 +4540,7 @@ extern "C" void func_002E3338(void* vself, int idx)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E3478);
+INCLUDE_ASM("visualfx/boardwakefx", cLensFxMan_DrawLens);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // FAKEMATCH: the invented zero-valued index `bank` over size-1 leading array dimensions (cnt / strip / blk[1][...]), so retail's zero register times 0x6000 is kept; plain form (no bank dimension) 94.97%. Byte-identical and behaves like the plain form; landed marked under
@@ -4570,17 +4570,17 @@ extern "C" void func_002F4A08(void* dst, void* src, int i);
  * end draw calls.
  *
  * Calls func_002F4A08 for the view's sun (+0x6070 + @p i * 0x210) when cLensFxMan_mbDrawSun is set, the manager's
- * virtual slot 2, func_002E2868 for each halo of view @p i with +0x2C set, then virtual slot 3. func_002E30D0 calls it
- * after func_002E3338.
+ * virtual slot 2, cLightHalo_Render for each halo of view @p i with +0x2C set, then virtual slot 3. cLensFxMan_render calls it
+ * after cLensFxMan_ProcessLens.
  *
  * @param selfv  the lens manager (this)
  * @param i  the view index
  */
-extern "C" void func_002E3478(void* selfv, int i)
+extern "C" void cLensFxMan_DrawLens(void* selfv, int i)
 {
     sBW3478Fx* self = (sBW3478Fx*)selfv;
     // The wake arrays have a leading bank dimension of one, indexed through a variable:
-    // func_002E3130 keeps it as a zeroed register multiplied by 0x6000 at run time.
+    // cLensFxMan_SampleLens keeps it as a zeroed register multiplied by 0x6000 at run time.
     int bank = 0;
     if (cLensFxMan_mbDrawSun != 0) {
         func_002F4A08(&self->blk[bank][i], self, i);
@@ -4588,7 +4588,7 @@ extern "C" void func_002E3478(void* selfv, int i)
     self->vf10();
     for (int n = 0; n < self->cnt[bank][i]; n++) {
         if (self->strip[bank][i][n].on != 0) {
-            func_002E2868(&self->strip[bank][i][n], i);
+            cLightHalo_Render(&self->strip[bank][i][n], i);
         }
     }
     self->vf18();
@@ -5241,7 +5241,7 @@ struct sBWVEntry1 {
 };
 
 extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
-extern "C" void func_002E4578(void* self);
+extern "C" void cTransitionMan_EndTransition(void* self);
 extern "C" void cScriptObject_DeInitScriptObject(void* self);
 extern "C" void cScriptObject__cScriptObject(void* self, int flags);
 extern "C" void cObjNode__cObjNode(void* self, int flags);
@@ -5260,7 +5260,7 @@ extern "C" void cTransitionMan__cTransitionMan(void* self, int flags)
     *(void***)((char*)self + 0x1C) = D_00488100;
     *(void***)((char*)self + 0xC) = cTransitionMan_vtbl;
     char* scriptObj = (char*)self + 0x10;
-    func_002E4578(self);
+    cTransitionMan_EndTransition(self);
     if (*(int*)((char*)self + 0x7C) != 0) {
         char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
         sBWVEntry1* removeScreenGrab = &(*(sBWVEntry1**)(obj + 0x10D8))[60];
@@ -5289,7 +5289,7 @@ struct sBWVEntryI4370 {
 };
 
 extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
-extern "C" void func_002E4578(void* self);
+extern "C" void cTransitionMan_EndTransition(void* self);
 
 // PORT: later callers declare this as void (and an int alias); the body returns int.
 extern "C" int cTransitionMan_StartTransition_def(void* self, int a1, void* o1, void* o2, float f0, float f1, float f2, int a4, int a5) __asm__("cTransitionMan_StartTransition");
@@ -5297,7 +5297,7 @@ extern "C" int cTransitionMan_StartTransition_def(void* self, int a1, void* o1, 
 /**
  * Starts a screen transition made of an in part, a hold and an out part.
  *
- * If a transition is active (+0x44) it is ended first (func_002E4578). The initiator goes to +0x78 and the external
+ * If a transition is active (+0x44) it is ended first (cTransitionMan_EndTransition). The initiator goes to +0x78 and the external
  * time pointer to +0x70. With a screen grab, a 0x100 x 0x100 grab texture is requested through the graphics manager's
  * virtual slot 59 if the handle at +0x6C is unset; if it stays unset, both transition objects get their virtual slot 1
  * with 3 and the call fails. Otherwise the objects (+0x4C, +0x50) and times (+0x54..+0x5C) are stored and the
@@ -5316,7 +5316,7 @@ extern "C" int cTransitionMan_StartTransition_def(void* self, int a1, void* o1, 
 extern "C" int cTransitionMan_StartTransition_def(void* self, int initiator, void* transitionIn, void* transitionOut, float inTime, float holdTime, float outTime, int useScreenGrab, int externalTimePercentage)
 {
     if (*(int*)((char*)self + 0x44) != 0) {
-        func_002E4578(self);
+        cTransitionMan_EndTransition(self);
     }
     *(int*)((char*)self + 0x78) = initiator;
     *(int*)((char*)self + 0x70) = externalTimePercentage;
@@ -5358,7 +5358,7 @@ extern "C" int cTransitionMan_StartTransition_def(void* self, int initiator, voi
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E44C8);
+INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_StartTransitionIn);
 #ifdef SKIP_ASM
 extern "C" void cTransitionMan_StartTransition(void* self, int a1, int a2, int a3, float f0, float f1, int a4, int a5, float f2);
 
@@ -5373,7 +5373,7 @@ extern "C" void cTransitionMan_StartTransition(void* self, int a1, int a2, int a
  * @param inTime  the in time
  * @param holdTime  the hold time
  */
-extern "C" void func_002E44C8(void* self, int initiator, int transitionIn, float inTime, float holdTime)
+extern "C" void cTransitionMan_StartTransitionIn(void* self, int initiator, int transitionIn, float inTime, float holdTime)
 {
     cTransitionMan_StartTransition(self, initiator, transitionIn, 0, inTime, holdTime, 0, 0, 0.0f);
 }
@@ -5430,7 +5430,7 @@ extern "C" void cTransitionMan_StartTransitionScreenGrab(void* self, int initiat
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4578);
+INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_EndTransition);
 #ifdef SKIP_ASM
 struct sBWVEntryI_4578 {
     short delta;
@@ -5453,9 +5453,9 @@ extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGr
  * and out (+0x50) objects through their deleting destructor (virtual slot 1, flags 3) and clears both pointers and
  * +0x70. When a screen-grab handle is held (+0x6C not -1) it sets +0x7C, stores GrMan virtual slot 114's result at
  * +0x80 and clears +0x60 and +0x64. Finally clears +0x78. Script commands, the rider and AI code, cTransitionMan_update
- * and func_002E4C60 call it.
+ * and cTransitionMan_OnEndObjectUse call it.
  */
-extern "C" void func_002E4578(void* self)
+extern "C" void cTransitionMan_EndTransition(void* self)
 {
     if (*(int*)((char*)self + 0x44) != 0) {
         *(int*)((char*)self + 0x44) = 0;
@@ -5487,7 +5487,7 @@ extern "C" void func_002E4578(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4638);
+INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_PauseTransition);
 #ifdef SKIP_ASM
 /**
  * Counts a pause or resume request for the running transition.
@@ -5497,7 +5497,7 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E4638);
  *
  * @param up  nonzero to pause, zero to resume
  */
-extern "C" void func_002E4638(void* self, int up)
+extern "C" void cTransitionMan_PauseTransition(void* self, int up)
 {
     if (*(int*)((char*)self + 0x44) == 0) {
         *(int*)((char*)self + 0x40) = 0;
@@ -5514,7 +5514,7 @@ extern "C" void func_002E4638(void* self, int up)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4678);
+INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_GetTransitionTimeLeft);
 #ifdef SKIP_ASM
 /**
  * Returns the time left in the running transition: in + hold + out time (+0x54, +0x58, +0x5C) minus the elapsed time
@@ -5524,7 +5524,7 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E4678);
  *
  * @return the remaining time in seconds
  */
-extern "C" float func_002E4678(void* self)
+extern "C" float cTransitionMan_GetTransitionTimeLeft(void* self)
 {
     if (*(int*)((char*)self + 0x44) == 0) {
         return 0.0f;
@@ -5575,7 +5575,7 @@ extern "C" void cTransitionMan_update(char* self)
         *(float*)(self + 0x48) += 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
     }
     if (*(float*)(self + 0x54) + *(float*)(self + 0x58) + *(float*)(self + 0x5C) <= *(float*)(self + 0x48)) {
-        func_002E4578(self);
+        cTransitionMan_EndTransition(self);
     }
 }
 #endif
@@ -5584,7 +5584,7 @@ extern "C" void cTransitionMan_update(char* self)
 INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_render);
 #ifdef SKIP_ASM
 extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
-extern "C" void func_002EB8F0(void);
+extern "C" void FigureOutTransitionUVs(void);
 // PORT: cWorldPainterMan_reset is defined with an unused self param; this caller passes none.
 void cWorldPainterMan_reset_47E8() __asm__("cWorldPainterMan_reset__FPv");
 
@@ -5678,7 +5678,7 @@ extern "C" void cTransitionMan_render(sFade47E8* self)
     if (self->rider != *(int*)((char*)SSXApp->Game->ViewMan + 0x14)) {
         return;
     }
-    func_002EB8F0();
+    FigureOutTransitionUVs();
     sRsCtx47E8* ctx = (sRsCtx47E8*)cGraphicsMan_TheGraphicsMan_boardwakefx;
     if (self->active == 0) {
         return;
@@ -5780,26 +5780,26 @@ extern "C" void cTransitionMan_OnStartObjectUse(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4C60);
+INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_OnEndObjectUse);
 #ifdef SKIP_ASM
 void cScriptObject_OnEndObjectUse(void*);
-extern "C" void func_002E4578(void* self);
+extern "C" void cTransitionMan_EndTransition(void* self);
 
 /**
  * Ends the transition when a player stops using the transition script object.
  *
- * Runs cScriptObject_OnEndObjectUse on the script object at +0x10, then func_002E4578. It sits in the
+ * Runs cScriptObject_OnEndObjectUse on the script object at +0x10, then cTransitionMan_EndTransition. It sits in the
  * cScriptObjTransition part's vtable (D_00488100) right after cTransitionMan_OnStartObjectUse.
  */
-extern "C" void func_002E4C60(void* self)
+extern "C" void cTransitionMan_OnEndObjectUse(void* self)
 {
     cScriptObject_OnEndObjectUse((char*)self + 0x10);
-    func_002E4578(self);
+    cTransitionMan_EndTransition(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4C90);
+INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_IsTransitionPending);
 #ifdef SKIP_ASM
 /**
  * Returns whether both screen-grab flags (+0x60 and +0x64) are set.
@@ -5809,7 +5809,7 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E4C90);
  *
  * @return 1 when both flags are set, otherwise 0
  */
-extern "C" int func_002E4C90(void* self)
+extern "C" int cTransitionMan_IsTransitionPending(void* self)
 {
     int result = 0;
     if (*(int*)((char*)self + 0x60) != 0) {
@@ -5907,17 +5907,17 @@ extern "C" void cTransitionObj_operator_delete(void* memory)
 extern void* cTransitionObj_vtbl[];
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4D70__FPv);
+INCLUDE_ASM("visualfx/boardwakefx", cTransitionObj_cTransitionObj__FPv);
 #ifdef SKIP_ASM
 /**
  * Constructs a transition object: installs cTransitionObj_vtbl.
  *
- * The wipe and circle constructors (func_002EBBA8, func_002EBD88, func_002EBE20), the fade object code and
+ * The wipe and circle constructors (cWipe_TObj_cWipe_TObj, func_002EBD88, cCircle_TObj_cCircle_TObj), the fade object code and
  * cSSXScriptEngine_MakeTransitionObject run it as the base constructor.
  *
  * @return @p self
  */
-void* func_002E4D70(void* self)
+void* cTransitionObj_cTransitionObj(void* self)
 {
     *(int*)self = (int)(void*)cTransitionObj_vtbl;
     return self;
@@ -6085,7 +6085,7 @@ extern "C" void cSnowBox__cSnowBox(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E4F50);
+INCLUDE_ASM("visualfx/boardwakefx", cSnowBox_update);
 #ifdef SKIP_ASM
 // cSnowBox::update(const tWorldPainterSnowfallParameters&) (SSX On Tour symbols, all_in_one_visualfx.obj).
 struct cSnowBox_4F50 {
@@ -6168,8 +6168,8 @@ static inline sWakeVecE398 Scale_4F50(float s, const sWakeVecE398& v)
     return r;
 }
 
-// The unit declares func_002E4F50(int*, sWakeRec_5DA0*) later; define it through a typed alias.
-extern "C" void func_002E4F50_4F50(cSnowBox_4F50* self, const tWorldPainterSnowfallParameters_4F50* params) __asm__("func_002E4F50");
+// The unit declares cSnowBox_update(int*, sWakeRec_5DA0*) later; define it through a typed alias.
+extern "C" void cSnowBox_update_4F50(cSnowBox_4F50* self, const tWorldPainterSnowfallParameters_4F50* params) __asm__("cSnowBox_update");
 /**
  * Updates a snow box for this frame: takes its flake settings from the snowfall parameters, varies the wind and moves
  * the box offset.
@@ -6183,7 +6183,7 @@ extern "C" void func_002E4F50_4F50(cSnowBox_4F50* self, const tWorldPainterSnowf
  *
  * @param params  the snowfall parameters filled by cSnowFall_update
  */
-extern "C" void func_002E4F50_4F50(cSnowBox_4F50* self, const tWorldPainterSnowfallParameters_4F50* params)
+extern "C" void cSnowBox_update_4F50(cSnowBox_4F50* self, const tWorldPainterSnowfallParameters_4F50* params)
 {
     switch (self->mode) {
     case 0:
@@ -6240,7 +6240,7 @@ extern "C" void func_002E4F50_4F50(cSnowBox_4F50* self, const tWorldPainterSnowf
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E5430);
+INCLUDE_ASM("visualfx/boardwakefx", cSnowBox_updateForCameraPosition);
 #ifdef SKIP_ASM
 struct sWakeVec5430 {
     float x, y, z, w;
@@ -6287,7 +6287,7 @@ static inline void wakeWrap5430(float& r, float v, float s)
  *
  * @param delta  the camera movement since the last frame
  */
-extern "C" void func_002E5430(sWakeGrid5430* self, sWakeVec5430* delta)
+extern "C" void cSnowBox_updateForCameraPosition(sWakeGrid5430* self, sWakeVec5430* delta)
 {
     wakeSub5430(self->pos, *delta);
     float x = self->pos.x;
@@ -6304,7 +6304,7 @@ extern "C" void func_002E5430(sWakeGrid5430* self, sWakeVec5430* delta)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E55D8);
+INCLUDE_ASM("visualfx/boardwakefx", cSnowBox_render);
 #ifdef SKIP_ASM
 struct sMat_6008;
 extern char* GrMan_boardwakefx __asm__("GrMan");
@@ -6508,7 +6508,7 @@ static inline void wakeSubV55D8(sVec55D8& a, const sVec55D8& b)
  * @param y  minimum y of the cell
  * @param z  minimum z of the cell
  */
-extern "C" void func_002E55D8(int* snowBox, sMat_6008* snowMatrix, float x, float y, float z)
+extern "C" void cSnowBox_render(int* snowBox, sMat_6008* snowMatrix, float x, float y, float z)
 {
     sCell55D8* self = (sCell55D8*)snowBox;
     if (self->active == 0) {
@@ -6687,22 +6687,22 @@ extern float cSnowfallToggles_m_SnowFluffWindIntensity;
 struct sWakeV4_5DA0 { float x, y, z, w; };
 extern sWakeV4_5DA0 cSnowfallToggles_m_SnowFlakeColour;
 extern sWakeV4_5DA0 cSnowfallToggles_m_SnowFluffColour;
-extern "C" float func_002EE448(int i);
-extern "C" float func_002EE508(int i);
-extern "C" float func_002EE600(int i);
-extern "C" float func_002EE660(int i);
-extern "C" float func_002EE4C0(int i);
-extern "C" float func_002EE570(int i);
-extern "C" float func_002EE5B8(int i);
-extern "C" float func_002EE6A8(int i);
-extern "C" float func_002EE780(int i);
+extern "C" float cRenderStateMan_SnowIntensity(int i);
+extern "C" float cRenderStateMan_WindIntensity(int i);
+extern "C" float cRenderStateMan_SnowFluffItensity(int i);
+extern "C" float cRenderStateMan_SnowFluffWindIntensity(int i);
+extern "C" float cRenderStateMan_FlakeSize(int i);
+extern "C" float cRenderStateMan_WindRotation(int i);
+extern "C" float cRenderStateMan_SnowFlurries(int i);
+extern "C" float cRenderStateMan_SnowGravityMultiplier(int i);
+extern "C" float cRenderStateMan_SnowFlakeColourA(int i);
 extern "C" float cRenderStateMan_SnowFlakeColourR(int i);
 extern "C" float cRenderStateMan_SnowFlakeColourG(int i);
 extern "C" float cRenderStateMan_SnowFlakeColourB(int i);
-extern "C" float func_002EE8A0(int i);
-extern "C" float func_002EE8E8(int i);
-extern "C" float func_002EE930(int i);
-extern "C" float func_002EE978(int i);
+extern "C" float cRenderStateMan_SnowFluffColourA(int i);
+extern "C" float cRenderStateMan_SnowFluffColourR(int i);
+extern "C" float cRenderStateMan_SnowFluffColourG(int i);
+extern "C" float cRenderStateMan_SnowFluffColourB(int i);
 void* cGame_getSplashManager(void* self, int i);
 extern "C" void func_002F4330(void* obj, float v);
 
@@ -6711,7 +6711,7 @@ struct sWakeRec_5DA0 {
     sWakeV4_5DA0 c0;
     sWakeV4_5DA0 c1;
 };
-extern "C" void func_002E4F50(int* elem, sWakeRec_5DA0* rec);
+extern "C" void cSnowBox_update(int* elem, sWakeRec_5DA0* rec);
 
 /**
  * Updates the falling snow from each view's snow settings, then advances every snow box with its view's
@@ -6742,22 +6742,22 @@ extern "C" void cSnowFall_update(void* self)
             const sWakeV4_5DA0* fluffColour = &cSnowfallToggles_m_SnowFluffColour; recs[i].c1.x = fluffColour->x; recs[i].c1.y = fluffColour->y; recs[i].c1.z = fluffColour->z; recs[i].c1.w = fluffColour->w;
         } else {
             int k = (i == 0) ? 6 : 7;
-            recs[i].f[0] = func_002EE448(k);
-            recs[i].f[1] = func_002EE508(k);
-            recs[i].f[2] = func_002EE600(k);
-            recs[i].f[3] = func_002EE660(k);
-            recs[i].f[4] = func_002EE4C0(k);
-            recs[i].f[5] = func_002EE570(k);
-            recs[i].f[6] = func_002EE5B8(k);
-            recs[i].f[7] = func_002EE6A8(k);
-            recs[i].c0.x = func_002EE780(k);
+            recs[i].f[0] = cRenderStateMan_SnowIntensity(k);
+            recs[i].f[1] = cRenderStateMan_WindIntensity(k);
+            recs[i].f[2] = cRenderStateMan_SnowFluffItensity(k);
+            recs[i].f[3] = cRenderStateMan_SnowFluffWindIntensity(k);
+            recs[i].f[4] = cRenderStateMan_FlakeSize(k);
+            recs[i].f[5] = cRenderStateMan_WindRotation(k);
+            recs[i].f[6] = cRenderStateMan_SnowFlurries(k);
+            recs[i].f[7] = cRenderStateMan_SnowGravityMultiplier(k);
+            recs[i].c0.x = cRenderStateMan_SnowFlakeColourA(k);
             recs[i].c0.y = cRenderStateMan_SnowFlakeColourR(k);
             recs[i].c0.z = cRenderStateMan_SnowFlakeColourG(k);
             recs[i].c0.w = cRenderStateMan_SnowFlakeColourB(k);
-            recs[i].c1.x = func_002EE8A0(k);
-            recs[i].c1.y = func_002EE8E8(k);
-            recs[i].c1.z = func_002EE930(k);
-            recs[i].c1.w = func_002EE978(k);
+            recs[i].c1.x = cRenderStateMan_SnowFluffColourA(k);
+            recs[i].c1.y = cRenderStateMan_SnowFluffColourR(k);
+            recs[i].c1.z = cRenderStateMan_SnowFluffColourG(k);
+            recs[i].c1.w = cRenderStateMan_SnowFluffColourB(k);
         }
         func_002F4330(cGame_getSplashManager(SSXApp->Game, i), recs[i].f[0]);
     }
@@ -6765,7 +6765,7 @@ extern "C" void cSnowFall_update(void* self)
     for (j = 0; j < 12; j++) {
         int* snowBox = ((int**)((char*)self + 0x10))[j];
         if (snowBox != 0) {
-            func_002E4F50(snowBox, &recs[*snowBox]);
+            cSnowBox_update(snowBox, &recs[*snowBox]);
         }
     }
 }
@@ -6842,7 +6842,7 @@ extern int cSnowfallToggles_m_TestAdditive[1];
 extern sRsCtx_6008* D_004A5B80_6008 __asm__("cGraphicsMan_TheGraphicsMan");
 extern sRsState_6008 D_00501420_6008[] __asm__("sDrawState_s_defaultDrawState");
 extern sV4_6008 t4vect_Origin;
-extern "C" void func_002E55D8(int* p, sMat_6008* m, float r, float g, float b);
+extern "C" void cSnowBox_render(int* p, sMat_6008* m, float r, float g, float b);
 
 static inline sRiders_6008* riders_6008()
 {
@@ -6922,8 +6922,8 @@ extern "C" void cSnowFall_render(sWakeFx_6008* self)
     for (i = 0; i < 12; i++) {
         int* snowBox = self->parts[i];
         if (snowBox != 0 && *snowBox == k) {
-            func_002E5430((sWakeGrid5430*)snowBox, &camDiff);
-            func_002E55D8(self->parts[i], &snowMatrix, boxMinX, boxMinY, boxMinZ);
+            cSnowBox_updateForCameraPosition((sWakeGrid5430*)snowBox, &camDiff);
+            cSnowBox_render(self->parts[i], &snowMatrix, boxMinX, boxMinY, boxMinZ);
         }
     }
     ctx->top--;
@@ -7204,7 +7204,7 @@ extern int cPowerUpFXToggles_m_EnableSpeedBoostStreamers;
 extern int cPowerUpFXToggles_m_TestSpeedBoostRibbon;
 extern int cPowerUpFXToggles_m_TestRedRibbon;
 extern int cPowerUpFXToggles_m_TestOrangeRibbon;
-extern "C" void func_002E6C08_66B8(sWake_66B8* self) __asm__("func_002E6C08");
+extern "C" void cSpeedBoostFX_UpdateSpeedBoostTrail_66B8(sWake_66B8* self) __asm__("cSpeedBoostFX_UpdateSpeedBoostTrail");
 
 // PORT: <? and >? (g++ min/max operators)
 static inline float Clamp_66B8(float v, float lo, float hi)
@@ -7349,12 +7349,12 @@ extern "C" void cSpeedBoostFX_update(sWake_66B8* self)
         t4Vector pos = *(t4Vector*)(self->rider + 0x1A0);
         Trail_66B8(self, pos, on, k, speed);
     }
-    func_002E6C08_66B8(self);
+    cSpeedBoostFX_UpdateSpeedBoostTrail_66B8(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/boardwakefx", func_002E6C08);
+INCLUDE_ASM("visualfx/boardwakefx", cSpeedBoostFX_UpdateSpeedBoostTrail);
 #ifdef SKIP_ASM
 // Three floats (12 bytes, unaligned); built through a temporary like a constructed value.
 struct sV3E6C08 {
@@ -7542,7 +7542,7 @@ static inline t4Vector wakeDropE6C08(sTrailE6C08* self, const t4Vector& c, const
  * (10 units above mGroundContactPoint) and stored as the sample's edges. Then the oldest samples are dropped while the
  * total exceeds the maximum, keeping at least 3 when the maximum is above 1. cSpeedBoostFX_update calls it.
  */
-extern "C" void func_002E6C08(sTrailE6C08* self)
+extern "C" void cSpeedBoostFX_UpdateSpeedBoostTrail(sTrailE6C08* self)
 {
     if (0.0f < self->maxLen || 0.0f < self->total) {
         if (0.0f < wakeLenE6C08(self->rider->mVelocity)) {

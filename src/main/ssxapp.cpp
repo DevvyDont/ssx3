@@ -841,7 +841,7 @@ extern "C" void cSSXApp_hasMCManager(void) {
 INCLUDE_ASM("main/ssxapp", cSSXApp_purge);
 #ifdef SKIP_ASM
 void operator_delete(int* p);
-extern "C" void func_00398438(void* p);
+extern "C" void cUIFontInterface_purgeFonts(void* p);
 extern "C" void cPadCache_purge(void* p);
 extern "C" void cSSXScriptEngine_DeInitOnce(void* p);
 extern "C" void func_003DEDC0(void* handle, int arg);
@@ -906,7 +906,7 @@ extern "C" void cSSXApp_purge(sSSXAppPurge* self)
     }
     int* fontInterface = self->f88;
     if (fontInterface) {
-        func_00398438(fontInterface);
+        cUIFontInterface_purgeFonts(fontInterface);
         operator_delete(fontInterface);
     }
     int* mgr = (int*)PadCache;
@@ -1031,7 +1031,7 @@ extern "C" int cSSXApp_loadInputMap(cSSXApp* self, const char* name);
 void cInput_setPad(void* self, int a1);
 void cInput_setMap(void* self, int a1);
 int GetHashValue32(char* s);
-extern "C" void func_003984B0(void* self, unsigned int index, void* data, int type);
+extern "C" void cUIFontInterface_addFontEntry(void* self, unsigned int index, void* data, int type);
 extern "C" void cUIFontInterface_loadFonts(void* self);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv really takes (be, kind); bound by asm label
@@ -1179,8 +1179,8 @@ extern "C" void cSSXApp_initload(sSSXApp_82D0* self)
     }
     sFontIface_82D0*& fonts = self->f88;
     fonts = new (str_cUIFontInterface, 0, 0) sFontIface_82D0;
-    func_003984B0(self->f88, 0, str_data_fonts_fefont_sfn, GetHashValue32(str_fefont_b));
-    func_003984B0(self->f88, 1, str_data_fonts_hudfont_sfn, GetHashValue32(str_hudfont_b));
+    cUIFontInterface_addFontEntry(self->f88, 0, str_data_fonts_fefont_sfn, GetHashValue32(str_fefont_b));
+    cUIFontInterface_addFontEntry(self->f88, 1, str_data_fonts_hudfont_sfn, GetHashValue32(str_hudfont_b));
     cUIFontInterface_loadFonts(self->f88);
     self->f78 = cBE_getBE();
     cSSXApp_activateBEOptions_self(self);
@@ -2536,7 +2536,7 @@ INCLUDE_ASM("main/ssxapp", func_00229F88);
 /**
  * Stores a vector and a 4x4 matrix (five quadwords) in VU0 data memory at quadword 80 + 5 * @p index.
  *
- * func_002425C0 (movie player) calls it.
+ * cOcclusionMan_updateView (movie player) calls it.
  *
  * @param index  the slot
  * @param vector  the vector (16-byte aligned)
@@ -3551,7 +3551,7 @@ extern "C" void func_0022A830(void* vctx, void* vnode, void* vcfg)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("main/ssxapp", func_0022ADD8);
 #ifdef SKIP_ASM
-extern "C" void func_002425C0(void* a, void* b);
+extern "C" void cOcclusionMan_updateView(void* a, void* b);
 extern "C" void func_00229F30(void* a, void* b);
 void func_00229F80(void* p);
 extern "C" void func_0022A830(void* ctx, void* data, void* cfg);
@@ -3639,7 +3639,7 @@ static inline void Load_22ADD8(sCtx_22ADD8* ctx, void* data, sCfg_22ADD8* c)
  * Stores @p visSource, @p viewBounds and @p cameraSlots at +0x0, +0x4 and +0x90 and zeroes every list count (+0x94, +0x1098, +0x209C, +0x40A0,
  * +0x50A8, +0x70AC, +0x78B4, +0x7ABC, +0x7BC0, +0x7FC4) and pending slot (+0x50A4, +0x78B0, +0x7AB8). Copies the matrix
  * returned by the graphics manager's vtable slot 43 to +0x10 and GrMan's matrix at +0x5800 to +0x50, calls
- * func_002425C0(@p visSource, @p viewBounds), loads both matrices into VU0 with func_00229F30 and calls func_00229F80 (empty). Then
+ * cOcclusionMan_updateView(@p visSource, @p viewBounds), loads both matrices into VU0 with func_00229F30 and calls func_00229F80 (empty). Then
  * runs func_0022A830 on each non-null root of the eight @p cfg entries (data at +0x10 of each 0x14-byte entry) with
  * plane mask *(@p visSource + 0x110), and sorts the culled cells' objects: func_0022A698, func_0022A5A0 and func_0022A770 over
  * the inside list (+0x98), func_0022A408, func_0022A368 and func_0022A4A8 over the partial list (+0x109C). cGame_render
@@ -3647,7 +3647,7 @@ static inline void Load_22ADD8(sCtx_22ADD8* ctx, void* data, sCfg_22ADD8* c)
  *
  * @param cfg  the eight octree roots (cell entries whose node pointer is at +0x10)
  * @param visSource  the visibility source: holds the clip planes and the initial plane mask (+0x110)
- * @param viewBounds  the view's bounding box (passed to func_002425C0)
+ * @param viewBounds  the view's bounding box (passed to cOcclusionMan_updateView)
  * @param cameraSlots  the camera-slot table pointer stored at +0x90 (read by func_0022A5A0 and func_0022A698)
  * @return @p self
  */
@@ -3677,7 +3677,7 @@ extern "C" char* func_0022ADD8(char* self, sCfg_22ADD8* cfg, void* visSource, vo
         MatCopy_22ADD8((sMat_22ADD8*)(self + 0x10), &gfxMatrix);
     }
     MatCopy_22ADD8((sMat_22ADD8*)(self + 0x50), (sMat_22ADD8*)((char*)GrMan + 0x5800));
-    func_002425C0(*(void**)(self + 0x0), *(void**)(self + 0x4));
+    cOcclusionMan_updateView(*(void**)(self + 0x0), *(void**)(self + 0x4));
     func_00229F30(self + 0x10, self + 0x50);
     func_00229F80(*(void**)(self + 0x4));
     sCtx_22ADD8 ctx;
@@ -3713,7 +3713,7 @@ extern "C" void cGameViewMan_updateStreamFocus(void* views);
 extern "C" int cGameViewMan_isStreamReady(void* views);
 extern "C" int cFadeScreen_drawFade(void* self);
 extern "C" void func_0022C830(void* self);
-extern "C" void func_0036A1E8();
+extern "C" void cGarbageMan_Update();
 extern "C" void t4mat_invert(void* m);
 extern "C" void func_00230640(void* self);
 extern "C" void func_00229BA8(void* p);
@@ -3724,8 +3724,8 @@ extern "C" void cGame_renderFogVolumes(void* self, void* world);
 extern "C" void cGame_renderLightHalos(void* self, void* world, int view);
 extern "C" void cGame_renderPatches(void* self, void* world);
 extern "C" int cMenuSys_isActive(void* menu);
-extern "C" void func_002CC350(void* menu);
-extern "C" void func_00397DF8(void* p);
+extern "C" void cMenuSys_render(void* menu);
+extern "C" void cUIEngine_render2D(void* p);
 void cWScriptMan_render(void* p);
 void cSSXScriptEngine_Render(void* p);
 extern "C" void cBXLoadIndicator_Render(void* p);
@@ -4070,7 +4070,7 @@ extern "C" int cGame_render(sGame_22B008* self)
         func_0022C830(self);
         return 1;
     }
-    func_0036A1E8();
+    cGarbageMan_Update();
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     ((cGfx_22B008*)ps2GraphicsMan)->f10A8 = ((cGfx_22B008*)ps2GraphicsMan)->tbl[((cGfx_22B008*)ps2GraphicsMan)->cur];
     ((cGfx_22B008*)ps2GraphicsMan)->f10AC = ((cGfx_22B008*)ps2GraphicsMan)->tbl[((cGfx_22B008*)ps2GraphicsMan)->f44];
@@ -4169,7 +4169,7 @@ extern "C" int cGame_render(sGame_22B008* self)
     self->hud->scale = sScale_22B008(2.0f, 2.0f);
     self->hud->color = sColor_22B008(1.0f, 0.8f, 0.8f, 0.0f);
     if (cMenuSys_isActive(self->menu) != 0) {
-        func_002CC350(self->menu);
+        cMenuSys_render(self->menu);
         self->hud->scale = sScale_22B008(2.0f, 2.0f);
         self->hud->color = sColor_22B008(1.0f, 0.8f, 0.8f, 0.0f);
     }
@@ -4180,7 +4180,7 @@ extern "C" int cGame_render(sGame_22B008* self)
     self->hud->color = sColor_22B008(1.0f, 0.8f, 0.8f, 0.0f);
     if (cRenderToggles_m_DisableHUD == 0) {
         self->hud->scale = sScale_22B008(0.0f, 0.0f);
-        func_00397DF8(self->f48);
+        cUIEngine_render2D(self->f48);
         cWScriptMan_render(self->f30);
     }
     cSSXScriptEngine_Render(ScriptEngine);

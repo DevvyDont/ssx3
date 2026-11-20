@@ -580,18 +580,18 @@ extern "C" void* func_003AD198(void)
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003AD1A8);
 #ifdef SKIP_ASM
-extern "C" void func_002F5998(void* lights);
+extern "C" void cWorldLightMan_flushOverlapCache(void* lights);
 extern "C" void cRider_flushActiveLights(void* self);
 
 /**
- * Drops all active lights: func_002F5998 on the game's WorldLightMan, then cRider_flushActiveLights on each rider of
+ * Drops all active lights: cWorldLightMan_flushOverlapCache on the game's WorldLightMan, then cRider_flushActiveLights on each rider of
  * Game->AI (count +0x78, riders from +0x28).
  *
  * cWorldView_update calls it after freeing an unloaded section's memory.
  */
 extern "C" void func_003AD1A8(void)
 {
-    func_002F5998(SSXApp->Game->WorldLightMan);
+    cWorldLightMan_flushOverlapCache(SSXApp->Game->WorldLightMan);
     char* riders = (char*)SSXApp->Game->AI;
     if (riders != 0) {
         for (int i = 0; i < *(int*)(riders + 0x78); i++) {
@@ -601,21 +601,21 @@ extern "C" void func_003AD1A8(void)
 }
 #endif
 
-extern "C" void* func_002E27E8(void* self);
+extern "C" void* cLensFxMan_getHaloRadius(void* self);
 
 //100%
 INCLUDE_ASM("world/wscriptcache", func_003AD230__FPv);
 #ifdef SKIP_ASM
 /**
- * Forwards to func_002E27E8 and returns its result.
+ * Forwards to cLensFxMan_getHaloRadius and returns its result.
  *
  * cChunkResolve_resolveHalo uses it to get the radius for a halo type.
  *
- * @return func_002E27E8's result
+ * @return cLensFxMan_getHaloRadius's result
  */
 void* func_003AD230(void* self)
 {
-    return func_002E27E8(self);
+    return cLensFxMan_getHaloRadius(self);
 }
 #endif
 

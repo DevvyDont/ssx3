@@ -168,7 +168,7 @@ void cFEStateTitle_onPopupEvent(void* self)
 INCLUDE_ASM("fe/ovstates", cFEStateTitle_onWidgetCreate);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void func_003A0330(void* self, int a1, int a2);
+extern "C" void cUIThing_setSound(void* self, int a1, int a2);
 extern char str_tReal[];
 
 /**
@@ -181,7 +181,7 @@ extern "C" void cFEStateTitle_onWidgetCreate(cFEStateTitle* self, void* item)
     int id = *(int*)((char*)item + 0x38);
     if (id == GetHashValue32(str_tReal)) {
         *(int*)((char*)item + 0x18) = 0;
-        func_003A0330(item, 0, 0);
+        cUIThing_setSound(item, 0, 0);
     }
 }
 #endif
@@ -237,20 +237,20 @@ extern "C" int cFEStateTitle_onWidgetMenu(cFEStateTitle* self, int pMenu, int Ev
 //100%
 INCLUDE_ASM("fe/ovstates", cFEStateMainMenu_cFEStateMainMenu1);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void*);
+extern "C" void* cUIState_cUIState(void*);
 extern void* cFEStateMainMenu_vtbl[];
 
 /**
  * Constructs the front end's main menu state.
  *
- * Runs the cUIState constructor (func_0039E2A0; the engine reaches it in the second argument register, which this
+ * Runs the cUIState constructor (cUIState_cUIState; the engine reaches it in the second argument register, which this
  * definition does not declare), sets mHashName to 2 and the vtable cFEStateMainMenu_vtbl, and clears +0x48 and +0x4C.
  *
  * @return @p self
  */
 extern "C" void* cFEStateMainMenu_cFEStateMainMenu1(cFEStateMainMenu* self)
 {
-    func_0039E2A0(self);
+    cUIState_cUIState(self);
     self->mHashName = 2;
     self->mVtbl = cFEStateMainMenu_vtbl;
     self->mGoToNextState = 0;
@@ -543,7 +543,7 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 // PORT: cMemMan_alloc called as the game's operator new(size, tag, flags, align): gcc then treats the
 // result as malloc-like (no aliasing), as the target shows. On PC use a real operator new.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" void func_0039E318(void* self, void* engine, void* owner);
+extern "C" void cUIState_cUIState1(void* self, void* engine, void* owner);
 extern "C" void cUIStateStack_pushPopup(void* stack, void* state);
 extern "C" void* func_001887A0(void* mem, void* engine, int a2);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
@@ -643,7 +643,7 @@ extern "C" void cFEStateMainMenu_onWidgetEvent(cFEStateMainMenu* self_, void* it
         if (*(int*)(item + 0x18) == 22 && self_->mGoToNextState == 0) {
             self_->mSaveCurrentCtrl = self_->mCurrentCtrl;
             char* popup = (char*)operator new(76, str_cFEPopupSelectMultiplayerMode, 0, 0);
-            func_0039E318(popup, self_->mpEngine, ((char*)self_));
+            cUIState_cUIState1(popup, self_->mpEngine, ((char*)self_));
             *(void***)(popup + 0x8) = cFEPopupSelectMultiplayerMode_vtbl;
             int bit = 1;
             bit <<= self_->mSaveCurrentCtrl;
@@ -782,18 +782,18 @@ extern "C" void cFEStateMainMenu_onPopupEvent(cFEStateMainMenu* self, char* obj,
 //100%
 INCLUDE_ASM("fe/ovstates", cFEStateBonusMaterial_cFEStateBonusMaterial1);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void*);
+extern "C" void* cUIState_cUIState(void*);
 extern char cFEStateBonusMaterial_vtbl[];
 
 /**
- * Constructs the front end's bonus material state: the cUIState constructor (func_0039E2A0, with the engine left in the
+ * Constructs the front end's bonus material state: the cUIState constructor (cUIState_cUIState, with the engine left in the
  * second argument register), the vtable cFEStateBonusMaterial_vtbl and mHashName 5.
  *
  * @return @p self
  */
 extern "C" void* cFEStateBonusMaterial_cFEStateBonusMaterial1(cFEStateBonusMaterial* self)
 {
-    func_0039E2A0(self);
+    cUIState_cUIState(self);
     self->mVtbl = (void**)cFEStateBonusMaterial_vtbl;
     self->mHashName = 5;
     return ((void*)self);

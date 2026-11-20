@@ -15,14 +15,14 @@
 // cOVState_ViewPopup: the popup that shows one message (screen "113ViewMessage"), pushed by
 // cOVState_MESSAGECENTER (func_001E50C8: cMemMan_alloc(0x70, "cOVState_ViewPopup") + constructor cOVState_ViewPopup_cOVState_ViewPopup(this,
 // pEngine, pParent, message, number)). Size 0x70. Base cUIState (ui/uistate.h, 0x48), written out flat (it is not a
-// cOVState: the constructor is cUIState(cUIEngine*, cUIState*) func_0039E318 and nothing stores 0x48..0x9C as
+// cOVState: the constructor is cUIState(cUIEngine*, cUIState*) cUIState_cUIState1 and nothing stores 0x48..0x9C as
 // cOVState does). Retail vtable cOVState_ViewPopup_vtbl (destructor cOVState_ViewPopup__cOVState_ViewPopup in fe/all_in_one_fe).
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance or virtuals. There is no
 // SSX On Tour DWARF for these classes and the preview keeps no accessors, so the own members carry [R]/[U]
 // evidence only; widget pointers are named after the UI object onWidgetCreate binds to them (names read from the
 // retail ELF). Evidence tags:
-//   [R] retail's constructors: cUIState(cUIEngine*) func_0039E2A0 / cUIState(cUIEngine*, cUIState*) func_0039E318,
+//   [R] retail's constructors: cUIState(cUIEngine*) cUIState_cUIState / cUIState(cUIEngine*, cUIState*) cUIState_cUIState1,
 //       cOVState(cUIEngine*, tOVStateEnum) (inlined in cOVState_MESSAGECENTER_cOVState_MESSAGECENTER), cOVState_MESSAGECENTER_cOVState_MESSAGECENTER, cOVState_ViewPopup_cOVState_ViewPopup, and the
 //       allocation sizes above;
 //   [P] the July 2003 preview's inline accessors (inherited cUIState/cOVState fields only; see ui/uistate.h);

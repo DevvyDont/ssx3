@@ -362,7 +362,7 @@ extern "C" tFrameData_5778 tActiveAvalancheNode_getFrameData(sAvAct_5778* self, 
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D6290);
+INCLUDE_ASM("visualfx/avalanche", cAvalanche_getColour);
 #ifdef SKIP_ASM
 struct sVec4_6290 {
     float x, y, z, w;
@@ -399,7 +399,7 @@ static inline sVec4_6290 vScale_6290(const sVec4_6290& v, float s)
  *
  * @return the colour as (alpha, red, green, blue)
  */
-extern "C" sVec4_6290 func_002D6290(void* self)
+extern "C" sVec4_6290 cAvalanche_getColour(void* self)
 {
     char* node = ((char**)cAvalanche_m_nodeList)[*(unsigned short*)((char*)self + 0x92) >> 8];
     char* activeNode = *(char**)(node + 0x114);
@@ -507,7 +507,7 @@ extern "C" void cAvalanche_init(void)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D64D8);
+INCLUDE_ASM("visualfx/avalanche", tAvalancheNode_fixVelocity);
 #ifdef SKIP_ASM
 struct sVec4_64D8 {
     float x, y, z, w;
@@ -592,7 +592,7 @@ static inline int isBad_64D8(const float* f)
  *
  * @param velocity  the velocity, changed in place
  */
-extern "C" void func_002D64D8(void* self, sVec4_64D8* velocity)
+extern "C" void tAvalancheNode_fixVelocity(void* self, sVec4_64D8* velocity)
 {
     if (D_004A3A94 < vLen_64D8(*velocity))
         *velocity = vScale_64D8(vNorm_64D8(*velocity), D_004A3A94);
@@ -1034,7 +1034,7 @@ extern "C" void cAvalanche_SaveData(void)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D82A0);
+INCLUDE_ASM("visualfx/avalanche", cAvalanche_writeData);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 extern "C" void FILESYS_writesync(void* a, void* b, void* data, int size, int prio);
@@ -1058,7 +1058,7 @@ extern char str_buffer[];
  * @param rows  number of units
  * @return the number of bytes written (@p stride * @p rows)
  */
-extern "C" int func_002D82A0(int direct, void* handle, void* offset, char* src, int stride, int rows)
+extern "C" int cAvalanche_writeData(int direct, void* handle, void* offset, char* src, int stride, int rows)
 {
     if (direct) {
         FILESYS_writesync(handle, offset, src, stride * rows, 100);
@@ -1096,7 +1096,7 @@ extern "C" char* cBENewRaceInterface_getLocationFile(void* iface, int i);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" int func_003DEBF0(char* name, int mode, int prio, int* fd);
 extern "C" void FILESYS_closesync(int fd, int prio);
-extern "C" int func_002D82A0(int direct, void* a, void* b, char* src, int stride, int rows);
+extern "C" int cAvalanche_writeData(int direct, void* a, void* b, char* src, int stride, int rows);
 
 struct sAvPart_83B8 {
     char pad_0x0[0xE0];
@@ -1136,11 +1136,11 @@ struct sAvGroup_83B8 {
  * and records (a collision stores its time and its instance's word at +0x78). Clears the save request
  * D_004A3A48 (On Tour m_Save).
  *
- * @param direct  byte-order flag for the writer func_002D82A0 (On Tour: littleEndian); the packed frames
+ * @param direct  byte-order flag for the writer cAvalanche_writeData (On Tour: littleEndian); the packed frames
  *                always pass 1
  * @param name  file extension
  */
-// PORT: func_002D82A0 takes the file handle and offset as void* (ints passed through pointers).
+// PORT: cAvalanche_writeData takes the file handle and offset as void* (ints passed through pointers).
 extern "C" void cAvalanche_SaveData1(int direct, char* name)
 {
     if (cAvalanche_m_avalancheList == 0) {
@@ -1167,31 +1167,31 @@ extern "C" void cAvalanche_SaveData1(int direct, char* name)
             }
         }
         int magic = 0x2BEEF00;
-        func_002D82A0(direct, (void*)fd, 0, (char*)&magic, 4, 1);
-        func_002D82A0(direct, (void*)fd, (void*)4, (char*)&off, 4, 1);
+        cAvalanche_writeData(direct, (void*)fd, 0, (char*)&magic, 4, 1);
+        cAvalanche_writeData(direct, (void*)fd, (void*)4, (char*)&off, 4, 1);
         off = 8;
         for (avalanche = (sAvGroup_83B8*)cAvalanche_m_avalancheList; avalanche != 0; avalanche = avalanche->next) {
             unsigned short header;
             for (sAvPart_83B8* node = avalanche->parts; node != 0; node = node->next) {
                 header = 48879;
-                off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&header, 2, 1);
+                off += cAvalanche_writeData(direct, (void*)fd, (void*)off, (char*)&header, 2, 1);
                 header = (int)node->count * 10 + 0xC;
-                off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&header, 2, 1);
-                off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)node->pos, 4, 3);
-                off += func_002D82A0(1, (void*)fd, (void*)off, node->data, 10, (int)node->count);
+                off += cAvalanche_writeData(direct, (void*)fd, (void*)off, (char*)&header, 2, 1);
+                off += cAvalanche_writeData(direct, (void*)fd, (void*)off, (char*)node->pos, 4, 3);
+                off += cAvalanche_writeData(1, (void*)fd, (void*)off, node->data, 10, (int)node->count);
             }
             header = avalanche->nlinks;
-            off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&header, 2, 1);
+            off += cAvalanche_writeData(direct, (void*)fd, (void*)off, (char*)&header, 2, 1);
             header = avalanche->npairs;
-            off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&header, 2, 1);
+            off += cAvalanche_writeData(direct, (void*)fd, (void*)off, (char*)&header, 2, 1);
             int k;
             for (k = 0; k < avalanche->nlinks; k++) {
-                off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&avalanche->links[k].id, 4, 1);
-                off += func_002D82A0(direct, (void*)fd, (void*)off, avalanche->links[k].obj + 0x78, 4, 1);
+                off += cAvalanche_writeData(direct, (void*)fd, (void*)off, (char*)&avalanche->links[k].id, 4, 1);
+                off += cAvalanche_writeData(direct, (void*)fd, (void*)off, avalanche->links[k].obj + 0x78, 4, 1);
             }
             for (k = 0; k < avalanche->npairs; k++) {
-                off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&avalanche->pairs[k].b, 2, 1);
-                off += func_002D82A0(direct, (void*)fd, (void*)off, (char*)&avalanche->pairs[k].a, 2, 1);
+                off += cAvalanche_writeData(direct, (void*)fd, (void*)off, (char*)&avalanche->pairs[k].b, 2, 1);
+                off += cAvalanche_writeData(direct, (void*)fd, (void*)off, (char*)&avalanche->pairs[k].a, 2, 1);
             }
         }
         FILESYS_closesync(fd, 100);
@@ -1977,7 +1977,7 @@ extern "C" void cAvalanche_addAvalancheNode(int id, char* obj, int type, float l
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D9538);
+INCLUDE_ASM("visualfx/avalanche", cAvalanche_setAvalancheNodeEmitterData);
 #ifdef SKIP_ASM
 struct sAvParams9538 { int data[0xD8 / 4]; };
 struct sAvNode9538 {
@@ -2007,7 +2007,7 @@ extern void* cAvalanche_m_avalancheList;
  * @param id  the instance record the node belongs to
  * @param params  the 0xD8-byte emitter parameters to copy
  */
-extern "C" void func_002D9538(int id, sAvParams9538* params)
+extern "C" void cAvalanche_setAvalancheNodeEmitterData(int id, sAvParams9538* params)
 {
     for (sAvGroup9538* group = (sAvGroup9538*)cAvalanche_m_avalancheList; group != 0; group = group->next) {
         for (sAvNode9538* n = group->nodes; n != 0; n = n->next) {
@@ -2041,7 +2041,7 @@ extern "C" void tAvalanche_calculate(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D96B0);
+INCLUDE_ASM("visualfx/avalanche", tAvalanche_getNode);
 #ifdef SKIP_ASM
 /**
  * Returns the node of this avalanche bound to an instance, or 0.
@@ -2052,7 +2052,7 @@ INCLUDE_ASM("visualfx/avalanche", func_002D96B0);
  * @param id  the instance record to look for
  * @return the matching node, or 0
  */
-extern "C" void* func_002D96B0(void* self, int id)
+extern "C" void* tAvalanche_getNode(void* self, int id)
 {
     for (void* n = *(void**)((char*)self + 0x4); n != 0; n = *(void**)((char*)n + 0xF4)) {
         if (*(int*)((char*)n + 0xF8) == id) {
@@ -2089,7 +2089,7 @@ extern "C" void cAvalanche_calculate(void)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D9738);
+INCLUDE_ASM("visualfx/avalanche", tAvalanche_addGroundCollision);
 #ifdef SKIP_ASM
 struct sAvNode_9738 { char pad[0xF4]; sAvNode_9738* next; };
 struct sAvEnt_9738 { short a; short depth; };
@@ -2106,12 +2106,12 @@ struct sAv_9738 {
  *
  * Does nothing once the count (+0xE) reaches 64. Otherwise counts the nodes from the list head (+0x4) up to @p stop
  * (through +0xF4) and stores (@p time, that index) as the next 4-byte entry at +0x110. tAvalancheNode_calculate calls it;
- * the entries are later sorted with func_002D5750.
+ * the entries are later sorted with compareAvalancheGroundCollisions.
  *
  * @param time  the time to record (stored as a short)
  * @param stop  the node that hit the ground
  */
-extern "C" void func_002D9738(sAv_9738* self, int time, sAvNode_9738* stop)
+extern "C" void tAvalanche_addGroundCollision(sAv_9738* self, int time, sAvNode_9738* stop)
 {
     if (self->count < 64) {
         int depth = 0;
@@ -2390,7 +2390,7 @@ extern "C" void cAvalanche_reset(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D9C00);
+INCLUDE_ASM("visualfx/avalanche", cAvalanche_getTransform);
 #ifdef SKIP_ASM
 struct sAvVec4 {
     float x, y, z, w;
@@ -2458,12 +2458,12 @@ static inline void vu0ScaleMatrixAV(sAvMatrix* dst, sAvMatrix* src, float s)
  *
  * Searches the 64 cAvalanche_m_activeNodes for one whose node (+0x2E0) has instance (+0xF8) @p id, then writes its
  * rotation (+0x70) scaled by its scale (+0xB0) to @p out with the position (+0x60) as row 3. Leaves @p out unchanged
- * when there is no match. func_002D1CF0 (util/objectinterface) forwards to it.
+ * when there is no match. cObjectInterface_getAvaSplineTransform (util/objectinterface) forwards to it.
  *
  * @param id  the instance record to look for
  * @param out  receives the transform
  */
-extern "C" void func_002D9C00(int id, sAvMatrix* out)
+extern "C" void cAvalanche_getTransform(int id, sAvMatrix* out)
 {
     int i;
     for (i = 0; i < 64; i++) {
@@ -2479,23 +2479,23 @@ extern "C" void func_002D9C00(int id, sAvMatrix* out)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002D9CB0);
+INCLUDE_ASM("visualfx/avalanche", cAvalanche_writeToReplayFrame);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct func_002D9CB0_sSlot {
+struct cAvalanche_writeToReplayFrame_sSlot {
     int* av;
     int pad4[5];
     float t;
     int isActive() { return av != 0; }
 };
-extern func_002D9CB0_sSlot D_00538938_9CB0[16] __asm__("cAvalanche_m_activeAvalanches");
+extern cAvalanche_writeToReplayFrame_sSlot D_00538938_9CB0[16] __asm__("cAvalanche_m_activeAvalanches");
 
-struct func_002D9CB0_sSave {
+struct cAvalanche_writeToReplayFrame_sSave {
     int ids[16];
     float times[16];
 };
 
-class func_002D9CB0_cStream {
+class cAvalanche_writeToReplayFrame_cStream {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01(void* data, int size);
@@ -2511,9 +2511,9 @@ public:
  *
  * @param stream  the replay stream
  */
-extern "C" void func_002D9CB0(func_002D9CB0_cStream* stream)
+extern "C" void cAvalanche_writeToReplayFrame(cAvalanche_writeToReplayFrame_cStream* stream)
 {
-    func_002D9CB0_sSave state;
+    cAvalanche_writeToReplayFrame_sSave state;
     for (int i = 0; i < 16; i++) {
         state.ids[i] = D_00538938_9CB0[i].isActive() ? *D_00538938_9CB0[i].av : -1;
         state.times[i] = D_00538938_9CB0[i].isActive() ? D_00538938_9CB0[i].t : 0.0f;
@@ -2751,7 +2751,7 @@ extern "C" void cAvalanche_resolveDataPointers(void)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/avalanche", func_002DA1C0);
+INCLUDE_ASM("visualfx/avalanche", cAvalanche_getAvalancheDataByPosition);
 #ifdef SKIP_ASM
 struct sVec4_A1C0 {
     float x, y, z, w;
@@ -2857,7 +2857,7 @@ static inline void vDivEq_A1C0(sVec4_A1C0& v, float s)
  * @return the 0x20-byte summary: average position, average scale, nearest distance, node count, type-2 flag
  */
 // PORT: g++ `<?` (min) operator.
-extern "C" sAvInfo_A1C0 func_002DA1C0(sVec3_A1C0 position)
+extern "C" sAvInfo_A1C0 cAvalanche_getAvalancheDataByPosition(sVec3_A1C0 position)
 {
     sAvInfo_A1C0 posData;
     posData.center = t4vect_Zero;

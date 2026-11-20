@@ -97,7 +97,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 class cUIScreen;
 unsigned short cUIScreen_getFrameByLabel(cUIScreen* self, int label);
 int cInput_getState(void* self, int button);
-extern "C" void func_0039F190(void* self, int a1);
+extern "C" void cUIStateStack_pop(void* self, int a1);
 extern "C" void cReplay_stopReplay(void* replay);
 extern "C" void cReplay_startAutoReplay(void* replay);
 extern "C" void cOVStateManager_triggerOverlay(int state);
@@ -230,7 +230,7 @@ extern "C" int cOVState_REPLAY_onInputBegin(sReplay_20DF38* self, cPad_20DF38* p
             cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
             break;
         case 1: {
-            func_0039F190(self->owner + 0x18, 1);
+            cUIStateStack_pop(self->owner + 0x18, 1);
             unsigned short frame = cUIScreen_getFrameByLabel((cUIScreen*)self->screen, GetHashValue32(str_TransitionOut_b));
             if (frame != 0xFFFF) {
                 cUIScreen_playFrame(self->screen, frame, 1);

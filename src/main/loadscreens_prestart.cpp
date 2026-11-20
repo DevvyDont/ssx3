@@ -767,10 +767,10 @@ public:
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // malloc-like allocation (gcc treats operator new results as unaliased)
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" void* func_00397B08(void* p);
+extern "C" void* cUIEngine_cUIEngine(void* p);
 extern "C" int cUIEngine_loadFile(void* ui, const char* name);
 extern "C" void* func_00186A08(void* p, void* ui);
-extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern char str_UIEngine_b[];
 extern char str_data_ui_su[];
@@ -803,16 +803,16 @@ struct sUI_232B28 {
 /**
  * Loads the start screen: creates its UI engine from "data/ui/su" and pushes the memory card or progressive-scan state.
  *
- * Calls GrMan's InitTextures (slot 44) with 0x100, builds a 0x70-byte UI engine (tag "UIEngine", func_00397B08) into
+ * Calls GrMan's InitTextures (slot 44) with 0x100, builds a 0x70-byte UI engine (tag "UIEngine", cUIEngine_cUIEngine) into
  * +0xC, loads "data/ui/su" (cUIEngine_loadFile), gives it SSXApp's FELocale (+0x10) and Fonts (+0x8) and a new
  * 0x1C-byte input (tag "GLUIInput", cFEInput_vtbl at +0x8) at +0xC of the engine. Type (+0x18) 0 pushes a
  * cFEStateMemCard (584 bytes, func_00186A08); type 2 pushes a 72-byte "cFEStateProgressive" (cUIState base
- * func_0039E2A0, vtable D_0047CA18); any other type pushes nothing. Load slot (+0x14) of cStartScreen_vtbl.
+ * cUIState_cUIState, vtable D_0047CA18); any other type pushes nothing. Load slot (+0x14) of cStartScreen_vtbl.
  */
 extern "C" void cStartScreen_load(void* self)
 {
     ((cWorld_232B28*)GrMan)->v44(0x100);
-    void* ui = func_00397B08(operator new(0x70, str_UIEngine_b, 0x100, 0));
+    void* ui = cUIEngine_cUIEngine(operator new(0x70, str_UIEngine_b, 0x100, 0));
     *(void**)((char*)self + 0xC) = ui;
     cUIEngine_loadFile(ui, str_data_ui_su);
     (*(sUI_232B28**)((char*)self + 0xC))->f10 = (int)SSXApp->FELocale;
@@ -831,7 +831,7 @@ extern "C" void cStartScreen_load(void* self)
         cUIStateStack_push(*(char**)((char*)self + 0xC) + 0x18, item);
     } else if (mode == 2) {
         void* progressiveState = operator new(72, str_cFEStateProgressive, 0, 0);
-        func_0039E2A0(progressiveState, *(void**)((char*)self + 0xC));
+        cUIState_cUIState(progressiveState, *(void**)((char*)self + 0xC));
         *(void**)((char*)progressiveState + 8) = D_0047CA18;
         cUIStateStack_push(*(char**)((char*)self + 0xC) + 0x18, progressiveState);
     }
@@ -905,10 +905,10 @@ void* cStartScreen_loseFocus(void* self)
 INCLUDE_ASM("main/loadscreens_prestart", cStartScreen_update);
 #ifdef SKIP_ASM
 void cLoadScreen_update(void*);
-extern "C" void func_00398038(void*);
+extern "C" void cUIEngine_update(void*);
 
 /**
- * Updates the start screen: runs the load-screen update (cLoadScreen_update), updates the UI engine (func_00398038 on +0xC)
+ * Updates the start screen: runs the load-screen update (cLoadScreen_update), updates the UI engine (cUIEngine_update on +0xC)
  * and counts a display tick (+0x14).
  *
  * Update slot (+0x34) of cStartScreen_vtbl.
@@ -916,7 +916,7 @@ extern "C" void func_00398038(void*);
 extern "C" void cStartScreen_update(void* self)
 {
     cLoadScreen_update(self);
-    func_00398038(*(void**)((char*)self + 0xC));
+    cUIEngine_update(*(void**)((char*)self + 0xC));
     (*(int*)((char*)self + 0x14))++;
 }
 #endif
@@ -947,13 +947,13 @@ public:
     virtual void v18();
     virtual void v19();
 };
-extern "C" void func_00397B70(void* obj, int a);
+extern "C" void cUIEngine__cUIEngine(void* obj, int a);
 extern "C" void cGraphicsMan_PurgeTextures(void* world);
 
 /**
  * Purges the start screen: flushes the renderer, destroys the UI engine and purges textures.
  *
- * Calls GrMan's FlushRenderer (slot 19), destroys the engine at +0xC with func_00397B70(engine, 3) when set, clears the
+ * Calls GrMan's FlushRenderer (slot 19), destroys the engine at +0xC with cUIEngine__cUIEngine(engine, 3) when set, clears the
  * pointer and calls cGraphicsMan_PurgeTextures. Purge slot (+0x1C) of cStartScreen_vtbl.
  */
 extern "C" void cStartScreen_purge(void* self)
@@ -961,7 +961,7 @@ extern "C" void cStartScreen_purge(void* self)
     ((cWorld232D50*)GrMan)->v19();
     void* uiEngine = *(void**)((char*)self + 0xC);
     if (uiEngine != 0) {
-        func_00397B70(uiEngine, 3);
+        cUIEngine__cUIEngine(uiEngine, 3);
     }
     *(void**)((char*)self + 0xC) = 0;
     cGraphicsMan_PurgeTextures(GrMan);
@@ -996,13 +996,13 @@ public:
     virtual void v20();
 };
 extern "C" int cFadeScreen_drawFade(void* self);
-extern "C" void func_00397DF8(void* obj);
+extern "C" void cUIEngine_render2D(void* obj);
 
 /**
  * Renders the start screen once the renderer is ready: the UI engine unless the fade covers the screen, then the frame.
  *
  * Returns 0 while GrMan's IsRenderReady (slot 17) is 0. Otherwise draws the fade (cFadeScreen_drawFade) and, when it is not
- * fully opaque, the UI engine (func_00397DF8 on +0xC), then DrawFrame (slot 20). Render slot (+0x3C) of cStartScreen_vtbl.
+ * fully opaque, the UI engine (cUIEngine_render2D on +0xC), then DrawFrame (slot 20). Render slot (+0x3C) of cStartScreen_vtbl.
  *
  * @return 1 when a frame was drawn, otherwise 0
  */
@@ -1012,7 +1012,7 @@ extern "C" int cStartScreen_render(void* self)
         return 0;
     }
     if (cFadeScreen_drawFade(self) == 0) {
-        func_00397DF8(*(void**)((char*)self + 0xC));
+        cUIEngine_render2D(*(void**)((char*)self + 0xC));
     }
     ((cWorld232DA8*)GrMan)->v20();
     return 1;
@@ -1028,9 +1028,9 @@ extern "C" void* cBE_getBE();
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 // malloc-like allocation (gcc treats operator new results as unaliased)
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" void* func_00397B08(void* p);
+extern "C" void* cUIEngine_cUIEngine(void* p);
 extern "C" int cUIEngine_loadFile(void* ui, const char* name);
-extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern "C" void cUIStateStack_push(void* list, void* item);
 // PORT: cGameLoadScreen_loadTexture takes (self) but this caller passes (self, 0).
 extern "C" void cGameLoadScreen_loadTexture_2E20(void* self, int a1) __asm__("cGameLoadScreen_loadTexture");
@@ -1077,7 +1077,7 @@ struct cLoadItemA_2E20 {
     char pad[0x48];
     cLoadItemA_2E20(void* ui)
     {
-        func_0039E2A0(this, ui);
+        cUIState_cUIState(this, ui);
         *(void**)(pad + 8) = D_0047C878;
         D_004A19D8 = 0;
     }
@@ -1087,7 +1087,7 @@ struct cLoadItemB_2E20 {
     char pad[0x48];
     cLoadItemB_2E20(void* ui)
     {
-        func_0039E2A0(this, ui);
+        cUIState_cUIState(this, ui);
         *(void**)(pad + 8) = D_0047C7A8;
         D_004A19DC = 0;
     }
@@ -1098,7 +1098,7 @@ struct cLoadItemC_2E20 {
     void* owner;    // 0x48
     cLoadItemC_2E20(void* ui)
     {
-        func_0039E2A0(this, ui);
+        cUIState_cUIState(this, ui);
         *(void**)(pad + 8) = D_0047C948;
         owner = 0;
     }
@@ -1108,8 +1108,8 @@ struct cLoadItemC_2E20 {
  * Loads the game load screen: creates its UI engine from "data/ui/gl" and pushes the loading state for the race.
  *
  * Calls GrMan's InitTextures (slot 44) with 0x100 and cBE_getInterface (result unused), builds a 0x70-byte UI engine
- * (tag "UIEngine", func_00397B08) into +0xC, loads "data/ui/gl", gives it SSXApp's Fonts and FELocale and a 0x1C-byte
- * "GLUIInput" input. Then pushes one 0x48-byte state built on func_0039E2A0:
+ * (tag "UIEngine", cUIEngine_cUIEngine) into +0xC, loads "data/ui/gl", gives it SSXApp's Fonts and FELocale and a 0x1C-byte
+ * "GLUIInput" input. Then pushes one 0x48-byte state built on cUIState_cUIState:
  * - "cGameLoadStateOutLodge" (vtable D_0047C878, clears D_004A19D8) when D_004A19D8 is set, or on the career path
  *   (cGamePath 0) in game mode 5 or 6;
  * - "cGameLoadStateConquer" (D_0047C7A8, clears D_004A19DC) on the career path in any other mode;
@@ -1124,7 +1124,7 @@ extern "C" void cGameLoadScreen_load(void* self)
     sVE_2E20* vt = (sVE_2E20*)w->mVtbl;
     vt[44].fn((char*)w + vt[44].delta, 0x100);
     cBE_getInterface_Fv(cBE_getBE(), 0);
-    void* ui = func_00397B08(operator new(0x70, str_UIEngine_b, 0x100, 0));
+    void* ui = cUIEngine_cUIEngine(operator new(0x70, str_UIEngine_b, 0x100, 0));
     *(void**)((char*)self + 0xC) = ui;
     cUIEngine_loadFile(ui, str_data_ui_gl);
     (*(sUI_2E20**)((char*)self + 0xC))->f8 = (int)SSXApp->Fonts;
@@ -1322,7 +1322,7 @@ int cGameLoadScreen_loseFocus(void* self)
 INCLUDE_ASM("main/loadscreens_prestart", cGameLoadScreen_purge);
 #ifdef SKIP_ASM
 extern "C" void cGraphicsMan_PurgeTextures(void* world);
-extern "C" void func_00397B70(void* obj, int a);
+extern "C" void cUIEngine__cUIEngine(void* obj, int a);
 extern "C" void* cAudioInterface_bxAudio(void);
 extern "C" void func_0028FA98(void* self, float v);
 
@@ -1385,7 +1385,7 @@ public:
  * Purges the game load screen: flushes the renderer, destroys the UI engine, removes its two textures and purges
  * textures.
  *
- * Calls GrMan's FlushRenderer (slot 19), destroys the engine at +0xC with func_00397B70(engine, 3) when set (the
+ * Calls GrMan's FlushRenderer (slot 19), destroys the engine at +0xC with cUIEngine__cUIEngine(engine, 3) when set (the
  * pointer is not cleared), removes each non-zero texture id of the pair at +0x10 (RemoveTexture, slot 50), calls
  * cGraphicsMan_PurgeTextures and func_0028FA98(audio, 1.0) on the audio (cAudioInterface_bxAudio). Purge slot (+0x1C) of
  * cGameLoadScreen_vtbl.
@@ -1395,7 +1395,7 @@ extern "C" void cGameLoadScreen_purge(void* self)
     ((cWorld002332E8*)GrMan)->v19();
     void* uiEngine = *(void**)((char*)self + 0xC);
     if (uiEngine != 0) {
-        func_00397B70(uiEngine, 3);
+        cUIEngine__cUIEngine(uiEngine, 3);
     }
     int i;
     for (i = 0; i < 2; i++) {
@@ -1437,13 +1437,13 @@ public:
     virtual void v20();
 };
 extern "C" int cFadeScreen_drawFade(void* self);
-extern "C" void func_00397DF8(void* obj);
+extern "C" void cUIEngine_render2D(void* obj);
 
 /**
  * Renders the game load screen once the renderer is ready: the UI engine unless the fade covers the screen, then the
  * frame.
  *
- * Same body as cStartScreen_render (IsRenderReady, cFadeScreen_drawFade, func_00397DF8 on +0xC, DrawFrame). Render slot (+0x3C) of
+ * Same body as cStartScreen_render (IsRenderReady, cFadeScreen_drawFade, cUIEngine_render2D on +0xC, DrawFrame). Render slot (+0x3C) of
  * cGameLoadScreen_vtbl.
  *
  * @return 1 when a frame was drawn, otherwise 0
@@ -1454,7 +1454,7 @@ extern "C" int cGameLoadScreen_render(void* self)
         return 0;
     }
     if (cFadeScreen_drawFade(self) == 0) {
-        func_00397DF8(*(void**)((char*)self + 0xC));
+        cUIEngine_render2D(*(void**)((char*)self + 0xC));
     }
     ((cWorld233390*)GrMan)->v20();
     return 1;
@@ -1464,18 +1464,18 @@ extern "C" int cGameLoadScreen_render(void* self)
 //100%
 INCLUDE_ASM("main/loadscreens_prestart", cGameLoadScreen_update);
 #ifdef SKIP_ASM
-extern "C" void func_00398038(void*);
+extern "C" void cUIEngine_update(void*);
 void cLoadScreen_update(void*);
 
 /**
- * Updates the game load screen: updates the UI engine (func_00398038 on +0xC), then runs the load-screen update
+ * Updates the game load screen: updates the UI engine (cUIEngine_update on +0xC), then runs the load-screen update
  * (cLoadScreen_update).
  *
  * Update slot (+0x34) of cGameLoadScreen_vtbl.
  */
 extern "C" void cGameLoadScreen_update(void* self)
 {
-    func_00398038(*(void**)((char*)self + 0xC));
+    cUIEngine_update(*(void**)((char*)self + 0xC));
     cLoadScreen_update(self);
 }
 #endif

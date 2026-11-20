@@ -3109,7 +3109,7 @@ extern "C" void func_002BC4E0(void) {
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Type);
 #ifdef SKIP_ASM
 /**
- * Returns 0: tWPInGameData's default Type, vtable slot 1 (tWPInGameData_MusicTrigger overrides it with func_002C1490).
+ * Returns 0: tWPInGameData's default Type, vtable slot 1 (tWPInGameData_MusicTrigger overrides it with tWPInGameData_MusicTrigger_Type).
  *
  * @return 0
  */
@@ -3122,7 +3122,7 @@ extern "C" int tWPInGameData_Type(void) {
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Value);
 #ifdef SKIP_ASM
 /**
- * Returns 0: tWPInGameData's default Value, vtable slot 2 (tWPInGameData_MusicTrigger overrides it with func_002C1498).
+ * Returns 0: tWPInGameData's default Value, vtable slot 2 (tWPInGameData_MusicTrigger overrides it with tWPInGameData_MusicTrigger_Value).
  *
  * @return 0
  */
@@ -3135,7 +3135,7 @@ extern "C" int tWPInGameData_Value(void) {
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_MixPreset);
 #ifdef SKIP_ASM
 /**
- * Returns 0: tWPInGameData's default MixPreset, vtable slot 3 (tWPInGameData_Mix overrides it with func_002C14A0).
+ * Returns 0: tWPInGameData's default MixPreset, vtable slot 3 (tWPInGameData_Mix overrides it with tWPInGameData_Mix_MixPreset).
  *
  * @return 0
  */
@@ -3148,7 +3148,7 @@ extern "C" int tWPInGameData_MixPreset(void) {
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_BankID);
 #ifdef SKIP_ASM
 /**
- * Returns 0: tWPInGameData's default BankID, vtable slot 4 (tWPInGameData_Ambience overrides it with func_002C14A8).
+ * Returns 0: tWPInGameData's default BankID, vtable slot 4 (tWPInGameData_Ambience overrides it with tWPInGameData_Ambience_BankID).
  *
  * @return 0
  */
@@ -3161,7 +3161,7 @@ extern "C" int tWPInGameData_BankID(void) {
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SpeechID);
 #ifdef SKIP_ASM
 /**
- * Returns 0: tWPInGameData's default SpeechID, vtable slot 5 (tWPInGameData_Speech overrides it with func_002C14B0).
+ * Returns 0: tWPInGameData's default SpeechID, vtable slot 5 (tWPInGameData_Speech overrides it with tWPInGameData_Speech_SpeechID).
  *
  * @return 0
  */
@@ -3175,7 +3175,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_DrawDistance);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default DrawDistance, vtable slot 6 (tWPInGameData_Camera overrides it with
- * func_002C14B8).
+ * tWPInGameData_Camera_DrawDistance).
  *
  * @return 0
  */
@@ -3188,7 +3188,7 @@ extern "C" int tWPInGameData_DrawDistance(void) {
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_FogDensity);
 #ifdef SKIP_ASM
 /**
- * Returns 0: tWPInGameData's default FogDensity, vtable slot 7 (tWPInGameData_Fog overrides it with func_002C14C0).
+ * Returns 0: tWPInGameData's default FogDensity, vtable slot 7 (tWPInGameData_Fog overrides it with tWPInGameData_Fog_FogDensity).
  *
  * @return 0
  */
@@ -3201,7 +3201,7 @@ extern "C" int tWPInGameData_FogDensity(void) {
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_FogNear);
 #ifdef SKIP_ASM
 /**
- * Returns 0: tWPInGameData's default FogNear, vtable slot 8 (tWPInGameData_Fog overrides it with func_002C14C8).
+ * Returns 0: tWPInGameData's default FogNear, vtable slot 8 (tWPInGameData_Fog overrides it with tWPInGameData_Fog_FogNear).
  *
  * @return 0
  */
@@ -3214,7 +3214,7 @@ extern "C" int tWPInGameData_FogNear(void) {
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_FogFar);
 #ifdef SKIP_ASM
 /**
- * Returns 0: tWPInGameData's default FogFar, vtable slot 9 (tWPInGameData_Fog overrides it with func_002C14D0).
+ * Returns 0: tWPInGameData's default FogFar, vtable slot 9 (tWPInGameData_Fog overrides it with tWPInGameData_Fog_FogFar).
  *
  * @return 0
  */
@@ -3227,7 +3227,7 @@ extern "C" int tWPInGameData_FogFar(void) {
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_FogColourR);
 #ifdef SKIP_ASM
 /**
- * Returns 0: tWPInGameData's default FogColourR, vtable slot 10 (tWPInGameData_Fog overrides it with func_002C14D8).
+ * Returns 0: tWPInGameData's default FogColourR, vtable slot 10 (tWPInGameData_Fog overrides it with tWPInGameData_Fog_FogColourR).
  *
  * @return 0
  */
@@ -3240,7 +3240,7 @@ extern "C" int tWPInGameData_FogColourR(void) {
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_FogColourG);
 #ifdef SKIP_ASM
 /**
- * Returns 0: tWPInGameData's default FogColourG, vtable slot 11 (tWPInGameData_Fog overrides it with func_002C14E0).
+ * Returns 0: tWPInGameData's default FogColourG, vtable slot 11 (tWPInGameData_Fog overrides it with tWPInGameData_Fog_FogColourG).
  *
  * @return 0
  */
@@ -3253,7 +3253,7 @@ extern "C" int tWPInGameData_FogColourG(void) {
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_FogColourB);
 #ifdef SKIP_ASM
 /**
- * Returns 0: tWPInGameData's default FogColourB, vtable slot 12 (tWPInGameData_Fog overrides it with func_002C14E8).
+ * Returns 0: tWPInGameData's default FogColourB, vtable slot 12 (tWPInGameData_Fog overrides it with tWPInGameData_Fog_FogColourB).
  *
  * @return 0
  */
@@ -3267,7 +3267,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlowCutoff);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default LightGlowCutoff, vtable slot 13 (tWPInGameData_LightGlow overrides it with
- * func_002C14F0).
+ * tWPInGameData_LightGlow_LightGlowCutoff).
  *
  * @return 0
  */
@@ -3281,7 +3281,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlowCutoffScale);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default LightGlowCutoffScale, vtable slot 14 (tWPInGameData_LightGlow overrides it with
- * func_002C14F8).
+ * tWPInGameData_LightGlow_LightGlowCutoffScale).
  *
  * @return 0
  */
@@ -3295,7 +3295,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlowCopyIntensity);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default LightGlowCopyIntensity, vtable slot 15 (tWPInGameData_LightGlow overrides it with
- * func_002C1500).
+ * tWPInGameData_LightGlow_LightGlowCopyIntensity).
  *
  * @return 0
  */
@@ -3309,7 +3309,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlowSourceIntensity);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default LightGlowSourceIntensity, vtable slot 16 (tWPInGameData_LightGlow overrides it
- * with func_002C1508).
+ * with tWPInGameData_LightGlow_LightGlowSourceIntensity).
  *
  * @return 0
  */
@@ -3323,7 +3323,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlowFrameIntensity);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default LightGlowFrameIntensity, vtable slot 17 (tWPInGameData_LightGlow overrides it with
- * func_002C1510).
+ * tWPInGameData_LightGlow_LightGlowFrameIntensity).
  *
  * @return 0
  */
@@ -3337,7 +3337,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlowBlend2);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default LightGlowBlend2, vtable slot 18 (tWPInGameData_LightGlow overrides it with
- * func_002C1518).
+ * tWPInGameData_LightGlow_LightGlowBlend2).
  *
  * @return 0
  */
@@ -3351,7 +3351,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlowBlend3);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default LightGlowBlend3, vtable slot 19 (tWPInGameData_LightGlow overrides it with
- * func_002C1520).
+ * tWPInGameData_LightGlow_LightGlowBlend3).
  *
  * @return 0
  */
@@ -3365,7 +3365,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTintScaleR);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default ScreenTintScaleR, vtable slot 20 (tWPInGameData_ScreenTint overrides it with
- * func_002C1528).
+ * tWPInGameData_ScreenTint_ScreenTintScaleR).
  *
  * @return 0
  */
@@ -3379,7 +3379,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTintScaleG);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default ScreenTintScaleG, vtable slot 21 (tWPInGameData_ScreenTint overrides it with
- * func_002C1530).
+ * tWPInGameData_ScreenTint_ScreenTintScaleG).
  *
  * @return 0
  */
@@ -3393,7 +3393,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTintScaleB);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default ScreenTintScaleB, vtable slot 22 (tWPInGameData_ScreenTint overrides it with
- * func_002C1538).
+ * tWPInGameData_ScreenTint_ScreenTintScaleB).
  *
  * @return 0
  */
@@ -3407,7 +3407,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTintOffsetR);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default ScreenTintOffsetR, vtable slot 23 (tWPInGameData_ScreenTint overrides it with
- * func_002C1540).
+ * tWPInGameData_ScreenTint_ScreenTintOffsetR).
  *
  * @return 0
  */
@@ -3421,7 +3421,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTintOffsetG);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default ScreenTintOffsetG, vtable slot 24 (tWPInGameData_ScreenTint overrides it with
- * func_002C1548).
+ * tWPInGameData_ScreenTint_ScreenTintOffsetG).
  *
  * @return 0
  */
@@ -3435,7 +3435,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTintOffsetB);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default ScreenTintOffsetB, vtable slot 25 (tWPInGameData_ScreenTint overrides it with
- * func_002C1550).
+ * tWPInGameData_ScreenTint_ScreenTintOffsetB).
  *
  * @return 0
  */
@@ -3449,7 +3449,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SkyBoxRotation);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SkyBoxRotation, vtable slot 26 (tWPInGameData_SkyBox overrides it with
- * func_002C1558).
+ * tWPInGameData_SkyBox_SkyBoxRotation).
  *
  * @return 0
  */
@@ -3463,7 +3463,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SunPitchOffset);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SunPitchOffset, vtable slot 27 (tWPInGameData_Sun overrides it with
- * func_002C1560).
+ * tWPInGameData_Sun_SunPitchOffset).
  *
  * @return 0
  */
@@ -3476,7 +3476,7 @@ extern "C" int tWPInGameData_SunPitchOffset(void) {
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SunYawOffset);
 #ifdef SKIP_ASM
 /**
- * Returns 0: tWPInGameData's default SunYawOffset, vtable slot 28 (tWPInGameData_Sun overrides it with func_002C1568).
+ * Returns 0: tWPInGameData's default SunYawOffset, vtable slot 28 (tWPInGameData_Sun overrides it with tWPInGameData_Sun_SunYawOffset).
  *
  * @return 0
  */
@@ -3489,7 +3489,7 @@ extern "C" int tWPInGameData_SunYawOffset(void) {
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SunColorR);
 #ifdef SKIP_ASM
 /**
- * Returns 0: tWPInGameData's default SunColorR, vtable slot 29 (tWPInGameData_Sun overrides it with func_002C1570).
+ * Returns 0: tWPInGameData's default SunColorR, vtable slot 29 (tWPInGameData_Sun overrides it with tWPInGameData_Sun_SunColorR).
  *
  * @return 0
  */
@@ -3502,7 +3502,7 @@ extern "C" int tWPInGameData_SunColorR(void) {
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SunColorG);
 #ifdef SKIP_ASM
 /**
- * Returns 0: tWPInGameData's default SunColorG, vtable slot 30 (tWPInGameData_Sun overrides it with func_002C1578).
+ * Returns 0: tWPInGameData's default SunColorG, vtable slot 30 (tWPInGameData_Sun overrides it with tWPInGameData_Sun_SunColorG).
  *
  * @return 0
  */
@@ -3515,7 +3515,7 @@ extern "C" int tWPInGameData_SunColorG(void) {
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SunColorB);
 #ifdef SKIP_ASM
 /**
- * Returns 0: tWPInGameData's default SunColorB, vtable slot 31 (tWPInGameData_Sun overrides it with func_002C1580).
+ * Returns 0: tWPInGameData's default SunColorB, vtable slot 31 (tWPInGameData_Sun overrides it with tWPInGameData_Sun_SunColorB).
  *
  * @return 0
  */
@@ -3528,7 +3528,7 @@ extern "C" int tWPInGameData_SunColorB(void) {
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SunIntensity);
 #ifdef SKIP_ASM
 /**
- * Returns 0: tWPInGameData's default SunIntensity, vtable slot 32 (tWPInGameData_Sun overrides it with func_002C1588).
+ * Returns 0: tWPInGameData's default SunIntensity, vtable slot 32 (tWPInGameData_Sun overrides it with tWPInGameData_Sun_SunIntensity).
  *
  * @return 0
  */
@@ -3541,7 +3541,7 @@ extern "C" int tWPInGameData_SunIntensity(void) {
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SunType);
 #ifdef SKIP_ASM
 /**
- * Returns 0: tWPInGameData's default SunType, vtable slot 33 (tWPInGameData_Sun overrides it with func_002C1590).
+ * Returns 0: tWPInGameData's default SunType, vtable slot 33 (tWPInGameData_Sun overrides it with tWPInGameData_Sun_SunType).
  *
  * @return 0
  */
@@ -3554,7 +3554,7 @@ extern "C" int tWPInGameData_SunType(void) {
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LensIntensity);
 #ifdef SKIP_ASM
 /**
- * Returns 0: tWPInGameData's default LensIntensity, vtable slot 34 (tWPInGameData_Sun overrides it with func_002C1598).
+ * Returns 0: tWPInGameData's default LensIntensity, vtable slot 34 (tWPInGameData_Sun overrides it with tWPInGameData_Sun_LensIntensity).
  *
  * @return 0
  */
@@ -3567,7 +3567,7 @@ extern "C" int tWPInGameData_LensIntensity(void) {
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SunRadius);
 #ifdef SKIP_ASM
 /**
- * Returns 0: tWPInGameData's default SunRadius, vtable slot 35 (tWPInGameData_Sun overrides it with func_002C15A0).
+ * Returns 0: tWPInGameData's default SunRadius, vtable slot 35 (tWPInGameData_Sun overrides it with tWPInGameData_Sun_SunRadius).
  *
  * @return 0
  */
@@ -3581,7 +3581,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowSparkleDensity);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowSparkleDensity, vtable slot 36 (tWPInGameData_Surface overrides it with
- * func_002C15A8).
+ * tWPInGameData_Surface_SnowSparkleDensity).
  *
  * @return 0
  */
@@ -3595,7 +3595,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightIrradianceName);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default LightIrradianceName, vtable slot 37 (tWPInGameData_Lighting overrides it with
- * func_002C15B0).
+ * tWPInGameData_Lighting_LightIrradianceName).
  *
  * @return 0
  */
@@ -3609,7 +3609,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ShadowIrradianceName);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default ShadowIrradianceName, vtable slot 38 (tWPInGameData_Lighting overrides it with
- * func_002C15B8).
+ * tWPInGameData_Lighting_ShadowIrradianceName).
  *
  * @return 0
  */
@@ -3623,7 +3623,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_TunnelIrradianceName);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default TunnelIrradianceName, vtable slot 39 (tWPInGameData_Lighting overrides it with
- * func_002C15C0).
+ * tWPInGameData_Lighting_TunnelIrradianceName).
  *
  * @return 0
  */
@@ -3637,7 +3637,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ObjectIrradianceName);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default ObjectIrradianceName, vtable slot 40 (tWPInGameData_Lighting overrides it with
- * func_002C15C8).
+ * tWPInGameData_Lighting_ObjectIrradianceName).
  *
  * @return 0
  */
@@ -3651,7 +3651,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_AmbientLightIntensityOffset);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default AmbientLightIntensityOffset, vtable slot 41 (tWPInGameData_Lighting overrides it
- * with func_002C15D0).
+ * with tWPInGameData_Lighting_AmbientLightIntensityOffset).
  *
  * @return 0
  */
@@ -3665,7 +3665,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_RimLightIntensityOffset);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default RimLightIntensityOffset, vtable slot 42 (tWPInGameData_Lighting overrides it with
- * func_002C15D8).
+ * tWPInGameData_Lighting_RimLightIntensityOffset).
  *
  * @return 0
  */
@@ -3679,7 +3679,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowIntensity);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowIntensity, vtable slot 43 (tWPInGameData_Weather overrides it with
- * func_002C15E0).
+ * tWPInGameData_Weather_SnowIntensity).
  *
  * @return 0
  */
@@ -3692,7 +3692,7 @@ extern "C" int tWPInGameData_SnowIntensity(void) {
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_FlakeSize);
 #ifdef SKIP_ASM
 /**
- * Returns 0: tWPInGameData's default FlakeSize, vtable slot 44 (tWPInGameData_Weather overrides it with func_002C15E8).
+ * Returns 0: tWPInGameData's default FlakeSize, vtable slot 44 (tWPInGameData_Weather overrides it with tWPInGameData_Weather_FlakeSize).
  *
  * @return 0
  */
@@ -3706,7 +3706,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_WindIntensity);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default WindIntensity, vtable slot 45 (tWPInGameData_Weather overrides it with
- * func_002C15F0).
+ * tWPInGameData_Weather_WindIntensity).
  *
  * @return 0
  */
@@ -3720,7 +3720,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_WindRotation);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default WindRotation, vtable slot 46 (tWPInGameData_Weather overrides it with
- * func_002C15F8).
+ * tWPInGameData_Weather_WindRotation).
  *
  * @return 0
  */
@@ -3734,7 +3734,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_PlayerWindIntensity);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default PlayerWindIntensity, vtable slot 47 (tWPInGameData_Weather overrides it with
- * func_002C1600).
+ * tWPInGameData_Weather_PlayerWindIntensity).
  *
  * @return 0
  */
@@ -3748,7 +3748,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Temperature);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default Temperature, vtable slot 48 (tWPInGameData_Weather overrides it with
- * func_002C1608).
+ * tWPInGameData_Weather_Temperature).
  *
  * @return 0
  */
@@ -3762,7 +3762,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowFlurries);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowFlurries, vtable slot 49 (tWPInGameData_Weather overrides it with
- * func_002C1610).
+ * tWPInGameData_Weather_SnowFlurries).
  *
  * @return 0
  */
@@ -3776,7 +3776,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowGravityMultiplier);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowGravityMultiplier, vtable slot 50 (tWPInGameData_Weather overrides it with
- * func_002C1618).
+ * tWPInGameData_Weather_SnowGravityMultiplier).
  *
  * @return 0
  */
@@ -3790,7 +3790,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowFluffItensity);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowFluffItensity, vtable slot 51 (tWPInGameData_Weather overrides it with
- * func_002C1620).
+ * tWPInGameData_Weather_SnowFluffItensity).
  *
  * @return 0
  */
@@ -3804,7 +3804,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowFluffWindIntensity);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowFluffWindIntensity, vtable slot 52 (tWPInGameData_Weather overrides it with
- * func_002C1628).
+ * tWPInGameData_Weather_SnowFluffWindIntensity).
  *
  * @return 0
  */
@@ -3818,7 +3818,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightningChance);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default LightningChance, vtable slot 53 (tWPInGameData_Weather overrides it with
- * func_002C1630).
+ * tWPInGameData_Weather_LightningChance).
  *
  * @return 0
  */
@@ -3832,7 +3832,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowFlakeColourA);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowFlakeColourA, vtable slot 54 (tWPInGameData_Weather overrides it with
- * func_002C1638).
+ * tWPInGameData_Weather_SnowFlakeColourA).
  *
  * @return 0
  */
@@ -3846,7 +3846,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowFlakeColourR);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowFlakeColourR, vtable slot 55 (tWPInGameData_Weather overrides it with
- * func_002C1640).
+ * tWPInGameData_Weather_SnowFlakeColourR).
  *
  * @return 0
  */
@@ -3860,7 +3860,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowFlakeColourG);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowFlakeColourG, vtable slot 56 (tWPInGameData_Weather overrides it with
- * func_002C1648).
+ * tWPInGameData_Weather_SnowFlakeColourG).
  *
  * @return 0
  */
@@ -3874,7 +3874,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowFlakeColourB);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowFlakeColourB, vtable slot 57 (tWPInGameData_Weather overrides it with
- * func_002C1650).
+ * tWPInGameData_Weather_SnowFlakeColourB).
  *
  * @return 0
  */
@@ -3888,7 +3888,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowFluffColourA);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowFluffColourA, vtable slot 58 (tWPInGameData_Weather overrides it with
- * func_002C1658).
+ * tWPInGameData_Weather_SnowFluffColourA).
  *
  * @return 0
  */
@@ -3902,7 +3902,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowFluffColourR);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowFluffColourR, vtable slot 59 (tWPInGameData_Weather overrides it with
- * func_002C1660).
+ * tWPInGameData_Weather_SnowFluffColourR).
  *
  * @return 0
  */
@@ -3916,7 +3916,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowFluffColourG);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowFluffColourG, vtable slot 60 (tWPInGameData_Weather overrides it with
- * func_002C1668).
+ * tWPInGameData_Weather_SnowFluffColourG).
  *
  * @return 0
  */
@@ -3930,7 +3930,7 @@ INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowFluffColourB);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowFluffColourB, vtable slot 61 (tWPInGameData_Weather overrides it with
- * func_002C1670).
+ * tWPInGameData_Weather_SnowFluffColourB).
  *
  * @return 0
  */
@@ -3943,7 +3943,7 @@ extern "C" int tWPInGameData_SnowFluffColourB(void) {
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Level);
 #ifdef SKIP_ASM
 /**
- * Returns 0: tWPInGameData's default Level, vtable slot 62 (tWPInGameData_Danger overrides it with func_002C1678).
+ * Returns 0: tWPInGameData's default Level, vtable slot 62 (tWPInGameData_Danger overrides it with tWPInGameData_Danger_Level).
  *
  * @return 0
  */
@@ -3956,7 +3956,7 @@ extern "C" int tWPInGameData_Level(void) {
 INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_PointRate);
 #ifdef SKIP_ASM
 /**
- * Returns 0: tWPInGameData's default PointRate, vtable slot 63 (tWPInGameData_Danger overrides it with func_002C1680).
+ * Returns 0: tWPInGameData's default PointRate, vtable slot 63 (tWPInGameData_Danger overrides it with tWPInGameData_Danger_PointRate).
  *
  * @return 0
  */

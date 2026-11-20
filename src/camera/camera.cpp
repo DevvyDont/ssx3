@@ -723,7 +723,7 @@ extern void cCamera_applyCameraShake_E668(void*) __asm__("cCamera_applyCameraSha
 extern "C" void cLookAtChaseAlgorithm_calcPitchHeading(void* self, int a1);                      // cLookAtChaseAlgorithm::calcPitchHeading(bool)
 extern "C" void cLookAtChaseAlgorithm_calcPose(void* self);                              // cLookAtChaseAlgorithm::calcPose
 extern "C" void cRenderStateMan_update(int, float, float, float);                // cRenderStateMan::update
-extern "C" float func_002EE3B8(int);                                    // cRenderStateMan::DrawDistance
+extern "C" float cRenderStateMan_DrawDistance(int);                                    // cRenderStateMan::DrawDistance
 extern t4Vector D_004FF120_E668 __asm__("t4vect_Zero");                  // t4vect::Zero
 extern t4Vector D_004FF130_E668 __asm__("t4vect_Origin");                  // t4vect::Origin
 extern t4Matrix D_004C53A0_E668 __asm__("D_004C53A0");                  // CamAxisFlip
@@ -987,7 +987,7 @@ extern "C" void cCamera_updateCamMat_E668(cCamera_E668* self) __asm__("cCamera_u
  * (cCamera_applyCameraShake) and recomputes Pose from ResultAlgorithm (cLookAtChaseAlgorithm_calcPitchHeading with 0). CamMat becomes the axis
  * flip D_004C53A0 times the rotation of Pose's quaternion, translated by minus Pose's position; Direction its z column.
  * View, Near and Far are blended from the algorithms by lens weight (list node +0x4). Last, cRenderStateMan_update runs
- * for view ViewIndex + 6 at the camera's x/y, Far is capped by that view's draw distance (func_002EE3B8) with MinNear
+ * for view ViewIndex + 6 at the camera's x/y, Far is capped by that view's draw distance (cRenderStateMan_DrawDistance) with MinNear
  * as the floor and stored in D_004A3B68 (the render far plane), and View is clamped to [0, MaxView] and Near and Far to
  * [MinNear, MaxFar].
  */
@@ -1056,7 +1056,7 @@ extern "C" void cCamera_updateCamMat_E668(cCamera_E668* self)
         }
     }
     cRenderStateMan_update(self->id + 6, self->pose.pos.x, self->pose.pos.y, -99999.0f);
-    self->farZ = bracket_E668(self->minClip, self->farZ, func_002EE3B8(self->id + 6));
+    self->farZ = bracket_E668(self->minClip, self->farZ, cRenderStateMan_DrawDistance(self->id + 6));
     D_004A3B68 = self->farZ;
     self->fov = bracket_E668(0.0f, self->fov, self->maxFov);
     self->nearZ = bracket_E668(self->minClip, self->nearZ, self->maxClip);

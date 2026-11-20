@@ -104,20 +104,20 @@ extern "C" void cFEStateSelectMultiplayerMode_onWidgetEvent(void* self, void* it
 //100%
 INCLUDE_ASM("fe/festateselectmp", cFEStateMPCircuit_cFEStateMPCircuit);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self);
+extern "C" void* cUIState_cUIState(void* self);
 extern void* cFEStateMPCircuit_vtbl[];
 
 /**
  * Constructs the multiplayer circuit state (allocated as "cFEStateMPCircuit", 72 bytes).
  *
- * Runs cUIState's constructor (func_0039E2A0; the engine argument reaches it untouched in the second argument
+ * Runs cUIState's constructor (cUIState_cUIState; the engine argument reaches it untouched in the second argument
  * register), then stores cFEStateMPCircuit_vtbl and mHashName 23.
  *
  * @return @p self
  */
 extern "C" void* cFEStateMPCircuit_cFEStateMPCircuit(cFEStateMPCircuit* self)
 {
-    func_0039E2A0(self);
+    cUIState_cUIState(self);
     self->mVtbl = cFEStateMPCircuit_vtbl;
     self->mHashName = 23;
     return ((void*)self);

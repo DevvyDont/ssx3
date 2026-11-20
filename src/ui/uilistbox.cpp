@@ -101,11 +101,11 @@ extern "C" unsigned char cUIListBox_addEntryByStringID(cUIListBox* self, int id,
 #endif
 
 //100%
-INCLUDE_ASM("ui/uilistbox", func_0039A670);
+INCLUDE_ASM("ui/uilistbox", cUIListBox_deleteAllEntries);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 
-struct func_0039A670_sItem {
+struct cUIListBox_deleteAllEntries_sItem {
     void* data;
     char pad[0x10];
 };
@@ -117,7 +117,7 @@ struct func_0039A670_sItem {
  * (0x14 bytes from +0x9C) frees its string. Then +0x319 and +0x318 are cleared. The options, rule-select and network
  * screens call it before refilling a list.
  */
-extern "C" void func_0039A670(void* self)
+extern "C" void cUIListBox_deleteAllEntries(void* self)
 {
     if (*(int*)((char*)self + 0x74) & 0x10) {
         if (*(void**)((char*)self + 0x9C) != 0) {
@@ -125,7 +125,7 @@ extern "C" void func_0039A670(void* self)
         }
     } else {
         for (int i = 0; i < *(unsigned char*)((char*)self + 0x318); i++) {
-            func_0039A670_sItem* it = (func_0039A670_sItem*)((char*)self + 0x9C) + i;
+            cUIListBox_deleteAllEntries_sItem* it = (cUIListBox_deleteAllEntries_sItem*)((char*)self + 0x9C) + i;
             if (it->data != 0) {
                 cMemMan_free(it->data);
             }

@@ -787,7 +787,7 @@ extern "C" void* cBECharacterInterface_getShortNameByCharacter(void* self, int p
 extern "C" int cBERewardInterface_isCheatCharOwned(void* iface, int a1, int a2, int a3);
 extern "C" void* cBERewardInterface_getDB();
 extern "C" int cUITextureBank_getElementByHashname(void* self, int id);
-extern "C" void* func_0039E318(void* self, void* engine, void* owner);
+extern "C" void* cUIState_cUIState1(void* self, void* engine, void* owner);
 extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 extern void* cFEStateCheatCharSelect_vtbl[];
 extern char* D_00440F78[];
@@ -817,7 +817,7 @@ struct sCharSel_2220 {
 /**
  * Constructs the cheat-character select state for a user and a base character.
  *
- * Builds the UI state (func_0039E318), sets state id 10, the cFEStateCheatCharSelect_vtbl vtable and the user. Entry 0
+ * Builds the UI state (cUIState_cUIState1), sets state id 10, the cFEStateCheatCharSelect_vtbl vtable and the user. Entry 0
  * is the base character itself: id 0, its face picture (D_00440F78[@p slot], looked up in the owner's texture bank at
  * +0x58) and its name (cBECharacterInterface_getShortNameByCharacter on interface 2). Then every reward-database character (cBERewardInterface_getDB)
  * that cBERewardInterface_isCheatCharOwned reports as owned by the user for @p slot is appended with its id, picture and name (count +0x78;
@@ -832,7 +832,7 @@ struct sCharSel_2220 {
  */
 extern "C" sCharSel_2220* cFEStateCheatCharSelect_cFEStateCheatCharSelect(sCharSel_2220* self, void* engine, void* owner, signed char player, int slot)
 {
-    func_0039E318(self, engine, owner);
+    cUIState_cUIState1(self, engine, owner);
     self->fC = 10;
     self->vt = cFEStateCheatCharSelect_vtbl;
     self->player = player;
@@ -1003,7 +1003,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewPlayerInterface_setPlayerCheatCharID(void* iface, int rider, int id);
-extern "C" void func_0039F190(void*, int);
+extern "C" void cUIStateStack_pop(void*, int);
 extern char D_004C66A8[];
 extern char D_004C66B8[];
 
@@ -1047,7 +1047,7 @@ extern "C" void cFEStateCheatCharSelect_onWidgetEvent(void* self, void* menu, un
     }
     case 6:
         *(int*)((char*)self + 0x70) = 0;
-        func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
+        cUIStateStack_pop(*(char**)((char*)self + 0x10) + 0x18, 1);
         break;
     case 5: {
         int sel = *(int*)((char*)menu + 0x18) + *(unsigned char*)(*(char**)((char*)self + 0x6C) + 0x98);
@@ -1060,7 +1060,7 @@ extern "C" void cFEStateCheatCharSelect_onWidgetEvent(void* self, void* menu, un
         sVEK182690b* vt = *(sVEK182690b**)(pl + 0xC);
         vt[1].fn(pl + vt[1].delta);
         *(int*)((char*)self + 0x74) = 1;
-        func_0039F190(*(char**)((char*)self + 0x10) + 0x18, 1);
+        cUIStateStack_pop(*(char**)((char*)self + 0x10) + 0x18, 1);
         break;
     }
     }
@@ -1126,14 +1126,14 @@ extern "C" void cFEStateCheatCharSelect_updateCharWidgets(void* self)
 //100%
 INCLUDE_ASM("fe/festatecharselect", cFEStateCharSetup_cFEStateCharSetup);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self, void* engine);
+extern "C" void* cUIState_cUIState(void* self, void* engine);
 extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 extern void* cFEStateCharSetup_vtbl[];
 
 /**
  * Constructs the character-setup state for a user.
  *
- * Builds the UI state (func_0039E2A0), sets state id 0xC, the cFEStateCharSetup_vtbl vtable and the user (+0x44),
+ * Builds the UI state (cUIState_cUIState), sets state id 0xC, the cFEStateCharSetup_vtbl vtable and the user (+0x44),
  * stores cFECustom_getPlayerCtrlMask's value for the user at +0x15 and clears the show-rider flag (+0x4C).
  *
  * @param engine  the UI engine
@@ -1142,7 +1142,7 @@ extern void* cFEStateCharSetup_vtbl[];
  */
 extern "C" void* cFEStateCharSetup_cFEStateCharSetup(void* self, void* engine, signed char idx)
 {
-    func_0039E2A0(self, engine);
+    cUIState_cUIState(self, engine);
     *(int*)((char*)self + 0xC) = 0xC;
     *(void***)((char*)self + 0x8) = cFEStateCharSetup_vtbl;
     *(signed char*)((char*)self + 0x44) = idx;

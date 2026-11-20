@@ -2898,7 +2898,7 @@ extern "C" void cSSXStatsObjNode_render(void* self)
 }
 #endif
 
-extern "C" void* func_0039E390(void* self);
+extern "C" void* cUIState__cUIState(void* self);
 
 //100%
 INCLUDE_ASM("main/ssxappdtor", func_00244A38);
@@ -2977,9 +2977,9 @@ extern "C" void cOVStateManager_triggerOverlay(int id);
 extern "C" void* cAudioInterface_bxAudio(void);
 extern "C" void cSSXAudio_PlayIconSound(void* snd, int a, int b, float f);
 extern "C" void cWScriptMan_doMissionCmd(void* mgr, int a, int b, int c);
-extern "C" void func_00398038(void* p);
+extern "C" void cUIEngine_update(void* p);
 extern "C" void func_0029ED18(void* snd);
-extern "C" void func_002CC0C0(void* p);
+extern "C" void cMenuSys_input(void* p);
 extern "C" int cGame_activatePauseMenu(char* self, int a);
 extern "C" int cOVStateManager_allowPauseMenu(void);
 extern "C" void cPadCache_clearAllVibrations(void* p);
@@ -3084,10 +3084,10 @@ static inline bool playing_4B48(char* pb)
  * queue is handled: type 8 opens overlay 29 and pushes pause owner 3 (its flags from D_004428FC) with an icon sound;
  * type 9 runs cWScriptMan_doMissionCmd(..., 5, ...) and either opens overlay 0x1E with pause owner 3 (when the UI has
  * no "fail" state) or pops the message. A pending script pause request (D_004A20CC not 0xFFFFFFFF) opens overlay 34
- * with pause owner 0xC and clears the request. An active MenuSys is updated (func_002CC0C0). When
+ * with pause owner 0xC and clears the request. An active MenuSys is updated (cMenuSys_input). When
  * cGame_activatePauseMenu allows it, no replay mode 1..9 is set and no playback is running, cOVStateManager_allowPauseMenu opens the
  * pause menu: pause owner 2, the UI's virtual slot 44 with PauseOwner (+0x228), audio paused. Otherwise
- * func_00398038(UI), cOVStateManager_pauseOverlayActive and cPlaybackMan_update run. Each pause push writes D_005366E8[++D_004A2A54] and
+ * cUIEngine_update(UI), cOVStateManager_pauseOverlayActive and cPlaybackMan_update run. Each pause push writes D_005366E8[++D_004A2A54] and
  * cPauseState_Flags.
  *
  * @return true when the race should update this frame (no menu, no new pause, not just unpaused), else false
@@ -3114,7 +3114,7 @@ extern "C" bool cGame_updateUI(sApp_4B48* self)
                     cOVStateManager_triggerOverlay(0x1E);
                     D_005366E8[++D_004A2A54] = 3;
                     cPauseState_Flags = D_004428FC[0];
-                    func_00398038(self->ui);
+                    cUIEngine_update(self->ui);
                 } else {
                     ((sScript_4B48*)cWScriptMan_TheWScriptMan)->popMessage();
                 }
@@ -3131,8 +3131,8 @@ extern "C" bool cGame_updateUI(sApp_4B48* self)
         return false;
     }
     if (cMenuSys_isActive(self->fA4) != 0) {
-        func_00398038(self->ui);
-        func_002CC0C0(self->fA4);
+        cUIEngine_update(self->ui);
+        cMenuSys_input(self->fA4);
         return false;
     }
     if (cGame_activatePauseMenu((char*)self, 0) != 0 && !racing_4B48(*self->state) && !playing_4B48(self->playback) && cOVStateManager_allowPauseMenu() != 0) {
@@ -3147,7 +3147,7 @@ extern "C" bool cGame_updateUI(sApp_4B48* self)
         return false;
     }
     int wasPaused = cPauseState_Flags & 1;
-    func_00398038(self->ui);
+    cUIEngine_update(self->ui);
     if (cOVStateManager_pauseOverlayActive() != 0) {
         return false;
     }
@@ -3357,16 +3357,16 @@ extern "C" void func_002451B0(void *self) {
 INCLUDE_ASM("main/ssxappdtor", func_00245228__FPv);
 #ifdef SKIP_ASM
 /**
- * Destroys the progressive-scan popup state (vtable D_0047CA18) through the UI-state base destructor func_0039E390.
+ * Destroys the progressive-scan popup state (vtable D_0047CA18) through the UI-state base destructor cUIState__cUIState.
  *
  * The destructor flags pass through in the second argument register; unlike the other states here it does not reset its
  * own vtable first.
  *
- * @return func_0039E390's result, passed through
+ * @return cUIState__cUIState's result, passed through
  */
 void* func_00245228(void* self)
 {
-    return func_0039E390(self);
+    return cUIState__cUIState(self);
 }
 #endif
 
@@ -3410,7 +3410,7 @@ INCLUDE_ASM("main/ssxappdtor", func_002452D8);
 #ifdef SKIP_ASM
 // PORT: cMemMan_alloc bound as a placement operator new (gcc then treats the result as unaliased)
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" void func_0039E2A0(void* self, void* owner);
+extern "C" void cUIState_cUIState(void* self, void* owner);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern char D_0047B9C0[];
 extern char str_yes_c[];
@@ -3443,7 +3443,7 @@ static inline int isHash_2452D8(int id, char* s)
 static inline sUIObj_2452D8* newUIObj_2452D8(void* owner, char flag)
 {
     sUIObj_2452D8* o = new (D_0047B9C0, 0, 0) sUIObj_2452D8;
-    func_0039E2A0(o, *(void**)((char*)owner + 0x10));
+    cUIState_cUIState(o, *(void**)((char*)owner + 0x10));
     o->vt = D_0047DA58;
     o->flag48 = flag;
     return o;
@@ -3452,7 +3452,7 @@ static inline sUIObj_2452D8* newUIObj_2452D8(void* owner, char flag)
 /**
  * Handles the progressive-scan popup's answer: pushes a new UI state that records it.
  *
- * Only widget events of type 5 with a message count. A new 0x50-byte UI state (func_0039E2A0 on the UI engine, vtable
+ * Only widget events of type 5 with a message count. A new 0x50-byte UI state (cUIState_cUIState on the UI engine, vtable
  * D_0047DA58) is pushed on the UI state stack (engine + 0x18) with its flag at +0x48 cleared for "yes" (the message
  * hash at +0x38) or set otherwise; "yes" also calls cGraphicsMan_TheGraphicsMan's vtable slot 8 with 1. Slot +0x9C
  * (onWidgetEvent) of D_0047CA18.
@@ -3499,20 +3499,20 @@ extern "C" int func_002453E0(void* self, int menu, int event)
 INCLUDE_ASM("main/ssxappdtor", func_002453F0);
 #ifdef SKIP_ASM
 extern void* D_0047C948[];
-extern "C" void* func_0039E390(void* self);
+extern "C" void* cUIState__cUIState(void* self);
 
 /**
  * Destroys the match / event loading state: installs its vtable D_0047C948 at +0x8 and runs the UI-state base
- * destructor func_0039E390.
+ * destructor cUIState__cUIState.
  *
  * The destructor flags pass through in the second argument register.
  *
- * @return func_0039E390's result, passed through
+ * @return cUIState__cUIState's result, passed through
  */
 extern "C" void* func_002453F0(void* self)
 {
     *(void**)((char*)self + 0x8) = D_0047C948;
-    return func_0039E390(self);
+    return cUIState__cUIState(self);
 }
 #endif
 
@@ -3628,20 +3628,20 @@ extern "C" void func_00245598(void* self, int widget)
 INCLUDE_ASM("main/ssxappdtor", func_00245600);
 #ifdef SKIP_ASM
 extern void* D_0047C878[];
-extern "C" void* func_0039E390(void* self);
+extern "C" void* cUIState__cUIState(void* self);
 
 /**
  * Destroys the leaving-the-lodge loading state: installs its vtable D_0047C878 at +0x8 and runs the UI-state base
- * destructor func_0039E390.
+ * destructor cUIState__cUIState.
  *
  * The destructor flags pass through in the second argument register.
  *
- * @return func_0039E390's result, passed through
+ * @return cUIState__cUIState's result, passed through
  */
 extern "C" void* func_00245600(void* self)
 {
     *(void**)((char*)self + 0x8) = D_0047C878;
-    return func_0039E390(self);
+    return cUIState__cUIState(self);
 }
 #endif
 
@@ -3713,20 +3713,20 @@ extern "C" int func_00245698(void* self)
 INCLUDE_ASM("main/ssxappdtor", func_00245708);
 #ifdef SKIP_ASM
 extern void* D_0047C7A8[];
-extern "C" void* func_0039E390(void* self);
+extern "C" void* cUIState__cUIState(void* self);
 
 /**
  * Destroys the controller-layout loading state: installs its vtable D_0047C7A8 at +0x8 and runs the UI-state base
- * destructor func_0039E390.
+ * destructor cUIState__cUIState.
  *
  * The destructor flags pass through in the second argument register.
  *
- * @return func_0039E390's result, passed through
+ * @return cUIState__cUIState's result, passed through
  */
 extern "C" void* func_00245708(void* self)
 {
     *(void**)((char*)self + 0x8) = D_0047C7A8;
-    return func_0039E390(self);
+    return cUIState__cUIState(self);
 }
 #endif
 
@@ -3842,20 +3842,20 @@ extern "C" int func_002458B8(void* self)
 INCLUDE_ASM("main/ssxappdtor", cFELoadHintState__cFELoadHintState);
 #ifdef SKIP_ASM
 extern void* cFELoadHintState_vtbl[];
-extern "C" void* func_0039E390(void* self);
+extern "C" void* cUIState__cUIState(void* self);
 
 /**
  * Destroys the front-end load-hint state: stores its vtable at +0x8, then runs the cUIState destructor.
  *
- * The cUIState destructor (func_0039E390) gets the g++ delete flags from the second argument register,
+ * The cUIState destructor (cUIState__cUIState) gets the g++ delete flags from the second argument register,
  * untouched.
  *
- * @return no meaningful value (func_0039E390 returns nothing)
+ * @return no meaningful value (cUIState__cUIState returns nothing)
  */
 extern "C" void* cFELoadHintState__cFELoadHintState(void* self)
 {
     *(void**)((char*)self + 0x8) = cFELoadHintState_vtbl;
-    return func_0039E390(self);
+    return cUIState__cUIState(self);
 }
 #endif
 

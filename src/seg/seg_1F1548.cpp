@@ -863,8 +863,8 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F1A08);
 // behaviour-preserving steering only); replace it when an honest spelling matches.
 struct sObj_22C8;
 extern "C" void func_002F22C8(sObj_22C8* self);
-extern "C" float func_002D1928(int n, float x);
-extern "C" void func_003710D0(void* fx, sVec4_1150* pos, sVec4_1150* vel, int withVel, float dt);
+extern "C" float perlinNoise(int n, float x);
+extern "C" void cBaseClass_DynamicEmitter_updateBASE(void* fx, sVec4_1150* pos, sVec4_1150* vel, int withVel, float dt);
 
 // Emitter parameters (an emitter's +0x20C).
 struct sFxParams_1A08 {
@@ -1038,7 +1038,7 @@ extern "C" void func_002F1A08(sFxMgr_1A08* self)
             self->fx[i]->phase += d->pulseRate * 0.01666666753590107f;
             if (self->fx[i]->phase >= 4.0f)
                 self->fx[i]->phase -= 4.0f;
-            if (d->pulse < (func_002D1928(3, self->fx[i]->phase) + 1.0f) * 0.5f)
+            if (d->pulse < (perlinNoise(3, self->fx[i]->phase) + 1.0f) * 0.5f)
                 emit = 0;
         }
         sVec4_1150 pos = bonePos_1A08(self->model, self->h[self->fx[i]->bone]);
@@ -1095,9 +1095,9 @@ extern "C" void func_002F1A08(sFxMgr_1A08* self)
                 dir = mul_1A08(m, dir);
                 addEq_1A08(v, dir);
             }
-            func_003710D0(self->fx[i], &pos, &v, 1, 0.01666666753590107f);
+            cBaseClass_DynamicEmitter_updateBASE(self->fx[i], &pos, &v, 1, 0.01666666753590107f);
         } else {
-            func_003710D0(self->fx[i], &pos, 0, 0, 0.01666666753590107f);
+            cBaseClass_DynamicEmitter_updateBASE(self->fx[i], &pos, 0, 0, 0.01666666753590107f);
         }
     }
 }
@@ -2687,7 +2687,7 @@ extern "C" void func_002F4330(void *arg0, float arg1) {
 //100%
 INCLUDE_ASM("seg/seg_1F1548", cSunHalo_cSunHalo);
 #ifdef SKIP_ASM
-extern void func_002E2860(void *);
+extern void cHalo_cHalo(void *);
 extern "C" void cSunHalo_InitLens(void *);
 inline void* operator new[](unsigned int, void* p) { return p; }
 struct Elem4380 { Elem4380() {} };
@@ -2695,7 +2695,7 @@ struct Elem4380 { Elem4380() {} };
 /**
  * Constructs the sun halo: the halo base, its lens-flare table and the default lens set.
  *
- * Runs func_002E2860 (the cHalo base constructor), constructs the 16 lens entries (trivial), clears the occlusion
+ * Runs cHalo_cHalo (the cHalo base constructor), constructs the 16 lens entries (trivial), clears the occlusion
  * factor (+0x204; On Tour mfOcclude) and the halo's mbOnScreen/mbRequestZSample shorts (+0x2C, +0x2E), then calls
  * cSunHalo_InitLens (InitLens) for the default flare.
  *
@@ -2703,7 +2703,7 @@ struct Elem4380 { Elem4380() {} };
  * @return @p sunHalo
  */
 extern "C" void *cSunHalo_cSunHalo(void *sunHalo) {
-    func_002E2860(sunHalo);
+    cHalo_cHalo(sunHalo);
     new ((char*)sunHalo + 0x40) Elem4380[16];
     *(int *)((char*)sunHalo + 0x204) = 0;
     *(short *)((char*)sunHalo + 0x2E) = 0;
@@ -2807,7 +2807,7 @@ extern "C" void cSunHalo_InitLens_43E0(sLightSet_43E0* self)
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F4690);
 #ifdef SKIP_ASM
-extern "C" float func_002EE268(int);
+extern "C" float cRenderStateMan_LensIntensity(int);
 
 struct sV2_4690 {
     float x, y;
@@ -2910,7 +2910,7 @@ extern "C" void func_002F4690(sFlare_4690* self)
         sV2_4690 pos = center + dir * self->lights[i].dist;
         sV2_4690 uv0;
         sCol_4690 col = self->lights[i].col;
-        col.r *= self->intensity * func_002EE268(6);
+        col.r *= self->intensity * cRenderStateMan_LensIntensity(6);
         sV2_4690 uv1;
         switch (self->lights[i].type) {
         case 0:
@@ -2945,12 +2945,12 @@ extern "C" void func_002F4690(sFlare_4690* self)
 INCLUDE_ASM("seg/seg_1F1548", func_002F4A08);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" float func_002EE100(int);
-extern "C" float func_002EE148(int);
-extern "C" float func_002EE190(int);
-extern "C" float func_002EE1D8(int);
-extern "C" int func_002EE220(int);
-extern "C" float func_002EE2B0(int);
+extern "C" float cRenderStateMan_SunColorR(int);
+extern "C" float cRenderStateMan_SunColorG(int);
+extern "C" float cRenderStateMan_SunColorB(int);
+extern "C" float cRenderStateMan_SunIntensity(int);
+extern "C" int cRenderStateMan_SunType(int);
+extern "C" float cRenderStateMan_SunRadius(int);
 extern "C" void func_002F4690_4A08(void*, void*) __asm__("func_002F4690");
 extern char t4mat_Identity[];
 
@@ -3038,14 +3038,14 @@ extern "C" void func_002F4A08(sSun_4A08* self, sV4_4A08* vp, int flag)
     if (self->visible == 0)
         return;
     int id = !flag ? 6 : 7;
-    float r = func_002EE100(id);
-    float g = func_002EE148(id);
-    float b = func_002EE190(id);
+    float r = cRenderStateMan_SunColorR(id);
+    float g = cRenderStateMan_SunColorG(id);
+    float b = cRenderStateMan_SunColorB(id);
     sV4_4A08 col;
     col = sV4_4A08(1.0f, r, g, b);
-    col.x *= self->intensity * func_002EE1D8(id);
-    float size = func_002EE2B0(id);
-    int tex = func_002EE220(id);
+    col.x *= self->intensity * cRenderStateMan_SunIntensity(id);
+    float size = cRenderStateMan_SunRadius(id);
+    int tex = cRenderStateMan_SunType(id);
     if (size == 1.0f)
         size = 320.0f;
     if (col.x <= 0.0f)
@@ -3080,9 +3080,9 @@ extern "C" void func_002F4A08(sSun_4A08* self, sV4_4A08* vp, int flag)
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F4DB8);
 #ifdef SKIP_ASM
-extern "C" int func_002EE220(int);
-extern "C" float func_002EE070(int);
-extern "C" float func_002EE0B8(int);
+extern "C" int cRenderStateMan_SunType(int);
+extern "C" float cRenderStateMan_SunPitchOffset(int);
+extern "C" float cRenderStateMan_SunYawOffset(int);
 extern "C" void fSinCos(float, float*, float*);
 
 struct sV4_4DB8 {
@@ -3191,15 +3191,15 @@ static inline float clamp_4DB8(float v, float lo, float hi)
 extern "C" void func_002F4DB8(sSun_4DB8* self, sCam_4DB8* cam, int flag)
 {
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
-    if (func_002EE220(6) == -1) {
+    if (cRenderStateMan_SunType(6) == -1) {
         self->visible = 0;
         self->onScreen = 0;
         return;
     }
     float dist = cam->farClip - 500.0f;
     int id = !flag ? 6 : 7;
-    float azimuth = func_002EE0B8(id) * 0.01745329424738884f;
-    float elevation = func_002EE070(id) * 0.01745329424738884f;
+    float azimuth = cRenderStateMan_SunYawOffset(id) * 0.01745329424738884f;
+    float elevation = cRenderStateMan_SunPitchOffset(id) * 0.01745329424738884f;
     float sa, ca, sb, cb;
     if (azimuth == 0.0f && elevation == 0.0f) {
         fSinCos(1.8675024509429932f, &sa, &ca);
@@ -3259,10 +3259,10 @@ extern "C" void func_002F4DB8(sSun_4DB8* self, sCam_4DB8* cam, int flag)
 //100%
 INCLUDE_ASM("seg/seg_1F1548", func_002F5148);
 #ifdef SKIP_ASM
-extern "C" void func_002F5400(int, void *, int);
+extern "C" void cWorldLightMan_getRealTimeLights(int, void *, int);
 
 extern "C" void func_002F5148(void *litObject) {
-    func_002F5400(((int)SSXApp->Game->WorldLightMan), litObject, ((int) (*(int *)((char*)(litObject) + (8))) >> 0xC) & 1);
+    cWorldLightMan_getRealTimeLights(((int)SSXApp->Game->WorldLightMan), litObject, ((int) (*(int *)((char*)(litObject) + (8))) >> 0xC) & 1);
 }
 #endif
 

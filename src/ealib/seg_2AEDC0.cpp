@@ -9,7 +9,7 @@ extern "C" void func_003ADEC8(void* self, int a1, int a2, int a3, int a4, int a5
  * Constructs a movie player that plays video only, with the source type given.
  *
  * Clears +0x60 and calls func_003ADEC8 with the missing sizes as 0. Passes no audio source, so the player uses one
- * interleaved stream. Its caller func_002534A8 uses it when the movie has no separate audio file.
+ * interleaved stream. Its caller cMoviePlayer_init uses it when the movie has no separate audio file.
  *
  * The player object is 0x78 bytes: +0x0 audio object, +0x4/+0x8 video/audio stream buffers, +0xC/+0x10 video/audio
  * sources, +0x14 separate-audio flag, +0x18 source type, +0x1C no-audio flag, +0x30/+0x34 video/audio STREAMs,
@@ -38,7 +38,7 @@ extern "C" void func_003ADEC8(void* self, int a1, int a2, int a3, int a4, int a5
  * Constructs a movie player with separate video and audio sources.
  *
  * Clears +0x60 and calls func_003ADEC8 with the missing sizes as 0. The data sizes (used only for in-memory sources)
- * are passed as 0. Its caller func_002534A8 uses it when the movie has a separate audio file.
+ * are passed as 0. Its caller cMoviePlayer_init uses it when the movie has a separate audio file.
  *
  * The player object is 0x78 bytes: +0x0 audio object, +0x4/+0x8 video/audio stream buffers, +0xC/+0x10 video/audio
  * sources, +0x14 separate-audio flag, +0x18 source type, +0x1C no-audio flag, +0x30/+0x34 video/audio STREAMs,
@@ -416,7 +416,7 @@ static inline bool wsCanAlloc_AE450(sAlloc_AE450* a)
  * and the offset (+0x40), clears +0x50 and +0x58, starts the audio (func_003AEEF8) and sets normal speed (func_003AE888
  * with 0x1000).
  *
- * The game calls it as func_003AE450(player, 1, 33) in func_002536C8.
+ * The game calls it as func_003AE450(player, 1, 33) in cMoviePlayer_startPlay.
  *
  * @param framesToBuffer  number of frames the decoder keeps (the CODEC_IDATA frame count)
  * @param timeOffsetMs  milliseconds added to the playback time when choosing the frame (+0x40)
@@ -627,7 +627,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003AE938__FPv);
 /**
  * Pauses the movie player (speed 0).
  *
- * Calls func_003AE888(self, 0). The game's movie code calls it from func_002536C8 and func_002539E0.
+ * Calls func_003AE888(self, 0). The game's movie code calls it from cMoviePlayer_startPlay and cMoviePlayer_asyncPause.
  *
  * @return func_003AE888's result (0)
  */
@@ -645,7 +645,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003AE958__FPv);
 /**
  * Resumes the movie player at normal speed (0x1000).
  *
- * Calls func_003AE888(self, 0x1000). The game's movie code calls it from func_002536C8 and func_00253A40.
+ * Calls func_003AE888(self, 0x1000). The game's movie code calls it from cMoviePlayer_startPlay and cMoviePlayer_asyncResume.
  *
  * @return func_003AE888's result (0)
  */
@@ -2025,7 +2025,7 @@ public:
 /**
  * Gives a frame back to the decoder's codec.
  *
- * Calls the codec's slot 6 without checking that a codec exists. The game's movie code (func_002535F8, func_002547B8,
+ * Calls the codec's slot 6 without checking that a codec exists. The game's movie code (cMoviePlayer_purge, func_002547B8,
  * func_00254DC0) calls it on frames it got from func_003AE6C8.
  *
  * @param frame  the frame

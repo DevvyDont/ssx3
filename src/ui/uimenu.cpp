@@ -136,7 +136,7 @@ INCLUDE_ASM("ui/uimenu", cUIMenu_onInput);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cList_getByIndex_i(void*, int) __asm__("cList_getByIndex");
 void* cUIThing_getEngine(void* self);
-extern "C" int func_003A0318(void* self, int a);
+extern "C" int cUIThing_getSound(void* self, int a);
 extern char gUISoundNull[4];
 extern "C" unsigned char cUIMenu_getNext(void* self);
 extern "C" unsigned char cUIMenu_getPrev(void* self);
@@ -237,7 +237,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, void* in)
             if (moved) {
                 result = 1;
             } else {
-                result = func_003A0318(self->mpSelected, 0);
+                result = cUIThing_getSound(self->mpSelected, 0);
             }
         }
     } else if ((inputBtn_B000(in, *(signed char*)(((char*)self) + 0x93)) && !(self->mAttr & 1)) ||
@@ -260,7 +260,7 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, void* in)
             if (moved) {
                 result = 1;
             } else {
-                result = func_003A0318(self->mpSelected, 0);
+                result = cUIThing_getSound(self->mpSelected, 0);
             }
         }
     } else if (inputIs_B000(in, 5)) {
@@ -271,9 +271,9 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, void* in)
             playEvent_B000(item, 2);
         }
         if (moveResult & 1) {
-            result = func_003A0318(self->mpSelected, 1);
+            result = cUIThing_getSound(self->mpSelected, 1);
         } else if (moveResult & 0x10) {
-            result = func_003A0318(self->mpSelected, 0);
+            result = cUIThing_getSound(self->mpSelected, 0);
         }
     } else if (inputIs_B000(in, 6)) {
         char* item = (char*)cList_getByIndex_i(((char*)self) + 0x74, self->mScrollItemCurrent - self->mScrollItemOffset);
@@ -283,9 +283,9 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, void* in)
             playEvent_B000(item, 3);
         }
         if (moveResult & 1) {
-            result = func_003A0318(self->mpSelected, 1);
+            result = cUIThing_getSound(self->mpSelected, 1);
         } else if (moveResult & 0x10) {
-            result = func_003A0318(self->mpSelected, 0);
+            result = cUIThing_getSound(self->mpSelected, 0);
         }
     } else if (inputIs_B000(in, 8)) {
         char* item = (char*)cList_getByIndex_i(((char*)self) + 0x74, self->mScrollItemCurrent - self->mScrollItemOffset);
@@ -295,9 +295,9 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, void* in)
             playEvent_B000(item, 5);
         }
         if (moveResult & 1) {
-            result = func_003A0318(self->mpSelected, 1);
+            result = cUIThing_getSound(self->mpSelected, 1);
         } else if (moveResult & 0x10) {
-            result = func_003A0318(self->mpSelected, 0);
+            result = cUIThing_getSound(self->mpSelected, 0);
         }
     } else if (inputIs_B000(in, 7)) {
         char* item = (char*)cList_getByIndex_i(((char*)self) + 0x74, self->mScrollItemCurrent - self->mScrollItemOffset);
@@ -307,9 +307,9 @@ extern "C" int cUIMenu_onInput(cUIMenu* self, void* in)
             playEvent_B000(item, 4);
         }
         if (moveResult & 1) {
-            result = func_003A0318(self->mpSelected, 1);
+            result = cUIThing_getSound(self->mpSelected, 1);
         } else if (moveResult & 0x10) {
-            result = func_003A0318(self->mpSelected, 0);
+            result = cUIThing_getSound(self->mpSelected, 0);
         }
     } else if (inputIs_B000(in, 4)) {
         char* item = (char*)cList_getByIndex_i(((char*)self) + 0x74, self->mScrollItemCurrent - self->mScrollItemOffset);
@@ -392,7 +392,7 @@ extern "C" void cUIMenu_setScrollableMenu(cUIMenu* self, char NumItems)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uimenu", func_0039B7A8);
+INCLUDE_ASM("ui/uimenu", cUIMenu_setScrollBar);
 #ifdef SKIP_ASM
 /**
  * Sets a menu's scroll bar (+0x9C).
@@ -402,7 +402,7 @@ INCLUDE_ASM("ui/uimenu", func_0039B7A8);
  * @param menu  the menu
  * @param scrollBar  the scroll bar widget
  */
-extern "C" void func_0039B7A8(void *menu, int scrollBar) {
+extern "C" void cUIMenu_setScrollBar(void *menu, int scrollBar) {
     (*(int *)((char*)(menu) + (0x9C))) = scrollBar;
 }
 #endif
@@ -846,7 +846,7 @@ struct cUIThing;
 unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x);
 extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 void* cUIThing_getEngine(void* self);
-extern "C" int func_003A0318(void* self, int a);
+extern "C" int cUIThing_getSound(void* self, int a);
 extern char gUISoundNull[4];
 
 struct sVE_BED8 { short delta; short index; int (*fn)(void*, ...); };
@@ -898,9 +898,9 @@ extern "C" int cUIPair_onInput(cUIPair* self, void* in)
             }
         }
         if (moveResult & 1) {
-            result = func_003A0318(((char*)self), 1);
+            result = cUIThing_getSound(((char*)self), 1);
         } else if (moveResult & 0x10) {
-            result = func_003A0318(((char*)self), 0);
+            result = cUIThing_getSound(((char*)self), 0);
         }
         if (listener != 0) {
             sVEv_BED8* vt = *(sVEv_BED8**)listener;
@@ -916,9 +916,9 @@ extern "C" int cUIPair_onInput(cUIPair* self, void* in)
             }
         }
         if (moveResult & 1) {
-            result = func_003A0318(((char*)self), 1);
+            result = cUIThing_getSound(((char*)self), 1);
         } else if (moveResult & 0x10) {
-            result = func_003A0318(((char*)self), 0);
+            result = cUIThing_getSound(((char*)self), 0);
         }
         if (listener != 0) {
             sVEv_BED8* vt = *(sVEv_BED8**)listener;

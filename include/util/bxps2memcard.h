@@ -41,7 +41,7 @@ struct tPS2MemCardDevice {
     int unk_04;                     // 0x04 [U] Update stores sceMcGetInfo's free clusters (D_004A393C);
                                     //       cPS2MemCard_GetFreeSpace1 returns it (slot 20 for the current device)
     int unk_08;                     // 0x08 [U] last sceMcSync result (D_004A3940); SetState(1) stores it;
-                                    //       GetLastError func_002C51D0 ([P] preview GetLastError reads the same
+                                    //       GetLastError cPS2MemCard_GetLastError ([P] preview GetLastError reads the same
                                     //       word) and slots 9, 48, 52, 74 classify it; slot 47 resets -1 to 0
     int unk_0C;                     // 0x0C [U] sceMcGetInfo's format word (D_004A3944); slot 56 tests > 0
     int unk_10;                     // 0x10 [U] card-changed flag: Update sets it, cPS2MemCard_CardChanged tests it ([P] preview

@@ -331,7 +331,7 @@ extern "C" void cMoveNode_postUpdateModifierBlock(cMoveNode* self)
 INCLUDE_ASM("object/movenode", cMoveNode_onCollide);
 #ifdef SKIP_ASM
 extern char* cAppMan_TheAppMan;
-extern "C" int func_002D1B30(int);
+extern "C" int cObjectInterface_getAIIndex(int);
 void cInstanceNode_runCollideScript(void*, int, int, int);
 
 struct cMN_355770_Obj {
@@ -376,7 +376,7 @@ extern "C" void cMoveNode_onCollide(cMoveNode* self, int tc, int ti, int pBeing)
             obj->v10(tc, ti);
             char* transformModifier = *(char**)((void*)self->ModifierBlock);
             cMN_355770_VEnt* vt = *(cMN_355770_VEnt**)transformModifier;
-            if (vt[9].fn(transformModifier + vt[9].delta, func_002D1B30(pBeing)) == 0) {
+            if (vt[9].fn(transformModifier + vt[9].delta, cObjectInterface_getAIIndex(pBeing)) == 0) {
                 return;
             }
         }
@@ -1176,7 +1176,7 @@ typedef int (*MnCullFn_6298)(void*, sMnVec_6298*, sMnVec_6298*, const sMnMat_629
 typedef void (*MnDrawFn_6298)(void*, void*, void*, void*, void*, void*, int, float);
 
 extern "C" void tModifierBlock_render(void* self);
-extern "C" int func_002D2058(void* v);
+extern "C" int cObjectInterface_isSphereOccluded(void* v);
 extern "C" void* cUVScrollModifier_getTextureMat(void* self, void* m);
 
 #define OBJ_6298(s) (*(sMnObj_6298**)((char*)(s) + 0x18))
@@ -1307,7 +1307,7 @@ extern "C" void cMoveNode_render(cMoveNode* self)
         flags |= 0x20;
     }
     if (!mat) {
-        if (func_002D2058(OBJ_6298(self)->box)) {
+        if (cObjectInterface_isSphereOccluded(OBJ_6298(self)->box)) {
             return;
         }
     }
@@ -2470,7 +2470,7 @@ extern "C" void* cMagnetModifier_cMagnetModifier1(cMagnetModifier* self, void* s
 INCLUDE_ASM("object/movenode", cMagnetModifier_update);
 #ifdef SKIP_ASM
 extern "C" float cObjectInterface_getUpdateTime();
-extern "C" void* func_002D1B58(int id);
+extern "C" void* cObjectInterface_getPosition(int id);
 
 struct sMnVec4_3573F8 {
     float x, y, z, w;
@@ -2553,7 +2553,7 @@ struct sMnMover_3573F8 {
 /**
  * Pulls the magnet's object toward the rider it has caught, faster the longer it chases.
  *
- * With a rider attached (Being >= 0) Time grows by the frame time; d = the rider's position (func_002D1B58) -
+ * With a rider attached (Being >= 0) Time grows by the frame time; d = the rider's position (cObjectInterface_getPosition) -
  * Offset. Within 50 units AllowCollide is set; otherwise Offset moves by d * Speed * Time / |d|, clamped to d
  * (which also sets AllowCollide). Marks the root transform dirty.
  */
@@ -2563,7 +2563,7 @@ extern "C" void cMagnetModifier_update(cMagnetModifier* self)
         return;
     }
     self->Time += cObjectInterface_getUpdateTime();
-    sMnVec4_3573F8 delta = vu0Sub_3573F8(*(sMnVec4_3573F8*)func_002D1B58(self->Being), (*(sMnVec4_3573F8*)&self->Offset));
+    sMnVec4_3573F8 delta = vu0Sub_3573F8(*(sMnVec4_3573F8*)cObjectInterface_getPosition(self->Being), (*(sMnVec4_3573F8*)&self->Offset));
     float len = vu0Length_3573F8(delta);
     if (len < 50.0f) {
         self->AllowCollide = 1;
@@ -2719,15 +2719,15 @@ struct sMnVEntryRd7798 {
     void* (*fn)(void*);
 };
 
-// PORT: the project names this func_002D1CF0__FPv (one void* arg), but it is a
+// PORT: the project names this cObjectInterface_getAvaSplineTransform__FPv (one void* arg), but it is a
 // pass-through wrapper and this caller passes two args (prototype mismatch).
-void* func_002D1CF0_2(void*, void*) __asm__("func_002D1CF0__FPv");
+void* cObjectInterface_getAvaSplineTransform_2(void*, void*) __asm__("cObjectInterface_getAvaSplineTransform__FPv");
 
 /**
  * Constructs an avalanche spline modifier from a replay frame.
  *
  * Installs cAvaSplineModifier_vtbl, reads Instance (stream vtable entry 3) and 0x30 bytes at +0x10, then refetches the
- * instance transform into +0x40 (func_002D1CF0).
+ * instance transform into +0x40 (cObjectInterface_getAvaSplineTransform).
  *
  * @param stream  replay stream to read from
  * @return self
@@ -2740,7 +2740,7 @@ extern "C" void* cAvaSplineModifier_cAvaSplineModifier1(cAvaSplineModifier* self
     self->Instance = (tInstanceRecord*)readInstFn->fn((char*)stream + readInstFn->delta);
     sMnVEntrySer7798* readFn = &(*(sMnVEntrySer7798**)stream)[2];
     readFn->fn((char*)stream + readFn->delta, payload, 0x30);
-    func_002D1CF0_2(self->Instance, (char*)self + 0x40);
+    cObjectInterface_getAvaSplineTransform_2(self->Instance, (char*)self + 0x40);
     return ((void*)self);
 }
 #endif
@@ -2748,17 +2748,17 @@ extern "C" void* cAvaSplineModifier_cAvaSplineModifier1(cAvaSplineModifier* self
 //100%
 INCLUDE_ASM("object/movenode", cAvaSplineModifier_update);
 #ifdef SKIP_ASM
-// PORT: the project names this func_002D1CF0__FPv (one void* arg), but it is a
+// PORT: the project names this cObjectInterface_getAvaSplineTransform__FPv (one void* arg), but it is a
 // pass-through wrapper and this caller passes two args (prototype mismatch).
-void* func_002D1CF0_2(void*, void*) __asm__("func_002D1CF0__FPv");
+void* cObjectInterface_getAvaSplineTransform_2(void*, void*) __asm__("cObjectInterface_getAvaSplineTransform__FPv");
 
 /**
- * Updates the avalanche spline modifier: fills Transform (+0x40) from its instance (func_002D1CF0, called with two
+ * Updates the avalanche spline modifier: fills Transform (+0x40) from its instance (cObjectInterface_getAvaSplineTransform, called with two
  * arguments though declared with one).
  */
 extern "C" void cAvaSplineModifier_update(cAvaSplineModifier* self)
 {
-    func_002D1CF0_2(self->Instance, (char*)self + 0x40);
+    cObjectInterface_getAvaSplineTransform_2(self->Instance, (char*)self + 0x40);
 }
 #endif
 

@@ -9,7 +9,7 @@
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_cFEStateMountainRoom);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void* func_0039E2A0_Room(void *, int) __asm__("func_0039E2A0");
+extern "C" void* cUIState_cUIState_Room(void *, int) __asm__("cUIState_cUIState");
 
 extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 
@@ -70,7 +70,7 @@ struct sMountainRoomK2678 {
 extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(cFEStateMountainRoom* self, void* ui, int idx)
 {
     signed char pl = idx;
-    func_0039E2A0_Room(self, (int)ui);
+    cUIState_cUIState_Room(self, (int)ui);
     self->mHashName = 43;
     self->mVtbl = cFEStateMountainRoom_vtbl;
     sMountainRoomK2678* room = (sMountainRoomK2678*)self;
@@ -136,7 +136,7 @@ struct sVEntry001D28F8 {
 extern void* cFEStateMountainRoom_vtbl[];
 extern void* D_0046D0D0[];
 extern "C" void func_0019DC20(void* self, int bank, int i);
-extern "C" void func_0039E390(void* self, int flags);
+extern "C" void cUIState__cUIState(void* self, int flags);
 
 /**
  * Destroys the mountain room: releases a pending pass-image load and frees the pass texture, then the base
@@ -159,7 +159,7 @@ extern "C" void cFEStateMountainRoom__cFEStateMountainRoom(cFEStateMountainRoom*
         vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, id);
     }
     self->mVtbl = D_0046D0D0;
-    func_0039E390(self, flags);
+    cUIState__cUIState(self, flags);
 }
 #endif
 
@@ -879,7 +879,7 @@ extern "C" void cFEStateMountainRoom_updateMarkers(cFEStateMountainRoom* mountai
 //100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStatePeakRoom_cFEStatePeakRoom);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self);
+extern "C" void* cUIState_cUIState(void* self);
 extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -900,7 +900,7 @@ struct sLodge_3780 {
 /**
  * Constructs the lodge's peak room state (the list of one peak's trophies) for a player.
  *
- * Runs the cUIState constructor (func_0039E2A0), sets mHashName to 44 and the vtable cFEStatePeakRoom_vtbl, stores the
+ * Runs the cUIState constructor (cUIState_cUIState), sets mHashName to 44 and the vtable cFEStatePeakRoom_vtbl, stores the
  * player number (low byte of @p userNum) in mUserNum and that player's controller mask (cFECustom_getPlayerCtrlMask on the engine's first
  * word) in mCtrlBits. The character id (+0xDC) comes from the player interface (back-end interface 1,
  * cBENewPlayerInterface_getPlayerCharID), the peak (+0xE0) is @p peakNum; the widget pointers from +0x48 to +0xD0 are
@@ -914,7 +914,7 @@ struct sLodge_3780 {
 extern "C" void* cFEStatePeakRoom_cFEStatePeakRoom(cFEStatePeakRoom* self, int engine, int userNum, int peakNum)
 {
     signed char idx = userNum;
-    func_0039E2A0(self);
+    cUIState_cUIState(self);
     self->mHashName = 44;
     self->mVtbl = cFEStatePeakRoom_vtbl;
     self->mUserNum = idx;
@@ -1391,7 +1391,7 @@ extern "C" void cFEStatePeakRoom_updateMedalsList(cFEStatePeakRoom* vself, int p
 //100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStateTrophyRoom_cFEStateTrophyRoom);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self);
+extern "C" void* cUIState_cUIState(void* self);
 extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1423,7 +1423,7 @@ struct sTrophy_4268 {
 /**
  * Constructs the lodge's trophy room state (one trophy and its medals) and starts loading their pictures.
  *
- * Runs the cUIState constructor (func_0039E2A0), sets mHashName to 45 and the vtable cFEStateTrophyRoom_vtbl, stores
+ * Runs the cUIState constructor (cUIState_cUIState), sets mHashName to 45 and the vtable cFEStateTrophyRoom_vtbl, stores
  * the player number (low byte of @p userNum) in mUserNum and that player's controller mask (cFECustom_getPlayerCtrlMask) in mCtrlBits, and
  * clears +0x48. The character id (+0x50) comes from the player interface (back-end interface 1,
  * cBENewPlayerInterface_getPlayerCharID), followed by a call of that interface's virtual slot 2. @p peakNum goes to +0x54
@@ -1441,7 +1441,7 @@ struct sTrophy_4268 {
 extern "C" void* cFEStateTrophyRoom_cFEStateTrophyRoom(void* self, int engine, int userNum, int peakNum, int trophyType)
 {
     signed char idx = userNum;
-    func_0039E2A0(self);
+    cUIState_cUIState(self);
     *(int*)((char*)self + 0xC) = 45;
     *(void***)((char*)self + 0x8) = cFEStateTrophyRoom_vtbl;
     *(signed char*)((char*)self + 0x44) = idx;

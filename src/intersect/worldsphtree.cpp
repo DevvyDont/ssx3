@@ -793,7 +793,7 @@ static inline int queryCell_331450(sGrid_331450* grid, int i, void* box, sCtx_33
  * (nash_CellKey_proximitytest 0) has its typed list (cell +0x28) appended and its children walked whole by
  * nash_Cell_descend1; a crossing cell (2) goes to nash_privy_QueryHelper_helpX2. The nodes themselves are not box-tested and the maximum is
  * never checked (likely bug: more than 0x200 typed nodes in the visited cells overrun the array). Sets the instance
- * count (+0x8) and the patch count (+0x10C) to -1. Called by func_002F5400.
+ * count (+0x8) and the patch count (+0x10C) to -1. Called by cWorldLightMan_getRealTimeLights.
  *
  * @param box  the query box: min at +0x0, max at +0x10
  */

@@ -2076,7 +2076,7 @@ extern "C" void cSSXScriptEngine_GetAnchorOrientation_impl(char* self, int id, v
 INCLUDE_ASM("scripter/ssxscriptengine", cSSXScriptEngine_MakeTransitionObject);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-void* func_002E4D70(void* self);
+void* cTransitionObj_cTransitionObj(void* self);
 extern void* cFade_TObj_vtbl[];
 // PORT: the wake-fx pool allocator ignores its argument; callers pass the object size.
 extern "C" void* cTransitionObj_operator_new_sz(unsigned size) __asm__("cTransitionObj_operator_new");
@@ -2094,12 +2094,12 @@ struct sFx_27A4A0
     sColor_27A4A0 c;
 };
 
-extern "C" void* func_002EBBA8(void* self, const sColor_27A4A0* col, int dx, int dy);
-extern "C" void* func_002EBE20(void* self, const sColor_27A4A0* col);
+extern "C" void* cWipe_TObj_cWipe_TObj(void* self, const sColor_27A4A0* col, int dx, int dy);
+extern "C" void* cCircle_TObj_cCircle_TObj(void* self, const sColor_27A4A0* col);
 
 static inline sFx_27A4A0* initFx_27A4A0(sFx_27A4A0* p, const sColor_27A4A0& col)
 {
-    func_002E4D70(p);
+    cTransitionObj_cTransitionObj(p);
     p->vt = cFade_TObj_vtbl;
     p->c = col;
     return p;
@@ -2140,15 +2140,15 @@ extern "C" void* cSSXScriptEngine_MakeTransitionObject(cSSXScriptEngine* self, i
         return initFx_27A4A0(fxObj, fxColor);
     }
     case 2:
-        return func_002EBBA8(cTransitionObj_operator_new_sz(0x1C), &color, -1, 0);
+        return cWipe_TObj_cWipe_TObj(cTransitionObj_operator_new_sz(0x1C), &color, -1, 0);
     case 3:
-        return func_002EBBA8(cTransitionObj_operator_new_sz(0x1C), &color, 1, 0);
+        return cWipe_TObj_cWipe_TObj(cTransitionObj_operator_new_sz(0x1C), &color, 1, 0);
     case 4:
-        return func_002EBBA8(cTransitionObj_operator_new_sz(0x1C), &color, 0, -1);
+        return cWipe_TObj_cWipe_TObj(cTransitionObj_operator_new_sz(0x1C), &color, 0, -1);
     case 5:
-        return func_002EBBA8(cTransitionObj_operator_new_sz(0x1C), &color, 0, 1);
+        return cWipe_TObj_cWipe_TObj(cTransitionObj_operator_new_sz(0x1C), &color, 0, 1);
     case 6:
-        return func_002EBE20(cTransitionObj_operator_new_sz(0x1C), &color);
+        return cCircle_TObj_cCircle_TObj(cTransitionObj_operator_new_sz(0x1C), &color);
     case 7: {
         sFx_27A4A0* fxObj = (sFx_27A4A0*)cTransitionObj_operator_new_sz(20);
         sColor_27A4A0 fxColor;

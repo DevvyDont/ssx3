@@ -232,7 +232,7 @@ extern "C" void cBERewardInterface_setPlayList(void* iface, int a, int b, unsign
 extern "C" void cBERewardInterface_setOwnedSongList(void* iface, int a, int b, unsigned long m);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028C2D0(void* p, unsigned long m);
-extern "C" void func_0039F190(void* list, int a);
+extern "C" void cUIStateStack_pop(void* list, int a);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* mem, void* engine, int a, int b);
 extern "C" void cUIStateStack_push(void* list, void* item);
@@ -345,7 +345,7 @@ extern "C" void cFEStateRequestLine_onWidgetEvent(void* requestLine, void* item,
             vt[3].fn(obj + vt[3].delta, 10);
         }
         if ((int)SSXApp->Game != 0) {
-            func_0039F190(self->engine + 0x18, 1);
+            cUIStateStack_pop(self->engine + 0x18, 1);
         } else {
             void* nextState = cFEStateAudioOptions_cFEStateAudioOptions(cMemMan_alloc(0x80, str_cFEStateAudioOptions, 0, 0), self->engine, self->player, self->f16C);
             if (nextState != 0) {

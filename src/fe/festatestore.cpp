@@ -912,13 +912,13 @@ extern "C" int cFEStateUberTrick_onWidgetMenu(cFEStateUberTrick* self, int menu,
 //100%
 INCLUDE_ASM("fe/festatestore", cFEStateCredits_cFEStateCredits1);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self);
+extern "C" void* cUIState_cUIState(void* self);
 extern void* cFEStateCredits_vtbl[];
 
 /**
  * Constructs the credits state (allocated as "cFEOptionsCredits", 104 bytes).
  *
- * Runs cUIState's constructor (func_0039E2A0; the engine argument reaches it untouched in the second argument
+ * Runs cUIState's constructor (cUIState_cUIState; the engine argument reaches it untouched in the second argument
  * register), stores cFEStateCredits_vtbl and mHashName 36, sets +0x60 to -100 and +0x64 to 1 (On Tour mPixelOffset,
  * mPixelDelta) and clears +0x48, +0x58 and +0x5C (On Tour mpWidget, mpDolbyIcon, mpTextScroll).
  *
@@ -926,7 +926,7 @@ extern void* cFEStateCredits_vtbl[];
  */
 extern "C" void* cFEStateCredits_cFEStateCredits1(void* self)
 {
-    func_0039E2A0(self);
+    cUIState_cUIState(self);
     *(void***)((char*)self + 0x8) = cFEStateCredits_vtbl;
     *(int*)((char*)self + 0x60) = -100;
     *(int*)((char*)self + 0x64) = 1;
@@ -939,7 +939,7 @@ extern "C" void* cFEStateCredits_cFEStateCredits1(void* self)
 #endif
 
 extern void* D_0046D0D0[];
-extern "C" void* func_0039E390(void*);
+extern "C" void* cUIState__cUIState(void*);
 
 //100%
 INCLUDE_ASM("fe/festatestore", cFEStateCredits__cFEStateCredits__FPv);
@@ -947,16 +947,16 @@ INCLUDE_ASM("fe/festatestore", cFEStateCredits__cFEStateCredits__FPv);
 /**
  * Destroys the credits front-end state through the cFEState and cUIState destructors.
  *
- * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor func_0039E390(): the same
+ * Stores the base cFEState vtable (D_0046D0D0), then calls the cUIState destructor cUIState__cUIState(): the same
  * body as cFEState's own destructor cFEState__cFEState, so the class tears down nothing of its own. The g++ delete
- * flags reach func_0039E390() untouched in the second argument register.
+ * flags reach cUIState__cUIState() untouched in the second argument register.
  *
- * @return no meaningful value (func_0039E390() returns nothing)
+ * @return no meaningful value (cUIState__cUIState() returns nothing)
  */
 void* cFEStateCredits__cFEStateCredits(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)D_0046D0D0;
-    return func_0039E390(self);
+    return cUIState__cUIState(self);
 }
 #endif
 

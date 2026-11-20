@@ -250,7 +250,7 @@ extern "C" void cBaseClass_DynamicEmitter_setupEmitter(cEmitter_00370DC8* self, 
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_003710D0);
+INCLUDE_ASM("render/particle", cBaseClass_DynamicEmitter_updateBASE);
 #ifdef SKIP_ASM
 struct sPtQ10D0 {
     float x, y, z, w;
@@ -264,7 +264,7 @@ static inline float randUnit10D0()
 }
 
 // PORT: the unit's callers use a 4-arg declaration; bind the real 5-arg body by asm label.
-extern "C" void func_003710D0_impl(char* self, sPtQ10D0* pos, sPtQ10D0* vel, int rnd, float dt) __asm__("func_003710D0");
+extern "C" void cBaseClass_DynamicEmitter_updateBASE_impl(char* self, sPtQ10D0* pos, sPtQ10D0* vel, int rnd, float dt) __asm__("cBaseClass_DynamicEmitter_updateBASE");
 /**
  * Records a dynamic emitter's new sub-emitter position and velocity for this frame and advances its ring index and
  * texture flip frame.
@@ -283,7 +283,7 @@ extern "C" void func_003710D0_impl(char* self, sPtQ10D0* pos, sPtQ10D0* vel, int
  * @param rnd  non-zero when the sub-emitter is enabled this frame
  * @param dt  the frame time
  */
-extern "C" void func_003710D0_impl(char* self, sPtQ10D0* pos, sPtQ10D0* vel, int rnd, float dt)
+extern "C" void cBaseClass_DynamicEmitter_updateBASE_impl(char* self, sPtQ10D0* pos, sPtQ10D0* vel, int rnd, float dt)
 {
     if (*(int*)(self + 0x174) == 0) {
         return;
@@ -686,7 +686,7 @@ struct sPtObj17C0 {
     sPtRGBA17C0* colors;        // 0x204
 };
 
-extern "C" void func_003710D0(void* self, int a1, int a2, int a3);
+extern "C" void cBaseClass_DynamicEmitter_updateBASE(void* self, int a1, int a2, int a3);
 
 // PORT: g++ minimum operator (<?).
 static inline float clamp17C0(float v, float lo, float hi)
@@ -703,7 +703,7 @@ static inline float clamp17C0(float v, float lo, float hi)
  *
  * When @p col is given it becomes the emitter's current colour (+0x1D0), otherwise the stored one is used; its
  * components times 255, clamped to 0..255, are written as RGBA bytes to m_colours (+0x204) at the current sub-emitter
- * index (+0x17C). Then func_003710D0 (On Tour updateBASE) gets (self, @p position, @p velocity, @p enable) with the frame time still in
+ * index (+0x17C). Then cBaseClass_DynamicEmitter_updateBASE (On Tour updateBASE) gets (self, @p position, @p velocity, @p enable) with the frame time still in
  * $f12: the C declaration omits On Tour's float dt, which every caller passes (1/60 or dt).
  *
  * @param position   the emitter position (const t4Vector*)
@@ -722,7 +722,7 @@ extern "C" void cDynamicColourEmitter_update(sPtObj17C0* self, int position, int
     self->colors[self->idx].r = (int)clamp17C0(col->r * 255.0f, 0.0f, 255.0f);
     self->colors[self->idx].g = (int)clamp17C0(col->g * 255.0f, 0.0f, 255.0f);
     self->colors[self->idx].b = (int)clamp17C0(col->b * 255.0f, 0.0f, 255.0f);
-    func_003710D0(self, position, velocity, enable);
+    cBaseClass_DynamicEmitter_updateBASE(self, position, velocity, enable);
 }
 #endif
 
@@ -3213,13 +3213,13 @@ static inline void vu0CopyMtx65B8(sPtMtx65B8* dst, sPtMtx65B8* src)
         : "memory");
 }
 
-extern "C" void func_003950C0(sViewportStack* dst, sViewportStack* src);
+extern "C" void cPS2GraphicsMan_sViewportStack_operatorE(sViewportStack* dst, sViewportStack* src);
 
 /**
  * Pushes the viewport stack: saves the scissor, the DeferMan scissor index, the screen, world, view, guard-band,
  * view-projection and net matrices, the guard and screen scales and offsets, and the clip bounds (unk_6B70 /
  * unk_6B80) into mViewportStack[mViewportDepth], then increments mViewportDepth and copies the entry into the new top
- * (func_003950C0). No overflow check.
+ * (cPS2GraphicsMan_sViewportStack_operatorE). No overflow check.
  */
 extern "C" void cPS2GraphicsMan_PushViewport(cPS2GraphicsMan* self)
 {
@@ -3243,7 +3243,7 @@ extern "C" void cPS2GraphicsMan_PushViewport(cPS2GraphicsMan* self)
     viewportStack->unk_02C = self->unk_5910;
     (*(sPtQ65B8*)&viewportStack->unk_050) = (*(sPtQ65B8*)&self->unk_5920);
     self->mViewportDepth++;
-    func_003950C0(&((&self->mViewportStack[0]))[self->mViewportDepth], viewportStack);
+    cPS2GraphicsMan_sViewportStack_operatorE(&((&self->mViewportStack[0]))[self->mViewportDepth], viewportStack);
 }
 #endif
 
@@ -5804,7 +5804,7 @@ static inline void CopyMtx_A610(void* dst, const void* src)
         : "memory");
 }
 
-// Inline copy of func_00396C30: uploads the list's matrices and calls the skinning program.
+// Inline copy of cPS2GraphicsMan_SetBlendMatrices: uploads the list's matrices and calls the skinning program.
 static inline void UploadMtx_A610(sMtxList_A610* list, t4Matrix* mats, unsigned long** cur)
 {
     int n = list->count;
@@ -9016,7 +9016,7 @@ static inline void CopyQuads_1310(unsigned long** pp, const void* srcp, int n)
  * Draws the falling snow flakes of a snow box.
  *
  * Sets the snow render mode, multiplies the box matrix with the view (+0x5860) and writes the flake packet.
- * func_002E55D8 calls it for snow-box type 0; cPS2GraphicsMan_RenderSnowBoxFluffs is the fluff variant.
+ * cSnowBox_render calls it for snow-box type 0; cPS2GraphicsMan_RenderSnowBoxFluffs is the fluff variant.
  *
  * @param obj  the snow box data
  */
@@ -9211,7 +9211,7 @@ static inline void CopyQuads_16F0(unsigned long** pp, const void* srcp, int n)
  * Draws the snow fluff (larger soft flakes) of a snow box.
  *
  * The same setup as cPS2GraphicsMan_RenderSnowBoxFlakes (RenderSnowBoxFlakes): snow render mode, box matrix times the view (+0x5860), then
- * the packet. func_002E55D8 calls it for snow-box type 1.
+ * the packet. cSnowBox_render calls it for snow-box type 1.
  *
  * @param obj  the snow box data
  */
@@ -11536,7 +11536,7 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_ResolveCharModel);
 extern "C" int cGraphicsMan_GetTextureID(void* self, const char* name);
 extern "C" int func_00416B18(const char* a, const char* b, int n);
 extern "C" void cGraphicsMan_AddBlendedMatrix(void* gfx, void* m);
-extern "C" int func_00369A78(void* m, void* slot, int a, int b, int c);
+extern "C" int areBlendedMatricesEqual(void* m, void* slot, int a, int b, int c);
 extern char str_alph[];
 
 struct sKey_66F0 {
@@ -11601,7 +11601,7 @@ struct sMdl_66F0 {
  * record: an alpha, flag 0x8000 for names starting with str_alph (4 chars) or "ea", an environment-map number from an
  * "envN" second name (+0x10), and the name itself is replaced by cGraphicsMan_GetTextureID's result. Material matrix
  * indices and blend indices are rebased by @p tbl; each blended matrix is registered (cGraphicsMan_AddBlendedMatrix)
- * and matched against the caller's list (func_00369A78) or appended to it, and the reference table is remapped to the
+ * and matched against the caller's list (areBlendedMatricesEqual) or appended to it, and the reference table is remapped to the
  * shared indices. cPS2GraphicsMan vtable slot 109.
  *
  * @param gfx    the graphics manager (this)
@@ -11669,7 +11669,7 @@ extern "C" void cPS2GraphicsMan_ResolveCharModel(cPS2GraphicsMan* gfx, sMdl_66F0
                 (*count)++;
                 goto next;
             }
-            if (func_00369A78(blendEntry, &slots[k], 0, 0, 0)) {
+            if (areBlendedMatricesEqual(blendEntry, &slots[k], 0, 0, 0)) {
                 blendEntry->idx = k;
                 goto next;
             }
@@ -11800,14 +11800,14 @@ extern "C" void cPS2GraphicsMan_GenerateBlendedMatrices(cPS2GraphicsMan* self, s
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_update);
 #ifdef SKIP_ASM
-void func_00369FF0(void* self);
+void cGraphicsMan_update(void* self);
 
 /**
- * Per-frame graphics update: calls func_00369FF0.
+ * Per-frame graphics update: calls cGraphicsMan_update.
  */
 extern "C" void cPS2GraphicsMan_update(cPS2GraphicsMan* self)
 {
-    func_00369FF0(self);
+    cGraphicsMan_update(self);
 }
 #endif
 

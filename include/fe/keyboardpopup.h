@@ -8,7 +8,7 @@
 // cKeyboardPopup__cKeyboardPopup.
 //
 // A FLAT layout, like main/game.h: every field at its retail offset, no C++ inheritance yet. Evidence tags:
-//   [R] retail's constructors: cUIState(cUIEngine*, cUIState*) = func_0039E318 (ui/uiscreen.cpp), cKeyboardPopup_cKeyboardPopup,
+//   [R] retail's constructors: cUIState(cUIEngine*, cUIState*) = cUIState_cUIState1 (ui/uiscreen.cpp), cKeyboardPopup_cKeyboardPopup,
 //       the destructor, and the allocation size (0x444 at every site: fepopup, feasyncfile, festateriderbio, ...);
 //   [P] the July 2003 preview's inline accessors, carried to retail by tools/layout_xlate.py;
 //   [U] how matched retail code uses the field (UI object names are strings read from the retail ELF);

@@ -332,13 +332,13 @@ extern "C" void cFEStateRiderDetail_onWidgetEvent(char* self, char* item, unsign
 INCLUDE_ASM("fe/festateriderbio", cFEStateUberTrick_cFEStateUberTrick);
 #ifdef SKIP_ASM
 extern void* D_0046CCC0[];
-extern "C" void* func_0039E2A0(void* self);
+extern "C" void* cUIState_cUIState(void* self);
 extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 
 /**
  * Constructs the uber-trick store state for a user (allocated as "cFEStateUberTrick", 0x60 bytes).
  *
- * Runs cUIState's constructor (func_0039E2A0; @p engine reaches it untouched in the second argument register as the
+ * Runs cUIState's constructor (cUIState_cUIState; @p engine reaches it untouched in the second argument register as the
  * engine), stores the vtable D_0046CCC0 and mHashName 18, sets mUserNum to @p userNum and mCtrlBits to that user's
  * controller bits (cFECustom_getPlayerCtrlMask on the engine's front end), and clears the two menu pointers +0x4C and +0x50 (On Tour
  * mpMainMenu, mpTrickMenu) and the rider-shown flag +0x48 (On Tour mbModelVisible).
@@ -350,7 +350,7 @@ extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
 extern "C" void* cFEStateUberTrick_cFEStateUberTrick(cFEStateUberTrick* self, int engine, int userNum)
 {
     signed char idx = userNum;
-    func_0039E2A0(self);
+    cUIState_cUIState(self);
     self->mVtbl = D_0046CCC0;
     self->mHashName = 18;
     self->mUserNum = idx;

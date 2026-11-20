@@ -3124,20 +3124,20 @@ INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" int cUITemplate_MAP_onWidgetEvent(void* p);
 // PORT: returns int (value unused here); the int return type keeps the target's register choice after the call.
-extern "C" int func_0039F190_85B8(void* self, int a1) __asm__("func_0039F190");
+extern "C" int cUIStateStack_pop_85B8(void* self, int a1) __asm__("cUIStateStack_pop");
 
 /**
  * Transport overlay's widget handler: when the map template reports a pick (cUITemplate_MAP_onWidgetEvent returns 1),
  * closes the overlay.
  *
- * Then pops one state from mpEngine's state stack (func_0039F190, On Tour cUIStateStack::pop) and sets mode 7 plus the
+ * Then pops one state from mpEngine's state stack (cUIStateStack_pop, On Tour cUIStateStack::pop) and sets mode 7 plus the
  * pending-delete bit in mAttrState (bits 8-13 = 7, bit 7 set). As declared the template call only gets the template
  * (+0x9C); the widget and event reach it in the argument registers.
  */
 extern "C" void cOVState_TRANSPORT_onWidgetEvent(char* self)
 {
     if (cUITemplate_MAP_onWidgetEvent(self + 0x9C) == 1) {
-        func_0039F190_85B8(*(char**)(self + 0x10) + 0x18, 1);
+        cUIStateStack_pop_85B8(*(char**)(self + 0x10) + 0x18, 1);
         *(int*)(self + 0x1C) = (*(int*)(self + 0x1C) & ~0x3F00) | 0x780;
     }
 }

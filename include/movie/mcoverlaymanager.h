@@ -13,7 +13,7 @@
 // Statics (not in the object): cMCOverlayManager_mSaveInProgress (gp-relative int), the instance cMCOverlayManager_instance.
 // Evidence tags:
 //   [R] retail's constructor cMCOverlayManager_cMCOverlayManager (word stores, the default callback stubs,
-//       MEM_fill sizes), init func_0023D5A8, SetAction, the vtable cMCOverlayManager_vtbl and getManager's alloc;
+//       MEM_fill sizes), init cMCOverlayManager_ManagerGainState, SetAction, the vtable cMCOverlayManager_vtbl and getManager's alloc;
 //   [P] the July 2003 preview's cMCOverlayManager::getMemCard (lw 0x330), carried to retail 0x434 by
 //       tools/layout_xlate.py (10 votes);
 //   [U] how matched retail code uses the field (movieplayer.cpp unless another unit is named);
@@ -101,12 +101,12 @@ struct cMCOverlayManager {
     void (*callbackSysRecheckFile)();              // 0x0AC [O][R]; [U] InitiateFileCheck
     int (*callbackAcknowledgeCardStatusChange)(int); // 0x0B0 [O][R]; [U] updateDeviceStateMonitor calls it with an arg
     // --- operation
-    int mFileType;              // 0x0B4 [O] tMCFileType; [R] ctor 2; [U] func_0023C8F0 / func_0023CAE8 store their
-                                //       type arg, pick mMaxFiles from it and pass it to func_00241D40 (On Tour
+    int mFileType;              // 0x0B4 [O] tMCFileType; [R] ctor 2; [U] cMCOverlayManager_readSetFileType / cMCOverlayManager_writeSetFileType store their
+                                //       type arg, pick mMaxFiles from it and pass it to cMCOverlayManager_getFileName (On Tour
                                 //       getFileName(tMCFileType, ...)); setTitleString switches on it
     int mAction;                // 0x0B8 [O] tMCOverlayManagerAction; [U] SetAction stores it, update switches on it
-    int mSave;                  // 0x0BC [O] (bool); [U] func_0023CAE8 (used by the autosave overlay) sets 1,
-                                //       func_0023C8F0 sets 0
+    int mSave;                  // 0x0BC [O] (bool); [U] cMCOverlayManager_writeSetFileType (used by the autosave overlay) sets 1,
+                                //       cMCOverlayManager_readSetFileType sets 0
     int mDelete;                // 0x0C0 [O] (bool); [U] the state handler sets 1 before callbackConfirmDelete
     int mFormatPressedBuffered; // 0x0C4 [O] (bool); [U] UpdateFormatConfirm sets it when callbackIsFormatPressed()
                                 //       and consumes it later
@@ -117,25 +117,25 @@ struct cMCOverlayManager {
     int mLoadOk;                // 0x0D0 [O] (bool); [U] ditto; UpdateLoad
     int mDeleteOk;              // 0x0D4 [O] (bool); [U] ditto; UpdateSave: callbackIsDeletePressed() && mDeleteOk
     int mCancelOk;              // 0x0D8 [O] (bool); [U] ditto; ManagerLoadSaveUpdate sets it in states 7 / 0x1D
-    int mSaved;                 // 0x0DC [O] (bool); [U] func_0023C8B8 returns it (On Tour isManagerSaved);
-                                //       func_00241380 clears it
+    int mSaved;                 // 0x0DC [O] (bool); [U] cMCOverlayManager_isManagerSaved returns it (On Tour isManagerSaved);
+                                //       cMCOverlayManager_ManagerStart clears it
     int mGetDir;                // 0x0E0 [O] (bool); [U] OnHighlightNext/PrevDevice clear it
-    int mSavedSize;             // 0x0E4 [O]; [U] func_00241138 adds to it; UpdateSaveFile / UpdateSaveProgress set
+    int mSavedSize;             // 0x0E4 [O]; [U] cMCOverlayManager_WriteData adds to it; UpdateSaveFile / UpdateSaveProgress set
                                 //       mProgress = mSavedSize / mSize; the state handler zeroes it when the save starts
     int mLoadedSize;            // 0x0E8 [O]; [U] cMCOverlayManager_ReadData adds to it; UpdateLoadProgress divides it by mSize
-    int mMaxFiles;              // 0x0EC [O]; [U] func_0023C8F0 / func_0023CAE8 store 4 / 6 / 1 by file type
+    int mMaxFiles;              // 0x0EC [O]; [U] cMCOverlayManager_readSetFileType / cMCOverlayManager_writeSetFileType store 4 / 6 / 1 by file type
     int mSize;                  // 0x0F0 [O]; [U] the divisor of both progress ratios
     int mCheckSize;             // 0x0F4 [O]; [R] ctor zeroes it
     int mFileCursor;            // 0x0F8 [O]; [U] the file slot index for the card calls (UpdateSave's 6-file loop
                                 //       skips it; setTitleString / the create-file state use it)
-    int mSaveProfileID;         // 0x0FC [O]; [U] func_0023C8F0 stores -1, func_0023CAE8 its profile arg;
+    int mSaveProfileID;         // 0x0FC [O]; [U] cMCOverlayManager_readSetFileType stores -1, cMCOverlayManager_writeSetFileType its profile arg;
                                 //       setTitleString passes it to cBENewPlayerInterface_getPlayerName
     int mWrapItems;             // 0x100 [O] (bool); [U] OnHighlightPrevDevice wraps to mMaxDevices - 1 when set
-    int mStackDepth;            // 0x104 [O]; [R] ctor and func_0023D5A8 zero it (no other access)
+    int mStackDepth;            // 0x104 [O]; [R] ctor and cMCOverlayManager_ManagerGainState zero it (no other access)
     int mDisplayWaitTicks;      // 0x108 [O]; [U] SetAction(1) and the state handler store 0x3C / 0x5A / 0x78;
                                 //       the *Wait states count it down
     float mProgress;            // 0x10C [O]; [U] = mSavedSize / mSize, mLoadedSize / mSize
-    float mFlash;               // 0x110 [O]; [U] SetAction(1), func_0023D5A8 and UpdateSave store 1.0
+    float mFlash;               // 0x110 [O]; [U] SetAction(1), cMCOverlayManager_ManagerGainState and UpdateSave store 1.0
     float mFlashStep;           // 0x114 [O]; [U] stored with mFlash: 0.01667 (1/60)
     int mWriteInProgress;       // 0x118 [O] (bool); [U] the create-file state sets 1 before the card write;
                                 //       WriteFailed / RetryCardOp read it
@@ -149,7 +149,7 @@ struct cMCOverlayManager {
     // --- 16-bit strings (func_002C2540 widens, strcpy1 / sprintf1 work on unsigned short)
     unsigned short mFileName[64];          // 0x134 [O]; [U] the create-file state sprintf1s "%s-%s%04d" (type, name,
                                            //       cursor + 1) into it and hands it to the card's write call
-    unsigned short mMatch[64];             // 0x1B4 [O]; [U] func_0023C8F0 / func_0023CAE8 sprintf1 the wildcard
+    unsigned short mMatch[64];             // 0x1B4 [O]; [U] cMCOverlayManager_readSetFileType / cMCOverlayManager_writeSetFileType sprintf1 the wildcard
                                            //       "%s-%s*" into it; passed to the card's directory call
     unsigned short mActiveTitleString[33]; // 0x234 [O]; [R] ctor MEM_fill(0x234, 0, 0x42); [U] setTitleString
                                            //       strcpy1s the title into it; UpdateSave reads the cursor's file name into it
@@ -162,15 +162,15 @@ struct cMCOverlayManager {
     int mCheckCard;             // 0x338 [O] (bool); [U] RecheckCard and the state handler set it; UpdateSave returns
                                 //       while set; preview 0x260 (layout_xlate, 2 votes)
     int mCheckDeviceTicks;      // 0x33C [O]; [R] ctor 5; [U] ManagerLoadSaveUpdate counts it down and resets it to 5
-    int mCheckAllowed;          // 0x340 [O] (bool); [R] ctor 0; [U] func_00241380 sets 1; fememcardcallbacks.cpp tests it
+    int mCheckAllowed;          // 0x340 [O] (bool); [R] ctor 0; [U] cMCOverlayManager_ManagerStart sets 1; fememcardcallbacks.cpp tests it
     cMCOverlayManager_sdevice mDevices[1]; // 0x344 [O]; [R] MEM_fill(&mDevices[0], 0, 0xE0); [U] indexed by device in
                                            //       GatherDeviceInfo1 / GetDevice*String / ManagerLoadSaveUpdate
     int mMaxDevices;            // 0x424 [O]; [R] ctor -1; [U] getMaxDevicesSupported returns it
-    int mSelectedDevice;        // 0x428 [O]; [U] func_0023FB18 stores it; the fe passes it to GetDeviceDisplayString;
+    int mSelectedDevice;        // 0x428 [O]; [U] cMCOverlayManager_selectDevice stores it; the fe passes it to GetDeviceDisplayString;
                                 //       preview 0x328
     int mCurrCheckDevice;       // 0x42C [O]; [U] checkDevice stores its arg; getDeviceState compares it with mSelectedDevice
     int mLastCheckDevice;       // 0x430 [O]; [U] ManagerLoadSaveUpdate's device poll index (MEM_fill(&mDevices[it]))
-    cMemCard* mpMemCard;        // 0x434 [P] getMemCard; [O]; [R] func_0023D5A8 stores cMemCard_CreateInstance(), cMCOverlayManager_ManagerLoseState
+    cMemCard* mpMemCard;        // 0x434 [P] getMemCard; [O]; [R] cMCOverlayManager_ManagerGainState stores cMemCard_CreateInstance(), cMCOverlayManager_ManagerLoseState
                                 //       frees and zeroes it; [U] every card call goes through its vtable
     int mCurrDeleteFile;        // 0x438 [O]; [R] ctor 0; [U] UpdateInitDeleteProgress
     int mCurrDeviceStateLast;   // 0x43C [O] sDeviceState (bits: 1 / 2 / 4 full / 8 no card / 0x10 unformatted);

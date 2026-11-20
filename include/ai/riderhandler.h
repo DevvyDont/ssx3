@@ -40,10 +40,10 @@ struct cRiderSphereTree;
 
 // On Tour struct tCheatState (4 chars). Retail reads m_misc with lbu only (it also holds the cheat input bits).
 struct tCheatState {
-    char m_state;           // 0x0 [O]; [U] lb/sb (cCheatFX_update, func_002F6910)
+    char m_state;           // 0x0 [O]; [U] lb/sb (cCheatFX_update, cCheatFX_updateState)
     char m_index;           // 0x1 [O]; [U] lb/lbu/sb
     char m_count;           // 0x2 [O]; [U] lb/lbu/sb
-    char m_misc;            // 0x3 [O]; [U] lbu/sb (setCheatInput cCheatFX_setCheatInput, func_002F6B28, func_002F6B38)
+    char m_misc;            // 0x3 [O]; [U] lbu/sb (setCheatInput cCheatFX_setCheatInput, cCheatFX_clearInput, cCheatFX_getInput)
 };
 
 CHECK_OFFSET(tCheatState, m_state, 0x0);

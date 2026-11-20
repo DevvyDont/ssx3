@@ -364,7 +364,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptions_saveOptionPrompt);
 #ifdef SKIP_ASM
 // PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" void func_0039E318(void* self, void* engine, void* owner);
+extern "C" void cUIState_cUIState1(void* self, void* engine, void* owner);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern char str_cFEPopupOptionReset[];
 extern void* D_0046B3D0[];
@@ -377,7 +377,7 @@ extern int D_004A14E0;
 /**
  * Pushes the save-options popup (a cFEPopupOptionReset) over the options menu and clears every options-changed flag.
  *
- * Allocates the 76-byte popup (tag "cFEPopupOptionReset"), constructs it as a child of this state (func_0039E318 with
+ * Allocates the 76-byte popup (tag "cFEPopupOptionReset"), constructs it as a child of this state (cUIState_cUIState1 with
  * the engine at +0x10), stores its vtable D_0046B3D0, clears its byte at +0x48 and pushes it onto the engine's state
  * stack (engine + 0x18) with cUIStateStack_pushPopup. cFEStateOptions_onPopupEvent sets the popup's question to
  * kT_FESaveOptionsQuesPS2 and handles the answer.
@@ -389,7 +389,7 @@ extern int D_004A14E0;
 extern "C" void cFEStateOptions_saveOptionPrompt(void* self)
 {
     char* savePopup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
-    func_0039E318(savePopup, *(void**)((char*)self + 0x10), self);
+    cUIState_cUIState1(savePopup, *(void**)((char*)self + 0x10), self);
     *(void***)(savePopup + 8) = D_0046B3D0;
     *(char*)(savePopup + 0x48) = 0;
     cUIStateStack_pushPopup(*(char**)((char*)self + 0x10) + 0x18, savePopup);
@@ -405,14 +405,14 @@ extern "C" void cFEStateOptions_saveOptionPrompt(void* self)
 //100%
 INCLUDE_ASM("fe/festateoptions", func_00188EE8);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self);
+extern "C" void* cUIState_cUIState(void* self);
 extern void* cFEStateOptionsGame_vtbl[];
 
 /**
  * Constructs the game options state (tag "cFEStateOptionsGame", 76 bytes), which cFECustom_getNextState creates for
  * state 28.
  *
- * Runs cUIState's constructor func_0039E2A0 (the engine pointer the caller passes in the second argument register goes
+ * Runs cUIState's constructor cUIState_cUIState (the engine pointer the caller passes in the second argument register goes
  * straight through; it is not declared here), stores cFEStateOptionsGame_vtbl in mVtbl (+0x8) and sets mHashName (+0xC)
  * to 0x1C. Unlike the sound, HUD and controller constructors it leaves its changed flag D_004A14D0 alone.
  * cFEStateOptionsGame_cFEStateOptionsGame is the variant built with a null engine.
@@ -421,7 +421,7 @@ extern void* cFEStateOptionsGame_vtbl[];
  */
 extern "C" void* func_00188EE8(void* self)
 {
-    func_0039E2A0(self);
+    cUIState_cUIState(self);
     *(void***)((char*)self + 0x8) = cFEStateOptionsGame_vtbl;
     *(int*)((char*)self + 0xC) = 0x1C;
     return self;
@@ -785,7 +785,7 @@ extern "C" void cSSXApp_activateBEOptions(void* p);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0029ED90(void* p, int a);
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
-extern "C" void func_0039E318(void* self, void* engine, void* owner);
+extern "C" void cUIState_cUIState1(void* self, void* engine, void* owner);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern char str_cFEPopupOptionReset[];
@@ -873,7 +873,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(cFEStateOptionsGame* self, cha
     switch (event) {
     case 7: {
         char* popup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
-        func_0039E318(popup, (char*)self->mpEngine, ((sOptGame_189980*)self));
+        cUIState_cUIState1(popup, (char*)self->mpEngine, ((sOptGame_189980*)self));
         *(void***)(popup + 8) = D_0046B3D0;
         popup[0x48] = 0;
         cUIStateStack_pushPopup(self->mpEngine->mStateStack, popup);
@@ -882,7 +882,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(cFEStateOptionsGame* self, cha
     case 5:
         if (Is_189980(*(int*)(widget + 0x38), D_004A1520)) {
             char* popup = (char*)operator new(84, str_cFEPopupScreenPos, 0x100, 0);
-            func_0039E318(popup, (char*)self->mpEngine, ((sOptGame_189980*)self));
+            cUIState_cUIState1(popup, (char*)self->mpEngine, ((sOptGame_189980*)self));
             *(void***)(popup + 8) = cFEPopupScreenPos_vtbl;
             *(int*)(popup + 0x4C) = 0;
             *(int*)(popup + 0x48) = 0;
@@ -890,7 +890,7 @@ extern "C" void cFEStateOptionsGame_onWidgetEvent(cFEStateOptionsGame* self, cha
             cUIStateStack_pushPopup(self->mpEngine->mStateStack, popup);
         } else if (Is_189980(*(int*)(widget + 0x38), D_004A1528)) {
             char* popup = (char*)operator new(76, str_cFEPopupVideoCalibration, 0x100, 0);
-            func_0039E318(popup, (char*)self->mpEngine, ((sOptGame_189980*)self));
+            cUIState_cUIState1(popup, (char*)self->mpEngine, ((sOptGame_189980*)self));
             *(void***)(popup + 8) = cFEPopupVideoCalibration_vtbl;
             *(int*)(popup + 0xC) = 27;
             cUIStateStack_pushPopup(self->mpEngine->mStateStack, popup);
@@ -1053,7 +1053,7 @@ extern "C" void cFEStateOptionsGame_updateWidget(cFEStateOptionsGame* self_)
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018A258);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self);
+extern "C" void* cUIState_cUIState(void* self);
 extern void* cFEStateOptionsSound_vtbl[];
 extern int D_004A14D4;
 
@@ -1061,7 +1061,7 @@ extern int D_004A14D4;
  * Constructs the sound options state (tag "cFEStateOptionsSound", 72 bytes), which cFECustom_getNextState creates for
  * state 29.
  *
- * Runs cUIState's constructor func_0039E2A0 (the engine pointer from the second argument register goes straight
+ * Runs cUIState's constructor cUIState_cUIState (the engine pointer from the second argument register goes straight
  * through; it is not declared here), stores cFEStateOptionsSound_vtbl in mVtbl (+0x8), sets mHashName (+0xC) to 29 and
  * clears the sound changed flag D_004A14D4. cFEStateOptionsSound_cFEStateOptionsSound is the variant built with a null
  * engine.
@@ -1070,7 +1070,7 @@ extern int D_004A14D4;
  */
 extern "C" void* func_0018A258(void* self)
 {
-    func_0039E2A0(self);
+    cUIState_cUIState(self);
     *(void***)((char*)self + 8) = cFEStateOptionsSound_vtbl;
     *(int*)((char*)self + 0xC) = 29;
     D_004A14D4 = 0;
@@ -1294,7 +1294,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" void func_0039E318(void* self, void* engine, void* owner);
+extern "C" void cUIState_cUIState1(void* self, void* engine, void* owner);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
@@ -1387,7 +1387,7 @@ extern "C" void cFEStateOptionsSound_onWidgetEvent(cFEStateOptionsSound* self, c
         break;
     case 7: {
         char* resetPopup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
-        func_0039E318(resetPopup, (char*)self->mpEngine, ((sOptSound_18A8D0*)self));
+        cUIState_cUIState1(resetPopup, (char*)self->mpEngine, ((sOptSound_18A8D0*)self));
         *(void***)(resetPopup + 8) = D_0046B3D0;
         resetPopup[0x48] = 0;
         cUIStateStack_pushPopup(self->mpEngine->mStateStack, resetPopup);
@@ -1455,7 +1455,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int cUIListBox_addEntryByStringID_i(void* box, int id, int idx) __asm__("cUIListBox_addEntryByStringID");
-extern "C" void func_0039A670(void* box);
+extern "C" void cUIListBox_deleteAllEntries(void* box);
 extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int v);
 extern "C" void* cAudioInterface_bxAudio();
@@ -1547,7 +1547,7 @@ extern "C" void cFEStateOptionsSound_updateWidget(cFEStateOptionsSound* vself)
     {
     char* w = (char*)Find_18B380(self, str_1lb);
     if (w != 0) {
-        func_0039A670(w);
+        cUIListBox_deleteAllEntries(w);
         cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_20SpeakerStereo), 0);
         cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_20SpeakerSurround), 1);
         cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_20SpeakerMono), 2);
@@ -1584,7 +1584,7 @@ extern "C" void cFEStateOptionsSound_updateWidget(cFEStateOptionsSound* vself)
     {
     char* w = (char*)Find_18B380(self, str_5lb);
     if (w != 0) {
-        func_0039A670(w);
+        cUIListBox_deleteAllEntries(w);
         cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNOff), 0);
         cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNOn), 1);
         unsigned char sel;
@@ -1596,7 +1596,7 @@ extern "C" void cFEStateOptionsSound_updateWidget(cFEStateOptionsSound* vself)
     {
     char* w = (char*)Find_18B380(self, str_6lb);
     if (w != 0) {
-        func_0039A670(w);
+        cUIListBox_deleteAllEntries(w);
         cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNOff), 0);
         cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNOn), 1);
         unsigned char sel;
@@ -1609,7 +1609,7 @@ extern "C" void cFEStateOptionsSound_updateWidget(cFEStateOptionsSound* vself)
     if (on) {
         char* w = (char*)Find_18B380(self, str_7lb);
         if (w != 0) {
-            func_0039A670(w);
+            cUIListBox_deleteAllEntries(w);
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNOff), 0);
             cUIListBox_addEntryByStringID_i(w, GetHashValue32(str_kT_CMNOn), 1);
             unsigned char sel;
@@ -1712,7 +1712,7 @@ extern "C" void cFEStateOptionsSound_setSoundMode(cFEStateOptionsSound* self, un
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018C0E8);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self);
+extern "C" void* cUIState_cUIState(void* self);
 extern void* D_0046C550[];
 extern int D_004A14D8;
 
@@ -1720,7 +1720,7 @@ extern int D_004A14D8;
  * Constructs the HUD options state (tag "cFEStateOptionsHUD", 72 bytes), which cFECustom_getNextState creates for state
  * 30.
  *
- * Runs cUIState's constructor func_0039E2A0 (the engine pointer from the second argument register goes straight
+ * Runs cUIState's constructor cUIState_cUIState (the engine pointer from the second argument register goes straight
  * through; it is not declared here), stores the vtable D_0046C550 in mVtbl (+0x8), sets mHashName (+0xC) to 0x1E and
  * clears the HUD changed flag D_004A14D8. cFEStateOptionsHUD_cFEStateOptionsHUD is the variant built with a null
  * engine.
@@ -1729,7 +1729,7 @@ extern int D_004A14D8;
  */
 extern "C" void* func_0018C0E8(void* self)
 {
-    func_0039E2A0(self);
+    cUIState_cUIState(self);
     *(void***)((char*)self + 8) = D_0046C550;
     *(int*)((char*)self + 0xC) = 0x1E;
     D_004A14D8 = 0;
@@ -1858,7 +1858,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" void func_0039E318(void* self, void* engine, void* owner);
+extern "C" void cUIState_cUIState1(void* self, void* engine, void* owner);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern char str_cFEPopupOptionReset[];
@@ -1915,7 +1915,7 @@ extern "C" void cFEStateOptionsHUD_onWidgetEvent(cFEStateOptionsHUD* self, char*
     switch (event) {
     case 7: {
         char* resetPopup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
-        func_0039E318(resetPopup, self->mpEngine, ((char*)self));
+        cUIState_cUIState1(resetPopup, self->mpEngine, ((char*)self));
         *(void***)(resetPopup + 8) = D_0046B3D0;
         *(char*)(resetPopup + 0x48) = 0;
         cUIStateStack_pushPopup(self->mpEngine->mStateStack, resetPopup);
@@ -2031,7 +2031,7 @@ extern "C" void cFEStateOptionsHUD_updateWidget(cFEStateOptionsHUD* vself)
 //100%
 INCLUDE_ASM("fe/festateoptions", func_0018C658);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self);
+extern "C" void* cUIState_cUIState(void* self);
 extern void* cFEStateOptionsController_vtbl[];
 extern int D_004A14DC;
 
@@ -2039,7 +2039,7 @@ extern int D_004A14DC;
  * Constructs the controller options state (tag "cFEStateOptionsController", 84 bytes), which cFECustom_getNextState
  * creates for state 31.
  *
- * Runs cUIState's constructor func_0039E2A0 (the engine pointer from the second argument register goes straight
+ * Runs cUIState's constructor cUIState_cUIState (the engine pointer from the second argument register goes straight
  * through; it is not declared here), stores cFEStateOptionsController_vtbl in mVtbl (+0x8), sets mHashName (+0xC) to
  * 0x1F, clears the byte at +0x50 (the pads whose test vibration is running) and clears the controller changed flag
  * D_004A14DC.
@@ -2048,7 +2048,7 @@ extern int D_004A14DC;
  */
 extern "C" void* func_0018C658(void* self)
 {
-    func_0039E2A0(self);
+    cUIState_cUIState(self);
     *(void***)((char*)self + 8) = cFEStateOptionsController_vtbl;
     *(int*)((char*)self + 0xC) = 0x1F;
     *(char*)((char*)self + 0x50) = 0;
@@ -2227,7 +2227,7 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 // PORT: cMemMan_alloc bound as operator new so gcc treats it as malloc-like.
 void* operator new(unsigned int size, const char* tag, unsigned int flags, int d) __asm__("cMemMan_alloc");
-extern "C" void func_0039E318(void* self, void* engine, void* owner);
+extern "C" void cUIState_cUIState1(void* self, void* engine, void* owner);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
@@ -2283,7 +2283,7 @@ extern "C" void cFEStateOptionsController_onWidgetEvent(char* self, char* widget
     switch (event) {
     case 7: {
         char* resetPopup = (char*)operator new(76, str_cFEPopupOptionReset, 0x100, 0);
-        func_0039E318(resetPopup, *(void**)(self + 0x10), self);
+        cUIState_cUIState1(resetPopup, *(void**)(self + 0x10), self);
         *(void***)(resetPopup + 8) = D_0046B3D0;
         *(char*)(resetPopup + 0x48) = 0;
         cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, resetPopup);
@@ -2598,13 +2598,13 @@ extern "C" void cFEStateOptionsController_vibratePad(void* self, int idx, float 
 //100%
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad1);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self);
+extern "C" void* cUIState_cUIState(void* self);
 extern void* cFEStateOptionsSaveLoad_vtbl[];
 
 /**
  * Constructs the save/load options state on the engine the caller passes.
  *
- * Runs the cUIState constructor (func_0039E2A0; the engine argument stays in place in the second argument register),
+ * Runs the cUIState constructor (cUIState_cUIState; the engine argument stays in place in the second argument register),
  * sets the state id (+0xC) to 0x20, installs cFEStateOptionsSaveLoad_vtbl and clears the byte at +0x48. The front end's
  * next-state choosers (cFECustom_getNextState, cFECustom_getPrevState) allocate it as "cFEStateOptionsSaveLoad" (76 bytes).
  *
@@ -2612,7 +2612,7 @@ extern void* cFEStateOptionsSaveLoad_vtbl[];
  */
 extern "C" void* cFEStateOptionsSaveLoad_cFEStateOptionsSaveLoad1(void* self)
 {
-    func_0039E2A0(self);
+    cUIState_cUIState(self);
     *(int*)((char*)self + 0xC) = 0x20;
     *(void***)((char*)self + 0x8) = cFEStateOptionsSaveLoad_vtbl;
     *(char*)((char*)self + 0x48) = 0;
@@ -2744,7 +2744,7 @@ INCLUDE_ASM("fe/festateoptions", cFEStateOptionsSaveLoad_onPopupEvent);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern "C" void func_0039F190(void* list, int a1);
+extern "C" void cUIStateStack_pop(void* list, int a1);
 extern "C" void cUIStateStack_push(void* list, void* item);
 extern "C" void cBENewPlayerInterface_setPlayerName(void* self, int a1, const char* name);
 extern "C" void cBE_newProfile(void* self, int c);
@@ -2785,11 +2785,11 @@ extern "C" void cFEStateOptionsSaveLoad_onPopupEvent(char* self, char* widget, u
     switch (event) {
     case 0xF:
         *(int*)(widget + 0x18) = 1;
-        func_0039F190(*(char**)(self + 0x10) + 0x18, 1);
+        cUIStateStack_pop(*(char**)(self + 0x10) + 0x18, 1);
         break;
     case 0x10:
         *(int*)(widget + 0x18) = 0;
-        func_0039F190(*(char**)(self + 0x10) + 0x18, 1);
+        cUIStateStack_pop(*(char**)(self + 0x10) + 0x18, 1);
         break;
     case 21:
         break;
@@ -3207,8 +3207,8 @@ extern "C" int cFEStateOptionsDeviceSelect_onWidgetMenu(void* self, void* widget
 INCLUDE_ASM("fe/festateoptions", cFEStateOptionsDeviceSelect_onWidgetEvent);
 #ifdef SKIP_ASM
 extern "C" void* cSSXApp_getMCManager(void* app);
-extern "C" void func_0023CAE8(void* app, int a1, int a2);
-extern "C" void func_0023C8F0(void* app, int a1);
+extern "C" void cMCOverlayManager_writeSetFileType(void* app, int a1, int a2);
+extern "C" void cMCOverlayManager_readSetFileType(void* app, int a1);
 extern "C" void cMCOverlayManager_SetAction(void* app, int a1);
 
 struct sVE_18DEA0n {
@@ -3329,9 +3329,9 @@ public:
  * Event 5 (a slot widget): does nothing without a widget or while busy (+0x1A8); sets +0x238, then acts only when the
  * display state f214 is 3 and the main button is active (+0x224). It takes the slot from the widget (+0x18) into slot
  * and the card manager's mFileCursor. In mode 2 on a save screen (+0x22C) it starts a save of file type 2
- * (func_0023CAE8 with profile -1), sets +0x1DC, busy and state 3 and calls this state's vtable slot 47 (cFEMemCard_displayStatusPopup,
+ * (cMCOverlayManager_writeSetFileType with profile -1), sets +0x1DC, busy and state 3 and calls this state's vtable slot 47 (cFEMemCard_displayStatusPopup,
  * the status popup with the manager's message). Otherwise a slot holding a file (cPS2MemCard_HasFileName through
- * mpMemCard) starts a load (func_0023C8F0, file type 0 in mode 1, else 2) and calls slot 44 (cFEMemCard_confirmLoad); an empty
+ * mpMemCard) starts a load (cMCOverlayManager_readSetFileType, file type 0 in mode 1, else 2) and calls slot 44 (cFEMemCard_confirmLoad); an empty
  * slot calls slot 47.
  *
  * Event 6 (back): clears +0x238; unless busy is 1 or state is already 6, sets +0x1E4, resets the manager
@@ -3363,21 +3363,21 @@ extern "C" void cFEStateOptionsDeviceSelect_onWidgetEvent(sDevSel_18DEA0* self, 
         self->slot = pickedSlot;
         *(int*)(app + 0xF8) = pickedSlot;
         if (self->mode == 2 && self->f22C != 0) {
-            func_0023CAE8(app, 2, -1);
+            cMCOverlayManager_writeSetFileType(app, 2, -1);
             self->f1DC = 1;
             self->busy = 1;
             self->state = st;
             self->vt[47].fn((char*)self + self->vt[47].delta);
         } else if (self->mode == 1) {
             if ((*(cDev_18DEA0**)(app + 0x434))->v67(self->slot)) {
-                func_0023C8F0(app, 0);
+                cMCOverlayManager_readSetFileType(app, 0);
                 self->vt[44].fn((char*)self + self->vt[44].delta);
             } else {
                 self->vt[47].fn((char*)self + self->vt[47].delta);
             }
         } else {
             if ((*(cDev_18DEA0**)(app + 0x434))->v67(self->slot)) {
-                func_0023C8F0(app, 2);
+                cMCOverlayManager_readSetFileType(app, 2);
                 self->vt[44].fn((char*)self + self->vt[44].delta);
             } else {
                 self->vt[47].fn((char*)self + self->vt[47].delta);
@@ -3836,20 +3836,20 @@ extern "C" void cFEStateOptionsDeviceSelect_displayStatus(cState_18E510* self)
 //100%
 INCLUDE_ASM("fe/festateoptions", cFEStateProfileSelect_cFEStateProfileSelect1);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self);
+extern "C" void* cUIState_cUIState(void* self);
 extern void* cFEStateProfileSelect_vtbl[];
 
 /**
  * Constructs the profile select state on the engine the caller passes.
  *
- * Runs the cUIState constructor (func_0039E2A0; the engine argument stays in place in the second argument register),
+ * Runs the cUIState constructor (cUIState_cUIState; the engine argument stays in place in the second argument register),
  * installs cFEStateProfileSelect_vtbl and sets the state id (+0xC) to 8. No caller in the source references it.
  *
  * @return @p self
  */
 extern "C" void* cFEStateProfileSelect_cFEStateProfileSelect1(void* self)
 {
-    func_0039E2A0(self);
+    cUIState_cUIState(self);
     *(void***)((char*)self + 0x8) = cFEStateProfileSelect_vtbl;
     *(int*)((char*)self + 0xC) = 8;
     return self;

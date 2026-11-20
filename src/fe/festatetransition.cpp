@@ -113,20 +113,20 @@ extern "C" int cFEStateTransition_handleEvent(cFEStateTransition* self, int whic
 //100%
 INCLUDE_ASM("fe/festatetransition", cFEStateTitle_cFEStateTitle1);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self);
+extern "C" void* cUIState_cUIState(void* self);
 extern void* cFEStateTitle_vtbl[];
 
 /**
  * Constructs the title-screen state (allocated as "cFEStateTitle", 76 bytes).
  *
- * Runs cUIState's constructor (func_0039E2A0; the engine argument reaches it untouched in the second argument
+ * Runs cUIState's constructor (cUIState_cUIState; the engine argument reaches it untouched in the second argument
  * register), stores cFEStateTitle_vtbl, clears +0x48 (On Tour mNumTicksIdle) and sets mHashName to 0.
  *
  * @return @p self
  */
 extern "C" void* cFEStateTitle_cFEStateTitle1(cFEStateTitle* self)
 {
-    func_0039E2A0(self);
+    cUIState_cUIState(self);
     self->mVtbl = cFEStateTitle_vtbl;
     self->mNumTicksIdle = 0;
     self->mHashName = 0;

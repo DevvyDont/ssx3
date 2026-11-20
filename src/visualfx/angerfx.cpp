@@ -481,7 +481,7 @@ extern "C" void func_002D5048(sAnger_2D4C08* self)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/angerfx", func_002D5598);
+INCLUDE_ASM("visualfx/angerfx", tAvalanchePackedFrameData_setPositionOffset);
 #ifdef SKIP_ASM
 /**
  * Writes three floats, each truncated to an integer, into bytes 0..2 of a 10-byte packed avalanche frame record.
@@ -493,7 +493,7 @@ INCLUDE_ASM("visualfx/angerfx", func_002D5598);
  * @param green  value for byte 1
  * @param blue  value for byte 2
  */
-extern "C" void func_002D5598(unsigned char* rgb, float red, float green, float blue)
+extern "C" void tAvalanchePackedFrameData_setPositionOffset(unsigned char* rgb, float red, float green, float blue)
 {
     rgb[0] = (int)red;
     rgb[1] = (int)green;
@@ -502,7 +502,7 @@ extern "C" void func_002D5598(unsigned char* rgb, float red, float green, float 
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/angerfx", func_002D55C0);
+INCLUDE_ASM("visualfx/angerfx", tAvalanchePackedFrameData_setColour);
 #ifdef SKIP_ASM
 extern float D_004A3A38;
 
@@ -518,7 +518,7 @@ extern float D_004A3A38;
  * @param blue  blue
  */
 // PORT: <? (g++ min operator)
-extern "C" void func_002D55C0(unsigned char* record, float red, float green, float blue)
+extern "C" void tAvalanchePackedFrameData_setColour(unsigned char* record, float red, float green, float blue)
 {
     float zero = 0.0f;
     float one = 1.0f;
@@ -536,7 +536,7 @@ extern "C" void func_002D55C0(unsigned char* record, float red, float green, flo
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/angerfx", func_002D5658);
+INCLUDE_ASM("visualfx/angerfx", tAvalanchePackedFrameData_setRotation);
 #ifdef SKIP_ASM
 /**
  * Packs four floats into bytes 6..9 of a 10-byte packed avalanche frame record: the first three times 127, the fourth
@@ -551,7 +551,7 @@ INCLUDE_ASM("visualfx/angerfx", func_002D5658);
  * @param blue  third value, -1..1
  * @param alpha  fourth value, 0..1
  */
-extern "C" void func_002D5658(unsigned char* dest, float red, float green, float blue, float alpha)
+extern "C" void tAvalanchePackedFrameData_setRotation(unsigned char* dest, float red, float green, float blue, float alpha)
 {
     dest[6] = (int)(red * 127.0f);
     dest[7] = (int)(green * 127.0f);
@@ -587,7 +587,7 @@ extern "C" void tActiveAvalancheNode__tActiveAvalancheNode(int* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/angerfx", func_002D5718);
+INCLUDE_ASM("visualfx/angerfx", compareAvalancheCollisions);
 #ifdef SKIP_ASM
 /**
  * Compares two entries by their leading float, for qsort (ascending).
@@ -598,7 +598,7 @@ INCLUDE_ASM("visualfx/angerfx", func_002D5718);
  * @param rhs  second entry
  * @return -1, 1 or 0 as the first float is smaller, larger or equal
  */
-extern "C" int func_002D5718(const void* lhs, const void* rhs)
+extern "C" int compareAvalancheCollisions(const void* lhs, const void* rhs)
 {
     float x = *(const float*)lhs;
     float y = *(const float*)rhs;
@@ -613,19 +613,19 @@ extern "C" int func_002D5718(const void* lhs, const void* rhs)
 #endif
 
 //100%
-INCLUDE_ASM("visualfx/angerfx", func_002D5750);
+INCLUDE_ASM("visualfx/angerfx", compareAvalancheGroundCollisions);
 #ifdef SKIP_ASM
 /**
  * Compares two entries by their leading unsigned short, for qsort (ascending).
  *
  * tAvalancheNode_calculate passes it to func_00418EF8 (qsort) for the avalanche's 4-byte ground-collision entries at
- * +0x110 (filled by func_002D9738).
+ * +0x110 (filled by tAvalanche_addGroundCollision).
  *
  * @param lhs  first entry
  * @param rhs  second entry
  * @return -1, 1 or 0 as the first value is smaller, larger or equal
  */
-extern "C" int func_002D5750(const void* lhs, const void* rhs)
+extern "C" int compareAvalancheGroundCollisions(const void* lhs, const void* rhs)
 {
     unsigned short x = *(const unsigned short*)lhs;
     unsigned short y = *(const unsigned short*)rhs;

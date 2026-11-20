@@ -245,7 +245,7 @@ float tHUDDef_getScale(void* self, void* outRange)
 INCLUDE_ASM("fe/ovstatehud", func_001E92A8);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" float func_003921F0(void* self, const unsigned short* str, void* out, int n, float sx, float sy);
+extern "C" float cFont_textExtent1(void* self, const unsigned short* str, void* out, int n, float sx, float sy);
 struct sFont_1E92A8 {
     char pad0[0x14];
     int lineH;          // 0x14
@@ -289,7 +289,7 @@ extern sIcon_1E92A8 D_004C8980[];
  * is overwritten with 0) and starts a picture name that runs to the next space or the end; the name's GetHashValue32 is
  * looked up in the picture table D_004C8980 (0x24-byte records: hash, texture, width +0xC, height +0x10, uvs; On Tour
  * tHUDPictureDB) and the record becomes the next segment, so even segments are text and odd ones pictures. Text
- * segments are measured with func_003921F0, with the end advance before a picture and without it for the last one. It
+ * segments are measured with cFont_textExtent1, with the end advance before a picture and without it for the last one. It
  * stores the total width, the height max(font MaxCharHeight * BaseScale.y * scale y, tallest picture) and the y offset
  * that centres the text in that height.
  *
@@ -321,7 +321,7 @@ extern "C" void func_001E92A8(void* textLine)
             *cursor = 0;
             cursor++;
             if (*segs[n].str != 0) {
-                float w = func_003921F0(font, segs[n].str, buf, 1, font->sx, font->sy);
+                float w = cFont_textExtent1(font, segs[n].str, buf, 1, font->sx, font->sy);
                 total += w;
                 segs[n].w = w;
             }
@@ -354,7 +354,7 @@ extern "C" void func_001E92A8(void* textLine)
         }
     }
     if (*segs[n].str != 0) {
-        float w = func_003921F0(font, segs[n].str, buf, 0, font->sx, font->sy);
+        float w = cFont_textExtent1(font, segs[n].str, buf, 0, font->sx, font->sy);
         total += w;
         segs[n].w = w;
         n++;
@@ -424,7 +424,7 @@ extern "C" void func_001E9540(void* self, unsigned short* str, int font, sVec2f*
 INCLUDE_ASM("fe/ovstatehud", func_001E95A0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern void func_00391E30_95A0(void* self, float x, float y, void* m) __asm__("func_00391E30");
+extern void cFont_text1_95A0(void* self, float x, float y, void* m) __asm__("cFont_text1");
 
 struct sCol_E95A0 {
     float a, r, g, b;
@@ -500,7 +500,7 @@ static inline void setScale_E95A0(sFont_E95A0* f, const sSize_E95A0& s)
  * to @p color and its ShadowColor to the saved shadow colour with the alpha multiplied by @p color's alpha. @p alignX
  * / @p alignY place the line around @p pos: 0 centres it, a positive value puts its right (bottom) edge there, a
  * negative one its left (top) edge. It then walks the segments left to right, advancing pos[0] (the caller's array is
- * modified): text segments are drawn with func_00391E30 at y plus the line's text offset; picture segments are drawn as
+ * modified): text segments are drawn with cFont_text1 at y plus the line's text offset; picture segments are drawn as
  * a quad (the record's texture id into the current draw state's texture slot, its uvs, its size times @p scale, centred
  * vertically on the line, colour channels times 128) through GrMan's virtual slot 71 (cPS2GraphicsMan_RenderTriStrip).
  * Finally the shadow colour is restored and the font Scale reset to BaseScale.
@@ -556,7 +556,7 @@ extern "C" void func_001E95A0(sHudLine_E95A0* self, float* pos, float* scale, sC
         if (!(i & 1)) {
             unsigned short* str = (unsigned short*)entry->p;
             if (*str != 0) {
-                func_00391E30_95A0(self->font, pos[0], pos[1] + lineOff, str);
+                cFont_text1_95A0(self->font, pos[0], pos[1] + lineOff, str);
                 float sx = scale[0];
                 pos[0] += entry->w * sx;
             }
@@ -618,7 +618,7 @@ extern "C" void func_001E95A0(sHudLine_E95A0* self, float* pos, float* scale, sC
 INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_cOVStateHUD1P);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void* func_0039E2A0_9A30(void* self, int a1) __asm__("func_0039E2A0");
+extern "C" void* cUIState_cUIState_9A30(void* self, int a1) __asm__("cUIState_cUIState");
 extern "C" void func_0020EAA0(void*);
 extern char cOVStateHUD1P_vtbl[];
 
@@ -632,7 +632,7 @@ struct sElem_9A30 {
 /**
  * Constructs the one-player HUD overlay state.
  *
- * Runs the cUIState constructor (func_0039E2A0) with @p pEngine, installs cOVStateHUD1P_vtbl at +0x8, constructs the
+ * Runs the cUIState constructor (cUIState_cUIState) with @p pEngine, installs cOVStateHUD1P_vtbl at +0x8, constructs the
  * two 0x8C-byte HUD elements at +0x48 (func_0020EAA0 on each one's +0x8), sets +0x474 to -1, clears +0x3D4, +0x3D8,
  * +0x480 and +0x484 and sets the four scales +0x478, +0x47C, +0x488 and +0x48C to 1.0. The caller (gameload) passes a
  * third argument, 0, which is not used.
@@ -645,7 +645,7 @@ struct sElem_9A30 {
 extern "C" void* cOVStateHUD1P_cOVStateHUD1P(void* hud, int pEngine)
 {
     char* self = (char*)hud;
-    func_0039E2A0_9A30(self, pEngine);
+    cUIState_cUIState_9A30(self, pEngine);
     *(char**)(self + 8) = cOVStateHUD1P_vtbl;
     new (self + 0x48) sElem_9A30[2];
     *(int*)(self + 0x474) = -1;
@@ -684,7 +684,7 @@ extern "C" void func_001E94E0_reen(void* self, char* str, int a2, sVec2f* pos) _
 extern "C" void func_001E9540_reen(void* self, unsigned short* str, int a2, sVec2f* pos) __asm__("func_001E9540");
 
 extern "C" void* cUITextureBank_getElementByHashname(void* self, int id);
-extern "C" int func_003983F0(void* self, int key);
+extern "C" int cUIFontInterface_getFontByHashName(void* self, int key);
 extern "C" void cOVStateHUD1P_calcElemPos_reen(void* self, float* out, float* pos, float* size, float* scale, int alignX, int alignY, int flags) __asm__("cOVStateHUD1P_calcElemPos");
 extern "C" void func_0020EB50(void* self, void* screen, void* rect);
 extern "C" void func_003DCA40(unsigned short* dst, const char* src);
@@ -901,7 +901,7 @@ static inline void* findElem_9AD0(char* engine, char* name)
     int hash = GetHashValue32(name);
     return cUITextureBank_getElementByHashname(engine + 0x58, hash);
 }
-static inline int findFont_9AD0(void* bank, char* name) { return func_003983F0(bank, GetHashValue32(name)); }
+static inline int findFont_9AD0(void* bank, char* name) { return cUIFontInterface_getFontByHashName(bank, GetHashValue32(name)); }
 
 struct sRace_9AD0 {
     char pad0[0x40];
@@ -1840,8 +1840,8 @@ INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_renderText1);
 // NOTE w1 2026-10-21: cOVStateHUD1P_renderText1 best 99.94 (not committed). Only residual: 4 insns at the start of the
 // last block before the jal cFont_text: $f0..$f3 numbering of the font->f38/f3C = f30/f34 * resEsc[] loads
 // is swapped (local alloc; sx regs reports nothing). Tried operand order / statement order / locals (99.78-99.94).
-// Sibling func_001F25E0 is identical except: func_003921F0 instead of cFont_textExtent (str is const unsigned short*),
-// func_00391E30 instead of cFont_text. Needs sColor_001F16C0, sHudElemDef_001F16C0 from cOVStateHUD1P_renderTime1's block.
+// Sibling func_001F25E0 is identical except: cFont_textExtent1 instead of cFont_textExtent (str is const unsigned short*),
+// cFont_text1 instead of cFont_text. Needs sColor_001F16C0, sHudElemDef_001F16C0 from cOVStateHUD1P_renderTime1's block.
 // Lessons: dead stores of dOutT/dOut land in the frame because arrays are written; col shares the slot of dOutT when
 // dOutT/dOut live in an inner block; nested by-value VU0 helper calls in ONE expression share one temp slot;
 // a 4-float ctor temp + struct copy gives the 'swc1 x4; ldl/ldr/sdl/sdr' colour build.
@@ -2040,8 +2040,8 @@ extern "C" void cOVStateHUD1P_renderText1(void* ctx, float blend, sFont_001F1E28
 //100%
 INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_renderText2);
 #ifdef SKIP_ASM
-extern "C" float func_003921F0(void* self, const unsigned short* str, void* out, int n, float sx, float sy);
-extern "C" void func_00391E30(void* self, float x, float y, const unsigned short* str);
+extern "C" float cFont_textExtent1(void* self, const unsigned short* str, void* out, int n, float sx, float sy);
+extern "C" void cFont_text1(void* self, float x, float y, const unsigned short* str);
 
 struct sVec4_001F22E8 {
     float x, y, z, w;
@@ -2062,7 +2062,7 @@ struct sFont_001F22E8 {
 /**
  * Draws a 16-bit string placed, scaled and coloured by a HUD element definition.
  *
- * The same as cOVStateHUD1P_renderText except that the text is measured with func_003921F0 and drawn with func_00391E30: element
+ * The same as cOVStateHUD1P_renderText except that the text is measured with cFont_textExtent1 and drawn with cFont_text1: element
  * position and scale (times @p scaleMul), pivots from the element unless overridden (0x7F), placement by cOVStateHUD1P_calcElemPos
  * with reflect bits @p reflect, @p posOff, the box into @p rect, the element's or @p color's colour, the layer byte into
  * bits 5-9 of the draw state's word 2, ShadowColor (colour alpha, 0, 0, 0) while drawing, then ShadowColor (1, 0, 0, 0)
@@ -2101,7 +2101,7 @@ extern "C" void cOVStateHUD1P_renderText2(void* ctx, sFont_001F22E8* font, sHudE
     }
     font->f38 = font->f30 * escale[0];
     font->f3C = font->f34 * escale[1];
-    func_003921F0(font, str, extent, 0, font->f38, font->f3C);
+    cFont_textExtent1(font, str, extent, 0, font->f38, font->f3C);
     int ax = (align == 0x7F) ? hudDef->align : align;
     int ay = (flags == 0x7F) ? defs[idx].flags : flags;
     size[0] = extent[2];
@@ -2127,7 +2127,7 @@ extern "C" void cOVStateHUD1P_renderText2(void* ctx, sFont_001F22E8* font, sHudE
     rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x3E0) | ((defs[idx].pad22[0] << 5) & 0x3E0);
     font->color = col;
     font->tint = shadowColour;
-    func_00391E30(font, out[0], out[1], str);
+    cFont_text1(font, out[0], out[1], str);
     font->tint = sVec4_001F22E8(1.0f, 0.0f, 0.0f, 0.0f);
     font->f38 = font->f30 * scale[0];
     font->f3C = font->f34 * scale[1];
@@ -2208,7 +2208,7 @@ static inline sV4_001F25E0 vu0Scale_25E0(const sV4_001F25E0& v, float s)
 /**
  * Draws a 16-bit string blended between two HUD element definitions, interpolating position, scale and colour by @p blend.
  *
- * The same as cOVStateHUD1P_renderText1 except that the text is measured with func_003921F0 and drawn with func_00391E30: both
+ * The same as cOVStateHUD1P_renderText1 except that the text is measured with cFont_textExtent1 and drawn with cFont_text1: both
  * elements' positions and scales (times @p scaleMul), boxes placed by cOVStateHUD1P_calcElemPos with reflect bits @p reflect, linear
  * interpolation by @p blend, @p posOff and @p rect, colours blended with VU0 maths toward an end alpha of 0 (or @p color
  * with its alpha times 1 - @p blend), and the layer bits taken from element 26 whatever the indices. Nothing in retail
@@ -2249,7 +2249,7 @@ extern "C" void func_001F25E0(void* ctx, float blend, sFont_001F25E0* font, sHud
     scale[1] = 1.0f;
     font->f38 = font->f30;
     font->f3C = font->f34;
-    func_003921F0(font, str, extent, 0, font->f38, font->f3C);
+    cFont_textExtent1(font, str, extent, 0, font->f38, font->f3C);
     sHudElemDef_001F16C0* startDef = &defs[idx1];
     tHUDDef_getPos(startDef, pos1);
     tHUDDef_getScale(startDef, esc1);
@@ -2320,7 +2320,7 @@ extern "C" void func_001F25E0(void* ctx, float blend, sFont_001F25E0* font, sHud
     float baseScaleY = font->f34;
     font->f3C = baseScaleY * blendScaleY;
     font->f38 = baseScaleX * blendScaleX;
-    func_00391E30(font, resPos[0], resPos[1], str);
+    cFont_text1(font, resPos[0], resPos[1], str);
     font->f38 = font->f30 * scale[0];
     font->f3C = font->f34 * scale[1];
 }
@@ -2329,7 +2329,7 @@ extern "C" void func_001F25E0(void* ctx, float blend, sFont_001F25E0* font, sHud
 //100%
 INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_renderMultiText);
 #ifdef SKIP_ASM
-extern "C" char* func_00392430(void* f, const char* str, char* dst, int max, float sx, float width);
+extern "C" char* cFont_textSmartLimit(void* f, const char* str, char* dst, int max, float sx, float width);
 extern "C" float cFont_textExtent(void* self, const char* str, void* out, int n, float sx, float sy);
 
 struct sFont_001F2AA0 {
@@ -2357,7 +2357,7 @@ static inline float alignPos_001F2AA0(float v, int a, float size)
  * Draws an 8-bit string word-wrapped to a HUD element's width, as lines stacked from the element's position.
  *
  * The wrapping uses the HUD state's font at +0x428 (cOVStateHUD1P's "fefont"; every caller also passes it as @p font),
- * scaled to the element's scale: func_00392430 cuts lines of at most 50 characters to fit the element's width
+ * scaled to the element's scale: cFont_textSmartLimit cuts lines of at most 50 characters to fit the element's width
  * (tHUDDef_getSize). The colour is the element's (no override) and its layer byte goes into the draw state as in
  * cOVStateHUD1P_renderText. The block's top is the element's y moved up by half (pivot 0) or all (pivot > 0) of the total height,
  * lines * MaxCharHeight * BaseScale.y * scale y. Each line is measured with cFont_textExtent at @p font's current
@@ -2392,7 +2392,7 @@ extern "C" void cOVStateHUD1P_renderMultiText(void* self, sFont_001F2AA0* font, 
     sf->f3C = sf->f34 * escale[1];
     const char* remaining = str;
     while (remaining != 0) {
-        remaining = func_00392430(*(sFont_001F2AA0**)((char*)self + 0x428), remaining, lines[n], 50, (*(sFont_001F2AA0**)((char*)self + 0x428))->f38, wrap[0]);
+        remaining = cFont_textSmartLimit(*(sFont_001F2AA0**)((char*)self + 0x428), remaining, lines[n], 50, (*(sFont_001F2AA0**)((char*)self + 0x428))->f38, wrap[0]);
         n++;
     }
     tHUDDef_getColour(&defs[idx], &col);
@@ -2440,9 +2440,9 @@ extern "C" void cOVStateHUD1P_renderMultiText(void* self, sFont_001F2AA0* font, 
 //100%
 INCLUDE_ASM("fe/ovstatehud", cOVStateHUD1P_renderMultiText1);
 #ifdef SKIP_ASM
-extern "C" unsigned short* func_00392680(void* f, float sx, float width, const unsigned short* str, unsigned short* dst, int max);
-extern "C" float func_003921F0(void* self, const unsigned short* str, void* out, int n, float sx, float sy);
-extern "C" void func_00391E30(void* self, float x, float y, const unsigned short* str);
+extern "C" unsigned short* cFont_textSmartLimit1(void* f, float sx, float width, const unsigned short* str, unsigned short* dst, int max);
+extern "C" float cFont_textExtent1(void* self, const unsigned short* str, void* out, int n, float sx, float sy);
+extern "C" void cFont_text1(void* self, float x, float y, const unsigned short* str);
 
 struct sFont_001F2DB0 {
     char pad0[0x14];
@@ -2468,8 +2468,8 @@ static inline float alignPos_001F2DB0(float v, int a, float size)
 /**
  * Draws a 16-bit string word-wrapped to a HUD element's width, as lines stacked from the element's position.
  *
- * The same as cOVStateHUD1P_renderMultiText with 16-bit text: func_00392680 wraps it (HUD state font at +0x428, scaled to the element),
- * func_003921F0 measures and func_00391E30 draws each line, with the element's colour, layer, pivots, @p flags reflect
+ * The same as cOVStateHUD1P_renderMultiText with 16-bit text: cFont_textSmartLimit1 wraps it (HUD state font at +0x428, scaled to the element),
+ * cFont_textExtent1 measures and cFont_text1 draws each line, with the element's colour, layer, pivots, @p flags reflect
  * bits and the @p rect out. Up to five lines of 50 characters fit the stack buffer and nothing enforces it.
  *
  * Likely bug: the wrap width always comes from element 29 (tHUDDef_getSize on defs[29]), not from element @p idx.
@@ -2499,7 +2499,7 @@ extern "C" void cOVStateHUD1P_renderMultiText1(void* self, sFont_001F2DB0* font,
     sf->f3C = sf->f34 * escale[1];
     const unsigned short* remaining = str;
     while (remaining != 0) {
-        remaining = func_00392680(*(sFont_001F2DB0**)((char*)self + 0x428), (*(sFont_001F2DB0**)((char*)self + 0x428))->f38, wrap[0], remaining, lines[n], 50);
+        remaining = cFont_textSmartLimit1(*(sFont_001F2DB0**)((char*)self + 0x428), (*(sFont_001F2DB0**)((char*)self + 0x428))->f38, wrap[0], remaining, lines[n], 50);
         n++;
     }
     tHUDDef_getColour(&defs[idx], &col);
@@ -2519,7 +2519,7 @@ extern "C" void cOVStateHUD1P_renderMultiText1(void* self, sFont_001F2DB0* font,
     int i = 0;
     if (n > 0) do {
         unsigned short* line = lines[i];
-        float w = func_003921F0(font, line, 0, 0, font->f38, font->f3C);
+        float w = cFont_textExtent1(font, line, 0, 0, font->f38, font->f3C);
         float x = pos[0];
         int al = defs[idx].align;
         if (flags & 1) {
@@ -2530,7 +2530,7 @@ extern "C" void cOVStateHUD1P_renderMultiText1(void* self, sFont_001F2DB0* font,
             x -= w * 0.5f;
         else if (al > 0)
             x -= w;
-        func_00391E30(font, x, y, line);
+        cFont_text1(font, x, y, line);
         if (rect != 0) {
             if (x < rect[0]) rect[0] = x;
             if (rect[2] < w) rect[2] = w;
@@ -2582,7 +2582,7 @@ struct sHudIds001F30D8 {
 };
 
 int GetHashValue32(char* str);
-extern "C" int func_003983F0(void* self, int key);
+extern "C" int cUIFontInterface_getFontByHashName(void* self, int key);
 extern char str_kT_ovrcmnloading_b[];
 extern char str_fefont[];
 
@@ -2590,7 +2590,7 @@ extern char str_fefont[];
  * Loads the loading indicator's text and font and clears its state.
  *
  * mpLoadText (+0x0) becomes the localized "kT_ovrcmnloading_b" string (its GetHashValue32 looked up through
- * SSXApp->FELocale's virtual slot 4) and mpFont (+0xC) the "fefont" font from the UI's font bank (func_003983F0 on
+ * SSXApp->FELocale's virtual slot 4) and mpFont (+0xC) the "fefont" font from the UI's font bank (cUIFontInterface_getFontByHashName on
  * SSXApp->Game->UI + 0x8); mLoadIndicators (+0x4) and mAnimFrame (+0x8) are cleared. cGame_gainFocus calls it.
  *
  * @param vself  the loading indicator (this)
@@ -2604,7 +2604,7 @@ extern "C" void cBXLoadIndicator_Init(void* vself)
     int loadingHash = GetHashValue32(str_kT_ovrcmnloading_b);
     self->a = vt[4].fn(adj, loadingHash);
     void* tbl = *(void**)((char*)SSXApp->Game->UI + 8);
-    self->d = func_003983F0(tbl, GetHashValue32(str_fefont));
+    self->d = cUIFontInterface_getFontByHashName(tbl, GetHashValue32(str_fefont));
     self->b = 0;
     self->c = 0;
 }
@@ -2660,7 +2660,7 @@ INCLUDE_ASM("fe/ovstatehud", cBXLoadIndicator_Render);
 // sVEntry<void> is a raw slot). Virtual calls in this unit go through these by hand.
 
 
-extern "C" void func_00391E30(void* self, float x, float y, const unsigned short* str);
+extern "C" void cFont_text1(void* self, float x, float y, const unsigned short* str);
 
 struct sVec4_31E0 {
     float x, y, z, w;
@@ -2700,7 +2700,7 @@ extern sGs_31E0 D_00501420_31E0 __asm__("sDrawState_s_defaultDrawState");
 extern char t4mat_Identity[];
 extern int D_004A4EB0;
 extern sV2_31E0 D_004A4EA8;
-extern "C" float func_003921F0(void* obj, const unsigned short* txt, void* a, int b, float x, float y);
+extern "C" float cFont_textExtent1(void* obj, const unsigned short* txt, void* a, int b, float x, float y);
 
 class cGfx_31E0 {
 public:
@@ -2813,10 +2813,10 @@ extern "C" void cBXLoadIndicator_Render(sHudTimer_001F31E0* self)
     self->font->SetScale(0.7f, 0.7f);
     self->font->color2 = sVec4_31E0(1.0f, 0.0f, 0.0f, 0.0f);
     self->font->scale = D_004A4EA8;
-    float w = func_003921F0(self->font, self->text, 0, 0, self->font->f38, self->font->f3C);
+    float w = cFont_textExtent1(self->font, self->text, 0, 0, self->font->f38, self->font->f3C);
     sVec4_31E0 pos(620.0f - w, 445.0f - (float)self->font->count * self->font->f34 * 0.35f, 0.0f, 1.0f);
     ((cGfx_31E0*)GrMan)->stateTop->f8_5 = 0x1F;
-    func_00391E30(self->font, pos.x, pos.y, self->text);
+    cFont_text1(self->font, pos.x, pos.y, self->text);
     self->font->scale = sV2_31E0(2.0f, 2.0f);
     pos.x = pos.x - 17.0f;
     pos.y = 445.0f;
@@ -2872,7 +2872,7 @@ extern "C" void cBXLoadIndicator_Hide(void* self, int bit)
 //100%
 INCLUDE_ASM("fe/ovstatehud", cFEStateLodge_cFEStateLodge);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self);
+extern "C" void* cUIState_cUIState(void* self);
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
@@ -2883,7 +2883,7 @@ extern void* cFEStateLodge_vtbl[];
 /**
  * Constructs the lodge front-end state.
  *
- * Runs the cUIState constructor func_0039E2A0 (the engine the callers pass as a second argument reaches it untouched in
+ * Runs the cUIState constructor cUIState_cUIState (the engine the callers pass as a second argument reaches it untouched in
  * $a1; this declaration takes only the memory), sets mHashName to 39 and mVtbl to cFEStateLodge_vtbl and sets mUserNum
  * to 0. When the engine's first word (an object) is set, the state is limited to player 0's controller: mCtrlBits = 1
  * << cBENewPlayerInterface_getPlayerCtrlID(player 0), and the same mask is stored in that object's byte at +0x8
@@ -2893,7 +2893,7 @@ extern void* cFEStateLodge_vtbl[];
  */
 extern "C" void* cFEStateLodge_cFEStateLodge(cFEStateLodge* self)
 {
-    func_0039E2A0(self);
+    cUIState_cUIState(self);
     self->mHashName = 39;
     self->mVtbl = cFEStateLodge_vtbl;
     int idx = cBENewPlayerInterface_getPlayerCtrlID(cBE_getInterface_Fv(cBE_getBE(), 1), 0);

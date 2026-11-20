@@ -170,8 +170,8 @@ extern "C" void cFEStateCredits_onGainFocus(void* self, void* pPrevState)
 //100%
 INCLUDE_ASM("fe/festatecredits", cFEStateCredits_onRender2D);
 #ifdef SKIP_ASM
-extern "C" void func_00391E30(void* self, float x, float y, void* m);
-extern "C" float func_003921F0(void* f_, const unsigned short* s, void* r_, int mono, float sx, float sy);
+extern "C" void cFont_text1(void* self, float x, float y, void* m);
+extern "C" float cFont_textExtent1(void* f_, const unsigned short* s, void* r_, int mono, float sx, float sy);
 extern "C" void* cUIState_onRender2D(void* self);
 extern "C" char* cUITextScroll_getFont(void* self);
 extern "C" unsigned short* func_003A2068(void* self, int idx);
@@ -228,7 +228,7 @@ static inline void DrawText_185F40(char* font, unsigned short* s, float x, float
 {
     *(float*)(font + 0x38) = *(float*)(font + 0x30) * sc.x;
     *(float*)(font + 0x3C) = *(float*)(font + 0x34) * sc.y;
-    func_00391E30(font, x, y, s);
+    cFont_text1(font, x, y, s);
     *(sV2_185F40*)(font + 0x38) = *(sV2_185F40*)(font + 0x30);
 }
 
@@ -310,7 +310,7 @@ extern "C" void cFEStateCredits_onRender2D(char* self)
                             sz.y -= 0.10000000149011612f;
                         }
                         sRect_185F40 textRect;
-                        func_003921F0(font, line, &textRect, 0, sz.x, sz.y);
+                        cFont_textExtent1(font, line, &textRect, 0, sz.x, sz.y);
                         newPos.x = (640.0f - textRect.x1) * 0.5f;
                         DrawText_185F40(font, line, newPos.x, newPos.y, sz);
                     }
@@ -517,14 +517,14 @@ extern "C" void cFEState_onLoseFocus(void* self)
 //100%
 INCLUDE_ASM("fe/festatecredits", cFEStateEventSelect_cFEStateEventSelect1);
 #ifdef SKIP_ASM
-extern "C" void* func_0039E2A0(void* self);
+extern "C" void* cUIState_cUIState(void* self);
 extern "C" void cUITemplate_MAP_init(void* self);
 extern void* cFEStateEventSelect_vtbl[];
 
 /**
  * Constructs the event-select state with an engine, as built by the state factory (cFECustom_getNextState).
  *
- * Builds the UI state (func_0039E2A0; the caller's engine argument reaches it unchanged in the second argument
+ * Builds the UI state (cUIState_cUIState; the caller's engine argument reaches it unchanged in the second argument
  * register, since the C declares only self), sets state id 19 and the cFEStateEventSelect_vtbl vtable, and calls
  * cUITemplate_MAP_init on +0x48 (its definition takes no argument and, for map styles 2 and up, sets cUITemplate_MAP_mPeak to
  * the current race location's peak). cFEStateEventSelect_cFEStateEventSelect is the null-engine variant of this
@@ -534,7 +534,7 @@ extern void* cFEStateEventSelect_vtbl[];
  */
 extern "C" void* cFEStateEventSelect_cFEStateEventSelect1(void* self)
 {
-    func_0039E2A0(self);
+    cUIState_cUIState(self);
     *(int*)((char*)self + 0xC) = 19;
     *(void***)((char*)self + 0x8) = cFEStateEventSelect_vtbl;
     cUITemplate_MAP_init((char*)self + 0x48);

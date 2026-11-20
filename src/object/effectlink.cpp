@@ -498,7 +498,7 @@ INCLUDE_ASM("object/effectlink", cDynamicParticleModifier_cDynamicParticleModifi
 void* operator_new1(int size);
 struct cStream00371318;
 extern "C" void cBaseClass_DynamicEmitter_readFromReplayFrame(void* self, cStream00371318* stream);
-extern "C" void func_003710D0(void* sub, void* a, void* b, int flag, float dt);
+extern "C" void cBaseClass_DynamicEmitter_updateBASE(void* sub, void* a, void* b, int flag, float dt);
 
 struct sEffectLinkVEntry_345D80 {
     short delta;
@@ -515,7 +515,7 @@ struct sEffectLinkVEntry_345D80 {
  * block starting at Mesh through the stream's read (slot 2). If the effect is not Complete it allocates a 0xD8-byte
  * tParticleData with operator_new1, reads it from the stream, sets the emitter up from it with a random seed
  * (cBaseClass_DynamicEmitter_setupEmitter, cBaseClass_DynamicEmitter::setupEmitter, seed -1), restores the emitter's own replay state and
- * steps it once at Pos/Vel for 1/60 s (func_003710D0). A Complete effect gets no ParticleData. Increments D_004A3FFC
+ * steps it once at Pos/Vel for 1/60 s (cBaseClass_DynamicEmitter_updateBASE). A Complete effect gets no ParticleData. Increments D_004A3FFC
  * (the dynamic particle count).
  *
  * @param stream  the replay frame to read from (On Tour data)
@@ -537,7 +537,7 @@ extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleMo
         vt2[2].fn((char*)stream + vt2[2].delta, particleData, 216);
         cBaseClass_DynamicEmitter_setupEmitter(((char*)&self->Emitter), (sTarget00345C90*)self->ParticleData, -1.0f);
         cBaseClass_DynamicEmitter_readFromReplayFrame(((char*)&self->Emitter), (cStream00371318*)stream);
-        func_003710D0(((char*)&self->Emitter), &(*(sVec4_00345C90*)&self->Pos), &(*(sVec4_00345C90*)&self->Vel), 1, 0.01666666753590107f);
+        cBaseClass_DynamicEmitter_updateBASE(((char*)&self->Emitter), &(*(sVec4_00345C90*)&self->Pos), &(*(sVec4_00345C90*)&self->Vel), 1, 0.01666666753590107f);
     } else {
         self->ParticleData = 0;
     }
@@ -643,7 +643,7 @@ INCLUDE_ASM("object/effectlink", cDynamicParticleModifier_update);
 #ifdef SKIP_ASM
 struct sEffectLink5EF8;
 extern "C" void cDynamicParticleModifier_updatePosition(cDynamicParticleModifier* self);
-extern "C" void func_003710D0(void* sub, void* a, void* b, int flag, float dt);
+extern "C" void cBaseClass_DynamicEmitter_updateBASE(void* sub, void* a, void* b, int flag, float dt);
 
 /**
  * Advances a dynamic particle effect by one 1/60 s step and marks it finished when it is done.
@@ -662,16 +662,16 @@ extern "C" void cDynamicParticleModifier_update(cDynamicParticleModifier* self)
     if (self->Fade > 0) {
         float* sub = (float*)(((char*)self) + 0x60);
         if (self->Emitter.m_enabledCount > 0) {
-            func_003710D0(sub, ((char*)self) + 0x30, ((char*)self) + 0x40, 0, 0.01666666753590107f);
+            cBaseClass_DynamicEmitter_updateBASE(sub, ((char*)self) + 0x30, ((char*)self) + 0x40, 0, 0.01666666753590107f);
             return;
         }
     } else {
         float* sub = (float*)(((char*)self) + 0x60);
         if (self->Emitter.Duration < 0.0f) {
-            func_003710D0(sub, ((char*)self) + 0x30, ((char*)self) + 0x40, 1, 0.01666666753590107f);
+            cBaseClass_DynamicEmitter_updateBASE(sub, ((char*)self) + 0x30, ((char*)self) + 0x40, 1, 0.01666666753590107f);
             return;
         }
-        func_003710D0(sub, ((char*)self) + 0x30, ((char*)self) + 0x40, 1, 0.01666666753590107f);
+        cBaseClass_DynamicEmitter_updateBASE(sub, ((char*)self) + 0x30, ((char*)self) + 0x40, 1, 0.01666666753590107f);
         if (!(self->Emitter.Duration <= 0.0f)) {
             return;
         }

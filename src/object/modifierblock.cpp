@@ -1138,9 +1138,9 @@ void* cSkyBox__cSkyBox(void* self)
 //100%
 INCLUDE_ASM("object/modifierblock", cSkyBox_render);
 #ifdef SKIP_ASM
-// PORT: func_002D1C58 is defined returning void*, but its value is the rider index passed to func_002D1C20(int).
-extern "C" int func_002D1C58_i() __asm__("func_002D1C58");
-extern "C" void* func_002D1C20(int i);
+// PORT: cObjectInterface_getCurrentCameraNum is defined returning void*, but its value is the rider index passed to cObjectInterface_getCameraPosition(int).
+extern "C" int cObjectInterface_getCurrentCameraNum_i() __asm__("cObjectInterface_getCurrentCameraNum");
+extern "C" void* cObjectInterface_getCameraPosition(int i);
 extern int cRenderToggles_m_DisableSkyBox;
 extern char t4mat_Identity[];
 
@@ -1206,7 +1206,7 @@ static inline void SetAlpha_53B10(sRS_53B10* r, int v) { r->alpha = v; }
  * Tour m_pInstanceSky). Pushes a copy of the draw state with the blend field (bits 5-9 of word 8) cleared,
  * zon 1, blendm 2, zmode 0 and alpha 0x14, sets bit 2 and clears bit 1 of the record's flags, and draws
  * through the graphics manager's slot 95 with an identity matrix moved to the current view's position
- * (func_002D1C20) and flags 0x5420. Then pops the state and writes the saved blend bits back.
+ * (cObjectInterface_getCameraPosition) and flags 0x5420. Then pops the state and writes the saved blend bits back.
  */
 extern "C" void cSkyBox_render(void* self)
 {
@@ -1217,7 +1217,7 @@ extern "C" void cSkyBox_render(void* self)
         return;
     sMat_53B10 skyMatrix;
     vu0CopyMatrix_53B10(&skyMatrix, t4mat_Identity);
-    sVec4_53B10 pos = *(sVec4_53B10*)func_002D1C20(func_002D1C58_i());
+    sVec4_53B10 pos = *(sVec4_53B10*)cObjectInterface_getCameraPosition(cObjectInterface_getCurrentCameraNum_i());
     *(sVec4_53B10*)&skyMatrix.m[12] = pos;
     ((sRS_53B10*)ctx->m_pCurrentDrawState)[1] = ((sRS_53B10*)ctx->m_pCurrentDrawState)[0];
     sRS_53B10* drawState = (sRS_53B10*)ctx->m_pCurrentDrawState;

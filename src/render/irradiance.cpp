@@ -47,7 +47,7 @@ extern "C" void cIrradianceDataBase_Load(cIrradianceDataBase_ACD0* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/irradiance", func_0038ADB0);
+INCLUDE_ASM("render/irradiance", cIrradianceDataBase_Purge);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 
@@ -57,7 +57,7 @@ void cMemMan_free(void*);
  * When the word at +0x4 is non-zero it frees the blocks at +0xC and +0x8 with cMemMan_free, then zeroes +0xC, +0x8 and
  * +0x4. Callers: cRealFE_purge and cGame_purge.
  */
-extern "C" void func_0038ADB0(void* self)
+extern "C" void cIrradianceDataBase_Purge(void* self)
 {
     if (*(int*)((char*)self + 0x4) != 0) {
         if (*(void**)((char*)self + 0xC) != 0) {

@@ -27,7 +27,7 @@ void UIAsciiToUnicode(unsigned short* dst, const char* src)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00397B08);
+INCLUDE_ASM("ui/uiengine", cUIEngine_cUIEngine);
 #ifdef SKIP_ASM
 extern "C" void* cList_cList(void* self);
 
@@ -40,7 +40,7 @@ extern "C" void* cList_cList(void* self);
  *
  * @return @p self
  */
-extern "C" void* func_00397B08(void* self)
+extern "C" void* cUIEngine_cUIEngine(void* self)
 {
     *(int*)((char*)self + 0x0) = 0;
     *(int*)((char*)self + 0x4) = 0;
@@ -62,12 +62,12 @@ extern "C" void* func_00397B08(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00397B70);
+INCLUDE_ASM("ui/uiengine", cUIEngine__cUIEngine);
 #ifdef SKIP_ASM
 void cMemMan_free(void*);
 void operator_delete(int*);
-extern "C" void func_00398078(void* self, int flags);
-extern "C" void func_0039E9D8(void* self, int flags);
+extern "C" void cUITextureBank__cUITextureBank(void* self, int flags);
+extern "C" void cUIStateStack__cUIStateStack(void* self, int flags);
 
 class cUIEngOwnA {
 public:
@@ -87,7 +87,7 @@ public:
     virtual ~cUIEngOwnC();
 };
 
-struct func_00397B70_sSelf {
+struct cUIEngine__cUIEngine_sSelf {
     cUIEngOwnA* a;
     void* buf;
     int f8;
@@ -101,22 +101,22 @@ struct func_00397B70_sSelf {
  * and state stack.
  *
  * Deletes +0x0, +0xC and +0x14 through their virtual destructors and frees the loaded data (+0x4); the font and locale
- * interfaces (+0x8, +0x10) are left alone. Then func_00398078 destroys the texture bank (+0x58) and func_0039E9D8 the
+ * interfaces (+0x8, +0x10) are left alone. Then cUITextureBank__cUITextureBank destroys the texture bank (+0x58) and cUIStateStack__cUIStateStack the
  * state stack (+0x18); bit 0 of @p flags frees the engine.
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_00397B70(void* self, int flags)
+extern "C" void cUIEngine__cUIEngine(void* self, int flags)
 {
-    func_00397B70_sSelf* fields = (func_00397B70_sSelf*)self;
+    cUIEngine__cUIEngine_sSelf* fields = (cUIEngine__cUIEngine_sSelf*)self;
     delete fields->a;
     if (fields->buf) {
         cMemMan_free(fields->buf);
     }
     delete fields->b;
     delete fields->c;
-    func_00398078((char*)self + 0x58, 2);
-    func_0039E9D8((char*)self + 0x18, 2);
+    cUITextureBank__cUITextureBank((char*)self + 0x58, 2);
+    cUIStateStack__cUIStateStack((char*)self + 0x18, 2);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -242,7 +242,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* self, void* owner, unsigned
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00397DF8);
+INCLUDE_ASM("ui/uiengine", cUIEngine_render2D);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sUIRS_7DF8 {
@@ -307,7 +307,7 @@ public:
 extern cUICtx_7DF8* D_004A289C_7df8 __asm__("GrMan");
 extern char t4mat_Identity[];
 extern sUIRS_7DF8 D_00501420_7df8 __asm__("sDrawState_s_defaultDrawState");
-extern "C" void func_0039EBE0(void* p);
+extern "C" void cUIStateStack_render2D(void* p);
 
 static inline void setF4_22_7DF8(sUIRS_7DF8* rs, int v) { rs->f4_22 = v; }
 static inline void setF4_23_7DF8(sUIRS_7DF8* rs, int v) { rs->f4_23 = v; }
@@ -320,10 +320,10 @@ static inline void setF4_2_7DF8(sUIRS_7DF8* rs, int v) { rs->f4_2 = v; }
  *
  * Pushes a copy of the draw state and resets it to sDrawState_s_defaultDrawState, sets a 0..640 x 0..480 view (z -1..1)
  * and the identity matrix t4mat_Identity through GrMan virtuals, sets the 2D draw-state bits, then renders the state
- * stack (+0x18) with func_0039EBE0 and pops the draw state. cRealFE_render, the load screens and the game and app
+ * stack (+0x18) with cUIStateStack_render2D and pops the draw state. cRealFE_render, the load screens and the game and app
  * render code call it each frame.
  */
-extern "C" void func_00397DF8(void* self)
+extern "C" void cUIEngine_render2D(void* self)
 {
     cUICtx_7DF8* ctx = D_004A289C_7df8;
     ctx->top[1] = ctx->top[0];
@@ -339,31 +339,31 @@ extern "C" void func_00397DF8(void* self)
     setF4_12_7DF8(D_004A289C_7df8->top, 20);
     setF4_2_7DF8(D_004A289C_7df8->top, 5);
     D_004A289C_7df8->top->f0_2 = 3;
-    func_0039EBE0((char*)self + 0x18);
+    cUIStateStack_render2D((char*)self + 0x18);
     D_004A289C_7df8->v22();
     D_004A289C_7df8->v32();
     D_004A289C_7df8->top--;
 }
 #endif
 
-void func_0039ECA8(void*);
+void cUIStateStack_render3D(void*);
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00398018);
+INCLUDE_ASM("ui/uiengine", cUIEngine_render3D);
 #ifdef SKIP_ASM
 /**
- * Draws a UI engine's 3D layer: calls func_0039ECA8__FPv (empty) on the state stack (+0x18).
+ * Draws a UI engine's 3D layer: calls cUIStateStack_render3D__FPv (empty) on the state stack (+0x18).
  *
- * cRealFE_render calls it just before func_00397DF8.
+ * cRealFE_render calls it just before cUIEngine_render2D.
  */
-extern "C" void func_00398018(void* self)
+extern "C" void cUIEngine_render3D(void* self)
 {
-    func_0039ECA8((char*)self + 0x18);
+    cUIStateStack_render3D((char*)self + 0x18);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00398038);
+INCLUDE_ASM("ui/uiengine", cUIEngine_update);
 #ifdef SKIP_ASM
 struct sVEntry398038 {
     short delta;
@@ -371,25 +371,25 @@ struct sVEntry398038 {
     void (*fn)(void*);
 };
 
-extern "C" void func_0039F100(void*);
+extern "C" void cUIStateStack_update(void*);
 
 /**
- * Updates a UI engine: polls its input object (+0xC, virtual slot 46), then updates the state stack (func_0039F100 on
+ * Updates a UI engine: polls its input object (+0xC, virtual slot 46), then updates the state stack (cUIStateStack_update on
  * +0x18).
  *
  * cRealFE_update, cFELoadScreen_update, the game loader and the app's UI loops call it.
  */
-extern "C" void func_00398038(void* self)
+extern "C" void cUIEngine_update(void* self)
 {
     void* obj = *(void**)((char*)self + 0xC);
     sVEntry398038* vt = *(sVEntry398038**)((char*)obj + 8);
     vt[46].fn((char*)obj + vt[0x2E].delta);
-    func_0039F100((char*)self + 0x18);
+    cUIStateStack_update((char*)self + 0x18);
 }
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00398078);
+INCLUDE_ASM("ui/uiengine", cUITextureBank__cUITextureBank);
 #ifdef SKIP_ASM
 struct sVEntry398078 {
     short delta;
@@ -402,11 +402,11 @@ extern void* GrMan_uiengine __asm__("GrMan");
  * Destroys a UI texture bank: releases its textures through the graphics manager and frees its arrays.
  *
  * Each of the +0x8 texture ids in the array at +0x4 goes to GrMan virtual slot 50; the id array and the element array
- * (+0xC) are freed; bit 0 of @p flags frees the bank. func_00397B70 runs it on the engine's +0x58.
+ * (+0xC) are freed; bit 0 of @p flags frees the bank. cUIEngine__cUIEngine runs it on the engine's +0x58.
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void func_00398078(void* self, int flags)
+extern "C" void cUITextureBank__cUITextureBank(void* self, int flags)
 {
     int i;
     for (i = 0; i < *(int*)((char*)self + 0x8); i++) {
@@ -583,7 +583,7 @@ extern "C" s398380Item* cUITextureBank_getElementByHashname(void* self, int id)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_003983B8);
+INCLUDE_ASM("ui/uiengine", cUITextureBank_getTextureByHashname);
 #ifdef SKIP_ASM
 struct sUiEntry_83B8 {
     int value;          // 0x00
@@ -600,7 +600,7 @@ struct sUiEntry_83B8 {
  * @param key  the element hash name
  * @return the texture, or 0 when not found
  */
-extern "C" int func_003983B8(char* self, int key)
+extern "C" int cUITextureBank_getTextureByHashname(char* self, int key)
 {
     int count = *(int*)(self + 0x10);
     for (int i = 0; i < count; i++) {
@@ -614,7 +614,7 @@ extern "C" int func_003983B8(char* self, int key)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_003983F0);
+INCLUDE_ASM("ui/uiengine", cUIFontInterface_getFontByHashName);
 #ifdef SKIP_ASM
 struct s3983F0Entry {
     int key;
@@ -637,7 +637,7 @@ struct s3983F0 {
  * @param key  the font hash name
  * @return the font, or 0 when not found
  */
-extern "C" int func_003983F0(s3983F0* self, int key)
+extern "C" int cUIFontInterface_getFontByHashName(s3983F0* self, int key)
 {
     signed char i;
     for (i = 0; i < self->count; i++) {
@@ -651,22 +651,22 @@ extern "C" int func_003983F0(s3983F0* self, int key)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_00398438);
+INCLUDE_ASM("ui/uiengine", cUIFontInterface_purgeFonts);
 #ifdef SKIP_ASM
-extern "C" void func_003916C0(int h, int a);
+extern "C" void cFont__cFont(int h, int a);
 
 /**
  * Releases all fonts of a font interface and empties it.
  *
- * Each entry with a font (+0x8) has it destroyed with func_003916C0(font, 3); every entry's name and hash are cleared
+ * Each entry with a font (+0x8) has it destroyed with cFont__cFont(font, 3); every entry's name and hash are cleared
  * and the count (+0x34) goes to 0. cSSXApp_purge calls it.
  */
-extern "C" void func_00398438(s3983F0* self)
+extern "C" void cUIFontInterface_purgeFonts(s3983F0* self)
 {
     for (int i = 0; i < self->count; i++) {
         s3983F0Entry* fontEntry = &self->entries[i];
         if (fontEntry->value != 0) {
-            func_003916C0(fontEntry->value, 3);
+            cFont__cFont(fontEntry->value, 3);
         }
         fontEntry->unk4 = 0;
         fontEntry->key = 0;
@@ -676,12 +676,12 @@ extern "C" void func_00398438(s3983F0* self)
 #endif
 
 //100%
-INCLUDE_ASM("ui/uiengine", func_003984B0);
+INCLUDE_ASM("ui/uiengine", cUIFontInterface_addFontEntry);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // cUIFontInterface::addFontEntry (On Tour): fill font slot `index` (cUIFontEntry::setFileName then
 // setHashName, both inline here) and bump the font count.
-extern "C" void func_003984B0_impl(s3983F0* self, int index, char* pszFontName, unsigned int hashID) __asm__("func_003984B0");
+extern "C" void cUIFontInterface_addFontEntry_impl(s3983F0* self, int index, char* pszFontName, unsigned int hashID) __asm__("cUIFontInterface_addFontEntry");
 
 static inline void uiFontSetFileName(s3983F0Entry* e, const char* name)
 {
@@ -697,13 +697,13 @@ static inline void uiFontSetHashName(s3983F0Entry* e, unsigned int hash)
  * Fills font-interface entry @p index with a font file name and hash name and counts it, unless 4 entries are already
  * used.
  *
- * cSSXApp_initload adds "fefont" and "hudfont" with it; func_003984E8 adds the entries of a font table.
+ * cSSXApp_initload adds "fefont" and "hudfont" with it; cUIFontInterface_setData adds the entries of a font table.
  *
  * @param index  the entry to fill, 0..3
  * @param pszFontName  the font file name
  * @param hashID  the font hash name
  */
-extern "C" void func_003984B0_impl(s3983F0* self, int index, char* pszFontName, unsigned int hashID)
+extern "C" void cUIFontInterface_addFontEntry_impl(s3983F0* self, int index, char* pszFontName, unsigned int hashID)
 {
     if (self->count < 4) {
         uiFontSetFileName(&self->entries[index], pszFontName);
@@ -714,9 +714,9 @@ extern "C" void func_003984B0_impl(s3983F0* self, int index, char* pszFontName, 
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("ui/uiengine", func_003984E8);
+INCLUDE_ASM("ui/uiengine", cUIFontInterface_setData);
 #ifdef SKIP_ASM
-extern "C" void func_003984B0(void* self, unsigned int index, void* data, int type);
+extern "C" void cUIFontInterface_addFontEntry(void* self, unsigned int index, void* data, int type);
 
 struct sChunkHdr_3984E8 {
     unsigned int count;
@@ -726,18 +726,18 @@ struct sChunkHdr_3984E8 {
  * Points a font interface at a font table and adds each of its records as a font entry.
  *
  * Stores @p hdr at +0x0; each record (after the 4-byte count) has its hash name at +0x0, its size at +0x4 and the file
- * name from +0x8, and goes to func_003984B0 with its index. Nothing in the C code calls it directly.
+ * name from +0x8, and goes to cUIFontInterface_addFontEntry with its index. Nothing in the C code calls it directly.
  *
  * @param hdr  the font table: a count followed by the records
  */
-extern "C" void func_003984E8(sChunkHdr_3984E8** self, sChunkHdr_3984E8* hdr)
+extern "C" void cUIFontInterface_setData(sChunkHdr_3984E8** self, sChunkHdr_3984E8* hdr)
 {
     char* rec = (char*)hdr + 4;
     *self = hdr;
     unsigned int i = 0;
     if (hdr->count != 0) {
         do {
-            func_003984B0(self, i, rec + 8, *(int*)rec);
+            cUIFontInterface_addFontEntry(self, i, rec + 8, *(int*)rec);
             i++;
             rec += *(int*)(rec + 4) + 8;
         } while (i < (*self)->count);
@@ -1518,7 +1518,7 @@ struct cUIThing;
 unsigned short cUIThing_getKeyframerEvent(cUIThing* self, int x);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 void* cUIThing_getEngine(void* self);
-extern "C" int func_003A0318(void* self, int a);
+extern "C" int cUIThing_getSound(void* self, int a);
 extern char gUISoundNull[4];
 
 struct sVE_9970 { short delta; short index; int (*fn)(void*, ...); };
@@ -1599,7 +1599,7 @@ extern "C" int cUIListBox_onInput(cUIListBox* self, void* in)
         if (moveResult & 1) {
             result = 1;
         } else if (moveResult & 0x10) {
-            result = func_003A0318(((char*)self), 0);
+            result = cUIThing_getSound(((char*)self), 0);
         }
         if (listener != 0) {
             sVEv_9970* vt = *(sVEv_9970**)listener;
@@ -1632,7 +1632,7 @@ extern "C" int cUIListBox_onInput(cUIListBox* self, void* in)
         if (moveResult & 1) {
             result = 1;
         } else if (moveResult & 0x10) {
-            result = func_003A0318(((char*)self), 0);
+            result = cUIThing_getSound(((char*)self), 0);
         }
         if (listener != 0) {
             sVEv_9970* vt = *(sVEv_9970**)listener;
@@ -1649,9 +1649,9 @@ extern "C" int cUIListBox_onInput(cUIListBox* self, void* in)
             }
         }
         if (moveResult & 1) {
-            result = func_003A0318(((char*)self), 1);
+            result = cUIThing_getSound(((char*)self), 1);
         } else if (moveResult & 0x10) {
-            result = func_003A0318(((char*)self), 0);
+            result = cUIThing_getSound(((char*)self), 0);
         }
         if (listener != 0) {
             sVEv_9970* vt = *(sVEv_9970**)listener;
@@ -1761,9 +1761,9 @@ extern "C" void cUIListBox_updateLocale(cUIListBox_updateLocale_sObj* self)
 INCLUDE_ASM("ui/uiengine", cUIListBox_render2D);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" float func_003921F0(void* font, int str, void* out, int flags, float sx, float sy);
+extern "C" float cFont_textExtent1(void* font, int str, void* out, int flags, float sx, float sy);
 extern "C" void cUIThing_applyPivot(void* self, void* pos, void* size);
-extern "C" void func_00391E30(void* font, float x, float y, int str);
+extern "C" void cFont_text1(void* font, float x, float y, int str);
 extern char* D_004A289C_9F00 __asm__("GrMan");
 
 struct sV2_9F00 {
@@ -1866,14 +1866,14 @@ extern "C" void cUIListBox_render2D(cUIListBox* self, float x, float y)
     float* box = &self->mSize.x;
     {
         sRect_9F00 textRect;
-        func_003921F0(font, str, &textRect, 0, listScale.x, listScale.y);
+        cFont_textExtent1(font, str, &textRect, 0, listScale.x, listScale.y);
         if (self->mSize.x < textRect.x1) {
             over = 1;
         }
         sV3_9F00 size(textRect.x1, self->mScale.y * ((float)font->height * font->scale.y), 0.0f);
         sV3_9F00 position(self->mPosition.x + x, self->mPosition.y + y, 0.0f);
         cUIThing_applyPivot((self), &position, &size);
-        func_00391E30(font, position.x, position.y, str);
+        cFont_text1(font, position.x, position.y, str);
     }
     char* loc = *(char**)(*(char**)(*(char**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x10);
     if (loc == 0) {
