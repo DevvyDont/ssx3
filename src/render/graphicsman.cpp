@@ -180,8 +180,8 @@ public:
     virtual void v08();
     virtual void v09();
     virtual void v10();
-    virtual void v11();
-    virtual void v12();
+    virtual void prepause();
+    virtual void postpause();
 };
 
 /**
@@ -193,10 +193,10 @@ extern "C" void cGraphicsMan_FlushRenderer(cGraphicsMan* self)
     for (;;) {
         sGmVEntryI_9C28* vt = (sGmVEntryI_9C28*)self->mVtbl;
         if (vt[18].fn((char*)self + vt[18].delta) != 0) break;
-        (*(cGmApp_9C28**)(cAppMan_TheAppMan + 0x8))->v11();
+        (*(cGmApp_9C28**)(cAppMan_TheAppMan + 0x8))->prepause();
         SYNCTASK_run(0);
         THREAD_yield(0);
-        (*(cGmApp_9C28**)(cAppMan_TheAppMan + 0x8))->v12();
+        (*(cGmApp_9C28**)(cAppMan_TheAppMan + 0x8))->postpause();
     }
 }
 #endif
@@ -2955,7 +2955,7 @@ class cStream00370AF8 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01(void* buf, int size);
-    virtual void v02(void* buf, int size);
+    virtual void read(void* buf, int size);
 };
 
 extern "C" void tParticleEmitter_calcBoundBox(void* a, void* b);
@@ -2973,7 +2973,7 @@ extern "C" void cStaticEmitter_readFromReplayFrame(cStaticEmitter* self, cStream
         float b;
         int c;
     } buf;
-    stream->v02(&buf, 0xC);
+    stream->read(&buf, 0xC);
     self->Duration = buf.a;
     self->Emitter.EndTime = buf.b;
     tParticleEmitter_calcBoundBox((char*)&self->Emitter, (char*)&self->BoundBox);

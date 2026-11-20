@@ -319,11 +319,11 @@ INCLUDE_ASM("object/railmodifier", cRailModifier_writeToReplayFrame);
 class cStream0035C540 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01(void* buf, int size);
+    virtual void write(void* buf, int size);
     virtual void v02(void* buf, int size);
     virtual void v03(void* buf, int size);
     virtual void v04(void* buf, int size);
-    virtual void v05(void* p);
+    virtual void writeReplayInstance(void* p);
 };
 
 /**
@@ -334,8 +334,8 @@ public:
  */
 extern "C" void cRailModifier_writeToReplayFrame(cRailModifier* self, cStream0035C540* stream)
 {
-    stream->v01((char*)&self->BoundBox, 0x30);
-    stream->v05(self->Instance);
+    stream->write((char*)&self->BoundBox, 0x30);
+    stream->writeReplayInstance(self->Instance);
 }
 #endif
 
@@ -1377,7 +1377,7 @@ INCLUDE_ASM("object/railmodifier", cRigidBody_writeToReplayFrame);
 class cRigidBody_writeToReplayFrame_cObj {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01(void* buf, int size);
+    virtual void write(void* buf, int size);
 };
 
 /**
@@ -1387,7 +1387,7 @@ public:
  */
 extern "C" void cRigidBody_writeToReplayFrame(cRigidBody* self, cRigidBody_writeToReplayFrame_cObj* obj)
 {
-    obj->v01(self, 80);
+    obj->write(self, 80);
 }
 #endif
 
@@ -1398,7 +1398,7 @@ class cRigidBody_readFromReplayFrame_cObj {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01(void* buf, int size);
-    virtual void v02(void* buf, int size);
+    virtual void read(void* buf, int size);
 };
 
 /**
@@ -1411,7 +1411,7 @@ public:
  */
 extern "C" void cRigidBody_readFromReplayFrame(void* self, cRigidBody_readFromReplayFrame_cObj* obj)
 {
-    obj->v02(self, 80);
+    obj->read(self, 80);
 }
 #endif
 
@@ -1804,8 +1804,8 @@ extern "C" void cRollerModifier_updateMOI(void* self);
 class cStreamDF70 {
 public:
     virtual void v01(void* buf, int size);
-    virtual void v02(void* buf, int size);
-    virtual int v03();
+    virtual void read(void* buf, int size);
+    virtual int readReplayInstance();
 };
 
 struct sRmMat33DF70 {
@@ -1858,8 +1858,8 @@ extern "C" sRailDF70* cRollerModifier_cRollerModifier1(sRailDF70* self, cStreamD
     self->vt = cRollerModifier_vtbl;
     SphereTree_SphereTree(self->mover);
     cRigidBody_readFromReplayFrame(self->body, (cRigidBody_readFromReplayFrame_cObj*)stream);
-    stream->v02(self->data, 40);
-    self->id = stream->v03();
+    stream->read(self->data, 40);
+    self->id = stream->readReplayInstance();
     void* meshTree = tSphTreeList_getMeshTree(cWorld_getPolyModelInfo(cObjectInterface_getWorld_DF70(), (void*)self->id), 0);
     bxSphereTree_operatorE(self->mover, meshTree);
     sRmSrcDF70* src = self->src;
@@ -1894,11 +1894,11 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier_writeToReplayFrame);
 class cRollerModifier_writeToReplayFrame_cObj {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01(void* buf, int size);
+    virtual void write(void* buf, int size);
     virtual void v02(void* buf, int size);
     virtual void v03();
     virtual void v04();
-    virtual void v05(void* ptr);
+    virtual void writeReplayInstance(void* ptr);
 };
 
 /**
@@ -1913,8 +1913,8 @@ public:
 extern "C" void cRollerModifier_writeToReplayFrame(void* self, cRollerModifier_writeToReplayFrame_cObj* obj)
 {
     cRigidBody_writeToReplayFrame((cRigidBody*)((char*)self + 0x30), (cRigidBody_writeToReplayFrame_cObj*)obj);
-    obj->v01((char*)self + 0x4, 40);
-    obj->v05(*(void**)((char*)self + 0xD0));
+    obj->write((char*)self + 0x4, 40);
+    obj->writeReplayInstance(*(void**)((char*)self + 0xD0));
 }
 #endif
 
@@ -2457,8 +2457,8 @@ class cTexFlipModifier_cTexFlipModifier1_cObj {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01(void* buf, int size);
-    virtual void v02(void* buf, int size);
-    virtual void* v03();
+    virtual void read(void* buf, int size);
+    virtual void* readReplayInstance();
 };
 
 extern "C" void cTexFlipModifier_setupTexFlip(cTexFlipModifier* self);
@@ -2472,8 +2472,8 @@ extern "C" void cTexFlipModifier_setupTexFlip(cTexFlipModifier* self);
  */
 extern "C" void* cTexFlipModifier_cTexFlipModifier1(cTexFlipModifier* self, cTexFlipModifier_cTexFlipModifier1_cObj* obj)
 {
-    obj->v02(self, 0x18);
-    self->Instance = (tInstanceRecord*)obj->v03();
+    obj->read(self, 0x18);
+    self->Instance = (tInstanceRecord*)obj->readReplayInstance();
     cTexFlipModifier_setupTexFlip(self);
     return ((void*)self);
 }
@@ -2741,11 +2741,11 @@ INCLUDE_ASM("object/railmodifier", cTexFlipModifier_writeToReplayFrame);
 class cStream0035F688 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01(void* buf, int size);
+    virtual void write(void* buf, int size);
     virtual void v02(void* buf, int size);
     virtual void v03(void* buf, int size);
     virtual void v04(void* buf, int size);
-    virtual void v05(void* p);
+    virtual void writeReplayInstance(void* p);
 };
 
 /**
@@ -2756,8 +2756,8 @@ public:
  */
 extern "C" void cTexFlipModifier_writeToReplayFrame(cTexFlipModifier* self, cStream0035F688* stream)
 {
-    stream->v01((char*)&self->Type, 0x18);
-    stream->v05(self->Instance);
+    stream->write((char*)&self->Type, 0x18);
+    stream->writeReplayInstance(self->Instance);
 }
 #endif
 
@@ -3099,7 +3099,7 @@ INCLUDE_ASM("object/railmodifier", cUVScrollModifier_writeToReplayFrame);
 class cUVScrollModifier_writeToReplayFrame_cObj {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01(void* buf, int size);
+    virtual void write(void* buf, int size);
 };
 
 /**
@@ -3110,7 +3110,7 @@ public:
  */
 extern "C" void cUVScrollModifier_writeToReplayFrame(cUVScrollModifier* self, cUVScrollModifier_writeToReplayFrame_cObj* obj)
 {
-    obj->v01(self, 80);
+    obj->write(self, 80);
 }
 #endif
 
@@ -3792,7 +3792,7 @@ public:
     virtual void v12();
     virtual void v13();
     virtual void v14();
-    virtual int v15();
+    virtual int updateNode();
     virtual void v16();
     virtual void v17();
     virtual void v18();
@@ -3827,7 +3827,7 @@ public:
     virtual void v47();
     virtual void v48();
     virtual void v49();
-    virtual void v50();
+    virtual void updateOverlapSystem();
 };
 
 /**
@@ -3837,7 +3837,7 @@ public:
  */
 extern "C" int cInstanceNode_update(cInstanceNode* self)
 {
-    return ((cRailVirt*)self)->v15();
+    return ((cRailVirt*)self)->updateNode();
 }
 #endif
 
@@ -5134,7 +5134,7 @@ INCLUDE_ASM("object/railmodifier", cMoveNode_apply);
  */
 extern "C" void cMoveNode_apply(cMoveNode* self)
 {
-    ((cRailVirt*)self)->v50();
+    ((cRailVirt*)self)->updateOverlapSystem();
 }
 #endif
 
@@ -5199,7 +5199,7 @@ public:
     virtual void v13();
     virtual void v14();
     virtual void v15();
-    virtual int v16();
+    virtual int getMesh();
 };
 
 /**
@@ -5216,7 +5216,7 @@ extern "C" int cMoveNode_getParentMesh(cMoveNode* self)
     if (holder != 0) {
         cVirt16* obj = *holder;
         if (obj != 0) {
-            return obj->v16();
+            return obj->getMesh();
         }
     }
     return 0;

@@ -14,7 +14,7 @@ public:
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual int v04();
+    virtual int snapCurrent();
 };
 
 struct sAlgoNodeK2 {
@@ -46,7 +46,7 @@ struct sAlgoListK2 {
  */
 extern "C" void cCameraAlgoList_insert(cCameraAlgoList* list, cCamAlgoK2* algo, int owned, float w)
 {
-    algo->v04();
+    algo->snapCurrent();
     sAlgoNodeK2* n = (sAlgoNodeK2*)cMemMan_alloc(0x1C, str_Algorithm_List_Node, 0x20000000, 0);
     n->owned = owned;
     n->algo = algo;

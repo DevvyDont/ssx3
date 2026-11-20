@@ -55,7 +55,7 @@ public:
     virtual void v04();
     virtual void v05();
     virtual void v06(int v);
-    virtual void v07(int v);
+    virtual void setFocus(int v);
     virtual void setStatic(int v);
     virtual void setVisible(int v);
 };
@@ -73,7 +73,7 @@ extern "C" int cFEStateTitle_onGainTransition(cFEStateTitle* self)
     if (D_004A17C0 == 0 || --D_004A17C0 == 0) {
         cUIObj_1947F8* uiObj = (cUIObj_1947F8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu0000));
         if (uiObj != 0) {
-            uiObj->v07(1);
+            uiObj->setFocus(1);
         }
         uiObj = (cUIObj_1947F8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_tReal));
         if (uiObj != 0) {

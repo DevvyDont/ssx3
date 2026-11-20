@@ -542,7 +542,7 @@ public:
     virtual void v10();
     virtual void v11();
     virtual void v12();
-    virtual void v13(int, void*);
+    virtual void setChannelDataKCP(int, void*);
 };
 
 /**
@@ -559,7 +559,7 @@ extern "C" void cUIScreen_parseObjectSetPos(cUIScreen* self, int pFrame, int* ms
     cUIScreen_parseObjectSetPos_cVirt* obj = (cUIScreen_parseObjectSetPos_cVirt*)cUIScreen_getObjectByHashName((cUIScreen*)self, msg[1]);
     if (obj != 0) {
         cUIThing_deleteAnimation(obj);
-        obj->v13(msg[2], msg + 3);
+        obj->setChannelDataKCP(msg[2], msg + 3);
     }
 }
 #endif
@@ -611,7 +611,7 @@ public:
     virtual void v13();
     virtual void v14();
     virtual void v15();
-    virtual int v16(void*, int);
+    virtual int onScreenEvent(void*, int);
 };
 
 class cUIScreen_parseEventTrigger_cVirtB {
@@ -620,7 +620,7 @@ public:
     // vptr at 0x4; slot N at vtable offset N*8
     virtual void v01();
     virtual void v02();
-    virtual int v03(void*, int);
+    virtual int onScreenEvent(void*, int);
 };
 
 /**
@@ -636,10 +636,10 @@ public:
 extern "C" void cUIScreen_parseEventTrigger(cUIScreen* self, void* pFrame, int* msg)
 {
     cUIScreen_parseEventTrigger_cVirtA* state = (cUIScreen_parseEventTrigger_cVirtA*)self->mpState;
-    if (state->v16(self, msg[1]) == 0) {
+    if (state->onScreenEvent(self, msg[1]) == 0) {
         cUIScreen_parseEventTrigger_cVirtB* customInterface = **(cUIScreen_parseEventTrigger_cVirtB***)((char*)self->mpState + 0x10);
         if (customInterface != 0) {
-            customInterface->v03(self, msg[1]);
+            customInterface->onScreenEvent(self, msg[1]);
         }
     }
 }
@@ -1947,7 +1947,7 @@ public:
     virtual void v04();
     virtual void v05();
     virtual void v06();
-    virtual void v07(int);
+    virtual void setFocus(int);
 };
 
 /**
@@ -1959,7 +1959,7 @@ public:
  */
 extern "C" void cUIState_onMenuGainFocus(cUIState* self, cUIState_onMenuGainFocus_cVirt* obj)
 {
-    obj->v07(1);
+    obj->setFocus(1);
 }
 #endif
 

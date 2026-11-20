@@ -2777,7 +2777,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual sQtVec4_B928* v05();
+    virtual sQtVec4_B928* getPosition();
 };
 
 
@@ -2865,7 +2865,7 @@ extern "C" void cWorldPainterMan_render1(cWorldPainterMan* ctx, sQtTree_B928* tr
     } else {
         cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
         char* rider = (char*)SSXApp->Game->AI->Players[0]->mRider;
-        sQtVec4_B928 cam = *((cQtCam_B928*)(rider + 0x6C0))->v05();
+        sQtVec4_B928 cam = *((cQtCam_B928*)(rider + 0x6C0))->getPosition();
         sQtVec4_B928 corner;
         corner.x = lo->x;
         corner.y = lo->y;

@@ -209,7 +209,7 @@ class cBEIface_2950 {
 public:
     char pad[0xC];
     virtual void v1();
-    virtual void v2();
+    virtual void discard();
 };
 cBEIface_2950* cBENewPlayerInterface_getThis_2950() __asm__("cBENewPlayerInterface_getThis__Fv");
 cBEIface_2950* cBEBAGTInterface_getThis_2950() __asm__("cBEBAGTInterface_getThis__Fv");
@@ -249,15 +249,15 @@ extern "C" void* cBESaveInterface_generateSaveProfile(void* self, int idx)
     dataPtr += sizeof(sProfile_2950);
     *dataPtr++ = D_00535B31_2950[idx].f;
     iface = cBENewPlayerInterface_getThis_2950();
-    iface->v2();
+    iface->discard();
     iface = cBEBAGTInterface_getThis_2950();
-    iface->v2();
+    iface->discard();
     iface = cBEMissionInterface_getThis_2950();
-    iface->v2();
+    iface->discard();
     iface = cBEScoreInterface_getThis_2950();
-    iface->v2();
+    iface->discard();
     iface = cBEStatInterface_getThis_2950();
-    iface->v2();
+    iface->discard();
     int crc = MEM_crc16(cBESaveInterface_buffer, size - 4, 64490);
     __builtin_memcpy(dataPtr, &crc, 4);
     return cBESaveInterface_buffer;

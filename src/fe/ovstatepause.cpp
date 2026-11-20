@@ -914,7 +914,7 @@ public:
     virtual void v04();
     virtual void v05();
     virtual void v06();
-    virtual void v07(int v);
+    virtual void setFocus(int v);
     virtual void setStatic(int v);
     virtual void setVisible(int v);
 };
@@ -935,7 +935,7 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(cOVState_PAUSE_ON
     cancelText->setStatic(!on);
     if (on) {
         cUIObj_1FAFF8* menuWidget = (cUIObj_1FAFF8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu_b));
-        menuWidget->v07(1);
+        menuWidget->setFocus(1);
         cUIMenu_setSelectedByIndex(menuWidget, 1);
     }
 }
@@ -2575,7 +2575,7 @@ public:
     virtual int v11();
     virtual int v12();
     virtual int v13();
-    virtual void v14(int, void*);
+    virtual void GetTitleString(int, void*);
     virtual int v15();
     virtual int v16();
     virtual int v17();
@@ -2614,9 +2614,9 @@ public:
     virtual int v50();
     virtual int v51();
     virtual int v52();
-    virtual int v53();
+    virtual int IsAvailable1();
     virtual int v54(int);
-    virtual int v55();
+    virtual int IsFormatted1();
     virtual int v56();
     virtual int v57();
     virtual int v58();
@@ -2625,10 +2625,10 @@ public:
     virtual int v61();
     virtual int v62();
     virtual int v63();
-    virtual void v64(void*);
+    virtual void GetStatus1(void*);
     virtual int v65();
-    virtual int v66(int);
-    virtual int v67(int);
+    virtual int IsFileSlotDisabled(int);
+    virtual int HasFileName(int);
 };
 
 class cState_DF40 {
@@ -2668,15 +2668,15 @@ public:
     virtual int v32();
     virtual int v33();
     virtual int v34();
-    virtual void v35(int);
+    virtual void triggerDisplayState(int);
     virtual int v36();
     virtual int v37();
     virtual int v38();
     virtual int v39();
     virtual int v40();
     virtual int v41();
-    virtual int v42();
-    virtual void v43();
+    virtual int displayFileOK();
+    virtual void setMenuHighlight();
 };
 
 class cUIObj_DF40 {
@@ -2689,8 +2689,8 @@ public:
     virtual int v05();
     virtual int v06();
     virtual int v07();
-    virtual void v08(int);
-    virtual void v09(int);
+    virtual void setStatic(int);
+    virtual void setVisible(int);
     virtual int v10();
     virtual int v11();
     virtual int v12();
@@ -2706,7 +2706,7 @@ public:
     virtual int v22();
     virtual int v23();
     virtual int v24();
-    virtual void v25(int);
+    virtual void setUseStaticColour(int);
 };
 
 struct sVE_DF40 {
@@ -2765,22 +2765,22 @@ extern "C" void cOVState_SAVEREPLAY_displayStatus(cOVState_SAVEREPLAY* self)
     unsigned short buf[800];
     char name[0x40];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-    if (((cState_DF40*)self)->v42()) {
-        if (!(*(cMCSub_DF40**)(mp + 0x434))->v53()) {
+    if (((cState_DF40*)self)->displayFileOK()) {
+        if (!(*(cMCSub_DF40**)(mp + 0x434))->IsAvailable1()) {
             cFEMemCard_callbackDisplayNoCards();
         } else if (self->mScreenStatus != 3) {
-            ((cState_DF40*)self)->v35(3);
+            ((cState_DF40*)self)->triggerDisplayState(3);
         }
     }
-    if (((cState_DF40*)self)->v42()) {
+    if (((cState_DF40*)self)->displayFileOK()) {
         int sel = 0;
-        ((cState_DF40*)self)->v43();
+        ((cState_DF40*)self)->setMenuHighlight();
         cMCOverlayManager_GetDeviceDisplayString(mp, *(int*)(mp + 0x428), buf, 800);
         cUIText_setUnicodeStringWrap(getObj_DF40(((cState_DF40*)self), str_Memory_card_info), buf);
         cUIObj_DF40* widget = getObj_DF40(((cState_DF40*)self), str_1percentage_b);
-        (*(cMCSub_DF40**)(mp + 0x434))->v64(buf);
+        (*(cMCSub_DF40**)(mp + 0x434))->GetStatus1(buf);
         cUIText_setUnicodeString(widget, buf);
-        widget->v09(0);
+        widget->setVisible(0);
         char* localeObj = (char*)SSXApp->FELocale;
         sVE_DF40* vt = *(sVE_DF40**)(localeObj + 4);
         char* localeThis = localeObj + vt[4].delta;
@@ -2788,46 +2788,46 @@ extern "C" void cOVState_SAVEREPLAY_displayStatus(cOVState_SAVEREPLAY* self)
         for (int i = 1; i < 5; i++) {
             sprintf(name, str_pct_dmemory_card_b, i);
             widget = getObj_DF40(((cState_DF40*)self), name);
-            (*(cMCSub_DF40**)(mp + 0x434))->v14(i - 1, (char*)&self->mTitle);
+            (*(cMCSub_DF40**)(mp + 0x434))->GetTitleString(i - 1, (char*)&self->mTitle);
             cUIText_setUnicodeString(widget, (unsigned short*)((char*)&self->mTitle));
-            if (!(*(cMCSub_DF40**)(mp + 0x434))->v67(i - 1) && !(*(cMCSub_DF40**)(mp + 0x434))->v66(i - 1)
-                && (*(cMCSub_DF40**)(mp + 0x434))->v55()) {
+            if (!(*(cMCSub_DF40**)(mp + 0x434))->HasFileName(i - 1) && !(*(cMCSub_DF40**)(mp + 0x434))->IsFileSlotDisabled(i - 1)
+                && (*(cMCSub_DF40**)(mp + 0x434))->IsFormatted1()) {
                 if (sel == 0) {
                     sel = 1;
-                    widget->v25(0);
-                    widget->v08(0);
+                    widget->setUseStaticColour(0);
+                    widget->setStatic(0);
                 } else {
-                    widget->v25(1);
-                    widget->v08(1);
+                    widget->setUseStaticColour(1);
+                    widget->setStatic(1);
                 }
             } else if ((*(cMCSub_DF40**)(mp + 0x434))->v54(*(int*)(mp + 0x428))) {
-                if ((*(cMCSub_DF40**)(mp + 0x434))->v66(i - 1)) {
-                    widget->v08(1);
-                    widget->v25(1);
+                if ((*(cMCSub_DF40**)(mp + 0x434))->IsFileSlotDisabled(i - 1)) {
+                    widget->setStatic(1);
+                    widget->setUseStaticColour(1);
                 } else {
-                    widget->v08(0);
-                    widget->v25(0);
+                    widget->setStatic(0);
+                    widget->setUseStaticColour(0);
                 }
             } else {
-                widget->v25(1);
-                widget->v08(1);
+                widget->setUseStaticColour(1);
+                widget->setStatic(1);
             }
         }
         if (cFEMemCard_checkNextAvailableDevice(((cState_DF40*)self), mp, *(int*)(mp + 0x428), 1) == -1)
-            getObj_DF40(((cState_DF40*)self), str_arrw_left_b)->v09(0);
+            getObj_DF40(((cState_DF40*)self), str_arrw_left_b)->setVisible(0);
         else
-            getObj_DF40(((cState_DF40*)self), str_arrw_left_b)->v09(1);
+            getObj_DF40(((cState_DF40*)self), str_arrw_left_b)->setVisible(1);
         if (cFEMemCard_checkNextAvailableDevice(((cState_DF40*)self), mp, *(int*)(mp + 0x428), 0) == -1)
-            getObj_DF40(((cState_DF40*)self), str_arrw_right_b)->v09(0);
+            getObj_DF40(((cState_DF40*)self), str_arrw_right_b)->setVisible(0);
         else
-            getObj_DF40(((cState_DF40*)self), str_arrw_right_b)->v09(1);
+            getObj_DF40(((cState_DF40*)self), str_arrw_right_b)->setVisible(1);
     }
     if (self->mScreenStatus != 3) {
         for (int i = 1; i < 5; i++) {
             sprintf(name, str_pct_dmemory_card_b, i);
             cUIObj_DF40* widget = getObj_DF40(((cState_DF40*)self), name);
-            widget->v25(0);
-            widget->v08(1);
+            widget->setUseStaticColour(0);
+            widget->setStatic(1);
         }
     }
 }
@@ -3031,13 +3031,13 @@ public:
     virtual int v64();
     virtual int v65();
     virtual int v66();
-    virtual int v67(int);
+    virtual int HasFileName(int);
 };
 
 class cMoviePlayer_1FE6E8 {
 public:
     char pad[0x748];
-    virtual void v01(int);
+    virtual void SetState(int);
 };
 
 /**
@@ -3097,7 +3097,7 @@ extern "C" void cOVState_SAVEREPLAY_onWidgetEvent(cOVState_SAVEREPLAY* self, voi
             return;
         self->mIsCancelPressed = 1;
         if (cardState == 0 || cardState == 2 || cardState == 1)
-            ((cMoviePlayer_1FE6E8*)mp)->v01(0);
+            ((cMoviePlayer_1FE6E8*)mp)->SetState(0);
         self->mState = 6;
         break;
     }
@@ -3115,12 +3115,12 @@ extern "C" void cOVState_SAVEREPLAY_onWidgetEvent(cOVState_SAVEREPLAY* self, voi
         int cardState = self->mState;
         if (cardState != one)
             return;
-        if (!(*(cMovieSub434_1FE6E8**)(mp + 0x434))->v67(self->mSlot))
+        if (!(*(cMovieSub434_1FE6E8**)(mp + 0x434))->HasFileName(self->mSlot))
             return;
         self->mIsProcessing = cardState;
         self->mState = 4;
         cMCOverlayManager_SetAction_v(mp, 0);
-        ((cMoviePlayer_1FE6E8*)mp)->v01(0x18);
+        ((cMoviePlayer_1FE6E8*)mp)->SetState(0x18);
         break;
     }
     }
@@ -3213,8 +3213,8 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int on);
-    virtual void v09(int on);
+    virtual void setStatic(int on);
+    virtual void setVisible(int on);
 };
 
 static inline void* engine_1FE9A8(char* self)
@@ -3238,11 +3238,11 @@ extern "C" void cOVState_SAVEOPTIONS_onCreateScreen(cOVState_SAVEOPTIONS* self)
         cUIScreen_playFrame(scr, 0, 0);
         cUIText_setAsciiString((cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_1percentage_b)), D_004A2560);
         cUIObj_1FE9A8* widget = (cUIObj_1FE9A8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_Save_Replay));
-        widget->v09(0);
+        widget->setVisible(0);
         widget = (cUIObj_1FE9A8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_Save_Records));
-        widget->v09(1);
+        widget->setVisible(1);
         widget = (cUIObj_1FE9A8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext01));
-        widget->v09(1);
+        widget->setVisible(1);
         cUIText_setAsciiString((cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Memory_card_info)), D_004A2560);
         for (int i = 1; i < 5; i++) {
             char buf[0x20];
@@ -3251,13 +3251,13 @@ extern "C" void cOVState_SAVEOPTIONS_onCreateScreen(cOVState_SAVEOPTIONS* self)
             if (i == 1) {
                 *(int*)((char*)widget + 0x18) = 0;
             } else {
-                widget->v08(1);
-                widget->v09(0);
+                widget->setStatic(1);
+                widget->setVisible(0);
             }
             sprintf(buf, D_004A2138, i);
             widget = (cUIObj_1FE9A8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
             if (i >= 2)
-                widget->v09(0);
+                widget->setVisible(0);
         }
     }
     void* backdrop = cUIEngine_addScreenByHashName(engine_1FE9A8(((char*)self)), ((char*)self), GetHashValue32(str_OV_darkblue), 0);
@@ -3321,7 +3321,7 @@ public:
     virtual int v11();
     virtual int v12();
     virtual int v13();
-    virtual void v14(int, void*);
+    virtual void GetTitleString(int, void*);
     virtual int v15();
     virtual int v16();
     virtual int v17();
@@ -3360,9 +3360,9 @@ public:
     virtual int v50();
     virtual int v51();
     virtual int v52();
-    virtual int v53();
+    virtual int IsAvailable1();
     virtual int v54(int);
-    virtual int v55();
+    virtual int IsFormatted1();
     virtual int v56();
     virtual int v57();
     virtual int v58();
@@ -3371,10 +3371,10 @@ public:
     virtual int v61();
     virtual int v62();
     virtual int v63();
-    virtual void v64(void*);
+    virtual void GetStatus1(void*);
     virtual int v65();
-    virtual int v66(int);
-    virtual int v67(int);
+    virtual int IsFileSlotDisabled(int);
+    virtual int HasFileName(int);
 };
 
 class cState_ECA0 {
@@ -3414,15 +3414,15 @@ public:
     virtual int v32();
     virtual int v33();
     virtual int v34();
-    virtual void v35(int);
+    virtual void triggerDisplayState(int);
     virtual int v36();
     virtual int v37();
     virtual int v38();
     virtual int v39();
     virtual int v40();
     virtual int v41();
-    virtual int v42();
-    virtual void v43();
+    virtual int displayFileOK();
+    virtual void setMenuHighlight();
 };
 
 class cUIObj_ECA0 {
@@ -3435,8 +3435,8 @@ public:
     virtual int v05();
     virtual int v06();
     virtual int v07();
-    virtual void v08(int);
-    virtual void v09(int);
+    virtual void setStatic(int);
+    virtual void setVisible(int);
     virtual int v10();
     virtual int v11();
     virtual int v12();
@@ -3452,7 +3452,7 @@ public:
     virtual int v22();
     virtual int v23();
     virtual int v24();
-    virtual void v25(int);
+    virtual void setUseStaticColour(int);
 };
 
 struct sVE_ECA0 {
@@ -3506,59 +3506,59 @@ extern "C" void cOVState_SAVEOPTIONS_displayStatus(cOVState_SAVEOPTIONS* self)
     unsigned short buf[800];
     char name[0x40];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-    if (((cState_ECA0*)self)->v42()) {
-        if (!(*(cMCSub_ECA0**)(mp + 0x434))->v53()) {
+    if (((cState_ECA0*)self)->displayFileOK()) {
+        if (!(*(cMCSub_ECA0**)(mp + 0x434))->IsAvailable1()) {
             cFEMemCard_callbackDisplayNoCards();
         } else if (self->mScreenStatus != 3) {
-            ((cState_ECA0*)self)->v35(3);
+            ((cState_ECA0*)self)->triggerDisplayState(3);
         }
     }
-    if (((cState_ECA0*)self)->v42()) {
-        ((cState_ECA0*)self)->v43();
+    if (((cState_ECA0*)self)->displayFileOK()) {
+        ((cState_ECA0*)self)->setMenuHighlight();
         cMCOverlayManager_GetDeviceDisplayString(mp, *(int*)(mp + 0x428), buf, 800);
         cUIText_setUnicodeStringWrap(getObj_ECA0(((cState_ECA0*)self), str_Memory_card_info), buf);
         cUIObj_ECA0* widget = getObj_ECA0(((cState_ECA0*)self), str_1percentage_b);
-        (*(cMCSub_ECA0**)(mp + 0x434))->v64(buf);
+        (*(cMCSub_ECA0**)(mp + 0x434))->GetStatus1(buf);
         cUIText_setUnicodeString(widget, buf);
-        widget->v09(0);
+        widget->setVisible(0);
         char* localeObj = (char*)SSXApp->FELocale;
         sVE_ECA0* vt = *(sVE_ECA0**)(localeObj + 4);
         char* localeThis = localeObj + vt[4].delta;
         vt[4].fn(localeThis, GetHashValue32(str_kT_MEMEmpty_b));
         sprintf(name, str_pct_dmemory_card_b, 1);
         widget = getObj_ECA0(((cState_ECA0*)self), name);
-        (*(cMCSub_ECA0**)(mp + 0x434))->v14(0, (char*)&self->mTitle);
+        (*(cMCSub_ECA0**)(mp + 0x434))->GetTitleString(0, (char*)&self->mTitle);
         cUIText_setUnicodeString(widget, (unsigned short*)((char*)&self->mTitle));
-        if (!(*(cMCSub_ECA0**)(mp + 0x434))->v67(0) && !(*(cMCSub_ECA0**)(mp + 0x434))->v66(0)
-            && (*(cMCSub_ECA0**)(mp + 0x434))->v55()) {
-            widget->v25(0);
-            widget->v08(0);
+        if (!(*(cMCSub_ECA0**)(mp + 0x434))->HasFileName(0) && !(*(cMCSub_ECA0**)(mp + 0x434))->IsFileSlotDisabled(0)
+            && (*(cMCSub_ECA0**)(mp + 0x434))->IsFormatted1()) {
+            widget->setUseStaticColour(0);
+            widget->setStatic(0);
         } else if ((*(cMCSub_ECA0**)(mp + 0x434))->v54(*(int*)(mp + 0x428))) {
-            if ((*(cMCSub_ECA0**)(mp + 0x434))->v66(0)) {
-                widget->v08(1);
-                widget->v25(1);
+            if ((*(cMCSub_ECA0**)(mp + 0x434))->IsFileSlotDisabled(0)) {
+                widget->setStatic(1);
+                widget->setUseStaticColour(1);
             } else {
-                widget->v08(0);
-                widget->v25(0);
+                widget->setStatic(0);
+                widget->setUseStaticColour(0);
             }
         } else {
-            widget->v25(1);
-            widget->v08(1);
+            widget->setUseStaticColour(1);
+            widget->setStatic(1);
         }
         if (cFEMemCard_checkNextAvailableDevice(((cState_ECA0*)self), mp, *(int*)(mp + 0x428), 1) == -1)
-            getObj_ECA0(((cState_ECA0*)self), str_arrw_left_b)->v09(0);
+            getObj_ECA0(((cState_ECA0*)self), str_arrw_left_b)->setVisible(0);
         else
-            getObj_ECA0(((cState_ECA0*)self), str_arrw_left_b)->v09(1);
+            getObj_ECA0(((cState_ECA0*)self), str_arrw_left_b)->setVisible(1);
         if (cFEMemCard_checkNextAvailableDevice(((cState_ECA0*)self), mp, *(int*)(mp + 0x428), 0) == -1)
-            getObj_ECA0(((cState_ECA0*)self), str_arrw_right_b)->v09(0);
+            getObj_ECA0(((cState_ECA0*)self), str_arrw_right_b)->setVisible(0);
         else
-            getObj_ECA0(((cState_ECA0*)self), str_arrw_right_b)->v09(1);
+            getObj_ECA0(((cState_ECA0*)self), str_arrw_right_b)->setVisible(1);
     }
     if (self->mScreenStatus != 3) {
         sprintf(name, str_pct_dmemory_card_b, 1);
         cUIObj_ECA0* widget = getObj_ECA0(((cState_ECA0*)self), name);
-        widget->v25(0);
-        widget->v08(1);
+        widget->setUseStaticColour(0);
+        widget->setStatic(1);
     }
 }
 #endif
@@ -3760,13 +3760,13 @@ public:
     virtual int v64();
     virtual int v65();
     virtual int v66();
-    virtual int v67(int);
+    virtual int HasFileName(int);
 };
 
 class cMoviePlayer_1FF3B0 {
 public:
     char pad[0x748];
-    virtual void v01(int);
+    virtual void SetState(int);
 };
 
 /**
@@ -3821,7 +3821,7 @@ extern "C" void cOVState_SAVEOPTIONS_onWidgetEvent(cOVState_SAVEOPTIONS* self, v
             return;
         self->mIsCancelPressed = 1;
         if (cardState == 0 || cardState == 2 || cardState == 1)
-            ((cMoviePlayer_1FF3B0*)mp)->v01(0);
+            ((cMoviePlayer_1FF3B0*)mp)->SetState(0);
         self->mState = 6;
         break;
     }
@@ -3839,12 +3839,12 @@ extern "C" void cOVState_SAVEOPTIONS_onWidgetEvent(cOVState_SAVEOPTIONS* self, v
         int cardState = self->mState;
         if (cardState != one)
             return;
-        if (!(*(cMovieSub434_1FF3B0**)(mp + 0x434))->v67(self->mSlot))
+        if (!(*(cMovieSub434_1FF3B0**)(mp + 0x434))->HasFileName(self->mSlot))
             return;
         self->mIsProcessing = cardState;
         self->mState = 4;
         cMCOverlayManager_SetAction_v(mp, 0);
-        ((cMoviePlayer_1FF3B0*)mp)->v01(0x18);
+        ((cMoviePlayer_1FF3B0*)mp)->SetState(0x18);
         break;
     }
     }
@@ -4018,8 +4018,8 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int on);
-    virtual void v09(int on);
+    virtual void setStatic(int on);
+    virtual void setVisible(int on);
     virtual void v10();
     virtual void v11();
     virtual void v12();
@@ -4035,7 +4035,7 @@ public:
     virtual void v22();
     virtual void v23();
     virtual void v24();
-    virtual void v25(int on);
+    virtual void setUseStaticColour(int on);
 };
 
 /**
@@ -4068,30 +4068,30 @@ extern "C" void cOVState_REWARDS_updateMenu(cOVState_REWARDS* vself, int base)
             color.b = 0.7215686440467834f;
             color.a = 0.7882353663444519f;
             *(sCol_1FFD08*)((char*)textObj + 0x88) = color;
-            textObj->v25(1);
-            textObj->v08(1);
+            textObj->setUseStaticColour(1);
+            textObj->setStatic(1);
         }
     }
     if (base == 0) {
         cUIObj_1FFD08* textObj = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_up));
         if (textObj != 0) {
-            textObj->v09(0);
+            textObj->setVisible(0);
         }
     } else {
         cUIObj_1FFD08* textObj = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_up));
         if (textObj != 0) {
-            textObj->v09(1);
+            textObj->setVisible(1);
         }
     }
     if (vself->mItemSize <= base + 9) {
         cUIObj_1FFD08* textObj = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_down));
         if (textObj != 0) {
-            textObj->v09(0);
+            textObj->setVisible(0);
         }
     } else {
         cUIObj_1FFD08* textObj = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_down));
         if (textObj != 0) {
-            textObj->v09(1);
+            textObj->setVisible(1);
         }
     }
 }

@@ -10833,13 +10833,13 @@ struct cDsObj2659E8 {
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual void v05(int a);
+    virtual void CheckDevice(int a);
     virtual void v06();
     virtual void v07();
     virtual void v08();
     virtual void v09();
     virtual void v10();
-    virtual int v11();
+    virtual int IsBusy();
 };
 
 extern void* D_004A33D8;
@@ -10854,8 +10854,8 @@ extern int D_004A33DC;
  */
 extern "C" void func_002659E8(void* self)
 {
-    if (((cDsObj2659E8*)D_004A33D8)->v11() == 0) {
-        ((cDsObj2659E8*)D_004A33D8)->v05(D_004A33DC);
+    if (((cDsObj2659E8*)D_004A33D8)->IsBusy() == 0) {
+        ((cDsObj2659E8*)D_004A33D8)->CheckDevice(D_004A33DC);
     }
 }
 #endif
@@ -10883,7 +10883,7 @@ struct cDsObj265A38 {
     virtual void v17();
     virtual void v18();
     virtual void v19();
-    virtual int v20();
+    virtual int GetFreeSpace();
 };
 
 extern void* D_004A33D8;
@@ -10897,7 +10897,7 @@ extern void* D_004A33D8;
  */
 extern "C" int func_00265A38(void* self)
 {
-    return ((cDsObj265A38*)D_004A33D8)->v20();
+    return ((cDsObj265A38*)D_004A33D8)->GetFreeSpace();
 }
 #endif
 
@@ -10916,15 +10916,15 @@ extern "C" int func_003F80E0(int* status);
 struct cDsObj265A68 {
     virtual void v01();
     virtual void v02();
-    virtual void v03();
+    virtual void Update();
     virtual void v04();
-    virtual void v05(int a);
+    virtual void CheckDevice(int a);
     virtual void v06();
     virtual void v07();
-    virtual void v08();
+    virtual void Format();
     virtual void v09();
     virtual void v10();
-    virtual int v11();
+    virtual int IsBusy();
 };
 
 /**
@@ -10943,33 +10943,33 @@ struct cDsObj265A68 {
 // Advances the DirtySock login state machine one step; each "wait" state checks that the socket is idle.
 extern "C" void func_00265A68(int* state)
 {
-    ((cDsObj265A68*)D_004A33D8)->v03();
+    ((cDsObj265A68*)D_004A33D8)->Update();
     int status = 0;
     switch (*state) {
     case 0:
         break;
     case 2:
-        if (!((cDsObj265A68*)D_004A33D8)->v11()) {
+        if (!((cDsObj265A68*)D_004A33D8)->IsBusy()) {
             func_00265D98(state);
         }
         break;
     case 6:
-        if (!((cDsObj265A68*)D_004A33D8)->v11()) {
+        if (!((cDsObj265A68*)D_004A33D8)->IsBusy()) {
             func_00265E40(state);
         }
         break;
     case 10:
-        if (!((cDsObj265A68*)D_004A33D8)->v11()) {
+        if (!((cDsObj265A68*)D_004A33D8)->IsBusy()) {
             func_00265E80(state);
         }
         break;
     case 14:
-        if (!((cDsObj265A68*)D_004A33D8)->v11()) {
+        if (!((cDsObj265A68*)D_004A33D8)->IsBusy()) {
             func_00265EC8(state);
         }
         break;
     case 18:
-        if (!((cDsObj265A68*)D_004A33D8)->v11()) {
+        if (!((cDsObj265A68*)D_004A33D8)->IsBusy()) {
             func_00265F00(state);
         }
         break;
@@ -10993,18 +10993,18 @@ extern "C" void func_00265A68(int* state)
     case 12:
     case 16:
     case 21:
-        if (!((cDsObj265A68*)D_004A33D8)->v11()) {
-            ((cDsObj265A68*)D_004A33D8)->v05(0);
+        if (!((cDsObj265A68*)D_004A33D8)->IsBusy()) {
+            ((cDsObj265A68*)D_004A33D8)->CheckDevice(0);
         }
         break;
     case 19:
-        if (!((cDsObj265A68*)D_004A33D8)->v11()) {
-            ((cDsObj265A68*)D_004A33D8)->v08();
+        if (!((cDsObj265A68*)D_004A33D8)->IsBusy()) {
+            ((cDsObj265A68*)D_004A33D8)->Format();
             *state = 20;
         }
         break;
     case 20:
-        if (!((cDsObj265A68*)D_004A33D8)->v11()) {
+        if (!((cDsObj265A68*)D_004A33D8)->IsBusy()) {
             if (D_004A3940 != 0) {
                 *state = 22;
             } else {
@@ -11074,9 +11074,9 @@ struct cDsObj265CB0 {
     virtual void v50();
     virtual void v51();
     virtual void v52();
-    virtual bool v53();
+    virtual bool IsAvailable1();
     virtual void v54();
-    virtual bool v55();
+    virtual bool IsFormatted1();
 };
 
 extern void* D_004A33D8;
@@ -11091,8 +11091,8 @@ extern void* D_004A33D8;
  */
 extern "C" int func_00265CB0(void* self)
 {
-    if (((cDsObj265CB0*)D_004A33D8)->v53() != 0) {
-        return !((cDsObj265CB0*)D_004A33D8)->v55();
+    if (((cDsObj265CB0*)D_004A33D8)->IsAvailable1() != 0) {
+        return !((cDsObj265CB0*)D_004A33D8)->IsFormatted1();
     }
     return 0;
 }
@@ -11230,7 +11230,7 @@ struct cDsObj265D38 {
     virtual void v60();
     virtual void v61();
     virtual void v62();
-    virtual int v63();
+    virtual int CardChanged1();
 };
 
 extern void* D_004A33D8;
@@ -11243,7 +11243,7 @@ extern void* D_004A33D8;
  */
 extern "C" int func_00265D38(void* self)
 {
-    return ((cDsObj265D38*)D_004A33D8)->v63();
+    return ((cDsObj265D38*)D_004A33D8)->CardChanged1();
 }
 #endif
 
@@ -11303,7 +11303,7 @@ struct cDsObj265D68 {
     virtual void v50();
     virtual void v51();
     virtual void v52();
-    virtual bool v53();
+    virtual bool IsAvailable1();
 };
 
 extern void* D_004A33D8;
@@ -11316,7 +11316,7 @@ extern void* D_004A33D8;
  */
 extern "C" int func_00265D68(void* self)
 {
-    return !((cDsObj265D68*)D_004A33D8)->v53();
+    return !((cDsObj265D68*)D_004A33D8)->IsAvailable1();
 }
 #endif
 
@@ -11986,7 +11986,7 @@ struct cDsObj266358 {
     virtual void v08();
     virtual void v09();
     virtual void v10();
-    virtual int v11();
+    virtual int IsBusy();
     virtual void v12();
     virtual void v13();
     virtual void v14();
@@ -11995,7 +11995,7 @@ struct cDsObj266358 {
     virtual void v17();
     virtual void v18();
     virtual void v19();
-    virtual int v20();
+    virtual int GetFreeSpace();
 };
 
 /**
@@ -12027,7 +12027,7 @@ extern "C" int func_00266358(int* status, int* out)
         *out = 0x800;
         return 0;
     }
-    if (((cDsObj266358*)D_004A33D8)->v11()) {
+    if (((cDsObj266358*)D_004A33D8)->IsBusy()) {
         *status = 1;
         return 0;
     }
@@ -12071,7 +12071,7 @@ extern "C" int func_00266358(int* status, int* out)
         *out = D_004A3940;
         break;
     case 9:
-        *out = ((cDsObj266358*)D_004A33D8)->v20() << 10;
+        *out = ((cDsObj266358*)D_004A33D8)->GetFreeSpace() << 10;
         break;
     }
     return 0;

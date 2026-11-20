@@ -2745,7 +2745,7 @@ public:
     virtual void v21();
     virtual void v22();
     virtual void v23();
-    virtual int v24(int a, int b);
+    virtual int handleEvent(int a, int b);
 };
 
 int GetHashValue32(char*);
@@ -2772,7 +2772,7 @@ extern "C" void func_0028F478(void* self)
                 if (list != 0) {
                     cUiObj_F478* obj = cUIStateStack_findState(list, GetHashValue32(str_hud_f));
                     if (obj != 0) {
-                        obj->v24(5, 0);
+                        obj->handleEvent(5, 0);
                     }
                 }
             }

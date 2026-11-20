@@ -1844,7 +1844,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual void v05(int);
+    virtual void restart(int);
 };
 extern char* cGameState_mpGame;
 
@@ -1855,7 +1855,7 @@ extern char* cGameState_mpGame;
  */
 extern "C" void cGFTransportWaitState_loseFocus(void)
 {
-    (*(cRace236B38**)(cGameState_mpGame + 0xC))->v05(3);
+    (*(cRace236B38**)(cGameState_mpGame + 0xC))->restart(3);
 }
 #endif
 
@@ -1996,7 +1996,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual void v05(int);
+    virtual void restart(int);
 };
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -2022,7 +2022,7 @@ extern "C" void cGFPreEventState_ResetGameState(void* self)
     cSSXScriptEngine_ResetNISList(ScriptEngine, 0);
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (!isMode4_236CD8()) {
-        (*(cRace236CD8**)(cGameState_mpGame + 0xC))->v05(3);
+        (*(cRace236CD8**)(cGameState_mpGame + 0xC))->restart(3);
         *(int*)(*(char**)(cGameState_mpGame + 0xC) + 0x14) = 1;
     }
     cSSXAudio_ResetAudioVariables(cAudioInterface_bxAudio());

@@ -94,12 +94,12 @@ public:
     virtual void v12();
     virtual void v13();
     virtual void v14();
-    virtual void v15(const sVec3_232488&);
+    virtual void SetScreenClearColour(const sVec3_232488&);
     virtual void v16();
-    virtual int v17();
+    virtual int IsRenderReady();
     virtual void v18();
     virtual void v19();
-    virtual void v20();
+    virtual void DrawFrame();
 };
 extern "C" void cLoadIndicator_render(void* a);
 
@@ -114,12 +114,12 @@ extern "C" void cLoadIndicator_render(void* a);
  */
 extern "C" int cPreStartScreen_render(void)
 {
-    if (((cWorld232488*)GrMan)->v17() == 0) {
+    if (((cWorld232488*)GrMan)->IsRenderReady() == 0) {
         return 0;
     }
-    ((cWorld232488*)GrMan)->v15(sVec3_232488(0.0f, 0.0f, 0.0f));
+    ((cWorld232488*)GrMan)->SetScreenClearColour(sVec3_232488(0.0f, 0.0f, 0.0f));
     cLoadIndicator_render(SSXApp->LoadIndicator);
-    ((cWorld232488*)GrMan)->v20();
+    ((cWorld232488*)GrMan)->DrawFrame();
     return 1;
 }
 #endif
@@ -246,12 +246,12 @@ public:
     virtual void v12();
     virtual void v13();
     virtual void v14();
-    virtual void v15(const sVec3_232650&);
+    virtual void SetScreenClearColour(const sVec3_232650&);
     virtual void v16();
-    virtual int v17();
+    virtual int IsRenderReady();
     virtual void v18();
     virtual void v19();
-    virtual void v20();
+    virtual void DrawFrame();
 };
 extern "C" void cLoadIndicator_render(void* a);
 
@@ -265,12 +265,12 @@ extern "C" void cLoadIndicator_render(void* a);
  */
 extern "C" int cInitLoadScreen_render(void)
 {
-    if (((cWorld232650*)GrMan)->v17() == 0) {
+    if (((cWorld232650*)GrMan)->IsRenderReady() == 0) {
         return 0;
     }
-    ((cWorld232650*)GrMan)->v15(sVec3_232650(0.0f, 0.0f, 0.0f));
+    ((cWorld232650*)GrMan)->SetScreenClearColour(sVec3_232650(0.0f, 0.0f, 0.0f));
     cLoadIndicator_render(SSXApp->LoadIndicator);
-    ((cWorld232650*)GrMan)->v20();
+    ((cWorld232650*)GrMan)->DrawFrame();
     return 1;
 }
 #endif
@@ -475,12 +475,12 @@ public:
     virtual void v12();
     virtual void v13();
     virtual void v14();
-    virtual void v15(const sVec3_232820&);
+    virtual void SetScreenClearColour(const sVec3_232820&);
     virtual void v16();
-    virtual int v17();
+    virtual int IsRenderReady();
     virtual void v18();
     virtual void v19();
-    virtual void v20();
+    virtual void DrawFrame();
 };
 extern "C" void cLoadIndicator_render(void* a);
 
@@ -494,12 +494,12 @@ extern "C" void cLoadIndicator_render(void* a);
  */
 extern "C" int cPreGameLoadScreen_render(void)
 {
-    if (((cWorld232820*)GrMan)->v17() == 0) {
+    if (((cWorld232820*)GrMan)->IsRenderReady() == 0) {
         return 0;
     }
-    ((cWorld232820*)GrMan)->v15(sVec3_232820(0.0f, 0.0f, 0.0f));
+    ((cWorld232820*)GrMan)->SetScreenClearColour(sVec3_232820(0.0f, 0.0f, 0.0f));
     cLoadIndicator_render(SSXApp->LoadIndicator);
-    ((cWorld232820*)GrMan)->v20();
+    ((cWorld232820*)GrMan)->DrawFrame();
     return 1;
 }
 #endif
@@ -528,12 +528,12 @@ public:
     virtual void v12();
     virtual void v13();
     virtual void v14();
-    virtual void v15(const sVec3_2328A8&);
+    virtual void SetScreenClearColour(const sVec3_2328A8&);
     virtual void v16();
-    virtual int v17();
+    virtual int IsRenderReady();
     virtual void v18();
     virtual void v19();
-    virtual void v20();
+    virtual void DrawFrame();
 };
 extern "C" void cLoadIndicator_render(void* a);
 
@@ -547,12 +547,12 @@ extern "C" void cLoadIndicator_render(void* a);
  */
 extern "C" int cPreFELoadScreen_render(void)
 {
-    if (((cWorld2328A8*)GrMan)->v17() == 0) {
+    if (((cWorld2328A8*)GrMan)->IsRenderReady() == 0) {
         return 0;
     }
-    ((cWorld2328A8*)GrMan)->v15(sVec3_2328A8(0.0f, 0.0f, 0.0f));
+    ((cWorld2328A8*)GrMan)->SetScreenClearColour(sVec3_2328A8(0.0f, 0.0f, 0.0f));
     cLoadIndicator_render(SSXApp->LoadIndicator);
-    ((cWorld2328A8*)GrMan)->v20();
+    ((cWorld2328A8*)GrMan)->DrawFrame();
     return 1;
 }
 #endif
@@ -762,7 +762,7 @@ public:
     virtual void v41();
     virtual void v42();
     virtual void v43();
-    virtual void v44(int);
+    virtual void InitTextures(int);
 };
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
@@ -812,7 +812,7 @@ struct sUI_232B28 {
  */
 extern "C" void cStartScreen_load(cStartScreen* self)
 {
-    ((cWorld_232B28*)GrMan)->v44(0x100);
+    ((cWorld_232B28*)GrMan)->InitTextures(0x100);
     void* ui = cUIEngine_cUIEngine(operator new(0x70, str_UIEngine_b, 0x100, 0));
     self->mpUI = (cUIEngine*)ui;
     cUIEngine_loadFile(ui, str_data_ui_su);
@@ -946,7 +946,7 @@ public:
     virtual void v16();
     virtual void v17();
     virtual void v18();
-    virtual void v19();
+    virtual void FlushRenderer();
 };
 extern "C" void cUIEngine__cUIEngine(void* obj, int a);
 extern "C" void cGraphicsMan_PurgeTextures(void* world);
@@ -959,7 +959,7 @@ extern "C" void cGraphicsMan_PurgeTextures(void* world);
  */
 extern "C" void cStartScreen_purge(cStartScreen* self)
 {
-    ((cWorld232D50*)GrMan)->v19();
+    ((cWorld232D50*)GrMan)->FlushRenderer();
     void* uiEngine = self->mpUI;
     if (uiEngine != 0) {
         cUIEngine__cUIEngine(uiEngine, 3);
@@ -991,10 +991,10 @@ public:
     virtual void v14();
     virtual void v15();
     virtual void v16();
-    virtual int v17();
+    virtual int IsRenderReady();
     virtual void v18();
     virtual void v19();
-    virtual void v20();
+    virtual void DrawFrame();
 };
 extern "C" int cFadeScreen_drawFade(void* self);
 extern "C" void cUIEngine_render2D(void* obj);
@@ -1009,13 +1009,13 @@ extern "C" void cUIEngine_render2D(void* obj);
  */
 extern "C" int cStartScreen_render(cStartScreen* self)
 {
-    if (((cWorld232DA8*)GrMan)->v17() == 0) {
+    if (((cWorld232DA8*)GrMan)->IsRenderReady() == 0) {
         return 0;
     }
     if (cFadeScreen_drawFade(self) == 0) {
         cUIEngine_render2D(self->mpUI);
     }
-    ((cWorld232DA8*)GrMan)->v20();
+    ((cWorld232DA8*)GrMan)->DrawFrame();
     return 1;
 }
 #endif
@@ -1344,7 +1344,7 @@ public:
     virtual void v16();
     virtual void v17();
     virtual void v18();
-    virtual void v19();
+    virtual void FlushRenderer();
     virtual void v20();
     virtual void v21();
     virtual void v22();
@@ -1375,7 +1375,7 @@ public:
     virtual void v47();
     virtual void v48();
     virtual void v49();
-    virtual void v50(void* obj);
+    virtual void RemoveTexture(void* obj);
 };
 
 /**
@@ -1389,7 +1389,7 @@ public:
  */
 extern "C" void cGameLoadScreen_purge(cGameLoadScreen* self)
 {
-    ((cWorld002332E8*)GrMan)->v19();
+    ((cWorld002332E8*)GrMan)->FlushRenderer();
     void* uiEngine = self->mpUI;
     if (uiEngine != 0) {
         cUIEngine__cUIEngine(uiEngine, 3);
@@ -1398,7 +1398,7 @@ extern "C" void cGameLoadScreen_purge(cGameLoadScreen* self)
     for (i = 0; i < 2; i++) {
         void* textureId = ((void**)((char*)&self->mTexID))[i];
         if (textureId != 0) {
-            ((cWorld002332E8*)GrMan)->v50(textureId);
+            ((cWorld002332E8*)GrMan)->RemoveTexture(textureId);
         }
     }
     cGraphicsMan_PurgeTextures(GrMan);
@@ -1428,10 +1428,10 @@ public:
     virtual void v14();
     virtual void v15();
     virtual void v16();
-    virtual int v17();
+    virtual int IsRenderReady();
     virtual void v18();
     virtual void v19();
-    virtual void v20();
+    virtual void DrawFrame();
 };
 extern "C" int cFadeScreen_drawFade(void* self);
 extern "C" void cUIEngine_render2D(void* obj);
@@ -1447,13 +1447,13 @@ extern "C" void cUIEngine_render2D(void* obj);
  */
 extern "C" int cGameLoadScreen_render(cGameLoadScreen* self)
 {
-    if (((cWorld233390*)GrMan)->v17() == 0) {
+    if (((cWorld233390*)GrMan)->IsRenderReady() == 0) {
         return 0;
     }
     if (cFadeScreen_drawFade(self) == 0) {
         cUIEngine_render2D(self->mpUI);
     }
-    ((cWorld233390*)GrMan)->v20();
+    ((cWorld233390*)GrMan)->DrawFrame();
     return 1;
 }
 #endif

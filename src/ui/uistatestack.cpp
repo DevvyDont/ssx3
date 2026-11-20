@@ -17,7 +17,7 @@ public:
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual void v04();
+    virtual void onCreateScreen();
 };
 
 /**
@@ -31,7 +31,7 @@ public:
 extern "C" void cUIStateStack_pushExplicit(cUIStateStack* self, cUIStateStack_pushExplicit_cState* state)
 {
     *(int*)((char*)state + 0x1C) |= 0x60;
-    state->v04();
+    state->onCreateScreen();
     cList_addToEnd((cList*)((char*)&self->mExplicitStack), (cListNode*)state);
 }
 #endif

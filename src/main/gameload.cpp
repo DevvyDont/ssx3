@@ -794,7 +794,7 @@ public:
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual void v04();
+    virtual void Reset();
     virtual void v05();
     virtual void v06();
     virtual void v07();
@@ -807,7 +807,7 @@ public:
     virtual void v14();
     virtual void v15();
     virtual void v16();
-    virtual void v17();
+    virtual void ClearPatches();
 };
 extern "C" void cFELocale_unloadFE(void* a);
 extern "C" void cBXLoadIndicator_Init(void* a);
@@ -837,8 +837,8 @@ extern "C" void cGame_gainFocus(cGame* self)
     cOVStateManager_mpPDATemplate = 0;
     cBXLoadIndicator_Init(loadIndicator);
     cSSXScriptEngine_Init(ScriptEngine);
-    cBezierMan_TheBezierMan->v17();
-    cBezierMan_TheBezierMan->v04();
+    cBezierMan_TheBezierMan->ClearPatches();
+    cBezierMan_TheBezierMan->Reset();
     cGraphicsMan_UploadTextures(GrMan);
     cWorld_init(self->World);
     cWorldTriggerManager_Reset(gWorldTriggerManager);
@@ -1673,7 +1673,7 @@ struct cMgr00230E98 {
     virtual void v12();
     virtual void v13();
     virtual void v14();
-    virtual void v15(const sVec3_00230E98& v);
+    virtual void SetScreenClearColour(const sVec3_00230E98& v);
 };
 
 /**
@@ -1695,7 +1695,7 @@ extern "C" int cGame_loseFocus(cGame* self)
         return 0;
     }
     cPS2GraphicsMan* mgr = GrMan;
-    ((cMgr00230E98*)mgr)->v15(sVec3_00230E98(0.0f, 0.0f, 0.0f));
+    ((cMgr00230E98*)mgr)->SetScreenClearColour(sVec3_00230E98(0.0f, 0.0f, 0.0f));
     ((cMgr00230E98*)GrMan)->f270 = 1;
     cDepthFog_m_Enable = 0;
     cScreenTint_m_Enable = 0;
@@ -2644,7 +2644,7 @@ public:
     virtual void v23();
     virtual void v24();
     virtual void v25();
-    virtual void v26(int a, float x, float y, float w, float h, float zn, float zf, int b);
+    virtual void SetViewportOrthographic(int a, float x, float y, float w, float h, float zn, float zf, int b);
     virtual void v27();
     virtual void v28();
     virtual void v29();
@@ -2652,7 +2652,7 @@ public:
     virtual void v31();
     virtual void v32();
     virtual void v33();
-    virtual void v34(void* p);
+    virtual void SetView1(void* p);
 };
 
 // Typed view of the render context (the unit declares GrMan as void*).
@@ -2683,8 +2683,8 @@ extern "C" int cFadeScreen_drawFade(cFadeScreen* self)
     ((cCtx231D60*)ctx)->top[1] = ((cCtx231D60*)ctx)->top[0];
     ((cCtx231D60*)ctx)->top++;
     *((cCtx231D60*)GrMan)->top = sDrawState_s_defaultDrawState;
-    ((cCtx231D60*)GrMan)->v26(0, -1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0);
-    ((cCtx231D60*)GrMan)->v34(t4mat_Identity);
+    ((cCtx231D60*)GrMan)->SetViewportOrthographic(0, -1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0);
+    ((cCtx231D60*)GrMan)->SetView1(t4mat_Identity);
     ((cCtx231D60*)GrMan)->top->f8_5 = 31;
     ((cCtx231D60*)GrMan)->top->f4_23 = 2;
     ((cCtx231D60*)GrMan)->top->f4_20 = 0;

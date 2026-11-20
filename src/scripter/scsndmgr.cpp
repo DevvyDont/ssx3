@@ -364,7 +364,7 @@ public:
     virtual void v37();
     virtual void v38();
     virtual void v39();
-    virtual void v40(int a);
+    virtual void SetTVDisplayFormat(int a);
 };
 
 
@@ -384,7 +384,7 @@ extern "C" void cVidEngine_ResetVideoEngine(void* self)
         if (*(int*)(vidEngine + 0x4) != 0) {
             cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
             cSSXAudio_ResumeSFX(cAudioInterface_bxAudio());
-            ((cWorld_3818*)GrMan)->v40(*(int*)(vidEngine + 0x10));
+            ((cWorld_3818*)GrMan)->SetTVDisplayFormat(*(int*)(vidEngine + 0x10));
             if (*(int*)(vidEngine + 0x14) != 0) {
                 *(int*)(vidEngine + 0x14) = 0;
                 cCutSceneTransitionMan_ForceToCutSceneMode(SSXApp->Game->CutSceneTransitionMan);

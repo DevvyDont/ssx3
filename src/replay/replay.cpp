@@ -13,7 +13,7 @@ class cStreamRF {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01(void* buf, int size);
-    virtual void v02(void* buf, int size);
+    virtual void read(void* buf, int size);
 };
 class cStreamRB;
 class cStreamRDB;
@@ -66,12 +66,12 @@ extern "C" void cReplay_restoreFrame(cReplay* self, cStreamRF* stream)
     cWorld_resetMap(cWorld_m_pTheWorld);
     cReplayFramePtr_readRewind((cReplayFramePtr*)stream);
     char buf[0x18];
-    stream->v02(buf, 0x18);
+    stream->read(buf, 0x18);
     AIsetseed(buf);
     int savedValue;
-    stream->v02(&savedValue, 4);
+    stream->read(&savedValue, 4);
     cSortObjNode_ObjNodeSortIndex = savedValue;
-    stream->v02(&savedValue, 4);
+    stream->read(&savedValue, 4);
     cSortObjNode_ObjNodeNoSortIndex = savedValue;
     cWorldPainterMan_reset_0();
     cBE_readFromReplayFrame(cBE_getBE(), stream);
@@ -102,7 +102,7 @@ class cStreamRB {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01(void* buf, int size);
-    virtual void v02(void* buf, int size);
+    virtual void read(void* buf, int size);
 };
 
 extern "C" void cReplay_restoreObject(cReplay* self, void* bucket, cStreamRB* stream);
@@ -125,7 +125,7 @@ extern "C" void cReplay_restoreBucket(cReplay* self, void* bucket, cStreamRB* st
         int pad;
     } hdr;
     int i;
-    stream->v02(&hdr, 8);
+    stream->read(&hdr, 8);
     for (i = 0; i < hdr.count; i++) {
         cReplay_restoreObject(self, bucket, stream);
     }
@@ -308,7 +308,7 @@ class cStreamRDB {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01(void* buf, int size);
-    virtual void v02(void* buf, int size);
+    virtual void read(void* buf, int size);
 };
 
 struct sRdbModelSet {
@@ -364,9 +364,9 @@ extern "C" void cReplay_restoreDeadBucket(cReplay* self, cStreamRDB* stream)
         int pad;
     } hdr;
     sRdbRef ref;
-    stream->v02(&hdr, 8);
+    stream->read(&hdr, 8);
     for (int i = 0; i < hdr.count; i++) {
-        stream->v02(&ref, 4);
+        stream->read(&ref, 4);
         void* mem = cMemMan_alloc(0x1C, str_Dead_Object, 0x20000000, 0);
         cDeadNode_cDeadNode(mem, ref.get());
     }

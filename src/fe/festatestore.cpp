@@ -84,7 +84,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int a);
+    virtual void setVisible(int a);
 };
 
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
@@ -103,11 +103,11 @@ extern "C" void cFEStateUberTrick_previewVisible(cFEStateUberTrick* self, int on
     void* screen = cList_first((cList*)((char*)&self->mScreens));
     cWidget_00184780* w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_btext5));
     if (w) {
-        w->v09(on);
+        w->setVisible(on);
     }
     w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_ps2sq));
     if (w) {
-        w->v09(on);
+        w->setVisible(on);
     }
 }
 #endif
@@ -137,27 +137,27 @@ extern "C" void cFEStateUberTrick_trickVisible(cFEStateUberTrick* self, int on)
     void* screen = cList_first((cList*)((char*)&self->mScreens));
     cWidget_00184780* w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_To_Execute_info));
     if (w) {
-        w->v09(on);
+        w->setVisible(on);
     }
     w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_Checkboxes));
     if (w) {
-        w->v09(on);
+        w->setVisible(on);
     }
     w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_MenuTrick));
     if (w) {
-        w->v09(on);
+        w->setVisible(on);
     }
     w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_InstBtn0));
     if (w) {
-        w->v09(on);
+        w->setVisible(on);
     }
     w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_InstBtn1));
     if (w) {
-        w->v09(on);
+        w->setVisible(on);
     }
     w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_InstBtn2));
     if (w) {
-        w->v09(on);
+        w->setVisible(on);
     }
 }
 #endif

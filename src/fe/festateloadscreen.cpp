@@ -284,7 +284,7 @@ struct cGame00233930 {
     virtual void v16();
     virtual void v17();
     virtual void v18();
-    virtual void v19();
+    virtual void FlushRenderer();
     virtual void v20();
     virtual void v21();
     virtual void v22();
@@ -315,7 +315,7 @@ struct cGame00233930 {
     virtual void v47();
     virtual void v48();
     virtual void v49();
-    virtual void v50(int id);
+    virtual void RemoveTexture(int id);
 };
 
 extern "C" void cUIEngine__cUIEngine(void* self, int a1);
@@ -333,10 +333,10 @@ extern "C" void func_0028FA98(void* self, float f);
  */
 extern "C" void cFELoadScreen_purge(void* self)
 {
-    ((cGame00233930*)GrMan)->v19();
+    ((cGame00233930*)GrMan)->FlushRenderer();
     int id = *(int*)((char*)self + 0x18);
     if (id >= 0) {
-        ((cGame00233930*)GrMan)->v50(id);
+        ((cGame00233930*)GrMan)->RemoveTexture(id);
     }
     void* uiObject = *(void**)((char*)self + 0xC);
     if (uiObject != 0) {
@@ -346,7 +346,7 @@ extern "C" void cFELoadScreen_purge(void* self)
     for (i = 0; i < 2; i++) {
         int textureId = *(int*)((char*)self + 0x10 + i * 4);
         if (textureId != 0) {
-            ((cGame00233930*)GrMan)->v50(textureId);
+            ((cGame00233930*)GrMan)->RemoveTexture(textureId);
         }
     }
     cGraphicsMan_PurgeTextures(GrMan);
@@ -769,7 +769,7 @@ public:
     virtual void v21();
     virtual void v22();
     virtual void v23();
-    virtual int v24(int on, int a2);
+    virtual int handleEvent(int on, int a2);
 };
 
 
@@ -801,7 +801,7 @@ extern "C" void cGFFinishlineState_update(void* self)
                 if (*(int*)(stateBytes + 0x10) != 2) {
                     cFEVObj_233CD8* finishOverlay = (cFEVObj_233CD8*)cUIStateStack_findState((char*)SSXApp->Game->UI + 0x18, GetHashValue32(str_finishov_b));
                     if (finishOverlay != 0) {
-                        finishOverlay->v24(0, 0);
+                        finishOverlay->handleEvent(0, 0);
                     }
                 }
             }
@@ -849,7 +849,7 @@ extern "C" void cGFFinishlineState_update(void* self)
         }
         cFEVObj_233CD8* finishOverlay = (cFEVObj_233CD8*)cUIStateStack_findState((char*)SSXApp->Game->UI + 0x18, GetHashValue32(str_finishov_b));
         if (finishOverlay != 0) {
-            finishOverlay->v24(1, 0);
+            finishOverlay->handleEvent(1, 0);
         }
         cBXLoadIndicator_Hide(SSXApp->Game->LoadIndicator, 4);
         *(int*)(stateBytes + 0x10) = 2;

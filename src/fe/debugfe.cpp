@@ -250,7 +250,7 @@ struct sDbgRaceSel17D008 {
 class cBENewRaceIfaceK17D008 {
 public:
     char pad_0x00[0xC];
-    virtual int v01();
+    virtual int submit();
 };
 struct sDbgFE17D008 {
     char pad_0x0000[0x8C38];
@@ -274,7 +274,7 @@ extern "C" void cDebugMenuScreen_setGamePath(void* self, int idx)
     ((sDbgFE17D008*)self)->modes[cBENewRaceInterface_newRace.cGamePath] = cBENewRaceInterface_newRace.cGameMode;
     cBENewRaceInterface_setGamePath(iface, idx);
     cBENewRaceInterface_setGameMode(iface, ((sDbgFE17D008*)self)->modes[idx]);
-    iface->v01();
+    iface->submit();
 }
 #endif
 

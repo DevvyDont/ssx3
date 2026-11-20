@@ -1823,13 +1823,13 @@ public:
     virtual int v02();
     virtual int v03();
     virtual int v04();
-    virtual void v05(int);
+    virtual void CheckDevice(int);
     virtual int v06();
     virtual int v07();
     virtual int v08();
-    virtual int v09();
+    virtual int DidFormatFail();
     virtual int v10();
-    virtual int v11();
+    virtual int IsBusy();
     virtual int v12();
     virtual int v13();
     virtual int v14();
@@ -1871,7 +1871,7 @@ public:
     virtual int v50();
     virtual int v51();
     virtual int v52();
-    virtual int v53();
+    virtual int IsAvailable1();
     virtual int v54();
     virtual int v55();
     virtual int v56();
@@ -1892,7 +1892,7 @@ public:
     virtual int v71();
     virtual int v72();
     virtual int v73();
-    virtual int v74();
+    virtual int FileExistsError();
     virtual int v75();
     virtual int v76();
     virtual int v77();
@@ -1903,7 +1903,7 @@ public:
 class cMoviePlayerVt {
 public:
     char pad[0x748];
-    virtual void v01(int);
+    virtual void SetState(int);
 };
 
 extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int v);
@@ -1921,17 +1921,17 @@ extern "C" void cMCOverlayManager_UpdateFormatConfirm(cMCOverlayManager* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
     if (self->mCheckCard == 0) {
-        if (((cMovieSub434*)self->mpMemCard)->v53() == 0) {
-            me->v01(4);
+        if (((cMovieSub434*)self->mpMemCard)->IsAvailable1() == 0) {
+            me->SetState(4);
             return;
         }
-        if (((cMovieSub434*)self->mpMemCard)->v09() != 0) {
-            me->v01(0xC);
+        if (((cMovieSub434*)self->mpMemCard)->DidFormatFail() != 0) {
+            me->SetState(0xC);
             return;
         }
         if (self->mFormatPressedBuffered != 0) {
             self->mFormatPressedBuffered = 0;
-            me->v01(11);
+            me->SetState(11);
             return;
         }
     }
@@ -1956,11 +1956,11 @@ extern "C" void cMCOverlayManager_UpdateFormatProgress(cMCOverlayManager* self)
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
     int waitTicks = (self->mDisplayWaitTicks)--;
     if (waitTicks <= 0) {
-        if (((cMovieSub434*)self->mpMemCard)->v11() == 0) {
-            if (((cMovieSub434*)self->mpMemCard)->v09() != 0) {
-                me->v01(0xC);
+        if (((cMovieSub434*)self->mpMemCard)->IsBusy() == 0) {
+            if (((cMovieSub434*)self->mpMemCard)->DidFormatFail() != 0) {
+                me->SetState(0xC);
             } else {
-                me->v01(13);
+                me->SetState(13);
             }
         }
     }
@@ -2179,15 +2179,15 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateCreateFile);
 extern "C" void cMCOverlayManager_UpdateCreateFile(cMCOverlayManager* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
-    if (((cMovieSub434*)self->mpMemCard)->v11() == 0) {
+    if (((cMovieSub434*)self->mpMemCard)->IsBusy() == 0) {
         if (((cMovieSub434*)self->mpMemCard)->v73() != 0) {
-            if (((cMovieSub434*)self->mpMemCard)->v74() != 0) {
-                me->v01(55);
+            if (((cMovieSub434*)self->mpMemCard)->FileExistsError() != 0) {
+                me->SetState(55);
             } else {
-                me->v01(20);
+                me->SetState(20);
             }
         } else {
-            me->v01(0x10);
+            me->SetState(0x10);
         }
     }
 }
@@ -2608,14 +2608,14 @@ extern "C" void cMCOverlayManager_UpdateSaveClosing(cMCOverlayManager* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
     (self->mDisplayWaitTicks)--;
-    if (((cMovieSub434*)self->mpMemCard)->v11() == 0) {
+    if (((cMovieSub434*)self->mpMemCard)->IsBusy() == 0) {
         if (((cMovieSub434*)self->mpMemCard)->v73() != 0) {
-            me->v01(20);
+            me->SetState(20);
             return;
         }
         if (self->mDisplayWaitTicks <= 0) {
             (self->callbackSaveSuccess)();
-            me->v01(19);
+            me->SetState(19);
         }
     }
 }
@@ -2834,12 +2834,12 @@ extern "C" void cMCOverlayManager_UpdateLoadDoneWait(cMCOverlayManager* self)
         self->mDisplayWaitTicks = n - 1;
         return;
     }
-    if (((cMovieSub434*)self->mpMemCard)->v11() == 0) {
+    if (((cMovieSub434*)self->mpMemCard)->IsBusy() == 0) {
         if (((cMovieSub434*)self->mpMemCard)->v73() != 0) {
-            me->v01(36);
+            me->SetState(36);
             (self->callbackReadFailed)();
         } else {
-            me->v01(35);
+            me->SetState(35);
             (self->callbackReadSuccess)();
         }
     }
@@ -2870,17 +2870,17 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateLoadConfirm);
 extern "C" void cMCOverlayManager_UpdateLoadConfirm(cMCOverlayManager* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
-    if (((cMovieSub434*)self->mpMemCard)->v11() == 0) {
-        if (((cMovieSub434*)self->mpMemCard)->v53() == 0) {
-            me->v01(4);
+    if (((cMovieSub434*)self->mpMemCard)->IsBusy() == 0) {
+        if (((cMovieSub434*)self->mpMemCard)->IsAvailable1() == 0) {
+            me->SetState(4);
             return;
         }
         if ((self->callbackIsLoadPressed)() != 0) {
-            me->v01(0x1F);
+            me->SetState(0x1F);
             return;
         }
         if ((self->callbackIsCancelPressed)() != 0) {
-            me->v01(29);
+            me->SetState(29);
         }
     }
 }
@@ -2944,7 +2944,7 @@ public:
     virtual int v15();
     virtual int v16();
     virtual int v17();
-    virtual int v18();
+    virtual int GetDataSize();
     virtual int v19();
     virtual int v20();
     virtual int v21();
@@ -2957,7 +2957,7 @@ public:
     virtual int v28();
     virtual int v29();
     virtual int v30();
-    virtual int v31();
+    virtual int IsReadWaiting();
     virtual int v32();
     virtual int v33();
     virtual int v34();
@@ -2966,7 +2966,7 @@ public:
     virtual int v37();
     virtual int v38();
     virtual int v39();
-    virtual void v40(int);
+    virtual void SetBrokenFile(int);
     virtual int v41();
     virtual int v42();
     virtual int v43();
@@ -3014,31 +3014,31 @@ extern "C" void cMCOverlayManager_UpdateLoadProgress(cMCOverlayManager* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
     self->mDisplayWaitTicks -= 1;
-    int n = ((cMovieSub434_0130*)self->mpMemCard)->v18();
+    int n = ((cMovieSub434_0130*)self->mpMemCard)->GetDataSize();
     self->mProgress = (float)n / (float)self->mSize;
     if (((cMovieSub434_0130*)self->mpMemCard)->v73() != 0) {
-        me->v01(36);
+        me->SetState(36);
         (self->callbackReadFailed)();
         return;
     }
-    if (((cMovieSub434_0130*)self->mpMemCard)->v31() == 1) {
+    if (((cMovieSub434_0130*)self->mpMemCard)->IsReadWaiting() == 1) {
         int loadedSize = self->mLoadedSize;
         int totalSize = self->mSize;
         if (loadedSize < totalSize) {
             if ((self->callbackReadUpdate)(totalSize - loadedSize) == 0)
                 cMCOverlayManager_ReadFailed(self);
         } else if ((self->callbackReadEnd)() == 0) {
-            ((cMovieSub434_0130*)self->mpMemCard)->v40(self->mFileCursor);
+            ((cMovieSub434_0130*)self->mpMemCard)->SetBrokenFile(self->mFileCursor);
             cMCOverlayManager_ReadFailed(self);
         } else {
             cMCOverlayManager_readClose(self);
-            me->v01(33);
+            me->SetState(33);
         }
         return;
     }
     if (((cMovieSub434_0130*)self->mpMemCard)->v73() != 0) {
         (self->callbackReadFailed)();
-        me->v01(36);
+        me->SetState(36);
     }
 }
 #endif
@@ -3199,14 +3199,14 @@ extern "C" void cMCOverlayManager_UpdateLoadClosing(cMCOverlayManager* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
     (self->mDisplayWaitTicks)--;
-    if (((cMovieSub434*)self->mpMemCard)->v11() == 0) {
+    if (((cMovieSub434*)self->mpMemCard)->IsBusy() == 0) {
         if (((cMovieSub434*)self->mpMemCard)->v73() != 0) {
-            me->v01(36);
+            me->SetState(36);
             (self->callbackReadFailed)();
             return;
         }
         if (self->mDisplayWaitTicks <= 0) {
-            me->v01(34);
+            me->SetState(34);
         }
     }
 }
@@ -3226,17 +3226,17 @@ extern "C" void cMCOverlayManager_CancelCardOp(cMCOverlayManager* self, int v);
 extern "C" void cMCOverlayManager_UpdateDeleteConfirm(cMCOverlayManager* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
-    if (((cMovieSub434*)self->mpMemCard)->v11() == 0) {
-        if (((cMovieSub434*)self->mpMemCard)->v53() == 0) {
-            me->v01(4);
+    if (((cMovieSub434*)self->mpMemCard)->IsBusy() == 0) {
+        if (((cMovieSub434*)self->mpMemCard)->IsAvailable1() == 0) {
+            me->SetState(4);
             return;
         }
         if (((cMovieSub434*)self->mpMemCard)->v73() != 0) {
-            me->v01(0x1C);
+            me->SetState(0x1C);
             return;
         }
         if ((self->callbackIsDeletePressed)() != 0) {
-            me->v01(25);
+            me->SetState(25);
             return;
         }
         if ((self->callbackIsCancelPressed)() != 0) {
@@ -3473,21 +3473,21 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateOverwriteConfirm);
 extern "C" void cMCOverlayManager_UpdateOverwriteConfirm(cMCOverlayManager* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
-    if (((cMovieSub434*)self->mpMemCard)->v11() == 0) {
-        if (((cMovieSub434*)self->mpMemCard)->v53() == 0) {
-            me->v01(4);
+    if (((cMovieSub434*)self->mpMemCard)->IsBusy() == 0) {
+        if (((cMovieSub434*)self->mpMemCard)->IsAvailable1() == 0) {
+            me->SetState(4);
             return;
         }
         if (((cMovieSub434*)self->mpMemCard)->v73() != 0) {
-            me->v01(20);
+            me->SetState(20);
             return;
         }
         if ((self->callbackIsOverwritePressed)() != 0) {
-            me->v01(13);
+            me->SetState(13);
             return;
         }
         if ((self->callbackIsCancelPressed)() != 0) {
-            me->v01(1);
+            me->SetState(1);
         }
     }
 }
@@ -3508,13 +3508,13 @@ extern "C" void cMCOverlayManager_RetryCardOp(cMCOverlayManager* self);
 extern "C" void cMCOverlayManager_UpdateInitFormatConfirm(cMCOverlayManager* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
-    if (((cMovieSub434*)self->mpMemCard)->v11() == 0) {
-        if (((cMovieSub434*)self->mpMemCard)->v53() == 0) {
-            me->v01(4);
+    if (((cMovieSub434*)self->mpMemCard)->IsBusy() == 0) {
+        if (((cMovieSub434*)self->mpMemCard)->IsAvailable1() == 0) {
+            me->SetState(4);
             return;
         }
         if ((self->callbackIsFormatPressed)() != 0) {
-            me->v01(40);
+            me->SetState(40);
             return;
         }
         if ((self->callbackIsCancelPressed)() != 0) {
@@ -3539,11 +3539,11 @@ extern "C" void cMCOverlayManager_UpdateInitFormatProgress(cMCOverlayManager* se
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
     int waitTicks = (self->mDisplayWaitTicks)--;
     if (waitTicks <= 0) {
-        if (((cMovieSub434*)self->mpMemCard)->v11() == 0) {
-            if (((cMovieSub434*)self->mpMemCard)->v09() != 0) {
-                me->v01(41);
+        if (((cMovieSub434*)self->mpMemCard)->IsBusy() == 0) {
+            if (((cMovieSub434*)self->mpMemCard)->DidFormatFail() != 0) {
+                me->SetState(41);
             } else {
-                me->v01(42);
+                me->SetState(42);
             }
         }
     }
@@ -3606,20 +3606,20 @@ INCLUDE_ASM("movie/movieplayer", cMCOverlayManager_UpdateInitDeleteConfirm);
 extern "C" void cMCOverlayManager_UpdateInitDeleteConfirm(cMCOverlayManager* self)
 {
     cMoviePlayerVt* me = (cMoviePlayerVt*)self;
-    if (((cMovieSub434*)self->mpMemCard)->v11() == 0) {
-        if (((cMovieSub434*)self->mpMemCard)->v53() == 0) {
-            me->v01(4);
+    if (((cMovieSub434*)self->mpMemCard)->IsBusy() == 0) {
+        if (((cMovieSub434*)self->mpMemCard)->IsAvailable1() == 0) {
+            me->SetState(4);
             return;
         }
         if ((self->callbackIsDeletePressed)() != 0) {
-            me->v01(44);
+            me->SetState(44);
             return;
         }
         if ((self->callbackIsCancelPressed)() != 0) {
-            me->v01(6);
+            me->SetState(6);
             return;
         }
-        ((cMovieSub434*)self->mpMemCard)->v05(self->mSelectedDevice);
+        ((cMovieSub434*)self->mpMemCard)->CheckDevice(self->mSelectedDevice);
     }
 }
 #endif
@@ -4475,15 +4475,15 @@ public:
     virtual int v45();
     virtual int v46();
     virtual int v47();
-    virtual int v48(int);
+    virtual int IsInvalid(int);
     virtual int v49();
     virtual int v50(int);
     virtual int v51();
-    virtual int v52(int);
+    virtual int IsAvailable(int);
     virtual int v53();
     virtual int v54();
     virtual int v55();
-    virtual int v56(int);
+    virtual int IsFormatted(int);
     virtual int v57(int);
     virtual int v58();
     virtual int v59();
@@ -4521,14 +4521,14 @@ static inline void* Loc_241710(char* key)
 extern "C" void cMCOverlayManager_GetDeviceDisplayString(cMCOverlayManager* self, int idx, char* dst)
 {
     char buf[0x200];
-    if (((cMovieSub434_1710*)self->mpMemCard)->v52(idx))
+    if (((cMovieSub434_1710*)self->mpMemCard)->IsAvailable(idx))
     {
-        if (((cMovieSub434_1710*)self->mpMemCard)->v48(idx) || ((cMovieSub434_1710*)self->mpMemCard)->v50(idx) || ((cMovieSub434_1710*)self->mpMemCard)->v60(idx))
+        if (((cMovieSub434_1710*)self->mpMemCard)->IsInvalid(idx) || ((cMovieSub434_1710*)self->mpMemCard)->v50(idx) || ((cMovieSub434_1710*)self->mpMemCard)->v60(idx))
         {
             cMCOverlayManager_getDeviceNumberString(self, buf, idx);
             sprintf1_v(dst, Loc_241710(str_kT_MEMOVNotDetectedPS2_b), buf);
         }
-        else if (!((cMovieSub434_1710*)self->mpMemCard)->v56(idx))
+        else if (!((cMovieSub434_1710*)self->mpMemCard)->IsFormatted(idx))
         {
             cMCOverlayManager_getDeviceNumberString(self, buf, idx);
             sprintf1_v(dst, Loc_241710(str_kT_MEMOVNotFormattedPS2_b), buf);
@@ -4721,17 +4721,17 @@ public:
     virtual int v10();
     virtual int v11();
     virtual int v12();
-    virtual int v13();
+    virtual int GetNumFiles();
     virtual int v14();
     virtual int v15();
     virtual int v16();
     virtual int v17();
     virtual int v18();
     virtual int v19();
-    virtual int v20();
+    virtual int GetFreeSpace();
     virtual int v21();
     virtual int v22();
-    virtual int v23();
+    virtual int SpaceRequired1();
     virtual int v24();
     virtual int v25();
     virtual int v26();
@@ -4757,13 +4757,13 @@ public:
     virtual int v46();
     virtual int v47();
     virtual int v48();
-    virtual int v49();
+    virtual int IsInvalid1();
     virtual int v50();
-    virtual int v51();
+    virtual int IsDamaged();
     virtual int v52();
-    virtual bool v53();
+    virtual bool IsAvailable1();
     virtual int v54();
-    virtual int v55();
+    virtual int IsFormatted1();
     virtual int v56();
     virtual int v57();
     virtual int v58();
@@ -4800,13 +4800,13 @@ extern "C" sMovieFlags_1B20 cMCOverlayManager_getDeviceState_s(void* self)
     if (*(int*)((char*)self + 0x42C) != *(int*)((char*)self + 0x428))
         return *(sMovieFlags_1B20*)((char*)self + 0x43C);
     sMovieFlags_1B20 state = {0, 0, 0, 0, 0, 0, 0};
-    state.a = (*(cMovieSub434_1B20**)((char*)self + 0x434))->v49();
-    int isDamaged = (*(cMovieSub434_1B20**)((char*)self + 0x434))->v51() || (*(cMovieSub434_1B20**)((char*)self + 0x434))->v59();
+    state.a = (*(cMovieSub434_1B20**)((char*)self + 0x434))->IsInvalid1();
+    int isDamaged = (*(cMovieSub434_1B20**)((char*)self + 0x434))->IsDamaged() || (*(cMovieSub434_1B20**)((char*)self + 0x434))->v59();
     state.b = isDamaged;
-    int isFull = !(*(cMovieSub434_1B20**)((char*)self + 0x434))->v13() && (*(cMovieSub434_1B20**)((char*)self + 0x434))->v20() < (*(cMovieSub434_1B20**)((char*)self + 0x434))->v23();
+    int isFull = !(*(cMovieSub434_1B20**)((char*)self + 0x434))->GetNumFiles() && (*(cMovieSub434_1B20**)((char*)self + 0x434))->GetFreeSpace() < (*(cMovieSub434_1B20**)((char*)self + 0x434))->SpaceRequired1();
     state.c = isFull;
-    state.d = !(*(cMovieSub434_1B20**)((char*)self + 0x434))->v53();
-    int isUnformatted = !(*(cMovieSub434_1B20**)((char*)self + 0x434))->v55() || !(*(cMovieSub434_1B20**)((char*)self + 0x434))->v58();
+    state.d = !(*(cMovieSub434_1B20**)((char*)self + 0x434))->IsAvailable1();
+    int isUnformatted = !(*(cMovieSub434_1B20**)((char*)self + 0x434))->IsFormatted1() || !(*(cMovieSub434_1B20**)((char*)self + 0x434))->v58();
     state.e = isUnformatted;
     state.f = 0;
     return state;
@@ -5097,7 +5097,7 @@ public:
     virtual int v17();
     virtual int v18();
     virtual int v19();
-    virtual int v20();
+    virtual int GetFreeSpace();
     virtual int v21();
     virtual int v22();
     virtual int v23();
@@ -5125,7 +5125,7 @@ public:
     virtual int v45();
     virtual int v46();
     virtual int v47();
-    virtual int v48(int);
+    virtual int IsInvalid(int);
     virtual int v49();
     virtual int v50(int);
     virtual int v51();
@@ -5133,7 +5133,7 @@ public:
     virtual int v53();
     virtual int v54();
     virtual int v55();
-    virtual int v56(int);
+    virtual int IsFormatted(int);
     virtual int v57(int);
     virtual int v58();
     virtual int v59();
@@ -5147,7 +5147,7 @@ public:
     virtual int v67();
     virtual int v68();
     virtual int v69();
-    virtual void v70(int, char*, int);
+    virtual void GetDeviceName(int, char*, int);
 };
 
 struct sSlot_20C8
@@ -5196,12 +5196,12 @@ extern "C" void cMCOverlayManager_GatherDeviceInfo1_v(void* self, int i)
     char* name = me->slots[i].name;
     me->slots[i].d = 1;
     MEM_fill(name, 0, 200);
-    if ((*(cMovieSub434_20C8**)((char*)self + 0x434))->v48(i) || (*(cMovieSub434_20C8**)((char*)self + 0x434))->v50(i) || (*(cMovieSub434_20C8**)((char*)self + 0x434))->v60(i))
+    if ((*(cMovieSub434_20C8**)((char*)self + 0x434))->IsInvalid(i) || (*(cMovieSub434_20C8**)((char*)self + 0x434))->v50(i) || (*(cMovieSub434_20C8**)((char*)self + 0x434))->v60(i))
     {
         me->slots[i].a = 0;
         return;
     }
-    if (!(*(cMovieSub434_20C8**)((char*)self + 0x434))->v56(i))
+    if (!(*(cMovieSub434_20C8**)((char*)self + 0x434))->IsFormatted(i))
     {
         *pb = 0;
         return;
@@ -5212,8 +5212,8 @@ extern "C" void cMCOverlayManager_GatherDeviceInfo1_v(void* self, int i)
         return;
     }
     if (i == me->cur)
-        me->slots[me->cur].e = (*(cMovieSub434_20C8**)((char*)self + 0x434))->v20();
-    (*(cMovieSub434_20C8**)((char*)self + 0x434))->v70(i, name, 100);
+        me->slots[me->cur].e = (*(cMovieSub434_20C8**)((char*)self + 0x434))->GetFreeSpace();
+    (*(cMovieSub434_20C8**)((char*)self + 0x434))->GetDeviceName(i, name, 100);
 }
 #endif
 

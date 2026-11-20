@@ -153,7 +153,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual sV4_87F0* v05();
+    virtual sV4_87F0* getPosition();
 };
 
 
@@ -241,7 +241,7 @@ extern "C" int cOVState_MAP_onGainTransition(cOVState_MAP* selfp, int on)
         char* game = (char*)SSXApp->Game;
         if (game != 0) {
             char* rider = *(char**)(*(char**)(game + 0xC) + 0x28);
-            sV4_87F0 riderPos = *((cRiderSub_87F0*)(rider + 0x6C0))->v05();
+            sV4_87F0 riderPos = *((cRiderSub_87F0*)(rider + 0x6C0))->getPosition();
             sV3_87F0 riderPos3;
             riderPos3.x = riderPos.x;
             riderPos3.y = riderPos.y;
@@ -966,7 +966,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual sV4_96A8* v05();
+    virtual sV4_96A8* getPosition();
 };
 
 
@@ -1006,7 +1006,7 @@ extern "C" void cOVState_MAP_setupPlayerIndicator(cOVState_MAP* selfp)
     void* ifGame = cBE_getInterface_Fv(cBE_getBE(), 0);
     sV3_96A8 mapPos = ((sFEObjData_96A8*)((cFEObj_96A8*)self->mpMap))->pos;
     char* rider = (char*)SSXApp->Game->AI->Riders[0];
-    sV4_96A8 pp = *((cRiderSub_96A8*)(rider + 0x6C0))->v05();
+    sV4_96A8 pp = *((cRiderSub_96A8*)(rider + 0x6C0))->getPosition();
     sBounds_96A8 bounds;
     cBEMissionInterface_getPictureDBRecord(&bounds, ifMap, *cBENewRaceInterface_getLocation(ifGame));
     float fx = Absf_96A8((pp.x - bounds.minX) / (bounds.maxX - bounds.minX));

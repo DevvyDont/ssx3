@@ -221,15 +221,15 @@ public:
     virtual void v0();
     virtual void v1();
     virtual void v2();
-    virtual void v3();
-    virtual void v4();
+    virtual void wait();
+    virtual void sync();
     virtual unsigned int v5();
     virtual void v6();
     virtual void v7();
     virtual void v8();
     virtual void v9();
-    virtual void v10();
-    virtual void v11();
+    virtual void prepause();
+    virtual void postpause();
 };
 
 /**
@@ -238,7 +238,7 @@ public:
  * Nothing in the C calls it.
  */
 extern "C" void cAppMan_wakeup(cAppMan* self) {
-    ((cExecObj *)self->ExecutionMan)->v4();
+    ((cExecObj *)self->ExecutionMan)->sync();
 }
 #endif
 //100%
@@ -250,7 +250,7 @@ INCLUDE_ASM("bx/execman", cAppMan_wait);
  * cAppMan_mainLoop calls the same entry when a frame has nothing to render. Nothing in the C calls this copy.
  */
 extern "C" void cAppMan_wait(cAppMan* self) {
-    ((cExecObj *)self->ExecutionMan)->v3();
+    ((cExecObj *)self->ExecutionMan)->wait();
 }
 #endif
 //100%
@@ -281,7 +281,7 @@ INCLUDE_ASM("bx/execman", cAppMan_prepause);
  * Nothing in the C calls it.
  */
 extern "C" void cAppMan_prepause(cAppMan* self) {
-    ((cExecObj *)self->ExecutionMan)->v10();
+    ((cExecObj *)self->ExecutionMan)->prepause();
 }
 #endif
 //100%
@@ -293,7 +293,7 @@ INCLUDE_ASM("bx/execman", cAppMan_postpause);
  * Nothing in the C calls it.
  */
 extern "C" void cAppMan_postpause(cAppMan* self) {
-    ((cExecObj *)self->ExecutionMan)->v11();
+    ((cExecObj *)self->ExecutionMan)->postpause();
 }
 #endif
 //100%

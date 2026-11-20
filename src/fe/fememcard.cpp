@@ -24,7 +24,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int);
+    virtual void setVisible(int);
 };
 
 /**
@@ -42,7 +42,7 @@ extern "C" void cFEStateMemCard_onCreateScreen(void* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
     cSSXApp_getMCManager(SSXApp);
-    ((cUIObjK186B50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_mc_messages)))->v09(0);
+    ((cUIObjK186B50*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_mc_messages)))->setVisible(0);
 }
 #endif
 
@@ -65,7 +65,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int);
+    virtual void setVisible(int);
 };
 
 /**
@@ -83,7 +83,7 @@ extern "C" void cFEStateMemCard_onUpdate(void* self)
         if (obj != 0) {
             cUIThing_deleteAnimation(obj);
         }
-        ((cUIObjK186BF0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_mc_messages)))->v09(0);
+        ((cUIObjK186BF0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_mc_messages)))->setVisible(0);
     }
 }
 #endif
@@ -479,7 +479,7 @@ extern "C" void cMCOverlayManager_readSetFileType(void* mp, int mode);
 class cMoviePlayerK1871A8 {
 public:
     char pad_0x000[0x748];
-    virtual void v01(int);
+    virtual void SetState(int);
 };
 
 /**
@@ -496,7 +496,7 @@ extern "C" void cFEStateMemCard_callbackCardsChecked(void)
     cMoviePlayerK1871A8* mp = (cMoviePlayerK1871A8*)cSSXApp_getMCManager(SSXApp);
     cMCOverlayManager_selectDevice(mp, 0);
     cMCOverlayManager_setSelectedDevice(mp);
-    mp->v01(54);
+    mp->SetState(54);
     D_004A14BC = 0;
     D_004A14B8_K1871A8->f22C = -1;
     D_004A14B8_K1871A8->f234 = 0;

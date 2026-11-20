@@ -129,10 +129,10 @@ public:
     // vptr at 0x8
     virtual void v01();
     virtual void v02();
-    virtual int v03();
+    virtual int isStart();
     virtual void v04();
-    virtual int v05();
-    virtual int v06();
+    virtual int isNext();
+    virtual int isPrevious();
     virtual void v07();
     virtual void v08();
     virtual void v09();
@@ -143,8 +143,8 @@ public:
     virtual void v14();
     virtual void v15();
     virtual void v16();
-    virtual int v17();
-    virtual int v18();
+    virtual int isUp();
+    virtual int isDown();
 };
 
 struct sMgr_20DF38 {
@@ -210,7 +210,7 @@ extern "C" int cOVState_REPLAY_onInputBegin(cOVState_REPLAY* self, cPad_20DF38* 
         self->mBottom_ydiff = 4;
         return 1;
     }
-    if (pInput->v03() && self->mShowPopupMenu == 0) {
+    if (pInput->isStart() && self->mShowPopupMenu == 0) {
         snd->play(6);
         int n = D_004A2A54 + 1;
         D_005366E8[n] = 2;
@@ -221,7 +221,7 @@ extern "C" int cOVState_REPLAY_onInputBegin(cOVState_REPLAY* self, cPad_20DF38* 
         *(int*)(obj + 0x90) &= ~8;
         return 1;
     }
-    if (self->mShowPopupMenu != 0 && pInput->v05()) {
+    if (self->mShowPopupMenu != 0 && pInput->isNext()) {
         snd->play(6);
         char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
         switch (*(int*)(*(char**)(obj + 0xA0) + 0x18)) {
@@ -253,7 +253,7 @@ extern "C" int cOVState_REPLAY_onInputBegin(cOVState_REPLAY* self, cPad_20DF38* 
         }
         return 1;
     }
-    if (self->mShowPopupMenu != 0 && pInput->v06()) {
+    if (self->mShowPopupMenu != 0 && pInput->isPrevious()) {
         snd->play(3);
         cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
         self->mShowPopupMenu = 0;
@@ -275,12 +275,12 @@ extern "C" int cOVState_REPLAY_onInputBegin(cOVState_REPLAY* self, cPad_20DF38* 
         }
         return 1;
     }
-    if (pInput->v17()) {
+    if (pInput->isUp()) {
         char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
         if (obj != 0 && self->mLoaded != 0 && *(unsigned char*)(obj + 0x95) == 1) {
             return 1;
         }
-    } else if (pInput->v18()) {
+    } else if (pInput->isDown()) {
         char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
         if (obj != 0 && self->mLoaded != 0 && *(unsigned char*)(obj + 0x95) == 2) {
             return 1;

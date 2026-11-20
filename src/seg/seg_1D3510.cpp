@@ -440,15 +440,15 @@ struct Obj_3840 {
   virtual void v45();
   virtual void v46();
   virtual void v47();
-  virtual int v48();
+  virtual int IsInvalid();
   virtual void v49();
   virtual int v50(int);
   virtual void v51();
-  virtual int v52(int);
+  virtual int IsAvailable(int);
   virtual void v53();
   virtual void v54();
   virtual void v55();
-  virtual int v56(int);
+  virtual int IsFormatted(int);
 };
 /**
  * Tells whether the card in a port is ready for use.
@@ -464,8 +464,8 @@ struct Obj_3840 {
  */
 extern "C" int func_002D3840(cPS2MemCard* pS2MemCard, int x) {
     int ok = 0;
-    if (!((Obj_3840*)pS2MemCard)->v48() && !((Obj_3840*)pS2MemCard)->v50(x) && ((Obj_3840*)pS2MemCard)->v56(x)) {
-        ok = ((Obj_3840*)pS2MemCard)->v52(x) != 0;
+    if (!((Obj_3840*)pS2MemCard)->IsInvalid() && !((Obj_3840*)pS2MemCard)->v50(x) && ((Obj_3840*)pS2MemCard)->IsFormatted(x)) {
+        ok = ((Obj_3840*)pS2MemCard)->IsAvailable(x) != 0;
     }
     return ok;
 }

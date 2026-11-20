@@ -157,7 +157,7 @@ class cLightSrc_DC70 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void* v01(int a);
-    virtual void* v02(int a);
+    virtual void* GetLightObj(int a);
 };
 
 extern "C" float func_0031C128(float x);
@@ -198,7 +198,7 @@ extern "C" void cPS2LightMan_CreateLights(cPS2LightMan* self, sLight_DC70* light
 {
     int i;
     for (i = 0; i < n; i++) {
-        void** obj = (void**)((cLightSrc_DC70*)self)->v02(base + i);
+        void** obj = (void**)((cLightSrc_DC70*)self)->GetLightObj(base + i);
         obj[0] = &lights[i];
         sCol_DC70 col;
         col.a = 1.0f;
@@ -235,7 +235,7 @@ class cObj0038DEE8 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void* v01(int a);
-    virtual void* v02(int a);
+    virtual void* GetLightObj(int a);
 };
 
 // PORT: the unit defines func_0038DC50(void*) (an empty stub), but this caller
@@ -255,7 +255,7 @@ void func_0038DC50_3(void* p, int b, float f) __asm__("func_0038DC50__FPv");
  */
 extern "C" void cPS2LightMan_CreateAmbient(cPS2LightMan* obj, int light, int colour, float intensity)
 {
-    func_0038DC50_3(((cObj0038DEE8*)obj)->v02(light), colour, intensity);
+    func_0038DC50_3(((cObj0038DEE8*)obj)->GetLightObj(light), colour, intensity);
 }
 #endif
 
@@ -266,7 +266,7 @@ class cObj0038DF38 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void* v01(int a);
-    virtual void* v02(int a);
+    virtual void* GetLightObj(int a);
 };
 
 // PORT: the unit defines func_0038DC58(void*) (an empty stub), but this caller
@@ -287,7 +287,7 @@ void func_0038DC58_4(void* p, int b, int c, float f) __asm__("func_0038DC58__FPv
  */
 extern "C" void cPS2LightMan_CreateDirectional(cPS2LightMan* obj, int light, int colour, int dir, float intensity)
 {
-    func_0038DC58_4(((cObj0038DF38*)obj)->v02(light), colour, dir, intensity);
+    func_0038DC58_4(((cObj0038DF38*)obj)->GetLightObj(light), colour, dir, intensity);
 }
 #endif
 
@@ -298,7 +298,7 @@ class cObj0038DF98 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void* v01(int a);
-    virtual void* v02(int a);
+    virtual void* GetLightObj(int a);
 };
 
 // PORT: the unit defines func_0038DC60(void*) (an empty stub), but this caller
@@ -320,7 +320,7 @@ void func_0038DC60_5(void* p, int b, int c, float f, int d) __asm__("func_0038DC
  */
 extern "C" void cPS2LightMan_CreatePoint(cPS2LightMan* obj, int light, int colour, int pos, float intensity, int decay)
 {
-    func_0038DC60_5(((cObj0038DF98*)obj)->v02(light), colour, pos, intensity, decay);
+    func_0038DC60_5(((cObj0038DF98*)obj)->GetLightObj(light), colour, pos, intensity, decay);
 }
 #endif
 
@@ -331,7 +331,7 @@ class cObj0038E008 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void* v01(int a);
-    virtual void* v02(int a);
+    virtual void* GetLightObj(int a);
 };
 
 // PORT: the unit defines func_0038DC68(void*) (an empty stub), but this caller
@@ -356,7 +356,7 @@ void func_0038DC68_8(void* p, int b, int c, int d, float x, float y, int e, floa
  */
 extern "C" void cPS2LightMan_CreateSpot(cPS2LightMan* obj, int light, int colour, int pos, int dir, float x, float y, int decay, float z)
 {
-    func_0038DC68_8(((cObj0038E008*)obj)->v02(light), colour, pos, dir, x, y, decay, z);
+    func_0038DC68_8(((cObj0038E008*)obj)->GetLightObj(light), colour, pos, dir, x, y, decay, z);
 }
 #endif
 
@@ -2228,11 +2228,11 @@ public:
     virtual void v8(); virtual unsigned int v9(); virtual unsigned int v10(); virtual void v11();
     virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15();
     virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19();
-    virtual void v20(); virtual void v21(); virtual void v22(float, float, float, float, int);
-    virtual void v23(); virtual void v24(); virtual void v25(float, float, float, float, float, float, int, int);
+    virtual void PushViewport(); virtual void PopViewport(); virtual void v22(float, float, float, float, int);
+    virtual void v23(); virtual void v24(); virtual void SetViewportOrthographic(float, float, float, float, float, float, int, int);
     virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29();
-    virtual void v30(); virtual void v31(); virtual void v32(); virtual void v33(char*);
-    virtual void v34(); virtual void v35(); virtual void v36(); virtual void v37();
+    virtual void PushView(); virtual void PopView(); virtual void v32(); virtual void v33(char*);
+    virtual void v34(); virtual void v35(); virtual void IdentityView(); virtual void v37();
     virtual void v38(); virtual void v39(); virtual void v40(); virtual void v41();
     virtual void v42(); virtual void v43(); virtual void v44(); virtual void v45();
     virtual void v46(); virtual void v47(); virtual void v48(); virtual void v49();
@@ -2241,7 +2241,7 @@ public:
     virtual void v58(); virtual void v59(); virtual void v60(); virtual void v61();
     virtual void v62(); virtual void v63(); virtual void v64(); virtual void v65();
     virtual void v66(); virtual void v67(); virtual void v68(); virtual void v69();
-    virtual void v70(int, sHudVert_0F20*, int);
+    virtual void RenderTriStrip(int, sHudVert_0F20*, int);
 };
 
 /**
@@ -2265,9 +2265,9 @@ extern "C" void cScreenTint_render()
     if (flag) {
         cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
         ((cGfx_0F20*)ps2GraphicsMan)->PushState();
-        ((cGfx_0F20*)ps2GraphicsMan)->v20();
-        ((cGfx_0F20*)ps2GraphicsMan)->v30();
-        ((cGfx_0F20*)ps2GraphicsMan)->v36();
+        ((cGfx_0F20*)ps2GraphicsMan)->PushViewport();
+        ((cGfx_0F20*)ps2GraphicsMan)->PushView();
+        ((cGfx_0F20*)ps2GraphicsMan)->IdentityView();
         float quadWidth;
         float quadLeft;
         if (((cGfx_0F20*)ps2GraphicsMan)->f270 == 1) {
@@ -2280,7 +2280,7 @@ extern "C" void cScreenTint_render()
                 quadLeft = quadWidth;
             }
         }
-        ((cGfx_0F20*)ps2GraphicsMan)->v25(quadLeft, 0.0f, quadWidth, 480.0f, 0.0f, 1.0f, 0, 0);
+        ((cGfx_0F20*)ps2GraphicsMan)->SetViewportOrthographic(quadLeft, 0.0f, quadWidth, 480.0f, 0.0f, 1.0f, 0, 0);
         *((cGfx_0F20*)ps2GraphicsMan)->stateTop = D_00501420_0F20;
         ((cGfx_0F20*)ps2GraphicsMan)->stateTop->f8_5 = 5;
         ((cGfx_0F20*)ps2GraphicsMan)->stateTop->SetF22(1);
@@ -2321,10 +2321,10 @@ extern "C" void cScreenTint_render()
                 verts[i].a = aa;
                 verts[i].q = 1.0f;
             }
-            ((cGfx_0F20*)ps2GraphicsMan)->v70(4, verts, 0);
+            ((cGfx_0F20*)ps2GraphicsMan)->RenderTriStrip(4, verts, 0);
         }
-        ((cGfx_0F20*)ps2GraphicsMan)->v31();
-        ((cGfx_0F20*)ps2GraphicsMan)->v21();
+        ((cGfx_0F20*)ps2GraphicsMan)->PopView();
+        ((cGfx_0F20*)ps2GraphicsMan)->PopViewport();
         ((cGfx_0F20*)ps2GraphicsMan)->stateTop--;
     }
 }

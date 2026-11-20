@@ -7840,7 +7840,7 @@ struct cInstanceNode_1FBE38 {
     virtual void v21();
     virtual void v22();
     virtual void v23();
-    virtual t4Matrix* v24();
+    virtual t4Matrix* getRootTransform();
     virtual void v25();
     virtual void v26();
     virtual void v27();
@@ -8046,7 +8046,7 @@ extern "C" cLunoValue CameraShakeFunc(int n, sBindArg_1FBE38 *params) {
             for (int i = 0; i < np; i++) {
                 const t4Vector *rp = game->race->players[i]->rider->getPosition();
                 cInstanceNode_1FBE38 *node = *(cInstanceNode_1FBE38**)(obj + 0xC);
-                t4Matrix *rootTransform = node ? node->v24() : (t4Matrix*)(obj + 0x10);
+                t4Matrix *rootTransform = node ? node->getRootTransform() : (t4Matrix*)(obj + 0x10);
                 t4Vector d = vSub_1FBE38(*rp, trans_50F0(rootTransform));
                 float dist = vLen_1FBE38(d);
                 cRider_1FBE38 *r = game->race->players[i]->rider;

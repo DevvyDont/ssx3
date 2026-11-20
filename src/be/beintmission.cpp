@@ -574,7 +574,7 @@ public:
     virtual void v1();
     virtual void v2();
     virtual void v3();
-    virtual void v4(int a);
+    virtual void getStringByHash(int a);
 };
 
 /**
@@ -587,7 +587,7 @@ public:
 extern "C" void cBEMissionInterface_getMissionName(void* self, int id)
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
-    ((cMissionObj_00153C88*)(void*)SSXApp->FELocale)->v4(D_0043EE10_v00153C88[i].f4);
+    ((cMissionObj_00153C88*)(void*)SSXApp->FELocale)->getStringByHash(D_0043EE10_v00153C88[i].f4);
 }
 #endif
 
@@ -612,7 +612,7 @@ public:
     virtual void v1();
     virtual void v2();
     virtual void v3();
-    virtual void v4(int a);
+    virtual void getStringByHash(int a);
 };
 
 /**
@@ -626,7 +626,7 @@ public:
 extern "C" void cBEMissionInterface_getMissionShortDesc(void* self, int id)
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
-    ((cMissionObj_00153CD8*)(void*)SSXApp->FELocale)->v4(D_0043EE10_v00153CD8[i].f8);
+    ((cMissionObj_00153CD8*)(void*)SSXApp->FELocale)->getStringByHash(D_0043EE10_v00153CD8[i].f8);
 }
 #endif
 
@@ -652,7 +652,7 @@ public:
     virtual void v1();
     virtual void v2();
     virtual void v3();
-    virtual void v4(int a);
+    virtual void getStringByHash(int a);
 };
 
 /**
@@ -665,7 +665,7 @@ public:
 extern "C" void cBEMissionInterface_getMissionLongDesc(void* self, int id)
 {
     int i = cBEMissionInterface_getMissionIdx(self, id);
-    ((cMissionObj_00153D28*)(void*)SSXApp->FELocale)->v4(D_0043EE10_v00153D28[i].fC);
+    ((cMissionObj_00153D28*)(void*)SSXApp->FELocale)->getStringByHash(D_0043EE10_v00153D28[i].fC);
 }
 #endif
 

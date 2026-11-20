@@ -2030,7 +2030,7 @@ public:
     virtual void v16();
     virtual void v17();
     virtual void v18();
-    virtual void v19();
+    virtual void FlushRenderer();
 };
 
 struct sVEntry002535F8 {
@@ -2062,7 +2062,7 @@ extern "C" void cMoviePlayer_purge(cMoviePlayer* self)
 {
     sStream002535F8* moviePlayer = (sStream002535F8*)self;
     if (moviePlayer->f38 != 0 && moviePlayer->f3C != 0) {
-        ((cWorld002535F8*)cGraphicsMan_TheGraphicsMan)->v19();
+        ((cWorld002535F8*)cGraphicsMan_TheGraphicsMan)->FlushRenderer();
     }
     if (moviePlayer->f40 != 0 && moviePlayer->fC != 0) {
         RCMP_DECODER_ReleaseFrame(*(void**)(moviePlayer->f38 + 0x64), moviePlayer->fC);
@@ -2861,14 +2861,14 @@ public:
     virtual void v07();
     virtual void v08();
     virtual void v09();
-    virtual unsigned int v10();
-    virtual unsigned int v11();
+    virtual unsigned int GetScreenWidth();
+    virtual unsigned int GetScreenHeight();
     virtual void v12();
     virtual void v13();
     virtual void v14();
     virtual void v15();
     virtual void v16();
-    virtual int v17();
+    virtual int IsRenderReady();
     virtual void v18();
     virtual void v19();
     virtual void v20();
@@ -2877,7 +2877,7 @@ public:
     virtual void v23();
     virtual void v24();
     virtual void v25();
-    virtual void v26(int a, int b, float x, float y, float w, float h, float zn, float zf);
+    virtual void SetViewportOrthographic(int a, int b, float x, float y, float w, float h, float zn, float zf);
     virtual void v27();
     virtual void v28();
     virtual void v29();
@@ -2885,7 +2885,7 @@ public:
     virtual void v31();
     virtual void v32();
     virtual void v33();
-    virtual void v34(void* p);
+    virtual void SetView1(void* p);
     virtual void v35();
     virtual void v36();
     virtual void v37();
@@ -2922,7 +2922,7 @@ public:
     virtual void v68();
     virtual void v69();
     virtual void v70();
-    virtual void v71(int n, void* verts, int flags);
+    virtual void RenderTriStrip(int n, void* verts, int flags);
 };
 
 extern char t4mat_Identity[];
@@ -2962,12 +2962,12 @@ extern "C" void func_002548D0_impl(void* p) __asm__("func_002548D0");
 extern "C" void func_002548D0_impl(void* videoDriver)
 {
     sMesh_2548D0* self = (sMesh_2548D0*)videoDriver;
-    while (self->world->v17() == 0) {
+    while (self->world->IsRenderReady() == 0) {
     }
-    float w = (float)self->world->v10();
-    float screenHeight = (float)self->world->v11();
-    self->world->v26(0, 0, 0.0f, 0.0f, w, screenHeight, 0.0f, 1.0f);
-    self->world->v34(t4mat_Identity);
+    float w = (float)self->world->GetScreenWidth();
+    float screenHeight = (float)self->world->GetScreenHeight();
+    self->world->SetViewportOrthographic(0, 0, 0.0f, 0.0f, w, screenHeight, 0.0f, 1.0f);
+    self->world->SetView1(t4mat_Identity);
     sRS_2548D0* rs = self->world->top;
     rs->f8 = (rs->f8 & ~0x3E0) | ((self->f3C << 5) & 0x3E0);
     sVtx_2548D0 quadVerts[4];
@@ -3010,7 +3010,7 @@ extern "C" void func_002548D0_impl(void* videoDriver)
                 cell++;
                 wp++;
                 col++;
-                self->world->v71(4, quadVerts, 0);
+                self->world->RenderTriStrip(4, quadVerts, 0);
             } while (col < self->cols);
         }
         x0 += cw;
@@ -3074,7 +3074,7 @@ public:
     virtual void v46();
     virtual void v47();
     virtual void v48();
-    virtual void v49(int a, char* p, int b, int c, int d, int e, int f, int g, int h);
+    virtual void SetNewTextureData1(int a, char* p, int b, int c, int d, int e, int f, int g, int h);
 };
 extern "C" void* func_002548D0(void* self);
 
@@ -3118,7 +3118,7 @@ extern "C" void func_00254C48(sMesh_254C48* self, void* res)
         int off = 0;
         for (int j = 0; j < self->cols; j++) {
             int* tileEntry = ((int**)self->items)[k];
-            ((cWorld_254C48*)cGraphicsMan_TheGraphicsMan)->v49(tileEntry[0], data + ((off << 6) + stride * (i << 6)), tileEntry[1], tileEntry[2], 0, 0, 0, 0, 0);
+            ((cWorld_254C48*)cGraphicsMan_TheGraphicsMan)->SetNewTextureData1(tileEntry[0], data + ((off << 6) + stride * (i << 6)), tileEntry[1], tileEntry[2], 0, 0, 0, 0, 0);
             k++;
             off += self->widths[j];
         }

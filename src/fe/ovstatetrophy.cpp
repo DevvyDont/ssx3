@@ -1505,7 +1505,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual sQuad_210820* v05();
+    virtual sQuad_210820* getPosition();
 };
 struct sZone_210820 {
     float sx, sy, ox, oy, f10;
@@ -1551,7 +1551,7 @@ extern "C" float func_00210820(int idx)
     sZone_210820* zones = (sZone_210820*)D_004A2754;
     char* world = (char*)SSXApp->Game->AI;
     char* rider = *(char**)(world + (idx << 2) + 0x28);
-    sQuad_210820 pos = *((cPosObj_210820*)(rider + 0x6C0))->v05();
+    sQuad_210820 pos = *((cPosObj_210820*)(rider + 0x6C0))->getPosition();
     float dy = suby_210820(&zones[D_slots210820[idx].zone], pos);
     float dx = subx_210820(&zones[D_slots210820[idx].zone], pos);
     float lateral = dy * sy_210820(&zones[D_slots210820[idx].zone]) + dx * sx_210820(&zones[D_slots210820[idx].zone]);

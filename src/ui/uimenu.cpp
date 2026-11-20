@@ -562,7 +562,7 @@ public:
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual void v04(int);
+    virtual void setActive(int);
 };
 
 struct cUIPair_setActive_s {
@@ -585,10 +585,10 @@ struct cUIPair_setActive_s {
 extern "C" void cUIPair_setActive(cUIPair_setActive_s* self, int on)
 {
     self->b1 = (on != 0);
-    self->a->v04(on);
+    self->a->setActive(on);
     cUIPair_setActive_cVirt* widget = self->b;
     if (widget != 0) {
-        widget->v04(on);
+        widget->setActive(on);
     }
 }
 #endif
@@ -711,7 +711,7 @@ class cUIPair_traverseFlat_cVirt {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01();
-    virtual int v02(void*);
+    virtual int onListNode(void*);
 };
 
 /**
@@ -726,7 +726,7 @@ public:
  */
 extern "C" int cUIPair_traverseFlat(cUIPair* self, cUIPair_traverseFlat_cVirt* obj)
 {
-    return obj->v02(self);
+    return obj->onListNode(self);
 }
 #endif
 
@@ -737,7 +737,7 @@ class cUIPair_traverseRecurse_cPred {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01();
-    virtual int v02(void*);
+    virtual int onListNode(void*);
 };
 
 class cUIPair_traverseRecurse_cNode {
@@ -746,7 +746,7 @@ public:
     // vptr at 0x8
     virtual void v01();
     virtual void v02();
-    virtual void* v03(cUIPair_traverseRecurse_cPred*);
+    virtual void* traverseRecurse(cUIPair_traverseRecurse_cPred*);
 };
 
 /**
@@ -757,16 +757,16 @@ public:
  */
 extern "C" void* cUIPair_traverseRecurse(cUIPair* self, cUIPair_traverseRecurse_cPred* pred)
 {
-    if (pred->v02(self)) {
+    if (pred->onListNode(self)) {
         return ((void*)self);
     }
     cUIPair_traverseRecurse_cNode* child = (cUIPair_traverseRecurse_cNode*)self->mpEntry;
-    if (child != 0 && child->v03(pred) != 0) {
+    if (child != 0 && child->traverseRecurse(pred) != 0) {
         return self->mpEntry;
     }
     cUIPair_traverseRecurse_cNode* next = (cUIPair_traverseRecurse_cNode*)self->mpWidget;
     if (next != 0) {
-        return next->v03(pred);
+        return next->traverseRecurse(pred);
     }
     return 0;
 }
@@ -794,7 +794,7 @@ public:
     virtual void v13();
     virtual void v14();
     virtual void v15();
-    virtual void v16();
+    virtual void updateLocale();
 };
 
 /**
@@ -804,11 +804,11 @@ extern "C" void cUIPair_updateLocale(cUIPair* self)
 {
     cUIPair_updateLocale_cVirt* entry = (cUIPair_updateLocale_cVirt*)self->mpEntry;
     if (entry != 0) {
-        entry->v16();
+        entry->updateLocale();
     }
     cUIPair_updateLocale_cVirt* widget = (cUIPair_updateLocale_cVirt*)self->mpWidget;
     if (widget != 0) {
-        widget->v16();
+        widget->updateLocale();
     }
 }
 #endif
@@ -998,7 +998,7 @@ public:
     virtual void v16();
     virtual void v17();
     virtual void v18();
-    virtual void v19(unsigned short);
+    virtual void update(unsigned short);
 };
 
 /**
@@ -1011,11 +1011,11 @@ extern "C" void cUIPair_update(cUIPair* self, unsigned short ev)
     cUIThing_update(self, ev);
     cUIPair_update_cVirt* entry = (cUIPair_update_cVirt*)self->mpEntry;
     if (entry != 0) {
-        entry->v19(ev);
+        entry->update(ev);
     }
     cUIPair_update_cVirt* widget = (cUIPair_update_cVirt*)self->mpWidget;
     if (widget != 0) {
-        widget->v19(ev);
+        widget->update(ev);
     }
 }
 #endif
@@ -1171,8 +1171,8 @@ public:
     virtual void v17();
     virtual void v18();
     virtual void v19();
-    virtual void v20(cUIProgress_setValue_sVec3*);
-    virtual void v21(cUIProgress_setValue_sVec3*);
+    virtual void getSize(cUIProgress_setValue_sVec3*);
+    virtual void setSize(cUIProgress_setValue_sVec3*);
 };
 
 /**
@@ -1190,7 +1190,7 @@ extern "C" void cUIProgress_setValue(cUIProgress* self, int pos)
     cUIProgress_setValue_cWidget* background = (cUIProgress_setValue_cWidget*)self->mpObjBackground;
     cUIProgress_setValue_sVec3 newSize = t3vect_Zero;
     if (background != 0) {
-        background->v20(&newSize);
+        background->getSize(&newSize);
     }
     if (self->mpObjKnob != 0) {
         int n = self->mNumValues;
@@ -1200,7 +1200,7 @@ extern "C" void cUIProgress_setValue(cUIProgress* self, int pos)
             } else {
                 newSize.y *= (float)self->mValue / (float)n;
             }
-            ((cUIProgress_setValue_cWidget*)self->mpObjKnob)->v21(&newSize);
+            ((cUIProgress_setValue_cWidget*)self->mpObjKnob)->setSize(&newSize);
         }
     }
 }

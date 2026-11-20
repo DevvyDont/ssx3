@@ -151,8 +151,8 @@ INCLUDE_ASM("object/instanceman", cAnimFrame_writeToReplayFrame);
 #ifdef SKIP_ASM
 class cInstSink {
 public:
-    virtual void v0(void *p, int n);
-    virtual void v1(void *p, int n);
+    virtual void write(void *p, int n);
+    virtual void read(void *p, int n);
 };
 
 /**
@@ -162,7 +162,7 @@ public:
  * @param sink  replay stream to write to
  */
 extern "C" void cAnimFrame_writeToReplayFrame(void *src, cInstSink *sink) {
-    sink->v0(src, 0x40);
+    sink->write(src, 0x40);
 }
 #endif
 //100%
@@ -175,7 +175,7 @@ INCLUDE_ASM("object/instanceman", cAnimFrame_readFromReplayFrame);
  * @param sink  replay stream to read from
  */
 extern "C" void cAnimFrame_readFromReplayFrame(void *src, cInstSink *sink) {
-    sink->v1(src, 0x40);
+    sink->read(src, 0x40);
 }
 #endif
 //100% - objdiff report; single-function view differs only in a relocation name

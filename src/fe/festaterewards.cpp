@@ -804,7 +804,7 @@ struct cGame001CFFF8 {
     virtual void v43();
     virtual void v44();
     virtual void v45();
-    virtual int v46(void* name, void* entry, int a, int b, int c);
+    virtual int AddTexture(void* name, void* entry, int a, int b, int c);
 };
 
 extern "C" void SHAPE_name(void* data, int i, void* entry);
@@ -852,7 +852,7 @@ extern "C" void cFEStateRewardGalleryBase_allocIcons(cFEStateRewardGalleryBase* 
     for (i = 0; i < self->mNumIcons; i++) {
         SHAPE_name(data, i, &((sEntry001CFFF8*)&self->mIcons[0])[i]);
         ((sEntry001CFFF8*)&self->mIcons[0])[i].name[4] = 0;
-        ((sEntry001CFFF8*)&self->mIcons[0])[i].handle = ((cGame001CFFF8*)GrMan)->v46((char*)data + data->tbl[i].off, &((sEntry001CFFF8*)&self->mIcons[0])[i], 0, 1, -1);
+        ((sEntry001CFFF8*)&self->mIcons[0])[i].handle = ((cGame001CFFF8*)GrMan)->AddTexture((char*)data + data->tbl[i].off, &((sEntry001CFFF8*)&self->mIcons[0])[i], 0, 1, -1);
     }
 }
 #endif
@@ -911,7 +911,7 @@ struct cGame001D00C0 {
     virtual void v47();
     virtual void v48();
     virtual void v49();
-    virtual void v50(int id);
+    virtual void RemoveTexture(int id);
 };
 
 extern "C" void func_0019DC20(void* self, int bank, int i);
@@ -938,7 +938,7 @@ extern "C" void cFEStateRewardGalleryBase_purgeIcons(sSelf001D00C0* self)
     int i;
     for (i = 0; i < self->count; i++) {
         if (self->entries[i].handle >= 0) {
-            ((cGame001D00C0*)GrMan)->v50(self->entries[i].handle);
+            ((cGame001D00C0*)GrMan)->RemoveTexture(self->entries[i].handle);
         }
         self->entries[i].handle = -1;
         self->entries[i].name[0] = 0;
@@ -3034,7 +3034,7 @@ extern "C" void cFEStatePreviewReward_updateTextureLoad(cFEStatePreviewReward* s
     sEntry001CFFF8 ent;
     SHAPE_name(data, 0, &ent);
     ent.name[4] = 0;
-    self->mTextureID = ((cGame001CFFF8*)GrMan)->v46(shapeHeader, &ent, 0, 1, -1);
+    self->mTextureID = ((cGame001CFFF8*)GrMan)->AddTexture(shapeHeader, &ent, 0, 1, -1);
     func_0019DC20(mgr, self->mCharID, self->mTextureFileIndex);
     self->mTextureFileIndex = -1;
     sSelfK1D2198* previewState = (sSelfK1D2198*)self;

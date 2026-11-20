@@ -1007,15 +1007,15 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int on);
-    virtual void v09(int on);
+    virtual void setStatic(int on);
+    virtual void setVisible(int on);
 };
 
 static inline void Hide_00192970(void* screen, char* name)
 {
     cFEVObj_00192970* t = (cFEVObj_00192970*)cUIScreen_getObjectByHashName(screen, GetHashValue32(name));
     if (t != 0) {
-        t->v09(0);
+        t->setVisible(0);
     }
 }
 
@@ -1049,8 +1049,8 @@ extern "C" void cBraggingRightsMenu_setEnableItem(sOwner_00192970* self, cUIScre
     for (int i = 0; i < 8; i++) {
         if (((self->mask >> i) & 1) == 0) {
             if (self->items[i] != 0) {
-                self->items[i]->v08(1);
-                self->items[i]->v09(0);
+                self->items[i]->setStatic(1);
+                self->items[i]->setVisible(0);
                 leftArrowName.c[0] = i + '0';
                 rightArrowName.c[0] = i + '0';
                 leftArrow1Name.c[0] = i + '0';

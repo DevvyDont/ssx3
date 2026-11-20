@@ -3361,7 +3361,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual void v05();
+    virtual void update();
 };
 
 /**
@@ -3369,7 +3369,7 @@ public:
  */
 extern "C" void func_001762F0(cTriggerVirt5* self)
 {
-    self->v05();
+    self->update();
 }
 #endif
 //100%
@@ -4130,7 +4130,7 @@ public:
     virtual void v04();
     virtual void v05();
     virtual void v06();
-    virtual int v07();
+    virtual int getAIIndex();
 };
 class cCamCtrlK8940 {
 public:
@@ -4139,7 +4139,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual void v05();
+    virtual void update();
 };
 
 /**
@@ -4153,10 +4153,10 @@ public:
 extern "C" void cDEFAULT_2ChaseAlgorithm_snap(cDEFAULT_2ChaseAlgorithm* self, int id)
 {
     char* rider = *(char**)((char*)self->Target + 4);
-    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->v07()) {
+    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->getAIIndex()) {
         cLookAtChaseAlgorithm_snap(((cCamCtrlK8940*)self), id);
         cLookAtChaseAlgorithm_setupInitialCamDir(((cCamCtrlK8940*)self), 559.7440185546875f, 300.0f);
-        ((cCamCtrlK8940*)self)->v05();
+        ((cCamCtrlK8940*)self)->update();
     }
 }
 #endif
@@ -4318,10 +4318,10 @@ extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(void* self, float a, fl
 extern "C" void cDEFAULT_3ChaseAlgorithm_snap(cDEFAULT_3ChaseAlgorithm* self, int id)
 {
     char* rider = *(char**)((char*)self->Target + 4);
-    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->v07()) {
+    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->getAIIndex()) {
         cLookAtChaseAlgorithm_snap(((cCamCtrlK8940*)self), id);
         cLookAtChaseAlgorithm_setupInitialCamDir(((cCamCtrlK8940*)self), 559.7440185546875f, 300.0f);
-        ((cCamCtrlK8940*)self)->v05();
+        ((cCamCtrlK8940*)self)->update();
     }
 }
 #endif
@@ -4483,10 +4483,10 @@ extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(void* self, float a, fl
 extern "C" void cDEFAULT_4ChaseAlgorithm_snap(cDEFAULT_4ChaseAlgorithm* self, int id)
 {
     char* rider = *(char**)((char*)self->Target + 4);
-    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->v07()) {
+    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->getAIIndex()) {
         cLookAtChaseAlgorithm_snap(((cCamCtrlK8940*)self), id);
         cLookAtChaseAlgorithm_setupInitialCamDir(((cCamCtrlK8940*)self), 559.7440185546875f, 300.0f);
-        ((cCamCtrlK8940*)self)->v05();
+        ((cCamCtrlK8940*)self)->update();
     }
 }
 #endif
@@ -4645,10 +4645,10 @@ extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(void* self, float a, fl
 extern "C" void cDirectionChaseAlgorithm_snap(cDirectionChaseAlgorithm* self, int id)
 {
     char* rider = *(char**)((char*)self->Target + 4);
-    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->v07()) {
+    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->getAIIndex()) {
         cLookAtChaseAlgorithm_snap(((cCamCtrlK8940*)self), id);
         cLookAtChaseAlgorithm_setupInitialCamDir(((cCamCtrlK8940*)self), 559.7440185546875f, 300.0f);
-        ((cCamCtrlK8940*)self)->v05();
+        ((cCamCtrlK8940*)self)->update();
     }
 }
 #endif
@@ -5390,7 +5390,7 @@ public:
     virtual void v02();
     virtual void v03(int on);
     virtual void v04();
-    virtual void v05();
+    virtual void update();
 };
 
 extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(void* self, float a, float b);
@@ -5455,7 +5455,7 @@ extern "C" void cSPOKEChaseAlgorithm_snap(cSPOKEChaseAlgorithm* self, long id)
         self->CamTargetPos = Add_1783E0(f_177EF8_1783E0(((cCameraAlgorithm_cVirt*)self)), ScaleP_1783E0(&D_004FF160_83E0, 37.0f));
         f_166C60_1783E0(((cCameraAlgorithm_cVirt*)self), id);
         cLookAtChaseAlgorithm_setupInitialCamDir(((cCameraAlgorithm_cVirt*)self), 559.7440185546875f, 300.0f);
-        ((cCameraAlgorithm_cVirt*)self)->v05();
+        ((cCameraAlgorithm_cVirt*)self)->update();
     }
 }
 #endif
@@ -5866,7 +5866,7 @@ public:
     virtual void v04();
     virtual void v05();
     virtual void v06();
-    virtual int v07();
+    virtual int getAIIndex();
 };
 class cCamCtrl_00178938 {
 public:
@@ -5875,7 +5875,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual void v05();
+    virtual void update();
 };
 
 /**
@@ -5890,12 +5890,12 @@ public:
 extern "C" void cSUPERPIPEChaseAlgorithm_snap(cSUPERPIPEChaseAlgorithm* self, int id)
 {
     char* rider = *(char**)((char*)self->Target + 4);
-    if (id == ((cCamTarget_00178938*)(rider + 0x6C0))->v07()) {
+    if (id == ((cCamTarget_00178938*)(rider + 0x6C0))->getAIIndex()) {
         *(sVec4_00178938*)&self->Position = cSUPERPIPEChaseAlgorithm_getIdealPosition(((cCamCtrl_00178938*)self));
         *(sVec4_00178938*)&self->CamTargetPos = cSUPERPIPEChaseAlgorithm_getIdealTargetPos(((cCamCtrl_00178938*)self));
         cLookAtChaseAlgorithm_snap(((cCamCtrl_00178938*)self), id);
         cLookAtChaseAlgorithm_setupInitialCamDir(((cCamCtrl_00178938*)self), 559.7440185546875f, 300.0f);
-        ((cCamCtrl_00178938*)self)->v05();
+        ((cCamCtrl_00178938*)self)->update();
     }
 }
 #endif

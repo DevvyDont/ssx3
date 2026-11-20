@@ -333,7 +333,7 @@ INCLUDE_ASM("object/multiparticle", cPhysicsModifier_cPhysicsModifier);
 class cPhysicsModifier_cPhysicsModifier_cObj {
 public:
     virtual void v01(void* buf, int size);
-    virtual void v02(void* buf, int size);
+    virtual void read(void* buf, int size);
 };
 
 extern char cPhysicsModifier_vtbl[];
@@ -347,7 +347,7 @@ extern char cPhysicsModifier_vtbl[];
 extern "C" void* cPhysicsModifier_cPhysicsModifier(cPhysicsModifier* self, cPhysicsModifier_cPhysicsModifier_cObj* obj)
 {
     self->mVtbl = (void**)cPhysicsModifier_vtbl;
-    obj->v02(self, 4);
+    obj->read(self, 4);
     return ((void*)self);
 }
 #endif
@@ -358,7 +358,7 @@ INCLUDE_ASM("object/multiparticle", cPhysicsModifier_writeToReplayFrame);
 class cPhysicsModifier_writeToReplayFrame_cObj {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01(void* buf, int size);
+    virtual void write(void* buf, int size);
 };
 
 /**
@@ -368,7 +368,7 @@ public:
  */
 extern "C" void cPhysicsModifier_writeToReplayFrame(cPhysicsModifier* self, cPhysicsModifier_writeToReplayFrame_cObj* obj)
 {
-    obj->v01(self, 4);
+    obj->write(self, 4);
 }
 #endif
 
@@ -417,7 +417,7 @@ extern "C" void cRailManNode_disableRail(void* self, int idx);
 class cRailManNode_cRailManNode_cStream {
 public:
     virtual void v01();
-    virtual void v02(void* buf, int size);
+    virtual void read(void* buf, int size);
 };
 
 /**
@@ -444,7 +444,7 @@ extern "C" void* cRailManNode_cRailManNode(void* self, void* bucket, cRailManNod
         *slot = 0xFFFFFFFF;
     }
     D_004A4040 = self;
-    stream->v02(selfBytes + 0x18, 0x200);
+    stream->read(selfBytes + 0x18, 0x200);
     for (i = 0; i < 0x80; i++) {
         if (((unsigned int*)(selfBytes + 0x18))[i] != 0xFFFFFFFF) {
             cRailManNode_disableRail(self, i);

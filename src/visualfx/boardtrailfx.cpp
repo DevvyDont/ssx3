@@ -948,7 +948,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual int v09();
+    virtual int isComputer();
 };
 
 static inline void push_A480(sRenderCtx_A480* ctx)
@@ -975,7 +975,7 @@ extern "C" void cBoardTrailFX_render(cBoardTrailFX* self)
     }
     if (D_004A451C != 0) {
         cBoardTrailFX_render_cObj* being = (cBoardTrailFX_render_cObj*)(*(char**)self + 0x6C0);
-        if (being->v09() != 0) {
+        if (being->isComputer() != 0) {
             return;
         }
     }

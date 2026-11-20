@@ -1712,7 +1712,7 @@ public:
     virtual void v14();
     virtual void v15();
     virtual void v16();
-    virtual void v17();
+    virtual void ClearPatches();
 };
 
 /**
@@ -1722,7 +1722,7 @@ public:
  */
 extern "C" void func_0038D638(cBezierVirt* self)
 {
-    self->v17();
+    self->ClearPatches();
 }
 #endif
 

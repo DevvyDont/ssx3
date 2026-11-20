@@ -1599,7 +1599,7 @@ public:
     virtual void v04();
     virtual void v05();
     virtual void v06();
-    virtual void v07(int);
+    virtual void setFocus(int);
 };
 
 /**
@@ -1612,7 +1612,7 @@ public:
  */
 extern "C" int cListOpSetFocus_onListNode(cListOpSetFocus* self, cListOpSetFocus_onListNode_cVirt* obj)
 {
-    obj->v07(self->mbState);
+    obj->setFocus(self->mbState);
     return 0;
 }
 #endif
@@ -2132,7 +2132,7 @@ class cUIGroup_traverseFlat_cVirt {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01();
-    virtual int v02(void*);
+    virtual int onListNode(void*);
 };
 
 /**
@@ -2147,7 +2147,7 @@ public:
  */
 extern "C" int cUIGroup_traverseFlat(cUIGroup* self, cUIGroup_traverseFlat_cVirt* obj)
 {
-    return obj->v02(self);
+    return obj->onListNode(self);
 }
 #endif
 
@@ -2158,7 +2158,7 @@ class cUIGroup_traverseRecurse_cFunctor {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01();
-    virtual int v02(void*);
+    virtual int onListNode(void*);
 };
 
 extern "C" void* cList_traverseRecurse(void* list, cUIGroup_traverseRecurse_cFunctor* fn);
@@ -2174,7 +2174,7 @@ extern "C" void* cList_traverseRecurse(void* list, cUIGroup_traverseRecurse_cFun
  */
 extern "C" void* cUIGroup_traverseRecurse(cUIGroup* self, cUIGroup_traverseRecurse_cFunctor* fn)
 {
-    if (fn->v02(self) != 0) {
+    if (fn->onListNode(self) != 0) {
         return ((void*)self);
     }
     return cList_traverseRecurse((char*)&self->mList, fn);

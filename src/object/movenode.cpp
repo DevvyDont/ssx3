@@ -353,7 +353,7 @@ struct cMN_355770_Obj {
     virtual void v07();
     virtual void v08();
     virtual int v09(int);
-    virtual int v10(int a, int b);
+    virtual int collide(int a, int b);
 };
 
 struct cMN_355770_VEnt {
@@ -382,7 +382,7 @@ extern "C" void cMoveNode_onCollide(cMoveNode* self, int tc, int ti, int pBeing)
     if (modBlock != 0) {
         cMN_355770_Obj* obj = *modBlock;
         if (obj != 0) {
-            obj->v10(tc, ti);
+            obj->collide(tc, ti);
             char* transformModifier = *(char**)((void*)self->ModifierBlock);
             cMN_355770_VEnt* vt = *(cMN_355770_VEnt**)transformModifier;
             if (vt[9].fn(transformModifier + vt[9].delta, cObjectInterface_getAIIndex(pBeing)) == 0) {
@@ -1109,7 +1109,7 @@ public:
     virtual void v23();
     virtual void v24();
     virtual void v25();
-    virtual int v26();
+    virtual int getTransformType();
 };
 
 struct sMnMod_6298 {
@@ -1144,10 +1144,10 @@ public:
     virtual void v21();
     virtual void v22();
     virtual void v23();
-    virtual void* v24();
+    virtual void* getRootTransform();
     virtual void v25();
-    virtual int v26();
-    virtual void* v27();
+    virtual int hasAnimMats();
+    virtual void* getAnimMats();
     virtual void v28();
     virtual void v29();
     virtual void v30();
@@ -1164,8 +1164,8 @@ public:
     virtual void v41();
     virtual void v42();
     virtual void v43();
-    virtual void* v44();
-    virtual sMnVec_6298* v45();
+    virtual void* hasBoundBox();
+    virtual sMnVec_6298* getBoundBox();
 };
 
 struct sMnGfxVt_6298 {
@@ -1275,7 +1275,7 @@ extern "C" void cMoveNode_render(cMoveNode* self)
         tModifierBlock_render(MOD_6298(self));
         cMnOwner_6298* modOwner = MOD_6298(self)->owner;
         if (modOwner) {
-            if (modOwner->v26() == 7) {
+            if (modOwner->getTransformType() == 7) {
                 flags |= 0x2000;
             }
         }
@@ -1286,10 +1286,10 @@ extern "C" void cMoveNode_render(cMoveNode* self)
     if (self->TransferHack) {
         return;
     }
-    void* mat = ((cMnNode_6298*)self)->v44();
+    void* mat = ((cMnNode_6298*)self)->hasBoundBox();
     int res;
     if (mat) {
-        sMnVec_6298* boundBox = ((cMnNode_6298*)self)->v45();
+        sMnVec_6298* boundBox = ((cMnNode_6298*)self)->getBoundBox();
         sMnGfxVt_6298* vt = (sMnGfxVt_6298*)gfx->mVtbl;
         char* thisp = (char*)gfx + vt[93].delta;
         res = ((MnCullFn_6298)vt[93].fn)(thisp, boundBox, boundBox + 1, ((MnViewFn_6298)((sMnGfxVt_6298*)gfx->mVtbl)[43].fn)((char*)gfx + ((sMnGfxVt_6298*)gfx->mVtbl)[43].delta));
@@ -1322,12 +1322,12 @@ extern "C" void cMoveNode_render(cMoveNode* self)
     void* rot = 0;
     void* tex;
     void* xf;
-    if (((cMnNode_6298*)self)->v26()) {
-        tex = ((cMnNode_6298*)self)->v27();
+    if (((cMnNode_6298*)self)->hasAnimMats()) {
+        tex = ((cMnNode_6298*)self)->getAnimMats();
         xf = t4mat_Identity;
     } else {
         tex = 0;
-        xf = ((cMnNode_6298*)self)->v24();
+        xf = ((cMnNode_6298*)self)->getRootTransform();
     }
     sMnMat_6298 rm;
     if (HasRot_6298(MOD_6298(self))) {
@@ -2128,7 +2128,7 @@ INCLUDE_ASM("object/movenode", cPositionModifier_writeToReplayFrame);
 class cPositionModifier_writeToReplayFrame_cObj {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01(void* buf, int size);
+    virtual void write(void* buf, int size);
 };
 
 /**
@@ -2139,7 +2139,7 @@ public:
  */
 extern "C" void cPositionModifier_writeToReplayFrame(cPositionModifier* self, cPositionModifier_writeToReplayFrame_cObj* obj)
 {
-    obj->v01((char*)&self->BoundBox, 0x40);
+    obj->write((char*)&self->BoundBox, 0x40);
 }
 #endif
 

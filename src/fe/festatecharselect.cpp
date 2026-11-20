@@ -591,7 +591,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
 };
 
 // PORT: the unit declares cFEStateCharSelect_updateWidget with an int index; the body sign-extends both id arguments.
@@ -640,7 +640,7 @@ extern "C" void cFEStateCharSelect_updateWidget_impl(void* self, signed char rid
             int barValue = statValue >? 0;
             total += statValue;
             sprintf(buf, &str_pct_1f, fptodp((float)statValue * k));
-            statText->v09(1);
+            statText->setVisible(1);
             cUIText_setAsciiString((cUIText*)statText, buf);
             *(int*)(statBar + 0x80) = 55;
             cUIProgress_setValue(statBar, barValue);

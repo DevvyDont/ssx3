@@ -155,9 +155,9 @@ public:
     // vptr at 0xC
     virtual void v01();
     virtual void v02();
-    virtual void v03(int key, int c, int a, int b);
+    virtual void OnDetachData(int key, int c, int a, int b);
     virtual void v04();
-    virtual void v05(int key, int c, int a, int b);
+    virtual void OnDetachDataBigFile(int key, int c, int a, int b);
 };
 
 // PORT: the unit declares cDataManager_DetachData as returning void; it really returns the entry's key.
@@ -180,13 +180,13 @@ int cDataManager_DetachData_impl(cDataManager5A20* self, sDmNode5A20* entry)
         sDmNode5A20* n = first;
         do {
             sDmNode5A20* next = n->next;
-            self->v03(n->key, n->c, n->a, n->b);
+            self->OnDetachData(n->key, n->c, n->a, n->b);
             cDataManager_AddToEmptyInstanceList(self, n);
             n = next;
         } while (n != 0);
-        self->v05(entry->key, entry->c, entry->a, entry->b);
+        self->OnDetachDataBigFile(entry->key, entry->c, entry->a, entry->b);
     } else {
-        self->v03(entry->key, entry->c, entry->a, entry->b);
+        self->OnDetachData(entry->key, entry->c, entry->a, entry->b);
     }
     int key = entry->key;
     cDataManager_AddToEmptyInstanceList(self, entry);

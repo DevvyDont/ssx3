@@ -3948,7 +3948,7 @@ public:
     virtual void v66();
     virtual void v67();
     virtual void v68();
-    virtual void v69(void* rec, int flags);
+    virtual void SetIrradiance(void* rec, int flags);
 };
 extern "C" void func_00389C38(void* rec, int flags);
 
@@ -3961,7 +3961,7 @@ extern "C" void func_00122048()
 {
     char rec[160];
     func_00389C38(rec, 0);
-    ((cRiderSys_122048*)GrMan)->v69(rec, 0);
+    ((cRiderSys_122048*)GrMan)->SetIrradiance(rec, 0);
 }
 #endif
 

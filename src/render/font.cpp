@@ -156,7 +156,7 @@ public:
     virtual void v47(int);
     virtual void v48(int);
     virtual void v49(int);
-    virtual void v50(int);
+    virtual void RemoveTexture(int);
 };
 
 
@@ -179,7 +179,7 @@ extern "C" void cFont_purge(cFont* self)
     self->NumGlyphs = 0;
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     if (self->TextureID >= 0) {
-        ((sFontGfx_19E8*)ps2GraphicsMan)->v50(self->TextureID);
+        ((sFontGfx_19E8*)ps2GraphicsMan)->RemoveTexture(self->TextureID);
     }
 }
 #endif

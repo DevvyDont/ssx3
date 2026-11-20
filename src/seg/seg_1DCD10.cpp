@@ -62,7 +62,7 @@ public:
   virtual void v43();
   virtual void v44();
   virtual void v45();
-  virtual int v46(long, char*, int, int, long);
+  virtual int AddTexture(long, char*, int, int, long);
 };
 extern Mgr_BD10 *D_BD10 __asm__("cGraphicsMan_TheGraphicsMan");
 extern "C" int FILE_load(char*, int);
@@ -114,7 +114,7 @@ extern "C" int cFXLoader_cFXLoader(int loader, long particlesOnly) {
         }
         texId = -1;
         if (shape != 0)
-            texId = D_BD10->v46(shape, gFXShape_BD10[k].name, gFXShape_BD10[k].tex, 1, -1);
+            texId = D_BD10->AddTexture(shape, gFXShape_BD10[k].name, gFXShape_BD10[k].tex, 1, -1);
         grMan->SetEffectTexMap(k, texId);
     }
     for (int i = 0; i < n; i++)
@@ -180,7 +180,7 @@ public:
   virtual void v47();
   virtual void v48();
   virtual void v48b();
-  virtual void v50(int);
+  virtual void RemoveTexture(int);
 };
 extern Mgr_BEE0 *cGraphicsMan_TheGraphicsMan_seg_1DCD10 __asm__("cGraphicsMan_TheGraphicsMan");
 void operator_delete(int *);
@@ -199,7 +199,7 @@ extern "C" void cFXLoader__cFXLoader(int *self, int flags) {
     for (i = 0; i < 81; i++) {
         int *slot = (int*)((char*)grMan + 0xF50) + i;
         if (*slot != -1) {
-            grMan->v50(*slot);
+            grMan->RemoveTexture(*slot);
             *slot = -1;
         }
     }

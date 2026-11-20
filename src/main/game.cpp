@@ -484,14 +484,14 @@ public:
     virtual unsigned int GetScreenWidth();
     virtual unsigned int GetScreenHeight();
     virtual void v11(); virtual void v12(); virtual void v13();
-    virtual void v14(const sV3_C830&);
+    virtual void SetScreenClearColour(const sV3_C830&);
     virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18();
-    virtual void v19();
+    virtual void DrawFrame();
     virtual void PushViewport();
     virtual void PopViewport();
     virtual void v22(float, float, float, float, int);
-    virtual void v23(void*, int);
-    virtual void v24(float, float, float);
+    virtual void SetViewportWindow1(void*, int);
+    virtual void SetViewportPerspective(float, float, float);
     virtual void SetViewportOrthographic(float, float, float, float, int, int, float, float);
     virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29();
     virtual void PushView();
@@ -598,8 +598,8 @@ extern "C" void func_0022C830(sGame_C830* self)
     do {
         self->views->cur = i;
         sCam_C830* cam = self->views->cams[self->views->cur];
-        ((cGfx_C830*)GrMan)->v23(&self->views->views[i], 1);
-        ((cGfx_C830*)GrMan)->v24(cam->x, cam->y, cam->z);
+        ((cGfx_C830*)GrMan)->SetViewportWindow1(&self->views->views[i], 1);
+        ((cGfx_C830*)GrMan)->SetViewportPerspective(cam->x, cam->y, cam->z);
         ((cGfx_C830*)GrMan)->SetView(cam->tex);
         *(short*)((char*)((cGfx_C830*)GrMan)->stateTop + 0x12) = ((cGfx_C830*)GrMan)->GetLayer();
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
@@ -635,12 +635,12 @@ extern "C" void func_0022C830(sGame_C830* self)
         self->font->scale = sV2_C830(2.0f, 2.0f);
         self->font->color = sVec4_C830(1.0f, 0.8f, 0.8f, 0.0f);
     }
-    ((cGfx_C830*)GrMan)->v14(sV3_C830(0.0f, 0.0f, 0.0f));
+    ((cGfx_C830*)GrMan)->SetScreenClearColour(sV3_C830(0.0f, 0.0f, 0.0f));
     // Storing through a pointer keeps the store ahead of the reload of GrMan.
     int* depthFogEnable = &cDepthFog_m_Enable;
     int saved = *depthFogEnable;
     *depthFogEnable = 0;
-    ((cGfx_C830*)GrMan)->v19();
+    ((cGfx_C830*)GrMan)->DrawFrame();
     *depthFogEnable = saved;
     cSSXAudio_Update(gSSXAudio, 1, (float)self->frames * (1.0f / 60.0f));
     cWorldTriggerManager_Update(gWorldTriggerManager);
@@ -1512,7 +1512,7 @@ INCLUDE_ASM("main/game", cSectionMan_preLoadMode);
 class cBEIface22DF50 {
 public:
     int pad[3];
-    virtual void v01();
+    virtual void submit();
 };
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1531,7 +1531,7 @@ extern "C" void cSectionMan_preLoadMode(cSectionMan* self)
     cBEIface22DF50* iface = (cBEIface22DF50*)cBE_getInterface_Fv(cBE_getBE(), 0);
     cBENewRaceInterface_newRace.iLocationIdx = self->mBELocationID;
     D_004A11B8 = 1;
-    iface->v01();
+    iface->submit();
     cGame_setPreloadState(self->mpGame, 10);
 }
 #endif
@@ -1562,7 +1562,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual void v05(int);
+    virtual void restart(int);
 };
 extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
@@ -1580,7 +1580,7 @@ extern "C" void cSectionMan_changeMode(cSectionMan* self)
     cSectionMan_setSky(self, *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0)));
     if (self->mModeReset != 0) {
         self->mModeReset = 0;
-        ((cRace22DFF0*)SSXApp->Game->AI)->v05(3);
+        ((cRace22DFF0*)SSXApp->Game->AI)->restart(3);
     }
     cGame_setState(self->mpGame, 10, 0, 0);
 }

@@ -2874,7 +2874,7 @@ struct Obj41A8 : Base41A8 {
     virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
     virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7();
     virtual void v8(); virtual void v9(); virtual void v10(); virtual void v11();
-    virtual void v12(); virtual void v13();
+    virtual void v12(); virtual void reset();
 };
 Obj41A8 *cGame_getSplashManager_41A8(void *, int) __asm__("cGame_getSplashManager__FPvi");
 #define F84(p) (*(char **)((char*)(p) + 0x84))
@@ -2897,7 +2897,7 @@ extern "C" void cSplashManager_CameraSnapped(int camera) {
             if (camera == *(int *)(F84(t5) + (i << 2) + 4)) {
                 if (cGame_getSplashManager_41A8(t5, i) != 0) {
                     Obj41A8 *splashMan = cGame_getSplashManager_41A8(F84(SSXApp), i);
-                    splashMan->v13();
+                    splashMan->reset();
                 }
             }
             i += 1;

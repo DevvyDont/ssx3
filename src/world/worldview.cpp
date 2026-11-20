@@ -809,7 +809,7 @@ public:
     virtual void v03();
     virtual void v04();
     virtual void v05();
-    virtual int v06(void* a1);
+    virtual int resolveModelHeirarchy(void* a1);
 };
 
 /**
@@ -824,7 +824,7 @@ extern "C" int cChunkResolve_resolveModel(cChunkResolve* self, void* pModel)
 {
     *(int*)((char*)pModel + 0x8) += (int)pModel;
     *(int*)((char*)pModel + 0xC) += (int)pModel;
-    ((cChunkResolve_resolveModel_cObj*)self)->v06(pModel);
+    ((cChunkResolve_resolveModel_cObj*)self)->resolveModelHeirarchy(pModel);
     return 1;
 }
 #endif
@@ -842,11 +842,11 @@ public:
     virtual void v04();
     virtual void v05();
     virtual void v06();
-    virtual int v07(void* p, void* base);
+    virtual int resolveMesh(void* p, void* base);
     virtual void v08();
     virtual void v09();
     virtual void v10();
-    virtual int v11(void* p, void* base);
+    virtual int resolveAnimation(void* p, void* base);
 };
 
 struct cChunkResolve_resolveModelHeirarchy_sEnt {
@@ -877,7 +877,7 @@ extern "C" int cChunkResolve_resolveModelHeirarchy(cChunkResolve* self, void* pM
     for (i = 0; i < n; i++, meshHierarchy++) {
         if (meshHierarchy->f4 != 0) {
             meshHierarchy->f4 += (int)pModel;
-            ((cChunkResolve_resolveModelHeirarchy_cObj*)self)->v07((void*)meshHierarchy->f4, pModel);
+            ((cChunkResolve_resolveModelHeirarchy_cObj*)self)->resolveMesh((void*)meshHierarchy->f4, pModel);
         }
         if (meshHierarchy->fC == 0xFFFFFFFF) {
             meshHierarchy->fC = (unsigned int)t4mat_Identity;
@@ -886,7 +886,7 @@ extern "C" int cChunkResolve_resolveModelHeirarchy(cChunkResolve* self, void* pM
         }
         if (meshHierarchy->f8 != 0) {
             meshHierarchy->f8 += (int)pModel;
-            ((cChunkResolve_resolveModelHeirarchy_cObj*)self)->v11((void*)meshHierarchy->f8, pModel);
+            ((cChunkResolve_resolveModelHeirarchy_cObj*)self)->resolveAnimation((void*)meshHierarchy->f8, pModel);
         }
     }
     return 1;
@@ -907,7 +907,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual int v08(void* p, int base);
+    virtual int resolveMeshContext(void* p, int base);
 };
 
 /**
@@ -927,7 +927,7 @@ extern "C" int cChunkResolve_resolveMesh(cChunkResolve* self, void* pMesh, int b
     int* contextEntry = (int*)(*(int*)((char*)pMesh + 0x20) += base);
     for (; i < *(int*)((char*)pMesh + 0x1C); i++) {
         *contextEntry += base;
-        ((cChunkResolve_resolveMesh_cObj*)self)->v08((void*)*contextEntry++, base);
+        ((cChunkResolve_resolveMesh_cObj*)self)->resolveMeshContext((void*)*contextEntry++, base);
     }
     return 1;
 }
@@ -954,7 +954,7 @@ public:
     virtual void v12();
     virtual void v13();
     virtual void v14();
-    virtual int v15(void* a1);
+    virtual int resolveParticleModelHeirarchy(void* a1);
 };
 
 /**
@@ -969,7 +969,7 @@ public:
 extern "C" int cChunkResolve_resolveParticleModel(cChunkResolve* self, void* pModel)
 {
     *(int*)((char*)pModel + 0x8) += (int)pModel;
-    ((cChunkResolve_resolveParticleModel_cObj*)self)->v15(pModel);
+    ((cChunkResolve_resolveParticleModel_cObj*)self)->resolveParticleModelHeirarchy(pModel);
     return 1;
 }
 #endif
@@ -991,12 +991,12 @@ public:
     virtual void v08();
     virtual void v09();
     virtual void v10();
-    virtual int v11(void* p, void* base);
+    virtual int resolveAnimation(void* p, void* base);
     virtual void v12();
     virtual void v13();
     virtual void v14();
     virtual void v15();
-    virtual int v16(void* p);
+    virtual int resolveParticleMesh(void* p);
 };
 
 struct cChunkResolve_resolveParticleModelHeirarchy_sEnt {
@@ -1027,7 +1027,7 @@ extern "C" int cChunkResolve_resolveParticleModelHeirarchy(cChunkResolve* self, 
     for (i = 0; i < n; i++, meshHierarchy++) {
         if (meshHierarchy->f4 != 0) {
             meshHierarchy->f4 += (int)pModel;
-            ((cChunkResolve_resolveParticleModelHeirarchy_cObj*)self)->v16((void*)meshHierarchy->f4);
+            ((cChunkResolve_resolveParticleModelHeirarchy_cObj*)self)->resolveParticleMesh((void*)meshHierarchy->f4);
         }
         if (meshHierarchy->fC == 0xFFFFFFFF) {
             meshHierarchy->fC = (unsigned int)t4mat_Identity;
@@ -1036,7 +1036,7 @@ extern "C" int cChunkResolve_resolveParticleModelHeirarchy(cChunkResolve* self, 
         }
         if (meshHierarchy->f8 != 0) {
             meshHierarchy->f8 += (int)pModel;
-            ((cChunkResolve_resolveParticleModelHeirarchy_cObj*)self)->v11((void*)meshHierarchy->f8, 0);
+            ((cChunkResolve_resolveParticleModelHeirarchy_cObj*)self)->resolveAnimation((void*)meshHierarchy->f8, 0);
         }
     }
     return 1;
@@ -1171,7 +1171,7 @@ public:
     virtual void v09();
     virtual void v10();
     virtual void v11();
-    virtual int v12(void* p, int base);
+    virtual int resolveChannel(void* p, int base);
 };
 
 /**
@@ -1191,7 +1191,7 @@ extern "C" int cChunkResolve_resolveAnimation(cChunkResolve* self, void* pAnimat
     int* channelId = (int*)(*(int*)((char*)pAnimation + 0x20) += base);
     for (; i < *(int*)((char*)pAnimation + 0x1C); i++) {
         *channelId += base;
-        ((cChunkResolve_resolveAnimation_cObj*)self)->v12((void*)*channelId++, base);
+        ((cChunkResolve_resolveAnimation_cObj*)self)->resolveChannel((void*)*channelId++, base);
     }
     return 1;
 }
@@ -2054,7 +2054,7 @@ public:
     virtual void v03();
     virtual void v04();
     virtual void v05();
-    virtual int v06(void* a1);
+    virtual int resolveModelHeirarchy(void* a1);
 };
 
 extern "C" int func_003ABF20(void* self, void* a1);
@@ -2093,7 +2093,7 @@ extern "C" int cPS2ChunkResolve_resolveModel(cPS2ChunkResolve_resolveModel_cObj*
     for (; i < *tbl; i++, entry++) {
         *entry = cPS2ChunkResolve_resolveModel_lookup(self, *entry);
     }
-    self->v06(pModel);
+    self->resolveModelHeirarchy(pModel);
     func_003ABF20(self, pModel);
     return 1;
 }

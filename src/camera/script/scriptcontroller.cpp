@@ -215,7 +215,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual void v05();
+    virtual void update();
 };
 
 struct sScrAlgoNodeK2 {
@@ -244,7 +244,7 @@ extern "C" void cScriptCameraController_update(void* self)
         if (smoothed > 1.0f)
             smoothed = 1.0f;
         n->weight = smoothed;
-        n->algo->v05();
+        n->algo->update();
         n = n->next;
     }
 }
@@ -379,7 +379,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual void v05();
+    virtual void update();
 };
 
 /**
@@ -389,7 +389,7 @@ public:
  */
 extern "C" void cScriptManualAlgorithm_snap(cScriptCtlVirt* self)
 {
-    self->v05();
+    self->update();
 }
 #endif
 
@@ -402,7 +402,7 @@ public:
     // vptr at 0x10; slot N at vtable offset N*8
     virtual void v01();
     virtual void v02();
-    virtual void v03(int);
+    virtual void snap(int);
 };
 
 /**
@@ -413,7 +413,7 @@ public:
  */
 extern "C" void cScriptManualAlgorithm_snapCurrent(cScriptCtlVirt2* self)
 {
-    self->v03(0);
+    self->snap(0);
 }
 #endif
 
@@ -794,7 +794,7 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptPointAlgorithm_snap);
  */
 extern "C" void cScriptPointAlgorithm_snap(cScriptCtlVirt* self)
 {
-    self->v05();
+    self->update();
 }
 #endif
 
@@ -809,7 +809,7 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptPointAlgorithm_snapCurrent)
  */
 extern "C" void cScriptPointAlgorithm_snapCurrent(cScriptCtlVirt2* self)
 {
-    self->v03(0);
+    self->snap(0);
 }
 #endif
 
@@ -1177,7 +1177,7 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptTargetAlgorithm_snap);
  */
 extern "C" void cScriptTargetAlgorithm_snap(cScriptCtlVirt* self)
 {
-    self->v05();
+    self->update();
 }
 #endif
 
@@ -1192,7 +1192,7 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptTargetAlgorithm_snapCurrent
  */
 extern "C" void cScriptTargetAlgorithm_snapCurrent(cScriptCtlVirt2* self)
 {
-    self->v03(0);
+    self->snap(0);
 }
 #endif
 
@@ -1859,7 +1859,7 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptRelativeAlgorithm_snapCurre
  */
 extern "C" void cScriptRelativeAlgorithm_snapCurrent(cScriptCtlVirt2* self)
 {
-    self->v03(0);
+    self->snap(0);
 }
 #endif
 

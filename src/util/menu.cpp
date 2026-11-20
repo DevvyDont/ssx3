@@ -579,7 +579,7 @@ public:
     // vptr at 0x10; slot N at vtable offset N*8
     virtual void v01();
     virtual void v02();
-    virtual int v03();
+    virtual int canHaveFocus();
 };
 
 extern "C" void cMenu_nextFocus(cMenu* self);
@@ -593,7 +593,7 @@ extern "C" void cMenu_nextFocus(cMenu* self);
 extern "C" void cMenu_checkFocus(cMenu* self)
 {
     cMenu_checkFocus_cItem* item = (cMenu_checkFocus_cItem*)self->Items[self->FocusItem];
-    if (item->v03() == 0) {
+    if (item->canHaveFocus() == 0) {
         cMenu_nextFocus(self);
     }
 }
@@ -608,11 +608,11 @@ public:
     // vptr at 0x10; slot N at vtable offset N*8
     virtual void v01();
     virtual void v02();
-    virtual int v03();
+    virtual int canHaveFocus();
     virtual void v04();
     virtual void v05();
-    virtual void v06(int);
-    virtual void v07();
+    virtual void gainFocus(int);
+    virtual void loseFocus();
 };
 
 struct cMenu_nextFocus_sMenu {
@@ -640,9 +640,9 @@ extern "C" void cMenu_nextFocus(cMenu* menu)
         if (self->cur == start) {
             return;
         }
-    } while (!self->items[self->cur]->v03());
-    self->items[start]->v07();
-    self->items[self->cur]->v06(0);
+    } while (!self->items[self->cur]->canHaveFocus());
+    self->items[start]->loseFocus();
+    self->items[self->cur]->gainFocus(0);
 }
 #endif
 
@@ -655,11 +655,11 @@ public:
     // vptr at 0x10; slot N at vtable offset N*8
     virtual void v01();
     virtual void v02();
-    virtual int v03();
+    virtual int canHaveFocus();
     virtual void v04();
     virtual void v05();
-    virtual void v06(int);
-    virtual void v07();
+    virtual void gainFocus(int);
+    virtual void loseFocus();
 };
 
 struct cMenu_prevFocus_sMenu {
@@ -687,9 +687,9 @@ extern "C" void cMenu_prevFocus(cMenu* menu)
         if (self->cur == start) {
             return;
         }
-    } while (!self->items[self->cur]->v03());
-    self->items[start]->v07();
-    self->items[self->cur]->v06(1);
+    } while (!self->items[self->cur]->canHaveFocus());
+    self->items[start]->loseFocus();
+    self->items[self->cur]->gainFocus(1);
 }
 #endif
 
@@ -701,7 +701,7 @@ public:
     char pad[0x10];
     // vptr at 0x10; slot N at vtable offset N*8
     virtual void v01();
-    virtual int v02();
+    virtual int input();
 };
 
 extern "C" void cMenu_prevFocus(cMenu* self);
@@ -718,7 +718,7 @@ extern "C" int cMenu_input(cMenu* self)
 {
     cMenu_checkFocus((cMenu*)self);
     cMenu_input_cItem* item = *(cMenu_input_cItem**)((char*)self + (self->FocusItem << 2) + 0xC);
-    int inputResult = item->v02();
+    int inputResult = item->input();
     switch (inputResult) {
     case 3:
         cMenu_nextFocus((cMenu*)self);
@@ -923,20 +923,20 @@ public:
     virtual void v18();
     virtual void v19();
     virtual void v20();
-    virtual void v21();
+    virtual void PushViewport();
     virtual void v22();
     virtual void v23();
     virtual void v24();
     virtual void v25();
-    virtual void v26(int a, int b, float x, float y, float w, float h, float zn, float zf);
+    virtual void SetViewportOrthographic(int a, int b, float x, float y, float w, float h, float zn, float zf);
     virtual void v27();
     virtual void v28();
     virtual void v29();
     virtual void v30();
-    virtual void v31();
+    virtual void PushView();
     virtual void v32();
     virtual void v33();
-    virtual void v34(void* p);
+    virtual void SetView1(void* p);
 };
 
 // Typed view of the render context (the unit declares GrMan with another class later).
@@ -962,15 +962,15 @@ extern "C" void cMenu_preRender()
     cPS2GraphicsMan* ctx = GrMan;
     ((cMenu_preRender_cCtx*)ctx)->top[1] = ((cMenu_preRender_cCtx*)ctx)->top[0];
     ((cMenu_preRender_cCtx*)ctx)->top++;
-    ((cMenu_preRender_cCtx*)GrMan)->v21();
-    ((cMenu_preRender_cCtx*)GrMan)->v31();
+    ((cMenu_preRender_cCtx*)GrMan)->PushViewport();
+    ((cMenu_preRender_cCtx*)GrMan)->PushView();
     cMenu_preRender_setF8_5(((cMenu_preRender_cCtx*)GrMan)->top, 17);
     cMenu_preRender_setF4_23(((cMenu_preRender_cCtx*)GrMan)->top, 2);
     cMenu_preRender_setF4_20(((cMenu_preRender_cCtx*)GrMan)->top, 3);
     cMenu_preRender_setF4_12(((cMenu_preRender_cCtx*)GrMan)->top, 20);
     cMenu_preRender_setF4_2(((cMenu_preRender_cCtx*)GrMan)->top, 5);
-    ((cMenu_preRender_cCtx*)GrMan)->v26(0, 0, 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f);
-    ((cMenu_preRender_cCtx*)GrMan)->v34(t4mat_Identity);
+    ((cMenu_preRender_cCtx*)GrMan)->SetViewportOrthographic(0, 0, 0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f);
+    ((cMenu_preRender_cCtx*)GrMan)->SetView1(t4mat_Identity);
 }
 #endif
 
@@ -1001,7 +1001,7 @@ public:
     virtual void v19();
     virtual void v20();
     virtual void v21();
-    virtual void v22();
+    virtual void PopViewport();
     virtual void v23();
     virtual void v24();
     virtual void v25();
@@ -1011,7 +1011,7 @@ public:
     virtual void v29();
     virtual void v30();
     virtual void v31();
-    virtual void v32();
+    virtual void PopView();
 };
 
 
@@ -1023,8 +1023,8 @@ public:
  */
 extern "C" void cMenu_postRender()
 {
-    ((cMenu_postRender_cObj*)GrMan)->v32();
-    ((cMenu_postRender_cObj*)GrMan)->v22();
+    ((cMenu_postRender_cObj*)GrMan)->PopView();
+    ((cMenu_postRender_cObj*)GrMan)->PopViewport();
     *(int*)&GrMan->m_pCurrentDrawState = (int)GrMan->m_pCurrentDrawState - 20;
 }
 #endif
@@ -1117,7 +1117,7 @@ public:
     virtual void v68();
     virtual void v69();
     virtual void v70();
-    virtual void v71(int n, void* verts, int flags);
+    virtual void RenderTriStrip(int n, void* verts, int flags);
 };
 
 // Typed view of the render context (the unit declares GrMan with another class later).
@@ -1147,7 +1147,7 @@ extern "C" void func_002CB350(func_002CB350_sVtx* quadVerts, float* screenRect, 
     quadVerts[3].pos = func_002CB350_sVec4(screenRect[0] + screenRect[2], screenRect[1] + screenRect[3], 0.0f, 1.0f);
     quadVerts[3].u = texRect[0] + texRect[2];
     quadVerts[3].v = texRect[1] + texRect[3];
-    ((func_002CB350_cCtx*)GrMan)->v71(4, quadVerts, 0);
+    ((func_002CB350_cCtx*)GrMan)->RenderTriStrip(4, quadVerts, 0);
 }
 #endif
 
@@ -1392,7 +1392,7 @@ public:
     virtual void v68();
     virtual void v69();
     virtual void v70();
-    virtual void v71(int n, void* verts, int flags);
+    virtual void RenderTriStrip(int n, void* verts, int flags);
 };
 
 
@@ -1442,7 +1442,7 @@ extern "C" void cMenu_renderUpArrow(cMenu* self, float* rect)
     arrowVerts[4].pos = vertexPos;
     vertexPos.x = right; vertexPos.y = bot - 3.0f; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
     arrowVerts[5].pos = vertexPos;
-    ((cCtx_2CB8C8*)GrMan)->v71(6, arrowVerts, 0);
+    ((cCtx_2CB8C8*)GrMan)->RenderTriStrip(6, arrowVerts, 0);
 }
 #endif
 
@@ -1549,7 +1549,7 @@ public:
     virtual void v68();
     virtual void v69();
     virtual void v70();
-    virtual void v71(int n, void* verts, int flags);
+    virtual void RenderTriStrip(int n, void* verts, int flags);
 };
 
 
@@ -1597,7 +1597,7 @@ extern "C" void cMenu_renderDownArrow(cMenu* self, float* rect)
     arrowVerts[4].pos = vertexPos;
     vertexPos.x = right; vertexPos.y = top + 3.0f; vertexPos.z = 0.0f; vertexPos.w = 1.0f;
     arrowVerts[5].pos = vertexPos;
-    ((cCtx_2CBAC8*)GrMan)->v71(6, arrowVerts, 0);
+    ((cCtx_2CBAC8*)GrMan)->RenderTriStrip(6, arrowVerts, 0);
 }
 #endif
 
@@ -1726,8 +1726,8 @@ public:
     virtual void v03();
     virtual void v04();
     virtual void v05();
-    virtual void v06(int);
-    virtual void v07();
+    virtual void gainFocus(int);
+    virtual void loseFocus();
 };
 
 struct cMenu_setFocus_sMenu {
@@ -1753,9 +1753,9 @@ extern "C" void cMenu_setFocus(cMenu_setFocus_sMenu* self, int index)
         index += self->count;
     }
     if (index != self->selected) {
-        self->items[self->selected]->v07();
+        self->items[self->selected]->loseFocus();
         self->selected = index;
-        self->items[index]->v06(2);
+        self->items[index]->gainFocus(2);
         cMenu_checkFocus((cMenu*)self);
     }
 }
@@ -1807,7 +1807,7 @@ public:
     virtual void v03();
     virtual void v04();
     virtual void v05();
-    virtual void v06(int);
+    virtual void gainFocus(int);
 };
 
 struct cMenu_onGainFocus_sMenu {
@@ -1833,7 +1833,7 @@ extern "C" void cMenu_onGainFocus(cMenu* menu, int wrap)
     if (self->selected >= self->count) {
         self->selected = self->count - 1;
     }
-    self->items[self->selected]->v06(2);
+    self->items[self->selected]->gainFocus(2);
     cMenu_checkFocus((cMenu*)self);
 }
 #endif
@@ -2209,7 +2209,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual void v05();
+    virtual void render();
 };
 
 struct cMenuSys_render_sVec2 {
@@ -2240,7 +2240,7 @@ extern "C" void cMenuSys_render(cMenuSys* self)
     *(float*)(font + 0x38) = *(float*)(font + 0x30) * scale.x;
     *(float*)(font + 0x3C) = *(float*)(font + 0x34) * scale.y;
     cMenuSys_render_sStack* st = (cMenuSys_render_sStack*)self;
-    st->items[st->count - 1]->v05();
+    st->items[st->count - 1]->render();
 }
 #endif
 
@@ -2258,8 +2258,8 @@ public:
     virtual void v03();
     virtual void v04();
     virtual void v05();
-    virtual void v06(void*);
-    virtual void v07();
+    virtual void onGainFocus(void*);
+    virtual void onLoseFocus();
 };
 
 struct cMenuSys_pushMenu_sStack {
@@ -2280,10 +2280,10 @@ extern "C" void cMenuSys_pushMenu(cMenuSys* stack, cMenu* item)
 {
     cMenuSys_pushMenu_sStack* self = (cMenuSys_pushMenu_sStack*)stack;
     if (self->count != 0) {
-        self->items[self->count - 1]->v07();
+        self->items[self->count - 1]->onLoseFocus();
     }
     self->items[self->count++] = (cMenuSys_pushMenu_cMenu*)item;
-    self->items[self->count - 1]->v06(self);
+    self->items[self->count - 1]->onGainFocus(self);
     cMenuSys_activate(self, 1);
 }
 #endif
@@ -2300,8 +2300,8 @@ public:
     virtual void v03();
     virtual void v04();
     virtual void v05();
-    virtual void v06(void*);
-    virtual void v07();
+    virtual void onGainFocus(void*);
+    virtual void onLoseFocus();
 };
 
 struct cMenuSys_popMenu_sStack {
@@ -2322,9 +2322,9 @@ extern "C" void cMenuSys_popMenu(cMenuSys* menuSys)
 {
     cMenuSys_popMenu_sStack* self = (cMenuSys_popMenu_sStack*)menuSys;
     self->count--;
-    self->entries[self->count]->v07();
+    self->entries[self->count]->onLoseFocus();
     if (self->count != 0) {
-        self->entries[self->count - 1]->v06(self);
+        self->entries[self->count - 1]->onGainFocus(self);
         if (self->count != 0) {
             return;
         }
@@ -2378,7 +2378,7 @@ public:
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual void v04(void*);
+    virtual void onChange(void*);
 };
 
 /**
@@ -2396,7 +2396,7 @@ extern "C" int cBoolMenuItem_input(void** self)
     if (cMenuItem_isLocked((cMenuItem*)self) == 0 && baseResult == 0) {
         if ((self[6] != 0 && self[7] != 0 && (cMenuItem_getKey(self) == 2 || cMenuItem_getKey(self) == 3)) || cMenuItem_getKey(self) == 6) {
             *(int*)self[8] ^= 1;
-            ((cBoolMenuItem_input_cMenu*)self[0])->v04(self);
+            ((cBoolMenuItem_input_cMenu*)self[0])->onChange(self);
         }
     }
     return baseResult;
@@ -3049,7 +3049,7 @@ public:
     // vptr at 0x12C; slot N at vtable offset N*8
     virtual void v01();
     virtual void v02();
-    virtual int v03(void* item, void* data);
+    virtual int onCommand(void* item, void* data);
 };
 
 extern "C" int cMenuItem_input(cMenuItem* self);
@@ -3065,7 +3065,7 @@ extern "C" int cCommandMenuItem_input(void* self)
 {
     int baseResult = cMenuItem_input((cMenuItem*)self);
     if (cMenuItem_isLocked((cMenuItem*)self) == 0 && baseResult == 0 && cMenuItem_getKey((void**)self) == 6) {
-        baseResult = (*(cCommandMenuItem_input_cMenu**)self)->v03(self, *(void**)((char*)self + 0x1C));
+        baseResult = (*(cCommandMenuItem_input_cMenu**)self)->onCommand(self, *(void**)((char*)self + 0x1C));
     }
     return baseResult;
 }
@@ -4748,7 +4748,7 @@ public:
     virtual void v68();
     virtual void v69();
     virtual void v70();
-    virtual void v71(int n, void* verts, int flags);
+    virtual void RenderTriStrip(int n, void* verts, int flags);
 };
 
 
@@ -4831,7 +4831,7 @@ extern "C" void cTextMenuItem_render(void* self, float* rect)
         cursorVerts[3].pos = vertexPos;
         ((cCtx_2CE910*)GrMan)->top->f4_2 = 1;
         *(short*)((char*)((cCtx_2CE910*)GrMan)->top + 0x10) = -1;
-        ((cCtx_2CE910*)GrMan)->v71(4, cursorVerts, 0);
+        ((cCtx_2CE910*)GrMan)->RenderTriStrip(4, cursorVerts, 0);
     }
     *(sVec2_2CE910*)(*(char**)(*(char**)(*(char**)self + 0x124) + 0x58) + 0x28) = sVec2_2CE910(0.0f, 0.0f);
 }
@@ -5133,7 +5133,7 @@ public:
     virtual void v68();
     virtual void v69();
     virtual void v70();
-    virtual void v71(int n, void* verts, int flags);
+    virtual void RenderTriStrip(int n, void* verts, int flags);
 };
 
 
@@ -5233,7 +5233,7 @@ extern "C" void cColorMenuItem_render(void* self, float* rect)
         ((cCtx_2CF1C8*)GrMan)->top->f4_2 = 1;
     }
     *(short*)((char*)((cCtx_2CF1C8*)GrMan)->top + 0x10) = -1;
-    ((cCtx_2CF1C8*)GrMan)->v71(4, verts, 0);
+    ((cCtx_2CF1C8*)GrMan)->RenderTriStrip(4, verts, 0);
 
     float mx = barRect.x + barRect.w * *(float*)(*(char**)((char*)self + 0x14) + (*(int*)((char*)self + 0x18) << 2));
     verts[0].r = (int)(textClr.r * 128.0f);
@@ -5251,7 +5251,7 @@ extern "C" void cColorMenuItem_render(void* self, float* rect)
     verts[2].b = (int)(textClr.b * 128.0f);
     vertPos.x = mx + 5.0f; vertPos.y = barRect.y - 7.0f; vertPos.z = 0.0f; vertPos.w = 1.0f;
     verts[2].pos = vertPos;
-    ((cCtx_2CF1C8*)GrMan)->v71(3, verts, 0);
+    ((cCtx_2CF1C8*)GrMan)->RenderTriStrip(3, verts, 0);
 }
 #endif
 
@@ -5270,7 +5270,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual int v09(int a, int b);
+    virtual int onCommand(int a, int b);
     virtual int v10(int a);
 };
 
@@ -5286,7 +5286,7 @@ public:
  */
 extern "C" int cExpandMenuItemMenu_onCommand(void* self, int item, int cmdArg)
 {
-    return (*(cExpandMenuItemMenu_onCommand_cItem**)((char*)self + 0x130))->v09(item, cmdArg);
+    return (*(cExpandMenuItemMenu_onCommand_cItem**)((char*)self + 0x130))->onCommand(item, cmdArg);
 }
 #endif
 
@@ -5306,7 +5306,7 @@ public:
     virtual void v07();
     virtual void v08();
     virtual int v09(int a, int b);
-    virtual void v10(int a);
+    virtual void onChange(int a);
 };
 
 /**
@@ -5319,7 +5319,7 @@ public:
  */
 extern "C" void cExpandMenuItemMenu_onChange(void* self, int item)
 {
-    (*(cExpandMenuItemMenu_onChange_cItem**)((char*)self + 0x130))->v10(item);
+    (*(cExpandMenuItemMenu_onChange_cItem**)((char*)self + 0x130))->onChange(item);
 }
 #endif
 
@@ -5423,7 +5423,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08();
+    virtual void zeroValue();
 };
 
 extern "C" void* cMenu_getFocusItem(cMenu* self);
@@ -5435,7 +5435,7 @@ extern "C" void* cMenu_getFocusItem(cMenu* self);
  */
 extern "C" void cExpandMenuItem_zeroValue(void* self)
 {
-    ((cExpandMenuItem_zeroValue_cItem*)cMenu_getFocusItem((cMenu*)((char*)self + 0x18)))->v08();
+    ((cExpandMenuItem_zeroValue_cItem*)cMenu_getFocusItem((cMenu*)((char*)self + 0x18)))->zeroValue();
 }
 #endif
 
@@ -5531,7 +5531,7 @@ public:
     char pad[0x10];
     // vptr at 0x10; slot N at vtable offset N*8
     virtual void v01();
-    virtual int v02();
+    virtual int input();
 };
 
 struct cExpandMenuItem_input_sOwner {
@@ -5555,7 +5555,7 @@ extern "C" void* cExpandMenuItem_input(void* expandItem)
     cExpandMenuItem_input_sOwner* self = (cExpandMenuItem_input_sOwner*)expandItem;
     cMenu_checkFocus((cMenu*)(&self->menu));
     int prev = self->menu.selected;
-    int key = ((cExpandMenuItem_input_cItem*)self->menu.items[prev])->v02();
+    int key = ((cExpandMenuItem_input_cItem*)self->menu.items[prev])->input();
     if (cMenuItem_isLocked((cMenuItem*)self) != 0) {
         return (void*)key;
     }
@@ -5588,7 +5588,7 @@ public:
     // vptr at 0x12C; slot N at vtable offset N*8
     virtual void v01();
     virtual void v02();
-    virtual int v03(int a, int b);
+    virtual int onCommand(int a, int b);
 };
 
 /**
@@ -5602,7 +5602,7 @@ public:
  */
 extern "C" int cExpandMenuItem_onCommand(cExpandMenuItem_onCommand_cMenu** self, int item, int commandArg)
 {
-    return (*self)->v03(item, commandArg);
+    return (*self)->onCommand(item, commandArg);
 }
 #endif
 
@@ -5616,7 +5616,7 @@ public:
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual void v04(void*);
+    virtual void onChange(void*);
 };
 
 /**
@@ -5626,7 +5626,7 @@ public:
  */
 extern "C" void cExpandMenuItem_onChange(cExpandMenuItem_onChange_cMenu** self)
 {
-    (*self)->v04(self);
+    (*self)->onChange(self);
 }
 #endif
 
@@ -5722,7 +5722,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual void v05(cExpandMenuItem_render_sRect* r);
+    virtual void render(cExpandMenuItem_render_sRect* r);
 };
 
 struct cExpandMenuItem_render_sOwner {
@@ -5759,7 +5759,7 @@ extern "C" void cExpandMenuItem_render(cExpandMenuItem_render_sOwner* self, cExp
             self->rects[i].x = pos.x + (float)off;
             self->rects[i].y = pos.y;
             self->rects[i].w = pos.w - (float)off;
-            self->items[i]->v05(&self->rects[i]);
+            self->items[i]->render(&self->rects[i]);
             pos.y += self->rects[i].h;
         }
     }
@@ -6002,7 +6002,7 @@ public:
     virtual void v68();
     virtual void v69();
     virtual void v70();
-    virtual void v71(int prim, void* verts, int n);
+    virtual void RenderTriStrip(int prim, void* verts, int n);
 };
 
 
@@ -6068,7 +6068,7 @@ extern "C" void cRGBTitleMenuItem_render(char* self, float* rect)
         ((cCtx_2D0008*)GrMan)->top->f4_2 = 1;
     }
     *(short*)((char*)((cCtx_2D0008*)GrMan)->top + 0x10) = -1;
-    ((cCtx_2D0008*)GrMan)->v71(4, verts, 0);
+    ((cCtx_2D0008*)GrMan)->RenderTriStrip(4, verts, 0);
 }
 #endif
 
@@ -6716,7 +6716,7 @@ public:
     virtual void v70();
     virtual void v71(int n, void* verts, int flags);
     virtual void v72();
-    virtual void v73(int n, void* verts, int flags);
+    virtual void RenderLineStrip(int n, void* verts, int flags);
 };
 
 
@@ -6910,7 +6910,7 @@ extern "C" void cGraphMenuItem_render(cGraphMenuItem_D0EF8* self, float* rect)
         vertexPos.z = 0.0f;
         vertexPos.w = 1.0f;
         *(sVec4*)quadVerts[1].pos = vertexPos;
-        ((cRenderCtx*)cGraphicsMan_TheGraphicsMan)->v73(2, quadVerts, 0);
+        ((cRenderCtx*)cGraphicsMan_TheGraphicsMan)->RenderLineStrip(2, quadVerts, 0);
     }
     SetDepth_D0EF8(((cRenderCtx*)GrMan)->top, old, 2);
     for (i = 0; i < 2; i++) {
@@ -6935,7 +6935,7 @@ extern "C" void cGraphMenuItem_render(cGraphMenuItem_D0EF8* self, float* rect)
         vertexPos.z = 0.0f;
         vertexPos.w = 1.0f;
         *(sVec4*)quadVerts[1].pos = vertexPos;
-        ((cRenderCtx*)cGraphicsMan_TheGraphicsMan)->v73(2, quadVerts, 0);
+        ((cRenderCtx*)cGraphicsMan_TheGraphicsMan)->RenderLineStrip(2, quadVerts, 0);
     }
     if (self->showCur) {
         SetDepth_D0EF8(((cRenderCtx*)GrMan)->top, old, 3);
@@ -7261,7 +7261,7 @@ public:
     virtual void v04();
     virtual void v05();
     virtual void v06();
-    virtual int v07();
+    virtual int getAIIndex();
 };
 
 /**
@@ -7274,7 +7274,7 @@ public:
  */
 extern "C" void cObjectInterface_getAIIndex(cObjectInterface_getAIIndex_cObj* obj)
 {
-    obj->v07();
+    obj->getAIIndex();
 }
 #endif
 
@@ -7287,7 +7287,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual int v05();
+    virtual int getPosition();
 };
 
 
@@ -7304,7 +7304,7 @@ extern "C" void cObjectInterface_getPosition(int i)
 {
     char* base = (char*)SSXApp->Game->AI;
     char* rider = *(char**)(base + (i << 2) + 0x28);
-    ((cObjectInterface_getPosition_cObj*)(rider + 0x6C0))->v05();
+    ((cObjectInterface_getPosition_cObj*)(rider + 0x6C0))->getPosition();
 }
 #endif
 

@@ -14,7 +14,7 @@ class cStream003595D8 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01(void* buf, int size);
-    virtual void v02(void* buf, int size);
+    virtual void read(void* buf, int size);
 };
 
 struct sSmQuad_95D8 {
@@ -46,7 +46,7 @@ extern "C" cSplineModifier* cSplineModifier_cSplineModifier(cSplineModifier* sel
     self->Spline.Seg = 0;
     self->Spline.SegIndex = 0;
     self->Spline.Length = 0;
-    stream->v02((char*)&self->BoundBox, 80);
+    stream->read((char*)&self->BoundBox, 80);
     cSpline_readFromReplayFrame(follower, stream);
     (*(sSmQuad_95D8*)&self->Dir) = t4vect_Zero;
     (*(sSmQuad_95D8*)&self->DDir) = t4vect_Zero;
@@ -658,7 +658,7 @@ INCLUDE_ASM("object/splinemodifier", cSplineModifier_writeToReplayFrame);
 class cStream00359F30 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01(void* buf, int size);
+    virtual void write(void* buf, int size);
 };
 
 extern "C" void cSpline_writeToReplayFrame(void* self, cStream00359F30* stream);
@@ -670,7 +670,7 @@ extern "C" void cSpline_writeToReplayFrame(void* self, cStream00359F30* stream);
  */
 extern "C" void cSplineModifier_writeToReplayFrame(cSplineModifier* self, cStream00359F30* stream)
 {
-    stream->v01((char*)&self->BoundBox, 80);
+    stream->write((char*)&self->BoundBox, 80);
     cSpline_writeToReplayFrame((char*)&self->Spline, stream);
 }
 #endif
@@ -757,8 +757,8 @@ class cStream0035A118 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01(void* buf, int size);
-    virtual void v02(void* buf, int size);
-    virtual int v03();
+    virtual void read(void* buf, int size);
+    virtual int readReplayInstance();
 };
 
 
@@ -791,13 +791,13 @@ extern "C" cMultiSplineModifier* cMultiSplineModifier_cMultiSplineModifier1(cMul
     self->Spline.Seg = 0;
     self->Spline.SegIndex = 0;
     self->Spline.Length = 0;
-    stream->v02((char*)&self->NumModels, 52);
+    stream->read((char*)&self->NumModels, 52);
     cSpline_readFromReplayFrame_A118(follower, stream);
-    self->Instance = (tInstanceRecord*)stream->v03();
+    self->Instance = (tInstanceRecord*)stream->readReplayInstance();
     cMultiSplineModifier_allocNodes(self);
     unsigned int id = 0xFFFFFFFF;
     for (int i = 0; i < self->NumModels; i++) {
-        stream->v02(&id, 4);
+        stream->read(&id, 4);
         (void**)self->NodeInst[i] = cInstanceMan_allocInstance(cObjectInterface_getInstanceMan(), id);
     }
     cMultiSplineModifier_setupNodes(self);
@@ -1562,7 +1562,7 @@ public:
     virtual void v48();
     virtual void v49();
     virtual void v50();
-    virtual int v51();
+    virtual int updateRootTransform();
 };
 
 /**
@@ -1576,7 +1576,7 @@ public:
 extern "C" int cMultiSplineModifier_postUpdate(cMultiSplineModifier* self)
 {
     cSplineVirt* splineObj = *(cSplineVirt**)((char*)self->Instance + 0xC);
-    return splineObj->v51();
+    return splineObj->updateRootTransform();
 }
 #endif
 
@@ -1972,11 +1972,11 @@ INCLUDE_ASM("object/splinemodifier", cMultiSplineModifier_writeToReplayFrame);
 class cStream0035B5A8 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01(void* buf, int size);
+    virtual void write(void* buf, int size);
     virtual void v02(void* buf, int size);
     virtual void v03();
     virtual void v04();
-    virtual void v05(void* obj);
+    virtual void writeReplayInstance(void* obj);
 };
 
 class cStream00359F30;
@@ -1993,11 +1993,11 @@ extern "C" void cSpline_writeToReplayFrame(void* self, cStream00359F30* stream);
  */
 extern "C" void cMultiSplineModifier_writeToReplayFrame(cMultiSplineModifier* self, cStream0035B5A8* stream)
 {
-    stream->v01((char*)&self->NumModels, 52);
+    stream->write((char*)&self->NumModels, 52);
     cSpline_writeToReplayFrame((char*)&self->Spline, (cStream00359F30*)stream);
-    stream->v05(self->Instance);
+    stream->writeReplayInstance(self->Instance);
     for (int i = 0; i < self->NumModels; i++) {
-        stream->v01(((char**)self->NodeInst)[i] + 0x78, 4);
+        stream->write(((char**)self->NodeInst)[i] + 0x78, 4);
     }
 }
 #endif
@@ -2405,8 +2405,8 @@ extern "C" void cRailModifier_buildXform(void* self);
 class cSmStream_BA88 {
 public:
     virtual void v01();
-    virtual void v02(void* p, int n);
-    virtual int v03();
+    virtual void read(void* p, int n);
+    virtual int readReplayInstance();
 };
 
 static inline sSmRoot_BA88* findRoot_BA88(char* w, const sSmCell_BA88& c)
@@ -2482,8 +2482,8 @@ extern "C" char* cRailModifier_cRailModifier1(cRailModifier* self, cSmStream_BA8
     self->mVtbl = (void**)cRailModifier_vtbl;
     self->Next = 0;
     self->Prev = 0;
-    src->v02(((char*)self) + 0x10, 0x30);
-    self->Instance = (tInstanceRecord*)src->v03();
+    src->read(((char*)self) + 0x10, 0x30);
+    self->Instance = (tInstanceRecord*)src->readReplayInstance();
     cRailModifier_buildXform(((char*)self));
     insert_BA88((char*)cObjectInterface_getNash(), self->Node, (sSmBox_BA88*)(((char*)self) + 0x10));
     sSmTrack_BA88* track = ((sSmRef_BA88*)(((char*)self) + 0x30))->get();

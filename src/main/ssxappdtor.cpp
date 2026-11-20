@@ -1993,8 +1993,8 @@ public:
     // vptr lands at 0x44 (g++ 2.95 places it after the class's own data);
     // slot N lives at vtable offset N*8 (delta at +0, function at +4)
     virtual void v01();
-    virtual void v02();
-    virtual void v03();
+    virtual void update();
+    virtual void render();
 };
 
 /**
@@ -2004,7 +2004,7 @@ public:
  */
 extern "C" void cVisualEffectsObjNode_update(void* self)
 {
-    (*(cAppDtorVirt44**)((char*)self + 0x10))->v02();
+    (*(cAppDtorVirt44**)((char*)self + 0x10))->update();
 }
 #endif
 
@@ -2018,7 +2018,7 @@ INCLUDE_ASM("main/ssxappdtor", cVisualEffectsObjNode_render);
  */
 extern "C" void cVisualEffectsObjNode_render(void* self)
 {
-    (*(cAppDtorVirt44**)((char*)self + 0x10))->v03();
+    (*(cAppDtorVirt44**)((char*)self + 0x10))->render();
 }
 #endif
 
@@ -2820,8 +2820,8 @@ public:
     // vptr lands at 0x4 (g++ 2.95 places it after the class's own data);
     // slot N lives at vtable offset N*8 (delta at +0, function at +4)
     virtual void v01();
-    virtual void v02();
-    virtual void v03();
+    virtual void update();
+    virtual void render();
 };
 
 /**
@@ -2832,7 +2832,7 @@ public:
  */
 extern "C" void cAIVisualEffectsObjNode_update(void* self)
 {
-    (*(cAppDtorVirt04**)((char*)self + 0x10))->v02();
+    (*(cAppDtorVirt04**)((char*)self + 0x10))->update();
 }
 #endif
 
@@ -2847,7 +2847,7 @@ INCLUDE_ASM("main/ssxappdtor", cAIVisualEffectsObjNode_render);
  */
 extern "C" void cAIVisualEffectsObjNode_render(void* self)
 {
-    (*(cAppDtorVirt04**)((char*)self + 0x10))->v03();
+    (*(cAppDtorVirt04**)((char*)self + 0x10))->render();
 }
 #endif
 

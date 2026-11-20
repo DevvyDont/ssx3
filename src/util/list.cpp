@@ -56,7 +56,7 @@ class cListNode_traverseFlat_cVirt {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01();
-    virtual int v02(void*);
+    virtual int onListNode(void*);
 };
 
 /**
@@ -70,7 +70,7 @@ public:
  */
 extern "C" int cListNode_traverseFlat(void* self, cListNode_traverseFlat_cVirt* obj)
 {
-    return obj->v02(self);
+    return obj->onListNode(self);
 }
 #endif
 
@@ -81,7 +81,7 @@ class cListNode_traverseRecurse_cVirt {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01();
-    virtual int v02(void*);
+    virtual int onListNode(void*);
 };
 
 /**
@@ -95,7 +95,7 @@ public:
  */
 extern "C" int cListNode_traverseRecurse(void* self, cListNode_traverseRecurse_cVirt* obj)
 {
-    return obj->v02(self);
+    return obj->onListNode(self);
 }
 #endif
 
@@ -333,7 +333,7 @@ public:
     cList_traverseFlat_cVirt* mpNext;   // 0x4
     // vptr at 0x8; slot N at vtable offset N*8
     virtual void v01();
-    virtual int v02(void*);
+    virtual int traverseFlat(void*);
 };
 
 /**
@@ -350,7 +350,7 @@ extern "C" int cList_traverseFlat(cList* self, cListOperator* pOperator)
     cList_traverseFlat_cVirt* n = (cList_traverseFlat_cVirt*)self->mStart.mpNext;
     while (n->mpNext != n) {
         cList_traverseFlat_cVirt* nextNode = n->mpNext;
-        int result = n->v02(pOperator);
+        int result = n->traverseFlat(pOperator);
         if (result != 0) {
             return result;
         }
@@ -370,7 +370,7 @@ public:
     // vptr at 0x8; slot N at vtable offset N*8
     virtual void v01();
     virtual void v02();
-    virtual int v03(void*);
+    virtual int traverseRecurse(void*);
 };
 
 /**
@@ -386,7 +386,7 @@ extern "C" int cList_traverseRecurse(cList* self, cListOperator* pOperator)
     cList_traverseRecurse_cVirt* n = (cList_traverseRecurse_cVirt*)self->mStart.mpNext;
     while (n->mpNext != n) {
         cList_traverseRecurse_cVirt* nextNode = n->mpNext;
-        int result = n->v03(pOperator);
+        int result = n->traverseRecurse(pOperator);
         if (result != 0) {
             return result;
         }

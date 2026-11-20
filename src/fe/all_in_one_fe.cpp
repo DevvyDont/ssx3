@@ -2423,7 +2423,7 @@ struct Obj_F660 {
     virtual void v04();
     virtual void v05();
     virtual void v06();
-    virtual int v07();
+    virtual int getAIIndex();
 };
 extern int D_00536640[];
 extern char str_pct_02d_pct_02d_pct_02d_b[];
@@ -2492,7 +2492,7 @@ extern "C" void cOVStateHUD1P_renderFinishMessage(char* self, int elems, int* ri
         cBE_getInterface_Fv(cBE_getBE(), 0);
         signed char mode = cBENewRaceInterface_newRace.cGameMode;
         Obj_F660* being = (Obj_F660*)(panelRider + 0x6C0);
-        int k = being->v07();
+        int k = being->getAIIndex();
         int val = D_00536640[k];
         if (mode == 0 || mode == 5) {
             int t = (int)((float)val * 0.01666666753590107f);
@@ -2531,7 +2531,7 @@ struct Obj_F9B0 {
     virtual void v04();
     virtual void v05();
     virtual void v06();
-    virtual int v07();
+    virtual int getAIIndex();
 };
 extern float D_00504FB8[];
 extern V4_F9B0 D_004C8648;
@@ -2616,7 +2616,7 @@ extern "C" void func_0021F9B0(char* self, char* obj, char* rider, int x, float a
         *(float*)(tx2 + 0x3C) = *(float*)(tx2 + 0x34) * sc.y;
         *(V4_F9B0*)(*(char**)(self + 0x42C) + 0x40) = col;
         Obj_F9B0* being = (Obj_F9B0*)(rider + 0x6C0);
-        sprintf(buf, str_pct_d_pct_d_b, cBEMissionInterface_getCurrentCollectForSection(iface, being->v07(), id), cBEMissionInterface_getTotalCollectForSection(iface, id));
+        sprintf(buf, str_pct_d_pct_d_b, cBEMissionInterface_getCurrentCollectForSection(iface, being->getAIIndex(), id), cBEMissionInterface_getTotalCollectForSection(iface, id));
         cFont_text(*(char**)(self + 0x42C), drawPos.x, drawPos.y, buf);
         tx = *(char**)(self + 0x42C);
         *(float*)(tx + 0x38) = *(float*)(tx + 0x30) * scale.x;

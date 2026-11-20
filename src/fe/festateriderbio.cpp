@@ -485,7 +485,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int a);
+    virtual void setVisible(int a);
     virtual void v10();
     virtual void v11();
     virtual void v12();
@@ -496,8 +496,8 @@ public:
     virtual void v17();
     virtual void v18();
     virtual void v19();
-    virtual void v20(sVec2_00183D08* p);
-    virtual void v21(sVec2_00183D08* p);
+    virtual void getSize(sVec2_00183D08* p);
+    virtual void setSize(sVec2_00183D08* p);
 };
 
 /**
@@ -515,14 +515,14 @@ extern "C" void func_00183D08(cWidget_00183D08* self, void* rect, float scale)
 {
     if (rect) {
         sVec2_00183D08 pos;
-        self->v20(&pos);
+        self->getSize(&pos);
         float k = scale * 256.0f;
         pos.x = (*(float*)((char*)rect + 0x14) - *(float*)((char*)rect + 0x10)) * k;
         pos.y = (*(float*)((char*)rect + 0x18) - *(float*)((char*)rect + 0xC)) * k;
-        self->v21(&pos);
-        self->v09(1);
+        self->setSize(&pos);
+        self->setVisible(1);
     } else {
-        self->v09(0);
+        self->setVisible(0);
     }
 }
 #endif

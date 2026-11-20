@@ -1190,7 +1190,7 @@ public:
     virtual void v3();
     virtual void v4();
     virtual void v5();
-    virtual int v6();
+    virtual int getAIIndex();
 };
 
 /**
@@ -1249,7 +1249,7 @@ extern "C" void cSSXAudio_InGameInit(cSSXAudio* self)
         do {
             void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
             char* playerRider = (char*)((cAI*)cAudioInterface_getAI())->Riders[0];
-            *firstTimeFlag = cBENewPlayerInterface_isFirstTimeOnTrack(iface, ((cSSXAudio_InGameInit_cObj*)(playerRider + 0x6C0))->v6(), i);
+            *firstTimeFlag = cBENewPlayerInterface_isFirstTimeOnTrack(iface, ((cSSXAudio_InGameInit_cObj*)(playerRider + 0x6C0))->getAIIndex(), i);
             i++;
             firstTimeFlag++;
         } while (i < 23);

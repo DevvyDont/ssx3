@@ -4915,7 +4915,7 @@ struct sRCtx_3AF8 {
     virtual void v32();
     virtual void v33();
     virtual void v34();
-    virtual float* v35();
+    virtual float* GetView();
     virtual void v36();
     virtual void v37();
     virtual void v38();
@@ -4951,7 +4951,7 @@ struct sRCtx_3AF8 {
     virtual void v68();
     virtual void v69();
     virtual void v70();
-    virtual void v71(int n, sVtx_3AF8* v, int a);
+    virtual void RenderTriStrip(int n, sVtx_3AF8* v, int a);
 };
 
 // PORT: PS2-only VU0 inline asm (vector * scalar).
@@ -5085,7 +5085,7 @@ extern "C" void cPlayerIndicatorFX_render(sWake_3AF8* self)
         rsSetB_3AF8(renderCtx, 0x3E0, 5, 7);
         *(short*)((char*)renderCtx->top + 0x10) = rsTex_3AF8(renderCtx);
     }
-    float* viewMat = ((sRCtx_3AF8*)GrMan_boardwakefx)->v35();
+    float* viewMat = ((sRCtx_3AF8*)GrMan_boardwakefx)->GetView();
     t4Vector side;
     Set4_3AF8(side, viewMat[0], viewMat[4], viewMat[8], 0.0f);
     t4Vector up;
@@ -5190,7 +5190,7 @@ extern "C" void cPlayerIndicatorFX_render(sWake_3AF8* self)
         verts[7].s = 1.0f;
         verts[7].t = 0.0f;
     }
-    ((sRCtx_3AF8*)GrMan_boardwakefx)->v71(8, verts, 0);
+    ((sRCtx_3AF8*)GrMan_boardwakefx)->RenderTriStrip(8, verts, 0);
     *(char**)(GrMan_boardwakefx + 0xE84) -= 0x14;
 }
 #endif

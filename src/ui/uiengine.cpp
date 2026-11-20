@@ -284,20 +284,20 @@ public:
     virtual void v18();
     virtual void v19();
     virtual void v20();
-    virtual void v21();
-    virtual void v22();
+    virtual void PushViewport();
+    virtual void PopViewport();
     virtual void v23();
     virtual void v24();
     virtual void v25();
-    virtual void v26(int a, int b, float x, float y, float w, float h, float zn, float zf);
+    virtual void SetViewportOrthographic(int a, int b, float x, float y, float w, float h, float zn, float zf);
     virtual void v27();
     virtual void v28();
     virtual void v29();
     virtual void v30();
-    virtual void v31();
-    virtual void v32();
+    virtual void PushView();
+    virtual void PopView();
     virtual void v33();
-    virtual void v34(void* p);
+    virtual void SetView1(void* p);
 };
 
 // Typed view of the render context (the unit declares GrMan as void* later).
@@ -326,10 +326,10 @@ extern "C" void cUIEngine_render2D(cUIEngine* self)
     ctx->top[1] = ctx->top[0];
     ctx->top++;
     *D_004A289C_7df8->top = D_00501420_7df8;
-    D_004A289C_7df8->v31();
-    D_004A289C_7df8->v21();
-    D_004A289C_7df8->v26(0, 1, 0.0f, 0.0f, 640.0f, 480.0f, -1.0f, 1.0f);
-    D_004A289C_7df8->v34(t4mat_Identity);
+    D_004A289C_7df8->PushView();
+    D_004A289C_7df8->PushViewport();
+    D_004A289C_7df8->SetViewportOrthographic(0, 1, 0.0f, 0.0f, 640.0f, 480.0f, -1.0f, 1.0f);
+    D_004A289C_7df8->SetView1(t4mat_Identity);
     setF4_22_7DF8(D_004A289C_7df8->top, 1);
     setF4_23_7DF8(D_004A289C_7df8->top, 2);
     setF4_20_7DF8(D_004A289C_7df8->top, 0);
@@ -337,8 +337,8 @@ extern "C" void cUIEngine_render2D(cUIEngine* self)
     setF4_2_7DF8(D_004A289C_7df8->top, 5);
     D_004A289C_7df8->top->f0_2 = 3;
     cUIStateStack_render2D((char*)&self->mStateStack);
-    D_004A289C_7df8->v22();
-    D_004A289C_7df8->v32();
+    D_004A289C_7df8->PopViewport();
+    D_004A289C_7df8->PopView();
     D_004A289C_7df8->top--;
 }
 #endif

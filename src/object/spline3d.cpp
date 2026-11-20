@@ -51,7 +51,7 @@ INCLUDE_ASM("object/spline3d", cSpline_writeToReplayFrame);
 class cSpline_writeToReplayFrame_cObj {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01(void* buf, int size);
+    virtual void write(void* buf, int size);
 };
 
 /**
@@ -61,7 +61,7 @@ public:
  */
 extern "C" void cSpline_writeToReplayFrame(cSpline* self, cSpline_writeToReplayFrame_cObj* obj)
 {
-    obj->v01(self, 8);
+    obj->write(self, 8);
 }
 #endif
 
@@ -72,7 +72,7 @@ class cStream_5570 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01(void* buf, int size);
-    virtual void v02(void* buf, int size);
+    virtual void read(void* buf, int size);
 };
 
 struct sTrackNode5570 {
@@ -122,7 +122,7 @@ struct sTrackRef5570 {
  */
 extern "C" void cSpline_readFromReplayFrame(cSpline* self, cStream_5570* stream)
 {
-    stream->v02((self), 8);
+    stream->read((self), 8);
     self->Seg = (void*)(*(sTrackRef5570*)&self->SplineId).get()->node;
     for (int i = 0; i < self->SegIndex; i++) {
         self->Seg = (void*)(*(sSplineNode**)((char*)(sSplineNode*)self->Seg + 0x64));
@@ -187,7 +187,7 @@ public:
     virtual void v40();
     virtual void v41();
     virtual void v42();
-    virtual sM44_5638 v43();
+    virtual sM44_5638 GetNetMatrix();
     virtual void v44();
     virtual void v45();
     virtual void v46();
@@ -264,7 +264,7 @@ extern "C" int func_00345638(void* self)
     sVEnt_5638* vt = (sVEnt_5638*)w->mVtbl;
     return vt[93].fn((char*)w + vt[93].delta, sV4_5638(*(float*)(nodeBytes + 0x6C), *(float*)(nodeBytes + 0x70), *(float*)(nodeBytes + 0x74), 1.0f),
                   sV4_5638(*(float*)(nodeBytes + 0x78), *(float*)(nodeBytes + 0x7C), *(float*)(nodeBytes + 0x80), 1.0f),
-                  ((cWorld_5638*)w)->v43()) != 1;
+                  ((cWorld_5638*)w)->GetNetMatrix()) != 1;
 }
 #endif
 

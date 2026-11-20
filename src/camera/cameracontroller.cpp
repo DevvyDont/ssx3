@@ -236,7 +236,7 @@ public:
     // vptr at 0x10
     virtual void v01();
     virtual void v02();
-    virtual void v03(int a);
+    virtual void snap(int a);
 };
 
 extern "C" void cCameraController_snap(void* self);
@@ -251,7 +251,7 @@ extern "C" void cCameraController_snap(void* self);
 extern "C" void cManualCameraController_snap(void* self, int subjectID)
 {
     cCameraController_snap(self);
-    (*(cCamCtrlVObj_0015CE98**)((char*)self + 0x18))->v03(subjectID);
+    (*(cCamCtrlVObj_0015CE98**)((char*)self + 0x18))->snap(subjectID);
 }
 #endif
 
@@ -265,8 +265,8 @@ public:
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual void v04();
-    virtual void v05();
+    virtual void snapCurrent();
+    virtual void update();
 };
 
 extern "C" void cCameraController_snapCurrent(void* self);
@@ -280,7 +280,7 @@ extern "C" void cCameraController_snapCurrent(void* self);
 extern "C" void cManualCameraController_snapCurrent(void* self)
 {
     cCameraController_snapCurrent(self);
-    (*(cCamCtrlVObj**)((char*)self + 0x18))->v04();
+    (*(cCamCtrlVObj**)((char*)self + 0x18))->snapCurrent();
 }
 #endif
 
@@ -354,7 +354,7 @@ extern "C" void cManualCameraController_update(void* self)
 {
     void** algoList = *(void***)((char*)self + 0x8);
     cCamCtrlVObj* obj = *(cCamCtrlVObj**)*algoList;
-    obj->v05();
+    obj->update();
 }
 #endif
 

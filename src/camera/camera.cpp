@@ -252,7 +252,7 @@ public:
     char pad[0x14];
     // vptr at 0x14
     virtual void v01();
-    virtual void v02();
+    virtual void update();
 };
 
 extern "C" void* cCamera_updateCamMat(void* self);
@@ -264,7 +264,7 @@ extern "C" void* cCamera_updateCamMat(void* self);
  */
 extern "C" void cCamera_update(cCamera* self)
 {
-    ((cCamVObj_0015DF98*)self->Controller)->v02();
+    ((cCamVObj_0015DF98*)self->Controller)->update();
     cCamera_updateCamMat(self);
 }
 #endif
@@ -1139,7 +1139,7 @@ public:
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual void v04();
+    virtual void snapCurrent();
 };
 
 /**
@@ -1153,7 +1153,7 @@ extern "C" void cCamera_switchChaseControllerTargetRider(cCamera* self, int valu
 {
     char* obj = (char*)self->ChaseController;
     *(int*)(*(char**)(obj + 0x20) + 0x4) = value;
-    ((cCamVObj_0015EDC8*)self->ChaseController)->v04();
+    ((cCamVObj_0015EDC8*)self->ChaseController)->snapCurrent();
 }
 #endif
 
@@ -1498,7 +1498,7 @@ class cCamVObj_0015F5B0 {
 public:
     // vptr at 0x0
     virtual void v01();
-    virtual sQuad_0015F5B0* v02();
+    virtual sQuad_0015F5B0* getVelocity();
 };
 
 /**
@@ -1513,7 +1513,7 @@ public:
 extern "C" void* cRiderCameraTarget_getVelocity(void* result, cRiderCameraTarget* target)
 {
     char* rider = (char*)target->Rider;
-    *(sQuad_0015F5B0*)result = *((cCamVObj_0015F5B0*)(rider + 0x6C0))->v02();
+    *(sQuad_0015F5B0*)result = *((cCamVObj_0015F5B0*)(rider + 0x6C0))->getVelocity();
     return result;
 }
 #endif
@@ -4234,7 +4234,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void updateAlgorithm(int on);
 };
 
 struct sAlgoNode_161BB8 {
@@ -4300,7 +4300,7 @@ extern "C" void cChaseCameraController_update(cChaseCameraController* self)
     if ((cPauseState_Flags & 1) == 0) {
         cChaseCameraController_processInput(self);
         sAlgoNode_161BB8* n = ((sAlgoList_161BB8*)self->AlgorithmList)->head;
-        n->algo->v09(0);
+        n->algo->updateAlgorithm(0);
         float rate = n->rate;
         Smooth_161BB8(n, Approach_161BB8(n->weight, 1.0f, rate));
         n = n->next;
@@ -4311,7 +4311,7 @@ extern "C" void cChaseCameraController_update(cChaseCameraController* self)
             if (n->weight <= 0.0f || n->blend <= 0.0f) {
                 n = cCameraAlgoList_remove((sAlgoList_161BB8*)self->AlgorithmList, n);
             } else {
-                n->algo->v09(1);
+                n->algo->updateAlgorithm(1);
                 n = n->next;
             }
         }
@@ -9521,7 +9521,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual void v05();
+    virtual void update();
 };
 
 /**
@@ -9529,7 +9529,7 @@ public:
  */
 extern "C" void cCameraAlgorithm_updateAlgorithm(cCameraAlgorithm* self)
 {
-    ((cCameraAlgorithm_updateAlgorithm_cObj*)self)->v05();
+    ((cCameraAlgorithm_updateAlgorithm_cObj*)self)->update();
 }
 #endif
 
@@ -10998,7 +10998,7 @@ public:
     virtual void v04();
     virtual void v05();
     virtual void v06();
-    virtual int v07();
+    virtual int getAIIndex();
 };
 class cCamCtrlK8940 {
 public:
@@ -11007,7 +11007,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual void v05();
+    virtual void update();
 };
 
 /**
@@ -11021,10 +11021,10 @@ public:
 extern "C" void cLookBackChaseAlgorithm_snap(cLookBackChaseAlgorithm* self, int id)
 {
     char* rider = *(char**)((char*)self->Target + 4);
-    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->v07()) {
+    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->getAIIndex()) {
         cLookAtChaseAlgorithm_snap(((cCamCtrlK8940*)self), id);
         cLookAtChaseAlgorithm_setupInitialCamDir(((cLookAtChaseAlgorithm*)self), 559.7440185546875f, 300.0f);
-        ((cCamCtrlK8940*)self)->v05();
+        ((cCamCtrlK8940*)self)->update();
     }
 }
 #endif
@@ -11178,10 +11178,10 @@ INCLUDE_ASM("camera/camera", cMidRightChaseAlgorithm_snap);
 extern "C" void cMidRightChaseAlgorithm_snap(cMidRightChaseAlgorithm* self, int id)
 {
     char* rider = *(char**)((char*)self->Target + 4);
-    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->v07()) {
+    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->getAIIndex()) {
         cLookAtChaseAlgorithm_snap(((cCamCtrlK8940*)self), id);
         cLookAtChaseAlgorithm_setupInitialCamDir(((cLookAtChaseAlgorithm*)self), 559.7440185546875f, 300.0f);
-        ((cCamCtrlK8940*)self)->v05();
+        ((cCamCtrlK8940*)self)->update();
     }
 }
 #endif
@@ -11334,10 +11334,10 @@ INCLUDE_ASM("camera/camera", cMidLeftChaseAlgorithm_snap);
 extern "C" void cMidLeftChaseAlgorithm_snap(cMidLeftChaseAlgorithm* self, int id)
 {
     char* rider = *(char**)((char*)self->Target + 4);
-    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->v07()) {
+    if (id == ((cCamTargetK8940*)(rider + 0x6C0))->getAIIndex()) {
         cLookAtChaseAlgorithm_snap(((cCamCtrlK8940*)self), id);
         cLookAtChaseAlgorithm_setupInitialCamDir(((cLookAtChaseAlgorithm*)self), 559.7440185546875f, 300.0f);
-        ((cCamCtrlK8940*)self)->v05();
+        ((cCamCtrlK8940*)self)->update();
     }
 }
 #endif

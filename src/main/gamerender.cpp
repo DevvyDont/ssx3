@@ -35,8 +35,8 @@ public:
     virtual void v07();
     virtual void v08();
     virtual void v09();
-    virtual unsigned int v10();
-    virtual unsigned int v11();
+    virtual unsigned int GetScreenWidth();
+    virtual unsigned int GetScreenHeight();
 };
 
 struct sCamRef22E3B8 {
@@ -90,8 +90,8 @@ extern "C" cGameViewMan22E3B8* cGameViewMan_cGameViewMan(cGameViewMan22E3B8* sel
     self->fC = 0;
     self->f10 = 1;
     self->f14 = 0;
-    float w = (float)((cDisp22E3B8*)GrMan)->v10();
-    float screenHeight = (float)((cDisp22E3B8*)GrMan)->v11();
+    float w = (float)((cDisp22E3B8*)GrMan)->GetScreenWidth();
+    float screenHeight = (float)((cDisp22E3B8*)GrMan)->GetScreenHeight();
     self->width = w;
     self->height = screenHeight;
     self->f18 = 0;
@@ -117,8 +117,8 @@ public:
     virtual void v07();
     virtual void v08();
     virtual void v09();
-    virtual unsigned int v10();
-    virtual unsigned int v11();
+    virtual unsigned int GetScreenWidth();
+    virtual unsigned int GetScreenHeight();
 };
 
 struct sCam22E550 {
@@ -178,8 +178,8 @@ extern "C" void cGameViewMan_updateViewState(cGameViewMan22E550* self)
     if (self->count == 1) {
         return;
     }
-    float w = (float)((cDisp22E550*)GrMan)->v10();
-    float screenHeight = (float)((cDisp22E550*)GrMan)->v11();
+    float w = (float)((cDisp22E550*)GrMan)->GetScreenWidth();
+    float screenHeight = (float)((cDisp22E550*)GrMan)->GetScreenHeight();
     switch (self->mode) {
     case 3:
     case 4:

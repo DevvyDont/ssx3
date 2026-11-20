@@ -62,7 +62,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
 };
 
 struct sMapTmpl_200700 {
@@ -112,7 +112,7 @@ extern "C" void cUITemplate_MAP_onCreateScreen(cUITemplate_MAP* tmpl, void* scre
     cUIObj_200700* mapObj = (cUIObj_200700*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_MapPic));
     self->map = mapObj;
     if (mapObj != 0)
-        mapObj->v09(0);
+        mapObj->setVisible(0);
     self->f2F0 = 0;
     cUITemplate_MAP_setupPeakUnlock((cUITemplate_MAP*)self);
     cUITemplate_MAP_setupEventUnlock((cUITemplate_MAP*)self);
@@ -846,9 +846,9 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
     virtual void v10();
-    virtual void v11(sColor_202828* c);
+    virtual void setColour(sColor_202828* c);
 };
 
 /**
@@ -870,8 +870,8 @@ extern "C" void cUITemplate_MAP_onUpdate(cUITemplate_MAP* vself)
         cUIPic_202828* pic = (cUIPic_202828*)vself->mpMap;
         sColor_202828 color = *(sColor_202828*)((char*)pic + 0x1C);
         color.a = vself->mMapPicAlpha;
-        pic->v11(&color);
-        ((cUIPic_202828*)vself->mpMap)->v09(1);
+        pic->setColour(&color);
+        ((cUIPic_202828*)vself->mpMap)->setVisible(1);
         if (cUITemplate_MAP_mMapState == 0) {
             cUIState_showObjSafe(vself->mpUIState, str_peak1outline);
             cUIState_showObjSafe(vself->mpUIState, str_peak2outline);
@@ -881,7 +881,7 @@ extern "C" void cUITemplate_MAP_onUpdate(cUITemplate_MAP* vself)
         }
     } else {
         vself->mMapPicAlpha = 0.0f;
-        ((cUIPic_202828*)vself->mpMap)->v09(0);
+        ((cUIPic_202828*)vself->mpMap)->setVisible(0);
         if (cUITemplate_MAP_mMapState == 0) {
             cUIState_hideObjSafe(vself->mpUIState, str_peak1outline);
             cUIState_hideObjSafe(vself->mpUIState, str_peak2outline);
@@ -1127,9 +1127,9 @@ public:
     virtual void v04();
     virtual void v05();
     virtual void v06();
-    virtual void v07(int on);
-    virtual void v08(int on);
-    virtual void v09(int on);
+    virtual void setFocus(int on);
+    virtual void setStatic(int on);
+    virtual void setVisible(int on);
 };
 
 static inline cUIObj_2030A0* getObj_2030A0(char* self, char* name)
@@ -1141,8 +1141,8 @@ static inline cUIObj_2030A0* hideObj_2030A0(char* self, char* name)
 {
     cUIObj_2030A0* o = getObj_2030A0(self, name);
     if (o != 0) {
-        o->v07(0);
-        o->v09(0);
+        o->setFocus(0);
+        o->setVisible(0);
     }
     return o;
 }
@@ -1177,16 +1177,16 @@ extern "C" void cUITemplate_MAP_setupMenuFocus(cUITemplate_MAP* vself, int focus
     cUIObj_2030A0* popup = hideObj_2030A0(((char*)vself), str_ConfirmMenu);
     if (vself->mTransportPopupActive != 0) {
         cUIState_hideObjSafe(vself->mpUIState, str_Locks);
-        popup->v07(1);
-        popup->v09(1);
+        popup->setFocus(1);
+        popup->setVisible(1);
         if (vself->mPopupType == 0) {
             cUIObj_2030A0* widget = getObj_2030A0(((char*)vself), str_ConfirmMenu_No);
-            widget->v09(1);
-            widget->v08(0);
+            widget->setVisible(1);
+            widget->setStatic(0);
         } else {
             cUIObj_2030A0* widget = getObj_2030A0(((char*)vself), str_ConfirmMenu_No);
-            widget->v09(0);
-            widget->v08(1);
+            widget->setVisible(0);
+            widget->setStatic(1);
         }
         return;
     }
@@ -1195,8 +1195,8 @@ extern "C" void cUITemplate_MAP_setupMenuFocus(cUITemplate_MAP* vself, int focus
         cUITemplate_MAP_setupPeakInfo(vself);
         if (peak != 0) {
             *(int*)((char*)peak + 0x14) |= 1;
-            peak->v07(1);
-            peak->v09(1);
+            peak->setFocus(1);
+            peak->setVisible(1);
         }
         if (cUITemplate_MAP_mMapStyle < 2) {
             cUIText_setUnicodeStringByID((cUIText*)getObj_2030A0(((char*)vself), str_title_title), GetHashValue32(str_kT_240SelectPeak));
@@ -1206,16 +1206,16 @@ extern "C" void cUITemplate_MAP_setupMenuFocus(cUITemplate_MAP* vself, int focus
         cUITemplate_MAP_setupPeakGoals(vself);
         if (cUITemplate_MAP_mPeak == 0 && goal0 != 0) {
             *(int*)((char*)goal0 + 0x14) |= 1;
-            goal0->v09(1);
-            goal0->v07(1);
+            goal0->setVisible(1);
+            goal0->setFocus(1);
         } else if (cUITemplate_MAP_mPeak == 1 && goal1 != 0) {
             *(int*)((char*)goal1 + 0x14) |= 1;
-            goal1->v09(1);
-            goal1->v07(1);
+            goal1->setVisible(1);
+            goal1->setFocus(1);
         } else if (goal2 != 0) {
             *(int*)((char*)goal2 + 0x14) |= 1;
-            goal2->v09(1);
-            goal2->v07(1);
+            goal2->setVisible(1);
+            goal2->setFocus(1);
         }
         if (cUITemplate_MAP_mMapStyle < 2) {
             cUIText_setUnicodeStringByID((cUIText*)getObj_2030A0(((char*)vself), str_title_title), GetHashValue32(str_kT_FEHelpSelectMode));
@@ -1247,8 +1247,8 @@ extern "C" void cUITemplate_MAP_setupMenuFocus(cUITemplate_MAP* vself, int focus
         }
         if (widget != 0) {
             *(int*)((char*)widget + 0x14) |= 1;
-            widget->v09(1);
-            widget->v07(1);
+            widget->setVisible(1);
+            widget->setFocus(1);
         }
         if (cUITemplate_MAP_mMapStyle < 2) {
             cUIText_setUnicodeStringByID((cUIText*)getObj_2030A0(((char*)vself), str_title_title), GetHashValue32(str_kT_240SelectEvent));
@@ -1331,8 +1331,8 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int on);
-    virtual void v09(int on);
+    virtual void setStatic(int on);
+    virtual void setVisible(int on);
 };
 
 /**
@@ -1368,16 +1368,16 @@ extern "C" void cUITemplate_MAP_setupPopup(cUITemplate_MAP* self)
             if (title != 0)
                 cUIText_setUnicodeStringByID(title, GetHashValue32(str_kT_BTNOK_b));
             if (confirmNo != 0) {
-                ((cUIObj_203A58*)confirmNo)->v09(0);
-                ((cUIObj_203A58*)confirmNo)->v08(1);
+                ((cUIObj_203A58*)confirmNo)->setVisible(0);
+                ((cUIObj_203A58*)confirmNo)->setStatic(1);
             }
             cUIState_hideObjSafe(self->mpUIState, str_ConfirmMenu_No);
         } else {
             if (title != 0)
                 cUIText_setUnicodeStringByID(title, GetHashValue32(str_kT_CMNYes_b));
             if (confirmNo != 0) {
-                ((cUIObj_203A58*)confirmNo)->v09(1);
-                ((cUIObj_203A58*)confirmNo)->v08(0);
+                ((cUIObj_203A58*)confirmNo)->setVisible(1);
+                ((cUIObj_203A58*)confirmNo)->setStatic(0);
             }
             cUIState_showObjSafe(self->mpUIState, str_ConfirmMenu_No);
         }
@@ -2366,9 +2366,9 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
                 obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesA.s[i]));
                 if (obj != 0) {
                     if (func_004165A8(namesA.s[i], name) == 0) {
-                        obj->v11(&col0);
+                        obj->setColour(&col0);
                     } else {
-                        obj->v11(&col1);
+                        obj->setColour(&col1);
                     }
                 }
             }
@@ -2378,9 +2378,9 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
                 obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesB.s[i]));
                 if (obj != 0) {
                     if (func_004165A8(namesB.s[i], name) == 0) {
-                        obj->v11(&col0);
+                        obj->setColour(&col0);
                     } else {
-                        obj->v11(&col1);
+                        obj->setColour(&col1);
                     }
                 }
             }
@@ -2390,9 +2390,9 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
                 obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesC.s[i]));
                 if (obj != 0) {
                     if (func_004165A8(namesC.s[i], name) == 0) {
-                        obj->v11(&col0);
+                        obj->setColour(&col0);
                     } else {
-                        obj->v11(&col1);
+                        obj->setColour(&col1);
                     }
                 }
             }
@@ -2402,10 +2402,10 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
         for (int i = 0; i < 6; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesA.s[i]));
             if (obj != 0) {
-                obj->v11(&col1);
+                obj->setColour(&col1);
                 for (int j = 0; j < 3; j++) {
                     if (func_004165A8(namesA.s[i], peak1RacePath.s[j]) == 0) {
-                        obj->v11(&col0);
+                        obj->setColour(&col0);
                     }
                 }
             }
@@ -2414,10 +2414,10 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
         for (int i = 0; i < 6; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesA.s[i]));
             if (obj != 0) {
-                obj->v11(&col1);
+                obj->setColour(&col1);
                 for (int j = 0; j < 2; j++) {
                     if (func_004165A8(namesA.s[i], peak1FreestylePath.s[j]) == 0) {
-                        obj->v11(&col0);
+                        obj->setColour(&col0);
                     }
                 }
             }
@@ -2426,10 +2426,10 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
         for (int i = 0; i < 6; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesB.s[i]));
             if (obj != 0) {
-                obj->v11(&col1);
+                obj->setColour(&col1);
                 for (int j = 0; j < 2; j++) {
                     if (func_004165A8(namesB.s[i], peak2RacePath.s[j]) == 0) {
-                        obj->v11(&col0);
+                        obj->setColour(&col0);
                     }
                 }
             }
@@ -2438,10 +2438,10 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
         for (int i = 0; i < 6; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesB.s[i]));
             if (obj != 0) {
-                obj->v11(&col1);
+                obj->setColour(&col1);
                 for (int j = 0; j < 2; j++) {
                     if (func_004165A8(namesB.s[i], peak2FreestylePath.s[j]) == 0) {
-                        obj->v11(&col0);
+                        obj->setColour(&col0);
                     }
                 }
             }
@@ -2450,10 +2450,10 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
         for (int i = 0; i < 5; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesC.s[i]));
             if (obj != 0) {
-                obj->v11(&col1);
+                obj->setColour(&col1);
                 for (int j = 0; j < 2; j++) {
                     if (func_004165A8(namesC.s[i], peak3RacePath.s[j]) == 0) {
-                        obj->v11(&col0);
+                        obj->setColour(&col0);
                     }
                 }
             }
@@ -2462,10 +2462,10 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
         for (int i = 0; i < 5; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesC.s[i]));
             if (obj != 0) {
-                obj->v11(&col1);
+                obj->setColour(&col1);
                 for (int j = 0; j < 2; j++) {
                     if (func_004165A8(namesC.s[i], peak3FreestylePath.s[j]) == 0) {
-                        obj->v11(&col0);
+                        obj->setColour(&col0);
                     }
                 }
             }
@@ -2474,99 +2474,99 @@ extern "C" void cUITemplate_MAP_showEventPath(cUITemplate_MAP* tmpl, char* name)
         for (int i = 0; i < 6; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesA.s[i]));
             if (obj != 0) {
-                obj->v11(&col1);
+                obj->setColour(&col1);
             }
         }
         for (int i = 0; i < 3; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00478225[i]));
             if (obj != 0) {
-                obj->v11(&col0);
+                obj->setColour(&col0);
             }
         }
     } else if (func_004165A8(name, str_peak1fsgroup) == 0) {
         for (int i = 0; i < 6; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesA.s[i]));
             if (obj != 0) {
-                obj->v11(&col1);
+                obj->setColour(&col1);
             }
         }
         for (int i = 0; i < 4; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00478735[i]));
             if (obj != 0) {
-                obj->v11(&col0);
+                obj->setColour(&col0);
             }
         }
     } else if (func_004165A8(name, str_peak1freeridegroup) == 0) {
         for (int i = 0; i < 6; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesA.s[i]));
             if (obj != 0) {
-                obj->v11(&col0);
+                obj->setColour(&col0);
             }
         }
     } else if (func_004165A8(name, str_peak2racegroup) == 0) {
         for (int i = 0; i < 6; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesB.s[i]));
             if (obj != 0) {
-                obj->v11(&col1);
+                obj->setColour(&col1);
             }
         }
         for (int i = 0; i < 3; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_004783D5[i]));
             if (obj != 0) {
-                obj->v11(&col0);
+                obj->setColour(&col0);
             }
         }
     } else if (func_004165A8(name, str_peak2fsgroup) == 0) {
         for (int i = 0; i < 6; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesB.s[i]));
             if (obj != 0) {
-                obj->v11(&col1);
+                obj->setColour(&col1);
             }
         }
         for (int i = 0; i < 4; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00478951[i]));
             if (obj != 0) {
-                obj->v11(&col0);
+                obj->setColour(&col0);
             }
         }
     } else if (func_004165A8(name, str_peak2freeridegroup) == 0) {
         for (int i = 0; i < 6; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesB.s[i]));
             if (obj != 0) {
-                obj->v11(&col0);
+                obj->setColour(&col0);
             }
         }
     } else if (func_004165A8(name, str_peak3racegroup) == 0) {
         for (int i = 0; i < 5; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesC.s[i]));
             if (obj != 0) {
-                obj->v11(&col1);
+                obj->setColour(&col1);
             }
         }
         for (int i = 0; i < 2; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00478585[i]));
             if (obj != 0) {
-                obj->v11(&col0);
+                obj->setColour(&col0);
             }
         }
     } else if (func_004165A8(name, str_peak3fsgroup) == 0) {
         for (int i = 0; i < 5; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesC.s[i]));
             if (obj != 0) {
-                obj->v11(&col1);
+                obj->setColour(&col1);
             }
         }
         for (int i = 0; i < 4; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(D_00478B6D[i]));
             if (obj != 0) {
-                obj->v11(&col0);
+                obj->setColour(&col0);
             }
         }
     } else if (func_004165A8(name, str_peak3freeridegroup) == 0) {
         for (int i = 0; i < 5; i++) {
             obj = (cUIPic_202828*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(namesC.s[i]));
             if (obj != 0) {
-                obj->v11(&col0);
+                obj->setColour(&col0);
             }
         }
     }
@@ -2708,7 +2708,7 @@ extern "C" void cUITemplate_MAP_setupLocationInfo_r(sMapTmpl_207430* self)
     char name[32];
     cUIObj_200700* mapObj = (cUIObj_200700*)getObj_207430(self, str_HelpText);
     if (cUITemplate_MAP_mMapState == 2)
-        mapObj->v09(1);
+        mapObj->setVisible(1);
     void* mission = cBE_getInterface_Fv(cBE_getBE(), 10);
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* reward = cBE_getInterface_Fv(cBE_getBE(), 13);

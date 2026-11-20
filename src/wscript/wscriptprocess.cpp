@@ -134,7 +134,7 @@ public:
     char pad00[0x40];
     // vptr at 0x40
     virtual void v01();
-    virtual void v02();
+    virtual void update();
 };
 
 class cWScriptProcess_update_cProc {
@@ -150,7 +150,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual void v05();
+    virtual void processUpdate();
 };
 
 /**
@@ -172,10 +172,10 @@ extern "C" void cWScriptProcess_update(cWScriptProcess_update_cProc* self)
         int st = self->state;
         if (st == 2) {
             if (self->cur < self->count) {
-                self->elems[self->cur].v02();
+                self->elems[self->cur].update();
             }
             if (self->state == st) {
-                self->v05();
+                self->processUpdate();
             }
         }
         break;
@@ -297,7 +297,7 @@ public:
     // vptr at 0x40; sizeof == 0x44 (same layout as cWScriptProcEntry)
     virtual void v01();
     virtual void v02();
-    virtual void v03(int a1); // 0x18
+    virtual void dispatchTaskEvent(int a1); // 0x18
 };
 
 /**
@@ -312,7 +312,7 @@ extern "C" void cWScriptProcess_dispatchTaskEvent(cWScriptProcess* self, int eve
 {
     int i = self->RunningTask;
     if (i < self->NumTasks) {
-        ((cWScriptProcess_dispatchTaskEvent_cObj*)(cWScriptProcEntry*)self->Tasks)[i].v03(event);
+        ((cWScriptProcess_dispatchTaskEvent_cObj*)(cWScriptProcEntry*)self->Tasks)[i].dispatchTaskEvent(event);
     }
 }
 #endif
@@ -527,7 +527,7 @@ public:
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual void v04();
+    virtual void taskStart();
 };
 
 struct cWScriptProcess_processStart_sProc {
@@ -572,7 +572,7 @@ extern "C" void cWScriptProcess_processStart(cWScriptProcess_processStart_sProc*
     }
     cWScriptMan_processStart(self->man, self);
     if (self->cur < self->count) {
-        self->elems[self->cur].v04();
+        self->elems[self->cur].taskStart();
     }
 }
 #endif
@@ -682,9 +682,9 @@ public:
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual void v04();
+    virtual void taskStart();
     virtual void v05();
-    virtual void v06();
+    virtual void taskEnd();
 };
 
 class cWScriptProcess_endTask_cProc {
@@ -697,7 +697,7 @@ public:
     char pad18[0x44];
     // vptr at 0x5C
     virtual void v01();
-    virtual void v02();
+    virtual void processComplete();
 };
 
 /**
@@ -712,14 +712,14 @@ extern "C" void cWScriptProcess_endTask(cWScriptProcess_endTask_cProc* self)
     if (self->state == 3) {
         return;
     }
-    self->elems[self->cur].v06();
+    self->elems[self->cur].taskEnd();
     int next = self->cur + 1;
     if (next < self->count) {
         self->cur = next;
         cWScriptProcess_endTask_cElem* nextTask = &self->elems[next];
-        nextTask->v04();
+        nextTask->taskStart();
     } else {
-        self->v02();
+        self->processComplete();
     }
 }
 #endif
@@ -736,7 +736,7 @@ public:
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual void v04();
+    virtual void taskStart();
 };
 
 struct cWScriptProcess_gotoTask_sProc {
@@ -765,7 +765,7 @@ extern "C" void cWScriptProcess_gotoTask(cWScriptProcess_gotoTask_sProc* self, i
                 self->states[self->cur].state = 3;
             }
             self->cur = i;
-            self->states[i].v04();
+            self->states[i].taskStart();
             return;
         }
     }
@@ -784,9 +784,9 @@ public:
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual void v04();
+    virtual void taskStart();
     virtual void v05();
-    virtual void v06();
+    virtual void taskEnd();
 };
 
 struct cWScriptProcess_advanceToTask_sProc {
@@ -813,10 +813,10 @@ extern "C" void cWScriptProcess_advanceToTask(cWScriptProcess_advanceToTask_sPro
     for (i = 0; i < self->count; i++) {
         if (self->elems[i].id == id) {
             if (self->cur < self->count) {
-                self->elems[self->cur].v06();
+                self->elems[self->cur].taskEnd();
             }
             self->cur = i;
-            self->elems[i].v04();
+            self->elems[i].taskStart();
             return;
         }
     }
@@ -848,7 +848,7 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_writeToReplayFrame);
 class cWScriptProcess_writeToReplayFrame_cStream {
 public:
     // slot N at vtable offset N*8
-    virtual void v01(void* data, int size);
+    virtual void write(void* data, int size);
 };
 
 class cWScriptTask_writeToReplayFrame_cObj;
@@ -868,10 +868,10 @@ extern "C" void luno_cLunoTable_writeToReplayFrame(void* obj, void* stream, int 
  */
 extern "C" void cWScriptProcess_writeToReplayFrame(cWScriptProcess* self, cWScriptProcess_writeToReplayFrame_cStream* stream)
 {
-    stream->v01(self, 0x10);
+    stream->write(self, 0x10);
     int x = cWScriptCache_getScriptBase(cWorld_m_pTheWorld->m_pWScriptCache, (int)self->SectionId);
     int has = self->Local != 0;
-    stream->v01(&has, 4);
+    stream->write(&has, 4);
     if (has) {
         luno_cLunoTable_writeToReplayFrame(self->Local, stream, x);
     }
@@ -889,7 +889,7 @@ class cWScriptProcess_readFromReplayFrame_cStream {
 public:
     // slot N at vtable offset N*8
     virtual void v01(void* data, int size);
-    virtual void v02(void* data, int size);
+    virtual void read(void* data, int size);
 };
 
 extern char str_ProcessLocalTable[];
@@ -912,14 +912,14 @@ extern "C" int cWScriptTask_readFromReplayFrame(cWScriptTask* a, cWScriptTask_re
  */
 extern "C" void cWScriptProcess_readFromReplayFrame(cWScriptProcess* self, cWScriptProcess_readFromReplayFrame_cStream* stream)
 {
-    stream->v02(self, 0x10);
+    stream->read(self, 0x10);
     int x = cWScriptCache_getScriptBase(cWorld_m_pTheWorld->m_pWScriptCache, (int)self->SectionId);
     if (self->Local != 0) {
         luno_cLunoTable__cLunoTable(self->Local, 3);
     }
     self->Local = 0;
     int has;
-    stream->v02(&has, 4);
+    stream->read(&has, 4);
     if (has) {
         void* localTable = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, str_ProcessLocalTable, 0x20000000, 0), 8);
         self->Local = (cLunoTable*)localTable;
@@ -1014,7 +1014,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual void v05();
+    virtual void taskUpdate();
 };
 
 /**
@@ -1028,10 +1028,10 @@ extern "C" void cWScriptTask_update(cWScriptTask_update_cProcess* self)
         break;
     case 1:
         self->state = 2;
-        self->v05();
+        self->taskUpdate();
         break;
     case 2:
-        self->v05();
+        self->taskUpdate();
         break;
     }
 }
@@ -1352,7 +1352,7 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptTask_writeToReplayFrame);
 class cWScriptTask_writeToReplayFrame_cObj {
 public:
     // slot N at vtable offset N*8
-    virtual int v01(void* a, int b);
+    virtual int write(void* a, int b);
 };
 
 /**
@@ -1366,7 +1366,7 @@ public:
  */
 extern "C" int cWScriptTask_writeToReplayFrame(cWScriptTask* task, cWScriptTask_writeToReplayFrame_cObj* obj)
 {
-    return obj->v01(task, 4);
+    return obj->write(task, 4);
 }
 #endif
 
@@ -1377,7 +1377,7 @@ class cWScriptTask_readFromReplayFrame_cObj {
 public:
     // slot N at vtable offset N*8
     virtual int v01(void* a, int b);
-    virtual int v02(void* a, int b);
+    virtual int read(void* a, int b);
 };
 
 /**
@@ -1391,7 +1391,7 @@ public:
  */
 extern "C" int cWScriptTask_readFromReplayFrame(cWScriptTask* task, cWScriptTask_readFromReplayFrame_cObj* obj)
 {
-    return obj->v02(task, 4);
+    return obj->read(task, 4);
 }
 #endif
 

@@ -253,7 +253,7 @@ public:
     virtual int v11();
     virtual int v12();
     virtual int v13();
-    virtual void v14(int, void*);
+    virtual void GetTitleString(int, void*);
     virtual int v15();
     virtual int v16();
     virtual int v17();
@@ -292,9 +292,9 @@ public:
     virtual int v50();
     virtual int v51();
     virtual int v52();
-    virtual int v53();
+    virtual int IsAvailable1();
     virtual int v54(int);
-    virtual int v55();
+    virtual int IsFormatted1();
     virtual int v56();
     virtual int v57();
     virtual int v58();
@@ -303,10 +303,10 @@ public:
     virtual int v61();
     virtual int v62();
     virtual int v63();
-    virtual void v64(void*);
+    virtual void GetStatus1(void*);
     virtual int v65();
-    virtual int v66(int);
-    virtual int v67(int);
+    virtual int IsFileSlotDisabled(int);
+    virtual int HasFileName(int);
 };
 
 class cState_1380 {
@@ -346,15 +346,15 @@ public:
     virtual int v32();
     virtual int v33();
     virtual int v34();
-    virtual void v35(int);
+    virtual void triggerDisplayState(int);
     virtual int v36();
     virtual int v37();
     virtual int v38();
     virtual int v39();
     virtual int v40();
     virtual int v41();
-    virtual int v42();
-    virtual void v43();
+    virtual int displayFileOK();
+    virtual void setMenuHighlight();
 };
 
 class cUIObj_1380 {
@@ -456,33 +456,33 @@ extern "C" void cOVState_PROFILE_displayOn(cOVState_PROFILE* profileState)
     unsigned short buf[800];
     char name[0x40];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-    if (self->v42()) {
-        if (!(*(cMCSub_1380**)(mp + 0x434))->v53()) {
+    if (self->displayFileOK()) {
+        if (!(*(cMCSub_1380**)(mp + 0x434))->IsAvailable1()) {
             cFEMemCard_callbackDisplayNoCards();
             cOVState_PROFILE_displayOff((cOVState_PROFILE*)self);
             return;
         }
         if (*(int*)((char*)self + 0x214) != 3)
-            self->v35(3);
+            self->triggerDisplayState(3);
     }
-    if (self->v42()) {
+    if (self->displayFileOK()) {
         cMCOverlayManager_GetDeviceDisplayString(mp, *(int*)(mp + 0x428), buf, 800);
         int first = 0;
         cUIText_setUnicodeStringWrap(getObj_1380(self, str_Memory_card_text_b), buf);
         *(int*)((char*)self + 0x21C) = *(int*)(mp + 0x428);
-        self->v43();
+        self->setMenuHighlight();
         cUIObj_1380* textWidget = getObj_1380(self, str_1percentage_b);
         *(sCol_1380*)((char*)textWidget + 0x88) = D_004C66C8_1380;
-        (*(cMCSub_1380**)(mp + 0x434))->v64(buf);
+        (*(cMCSub_1380**)(mp + 0x434))->GetStatus1(buf);
         cUIText_setUnicodeString(textWidget, buf);
         textWidget->setVisible(0);
         for (int i = 1; i < 7; i++) {
             sprintf(name, str_playerpct_d_b, i);
             textWidget = getObj_1380(self, name);
-            (*(cMCSub_1380**)(mp + 0x434))->v14(i - 1, (char*)self + 0x234);
+            (*(cMCSub_1380**)(mp + 0x434))->GetTitleString(i - 1, (char*)self + 0x234);
             cUIText_setUnicodeString(textWidget, (unsigned short*)((char*)self + 0x234));
-            if (!(*(cMCSub_1380**)(mp + 0x434))->v67(i - 1) && !(*(cMCSub_1380**)(mp + 0x434))->v66(i - 1)
-                && (*(cMCSub_1380**)(mp + 0x434))->v55()) {
+            if (!(*(cMCSub_1380**)(mp + 0x434))->HasFileName(i - 1) && !(*(cMCSub_1380**)(mp + 0x434))->IsFileSlotDisabled(i - 1)
+                && (*(cMCSub_1380**)(mp + 0x434))->IsFormatted1()) {
                 if (!first) {
                     first = 1;
                     textWidget->setStatic(0);
@@ -491,7 +491,7 @@ extern "C" void cOVState_PROFILE_displayOn(cOVState_PROFILE* profileState)
                     textWidget->setStatic(1);
                 }
             } else if ((*(cMCSub_1380**)(mp + 0x434))->v54(*(int*)(mp + 0x428))) {
-                if ((*(cMCSub_1380**)(mp + 0x434))->v66(i - 1)) {
+                if ((*(cMCSub_1380**)(mp + 0x434))->IsFileSlotDisabled(i - 1)) {
                     textWidget->setStatic(1);
                     textWidget->setUseStaticColour(1);
                 } else {

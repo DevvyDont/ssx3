@@ -150,7 +150,7 @@ class cStream26EA68 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01(void* buf, int size);
-    virtual void v02(void* buf, int size);
+    virtual void read(void* buf, int size);
 };
 
 /**
@@ -169,7 +169,7 @@ extern "C" short cReplayFramePtr_peekObjNodeType(cReplayFramePtr* self)
         short size;
     } hdr;
     int pos = (int)self->ReadData;
-    ((cStream26EA68*)self)->v02(&hdr, 4);
+    ((cStream26EA68*)self)->read(&hdr, 4);
     self->ReadData = (char*)pos;
     return hdr.id;
 }
@@ -229,7 +229,7 @@ class cStream_EB48 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01(void* buf, int size);
-    virtual void v02(void* buf, int size);
+    virtual void read(void* buf, int size);
 };
 
 static inline void* refToPtr_EB48(unsigned int p)
@@ -270,7 +270,7 @@ extern "C" void* cReplayFramePtr_readReplayInstance(cReplayFramePtr* stream)
 {
     void* instRecord = 0;
     sRefH_EB48 savedId;
-    ((cStream_EB48*)stream)->v02(&savedId, 4);
+    ((cStream_EB48*)stream)->read(&savedId, 4);
     if (~savedId.id != 0) {
         instRecord = func_003512C0(SSXApp->Game->InstanceMan, savedId.id);
         if (instRecord == 0) {
@@ -302,7 +302,7 @@ class cStream_EC08 {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
     virtual void v01(void* buf, int size);
-    virtual void v02(void* buf, int size);
+    virtual void read(void* buf, int size);
 };
 
 struct sRec_EC08 {
@@ -351,7 +351,7 @@ extern "C" void* cReplayFramePtr_readReplayInstance1(cReplayFramePtr* stream, vo
 {
     sNode_EC08* instRecord = 0;
     sRec_EC08 rec;
-    ((cStream_EC08*)stream)->v02(&rec, 8);
+    ((cStream_EC08*)stream)->read(&rec, 8);
     if (~rec.id != 0) {
         void* cachedRecord = lookup_EC08(rec.id);
         instRecord = (sNode_EC08*)cachedRecord;

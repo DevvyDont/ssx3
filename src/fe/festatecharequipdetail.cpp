@@ -765,12 +765,12 @@ public:
     virtual void v30();
     virtual void v31();
     virtual void v32();
-    virtual int v33();
-    virtual int v34();
-    virtual int v35();
-    virtual float v36();
-    virtual float v37();
-    virtual float v38();
+    virtual int isCamZoom();
+    virtual int isCamPan();
+    virtual int isCamRotate();
+    virtual float getCamZoom();
+    virtual float getCamPan();
+    virtual float getCamRotate();
 };
 
 static inline int isMode1_9A38(void* self)
@@ -801,21 +801,21 @@ extern "C" int cFEStateCharEquip_onInputBegin(void* self, cPad_9A38* in)
     if (!isMode1_9A38(self)) {
     int mode = *(int*)((char*)self + 0xAE0);
     if (mode == 1 || mode == 4) {
-    if (in->v35()) {
-        *(float*)((char*)self + 0xAAC) += in->v38() * 3.0f;
+    if (in->isCamRotate()) {
+        *(float*)((char*)self + 0xAAC) += in->getCamRotate() * 3.0f;
         while (*(float*)((char*)self + 0xAAC) >= 360.0f)
             *(float*)((char*)self + 0xAAC) -= 360.0f;
         while (*(float*)((char*)self + 0xAAC) < 0.0f)
             *(float*)((char*)self + 0xAAC) += 360.0f;
         handled = 1;
     }
-    if (in->v33()) {
+    if (in->isCamZoom()) {
         // PORT: <? (GNU min operator)
-        *(float*)((char*)self + 0xAA4) = clamp_9A38(*(float*)((char*)self + 0xAA4) + in->v36() * -0.10000000149011612f, 0.0f, 1.0f);
+        *(float*)((char*)self + 0xAA4) = clamp_9A38(*(float*)((char*)self + 0xAA4) + in->getCamZoom() * -0.10000000149011612f, 0.0f, 1.0f);
         handled = 1;
     }
-    if (in->v34()) {
-        *(float*)((char*)self + 0xAA8) = clamp_9A38(*(float*)((char*)self + 0xAA8) + in->v37() * -0.10000000149011612f, -1.0f, 1.0f);
+    if (in->isCamPan()) {
+        *(float*)((char*)self + 0xAA8) = clamp_9A38(*(float*)((char*)self + 0xAA8) + in->getCamPan() * -0.10000000149011612f, -1.0f, 1.0f);
         handled = 1;
     }
     }

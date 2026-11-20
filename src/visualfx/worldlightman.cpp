@@ -1299,8 +1299,8 @@ INCLUDE_ASM("visualfx/worldlightman", cCheatFX_writeToReplayFrame);
 class cCheatFX_writeToReplayFrame_cObj {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
-    virtual int v01(void* dst, int size);
-    virtual int v02(void* src, int size);
+    virtual int write(void* dst, int size);
+    virtual int read(void* src, int size);
 };
 
 /**
@@ -1310,7 +1310,7 @@ public:
  */
 extern "C" void cCheatFX_writeToReplayFrame(cCheatFX* self, cCheatFX_writeToReplayFrame_cObj* stream)
 {
-    stream->v01((char*)&self->m_cheatState, 4);
+    stream->write((char*)&self->m_cheatState, 4);
 }
 #endif
 
@@ -1324,7 +1324,7 @@ INCLUDE_ASM("visualfx/worldlightman", cCheatFX_readFromReplayFrame);
  */
 extern "C" void cCheatFX_readFromReplayFrame(cCheatFX* self, cCheatFX_writeToReplayFrame_cObj* stream)
 {
-    stream->v02((char*)&self->m_cheatState, 4);
+    stream->read((char*)&self->m_cheatState, 4);
 }
 #endif
 

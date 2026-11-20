@@ -2600,7 +2600,7 @@ public:
     virtual void v72();
     virtual void v73();
     virtual void v74();
-    virtual void v75(void* a, int b, int c);
+    virtual void RenderSpline(void* a, int b, int c);
 };
 
 struct sCtl00345430 {
@@ -2633,7 +2633,7 @@ extern "C" void cSpline_draw(void* self, int lineColour)
     int i;
     for (i = 0; i < n; i++) {
         if (func_00345638(node) != 0) {
-            ((cWorld00345430*)w)->v75(node + 0x10, lineColour, 10);
+            ((cWorld00345430*)w)->RenderSpline(node + 0x10, lineColour, 10);
         }
         node = *(char**)(node + 0x64);
     }

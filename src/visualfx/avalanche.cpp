@@ -2498,7 +2498,7 @@ struct cAvalanche_writeToReplayFrame_sSave {
 class cAvalanche_writeToReplayFrame_cStream {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01(void* data, int size);
+    virtual void write(void* data, int size);
 };
 
 /**
@@ -2518,7 +2518,7 @@ extern "C" void cAvalanche_writeToReplayFrame(cAvalanche_writeToReplayFrame_cStr
         state.ids[i] = D_00538938_9CB0[i].isActive() ? *D_00538938_9CB0[i].av : -1;
         state.times[i] = D_00538938_9CB0[i].isActive() ? D_00538938_9CB0[i].t : 0.0f;
     }
-    stream->v01(&state, 0x80);
+    stream->write(&state, 0x80);
 }
 #endif
 

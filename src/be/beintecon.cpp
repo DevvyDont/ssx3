@@ -293,7 +293,7 @@ class cBEIface_0C20 {
 public:
     char pad[0xC];
     virtual void v1();
-    virtual void v2();
+    virtual void discard();
 };
 extern "C" cBEIface_0C20* cBEStatInterface_getThis();
 int cBEEconInterface_getAttribCost(void* self, int a1);
@@ -350,7 +350,7 @@ extern "C" int cBEEconInterface_buyAttribute(void* self, int humanIndex, int cha
         sEconRec_0C20* charProfile = (sEconRec_0C20*)((characterId * 0xF88 + humanIndex * 0x9B50) + (char*)cBELibrary_profileLib);
         charProfile->unk_AC4 = charProfile->unk_AC4 - cost;
         *attribLevel = (unsigned char)*attribLevel + 1;
-        cBEStatInterface_getThis()->v2();
+        cBEStatInterface_getThis()->discard();
         return 1;
     }
 }

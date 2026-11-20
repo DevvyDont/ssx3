@@ -324,7 +324,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual void v05();
+    virtual void sync();
 };
 
 class cAppTickK2 {
@@ -343,7 +343,7 @@ public:
     virtual void v04();
     virtual void v05();
     virtual void v06();
-    virtual void v07();
+    virtual void timerCallback();
 };
 
 /**
@@ -367,9 +367,9 @@ int cAppMan_timerFunction(void* appMan)
     int n = (int)sum - wholeTicks;
     self->accum = sum - (float)n;
     while (n--) {
-        self->v07();
+        self->timerCallback();
     }
-    self->sub->v05();
+    self->sub->sync();
 }
 #endif
 

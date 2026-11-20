@@ -430,7 +430,7 @@ public:
     virtual void v04();
     virtual void v05();
     virtual void v06();
-    virtual void v07(int on);
+    virtual void setFocus(int on);
     virtual void v08();
     virtual void v09();
     virtual void v10();
@@ -466,13 +466,13 @@ extern "C" void cFEStateBraggingRights_onWidgetCreate(char* self, cUIObj_193650*
     char* wp = (char*)w;
     if (Is_193650(*(int*)(wp + 0x38), str_1Menu)) {
         *(void**)(self + 0x6D0) = 0;
-        w->v07(1);
+        w->setFocus(1);
         *(void**)(self + 0x6D0) = w;
         *(int*)(wp + 0x14) |= 1;
         *(int*)(wp + 0x90) |= 1;
     } else if (Is_193650(*(int*)(wp + 0x38), str_2Menu)) {
         *(void**)(self + 0x704) = 0;
-        w->v07(1);
+        w->setFocus(1);
         *(void**)(self + 0x704) = w;
         *(int*)(wp + 0x14) |= 1;
         *(int*)(wp + 0x90) |= 1;

@@ -225,7 +225,7 @@ INCLUDE_ASM("object/objnode", cTypeObjNode_writeToReplayFrame);
 class cTypeObjNode_writeToReplayFrame_cObj {
 public:
     // vptr at 0x0; slot N at vtable offset N*8
-    virtual void v01(void* buf, int size);
+    virtual void write(void* buf, int size);
 };
 
 /**
@@ -235,7 +235,7 @@ public:
  */
 extern "C" void cTypeObjNode_writeToReplayFrame(void* self, cTypeObjNode_writeToReplayFrame_cObj* obj)
 {
-    obj->v01((char*)self + 0x10, 4);
+    obj->write((char*)self + 0x10, 4);
 }
 #endif
 
@@ -250,7 +250,7 @@ INCLUDE_ASM("object/objnode", cSortObjNode_writeToReplayFrame);
 extern "C" void cSortObjNode_writeToReplayFrame(void* self, cTypeObjNode_writeToReplayFrame_cObj* obj)
 {
     cTypeObjNode_writeToReplayFrame(self, obj);
-    obj->v01((char*)self + 0x14, 4);
+    obj->write((char*)self + 0x14, 4);
 }
 #endif
 

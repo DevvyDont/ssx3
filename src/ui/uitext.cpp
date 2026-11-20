@@ -322,7 +322,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual void v05(int);
+    virtual void setCached(int);
     virtual void v06();
     virtual void v07();
     virtual void v08();
@@ -341,7 +341,7 @@ public:
     virtual void v21();
     virtual void v22();
     virtual void v23();
-    virtual void v24(int);
+    virtual void setUnicode(int);
 };
 
 /**
@@ -356,8 +356,8 @@ public:
 extern "C" void cUIText_setAsciiStringPrivate(cUIText* self, const char* str)
 {
     unsigned short buf[0x200];
-    ((cUIText_3A0C70*)self)->v05(1);
-    ((cUIText_3A0C70*)self)->v24(0);
+    ((cUIText_3A0C70*)self)->setCached(1);
+    ((cUIText_3A0C70*)self)->setUnicode(0);
     if (strlen(str) + 1 < 0x200) {
         UIAsciiToUnicode(buf, str);
         cUIText_setUnicodeStringPrivate(self, buf);
@@ -390,7 +390,7 @@ extern unsigned short gUSTRBackSlash;
  */
 extern "C" void cUIText_setUnicodeStringWrap(cUIText* self, unsigned short* str)
 {
-    ((cUIText_3A0C70*)self)->v05(1);
+    ((cUIText_3A0C70*)self)->setCached(1);
     void* font = cUIText_getFont(self);
     if (font == 0) {
         return;
@@ -471,8 +471,8 @@ extern unsigned short gUSTRBackSlash;
  */
 extern "C" void cUIText_setUnicodeStringPrivate(cUIText* self_, const unsigned short* str)
 {
-    ((cUIText_3A0C70*)self_)->v05(1);
-    ((cUIText_3A0C70*)self_)->v24(1);
+    ((cUIText_3A0C70*)self_)->setCached(1);
+    ((cUIText_3A0C70*)self_)->setUnicode(1);
     cUIText_deleteText(self_);
     int len = USTR_length((unsigned short*)str);
     if (len < 801) {
@@ -759,7 +759,7 @@ public:
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual void* v04(int);
+    virtual void* getStringByHash(int);
 };
 
 class cUITextScroll_updateLocale_cVirtB {
@@ -770,7 +770,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual void v05(int);
+    virtual void setCached(int);
 };
 
 /**
@@ -784,11 +784,11 @@ extern "C" void cUITextScroll_updateLocale(cUITextScroll* self)
     if (id != 0) {
         cUITextScroll_updateLocale_cVirtA* strings = *(cUITextScroll_updateLocale_cVirtA**)((char*)*(void**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x10);
         if (strings != 0) {
-            void* wideStr = strings->v04(id);
+            void* wideStr = strings->getStringByHash(id);
             if (wideStr != 0) {
                 cUITextScroll_setUnicodeStringWrap(self, wideStr);
             }
-            ((cUITextScroll_updateLocale_cVirtB*)self)->v05(1);
+            ((cUITextScroll_updateLocale_cVirtB*)self)->setCached(1);
         }
     }
 }
@@ -1115,7 +1115,7 @@ extern "C" void func_002C2540(void* dst, void* src);
  */
 extern "C" void cUITextScroll_addAsciiString(cUITextScroll* self, char* str)
 {
-    ((cUIText_3A0C70*)self)->v05(1);
+    ((cUIText_3A0C70*)self)->setCached(1);
     void* font = (void*)cUITextScroll_getFont(self);
     if (font == 0) {
         return;
@@ -1260,7 +1260,7 @@ extern "C" void cUITextScroll_addUnicodeString(cUITextScroll* self, unsigned sho
 extern "C" void cUITextScroll_addUnicodeStringWrap(cUITextScroll* self, void* vstr)
 {
     unsigned short* str = (unsigned short*)vstr;
-    ((cUIText_3A0C70*)self)->v05(1);
+    ((cUIText_3A0C70*)self)->setCached(1);
     void* font = (void*)cUITextScroll_getFont(self);
     if (font == 0) {
         return;
@@ -1322,7 +1322,7 @@ public:
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual void* v04(int);
+    virtual void* getStringByHash(int);
 };
 
 class cUITextScroll_addUnicodeStringByID_cVirtB {
@@ -1333,7 +1333,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual void v05(int);
+    virtual void setCached(int);
 };
 
 /**
@@ -1348,11 +1348,11 @@ extern "C" void cUITextScroll_addUnicodeStringByID(cUITextScroll* self, int id)
     self->mStringID = (unsigned int)id;
     cUITextScroll_addUnicodeStringByID_cVirtA* localeInterface = *(cUITextScroll_addUnicodeStringByID_cVirtA**)((char*)*(void**)((char*)*(void**)((char*)self->mpScreen + 0xD0) + 0x10) + 0x10);
     if (localeInterface != 0) {
-        void* unicodeString = localeInterface->v04(id);
+        void* unicodeString = localeInterface->getStringByHash(id);
         if (unicodeString != 0) {
             cUITextScroll_addUnicodeStringWrap(self, unicodeString);
         }
-        ((cUITextScroll_addUnicodeStringByID_cVirtB*)self)->v05(1);
+        ((cUITextScroll_addUnicodeStringByID_cVirtB*)self)->setCached(1);
     }
 }
 #endif

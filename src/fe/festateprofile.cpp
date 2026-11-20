@@ -518,21 +518,21 @@ class cMCSub_F2B8 {
 public:
     V_F2B8(01) V_F2B8(02) V_F2B8(03) V_F2B8(04) V_F2B8(05) V_F2B8(06) V_F2B8(07) V_F2B8(08) V_F2B8(09) V_F2B8(10)
     V_F2B8(11) V_F2B8(12) V_F2B8(13)
-    virtual void v14(int, void*);
-    virtual void v15(int, void*);
-    virtual void v16(int, void*);
+    virtual void GetTitleString(int, void*);
+    virtual void GetFileDate(int, void*);
+    virtual void GetFileTime(int, void*);
     V_F2B8(17) V_F2B8(18) V_F2B8(19) V_F2B8(20)
     V_F2B8(21) V_F2B8(22) V_F2B8(23) V_F2B8(24) V_F2B8(25) V_F2B8(26) V_F2B8(27) V_F2B8(28) V_F2B8(29) V_F2B8(30)
     V_F2B8(31) V_F2B8(32) V_F2B8(33) V_F2B8(34) V_F2B8(35) V_F2B8(36) V_F2B8(37) V_F2B8(38) V_F2B8(39) V_F2B8(40)
     V_F2B8(41) V_F2B8(42) V_F2B8(43) V_F2B8(44) V_F2B8(45) V_F2B8(46) V_F2B8(47) V_F2B8(48) V_F2B8(49) V_F2B8(50)
     V_F2B8(51) V_F2B8(52)
-    virtual int v53();
+    virtual int IsAvailable1();
     virtual int v54(int);
-    virtual int v55();
+    virtual int IsFormatted1();
     V_F2B8(56) V_F2B8(57) V_F2B8(58) V_F2B8(59) V_F2B8(60)
     V_F2B8(61) V_F2B8(62) V_F2B8(63) V_F2B8(64) V_F2B8(65)
-    virtual int v66(int);
-    virtual int v67(int);
+    virtual int IsFileSlotDisabled(int);
+    virtual int HasFileName(int);
 };
 
 class cState_F2B8 {
@@ -542,21 +542,21 @@ public:
     V_F2B8(11) V_F2B8(12) V_F2B8(13) V_F2B8(14) V_F2B8(15) V_F2B8(16) V_F2B8(17) V_F2B8(18) V_F2B8(19) V_F2B8(20)
     V_F2B8(21) V_F2B8(22) V_F2B8(23) V_F2B8(24) V_F2B8(25) V_F2B8(26) V_F2B8(27) V_F2B8(28) V_F2B8(29) V_F2B8(30)
     V_F2B8(31) V_F2B8(32) V_F2B8(33) V_F2B8(34)
-    virtual void v35(int);
+    virtual void triggerDisplayState(int);
     V_F2B8(36) V_F2B8(37) V_F2B8(38) V_F2B8(39) V_F2B8(40) V_F2B8(41)
-    virtual int v42();
-    virtual void v43();
+    virtual int displayFileOK();
+    virtual void setMenuHighlight();
 };
 
 class cUIObj_F2B8 {
 public:
     int pad[2];
     V_F2B8(01) V_F2B8(02) V_F2B8(03) V_F2B8(04) V_F2B8(05) V_F2B8(06) V_F2B8(07)
-    virtual void v08(int);
-    virtual void v09(int);
+    virtual void setStatic(int);
+    virtual void setVisible(int);
     V_F2B8(10) V_F2B8(11) V_F2B8(12) V_F2B8(13) V_F2B8(14) V_F2B8(15) V_F2B8(16) V_F2B8(17) V_F2B8(18) V_F2B8(19)
     V_F2B8(20) V_F2B8(21) V_F2B8(22) V_F2B8(23) V_F2B8(24)
-    virtual void v25(int);
+    virtual void setUseStaticColour(int);
 };
 #undef V_F2B8
 
@@ -583,86 +583,86 @@ extern "C" void cFEStateProfileLoad_displayOn(cFEStateProfileLoad* vself)
     unsigned short buf[800];
     char name[0x40];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-    if (self->v42()) {
-        if (!(*(cMCSub_F2B8**)(mp + 0x434))->v53()) {
+    if (self->displayFileOK()) {
+        if (!(*(cMCSub_F2B8**)(mp + 0x434))->IsAvailable1()) {
             cFEMemCard_callbackDisplayNoCards();
             cFEStateProfileLoad_displayOff((cFEStateProfileLoad*)self);
             return;
         } else if (*(int*)((char*)self + 0x214) != 3) {
-            self->v35(3);
+            self->triggerDisplayState(3);
         }
     }
-    if (self->v42()) {
+    if (self->displayFileOK()) {
         int sel = 0;
         cMCOverlayManager_GetDeviceDisplayString(mp, *(int*)(mp + 0x428), buf, 800);
         cUIText_setUnicodeStringWrap(getObj_F2B8(self, str_Memory_card_text), buf);
         *(int*)((char*)self + 0x21C) = *(int*)(mp + 0x428);
-        self->v43();
+        self->setMenuHighlight();
         cUIObj_F2B8* widget = getObj_F2B8(self, str_1percentage);
-        widget->v09(0);
+        widget->setVisible(0);
         for (int i = 1; i < 7; i++) {
             sprintf(name, str_playerpct_d, i);
             widget = getObj_F2B8(self, name);
             *(sColor_F2B8*)((char*)widget + 0x88) = D_004C66C8;
-            if (!(*(cMCSub_F2B8**)(mp + 0x434))->v67(i - 1) && !(*(cMCSub_F2B8**)(mp + 0x434))->v66(i - 1)
-                && (*(cMCSub_F2B8**)(mp + 0x434))->v55()) {
-                (*(cMCSub_F2B8**)(mp + 0x434))->v14(i - 1, (char*)self + 0x238);
+            if (!(*(cMCSub_F2B8**)(mp + 0x434))->HasFileName(i - 1) && !(*(cMCSub_F2B8**)(mp + 0x434))->IsFileSlotDisabled(i - 1)
+                && (*(cMCSub_F2B8**)(mp + 0x434))->IsFormatted1()) {
+                (*(cMCSub_F2B8**)(mp + 0x434))->GetTitleString(i - 1, (char*)self + 0x238);
                 cUIText_setUnicodeString(widget, (unsigned short*)((char*)self + 0x238));
                 if (cFEStateProfileLoad_mScreenAction != 2 && sel == 0) {
                     sel = 1;
-                    widget->v08(0);
-                    widget->v25(0);
+                    widget->setStatic(0);
+                    widget->setUseStaticColour(0);
                 } else {
-                    widget->v25(1);
-                    widget->v08(1);
+                    widget->setUseStaticColour(1);
+                    widget->setStatic(1);
                 }
                 sprintf(name, str_datepct_d, i);
                 widget = getObj_F2B8(self, name);
-                widget->v09(0);
+                widget->setVisible(0);
                 sprintf(name, str_timepct_d, i);
                 widget = getObj_F2B8(self, name);
-                widget->v09(0);
+                widget->setVisible(0);
             } else if ((*(cMCSub_F2B8**)(mp + 0x434))->v54(*(int*)(mp + 0x428))) {
-                (*(cMCSub_F2B8**)(mp + 0x434))->v14(i - 1, (char*)self + 0x238);
+                (*(cMCSub_F2B8**)(mp + 0x434))->GetTitleString(i - 1, (char*)self + 0x238);
                 cUIText_setUnicodeString(widget, (unsigned short*)((char*)self + 0x238));
-                if ((*(cMCSub_F2B8**)(mp + 0x434))->v66(i - 1)) {
-                    widget->v08(1);
-                    widget->v25(1);
+                if ((*(cMCSub_F2B8**)(mp + 0x434))->IsFileSlotDisabled(i - 1)) {
+                    widget->setStatic(1);
+                    widget->setUseStaticColour(1);
                 } else {
-                    widget->v08(0);
-                    widget->v25(0);
+                    widget->setStatic(0);
+                    widget->setUseStaticColour(0);
                 }
                 sprintf(name, str_datepct_d, i);
                 widget = getObj_F2B8(self, name);
-                (*(cMCSub_F2B8**)(mp + 0x434))->v15(i - 1, buf);
+                (*(cMCSub_F2B8**)(mp + 0x434))->GetFileDate(i - 1, buf);
                 cUIText_setUnicodeString(widget, buf);
-                widget->v09(1);
+                widget->setVisible(1);
                 sprintf(name, str_timepct_d, i);
                 widget = getObj_F2B8(self, name);
-                (*(cMCSub_F2B8**)(mp + 0x434))->v16(i - 1, buf);
+                (*(cMCSub_F2B8**)(mp + 0x434))->GetFileTime(i - 1, buf);
                 cUIText_setUnicodeString(widget, buf);
-                widget->v09(1);
+                widget->setVisible(1);
             } else {
-                (*(cMCSub_F2B8**)(mp + 0x434))->v14(i - 1, (char*)self + 0x238);
+                (*(cMCSub_F2B8**)(mp + 0x434))->GetTitleString(i - 1, (char*)self + 0x238);
                 cUIText_setUnicodeString(widget, (unsigned short*)((char*)self + 0x238));
-                widget->v25(1);
-                widget->v08(1);
+                widget->setUseStaticColour(1);
+                widget->setStatic(1);
                 sprintf(name, str_datepct_d, i);
                 widget = getObj_F2B8(self, name);
-                widget->v09(0);
+                widget->setVisible(0);
                 sprintf(name, str_timepct_d, i);
                 widget = getObj_F2B8(self, name);
-                widget->v09(0);
+                widget->setVisible(0);
             }
         }
         if (cFEMemCard_checkNextAvailableDevice(self, mp, *(int*)(mp + 0x428), 1) == -1)
-            getObj_F2B8(self, str_arrw_left)->v09(0);
+            getObj_F2B8(self, str_arrw_left)->setVisible(0);
         else
-            getObj_F2B8(self, str_arrw_left)->v09(1);
+            getObj_F2B8(self, str_arrw_left)->setVisible(1);
         if (cFEMemCard_checkNextAvailableDevice(self, mp, *(int*)(mp + 0x428), 0) == -1)
-            getObj_F2B8(self, str_arrw_right)->v09(0);
+            getObj_F2B8(self, str_arrw_right)->setVisible(0);
         else
-            getObj_F2B8(self, str_arrw_right)->v09(1);
+            getObj_F2B8(self, str_arrw_right)->setVisible(1);
     }
 }
 #endif

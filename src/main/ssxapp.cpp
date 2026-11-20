@@ -1354,7 +1354,7 @@ public:
     virtual void v37();
     virtual void v38();
     virtual void v39();
-    virtual void v40(int mode);
+    virtual void SetTVDisplayFormat(int mode);
 };
 
 struct sVE_228C08 {
@@ -1376,16 +1376,16 @@ extern "C" void cSSXApp_activateBEOptions()
     cBE_getInterface_Fv(cBE_getBE(), 4);
     switch (GetOptions_228C08().mode) {
     case 0:
-        ((cGfx_228C08*)cGraphicsMan_TheGraphicsMan)->v40(0);
+        ((cGfx_228C08*)cGraphicsMan_TheGraphicsMan)->SetTVDisplayFormat(0);
         break;
     case 1:
-        ((cGfx_228C08*)cGraphicsMan_TheGraphicsMan)->v40(1);
+        ((cGfx_228C08*)cGraphicsMan_TheGraphicsMan)->SetTVDisplayFormat(1);
         break;
     case 2:
-        ((cGfx_228C08*)cGraphicsMan_TheGraphicsMan)->v40(2);
+        ((cGfx_228C08*)cGraphicsMan_TheGraphicsMan)->SetTVDisplayFormat(2);
         break;
     default:
-        ((cGfx_228C08*)cGraphicsMan_TheGraphicsMan)->v40(0);
+        ((cGfx_228C08*)cGraphicsMan_TheGraphicsMan)->SetTVDisplayFormat(0);
         break;
     }
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
@@ -2325,7 +2325,7 @@ public:
     virtual void v69(); virtual void v70(); virtual void v71(); virtual void v72();
     virtual void v73(); virtual void v74(); virtual void v75(); virtual void v76();
     virtual void v77();
-    virtual void v78(const sV4_229BA8* pos, const sV2_229BA8* size, const sV2_229BA8* uv0,
+    virtual void DrawSprite(const sV4_229BA8* pos, const sV2_229BA8* size, const sV2_229BA8* uv0,
                      const sV2_229BA8* uv1, const sV4_229BA8* col);
 };
 
@@ -2402,7 +2402,7 @@ extern "C" void func_00229BA8(void* crowdMan)
                 set2_229BA8((cGfx_229BA8*)ps2GraphicsMan, 0x3E0, 5, 4);
                 set1_229BA8((cGfx_229BA8*)ps2GraphicsMan, 0x7C, 2, 7);
             }
-            ((cGfx_229BA8*)ps2GraphicsMan)->v78(&self->markers[i].pos, &size, &uv0, &uv1, &col);
+            ((cGfx_229BA8*)ps2GraphicsMan)->DrawSprite(&self->markers[i].pos, &size, &uv0, &uv1, &col);
         }
     }
     if (pushed) {
@@ -3791,31 +3791,31 @@ public:
     virtual void v01(); virtual void v02(); virtual void v03(); virtual void v04();
     virtual void v05(); virtual void v06(); virtual void v07(); virtual void v08();
     virtual void v09();
-    virtual unsigned int v10();
-    virtual unsigned int v11();
+    virtual unsigned int GetScreenWidth();
+    virtual unsigned int GetScreenHeight();
     virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15();
     virtual void v16();
-    virtual int v17();
+    virtual int IsRenderReady();
     virtual void v18(); virtual void v19();
-    virtual void v20();
+    virtual void DrawFrame();
     virtual void v21(); virtual void v22();
     virtual void v23(float x, float y, float w, float h, int a);
-    virtual void v24(sRect_22B008* r, int a);
-    virtual void v25(float fov, float nearClip, float farClip);
-    virtual void v26(float a, float b, float c, float d, float e, float f, int g, int h);
+    virtual void SetViewportWindow1(sRect_22B008* r, int a);
+    virtual void SetViewportPerspective(float fov, float nearClip, float farClip);
+    virtual void SetViewportOrthographic(float a, float b, float c, float d, float e, float f, int g, int h);
     virtual void v27(); virtual void v28(); virtual void v29(); virtual void v30();
     virtual void v31(); virtual void v32(); virtual void v33();
-    virtual void v34(sMat_22B008* m);
+    virtual void SetView1(sMat_22B008* m);
     virtual void v35(); virtual void v36(); virtual void v37(); virtual void v38();
     virtual void v39(); virtual void v40(); virtual void v41(); virtual void v42();
-    virtual sMat_22B008 v43();
+    virtual sMat_22B008 GetNetMatrix();
     virtual void v44(); virtual void v45(); virtual void v46(); virtual void v47();
     virtual void v48(); virtual void v49(); virtual void v50(); virtual void v51();
     virtual void v52(); virtual void v53(); virtual void v54(); virtual void v55();
     virtual void v56(); virtual void v57(); virtual void v58(); virtual void v59();
     virtual void v60(); virtual void v61(); virtual void v62(); virtual void v63();
     virtual void v64(); virtual void v65();
-    virtual void v66();
+    virtual void ClearProjTextures();
     virtual void v67(); virtual void v68(); virtual void v69(); virtual void v70();
     virtual void v71(); virtual void v72(); virtual void v73(); virtual void v74();
     virtual void v75(); virtual void v76(); virtual void v77(); virtual void v78();
@@ -3829,7 +3829,7 @@ public:
     virtual void v107(); virtual void v108(); virtual void v109(); virtual void v110();
     virtual void v111(); virtual void v112(); virtual void v113(); virtual void v114();
     virtual void v115();
-    virtual void v116(int view);
+    virtual void RenderFullScreenEffects(int view);
 };
 
 
@@ -4050,10 +4050,10 @@ static inline int IsReady_22B008(sGame_22B008* self)
  */
 extern "C" int cGame_render(sGame_22B008* self)
 {
-    if (((cGfx_22B008*)GrMan)->v17() == 0) {
+    if (((cGfx_22B008*)GrMan)->IsRenderReady() == 0) {
         return 0;
     }
-    ((cGfx_22B008*)GrMan)->v116(-1);
+    ((cGfx_22B008*)GrMan)->RenderFullScreenEffects(-1);
     {
         sLoader_22B008* streamPause = self->loader;
         sVELoader_22B008* vt = streamPause->vt;
@@ -4079,18 +4079,18 @@ extern "C" int cGame_render(sGame_22B008* self)
     sWorld_22B008* world = 0;
     for (unsigned int i = 0; i < self->views->views; i++) {
         ((cGfx_22B008*)GrMan)->view = i;
-        ((cGfx_22B008*)GrMan)->v66();
+        ((cGfx_22B008*)GrMan)->ClearProjTextures();
         self->views->cur = i;
         sCam_22B008* cam = self->views->cams[self->views->cur];
-        ((cGfx_22B008*)GrMan)->v24(&self->views->rects[i], 1);
-        ((cGfx_22B008*)GrMan)->v34(&cam->mat);
-        ((cGfx_22B008*)GrMan)->v25(cam->fov, 1.0f, cam->farClip);
+        ((cGfx_22B008*)GrMan)->SetViewportWindow1(&self->views->rects[i], 1);
+        ((cGfx_22B008*)GrMan)->SetView1(&cam->mat);
+        ((cGfx_22B008*)GrMan)->SetViewportPerspective(cam->fov, 1.0f, cam->farClip);
         ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & 0xFE7FFFFF) | 0x800000;
         ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & 0xFFCFFFFF) | 0x300000;
         ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & 0xFFF00FFF) | 0xD000;
         self->renderer->v04();
-        ((cGfx_22B008*)GrMan)->v25(cam->fov, cam->nearClip, cam->farClip);
-        ((cGfx_22B008*)GrMan)->v116(i);
+        ((cGfx_22B008*)GrMan)->SetViewportPerspective(cam->fov, cam->nearClip, cam->farClip);
+        ((cGfx_22B008*)GrMan)->RenderFullScreenEffects(i);
         ((cGfx_22B008*)GrMan)->top->f8 = (((cGfx_22B008*)GrMan)->top->f8 & ~0x3E0) | 0x80;
         *(short*)((char*)((cGfx_22B008*)GrMan)->top + 0x12) = CurLayer_22B008((cGfx_22B008*)GrMan);
         ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & ~0xF80) | 0x380;
@@ -4100,7 +4100,7 @@ extern "C" int cGame_render(sGame_22B008* self)
         ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & 0xFFF00FFF) | 0xD000;
         ((cGfx_22B008*)GrMan)->top->f8 = (((cGfx_22B008*)GrMan)->top->f8 & ~0x3E0) | 0x80;
         sBox_22B008 box;
-        sMat_22B008 view = ((cGfx_22B008*)GrMan)->v43();
+        sMat_22B008 view = ((cGfx_22B008*)GrMan)->GetNetMatrix();
         float nearClip = cam->nearClip;
         float farClip = cam->farClip;
         sMat_22B008 inv;
@@ -4157,10 +4157,10 @@ extern "C" int cGame_render(sGame_22B008* self)
         sVEView_22B008* vt = (sVEView_22B008*)GrMan->mVtbl;
         char* thisp = (char*)GrMan + vt[23].delta;
         void (**pfn)(void*, float, float, float, float, int) = &vt[23].fn;
-        (*pfn)(thisp, 0.0f, 0.0f, (float)((cGfx_22B008*)GrMan)->v10(), (float)((cGfx_22B008*)GrMan)->v11(), 1);
+        (*pfn)(thisp, 0.0f, 0.0f, (float)((cGfx_22B008*)GrMan)->GetScreenWidth(), (float)((cGfx_22B008*)GrMan)->GetScreenHeight(), 1);
     }
-    ((cGfx_22B008*)GrMan)->v26(0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f, 0, 0);
-    ((cGfx_22B008*)GrMan)->v34(&D_004FF1A0_22B008);
+    ((cGfx_22B008*)GrMan)->SetViewportOrthographic(0.0f, 0.0f, 640.0f, 480.0f, 0.0f, 1.0f, 0, 0);
+    ((cGfx_22B008*)GrMan)->SetView1(&D_004FF1A0_22B008);
     ((cGfx_22B008*)GrMan)->top->f8 = (((cGfx_22B008*)GrMan)->top->f8 & ~0x3E0) | 0x300;
     ((cGfx_22B008*)GrMan)->top->f4 = (((cGfx_22B008*)GrMan)->top->f4 & ~0x7C) | 0x14;
     sHud_22B008* hud = self->hud;
@@ -4185,7 +4185,7 @@ extern "C" int cGame_render(sGame_22B008* self)
     }
     cSSXScriptEngine_Render(ScriptEngine);
     cBXLoadIndicator_Render(self->f94);
-    ((cGfx_22B008*)GrMan)->v20();
+    ((cGfx_22B008*)GrMan)->DrawFrame();
     cSSXAudio_Update(gSSXAudio, (float)self->frames * (1.0f / 60.0f), 1);
     cWorldTriggerManager_Update(gWorldTriggerManager);
     self->frames = 0;

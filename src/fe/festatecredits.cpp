@@ -86,7 +86,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int a);
+    virtual void setVisible(int a);
     virtual void v10();
     virtual void v11();
     virtual void v12();
@@ -97,8 +97,8 @@ public:
     virtual void v17();
     virtual void v18();
     virtual void v19();
-    virtual int v20(float* pos);
-    virtual void v21(float* pos);
+    virtual int getSize(float* pos);
+    virtual void setSize(float* pos);
 };
 
 /**
@@ -119,10 +119,10 @@ extern "C" void cFEStateCredits_onGainFocus(cFEStateCredits* self, cUIState* pPr
         float pos[4];
         char buf[0x20];
         int i;
-        textScroll->v20(pos);
+        textScroll->getSize(pos);
         pos[0] = 600.0f;
-        ((cUIObjK185BA0*)self->mpTextScroll)->v21(pos);
-        ((cUIObjK185BA0*)self->mpTextScroll)->v09(0);
+        ((cUIObjK185BA0*)self->mpTextScroll)->setSize(pos);
+        ((cUIObjK185BA0*)self->mpTextScroll)->setVisible(0);
         for (i = 0; i < 7; i++)
         {
             sprintf(buf, str_kT_CREDITSpct_03d, i);
@@ -209,7 +209,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
     virtual void v10();
     virtual void v11();
     virtual void v12();
@@ -220,7 +220,7 @@ public:
     virtual void v17();
     virtual void v18();
     virtual void v19();
-    virtual void v20(sV4_185F40* out);
+    virtual void getSize(sV4_185F40* out);
 };
 
 struct sRS_185F40 {
@@ -254,7 +254,7 @@ extern "C" void cFEStateCredits_onRender2D(cFEStateCredits* self)
         sV3_185F40 pos = *(sV3_185F40*)(textScroll + 0x44);
         sV3_185F40 size = *(sV3_185F40*)(textScroll + 0x50);
         sV4_185F40 box;
-        ((cUIObj185F40*)textScroll)->v20(&box);
+        ((cUIObj185F40*)textScroll)->getSize(&box);
         char* font = cUITextScroll_getFont(self->mpTextScroll);
         if (font != 0)
         {
@@ -294,10 +294,10 @@ extern "C" void cFEStateCredits_onRender2D(cFEStateCredits* self)
                     {
                         sV4_185F40 iconSize;
                         any = 1;
-                        ((cUIObj185F40*)self->mpDolbyIcon)->v20(&iconSize);
+                        ((cUIObj185F40*)self->mpDolbyIcon)->getSize(&iconSize);
                         newPos.x = (640.0f - iconSize.x) * 0.5f;
                         *(sV3_185F40*)((char*)self->mpDolbyIcon + 0x44) = newPos;
-                        ((cUIObj185F40*)self->mpDolbyIcon)->v09(1);
+                        ((cUIObj185F40*)self->mpDolbyIcon)->setVisible(1);
                     }
                     else
                     {
@@ -326,7 +326,7 @@ extern "C" void cFEStateCredits_onRender2D(cFEStateCredits* self)
             if (!any)
             {
                 if (self->mpDolbyIcon != 0)
-                    ((cUIObj185F40*)self->mpDolbyIcon)->v09(0);
+                    ((cUIObj185F40*)self->mpDolbyIcon)->setVisible(0);
             }
             int total = count * rows;
             int lim = self->mpTextScroll->mLineSize * rows + total;

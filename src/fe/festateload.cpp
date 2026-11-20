@@ -131,8 +131,8 @@ public:
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual void* v04(void* owner, int id);
-    virtual void* v05(void* owner, int id);
+    virtual void* getNextState(void* owner, int id);
+    virtual void* getPrevState(void* owner, int id);
 };
 
 class cFEVObj_1867A8 {
@@ -207,7 +207,7 @@ extern "C" void cFEStateEventSelect_onWidgetEvent(cFEStateEventSelect* self, cUI
                 cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
             } else {
                 cMgr1867A8* feCustom = *(cMgr1867A8**)self->mpEngine;
-                Opened1867A8(self, feCustom->v04(self, obj->mMiscData));
+                Opened1867A8(self, feCustom->getNextState(self, obj->mMiscData));
             }
         }
     } else if (msg == 6) {
@@ -217,7 +217,7 @@ extern "C" void cFEStateEventSelect_onWidgetEvent(cFEStateEventSelect* self, cUI
                 cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
             } else {
                 cMgr1867A8* feCustom = *(cMgr1867A8**)self->mpEngine;
-                Opened1867A8(self, feCustom->v05(self, obj->mMiscData));
+                Opened1867A8(self, feCustom->getPrevState(self, obj->mMiscData));
             }
         }
     } else {

@@ -981,9 +981,9 @@ public:
     virtual void v17();
     virtual void v18();
     virtual void v19();
-    virtual int v20();
-    virtual int v21(void* obj);
-    virtual int v22(void* obj);
+    virtual int hasFocusCount();
+    virtual int incFocusCount(void* obj);
+    virtual int decFocusCount(void* obj);
     virtual void v23();
     virtual void v24();
     virtual void v25();
@@ -996,7 +996,7 @@ public:
     virtual void v32();
     virtual void v33();
     virtual void v34();
-    virtual void v35();
+    virtual void loseFocus();
 };
 
 struct cWScriptMan_upFocusScript_sType {
@@ -1020,8 +1020,8 @@ extern "C" void cWScriptMan_upFocusScript(cWScriptMan* self, void* obj)
 {
     cWScriptCtl* ctl = *(cWScriptCtl**)((char*)obj + 0xC);
     if (ctl != 0) {
-        if (ctl->v20() != 0) {
-            (*(cWScriptCtl**)((char*)obj + 0xC))->v21(obj);
+        if (ctl->hasFocusCount() != 0) {
+            (*(cWScriptCtl**)((char*)obj + 0xC))->incFocusCount(obj);
         }
     } else {
         cWScriptMan_upFocusScript_sType* instTypes = *(cWScriptMan_upFocusScript_sType**)(*(char**)((char*)self->World + 0x4) + 0x4);
@@ -1056,8 +1056,8 @@ extern "C" void cWScriptMan_downFocusScript(cWScriptMan* self, void* obj)
 {
     cWScriptCtl* ctl = *(cWScriptCtl**)((char*)obj + 0xC);
     if (ctl != 0) {
-        if (ctl->v20() != 0) {
-            (*(cWScriptCtl**)((char*)obj + 0xC))->v22(obj);
+        if (ctl->hasFocusCount() != 0) {
+            (*(cWScriptCtl**)((char*)obj + 0xC))->decFocusCount(obj);
             return;
         }
         ctl = *(cWScriptCtl**)((char*)obj + 0xC);
@@ -1069,7 +1069,7 @@ extern "C" void cWScriptMan_downFocusScript(cWScriptMan* self, void* obj)
             cWScriptMan_doOnLoseFocusScript(self, (int)obj);
             return;
         }
-        (*(cWScriptCtl**)((char*)obj + 0xC))->v35();
+        (*(cWScriptCtl**)((char*)obj + 0xC))->loseFocus();
         return;
     }
     if (cWScriptMan_hasOnLoseFocusScript(self, (int)obj) != 0) {
@@ -1333,7 +1333,7 @@ public:
     char pad_0x24[0x5C - 0x24];
     // vptr at 0x5C
     virtual void v01();
-    virtual void v02();
+    virtual void processComplete();
     virtual void v03();
     virtual void v04();
     virtual void v05();
@@ -1348,10 +1348,10 @@ public:
     virtual void v14();
     virtual void v15();
     virtual void v16();
-    virtual void v17();
+    virtual void missionRestart();
     virtual void v18();
-    virtual void v19();
-    virtual void v20();
+    virtual void missionFail();
+    virtual void missionUpdateWorld();
 };
 
 // PORT: the unit defines cProcessList_findMission later with its own class type
@@ -1421,7 +1421,7 @@ extern "C" int cWScriptMan_doMissionCmd(cWScriptMan* self, unsigned int id, unsi
             }
         }
         if (obj != 0) {
-            obj->v17();
+            obj->missionRestart();
             cSSXAudio_BigChallengeBegin(cAudioInterface_bxAudio(), id);
         }
         break;
@@ -1430,7 +1430,7 @@ extern "C" int cWScriptMan_doMissionCmd(cWScriptMan* self, unsigned int id, unsi
             obj = cProcessList_findMission_a((char*)&self->ActiveList, id);
         }
         if (obj != 0) {
-            obj->v02();
+            obj->processComplete();
         }
         break;
     case 5:
@@ -1438,7 +1438,7 @@ extern "C" int cWScriptMan_doMissionCmd(cWScriptMan* self, unsigned int id, unsi
             obj = cProcessList_findMission_a((char*)&self->ActiveList, id);
         }
         if (obj != 0) {
-            obj->v19();
+            obj->missionFail();
             cSSXAudio_BigChallengeFailed(cAudioInterface_bxAudio(), 0);
         }
         break;
@@ -1450,7 +1450,7 @@ extern "C" int cWScriptMan_doMissionCmd(cWScriptMan* self, unsigned int id, unsi
             }
         }
         if (obj != 0) {
-            obj->v20();
+            obj->missionUpdateWorld();
         }
         break;
     case 13:
@@ -2079,7 +2079,7 @@ public:
     // vptr at 0x5C
     virtual void v01();
     virtual void v02();
-    virtual int v03(); // 0x18
+    virtual int isMission(); // 0x18
 };
 
 extern "C" void* cProcessList_findProcess1(void*, int);
@@ -2097,7 +2097,7 @@ extern "C" cProcessList_findMission_cObj* cProcessList_findMission(void* self, u
     if (id != 0xFFFFFFFF) {
         cProcessList_findMission_cObj* process = (cProcessList_findMission_cObj*)cProcessList_findProcess1(self, id);
         if (process != 0) {
-            if (process->v03()) {
+            if (process->isMission()) {
                 result = process;
             }
         }
@@ -2475,7 +2475,7 @@ public:
     // vptr at 0x5C; slot N at vtable offset N*8
     virtual void v01();
     virtual void v02();
-    virtual int v03();
+    virtual int isMission();
 };
 
 /**
@@ -2488,7 +2488,7 @@ extern "C" int cWScriptMan_isLocalMissionActive(cWScriptMan* self)
     int n = 0;
     cWScriptMan_isLocalMissionActive_cNode* node;
     for (node = *(cWScriptMan_isLocalMissionActive_cNode**)&self->ActiveList; node != 0; node = node->next) {
-        if (node->v03() != 0 && *(int*)((char*)node + 0x60) == 2) {
+        if (node->isMission() != 0 && *(int*)((char*)node + 0x60) == 2) {
             n++;
         }
     }
@@ -3245,7 +3245,7 @@ INCLUDE_ASM("wscript/wscriptman", cCollectPool_writeToReplayFrame);
 class cCollectPool_writeToReplayFrame_cObj {
 public:
     // slot N at vtable offset N*8
-    virtual int v01(void* a, int b);
+    virtual int write(void* a, int b);
 };
 
 /**
@@ -3257,7 +3257,7 @@ public:
  */
 extern "C" int cCollectPool_writeToReplayFrame(void* collectPool, cCollectPool_writeToReplayFrame_cObj* obj)
 {
-    return obj->v01(collectPool, 268);
+    return obj->write(collectPool, 268);
 }
 #endif
 
@@ -3268,7 +3268,7 @@ class cCollectPool_readFromReplayFrame_cObj {
 public:
     // slot N at vtable offset N*8
     virtual int v01(void* a, int b);
-    virtual int v02(void* a, int b);
+    virtual int read(void* a, int b);
 };
 
 /**
@@ -3280,7 +3280,7 @@ public:
  */
 extern "C" int cCollectPool_readFromReplayFrame(void* collectPool, cCollectPool_readFromReplayFrame_cObj* obj)
 {
-    return obj->v02(collectPool, 268);
+    return obj->read(collectPool, 268);
 }
 #endif
 

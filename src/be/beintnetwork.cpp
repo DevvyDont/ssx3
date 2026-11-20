@@ -195,7 +195,7 @@ class cBEIface_E5C8 {
 public:
     int pad[3];
     virtual void v01();
-    virtual void v02();
+    virtual void discard();
 };
 
 /**
@@ -214,14 +214,14 @@ extern "C" void cBENetworkInterface_setSyncData(cBENetworkInterface* self, int p
     D_004A11B8 = in->a;
     cBENewRaceInterface_mNextLocation = in->b;
     cBELibrary_raceDB = in->hdr;
-    ((cBEIface_E5C8*)cBE_getInterface_Fv(cBE_getBE(), 0))->v02();
+    ((cBEIface_E5C8*)cBE_getInterface_Fv(cBE_getBE(), 0))->discard();
     if (cBENetworkInterface_networkOpt.bIsHost == 0)
     {
         for (int i = 2; i < 6; i++)
             D_00535B20_E2C8[i] = in->chars[i];
     }
     D_00535B20_E2C8[player] = in->me;
-    ((cBEIface_E5C8*)cBE_getInterface_Fv(cBE_getBE(), 1))->v02();
+    ((cBEIface_E5C8*)cBE_getInterface_Fv(cBE_getBE(), 1))->discard();
     signed char characterId = in->charID;
     if (cBENetworkInterface_networkOpt.bIsHost == 0)
         *(sNetPair_E2C8*)D_005308D0 = in->pair;
@@ -235,7 +235,7 @@ extern "C" void cBENetworkInterface_setSyncData(cBENetworkInterface* self, int p
     *(sNetTag_E2C8*)(D_004A7887 + (characterId * 0xF88 + player * 0x9B50)) = in->tag;
     for (int k = 0; k < 85; k++)
         ((sNetKey_E2C8*)(D_004A7887 + 7 + (characterId * 0xF88 + player * 0x9B50)))[k] = in->keys[k];
-    ((cBEIface_E5C8*)cBE_getInterface_Fv(cBE_getBE(), 6))->v02();
+    ((cBEIface_E5C8*)cBE_getInterface_Fv(cBE_getBE(), 6))->discard();
 }
 #endif
 

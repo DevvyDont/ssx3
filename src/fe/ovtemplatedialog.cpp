@@ -1361,7 +1361,7 @@ public:
     virtual void v22();
     virtual void v23();
     virtual void v24();
-    virtual int v25();
+    virtual int allowPauseMenu();
 };
 extern "C" void* cUIStateStack_getCurrentState(void* stack);
 extern "C" int cOVStateManager_pauseOverlayActive(void);
@@ -1384,7 +1384,7 @@ extern "C" int cOVStateManager_allowPauseMenu(void)
             if (*(int*)((char*)topState + 0x1C) & 1) {
                 return 0;
             }
-            return topState->v25();
+            return topState->allowPauseMenu();
         }
         return 1;
     }

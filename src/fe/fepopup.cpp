@@ -3075,7 +3075,7 @@ public:
     virtual int v21(int, int);
     virtual int v22(int, int);
     virtual int v23(int, int);
-    virtual int v24(int, int);
+    virtual int handleEvent(int, int);
 };
 
 /**
@@ -3089,7 +3089,7 @@ public:
  */
 extern "C" int cScreenPopup_handleEvent(cScreenPopup* self, int msg, int pParam)
 {
-    return ((cScreenPopup_handleEvent_cObj*)self->mpParentState)->v24(msg, pParam);
+    return ((cScreenPopup_handleEvent_cObj*)self->mpParentState)->handleEvent(msg, pParam);
 }
 #endif
 

@@ -971,7 +971,7 @@ public:
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual int v05(void* ctx, int arg);
+    virtual int IsMatchingEntity(void* ctx, int arg);
 };
 
 /**
@@ -992,7 +992,7 @@ extern "C" cBxsHandler2A80* cBXScriptEngine_OnInSeqRequestEntityCommInterface(cB
     int n = cScriptDatabaseObject_GetAvailableEntities(self, *(int*)ctx->mpOwner, (void**)buf, 30);
     for (int i = 0; i < n; i++) {
         cBxsHandler2A80* candidate = buf[i];
-        if (candidate->v05(ctx, entityType)) {
+        if (candidate->IsMatchingEntity(ctx, entityType)) {
             found = candidate;
             break;
         }
@@ -1426,8 +1426,8 @@ public:
     int field_0x4;
     int field_0x8;
     virtual void v01();
-    virtual void v02();
-    virtual void v03();
+    virtual void PauseObjScript();
+    virtual void ResumeObjScript();
 };
 
 /**
@@ -1436,7 +1436,7 @@ public:
  */
 extern "C" void cScriptObjTransition_PauseObjScript(void* self)
 {
-    (*(cBxScriptVirt**)((char*)self + 0x10))->v02();
+    (*(cBxScriptVirt**)((char*)self + 0x10))->PauseObjScript();
 }
 #endif
 
@@ -1449,7 +1449,7 @@ INCLUDE_ASM("scripter/bxscriptengine", cScriptObjTransition_ResumeObjScript);
  */
 extern "C" void cScriptObjTransition_ResumeObjScript(void* self)
 {
-    (*(cBxScriptVirt**)((char*)self + 0x10))->v03();
+    (*(cBxScriptVirt**)((char*)self + 0x10))->ResumeObjScript();
 }
 #endif
 
@@ -1800,8 +1800,8 @@ public:
     virtual void v03();
     virtual void v04();
     virtual void v05();
-    virtual int v06();
-    virtual void* v07(int i);
+    virtual int GetNumScriptEntities();
+    virtual void* GetScriptEntity(int i);
 };
 
 /**
@@ -1815,9 +1815,9 @@ public:
 extern "C" void cScriptObject_PauseObjScript(cScriptOwner3320* self)
 {
     int i = 0;
-    int n = self->v06();
+    int n = self->GetNumScriptEntities();
     for (; i < n; i++) {
-        cScriptEntity_PauseEntityScript(self->v07(i));
+        cScriptEntity_PauseEntityScript(self->GetScriptEntity(i));
     }
 }
 #endif
@@ -1836,8 +1836,8 @@ public:
     virtual void v03();
     virtual void v04();
     virtual void v05();
-    virtual int v06();
-    virtual void* v07(int i);
+    virtual int GetNumScriptEntities();
+    virtual void* GetScriptEntity(int i);
 };
 
 /**
@@ -1850,9 +1850,9 @@ public:
 extern "C" void cScriptObject_ResumeObjScript(cScriptOwner33A8* self)
 {
     int i = 0;
-    int n = self->v06();
+    int n = self->GetNumScriptEntities();
     for (; i < n; i++) {
-        cScriptEntity_ResumeEntityScript(self->v07(i));
+        cScriptEntity_ResumeEntityScript(self->GetScriptEntity(i));
     }
 }
 #endif

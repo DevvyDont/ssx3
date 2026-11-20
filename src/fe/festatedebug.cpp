@@ -141,7 +141,7 @@ struct sDbgObj_180EF0 {
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int on);
+    virtual void setVisible(int on);
 };
 struct sDbgInput_180EF0 {
     char pad0[0x8];
@@ -149,7 +149,7 @@ struct sDbgInput_180EF0 {
     virtual void v02();
     virtual void v03();
     virtual void v04();
-    virtual int v05();
+    virtual int isNext();
     virtual void v06();
     virtual void v07();
     virtual void v08();
@@ -161,16 +161,16 @@ struct sDbgInput_180EF0 {
     virtual void v14();
     virtual void v15();
     virtual void v16();
-    virtual int v17();
-    virtual int v18();
-    virtual int v19();
-    virtual int v20();
+    virtual int isUp();
+    virtual int isDown();
+    virtual int isLeft();
+    virtual int isRight();
     virtual void v21();
     virtual void v22();
     virtual void v23();
     virtual void v24();
     virtual void v25();
-    virtual int v26();
+    virtual int isRShift2();
 };
 struct sDbgState_180EF0 {
     char pad0[0x170];
@@ -198,25 +198,25 @@ extern "C" int cScreenKeyboard_onInput(sDbgState_180EF0* self, sDbgInput_180EF0*
     cScreenKeyboard_getCursorObjName(self, self->sel, buf);
     sDbgObj_180EF0* keyObject = (sDbgObj_180EF0*)cUIScreen_getObjectByHashName(self, GetHashValue32(buf));
     if (keyObject) {
-        keyObject->v09(0);
+        keyObject->setVisible(0);
     }
-    if (in->v19()) {
+    if (in->isLeft()) {
         cScreenKeyboard_kbMoveLeft(self);
-    } else if (in->v20()) {
+    } else if (in->isRight()) {
         cScreenKeyboard_kbMoveRight(self);
-    } else if (in->v17()) {
+    } else if (in->isUp()) {
         cScreenKeyboard_kbMoveUp(self);
-    } else if (in->v18()) {
+    } else if (in->isDown()) {
         cScreenKeyboard_kbMoveDown(self);
-    } else if (in->v05()) {
+    } else if (in->isNext()) {
         cScreenKeyboard_pressKey(self);
-    } else if (in->v26()) {
+    } else if (in->isRShift2()) {
         cScreenKeyboard_toggleShift(self);
     }
     cScreenKeyboard_getCursorObjName(self, self->sel, buf);
     keyObject = (sDbgObj_180EF0*)cUIScreen_getObjectByHashName(self, GetHashValue32(buf));
     if (keyObject) {
-        keyObject->v09(1);
+        keyObject->setVisible(1);
     }
     return 1;
 }

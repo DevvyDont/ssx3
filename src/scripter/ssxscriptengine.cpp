@@ -3684,7 +3684,7 @@ public:
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual float* v04();
+    virtual float* GetValue();
 };
 
 // Same symbol as the unit's cScriptPlayerEntity_GetChannel (cScriptObj002742C8*), viewed with a float getter.
@@ -3698,16 +3698,16 @@ cScriptObjC0F0* cScriptPlayerEntity_GetChannel_C0F0(void* self, int a1) __asm__(
  */
 extern "C" void GetSSXCameraManualFrame(void* self, float* out)
 {
-    out[0] = *cScriptPlayerEntity_GetChannel_C0F0(self, 0)->v04();
-    out[1] = *cScriptPlayerEntity_GetChannel_C0F0(self, 1)->v04();
-    out[2] = *cScriptPlayerEntity_GetChannel_C0F0(self, 2)->v04();
-    out[3] = *cScriptPlayerEntity_GetChannel_C0F0(self, 3)->v04();
-    out[4] = *cScriptPlayerEntity_GetChannel_C0F0(self, 4)->v04();
-    out[5] = *cScriptPlayerEntity_GetChannel_C0F0(self, 5)->v04();
-    out[6] = *cScriptPlayerEntity_GetChannel_C0F0(self, 6)->v04();
-    out[7] = *cScriptPlayerEntity_GetChannel_C0F0(self, 7)->v04();
-    out[8] = *cScriptPlayerEntity_GetChannel_C0F0(self, 8)->v04();
-    out[9] = *cScriptPlayerEntity_GetChannel_C0F0(self, 9)->v04();
+    out[0] = *cScriptPlayerEntity_GetChannel_C0F0(self, 0)->GetValue();
+    out[1] = *cScriptPlayerEntity_GetChannel_C0F0(self, 1)->GetValue();
+    out[2] = *cScriptPlayerEntity_GetChannel_C0F0(self, 2)->GetValue();
+    out[3] = *cScriptPlayerEntity_GetChannel_C0F0(self, 3)->GetValue();
+    out[4] = *cScriptPlayerEntity_GetChannel_C0F0(self, 4)->GetValue();
+    out[5] = *cScriptPlayerEntity_GetChannel_C0F0(self, 5)->GetValue();
+    out[6] = *cScriptPlayerEntity_GetChannel_C0F0(self, 6)->GetValue();
+    out[7] = *cScriptPlayerEntity_GetChannel_C0F0(self, 7)->GetValue();
+    out[8] = *cScriptPlayerEntity_GetChannel_C0F0(self, 8)->GetValue();
+    out[9] = *cScriptPlayerEntity_GetChannel_C0F0(self, 9)->GetValue();
 }
 #endif
 
@@ -3773,7 +3773,7 @@ public:
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual float* v04();
+    virtual float* GetValue();
 };
 
 // Same symbol as the unit's cScriptPlayerEntity_GetChannel (cScriptObj002742C8*), viewed with a float getter.
@@ -3787,16 +3787,16 @@ cScriptObjC300* cScriptPlayerEntity_GetChannel_C300(void* self, int a1) __asm__(
  */
 extern "C" void GetSSXCameraTargetFrame(void* self, float* out)
 {
-    out[0] = *cScriptPlayerEntity_GetChannel_C300(self, 0)->v04();
-    out[1] = *cScriptPlayerEntity_GetChannel_C300(self, 1)->v04();
-    out[2] = *cScriptPlayerEntity_GetChannel_C300(self, 2)->v04();
-    out[3] = *cScriptPlayerEntity_GetChannel_C300(self, 3)->v04();
-    out[4] = *cScriptPlayerEntity_GetChannel_C300(self, 4)->v04();
-    out[5] = *cScriptPlayerEntity_GetChannel_C300(self, 5)->v04();
-    out[6] = *cScriptPlayerEntity_GetChannel_C300(self, 6)->v04();
-    out[7] = *cScriptPlayerEntity_GetChannel_C300(self, 7)->v04();
-    out[8] = *cScriptPlayerEntity_GetChannel_C300(self, 8)->v04();
-    out[9] = *cScriptPlayerEntity_GetChannel_C300(self, 9)->v04();
+    out[0] = *cScriptPlayerEntity_GetChannel_C300(self, 0)->GetValue();
+    out[1] = *cScriptPlayerEntity_GetChannel_C300(self, 1)->GetValue();
+    out[2] = *cScriptPlayerEntity_GetChannel_C300(self, 2)->GetValue();
+    out[3] = *cScriptPlayerEntity_GetChannel_C300(self, 3)->GetValue();
+    out[4] = *cScriptPlayerEntity_GetChannel_C300(self, 4)->GetValue();
+    out[5] = *cScriptPlayerEntity_GetChannel_C300(self, 5)->GetValue();
+    out[6] = *cScriptPlayerEntity_GetChannel_C300(self, 6)->GetValue();
+    out[7] = *cScriptPlayerEntity_GetChannel_C300(self, 7)->GetValue();
+    out[8] = *cScriptPlayerEntity_GetChannel_C300(self, 8)->GetValue();
+    out[9] = *cScriptPlayerEntity_GetChannel_C300(self, 9)->GetValue();
 }
 #endif
 
@@ -3862,7 +3862,7 @@ public:
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual float* v04();
+    virtual float* GetValue();
 };
 
 // Same symbol as the unit's cScriptPlayerEntity_GetChannel (cScriptObj002742C8*), viewed with a float getter.
@@ -3876,15 +3876,15 @@ cScriptObjC510* cScriptPlayerEntity_GetChannel_C510(void* self, int a1) __asm__(
  */
 extern "C" void GetSSXCameraSubjectFrame(void* self, float* out)
 {
-    out[0] = *cScriptPlayerEntity_GetChannel_C510(self, 0)->v04();
-    out[1] = *cScriptPlayerEntity_GetChannel_C510(self, 1)->v04();
-    out[2] = *cScriptPlayerEntity_GetChannel_C510(self, 2)->v04();
-    out[3] = *cScriptPlayerEntity_GetChannel_C510(self, 3)->v04();
-    out[4] = *cScriptPlayerEntity_GetChannel_C510(self, 4)->v04();
-    out[5] = *cScriptPlayerEntity_GetChannel_C510(self, 5)->v04();
-    out[6] = *cScriptPlayerEntity_GetChannel_C510(self, 6)->v04();
-    out[7] = *cScriptPlayerEntity_GetChannel_C510(self, 7)->v04();
-    out[8] = *cScriptPlayerEntity_GetChannel_C510(self, 8)->v04();
+    out[0] = *cScriptPlayerEntity_GetChannel_C510(self, 0)->GetValue();
+    out[1] = *cScriptPlayerEntity_GetChannel_C510(self, 1)->GetValue();
+    out[2] = *cScriptPlayerEntity_GetChannel_C510(self, 2)->GetValue();
+    out[3] = *cScriptPlayerEntity_GetChannel_C510(self, 3)->GetValue();
+    out[4] = *cScriptPlayerEntity_GetChannel_C510(self, 4)->GetValue();
+    out[5] = *cScriptPlayerEntity_GetChannel_C510(self, 5)->GetValue();
+    out[6] = *cScriptPlayerEntity_GetChannel_C510(self, 6)->GetValue();
+    out[7] = *cScriptPlayerEntity_GetChannel_C510(self, 7)->GetValue();
+    out[8] = *cScriptPlayerEntity_GetChannel_C510(self, 8)->GetValue();
 }
 #endif
 
@@ -3950,7 +3950,7 @@ public:
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual float* v04();
+    virtual float* GetValue();
 };
 
 // Same symbol as the unit's cScriptPlayerEntity_GetChannel (cScriptObj002742C8*), viewed with a float getter.
@@ -3964,15 +3964,15 @@ cScriptObjC6F8* cScriptPlayerEntity_GetChannel_C6F8(void* self, int a1) __asm__(
  */
 extern "C" void GetSSXCameraAlgorithmicFrame(void* self, float* out)
 {
-    out[0] = *cScriptPlayerEntity_GetChannel_C6F8(self, 0)->v04();
-    out[1] = *cScriptPlayerEntity_GetChannel_C6F8(self, 1)->v04();
-    out[2] = *cScriptPlayerEntity_GetChannel_C6F8(self, 2)->v04();
-    out[3] = *cScriptPlayerEntity_GetChannel_C6F8(self, 3)->v04();
-    out[4] = *cScriptPlayerEntity_GetChannel_C6F8(self, 4)->v04();
-    out[5] = *cScriptPlayerEntity_GetChannel_C6F8(self, 5)->v04();
-    out[6] = *cScriptPlayerEntity_GetChannel_C6F8(self, 6)->v04();
-    out[7] = *cScriptPlayerEntity_GetChannel_C6F8(self, 7)->v04();
-    out[8] = *cScriptPlayerEntity_GetChannel_C6F8(self, 8)->v04();
+    out[0] = *cScriptPlayerEntity_GetChannel_C6F8(self, 0)->GetValue();
+    out[1] = *cScriptPlayerEntity_GetChannel_C6F8(self, 1)->GetValue();
+    out[2] = *cScriptPlayerEntity_GetChannel_C6F8(self, 2)->GetValue();
+    out[3] = *cScriptPlayerEntity_GetChannel_C6F8(self, 3)->GetValue();
+    out[4] = *cScriptPlayerEntity_GetChannel_C6F8(self, 4)->GetValue();
+    out[5] = *cScriptPlayerEntity_GetChannel_C6F8(self, 5)->GetValue();
+    out[6] = *cScriptPlayerEntity_GetChannel_C6F8(self, 6)->GetValue();
+    out[7] = *cScriptPlayerEntity_GetChannel_C6F8(self, 7)->GetValue();
+    out[8] = *cScriptPlayerEntity_GetChannel_C6F8(self, 8)->GetValue();
 }
 #endif
 
@@ -4037,8 +4037,8 @@ public:
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual int* v04();
-    virtual int v05();
+    virtual int* GetValue();
+    virtual int GetCustom();
 };
 
 cScriptObj002742C8* cScriptPlayerEntity_GetChannel(void* self, int a1);
@@ -4051,8 +4051,8 @@ cScriptObj002742C8* cScriptPlayerEntity_GetChannel(void* self, int a1);
  */
 extern "C" void GetSSXCameraManagerFrame(void* self, int* out)
 {
-    out[0] = *cScriptPlayerEntity_GetChannel(self, 0)->v04();
-    out[1] = cScriptPlayerEntity_GetChannel(self, 0)->v05();
+    out[0] = *cScriptPlayerEntity_GetChannel(self, 0)->GetValue();
+    out[1] = cScriptPlayerEntity_GetChannel(self, 0)->GetCustom();
 }
 #endif
 
@@ -4121,7 +4121,7 @@ public:
     virtual void v01();
     virtual void v02();
     virtual void v03();
-    virtual float* v04();
+    virtual float* GetValue();
 };
 
 cScriptObj002742C8* cScriptPlayerEntity_GetChannel(void* self, int a1);
@@ -4140,18 +4140,18 @@ cScriptObjC9B0* cScriptPlayerEntity_GetChannel_C9B0(void* self, int a1) __asm__(
  */
 extern "C" void GetSSXActorFrame(void* self, void* out)
 {
-    ((int*)out)[0] = *cScriptPlayerEntity_GetChannel(self, 0)->v04();
-    ((int*)out)[1] = cScriptPlayerEntity_GetChannel(self, 0)->v05();
-    ((int*)out)[2] = *cScriptPlayerEntity_GetChannel(self, 1)->v04();
-    ((int*)out)[3] = cScriptPlayerEntity_GetChannel(self, 1)->v05();
-    ((int*)out)[4] = *cScriptPlayerEntity_GetChannel(self, 2)->v04();
-    ((int*)out)[5] = cScriptPlayerEntity_GetChannel(self, 2)->v05();
-    ((float*)out)[6] = *cScriptPlayerEntity_GetChannel_C9B0(self, 3)->v04();
-    ((float*)out)[7] = *cScriptPlayerEntity_GetChannel_C9B0(self, 4)->v04();
-    ((float*)out)[8] = *cScriptPlayerEntity_GetChannel_C9B0(self, 5)->v04();
-    ((float*)out)[9] = *cScriptPlayerEntity_GetChannel_C9B0(self, 6)->v04();
-    ((float*)out)[10] = *cScriptPlayerEntity_GetChannel_C9B0(self, 7)->v04();
-    ((float*)out)[11] = *cScriptPlayerEntity_GetChannel_C9B0(self, 8)->v04();
+    ((int*)out)[0] = *cScriptPlayerEntity_GetChannel(self, 0)->GetValue();
+    ((int*)out)[1] = cScriptPlayerEntity_GetChannel(self, 0)->GetCustom();
+    ((int*)out)[2] = *cScriptPlayerEntity_GetChannel(self, 1)->GetValue();
+    ((int*)out)[3] = cScriptPlayerEntity_GetChannel(self, 1)->GetCustom();
+    ((int*)out)[4] = *cScriptPlayerEntity_GetChannel(self, 2)->GetValue();
+    ((int*)out)[5] = cScriptPlayerEntity_GetChannel(self, 2)->GetCustom();
+    ((float*)out)[6] = *cScriptPlayerEntity_GetChannel_C9B0(self, 3)->GetValue();
+    ((float*)out)[7] = *cScriptPlayerEntity_GetChannel_C9B0(self, 4)->GetValue();
+    ((float*)out)[8] = *cScriptPlayerEntity_GetChannel_C9B0(self, 5)->GetValue();
+    ((float*)out)[9] = *cScriptPlayerEntity_GetChannel_C9B0(self, 6)->GetValue();
+    ((float*)out)[10] = *cScriptPlayerEntity_GetChannel_C9B0(self, 7)->GetValue();
+    ((float*)out)[11] = *cScriptPlayerEntity_GetChannel_C9B0(self, 8)->GetValue();
 }
 #endif
 
@@ -4168,8 +4168,8 @@ cScriptObj002742C8* cScriptPlayerEntity_GetChannel(void* self, int a1);
  */
 extern "C" void GetSSXGameStateManagerFrame(void* self, void* out)
 {
-    ((int*)out)[0] = *cScriptPlayerEntity_GetChannel(self, 0)->v04();
-    ((int*)out)[1] = cScriptPlayerEntity_GetChannel(self, 0)->v05();
+    ((int*)out)[0] = *cScriptPlayerEntity_GetChannel(self, 0)->GetValue();
+    ((int*)out)[1] = cScriptPlayerEntity_GetChannel(self, 0)->GetCustom();
 }
 #endif
 
@@ -4186,16 +4186,16 @@ cScriptObj002742C8* cScriptPlayerEntity_GetChannel(void* self, int a1);
  */
 extern "C" void GetSSXGameEventFrame(void* self, void* out)
 {
-    ((int*)out)[0] = *cScriptPlayerEntity_GetChannel(self, 0)->v04();
-    ((int*)out)[1] = cScriptPlayerEntity_GetChannel(self, 0)->v05();
-    ((int*)out)[2] = *cScriptPlayerEntity_GetChannel(self, 1)->v04();
-    ((int*)out)[3] = cScriptPlayerEntity_GetChannel(self, 1)->v05();
-    ((int*)out)[4] = *cScriptPlayerEntity_GetChannel(self, 2)->v04();
-    ((int*)out)[5] = cScriptPlayerEntity_GetChannel(self, 2)->v05();
-    ((int*)out)[6] = *cScriptPlayerEntity_GetChannel(self, 3)->v04();
-    ((int*)out)[7] = cScriptPlayerEntity_GetChannel(self, 3)->v05();
-    ((int*)out)[8] = *cScriptPlayerEntity_GetChannel(self, 4)->v04();
-    ((int*)out)[9] = cScriptPlayerEntity_GetChannel(self, 4)->v05();
+    ((int*)out)[0] = *cScriptPlayerEntity_GetChannel(self, 0)->GetValue();
+    ((int*)out)[1] = cScriptPlayerEntity_GetChannel(self, 0)->GetCustom();
+    ((int*)out)[2] = *cScriptPlayerEntity_GetChannel(self, 1)->GetValue();
+    ((int*)out)[3] = cScriptPlayerEntity_GetChannel(self, 1)->GetCustom();
+    ((int*)out)[4] = *cScriptPlayerEntity_GetChannel(self, 2)->GetValue();
+    ((int*)out)[5] = cScriptPlayerEntity_GetChannel(self, 2)->GetCustom();
+    ((int*)out)[6] = *cScriptPlayerEntity_GetChannel(self, 3)->GetValue();
+    ((int*)out)[7] = cScriptPlayerEntity_GetChannel(self, 3)->GetCustom();
+    ((int*)out)[8] = *cScriptPlayerEntity_GetChannel(self, 4)->GetValue();
+    ((int*)out)[9] = cScriptPlayerEntity_GetChannel(self, 4)->GetCustom();
 }
 #endif
 
@@ -4291,8 +4291,8 @@ public:
     virtual void v03();
     virtual void v04();
     virtual void v05();
-    virtual int v06();
-    virtual void* v07(int i);
+    virtual int GetNumScriptEntities();
+    virtual void* GetScriptEntity(int i);
 };
 
 struct sScrOwnersCEA8 {
@@ -4324,9 +4324,9 @@ extern "C" int cScriptDatabaseObject_AddObject(cScriptDatabaseObject* engine, vo
         }
     }
     int k = 0;
-    int n = obj->v06();
+    int n = obj->GetNumScriptEntities();
     for (; k < n; k++) {
-        cScriptDatabaseObject_AddEntity((cScriptDatabaseObject*)self, i, obj->v07(k));
+        cScriptDatabaseObject_AddEntity((cScriptDatabaseObject*)self, i, obj->GetScriptEntity(k));
     }
     return i;
 }
@@ -4348,8 +4348,8 @@ public:
     virtual void v03();
     virtual void v04();
     virtual void v05();
-    virtual int v06();
-    virtual void* v07(int i);
+    virtual int GetNumScriptEntities();
+    virtual void* GetScriptEntity(int i);
 };
 
 /**
@@ -4366,9 +4366,9 @@ extern "C" int cScriptDatabaseObject_RemoveObject(cScriptDatabaseObject* self, i
     cScriptOwnerCF88* obj = *(cScriptOwnerCF88**)((char*)self + (idx << 2));
     if (obj == 0) return 0;
     int k = 0;
-    int n = obj->v06();
+    int n = obj->GetNumScriptEntities();
     for (; k < n; k++) {
-        cScriptDatabaseObject_RemoveEntity(self, obj->v07(k));
+        cScriptDatabaseObject_RemoveEntity(self, obj->GetScriptEntity(k));
     }
     *(cScriptOwnerCF88**)((char*)self + (idx << 2)) = 0;
     return 1;
@@ -4419,8 +4419,8 @@ public:
     virtual void v03();
     virtual void v04();
     virtual void v05();
-    virtual int v06();
-    virtual void* v07(int i);
+    virtual int GetNumScriptEntities();
+    virtual void* GetScriptEntity(int i);
 };
 
 /**
@@ -4436,9 +4436,9 @@ extern "C" void cScriptDatabaseObject_MarkObjectAsReserved(cScriptDatabaseObject
 {
     cScriptOwnerD0C0* obj = *(cScriptOwnerD0C0**)((char*)self + (idx << 2));
     int i = 0;
-    int n = obj->v06();
+    int n = obj->GetNumScriptEntities();
     for (; i < n; i++) {
-        cScriptDatabaseObject_MarkEntityAsReserved(self, obj->v07(i), val);
+        cScriptDatabaseObject_MarkEntityAsReserved(self, obj->GetScriptEntity(i), val);
     }
 }
 #endif
@@ -4457,8 +4457,8 @@ public:
     virtual void v03();
     virtual void v04();
     virtual void v05();
-    virtual int v06();
-    virtual void* v07(int i);
+    virtual int GetNumScriptEntities();
+    virtual void* GetScriptEntity(int i);
 };
 
 extern "C" void cScriptDatabaseObject_MarkEntityAsUnreserved(cScriptDatabaseObject* self, void* a1);
@@ -4473,9 +4473,9 @@ extern "C" void cScriptDatabaseObject_MarkObjectAsUnreserved(cScriptDatabaseObje
 {
     cScriptOwnerD170* obj = *(cScriptOwnerD170**)((char*)self + (idx << 2));
     int i = 0;
-    int n = obj->v06();
+    int n = obj->GetNumScriptEntities();
     for (; i < n; i++) {
-        cScriptDatabaseObject_MarkEntityAsUnreserved(self, obj->v07(i));
+        cScriptDatabaseObject_MarkEntityAsUnreserved(self, obj->GetScriptEntity(i));
     }
 }
 #endif
@@ -4496,8 +4496,8 @@ public:
     virtual void v03();
     virtual void v04();
     virtual void v05();
-    virtual int v06();
-    virtual int* v07(int i);
+    virtual int GetNumScriptEntities();
+    virtual int* GetScriptEntity(int i);
 };
 
 // PORT: cSSXScriptEngine_IsObjInUseByPlayer declares cScriptDatabaseObject_IsObjInUseByPlayer as void; it really
@@ -4516,9 +4516,9 @@ int cScriptDatabaseObject_IsObjInUseByPlayer_impl(void* self, int idx, int val)
 {
     cScriptOwnerD210* obj = *(cScriptOwnerD210**)((char*)self + (idx << 2));
     int i = 0;
-    int n = obj->v06();
+    int n = obj->GetNumScriptEntities();
     for (; i < n; i++) {
-        if (cScriptDatabaseObject_IsEntityInUseByPlayer((cScriptDatabaseObject*)self, obj->v07(i)[1], val)) {
+        if (cScriptDatabaseObject_IsEntityInUseByPlayer((cScriptDatabaseObject*)self, obj->GetScriptEntity(i)[1], val)) {
             return 1;
         }
     }
@@ -5013,8 +5013,8 @@ public:
     int field_0x4;
     int field_0x8;
     virtual void v01();
-    virtual void v02();
-    virtual void v03();
+    virtual void PauseObjScript();
+    virtual void ResumeObjScript();
 };
 
 /**
@@ -5023,7 +5023,7 @@ public:
  */
 extern "C" void cScriptObjCamera_PauseObjScript(cScriptObjCamera* self)
 {
-    ((cSsxScriptVirt*)self->mpCameraManager)->v02();
+    ((cSsxScriptVirt*)self->mpCameraManager)->PauseObjScript();
 }
 #endif
 
@@ -5036,7 +5036,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCamera_ResumeObjScript);
  */
 extern "C" void cScriptObjCamera_ResumeObjScript(cScriptObjCamera* self)
 {
-    ((cSsxScriptVirt*)self->mpCameraManager)->v03();
+    ((cSsxScriptVirt*)self->mpCameraManager)->ResumeObjScript();
 }
 #endif
 
@@ -5086,7 +5086,7 @@ public:
     virtual void v1();
     virtual void v2();
     virtual void v3();
-    virtual void v4();
+    virtual void snapCurrent();
 };
 
 /**
@@ -5111,7 +5111,7 @@ extern "C" void cScriptObjCamera_OnEndObjectUse(cScriptObjCamera* self)
         if (*(int*)(*(char**)(rider + 0xAC) + 0x18) == 0) {
             cCamera_setCurrentController(rider, 2);
             cChaseCameraController_switchCamera_Restart(*(void**)(rider + 0xA8));
-            (*(cScrObj_D8D8**)(rider + 0xA0))->v4();
+            (*(cScrObj_D8D8**)(rider + 0xA0))->snapCurrent();
         }
     }
 }

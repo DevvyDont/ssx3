@@ -498,7 +498,7 @@ public:
     virtual void v21();
     virtual void v22();
     virtual void v23();
-    virtual int v24(int a, int b);
+    virtual int handleEvent(int a, int b);
 };
 
 /**
@@ -514,7 +514,7 @@ extern "C" void cFEStateAudioOptions_onCreateScreen(void* self)
         name = str_142audio_pda;
         cFEStateAudioOptions_onCreateScreen_cObj* obj = (cFEStateAudioOptions_onCreateScreen_cObj*)cUIStateStack_findState(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(str_hud));
         if (obj != 0) {
-            obj->v24(3, 0);
+            obj->handleEvent(3, 0);
         }
     } else {
         name = str_140audio;
@@ -563,7 +563,7 @@ public:
     virtual void v21();
     virtual void v22();
     virtual void v23();
-    virtual int v24(int a, int b);
+    virtual int handleEvent(int a, int b);
 };
 
 extern "C" cFEStateAudioOptions_onDestroyScreen_cObj* cUIStateStack_findState(void* list, int hash);
@@ -576,7 +576,7 @@ extern "C" void cFEStateAudioOptions_onDestroyScreen(void* self)
     if ((void*)SSXApp->Game != 0) {
         cFEStateAudioOptions_onDestroyScreen_cObj* obj = cUIStateStack_findState(*(char**)((char*)self + 0x10) + 0x18, GetHashValue32(str_hud));
         if (obj != 0) {
-            obj->v24(4, 0);
+            obj->handleEvent(4, 0);
         }
     }
     cUIState_onDestroyScreen(self);

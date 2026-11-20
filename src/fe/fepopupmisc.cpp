@@ -65,7 +65,7 @@ public:
     virtual void v06();
     virtual void v07();
     virtual void v08();
-    virtual void v09(int);
+    virtual void setVisible(int);
 };
 
 /**
@@ -83,7 +83,7 @@ extern "C" void cFEPopupVideoCalibration_onCreateScreen(cFEPopupVideoCalibration
     }
     cUIObjK1DEB90* obj = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1540));
     if (obj != 0) {
-        obj->v09(1);
+        obj->setVisible(1);
     }
     cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Text0000));
     if (text != 0) {
@@ -148,11 +148,11 @@ extern "C" int cFEPopupVideoCalibration_onInputBegin(cFEPopupVideoCalibration* s
         if (*(signed char*)&self->mImage == 0) {
             cUIObjK1DEB90* obj = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1540));
             if (obj != 0) {
-                obj->v09(0);
+                obj->setVisible(0);
             }
             obj = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A1540_DEC68[1]));
             if (obj != 0) {
-                obj->v09(1);
+                obj->setVisible(1);
             }
             cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Text0000));
             if (text != 0) {
@@ -160,7 +160,7 @@ extern "C" int cFEPopupVideoCalibration_onInputBegin(cFEPopupVideoCalibration* s
             }
             obj = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Text0001));
             if (obj != 0) {
-                obj->v09(0);
+                obj->setVisible(0);
             }
             *(signed char*)&self->mImage = 1;
         } else {
@@ -9159,7 +9159,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int on);
+    virtual void setStatic(int on);
     virtual void setVisible(int on);
 };
 
@@ -9341,7 +9341,7 @@ extern "C" void func_001E5B80(void* self)
                     *(int*)((char*)object + 0x18) = ids.v[i];
                 } else {
                     object->setVisible(0);
-                    object->v08(1);
+                    object->setStatic(1);
                 }
             }
         }
@@ -10028,7 +10028,7 @@ extern "C" void func_001E75D0(void* self)
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 && cGameComm_mGameComm != 0 && cGameComm_mGameComm->mConnected != 0) {
         cUIObjK1DEB90* groupWidget = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ChatGroup));
         if (groupWidget != 0) {
-            groupWidget->v09(1);
+            groupWidget->setVisible(1);
         }
         cUIText* uiText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_chatText));
         if (uiText != 0) {
@@ -10036,13 +10036,13 @@ extern "C" void func_001E75D0(void* self)
         }
         groupWidget = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptexts));
         if (groupWidget != 0) {
-            groupWidget->v09(1);
+            groupWidget->setVisible(1);
         }
         char* chatScroll = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_textScrollChat_b));
         *(int*)(chatScroll + 0x74) |= 1;
         *(sRect_75D0*)(chatScroll + 0xA8) = D_004C8408;
         cUITextScroll_setInputMap(chatScroll, 1);
-        ((cUIObjK1DEB90*)chatScroll)->v09(0);
+        ((cUIObjK1DEB90*)chatScroll)->setVisible(0);
     }
     cSSXAudio_MenuSound(cAudioInterface_bxAudio(), 0xE);
 }
@@ -10087,18 +10087,18 @@ extern "C" void func_001E7928(void* self)
             if (cOVState_onUpdate_HandleIncomingChat(self) != 0) {
                 cUIObjK1DEB90* panelWidget = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_b));
                 if (panelWidget != 0) {
-                    panelWidget->v09(0);
+                    panelWidget->setVisible(0);
                 }
                 panelWidget = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptexts));
                 if (panelWidget != 0) {
-                    panelWidget->v09(0);
+                    panelWidget->setVisible(0);
                 }
             }
         }
         if (*(int*)((char*)cAppMan_TheAppMan + 0x18) % 30 == 0 && cGameComm_mGameComm->mConnected == 0) {
             cUIObjK1DEB90* panelWidget = (cUIObjK1DEB90*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ChatGroup));
             if (panelWidget != 0) {
-                panelWidget->v09(0);
+                panelWidget->setVisible(0);
             }
             cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_chatText));
             if (text != 0) {
@@ -10763,7 +10763,7 @@ public:
     virtual void v05();
     virtual void v06();
     virtual void v07();
-    virtual void v08(int on);
+    virtual void setStatic(int on);
     virtual void setVisible(int on);
 };
 
@@ -10862,7 +10862,7 @@ done:
                     *(int*)((char*)screenWidget + 0x18) = ids.v[i];
                 } else {
                     screenWidget->setVisible(0);
-                    screenWidget->v08(1);
+                    screenWidget->setStatic(1);
                 }
             }
         }
