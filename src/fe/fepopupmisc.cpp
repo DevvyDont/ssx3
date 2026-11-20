@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festaterewards.h"
 #include "fe/festatenet.h"
 #include "fe/festatelogin.h"
 #include "fe/festatenetcreateroompopup.h"
@@ -1140,11 +1141,11 @@ extern void* D_0046A3C8[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateRewardGalleryBase_cFEStateRewardGalleryBase1(void* self)
+extern "C" void* cFEStateRewardGalleryBase_cFEStateRewardGalleryBase1(cFEStateRewardGalleryBase* self)
 {
     func_0039E2A0(self, 0);
-    *(void***)((char*)self + 0x8) = D_0046A3C8;
-    return self;
+    self->mVtbl = D_0046A3C8;
+    return ((void*)self);
 }
 #endif
 
@@ -1167,12 +1168,12 @@ extern "C" void func_0039E390_dtor(void* self, int flags) __asm__("func_0039E390
  *
  * @param flags  g++ destructor flags; bit 0 frees the object
  */
-extern "C" void cFEStateRewardGalleryBase__cFEStateRewardGalleryBase(void* self, int flags)
+extern "C" void cFEStateRewardGalleryBase__cFEStateRewardGalleryBase(cFEStateRewardGalleryBase* self, int flags)
 {
-    *(void***)((char*)self + 0x8) = D_0046A3C8;
+    self->mVtbl = D_0046A3C8;
     cFEStateRewardGalleryBase_purgeRewards(self);
     cFEStateRewardGalleryBase_purgeIcons(self);
-    *(void***)((char*)self + 0x8) = D_0046D0D0;
+    self->mVtbl = D_0046D0D0;
     func_0039E390_dtor(self, flags);
 }
 #endif
@@ -1188,8 +1189,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_getStoreNum);
  * @param gallery  the gallery state
  * @return the store number, or a negative value outside a store
  */
-extern "C" int cFEStateRewardGalleryBase_getStoreNum(void *gallery) {
-    return (*(int *)((char*)(gallery) + (0x8F0)));
+extern "C" int cFEStateRewardGalleryBase_getStoreNum(cFEStateRewardGalleryBase* gallery) {
+    return (gallery->mStoreNum);
 }
 #endif
 //100%
@@ -1203,8 +1204,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_isInStore);
  * @param gallery  the gallery state
  * @return 1 when the store number is 0 or more, else 0
  */
-extern "C" unsigned int cFEStateRewardGalleryBase_isInStore(void *gallery) {
-    return (unsigned int) ~(*(int *)((char*)(gallery) + (0x8F0))) >> 0x1F;
+extern "C" unsigned int cFEStateRewardGalleryBase_isInStore(cFEStateRewardGalleryBase* gallery) {
+    return (unsigned int) ~(gallery->mStoreNum) >> 0x1F;
 }
 #endif
 
@@ -1237,8 +1238,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_isIconsLoaded);
  * @param gallery  the gallery state
  * @return 1 when the icons are loaded, else 0
  */
-extern "C" int cFEStateRewardGalleryBase_isIconsLoaded(void *gallery) {
-    return ((int) (*(int *)((char*)(gallery) + (0x48))) >> 3) & 1;
+extern "C" int cFEStateRewardGalleryBase_isIconsLoaded(cFEStateRewardGalleryBase* gallery) {
+    return ((int) (gallery->mLoadingState) >> 3) & 1;
 }
 #endif
 
@@ -1286,8 +1287,8 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRewardGalleryBase_isRewardsLoaded);
  * @param gallery  the gallery state
  * @return 1 when the rewards are loaded, else 0
  */
-extern "C" int cFEStateRewardGalleryBase_isRewardsLoaded(void *gallery) {
-    return ((int) (*(int *)((char*)(gallery) + (0x48))) >> 1) & 1;
+extern "C" int cFEStateRewardGalleryBase_isRewardsLoaded(cFEStateRewardGalleryBase* gallery) {
+    return ((int) (gallery->mLoadingState) >> 1) & 1;
 }
 #endif
 
