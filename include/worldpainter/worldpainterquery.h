@@ -20,7 +20,7 @@
 // BankID, SpeechID, DrawDistance, FogDensity ... PointRate; each subclass overrides its own and they return
 // this + offset), 64 writeToReplayFrame, 65 readFromReplayFrame (64/65 order from On Tour's declaration order,
 // not verified), 66 blend(const tWPData*, float), 67 debugBlend, 68 isEqual(const tWPData*), 69 setDefaults; the
-// base's 64-66/68/69 are pure (func_00411530), its getters return 0. No virtual destructor.
+// base's 64-66/68/69 are pure (__pure_virtual), its getters return 0. No virtual destructor.
 // EA's source: d:/ssx/code/source/worldpainter/worldpainterquery.cpp (preview: the "tWPIGD_<X>" and
 // "WorldPainterQuery" tags, "iContents < pWPLayer->getNumRegions()"); it is one translation unit in retail
 // (0x002BC500-0x002C16A8: tWPInGameData's code from 0x002BC500 in bx/seg_1BA100, then cWorldPainterQuery from

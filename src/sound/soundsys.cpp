@@ -7274,8 +7274,8 @@ extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" void* cAudioInterface_getAI();
 extern "C" void* cSSXAudio_GetCurrAppliedVolumePtr(void* self, int a1, int a2);
 extern "C" void cMonitor_MONITOR_Create(void*, int, long, int, int, int, int, int);
-// PORT: func_004139F8 is libgcc's float -> unsigned conversion (__fixunssfsi).
-extern "C" int func_004139F8(float f);
+// PORT: fptoui is libgcc's float -> unsigned conversion (__fixunssfsi).
+extern "C" int fptoui(float f);
 extern int D_005308D0[];
 extern sSndKey8 D_004A3678[];
 
@@ -7303,7 +7303,7 @@ extern "C" void cSSXAudio_UpdateTimedEvent(cSSXAudio* self)
         return;
     }
     int elapsedSec = (int)((float)((cAI*)cAudioInterface_getAI())->EventTimerTick * 0.01666666753590107f);
-    int secsLeft = (func_004139F8((float)*(unsigned int*)(gameModeMan + 0x78) * 0.01666666753590107f) - elapsedSec) % 3600;
+    int secsLeft = (fptoui((float)*(unsigned int*)(gameModeMan + 0x78) * 0.01666666753590107f) - elapsedSec) % 3600;
     if (secsLeft <= 0) {
         return;
     }
@@ -14971,7 +14971,7 @@ extern "C" int FileParser_FindSection(FileParser* self, const char* name)
 INCLUDE_ASM("sound/soundsys", FileParser_FindPartialSection);
 #ifdef SKIP_ASM
 extern "C" char* FileParser_FindNextSection(FileParser*);
-extern "C" char* func_0041AD80(const char* s, const char* sub);
+extern "C" char* strstr(const char* s, const char* sub);
 
 /**
  * Advances to the first section whose name and @p name match as prefixes either way (one starts with the other, via
@@ -14984,7 +14984,7 @@ extern "C" int FileParser_FindPartialSection(FileParser* self, char* name)
 {
     char* tok;
     while (*self->mPtr != 0 && (tok = FileParser_FindNextSection(self)) != 0) {
-        if (func_0041AD80(name, tok) == name || func_0041AD80(tok, name) == tok) {
+        if (strstr(name, tok) == name || strstr(tok, name) == tok) {
             return 1;
         }
     }
@@ -15060,7 +15060,7 @@ INCLUDE_ASM("sound/soundsys", FileParser_GetFloat);
 #ifdef SKIP_ASM
 extern "C" void FileParser_SkipSpace(void*);
 extern "C" void FileParser_GetName(void*);
-extern "C" int func_004178B0(const char* s, const char* fmt, ...);
+extern "C" int sscanf(const char* s, const char* fmt, ...);
 extern char str_pct_f[];
 
 /**
@@ -15074,7 +15074,7 @@ extern "C" float FileParser_GetFloat(FileParser* self)
     float value;
     FileParser_SkipSpace(self);
     FileParser_GetName(self);
-    func_004178B0((char*)self + 0xC, str_pct_f, &value);
+    sscanf((char*)self + 0xC, str_pct_f, &value);
     return value;
 }
 #endif
@@ -15084,7 +15084,7 @@ INCLUDE_ASM("sound/soundsys", FileParser_GetInt);
 #ifdef SKIP_ASM
 extern "C" void FileParser_SkipSpace(void*);
 extern "C" void FileParser_GetName(void*);
-extern "C" int func_004178B0(const char* s, const char* fmt, ...);
+extern "C" int sscanf(const char* s, const char* fmt, ...);
 extern char str_pct_d_h[];
 
 /**
@@ -15098,7 +15098,7 @@ extern "C" int FileParser_GetInt(FileParser* self)
     int value;
     FileParser_SkipSpace(self);
     FileParser_GetName(self);
-    func_004178B0((char*)self + 0xC, str_pct_d_h, &value);
+    sscanf((char*)self + 0xC, str_pct_d_h, &value);
     return value;
 }
 #endif

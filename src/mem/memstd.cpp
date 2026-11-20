@@ -534,13 +534,13 @@ typedef char* DEBUG_trace_va_list;
     (ap = (char*)__builtin_next_arg()                                    \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
 
-extern "C" int func_004186C8(char* dst, const char* fmt, char* ap);
+extern "C" int vsprintf(char* dst, const char* fmt, char* ap);
 extern "C" void PRINT_string(int, char*);
 
 /**
  * Prints a printf-style debug message on print channel 2.
  *
- * Formats @p fmt into a 512-byte stack buffer with func_004186C8 (vsprintf) and passes it to PRINT_string.
+ * Formats @p fmt into a 512-byte stack buffer with vsprintf (vsprintf) and passes it to PRINT_string.
  * MEM_printclass uses it as the line printer for MEM_printclassf.
  *
  * @param fmt  printf-style format, followed by its arguments
@@ -550,7 +550,7 @@ extern "C" void DEBUG_trace(const char* fmt, ...)
     char buf[0x200];
     DEBUG_trace_va_list ap;
     DEBUG_trace_va_start(ap);
-    func_004186C8(buf, fmt, ap);
+    vsprintf(buf, fmt, ap);
     PRINT_string(2, buf);
 }
 #endif

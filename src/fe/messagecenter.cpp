@@ -1512,7 +1512,7 @@ INCLUDE_ASM("fe/messagecenter", func_00198DA0);
  * ascending.
  *
  * Both arguments (@p self, @p other) point at array elements, each a pointer to an item. func_0019B180 passes it to
- * func_00418EF8 to sort its list of equipment item pointers.
+ * qsort to sort its list of equipment item pointers.
  *
  * @param other  the second element
  * @return the first item's key minus the second's

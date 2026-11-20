@@ -84,7 +84,7 @@ INCLUDE_ASM("animation/animmodel", func_0030DB90);
 /**
  * Compares two records by their first int: returns *self - *other (qsort-style comparator).
  *
- * cAnimModel_compile passes it to func_00418EF8 to sort the model's 0x58-byte parts by sAnimModelPart::id.
+ * cAnimModel_compile passes it to qsort to sort the model's 0x58-byte parts by sAnimModelPart::id.
  *
  * @param other  the second record
  * @return negative, zero or positive as the first int of @p self is below, equal to or above that of @p other

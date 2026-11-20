@@ -908,9 +908,9 @@ extern "C" int ReferThreadStatus(int id, void* st);
 extern "C" int CreateSema(void* sema);
 extern "C" int CreateThread(void* tp);
 extern "C" void StartThread(int id, void* arg);
-extern "C" void func_00424880(int n);
+extern "C" void DisableIntc(int n);
 extern "C" int func_00423A90(int n, void (*a)(), int b, void (*c)());
-extern "C" int func_004248E8(int n);
+extern "C" int EnableIntc(int n);
 extern int _gp;     // linker-defined $gp base (0x4A30F0; splat names it D_004A30F0)
 extern int D_004A3ECC;
 
@@ -971,7 +971,7 @@ struct sSemaParam_31A6D8 {
  * (func_0031AC60, 0x10000-byte stack at +0x4040, priority main + 1; id at +0x14040 and in D_004A3ECC), clears the
  * halt-request flag (+0x4038), creates the timer counting semaphore (+0x4034, max 0x400) and starts the timer thread
  * (func_0031AC08, 0x4000-byte stack at +0x30, priority main - 1; id at +0x4030). Both threads get @p self as their
- * argument and _gp as their $gp. Finally, between func_00424880(3) and func_004248E8(3), installs func_0031A490 as
+ * argument and _gp as their $gp. Finally, between DisableIntc(3) and EnableIntc(3), installs func_0031A490 as
  * the INTC 3 handler with func_00423A90, passing func_0031ABD0 as its argument; the handler id goes to +0x14290.
  */
 extern "C" void cPS2ExecutionMan_init(sMgr_31A6D8* self)
@@ -1025,18 +1025,18 @@ extern "C" void cPS2ExecutionMan_init(sMgr_31A6D8* self)
     tp.option = 0;
     self->f4030 = CreateThread(&tp);
     StartThread(self->f4030, self);
-    func_00424880(3);
+    DisableIntc(3);
     self->f14290 = func_00423A90(3, (void (*)())func_0031A490, 0, func_0031ABD0);
-    func_004248E8(3);
+    EnableIntc(3);
 }
 #endif
 
 //100%
 INCLUDE_ASM("bx/memblockman", cPS2ExecutionMan_purge);
 #ifdef SKIP_ASM
-extern "C" void func_00424880(int);
+extern "C" void DisableIntc(int);
 extern "C" void RemoveIntcHandler(int, int);
-extern "C" int func_004248E8(int);
+extern "C" int EnableIntc(int);
 extern "C" void SignalSema(int);
 extern "C" void SleepThread();
 extern "C" void TerminateThread(int);
@@ -1046,7 +1046,7 @@ extern "C" void DeleteSema(int);
 /**
  * Shuts the PS2 execution manager down, undoing cPS2ExecutionMan_init.
  *
- * Between func_00424880(3) and func_004248E8(3) removes the INTC 3 handler (id at +0x14290). Sets the quit flag
+ * Between DisableIntc(3) and EnableIntc(3) removes the INTC 3 handler (id at +0x14290). Sets the quit flag
  * (+0x20) and signals the loader semaphore (+0x14044) and the timer semaphore (+0x4034) so both threads see it, then
  * sleeps twice (each thread wakes this one, the main thread, on its way out). Terminates and deletes the timer
  * thread (+0x4030) and the loader thread (+0x14040), then deletes the timer, loader, sync (+0x18) and halt (+0xC)
@@ -1054,9 +1054,9 @@ extern "C" void DeleteSema(int);
  */
 extern "C" void cPS2ExecutionMan_purge(void* self)
 {
-    func_00424880(3);
+    DisableIntc(3);
     RemoveIntcHandler(3, *(int*)((char*)self + 0x14290));
-    func_004248E8(3);
+    EnableIntc(3);
     *(volatile int*)((char*)self + 0x20) = 1;
     SignalSema(*(int*)((char*)self + 0x14044));
     SignalSema(*(int*)((char*)self + 0x4034));
@@ -1406,15 +1406,15 @@ INCLUDE_ASM("bx/memblockman", func_0031AD20);
 #ifdef SKIP_ASM
 extern int D_00519C40[];
 extern int D_004A3ED4;
-extern "C" int func_00402618(int cmd, int* out);
+extern "C" int sceCdTrayReq(int cmd, int* out);
 extern "C" void func_003E3D78(void);
 
 /**
  * Recovers from a failed disc read and notes whether the disc tray was opened (a sync task).
  *
  * systemInit installs it with SYNCTASK_add in place of the CD file system's func_003E4000, which does the same
- * recovery. When D_004A3ED4 is set, clears it and calls func_00402618(2, ...) (command 2, the result is discarded).
- * When both bits 2 and 4 (mask 6) of the CD file system flags (D_00519C40) are set, calls func_00402618(2, ...) again
+ * recovery. When D_004A3ED4 is set, clears it and calls sceCdTrayReq(2, ...) (command 2, the result is discarded).
+ * When both bits 2 and 4 (mask 6) of the CD file system flags (D_00519C40) are set, calls sceCdTrayReq(2, ...) again
  * and sets D_004A3ED0 when it reports a nonzero count, clears the two bits and re-runs the read with func_003E3D78.
  *
  * @return 0
@@ -1426,11 +1426,11 @@ extern "C" int func_0031AD20(void)
         int trayStatus;
         D_004A3ED4 = 0;
         trayStatus = 0;
-        func_00402618(2, &trayStatus);
+        sceCdTrayReq(2, &trayStatus);
     }
     if ((flags & 6) == 6) {
         int trayChanged = 0;
-        func_00402618(2, &trayChanged);
+        sceCdTrayReq(2, &trayChanged);
         if (trayChanged != 0)
             D_004A3ED0 = 1;
         D_00519C40[0] &= ~6;

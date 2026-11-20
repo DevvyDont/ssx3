@@ -1365,7 +1365,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" char* func_0014B700(void* iface, int rider);
-extern "C" char* func_0041ACC0(const char* s, int c);
+extern "C" char* strrchr(const char* s, int c);
 extern "C" char* strncpy(char* dst, const char* src, int n);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cFEStateCharEquip_cancelLargePreviewLoad(void* self);
@@ -1409,7 +1409,7 @@ extern "C" void cFEStateCharEquip_startLargePreviewLoad(void* self, int flag)
         *(int*)((char*)self + 0x95C) = 1;
     char* buf = (char*)self + 0x960;
     char* fileName = func_0014B700(cBE_getInterface_Fv(cBE_getBE(), 9), *(int*)((char*)self + 0xBC));
-    char* dot = func_0041ACC0(fileName, '.');
+    char* dot = strrchr(fileName, '.');
     int len = dot - fileName - 1;
     strncpy(buf, fileName, len);
     buf[len] = 0;
@@ -2034,7 +2034,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", func_0019B180);
 #ifdef SKIP_ASM
 // PORT: func_0014BDB8 is declared (void*) but never reads its argument; called here with none
 void* func_0014BDB8_noarg() __asm__("func_0014BDB8__FPv");
-extern "C" void func_00418EF8_B180(void* base, int n, int size, int (*cmp)(const void*, const void*)) __asm__("func_00418EF8");
+extern "C" void qsort_B180(void* base, int n, int size, int (*cmp)(const void*, const void*)) __asm__("qsort");
 extern "C" int func_00198DA0(const void* a, const void* b);
 
 struct sEquipEntry_B180 {
@@ -2090,7 +2090,7 @@ extern "C" int func_0019B180_impl(void* selfv, int cat) __asm__("func_0019B180")
  * Lists the category's items (func_0014D7E8) into the list at +0x124 (count +0x958, cleared first), keeping only named
  * items and categories. In the store (mode 1): items whose character entry lacks flag 2 and whose store number matches
  * +0xCC (or +0xCC is -1), and categories with something to buy (func_0019B098). In the inventory: items whose entry has
- * flag 2 and categories holding one (func_0019AFD0). Sorts the list (func_00418EF8 with func_00198DA0).
+ * flag 2 and categories holding one (func_0019AFD0). Sorts the list (qsort with func_00198DA0).
  *
  * @param selfv  the equip state
  * @param cat  the category
@@ -2151,7 +2151,7 @@ extern "C" int func_0019B180_impl(void* selfv, int cat)
             }
         }
     }
-    func_00418EF8_B180(self->items, self->count, 4, func_00198DA0);
+    qsort_B180(self->items, self->count, 4, func_00198DA0);
     return self->count;
 }
 #endif
@@ -4515,12 +4515,12 @@ extern "C" void func_0019D8B8_DF20(sFileCache* self, int bank, int i) __asm__("f
 // (prototype from their definition at line 2766)
 extern "C" int func_0019DD10_DF20(const int* a, const int* b) __asm__("func_0019DD10");
 
-extern "C" void func_00418EF8(void* base, int n, int size, int (*cmp)(const int*, const int*));
+extern "C" void qsort(void* base, int n, int size, int (*cmp)(const int*, const int*));
 
 /**
  * Stamps a bank's deferred type-8 loads in name order and starts the first one.
  *
- * Sorts the bank's 256 packed keys with func_00418EF8 (qsort) and func_0019DD10, then walks them while the slot has
+ * Sorts the bank's 256 packed keys with qsort (qsort) and func_0019DD10, then walks them while the slot has
  * type 8 and stamp 0: each gets the bank's next stamp (counts) and, when no loads are in flight and it is queued,
  * starts loading (func_0019D8B8). The rider manager (func_0019FF00) calls it after requesting deferred files.
  *
@@ -4531,7 +4531,7 @@ extern "C" void func_0019DF20(sFileCache* self, int bank)
     int keys[256];
     for (int i = 0; i < 256; i++)
         keys[i] = (bank << 16) | i;
-    func_00418EF8(keys, 256, 4, func_0019DD10_DF20);
+    qsort(keys, 256, 4, func_0019DD10_DF20);
     for (int i = 0; i < 256; i++) {
         unsigned short idx = keys[i] & 0xFFFF;
         sFileSlot* slot = &self->banks[bank].slots[idx];
@@ -4558,7 +4558,7 @@ extern "C" void func_0019D8B8_E070(sFileCache* self, int bank, int i) __asm__("f
 // (prototype from their definition at line 2789)
 extern "C" int func_0019DE18_E070(const int* a, const int* b) __asm__("func_0019DE18");
 
-extern "C" void func_00418EF8(void* base, int n, int size, int (*cmp)(const int*, const int*));
+extern "C" void qsort(void* base, int n, int size, int (*cmp)(const int*, const int*));
 
 /**
  * Stamps a bank's deferred type-11 loads in name order and starts the first one.
@@ -4573,7 +4573,7 @@ extern "C" void func_0019E070(sFileCache* self, int bank)
     int keys[256];
     for (int i = 0; i < 256; i++)
         keys[i] = (bank << 16) | i;
-    func_00418EF8(keys, 256, 4, func_0019DE18_E070);
+    qsort(keys, 256, 4, func_0019DE18_E070);
     for (int i = 0; i < 256; i++) {
         unsigned short idx = keys[i] & 0xFFFF;
         sFileSlot* slot = &self->banks[bank].slots[idx];

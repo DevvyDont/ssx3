@@ -111,7 +111,7 @@ struct cComputer {
     cRider Rider;              // 0xF50 [R] cComputer_cComputer: cRider_cRider(this + 0xF50) when in charge
 };
 
-// Virtual slots of _vt$9cComputer (D_004585F0). cRiderHandler's slot 1 is pure virtual (cRiderHandler_vtbl: func_00411530);
+// Virtual slots of _vt$9cComputer (D_004585F0). cRiderHandler's slot 1 is pure virtual (cRiderHandler_vtbl: __pure_virtual);
 // cPlayer and cComputer each provide one.
 enum {
     kComputerVt_getControlCmd = 1,  // cComputer_getControlCmd ([O] getControlCmd; writes mGrabEndTime)

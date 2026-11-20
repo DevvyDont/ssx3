@@ -91,7 +91,7 @@ struct __class_type_info : public __user_type_info {
   // This is a little complex.
   // (retail symbol: the body is landed C in seg_315B68_tinfo.cpp)
   virtual void* dcast (const type_info &, int, void *,
-		       const type_info * = 0, void * = 0) const __asm__ ("func_00414D08");
+		       const type_info * = 0, void * = 0) const __asm__ ("__class_type_info_dcast");
 };
 
 // cp/tinfo2.cc

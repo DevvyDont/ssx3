@@ -578,7 +578,7 @@ extern "C" const char* cDirtysock_tag_TagFieldFind(const char* record, const cha
 extern "C" int cDirtysock_tag_TagFieldGetString4(const char* tag, char* buf, int size, const char* defval) __asm__("cDirtysock_tag_TagFieldGetString");
 // PORT: TagFieldGetUnk is called with a 4th (default value) argument; the unit defines 3.
 extern "C" void cDirtysock_tag_TagFieldGetUnk4(const char* tag, char* dst, int size, const char* defval) __asm__("cDirtysock_tag_TagFieldGetUnk");
-extern "C" int func_004178B0(const char* str, const char* fmt, ...);
+extern "C" int sscanf(const char* str, const char* fmt, ...);
 extern "C" int func_004165A8(void*, void*);
 extern "C" char* cCommSystem_getSignature(void* comm);
 extern "C" void* strcasecmp(void*, void*);
@@ -677,7 +677,7 @@ extern "C" sBXStr_9B10 func_00318630(const sBXStr_9B10& a, const char* b);
  * Reads the sender ("N", into a 256-byte buffer) and the text ("T", via cDirtysock_tag_TagFieldGetUnk, which drops an
  * escaping backquote), then switches on the message code at +0x4. Every BuddyMan lookup first makes sure the buddy
  * manager exists (func_00260F80) and is connected (func_00261460 / func_002613C8).
- * - 'priv' with flag 0x40000000 set and 0x200000 clear in the word at +0x8: scans the text with func_004178B0()
+ * - 'priv' with flag 0x40000000 set and 0x200000 clear in the word at +0x8: scans the text with sscanf()
  *   (sscanf-style, "%s" then 8 "%d", "%s", 4 "%d") into a command word, 8 numbers, a version signature and 4 more
  *   numbers, then by command:
  * - "challenge": a signature other than cCommSystem_getSignature() answers "badversion" (func_0025FB80); a sender
@@ -712,7 +712,7 @@ extern "C" void LobbyMan_onchatmsg(LobbyMan* self, char* msg)
         char cmd[0x100];
         char sig[0x40];
         int locationId, gameMode, gameEvent, ranked, multipliers, powerUps, numberAI, pointIcons, i, j, k, rank;
-        func_004178B0(text, str_pct_s_pct_d_pct_d_pct_d_pct_d_pct_d_pct, cmd, &locationId, &gameMode, &gameEvent, &ranked, &multipliers, &powerUps, &numberAI, &pointIcons, sig, &i, &j, &k, &rank);
+        sscanf(text, str_pct_s_pct_d_pct_d_pct_d_pct_d_pct_d_pct, cmd, &locationId, &gameMode, &gameEvent, &ranked, &multipliers, &powerUps, &numberAI, &pointIcons, sig, &i, &j, &k, &rank);
         if (func_004165A8(cmd, str_challenge) == 0) {
             if (func_004165A8(sig, cCommSystem_getSignature(cCommSystem_mCommSystem)) != 0) {
                 func_0025FB80(self, (int)name, D_004807E8);
@@ -5714,8 +5714,8 @@ struct sRaceStats {
 
 extern "C" int cDirtysock_tag_TagFieldSetEpoch(char* record, int len, char* name, unsigned int epoch);
 extern "C" int cBENewRaceInterface_getLocationID(void* iface);
-// PORT: func_004139F8 is libgcc's __fixunssfsi (float -> unsigned); called by its address name.
-extern "C" unsigned int func_004139F8(float f);
+// PORT: fptoui is libgcc's __fixunssfsi (float -> unsigned); called by its address name.
+extern "C" unsigned int fptoui(float f);
 extern "C" void func_00268EF0(void* self, void* a1, int a2);
 extern signed char D_00535C12[];
 extern int D_005366A8[];
@@ -5855,7 +5855,7 @@ static inline int RaceTime(int end)
  * becomes 0 when that is 4, else 1), DESYNC, then per rider NAME (mHostName / mOppoName), QUIT (race time from unk_034
  * to the end time when the rider did not finish), CHEAT (mCheating), DISC (the same time when a significant comm error
  * is put on that side), CHARACTER, RACETIM or SCORE (D_00536640; SCORE when RACEEVE0 is nonzero) and the trick and
- * speed totals (SPINDEG .. PLOSTRE, floats converted with func_004139F8). It sends the record with func_0025B608 (state
+ * speed totals (SPINDEG .. PLOSTRE, floats converted with fptoui). It sends the record with func_0025B608 (state
  * unchanged, callback func_00268EF0, which runs LobbyMan_onresultsreportresponse, timeout 20.0) and posts an online::Event of type 0x100
  * on mEventList. Likely bug: CHARACTER0 is always MyCharacterID, so on the non-host side both CHARACTER0 and CHARACTER1
  * are this player's character.
@@ -6008,16 +6008,16 @@ extern "C" void func_0025FD50(char* const self, int sendName, int idxA, int idxB
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMCCHL0, mine->f38);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMPLAB0, mine->f3C);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMSLAB0, mine->f40);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_AIRTIME0, func_004139F8(mine->f44));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_GRABTIM0, func_004139F8(mine->f48));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_RAILDIS0, func_004139F8(mine->f4C));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BAIRTIM0, func_004139F8(mine->f50));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BGRABTI0, func_004139F8(mine->f54));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BRAILDI0, func_004139F8(mine->f58));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_MAXSPEE0, func_004139F8(mine->f60));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_MAXAVSP0, func_004139F8(mine->f64));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SUMSPEE0, func_004139F8(mine->f68));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SUMTICK0, func_004139F8(mine->f6C));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_AIRTIME0, fptoui(mine->f44));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_GRABTIM0, fptoui(mine->f48));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_RAILDIS0, fptoui(mine->f4C));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BAIRTIM0, fptoui(mine->f50));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BGRABTI0, fptoui(mine->f54));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BRAILDI0, fptoui(mine->f58));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_MAXSPEE0, fptoui(mine->f60));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_MAXAVSP0, fptoui(mine->f64));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SUMSPEE0, fptoui(mine->f68));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SUMTICK0, fptoui(mine->f6C));
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL10, mine->f70);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL20, mine->f74);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL30, mine->f78);
@@ -6051,16 +6051,16 @@ extern "C" void func_0025FD50(char* const self, int sendName, int idxA, int idxB
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMCCHL1, opp->f38);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMPLAB1, opp->f3C);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_NUMSLAB1, opp->f40);
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_AIRTIME1, func_004139F8(opp->f44));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_GRABTIM1, func_004139F8(opp->f48));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_RAILDIS1, func_004139F8(opp->f4C));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BAIRTIM1, func_004139F8(opp->f50));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BGRABTI1, func_004139F8(opp->f54));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BRAILDI1, func_004139F8(opp->f58));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_MAXSPEE1, func_004139F8(opp->f60));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_MAXAVSP1, func_004139F8(opp->f64));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SUMSPEE1, func_004139F8(opp->f68));
-    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SUMTICK1, func_004139F8(opp->f6C));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_AIRTIME1, fptoui(opp->f44));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_GRABTIM1, fptoui(opp->f48));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_RAILDIS1, fptoui(opp->f4C));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BAIRTIM1, fptoui(opp->f50));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BGRABTI1, fptoui(opp->f54));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_BRAILDI1, fptoui(opp->f58));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_MAXSPEE1, fptoui(opp->f60));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_MAXAVSP1, fptoui(opp->f64));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SUMSPEE1, fptoui(opp->f68));
+    cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_SUMTICK1, fptoui(opp->f6C));
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL11, opp->f70);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL21, opp->f74);
     cDirtysock_tag_TagFieldSetNumber(buf, 0x800, str_TRICKL31, opp->f78);
@@ -12349,21 +12349,21 @@ extern "C" void func_00266850_impl(void *self, int flags) {
 INCLUDE_ASM("dirtysock/tagsunk", func_002668A8);
 #ifdef SKIP_ASM
 extern "C" void func_003F6358(void* self);
-extern "C" void func_0040C7C0(void* self, int a1);
-extern "C" void func_0040D430(void* self, int a1);
+extern "C" void sceUsbKbSetArrangement(void* self, int a1);
+extern "C" void sceUsbKbSetReadMode(void* self, int a1);
 
 /**
  * Sets up a newly connected USB keyboard: the connect callback func_002667E8 registers.
  *
  * Runs the library's default callback func_003F6358 (LED setup; the second argument register passes through untouched),
- * then func_0040C7C0 and func_0040D430 with the keyboard number (the first argument) and 0, which put that keyboard's
+ * then sceUsbKbSetArrangement and sceUsbKbSetReadMode with the keyboard number (the first argument) and 0, which put that keyboard's
  * two modes back to 0.
  */
 extern "C" void func_002668A8(void* self)
 {
     func_003F6358(self);
-    func_0040C7C0(self, 0);
-    func_0040D430(self, 0);
+    sceUsbKbSetArrangement(self, 0);
+    sceUsbKbSetReadMode(self, 0);
 }
 #endif
 

@@ -18,7 +18,7 @@
 #define MTC0_WIRED_4248(v) __asm__ volatile("mtc0 %z0, $6\n\tsync.p" : : "rJ"(v))
 
 /* SIF RPC client data (the SDK's sceSifClientData, 0x28 bytes); `server` is non-zero once bound.
-   func_00426B48 / sceSifCheckStatRpc in this unit are the implementation. */
+   sceSifBindRpc / sceSifCheckStatRpc in this unit are the implementation. */
 typedef struct {
     int rpcd[4];
     unsigned int command;
@@ -28,7 +28,7 @@ typedef struct {
     void *end_param;
     void *server;
 } sSifClient;
-extern int func_00426B48(sSifClient *cd, unsigned int rpc_number, int mode);
+extern int sceSifBindRpc(sSifClient *cd, unsigned int rpc_number, int mode);
 extern int sceSifCallRpc(sSifClient *cd, int fno, int mode, void *send, int ssize, void *recv, int rsize,
                          void (*end_function)(void *), void *end_param);
 extern sSifClient D_0052EE00;   /* fileio */
@@ -111,7 +111,7 @@ typedef struct {
 extern sSifRpcState D_0052D680;
 
 
-/* wake-up request queue of the helper thread started by func_00424B78 (512 {type, thread id} entries) */
+/* wake-up request queue of the helper thread started by InitThread (512 {type, thread id} entries) */
 typedef struct {
     int f0;
     unsigned idx;
@@ -128,7 +128,7 @@ extern int isceSifSetDma(sSifDmaData *sdd, int n);
 
 /* library state used by more than one function */
 extern int D_00455168;
-extern int D_00455170;          /* helper thread id (func_00424B78) */
+extern int D_00455170;          /* helper thread id (InitThread) */
 extern int D_0052B3A0;          /* its wake-up semaphore */
 extern int D_0052BCD8[];
 extern int *D_0052BCE4;
@@ -272,7 +272,7 @@ extern int func_00425040(int, int);
  * Writes bytes to the console: descriptors 1 and 2 go to the DECI2 TTY channel; returns the count or -1.
  *
  * Opens the channel with func_00425260 on first use (flag D_00455168) and sends with func_00425040. Other descriptors,
- * or a channel that cannot be opened, return -1 without setting errno. func_0041FDD0 and the console buffers
+ * or a channel that cannot be opened, return -1 without setting errno. _write_r and the console buffers
  * func_0041B550 and func_0041C938 call it.
  *
  * @param fileDesc  the descriptor
@@ -303,7 +303,7 @@ extern int func_00425190(int, int);
  * Reads console input for descriptor 0 from the DECI2 TTY channel and returns the count or -1.
  *
  * Opens the channel with func_00425260 on first use (flag D_00455168) and reads with func_00425190, which waits for
- * input and stops after a newline. Other descriptors return -1. func_0041FD10 calls it.
+ * input and stops after a newline. Other descriptors return -1. _read_r calls it.
  *
  * @param fileDesc  the descriptor
  * @param buffer  the destination
@@ -327,17 +327,17 @@ int func_004243E8(int fileDesc, int buffer, int byteCount) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_00424460);
 #ifdef SKIP_ASM
-extern int *func_00415FB8(void);
+extern int *__errno(void);
 /**
  * Fails a file open: sets errno 5 (EIO) and returns -1.
  *
- * Declared without parameters; errno is set through func_00415FB8. func_0041FCB0 calls it, so every stdio file open
+ * Declared without parameters; errno is set through __errno. _open_r calls it, so every stdio file open
  * fails.
  *
  * @return -1
  */
 int func_00424460(void) {
-    *func_00415FB8() = 5;
+    *__errno() = 5;
     return -1;
 }
 #endif
@@ -348,7 +348,7 @@ INCLUDE_ASM("seg/seg_325220", func_00424488);
 /**
  * Returns -1: closing a descriptor is not supported (errno is left alone).
  *
- * func_0041FB98 calls it.
+ * _close_r calls it.
  *
  * @return -1
  */
@@ -378,7 +378,7 @@ INCLUDE_ASM("seg/seg_325220", func_00424498);
 /**
  * Returns -1: seeking a descriptor is not supported (errno is left alone).
  *
- * func_0041FC50 calls it.
+ * _lseek_r calls it.
  *
  * @return -1
  */
@@ -392,13 +392,13 @@ INCLUDE_ASM("seg/seg_325220", func_004244A0);
 #ifdef SKIP_ASM
 extern unsigned D_0045516C;
 extern unsigned EndOfHeap(void);
-extern int *func_00415FB8(void);
+extern int *__errno(void);
 /**
  * Moves the C heap break by n bytes and returns the old break, or all ones when it would pass the end of the heap.
  *
  * The break is D_0045516C; the limit comes from EndOfHeap. When interrupts are enabled (Status bit 16) they are
  * disabled for the update (di until the bit reads clear) and enabled again afterwards. Failure sets errno 12 (ENOMEM)
- * through func_00415FB8. func_0041FD70 calls it.
+ * through __errno. _sbrk_r calls it.
  *
  * @param n  the byte change
  * @return the previous break, or 0xFFFFFFFF
@@ -417,7 +417,7 @@ unsigned func_004244A0(unsigned n) {
     }
     end = D_0045516C + n;
     if (EndOfHeap() < end) {
-        *func_00415FB8() = 12;
+        *__errno() = 12;
         if (s) EI_4248();
         return 0xFFFFFFFF;
     }
@@ -450,7 +450,7 @@ INCLUDE_ASM("seg/seg_325220", func_00424558);
  * Fills a stat buffer as a character device for any descriptor and returns 0.
  *
  * Sets the mode word (+4) to 0x2000 (S_IFCHR) and clears the 64-bit word at +0x48; nothing else is written.
- * func_0041FBF0 calls it, so stdio never treats a stream as a seekable regular file.
+ * _fstat_r calls it, so stdio never treats a stream as a seekable regular file.
  *
  * @param fileDesc  the descriptor (ignored)
  * @param statBuf   the stat buffer
@@ -498,16 +498,16 @@ int func_00424578(int pid, int sigNum) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_004245A0);
 #ifdef SKIP_ASM
-extern int *func_00415FB8(void);
+extern int *__errno(void);
 /**
  * Fails an unsupported file operation: sets errno 5 (EIO) and returns -1.
  *
- * Declared without parameters; errno is set through func_00415FB8.
+ * Declared without parameters; errno is set through __errno.
  *
  * @return -1
  */
 int func_004245A0(void) {
-    *func_00415FB8() = 5;
+    *__errno() = 5;
     return -1;
 }
 #endif
@@ -515,16 +515,16 @@ int func_004245A0(void) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_004245C8);
 #ifdef SKIP_ASM
-extern int *func_00415FB8(void);
+extern int *__errno(void);
 /**
  * Fails an unsupported file operation: sets errno 5 (EIO) and returns -1.
  *
- * Declared without parameters; errno is set through func_00415FB8. No code calls it.
+ * Declared without parameters; errno is set through __errno. No code calls it.
  *
  * @return -1
  */
 int func_004245C8(void) {
-    *func_00415FB8() = 5;
+    *__errno() = 5;
     return -1;
 }
 #endif
@@ -541,7 +541,7 @@ INCLUDE_ASM("seg/seg_325220", func_004245F0);
  *
  * Walks the 64 sets of both ways (index 0..0xFC0 in 0x40 steps): loads the line tag (cache 0x10, then TagLo), rebuilds
  * the line address and runs cache 0x14 (index write-back invalidate) on the lines in range, with sync around each cache
- * operation. func_00424698 and func_00424718 call it with 64-byte aligned bounds.
+ * operation. SyncDCache and iSyncDCache call it with 64-byte aligned bounds.
  *
  * @param lo  the first line address
  * @param hi  the last line address
@@ -564,7 +564,7 @@ void func_004245F0(unsigned lo, unsigned hi) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00424698);
+INCLUDE_ASM("seg/seg_325220", SyncDCache);
 #ifdef SKIP_ASM
 extern void DIntr(void);
 extern void func_004245F0(unsigned, unsigned);
@@ -577,7 +577,7 @@ extern void func_004245F0(unsigned, unsigned);
  * @param startAddr  the first address
  * @param endAddr    the last address
  */
-void func_00424698(unsigned startAddr, unsigned endAddr) {
+void SyncDCache(unsigned startAddr, unsigned endAddr) {
     int s;
     MFC0_STATUS_4248(s);
     s &= 0x10000;
@@ -588,7 +588,7 @@ void func_00424698(unsigned startAddr, unsigned endAddr) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00424718);
+INCLUDE_ASM("seg/seg_325220", iSyncDCache);
 #ifdef SKIP_ASM
 extern void func_004245F0(unsigned, unsigned);
 /**
@@ -599,7 +599,7 @@ extern void func_004245F0(unsigned, unsigned);
  * @param startAddr  the first address
  * @param endAddr    the last address
  */
-void func_00424718(unsigned startAddr, unsigned endAddr) {
+void iSyncDCache(unsigned startAddr, unsigned endAddr) {
     func_004245F0(startAddr & ~63, endAddr & ~63);
 }
 #endif
@@ -611,7 +611,7 @@ INCLUDE_ASM("seg/seg_325220", func_00424730);
  * Invalidates, without writing back, every data-cache line whose address lies in [lo, hi].
  *
  * The same tag walk as func_004245F0, but runs cache 0x16 (index invalidate), so dirty data in the range is discarded.
- * func_004247D8 and func_00424858 call it with 64-byte aligned bounds.
+ * InvalidDCache and iInvalidDCache call it with 64-byte aligned bounds.
  *
  * @param lo  the first line address
  * @param hi  the last line address
@@ -634,7 +634,7 @@ void func_00424730(unsigned lo, unsigned hi) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_004247D8);
+INCLUDE_ASM("seg/seg_325220", InvalidDCache);
 #ifdef SKIP_ASM
 extern void DIntr(void);
 extern void func_00424730(unsigned, unsigned);
@@ -647,7 +647,7 @@ extern void func_00424730(unsigned, unsigned);
  * @param startAddr  the first address
  * @param endAddr    the last address
  */
-void func_004247D8(unsigned startAddr, unsigned endAddr) {
+void InvalidDCache(unsigned startAddr, unsigned endAddr) {
     int s;
     MFC0_STATUS_4248(s);
     s &= 0x10000;
@@ -658,7 +658,7 @@ void func_004247D8(unsigned startAddr, unsigned endAddr) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00424858);
+INCLUDE_ASM("seg/seg_325220", iInvalidDCache);
 #ifdef SKIP_ASM
 extern void func_00424730(unsigned, unsigned);
 /**
@@ -670,7 +670,7 @@ extern void func_00424730(unsigned, unsigned);
  * @param startAddr  the first address
  * @param endAddr    the last address
  */
-void func_00424858(unsigned startAddr, unsigned endAddr) {
+void iInvalidDCache(unsigned startAddr, unsigned endAddr) {
     func_00424730(startAddr & ~63, endAddr & ~63);
 }
 #endif
@@ -693,7 +693,7 @@ int func_00424870(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00424880);
+INCLUDE_ASM("seg/seg_325220", DisableIntc);
 #ifdef SKIP_ASM
 extern void DIntr(void);
 extern int _DisableIntc(int);
@@ -705,7 +705,7 @@ extern int _DisableIntc(int);
  * @param cause  the INTC cause number
  * @return _DisableIntc's result
  */
-int func_00424880(int cause) {
+int DisableIntc(int cause) {
     int s, result;
     MFC0_STATUS_4248(s);
     s &= 0x10000;
@@ -718,7 +718,7 @@ int func_00424880(int cause) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_004248E8);
+INCLUDE_ASM("seg/seg_325220", EnableIntc);
 #ifdef SKIP_ASM
 extern void DIntr(void);
 extern int _EnableIntc(int);
@@ -730,7 +730,7 @@ extern int _EnableIntc(int);
  * @param cause  the INTC cause number
  * @return _EnableIntc's result
  */
-int func_004248E8(int cause) {
+int EnableIntc(int cause) {
     int s, result;
     MFC0_STATUS_4248(s);
     s &= 0x10000;
@@ -743,7 +743,7 @@ int func_004248E8(int cause) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00424950);
+INCLUDE_ASM("seg/seg_325220", DisableDmac);
 #ifdef SKIP_ASM
 extern void DIntr(void);
 extern int _DisableDmac(int);
@@ -751,12 +751,12 @@ extern int _DisableDmac(int);
  * Disables one DMA channel's completion interrupt and returns the system call's result.
  *
  * Calls _DisableDmac followed by sync, between DIntr and EIntr when interrupts were enabled. Callers include
- * func_00425FB8 (channel 5) and cPS2GraphicsMan_Purge.
+ * sceSifExitCmd (channel 5) and cPS2GraphicsMan_Purge.
  *
  * @param channel  the DMA channel
  * @return _DisableDmac's result
  */
-int func_00424950(int channel) {
+int DisableDmac(int channel) {
     int s, result;
     MFC0_STATUS_4248(s);
     s &= 0x10000;
@@ -769,20 +769,20 @@ int func_00424950(int channel) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_004249B8);
+INCLUDE_ASM("seg/seg_325220", EnableDmac);
 #ifdef SKIP_ASM
 extern void DIntr(void);
 extern int _EnableDmac(int);
 /**
  * Enables one DMA channel's completion interrupt and returns the system call's result.
  *
- * Calls _EnableDmac followed by sync, between DIntr and EIntr when interrupts were enabled. func_00425D38 calls it for
+ * Calls _EnableDmac followed by sync, between DIntr and EIntr when interrupts were enabled. sceSifInitCmd calls it for
  * channel 5 after installing its handler.
  *
  * @param channel  the DMA channel
  * @return _EnableDmac's result
  */
-int func_004249B8(int channel) {
+int EnableDmac(int channel) {
     int s, result;
     MFC0_STATUS_4248(s);
     s &= 0x10000;
@@ -795,7 +795,7 @@ int func_004249B8(int channel) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00424A20);
+INCLUDE_ASM("seg/seg_325220", iEnableIntc);
 #ifdef SKIP_ASM
 extern void _iEnableIntc(void);
 /**
@@ -804,14 +804,14 @@ extern void _iEnableIntc(void);
  * Declared without parameters: the cause stays in the first argument register for _iEnableIntc, followed by sync. No
  * code calls it.
  */
-void func_00424A20(void) {
+void iEnableIntc(void) {
     _iEnableIntc();
     __asm__ volatile("sync");
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00424A40);
+INCLUDE_ASM("seg/seg_325220", iDisableIntc);
 #ifdef SKIP_ASM
 extern void _iDisableIntc(void);
 /**
@@ -820,14 +820,14 @@ extern void _iDisableIntc(void);
  * Declared without parameters: the cause stays in the first argument register for _iDisableIntc, followed by sync. No
  * code calls it.
  */
-void func_00424A40(void) {
+void iDisableIntc(void) {
     _iDisableIntc();
     __asm__ volatile("sync");
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00424A60);
+INCLUDE_ASM("seg/seg_325220", iEnableDmac);
 #ifdef SKIP_ASM
 extern void _iEnableDmac(void);
 /**
@@ -836,14 +836,14 @@ extern void _iEnableDmac(void);
  * Declared without parameters: the channel stays in the first argument register for _iEnableDmac, followed by sync. No
  * code calls it.
  */
-void func_00424A60(void) {
+void iEnableDmac(void) {
     _iEnableDmac();
     __asm__ volatile("sync");
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00424A80);
+INCLUDE_ASM("seg/seg_325220", iDisableDmac);
 #ifdef SKIP_ASM
 extern void _iDisableDmac(void);
 /**
@@ -852,7 +852,7 @@ extern void _iDisableDmac(void);
  * Declared without parameters: the channel stays in the first argument register for _iDisableDmac, followed by sync. No
  * code calls it.
  */
-void func_00424A80(void) {
+void iDisableDmac(void) {
     _iDisableDmac();
     __asm__ volatile("sync");
 }
@@ -872,7 +872,7 @@ extern void SuspendThread(int);
  * Each time the semaphore D_0052B3A0 is signalled it takes the next 2-byte entry {type, thread id} from the 512-entry
  * ring (read index in the first word, entries from +8) and calls WakeupThread (type 0), RotateThreadReadyQueue (type 1,
  * the id being a priority) or SuspendThread (type 2). Any other type prints "## internel error in libkernl.a!" (sic)
- * with func_00425C28. func_00424B78 starts it with D_0052B3A8.
+ * with func_00425C28. InitThread starts it with D_0052B3A8.
  *
  * @param wakeQueue  the request queue
  */
@@ -905,7 +905,7 @@ void func_00424AA0(unsigned *wakeQueue) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00424B78);
+INCLUDE_ASM("seg/seg_325220", InitThread);
 #ifdef SKIP_ASM
 extern char D_0052AFA0[];
 extern char D_004A30F0[];
@@ -916,7 +916,7 @@ extern int GetThreadId(void);
 extern void ChangeThreadPriority(int, int);
 extern void DeleteSema(int);
 extern void func_00424AA0(unsigned *);
-int func_00424B78_i(void) __asm__("func_00424B78");
+int InitThread_i(void) __asm__("InitThread");
 /**
  * Creates and starts the helper thread for interrupt-context thread requests and returns its id, or -1.
  *
@@ -927,7 +927,7 @@ int func_00424B78_i(void) __asm__("func_00424B78");
  *
  * @return the helper thread id, or -1
  */
-int func_00424B78_i(void) {
+int InitThread_i(void) {
     int cfg[12];
     int buf[8];
     if (D_00455170 > 0) {
@@ -958,13 +958,13 @@ int func_00424B78_i(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00424C50);
+INCLUDE_ASM("seg/seg_325220", iWakeupThread);
 #ifdef SKIP_ASM
 extern void iSignalSema(int);
 extern int _iWakeupThread(void);
 // PORT: PS2 kernel syscall (number in $3, result in $2).
 #define SYSCALL_RET_4C50(n, r) do { register int r_ __asm__("$2"); __asm__ volatile("li $3, " #n "\n\tsyscall" : "=r"(r_) : : "$3"); r = r_; } while (0)
-int func_00424C50_r(int a0) __asm__("func_00424C50");
+int iWakeupThread_r(int a0) __asm__("iWakeupThread");
 /**
  * Wakes a thread from interrupt context; waking the interrupted thread itself is passed to the helper thread.
  *
@@ -975,7 +975,7 @@ int func_00424C50_r(int a0) __asm__("func_00424C50");
  * @param threadId  the thread id
  * @return the thread id or _iWakeupThread's result, or -1 when it cannot be queued
  */
-int func_00424C50_r(int threadId) {
+int iWakeupThread_r(int threadId) {
     int id;
     unsigned i;
     SYSCALL_RET_4C50(-47, id);
@@ -991,7 +991,7 @@ int func_00424C50_r(int threadId) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00424CE8);
+INCLUDE_ASM("seg/seg_325220", iRotateThreadReadyQueue);
 #ifdef SKIP_ASM
 extern void iSignalSema(int);
 /**
@@ -1003,7 +1003,7 @@ extern void iSignalSema(int);
  * @param priority  the priority
  * @return the priority, or -1
  */
-int func_00424CE8(unsigned priority) {
+int iRotateThreadReadyQueue(unsigned priority) {
     unsigned i;
     if (priority >= 0x80 || D_00455170 == 0) {
         return -1;
@@ -1018,19 +1018,19 @@ int func_00424CE8(unsigned priority) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00424D68);
+INCLUDE_ASM("seg/seg_325220", iSuspendThread);
 #ifdef SKIP_ASM
 extern int _iSuspendThread(void);
-int func_00424D68_r(int a0) __asm__("func_00424D68");
+int iSuspendThread_r(int a0) __asm__("iSuspendThread");
 /**
  * Suspends a thread from interrupt context; suspending the interrupted thread itself is passed to the helper thread.
  *
- * Like func_00424C50 with _iSuspendThread and a type-2 entry. No code calls it.
+ * Like iWakeupThread with _iSuspendThread and a type-2 entry. No code calls it.
  *
  * @param threadId  the thread id
  * @return the thread id or _iSuspendThread's result, or -1 when it cannot be queued
  */
-int func_00424D68_r(int threadId) {
+int iSuspendThread_r(int threadId) {
     int id;
     unsigned i;
     SYSCALL_RET_4C50(-47, id);
@@ -1327,7 +1327,7 @@ extern void func_0042CA58_v(char *) __asm__("func_0042CA58");
  * Adds a character to the 128-byte console line buffer, printing the line at a newline or when the buffer is full.
  *
  * The buffer is D_0052BB80 with the fill count D_00455174; func_0042CA58 prints it. A newline is stored, terminated and
- * printed at once. func_00425C60 installs it as the output routine.
+ * printed at once. scePrintf installs it as the output routine.
  *
  * Likely bug: when 126 characters are waiting it terminates the buffer at index 127, so the byte at index 126 (left
  * from an earlier line) is printed too.
@@ -1478,9 +1478,9 @@ extern void (*D_00455178)(int);
 extern int DIntr_p(void) __asm__("DIntr");
 extern void EIntr(void);
 extern long __moddi3(long, long);
-extern long func_0040FCB0(long, long);
+extern long __divdi3(long, long);
 extern unsigned long __umoddi3(unsigned long, unsigned long);
-extern unsigned long func_00411538(unsigned long, unsigned long);
+extern unsigned long __udivdi3(unsigned long, unsigned long);
 extern double fptodp(float);
 extern void func_004254D0(double x);
 // printf core: fmt + va_list (8-byte argument slots); 64-bit div/mod go through the soft helpers.
@@ -1489,9 +1489,9 @@ void func_00425638_f(char *fmt, char *ap) __asm__("func_00425638");
  * Formats text from a format string and argument list, sending each character to the output routine D_00455178.
  *
  * Supports %d, %u, %x, %o with h or l sizes and a 0-prefixed width of up to 31 digits, %c, %s and %e / %f (printed by
- * func_004254D0). Arguments take 8-byte slots; 64-bit division uses __moddi3, func_0040FCB0, __umoddi3 and
- * func_00411538. Interrupts are off (DIntr) for the whole call and turned back on (EIntr) at the end when they were on.
- * func_00425C28 and func_00425C60 call it.
+ * func_004254D0). Arguments take 8-byte slots; 64-bit division uses __moddi3, __divdi3, __umoddi3 and
+ * __udivdi3. Interrupts are off (DIntr) for the whole call and turned back on (EIntr) at the end when they were on.
+ * func_00425C28 and scePrintf call it.
  *
  * Quirks: %s prints "(null)" for an empty string but dereferences a null pointer; %e and %f read the argument slot as a
  * float although C passes a double; %% and unknown conversions print nothing.
@@ -1619,7 +1619,7 @@ void func_00425638_f(char *fmt, char *ap) {
                     }
                     while (signedValue) {
                         *--printCursor = __moddi3(signedValue, 10) + '0';
-                        signedValue = func_0040FCB0(signedValue, 10);
+                        signedValue = __divdi3(signedValue, 10);
                     }
                 }
                 if (pad && pad < printCursor)
@@ -1645,7 +1645,7 @@ void func_00425638_f(char *fmt, char *ap) {
                 } else {
                     while (unsignedValue) {
                         *--printCursor = __umoddi3(unsignedValue, 10) + '0';
-                        unsignedValue = func_00411538(unsignedValue, 10);
+                        unsignedValue = __udivdi3(unsignedValue, 10);
                     }
                 }
                 if (pad && pad < printCursor)
@@ -1715,7 +1715,7 @@ void func_00425C28(int a0, ...) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00425C60);
+INCLUDE_ASM("seg/seg_325220", scePrintf);
 #ifdef SKIP_ASM
 extern void (*D_00455178)(int);
 extern void func_00425358(int c);
@@ -1728,7 +1728,7 @@ extern void func_00425638(int a0, char *ap);
  *
  * @param format  the format
  */
-void func_00425C60(int format, ...) {
+void scePrintf(int format, ...) {
     char *ap;
     void (*old)(int) = D_00455178;
     D_00455178 = func_00425358;
@@ -1744,7 +1744,7 @@ INCLUDE_ASM("seg/seg_325220", func_00425CC0);
 /**
  * Handles the IOP's set-register system command: stores a value in one of the SIF software registers.
  *
- * Writes packet word 5 into the register array (command data +0x1C) at the index in packet word 4. func_00425D38
+ * Writes packet word 5 into the register array (command data +0x1C) at the index in packet word 4. sceSifInitCmd
  * installs it as system command 1.
  *
  * @param packet   the command packet
@@ -1761,7 +1761,7 @@ INCLUDE_ASM("seg/seg_325220", func_00425CE0);
 /**
  * Handles the IOP's change-address system command: records the IOP's command receive address.
  *
- * Stores packet word 4 as the IOP buffer address (command data +8). func_00425D38 installs it as system command 0.
+ * Stores packet word 4 as the IOP buffer address (command data +8). sceSifInitCmd installs it as system command 0.
  *
  * @param packet   the command packet
  * @param cmdData  the command layer data D_0052BCD8
@@ -1772,7 +1772,7 @@ void func_00425CE0(int *packet, int *cmdData) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00425CF0);
+INCLUDE_ASM("seg/seg_325220", sceSifGetSreg);
 #ifdef SKIP_ASM
 /**
  * Returns one of the 32 SIF software registers (D_0052BE00).
@@ -1782,13 +1782,13 @@ INCLUDE_ASM("seg/seg_325220", func_00425CF0);
  * @param regIndex  the register index
  * @return the register value
  */
-int func_00425CF0(int regIndex) {
+int sceSifGetSreg(int regIndex) {
     return D_0052BE00[regIndex];
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00425D08);
+INCLUDE_ASM("seg/seg_325220", sceSifSetSreg);
 #ifdef SKIP_ASM
 /**
  * Sets one of the 32 SIF software registers and returns the value.
@@ -1799,14 +1799,14 @@ INCLUDE_ASM("seg/seg_325220", func_00425D08);
  * @param regValue  the value
  * @return the value
  */
-int func_00425D08(int regIndex, int regValue) {
+int sceSifSetSreg(int regIndex, int regValue) {
     D_0052BE00[regIndex] = regValue;
     return regValue;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00425D28);
+INCLUDE_ASM("seg/seg_325220", sceSifGetDataTable);
 #ifdef SKIP_ASM
 /**
  * Returns the SIF command layer data D_0052BCD8.
@@ -1815,13 +1815,13 @@ INCLUDE_ASM("seg/seg_325220", func_00425D28);
  *
  * @return the command layer data
  */
-int *func_00425D28(void) {
+int *sceSifGetDataTable(void) {
     return D_0052BCD8;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00425D38);
+INCLUDE_ASM("seg/seg_325220", sceSifInitCmd);
 #ifdef SKIP_ASM
 /* sceSifInitCmd (libkernel sifcmd): one-time SIF command layer setup and handshake with the IOP. */
 typedef struct { void (*func)(int *, int *); void *data; } sCmdHandler_5D38;
@@ -1849,7 +1849,7 @@ extern void sceSifSetDChain(void);
 extern int sceSifGetReg(int a0);
 extern unsigned int f5D38_getreg(unsigned int) __asm__("sceSifGetReg");
 extern int sceSifSetReg(int, int);
-extern int f5D38_send(int, void *, int, void *, void *, int) __asm__("func_004261B0");
+extern int f5D38_send(int, void *, int, void *, void *, int) __asm__("sceSifSendCmd");
 /**
  * Initialises the SIF command layer once and starts the handshake with the IOP.
  *
@@ -1860,12 +1860,12 @@ extern int f5D38_send(int, void *, int, void *, void *, int) __asm__("func_00426
  *
  * After FlushCache(0) it acknowledges DMA status bit 5 (0x1000E010), sets the SIF DMA chain up with sceSifSetDChain
  * when 0x1000C000 bit 8 is clear, installs func_00426230 as the DMA channel 5 handler (func_00423AB0) and enables it
- * (func_004249B8). If the IOP's buffer address is already in SIF register 0x80000000 it sends the init packet
+ * (EnableDmac). If the IOP's buffer address is already in SIF register 0x80000000 it sends the init packet
  * D_0052BCC0 as command 0x80000000; otherwise it waits for register 4 bit 0x20000, reads the IOP buffer from register
  * 2, publishes both addresses in registers 0x80000000 and 0x80000001 and sends command 0x80000002. The RPC set-up
  * func_00426408 calls it.
  */
-void func_00425D38(void) {
+void sceSifInitCmd(void) {
     int i;
     DIntr();
     if (D_0045517C) {
@@ -1898,7 +1898,7 @@ void func_00425D38(void) {
     if (!(*(volatile int *)0x1000C000 & 0x100))
         sceSifSetDChain();
     D_0052BCD4 = f5D38_adddh(5, func_00426230, 0);
-    func_004249B8(5);
+    EnableDmac(5);
     cmd_5D38.iopbuf = (void *)f5D38_getreg(0x80000000);
     if (cmd_5D38.iopbuf) {
         D_0052BCC0[4] = (int)D_0052BC00;
@@ -1918,27 +1918,27 @@ void func_00425D38(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00425FB8);
+INCLUDE_ASM("seg/seg_325220", sceSifExitCmd);
 #ifdef SKIP_ASM
-extern int func_00424950(int a0);
+extern int DisableDmac(int a0);
 extern int RemoveDmacHandler(int a0, int a1);
 extern int D_0045517C;
 extern int D_0052BCD4;
 /**
  * Shuts the SIF command layer down.
  *
- * Disables DMA channel 5 (func_00424950), removes the channel 5 handler with RemoveDmacHandler and clears the
- * initialised flag D_0045517C. func_004265A8 and func_0031B008 call it.
+ * Disables DMA channel 5 (DisableDmac), removes the channel 5 handler with RemoveDmacHandler and clears the
+ * initialised flag D_0045517C. sceSifExitRpc and func_0031B008 call it.
  */
-void func_00425FB8(void) {
-    func_00424950(5);
+void sceSifExitCmd(void) {
+    DisableDmac(5);
     RemoveDmacHandler(5, D_0052BCD4);
     D_0045517C = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00425FF0);
+INCLUDE_ASM("seg/seg_325220", sceSifSetCmdBuffer);
 #ifdef SKIP_ASM
 /**
  * Sets the user command handler table and returns the previous one.
@@ -1949,7 +1949,7 @@ INCLUDE_ASM("seg/seg_325220", func_00425FF0);
  * @param handlerCount  the entry count
  * @return the previous table
  */
-int func_00425FF0(int handlerTable, int handlerCount) {
+int sceSifSetCmdBuffer(int handlerTable, int handlerCount) {
     int old = D_0052BCD8[5];
     D_0052BCD8[5] = handlerTable;
     D_0052BCD8[6] = handlerCount;
@@ -1958,7 +1958,7 @@ int func_00425FF0(int handlerTable, int handlerCount) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00426008);
+INCLUDE_ASM("seg/seg_325220", sceSifSetSysCmdBuffer);
 #ifdef SKIP_ASM
 /**
  * Sets the system command handler table and returns the previous one.
@@ -1969,7 +1969,7 @@ INCLUDE_ASM("seg/seg_325220", func_00426008);
  * @param handlerCount  the entry count
  * @return the previous table
  */
-int func_00426008(int handlerTable, int handlerCount) {
+int sceSifSetSysCmdBuffer(int handlerTable, int handlerCount) {
     int old = D_0052BCD8[3];
     D_0052BCD8[3] = handlerTable;
     D_0052BCD8[4] = handlerCount;
@@ -1978,7 +1978,7 @@ int func_00426008(int handlerTable, int handlerCount) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00426020);
+INCLUDE_ASM("seg/seg_325220", sceSifAddCmdHandler);
 #ifdef SKIP_ASM
 /**
  * Installs a SIF command handler and its data in the system table (command id with the top bit set) or the user table.
@@ -1991,7 +1991,7 @@ INCLUDE_ASM("seg/seg_325220", func_00426020);
  * @param handler  the handler
  * @param handlerData  the handler's data
  */
-void func_00426020(int a0, int handler, int handlerData) {
+void sceSifAddCmdHandler(int a0, int handler, int handlerData) {
     int off = a0 << 3;
     if (a0 < 0) {
         a0 = (int)D_0052BCE4;
@@ -2005,7 +2005,7 @@ void func_00426020(int a0, int handler, int handlerData) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00426050);
+INCLUDE_ASM("seg/seg_325220", sceSifRemoveCmdHandler);
 #ifdef SKIP_ASM
 /**
  * Removes the SIF command handler for a command id (system table when the top bit is set, else user table).
@@ -2014,7 +2014,7 @@ INCLUDE_ASM("seg/seg_325220", func_00426050);
  *
  * @param a0  the command id
  */
-void func_00426050(int a0) {
+void sceSifRemoveCmdHandler(int a0) {
     int off = a0 << 3;
     if (a0 < 0) {
         a0 = (int)D_0052BCE4;
@@ -2089,13 +2089,13 @@ int func_00426078_d(int cmdId, int sendFlags, int *packet, unsigned packetSize, 
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_004261B0);
+INCLUDE_ASM("seg/seg_325220", sceSifSendCmd);
 #ifdef SKIP_ASM
 extern int func_00426078(int a0, int a1, int a2, int a3, int a4, int a5, int a6);
 /**
  * Sends a SIF command packet to the IOP from thread context and returns the DMA id (0 on failure).
  *
- * Calls func_00426078 with flags 0. Callers include sceSifCallRpc, sceSifExecRequest, func_00426B48 and func_004268F0.
+ * Calls func_00426078 with flags 0. Callers include sceSifCallRpc, sceSifExecRequest, sceSifBindRpc and sceSifGetOtherData.
  *
  * @param cmdId       the command id
  * @param packet      the packet
@@ -2105,13 +2105,13 @@ extern int func_00426078(int a0, int a1, int a2, int a3, int a4, int a5, int a6)
  * @param extraSize   the extra data size (0 for none)
  * @return the DMA id, or 0
  */
-int func_004261B0(int cmdId, int packet, int packetSize, int extraSrc, int extraDest, int extraSize) {
+int sceSifSendCmd(int cmdId, int packet, int packetSize, int extraSrc, int extraDest, int extraSize) {
     return func_00426078(cmdId, 0, packet, packetSize, extraSrc, extraDest, extraSize);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_004261F0);
+INCLUDE_ASM("seg/seg_325220", isceSifSendCmd);
 #ifdef SKIP_ASM
 extern int func_00426078(int a0, int a1, int a2, int a3, int a4, int a5, int a6);
 /**
@@ -2128,7 +2128,7 @@ extern int func_00426078(int a0, int a1, int a2, int a3, int a4, int a5, int a6)
  * @param extraSize   the extra data size (0 for none)
  * @return the DMA id, or 0
  */
-int func_004261F0(int cmdId, int packet, int packetSize, int extraSrc, int extraDest, int extraSize) {
+int isceSifSendCmd(int cmdId, int packet, int packetSize, int extraSrc, int extraDest, int extraSize) {
     return func_00426078(cmdId, 1, packet, packetSize, extraSrc, extraDest, extraSize);
 }
 #endif
@@ -2211,17 +2211,17 @@ __asm__(
 INCLUDE_ASM("seg/seg_325220", func_00426408);
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_004265A8);
+INCLUDE_ASM("seg/seg_325220", sceSifExitRpc);
 #ifdef SKIP_ASM
-extern void func_00425FB8(void);
+extern void sceSifExitCmd(void);
 extern int D_00455180;
 /**
  * Shuts the SIF RPC layer down.
  *
- * Calls func_00425FB8 and clears the RPC initialised flag D_00455180. sceSifRebootIop calls it.
+ * Calls sceSifExitCmd and clears the RPC initialised flag D_00455180. sceSifRebootIop calls it.
  */
-void func_004265A8(void) {
-    func_00425FB8();
+void sceSifExitRpc(void) {
+    sceSifExitCmd();
     D_00455180 = 0;
 }
 #endif
@@ -2237,7 +2237,7 @@ sSifRpcPkt *f65D0(sSifRpcState *s) __asm__("func_004265D0");
  *
  * With interrupts off it scans the table for an entry whose word +0x10 has bit 0 clear, marks it (index << 16 | 5),
  * stores its own address at +0x14 and a new packet id at +0x18. The id comes from the counter (+0); the first call
- * hands out 1 and leaves the counter at 2, so id 2 is never used. sceSifCallRpc, func_00426B48 and func_004268F0 call
+ * hands out 1 and leaves the counter at 2, so id 2 is never used. sceSifCallRpc, sceSifBindRpc and sceSifGetOtherData call
  * it.
  *
  * @param rpcState  the RPC state D_0052D680
@@ -2381,12 +2381,12 @@ void f6708(struct A6708 *endRequest) {
 //100%
 INCLUDE_ASM("seg/seg_325220", func_004267C0);
 #ifdef SKIP_ASM
-extern int func_004261F0(int a0, int a1, int a2, int a3, int a4, int a5);
+extern int isceSifSendCmd(int a0, int a1, int a2, int a3, int a4, int a5);
 extern void func_00423B80(int a0, int (*a1)(int, int, int *), int *a2);
 /**
  * Retries sending an RPC reply from an alarm until the command DMA accepts it.
  *
- * Sends the 0x40-byte packet as command 0x80000008 with its extra data (packet words 9..11) through func_004261F0; when
+ * Sends the 0x40-byte packet as command 0x80000008 with its extra data (packet words 9..11) through isceSifSendCmd; when
  * that fails it re-arms itself with func_00423B80 (10 ticks). Declared int but returns no value. func_00426820 sets the
  * first alarm.
  *
@@ -2395,7 +2395,7 @@ extern void func_00423B80(int a0, int (*a1)(int, int, int *), int *a2);
  * @param packet     the reply packet
  */
 int func_004267C0(int alarmId, int alarmTime, int *packet) {
-    if (func_004261F0(0x80000008, (int)packet, 0x40, packet[9], packet[10], packet[11]) == 0) {
+    if (isceSifSendCmd(0x80000008, (int)packet, 0x40, packet[9], packet[10], packet[11]) == 0) {
         func_00423B80(10, func_004267C0, packet);
     }
 }
@@ -2406,7 +2406,7 @@ INCLUDE_ASM("seg/seg_325220", func_00426820);
 #ifdef SKIP_ASM
 extern int func_00426698(sSifRpcState *a0);
 extern int func_004266C8(sSifRpcState *a0, int a1);
-extern int func_004261F0(int a0, int a1, int a2, int a3, int a4, int a5);
+extern int isceSifSendCmd(int a0, int a1, int a2, int a3, int a4, int a5);
 extern void func_00423B80(int a0, int (*a1)(int, int, int *), int *a2);
 extern int func_004267C0(int a0, int a1, int *p);
 extern int func_004266C8_u(sSifRpcState *, unsigned) __asm__("func_004266C8");
@@ -2415,7 +2415,7 @@ extern int func_004266C8_u(sSifRpcState *, unsigned) __asm__("func_004266C8");
  *
  * Takes a reply packet (the numbered one when request flag 4 is set, else round robin), copies the packet address and
  * client, sets the type 0x8000000C and the source, destination and size, and sends it as command 0x80000008 with the
- * block as extra data through func_004261F0. When the DMA queue is full it retries from an alarm (func_00423B80 with
+ * block as extra data through isceSifSendCmd. When the DMA queue is full it retries from an alarm (func_00423B80 with
  * func_004267C0). func_00426408 installs it for command 0x8000000C.
  *
  * @param request   the received request packet
@@ -2439,27 +2439,27 @@ void func_00426820(int *request, sSifRpcState *rpcState) {
     reply[9] = request[8];
     reply[10] = request[9];
     reply[11] = request[10];
-    if (func_004261F0(0x80000008, (int)reply, 0x40, request[8], request[9], request[10]) == 0) {
+    if (isceSifSendCmd(0x80000008, (int)reply, 0x40, request[8], request[9], request[10]) == 0) {
         func_00423B80(10, func_004267C0, reply);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_004268F0);
+INCLUDE_ASM("seg/seg_325220", sceSifGetOtherData);
 #ifdef SKIP_ASM
 struct S68F0 { struct S68F0 *f0; int f4; int f8; int fC; int f10; int f14; int f18; int f1C; int f20; int f24; int f28; };
 extern struct S68F0 *func_004265D0_p(sSifRpcState *) __asm__("func_004265D0");
 extern void func_00426678_j(struct S68F0 *) __asm__("func_00426678");
 extern int CreateSema_j(int *) __asm__("CreateSema");
 extern int WaitSema_j(int) __asm__("WaitSema");
-extern int func_004261B0_j(int, int, int, int, int, int) __asm__("func_004261B0");
-int func_004268F0_d(struct S68F0 *, int, int, int, int) __asm__("func_004268F0");
+extern int sceSifSendCmd_j(int, int, int, int, int, int) __asm__("sceSifSendCmd");
+int sceSifGetOtherData_d(struct S68F0 *, int, int, int, int) __asm__("sceSifGetOtherData");
 /**
  * Asks the IOP to copy a block of IOP memory into EE memory and returns 0, or a negative error.
  *
  * Takes a packet with func_004265D0 (-1 when none), links it to the receive data (packet +0, id +4), fills the source,
- * destination and size (+0x20..+0x28) and the client (+0x1C), and sends command 0x8000000C with func_004261B0. Without
+ * destination and size (+0x20..+0x28) and the client (+0x1C), and sends command 0x8000000C with sceSifSendCmd. Without
  * mode bit 0 it waits on a new semaphore (stored at +8, -3 when it cannot be created) that the end handler signals,
  * then deletes it. A failed send releases the packet and returns -2. With bit 0 the semaphore field is -1 and it
  * returns at once.
@@ -2471,7 +2471,7 @@ int func_004268F0_d(struct S68F0 *, int, int, int, int) __asm__("func_004268F0")
  * @param mode  the mode (bit 0: do not wait)
  * @return 0, -1 (no packet), -2 (send failed) or -3 (no semaphore)
  */
-int func_004268F0_d(struct S68F0 *receiveData, int srcAddr, int destAddr, int byteCount, int mode) {
+int sceSifGetOtherData_d(struct S68F0 *receiveData, int srcAddr, int destAddr, int byteCount, int mode) {
     int buf[8];
     struct S68F0 *packet;
     packet = func_004265D0_p(&D_0052D680);
@@ -2493,7 +2493,7 @@ int func_004268F0_d(struct S68F0 *receiveData, int srcAddr, int destAddr, int by
             func_00426678_j(packet);
             return -3;
         }
-        if (func_004261B0_j(0x8000000C, (int)packet, 0x40, 0, 0, 0) == 0) {
+        if (sceSifSendCmd_j(0x8000000C, (int)packet, 0x40, 0, 0, 0) == 0) {
             func_00426678_j(packet);
             DeleteSema(receiveData->f8);
             return -2;
@@ -2503,7 +2503,7 @@ int func_004268F0_d(struct S68F0 *receiveData, int srcAddr, int destAddr, int by
         return 0;
     }
     receiveData->f8 = -1;
-    if (func_004261B0_j(0x8000000C, (int)packet, 0x40, 0, 0, 0) == 0) {
+    if (sceSifSendCmd_j(0x8000000C, (int)packet, 0x40, 0, 0, 0) == 0) {
         func_00426678_j(packet);
         return -2;
     }
@@ -2542,13 +2542,13 @@ INCLUDE_ASM("seg/seg_325220", func_00426A98);
 #ifdef SKIP_ASM
 extern int func_00426698(sSifRpcState *a0);
 extern int *func_00426A48_p(int, sSifRpcState *) __asm__("func_00426A48");
-extern void func_004261F0_v(int, int *, int, int, int, int) __asm__("func_004261F0");
+extern void isceSifSendCmd_v(int, int *, int, int, int, int) __asm__("isceSifSendCmd");
 /**
  * Handles the IOP's RPC bind command: looks up the server and sends the end reply.
  *
  * Takes a round-robin reply packet, copies the packet address and client, sets the type 0x80000009 and the server found
  * by func_00426A48 with its words at +8 and +0x14 (zeros when there is none), and sends it as command 0x80000008 with
- * func_004261F0. func_00426408 installs it for command 0x80000009.
+ * isceSifSendCmd. func_00426408 installs it for command 0x80000009.
  *
  * @param request   the received request packet
  * @param rpcState  the RPC state
@@ -2571,12 +2571,12 @@ void func_00426A98(int *request, sSifRpcState *rpcState) {
         reply[10] = n[2];
         reply[11] = n[5];
     }
-    func_004261F0_v(0x80000008, reply, 0x40, 0, 0, 0);
+    isceSifSendCmd_v(0x80000008, reply, 0x40, 0, 0, 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_325220", func_00426B48);
+INCLUDE_ASM("seg/seg_325220", sceSifBindRpc);
 #ifdef SKIP_ASM
 struct S6B48 { struct S6B48 *f0; int f4; int f8; int fC; int f10; int f14; int f18; int f1C; int f20; int f24; };
 extern struct S6B48 *func_004265D0(sSifRpcState *);
@@ -2584,12 +2584,12 @@ extern void func_00426678_i(struct S6B48 *) __asm__("func_00426678");
 extern int CreateSema(int *);
 extern void DeleteSema(int);
 extern int WaitSema_i(int) __asm__("WaitSema");
-int func_00426B48_d(struct S6B48 *, int, int) __asm__("func_00426B48");
+int sceSifBindRpc_d(struct S6B48 *, int, int) __asm__("sceSifBindRpc");
 /**
  * Binds an RPC client to the IOP server with the given number and returns 0, or a negative error.
  *
  * Clears the client's command and server fields, takes a packet with func_004265D0 (-1 when none), links it to the
- * client (rpcd[0], rpcd[1]), stores the server number and client, and sends command 0x80000009 with func_004261B0.
+ * client (rpcd[0], rpcd[1]), stores the server number and client, and sends command 0x80000009 with sceSifSendCmd.
  * Without mode bit 0 it waits on a new semaphore (rpcd[2], -3 when it cannot be created) that the end handler signals;
  * a failed send returns -2. The server field stays 0 when the IOP has no such server yet, so callers retry. Callers
  * include sceSifInitIopHeap and SNDPLATFORM_init.
@@ -2599,7 +2599,7 @@ int func_00426B48_d(struct S6B48 *, int, int) __asm__("func_00426B48");
  * @param mode  the mode (bit 0: do not wait)
  * @return 0, -1 (no packet), -2 (send failed) or -3 (no semaphore)
  */
-int func_00426B48_d(struct S6B48 *client, int rpcNumber, int mode) {
+int sceSifBindRpc_d(struct S6B48 *client, int rpcNumber, int mode) {
     int buf[8];
     struct S6B48 *packet;
     client->f10 = 0;
@@ -2621,7 +2621,7 @@ int func_00426B48_d(struct S6B48 *client, int rpcNumber, int mode) {
             func_00426678_i(packet);
             return -3;
         }
-        if (func_004261B0(0x80000009, (int)packet, 0x40, 0, 0, 0) == 0) {
+        if (sceSifSendCmd(0x80000009, (int)packet, 0x40, 0, 0, 0) == 0) {
             func_00426678_i(packet);
             DeleteSema(client->f8);
             return -2;
@@ -2631,7 +2631,7 @@ int func_00426B48_d(struct S6B48 *client, int rpcNumber, int mode) {
         return 0;
     }
     client->f8 = -1;
-    if (func_004261B0(0x80000009, (int)packet, 0x40, 0, 0, 0) == 0) {
+    if (sceSifSendCmd(0x80000009, (int)packet, 0x40, 0, 0, 0) == 0) {
         func_00426678_i(packet);
         return -2;
     }
@@ -2677,13 +2677,13 @@ struct A26C88 {
     int f30;
     struct E26C88 *e;
 };
-extern void func_00424C50(int);
+extern void iWakeupThread(int);
 /**
  * Handles the IOP's RPC call command: queues the call on its server and wakes the server thread.
  *
  * Appends the server data (request +0x34) to its queue (head +0xC, tail +0x10, link +0x3C), copies the packet address,
  * client, call number, send size, receive buffer, receive size, receive mode and packet id into it, and wakes the
- * queue's thread (+0) with func_00424C50 when the id is valid and the queue is not active (+4). func_00426408 installs
+ * queue's thread (+0) with iWakeupThread when the id is valid and the queue is not active (+4). func_00426408 installs
  * it for command 0x8000000A.
  *
  * @param callRequest  the received call packet
@@ -2710,7 +2710,7 @@ void func_00426C88(struct A26C88 *callRequest) {
     serverData->f30 = callRequest->f30;
     serverData->f34 = callRequest->f10;
     if (rpcQueue->f0 >= 0 && rpcQueue->f4 == 0) {
-        func_00424C50(rpcQueue->f0);
+        iWakeupThread(rpcQueue->f0);
     }
 }
 #endif
@@ -2757,7 +2757,7 @@ struct Sema6D18 { int count; int max_count; int init_count; int wait_threads; un
 extern struct Call6D18 *f6D18_get(sSifRpcState *) __asm__("func_004265D0");
 extern void f6D18_free(struct Call6D18 *) __asm__("func_00426678");
 extern void f6D18_wb(void *, int) __asm__("func_00426358");
-extern int f6D18_send(int, void *, int, void *, void *, int) __asm__("func_004261B0");
+extern int f6D18_send(int, void *, int, void *, void *, int) __asm__("sceSifSendCmd");
 extern int f6D18_csema(struct Sema6D18 *) __asm__("CreateSema");
 extern int f6D18_wsema(int) __asm__("WaitSema");
 /**
@@ -2768,7 +2768,7 @@ extern int f6D18_wsema(int) __asm__("WaitSema");
  * client. The client records the packet, its id, the end function and its argument. Unless mode bit 1 is set, it writes
  * the send and receive buffers back from the data cache first (func_00426358; once with the larger size when they are
  * the same buffer). The packet goes out as SIF command 0x8000000A with the send data DMA'd to the client's server
- * buffer (func_004261B0). With mode bit 0 set (no wait) the client's semaphore is -1, the packet's reply mode is 1 only
+ * buffer (sceSifSendCmd). With mode bit 0 set (no wait) the client's semaphore is -1, the packet's reply mode is 1 only
  * when @p end_function is set, and it returns at once. Otherwise it creates a semaphore (max 1, initial 0), waits on it
  * until the reply handler signals it, then deletes it. A failed send frees the packet (func_00426678). Called by the
  * file, heap and module-load wrappers in this unit and by the pad, memory card and USB keyboard libraries.
@@ -3069,7 +3069,7 @@ extern void DIntr_w(void) __asm__("DIntr");
 extern int EIntr_w(void) __asm__("EIntr");
 extern struct R7230 *func_004266C8_w(sSifRpcState *, unsigned) __asm__("func_004266C8");
 extern struct R7230 *func_00426698_w(sSifRpcState *, unsigned) __asm__("func_00426698");
-extern int func_004261B0_w(int, void *, int, int, int, int) __asm__("func_004261B0");
+extern int sceSifSendCmd_w(int, void *, int, int, int, int) __asm__("sceSifSendCmd");
 void sceSifExecRequest_d(struct W7230 *) __asm__("sceSifExecRequest");
 // Release-build assert: compiles to an empty do { } while (0) (its loop notes still shape the code)
 #define ASSERT_7230(cond) do { } while (0)
@@ -3081,7 +3081,7 @@ void sceSifExecRequest_d(struct W7230 *) __asm__("sceSifExecRequest");
  * the data cache (func_00426358), then, with interrupts disabled, takes a reply packet: the numbered packet from the
  * high half of +0x34 when its bit 2 is set (func_004266C8), else the next round-robin one (func_00426698). The reply
  * carries the client (+0x1C) and command 0x8000000A. In reply mode (+0x30 set) it sends SIF command 0x80000008 with the
- * result DMA'd to the caller's buffer (+0x28) through func_004261B0, retrying until it is accepted. Otherwise it clears
+ * result DMA'd to the caller's buffer (+0x28) through sceSifSendCmd, retrying until it is accepted. Otherwise it clears
  * the packet's id and in-use words and DMAs the result (when any) and then the packet itself to the caller's packet
  * address (+0x20) with sceSifSetDma, spinning 0x100000 iterations between refused attempts. Only sceSifRpcLoop calls
  * it.
@@ -3126,7 +3126,7 @@ void sceSifExecRequest_d(struct W7230 *serveData) {
     e->f20 = w;
     e->f1C = clientAddr;
     if (serveData->f30 != 0) {
-        while (func_004261B0_w(0x80000008, e, 0x40, replyData, serveData->f28, replySize) == 0) {
+        while (sceSifSendCmd_w(0x80000008, e, 0x40, replyData, serveData->f28, replySize) == 0) {
         }
         return;
     }
@@ -3483,7 +3483,7 @@ INCLUDE_ASM("seg/seg_325220", func_00427A90);
 extern void func_00426408_z(int) __asm__("func_00426408");
 extern int DIntr_z(void) __asm__("DIntr");
 extern void EIntr_z(void) __asm__("EIntr");
-extern void func_00426020_z(int, void *, void *) __asm__("func_00426020");
+extern void sceSifAddCmdHandler_z(int, void *, void *) __asm__("sceSifAddCmdHandler");
 extern void func_00427438_z(void) __asm__("func_00427438");
 extern void func_00427590_z(void) __asm__("func_00427590");
 extern void func_00427A60_z(void) __asm__("func_00427A60");
@@ -3494,8 +3494,8 @@ int func_00427A90_d(void) __asm__("func_00427A90");
  * Initialises the EE side of the IOP file library: binds the file server and reads its version.
  *
  * Calls func_00426408(0), clears the user callback D_0052EE80 and, with interrupts disabled, installs func_00427590
- * (SIF command 0x80000011, reply buffer D_0052EE40) and func_00427A60 (0x80000013, the callback) with func_00426020.
- * Then binds D_0052EE00 to server 0x80000001 (func_00426B48), retrying after a 0x100000-iteration spin until the server
+ * (SIF command 0x80000011, reply buffer D_0052EE40) and func_00427A60 (0x80000013, the callback) with sceSifAddCmdHandler.
+ * Then binds D_0052EE00 to server 0x80000001 (sceSifBindRpc), retrying after a 0x100000-iteration spin until the server
  * is bound. It frees all 32 descriptor slots of D_0052EC00 under D_00455218, sends the addresses of the two 0x440-byte
  * reply buffers D_0052E380 (in D_0052D6C0) with RPC function 0xFF and copies the 4-byte server version to D_0052EE28;
  * D_00455210 becomes 1 when the second reply word is 2 (the server then names a reply buffer per request). Sets the
@@ -3513,12 +3513,12 @@ int func_00427A90_d(void) {
     D_0052EE80.fn = 0;
     callbackSlot->arg = 0;
     old = DIntr_z();
-    func_00426020_z(0x80000011, func_00427590_z, D_0052EE40);
-    func_00426020_z(0x80000013, func_00427A60_z, callbackSlot);
+    sceSifAddCmdHandler_z(0x80000011, func_00427590_z, D_0052EE40);
+    sceSifAddCmdHandler_z(0x80000013, func_00427A60_z, callbackSlot);
     if (old != 0)
         EIntr_z();
     for (;;) {
-        if (func_00426B48(&D_0052EE00, 0x80000001, 0) < 0)
+        if (sceSifBindRpc(&D_0052EE00, 0x80000001, 0) < 0)
             return -1;
         if (D_0052EE00.server != 0)
             break;
@@ -5542,7 +5542,7 @@ INCLUDE_ASM("seg/seg_325220", sceSifInitIopHeap);
 /**
  * Binds the IOP heap RPC server, retrying until it answers.
  *
- * Binds D_0052EEC0 to server 0x80000003 (func_00426B48); while the client has no server yet it spins 0x100000
+ * Binds D_0052EEC0 to server 0x80000003 (sceSifBindRpc); while the client has no server yet it spins 0x100000
  * iterations and binds again. Once bound it sets D_00455224 to 0, which the heap calls (sceSifAllocIopHeap ...
  * func_0042AFE8) check. Called by the IOP boot code (func_00319610, func_00319820) and SNDPLATFORM_init.
  *
@@ -5551,7 +5551,7 @@ INCLUDE_ASM("seg/seg_325220", sceSifInitIopHeap);
 int sceSifInitIopHeap(void) {
     int i;
     for (;;) {
-        i = func_00426B48(&D_0052EEC0, 0x80000003, 0);
+        i = sceSifBindRpc(&D_0052EEC0, 0x80000003, 0);
         if (i < 0) {
             return -1;
         }
@@ -5821,7 +5821,7 @@ INCLUDE_ASM("seg/seg_325220", func_0042B068);
 /**
  * Binds the IOP module-loader RPC server once and reads its version.
  *
- * Does nothing when D_00455228 is already >= 0. Otherwise binds D_0052F280 to server 0x80000006 (func_00426B48),
+ * Does nothing when D_00455228 is already >= 0. Otherwise binds D_0052F280 to server 0x80000006 (sceSifBindRpc),
  * spinning 0x100000 iterations between attempts until the client has a server, sets D_00455228 to 0 and fetches the
  * 4-byte version with request 0xFF into D_0052F2A8. Every module-loader call in this unit calls it first.
  *
@@ -5831,7 +5831,7 @@ int func_0042B068(void) {
     int i;
     if (D_00455228 < 0) {
         for (;;) {
-            if (func_00426B48(&D_0052F280, 0x80000006, 0) < 0) {
+            if (sceSifBindRpc(&D_0052F280, 0x80000006, 0) < 0) {
                 return -1;
             }
             if (D_0052F280.server != 0) {
@@ -6475,12 +6475,12 @@ int sceSifSyncIop(void) {
 INCLUDE_ASM("seg/seg_325220", sceSifRebootIop);
 #ifdef SKIP_ASM
 /* sceSifRebootIop (libkernel): reset the IOP with "rom0:UDNL <img>". */
-extern void func_00425C60_s(const char *fmt, ...) __asm__("func_00425C60");
+extern void scePrintf_s(const char *fmt, ...) __asm__("scePrintf");
 /**
  * Reboots the IOP with an IOP image through "rom0:UDNL".
  *
- * Refuses an image path whose length plus 11 exceeds 80 (prints "too long parameter '%s'\n" with func_00425C60 and
- * returns 0). Otherwise calls func_00426408(0) and func_004265A8, builds "rom0:UDNL " + @p img and sends it with
+ * Refuses an image path whose length plus 11 exceeds 80 (prints "too long parameter '%s'\n" with scePrintf and
+ * returns 0). Otherwise calls func_00426408(0) and sceSifExitRpc, builds "rom0:UDNL " + @p img and sends it with
  * sceSifResetIop (mode 0). func_00319820 retries it with the DNAS image until it succeeds.
  *
  * @param img  path of the IOP image
@@ -6499,11 +6499,11 @@ int sceSifRebootIop(const char *img) {
        reassociating it into (p - img) + 11. Integer arithmetic, so no out-of-bounds pointer. */
     imgBias = (__SIZE_TYPE__)img - 11;
     if ((__SIZE_TYPE__)imgEnd - imgBias > 80) {
-        func_00425C60_s("too long parameter '%s'\n", img);
+        scePrintf_s("too long parameter '%s'\n", img);
         return 0;
     }
     func_00426408_z(0);
-    func_004265A8();
+    sceSifExitRpc();
     dst = buf;
     while (*prefix)
         *dst++ = *prefix++;
@@ -6560,7 +6560,7 @@ extern int CreateSema(int *a0);
 /**
  * Creates two semaphores (max and initial count 1) and stores their ids in D_00455248 and D_0045524C.
  *
- * D_00455248 is the one the recursive lock func_00418CA8 / func_00418D08 waits on and signals. Called by _InitSys
+ * D_00455248 is the one the recursive lock __malloc_lock / __malloc_unlock waits on and signals. Called by _InitSys
  * at start-up.
  */
 void func_0042C0D8(void) {
@@ -6720,14 +6720,14 @@ INCLUDE_ASM("seg/seg_325220", _InitSys);
 extern void func_0042C0D8(void);
 extern void func_0042C1F0(void);
 extern void func_0042C7C8(void);
-extern void func_00424B78(void);
+extern void InitThread(void);
 extern void func_0042C410(void);
 extern void func_0042CBD0(void);
 /**
  * Runs the kernel library's start-up initialisation.
  *
  * Creates the two library semaphores (func_0042C0D8), installs the helper syscalls and finds the syscall table
- * (func_0042C1F0), patches the alarm syscalls (func_0042C7C8), starts the wake-up helper thread (func_00424B78),
+ * (func_0042C1F0), patches the alarm syscalls (func_0042C7C8), starts the wake-up helper thread (InitThread),
  * patches the OSD configuration syscall when needed (func_0042C410) and installs the TLB syscall patch (func_0042CBD0).
  * Called by the program entry func_00100008 before main.
  */
@@ -6735,7 +6735,7 @@ void _InitSys(void) {
     func_0042C0D8();
     func_0042C1F0();
     func_0042C7C8();
-    func_00424B78();
+    InitThread();
     func_0042C410();
     func_0042CBD0();
 }

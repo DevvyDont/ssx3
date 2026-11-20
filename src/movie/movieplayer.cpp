@@ -5457,7 +5457,7 @@ INCLUDE_ASM("movie/movieplayer", cOcclusionMan_updateView);
 #ifdef SKIP_ASM
 extern "C" void cOcclusionMan_updateVisPlane(cOcclusionMan* self, const void* eye, void* frustum);
 extern "C" void func_00229F88(int index, void* v, void* m);
-extern "C" void func_00418EF8(void* base, int n, int size, int (*cmp)(const void*, const void*));
+extern "C" void qsort(void* base, int n, int size, int (*cmp)(const void*, const void*));
 extern "C" int cOcclusionMan__VisSortFunc(const void* a, const void* b);
 
 struct sVec4_25C0 {
@@ -5605,7 +5605,7 @@ static inline sMtx_25C0* camMtx_25C0()
  * position from the graphics manager's view (slot 35, cPS2GraphicsMan_GetView) and a matrix from slot 43. Each curtain
  * whose bounds (+0xA0..+0xB4) overlap @p bb, survive cPS2GraphicsMan_ClipBoundBox (slot 93) and face the eye (the dot
  * product with its normal +0x50 is not positive) goes into the in-view table (+0x8, count +0x108) with its squared
- * distance. The table is sorted nearest first (func_00418EF8 with cOcclusionMan__VisSortFunc); for the first two it sets the mask
+ * distance. The table is sorted nearest first (qsort with cOcclusionMan__VisSortFunc); for the first two it sets the mask
  * bit, builds the clip planes (cOcclusionMan_updateVisPlane) and hands them to func_00229F88. Likely bug: the in-view table has 32
  * entries and the count is not checked.
  *
@@ -5654,7 +5654,7 @@ extern "C" void cOcclusionMan_updateView(sVisMgr_25C0* self, sBounds_25C0* bb)
     }
     if (self->count == 0)
         return;
-    func_00418EF8(self->ents, self->count, 8, cOcclusionMan__VisSortFunc);
+    qsort(self->ents, self->count, 8, cOcclusionMan__VisSortFunc);
     int n = self->count;
     if (n > 2)
         n = 2;

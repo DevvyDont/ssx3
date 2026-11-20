@@ -12693,12 +12693,12 @@ extern void StartThread_1B80(int, int) __asm__("StartThread");
 extern int ChangeThreadPriority_1B80(int, int) __asm__("ChangeThreadPriority");
 extern int GetThreadId_1B80(void) __asm__("GetThreadId");
 extern int CreateSema_1B80(R_1B80 *) __asm__("CreateSema");
-extern void func_00424880_1B80(int) __asm__("func_00424880");
-extern void func_004248E8_1B80(int) __asm__("func_004248E8");
-extern void func_00425FF0_1B80(void *, int) __asm__("func_00425FF0");
-extern void func_00426020_1B80(int, void *, void *) __asm__("func_00426020");
+extern void DisableIntc_1B80(int) __asm__("DisableIntc");
+extern void EnableIntc_1B80(int) __asm__("EnableIntc");
+extern void sceSifSetCmdBuffer_1B80(void *, int) __asm__("sceSifSetCmdBuffer");
+extern void sceSifAddCmdHandler_1B80(int, void *, void *) __asm__("sceSifAddCmdHandler");
 extern void func_00426408_1B80(int) __asm__("func_00426408");
-extern int func_00426B48_1B80(void *, int, int) __asm__("func_00426B48");
+extern int sceSifBindRpc_1B80(void *, int, int) __asm__("sceSifBindRpc");
 extern void sceSifInitIopHeap_1B80(void) __asm__("sceSifInitIopHeap");
 extern int sceSifAllocIopHeap_1B80(int) __asm__("sceSifAllocIopHeap");
 extern int sceSifLoadModule_1B80(char *, int, int) __asm__("sceSifLoadModule");
@@ -12850,20 +12850,20 @@ int SNDPLATFORM_init(void) {
         do {
             __asm__ volatile("di\n\tsync.p\n\tmfc0 %0, $12" : "=r"(stat));
         } while (stat & 0x10000);
-        func_00425FF0_1B80(D_0050C880_1B80, 0x10);
-        func_00426020_1B80(1, func_003C1578_1B80, D_0050C900_1B80);
+        sceSifSetCmdBuffer_1B80(D_0050C880_1B80, 0x10);
+        sceSifAddCmdHandler_1B80(1, func_003C1578_1B80, D_0050C900_1B80);
         __asm__ volatile("ei");
         do {
-            if (func_00426B48_1B80(D_0050AD00_1B80.fC80, 0x534E44, 0) < 0) {
+            if (sceSifBindRpc_1B80(D_0050AD00_1B80.fC80, 0x534E44, 0) < 0) {
                 return -1;
             }
         } while (D_0050AD00_1B80.fCA4 == 0);
     }
     if (D_0050A8E8_1B80.f34 == -1.0f) {
         D_0050A8E8_1B80.f1C4 = (func_003FDAA0_1B80()->f2 == 2) ? 16.683349609375f : 20.0f;
-        func_00424880_1B80(2);
+        DisableIntc_1B80(2);
         D_0050AD00_1B80.f1AA8 = func_00423A80_1B80(2, func_003C1980_1B80, 0);
-        func_004248E8_1B80(2);
+        EnableIntc_1B80(2);
     } else {
         D_0050A8E8_1B80.f1C4 = 10.666666984558105f;
         D_0050AD00_1B80.f1AA8 = -1;
@@ -12931,8 +12931,8 @@ extern void DeleteThread_2268(int) __asm__("DeleteThread");
 extern void TerminateThread_2268(int) __asm__("TerminateThread");
 extern void ReferThreadStatus_2268(int, void *) __asm__("ReferThreadStatus");
 extern void DeleteSema_2268(int) __asm__("DeleteSema");
-extern void func_00424880_2268(int) __asm__("func_00424880");
-extern void func_004248E8_2268(int) __asm__("func_004248E8");
+extern void DisableIntc_2268(int) __asm__("DisableIntc");
+extern void EnableIntc_2268(int) __asm__("EnableIntc");
 extern void func_0042AD08_2268(int) __asm__("func_0042AD08");
 
 /**
@@ -12961,9 +12961,9 @@ int SNDPLATFORM_restore(void) {
         SNDSYS_service_2268();
     }
     if (D_0050AD00_2268.f1AA8 >= 0) {
-        func_00424880_2268(2);
+        DisableIntc_2268(2);
         if (RemoveIntcHandler_2268(2, D_0050AD00_2268.f1AA8) > 0) {
-            func_004248E8_2268(2);
+            EnableIntc_2268(2);
         }
     }
     func_003C0B10_2268(1, 0, 0);
@@ -14272,8 +14272,8 @@ extern struct sAD00 D_0050AD00;
 struct Dst_4450 { char b0; char pad1[0xF]; int f10; int f14; int f18; int f1C; unsigned short h20; short h22; };
 extern struct Dst_4450 D_00515780_4450 __asm__("D_00515780");
 extern void func_003C43C0(int, int, int, int);
-extern void func_004261B0(int, void *, int, int, int, int);
-extern void f61F0_4450(int, void *, int, int, int, int) __asm__("func_004261F0");
+extern void sceSifSendCmd(int, void *, int, int, int, int);
+extern void f61F0_4450(int, void *, int, int, int, int) __asm__("isceSifSendCmd");
 
 /**
  * Starts the next queued sound-memory transfer.
@@ -14281,7 +14281,7 @@ extern void f61F0_4450(int, void *, int, int, int, int) __asm__("func_004261F0")
  * Picks among the queued entries (+0xCC8 of D_0050AD00, 28 slots) the one with the highest priority (+0x0E), the oldest
  * (lowest id) among equals, as +0xCC1; stamps the tick (+0xCC4), DMAs its data to the IOP staging block (+0xE88 port,
  * func_003C43C0), marks a transfer running (+0xCC2) and sends the IOP a 0x30-byte request (D_00515780: id, staging
- * address, destination, size, priority) with func_004261F0 (from an interrupt) or func_004261B0.
+ * address, destination, size, priority) with isceSifSendCmd (from an interrupt) or sceSifSendCmd.
  *
  * @param inInterrupt  non-zero when called from an interrupt handler
  */
@@ -14321,7 +14321,7 @@ void func_003C4450(int inInterrupt) {
         f61F0_4450(0, &D_00515780_4450, 0x30, 0, 0, 0);
         return;
     }
-    func_004261B0(0, &D_00515780_4450, 0x30, 0, 0, 0);
+    sceSifSendCmd(0, &D_00515780_4450, 0x30, 0, 0, 0);
 }
 #endif
 
@@ -16469,12 +16469,12 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C6380);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 typedef struct { unsigned int lo, hi; } L64_6380;
-extern unsigned long f14D0_6380(unsigned long, unsigned long) __asm__("func_004114D0");
+extern unsigned long f14D0_6380(unsigned long, unsigned long) __asm__("__muldi3");
 
 /**
  * Multiplies two unsigned 32-bit values into a 64-bit result (low word, high word).
  *
- * Builds it from the four 16 x 16-bit partial products (func_004114D0). SNDSTRM_requeststatus uses it with
+ * Builds it from the four 16 x 16-bit partial products (__muldi3). SNDSTRM_requeststatus uses it with
  * func_003C64A8 to scale a position without overflow.
  *
  * @param lhs  the first factor
@@ -25210,17 +25210,17 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D1608);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern unsigned int D_0044F430_1608[] __asm__("D_0044F430");
-extern void func_00411310_1608(int, ...) __asm__("func_00411310") __attribute__((noreturn));
+extern void exit_1608(int, ...) __asm__("exit") __attribute__((noreturn));
 
 /**
  * Fatal-error handler of the path library: sets D_0044F430 to -1 (busy, so every entry point refuses) and calls
- * func_00411310(0), which exits. The printf-style arguments are ignored.
+ * exit(0), which exits. The printf-style arguments are ignored.
  *
  * @param format  the format string (ignored)
  */
 void func_003D1608(int format, ...) {
     D_0044F430_1608[0] = 0xFFFFFFFF;
-    func_00411310_1608(0);
+    exit_1608(0);
 }
 #endif
 

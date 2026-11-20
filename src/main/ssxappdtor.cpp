@@ -1871,7 +1871,7 @@ extern char D_0047DB28[];
  * Destroys the game's stream-pause object: resets the vtable to D_0047DB28 and frees the object when asked.
  *
  * It is the destructor slot of D_0047D0E8, the vtable cStreamPause_construct installs ("GenericStreamPause");
- * D_0047DB28 is the base vtable (destructor func_00245F00, two pure-virtual slots func_00411530).
+ * D_0047DB28 is the base vtable (destructor func_00245F00, two pure-virtual slots __pure_virtual).
  *
  * @param flags  destructor flags; bit 0 frees the memory with operator_delete()
  */

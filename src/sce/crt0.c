@@ -162,7 +162,7 @@ __asm__(
 INCLUDE_ASM("sce/crt0", func_001001D0);
 #ifdef SKIP_ASM
 // PORT: PS2-only. Sony crt0.s `_root`, the thread SetupThread installs as root: ExitThread (syscall 0x23), then a
-// frame-pointer call func_00414728(D_0043CE00, D_004A5D48) (hand-written: raw syscall, `daddu $fp, $sp` frame).
+// frame-pointer call __register_frame_info_table(D_0043CE00, D_004A5D48) (hand-written: raw syscall, `daddu $fp, $sp` frame).
 // A port drops it.
 __asm__(
     ".set push\n.set noreorder\n.set noat\n"
@@ -177,7 +177,7 @@ __asm__(
     "addiu $4, $4, %lo(D_0043CE00)\n"
     "lui $5, %hi(D_004A5D48)\n"
     "addiu $5, $5, %lo(D_004A5D48)\n"
-    "jal func_00414728\n"
+    "jal __register_frame_info_table\n"
     "nop\n"
     "daddu $29, $30, $0\n"
     "lq $30, 0x10($29)\n"

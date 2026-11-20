@@ -579,7 +579,7 @@ void cLoadTimer_setnextpercent(void* self, float newValue)
 }
 #endif
 
-extern "C" float func_0040D758(float);
+extern "C" float expf(float);
 
 //99.96%
 INCLUDE_ASM("bx/appman", cLoadTimer_update__FPv);
@@ -587,14 +587,14 @@ INCLUDE_ASM("bx/appman", cLoadTimer_update__FPv);
 /**
  * Updates a load-progress timer's shown percentage from the time since its last target was set.
  *
- * percentage (+0x0) = offset (+0x14) + scale (+0x18) * func_0040D758((Tick - target tick) * TimerPeriod * decay), using
- * the app manager's Tick (+0x1C) and TimerPeriod (+0x14); func_0040D758 is the exponential. cAppMan_mainLoop calls it
+ * percentage (+0x0) = offset (+0x14) + scale (+0x18) * expf((Tick - target tick) * TimerPeriod * decay), using
+ * the app manager's Tick (+0x1C) and TimerPeriod (+0x14); expf is the exponential. cAppMan_mainLoop calls it
  * each frame while a module is loading.
  */
 void cLoadTimer_update(void* self)
 {
     int delta = *(int*)((char*)cAppMan_TheAppMan + 0x1C) - *(int*)((char*)self + 0x10);
-    float ret = func_0040D758((float)delta * *(float*)((char*)cAppMan_TheAppMan + 0x14) * *(float*)((char*)self + 0x1C));
+    float ret = expf((float)delta * *(float*)((char*)cAppMan_TheAppMan + 0x14) * *(float*)((char*)self + 0x1C));
     *(float*)((char*)self + 0x0) = *(float*)((char*)self + 0x14) + *(float*)((char*)self + 0x18) * ret;
 }
 #endif

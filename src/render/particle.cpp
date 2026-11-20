@@ -3211,8 +3211,8 @@ extern "C" void* cGraphicsMan_construct(void)
  *
  * Hand-checked from the asm only (no C body yet): it calls a run of setup functions (func_003FDF88, func_003912A8,
  * func_00391360, ...), allocates two objects with operator_new, creates two semaphores and the kick thread (CreateSema,
- * CreateThread, StartThread), calls func_00424880, func_00423A90, func_004248E8, func_00424950, func_00423AC0 and
- * func_004249B8 (the interrupt-handler setup that Purge undoes), then allocates the texture manager (cMemMan_alloc +
+ * CreateThread, StartThread), calls DisableIntc, func_00423A90, EnableIntc, DisableDmac, func_00423AC0 and
+ * EnableDmac (the interrupt-handler setup that Purge undoes), then allocates the texture manager (cMemMan_alloc +
  * func_00366FE8) and the defer manager and sets up the default render state. cPS2GraphicsMan_Purge undoes these steps.
  */
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_Init);
@@ -3220,9 +3220,9 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_Init);
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_Purge);
 #ifdef SKIP_ASM
-extern "C" void func_00424880(int);
+extern "C" void DisableIntc(int);
 extern "C" void RemoveIntcHandler(int, int);
-extern "C" void func_00424950(int);
+extern "C" void DisableDmac(int);
 extern "C" void RemoveDmacHandler(int, int);
 extern "C" void TerminateThread(int);
 extern "C" void DeleteThread(int);
@@ -3235,16 +3235,16 @@ extern char D_005059D8[];
 /**
  * Shuts the PS2 renderer down, undoing cPS2GraphicsMan_Init.
  *
- * Calls func_00424880(2) and removes the INTC 2 handler (mIntcHandlerId), calls func_00424950(1) and removes the DMAC 0
+ * Calls DisableIntc(2) and removes the INTC 2 handler (mIntcHandlerId), calls DisableDmac(1) and removes the DMAC 0
  * handler (mDmacHandlerId), terminates and deletes the kick thread (mKickThreadId), deletes mKickSema and mQueueMutex,
  * deletes the defer manager (mpDeferMan), purges and deletes the texture manager (func_00367360, mpTextureMan), and
  * finally calls func_00361F40 on the render queue D_005059D8.
  */
 extern "C" void cPS2GraphicsMan_Purge(void* self)
 {
-    func_00424880(2);
+    DisableIntc(2);
     RemoveIntcHandler(2, *(int*)((char*)self + 0x5AC0));
-    func_00424950(1);
+    DisableDmac(1);
     RemoveDmacHandler(0, *(int*)((char*)self + 0x5AC4));
     TerminateThread(*(int*)((char*)self + 0x5AD0));
     DeleteThread(*(int*)((char*)self + 0x5AD0));
@@ -3943,7 +3943,7 @@ struct sPtGfx6C58 {
 
 // PORT: the unit declares fSinCos as (s, c, angle); its real parameter order is (angle, s, c).
 extern void SinCos_6C58(float angle, float* s, float* c) __asm__("fSinCos");
-extern "C" float func_0040D588(float x);
+extern "C" float tanf(float x);
 extern "C" void func_00376938_6C58(void* self, float x, float y, float w, float h) __asm__("func_00376938");
 
 // PORT: SN abs.s asm helper (PS2 FPU).
@@ -4052,8 +4052,8 @@ extern "C" void cPS2GraphicsMan_SetViewportPerspective(sPtGfx6C58* self, float f
     self->q6B80.v[3] = 1.0f / zFar;
     self->texReady = 0;
     float aspect2 = aspect * (w / viewHeight);
-    float px = 1.0f / func_0040D588(fov);
-    float py = 1.0f / func_0040D588(fov) * aspect2;
+    float px = 1.0f / tanf(fov);
+    float py = 1.0f / tanf(fov) * aspect2;
     ClampScale6C58(self, px, py);
     vtEntry = &self->vtable[10];
     float sw = (float)vtEntry->fn((char*)self + vtEntry->delta);
@@ -4525,7 +4525,7 @@ extern char D_005059D8[];
 extern "C" void func_00363490(void* ring, unsigned int* a, int* x, unsigned int* b, int* y);
 extern "C" void* WaitSema(int sema);  // WaitSema (returns in $2: the call clobbers v0)
 extern "C" void SignalSema(int sema);
-extern "C" void func_004247D8(unsigned int start, unsigned int end);
+extern "C" void InvalidDCache(unsigned int start, unsigned int end);
 extern "C" void func_00362CC8(void* ring);
 void func_003673D0(void* p);
 void func_00361F90(void* p);
@@ -4612,7 +4612,7 @@ inline void cGfx_7A10::ResetViewport()
  *
  * Defined in C as cGfx_7A10::EndFrame_impl(). It calls func_00363490 on the render ring, waits on mQueueMutex
  * (+0x5ACC), stores the packet-buffer words at +0x5AA4..+0x5AB4, signals mQueueMutex and mKickSema (+0x5AC8), swaps the
- * double-buffered packet pointers around +0x5A00..+0x5A24, calls func_004247D8 on the new buffer ranges, resets the
+ * double-buffered packet pointers around +0x5A00..+0x5A24, calls InvalidDCache on the new buffer ranges, resets the
  * draw state to sDrawState_s_defaultDrawState and calls func_00362CC8 on the ring.
  */
 void cGfx_7A10::EndFrame_impl()
@@ -4642,8 +4642,8 @@ void cGfx_7A10::EndFrame_impl()
     *(int*)(gfxBase + 0x5A24) = *(int*)(gfxBase + 0x5A24) == 0;
     *(unsigned int*)(gfxBase + 0x5A00) = *(unsigned int*)(gfxBase + 0x5A04) = *(unsigned int*)(gfxBase + 0x5A0C) + *(int*)(gfxBase + 0x5A10) * 0xCCC80;
     *(unsigned int*)(gfxBase + 0x5A14) = *(unsigned int*)(gfxBase + 0x5A18) = *(unsigned int*)(gfxBase + 0x5A20) + *(int*)(gfxBase + 0x5A24) * 0x26600;
-    func_004247D8(*(unsigned int*)(gfxBase + 0x5A00), *(unsigned int*)(gfxBase + 0x5A00) + 0xCCC80);
-    func_004247D8(*(unsigned int*)(gfxBase + 0x5A14), *(unsigned int*)(gfxBase + 0x5A14) + 0x26600);
+    InvalidDCache(*(unsigned int*)(gfxBase + 0x5A00), *(unsigned int*)(gfxBase + 0x5A00) + 0xCCC80);
+    InvalidDCache(*(unsigned int*)(gfxBase + 0x5A14), *(unsigned int*)(gfxBase + 0x5A14) + 0x26600);
     **(sPtRS_7A10**)(gfxBase + 0xE84) = D_00501420_rs7A10;
     func_00362CC8(*(void**)(gfxBase + 0x18F0));
     func_003673D0(*(void**)(gfxBase + 0x18F4));
@@ -7082,7 +7082,7 @@ extern "C" void func_0037C198(cPS2GraphicsMan* self, int* src)
 //100%
 INCLUDE_ASM("render/particle", func_0037C570);
 #ifdef SKIP_ASM
-extern "C" int func_004139F8(float f);
+extern "C" int fptoui(float f);
 
 // PORT: g++ `<?` (min) operator; needs a macro / std::min on a modern compiler.
 static inline float clamp_C570(float x, float hi)
@@ -7096,7 +7096,7 @@ struct sPartColour_C570 {
 
 /**
  * Sets the screen brightness colour: unk_59EC[0..2] = @p colour's r, g and b, each clamped to 0..1 and times 128,
- * converted with func_004139F8 (float to unsigned).
+ * converted with fptoui (float to unsigned).
  *
  * func_00382AF0 multiplies these into the colour of the sprites that copy the draw buffer to the display buffer.
  * cPS2GraphicsMan_Init calls it.
@@ -7106,9 +7106,9 @@ struct sPartColour_C570 {
 extern "C" void func_0037C570(void* self, sPartColour_C570* colour)
 {
     float one = 1.0f;
-    *(int*)((char*)self + 0x59EC) = func_004139F8(clamp_C570(colour->r, one) * 128.0f);
-    *(int*)((char*)self + 0x59F0) = func_004139F8(clamp_C570(colour->g, one) * 128.0f);
-    *(int*)((char*)self + 0x59F4) = func_004139F8(clamp_C570(colour->b, one) * 128.0f);
+    *(int*)((char*)self + 0x59EC) = fptoui(clamp_C570(colour->r, one) * 128.0f);
+    *(int*)((char*)self + 0x59F0) = fptoui(clamp_C570(colour->g, one) * 128.0f);
+    *(int*)((char*)self + 0x59F4) = fptoui(clamp_C570(colour->b, one) * 128.0f);
 }
 #endif
 
@@ -7146,7 +7146,7 @@ static inline float clamp_C720(float x, float hi)
 }
 
 /**
- * Sets the screen alpha unk_59F8 to (1 - @p alpha clamped to 0..1) * 128, converted with func_004139F8.
+ * Sets the screen alpha unk_59F8 to (1 - @p alpha clamped to 0..1) * 128, converted with fptoui.
  *
  * func_00382AF0 uses it as the alpha of the sprites that copy the draw buffer to the display buffer and turns blending
  * on when it is not 128. cPS2GraphicsMan_Init and cSpeedBoostFX__cSpeedBoostFX (with 0, i.e. 128) call it.
@@ -7155,7 +7155,7 @@ static inline float clamp_C720(float x, float hi)
  */
 extern "C" void func_0037C720(void* self, float alpha)
 {
-    *(int*)((char*)self + 0x59F8) = func_004139F8((1.0f - clamp_C720(alpha, 1.0f)) * 128.0f);
+    *(int*)((char*)self + 0x59F8) = fptoui((1.0f - clamp_C720(alpha, 1.0f)) * 128.0f);
 }
 #endif
 
@@ -7276,7 +7276,7 @@ struct sVEntry0037C8C0 {
 };
 
 extern "C" double fptodp(float f);
-extern "C" double dlog_C8C0(double) __asm__("func_0040D610");
+extern "C" double dlog_C8C0(double) __asm__("log");
 extern "C" double dpmul(double, double);
 extern "C" double dpsub(double, double);
 extern "C" int dtoi_C8C0(double) __asm__("dptoli");
@@ -13660,10 +13660,10 @@ INCLUDE_ASM("render/particle", cPS2GraphicsMan_GetTexel);
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetScreenClearColour);
 #ifdef SKIP_ASM
-extern "C" int func_004139F8(float f);
+extern "C" int fptoui(float f);
 
 /**
- * Sets the screen clear colour: mClearColour (+0x6AE0) = the colour's r, g, b times 255 converted (func_004139F8) and
+ * Sets the screen clear colour: mClearColour (+0x6AE0) = the colour's r, g, b times 255 converted (fptoui) and
  * packed as 0x00BBGGRR.
  *
  * @param col  the colour as three floats in 0..1 (On Tour col)
@@ -13671,9 +13671,9 @@ extern "C" int func_004139F8(float f);
 extern "C" void cPS2GraphicsMan_SetScreenClearColour(cPS2GraphicsMan* self, const float* col)
 {
     float k = 255.0f;
-    int packed = func_004139F8(col[0] * k);
-    packed |= func_004139F8(col[1] * k) << 8;
-    packed |= func_004139F8(col[2] * k) << 16;
+    int packed = fptoui(col[0] * k);
+    packed |= fptoui(col[1] * k) << 8;
+    packed |= fptoui(col[2] * k) << 16;
     *(int*)((char*)self + 0x6AE0) = packed;
 }
 #endif
@@ -13681,22 +13681,22 @@ extern "C" void cPS2GraphicsMan_SetScreenClearColour(cPS2GraphicsMan* self, cons
 //100%
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_loadexecpurge);
 #ifdef SKIP_ASM
-extern "C" void func_00424880(int);
+extern "C" void DisableIntc(int);
 extern "C" void RemoveIntcHandler(int, int);
-extern "C" void func_00424950(int);
+extern "C" void DisableDmac(int);
 extern "C" void RemoveDmacHandler(int, int);
 
 /**
  * Removes the renderer's interrupt handlers before another executable is loaded.
  *
- * Calls func_00424880(2) and removes the INTC 2 handler (+0x5AC0), then func_00424950(1) and removes the DMAC 0 handler
+ * Calls DisableIntc(2) and removes the INTC 2 handler (+0x5AC0), then DisableDmac(1) and removes the DMAC 0 handler
  * (+0x5AC4): the same first steps as cPS2GraphicsMan_Purge, leaving the threads and memory alone.
  */
 extern "C" void cPS2GraphicsMan_loadexecpurge(void* self)
 {
-    func_00424880(2);
+    DisableIntc(2);
     RemoveIntcHandler(2, *(int*)((char*)self + 0x5AC0));
-    func_00424950(1);
+    DisableDmac(1);
     RemoveDmacHandler(0, *(int*)((char*)self + 0x5AC4));
 }
 #endif

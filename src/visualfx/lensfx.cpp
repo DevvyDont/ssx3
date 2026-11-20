@@ -72,7 +72,7 @@ void* cPS2LensFxMan__cPS2LensFxMan(void* self)
  * Measures how much of a lens-flare halo is visible by reading the depth buffer back from the GS.
  *
  * Converts the halo's screen rectangle (floats at +0x0..+0x24 of the second argument) to ints, gets a depth threshold
- * from func_004139F8, builds a GS-to-host transfer of that area of the Z buffer in the object's packet buffer
+ * from fptoui, builds a GS-to-host transfer of that area of the Z buffer in the object's packet buffer
  * (+0x64A0), flushes the cache, reads the 24-bit samples back into +0x6510 over the GIF (sceGsSyncPath, func_00371940),
  * then counts the samples inside the rectangle and those at or below the threshold (unoccluded). When the count equals
  * the halo's area (+0x8 x +0xC) the visible fraction is stored through the third argument; otherwise (a clipped
@@ -771,8 +771,8 @@ extern "C" void cRenderStateMan_calculatePatchColour(sLensSrc_DB20* self, float 
 //100%
 INCLUDE_ASM("visualfx/lensfx", cRenderStateMan_calculateIrradianceBlend);
 #ifdef SKIP_ASM
-extern "C" float func_0040DA10(float x);
-extern "C" float func_0040D758(float x);
+extern "C" float logf(float x);
+extern "C" float expf(float x);
 
 // PORT: abs.s via inline asm (as an SDK math-header fabsf would); gcc folds __builtin_fabsf of a constant.
 static inline float absf_DF00(float x)
@@ -795,7 +795,7 @@ static inline float clamp_DF00(float f, float lo, float hi)
  * Maps a colour's luminance to a 0..1 factor: 0 at or below 0.1, 1 at or above 0.45, ((lum - 0.1) / 0.35)^0.6 between.
  *
  * The luminance is 0.299 r + 0.587 g + 0.114 b of the floats at +0x4, +0x8, +0xC (an a, r, g, b colour); the power uses
- * func_0040D758 (expf) of func_0040DA10 (logf) times 0.6. cRenderStateMan_update calls it.
+ * expf (expf) of logf (logf) times 0.6. cRenderStateMan_update calls it.
  *
  * @return the factor, 0..1
  */
@@ -812,7 +812,7 @@ extern "C" float cRenderStateMan_calculateIrradianceBlend(void* self)
     }
     float k = 0.600117564201355f;
     float norm = (lum - 0.10000000149011612f) / absf_DF00(0.3499999940395355f);
-    return clamp_DF00(func_0040D758(func_0040DA10(norm) * k), 0.0f, 1.0f);
+    return clamp_DF00(expf(logf(norm) * k), 0.0f, 1.0f);
 }
 #endif
 

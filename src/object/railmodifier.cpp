@@ -7796,15 +7796,15 @@ void func_00361F90(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00361F98);
 #ifdef SKIP_ASM
-extern "C" int func_00424880(int ch);
+extern "C" int DisableIntc(int ch);
 extern "C" int func_00423A80(int cause, int (*handler)(void), int arg);
-extern "C" int func_004248E8(int ch);
+extern "C" int EnableIntc(int ch);
 
 /**
  * Registers an INTC handler for an interrupt cause and records its id.
  *
- * Calls func_00424880(cause), stores the id func_00423A80(cause, handler, next) returns at +cause*4, then calls
- * func_004248E8(cause).
+ * Calls DisableIntc(cause), stores the id func_00423A80(cause, handler, next) returns at +cause*4, then calls
+ * EnableIntc(cause).
  *
  * @param cause  INTC cause number (5 = VIF1, 7 = VU1)
  * @param handler  handler function
@@ -7812,29 +7812,29 @@ extern "C" int func_004248E8(int ch);
  */
 extern "C" void func_00361F98(void* self, int cause, int (*handler)(void), int next)
 {
-    func_00424880(cause);
+    DisableIntc(cause);
     *(int*)((char*)self + (cause << 2)) = func_00423A80(cause, handler, next);
-    func_004248E8(cause);
+    EnableIntc(cause);
 }
 #endif
 
 //100%
 INCLUDE_ASM("object/railmodifier", func_00362008);
 #ifdef SKIP_ASM
-extern "C" int func_00424880(int ch);
+extern "C" int DisableIntc(int ch);
 extern "C" void* RemoveIntcHandler(int ch, int id);
 
 /**
  * Removes the INTC handler recorded for a cause.
  *
- * Calls func_00424880(ch), sets the cause's slot (+ch*4) to -1 and calls RemoveIntcHandler with the old id.
+ * Calls DisableIntc(ch), sets the cause's slot (+ch*4) to -1 and calls RemoveIntcHandler with the old id.
  *
  * @param ch  INTC cause number
  * @return RemoveIntcHandler's result
  */
 extern "C" void* func_00362008(void* self, int ch)
 {
-    func_00424880(ch);
+    DisableIntc(ch);
     int* handlerSlot = (int*)((char*)self + (ch << 2));
     int id = *handlerSlot;
     *handlerSlot = -1;
@@ -7846,14 +7846,14 @@ extern "C" void* func_00362008(void* self, int ch)
 INCLUDE_ASM("object/railmodifier", func_00362058);
 #ifdef SKIP_ASM
 extern "C" int func_00423AB0(int, int, int);
-extern "C" void func_00424950(int);
-extern "C" void func_004249B8(int);
+extern "C" void DisableDmac(int);
+extern "C" void EnableDmac(int);
 
 /**
  * Registers a DMAC handler for a channel and records its id.
  *
- * Calls func_00424950(channel), stores the id func_00423AB0(channel, handler, next) returns at +0x40 + channel*4, then
- * calls func_004249B8(channel).
+ * Calls DisableDmac(channel), stores the id func_00423AB0(channel, handler, next) returns at +0x40 + channel*4, then
+ * calls EnableDmac(channel).
  *
  * @param owner  the interrupt handler table
  * @param channel  DMA channel number
@@ -7861,9 +7861,9 @@ extern "C" void func_004249B8(int);
  * @param next  argument passed through to func_00423AB0
  */
 extern "C" void func_00362058(int owner, int channel, int handler, int next) {
-    func_00424950(channel);
+    DisableDmac(channel);
     (*(int *)(((char*)(owner) + (channel << 2)) + (0x40))) = func_00423AB0(channel, handler, next);
-    func_004249B8(channel);
+    EnableDmac(channel);
 }
 #endif
 //100%
@@ -7874,13 +7874,13 @@ extern "C" void RemoveDmacHandler(int, int);
 /**
  * Removes the DMAC handler recorded for a channel.
  *
- * Calls func_00424950(idx), sets the channel's slot (+0x40 + idx*4) to -1 and calls RemoveDmacHandler with the old id.
+ * Calls DisableDmac(idx), sets the channel's slot (+0x40 + idx*4) to -1 and calls RemoveDmacHandler with the old id.
  *
  * @param idx  DMA channel number
  */
 extern "C" void func_003620C8(char* self, int idx)
 {
-    func_00424950(idx);
+    DisableDmac(idx);
     char* base = self + 0x40;
     int* slot = (int*)(base + (idx << 2));
     int old = *slot;
@@ -8595,7 +8595,7 @@ extern "C" void func_003629B8(sRmBatch_29B8* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00362CC8);
 #ifdef SKIP_ASM
-extern "C" void func_004247D8(void* begin, void* end);
+extern "C" void InvalidDCache(void* begin, void* end);
 extern "C" void func_0038F738(void* base, int size, int mode);
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern void* D_004A5B84;
@@ -8621,9 +8621,9 @@ extern "C" void func_00362CC8(char* self)
     *(int*)(self + 0x57494) = 0;
     *(int*)(self + 0x51480) = *(int*)(self + 0x57484);
     char* stateHashTable = self + 0x674A0;
-    func_004247D8(stateHashTable, self + 0x6789F);
+    InvalidDCache(stateHashTable, self + 0x6789F);
     char* nodeHashTable = self + 0x678A0;
-    func_004247D8(nodeHashTable, self + 0x67C9F);
+    InvalidDCache(nodeHashTable, self + 0x67C9F);
     MEM_fill(D_004A5B84, 0, 0x400);
     func_0038F738(stateHashTable, 0x400, 2);
     func_0038F738(nodeHashTable, 0x400, 2);
@@ -8641,7 +8641,7 @@ extern "C" void func_00362CC8(char* self)
 INCLUDE_ASM("object/railmodifier", func_00362DE8);
 #ifdef SKIP_ASM
 extern void* D_004A4474;
-extern "C" void func_00424698(void* begin, void* end);
+extern "C" void SyncDCache(void* begin, void* end);
 extern "C" void* func_0038F4F8(void* ring, void* src, int size, int flags);
 extern "C" void func_0038F6A8(void* ring);
 extern "C" void func_0038F7B0();
@@ -8785,7 +8785,7 @@ extern "C" void func_00362DE8(void* vself)
 {
     sRmBatch_2DE8* self = (sRmBatch_2DE8*)vself;
     self->last = 0;
-    func_00424698(self->entries, (char*)&self->entries[self->count] - 1);
+    SyncDCache(self->entries, (char*)&self->entries[self->count] - 1);
     void* ring = D_004A4474;
     int bytes = *(int*)((char*)ring + 0x10) << 4;
     int chunk = bytes / sizeof(sRmEntry_2DE8);
@@ -10146,18 +10146,18 @@ extern "C" void func_00365E40(void* list, int startAddr, int heapSize, void* poo
 //100%
 INCLUDE_ASM("object/railmodifier", func_00365F68);
 #ifdef SKIP_ASM
-extern "C" void func_00424698(void* begin, void* end);
+extern "C" void SyncDCache(void* begin, void* end);
 extern "C" int func_0038F708(void* base, int size, int mode);
 
 /**
  * Moves a block allocator's link array into the scratchpad ring for fast access.
  *
- * Writes the 0x1FF0-byte array back from the data cache (func_00424698), copies it with func_0038F708 and points the
+ * Writes the 0x1FF0-byte array back from the data cache (SyncDCache), copies it with func_0038F708 and points the
  * links pointer (+0x1FF0) at the copy. func_00365FA8 undoes it.
  */
 extern "C" void func_00365F68(void* self)
 {
-    func_00424698(self, (char*)self + 0x1FEF);
+    SyncDCache(self, (char*)self + 0x1FEF);
     *(int*)((char*)self + 0x1FF0) = func_0038F708(self, 0x1FF0, 2);
 }
 #endif
@@ -10165,16 +10165,16 @@ extern "C" void func_00365F68(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", func_00365FA8);
 #ifdef SKIP_ASM
-extern "C" void func_004247D8(void* begin, void* end);
+extern "C" void InvalidDCache(void* begin, void* end);
 extern "C" void func_0038F738(void* base, int size, int mode);
 
 /**
- * Moves a block allocator's link array back from the scratchpad ring (func_004247D8, func_0038F738) and points the
+ * Moves a block allocator's link array back from the scratchpad ring (InvalidDCache, func_0038F738) and points the
  * links pointer (+0x1FF0) at it again.
  */
 extern "C" void func_00365FA8(void* self)
 {
-    func_004247D8(self, (char*)self + 0x1FEF);
+    InvalidDCache(self, (char*)self + 0x1FEF);
     func_0038F738(self, 0x1FF0, 2);
     *(void**)((char*)self + 0x1FF0) = self;
 }
@@ -10577,13 +10577,13 @@ static inline unsigned int spadFree66F8()
 /**
  * Resets the 2000-entry texture use table D_0053AB80 to all-ones (-1).
  *
- * Invalidates the table's cache lines (func_004247D8), fills the free scratchpad above D_004A5B84 with 0xFF bytes and
+ * Invalidates the table's cache lines (InvalidDCache), fills the free scratchpad above D_004A5B84 with 0xFF bytes and
  * copies that into the table in chunks with func_0038F738.
  */
 extern "C" void func_003666F8()
 {
     cQuad128 fill = makeFill66F8(0xFFFFFFFF, 0xFFFFFFFF);
-    func_004247D8(D_0053AB80, D_0053E9FF);
+    InvalidDCache(D_0053AB80, D_0053E9FF);
     cQuad128* spadCursor = (cQuad128*)D_004A5B84;
     unsigned int n = spadFree66F8() >> 4;
     for (; n != 0; n--) {

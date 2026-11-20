@@ -5805,7 +5805,7 @@ INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_IsTransitionPending);
 /**
  * Returns whether both screen-grab flags (+0x60 and +0x64) are set.
  *
- * It fills a slot that the base cScriptObjTransition vtable leaves pure (func_00411530), in the transition manager's
+ * It fills a slot that the base cScriptObjTransition vtable leaves pure (__pure_virtual), in the transition manager's
  * vtable D_00488100.
  *
  * @return 1 when both flags are set, otherwise 0

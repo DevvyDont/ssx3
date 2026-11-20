@@ -185,7 +185,7 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_readToken);
 // every advance is followed by a peek (also after the optional 'f' float suffix, whose re-read value is unused).
 extern "C" void cInputMapParser_error(void* self, const char* fmt, ...);
 extern "C" int strcasecmp(const char* a, const char* b);
-extern "C" int func_004178B0(const char* a, const char* b, ...);
+extern "C" int sscanf(const char* a, const char* b, ...);
 extern char str_malformed_pre_processor_line[];
 extern char str_Operator_plus_plus_not_defined[];
 extern char str_Identifer_exceeds_64_characters[];
@@ -569,7 +569,7 @@ extern "C" void cInputMapParser_readToken(cInputMapParser* self)
             PKC_321AF0(c);
         }
         *p = 0;
-        func_004178B0(text, str_pct_f_b, &s->value);
+        sscanf(text, str_pct_f_b, &s->value);
         s->tok = 11;
         return;
     } else {
@@ -1356,8 +1356,8 @@ extern "C" void cInputMapParser_error(void* self, const char* fmt, ...);
 extern "C" void* cInputMapParser_newParseNode(void* self);
 extern "C" void cInputMapParser_freeParseNode(void* self, void* node);
 extern "C" float func_0031C228(float x);
-extern "C" float func_0040DA10(float x);
-extern "C" float func_0040D758(float x);
+extern "C" float logf(float x);
+extern "C" float expf(float x);
 extern char str_Expected_in_expression_b[];
 extern char str_Expected_in_expression_c[];
 extern char str_Expected_in_expression[];
@@ -1373,7 +1373,7 @@ struct sBinNode_4138 {
 
 static inline float pow_4138(float x, float y)
 {
-    return func_0040D758(func_0040DA10(x) * y);
+    return expf(logf(x) * y);
 }
 
 static inline float atan2_4138(float y, float x)
@@ -1557,10 +1557,10 @@ extern "C" void* cInputMapParser_parseUnaryFunc(cInputMapParser* self, int op)
             operand->value = fCos(operand->value);
             break;
         case 27:
-            operand->value = func_0040D758(operand->value);
+            operand->value = expf(operand->value);
             break;
         case 0x1C:
-            operand->value = func_0040DA10(operand->value);
+            operand->value = logf(operand->value);
             break;
         case 29:
             operand->value = floor_43A0(operand->value);
@@ -2319,12 +2319,12 @@ extern "C" float cInputExec_execute(sInputVM_325450* self, void* list, sInsn_324
         }
         case 23: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = func_0040D758(cInputExec_getRegister_vm(self, ins->r.src));
+            *destSlot = expf(cInputExec_getRegister_vm(self, ins->r.src));
             break;
         }
         case 24: {
             float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
-            *destSlot = func_0040DA10(cInputExec_getRegister_vm(self, ins->r.src));
+            *destSlot = logf(cInputExec_getRegister_vm(self, ins->r.src));
             break;
         }
         case 25: {
@@ -2379,7 +2379,7 @@ void cMemMan_free(void* ptr);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern "C" void* func_0041605C(void* dst, const void* src, int n);
-extern "C" char* func_0041ACC0(const char* s, int c);
+extern "C" char* strrchr(const char* s, int c);
 extern "C" char* strcpy(char* dst, const char* src);
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
 // PORT: cInputPreProcessor_readFile is declared (void*, int, int) later in the unit; this caller passes two strings.
@@ -2410,7 +2410,7 @@ extern "C" void* cInputPreProcessor_loadFileSize(sParseBuf_5F48* self, char* pat
     self->size = 0;
     self->cap = 0x800;
     self->data = (char*)operator_new_tag(0x800, str_PreProcBuf, 0, 0);
-    char* lastSlash = func_0041ACC0(path, '/');
+    char* lastSlash = strrchr(path, '/');
     if (lastSlash != 0) {
         lastSlash++;
         int n = lastSlash - path;

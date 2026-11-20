@@ -275,21 +275,21 @@ struct sMat00391C48 {
 } __attribute__((aligned(16)));
 
 extern sMat00391C48 D_00500CA0;
-extern "C" void func_004186C8(sMat00391C48* m);
+extern "C" void vsprintf(sMat00391C48* m);
 extern "C" void cFont_text(cFont* self, float x, float y, sMat00391C48* m);
 
 /**
  * Formats text into a shared static buffer (D_00500CA0) and draws it at a position.
  *
  * The C declaration drops the format and va_list arguments (On Tour fmt, va); they reach the vsprintf
- * (func_004186C8) in the untouched argument registers.
+ * (vsprintf) in the untouched argument registers.
  *
  * @param x  screen x
  * @param y  screen y
  */
 extern "C" void cFont_vtextf(cFont* self, float x, float y)
 {
-    func_004186C8(&D_00500CA0);
+    vsprintf(&D_00500CA0);
     cFont_text(self, x, y, &D_00500CA0);
 }
 #endif

@@ -665,7 +665,7 @@ struct cRiderHandler {
 
 // Virtual slots of _vt$13cRiderHandler (cRiderHandler_vtbl; [O] cRiderHandler's virtual order).
 enum {
-    kRiderHandlerVt_getControlCmd = 1,      // pure (func_00411530); cPlayer cPlayer_getControlCmd, cComputer cComputer_getControlCmd
+    kRiderHandlerVt_getControlCmd = 1,      // pure (__pure_virtual); cPlayer cPlayer_getControlCmd, cComputer cComputer_getControlCmd
     kRiderHandlerVt_writeToReplayFrame = 2, // cRiderHandler_writeToReplayFrame (calls every part's writeToReplayFrame)
     kRiderHandlerVt_readFromReplayFrame = 3 // cRiderHandler_readFromReplayFrame (calls every part's readFromReplayFrame / FX reset)
 };

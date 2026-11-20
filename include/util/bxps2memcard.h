@@ -16,9 +16,9 @@
 // Methods: see methods.txt (in retail they sit in the worldpainter/quadtree split, 0x002C3FA0-0x002C6D70).
 //
 // The libmc calls are identified by argument shape and address order (inferred, not symbol-backed):
-//   func_00409D10 sceMcOpen, func_00409E38 sceMcMkdir, func_00409E70 sceMcClose, func_00409F28 sceMcSeek,
-//   func_0040A090 sceMcRead, func_0040A1A8 sceMcWrite, func_0040A360 sceMcSync, func_0040A498 sceMcGetInfo,
-//   func_0040A688 sceMcGetDir, func_0040A998 sceMcFormat, func_0040AA68 sceMcDelete, func_0040AB80 sceMcFlush.
+//   sceMcOpen sceMcOpen, sceMcMkdir sceMcMkdir, sceMcClose sceMcClose, sceMcSeek sceMcSeek,
+//   sceMcRead sceMcRead, sceMcWrite sceMcWrite, sceMcSync sceMcSync, sceMcGetInfo sceMcGetInfo,
+//   sceMcGetDir sceMcGetDir, sceMcFormat sceMcFormat, sceMcDelete sceMcDelete, sceMcFlush sceMcFlush.
 //
 // A FLAT layout, like main/game.h. Evidence tags:
 //   [R] retail's constructor cPS2MemCard_cPS2MemCard, Reset cPS2MemCard_Init (vtable slot 2, called by the ctor; it sets or

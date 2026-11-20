@@ -579,12 +579,12 @@ extern int D_00536730[];
 extern int D_00536708[];
 extern "C" int func_00245E30(const void* a, const void* b);
 extern "C" int func_00245EC0(const void* a, const void* b);
-extern "C" void func_00418EF8(void* base, int n, int size, int (*cmp)(const void*, const void*));
+extern "C" void qsort(void* base, int n, int size, int (*cmp)(const void*, const void*));
 
 /**
  * Ranks the first @p n riders by score, highest first, into the rank tables.
  *
- * Resets D_00536730 and D_00536708 to 0..9, then sorts D_00536708 with func_00418EF8 (qsort) and func_00245E30, and
+ * Resets D_00536730 and D_00536708 to 0..9, then sorts D_00536708 with qsort (qsort) and func_00245E30, and
  * D_00536730 with func_00245EC0, both over the scores in D_00536640. The game-mode handlers call it after every heat.
  *
  * @param n  number of riders to rank
@@ -596,8 +596,8 @@ extern "C" void cGameModeMan_sortScores(void* self, int n)
         D_00536730[i] = i;
         D_00536708[i] = i;
     }
-    func_00418EF8(D_00536708, n, 4, func_00245E30);
-    func_00418EF8(D_00536730, n, 4, func_00245EC0);
+    qsort(D_00536708, n, 4, func_00245E30);
+    qsort(D_00536730, n, 4, func_00245EC0);
 }
 #endif
 
@@ -608,7 +608,7 @@ extern int D_00536730[];
 extern int D_00536708[];
 extern "C" int func_00245E78(const void* a, const void* b);
 extern "C" int func_00245EC0(const void* a, const void* b);
-extern "C" void func_00418EF8(void* base, int n, int size, int (*cmp)(const void*, const void*));
+extern "C" void qsort(void* base, int n, int size, int (*cmp)(const void*, const void*));
 
 /**
  * Ranks the first @p n riders by time, lowest first, into the rank tables.
@@ -625,8 +625,8 @@ extern "C" void cGameModeMan_sortTimes(void* self, int n)
         D_00536730[i] = i;
         D_00536708[i] = i;
     }
-    func_00418EF8(D_00536708, n, 4, func_00245E78);
-    func_00418EF8(D_00536730, n, 4, func_00245EC0);
+    qsort(D_00536708, n, 4, func_00245E78);
+    qsort(D_00536730, n, 4, func_00245EC0);
 }
 #endif
 

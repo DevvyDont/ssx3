@@ -484,7 +484,7 @@ typedef char* cInputMapParser_error_va_list;
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
 
 extern "C" int sprintf(char* dst, const char* fmt, ...);
-extern "C" int func_004186C8(char* dst, const char* fmt, char* ap);
+extern "C" int vsprintf(char* dst, const char* fmt, char* ap);
 extern char str_pct_s_pct_d[];
 
 /**
@@ -500,7 +500,7 @@ extern "C" void cInputMapParser_error(cInputMapParser* self, const char* fmt, ..
     char buf[0x400];
     cInputMapParser_error_va_list ap;
     cInputMapParser_error_va_start(ap);
-    func_004186C8(buf + sprintf(buf, str_pct_s_pct_d, (char*)self + 0xC, self->LineNumber), fmt, ap);
+    vsprintf(buf + sprintf(buf, str_pct_s_pct_d, (char*)self + 0xC, self->LineNumber), fmt, ap);
     self->ErrorFlag = 1;
 }
 #endif

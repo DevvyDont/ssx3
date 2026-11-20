@@ -230,7 +230,7 @@ extern "C" void *cFogParticleMan_cFogParticleMan(int *self) {
 INCLUDE_ASM("seg/seg_1DCD10", cFogParticleMan_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_00418EF8_BF98(void* base, int n, int size, int (*cmp)(void*, void*)) __asm__("func_00418EF8");
+extern "C" void qsort_BF98(void* base, int n, int size, int (*cmp)(void*, void*)) __asm__("qsort");
 extern "C" int cFogParticleMan__FogSortFuc(void* arg0, void* arg1);
 struct RS_BF98 {
     unsigned int w0_lo : 2;
@@ -278,13 +278,13 @@ static inline void G3_BF98(int c, int f, int g, int e, int d) {
  * Renders the frame's fog particles and empties the list.
  *
  * Does nothing while miNumSphere is 0. Otherwise sorts the first miNumSphere 8-byte sort keys at D_00537AC0 (On Tour
- * cFogParticleMan::mSortKey) with func_00418EF8 and the comparator cFogParticleMan__FogSortFuc, pushes a copy of the graphics
+ * cFogParticleMan::mSortKey) with qsort and the comparator cFogParticleMan__FogSortFuc, pushes a copy of the graphics
  * manager's top render-state record (GrMan +0xE84) and sets several of its fields, calls virtual slot 3
  * (platformrender, cPS2FogParticleMan_platformrender in cPS2FogParticleMan), pops the state and resets miNumSphere to 0.
  */
 extern "C" void cFogParticleMan_render(cFogParticleMan* self) {
     if (self->miNumSphere) {
-        func_00418EF8_BF98(D_00537AC0, self->miNumSphere, 8, cFogParticleMan__FogSortFuc);
+        qsort_BF98(D_00537AC0, self->miNumSphere, 8, cFogParticleMan__FogSortFuc);
         Push_BF98();
         {
             Ctx_BF98* ctx = GrMan_seg_1DCD10;

@@ -4,7 +4,7 @@
 INCLUDE_ASM("ealib/seg_2DCAE8", getstringidbyindex);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern unsigned char *func_004187E8_BAE8(void *, void *, unsigned int, int, void *) __asm__("func_004187E8");
+extern unsigned char *bsearch_BAE8(void *, void *, unsigned int, int, void *) __asm__("bsearch");
 extern char func_003DBAC8_BAE8[] __asm__("func_003DBAC8");
 
 int getstringidbyindex_impl(short key, unsigned char *p) __asm__("getstringidbyindex");
@@ -12,7 +12,7 @@ int getstringidbyindex_impl(short key, unsigned char *p) __asm__("getstringidbyi
  * Looks a string id up in a locale file's index: returns the entry's string number (its second little-endian halfword),
  * or -1 when the id is not there.
  *
- * Binary search (func_004187E8, comparator func_003DBAC8) over the index's 4-byte entries from +0x10, count at +0x8.
+ * Binary search (bsearch, comparator func_003DBAC8) over the index's 4-byte entries from +0x10, count at +0x8.
  *
  * @param key  the string id
  * @param indexTable  the index chunk
@@ -22,7 +22,7 @@ int getstringidbyindex_impl(short key, unsigned char *indexTable) {
     short k = key;
     unsigned char *n = indexTable + 8;
     unsigned char *found;
-    found = func_004187E8_BAE8(&k, indexTable + 0x10, (n[3] << 24) | (n[2] << 16) | (n[1] << 8) | n[0], 4, func_003DBAC8_BAE8);
+    found = bsearch_BAE8(&k, indexTable + 0x10, (n[3] << 24) | (n[2] << 16) | (n[1] << 8) | n[0], 4, func_003DBAC8_BAE8);
     if (found == 0) {
         return -1;
     }
@@ -6984,16 +6984,16 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3618);
 extern int D_00519C40_3618[] __asm__("D_00519C40");
 extern char D_00519C80_3618[] __asm__("D_00519C80");
 extern int D_00450C58_3618[] __asm__("D_00450C58");
-extern int func_00401DF8_3618(int, int, void *, int *) __asm__("func_00401DF8");
-extern int func_004013E8_3618(int) __asm__("func_004013E8");
-extern void func_00401718_3618(int) __asm__("func_00401718");
-extern void func_00402450_3618(int) __asm__("func_00402450");
-extern void func_00401BF0_3618(int) __asm__("func_00401BF0");
-extern int func_00402300_3618(void) __asm__("func_00402300");
+extern int sceCdRead_3618(int, int, void *, int *) __asm__("sceCdRead");
+extern int sceCdSync_3618(int) __asm__("sceCdSync");
+extern void sceCdInit_3618(int) __asm__("sceCdInit");
+extern void sceCdMmode_3618(int) __asm__("sceCdMmode");
+extern void sceCdDiskReady_3618(int) __asm__("sceCdDiskReady");
+extern int sceCdGetError_3618(void) __asm__("sceCdGetError");
 /**
  * Reads one disc sector, the one at the CD state's sector (D_00519C40 +0x2C), into the sector buffer D_00519C80 and
  * returns it. Retries until the read reports no error, waiting 480 ticks between polls; every 10 failures the CD is
- * initialised again (func_00401718(0), media mode from D_00450C58 +0x8).
+ * initialised again (sceCdInit(0), media mode from D_00450C58 +0x8).
  *
  * @return the sector buffer
  */
@@ -7003,19 +7003,19 @@ char *func_003E3618(void) {
     int done;
     do {
         if (n == 0) {
-            func_00401718_3618(0);
+            sceCdInit_3618(0);
             n = 10;
-            func_00402450_3618(D_00450C58_3618[2]);
+            sceCdMmode_3618(D_00450C58_3618[2]);
         }
-        func_00401BF0_3618(0);
-        while (func_00401DF8_3618(D_00519C40_3618[11], 1, D_00519C80_3618, &D_00519C40_3618[7]) == 0) {
+        sceCdDiskReady_3618(0);
+        while (sceCdRead_3618(D_00519C40_3618[11], 1, D_00519C80_3618, &D_00519C40_3618[7]) == 0) {
             func_003E35B0(0x1E0);
         }
         do {
-            syncBusy = func_004013E8_3618(1);
+            syncBusy = sceCdSync_3618(1);
             func_003E35B0(0x1E0);
         } while (syncBusy != 0);
-        done = func_00402300_3618() == 0;
+        done = sceCdGetError_3618() == 0;
         if (!done) n--;
     } while (!done);
     return D_00519C80_3618;
@@ -7079,7 +7079,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E39A8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003E36F8_39A8(char *, int) __asm__("func_003E36F8");
-extern void func_00418EF8_39A8(char *, int, int, void *) __asm__("func_00418EF8");
+extern void qsort_39A8(char *, int, int, void *) __asm__("qsort");
 extern char *strcpy_39A8(char *, char *) __asm__("strcpy");
 extern void func_003E3968_39A8(void) __asm__("func_003E3968");
 extern int D_00450C58_39A8[] __asm__("D_00450C58");
@@ -7090,7 +7090,7 @@ extern int D_0051ED80_39A8[] __asm__("D_0051ED80");
  *
  * Each 0x108-byte source entry (path, sector, size) becomes {hash of the path (func_003E36F8), sector, size, then the
  * path when D_00450C58 +0x4, the name length, is above 0} in entries of name length + 0xC bytes, sorted by hash
- * (func_00418EF8 with func_003E3968). On any equal hashes the seed becomes seed * 101 + 7 and it starts over. Quirks:
+ * (qsort with func_003E3968). On any equal hashes the seed becomes seed * 101 + 7 and it starts over. Quirks:
  * two identical paths hash alike for every seed, so the loop never ends; the path is copied with no length limit.
  *
  * @param src  the directory list
@@ -7123,7 +7123,7 @@ int func_003E39A8(char *src, char *dst, int n, int seed) {
             } while (i != 0);
         }
         D_0051ED80_39A8[0] = 0;
-        func_00418EF8_39A8(dst, n, D_00450C58_39A8[1] + 0xC, func_003E3968_39A8);
+        qsort_39A8(dst, n, D_00450C58_39A8[1] + 0xC, func_003E3968_39A8);
         if (D_0051ED80_39A8[0] != 0) {
             seed = seed * 101 + 7;
         } else {
@@ -7154,8 +7154,8 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3B00);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern int D_00519C40_3B00[] __asm__("D_00519C40");
-extern int func_00401DF8_3B00(int, int, int, int *) __asm__("func_00401DF8");
-extern void func_004013E8_3B00(int) __asm__("func_004013E8");
+extern int sceCdRead_3B00(int, int, int, int *) __asm__("sceCdRead");
+extern void sceCdSync_3B00(int) __asm__("sceCdSync");
 /**
  * Issues the CD read of the current step: sectors +0x30 from sector +0x2C into the sector buffer (+0x3C) when flag bit
  * 0 is set, else straight into the destination (+0x34). Up to three tries, waiting and syncing between them; it sets
@@ -7174,13 +7174,13 @@ void func_003E3B00(void) {
     }
     ok = 0;
     for (i = 0; i < 3; i++) {
-        if (func_00401DF8_3B00(readState[3], readState[4], readBuf, &D_00519C40_3B00[7]) != 0) {
+        if (sceCdRead_3B00(readState[3], readState[4], readBuf, &D_00519C40_3B00[7]) != 0) {
             D_00519C40_3B00[0] |= 2;
             ok = 1;
             break;
         }
         func_003E35B0(i + 1);
-        func_004013E8_3B00(0);
+        sceCdSync_3B00(0);
     }
     if (!ok) {
         D_00519C40_3B00[0] |= 6;
@@ -7193,7 +7193,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3BE0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-struct sC40Mode {                   /* the CD read mode handed to func_00401DF8 */
+struct sC40Mode {                   /* the CD read mode handed to sceCdRead */
     unsigned char f00;
     unsigned char f01;
     unsigned char f02;
@@ -7222,7 +7222,7 @@ struct sC40 {                       /* 0x40, D_00519C40: the CD file system */
 };
 extern struct sC40 D_00519C40;
 extern void func_003E3B00_3BE0(void) __asm__("func_003E3B00");
-extern int func_00402300_3618(void) __asm__("func_00402300");
+extern int sceCdGetError_3618(void) __asm__("sceCdGetError");
 extern void MEM_copy_2190(int, int, int) __asm__("MEM_copy");
 extern void iFILESYS_CommandCompleteCallback_33B0(int) __asm__("iFILESYS_CommandCompleteCallback");
 
@@ -7243,7 +7243,7 @@ void func_003E3BE0_impl(void) {
     while (1) {
         int fl;
         WaitSema(D_00519C40.f0C);
-        if (func_00402300_3618() != 0 || (D_00519C40.f00 & 8)) {
+        if (sceCdGetError_3618() != 0 || (D_00519C40.f00 & 8)) {
             fl = D_00519C40.f00 & ~8;
             D_00519C40.f00 = fl;
             if (fl & 2) {
@@ -7293,14 +7293,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3D78);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void MEM_copy_3D78(void *, void *, int) __asm__("MEM_copy");
-extern int func_004008A0_3D78(void *) __asm__("func_004008A0");
-extern void func_00400A78_3D78(int, void *, int) __asm__("func_00400A78");
-extern int func_004013E8_3D78(int) __asm__("func_004013E8");
-extern int func_00401718_3D78(int) __asm__("func_00401718");
-extern void func_00401BF0_3D78(int) __asm__("func_00401BF0");
-extern int func_00401DF8_3D78(int, int, void *, void *) __asm__("func_00401DF8");
-extern int func_00402300_3D78(void) __asm__("func_00402300");
-extern void func_00402450_3D78(int) __asm__("func_00402450");
+extern int sceCdCallback_3D78(void *) __asm__("sceCdCallback");
+extern void sceCdInitEeCB_3D78(int, void *, int) __asm__("sceCdInitEeCB");
+extern int sceCdSync_3D78(int) __asm__("sceCdSync");
+extern int sceCdInit_3D78(int) __asm__("sceCdInit");
+extern void sceCdDiskReady_3D78(int) __asm__("sceCdDiskReady");
+extern int sceCdRead_3D78(int, int, void *, void *) __asm__("sceCdRead");
+extern int sceCdGetError_3D78(void) __asm__("sceCdGetError");
+extern void sceCdMmode_3D78(int) __asm__("sceCdMmode");
 extern void SignalSema_3D78(int) __asm__("SignalSema");
 
 struct CdReq_3D78 { int left; int f4; int f8; int lba; int count; char *buf; };
@@ -7334,36 +7334,36 @@ int func_003E3D78(void) {
     int busy;
 
     tries = 0;
-    func_004008A0_3D78(0);
+    sceCdCallback_3D78(0);
     MEM_copy_3D78(&req, &D_00519C40_3D78.req, 0x18);
     do {
         tries++;
-        while (func_00401718_3D78(0) == 0) {
+        while (sceCdInit_3D78(0) == 0) {
             func_003E35B0(7200);
-            while (func_00401718_3D78(5) == 0) {
+            while (sceCdInit_3D78(5) == 0) {
                 func_003E35B0(7200);
             }
         }
-        func_00402450_3D78(D_00450C58[2]);
+        sceCdMmode_3D78(D_00450C58[2]);
         func_003E35B0(tries * 0x1E0);
-        while (func_00401DF8_3D78(0x10, 1, D_00519C40_3D78.buf, D_00519C40_3D78.mode) == 0) {
+        while (sceCdRead_3D78(0x10, 1, D_00519C40_3D78.buf, D_00519C40_3D78.mode) == 0) {
             func_003E35B0(tries * 0x1E0);
         }
         do {
-            busy = func_004013E8_3D78(1);
+            busy = sceCdSync_3D78(1);
             func_003E35B0(tries * 0x1E0);
         } while (busy != 0);
-        if (func_00402300_3D78() == 0 && req.count > 0) {
+        if (sceCdGetError_3D78() == 0 && req.count > 0) {
             do {
-                func_00401BF0_3D78(0);
-                while (func_00401DF8_3D78(req.lba, 1, (D_00519C40_3D78.flags & 1) ? D_00519C40_3D78.buf : req.buf, D_00519C40_3D78.mode) == 0) {
+                sceCdDiskReady_3D78(0);
+                while (sceCdRead_3D78(req.lba, 1, (D_00519C40_3D78.flags & 1) ? D_00519C40_3D78.buf : req.buf, D_00519C40_3D78.mode) == 0) {
                     func_003E35B0(tries * 0x1E0);
                 }
                 do {
-                    busy = func_004013E8_3D78(1);
+                    busy = sceCdSync_3D78(1);
                     func_003E35B0(tries * 0x1E0);
                 } while (busy != 0);
-                if (func_00402300_3D78() != 0) {
+                if (sceCdGetError_3D78() != 0) {
                     func_003E35B0(7200);
                     break;
                 }
@@ -7373,9 +7373,9 @@ int func_003E3D78(void) {
                 req.left -= 0x800;
             } while (req.count > 0);
         }
-    } while (func_00402300_3D78() != 0);
-    func_00400A78_3D78(11, D_0051A480, 0x800);
-    func_004008A0_3D78(func_003E3AD8);
+    } while (sceCdGetError_3D78() != 0);
+    sceCdInitEeCB_3D78(11, D_0051A480, 0x800);
+    sceCdCallback_3D78(func_003E3AD8);
     SignalSema_3D78(D_00519C40_3D78.fC);
     return 0;
 }
@@ -7409,11 +7409,11 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4040);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void MEM_fill_4040(void *, int, int) __asm__("MEM_fill");
-extern int func_00401718_4040(int) __asm__("func_00401718");
-extern void func_00402450_4040(int) __asm__("func_00402450");
-extern int func_00401BF0_4040(int) __asm__("func_00401BF0");
-extern int func_00402268_4040(void) __asm__("func_00402268");
-extern int func_00401FD8_4040(void *) __asm__("func_00401FD8");
+extern int sceCdInit_4040(int) __asm__("sceCdInit");
+extern void sceCdMmode_4040(int) __asm__("sceCdMmode");
+extern int sceCdDiskReady_4040(int) __asm__("sceCdDiskReady");
+extern int sceCdGetDiskType_4040(void) __asm__("sceCdGetDiskType");
+extern int sceCdGetToc_4040(void *) __asm__("sceCdGetToc");
 extern void FlushCache_4040(int) __asm__("FlushCache");
 extern void MEM_clear_4040(void *, int) __asm__("MEM_clear");
 extern char *strcat_4040(char *, char *) __asm__("strcat");
@@ -7422,8 +7422,8 @@ extern int func_003E39A8_4040(void *, void *, unsigned int, int) __asm__("func_0
 extern int CreateSema_4040(void *) __asm__("CreateSema");
 extern int CreateThread_4040(void *) __asm__("CreateThread");
 extern int StartThread_4040(int, int) __asm__("StartThread");
-extern void func_00400A78_4040(int, void *, int) __asm__("func_00400A78");
-extern int func_004008A0_4040(void *) __asm__("func_004008A0");
+extern void sceCdInitEeCB_4040(int, void *, int) __asm__("sceCdInitEeCB");
+extern int sceCdCallback_4040(void *) __asm__("sceCdCallback");
 extern void func_003E3BE0_4040(void) __asm__("func_003E3BE0");
 extern void func_003E3AD8_4040(void) __asm__("func_003E3AD8");
 extern void func_003E4000_4040(void) __asm__("func_003E4000");
@@ -7503,7 +7503,7 @@ extern void func_003E3758_4040(unsigned int, unsigned int) __asm__("func_003E375
  * Starts the CD file system and builds its file table; returns the number of files, or 0.
  *
  * Fails (0) when the CD does not initialise or the disc is not a PS2 CD or DVD (disc types 18, 20). It reads the disc's
- * TOC (func_00401FD8), sets the read mode and sector 0x10 and lists every file into a temporary table (n * 264 bytes,
+ * TOC (sceCdGetToc), sets the read mode and sector 0x10 and lists every file into a temporary table (n * 264 bytes,
  * gFileSysOpts allocator): from the built-in file list (gFileSysOpts +0x20; the 7-character device prefix and the
  * 2-character version suffix are dropped and backslashes become slashes), or by walking the ISO 9660 directories
  * (func_003E3758) from the root or from the root directory D_00450C58 names. More than @p n files fails. Otherwise it
@@ -7531,19 +7531,19 @@ unsigned int func_003E4040(unsigned int n, void *files) {
     ok = 0;
     MEM_fill_4040(&D_00519C40_4040, 0, 0x40);
     MEM_fill_4040(files, 0, (D_00450C58_4040.namelen + 0xC) * n);
-    if (func_00401718_4040(0) == 0) {
+    if (sceCdInit_4040(0) == 0) {
         return 0;
     }
-    func_00402450_4040(D_00450C58_4040.mmode);
-    func_00401BF0_4040(0);
-    if (func_00402268_4040() == 18 || func_00402268_4040() == 20) {
+    sceCdMmode_4040(D_00450C58_4040.mmode);
+    sceCdDiskReady_4040(0);
+    if (sceCdGetDiskType_4040() == 18 || sceCdGetDiskType_4040() == 20) {
         ok = 1;
     }
     if (!ok) {
         return 0;
     }
-    func_00401BF0_4040(0);
-    func_00401FD8_4040(toc);
+    sceCdDiskReady_4040(0);
+    sceCdGetToc_4040(toc);
     D_00519C40_4040.mode[1] = 1;
     D_00519C40_4040.lba = 0x10;
     D_00519C40_4040.mode[0] = 0;
@@ -7612,8 +7612,8 @@ unsigned int func_003E4040(unsigned int n, void *files) {
     tp.option = 0;
     D_00519C40_4040.tid = CreateThread_4040(&tp);
     StartThread_4040(D_00519C40_4040.tid, 0);
-    func_00400A78_4040(11, D_0051A480, 0x800);
-    func_004008A0_4040(func_003E3AD8_4040);
+    sceCdInitEeCB_4040(11, D_0051A480, 0x800);
+    sceCdCallback_4040(func_003E3AD8_4040);
     D_00519C40_4040.sector = D_00519C80;
     SYNCTASK_add(func_003E4000_4040, 0, 0);
     return D_00519C40_4040.count;
@@ -7625,8 +7625,8 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E44B0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void SYNCTASK_del_44B0(void (*)(void)) __asm__("SYNCTASK_del");
-extern void func_004008A0(int);
-extern void func_00401718(int);
+extern void sceCdCallback(int);
+extern void sceCdInit(int);
 extern void DeleteThread(int);
 extern void TerminateThread(int);
 extern void DeleteSema(int);
@@ -7635,15 +7635,15 @@ extern void func_003E4000_4000(void) __asm__("func_003E4000");
 
 /**
  * Shuts the CD file system down: removes its sync task (func_003E4000) and the CD callback, terminates and deletes the
- * reader thread, deletes its semaphore and shuts the CD down (func_00401718(5)).
+ * reader thread, deletes its semaphore and shuts the CD down (sceCdInit(5)).
  */
 void func_003E44B0(void) {
     SYNCTASK_del_44B0(func_003E4000_4000);
-    func_004008A0(0);
+    sceCdCallback(0);
     TerminateThread(D_00519C40_9C40[2]);
     DeleteThread(D_00519C40_9C40[2]);
     DeleteSema(D_00519C40_9C40[3]);
-    func_00401718(5);
+    sceCdInit(5);
 }
 #endif
 
@@ -7653,7 +7653,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4508);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 #include "fakematch.h"
 extern int func_003E36F8_4508(char *, int) __asm__("func_003E36F8");
-extern unsigned int func_004187E8_4508(int *, int, int, int, void *) __asm__("func_004187E8");
+extern unsigned int bsearch_4508(int *, int, int, int, void *) __asm__("bsearch");
 extern void func_003E3968_4508(void) __asm__("func_003E3968");
 extern int D_00450C58_4508[] __asm__("D_00450C58");
 extern char D_00499C81_4508[] __asm__("D_00499C81");
@@ -7665,7 +7665,7 @@ int func_003E4508_4508(char *path, int unused, int *out) __asm__("func_003E4508"
  *
  * Builds a normalised copy of @p path in a 256-byte buffer: exactly one leading '/', every '\\' turned into '/', and
  * lower-case letters upper-cased (flag 2 of the ctype table D_00499C81). Hashes it with func_003E36F8 (seed word 6 of
- * the file-system state D_00519C40) and binary-searches (func_004187E8, called bsearch-style) the entry table (word 14,
+ * the file-system state D_00519C40) and binary-searches (bsearch, called bsearch-style) the entry table (word 14,
  * D_00519C78) of word 1 entries, each D_00450C5C + 12 bytes, comparing the hashes with func_003E3968. Used by
  * FILEDEV_open, which tags the number with device 1 in the top byte, and by func_003E4968.
  *
@@ -7709,7 +7709,7 @@ int func_003E4508_4508(char *path, int modeFlags, int *out) {
     }
     *bufCursor = 0;
     key = func_003E36F8_4508(buf, D_00519C40_4508[6]);
-    foundEntry = func_004187E8_4508(&key, D_00519C40_4508[14], D_00519C40_4508[1], D_00450C58_4508[1] + 0xC, func_003E3968_4508);
+    foundEntry = bsearch_4508(&key, D_00519C40_4508[14], D_00519C40_4508[1], D_00450C58_4508[1] + 0xC, func_003E3968_4508);
     if (foundEntry == 0) {
         *out = 0;
         return 0;
@@ -7889,7 +7889,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", TIMER_init);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003E6690_4AF0(int) __asm__("func_003E6690");
 extern int func_00423A80_4AF0(int, void (*)(void), int) __asm__("func_00423A80");
-extern int func_004248E8_4AF0(int) __asm__("func_004248E8");
+extern int EnableIntc_4AF0(int) __asm__("EnableIntc");
 extern void REAL_addexit_4AF0(void (*)(void)) __asm__("REAL_addexit");
 extern void tmrint_4AF0(void) __asm__("tmrint");
 extern void TIMER_restore_4AF0(void) __asm__("TIMER_restore");
@@ -7914,7 +7914,7 @@ extern unsigned short D_00450DE0;
  * picks EE timer 1's clock for the rate (bus clock / 256 below 196 Hz, / 16 below 3150 Hz, / 1 above: 0x8CA00, 0x8CA000
  * or 0x8CA0000 counts a second), stores the compare period in D_00450DE0 and the resulting rate in D_00450DC8, programs
  * T1 (count 0, the compare value, the clock mode | 0x180: compare interrupt and count enable), installs tmrint
- * as the INTC 10 (timer 1) handler (func_00423A80) and enables it (func_004248E8). While the H-blank rate D_00450DA0 is
+ * as the INTC 10 (timer 1) handler (func_00423A80) and enables it (EnableIntc). While the H-blank rate D_00450DA0 is
  * still 0 it calibrates the video mode: it counts H-blanks on timer 0 (mode 0x83) over one second of ticks and passes 1
  * (15701-15799, NTSC), 2 (15576-15674, PAL) or 3 (28801-31999) to func_003E6690. Finally it registers the teardown
  * TIMER_restore with REAL_addexit. systemInit calls it with 60.
@@ -7957,7 +7957,7 @@ int TIMER_init(int hz) {
     T1_COMP_4AF0 = D_00450DE0;
     T1_MODE_4AF0 = mode | 0x180;
     D_00450DDC = func_00423A80_4AF0(10, tmrint_4AF0, 0);
-    func_004248E8_4AF0(10);
+    EnableIntc_4AF0(10);
     if (D_00450DA0 == 0) {
         count = T0_COUNT_4AF0;
         tmode = T0_MODE_4AF0;
@@ -7991,13 +7991,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", TIMER_restore);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void RemoveIntcHandler(int, int);
-extern void func_00424880(int);
+extern void DisableIntc(int);
 extern int D_00450DDC_0DDC[] __asm__("D_00450DDC");
 
 /**
  * Stops the library tick timer.
  *
- * When a handler is installed (D_00450DDC) it clears T1_MODE (0x10000810), disables INTC 10 with func_00424880, removes
+ * When a handler is installed (D_00450DDC) it clears T1_MODE (0x10000810), disables INTC 10 with DisableIntc, removes
  * the handler with RemoveIntcHandler and clears D_00450DDC. TIMER_init registers it as an exit routine.
  */
 void TIMER_restore(void) {
@@ -8006,7 +8006,7 @@ void TIMER_restore(void) {
     if (D_00450DDC_0DDC[0] != 0) {
         reg = (volatile int *)0x10000810;
         *reg = 0;
-        func_00424880(10);
+        DisableIntc(10);
         RemoveIntcHandler(10, D_00450DDC_0DDC[0]);
         D_00450DDC_0DDC[0] = 0;
     }
@@ -8447,20 +8447,20 @@ void func_003E5288(void) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5290);
 #ifdef SKIP_ASM
-extern void func_00424C50(int);
+extern void iWakeupThread(int);
 
 /**
  * Kernel alarm handler that wakes the thread THREAD_yieldticks put to sleep.
  *
  * THREAD_yieldticks sets an alarm with this handler and its own thread id as the argument, then sleeps; on expiry this
- * passes that id (@p threadId) to func_00424C50.
+ * passes that id (@p threadId) to iWakeupThread.
  *
  * @param alarmId  the alarm id (unused)
  * @param alarmTime  the alarm time (unused)
  * @param threadId  the argument given to SetAlarm: the sleeping thread's id
  */
 void func_003E5290(int alarmId, int alarmTime, int threadId) {
-    func_00424C50(threadId);
+    iWakeupThread(threadId);
 }
 #endif
 
@@ -8476,7 +8476,7 @@ extern int f3C90_YT(void) __asm__("GetThreadId");
 extern void f3CA0_YT(int, int *) __asm__("ReferThreadStatus");
 extern void f3CB0_YT(int, int *) __asm__("iReferThreadStatus");
 extern void f3CC0_YT(void) __asm__("SleepThread");
-extern void f4CE8_YT(int) __asm__("func_00424CE8");
+extern void f4CE8_YT(int) __asm__("iRotateThreadReadyQueue");
 extern int D_0DA0_YT[] __asm__("D_00450DA0");
 extern int D_0DE4_YT[] __asm__("D_00450DE4");
 extern char D_5E20_YT[] __asm__("D_00495E20");
@@ -8488,7 +8488,7 @@ extern char fE5290_YT[] __asm__("func_003E5290");
  * For @p numTicks > 0 it converts the ticks to H-blank counts (a0 times the H-blank rate D_00450DA0, divided by the
  * tick rate), sets a kernel alarm whose handler wakes this thread, and sleeps; it aborts with "ERROR SETTING
  * WAKEUP ALARM" if the alarm can't be set. Otherwise it rotates the ready queue at the thread's current
- * priority (through func_00424CE8 inside a timer handler).
+ * priority (through iRotateThreadReadyQueue inside a timer handler).
  *
  * @param numTicks  ticks to sleep, or 0 or less to yield
  */
@@ -8522,7 +8522,7 @@ extern int D_00450DE4_5398 __asm__("D_00450DE4");
 extern void THREAD_yieldticks_5398(int) __asm__("THREAD_yieldticks");
 extern int GetThreadId_5398(void) __asm__("GetThreadId");
 extern void iReferThreadStatus_5398(int, void *) __asm__("iReferThreadStatus");
-extern void func_00424CE8_5398(int) __asm__("func_00424CE8");
+extern void iRotateThreadReadyQueue_5398(int) __asm__("iRotateThreadReadyQueue");
 extern void ReferThreadStatus_5398(int, void *) __asm__("ReferThreadStatus");
 extern void RotateThreadReadyQueue_5398(int) __asm__("RotateThreadReadyQueue");
 
@@ -8532,7 +8532,7 @@ void THREAD_yield_impl(int ms) __asm__("THREAD_yield");
  *
  * With @p ms nonzero it converts the milliseconds to ticks (ms * D_00450DC8 / 1000, at least 1) and sleeps with
  * THREAD_yieldticks. With 0 it rotates the ready queue at the thread's current priority (inside the timer interrupt,
- * flag D_00450DE4, with iReferThreadStatus and func_00424CE8; else ReferThreadStatus and RotateThreadReadyQueue),
+ * flag D_00450DE4, with iReferThreadStatus and iRotateThreadReadyQueue; else ReferThreadStatus and RotateThreadReadyQueue),
  * letting other threads of that priority run. Loading and streaming loops call it with 0 while they wait.
  *
  * @param ms  milliseconds to sleep, or 0 to yield once
@@ -8547,7 +8547,7 @@ void THREAD_yield_impl(int ms) {
         THREAD_yieldticks_5398(yieldTicks);
     } else if (D_00450DE4_5398 != 0) {
         iReferThreadStatus_5398(GetThreadId_5398(), info);
-        func_00424CE8_5398(info[6]);
+        iRotateThreadReadyQueue_5398(info[6]);
     } else {
         ReferThreadStatus_5398(GetThreadId_5398(), info);
         RotateThreadReadyQueue_5398(info[6]);
@@ -9158,7 +9158,7 @@ void PRINT_vstring_5C78(int idx, char *fmt, char *ap) {
         PRINT_init();
     }
     if (D_00450E08_5C78[idx].b0) {
-        func_004186C8(buf, fmt, ap);
+        vsprintf(buf, fmt, ap);
         handler = (int)D_00451250_5C78;
         do {
             if (((struct H_5C78 *)handler)->b0) {
@@ -9407,7 +9407,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", REAL_abortmessage);
 #define REAL_abortmessage_va_start(ap)                                   \
     (ap = (char*)__builtin_next_arg()                                    \
           - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0))
-extern int func_004186C8(char *dst, const char *fmt, char *ap);
+extern int vsprintf(char *dst, const char *fmt, char *ap);
 extern void (*D_00450DD8_6070[])(char *, char *) __asm__("D_00450DD8");
 extern char D_00495EE8_6070[] __asm__("D_00495EE8");
 
@@ -9424,7 +9424,7 @@ void REAL_abortmessage(const char *fmt, ...) {
     if (fmt) {
         char *ap;
         REAL_abortmessage_va_start(ap);
-        func_004186C8(buf, fmt, ap);
+        vsprintf(buf, fmt, ap);
     } else {
         buf[0] = 0;
     }
@@ -9437,7 +9437,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", SYSTEM_abortmessage);
 #ifdef SKIP_ASM
 extern void REAL_exit(void);
 extern void PRINT_string_60E8(int, char *, ...) __asm__("PRINT_string");
-extern int func_004186C8_60E8(char *, char *, char *) __asm__("func_004186C8");
+extern int vsprintf_60E8(char *, char *, char *) __asm__("vsprintf");
 extern char str_ERROR_pct_s[];
 extern char D_00495F00[];
 extern char *D_0045100C_100C[] __asm__("REALabortfilename");
@@ -9453,7 +9453,7 @@ void SYSTEM_abortmessage(char *fmt, ...) {
     char buf[512];
     // PORT: hand-rolled EE EABI va_start
     if (fmt != 0) {
-        func_004186C8_60E8(buf, fmt, (char *)__builtin_next_arg() - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0));
+        vsprintf_60E8(buf, fmt, (char *)__builtin_next_arg() - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0));
     } else {
         buf[0] = 0;
     }
@@ -9664,10 +9664,10 @@ void SORT_shell(int n, int *keys, int *vals) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", PRINT_debuggerfunc);
 #ifdef SKIP_ASM
-extern void func_004175C8(int);
+extern void printf(int);
 
 /**
- * Output routine of the "debugger" print device: passes the text to func_004175C8.
+ * Output routine of the "debugger" print device: passes the text to printf.
  *
  * PRINTdevicelist presets device 2 with the name "debugger" and this routine; PRINT_vstring calls it for every message
  * on an enabled channel while the device is enabled.
@@ -9676,7 +9676,7 @@ extern void func_004175C8(int);
  * @param text  the text
  */
 void PRINT_debuggerfunc(int channel, int text) {
-    func_004175C8(text);
+    printf(text);
 }
 #endif
 
@@ -10637,7 +10637,7 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7500);
 // From peak3project's fork (github.com/peak3project/ssx3).
 typedef struct { char b[4]; } U4_7500;
 extern int D_0051EEE8_7500[] __asm__("D_0051EEE8");
-extern void func_004247D8_7500(char *, char *) __asm__("func_004247D8");
+extern void InvalidDCache_7500(char *, char *) __asm__("InvalidDCache");
 extern void func_0041605C_7500(char *, char *, int) __asm__("func_0041605C");
 extern int func_003F4C98_7500(int *, int, int) __asm__("func_003F4C98");
 extern void func_003F4C68_7500(int *, int, int, int, int, int, char *, int, void *, void *) __asm__("func_003F4C68");
@@ -10651,7 +10651,7 @@ int func_003E7500_impl(struct S_7500 *self, char *buf, int *a2, int *a3) __asm__
  * header is copied to @p response and the payload (up to *@p bufLen bytes, *@p bufLen updated) to @p buf; then the count and the time
  * stamp +8 are cleared. Then, when no request is in flight (+4 == 0) and no reply waits, it sends a new 'ping'/'resp'
  * request (into D_0051EEE8) with the 2 KB buffer and func_003E74E8 as completion, at most once per 6 units of
- * func_003F4DE8 (+8 holds the last send) and, for a fresh buffer, after passing it to func_004247D8 and marking the
+ * func_003F4DE8 (+8 holds the last send) and, for a fresh buffer, after passing it to InvalidDCache and marking the
  * count -1.
  *
  * @param buf  receives the reply payload, or 0
@@ -10686,7 +10686,7 @@ int func_003E7500_impl(struct S_7500 *self, char *buf, int *bufLen, int *respons
         self->f8 = func_003F4DE8();
         self->f4 = 1;
         if (self->f0 == 0) {
-            func_004247D8_7500(self->f10, self->f10 + 0x7FF);
+            InvalidDCache_7500(self->f10, self->f10 + 0x7FF);
             self->f0 = -1;
         }
         func_003F4C98_7500(D_0051EEE8_7500, 0x70696E67, 0x72657370);
@@ -10699,12 +10699,12 @@ int func_003E7500_impl(struct S_7500 *self, char *buf, int *bufLen, int *respons
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E76A8);
 #ifdef SKIP_ASM
-extern void func_004186C8_76A8(char *, const char *, char *) __asm__("func_004186C8");
+extern void vsprintf_76A8(char *, const char *, char *) __asm__("vsprintf");
 
 /**
  * Formats a debug message for the lobby and hands it to the lobby's debug routine.
  *
- * Formats @p fmt and the variable arguments into a 4 KB buffer (func_004186C8, vsprintf-style) and, when a routine is
+ * Formats @p fmt and the variable arguments into a 4 KB buffer (vsprintf, vsprintf-style) and, when a routine is
  * set at +0x548, calls it with the data word +0x544 and the text (both given to func_003E7FF0). Used for the
  * "connecting to %08x:%d" note, the incoming-message dump func_003E8FD0 and the server ping timeout.
  *
@@ -10716,7 +10716,7 @@ void func_003E76A8(char *self, const char *fmt, ...) {
     char *ap;
     void (*cb)(int, char *);
     ap = (char*)__builtin_next_arg() - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0);
-    func_004186C8_76A8(buf, fmt, ap);
+    vsprintf_76A8(buf, fmt, ap);
     cb = *(void (**)(int, char *))(self + 0x548);
     if (cb != 0) {
         cb(*(int *)(self + 0x544), buf);

@@ -1493,14 +1493,14 @@ extern "C" int cChunkResolve_unresolveLight(void* self, void* pRTLight)
 //100%
 INCLUDE_ASM("world/worldview", cChunkResolve_calcMaxLightDistance);
 #ifdef SKIP_ASM
-extern "C" float func_0040D758(float);
-extern "C" float func_0040DA10(float);
+extern "C" float expf(float);
+extern "C" float logf(float);
 
 /**
  * Returns how far a light reaches before its strength falls to @p divisor.
  *
  * The strength is the light's +0x14 times +0x18. By the falloff type at +0x64: 1 gives strength / @p divisor x 100, 2
- * the square root of that ratio x 100, 3 the cube root (func_0040DA10 log, func_0040D758 exp of a third) x 100; any
+ * the square root of that ratio x 100, 3 the cube root (logf log, expf exp of a third) x 100; any
  * other type gives 1e7. No C caller in the source.
  *
  * @param light  the tLightRecord
@@ -1523,8 +1523,8 @@ extern "C" float cChunkResolve_calcMaxLightDistance(void* self, void* light, flo
     case 3:
     {
         float third = 0.33333334f;
-        float logRatio = func_0040DA10(ratio);
-        return func_0040D758(logRatio * third) * 100.0f;
+        float logRatio = logf(ratio);
+        return expf(logRatio * third) * 100.0f;
     }
     default:
         return 1e7f;

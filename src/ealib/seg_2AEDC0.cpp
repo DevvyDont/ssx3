@@ -477,7 +477,7 @@ extern "C" int func_003AE450(char* self, int framesToBuffer, int timeOffsetMs)
 //100%
 INCLUDE_ASM("ealib/seg_2AEDC0", func_003AE6C8);
 #ifdef SKIP_ASM
-extern "C" int func_004139F8(float f);
+extern "C" int fptoui(float f);
 extern "C" int RCMP_DECODER_GetFrame(void* p, int a1);
 extern "C" int RCMP_DECODER_GetCurrentFrameNumber(void* self);
 
@@ -485,7 +485,7 @@ extern "C" int RCMP_DECODER_GetCurrentFrameNumber(void* self);
  * Decodes up to a goal frame and returns the movie player's current frame.
  *
  * Stores the goal at +0x48, asks the decoder (+0x64) for that frame with RCMP_DECODER_GetFrame (goal converted by
- * func_004139F8) into +0x74, and stores the decoder's current frame number (RCMP_DECODER_GetCurrentFrameNumber) at +0x44.
+ * fptoui) into +0x74, and stores the decoder's current frame number (RCMP_DECODER_GetCurrentFrameNumber) at +0x44.
  *
  * @param position  the goal frame number
  * @return the frame object (+0x74), or 0
@@ -493,7 +493,7 @@ extern "C" int RCMP_DECODER_GetCurrentFrameNumber(void* self);
 extern "C" int func_003AE6C8(void* self, float position)
 {
     *(float*)((char*)self + 0x48) = position;
-    *(int*)((char*)self + 0x74) = RCMP_DECODER_GetFrame(*(void**)((char*)self + 0x64), func_004139F8(position));
+    *(int*)((char*)self + 0x74) = RCMP_DECODER_GetFrame(*(void**)((char*)self + 0x64), fptoui(position));
     *(int*)((char*)self + 0x44) = RCMP_DECODER_GetCurrentFrameNumber(*(void**)((char*)self + 0x64));
     return *(int*)((char*)self + 0x74);
 }
@@ -517,7 +517,7 @@ extern "C" int func_003AE718(void *self) {
         if (*(int *)((char *)self + 0x74) != 0) {
             return RCMP_AV_SUBTITLE_ARRAY_FindSubtitle(*(int *)((char *)self + 0x70), *(int *)((char *)self + 0x44));
         }
-        return RCMP_AV_SUBTITLE_ARRAY_FindSubtitle(*(int *)((char *)self + 0x70), func_004139F8(*(float *)((char *)self + 0x48)));
+        return RCMP_AV_SUBTITLE_ARRAY_FindSubtitle(*(int *)((char *)self + 0x70), fptoui(*(float *)((char *)self + 0x48)));
     }
     return 0;
 }
@@ -2415,7 +2415,7 @@ extern "C" void func_003B0B40(void* a, void* b, void* c);
 /**
  * Feeds the MPEG decoder more input when it runs out (decoder callback).
  *
- * Registered by PS2_SONY_CODEC_INTERNAL_Init through func_00402C08 with type 1; calls func_003B0B40(codec, decoder state,
+ * Registered by PS2_SONY_CODEC_INTERNAL_Init through sceMpegAddCallback with type 1; calls func_003B0B40(codec, decoder state,
  * callbackArg).
  *
  * @param callbackArg  the callback's second argument (passed on unused)
@@ -2434,7 +2434,7 @@ INCLUDE_ASM("ealib/seg_2AEDC0", func_003B0B40);
 #ifdef SKIP_ASM
 extern "C" void RCMP_DECODER_ReleaseChunk(void* req, void* blk);
 extern "C" void MEM_copy(void* dst, void* src, int size);
-extern "C" void func_004029D0(void* dst, void* src, int size);
+extern "C" void sceMpegAddBs(void* dst, void* src, int size);
 
 struct func_003B0B40_sBlock {
     int f0;
@@ -2458,10 +2458,10 @@ struct func_003B0B40_sScript {
  * Gets a CHUNK from the DECODER (+0x28) with RCMP_DECODER_GetChunk. With data it copies size - 8 bytes into the uncached buffer
  * (+0x7C) and zero-pads to the 16-byte-rounded size plus 16; without data it writes four 0xB7010000 words (MPEG
  * sequence end codes) so the decoder stops. It releases the CHUNK (RCMP_DECODER_ReleaseChunk), counts it (+0x14) and passes the
- * buffer (+0x78) and size to func_004029D0.
+ * buffer (+0x78) and size to sceMpegAddBs.
  *
  * @param source  the Sony codec object
- * @param consumer  the MPEG decoder state passed to func_004029D0
+ * @param consumer  the MPEG decoder state passed to sceMpegAddBs
  * @param callbackArg  the callback argument (unused)
  */
 // PORT: RCMP_DECODER_GetChunk returns the block pointer as int.
@@ -2493,7 +2493,7 @@ extern "C" void func_003B0B40(void* source, void* consumer, void* callbackArg)
         RCMP_DECODER_ReleaseChunk(self->req, blk);
     }
     self->count++;
-    func_004029D0(consumer, self->hdr, total);
+    sceMpegAddBs(consumer, self->hdr, total);
 }
 #endif
 
@@ -2532,9 +2532,9 @@ extern char str_RCMP_chunkbuff[];
 extern "C" void Initialize_Buffer(void* data);
 extern "C" int Get_Hdr(void);
 extern "C" void* func_003B07F8(void* self, unsigned int w, int h);
-extern "C" void func_00402708(void);
-extern "C" void func_004027B8(void* a, void* b, int size);
-extern "C" void* func_00402C08(void* a, int n, void* fn, void* arg);
+extern "C" void sceMpegInit(void);
+extern "C" void sceMpegCreate(void* a, void* b, int size);
+extern "C" void* sceMpegAddCallback(void* a, int n, void* fn, void* arg);
 extern "C" int func_003B0B10(void* self, void* a1, void* a2);
 
 struct sWSNode_B0C58 {
@@ -2578,8 +2578,8 @@ struct sPlayer_B0C58 {
  *
  * It allocates as many frames as the DECODER's frame count (+0x10) with func_003B07F8 onto the free list (+0x20), an
  * "RCMP::mpegbuff" work area of w * h * 9 / 2 + 5996 bytes (+0x2C) and a 0x32000-byte "RCMP::chunkbuff" (+0x78,
- * uncached alias at +0x7C), both with flag 0x400, then sets the MPEG decoder up with func_00402708, func_004027B8 and
- * registers func_003B0B10 with func_00402C08. Slot 2 of D_00456850.
+ * uncached alias at +0x7C), both with flag 0x400, then sets the MPEG decoder up with sceMpegInit, sceMpegCreate and
+ * registers func_003B0B10 with sceMpegAddCallback. Slot 2 of D_00456850.
  *
  * @param script  the DECODER
  * @param firstChunk  the first CHUNK
@@ -2637,9 +2637,9 @@ extern "C" int PS2_SONY_CODEC_INTERNAL_Init(sPlayer_B0C58* self, sScript_B0C58* 
     self->work = D_00509430_B0C58.alloc(str_RCMP_mpegbuff, self->w * self->h * 9 / 2 + 5996, 0, 0, D_00509430_B0C58.flags | 0x400);
     self->ipuBuf = D_00509430_B0C58.alloc(str_RCMP_chunkbuff, 0x32000, 0, 0, D_00509430_B0C58.flags | 0x400);
     self->ipuBufUc = (void*)(((unsigned int)self->ipuBuf & 0x0FFFFFFF) | 0x30000000);
-    func_00402708();
-    func_004027B8(self->mpeg, self->work, self->w * self->h * 9 / 2 + 5996);
-    func_00402C08(self->mpeg, 1, (void*)func_003B0B10, self);
+    sceMpegInit();
+    sceMpegCreate(self->mpeg, self->work, self->w * self->h * 9 / 2 + 5996);
+    sceMpegAddCallback(self->mpeg, 1, (void*)func_003B0B10, self);
     return 2;
 }
 #endif
@@ -2688,13 +2688,13 @@ INCLUDE_ASM("ealib/seg_2AEDC0", PS2_SONY_CODEC_INTERNAL_DecodeFrame);
 struct sWSPool;
 struct sWSItem;
 extern "C" sWSItem* func_003B10D0(sWSPool* self);
-extern "C" void func_00402A10(void* dma, void* data, int qwc);
+extern "C" void sceMpegGetPicture(void* dma, void* data, int qwc);
 
 /**
  * Decodes the next picture into a free frame and returns it.
  *
  * Takes a frame from the free list (func_003B10D0), finds its SHAPE pixel data (after the 16-byte header, or at the
- * header's offset when flag 0x1000 is set), has the MPEG decoder (+0x30) write the picture there with func_00402A10 for
+ * header's offset when flag 0x1000 is set), has the MPEG decoder (+0x30) write the picture there with sceMpegGetPicture for
  * (width/16) * (height/16) macroblocks, and increments the frame number (+0x10). Likely bug: it does not check for an
  * empty free list before reading the frame. Called by PS2_SONY_CODEC_INTERNAL_GetFrame.
  *
@@ -2710,7 +2710,7 @@ extern "C" void* PS2_SONY_CODEC_INTERNAL_DecodeFrame(void* self)
     } else {
         data = hdr + 0x10;
     }
-    func_00402A10((char*)self + 0x30, data, *(int*)((char*)self + 0x8) / 16 * *(int*)((char*)self + 0xC) / 16);
+    sceMpegGetPicture((char*)self + 0x30, data, *(int*)((char*)self + 0x8) / 16 * *(int*)((char*)self + 0xC) / 16);
     *(int*)((char*)self + 0x10) += 1;
     return item;
 }
@@ -2720,7 +2720,7 @@ extern "C" void* PS2_SONY_CODEC_INTERNAL_DecodeFrame(void* self)
 INCLUDE_ASM("ealib/seg_2AEDC0", PS2_SONY_CODEC_INTERNAL_GetFrame);
 #ifdef SKIP_ASM
 extern "C" void* PS2_SONY_CODEC_INTERNAL_DecodeFrame(void* self);
-extern "C" int func_00402B38(void* sema);
+extern "C" int sceMpegIsEnd(void* sema);
 
 class PS2_SONY_CODEC_INTERNAL_GetFrame_cCache {
 public:
@@ -2736,7 +2736,7 @@ public:
 /**
  * Decodes pictures until the frame number reaches the goal and returns the last one.
  *
- * Each pass first releases the previously decoded frame through the codec's slot 6, stops with 0 when func_00402B38
+ * Each pass first releases the previously decoded frame through the codec's slot 6, stops with 0 when sceMpegIsEnd
  * reports the MPEG decoder (+0x30) finished, and decodes with PS2_SONY_CODEC_INTERNAL_DecodeFrame. Slot 3 of D_00456850.
  *
  * @param limit  the goal frame number
@@ -2749,7 +2749,7 @@ extern "C" void* PS2_SONY_CODEC_INTERNAL_GetFrame(PS2_SONY_CODEC_INTERNAL_GetFra
         if (item != 0) {
             self->v06(item);
         }
-        if (func_00402B38((char*)self + 0x30) != 0) {
+        if (sceMpegIsEnd((char*)self + 0x30) != 0) {
             return 0;
         }
         item = PS2_SONY_CODEC_INTERNAL_DecodeFrame(self);

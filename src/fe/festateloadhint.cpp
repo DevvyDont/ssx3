@@ -322,7 +322,7 @@ extern unsigned int D_00536640[];
 /**
  * Compares two rider indices by their scores in D_00536640, higher score first (qsort comparator).
  *
- * cGameModeMan_sortScores() passes it to func_00418EF8() to sort D_00536708. The scores are compared unsigned.
+ * cGameModeMan_sortScores() passes it to qsort() to sort D_00536708. The scores are compared unsigned.
  *
  * @param firstRider  the first rider index
  * @param secondRider  the second rider index
@@ -347,7 +347,7 @@ extern unsigned int D_00536640[];
 /**
  * Compares two rider indices by their values in D_00536640, lower value first (qsort comparator).
  *
- * cGameModeMan_sortTimes() passes it to func_00418EF8() to sort D_00536708. The values are compared unsigned.
+ * cGameModeMan_sortTimes() passes it to qsort() to sort D_00536708. The values are compared unsigned.
  *
  * @param firstRider  the first rider index
  * @param secondRider  the second rider index
@@ -400,7 +400,7 @@ extern char D_0047DB28[];
 /**
  * Destroys an object whose vptr is at +0: stores vtable D_0047DB28 and frees the object when bit 0 of @p flags is set.
  *
- * D_0047DB28 holds this destructor and two slots of func_00411530. func_002443C0 in ssxappdtor is an identical copy.
+ * D_0047DB28 holds this destructor and two slots of __pure_virtual. func_002443C0 in ssxappdtor is an identical copy.
  *
  * @param flags  g++ destructor flags (bit 0: free with operator_delete)
  */
@@ -1190,7 +1190,7 @@ extern char str_Score[];
 extern int D_00536730[];
 extern "C" void* cGameModeMan_getGM();
 extern "C" char* cBEScoreInterface_getPlayerLastCompletedEventStats(void* iface, int a1);
-extern "C" unsigned int func_004139F8(float f);
+extern "C" unsigned int fptoui(float f);
 extern "C" char* func_0020A1A8(int v);
 extern "C" char* strcpy(char* dst, const char* src);
 
@@ -1282,7 +1282,7 @@ extern "C" void cFELoadState_InitwidgetMultiP_72C0(void* self, char player)
     if (obj != 0) {
         if (D_00535C10[0] == 0 || D_00535C10[0] == 5) {
             int i = cBENewPlayerInterface_getHumanRider(iface1, player != 0);
-            unsigned int seconds = func_004139F8((float)D_00536640[i] * (1.0f / 60.0f));
+            unsigned int seconds = fptoui((float)D_00536640[i] * (1.0f / 60.0f));
             char* o = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Time));
             if (o != 0) {
                 Activate_72C0(o);

@@ -11,7 +11,7 @@ struct cBXString_91C0 {
 extern "C" long strtol(const char* s, char** end, int base);
 extern "C" int strlen(const char* s);
 extern "C" void cBXString_getBuffer(cBXString_91C0* self, int len);
-extern "C" int func_004186C8(char* buf, const char* fmt, char* ap);
+extern "C" int vsprintf(char* buf, const char* fmt, char* ap);
 extern "C" void cBXString_releaseBuffer(cBXString_91C0* self, int len);
 
 #define MAX_91C0(a, b) (((a) > (b)) ? (a) : (b))
@@ -23,7 +23,7 @@ extern "C" void cBXString_releaseBuffer(cBXString_91C0* self, int len);
  * It first estimates the length: one per plain character, and per conversion its flags ('#' adds 2), width and
  * precision (also from '*' arguments), then 2 for %c, the string length (at least 1) for %s, 128 for e/f/g/G and 32 for
  * integer and pointer conversions, limited by width and precision. It reserves that much (cBXString_getBuffer), formats
- * with func_004186C8 (vsprintf) and lets cBXString_releaseBuffer(-1) take the length from the text.
+ * with vsprintf (vsprintf) and lets cBXString_releaseBuffer(-1) take the length from the text.
  *
  * Each argument is taken as 8 bytes (the EE's va_list slots).
  *
@@ -136,7 +136,7 @@ extern "C" void cBXString_vprintf(void* self_, const char* fmt, char* args)
         maxLen += itemLen;
     }
     cBXString_getBuffer(self, maxLen);
-    func_004186C8(self->str, fmt, args);
+    vsprintf(self->str, fmt, args);
     cBXString_releaseBuffer(self, -1);
 }
 #endif
@@ -238,23 +238,23 @@ INCLUDE_ASM("seg/seg_21A1C0", func_00319610);
 extern "C" void func_00426408(int a);
 extern "C" void sceSifInitIopHeap(void);
 extern "C" void func_00319820(void* self);
-extern "C" void func_00401718(int a);
-extern "C" void func_00402450(int a);
+extern "C" void sceCdInit(int a);
+extern "C" void sceCdMmode(int a);
 extern "C" void sceFsReset(void);
 
 /**
  * Prepares the IOP at start-up, rebooting it with the DNAS image.
  *
  * Calls func_00426408(0) and sceSifInitIopHeap, reboots the IOP with DNAS271.IMG (func_00319820), then calls
- * func_00401718(0), func_00402450(2) and sceFsReset. systemInit calls it; @p self is not used.
+ * sceCdInit(0), sceCdMmode(2) and sceFsReset. systemInit calls it; @p self is not used.
  */
 extern "C" void func_00319610(void* self)
 {
     func_00426408(0);
     sceSifInitIopHeap();
     func_00319820(self);
-    func_00401718(0);
-    func_00402450(2);
+    sceCdInit(0);
+    sceCdMmode(2);
     sceFsReset();
 }
 #endif
@@ -411,8 +411,8 @@ INCLUDE_ASM("seg/seg_21A1C0", func_00319820);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void func_00426408(int a);
-extern "C" void func_00401718(int a);
-extern "C" void func_00402450(int a);
+extern "C" void sceCdInit(int a);
+extern "C" void sceCdMmode(int a);
 extern "C" void func_00319690(void* self, char* out, const char* name);
 extern "C" int sceSifRebootIop(const char* path);
 extern "C" int sceSifSyncIop(void);
@@ -422,7 +422,7 @@ extern char str_DNAS271_IMG[];
 /**
  * Reboots the IOP with the DNAS image DNAS271.IMG and waits until it is done.
  *
- * Calls func_00426408(0), func_00401718(0) and func_00402450(2), builds the image path (func_00319690), retries
+ * Calls func_00426408(0), sceCdInit(0) and sceCdMmode(2), builds the image path (func_00319690), retries
  * sceSifRebootIop (the IOP reboot through rom0:UDNL) until it succeeds, polls sceSifSyncIop until it reports done, then
  * calls func_00426408(0) and sceSifInitIopHeap again. func_00319610 calls it; @p self is not used.
  */
@@ -431,8 +431,8 @@ extern "C" void func_00319820(void* self)
 {
     char path[256];
     func_00426408(0);
-    func_00401718(0);
-    func_00402450(2);
+    sceCdInit(0);
+    sceCdMmode(2);
     func_00319690(self, path, str_DNAS271_IMG);
     while (sceSifRebootIop(path) == 0)
         ;
@@ -449,15 +449,15 @@ INCLUDE_ASM("seg/seg_21A1C0", func_003198A0);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void WaitSema(int sema);
 extern "C" int sceDevctl(void* client, int cmd, int a, int b, int c, int d);
-extern "C" int func_00402398(int* status);
+extern "C" int sceCdPowerOff(int* status);
 extern char str_dev9x[];
 
 /**
- * Runs a worker thread that, on each semaphore signal, sends the "dev9x" request 0x4402 and then calls func_00402398
+ * Runs a worker thread that, on each semaphore signal, sends the "dev9x" request 0x4402 and then calls sceCdPowerOff
  * until both succeed.
  *
  * Loops forever: waits on @p sema (WaitSema), retries sceDevctl("dev9x", 0x4402, ...) until it succeeds, then
- * retries func_00402398(&status) until it returns non-zero with status 0. func_00319930 starts it as a thread;
+ * retries sceCdPowerOff(&status) until it returns non-zero with status 0. func_00319930 starts it as a thread;
  * func_00319910 signals the semaphore. The shape is that of the usual PS2 power-off handler (dev9 shutdown, then
  * console power-off), but the callees are not named in this build.
  *
@@ -471,7 +471,7 @@ extern "C" void func_003198A0(int sema)
         while (sceDevctl(str_dev9x, 17410, 0, 0, 0, 0) < 0)
             ;
         int status = 0;
-        while (func_00402398(&status) == 0 || status != 0)
+        while (sceCdPowerOff(&status) == 0 || status != 0)
             ;
     }
 }
@@ -486,7 +486,7 @@ extern "C" void iSignalSema(void);
 /**
  * Signals the power-off thread's semaphore (iSignalSema).
  *
- * func_00319930 installs it as the power-off callback (func_00400D58); the semaphore id arrives as the callback
+ * func_00319930 installs it as the power-off callback (sceCdPOffCallback); the semaphore id arrives as the callback
  * argument.
  */
 extern "C" void func_00319910(void)
@@ -527,7 +527,7 @@ extern "C" int sceSifSearchModuleByName(void* client);
 extern "C" int CreateSema(sSemaParam_9930* p);
 extern "C" int CreateThread(sThreadParam_9930* p);
 extern "C" int StartThread(int thread, int arg);
-extern "C" void func_00400D58(void (*fn)(void), int arg);
+extern "C" void sceCdPOffCallback(void (*fn)(void), int arg);
 extern "C" void func_003198A0(int sema);
 extern "C" void func_00319910(void);
 extern int _gp;
@@ -541,7 +541,7 @@ extern int D_004A5B70;
  *
  * Only when sceSifSearchModuleByName("dev9") succeeds: creates a semaphore (initial count 0, maximum 1; D_004A5B54), creates and
  * starts a thread (priority 1, 0x2000-byte stack D_00538B10, _gp; id in D_004A5B70) on func_003198A0 with the semaphore
- * as its argument, and registers func_00319910 with func_00400D58 as the callback, with the same argument. initOnline
+ * as its argument, and registers func_00319910 with sceCdPOffCallback as the callback, with the same argument. initOnline
  * calls it.
  */
 extern "C" void func_00319930(void)
@@ -560,7 +560,7 @@ extern "C" void func_00319930(void)
         tp.initPriority = 1;
         D_004A5B70 = CreateThread(&tp);
         StartThread(D_004A5B70, D_004A5B54);
-        func_00400D58(func_00319910, D_004A5B54);
+        sceCdPOffCallback(func_00319910, D_004A5B54);
     }
 }
 #endif

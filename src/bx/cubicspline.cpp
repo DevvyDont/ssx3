@@ -460,7 +460,7 @@ struct sMState_31EEE8;
 extern "C" void cDynamicMemMan_malloc_consolidate(cDynamicMemMan* ms, sMState_31EEE8* av);
 // PORT: the unit declares cDynamicMemMan_dlfree(void*); the body really takes (ms, mem).
 extern "C" void cDynamicMemMan_dlfree_E2D8(void* ms, void* mem) __asm__("cDynamicMemMan_dlfree");
-extern "C" int* func_00415FB8();
+extern "C" int* __errno();
 
 struct sMChunk_31E2D8
 {
@@ -494,7 +494,7 @@ struct sMState_31E2D8
  * contiguous), fixes up a foreign or misaligned break with a second request, frees the old top when the new memory is
  * not adjacent, and updates sbrked_mem and its maxima.
  *
- * Returns the chunk carved from the new top, or sets *func_00415FB8() to 12 (ENOMEM) and returns null. cDynamicMemMan_dlmalloc
+ * Returns the chunk carved from the new top, or sets *__errno() to 12 (ENOMEM) and returns null. cDynamicMemMan_dlmalloc
  * ends with it.
  *
  * @param ms  the heap manager; its first word points to the malloc state
@@ -624,7 +624,7 @@ extern "C" void* cDynamicMemMan_sYSMALLOc(cDynamicMemMan* ms, unsigned int nb, s
         }
     }
 
-    *func_00415FB8() = 12;
+    *__errno() = 12;
     return 0;
 }
 #endif
@@ -635,8 +635,8 @@ INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_sYSTRIm);
 extern "C" unsigned int cDynamicMemMan_dlmorecore(cDynamicMemMan* self, long incr); // PORT: 64-bit long param
 // PORT: libgcc 64-bit helpers called by name so the relocations match
 // (__divdi3 / __muldi3 in the retail ELF's unnamed libgcc copy).
-extern "C" long func_0040FCB0(long a, long b);
-extern "C" long func_004114D0(long a, long b);
+extern "C" long __divdi3(long a, long b);
+extern "C" long __muldi3(long a, long b);
 
 struct sChunk_31E6D8
 {
@@ -677,7 +677,7 @@ extern "C" int cDynamicMemMan_sYSTRIm(cDynamicMemMan* ms, unsigned int topPad, s
 
     pagesz = av->pagesize;
     top_size = av->top->size & ~3;
-    extra = func_004114D0(func_0040FCB0(top_size - topPad - 16 + (pagesz - 1), pagesz) - 1, pagesz);
+    extra = __muldi3(__divdi3(top_size - topPad - 16 + (pagesz - 1), pagesz) - 1, pagesz);
     if (extra > 0) {
         current_brk = (char*)cDynamicMemMan_dlmorecore(ms, 0);
         if (current_brk == (char*)av->top + top_size) {
@@ -730,7 +730,7 @@ extern "C" void* cDynamicMemMan_sYSMALLOc_E818(void* ms, unsigned int nb, sMStat
 /**
  * Allocates @p bytes from the heap (dlmalloc 2.7's malloc on 16-byte aligned chunks).
  *
- * Sizes of 0xFFFFFFE0 or more set *func_00415FB8() to 12 (ENOMEM) and return null. Otherwise it tries the fast bins,
+ * Sizes of 0xFFFFFFE0 or more set *__errno() to 12 (ENOMEM) and return null. Otherwise it tries the fast bins,
  * the small bins, the unsorted chunks (filing them into their bins, largebin_index for large ones), the best-fitting
  * larger bin through the bin map, then the top chunk, and finally grows the heap with cDynamicMemMan_sYSMALLOc. Every other
  * allocator here (cDynamicMemMan_alloc, calloc, realloc, memalign, cDynamicMemMan_iALLOc) goes through it.
@@ -758,7 +758,7 @@ extern "C" void* cDynamicMemMan_dlmalloc(cDynamicMemMan* ms, unsigned int bytes)
     sMChunk_31E818* bck;
 
     if (bytes >= (unsigned int)-32) {
-        *func_00415FB8() = 12;
+        *__errno() = 12;
         return 0;
     }
     nb = (bytes + 4 + 15 < 16) ? 16 : (bytes + 4 + 15) & ~15U;
@@ -1186,7 +1186,7 @@ extern "C" void MEM_copy(void* d, void* s, int n);
  *
  * A null @p oldmem allocates with cDynamicMemMan_dlmalloc. Otherwise it grows into the top or a free next chunk, or allocates a
  * new block, copies the contents (MEM_copy) and frees the old one with cDynamicMemMan_dlfree; any surplus is split off
- * and freed. Sizes of 0xFFFFFFE0 or more set *func_00415FB8() to 12 (ENOMEM) and return null.
+ * and freed. Sizes of 0xFFFFFFE0 or more set *__errno() to 12 (ENOMEM) and return null.
  *
  * @param ms  the heap manager; its first word points to the malloc state
  * @param oldmem  the allocation to resize, or null
@@ -1296,7 +1296,7 @@ split:
     return (char*)newp + 8;
 
 nomem:
-    *func_00415FB8() = 12;
+    *__errno() = 12;
     return 0;
 }
 #endif
@@ -1308,7 +1308,7 @@ INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlmemalign);
 extern "C" void* cDynamicMemMan_dlmalloc(cDynamicMemMan* ms, unsigned int bytes);
 // PORT: the unit declares cDynamicMemMan_dlfree(void*); the body really takes (ms, mem).
 extern "C" void cDynamicMemMan_dlfree_F2C8(void* ms, void* mem) __asm__("cDynamicMemMan_dlfree");
-extern "C" int* func_00415FB8();
+extern "C" int* __errno();
 
 struct sMChunk_31F2C8
 {
@@ -1355,7 +1355,7 @@ extern "C" void* cDynamicMemMan_dlmemalign_memalign(void* ms, unsigned int align
         alignment = alignPow2;
     }
     if (bytes >= (unsigned int)-32) {
-        *func_00415FB8() = 12;
+        *__errno() = 12;
         return 0;
     }
     nb = (bytes + 4 + 15 < 16) ? 16 : (bytes + 4 + 15) & ~15;
@@ -1403,7 +1403,7 @@ INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_dlmemalignhdr);
 extern "C" void* cDynamicMemMan_dlmalloc(cDynamicMemMan* ms, unsigned int bytes);
 // PORT: the unit declares cDynamicMemMan_dlfree(void*); the body really takes (ms, mem).
 extern "C" void cDynamicMemMan_dlfree_F4E8(void* ms, void* mem) __asm__("cDynamicMemMan_dlfree");
-extern "C" int* func_00415FB8();
+extern "C" int* __errno();
 
 struct sMChunk_31F4E8
 {
@@ -1451,7 +1451,7 @@ extern "C" void* cDynamicMemMan_dlmemalignhdr_memalign(void* ms, unsigned int al
     }
     bytes += offset;
     if (bytes >= (unsigned int)-32) {
-        *func_00415FB8() = 12;
+        *__errno() = 12;
         return 0;
     }
     nb = (bytes + 4 + 15 < 16) ? 16 : (bytes + 4 + 15) & ~15;

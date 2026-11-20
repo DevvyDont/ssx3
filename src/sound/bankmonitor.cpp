@@ -1431,7 +1431,7 @@ INCLUDE_ASM("sound/bankmonitor", func_002AE048);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void REAL_abortmessage();
-extern "C" void func_004175C8();
+extern "C" void printf();
 extern "C" void* MEM_alloc(void* a0, int a1, int a2);
 extern "C" void* resizeBlock(void* block, int size);
 extern "C" void SYNCTASK_add(int (*fn)(), int a, int b);
@@ -1463,7 +1463,7 @@ extern sBankMonSlot28_E048 D_004D3EF8_E048[] __asm__("D_004D3EF8");
  * Clears the 24 player-slot pointers D_004D3E98 and resets the 24 bank records D_004D3EF8 (words 0, 1, 2 = -1, word 6 =
  * 0). Stores cb in D_004A3798 and id in D_004A379C, registers id as a 100 Hz sound-system client
  * (SNDSYS_add100hzclient) and func_002AE020 as a sync task (SYNCTASK_add(.., 5, 100)), and installs the hooks
- * D_004A3780 = REAL_abortmessage, D_004A3784 = func_004175C8, D_004A378C = MEM_alloc, D_004A3790 = resizeBlock,
+ * D_004A3780 = REAL_abortmessage, D_004A3784 = printf, D_004A378C = MEM_alloc, D_004A3790 = resizeBlock,
  * D_004A3794 = func_002AE000. Called by the Pathfinder library (func_003D25F0) when it opens its first player.
  *
  * @param cb  the callback the sync task func_002AE020 calls
@@ -1483,7 +1483,7 @@ extern "C" void func_002AE048(void (*cb)(), int id)
     SNDSYS_add100hzclient((void*)id);
     SYNCTASK_add(func_002AE020, 5, 100);
     D_004A3780 = REAL_abortmessage;
-    D_004A3784 = func_004175C8;
+    D_004A3784 = printf;
     D_004A378C = MEM_alloc;
     D_004A3790 = resizeBlock;
     D_004A3794 = func_002AE000;
@@ -2588,18 +2588,18 @@ extern "C" int func_002AF2F0(int idx, int* elapsedOut, int* remainingOut)
 INCLUDE_ASM("sound/bankmonitor", func_002AF370);
 #ifdef SKIP_ASM
 extern "C" int TIMER_gettick();
-extern "C" void func_004139F8(float);
+extern "C" void fptoui(float);
 extern int D_00450DC8[];
 
 /**
  * Returns the current time in ms: TIMER_gettick() / D_00450DC8[0] * 1000, converted to unsigned int.
  *
- * Declared void, but the __fixunssfsi result (func_004139F8) is returned in v0; callers use it (func_002AE7A8 stamps
+ * Declared void, but the __fixunssfsi result (fptoui) is returned in v0; callers use it (func_002AE7A8 stamps
  * bank play times with it, and the Pathfinder library).
  */
 extern "C" void func_002AF370(void)
 {
-    func_004139F8((float)TIMER_gettick() / (float)D_00450DC8[0] * 1000.0f);
+    fptoui((float)TIMER_gettick() / (float)D_00450DC8[0] * 1000.0f);
 }
 #endif
 
@@ -3019,7 +3019,7 @@ extern "C" int BXFILE_exists(const char* name);
 extern "C" void* FILE_load(const char* name, int a1);
 extern "C" int func_003D69F0(void* data);
 extern "C" char* strcpy(char* dst, const char* src);
-extern "C" char* func_0041ACC0(const char* s, int c);
+extern "C" char* strrchr(const char* s, int c);
 void* func_002AF8E0(void* self);
 extern char str_pct_s_hdr[];
 extern char str_SpeechBank[];
@@ -3057,7 +3057,7 @@ void* func_002AF960_impl(const char* name, int shortName, void* data)
     *(void**)(obj + 0x44) = data;
     *(int*)obj = func_003D69F0(data);
     strcpy(obj + 4, name);
-    char* lastSlash = func_0041ACC0(obj + 4, '\\');
+    char* lastSlash = strrchr(obj + 4, '\\');
     if (lastSlash == 0) {
         *(char**)(obj + 0x40) = obj + 4;
     } else {
@@ -5527,10 +5527,10 @@ extern "C" void func_002B26F8(void) {
 INCLUDE_ASM("sound/bankmonitor", func_002B2718);
 #ifdef SKIP_ASM
 extern "C" float func_002B2600(cSongInstance* self);
-extern "C" float func_0040D8D0(float x, float y);
+extern "C" float fmodf(float x, float y);
 
 /**
- * Returns the time to the song's next beat: beat length minus the position modulo the beat length (func_0040D8D0).
+ * Returns the time to the song's next beat: beat length minus the position modulo the beat length (fmodf).
  *
  * @return the time in ms
  */
@@ -5538,7 +5538,7 @@ extern "C" float func_002B2718(cSongInstance* self)
 {
     float beatLength = func_002B2690(self);
     float playPosition = func_002B2600(self);
-    return beatLength - func_0040D8D0(playPosition, func_002B2690(self));
+    return beatLength - fmodf(playPosition, func_002B2690(self));
 }
 #endif
 
@@ -6572,7 +6572,7 @@ extern "C" void func_002B3EB0(cMusicSys* self)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B3EE8);
 #ifdef SKIP_ASM
-extern "C" int func_0041AD80(const char* a, const char* b);
+extern "C" int strstr(const char* a, const char* b);
 
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 struct sBankMonFind {
@@ -6599,7 +6599,7 @@ extern "C" void func_002B3EE8(sBankMonFind* self, const char* name)
 {
     if (self->count < 64) {
         for (int i = 0; i < self->nnames; i++) {
-            if (func_0041AD80(self->names[i], name) != 0) {
+            if (strstr(self->names[i], name) != 0) {
                 self->mask |= (ulong)1 << i;
                 self->count++;
                 for (int j = 0; j < 5; j++) {

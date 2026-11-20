@@ -1126,14 +1126,14 @@ typedef struct {
     unsigned char year;
 } func_003EF090_clock;
 extern int D_004A4A94;
-extern void func_0040BFD8(void*);
-extern void func_0040BFE0(void*);
+extern void sceScfGetGMTfromRTC(void*);
+extern void sceScfGetLocalTimefromRTC(void*);
 #define BCD(x) (((x) >> 4) * 10 + ((x) & 0xF))
 /**
  * Returns, computed once, the difference in seconds between two clock conversions of the same date.
  *
  * On the first call (D_004A4A94 is -1) it fills an 8-byte clock record (BCD seconds, minutes, hours, day 2, month 1,
- * year 1), converts it with func_0040BFD8 and with func_0040BFE0, turns each result into seconds (day * 86400 + hours *
+ * year 1), converts it with sceScfGetGMTfromRTC and with sceScfGetLocalTimefromRTC, turns each result into seconds (day * 86400 + hours *
  * 3600 + minutes * 60 + seconds) and caches the second minus the first in D_004A4A94 (in effect a time-zone offset). No
  * retail code calls it.
  *
@@ -1148,13 +1148,13 @@ int func_003EF090(void) {
         c.day = 2;
         c.month = 1;
         c.year = 1;
-        func_0040BFD8(&c);
+        sceScfGetGMTfromRTC(&c);
         firstSecs = BCD(c.day) * 86400 + BCD(c.hour) * 3600 + BCD(c.minute) * 60 + BCD(c.second);
         *(long*)&c = 0;
         c.day = 2;
         c.month = 1;
         c.year = 1;
-        func_0040BFE0(&c);
+        sceScfGetLocalTimefromRTC(&c);
         secondSecs = BCD(c.day) * 86400 + BCD(c.hour) * 3600 + BCD(c.minute) * 60 + BCD(c.second);
         D_004A4A94 = secondSecs - firstSecs;
     }
@@ -1669,11 +1669,11 @@ short func_003EFE20(void* self, int key, short* list, int n, char* x, int y) {
 INCLUDE_ASM("seg/seg_2EEF50", func_003EFED0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_004186C8(char* dst, const char* fmt, char* ap);
+extern int vsprintf(char* dst, const char* fmt, char* ap);
 /**
  * Formats a debug line for a buddy-API object and passes it to its log callback.
  *
- * Formats into a 4 KB stack buffer (func_004186C8, vsprintf) and, when the callback at +0x508 is set, calls it with the
+ * Formats into a 4 KB stack buffer (vsprintf, vsprintf) and, when the callback at +0x508 is set, calls it with the
  * user word at +0x504 and the text.
  *
  * @param buddyApi  the buddy-API object
@@ -1684,7 +1684,7 @@ void func_003EFED0(int* buddyApi, const char* fmt, ...) {
     char* ap;
     ap = (char*)__builtin_next_arg()
          - (__builtin_args_info(2) < 8 ? (8 - __builtin_args_info(2)) * 8 : 0);
-    func_004186C8(buf, fmt, ap);
+    vsprintf(buf, fmt, ap);
     if (buddyApi[322]) {
         ((void (*)(int, char*))buddyApi[322])(buddyApi[321], buf);
     }

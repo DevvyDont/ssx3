@@ -863,18 +863,18 @@ int cBXString_find(cBXString* self, char ch, int start)
 }
 #endif
 
-extern "C" char* func_0041ACC0(char* str, int ch);
+extern "C" char* strrchr(char* str, int ch);
 
 //100%
 INCLUDE_ASM("bx/bxstring", cBXString_findOneOf);
 #ifdef SKIP_ASM
-extern "C" int func_0041AC40(int);
+extern "C" int strpbrk(int);
 
 /**
  * Returns the offset of the string's first character that belongs to a character set, or -1 when none does.
  *
- * func_0041AC40 behaves like strpbrk. The set pointer is the second argument, which the C does not declare; it reaches
- * func_0041AC40 untouched in its register. Nothing in the C calls it.
+ * strpbrk behaves like strpbrk. The set pointer is the second argument, which the C does not declare; it reaches
+ * strpbrk untouched in its register. Nothing in the C calls it.
  *
  * @param string  the string
  * @return the offset from the start of the text, or -1
@@ -882,7 +882,7 @@ extern "C" int func_0041AC40(int);
 extern "C" int cBXString_findOneOf(int *string) {
     int temp_2;
 
-    temp_2 = func_0041AC40(*string);
+    temp_2 = strpbrk(*string);
     if (temp_2 == 0) {
         return -1;
     }
@@ -896,7 +896,7 @@ INCLUDE_ASM("bx/bxstring", cBXString_reverseFind__FP9cBXStringc);
 /**
  * Finds a character in the string, searching from the end.
  *
- * A reverse search: it calls func_0041ACC0() (newlib strrchr), so it returns the last occurrence of @p ch. (EA's
+ * A reverse search: it calls strrchr() (newlib strrchr), so it returns the last occurrence of @p ch. (EA's
  * symbol called it FindFirstOf.)
  *
  * @param ch  character to look for
@@ -904,7 +904,7 @@ INCLUDE_ASM("bx/bxstring", cBXString_reverseFind__FP9cBXStringc);
  */
 int cBXString_reverseFind(cBXString* self, char ch)
 {
-    char* result = func_0041ACC0(self->Str, ch);
+    char* result = strrchr(self->Str, ch);
     if (result == 0) {
         return -1;
     }
@@ -915,13 +915,13 @@ int cBXString_reverseFind(cBXString* self, char ch)
 //100%
 INCLUDE_ASM("bx/bxstring", cBXString_find1);
 #ifdef SKIP_ASM
-extern "C" char* func_0041AD80(char* str);
+extern "C" char* strstr(char* str);
 
 /**
  * Returns the offset of the first occurrence of a substring at or after @p start, or -1 when there is none.
  *
- * func_0041AD80 behaves like strstr. The substring is the second argument, declared as int @p subString; it reaches
- * func_0041AD80 untouched in its register. Nothing in the C calls it.
+ * strstr behaves like strstr. The substring is the second argument, declared as int @p subString; it reaches
+ * strstr untouched in its register. Nothing in the C calls it.
  *
  * @param subString  the substring to find (declared int; it is a const char*)
  * @param start  offset to start searching at
@@ -929,7 +929,7 @@ extern "C" char* func_0041AD80(char* str);
  */
 extern "C" int cBXString_find1(cBXString* self, int subString, int start)
 {
-    char* result = func_0041AD80(self->Str + start);
+    char* result = strstr(self->Str + start);
     if (result == 0) {
         return -1;
     }
@@ -1212,12 +1212,12 @@ INCLUDE_ASM("bx/bxstring", cBXString_spanIncluding);
 #ifdef SKIP_ASM
 // PORT: the unit defines cBXString_cBXString5 returning cBXString*; the caller ignores the result.
 void cBXString_cBXString5_v(cBXString* self, cBXString* other, int n) __asm__("cBXString_cBXString5");
-extern "C" int func_0041AD10(char* str, int ch);
+extern "C" int strspn(char* str, int ch);
 
 /**
  * Returns the leading run of a string made of characters from a set (MFC CString::SpanIncluding).
  *
- * Constructs @p self from the first func_0041AD10(other->Str, ch) characters of @p other (cBXString_cBXString5).
+ * Constructs @p self from the first strspn(other->Str, ch) characters of @p other (cBXString_cBXString5).
  *
  * @param other  the source string (On Tour this)
  * @param ch  the character set (On Tour const char* set; declared int here)
@@ -1225,7 +1225,7 @@ extern "C" int func_0041AD10(char* str, int ch);
  */
 extern "C" cBXString* cBXString_spanIncluding(cBXString* self, cBXString* other, int ch)
 {
-    cBXString_cBXString5_v(self, other, func_0041AD10(other->Str, ch));
+    cBXString_cBXString5_v(self, other, strspn(other->Str, ch));
     return self;
 }
 #endif
@@ -1234,12 +1234,12 @@ INCLUDE_ASM("bx/bxstring", cBXString_spanExcluding);
 #ifdef SKIP_ASM
 // PORT: the unit defines cBXString_cBXString5 returning cBXString*; the caller ignores the result.
 void cBXString_cBXString5_v(cBXString* self, cBXString* other, int n) __asm__("cBXString_cBXString5");
-extern "C" int func_0041AB08(char* str, int ch);
+extern "C" int strcspn(char* str, int ch);
 
 /**
  * Returns the leading run of a string that contains no character from a set (MFC CString::SpanExcluding).
  *
- * Constructs @p self from the first func_0041AB08(other->Str, ch) characters of @p other (cBXString_cBXString5).
+ * Constructs @p self from the first strcspn(other->Str, ch) characters of @p other (cBXString_cBXString5).
  *
  * @param other  the source string (On Tour this)
  * @param ch  the character set (declared int here)
@@ -1247,7 +1247,7 @@ extern "C" int func_0041AB08(char* str, int ch);
  */
 extern "C" cBXString* cBXString_spanExcluding(cBXString* self, cBXString* other, int ch)
 {
-    cBXString_cBXString5_v(self, other, func_0041AB08(other->Str, ch));
+    cBXString_cBXString5_v(self, other, strcspn(other->Str, ch));
     return self;
 }
 #endif

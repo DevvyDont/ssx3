@@ -193,22 +193,22 @@ extern int D_0053EA00;
 extern int D_004A5BA0;
 extern char str_Q24RCMP5CODEC[];
 extern char str_23PS2_SONY_CODEC_INTERNAL[];
-extern void func_00414C20(void *a0, void *a1);
-extern void func_00414C00(void *a0, void *a1, void *a2);
+extern void __rtti_user(void *a0, void *a1);
+extern void __rtti_si(void *a0, void *a1, void *a2);
 /**
  * Returns the run-time type descriptor of PS2_SONY_CODEC_INTERNAL, building it on first use.
  *
- * When D_0053EA00 is still empty it first builds the base class descriptor D_004A5BA0 ("Q24RCMP5CODEC", func_00414C20)
- * if needed, then D_0053EA00 itself as a single-base descriptor named "23PS2_SONY_CODEC_INTERNAL" (func_00414C00).
+ * When D_0053EA00 is still empty it first builds the base class descriptor D_004A5BA0 ("Q24RCMP5CODEC", __rtti_user)
+ * if needed, then D_0053EA00 itself as a single-base descriptor named "23PS2_SONY_CODEC_INTERNAL" (__rtti_si).
  *
  * @return &D_0053EA00
  */
 int *__tf23PS2_SONY_CODEC_INTERNAL(void) {
     if (D_0053EA00 == 0) {
         if (D_004A5BA0 == 0) {
-            func_00414C20(&D_004A5BA0, str_Q24RCMP5CODEC);
+            __rtti_user(&D_004A5BA0, str_Q24RCMP5CODEC);
         }
-        func_00414C00(&D_0053EA00, str_23PS2_SONY_CODEC_INTERNAL, &D_004A5BA0);
+        __rtti_si(&D_0053EA00, str_23PS2_SONY_CODEC_INTERNAL, &D_004A5BA0);
     }
     return &D_0053EA00;
 }
@@ -241,16 +241,16 @@ INCLUDE_ASM("seg/seg_32F020", __tfQ24RCMP5CODEC);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_004A5BA0;
 extern char str_Q24RCMP5CODEC[];
-extern void func_00414C20(void *a0, void *a1);
+extern void __rtti_user(void *a0, void *a1);
 /**
  * Returns the run-time type descriptor of RCMP::CODEC (D_004A5BA0, named "Q24RCMP5CODEC"), building it on first use
- * with func_00414C20.
+ * with __rtti_user.
  *
  * @return &D_004A5BA0
  */
 int *__tfQ24RCMP5CODEC(void) {
     if (D_004A5BA0 == 0) {
-        func_00414C20(&D_004A5BA0, str_Q24RCMP5CODEC);
+        __rtti_user(&D_004A5BA0, str_Q24RCMP5CODEC);
     }
     return &D_004A5BA0;
 }
@@ -446,16 +446,16 @@ INCLUDE_ASM("seg/seg_32F020", __tfQ24RCMP7DECODER);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_004A5B90;
 extern char str_Q24RCMP7DECODER[];
-extern void func_00414C20(void *a0, void *a1);
+extern void __rtti_user(void *a0, void *a1);
 /**
  * Returns the run-time type descriptor of RCMP::DECODER (D_004A5B90, named "Q24RCMP7DECODER"), building it on first use
- * with func_00414C20.
+ * with __rtti_user.
  *
  * @return &D_004A5B90
  */
 int *__tfQ24RCMP7DECODER(void) {
     if (D_004A5B90 == 0) {
-        func_00414C20(&D_004A5B90, str_Q24RCMP7DECODER);
+        __rtti_user(&D_004A5B90, str_Q24RCMP7DECODER);
     }
     return &D_004A5B90;
 }
@@ -488,16 +488,16 @@ INCLUDE_ASM("seg/seg_32F020", __tfQ24RCMP11RCMP_SYSTEM);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_004A5B98;
 extern char str_Q24RCMP11RCMP_SYSTEM[];
-extern void func_00414C20(void *a0, void *a1);
+extern void __rtti_user(void *a0, void *a1);
 /**
  * Returns the run-time type descriptor of RCMP::RCMP_SYSTEM (D_004A5B98, named "Q24RCMP11RCMP_SYSTEM"), building it on
- * first use with func_00414C20.
+ * first use with __rtti_user.
  *
  * @return &D_004A5B98
  */
 int *__tfQ24RCMP11RCMP_SYSTEM(void) {
     if (D_004A5B98 == 0) {
-        func_00414C20(&D_004A5B98, str_Q24RCMP11RCMP_SYSTEM);
+        __rtti_user(&D_004A5B98, str_Q24RCMP11RCMP_SYSTEM);
     }
     return &D_004A5B98;
 }

@@ -5114,7 +5114,7 @@ INCLUDE_ASM("fe/fepopupmisc", func_001E12B0__FPv);
 /**
  * Runs all_in_one_main's static constructors: calls func_001DBC98(1, 0xFFFF).
  *
- * Entry +0x20 of the global constructor table D_0043CE38 that func_0040FBE0 (__do_global_ctors) walks; func_001E12D0 is
+ * Entry +0x20 of the global constructor table D_0043CE38 that __do_global_ctors (__do_global_ctors) walks; func_001E12D0 is
  * its destructor twin. The declared parameter is not used.
  *
  * @return func_001DBC98's result
@@ -9548,7 +9548,7 @@ extern int D_00536730[];
 
 extern char str_helptext_b[];
 
-extern "C" int func_004139F8(float f);
+extern "C" int fptoui(float f);
 
 extern "C" char* func_0020A1A8(int v);
 
@@ -9770,7 +9770,7 @@ extern "C" int func_001E6718(void* self)
                     cUIText_setAsciiString(uiText, str_DNF);
                     done = 1;
                 } else if (track == 0 || track == 5) {
-                    cUIText_setAsciiString(uiText, func_0020A1A8(func_004139F8(D_00536640[idx] * 0.01666666753590107f)));
+                    cUIText_setAsciiString(uiText, func_0020A1A8(fptoui(D_00536640[idx] * 0.01666666753590107f)));
                 } else {
                     unsigned int time = D_00536640[idx];
                     sprintf(text, D_004A2138, time);
@@ -10206,7 +10206,7 @@ extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cUIState_showObjSafe(void* self, char* name);
 void cUIText_setAsciiString(cUIText* text, const char* str);
-extern "C" int func_004139F8(float f);
+extern "C" int fptoui(float f);
 extern "C" char* func_0020A1A8(int v);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void* cAudioInterface_bxAudio();
@@ -10282,7 +10282,7 @@ extern "C" void func_001E7BB0(void* self)
     cUIState_hideObjSafe(self, str_thirdrun);
     cUIState_hideObjSafe(self, str_finalrun);
     cUIObj_7BB0* screenWidget = (cUIObj_7BB0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_pointstotal));
-    cUIText_setAsciiString((cUIText*)screenWidget, func_0020A1A8(func_004139F8(D_00536640[pl] * 0.01666666753590107f)));
+    cUIText_setAsciiString((cUIText*)screenWidget, func_0020A1A8(fptoui(D_00536640[pl] * 0.01666666753590107f)));
     int off = pl * 4;
     int i;
     for (i = 1; i < 7; i++) {
@@ -10715,7 +10715,7 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int cBENewPlayerInterface_getHumanRider(void* iface, int a1);
 void cUIText_setAsciiString(cUIText* text, const char* str);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-extern "C" int func_004139F8(float f);
+extern "C" int fptoui(float f);
 extern "C" char* func_0020A1A8(int v);
 extern "C" void* func_001FD190(int v);
 extern "C" void cUIText_setUnicodeString(void* text, void* p);
@@ -10809,11 +10809,11 @@ extern "C" void func_001E8920(void* self)
     if (trk >= 6 && trk <= 8) {
         cUIText_setUnicodeStringByID(targetLabel, GetHashValue32(str_kT_OVRCMNTimeToBeatColon));
         cUIText_setUnicodeStringByID(resultLabel, GetHashValue32(str_kT_OVRCMNYourTimeColon));
-        cUIText_setAsciiString(targetValue, func_0020A1A8(func_004139F8(*(unsigned int*)(modeData + 0x78) * 0.01666666753590107f)));
+        cUIText_setAsciiString(targetValue, func_0020A1A8(fptoui(*(unsigned int*)(modeData + 0x78) * 0.01666666753590107f)));
         if (D_005366A8[0] != 0) {
             cUIText_setAsciiString(resultValue, str_DNF);
         } else {
-            cUIText_setAsciiString(resultValue, func_0020A1A8(func_004139F8(D_00536640[0] * 0.01666666753590107f)));
+            cUIText_setAsciiString(resultValue, func_0020A1A8(fptoui(D_00536640[0] * 0.01666666753590107f)));
         }
     } else {
         char buf[32];

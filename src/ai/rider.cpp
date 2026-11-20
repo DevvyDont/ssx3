@@ -397,7 +397,7 @@ INCLUDE_ASM("ai/rider", func_0011BD60);
 extern "C" int func_004165A8(const void* a, const void* b);
 extern "C" char* strcpy(char* dst, const char* src);
 void* func_0011B678(void* self);
-extern "C" void func_00418EF8(void* base, int n, int size, void* (*cmp)(void*));
+extern "C" void qsort(void* base, int n, int size, void* (*cmp)(void*));
 
 struct sAnimName_11BD60
 {
@@ -417,7 +417,7 @@ struct sAnimNameTable_11BD60
  *
  * Each part's name is at +0x28; empty names are skipped and a name already in the table (func_004165A8) is not added
  * again. New entries (0x108 bytes: the name, -1, 0) go at the end and the count (+0x2940) is incremented; there is no
- * check against the table's 40 entries. The table is then sorted with func_00418EF8 and func_0011B678.
+ * check against the table's 40 entries. The table is then sorted with qsort and func_0011B678.
  *
  * @param list  the part entries
  * @param n  how many there are
@@ -445,7 +445,7 @@ extern "C" void func_0011BD60(cRider* self, void** list, int n)
     next:;
     }
     sAnimNameTable_11BD60* sortTable = ((sAnimNameTable_11BD60*)self->mLoadList);
-    func_00418EF8(sortTable, sortTable->count, 264, func_0011B678);
+    qsort(sortTable, sortTable->count, 264, func_0011B678);
 }
 #endif
 
@@ -458,7 +458,7 @@ void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" int func_004165A8(const void* a, const void* b);
 extern "C" char* strcpy(char* dst, const char* src);
 void* func_0011B678(void* self);
-extern "C" void func_00418EF8(void* base, int n, int size, void* (*cmp)(void*));
+extern "C" void qsort(void* base, int n, int size, void* (*cmp)(void*));
 extern "C" int func_0014AC30(int c);
 extern "C" int cBELibrary_getCheatCharacterID(int c);
 extern "C" int func_0014AC50(int c);
@@ -484,7 +484,7 @@ struct sAnimNameTable_11BE88
  *
  * For a cheat character the name is the part's +0x2C string; otherwise func_0014B988 on interface 9 builds it from the
  * character values func_0014AC50 / func_0014AC30 and the part into a 256-byte buffer, skipping parts it rejects. New
- * entries go at start + count, without a bound check, and the range is sorted with func_00418EF8 and func_0011B678.
+ * entries go at start + count, without a bound check, and the range is sorted with qsort and func_0011B678.
  *
  * @param list  the part entries
  * @param n  how many there are
@@ -537,7 +537,7 @@ extern "C" void func_0011BE88(cRider* self, void** list, int n)
         }
     }
     sAnimNameTable_11BE88* sortTable = ((sAnimNameTable_11BE88*)self->mLoadList);
-    func_00418EF8(&sortTable->e[sortTable->start], sortTable->count, 264, func_0011B678);
+    qsort(&sortTable->e[sortTable->start], sortTable->count, 264, func_0011B678);
 }
 #endif
 
@@ -6628,7 +6628,7 @@ void* cBE_getInterface(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cRider_doFinishEvent(cRider* self);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_002A3C00(void* a, void* self, int n);
-extern "C" unsigned int func_004139F8(float f);
+extern "C" unsigned int fptoui(float f);
 extern signed char D_00535C10[];
 extern int D_005308D0[];
 
@@ -6658,7 +6658,7 @@ extern "C" int cRider_updateFinishTest(cRider* self)
             char* gameModeMan = *(char**)(app + 0xC0);
             if (*(int*)(gameModeMan + 0x88) != 0 && ((D_005308D0[0] >> 9) & 1) == 0) {
                 int eventTicks = *(int*)(*(char**)(*(char**)(app + 0x84) + 0xC) + 0xC);
-                int secs = func_004139F8((float)*(unsigned int*)(gameModeMan + 0x78) * 0.01666666753590107f);
+                int secs = fptoui((float)*(unsigned int*)(gameModeMan + 0x78) * 0.01666666753590107f);
                 if (secs * 60 < eventTicks) {
                     self->mDidNotFinish = 1;
                     cRider_doFinishEvent(self);

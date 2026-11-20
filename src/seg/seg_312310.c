@@ -15,22 +15,22 @@
 #include "common.h"
 
 //100%
-INCLUDE_ASM("seg/seg_312310", func_00411310);
+INCLUDE_ASM("seg/seg_312310", exit);
 #ifdef SKIP_ASM
-extern void func_0040FB88(int);
-extern void func_00416FE0(void);
+extern void __do_global_dtors(int);
+extern void _cleanup(void);
 extern void func_001001C8(int);
 /**
  * Ends the program: runs the static destructors, the C library clean-up, then leaves with @p status.
  *
- * Calls func_0040FB88 (destructors), func_00416FE0 and func_001001C8 (the start-up code's process end) with @p status.
+ * Calls __do_global_dtors (destructors), _cleanup and func_001001C8 (the start-up code's process end) with @p status.
  * func_003D1608 calls it as a no-return function.
  *
  * @param status  the status code handed on to func_001001C8
  */
-void func_00411310(int status) {
-    func_0040FB88(status);
-    func_00416FE0();
+void exit(int status) {
+    __do_global_dtors(status);
+    _cleanup();
     func_001001C8(status);
 }
 #endif
@@ -103,7 +103,7 @@ double __floatdidf(long value) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_312310", func_004114D0);
+INCLUDE_ASM("seg/seg_312310", __muldi3);
 #ifdef SKIP_ASM
 /* libgcc2.c + longlong.h shared text for the 64-bit integer routines (GCC runtime, GPL v2+ with the libgcc linking
    exception). Resolved for this target (mips r5900, little-endian, ee-gcc 2.9-ee-991111): */
@@ -234,7 +234,7 @@ typedef union
   } while (0)
 
 /* libgcc2.c __muldi3 (GCC runtime, GPL v2+ with the libgcc linking exception) */
-DItype __muldi3 (DItype u, DItype v) __asm__("func_004114D0");
+DItype __muldi3 (DItype u, DItype v) __asm__("__muldi3");
 
 /**
  * Multiplies two 64-bit integers (GCC runtime helper; the R5900 has no 64-bit multiply).
@@ -264,22 +264,22 @@ __muldi3 (DItype lhs, DItype rhs)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_312310", func_00411530);
+INCLUDE_ASM("seg/seg_312310", __pure_virtual);
 #ifdef SKIP_ASM
-extern void func_004103B0(void);
+extern void __terminate(void);
 /**
- * Fills the pure virtual slots of abstract classes' vtables: calls func_004103B0 (terminate).
+ * Fills the pure virtual slots of abstract classes' vtables: calls __terminate (terminate).
  *
  * cRiderHandler_vtbl, cChaseAlgorithm_vtbl, cScriptAlgorithm_vtbl, cFE_vtbl, cSSXApp_vtbl and many others point their
  * pure methods here.
  */
-void func_00411530(void) {
-    func_004103B0();
+void __pure_virtual(void) {
+    __terminate();
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_312310", func_00411538);
+INCLUDE_ASM("seg/seg_312310", __udivdi3);
 #ifdef SKIP_ASM
 /* libgcc2.c __udivdi3 with its static inline __udivmoddi4 (GCC runtime, GPL v2+ with the libgcc linking exception) */
 /* The L_udivdi3 object's own copy of libgcc2.c's `static const UQItype __clz_tab[]` (its rodata stays in asm). */
@@ -468,7 +468,7 @@ __udivmoddi4 (UDItype n, UDItype d, UDItype *rp)
   return ww.ll;
 }
 
-UDItype __udivdi3 (UDItype n, UDItype d) __asm__("func_00411538");
+UDItype __udivdi3 (UDItype n, UDItype d) __asm__("__udivdi3");
 
 UDItype __udivmoddi4 ();
 /**
@@ -1071,7 +1071,7 @@ INCLUDE_ASM("seg/seg_312310", dpmul);
 /* fp-bit.c multiply (GCC runtime, GPL v2+ with the libgcc linking exception): dpmul (US_SOFTWARE_GOFAST), with _fpmul_parts inlined */
 /* The 64-bit multiplies below are libgcc calls to __muldi3 (the R5900 has no dmult): bind gcc's fixed libcall
    name to retail's symbol for it (naming only). */
-__asm__("__muldi3 = func_004114D0");
+
 
 static INLINE fp_number_type *
 _fpmul_parts ( fp_number_type *  a,
@@ -1518,7 +1518,7 @@ sat:
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_312310", func_00412740);
+INCLUDE_ASM("seg/seg_312310", __negdf2);
 #ifdef SKIP_ASM
 extern void func_00411C38(long *, int *);
 /**
@@ -1528,7 +1528,7 @@ extern void func_00411C38(long *, int *);
  *
  * @param value  the double
  */
-void func_00412740(long value) {
+void __negdf2(long value) {
     int buf[8];
     func_00411C38(&value, buf);
     buf[1] = buf[1] == 0;
@@ -1537,7 +1537,7 @@ void func_00412740(long value) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_312310", func_00412778);
+INCLUDE_ASM("seg/seg_312310", __make_dp);
 #ifdef SKIP_ASM
 struct S412778 { int a, b, c; long d; };
 extern void func_00411B08(struct S412778 *);
@@ -1552,7 +1552,7 @@ extern void func_00411B08(struct S412778 *);
  * @param fraction  the fraction with guard bits
  * @return the double
  */
-void func_00412778(int fpClass, int sign, int exponent, long fraction) {
+void __make_dp(int fpClass, int sign, int exponent, long fraction) {
     struct S412778 parts;
     parts.a = fpClass;
     parts.b = sign;
@@ -1566,7 +1566,7 @@ void func_00412778(int fpClass, int sign, int exponent, long fraction) {
 INCLUDE_ASM("seg/seg_312310", dptofp);
 #ifdef SKIP_ASM
 /* fp-bit.c df_to_sf (GCC runtime, GPL v2+ with the libgcc linking exception): dptofp (US_SOFTWARE_GOFAST) */
-extern SFtype __make_fp (fp_class_type, unsigned int, int, USItype) __asm__("func_00413AC8");
+extern SFtype __make_fp (fp_class_type, unsigned int, int, USItype) __asm__("__make_fp");
 
 /**
  * Converts a double to a float in software (libgcc's df_to_sf).

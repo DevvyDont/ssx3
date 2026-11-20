@@ -13,9 +13,9 @@ extern char str_MCSERV_IRX[];
 extern char str_cd[];
 extern "C" void func_00319610(void* io);
 extern "C" void func_00319718(void* io, const char* module, int a, int b, int c);
-extern "C" void func_00409940(void);
+extern "C" void sceMcInit(void);
 extern "C" void func_003FF4A8(int a);
-extern "C" void func_00402520(int* clock);
+extern "C" void sceCdReadClock(int* clock);
 void BXsrand(unsigned int seed);
 extern "C" void THREAD_init(void);
 extern "C" void* func_004188C0(int size);
@@ -63,10 +63,10 @@ extern "C" void systemInit(void)
     func_00319718(D_004A3E94, str_SNDDRV_IRX, 1, 0, 0);
     func_00319718(D_004A3E94, str_MCMAN_IRX, 1, 0, 0);
     func_00319718(D_004A3E94, str_MCSERV_IRX, 1, 0, 0);
-    func_00409940();
+    sceMcInit();
     func_003FF4A8(0);
     int clock[2];
-    func_00402520(clock);
+    sceCdReadClock(clock);
     BXsrand(clock[0] ^ (clock[1] << 3));
     THREAD_init();
     char* heapProbe = (char*)func_004188C0(0x400);
@@ -101,7 +101,7 @@ struct cExecutionManMainK {
 };
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 cExecutionMan* cExecutionMan_cExecutionMan(cExecutionMan* self);
-extern "C" void func_0040FC90(void); // __main
+extern "C" void __main(void); // __main
 extern "C" void systemInit(void);
 extern "C" int cAppMan_run(void* self, cExecutionMan* exec, int argc, char** argv);
 extern void* cAppMan_TheAppMan;
@@ -109,13 +109,13 @@ extern const char str_PS2ExecutionMan[];
 extern void* D_0048DB68[];
 
 // PORT: bound to "main" by asm label so gcc doesn't emit its own __main call;
-// the target calls func_0040FC90 (__main) explicitly. Off-PS2 this is plain main().
+// the target calls __main (__main) explicitly. Off-PS2 this is plain main().
 int main_impl(int argc, char** argv) __asm__("main");
 
 /**
  * Program entry point: initialises the system, creates the PS2 execution manager and runs the application.
  *
- * Calls __main (func_0040FC90) and systemInit(), allocates the 0x142C0-byte "PS2ExecutionMan", initialises it
+ * Calls __main (__main) and systemInit(), allocates the 0x142C0-byte "PS2ExecutionMan", initialises it
  * with cExecutionMan_cExecutionMan() and gives it the PS2 vtable (D_0048DB68), then hands it to cAppMan_run() on the
  * application object (cAppMan_TheAppMan).
  *
@@ -125,7 +125,7 @@ int main_impl(int argc, char** argv) __asm__("main");
  */
 int main_impl(int argc, char** argv)
 {
-    func_0040FC90();
+    __main();
     systemInit();
     cExecutionManMainK* exec = (cExecutionManMainK*)cMemMan_alloc(0x142C0, str_PS2ExecutionMan, 0, 0);
     cExecutionMan_cExecutionMan((cExecutionMan*)exec);
@@ -146,17 +146,17 @@ public:
 };
 // Typed view of cAppMan_TheAppMan (main() in this unit declares it as void*).
 extern cAppManB008* D_004A5B64_B008 __asm__("cAppMan_TheAppMan");
-extern "C" void func_00402450(int);
-extern "C" void func_00401718(int);
-extern "C" void func_00425FB8(void);
+extern "C" void sceCdMmode(int);
+extern "C" void sceCdInit(int);
+extern "C" void sceSifExitCmd(void);
 extern "C" void LoadExecPS2(int, int, int);
 
 /**
  * Shuts the game's systems down and loads another executable with LoadExecPS2.
  *
  * Calls virtual slot 2 of cAppMan_TheAppMan (cAppMan_loadexecpurge in cAppMan_vtbl, which purges the execution
- * manager), then func_00402450(2), func_00401718(0) and func_00401718(5) (func_00401718 has the shape of libcdvd's
- * sceCdInit; mode 5 shuts the CD client down), func_00425FB8 (removes the DMAC 5 handler), and finally passes the
+ * manager), then sceCdMmode(2), sceCdInit(0) and sceCdInit(5) (sceCdInit has the shape of libcdvd's
+ * sceCdInit; mode 5 shuts the CD client down), sceSifExitCmd (removes the DMAC 5 handler), and finally passes the
  * arguments to LoadExecPS2, which packs them with func_0042C510 and calls _LoadExecPS2.
  *
  * @param path  path of the executable to load
@@ -166,10 +166,10 @@ extern "C" void LoadExecPS2(int, int, int);
 extern "C" void func_0031B008(int path, int argc, int argv)
 {
     D_004A5B64_B008->v02();
-    func_00402450(2);
-    func_00401718(0);
-    func_00401718(5);
-    func_00425FB8();
+    sceCdMmode(2);
+    sceCdInit(0);
+    sceCdInit(5);
+    sceSifExitCmd();
     LoadExecPS2(path, argc, argv);
 }
 #endif

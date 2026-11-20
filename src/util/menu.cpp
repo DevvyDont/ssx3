@@ -1692,14 +1692,14 @@ extern "C" void cMenu_remAllItems(void *self) {
 INCLUDE_ASM("util/menu", cMenu_sortItems);
 #ifdef SKIP_ASM
 extern int (*D_004A54BC)(int, int);
-extern "C" void func_00418EF8(void* base, int n, int size, int (*cmp)(const void*, const void*));
+extern "C" void qsort(void* base, int n, int size, int (*cmp)(const void*, const void*));
 extern "C" int func_002D4008(const void*, const void*);
 
 /**
  * Sorts a menu's items with @p cmp, then re-checks the focus.
  *
  * Stores @p cmp in D_004A54BC for the trampoline func_002D4008, sorts the NumItems pointers of Items (+0xC) with
- * func_00418EF8 (a qsort: base, count, element size 4, compare), clears D_004A54BC and calls cMenu_checkFocus.
+ * qsort (a qsort: base, count, element size 4, compare), clears D_004A54BC and calls cMenu_checkFocus.
  * FocusItem keeps its index, so the focus moves to whichever item lands there.
  *
  * @param cmp  compares two items; called through func_002D4008
@@ -1707,7 +1707,7 @@ extern "C" int func_002D4008(const void*, const void*);
 extern "C" void cMenu_sortItems(void* self, int (*cmp)(int, int))
 {
     D_004A54BC = cmp;
-    func_00418EF8((char*)self + 0xC, *(int*)self, 4, func_002D4008);
+    qsort((char*)self + 0xC, *(int*)self, 4, func_002D4008);
     D_004A54BC = 0;
     cMenu_checkFocus((cMenu*)self);
 }
@@ -4212,7 +4212,7 @@ extern void* cBXString_EmptyString;
 extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void cBXString_cBXString1(void* self, void* src);
 extern "C" int cBXString_printf(void* str, const char* fmt, ...);
-extern "C" float func_0040DA10(float x);
+extern "C" float logf(float x);
 extern "C" int fptodp(float f);
 extern char str_pct_4f[];
 extern char str_pct_3f[];
@@ -4238,7 +4238,7 @@ void* prettyFloat_impl(void* out, float v) __asm__("prettyFloat");
  */
 void* prettyFloat_impl(void* out, float value)
 {
-    float logValue = func_0040DA10(value) / func_0040DA10(10.0f) + 4.3431620724732056e-05f;
+    float logValue = logf(value) / logf(10.0f) + 4.3431620724732056e-05f;
     float logFloor;
     // PORT: FPU-only float->int->float round trip (floor helper); no C cast reproduces it.
     __asm__("cvt.w.s %0,%1\n\tcvt.s.w %0,%0" : "=f"(logFloor) : "f"(logValue));

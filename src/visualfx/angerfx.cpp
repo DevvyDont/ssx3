@@ -592,7 +592,7 @@ INCLUDE_ASM("visualfx/angerfx", compareAvalancheCollisions);
 /**
  * Compares two entries by their leading float, for qsort (ascending).
  *
- * tAvalancheNode_calculate passes it to func_00418EF8 (qsort) for the avalanche's 8-byte collision entries at +0x10.
+ * tAvalancheNode_calculate passes it to qsort (qsort) for the avalanche's 8-byte collision entries at +0x10.
  *
  * @param lhs  first entry
  * @param rhs  second entry
@@ -618,7 +618,7 @@ INCLUDE_ASM("visualfx/angerfx", compareAvalancheGroundCollisions);
 /**
  * Compares two entries by their leading unsigned short, for qsort (ascending).
  *
- * tAvalancheNode_calculate passes it to func_00418EF8 (qsort) for the avalanche's 4-byte ground-collision entries at
+ * tAvalancheNode_calculate passes it to qsort (qsort) for the avalanche's 4-byte ground-collision entries at
  * +0x110 (filled by tAvalanche_addGroundCollision).
  *
  * @param lhs  first entry

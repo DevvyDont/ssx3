@@ -1803,7 +1803,7 @@ extern int (*D_004A54BC)(int, int);
 /**
  * Compares two menu-item pointers for cMenu_sortItems: calls the comparison function in D_004A54BC with the two items.
  *
- * cMenu_sortItems stores its comparison function in D_004A54BC and passes this function to the qsort func_00418EF8. The
+ * cMenu_sortItems stores its comparison function in D_004A54BC and passes this function to the qsort qsort. The
  * C declares no return value; the comparison's result is left in the return register.
  *
  * @param lhsItem  points to the first item pointer
@@ -1841,7 +1841,7 @@ extern "C" void func_002D2988(int, int);
 /**
  * Runs a static initializer of this unit: func_002D2988 with initialize 1 and priority 0xFFFF.
  *
- * It is word 24 of the global constructor table D_0043CE38 (walked by func_0040FBE0).
+ * It is word 24 of the global constructor table D_0043CE38 (walked by __do_global_ctors).
  */
 extern "C" void func_002D4060(void) {
     func_002D2988(1, 0xFFFF);
@@ -2020,7 +2020,7 @@ extern "C" void func_002D40C0(int, int);
 /**
  * Runs a static initializer of this unit: func_002D40C0 with initialize 1 and priority 0xFFFF.
  *
- * It is word 25 of the global constructor table D_0043CE38 (walked by func_0040FBE0).
+ * It is word 25 of the global constructor table D_0043CE38 (walked by __do_global_ctors).
  */
 extern "C" void func_002D48D0(void) {
     func_002D40C0(1, 0xFFFF);

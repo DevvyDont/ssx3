@@ -3205,7 +3205,7 @@ INCLUDE_ASM("ai/ridermetrix", func_0011B678__FPv);
 /**
  * Compares two load-list names without case: forwards to strcasecmp.
  *
- * The sort comparator func_0011BD60 and func_0011BE88 pass to func_00418EF8; the second string arrives in a1.
+ * The sort comparator func_0011BD60 and func_0011BE88 pass to qsort; the second string arrives in a1.
  *
  * @return strcasecmp's result
  */

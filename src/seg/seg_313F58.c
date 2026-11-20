@@ -380,9 +380,9 @@ extern void fde_merge (fde_vector *v1, const fde_vector *v2) __asm__("func_00413
 extern void frame_init (struct object* ob) __asm__("func_00414008");
 extern void *extract_cie_info (fde *f, struct cie_info *c) __asm__("func_00414230");
 static fde **end_fde_sort (fde_accumulator *accu, size_t count) __asm__("func_00413CD0");
-static fde *find_fde (void *pc) __asm__("func_00414148");
+static fde *find_fde (void *pc) __asm__("find_fde");
 static void *execute_cfa_insn (void *p, struct frame_state_internal *state,
-			       struct cie_info *info, void **pc) __asm__("func_00414338");
+			       struct cie_info *info, void **pc) __asm__("execute_cfa_insn");
 
 /* fp-bit.c pack_d (__pack_f, single precision) (GCC runtime, GPL v2+ with the libgcc linking exception) */
 FLO_type
@@ -691,7 +691,7 @@ _fpadd_parts (fp_number_type * lhs,
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_00413330);
+INCLUDE_ASM("seg/seg_313F58", fpadd);
 #ifdef SKIP_ASM
 extern void func_00413068(float *, int *);
 extern int *func_004130F8(int *, int *, int *);
@@ -706,7 +706,7 @@ extern int func_00412F58(int *);
  * @param y  second operand
  * @return the sum, as func_00412F58 leaves it in the float return register (the C declaration says int)
  */
-int func_00413330(float x, float y) {
+int fpadd(float x, float y) {
     int unpackedX[4];
     int unpackedY[4];
     int sum[4];
@@ -719,7 +719,7 @@ int func_00413330(float x, float y) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_00413388);
+INCLUDE_ASM("seg/seg_313F58", fpsub);
 #ifdef SKIP_ASM
 extern void func_00413068(float *, int *);
 extern int *func_004130F8(int *, int *, int *);
@@ -735,7 +735,7 @@ extern int func_00412F58(int *);
  * @param y  subtrahend
  * @return x - y, as func_00412F58 leaves it in the float return register (the C declaration says int)
  */
-int func_00413388(float x, float y) {
+int fpsub(float x, float y) {
     int unpackedX[4];
     int unpackedY[4];
     int difference[4];
@@ -749,7 +749,7 @@ int func_00413388(float x, float y) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_004133F0);
+INCLUDE_ASM("seg/seg_313F58", fpmul);
 #ifdef SKIP_ASM
 /* fp-bit.c multiply (fpmul, single precision; _fpmul_parts inlined) (GCC runtime, GPL v2+ with the libgcc linking exception) */
 static INLINE fp_number_type *
@@ -855,7 +855,7 @@ _fpmul_parts ( fp_number_type *  a,
 }
 
 FLO_type
-multiply (FLO_type arg_a, FLO_type arg_b) __asm__("func_004133F0");
+multiply (FLO_type arg_a, FLO_type arg_b) __asm__("fpmul");
 
 /**
  * Multiplies two floats in software.
@@ -888,7 +888,7 @@ multiply (FLO_type arg_a, FLO_type arg_b)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_004135E8);
+INCLUDE_ASM("seg/seg_313F58", fpdiv);
 #ifdef SKIP_ASM
 extern void func_00413068(float *, int *);
 extern float func_00412F58_f(int *) __asm__("func_00412F58");
@@ -908,7 +908,7 @@ extern int D_0052ADD8[];
  * @param y  divisor
  * @return x / y
  */
-float func_004135E8(float x, float y) {
+float fpdiv(float x, float y) {
     int dividend[4];
     int divisor[4];
     float fx = x;
@@ -1058,7 +1058,7 @@ __fpcmp_parts (fp_number_type * lhs, fp_number_type * rhs)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_00413860);
+INCLUDE_ASM("seg/seg_313F58", fpcmp);
 #ifdef SKIP_ASM
 extern void func_00413068(float *, int *);
 extern int func_00413748(int *, int *);
@@ -1072,7 +1072,7 @@ extern int func_00413748(int *, int *);
  * @param y  second operand
  * @return -1, 0 or 1 for x <, == or > y; 1 when either is a NaN
  */
-int func_00413860(float x, float y) {
+int fpcmp(float x, float y) {
     int unpackedX[4];
     int unpackedY[4];
     float fx = x;
@@ -1084,7 +1084,7 @@ int func_00413860(float x, float y) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_004138B0);
+INCLUDE_ASM("seg/seg_313F58", sitofp);
 #ifdef SKIP_ASM
 extern float func_00412F58_f(int *) __asm__("func_00412F58");
 
@@ -1097,7 +1097,7 @@ extern float func_00412F58_f(int *) __asm__("func_00412F58");
  * @param x  the integer
  * @return the float value
  */
-float func_004138B0(int x) {
+float sitofp(int x) {
     int unpacked[4];
     unsigned fraction, shifted;
     int exponent;
@@ -1131,7 +1131,7 @@ float func_004138B0(int x) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_00413968);
+INCLUDE_ASM("seg/seg_313F58", fptosi);
 #ifdef SKIP_ASM
 /**
  * Converts a float to an int in software, truncating toward zero and saturating.
@@ -1142,7 +1142,7 @@ INCLUDE_ASM("seg/seg_313F58", func_00413968);
  * @param x  the float
  * @return the truncated integer
  */
-int func_00413968(float x) {
+int fptosi(float x) {
     int unpacked[4];
     float value = x;
     unsigned fpClass;
@@ -1167,7 +1167,7 @@ sat:
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_004139F8);
+INCLUDE_ASM("seg/seg_313F58", fptoui);
 #ifdef SKIP_ASM
 /**
  * Converts a float to an unsigned int in software, truncating and saturating.
@@ -1178,7 +1178,7 @@ INCLUDE_ASM("seg/seg_313F58", func_004139F8);
  * @param x  the float
  * @return the truncated unsigned value
  */
-unsigned func_004139F8(float x) {
+unsigned fptoui(float x) {
     int unpacked[4];
     float value = x;
     unsigned fpClass;
@@ -1205,7 +1205,7 @@ sat:
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_00413A90);
+INCLUDE_ASM("seg/seg_313F58", __negsf2);
 #ifdef SKIP_ASM
 extern void func_00413068(float *, int *);
 extern int func_00412F58(int *);
@@ -1220,7 +1220,7 @@ extern int func_00412F58(int *);
  * @param x  the value
  * @return -x, as func_00412F58 leaves it in the float return register (the C declaration says int)
  */
-int func_00413A90(float x) {
+int __negsf2(float x) {
     int obj[2];
     float value = x;
     func_00413068(&value, obj);
@@ -1230,7 +1230,7 @@ int func_00413A90(float x) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_00413AC8);
+INCLUDE_ASM("seg/seg_313F58", __make_fp);
 #ifdef SKIP_ASM
 /**
  * Builds a float from its unpacked fields: class, sign, exponent and guarded fraction.
@@ -1244,7 +1244,7 @@ INCLUDE_ASM("seg/seg_313F58", func_00413AC8);
  * @param exponent  unbiased exponent
  * @param fraction  fraction with the implicit one at bit 30
  */
-void func_00413AC8(int fpClass, int sign, int exponent, int fraction) {
+void __make_fp(int fpClass, int sign, int exponent, int fraction) {
     int parts[4];
     parts[0] = fpClass;
     parts[1] = sign;
@@ -1258,21 +1258,21 @@ void func_00413AC8(int fpClass, int sign, int exponent, int fraction) {
 INCLUDE_ASM("seg/seg_313F58", fptodp);
 #ifdef SKIP_ASM
 extern void func_00413068(float *, int *);
-extern int func_00412778(int, int, int, unsigned long long);
+extern int __make_dp(int, int, int, unsigned long long);
 /**
  * Converts a float to a double in software (fp-bit.c's GOFAST fptodp).
  *
- * Unpacks the float (func_00413068, unpack_d) and packs the parts as a double (func_00412778), shifting the
+ * Unpacks the float (func_00413068, unpack_d) and packs the parts as a double (__make_dp), shifting the
  * fraction into the double's position.
  *
  * @param x  the value to convert
- * @return the packed double, left by func_00412778() in the return registers (the C declaration says int)
+ * @return the packed double, left by __make_dp() in the return registers (the C declaration says int)
  */
 int fptodp(float x) {
     int unpacked[4];
     float value = x;
     func_00413068(&value, unpacked);
-    return func_00412778(unpacked[0], unpacked[1], unpacked[2], ((unsigned long long)(long long)unpacked[3] << 32) >> 2);
+    return __make_dp(unpacked[0], unpacked[1], unpacked[2], ((unsigned long long)(long long)unpacked[3] << 32) >> 2);
 }
 #endif
 
@@ -1467,7 +1467,7 @@ end_fde_sort (fde_accumulator *accu, size_t count)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_00413F38);
+INCLUDE_ASM("seg/seg_313F58", count_fdes);
 #ifdef SKIP_ASM
 struct N13F38 {
     int off;
@@ -1483,7 +1483,7 @@ struct N13F38 {
  * @param n  the first entry of the section
  * @return the number of usable FDEs
  */
-int func_00413F38(struct N13F38 *n) {
+int count_fdes(struct N13F38 *n) {
     int cnt = 0;
     if (n->off != 0) {
         do {
@@ -1497,7 +1497,7 @@ int func_00413F38(struct N13F38 *n) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_00413F80);
+INCLUDE_ASM("seg/seg_313F58", add_fdes);
 #ifdef SKIP_ASM
 struct N13F80 {
     int off;
@@ -1520,7 +1520,7 @@ struct L13F80 {
  * @param lo           in/out: lowest pc_begin seen
  * @param hi           in/out: highest pc end seen
  */
-void func_00413F80(struct N13F80 *n, struct L13F80 *accumulator, unsigned *lo, unsigned *hi) {
+void add_fdes(struct N13F80 *n, struct L13F80 *accumulator, unsigned *lo, unsigned *hi) {
     unsigned mn = *lo;
     unsigned mx = *hi;
     if (n->off != 0) {
@@ -1561,9 +1561,9 @@ extern struct N13F80 **func_00413CD0(struct LL14008 *, int);
 /**
  * Builds an unwind object's sorted FDE table and its covered address range on first use.
  *
- * Counts the FDEs (func_00413F38) of every section in the object's fde_array list (+0xC, null-terminated) when it is
+ * Counts the FDEs (count_fdes) of every section in the object's fde_array list (+0xC, null-terminated) when it is
  * set, else of the single section at fde_begin (+8), and stores the count (+0x10). Allocates the linear and erratic
- * arrays (func_004188C0, 4 bytes per FDE), adds every FDE (func_00413F80), sorts (func_00413CD0) and stores the sorted
+ * arrays (func_004188C0, 4 bytes per FDE), adds every FDE (add_fdes), sorts (func_00413CD0) and stores the sorted
  * array in fde_array and the range in pc_begin (+0) and pc_end (+4).
  *
  * @param n  the registered unwind object
@@ -1577,11 +1577,11 @@ void func_00414008(struct N14008 *n) {
         pp = n->roots;
         cnt = 0;
         while (*pp != 0) {
-            cnt += func_00413F38((struct N13F38 *)*pp);
+            cnt += count_fdes((struct N13F38 *)*pp);
             pp++;
         }
     } else {
-        cnt = func_00413F38((struct N13F38 *)n->root);
+        cnt = count_fdes((struct N13F38 *)n->root);
     }
     bytes = cnt * 4;
     n->cnt = cnt;
@@ -1594,11 +1594,11 @@ void func_00414008(struct N14008 *n) {
     if (n->roots != 0) {
         pp = n->roots;
         while (*pp != 0) {
-            func_00413F80(*pp, (struct L13F80 *)&accumulator, &lo, &hi);
+            add_fdes(*pp, (struct L13F80 *)&accumulator, &lo, &hi);
             pp++;
         }
     } else {
-        func_00413F80(n->root, (struct L13F80 *)&accumulator, &lo, &hi);
+        add_fdes(n->root, (struct L13F80 *)&accumulator, &lo, &hi);
     }
     n->roots = func_00413CD0(&accumulator, cnt);
     n->lo = lo;
@@ -1607,7 +1607,7 @@ void func_00414008(struct N14008 *n) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_00414148);
+INCLUDE_ASM("seg/seg_313F58", find_fde);
 #ifdef SKIP_ASM
 /* Return a pointer to the FDE for the function containing PC.  */
 
@@ -1717,7 +1717,7 @@ unsigned char *func_00414230(int *cie, struct C14230 *cieInfo) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_00414338);
+INCLUDE_ASM("seg/seg_313F58", execute_cfa_insn);
 #ifdef SKIP_ASM
 /* Decode one instruction's worth of DWARF 2 call frame information.
    Used by __frame_state_for.  Takes pointers P to the instruction to
@@ -1862,7 +1862,7 @@ execute_cfa_insn (void *insnPtr, struct frame_state_internal *state,
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_004146D0);
+INCLUDE_ASM("seg/seg_313F58", __register_frame_info);
 #ifdef SKIP_ASM
 extern int *D_0052ADE8;
 /**
@@ -1874,7 +1874,7 @@ extern int *D_0052ADE8;
  * @param begin  the first entry of the .eh_frame section
  * @param frameObject  the 0x18-byte object record to fill and link
  */
-void func_004146D0(int begin, int *frameObject) {
+void __register_frame_info(int begin, int *frameObject) {
     frameObject[2] = begin;
     frameObject[5] = (int)D_0052ADE8;
     D_0052ADE8 = frameObject;
@@ -1886,36 +1886,36 @@ void func_004146D0(int begin, int *frameObject) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_004146F8);
+INCLUDE_ASM("seg/seg_313F58", __register_frame);
 #ifdef SKIP_ASM
-extern void func_004146D0(int, int *);
+extern void __register_frame_info(int, int *);
 extern int *func_004188C0(int);
 /**
  * Registers an .eh_frame section for unwinding with a newly allocated object record.
  *
- * Allocates 0x18 bytes (func_004188C0) and passes them with the section to func_004146D0.
+ * Allocates 0x18 bytes (func_004188C0) and passes them with the section to __register_frame_info.
  *
  * @param begin  the first entry of the .eh_frame section
  */
-void func_004146F8(int begin) {
-    func_004146D0(begin, func_004188C0(0x18));
+void __register_frame(int begin) {
+    __register_frame_info(begin, func_004188C0(0x18));
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_00414728);
+INCLUDE_ASM("seg/seg_313F58", __register_frame_info_table);
 #ifdef SKIP_ASM
 extern int *D_0052ADE8;
 /**
  * Registers a null-terminated table of .eh_frame sections for unwinding, using an object record the caller supplies.
  *
- * Like func_004146D0 but also stores the table in fde_array (+0xC), so func_00414008 walks every listed section. crt0
+ * Like __register_frame_info but also stores the table in fde_array (+0xC), so func_00414008 walks every listed section. crt0
  * (func_001001D0) calls it at startup with D_0043CE00 and the object D_004A5D48.
  *
  * @param begin  the table of section pointers
  * @param frameObject  the 0x18-byte object record to fill and link
  */
-void func_00414728(int begin, int *frameObject) {
+void __register_frame_info_table(int begin, int *frameObject) {
     frameObject[2] = begin;
     frameObject[5] = (int)D_0052ADE8;
     D_0052ADE8 = frameObject;
@@ -1927,24 +1927,24 @@ void func_00414728(int begin, int *frameObject) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_00414750);
+INCLUDE_ASM("seg/seg_313F58", __register_frame_table);
 #ifdef SKIP_ASM
-extern void func_00414728(int, int *);
+extern void __register_frame_info_table(int, int *);
 extern int *func_004188C0(int);
 /**
  * Registers a table of .eh_frame sections for unwinding with a newly allocated object record.
  *
- * Allocates 0x18 bytes (func_004188C0) and passes them with the table to func_00414728.
+ * Allocates 0x18 bytes (func_004188C0) and passes them with the table to __register_frame_info_table.
  *
  * @param begin  the table of section pointers
  */
-void func_00414750(int begin) {
-    func_00414728(begin, func_004188C0(0x18));
+void __register_frame_table(int begin) {
+    __register_frame_info_table(begin, func_004188C0(0x18));
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_00414780);
+INCLUDE_ASM("seg/seg_313F58", __deregister_frame_info);
 #ifdef SKIP_ASM
 extern int *D_0052ADE8;
 extern void func_00418910(int);
@@ -1959,7 +1959,7 @@ extern void func_00418790();
  * @param key  the section (or table) the object was registered with
  * @return the unlinked object record
  */
-int func_00414780(key)
+int __deregister_frame_info(key)
     int key;
 {
     int **pp = &D_0052ADE8;
@@ -1981,37 +1981,37 @@ int func_00414780(key)
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_004147F8);
+INCLUDE_ASM("seg/seg_313F58", __deregister_frame);
 #ifdef SKIP_ASM
-extern int func_00414780();
+extern int __deregister_frame_info();
 extern void func_00418910(int);
 /**
- * Unregisters an .eh_frame section and frees the object record func_004146F8 allocated for it.
+ * Unregisters an .eh_frame section and frees the object record __register_frame allocated for it.
  *
- * Declared without parameters: the caller's section pointer reaches func_00414780 in the first argument register
+ * Declared without parameters: the caller's section pointer reaches __deregister_frame_info in the first argument register
  * untouched; the returned record is freed with func_00418910.
  */
-void func_004147F8(void) {
-    func_00418910(func_00414780());
+void __deregister_frame(void) {
+    func_00418910(__deregister_frame_info());
 }
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_313F58", func_00414818);
+INCLUDE_ASM("seg/seg_313F58", __frame_state_for);
 #ifdef SKIP_ASM
 /* Called from __throw to find the registers to restore for a given
    PC_TARGET.  The caller should allocate a local variable of `struct
    frame_state' (declared in frame.h) and pass its address to STATE_IN.  */
 
-extern struct frame_state *__frame_state_for (void *, struct frame_state *) __asm__("func_00414818");
+extern struct frame_state *__frame_state_for (void *, struct frame_state *) __asm__("__frame_state_for");
 
 /**
  * Computes the register save state at a code address from its DWARF 2 unwind info.
  *
- * Finds the FDE (func_00414148) and its CIE (func_00414230); returns 0 when either is missing. Starts from a zeroed
+ * Finds the FDE (find_fde) and its CIE (func_00414230); returns 0 when either is missing. Starts from a zeroed
  * state with the CIE's return-address column and eh_ptr, runs the CIE's instructions, skips a 'z' augmentation block,
- * then runs the FDE's instructions up to the target address (func_00414338) and copies the resulting frame_state (0x2F0
- * bytes) to state_in. func_00410F48 (the throw) and the other unwinders call it.
+ * then runs the FDE's instructions up to the target address (execute_cfa_insn) and copies the resulting frame_state (0x2F0
+ * bytes) to state_in. __throw (the throw) and the other unwinders call it.
  *
  * @param pc_target  the code address to unwind from
  * @param state_in   receives the frame state

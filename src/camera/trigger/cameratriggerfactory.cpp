@@ -632,7 +632,7 @@ struct sVEin_171FA8 {
     int (*fn)(void*, sVec4_171FA8*);
 };
 
-extern "C" float func_0040DA10(float x);
+extern "C" float logf(float x);
 
 // PORT: PS2-only VU0 inline asm (a + b).
 static inline sVec4_171FA8 Add_171FA8(const sVec4_171FA8& a, const sVec4_171FA8& b)
@@ -725,11 +725,11 @@ static inline sVec4_171FA8 Center_171FA8(const sBox_171FA8& b)
  * Gets the volume's bounding box from its own virtual slot 6 (boundBox; the vtable sits at +0x24 of the cCTObject part)
  * and starts from the box centre. While the volume still contains the test point (slot 7, containsPoint) it moves the
  * test point out along centre-to-@p pos at 2, 4, 8, ... times that offset, remembering the last point that was inside.
- * It then halves the inside/outside bracket (int)func_0040DA10(length / @p step) + 1 times and returns the outside end.
+ * It then halves the inside/outside bracket (int)logf(length / @p step) + 1 times and returns the outside end.
  * When @p pos is already outside, the bracket is simply the centre and @p pos.
  *
  * It fills slot 8 of the cCTVolume vtable D_0045C3A0 and of both concrete volume vtables (ellipse cCTVolumeEllipse_vtbl, box
- * cCTVolumeBox_vtbl). Likely bug: func_0040DA10 is the natural logarithm, so the step count is ln(length / step) + 1 rather
+ * cCTVolumeBox_vtbl). Likely bug: logf is the natural logarithm, so the step count is ln(length / step) + 1 rather
  * than log2, and the final bracket can stay wider than @p step.
  *
  * @param obj  the trigger volume (this)
@@ -752,7 +752,7 @@ extern "C" sVec4_171FA8 cCTVolume_getBoundaryPointClosestTo(char* obj, sVec4_171
         k += k;
     }
     float len = Length_171FA8(Sub_171FA8(outsidePos, lastInsidePos));
-    int n = (int)func_0040DA10(len / step) + 1;
+    int n = (int)logf(len / step) + 1;
     for (int i = 0; i < n; i++) {
         sVec4_171FA8 testPos = Scale_171FA8(Add_171FA8(outsidePos, lastInsidePos), 0.5f);
         containsEntry = &(*(sVEin_171FA8**)(obj + 0x24))[7];

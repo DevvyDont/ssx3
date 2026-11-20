@@ -299,12 +299,12 @@ INCLUDE_ASM("util/statemachine", cPS2ConsoleConfig_cPS2ConsoleConfig);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" int func_0040BAA8(void);
-extern "C" int func_0040B9E8(void);
-extern "C" int func_0040BB38(void);
-extern "C" int func_0040BC08(void);
-extern "C" int func_00402520(unsigned char* clock);
-extern "C" void func_0040BFE0(unsigned char* clock);
+extern "C" int sceScfGetSpdif(void);
+extern "C" int sceScfGetLanguage(void);
+extern "C" int sceScfGetDateFormat(void);
+extern "C" int sceScfGetTimeNotation(void);
+extern "C" int sceCdReadClock(unsigned char* clock);
+extern "C" void sceScfGetLocalTimefromRTC(unsigned char* clock);
 extern char cPS2ConsoleConfig_vtbl[];
 extern void* D_004A28A8_7478 __asm__("SSXApp");
 
@@ -312,9 +312,9 @@ extern void* D_004A28A8_7478 __asm__("SSXApp");
  * Constructs the PS2 console configuration object from the system settings and clock.
  *
  * Clears +0x24 and points +0x34 at cPS2ConsoleConfig_vtbl. From the OSD configuration it stores 1 at +0x28 when
- * func_0040BAA8 (config bit 0) returns 0, else 0; 1 at +0x2C; the language from func_0040B9E8 (0 to 7, otherwise 1) at
- * +0x30; func_0040BB38's 0 to 2 (else 0) at +0x0 and func_0040BC08's 0 or 1 at +0x4. When func_00402520 reads the
- * real-time clock, func_0040BFE0 converts it from Japan time to the console's time zone and the BCD bytes give the
+ * sceScfGetSpdif (config bit 0) returns 0, else 0; 1 at +0x2C; the language from sceScfGetLanguage (0 to 7, otherwise 1) at
+ * +0x30; sceScfGetDateFormat's 0 to 2 (else 0) at +0x0 and sceScfGetTimeNotation's 0 or 1 at +0x4. When sceCdReadClock reads the
+ * real-time clock, sceScfGetLocalTimefromRTC converts it from Japan time to the console's time zone and the BCD bytes give the
  * hour, minute and second (+0x8 to +0x10) and the year (+ 2000), month and day (+0x14 to +0x1C); otherwise the date
  * defaults to 2003-10-14 at 00:00:00. +0x20 takes the word at SSXApp+0x18.
  *
@@ -327,7 +327,7 @@ extern "C" void* cPS2ConsoleConfig_cPS2ConsoleConfig(void* self_)
     unsigned char clock[8];
     self[9] = 0;
     *(char**)&self[13] = cPS2ConsoleConfig_vtbl;
-    int osdSetting = func_0040BAA8();
+    int osdSetting = sceScfGetSpdif();
     switch (osdSetting) {
     case 0:
         self[10] = 1;
@@ -340,7 +340,7 @@ extern "C" void* cPS2ConsoleConfig_cPS2ConsoleConfig(void* self_)
         break;
     }
     self[11] = 1;
-    switch (func_0040B9E8()) {
+    switch (sceScfGetLanguage()) {
     case 0:
         self[12] = 0;
         break;
@@ -369,7 +369,7 @@ extern "C" void* cPS2ConsoleConfig_cPS2ConsoleConfig(void* self_)
         self[12] = 1;
         break;
     }
-    osdSetting = func_0040BB38();
+    osdSetting = sceScfGetDateFormat();
     switch (osdSetting) {
     case 0:
         self[0] = 0;
@@ -384,7 +384,7 @@ extern "C" void* cPS2ConsoleConfig_cPS2ConsoleConfig(void* self_)
         self[0] = 0;
         break;
     }
-    osdSetting = func_0040BC08();
+    osdSetting = sceScfGetTimeNotation();
     switch (osdSetting) {
     case 0:
         self[1] = 0;
@@ -396,8 +396,8 @@ extern "C" void* cPS2ConsoleConfig_cPS2ConsoleConfig(void* self_)
         self[1] = 0;
         break;
     }
-    if (func_00402520(clock) != 0) {
-        func_0040BFE0(clock);
+    if (sceCdReadClock(clock) != 0) {
+        sceScfGetLocalTimefromRTC(clock);
         self[2] = (clock[3] & 0xF) + (clock[3] >> 4) * 10;
         self[3] = (clock[2] & 0xF) + (clock[2] >> 4) * 10;
         self[4] = (clock[1] & 0xF) + (clock[1] >> 4) * 10;

@@ -2157,7 +2157,7 @@ extern "C" int cBENewRaceInterface_getRival(void* iface);
 extern "C" char* cBECharacterInterface_getShortNameByCharacter(void* iface, int id, int a2);
 extern "C" int cBENewPlayerInterface_isEventLocked(void* iface, int a1, int charId, int item);
 extern "C" int cBERewardInterface_isPeakLocked(void* iface, int a1, int a2);
-extern "C" void* func_004139F8(float x);
+extern "C" void* fptoui(float x);
 extern "C" void cUIText_setUnicodeStringWrap(void* obj, unsigned short* s);
 // func_002C2540 returns dst (the unit declares it void)
 unsigned short* func_002C2540_r(unsigned short* dst, char* src) __asm__("func_002C2540");
@@ -2308,7 +2308,7 @@ extern "C" int func_001FD320(void* self, void* msg)
         case 8: {
             widget = getObj_1FD320(self, str_timescoretobeat);
             float mins = (float)*(unsigned int*)(stats + 0x78) * 0.01666666753590107f;
-            void* wholeSeconds = func_004139F8(mins);
+            void* wholeSeconds = fptoui(mins);
             func_002C2540_r(num, func_0020A1A8(wholeSeconds));
             unsigned short* labelText = lookupString_1FD320(str_kT_OVRCMNTimeToBeatColon);
             func_002C2540_r(title, D_004A2550);

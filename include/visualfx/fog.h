@@ -7,7 +7,7 @@
 // (main/game.h +0x18): cMemMan_alloc(0x3010, "cPS2FogParticleMan") + cFogParticleMan ctor cFogParticleMan_cFogParticleMan + the
 // cPS2FogParticleMan vtable D_004882E0 stored inline + 256 sprites constructed at +0x10 (cGame_loadTrack).
 //   cFogParticleMan     0x8 (On Tour 0x8): miNumSphere + vptr. Vtable cFogParticleMan_vtbl: 1 dtor cFogParticleMan__cFogParticleMan, 2
-//                       addFogInstance and 3 platformrender pure (func_00411530). render (cFogParticleMan_render) is
+//                       addFogInstance and 3 platformrender pure (__pure_virtual). render (cFogParticleMan_render) is
 //                       non-virtual. Static mSortKey = D_00537AC0 (0x800 bytes: 256 tFogSortKey; On Tour has 128).
 //   cPS2FogParticleMan  0x3010: + 256 tFogSprite. Vtable D_004882E0: 1 dtor cPS2FogParticleMan__cPS2FogParticleMan, 2 addFogInstance
 //                       cPS2FogParticleMan_addFogInstance, 3 platformrender cPS2FogParticleMan_platformrender.

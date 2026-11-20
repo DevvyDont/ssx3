@@ -957,14 +957,14 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F4448);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 
-extern int f4C50(int) __asm__("func_00424C50");
+extern int f4C50(int) __asm__("iWakeupThread");
 extern int f3B80(int, void *, void *) __asm__("func_00423B80");
 void func_003F4448(int a, int b, struct sSifQueue *s);
 /**
  * Alarm handler that wakes the IOP queue thread when a reply has arrived, re-arming itself while requests are pending.
  *
  * Forgets the alarm id that fired (+0x4DEC, armed by func_003F4528; +0x4DF0, its own). While requests are outstanding,
- * wakes the queue thread (+0x4DE8, func_00424C50) when the oldest one's reply key matches, and sets a new 16-tick alarm
+ * wakes the queue thread (+0x4DE8, iWakeupThread) when the oldest one's reply key matches, and sets a new 16-tick alarm
  * (func_00423B80) when none is armed.
  *
  * @param alarmId  id of the alarm that fired
@@ -1019,16 +1019,16 @@ extern int SignalSema(int);
 extern int func_003F4A78(void);
 extern int GetThreadId(void);
 extern void func_0041605C(char *, char *, int);
-extern int func_00424698(int, int);
+extern int SyncDCache(int, int);
 extern int sceSifSetDma(struct sSifDma_4528 *, int);
 extern int func_003F4DE8(void);
-extern void func_004261B0(int, void *, int, int, int, int);
+extern void sceSifSendCmd(int, void *, int, int, int, int);
 extern int SetAlarm(int, void *, void *);
 extern int SleepThread(void);
 extern unsigned int strlen(const char *);
 
 /* Writes back the D-cache over [a, a + n). */
-static __inline__ void f4528_wb(int a, int n) { func_00424698(a, a + n); }
+static __inline__ void f4528_wb(int a, int n) { SyncDCache(a, a + n); }
 
 /**
  * Queues a request to an IOP service and sends it over SIF DMA; optionally blocks until the reply.
@@ -1144,7 +1144,7 @@ int func_003F4528(struct sSifClient_4528 *cl, int flags, int fno, int callArg, c
         }
         ((int *)queue->pad4DB8[0])[queue->head] = dma[0].size != 0 ? sceSifSetDma(&dma[0], 2) : sceSifSetDma(&dma[1], 1);
     }
-    if (nowait) func_004261B0(1, &D_00451300, D_00451300.b, 0, 0, 0);
+    if (nowait) sceSifSendCmd(1, &D_00451300, D_00451300.b, 0, 0, 0);
     key = queue->pad4DC8[1];
     if (size > 0) queue->pad4DDC = off + (asize & ~0x3F);
     queue->pad4DC8[1] = (queue->pad4DC8[1] + 1) % *(int *)&queue->buf[0x4D84];
@@ -1347,13 +1347,13 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F4DE8);
 // PORT: PS2-only COP0 (read the Count register).
 #define MFC0_COUNT_2F41(v) __asm__ volatile("mfc0 %0, $9" : "=r"(v))
 
-extern long func_00411538_4DE8(long, long) __asm__("func_00411538");
+extern long __udivdi3_4DE8(long, long) __asm__("__udivdi3");
 /**
  * Returns the time in milliseconds since the IOP queue's timer started.
  *
  * Reads a consistent snapshot of the last Count value (+0x4DF8) and the 64-bit cycle total (+0x4E00) kept by the
  * interrupt handler func_003F4410 (re-reading while either changes), adds the Count cycles since that update and
- * divides by 0x48000 (294,912 cycles per millisecond at the EE's 294.912 MHz) with func_00411538.
+ * divides by 0x48000 (294,912 cycles per millisecond at the EE's 294.912 MHz) with __udivdi3.
  *
  * @return the tick in milliseconds
  */
@@ -1376,7 +1376,7 @@ int func_003F4DE8(void) {
         lastSeen = last;
     } while (lastSeen != D_0051F0C0.last || total != D_0051F0C0.total);
     sum = total + (unsigned)(cnt - last);
-    return (int)func_00411538_4DE8(sum, 0x48000);
+    return (int)__udivdi3_4DE8(sum, 0x48000);
 }
 #endif
 
@@ -1384,15 +1384,15 @@ int func_003F4DE8(void) {
 INCLUDE_ASM("seg/seg_2F41F8", func_003F4E80);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern int func_00424698(int, int);
+extern int SyncDCache(int, int);
 /**
- * Writes a memory range back from the data cache (func_00424698 over @p start .. @p start + @p size).
+ * Writes a memory range back from the data cache (SyncDCache over @p start .. @p start + @p size).
  *
  * @param start  first address
  * @param size  byte count
- * @return func_00424698's result
+ * @return SyncDCache's result
  */
-int func_003F4E80(int start, int size) { return func_00424698(start, start + size); }
+int func_003F4E80(int start, int size) { return SyncDCache(start, start + size); }
 #endif
 
 //100%
@@ -1442,11 +1442,11 @@ extern struct sSifQueue D_0051F0C0;
 
 extern struct { unsigned char b; char pad[11]; int w; } D_00451340;
 extern void FlushCache(int);
-extern void func_004261B0(int, void *, int, int, int, int);
+extern void sceSifSendCmd(int, void *, int, int, int, int);
 /**
  * Checks that the IOP side of the request queue answers.
  *
- * Clears the flag byte at the start of D_0051F0C0, sends SIF command 1 (func_004261B0) carrying the flag's address + 1,
+ * Clears the flag byte at the start of D_0051F0C0, sends SIF command 1 (sceSifSendCmd) carrying the flag's address + 1,
  * and spins (flushing the cache) until the IOP sets the flag or 50,000,000 Count cycles (about 170 ms) pass.
  *
  * @return 1 when the IOP answered, 0 on timeout
@@ -1460,7 +1460,7 @@ int func_003F4F40(void) {
     *flag = 0;
     D_00451340.w = (int)flag + 1;
     FlushCache(0);
-    func_004261B0(1, &D_00451340, D_00451340.b, 0, 0, 0);
+    sceSifSendCmd(1, &D_00451340, D_00451340.b, 0, 0, 0);
     answered = 1;
     MFC0_COUNT_2F41(start);
     while (*flag == 0) {
@@ -1493,15 +1493,15 @@ struct sSemaParam_5000 { int count; int max_count; int init_count; int wait_thre
 struct sThreadParam_5000 { int status; void (*func)(void); void *stack; int stackSize; void *gpReg; int initPriority; int currentPriority; unsigned int attr; unsigned int option; };
 
 extern void f5000_6210(void *, int, int) __asm__("func_00416210");
-/* func_004261B0 (sceSifSendCmd) returns its packet id; the unit declares it void. */
-extern int f5000_61B0(int, void *, int, int, int, int) __asm__("func_004261B0");
+/* sceSifSendCmd (sceSifSendCmd) returns its packet id; the unit declares it void. */
+extern int f5000_61B0(int, void *, int, int, int, int) __asm__("sceSifSendCmd");
 extern int sceSifAllocIopHeap(int);
 extern int sceSifDmaStat(int);
-extern void func_00425D38(void);
+extern void sceSifInitCmd(void);
 extern int CreateSema(struct sSemaParam_5000 *);
 extern int CreateThread(struct sThreadParam_5000 *);
 extern int func_00423A90(int, int (*)(int, void *), int, void *);
-extern int func_004248E8(int);
+extern int EnableIntc(int);
 extern void StartThread(int, void *);
 extern int func_003F4410(int, void *);
 
@@ -1511,7 +1511,7 @@ extern int func_003F4410(int, void *);
  * Fails (-1) when the IOP does not answer (func_003F4F40). Zeroes the queue and lays out its uncached areas: service
  * directory (0x800 bytes), request ring and reply ring (0x200 each), payload area (0x4000), DMA-id words and the
  * completion ring. Allocates the IOP-side copy (sceSifAllocIopHeap, -2 on failure), DMAs a 0x40-byte header describing the
- * areas and then the request ring (sceSifSetDma, -3 / -4 on failure), initialises SIF commands (func_00425D38) and
+ * areas and then the request ring (sceSifSetDma, -3 / -4 on failure), initialises SIF commands (sceSifInitCmd) and
  * sends command 1 with the IOP address. Creates the queue semaphore and the queue thread (func_003F44F8, priority 10,
  * 0x2000-byte stack D_00523F00; -5 on failure), installs the Count handler func_003F4410 on interrupt 2 and enables it,
  * starts the thread and sets the started flag D_004A4BB0.
@@ -1591,7 +1591,7 @@ int func_003F5000(void) {
     if (id == 0) return -4;
     while (sceSifDmaStat(id) >= 0) {
     }
-    func_00425D38();
+    sceSifInitCmd();
     D_00451340.w = queue->pad4DB8[2];
     FlushCache(0);
     f5000_61B0(1, &D_00451340, D_00451340.b, 0, 0, 0);
@@ -1616,7 +1616,7 @@ int func_003F5000(void) {
     queue->h4DE8 = CreateThread(&tp);
     if (queue->h4DE8 <= 0) return -5;
     queue->h4DF4 = func_00423A90(2, func_003F4410, -1, queue);
-    func_004248E8(2);
+    EnableIntc(2);
     StartThread(queue->h4DE8, queue);
     D_004A4BB0 = 1;
     return 0;
@@ -1683,7 +1683,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F5478);
 extern char D_00525F00[];
 extern int *RpcAlloc(int);
 extern void *f6210h(void *, int, int) __asm__("func_00416210");
-extern int func_00424698(int, int);
+extern int SyncDCache(int, int);
 extern void FlushCache(int);
 extern void func_00256BD8(int *);
 extern int func_003F4C98(char *, int, int);
@@ -1713,8 +1713,8 @@ int *func_003F5478(int size) {
     session[6] = session[1] + 0x40;
     f6210h((void *)session[1], 0, 0x20);
     f6210h((void *)session[6], 0, session[5]);
-    func_00424698(session[1], session[1] + 0x20);
-    func_00424698(session[6], session[6] + session[5]);
+    SyncDCache(session[1], session[1] + 0x20);
+    SyncDCache(session[6], session[6] + session[5]);
     FlushCache(0);
     func_003F4C98(D_00525F00, 'sess', 'crea');
     func_003F4C68(D_00525F00, 1, 0, size, 0, 0, 0, 0, 1, (int)session);
@@ -1752,7 +1752,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F5638);
 extern char D_00525F20[];
 extern int func_003F4C98(char *, int, int);
 extern int func_003F4C68(char *, int, int, int, int, int, int, int, int, int);
-extern int func_00424698(int, int);
+extern int SyncDCache(int, int);
 /* Network session handle (0x9C bytes, created by func_003F5478). The receive callback func_003F5A50 (an RPC
    completion) writes f8 / fC / f10, so they are volatile in every accessor. */
 struct sSess { int f0; int f4; volatile int f8; volatile int fC; volatile int f10; int f14; unsigned char *f18; };
@@ -1786,7 +1786,7 @@ int func_003F5638(struct sSess *self, unsigned addr, int port) {
     ((unsigned char *)self->f4)[5] = addrShift;
     addrShift >>= 8;
     ((unsigned char *)self->f4)[4] = addrShift;
-    func_00424698(self->f4, self->f4 + 0x20);
+    SyncDCache(self->f4, self->f4 + 0x20);
     func_003F4C98(D_00525F20, 'sess', 'conn');
     func_003F4C68(D_00525F20, 0, self->f0, 0, self->f4, 0x10, 0, 0, 0, 0);
     self->f10 = 0;
@@ -1961,7 +1961,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F5A70);
 extern char D_00525F60[];
 extern char D_004A4BB8[];
 extern int func_003F4C98(char *, int, int);
-extern void a70_47D8(unsigned char *, unsigned char *) __asm__("func_004247D8");
+extern void a70_47D8(unsigned char *, unsigned char *) __asm__("InvalidDCache");
 extern int a70_4C68(char *, int, int, int, int, int, unsigned char *, int, int, int) __asm__("func_003F4C68");
 extern int func_003F5A50(void);
 /**
@@ -2017,7 +2017,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F5C38);
 extern char D_00525F70[];
 extern int c38_5A70(struct sSess *, int, int, int) __asm__("func_003F5A70");
 extern void c38_605C(char *, void *, int) __asm__("func_0041605C");
-extern void c38_47D8(unsigned char *, unsigned char *) __asm__("func_004247D8");
+extern void c38_47D8(unsigned char *, unsigned char *) __asm__("InvalidDCache");
 extern int func_003F4C98(char *, int, int);
 extern int c38_4C68(char *, int, int, int, int, int, unsigned char *, int, int, int) __asm__("func_003F4C68");
 extern int func_003F5A50(void);
@@ -2079,7 +2079,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F5DA8);
 extern unsigned int strlen(const char *);
 
 /* D_00525F80: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
-   max-connect word handed to func_0040C028; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
+   max-connect word handed to sceUsbKbInit; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
 struct sKb {
     int fd[2];                          /* 0x00 */
     int info[2];                        /* 0x08 */
@@ -2164,7 +2164,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F5F08);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_00525F80: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
-   max-connect word handed to func_0040C028; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
+   max-connect word handed to sceUsbKbInit; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
 extern struct sKb D_00525F80;
 
 extern char D_00525F88[];
@@ -2194,14 +2194,14 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F5F88);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_00525F80: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
-   max-connect word handed to func_0040C028; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
+   max-connect word handed to sceUsbKbInit; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
 extern struct sKb D_00525F80;
 
-extern int f810(int, int *) __asm__("func_0040C810");
+extern int f810(int, int *) __asm__("sceUsbKbSync");
 /**
  * Finishes the USB keyboard connection query started by func_003F5F08.
  *
- * Polls the request without waiting (func_0040C810 with mode 1). When it has finished, calls the connect callback
+ * Polls the request without waiting (sceUsbKbSync with mode 1). When it has finished, calls the connect callback
  * (+0xBC) with (keyboard, connected) for every keyboard whose connected flag changed, and clears the busy flag and the
  * state.
  *
@@ -2227,7 +2227,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6040);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_00525F80: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
-   max-connect word handed to func_0040C028; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
+   max-connect word handed to sceUsbKbInit; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
 extern struct sKb D_00525F80;
 
 /**
@@ -2255,7 +2255,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F60B8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_00525F80: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
-   max-connect word handed to func_0040C028; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
+   max-connect word handed to sceUsbKbInit; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
 extern struct sKb D_00525F80;
 
 extern int func_003F6040(int);
@@ -2288,18 +2288,18 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6138);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_00525F80: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
-   max-connect word handed to func_0040C028; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
+   max-connect word handed to sceUsbKbInit; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
 extern struct sKb D_00525F80;
 
-extern int f810(int, int *) __asm__("func_0040C810");
+extern int f810(int, int *) __asm__("sceUsbKbSync");
 /**
  * Finishes the USB keyboard read started by func_003F60B8.
  *
- * Waits for the read to finish (func_0040C810 with mode 0, the blocking wait). Then marks the current keyboard's buffer
+ * Waits for the read to finish (sceUsbKbSync with mode 0, the blocking wait). Then marks the current keyboard's buffer
  * ready (+0x88 = 1) if it holds key codes or its LED / modifier words changed from the remembered ones, and clears the
  * busy flag and the state.
  *
- * @return 0, or func_0040C810's error (-1 when the keyboard library is not running)
+ * @return 0, or sceUsbKbSync's error (-1 when the keyboard library is not running)
  */
 int func_003F6138(void) {
     int syncResult;
@@ -2334,23 +2334,23 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F61D0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_00525F80: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
-   max-connect word handed to func_0040C028; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
+   max-connect word handed to sceUsbKbInit; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
 extern struct sKb D_00525F80;
 
 extern int D_00526010[];
 
 extern int func_003F5DA8(char *, char *);
-extern int f0C028(int *) __asm__("func_0040C028");
+extern int f0C028(int *) __asm__("sceUsbKbInit");
 extern void f5F08(void) __asm__("func_003F5F08");
 extern int f5F88(void) __asm__("func_003F5F88");
 extern void f6358(int, int) __asm__("func_003F6358");
 extern int f61C8(int) __asm__("func_003F61C8");
-// The keyboard state block sits 0x90 bytes below the max-connect word passed to func_0040C028.
+// The keyboard state block sits 0x90 bytes below the max-connect word passed to sceUsbKbInit.
 static inline struct sKb *ctl(void) { return (struct sKb *)((char *)D_00526010 - 0x90); }
 /**
  * Starts the USB keyboard reader.
  *
- * Loads the USB modules (func_003F5DA8 with @p name / @p str) and initialises the keyboard library (func_0040C028 with
+ * Loads the USB modules (func_003F5DA8 with @p name / @p str) and initialises the keyboard library (sceUsbKbInit with
  * the max-connect word D_00526010, capped at 8). Clears every keyboard's connected and previous flags and the ready
  * flag of each 0x8C-byte buffer in @p ents, resets the current keyboard, sets the info-refresh period and counter to 60
  * updates, installs the callbacks (defaults func_003F6358 and func_003F61C8) and runs one connection query to
@@ -2393,20 +2393,20 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F62F8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_00525F80: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
-   max-connect word handed to func_0040C028; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
+   max-connect word handed to sceUsbKbInit; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
 extern struct sKb D_00525F80;
 
-extern int func_0040C220(void);
+extern int sceUsbKbEnd(void);
 extern int func_003F5E90_62F8(int, int) __asm__("func_003F5E90");
 /**
- * Shuts the USB keyboard reader down: ends the keyboard library (func_0040C220) and unloads USBKB.IRX and USBD.IRX
+ * Shuts the USB keyboard reader down: ends the keyboard library (sceUsbKbEnd) and unloads USBKB.IRX and USBD.IRX
  * (func_003F5E90 with error values 1 and 2).
  *
  * @return 0, or the OR of the error values of the unloads that failed
  */
 int func_003F62F8(void) {
     int unloadErrors;
-    func_0040C220();
+    sceUsbKbEnd();
     unloadErrors = func_003F5E90_62F8(D_00525F80.fd[1], 1);
     return unloadErrors | func_003F5E90_62F8(D_00525F80.fd[0], 2);
 }
@@ -2432,15 +2432,15 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6358);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int sceUsbKbSetLEDStatus(int, int);
 extern int sceUsbKbSetLEDMode(int, int);
-extern void func_0040C810(int, int *);
-extern void func_0040D4A0(int);
-extern void func_0040C728(int, int, int);
-extern void func_0040C770(int, int);
+extern void sceUsbKbSync(int, int *);
+extern void sceUsbKbClearRbuf(int);
+extern void sceUsbKbSetRepeat(int, int, int);
+extern void sceUsbKbSetCodeType(int, int);
 /**
  * Default connect callback of the USB keyboard reader: sets up a keyboard that has just connected.
  *
- * When @p on is set: LED status 1 and LED mode 1 (each waited for with func_0040C810), clears its buffered keys
- * (func_0040D4A0), sets key repeat to delay 30, rate 2 (func_0040C728) and the code type to 0 (func_0040C770).
+ * When @p on is set: LED status 1 and LED mode 1 (each waited for with sceUsbKbSync), clears its buffered keys
+ * (sceUsbKbClearRbuf), sets key repeat to delay 30, rate 2 (sceUsbKbSetRepeat) and the code type to 0 (sceUsbKbSetCodeType).
  *
  * @param keyboard  keyboard index
  * @param on  nonzero when it connected
@@ -2449,12 +2449,12 @@ void func_003F6358(int keyboard, int on) {
     int res;
     if (on) {
         res = sceUsbKbSetLEDStatus(keyboard, 1);
-        if (res == 0) func_0040C810(0, &res);
+        if (res == 0) sceUsbKbSync(0, &res);
         res = sceUsbKbSetLEDMode(keyboard, 1);
-        if (res == 0) func_0040C810(0, &res);
-        func_0040D4A0(keyboard);
-        func_0040C728(keyboard, 0x1E, 2);
-        func_0040C770(keyboard, 0);
+        if (res == 0) sceUsbKbSync(0, &res);
+        sceUsbKbClearRbuf(keyboard);
+        sceUsbKbSetRepeat(keyboard, 0x1E, 2);
+        sceUsbKbSetCodeType(keyboard, 0);
     }
 }
 #endif
@@ -2478,7 +2478,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F63F0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_00525F80: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
-   max-connect word handed to func_0040C028; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
+   max-connect word handed to sceUsbKbInit; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
 extern struct sKb D_00525F80;
 
 extern int func_003F5F88(void);
@@ -2516,7 +2516,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F64E0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_00525F80: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
-   max-connect word handed to func_0040C028; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
+   max-connect word handed to sceUsbKbInit; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
 extern struct sKb D_00525F80;
 
 /**
@@ -2540,7 +2540,7 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6520);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 /* D_00525F80: the USB keyboard state. D_00525F88 (+8) is the sceUsbKbGetInfo block and D_00526010 (+0x90) the
-   max-connect word handed to func_0040C028; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
+   max-connect word handed to sceUsbKbInit; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
 extern struct sKb D_00525F80;
 
 /**
@@ -2632,17 +2632,17 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6670);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern unsigned char D_00451458[];
-extern int f268(int, int, int, int) __asm__("func_0040D268");
+extern int f268(int, int, int, int) __asm__("sceUsbKbCnvRawCode");
 void func_003F6670_impl(unsigned char *self, int *fl, int kb, unsigned code) __asm__("func_003F6670");
 /**
  * Translates a USB key code to its character, stored in byte 1 of the output pair @p self.
  *
  * Keypad codes 84..99 come from D_00451458 ("/*-+" first); the digit and period keys (89 and up) give 0 unless Num Lock
- * (bit 0 of @p fl[0]) is on. Other codes go through func_0040D268 with the layout @p kb, the modifier word
+ * (bit 0 of @p fl[0]) is on. Other codes go through sceUsbKbCnvRawCode with the layout @p kb, the modifier word
  * @p fl[1] and the LED word; results of 0x100 or more give 0.
  *
  * @param fl  the keyboard read buffer: LED word, modifier word
- * @param kb  keyboard layout passed to func_0040D268
+ * @param kb  keyboard layout passed to sceUsbKbCnvRawCode
  * @param code  USB HID key code
  */
 void func_003F6670_impl(unsigned char *self, int *fl, int kb, unsigned code) {
@@ -2846,10 +2846,10 @@ extern int D_00526140[];
 
 extern int *D_004A5B18;
 
-extern int func_00426B48(int *, int, int);
+extern int sceSifBindRpc(int *, int, int);
 extern void func_003F6960b(int, int, int, int *, int) __asm__("func_003F6960");
 /**
- * Binds the voice-chat SIF RPC client (server id 567, func_00426B48) and registers the status word with the module.
+ * Binds the voice-chat SIF RPC client (server id 567, sceSifBindRpc) and registers the status word with the module.
  *
  * Marks the client bound first, keeps an uncached pointer to D_005261C0 in D_004A5B18 and sends it with RPC function 0.
  * initOnline calls it when VOIPF.IRX loaded. Quirk: the bind result is not checked.
@@ -2857,7 +2857,7 @@ extern void func_003F6960b(int, int, int, int *, int) __asm__("func_003F6960");
 void func_003F6A40(void) {
     int *statusWord;
     D_004A5B14 = 1;
-    func_00426B48(D_00526100, 567, 0);
+    sceSifBindRpc(D_00526100, 567, 0);
     statusWord = (int *)(((int)D_005261C0 & 0xFFFFFFF) | 0x20000000);
     D_004A5B18 = statusWord;
     func_003F6960b(0, (int)statusWord, 0, D_00526140, 0x80);

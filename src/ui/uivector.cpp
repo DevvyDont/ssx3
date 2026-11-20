@@ -284,8 +284,8 @@ extern "C" void cUIVector_setChannelDataKCP(cUIVector_3808* self, unsigned int n
 //100%
 INCLUDE_ASM("ui/uivector", cUIVector_render2D);
 #ifdef SKIP_ASM
-// PORT: func_004139F8 is libgcc's __fixunssfsi (float -> unsigned); called by its address name.
-extern "C" unsigned int func_004139F8(float f);
+// PORT: fptoui is libgcc's __fixunssfsi (float -> unsigned); called by its address name.
+extern "C" unsigned int fptoui(float f);
 
 
 struct sV4_3A39F8 {
@@ -322,7 +322,7 @@ typedef void (*tDraw2_3A39F8)(void*, int, void*, int);
 
 static inline void SetCol_3A39F8(sVtx_3A39F8& vtx, int k, float v)
 {
-    vtx.col[k] = func_004139F8(v * 0.5f);
+    vtx.col[k] = fptoui(v * 0.5f);
 }
 
 static inline void AddPos_3A39F8(sV4_3A39F8& p, int k, float d)
