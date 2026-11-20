@@ -3208,7 +3208,7 @@ extern "C" void* cGraphicsMan_construct(void)
  * func_00391360, ...), allocates two objects with operator_new, creates two semaphores and the kick thread (CreateSema,
  * CreateThread, StartThread), calls func_00424880, func_00423A90, func_004248E8, func_00424950, func_00423AC0 and
  * func_004249B8 (the interrupt-handler setup that Purge undoes), then allocates the texture manager (cMemMan_alloc +
- * func_00366FE8) and the defer manager and sets up the default render state. cPS2GraphicsMan_Purge (Purge) undoes these steps.
+ * func_00366FE8) and the defer manager and sets up the default render state. cPS2GraphicsMan_Purge undoes these steps.
  */
 INCLUDE_ASM("render/particle", cPS2GraphicsMan_Init);
 
@@ -3228,7 +3228,7 @@ void operator_delete(int* ptr);
 extern char D_005059D8[];
 
 /**
- * Shuts the PS2 renderer down, undoing cPS2GraphicsMan_Init (Init).
+ * Shuts the PS2 renderer down, undoing cPS2GraphicsMan_Init.
  *
  * Calls func_00424880(2) and removes the INTC 2 handler (mIntcHandlerId), calls func_00424950(1) and removes the DMAC 0
  * handler (mDmacHandlerId), terminates and deletes the kick thread (mKickThreadId), deletes mKickSema and mQueueMutex,
@@ -9802,7 +9802,7 @@ static inline void CopyQuads_16F0(unsigned long** pp, const void* srcp, int n)
 /**
  * Draws the snow fluff (larger soft flakes) of a snow box.
  *
- * The same setup as cPS2GraphicsMan_RenderSnowBoxFlakes (RenderSnowBoxFlakes): snow render mode, box matrix times the view (+0x5860), then
+ * The same setup as cPS2GraphicsMan_RenderSnowBoxFlakes: snow render mode, box matrix times the view (+0x5860), then
  * the packet. cSnowBox_render calls it for snow-box type 1.
  *
  * @param obj  the snow box data
@@ -13685,7 +13685,7 @@ extern "C" void RemoveDmacHandler(int, int);
  * Removes the renderer's interrupt handlers before another executable is loaded.
  *
  * Calls func_00424880(2) and removes the INTC 2 handler (+0x5AC0), then func_00424950(1) and removes the DMAC 0 handler
- * (+0x5AC4): the same first steps as cPS2GraphicsMan_Purge (Purge), leaving the threads and memory alone.
+ * (+0x5AC4): the same first steps as cPS2GraphicsMan_Purge, leaving the threads and memory alone.
  */
 extern "C" void cPS2GraphicsMan_loadexecpurge(void* self)
 {

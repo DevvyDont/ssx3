@@ -2277,7 +2277,7 @@ struct cMenuSys_pushMenu_sStack {
  * Opens a menu: pushes @p item on top of the menu stack @p stack and activates the menu system.
  *
  * Calls the old top menu's vtable slot 7 (onLoseFocus), stores @p item at MenuStack[MenuDepth++], calls its slot 6
- * (onGainFocus) with the menu system, then cMenuSys_activate (activate) with 1. There is no overflow check.
+ * (onGainFocus) with the menu system, then cMenuSys_activate with 1. There is no overflow check.
  *
  * @param stack  the menu system
  * @param item  the menu to open
@@ -2319,7 +2319,7 @@ struct cMenuSys_popMenu_sStack {
  * Closes the top menu of the menu system and deactivates the system when none is left.
  *
  * Decrements MenuDepth, calls the popped menu's vtable slot 7 (onLoseFocus) and, when a menu remains, the new top's
- * slot 6 (onGainFocus) with the menu system; with none left it calls cMenuSys_activate (activate) with 0. There is no
+ * slot 6 (onGainFocus) with the menu system; with none left it calls cMenuSys_activate with 0. There is no
  * underflow check.
  *
  * @param menuSys  the menu system

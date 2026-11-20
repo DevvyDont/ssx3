@@ -7,10 +7,10 @@
 // (cWorldCache_cWorldCache constructs it in place, cWorldCache__cWorldCache destroys it); no vtable, no base class.
 // EA's source is d:/ssx/code/source/world/streamman.cpp (preview assert strings); methods 0x003A6D50-0x003A7598
 // (world/streamman):
-//   cStreamMan_cStreamMan, cStreamMan__cStreamMan, cStreamMan_init (init), cStreamMan_reset (reset),
-//   cStreamMan_purge (purge), cStreamMan_addStreamRequest (addStreamRequest), cStreamMan_cancelStreamRequest (cancelStreamRequest),
-//   cStreamMan_setBandWidthLimit (setBandWidthLimit), cStreamMan_update (update), cStreamMan_decompressChunk (decompressChunk),
-//   cStreamMan_processChunk (processChunk). The static _NULLCHUNK is cStreamMan_NULLCHUNK.
+//   cStreamMan_cStreamMan, cStreamMan__cStreamMan, cStreamMan_init, cStreamMan_reset,
+//   cStreamMan_purge, cStreamMan_addStreamRequest, cStreamMan_cancelStreamRequest,
+//   cStreamMan_setBandWidthLimit, cStreamMan_update, cStreamMan_decompressChunk,
+//   cStreamMan_processChunk. The static _NULLCHUNK is cStreamMan_NULLCHUNK.
 //
 // Size 0xE8: cWorldCache's next member, mp_ChunkResolve, is at 0x3E8 = 0x300 + 0xE8 (cWorldCache_init stores
 // cChunkResolve_construct() there), and the last field written is 0xE4 (cStreamMan_addStreamRequest, cStreamMan_update).

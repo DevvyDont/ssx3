@@ -49,7 +49,7 @@ struct cUIScreen {
     cList mThreads;                  // 0x018 [O] cList of cUIThread; [U] cUIScreen_playFrame appends a "UIThread",
                                      //       cUIScreen_getPrimaryThread walks it; [R] the destructor tears down its vptrs (0x20/0x2C/0x30)
     tUIKeyframeBlock* mpKeyframeBlock; // 0x034 [O]; [R] = 0; cUIScreen_setData = record + record[2]; [U] the frame list searched by
-                                     //       cUIScreen_getFrameByLabel and cUIScreen_getFrameByIndex (getFrameByIndex)
+                                     //       cUIScreen_getFrameByLabel and cUIScreen_getFrameByIndex
     tUIObjectBlock* mpObjectBlock;   // 0x038 [O]; [R] = 0; cUIScreen_setData = record + record[1]; [U] object count + records read by
                                      //       cUIScreen_createAllObjects, cUIScreen_createObjectByHashName, cUIScreen_getObjectByHashName
     cUIThing** mppObjectList;        // 0x03C [O]; [R] = 0; [U] cUIScreen_createAllObjects allocates count * 4 ("UIScreenObjs");

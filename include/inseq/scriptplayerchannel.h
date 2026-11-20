@@ -91,11 +91,11 @@ struct cScriptPlayerChannelObject {
     // --- cScriptPlayerChannelObject
     tInSeqObjectChannelHeader* mpHeader; // 0x010 [O]; [U] Play stores the data; header[0] = key count, header[1] =
                                    //       object count
-    tInSeqObjectChannelKey* mpNextKey; // 0x014 [O]; [U] Play: data + 4; cScriptPlayerChannelObject_LoadNextScriptKey (LoadNextScriptKey) steps it
+    tInSeqObjectChannelKey* mpNextKey; // 0x014 [O]; [U] Play: data + 4; cScriptPlayerChannelObject_LoadNextScriptKey steps it
     int mNextKeyIndex;             // 0x018 [O]; [U] cScriptPlayerChannelObject_LoadNextScriptKey counts it
     tObjectEntry* mpObjectArray;   // 0x01C [O]; [U] Play allocates header[1] x 0x24 (tObjectEntry); Stop frees it;
                                    //       cScriptPlayerChannelObject_AddActiveKey indexes it
-    tObjectEntry* mpActiveObjectList; // 0x020 [O]; [U] cScriptPlayerChannelObject_AddActiveKey (AddActiveKey) pushes onto it; Update
+    tObjectEntry* mpActiveObjectList; // 0x020 [O]; [U] cScriptPlayerChannelObject_AddActiveKey pushes onto it; Update
                                    //       (cScriptPlayerChannelObject_Update) unlinks ended entries; GetCustom returns it
     int mNumActiveObjects;         // 0x024 [O]; [U] ++ by AddActiveKey, -- by Update; GetValue returns its address
 };
@@ -114,14 +114,14 @@ struct cScriptPlayerChannelBlock {
     // --- cScriptPlayerChannelBlock
     tInSeqBlockChannelHeader* mpHeader; // 0x010 [O]; [U] Play stores the data; header[0] = key count, header[1] =
                                    //       block count
-    tInSeqBlockChannelKey* mpNextKey; // 0x014 [O]; [U] Play: data + 4; cScriptPlayerChannelBlock_LoadNextScriptKey (LoadNextScriptKey) steps it by
+    tInSeqBlockChannelKey* mpNextKey; // 0x014 [O]; [U] Play: data + 4; cScriptPlayerChannelBlock_LoadNextScriptKey steps it by
                                    //       the key's size (0 at the end)
     int mNextKeyIndex;             // 0x018 [O]; [U] cScriptPlayerChannelBlock_LoadNextScriptKey counts it up to header[0] - 1
     tInSeqBlock* mpDataArray;      // 0x01C [O]; no retail access seen (the ctor and Stop skip it: placed by the
                                    //       order)
     tBlockEntry* mpBlockArray;     // 0x020 [O]; [U] Play allocates header[1] x 0x1C (tBlockEntry) from the owner's
                                    //       heap; Stop frees it; cScriptPlayerChannelBlock_AddActiveKey indexes it
-    tBlockEntry* mpActiveBlockList; // 0x024 [O]; [U] cScriptPlayerChannelBlock_AddActiveKey (AddActiveKey) pushes onto it; Update
+    tBlockEntry* mpActiveBlockList; // 0x024 [O]; [U] cScriptPlayerChannelBlock_AddActiveKey pushes onto it; Update
                                    //       (cScriptPlayerChannelBlock_Update) unlinks ended entries; GetCustom returns it
     int mNumActiveBlocks;          // 0x028 [O]; [U] ++ by AddActiveKey, -- by Update; GetValue returns its address
 };
@@ -140,7 +140,7 @@ struct cScriptPlayerChannelEvent {
     // --- cScriptPlayerChannelEvent
     tInSeqEventChannelHeader* mpHeader; // 0x010 [O]; [U] Play stores the data; header[0] = key count, header[1] =
                                    //       event count
-    tInSeqEventChannelKey* mpNextKey; // 0x014 [O]; [U] Play: data + 4; cScriptPlayerChannelEvent_LoadNextScriptKey (LoadNextScriptKey) steps it
+    tInSeqEventChannelKey* mpNextKey; // 0x014 [O]; [U] Play: data + 4; cScriptPlayerChannelEvent_LoadNextScriptKey steps it
     int mNextKeyIndex;             // 0x018 [O]; [U] cScriptPlayerChannelEvent_LoadNextScriptKey counts it
     tEventEntry* mpEventArray;     // 0x01C [O]; [U] Play allocates header[1] x 8 (tEventEntry); Stop frees it;
                                    //       cScriptPlayerChannelEvent_AddActiveKey fills entry [mNumActiveEvents]; GetCustom returns it

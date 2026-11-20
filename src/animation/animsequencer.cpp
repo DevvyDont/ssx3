@@ -769,7 +769,7 @@ extern "C" void cAnimSequence_setSubAnim(void* self, int i, int anim);
 /**
  * Starts a new sequence that plays an animation once and holds its last frame.
  *
- * cAnimSequencer_newSequence (newSequence), then sub-animation 0 gets @p anim (cAnimSequence_setSubAnim), time @p val (cAnimSequence_setSubAnimTime) and type
+ * cAnimSequencer_newSequence, then sub-animation 0 gets @p anim (cAnimSequence_setSubAnim), time @p val (cAnimSequence_setSubAnimTime) and type
  * 0, hold (cAnimSequence_setSubAnimType).
  *
  * @param sequenceID  the sequence id (On Tour sequenceID)
@@ -796,7 +796,7 @@ extern "C" void cAnimSequence_setSubAnim(void* self, int i, int anim);
 /**
  * Starts a new sequence that loops an animation.
  *
- * cAnimSequencer_newSequence (newSequence), then sub-animation 0 gets @p anim (cAnimSequence_setSubAnim), time @p val (cAnimSequence_setSubAnimTime) and type
+ * cAnimSequencer_newSequence, then sub-animation 0 gets @p anim (cAnimSequence_setSubAnim), time @p val (cAnimSequence_setSubAnimTime) and type
  * 1, loop (cAnimSequence_setSubAnimType).
  *
  * @param sequenceID  the sequence id (On Tour sequenceID)
@@ -897,7 +897,7 @@ INCLUDE_ASM("animation/animsequencer", cAnimSequencer_fadeOutAndExpireAll);
 /**
  * Fades out every sequence of the sequencer and marks them all to expire.
  *
- * cAnimSequence_fadeOutAndExpire (fadeOutAndExpire) on each sequence of the list at +0x4.
+ * cAnimSequence_fadeOutAndExpire on each sequence of the list at +0x4.
  *
  * @param time  the fade-out time in seconds (On Tour time)
  */
@@ -918,7 +918,7 @@ extern "C" void cAnimSequence_removeEndTrigger(void* self, int v);
 /**
  * Removes the given end trigger from every sequence of the sequencer.
  *
- * cAnimSequence_removeEndTrigger (removeEndTrigger) on each sequence of the list at +0x4.
+ * cAnimSequence_removeEndTrigger on each sequence of the list at +0x4.
  *
  * @param trig  the end trigger's event id (On Tour trig)
  */

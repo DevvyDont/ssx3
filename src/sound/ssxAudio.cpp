@@ -3006,7 +3006,7 @@ void* cSSXAudio_GetCameraPos(void* self, int a1);
 /**
  * Tells whether a position lies within a radius (in metres) of any view's camera and in front of it (z above 0).
  *
- * cSSXAudio_RiderCollision (RiderCollision) uses it.
+ * cSSXAudio_RiderCollision uses it.
  *
  * @param pos  the position
  * @param radius  the radius in metres (scaled by 100)

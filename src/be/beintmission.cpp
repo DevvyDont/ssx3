@@ -1253,7 +1253,7 @@ extern int D_005305F0[];
 /**
  * Returns the id of the n-th mission at the current location.
  *
- * cBEMissionInterface_getMissionIDOnTrack (getMissionIDOnTrack) with the current location id from D_005305F0.
+ * cBEMissionInterface_getMissionIDOnTrack with the current location id from D_005305F0.
  *
  * @param iIdx  the mission's index at this location (On Tour iIdx)
  * @return the mission id, 0 when there are not that many

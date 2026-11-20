@@ -4443,7 +4443,7 @@ struct Ent_2048 { int idx; int val; int pad; int type; };
  *
  * Defaults (D_004FBC10, under D_004A572C: -1, -1) take the keyword arguments (types from D_004A3CC0). Only when the
  * script's rider is set and not busy (virtual slot 9): the mode index (< 8) selects the eSectionManMode in D_00445E40;
- * if the second value is 0, cWScriptMan_failActiveLocalMission (failActiveLocalMission) runs unless that mode is 1, then
+ * if the second value is 0, cWScriptMan_failActiveLocalMission runs unless that mode is 1, then
  * cSectionMan_eventbegin(SSXApp->Game->SectionMan, mode).
  *
  * @param n  the number of keyword arguments
@@ -4539,7 +4539,7 @@ public:
  *
  * Defaults (D_004FBC20, under D_004A5730: -1, -1, -1) take the keyword arguments (types from D_004465C8). Only when the
  * script's rider is set and not busy: the location comes from the script ID through cBENewRaceInterface_getLocationIDFromScript (BE interface 0) and
- * the mode from D_00445E40 (index < 8). The action: 0 cSectionMan_load (load), 2 cSectionMan_activate, 3
+ * the mode from D_00445E40 (index < 8). The action: 0 cSectionMan_load, 2 cSectionMan_activate, 3
  * cGame_setState(game, 0xE, 2, 0) and func_002A49E8(cAudioInterface_bxAudio()), 4 cGame_setState(game, 0xE, 0, 0), 5 sets
  * SectionMan +0x1A4; 1 does nothing (load and activate act on SSXApp->Game->SectionMan).
  *
@@ -7933,8 +7933,8 @@ struct sGame_7308 {
  * the script's rider with the BE interface 0 value from cBENewRaceInterface_getLocationPeak1 and the money. If there is a next mission
  * (cBEMissionInterface_getNextMissionID != -1) this one's icon is hidden (cBEMissionInterface_setIsShowIcon), the pass script (+0x6C) runs
  * through cWScriptMan_runScriptCode, and a locked next mission is unlocked, made ready and shown (cBEMissionInterface_setIsLocked,
- * cBEMissionInterface_setIsReady, cBEMissionInterface_setIsShowIcon); with no next mission only the pass script runs. Ends with cWScriptMan_updateWorld (updateWorld)
- * and cWScriptMan_processPass (processPass) on the script manager (+0x10), then cReplay_reset and cReplay_startRace on
+ * cBEMissionInterface_setIsReady, cBEMissionInterface_setIsShowIcon); with no next mission only the pass script runs. Ends with cWScriptMan_updateWorld
+ * and cWScriptMan_processPass on the script manager (+0x10), then cReplay_reset and cReplay_startRace on
  * SSXApp->Game->Replay.
  *
  * On Tour also awards leaderboard points and a medal and triggers an overlay; retail has none of that.

@@ -22,7 +22,7 @@
 //   cWorldPainterQuery_queryPosition and render cWorldPainterMan_render; cRenderStateMan_update reads it too).
 //
 // A FLAT layout, like main/game.h. Evidence tags:
-//   [R] retail's constructors cWorldPainterMan_cWorldPainterMan and cWorldPainterSection_cWorldPainterSection (cWorldPainterSection), init
+//   [R] retail's constructors cWorldPainterMan_cWorldPainterMan and cWorldPainterSection_cWorldPainterSection, init
 //       cWorldPainterMan_init, the allocation sizes above;
 //   [P] the July 2003 preview's assert strings (worldpainterman.h / worldpainterman.cpp);
 //   [U] how retail code uses the field;

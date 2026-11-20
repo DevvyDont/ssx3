@@ -21,7 +21,7 @@
 //       cBENewRaceInterface_getNumberMission = 0x38, cBENewRaceInterface_setRaceTime/cBENewRaceInterface_getRaceTime = set/get 0x44);
 //   [R] retail's setters: cBENewRaceInterface_assignPlayer(gate, player) writes playerID[gate] = player and
 //       riderID[player] = gate; setNumberHumans/setNumberMission/setNumberAI recompute iNumberRiders;
-//       setGameMode sb 0x48, cBENewRaceInterface_setGamePath (setGamePath) sb 0x49, setGameEvent sb 0x4A;
+//       setGameMode sb 0x48, cBENewRaceInterface_setGamePath sb 0x49, setGameEvent sb 0x4A;
 //   [O] On Tour's member order.
 // The preview's newRace continues past 0x4C (getGameTournament lw 0x50, getCurrentTournamentRound lw 0x54); retail's
 // struct copy stops at 0x4C, so those are separate statics in retail.
@@ -39,7 +39,7 @@ struct cBERaceDB {
     int iLocationIdx;           // 0x40 [P] setLocationID; [U] cBENewRaceInterface_getLocation(ID) (D_00535C08)
     int iRaceTime;              // 0x44 [P] get/setRaceTime; [R] cBENewRaceInterface_setRaceTime / cBENewRaceInterface_getRaceTime (D_00535C0C)
     signed char cGameMode;      // 0x48 [P] getGameMode; [R] setGameMode stores its argument (D_00535C10)
-    signed char cGamePath;      // 0x49 [P] getGamePath; [R] cBENewRaceInterface_setGamePath (setGamePath): 0, 1, 2
+    signed char cGamePath;      // 0x49 [P] getGamePath; [R] cBENewRaceInterface_setGamePath: 0, 1, 2
                                 //      (D_00535C11); 2 is On Tour's kGAMEPATH_MULTIPLAYER, which the main menu's online
                                 //      item also sets; [U] cGameModeMan::iCurrentGamePath copies it
     signed char cGameEvent;     // 0x4A [P] getGameEvent; [R] setGameEvent (D_00535C12); [U] initGameMode's argument

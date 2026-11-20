@@ -398,7 +398,7 @@ INCLUDE_ASM("replay/replay", cReplay_findNextFrame);
  * Returns the recorded frame after the one containing a tick, or that frame itself when it is the newest (On Tour
  * findNextFrame(int tick)).
  *
- * Declared with only self: the tick stays in $a1 and reaches cReplay_findFrame (findFrame), whose frame's Next (+0x14) is
+ * Declared with only self: the tick stays in $a1 and reaches cReplay_findFrame, whose frame's Next (+0x14) is
  * taken when non-null.
  *
  * @return the next cReplayFrame
@@ -421,7 +421,7 @@ INCLUDE_ASM("replay/replay", cReplay_findPrevFrame);
  * Returns the recorded frame before the one containing a tick, or that frame itself when it is the oldest (On Tour
  * findPrevFrame(int tick)).
  *
- * Declared with only self: the tick stays in $a1 and reaches cReplay_findFrame (findFrame), whose frame's Prev (+0x18) is
+ * Declared with only self: the tick stays in $a1 and reaches cReplay_findFrame, whose frame's Prev (+0x18) is
  * taken when non-null.
  *
  * @return the previous cReplayFrame

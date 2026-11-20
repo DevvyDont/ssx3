@@ -8,15 +8,15 @@
 // No vtable, no base class. EA's source: d:/ssx/code/source/world/worldview.cpp and ../source/world/worldview.h
 // (preview assert strings). Retail splits it over two units:
 //   world/worldcache (0x003A8F80-0x003A9800): cWorldView_cWorldView, cWorldView__cWorldView, cWorldView_init,
-//     cWorldView_purge, cWorldView_reset (reset), cWorldView_update, cWorldView_recursiveFlushPages (recursiveFlushPages),
-//     cWorldView_recursiveIsEmptyPages (recursiveIsEmptyPages), cWorldView_setFocus (setFocus), cWorldView_getFocus (getFocus),
-//     cWorldView_getTestFocus (getTestFocus);
-//   world/worldview (0x003A9800-0x003AA2D8): cWorldView_getNumSections, cWorldView_getSectionName (getSectionName),
-//     cWorldView_isSectionLoaded, cWorldView_isSectionUnLoaded (isSectionUnLoaded), cWorldView_loadSection (loadSection),
-//     cWorldView_unloadSection (unloadSection), cWorldView_activateSection (activateSection), cWorldView_deactivateSection (deactivateSection),
-//     cWorldView_getWorldBoundBox (getWorldBoundBox), cWorldView_getHull (getHull), cWorldView_getNumHull (getNumHull),
-//     cWorldView_isBoxValid (isBoxValid), cWorldView_recursiveIsValid (recursiveIsValid), cWorldView_refreshStreamFocus (refreshStreamFocus),
-//     cWorldView_getDistanceToBox (getDistanceToBox), cWorldView_recursiveTreeFocus (recursiveTreeFocus).
+//     cWorldView_purge, cWorldView_reset, cWorldView_update, cWorldView_recursiveFlushPages,
+//     cWorldView_recursiveIsEmptyPages, cWorldView_setFocus, cWorldView_getFocus,
+//     cWorldView_getTestFocus;
+//   world/worldview (0x003A9800-0x003AA2D8): cWorldView_getNumSections, cWorldView_getSectionName,
+//     cWorldView_isSectionLoaded, cWorldView_isSectionUnLoaded, cWorldView_loadSection,
+//     cWorldView_unloadSection, cWorldView_activateSection, cWorldView_deactivateSection,
+//     cWorldView_getWorldBoundBox, cWorldView_getHull, cWorldView_getNumHull,
+//     cWorldView_isBoxValid, cWorldView_recursiveIsValid, cWorldView_refreshStreamFocus,
+//     cWorldView_getDistanceToBox, cWorldView_recursiveTreeFocus.
 // (Names from On Tour's cWorldView methods, matched by body; the rest of world/worldview is cChunkResolve,
 // cPS2ChunkResolve and cWScriptCache.)
 //
@@ -47,7 +47,7 @@ struct tStreamDataHeader {
     unsigned int m_uiCheckSum;      // 0x04 [O]
     unsigned int m_uiNumSections;   // 0x08 [P] assert mp_Hdr->m_uiNumSections; [U] cWorldView_getNumSections
     unsigned int m_uiNumBSPNodes;   // 0x0C [O]; [R] cWorldView_init: count of 0x60-byte nodes
-    unsigned int m_uiNumBSPHulls;   // 0x10 [P] assert mp_Hdr->m_uiNumBSPHulls; [U] cWorldView_getNumHull (getNumHull)
+    unsigned int m_uiNumBSPHulls;   // 0x10 [P] assert mp_Hdr->m_uiNumBSPHulls; [U] cWorldView_getNumHull
     struct tBxSection* m_pSection;  // 0x14 [O]; [R] cWorldCache_init fixes it up to this + 0x50
     short m_iTable[28];             // 0x18 [O]; [R] cWorldCache_init: per-type counts of the shared cWorldCacheTable
 };
@@ -164,12 +164,12 @@ struct cWorldView {
     tStreamDataHeader* mp_Hdr;      // 0x004 [P] assert mp_Hdr->m_uiNumSections; [R] init; [U] all the section getters
     tBxSection* mp_Section;         // 0x008 [P] assert mp_Section[i]; [R] init = hdr + 0x50
     tBxBSPNode* mp_Nodes;           // 0x00C [O]; [R] init: 16-aligned after the sections, indices fixed up to pointers
-    tBxBSPHull* mp_Hulls;           // 0x010 [O]; [R] init: after the nodes; [U] cWorldView_getHull (getHull) steps 0x44
+    tBxBSPHull* mp_Hulls;           // 0x010 [O]; [R] init: after the nodes; [U] cWorldView_getHull steps 0x44
     tSectionState mp_SectionState[64]; // 0x014 [O]; [R] reset zeroes 64; [U] isSectionLoaded = state 5 or 6,
                                     //       load/unload/activate/deactivate, update's state machine
     int unk_214[3];                 // 0x214 padding (tBoundBox alignment)
     tBoundBox m_WorldBoundBox;      // 0x220 [O]; [R] init copies section 0's root node box, reset = zero vectors;
-                                    //       [U] cWorldView_getWorldBoundBox (getWorldBoundBox) returns its address
+                                    //       [U] cWorldView_getWorldBoundBox returns its address
     tStreamFocusInfo m_StreamFocus[2]; // 0x240 [O] (kStreamFocus_Num = 2, one per local rider); [R] reset clears both
                                     //       and calls setFocus(i, zero, 0)
     unsigned int m_uiNumSectionsLoaded; // 0x2E0 [O]; [R] reset = 0; [U] update counts sections in state 5 or 6

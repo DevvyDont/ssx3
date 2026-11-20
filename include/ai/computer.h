@@ -97,7 +97,7 @@ struct cComputer {
     int mBadHeadingTime;       // 0xE78 [O]; [R] Init = 0; [U] cComputer_checkForReset
     int GrabHistoryCounter[15]; // 0xE7C [O] (On Tour [7]); [R] Init/resetCounters clear 0x3C bytes; [U] cComputer_chooseRandomGrab
     int UberHistoryCounter[15]; // 0xEB8 [O]; [U] cComputer_chooseRandomUberGrab (chooseRandomUberGrab: sets mIsUber)
-    int TweakHistoryCounter[15]; // 0xEF4 [O]; [U] cComputer_chooseRandomTweakGrab (chooseRandomTweakGrab)
+    int TweakHistoryCounter[15]; // 0xEF4 [O]; [U] cComputer_chooseRandomTweakGrab
     float mBlockTimer;         // 0xF30 [O]; [R] Init = 0; [U] cComputer_checkForBlock (float)
     int mShouldIBlock;         // 0xF34 [O] (bool); [R] Init = 0; [U] cComputer_checkForBlock
     short mCruiseLogicID;      // 0xF38 [P] setCruiseLogic (preview sh 0xEE8); [R] Init = 1, cComputer_setCruiseLogic

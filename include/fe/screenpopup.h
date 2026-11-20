@@ -68,7 +68,7 @@ struct cScreenPopup {
     cUIMenu* mpMenu;                // 0x06C [O]; [U] widget "Menu0000"; cUIMenu_setSelectedByIndex in setPrivateDefaultOption
     cUIGroup* mpButtonGroup;        // 0x070 [O]; [U] widget "buttons"
     cUIText* mpMessageText;         // 0x074 [O]; [U] widget "popupText"; cScreenPopup_setPopupMessage
-    cUIText* mpPostText;            // 0x078 [O]; [U] widget "popupPost"; cScreenPopup_handlePostPending (handlePostPending)
+    cUIText* mpPostText;            // 0x078 [O]; [U] widget "popupPost"; cScreenPopup_handlePostPending
     cUIText* mpTitleText;           // 0x07C [O]; [U] widget "popupTitle"; cScreenPopup_createTitleBar
     cUIText* mpEnterBox;            // 0x080 [O]; [U] widget "EnterTextBox"; cScreenPopup_handleEntryBox
     cUIText* mpStaticBox;           // 0x084 [O]; [U] widget "StaticTextBoxLabel"

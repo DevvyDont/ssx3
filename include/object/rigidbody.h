@@ -3,9 +3,9 @@
 
 // cRigidBody: a rigid body's integrator state (pose, linear/angular momentum, inverse mass and inertia, the derived
 // velocities). In SSX 3 its only user is cRollerModifier, which has it as a base at +0x30 (object/rollermodifier.h);
-// the methods are in src/object/railmodifier.cpp: cRigidBody_cRigidBody (ctor, empty), cRigidBody_setW (setW), cRigidBody_updateImplicit
-// (updateImplicit), cRigidBody_stepMotion (stepMotion), cRigidBody_rigidImpact (rigidImpact), func_0035D908 (applyImpulse),
-// cRigidBody_writeToReplayFrame, cRigidBody_readFromReplayFrame (readFromReplayFrame). Size 0xA0: On Tour's DWARF, and in retail
+// the methods are in src/object/railmodifier.cpp: cRigidBody_cRigidBody (ctor, empty), cRigidBody_setW, cRigidBody_updateImplicit
+// (updateImplicit), cRigidBody_stepMotion, cRigidBody_rigidImpact, func_0035D908 (applyImpulse),
+// cRigidBody_writeToReplayFrame, cRigidBody_readFromReplayFrame. Size 0xA0: On Tour's DWARF, and in retail
 // cRollerModifier's next field (m_pInstance) is at 0x30 + 0xA0. EA's header path is unknown (On Tour builds it in
 // all_in_one_object.cpp); the preview keeps the RTTI names cRigidBody and cRigidBodyState.
 //

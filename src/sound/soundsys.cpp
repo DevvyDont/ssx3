@@ -536,7 +536,6 @@ struct sCurve_290B58 {
     float value[5];     // 0x14
 };
 
-// Piecewise-linear lookup in a 5-point curve; 0 above the last key gap.
 // Named _impl: a later block declares func_00290B58 with its own curve struct.
 extern "C" float func_00290B58_impl(sCurve_290B58* c, float x) __asm__("func_00290B58");
 /**

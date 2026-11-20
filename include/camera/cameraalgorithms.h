@@ -147,7 +147,7 @@ struct cLookAtChaseAlgorithm {
     float Pitch;                    // 0x054 [O]; [R] 0; [U] lwc1/swc1 (cLookAtChaseAlgorithm_updatePitchBlending, cLookAtChaseAlgorithm_calcPitchHeading)
     float CamRoll;                  // 0x058 [O]; [R] 0
     char unk_05C[0x4];              // 0x05C alignment gap
-    tPose CalculatedPose;           // 0x060 [O]; [U] cLookAtChaseAlgorithm_calcPose (calcPose) writes P and Q (sq), reads Q.x..w
+    tPose CalculatedPose;           // 0x060 [O]; [U] cLookAtChaseAlgorithm_calcPose writes P and Q (sq), reads Q.x..w
     t4Vector LastCamDir;            // 0x080 [O]; [U] sq/lqc2
     t4Vector LastVelLookahead;      // 0x090 [O]; [R] = t4vect_Zero
     t4Vector LastRiderPos;          // 0x0A0 [O]; [U] cLookAtChaseAlgorithm_updateHandplant
@@ -155,9 +155,9 @@ struct cLookAtChaseAlgorithm {
     t4Vector LastRailMove;          // 0x0C0 [O]; [R] = t4vect_Zero
     t4Vector LastHalfPipeMove;      // 0x0D0 [O]; [R] = t4vect_Zero
     t4Vector LastHalfPipeDistCorrection; // 0x0E0 [O]; [R] = t4vect_Zero
-    t4Vector LastLookaheadSkew;     // 0x0F0 [O]; [U] cLookAtChaseAlgorithm_snap (snap) clears it
+    t4Vector LastLookaheadSkew;     // 0x0F0 [O]; [U] cLookAtChaseAlgorithm_snap clears it
     t4Vector LastHorizontalVel;     // 0x100 [O]; [U] lq/sq (cLookAtChaseAlgorithm_setupChaseData), .z by sw in snap
-    t4Vector HalfPipeInboundLook;   // 0x110 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam (updateHalfPipeCam)
+    t4Vector HalfPipeInboundLook;   // 0x110 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
     t4Vector HalfPipeExitLook;      // 0x120 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam, .z lwc1/swc1
     t4Vector HalfPipeRotator;       // 0x130 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam, .x/.y/.z lwc1
     t4Vector HalfPipeNewLook;       // 0x140 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
@@ -178,7 +178,7 @@ struct cLookAtChaseAlgorithm {
     float ExtraBoostDist;           // 0x1E8 [O]; [U] cLookAtChaseAlgorithm_updateFollowDistance
     float LastBoostWarp;            // 0x1EC [O]; [U] cLookAtChaseAlgorithm_updateFollowDistance
     float LastCameraSwing;          // 0x1F0 [O]; [U] snap zeroes it (sw)
-    float AirCamTimeInAir;          // 0x1F4 [O]; [U] cLookAtChaseAlgorithm_updateAirCam (updateAirCam)
+    float AirCamTimeInAir;          // 0x1F4 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float AirSplineScalar;          // 0x1F8 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float AirTimeScalar;            // 0x1FC [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float AirCamMaxTime;            // 0x200 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
@@ -186,7 +186,7 @@ struct cLookAtChaseAlgorithm {
     float LastTargetCrouchFactor;   // 0x208 [O]; [U] cLookAtChaseAlgorithm_updateCamTargetLate
     float LastAirTargetDelta;       // 0x20C [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float LastAirPositionDelta;     // 0x210 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
-    float ViewCamLastFactor;        // 0x214 [O]; [U] cLookAtChaseAlgorithm_updateViewCam (updateViewCam)
+    float ViewCamLastFactor;        // 0x214 [O]; [U] cLookAtChaseAlgorithm_updateViewCam
     float FullAirCamTimeInAir;      // 0x218 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float LastFullAirTargetDelta;   // 0x21C [O]; [U] cLookAtChaseAlgorithm_updateAirCam
     float LastFullAirPositionDelta; // 0x220 [O]; [U] cLookAtChaseAlgorithm_updateAirCam
@@ -202,7 +202,7 @@ struct cLookAtChaseAlgorithm {
     float SlowCamBlend;             // 0x248 [O]; [U] cLookAtChaseAlgorithm_updateSlowSpeedCam (updateSlowSpeedCam; one sw zero)
     float LastHorizontalMoveLen;    // 0x24C [O]; [U] snap
     float LastEnemyPullback;        // 0x250 [O]; [U] snap
-    float ShakeNextXTime;           // 0x254 [O]; [U] cLookAtChaseAlgorithm_setupCameraShake (setupCameraShake), cLookAtChaseAlgorithm_updateCameraShake (updateCameraShake)
+    float ShakeNextXTime;           // 0x254 [O]; [U] cLookAtChaseAlgorithm_setupCameraShake, cLookAtChaseAlgorithm_updateCameraShake
     float ShakeNextYTime;           // 0x258 [O]; [U] ditto
     float ShakeNextZTime;           // 0x25C [O]; [U] ditto
     float ShakeXTarget;             // 0x260 [O]; [U] ditto
@@ -227,7 +227,7 @@ struct cLookAtChaseAlgorithm {
     float SecondaryShakeYCounter;   // 0x2AC [O]; [U] ditto
     float SecondaryShakeZCounter;   // 0x2B0 [O]; [U] ditto
     float ShakeBlendOutTime;        // 0x2B4 [O]; [U] ditto
-    float LastHandplantRise;        // 0x2B8 [O]; [U] cLookAtChaseAlgorithm_updateHandplant (updateHandplant)
+    float LastHandplantRise;        // 0x2B8 [O]; [U] cLookAtChaseAlgorithm_updateHandplant
     float SteerTime;                // 0x2BC [O]; [U] snap
     int FramesSinceHandplant;       // 0x2C0 [O]; [R] 5000; [U] cLookAtChaseAlgorithm_setupHandplantBlend
     int AirCamSetupCountdown;       // 0x2C4 [O]; [U] cLookAtChaseAlgorithm_setupHalfPipeCam, cLookAtChaseAlgorithm_updateAirCam
@@ -254,7 +254,7 @@ struct cLookAtChaseAlgorithm {
     char FullAirTargetSpline[0xC];  // 0x31C [O] cCubicSplineInterpolant; [R] ditto
     char FullAirPositionSpline[0xC]; // 0x328 [O] cCubicSplineInterpolant; [R] ditto
     char HalfPipeAngleSpline[0xC];  // 0x334 [O] cCubicSplineInterpolant; [R] ditto
-    cPIDFilter TurningPIDFilter;    // 0x340 [O]; [R] the ctor sets its three factors and calls cPIDFilter_reset (reset);
+    cPIDFilter TurningPIDFilter;    // 0x340 [O]; [R] the ctor sets its three factors and calls cPIDFilter_reset;
                                     //       [U] cLookAtChaseAlgorithm_setupCamDirection runs the filter inline
     char unk_38C[0x4];              // 0x38C padding to the 16-byte class alignment
 };

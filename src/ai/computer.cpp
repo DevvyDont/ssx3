@@ -3775,7 +3775,7 @@ extern "C" void cRider_flagEventPathEvent(cRider* self, int* arg, int a2, int a3
  * off the path (only every 60th AITick), with 1 within 200 of the path's end, or with 0 when the path's vtable slot 2
  * says to; a path change resets mTrackPathHint and re-measures.
  *
- * Each event in the new list is reported with cRider_flagEventPathEvent (flagEventPathEvent) as current, flagged as previous too
+ * Each event in the new list is reported with cRider_flagEventPathEvent as current, flagged as previous too
  * when it was in the old list; old events no longer present are reported as previous only.
  */
 extern "C" void cRider_updateTrackPath(cRider* self)
@@ -3933,10 +3933,10 @@ static inline float atan2_001125C0(float y, float x)
  * Keeps the previous path position (+0x4C0 = +0x4C4), then intersects the rider's position (+0x110) with the AI path
  * (+0xAB8): cPath_intersectPath1 with mAIPathHint normally, or the hint-less cPath_intersectPath for a pipe jump (cRider_isPipeJump__FPv,
  * which always says no). The closest point goes to +0x490 and the distance off the path to +0x4C8. The aim point +0x4A0
- * is the path point cRider_calculateAheadDist (calculateAheadDist) further on, and cRider_setAimTarget (setAimTarget) copies it to the
+ * is the path point cRider_calculateAheadDist further on, and cRider_setAimTarget copies it to the
  * aim target.
  *
- * While the rider still has distance left (+0x4D4 > 0) it calls cRider_checkAIPathSwitch (checkAIPathSwitch) with 0 when more than
+ * While the rider still has distance left (+0x4D4 > 0) it calls cRider_checkAIPathSwitch with 0 when more than
  * 500 off the path (only every 60th AITick), with 1 within 200 of the path's end, or with 0 when the path's vtable slot
  * 2 says so. Finally +0x4CC = atan2 of the aim point minus the closest point (x/y).
  */
@@ -4423,7 +4423,7 @@ struct sPathSys_112FB0 { char pad0[0x18]; tPathCheckpoint_112FB0 Checkpoints[6];
  *
  * Intersects the rider with the track path (+0xAB4, mTrackPathHint) and sets mDistToFinish = path length (+0x38) - path
  * position. When the rider moved forward (below the previous distance at +0x4D4), every one of gPaths' 6 checkpoints
- * between the old and new distance (the list ends at a zero entry) goes to cRider_flagEventPathCheckpoint (flagEventPathCheckpoint), the
+ * between the old and new distance (the list ends at a zero entry) goes to cRider_flagEventPathCheckpoint, the
  * path's vtable slot 1 collects up to 12 events in the covered range into +0x4DC (count in mOverlapCount), and +0x4D4
  * advances. Otherwise the same query runs on the empty range at the old distance.
  *

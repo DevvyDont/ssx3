@@ -1228,7 +1228,7 @@ INCLUDE_ASM("be/beintplayer", cBENewPlayerInterface_getPlayerCtrlID);
 /**
  * Returns which controller is assigned to a player slot.
  *
- * cBENewPlayerInterface_tempPlayers[@p iPlayer].field_0xc, the field cBENewPlayerInterface_setPlayerCtrlID (setPlayerCtrlID) writes.
+ * cBENewPlayerInterface_tempPlayers[@p iPlayer].field_0xc, the field cBENewPlayerInterface_setPlayerCtrlID writes.
  *
  * @param iPlayer  the player slot (On Tour iPlayer)
  * @return the controller id, negative for none

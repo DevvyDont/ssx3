@@ -8713,7 +8713,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cPlayer_scorePath__FPv);
 /**
  * Scores an AI path for a human player; humans do not choose paths, so every path scores 0.
  *
- * The cPlayer override of the path-scoring virtual (cRider vtable slot 20) that cRider_checkAIPathSwitch (checkAIPathSwitch)
+ * The cPlayer override of the path-scoring virtual (cRider vtable slot 20) that cRider_checkAIPathSwitch
  * calls; cComputer_scorePath is the real one. The path argument is not read and is left out of the C signature.
  *
  * @return always 0.0

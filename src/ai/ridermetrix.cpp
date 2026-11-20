@@ -1552,7 +1552,7 @@ extern "C" int cRiderMetrix_losePoints(cRiderMetrix* self);
 /**
  * Scores a reset: the trick in progress is lost, the combo ends and a boost penalty is returned.
  *
- * Adds cRiderMetrix_losePoints (losePoints) to Totals.TotalPointsLostToResets (+0x1A4), resets the current trick and combo chain
+ * Adds cRiderMetrix_losePoints to Totals.TotalPointsLostToResets (+0x1A4), resets the current trick and combo chain
  * and increments Totals.NumResets (+0x120).
  *
  * @param isUserReset  On Tour isUserReset: the player asked for the reset
@@ -1935,7 +1935,7 @@ INCLUDE_ASM("ai/ridermetrix", cRiderMetrix_evRailSpin__FPvi);
 /**
  * Scores a spin onto or off a rail: records the rail-slide mode, then scores the spin angle.
  *
- * Stores @p rsm as the current rail-slide mode (+0x20) and tail-calls cRiderMetrix_evSpin (evSpin); the angle passes through
+ * Stores @p rsm as the current rail-slide mode (+0x20) and tail-calls cRiderMetrix_evSpin; the angle passes through
  * untouched in $f12, which the C prototype does not show.
  *
  * @param rsm  the rail-slide mode (On Tour rsm)
@@ -1980,7 +1980,7 @@ extern "C" float cRiderMetrix_earnNameAndPoints(cRiderMetrix* self, int stance, 
 /**
  * Scores the end of an uber grind: earns the trick and starts a new one on the same rail.
  *
- * Increments the uber (+0x54) and uber-grind (+0x74) counts, calls cRiderMetrix_earnNameAndPoints (earnNameAndPoints) with no flags,
+ * Increments the uber (+0x54) and uber-grind (+0x74) counts, calls cRiderMetrix_earnNameAndPoints with no flags,
  * resets the current trick and restores the rail distance (+0x24) and air time (+0x30) with @p rsm as the initial and
  * current rail-slide mode.
  *
@@ -2034,7 +2034,7 @@ extern "C" float cRiderMetrix_earnNameAndPoints(cRiderMetrix* self, int stance, 
 /**
  * Scores the end of a board press: earns the trick and starts a new one.
  *
- * Calls cRiderMetrix_earnNameAndPoints (earnNameAndPoints) with the current rail-slide mode (+0x20) and an in-the-air flag (air time
+ * Calls cRiderMetrix_earnNameAndPoints with the current rail-slide mode (+0x20) and an in-the-air flag (air time
  * +0x30 >= 0), then resets the current trick, restoring the rail mode (initial and current), rail distance (+0x24) and
  * air time.
  *
@@ -2064,7 +2064,7 @@ float cRiderMetrix_evSpin_impl(void* self, float x) __asm__("cRiderMetrix_evSpin
 /**
  * Scores a pivot during a board press: half a turn of extra spin.
  *
- * Stores @p pressMode as the current press mode (+0x28) and calls cRiderMetrix_evSpin (evSpin) with the spin angle (+0x34) + pi.
+ * Stores @p pressMode as the current press mode (+0x28) and calls cRiderMetrix_evSpin with the spin angle (+0x34) + pi.
  *
  * @param pressMode  the press mode after the pivot (On Tour pressMode)
  * @return evSpin's result (0.0)
@@ -2086,7 +2086,7 @@ extern "C" int cRiderMetrix_getCurTrickPoints(cRiderMetrix* self);
  * Scores a wipeout: counts it, loses the trick in progress and ends the combo.
  *
  * With @p flag (knocked down by another rider) Totals.NumDeaths (+0x12C) grows and HUD effect 0x2D shows; otherwise
- * Totals.NumWipeouts (+0x124) grows. cRiderMetrix_losePoints (losePoints) is added to Totals.TotalPointsLostToWipeouts (+0x1A0);
+ * Totals.NumWipeouts (+0x124) grows. cRiderMetrix_losePoints is added to Totals.TotalPointsLostToWipeouts (+0x1A0);
  * then the trick and combo are reset.
  *
  * @param flag  On Tour isFrag: the wipeout came from another rider's attack
@@ -2168,7 +2168,7 @@ extern "C" void cRiderMetrix_resetCurTrick(cRiderMetrix* self);
 /**
  * Scores the end of a handplant: earns the trick and starts a new one.
  *
- * Increments the handplant count (+0x80), calls cRiderMetrix_earnNameAndPoints (earnNameAndPoints) with only the last flag set, resets
+ * Increments the handplant count (+0x80), calls cRiderMetrix_earnNameAndPoints with only the last flag set, resets
  * the current trick and zeroes the air time (+0x30).
  *
  * @return the boost earnNameAndPoints returns
@@ -2191,7 +2191,7 @@ extern "C" void cRiderMetrix_earnName(cRiderMetrix* self, int a, int b, int c, i
 /**
  * Scores a late spin: names the trick so far and restarts scoring as a late-spin trick.
  *
- * Calls cRiderMetrix_earnName (earnName) with no flags. If the trick had power (+0x14 > 0): the starting stance (+0x0) becomes
+ * Calls cRiderMetrix_earnName with no flags. If the trick had power (+0x14 > 0): the starting stance (+0x0) becomes
  * @p isFakieInit, spin (+0x34) and flip (+0x38) angles and the pipe, rail and press starts are cleared, the hold timer (+0x40) is
  * set to -1, the late-spin flag (+0x8) set and the 3 grab slots (+0x60) zeroed. The combo timer is suspended either
  * way.
@@ -2229,7 +2229,7 @@ extern "C" float cRiderMetrix_earnNameAndPoints(cRiderMetrix* self, int stance, 
 /**
  * Scores a landing: earns the trick and starts the next one from the landing state.
  *
- * Landing on a rail with trick power adds 0.13 power first. Calls cRiderMetrix_earnNameAndPoints (earnNameAndPoints) with the landing
+ * Landing on a rail with trick power adds 0.13 power first. Calls cRiderMetrix_earnNameAndPoints with the landing
  * arguments, resets the trick and seeds the new one: stance (+0x0), pipe (+0x4), rail mode (+0xC, and +0x20 with rail
  * distance +0x24 = 0 when on a rail), press (+0x10, and +0x28 with press time +0x2C = 0 when pressing). An uber grind
  * in progress (+0x70) survives with the uber flag set and its hold time zeroed.
@@ -2493,8 +2493,8 @@ struct sTrickIdA168 {
 /**
  * Names the trick so far without banking its points, paying any monster-trick bonus into the trick power.
  *
- * When cRiderMetrix_buildTrickName (buildTrickName) gives a name: a monster-trick bonus from cRiderMetrix_checkForMonsterTrick adds bonus / 10000 to the
- * trick power (+0x14), shows HUD effect 0x32 and plays the monster-combo sound; then cRiderMetrix_addTrick (addTrick) announces
+ * When cRiderMetrix_buildTrickName gives a name: a monster-trick bonus from cRiderMetrix_checkForMonsterTrick adds bonus / 10000 to the
+ * trick power (+0x14), shows HUD effect 0x32 and plays the monster-combo sound; then cRiderMetrix_addTrick announces
  * it, as a repeat when cRiderMetrix_addToHistory finds it in the trick history.
  *
  * @param stance  On Tour isFakieLand: landed fakie

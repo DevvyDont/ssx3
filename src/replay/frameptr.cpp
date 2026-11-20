@@ -13,7 +13,7 @@ INCLUDE_ASM("replay/frameptr", cReplayFramePtr_initBlock);
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern const char str_Frame_Block[];
 
-// same body as cReplayFramePtr_setBlock (setBlock), inlined here
+// same body as cReplayFramePtr_setBlock, inlined here
 static inline void cReplayFramePtr_setBlockInl(void* self, char* buf, int size)
 {
     *(char**)((char*)self + 0x4) = buf;

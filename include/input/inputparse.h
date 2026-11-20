@@ -83,7 +83,7 @@ struct cInputMapParser {
                                     //         use it as the identifier name
     float TokenValue;               // 0x000DC [O]; [U] readToken scans a constant into it; parseTerm copies it into a
                                     //         Constant node
-    tParseNode* FreeParseNodes;     // 0x000E0 [O]; [R] = ParseNodes; [U] cInputMapParser_newParseNode (newParseNode) pops, freeParseNode
+    tParseNode* FreeParseNodes;     // 0x000E0 [O]; [R] = ParseNodes; [U] cInputMapParser_newParseNode pops, freeParseNode
                                     //         pushes
     tParseNode ParseNodes[2048];    // 0x000E4 [O]; [R] the constructor links all 0x800 into the free list
     int NumIdentifiers;             // 0x080E4 [O]; [R] = 0; [U] lookupIdentifierName's loop bound, parseStatement's ++

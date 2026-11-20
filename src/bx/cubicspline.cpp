@@ -2177,7 +2177,7 @@ INCLUDE_ASM("bx/cubicspline", cDynamicMemMan_free__FPv);
 /**
  * Frees a block of the dynamic heap.
  *
- * Tail-calls cDynamicMemMan_dlfree (dlfree). The block pointer passes through in $a1, which the one-argument C prototype does
+ * Tail-calls cDynamicMemMan_dlfree. The block pointer passes through in $a1, which the one-argument C prototype does
  * not show.
  *
  * @return nothing useful (the C declares int)

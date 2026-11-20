@@ -3893,9 +3893,9 @@ static inline float Sqrt_57B8(float x)
  * mImpactAccum2.
  *
  * In the air with channel 2 in animation category 1, 2, 9 or 0xB and unk_180 facing the surface (> 0.3), the hit
- * becomes a takeoff: mVelocity is rebuilt along the surface, then cRider_flagEventLand (flagEventLand), cRiderMetrix_evTakeoff
+ * becomes a takeoff: mVelocity is rebuilt along the surface, then cRider_flagEventLand, cRiderMetrix_evTakeoff
  * (evTakeoff), control states 0xD and 5, animation 0x10C and cAirPredictor_startLaunchIntoAir. Otherwise the rebound is
- * added to mVelocity and cRider_reactToCollision (reactToCollision) picks the reaction.
+ * added to mVelocity and cRider_reactToCollision picks the reaction.
  *
  * @param rider  the rider (this)
  * @param obj  the hit object's instance record (tInstanceRecord)
@@ -4103,7 +4103,7 @@ extern "C" void cRider_reactToCollision_impl(cRider* self, sInfo_5D98* info, int
  *
  * It then compares the contact direction with the rider's axes (+0x160, +0x170, +0x180) and, from the dominant axis,
  * the normal speed and channel 2's animation category, picks a wipeout animation (0x148 .. 0x169, random variants by
- * AIrand) for cRider_flagEventWipeout (flagEventWipeout); when none applies it bumps (cRider_doBump).
+ * AIrand) for cRider_flagEventWipeout; when none applies it bumps (cRider_doBump).
  *
  * @param info  the collide info: contact position, direction, normal (+0x20) and normal speed (+0x30)
  * @param id  the surface material id, or -1
@@ -4445,7 +4445,7 @@ extern "C" void cRiderSphereTree_Update1(int);
  * Refreshes the rider's collision sphere tree.
  *
  * Calls cRiderSphereTree_Update1 on mSphereTree (+0xAA0), the sphere tree the object collision queries use (On Tour:
- * cRiderSphereTree::Update). Callers: cRider_updateSkeleton (updateSkeleton), cRiderHandler_readFromReplayFrame and
+ * cRiderSphereTree::Update). Callers: cRider_updateSkeleton, cRiderHandler_readFromReplayFrame and
  * cRider_DoInSeqAnimUpdate.
  *
  * @param rider  the rider (this)
@@ -5031,7 +5031,7 @@ extern "C" int cRider_checkRailBodyCollisions_impl(cRider* self) __asm__("cRider
  * isRailLandSuccess) are ignored. For a body hit it notifies the rail's handler (virtual 42), moves the rider out to 50
  * from the rail (func_00106538), pushes mVelocity away along the contact normal by the closing speed + 55.6, reports
  * the impulse (virtual 43), on the ground turns the rider (func_001065B0, cRider_updateOrientationImplicit) and runs
- * cRider_reactToCollision (reactToCollision).
+ * cRider_reactToCollision.
  *
  * The // note above the definition says it snaps the rider onto the rail, but a landable rail returns 0 here; landing
  * is cRider_checkRailBoardCollisions's job.

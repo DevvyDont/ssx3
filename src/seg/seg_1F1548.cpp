@@ -2588,7 +2588,7 @@ Obj41A8 *cGame_getSplashManager_41A8(void *, int) __asm__("cGame_getSplashManage
  *
  * Loops over the game's views (SSXApp->Game->ViewMan: count at +0x10, camera pointers from +0x4); where view i's camera
  * is @p camera and cGame_getSplashManager__FPvi(game, i) returns a splash manager, it calls that manager's virtual at +0x70,
- * cSplashManager_reset (reset), so no splashes carry over a camera cut. Called by cCameraController_snap and cCameraController_snapCurrent
+ * cSplashManager_reset, so no splashes carry over a camera cut. Called by cCameraController_snap and cCameraController_snapCurrent
  * (cameracontroller).
  *
  * @param camera  the camera that snapped (a cCamera*)
@@ -2697,7 +2697,7 @@ struct Elem4380 { Elem4380() {} };
  *
  * Runs cHalo_cHalo (the cHalo base constructor), constructs the 16 lens entries (trivial), clears the occlusion
  * factor (+0x204; On Tour mfOcclude) and the halo's mbOnScreen/mbRequestZSample shorts (+0x2C, +0x2E), then calls
- * cSunHalo_InitLens (InitLens) for the default flare.
+ * cSunHalo_InitLens for the default flare.
  *
  * @param sunHalo  the object to construct (this)
  * @return @p sunHalo

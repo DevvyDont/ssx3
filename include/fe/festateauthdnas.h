@@ -15,7 +15,7 @@
 // 0) and the default cFEStateAuthDNAS_cFEStateAuthDNAS1 (fe/fepopupmisc); destructor cFEStateAuthDNAS__cFEStateAuthDNAS (slot 1: deletes mpAuth, frees
 // mpustrText). Retail vtable cFEStateAuthDNAS_vtbl (32 slots; vtables.tsv lists 24: 4 onCreateScreen cFEStateAuthDNAS_onCreateScreen, 7
 // cFEStateAuthDNAS_onGainTransition
-// (onGainTransition), 8 cFEStateAuthDNAS_onInputBegin, 10 cFEStateAuthDNAS_onLoseTransition (onLoseTransition), 12 onUpdate cFEStateAuthDNAS_onUpdate, 18
+// (onGainTransition), 8 cFEStateAuthDNAS_onInputBegin, 10 cFEStateAuthDNAS_onLoseTransition, 12 onUpdate cFEStateAuthDNAS_onUpdate, 18
 // onWidgetCreate cFEStateAuthDNAS_onWidgetCreate, 19 onWidgetEvent cFEStateAuthDNAS_onWidgetEvent, 20 cFEStateAuthDNAS_onWidgetMenu, 24 handleEvent cFEStateAuthDNAS_handleEvent, 29
 // func_001E0C28, 32 func_001E0C20).
 // Methods: fe/feasyncfile 0x1B6288-0x1B6A90.
@@ -95,7 +95,7 @@ struct cFEStateAuthDNAS {
     unsigned short unk_59C[0x80];   // 0x59C [U] func_001AB478: the second status line, used the same way
     cKeyboardPopup* mpKeyboard;     // 0x69C [R] 0; [U] func_001A91B0 stores cMemMan_alloc(0x444, "cKeyboardPopup") +
                                     //       cKeyboardPopup_cKeyboardPopup and pushes it; func_001A9090/90F0/9150 set its texts;
-                                    //       cFEStateNet_onPopupEvent (onPopupEvent) compares the closing popup with it
+                                    //       cFEStateNet_onPopupEvent compares the closing popup with it
     cScreenPopup* mpPopup;          // 0x6A0 [R] 0; [U] createPopup func_001A9C50: cMemMan_alloc(0x360, "createPopup") +
                                     //       cScreenPopup_cScreenPopup, reused (cPopupInfo::clear) when set; func_001A9BC0
                                     //       shows it; func_001A93D0 clears it when that popup closes (event 22)
@@ -245,7 +245,7 @@ struct cFEStateAuthDNASError {
     unsigned short unk_59C[0x80];   // 0x59C [U] func_001AB478: the second status line, used the same way
     cKeyboardPopup* mpKeyboard;     // 0x69C [R] 0; [U] func_001A91B0 stores cMemMan_alloc(0x444, "cKeyboardPopup") +
                                     //       cKeyboardPopup_cKeyboardPopup and pushes it; func_001A9090/90F0/9150 set its texts;
-                                    //       cFEStateNet_onPopupEvent (onPopupEvent) compares the closing popup with it
+                                    //       cFEStateNet_onPopupEvent compares the closing popup with it
     cScreenPopup* mpPopup;          // 0x6A0 [R] 0; [U] createPopup func_001A9C50: cMemMan_alloc(0x360, "createPopup") +
                                     //       cScreenPopup_cScreenPopup, reused (cPopupInfo::clear) when set; func_001A9BC0
                                     //       shows it; func_001A93D0 clears it when that popup closes (event 22)

@@ -75,11 +75,11 @@ struct cSSXScriptEngine {
     char mScriptRequests[16][0x24];              // 0x2C0 [O] tScriptRequestInfo[16]; [R] ResetInstVars: 16 x 0x24
     // --- cVidEngine (ctor cVidEngine_cVidEngine(self+0x500), which zeroes 0x0-0x14 and sets the vptr at 0x18)
     cMoviePlayer* mpPlayer;                      // 0x500 [O]; [R] cVidEngine_ReadyVideo allocates the 0x44-byte player
-    int mIsPlaying;                              // 0x504 [O] (a bool in On Tour); [U] cVidEngine_PlayVideo (PlayVideo) sets 1;
+    int mIsPlaying;                              // 0x504 [O] (a bool in On Tour); [U] cVidEngine_PlayVideo sets 1;
                                                  //       tested by ssxapp.cpp and all_in_one_fe.cpp
     int mFrameUpdated;                           // 0x508 [O] (a bool in On Tour); [U] cVidEngine_UpdateVideo sets 1 while
                                                  //       playing and not paused
-    int mNumPause;                               // 0x50C [O]; [U] cVidEngine_PauseVideo (PauseVideo) counts it up and down
+    int mNumPause;                               // 0x50C [O]; [U] cVidEngine_PauseVideo counts it up and down
     int unk_510;                                 // 0x510 [U] cVidEngine_PlayVideo saves a GrMan virtual-call result
     int unk_514;                                 // 0x514 [U] cVidEngine_PlayVideo: 1 unless the game's state object is 0 or 2
     void** mVidEngineVtbl;                       // 0x518 [R] _vt$16cSSXScriptEngine$10cVidEngine (D_004821A0)
@@ -107,7 +107,7 @@ struct cSSXScriptEngine {
     tNISList* mpNISLists;                        // 0x54C [O]; [R] Load: new[2] ("NISLists"), 0xCC each
     int mPlayingNISList;                         // 0x550 [P] GetActiveNIS (preview 0x548; IsNISActive: != 2);
                                                  //       [O] eNISList; [R] the ctor sets 2 (none)
-    int mNumFramesNoSkip;                        // 0x554 [O]; [U] cSSXScriptEngine_DisallowNISListSkip (DisallowNISListSkip) stores its arg;
+    int mNumFramesNoSkip;                        // 0x554 [O]; [U] cSSXScriptEngine_DisallowNISListSkip stores its arg;
                                                  //       Update counts it down and ignores the skip button until 0
     unsigned int* mpAnchorTableDB[50];           // 0x558 [O] (tResourceID*[60] in On Tour); [R] the ctor zeroes 50;
                                                  //       [U] cSSXScriptEngine_AttachAnchorDataTable / cSSXScriptEngine_DetachAnchorDataTable (Attach/DetachAnchorDataTable)

@@ -932,7 +932,7 @@ extern int D_0048D808[];
 /**
  * Plays a specific animation clip under an AI animation id, on that animation's sequencer.
  *
- * The sequencer is attribute word 3; a negative @p blend takes attribute word 4. Calls cRiderAnimBase_onInput (onInput) with
+ * The sequencer is attribute word 3; a negative @p blend takes attribute word 4. Calls cRiderAnimBase_onInput with
  * duplicates allowed and the sequencer's priority from D_0048D808, and stores the result as the sequencer's current AI
  * anim (+slot * 4). cAIAnimEventMap_getAnimPlayAttr returns the anim's whole attribute record (On Tour release:
  * cAIAnimEventMap::getAnimPlayAttr): word 0 is the category, 1 the update rule, 3 the sequencer and 4 the default

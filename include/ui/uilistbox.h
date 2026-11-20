@@ -11,7 +11,7 @@
 // Methods: vtable cUIListBox_vtbl slots 0 ~cUIListBox (cUIListBox__cUIListBox), 9 setUIData (cUIListBox_setUIData), 14 onInput
 // (cUIListBox_onInput), 15 updateLocale (cUIListBox_updateLocale), 16 render2D (cUIListBox_render2D), 21 getType (cUIListBox_getType),
 // 22 setShadow (cUIListBox_setShadow), 23 setUseStaticColour (cUIListBox_setUseStaticColour); cUIListBox_addEntryByAsciiString,
-// cUIListBox_addEntryByUnicodeString (addEntryByUnicodeString), cUIListBox_addEntryByStringID, cUIListBox_deleteAllEntries (clear; the dtor calls it),
+// cUIListBox_addEntryByUnicodeString, cUIListBox_addEntryByStringID, cUIListBox_deleteAllEntries (clear; the dtor calls it),
 // cUIListBox_getCurrentAsciiText / cUIListBox_getCurrentEntryData (current entry's ASCII text / data), cUIListBox_getEntryByData (find by data), cUIListBox_setCurrentEntryByIndex
 // (setCurrentEntry), cUIListBox_setEntryDataByIndex (setEntryData), cUIListBox_setEntryByAsciiString, cUIListBox_setCallbackListBox, cUIListBox_getFont,
 // cUIListBox_setUnicodePrivate (setEntryUnicode).

@@ -362,7 +362,7 @@ extern "C" void HUFF_writenum_impl(HuffState_8A78* s, HuffOut_8A78* out, unsigne
  * For values below 0xFC the bit count and base come from the context's tables (+0xD44 and +0x1134, one entry per
  * value); larger values fall into fixed classes: 6 bits from 0xFC, 7 from 0x1FC, ... 16 from 0x3FFFC, 17 from 0x80000
  * and 18 from 0x100000. It then calls HUFF_writebits twice: the value 1 in bits + 1 bits (the prefix) and @p num minus
- * the base in bits + 2 bits. Called by HUFF_pack and by HUFF_writeexp (writeexp).
+ * the base in bits + 2 bits. Called by HUFF_pack and by HUFF_writeexp.
  *
  * @param encodeContext    the encoder context (On Tour HuffEncodeContext)
  * @param out  the output stream (HUFFMemStruct)
@@ -433,7 +433,7 @@ extern "C" void HUFF_writeexp_impl(HS_8C30 *self, int x, int y) __asm__("HUFF_wr
  * Writes an escaped symbol: the escape code, a zero count, then the symbol itself as a raw 9-bit value.
  *
  * The escape symbol is the context's +0x2DCC entry; its bit pattern comes from the code table (+0x2964) and its length
- * from the length table (+0x2564), written with HUFF_writebits. Then HUFF_writenum (writenum) writes 0 and
+ * from the length table (+0x2564), written with HUFF_writebits. Then HUFF_writenum writes 0 and
  * HUFF_writebits writes @p y in 9 bits.
  *
  * @param x  the output stream (HUFFMemStruct)
@@ -456,7 +456,7 @@ extern "C" void HUFF_writeexp(HS_8CA8 *, int, int);
 /**
  * Writes one symbol's Huffman code to the bit stream.
  *
- * If @p idx is the escape symbol (+0x2DCC) it goes through HUFF_writeexp (writeexp); otherwise HUFF_writebits writes
+ * If @p idx is the escape symbol (+0x2DCC) it goes through HUFF_writeexp; otherwise HUFF_writebits writes
  * its bit pattern (code table +0x2964) with its length (length table +0x2564).
  *
  * @param x    the output stream (HUFFMemStruct)

@@ -633,7 +633,7 @@ INCLUDE_ASM("object/flexrailnode", cFloatRailNode_updateIntersectInfo);
  * Does nothing when the hit segment (+0x64) is negative. Otherwise adds Vel[seg] * t + Vel[seg + 1] * (1 - t) to the
  * info's +0x20 vector (t at +0x68).
  *
- * Likely bug: the weights are the reverse of cFloatRailNode_applyForce (applyForce), which gives node seg the (1 - t) share.
+ * Likely bug: the weights are the reverse of cFloatRailNode_applyForce, which gives node seg the (1 - t) share.
  *
  * @param node  intersect info of the hit
  */

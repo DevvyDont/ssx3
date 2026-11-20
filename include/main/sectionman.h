@@ -14,17 +14,17 @@
 // mLocationModeMap = D_00442820, mStreamBandWidthRates[5] = D_00442150 = {256000, 460800, 819200, 819200, 819200}.
 //
 // Methods (names from On Tour's cSectionMan, matched by body and call pattern):
-//   main/game: cSectionMan_cSectionMan (ctor), cSectionMan__cSectionMan (dtor), cSectionMan_init (init), cSectionMan_load (load),
-//     cSectionMan_activate (activate), cSectionMan_isLoaded (isLoaded), cSectionMan_isActive (isActive), cSectionMan_loadSection (loadSection),
-//     cSectionMan_activateSection (activateSection), cSectionMan_unloadSection (unloadSection), cSectionMan_loadMode (loadMode),
-//     cSectionMan_activateMode (activateMode), cSectionMan_eventbegin, cSectionMan_update, cSectionMan_skyLoadComplete (skyLoadComplete),
-//     cSectionMan_skySwap, cSectionMan_preLoadMode (preLoadMode), cSectionMan_isPreLoadModeDone (isPreLoadModeDone), cSectionMan_changeMode (changeMode),
-//     cSectionMan_isSectionLoaded (isSectionLoaded), cSectionMan_getWorldSectionIDFromBELocationID (getWorldSectionIDFromBELocationID),
-//     cSectionMan_getWorldSectionIDFromBESectionID (getWorldSectionIDFromBESectionID), cSectionMan_getBESectionIDFromWorldSectionID (getBESectionIDFromWorldSectionID),
-//     cSectionMan_gotoLocation (gotoLocation);
-//   main/sectionman: cSectionMan_setSky, cSectionMan_initEventPool (initEventPool), cSectionMan_allocEvent (allocEvent),
-//     cSectionMan_freeEvent (freeEvent), cSectionMan_addActiveEvent (addActiveEvent), cSectionMan_getNextActiveEvent,
-//     cSectionMan_removeActiveEvent (removeActiveEvent).
+//   main/game: cSectionMan_cSectionMan (ctor), cSectionMan__cSectionMan (dtor), cSectionMan_init, cSectionMan_load,
+//     cSectionMan_activate, cSectionMan_isLoaded, cSectionMan_isActive, cSectionMan_loadSection,
+//     cSectionMan_activateSection, cSectionMan_unloadSection, cSectionMan_loadMode,
+//     cSectionMan_activateMode, cSectionMan_eventbegin, cSectionMan_update, cSectionMan_skyLoadComplete,
+//     cSectionMan_skySwap, cSectionMan_preLoadMode, cSectionMan_isPreLoadModeDone, cSectionMan_changeMode,
+//     cSectionMan_isSectionLoaded, cSectionMan_getWorldSectionIDFromBELocationID,
+//     cSectionMan_getWorldSectionIDFromBESectionID, cSectionMan_getBESectionIDFromWorldSectionID,
+//     cSectionMan_gotoLocation;
+//   main/sectionman: cSectionMan_setSky, cSectionMan_initEventPool, cSectionMan_allocEvent,
+//     cSectionMan_freeEvent, cSectionMan_addActiveEvent, cSectionMan_getNextActiveEvent,
+//     cSectionMan_removeActiveEvent.
 //   Inline accessors used elsewhere: tiggerskyswap (sw 0x1A4), getLocationID (lw 0x1BC), transportwait /
 //   iswaitingtransport (0x1C8), isStreamReady (lw 0x1D0).
 //

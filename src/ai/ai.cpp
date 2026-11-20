@@ -377,7 +377,7 @@ static inline char* Rider_AF0(char* obj)
 /**
  * Runs one AI tick: the online check, the state machine, the group AI and every active rider's update passes.
  *
- * Calls cAI_onlineAICheck (onlineAICheck), cAI_AIStateUpdate() and cAI_UpdateGroupAI (group AI), then gathers the
+ * Calls cAI_onlineAICheck, cAI_AIStateUpdate() and cAI_UpdateGroupAI (group AI), then gathers the
  * riders: with a mission rider loaded, player 0 and, unless PlaybackMan's mode (+0x70) is 0, the mission
  * rider; otherwise the players, the computers (if ComputerRidersActive) and the actors (if
  * ComputerActorsActive). Each pass (cRider_updateSplit1..12, then the rider handler's FX parts) runs over all
@@ -2332,7 +2332,7 @@ extern "C" int cRider_syncCheckSum(void* self);
 /**
  * Builds the online sync checksum: one AIrand() draw plus every rider's cRider_syncCheckSum().
  *
- * The AIrand() call advances the shared AI random generator. cAI_onlineAICheck (onlineAICheck) calls this every
+ * The AIrand() call advances the shared AI random generator. cAI_onlineAICheck calls this every
  * 60 ticks of an online race.
  *
  * @return the sum (wrapping)

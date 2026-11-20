@@ -31,7 +31,7 @@ struct cRiderAnimBase {
                                     //       cRiderAnimBase_getCurrentAnimCategory / cRiderAnimBase_getCurrentAnimID read [i]
     int IsFlipped;                  // 0x018 [P] isFlipped/setIsFlipped (lw/sw: a 4-byte bool); [O]; [R] reset: 0;
                                     //       [U] cRiderAnimBase_onInput copies it to the new sequence (+0x80), as
-                                    //       cRiderAnimBase_changeIsFlipped (changeIsFlipped) does for every sequence
+                                    //       cRiderAnimBase_changeIsFlipped does for every sequence
     float FrameRateFactor;          // 0x01C [P] get/setFrameRateFactor (lwc1/swc1); [O]; [R] reset: 1.0f;
                                     //       [U] cRiderAnimBase_onInput copies it to the sequence (+0x90)
     unsigned long GraftMask;        // 0x020 [P] get/setGraftingMask (ld/sd, `Ul`), clearGraftingMask stores -1; [O];

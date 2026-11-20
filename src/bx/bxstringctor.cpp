@@ -2316,7 +2316,7 @@ struct sBXRangeListK2 {
  *
  * Starting from *@p pathParam + 50 for both bounds, every range of the path's list that contains *@p pathParam adjusts them: type 16
  * raises the upper bound to its end, type 12 lowers the lower bound to its start, type 14 raises the lower bound to its
- * end. *@p pathParam becomes the lower bound unless that equals *@p pathParam, then the upper one, and cPath_getPathPos (getPathPos) gives
+ * end. *@p pathParam becomes the lower bound unless that equals *@p pathParam, then the upper one, and cPath_getPathPos gives
  * the position.
  *
  * @param path  the AI path (this); starts with its range list

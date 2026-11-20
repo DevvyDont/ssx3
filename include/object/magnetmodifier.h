@@ -28,7 +28,7 @@ struct cMagnetModifier {
     int Being;                      // 0x44 [O]; [R] ctor; [U] update, runCollide cMagnetModifier_runCollide
     float Speed;                    // 0x48 [O]; [R] ctor ($f13); [U] update
     float Time;                     // 0x4C [O]; [R] ctor zeroes it; [U] update
-    int RootTransformDirty;         // 0x50 [O] bool; [R] ctors; [U] cMagnetModifier_isRootTransformDirty (isRootTransformDirty),
+    int RootTransformDirty;         // 0x50 [O] bool; [R] ctors; [U] cMagnetModifier_isRootTransformDirty,
                                     //      getRootTransform cMagnetModifier_getRootTransform, update
     int AllowCollide;               // 0x54 [O] bool; [R] ctor zeroes it; [U] update, runCollide
     char unk_58[0x8];               // 0x58 padding (Transform is 16-byte aligned)

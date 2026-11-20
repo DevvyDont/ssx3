@@ -60,8 +60,8 @@ struct cChaseCameraController {
     // --- cChaseCameraController
     int LatestAlgoType;             // 0x18 [O] eCamAlgoType; [P] getLatestAlgoType (lw); [U] cChaseCameraController_addAlgorithm copies the
                                     //      new algorithm's AlgorithmType; cChaseCameraController_getLatestAlgoType returns it
-    int PreferredChaseAlgoLastFrame; // 0x1C [O] eCamAlgoType; [R] HardReset: 0x3D; [U] cChaseCameraController_processInput (processInput)
-    cRiderCameraTarget* Target;     // 0x20 [O]; [P] getTarget (lw); [R] ctor 0; [U] cChaseCameraController_setTarget (setTarget) deletes the
+    int PreferredChaseAlgoLastFrame; // 0x1C [O] eCamAlgoType; [R] HardReset: 0x3D; [U] cChaseCameraController_processInput
+    cRiderCameraTarget* Target;     // 0x20 [O]; [P] getTarget (lw); [R] ctor 0; [U] cChaseCameraController_setTarget deletes the
                                     //      old one; the dtor deletes it; cChaseCameraController_getTarget returns it
     tCameraSwitchRecord CamSwitchRecord; // 0x24 [O]; [P] the preview asserts on this->CamSwitchRecord.*
     float TimeSinceLastSuggestedVolumeTrigger; // 0x38 [O]; [R] HardReset: 0; [U] update (lwc1/swc1)

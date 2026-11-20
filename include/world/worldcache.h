@@ -56,7 +56,7 @@ CHECK_OFFSET(tWorldMemBlock, pNext, 0x14);
 CHECK_SIZE(tWorldMemBlock, 0x18);
 
 // A pool of equal blocks (On Tour cWorldBlockAllocator, 0x14; retail cWorldMemoryMan holds three, 0x14 apart).
-// Methods: cWorldBlockAllocator_init, cWorldBlockAllocator__cWorldBlockAllocator (dtor), cWorldBlockAllocator_getFreeBlock (getFreeBlock), cWorldBlockAllocator_releaseBlock (releaseBlock).
+// Methods: cWorldBlockAllocator_init, cWorldBlockAllocator__cWorldBlockAllocator (dtor), cWorldBlockAllocator_getFreeBlock, cWorldBlockAllocator_releaseBlock.
 // The pool sizes are cWorldMemoryMan::m_BlockMemType[3] = D_0044C1E0: {type, uiNumBlock, uiBlockSize} =
 // {0, 2, 0x4000}, {1, 0, 0x8000}, {2, 0x35, 0x20000}.
 struct cWorldBlockAllocator {
@@ -75,7 +75,7 @@ CHECK_OFFSET(cWorldBlockAllocator, m_pFreeBlocks, 0x10);
 CHECK_SIZE(cWorldBlockAllocator, 0x14);
 
 // One section's arena (On Tour cSectionBlockAllocator; retail cMemMan_alloc(0x14, "Section Allocator")).
-// Methods: cSectionBlockAllocator_cSectionBlockAllocator (ctor), cSectionBlockAllocator__cSectionBlockAllocator (dtor), cSectionBlockAllocator_releaseBlocks (releaseBlocks), cSectionBlockAllocator_allocate (allocate).
+// Methods: cSectionBlockAllocator_cSectionBlockAllocator (ctor), cSectionBlockAllocator__cSectionBlockAllocator (dtor), cSectionBlockAllocator_releaseBlocks, cSectionBlockAllocator_allocate.
 struct cSectionBlockAllocator {
     cWorldBlockAllocator* m_pBlockAllocator; // 0x00 [P] assert pAllocator (ctor argument); [R] ctor
     unsigned int m_uiSectionID;     // 0x04 [O]; [R] ctor
@@ -173,7 +173,7 @@ CHECK_SIZE(cWorldCacheTable, 0xE8);
 struct tWorldCacheHullPage {
     int m_State;                    // 0x00 [P] assert m_HullPages[uiHullPage].m_State == kHullPage_Loading (states
                                     //      above); [U] touchPage, updatePages, isPageLoaded (== 3), isPageEmpty (== 0)
-    int m_bLock;                    // 0x04 [O] (a bool); [U] cWorldCache_setPageLock (setPageLock), cWorldCache_isPageLocked (isPageLocked);
+    int m_bLock;                    // 0x04 [O] (a bool); [U] cWorldCache_setPageLock, cWorldCache_isPageLocked;
                                     //      touchPage/flushPage = 0; updatePages skips locked pages
     cHullPage* mp_Page;             // 0x08 [P] assert !m_HullPages[i].mp_Page; [U] updatePages allocates it,
                                     //      purgePage frees it (several views type it int)
@@ -193,12 +193,12 @@ CHECK_SIZE(tWorldCacheHullPage, 0x18);
 
 // cWorldCache methods (world/worldcache 0x003A7DD0-0x003A8F80): cWorldCache_cWorldCache, cWorldCache__cWorldCache,
 // cWorldCache_purge, cWorldCache_reset, cWorldCache_init, cWorldCache_activateSectionMem, cWorldCache_deactivateSectionMem
-// (deactivateSectionMem), cWorldCache_update, cWorldCache_initPageMap, cWorldCache_resetPageMap (resetPageMap), cWorldCache_touchPage
-// (touchPage), cWorldCache_flushPage (flushPage), cWorldCache_setPageLock (setPageLock), cWorldCache_isPageLocked (isPageLocked), cWorldCache_purgePage
-// (purgePage), cWorldCache_isPageLoaded (isPageLoaded), cWorldCache_isPageEmpty (isPageEmpty), cWorldCache_signalPageLoadComplete (signalPageLoadComplete),
-// cWorldCache_updatePages, cWorldCache_flushInActivePages (flushInActivePages), cWorldCache_flushOnePage (flushOnePage),
-// cWorldCache_addBxStreamDataTest, cWorldCache_addBxStreamDataSubmit (addBxStreamDataSubmit), cWorldCache_removeBxStreamData (removeBxStreamData),
-// cWorldCache_activateSectionPatches (activateSectionPatches). The section/focus/bandwidth wrappers are inlined into their callers.
+// (deactivateSectionMem), cWorldCache_update, cWorldCache_initPageMap, cWorldCache_resetPageMap, cWorldCache_touchPage
+// (touchPage), cWorldCache_flushPage, cWorldCache_setPageLock, cWorldCache_isPageLocked, cWorldCache_purgePage
+// (purgePage), cWorldCache_isPageLoaded, cWorldCache_isPageEmpty, cWorldCache_signalPageLoadComplete,
+// cWorldCache_updatePages, cWorldCache_flushInActivePages, cWorldCache_flushOnePage,
+// cWorldCache_addBxStreamDataTest, cWorldCache_addBxStreamDataSubmit, cWorldCache_removeBxStreamData,
+// cWorldCache_activateSectionPatches. The section/focus/bandwidth wrappers are inlined into their callers.
 struct cWorldCache {
     tStreamDataHeader* mp_DataHeader;  // 0x0000 [P] assert mp_DataHeader->m_uiNumSections; [R] init: FILE_load of
                                     //        "|<track>.sdb"; [U] purge frees it

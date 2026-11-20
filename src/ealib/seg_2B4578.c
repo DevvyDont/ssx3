@@ -3738,7 +3738,8 @@ INCLUDE_ASM("ealib/seg_2B4578", SNDSTRM_create);
 /**
  * Creates a stream that reads its own file queue (SNDSTRMI_create with no tap stream).
  *
- * The handle passes through in $v0 although the declaration is void. Nothing in the code calls it.
+ * The handle passes through in $v0 although the declaration is void; its caller, func_002AE4C0 (sound/bankmonitor),
+ * declares it returning int and stores the handle.
  *
  * @param playOpts  the play options
  * @param maxRequests  maximum queued requests

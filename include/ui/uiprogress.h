@@ -47,7 +47,7 @@ struct cUIProgress {
     cUIThing* mpObjBackground;       // 0x074 [O]; [R] = 0, then the record's child (hash rec+0x20); [U] cUIProgress_setBackgroundObject
                                      //       setBackground (sw); the dtor deletes it; render2D, update, cUIProgress_setValue
     cUIThing* mpObjKnob;             // 0x078 [O]; [R] = 0, then the child named at rec+0x24; [U] cUIProgress_setKnobObject setKnob;
-                                     //       the dtor deletes it; update, cUIProgress_setValue (setValue) moves it
+                                     //       the dtor deletes it; update, cUIProgress_setValue moves it
     int mValue;                      // 0x07C [O]; [R] = 0; [U] cUIProgress_getValue getValue (lw), cUIProgress_setValue setValue (sw)
     int mNumValues;                  // 0x080 [O]; [R] = 0; [U] cUIProgress_setUIData (sw), cUIProgress_setNumValues setNumValues
     int mBackWidth;                  // 0x084 [O]; [R] = 0; [U] cUIProgress_setUIData (sw); cUIProgress_setValue

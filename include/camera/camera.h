@@ -99,25 +99,25 @@ struct cCamera {
     void** mVtbl;                   // 0x090 [R] cCamera_vtbl (D_0045B888); the dtor restores cSimpleCamera_vtbl
     char unk_094[0xC];              // 0x094 padding
     // --- cCamera
-    cCameraController* Controller;  // 0x0A0 [O]; [P] getCurrentController; [U] cCamera_setCurrentController (setCurrentController)
-                                    //       copies one of the three below, cCamera_update (update) calls its slot 2
+    cCameraController* Controller;  // 0x0A0 [O]; [P] getCurrentController; [U] cCamera_setCurrentController
+                                    //       copies one of the three below, cCamera_update calls its slot 2
     cManualCameraController* ManualController; // 0x0A4 [O]; [P] getManualController; [R] "Manual Cam Controller" (0x20)
     cChaseCameraController* ChaseController;   // 0x0A8 [O]; [P] getChaseController; [R] "Chase Cam Controller" (0x44)
     cScriptCameraController* ScriptController; // 0x0AC [O]; [P] getScriptController; [R] "Script Cam Controller" (0x20)
     int StreamFocusID;              // 0x0B0 [O] eStreamFocusID; [R] -1, then cCamera_init: 0 for view 0, 1 for view 1;
-                                    //       [U] cCamera_updateStreamFocus (updateStreamFocus), cCamera_getStreamFocusID getStreamFocusID
+                                    //       [U] cCamera_updateStreamFocus, cCamera_getStreamFocusID getStreamFocusID
     int bStreamIsReady;             // 0x0B4 [O] bool (a word in retail); [P] isStreamReady (lw); [R] 0;
                                     //       [U] cCamera_updateStreamFocus sets it, cCamera_isStreamReady returns it
     char unk_0B8[0x8];              // 0x0B8 alignment gap
     cLookAtChaseAlgorithm ResultAlgorithm; // 0x0C0 [O] a cDEFAULT_3ChaseAlgorithm (no fields of its own); [R] constructed
                                     //       by cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm, destroyed by cDEFAULT_3ChaseAlgorithm__cDEFAULT_3ChaseAlgorithm__FPv; [U] cCamera_init sets its
                                     //       Target (cChaseAlgorithm_setTarget), cCamera_snapResultAlgorithm snaps it (cLookAtChaseAlgorithm_snapCurrent)
-    int DominantCamShakeType;       // 0x450 [O] eCamShakeType; [R] 0; [U] cCamera_shakeCamera (shakeCamera) sw,
-                                    //       cCamera_applyCameraShake (applyCameraShake) lw
+    int DominantCamShakeType;       // 0x450 [O] eCamShakeType; [R] 0; [U] cCamera_shakeCamera sw,
+                                    //       cCamera_applyCameraShake lw
     float MaxShakeVariance;         // 0x454 [O]; [R] 0; [U] cCamera_shakeCamera lwc1/swc1, cCamera_applyCameraShake lwc1
     int DoingCamShake;              // 0x458 [O] bool; [R] 0; [U] cCamera_shakeCamera sw, cCamera_applyCameraShake lw/sw
     int DoingCamShakeLastFrame;     // 0x45C [O] bool; [R] 0; [U] cCamera_applyCameraShake lw/sw
-    float LastGroundMove;           // 0x460 [O]; [R] 0; [U] cCamera_avoidGround (avoidGround) lwc1/swc1
+    float LastGroundMove;           // 0x460 [O]; [R] 0; [U] cCamera_avoidGround lwc1/swc1
     char unk_464[0xC];              // 0x464 alignment gap
     t4Vector LastGroundNormal;      // 0x470 [O]; [R] = t4vect_ZAxis; [U] cCamera_avoidGround
     char IntersectionHint[0x10];    // 0x480 [O] tIntHint (intersect: mPatch, mU/mV, mFirstTri, mPrecision); only its

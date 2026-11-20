@@ -76,7 +76,7 @@ struct tProjTexInfo {
 // one pushed viewport/projection state, 0x230 bytes. PushViewport (cPS2GraphicsMan_PushViewport) saves the live members listed
 // below into it, PopViewport (cPS2GraphicsMan_PopViewport) restores them.
 struct sViewportStack {
-    float unk_000[4];               // 0x000 [U] cPS2GraphicsMan_SetViewportWindow (SetViewportWindow); [X] viewport x, y, w, h
+    float unk_000[4];               // 0x000 [U] cPS2GraphicsMan_SetViewportWindow; [X] viewport x, y, w, h
     float unk_010[3];               // 0x010 [U] cPS2GraphicsMan_SetViewportPerspective / cPS2GraphicsMan_SetViewportOrthographic store, cPS2GraphicsMan_GetViewportPerspective reads; [X] near?, 1.0, fov
     float unk_01C;                  // 0x01C [U] cPS2GraphicsMan_SetViewportPerspective / cPS2GraphicsMan_SetViewportZBias read; [R] Init zeroes entry 0
     int unk_020;                    // 0x020 [U] cPS2GraphicsMan_SetViewportPerspective / cPS2GraphicsMan_SetViewportOrthographic store; [X] projection type

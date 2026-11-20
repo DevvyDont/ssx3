@@ -1352,16 +1352,16 @@ extern void* D_004D3E98[];
 INCLUDE_ASM("sound/bankmonitor", func_002ADFB0__Fi);
 #ifdef SKIP_ASM
 /**
- * Returns the Pathfinder sound back end's player-slot pointer D_004D3E98[self] (24 slots).
+ * Returns the Pathfinder sound back end's player-slot pointer D_004D3E98[slot] (24 slots).
  *
- * The parameter is an index, not an object (the name self is a misnomer). func_002B2488 reads the slot's first word
- * (its sound handle).
+ * func_002B2488 reads the slot's first word (its sound handle).
  *
+ * @param slot  the slot index
  * @return the slot pointer (0 when the slot is unused)
  */
-int func_002ADFB0(int self)
+int func_002ADFB0(int slot)
 {
-    return *(int*)((char*)(void*)D_004D3E98 + self * 4);
+    return *(int*)((char*)(void*)D_004D3E98 + slot * 4);
 }
 #endif
 

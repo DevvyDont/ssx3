@@ -7591,7 +7591,7 @@ struct sRS_6B40 {
  *
  * Sets the top render state's mode bits to 6 (0x180) and points it at the current packet address (+0x5A00), then writes
  * a 12-qword DMA packet: a GIF/VIF header, the 10 qwords of mIrradianceInfo (+0x6BB0) and a VIF call of the
- * microprogram at D_1150. cPS2GraphicsMan_DrawCharModel (DrawCharModel) calls it through slot 124 with a scale of 1.0, which this code
+ * microprogram at D_1150. cPS2GraphicsMan_DrawCharModel calls it through slot 124 with a scale of 1.0, which this code
  * ignores.
  */
 extern "C" void cPS2GraphicsMan_InitCharMatrices(char* self)

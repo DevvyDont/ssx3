@@ -21,7 +21,7 @@
 //
 // A FLAT layout, like main/game.h. Evidence tags:
 //   [R] retail's constructor cQuadTree_cQuadTree (cQuadTree(minx, miny, areaWidth, defaultKey, defaultData)),
-//       cQuadTree_exportTree, cQuadTree_resolve (resolve);
+//       cQuadTree_exportTree, cQuadTree_resolve;
 //   [P] the July 2003 preview's assert string (quadtree.cpp);
 //   [U] how retail code uses the field;
 //   [O] SSX On Tour's DWARF (cQuadTree, tQuadTreeNode, tQuadTreeLeafNode, tQuadTreeSubNode, tQuadTreeFreeNode,
@@ -44,7 +44,7 @@ CHECK_SIZE(tQuadTreeLeafNode, 0x8);
 // (index << 1) | (old bit 0) in the others (setSubNodes, tQuadTreeNode_setSubNodes). Child order: (ux bit, uy bit) =
 // 00, 01, 10, 11 (getLeaf, cQuadTree_getLeaf).
 struct tQuadTreeSubNode {
-    unsigned short m_children[4];   // 0x0 [O]; [R] tQuadTreeNode_setSubNodes (setSubNodes); [U] getLeaf, exportNode, calcUsedNodes
+    unsigned short m_children[4];   // 0x0 [O]; [R] tQuadTreeNode_setSubNodes; [U] getLeaf, exportNode, calcUsedNodes
 };
 
 CHECK_OFFSET(tQuadTreeSubNode, m_children, 0x0);
