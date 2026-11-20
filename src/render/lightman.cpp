@@ -969,60 +969,60 @@ static inline void lmMulIn_EE78(void* m, const void* b)
  */
 extern "C" void func_0038EE78(void)
 {
-    sLmMat_EE78 m0;
-    sLmMat_EE78 r;
-    sLmMat_EE78 tmp;
-    float s;
-    float c;
+    sLmMat_EE78 branchMat;
+    sLmMat_EE78 rotMat;
+    sLmMat_EE78 product;
+    float sinAngle;
+    float cosAngle;
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     sLmVEntry_EE78* vt = (sLmVEntry_EE78*)ps2GraphicsMan->mVtbl;
-    float t = (float)vt[114].fn((char*)ps2GraphicsMan + vt[114].delta);
+    float frameClock = (float)vt[114].fn((char*)ps2GraphicsMan + vt[114].delta);
     int i;
     for (i = 0; i < 8; i++) {
-        sLmMat_EE78* pm = &m0;
+        sLmMat_EE78* pm = &branchMat;
         float fi = (float)i * 0.125f;
-        float amp = D_004A4448 * fSin(fi + t * (float)D_004A445C * 0.0016666667f) + D_004A444C;
-        float b = fSin(fi + t * D_004A4464 * 0.0016666667f);
-        float amp2 = D_004A4450 * fSin(fi * D_004A4468 * 0.0016666667f + b);
-        float angle = D_004A4454 * fSin(fi + t * D_004A4460 * 0.0016666667f);
-        lmCopy_EE78(&m0, &t4mat_Identity);
-        fSinCos(&s, &c, angle);
-        float tc = 1.0f - c;
+        float amp = D_004A4448 * fSin(fi + frameClock * (float)D_004A445C * 0.0016666667f) + D_004A444C;
+        float branchPhase = fSin(fi + frameClock * D_004A4464 * 0.0016666667f);
+        float amp2 = D_004A4450 * fSin(fi * D_004A4468 * 0.0016666667f + branchPhase);
+        float angle = D_004A4454 * fSin(fi + frameClock * D_004A4460 * 0.0016666667f);
+        lmCopy_EE78(&branchMat, &t4mat_Identity);
+        fSinCos(&sinAngle, &cosAngle, angle);
+        float tc = 1.0f - cosAngle;
         float x = t4vect_ZAxis[0];
         float y = t4vect_ZAxis[1];
         float z = t4vect_ZAxis[2];
         float tx = tc * x;
         float ty = tc * y;
         float tz = tc * z;
-        float sx = s * x;
-        float sy = s * y;
-        float sz = s * z;
-        r.m[0][0] = tx * x + c;
-        r.m[1][0] = tx * y + sz;
-        r.m[2][0] = tx * z - sy;
-        r.m[0][1] = ty * x - sz;
-        r.m[1][1] = ty * y + c;
-        r.m[2][1] = ty * z + sx;
-        r.m[0][2] = tz * x + sy;
-        r.m[1][2] = tz * y - sx;
-        r.m[2][2] = tz * z + c;
-        r.m[3][0] = 0.0f;
-        r.m[3][1] = 0.0f;
-        r.m[3][2] = 0.0f;
-        r.m[0][3] = 0.0f;
-        r.m[1][3] = 0.0f;
-        r.m[2][3] = 0.0f;
-        r.m[3][3] = 1.0f;
-        lmMulIn_EE78(pm, &r);
+        float sx = sinAngle * x;
+        float sy = sinAngle * y;
+        float sz = sinAngle * z;
+        rotMat.m[0][0] = tx * x + cosAngle;
+        rotMat.m[1][0] = tx * y + sz;
+        rotMat.m[2][0] = tx * z - sy;
+        rotMat.m[0][1] = ty * x - sz;
+        rotMat.m[1][1] = ty * y + cosAngle;
+        rotMat.m[2][1] = ty * z + sx;
+        rotMat.m[0][2] = tz * x + sy;
+        rotMat.m[1][2] = tz * y - sx;
+        rotMat.m[2][2] = tz * z + cosAngle;
+        rotMat.m[3][0] = 0.0f;
+        rotMat.m[3][1] = 0.0f;
+        rotMat.m[3][2] = 0.0f;
+        rotMat.m[0][3] = 0.0f;
+        rotMat.m[1][3] = 0.0f;
+        rotMat.m[2][3] = 0.0f;
+        rotMat.m[3][3] = 1.0f;
+        lmMulIn_EE78(pm, &rotMat);
         sLmMat_EE78* cell = &D_00504D80_EE78[i];
         lmCopy_EE78(cell, &t4mat_Identity);
         cell->m[2][0] += fSin(D_004A446C * 0.017453294f) * amp;
         cell->m[2][1] += fCos(D_004A446C * 0.017453294f) * amp;
-        m0.m[0][2] += amp2 * fSin(D_004A4470 * 0.017453294f);
-        m0.m[1][2] += amp2 * fCos(D_004A4470 * 0.017453294f);
-        lmMul_EE78(&tmp, cell, &m0);
-        lmCopy_EE78(&r, &tmp);
-        lmCopy_EE78(cell, &r);
+        branchMat.m[0][2] += amp2 * fSin(D_004A4470 * 0.017453294f);
+        branchMat.m[1][2] += amp2 * fCos(D_004A4470 * 0.017453294f);
+        lmMul_EE78(&product, cell, &branchMat);
+        lmCopy_EE78(&rotMat, &product);
+        lmCopy_EE78(cell, &rotMat);
     }
 }
 #endif
@@ -1047,11 +1047,11 @@ extern sLmCell_F2A8 D_00504D80[];
  */
 extern "C" sLmCell_F2A8* func_0038F2A8(float* pos)
 {
-    float d2 = pos[0] * pos[0] + pos[1] * pos[1];
-    float d;
+    float distSq = pos[0] * pos[0] + pos[1] * pos[1];
+    float dist;
     // PORT: sqrt.s (sqrtf without errno check)
-    __asm__("sqrt.s %0, %1" : "=f"(d) : "f"(d2));
-    int i = (int)(D_004A4458 * d);
+    __asm__("sqrt.s %0, %1" : "=f"(dist) : "f"(distSq));
+    int i = (int)(D_004A4458 * dist);
     return &D_00504D80[i % 8];
 }
 #endif
@@ -1485,27 +1485,27 @@ extern unsigned int D_0044B9E0[];
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
 extern "C" int func_0038F820(void* self, unsigned char* src, unsigned char* dst)
 {
-    register unsigned char* d FM_REG("$16") = dst;
+    register unsigned char* outBytes FM_REG("$16") = dst;
     unsigned int n = 0;
     unsigned int i;
     for (i = 0; i < 4; i++) {
         unsigned int k = (i & 1) << 7;
         unsigned int j;
         for (j = 0; j < 16; j++) {
-            unsigned int* p = &D_0044B9E0[k];
-            unsigned int m;
-            for (m = 0; m < 4; m++) {
-                unsigned int a = *p++;
-                int sa = (a & 1) * 4;
-                unsigned int x = a >> 1;
+            unsigned int* tablePtr = &D_0044B9E0[k];
+            unsigned int column;
+            for (column = 0; column < 4; column++) {
+                unsigned int entry = *tablePtr++;
+                int sa = (entry & 1) * 4;
+                unsigned int x = entry >> 1;
                 unsigned char* pa = &src[x];
-                a = *p++;
+                entry = *tablePtr++;
                 k += 2;
-                int sb = (a & 1) * 4;
-                x = a >> 1;
+                int sb = (entry & 1) * 4;
+                x = entry >> 1;
                 int lo = (*pa & (0xF << sa)) >> sa;
                 unsigned char hi = (src[x] & (0xF << sb)) >> sb;
-                d[n] = lo | ((hi * 0x10) & ~0xF);
+                outBytes[n] = lo | ((hi * 0x10) & ~0xF);
                 n++;
             }
         }
@@ -1537,8 +1537,8 @@ extern "C" int func_0038F930(void* self, unsigned char* src, unsigned char* dst)
         unsigned int k = (i & 1) * 64;
         unsigned int j;
         for (j = 0; j < 16; j++) {
-            unsigned int m;
-            for (m = 0; m < 4; m++) {
+            unsigned int column;
+            for (column = 0; column < 4; column++) {
                 dst[n] = src[D_0044BDE0[k]];
                 k++;
                 n++;
@@ -1571,17 +1571,17 @@ struct sRow32_F9C0 {
  * Rearranges a 4-bit texture block by block: each 32x16 block is reordered with func_0038F820 and placed where the
  * tables D_0044BFE0 and D_0044C060 say.
  *
- * Reads @p w / 32 by @p h / 16 blocks from @p src (row pitch 0x40 bytes) and writes 8 rows of 32 bytes per block to @p
+ * Reads @p w / 32 by @p height / 16 blocks from @p src (row pitch 0x40 bytes) and writes 8 rows of 32 bytes per block to @p
  * dst (row pitch 0x100). The pitches are fixed, so it only fits 128-texel-wide images. Caller: func_0038FED0 (128x128
  * tiles).
  *
  * @param w  the width in texels
- * @param h  the height in texels
+ * @param height  the height in texels
  * @param src  the source texels
  * @param dst  the output
  * @return 0
  */
-extern "C" int func_0038F9C0(void* self, int w, int h, unsigned char* src, unsigned char* dst)
+extern "C" int func_0038F9C0(void* self, int w, int height, unsigned char* src, unsigned char* dst)
 {
     int xmap[32];
     int ymap[32];
@@ -1593,13 +1593,13 @@ extern "C" int func_0038F9C0(void* self, int w, int h, unsigned char* src, unsig
     int k;
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 8; j++) {
-            int t = D_0044C060[n++];
-            xmap[t] = j;
-            ymap[t] = i;
+            int slot = D_0044C060[n++];
+            xmap[slot] = j;
+            ymap[slot] = i;
         }
     }
     int bw = w / 32;
-    int bh = h / 16;
+    int bh = height / 16;
     int spitch = 0x40;
     int dpitch = 0x100;
     func_00416210(block, 0, 0x100);
@@ -1607,20 +1607,20 @@ extern "C" int func_0038F9C0(void* self, int w, int h, unsigned char* src, unsig
     for (i = 0; i < bh; i++) {
         for (j = 0; j < bw; j++) {
             int id = D_0044BFE0[i * bw + j];
-            sRow16_F9C0* s = (sRow16_F9C0*)(src + (i * 16) * spitch + j * 16);
-            sRow16_F9C0* d = (sRow16_F9C0*)block;
+            sRow16_F9C0* srcRow = (sRow16_F9C0*)(src + (i * 16) * spitch + j * 16);
+            sRow16_F9C0* blockRow = (sRow16_F9C0*)block;
             for (k = 0; k < 16; k++) {
-                *d = *s;
-                d++;
-                s += 4;
+                *blockRow = *srcRow;
+                blockRow++;
+                srcRow += 4;
             }
             func_0038F820(self, block, out);
-            sRow32_F9C0* s2 = (sRow32_F9C0*)out;
-            sRow32_F9C0* d2 = (sRow32_F9C0*)(dst + (ymap[id] * 8) * dpitch + xmap[id] * 32);
+            sRow32_F9C0* outRow = (sRow32_F9C0*)out;
+            sRow32_F9C0* dstRow = (sRow32_F9C0*)(dst + (ymap[id] * 8) * dpitch + xmap[id] * 32);
             for (k = 0; k < 8; k++) {
-                *d2 = *s2;
-                s2++;
-                d2 += 8;
+                *dstRow = *outRow;
+                outRow++;
+                dstRow += 8;
             }
         }
     }
@@ -1647,16 +1647,16 @@ extern "C" void* func_00416210(void* dst, int c, int n);
  * Rearranges an 8-bit texture block by block: each 16x16 block is reordered with func_0038F930 and placed where the
  * tables D_0044C0E0 and D_0044C160 say.
  *
- * Reads @p w / 16 by @p h / 16 blocks from @p src (row pitch 0x80 bytes) and writes 8 rows of 32 bytes per block to @p
+ * Reads @p w / 16 by @p height / 16 blocks from @p src (row pitch 0x80 bytes) and writes 8 rows of 32 bytes per block to @p
  * dst (row pitch 0x100). Caller: func_00390198 (128x64 tiles).
  *
  * @param w  the width in texels
- * @param h  the height in texels
+ * @param height  the height in texels
  * @param src  the source texels
  * @param dst  the output
  * @return 0
  */
-extern "C" int func_0038FC48(void* self, int w, int h, unsigned char* src, unsigned char* dst)
+extern "C" int func_0038FC48(void* self, int w, int height, unsigned char* src, unsigned char* dst)
 {
     int xmap[32];
     int ymap[32];
@@ -1668,13 +1668,13 @@ extern "C" int func_0038FC48(void* self, int w, int h, unsigned char* src, unsig
     int k;
     for (i = 0; i < 4; i++) {
         for (j = 0; j < 8; j++) {
-            int t = D_0044C160[n++];
-            xmap[t] = j;
-            ymap[t] = i;
+            int slot = D_0044C160[n++];
+            xmap[slot] = j;
+            ymap[slot] = i;
         }
     }
     int bw = w / 16;
-    int bh = h / 16;
+    int bh = height / 16;
     int spitch = 0x80;
     int dpitch = 0x100;
     func_00416210(block, 0, 0x100);
@@ -1682,20 +1682,20 @@ extern "C" int func_0038FC48(void* self, int w, int h, unsigned char* src, unsig
     for (i = 0; i < bh; i++) {
         for (j = 0; j < bw; j++) {
             int id = D_0044C0E0[i * bw + j];
-            sRow16_FC48* s = (sRow16_FC48*)(src + (i * 16) * spitch + j * 16);
-            sRow16_FC48* d = (sRow16_FC48*)block;
+            sRow16_FC48* srcRow = (sRow16_FC48*)(src + (i * 16) * spitch + j * 16);
+            sRow16_FC48* blockRow = (sRow16_FC48*)block;
             for (k = 0; k < 16; k++) {
-                *d = *s;
-                d++;
-                s += 8;
+                *blockRow = *srcRow;
+                blockRow++;
+                srcRow += 8;
             }
             func_0038F930(self, block, out);
-            sRow32_FC48* s2 = (sRow32_FC48*)out;
-            sRow32_FC48* d2 = (sRow32_FC48*)(dst + (ymap[id] * 8) * dpitch + xmap[id] * 32);
+            sRow32_FC48* outRow = (sRow32_FC48*)out;
+            sRow32_FC48* dstRow = (sRow32_FC48*)(dst + (ymap[id] * 8) * dpitch + xmap[id] * 32);
             for (k = 0; k < 8; k++) {
-                *d2 = *s2;
-                s2++;
-                d2 += 8;
+                *dstRow = *outRow;
+                outRow++;
+                dstRow += 8;
             }
         }
     }
@@ -1853,8 +1853,8 @@ extern "C" int func_00390198(void* self, int w, int height, unsigned char* src, 
         th2 = 0x20;
     }
     for (i = 0; i < rows; i++) {
-        int c64 = cols << 6;
-        int sstep = bw * c64;
+        int colsTimes64 = cols << 6;
+        int sstep = bw * colsTimes64;
         for (j = 0; j < cols; j++) {
             unsigned char* srcRow = (unsigned char*)((int)src + sstep * i + bw * j);
             unsigned char* bufARow = bufA;
@@ -1950,8 +1950,8 @@ extern "C" void func_003904A0(void* self, int idx, void* pkt, int* addr)
     if (cScreenTint_m_OverrideWP != 0) {
         func_00390458(self, idx);
     }
-    float* e = ((sLmOwner_0458*)self)->entries[idx].v;
-    if (e[0] == 1.0f && e[1] == 1.0f && e[2] == 1.0f && e[3] == 0.0f && e[4] == 0.0f && e[5] == 0.0f) {
+    float* tint = ((sLmOwner_0458*)self)->entries[idx].v;
+    if (tint[0] == 1.0f && tint[1] == 1.0f && tint[2] == 1.0f && tint[3] == 0.0f && tint[4] == 0.0f && tint[5] == 0.0f) {
         return;
     }
     void* ring = D_004A4474;
@@ -2066,41 +2066,41 @@ extern "C" void func_00390C60()
     if (D_004A46B4 > 0) {
         D_004A46B4--;
     }
-    int t = D_004A4698;
+    int lightFrame = D_004A4698;
     int trig = D_004A4610;
-    if (t < 0) {
+    if (lightFrame < 0) {
         if (RandF_0C60() < cScreenTint_m_LightningChance * cScreenTint_m_LightningChance) {
             func_00390EC8(RandRange_0C60(0.019999999552965164f, 2.0f) * 100000.0f);
         }
         return;
     }
     if (trig < 0 || D_004A4618 + D_004A461C + D_004A4620 + D_004A4624 < trig) {
-        D_004A4698 = t + 1;
+        D_004A4698 = lightFrame + 1;
     } else {
         D_004A4698 = trig;
     }
     int cur = D_004A4698;
-    int d0 = D_004A4618;
-    if (cur <= d0) {
-        *(float*)&D_004A469C = ((float)cur / (float)d0) * D_004A4628;
+    int fadeInFrames = D_004A4618;
+    if (cur <= fadeInFrames) {
+        *(float*)&D_004A469C = ((float)cur / (float)fadeInFrames) * D_004A4628;
         D_004A46A0 = D_004A4634;
         D_004A46A4 = D_004A4638;
         D_004A46A8 = D_004A463C;
         D_004A46AC = 5;
-    } else if (cur <= d0 + D_004A461C) {
+    } else if (cur <= fadeInFrames + D_004A461C) {
         *(float*)&D_004A469C = D_004A4628;
         D_004A46A0 = D_004A4634;
         D_004A46A4 = D_004A4638;
         D_004A46A8 = D_004A463C;
         D_004A46AC = 5;
-    } else if (cur <= d0 + D_004A461C + D_004A4620) {
+    } else if (cur <= fadeInFrames + D_004A461C + D_004A4620) {
         *(float*)&D_004A469C = D_004A462C;
         D_004A46A0 = D_004A4640;
         D_004A46A4 = D_004A4644;
         D_004A46A8 = D_004A4648;
         D_004A46AC = 5;
-    } else if (cur <= d0 + D_004A461C + D_004A4620 + D_004A4624) {
-        *(float*)&D_004A469C = (1.0f - ((float)cur - (float)d0 - (float)D_004A461C - (float)D_004A4620) / (float)D_004A4624) * D_004A4630;
+    } else if (cur <= fadeInFrames + D_004A461C + D_004A4620 + D_004A4624) {
+        *(float*)&D_004A469C = (1.0f - ((float)cur - (float)fadeInFrames - (float)D_004A461C - (float)D_004A4620) / (float)D_004A4624) * D_004A4630;
         D_004A46A0 = D_004A464C;
         D_004A46A4 = D_004A4650;
         D_004A46A8 = D_004A4654;
@@ -2126,20 +2126,20 @@ extern float D_004A46B0;
 extern int D_004A46B4;
 
 /**
- * Starts a lightning flash at distance @p t when lightning is enabled.
+ * Starts a lightning flash at distance @p flashDistance when lightning is enabled.
  *
- * Sets the flash frame D_004A4698 and brightness D_004A469C to 0, stores @p t in D_004A46B0 and sets the thunder
- * countdown D_004A46B4 to (int)(@p t * 0.0018072289). Callers: func_00390C60 and func_00305660.
+ * Sets the flash frame D_004A4698 and brightness D_004A469C to 0, stores @p flashDistance in D_004A46B0 and sets the thunder
+ * countdown D_004A46B4 to (int)(@p flashDistance * 0.0018072289). Callers: func_00390C60 and func_00305660.
  *
- * @param t  the flash distance; larger values delay the thunder
+ * @param flashDistance  the flash distance; larger values delay the thunder
  */
-extern "C" void func_00390EC8(float t)
+extern "C" void func_00390EC8(float flashDistance)
 {
     if (cScreenTint_m_LightningEnable != 0) {
         D_004A4698 = 0;
         D_004A469C = 0;
-        D_004A46B0 = t;
-        D_004A46B4 = (int)(t * 0.0018072288949042559f);
+        D_004A46B0 = flashDistance;
+        D_004A46B4 = (int)(flashDistance * 0.0018072288949042559f);
     }
 }
 #endif
@@ -2267,19 +2267,19 @@ extern "C" void func_00390F20()
         ((cGfx_0F20*)ps2GraphicsMan)->v20();
         ((cGfx_0F20*)ps2GraphicsMan)->v30();
         ((cGfx_0F20*)ps2GraphicsMan)->v36();
-        float a;
-        float b;
+        float quadWidth;
+        float quadLeft;
         if (((cGfx_0F20*)ps2GraphicsMan)->f270 == 1) {
-            a = 640.0f;
-            b = 0.0f;
+            quadWidth = 640.0f;
+            quadLeft = 0.0f;
         } else {
-            a = 320.0f;
-            b = 0.0f;
+            quadWidth = 320.0f;
+            quadLeft = 0.0f;
             if (((cGfx_0F20*)ps2GraphicsMan)->f274 != 0) {
-                b = a;
+                quadLeft = quadWidth;
             }
         }
-        ((cGfx_0F20*)ps2GraphicsMan)->v25(b, 0.0f, a, 480.0f, 0.0f, 1.0f, 0, 0);
+        ((cGfx_0F20*)ps2GraphicsMan)->v25(quadLeft, 0.0f, quadWidth, 480.0f, 0.0f, 1.0f, 0, 0);
         *((cGfx_0F20*)ps2GraphicsMan)->stateTop = D_00501420_0F20;
         ((cGfx_0F20*)ps2GraphicsMan)->stateTop->f8_5 = 5;
         ((cGfx_0F20*)ps2GraphicsMan)->stateTop->SetF22(1);
@@ -2288,39 +2288,39 @@ extern "C" void func_00390F20()
         ((cGfx_0F20*)ps2GraphicsMan)->stateTop->f4_12 = 20;
         ((cGfx_0F20*)ps2GraphicsMan)->stateTop->SetF2(D_004A46AC_i);
         *(short*)((char*)((cGfx_0F20*)ps2GraphicsMan)->stateTop + 0x10) = -1;
-        sHudVert_0F20 v[4];
-        sPos_0F20 p;
-        p.x = b;
-        p.z = 0.0f;
-        p.y = 0.0f;
-        p.w = 1.0f;
-        v[0].pos = p;
-        p.x = b + a;
-        p.z = 0.0f;
-        p.y = 0.0f;
-        v[1].pos = p;
-        p.x = b;
-        p.z = 0.0f;
-        p.y = 480.0f;
-        v[2].pos = p;
-        p.x = b + a;
-        p.z = 0.0f;
-        p.y = 480.0f;
-        v[3].pos = p;
+        sHudVert_0F20 verts[4];
+        sPos_0F20 corner;
+        corner.x = quadLeft;
+        corner.z = 0.0f;
+        corner.y = 0.0f;
+        corner.w = 1.0f;
+        verts[0].pos = corner;
+        corner.x = quadLeft + quadWidth;
+        corner.z = 0.0f;
+        corner.y = 0.0f;
+        verts[1].pos = corner;
+        corner.x = quadLeft;
+        corner.z = 0.0f;
+        corner.y = 480.0f;
+        verts[2].pos = corner;
+        corner.x = quadLeft + quadWidth;
+        corner.z = 0.0f;
+        corner.y = 480.0f;
+        verts[3].pos = corner;
         if (flag) {
             float al = D_004A469C_f;
-            int r = (int)(al * D_004A46A0_f * 255.0f);
+            int red = (int)(al * D_004A46A0_f * 255.0f);
             int gg = (int)(al * D_004A46A4_f * 255.0f);
             int bb = (int)(al * D_004A46A8_f * 255.0f);
             int aa = (int)(al * 255.0f);
             for (int i = 0; i < 4; i++) {
-                v[i].r = r;
-                v[i].g = gg;
-                v[i].b = bb;
-                v[i].a = aa;
-                v[i].q = 1.0f;
+                verts[i].r = red;
+                verts[i].g = gg;
+                verts[i].b = bb;
+                verts[i].a = aa;
+                verts[i].q = 1.0f;
             }
-            ((cGfx_0F20*)ps2GraphicsMan)->v70(4, v, 0);
+            ((cGfx_0F20*)ps2GraphicsMan)->v70(4, verts, 0);
         }
         ((cGfx_0F20*)ps2GraphicsMan)->v31();
         ((cGfx_0F20*)ps2GraphicsMan)->v21();

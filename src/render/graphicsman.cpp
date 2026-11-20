@@ -211,18 +211,18 @@ struct sGfxVEntry95 {
 /**
  * Draws a model instance through vtable slot 95 (cPS2GraphicsMan_RenderModel) with a scale of 1.0.
  *
- * Passes @p obj, the word at @p obj + 0x94, the address @p obj + 0x10, then @p a2, @p a3, @p a4 and 1.0f. Slot 96 of
+ * Passes @p obj, the word at @p obj + 0x94, the address @p obj + 0x10, then @p animMats, @p texMat, @p renderFlags and 1.0f. Slot 96 of
  * both cGraphicsMan_vtbl and cPS2GraphicsMan_vtbl.
  *
  * @param obj  the instance record handed to slot 95
- * @param a2  passed through to slot 95 (animation matrices)
- * @param a3  passed through to slot 95 (texture matrix)
- * @param a4  passed through to slot 95 (render flags)
+ * @param animMats  passed through to slot 95 (animation matrices)
+ * @param texMat  passed through to slot 95 (texture matrix)
+ * @param renderFlags  passed through to slot 95 (render flags)
  */
-extern "C" void func_00369CB0(cPS2GraphicsMan* self, void* obj, int a2, int a3, int a4)
+extern "C" void func_00369CB0(cPS2GraphicsMan* self, void* obj, int animMats, int texMat, int renderFlags)
 {
     sGfxVEntry95* vt = (sGfxVEntry95*)self->mVtbl;
-    vt[95].fn((char*)self + vt[95].delta, obj, *(int*)((char*)obj + 0x94), (char*)obj + 0x10, a2, a3, a4, 1.0f);
+    vt[95].fn((char*)self + vt[95].delta, obj, *(int*)((char*)obj + 0x94), (char*)obj + 0x10, animMats, texMat, renderFlags, 1.0f);
 }
 #endif
 
@@ -849,8 +849,8 @@ extern "C" void func_0036AC00(char* self, int idx, void* pkt2, int* handle)
     if (cDepthFog_m_OverrideWP != 0) {
         func_0036ABA0(self, idx);
     }
-    sGmEntry_AC00* e = &((sGmOwner_AC00*)self)->entries[idx];
-    if (e->w == 0.0f && e->z != 0) {
+    sGmEntry_AC00* fogEntry = &((sGmOwner_AC00*)self)->entries[idx];
+    if (fogEntry->w == 0.0f && fogEntry->z != 0) {
         return;
     }
     char* mat = D_00507B80 + (idx << 10);
@@ -863,11 +863,11 @@ extern "C" void func_0036AC00(char* self, int idx, void* pkt2, int* handle)
     func_0036AA60(self, (int)mat, *rec >> 8, &pkt);
     *handle = func_0038F668(dma, pkt, 4);
     pkt = func_0038F460(dma, *handle, -1, 0);
-    int a = *(int*)(self + 0x5A80);
-    int b = *(int*)(self + 0x5A84);
+    int zBufPage = *(int*)(self + 0x5A80);
+    int frameBufPage = *(int*)(self + 0x5A84);
     sGmVEntry_AC00* vt = *(sGmVEntry_AC00**)(self + 0x10D8);
     int n = vt[11].fn(self + vt[11].delta);
-    func_0036AE20(self, idx, a, b, n * 2, &pkt);
+    func_0036AE20(self, idx, zBufPage, frameBufPage, n * 2, &pkt);
     *handle = func_0038F668(dma, pkt, 4);
     pkt = func_0038F460(dma, *handle, -1, 0);
     func_0036B158(self, idx, *rec >> 8, &pkt);
@@ -1101,8 +1101,8 @@ INCLUDE_ASM("render/graphicsman", func_0036B9D8);
  * @p off and added to the previous ones.
  *
  * FRAME_1 is @p fbp >> 5 with width @p w / 64 (at least 1), PSMCT24, alpha masked; ZBUF without writes; TEST ALWAYS;
- * ALPHA 0x68 with FIX 0x80 (Cs + Cd); SCISSOR @p w x @p h; TEX1 bilinear; TEX0 @p tbp, width @p tw / 64, PSMCT24,
- * MODULATE; CLAMP REGION_CLAMP to [@p u, @p u + @p uw - 1] x [@p v, @p v + @p vh - 1]. The colour is @p intensity / @p
+ * ALPHA 0x68 with FIX 0x80 (Cs + Cd); SCISSOR @p w x @p height; TEX1 bilinear; TEX0 @p tbp, width @p tw / 64, PSMCT24,
+ * MODULATE; CLAMP REGION_CLAMP to [@p srcU, @p srcU + @p uw - 1] x [@p srcV, @p srcV + @p vh - 1]. The colour is @p intensity / @p
  * passes as grey. Pass 1 uses PRIM 0x116 (overwrite) and passes 2 to 4 PRIM 0x156 (blend), offset by (-off, -off),
  * (+off, +off), (+off, -off), (-off, +off) in 1/16 pixels.
  *
@@ -1112,14 +1112,14 @@ INCLUDE_ASM("render/graphicsman", func_0036B9D8);
  * @param vself  the graphics manager (cPS2GraphicsMan)
  * @param tbp  the source texture's GS base pointer
  * @param tw  the source texture width
- * @param u  the source region's left texel
- * @param v  the source region's top texel
+ * @param srcU  the source region's left texel
+ * @param srcV  the source region's top texel
  * @param uw  the source region width
  * @param vh  the source region height
  * @param fbp  the destination frame-buffer address (>> 5 gives FBP)
  * @param intensity  the summed brightness
  * @param w  the destination width
- * @param h  the destination height
+ * @param height  the destination height
  * @param off  the per-pass offset in 1/16 pixels
  * @param passes  the number of passes, 1 to 4
  * @param handle  in/out: the DMA ring's current main-memory address
@@ -1127,150 +1127,150 @@ INCLUDE_ASM("render/graphicsman", func_0036B9D8);
 // PORT: ulong is 64-bit here (GIF/DMA packet words).
 // Multi-pass offset blur: draws the source region `passes` times as column sprites, each pass
 // shifted diagonally by +-off texels, with the vertex colour scaled by intensity / passes.
-extern "C" void func_0036B9D8(void* vself, int tbp, int tw, int u, int v, int uw, int vh, int fbp,
-                              float intensity, int w, int h, int off, int passes, int* handle)
+extern "C" void func_0036B9D8(void* vself, int tbp, int tw, int srcU, int srcV, int uw, int vh, int fbp,
+                              float intensity, int w, int height, int off, int passes, int* handle)
 {
     char* self = (char*)vself;
-    int u0 = (u << 4) + 8 + off;
-    int du = ((u + uw) << 4) + 8 - off - u0;
-    int v0 = (v << 4) + 8 + off;
-    int v1 = ((v + vh) << 4) + 8 - off;
+    int uStart = (srcU << 4) + 8 + off;
+    int du = ((srcU + uw) << 4) + 8 - off - uStart;
+    int vStart = (srcV << 4) + 8 + off;
+    int vEnd = ((srcV + vh) << 4) + 8 - off;
     int cols = w / 32;
     void* dma = D_004A4474;
     int zbp = *(int*)(self + 0x5A80);
     int w16 = w << 4;
     int x0;
     int x1;
-    ulong* p = (ulong*)func_0038F460(dma, *handle, -1, 0);
+    ulong* gsPacket = (ulong*)func_0038F460(dma, *handle, -1, 0);
     int grey = (int)(intensity / (float)passes);
     int fbw = w / 64;
     if (fbw <= 0) fbw = 1;
     int tbw = tw / 64;
     if (tbw <= 0) tbw = 1;
-    p[0] = (cols * 4 * passes + 14) | 0x10000000;
-    p[1] = 0;
-    p += 2;
-    p[0] = (cols * 4 * passes + 13) | ((ulong)0x8000 << 45);
-    p[1] = 0xE;
-    p[2] = (fbp >> 5) | ((ulong)fbw << 16) | 0xFF00000001000000;
-    p[3] = 76;
-    p[4] = (zbp | 0x1000000) | ((ulong)0x8000 << 17);
-    p[5] = 78;
-    p[6] = 0x30000;
-    p[7] = 71;
-    p[8] = 0;
-    p[9] = 0x18;
-    p[10] = 0x68 | ((ulong)0x80 << 32);
-    p[11] = 66;
-    p[12] = 0;
-    p[13] = 0x3F;
-    p[14] = ((ulong)(w - 1) << 16) | ((ulong)(h - 1) << 48);
-    p[15] = 0x40;
-    p[16] = 0x60;
-    p[17] = 20;
-    p[18] = tbp | ((ulong)tbw << 14) | ((ulong)54530 << 19);
-    p[19] = 6;
-    p[20] = 0xA | ((ulong)u << 4) | ((ulong)(u + uw - 1) << 14) | ((ulong)v << 24) | ((ulong)(v + vh - 1) << 34);
-    p[21] = 8;
-    p += 22;
-    p[0] = 278;
-    p[1] = 0;
-    p[2] = grey | ((ulong)grey << 8) | ((ulong)grey << 16) | 0x3F80000080000000;
-    p[3] = 1;
-    p += 4;
-    *handle = func_0038F668(dma, (char*)p, 4);
+    gsPacket[0] = (cols * 4 * passes + 14) | 0x10000000;
+    gsPacket[1] = 0;
+    gsPacket += 2;
+    gsPacket[0] = (cols * 4 * passes + 13) | ((ulong)0x8000 << 45);
+    gsPacket[1] = 0xE;
+    gsPacket[2] = (fbp >> 5) | ((ulong)fbw << 16) | 0xFF00000001000000;
+    gsPacket[3] = 76;
+    gsPacket[4] = (zbp | 0x1000000) | ((ulong)0x8000 << 17);
+    gsPacket[5] = 78;
+    gsPacket[6] = 0x30000;
+    gsPacket[7] = 71;
+    gsPacket[8] = 0;
+    gsPacket[9] = 0x18;
+    gsPacket[10] = 0x68 | ((ulong)0x80 << 32);
+    gsPacket[11] = 66;
+    gsPacket[12] = 0;
+    gsPacket[13] = 0x3F;
+    gsPacket[14] = ((ulong)(w - 1) << 16) | ((ulong)(height - 1) << 48);
+    gsPacket[15] = 0x40;
+    gsPacket[16] = 0x60;
+    gsPacket[17] = 20;
+    gsPacket[18] = tbp | ((ulong)tbw << 14) | ((ulong)54530 << 19);
+    gsPacket[19] = 6;
+    gsPacket[20] = 0xA | ((ulong)srcU << 4) | ((ulong)(srcU + uw - 1) << 14) | ((ulong)srcV << 24) | ((ulong)(srcV + vh - 1) << 34);
+    gsPacket[21] = 8;
+    gsPacket += 22;
+    gsPacket[0] = 278;
+    gsPacket[1] = 0;
+    gsPacket[2] = grey | ((ulong)grey << 8) | ((ulong)grey << 16) | 0x3F80000080000000;
+    gsPacket[3] = 1;
+    gsPacket += 4;
+    *handle = func_0038F668(dma, (char*)gsPacket, 4);
 
-    p = (ulong*)func_0038F460(dma, *handle, -1, 0);
+    gsPacket = (ulong*)func_0038F460(dma, *handle, -1, 0);
     x1 = 0x200;
     x0 = 0;
     for (int i = 0; i < cols; i++) {
-        int ua = u0 + x0 * du / w16;
-        int ub = u0 + x1 * du / w16;
-        p[0] = (ua - off) | ((ulong)(v0 - off) << 16);
-        p[1] = 3;
-        p[2] = x0;
-        p[3] = 5;
-        p[4] = (ub - off) | ((ulong)(v1 - off) << 16);
-        p[5] = 3;
-        p[6] = x1 | ((ulong)(h << 4) << 16);
-        p[7] = 5;
+        int ua = uStart + x0 * du / w16;
+        int ub = uStart + x1 * du / w16;
+        gsPacket[0] = (ua - off) | ((ulong)(vStart - off) << 16);
+        gsPacket[1] = 3;
+        gsPacket[2] = x0;
+        gsPacket[3] = 5;
+        gsPacket[4] = (ub - off) | ((ulong)(vEnd - off) << 16);
+        gsPacket[5] = 3;
+        gsPacket[6] = x1 | ((ulong)(height << 4) << 16);
+        gsPacket[7] = 5;
         x0 += 0x200;
         x1 = (x1 + 0x200 < w16) ? x1 + 0x200 : w16;
-        p += 8;
+        gsPacket += 8;
     }
-    p[0] = 342;
-    p[1] = 0;
-    p += 2;
-    *handle = func_0038F668(dma, (char*)p, 4);
+    gsPacket[0] = 342;
+    gsPacket[1] = 0;
+    gsPacket += 2;
+    *handle = func_0038F668(dma, (char*)gsPacket, 4);
     if (passes < 2) {
         return;
     }
 
-    p = (ulong*)func_0038F460(dma, *handle, -1, 0);
+    gsPacket = (ulong*)func_0038F460(dma, *handle, -1, 0);
     x1 = 0x200;
     x0 = 0;
     for (int i = 0; i < cols; i++) {
-        int ua = u0 + x0 * du / w16;
-        int ub = u0 + x1 * du / w16;
-        p[0] = (ua + off) | ((ulong)(v0 + off) << 16);
-        p[1] = 3;
-        p[2] = x0;
-        p[3] = 5;
-        p[4] = (ub + off) | ((ulong)(v1 + off) << 16);
-        p[5] = 3;
-        p[6] = x1 | ((ulong)(h << 4) << 16);
-        p[7] = 5;
+        int ua = uStart + x0 * du / w16;
+        int ub = uStart + x1 * du / w16;
+        gsPacket[0] = (ua + off) | ((ulong)(vStart + off) << 16);
+        gsPacket[1] = 3;
+        gsPacket[2] = x0;
+        gsPacket[3] = 5;
+        gsPacket[4] = (ub + off) | ((ulong)(vEnd + off) << 16);
+        gsPacket[5] = 3;
+        gsPacket[6] = x1 | ((ulong)(height << 4) << 16);
+        gsPacket[7] = 5;
         x0 += 0x200;
         x1 = (x1 + 0x200 < w16) ? x1 + 0x200 : w16;
-        p += 8;
+        gsPacket += 8;
     }
-    *handle = func_0038F668(dma, (char*)p, 4);
+    *handle = func_0038F668(dma, (char*)gsPacket, 4);
     if (passes < 3) {
         return;
     }
 
-    p = (ulong*)func_0038F460(dma, *handle, -1, 0);
+    gsPacket = (ulong*)func_0038F460(dma, *handle, -1, 0);
     x1 = 0x200;
     x0 = 0;
     for (int i = 0; i < cols; i++) {
-        int ua = u0 + x0 * du / w16;
-        int ub = u0 + x1 * du / w16;
-        p[0] = (ua + off) | ((ulong)(v0 - off) << 16);
-        p[1] = 3;
-        p[2] = x0;
-        p[3] = 5;
-        p[4] = (ub + off) | ((ulong)(v1 - off) << 16);
-        p[5] = 3;
-        p[6] = x1 | ((ulong)(h << 4) << 16);
-        p[7] = 5;
+        int ua = uStart + x0 * du / w16;
+        int ub = uStart + x1 * du / w16;
+        gsPacket[0] = (ua + off) | ((ulong)(vStart - off) << 16);
+        gsPacket[1] = 3;
+        gsPacket[2] = x0;
+        gsPacket[3] = 5;
+        gsPacket[4] = (ub + off) | ((ulong)(vEnd - off) << 16);
+        gsPacket[5] = 3;
+        gsPacket[6] = x1 | ((ulong)(height << 4) << 16);
+        gsPacket[7] = 5;
         x0 += 0x200;
         x1 = (x1 + 0x200 < w16) ? x1 + 0x200 : w16;
-        p += 8;
+        gsPacket += 8;
     }
-    *handle = func_0038F668(dma, (char*)p, 4);
+    *handle = func_0038F668(dma, (char*)gsPacket, 4);
     if (passes < 4) {
         return;
     }
 
-    p = (ulong*)func_0038F460(dma, *handle, -1, 0);
+    gsPacket = (ulong*)func_0038F460(dma, *handle, -1, 0);
     x0 = 0;
     x1 = 0x200;
     for (int i = 0; i < cols; i++) {
-        int ua = u0 + x0 * du / w16;
-        int ub = u0 + x1 * du / w16;
-        p[0] = (ua - off) | ((ulong)(v0 + off) << 16);
-        p[1] = 3;
-        p[2] = x0;
-        p[3] = 5;
-        p[4] = (ub - off) | ((ulong)(v1 + off) << 16);
-        p[5] = 3;
-        p[6] = x1 | ((ulong)(h << 4) << 16);
-        p[7] = 5;
+        int ua = uStart + x0 * du / w16;
+        int ub = uStart + x1 * du / w16;
+        gsPacket[0] = (ua - off) | ((ulong)(vStart + off) << 16);
+        gsPacket[1] = 3;
+        gsPacket[2] = x0;
+        gsPacket[3] = 5;
+        gsPacket[4] = (ub - off) | ((ulong)(vEnd + off) << 16);
+        gsPacket[5] = 3;
+        gsPacket[6] = x1 | ((ulong)(height << 4) << 16);
+        gsPacket[7] = 5;
         x0 += 0x200;
         x1 = (x1 + 0x200 < w16) ? x1 + 0x200 : w16;
-        p += 8;
+        gsPacket += 8;
     }
-    *handle = func_0038F668(dma, (char*)p, 4);
+    *handle = func_0038F668(dma, (char*)gsPacket, 4);
 }
 #endif
 
@@ -1300,40 +1300,40 @@ extern "C" void func_0036C188(void* self, int x, int w, int y, int grey, int alp
     int cols = w / 32;
     int step = (w / cols) << 4;
     void* dma = D_004A4474;
-    ulong* p = (ulong*)func_0038F460(dma, *handle, -1, 0);
+    ulong* gsPacket = (ulong*)func_0038F460(dma, *handle, -1, 0);
     int fbw = w / 64;
     if (fbw <= 0) fbw = 1;
-    p[0] = (cols * 2 + 7) | 0x10000000;
-    p[1] = 0;
-    p += 2;
-    p[0] = (cols * 2 + 6) | ((ulong)0x8000 << 45);
-    p[1] = 0xE;
-    p[2] = (x >> 5) | ((ulong)fbw << 16) | 0xFF00000001000000;
-    p[3] = 76;
-    p[4] = 0;
-    p[5] = 0x18;
-    p[6] = 0xA1 | ((ulong)alpha << 32);
-    p[7] = 66;
-    p[8] = 0;
-    p[9] = 0x3F;
-    p += 10;
-    p[0] = 326;
-    p[1] = 0;
-    p[2] = grey | ((ulong)grey << 8) | ((ulong)grey << 16) | 0x3F80000080000000;
-    p[3] = 1;
-    p += 4;
+    gsPacket[0] = (cols * 2 + 7) | 0x10000000;
+    gsPacket[1] = 0;
+    gsPacket += 2;
+    gsPacket[0] = (cols * 2 + 6) | ((ulong)0x8000 << 45);
+    gsPacket[1] = 0xE;
+    gsPacket[2] = (x >> 5) | ((ulong)fbw << 16) | 0xFF00000001000000;
+    gsPacket[3] = 76;
+    gsPacket[4] = 0;
+    gsPacket[5] = 0x18;
+    gsPacket[6] = 0xA1 | ((ulong)alpha << 32);
+    gsPacket[7] = 66;
+    gsPacket[8] = 0;
+    gsPacket[9] = 0x3F;
+    gsPacket += 10;
+    gsPacket[0] = 326;
+    gsPacket[1] = 0;
+    gsPacket[2] = grey | ((ulong)grey << 8) | ((ulong)grey << 16) | 0x3F80000080000000;
+    gsPacket[3] = 1;
+    gsPacket += 4;
     int x0 = 0;
     int x1 = step;
     for (int i = 0; i < cols; i++) {
-        p[0] = x0;
-        p[1] = 5;
-        p[2] = x1 | ((ulong)(y << 4) << 16);
-        p[3] = 5;
+        gsPacket[0] = x0;
+        gsPacket[1] = 5;
+        gsPacket[2] = x1 | ((ulong)(y << 4) << 16);
+        gsPacket[3] = 5;
         x0 += step;
         x1 += step;
-        p += 4;
+        gsPacket += 4;
     }
-    *handle = func_0038F668(dma, (char*)p, 4);
+    *handle = func_0038F668(dma, (char*)gsPacket, 4);
 }
 #endif
 
@@ -1341,7 +1341,7 @@ extern "C" void func_0036C188(void* self, int x, int w, int y, int grey, int alp
 INCLUDE_ASM("render/graphicsman", func_0036C398);
 #ifdef SKIP_ASM
 /**
- * Queues a GS pass that adds a texture, scaled by @p alpha / 128, onto the view rectangle @p x, @p y, @p w, @p h.
+ * Queues a GS pass that adds a texture, scaled by @p alpha / 128, onto the view rectangle @p x, @p y, @p w, @p height.
  *
  * FRAME_1 is @p fbp >> 5 with the slot 10 screen width / 64 (width 1 when that is 0), PSMCT24, alpha masked; ZBUF
  * mCurrentZBufferPage without writes; TEST ALWAYS; ALPHA 0x29 (Cs + Cd * FIX) with FIX = @p alpha; SCISSOR to the
@@ -1356,14 +1356,14 @@ INCLUDE_ASM("render/graphicsman", func_0036C398);
  * @param x  the rectangle's left edge
  * @param y  the rectangle's top edge
  * @param w  the rectangle width
- * @param h  the rectangle height
+ * @param height  the rectangle height
  * @param grey  the vertex colour (texture modulation)
  * @param alpha  the destination scale, 128 = 1.0
  * @param handle  in/out: the DMA ring's current main-memory address
  */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // PORT: ulong is 64-bit here (GIF/DMA packet words).
-extern "C" void func_0036C398(void* vself, int tbp, int tw, int th, int fbp, int x, int y, int w, int h,
+extern "C" void func_0036C398(void* vself, int tbp, int tw, int th, int fbp, int x, int y, int w, int height,
                               int grey, int alpha, int* handle)
 {
     char* self = (char*)vself;
@@ -1371,64 +1371,64 @@ extern "C" void func_0036C398(void* vself, int tbp, int tw, int th, int fbp, int
     int step = (tw / cols) << 4;
     void* dma = D_004A4474;
     int zbp = *(int*)(self + 0x5A80);
-    ulong* p = (ulong*)func_0038F460(dma, *handle, -1, 0);
-    p[0] = (cols * 4 + 13) | 0x10000000;
-    p[1] = 0;
-    p += 2;
-    p[0] = (cols * 4 + 12) | ((ulong)0x8000 << 45);
-    p[1] = 0xE;
+    ulong* gsPacket = (ulong*)func_0038F460(dma, *handle, -1, 0);
+    gsPacket[0] = (cols * 4 + 13) | 0x10000000;
+    gsPacket[1] = 0;
+    gsPacket += 2;
+    gsPacket[0] = (cols * 4 + 12) | ((ulong)0x8000 << 45);
+    gsPacket[1] = 0xE;
     ulong fr = fbp >> 5;
-    ulong* q = p + 2;
+    ulong* frameWord = gsPacket + 2;
     if (gmCall_AE20(self, 10) >> 6) {
         fr = fr | ((ulong)(gmCall_AE20(self, 10) >> 6) << 16) | 0xFF00000001000000;
     } else {
         fr = fr | 0xFF00000001010000;
     }
-    *q = fr;
+    *frameWord = fr;
     int tbw = tw / 64;
     if (tbw <= 0) tbw = 1;
-    p[3] = 76;
-    p[4] = (zbp | 0x1000000) | ((ulong)0x8000 << 17);
-    p[5] = 78;
-    p[6] = 0x30000;
-    p[7] = 71;
-    p[8] = 0;
-    p[9] = 0x18;
-    p[10] = 0x29 | ((ulong)alpha << 32);
-    p[11] = 66;
-    p[12] = 0;
-    p[13] = 0x3F;
-    p[14] = x | ((ulong)(x + w - 1) << 16) | ((ulong)y << 32) | ((ulong)(y + h - 1) << 48);
-    p[15] = 0x40;
-    p[16] = 0x60;
-    p[17] = 20;
-    p[18] = tbp | ((ulong)tbw << 14) | ((ulong)54530 << 19);
-    p[19] = 6;
-    p[20] = 0xA | ((ulong)(tw - 1) << 14) | ((ulong)(th - 1) << 34);
-    p[21] = 8;
-    p[22] = 342;
-    p[23] = 0;
-    p[24] = grey | ((ulong)grey << 8) | ((ulong)grey << 16) | ((ulong)grey << 24) | 0x3F80000000000000;
-    p[25] = 1;
-    p += 26;
-    int u0 = 8;
-    int u1 = step + 8;
+    gsPacket[3] = 76;
+    gsPacket[4] = (zbp | 0x1000000) | ((ulong)0x8000 << 17);
+    gsPacket[5] = 78;
+    gsPacket[6] = 0x30000;
+    gsPacket[7] = 71;
+    gsPacket[8] = 0;
+    gsPacket[9] = 0x18;
+    gsPacket[10] = 0x29 | ((ulong)alpha << 32);
+    gsPacket[11] = 66;
+    gsPacket[12] = 0;
+    gsPacket[13] = 0x3F;
+    gsPacket[14] = x | ((ulong)(x + w - 1) << 16) | ((ulong)y << 32) | ((ulong)(y + height - 1) << 48);
+    gsPacket[15] = 0x40;
+    gsPacket[16] = 0x60;
+    gsPacket[17] = 20;
+    gsPacket[18] = tbp | ((ulong)tbw << 14) | ((ulong)54530 << 19);
+    gsPacket[19] = 6;
+    gsPacket[20] = 0xA | ((ulong)(tw - 1) << 14) | ((ulong)(th - 1) << 34);
+    gsPacket[21] = 8;
+    gsPacket[22] = 342;
+    gsPacket[23] = 0;
+    gsPacket[24] = grey | ((ulong)grey << 8) | ((ulong)grey << 16) | ((ulong)grey << 24) | 0x3F80000000000000;
+    gsPacket[25] = 1;
+    gsPacket += 26;
+    int texU0 = 8;
+    int texU1 = step + 8;
     int x0 = x << 4;
     for (int i = 0; i < cols; i++) {
-        p[0] = u0;
-        p[1] = 3;
-        p[2] = x0 | ((ulong)(y << 4) << 16);
-        p[3] = 5;
-        p[4] = u1 | ((ulong)(th << 4) << 16);
-        p[5] = 3;
-        p[6] = (x0 + 0x200) | ((ulong)((y + h) << 4) << 16);
-        p[7] = 5;
+        gsPacket[0] = texU0;
+        gsPacket[1] = 3;
+        gsPacket[2] = x0 | ((ulong)(y << 4) << 16);
+        gsPacket[3] = 5;
+        gsPacket[4] = texU1 | ((ulong)(th << 4) << 16);
+        gsPacket[5] = 3;
+        gsPacket[6] = (x0 + 0x200) | ((ulong)((y + height) << 4) << 16);
+        gsPacket[7] = 5;
         x0 += 0x200;
-        u0 += step;
-        u1 += step;
-        p += 8;
+        texU0 += step;
+        texU1 += step;
+        gsPacket += 8;
     }
-    *handle = func_0038F668(dma, (char*)p, 4);
+    *handle = func_0038F668(dma, (char*)gsPacket, 4);
 }
 #endif
 
@@ -1534,12 +1534,12 @@ extern "C" void func_0036C790(void* vself, int idx, void* pkt2, int* handle)
     if (cLightGlow_m_OverrideWP != 0) {
         func_0036C740(self, idx);
     }
-    sGmBloom_C790* e = (sGmBloom_C790*)(self + 0x6CD4) + idx;
+    sGmBloom_C790* glowParams = (sGmBloom_C790*)(self + 0x6CD4) + idx;
     int alpha[4] = {
         (int)(D_004A43E8 * 127.5f),
         (int)(D_004A43EC * 127.5f),
-        (int)(e->v[5] * 127.5f),
-        (int)(e->v[6] * 127.5f),
+        (int)(glowParams->v[5] * 127.5f),
+        (int)(glowParams->v[6] * 127.5f),
     };
     if (alpha[3] == 0 && alpha[2] == 0 && alpha[1] == 0 && alpha[0] == 0) {
         return;
@@ -1556,14 +1556,14 @@ extern "C" void func_0036C790(void* vself, int idx, void* pkt2, int* handle)
     int y0 = ((sGmViews_C790*)self)->views[idx].y;
     int w = ((sGmViews_C790*)self)->views[idx].w;
     int drawFbp = *(int*)(self + 0x5A84);
-    int h = ((sGmViews_C790*)self)->views[idx].h;
+    int viewHeight = ((sGmViews_C790*)self)->views[idx].h;
     int width = gmCall_AE20(self, 10);
     int fbp32 = drawFbp << 5;
-    func_0036B9D8(self, fbp32, width, x0, y0, w, h, src, e->v[3] * 127.5f, tw, th, 0, 1, handle);
-    func_0036C188(self, src, tw, th, (int)(e->v[0] * 127.5f), (int)(cLightGlow_m_PS2ModIntensity * 127.5f), handle);
+    func_0036B9D8(self, fbp32, width, x0, y0, w, viewHeight, src, glowParams->v[3] * 127.5f, tw, th, 0, 1, handle);
+    func_0036C188(self, src, tw, th, (int)(glowParams->v[0] * 127.5f), (int)(cLightGlow_m_PS2ModIntensity * 127.5f), handle);
     for (int i = 0; i < 3; i++) {
         if (alpha[i] != 0) {
-            func_0036C398(self, src, tw, th, fbp32, x0, y0, w, h, alpha[i], (int)(e->v[4] * 127.5f), handle);
+            func_0036C398(self, src, tw, th, fbp32, x0, y0, w, viewHeight, alpha[i], (int)(glowParams->v[4] * 127.5f), handle);
         }
         int psrc = src;
         int pw = tw;
@@ -1571,25 +1571,25 @@ extern "C" void func_0036C790(void* vself, int idx, void* pkt2, int* handle)
         src = bufs[(i + 1) & 1];
         tw >>= 1;
         th >>= 1;
-        func_0036B9D8(self, psrc, pw, 0, 0, pw, ph, src, e->v[2] * 127.5f, tw, th, offset, 4, handle);
+        func_0036B9D8(self, psrc, pw, 0, 0, pw, ph, src, glowParams->v[2] * 127.5f, tw, th, offset, 4, handle);
     }
     if (alpha[3] != 0) {
-        func_0036C398(self, src, tw, th, fbp32, x0, y0, w, h, alpha[3], (int)(e->v[4] * 127.5f), handle);
+        func_0036C398(self, src, tw, th, fbp32, x0, y0, w, viewHeight, alpha[3], (int)(glowParams->v[4] * 127.5f), handle);
     }
-    ulong* p = (ulong*)(*handle | 0x30000000);
+    ulong* gsPacket = (ulong*)(*handle | 0x30000000);
     unsigned int full = 0x1000;
     int offX = ((full - gmCall_AE20(self, 10)) >> 1) << 4;
     int offY = ((full - gmCall_AE20(self, 11)) >> 1) << 4;
-    p[0] = 0x10000003;
-    p[1] = 0;
-    p[2] = 0x1000000000008002;
-    p[3] = 0xE;
-    p[4] = drawFbp | ((ulong)(gmCall_AE20(self, 10) >> 6) << 16);
-    p[5] = 76;
-    p[6] = offX | ((ulong)offY << 32);
-    p[7] = 0x18;
-    p += 8;
-    *handle = (int)p & 0x0FFFFFFF;
+    gsPacket[0] = 0x10000003;
+    gsPacket[1] = 0;
+    gsPacket[2] = 0x1000000000008002;
+    gsPacket[3] = 0xE;
+    gsPacket[4] = drawFbp | ((ulong)(gmCall_AE20(self, 10) >> 6) << 16);
+    gsPacket[5] = 76;
+    gsPacket[6] = offX | ((ulong)offY << 32);
+    gsPacket[7] = 0x18;
+    gsPacket += 8;
+    *handle = (int)gsPacket & 0x0FFFFFFF;
     func_00368138(*(char**)(self + 0x18F4), pkt2);
 }
 #endif

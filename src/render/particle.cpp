@@ -3664,17 +3664,17 @@ static inline void ClampScale6C58(sPtGfx6C58* self, float& x, float& y)
  */
 extern "C" void cPS2GraphicsMan_SetViewportPerspective(sPtGfx6C58* self, float fov, float zNear, float zFar)
 {
-    sPtView6C58* v = &self->views[self->curView];
-    v->f20 = 0;
-    v->zNear = zNear;
-    v->zFar = zFar;
-    v->fov = fov;
+    sPtView6C58* viewEntry = &self->views[self->curView];
+    viewEntry->f20 = 0;
+    viewEntry->zNear = zNear;
+    viewEntry->zFar = zFar;
+    viewEntry->fov = fov;
     // PORT: int-arithmetic view address (as in cPS2GraphicsMan_GetViewportFOV); the typed self->views[i] reads score 94-95%.
-    char* p = (char*)self + self->curView * 0x230;
-    float x = *(float*)(p + 0x6D20);
-    float y = *(float*)(p + 0x6D24);
-    float w = *(float*)(p + 0x6D28);
-    float h = *(float*)(p + 0x6D2C);
+    char* viewBase = (char*)self + self->curView * 0x230;
+    float x = *(float*)(viewBase + 0x6D20);
+    float y = *(float*)(viewBase + 0x6D24);
+    float w = *(float*)(viewBase + 0x6D28);
+    float viewHeight = *(float*)(viewBase + 0x6D2C);
     float zlo, zhi, zscale;
     if (self->mode == 49) {
         zscale = 16777215.0f;
@@ -3687,20 +3687,20 @@ extern "C" void cPS2GraphicsMan_SetViewportPerspective(sPtGfx6C58* self, float f
     }
     self->zFar = zFar;
     self->fov = fov;
-    sPtVtU6C58* e = &self->vtable[11];
-    unsigned height = e->fn((char*)self + e->delta);
-    e = &self->vtable[10];
-    unsigned width = e->fn((char*)self + e->delta);
+    sPtVtU6C58* vtEntry = &self->vtable[11];
+    unsigned height = vtEntry->fn((char*)self + vtEntry->delta);
+    vtEntry = &self->vtable[10];
+    unsigned width = vtEntry->fn((char*)self + vtEntry->delta);
     float aspect = (float)height * 1.3333334f / (float)width;
-    float s, c;
-    SinCos_6C58(fov, &s, &c);
-    float sx = (w * 0.5f) / (s / c);
+    float sinFov, cosFov;
+    SinCos_6C58(fov, &sinFov, &cosFov);
+    float sx = (w * 0.5f) / (sinFov / cosFov);
     float sy = sx * aspect;
     ClampScale6C58(self, sx, sy);
-    e = &self->vtable[10];
-    float offX = 32768.0f - (float)(e->fn((char*)self + e->delta) * 8);
-    e = &self->vtable[11];
-    float offY = 32768.0f - (float)(e->fn((char*)self + e->delta) * 8);
+    vtEntry = &self->vtable[10];
+    float offX = 32768.0f - (float)(vtEntry->fn((char*)self + vtEntry->delta) * 8);
+    vtEntry = &self->vtable[11];
+    float offY = 32768.0f - (float)(vtEntry->fn((char*)self + vtEntry->delta) * 8);
     float zA = (-zscale * zNear) / (zFar - zNear);
     self->m6AF0.m[0][0] = sx * 16.0f;
     self->m6AF0.m[1][0] = 0.0f;
@@ -3708,12 +3708,12 @@ extern "C" void cPS2GraphicsMan_SetViewportPerspective(sPtGfx6C58* self, float f
     self->m6AF0.m[3][0] = 0.0f;
     self->m6AF0.m[0][1] = 0.0f;
     self->m6AF0.m[1][1] = -sy * 16.0f;
-    self->m6AF0.m[2][1] = (h * 0.5f + y) * 16.0f + offY;
+    self->m6AF0.m[2][1] = (viewHeight * 0.5f + y) * 16.0f + offY;
     self->m6AF0.m[3][1] = 0.0f;
     self->m6AF0.m[0][2] = 0.0f;
     self->m6AF0.m[1][2] = 0.0f;
     self->m6AF0.m[2][2] = zA;
-    float zB = -zFar * zA + v->depth;
+    float zB = -zFar * zA + viewEntry->depth;
     self->m6AF0.m[3][2] = zB;
     self->m6AF0.m[0][3] = 0.0f;
     self->m6AF0.m[1][3] = 0.0f;
@@ -3723,21 +3723,21 @@ extern "C" void cPS2GraphicsMan_SetViewportPerspective(sPtGfx6C58* self, float f
     self->q6B70.v[1] = y * 16.0f + offY;
     self->q6B70.v[2] = zA * zNear + zB;
     self->q6B80.v[0] = (x + w) * 16.0f + offX;
-    self->q6B80.v[1] = (y + h) * 16.0f + offY;
+    self->q6B80.v[1] = (y + viewHeight) * 16.0f + offY;
     self->q6B80.v[2] = zA * zFar + zB;
     self->q6B70.v[3] = 1.0f / zNear;
     self->q6B80.v[3] = 1.0f / zFar;
     self->texReady = 0;
-    float aspect2 = aspect * (w / h);
+    float aspect2 = aspect * (w / viewHeight);
     float px = 1.0f / func_0040D588(fov);
     float py = 1.0f / func_0040D588(fov) * aspect2;
     ClampScale6C58(self, px, py);
-    e = &self->vtable[10];
-    float sw = (float)e->fn((char*)self + e->delta);
+    vtEntry = &self->vtable[10];
+    float sw = (float)vtEntry->fn((char*)self + vtEntry->delta);
     float cx = (w * 0.5f - sw * 0.5f) + x;
-    e = &self->vtable[11];
-    float sh = (float)e->fn((char*)self + e->delta);
-    float cy = (h * 0.5f - sh * 0.5f) + y;
+    vtEntry = &self->vtable[11];
+    float sh = (float)vtEntry->fn((char*)self + vtEntry->delta);
+    float cy = (viewHeight * 0.5f - sh * 0.5f) + y;
     float zz = (zFar + zNear) / (zFar - zNear);
     float zw = -(2.0f * zFar * zNear) / (zFar - zNear);
     self->m5860.m[0][0] = px;
@@ -3757,12 +3757,12 @@ extern "C" void cPS2GraphicsMan_SetViewportPerspective(sPtGfx6C58* self, float f
     self->m5860.m[3][2] = zw;
     self->m5860.m[3][3] = 0.0f;
     self->q58E0.v[0] = w * 0.5f;
-    self->q58E0.v[1] = -(h * 0.5f);
+    self->q58E0.v[1] = -(viewHeight * 0.5f);
     self->q58E0.v[2] = zlo;
     self->q58E0.v[3] = 0.0f;
     self->q58F0.v[0] = cx + 2047.5f;
     self->q58F0.v[1] = cy + 2047.5f;
-    self->q58F0.v[2] = zhi + v->depth;
+    self->q58F0.v[2] = zhi + viewEntry->depth;
     self->q58F0.v[3] = 0.0f;
     float gw = 2048.0f - 2.0f * fsAbs_6C58(cx);
     float gh = 2048.0f - 2.0f * fsAbs_6C58(cy);
@@ -3771,7 +3771,7 @@ extern "C" void cPS2GraphicsMan_SetViewportPerspective(sPtGfx6C58* self, float f
     self->m57C0.m[0][2] = 0.0f;
     self->m57C0.m[0][3] = 0.0f;
     self->m57C0.m[1][0] = 0.0f;
-    self->m57C0.m[1][1] = (h / gh) * py;
+    self->m57C0.m[1][1] = (viewHeight / gh) * py;
     self->m57C0.m[1][2] = 0.0f;
     self->m57C0.m[1][3] = 0.0f;
     self->m57C0.m[2][0] = 0.0f;
@@ -3788,9 +3788,9 @@ extern "C" void cPS2GraphicsMan_SetViewportPerspective(sPtGfx6C58* self, float f
     self->q5840.v[3] = 0.0f;
     self->q5850.v[0] = cx + 2047.5f;
     self->q5850.v[1] = cy + 2047.5f;
-    self->q5850.v[2] = zhi + v->depth;
+    self->q5850.v[2] = zhi + viewEntry->depth;
     self->q5850.v[3] = 0.0f;
-    func_00376938_6C58(self, x, y, w, h);
+    func_00376938_6C58(self, x, y, w, viewHeight);
     self->f5910 = 40000.0f;
     self->q5920.v[0] = 1023.0f;
     self->q5920.v[1] = 0.0f;
@@ -3996,24 +3996,24 @@ static inline void ZScale7458(sPtGfx6C58* self, float& zscale)
  */
 extern "C" void cPS2GraphicsMan_SetViewportOrthographic(sPtGfx6C58* self, float cx, float cy, float fx, float fy, float zNear, float zFar)
 {
-    sPtView6C58* v = &self->views[self->curView];
-    v->f20 = 1;
-    v->zNear = zNear;
-    v->zFar = zFar;
+    sPtView6C58* viewEntry = &self->views[self->curView];
+    viewEntry->f20 = 1;
+    viewEntry->zNear = zNear;
+    viewEntry->zFar = zFar;
     // PORT: int-arithmetic view address, as in the perspective sibling cPS2GraphicsMan_SetViewportPerspective.
-    char* p = (char*)self + self->curView * 0x230;
-    float x = *(float*)(p + 0x6D20);
-    float y = *(float*)(p + 0x6D24);
-    float w = *(float*)(p + 0x6D28);
-    float h = *(float*)(p + 0x6D2C);
+    char* viewBase = (char*)self + self->curView * 0x230;
+    float x = *(float*)(viewBase + 0x6D20);
+    float y = *(float*)(viewBase + 0x6D24);
+    float w = *(float*)(viewBase + 0x6D28);
+    float viewHeight = *(float*)(viewBase + 0x6D2C);
     float zscale;
     ZScale7458(self, zscale);
-    sPtVtU6C58* e = &self->vtable[10];
-    float offX = 32768.0f - (float)(e->fn((char*)self + e->delta) * 8);
-    e = &self->vtable[11];
-    float offY = 32768.0f - (float)(e->fn((char*)self + e->delta) * 8);
+    sPtVtU6C58* vtEntry = &self->vtable[10];
+    float offX = 32768.0f - (float)(vtEntry->fn((char*)self + vtEntry->delta) * 8);
+    vtEntry = &self->vtable[11];
+    float offY = 32768.0f - (float)(vtEntry->fn((char*)self + vtEntry->delta) * 8);
     float sx = w / fx * 16.0f;
-    float sy = h / fy * 16.0f;
+    float sy = viewHeight / fy * 16.0f;
 
     float zA = -zscale / (zFar - zNear);
     float zB = -zFar * zA;
@@ -4038,7 +4038,7 @@ extern "C" void cPS2GraphicsMan_SetViewportOrthographic(sPtGfx6C58* self, float 
     self->q6B70.v[2] = zA * zNear + zB;
     self->q6B70.v[3] = 1.0f;
     self->q6B80.v[0] = (x + w) * 16.0f + offX;
-    self->q6B80.v[1] = (y + h) * 16.0f + offY;
+    self->q6B80.v[1] = (y + viewHeight) * 16.0f + offY;
     self->q6B80.v[2] = zA * zFar + zB;
     self->q6B80.v[3] = 1.0f;
     self->texReady = 0;
@@ -4052,12 +4052,12 @@ extern "C" void cPS2GraphicsMan_SetViewportOrthographic(sPtGfx6C58* self, float 
     }
     float px = 2.0f / fx;
     float py = 2.0f / fy;
-    e = &self->vtable[10];
-    float sw = (float)e->fn((char*)self + e->delta);
+    vtEntry = &self->vtable[10];
+    float sw = (float)vtEntry->fn((char*)self + vtEntry->delta);
     float ox = (w * 0.5f - sw * 0.5f) + x;
-    e = &self->vtable[11];
-    float sh = (float)e->fn((char*)self + e->delta);
-    float oy = (h * 0.5f - sh * 0.5f) + y;
+    vtEntry = &self->vtable[11];
+    float sh = (float)vtEntry->fn((char*)self + vtEntry->delta);
+    float oy = (viewHeight * 0.5f - sh * 0.5f) + y;
     float zz = 2.0f / (zFar - zNear);
     float zw = -(zFar + zNear) / (zFar - zNear);
     self->m5860.m[0][0] = px;
@@ -4077,11 +4077,11 @@ extern "C" void cPS2GraphicsMan_SetViewportOrthographic(sPtGfx6C58* self, float 
     self->m5860.m[3][2] = zw;
     self->m5860.m[3][3] = 1.0f;
     self->q58E0.v[0] = w * 0.5f;
-    self->q58E0.v[1] = h * 0.5f;
+    self->q58E0.v[1] = viewHeight * 0.5f;
     self->q58E0.v[2] = zlo;
     self->q58E0.v[3] = 0.0f;
     float tx = (ox + 2047.5f) - cx * w / fx;
-    float ty = (oy + 2047.5f) - cy * h / fy;
+    float ty = (oy + 2047.5f) - cy * viewHeight / fy;
     self->q58F0.v[0] = tx;
     self->q58F0.v[1] = ty;
     self->q58F0.v[2] = zhi;
@@ -4089,7 +4089,7 @@ extern "C" void cPS2GraphicsMan_SetViewportOrthographic(sPtGfx6C58* self, float 
     float gw = 2048.0f - 2.0f * fsAbs_6C58(ox);
     float gh = 2048.0f - 2.0f * fsAbs_6C58(oy);
     float gx = w / gw;
-    float gy = h / gh;
+    float gy = viewHeight / gh;
     self->m57C0.m[0][0] = gx * px;
     self->m57C0.m[0][1] = 0.0f;
     self->m57C0.m[0][2] = 0.0f;
@@ -4114,7 +4114,7 @@ extern "C" void cPS2GraphicsMan_SetViewportOrthographic(sPtGfx6C58* self, float 
     self->q5850.v[1] = ty;
     self->q5850.v[2] = zhi;
     self->q5850.v[3] = 0.0f;
-    func_00376938((cPS2GraphicsMan*)self, x, y, w, h);
+    func_00376938((cPS2GraphicsMan*)self, x, y, w, viewHeight);
     self->f5910 = 40000.0f;
     self->q5920.v[0] = 1023.0f;
     self->q5920.v[1] = 0.0f;
@@ -4908,7 +4908,7 @@ static inline sGlyph8808* Find8808(sFontRes8808* f, int c)
 }
 
 /**
- * Draws string @p s in @p font as one textured sprite per glyph, queued as a single GS packet.
+ * Draws string @p text in @p font as one textured sprite per glyph, queued as a single GS packet.
  *
  * Rebuilds the matrices first (func_0037D968) when mMatricesValid is 0. Each character's glyph is found by code (direct
  * index from FirstCode to LastLinearCode, then a binary search, else MissingGlyph). When the current viewport is
@@ -4924,7 +4924,7 @@ static inline sGlyph8808* Find8808(sFontRes8808* f, int c)
  * sort key at +0x69CC0. mVifCursor moves past the packet. Slot 80 of cPS2GraphicsMan_vtbl.
  *
  * @param font  the font (cFont layout)
- * @param s  the zero-terminated string
+ * @param text  the zero-terminated string
  * @param color  the colour {a, r, g, b} in 0..1
  * @param x  the left edge
  * @param y  the top edge
@@ -4935,100 +4935,100 @@ static inline sGlyph8808* Find8808(sFontRes8808* f, int c)
  * @param z  the depth
  */
 // PORT: PS2-only GS packet build and VU0 inline asm; uncached (0x30000000) pointers.
-extern "C" void cPS2GraphicsMan_DrawString3D(sGfx8808* self, sFontRes8808* font, char* s, float* color,
+extern "C" void cPS2GraphicsMan_DrawString3D(sGfx8808* self, sFontRes8808* font, char* text, float* color,
                               float x, float y, float sx, float sy, float su, float sv, float z)
 {
     if (self->texReady == 0) {
         func_0037D968((cPS2GraphicsMan*)self);
     }
     unsigned int buf = self->bufAddr;
-    unsigned long* p = (unsigned long*)(buf | 0x30000000);
-    unsigned long* q = p + 10;
+    unsigned long* packetHead = (unsigned long*)(buf | 0x30000000);
+    unsigned long* glyphOut = packetHead + 10;
     int nloop = 0;
     if (self->views[self->curView].mode != 0) {
         float vz = self->f6B18 * z + self->f6B28;
-        sPt7278 a;
-        sPt7278 b;
-        a.z = vz;
-        a.w = 1.0f;
-        b.z = vz;
-        b.w = 1.0f;
-        for (; *s; s++) {
-            sGlyph8808* g = Find8808(font, (unsigned char)*s);
-            if (g) {
+        sPt7278 cornerMin;
+        sPt7278 cornerMax;
+        cornerMin.z = vz;
+        cornerMin.w = 1.0f;
+        cornerMax.z = vz;
+        cornerMax.w = 1.0f;
+        for (; *text; text++) {
+            sGlyph8808* glyphRec = Find8808(font, (unsigned char)*text);
+            if (glyphRec) {
                 nloop++;
                 float uv0[2];
                 float uv1[2];
-                Set2_8808(uv0, g->u * su, g->v * sv);
-                Set2_8808(uv1, (g->u + g->w) * su, (g->v + g->h) * sv);
-                a.x = (x + g->xoff * sx) * self->f6AF0 + self->f6B20;
-                a.y = (y + g->yoff * sy) * self->f6B04 + self->f6B24;
-                b.x = a.x + g->w * sx * self->f6AF0;
-                b.y = a.y + g->h * sy * self->f6B04;
-                q[0] = Bits_CF0(uv0[0]) | ((long)Bits_CF0(uv0[1]) << 32);
-                q[1] = (int)a.x | ((long)(int)a.y << 16) | ((long)(int)a.z << 32);
-                q[2] = Bits_CF0(uv1[0]) | ((long)Bits_CF0(uv1[1]) << 32);
-                q[3] = (int)b.x | ((long)(int)b.y << 16) | ((long)(int)b.z << 32);
-                q += 4;
-                x += g->adv * sx;
+                Set2_8808(uv0, glyphRec->u * su, glyphRec->v * sv);
+                Set2_8808(uv1, (glyphRec->u + glyphRec->w) * su, (glyphRec->v + glyphRec->h) * sv);
+                cornerMin.x = (x + glyphRec->xoff * sx) * self->f6AF0 + self->f6B20;
+                cornerMin.y = (y + glyphRec->yoff * sy) * self->f6B04 + self->f6B24;
+                cornerMax.x = cornerMin.x + glyphRec->w * sx * self->f6AF0;
+                cornerMax.y = cornerMin.y + glyphRec->h * sy * self->f6B04;
+                glyphOut[0] = Bits_CF0(uv0[0]) | ((long)Bits_CF0(uv0[1]) << 32);
+                glyphOut[1] = (int)cornerMin.x | ((long)(int)cornerMin.y << 16) | ((long)(int)cornerMin.z << 32);
+                glyphOut[2] = Bits_CF0(uv1[0]) | ((long)Bits_CF0(uv1[1]) << 32);
+                glyphOut[3] = (int)cornerMax.x | ((long)(int)cornerMax.y << 16) | ((long)(int)cornerMax.z << 32);
+                glyphOut += 4;
+                x += glyphRec->adv * sx;
             }
         }
     } else {
-        for (; *s; s++) {
-            sGlyph8808* g = Find8808(font, (unsigned char)*s);
-            if (g) {
+        for (; *text; text++) {
+            sGlyph8808* glyphRec = Find8808(font, (unsigned char)*text);
+            if (glyphRec) {
                 nloop++;
                 float uv0[2];
                 float uv1[2];
                 float size[2];
-                Set2_8808(uv0, g->u * su, g->v * sv);
-                Set2_8808(uv1, (g->u + g->w) * su, (g->v + g->h) * sv);
-                Set2_8808(size, g->w * sx * 0.5f, g->h * sy * 0.5f);
-                sPtPos8808 pos(x + g->xoff * sx + size[0], y + g->yoff * sy + size[1], z, 1.0f);
-                sPt7278 v = MulMat7278(&self->m6B30, pos);
-                float inv = 1.0f / v.w;
-                v.x *= inv;
-                v.y *= inv;
+                Set2_8808(uv0, glyphRec->u * su, glyphRec->v * sv);
+                Set2_8808(uv1, (glyphRec->u + glyphRec->w) * su, (glyphRec->v + glyphRec->h) * sv);
+                Set2_8808(size, glyphRec->w * sx * 0.5f, glyphRec->h * sy * 0.5f);
+                sPtPos8808 pos(x + glyphRec->xoff * sx + size[0], y + glyphRec->yoff * sy + size[1], z, 1.0f);
+                sPt7278 projCentre = MulMat7278(&self->m6B30, pos);
+                float inv = 1.0f / projCentre.w;
+                projCentre.x *= inv;
+                projCentre.y *= inv;
                 float dx = self->f6AF0 * size[0] * inv;
-                v.w = inv;
+                projCentre.w = inv;
                 float dy = self->f6B04 * size[1] * inv;
-                sPt7278 d(dx, dy, 0.0f, 0.0f);
-                sPt7278 a = Sub_CF0(v, d);
-                sPt7278 b = Add7278(v, d);
-                q[0] = Bits_CF0(uv0[0]) | ((long)Bits_CF0(uv0[1]) << 32);
-                q[1] = (int)a.x | ((long)(int)a.y << 16) | ((long)(int)(a.z * a.w) << 32);
-                q[2] = Bits_CF0(uv1[0]) | ((long)Bits_CF0(uv1[1]) << 32);
-                q[3] = (int)b.x | ((long)(int)b.y << 16) | ((long)(int)(b.z * b.w) << 32);
-                q += 4;
-                x += g->adv * sx;
+                sPt7278 halfExtent(dx, dy, 0.0f, 0.0f);
+                sPt7278 cornerMin = Sub_CF0(projCentre, halfExtent);
+                sPt7278 cornerMax = Add7278(projCentre, halfExtent);
+                glyphOut[0] = Bits_CF0(uv0[0]) | ((long)Bits_CF0(uv0[1]) << 32);
+                glyphOut[1] = (int)cornerMin.x | ((long)(int)cornerMin.y << 16) | ((long)(int)(cornerMin.z * cornerMin.w) << 32);
+                glyphOut[2] = Bits_CF0(uv1[0]) | ((long)Bits_CF0(uv1[1]) << 32);
+                glyphOut[3] = (int)cornerMax.x | ((long)(int)cornerMax.y << 16) | ((long)(int)(cornerMax.z * cornerMax.w) << 32);
+                glyphOut += 4;
+                x += glyphRec->adv * sx;
             }
         }
     }
-    p[0] = (nloop * 2 + 4) | 0x10000000;
-    p[1] = 0;
-    p[2] = 0;
-    p[3] = (unsigned long)((nloop * 2 + 3) | 0x50000000U) << 32;
-    p[4] = 0x2400000000000001UL;
-    p[5] = 0x10;
-    p[6] = 86;
-    p[7] = (long)(int)(color[1] * 204.0f) | ((long)(int)(color[2] * 204.0f) << 8) |
+    packetHead[0] = (nloop * 2 + 4) | 0x10000000;
+    packetHead[1] = 0;
+    packetHead[2] = 0;
+    packetHead[3] = (unsigned long)((nloop * 2 + 3) | 0x50000000U) << 32;
+    packetHead[4] = 0x2400000000000001UL;
+    packetHead[5] = 0x10;
+    packetHead[6] = 86;
+    packetHead[7] = (long)(int)(color[1] * 204.0f) | ((long)(int)(color[2] * 204.0f) << 8) |
            ((long)(int)(color[3] * 204.0f) << 16) | ((long)(int)(color[0] * 128.0f) << 24) |
            ((long)Bits_CF0(1.0f) << 32);
-    p[8] = (unsigned long)(nloop | 0x8000) | ((unsigned long)34816 << 47);
-    p[9] = 21074;
-    unsigned int next = (unsigned int)q & 0x0FFFFFFF;
+    packetHead[8] = (unsigned long)(nloop | 0x8000) | ((unsigned long)34816 << 47);
+    packetHead[9] = 21074;
+    unsigned int next = (unsigned int)glyphOut & 0x0FFFFFFF;
     sPtRing* ring = self->ring;
     sPtRenderState* rs = self->top;
     self->bufAddr = next + 0x10;
     if (ring->count < 2600) {
         rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
-        sPtRingEnt* e = (sPtRingEnt*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
-        e->rs = *rs;
-        e->buf = buf;
-        e->next = next;
-        e->key = key;
-        e->flag = 0;
+        sPtRingEnt* ringEntry = (sPtRingEnt*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        ringEntry->rs = *rs;
+        ringEntry->buf = buf;
+        ringEntry->next = next;
+        ringEntry->key = key;
+        ringEntry->flag = 0;
     }
 }
 #endif
@@ -6836,13 +6836,13 @@ static inline int clampW_C8C0(int v, int lo, int hi)
  * -2047..-135, and calls func_0037D090(self, id, 5, 1, 0, k). Slot 46 of cPS2GraphicsMan_vtbl.
  *
  * @param src  the shape record
- * @param a2  the texture name, passed through
- * @param a3  the lock type, passed through
- * @param a4  the copy-memory flag, passed through
- * @param a5  the bind id, passed through
+ * @param textureName  the texture name, passed through
+ * @param lockType  the lock type, passed through
+ * @param copyMem  the copy-memory flag, passed through
+ * @param bindId  the bind id, passed through
  * @return the texture id slot 47 returns
  */
-extern "C" int cPS2GraphicsMan_AddTexture(cPS2GraphicsMan* self, sTexHdr_C8C0* src, int a2, int a3, int a4, int a5)
+extern "C" int cPS2GraphicsMan_AddTexture(cPS2GraphicsMan* self, sTexHdr_C8C0* src, int textureName, int lockType, int copyMem, int bindId)
 {
     int fmt = 0;
     int cls = 0;
@@ -6886,18 +6886,18 @@ extern "C" int cPS2GraphicsMan_AddTexture(cPS2GraphicsMan* self, sTexHdr_C8C0* s
     if (flags & 0x1000)
         data = (char*)src + src->f10;
     sVEntry0037C8C0* vt = (sVEntry0037C8C0*)self->mVtbl;
-    int h = vt[47].fn(((char*)self) + vt[47].delta, data, a2, src->s4, src->s6, flags >> 28, fmt, cls, pal, a3, a4, a5);
+    int textureId = vt[47].fn(((char*)self) + vt[47].delta, data, textureName, src->s4, src->s6, flags >> 28, fmt, cls, pal, lockType, copyMem, bindId);
     if ((src->fC & 0xF0000000) != 0 && src->s8 != 0) {
-        double d = fptodp(240.0f / ((float)src->s8 * 6.1035156e-05f));
-        d = dlog_C8C0(d);
-        d = dpmul(d, 1.4426950408889634);
-        d = dpsub(0.0, d);
-        d = dpmul(d, 16.0);
-        int k = dtoi_C8C0(d);
+        double lodValue = fptodp(240.0f / ((float)src->s8 * 6.1035156e-05f));
+        lodValue = dlog_C8C0(lodValue);
+        lodValue = dpmul(lodValue, 1.4426950408889634);
+        lodValue = dpsub(0.0, lodValue);
+        lodValue = dpmul(lodValue, 16.0);
+        int k = dtoi_C8C0(lodValue);
         k = clampZ_C8C0(k, -0x7FF, -135);
-        func_0037D090_C8C0(((char*)self), h, 5, 1, 0, k);
+        func_0037D090_C8C0(((char*)self), textureId, 5, 1, 0, k);
     }
-    return h;
+    return textureId;
 }
 #endif
 
@@ -6917,19 +6917,19 @@ extern "C" int func_00367440(void* mgr, int a1, int a2, int a3, int a4, int a5, 
  * @param name  the texture name
  * @param width  the width in texels
  * @param height  the height in texels
- * @param a5  the mipmap count
- * @param a6  the texel format
- * @param a7  the CLUT format
- * @param a8  the CLUT data
- * @param a9  the lock type
- * @param a10  the copy-memory flag
- * @param a11  the bind id
+ * @param mipmapCount  the mipmap count
+ * @param texelFormat  the texel format
+ * @param clutFormat  the CLUT format
+ * @param clutData  the CLUT data
+ * @param lockType  the lock type
+ * @param copyMem  the copy-memory flag
+ * @param bindId  the bind id
  * @return the new texture id
  */
-extern "C" int cPS2GraphicsMan_AddTexture1(cPS2GraphicsMan* self, int pixels, int name, int width, int height, int a5, int a6, int a7,
-                              int a8, int a9, int a10, int a11)
+extern "C" int cPS2GraphicsMan_AddTexture1(cPS2GraphicsMan* self, int pixels, int name, int width, int height, int mipmapCount, int texelFormat, int clutFormat,
+                              int clutData, int lockType, int copyMem, int bindId)
 {
-    int i = func_00367440(self->mpTextureMan, pixels, name, width, height, a5, a6, a7, a8, a9, a10, a11);
+    int i = func_00367440(self->mpTextureMan, pixels, name, width, height, mipmapCount, texelFormat, clutFormat, clutData, lockType, copyMem, bindId);
     *(int*)((char*)self + (i << 2) + 0x3838) = 1;
     return i;
 }
@@ -7249,7 +7249,7 @@ extern "C" unsigned int unpack(void* src, void* dst);
 extern "C" void* MEM_free(void* p);
 
 /**
- * Replaces the texels of texture @p a1 with an EA shape record's, unpacking a compressed record first.
+ * Replaces the texels of texture @p textureId with an EA shape record's, unpacking a compressed record first.
  *
  * Formats as in cPS2GraphicsMan_AddTexture: type 1 gives texel format 11 (12 swizzled), type 2 gives 9 (10), both with
  * CLUT format 1 and the next record's palette; type 3 gives 2 and type 5 gives 0. When the bytes after the header start
@@ -7257,15 +7257,15 @@ extern "C" void* MEM_free(void* p);
  * header, unpacks the data with unpack, clears bit 7 of the type byte and uses the copy, freeing it with MEM_free
  * afterwards.
  *
- * Calls vtable slot 49 (func_0037D318) with (@p a1, texels, width, height, mipmap count, texel format, CLUT format,
- * palette, @p a3). Slot 48 of cPS2GraphicsMan_vtbl.
+ * Calls vtable slot 49 (func_0037D318) with (@p textureId, texels, width, height, mipmap count, texel format, CLUT format,
+ * palette, @p copyMem). Slot 48 of cPS2GraphicsMan_vtbl.
  *
  * @param selfp  the graphics manager
- * @param a1  the texture id
+ * @param textureId  the texture id
  * @param objp  the shape record
- * @param a3  the copy-memory flag, passed through
+ * @param copyMem  the copy-memory flag, passed through
  */
-extern "C" void cPS2GraphicsMan_SetNewTextureData(cPS2GraphicsMan* selfp, int a1, void* objp, int a3)
+extern "C" void cPS2GraphicsMan_SetNewTextureData(cPS2GraphicsMan* selfp, int textureId, void* objp, int copyMem)
 {
     cPS2GraphicsMan* self = selfp;
     sTexSrc_D0B0* obj = (sTexSrc_D0B0*)objp;
@@ -7308,37 +7308,37 @@ extern "C" void cPS2GraphicsMan_SetNewTextureData(cPS2GraphicsMan* selfp, int a1
         break;
     }
     int allocated = 0;
-    char* tmp = 0;
-    char* p10 = (char*)obj + 0x10;
+    char* unpackedCopy = 0;
+    char* afterHeader = (char*)obj + 0x10;
     unsigned int fC;
     char* data;
     unsigned char* ob = (unsigned char*)obj;
     if (ob[0x10] == 0x10 && ob[0x11] == 251) {
         unsigned int size = (ob[0x12] << 16 | ob[0x13] << 8 | ob[0x14]) + 0x10;
         allocated = 1;
-        tmp = (char*)operator_new_D0B0(size, str_unpack, 0x80000100, 0);
-        MEM_move(tmp, obj, 0x10);
-        char* payload = tmp + 0x10;
-        unpack(p10, payload);
-        *(unsigned char*)tmp &= 0x7F;
-        if (((sTexSrc_D0B0*)tmp)->fC & 0x1000) {
-            data = tmp + *(int*)(tmp + 0x10);
+        unpackedCopy = (char*)operator_new_D0B0(size, str_unpack, 0x80000100, 0);
+        MEM_move(unpackedCopy, obj, 0x10);
+        char* payload = unpackedCopy + 0x10;
+        unpack(afterHeader, payload);
+        *(unsigned char*)unpackedCopy &= 0x7F;
+        if (((sTexSrc_D0B0*)unpackedCopy)->fC & 0x1000) {
+            data = unpackedCopy + *(int*)(unpackedCopy + 0x10);
             fC = obj->fC;
         } else {
-            data = tmp + 0x10;
+            data = unpackedCopy + 0x10;
             fC = obj->fC;
         }
     } else {
         if (obj->fC & 0x1000)
             data = (char*)obj + *(int*)((char*)obj + 0x10);
         else
-            data = p10;
+            data = afterHeader;
         fC = obj->fC;
     }
-    sVE_D0B0* e = &((sVE_D0B0*)self->mVtbl)[0x188 / 8];
-    e->fn((char*)self + e->delta, a1, data, obj->s4, obj->s6, fC >> 28, mode, flagB, extra, a3);
+    sVE_D0B0* slotEntry = &((sVE_D0B0*)self->mVtbl)[0x188 / 8];
+    slotEntry->fn((char*)self + slotEntry->delta, textureId, data, obj->s4, obj->s6, fC >> 28, mode, flagB, extra, copyMem);
     if (allocated) {
-        MEM_free(tmp);
+        MEM_free(unpackedCopy);
     }
 }
 #endif
@@ -8558,55 +8558,55 @@ extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter(sPtGfx_07A0* self, 
     int nb = n / 64 + 1;
     for (int i = 0; i < nb; i++) {
         unsigned int buf = self->bufAddr;
-        unsigned long* p = func_0038F460(D_004A4474, buf, -1, 0);
-        p[0] = 0x1000009A;
-        p[1] = 0;
-        p[2] = 0;
-        p[3] = (unsigned long)55601 << 47;
+        unsigned long* writePtr = func_0038F460(D_004A4474, buf, -1, 0);
+        writePtr[0] = 0x1000009A;
+        writePtr[1] = 0;
+        writePtr[2] = 0;
+        writePtr[3] = (unsigned long)55601 << 47;
         hdr.v = hdr.fstep * (float)(i * 64) * *(float*)((char*)obj + 0x2C);
         int seg = obj->count - done;
         if (seg >= 65)
             seg = 0x40;
         hdr.seg = seg;
-        p += 4;
-        CopyQuads_07A0(&p, obj->q, 21);
-        CopyQuads_07A0(&p, &hdr, 1);
+        writePtr += 4;
+        CopyQuads_07A0(&writePtr, obj->q, 21);
+        CopyQuads_07A0(&writePtr, &hdr, 1);
         int wrap = obj->head + 1;
-        int m = obj->count;
-        int s = (done + wrap) % m;
+        int ringSize = obj->count;
+        int firstIndex = (done + wrap) % ringSize;
         done += hdr.seg;
-        int over = s + hdr.seg - m;
+        int over = firstIndex + hdr.seg - ringSize;
         if (over < 0)
             over = 0;
-        int first = s + hdr.seg - s;
-        if (m - s < first)
-            first = m - s;
+        int first = firstIndex + hdr.seg - firstIndex;
+        if (ringSize - firstIndex < first)
+            first = ringSize - firstIndex;
         int pad = 0x40 - first - over;
         sQuad_07A0* lastA;
         sQuad_07A0* lastB;
-        if (done < m) {
-            int e = Wrap_07A0(done, wrap, m);
+        if (done < ringSize) {
+            int e = Wrap_07A0(done, wrap, ringSize);
             lastB = obj->posB + e;
             lastA = obj->posA + e;
         } else {
-            int e = Wrap_07A0(done - 1, wrap, m);
+            int e = Wrap_07A0(done - 1, wrap, ringSize);
             lastB = obj->posB + e;
             lastA = obj->posA + e;
         }
-        CopyQuads_07A0(&p, obj->posA + s, first);
+        CopyQuads_07A0(&writePtr, obj->posA + firstIndex, first);
         if (over > 0)
-            CopyQuads_07A0(&p, obj->posA, over);
-        CopyQuads_07A0(&p, lastA, 1);
-        p = (unsigned long*)((sQuad_07A0*)p + pad);
-        CopyQuads_07A0(&p, obj->posB + s, first);
+            CopyQuads_07A0(&writePtr, obj->posA, over);
+        CopyQuads_07A0(&writePtr, lastA, 1);
+        writePtr = (unsigned long*)((sQuad_07A0*)writePtr + pad);
+        CopyQuads_07A0(&writePtr, obj->posB + firstIndex, first);
         if (over > 0)
-            CopyQuads_07A0(&p, obj->posB, over);
-        CopyQuads_07A0(&p, lastB, 1);
-        p = (unsigned long*)((sQuad_07A0*)p + pad);
-        p[0] = (unsigned long)(((unsigned int)D_510 >> 3) | 0x14000000) << 32;
-        p[1] = (unsigned long)34816 << 45;
-        p += 2;
-        unsigned int next = func_0038F668(D_004A4474, p, 4);
+            CopyQuads_07A0(&writePtr, obj->posB, over);
+        CopyQuads_07A0(&writePtr, lastB, 1);
+        writePtr = (unsigned long*)((sQuad_07A0*)writePtr + pad);
+        writePtr[0] = (unsigned long)(((unsigned int)D_510 >> 3) | 0x14000000) << 32;
+        writePtr[1] = (unsigned long)34816 << 45;
+        writePtr += 2;
+        unsigned int next = func_0038F668(D_004A4474, writePtr, 4);
         self->bufAddr = next;
         sPtRing_07A0* ring = self->ring;
         sPtRS_07A0* rs = self->top;
@@ -8800,67 +8800,67 @@ extern "C" void cPS2GraphicsMan_RenderDynamicParticleEmitter1(sPS2GfxView_0CE0* 
     unsigned int prog = (unsigned int)(obj->alt != 0 ? D_F10 : D_A00) >> 3;
     for (int i = 0; i < nb; i++) {
         unsigned int buf = self->bufAddr;
-        unsigned long* p = func_0038F460(D_004A4474, buf, -1, 0);
-        p[0] = 0x1000007C;
-        p[1] = 0;
-        p[2] = 0;
-        p[3] = (unsigned long)55517 << 47;
+        unsigned long* writePtr = func_0038F460(D_004A4474, buf, -1, 0);
+        writePtr[0] = 0x1000007C;
+        writePtr[1] = 0;
+        writePtr[2] = 0;
+        writePtr[3] = (unsigned long)55517 << 47;
         hdr.v = hdr.fstep * (float)(i * 43) * *(float*)((char*)obj + 0x2C);
         int seg = obj->count - done;
         if (seg >= 44)
             seg = 43;
         hdr.seg = seg;
-        p += 4;
-        CopyQuads(&p, obj->q, 21);
-        CopyQuads(&p, &hdr, 1);
+        writePtr += 4;
+        CopyQuads(&writePtr, obj->q, 21);
+        CopyQuads(&writePtr, &hdr, 1);
         int wrap = obj->head + 1;
-        int m = obj->count;
-        int s = (done + wrap) % m;
+        int ringSize = obj->count;
+        int firstIndex = (done + wrap) % ringSize;
         done += hdr.seg;
-        int over = s + hdr.seg - m;
+        int over = firstIndex + hdr.seg - ringSize;
         if (over < 0)
             over = 0;
-        int first = s + hdr.seg - s;
-        if (m - s < first)
-            first = m - s;
+        int first = firstIndex + hdr.seg - firstIndex;
+        if (ringSize - firstIndex < first)
+            first = ringSize - firstIndex;
         int pad = 43 - first - over;
         sGifQuad* lastA;
         sGifQuad* lastB;
         sCol_0CE0* lastC;
-        if (done < m) {
-            int e = wrapIndex(done, wrap, m);
+        if (done < ringSize) {
+            int e = wrapIndex(done, wrap, ringSize);
             lastA = obj->posA + e;
             lastB = obj->posB + e;
             lastC = obj->cols + e;
         } else {
-            int e = wrapIndex(done - 1, wrap, m);
+            int e = wrapIndex(done - 1, wrap, ringSize);
             lastA = obj->posA + e;
             lastB = obj->posB + e;
             lastC = obj->cols + e;
         }
-        CopyQuads(&p, obj->posA + s, first);
+        CopyQuads(&writePtr, obj->posA + firstIndex, first);
         if (over > 0)
-            CopyQuads(&p, obj->posA, over);
-        CopyQuads(&p, lastA, 1);
-        p = (unsigned long*)((sGifQuad*)p + pad);
-        CopyQuads(&p, obj->posB + s, first);
+            CopyQuads(&writePtr, obj->posA, over);
+        CopyQuads(&writePtr, lastA, 1);
+        writePtr = (unsigned long*)((sGifQuad*)writePtr + pad);
+        CopyQuads(&writePtr, obj->posB + firstIndex, first);
         if (over > 0)
-            CopyQuads(&p, obj->posB, over);
-        CopyQuads(&p, lastB, 1);
-        p = (unsigned long*)((sGifQuad*)p + pad);
-        p[0] = 0;
-        p[1] = (unsigned long)0x6E2CC06E << 32;
-        p += 2;
+            CopyQuads(&writePtr, obj->posB, over);
+        CopyQuads(&writePtr, lastB, 1);
+        writePtr = (unsigned long*)((sGifQuad*)writePtr + pad);
+        writePtr[0] = 0;
+        writePtr[1] = (unsigned long)0x6E2CC06E << 32;
+        writePtr += 2;
         sCol_0CE0 cols[44];
-        MEM_copy(cols, obj->cols + s, first * 4);
+        MEM_copy(cols, obj->cols + firstIndex, first * 4);
         if (over > 0)
             MEM_copy(cols + first, obj->cols, over * 4);
         cols[first + over] = *lastC;
-        CopyQuads(&p, cols, 11);
-        p[0] = (unsigned long)(prog | 0x14000000) << 32;
-        p[1] = (unsigned long)34816 << 45;
-        p += 2;
-        unsigned int next = func_0038F668(D_004A4474, p, 4);
+        CopyQuads(&writePtr, cols, 11);
+        writePtr[0] = (unsigned long)(prog | 0x14000000) << 32;
+        writePtr[1] = (unsigned long)34816 << 45;
+        writePtr += 2;
+        unsigned int next = func_0038F668(D_004A4474, writePtr, 4);
         self->bufAddr = next;
         sPtRing* ring = self->ring;
         sPtRenderState* rs = self->top;

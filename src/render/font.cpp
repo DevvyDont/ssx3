@@ -2252,17 +2252,17 @@ INCLUDE_ASM("render/font", func_003944A8);
  * them back.
  *
  * @param ps2GraphicsMan  the graphics manager
- * @param arg1  the alpha sort mode (On Tour eGMAlphaSort; 2 bits)
- * @param arg2  the sort key (19 bits)
+ * @param alphaSort  the alpha sort mode (On Tour eGMAlphaSort; 2 bits)
+ * @param sortKey  the sort key (19 bits)
  */
-extern "C" void func_003944A8(cPS2GraphicsMan* ps2GraphicsMan, int arg1, int arg2) {
+extern "C" void func_003944A8(cPS2GraphicsMan* ps2GraphicsMan, int alphaSort, int sortKey) {
     void *temp_3;
     void *temp_8;
 
     temp_8 = ((void*)ps2GraphicsMan->m_pCurrentDrawState);
-    (*(int *)((char*)(temp_8) + (4))) = (int) (((*(int *)((char*)(temp_8) + (4))) & ~3) | (arg1 & 3));
+    (*(int *)((char*)(temp_8) + (4))) = (int) (((*(int *)((char*)(temp_8) + (4))) & ~3) | (alphaSort & 3));
     temp_3 = ((void*)ps2GraphicsMan->m_pCurrentDrawState);
-    (*(int *)((char*)(temp_3) + (8))) = (int) (((*(int *)((char*)(temp_3) + (8))) & 0xE00003FF) | ((arg2 << 0xA) & 0x1FFFFC00));
+    (*(int *)((char*)(temp_3) + (8))) = (int) (((*(int *)((char*)(temp_3) + (8))) & 0xE00003FF) | ((sortKey << 0xA) & 0x1FFFFC00));
 }
 #endif
 //100%
@@ -3058,19 +3058,19 @@ extern "C" float func_00394A20(int n, float x) {
 INCLUDE_ASM("render/font", func_00394AD8);
 #ifdef SKIP_ASM
 /**
- * Returns a fade factor: 1, unless @p a is at least 5000 and @p b is above 3750, then 1 - (b - 3750) * 0.0008.
+ * Returns a fade factor: 1, unless @p fadeGate is at least 5000 and @p fadeDistance is above 3750, then 1 - (b - 3750) * 0.0008.
  *
- * The factor reaches 0 at @p b = 5000 and goes negative beyond it (no clamp). No caller in C or asm.
+ * The factor reaches 0 at @p fadeDistance = 5000 and goes negative beyond it (no clamp). No caller in C or asm.
  *
- * @param a  a distance compared with 5000
- * @param b  the distance that drives the fade
+ * @param fadeGate  a distance compared with 5000
+ * @param fadeDistance  the distance that drives the fade
  * @return the fade factor
  */
-extern "C" float func_00394AD8(float a, float b)
+extern "C" float func_00394AD8(float fadeGate, float fadeDistance)
 {
     float factor;
-    if (a < 5000.0f) return 1.0f;
-    if (!(b <= 3750.0f)) factor = 1.0f - (b - 3750.0f) * 0.0008f;
+    if (fadeGate < 5000.0f) return 1.0f;
+    if (!(fadeDistance <= 3750.0f)) factor = 1.0f - (fadeDistance - 3750.0f) * 0.0008f;
     else factor = 1.0f;
     return factor;
 }
@@ -3223,15 +3223,15 @@ public:
  * That entry is this function's own slot in the cBezierMan vtable D_00493820; cPS2BezierMan overrides it with
  * func_0038B190, so the forward only reaches a derived implementation (on a plain cBezierMan it would call itself).
  *
- * @param a  the patch record (On Tour tPatchRecord* pPatch)
- * @param b  the edge LOD bytes (On Tour edges)
- * @param c  the texture ids (On Tour texid)
- * @param d  the clip flag (On Tour clip)
- * @param e  the light matrices (preview tLightMats*)
+ * @param patchRecord  the patch record (On Tour tPatchRecord* pPatch)
+ * @param edgeLods  the edge LOD bytes (On Tour edges)
+ * @param textureIds  the texture ids (On Tour texid)
+ * @param clip  the clip flag (On Tour clip)
+ * @param lightMats  the light matrices (preview tLightMats*)
  */
-extern "C" void func_00394B98(cPS2BezierMan* self, int a, int b, int c, int d, int e)
+extern "C" void func_00394B98(cPS2BezierMan* self, int patchRecord, int edgeLods, int textureIds, int clip, int lightMats)
 {
-    ((cFontVirt*)self)->v22(a, b, c, d, e);
+    ((cFontVirt*)self)->v22(patchRecord, edgeLods, textureIds, clip, lightMats);
 }
 #endif
 
@@ -3837,33 +3837,33 @@ struct sCache5000 {
  * state, texture key and matrix index. A hit is moved to the front of its chain and returned; a miss returns 0 (the
  * callers then add a bucket). Callers: cPS2BezierMan_DrawPatches, cPS2GraphicsMan_RenderModel and func_00362DE8.
  *
- * @param a  the state entry (from func_00394ED0)
- * @param b  the texture key (both texture ids)
+ * @param stateEntry  the state entry (from func_00394ED0)
+ * @param texKey  the texture key (both texture ids)
  * @param hash  the bucket index
- * @param c  the matrix index
+ * @param matrixIndex  the matrix index
  * @return the bucket, or 0 if none matches
  */
-extern "C" sNode5000* func_00395000(sCache5000* self, int a, int b, unsigned char hash, int c)
+extern "C" sNode5000* func_00395000(sCache5000* self, int stateEntry, int texKey, unsigned char hash, int matrixIndex)
 {
     sNode5000** pp = &self->buckets[hash];
     while (*pp != 0) {
-        sNode5000* e;
+        sNode5000* node;
         int hit = 0;
         if ((*pp)->busy == 0) {
-            int t = (*pp)->k4 == b && (*pp)->k8 == c && (*pp)->k0 == a;
-            if (t) hit = 1;
+            int keysMatch = (*pp)->k4 == texKey && (*pp)->k8 == matrixIndex && (*pp)->k0 == stateEntry;
+            if (keysMatch) hit = 1;
         }
-        e = *pp;
+        node = *pp;
         if (hit) {
             if ((*pp) == self->buckets[hash]) {
-                return e;
+                return node;
             }
-            *pp = e->next;
-            e->next = self->buckets[hash];
-            self->buckets[hash] = e;
-            return e;
+            *pp = node->next;
+            node->next = self->buckets[hash];
+            self->buckets[hash] = node;
+            return node;
         }
-        pp = &e->next;
+        pp = &node->next;
     }
     return 0;
 }
@@ -4557,12 +4557,12 @@ extern "C" void func_003955B0(cPS2GraphicsMan* gfx, unsigned int buf, unsigned i
     if (ring->count < 2600) {
         rs->unk_00[2] = (((int)rs->unk_00[2]) & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
         int key = *(int*)((char*)ring + 0x69CC0);
-        sEnt_55B0* e = (sEnt_55B0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
-        e->rs = *rs;
-        e->buf = buf;
-        e->next = next;
-        e->key = key;
-        e->flag = flag;
+        sEnt_55B0* record = (sEnt_55B0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+        record->rs = *rs;
+        record->buf = buf;
+        record->next = next;
+        record->key = key;
+        record->flag = flag;
     }
 }
 #endif
@@ -6474,63 +6474,63 @@ extern "C" int *func_003965A8(void) {
 INCLUDE_ASM("render/font", func_003965B8);
 #ifdef SKIP_ASM
 /**
- * Returns @p arg0 unchanged.
+ * Returns @p object unchanged.
  *
  * An 8-byte accessor between the cPlants and cBaseClass_DynamicEmitter accessor runs, with no preview counterpart and
  * no caller.
  *
- * @param arg0  an object pointer
- * @return @p arg0
+ * @param object  an object pointer
+ * @return @p object
  */
-extern "C" int func_003965B8(int arg0) {
-    return arg0;
+extern "C" int func_003965B8(int object) {
+    return object;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_003965C0);
 #ifdef SKIP_ASM
 /**
- * Returns @p arg0 + 0x160: in cStaticEmitter's layout, the address of BoundBox.
+ * Returns @p emitter + 0x160: in cStaticEmitter's layout, the address of BoundBox.
  *
  * No caller.
  *
- * @param arg0  the emitter (cStaticEmitter)
+ * @param emitter  the emitter (cStaticEmitter)
  * @return the address of the bound box
  */
-extern "C" int func_003965C0(int arg0) {
-    return arg0 + 352;
+extern "C" int func_003965C0(int emitter) {
+    return emitter + 352;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_003965C8);
 #ifdef SKIP_ASM
 /**
- * Returns @p arg0 + 0xC0: in cStaticEmitter's layout, the address of Emitter.X0 (the emitter position).
+ * Returns @p emitter + 0xC0: in cStaticEmitter's layout, the address of Emitter.X0 (the emitter position).
  *
  * No caller. cStaticEmitter's render(bbox, pos) overload stores its position there.
  *
- * @param arg0  the emitter (cStaticEmitter)
+ * @param emitter  the emitter (cStaticEmitter)
  * @return the address of the position
  */
-extern "C" int func_003965C8(int arg0) {
-    return arg0 + 0xC0;
+extern "C" int func_003965C8(int emitter) {
+    return emitter + 0xC0;
 }
 #endif
 //100%
 INCLUDE_ASM("render/font", func_003965D0);
 #ifdef SKIP_ASM
 /**
- * Copies the 16-byte vector at @p arg1 to @p arg0 + 0xC0 (in cStaticEmitter's layout, Emitter.X0).
+ * Copies the 16-byte vector at @p position to @p emitter + 0xC0 (in cStaticEmitter's layout, Emitter.X0).
  *
  * One lq/sq pair: long long is 128-bit on ee-gcc, so the copy is 16 bytes. No caller.
  *
- * @param arg0  the emitter (cStaticEmitter)
- * @param arg1  the new position
+ * @param emitter  the emitter (cStaticEmitter)
+ * @param position  the new position
  */
 // PORT: `long long` is 128-bit on the EE (one lq/sq copy); off-PS2 the same C copies only 8 bytes, so use a
 // 16-byte type.
-extern "C" void func_003965D0(void *arg0, long long *arg1) {
-    (*(long long *)((char*)(arg0) + (0xC0))) = (long long) *arg1;
+extern "C" void func_003965D0(void *emitter, long long *position) {
+    (*(long long *)((char*)(emitter) + (0xC0))) = (long long) *position;
 }
 #endif
 //100%
@@ -6541,11 +6541,11 @@ INCLUDE_ASM("render/font", func_003965E0);
  *
  * No caller.
  *
- * @param arg0  the dynamic emitter
+ * @param emitter  the dynamic emitter
  * @return &m_emitter
  */
-extern "C" int func_003965E0(int arg0) {
-    return arg0 + 0x20;
+extern "C" int func_003965E0(int emitter) {
+    return emitter + 0x20;
 }
 #endif
 //100%
@@ -6556,11 +6556,11 @@ INCLUDE_ASM("render/font", func_003965E8);
  *
  * No caller.
  *
- * @param arg0  the dynamic emitter
+ * @param emitter  the dynamic emitter
  * @param fparg0  the seed
  */
-extern "C" void func_003965E8(void *arg0, float fparg0) {
-    (*(float *)((char*)(arg0) + (0x58))) = fparg0;
+extern "C" void func_003965E8(void *emitter, float fparg0) {
+    (*(float *)((char*)(emitter) + (0x58))) = fparg0;
 }
 #endif
 //100%
@@ -6571,11 +6571,11 @@ INCLUDE_ASM("render/font", func_003965F0);
  *
  * No caller.
  *
- * @param arg0  the dynamic emitter
+ * @param emitter  the dynamic emitter
  * @return m_numSubEmitters
  */
-extern "C" int func_003965F0(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x178)));
+extern "C" int func_003965F0(void *emitter) {
+    return (*(int *)((char*)(emitter) + (0x178)));
 }
 #endif
 //100%
@@ -6586,11 +6586,11 @@ INCLUDE_ASM("render/font", func_003965F8);
  *
  * No caller.
  *
- * @param arg0  the dynamic emitter
+ * @param emitter  the dynamic emitter
  * @return m_subEmitterId
  */
-extern "C" int func_003965F8(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x17C)));
+extern "C" int func_003965F8(void *emitter) {
+    return (*(int *)((char*)(emitter) + (0x17C)));
 }
 #endif
 //100%
@@ -6601,11 +6601,11 @@ INCLUDE_ASM("render/font", func_00396600);
  *
  * No caller.
  *
- * @param arg0  the dynamic emitter
+ * @param emitter  the dynamic emitter
  * @return m_enabled
  */
-extern "C" int func_00396600(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x174)));
+extern "C" int func_00396600(void *emitter) {
+    return (*(int *)((char*)(emitter) + (0x174)));
 }
 #endif
 //100%
@@ -6616,11 +6616,11 @@ INCLUDE_ASM("render/font", func_00396608);
  *
  * No caller.
  *
- * @param arg0  the dynamic emitter
- * @param arg1  nonzero to enable
+ * @param emitter  the dynamic emitter
+ * @param enable  nonzero to enable
  */
-extern "C" void func_00396608(void *arg0, int arg1) {
-    (*(int *)((char*)(arg0) + (0x174))) = arg1;
+extern "C" void func_00396608(void *emitter, int enable) {
+    (*(int *)((char*)(emitter) + (0x174))) = enable;
 }
 #endif
 //100%
@@ -6631,11 +6631,11 @@ INCLUDE_ASM("render/font", func_00396610);
  *
  * No caller.
  *
- * @param arg0  the dynamic emitter
+ * @param emitter  the dynamic emitter
  * @return m_enabledCount
  */
-extern "C" int func_00396610(void *arg0) {
-    return (*(int *)((char*)(arg0) + (0x1E0)));
+extern "C" int func_00396610(void *emitter) {
+    return (*(int *)((char*)(emitter) + (0x1E0)));
 }
 #endif
 //100%
