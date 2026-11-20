@@ -366,7 +366,7 @@ extern "C" void func_003158E0(void *riderAnim, float fparg0) {
 INCLUDE_ASM("animation/gameanimmap", func_003158E8);
 #ifdef SKIP_ASM
 #include "bx/math3d.h"
-extern "C" void func_0031BE50(float *, float *, float);
+extern "C" void fSinCos(float *, float *, float);
 extern t4Vector t4vect_Origin;
 extern t4Vector t4vect_ZAxis;
 
@@ -377,7 +377,7 @@ extern "C" void func_003158E8(void *self, float angle) {
     const t4Vector* axis = &t4vect_ZAxis;
 
     *(t4Vector *)((char*)self + 0x30) = t4vect_Origin;
-    func_0031BE50(&sinHalf, &cosHalf, -angle * 0.5f);
+    fSinCos(&sinHalf, &cosHalf, -angle * 0.5f);
     rotation.w = cosHalf;
     rotation.x = sinHalf * axis->x;
     rotation.y = sinHalf * axis->y;

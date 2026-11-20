@@ -64,7 +64,7 @@ void* operator new(unsigned int size, const char* tag, unsigned int flags, int d
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
 class cPlayerMgr_6900;
-extern "C" void func_00326A28(cPlayerMgr_6900* self);
+extern "C" void cPadCache_init(cPlayerMgr_6900* self);
 
 struct sApp_6900 {
     char pad_0x0[0xA0];
@@ -142,7 +142,7 @@ extern "C" void cSSXApp_init(cSSXApp* self, int argc, char** argv)
     SSXApp = (cSSXApp*)self;
     *(void**)&self->ConsoleConfig = cConsoleConfig_construct();
     cPlayerMgr_6900* volatile pm = (cPlayerMgr_6900*)cMemMan_alloc(12028, str_PadCache, 0, 0);
-    func_00326A28(pm);
+    cPadCache_init(pm);
     PadCache = pm;
     char* graphicsMan = (char*)func_00375A08();
     GrMan = (cPS2GraphicsMan*)(graphicsMan);
@@ -750,11 +750,11 @@ int cSSXApp_flush()
 //100%
 INCLUDE_ASM("main/ssxapp", cSSXApp_preUpdate);
 #ifdef SKIP_ASM
-extern "C" int func_00326B48(void* pad);
+extern "C" int cPadCache_nextInput(void* pad);
 extern "C" void func_00255A20(void* p);
 extern "C" void func_002668E8(void* p);
-extern "C" int func_00326CA0(void* self, int i);
-extern "C" void* func_00326CC8(void* self, int i);
+extern "C" int cPadCache_numButtons(void* self, int i);
+extern "C" void* cPadCache_buttonValues(void* self, int i);
 extern "C" void cInputPad_update(void* target, int a, void* data);
 extern void* PadCache;
 extern void* D_004A33F0;
@@ -763,7 +763,7 @@ extern void* D_004A33F0;
  * Starts a frame's input: when the pad cache has a new sample, updates the network and keyboard and feeds the
  * pads.
  *
- * Advances the pad cache's read position (func_00326B48); on success it updates cCommSystem_mCommSystem and
+ * Advances the pad cache's read position (cPadCache_nextInput); on success it updates cCommSystem_mCommSystem and
  * the keyboard object D_004A33F0 when they exist, and passes each of the two sample slots (value count and
  * values) to InputPads[i] through cInputPad_update().
  *
@@ -771,7 +771,7 @@ extern void* D_004A33F0;
  */
 extern "C" int cSSXApp_preUpdate(cSSXApp* self)
 {
-    if (PadCache != 0 && func_00326B48(PadCache) != 0) {
+    if (PadCache != 0 && cPadCache_nextInput(PadCache) != 0) {
         if (cCommSystem_mCommSystem != 0) {
             func_00255A20(cCommSystem_mCommSystem);
         }
@@ -780,8 +780,8 @@ extern "C" int cSSXApp_preUpdate(cSSXApp* self)
         }
         int i;
         for (i = 0; i < 2; i++) {
-            int valueCount = func_00326CA0(PadCache, i);
-            void* values = func_00326CC8(PadCache, i);
+            int valueCount = cPadCache_numButtons(PadCache, i);
+            void* values = cPadCache_buttonValues(PadCache, i);
             cInputPad_update(((void**)((char*)self + 0xA8))[i], valueCount, values);
         }
         return 1;
@@ -842,7 +842,7 @@ INCLUDE_ASM("main/ssxapp", cSSXApp_purge);
 #ifdef SKIP_ASM
 void operator_delete(int* p);
 extern "C" void func_00398438(void* p);
-extern "C" void func_00326A68(void* p);
+extern "C" void cPadCache_purge(void* p);
 extern "C" void cSSXScriptEngine_DeInitOnce(void* p);
 extern "C" void func_003DEDC0(void* handle, int arg);
 // PORT: WORLDTRIGGERMANAGER_DeInit is declared (void*) but never reads it; this caller passes nothing.
@@ -912,7 +912,7 @@ extern "C" void cSSXApp_purge(sSSXAppPurge* self)
     int* mgr = (int*)PadCache;
     self->f88 = 0;
     PadCache = 0;
-    func_00326A68(mgr);
+    cPadCache_purge(mgr);
     operator_delete(mgr);
     if (ScriptEngine) {
         cSSXScriptEngine_DeInitOnce(ScriptEngine);
@@ -3714,7 +3714,7 @@ extern "C" int cGameViewMan_isStreamReady(void* views);
 extern "C" int cFadeScreen_drawFade(void* self);
 extern "C" void func_0022C830(void* self);
 extern "C" void func_0036A1E8();
-extern "C" void func_0031B6C8(void* m);
+extern "C" void t4mat_invert(void* m);
 extern "C" void func_00230640(void* self);
 extern "C" void func_00229BA8(void* p);
 extern "C" void func_00344138(void* p);
@@ -4105,7 +4105,7 @@ extern "C" int cGame_render(sGame_22B008* self)
         float farClip = cam->farClip;
         sMat_22B008 inv;
         MatCopy_22B008(&inv, &view);
-        func_0031B6C8(&inv);
+        t4mat_invert(&inv);
         sMat_22B008 invView = inv;
         sBox_22B008& bounds = box;
         const sV4_22B008& right = invView.row[0];

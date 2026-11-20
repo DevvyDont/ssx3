@@ -88,8 +88,8 @@ struct sAirP_3200 {
 extern sQuadR t4vect_ZAxis;
 // cAirPredictor_simOneTick is defined later in the unit (with its own vector type).
 float cAirPredictor_simOneTick_3200(void* self, sVec4_3200* pos, sVec4_3200* vel, sVec4_3200* outPos, sVec4_3200* outVel) __asm__("cAirPredictor_simOneTick");
-// func_0032E100 (intersect/riderspheretree) builds the capsule and returns it.
-extern "C" sRay_3200* func_0032E100(sRay_3200* ray, sVec4_3200* a, sVec4_3200* b, int c, float d);
+// cWorldLine_cWorldLine (intersect/riderspheretree) builds the capsule and returns it.
+extern "C" sRay_3200* cWorldLine_cWorldLine(sRay_3200* ray, sVec4_3200* a, sVec4_3200* b, int c, float d);
 extern "C" float func_00336850(void* world, sRay_3200* ray, sHit_3200* hit, int c);
 extern "C" float func_003378C0(void* world, sRay_3200* ray, sHit_3200* hit, int c);
 
@@ -227,7 +227,7 @@ static inline void vu0AddEq_3200(sVec4_3200& a, const sVec4_3200& b)
  * Saves CurSimPos/CurSimVel (0x50/0x60), then repeatedly adds 1/60 to TotalAirTime (+0x98) and steps the sim one tick
  * (cAirPredictor_simOneTick), recording ApexTime/GuessApexPos (+0x9C/+0x40) while the height keeps rising; it stops when the new
  * velocity's direction differs from the start (speed * 0.99 > dot of the old unit velocity and the new velocity) or
- * after 270000 / TerminalVel (+0xA8) ticks. It then casts a capsule (func_0032E100) along the travelled segment,
+ * after 270000 / TerminalVel (+0xA8) ticks. It then casts a capsule (cWorldLine_cWorldLine) along the travelled segment,
  * lengthened by 2% at each end, against the world (func_00336850 in SimState 0, func_003378C0 otherwise). A hit facing
  * the motion sets GuessLandPosition, rewinds TotalAirTime by the unused part of the step, blends GuessLandVelocity from
  * the old and new velocities, and sets SimState 1 with the hit's normal and surface (or 3 with the Z axis and surface
@@ -265,7 +265,7 @@ extern "C" void cAirPredictor_simStep(char* vself)
     vu0AddEq_3200(segEnd, ray);
     sHit_3200 ti;
     sRay_3200 w1;
-    func_0032E100(&w1, &segEnd, &segStart, 1, 1.0f);
+    cWorldLine_cWorldLine(&w1, &segEnd, &segStart, 1, 1.0f);
     float hitParam;
     if (self->state == 0) {
         hitParam = func_00336850(SSXApp->Game->BXNash, &w1, &ti, 0);

@@ -199,7 +199,7 @@ extern "C" cAnimSequenceNode* cRiderAnimBase_getCurrentAnimSequence(void* self, 
 //100%
 INCLUDE_ASM("animation/rideranimbase", cRiderAnimBase_changeHeadingOffset);
 #ifdef SKIP_ASM
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 
 struct sRabQuat_00311B48
 {
@@ -221,7 +221,7 @@ extern "C" void cRiderAnimBase_changeOrientationOffset(cRiderAnimBase* self, sRa
 static inline sRabQuat_00311B48 AxisAngle_00311B48(const sRabQuat_00311B48& axis, float angle)
 {
     float s, c;
-    func_0031BE50(&s, &c, angle * 0.5f);
+    fSinCos(&s, &c, angle * 0.5f);
     return sRabQuat_00311B48(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
@@ -229,7 +229,7 @@ static inline sRabQuat_00311B48 AxisAngle_00311B48(const sRabQuat_00311B48& axis
  * Turns the orientation offset of every playing sequence by an angle about the heading axis.
  *
  * Builds a transform with position t4vect_Origin and the rotation quaternion of -angle about t4vect_ZAxis
- * (half-angle sine and cosine from func_0031BE50) and applies it with
+ * (half-angle sine and cosine from fSinCos) and applies it with
  * cRiderAnimBase_changeOrientationOffset().
  *
  * @param angle  the heading change (probably radians); applied with the opposite sign

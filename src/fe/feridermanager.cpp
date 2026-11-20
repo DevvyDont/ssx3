@@ -761,7 +761,7 @@ extern "C" void cFERider_translate(void* self, sVec_F418* delta)
 INCLUDE_ASM("fe/feridermanager", cFERider_rotate);
 #ifdef SKIP_ASM
 extern "C" void cFERider_updateModelPose(void* self);
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 
 struct sQuat_F488 {
     float x, y, z, w;
@@ -804,7 +804,7 @@ extern "C" void cFERider_rotate(void* self, sQuat_F488* axis, float angle)
     sQuat_F488* rot = (sQuat_F488*)((char*)self + 0xC40);
     sQuat_F488 turn;
     float sinHalf, cosHalf;
-    func_0031BE50(&sinHalf, &cosHalf, angle * 0.5f);
+    fSinCos(&sinHalf, &cosHalf, angle * 0.5f);
     sQuat_F488 rotQuat;
     rotQuat.w = cosHalf;
     rotQuat.x = sinHalf * axis->x;
@@ -901,7 +901,7 @@ extern "C" void cFERider_translateBoard(void* self, sVec_F578* delta)
 INCLUDE_ASM("fe/feridermanager", cFERider_rotateBoard);
 #ifdef SKIP_ASM
 extern "C" void cFERider_updateModelPose(void* self);
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 
 struct sQuat_F5E8 {
     float x, y, z, w;
@@ -943,7 +943,7 @@ extern "C" void cFERider_rotateBoard(void* self, sQuat_F5E8* axis, float angle)
     sQuat_F5E8* rot = (sQuat_F5E8*)((char*)self + 0xC60);
     sQuat_F5E8 turn;
     float sinHalf, cosHalf;
-    func_0031BE50(&sinHalf, &cosHalf, angle * 0.5f);
+    fSinCos(&sinHalf, &cosHalf, angle * 0.5f);
     sQuat_F5E8 rotQuat;
     rotQuat.w = cosHalf;
     rotQuat.x = sinHalf * axis->x;

@@ -10,8 +10,8 @@ struct cAppMan;
 void cAppMan_setNextModule(cAppMan* self, unsigned int module);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cLoadIndicator_update(void* fade);
-extern "C" int func_00326CA0(void* pads, int port);
-extern "C" char* func_00326CC8(void* pads, int port);
+extern "C" int cPadCache_numButtons(void* pads, int port);
+extern "C" char* cPadCache_buttonValues(void* pads, int port);
 extern char* PadCache;
 extern char str_InitLoadScreen[];
 extern void* cInitLoadScreen_vtbl[];
@@ -60,8 +60,8 @@ extern "C" void cPreStartScreen_update(sPreStart_232348* self)
     self->t += 0.01666666753590107f;
     if (*(int*)(PadCache + 0x2EE8) > 0) {
         self->t += 0.15000000596046448f;
-        if (func_00326CA0(PadCache, 0) >= 11) {
-            if (*(float*)(func_00326CC8(PadCache, 0) + 0x20) != 0.0f && *(float*)(func_00326CC8(PadCache, 0) + 0x28) != 0.0f) {
+        if (cPadCache_numButtons(PadCache, 0) >= 11) {
+            if (*(float*)(cPadCache_buttonValues(PadCache, 0) + 0x20) != 0.0f && *(float*)(cPadCache_buttonValues(PadCache, 0) + 0x28) != 0.0f) {
                 self->next->f4 = 1;
             }
         }

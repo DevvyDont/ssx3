@@ -929,7 +929,7 @@ extern "C" void cFlexBridgeNode_update(void* self)
 //100%
 INCLUDE_ASM("object/flexbridgenode", cFlexBridgeNode_updateGrid);
 #ifdef SKIP_ASM
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void* cObjectInterface_getNash();
 // PORT: the unit declares nash_Nash_movenode with sBox00348058 (defined later); bound by asm label.
 extern "C" void nash_Nash_movenode_75D8(void* world, int type, int id, void* box, void* old) __asm__("nash_Nash_movenode");
@@ -1156,7 +1156,7 @@ extern "C" void cFlexBridgeNode_updateGrid(void* vself)
     int i;
     for (i = 0; i < n; i++) {
         float sinAngle, cosAngle;
-        func_0031BE50(&sinAngle, &cosAngle, node->angle);
+        fSinCos(&sinAngle, &cosAngle, node->angle);
         self->pts[i] = Add_75D8(Add_75D8(node->pos, Scale_75D8(self->up, cosAngle)), Scale_75D8(upRef, sinAngle));
         self->pts[n + i] = Sub_75D8(Add_75D8(node->pos, Scale_75D8(self->side, cosAngle)), Scale_75D8(sideRef, sinAngle));
         node++;

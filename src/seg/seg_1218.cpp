@@ -3521,7 +3521,7 @@ extern "C" float func_00104E70_5398(char*, cScope_5398*, sContact_5398*) __asm__
 extern "C" int cRider_isGroundNormalValid(void*);
 extern "C" void cRider_doObjectCollision_5398(char*, sSurf_5398*, sInfo_5398*, sContact_5398*, float) __asm__("cRider_doObjectCollision");
 extern "C" void cSSXAudio_CollisionSound_5398(void*, char*, sSurf_5398*, int) __asm__("cSSXAudio_CollisionSound");
-extern "C" void func_0016D320(void*, void*);
+extern "C" void cCameraTriggerMan_checkCollisions(void*, void*);
 extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 extern char* D_004A3500_5398 __asm__("gSSXAudio");
 extern char D_004C5830_5398[] __asm__("gCamTriggerMan");
@@ -3649,7 +3649,7 @@ static inline unsigned short TriFlags_5398(sSurf_5398* s, int i)
  * state 4 snapped to the handler's up vector (+0xB0); the impact speed is the closing speed along it. A triangle with
  * flag 2 on an object without flag 0x2000 caches the contact at +0x9E0 and +0xA60; flag 1 runs cRider_doObjectCollision
  * (doObjectCollision); objects without 0x2000 play cSSXAudio_CollisionSound. Always ends with the camera trigger check
- * (func_0016D320 on gCamTriggerMan) and cWorldRider__cWorldRider.
+ * (cCameraTriggerMan_checkCollisions on gCamTriggerMan) and cWorldRider__cWorldRider.
  *
  * @param norm  a ground normal to project the contact normal onto, or 0 (cAirMotion_resolve passes one)
  */
@@ -3697,7 +3697,7 @@ extern "C" void cRider_checkObjectCollisions(char* self, sV4_5398* norm)
         if (!(contact.surf->flags & 0x2000))
             cSSXAudio_CollisionSound_5398(D_004A3500_5398, self, contact.surf, contact.idx);
     }
-    func_0016D320(D_004C5830_5398, self);
+    cCameraTriggerMan_checkCollisions(D_004C5830_5398, self);
     cWorldRider__cWorldRider(&sc, 2);
 }
 #endif
@@ -4268,7 +4268,7 @@ static inline void AddEq_6538(t4Vector& a, const t4Vector& b)
         : "m"(a), "m"(b)
         : "memory");
 }
-extern "C" void func_00329B40(void* p, const t4Vector* d);
+extern "C" void cRiderSphereTree_ApplyOffset(void* p, const t4Vector* d);
 // PORT: the unit declares func_00106538(void*, const t4Vector&) for its callers; same symbol.
 extern "C" void func_00106538_6538(char* self, const t4Vector* d) __asm__("func_00106538");
 
@@ -4276,7 +4276,7 @@ extern "C" void func_00106538_6538(char* self, const t4Vector* offset)
 {
     AddEq_6538(*(t4Vector*)(self + 0x110), *offset);
     AddEq_6538(*(t4Vector*)(self + 0x9D0), *offset);
-    func_00329B40(*(void**)(self + 0xAA0), offset);
+    cRiderSphereTree_ApplyOffset(*(void**)(self + 0xAA0), offset);
     AddEq_6538(*(t4Vector*)(self + 0x400), *offset);
     AddEq_6538(*(t4Vector*)(self + 0x410), *offset);
 }
@@ -4292,7 +4292,7 @@ struct sV4_65B0
     sV4_65B0(float ax, float ay, float az, float aw) { w = aw; x = ax; y = ay; z = az; }
 } __attribute__((aligned(16)));
 
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" float func_0031C228(float);
 
 // PORT: PS2-only VU0 inline asm (cross product, w = 0).
@@ -4403,7 +4403,7 @@ static inline float Clamp_65B0(float v, float lo, float hi)
 static inline sV4_65B0 AxisAngle_65B0(const sV4_65B0& axis, float angle)
 {
     float s, c;
-    func_0031BE50(&s, &c, angle * 0.5f);
+    fSinCos(&s, &c, angle * 0.5f);
     return sV4_65B0(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
@@ -4439,19 +4439,19 @@ extern "C" void func_001065B0_impl(char* self, char* arg)
 //100%
 INCLUDE_ASM("seg/seg_1218", cRider_updateCollideInfo);
 #ifdef SKIP_ASM
-extern "C" void func_00329AE0(int);
+extern "C" void cRiderSphereTree_Update1(int);
 
 /**
  * Refreshes the rider's collision sphere tree.
  *
- * Calls func_00329AE0 on mSphereTree (+0xAA0), the sphere tree the object collision queries use (On Tour:
+ * Calls cRiderSphereTree_Update1 on mSphereTree (+0xAA0), the sphere tree the object collision queries use (On Tour:
  * cRiderSphereTree::Update). Callers: cRider_updateSkeleton (updateSkeleton), cRiderHandler_readFromReplayFrame and
  * cRider_DoInSeqAnimUpdate.
  *
  * @param rider  the rider (this)
  */
 extern "C" void cRider_updateCollideInfo(void *rider) {
-    func_00329AE0((*(int *)((char*)(rider) + (0xAA0))));
+    cRiderSphereTree_Update1((*(int *)((char*)(rider) + (0xAA0))));
 }
 #endif
 
@@ -4466,7 +4466,7 @@ int cRider_getMotionState(void*);
 void cRider_setControlState_57B8(void* self, int v) __asm__("cRider_setControlState__FPv");
 void cRider_setMotionState_6848(void* self, int v) __asm__("cRider_setMotionState__FPv");
 extern "C" float func_0031C228(float);
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void cRiderAnimBase_play(void*, int, int, float);
 extern "C" void cRiderAnimBase_changeHeadingOffset(void* anim, float a);
 extern "C" void cRider_rotateOrientation(cRider* self, const t4Vector& axis, float angle);
@@ -4664,7 +4664,7 @@ static inline sV_6848 Up_6848(const sAnimModelBone* animModelBone)
 static inline sQuat_6848 AxisAngle_6848(const sV_6848& axis, float angle)
 {
     float s, c;
-    func_0031BE50(&s, &c, angle * 0.5f);
+    fSinCos(&s, &c, angle * 0.5f);
     return sQuat_6848(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
@@ -5493,7 +5493,7 @@ struct sRec_7888 {
 };
 
 extern "C" float cRider_getMass(cRider* self);
-extern "C" int func_00329F98(void* a, void* b, t4Vector* dir, t4Vector* pos);
+extern "C" int cRiderSphereTree_IsRiderCollision(void* a, void* b, t4Vector* dir, t4Vector* pos);
 extern "C" float cBEStatInterface_getStrikingAttrib(void* iface, int index, int column);
 extern "C" void cRider_doOpponentCollision_7888(cRider* self, cRider* other, t4Vector* n, int flag, float speed) __asm__("cRider_doOpponentCollision");
 
@@ -5538,7 +5538,7 @@ static inline sRec_7888* Rec_7888(cRider* rider, int idx) { return &((sRec_7888*
 /**
  * Handles this rider's contacts with the other riders: pushes overlapping bodies apart and lands shoves.
  *
- * Once per tick per pair, overlapping sphere trees (func_00329F98) push both riders 0.55 of the contact
+ * Once per tick per pair, overlapping sphere trees (cRiderSphereTree_IsRiderCollision) push both riders 0.55 of the contact
  * vector apart along their ground planes and, at most every 3 ticks, exchange momentum along the contact
  * (cRider_doOpponentCollision). While this rider's channel-1 animation (class 13, probably the punch) is in its hit
  * window, a rider within 150 in front of PunchVect that is not blocking is shoved with a strength from the
@@ -5565,7 +5565,7 @@ extern "C" void cRider_checkOpponentCollisions(cRider* self)
             orec->lastContact = AITick();
             t4Vector dir;
             t4Vector pos;
-            if (func_00329F98(self->mSphereTree, other->mSphereTree, &dir, &pos)) {
+            if (cRiderSphereTree_IsRiderCollision(self->mSphereTree, other->mSphereTree, &dir, &pos)) {
                 float omass = cRider_getMass(other);
                 t4Vector selfPush = dir * -0.550000011920929f;
                 t4Vector otherPush = dir * 0.550000011920929f;
@@ -7522,7 +7522,7 @@ struct sRiderT_BD10
 };
 
 extern "C" int cComputer_checkForAttack(char* self, int i);
-extern "C" float func_0031C040(float);
+extern "C" float fCos(float);
 extern "C" float func_0031C228(float);
 
 // PORT: PS2-only FPU asm (absolute value).
@@ -7606,7 +7606,7 @@ extern "C" int cComputer_checkForTargets(cComputer* self, int* isAttack)
                 continue;
             shouldAttack = cComputer_checkForAttack(((char*)self), i);
             float del = ((sRiderT_BD10*)self->mRider)->targets[i].angle - Atan2_BD10(Fwd_BD10((sRiderT_BD10*)self->mRider).y, Fwd_BD10((sRiderT_BD10*)self->mRider).x);
-            float cosDelta = func_0031C040(del - Floor_BD10(del * 0.15915493667125702f + 0.5f) * 6.2831854820251465f);
+            float cosDelta = fCos(del - Floor_BD10(del * 0.15915493667125702f + 0.5f) * 6.2831854820251465f);
             if (shouldAttack)
                 aScore *= Abs_BD10(cosDelta) + 1.0f;
             else

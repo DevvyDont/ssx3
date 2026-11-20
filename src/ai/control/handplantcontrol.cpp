@@ -70,8 +70,8 @@ extern t4Vector D_004FF120_8BA0 __asm__("t4vect_Zero");
 extern t4Vector D_004FF160_8BA0 __asm__("t4vect_ZAxis");
 
 extern "C" float func_0031C128(float x);
-extern "C" float func_0031BF60(float x);
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" float fSin(float x);
+extern "C" void fSinCos(float* s, float* c, float angle);
 extern t4Vector t4vect_XAxis;
 
 struct sQ_8BA0 {
@@ -286,7 +286,7 @@ static inline sQ_8BA0 QuatMul_8BA0(const sQ_8BA0& a, const sQ_8BA0& b)
 static inline sQ_8BA0 AxisAngle_8BA0(const sQ_8BA0& axis, float angle)
 {
     float s, c;
-    func_0031BE50(&s, &c, angle * 0.5f);
+    fSinCos(&s, &c, angle * 0.5f);
     return sQ_8BA0(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
@@ -370,14 +370,14 @@ extern "C" void cHandplantMotion_init(cHandplantMotion* self, sHit_8BA0* hit, fl
         ang = (1.5707963705062866f - func_0031C128(deltaRot.w <? 1.0f)) * 2.0f;
         self->SnapRotationRate = ang;
         if (ang >= 9.999999747378752e-06f)
-            (*(sQ_8BA0*)&self->SnapRotationAxis) = Div_8BA0(sV_8BA0(deltaRot.x, deltaRot.y, deltaRot.z, 0.0f), func_0031BF60(ang * 0.5f));
+            (*(sQ_8BA0*)&self->SnapRotationAxis) = Div_8BA0(sV_8BA0(deltaRot.x, deltaRot.y, deltaRot.z, 0.0f), fSin(ang * 0.5f));
         else
             (*(sQ_8BA0*)&self->SnapRotationAxis) = (const sQ_8BA0&)t4vect_XAxis;
     } else {
         ang = (1.5707963705062866f - func_0031C128(-(deltaRot.w >? -1.0f))) * 2.0f;
         self->SnapRotationRate = ang;
         if (ang >= 9.999999747378752e-06f)
-            (*(sQ_8BA0*)&self->SnapRotationAxis) = Div_8BA0(sV_8BA0(deltaRot.x, deltaRot.y, deltaRot.z, 0.0f), func_0031BF60(ang * -0.5f));
+            (*(sQ_8BA0*)&self->SnapRotationAxis) = Div_8BA0(sV_8BA0(deltaRot.x, deltaRot.y, deltaRot.z, 0.0f), fSin(ang * -0.5f));
         else
             (*(sQ_8BA0*)&self->SnapRotationAxis) = (const sQ_8BA0&)t4vect_XAxis;
     }
@@ -421,7 +421,7 @@ extern "C" void cAirPredictor_startLaunchIntoAir(void* self, void* a, void* b, f
 extern "C" void cAirPredictor_updateFlightPath(void* ap, void* pos, void* vel, float dt);
 extern "C" void cRider_alignRiderAxis(void* rider, void* a, void* b, float x, float y);
 extern "C" int cHandplantMotion_calcExitVel(void* self);
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 
 struct sQ_91A8 {
     float x, y, z, w;
@@ -541,7 +541,7 @@ static inline sQ_91A8 QuatMul_91A8(const sQ_91A8& a, const sQ_91A8& b)
 static inline sQ_91A8 AxisAngle_91A8(const sQ_91A8& axis, float angle)
 {
     float s, c;
-    func_0031BE50(&s, &c, angle * 0.5f);
+    fSinCos(&s, &c, angle * 0.5f);
     return sQ_91A8(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
@@ -581,7 +581,7 @@ extern "C" void cHandplantMotion_step(cHandplantMotion* self)
         sQ_91A8 deltaRot;
         {
             float sinHalf, cosHalf;
-            func_0031BE50(&sinHalf, &cosHalf, self->SnapRotationRate * step * 0.5f);
+            fSinCos(&sinHalf, &cosHalf, self->SnapRotationRate * step * 0.5f);
             deltaRot = sQ_91A8(sinHalf * self->SnapRotationAxis.x, sinHalf * self->SnapRotationAxis.y, sinHalf * self->SnapRotationAxis.z, cosHalf);
         }
         *(sQ_91A8*)((char*)self->mRider + 0x120) = QuatMul_91A8(deltaRot, *(sQ_91A8*)((char*)self->mRider + 0x120));
@@ -1463,7 +1463,7 @@ extern "C" void cAirMotion_resolve(cAirMotion* self)
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cAirMotion_intersectBoard);
 #ifdef SKIP_ASM
-extern "C" void* func_0032E100(void* seg, const sVec4HP& a, const sVec4HP& b, int n, float r);
+extern "C" void* cWorldLine_cWorldLine(void* seg, const sVec4HP& a, const sVec4HP& b, int n, float r);
 extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
@@ -1529,7 +1529,7 @@ extern "C" float cAirMotion_intersectBoard(cAirMotion* self, char* hit)
     sVec4HP* pt = (sVec4HP*)(*(char**)(*(char**)(rider + 0x780) + 0x2C) + (*(int*)(rider + 0x8A0) << 5));
     sVec4HP dir = *(sVec4HP*)(rider + 0x180);
     char seg[176];
-    func_0032E100(seg, vu0Sub_13A7B0(*pt, vu0Scale_13A7B0(dir, 200.0f)), vu0Add_13A7B0(*pt, vu0Scale_13A7B0(dir, 200.0f)), 2, 0.574999988079071f);
+    cWorldLine_cWorldLine(seg, vu0Sub_13A7B0(*pt, vu0Scale_13A7B0(dir, 200.0f)), vu0Add_13A7B0(*pt, vu0Scale_13A7B0(dir, 200.0f)), 2, 0.574999988079071f);
     char* rider2 = (char*)self->mRider;
     float hitParam = func_003342D0(*(void**)(rider2 + 0x860), seg, hit, *(int*)(rider2 + 0x864));
     if (hitParam >= 0.0f)
@@ -1987,7 +1987,7 @@ extern "C" void* cBE_getInterface__Fv(void* be, int kind);
 extern "C" float func_00149208(void* self, int rider, int value);
 // PORT: the unit declares cRailslideMotion_getRailUpNorm earlier as returning sVec4HP; same symbol.
 extern "C" t4Vector cRailslideMotion_getRailUpNorm_AF28(char* p, const t4Vector& n) __asm__("cRailslideMotion_getRailUpNorm");
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void cRider_alignRiderAxis(void* rider, void* a, void* b, float x, float y);
 extern "C" void cRider_updateOrientationImplicit(void*);
 int cRider_getControlState(void* rider);
@@ -2398,13 +2398,13 @@ extern "C" void cRailslideMotion_step(char* self)
             float leanAngle = Approach_AF28(*(float*)(self + 0x10), target, dt * 300.0f);
             *(float*)(self + 0x10) = leanAngle;
             float sinLean, cosLean;
-            func_0031BE50(&sinLean, &cosLean, leanAngle);
+            fSinCos(&sinLean, &cosLean, leanAngle);
             t4Vector dir = cRailslideMotion_getRailUpNorm_AF28(self, hit.nrm);
             *(t4Vector*)(RIDER_AF28 + 0x370) = dir;
             t4Vector cr = Cross_AF28(dir, hit.nrm);
             t4Vector leanDir = Add_AF28(Scale_AF28(dir, cosLean), Scale_AF28(cr, sinLean));
             float sinRoll, cosRoll;
-            func_0031BE50(&sinRoll, &cosRoll, roll);
+            fSinCos(&sinRoll, &cosRoll, roll);
             t4Vector rollDir = Sub_AF28(Scale_AF28(cr, cosRoll), Scale_AF28(hit.nrm, sinRoll));
             t4Vector axis = Normalize_AF28(Cross_AF28(rollDir, leanDir));
             float forwardWeight = Dot_AF28(axis, fwd_AF28(self)) * 0.5f + 0.5f;
@@ -2449,7 +2449,7 @@ INCLUDE_ASM("ai/control/handplantcontrol", cRailslideMotion_getRailUpNorm);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
 extern t4Vector D_004FF160_BD80 __asm__("t4vect_ZAxis");
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline t4Vector vu0Scale_BD80(const t4Vector& v, float s)
@@ -2572,7 +2572,7 @@ extern "C" t4Vector cRailslideMotion_getRailUpNorm_BD80(char* p, const t4Vector&
  *
  * For a rail whose normal is not steep (|n.z| <= 0.92) it is the Z axis with its component along @p n removed,
  * normalised and flipped to agree with the rider's up (mMatrix row 2). For a steep one it builds a = normalised (up x
- * n) and b = n x a, and returns b cos(RailLeanAngle) - a sin(RailLeanAngle) (func_0031BE50).
+ * n) and b = n x a, and returns b cos(RailLeanAngle) - a sin(RailLeanAngle) (fSinCos).
  *
  * @param railslide  the cRailslideMotion (this)
  * @param n  the rail normal
@@ -2581,7 +2581,7 @@ extern "C" t4Vector cRailslideMotion_getRailUpNorm_BD80(char* p, const t4Vector&
 extern "C" t4Vector cRailslideMotion_getRailUpNorm_BD80(char* railslide, const t4Vector& n)
 {
     float sinLean, cosLean;
-    func_0031BE50(&sinLean, &cosLean, *(float*)(railslide + 0x10));
+    fSinCos(&sinLean, &cosLean, *(float*)(railslide + 0x10));
     bool steep = absf_BD80(n.z) > 0.92f;
     t4Vector railUp;
     if (!steep) {
@@ -3516,7 +3516,7 @@ extern "C" float cGroundMotion_getDigForce(cGroundMotion* self, float* snow, flo
 //100%
 INCLUDE_ASM("ai/control/handplantcontrol", cGroundMotion_setupGroundVectors);
 #ifdef SKIP_ASM
-extern "C" void* func_0032E100(void* seg, const sVec4HP& a, const sVec4HP& b, int n, float r);
+extern "C" void* cWorldLine_cWorldLine(void* seg, const sVec4HP& a, const sVec4HP& b, int n, float r);
 extern void* t4vect_Zero[];
 
 struct sHit_13D1B8 {
@@ -3748,7 +3748,7 @@ extern "C" int cGroundMotion_setupGroundVectors(cGroundMotion* self, sHit_13D1B8
     sVec4HP lineBottom = vu0Add_13D1B8(pos, vu0Scale_13D1B8(RV(880), -100.0f));
     sVec4HP lineTop = vu0Add_13D1B8(pos, vu0Scale_13D1B8(RV(880), 200.0f));
     char seg[176];
-    func_0032E100(seg, lineBottom, lineTop, 2, 0.5f);
+    cWorldLine_cWorldLine(seg, lineBottom, lineTop, 2, 0.5f);
     sHit_13D1B8 hits[64];
     int n = func_00333EF8(*(void**)(RIDER + 0x860), seg, hits, 0x40, *(int*)(RIDER + 0x864));
     if (n == 0) {
@@ -3857,7 +3857,7 @@ extern "C" float cGroundMotion_getSlipForce_13D818(void* self, sSurf_13D818* e, 
 // PORT: func_00148E68 is declared void in this unit; this caller uses its float result.
 extern "C" float func_00148E68_f(void* iface, int rider, int b) __asm__("func_00148E68");
 extern "C" void cRider_rotateOrientation(cRider* self, const t4Vector& axis, float angle);
-extern "C" float func_0031C040(float a);
+extern "C" float fCos(float a);
 extern "C" float func_0031C128(float x);
 int cRiderAnimBase_getCurrentAnimID(void* anim, int layer);
 
@@ -4237,7 +4237,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
     float k = func_00148E68_f(cBE_getInterface_Fv(cBE_getBE(), 3), self->mRider->mAIIndex, self->mRider->mStatsIndex);
     float curveRange = hi - lo;
     float sinBank, c;
-    func_0031BE50(&sinBank, &c, snow->m0C * (lo + (k * curveRange + curveRange)) * 0.01745329424738884f * lean);
+    fSinCos(&sinBank, &c, snow->m0C * (lo + (k * curveRange + curveRange)) * 0.01745329424738884f * lean);
     float lift = (push <? (snow->m00 + snow->m00)) / c;
     t4Vector up = vu0Add_13D818(vu0Scale_13D818(self->mRider->mGroundNormal, c), vu0Scale_13D818(self->mRider->mGroundSide, sinBank));
     push -= lift;
@@ -4459,7 +4459,7 @@ extern "C" void cGroundMotion_step(cGroundMotion* self)
         self->ChatterTime += amp * 2.6500000953674316f;
         if (6.283185958862305f <= self->ChatterTime)
             self->ChatterTime -= 6.283185958862305f;
-        self->mRider->unk_31C = amp * (func_0031C040(self->ChatterTime) * 7.5f);
+        self->mRider->unk_31C = amp * (fCos(self->ChatterTime) * 7.5f);
     }
     cRider_updateOrientationImplicit(self->mRider);
 }

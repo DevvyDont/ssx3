@@ -305,7 +305,7 @@ struct sVE_E798 {
 
 extern sVec4_E798 t4vect_Zero;
 extern char* cAppMan_TheAppMan;
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void cAnimFrame_getDeriv(void* node, sVec4_E798* pos, sVec4_E798* rot, float t);
 
 // PORT: PS2-only VU0 inline asm (vector times-assign scalar).
@@ -454,8 +454,8 @@ extern "C" void cAnimNode_updateMeshVelocity(char* self)
             eulerAngles.y = rot.y;
             eulerAngles.z = rot.z;
             float sinY, cosY, sinZ, cosZ;
-            func_0031BE50(&sinY, &cosY, eulerAngles.y);
-            func_0031BE50(&sinZ, &cosZ, eulerAngles.z);
+            fSinCos(&sinY, &cosY, eulerAngles.y);
+            fSinCos(&sinZ, &cosZ, eulerAngles.z);
             eulerMat.r[0].x = cosY * cosZ;
             eulerMat.r[0].y = -cosY * sinZ;
             eulerMat.r[0].z = sinY;

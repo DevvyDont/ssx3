@@ -4603,7 +4603,7 @@ extern "C" void cScriptObjCamera_OnStartObjectUse(void* self)
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCamera_OnEndObjectUse);
 #ifdef SKIP_ASM
 void func_00283440(void*);
-extern "C" void func_001692D8(void* self, void* algo);
+extern "C" void cScriptCameraController_removeCamera(void* self, void* algo);
 extern "C" void cCamera_setCurrentController(void* self, int mode);
 extern "C" void* cChaseCameraController_switchCamera_Restart(void* self);
 
@@ -4621,7 +4621,7 @@ public:
  * no script camera is left.
  *
  * Drops the use count (func_00283440). During a game it clears mWeight (+0x18), takes the camera of view mViewIndex
- * (+0x7C) from the game's ViewMan, removes this object from the camera's ScriptController (func_001692D8) and, when
+ * (+0x7C) from the game's ViewMan, removes this object from the camera's ScriptController (cScriptCameraController_removeCamera) and, when
  * that controller's count (+0x18) reaches 0, switches the camera to controller 2 (chase), restarts the chase camera
  * and calls the current Controller's slot 4. The local view calls the camera a rider. On Tour passes a playerID;
  * this C takes none.
@@ -4634,7 +4634,7 @@ extern "C" void cScriptObjCamera_OnEndObjectUse(void* self)
         *(int*)((char*)self + 0x18) = 0;
         char* riders = *(char**)(*(char**)(app + 0x84) + 0x84);
         char* rider = *(char**)(riders + (*(int*)((char*)self + 0x7C) << 2) + 4);
-        func_001692D8(*(void**)(rider + 0xAC), self);
+        cScriptCameraController_removeCamera(*(void**)(rider + 0xAC), self);
         if (*(int*)(*(char**)(rider + 0xAC) + 0x18) == 0) {
             cCamera_setCurrentController(rider, 2);
             cChaseCameraController_switchCamera_Restart(*(void**)(rider + 0xA8));
@@ -4660,7 +4660,7 @@ struct sVec4_SE {
     float x, y, z, w;
 } __attribute__((aligned(16)));
 
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 
 static inline void VSet_SE(sVec4_SE* v, float x, float y, float z, float w)
 {
@@ -4781,7 +4781,7 @@ static inline void MulMat_SE(sRotMat_SE* top, sRotMat_SE* r)
         sRotMat_SE r; \
         float s; \
         float c; \
-        func_0031BE50(&s, &c, (ANGLE)); \
+        fSinCos(&s, &c, (ANGLE)); \
         float t = 1.0f - c; \
         float x = axis[0]; \
         float y = axis[1]; \
@@ -4988,7 +4988,7 @@ int func_0027C070(void* self);
 void* cSSXScriptEngine_GetAnimationBankInfo_2(void* engine, int id) __asm__("cSSXScriptEngine_GetAnimationBankInfo__FPv");
 void* cSSXScriptEngine_GetSoundBankInfo_2(void* engine, int id) __asm__("cSSXScriptEngine_GetSoundBankInfo__FPv");
 extern "C" void func_0027A0D8(void* engine, int id, void* obj, void* pos, float* a, float* b, float* c);
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 extern char t4mat_Identity[];
 extern float t4vect_XAxis[4];
 extern float t4vect_YAxis[4];
@@ -5143,7 +5143,7 @@ static inline void MulIn_F9F8(void* m, const void* b)
     { \
         float s; \
         float c; \
-        func_0031BE50(&s, &c, angle); \
+        fSinCos(&s, &c, angle); \
         sMat_F9F8 r; \
         MakeRot_F9F8(&r, axis, s, c); \
         r.m[3][3] = 1.0f; \
@@ -5155,7 +5155,7 @@ static inline void MulIn_F9F8(void* m, const void* b)
     { \
         float s; \
         float c; \
-        func_0031BE50(&s, &c, angle); \
+        fSinCos(&s, &c, angle); \
         sMat_F9F8 r; \
         MakeRot_F9F8(&r, axis, s, c); \
         r.m[3][3] = 1.0f; \

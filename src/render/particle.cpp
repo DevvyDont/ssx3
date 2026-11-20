@@ -3437,8 +3437,8 @@ struct sPtGfx6C58 {
     sPtView6C58 views[1];           // 0x6D20
 };
 
-// PORT: the unit declares func_0031BE50 as (s, c, angle); its real parameter order is (angle, s, c).
-extern void SinCos_6C58(float angle, float* s, float* c) __asm__("func_0031BE50");
+// PORT: the unit declares fSinCos as (s, c, angle); its real parameter order is (angle, s, c).
+extern void SinCos_6C58(float angle, float* s, float* c) __asm__("fSinCos");
 extern "C" float func_0040D588(float x);
 extern "C" void func_00376938_6C58(void* self, float x, float y, float w, float h) __asm__("func_00376938");
 
@@ -4436,12 +4436,12 @@ static inline sV_81A0 Project_81A0(sGfx_81A0* self, const sV_81A0* v)
 }
 
 extern "C" void func_0037D968(cPS2GraphicsMan* self);
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 
 /**
  * Draws a camera-facing textured sprite rotated about its centre.
  *
- * Builds the two corner axes from the sine and cosine of @p angle (func_0031BE50) in camera space, scales them by @p
+ * Builds the two corner axes from the sine and cosine of @p angle (fSinCos) in camera space, scales them by @p
  * size, projects the centre and both axis ends, and forms the four corners from the differences; @p count is the number
  * of passes.
  *
@@ -4463,7 +4463,7 @@ extern "C" void cPS2GraphicsMan_DrawRotatedSprite(sGfx_81A0* self, sV_81A0* pos,
     float gsQ = 1.0f;
     sV_81A0 center = Project_81A0(self, pos);
     float sinAngle, cosAngle;
-    func_0031BE50(&sinAngle, &cosAngle, angle);
+    fSinCos(&sinAngle, &cosAngle, angle);
     sV_81A0 axisU;
     sV_81A0 axisV(cosAngle, sinAngle, 0.0f, 0.0f);
     Rot_81A0(&axisU, self->cam, axisV);
@@ -12658,7 +12658,7 @@ extern sV_9CB8 D_004FF160_9CB8 __asm__("t4vect_ZAxis");
 extern sMat_9CB8 D_004FF1A0_9CB8 __asm__("t4mat_Identity");
 extern sMat_9CB8 D_00500C60;
 
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" float func_0031C128(float x);
 extern "C" float func_0031C228(float x);
 extern "C" void func_00389840(sV_9CB8* out, sMat3_9CB8* m, int a, int b);
@@ -12962,7 +12962,7 @@ static inline void RotateAxis_9CB8(sMat_9CB8* R, const sV_9CB8* axis, float angl
     old.r[3] = t4vect_Origin;
     float s;
     float c;
-    func_0031BE50(&s, &c, angle);
+    fSinCos(&s, &c, angle);
     float one = 1.0f;
     float k = one - c;
     float x = axis->x;

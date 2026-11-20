@@ -201,7 +201,7 @@ static inline t4Vector vu0Normalize(const t4Vector& v)
 }
 
 extern "C" float func_0031C228(float);
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void cSpline_getPos(void* follow, float t, void* pos, void* vel, void* acc);
 
 
@@ -344,9 +344,9 @@ extern "C" void cSplineModifier_updateRootTransform(cSplineModifier_9830* self)
     sSmM44_9830 product;
     sSmM44_9830* rootMat = &self->mat;
     float sc[4][2];
-    func_0031BE50(&sc[0][0], &sc[0][1], rot.x);
-    func_0031BE50(&sc[1][0], &sc[1][1], rot.y);
-    func_0031BE50(&sc[2][0], &sc[2][1], rot.z);
+    fSinCos(&sc[0][0], &sc[0][1], rot.x);
+    fSinCos(&sc[1][0], &sc[1][1], rot.y);
+    fSinCos(&sc[2][0], &sc[2][1], rot.z);
     float sx = sc[0][0];
     float sy = sc[1][0];
     float cx = sc[0][1];
@@ -375,7 +375,7 @@ extern "C" void cSplineModifier_updateRootTransform(cSplineModifier_9830* self)
     char* sub = (char*)self + 0x10;
     if (self->angle != 0.0f) {
         const sSmV3_9830* axis = &t4vect_ZAxis;
-        func_0031BE50(&sc[3][0], &sc[3][1], *(float*)(sub + 0x28));
+        fSinCos(&sc[3][0], &sc[3][1], *(float*)(sub + 0x28));
         float k = 1.0f - sc[3][1];
         float kx = k * axis->x;
         float ky = k * axis->y;
@@ -1608,7 +1608,7 @@ struct sSmMat_AC20 {
 extern sSmVec4_AC20 D_004FF160_AC20 __asm__("t4vect_ZAxis");
 extern void cSpline_getPos_AC20(void* out, sSmVec4_AC20* pos, sSmVec4_AC20* dir, sSmVec4_AC20* c, float t) __asm__("cSpline_getPos");
 extern "C" float func_0031C228(float);
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 
 // PORT: PS2 sqrt.s asm helper; use sqrtf on PC.
 static inline float Sqrt_AC20(float x)
@@ -1724,7 +1724,7 @@ inline void sSmMat_AC20::setCols(const float& a00, const float& a10, const float
 inline void sSmMat_AC20::setAxisRot(const sSmVec4_AC20& axis, float angle)
 {
     float s, c;
-    func_0031BE50(&s, &c, angle);
+    fSinCos(&s, &c, angle);
     float t = 1.0f - c;
     float x = axis.x;
     float y = axis.y;
@@ -1813,10 +1813,10 @@ extern "C" void* cMultiSplineModifier_updateNodes(cMultiSplineModifier* multiSpl
         ang.z = rz;
         sSplineInst_AC20* node = ((sSplineInst_AC20**)self->NodeInst)[i];
         float sx, cx, sy, cy, sz, cz;
-        func_0031BE50(&sx, &cx, ang.x);
+        fSinCos(&sx, &cx, ang.x);
         sSmMat_AC20* nodeMat = &node->mat;
-        func_0031BE50(&sy, &cy, ang.y);
-        func_0031BE50(&sz, &cz, ang.z);
+        fSinCos(&sy, &cy, ang.y);
+        fSinCos(&sz, &cz, ang.z);
         float sxsy = sx * sy;
         float cxsz = cx * sz;
         node->mat.r[0].x = cy * cz;

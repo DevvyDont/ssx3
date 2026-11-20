@@ -29,7 +29,7 @@ extern "C" void cInputMap_init(void* self, int count)
 #endif
 
 //100%
-INCLUDE_ASM("input/inputmap", func_00320D08);
+INCLUDE_ASM("input/inputmap", cInputMap_purge);
 #ifdef SKIP_ASM
 void cMemMan_free(void* p);
 
@@ -39,7 +39,7 @@ void cMemMan_free(void* p);
  * Frees MapOffset (+0x4) and the op-code buffer (+0x14) with cMemMan_free when they are set. The pointers are not
  * cleared afterwards. Nothing calls it.
  */
-extern "C" void func_00320D08(void *self)
+extern "C" void cInputMap_purge(void *self)
 {
     void *buffer = *(void **)((char *)self + 4);
     if (buffer != 0) {
@@ -52,7 +52,7 @@ extern "C" void func_00320D08(void *self)
 }
 #endif
 //100%
-INCLUDE_ASM("input/inputmap", func_00320D50);
+INCLUDE_ASM("input/inputmap", cInputMap_loadMapFile1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void cInputMap_loadMapFile_vvi(void* self, void* data, int size) __asm__("cInputMap_loadMapFile");
@@ -67,7 +67,7 @@ extern "C" void* func_003E1A10(const char* path, int* size, int a2);
  *
  * @param path  the map file's path (On Tour fn)
  */
-extern "C" void func_00320D50(void* self, const char* path)
+extern "C" void cInputMap_loadMapFile1(void* self, const char* path)
 {
     int size;
     void* data = func_003E1A10(path, &size, 0x100);
@@ -183,13 +183,13 @@ extern "C" void cInputMap_purgeMapFile(void* self)
 //100%
 INCLUDE_ASM("input/inputmap", cInputMap_getValue);
 #ifdef SKIP_ASM
-void* func_00325250(void* self);
-extern "C" float func_00325450(void* parser, void* a1, void* a2);
+void* cInputExec_cInputExec(void* self);
+extern "C" float cInputExec_execute(void* parser, void* a1, void* a2);
 
 /**
  * Evaluates one compiled map statement against a controller pad and returns its value.
  *
- * Builds a 0x190-byte evaluator on the stack with func_00325250() and runs func_00325450() on the op-code
+ * Builds a 0x190-byte evaluator on the stack with cInputExec_cInputExec() and runs cInputExec_execute() on the op-code
  * stream at the statement's offset.
  *
  * @param inputPad  the controller pad to read (On Tour cInputPad*)
@@ -199,16 +199,16 @@ extern "C" float func_00325450(void* parser, void* a1, void* a2);
 extern "C" float cInputMap_getValue(void* self, void* inputPad, int id)
 {
     char parser[400];
-    func_00325250(parser);
-    return func_00325450(parser, inputPad, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[id] << 2));
+    cInputExec_cInputExec(parser);
+    return cInputExec_execute(parser, inputPad, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[id] << 2));
 }
 #endif
 
 //100%
-INCLUDE_ASM("input/inputmap", func_00321010);
+INCLUDE_ASM("input/inputmap", cInputMap_getValue1);
 #ifdef SKIP_ASM
-void* func_00325250(void* self);
-extern "C" float func_00325450(void* parser, void* a1, void* a2);
+void* cInputExec_cInputExec(void* self);
+extern "C" float cInputExec_execute(void* parser, void* a1, void* a2);
 
 struct sParser_1010 {
     int f0;                 // 0x0
@@ -220,7 +220,7 @@ struct sParser_1010 {
 /**
  * Evaluates one compiled map statement against a controller pad with a default button modifier and eight config values.
  *
- * Like cInputMap_getValue, but before running the statement through func_00325450 it stores @p modifier as the evaluator's
+ * Like cInputMap_getValue, but before running the statement through cInputExec_execute it stores @p modifier as the evaluator's
  * default button modifier (+0x0) and @p config0..@p config7 as its config values 1..8 (+0x10C..+0x128; config 0 always reads 0).
  * Called by func_00320C18, the cInput wrapper beside cInput_getValue.
  *
@@ -237,10 +237,10 @@ struct sParser_1010 {
  * @param config7  config value 8 (On Tour c7)
  * @return the statement's value
  */
-extern "C" float func_00321010(void* self, void* inputPad, int stateId, int modifier, float config0, float config1, float config2, float config3, float config4, float config5, float config6, float config7)
+extern "C" float cInputMap_getValue1(void* self, void* inputPad, int stateId, int modifier, float config0, float config1, float config2, float config3, float config4, float config5, float config6, float config7)
 {
     sParser_1010 parser;
-    func_00325250(&parser);
+    cInputExec_cInputExec(&parser);
     parser.f0 = modifier;
     parser.v[0] = config0;
     parser.v[1] = config1;
@@ -250,15 +250,15 @@ extern "C" float func_00321010(void* self, void* inputPad, int stateId, int modi
     parser.v[5] = config5;
     parser.v[6] = config6;
     parser.v[7] = config7;
-    return func_00325450(&parser, inputPad, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[stateId] << 2));
+    return cInputExec_execute(&parser, inputPad, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[stateId] << 2));
 }
 #endif
 
 //100%
 INCLUDE_ASM("input/inputmap", cInputMap_getState);
 #ifdef SKIP_ASM
-void* func_00325250(void* self);
-extern "C" float func_00325450(void* parser, void* a1, void* a2);
+void* cInputExec_cInputExec(void* self);
+extern "C" float cInputExec_execute(void* parser, void* a1, void* a2);
 
 /**
  * Evaluates one compiled map statement against a controller pad and tells whether it is nonzero.
@@ -272,16 +272,16 @@ extern "C" float func_00325450(void* parser, void* a1, void* a2);
 extern "C" int cInputMap_getState(void* self, void* inputPad, int id)
 {
     char parser[400];
-    func_00325250(parser);
-    return func_00325450(parser, inputPad, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[id] << 2)) != 0.0f;
+    cInputExec_cInputExec(parser);
+    return cInputExec_execute(parser, inputPad, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[id] << 2)) != 0.0f;
 }
 #endif
 
 //100%
-INCLUDE_ASM("input/inputmap", func_00321188);
+INCLUDE_ASM("input/inputmap", cInputMap_getState1);
 #ifdef SKIP_ASM
-void* func_00325250(void* self);
-extern "C" float func_00325450(void* parser, void* a1, void* a2);
+void* cInputExec_cInputExec(void* self);
+extern "C" float cInputExec_execute(void* parser, void* a1, void* a2);
 
 struct sParser_1188 {
     int f0;                 // 0x0
@@ -294,7 +294,7 @@ struct sParser_1188 {
  * Tells whether one compiled map statement is nonzero for a controller pad, with a default button modifier and eight
  * config values.
  *
- * Same evaluation as func_00321010 (modifier into +0x0, config values 1..8 into +0x10C..), compared with 0.0 like
+ * Same evaluation as cInputMap_getValue1 (modifier into +0x0, config values 1..8 into +0x10C..), compared with 0.0 like
  * cInputMap_getState. Called by func_00320C70, the cInput wrapper beside cInput_getState.
  *
  * @param inputPad  the controller pad to read (On Tour cInputPad*)
@@ -310,10 +310,10 @@ struct sParser_1188 {
  * @param config7  config value 8 (On Tour c7)
  * @return 1 when the statement's value is not 0.0, otherwise 0
  */
-extern "C" int func_00321188(void* self, void* inputPad, int stateId, int modifier, float config0, float config1, float config2, float config3, float config4, float config5, float config6, float config7)
+extern "C" int cInputMap_getState1(void* self, void* inputPad, int stateId, int modifier, float config0, float config1, float config2, float config3, float config4, float config5, float config6, float config7)
 {
     sParser_1188 parser;
-    func_00325250(&parser);
+    cInputExec_cInputExec(&parser);
     parser.f0 = modifier;
     parser.v[0] = config0;
     parser.v[1] = config1;
@@ -323,7 +323,7 @@ extern "C" int func_00321188(void* self, void* inputPad, int stateId, int modifi
     parser.v[5] = config5;
     parser.v[6] = config6;
     parser.v[7] = config7;
-    return func_00325450(&parser, inputPad, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[stateId] << 2)) != 0.0f;
+    return cInputExec_execute(&parser, inputPad, (char*)*(void**)((char*)self + 0x14) + ((*(int**)((char*)self + 0x4))[stateId] << 2)) != 0.0f;
 }
 #endif
 
@@ -525,7 +525,7 @@ extern "C" void cInputMapParser_skipPastSemicolon(cInputMapParser* self)
 #endif
 
 //100%
-INCLUDE_ASM("input/inputmap", func_003215F8);
+INCLUDE_ASM("input/inputmap", cInputMapParser_newParseNode);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 
@@ -538,7 +538,7 @@ extern "C" void* func_00416210(void* dst, int c, int n);
  *
  * @return the new node
  */
-extern "C" void* func_003215F8(void* self)
+extern "C" void* cInputMapParser_newParseNode(void* self)
 {
     void* freeNode = *(void**)((char*)self + 0xE0);
     *(void**)((char*)self + 0xE0) = *(void**)((char*)freeNode + 4);

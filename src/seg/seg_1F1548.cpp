@@ -3083,7 +3083,7 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F4DB8);
 extern "C" int func_002EE220(int);
 extern "C" float func_002EE070(int);
 extern "C" float func_002EE0B8(int);
-extern "C" void func_0031BE50(float, float*, float*);
+extern "C" void fSinCos(float, float*, float*);
 
 struct sV4_4DB8 {
     float x, y, z, w;
@@ -3202,11 +3202,11 @@ extern "C" void func_002F4DB8(sSun_4DB8* self, sCam_4DB8* cam, int flag)
     float elevation = func_002EE070(id) * 0.01745329424738884f;
     float sa, ca, sb, cb;
     if (azimuth == 0.0f && elevation == 0.0f) {
-        func_0031BE50(1.8675024509429932f, &sa, &ca);
-        func_0031BE50(0.27925270795822144f, &sb, &cb);
+        fSinCos(1.8675024509429932f, &sa, &ca);
+        fSinCos(0.27925270795822144f, &sb, &cb);
     } else {
-        func_0031BE50(azimuth, &sa, &ca);
-        func_0031BE50(elevation, &sb, &cb);
+        fSinCos(azimuth, &sa, &ca);
+        fSinCos(elevation, &sb, &cb);
     }
     sV4_4DB8 dir;
     sV4_4DB8 sun;

@@ -449,10 +449,10 @@ INCLUDE_ASM("bx/appman", cExecutionMan_checkHalt__FPvi);
  * Runs the execution manager's halt callback, when one is set, and optionally its virtual halt.
  *
  * Calls the callback (+0x0) with its argument (+0x4). When @p flag is set it then calls virtual slot 14, which
- * is pure in the base class; the PS2 execution manager's version (func_0031AB10) wakes a thread and then idles
+ * is pure in the base class; the PS2 execution manager's version (cPS2ExecutionMan_signalHalt) wakes a thread and then idles
  * forever.
  *
- * @param flag  nonzero to also call the virtual halt (cAppMan_checkHalt() passes 1, func_0031AB30() passes 0)
+ * @param flag  nonzero to also call the virtual halt (cAppMan_checkHalt() passes 1, cPS2ExecutionMan_halt() passes 0)
  * @return no meaningful value; the body sets no return value
  */
 int cExecutionMan_checkHalt(void* self, int flag)

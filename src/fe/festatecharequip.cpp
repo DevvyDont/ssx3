@@ -10,8 +10,8 @@ extern "C" void* cFadeScreen_cFadeScreen(void* self);
 extern "C" void* cSimpleCamera_cSimpleCamera(void* self);
 extern "C" void* cFERiderManager_cFERiderManager(void* self);
 extern "C" void* func_0019CDF0(void* self);
-// PORT: called with an extra int in $a1 here; func_0015D700's body is (self, x, y, z). Bound by asm label.
-void func_0015D700_i(void* self, int a1, float x, float y, float z) __asm__("func_0015D700");
+// PORT: called with an extra int in $a1 here; cSimpleCamera_init's body is (self, x, y, z). Bound by asm label.
+void cSimpleCamera_init_i(void* self, int a1, float x, float y, float z) __asm__("cSimpleCamera_init");
 extern void* D_0046D878[];
 extern void* D_0046D8D8[];
 extern char str_UIEngine[];
@@ -32,7 +32,7 @@ public:
  * Constructs the front end: its camera, rider manager, asynchronous files, UI engine and effects loader.
  *
  * Runs the base constructor cFadeScreen_cFadeScreen, stores the vtable D_0046D878, builds the camera at +0x10 (vtable
- * at +0xA0) and sets it up with func_0015D700 (pi/4, 5, 5000), the rider manager at +0xB0 (On Tour
+ * at +0xA0) and sets it up with cSimpleCamera_init (pi/4, 5, 5000), the rider manager at +0xB0 (On Tour
  * mRiderManager) and the object at +0x1A70, and allocates the UI engine ("UIEngine", +0xC) and an effects
  * loader ("FXLoader FE", +0xB5AA0).
  *
@@ -47,7 +47,7 @@ extern "C" void* cFE_cFE(void* self)
     cFERiderManager_cFERiderManager((char*)self + 0xB0);
     func_0019CDF0((char*)self + 0x1A70);
     *(cFEObjK1956F8_70**)((char*)self + 0xC) = new (str_UIEngine, 0, 0) cFEObjK1956F8_70;
-    func_0015D700_i((char*)self + 0x10, 0, 0.7853981852531433f, 5.0f, 5000.0f);
+    cSimpleCamera_init_i((char*)self + 0x10, 0, 0.7853981852531433f, 5.0f, 5000.0f);
     *(cFEObjK1956F8_1**)((char*)self + 0xB5AA0) = new (str_FXLoader_FE, 0, 0) cFEObjK1956F8_1(1);
     return self;
 }

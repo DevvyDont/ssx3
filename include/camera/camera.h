@@ -45,7 +45,7 @@ struct cRider;
 struct cRiderCameraTarget {
     void** mVtbl;               // 0x0 [R] D_0045B7A8 (cCamera_init); cCameraTarget declares the virtuals
     cRider* Rider;              // 0x4 [O]; [P] getRider (lw) / setRider (sw); [R] cCamera_init stores the view's rider;
-                                //     [U] all 26 slots lw 0x4; func_00168140 setRider, func_00168148 getRider
+                                //     [U] all 26 slots lw 0x4; cRiderCameraTarget_setRider setRider, cRiderCameraTarget_getRider getRider
 };
 
 CHECK_OFFSET(cRiderCameraTarget, mVtbl, 0x0);
@@ -53,19 +53,19 @@ CHECK_OFFSET(cRiderCameraTarget, Rider, 0x4);
 CHECK_SIZE(cRiderCameraTarget, 0x8);
 
 struct cSimpleCamera {
-    float View;                 // 0x00 [O]; [P] getFOV (lwc1); [U] func_00168080 getFOV, func_001680F0 setFOV
-    float Near;                 // 0x04 [O]; [P] getNear; [U] func_00168088
-    float Far;                  // 0x08 [O]; [P] getFar; [U] func_00168090
-    float MaxView;              // 0x0C [O]; [P] setMaxFOV (swc1); [U] func_00168108; cCamera_init stores its arg
-    float MinNear;              // 0x10 [O]; [U] func_00168100 (swc1); cCamera_init
-    float MaxFar;               // 0x14 [O]; [U] func_001680F8 (swc1); cCamera_init
-    int ViewIndex;              // 0x18 [O]; [U] cCamera_init stores the view index; func_0015E668 reads it
+    float View;                 // 0x00 [O]; [P] getFOV (lwc1); [U] cSimpleCamera_getFOV getFOV, cSimpleCamera_setFOV setFOV
+    float Near;                 // 0x04 [O]; [P] getNear; [U] cSimpleCamera_getNear
+    float Far;                  // 0x08 [O]; [P] getFar; [U] cSimpleCamera_getFar
+    float MaxView;              // 0x0C [O]; [P] setMaxFOV (swc1); [U] cSimpleCamera_setMaxFOV; cCamera_init stores its arg
+    float MinNear;              // 0x10 [O]; [U] cSimpleCamera_setMinNear (swc1); cCamera_init
+    float MaxFar;               // 0x14 [O]; [U] cSimpleCamera_setMaxFar (swc1); cCamera_init
+    int ViewIndex;              // 0x18 [O]; [U] cCamera_init stores the view index; cCamera_updateCamMat reads it
     char unk_1C[0x4];           // 0x1C alignment gap before the 16-byte-aligned tPose
     tPose Pose;                 // 0x20 [O]; [R] ctor: P = 0, Q = (0, 1, 0, 1) on the stack, sq 0x20/0x30;
-                                //      [U] func_001680A0/func_001680A8 return this + 0x20, func_001680B8 (sq 0x20),
-                                //      func_001680C8 (sq 0x30), func_001680D8 (both)
-    t4Matrix CamMat;            // 0x40 [O]; [U] func_00168098 returns this + 0x40; func_0015E050 writes its rows
-    t4Vector Direction;         // 0x80 [O]; [R] = t4vect_XAxis; [U] func_001680B0 returns this + 0x80
+                                //      [U] cSimpleCamera_getPosition/cSimpleCamera_getPose return this + 0x20, cSimpleCamera_setPosition (sq 0x20),
+                                //      cSimpleCamera_setOrientation (sq 0x30), cSimpleCamera_setPose (both)
+    t4Matrix CamMat;            // 0x40 [O]; [U] cSimpleCamera_getCamMat returns this + 0x40; cSimpleCamera_setupCamWithPosAndTarget writes its rows
+    t4Vector Direction;         // 0x80 [O]; [R] = t4vect_XAxis; [U] cSimpleCamera_getDirection returns this + 0x80
     void** mVtbl;               // 0x90 [R] cSimpleCamera_vtbl (D_0045B8B0)
     char unk_94[0xC];           // 0x94 padding to the 16-byte class alignment
 };
@@ -85,17 +85,17 @@ CHECK_SIZE(cSimpleCamera, 0xA0);
 
 struct cCamera {
     // --- cSimpleCamera
-    float View;                     // 0x000 [O]; [U] func_0015E668
-    float Near;                     // 0x004 [O]; [U] func_0015E668
-    float Far;                      // 0x008 [O]; [U] func_0015E668, cCamera_updateStreamFocus
+    float View;                     // 0x000 [O]; [U] cCamera_updateCamMat
+    float Near;                     // 0x004 [O]; [U] cCamera_updateCamMat
+    float Far;                      // 0x008 [O]; [U] cCamera_updateCamMat, cCamera_updateStreamFocus
     float MaxView;                  // 0x00C [O]; [U] cCamera_init stores its arg
     float MinNear;                  // 0x010 [O]; [U] cCamera_init
     float MaxFar;                   // 0x014 [O]; [U] cCamera_init
     int ViewIndex;                  // 0x018 [O]; [U] cCamera_init stores the view index
     char unk_01C[0x4];              // 0x01C alignment gap
-    tPose Pose;                     // 0x020 [O]; [U] func_0015E050, func_0015E668 (sq, .x/.y/.z by lwc1)
-    t4Matrix CamMat;                // 0x040 [O]; [U] func_0015E050 (setupCamWithPosAndTarget, which inlines the CamMat rebuild: sqc2 rows)
-    t4Vector Direction;             // 0x080 [O]; [U] func_0015E050, func_0015E668 (sq)
+    tPose Pose;                     // 0x020 [O]; [U] cSimpleCamera_setupCamWithPosAndTarget, cCamera_updateCamMat (sq, .x/.y/.z by lwc1)
+    t4Matrix CamMat;                // 0x040 [O]; [U] cSimpleCamera_setupCamWithPosAndTarget (setupCamWithPosAndTarget, which inlines the CamMat rebuild: sqc2 rows)
+    t4Vector Direction;             // 0x080 [O]; [U] cSimpleCamera_setupCamWithPosAndTarget, cCamera_updateCamMat (sq)
     void** mVtbl;                   // 0x090 [R] cCamera_vtbl (D_0045B888); the dtor restores cSimpleCamera_vtbl
     char unk_094[0xC];              // 0x094 padding
     // --- cCamera
@@ -105,9 +105,9 @@ struct cCamera {
     cChaseCameraController* ChaseController;   // 0x0A8 [O]; [P] getChaseController; [R] "Chase Cam Controller" (0x44)
     cScriptCameraController* ScriptController; // 0x0AC [O]; [P] getScriptController; [R] "Script Cam Controller" (0x20)
     int StreamFocusID;              // 0x0B0 [O] eStreamFocusID; [R] -1, then cCamera_init: 0 for view 0, 1 for view 1;
-                                    //       [U] cCamera_updateStreamFocus (updateStreamFocus), func_00168138 getStreamFocusID
+                                    //       [U] cCamera_updateStreamFocus (updateStreamFocus), cCamera_getStreamFocusID getStreamFocusID
     int bStreamIsReady;             // 0x0B4 [O] bool (a word in retail); [P] isStreamReady (lw); [R] 0;
-                                    //       [U] cCamera_updateStreamFocus sets it, func_00168130 returns it
+                                    //       [U] cCamera_updateStreamFocus sets it, cCamera_isStreamReady returns it
     char unk_0B8[0x8];              // 0x0B8 alignment gap
     cLookAtChaseAlgorithm ResultAlgorithm; // 0x0C0 [O] a cDEFAULT_3ChaseAlgorithm (no fields of its own); [R] constructed
                                     //       by cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm, destroyed by cDEFAULT_3ChaseAlgorithm__cDEFAULT_3ChaseAlgorithm__FPv; [U] cCamera_init sets its
@@ -117,14 +117,14 @@ struct cCamera {
     float MaxShakeVariance;         // 0x454 [O]; [R] 0; [U] cCamera_shakeCamera lwc1/swc1, cCamera_applyCameraShake lwc1
     int DoingCamShake;              // 0x458 [O] bool; [R] 0; [U] cCamera_shakeCamera sw, cCamera_applyCameraShake lw/sw
     int DoingCamShakeLastFrame;     // 0x45C [O] bool; [R] 0; [U] cCamera_applyCameraShake lw/sw
-    float LastGroundMove;           // 0x460 [O]; [R] 0; [U] func_0015EE00 (avoidGround) lwc1/swc1
+    float LastGroundMove;           // 0x460 [O]; [R] 0; [U] cCamera_avoidGround (avoidGround) lwc1/swc1
     char unk_464[0xC];              // 0x464 alignment gap
-    t4Vector LastGroundNormal;      // 0x470 [O]; [R] = t4vect_ZAxis; [U] func_0015EE00
+    t4Vector LastGroundNormal;      // 0x470 [O]; [R] = t4vect_ZAxis; [U] cCamera_avoidGround
     char IntersectionHint[0x10];    // 0x480 [O] tIntHint (intersect: mPatch, mU/mV, mFirstTri, mPrecision); only its
-                                    //       address is used (func_0015EE00)
-    t4Vector LastSafePosition;      // 0x490 [O]; [R] = t4vect_Origin; [U] func_0015EE00
-    int UsingSafePositionLastFrame; // 0x4A0 [O] bool; [R] 0; [U] func_0015EE00
-    int LastSafePositionInvalid;    // 0x4A4 [O] bool; [R] 1; [U] func_0015EE00
+                                    //       address is used (cCamera_avoidGround)
+    t4Vector LastSafePosition;      // 0x490 [O]; [R] = t4vect_Origin; [U] cCamera_avoidGround
+    int UsingSafePositionLastFrame; // 0x4A0 [O] bool; [R] 0; [U] cCamera_avoidGround
+    int LastSafePositionInvalid;    // 0x4A4 [O] bool; [R] 1; [U] cCamera_avoidGround
     char unk_4A8[0x8];              // 0x4A8 padding to the 16-byte class alignment
 };
 

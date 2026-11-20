@@ -53,11 +53,11 @@ struct cMatrixChaseAlgorithm {
     char unk_034[0xC];              // 0x034 padding
     // --- cLookAtChaseAlgorithm
     t4Vector Position;              // 0x040 [O]; [R] = t4vect_Origin; [U] lq/sq/lqc2, .z/.w by lwc1/swc1
-    float Heading;                  // 0x050 [O]; [R] 0; [U] lwc1/swc1 (func_00166640, func_001668B8)
-    float Pitch;                    // 0x054 [O]; [R] 0; [U] lwc1/swc1 (cLookAtChaseAlgorithm_updatePitchBlending, func_00166640)
+    float Heading;                  // 0x050 [O]; [R] 0; [U] lwc1/swc1 (cLookAtChaseAlgorithm_calcPitchHeading, cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading)
+    float Pitch;                    // 0x054 [O]; [R] 0; [U] lwc1/swc1 (cLookAtChaseAlgorithm_updatePitchBlending, cLookAtChaseAlgorithm_calcPitchHeading)
     float CamRoll;                  // 0x058 [O]; [R] 0
     char unk_05C[0x4];              // 0x05C alignment gap
-    tPose CalculatedPose;           // 0x060 [O]; [U] func_00166F90 (calcPose) writes P and Q (sq), reads Q.x..w
+    tPose CalculatedPose;           // 0x060 [O]; [U] cLookAtChaseAlgorithm_calcPose (calcPose) writes P and Q (sq), reads Q.x..w
     t4Vector LastCamDir;            // 0x080 [O]; [U] sq/lqc2
     t4Vector LastVelLookahead;      // 0x090 [O]; [R] = t4vect_Zero
     t4Vector LastRiderPos;          // 0x0A0 [O]; [U] cLookAtChaseAlgorithm_updateHandplant
@@ -66,7 +66,7 @@ struct cMatrixChaseAlgorithm {
     t4Vector LastHalfPipeMove;      // 0x0D0 [O]; [R] = t4vect_Zero
     t4Vector LastHalfPipeDistCorrection; // 0x0E0 [O]; [R] = t4vect_Zero
     t4Vector LastLookaheadSkew;     // 0x0F0 [O]; [U] cLookAtChaseAlgorithm_snap (snap) clears it
-    t4Vector LastHorizontalVel;     // 0x100 [O]; [U] lq/sq (func_00162568), .z by sw in snap
+    t4Vector LastHorizontalVel;     // 0x100 [O]; [U] lq/sq (cLookAtChaseAlgorithm_setupChaseData), .z by sw in snap
     t4Vector HalfPipeInboundLook;   // 0x110 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam (updateHalfPipeCam)
     t4Vector HalfPipeExitLook;      // 0x120 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam, .z lwc1/swc1
     t4Vector HalfPipeRotator;       // 0x130 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam, .x/.y/.z lwc1
@@ -77,7 +77,7 @@ struct cMatrixChaseAlgorithm {
     t4Vector HalfPipeBlendOutLastTargetDelta; // 0x180 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
     t4Vector LastSlowVelocity;      // 0x190 [O]; [U] snap
     t4Vector SlowCamEnterLook;      // 0x1A0 [O]; [U] snap
-    t4Vector LastOriginalVel;       // 0x1B0 [O]; [U] func_00162568, snap
+    t4Vector LastOriginalVel;       // 0x1B0 [O]; [U] cLookAtChaseAlgorithm_setupChaseData, snap
     t4Vector LastDirectionVel;      // 0x1C0 [O]; [U] cLookAtChaseAlgorithm_setupCamDirection, snap
     float LastDist;                 // 0x1D0 [O]; [R] 200.0f; [U] cLookAtChaseAlgorithm_updateFollowDistance
     float LastDrop;                 // 0x1D4 [O]; [R] 0; [U] cLookAtChaseAlgorithm_updateDropWithSpeed
@@ -154,9 +154,9 @@ struct cMatrixChaseAlgorithm {
     int ShakingLastFrame;           // 0x2EC [O] bool; [U] cLookAtChaseAlgorithm_setupCameraShake, cLookAtChaseAlgorithm_updateCameraShake
     int DoSnap;                     // 0x2F0 [O] bool; [P] shouldSnapOnUpdate (lw); [U] updateAlgorithm cLookAtChaseAlgorithm_updateAlgorithm
                                     //       calls snapCurrent when set
-    float Setup_Boost;              // 0x2F4 [O]; [U] func_00162568 (swc1)
-    float Setup_VisualBoost;        // 0x2F8 [O]; [U] func_00162568 (swc1)
-    int Setup_IsTargetHandplanting; // 0x2FC [O] bool; [U] func_00162568 (sw)
+    float Setup_Boost;              // 0x2F4 [O]; [U] cLookAtChaseAlgorithm_setupChaseData (swc1)
+    float Setup_VisualBoost;        // 0x2F8 [O]; [U] cLookAtChaseAlgorithm_setupChaseData (swc1)
+    int Setup_IsTargetHandplanting; // 0x2FC [O] bool; [U] cLookAtChaseAlgorithm_setupChaseData (sw)
     int SlowCamState;               // 0x300 [O] eCamAttributeBlendState; [U] cLookAtChaseAlgorithm_updateSlowSpeedCam (lw/sw)
     char AirTargetSpline[0xC];      // 0x304 [O] cCubicSplineInterpolant (bx/cubicspline.h: bitfield word, MaxX,
                                     //       CubicSplines); [R] constructed by func_0031D5E8, destroyed by func_0031D618
@@ -315,11 +315,11 @@ struct cRelativeChaseAlgorithm {
     char unk_034[0xC];              // 0x034 padding
     // --- cLookAtChaseAlgorithm
     t4Vector Position;              // 0x040 [O]; [R] = t4vect_Origin; [U] lq/sq/lqc2, .z/.w by lwc1/swc1
-    float Heading;                  // 0x050 [O]; [R] 0; [U] lwc1/swc1 (func_00166640, func_001668B8)
-    float Pitch;                    // 0x054 [O]; [R] 0; [U] lwc1/swc1 (cLookAtChaseAlgorithm_updatePitchBlending, func_00166640)
+    float Heading;                  // 0x050 [O]; [R] 0; [U] lwc1/swc1 (cLookAtChaseAlgorithm_calcPitchHeading, cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading)
+    float Pitch;                    // 0x054 [O]; [R] 0; [U] lwc1/swc1 (cLookAtChaseAlgorithm_updatePitchBlending, cLookAtChaseAlgorithm_calcPitchHeading)
     float CamRoll;                  // 0x058 [O]; [R] 0
     char unk_05C[0x4];              // 0x05C alignment gap
-    tPose CalculatedPose;           // 0x060 [O]; [U] func_00166F90 (calcPose) writes P and Q (sq), reads Q.x..w
+    tPose CalculatedPose;           // 0x060 [O]; [U] cLookAtChaseAlgorithm_calcPose (calcPose) writes P and Q (sq), reads Q.x..w
     t4Vector LastCamDir;            // 0x080 [O]; [U] sq/lqc2
     t4Vector LastVelLookahead;      // 0x090 [O]; [R] = t4vect_Zero
     t4Vector LastRiderPos;          // 0x0A0 [O]; [U] cLookAtChaseAlgorithm_updateHandplant
@@ -328,7 +328,7 @@ struct cRelativeChaseAlgorithm {
     t4Vector LastHalfPipeMove;      // 0x0D0 [O]; [R] = t4vect_Zero
     t4Vector LastHalfPipeDistCorrection; // 0x0E0 [O]; [R] = t4vect_Zero
     t4Vector LastLookaheadSkew;     // 0x0F0 [O]; [U] cLookAtChaseAlgorithm_snap (snap) clears it
-    t4Vector LastHorizontalVel;     // 0x100 [O]; [U] lq/sq (func_00162568), .z by sw in snap
+    t4Vector LastHorizontalVel;     // 0x100 [O]; [U] lq/sq (cLookAtChaseAlgorithm_setupChaseData), .z by sw in snap
     t4Vector HalfPipeInboundLook;   // 0x110 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam (updateHalfPipeCam)
     t4Vector HalfPipeExitLook;      // 0x120 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam, .z lwc1/swc1
     t4Vector HalfPipeRotator;       // 0x130 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam, .x/.y/.z lwc1
@@ -339,7 +339,7 @@ struct cRelativeChaseAlgorithm {
     t4Vector HalfPipeBlendOutLastTargetDelta; // 0x180 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
     t4Vector LastSlowVelocity;      // 0x190 [O]; [U] snap
     t4Vector SlowCamEnterLook;      // 0x1A0 [O]; [U] snap
-    t4Vector LastOriginalVel;       // 0x1B0 [O]; [U] func_00162568, snap
+    t4Vector LastOriginalVel;       // 0x1B0 [O]; [U] cLookAtChaseAlgorithm_setupChaseData, snap
     t4Vector LastDirectionVel;      // 0x1C0 [O]; [U] cLookAtChaseAlgorithm_setupCamDirection, snap
     float LastDist;                 // 0x1D0 [O]; [R] 200.0f; [U] cLookAtChaseAlgorithm_updateFollowDistance
     float LastDrop;                 // 0x1D4 [O]; [R] 0; [U] cLookAtChaseAlgorithm_updateDropWithSpeed
@@ -416,9 +416,9 @@ struct cRelativeChaseAlgorithm {
     int ShakingLastFrame;           // 0x2EC [O] bool; [U] cLookAtChaseAlgorithm_setupCameraShake, cLookAtChaseAlgorithm_updateCameraShake
     int DoSnap;                     // 0x2F0 [O] bool; [P] shouldSnapOnUpdate (lw); [U] updateAlgorithm cLookAtChaseAlgorithm_updateAlgorithm
                                     //       calls snapCurrent when set
-    float Setup_Boost;              // 0x2F4 [O]; [U] func_00162568 (swc1)
-    float Setup_VisualBoost;        // 0x2F8 [O]; [U] func_00162568 (swc1)
-    int Setup_IsTargetHandplanting; // 0x2FC [O] bool; [U] func_00162568 (sw)
+    float Setup_Boost;              // 0x2F4 [O]; [U] cLookAtChaseAlgorithm_setupChaseData (swc1)
+    float Setup_VisualBoost;        // 0x2F8 [O]; [U] cLookAtChaseAlgorithm_setupChaseData (swc1)
+    int Setup_IsTargetHandplanting; // 0x2FC [O] bool; [U] cLookAtChaseAlgorithm_setupChaseData (sw)
     int SlowCamState;               // 0x300 [O] eCamAttributeBlendState; [U] cLookAtChaseAlgorithm_updateSlowSpeedCam (lw/sw)
     char AirTargetSpline[0xC];      // 0x304 [O] cCubicSplineInterpolant (bx/cubicspline.h: bitfield word, MaxX,
                                     //       CubicSplines); [R] constructed by func_0031D5E8, destroyed by func_0031D618
@@ -584,11 +584,11 @@ struct cSplineCamAlgorithm {
     char unk_034[0xC];              // 0x034 padding
     // --- cLookAtChaseAlgorithm
     t4Vector Position;              // 0x040 [O]; [R] = t4vect_Origin; [U] lq/sq/lqc2, .z/.w by lwc1/swc1
-    float Heading;                  // 0x050 [O]; [R] 0; [U] lwc1/swc1 (func_00166640, func_001668B8)
-    float Pitch;                    // 0x054 [O]; [R] 0; [U] lwc1/swc1 (cLookAtChaseAlgorithm_updatePitchBlending, func_00166640)
+    float Heading;                  // 0x050 [O]; [R] 0; [U] lwc1/swc1 (cLookAtChaseAlgorithm_calcPitchHeading, cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading)
+    float Pitch;                    // 0x054 [O]; [R] 0; [U] lwc1/swc1 (cLookAtChaseAlgorithm_updatePitchBlending, cLookAtChaseAlgorithm_calcPitchHeading)
     float CamRoll;                  // 0x058 [O]; [R] 0
     char unk_05C[0x4];              // 0x05C alignment gap
-    tPose CalculatedPose;           // 0x060 [O]; [U] func_00166F90 (calcPose) writes P and Q (sq), reads Q.x..w
+    tPose CalculatedPose;           // 0x060 [O]; [U] cLookAtChaseAlgorithm_calcPose (calcPose) writes P and Q (sq), reads Q.x..w
     t4Vector LastCamDir;            // 0x080 [O]; [U] sq/lqc2
     t4Vector LastVelLookahead;      // 0x090 [O]; [R] = t4vect_Zero
     t4Vector LastRiderPos;          // 0x0A0 [O]; [U] cLookAtChaseAlgorithm_updateHandplant
@@ -597,7 +597,7 @@ struct cSplineCamAlgorithm {
     t4Vector LastHalfPipeMove;      // 0x0D0 [O]; [R] = t4vect_Zero
     t4Vector LastHalfPipeDistCorrection; // 0x0E0 [O]; [R] = t4vect_Zero
     t4Vector LastLookaheadSkew;     // 0x0F0 [O]; [U] cLookAtChaseAlgorithm_snap (snap) clears it
-    t4Vector LastHorizontalVel;     // 0x100 [O]; [U] lq/sq (func_00162568), .z by sw in snap
+    t4Vector LastHorizontalVel;     // 0x100 [O]; [U] lq/sq (cLookAtChaseAlgorithm_setupChaseData), .z by sw in snap
     t4Vector HalfPipeInboundLook;   // 0x110 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam (updateHalfPipeCam)
     t4Vector HalfPipeExitLook;      // 0x120 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam, .z lwc1/swc1
     t4Vector HalfPipeRotator;       // 0x130 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam, .x/.y/.z lwc1
@@ -608,7 +608,7 @@ struct cSplineCamAlgorithm {
     t4Vector HalfPipeBlendOutLastTargetDelta; // 0x180 [O]; [U] cLookAtChaseAlgorithm_updateHalfPipeCam
     t4Vector LastSlowVelocity;      // 0x190 [O]; [U] snap
     t4Vector SlowCamEnterLook;      // 0x1A0 [O]; [U] snap
-    t4Vector LastOriginalVel;       // 0x1B0 [O]; [U] func_00162568, snap
+    t4Vector LastOriginalVel;       // 0x1B0 [O]; [U] cLookAtChaseAlgorithm_setupChaseData, snap
     t4Vector LastDirectionVel;      // 0x1C0 [O]; [U] cLookAtChaseAlgorithm_setupCamDirection, snap
     float LastDist;                 // 0x1D0 [O]; [R] 200.0f; [U] cLookAtChaseAlgorithm_updateFollowDistance
     float LastDrop;                 // 0x1D4 [O]; [R] 0; [U] cLookAtChaseAlgorithm_updateDropWithSpeed
@@ -685,9 +685,9 @@ struct cSplineCamAlgorithm {
     int ShakingLastFrame;           // 0x2EC [O] bool; [U] cLookAtChaseAlgorithm_setupCameraShake, cLookAtChaseAlgorithm_updateCameraShake
     int DoSnap;                     // 0x2F0 [O] bool; [P] shouldSnapOnUpdate (lw); [U] updateAlgorithm cLookAtChaseAlgorithm_updateAlgorithm
                                     //       calls snapCurrent when set
-    float Setup_Boost;              // 0x2F4 [O]; [U] func_00162568 (swc1)
-    float Setup_VisualBoost;        // 0x2F8 [O]; [U] func_00162568 (swc1)
-    int Setup_IsTargetHandplanting; // 0x2FC [O] bool; [U] func_00162568 (sw)
+    float Setup_Boost;              // 0x2F4 [O]; [U] cLookAtChaseAlgorithm_setupChaseData (swc1)
+    float Setup_VisualBoost;        // 0x2F8 [O]; [U] cLookAtChaseAlgorithm_setupChaseData (swc1)
+    int Setup_IsTargetHandplanting; // 0x2FC [O] bool; [U] cLookAtChaseAlgorithm_setupChaseData (sw)
     int SlowCamState;               // 0x300 [O] eCamAttributeBlendState; [U] cLookAtChaseAlgorithm_updateSlowSpeedCam (lw/sw)
     char AirTargetSpline[0xC];      // 0x304 [O] cCubicSplineInterpolant (bx/cubicspline.h: bitfield word, MaxX,
                                     //       CubicSplines); [R] constructed by func_0031D5E8, destroyed by func_0031D618

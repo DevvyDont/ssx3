@@ -2980,7 +2980,7 @@ extern "C" void func_0029ED18(void* snd);
 extern "C" void func_002CC0C0(void* p);
 extern "C" int cGame_activatePauseMenu(char* self, int a);
 extern "C" int cOVStateManager_allowPauseMenu(void);
-extern "C" void func_00326AE0(void* p);
+extern "C" void cPadCache_clearAllVibrations(void* p);
 extern "C" void func_0020CA10(void);
 extern "C" void cSSXAudio_PauseAudio(void* snd);
 extern "C" void func_00294F48(void* snd);
@@ -3134,7 +3134,7 @@ extern "C" bool cGame_updateUI(sApp_4B48* self)
         return false;
     }
     if (cGame_activatePauseMenu((char*)self, 0) != 0 && !racing_4B48(*self->state) && !playing_4B48(self->playback) && cOVStateManager_allowPauseMenu() != 0) {
-        func_00326AE0(PadCache);
+        cPadCache_clearAllVibrations(PadCache);
         func_0020CA10();
         D_005366E8[++D_004A2A54] = 2;
         cPauseState_Flags = D_004428F8[0];

@@ -32,7 +32,7 @@ struct tParseNode {
                                     //      (1 Reference, 2 Button, 3 Config, 4 Constant, 5 Selection, 6.. operators)
     union {
         tParseNode* unk_04;         // 0x04 [U] first operand (operators, Selection's condition); the free-list link
-                                    //      (cInputMapParser_cInputMapParser, func_003215F8, freeParseNode)
+                                    //      (cInputMapParser_cInputMapParser, cInputMapParser_newParseNode, freeParseNode)
         tIdentifier* unk_04_id;     // 0x04 [U] Reference node (Type 1): the identifier (compileParseNode reads ->Expression)
         int unk_04_i;               // 0x04 [U] Button/Config node (Type 2/3): the button or config index (compileParseNode)
         float unk_04_f;             // 0x04 [U] Constant node (Type 4): the value (parseOr/parseAnd/parseExpression fold it)
@@ -83,7 +83,7 @@ struct cInputMapParser {
                                     //         use it as the identifier name
     float TokenValue;               // 0x000DC [O]; [U] readToken scans a constant into it; parseTerm copies it into a
                                     //         Constant node
-    tParseNode* FreeParseNodes;     // 0x000E0 [O]; [R] = ParseNodes; [U] func_003215F8 (newParseNode) pops, freeParseNode
+    tParseNode* FreeParseNodes;     // 0x000E0 [O]; [R] = ParseNodes; [U] cInputMapParser_newParseNode (newParseNode) pops, freeParseNode
                                     //         pushes
     tParseNode ParseNodes[2048];    // 0x000E4 [O]; [R] the constructor links all 0x800 into the free list
     int NumIdentifiers;             // 0x080E4 [O]; [R] = 0; [U] lookupIdentifierName's loop bound, parseStatement's ++

@@ -281,7 +281,7 @@ extern "C" int cCameraTriggerList_loadFromBuffer(void* self_, void* buf)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerlist", func_0016C388);
+INCLUDE_ASM("camera/trigger/cameratriggerlist", cCameraTriggerList_headerSize);
 #ifdef SKIP_ASM
 /**
  * Returns 16, the size in bytes of a camera trigger list's header.
@@ -291,7 +291,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerlist", func_0016C388);
  *
  * @return 16
  */
-extern "C" int func_0016C388(void) {
+extern "C" int cCameraTriggerList_headerSize(void) {
     return 0x10;
 }
 #endif

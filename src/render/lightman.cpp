@@ -672,9 +672,9 @@ extern "C" void func_0038ED90(void* self, sLmQuadVec4_E118* start, sLmQuadVec4_E
 //100%
 INCLUDE_ASM("render/lightman", func_0038EE78);
 #ifdef SKIP_ASM
-extern "C" float func_0031BF60(float a);
-extern "C" float func_0031C040(float a);
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" float fSin(float a);
+extern "C" float fCos(float a);
+extern "C" void fSinCos(float* s, float* c, float angle);
 
 struct sLmMat_EE78 {
     float m[4][4];
@@ -817,12 +817,12 @@ extern "C" void func_0038EE78(void)
     for (i = 0; i < 8; i++) {
         sLmMat_EE78* pm = &m0;
         float fi = (float)i * 0.125f;
-        float amp = D_004A4448 * func_0031BF60(fi + t * (float)D_004A445C * 0.0016666667f) + D_004A444C;
-        float b = func_0031BF60(fi + t * D_004A4464 * 0.0016666667f);
-        float amp2 = D_004A4450 * func_0031BF60(fi * D_004A4468 * 0.0016666667f + b);
-        float angle = D_004A4454 * func_0031BF60(fi + t * D_004A4460 * 0.0016666667f);
+        float amp = D_004A4448 * fSin(fi + t * (float)D_004A445C * 0.0016666667f) + D_004A444C;
+        float b = fSin(fi + t * D_004A4464 * 0.0016666667f);
+        float amp2 = D_004A4450 * fSin(fi * D_004A4468 * 0.0016666667f + b);
+        float angle = D_004A4454 * fSin(fi + t * D_004A4460 * 0.0016666667f);
         lmCopy_EE78(&m0, &t4mat_Identity);
-        func_0031BE50(&s, &c, angle);
+        fSinCos(&s, &c, angle);
         float tc = 1.0f - c;
         float x = t4vect_ZAxis[0];
         float y = t4vect_ZAxis[1];
@@ -852,10 +852,10 @@ extern "C" void func_0038EE78(void)
         lmMulIn_EE78(pm, &r);
         sLmMat_EE78* cell = &D_00504D80_EE78[i];
         lmCopy_EE78(cell, &t4mat_Identity);
-        cell->m[2][0] += func_0031BF60(D_004A446C * 0.017453294f) * amp;
-        cell->m[2][1] += func_0031C040(D_004A446C * 0.017453294f) * amp;
-        m0.m[0][2] += amp2 * func_0031BF60(D_004A4470 * 0.017453294f);
-        m0.m[1][2] += amp2 * func_0031C040(D_004A4470 * 0.017453294f);
+        cell->m[2][0] += fSin(D_004A446C * 0.017453294f) * amp;
+        cell->m[2][1] += fCos(D_004A446C * 0.017453294f) * amp;
+        m0.m[0][2] += amp2 * fSin(D_004A4470 * 0.017453294f);
+        m0.m[1][2] += amp2 * fCos(D_004A4470 * 0.017453294f);
         lmMul_EE78(&tmp, cell, &m0);
         lmCopy_EE78(&r, &tmp);
         lmCopy_EE78(cell, &r);

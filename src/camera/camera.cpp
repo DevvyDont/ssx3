@@ -253,17 +253,17 @@ public:
     virtual void v02();
 };
 
-extern "C" void* func_0015E668(void* self);
+extern "C" void* cCamera_updateCamMat(void* self);
 
 /**
  * Updates the current controller, then the camera itself.
  *
- * Calls the current controller's virtual slot 2 (update), then func_0015E668 (unknown).
+ * Calls the current controller's virtual slot 2 (update), then cCamera_updateCamMat (unknown).
  */
 extern "C" void cCamera_update(cCamera* self)
 {
     ((cCamVObj_0015DF98*)self->Controller)->v02();
-    func_0015E668(self);
+    cCamera_updateCamMat(self);
 }
 #endif
 
@@ -312,12 +312,12 @@ void* cCamera_snapResultAlgorithm(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_0015E050);
+INCLUDE_ASM("camera/camera", cSimpleCamera_setupCamWithPosAndTarget);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
 
-// A transform as position + rotation quaternion, returned by value (func_0031B748 builds one from a matrix).
+// A transform as position + rotation quaternion, returned by value (tPose_tPose builds one from a matrix).
 struct sXf {
     t4Vector pos;
     t4Vector rot;
@@ -330,8 +330,8 @@ struct sObj_E050 {
 } __attribute__((aligned(16)));
 
 extern "C" void* cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm(void* self);
-extern "C" void func_00166640(void* self, int a1);
-extern "C" void func_00166F90(void* self);
+extern "C" void cLookAtChaseAlgorithm_calcPitchHeading(void* self, int a1);
+extern "C" void cLookAtChaseAlgorithm_calcPose(void* self);
 extern "C" sXf cLookAtChaseAlgorithm_getPose_E050(void* a1) __asm__("cLookAtChaseAlgorithm_getPose");
 void cDEFAULT_3ChaseAlgorithm__cDEFAULT_3ChaseAlgorithm_E050(void* self, int flags) __asm__("cDEFAULT_3ChaseAlgorithm__cDEFAULT_3ChaseAlgorithm__FPv");
 
@@ -457,12 +457,12 @@ static inline void vu0TransMtx_E050(t4Matrix* m, const t4Vector& v)
         : "memory");
 }
 
-extern "C" void func_0015E050_impl(char* self, char* a1, char* a2) __asm__("func_0015E050");
+extern "C" void cSimpleCamera_setupCamWithPosAndTarget_impl(char* self, char* a1, char* a2) __asm__("cSimpleCamera_setupCamWithPosAndTarget");
 /**
  * Points a camera from a position at a target point.
  *
  * Constructs a temporary cDEFAULT_3ChaseAlgorithm on the stack, sets its Position to @p camPos and its CamTargetPos to
- * @p camTargetPos (both with w = 1), computes its pitch and heading (func_00166640 with 1) and pose (func_00166F90), and stores
+ * @p camTargetPos (both with w = 1), computes its pitch and heading (cLookAtChaseAlgorithm_calcPitchHeading with 1) and pose (cLookAtChaseAlgorithm_calcPose), and stores
  * cLookAtChaseAlgorithm_getPose's result in Pose. CamMat becomes the axis-flip matrix D_004C53A0 times the rotation of
  * Pose's quaternion, translated by minus Pose's position; Direction becomes the z column of its rotation rows (w = 0).
  * The temporary is destroyed with cDEFAULT_3ChaseAlgorithm__cDEFAULT_3ChaseAlgorithm.
@@ -470,7 +470,7 @@ extern "C" void func_0015E050_impl(char* self, char* a1, char* a2) __asm__("func
  * @param camPos  the camera position
  * @param camTargetPos  the point to look at
  */
-extern "C" void func_0015E050_impl(char* self, char* camPos, char* camTargetPos)
+extern "C" void cSimpleCamera_setupCamWithPosAndTarget_impl(char* self, char* camPos, char* camTargetPos)
 {
     sObj_E050 lookAtAlgo;
     cDEFAULT_3ChaseAlgorithm_cDEFAULT_3ChaseAlgorithm(&lookAtAlgo);
@@ -478,8 +478,8 @@ extern "C" void func_0015E050_impl(char* self, char* camPos, char* camTargetPos)
     *(cQuad128*)((char*)&lookAtAlgo + 0x40) = *(cQuad128*)camPos;
     *(float*)((char*)&lookAtAlgo + 0x4C) = 1.0f;
     *(float*)((char*)&lookAtAlgo + 0x2C) = 1.0f;
-    func_00166640(&lookAtAlgo, 1);
-    func_00166F90(&lookAtAlgo);
+    cLookAtChaseAlgorithm_calcPitchHeading(&lookAtAlgo, 1);
+    cLookAtChaseAlgorithm_calcPose(&lookAtAlgo);
     sXf out = cLookAtChaseAlgorithm_getPose_E050(&lookAtAlgo);
     t4Vector* poseQuat = (t4Vector*)(self + 0x30);
     t4Matrix* camMatrix = (t4Matrix*)(self + 0x40);
@@ -713,15 +713,15 @@ extern "C" void cCamera_applyCameraShake(cCamera* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_0015E668);
+INCLUDE_ASM("camera/camera", cCamera_updateCamMat);
 #ifdef SKIP_ASM
 // cCamera::updateCamMat(void) (SSX On Tour PSP symbols: all_in_one_camera.obj / camera.cpp).
 #include "bx/math3d.h"
 
-extern "C" void func_0015EE00(void*);                                   // cCamera::avoidGround
+extern "C" void cCamera_avoidGround(void*);                                   // cCamera::avoidGround
 extern void cCamera_applyCameraShake_E668(void*) __asm__("cCamera_applyCameraShake");         // cCamera::applyCameraShake
-extern "C" void func_00166640(void* self, int a1);                      // cLookAtChaseAlgorithm::calcPitchHeading(bool)
-extern "C" void func_00166F90(void* self);                              // cLookAtChaseAlgorithm::calcPose
+extern "C" void cLookAtChaseAlgorithm_calcPitchHeading(void* self, int a1);                      // cLookAtChaseAlgorithm::calcPitchHeading(bool)
+extern "C" void cLookAtChaseAlgorithm_calcPose(void* self);                              // cLookAtChaseAlgorithm::calcPose
 extern "C" void cRenderStateMan_update(int, float, float, float);                // cRenderStateMan::update
 extern "C" float func_002EE3B8(int);                                    // cRenderStateMan::DrawDistance
 extern t4Vector D_004FF120_E668 __asm__("t4vect_Zero");                  // t4vect::Zero
@@ -972,7 +972,7 @@ static inline float bracket_E668(float lo, float v, float hi)
     return (lo <= v) ? (v <? hi) : lo; // PORT: g++ <? operator
 }
 
-extern "C" void func_0015E668_E668(cCamera_E668* self) __asm__("func_0015E668");
+extern "C" void cCamera_updateCamMat_E668(cCamera_E668* self) __asm__("cCamera_updateCamMat");
 /**
  * Computes the camera's pose, matrix, direction and lens from its current Controller's algorithm list.
  *
@@ -980,18 +980,18 @@ extern "C" void func_0015E668_E668(cCamera_E668* self) __asm__("func_0015E668");
  * 2, e.g. cLookAtChaseAlgorithm_getPose); when Controller is the ChaseController, ResultAlgorithm's Position and
  * CamTargetPos also take that position and the algorithm's target (slot 6). Otherwise every algorithm whose blend
  * weight (list node +0xC) is over 0.0001 is blended by running weight into ResultAlgorithm's Position and CamTargetPos,
- * and ResultAlgorithm's pitch and heading (func_00166640 with 1) and pose (func_00166F90,
+ * and ResultAlgorithm's pitch and heading (cLookAtChaseAlgorithm_calcPitchHeading with 1) and pose (cLookAtChaseAlgorithm_calcPose,
  * cLookAtChaseAlgorithm_getPose) become Pose.
  *
- * For the chase controller it then keeps the eye out of the ground (func_0015EE00), applies the camera shake
- * (cCamera_applyCameraShake) and recomputes Pose from ResultAlgorithm (func_00166640 with 0). CamMat becomes the axis
+ * For the chase controller it then keeps the eye out of the ground (cCamera_avoidGround), applies the camera shake
+ * (cCamera_applyCameraShake) and recomputes Pose from ResultAlgorithm (cLookAtChaseAlgorithm_calcPitchHeading with 0). CamMat becomes the axis
  * flip D_004C53A0 times the rotation of Pose's quaternion, translated by minus Pose's position; Direction its z column.
  * View, Near and Far are blended from the algorithms by lens weight (list node +0x4). Last, cRenderStateMan_update runs
  * for view ViewIndex + 6 at the camera's x/y, Far is capped by that view's draw distance (func_002EE3B8) with MinNear
  * as the floor and stored in D_004A3B68 (the render far plane), and View is clamped to [0, MaxView] and Near and Far to
  * [MinNear, MaxFar].
  */
-extern "C" void func_0015E668_E668(cCamera_E668* self)
+extern "C" void cCamera_updateCamMat_E668(cCamera_E668* self)
 {
     cCameraAlgoListNode_E668* algoNode;
     tPose_E668 tempPose;
@@ -1025,15 +1025,15 @@ extern "C" void func_0015E668_E668(cCamera_E668* self)
         }
         self->blendPos.w = 1.0f;
         self->blendTarget.w = 1.0f;
-        func_00166640(self->lookAtChase, 1);
-        func_00166F90(self->lookAtChase);
+        cLookAtChaseAlgorithm_calcPitchHeading(self->lookAtChase, 1);
+        cLookAtChaseAlgorithm_calcPose(self->lookAtChase);
         self->pose = cLookAtChaseAlgorithm_getPose_E668(self->lookAtChase);
     }
     if (self->controller == self->prevController) {
-        func_0015EE00(self);
+        cCamera_avoidGround(self);
         cCamera_applyCameraShake_E668(self);
-        func_00166640(self->lookAtChase, 0);
-        func_00166F90(self->lookAtChase);
+        cLookAtChaseAlgorithm_calcPitchHeading(self->lookAtChase, 0);
+        cLookAtChaseAlgorithm_calcPose(self->lookAtChase);
         self->pose = cLookAtChaseAlgorithm_getPose_E668(self->lookAtChase);
     }
     CopyMtx_E668(&self->viewMat, &D_004C53A0_E668);
@@ -1156,7 +1156,7 @@ extern "C" void cCamera_switchChaseControllerTargetRider(cCamera* self, int valu
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_0015EE00);
+INCLUDE_ASM("camera/camera", cCamera_avoidGround);
 #ifdef SKIP_ASM
 struct sVec_EE00 {
     float x, y, z, w;
@@ -1172,9 +1172,9 @@ struct sHit_EE00 {
 extern sVec_EE00 D_004FF160_vEE00 __asm__("t4vect_ZAxis");
 extern sVec_EE00 D_004FF140_vEE00 __asm__("t4vect_XAxis");
 // cWorldLine::cWorldLine(const t4Vector&, const t4Vector&, float, tIntPrecision)
-extern "C" void* func_0032E100(void* seg, const sVec_EE00& a, const sVec_EE00& b, float r, int n);
+extern "C" void* cWorldLine_cWorldLine(void* seg, const sVec_EE00& a, const sVec_EE00& b, float r, int n);
 extern "C" float func_00336850(void* world, void* seg, sHit_EE00* out, int a3);
-extern "C" int func_0015D020(void* self);
+extern "C" int cChaseCameraController_shouldDoExtraGroundTest(void* self);
 
 static inline const sVec_EE00& Forward_EE00()
 {
@@ -1334,25 +1334,25 @@ static inline float Abs_EE00(float x)
 // (self+0x460), keeps the eye-target distance, then probes eye->target and moves the eye (ResultAlgorithm's Position,
 // +0x100) relative to the target (+0xE0) when it would end up inside geometry.
 // cCamera::avoidGround(void) (SSX On Tour symbols). PORT: g++ `>?` (max) operator.
-extern "C" void func_0015EE00_impl(char* self) __asm__("func_0015EE00");
+extern "C" void cCamera_avoidGround_impl(char* self) __asm__("cCamera_avoidGround");
 /**
  * Keeps the chase camera's eye (ResultAlgorithm's Position, +0x100) out of the ground and walls.
  *
  * Ground test: a vertical line through the eye raised by LastGroundMove, 300 / s above and below it (s = the sine of
  * the look direction's slope, at least 0.05) and moved 50 to the side away from LastGroundNormal, is tested against
- * the world SSXApp->Game->BXNash (func_0032E100 builds the line, func_00336850 tests it with IntersectionHint). On a
+ * the world SSXApp->Game->BXNash (cWorldLine_cWorldLine builds the line, func_00336850 tests it with IntersectionHint). On a
  * hit, LastGroundMove is raised for an upward-facing hit normal and lowered for a downward one: by 50 / s minus the
  * hit's distance from the eye when the eye is on the side the normal faces, else by that distance plus 50 / s
  * (nothing when that is over 150); LastGroundNormal takes the normal. The eye is then raised by LastGroundMove, put
  * back at its old distance from the target (CamTargetPos, +0xE0), and LastGroundMove decays by 0.97.
  *
- * Extra test, when func_0015D020 on ChaseController is nonzero: a line from 100 above the target to the eye. On a hit
+ * Extra test, when cChaseCameraController_shouldDoExtraGroundTest on ChaseController is nonzero: a line from 100 above the target to the eye. On a hit
  * the eye moves to LastSafePosition (to target + 180 up + 180 along x when LastSafePositionInvalid), is pushed 50
  * along the hit normal on the first such frame (UsingSafePositionLastFrame), and goes to target + 150 up + 100 along x
  * if it is then within 2 of the target (or within 1 in both x and y); LastSafePosition takes the eye. Finally
  * LastSafePositionInvalid is cleared.
  */
-extern "C" void func_0015EE00_impl(char* self)
+extern "C" void cCamera_avoidGround_impl(char* self)
 {
     sHit_EE00 info;
     void* nash = SSXApp->Game->BXNash;
@@ -1377,7 +1377,7 @@ extern "C" void func_0015EE00_impl(char* self)
         dir = -1.0f;
     ScaleEq_EE00(screenLeft, dir * 50.0f / Length_EE00(screenLeft));
     char line[176];
-    func_0032E100(line, Add_EE00(testHigh, screenLeft), Add_EE00(testLow, screenLeft), 0.5f, 2);
+    cWorldLine_cWorldLine(line, Add_EE00(testHigh, screenLeft), Add_EE00(testLow, screenLeft), 0.5f, 2);
     float hitFraction = func_00336850(nash, line, &info, (int)(self + 0x480));
     if (hitFraction > 0.0f) {
         float normZ = info.normal.z;
@@ -1416,11 +1416,11 @@ extern "C" void func_0015EE00_impl(char* self)
     ScaleEq_EE00(newLook, originalLookLen / Length_EE00(newLook));
     *(sVec_EE00*)(self + 0x100) = Sub_EE00(*(sVec_EE00*)(self + 0xE0), newLook);
     *(float*)(self + 0x460) = *(float*)(self + 0x460) * 0.9700000286102295f;
-    if (func_0015D020(*(void**)(self + 0xA8)) != 0) {
+    if (cChaseCameraController_shouldDoExtraGroundTest(*(void**)(self + 0xA8)) != 0) {
         sVec_EE00 riderPoint = Add_EE00(*(sVec_EE00*)(self + 0xE0), Scale_EE00(D_004FF160_vEE00, 100.0f));
         sVec_EE00 viewPoint = *(sVec_EE00*)(self + 0x100);
         char line2[176];
-        func_0032E100(line2, riderPoint, viewPoint, 0.5f, 2);
+        cWorldLine_cWorldLine(line2, riderPoint, viewPoint, 0.5f, 2);
         sHit_EE00 info2;
         if (func_00336850(SSXApp->Game->BXNash, line2, &info2, 0) > 0.0f) {
             if (*(int*)(self + 0x4A4) != 0)
@@ -2014,7 +2014,7 @@ extern "C" void* cBasicCameraAlgorithm_cBasicCameraAlgorithm(cBasicCameraAlgorit
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_0015F9B8);
+INCLUDE_ASM("camera/camera", cBasicCameraAlgorithm_getPose);
 #ifdef SKIP_ASM
 struct sV_15F9B8 {
     float x, y, z, w;
@@ -2032,8 +2032,8 @@ struct sPair_15F9B8 {
 extern sM_15F9B8 D_004FF1A0_15F9B8 __asm__("t4mat_Identity");
 extern sV_15F9B8 D_004FF150_15F9B8 __asm__("t4vect_YAxis");
 extern sV_15F9B8 D_004FF160_v15F9B8 __asm__("t4vect_ZAxis");
-extern "C" void func_0031BE50(float* sout, float* cout, float x);
-extern "C" sPair_15F9B8 func_0031B748_15F9B8(sM_15F9B8* m) __asm__("func_0031B748");
+extern "C" void fSinCos(float* sout, float* cout, float x);
+extern "C" sPair_15F9B8 tPose_tPose_15F9B8(sM_15F9B8* m) __asm__("tPose_tPose");
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
 static inline void vu0CopyMtx_15F9B8(sM_15F9B8* dst, const sM_15F9B8* src)
@@ -2116,7 +2116,7 @@ static inline void vu0TransMtx_15F9B8(sM_15F9B8* m, const sV_15F9B8& v)
 
 static inline void SinCos_15F9B8(float* s, float* c, float angle)
 {
-    func_0031BE50(s, c, angle);
+    fSinCos(s, c, angle);
 }
 
 static inline void RotAxis_15F9B8(sM_15F9B8* m, const sV_15F9B8& axis, float angle)
@@ -2157,19 +2157,19 @@ static inline void RotAxis_15F9B8(sM_15F9B8* m, const sV_15F9B8& axis, float ang
 
 /**
  * Returns the free camera's pose: t4mat_Identity translated to Position, turned by -Pitch about the y axis and by
- * Heading about the z axis, converted with func_0031B748.
+ * Heading about the z axis, converted with tPose_tPose.
  *
  * @param src  the algorithm (a cBasicCameraAlgorithm)
  * @return the pose (position and rotation quaternion), through the hidden return slot
  */
-extern "C" sPair_15F9B8 func_0015F9B8(char* src)
+extern "C" sPair_15F9B8 cBasicCameraAlgorithm_getPose(char* src)
 {
     sM_15F9B8 poseMatrix;
     vu0CopyMtx_15F9B8(&poseMatrix, &D_004FF1A0_15F9B8);
     vu0TransMtx_15F9B8(&poseMatrix, *(sV_15F9B8*)(src + 0x20));
     RotAxis_15F9B8(&poseMatrix, D_004FF150_15F9B8, -*(float*)(src + 0x30));
     RotAxis_15F9B8(&poseMatrix, D_004FF160_v15F9B8, *(float*)(src + 0x34));
-    return func_0031B748_15F9B8(&poseMatrix);
+    return tPose_tPose_15F9B8(&poseMatrix);
 }
 #endif
 
@@ -2211,8 +2211,8 @@ INCLUDE_ASM("camera/camera", cManualCameraAlgorithm_update);
 #ifdef SKIP_ASM
 // PORT: cInput_getValue returns a float (input axis value, $f0).
 extern "C" float cInput_getValue(int pad, int axis);
-extern "C" float func_0031BF60(float x);
-extern "C" float func_0031C040(float x);
+extern "C" float fSin(float x);
+extern "C" float fCos(float x);
 
 struct sVec_0015FD50 {
     float x, y, z, w;
@@ -2299,7 +2299,7 @@ static inline float ffloor_0015FD50(float x)
  * Takes the pad from SSXApp->Game->ViewMan (+0x4, then +0xA4, then +0xC) and reads cInput_getValue channels 0x34
  * (speed), 0x31 and 0x30 (pitch and heading rates), 0x32 (forward) and 0x33 (strafe). Pitch changes by max(speed, 2)
  * * input * pi/5 per 1/60 s and is clamped to +-pi/2; heading changes the same way and wraps into [0, 2pi). Position
- * then moves along the look vector built from them (cos/sin: func_0031C040/func_0031BF60) by speed * forward * 25 and
+ * then moves along the look vector built from them (cos/sin: fCos/fSin) by speed * forward * 25 and
  * along the side vector by speed * strafe * -25.
  */
 // PORT: g++ `>?` / `<?` (max/min) operators.
@@ -2316,9 +2316,9 @@ extern "C" void cManualCameraAlgorithm_update(cBasicCameraAlgorithm* self)
                                    -1.5707963705062866f, 1.5707963705062866f);
     float yaw = self->Heading + rs * (rx * 0.6283185482025146f) * 0.01666666753590107f;
     yaw -= ffloor_0015FD50(yaw * 0.15915493667125702f) * 6.2831854820251465f;
-    sVec_0015FD50 fwd(func_0031C040(pitch) * func_0031C040(yaw), func_0031C040(pitch) * func_0031BF60(yaw),
-                      func_0031BF60(pitch), 0.0f);
-    sVec_0015FD50 right(func_0031BF60(yaw), -func_0031C040(yaw), 0.0f, 0.0f);
+    sVec_0015FD50 fwd(fCos(pitch) * fCos(yaw), fCos(pitch) * fSin(yaw),
+                      fSin(pitch), 0.0f);
+    sVec_0015FD50 right(fSin(yaw), -fCos(yaw), 0.0f, 0.0f);
     sVec_0015FD50 pos = fcAdd_0015FD50(sVec_0015FD50((*(sVec_0015FD50*)&self->Position)), fcScale_0015FD50(fwd, speed * (mf * 25.0f)));
     pos += fcScale_0015FD50(right, speed * (ms * -25.0f));
     self->Pitch = pitch;
@@ -2505,10 +2505,10 @@ extern "C" void cCameraJitterer_updateRollJitter(cCameraJitterer* self, float am
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00160228);
+INCLUDE_ASM("camera/camera", cCameraJitterer_getPositionalJitter);
 #ifdef SKIP_ASM
-extern "C" float func_0031BF60(float x);
-extern "C" float func_0031C040(float x);
+extern "C" float fSin(float x);
+extern "C" float fCos(float x);
 
 struct sVec_00160228 {
     float x, y, z, w;
@@ -2571,7 +2571,7 @@ static inline sVec_00160228 Cross_00160228(const sVec_00160228& a, const sVec_00
  * Returns the current positional jitter as an offset across the view.
  *
  * Returns t4vect_Zero when FocusJitterFactor is 0. Otherwise builds the view's forward vector from the angles @p heading and
- * @p pitch (cosines and sines from func_0031C040 and func_0031BF60), the side vector (sin a, -cos a, 0) and up = forward x
+ * @p pitch (cosines and sines from fCos and fSin), the side vector (sin a, -cos a, 0) and up = forward x
  * side, and returns (side * sx + up * sy) * FocusJitterFactor * 10, where k = CurrFocusJitterTime / FocusJitterTime,
  * sx = k * (RandomSideJitter - OldRandomSideJitter) and sy = k * (RandomUpJitter - OldRandomUpJitter).
  *
@@ -2580,12 +2580,12 @@ static inline sVec_00160228 Cross_00160228(const sVec_00160228& a, const sVec_00
  * @param pitch  the view pitch (radians)
  * @return the offset (w = 0)
  */
-extern "C" sVec_00160228 func_00160228(char* jitterer, float heading, float pitch)
+extern "C" sVec_00160228 cCameraJitterer_getPositionalJitter(char* jitterer, float heading, float pitch)
 {
     float zero = 0.0f;
     if (*(float*)(jitterer + 0x18) == zero) return D_004FF120_v160228;
-    sVec_00160228 fwd(func_0031C040(pitch) * func_0031C040(heading), func_0031C040(pitch) * func_0031BF60(heading), -func_0031BF60(pitch), zero);
-    sVec_00160228 right(func_0031BF60(heading), -func_0031C040(heading), zero, zero);
+    sVec_00160228 fwd(fCos(pitch) * fCos(heading), fCos(pitch) * fSin(heading), -fSin(pitch), zero);
+    sVec_00160228 right(fSin(heading), -fCos(heading), zero, zero);
     sVec_00160228 up = Cross_00160228(fwd, right);
     float k = *(float*)(jitterer + 0x20) / *(float*)(jitterer + 0x28);
     float sx = k * (*(float*)(jitterer + 0xC) - *(float*)(jitterer + 0x0));
@@ -2695,9 +2695,9 @@ void cManualChaseAlgorithm_getRaceCamFinalPhaseData(void* self, void* other)
 INCLUDE_ASM("camera/camera", cManualChaseAlgorithm_update);
 #ifdef SKIP_ASM
 extern "C" float cInput_getValue(int pad, int axis);
-extern "C" void func_00162568(void* self, struct sCamInfo_001607E0* out, float a, float b, float c, float d,
+extern "C" void cLookAtChaseAlgorithm_setupChaseData(void* self, struct sCamInfo_001607E0* out, float a, float b, float c, float d,
                               float e, float f, float g, float h);
-extern "C" void func_001668B8(void* self, void* out);
+extern "C" void cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading(void* self, void* out);
 extern float D_004A127C;
 extern float D_004A1280;
 extern float D_004A1284;
@@ -2810,17 +2810,17 @@ struct sGame_1604B8 {
 /**
  * Runs one frame of the manual chase camera: the player orbits the rider and zooms with three analogue axes.
  *
- * Runs setupChaseData (func_00162568) with the standard smoothing constants, then reads cInput_getValue channels
+ * Runs setupChaseData (cLookAtChaseAlgorithm_setupChaseData) with the standard smoothing constants, then reads cInput_getValue channels
  * 0xBE, 0xBF and 0xC0 (negated) of the pad SSXApp->pads selects through +0x84, +0x28, +0x28, squaring each but
  * keeping its sign. They drive three globals shared by every manual chase camera: heading D_004A127C (+= 0.05 * x,
  * wrapped into [0, 2pi]), pitch D_004A1280 (+= 0.05 * y, clamped to 0..0.48pi) and distance D_004A1284 (*= 1 + 0.05 *
  * z, clamped to 150..850). Pitch and Heading take the globals, CamTargetPos becomes the setup's target position and
- * Position sits that distance back along the look vector (func_001668B8, normalised).
+ * Position sits that distance back along the look vector (cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading, normalised).
  */
 extern "C" void cManualChaseAlgorithm_update(cManualChaseAlgorithm* self)
 {
     sCamInfo_1604B8 info;
-    func_00162568(((char*)self), (sCamInfo_001607E0*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+    cLookAtChaseAlgorithm_setupChaseData(((char*)self), (sCamInfo_001607E0*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
     sGame_1604B8* app = (sGame_1604B8*)SSXApp;
@@ -2844,7 +2844,7 @@ extern "C" void cManualChaseAlgorithm_update(cManualChaseAlgorithm* self)
     self->Pitch = D_004A1280;
     self->Heading = D_004A127C;
     sVec_1604B8 dir;
-    func_001668B8(((char*)self), &dir);
+    cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading(((char*)self), &dir);
     DivEq_1604B8(dir, Length_1604B8(dir));
     D_004A1284 = Clamp_1604B8(D_004A1284 * (az * k + 1.0f), 150.0f, 850.0f);
     *(sVec_1604B8*)&self->CamTargetPos = info.pos;
@@ -2971,8 +2971,8 @@ void cMatrixChaseAlgorithm_getRaceCamFinalPhaseData(void* self, void* other)
 //100%
 INCLUDE_ASM("camera/camera", cMatrixChaseAlgorithm_update);
 #ifdef SKIP_ASM
-extern "C" float func_0031BF60(float x);
-extern "C" float func_0031C040(float x);
+extern "C" float fSin(float x);
+extern "C" float fCos(float x);
 
 struct sVec_001607E0 {
     float x, y, z, w;
@@ -2987,7 +2987,7 @@ struct sCamInfo_001607E0 {
 // asm-label views: camera.cpp declares these globals as cQuad128
 extern sVec_001607E0 D_004FF140_v1607E0 __asm__("t4vect_XAxis");
 extern sVec_001607E0 D_004FF160_v1607E0 __asm__("t4vect_ZAxis");
-extern "C" void func_00162568(void* self, sCamInfo_001607E0* out, float a, float b, float c, float d,
+extern "C" void cLookAtChaseAlgorithm_setupChaseData(void* self, sCamInfo_001607E0* out, float a, float b, float c, float d,
                               float e, float f, float g, float h);
 
 struct sVEv_001607E0 {
@@ -3109,7 +3109,7 @@ static inline sVec_001607E0 cmGet_001607E0(char* self, int slot)
 /**
  * Runs one frame of the matrix camera: circles the rider at a fixed radius of 216.2, advancing LastAngle each frame.
  *
- * After setupChaseData (func_00162568) takes the horizontal travel direction from the setup's velocity, or the
+ * After setupChaseData (cLookAtChaseAlgorithm_setupChaseData) takes the horizontal travel direction from the setup's velocity, or the
  * target's front (slot 4) or the X axis (t4vect_XAxis) when that is near zero, with z cleared, and its side vector
  * (t4vect_ZAxis x dir); both are normalised. LastAngle (+0x390) advances by 0.0614 rad and wraps into [-pi, pi).
  * CamTargetPos becomes the rider position (target slot 1) and Position = target + dir * cos(angle) * 216.2 + side *
@@ -3118,7 +3118,7 @@ static inline sVec_001607E0 cmGet_001607E0(char* self, int slot)
 extern "C" void cMatrixChaseAlgorithm_update(cMatrixChaseAlgorithm* self)
 {
     sCamInfo_001607E0 info;
-    func_00162568(((char*)self), &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+    cLookAtChaseAlgorithm_setupChaseData(((char*)self), &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
     float eps = 0.0010000000474974513f;
@@ -3141,8 +3141,8 @@ extern "C" void cMatrixChaseAlgorithm_update(cMatrixChaseAlgorithm* self)
     float radius = 216.23182678222656f;
     *(sVec_001607E0*)&self->CamTargetPos = cmAdd_001607E0(cmGet_001607E0(((char*)self), 1), cmScale_001607E0(D_004FF160_v1607E0, 0.0f));
     *(sVec_001607E0*)&self->Position = cmAdd_001607E0(
-        cmAdd_001607E0(cmAdd_001607E0(*(sVec_001607E0*)&self->CamTargetPos, cmScale_001607E0(dir, func_0031C040(*ang) * radius)),
-                       cmScale_001607E0(side, func_0031BF60(*ang) * radius)),
+        cmAdd_001607E0(cmAdd_001607E0(*(sVec_001607E0*)&self->CamTargetPos, cmScale_001607E0(dir, fCos(*ang) * radius)),
+                       cmScale_001607E0(side, fSin(*ang) * radius)),
         cmScale_001607E0(D_004FF160_v1607E0, -0.5597707033157349f));
 }
 #endif
@@ -3284,7 +3284,7 @@ static inline sVec_001607E0 cmSub_00160BF8(const sVec_001607E0& a, const sVec_00
 extern "C" void cRelativeChaseAlgorithm_update(cRelativeChaseAlgorithm* self)
 {
     sCamInfo_001607E0 info;
-    func_00162568(((char*)self), &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+    cLookAtChaseAlgorithm_setupChaseData(((char*)self), &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
     float eps = 0.0010000000474974513f;
@@ -3309,8 +3309,8 @@ extern "C" void cRelativeChaseAlgorithm_update(cRelativeChaseAlgorithm* self)
     *(sVec_001607E0*)&self->LastCamTargetPos = *(sVec_001607E0*)&self->CamTargetPos;
     float radius = 385.91839599609375f;
     *(sVec_001607E0*)&self->Position = cmAdd_001607E0(
-        cmAdd_001607E0(cmAdd_001607E0(*(sVec_001607E0*)&self->CamTargetPos, cmScale_001607E0(dir, func_0031C040(self->Angle) * radius)),
-                       cmScale_001607E0(side, func_0031BF60(self->Angle) * radius)),
+        cmAdd_001607E0(cmAdd_001607E0(*(sVec_001607E0*)&self->CamTargetPos, cmScale_001607E0(dir, fCos(self->Angle) * radius)),
+                       cmScale_001607E0(side, fSin(self->Angle) * radius)),
         cmScale_001607E0(D_004FF160_v1607E0, 53.241573333740234f));
     if (self->Initialized) {
         sVec_001607E0 look = cmSub_00160BF8(*(sVec_001607E0*)&self->CamTargetPos, *(sVec_001607E0*)&self->Position);
@@ -3796,7 +3796,7 @@ INCLUDE_ASM("camera/camera", cIdleChaseAlgorithm_update);
 
 extern t4Vector D_004FF160_1728 __asm__("t4vect_ZAxis");
 
-// The per-frame camera input record (0x70 bytes) that func_00162568_1728 fills from the target for the chase algorithms.
+// The per-frame camera input record (0x70 bytes) that cLookAtChaseAlgorithm_setupChaseData_1728 fills from the target for the chase algorithms.
 struct sCamInfo_1728 {
     t4Vector f00;               // 0x00
     t4Vector pos;               // 0x10
@@ -3814,8 +3814,8 @@ struct sCamInfo_1728 {
     int f64;                    // 0x64
 };
 
-extern "C" void func_00162568_1728(void* self, sCamInfo_1728* out, float a, float b, float c, float d,
-                              float e, float f, float g, float h) __asm__("func_00162568");
+extern "C" void cLookAtChaseAlgorithm_setupChaseData_1728(void* self, sCamInfo_1728* out, float a, float b, float c, float d,
+                              float e, float f, float g, float h) __asm__("cLookAtChaseAlgorithm_setupChaseData");
 
 // PORT: PS2-only VU0 inline asm (vector add).
 static inline t4Vector cmAdd_001607E0_1728(const t4Vector& a, const t4Vector& b)
@@ -3897,13 +3897,13 @@ extern "C" void cIdleChaseAlgorithm_update_v(char* self) __asm__("cIdleChaseAlgo
 /**
  * Runs one frame of the idle chase camera: the eye stays put and the view narrows as the rider moves away.
  *
- * After setupChaseData (func_00162568) sets CamTargetPos to the rider position (target slot 1) + Z * 13.5. When the
+ * After setupChaseData (cLookAtChaseAlgorithm_setupChaseData) sets CamTargetPos to the rider position (target slot 1) + Z * 13.5. When the
  * eye-to-target distance is positive, View = min(531.66 / distance, 1) * pi/4. Position is not changed.
  */
 extern "C" void cIdleChaseAlgorithm_update_v(char* self)
 {
     sCamInfo_1728 info;
-    func_00162568_1728(self, &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+    cLookAtChaseAlgorithm_setupChaseData_1728(self, &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
     t4Vector* camTargetPos = (t4Vector*)(self + 0x20);
@@ -4121,7 +4121,7 @@ extern "C" void cChaseCameraController_setTarget(cChaseCameraController* self, i
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00161AA0);
+INCLUDE_ASM("camera/camera", cChaseCameraController_getRider);
 #ifdef SKIP_ASM
 /**
  * Returns the rider the chase camera follows: Target's Rider (Target is not checked for 0).
@@ -4129,7 +4129,7 @@ INCLUDE_ASM("camera/camera", func_00161AA0);
  * @param chaseCameraController  the controller
  * @return the rider (a cRider*)
  */
-extern "C" int func_00161AA0(cChaseCameraController* chaseCameraController) {
+extern "C" int cChaseCameraController_getRider(cChaseCameraController* chaseCameraController) {
     return (*(int *)((char*)((chaseCameraController->Target)) + (4)));
 }
 #endif
@@ -4241,7 +4241,7 @@ struct sAlgoList_161BB8 {
     int count;
 };
 
-extern "C" sAlgoNode_161BB8* func_0015CA50(sAlgoList_161BB8* list, sAlgoNode_161BB8* n);
+extern "C" sAlgoNode_161BB8* cCameraAlgoList_remove(sAlgoList_161BB8* list, sAlgoNode_161BB8* n);
 
 static inline float Approach_161BB8(float cur, float target, float rate)
 {
@@ -4299,7 +4299,7 @@ extern "C" void cChaseCameraController_update(cChaseCameraController* self)
             if (n->algo->type == 74)
                 n->weight = 0.0f;
             if (n->weight <= 0.0f || n->blend <= 0.0f) {
-                n = func_0015CA50((sAlgoList_161BB8*)self->AlgorithmList, n);
+                n = cCameraAlgoList_remove((sAlgoList_161BB8*)self->AlgorithmList, n);
             } else {
                 n->algo->v09(1);
                 n = n->next;
@@ -4634,7 +4634,7 @@ extern "C" void cChaseCameraController_switchCamera_EndRace(cChaseCameraControll
 extern "C" void* cChaseCameraController_createChaseAlgorithmCut(void*, int, int);
 
 //100%
-INCLUDE_ASM("camera/camera", func_00162290__FPv);
+INCLUDE_ASM("camera/camera", cChaseCameraController_switchCamera_EndPostRace__FPv);
 #ifdef SKIP_ASM
 /**
  * Switches the chase camera back to the player's chosen algorithm with a cut.
@@ -4643,7 +4643,7 @@ INCLUDE_ASM("camera/camera", func_00162290__FPv);
  *
  * @return cChaseCameraController_createChaseAlgorithmCut's result (declared void*)
  */
-void* func_00162290(void* self)
+void* cChaseCameraController_switchCamera_EndPostRace(void* self)
 {
     return cChaseCameraController_createChaseAlgorithmCut(self, *(int*)((char*)self + 0x24), 0);
 }
@@ -4699,10 +4699,10 @@ INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_cLookAtChaseAlgorithm);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern void* cLookAtChaseAlgorithm_vtbl[];
 extern cQuad128 D_004FF120_q162318 __asm__("t4vect_Zero");
-extern "C" float func_00167D88(void);
+extern "C" float cPIDFilter_getDefaultProportionFactor(void);
 // PORT: these take an unused self; they are called here with none.
-float func_00167D98_0() __asm__("func_00167D98");
-float func_00167DA8_0() __asm__("func_00167DA8");
+float cPIDFilter_getDefaultErrorHistoryFactor_0() __asm__("cPIDFilter_getDefaultErrorHistoryFactor");
+float cPIDFilter_getDefaultDerrivativeFactor_0() __asm__("cPIDFilter_getDefaultDerrivativeFactor");
 struct sCamFilter;
 extern "C" void cPIDFilter_reset(cPIDFilter* self, float value);
 
@@ -4728,9 +4728,9 @@ extern "C" void* cLookAtChaseAlgorithm_cLookAtChaseAlgorithm(cLookAtChaseAlgorit
     func_0031D5E8(((char*)self) + 0x31C);
     func_0031D5E8(((char*)self) + 0x328);
     func_0031D5E8(((char*)self) + 0x334);
-    self->TurningPIDFilter.ProportionFactor = func_00167D88();
-    self->TurningPIDFilter.ErrorHistoryFactor = func_00167D98_0();
-    self->TurningPIDFilter.DerrivativeFactor = func_00167DA8_0();
+    self->TurningPIDFilter.ProportionFactor = cPIDFilter_getDefaultProportionFactor();
+    self->TurningPIDFilter.ErrorHistoryFactor = cPIDFilter_getDefaultErrorHistoryFactor_0();
+    self->TurningPIDFilter.DerrivativeFactor = cPIDFilter_getDefaultDerrivativeFactor_0();
     cPIDFilter_reset((cPIDFilter*)filter, 0.0f);
     *(cQuad128*)&self->Position = t4vect_Origin;
     *(int*)&self->Pitch = 0;
@@ -4836,7 +4836,7 @@ extern "C" void func_00162560(void) {
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00162568);
+INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_setupChaseData);
 #ifdef SKIP_ASM
 int cRider_getMotionState(void*);
 extern sVec_001607E0 D_004FF120_v162568 __asm__("t4vect_Zero");
@@ -4944,8 +4944,8 @@ static inline void SetFrame_162568(char* out, const sVec_001607E0& pos, sVec_001
     *(sVec_001607E0*)(out + 0x20) = dir;
 }
 
-extern "C" void func_00162568_impl(char* self, char* out, float a, float b, float c, float d, float e, float f,
-                                   float g, float h) __asm__("func_00162568");
+extern "C" void cLookAtChaseAlgorithm_setupChaseData_impl(char* self, char* out, float a, float b, float c, float d, float e, float f,
+                                   float g, float h) __asm__("cLookAtChaseAlgorithm_setupChaseData");
 /**
  * Fills a chase setup with this frame's target data and the smoothed target velocity.
  *
@@ -4972,7 +4972,7 @@ extern "C" void func_00162568_impl(char* self, char* out, float a, float b, floa
  * @param powderVelStartSlope  slope at which powder smoothing starts rising
  * @param powderVelEndSlope  slope at which powder smoothing reaches the maximum
  */
-extern "C" void func_00162568_impl(char* self, char* out, float normalVelMinSmoothness, float normalVelMaxSmoothness, float normalVelStartSlope, float normalVelEndSlope, float powderVelMinSmoothness, float powderVelMaxSmoothness,
+extern "C" void cLookAtChaseAlgorithm_setupChaseData_impl(char* self, char* out, float normalVelMinSmoothness, float normalVelMaxSmoothness, float normalVelStartSlope, float normalVelEndSlope, float powderVelMinSmoothness, float powderVelMaxSmoothness,
                                    float powderVelStartSlope, float powderVelEndSlope)
 {
     sVec_001607E0 targetVelocity = cmGet_001607E0(self, 3);
@@ -5208,7 +5208,7 @@ INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_updateCamTargetLate);
 
 extern t4Vector D_004FF160_2B90 __asm__("t4vect_ZAxis");
 
-// The per-frame camera input record (0x70 bytes) that func_00162568 fills from the target for the chase algorithms.
+// The per-frame camera input record (0x70 bytes) that cLookAtChaseAlgorithm_setupChaseData fills from the target for the chase algorithms.
 struct sCamInfo {
     t4Vector f00;               // 0x00
     t4Vector pos;               // 0x10
@@ -5226,7 +5226,7 @@ struct sCamInfo {
     int f64;                    // 0x64
 };
 
-extern "C" void func_00168150_v(void* self) __asm__("func_00168150");
+extern "C" void cLookAtChaseAlgorithm_verify_v(void* self) __asm__("cLookAtChaseAlgorithm_verify");
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline t4Vector Scale_162B90(const t4Vector& v, float s)
@@ -5289,7 +5289,7 @@ extern "C" void cLookAtChaseAlgorithm_updateCamTargetLate_i(float a, float b, fl
  * t = min(max(speed - 1388.9, 0) / 1944.4, 1) (speeds are cm/s: 50 km/h up to 120 km/h). The crouch term x is the
  * setup's Crouch (+0x54), or LastTargetCrouchFactor while airborne (+0x60), and is stored in LastTargetCrouchFactor.
  * LastHeight = e * LastHeight + (1 - e) * (a + t * b + Boost (+0x4C) * d + c * x); CamTargetPos += Z * LastHeight,
- * then func_00168150 (the eye sanity check) runs.
+ * then cLookAtChaseAlgorithm_verify (the eye sanity check) runs.
  *
  * The floats come first in the declaration: they travel in $f12..$f16 wherever they sit, so the callers' order
  * (setup, then the five floats) still lines up.
@@ -5312,7 +5312,7 @@ extern "C" void cLookAtChaseAlgorithm_updateCamTargetLate_i(float defaultHeight,
     float smoothedHeight = smoothness * self->f1E4 + (1.0f - smoothness) * (defaultHeight + speedFrac * height + src->f4C * boostHeight + crouchCorrection * x);
     self->f1E4 = smoothedHeight;
     AddTo_162B90(self->v20, Scale_162B90(D_004FF160_2B90, smoothedHeight));
-    func_00168150_v(self);
+    cLookAtChaseAlgorithm_verify_v(self);
 }
 #endif
 
@@ -5546,7 +5546,7 @@ INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_updateFollowDistance);
 // FAKEMATCH: a dead two-statement chain `int u = 0; int w = u;` in the select's else arm (it outlives jump1's unused-set pass, so the
 // `pk = &f` select is rewritten only after purge_addressof, which then gives g the lower stack slot); plain form 99.95%. Byte-identical and behaves like the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
-extern "C" void* func_00168150(void* self);
+extern "C" void* cLookAtChaseAlgorithm_verify(void* self);
 
 struct sVec4_163010
 {
@@ -5620,7 +5620,7 @@ extern "C" void cLookAtChaseAlgorithm_updateFollowDistance_impl(char* self, char
  * setup's Boost (+0x4C) rises above LastBoostWarp, ExtraBoostDist restarts at d * sqrt(boost); each frame it loses e
  * (floored at 0) and is added on; LastBoostWarp takes the boost. LastDist = k * LastDist + (1 - k) * wanted, with k =
  * g when the distance shrinks and f when it grows. Position = CamTargetPos - CameraDirection (+0x30) scaled to
- * LastDist, then func_00168150 (the eye sanity check). Callers pass seven floats; On Tour's eighth
+ * LastDist, then cLookAtChaseAlgorithm_verify (the eye sanity check). Callers pass seven floats; On Tour's eighth
  * (defaultViewScalar) is gone.
  *
  * @param trig  the frame's chase setup, not a trigger (On Tour const cChaseSetup& setup)
@@ -5661,7 +5661,7 @@ extern "C" void cLookAtChaseAlgorithm_updateFollowDistance_impl(char* self, char
     ScaleEq_163010(cameraDirection, cur / Length_163010(cameraDirection));
     sVec4_163010 eyePos = Sub_163010(*(sVec4_163010*)(self + 0x20), cameraDirection);
     *(sVec4_163010*)(self + 0x40) = eyePos;
-    func_00168150(self);
+    cLookAtChaseAlgorithm_verify(self);
 }
 #endif
 
@@ -5673,7 +5673,7 @@ INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_updateLateralShift);
 
 extern t4Vector D_004FF160_3158 __asm__("t4vect_ZAxis");
 
-extern "C" void* func_00168150(void* self);
+extern "C" void* cLookAtChaseAlgorithm_verify(void* self);
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline t4Vector Sub_163158(const t4Vector& a, const t4Vector& b)
@@ -5777,7 +5777,7 @@ static inline float Length_163158(const t4Vector& v)
  * Shifts the eye, and part of the way the look-at point, sideways from the line of sight.
  *
  * The shift is Z x (CamTargetPos - Position) scaled to @p proportion times the eye distance. When it is nonzero,
- * Position moves by it and CamTargetPos by it times @p targetProportion. Ends with func_00168150 (the eye sanity
+ * Position moves by it and CamTargetPos by it times @p targetProportion. Ends with cLookAtChaseAlgorithm_verify (the eye sanity
  * check).
  *
  * @param self_  the chase algorithm (this)
@@ -5797,7 +5797,7 @@ extern "C" void cLookAtChaseAlgorithm_updateLateralShift(cLookAtChaseAlgorithm* 
         t4Vector targetShift = Scale_163158(left, targetProportion);
         AddTo_163158(self_->CamTargetPos, self_->CamTargetPos, targetShift);
     }
-    func_00168150(((char*)self_));
+    cLookAtChaseAlgorithm_verify(((char*)self_));
 }
 #endif
 
@@ -5809,8 +5809,8 @@ INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_updateDropWithSpeed);
 
 extern t4Vector D_004FF160_3270 __asm__("t4vect_ZAxis");
 
-// The per-frame camera input record (0x70 bytes) that func_00162568 fills from the target for the chase algorithms.
-extern "C" void func_00168150_v(void* self) __asm__("func_00168150");
+// The per-frame camera input record (0x70 bytes) that cLookAtChaseAlgorithm_setupChaseData fills from the target for the chase algorithms.
+extern "C" void cLookAtChaseAlgorithm_verify_v(void* self) __asm__("cLookAtChaseAlgorithm_verify");
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 // PORT: PS2-only VU0 inline asm (dst -= b).
@@ -5852,7 +5852,7 @@ extern "C" void cLookAtChaseAlgorithm_updateDropWithSpeed_i(float a, float b, fl
  * t ramps from 0 to 1 between speeds 833.3 and 1666.7 cm/s (30 to 60 km/h). The crouch term x = t^2 * d * (Crouch
  * (+0x54) - 0.5), or LastCrouchFactor while airborne (+0x60), is stored in LastCrouchFactor. LastDrop = e * LastDrop
  * + (1 - e) * (a * 1e-4 * s^1.5 - b + max(x, c * sqrt(Boost))), with s = max(speed - 1388.9, 0); Position -= Z *
- * LastDrop, then func_00168150 (the eye sanity check). Floats first in the declaration, as in updateCamTargetLate.
+ * LastDrop, then cLookAtChaseAlgorithm_verify (the eye sanity check). Floats first in the declaration, as in updateCamTargetLate.
  *
  * @param dropPerSpeed  drop added with speed (On Tour dropPerSpeed)
  * @param defaultRise  constant rise (On Tour defaultRise)
@@ -5881,21 +5881,21 @@ extern "C" void cLookAtChaseAlgorithm_updateDropWithSpeed_i(float dropPerSpeed, 
     float smoothedDrop = smoothness * self->f1D4 + (1.0f - smoothness) * (dropPerSpeed * (dist * 9.999999747378752e-05f) * Sqrt_163270(dist) - defaultRise + (x >? (boostDrop * Sqrt_163270(src->f4C))));
     self->f1D4 = smoothedDrop;
     SubTo_163270(self->v40, Scale_162B90(D_004FF160_3270, smoothedDrop));
-    func_00168150_v(self);
+    cLookAtChaseAlgorithm_verify_v(self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_updateFOVWithSpeed);
 #ifdef SKIP_ASM
-extern "C" void* func_00168150(void* self);
+extern "C" void* cLookAtChaseAlgorithm_verify(void* self);
 /**
  * Widens the field of view with speed and boost.
  *
  * x = 1 + fOVSpeedScalar * 1e-7 * speed^2 + (fOVBoostScalar - 1) * Boost (+0x4C). The smoothing is @p smoothness on
  * the ground; for setup motion state (+0x40) 1 (MS_Air) it is 1, freezing the view, and 0.999 for the other states.
  * LastViewScalar = k * LastViewScalar + (1 - k) * x; View = defaultViewScalar * pi/4 * LastViewScalar. Ends with
- * func_00168150 (the eye sanity check).
+ * cLookAtChaseAlgorithm_verify (the eye sanity check).
  *
  * @param obj  the frame's chase setup (On Tour const cChaseSetup& setup)
  * @param fOVSpeedScalar  how much speed widens the view
@@ -5914,14 +5914,14 @@ extern "C" void cLookAtChaseAlgorithm_updateFOVWithSpeed(cLookAtChaseAlgorithm* 
         smoothness = 0.9990000128746033f;
     self->LastViewScalar = smoothness * self->LastViewScalar + (1.0f - smoothness) * x;
     *(float*)self = defaultViewScalar * 0.7853981852531433f * self->LastViewScalar;
-    func_00168150(self);
+    cLookAtChaseAlgorithm_verify(self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_updateHandplant);
 #ifdef SKIP_ASM
-extern "C" void* func_00168150(void* self);
+extern "C" void* cLookAtChaseAlgorithm_verify(void* self);
 
 struct sVec4_163450
 {
@@ -5983,7 +5983,7 @@ static inline sVec4_163450 Scale_163450(const sVec4_163450& v, float s)
  * Position. After it, for up to 5 s the counter advances by 1/60, and while it is under @p exitDelay Position blends by a
  * smoothstep from CamTargetPos - LastHandplantLook back to the current eye. LastRiderPos takes the setup's position
  * (+0x10). LastHandplantRise = f * LastHandplantRise + (1 - f) * e while planted and g * LastHandplantRise after;
- * Position.z rises by it, then func_00168150 (the eye sanity check).
+ * Position.z rises by it, then cLookAtChaseAlgorithm_verify (the eye sanity check).
  *
  * The first three floats are not read: On Tour's tangent-following handplant camera is gone. Callers pass an eighth
  * float (0.455, On Tour zScalar) that is not declared either.
@@ -6028,7 +6028,7 @@ extern "C" void cLookAtChaseAlgorithm_updateHandplant(cLookAtChaseAlgorithm* sel
         z = riseExitSmoothness * self->LastHandplantRise;
     self->LastHandplantRise = z;
     self->Position.z += z;
-    func_00168150(((char*)self));
+    cLookAtChaseAlgorithm_verify(((char*)self));
 }
 #endif
 
@@ -6279,7 +6279,7 @@ static inline float CallF_1635F8(char* self, int slot)
  * active air splines. On landing AirExitSmoothness is set (0.93 toward @p exitSmoothness over 1.2..2.2 s of full-air
  * time, then halfway toward 1 for landing angles 1.05..1.4, slot 23), the curves stop, and from then on the deltas
  * decay by it each frame. The deltas, blended by AirCamTimeInAir / @p blendTime and scaled by eye distance / 300,
- * raise CamTargetPos and Position; after func_00168150 (the eye sanity check) the eye is put back at its old distance
+ * raise CamTargetPos and Position; after cLookAtChaseAlgorithm_verify (the eye sanity check) the eye is put back at its old distance
  * (at least 50).
  *
  * @param info  the frame's chase setup (On Tour const cChaseSetup& setup)
@@ -6458,7 +6458,7 @@ extern "C" void cLookAtChaseAlgorithm_updateAirCam(cLookAtChaseAlgorithm* self, 
     float ul = Lerp_1635F8(scale * self->LastFullAirPositionDelta, scale * self->LastAirPositionDelta, w);
     AddEq_1635F8(*(sVec_1635F8*)&self->CamTargetPos, Scale_1635F8(D_004FF160_v1635F8, ue));
     AddEq_1635F8(*(sVec_1635F8*)&self->Position, Scale_1635F8(D_004FF160_v1635F8, ul));
-    func_00168150(self);
+    cLookAtChaseAlgorithm_verify(self);
     sVec_1635F8 off = Sub_1635F8(*(sVec_1635F8*)&self->CamTargetPos, *(sVec_1635F8*)&self->Position);
     ScaleEq_1635F8(off, (dist >? 50.0f) / Length_1635F8(off));
     *(sVec_1635F8*)&self->Position = Sub_1635F8(*(sVec_1635F8*)&self->CamTargetPos, off);
@@ -6479,7 +6479,7 @@ INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_updateViewCam);
 
 extern t4Vector D_004FF160_41C0 __asm__("t4vect_ZAxis");
 
-extern "C" void* func_00168150(void* self);
+extern "C" void* cLookAtChaseAlgorithm_verify(void* self);
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline t4Vector Sub_41C0(const t4Vector& a, const t4Vector& b)
@@ -6647,7 +6647,7 @@ extern "C" void cLookAtChaseAlgorithm_updateViewCam_v(char* self, float a, float
  * ViewCamLastFactor eases toward 1 while the target's virtual slot 24 (isRidingFlexRail in On Tour's order) is true
  * and toward 0 otherwise, keeping @p ease of the old value. The offset is the unit eye-minus-target direction times
  * factor * b, plus Z * factor * c, plus its horizontal perpendicular (Z x offset) scaled to factor * a; it is added
- * to Position, then func_00168150 (the eye sanity check). Callers pass the chase setup in $a1; it is neither declared
+ * to Position, then cLookAtChaseAlgorithm_verify (the eye sanity check). Callers pass the chase setup in $a1; it is neither declared
  * nor read.
  *
  * @param side  sideways offset (On Tour side)
@@ -6675,7 +6675,7 @@ extern "C" void cLookAtChaseAlgorithm_updateViewCam_v(char* self, float side, fl
     }
     t4Vector sum = Add_41C0(offset, cr);
     AddEq_41C0(*(t4Vector*)(self + 0x40), sum);
-    func_00168150(self);
+    cLookAtChaseAlgorithm_verify(self);
 }
 #endif
 
@@ -6780,7 +6780,7 @@ static inline float Length_1643A8(const sVec_1643A8& v)
  * if slow again, or to 3 at blend 0. SlowCamBlend changes by 1 / (60 * blendInTime) or 1 / (60 * blendOutTime) per
  * frame. While not off, with s = smoothstep(SlowCamBlend), the look vector blends toward SlowCamEnterLook (length the
  * mean of the two), CamTargetPos toward the setup's position (+0x10) and Position = CamTargetPos - look. Ends with
- * func_00168150 (the eye sanity check).
+ * cLookAtChaseAlgorithm_verify (the eye sanity check).
  *
  * @param info  the frame's chase setup (On Tour const cChaseSetup& setup)
  * @param slowSpeed  the speed threshold in km/h
@@ -6827,7 +6827,7 @@ extern "C" void cLookAtChaseAlgorithm_updateSlowSpeedCam(cLookAtChaseAlgorithm* 
             Add_1643A8(Scale_1643A8(*(sVec_1643A8*)&self->CamTargetPos, 1.0f - smoothFraction), Scale_1643A8(*(sVec_1643A8*)(I_1643A8 + 0x10), smoothFraction));
         *(sVec_1643A8*)&self->Position = Sub_1643A8(*(sVec_1643A8*)&self->CamTargetPos, newLook);
     }
-    func_00168150(self);
+    cLookAtChaseAlgorithm_verify(self);
 }
 #undef S_1643A8
 #undef I_1643A8
@@ -6845,7 +6845,7 @@ extern t4Vector D_004FF120_46A0 __asm__("t4vect_Zero");
 extern t4Vector D_004FF160_46A0 __asm__("t4vect_ZAxis");
 
 extern "C" void cLookAtChaseAlgorithm_updateRailCam_def(char* self, char* src, float a, float b) __asm__("cLookAtChaseAlgorithm_updateRailCam");
-extern "C" void* func_00168150(void* self);
+extern "C" void* cLookAtChaseAlgorithm_verify(void* self);
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline t4Vector cmSub_1646A0(const t4Vector& a, const t4Vector& b)
@@ -6995,7 +6995,7 @@ static inline void cmStep_1646A0(t4Vector& pos, t4Vector& vel, t4Vector v)
  * When the speed (+0x44) is positive the wanted eye is CamTargetPos minus the velocity (+0x20) scaled to the current
  * eye distance, raised by Z * @p rise; otherwise the current eye. The correction toward it counts only while the setup
  * is rail-sliding (+0x64) and is zero otherwise; LastRailMove = b * LastRailMove + (1 - b) * correction is stored and
- * added to Position, then func_00168150 (the eye sanity check).
+ * added to Position, then cLookAtChaseAlgorithm_verify (the eye sanity check).
  *
  * @param src  the frame's chase setup (On Tour const cChaseSetup& setup)
  * @param rise  rise of the eye above the rail line (On Tour rise)
@@ -7019,7 +7019,7 @@ extern "C" void cLookAtChaseAlgorithm_updateRailCam_def(char* self, char* src, f
     const t4Vector* pe = *(int*)(src + 0x64) ? &correction : &D_004FF120_46A0;
     t4Vector appliedCorrection = *pe;
     cmStep_1646A0(*(t4Vector*)(self + 0x40), *(t4Vector*)(self + 0xC0), cmLerp_1646A0(*(t4Vector*)(self + 0xC0), appliedCorrection, smoothness));
-    func_00168150(self);
+    cLookAtChaseAlgorithm_verify(self);
 }
 #endif
 
@@ -7382,7 +7382,7 @@ static inline sVec_164878* CallV_164878(char* self, int slot)
  * while HalfPipeBlendOutTimeLeft lasts, both points blend back toward the chase pose, saving
  * HalfPipeBlendOutLastLook, HalfPipeBlendOutLastTargetDelta and the cross-blend times, which a following half-pipe
  * swing blends out of. Finally the eye is kept at least 60 % of its starting distance from the target, then
- * func_00168150 (the eye sanity check).
+ * cLookAtChaseAlgorithm_verify (the eye sanity check).
  *
  * @param info  the frame's chase setup (On Tour const cChaseSetup& setup)
  * @param blendOut  seconds to blend back after the swing (On Tour blendOutTime)
@@ -7469,7 +7469,7 @@ extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* s
                 D_004A4DE0 = (int)(S_164878 + 0x334);
                 float fraction = func_0031DEE0(S_164878 + 0x334, timeFraction);
                 float sn, cs;
-                func_0031BE50(&sn, &cs, fraction * F_164878(568) * 0.5f);
+                fSinCos(&sn, &cs, fraction * F_164878(568) * 0.5f);
                 sQuat_164878 rotation = Quat_164878(sn * V_164878(304).x, sn * V_164878(304).y, sn * V_164878(304).z, cs);
                 V_164878(320) = RotQ_164878(rotation, V_164878(272));
                 V_164878(352) = Scale_164878(V_164878(336), fraction);
@@ -7513,7 +7513,7 @@ extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* s
             V_164878(0x40) = eye0;
         }
     }
-    func_00168150(self);
+    cLookAtChaseAlgorithm_verify(self);
 }
 #undef S_164878
 #undef I_164878
@@ -7524,8 +7524,8 @@ extern "C" void cLookAtChaseAlgorithm_updateHalfPipeCam(cLookAtChaseAlgorithm* s
 //100%
 INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_updateRotation);
 #ifdef SKIP_ASM
-extern "C" void* func_00168150(void* self);
-extern "C" void func_0031BE50(float* sout, float* cout, float x);
+extern "C" void* cLookAtChaseAlgorithm_verify(void* self);
+extern "C" void fSinCos(float* sout, float* cout, float x);
 
 struct sVec4_165540
 {
@@ -7615,7 +7615,7 @@ static inline sVec4_165540 Rot_165540(const sVec4_165540& q, const sVec4_165540&
 static inline sVec4_165540 AxisAngle_165540(const sVec4_165540& axis, float ang)
 {
     float s, c;
-    func_0031BE50(&s, &c, ang * 0.5f);
+    fSinCos(&s, &c, ang * 0.5f);
     sVec4_165540 r(s * axis.x, s * axis.y, s * axis.z, c);
     return r;
 }
@@ -7625,7 +7625,7 @@ static inline sVec4_165540 AxisAngle_165540(const sVec4_165540& axis, float ang)
  *
  * With off = CamTargetPos - Position, if its horizontal length is positive the X axis scaled to that length, with
  * off's z, is rotated by @p ang about Z (axis-angle quaternion) and Position = CamTargetPos - that. Ends with
- * func_00168150 (the eye sanity check).
+ * cLookAtChaseAlgorithm_verify (the eye sanity check).
  *
  * @param ang  the heading in radians (cDirectionChaseAlgorithm passes its Angle; On Tour angle)
  */
@@ -7645,7 +7645,7 @@ extern "C" void cLookAtChaseAlgorithm_updateRotation(cLookAtChaseAlgorithm* self
         sVec4_165540 newPos = Sub_165540(*(sVec4_165540*)&self->CamTargetPos, rd);
         *(sVec4_165540*)&self->Position = newPos;
     }
-    func_00168150(((char*)self));
+    cLookAtChaseAlgorithm_verify(((char*)self));
 }
 #endif
 
@@ -7957,17 +7957,17 @@ struct sCamVE166228 {
     void (*fn)(void*, sCamTarget166228*);
 };
 
-extern "C" void func_00166640(void* self, int a1);
+extern "C" void cLookAtChaseAlgorithm_calcPitchHeading(void* self, int a1);
 extern "C" void cLookAtChaseAlgorithm_updatePitchBlending(cLookAtChaseAlgorithm* self, float x, float y, float z, float w);
 void* cLookAtChaseAlgorithm_updateDebugCam(void* self);
-extern "C" void func_00166F90(void* self);
+extern "C" void cLookAtChaseAlgorithm_calcPose(void* self);
 
 /**
  * Finishes a race camera frame: pitch, optional pitch blending and the final pose.
  *
  * Gets the final-phase data from the algorithm (virtual slot 7, getRaceCamFinalPhaseData), recomputes pitch and
- * heading (func_00166640, calcPitchHeading(false)), runs updatePitchBlending with the data's four values when its
- * DoPitchBlending flag is set, then updateDebugCam and calcPose (func_00166F90). On Tour's takes a bool
+ * heading (cLookAtChaseAlgorithm_calcPitchHeading, calcPitchHeading(false)), runs updatePitchBlending with the data's four values when its
+ * DoPitchBlending flag is set, then updateDebugCam and calcPose (cLookAtChaseAlgorithm_calcPose). On Tour's takes a bool
  * ignoreCollisions; this one takes none.
  */
 extern "C" void cLookAtChaseAlgorithm_doRaceCamFinalPhase(cLookAtChaseAlgorithm* self)
@@ -7975,11 +7975,11 @@ extern "C" void cLookAtChaseAlgorithm_doRaceCamFinalPhase(cLookAtChaseAlgorithm*
     sCamTarget166228 finalPhaseData;
     sCamVE166228* vt = (sCamVE166228*)self->mVtbl;
     vt[7].fn((char*)self + vt[7].delta, &finalPhaseData);
-    func_00166640(self, 0);
+    cLookAtChaseAlgorithm_calcPitchHeading(self, 0);
     if (finalPhaseData.valid != 0)
         cLookAtChaseAlgorithm_updatePitchBlending(self, finalPhaseData.x, finalPhaseData.y, finalPhaseData.z, finalPhaseData.w);
     cLookAtChaseAlgorithm_updateDebugCam(self);
-    func_00166F90(self);
+    cLookAtChaseAlgorithm_calcPose(self);
 }
 #endif
 
@@ -8101,9 +8101,9 @@ static inline sVec_1662A0 Get_1662A0(char* self, int slot)
  *
  * When Pitch has risen above LastPitch it uses smoothing @p w and limit @p y, else @p z and @p x. Pitch = k *
  * LastPitch + (1 - k) * Pitch; if the angle between the eye's look (CamTargetPos - Position) and the new
- * pitch/heading look vector (func_001668B8) exceeds the limit (degrees), k is divided by angle / limit and the blend
+ * pitch/heading look vector (cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading) exceeds the limit (degrees), k is divided by angle / limit and the blend
  * redone from the original pitch. LastPitch takes the result. CamTargetPos becomes the rider position (target slot 1)
- * projected onto the new look line through Position, then func_00168150 (the eye sanity check).
+ * projected onto the new look line through Position, then cLookAtChaseAlgorithm_verify (the eye sanity check).
  *
  * @param x  the angle limit in degrees while pitch falls (On Tour maxAngleUp)
  * @param y  the angle limit while pitch rises (On Tour maxAngleDown)
@@ -8125,7 +8125,7 @@ extern "C" void cLookAtChaseAlgorithm_updatePitchBlending(cLookAtChaseAlgorithm*
     self->Pitch = k * self->LastPitch + (1.0f - k) * old;
     sVec_1662A0 toTarget = Sub_1662A0(*(sVec_1662A0*)&self->CamTargetPos, *(sVec_1662A0*)&self->Position);
     sVec_1662A0 look;
-    func_001668B8(self, &look);
+    cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading(self, &look);
     float bearing = Angle_1662A0(toTarget, look);
     float lim = ang * 0.01745329424738884f;
     float historyFactor;
@@ -8135,29 +8135,29 @@ extern "C" void cLookAtChaseAlgorithm_updatePitchBlending(cLookAtChaseAlgorithm*
         historyFactor = k;
     self->LastPitch = self->Pitch = historyFactor * self->LastPitch + (1.0f - historyFactor) * old;
     sVec_1662A0 newLook;
-    func_001668B8(self, &newLook);
+    cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading(self, &newLook);
     sVec_1662A0 off = Sub_1662A0(Get_1662A0(S_1662A0, 1), *(sVec_1662A0*)&self->Position);
     float alongLook = Dot_1662A0(off, newLook) / Dot_1662A0(newLook, newLook);
     sVec_1662A0 sc = Scale_1662A0(newLook, alongLook);
     *(sVec_1662A0*)&self->CamTargetPos = Add_1662A0(*(sVec_1662A0*)&self->Position, sc);
-    func_00168150(self);
+    cLookAtChaseAlgorithm_verify(self);
 }
 #undef S_1662A0
 #endif
 
-extern "C" void* func_00168150(void* self);
+extern "C" void* cLookAtChaseAlgorithm_verify(void* self);
 
 //100%
 INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_updateDebugCam__FPv);
 #ifdef SKIP_ASM
 /**
- * On Tour's updateDebugCam, reduced to the eye sanity check: calls func_00168150 and returns its result.
+ * On Tour's updateDebugCam, reduced to the eye sanity check: calls cLookAtChaseAlgorithm_verify and returns its result.
  *
- * @return func_00168150's result (the function is really void; declared void*)
+ * @return cLookAtChaseAlgorithm_verify's result (the function is really void; declared void*)
  */
 void* cLookAtChaseAlgorithm_updateDebugCam(void* self)
 {
-    return func_00168150(self);
+    return cLookAtChaseAlgorithm_verify(self);
 }
 #endif
 
@@ -8281,7 +8281,7 @@ extern "C" void cLookAtChaseAlgorithm_setupInitialCamDir(cLookAtChaseAlgorithm* 
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00166640);
+INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_calcPitchHeading);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
@@ -8388,7 +8388,7 @@ static inline float Angle_166640(const t4Vector& a, const t4Vector& b)
     return 1.5707963705062866f - func_0031C128(c);
 }
 
-extern "C" void func_00166640_def(char* self) __asm__("func_00166640");
+extern "C" void cLookAtChaseAlgorithm_calcPitchHeading_def(char* self) __asm__("cLookAtChaseAlgorithm_calcPitchHeading");
 /**
  * Computes Heading and Pitch for looking from the eye (Position) at CamTargetPos.
  *
@@ -8396,7 +8396,7 @@ extern "C" void func_00166640_def(char* self) __asm__("func_00166640");
  * direction and the x axis (an arccosine through func_0031C128), or 2 pi minus it when the direction's y is not
  * positive, and 0 when the horizontal distance is 0. Callers pass a second argument (1 or 0) that is not read.
  */
-extern "C" void func_00166640_def(char* self)
+extern "C" void cLookAtChaseAlgorithm_calcPitchHeading_def(char* self)
 {
     const t4Vector& off0 = Sub_166640(*(t4Vector*)(self + 0x20), *(t4Vector*)(self + 0x40));
     t4Vector off = off0;
@@ -8420,7 +8420,7 @@ extern "C" void func_00166640_def(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_001668B8);
+INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading);
 #ifdef SKIP_ASM
 struct sV_1668B8 {
     float x, y, z, w;
@@ -8435,7 +8435,7 @@ extern sM_1668B8 D_004FF1A0_1668B8 __asm__("t4mat_Identity");
 extern sV_1668B8 D_004FF150_1668B8 __asm__("t4vect_YAxis");
 extern sV_1668B8 D_004FF160_v1668B8 __asm__("t4vect_ZAxis");
 extern sV_1668B8 D_004FF130_v1668B8 __asm__("t4vect_Origin");
-extern "C" void func_0031BE50(float* sout, float* cout, float x);
+extern "C" void fSinCos(float* sout, float* cout, float x);
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
 static inline void vu0CopyMtx_1668B8(sM_1668B8* dst, const sM_1668B8* src)
@@ -8557,7 +8557,7 @@ static inline void vu0TransMtx_1668B8(sM_1668B8* m, const sV_1668B8& v)
 
 static inline void SinCos_1668B8(float* s, float* c, float angle)
 {
-    func_0031BE50(s, c, angle);
+    fSinCos(s, c, angle);
 }
 
 static inline void Rotate_1668B8(sM_1668B8* m, const sV_1668B8& axis, float angle)
@@ -8605,14 +8605,14 @@ static inline sV_1668B8 Row_1668B8(const sM_1668B8& m, int i)
     return *(const sV_1668B8*)m.m[i];
 }
 
-extern "C" void func_001668B8_impl(char* self, sV_1668B8* out) __asm__("func_001668B8");
+extern "C" void cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading_impl(char* self, sV_1668B8* out) __asm__("cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading");
 /**
  * Computes the look vector for the current Pitch and Heading: row 0 of t4mat_Identity turned by -Pitch about the y
  * axis and then by -Heading about the z axis.
  *
  * @param out  receives the look vector
  */
-extern "C" void func_001668B8_impl(char* self, sV_1668B8* out)
+extern "C" void cLookAtChaseAlgorithm_calcLookVectorFromPitchAndHeading_impl(char* self, sV_1668B8* out)
 {
     sM_1668B8 lookMatrix;
     vu0CopyMtx_1668B8(&lookMatrix, &D_004FF1A0_1668B8);
@@ -8826,7 +8826,7 @@ extern "C" void* cLookAtChaseAlgorithm_snapCurrent(cLookAtChaseAlgorithm* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00166F90);
+INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_calcPose);
 #ifdef SKIP_ASM
 struct sV_166F90 {
     float x, y, z, w;
@@ -8848,7 +8848,7 @@ extern sM_166F90 D_004FF1A0_166F90 __asm__("t4mat_Identity");
 extern sV_166F90 D_004FF150_166F90 __asm__("t4vect_YAxis");
 extern sV_166F90 D_004FF160_v166F90 __asm__("t4vect_ZAxis");
 extern sV_166F90 D_004FF130_v166F90 __asm__("t4vect_Origin");
-extern "C" void func_0031BE50(float* sout, float* cout, float x);
+extern "C" void fSinCos(float* sout, float* cout, float x);
 
 struct sPair_166F90 {
     sV_166F90 pos;
@@ -8860,8 +8860,8 @@ struct sCamXf_166F90 {
     sPair_166F90 xf;
 };
 
-// func_0031B748 (bx/ps2main) fills *out from the matrix and returns out.
-extern "C" sPair_166F90* func_0031B748_166F90(sPair_166F90* out, sM_166F90* m) __asm__("func_0031B748");
+// tPose_tPose (bx/ps2main) fills *out from the matrix and returns out.
+extern "C" sPair_166F90* tPose_tPose_166F90(sPair_166F90* out, sM_166F90* m) __asm__("tPose_tPose");
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
 static inline void vu0CopyMtx_166F90(sM_166F90* dst, const sM_166F90* src)
@@ -8983,7 +8983,7 @@ static inline void vu0TransMtx_166F90(sM_166F90* m, const sV_166F90* v)
 
 static inline void SinCos_166F90(float* s, float* c, float angle)
 {
-    func_0031BE50(s, c, angle);
+    fSinCos(s, c, angle);
 }
 
 static inline void Rotate_166F90(sM_166F90* m, const sV_166F90& axis, float angle)
@@ -9036,15 +9036,15 @@ static inline sV_166F90 ConjF_166F90(float x, float y, float z, float w)
     return r;
 }
 
-extern "C" void func_00166F90_impl(char* self) __asm__("func_00166F90");
+extern "C" void cLookAtChaseAlgorithm_calcPose_impl(char* self) __asm__("cLookAtChaseAlgorithm_calcPose");
 /**
  * Builds CalculatedPose from Position, Pitch and Heading.
  *
  * Sets Position.w to 1, translates t4mat_Identity to Position, turns it by -Pitch about the y axis and by -Heading
- * about the z axis, converts the matrix with func_0031B748 into CalculatedPose, and then negates the quaternion's x,
+ * about the z axis, converts the matrix with tPose_tPose into CalculatedPose, and then negates the quaternion's x,
  * y and z (its conjugate).
  */
-extern "C" void func_00166F90_impl(char* self)
+extern "C" void cLookAtChaseAlgorithm_calcPose_impl(char* self)
 {
     *(float*)(self + 0x4C) = 1.0f;
     sV_166F90* pos = (sV_166F90*)(self + 0x40);
@@ -9055,7 +9055,7 @@ extern "C" void func_00166F90_impl(char* self)
     Rotate_166F90(&poseMatrix, D_004FF160_v166F90, -*(float*)(self + 0x50));
     {
         sPair_166F90 xf;
-        func_0031B748_166F90(&xf, &poseMatrix);
+        tPose_tPose_166F90(&xf, &poseMatrix);
         ((sCamXf_166F90*)self)->xf = xf;
     }
     *(sV_166F90*)(self + 0x70) = ConjF_166F90(*(float*)(self + 0x70), *(float*)(self + 0x74), *(float*)(self + 0x78), *(float*)(self + 0x7C));
@@ -9308,7 +9308,7 @@ extern "C" void func_001673F8_impl(int initialize, int priority)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00167D88);
+INCLUDE_ASM("camera/camera", cPIDFilter_getDefaultProportionFactor);
 #ifdef SKIP_ASM
 /**
  * Returns 0.1f, the value cLookAtChaseAlgorithm_cLookAtChaseAlgorithm first stores in TurningPIDFilter's
@@ -9316,14 +9316,14 @@ INCLUDE_ASM("camera/camera", func_00167D88);
  *
  * @return 0.1f
  */
-extern "C" float func_00167D88(void)
+extern "C" float cPIDFilter_getDefaultProportionFactor(void)
 {
     return 0.1f;
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00167D98);
+INCLUDE_ASM("camera/camera", cPIDFilter_getDefaultErrorHistoryFactor);
 #ifdef SKIP_ASM
 /**
  * Returns 0.1f, the value cLookAtChaseAlgorithm_cLookAtChaseAlgorithm first stores in TurningPIDFilter's
@@ -9331,14 +9331,14 @@ INCLUDE_ASM("camera/camera", func_00167D98);
  *
  * @return 0.1f
  */
-extern "C" float func_00167D98(cPIDFilter* self)
+extern "C" float cPIDFilter_getDefaultErrorHistoryFactor(cPIDFilter* self)
 {
     return 0.10000000149011612f;
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00167DA8);
+INCLUDE_ASM("camera/camera", cPIDFilter_getDefaultDerrivativeFactor);
 #ifdef SKIP_ASM
 /**
  * Returns 0.1f, the value cLookAtChaseAlgorithm_cLookAtChaseAlgorithm first stores in TurningPIDFilter's
@@ -9346,7 +9346,7 @@ INCLUDE_ASM("camera/camera", func_00167DA8);
  *
  * @return 0.1f
  */
-extern "C" float func_00167DA8(cPIDFilter* self)
+extern "C" float cPIDFilter_getDefaultDerrivativeFactor(cPIDFilter* self)
 {
     return 0.10000000149011612f;
 }
@@ -9402,35 +9402,35 @@ extern "C" void cCameraAlgorithm__cCameraAlgorithm(cCameraAlgorithm* self, int f
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00167E18__FPv);
+INCLUDE_ASM("camera/camera", cCameraAlgorithm_snap__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: cCameraAlgorithm's default for vtable slot 3, which cLookAtChaseAlgorithm_snap overrides.
  */
-void func_00167E18(void* self)
+void cCameraAlgorithm_snap(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00167E20__FPv);
+INCLUDE_ASM("camera/camera", cCameraAlgorithm_snapCurrent__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: cCameraAlgorithm's default for vtable slot 4, which cLookAtChaseAlgorithm_snapCurrent overrides.
  */
-void func_00167E20(void* self)
+void cCameraAlgorithm_snapCurrent(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00167E28__FPv);
+INCLUDE_ASM("camera/camera", cCameraAlgorithm_update__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: cCameraAlgorithm's default for vtable slot 5, which the chase algorithms' update functions (e.g.
  * cIdleChaseAlgorithm_update) override.
  */
-void func_00167E28(void* self)
+void cCameraAlgorithm_update(void* self)
 {
 }
 #endif
@@ -9452,14 +9452,14 @@ extern "C" float cCameraAlgorithm_getDefaultView(cCameraAlgorithm* self)
 extern cQuad128 t4vect_Zero;
 
 //100%
-INCLUDE_ASM("camera/camera", func_00167E40);
+INCLUDE_ASM("camera/camera", cCameraAlgorithm_getTargetPos);
 #ifdef SKIP_ASM
 /**
  * Returns t4vect_Zero: cCameraAlgorithm's default for vtable slot 6, which cChaseAlgorithm_getTargetPos overrides.
  *
  * @return @p self, the hidden return slot, holding t4vect_Zero
  */
-extern "C" void* func_00167E40(void* self)
+extern "C" void* cCameraAlgorithm_getTargetPos(void* self)
 {
     *(cQuad128*)self = t4vect_Zero;
     return self;
@@ -9467,24 +9467,24 @@ extern "C" void* func_00167E40(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00167E58__FPv);
+INCLUDE_ASM("camera/camera", cCameraAlgorithm_getRaceCamFinalPhaseData__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: cCameraAlgorithm's default for vtable slot 7 (no class in the camera unit overrides it).
  */
-void func_00167E58(void* self)
+void cCameraAlgorithm_getRaceCamFinalPhaseData(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00167E60__FPv);
+INCLUDE_ASM("camera/camera", cCameraAlgorithm_doRaceCamFinalPhase__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: cCameraAlgorithm's default for vtable slot 8, which cLookAtChaseAlgorithm_doRaceCamFinalPhase
  * overrides.
  */
-void func_00167E60(void* self)
+void cCameraAlgorithm_doRaceCamFinalPhase(void* self)
 {
 }
 #endif
@@ -9527,7 +9527,7 @@ void cCameraAlgorithm_notifyMoveZ(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00167E98__FPv);
+INCLUDE_ASM("camera/camera", cCameraAlgorithm_shouldSnapOnUpdate__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 0 (false): cCameraAlgorithm's default for vtable slot 11, which cLookAtChaseAlgorithm_shouldSnapOnUpdate__FPv
@@ -9535,7 +9535,7 @@ INCLUDE_ASM("camera/camera", func_00167E98__FPv);
  *
  * @return 0
  */
-int func_00167E98(void* self)
+int cCameraAlgorithm_shouldSnapOnUpdate(void* self)
 {
     return 0;
 }
@@ -9563,7 +9563,7 @@ extern "C" void cBasicCameraAlgorithm__cBasicCameraAlgorithm(cBasicCameraAlgorit
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00167ED0);
+INCLUDE_ASM("camera/camera", cBasicCameraAlgorithm_setPosition);
 #ifdef SKIP_ASM
 /**
  * Sets Position: a 16-byte copy of *@p position.
@@ -9572,12 +9572,12 @@ INCLUDE_ASM("camera/camera", func_00167ED0);
  * @param position  the new position
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void func_00167ED0(cBasicCameraAlgorithm* basicCameraAlgorithm, long long *position) {
+extern "C" void cBasicCameraAlgorithm_setPosition(cBasicCameraAlgorithm* basicCameraAlgorithm, long long *position) {
     (*(long long*)&basicCameraAlgorithm->Position) = (long long) *position;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00167EE0);
+INCLUDE_ASM("camera/camera", cBasicCameraAlgorithm_setPitch);
 #ifdef SKIP_ASM
 /**
  * Sets Pitch.
@@ -9585,12 +9585,12 @@ INCLUDE_ASM("camera/camera", func_00167EE0);
  * @param basicCameraAlgorithm  the algorithm
  * @param fparg0  the new pitch (radians)
  */
-extern "C" void func_00167EE0(cBasicCameraAlgorithm* basicCameraAlgorithm, float fparg0) {
+extern "C" void cBasicCameraAlgorithm_setPitch(cBasicCameraAlgorithm* basicCameraAlgorithm, float fparg0) {
     (basicCameraAlgorithm->Pitch) = fparg0;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00167EE8);
+INCLUDE_ASM("camera/camera", cBasicCameraAlgorithm_setHeading);
 #ifdef SKIP_ASM
 /**
  * Sets Heading.
@@ -9598,12 +9598,12 @@ INCLUDE_ASM("camera/camera", func_00167EE8);
  * @param basicCameraAlgorithm  the algorithm
  * @param fparg0  the new heading (radians)
  */
-extern "C" void func_00167EE8(cBasicCameraAlgorithm* basicCameraAlgorithm, float fparg0) {
+extern "C" void cBasicCameraAlgorithm_setHeading(cBasicCameraAlgorithm* basicCameraAlgorithm, float fparg0) {
     (basicCameraAlgorithm->Heading) = fparg0;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00167EF0);
+INCLUDE_ASM("camera/camera", cBasicCameraAlgorithm_getPosition);
 #ifdef SKIP_ASM
 /**
  * Returns Position by value: copies it into @p outPosition.
@@ -9613,13 +9613,13 @@ INCLUDE_ASM("camera/camera", func_00167EF0);
  * @return @p outPosition
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long long *func_00167EF0(long long *outPosition, void *algorithm) {
+extern "C" long long *cBasicCameraAlgorithm_getPosition(long long *outPosition, void *algorithm) {
     *outPosition = (*(long long *)((char*)(algorithm) + (0x20)));
     return outPosition;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00167F00);
+INCLUDE_ASM("camera/camera", cBasicCameraAlgorithm_getPitch);
 #ifdef SKIP_ASM
 /**
  * Returns Pitch.
@@ -9627,12 +9627,12 @@ INCLUDE_ASM("camera/camera", func_00167F00);
  * @param basicCameraAlgorithm  the algorithm
  * @return the pitch (radians)
  */
-extern "C" float func_00167F00(cBasicCameraAlgorithm* basicCameraAlgorithm) {
+extern "C" float cBasicCameraAlgorithm_getPitch(cBasicCameraAlgorithm* basicCameraAlgorithm) {
     return (basicCameraAlgorithm->Pitch);
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00167F08);
+INCLUDE_ASM("camera/camera", cBasicCameraAlgorithm_getHeading);
 #ifdef SKIP_ASM
 /**
  * Returns Heading.
@@ -9640,7 +9640,7 @@ INCLUDE_ASM("camera/camera", func_00167F08);
  * @param basicCameraAlgorithm  the algorithm
  * @return the heading (radians)
  */
-extern "C" float func_00167F08(cBasicCameraAlgorithm* basicCameraAlgorithm) {
+extern "C" float cBasicCameraAlgorithm_getHeading(cBasicCameraAlgorithm* basicCameraAlgorithm) {
     return (basicCameraAlgorithm->Heading);
 }
 #endif
@@ -9752,7 +9752,7 @@ void cCameraController_update(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00167FC0);
+INCLUDE_ASM("camera/camera", cCameraAlgorithm_setAlgorithmType);
 #ifdef SKIP_ASM
 /**
  * Sets AlgorithmType.
@@ -9760,12 +9760,12 @@ INCLUDE_ASM("camera/camera", func_00167FC0);
  * @param cameraAlgorithm  the algorithm
  * @param algoType  the new type (an eCamAlgoType)
  */
-extern "C" void func_00167FC0(cCameraAlgorithm* cameraAlgorithm, int algoType) {
+extern "C" void cCameraAlgorithm_setAlgorithmType(cCameraAlgorithm* cameraAlgorithm, int algoType) {
     (cameraAlgorithm->AlgorithmType) = algoType;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00167FC8);
+INCLUDE_ASM("camera/camera", cCameraAlgorithm_getType);
 #ifdef SKIP_ASM
 /**
  * Returns AlgorithmType.
@@ -9773,12 +9773,12 @@ INCLUDE_ASM("camera/camera", func_00167FC8);
  * @param cameraAlgorithm  the algorithm
  * @return the type (an eCamAlgoType)
  */
-extern "C" int func_00167FC8(cCameraAlgorithm* cameraAlgorithm) {
+extern "C" int cCameraAlgorithm_getType(cCameraAlgorithm* cameraAlgorithm) {
     return (cameraAlgorithm->AlgorithmType);
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00167FD0);
+INCLUDE_ASM("camera/camera", cCameraController_getType);
 #ifdef SKIP_ASM
 /**
  * Returns a camera controller's Type (its first word).
@@ -9786,12 +9786,12 @@ INCLUDE_ASM("camera/camera", func_00167FD0);
  * @param controller  the controller
  * @return the type (an eCamControllerType)
  */
-extern "C" int func_00167FD0(int *controller) {
+extern "C" int cCameraController_getType(int *controller) {
     return *controller;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00167FD8);
+INCLUDE_ASM("camera/camera", cCameraController_getBlendType);
 #ifdef SKIP_ASM
 /**
  * Returns BlendType.
@@ -9799,12 +9799,12 @@ INCLUDE_ASM("camera/camera", func_00167FD8);
  * @param chaseCameraController  the controller (any cCameraController)
  * @return the blend type (an eCamBlendType)
  */
-extern "C" int func_00167FD8(cChaseCameraController* chaseCameraController) {
+extern "C" int cCameraController_getBlendType(cChaseCameraController* chaseCameraController) {
     return (chaseCameraController->BlendType);
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00167FE0);
+INCLUDE_ASM("camera/camera", cCameraController_getAlgorithmList);
 #ifdef SKIP_ASM
 /**
  * Returns AlgorithmList.
@@ -9812,12 +9812,12 @@ INCLUDE_ASM("camera/camera", func_00167FE0);
  * @param chaseCameraController  the controller (any cCameraController)
  * @return the algorithm list (a cCameraAlgoList*)
  */
-extern "C" int func_00167FE0(cChaseCameraController* chaseCameraController) {
+extern "C" int cCameraController_getAlgorithmList(cChaseCameraController* chaseCameraController) {
     return ((int)chaseCameraController->AlgorithmList);
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00167FE8);
+INCLUDE_ASM("camera/camera", cChaseCameraController_getLatestAlgoType);
 #ifdef SKIP_ASM
 /**
  * Returns LatestAlgoType, the type of the algorithm cChaseCameraController_addAlgorithm added last.
@@ -9825,12 +9825,12 @@ INCLUDE_ASM("camera/camera", func_00167FE8);
  * @param chaseCameraController  the controller
  * @return the algorithm type (an eCamAlgoType)
  */
-extern "C" int func_00167FE8(cChaseCameraController* chaseCameraController) {
+extern "C" int cChaseCameraController_getLatestAlgoType(cChaseCameraController* chaseCameraController) {
     return (chaseCameraController->LatestAlgoType);
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00167FF0);
+INCLUDE_ASM("camera/camera", cChaseCameraController_getTarget);
 #ifdef SKIP_ASM
 /**
  * Returns Target, the camera target the chase controller follows.
@@ -9838,7 +9838,7 @@ INCLUDE_ASM("camera/camera", func_00167FF0);
  * @param chaseCameraController  the controller
  * @return the target (a cRiderCameraTarget*)
  */
-extern "C" int func_00167FF0(cChaseCameraController* chaseCameraController) {
+extern "C" int cChaseCameraController_getTarget(cChaseCameraController* chaseCameraController) {
     return ((int)chaseCameraController->Target);
 }
 #endif
@@ -9895,7 +9895,7 @@ extern "C" int func_00168018(void) {
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00168020);
+INCLUDE_ASM("camera/camera", cManualCameraController_getManualAlgo);
 #ifdef SKIP_ASM
 /**
  * Returns the manual camera controller's manual algorithm (+0x18, the "Manual Cam Algo" its constructor creates).
@@ -9903,12 +9903,12 @@ INCLUDE_ASM("camera/camera", func_00168020);
  * @param manualController  the controller
  * @return the algorithm (a cManualCameraAlgorithm*)
  */
-extern "C" int func_00168020(void *manualController) {
+extern "C" int cManualCameraController_getManualAlgo(void *manualController) {
     return (*(int *)((char*)(manualController) + (0x18)));
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00168028);
+INCLUDE_ASM("camera/camera", cManualCameraController_getEditorAlgo);
 #ifdef SKIP_ASM
 /**
  * Returns the manual camera controller's editor algorithm (+0x1C, the "Editor Cam Algo" its constructor creates).
@@ -9916,7 +9916,7 @@ INCLUDE_ASM("camera/camera", func_00168028);
  * @param manualController  the controller
  * @return the algorithm (a cEditorCameraAlgorithm*)
  */
-extern "C" int func_00168028(void *manualController) {
+extern "C" int cManualCameraController_getEditorAlgo(void *manualController) {
     return (*(int *)((char*)(manualController) + (0x1C)));
 }
 #endif
@@ -9942,24 +9942,24 @@ extern "C" void cSimpleCamera__cSimpleCamera(cSimpleCamera* self, int flags)
 }
 #endif
 
-extern "C" void* func_0015D928(void* self);
+extern "C" void* cSimpleCamera_updateCamMat(void* self);
 
 //100%
-INCLUDE_ASM("camera/camera", func_00168060__FPv);
+INCLUDE_ASM("camera/camera", cSimpleCamera_update__FPv);
 #ifdef SKIP_ASM
 /**
- * Rebuilds the camera matrix from the pose: calls func_0015D928 (slot 3 of cSimpleCamera_vtbl).
+ * Rebuilds the camera matrix from the pose: calls cSimpleCamera_updateCamMat (slot 3 of cSimpleCamera_vtbl).
  *
- * @return func_0015D928's result (declared void*)
+ * @return cSimpleCamera_updateCamMat's result (declared void*)
  */
-void* func_00168060(void* self)
+void* cSimpleCamera_update(void* self)
 {
-    return func_0015D928(self);
+    return cSimpleCamera_updateCamMat(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00168080);
+INCLUDE_ASM("camera/camera", cSimpleCamera_getFOV);
 #ifdef SKIP_ASM
 /**
  * Returns the camera's field of view (View, its first float).
@@ -9967,12 +9967,12 @@ INCLUDE_ASM("camera/camera", func_00168080);
  * @param camera  the camera (a cSimpleCamera)
  * @return the field of view (radians)
  */
-extern "C" float func_00168080(float *camera) {
+extern "C" float cSimpleCamera_getFOV(float *camera) {
     return *camera;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00168088);
+INCLUDE_ASM("camera/camera", cSimpleCamera_getNear);
 #ifdef SKIP_ASM
 /**
  * Returns Near, the near plane distance.
@@ -9980,12 +9980,12 @@ INCLUDE_ASM("camera/camera", func_00168088);
  * @param simpleCamera  the camera
  * @return the near distance
  */
-extern "C" float func_00168088(cSimpleCamera* simpleCamera) {
+extern "C" float cSimpleCamera_getNear(cSimpleCamera* simpleCamera) {
     return (simpleCamera->Near);
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00168090);
+INCLUDE_ASM("camera/camera", cSimpleCamera_getFar);
 #ifdef SKIP_ASM
 /**
  * Returns Far, the far plane distance.
@@ -9993,12 +9993,12 @@ INCLUDE_ASM("camera/camera", func_00168090);
  * @param simpleCamera  the camera
  * @return the far distance
  */
-extern "C" float func_00168090(cSimpleCamera* simpleCamera) {
+extern "C" float cSimpleCamera_getFar(cSimpleCamera* simpleCamera) {
     return (simpleCamera->Far);
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00168098);
+INCLUDE_ASM("camera/camera", cSimpleCamera_getCamMat);
 #ifdef SKIP_ASM
 /**
  * Returns the address of CamMat (camera + 0x40).
@@ -10006,12 +10006,12 @@ INCLUDE_ASM("camera/camera", func_00168098);
  * @param camera  the camera's address (a cSimpleCamera)
  * @return the matrix's address
  */
-extern "C" int func_00168098(int camera) {
+extern "C" int cSimpleCamera_getCamMat(int camera) {
     return camera + 0x40;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_001680A0);
+INCLUDE_ASM("camera/camera", cSimpleCamera_getPosition);
 #ifdef SKIP_ASM
 /**
  * Returns the address of Pose (camera + 0x20), whose position comes first.
@@ -10019,12 +10019,12 @@ INCLUDE_ASM("camera/camera", func_001680A0);
  * @param camera  the camera's address (a cSimpleCamera)
  * @return the pose's address
  */
-extern "C" int func_001680A0(int camera) {
+extern "C" int cSimpleCamera_getPosition(int camera) {
     return camera + 0x20;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_001680A8);
+INCLUDE_ASM("camera/camera", cSimpleCamera_getPose);
 #ifdef SKIP_ASM
 /**
  * Returns the address of Pose (camera + 0x20).
@@ -10032,12 +10032,12 @@ INCLUDE_ASM("camera/camera", func_001680A8);
  * @param camera  the camera's address (a cSimpleCamera)
  * @return the pose's address
  */
-extern "C" int func_001680A8(int camera) {
+extern "C" int cSimpleCamera_getPose(int camera) {
     return camera + 0x20;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_001680B0);
+INCLUDE_ASM("camera/camera", cSimpleCamera_getDirection);
 #ifdef SKIP_ASM
 /**
  * Returns the address of Direction (camera + 0x80).
@@ -10045,12 +10045,12 @@ INCLUDE_ASM("camera/camera", func_001680B0);
  * @param camera  the camera's address (a cSimpleCamera)
  * @return the direction's address
  */
-extern "C" int func_001680B0(int camera) {
+extern "C" int cSimpleCamera_getDirection(int camera) {
     return camera + 0x80;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_001680B8);
+INCLUDE_ASM("camera/camera", cSimpleCamera_setPosition);
 #ifdef SKIP_ASM
 /**
  * Sets Pose's position: a 16-byte copy of *@p position.
@@ -10059,12 +10059,12 @@ INCLUDE_ASM("camera/camera", func_001680B8);
  * @param position  the new position
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void func_001680B8(cSimpleCamera* simpleCamera, long long *position) {
+extern "C" void cSimpleCamera_setPosition(cSimpleCamera* simpleCamera, long long *position) {
     (*(long long*)&simpleCamera->Pose) = (long long) *position;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_001680C8);
+INCLUDE_ASM("camera/camera", cSimpleCamera_setOrientation);
 #ifdef SKIP_ASM
 /**
  * Sets Pose's rotation quaternion (Pose.Q): a 16-byte copy of *@p orientation.
@@ -10073,12 +10073,12 @@ INCLUDE_ASM("camera/camera", func_001680C8);
  * @param orientation  the new quaternion
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void func_001680C8(cSimpleCamera* simpleCamera, long long *orientation) {
+extern "C" void cSimpleCamera_setOrientation(cSimpleCamera* simpleCamera, long long *orientation) {
     (*(long long*)&simpleCamera->Pose.Q) = (long long) *orientation;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_001680D8);
+INCLUDE_ASM("camera/camera", cSimpleCamera_setPose);
 #ifdef SKIP_ASM
 /**
  * Sets Pose: copies the position (+0x0) and the quaternion (+0x10) of @p pose.
@@ -10087,13 +10087,13 @@ INCLUDE_ASM("camera/camera", func_001680D8);
  * @param pose  the new pose (a tPose)
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void func_001680D8(cSimpleCamera* simpleCamera, void *pose) {
+extern "C" void cSimpleCamera_setPose(cSimpleCamera* simpleCamera, void *pose) {
     (*(long long*)&simpleCamera->Pose) = (long long) (*(long long *)((char*)(pose) + (0)));
     (*(long long*)&simpleCamera->Pose.Q) = (long long) (*(long long *)((char*)(pose) + (0x10)));
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_001680F0);
+INCLUDE_ASM("camera/camera", cSimpleCamera_setFOV);
 #ifdef SKIP_ASM
 /**
  * Sets the field of view (View, the camera's first float).
@@ -10101,12 +10101,12 @@ INCLUDE_ASM("camera/camera", func_001680F0);
  * @param camera  the camera (a cSimpleCamera)
  * @param fparg0  the new field of view (radians)
  */
-extern "C" void func_001680F0(float *camera, float fparg0) {
+extern "C" void cSimpleCamera_setFOV(float *camera, float fparg0) {
     *camera = fparg0;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_001680F8);
+INCLUDE_ASM("camera/camera", cSimpleCamera_setMaxFar);
 #ifdef SKIP_ASM
 /**
  * Sets MaxFar, the upper limit for Near and Far.
@@ -10114,12 +10114,12 @@ INCLUDE_ASM("camera/camera", func_001680F8);
  * @param simpleCamera  the camera
  * @param fparg0  the new limit
  */
-extern "C" void func_001680F8(cSimpleCamera* simpleCamera, float fparg0) {
+extern "C" void cSimpleCamera_setMaxFar(cSimpleCamera* simpleCamera, float fparg0) {
     (simpleCamera->MaxFar) = fparg0;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00168100);
+INCLUDE_ASM("camera/camera", cSimpleCamera_setMinNear);
 #ifdef SKIP_ASM
 /**
  * Sets MinNear, the lower limit for Near and Far.
@@ -10127,12 +10127,12 @@ INCLUDE_ASM("camera/camera", func_00168100);
  * @param simpleCamera  the camera
  * @param fparg0  the new limit
  */
-extern "C" void func_00168100(cSimpleCamera* simpleCamera, float fparg0) {
+extern "C" void cSimpleCamera_setMinNear(cSimpleCamera* simpleCamera, float fparg0) {
     (simpleCamera->MinNear) = fparg0;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00168108);
+INCLUDE_ASM("camera/camera", cSimpleCamera_setMaxFOV);
 #ifdef SKIP_ASM
 /**
  * Sets MaxView, the upper limit for the field of view.
@@ -10140,12 +10140,12 @@ INCLUDE_ASM("camera/camera", func_00168108);
  * @param simpleCamera  the camera
  * @param fparg0  the new limit (radians)
  */
-extern "C" void func_00168108(cSimpleCamera* simpleCamera, float fparg0) {
+extern "C" void cSimpleCamera_setMaxFOV(cSimpleCamera* simpleCamera, float fparg0) {
     (simpleCamera->MaxView) = fparg0;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00168110);
+INCLUDE_ASM("camera/camera", cCamera_getCurrentController);
 #ifdef SKIP_ASM
 /**
  * Returns Controller, the controller currently driving the camera.
@@ -10153,12 +10153,12 @@ INCLUDE_ASM("camera/camera", func_00168110);
  * @param camera  the camera
  * @return the controller (a cCameraController*)
  */
-extern "C" int func_00168110(cCamera* camera) {
+extern "C" int cCamera_getCurrentController(cCamera* camera) {
     return ((int)camera->Controller);
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00168118);
+INCLUDE_ASM("camera/camera", cCamera_getManualController);
 #ifdef SKIP_ASM
 /**
  * Returns ManualController.
@@ -10166,12 +10166,12 @@ INCLUDE_ASM("camera/camera", func_00168118);
  * @param camera  the camera
  * @return the manual controller
  */
-extern "C" int func_00168118(cCamera* camera) {
+extern "C" int cCamera_getManualController(cCamera* camera) {
     return ((int)camera->ManualController);
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00168120);
+INCLUDE_ASM("camera/camera", cCamera_getChaseController);
 #ifdef SKIP_ASM
 /**
  * Returns ChaseController.
@@ -10179,12 +10179,12 @@ INCLUDE_ASM("camera/camera", func_00168120);
  * @param camera  the camera
  * @return the chase controller
  */
-extern "C" int func_00168120(cCamera* camera) {
+extern "C" int cCamera_getChaseController(cCamera* camera) {
     return ((int)camera->ChaseController);
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00168128);
+INCLUDE_ASM("camera/camera", cCamera_getScriptController);
 #ifdef SKIP_ASM
 /**
  * Returns ScriptController.
@@ -10192,12 +10192,12 @@ INCLUDE_ASM("camera/camera", func_00168128);
  * @param camera  the camera
  * @return the script controller
  */
-extern "C" int func_00168128(cCamera* camera) {
+extern "C" int cCamera_getScriptController(cCamera* camera) {
     return ((int)camera->ScriptController);
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00168130);
+INCLUDE_ASM("camera/camera", cCamera_isStreamReady);
 #ifdef SKIP_ASM
 /**
  * Returns bStreamIsReady, which cCamera_updateStreamFocus sets.
@@ -10205,12 +10205,12 @@ INCLUDE_ASM("camera/camera", func_00168130);
  * @param camera  the camera
  * @return nonzero when the camera's stream is ready
  */
-extern "C" int func_00168130(cCamera* camera) {
+extern "C" int cCamera_isStreamReady(cCamera* camera) {
     return (camera->bStreamIsReady);
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00168138);
+INCLUDE_ASM("camera/camera", cCamera_getStreamFocusID);
 #ifdef SKIP_ASM
 /**
  * Returns StreamFocusID (0 for view 0, 1 for view 1, -1 before cCamera_init).
@@ -10218,12 +10218,12 @@ INCLUDE_ASM("camera/camera", func_00168138);
  * @param camera  the camera
  * @return the stream focus id (an eStreamFocusID)
  */
-extern "C" int func_00168138(cCamera* camera) {
+extern "C" int cCamera_getStreamFocusID(cCamera* camera) {
     return (camera->StreamFocusID);
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00168140);
+INCLUDE_ASM("camera/camera", cRiderCameraTarget_setRider);
 #ifdef SKIP_ASM
 /**
  * Sets the camera target's Rider (+0x4).
@@ -10231,12 +10231,12 @@ INCLUDE_ASM("camera/camera", func_00168140);
  * @param cameraTarget  the target (a cRiderCameraTarget)
  * @param rider  the rider (a cRider*)
  */
-extern "C" void func_00168140(void *cameraTarget, int rider) {
+extern "C" void cRiderCameraTarget_setRider(void *cameraTarget, int rider) {
     (*(int *)((char*)(cameraTarget) + (4))) = rider;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/camera", func_00168148);
+INCLUDE_ASM("camera/camera", cRiderCameraTarget_getRider);
 #ifdef SKIP_ASM
 /**
  * Returns the camera target's Rider.
@@ -10244,13 +10244,13 @@ INCLUDE_ASM("camera/camera", func_00168148);
  * @param riderCameraTarget  the target
  * @return the rider (a cRider*)
  */
-extern "C" int func_00168148(cRiderCameraTarget* riderCameraTarget) {
+extern "C" int cRiderCameraTarget_getRider(cRiderCameraTarget* riderCameraTarget) {
     return ((int)riderCameraTarget->Rider);
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/camera", func_00168150);
+INCLUDE_ASM("camera/camera", cLookAtChaseAlgorithm_verify);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
@@ -10261,8 +10261,8 @@ INCLUDE_ASM("camera/camera", func_00168150);
 
 extern t4Vector D_004FF160_8150 __asm__("t4vect_ZAxis");
 
-// PORT: the unit declares func_00168150 as returning void*; this is the real (void) definition.
-extern "C" void func_00168150_def(char* self) __asm__("func_00168150");
+// PORT: the unit declares cLookAtChaseAlgorithm_verify as returning void*; this is the real (void) definition.
+extern "C" void cLookAtChaseAlgorithm_verify_def(char* self) __asm__("cLookAtChaseAlgorithm_verify");
 
 // PORT: PS2-only VU0 inline asm (vector subtract).
 static inline t4Vector cmSub_168150b(const t4Vector& a, const t4Vector& b)
@@ -10373,7 +10373,7 @@ static inline float cmLength_168150b(const t4Vector& v)
  */
 // cLookAtChaseAlgorithm::verify(void): if the camera is closer to / farther from its target than the
 // allowed range, snap it back behind the target.
-extern "C" void func_00168150_def(char* self)
+extern "C" void cLookAtChaseAlgorithm_verify_def(char* self)
 {
     t4Vector eyeToTarget = cmSub_168150b(*(t4Vector*)(self + 0x20), *(t4Vector*)(self + 0x40));
     float len = cmLength_168150b(eyeToTarget);
@@ -10489,9 +10489,9 @@ INCLUDE_ASM("camera/camera", cLazyChaseAlgorithm_update);
 
 extern t4Vector D_004FF160_8338 __asm__("t4vect_ZAxis");
 
-// The per-frame camera input record (0x70 bytes) that func_00162568_8338 fills from the target for the chase algorithms.
-extern "C" void func_00162568_8338(void* self, sCamInfo* out, float a, float b, float c, float d,
-                              float e, float f, float g, float h) __asm__("func_00162568");
+// The per-frame camera input record (0x70 bytes) that cLookAtChaseAlgorithm_setupChaseData_8338 fills from the target for the chase algorithms.
+extern "C" void cLookAtChaseAlgorithm_setupChaseData_8338(void* self, sCamInfo* out, float a, float b, float c, float d,
+                              float e, float f, float g, float h) __asm__("cLookAtChaseAlgorithm_setupChaseData");
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
 static inline t4Vector cmScale_001607E0_8338(const t4Vector& v, float s)
@@ -10599,14 +10599,14 @@ extern "C" void cLazyChaseAlgorithm_update_v(char* self) __asm__("cLazyChaseAlgo
 /**
  * Runs one frame of the lazy chase camera: the eye trails the rider on a loose leash.
  *
- * After setupChaseData (func_00162568) sets CamTargetPos to the setup's position + Z * 2.36. With d = CamTargetPos -
+ * After setupChaseData (cLookAtChaseAlgorithm_setupChaseData) sets CamTargetPos to the setup's position + Z * 2.36. With d = CamTargetPos -
  * Position, the wanted eye is 180.2 units back from the target along d; Position eases toward it, keeping 0.992 of
  * the old eye at distances up to 188.1 and 0.860 from 775.5 on (linear between).
  */
 extern "C" void cLazyChaseAlgorithm_update_v(char* self)
 {
     sCamInfo info;
-    func_00162568_8338(self, &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+    cLookAtChaseAlgorithm_setupChaseData_8338(self, &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
     *(t4Vector*)(self + 0x20) = cmAdd_001607E0_8338(info.pos, cmScaleP_1848(&D_004FF160_8338, 2.3602666854858398f));
@@ -10927,7 +10927,7 @@ static inline sVec_1686D0 Get_1686D0(char* self, int slot)
  * Runs one frame of the look-back camera: builds a normal chase pose, then moves the eye past the rider to look back
  * at them.
  *
- * Runs setupChaseData (func_00162568), setupHalfPipeCam, updateCamTarget, setupCamDirection, updateFollowDistance
+ * Runs setupChaseData (cLookAtChaseAlgorithm_setupChaseData), setupHalfPipeCam, updateCamTarget, setupCamDirection, updateFollowDistance
  * (193.2 base, no speed or boost terms), updateDropWithSpeed (rise 1.24), updateFOVWithSpeed (0.993 * pi/4),
  * updateCamTargetLate, updateSlowSpeedCam (15 km/h, 1.5 s each way) and updateLateralShift (0.135, 1.77). Then
  * Position moves along the look line to 294.9 units beyond the look-at point, and CamTargetPos becomes the rider
@@ -10936,7 +10936,7 @@ static inline sVec_1686D0 Get_1686D0(char* self, int slot)
 extern "C" void cLookBackChaseAlgorithm_update(cLookBackChaseAlgorithm* self)
 {
     sCamInfo_001607E0 info;
-    func_00162568(((char*)self), &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f, 0.8513929843902588f,
+    cLookAtChaseAlgorithm_setupChaseData(((char*)self), &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f, 0.8513929843902588f,
                   0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f, 0.6000000238418579f);
     float zero = 0.0f;
     cLookAtChaseAlgorithm_setupHalfPipeCam(((cLookAtChaseAlgorithm*)self), (char*)&info);
@@ -11105,7 +11105,7 @@ void cLookAtChaseAlgorithm_updateHandplant_8(char* self, char* trig, float a, fl
 /**
  * Runs one frame of the mid-right chase camera: the full look-at chase pipeline with the rider shifted off centre.
  *
- * Runs setupChaseData (func_00162568), setupHandplantBlend, setupHalfPipeCam, updateCamTarget, setupCamDirection,
+ * Runs setupChaseData (cLookAtChaseAlgorithm_setupChaseData), setupHandplantBlend, setupHalfPipeCam, updateCamTarget, setupCamDirection,
  * updateFollowDistance (555.1 stopped, boost 307.1), updateDropWithSpeed, updateFOVWithSpeed (0.857 * pi/4),
  * updateHandplant, updateCamTargetLate, updateAirCam, updateHalfPipeCam (1.53 s), updateRailCam (rise 200.3),
  * updateViewCam (600, 300, 100), updateSlowSpeedCam (15 km/h) and updateLateralShift (-0.294, 0.652).
@@ -11114,7 +11114,7 @@ void cLookAtChaseAlgorithm_updateHandplant_8(char* self, char* trig, float a, fl
 extern "C" void cMidRightChaseAlgorithm_update(cMidRightChaseAlgorithm* self)
 {
     sCamInfo_001607E0 info;
-    func_00162568(((char*)self), &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f, 0.8513929843902588f,
+    cLookAtChaseAlgorithm_setupChaseData(((char*)self), &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f, 0.8513929843902588f,
                   0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f, 0.6000000238418579f);
     float zero = 0.0f;
     float k = 0.9800000190734863f;
@@ -11270,7 +11270,7 @@ void cLookAtChaseAlgorithm_updateHandplant_8(char* self, char* trig, float a, fl
 extern "C" void cMidLeftChaseAlgorithm_update(cMidLeftChaseAlgorithm* self)
 {
     sCamInfo_001607E0 info;
-    func_00162568(((char*)self), &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f, 0.8513929843902588f,
+    cLookAtChaseAlgorithm_setupChaseData(((char*)self), &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f, 0.8513929843902588f,
                   0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f, 0.6000000238418579f);
     float zero = 0.0f;
     float k = 0.9800000190734863f;

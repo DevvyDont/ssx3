@@ -1002,7 +1002,7 @@ INCLUDE_ASM("ui/uiengine", cUIIcon_render2D);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cUIThing_applyPivot(void* self, void* a, void* b);
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 
 struct sV3_8A78 {
     float x, y, z;
@@ -1117,7 +1117,7 @@ static inline void Rotate_8A78(sM33_8A78& m, const sV3_8A78& axis, float angle)
     sM33_8A78 r;
     float s;
     float c;
-    func_0031BE50(&s, &c, angle);
+    fSinCos(&s, &c, angle);
     float t = 1.0f - c;
     float x = axis.x;
     float y = axis.y;

@@ -10,14 +10,14 @@ int GetHashValue32(char* str);
 extern char str_08sel_char[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
-extern "C" void func_0015E050(void* cam, sVec4_181148* a, sVec4_181148* b);
+extern "C" void cSimpleCamera_setupCamWithPosAndTarget(void* cam, sVec4_181148* a, sVec4_181148* b);
 extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
 extern "C" void cFERider_setVisible(void* self, int a1);
 
 /**
  * Creates the character-select screen "08sel_char" and sets up the front-end camera and rider view.
  *
- * The camera (cFE::mCamera) gets (0, 200, 0) and the origin, probably position and target (func_0015E050),
+ * The camera (cFE::mCamera) gets (0, 200, 0) and the origin, probably position and target (cSimpleCamera_setupCamWithPosAndTarget),
  * and a field of view of 0.436 (25 degrees). Calls cFERider_setVisible with 0 on the user's front-end rider, sets
  * +0x80 to 1, +0x5C to -1 and +0x58 and +0x60 to 0.
  */
@@ -40,7 +40,7 @@ extern "C" void cFEStateCharSelect_onCreateScreen(void* self)
     lookAt.y = 0.0f;
     lookAt.z = 0.0f;
     lookAt.w = 1.0f;
-    func_0015E050((char*)cam + 0x10, &pos, &lookAt);
+    cSimpleCamera_setupCamWithPosAndTarget((char*)cam + 0x10, &pos, &lookAt);
     cam->fov = 0.4363323450088501f;
     cFERider_setVisible(cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
     *(int*)((char*)self + 0x80) = 1;
@@ -656,7 +656,7 @@ extern "C" void cFEStateCharSelect_updateWidget_impl(void* self, signed char rid
 //100%
 INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_updateCharacter3DPos);
 #ifdef SKIP_ASM
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void cRiderAnimBase_reset(void* anim);
 extern "C" void cRiderAnimBase_play(void* anim, int id, int a2, float t);
 
@@ -706,7 +706,7 @@ static inline sQuat_181EF0 QuatMul_181EF0(const sQuat_181EF0& a, const sQuat_181
 static inline sQuat_181EF0 AxisAngle_181EF0(const sQuat_181EF0& axis, float angle)
 {
     float s, c;
-    func_0031BE50(&s, &c, angle * 0.5f);
+    fSinCos(&s, &c, angle * 0.5f);
     return sQuat_181EF0(s * axis.x, s * axis.y, s * axis.z, c);
 }
 

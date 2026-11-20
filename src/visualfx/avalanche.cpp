@@ -205,7 +205,7 @@ extern sMat_5778 D_004FF1A0_5778 __asm__("t4mat_Identity");
 extern "C" void tActiveAvalancheNode_calculateScale_Data(void* self, float t) __asm__("tActiveAvalancheNode_calculateScale");
 // PORT: sine/cosine; the angle is set up first at both calls here (other units declare it (s, c, angle),
 // which uses the same registers), so it is declared angle-first under its own name.
-extern "C" void func_0031BE50_5778(float angle, float* s, float* c) __asm__("func_0031BE50");
+extern "C" void fSinCos_5778(float angle, float* s, float* c) __asm__("fSinCos");
 extern "C" void cDynamicColourEmitter_update_Data(float dt, void* emitter, sV4_5778* pos, sV4_5778* vel, sV4_5778* col, int on) __asm__("cDynamicColourEmitter_update");
 
 // Rotates obj->mat by ANGLE about AXIS, keeping its translation (used on the active node and on the
@@ -219,7 +219,7 @@ static inline void RotateFrame_5778(T* obj, const sV4_5778& axis, float angle)
     saved.r3 = D_004FF130_5778;
     float s;
     float c;
-    func_0031BE50_5778(angle, &s, &c);
+    fSinCos_5778(angle, &s, &c);
     float t = 1.0f - c;
     float tx = t * axis.x;
     float ty = t * axis.y;
@@ -1373,7 +1373,7 @@ extern int D_004A3A58;
 extern sOut_8A00 D_004D5B70_8A00[] __asm__("vertlist");
 extern sMat_8A00 D_004FF1A0_8A00 __asm__("t4mat_Identity");
 extern sRow_8A00 D_004FF130_8A00 __asm__("t4vect_Origin");
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 
 // PORT: PS2-only VU0 inline asm (matrix copy).
 static inline void CopyMat_8A00(sMat_8A00* d, const sMat_8A00* s)
@@ -1458,7 +1458,7 @@ static inline void Rotate_8A00(sMat_8A00& m, const sRow_8A00& axis, float angle)
     CopyMat_8A00(&old, &m);
     sRow_8A00 trans = old.v[3];
     old.v[3] = D_004FF130_8A00;
-    func_0031BE50(&s, &c, angle);
+    fSinCos(&s, &c, angle);
     float t = 1.0f - c;
     float x = axis.x;
     float y = axis.y;

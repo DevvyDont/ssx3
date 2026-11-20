@@ -269,7 +269,7 @@ struct sCTVec3G {
 };
 
 extern sCTVec3G t3vect_Zero;     // zero vector
-extern void* D_0045C3F0[];      // cCTObject vtable (the base class; the July preview's _vt$9cCTObject)
+extern void* cCTObject_vtbl[];      // cCTObject vtable (the base class; the July preview's _vt$9cCTObject)
 extern void* D_0045C2A8[];      // ellipse
 extern void* D_0045C268[];      // box
 extern void* D_0045C228[];      // line
@@ -291,7 +291,7 @@ struct sCTBoundObjG {
     void** vtable;      // 0x24
     sCTBoundObjG(const sCTVec3G& s, void** vt)
     {
-        vtable = D_0045C3F0;
+        vtable = cCTObject_vtbl;
         center = t3vect_Zero;
         f0C = 0;
         f10 = 0;
@@ -558,7 +558,7 @@ extern char str_Camera_Trigger_Spline[];
 
 struct sCTSplineG : sCTBoundObjG {
     sCTVec3G pts[4];    // 0x28
-    sCTSplineG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045C3F0)
+    sCTSplineG() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), cCTObject_vtbl)
     {
         pts[0] = t3vect_Zero;
         pts[1] = t3vect_Zero;
@@ -582,7 +582,7 @@ public:
  * Allocates a camera trigger spline and reads its data from a trigger stream.
  *
  * Constructs a "Camera Trigger Spline" (scale 1, position and control points zero; it keeps the cCTBoundObj
- * vtable D_0045C3F0), reads position, scale, heading, pitch and roll like the bounding shapes, then the four
+ * vtable cCTObject_vtbl), reads position, scale, heading, pitch and roll like the bounding shapes, then the four
  * control-point vectors at +0x28, +0x34, +0x40 and +0x4C. readAction calls it for a spline action.
  *
  * @param reader  pointer to the stream's read cursor, advanced past what is read
@@ -607,7 +607,7 @@ extern "C" int get_camspline(void* reader, cCTSplineK2** out)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00171FA8);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTVolume_getBoundaryPointClosestTo);
 #ifdef SKIP_ASM
 struct sVec4_171FA8 {
     float x, y, z, w;
@@ -735,7 +735,7 @@ static inline sVec4_171FA8 Center_171FA8(const sBox_171FA8& b)
  * @param step  the wanted accuracy in cm (On Tour tolerance_cm)
  * @return the boundary point (the last tested point outside the volume), returned by value
  */
-extern "C" sVec4_171FA8 func_00171FA8(char* obj, sVec4_171FA8* pos, float step)
+extern "C" sVec4_171FA8 cCTVolume_getBoundaryPointClosestTo(char* obj, sVec4_171FA8* pos, float step)
 {
     sVec4_171FA8 center = Center_171FA8(GetBox_171FA8(obj));
     sVec4_171FA8 dir = Sub_171FA8(*pos, center);
@@ -765,9 +765,9 @@ extern "C" sVec4_171FA8 func_00171FA8(char* obj, sVec4_171FA8* pos, float step)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001721C0);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTVolumeEllipse_boundBox);
 #ifdef SKIP_ASM
-extern "C" float func_001731C0(float* v);
+extern "C" float GetMaxElement(float* v);
 
 struct sCTVec3K2 {
     float x, y, z;
@@ -800,7 +800,7 @@ struct sCTBoxK2 {
 /**
  * Returns the bounding box of an ellipse trigger volume: its position plus or minus its largest scale component.
  *
- * The box is Pos (+0x0) - m and Pos + m, both with w = 1, where m = func_001731C0 (the largest of the three scale
+ * The box is Pos (+0x0) - m and Pos + m, both with w = 1, where m = GetMaxElement (the largest of the three scale
  * components at +0x18). This encloses the ellipsoid whatever its rotation. Slot 6 of the ellipse volume vtable
  * D_0045C350.
  *
@@ -808,9 +808,9 @@ struct sCTBoxK2 {
  * @return the bounding box (min, max), returned by value
  */
 // Bounding box of a trigger volume: centre +- the largest half-extent.
-extern "C" sCTBoxK2 func_001721C0(char* obj)
+extern "C" sCTBoxK2 cCTVolumeEllipse_boundBox(char* obj)
 {
-    float maxDist = func_001731C0((float*)(obj + 0x18));
+    float maxDist = GetMaxElement((float*)(obj + 0x18));
     sCTVec3K2 rv(maxDist, maxDist, maxDist);
     const sCTVec3K2& center = *(sCTVec3K2*)obj;
     return sCTBoxK2(sCTVec4K2(center - maxDist, 1.0f), sCTVec4K2(center + maxDist, 1.0f));
@@ -818,7 +818,7 @@ extern "C" sCTBoxK2 func_001721C0(char* obj)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00172278);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTVolumeEllipse_containsPoint);
 #ifdef SKIP_ASM
 struct sV3_172278 {
     float x, y, z;
@@ -869,7 +869,7 @@ extern sM_172278 D_004FF1A0_v172278 __asm__("t4mat_Identity");
 extern sV_172278 D_004FF140_v172278 __asm__("t4vect_XAxis");
 extern sV_172278 D_004FF150_v172278 __asm__("t4vect_YAxis");
 extern sV_172278 D_004FF160_v172278 __asm__("t4vect_ZAxis");
-extern "C" void func_0031BE50(float* sout, float* cout, float x);
+extern "C" void fSinCos(float* sout, float* cout, float x);
 
 // PORT: PS2-only VU0 inline asm (scale the rows of m by s.x, s.y, s.z, s.w).
 static inline sM_172278 vu0ScaleMtx_172278(const sM_172278& m, const sV_172278& s)
@@ -982,7 +982,7 @@ static inline sV_172278 vu0MulVec_172278(const sM_172278& m, const sV_172278& v)
 
 static inline void SinCos_172278(float* s, float* c, float angle)
 {
-    func_0031BE50(s, c, angle);
+    fSinCos(s, c, angle);
 }
 
 static inline void RotAxis_172278(sM_172278* m, const sV_172278& axis, float angle)
@@ -1033,7 +1033,7 @@ static inline void RotAxis_172278(sM_172278* m, const sV_172278& axis, float ang
  * @return 1 when the point is inside (or on) the ellipsoid, else 0
  */
 // Ellipsoid volume test: is p inside the unit sphere after the inverse transform?
-extern "C" int func_00172278(char* self, sV_172278* point)
+extern "C" int cCTVolumeEllipse_containsPoint(char* self, sV_172278* point)
 {
     sM_172278 toLocal(D_004FF1A0_v172278);
     float one = 1.0f;
@@ -1048,9 +1048,9 @@ extern "C" int func_00172278(char* self, sV_172278* point)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00172840);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTVolumeBox_boundBox);
 #ifdef SKIP_ASM
-extern "C" float func_001731C0(float* v);
+extern "C" float GetMaxElement(float* v);
 
 struct sCTVec3K2b {
     float x, y, z;
@@ -1083,7 +1083,7 @@ struct sCTBoxK2b {
 /**
  * Returns the bounding box of a box trigger volume: its position plus or minus its largest scale component.
  *
- * The same body as the ellipse version (func_001721C0): Pos (+0x0) -/+ func_001731C0 of the scale (+0x18), w = 1. Slot
+ * The same body as the ellipse version (cCTVolumeEllipse_boundBox): Pos (+0x0) -/+ GetMaxElement of the scale (+0x18), w = 1. Slot
  * 6 of the box volume vtable D_0045C300. For a box turned by its heading or pitch the corners reach up to sqrt(3) times
  * further than the largest half-extent, so such a box is not fully enclosed (likely bug).
  *
@@ -1091,9 +1091,9 @@ struct sCTBoxK2b {
  * @return the bounding box (min, max), returned by value
  */
 // Bounding box of a trigger volume: centre +- the largest half-extent.
-extern "C" sCTBoxK2b func_00172840(char* obj)
+extern "C" sCTBoxK2b cCTVolumeBox_boundBox(char* obj)
 {
-    float maxDist = func_001731C0((float*)(obj + 0x18));
+    float maxDist = GetMaxElement((float*)(obj + 0x18));
     sCTVec3K2b rv(maxDist, maxDist, maxDist);
     const sCTVec3K2b& center = *(sCTVec3K2b*)obj;
     return sCTBoxK2b(sCTVec4K2b(center - maxDist, 1.0f), sCTVec4K2b(center + maxDist, 1.0f));
@@ -1101,7 +1101,7 @@ extern "C" sCTBoxK2b func_00172840(char* obj)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001728F8);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTVolumeBox_containsPoint);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
@@ -1114,7 +1114,7 @@ extern t4Vector D_004FF160_28F8 __asm__("t4vect_ZAxis");
 
 extern t4Matrix D_004FF1A0_28F8 __asm__("t4mat_Identity");
 
-extern "C" void func_0031BE50(float* sout, float* cout, float x);
+extern "C" void fSinCos(float* sout, float* cout, float x);
 
 
 struct sVec3_28F8 {
@@ -1253,7 +1253,7 @@ struct sXform_28F8 {
     { \
         const float* ax = a; \
         float s, c; \
-        func_0031BE50(&s, &c, angle); \
+        fSinCos(&s, &c, angle); \
         float t = 1.0f - c; \
         float x = ax[0]; \
         float y = ax[1]; \
@@ -1345,7 +1345,7 @@ extern t4Vector D_004C5480[3];      // static local: the three box axes
  * forced to 1). The point is inside when, on each of the three axes (a static table D_004C5480 filled once with the X,
  * Y and Z axes, guarded by D_004A4DEC), it lies between -size and +size (the scale at +0x18 is a half-extent).
  *
- * Unlike the ellipse test (func_00172278) and the box bound object's limiter (func_0016F068), the roll (+0x14) is
+ * Unlike the ellipse test (cCTVolumeEllipse_containsPoint) and the box bound object's limiter (cCTBoundObjBox_limitPoint), the roll (+0x14) is
  * ignored. Slot 7 of the box volume vtable D_0045C300.
  *
  * @param t  the box volume (this): position, heading/pitch/roll and half-extents
@@ -1353,7 +1353,7 @@ extern t4Vector D_004C5480[3];      // static local: the three box axes
  * @return 1 when the point is inside the box, else 0
  */
 // cCTVolumeBox: is pt inside the (rotated) box?
-extern "C" int func_001728F8(const sXform_28F8* t, const t4Vector* pt)
+extern "C" int cCTVolumeBox_containsPoint(const sXform_28F8* t, const t4Vector* pt)
 {
     sMtx_28F8 toLocal = (const sMtx_28F8&)D_004FF1A0_28F8;
     {
@@ -1536,17 +1536,17 @@ extern "C" int get_cCTVolumeBox(void* reader, cCTVolumeBoxK2* obj)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001731C0);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", GetMaxElement);
 #ifdef SKIP_ASM
 /**
  * Returns the largest of three floats.
  *
- * Used on a trigger shape's scale (+0x18) by the volume bounding boxes func_001721C0 and func_00172840.
+ * Used on a trigger shape's scale (+0x18) by the volume bounding boxes cCTVolumeEllipse_boundBox and cCTVolumeBox_boundBox.
  *
  * @param halfExtents  the three components (x, y, z)
  * @return the largest component
  */
-extern "C" float func_001731C0(float* halfExtents)
+extern "C" float GetMaxElement(float* halfExtents)
 {
     float x = halfExtents[0];
     float y = halfExtents[1];
@@ -1563,7 +1563,7 @@ extern "C" float func_001731C0(float* halfExtents)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00173208);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTriggerAlgorithm_cTriggerAlgorithm);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cChaseAlgorithm_cChaseAlgorithm(void* self);
@@ -1583,11 +1583,11 @@ extern sQuad_00173208 D_004FF130_00173208 __asm__("t4vect_Origin");
  * (+0x5C) 10.3, PitchAdjustRate (+0x60) 1.1, HeadingLookRate (+0x64) 5, PitchLookRate (+0x68) 10, HeightOffset (+0x6C)
  * 70, IdealDist (+0x70) 400, LeadDistance (+0x74) 0 and PitchOffset (+0x78) 20 (degrees).
  *
- * The bounded-camera constructor func_00174190 builds on it.
+ * The bounded-camera constructor cBoundedAlgorithm_cBoundedAlgorithm builds on it.
  *
  * @return @p self
  */
-extern "C" void* func_00173208(void* self)
+extern "C" void* cTriggerAlgorithm_cTriggerAlgorithm(void* self)
 {
     cChaseAlgorithm_cChaseAlgorithm(self);
     *(void***)((char*)self + 0x10) = D_0045C4C8;
@@ -1609,25 +1609,25 @@ extern "C" void* func_00173208(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001732B8);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTriggerAlgorithm__cTriggerAlgorithm);
 #ifdef SKIP_ASM
 extern void* D_0045BDE0[];
 void operator_delete(int* ptr);
 
-// PORT: the unit declares func_001732B8 as `void* (void*)` (callers pass the
+// PORT: the unit declares cTriggerAlgorithm__cTriggerAlgorithm as `void* (void*)` (callers pass the
 // flags through in $a1); the real body takes (self, flags). Bound by asm label.
-void func_001732B8_impl(void* self, int flags) __asm__("func_001732B8");
+void cTriggerAlgorithm__cTriggerAlgorithm_impl(void* self, int flags) __asm__("cTriggerAlgorithm__cTriggerAlgorithm");
 
 /**
  * Destroys a trigger camera algorithm: puts back the base camera-algorithm vtable and frees the object when asked.
  *
  * Stores cCameraAlgorithm's vtable D_0045BDE0 at +0x10 and calls operator_delete when bit 0 of @p flags is set. Slot 1
- * of the trigger algorithm vtable D_0045C4C8; the bounded algorithm's destructor func_001741D8 chains to it.
+ * of the trigger algorithm vtable D_0045C4C8; the bounded algorithm's destructor cBoundedAlgorithm__cBoundedAlgorithm chains to it.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-void func_001732B8_impl(void* self, int flags)
+void cTriggerAlgorithm__cTriggerAlgorithm_impl(void* self, int flags)
 {
     *(void***)((char*)self + 0x10) = D_0045BDE0;
     if (flags & 1) {
@@ -1637,7 +1637,7 @@ void func_001732B8_impl(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001732E8);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTriggerAlgorithm_snap);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
@@ -1653,7 +1653,7 @@ struct sVec2 {
 extern t4Vector D_004FF160_32E8 __asm__("t4vect_ZAxis");
 
 extern "C" float func_0031C228(float x);
-extern "C" void func_0031BE50(float* sout, float* cout, float x);
+extern "C" void fSinCos(float* sout, float* cout, float x);
 
 // PORT: PS2-only VU0 inline asm (dst += b).
 static inline void AddEq_1732E8(t4Vector& dst, const t4Vector& b)
@@ -1748,7 +1748,7 @@ static inline float Atan2_1732E8(float y, float x)
     return a;
 }
 
-extern "C" void func_001732E8_x(char* self, long key) __asm__("func_001732E8");
+extern "C" void cTriggerAlgorithm_snap_x(char* self, long key) __asm__("cTriggerAlgorithm_snap");
 /**
  * Snaps a trigger camera into place behind the rider it follows, when @p key names that rider.
  *
@@ -1757,11 +1757,11 @@ extern "C" void func_001732E8_x(char* self, long key) __asm__("func_001732E8");
  * t4vect_ZAxis and pushed LeadDistance (+0x74) along getFront (slot 4). Heading (+0x50) becomes the wrapped yaw of the
  * front vector and Pitch (+0x54) the wrapped -PitchMultiplier (+0x58) x the front vector's pitch minus PitchOffset
  * (+0x78, degrees); Position (+0x40) is put IdealDist (+0x70) back from the focus along the direction given by that
- * heading and pitch. Finally it calls its own virtual update (slot 5, func_001736E0 for this class).
+ * heading and pitch. Finally it calls its own virtual update (slot 5, cTriggerAlgorithm_update for this class).
  *
  * @param key  the subject to snap for: the rider's AI index (On Tour subjectID)
  */
-extern "C" void func_001732E8_x(char* self, long key)
+extern "C" void cTriggerAlgorithm_snap_x(char* self, long key)
 {
     char* riderTarget = *(char**)(self + 0x30);
     char* riderPart = *(char**)(riderTarget + 4) + 0x6C0;
@@ -1786,8 +1786,8 @@ extern "C" void func_001732E8_x(char* self, long key)
     float mm = -*(float*)(self + 0x78) * 0.01745329424738884f;
     *(float*)(self + 0x54) = wrap_1732E8(frontPitch * -*(float*)(self + 0x58) + mm);
     float sinHeading, cosHeading, sinPitch, cosPitch;
-    func_0031BE50(&sinHeading, &cosHeading, *(float*)(self + 0x50));
-    func_0031BE50(&sinPitch, &cosPitch, -*(float*)(self + 0x54));
+    fSinCos(&sinHeading, &cosHeading, *(float*)(self + 0x50));
+    fSinCos(&sinPitch, &cosPitch, -*(float*)(self + 0x54));
     dir.x = cosPitch * cosHeading;
     dir.y = cosPitch * sinHeading;
     dir.z = -sinPitch;
@@ -1799,7 +1799,7 @@ extern "C" void func_001732E8_x(char* self, long key)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00173678);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTriggerAlgorithm_snapCurrent);
 #ifdef SKIP_ASM
 struct sVE173678a {
     short delta;
@@ -1819,7 +1819,7 @@ struct sVE173678b {
  * Calls its own virtual snap (slot 3) with that rider's AI index (slot 7 of the rider's +0x6C0 part, reached through
  * Target +0x30 and its Rider +0x4).
  */
-extern "C" void* func_00173678(void* self)
+extern "C" void* cTriggerAlgorithm_snapCurrent(void* self)
 {
     sVE173678b* vt = *(sVE173678b**)((char*)self + 0x10);
     char* riderIface = *(char**)(*(char**)((char*)self + 0x30) + 0x4) + 0x6C0;
@@ -1829,7 +1829,7 @@ extern "C" void* func_00173678(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001736E0);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTriggerAlgorithm_update);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
@@ -1844,7 +1844,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001736E0);
 extern t4Vector D_004FF160_36E0 __asm__("t4vect_ZAxis");
 
 extern "C" float func_0031C228(float x);
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 
 // PORT: PS2-only VU0 inline asm (d += b).
 static inline void AddEq_1736E0(t4Vector& d, const t4Vector& b)
@@ -1995,7 +1995,7 @@ static inline float Wrap_1736E0(float v)
  * Position (+0x40) is set from those, then Heading (+0x50) and Pitch (+0x54) turn toward the new camera-to-focus
  * direction by HeadingLookRate (+0x64) / 60 and PitchLookRate (+0x68) / 60 (the pitch step is not wrapped).
  */
-extern "C" void func_001736E0(char* self)
+extern "C" void cTriggerAlgorithm_update(char* self)
 {
     t4Vector focusPos, riderVel, riderFront;
     char* riderTarget = *(char**)(self + 0x30);
@@ -2043,8 +2043,8 @@ extern "C" void func_001736E0(char* self)
     t4Vector dir;
     t4Vector n;
     float sc0, sc1, sc2, sc3;
-    func_0031BE50(&sc0, &sc1, yawN);
-    func_0031BE50(&sc2, &sc3, pitchN);
+    fSinCos(&sc0, &sc1, yawN);
+    fSinCos(&sc2, &sc3, pitchN);
     dir.x = sc3 * sc1;
     dir.y = sc3 * sc0;
     dir.z = -sc2;
@@ -2066,7 +2066,7 @@ extern "C" void func_001736E0(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00173E40);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTriggerAlgorithm_getPose);
 #ifdef SKIP_ASM
 struct sV_173E40 {
     float x, y, z, w;
@@ -2084,8 +2084,8 @@ struct sPair_173E40 {
 extern sM_173E40 t4mat_Identity;
 extern sV_173E40 t4vect_YAxis;
 extern sV_173E40 D_004FF160_v173E40 __asm__("t4vect_ZAxis");
-extern "C" void func_0031BE50(float* sout, float* cout, float x);
-extern "C" sPair_173E40 func_0031B748(sM_173E40* m);
+extern "C" void fSinCos(float* sout, float* cout, float x);
+extern "C" sPair_173E40 tPose_tPose(sM_173E40* m);
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
 static inline void vu0CopyMtx_173E40(sM_173E40* dst, const sM_173E40* src)
@@ -2168,7 +2168,7 @@ static inline void vu0TransMtx_173E40(sM_173E40* m, const sV_173E40& v)
 
 static inline void SinCos_173E40(float* s, float* c, float angle)
 {
-    func_0031BE50(s, c, angle);
+    fSinCos(s, c, angle);
 }
 
 static inline void RotAxis_173E40(sM_173E40* m, const sV_173E40& axis, float angle)
@@ -2211,42 +2211,42 @@ static inline void RotAxis_173E40(sM_173E40* m, const sV_173E40& axis, float ang
  * Returns a trigger camera's pose: Position turned by Pitch and Heading.
  *
  * Starts from t4mat_Identity translated to Position (+0x40), rotates it about t4vect_YAxis by -Pitch (+0x54) and about
- * t4vect_ZAxis by Heading (+0x50), and splits the matrix into a position and a rotation quaternion with func_0031B748.
+ * t4vect_ZAxis by Heading (+0x50), and splits the matrix into a position and a rotation quaternion with tPose_tPose.
  * Slot 2 of both the trigger (D_0045C4C8) and the bounded (D_0045C458) algorithm vtables.
  *
  * @param src  the trigger camera algorithm (this)
  * @return the pose: position and rotation quaternion (On Tour tPose), returned by value
  */
-extern "C" sPair_173E40 func_00173E40(char* src)
+extern "C" sPair_173E40 cTriggerAlgorithm_getPose(char* src)
 {
     sM_173E40 poseMtx;
     vu0CopyMtx_173E40(&poseMtx, &t4mat_Identity);
     vu0TransMtx_173E40(&poseMtx, *(sV_173E40*)(src + 0x40));
     RotAxis_173E40(&poseMtx, t4vect_YAxis, -*(float*)(src + 0x54));
     RotAxis_173E40(&poseMtx, D_004FF160_v173E40, *(float*)(src + 0x50));
-    return func_0031B748(&poseMtx);
+    return tPose_tPose(&poseMtx);
 }
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00174190);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm_cBoundedAlgorithm);
 #ifdef SKIP_ASM
 extern void* D_0045C458[];
-extern "C" void* func_00173208(void* self);
+extern "C" void* cTriggerAlgorithm_cTriggerAlgorithm(void* self);
 
 /**
  * Constructs a bounded trigger camera: a trigger camera whose position is kept inside a bound object.
  *
- * Runs the trigger algorithm constructor func_00173208, then sets AlgorithmType (+0xC) to 91 (On Tour
+ * Runs the trigger algorithm constructor cTriggerAlgorithm_cTriggerAlgorithm, then sets AlgorithmType (+0xC) to 91 (On Tour
  * CAMERA_ALGORITHM_TRIGGER_BOUNDED), installs the vtable D_0045C458 and zeroes BoundAction (+0x80) and LeadDistance
  * (+0x74). cChaseCameraController_createChaseAlgorithmBlend allocates it (0x90 bytes) for a camera type 91 action and
  * stores the action in BoundAction.
  *
  * @return @p self
  */
-extern "C" void* func_00174190(void* self)
+extern "C" void* cBoundedAlgorithm_cBoundedAlgorithm(void* self)
 {
-    func_00173208(self);
+    cTriggerAlgorithm_cTriggerAlgorithm(self);
     *(int*)((char*)self + 0xC) = 91;
     *(void***)((char*)self + 0x10) = D_0045C458;
     *(int*)((char*)self + 0x80) = 0;
@@ -2256,28 +2256,28 @@ extern "C" void* func_00174190(void* self)
 #endif
 
 extern void* D_0045C458[];
-extern "C" void* func_001732B8(void*);
+extern "C" void* cTriggerAlgorithm__cTriggerAlgorithm(void*);
 
 //99.5%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001741D8__FPv);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm__cBoundedAlgorithm__FPv);
 #ifdef SKIP_ASM
 /**
  * Destroys a bounded trigger camera: re-installs its vtable D_0045C458 and chains to the trigger algorithm destructor.
  *
- * Stores D_0045C458 at +0x10 and calls func_001732B8, which puts back the base vtable and frees the object when bit 0
+ * Stores D_0045C458 at +0x10 and calls cTriggerAlgorithm__cTriggerAlgorithm, which puts back the base vtable and frees the object when bit 0
  * of the g++ destructor flags (passed through in $a1, not declared here) is set.
  *
- * @return func_001732B8's result (the destructor returns nothing)
+ * @return cTriggerAlgorithm__cTriggerAlgorithm's result (the destructor returns nothing)
  */
-void* func_001741D8(void* self)
+void* cBoundedAlgorithm__cBoundedAlgorithm(void* self)
 {
     *(int*)((char*)self + 0x10) = (int)(void*)D_0045C458;
-    return func_001732B8(self);
+    return cTriggerAlgorithm__cTriggerAlgorithm(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00174200);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm_update);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
@@ -2415,7 +2415,7 @@ static inline float Atan2_174200(float y, float x)
  * CamTargetPos (+0x20). The action's BoundObj (+0x8) then limits Position (+0x40) through its virtual slot 6
  * (limitPoint), and Heading (+0x50) and Pitch (+0x54) are set to look straight from Position at the target.
  */
-extern "C" void func_00174200(char* self)
+extern "C" void cBoundedAlgorithm_update(char* self)
 {
     char* act = *(char**)(self + 0x80);
     *(float*)(self + 0x70) = *(float*)(act + 0x10);
@@ -2457,7 +2457,7 @@ extern "C" void func_00174200(char* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001744B0);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm_snap);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "bx/math3d.h"
@@ -2584,16 +2584,16 @@ static inline float Atan2_1744B0(float y, float x)
     return a;
 }
 
-extern "C" void func_001732E8(void* self, long a1);
+extern "C" void cTriggerAlgorithm_snap(void* self, long a1);
 
 /**
  * Snaps a bounded trigger camera into place for the rider @p subjectId names: the trigger camera snap, then the bound object
  * limit.
  *
  * Does nothing unless @p subjectId equals slot 7 (getAIIndex) of the target rider's +0x6C0 part. Computes the look target like
- * func_00174200 (the action's TargetPoint for TargetType 1, else rider position + lead + height), but with the
+ * cBoundedAlgorithm_update (the action's TargetPoint for TargetType 1, else rider position + lead + height), but with the
  * LeadDistance (+0x74) and HeightOffset (+0x6C) the algorithm held before; only then copies IdealDist, HeightOffset,
- * PitchOffset, FieldOfView and LeadDistance from BoundAction (+0x80). Runs the trigger algorithm snap func_001732E8,
+ * PitchOffset, FieldOfView and LeadDistance from BoundAction (+0x80). Runs the trigger algorithm snap cTriggerAlgorithm_snap,
  * lets the action's BoundObj limit Position (slot 6), and aims Heading (+0x50) and Pitch (+0x54) from Position at the
  * look target.
  *
@@ -2601,7 +2601,7 @@ extern "C" void func_001732E8(void* self, long a1);
  *
  * @param subjectId  the subject to snap for: the rider's AI index (On Tour subjectID)
  */
-extern "C" void func_001744B0(char* self, long subjectId)
+extern "C" void cBoundedAlgorithm_snap(char* self, long subjectId)
 {
     {
         char* calleeObj = *(char**)(*(char**)(self + 0x30) + 4) + 0x6C0;
@@ -2637,7 +2637,7 @@ extern "C" void func_001744B0(char* self, long subjectId)
     *(float*)(self + 0x78) = *(float*)(act2 + 0x1C);
     *(float*)(self + 0x00) = *(float*)(act2 + 0x14);
     *(float*)(self + 0x74) = *(float*)(act2 + 0x20);
-    func_001732E8(self, subjectId);
+    cTriggerAlgorithm_snap(self, subjectId);
     {
         char* calleeObj = *(char**)(*(char**)(self + 0x80) + 8);
         sVEntry<t4Vector(void*)>* vEntry = &(*(sVEntry<t4Vector(void*)>**)(calleeObj + 0x24))[6];
@@ -2650,7 +2650,7 @@ extern "C" void func_001744B0(char* self, long subjectId)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001747A0);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm_snapCurrent);
 #ifdef SKIP_ASM
 struct sVE1747A0a {
     short delta;
@@ -2667,10 +2667,10 @@ struct sVE1747A0b {
 /**
  * Snaps a bounded trigger camera for the rider it currently follows.
  *
- * Calls its own virtual snap (slot 3, func_001744B0) with that rider's AI index (slot 7 of the rider's +0x6C0 part,
+ * Calls its own virtual snap (slot 3, cBoundedAlgorithm_snap) with that rider's AI index (slot 7 of the rider's +0x6C0 part,
  * through Target +0x30 and its Rider +0x4).
  */
-extern "C" void* func_001747A0(void* self)
+extern "C" void* cBoundedAlgorithm_snapCurrent(void* self)
 {
     sVE1747A0b* vt = *(sVE1747A0b**)((char*)self + 0x10);
     char* riderIface = *(char**)(*(char**)((char*)self + 0x30) + 0x4) + 0x6C0;
@@ -2697,7 +2697,7 @@ extern "C" void* func_00174808(void* self, ...)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00174848);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", nash_privy_QueryHelper_helpX);
 #ifdef SKIP_ASM
 // Camera-trigger octree query (REF crates/ssx3-game/src/game/camera/trigger/cameratriggerfactory.rs,
 // "CollectOctreeTriggersInBox"): adds the node's triggers, then visits the eight children whose
@@ -2726,9 +2726,9 @@ struct sBox_4848 {
     float maxx, maxy, maxz, pad1;
 };
 
-extern "C" void* func_0016C6B0(void*, void*);
+extern "C" void* cActiveTriggerList_find(void*, void*);
 extern "C" void cActiveTriggerList_add(void*, void*);
-extern "C" void func_00176890(void* node, void* ctx);
+extern "C" void descend(void* node, void* ctx);
 
 static inline void WalkList_4848(char* e, void* ctx)
 {
@@ -2742,7 +2742,7 @@ static inline void WalkList_4848(char* e, void* ctx)
             char* bthis = bound + bvt[7].delta;
             int r = cvt[5].fn(sub + cvt[5].delta);
             if (bvt[7].fn(bthis, r)) {
-                void* f = func_0016C6B0(*(void**)ctx, trig);
+                void* f = cActiveTriggerList_find(*(void**)ctx, trig);
                 if (f) {
                     *(int*)((char*)f + 0xC) = 1;
                 } else {
@@ -2756,14 +2756,14 @@ static inline void WalkList_4848(char* e, void* ctx)
 static inline void Subtree_4848(sOctNode_4848* node, void* ctx)
 {
     WalkList_4848(node->list, ctx);
-    if (node->child[0]) func_00176890(node->child[0], ctx);
-    if (node->child[1]) func_00176890(node->child[1], ctx);
-    if (node->child[2]) func_00176890(node->child[2], ctx);
-    if (node->child[3]) func_00176890(node->child[3], ctx);
-    if (node->child[4]) func_00176890(node->child[4], ctx);
-    if (node->child[5]) func_00176890(node->child[5], ctx);
-    if (node->child[6]) func_00176890(node->child[6], ctx);
-    if (node->child[7]) func_00176890(node->child[7], ctx);
+    if (node->child[0]) descend(node->child[0], ctx);
+    if (node->child[1]) descend(node->child[1], ctx);
+    if (node->child[2]) descend(node->child[2], ctx);
+    if (node->child[3]) descend(node->child[3], ctx);
+    if (node->child[4]) descend(node->child[4], ctx);
+    if (node->child[5]) descend(node->child[5], ctx);
+    if (node->child[6]) descend(node->child[6], ctx);
+    if (node->child[7]) descend(node->child[7], ctx);
 }
 
 /**
@@ -2772,16 +2772,16 @@ static inline void Subtree_4848(sOctNode_4848* node, void* ctx)
  *
  * First runs the crossing callback (@p ctx1, inlined) on the cell's own node list (+0x28): every entry of type 4 is a
  * camera trigger, and when the trigger's Volume (+0x8) contains the rider's position (volume slot 7 containsPoint,
- * rider +0x6C0 slot 5 getPosition) the trigger is flagged in the active list (node +0xC = 1, found with func_0016C6B0)
+ * rider +0x6C0 slot 5 getPosition) the trigger is flagged in the active list (node +0xC = 1, found with cActiveTriggerList_find)
  * or added to it (cActiveTriggerList_add). Cells at level 11 stop there.
  *
  * Otherwise the children are 2^(level - 1) units wide; for each axis it checks which of the two child spans, widened by
  * 0.2 cell on both sides, overlap the box (returning when neither does) and which lie wholly inside it. It then visits
  * the eight children in the order 0, 1, 3, 2, 6, 7, 5, 4 with the child key kept up to date: an overlapping child
- * wholly inside the box gets the inside callback (@p ctx2) on its own list and func_00176890 on each of its children,
+ * wholly inside the box gets the inside callback (@p ctx2) on its own list and descend on each of its children,
  * any other overlapping child is handled by a recursive call.
  *
- * Called by func_0016D320 for the root cells of the world's octree (SSXApp->Game->BXNash) that cross the rider's box.
+ * Called by cCameraTriggerMan_checkCollisions for the root cells of the world's octree (SSXApp->Game->BXNash) that cross the rider's box.
  *
  * @param hit  the query helper object (this); unused, the caller passes a byte of a local flag array
  * @param ctx1  the crossing callback (On Tour CameraCollisionCallback: the active trigger list and the rider)
@@ -2790,7 +2790,7 @@ static inline void Subtree_4848(sOctNode_4848* node, void* ctx)
  * @param node  the octree cell (On Tour Cell: children[2][2][2], node lists from +0x20)
  * @param cell  the cell's key: level and x, y, z cell coordinates (On Tour CellKey)
  */
-extern "C" void func_00174848(int hit, void* ctx1, void* ctx2, sBox_4848* box, sOctNode_4848* node, sCell_4848* cell)
+extern "C" void nash_privy_QueryHelper_helpX(int hit, void* ctx1, void* ctx2, sBox_4848* box, sOctNode_4848* node, sCell_4848* cell)
 {
     sCell_4848 childCell;
     sOctNode_4848* ch;
@@ -2854,7 +2854,7 @@ extern "C" void func_00174848(int hit, void* ctx1, void* ctx2, sBox_4848* box, s
         if (iu0 && iv0 && iw0) {
             Subtree_4848(ch, ctx2);
         } else {
-            func_00174848(hit, ctx1, ctx2, box, ch, &childCell);
+            nash_privy_QueryHelper_helpX(hit, ctx1, ctx2, box, ch, &childCell);
         }
     }
     childCell.w++;
@@ -2863,7 +2863,7 @@ extern "C" void func_00174848(int hit, void* ctx1, void* ctx2, sBox_4848* box, s
         if (iu0 && iv0 && iw1) {
             Subtree_4848(ch, ctx2);
         } else {
-            func_00174848(hit, ctx1, ctx2, box, ch, &childCell);
+            nash_privy_QueryHelper_helpX(hit, ctx1, ctx2, box, ch, &childCell);
         }
     }
     childCell.v++;
@@ -2872,7 +2872,7 @@ extern "C" void func_00174848(int hit, void* ctx1, void* ctx2, sBox_4848* box, s
         if (iu0 && iv1 && iw1) {
             Subtree_4848(ch, ctx2);
         } else {
-            func_00174848(hit, ctx1, ctx2, box, ch, &childCell);
+            nash_privy_QueryHelper_helpX(hit, ctx1, ctx2, box, ch, &childCell);
         }
     }
     childCell.w--;
@@ -2881,7 +2881,7 @@ extern "C" void func_00174848(int hit, void* ctx1, void* ctx2, sBox_4848* box, s
         if (iu0 && iv1 && iw0) {
             Subtree_4848(ch, ctx2);
         } else {
-            func_00174848(hit, ctx1, ctx2, box, ch, &childCell);
+            nash_privy_QueryHelper_helpX(hit, ctx1, ctx2, box, ch, &childCell);
         }
     }
     childCell.u++;
@@ -2890,7 +2890,7 @@ extern "C" void func_00174848(int hit, void* ctx1, void* ctx2, sBox_4848* box, s
         if (iu1 && iv1 && iw0) {
             Subtree_4848(ch, ctx2);
         } else {
-            func_00174848(hit, ctx1, ctx2, box, ch, &childCell);
+            nash_privy_QueryHelper_helpX(hit, ctx1, ctx2, box, ch, &childCell);
         }
     }
     childCell.w++;
@@ -2899,7 +2899,7 @@ extern "C" void func_00174848(int hit, void* ctx1, void* ctx2, sBox_4848* box, s
         if (iu1 && iv1 && iw1) {
             Subtree_4848(ch, ctx2);
         } else {
-            func_00174848(hit, ctx1, ctx2, box, ch, &childCell);
+            nash_privy_QueryHelper_helpX(hit, ctx1, ctx2, box, ch, &childCell);
         }
     }
     childCell.v--;
@@ -2908,7 +2908,7 @@ extern "C" void func_00174848(int hit, void* ctx1, void* ctx2, sBox_4848* box, s
         if (iu1 && iv0 && iw1) {
             Subtree_4848(ch, ctx2);
         } else {
-            func_00174848(hit, ctx1, ctx2, box, ch, &childCell);
+            nash_privy_QueryHelper_helpX(hit, ctx1, ctx2, box, ch, &childCell);
         }
     }
     childCell.w--;
@@ -2917,7 +2917,7 @@ extern "C" void func_00174848(int hit, void* ctx1, void* ctx2, sBox_4848* box, s
         if (iu1 && iv0 && iw0) {
             Subtree_4848(ch, ctx2);
         } else {
-            func_00174848(hit, ctx1, ctx2, box, ch, &childCell);
+            nash_privy_QueryHelper_helpX(hit, ctx1, ctx2, box, ch, &childCell);
         }
     }
 }
@@ -2984,7 +2984,7 @@ extern float D_004C57F0[4];
 extern float D_004C5800[4];
 extern float D_004C5810[4];
 extern float D_004C5820[4];
-extern "C" void* func_0016C800(void*);
+extern "C" void* cCameraTriggerMan_cCameraTriggerMan(void*);
 extern "C" void cCameraTriggerMan__cCameraTriggerMan(void*, int);
 extern char gCamTriggerMan[];
 extern int D_004A4DF0;
@@ -2995,7 +2995,7 @@ void sti_00175A20(int init, int prio) __asm__("func_00175A20");
  * Only priority 0xFFFF does anything. With @p init set it fills the 56 four-float constants D_004C54B0..D_004C5820 (the
  * colour and blend vectors every unit of this kind sets up; nothing else in the ELF reads these copies), sets the word
  * D_004A4DF0 to all ones (its low byte, then the upper 24 bits) and constructs the camera trigger manager
- * gCamTriggerMan with func_0016C800. With @p init clear it destroys gCamTriggerMan
+ * gCamTriggerMan with cCameraTriggerMan_cCameraTriggerMan. With @p init clear it destroys gCamTriggerMan
  * (cCameraTriggerMan__cCameraTriggerMan, flags 2). func_00176A28 calls it with (1, 0xFFFF) and func_00176A48 with (0,
  * 0xFFFF).
  *
@@ -3232,7 +3232,7 @@ void sti_00175A20(int init, int prio)
             D_004C5820[3] = 0.0f;
             *(char*)&D_004A4DF0 = -1;
             D_004A4DF0 = (D_004A4DF0 & 0xFF) | 0xFFFFFF00u;
-            func_0016C800(gCamTriggerMan);
+            cCameraTriggerMan_cCameraTriggerMan(gCamTriggerMan);
         } else {
             cCameraTriggerMan__cCameraTriggerMan(gCamTriggerMan, 2);
         }
@@ -3265,7 +3265,7 @@ extern "C" void func_00176270(void* self, int flags)
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001762A0);
 #ifdef SKIP_ASM
 /**
- * Does nothing: an unreferenced copy of the base camera algorithm's empty snap (slot 3; func_00167E18 in the vtable).
+ * Does nothing: an unreferenced copy of the base camera algorithm's empty snap (slot 3; cCameraAlgorithm_snap in the vtable).
  */
 extern "C" void func_001762A0(void) {
 
@@ -3275,7 +3275,7 @@ extern "C" void func_001762A0(void) {
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001762A8);
 #ifdef SKIP_ASM
 /**
- * Does nothing: an unreferenced copy of the base camera algorithm's empty snapCurrent (slot 4; func_00167E20 in the
+ * Does nothing: an unreferenced copy of the base camera algorithm's empty snapCurrent (slot 4; cCameraAlgorithm_snapCurrent in the
  * vtable).
  */
 extern "C" void func_001762A8(void) {
@@ -3286,7 +3286,7 @@ extern "C" void func_001762A8(void) {
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001762B0);
 #ifdef SKIP_ASM
 /**
- * Does nothing: an unreferenced copy of the base camera algorithm's empty update (slot 5; func_00167E28 in the vtable).
+ * Does nothing: an unreferenced copy of the base camera algorithm's empty update (slot 5; cCameraAlgorithm_update in the vtable).
  */
 extern "C" void func_001762B0(void) {
 
@@ -3312,7 +3312,7 @@ extern long long t4vect_Zero;
 
 /**
  * Returns the zero vector as the target position: an unreferenced copy of the base camera algorithm's getTargetPos
- * (func_00167E40).
+ * (cCameraAlgorithm_getTargetPos).
  *
  * Copies t4vect_Zero into @p result.
  *
@@ -3328,7 +3328,7 @@ extern "C" long long *func_001762C8(long long *result) {
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001762E0);
 #ifdef SKIP_ASM
 /**
- * Does nothing: an unreferenced copy of the base camera algorithm's empty getRaceCamFinalPhaseData (func_00167E58).
+ * Does nothing: an unreferenced copy of the base camera algorithm's empty getRaceCamFinalPhaseData (cCameraAlgorithm_getRaceCamFinalPhaseData).
  */
 extern "C" void func_001762E0(void) {
 
@@ -3338,7 +3338,7 @@ extern "C" void func_001762E0(void) {
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001762E8);
 #ifdef SKIP_ASM
 /**
- * Does nothing: an unreferenced copy of the base camera algorithm's empty doRaceCamFinalPhase (func_00167E60).
+ * Does nothing: an unreferenced copy of the base camera algorithm's empty doRaceCamFinalPhase (cCameraAlgorithm_doRaceCamFinalPhase).
  */
 extern "C" void func_001762E8(void) {
 
@@ -3383,7 +3383,7 @@ extern "C" void func_00176318(void) {
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176320);
 #ifdef SKIP_ASM
 /**
- * Returns 0: an unreferenced copy of the base camera algorithm's shouldSnapOnUpdate (func_00167E98).
+ * Returns 0: an unreferenced copy of the base camera algorithm's shouldSnapOnUpdate (cCameraAlgorithm_shouldSnapOnUpdate).
  *
  * @return 0 (false)
  */
@@ -3393,7 +3393,7 @@ extern "C" int func_00176320(void) {
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176328);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptAlgorithm__cScriptAlgorithm);
 #ifdef SKIP_ASM
 extern void* D_0045BDE0[];
 void operator_delete(int* ptr);
@@ -3407,7 +3407,7 @@ void operator_delete(int* ptr);
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void func_00176328(void* self, int flags)
+extern "C" void cScriptAlgorithm__cScriptAlgorithm(void* self, int flags)
 {
     *(void***)((char*)self + 0x10) = D_0045BDE0;
     if (flags & 1) {
@@ -3419,7 +3419,7 @@ extern "C" void func_00176328(void* self, int flags)
 typedef int cQuad128 __attribute__((mode(TI)));
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176358);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cScriptAlgorithm_getTargetPos);
 #ifdef SKIP_ASM
 /**
  * Returns a script camera algorithm's target position.
@@ -3432,7 +3432,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176358);
  * @param scriptAlgo  the script camera algorithm (this)
  * @return @p self, holding the target position
  */
-extern "C" void* func_00176358(void* self, void* scriptAlgo)
+extern "C" void* cScriptAlgorithm_getTargetPos(void* self, void* scriptAlgo)
 {
     *(cQuad128*)self = *(cQuad128*)((char*)scriptAlgo + 0x20);
     return self;
@@ -3536,7 +3536,7 @@ extern "C" void cScriptRelativeAlgorithm__cScriptRelativeAlgorithm(void* self, i
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176428);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm_setBoundAction);
 #ifdef SKIP_ASM
 /**
  * Sets a bounded camera algorithm's bound action.
@@ -3547,12 +3547,12 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176428);
  * @param boundedAlgo  the bounded camera algorithm (this)
  * @param boundAction  the cCTActionBoundedCam to follow
  */
-extern "C" void func_00176428(void *boundedAlgo, int boundAction) {
+extern "C" void cBoundedAlgorithm_setBoundAction(void *boundedAlgo, int boundAction) {
     (*(int *)((char*)(boundedAlgo) + (0x80))) = boundAction;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176430);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBoundedAlgorithm_getBoundAction);
 #ifdef SKIP_ASM
 /**
  * Returns a bounded camera algorithm's bound action.
@@ -3562,7 +3562,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176430);
  * @param boundedAlgo  the bounded camera algorithm (this)
  * @return the cCTActionBoundedCam pointer at +0x80
  */
-extern "C" int func_00176430(void *boundedAlgo) {
+extern "C" int cBoundedAlgorithm_getBoundAction(void *boundedAlgo) {
     return (*(int *)((char*)(boundedAlgo) + (0x80)));
 }
 #endif
@@ -3653,7 +3653,7 @@ void* cCTObject_scale(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176468);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTVolume_cCTVolume);
 #ifdef SKIP_ASM
 extern void* D_0045C3A0[];
 inline void* operator new(unsigned int, void* p) { return p; }
@@ -3665,19 +3665,19 @@ struct sCTBoundK_6468 : sCTBoundObjG {
 /**
  * Constructs a trigger volume base object: the cCTObject defaults plus the abstract volume vtable.
  *
- * Stores the cCTObject vtable D_0045C3F0 at +0x24, zeroes the position (+0x0, t3vect_Zero) and heading, pitch and roll
+ * Stores the cCTObject vtable cCTObject_vtbl at +0x24, zeroes the position (+0x0, t3vect_Zero) and heading, pitch and roll
  * (+0xC..+0x14), sets the scale (+0x18) to (1, 1, 1) and then installs D_0045C3A0, whose slots 6 and 7 (boundBox,
- * containsPoint) are empty and slot 8 is func_00171FA8. Type (+0x28) is not set. Nothing calls it.
+ * containsPoint) are empty and slot 8 is cCTVolume_getBoundaryPointClosestTo. Type (+0x28) is not set. Nothing calls it.
  *
  * @return @p self
  */
-extern "C" void* func_00176468(void* self)
+extern "C" void* cCTVolume_cCTVolume(void* self)
 {
     return new (self) sCTBoundK_6468;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001764E8);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTVolumeEllipse_cCTVolumeEllipse);
 #ifdef SKIP_ASM
 /**
  * Constructs an ellipse trigger volume with default values.
@@ -3688,13 +3688,13 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001764E8);
  *
  * @return @p self
  */
-extern "C" void* func_001764E8(void* self)
+extern "C" void* cCTVolumeEllipse_cCTVolumeEllipse(void* self)
 {
     return new (self) sCTVolEllG;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176570);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTVolumeBox_cCTVolumeBox);
 #ifdef SKIP_ASM
 /**
  * Constructs a box trigger volume with default values.
@@ -3705,28 +3705,28 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176570);
  *
  * @return @p self
  */
-extern "C" void* func_00176570(void* self)
+extern "C" void* cCTVolumeBox_cCTVolumeBox(void* self)
 {
     return new (self) sCTVolBoxG;
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001765F8__FPv);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTAction_purge__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: a camera trigger action's default purge.
  *
  * Slot 1 of the cCTAction vtable D_0045C2E8 (the plain switch and none actions). The bounded and spline actions
- * override it with func_00176840 and func_00176868, which free their bound object or spline.
+ * override it with cCTActionBoundedCam_purge and cCTActionSpline_purge, which free their bound object or spline.
  */
-void func_001765F8(void* self)
+void cCTAction_purge(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176600);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTBoundObjEllipse_cCTBoundObjEllipse);
 #ifdef SKIP_ASM
 /**
  * Constructs an ellipse camera bound object with default values.
@@ -3737,13 +3737,13 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176600);
  *
  * @return @p self
  */
-extern "C" void* func_00176600(void* self)
+extern "C" void* cCTBoundObjEllipse_cCTBoundObjEllipse(void* self)
 {
     return new (self) sCTBoundEllG;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176688);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTBoundObjBox_cCTBoundObjBox);
 #ifdef SKIP_ASM
 /**
  * Constructs a box camera bound object with default values.
@@ -3754,19 +3754,19 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176688);
  *
  * @return @p self
  */
-extern "C" void* func_00176688(void* self)
+extern "C" void* cCTBoundObjBox_cCTBoundObjBox(void* self)
 {
     return new (self) sCTBoundBoxG;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176710);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTBoundObjLine_cCTBoundObjLine);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct sCTBoundLineK : sCTBoundObjG {
     int type;
     sCTVec3G pts[2];
-    sCTBoundLineK() __asm__("func_00176710");
+    sCTBoundLineK() __asm__("cCTBoundObjLine_cCTBoundObjLine");
 };
 
 /**
@@ -3784,7 +3784,7 @@ sCTBoundLineK::sCTBoundLineK() : sCTBoundObjG(sCTVec3G(1.0f, 1.0f, 1.0f), D_0045
 }
 #endif
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001767F8);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTBoundObjLine_point1);
 #ifdef SKIP_ASM
 /**
  * Returns the address of a line bound object's first end point.
@@ -3794,12 +3794,12 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_001767F8);
  * @param boundLine  the line bound object (this)
  * @return @p boundLine + 0x2C
  */
-extern "C" int func_001767F8(int boundLine) {
+extern "C" int cCTBoundObjLine_point1(int boundLine) {
     return boundLine + 44;
 }
 #endif
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176800);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTBoundObjLine_point2);
 #ifdef SKIP_ASM
 /**
  * Returns the address of a line bound object's second end point.
@@ -3809,7 +3809,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176800);
  * @param boundLine  the line bound object (this)
  * @return @p boundLine + 0x38
  */
-extern "C" int func_00176800(int boundLine) {
+extern "C" int cCTBoundObjLine_point2(int boundLine) {
     return boundLine + 0x38;
 }
 #endif
@@ -3840,7 +3840,7 @@ extern "C" void cCTBoundObjPoint_limitPoint(float* self, sVec4A16* out)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176840);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTActionBoundedCam_purge);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -3850,7 +3850,7 @@ void operator_delete(int* ptr);
  * Calls operator_delete on the pointer at +0x8 (On Tour cCTActionBoundedCam::BoundObj) when it is set; the pointer
  * itself is not cleared. Slot 1 of the bounded action vtable D_0045C1D0.
  */
-extern "C" void func_00176840(void* self)
+extern "C" void cCTActionBoundedCam_purge(void* self)
 {
     int* buffer = *(int**)((char*)self + 0x8);
     if (buffer != 0) {
@@ -3860,7 +3860,7 @@ extern "C" void func_00176840(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176868);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cCTActionSpline_purge);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -3870,7 +3870,7 @@ void operator_delete(int* ptr);
  * Calls operator_delete on the pointer at +0x8 (On Tour cCTActionSpline::Spline) when it is set; the pointer itself is
  * not cleared. Slot 1 of the spline action vtable D_0045C1B8.
  */
-extern "C" void func_00176868(void* self)
+extern "C" void cCTActionSpline_purge(void* self)
 {
     int* buffer = *(int**)((char*)self + 0x8);
     if (buffer != 0) {
@@ -3880,7 +3880,7 @@ extern "C" void func_00176868(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_00176890);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", descend);
 #ifdef SKIP_ASM
 struct sVEnt176890 {
     short delta;
@@ -3888,7 +3888,7 @@ struct sVEnt176890 {
     int (*fn)(void*, ...);
 };
 
-extern "C" void* func_0016C6B0(void*, void*);
+extern "C" void* cActiveTriggerList_find(void*, void*);
 extern "C" void cActiveTriggerList_add(void*, void*);
 
 /**
@@ -3896,13 +3896,13 @@ extern "C" void cActiveTriggerList_add(void*, void*);
  *
  * For each entry of type 4 (a camera trigger) in the cell's node list (+0x28) whose trigger Volume (+0x8) contains the
  * rider's position (volume slot 7 containsPoint; rider +0x6C0 slot 5 getPosition), flags the trigger's node in the
- * active list (+0xC = 1, found with func_0016C6B0) or adds it with cActiveTriggerList_add. Then recurses into each
- * non-null child (+0x0..+0x1C). Used for cells that lie wholly inside the query box (func_00174848, func_0016D320).
+ * active list (+0xC = 1, found with cActiveTriggerList_find) or adds it with cActiveTriggerList_add. Then recurses into each
+ * non-null child (+0x0..+0x1C). Used for cells that lie wholly inside the query box (nash_privy_QueryHelper_helpX, cCameraTriggerMan_checkCollisions).
  *
  * @param node  the octree cell (On Tour Cell)
  * @param ctx  the callback: active trigger list at +0x0, rider at +0x4 (On Tour CameraCollisionCallback)
  */
-extern "C" void func_00176890(void* node, void* ctx)
+extern "C" void descend(void* node, void* ctx)
 {
     char* entry;
     for (entry = *(char**)((char*)node + 0x28); entry != 0; entry = *(char**)entry) {
@@ -3915,7 +3915,7 @@ extern "C" void func_00176890(void* node, void* ctx)
             char* bthis = bound + bvt[7].delta;
             int riderPos = cvt[5].fn(sub + cvt[5].delta);
             if (bvt[7].fn(bthis, riderPos)) {
-                void* existing = func_0016C6B0(*(void**)ctx, trig);
+                void* existing = cActiveTriggerList_find(*(void**)ctx, trig);
                 if (existing) {
                     *(int*)((char*)existing + 0xC) = 1;
                 } else {
@@ -3924,14 +3924,14 @@ extern "C" void func_00176890(void* node, void* ctx)
             }
         }
     }
-    if (*(void**)((char*)node + 0x0)) func_00176890(*(void**)((char*)node + 0x0), ctx);
-    if (*(void**)((char*)node + 0x4)) func_00176890(*(void**)((char*)node + 0x4), ctx);
-    if (*(void**)((char*)node + 0x8)) func_00176890(*(void**)((char*)node + 0x8), ctx);
-    if (*(void**)((char*)node + 0xC)) func_00176890(*(void**)((char*)node + 0xC), ctx);
-    if (*(void**)((char*)node + 0x10)) func_00176890(*(void**)((char*)node + 0x10), ctx);
-    if (*(void**)((char*)node + 0x14)) func_00176890(*(void**)((char*)node + 0x14), ctx);
-    if (*(void**)((char*)node + 0x18)) func_00176890(*(void**)((char*)node + 0x18), ctx);
-    if (*(void**)((char*)node + 0x1C)) func_00176890(*(void**)((char*)node + 0x1C), ctx);
+    if (*(void**)((char*)node + 0x0)) descend(*(void**)((char*)node + 0x0), ctx);
+    if (*(void**)((char*)node + 0x4)) descend(*(void**)((char*)node + 0x4), ctx);
+    if (*(void**)((char*)node + 0x8)) descend(*(void**)((char*)node + 0x8), ctx);
+    if (*(void**)((char*)node + 0xC)) descend(*(void**)((char*)node + 0xC), ctx);
+    if (*(void**)((char*)node + 0x10)) descend(*(void**)((char*)node + 0x10), ctx);
+    if (*(void**)((char*)node + 0x14)) descend(*(void**)((char*)node + 0x14), ctx);
+    if (*(void**)((char*)node + 0x18)) descend(*(void**)((char*)node + 0x18), ctx);
+    if (*(void**)((char*)node + 0x1C)) descend(*(void**)((char*)node + 0x1C), ctx);
 }
 #endif
 
@@ -4055,7 +4055,7 @@ extern "C" void cDEFAULT_2ChaseAlgorithm_getRaceCamFinalPhaseData(cDEFAULT_2Chas
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_2ChaseAlgorithm_update);
 #ifdef SKIP_ASM
 struct sCamInfo_00178BB0;
-extern "C" void func_00162568(void* self, sCamInfo_00178BB0* out, float a, float b, float c, float d,
+extern "C" void cLookAtChaseAlgorithm_setupChaseData(void* self, sCamInfo_00178BB0* out, float a, float b, float c, float d,
                               float e, float f, float g, float h);
 extern "C" void cLookAtChaseAlgorithm_setupHandplantBlend(void* self, void* info);
 extern "C" void cLookAtChaseAlgorithm_setupHalfPipeCam(void* self, void* info);
@@ -4082,7 +4082,7 @@ struct sCamInfo_176B10
 /**
  * Runs one frame of the DEFAULT_2 (near) chase camera through the full look-at chase pipeline.
  *
- * Runs setupChaseData (func_00162568), setupHandplantBlend, setupHalfPipeCam, updateCamTarget, setupCamDirection,
+ * Runs setupChaseData (cLookAtChaseAlgorithm_setupChaseData), setupHandplantBlend, setupHalfPipeCam, updateCamTarget, setupCamDirection,
  * updateFollowDistance (222.8 stopped, 5.92 per speed, boost 5.25), updateDropWithSpeed, updateFOVWithSpeed (0.965 *
  * pi/4), updateHandplant, updateCamTargetLate (base height 57.0), updateAirCam, updateHalfPipeCam (1.53 s),
  * updateRailCam (rise 120.9), updateViewCam (600, 300, 100) and updateSlowSpeedCam (15 km/h, 1.5 s each way).
@@ -4090,7 +4090,7 @@ struct sCamInfo_176B10
 extern "C" void cDEFAULT_2ChaseAlgorithm_update(cDEFAULT_2ChaseAlgorithm* self)
 {
     sCamInfo_176B10 info;
-    func_00162568(((char*)self), (sCamInfo_00178BB0*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+    cLookAtChaseAlgorithm_setupChaseData(((char*)self), (sCamInfo_00178BB0*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
     cLookAtChaseAlgorithm_setupHandplantBlend(((char*)self), &info);
@@ -4241,7 +4241,7 @@ extern "C" void cDEFAULT_3ChaseAlgorithm_getRaceCamFinalPhaseData(cDEFAULT_3Chas
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_3ChaseAlgorithm_update);
 #ifdef SKIP_ASM
 struct sCamInfo_00178BB0;
-extern "C" void func_00162568(void* self, sCamInfo_00178BB0* out, float a, float b, float c, float d,
+extern "C" void cLookAtChaseAlgorithm_setupChaseData(void* self, sCamInfo_00178BB0* out, float a, float b, float c, float d,
                               float e, float f, float g, float h);
 extern "C" void cLookAtChaseAlgorithm_setupHandplantBlend(void* self, void* info);
 extern "C" void cLookAtChaseAlgorithm_setupHalfPipeCam(void* self, void* info);
@@ -4275,7 +4275,7 @@ struct sCamInfo_176E10
 extern "C" void cDEFAULT_3ChaseAlgorithm_update(cDEFAULT_3ChaseAlgorithm* self)
 {
     sCamInfo_176E10 info;
-    func_00162568(((char*)self), (sCamInfo_00178BB0*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+    cLookAtChaseAlgorithm_setupChaseData(((char*)self), (sCamInfo_00178BB0*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
     cLookAtChaseAlgorithm_setupHandplantBlend(((char*)self), &info);
@@ -4406,7 +4406,7 @@ extern "C" void cDEFAULT_4ChaseAlgorithm_getRaceCamFinalPhaseData(cDEFAULT_4Chas
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDEFAULT_4ChaseAlgorithm_update);
 #ifdef SKIP_ASM
 struct sCamInfo_00178BB0;
-extern "C" void func_00162568(void* self, sCamInfo_00178BB0* out, float a, float b, float c, float d,
+extern "C" void cLookAtChaseAlgorithm_setupChaseData(void* self, sCamInfo_00178BB0* out, float a, float b, float c, float d,
                               float e, float f, float g, float h);
 extern "C" void cLookAtChaseAlgorithm_setupHandplantBlend(void* self, void* info);
 extern "C" void cLookAtChaseAlgorithm_setupHalfPipeCam(void* self, void* info);
@@ -4440,7 +4440,7 @@ struct sCamInfo_177110
 extern "C" void cDEFAULT_4ChaseAlgorithm_update(cDEFAULT_4ChaseAlgorithm* self)
 {
     sCamInfo_177110 info;
-    func_00162568(((char*)self), (sCamInfo_00178BB0*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+    cLookAtChaseAlgorithm_setupChaseData(((char*)self), (sCamInfo_00178BB0*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
     cLookAtChaseAlgorithm_setupHandplantBlend(((char*)self), &info);
@@ -4492,7 +4492,7 @@ extern "C" void cDEFAULT_4ChaseAlgorithm_snap(cDEFAULT_4ChaseAlgorithm* self, in
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cDirectionChaseAlgorithm_update);
 #ifdef SKIP_ASM
 struct sCamInfo_00178BB0;
-extern "C" void func_00162568(void* self, sCamInfo_00178BB0* out, float a, float b, float c, float d,
+extern "C" void cLookAtChaseAlgorithm_setupChaseData(void* self, sCamInfo_00178BB0* out, float a, float b, float c, float d,
                               float e, float f, float g, float h);
 extern "C" void cLookAtChaseAlgorithm_setupHandplantBlend(void* self, void* info);
 extern "C" void cLookAtChaseAlgorithm_setupHalfPipeCam(void* self, void* info);
@@ -4515,7 +4515,7 @@ struct sCamInfo_177368
 /**
  * Runs one frame of a direction chase camera: a chase pose whose eye always looks along one compass heading.
  *
- * Runs setupChaseData (func_00162568), setupHandplantBlend, setupHalfPipeCam, updateCamTarget, setupCamDirection,
+ * Runs setupChaseData (cLookAtChaseAlgorithm_setupChaseData), setupHandplantBlend, setupHalfPipeCam, updateCamTarget, setupCamDirection,
  * updateFollowDistance (356.4, no speed or boost terms), updateDropWithSpeed (only a constant 168.6 drop),
  * updateFOVWithSpeed (0.971 * pi/4), updateCamTargetLate, updateAirCam, updateHalfPipeCam (1.53 s) and updateRailCam
  * (rise 0), then updateRotation with Angle to put the eye on the fixed heading. There is no handplant, view or
@@ -4524,7 +4524,7 @@ struct sCamInfo_177368
 extern "C" void cDirectionChaseAlgorithm_update(cDirectionChaseAlgorithm* self)
 {
     sCamInfo_177368 info;
-    func_00162568(((char*)self), (sCamInfo_00178BB0*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+    cLookAtChaseAlgorithm_setupChaseData(((char*)self), (sCamInfo_00178BB0*)&info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
     cLookAtChaseAlgorithm_setupHandplantBlend(((char*)self), &info);
@@ -5169,7 +5169,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSPOKEChaseAlgorithm_update);
 
 extern t4Vector D_004FF160_8208 __asm__("t4vect_ZAxis");
 
-// The per-frame camera input record (0x70 bytes) that func_00162568_8208 (camera/camera) fills from the target.
+// The per-frame camera input record (0x70 bytes) that cLookAtChaseAlgorithm_setupChaseData_8208 (camera/camera) fills from the target.
 struct sCamInfo {
     t4Vector f00;               // 0x00
     t4Vector pos;               // 0x10
@@ -5187,8 +5187,8 @@ struct sCamInfo {
     int f64;                    // 0x64
 };
 
-extern "C" void func_00162568_8208(void* self, sCamInfo* out, float a, float b, float c, float d,
-                              float e, float f, float g, float h) __asm__("func_00162568");
+extern "C" void cLookAtChaseAlgorithm_setupChaseData_8208(void* self, sCamInfo* out, float a, float b, float c, float d,
+                              float e, float f, float g, float h) __asm__("cLookAtChaseAlgorithm_setupChaseData");
 
 // PORT: PS2-only VU0 inline asm (a - b).
 static inline t4Vector Sub_8208(const t4Vector& a, const t4Vector& b)
@@ -5307,14 +5307,14 @@ extern "C" void cSPOKEChaseAlgorithm_update_v(char* self) __asm__("cSPOKEChaseAl
  * Runs one frame of the SPOKE camera: eases the eye toward getDesiredPosition and aims 37 units above the followed
  * point.
  *
- * After setupChaseData (func_00162568) sets View to pi/4. The weight kept on the old eye falls from 0.988 at an eye
+ * After setupChaseData (cLookAtChaseAlgorithm_setupChaseData) sets View to pi/4. The weight kept on the old eye falls from 0.988 at an eye
  * distance of 150 to 0 at 1500 (its square root while handplanting, motion state 5); Position = f * Position + (1 -
  * f) * getDesiredPosition(setup velocity), and CamTargetPos = getRiderPosition + Z * 37.
  */
 extern "C" void cSPOKEChaseAlgorithm_update_v(char* self)
 {
     sCamInfo info;
-    func_00162568_8208(self, &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+    cLookAtChaseAlgorithm_setupChaseData_8208(self, &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
     *(float*)self = 0.7853981852531433f;
@@ -5741,9 +5741,9 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", cSUPERPIPEChaseAlgorithm_upda
 
 extern t4Vector t4vect_XAxis;
 
-// The per-frame camera input record (0x70 bytes) that func_00162568_87E0 (camera/camera) fills from the target.
-extern "C" void func_00162568_87E0(void* self, sCamInfo* out, float a, float b, float c, float d,
-                              float e, float f, float g, float h) __asm__("func_00162568");
+// The per-frame camera input record (0x70 bytes) that cLookAtChaseAlgorithm_setupChaseData_87E0 (camera/camera) fills from the target.
+extern "C" void cLookAtChaseAlgorithm_setupChaseData_87E0(void* self, sCamInfo* out, float a, float b, float c, float d,
+                              float e, float f, float g, float h) __asm__("cLookAtChaseAlgorithm_setupChaseData");
 extern "C" t4Vector f_1785F0_1787E0(void* self) __asm__("cSUPERPIPEChaseAlgorithm_getIdealPosition");
 extern "C" t4Vector f_178758_1787E0(void* self) __asm__("cSUPERPIPEChaseAlgorithm_getIdealTargetPos");
 
@@ -5818,14 +5818,14 @@ static inline float Length_1787E0(const t4Vector& v)
 /**
  * Runs one frame of the SUPERPIPE camera: eye on the pipe's axis, aimed just below the rider, at most 600 away.
  *
- * After setupChaseData (func_00162568) sets View to pi/4, Position to getIdealPosition and CamTargetPos to
+ * After setupChaseData (cLookAtChaseAlgorithm_setupChaseData) sets View to pi/4, Position to getIdealPosition and CamTargetPos to
  * getIdealTargetPos. When the two are over 600 apart the eye is pulled in to 600. When they are under 1 apart it
  * computes a fallback offset (X axis * 600) but never applies it, so the degenerate pose stays.
  */
 extern "C" void cSUPERPIPEChaseAlgorithm_update(cSUPERPIPEChaseAlgorithm* self)
 {
     sCamInfo info;
-    func_00162568_87E0(((char*)self), &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+    cLookAtChaseAlgorithm_setupChaseData_87E0(((char*)self), &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
     *(float*)self = 0.7853981852531433f;
@@ -6132,8 +6132,8 @@ void cPOST_RACE_1ChaseAlgorithm_getRaceCamFinalPhaseData(void* self, void* other
 //100%
 INCLUDE_ASM("camera/trigger/cameratriggerfactory", cPOST_RACE_1ChaseAlgorithm_update);
 #ifdef SKIP_ASM
-extern "C" float func_0031C040(float x);
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" float fCos(float x);
+extern "C" void fSinCos(float* s, float* c, float angle);
 
 struct sVec_00178BB0 {
     float x, y, z, w;
@@ -6146,7 +6146,7 @@ struct sCamInfo_00178BB0 {
 } __attribute__((aligned(16)));
 
 extern sVec_00178BB0 t4vect_ZAxis;
-extern "C" void func_00162568(void* self, sCamInfo_00178BB0* out, float a, float b, float c, float d,
+extern "C" void cLookAtChaseAlgorithm_setupChaseData(void* self, sCamInfo_00178BB0* out, float a, float b, float c, float d,
                               float e, float f, float g, float h);
 
 struct sVEv_00178BB0 {
@@ -6245,7 +6245,7 @@ static inline float wrap_00178BB0(float x)
 static inline sVec_00178BB0 AxisAngle_00178BB0(const sVec_00178BB0& axis, float angle)
 {
     float s, c;
-    func_0031BE50(&s, &c, angle * 0.5f);
+    fSinCos(&s, &c, angle * 0.5f);
     sVec_00178BB0 q;
     q.w = c;
     q.x = s * axis.x;
@@ -6264,7 +6264,7 @@ static inline sVec_00178BB0 getPos_00178BB0(char* self)
 /**
  * Runs one frame of the post-race camera: a slow side-to-side swing of the eye behind the rider's start direction.
  *
- * After setupChaseData (func_00162568) AgeInFrames advances modulo 1100 (18.3 s). The swing angle is (1 - cos(2pi *
+ * After setupChaseData (cLookAtChaseAlgorithm_setupChaseData) AgeInFrames advances modulo 1100 (18.3 s). The swing angle is (1 - cos(2pi *
  * age / 1100)) * 0.748 - 0.748, wrapped into [-pi, pi), and StartDir rotated by it about Z gives v. CamTargetPos is
  * the target position (slot 1) - Z * 3; Position = CamTargetPos - v * 126 - Z * 27, or v * 326 back and 123 up when
  * two or more riders are allocated (cAI::NumberOfRidersAllocated, AI + 0x78).
@@ -6272,13 +6272,13 @@ static inline sVec_00178BB0 getPos_00178BB0(char* self)
 extern "C" void cPOST_RACE_1ChaseAlgorithm_update(cPOST_RACE_1ChaseAlgorithm* self)
 {
     sCamInfo_00178BB0 info;
-    func_00162568(((char*)self), &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
+    cLookAtChaseAlgorithm_setupChaseData(((char*)self), &info, 0.2713613510131836f, 0.8999999761581421f, 0.29420721530914307f,
                   0.8513929843902588f, 0.8500000238418579f, 0.9700000286102295f, 0.10000000149011612f,
                   0.6000000238418579f);
     (self->AgeInFrames)++;
     self->AgeInFrames %= 1100;
     float ang = wrap_00178BB0((float)self->AgeInFrames * 0.0009090909152291715f * 6.2831854820251465f);
-    float angle = (1.0f - func_0031C040(ang)) * 0.7482788562774658f + -0.7482788562774658f;
+    float angle = (1.0f - fCos(ang)) * 0.7482788562774658f + -0.7482788562774658f;
     angle -= ffloor_00178BB0(angle * 0.15915493667125702f + 0.5f) * 6.2831854820251465f;
     sVec_00178BB0 rotation = AxisAngle_00178BB0(t4vect_ZAxis, angle);
     sVec_00178BB0 look = ctRot_00178BB0(rotation, *(sVec_00178BB0*)&self->StartDir);
@@ -6913,15 +6913,15 @@ extern "C" int cTrackFileMan_getPrevLocation(int* self, int start, void* key)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A378);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTrackFileMan_scanTrackIndex);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern "C" void* FILE_loadsizez(const char* name, int* size, int align);
 extern "C" void func_00318350(void* self, const char* s, int len);
 extern "C" void* MEM_free(void* self);
 extern "C" void cBXString__cBXString(void* self, int flags);
-// PORT: alias; the unit defines func_0017A830 later with a typed self (sCamMgr_A830*).
-extern "C" int func_0017A830_17A378(void* selfp, char* name, char* tag) __asm__("func_0017A830");
+// PORT: alias; the unit defines cTrackFileMan_checkLocation later with a typed self (sCamMgr_A830*).
+extern "C" int cTrackFileMan_checkLocation_17A378(void* selfp, char* name, char* tag) __asm__("cTrackFileMan_checkLocation");
 extern "C" char* strcpy(char* d, const char* s);
 
 struct sCamEntry_17A378 {
@@ -6949,7 +6949,7 @@ struct sStr_17A378 {
  * Loads @p file whole (FILE_loadsizez, 0x100 alignment) and splits it into names: whitespace separates them, a leading
  * quote and a trailing quote are skipped, a name runs over letters, digits and "_.-/", a "\" or ":" restarts it
  * (dropping any path), and everything from the first "." on is dropped. For each non-empty name, made into a cBXString
- * (func_00318350), func_0017A830 is asked with the name as both location file and big file; when it says yes the name
+ * (func_00318350), cTrackFileMan_checkLocation is asked with the name as both location file and big file; when it says yes the name
  * is copied into the next entry's File (+0x0) and BigFile (+0x40) fields (0x8C-byte entries from +0x4), the entry's
  * location id (+0x80) is set to 22 (one past the built-in locations) and its BAM flag (+0x84) to 0, and the count
  * (+0x0) grows. There is no check against the 256-entry limit. The buffer is freed with MEM_free.
@@ -6959,7 +6959,7 @@ struct sStr_17A378 {
  * @param selfp  the track file manager (this, On Tour cTrackFileMan)
  * @param file  path of the index file
  */
-extern "C" void func_0017A378(void* selfp, const char* file)
+extern "C" void cTrackFileMan_scanTrackIndex(void* selfp, const char* file)
 {
     sCamMgr_17A378* self = (sCamMgr_17A378*)selfp;
     int size;
@@ -7014,7 +7014,7 @@ extern "C" void func_0017A378(void* selfp, const char* file)
             continue;
         sStr_17A378 str;
         func_00318350(&str, start, stop - start);
-        if (func_0017A830_17A378(self, str.s, str.s)) {
+        if (cTrackFileMan_checkLocation_17A378(self, str.s, str.s)) {
             strcpy(self->entries[self->count].name, str.s);
             strcpy(self->entries[self->count].tag, str.s);
             self->entries[self->count].type = 22;
@@ -7060,7 +7060,7 @@ extern "C" void* cBE_getBE();
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 void* cBE_getInterface_17A638(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" char* cBENewRaceInterface_getLocationFile(void* iface, int id);
-extern "C" int func_0017A978_A638(void* self, int n, void* names, char* tag) __asm__("func_0017A978");
+extern "C" int cTrackFileMan_checkLocation1_A638(void* self, int n, void* names, char* tag) __asm__("cTrackFileMan_checkLocation1");
 extern "C" int cTrackFileMan_testWCBAMStartLocation_A638(void* self, int id) __asm__("cTrackFileMan_testWCBAMStartLocation");
 extern "C" char* strcpy(char* d, const char* s);
 extern char* str_BAM_b[];
@@ -7069,7 +7069,7 @@ extern char* str_BAM_b[];
  * Builds the debug menu's location table from the race locations present on disc.
  *
  * Zeroes NumLocations (+0x0), the BAM and WC-BAM-start counts and the 256-entry table (0x8C bytes each), asks
- * func_0017A978 (On Tour checkLocation) which of the 0x16 location files (cBENewRaceInterface_getLocationFile)
+ * cTrackFileMan_checkLocation1 (On Tour checkLocation) which of the 0x16 location files (cBENewRaceInterface_getLocationFile)
  * exist, and for each one found copies its file name, records its location id, marks it a BAM location and,
  * when cTrackFileMan_testWCBAMStartLocation says so, a WC BAM start. On Tour's second pass for separate "%sBAM" files is not here.
  */
@@ -7084,7 +7084,7 @@ extern "C" void cTrackFileMan_scanLocations(sCamMgr* self)
     void* iface = cBE_getInterface_17A638(cBE_getBE(), 0);
     for (i = 0; i < 22; i++)
         names[i].name = cBENewRaceInterface_getLocationFile(iface, i);
-    if (func_0017A978_A638(self, 22, names, (char*)str_BAM_b)) {
+    if (cTrackFileMan_checkLocation1_A638(self, 22, names, (char*)str_BAM_b)) {
         int j;
         for (j = 0; j < 22 && self->count < 0x100; j++) {
             if (names[j].ok) {
@@ -7107,7 +7107,7 @@ extern "C" void cTrackFileMan_scanLocations(sCamMgr* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A830);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTrackFileMan_checkLocation);
 #ifdef SKIP_ASM
 struct cBXString;
 struct cBigFile;
@@ -7162,13 +7162,13 @@ struct sBigFile_A830 {
  * flags 0x100) and asks func_003A6948 whether section @p name exists in "data/worlds/<tag>"; the big file and the
  * strings are destroyed again before returning.
  *
- * Called by func_0017A378.
+ * Called by cTrackFileMan_scanTrackIndex.
  *
  * @param name  the location (section) file name (On Tour sLocationFile)
  * @param tag  the big file name (On Tour sBigFile)
  * @return 1 when the section exists and is not in the table yet, else 0
  */
-extern "C" int func_0017A830(sCamMgr_A830* self, char* name, char* tag)
+extern "C" int cTrackFileMan_checkLocation(sCamMgr_A830* self, char* name, char* tag)
 {
     int i;
     for (i = 0; i < self->count; i++) {
@@ -7199,7 +7199,7 @@ extern "C" int func_0017A830(sCamMgr_A830* self, char* name, char* tag)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017A978);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cTrackFileMan_checkLocation1);
 #ifdef SKIP_ASM
 struct cBXString;
 struct cBigFile;
@@ -7262,7 +7262,7 @@ struct sBigFile_17A978 {
  * @param tag  the big file name (On Tour sBigFile)
  * @return 1 when at least one name was found in the big file, else 0
  */
-extern "C" int func_0017A978(void* selfp, int n, void* namesp, char* tag)
+extern "C" int cTrackFileMan_checkLocation1(void* selfp, int n, void* namesp, char* tag)
 {
     sCamMgr_17A978* self = (sCamMgr_17A978*)selfp;
     sCamName_17A978* names = (sCamName_17A978*)namesp;
@@ -7388,7 +7388,7 @@ extern "C" void cBackgroundMan__cBackgroundMan(sIdList_0017ABE0* self, int flags
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017AC98);
+INCLUDE_ASM("camera/trigger/cameratriggerfactory", cBackgroundMan_setActiveImage);
 #ifdef SKIP_ASM
 /**
  * Selects which background image to show.
@@ -7399,7 +7399,7 @@ INCLUDE_ASM("camera/trigger/cameratriggerfactory", func_0017AC98);
  * @param i  the image index
  * @return 1, always
  */
-extern "C" int func_0017AC98(void* self, int i)
+extern "C" int cBackgroundMan_setActiveImage(void* self, int i)
 {
     if (i >= 0 && i < *(int*)((char*)self + 0x4)) {
         *(int*)((char*)self + 0x8) = i;

@@ -1388,13 +1388,13 @@ extern void* cTransformModifier_vtbl[];
 extern void* cRollerModifier_vtbl[];
 void* cRigidBody_cRigidBody(void* self);
 extern "C" void SphereTree_SphereTree(void* p);
-extern "C" void* func_00327CC8(void* self, void* src);
+extern "C" void* bxSphereTree_operatorE(void* self, void* src);
 extern "C" void cRollerModifier_updateMOI(void* self);
 
 extern "C" void* cRollerModifier_Collision_DA70(void* self, void* a1, void* a2) __asm__("cRollerModifier_Collision");
 
 
-extern "C" tPose func_0031B748(void* m);
+extern "C" tPose tPose_tPose(void* m);
 extern "C" tPose cRollerModifier_getBodyPose_DA70(void* self) __asm__("cRollerModifier_getBodyPose");
 
 struct sV4c_DA70 {
@@ -1541,7 +1541,7 @@ extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, char* rd
     SphereTree_SphereTree(((char*)self) + 0xE0);
     *(int*)&self->Life = 0;
     self->m_pInstance = (tInstanceRecord*)(*(int*)(ii + 0x50));
-    func_00327CC8(((char*)self) + 0xE0, *(void**)(ii + 0x48));
+    bxSphereTree_operatorE(((char*)self) + 0xE0, *(void**)(ii + 0x48));
     self->mMass = *(float*)(rdata + 0x4);
     char* info = (char*)self->SphTree.treeInfo;
     self->mElast = *(float*)(rdata + 0x8);
@@ -1562,7 +1562,7 @@ extern "C" char* cRollerModifier_cRollerModifier(cRollerModifier* self, char* rd
     ((sRmMat33*)(((char*)self) + 0x280))->m[2][0] *= 0.5f;
     ((sRmMat33*)(((char*)self) + 0x280))->m[2][1] *= 0.5f;
     ((sRmMat33*)(((char*)self) + 0x280))->m[2][2] *= 0.5f;
-    tPose x = func_0031B748((char*)self->m_pInstance + 0x10);
+    tPose x = tPose_tPose((char*)self->m_pInstance + 0x10);
     {
         sRmVec4 rotated;
         QuatRotTo_DA70(rotated, (*(sRmVec4*)&x.Q), *(sRmVec4*)&self->COMOffset);
@@ -1815,7 +1815,7 @@ extern "C" sRailDF70* func_0035DF70(sRailDF70* self, cStreamDF70* stream)
     stream->v02(self->data, 40);
     self->id = stream->v03();
     void* r = tSphTreeList_getMeshTree(cWorld_getPolyModelInfo(cObjectInterface_getWorld_DF70(), (void*)self->id), 0);
-    func_00327CC8(self->mover, r);
+    bxSphereTree_operatorE(self->mover, r);
     sRmSrcDF70* src = self->src;
     sRmVec4 off;
     off.x = src->x;
@@ -2932,7 +2932,7 @@ extern "C" void cUVScrollModifier_signal(cUVScrollModifier* self, int id, float 
 //100%
 INCLUDE_ASM("object/railmodifier", cUVScrollModifier_getTextureMat);
 #ifdef SKIP_ASM
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 
 struct sRmAxisRot_35FC20 {
     char pad_0x0[0x10];
@@ -2962,7 +2962,7 @@ extern "C" sRmMtx_35FC20* cUVScrollModifier_getTextureMat(cUVScrollModifier* sel
     if (self->Angle != zeroF) {
         float sinA;
         float cosA;
-        func_0031BE50(&sinA, &cosA, self->Angle);
+        fSinCos(&sinA, &cosA, self->Angle);
         float one = 1.0f;
         float oneMinusCos = one - cosA;
         float tx = oneMinusCos * self->Axis.x;

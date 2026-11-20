@@ -574,8 +574,8 @@ extern "C" void cRider_setupBoostWarp(char* rider, int isHeld, int isPressed)
 INCLUDE_ASM("seg/seg_14B10", func_00114298);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" float func_0031C040(float x);
-extern "C" float func_0031BF60(float x);
+extern "C" float fCos(float x);
+extern "C" float fSin(float x);
 int cRider_getMotionState(void* self);
 extern "C" void cReplay_eventJump(int a, int b, void* c);
 extern "C" void func_00309848(void* self);
@@ -817,8 +817,8 @@ extern "C" void func_00114298(char* self, float speedFactor)
         push *= speed < 972.1808471679688f ? speed * 0.357146680355072f + 361.203125f : 708.4142456054688f;
         push = Clamp_4298(push, 361.203125f, 708.4142456054688f);
     }
-    float lo = func_0031C040(0.8726646900177002f);
-    float hi = func_0031C040(1.2217305898666382f);
+    float lo = fCos(0.8726646900177002f);
+    float hi = fCos(1.2217305898666382f);
     if (cRider_getMotionState(self) == 4) {
         AddEq_4298(VEL_4298, Scale_4298(Up_4298(self), push));
     } else {
@@ -830,8 +830,8 @@ extern "C" void func_00114298(char* self, float speedFactor)
             sV4_4298 flat = Normalize_4298(sV4_4298(*(float*)(self + 0x370), *(float*)(self + 0x374), 0.0f, 0.0f));
             sV4_4298 side = Normalize_4298(Sub_4298(*(sV4_4298*)(self + 0x3A0), Scale_4298(flat, Dot_4298(*(sV4_4298*)(self + 0x3A0), flat))));
             sV4_4298 vdir = Normalize_4298(Sub_4298(VEL_4298, Scale_4298(flat, Dot_4298(VEL_4298, flat))));
-            float s0 = func_0031BF60(0.0f);
-            float s1 = func_0031BF60(0.349065899848938f);
+            float s0 = fSin(0.0f);
+            float s1 = fSin(0.349065899848938f);
             float f = t * (side.z - s0) * (1.0f / (s1 - s0));
             f = Clamp_4298(f, 0.0f, 0.949999988079071f);
             steered = 1;
@@ -1234,7 +1234,7 @@ struct Q_5168 {
     Q_5168(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 } __attribute__((aligned(16)));
 
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void cRiderAnimBase_changeHeadingOffset(void* self, float angle);
 extern Q_5168 t4vect_Origin;
 extern Q_5168 t4vect_ZAxis;
@@ -1242,7 +1242,7 @@ extern Q_5168 t4vect_ZAxis;
 static inline Q_5168 AxisAngle_5168(const Q_5168& axis, float angle)
 {
     float s, c;
-    func_0031BE50(&s, &c, angle * 0.5f);
+    fSinCos(&s, &c, angle * 0.5f);
     return Q_5168(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
@@ -1400,7 +1400,7 @@ struct Q_5640 {
     Q_5640(float ax, float ay, float az, float aw) { x = ax; y = ay; z = az; w = aw; }
 } __attribute__((aligned(16)));
 
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void cRiderAnimBase_changeHeadingOffset(void* self, float angle);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 extern "C" void cRider_rotateOrientation(void* self, Q_5640 dir, float angle);
@@ -1413,7 +1413,7 @@ extern Q_5640 D_004FF160_5640 __asm__("t4vect_ZAxis");
 static inline Q_5640 AxisAngle_5640(const Q_5640& axis, float angle)
 {
     float s, c;
-    func_0031BE50(&s, &c, angle * 0.5f);
+    fSinCos(&s, &c, angle * 0.5f);
     return Q_5640(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
@@ -1467,7 +1467,7 @@ extern "C" void cRider_undoRailslideModeOrientation(char* self)
 INCLUDE_ASM("seg/seg_14B10", cRider_snapAxisIncrement);
 #ifdef SKIP_ASM
 extern "C" float func_0031C228(float x);
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 
 // PORT: sqrt.s (sqrtf without errno check)
 static inline float Sqrt_58B8(float x)
@@ -1516,7 +1516,7 @@ static inline float Clamp_58B8(float v, float lo, float hi)
  * Snaps a two-axis stick input to the nearest multiple of an angle step, keeping its length.
  *
  * Components within @p eps of 0 are zeroed first, and a zero vector is left alone. Otherwise the angle atan2(y, x) is
- * rounded to the nearest multiple of @p step and the vector rebuilt from it with the same length (func_0031BE50
+ * rounded to the nearest multiple of @p step and the vector rebuilt from it with the same length (fSinCos
  * sin/cos), each component clamped to -1 .. 1 and zeroed below 0.001. cPrewindControl_update and cSpinControl_update
  * call it with a pi/4 step.
  *
@@ -1539,7 +1539,7 @@ extern "C" void cRider_snapAxisIncrement(void* self, float* y, float* x, float s
     steps = ang / step;
     if (ang < 0.0f) rounded = steps + -0.5f;
     else rounded = steps + 0.5f;
-    func_0031BE50(&sc[0], &sc[1], (float)(int)rounded * step);
+    fSinCos(&sc[0], &sc[1], (float)(int)rounded * step);
     *x = Clamp_58B8(sc[1] * len, -1.0f, 1.0f);
     *y = Clamp_58B8(sc[0] * len, -1.0f, 1.0f);
     if (__builtin_fabsf(*x) < 0.001f) *x = 0.0f;

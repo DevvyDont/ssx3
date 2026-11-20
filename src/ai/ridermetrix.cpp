@@ -895,7 +895,7 @@ extern "C" void cRiderMetrix_addHUDfx1(void* self, int type, int value, int arg,
 extern "C" int cRiderMetrix_calcTrickLevel(void* self, int points);
 int cRider_getControlState(void* rider);
 extern "C" int AITick();
-extern "C" float func_0031C040(float a);
+extern "C" float fCos(float a);
 extern "C" float cPrewindControl_getFlipSpinInputAng(void* p, int* fail);
 extern "C" float cSpinControl_getFlipSpinInputAng(void* p, int* fail);
 extern "C" float cSpinControl_getFlipSpinAng(void* p, int* fail);
@@ -1062,7 +1062,7 @@ extern "C" void cRiderMetrix_updateStaticHUD(void* vself)
         if (fail != 0) {
             cRiderMetrix_removeHUDfx(self, 13);
         } else {
-            float dialPct = angle * 0.15915493667125702f + func_0031C040((float)AITick() * 0.10471976548433304f) * 0.029999999329447746f;
+            float dialPct = angle * 0.15915493667125702f + fCos((float)AITick() * 0.10471976548433304f) * 0.029999999329447746f;
             if (dialPct < 0.0f)
                 dialPct += 1.0f;
             if (!slotFree_117FE0(&self->slots[13])) {

@@ -1654,7 +1654,7 @@ extern "C" void func_002B6B08(void* self, void* obj, unsigned int arg);
 extern char* D_004A28A8_AE68 __asm__("SSXApp");
 extern "C" int cAI_swaploadInjectedPathFile(void* self, int a, unsigned int b, void* obj);
 void cMemMan_free(void* p);
-extern "C" void func_002BB348(void* self, int a, void* obj);
+extern "C" void cWorldPainterMan_load(void* self, int a, void* obj);
 extern "C" void func_003ACA10(void* self, int a, void* obj);
 extern "C" void* func_003AD188();
 extern "C" void cGame_loadWScriptManSection(void* self, int a);
@@ -1776,7 +1776,7 @@ extern "C" void* cPS2ChunkResolve_resolve(void* self, int msg, unsigned int RID,
         break;
     case 15:
         if (cWorld_m_pTheWorld) {
-            func_002BB348((char**)cWorld_m_pTheWorld->m_pWorldPainterMan, RID & 0xFF, obj);
+            cWorldPainterMan_load((char**)cWorld_m_pTheWorld->m_pWorldPainterMan, RID & 0xFF, obj);
         }
         break;
     case 16:
@@ -1834,7 +1834,7 @@ extern "C" void cSSXAudio_UnAttachAudioBank(void* p, unsigned int param, void* d
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void* cAudioInterface_getGame();
 extern "C" void func_002B6B30(void* p, void* data, unsigned int param);
-extern "C" void func_002BB5A8(void* entry);
+extern "C" void cWorldPainterSection_unload(void* entry);
 extern "C" void cAvalanche_reset();
 extern "C" void nash_Cell_remnode(void* node, int idx, void* item, const void* target, const void* cur);
 extern "C" void nash_Nash_findkey(void* out, const void* box);
@@ -1912,7 +1912,7 @@ static inline void update_B498(char* w, int idx, void* item, const sWVBox_B498* 
  * Undoes the resolve of a stream data chunk that is about to be unloaded.
  *
  * Dispatches on @p msg: spatial types take their nodes out of the world's spatial hash (nash_Nash_findkey, nash_Cell_remnode)
- * and free them; type 13 purges a world audio file (func_002B6B30), 15 unloads a world-painter section (func_002BB5A8),
+ * and free them; type 13 purges a world audio file (func_002B6B30), 15 unloads a world-painter section (cWorldPainterSection_unload),
  * 18 detaches a script anchor table, 20 unattaches an audio bank, 19 removes mission stream data through BE interface
  * 10, 11 removes an occlusion curtain (func_00242570), 14 drops an AI file (cAI_removeInjectedFile) and 22 resets the avalanche;
  * types 17 and 21 go to func_0016CF18 and func_00210608. Other types need nothing.
@@ -1999,7 +1999,7 @@ extern "C" void* cPS2ChunkResolve_unresolve(char* self, unsigned int msg, unsign
         break;
     case 15:
         if (cWorld_m_pTheWorld != 0) {
-            func_002BB5A8(((char**)(char**)cWorld_m_pTheWorld->m_pWorldPainterMan)[1] + (unsigned char)resourceId * 12);
+            cWorldPainterSection_unload(((char**)(char**)cWorld_m_pTheWorld->m_pWorldPainterMan)[1] + (unsigned char)resourceId * 12);
         }
         break;
     case 18:

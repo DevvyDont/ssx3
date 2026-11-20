@@ -47,7 +47,7 @@ CHECK_SIZE(cDEFAULT_2ChaseAlgorithm, 0x390);
 // 0x390), ctor stores CAMERA_ALGORITHM_CHASE_DEFAULT_3 = 61.
 // Methods (vtable slot): dtor cDEFAULT_3ChaseAlgorithm__cDEFAULT_3ChaseAlgorithm__FPv (1), snap cDEFAULT_3ChaseAlgorithm_snap (3), update cDEFAULT_3ChaseAlgorithm_update (5),
 // getRaceCamFinalPhaseData cDEFAULT_3ChaseAlgorithm_getRaceCamFinalPhaseData (7), getRestDrop cDEFAULT_3ChaseAlgorithm_getRestDrop (13); the other slots are the base's.
-// Also [R] cCamera_cCamera and func_0015E050 construct one in place at cCamera+0xC0 (On Tour: cCamera::
+// Also [R] cCamera_cCamera and cSimpleCamera_setupCamWithPosAndTarget construct one in place at cCamera+0xC0 (On Tour: cCamera::
 // ResultAlgorithm is a cDEFAULT_3ChaseAlgorithm at 0xC0). builds/x/v2 pairs cDEFAULT_3ChaseAlgorithm_vtbl with the preview's
 // _vt$18cMidChaseAlgorithm by body similarity only; the retail tag, type 61 and On Tour say DEFAULT_3.
 struct cDEFAULT_3ChaseAlgorithm : public cLookAtChaseAlgorithm {

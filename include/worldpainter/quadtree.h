@@ -33,7 +33,7 @@
 // the node's first short is 0 for a leaf.
 struct tQuadTreeLeafNode {
     void* m_data;                   // 0x0 [O]; [R] setLeafNode (tQuadTreeNode_setLeafNode) stores data here, clear (tQuadTreeNode_init) 0
-    unsigned int m_key;             // 0x4 [O]; [R] setLeafNode stores key; [U] getQuadTreeContents (func_002BAF90) returns it
+    unsigned int m_key;             // 0x4 [O]; [R] setLeafNode stores key; [U] getQuadTreeContents (cWorldPainterLayer_getQuadTreeContents) returns it
 };
 
 CHECK_OFFSET(tQuadTreeLeafNode, m_data, 0x0);

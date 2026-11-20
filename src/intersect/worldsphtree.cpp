@@ -8,7 +8,7 @@ INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_cWorldSphTree);
 extern void* cWorldSphTree_vtbl[];
 extern char str_SphereTree[];
 extern "C" void* SphereTree_SphereTree(void* p);
-extern "C" float func_0032C590(void* self);
+extern "C" float SphereTree_GetRadius(void* self);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 
 struct sSphV4 { float x, y, z, w; } __attribute__((aligned(16)));
@@ -18,7 +18,7 @@ struct sSphV4 { float x, y, z, w; } __attribute__((aligned(16)));
  *
  * Stores cWorldSphTree's vtable at +0x50, clears +0x4 and +0x8, sets +0x0 to 1 unless @p isLow and keeps @p
  * ast at +0x60 and +0x64. Copies the tree's transCenter to +0x40 and stores centre + r and centre - r (w = 1)
- * at +0x20 and +0x30, r being func_0032C590()'s radius. Also allocates a fresh 0x140-byte "SphereTree"
+ * at +0x20 and +0x30, r being SphereTree_GetRadius()'s radius. Also allocates a fresh 0x140-byte "SphereTree"
  * (SphereTree_SphereTree) at +0x68, which the destructor cWorldSphTree__cWorldSphTree frees.
  *
  * @param ast    the bxSphereTree to wrap
@@ -38,7 +38,7 @@ extern "C" void* cWorldSphTree_cWorldSphTree(void* self, void* ast, int isLow)
     *(void**)((char*)self + 0x64) = ast;
     *(void**)((char*)self + 0x60) = ast;
     sSphV4 center = *(sSphV4*)((char*)ast + 0x80);
-    float radius = func_0032C590(ast);
+    float radius = SphereTree_GetRadius(ast);
     sSphV4 corner;
     *(sSphV4*)((char*)self + 0x40) = center;
     corner.x = center.x + radius;
@@ -119,12 +119,12 @@ static inline sV4_330540 sub_330540(const sV4_330540& a, const sV4_330540& b)
     return r;
 }
 
-extern "C" float func_0032C590(void* self);
+extern "C" float SphereTree_GetRadius(void* self);
 
 /**
  * Tells whether the current sphere tree's root sphere (centre at tree + 0x80) can touch an axis-aligned box.
  *
- * The radius comes from func_0032C590(tree), called once per axis.
+ * The radius comes from SphereTree_GetRadius(tree), called once per axis.
  *
  * @param lo  the box's minimum corner (On Tour bMin)
  * @param hi  the box's maximum corner (On Tour bMax)
@@ -133,9 +133,9 @@ extern "C" float func_0032C590(void* self);
 extern "C" int cWorldSphTree_IsInBoxTransformed(void* self, float* lo, float* hi)
 {
     sV4_330540 ext;
-    float rx = func_0032C590(*(void**)((char*)self + 0x60));
-    float ry = func_0032C590(*(void**)((char*)self + 0x60));
-    float rz = func_0032C590(*(void**)((char*)self + 0x60));
+    float rx = SphereTree_GetRadius(*(void**)((char*)self + 0x60));
+    float ry = SphereTree_GetRadius(*(void**)((char*)self + 0x60));
+    float rz = SphereTree_GetRadius(*(void**)((char*)self + 0x60));
     ext.x = rx;
     ext.y = ry;
     ext.z = rz;
@@ -161,12 +161,12 @@ extern "C" int cWorldSphTree_IsInBoxTransformed(void* self, float* lo, float* hi
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_GetIdealParam);
 #ifdef SKIP_ASM
-extern "C" float func_0032C590(void* self);
+extern "C" float SphereTree_GetRadius(void* self);
 
 /**
  * Returns the wrapper's ideal query parameter: twice the wrapped sphere tree's radius, or -1.
  *
- * Uses func_0032C590() on the tree at +0x60 when the flag at +0x0 is set (the constructor's isLow was 0).
+ * Uses SphereTree_GetRadius() on the tree at +0x60 when the flag at +0x0 is set (the constructor's isLow was 0).
  *
  * @return 2 * radius, or -1.0 for a low-detail wrapper
  */
@@ -174,7 +174,7 @@ extern "C" float cWorldSphTree_GetIdealParam(void* self)
 {
     float idealParam;
     if (*(int*)self != 0) {
-        idealParam = func_0032C590(*(void**)((char*)self + 0x60)) * 2.0f;
+        idealParam = SphereTree_GetRadius(*(void**)((char*)self + 0x60)) * 2.0f;
     } else {
         idealParam = -1.0f;
     }
@@ -185,13 +185,13 @@ extern "C" float cWorldSphTree_GetIdealParam(void* self)
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cWorldSphTree_Transform);
 #ifdef SKIP_ASM
-extern "C" void* func_00327CC8(void* self, void* src);
+extern "C" void* bxSphereTree_operatorE(void* self, void* src);
 extern "C" void SphereTree_TransformRel(void* p, void* a, float f);
 
 /**
  * Transforms the sphere tree into a model's space using its working copy.
  *
- * Copies the current tree (+0x60) into the copy at +0x68 (func_00327CC8, On Tour bxSphereTree::operator=), makes
+ * Copies the current tree (+0x60) into the copy at +0x68 (bxSphereTree_operatorE, On Tour bxSphereTree::operator=), makes
  * the copy current, applies @p mat and @p scale (SphereTree_TransformRel) and sets the transformed flag (+0x4).
  *
  * @param mat  the transform (On Tour const t4Matrix& mat)
@@ -199,7 +199,7 @@ extern "C" void SphereTree_TransformRel(void* p, void* a, float f);
  */
 extern "C" void cWorldSphTree_Transform(void* self, void* mat, float scale)
 {
-    func_00327CC8(*(void**)((char*)self + 0x68), *(void**)((char*)self + 0x60));
+    bxSphereTree_operatorE(*(void**)((char*)self + 0x68), *(void**)((char*)self + 0x60));
     *(void**)((char*)self + 0x60) = *(void**)((char*)self + 0x68);
     SphereTree_TransformRel(*(void**)((char*)self + 0x60), mat, scale);
     *(int*)((char*)self + 0x4) = 1;
@@ -423,18 +423,18 @@ struct sWsHit_3308C8 {
     float len;            // 0x40
 };
 
-extern "C" int func_0032CB58(void* self, void* other, void* a2, void* a3);
+extern "C" int SphereTree_IsTreeCollision(void* self, void* other, void* a2, void* a3);
 
 /**
  * Collides another sphere tree with this one's current tree and normalises the hit's push-out vector.
  *
  * @param tree  the other sphere tree (On Tour bxSphereTree* tree)
  * @param hit  receives the intersection (On Tour tIntersectInfo* ti); direction normalised, length stored
- * @return 1 on a hit (func_0032CB58), otherwise 0
+ * @return 1 on a hit (SphereTree_IsTreeCollision), otherwise 0
  */
 extern "C" int cWorldSphTree_IsSphTreeInt(void* self, void* tree, sWsHit_3308C8* hit)
 {
-    if (func_0032CB58(*(void**)((char*)self + 0x60), tree, &hit->dir, hit) != 0) {
+    if (SphereTree_IsTreeCollision(*(void**)((char*)self + 0x60), tree, &hit->dir, hit) != 0) {
         float len = wsLength_3308C8(hit->dir);
         hit->len = len;
         wsDivEq_3308C8(hit->dir, len);
@@ -492,7 +492,7 @@ struct sWsHit_330950 {
     float len;            // 0x40
 };
 
-extern "C" int func_0032C928(void* self, void* a1, void* a2, void* a3, void* a4);
+extern "C" int SphereTree_IsBoxCollision(void* self, void* a1, void* a2, void* a3, void* a4);
 
 /**
  * Collides the current sphere tree with an axis-aligned box and normalises the hit's push-out vector.
@@ -500,11 +500,11 @@ extern "C" int func_0032C928(void* self, void* a1, void* a2, void* a3, void* a4)
  * @param bMin  the box's minimum corner (On Tour bMin)
  * @param bMax  the box's maximum corner (On Tour bMax)
  * @param hit  receives the intersection (On Tour tIntersectInfo* ti); direction normalised, length stored
- * @return 1 on a hit (func_0032C928), otherwise 0
+ * @return 1 on a hit (SphereTree_IsBoxCollision), otherwise 0
  */
 extern "C" int cWorldSphTree_IsBoxInt(void* self, void* bMin, void* bMax, sWsHit_330950* hit)
 {
-    if (func_0032C928(*(void**)((char*)self + 0x60), bMin, bMax, &hit->dir, hit) != 0) {
+    if (SphereTree_IsBoxCollision(*(void**)((char*)self + 0x60), bMin, bMax, &hit->dir, hit) != 0) {
         float len = wsLength_330950(hit->dir);
         hit->len = len;
         wsDivEq_330950(hit->dir, len);
@@ -515,7 +515,7 @@ extern "C" int cWorldSphTree_IsBoxInt(void* self, void* bMin, void* bMax, sWsHit
 #endif
 
 //100%
-INCLUDE_ASM("intersect/worldsphtree", func_003309D8);
+INCLUDE_ASM("intersect/worldsphtree", OverlapInstancesCallback_operatorCall);
 #ifdef SKIP_ASM
 struct sVEnt_3309D8 { short delta; short index; void* fn; };
 typedef int (*Test_3309D8)(void*);
@@ -583,7 +583,7 @@ static inline int overlapBox_3309D8(const sBox_3309D8* b, const sBox_3309D8* o)
  * @param ctx  the callback: instance list, count pointer, maximum, query box (On Tour OverlapInstancesCallback, this)
  * @param tree  the octree cell (On Tour const Cell& cell)
  */
-extern "C" void func_003309D8(sCtx_3309D8* ctx, void* tree)
+extern "C" void OverlapInstancesCallback_operatorCall(sCtx_3309D8* ctx, void* tree)
 {
     for (sNode_3309D8* node = *(sNode_3309D8**)((char*)tree + 0x20); node != 0; node = node->next) {
         int flags = node->flags;
@@ -616,7 +616,7 @@ INCLUDE_ASM("intersect/worldsphtree", func_00330BA8);
 #ifdef SKIP_ASM
 struct sSphNode_340A40;
 extern "C" void func_00340A40(sSphNode_340A40* node, sCtx_3309D8* ctx);
-extern "C" int func_00328360(void* cell, void* box);
+extern "C" int nash_CellKey_proximitytest(void* cell, void* box);
 extern "C" void func_00338920(char* flag, sCtx_3309D8* ctx, sCtx_3309D8* ctx2, void* box, void* tree, void* cell);
 
 struct sOctNode_330BA8 {
@@ -646,7 +646,7 @@ struct sQuery_330BA8 {
 
 static inline void collect_330BA8(sOctNode_330BA8* node, sCtx_3309D8* ctx)
 {
-    func_003309D8(ctx, node);
+    OverlapInstancesCallback_operatorCall(ctx, node);
     if (node->child[0] != 0) func_00340A40(node->child[0], ctx);
     if (node->child[1] != 0) func_00340A40(node->child[1], ctx);
     if (node->child[2] != 0) func_00340A40(node->child[2], ctx);
@@ -664,7 +664,7 @@ static inline void queryCell_330BA8(sGrid_330BA8* grid, int i, void* box, sCtx_3
     if (grid->cells[i].tree != 0) {
         sOctNode_330BA8* tree = cell->tree;
         char* flag = &flags[i];
-        int r = func_00328360(cell, box);
+        int r = nash_CellKey_proximitytest(cell, box);
         if (r == 0) {
             collect_330BA8(tree, ctx);
         } else if (r == 2) {
@@ -762,7 +762,7 @@ static inline int queryCell_331450(sGrid_331450* grid, int i, void* box, sCtx_33
     if (grid->cells[i].tree != 0) {
         tree = cell->tree;
         flag = (char*)&tag;
-        r = func_00328360(cell, box);
+        r = nash_CellKey_proximitytest(cell, box);
         if (r == 0) {
             collect_331450(tree, ctx);
         } else if (r == 2) {
@@ -855,7 +855,7 @@ static inline int overlapObj_331E90(const sBox_3309D8* b, const sObj_331E90* n)
 
 static inline void collect_331E90(sTree_331E90* tree, sCtx_3309D8* ctx)
 {
-    func_003309D8(ctx, tree);
+    OverlapInstancesCallback_operatorCall(ctx, tree);
     sCtx_3309D8* q = (sCtx_3309D8*)((char*)ctx + 0x10);
     for (sObj_331E90* p = tree->objs; p != 0; p = p->next) {
         if (overlapObj_331E90(q->box, p)) {
@@ -885,7 +885,7 @@ static inline void queryCell_331E90(sGrid_331E90* grid, int i, sBox_3309D8* box,
         sTree_331E90* tree = cell->tree;
         sTag_331E90 tag;
         char* flag = (char*)&tag;
-        int r = func_00328360(cell, box);
+        int r = nash_CellKey_proximitytest(cell, box);
         if (r == 0) {
             collect_331E90(tree, ctx);
         } else if (r == 2) {
@@ -997,7 +997,7 @@ static inline void add_332DB8(sCtx_3309D8* s, void* p)
 
 static inline void collect_332DB8(sTree_332DB8* tree, sCtx3_332DB8* ctx)
 {
-    func_003309D8(&ctx->nodes, tree);
+    OverlapInstancesCallback_operatorCall(&ctx->nodes, tree);
     sCtx_3309D8* s = &ctx->objs;
     for (sObj_332DB8* p = tree->objs; p != 0; p = p->next) {
         if (overlapObj_332DB8(s->box, p)) {
@@ -1025,7 +1025,7 @@ static inline void queryCell_332DB8(sGrid_332DB8* grid, int i, sBox_3309D8* box,
         sTree_332DB8* tree = cell->tree;
         sTag_332DB8 tag;
         char* flag = (char*)&tag;
-        int r = func_00328360(cell, box);
+        int r = nash_CellKey_proximitytest(cell, box);
         if (r == 0) {
             collect_332DB8(tree, ctx);
         } else if (r == 2) {
@@ -1155,10 +1155,10 @@ struct sTree_333EF8 {
     sTriObj_333EF8* tris[1];        // 0x110
 };
 
-extern "C" void func_003279D0(void* cache, void* src, void** out);
+extern "C" void cAIFwdDiffCache_GetFwdDiff(void* cache, void* src, void** out);
 struct sVec4_335960;
 struct sHit_003342D0;
-extern "C" int func_0032B6E0(void* q, void* obj, void* node, sVec4_335960* pos, sVec4_335960* nrm, float* dist, sVec4_335960* uv, int arg);
+extern "C" int cWorldIntersectType_IsPatchInt(void* q, void* obj, void* node, sVec4_335960* pos, sVec4_335960* nrm, float* dist, sVec4_335960* uv, int arg);
 extern "C" int intersect_instanceIntersect(void* q, void* node, void* buf, int cap, int mode);
 
 static inline int overlapTri_333EF8(const sQuery_333EF8* q, const sTriObj_333EF8* n)
@@ -1230,8 +1230,8 @@ extern "C" int func_00333EF8(void* vself, void* vq, sHit_003342D0* vhits, int ca
         sVec4_333EF8 nrm;
         void* node;
         float dist;
-        func_003279D0(self->owner->cache, obj, &node);
-        if (!func_0032B6E0(query, obj, node, (sVec4_335960*)&pos, (sVec4_335960*)&nrm, &dist, (sVec4_335960*)&uv, hitCache)) {
+        cAIFwdDiffCache_GetFwdDiff(self->owner->cache, obj, &node);
+        if (!cWorldIntersectType_IsPatchInt(query, obj, node, (sVec4_335960*)&pos, (sVec4_335960*)&nrm, &dist, (sVec4_335960*)&uv, hitCache)) {
             continue;
         }
         reset_333EF8(&hits[n]);
@@ -1537,7 +1537,7 @@ extern "C" void cBXNash_initTheAIFwdDiffCache(void* self)
 //100%
 INCLUDE_ASM("intersect/worldsphtree", cBXNash_purgeTheAIFwdDiffCache);
 #ifdef SKIP_ASM
-extern "C" void func_00327828(void* p, int flags);
+extern "C" void cAIFwdDiffCache__cAIFwdDiffCache(void* p, int flags);
 
 /**
  * Deletes the AI forward-difference cache (+0xA4) built by cBXNash_initTheAIFwdDiffCache, then clears the pointer.
@@ -1546,7 +1546,7 @@ extern "C" void cBXNash_purgeTheAIFwdDiffCache(void* self)
 {
     void* fwdDiffCache = *(void**)((char*)self + 0xA4);
     if (fwdDiffCache != 0) {
-        func_00327828(fwdDiffCache, 3);
+        cAIFwdDiffCache__cAIFwdDiffCache(fwdDiffCache, 3);
     }
     *(void**)((char*)self + 0xA4) = 0;
 }
@@ -2377,8 +2377,8 @@ struct sCtx_335960 {
     void* cache;
 };
 
-extern "C" void func_003279D0(void* cache, void* src, void** out);
-extern "C" int func_0032B6E0(void* q, void* obj, void* node, sVec4_335960* pos, sVec4_335960* nrm, float* dist, sVec4_335960* uv, int arg);
+extern "C" void cAIFwdDiffCache_GetFwdDiff(void* cache, void* src, void** out);
+extern "C" int cWorldIntersectType_IsPatchInt(void* q, void* obj, void* node, sVec4_335960* pos, sVec4_335960* nrm, float* dist, sVec4_335960* uv, int arg);
 
 static inline int overlap_335960(const sQuery_335960* q, const sTriObj_335960* n)
 {
@@ -2419,8 +2419,8 @@ extern "C" void func_00335960(void* vctx, void* vobj)
     float dist;
     if ((obj->flags & 0x41) != 65) return;
     if (!overlap_335960(ctx->q, obj)) return;
-    func_003279D0(ctx->cache, obj, &node);
-    if (!func_0032B6E0(ctx->q, obj, node, &pos, &nrm, &dist, &uv, ctx->arg)) return;
+    cAIFwdDiffCache_GetFwdDiff(ctx->cache, obj, &node);
+    if (!cWorldIntersectType_IsPatchInt(ctx->q, obj, node, &pos, &nrm, &dist, &uv, ctx->arg)) return;
     reset_335960(&ctx->hits[*ctx->count]);
     ctx->hits[*ctx->count].pos = pos;
     ctx->hits[*ctx->count].nrm = nrm;
@@ -2598,7 +2598,7 @@ static inline void queryCell_335D78(sGrid_335D78* grid, int i, sBox_335D78* box,
         sOct_335D78* tree = cell->tree;
         sTag_335D78 tag;
         char* flag = (char*)&tag;
-        int r = func_00328360(cell, box);
+        int r = nash_CellKey_proximitytest(cell, box);
         if (r == 0) {
             collect_335D78(tree, ctx);
         } else if (r == 2) {
@@ -2736,7 +2736,7 @@ struct sCell_369D8 {
     void* node;             // 0x10
 };
 
-extern "C" void* func_0032E100(void* seg, const sQuad_369D8& a, const sQuad_369D8& b, int n, float r);
+extern "C" void* cWorldLine_cWorldLine(void* seg, const sQuad_369D8& a, const sQuad_369D8& b, int n, float r);
 struct sCtx_369D8 {
     float* pos;             // 0x0
     char flags[8];          // 0x4
@@ -2800,7 +2800,7 @@ extern "C" int func_003369D8(sCell_369D8* self, float* pos, sQuad_369D8* outP, s
         b.y = pos[1];
         b.z = hi;
         b.w = 1.0f;
-        func_0032E100(seg, a, b, 2, t);
+        cWorldLine_cWorldLine(seg, a, b, 2, t);
     }
     sHit_003369D8 hits[64];
     sQuery_369D8 q;
@@ -3012,7 +3012,7 @@ static inline void queryCell_336F30(sGrid_336F30* grid, int i, sBox_336F30* box,
         sOct_336F30* tree = cell->tree;
         sTag_336F30 tag;
         char* flag = (char*)&tag;
-        int r = func_00328360(cell, box);
+        int r = nash_CellKey_proximitytest(cell, box);
         if (r == 0) {
             collect_336F30(tree, ctx);
         } else if (r == 2) {
@@ -3184,7 +3184,7 @@ static inline void queryCell_337A48(sGrid_337A48* grid, int i, sBox_00334680* bo
         sOct_337A48* tree = cell->tree;
         sTag_337A48 tag;
         char* flag = (char*)&tag;
-        int r = func_00328360(cell, box);
+        int r = nash_CellKey_proximitytest(cell, box);
         if (r == 0) {
             collect_337A48(tree, q);
         } else if (r == 2) {
@@ -3249,7 +3249,7 @@ extern "C" void func_00338920(char* flag, sCtx_3309D8* ctx, sCtx_3309D8* ctx2, v
     sBox_3309D8* box = (sBox_3309D8*)vbox;
     sOctNode_330BA8* node = (sOctNode_330BA8*)vnode;
     sCell_338920* cell = (sCell_338920*)vcell;
-    func_003309D8(ctx, node);
+    OverlapInstancesCallback_operatorCall(ctx, node);
     if (cell->level == 11) {
         return;
     }
@@ -3515,7 +3515,7 @@ static inline int overlapObj_33A3D8(const sBox_3309D8* b, const sObj_33A3D8* n)
 
 static inline void collectObjs_33A3D8(sTree_33A3D8* tree, sCtx_3309D8* ctx)
 {
-    func_003309D8(ctx, tree);
+    OverlapInstancesCallback_operatorCall(ctx, tree);
     sCtx_3309D8* q = (sCtx_3309D8*)((char*)ctx + 0x10);
     for (sObj_33A3D8* p = tree->objs; p != 0; p = p->next) {
         if (overlapObj_33A3D8(q->box, p)) {
@@ -3723,7 +3723,7 @@ static inline int overlap_33B748(const sBox_33B748* b, const sObjNode_33B748* n)
 
 static inline void visit_33B748(sTree_33B748* self, sCtx_33B748* ctx)
 {
-    func_003309D8((sCtx_3309D8*)ctx, self);
+    OverlapInstancesCallback_operatorCall((sCtx_3309D8*)ctx, self);
     sSub_33B748* s = &ctx->objs;
     for (sObjNode_33B748* p = self->objs; p != 0; p = p->next) {
         if (overlap_33B748(s->box, p)) {
@@ -4708,7 +4708,7 @@ struct sSphNode_340A40 {
 
 extern "C" void func_00340A40(sSphNode_340A40* node, sCtx_3309D8* ctx)
 {
-    func_003309D8(ctx, node);
+    OverlapInstancesCallback_operatorCall(ctx, node);
     if (node->child[0] != 0) func_00340A40(node->child[0], ctx);
     if (node->child[1] != 0) func_00340A40(node->child[1], ctx);
     if (node->child[2] != 0) func_00340A40(node->child[2], ctx);
@@ -4774,7 +4774,7 @@ static inline int overlapObj_340C20(const sBox_3309D8* b, const sObj_340C20* n)
 
 extern "C" void func_00340C20(sTree_340C20* tree, sCtx_3309D8* ctx)
 {
-    func_003309D8(ctx, tree);
+    OverlapInstancesCallback_operatorCall(ctx, tree);
     sCtx_3309D8* objCtx = (sCtx_3309D8*)((char*)ctx + 0x10);
     for (sObj_340C20* obj = tree->objs; obj != 0; obj = obj->next) {
         if (overlapObj_340C20(objCtx->box, obj)) {
@@ -4799,7 +4799,7 @@ extern "C" void func_00340C20(sTree_340C20* tree, sCtx_3309D8* ctx)
 INCLUDE_ASM("intersect/worldsphtree", func_00340DC0);
 #ifdef SKIP_ASM
 struct sCtx_3309D8;
-extern "C" void func_003309D8(sCtx_3309D8* ctx, void* tree);
+extern "C" void OverlapInstancesCallback_operatorCall(sCtx_3309D8* ctx, void* tree);
 
 struct sBox_340DC0 {
     float min[4];
@@ -4854,7 +4854,7 @@ static inline int overlap_340DC0(const sBox_340DC0* b, const sObjNode_340DC0* n)
 
 extern "C" void func_00340DC0(sTree_340DC0* self, sCtx_340DC0* ctx)
 {
-    func_003309D8((sCtx_3309D8*)ctx, self);
+    OverlapInstancesCallback_operatorCall((sCtx_3309D8*)ctx, self);
     sSub_340DC0* bucket = &ctx->objs;
     for (sObjNode_340DC0* objNode = self->objs; objNode != 0; objNode = objNode->next) {
         if (overlap_340DC0(bucket->box, objNode)) {

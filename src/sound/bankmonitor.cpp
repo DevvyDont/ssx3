@@ -319,7 +319,7 @@ extern "C" void func_003B89E0(int h);
 extern "C" int func_003B9920(int h);
 extern char D_00483250[];
 
-// cSndPlayOpts::OPTS_GetCallback (prototype name; out-of-line copy in bx is func_002B91C8)
+// cSndPlayOpts::OPTS_GetCallback (prototype name; out-of-line copy in bx is cSndPlayOpts_OPTS_GetCallback)
 static inline sSndCallback OPTS_GetCallback_Create(sBankMonitorView* s)
 {
     return s->callbacks[s->cur];
@@ -4492,7 +4492,7 @@ extern "C" int func_002B2778(cSongInstance* self)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B27C0);
 #ifdef SKIP_ASM
-extern "C" int func_002B9F88(void*, int);
+extern "C" int cBankManager_BANK_Handle(void*, int);
 extern "C" int func_003B65D0(int);
 
 extern "C" int func_002B27C0(cSongInstance* self, void* other)
@@ -4503,7 +4503,7 @@ extern "C" int func_002B27C0(cSongInstance* self, void* other)
         func_003B58A0();
         bool notReady = *(int*)(slot * 0x60 + *(int*)((char*)other + 0xACC)) != 1;
         if (!notReady) {
-            ok = func_003B65D0(func_002B9F88(other, slot)) == 1;
+            ok = func_003B65D0(cBankManager_BANK_Handle(other, slot)) == 1;
         }
         func_003B58D8();
         if (ok == 0) {
@@ -5828,7 +5828,7 @@ extern "C" int func_002B4740(void* self)
 //100%
 INCLUDE_ASM("sound/bankmonitor", func_002B47C0);
 #ifdef SKIP_ASM
-extern "C" int func_002B9F88(void*, int);
+extern "C" int cBankManager_BANK_Handle(void*, int);
 extern "C" int func_003B65D0(int);
 
 extern "C" int func_002B47C0(void* self)
@@ -5839,7 +5839,7 @@ extern "C" int func_002B47C0(void* self)
     func_003B58A0();
     bool notReady = *(int*)(slot * 0x60 + *(int*)((char*)other + 0xACC)) != 1;
     if (!notReady) {
-        ok = func_003B65D0(func_002B9F88(other, slot)) == 1;
+        ok = func_003B65D0(cBankManager_BANK_Handle(other, slot)) == 1;
     }
     func_003B58D8();
     if (ok == 0) {

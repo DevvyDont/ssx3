@@ -815,7 +815,7 @@ INCLUDE_ASM("ai/rider", cRider_putAt);
 // (drop >= 0: probe from 200 above to 7000 below), and resets its motion state and animation.
 extern "C" float func_0031C228(float x);
 extern "C" float func_0031C128(float x);
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void cRider_updateOrientationImplicit(cRider* self);
 extern "C" void cRiderAnimBase_reset(void* anim);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
@@ -843,7 +843,7 @@ struct sHit_D660 {
     char pad20[0x60];
 } __attribute__((aligned(16)));
 
-void func_0032E100_D660(sRay_D660* ray, const t4Vector& a, const t4Vector& b, int n, float t) __asm__("func_0032E100");
+void cWorldLine_cWorldLine_D660(sRay_D660* ray, const t4Vector& a, const t4Vector& b, int n, float t) __asm__("cWorldLine_cWorldLine");
 extern float func_00336850_D660(void* coll, sRay_D660* ray, sHit_D660* hit, int flags) __asm__("func_00336850");
 
 struct sVE_D660 { short delta; short index; void (*fn)(void*); };
@@ -887,14 +887,14 @@ static inline float Atan2_D660(float y, float x)
 static inline sQuat_D660 AxisAngle_D660(const t4Vector& axis, float angle)
 {
     float s, c;
-    func_0031BE50(&s, &c, angle * 0.5f);
+    fSinCos(&s, &c, angle * 0.5f);
     return sQuat_D660(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
 static inline sQuat_D660 AxisAngleL_D660(const t4Vector& axis, float angle)
 {
     float s, c;
-    func_0031BE50(&s, &c, angle * 0.5f);
+    fSinCos(&s, &c, angle * 0.5f);
     sQuat_D660 q;
     q.w = c;
     q.x = s * axis.x;
@@ -1115,7 +1115,7 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
  * animation.
  *
  * Clears the line/wall hints, faces the rider along atan2(@p dir) and, when @p drop >= 0, casts a terrain ray from 200
- * above to 7000 below @p pos (func_0032E100/func_00336850) and stands the rider @p drop above the hit, tilted to the
+ * above to 7000 below @p pos (cWorldLine_cWorldLine/func_00336850) and stands the rider @p drop above the hit, tilted to the
  * hit normal. Then resets the ground frame, velocity, impulse, the 19 smoothed channels (channel 9 to 1), spin/flip
  * rates, boost, rail/press state, attack and HUD message, sets the stance from IsGoofyStance (anim heading turned half
  * a turn when switched), plays @p anim, sets up and runs the animation and skeleton (cRiderAnimBase_setupAnimation,
@@ -1143,7 +1143,7 @@ extern "C" void cRider_putAt_impl(cRider* self, const t4Vector* pos, const float
         t4Vector hi = Add_D660(*pos, Scale_D660(D_004FF160_D660, 200.0f));
         sHit_D660 hit;
         sRay_D660 ray;
-        func_0032E100_D660(&ray, lo, hi, 2, 0.9791666865348816f);
+        cWorldLine_cWorldLine_D660(&ray, lo, hi, 2, 0.9791666865348816f);
         if (func_00336850_D660(SSXApp->Game->BXNash, &ray, &hit, 0) >= 0.0f)
         {
             placePos = hit.pos;
@@ -1433,7 +1433,7 @@ extern "C" void cRider_cleanupAfterPutAt(cRider* self, int notify)
 //100%
 INCLUDE_ASM("ai/rider", cRider_rotateOrientation);
 #ifdef SKIP_ASM
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void cRider_updateOrientationImplicit(cRider* self);
 
 struct sQuat_0011DFE0
@@ -1468,7 +1468,7 @@ static inline t4Vector QuatMul_0011DFE0(const sQuat_0011DFE0& a, const t4Vector&
 static inline sQuat_0011DFE0 AxisAngle_0011DFE0(const t4Vector& axis, float angle)
 {
     float s, c;
-    func_0031BE50(&s, &c, angle * 0.5f);
+    fSinCos(&s, &c, angle * 0.5f);
     return sQuat_0011DFE0(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
@@ -1728,7 +1728,7 @@ extern "C" void cAnimModel_transform(cAnimModel* self, void* roots);
 extern "C" void cRider_doLegIK(void* self, void* obj, void* xf, float t);
 extern "C" void cRider_updateCollideInfo(void* self);
 extern "C" float func_0031C128(float x);
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 int cRider_getControlState(void* self);
 
 struct sXf_EB98 {
@@ -2006,7 +2006,7 @@ static inline void QuatToMat_EB98(void* dst, const sVec4W* q, const sVec4W* p)
 static inline sVec4W AxisAngle_EB98(const sVec4W& axis, float angle)
 {
     float s, c;
-    func_0031BE50(&s, &c, angle * 0.5f);
+    fSinCos(&s, &c, angle * 0.5f);
     return sVec4W(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
@@ -2122,7 +2122,7 @@ INCLUDE_ASM("ai/rider", cRider_doLegIK);
 // Two-bone IK: moves bone chain[2] (end effector) toward target (blended by blend), then bends the
 // chain[1] joint and swings the chain[0] root so the end reaches it. Uses the unit's sVec4W / sXf_EB98
 // helpers (cRider_updateSkeleton, this function's caller).
-extern "C" sVec4W func_0031BCB0(const sVec4W& a, const sVec4W& b, float t);
+extern "C" sVec4W tquat_slerp(const sVec4W& a, const sVec4W& b, float t);
 
 // PORT: PS2-only VU0 inline asm (normalize via rsqrt).
 static inline sVec4W Normalize_F3D8(const sVec4W& v)
@@ -2163,7 +2163,7 @@ extern "C" void cRider_doLegIK_impl(cRider* self, int* chain, sXf_EB98* target, 
  *
  * @p chain holds the leg's three bone indices (On Tour tLegInfo): [0] the root (hip), [1] the middle joint (knee), [2]
  * the end (foot). The end bone is set to @p target when @p blend is 1.0f, otherwise moved toward it: position lerp,
- * rotation through func_0031BCB0 (a quaternion slerp). The two segment lengths are the x of the middle and end bones'
+ * rotation through tquat_slerp (a quaternion slerp). The two segment lengths are the x of the middle and end bones'
  * local offsets scaled by the model's unk_140 (its length scale).
  *
  * The knee angle follows from the law of cosines (func_0031C128 is an arcsine; its argument is clamped to [-1, 1]); the
@@ -2183,7 +2183,7 @@ extern "C" void cRider_doLegIK_impl(cRider* self, int* chain, sXf_EB98* target, 
         *end = *target;
     } else {
         end->pos = Add_EB98(end->pos, Scale_EB98(Sub_EB98(target->pos, end->pos), blend));
-        end->rot = func_0031BCB0(end->rot, target->rot, blend);
+        end->rot = tquat_slerp(end->rot, target->rot, blend);
     }
     cAnimModel* am = self->mAnimModel;
     sAnimModelBone* bones = am->bones;
@@ -2226,7 +2226,7 @@ struct sVec4XW : t4Vector {
 extern t4Vector t4vect_Origin;
 extern t4Vector t4vect_XAxis;
 extern t4Vector t4vect_YAxis;
-extern "C" void func_0031BE50(float* sout, float* cout, float x);
+extern "C" void fSinCos(float* sout, float* cout, float x);
 
 struct sXf_LP {
     sVec4XW pos;
@@ -2352,7 +2352,7 @@ static inline float absf_LP(float x)
 static inline void SetAA_LP(sVec4XW& q, const t4Vector& axis, float angle)
 {
     float s, c;
-    func_0031BE50(&s, &c, angle * 0.5f);
+    fSinCos(&s, &c, angle * 0.5f);
     q.x = s * axis.x;
     q.w = c;
     q.y = s * axis.y;
@@ -3616,9 +3616,9 @@ INCLUDE_ASM("ai/rider", cRider_alignRiderAxis);
 // sVec4W stores w first, then x, y, z.
 extern t4Vector D_004FF120_1AA0 __asm__("t4vect_Zero");
 extern t4Vector t4vect_XAxis;
-extern "C" void func_0031BB30(void* q, const void* a, const void* b);
+extern "C" void tquat_prerotateto(void* q, const void* a, const void* b);
 extern "C" float func_0031C128(float x);
-extern "C" float func_0031BF60(float x);
+extern "C" float fSin(float x);
 
 
 // PORT: PS2-only VU0 macro-mode asm (rotate v by the conjugate of quaternion q).
@@ -3690,7 +3690,7 @@ static inline sVec4 Div_1AA0(const sVec4& v, float s)
 static inline sVec4W AxisAngle_1AA0(const t4Vector& axis, float angle)
 {
     float s, c;
-    func_0031BE50(&s, &c, angle * 0.5f);
+    fSinCos(&s, &c, angle * 0.5f);
     return sVec4W(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
@@ -3760,7 +3760,7 @@ extern "C" void cRider_alignRiderAxis(cRider* self, const sVec4* up, const sVec4
     {
         sVec4 cur(2.0f * (ROT_1AA0.z * ROT_1AA0.x + ROT_1AA0.w * ROT_1AA0.y), 2.0f * (ROT_1AA0.z * ROT_1AA0.y - ROT_1AA0.w * ROT_1AA0.x),
                     1.0f - 2.0f * (ROT_1AA0.x * ROT_1AA0.x + ROT_1AA0.y * ROT_1AA0.y), 0.0f);
-        func_0031BB30(&targetRot, &cur, up);
+        tquat_prerotateto(&targetRot, &cur, up);
     }
     if (neq_1AA0(fwd, D_004FF120_1AA0)) {
         sVec4 rotatedFwd = QuatRot_1AA0(targetRot, *fwd);
@@ -3773,13 +3773,13 @@ extern "C" void cRider_alignRiderAxis(cRider* self, const sVec4* up, const sVec4
     if (0.0f < deltaRot.w) {
         angle = 2.0f * Acos_1AA0(deltaRot.w <? 1.0f);
         if (9.999999747378752e-06f <= angle) {
-            axis = Div_1AA0(sVec4(deltaRot.x, deltaRot.y, deltaRot.z, 0.0f), func_0031BF60(angle * 0.5f));
+            axis = Div_1AA0(sVec4(deltaRot.x, deltaRot.y, deltaRot.z, 0.0f), fSin(angle * 0.5f));
             goto have_axis;
         }
     } else {
         angle = 2.0f * Acos_1AA0(-(deltaRot.w >? -1.0f));
         if (9.999999747378752e-06f <= angle) {
-            axis = Div_1AA0(sVec4(deltaRot.x, deltaRot.y, deltaRot.z, 0.0f), func_0031BF60(angle * -0.5f));
+            axis = Div_1AA0(sVec4(deltaRot.x, deltaRot.y, deltaRot.z, 0.0f), fSin(angle * -0.5f));
             goto have_axis;
         }
     }
@@ -3796,7 +3796,7 @@ have_axis:
 //100%
 INCLUDE_ASM("ai/rider", func_00121F30);
 #ifdef SKIP_ASM
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 
 struct sVec4_121F30
 {
@@ -3850,7 +3850,7 @@ extern "C" void func_00121F30(cRider* self)
     sVEntryF_121F30* gvt2 = (sVEntryF_121F30*)graphicsMan->mVtbl;
     float fov = gvt2[29].fn((char*)graphicsMan + gvt2[29].delta);
     float sinFov, cosFov;
-    func_0031BE50(&sinFov, &cosFov, fov);
+    fSinCos(&sinFov, &cosFov, fov);
     z = z * (sinFov / cosFov);
     z = z * 0.009999999776482582f;
     if (z < 6.0f)
@@ -5176,7 +5176,7 @@ int func_0027C958(void* self);
 extern "C" void GetSSXActorFrame(int, void*);
 struct sQuat_001241C0;
 extern "C" void cRider_EulerToQuat(cRider* self, sQuat_001241C0* out, float rx, float ry, float rz);
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void cRider_updateOrientationImplicit(cRider* self);
 extern "C" void cRiderHandler_resetRiderFX(void* self);
 extern "C" void func_0030EA80(void* model, int i, int channel);
@@ -5201,7 +5201,7 @@ extern sV_3640 D_004FF160_3640 __asm__("t4vect_ZAxis");
 static inline sV_3640 AxisAngle_3640(const sV_3640& axis, float angle)
 {
     float s, c;
-    func_0031BE50(&s, &c, angle * 0.5f);
+    fSinCos(&s, &c, angle * 0.5f);
     return sV_3640(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
@@ -5658,7 +5658,7 @@ struct sHit_3F38 {
     char pad[0x70];
 } __attribute__((aligned(16)));
 
-extern "C" void func_0032E100_3F38(sRay_3F38* ray, const sV_3F38& a, const sV_3F38& b, int n, float t) __asm__("func_0032E100");
+extern "C" void cWorldLine_cWorldLine_3F38(sRay_3F38* ray, const sV_3F38& a, const sV_3F38& b, int n, float t) __asm__("cWorldLine_cWorldLine");
 extern "C" float func_00336850(void* self, sRay_3F38* ray, sHit_3F38* out, int a3);
 
 // PORT: PS2-only VU0 inline asm (vector * scalar).
@@ -5810,7 +5810,7 @@ extern "C" sV_3F38 cRider_GetNISEndPosition(cRider* self)
     sV_3F38 hi = Add_3F38(pos, Scale_3F38(D_004FF160_3F38, 200.0f));
     sHit_3F38 hit;
     sRay_3F38 ray;
-    func_0032E100_3F38(&ray, lo, hi, 2, 0.9791666865348816f);
+    cWorldLine_cWorldLine_3F38(&ray, lo, hi, 2, 0.9791666865348816f);
     if (func_00336850(SSXApp->Game->BXNash, &ray, &hit, 0) >= 0.0f)
         pos = hit.pos;
     AddTo_3F38(pos, Scale_3F38(D_004FF160_3F38, lift));
@@ -5821,7 +5821,7 @@ extern "C" sV_3F38 cRider_GetNISEndPosition(cRider* self)
 //100%
 INCLUDE_ASM("ai/rider", cRider_EulerToQuat);
 #ifdef SKIP_ASM
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 
 struct sQuat_001241C0
 {
@@ -5843,9 +5843,9 @@ extern "C" void cRider_EulerToQuat(cRider* self, sQuat_001241C0* out, float rx, 
 {
     sQuat_001241C0 quat;
     float sz, cz, sy, cy, sx, cx;
-    func_0031BE50(&sz, &cz, rz * 0.5f);
-    func_0031BE50(&sy, &cy, ry * 0.5f);
-    func_0031BE50(&sx, &cx, rx * 0.5f);
+    fSinCos(&sz, &cz, rz * 0.5f);
+    fSinCos(&sy, &cy, ry * 0.5f);
+    fSinCos(&sx, &cx, rx * 0.5f);
     float cc = cy * cx;
     float ss = sy * sx;
     quat.w = cz * cc + sz * ss;
@@ -5886,7 +5886,7 @@ struct sHit_42B0 {
 
 struct sVE_42B0 { short delta; short index; sV_42B0* (*fn)(void*); };
 
-extern "C" void func_0032E100(sRay_42B0* ray, const sV_42B0& a, const sV_42B0& b, int n, float t);
+extern "C" void cWorldLine_cWorldLine(sRay_42B0* ray, const sV_42B0& a, const sV_42B0& b, int n, float t);
 extern "C" float func_003342D0(void* coll, sRay_42B0* ray, sHit_42B0* hit, int flags);
 void func_00111AA0_42B0(void* self, void* a, void* b, int c, float x) __asm__("func_00111AA0__FPv");
 
@@ -6040,7 +6040,7 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* p) __asm__("
  * Probes the ground under a position during an NIS (in-game cutscene) and sets the rider's ground vectors.
  *
  * The probe base is @p pRiderPos moved along mGroundSide by mAnimModel->unk_140.x * mSlewed[0].cur * 45; a line from 100 below
- * to 200 above it (along mGroundNormal) is built with func_0032E100 and intersected with the terrain through
+ * to 200 above it (along mGroundNormal) is built with cWorldLine_cWorldLine and intersected with the terrain through
  * mOverlapList (func_003342D0). The speed is the length of the virtual getVelocity, and unk_380 keeps the previous
  * mGroundNormal. A hit object sets mGroundPolyId (object +0x150), unk_AAC / unk_AB0 (the hit's +0x6C / +0x70) and
  * unk_2D4 (the object's half-word +0xA); otherwise mGroundPolyId becomes -1.
@@ -6067,7 +6067,7 @@ extern "C" void cRider_SetNISGroundVectors_impl(cRider* self, void* pRiderPos)
     sV_42B0 hi = Add_42B0(probeBase, Scale_42B0(*(sV_42B0*)&self->mGroundNormal, 200.0f));
     sHit_42B0 hit;
     sRay_42B0 ray;
-    func_0032E100(&ray, lo, hi, 2, 0.5f);
+    cWorldLine_cWorldLine(&ray, lo, hi, 2, 0.5f);
     float hitDist = func_003342D0(self->mOverlapList, &ray, &hit, 0);
     *(sV_42B0*)&self->unk_380 = *(sV_42B0*)&self->mGroundNormal;
     if (hitDist > 0.0f && hit.obj != 0) {
@@ -7034,7 +7034,7 @@ extern "C" int cRider_syncCheckSum(cRider* self)
 //100%
 INCLUDE_ASM("ai/rider", func_00125B18);
 #ifdef SKIP_ASM
-extern "C" void func_00326CF0(void* obj);
+extern "C" void cPadDevice_clearAllVibrations(void* obj);
 
 struct sVEntryI_125B18 { short delta; short index; int (*fn)(void*); };
 struct sVEntryF_125B18 { short delta; short index; void (*fn)(void*, float, int); };
@@ -7042,7 +7042,7 @@ struct sVEntryF_125B18 { short delta; short index; void (*fn)(void*, float, int)
 /**
  * Decays a player's two vibration levels and drives the pad's two motors from them.
  *
- * With @p on 0 both levels are zeroed and func_00326CF0 stops the pad. Otherwise level 0 (bump) becomes max(level x
+ * With @p on 0 both levels are zeroed and cPadDevice_clearAllVibrations stops the pad. Otherwise level 0 (bump) becomes max(level x
  * 0.9133 - 18.5, 0) and level 1 (rumble) is multiplied by 0.99167; when the pad's virtual slot 3 returns 2, slot 4 sets
  * motor 0 to max((rumble - 0.5) x 0.01, (bump - 2) / 972.2, 0) and motor 1 to max((rumble - 70) / 160, (bump - 100) /
  * 5000, 0). Called by cPlayer_vibrationUpdate with &unk_DFC.
@@ -7059,7 +7059,7 @@ extern "C" void func_00125B18(void* vibState, int controller, int on)
     if (on == 0)
     {
         vibLevels[0] = vibLevels[1] = 0.0f;
-        func_00326CF0(obj);
+        cPadDevice_clearAllVibrations(obj);
         return;
     }
     float decayed = vibLevels[0] * 0.9133333563804626f - 18.518518447875977f;

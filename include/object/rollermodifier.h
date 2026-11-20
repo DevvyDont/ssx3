@@ -34,7 +34,7 @@ struct tSphTreeInfo;
 
 // EA's sphere tree of one mesh, placed in world space (On Tour: bxSphereTree 0x140 = SphereTree 0xC0 + staticInfo).
 // Retail methods in src/intersect/riderspheretree.cpp: SphereTree_SphereTree (ctor), SphereTree_init (reset), SphereTree_GetResolution
-// (radius), SphereTree_MoveOffset (translate), SphereTree_TransformAbs (set transform); func_00327CC8 is operator=.
+// (radius), SphereTree_MoveOffset (translate), SphereTree_TransformAbs (set transform); bxSphereTree_operatorE is operator=.
 struct bxSphereTree {
     // --- SphereTree (On Tour 0xC0)
     t4Vector axis[8];      // 0x000 [O]; [U] SphereTree_init fills 8 qwords from D_004FF640, operator= copies them
@@ -93,7 +93,7 @@ struct cRollerModifier {
     tInstanceRecord* m_pInstance; // 0x0D0 [O]; [R] ctor: the intersect info's instance (ii + 0x50), then sets flag bits
                                   //       in its word +0x8; func_0035DF70 reads it from the frame; [U] writeToReplayFrame
     char unk_0D4[0xC];            // 0x0D4 padding (SphTree is 16-byte aligned)
-    bxSphereTree SphTree;         // 0x0E0 [O]; [R] ctor SphereTree_SphereTree(self + 0xE0), then operator= (func_00327CC8) from
+    bxSphereTree SphTree;         // 0x0E0 [O]; [R] ctor SphereTree_SphereTree(self + 0xE0), then operator= (bxSphereTree_operatorE) from
                                   //       ii + 0x48; ctors read SphTree.treeInfo (lw 0x178); [U] collide, translateMe
     tBoundBox boundbox;           // 0x220 [O]; [U] setBoundBox (sq 0x220, 0x230), getBoundBox returns its address
     t4Matrix Transform;           // 0x240 [O]; [U] ctors/update build it from the body pose (sqc2 0x240-0x270);

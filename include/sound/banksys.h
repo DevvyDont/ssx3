@@ -10,7 +10,7 @@
 // asserts; the preview's .gnu.linkonce.t.SFX_*__8cBankSys* show the inlines live in its header); the path is ours.
 // Non-virtual part 0x10 [R]: the ctor (inchrg != 0) puts the virtual base cSoundSys at this + 0x10 and cBankManager at
 // this + 0x18 (sw this + 0x18 into 0x0, this + 0x10 into cBankManager + 0x1D8 = 0x1F0); vtable D_00483A48 (one slot,
-// func_002BA6B0) is stored at 0xC. The struct below is the NON-VIRTUAL part, so it can be embedded where the object
+// cBankSys_SFX_Play2D) is stored at 0xC. The struct below is the NON-VIRTUAL part, so it can be embedded where the object
 // lives: cMidiSys / cCrowdSys / cController / cSSXAudio all start with it (sound/midisys.h, sound/crowdsys.h,
 // sound/ssxaudio.h). The only instance is cSSXAudio + 0x0; the ctor stores it in gBankSys (EA name unknown).
 // Vtables: D_00483A48 is cBankSys's primary vtable (preview _vt$8cBankSys). cMidiSys adds no primary-table virtual, so
@@ -28,8 +28,8 @@ struct cBankManager;
 
 struct cBankSys {
     cBankManager* mpVBankManager; // 0x000 [R] g++ 2.95 virtual-base pointer to cBankManager (this + 0x18 in a complete cBankSys; cSSXAudio + 0x6C98); [U] every SFX_ method reaches the play options as mpVBankManager + 0x1D8 (cBankMonitor's cSndPlayOpts)
-    int* mBank;                   // 0x004 [O]; [R] operator new(0x10, "mBank") (one per play-option level); [U] SFX_Bank (func_002B9FB8) / SFX_Begin store mBank[mInst], SFX_End (cBankSys_SFX_End) reads it
-    int* mPatch;                  // 0x008 [O]; [R] operator new(0x10, "mPath") (EA's tag spelling); [U] SFX_Patch (func_002B9FD8) / SFX_Begin store mPatch[mInst], SFX_End reads it
+    int* mBank;                   // 0x004 [O]; [R] operator new(0x10, "mBank") (one per play-option level); [U] SFX_Bank (cBankSys_SFX_Bank) / SFX_Begin store mBank[mInst], SFX_End (cBankSys_SFX_End) reads it
+    int* mPatch;                  // 0x008 [O]; [R] operator new(0x10, "mPath") (EA's tag spelling); [U] SFX_Patch (cBankSys_SFX_Patch) / SFX_Begin store mPatch[mInst], SFX_End reads it
     void** mVtbl;                 // 0x00C [R] cBankSys vptr: D_00483A48 (cBankSys / cMidiSys ctors and dtors), D_004837F8 (cCrowdSys / cController), cSSXAudio_vtbl
 };
 

@@ -168,7 +168,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 extern "C" void cFERiderManager_setHumanCharacter(void* self, int a1, int a2, int a3);
 extern "C" void cFERiderManager_setHumanVisible(void* self, int a1, int a2);
-extern "C" void func_0015E050(void* cam, void* a, void* b);
+extern "C" void cSimpleCamera_setupCamWithPosAndTarget(void* cam, void* a, void* b);
 extern "C" void* cUITextureBank_getElementByHashname(void* list, int hash);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* p, int a);
@@ -194,7 +194,7 @@ struct sVE_1849B0 {
  *
  * Adds the screen through mpEngine into mpScreen (+0x40) and plays frame 0. Calls the player interface's (cBE interface
  * 1) vtable slot 2, has the FE rider manager (RealFE + 0xB0) set the user's rider to the user's character
- * (cFERiderManager_setHumanCharacter) and hides that rider (cFERiderManager_setHumanVisible with 0). Points the FE camera (RealFE + 0x10, func_0015E050) from
+ * (cFERiderManager_setHumanCharacter) and hides that rider (cFERiderManager_setHumanVisible with 0). Points the FE camera (RealFE + 0x10, cSimpleCamera_setupCamWithPosAndTarget) from
  * (0, 660, 80) at (0, 0, 80) and sets its first float to 0.4363 (25 degrees). Looks up the "empty_box", "checkbox" and
  * "yell_dollar_sign" texture elements (mpEngine + 0x58) into +0x58, +0x54 and +0x5C (On Tour mpCheckbox, mpCheckmark,
  * mpDollarSign), sets the sound bank manager's mode 5 (func_0028F140 on cAudioInterface_bxAudio()) and hides the cost display
@@ -229,7 +229,7 @@ extern "C" void cFEStateUberTrick_onCreateScreen(void* self)
     lookAt.y = 0.0f;
     lookAt.z = z;
     lookAt.w = w;
-    func_0015E050(realFe + 0x10, &camPos, &lookAt);
+    cSimpleCamera_setupCamWithPosAndTarget(realFe + 0x10, &camPos, &lookAt);
     *(float*)(realFe + 0x10) = 0.4363323450088501f;
     {
         char* uiEngine = *(char**)((char*)self + 0x10);
@@ -340,7 +340,7 @@ extern "C" void cFEStateUberTrick_onGainFocus(void* self, int prevState)
 //100%
 INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_onUpdate);
 #ifdef SKIP_ASM
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void* cFERiderManager_getHuman1(void* self, int idx);
 extern "C" void cRiderAnimBase_reset(void* anim);
 extern "C" void cRiderAnimBase_play(void* anim, int id, int a2, float t);
@@ -390,7 +390,7 @@ static inline sQuat_184C60 QuatMul_184C60(const sQuat_184C60& a, const sQuat_184
 static inline sQuat_184C60 AxisAngle_184C60(const sQuat_184C60& axis, float angle)
 {
     float s, c;
-    func_0031BE50(&s, &c, angle * 0.5f);
+    fSinCos(&s, &c, angle * 0.5f);
     return sQuat_184C60(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
@@ -400,7 +400,7 @@ static inline sQuat_184C60 AxisAngle_184C60(const sQuat_184C60& axis, float angl
  * Until +0x48 (On Tour mbModelVisible) is set it takes the user's FE rider (cFERiderManager_getHuman1 on RealFE + 0xB0). When the
  * rider's character (+0x0) is below 10 and +0xCB8 and +0xCB4 are both set, it sets the rider's +0xCCC, resets its
  * animation (+0xC, cRiderAnimBase_reset) and plays animation 436 (cRiderAnimBase_play, blend -1), places it at (-228,
- * -205, 63) turned 1.0821 rad (62 degrees) about Z (the X and Y turns are 0; func_0031BE50 gives the sines) with
+ * -205, 63) turned 1.0821 rad (62 degrees) about Z (the X and Y turns are 0; fSinCos gives the sines) with
  * cFERider_setPose, shows it (cFERiderManager_setHumanVisible with 1) and sets +0x48. onUpdate slot (+0x64) of the vtable D_0046CCC0.
  */
 extern "C" void cFEStateUberTrick_onUpdate(char* self)

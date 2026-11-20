@@ -256,7 +256,7 @@ extern "C" void cPS2BezierMan_AddPatch(cPS2BezierMan* self, void* pPatch, void* 
 INCLUDE_ASM("render/bezierman", cPS2BezierMan_DrawPatches);
 #ifdef SKIP_ASM
 // REF refs/ssx3-rust crates/ssx3-game/src/packetless/bezier.rs (end_pass): field meanings.
-extern "C" void func_0031BE50(float angle, float* s, float* c);
+extern "C" void fSinCos(float angle, float* s, float* c);
 
 struct sRS_B370 {
     int f0;
@@ -490,7 +490,7 @@ static inline void MulIn_B370(void* m, const void* b)
         float* ax = (axis);                     \
         float s;                                \
         float c;                                \
-        func_0031BE50(angle, &s, &c);           \
+        fSinCos(angle, &s, &c);           \
         float t = 1.0f - c;                     \
         float x = ax[0];                        \
         float y = ax[1];                        \
@@ -669,8 +669,8 @@ static inline void Render_B370(sBezMan_B370* self)
     float ax = cam.x * D_004A4440;
     ay = Frac_B370(ay * 0.15915494f) * 6.2831855f;
     ax = Frac_B370(ax * 0.15915494f) * 6.2831855f;
-    func_0031BE50(ay, &s1, &c1);
-    func_0031BE50(ax, &s2, &c2);
+    fSinCos(ay, &s1, &c1);
+    fSinCos(ax, &s2, &c2);
     sM4_B370 a;
     a.r[0].x = 1.0f; a.r[1].x = 0.0f; a.r[2].x = 0.0f; a.r[3].x = 0.0f;
     a.r[0].y = 0.0f; a.r[1].y = s1; a.r[2].y = -c1; a.r[3].y = 0.0f;
@@ -694,9 +694,9 @@ static inline void Render_B370(sBezMan_B370* self)
     rx = Frac_B370(rx * 0.15915494f) * 6.2831855f;
     rz = Frac_B370(rz * 0.15915494f) * 6.2831855f;
     float s3, c3, s4, c4, s5, c5;
-    func_0031BE50(ry, &s3, &c3);
-    func_0031BE50(rx, &s4, &c4);
-    func_0031BE50(rz, &s5, &c5);
+    fSinCos(ry, &s3, &c3);
+    fSinCos(rx, &s4, &c4);
+    fSinCos(rz, &s5, &c5);
     self->fx = D_004FF1A0_B370;
     {
         sM4_B370 r;

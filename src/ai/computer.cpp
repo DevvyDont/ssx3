@@ -1868,7 +1868,7 @@ extern "C" void cRider_updateOrientationImplicit(cRider* self);
 extern "C" void cRider_doLeanPoseAdjust(cRider* self, t4Vector* pos);
 extern "C" void func_00116930(cRider* self);
 extern "C" void cRider_rotateOrientation(cRider* self, const t4Vector& axis, float angle);
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" float cRiderMetrix_evWipeout(cRiderMetrix* m, int a);
 extern "C" void func_00296310(void* mgr, cRider* rider);
 extern "C" void cSSXAudio_PlayGrunt(void* mgr, void* rider, int a, int b);
@@ -1891,7 +1891,7 @@ extern sQuat_EB30 D_004FF160_EB30 __asm__("t4vect_ZAxis");
 static inline sQuat_EB30 AxisAngle_EB30(const sQuat_EB30& axis, float angle)
 {
     float s, c;
-    func_0031BE50(&s, &c, angle * 0.5f);
+    fSinCos(&s, &c, angle * 0.5f);
     return sQuat_EB30(s * axis.x, s * axis.y, s * axis.z, c);
 }
 

@@ -253,7 +253,7 @@ struct sStr_3A6948 {
  * each name is upper-cased and compared (func_004165A8) with the 0x58-byte section records after the 0x50-byte header
  * (count at +0x8); a found name gets its flag set (names[i].ok = 1, else 0). The file is freed afterwards. When the
  * file is missing or has the wrong cookie the flags are left untouched. Called by cTrackFileMan_scanLocations' helpers
- * (func_0017A830, func_0017A978).
+ * (cTrackFileMan_checkLocation, cTrackFileMan_checkLocation1).
  *
  * @param path  the track's base name
  * @param n  how many names to check

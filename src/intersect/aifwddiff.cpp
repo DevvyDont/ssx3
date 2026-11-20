@@ -51,16 +51,16 @@ extern "C" void cAIFwdDiffCache_Init(sCache_7890* self, int n)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_003279D0);
+INCLUDE_ASM("intersect/aifwddiff", cAIFwdDiffCache_GetFwdDiff);
 #ifdef SKIP_ASM
 struct sFwdDiffList;
 struct sFwdDiffLink;
 struct sFwdDiffTable;
 struct sFwdDiffNode;
-extern "C" void func_00327AC0(sFwdDiffList* list, sFwdDiffLink* n);
-extern "C" void func_00327B30(void* self, void* node);
-extern "C" void func_00327BB0(sFwdDiffTable* table, sFwdDiffNode* node);
-extern "C" void func_00327C00(void* self, void* src, void* node);
+extern "C" void cAIFwdDiffCache_MoveToAgeQueueTail(sFwdDiffList* list, sFwdDiffLink* n);
+extern "C" void cAIFwdDiffCache_RemoveFromHash(void* self, void* node);
+extern "C" void cAIFwdDiffCache_AddToHash(sFwdDiffTable* table, sFwdDiffNode* node);
+extern "C" void cAIFwdDiffCache_TesselatePatch(void* self, void* src, void* node);
 
 struct sCacheNode_279D0 {
     unsigned int key;           // 0x0
@@ -76,43 +76,43 @@ struct sCache_279D0 {
     unsigned int count;         // 0xC
 };
 
-static inline int func_003279D0_less(unsigned int a, unsigned int b) { return a < b; }
+static inline int cAIFwdDiffCache_GetFwdDiff_less(unsigned int a, unsigned int b) { return a < b; }
 
 /**
  * Returns the forward-difference tessellation of a terrain patch from the AI cache, building it when it is not cached.
  *
  * Looks the patch's key (+0x150) up in its hash bucket (key modulo the bucket count +0xC; chains are sorted by key). On
- * a hit the node is moved to the tail of the age queue (func_00327AC0). On a miss the oldest node (+0x4) is reused: it
- * is taken out of the hash (func_00327B30), given the key, hashed again (func_00327BB0), the age queue head moves on,
- * and the patch is tessellated into it (func_00327C00). Called by func_00333EF8 and func_00335960.
+ * a hit the node is moved to the tail of the age queue (cAIFwdDiffCache_MoveToAgeQueueTail). On a miss the oldest node (+0x4) is reused: it
+ * is taken out of the hash (cAIFwdDiffCache_RemoveFromHash), given the key, hashed again (cAIFwdDiffCache_AddToHash), the age queue head moves on,
+ * and the patch is tessellated into it (cAIFwdDiffCache_TesselatePatch). Called by func_00333EF8 and func_00335960.
  *
  * @param src  the terrain patch record (On Tour const tPatchRecord&)
  * @param out  receives the cache node (On Tour ppFwdDiff)
  */
-extern "C" void func_003279D0(sCache_279D0* self, void* src, sCacheNode_279D0** out)
+extern "C" void cAIFwdDiffCache_GetFwdDiff(sCache_279D0* self, void* src, sCacheNode_279D0** out)
 {
     unsigned int key = *(unsigned int*)((char*)src + 0x150);
     sCacheNode_279D0* n = self->buckets[key % self->count];
-    while (n != 0 && !func_003279D0_less(key, n->key)) {
+    while (n != 0 && !cAIFwdDiffCache_GetFwdDiff_less(key, n->key)) {
         if (n->key == key) {
-            func_00327AC0((sFwdDiffList*)self, (sFwdDiffLink*)n);
+            cAIFwdDiffCache_MoveToAgeQueueTail((sFwdDiffList*)self, (sFwdDiffLink*)n);
             *out = n;
             return;
         }
         n = n->next;
     }
     n = self->lru;
-    func_00327B30(self, n);
+    cAIFwdDiffCache_RemoveFromHash(self, n);
     n->key = key;
-    func_00327BB0((sFwdDiffTable*)self, (sFwdDiffNode*)n);
+    cAIFwdDiffCache_AddToHash((sFwdDiffTable*)self, (sFwdDiffNode*)n);
     self->lru = n->lruNext;
-    func_00327C00(self, src, n);
+    cAIFwdDiffCache_TesselatePatch(self, src, n);
     *out = n;
 }
 #endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00327AC0);
+INCLUDE_ASM("intersect/aifwddiff", cAIFwdDiffCache_MoveToAgeQueueTail);
 #ifdef SKIP_ASM
 struct sFwdDiffLink {
     int pad0;
@@ -134,7 +134,7 @@ struct sFwdDiffList {
  * @param list  the cache (this)
  * @param n  the node (On Tour node)
  */
-extern "C" void func_00327AC0(sFwdDiffList* list, sFwdDiffLink* n)
+extern "C" void cAIFwdDiffCache_MoveToAgeQueueTail(sFwdDiffList* list, sFwdDiffLink* n)
 {
     if (list->head == n) {
         list->head = n->next;
@@ -153,7 +153,7 @@ extern "C" void func_00327AC0(sFwdDiffList* list, sFwdDiffLink* n)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00327B30);
+INCLUDE_ASM("intersect/aifwddiff", cAIFwdDiffCache_RemoveFromHash);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -173,7 +173,7 @@ struct sCache_7B30 {
 
 static inline int less_7B30(unsigned int a, unsigned int b) { return a < b; }
 
-extern "C" void func_00327B30_7B30(sCache_7B30* self, sCacheNode_7B30* node) __asm__("func_00327B30");
+extern "C" void cAIFwdDiffCache_RemoveFromHash_7B30(sCache_7B30* self, sCacheNode_7B30* node) __asm__("cAIFwdDiffCache_RemoveFromHash");
 /**
  * Removes an AI forward-difference cache node from the patch hash table.
  *
@@ -182,7 +182,7 @@ extern "C" void func_00327B30_7B30(sCache_7B30* self, sCacheNode_7B30* node) __a
  *
  * @param node  the node (On Tour node)
  */
-extern "C" void func_00327B30_7B30(sCache_7B30* self, sCacheNode_7B30* node)
+extern "C" void cAIFwdDiffCache_RemoveFromHash_7B30(sCache_7B30* self, sCacheNode_7B30* node)
 {
     unsigned int key = node->key;
     if (key == 0xFFFFFFFF)
@@ -203,7 +203,7 @@ extern "C" void func_00327B30_7B30(sCache_7B30* self, sCacheNode_7B30* node)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00327BB0);
+INCLUDE_ASM("intersect/aifwddiff", cAIFwdDiffCache_AddToHash);
 #ifdef SKIP_ASM
 struct sFwdDiffNode {
     unsigned int key;
@@ -227,7 +227,7 @@ struct sFwdDiffTable {
  * @param table  the cache (this)
  * @param node  the node (On Tour anode)
  */
-extern "C" void func_00327BB0(sFwdDiffTable* table, sFwdDiffNode* node)
+extern "C" void cAIFwdDiffCache_AddToHash(sFwdDiffTable* table, sFwdDiffNode* node)
 {
     unsigned int key = node->key;
     sFwdDiffNode** link = &table->buckets[key % table->count];
@@ -244,10 +244,10 @@ extern "C" void func_00327BB0(sFwdDiffTable* table, sFwdDiffNode* node)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00327C00);
+INCLUDE_ASM("intersect/aifwddiff", cAIFwdDiffCache_TesselatePatch);
 #ifdef SKIP_ASM
 extern "C" void func_00391418(void* t, void* a);
-extern "C" void func_00327C68(void* self, void* a);
+extern "C" void cAIFwdDiffCache_InitializeCache(void* self, void* a);
 extern "C" void func_003914F8(void* t);
 extern "C" void func_00391480(void* t, void* a);
 struct sGp2930 { int a, b; };
@@ -257,35 +257,35 @@ extern sGp2930 D_004A5A20; // placeholder: target is a raw $gp+0x2930 reference
  * Tessellates a terrain patch into an AI forward-difference cache node on VU0.
  *
  * Loads the patch's 16 control points (+0x40) into VU0 and starts its micro-program (func_00391418), resets the node's
- * cached face data (func_00327C68) while VU0 runs, waits for it (func_003914F8) and copies the 10 x 10 evaluated
+ * cached face data (cAIFwdDiffCache_InitializeCache) while VU0 runs, waits for it (func_003914F8) and copies the 10 x 10 evaluated
  * vertices from VU0 memory into the node (+0x10, func_00391480). The object at $gp+0x2930 passed to the VU0 helpers is
- * not used by them. Called by func_003279D0 on a cache miss.
+ * not used by them. Called by cAIFwdDiffCache_GetFwdDiff on a cache miss.
  *
  * @param patch  the terrain patch record (On Tour const tPatchRecord&)
  * @param fwdDiff  the cache node to fill (On Tour node)
  */
-extern "C" void func_00327C00(void* self, void* patch, void* fwdDiff)
+extern "C" void cAIFwdDiffCache_TesselatePatch(void* self, void* patch, void* fwdDiff)
 {
     sGp2930* patchEval = &D_004A5A20;
     func_00391418(patchEval, (char*)patch + 0x40);
-    func_00327C68(self, fwdDiff);
+    cAIFwdDiffCache_InitializeCache(self, fwdDiff);
     func_003914F8(patchEval);
     func_00391480(patchEval, (char*)fwdDiff + 0x10);
 }
 #endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00327C68);
+INCLUDE_ASM("intersect/aifwddiff", cAIFwdDiffCache_InitializeCache);
 #ifdef SKIP_ASM
 /**
  * Clears the face data of an AI forward-difference cache node: marks every entry as not yet computed.
  *
  * Sets the first float of each of the three leading vectors of the 81 entries at +0x650 and the 9 entries at +0x1A90
- * (0x40 bytes each) to 1e10. Called by func_00327C00 before the patch is evaluated.
+ * (0x40 bytes each) to 1e10. Called by cAIFwdDiffCache_TesselatePatch before the patch is evaluated.
  *
  * @param patch  the cache node (On Tour node; despite the name not a patch)
  */
-extern "C" void func_00327C68(void* self, void* patch)
+extern "C" void cAIFwdDiffCache_InitializeCache(void* self, void* patch)
 {
     float* cell = (float*)((char*)patch + 0x650);
     int n = 80;
@@ -307,7 +307,7 @@ extern "C" void func_00327C68(void* self, void* patch)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00327CC8);
+INCLUDE_ASM("intersect/aifwddiff", bxSphereTree_operatorE);
 #ifdef SKIP_ASM
 struct sQuad_27CC8 {
     float x, y, z, w;
@@ -336,7 +336,7 @@ struct sFwdDiff_27CC8 {
  * @param src  the tree to copy (On Tour aTree)
  * @return @p self
  */
-extern "C" sFwdDiff_27CC8* func_00327CC8(sFwdDiff_27CC8* self, sFwdDiff_27CC8* src)
+extern "C" sFwdDiff_27CC8* bxSphereTree_operatorE(sFwdDiff_27CC8* self, sFwdDiff_27CC8* src)
 {
     int i;
     for (i = 0; i < 8; i++) {
@@ -409,10 +409,10 @@ extern "C" int bxSphereTree_Load(sFwdDiff_27CC8* self, char* buf, int aTreeID)
 #endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00327F18);
+INCLUDE_ASM("intersect/aifwddiff", bxSphereTree_IsRiderTreeCollision);
 #ifdef SKIP_ASM
 extern "C" int SphereTree_AllocBuf(void* self);
-extern "C" int func_0032CDB0(void* self, void* pos, void* out, int a3, int a4, int a5, int a6, float radius);
+extern "C" int SphereTree_isSphereCollision(void* self, void* pos, void* out, int a3, int a4, int a5, int a6, float radius);
 
 struct sSphere_27F18 {
     float pos[4];
@@ -432,30 +432,30 @@ struct sShape_27F18 {
  * Tests a sphere tree against a rider's spheres.
  *
  * Makes sure the tree's data buffer is loaded (SphereTree_AllocBuf when the info word +0x8 is set; the buffer goes to
- * info +0x28), then tests the rider's bounding sphere (+0x10, radius +0x20) with func_0032CDB0 from the root (centre
+ * info +0x28), then tests the rider's bounding sphere (+0x10, radius +0x20) with SphereTree_isSphereCollision from the root (centre
  * +0x80). A miss returns 0. A hit returns 1 when the rider has no sphere list (+0x2C = 0); otherwise each listed sphere
  * (from +0x30, 0x20 bytes each) is tested and the first hit returns 1. The push-out and contact outputs are filled by
- * func_0032CDB0. Called by cWorldRider_IsSphTreeInt.
+ * SphereTree_isSphereCollision. Called by cWorldRider_IsSphTreeInt.
  *
  * @param shape  the rider's sphere tree (On Tour const cRiderSphereTree*)
  * @param outPush  out: how far to push apart (On Tour overlap)
  * @param outContact  out: the contact point (On Tour loc)
  * @return 1 on contact, else 0
  */
-extern "C" int func_00327F18(void* self, sShape_27F18* shape, int outPush, int outContact)
+extern "C" int bxSphereTree_IsRiderTreeCollision(void* self, sShape_27F18* shape, int outPush, int outContact)
 {
     void* tree = *(void**)((char*)self + 0x98);
     if (*(int*)((char*)tree + 8) != 0) {
         *(int*)(*(char**)((char*)self + 0x98) + 0x28) = SphereTree_AllocBuf(tree);
     }
-    if (func_0032CDB0(self, shape->pos, (char*)self + 0x80, 0, 0, outPush, outContact, shape->radius) == 0) {
+    if (SphereTree_isSphereCollision(self, shape->pos, (char*)self + 0x80, 0, 0, outPush, outContact, shape->radius) == 0) {
         return 0;
     }
     if (shape->count == 0) {
         return 1;
     }
     for (int i = 0; i < shape->count; i++) {
-        if (func_0032CDB0(self, shape->subs[i].pos, (char*)self + 0x80, 0, 0, outPush, outContact, shape->subs[i].radius) != 0) {
+        if (SphereTree_isSphereCollision(self, shape->subs[i].pos, (char*)self + 0x80, 0, 0, outPush, outContact, shape->subs[i].radius) != 0) {
             return 1;
         }
     }
@@ -466,7 +466,7 @@ extern "C" int func_00327F18(void* self, sShape_27F18* shape, int outPush, int o
 //100%
 INCLUDE_ASM("intersect/aifwddiff", bxSphereTree_Is2SidedTriCollision);
 #ifdef SKIP_ASM
-extern "C" float func_0032C590(void* self);
+extern "C" float SphereTree_GetRadius(void* self);
 extern "C" int SphereTree_IsTriCollision(void* self, void* a1, void* a2, void* a3, void* v, void* a5, void* a6);
 
 struct sVec4_28030 {
@@ -527,7 +527,7 @@ static inline sVec4_28030 vu0Scale_28030(const sVec4_28030& v, float s)
  * Tests the sphere tree against a triangle from either side.
  *
  * Returns 0 when the tree's centre (+0x80) is farther from the triangle's plane than its radius
- * (func_0032C590). Otherwise flips the normal to face the tree when needed and runs SphereTree_IsTriCollision (the one-sided
+ * (SphereTree_GetRadius). Otherwise flips the normal to face the tree when needed and runs SphereTree_IsTriCollision (the one-sided
  * test), which fills the push-out vector and contact point.
  *
  * @param point1    first triangle corner
@@ -545,7 +545,7 @@ extern "C" int bxSphereTree_Is2SidedTriCollision(void* self, sVec4_28030* point1
         sVec4_28030 toCentre = vu0Sub_28030(*(sVec4_28030*)((char*)self + 0x80), *point1);
         dot = vu0Dot_28030(*dir, toCentre);
     }
-    if (func_0032C590(self) < __builtin_fabsf(dot)) {
+    if (SphereTree_GetRadius(self) < __builtin_fabsf(dot)) {
         return 0;
     }
     if (dot < 0.0f) {
@@ -557,30 +557,30 @@ extern "C" int bxSphereTree_Is2SidedTriCollision(void* self, sVec4_28030* point1
 #endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00328170);
+INCLUDE_ASM("intersect/aifwddiff", bxSphereTree_Draw);
 #ifdef SKIP_ASM
-extern "C" void func_003281D0(void *, int, void *, int, int);
+extern "C" void bxSphereTree_drawLeaves(void *, int, void *, int, int);
 
 /**
  * Debug-draws a sphere tree's occupied leaf cells.
  *
- * Makes sure the tree's data buffer is loaded (as func_00327F18 does) and calls func_003281D0 from the root: centre
+ * Makes sure the tree's data buffer is loaded (as bxSphereTree_IsRiderTreeCollision does) and calls bxSphereTree_drawLeaves from the root: centre
  * +0x80, level 0, index 0, down to the depth stored at info +0xC. Nothing calls it.
  *
  * @param octree  the sphere tree (this)
  */
-extern "C" void func_00328170(void *octree) {
+extern "C" void bxSphereTree_Draw(void *octree) {
     void *temp_4;
 
     temp_4 = (*(void **)((char*)(octree) + (0x98)));
     if ((*(int *)((char*)(temp_4) + (8))) != 0) {
         (*(int *)((char*)((*(void **)((char*)(octree) + (0x98)))) + (0x28))) = SphereTree_AllocBuf(temp_4);
     }
-    func_003281D0(octree, (*(int *)((char*)((*(void **)((char*)(octree) + (0x98)))) + (0xC))), (char*)octree + 0x80, 0, 0);
+    bxSphereTree_drawLeaves(octree, (*(int *)((char*)((*(void **)((char*)(octree) + (0x98)))) + (0xC))), (char*)octree + 0x80, 0, 0);
 }
 #endif
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_003281D0);
+INCLUDE_ASM("intersect/aifwddiff", bxSphereTree_drawLeaves);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sVec4_281D0 {
@@ -636,7 +636,7 @@ static inline void vu0Add_281D0(sVec4_281D0& r, const sVec4_281D0& a, const sVec
 }
 
 
-extern "C" void func_281D0(sAI_281D0* self, int end, sVec4_281D0* pos, int level, int off) __asm__("func_003281D0");
+extern "C" void func_281D0(sAI_281D0* self, int end, sVec4_281D0* pos, int level, int off) __asm__("bxSphereTree_drawLeaves");
 /**
  * Recursively draws the occupied leaf cells of a sphere tree as magenta boxes.
  *
@@ -644,7 +644,7 @@ extern "C" void func_281D0(sAI_281D0* self, int end, sVec4_281D0* pos, int level
  * centre is @p pos plus axis vector i (+0x0 + 16i) scaled by the level's offset (level table at info +0x20, 12 bytes
  * per level, float +0x10 from the entry), and its index is off + (i + 1) x the level's stride (+0x8). At the target
  * level it draws a box of size level scale x the tree's scale (+0x90) at @p pos in colour (1, 0, 1, 0) through virtual
- * slot 87 of cGraphicsMan_TheGraphicsMan. Called by func_00328170 and itself.
+ * slot 87 of cGraphicsMan_TheGraphicsMan. Called by bxSphereTree_Draw and itself.
  *
  * @param end  the level whose cells are drawn (On Tour desLevel)
  * @param pos  this cell's centre (On Tour center)
@@ -684,7 +684,7 @@ extern "C" void func_281D0(sAI_281D0* self, int end, sVec4_281D0* pos, int level
 #endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00328360);
+INCLUDE_ASM("intersect/aifwddiff", nash_CellKey_proximitytest);
 #ifdef SKIP_ASM
 struct sCell_00328360 {
     int level;
@@ -702,17 +702,17 @@ struct sBox_00328360 {
  * misses that span on any axis. The remaining tests are likely buggy: it returns 2 when the box's maximum exceeds the
  * cell's upper bound on an axis, or when the box's minimum is below the cell's UPPER bound (x, then y twice; z is never
  * tested), which holds for practically every box that is not outside. 0 therefore only comes back when the box's
- * minimum sits exactly on the upper corner. Callers walk a 0 cell whole (for camera triggers func_00176890) and a 2
- * cell child by child (func_00174848), so in practice every overlapping cell takes the crossing path.
+ * minimum sits exactly on the upper corner. Callers walk a 0 cell whole (for camera triggers descend) and a 2
+ * cell child by child (nash_privy_QueryHelper_helpX), so in practice every overlapping cell takes the crossing path.
  *
- * Called by func_0016D320 (camera triggers), func_003309D8 and the other octree queries (func_00331450, func_00332DB8,
+ * Called by cCameraTriggerMan_checkCollisions (camera triggers), OverlapInstancesCallback_operatorCall and the other octree queries (func_00331450, func_00332DB8,
  * func_00335D78, func_00336F30, func_003378C0), once per root cell.
  *
  * @param cell  the cell key: level, x, y, z (On Tour CellKey, this)
  * @param box  the query box: min at +0x0, max at +0x10
  * @return 1 outside, 2 crossing, 0 inside (On Tour ProximityResult)
  */
-extern "C" int func_00328360(sCell_00328360* cell, sBox_00328360* box)
+extern "C" int nash_CellKey_proximitytest(sCell_00328360* cell, sBox_00328360* box)
 {
     union {
         int i;
@@ -1272,7 +1272,7 @@ extern "C" void nash_Nash_movenode(sRoot_8C20 (*roots)[2][2], int idx, sItem_003
 #endif
 
 //100%
-INCLUDE_ASM("intersect/aifwddiff", func_00329590);
+INCLUDE_ASM("intersect/aifwddiff", gIsBoxSphereInt);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sVec4_29590 {
@@ -1308,7 +1308,7 @@ static inline sVec4_29590 vu0Scale_29590(const sVec4_29590& v, float s)
  * axis, from t4vect_XAxis/YAxis/ZAxis) and *@p outDist. Contacts at the box's edges or corners, where the centre lies
  * outside every cross-section, are not found.
  *
- * Called by cWorldSphere_IsBoxInt, func_0032B2B8 and func_0032D028.
+ * Called by cWorldSphere_IsBoxInt, cRiderSphereTree_IsBoxCollision and SphereTree_isBoxCollision.
  *
  * @param margin  the sphere's radius (On Tour rad)
  * @param mn  the box minimum (On Tour bMin)
@@ -1319,7 +1319,7 @@ static inline sVec4_29590 vu0Scale_29590(const sVec4_29590& v, float s)
  * @param outDist  out: the depth, 1e30 when there is none (On Tour param)
  * @return 1 when a face was found, else 0
  */
-extern "C" int func_00329590(float margin, sVec4_29590* mn, sVec4_29590* mx, sVec4_29590* point, sVec4_29590* hp, sVec4_29590* nrm, float* outDist)
+extern "C" int gIsBoxSphereInt(float margin, sVec4_29590* mn, sVec4_29590* mx, sVec4_29590* point, sVec4_29590* hp, sVec4_29590* nrm, float* outDist)
 {
     *outDist = 1e30f;
     if (mn->y <= point->y && point->y <= mx->y && point->z >= mn->z && point->z <= mx->z) {

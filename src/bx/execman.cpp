@@ -311,10 +311,10 @@ extern "C" void* cInputMap_getState(int, int, int);
 //100%
 INCLUDE_ASM("bx/execman", func_00320C18);
 #ifdef SKIP_ASM
-extern "C" void func_00321010(int, int, int, int);
+extern "C" void cInputMap_getValue1(int, int, int, int);
 
 extern "C" void func_00320C18(void *input, int state, int arg2) {
-    func_00321010((*(int *)((char*)(input) + (4))), (*(int *)((char*)(input) + (0))), state, arg2);
+    cInputMap_getValue1((*(int *)((char*)(input) + (4))), (*(int *)((char*)(input) + (0))), state, arg2);
 }
 #endif
 
@@ -339,9 +339,9 @@ void* cInput_getState(void* self, int state)
 //100%
 INCLUDE_ASM("bx/execman", func_00320C70);
 #ifdef SKIP_ASM
-extern "C" void func_00321188(int, int, int, int);
+extern "C" void cInputMap_getState1(int, int, int, int);
 
 extern "C" void func_00320C70(void *input, int state, int arg2) {
-    func_00321188((*(int *)((char*)(input) + (4))), (*(int *)((char*)(input) + (0))), state, arg2);
+    cInputMap_getState1((*(int *)((char*)(input) + (4))), (*(int *)((char*)(input) + (0))), state, arg2);
 }
 #endif

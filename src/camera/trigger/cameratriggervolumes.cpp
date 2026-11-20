@@ -19,16 +19,16 @@ void tCameraTrigger__tCameraTrigger(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/cameratriggervolumes", func_0016C5D0__FPv);
+INCLUDE_ASM("camera/trigger/cameratriggervolumes", cActiveTriggerList_cActiveTriggerList__FPv);
 #ifdef SKIP_ASM
 /**
  * Constructs an empty active camera-trigger list: clears its head pointer.
  *
- * func_0016C800 runs it on both of the camera trigger manager's active lists (+0x14, +0x18).
+ * cCameraTriggerMan_cCameraTriggerMan runs it on both of the camera trigger manager's active lists (+0x14, +0x18).
  *
  * @return @p self
  */
-void* func_0016C5D0(void* self)
+void* cActiveTriggerList_cActiveTriggerList(void* self)
 {
     *(int*)self = 0;
     return self;

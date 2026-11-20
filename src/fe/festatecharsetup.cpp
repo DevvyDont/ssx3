@@ -258,7 +258,7 @@ int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setAsciiString(cUIText* self, const char* str);
 extern "C" void* func_0014EEC8(void* self, int player, int index);
-extern "C" void func_0015E050(void* cam, sVec4_182DB8* a, sVec4_182DB8* b);
+extern "C" void cSimpleCamera_setupCamWithPosAndTarget(void* cam, sVec4_182DB8* a, sVec4_182DB8* b);
 extern "C" void cFEStateCharSetup_show3DCharacter(void* self, int a1);
 extern "C" void cFEStateCharSetup_updateCharacter3DPos(void* self);
 extern char str_rider_name[];
@@ -267,7 +267,7 @@ extern char str_rider_name[];
  * Shows the user's character name and sets up the front-end camera and rider for the character-setup screen.
  *
  * Sets the "rider_name" text to the name of the user's character (cBENewPlayerInterface_getPlayerCharID, then
- * func_0014EEC8 on interface 2). Points the camera (cFE +0x10) from (0, 200, 0) at the origin (func_0015E050) with a
+ * func_0014EEC8 on interface 2). Points the camera (cFE +0x10) from (0, 200, 0) at the origin (cSimpleCamera_setupCamWithPosAndTarget) with a
  * field of view of 0.436 (25 degrees), shows the rider (cFEStateCharSetup_show3DCharacter with 1), sets the restart-animation flag (+0x48)
  * and places the rider (cFEStateCharSetup_updateCharacter3DPos). Called by cFEStateCharSetup_onCreateScreen and
  * cFEStateRiderDetail_onCreateScreen.
@@ -288,7 +288,7 @@ extern "C" void cFEStateCharSetup_updateWidget(void* self)
     lookAt.y = 0.0f;
     lookAt.z = 0.0f;
     lookAt.w = 1.0f;
-    func_0015E050((char*)cam + 0x10, &pos, &lookAt);
+    cSimpleCamera_setupCamWithPosAndTarget((char*)cam + 0x10, &pos, &lookAt);
     cam->fov = 0.4363323450088501f;
     cFEStateCharSetup_show3DCharacter(self, 1);
     *(int*)((char*)self + 0x48) = 1;
@@ -299,7 +299,7 @@ extern "C" void cFEStateCharSetup_updateWidget(void* self)
 //100%
 INCLUDE_ASM("fe/festatecharsetup", cFEStateCharSetup_updateCharacter3DPos);
 #ifdef SKIP_ASM
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void* cFERiderManager_getHuman1(void* self, int idx);
 extern "C" void cRiderAnimBase_reset(void* anim);
 extern "C" void cRiderAnimBase_play(void* anim, int id, int a2, float t);
@@ -351,7 +351,7 @@ static inline sQuat_182EC0 QuatMul_182EC0(const sQuat_182EC0& a, const sQuat_182
 static inline sQuat_182EC0 AxisAngle_182EC0(const sQuat_182EC0& axis, float angle)
 {
     float s, c;
-    func_0031BE50(&s, &c, angle * 0.5f);
+    fSinCos(&s, &c, angle * 0.5f);
     return sQuat_182EC0(s * axis.x, s * axis.y, s * axis.z, c);
 }
 

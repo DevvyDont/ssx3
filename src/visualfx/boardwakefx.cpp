@@ -4478,7 +4478,7 @@ extern "C" void cPlayerIndicatorFX_readFromReplayFrame(sWakeFade_3930* self)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", cPlayerIndicatorFX_update);
 #ifdef SKIP_ASM
-extern "C" float func_0031C040(float x);
+extern "C" float fCos(float x);
 extern float D_004A55AC;
 
 struct sWkVt39D8 { short delta; short index; int (*fn)(void*); };
@@ -4510,7 +4510,7 @@ extern "C" void cPlayerIndicatorFX_update(sWkCol39D8* self)
     if (turns < wholeTurns) wholeTurns -= 1.0f;
     float wrapped = newPhase - wholeTurns * 6.2831854820251465f;
     self->phase = wrapped;
-    float blend = func_0031C040(wrapped) * half + half;
+    float blend = fCos(wrapped) * half + half;
     float invBlend = 1.0f - blend;
     self->out[0] = blend * self->a[0] + invBlend * self->b[0];
     self->out[1] = blend * self->a[1] + invBlend * self->b[1];

@@ -22,11 +22,11 @@ public:
     virtual void v09(); virtual void v10(); virtual void v11(); virtual void setTarget(void* target);
 };
 
-extern "C" void func_00170240(sCamTmp_D0A0* out, void* target);
-extern "C" void func_001707B0(sCamTmp_D0A0* out, void* target);
-extern "C" void func_00170D20(sCamTmp_D0A0* out, void* target, int corner);
+extern "C" void cCTBoundObjLine_worldPoint1(sCamTmp_D0A0* out, void* target);
+extern "C" void cCTBoundObjLine_worldPoint2(sCamTmp_D0A0* out, void* target);
+extern "C" void cCTSpline_worldPoint(sCamTmp_D0A0* out, void* target, int corner);
 extern "C" cCamAlgo_D0A0* cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm(void* mem, sCamTmp_D0A0* a, sCamTmp_D0A0* b);
-extern "C" cCamAlgo_D0A0* func_00174190(void* mem);
+extern "C" cCamAlgo_D0A0* cBoundedAlgorithm_cBoundedAlgorithm(void* mem);
 extern "C" cCamAlgo_D0A0* cSplineCamAlgorithm_cSplineCamAlgorithm(void* mem, sCamTmp_D0A0* a, sCamTmp_D0A0* b, sCamTmp_D0A0* c, sCamTmp_D0A0* d,
                                float f0, float f1, float f2, float f3);
 extern "C" cCamAlgo_D0A0* cIdleChaseAlgorithm_cIdleChaseAlgorithm(void* mem);
@@ -76,14 +76,14 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(char* self, int
             if (*(int*)(target + 0x28) == 2) {
                 void* mem = cMemMan_alloc(944, D_0045B250, 0x20000000, 0);
                 sCamTmp_D0A0 lineStart;
-                func_00170240(&lineStart, target);
+                cCTBoundObjLine_worldPoint1(&lineStart, target);
                 sCamTmp_D0A0 lineEnd;
-                func_001707B0(&lineEnd, target);
+                cCTBoundObjLine_worldPoint2(&lineEnd, target);
                 algo = cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm(mem, &lineStart, &lineEnd);
                 break;
             }
         }
-        algo = func_00174190(cMemMan_alloc(144, D_0045B278, 0x20000000, 0));
+        algo = cBoundedAlgorithm_cBoundedAlgorithm(cMemMan_alloc(144, D_0045B278, 0x20000000, 0));
         *(char**)((char*)algo + 0x80) = ctx;
         break;
     }
@@ -91,13 +91,13 @@ extern "C" void cChaseCameraController_createChaseAlgorithmBlend(char* self, int
         char* target = *(char**)(ctx + 8);
         void* mem = cMemMan_alloc(976, D_0045B298, 0x20000000, 0);
         sCamTmp_D0A0 point1;
-        func_00170D20(&point1, target, 0);
+        cCTSpline_worldPoint(&point1, target, 0);
         sCamTmp_D0A0 point2;
-        func_00170D20(&point2, target, 1);
+        cCTSpline_worldPoint(&point2, target, 1);
         sCamTmp_D0A0 point3;
-        func_00170D20(&point3, target, 2);
+        cCTSpline_worldPoint(&point3, target, 2);
         sCamTmp_D0A0 point4;
-        func_00170D20(&point4, target, 3);
+        cCTSpline_worldPoint(&point4, target, 3);
         algo = cSplineCamAlgorithm_cSplineCamAlgorithm(mem, &point1, &point2, &point3, &point4,
                           *(float*)(ctx + 0x18), *(float*)(ctx + 0x14), *(float*)(ctx + 0x1C), *(float*)(ctx + 0x10));
         break;
@@ -231,22 +231,22 @@ extern "C" void* cSimpleCamera_cSimpleCamera(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/cameraalgorithms", func_0015D700);
+INCLUDE_ASM("camera/cameraalgorithms", cSimpleCamera_init);
 #ifdef SKIP_ASM
-extern "C" void* func_0015D928(void* self);
+extern "C" void* cSimpleCamera_updateCamMat(void* self);
 
 /**
  * Sets up a camera's lens and resets its pose.
  *
  * View, Near and Far and their limits MaxView, MinNear and MaxFar take @p x, @p y and @p z. Pose's position becomes
  * (0, 0, 0, 0) and its quaternion (0, 1, 0, 1), as in cSimpleCamera_cSimpleCamera (not a unit quaternion; the identity
- * is (0, 0, 0, 1)), Direction becomes t4vect_XAxis, and CamMat is rebuilt (func_0015D928).
+ * is (0, 0, 0, 1)), Direction becomes t4vect_XAxis, and CamMat is rebuilt (cSimpleCamera_updateCamMat).
  *
  * @param x  the field of view, also its maximum
  * @param y  the near distance, also its minimum
  * @param z  the far distance, also its maximum
  */
-extern "C" void func_0015D700(void* self, float x, float y, float z)
+extern "C" void cSimpleCamera_init(void* self, float x, float y, float z)
 {
     cSimpleCamera_cSimpleCamera_sVec4 poseVec;
     *(float*)((char*)self + 0xC) = x;
@@ -263,14 +263,14 @@ extern "C" void func_0015D700(void* self, float x, float y, float z)
     poseVec.z = 0;
     *(cSimpleCamera_cSimpleCamera_sVec4*)((char*)self + 0x30) = poseVec;
     *(cSimpleCamera_cSimpleCamera_sVec4*)((char*)self + 0x80) = t4vect_XAxis;
-    func_0015D928(self);
+    cSimpleCamera_updateCamMat(self);
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/cameraalgorithms", func_0015D780);
+INCLUDE_ASM("camera/cameraalgorithms", cSimpleCamera_getHeading);
 #ifdef SKIP_ASM
-struct func_0015D780_V { float x, y, z, w; } __attribute__((aligned(16)));
+struct cSimpleCamera_getHeading_V { float x, y, z, w; } __attribute__((aligned(16)));
 
 extern "C" float func_0031C228(float);
 
@@ -297,9 +297,9 @@ static inline float atan2_15D780(float y, float x, float zero)
  *
  * @return the heading (radians)
  */
-extern "C" float func_0015D780(void* self)
+extern "C" float cSimpleCamera_getHeading(void* self)
 {
-    func_0015D780_V look;
+    cSimpleCamera_getHeading_V look;
     float x = 2.0f * (*(float*)((char*)self + 0x34) * *(float*)((char*)self + 0x30) - *(float*)((char*)self + 0x3C) * *(float*)((char*)self + 0x38));
     float y = 1.0f - 2.0f * (*(float*)((char*)self + 0x38) * *(float*)((char*)self + 0x38) + *(float*)((char*)self + 0x30) * *(float*)((char*)self + 0x30));
     float z = 2.0f * (*(float*)((char*)self + 0x34) * *(float*)((char*)self + 0x38) + *(float*)((char*)self + 0x3C) * *(float*)((char*)self + 0x30));
@@ -312,14 +312,14 @@ extern "C" float func_0015D780(void* self)
 }
 #endif
 //100%
-INCLUDE_ASM("camera/cameraalgorithms", func_0015D880);
+INCLUDE_ASM("camera/cameraalgorithms", cSimpleCamera_getPitch);
 #ifdef SKIP_ASM
-struct func_0015D880_V { float x, y, z, w; } __attribute__((aligned(16)));
+struct cSimpleCamera_getPitch_V { float x, y, z, w; } __attribute__((aligned(16)));
 
 extern "C" float func_0031C128(float x);
 
 // PORT: PS2-only VU0 inline asm (4-component vector length).
-static inline float func_0015D880_Length(const func_0015D880_V& v)
+static inline float cSimpleCamera_getPitch_Length(const cSimpleCamera_getPitch_V& v)
 {
     float r;
     int t;
@@ -345,19 +345,19 @@ static inline float func_0015D880_Length(const func_0015D880_V& v)
  *
  * @return the pitch (radians)
  */
-extern "C" float func_0015D880(void* self)
+extern "C" float cSimpleCamera_getPitch(void* self)
 {
-    func_0015D880_V look;
+    cSimpleCamera_getPitch_V look;
     look.x = 2.0f * (*(float*)((char*)self + 0x34) * *(float*)((char*)self + 0x30) - *(float*)((char*)self + 0x3C) * *(float*)((char*)self + 0x38));
     look.y = 1.0f - 2.0f * (*(float*)((char*)self + 0x38) * *(float*)((char*)self + 0x38) + *(float*)((char*)self + 0x30) * *(float*)((char*)self + 0x30));
     look.z = 2.0f * (*(float*)((char*)self + 0x34) * *(float*)((char*)self + 0x38) + *(float*)((char*)self + 0x3C) * *(float*)((char*)self + 0x30));
     look.w = 0;
-    return func_0031C128(look.z / func_0015D880_Length(look));
+    return func_0031C128(look.z / cSimpleCamera_getPitch_Length(look));
 }
 #endif
 
 //100%
-INCLUDE_ASM("camera/cameraalgorithms", func_0015D928);
+INCLUDE_ASM("camera/cameraalgorithms", cSimpleCamera_updateCamMat);
 #ifdef SKIP_ASM
 struct sV_D928 {
     float x, y, z, w;
@@ -491,12 +491,12 @@ static inline void vu0TransMtx_D928(void* m, const sV_D928& v)
         : "memory");
 }
 
-extern "C" void func_0015D928_impl(void* self) __asm__("func_0015D928");
+extern "C" void cSimpleCamera_updateCamMat_impl(void* self) __asm__("cSimpleCamera_updateCamMat");
 /**
  * Rebuilds CamMat from Pose: the axis-flip matrix D_004C53A0 times the rotation of Pose's quaternion, translated by
  * minus Pose's position (w = 1). Direction is not updated.
  */
-extern "C" void func_0015D928_impl(void* self)
+extern "C" void cSimpleCamera_updateCamMat_impl(void* self)
 {
     char* view = (char*)self + 0x40;
     vu0CopyMtx_D928(view, D_004C53A0);
@@ -540,9 +540,9 @@ extern "C" void cCamera_invalidateSafePosition(void)
 #endif
 
 //100%
-INCLUDE_ASM("camera/cameraalgorithms", func_0015DAE0);
+INCLUDE_ASM("camera/cameraalgorithms", cCamera_snapChaseControllers);
 #ifdef SKIP_ASM
-struct func_0015DAE0_VE { short delta; short index; void (*fn)(void*); };
+struct cCamera_snapChaseControllers_VE { short delta; short index; void (*fn)(void*); };
 
 /**
  * Snaps the chase controller of each view's camera.
@@ -550,17 +550,17 @@ struct func_0015DAE0_VE { short delta; short index; void (*fn)(void*); };
  * For the first camera of SSXApp->Game->ViewMan, and for the second when the view count (its first word) is at least 2,
  * calls the ChaseController's virtual slot 4 (cCameraController_snapCurrent in cChaseCameraController_vtbl).
  */
-extern "C" void func_0015DAE0(void)
+extern "C" void cCamera_snapChaseControllers(void)
 {
     void* cam = SSXApp->Game;
     char* ctx = *(char**)((char*)cam + 0x84);
     int count = *(int*)ctx;
     char* firstController = *(char**)(*(char**)(ctx + 4) + 0xA8);
-    func_0015DAE0_VE* firstSlot = &(*(func_0015DAE0_VE**)(firstController + 0x14))[4];
+    cCamera_snapChaseControllers_VE* firstSlot = &(*(cCamera_snapChaseControllers_VE**)(firstController + 0x14))[4];
     firstSlot->fn(firstController + firstSlot->delta);
     if (count >= 2) {
         char* secondController = *(char**)(*(char**)(ctx + 8) + 0xA8);
-        func_0015DAE0_VE* secondSlot = &(*(func_0015DAE0_VE**)(secondController + 0x14))[4];
+        cCamera_snapChaseControllers_VE* secondSlot = &(*(cCamera_snapChaseControllers_VE**)(secondController + 0x14))[4];
         secondSlot->fn(secondController + secondSlot->delta);
     }
 }

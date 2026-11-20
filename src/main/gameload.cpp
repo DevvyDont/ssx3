@@ -1286,7 +1286,7 @@ extern "C" int cGame_activatePauseMenu_pi(void* self, int a) __asm__("cGame_acti
 // cFadeScreen_update returns nothing (its body has no return value); the unit declares it void*.
 extern "C" void cFadeScreen_update_v(void* self) __asm__("cFadeScreen_update");
 extern "C" int cOVStateManager_allowPauseMenu(void);
-extern "C" void func_00326AE0(void* p);
+extern "C" void cPadCache_clearAllVibrations(void* p);
 extern "C" void func_0020CA10(void);
 extern "C" void cSSXAudio_PauseAudio(void* p);
 extern "C" void func_00294F48(void* p);
@@ -1471,7 +1471,7 @@ static inline int updateState_2306B8(cGame* self)
     }
     if (cGame_activatePauseMenu_pi(self, 0) != 0 && !inRace_2306B8(*((int*)((char*)self->Replay)))
         && notPlaying_2306B8(((char*)self->PlaybackMan)) && cOVStateManager_allowPauseMenu() != 0) {
-        func_00326AE0(PadCache);
+        cPadCache_clearAllVibrations(PadCache);
         func_0020CA10();
         pushState_2306B8(2);
         {
@@ -2749,7 +2749,7 @@ INCLUDE_ASM("main/gameload", cLoadIndicator_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" float func_0031C040(float);
+extern "C" float fCos(float);
 extern char t4mat_Identity[];
 
 struct sV2_1FC0 {
@@ -2871,7 +2871,7 @@ extern "C" void cLoadIndicator_render(sFade_1FC0* self)
         (*pfn)(thisp, 0.0f, 0.0f, (float)((cGfx_1FC0*)GrMan)->GetScreenWidth(), (float)((cGfx_1FC0*)GrMan)->GetScreenHeight(), 1);
     }
     ((cGfx_1FC0*)GrMan)->SetViewportOrthographic(0.0f, 0.0f, 640.0f, 480.0f, 1, 0, 0.0f, 1.0f);
-    float s = func_0031C040(self->t * 6.2831854820251465f);
+    float s = fCos(self->t * 6.2831854820251465f);
     sV2_1FC0 size((s + 1.0f) * 9.0f, 18.0f);
     sV4_1FC0 pos(599.0f, 445.0f, 0.0f, 1.0f);
     int f10v = *(int*)(D_004A28A8_1FC0 + 0xA0);

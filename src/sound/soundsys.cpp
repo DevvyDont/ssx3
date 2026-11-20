@@ -672,7 +672,7 @@ struct sSnd0CC0Mgr {
  * Pushes a play-option level on the bank manager (mpVBankManager) with default options (the inlined
  * cBankSys::SFX_Begin(Bank, Patch)) and records @p bank in mBank and @p patch in mPatch for that level; sets the
  * level's volume-control pointer to func_00287968(this, 5, 0) (On Tour GetCurrAppliedVolumePtr(5, 0)); then plays it
- * with cBankSys_SFX_End. Virtual slot 1 of cSSXAudio_vtbl, overriding cBankSys's func_002BA6B0.
+ * with cBankSys_SFX_End. Virtual slot 1 of cSSXAudio_vtbl, overriding cBankSys's cBankSys_SFX_Play2D.
  *
  * @param vself  the audio system (this)
  * @param bank   the sound bank (On Tour Bank)
@@ -8732,7 +8732,7 @@ int func_0029F330_i(void* self) __asm__("func_0029F330");
 int func_002A1D48_i(void* self, void* obj) __asm__("func_002A1D48");
 void* cSSXAudio_GetFocusRider_p(void* self, int which) __asm__("cSSXAudio_GetFocusRider");
 unsigned func_002A1820_0560(void* self, void* a, void* b) __asm__("func_002A1820");
-void func_0031BE50_0560(float a, float* x, float* y) __asm__("func_0031BE50");
+void fSinCos_0560(float a, float* x, float* y) __asm__("fSinCos");
 // PORT: D_004A482C is called with 4 and 5 args here (the unit's later declaration has 3).
 extern void (*D_004A482C_4)(void*, int, int, int) __asm__("D_004A482C");
 extern void (*D_004A482C_5)(void*, int, int, int, int) __asm__("D_004A482C");
@@ -8816,7 +8816,7 @@ void func_002A0560_0560(void* self, sSs0560Rider* a, sSs0560Rider* b)
     int okB = cSSXAudio_CameraInRange(self, b->v05(), D_004A36D8);
     if (okA != okB) return;
     float t0, t1;
-    func_0031BE50_0560(b->f4CC, &t0, &t1);
+    fSinCos_0560(b->f4CC, &t0, &t1);
     sVec4_0560 v;
     v.x = t1;
     v.y = t0;

@@ -2828,7 +2828,7 @@ INCLUDE_ASM("fe/festatecharequipdetail", cFEStateCharEquip_update3DPositions);
 // they take retail's fs3/fs4); plain form 99.95%. Byte-identical and behaves like the plain form; landed marked under
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
-extern "C" void func_0031BE50(float angle, float* s, float* c);
+extern "C" void fSinCos(float angle, float* s, float* c);
 
 struct sQuat_BFE8
 {
@@ -2848,7 +2848,7 @@ extern sQuat_BFE8 t4vect_YAxis;
 extern sQuat_BFE8 t4vect_ZAxis;
 extern "C" void cFERider_setPose(void* rider, sXform_BFE8* xf);
 extern "C" void cFERider_setBoardPose(void* rider, sXform_BFE8* xf);
-extern "C" void func_0015E050(void* cam, sQuat_BFE8* a, sQuat_BFE8* b);
+extern "C" void cSimpleCamera_setupCamWithPosAndTarget(void* cam, sQuat_BFE8* a, sQuat_BFE8* b);
 
 // PORT: PS2-only VU0 macro-mode asm (quaternion product a * b).
 static inline sQuat_BFE8 QuatMul_BFE8(const sQuat_BFE8& a, const sQuat_BFE8& b)
@@ -2876,7 +2876,7 @@ static inline sQuat_BFE8 QuatMul_BFE8(const sQuat_BFE8& a, const sQuat_BFE8& b)
 static inline sQuat_BFE8 AxisAngle_BFE8(const sQuat_BFE8& axis, float angle)
 {
     float s, c;
-    func_0031BE50(angle * 0.5f, &s, &c);
+    fSinCos(angle * 0.5f, &s, &c);
     return sQuat_BFE8(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
@@ -2950,7 +2950,7 @@ static inline float VecDot_BFE8(const sQuat_BFE8& a, const sQuat_BFE8& b)
  * call) toward the state-2 and state-1 positions and switch to that state when close. The rider (+0xAC0) is turned
  * +0xAAC + 80 degrees about Z (cFERider_setPose); the board (+0xAD0) is turned 245 degrees about Z, 320 about Y and its
  * spin angle (+0xAB0, one degree more per call) + 90 about X (cFERider_setBoardPose). Always places the camera (RealFE + 0x10,
- * func_0015E050) at (-110, 394, 0) looking at (-35, 0, 0) and stores 0.43633 (25 degrees) in its first word.
+ * cSimpleCamera_setupCamWithPosAndTarget) at (-110, 394, 0) looking at (-35, 0, 0) and stores 0.43633 (25 degrees) in its first word.
  *
  * @param vself  the equip state
  */
@@ -3069,7 +3069,7 @@ extern "C" void cFEStateCharEquip_update3DPositions(void* vself)
     lookAt.y = 0.0f;
     lookAt.z = 0.0f;
     lookAt.w = 1.0f;
-    func_0015E050(cam + 0x10, &pos, &lookAt);
+    cSimpleCamera_setupCamWithPosAndTarget(cam + 0x10, &pos, &lookAt);
     *(float*)(cam + 0x10) = 0.4363323450088501f;
 }
 #endif

@@ -2753,7 +2753,7 @@ extern "C" void cAI_onlineAICheck(sAi_12BB20* self)
 INCLUDE_ASM("ai/ai", cGateControl_gainFocus);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void cRiderAnimBase_reset(void* anim);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 
@@ -2770,7 +2770,7 @@ extern sQuat_12BE20 D_004FF160_12BE20 __asm__("t4vect_ZAxis");
 static inline sQuat_12BE20 AxisAngle_12BE20(const sQuat_12BE20& axis, float angle)
 {
     float s, c;
-    func_0031BE50(&s, &c, angle * 0.5f);
+    fSinCos(&s, &c, angle * 0.5f);
     return sQuat_12BE20(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
@@ -5996,7 +5996,7 @@ extern "C" void cBoardPressControl_loseFocus(cBoardPressControl* self)
 //100%
 INCLUDE_ASM("ai/ai", cBoardPressControl_changeFakieBoardPress);
 #ifdef SKIP_ASM
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void func_00116930(void* rider);
 
 struct sQuat_12FEC8
@@ -6012,7 +6012,7 @@ extern sQuat_12FEC8 t4vect_ZAxis;
 static inline sQuat_12FEC8 AxisAngle_12FEC8(const sQuat_12FEC8& axis, float angle)
 {
     float s, c;
-    func_0031BE50(&s, &c, angle * 0.5f);
+    fSinCos(&s, &c, angle * 0.5f);
     return sQuat_12FEC8(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
@@ -7558,7 +7558,7 @@ extern "C" void cRailslideControl_loseFocus(cRailslideControl* self)
 INCLUDE_ASM("ai/ai", cRailslideControl_chooseRailSpin);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" int cRiderAnimBase_play_2060(void* self, int anim, int flags, float blend) __asm__("cRiderAnimBase_play");
 extern "C" void cRider_flagEventBoostPowerUp(void*, int, float);
 extern "C" void func_00116930(void* rider);
@@ -7577,7 +7577,7 @@ extern sQuat_2060 D_004FF160_2060 __asm__("t4vect_ZAxis");
 static inline sQuat_2060 AxisAngle_2060(const sQuat_2060& axis, float angle)
 {
     float s, c;
-    func_0031BE50(&s, &c, angle * 0.5f);
+    fSinCos(&s, &c, angle * 0.5f);
     return sQuat_2060(s * axis.x, s * axis.y, s * axis.z, c);
 }
 
@@ -9213,7 +9213,7 @@ static inline sVec4 Scale_12E010_4DD0(const sVec4& v, float s)
     return r;
 }
 extern "C" float cSpinControl_calcFlipAxisWeight(cSpinControl* self);
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 
 // PORT: PS2-only VU0 inline asm (vector times scalar, constant vector through a register).
 static inline sVec4 ScaleO_134DD0(const t4Vector& v, float s)
@@ -9335,7 +9335,7 @@ static inline sVec4 Norm_134DD0(const sVec4& v)
 static inline sVec4 AxisAngleB_134DD0(const sVec4& axis, float angle) return r
 {
     float s, c;
-    func_0031BE50(&s, &c, angle * 0.5f);
+    fSinCos(&s, &c, angle * 0.5f);
     r.w = c;
     r.x = s * axis.x;
     r.y = s * axis.y;
@@ -9345,7 +9345,7 @@ static inline sVec4 AxisAngleB_134DD0(const sVec4& axis, float angle) return r
 static inline void SetAA_134DD0(sVec4& q, const t4Vector& axis, float angle)
 {
     float s, c;
-    func_0031BE50(&s, &c, angle * 0.5f);
+    fSinCos(&s, &c, angle * 0.5f);
     q.x = s * axis.x;
     q.y = s * axis.y;
     q.z = s * axis.z;

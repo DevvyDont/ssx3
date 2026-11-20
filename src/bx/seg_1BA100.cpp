@@ -23,7 +23,7 @@ extern "C" void bxLogPrint(const char *fmt, ...) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9138);
+INCLUDE_ASM("bx/seg_1BA100", cSoundSys_GetSoundManager);
 #ifdef SKIP_ASM
 /**
  * Returns the first word of a cSoundSys, its sound manager pointer (pManager).
@@ -31,13 +31,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9138);
  * @param soundSys  the cSoundSys
  * @return pManager
  */
-extern "C" int func_002B9138(int *soundSys) {
+extern "C" int cSoundSys_GetSoundManager(int *soundSys) {
     return *soundSys;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9140);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Instance);
 #ifdef SKIP_ASM
 /**
  * Returns mInst, the play-option stack's current level (read as volatile).
@@ -45,13 +45,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9140);
  * @param opts  the play options
  * @return mInst
  */
-extern "C" int func_002B9140(void *opts) {
+extern "C" int cSndPlayOpts_OPTS_Instance(void *opts) {
     return *(volatile int *)((char*)opts + 0x1C);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9150);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Current);
 #ifdef SKIP_ASM
 /**
  * Returns the current level's SNDPLAYOPTS record, &mCurrent[mInst].
@@ -59,13 +59,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9150);
  * @param opts  the play options
  * @return the current level's play options
  */
-extern "C" int func_002B9150(void *opts) {
+extern "C" int cSndPlayOpts_OPTS_Current(void *opts) {
     return (*(int *)((char*)(opts) + (0x20))) + ((*(volatile int *)((char*)(opts) + (0x1C))) * 0x18);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9168);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetPos);
 #ifdef SKIP_ASM
 /**
  * Returns mPosition[mInst], the current level's sound position.
@@ -73,13 +73,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9168);
  * @param opts  the play options
  * @return the position vector pointer, or 0
  */
-extern "C" int func_002B9168(void *opts) {
+extern "C" int cSndPlayOpts_OPTS_GetPos(void *opts) {
     return *(int*)((char*)opts + (*(volatile int*)((char*)opts + 0x1C) << 2) + 0x24);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9180);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetStaticPos);
 #ifdef SKIP_ASM
 /**
  * Returns mPosStatic[mInst], the current level's static-position flag.
@@ -87,13 +87,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9180);
  * @param opts  the play options
  * @return nonzero when the position is static
  */
-extern "C" int func_002B9180(void *opts) {
+extern "C" int cSndPlayOpts_OPTS_GetStaticPos(void *opts) {
     return (*(int**)((char*)opts + 0x34))[*(volatile int*)((char*)opts + 0x1C)];
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9198);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetVol);
 #ifdef SKIP_ASM
 /**
  * Returns mBaseVol[mInst], the current level's unclamped base volume.
@@ -101,13 +101,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9198);
  * @param opts  the play options
  * @return the base volume
  */
-extern "C" int func_002B9198(void *opts) {
+extern "C" int cSndPlayOpts_OPTS_GetVol(void *opts) {
     return (*(int**)((char*)opts + 0x38))[*(volatile int*)((char*)opts + 0x1C)];
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B91B0);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetVolControl);
 #ifdef SKIP_ASM
 /**
  * Returns mVolControl[mInst], the current level's volume-control float pointer.
@@ -115,13 +115,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B91B0);
  * @param opts  the play options
  * @return the volume control, or 0
  */
-extern "C" int func_002B91B0(void *opts) {
+extern "C" int cSndPlayOpts_OPTS_GetVolControl(void *opts) {
     return (*(int**)((char*)opts + 0x3C))[*(volatile int*)((char*)opts + 0x1C)];
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B91C8);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetCallback);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 class cController;
@@ -166,13 +166,13 @@ struct sSndPlayOpts {
  * @return the callback
  */
 // cSndPlayOpts::OPTS_GetCallback (prototype name)
-extern "C" sSndCallback func_002B91C8(sSndPlayOpts* opts) {
+extern "C" sSndCallback cSndPlayOpts_OPTS_GetCallback(sSndPlayOpts* opts) {
     return opts->callbacks[opts->idx];
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9208);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetAzimuth);
 #ifdef SKIP_ASM
 /**
  * Returns the current level's azimuth, mCurrent[mInst].azimuth.
@@ -180,13 +180,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9208);
  * @param opts  the play options
  * @return the azimuth
  */
-extern "C" unsigned short func_002B9208(void *opts) {
+extern "C" unsigned short cSndPlayOpts_OPTS_GetAzimuth(void *opts) {
     return (*(unsigned short *)((char*)((((*(volatile int *)((char*)(opts) + (0x1C))) * 0x18) + (*(int *)((char*)(opts) + (0x20))))) + (8)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9228);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetElevation);
 #ifdef SKIP_ASM
 /**
  * Returns the current level's elevation, mCurrent[mInst].elevation.
@@ -194,13 +194,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9228);
  * @param opts  the play options
  * @return the elevation
  */
-extern "C" short func_002B9228(void *opts) {
+extern "C" short cSndPlayOpts_OPTS_GetElevation(void *opts) {
     return (*(short *)((char*)((((*(volatile int *)((char*)(opts) + (0x1C))) * 0x18) + (*(int *)((char*)(opts) + (0x20))))) + (0xA)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9248);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetDelay);
 #ifdef SKIP_ASM
 /**
  * Returns the current level's delay settings, &mDelay[mInst].
@@ -208,13 +208,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9248);
  * @param opts  the play options
  * @return the cDelayOpts record
  */
-extern "C" int func_002B9248(void *opts) {
+extern "C" int cSndPlayOpts_OPTS_GetDelay(void *opts) {
     return (*(int *)((char*)(opts) + (0x70))) + ((*(volatile int *)((char*)(opts) + (0x1C))) * 0x10);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9260);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetPtr);
 #ifdef SKIP_ASM
 /**
  * Returns mPtr[mInst], the current level's user pointer.
@@ -222,13 +222,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9260);
  * @param opts  the play options
  * @return the user pointer
  */
-extern "C" int func_002B9260(void *opts) {
+extern "C" int cSndPlayOpts_OPTS_GetPtr(void *opts) {
     return (*(int**)((char*)opts + 0x60))[*(volatile int*)((char*)opts + 0x1C)];
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9278);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetViewport);
 #ifdef SKIP_ASM
 /**
  * Returns mViewport[mInst], the current level's viewport.
@@ -236,13 +236,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9278);
  * @param opts  the play options
  * @return the viewport
  */
-extern "C" int func_002B9278(void *opts) {
+extern "C" int cSndPlayOpts_OPTS_GetViewport(void *opts) {
     return (*(int**)((char*)opts + 0x64))[*(volatile int*)((char*)opts + 0x1C)];
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9290);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetVanish);
 #ifdef SKIP_ASM
 /**
  * Returns mVanish[mInst], the current level's vanish distance.
@@ -250,13 +250,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9290);
  * @param opts  the play options
  * @return the vanish distance
  */
-extern "C" float func_002B9290(void *opts) {
+extern "C" float cSndPlayOpts_OPTS_GetVanish(void *opts) {
     return (*(float**)((char*)opts + 0x68))[*(volatile int*)((char*)opts + 0x1C)];
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B92A8);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetRadius);
 #ifdef SKIP_ASM
 /**
  * Returns mRadius[mInst], the current level's radius.
@@ -264,13 +264,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B92A8);
  * @param opts  the play options
  * @return the radius
  */
-extern "C" float func_002B92A8(void *opts) {
+extern "C" float cSndPlayOpts_OPTS_GetRadius(void *opts) {
     return (*(float**)((char*)opts + 0x6C))[*(volatile int*)((char*)opts + 0x1C)];
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B92C0);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetExternalVol);
 #ifdef SKIP_ASM
 /**
  * Returns mExternalVol[mInst], the current level's external-volume flag.
@@ -278,13 +278,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B92C0);
  * @param opts  the play options
  * @return the flag
  */
-extern "C" int func_002B92C0(void *opts) {
+extern "C" int cSndPlayOpts_OPTS_GetExternalVol(void *opts) {
     return (*(int**)((char*)opts + 0x74))[*(volatile int*)((char*)opts + 0x1C)];
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B92D8);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetMapToMaxVol);
 #ifdef SKIP_ASM
 /**
  * Returns mMapToMaxVol[mInst], the current level's map-to-max-volume value.
@@ -292,13 +292,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B92D8);
  * @param opts  the play options
  * @return the value
  */
-extern "C" int func_002B92D8(void *opts) {
+extern "C" int cSndPlayOpts_OPTS_GetMapToMaxVol(void *opts) {
     return (*(int**)((char*)opts + 0x78))[*(volatile int*)((char*)opts + 0x1C)];
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B92F0);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetCloseOnEnd);
 #ifdef SKIP_ASM
 /**
  * Returns mCloseOnEnd[mInst], the current level's close-on-end flag.
@@ -306,13 +306,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B92F0);
  * @param opts  the play options
  * @return the flag
  */
-extern "C" int func_002B92F0(void *opts) {
+extern "C" int cSndPlayOpts_OPTS_GetCloseOnEnd(void *opts) {
     return (*(int**)((char*)opts + 0x7C))[*(volatile int*)((char*)opts + 0x1C)];
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9308);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetTwoPlayerPan);
 #ifdef SKIP_ASM
 /**
  * Returns mTwoPlayerPan[mInst], the current level's two-player pan flag.
@@ -320,13 +320,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9308);
  * @param opts  the play options
  * @return the flag
  */
-extern "C" int func_002B9308(void *opts) {
+extern "C" int cSndPlayOpts_OPTS_GetTwoPlayerPan(void *opts) {
     return (*(int**)((char*)opts + 0x80))[*(volatile int*)((char*)opts + 0x1C)];
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9320);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetTwoPlayerSide);
 #ifdef SKIP_ASM
 /**
  * Returns mTwoPlayerSide[mInst], the current level's two-player side.
@@ -334,13 +334,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9320);
  * @param opts  the play options
  * @return the side
  */
-extern "C" int func_002B9320(void *opts) {
+extern "C" int cSndPlayOpts_OPTS_GetTwoPlayerSide(void *opts) {
     return (*(int**)((char*)opts + 0x84))[*(volatile int*)((char*)opts + 0x1C)];
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9338);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_LibDefault);
 #ifdef SKIP_ASM
 extern "C" void func_003BA020(int);
 
@@ -349,25 +349,25 @@ extern "C" void func_003BA020(int);
  *
  * @param opts  the play options
  */
-extern "C" void func_002B9338(void *opts) {
+extern "C" void cSndPlayOpts_OPTS_LibDefault(void *opts) {
     func_003BA020((*(int *)((char*)(opts) + (0x20))) + ((*(volatile int *)((char*)(opts) + (0x1C))) * 0x18));
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9368);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_SetDefault);
 #ifdef SKIP_ASM
 struct S9368 { int a[6]; };
 /**
  * Copies the current level's SNDPLAYOPTS (mCurrent[mInst]) into mDefault, the record each push starts from.
  */
-extern "C" void func_002B9368(void *self) {
+extern "C" void cSndPlayOpts_OPTS_SetDefault(void *self) {
     *(S9368*)((char*)self + 4) = *(S9368*)((char*)(*(int*)((char*)self + 0x20)) + *(volatile int*)((char*)self + 0x1C) * 0x18);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B93B8);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Reset);
 #ifdef SKIP_ASM
 struct Rec_93B8 { signed char v; char pad[0x17]; };
 struct Q_93B8 { int a, b, c, d; };
@@ -403,7 +403,7 @@ extern "C" void* func_00416210(void*, int, unsigned int);
  *
  * @param playOpts  the play options
  */
-extern "C" void func_002B93B8(Obj_93B8* playOpts) {
+extern "C" void cSndPlayOpts_OPTS_Reset(Obj_93B8* playOpts) {
     playOpts->recs[playOpts->idx] = playOpts->cur;
     playOpts->arr24[playOpts->idx] = 0;
     playOpts->p34[playOpts->idx] = 0;
@@ -427,7 +427,7 @@ extern "C" void func_002B93B8(Obj_93B8* playOpts) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B95B0);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Open);
 #ifdef SKIP_ASM
 struct Rec_95B0 { signed char v; char pad[0x17]; };
 struct Q_95B0 { int a, b, c, d; };
@@ -455,7 +455,7 @@ struct Obj_95B0 {
 extern "C" void* func_00416210(void*, int, unsigned int);
 
 /**
- * Pushes a new play-option level: increments mInst, then resets that level as func_002B93B8 does.
+ * Pushes a new play-option level: increments mInst, then resets that level as cSndPlayOpts_OPTS_Reset does.
  *
  * mCurrent[mInst] gets mDefault and mBaseVol[mInst] its volume; mPosition, mPosStatic, mVolControl, mCallback,
  * mPtr, mViewport, mVanish, mRadius, mExternalVol, mTwoPlayerPan and mTwoPlayerSide are cleared; mDelay[mInst] becomes
@@ -465,7 +465,7 @@ extern "C" void* func_00416210(void*, int, unsigned int);
  *
  * @param playOpts  the play options
  */
-extern "C" void func_002B95B0(Obj_95B0* playOpts) {
+extern "C" void cSndPlayOpts_OPTS_Open(Obj_95B0* playOpts) {
     playOpts->idx++;
     playOpts->recs[playOpts->idx] = playOpts->cur;
     playOpts->arr24[playOpts->idx] = 0;
@@ -490,20 +490,20 @@ extern "C" void func_002B95B0(Obj_95B0* playOpts) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B97B8);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Close);
 #ifdef SKIP_ASM
 /**
  * Pops the current play-option level: decrements mInst (no check against 0).
  *
  * @param opts  the play options
  */
-extern "C" void func_002B97B8(void *opts) {
+extern "C" void cSndPlayOpts_OPTS_Close(void *opts) {
     *(volatile int *)((char*)opts + 0x1C) = *(volatile int *)((char*)opts + 0x1C) - 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B97D0);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Key);
 #ifdef SKIP_ASM
 /**
  * Sets the current level's key number, mCurrent[mInst].keynum, to @p value.
@@ -511,13 +511,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B97D0);
  * @param opts  the play options
  * @param value  the key number
  */
-extern "C" void func_002B97D0(void *opts, signed char value) {
+extern "C" void cSndPlayOpts_OPTS_Key(void *opts, signed char value) {
     (*(signed char *)((char*)((((*(volatile int *)((char*)(opts) + (0x1C))) * 0x18) + (*(int *)((char*)(opts) + (0x20))))) + (2))) = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B97F0);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Velocity);
 #ifdef SKIP_ASM
 /**
  * Sets the current level's velocity, mCurrent[mInst].velocity, to @p value.
@@ -525,13 +525,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B97F0);
  * @param opts  the play options
  * @param value  the velocity
  */
-extern "C" void func_002B97F0(void *opts, signed char value) {
+extern "C" void cSndPlayOpts_OPTS_Velocity(void *opts, signed char value) {
     (*(signed char *)((char*)((((*(volatile int *)((char*)(opts) + (0x1C))) * 0x18) + (*(int *)((char*)(opts) + (0x20))))) + (3))) = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9810);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Vol);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 #define MIN_9810(a,b) ((a) < (b) ? (a) : (b))
@@ -542,14 +542,14 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9810);
  * @param p  the play options
  * @param vol  the volume
  */
-extern "C" void func_002B9810(sSndPlayOpts *p, int vol) {
+extern "C" void cSndPlayOpts_OPTS_Vol(sSndPlayOpts *p, int vol) {
     p->vals[p->idx] = vol;
     p->recs[p->idx].v = MAX_9810(MIN_9810(p->vals[p->idx], 127), 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B98A8);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_ScaleVol);
 #ifdef SKIP_ASM
 #define MIN_98A8(a, b) ((a) < (b) ? (a) : (b))
 #define MAX_98A8(a, b) ((a) >= (b) ? (a) : (b))
@@ -571,14 +571,14 @@ struct Obj_98A8 {
  * @param p  the play options
  * @param f  the scale factor
  */
-extern "C" void func_002B98A8(Obj_98A8* p, float f) {
+extern "C" void cSndPlayOpts_OPTS_ScaleVol(Obj_98A8* p, float f) {
     p->vals[p->idx] = (int)MAX_98A8(MIN_98A8(p->vals[p->idx] * f, 127.0f), 0.0f);
     p->recs[p->idx].v = MAX_98A8(MIN_98A8(p->vals[p->idx], 127), 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B99E8);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_ScaleVol1);
 #ifdef SKIP_ASM
 #define MIN_99E8(a, b) ((a) < (b) ? (a) : (b))
 #define MAX_99E8(a, b) ((a) >= (b) ? (a) : (b))
@@ -600,14 +600,14 @@ struct Obj_99E8 {
  * @param p  the play options
  * @param n  the scale, 127 for unchanged
  */
-extern "C" void func_002B99E8(Obj_99E8* p, int n) {
+extern "C" void cSndPlayOpts_OPTS_ScaleVol1(Obj_99E8* p, int n) {
     p->vals[p->idx] = MAX_99E8(MIN_99E8(p->vals[p->idx] * n / 127, 127), 0);
     p->recs[p->idx].v = MAX_99E8(MIN_99E8(p->vals[p->idx], 127), 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9B48);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Bend);
 #ifdef SKIP_ASM
 /**
  * Sets the current level's pitch bend, mCurrent[mInst].bend, to @p value.
@@ -615,13 +615,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9B48);
  * @param opts  the play options
  * @param value  the bend
  */
-extern "C" void func_002B9B48(void *opts, signed char value) {
+extern "C" void cSndPlayOpts_OPTS_Bend(void *opts, signed char value) {
     (*(signed char *)((char*)((((*(volatile int *)((char*)(opts) + (0x1C))) * 0x18) + (*(int *)((char*)(opts) + (0x20))))) + (1))) = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9B68);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_PitchMult);
 #ifdef SKIP_ASM
 /**
  * Sets the current level's pitch multiplier, mCurrent[mInst].pitchmult, to @p value.
@@ -629,13 +629,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9B68);
  * @param opts  the play options
  * @param value  the pitch multiplier
  */
-extern "C" void func_002B9B68(void *opts, short value) {
+extern "C" void cSndPlayOpts_OPTS_PitchMult(void *opts, short value) {
     (*(short *)((char*)((((*(volatile int *)((char*)(opts) + (0x1C))) * 0x18) + (*(int *)((char*)(opts) + (0x20))))) + (0xC))) = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9B88);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_DelayCount);
 #ifdef SKIP_ASM
 /**
  * Sets the current level's delay count, mDelay[mInst].mCount, to @p value.
@@ -643,13 +643,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9B88);
  * @param opts  the play options
  * @param value  the new count
  */
-extern "C" void func_002B9B88(void *opts, int value) {
+extern "C" void cSndPlayOpts_OPTS_DelayCount(void *opts, int value) {
     (*(int *)((char*)((((*(volatile int *)((char*)(opts) + (0x1C))) * 0x10) + (*(int *)((char*)(opts) + (0x70))))) + (4))) = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9BA0);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_DelayTime);
 #ifdef SKIP_ASM
 struct E_9BA0 { int v[4]; };
 /**
@@ -658,13 +658,13 @@ struct E_9BA0 { int v[4]; };
  * @param opts  the play options
  * @param value  the new time
  */
-extern "C" void func_002B9BA0(void *opts, int value) {
+extern "C" void cSndPlayOpts_OPTS_DelayTime(void *opts, int value) {
     (*(E_9BA0**)((char*)opts + 0x70))[*(volatile int*)((char*)opts + 0x1C)].v[0] = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9BB8);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_DelayFeedback);
 #ifdef SKIP_ASM
 /**
  * Sets the current level's delay feedback, mDelay[mInst].mFeedback, to @p value.
@@ -672,13 +672,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9BB8);
  * @param opts  the play options
  * @param value  the new feedback
  */
-extern "C" void func_002B9BB8(void *opts, int value) {
+extern "C" void cSndPlayOpts_OPTS_DelayFeedback(void *opts, int value) {
     (*(int *)((char*)((((*(volatile int *)((char*)(opts) + (0x1C))) * 0x10) + (*(int *)((char*)(opts) + (0x70))))) + (8))) = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9BD0);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_DelayLevel);
 #ifdef SKIP_ASM
 /**
  * Sets the current level's delay level, mDelay[mInst].mLevel, to @p value.
@@ -686,13 +686,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9BD0);
  * @param opts  the play options
  * @param value  the new level
  */
-extern "C" void func_002B9BD0(void *opts, int value) {
+extern "C" void cSndPlayOpts_OPTS_DelayLevel(void *opts, int value) {
     (*(int *)((char*)((((*(volatile int *)((char*)(opts) + (0x1C))) * 0x10) + (*(int *)((char*)(opts) + (0x70))))) + (0xC))) = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9BE8);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Azimuth);
 #ifdef SKIP_ASM
 /**
  * Sets the current level's azimuth, mCurrent[mInst].azimuth, to @p value.
@@ -700,13 +700,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9BE8);
  * @param opts  the play options
  * @param value  the azimuth
  */
-extern "C" void func_002B9BE8(void *opts, short value) {
+extern "C" void cSndPlayOpts_OPTS_Azimuth(void *opts, short value) {
     (*(short *)((char*)((((*(volatile int *)((char*)(opts) + (0x1C))) * 0x18) + (*(int *)((char*)(opts) + (0x20))))) + (8))) = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9C08);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Elevation);
 #ifdef SKIP_ASM
 /**
  * Sets the current level's elevation, mCurrent[mInst].elevation, to @p value.
@@ -714,13 +714,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9C08);
  * @param opts  the play options
  * @param value  the elevation
  */
-extern "C" void func_002B9C08(void *opts, short value) {
+extern "C" void cSndPlayOpts_OPTS_Elevation(void *opts, short value) {
     (*(short *)((char*)((((*(volatile int *)((char*)(opts) + (0x1C))) * 0x18) + (*(int *)((char*)(opts) + (0x20))))) + (0xA))) = value;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9C28);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Position);
 #ifdef SKIP_ASM
 /**
  * Sets the current level's sound position, mPosition[mInst], to @p position.
@@ -728,27 +728,27 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9C28);
  * @param opts  the play options
  * @param position  the position vector pointer (kept, not copied)
  */
-extern "C" void func_002B9C28(void *opts, int position) {
+extern "C" void cSndPlayOpts_OPTS_Position(void *opts, int position) {
     *(int*)((char*)opts + (*(volatile int*)((char*)opts + 0x1C) << 2) + 0x24) = position;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9C40);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_StaticPos);
 #ifdef SKIP_ASM
 /**
  * Marks the current level's position as static: sets mPosStatic[mInst] to 1.
  *
  * @param opts  the play options
  */
-extern "C" void func_002B9C40(void *opts) {
+extern "C" void cSndPlayOpts_OPTS_StaticPos(void *opts) {
     int *base = *(int **)((char *)opts + 0x34);
     base[*(volatile int *)((char *)opts + 0x1C)] = 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9C60);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Viewport);
 #ifdef SKIP_ASM
 /**
  * Sets the current level's viewport, mViewport[mInst], to @p viewport.
@@ -756,27 +756,27 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9C60);
  * @param opts  the play options
  * @param viewport  the viewport
  */
-extern "C" void func_002B9C60(void *opts, int viewport) {
+extern "C" void cSndPlayOpts_OPTS_Viewport(void *opts, int viewport) {
     (*(int**)((char*)opts + 0x64))[*(volatile int*)((char*)opts + 0x1C)] = viewport;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9C78);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_LowPassCutOffFrequency);
 #ifdef SKIP_ASM
 /**
  * Sets the current level's low-pass cutoff, mCurrent[mInst].lowpasscutoff, to @p value clamped to 0..0xFFFF.
  *
  * @param value  the cutoff frequency
  */
-extern "C" void func_002B9C78(void *self, int value) {
+extern "C" void cSndPlayOpts_OPTS_LowPassCutOffFrequency(void *self, int value) {
     int clamped = (value <= 0xFFFF) ? value : 0xFFFF;
     *(short*)((char*)(*(volatile int*)((char*)self + 0x1C) * 0x18 + *(int*)((char*)self + 0x20)) + 0x14) = (clamped <= -1) ? 0 : clamped;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9CB0);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Ptr);
 #ifdef SKIP_ASM
 /**
  * Sets the current level's user pointer, mPtr[mInst], to @p userPtr.
@@ -784,13 +784,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9CB0);
  * @param opts  the play options
  * @param userPtr  the user pointer
  */
-extern "C" void func_002B9CB0(void *opts, int userPtr) {
+extern "C" void cSndPlayOpts_OPTS_Ptr(void *opts, int userPtr) {
     (*(int**)((char*)opts + 0x60))[*(volatile int*)((char*)opts + 0x1C)] = userPtr;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9CC8);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_VolControl);
 #ifdef SKIP_ASM
 /**
  * Sets the current level's volume control, mVolControl[mInst], to @p volControl.
@@ -798,13 +798,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9CC8);
  * @param opts  the play options
  * @param volControl  the float the sound's volume follows (a float pointer), or 0
  */
-extern "C" void func_002B9CC8(void *opts, int volControl) {
+extern "C" void cSndPlayOpts_OPTS_VolControl(void *opts, int volControl) {
     (*(int**)((char*)opts + 0x3C))[*(volatile int*)((char*)opts + 0x1C)] = volControl;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9CE0);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Callback);
 #ifdef SKIP_ASM
 struct V8_9CE0 { int a, b; };
 /**
@@ -813,14 +813,14 @@ struct V8_9CE0 { int a, b; };
  * @param opts  the play options
  * @param callback  the cController member-function pointer
  */
-extern "C" void func_002B9CE0(char *opts, V8_9CE0 callback) {
+extern "C" void cSndPlayOpts_OPTS_Callback(char *opts, V8_9CE0 callback) {
     V8_9CE0 *callbackBase = (V8_9CE0 *)(opts + *(volatile int *)(opts + 0x1C) * 8);
     callbackBase[8] = callback;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9D10);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_ExternalVol);
 #ifdef SKIP_ASM
 /**
  * Sets the current level's external-volume flag, mExternalVol[mInst], to @p externalVol.
@@ -828,42 +828,42 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9D10);
  * @param opts  the play options
  * @param externalVol  the flag
  */
-extern "C" void func_002B9D10(void *opts, int externalVol) {
+extern "C" void cSndPlayOpts_OPTS_ExternalVol(void *opts, int externalVol) {
     (*(int**)((char*)opts + 0x74))[*(volatile int*)((char*)opts + 0x1C)] = externalVol;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9D28);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_MapToMaxVol);
 #ifdef SKIP_ASM
 /**
  * Sets the current level's map-to-max-volume value, mMapToMaxVol[mInst], to @p mapToMaxVol.
  *
  * @param opts  the play options
- * @param mapToMaxVol  the value (func_002B93B8 resets it to 127)
+ * @param mapToMaxVol  the value (cSndPlayOpts_OPTS_Reset resets it to 127)
  */
-extern "C" void func_002B9D28(void *opts, int mapToMaxVol) {
+extern "C" void cSndPlayOpts_OPTS_MapToMaxVol(void *opts, int mapToMaxVol) {
     (*(int**)((char*)opts + 0x78))[*(volatile int*)((char*)opts + 0x1C)] = mapToMaxVol;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9D40);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_CloseOnEnd);
 #ifdef SKIP_ASM
 /**
  * Sets the current level's close-on-end flag, mCloseOnEnd[mInst], to @p closeOnEnd.
  *
  * @param opts  the play options
- * @param closeOnEnd  the flag (func_002B93B8 resets it to 1)
+ * @param closeOnEnd  the flag (cSndPlayOpts_OPTS_Reset resets it to 1)
  */
-extern "C" void func_002B9D40(void *opts, int closeOnEnd) {
+extern "C" void cSndPlayOpts_OPTS_CloseOnEnd(void *opts, int closeOnEnd) {
     int *base = *(int **)((char *)opts + 0x7C);
     base[*(volatile int *)((char *)opts + 0x1C)] = closeOnEnd;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9D58);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_TwoPlayerPan);
 #ifdef SKIP_ASM
 /**
  * Sets the current level's two-player pan flag, mTwoPlayerPan[mInst], to @p twoPlayerPan.
@@ -871,14 +871,14 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9D58);
  * @param opts  the play options
  * @param twoPlayerPan  the flag
  */
-extern "C" void func_002B9D58(void *opts, int twoPlayerPan) {
+extern "C" void cSndPlayOpts_OPTS_TwoPlayerPan(void *opts, int twoPlayerPan) {
     int *base = *(int **)((char *)opts + 0x80);
     base[*(volatile int *)((char *)opts + 0x1C)] = twoPlayerPan;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9D70);
+INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_TwoPlayerSide);
 #ifdef SKIP_ASM
 /**
  * Sets the current level's two-player side, mTwoPlayerSide[mInst], to @p twoPlayerSide.
@@ -886,40 +886,40 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9D70);
  * @param opts  the play options
  * @param twoPlayerSide  the side
  */
-extern "C" void func_002B9D70(void *opts, int twoPlayerSide) {
+extern "C" void cSndPlayOpts_OPTS_TwoPlayerSide(void *opts, int twoPlayerSide) {
     int *base = *(int **)((char *)opts + 0x84);
     base[*(volatile int *)((char *)opts + 0x1C)] = twoPlayerSide;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9D88);
+INCLUDE_ASM("bx/seg_1BA100", cMonitor_MONITOR_Pause);
 #ifdef SKIP_ASM
 /**
  * Pauses the monitor: sets mPaused to 1.
  *
  * @param monitor  the cMonitor
  */
-extern "C" void func_002B9D88(void *monitor) {
+extern "C" void cMonitor_MONITOR_Pause(void *monitor) {
     (*(int *)((char*)(monitor) + (0x94))) = 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9D98);
+INCLUDE_ASM("bx/seg_1BA100", cMonitor_MONITOR_Resume);
 #ifdef SKIP_ASM
 /**
  * Resumes the monitor: clears mPaused.
  *
  * @param monitor  the cMonitor
  */
-extern "C" void func_002B9D98(void *monitor) {
+extern "C" void cMonitor_MONITOR_Resume(void *monitor) {
     (*(int *)((char*)(monitor) + (0x94))) = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9DA0);
+INCLUDE_ASM("bx/seg_1BA100", cMonitor_MONITOR_Paused);
 #ifdef SKIP_ASM
 /**
  * Returns the monitor's mPaused flag.
@@ -927,13 +927,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9DA0);
  * @param monitor  the cMonitor
  * @return mPaused
  */
-extern "C" int func_002B9DA0(void *monitor) {
+extern "C" int cMonitor_MONITOR_Paused(void *monitor) {
     return (*(int *)((char*)(monitor) + (0x94)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9DA8);
+INCLUDE_ASM("bx/seg_1BA100", cMonitor_MONITOR_Counter);
 #ifdef SKIP_ASM
 /**
  * Returns the monitor's tick counter, mCounter (read as volatile).
@@ -943,13 +943,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9DA8);
  */
 // From peak3project's fork (github.com/peak3project/ssx3).
 // volatile keeps the load out of the jr delay slot, as in the target.
-extern "C" int func_002B9DA8(void *monitor) {
+extern "C" int cMonitor_MONITOR_Counter(void *monitor) {
     return (*(volatile int *)((char*)(monitor) + (0x88)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9DB8);
+INCLUDE_ASM("bx/seg_1BA100", cMonitor_MONITOR_Delta);
 #ifdef SKIP_ASM
 /**
  * Returns the monitor ticks since the last call, in hundredths: (mCounter - mLastCounter) * 0.01.
@@ -959,7 +959,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9DB8);
  * @param monitor  the cMonitor
  * @return the elapsed ticks times 0.01
  */
-extern "C" float func_002B9DB8(void *monitor) {
+extern "C" float cMonitor_MONITOR_Delta(void *monitor) {
     int temp_2;
     int temp_3;
 
@@ -971,7 +971,7 @@ extern "C" float func_002B9DB8(void *monitor) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9DE0);
+INCLUDE_ASM("bx/seg_1BA100", cBankMonitor_BANKMONITOR_GetInstance);
 #ifdef SKIP_ASM
 /**
  * Returns monitored sound @p instance's record, &mBankMonitorInstance[instance] (0xC0 bytes each).
@@ -980,13 +980,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9DE0);
  * @param instance  the instance index (64 records)
  * @return the cBankMonitorInstance
  */
-extern "C" int func_002B9DE0(void *bankMonitor, int instance) {
+extern "C" int cBankMonitor_BANKMONITOR_GetInstance(void *bankMonitor, int instance) {
     return (*(int *)((char*)(bankMonitor) + (0x8EC))) + (instance * 0xC0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9DF8);
+INCLUDE_ASM("bx/seg_1BA100", cBankMonitor_BANKMONITOR_Paused);
 #ifdef SKIP_ASM
 /**
  * Returns the bank monitor's pause flag, mBankMonitorPaused.
@@ -994,13 +994,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9DF8);
  * @param bankMonitor  the cBankMonitor
  * @return mBankMonitorPaused
  */
-extern "C" int func_002B9DF8(void *bankMonitor) {
+extern "C" int cBankMonitor_BANKMONITOR_Paused(void *bankMonitor) {
     return (*(int *)((char*)(bankMonitor) + (0x8E8)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9E00);
+INCLUDE_ASM("bx/seg_1BA100", cBankMonitor_BANKMONITOR_SetDoppler);
 #ifdef SKIP_ASM
 /**
  * Sets the bank monitor's Doppler switch, mDopplerEnable, to @p enable.
@@ -1008,13 +1008,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9E00);
  * @param bankMonitor  the cBankMonitor
  * @param enable  nonzero to enable Doppler
  */
-extern "C" void func_002B9E00(void *bankMonitor, int enable) {
+extern "C" void cBankMonitor_BANKMONITOR_SetDoppler(void *bankMonitor, int enable) {
     (*(int *)((char*)(bankMonitor) + (0x8E0))) = enable;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9E08);
+INCLUDE_ASM("bx/seg_1BA100", cBankMonitor_BANKMONITOR_SetPositional);
 #ifdef SKIP_ASM
 /**
  * Sets the bank monitor's positional switch, mPositionalEnable, to @p enable.
@@ -1022,13 +1022,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9E08);
  * @param bankMonitor  the cBankMonitor
  * @param enable  nonzero to enable positional sound
  */
-extern "C" void func_002B9E08(void *bankMonitor, int enable) {
+extern "C" void cBankMonitor_BANKMONITOR_SetPositional(void *bankMonitor, int enable) {
     (*(int *)((char*)(bankMonitor) + (0x8E4))) = enable;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9E10);
+INCLUDE_ASM("bx/seg_1BA100", cBankMonitor_BANKMONITOR_DopplerEnabled);
 #ifdef SKIP_ASM
 /**
  * Returns the bank monitor's Doppler switch, mDopplerEnable.
@@ -1036,13 +1036,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9E10);
  * @param bankMonitor  the cBankMonitor
  * @return mDopplerEnable
  */
-extern "C" int func_002B9E10(void *bankMonitor) {
+extern "C" int cBankMonitor_BANKMONITOR_DopplerEnabled(void *bankMonitor) {
     return (*(int *)((char*)(bankMonitor) + (0x8E0)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9E18);
+INCLUDE_ASM("bx/seg_1BA100", cBankMonitor_BANKMONITOR_PositionalEnabled);
 #ifdef SKIP_ASM
 /**
  * Returns the bank monitor's positional switch, mPositionalEnable.
@@ -1050,13 +1050,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9E18);
  * @param bankMonitor  the cBankMonitor
  * @return mPositionalEnable
  */
-extern "C" int func_002B9E18(void *bankMonitor) {
+extern "C" int cBankMonitor_BANKMONITOR_PositionalEnabled(void *bankMonitor) {
     return (*(int *)((char*)(bankMonitor) + (0x8E4)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9E20);
+INCLUDE_ASM("bx/seg_1BA100", cAsyncSys_ASYNCSYS_Busy);
 #ifdef SKIP_ASM
 /**
  * Returns the async loader's busy flag (+0x4, On Tour cAsyncSys::mBusy).
@@ -1064,13 +1064,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9E20);
  * @param asyncSys  the cAsyncSys
  * @return nonzero while a load is in progress
  */
-extern "C" int func_002B9E20(void *asyncSys) {
+extern "C" int cAsyncSys_ASYNCSYS_Busy(void *asyncSys) {
     return (*(int *)((char*)(asyncSys) + (4)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9E28);
+INCLUDE_ASM("bx/seg_1BA100", cAsyncSys_ASYNCSYS_GetCurrOperationUserHandle);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct Q_9E28 { int a; int *data; int tail; int head; };
@@ -1082,7 +1082,7 @@ struct Q_9E28 { int a; int *data; int tail; int head; };
  *
  * @return the user handle, or -1
  */
-extern "C" int func_002B9E28(char *self) {
+extern "C" int cAsyncSys_ASYNCSYS_GetCurrOperationUserHandle(char *self) {
     int userHandle;
     if (*(int *)(self + 4) != 0) {
         Q_9E28 *handleQueue = (Q_9E28 *)(self + 0x18C);
@@ -1094,7 +1094,7 @@ extern "C" int func_002B9E28(char *self) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9E70);
+INCLUDE_ASM("bx/seg_1BA100", cAsyncSys_ASYNCSYS_CancelCurrent);
 #ifdef SKIP_ASM
 extern "C" void func_00289DF0(void*, int);
 /**
@@ -1102,13 +1102,13 @@ extern "C" void func_00289DF0(void*, int);
  *
  * @param asyncSys  the cAsyncSys
  */
-extern "C" void func_002B9E70(void *asyncSys) {
+extern "C" void cAsyncSys_ASYNCSYS_CancelCurrent(void *asyncSys) {
     func_00289DF0(asyncSys, 0);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9E90);
+INCLUDE_ASM("bx/seg_1BA100", cAsyncSys_ASYNCSYS_CancelAll);
 #ifdef SKIP_ASM
 extern "C" void func_00289DF0(void*, int);
 /**
@@ -1116,13 +1116,13 @@ extern "C" void func_00289DF0(void*, int);
  *
  * @param asyncSys  the cAsyncSys
  */
-extern "C" void func_002B9E90(void *asyncSys) {
+extern "C" void cAsyncSys_ASYNCSYS_CancelAll(void *asyncSys) {
     func_00289DF0(asyncSys, 1);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9EB0);
+INCLUDE_ASM("bx/seg_1BA100", cBankManager_BANK_Status);
 #ifdef SKIP_ASM
 struct S9EB0 { int a; char pad[0x5C]; };
 /**
@@ -1134,14 +1134,14 @@ struct S9EB0 { int a; char pad[0x5C]; };
  * @param bankId  the bank index
  * @return the bank status
  */
-extern "C" int func_002B9EB0(void *bankManager, int bankId) {
+extern "C" int cBankManager_BANK_Status(void *bankManager, int bankId) {
     S9EB0 *base = *(S9EB0 **)((char *)bankManager + 0xACC);
     return base[bankId].a;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9EC8);
+INCLUDE_ASM("bx/seg_1BA100", cBankManager_BANK_Used);
 #ifdef SKIP_ASM
 struct S9EC8 { int a; char pad[0x5C]; };
 /**
@@ -1151,14 +1151,14 @@ struct S9EC8 { int a; char pad[0x5C]; };
  * @param bankId  the bank index
  * @return 1 when the bank's status is 1 (used), else 0
  */
-extern "C" int func_002B9EC8(void *bankManager, int bankId) {
+extern "C" int cBankManager_BANK_Used(void *bankManager, int bankId) {
     S9EC8 *base = *(S9EC8 **)((char *)bankManager + 0xACC);
     return base[bankId].a == 1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9EE8);
+INCLUDE_ASM("bx/seg_1BA100", cBankManager_BANK_Loading);
 #ifdef SKIP_ASM
 struct S9EE8 { int a; char pad[0x5C]; };
 /**
@@ -1168,16 +1168,16 @@ struct S9EE8 { int a; char pad[0x5C]; };
  * @param bankId  the bank index
  * @return 1 when the bank's status is 2 (loading), else 0
  */
-extern "C" int func_002B9EE8(void *bankManager, int bankId) {
+extern "C" int cBankManager_BANK_Loading(void *bankManager, int bankId) {
     S9EE8 *base = *(S9EE8 **)((char *)bankManager + 0xACC);
     return base[bankId].a == 2;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9F08);
+INCLUDE_ASM("bx/seg_1BA100", cBankManager_BANK_InUse);
 #ifdef SKIP_ASM
-extern "C" int func_002B9F88(void *, int);
+extern "C" int cBankManager_BANK_Handle(void *, int);
 extern "C" void func_003B58A0();
 extern "C" void func_003B58D8();
 extern "C" int func_003B65D0(int);
@@ -1186,17 +1186,17 @@ extern "C" int func_003B65D0(int);
  * Returns whether a loaded bank is in use by the audio library.
  *
  * Between func_003B58A0 and func_003B58D8 (the lock pair cBankSys_SFX_End also uses around library calls), checks that
- * the bank's status is 1 (used) and then whether func_003B65D0 returns 1 for its handle (func_002B9F88).
+ * the bank's status is 1 (used) and then whether func_003B65D0 returns 1 for its handle (cBankManager_BANK_Handle).
  *
  * @param idx  the bank index
  * @return 1 when the bank is loaded and func_003B65D0 reports 1, else 0
  */
-extern "C" int func_002B9F08(void *self, int idx) {
+extern "C" int cBankManager_BANK_InUse(void *self, int idx) {
     int ready = 0;
     func_003B58A0();
     bool ok = *(int *)((char*)(*(int *)((char*)self + 0xACC)) + idx * 0x60) != 1;
     if (!ok) {
-        ready = func_003B65D0(func_002B9F88(self, idx)) == 1;
+        ready = func_003B65D0(cBankManager_BANK_Handle(self, idx)) == 1;
     }
     func_003B58D8();
     return ready;
@@ -1204,7 +1204,7 @@ extern "C" int func_002B9F08(void *self, int idx) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9F88);
+INCLUDE_ASM("bx/seg_1BA100", cBankManager_BANK_Handle);
 #ifdef SKIP_ASM
 struct S9F88 { int a; int b; char pad[0x58]; };
 /**
@@ -1214,7 +1214,7 @@ struct S9F88 { int a; int b; char pad[0x58]; };
  * @param bankId  the bank index
  * @return the bank handle, or -1 when its status is not 1 (used)
  */
-extern "C" int func_002B9F88(void *bankManager, int bankId) {
+extern "C" int cBankManager_BANK_Handle(void *bankManager, int bankId) {
     S9F88 *base = *(S9F88 **)((char *)bankManager + 0xACC);
     bool ne = base[bankId].a != 1;
     if (!ne) {
@@ -1225,7 +1225,7 @@ extern "C" int func_002B9F88(void *bankManager, int bankId) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9FB8);
+INCLUDE_ASM("bx/seg_1BA100", cBankSys_SFX_Bank);
 #ifdef SKIP_ASM
 /**
  * Sets the bank of the current play-option level: mBank[mInst] = @p bank.
@@ -1235,14 +1235,14 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9FB8);
  * @param bankSys  the cBankSys
  * @param bank  the bank index
  */
-extern "C" void func_002B9FB8(cBankSys* bankSys, int bank) {
+extern "C" void cBankSys_SFX_Bank(cBankSys* bankSys, int bank) {
     int *base = bankSys->mBank;
     base[*(int *)(*(char **)bankSys + 0x1F4)] = bank;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9FD8);
+INCLUDE_ASM("bx/seg_1BA100", cBankSys_SFX_Patch);
 #ifdef SKIP_ASM
 /**
  * Sets the patch of the current play-option level: mPatch[mInst] = @p patch.
@@ -1252,14 +1252,14 @@ INCLUDE_ASM("bx/seg_1BA100", func_002B9FD8);
  * @param bankSys  the cBankSys
  * @param patch  the patch index
  */
-extern "C" void func_002B9FD8(cBankSys* bankSys, int patch) {
+extern "C" void cBankSys_SFX_Patch(cBankSys* bankSys, int patch) {
     int *base = bankSys->mPatch;
     base[*(int *)(*(char **)bankSys + 0x1F4)] = patch;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002B9FF8);
+INCLUDE_ASM("bx/seg_1BA100", cBankSys_SFX_Begin);
 #ifdef SKIP_ASM
 struct Rec_9FF8 { signed char v; char pad[0x17]; };
 struct Q_9FF8 { int a, b, c, d; };
@@ -1292,11 +1292,11 @@ struct Outer_9FF8 { char pad[0x1D8]; Obj_9FF8 sub; };
  * Starts an SFX setup: pushes a play-option level.
  *
  * Through mpVBankManager, the cBankManager's play options (its cBankMonitor at mpVBankManager + 0x1D8) get a new level
- * exactly as func_002B95B0 pushes one (mInst incremented, the level reset to mDefault and the defaults).
+ * exactly as cSndPlayOpts_OPTS_Open pushes one (mInst incremented, the level reset to mDefault and the defaults).
  *
  * @param bankSys  the cBankSys
  */
-extern "C" void func_002B9FF8(Outer_9FF8** bankSys) {
+extern "C" void cBankSys_SFX_Begin(Outer_9FF8** bankSys) {
     Outer_9FF8* bankManager = *bankSys;
     Obj_9FF8* playOpts = &bankManager->sub;
     bankManager->sub.idx++;
@@ -1323,7 +1323,7 @@ extern "C" void func_002B9FF8(Outer_9FF8** bankSys) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BA208);
+INCLUDE_ASM("bx/seg_1BA100", cBankSys_SFX_Begin1);
 #ifdef SKIP_ASM
 struct Rec_A208 { signed char v; char pad[0x17]; };
 struct Q_A208 { int a, b, c, d; };
@@ -1357,13 +1357,13 @@ struct Arg_A208 { Outer_A208* o; int* vals; };
  * Starts an SFX setup for a bank: pushes a play-option level and sets its bank.
  *
  * Through mpVBankManager, the cBankManager's play options (its cBankMonitor at mpVBankManager + 0x1D8) get a new level
- * exactly as func_002B95B0 pushes one (mInst incremented, the level reset to mDefault and the defaults), then
+ * exactly as cSndPlayOpts_OPTS_Open pushes one (mInst incremented, the level reset to mDefault and the defaults), then
  * mBank[mInst] = @p bank.
  *
  * @param bankSys  the cBankSys
  * @param bank  the bank index
  */
-extern "C" void func_002BA208(Arg_A208* bankSys, int bank) {
+extern "C" void cBankSys_SFX_Begin1(Arg_A208* bankSys, int bank) {
     Outer_A208* bankManager = bankSys->o;
     Obj_A208* playOpts = &bankManager->sub;
     bankManager->sub.idx++;
@@ -1391,13 +1391,13 @@ extern "C" void func_002BA208(Arg_A208* bankSys, int bank) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BA448);
+INCLUDE_ASM("bx/seg_1BA100", cBankSys_SFX_Begin2);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // cSoundSys (its vtable is _vt$12cSndPlayOpts$9cSoundSys): the cSndPlayOpts part sits at 0x1D8.
 struct sSoundSysView { char pad[0x1D8]; sSndPlayOpts sub; };
 
-// The cBankSys as func_002BA448 sees it: `o` is its cBankManager (mpVBankManager; the play options' cBankMonitor
+// The cBankSys as cBankSys_SFX_Begin2 sees it: `o` is its cBankManager (mpVBankManager; the play options' cBankMonitor
 // sits at +0x1D8), then two per-level int arrays.
 struct sSndOptsUser { sSoundSysView* o; int* vals; int* vals2; };
 
@@ -1407,14 +1407,14 @@ extern "C" void* func_00416210(void*, int, unsigned int);
  * Starts an SFX setup for a bank and patch: pushes a play-option level and sets both.
  *
  * Through mpVBankManager, the cBankManager's play options (its cBankMonitor at mpVBankManager + 0x1D8) get a new level
- * exactly as func_002B95B0 pushes one (mInst incremented, the level reset to mDefault and the defaults), then
+ * exactly as cSndPlayOpts_OPTS_Open pushes one (mInst incremented, the level reset to mDefault and the defaults), then
  * mBank[mInst] = @p bank and mPatch[mInst] = @p patch.
  *
  * @param bankSys  the cBankSys
  * @param bank  the bank index
  * @param patch  the patch index
  */
-extern "C" void func_002BA448(sSndOptsUser* bankSys, int bank, int patch) {
+extern "C" void cBankSys_SFX_Begin2(sSndOptsUser* bankSys, int bank, int patch) {
     sSoundSysView* bankManager = bankSys->o;
     sSndPlayOpts* playOpts = &bankManager->sub;
     bankManager->sub.idx++;
@@ -1443,7 +1443,7 @@ extern "C" void func_002BA448(sSndOptsUser* bankSys, int bank, int patch) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BA6B0);
+INCLUDE_ASM("bx/seg_1BA100", cBankSys_SFX_Play2D);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* func_00416210(void*, int, unsigned int);
@@ -1453,14 +1453,14 @@ extern "C" int cBankSys_SFX_End(void*);
  * Plays a bank patch with the default options: pushes a play-option level, sets its bank and patch, and plays it.
  *
  * Through mpVBankManager, the cBankManager's play options (its cBankMonitor at mpVBankManager + 0x1D8) get a new level
- * exactly as func_002B95B0 pushes one (mInst incremented, the level reset to mDefault and the defaults), then
+ * exactly as cSndPlayOpts_OPTS_Open pushes one (mInst incremented, the level reset to mDefault and the defaults), then
  * mBank[mInst] = @p bank, mPatch[mInst] = @p patch, and cBankSys_SFX_End plays the patch (and pops the level).
  *
  * @param bankSys  the cBankSys
  * @param bank  the bank index
  * @param patch  the patch index
  */
-extern "C" void func_002BA6B0(sSndOptsUser* bankSys, int bank, int patch) {
+extern "C" void cBankSys_SFX_Play2D(sSndOptsUser* bankSys, int bank, int patch) {
     sSoundSysView* bankManager = bankSys->o;
     sSndPlayOpts* playOpts = &bankManager->sub;
     bankManager->sub.idx++;
@@ -1490,7 +1490,7 @@ extern "C" void func_002BA6B0(sSndOptsUser* bankSys, int bank, int patch) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BA920);
+INCLUDE_ASM("bx/seg_1BA100", cBankSys_SFX_Play2DVol);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void* func_00416210(void*, int, unsigned int);
@@ -1502,8 +1502,8 @@ extern "C" int cBankSys_SFX_End(void*);
  * Plays a bank patch at a volume: pushes a play-option level, sets its bank, patch and volume, and plays it.
  *
  * Through mpVBankManager, the cBankManager's play options (its cBankMonitor at mpVBankManager + 0x1D8) get a new level
- * exactly as func_002B95B0 pushes one (mInst incremented, the level reset to mDefault and the defaults), then
- * mBank[mInst] = @p bank, mPatch[mInst] = @p patch, the level's volume is set as func_002B9810 does (mBaseVol = @p volume,
+ * exactly as cSndPlayOpts_OPTS_Open pushes one (mInst incremented, the level reset to mDefault and the defaults), then
+ * mBank[mInst] = @p bank, mPatch[mInst] = @p patch, the level's volume is set as cSndPlayOpts_OPTS_Vol does (mBaseVol = @p volume,
  * SNDPLAYOPTS volume clamped to 0..127), and cBankSys_SFX_End plays the patch.
  *
  * @param bankSys  the cBankSys
@@ -1511,7 +1511,7 @@ extern "C" int cBankSys_SFX_End(void*);
  * @param patch  the patch index
  * @param volume  the volume
  */
-extern "C" void func_002BA920(sSndOptsUser* bankSys, int bank, int patch, int volume) {
+extern "C" void cBankSys_SFX_Play2DVol(sSndOptsUser* bankSys, int bank, int patch, int volume) {
     sSoundSysView* bankManager = bankSys->o;
     sSndPlayOpts* playOpts = &bankManager->sub;
     bankManager->sub.idx++;
@@ -1547,7 +1547,7 @@ extern "C" void func_002BA920(sSndOptsUser* bankSys, int bank, int patch, int vo
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BAC30);
+INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_Current);
 #ifdef SKIP_ASM
 /**
  * Returns the music system's current song instance, mCurrent.
@@ -1555,13 +1555,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BAC30);
  * @param musicSys  the cMusicSys
  * @return mCurrent, or 0 when no song is set up
  */
-extern "C" int func_002BAC30(void *musicSys) {
+extern "C" int cMusicSys_MUSIC_Current(void *musicSys) {
     return (*(int *)((char*)(musicSys) + (0x408)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BAC38);
+INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_GetStreamHandle);
 #ifdef SKIP_ASM
 extern "C" int func_002B2488(int);
 
@@ -1571,7 +1571,7 @@ extern "C" int func_002B2488(int);
  * @param musicSys  the cMusicSys
  * @return the stream handle, or -1
  */
-extern "C" int func_002BAC38(void *musicSys) {
+extern "C" int cMusicSys_MUSIC_GetStreamHandle(void *musicSys) {
     int temp_4;
     int var_2;
 
@@ -1585,7 +1585,7 @@ extern "C" int func_002BAC38(void *musicSys) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BAC60);
+INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_GetNumSongs);
 #ifdef SKIP_ASM
 /**
  * Returns mNumSongs, the number of songs in the music .ini.
@@ -1593,13 +1593,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BAC60);
  * @param musicSys  the cMusicSys
  * @return mNumSongs
  */
-extern "C" int func_002BAC60(cMusicSys* musicSys) {
+extern "C" int cMusicSys_MUSIC_GetNumSongs(cMusicSys* musicSys) {
     return (musicSys->mNumSongs);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BAC68);
+INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_GetNumActiveSongs);
 #ifdef SKIP_ASM
 /**
  * Returns mNumActiveSongs, the number of songs in the active playlist.
@@ -1607,13 +1607,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BAC68);
  * @param musicSys  the cMusicSys
  * @return mNumActiveSongs
  */
-extern "C" int func_002BAC68(cMusicSys* musicSys) {
+extern "C" int cMusicSys_MUSIC_GetNumActiveSongs(cMusicSys* musicSys) {
     return (musicSys->mNumActiveSongs);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BAC70);
+INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_GetNumFESongs);
 #ifdef SKIP_ASM
 /**
  * Returns mNumFESongs, the number of songs flagged for the front end (ADDTOFE).
@@ -1621,13 +1621,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BAC70);
  * @param musicSys  the cMusicSys
  * @return mNumFESongs
  */
-extern "C" int func_002BAC70(cMusicSys* musicSys) {
+extern "C" int cMusicSys_MUSIC_GetNumFESongs(cMusicSys* musicSys) {
     return (musicSys->mNumFESongs);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BAC78);
+INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_SongName);
 #ifdef SKIP_ASM
 struct S78 { char x[0xB]; };
 /**
@@ -1636,13 +1636,13 @@ struct S78 { char x[0xB]; };
  * @param musicSys  the cMusicSys
  * @return the song name
  */
-extern "C" void *func_002BAC78(cMusicSys* musicSys) {
+extern "C" void *cMusicSys_MUSIC_SongName(cMusicSys* musicSys) {
     return (S78 *)((char *)musicSys + 0x124) + musicSys->mCurrentSongNum;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BAC90);
+INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_GetCurrentSongNum);
 #ifdef SKIP_ASM
 /**
  * Returns mCurrentSongNum, the current song's index.
@@ -1650,13 +1650,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BAC90);
  * @param musicSys  the cMusicSys
  * @return mCurrentSongNum
  */
-extern "C" int func_002BAC90(cMusicSys* musicSys) {
+extern "C" int cMusicSys_MUSIC_GetCurrentSongNum(cMusicSys* musicSys) {
     return (musicSys->mCurrentSongNum);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BAC98);
+INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_SetDelay);
 #ifdef SKIP_ASM
 extern "C" void func_002B2850(int, void *);
 
@@ -1665,13 +1665,13 @@ extern "C" void func_002B2850(int, void *);
  *
  * @param musicSys  the cMusicSys
  */
-extern "C" void func_002BAC98(void *musicSys) {
+extern "C" void cMusicSys_MUSIC_SetDelay(void *musicSys) {
     func_002B2850((*(int *)((char*)(musicSys) + (0x408))), musicSys);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BACB8);
+INCLUDE_ASM("bx/seg_1BA100", cMusicSys_IsSongPlaying);
 #ifdef SKIP_ASM
 /**
  * Returns whether a song is playing, mSongPlaying.
@@ -1679,7 +1679,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BACB8);
  * @param musicSys  the cMusicSys
  * @return mSongPlaying
  */
-extern "C" int func_002BACB8(void *musicSys) {
+extern "C" int cMusicSys_IsSongPlaying(void *musicSys) {
     return (*(int *)((char*)(musicSys) + (0x418)));
 }
 #endif
@@ -1698,7 +1698,7 @@ extern "C" void func_002BACC0(void *musicSys) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BACC8);
+INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_StoreDefaultActiveMap);
 #ifdef SKIP_ASM
 /**
  * Saves the active-song map as the default: mDefaultActiveMap = mActiveMap (64-bit).
@@ -1706,13 +1706,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BACC8);
  * @param musicSys  the cMusicSys
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" void func_002BACC8(void *musicSys) {
+extern "C" void cMusicSys_MUSIC_StoreDefaultActiveMap(void *musicSys) {
     (*(long *)((char*)(musicSys) + (0x400))) = (long) (*(long *)((char*)(musicSys) + (0x3F8)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BACD8);
+INCLUDE_ASM("bx/seg_1BA100", cMusicSys_MUSIC_GetDefaultActiveMap);
 #ifdef SKIP_ASM
 /**
  * Returns the default active-song map, mDefaultActiveMap (64-bit).
@@ -1721,7 +1721,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BACD8);
  * @return mDefaultActiveMap
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long func_002BACD8(void *musicSys) {
+extern "C" long cMusicSys_MUSIC_GetDefaultActiveMap(void *musicSys) {
     return (*(long *)((char*)(musicSys) + (0x400)));
 }
 #endif
@@ -1757,27 +1757,27 @@ extern "C" int func_002BACE8(cMusicSys* musicSys) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BACF0);
+INCLUDE_ASM("bx/seg_1BA100", cSpeechSys_GetSpeechVolumeIdentifier);
 #ifdef SKIP_ASM
 /**
  * Returns -1 (slot 2 of cSpeechSys's vtable D_00483870).
  *
  * @return -1
  */
-extern "C" int func_002BACF0(void) {
+extern "C" int cSpeechSys_GetSpeechVolumeIdentifier(void) {
     return -1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BACF8);
+INCLUDE_ASM("bx/seg_1BA100", cSpeechSys_UpdateSpeechVolume);
 #ifdef SKIP_ASM
 /**
  * Returns 0 (slot 3 of cSpeechSys's vtable D_00483870).
  *
  * @return 0
  */
-extern "C" int func_002BACF8(void) {
+extern "C" int cSpeechSys_UpdateSpeechVolume(void) {
     return 0;
 }
 #endif
@@ -1801,7 +1801,7 @@ extern "C" char* func_002BAD00(cSpeechSys* speechSys, int i) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BAD18);
+INCLUDE_ASM("bx/seg_1BA100", cCrowdSys_CROWD_GetData);
 #ifdef SKIP_ASM
 /**
  * Returns the crowd system's cheer data for intensity @p i, &mCrowdData[i] (0x54 bytes each).
@@ -1810,7 +1810,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BAD18);
  * @param i  the crowd intensity (three entries)
  * @return the tCrowdData
  */
-extern "C" char* func_002BAD18(cCrowdSys* crowdSys, int i) {
+extern "C" char* cCrowdSys_CROWD_GetData(cCrowdSys* crowdSys, int i) {
     int off = i * 84 + 0x1C;
     return ((char*)crowdSys) + off;
 }
@@ -1860,7 +1860,7 @@ extern "C" int func_002BAD50(void *audio) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BAD58);
+INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_SetRailSurface);
 #ifdef SKIP_ASM
 /**
  * Sets the rail surface type the audio uses for a rider on a rail, mRailType.
@@ -1868,7 +1868,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BAD58);
  * @param audio  the cSSXAudio
  * @param railType  the rail surface type
  */
-extern "C" void func_002BAD58(void *audio, int railType) {
+extern "C" void cSSXAudio_SetRailSurface(void *audio, int railType) {
     (*(int *)((char*)(audio) + (0x598C))) = railType;
 }
 #endif
@@ -1902,7 +1902,7 @@ extern "C" int func_002BAD68(void *audio) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BAD70);
+INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetRadioPlayList);
 #ifdef SKIP_ASM
 /**
  * Returns the radio playlist mask, mRadioPlayList (64-bit).
@@ -1911,13 +1911,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BAD70);
  * @return mRadioPlayList
  */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
-extern "C" long func_002BAD70(void *audio) {
+extern "C" long cSSXAudio_GetRadioPlayList(void *audio) {
     return (*(long *)((char*)(audio) + (0x6098)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BAD78);
+INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetNumPlayLists);
 #ifdef SKIP_ASM
 /**
  * Returns the number of radio playlists, mNumPlayLists.
@@ -1925,13 +1925,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BAD78);
  * @param audio  the cSSXAudio
  * @return mNumPlayLists
  */
-extern "C" int func_002BAD78(void *audio) {
+extern "C" int cSSXAudio_GetNumPlayLists(void *audio) {
     return (*(int *)((char*)(audio) + (0x6234)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BAD80);
+INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetPlayListName);
 #ifdef SKIP_ASM
 /**
  * Returns the name of radio playlist @p i, &mPlayListName[i] (20 bytes each).
@@ -1940,14 +1940,14 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BAD80);
  * @param i  the playlist index
  * @return the playlist name
  */
-extern "C" char* func_002BAD80(char *audio, int i) {
+extern "C" char* cSSXAudio_GetPlayListName(char *audio, int i) {
     int off = i * 20 + 24740;
     return audio + off;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BAD98);
+INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetPlayListIndex);
 #ifdef SKIP_ASM
 /**
  * Returns the current radio playlist index, mPlayListIndex.
@@ -1955,7 +1955,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BAD98);
  * @param audio  the cSSXAudio
  * @return mPlayListIndex
  */
-extern "C" int func_002BAD98(void *audio) {
+extern "C" int cSSXAudio_GetPlayListIndex(void *audio) {
     return (*(int *)((char*)(audio) + (0x6238)));
 }
 #endif
@@ -2017,7 +2017,7 @@ extern "C" int func_002BADB8(void *audio) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BADC0);
+INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetPreset);
 #ifdef SKIP_ASM
 /**
  * Returns the audio preset, mPreset.
@@ -2025,13 +2025,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BADC0);
  * @param audio  the cSSXAudio
  * @return mPreset
  */
-extern "C" int func_002BADC0(void *audio) {
+extern "C" int cSSXAudio_GetPreset(void *audio) {
     return (*(int *)((char*)(audio) + (0x6470)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BADC8);
+INCLUDE_ASM("bx/seg_1BA100", cSSXAudio_GetAudioUpdateState);
 #ifdef SKIP_ASM
 /**
  * Returns the audio update state, mAudioUpdateState.
@@ -2039,7 +2039,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BADC8);
  * @param audio  the cSSXAudio
  * @return mAudioUpdateState
  */
-extern "C" int func_002BADC8(void *audio) {
+extern "C" int cSSXAudio_GetAudioUpdateState(void *audio) {
     return (*(int *)((char*)(audio) + (0x6474)));
 }
 #endif
@@ -2126,7 +2126,7 @@ extern "C" void cWorldPainterLayer_resolve(cWorldPainterLayer* self) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BAF90);
+INCLUDE_ASM("bx/seg_1BA100", cWorldPainterLayer_getQuadTreeContents);
 #ifdef SKIP_ASM
 extern "C" void *cQuadTree_getLeaf(int);
 
@@ -2140,7 +2140,7 @@ extern "C" void *cQuadTree_getLeaf(int);
  * @param layer  the world-painter layer
  * @return the leaf's contents (a region index, or -1)
  */
-extern "C" int func_002BAF90(int *layer) {
+extern "C" int cWorldPainterLayer_getQuadTreeContents(int *layer) {
     return (*(int *)((char*)(cQuadTree_getLeaf(*layer)) + (4)));
 }
 #endif
@@ -2312,7 +2312,7 @@ extern "C" void cWorldPainterMan__cWorldPainterMan(cWorldPainterMan* self, int f
 INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_init);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-extern "C" void *func_002BB370(void *arg0);
+extern "C" void *cWorldPainterSection_cWorldPainterSection(void *arg0);
 int operator_new_B1D0(unsigned int, void*, int, int) __asm__("operator_new__FUi");
 extern char str_cWorldPainterMan[];
 struct sArr_B1D0 { int n; S12_B140 *arr; };
@@ -2322,7 +2322,7 @@ struct sArr_B1D0 { int n; S12_B140 *arr; };
  *
  * Destroys and frees the old m_pCache as the destructor does, stores @p n in m_uiNumSections and allocates n * 12 +
  * 0x10 bytes tagged "cWorldPainterMan" (count cookie in the first word), constructing each 12-byte section with
- * func_002BB370 (the cWorldPainterSection constructor).
+ * cWorldPainterSection_cWorldPainterSection (the cWorldPainterSection constructor).
  *
  * @param n  the number of sections (On Tour iNumSections)
  */
@@ -2346,7 +2346,7 @@ extern "C" void cWorldPainterMan_init(cWorldPainterMan* self, int n) {
     S12_B140 *newSection = sections;
     int i;
     for (i = n - 1; i != -1; i--) {
-        func_002BB370(newSection);
+        cWorldPainterSection_cWorldPainterSection(newSection);
         newSection++;
     }
     *dst = sections;
@@ -2386,23 +2386,23 @@ extern "C" void func_002BB318(cWorldPainterMan* worldPainterMan, int sectionId, 
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BB348);
+INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_load);
 #ifdef SKIP_ASM
-extern "C" void func_002BB570(void*, int, int);
+extern "C" void cWorldPainterSection_load(void*, int, int);
 /**
- * Installs already-loaded world-painter data for a section: m_pCache[@p sectionId] gets it through func_002BB570.
+ * Installs already-loaded world-painter data for a section: m_pCache[@p sectionId] gets it through cWorldPainterSection_load.
  *
  * @param worldPainterMan  the manager
  * @param sectionId  the section index into m_pCache
  * @param wpData  the section's world-painter data (a tWPHeader), kept in place (streamed)
  */
-extern "C" void func_002BB348(cWorldPainterMan* worldPainterMan, int sectionId, int wpData) {
-    func_002BB570((char*)worldPainterMan->m_pCache + sectionId * 12, sectionId, wpData);
+extern "C" void cWorldPainterMan_load(cWorldPainterMan* worldPainterMan, int sectionId, int wpData) {
+    cWorldPainterSection_load((char*)worldPainterMan->m_pCache + sectionId * 12, sectionId, wpData);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BB370);
+INCLUDE_ASM("bx/seg_1BA100", cWorldPainterSection_cWorldPainterSection);
 #ifdef SKIP_ASM
 /**
  * Constructs a world-painter section: m_pWPHeader 0, m_iAsyncHandle -1, m_iState (kWPSection_Unloaded) and m_iStreamed
@@ -2411,7 +2411,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BB370);
  * @param section  the section
  * @return @p section
  */
-extern "C" void *func_002BB370(void *section) {
+extern "C" void *cWorldPainterSection_cWorldPainterSection(void *section) {
     (*(int *)((char*)(section) + (8))) = 0;
     (*(int *)((char*)(section) + (4))) = -1;
     (*(short *)((char*)(section) + (0))) = 0;
@@ -2527,30 +2527,30 @@ extern "C" void func_002BB4D8_B4D8(void *self, int fileName) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BB570);
+INCLUDE_ASM("bx/seg_1BA100", cWorldPainterSection_load);
 #ifdef SKIP_ASM
-extern "C" void func_002BB5F0(cWorldPainterSection*);
+extern "C" void cWorldPainterSection_resolve(cWorldPainterSection*);
 
 /**
  * Installs already-loaded data in a section and resolves it.
  *
  * Sets m_iStreamed (the section does not own the data), m_iState to 2 (kWPSection_Loaded) and m_pWPHeader to
- * @p wpData, then relocates it with func_002BB5F0. @p sectionId is not used.
+ * @p wpData, then relocates it with cWorldPainterSection_resolve. @p sectionId is not used.
  *
  * @param section  the section
  * @param sectionId  the section index (unused)
  * @param wpData  the world-painter data (a tWPHeader)
  */
-extern "C" void func_002BB570(void *section, int sectionId, int wpData) {
+extern "C" void cWorldPainterSection_load(void *section, int sectionId, int wpData) {
     (*(short *)((char*)(section) + (2))) = 1;
     (*(short *)((char*)(section) + (0))) = 2;
     (*(int *)((char*)(section) + (8))) = wpData;
-    func_002BB5F0((cWorldPainterSection*)section);
+    cWorldPainterSection_resolve((cWorldPainterSection*)section);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BB5A8);
+INCLUDE_ASM("bx/seg_1BA100", cWorldPainterSection_unload);
 #ifdef SKIP_ASM
 extern "C" void cMemMan_free__FPv(int);
 
@@ -2559,7 +2559,7 @@ extern "C" void cMemMan_free__FPv(int);
  *
  * @param section  the section
  */
-extern "C" void func_002BB5A8(void *section) {
+extern "C" void cWorldPainterSection_unload(void *section) {
     int temp_4;
 
     temp_4 = (*(int *)((char*)(section) + (8)));
@@ -2574,7 +2574,7 @@ extern "C" void func_002BB5A8(void *section) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BB5F0);
+INCLUDE_ASM("bx/seg_1BA100", cWorldPainterSection_resolve);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cWorldPainterLayer_resolve_B5F0(int p) __asm__("cWorldPainterLayer_resolve");
@@ -2596,7 +2596,7 @@ struct sReloc_B5F0 {
  * @param vself  the section
  */
 // Relocates the loaded block's offset table (dropping it if it has the wrong magic) and marks it ready.
-extern "C" void func_002BB5F0(cWorldPainterSection* vself)
+extern "C" void cWorldPainterSection_resolve(cWorldPainterSection* vself)
 {
     cWorldPainterSection* self = vself;
     if (((sReloc_B5F0*)self->m_pWPHeader) == 0) {
@@ -2629,23 +2629,23 @@ extern "C" void func_002BB5F0(cWorldPainterSection* vself)
 //100%
 INCLUDE_ASM("bx/seg_1BA100", cWorldPainterManRender);
 #ifdef SKIP_ASM
-extern "C" void func_002BB6E0(int, void *);
+extern "C" void cWorldPainterMan_render(int, void *);
 
 /**
  * Draws the world painter debug overlay of the current world.
  *
- * Calls func_002BB6E0 (cWorldPainterMan::render) on the painter manager stored at +0x8 of SSXApp->Game->World.
+ * Calls cWorldPainterMan_render (cWorldPainterMan::render) on the painter manager stored at +0x8 of SSXApp->Game->World.
  */
 extern "C" void cWorldPainterManRender(void) {
     void *temp_5;
 
     temp_5 = ((void*)SSXApp->Game->World);
-    func_002BB6E0((*(int *)((char*)(temp_5) + (8))), temp_5);
+    cWorldPainterMan_render((*(int *)((char*)(temp_5) + (8))), temp_5);
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BB6E0);
+INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_render);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // cWorldPainterMan::render() (On Tour name and locals): draws the active painter layer's quad tree.
@@ -2675,9 +2675,9 @@ extern int cVisualEffectsTest_m_LayerId;   // cVisualEffectsTest::m_LayerId
 static inline int layerId_B6E0() { return cVisualEffectsTest_m_LayerId; }
 extern sDrawState sDrawState_s_defaultDrawState;  // sDrawState::s_defaultDrawState
 // cWorldPainterMan::render(cQuadTree*, const tQuadTreeNode*, tBxVertex*, t4Vector&, t4Vector&)
-extern "C" void func_002BB928_B6E0(cWorldPainterMan_B6E0*, cQuadTree_B6E0*, char*, tBxVertex_B6E0*, t4Vector_B6E0*, t4Vector_B6E0*) __asm__("func_002BB928");
+extern "C" void cWorldPainterMan_render1_B6E0(cWorldPainterMan_B6E0*, cQuadTree_B6E0*, char*, tBxVertex_B6E0*, t4Vector_B6E0*, t4Vector_B6E0*) __asm__("cWorldPainterMan_render1");
 
-extern "C" void func_002BB6E0_impl(cWorldPainterMan_B6E0* self) __asm__("func_002BB6E0");
+extern "C" void cWorldPainterMan_render_impl(cWorldPainterMan_B6E0* self) __asm__("cWorldPainterMan_render");
 /**
  * Debug-draws the quad tree of the current section's selected world-painter layer.
  *
@@ -2685,9 +2685,9 @@ extern "C" void func_002BB6E0_impl(cWorldPainterMan_B6E0* self) __asm__("func_00
  * cVisualEffectsTest_m_LayerId (clamped to the header's layer count). If that layer has a quad tree, pushes a default
  * draw state on cGraphicsMan_TheGraphicsMan, fills five green opaque vertices, builds the tree's corner rectangle
  * (min = the tree's min x/y; max = min + 32768 / scale, all truncated to whole numbers) and walks the tree from its
- * root with func_002BB928, then pops the draw state.
+ * root with cWorldPainterMan_render1, then pops the draw state.
  */
-extern "C" void func_002BB6E0_impl(cWorldPainterMan_B6E0* self) {
+extern "C" void cWorldPainterMan_render_impl(cWorldPainterMan_B6E0* self) {
     if (cVisualEffectsTest_m_Enable) {
         cWorldPainterSection_B6E0* section = &self->m_pCache[cWorldPainterMan_m_iCurrSection];
         if (section) {
@@ -2719,7 +2719,7 @@ extern "C" void func_002BB6E0_impl(cWorldPainterMan_B6E0* self) {
                         t4Vector_B6E0 mincorner((float)(int)tree->minx, (float)(int)tree->miny, 0.0f, 1.0f);
                         t4Vector_B6E0 maxcorner((float)(int)(32768.0f / tree->scale + tree->minx),
                                                 (float)(int)(32768.0f / tree->scale + tree->miny), 0.0f, 1.0f);
-                        func_002BB928_B6E0(self, tree, tree->nodes + tree->root * 8, quadVerts, &mincorner, &maxcorner);
+                        cWorldPainterMan_render1_B6E0(self, tree, tree->nodes + tree->root * 8, quadVerts, &mincorner, &maxcorner);
                         (*(sDrawState**)&gm->m_pCurrentDrawState)--;  // PopDrawState
                     }
                 }
@@ -2730,7 +2730,7 @@ extern "C" void func_002BB6E0_impl(cWorldPainterMan_B6E0* self) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BB928);
+INCLUDE_ASM("bx/seg_1BA100", cWorldPainterMan_render1);
 #ifdef SKIP_ASM
 // PORT: PS2-only vector layout (16-byte aligned quads, copied with lq/sq).
 struct sQtVec4_B928 {
@@ -2826,7 +2826,7 @@ static inline sQtVec4_B928 qtDiv_B928(const sQtVec4_B928& v, float s)
  */
 // Walks a quadtree: inner nodes split the rect (lo, hi) at its midpoint into four children;
 // leaves submit the rect's outline as a 5-vertex strip at the camera's height.
-extern "C" void func_002BB928(cWorldPainterMan* ctx, sQtTree_B928* tree, sQtNode_B928* node, sQtVtx_B928* verts,
+extern "C" void cWorldPainterMan_render1(cWorldPainterMan* ctx, sQtTree_B928* tree, sQtNode_B928* node, sQtVtx_B928* verts,
                               sQtVec4_B928* lo, sQtVec4_B928* hi)
 {
     if (node->child[0] & 1) {
@@ -2851,10 +2851,10 @@ extern "C" void func_002BB928(cWorldPainterMan* ctx, sQtTree_B928* tree, sQtNode
         topEdgeMid.y = hi->y;
         topEdgeMid.z = 0.0f;
         topEdgeMid.w = 1.0f;
-        func_002BB928(ctx, tree, tree->nodes + (node->child[0] >> 1), verts, lo, &mid);
-        func_002BB928(ctx, tree, tree->nodes + (node->child[1] >> 1), verts, &leftEdgeMid, &topEdgeMid);
-        func_002BB928(ctx, tree, tree->nodes + (node->child[2] >> 1), verts, &bottomEdgeMid, &rightEdgeMid);
-        func_002BB928(ctx, tree, tree->nodes + (node->child[3] >> 1), verts, &mid, hi);
+        cWorldPainterMan_render1(ctx, tree, tree->nodes + (node->child[0] >> 1), verts, lo, &mid);
+        cWorldPainterMan_render1(ctx, tree, tree->nodes + (node->child[1] >> 1), verts, &leftEdgeMid, &topEdgeMid);
+        cWorldPainterMan_render1(ctx, tree, tree->nodes + (node->child[2] >> 1), verts, &bottomEdgeMid, &rightEdgeMid);
+        cWorldPainterMan_render1(ctx, tree, tree->nodes + (node->child[3] >> 1), verts, &mid, hi);
     } else {
         cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
         char* rider = *(char**)(*(char**)((char*)SSXApp->Game->AI + 0x40) + 0x18);
@@ -3102,72 +3102,72 @@ extern "C" void func_002BC4E0(void) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC500);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Type);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default Type, vtable slot 1 (tWPInGameData_MusicTrigger overrides it with func_002C1490).
  *
  * @return 0
  */
-extern "C" int func_002BC500(void) {
+extern "C" int tWPInGameData_Type(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC508);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Value);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default Value, vtable slot 2 (tWPInGameData_MusicTrigger overrides it with func_002C1498).
  *
  * @return 0
  */
-extern "C" int func_002BC508(void) {
+extern "C" int tWPInGameData_Value(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC510);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_MixPreset);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default MixPreset, vtable slot 3 (tWPInGameData_Mix overrides it with func_002C14A0).
  *
  * @return 0
  */
-extern "C" int func_002BC510(void) {
+extern "C" int tWPInGameData_MixPreset(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC518);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_BankID);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default BankID, vtable slot 4 (tWPInGameData_Ambience overrides it with func_002C14A8).
  *
  * @return 0
  */
-extern "C" int func_002BC518(void) {
+extern "C" int tWPInGameData_BankID(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC520);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SpeechID);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SpeechID, vtable slot 5 (tWPInGameData_Speech overrides it with func_002C14B0).
  *
  * @return 0
  */
-extern "C" int func_002BC520(void) {
+extern "C" int tWPInGameData_SpeechID(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC528);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_DrawDistance);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default DrawDistance, vtable slot 6 (tWPInGameData_Camera overrides it with
@@ -3175,91 +3175,91 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC528);
  *
  * @return 0
  */
-extern "C" int func_002BC528(void) {
+extern "C" int tWPInGameData_DrawDistance(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC530);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_FogDensity);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default FogDensity, vtable slot 7 (tWPInGameData_Fog overrides it with func_002C14C0).
  *
  * @return 0
  */
-extern "C" int func_002BC530(void) {
+extern "C" int tWPInGameData_FogDensity(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC538);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_FogNear);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default FogNear, vtable slot 8 (tWPInGameData_Fog overrides it with func_002C14C8).
  *
  * @return 0
  */
-extern "C" int func_002BC538(void) {
+extern "C" int tWPInGameData_FogNear(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC540);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_FogFar);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default FogFar, vtable slot 9 (tWPInGameData_Fog overrides it with func_002C14D0).
  *
  * @return 0
  */
-extern "C" int func_002BC540(void) {
+extern "C" int tWPInGameData_FogFar(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC548);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_FogColourR);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default FogColourR, vtable slot 10 (tWPInGameData_Fog overrides it with func_002C14D8).
  *
  * @return 0
  */
-extern "C" int func_002BC548(void) {
+extern "C" int tWPInGameData_FogColourR(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC550);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_FogColourG);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default FogColourG, vtable slot 11 (tWPInGameData_Fog overrides it with func_002C14E0).
  *
  * @return 0
  */
-extern "C" int func_002BC550(void) {
+extern "C" int tWPInGameData_FogColourG(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC558);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_FogColourB);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default FogColourB, vtable slot 12 (tWPInGameData_Fog overrides it with func_002C14E8).
  *
  * @return 0
  */
-extern "C" int func_002BC558(void) {
+extern "C" int tWPInGameData_FogColourB(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC560);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlowCutoff);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default LightGlowCutoff, vtable slot 13 (tWPInGameData_LightGlow overrides it with
@@ -3267,13 +3267,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC560);
  *
  * @return 0
  */
-extern "C" int func_002BC560(void) {
+extern "C" int tWPInGameData_LightGlowCutoff(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC568);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlowCutoffScale);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default LightGlowCutoffScale, vtable slot 14 (tWPInGameData_LightGlow overrides it with
@@ -3281,13 +3281,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC568);
  *
  * @return 0
  */
-extern "C" int func_002BC568(void) {
+extern "C" int tWPInGameData_LightGlowCutoffScale(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC570);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlowCopyIntensity);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default LightGlowCopyIntensity, vtable slot 15 (tWPInGameData_LightGlow overrides it with
@@ -3295,13 +3295,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC570);
  *
  * @return 0
  */
-extern "C" int func_002BC570(void) {
+extern "C" int tWPInGameData_LightGlowCopyIntensity(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC578);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlowSourceIntensity);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default LightGlowSourceIntensity, vtable slot 16 (tWPInGameData_LightGlow overrides it
@@ -3309,13 +3309,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC578);
  *
  * @return 0
  */
-extern "C" int func_002BC578(void) {
+extern "C" int tWPInGameData_LightGlowSourceIntensity(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC580);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlowFrameIntensity);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default LightGlowFrameIntensity, vtable slot 17 (tWPInGameData_LightGlow overrides it with
@@ -3323,13 +3323,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC580);
  *
  * @return 0
  */
-extern "C" int func_002BC580(void) {
+extern "C" int tWPInGameData_LightGlowFrameIntensity(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC588);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlowBlend2);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default LightGlowBlend2, vtable slot 18 (tWPInGameData_LightGlow overrides it with
@@ -3337,13 +3337,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC588);
  *
  * @return 0
  */
-extern "C" int func_002BC588(void) {
+extern "C" int tWPInGameData_LightGlowBlend2(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC590);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlowBlend3);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default LightGlowBlend3, vtable slot 19 (tWPInGameData_LightGlow overrides it with
@@ -3351,13 +3351,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC590);
  *
  * @return 0
  */
-extern "C" int func_002BC590(void) {
+extern "C" int tWPInGameData_LightGlowBlend3(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC598);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTintScaleR);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default ScreenTintScaleR, vtable slot 20 (tWPInGameData_ScreenTint overrides it with
@@ -3365,13 +3365,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC598);
  *
  * @return 0
  */
-extern "C" int func_002BC598(void) {
+extern "C" int tWPInGameData_ScreenTintScaleR(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC5A0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTintScaleG);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default ScreenTintScaleG, vtable slot 21 (tWPInGameData_ScreenTint overrides it with
@@ -3379,13 +3379,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC5A0);
  *
  * @return 0
  */
-extern "C" int func_002BC5A0(void) {
+extern "C" int tWPInGameData_ScreenTintScaleG(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC5A8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTintScaleB);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default ScreenTintScaleB, vtable slot 22 (tWPInGameData_ScreenTint overrides it with
@@ -3393,13 +3393,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC5A8);
  *
  * @return 0
  */
-extern "C" int func_002BC5A8(void) {
+extern "C" int tWPInGameData_ScreenTintScaleB(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC5B0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTintOffsetR);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default ScreenTintOffsetR, vtable slot 23 (tWPInGameData_ScreenTint overrides it with
@@ -3407,13 +3407,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC5B0);
  *
  * @return 0
  */
-extern "C" int func_002BC5B0(void) {
+extern "C" int tWPInGameData_ScreenTintOffsetR(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC5B8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTintOffsetG);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default ScreenTintOffsetG, vtable slot 24 (tWPInGameData_ScreenTint overrides it with
@@ -3421,13 +3421,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC5B8);
  *
  * @return 0
  */
-extern "C" int func_002BC5B8(void) {
+extern "C" int tWPInGameData_ScreenTintOffsetG(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC5C0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTintOffsetB);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default ScreenTintOffsetB, vtable slot 25 (tWPInGameData_ScreenTint overrides it with
@@ -3435,13 +3435,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC5C0);
  *
  * @return 0
  */
-extern "C" int func_002BC5C0(void) {
+extern "C" int tWPInGameData_ScreenTintOffsetB(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC5C8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SkyBoxRotation);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SkyBoxRotation, vtable slot 26 (tWPInGameData_SkyBox overrides it with
@@ -3449,13 +3449,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC5C8);
  *
  * @return 0
  */
-extern "C" int func_002BC5C8(void) {
+extern "C" int tWPInGameData_SkyBoxRotation(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC5D0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SunPitchOffset);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SunPitchOffset, vtable slot 27 (tWPInGameData_Sun overrides it with
@@ -3463,117 +3463,117 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC5D0);
  *
  * @return 0
  */
-extern "C" int func_002BC5D0(void) {
+extern "C" int tWPInGameData_SunPitchOffset(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC5D8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SunYawOffset);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SunYawOffset, vtable slot 28 (tWPInGameData_Sun overrides it with func_002C1568).
  *
  * @return 0
  */
-extern "C" int func_002BC5D8(void) {
+extern "C" int tWPInGameData_SunYawOffset(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC5E0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SunColorR);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SunColorR, vtable slot 29 (tWPInGameData_Sun overrides it with func_002C1570).
  *
  * @return 0
  */
-extern "C" int func_002BC5E0(void) {
+extern "C" int tWPInGameData_SunColorR(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC5E8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SunColorG);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SunColorG, vtable slot 30 (tWPInGameData_Sun overrides it with func_002C1578).
  *
  * @return 0
  */
-extern "C" int func_002BC5E8(void) {
+extern "C" int tWPInGameData_SunColorG(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC5F0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SunColorB);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SunColorB, vtable slot 31 (tWPInGameData_Sun overrides it with func_002C1580).
  *
  * @return 0
  */
-extern "C" int func_002BC5F0(void) {
+extern "C" int tWPInGameData_SunColorB(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC5F8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SunIntensity);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SunIntensity, vtable slot 32 (tWPInGameData_Sun overrides it with func_002C1588).
  *
  * @return 0
  */
-extern "C" int func_002BC5F8(void) {
+extern "C" int tWPInGameData_SunIntensity(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC600);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SunType);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SunType, vtable slot 33 (tWPInGameData_Sun overrides it with func_002C1590).
  *
  * @return 0
  */
-extern "C" int func_002BC600(void) {
+extern "C" int tWPInGameData_SunType(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC608);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LensIntensity);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default LensIntensity, vtable slot 34 (tWPInGameData_Sun overrides it with func_002C1598).
  *
  * @return 0
  */
-extern "C" int func_002BC608(void) {
+extern "C" int tWPInGameData_LensIntensity(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC610);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SunRadius);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SunRadius, vtable slot 35 (tWPInGameData_Sun overrides it with func_002C15A0).
  *
  * @return 0
  */
-extern "C" int func_002BC610(void) {
+extern "C" int tWPInGameData_SunRadius(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC618);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowSparkleDensity);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowSparkleDensity, vtable slot 36 (tWPInGameData_Surface overrides it with
@@ -3581,13 +3581,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC618);
  *
  * @return 0
  */
-extern "C" int func_002BC618(void) {
+extern "C" int tWPInGameData_SnowSparkleDensity(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC620);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightIrradianceName);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default LightIrradianceName, vtable slot 37 (tWPInGameData_Lighting overrides it with
@@ -3595,13 +3595,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC620);
  *
  * @return 0
  */
-extern "C" int func_002BC620(void) {
+extern "C" int tWPInGameData_LightIrradianceName(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC628);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ShadowIrradianceName);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default ShadowIrradianceName, vtable slot 38 (tWPInGameData_Lighting overrides it with
@@ -3609,13 +3609,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC628);
  *
  * @return 0
  */
-extern "C" int func_002BC628(void) {
+extern "C" int tWPInGameData_ShadowIrradianceName(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC630);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_TunnelIrradianceName);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default TunnelIrradianceName, vtable slot 39 (tWPInGameData_Lighting overrides it with
@@ -3623,13 +3623,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC630);
  *
  * @return 0
  */
-extern "C" int func_002BC630(void) {
+extern "C" int tWPInGameData_TunnelIrradianceName(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC638);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ObjectIrradianceName);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default ObjectIrradianceName, vtable slot 40 (tWPInGameData_Lighting overrides it with
@@ -3637,13 +3637,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC638);
  *
  * @return 0
  */
-extern "C" int func_002BC638(void) {
+extern "C" int tWPInGameData_ObjectIrradianceName(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC640);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_AmbientLightIntensityOffset);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default AmbientLightIntensityOffset, vtable slot 41 (tWPInGameData_Lighting overrides it
@@ -3651,13 +3651,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC640);
  *
  * @return 0
  */
-extern "C" int func_002BC640(void) {
+extern "C" int tWPInGameData_AmbientLightIntensityOffset(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC648);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_RimLightIntensityOffset);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default RimLightIntensityOffset, vtable slot 42 (tWPInGameData_Lighting overrides it with
@@ -3665,13 +3665,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC648);
  *
  * @return 0
  */
-extern "C" int func_002BC648(void) {
+extern "C" int tWPInGameData_RimLightIntensityOffset(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC650);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowIntensity);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowIntensity, vtable slot 43 (tWPInGameData_Weather overrides it with
@@ -3679,26 +3679,26 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC650);
  *
  * @return 0
  */
-extern "C" int func_002BC650(void) {
+extern "C" int tWPInGameData_SnowIntensity(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC658);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_FlakeSize);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default FlakeSize, vtable slot 44 (tWPInGameData_Weather overrides it with func_002C15E8).
  *
  * @return 0
  */
-extern "C" int func_002BC658(void) {
+extern "C" int tWPInGameData_FlakeSize(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC660);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_WindIntensity);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default WindIntensity, vtable slot 45 (tWPInGameData_Weather overrides it with
@@ -3706,13 +3706,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC660);
  *
  * @return 0
  */
-extern "C" int func_002BC660(void) {
+extern "C" int tWPInGameData_WindIntensity(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC668);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_WindRotation);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default WindRotation, vtable slot 46 (tWPInGameData_Weather overrides it with
@@ -3720,13 +3720,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC668);
  *
  * @return 0
  */
-extern "C" int func_002BC668(void) {
+extern "C" int tWPInGameData_WindRotation(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC670);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_PlayerWindIntensity);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default PlayerWindIntensity, vtable slot 47 (tWPInGameData_Weather overrides it with
@@ -3734,13 +3734,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC670);
  *
  * @return 0
  */
-extern "C" int func_002BC670(void) {
+extern "C" int tWPInGameData_PlayerWindIntensity(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC678);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Temperature);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default Temperature, vtable slot 48 (tWPInGameData_Weather overrides it with
@@ -3748,13 +3748,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC678);
  *
  * @return 0
  */
-extern "C" int func_002BC678(void) {
+extern "C" int tWPInGameData_Temperature(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC680);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowFlurries);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowFlurries, vtable slot 49 (tWPInGameData_Weather overrides it with
@@ -3762,13 +3762,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC680);
  *
  * @return 0
  */
-extern "C" int func_002BC680(void) {
+extern "C" int tWPInGameData_SnowFlurries(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC688);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowGravityMultiplier);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowGravityMultiplier, vtable slot 50 (tWPInGameData_Weather overrides it with
@@ -3776,13 +3776,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC688);
  *
  * @return 0
  */
-extern "C" int func_002BC688(void) {
+extern "C" int tWPInGameData_SnowGravityMultiplier(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC690);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowFluffItensity);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowFluffItensity, vtable slot 51 (tWPInGameData_Weather overrides it with
@@ -3790,13 +3790,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC690);
  *
  * @return 0
  */
-extern "C" int func_002BC690(void) {
+extern "C" int tWPInGameData_SnowFluffItensity(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC698);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowFluffWindIntensity);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowFluffWindIntensity, vtable slot 52 (tWPInGameData_Weather overrides it with
@@ -3804,13 +3804,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC698);
  *
  * @return 0
  */
-extern "C" int func_002BC698(void) {
+extern "C" int tWPInGameData_SnowFluffWindIntensity(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC6A0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightningChance);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default LightningChance, vtable slot 53 (tWPInGameData_Weather overrides it with
@@ -3818,13 +3818,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC6A0);
  *
  * @return 0
  */
-extern "C" int func_002BC6A0(void) {
+extern "C" int tWPInGameData_LightningChance(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC6A8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowFlakeColourA);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowFlakeColourA, vtable slot 54 (tWPInGameData_Weather overrides it with
@@ -3832,13 +3832,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC6A8);
  *
  * @return 0
  */
-extern "C" int func_002BC6A8(void) {
+extern "C" int tWPInGameData_SnowFlakeColourA(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC6B0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowFlakeColourR);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowFlakeColourR, vtable slot 55 (tWPInGameData_Weather overrides it with
@@ -3846,13 +3846,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC6B0);
  *
  * @return 0
  */
-extern "C" int func_002BC6B0(void) {
+extern "C" int tWPInGameData_SnowFlakeColourR(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC6B8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowFlakeColourG);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowFlakeColourG, vtable slot 56 (tWPInGameData_Weather overrides it with
@@ -3860,13 +3860,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC6B8);
  *
  * @return 0
  */
-extern "C" int func_002BC6B8(void) {
+extern "C" int tWPInGameData_SnowFlakeColourG(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC6C0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowFlakeColourB);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowFlakeColourB, vtable slot 57 (tWPInGameData_Weather overrides it with
@@ -3874,13 +3874,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC6C0);
  *
  * @return 0
  */
-extern "C" int func_002BC6C0(void) {
+extern "C" int tWPInGameData_SnowFlakeColourB(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC6C8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowFluffColourA);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowFluffColourA, vtable slot 58 (tWPInGameData_Weather overrides it with
@@ -3888,13 +3888,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC6C8);
  *
  * @return 0
  */
-extern "C" int func_002BC6C8(void) {
+extern "C" int tWPInGameData_SnowFluffColourA(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC6D0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowFluffColourR);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowFluffColourR, vtable slot 59 (tWPInGameData_Weather overrides it with
@@ -3902,13 +3902,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC6D0);
  *
  * @return 0
  */
-extern "C" int func_002BC6D0(void) {
+extern "C" int tWPInGameData_SnowFluffColourR(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC6D8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowFluffColourG);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowFluffColourG, vtable slot 60 (tWPInGameData_Weather overrides it with
@@ -3916,13 +3916,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC6D8);
  *
  * @return 0
  */
-extern "C" int func_002BC6D8(void) {
+extern "C" int tWPInGameData_SnowFluffColourG(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC6E0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SnowFluffColourB);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default SnowFluffColourB, vtable slot 61 (tWPInGameData_Weather overrides it with
@@ -3930,39 +3930,39 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BC6E0);
  *
  * @return 0
  */
-extern "C" int func_002BC6E0(void) {
+extern "C" int tWPInGameData_SnowFluffColourB(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC6E8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Level);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default Level, vtable slot 62 (tWPInGameData_Danger overrides it with func_002C1678).
  *
  * @return 0
  */
-extern "C" int func_002BC6E8(void) {
+extern "C" int tWPInGameData_Level(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC6F0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_PointRate);
 #ifdef SKIP_ASM
 /**
  * Returns 0: tWPInGameData's default PointRate, vtable slot 63 (tWPInGameData_Danger overrides it with func_002C1680).
  *
  * @return 0
  */
-extern "C" int func_002BC6F0(void) {
+extern "C" int tWPInGameData_PointRate(void) {
     return 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC6F8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_MusicTrigger_tWPInGameData_MusicTrigger);
 #ifdef SKIP_ASM
 extern char D_00485AF8[];
 /**
@@ -3973,7 +3973,7 @@ extern char D_00485AF8[];
  *              "tWPIGD_MusicTrigger")
  * @return @p musicTrigger
  */
-extern "C" void *func_002BC6F8(tWPInGameData_MusicTrigger* musicTrigger) {
+extern "C" void *tWPInGameData_MusicTrigger_tWPInGameData_MusicTrigger(tWPInGameData_MusicTrigger* musicTrigger) {
     musicTrigger->mVtbl = (void**)D_00485AF8;
     musicTrigger->m_wpTravelDistance = -99999.0f;
     musicTrigger->m_lastType = -1;
@@ -3985,7 +3985,7 @@ extern "C" void *func_002BC6F8(tWPInGameData_MusicTrigger* musicTrigger) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC728);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Mix_tWPInGameData_Mix);
 #ifdef SKIP_ASM
 extern char D_004858C0[];
 /**
@@ -3995,7 +3995,7 @@ extern char D_004858C0[];
  * @param mix  the object (0x10 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Mix")
  * @return @p mix
  */
-extern "C" void *func_002BC728(tWPInGameData_Mix* mix) {
+extern "C" void *tWPInGameData_Mix_tWPInGameData_Mix(tWPInGameData_Mix* mix) {
     mix->mVtbl = (void**)D_004858C0;
     mix->m_wpTravelDistance = -99999.0f;
     mix->m_lastMixPreset = -1;
@@ -4005,7 +4005,7 @@ extern "C" void *func_002BC728(tWPInGameData_Mix* mix) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC750);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Ambience_tWPInGameData_Ambience);
 #ifdef SKIP_ASM
 extern char D_00485688[];
 /**
@@ -4015,7 +4015,7 @@ extern char D_00485688[];
  * @param ambience  the object (0x10 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Ambience")
  * @return @p ambience
  */
-extern "C" void *func_002BC750(tWPInGameData_Ambience* ambience) {
+extern "C" void *tWPInGameData_Ambience_tWPInGameData_Ambience(tWPInGameData_Ambience* ambience) {
     ambience->mVtbl = (void**)D_00485688;
     ambience->m_wpTravelDistance = -99999.0f;
     ambience->m_lastBankID = -1;
@@ -4025,7 +4025,7 @@ extern "C" void *func_002BC750(tWPInGameData_Ambience* ambience) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC778);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Speech_tWPInGameData_Speech);
 #ifdef SKIP_ASM
 extern char D_00485450[];
 /**
@@ -4035,7 +4035,7 @@ extern char D_00485450[];
  * @param speech  the object (0x10 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Speech")
  * @return @p speech
  */
-extern "C" void *func_002BC778(tWPInGameData_Speech* speech) {
+extern "C" void *tWPInGameData_Speech_tWPInGameData_Speech(tWPInGameData_Speech* speech) {
     speech->mVtbl = (void**)D_00485450;
     speech->m_wpTravelDistance = -99999.0f;
     speech->m_lastSpeechID = -1;
@@ -4045,7 +4045,7 @@ extern "C" void *func_002BC778(tWPInGameData_Speech* speech) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC7A0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Camera_tWPInGameData_Camera);
 #ifdef SKIP_ASM
 extern char D_00485218[];
 /**
@@ -4055,7 +4055,7 @@ extern char D_00485218[];
  * @param camera  the object (0x10 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Camera")
  * @return @p camera
  */
-extern "C" void *func_002BC7A0(tWPInGameData_Camera* camera) {
+extern "C" void *tWPInGameData_Camera_tWPInGameData_Camera(tWPInGameData_Camera* camera) {
     camera->mVtbl = (void**)D_00485218;
     camera->m_lastDrawDistance = 30000.0f;
     camera->m_wpTravelDistance = -99999.0f;
@@ -4065,7 +4065,7 @@ extern "C" void *func_002BC7A0(tWPInGameData_Camera* camera) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC7C8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Fog_tWPInGameData_Fog);
 #ifdef SKIP_ASM
 extern char D_00484FE0[];
 /**
@@ -4076,7 +4076,7 @@ extern char D_00484FE0[];
  * @param fog  the object (0x38 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Fog")
  * @return @p fog
  */
-extern "C" void *func_002BC7C8(tWPInGameData_Fog* fog) {
+extern "C" void *tWPInGameData_Fog_tWPInGameData_Fog(tWPInGameData_Fog* fog) {
     float zero = 0.0f;
     float fogNear = 3000.0f, fogFar = 30000.0f, fogRed = 0.43f, fogGreen = 0.55f, fogBlue = 0.71f;
     fog->mVtbl = (void**)((int*)D_00484FE0);
@@ -4165,7 +4165,7 @@ extern "C" void *tWPInGameData_ScreenTint_tWPInGameData_ScreenTint(tWPInGameData
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC8E8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SkyBox_tWPInGameData_SkyBox);
 #ifdef SKIP_ASM
 extern char D_00484938[];
 /**
@@ -4175,7 +4175,7 @@ extern char D_00484938[];
  * @param skyBox  the object (0x10 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_SkyBox")
  * @return @p skyBox
  */
-extern "C" void *func_002BC8E8(tWPInGameData_SkyBox* skyBox) {
+extern "C" void *tWPInGameData_SkyBox_tWPInGameData_SkyBox(tWPInGameData_SkyBox* skyBox) {
     float zero = 0.0f;
     skyBox->mVtbl = (void**)D_00484938;
     skyBox->m_lastSkyBoxRotation = zero;
@@ -4225,7 +4225,7 @@ extern "C" void *tWPInGameData_Sun_tWPInGameData_Sun(tWPInGameData_Sun* self) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC980);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Surface_tWPInGameData_Surface);
 #ifdef SKIP_ASM
 extern char D_004844C8[];
 /**
@@ -4235,7 +4235,7 @@ extern char D_004844C8[];
  * @param surface  the object (0x10 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Surface")
  * @return @p surface
  */
-extern "C" void *func_002BC980(tWPInGameData_Surface* surface) {
+extern "C" void *tWPInGameData_Surface_tWPInGameData_Surface(tWPInGameData_Surface* surface) {
     float one = 1.0f;
     surface->mVtbl = (void**)D_004844C8;
     surface->m_lastSnowSparkleDensity = one;
@@ -4246,7 +4246,7 @@ extern "C" void *func_002BC980(tWPInGameData_Surface* surface) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BC9B0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Lighting_tWPInGameData_Lighting);
 #ifdef SKIP_ASM
 extern tWPNameField D_004A53D0_2BC9B0 __asm__("D_004A53D0");
 extern char D_00484290[];
@@ -4259,7 +4259,7 @@ extern char D_00484290[];
  * @param lighting  the object (0x58 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Lighting")
  * @return @p lighting
  */
-extern "C" void* func_002BC9B0(tWPInGameData_Lighting* lighting)
+extern "C" void* tWPInGameData_Lighting_tWPInGameData_Lighting(tWPInGameData_Lighting* lighting)
 {
     lighting->mVtbl = (void**)D_00484290;
     lighting->m_wpTravelDistance = -99999.0f;
@@ -4284,7 +4284,7 @@ extern "C" void* func_002BC9B0(tWPInGameData_Lighting* lighting)
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BCAF8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Weather_tWPInGameData_Weather);
 #ifdef SKIP_ASM
 extern char D_00484058[];
 #define F_CAF8(o) (*(float*)(self + (o)))
@@ -4297,7 +4297,7 @@ extern char D_00484058[];
  *
  * @return @p self (0xA0 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Weather")
  */
-extern "C" void* func_002BCAF8(char *self) {
+extern "C" void* tWPInGameData_Weather_tWPInGameData_Weather(char *self) {
     *(char**)(self + 4) = D_00484058;
     F_CAF8(0) = -99999.0f;
     F_CAF8(0x8) = F_CAF8(0xC) = 0.0f;
@@ -4325,7 +4325,7 @@ extern "C" void* func_002BCAF8(char *self) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BCBD0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Danger_tWPInGameData_Danger);
 #ifdef SKIP_ASM
 extern char D_00483E20[];
 /**
@@ -4335,7 +4335,7 @@ extern char D_00483E20[];
  * @param danger  the object (0x18 bytes; cWorldPainterQuery_cWorldPainterQuery allocates it with tag "tWPIGD_Danger")
  * @return @p danger
  */
-extern "C" void *func_002BCBD0(tWPInGameData_Danger* danger) {
+extern "C" void *tWPInGameData_Danger_tWPInGameData_Danger(tWPInGameData_Danger* danger) {
     float zero = 0.0f;
     danger->mVtbl = (void**)D_00483E20;
     danger->m_lastLevel = 0;
@@ -4812,102 +4812,102 @@ extern "C" void tWPInGameData_Danger_blend(tWPInGameData_Danger* self, void *rhs
  * Does nothing: slot 67 of tWPInGameData_MusicTrigger's vtable D_00485AF8, the slot the class's blend
  * (tWPInGameData_MusicTrigger_blend) calls before and after blending.
  */
-extern "C" void func_002BDA28(void) {
+extern "C" void tWPInGameData_MusicTrigger_debugBlend(void) {
 }
 
 /**
  * Does nothing: slot 67 of tWPInGameData_Ambience's vtable D_00485688, the slot the class's blend
  * (tWPInGameData_Ambience_blend) calls before and after blending.
  */
-extern "C" void func_002BDA30(void) {
+extern "C" void tWPInGameData_Ambience_debugBlend(void) {
 }
 
 /**
  * Does nothing: slot 67 of tWPInGameData_Camera's vtable D_00485218, the slot the class's blend
  * (tWPInGameData_Camera_blend) calls before and after blending.
  */
-extern "C" void func_002BDA38(void) {
+extern "C" void tWPInGameData_Camera_debugBlend(void) {
 }
 
 /**
  * Does nothing: slot 67 of tWPInGameData_Danger's vtable D_00483E20, the slot the class's blend
  * (tWPInGameData_Danger_blend) calls before and after blending.
  */
-extern "C" void func_002BDA40(void) {
+extern "C" void tWPInGameData_Danger_debugBlend(void) {
 }
 
 /**
  * Does nothing: slot 67 of tWPInGameData_Fog's vtable D_00484FE0, the slot the class's blend (tWPInGameData_Fog_blend)
  * calls before and after blending.
  */
-extern "C" void func_002BDA48(void) {
+extern "C" void tWPInGameData_Fog_debugBlend(void) {
 }
 
 /**
  * Does nothing: slot 67 of tWPInGameData_LightGlow's vtable D_00484DA8, the slot the class's blend
  * (tWPInGameData_LightGlow_blend) calls before and after blending.
  */
-extern "C" void func_002BDA50(void) {
+extern "C" void tWPInGameData_LightGlow_debugBlend(void) {
 }
 
 /**
  * Does nothing: slot 67 of tWPInGameData_Lighting's vtable D_00484290, the slot the class's blend
  * (tWPInGameData_Lighting_blend) calls before and after blending.
  */
-extern "C" void func_002BDA58(void) {
+extern "C" void tWPInGameData_Lighting_debugBlend(void) {
 }
 
 /**
  * Does nothing: slot 67 of tWPInGameData_Mix's vtable D_004858C0, the slot the class's blend (tWPInGameData_Mix_blend)
  * calls before and after blending.
  */
-extern "C" void func_002BDA60(void) {
+extern "C" void tWPInGameData_Mix_debugBlend(void) {
 }
 
 /**
  * Does nothing: slot 67 of tWPInGameData_ScreenTint's vtable D_00484B70, the slot the class's blend
  * (tWPInGameData_ScreenTint_blend) calls before and after blending.
  */
-extern "C" void func_002BDA68(void) {
+extern "C" void tWPInGameData_ScreenTint_debugBlend(void) {
 }
 
 /**
  * Does nothing: slot 67 of tWPInGameData_SkyBox's vtable D_00484938, the slot the class's blend
  * (tWPInGameData_SkyBox_blend) calls before and after blending.
  */
-extern "C" void func_002BDA70(void) {
+extern "C" void tWPInGameData_SkyBox_debugBlend(void) {
 }
 
 /**
  * Does nothing: slot 67 of tWPInGameData_Speech's vtable D_00485450, the slot the class's blend
  * (tWPInGameData_Speech_blend) calls before and after blending.
  */
-extern "C" void func_002BDA78(void) {
+extern "C" void tWPInGameData_Speech_debugBlend(void) {
 }
 
 /**
  * Does nothing: slot 67 of tWPInGameData_Sun's vtable D_00484700, the slot the class's blend (tWPInGameData_Sun_blend)
  * calls before and after blending.
  */
-extern "C" void func_002BDA80(void) {
+extern "C" void tWPInGameData_Sun_debugBlend(void) {
 }
 
 /**
  * Does nothing: slot 67 of tWPInGameData_Surface's vtable D_004844C8, the slot the class's blend
  * (tWPInGameData_Surface_blend) calls before and after blending.
  */
-extern "C" void func_002BDA88(void) {
+extern "C" void tWPInGameData_Surface_debugBlend(void) {
 }
 
 /**
  * Does nothing: slot 67 of tWPInGameData_Weather's vtable D_00484058, the slot the class's blend
  * (tWPInGameData_Weather_blend) calls before and after blending.
  */
-extern "C" void func_002BDA90(void) {
+extern "C" void tWPInGameData_Weather_debugBlend(void) {
 }
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BDA98);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_MusicTrigger_isEqual);
 #ifdef SKIP_ASM
 /**
  * Returns whether m_Type and m_Value (ints) equal the region data's two values (at +4 and +8); the m_last copies are
@@ -4919,7 +4919,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BDA98);
  * @param rhs  the region's tWPData_MusicTrigger (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int func_002BDA98(tWPInGameData_MusicTrigger* lhs, void *rhs) {
+extern "C" int tWPInGameData_MusicTrigger_isEqual(tWPInGameData_MusicTrigger* lhs, void *rhs) {
     if ((lhs->m_Type) != (*(int *)((char*)(rhs) + (4)))) {
         return 0;
     }
@@ -4928,7 +4928,7 @@ extern "C" int func_002BDA98(tWPInGameData_MusicTrigger* lhs, void *rhs) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BDAC8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Mix_isEqual);
 #ifdef SKIP_ASM
 /**
  * Returns whether m_MixPreset equals the region data's preset (at +4); the m_last copies are not compared.
@@ -4939,13 +4939,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BDAC8);
  * @param rhs  the region's tWPData_Mix (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int func_002BDAC8(tWPInGameData_Mix* lhs, void *rhs) {
+extern "C" int tWPInGameData_Mix_isEqual(tWPInGameData_Mix* lhs, void *rhs) {
     return (lhs->m_MixPreset) == (*(int *)((char*)(rhs) + (4)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BDAE0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Ambience_isEqual);
 #ifdef SKIP_ASM
 /**
  * Returns whether m_BankID equals the region data's bank id (at +4); the m_last copies are not compared.
@@ -4956,13 +4956,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BDAE0);
  * @param rhs  the region's tWPData_Ambience (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int func_002BDAE0(tWPInGameData_Ambience* lhs, void *rhs) {
+extern "C" int tWPInGameData_Ambience_isEqual(tWPInGameData_Ambience* lhs, void *rhs) {
     return (lhs->m_BankID) == (*(int *)((char*)(rhs) + (4)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BDAF8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Speech_isEqual);
 #ifdef SKIP_ASM
 /**
  * Returns whether m_SpeechID equals the region data's speech id (at +4); the m_last copies are not compared.
@@ -4973,13 +4973,13 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BDAF8);
  * @param rhs  the region's tWPData_Speech (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int func_002BDAF8(tWPInGameData_Speech* lhs, void *rhs) {
+extern "C" int tWPInGameData_Speech_isEqual(tWPInGameData_Speech* lhs, void *rhs) {
     return (lhs->m_SpeechID) == (*(int *)((char*)(rhs) + (4)));
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BDB10);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Camera_isEqual);
 #ifdef SKIP_ASM
 /**
  * Returns whether m_DrawDistance equals the region data's draw distance (at +4); the m_last copies are not compared.
@@ -4990,7 +4990,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BDB10);
  * @param rhs  the region's tWPData_Camera (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int func_002BDB10(tWPInGameData_Camera* lhs, void *rhs) {
+extern "C" int tWPInGameData_Camera_isEqual(tWPInGameData_Camera* lhs, void *rhs) {
     int var_2;
 
     var_2 = 0;
@@ -5002,7 +5002,7 @@ extern "C" int func_002BDB10(tWPInGameData_Camera* lhs, void *rhs) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BDB38);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Fog_isEqual);
 #ifdef SKIP_ASM
 /**
  * Returns whether m_FogDensity, m_FogNear, m_FogFar and m_FogColourR/G/B all equal the region data's six floats (from
@@ -5014,7 +5014,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BDB38);
  * @param rhs  the region's tWPData_Fog (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int func_002BDB38(tWPInGameData_Fog* lhs, void *rhs) {
+extern "C" int tWPInGameData_Fog_isEqual(tWPInGameData_Fog* lhs, void *rhs) {
     if (lhs->m_FogDensity != *(float*)((char*)rhs + 4)) return 0;
     if (lhs->m_FogNear != *(float*)((char*)rhs + 8)) return 0;
     if (lhs->m_FogFar != *(float*)((char*)rhs + 0xC)) return 0;
@@ -5026,7 +5026,7 @@ extern "C" int func_002BDB38(tWPInGameData_Fog* lhs, void *rhs) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BDBD0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlow_isEqual);
 #ifdef SKIP_ASM
 /**
  * Returns whether the seven current light-glow values (m_LightGlowCutoff .. m_LightGlowBlend3) all equal the region
@@ -5038,7 +5038,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BDBD0);
  * @param rhs  the region's tWPData_LightGlow (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int func_002BDBD0(tWPInGameData_LightGlow* lhs, void *rhs) {
+extern "C" int tWPInGameData_LightGlow_isEqual(tWPInGameData_LightGlow* lhs, void *rhs) {
     if (lhs->m_LightGlowCutoff != *(float*)((char*)rhs + 0x4)) return 0;
     if (lhs->m_LightGlowCutoffScale != *(float*)((char*)rhs + 0x8)) return 0;
     if (lhs->m_LightGlowCopyIntensity != *(float*)((char*)rhs + 0xC)) return 0;
@@ -5051,7 +5051,7 @@ extern "C" int func_002BDBD0(tWPInGameData_LightGlow* lhs, void *rhs) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BDC78);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTint_isEqual);
 #ifdef SKIP_ASM
 /**
  * Returns whether m_ScreenTintScaleR/G/B and m_ScreenTintOffsetR/G/B all equal the region data's six floats (from +4);
@@ -5063,7 +5063,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BDC78);
  * @param rhs  the region's tWPData_ScreenTint (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int func_002BDC78(tWPInGameData_ScreenTint* lhs, void *rhs) {
+extern "C" int tWPInGameData_ScreenTint_isEqual(tWPInGameData_ScreenTint* lhs, void *rhs) {
     if (lhs->m_ScreenTintScaleR != *(float*)((char*)rhs + 4)) return 0;
     if (lhs->m_ScreenTintScaleG != *(float*)((char*)rhs + 8)) return 0;
     if (lhs->m_ScreenTintScaleB != *(float*)((char*)rhs + 0xC)) return 0;
@@ -5075,7 +5075,7 @@ extern "C" int func_002BDC78(tWPInGameData_ScreenTint* lhs, void *rhs) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BDD10);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SkyBox_isEqual);
 #ifdef SKIP_ASM
 /**
  * Returns whether m_SkyBoxRotation equals the region data's rotation (at +4); the m_last copies are not compared.
@@ -5086,7 +5086,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BDD10);
  * @param rhs  the region's tWPData_SkyBox (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int func_002BDD10(tWPInGameData_SkyBox* lhs, void *rhs) {
+extern "C" int tWPInGameData_SkyBox_isEqual(tWPInGameData_SkyBox* lhs, void *rhs) {
     int var_2;
 
     var_2 = 0;
@@ -5098,7 +5098,7 @@ extern "C" int func_002BDD10(tWPInGameData_SkyBox* lhs, void *rhs) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BDD38);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Sun_isEqual);
 #ifdef SKIP_ASM
 /**
  * Returns whether the nine current sun values (m_SunPitchOffset .. m_SunRadius; m_SunType compared as an int) all equal
@@ -5110,7 +5110,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BDD38);
  * @param rhs  the region's tWPData_Sun (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int func_002BDD38(tWPInGameData_Sun* lhs, void *rhs) {
+extern "C" int tWPInGameData_Sun_isEqual(tWPInGameData_Sun* lhs, void *rhs) {
     if (lhs->m_SunPitchOffset != *(float*)((char*)rhs + 0x4)) return 0;
     if (lhs->m_SunYawOffset != *(float*)((char*)rhs + 0x8)) return 0;
     if (lhs->m_SunColorR != *(float*)((char*)rhs + 0xC)) return 0;
@@ -5125,7 +5125,7 @@ extern "C" int func_002BDD38(tWPInGameData_Sun* lhs, void *rhs) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BDE08);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Surface_isEqual);
 #ifdef SKIP_ASM
 /**
  * Returns whether m_SnowSparkleDensity equals the region data's sparkle density (at +4); the m_last copies are not
@@ -5137,7 +5137,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BDE08);
  * @param rhs  the region's tWPData_Surface (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int func_002BDE08(tWPInGameData_Surface* lhs, void *rhs) {
+extern "C" int tWPInGameData_Surface_isEqual(tWPInGameData_Surface* lhs, void *rhs) {
     int var_2;
 
     var_2 = 0;
@@ -5149,7 +5149,7 @@ extern "C" int func_002BDE08(tWPInGameData_Surface* lhs, void *rhs) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BDE30);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Lighting_isEqual);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_002BB100_DE30(char *, char *) __asm__("func_002BB100");
@@ -5164,7 +5164,7 @@ extern "C" int func_002BB100_DE30(char *, char *) __asm__("func_002BB100");
  * @param rhs  the region's tWPData_Lighting (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int func_002BDE30(tWPInGameData_Lighting* lhs, char *rhs) {
+extern "C" int tWPInGameData_Lighting_isEqual(tWPInGameData_Lighting* lhs, char *rhs) {
     if (func_002BB100_DE30(((char*)lhs) + 8, rhs + 4)) return 0;
     if (func_002BB100_DE30(((char*)lhs) + 0x18, rhs + 0xC)) return 0;
     if (func_002BB100_DE30(((char*)lhs) + 0x28, rhs + 0x14)) return 0;
@@ -5176,7 +5176,7 @@ extern "C" int func_002BDE30(tWPInGameData_Lighting* lhs, char *rhs) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BDEE0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Weather_isEqual);
 #ifdef SKIP_ASM
 /**
  * Returns whether all nineteen current weather values (m_SnowIntensity .. m_SnowFluffColourB) equal the region data's
@@ -5189,7 +5189,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BDEE0);
  * @return 1 if every value matches, else 0
  */
 // Environment property compare: all 19 current values against the incoming set.
-extern "C" int func_002BDEE0(tWPInGameData_Weather* lhs, void *rhs) {
+extern "C" int tWPInGameData_Weather_isEqual(tWPInGameData_Weather* lhs, void *rhs) {
     if ((lhs->m_SnowIntensity) != (*(float *)((char*)(rhs) + (0x4)))) {
         return 0;
     }
@@ -5252,7 +5252,7 @@ extern "C" int func_002BDEE0(tWPInGameData_Weather* lhs, void *rhs) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BE078);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Danger_isEqual);
 #ifdef SKIP_ASM
 /**
  * Returns whether m_Level (an int) and m_PointRate equal the region data's (at +4 and +8); the m_last copies are not
@@ -5264,7 +5264,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BE078);
  * @param rhs  the region's tWPData_Danger (its values start at +4, after tWPData's own word)
  * @return 1 if every value matches, else 0
  */
-extern "C" int func_002BE078(tWPInGameData_Danger* lhs, void *rhs) {
+extern "C" int tWPInGameData_Danger_isEqual(tWPInGameData_Danger* lhs, void *rhs) {
     if ((lhs->m_Level) != (*(int *)((char*)(rhs) + (4)))) {
         return 0;
     }
@@ -5276,7 +5276,7 @@ extern "C" int func_002BE078(tWPInGameData_Danger* lhs, void *rhs) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BE0B0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_MusicTrigger_setDefaults);
 #ifdef SKIP_ASM
 /**
  * Resets the current values to the constructor's defaults: m_Type and m_Value to -1; the m_last copies are left alone.
@@ -5286,7 +5286,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BE0B0);
  *
  * @param musicTrigger  the in-game data
  */
-extern "C" void func_002BE0B0(tWPInGameData_MusicTrigger* musicTrigger) {
+extern "C" void tWPInGameData_MusicTrigger_setDefaults(tWPInGameData_MusicTrigger* musicTrigger) {
     *(int*)&musicTrigger->m_wpTravelDistance = 0;
     musicTrigger->m_Type = -1;
     musicTrigger->m_Value = -1;
@@ -5294,7 +5294,7 @@ extern "C" void func_002BE0B0(tWPInGameData_MusicTrigger* musicTrigger) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BE0C8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Mix_setDefaults);
 #ifdef SKIP_ASM
 /**
  * Resets the current values to the constructor's defaults: m_MixPreset to -1; the m_last copies are left alone.
@@ -5304,14 +5304,14 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BE0C8);
  *
  * @param mix  the in-game data
  */
-extern "C" void func_002BE0C8(tWPInGameData_Mix* mix) {
+extern "C" void tWPInGameData_Mix_setDefaults(tWPInGameData_Mix* mix) {
     (*(int*)&mix->m_wpTravelDistance) = 0;
     (mix->m_MixPreset) = -1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BE0D8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Ambience_setDefaults);
 #ifdef SKIP_ASM
 /**
  * Resets the current values to the constructor's defaults: m_BankID to -1; the m_last copies are left alone.
@@ -5321,14 +5321,14 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BE0D8);
  *
  * @param ambience  the in-game data
  */
-extern "C" void func_002BE0D8(tWPInGameData_Ambience* ambience) {
+extern "C" void tWPInGameData_Ambience_setDefaults(tWPInGameData_Ambience* ambience) {
     (*(int*)&ambience->m_wpTravelDistance) = 0;
     (ambience->m_BankID) = -1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BE0E8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Speech_setDefaults);
 #ifdef SKIP_ASM
 /**
  * Resets the current values to the constructor's defaults: m_SpeechID to -1; the m_last copies are left alone.
@@ -5338,14 +5338,14 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BE0E8);
  *
  * @param speech  the in-game data
  */
-extern "C" void func_002BE0E8(tWPInGameData_Speech* speech) {
+extern "C" void tWPInGameData_Speech_setDefaults(tWPInGameData_Speech* speech) {
     (*(int*)&speech->m_wpTravelDistance) = 0;
     (speech->m_SpeechID) = -1;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BE0F8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Camera_setDefaults);
 #ifdef SKIP_ASM
 /**
  * Resets the current values to the constructor's defaults: m_DrawDistance to 30000.0f; the m_last copies are left
@@ -5356,14 +5356,14 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BE0F8);
  *
  * @param camera  the in-game data
  */
-extern "C" void func_002BE0F8(tWPInGameData_Camera* camera) {
+extern "C" void tWPInGameData_Camera_setDefaults(tWPInGameData_Camera* camera) {
     (*(int*)&camera->m_wpTravelDistance) = 0;
     (camera->m_DrawDistance) = 30000.0f;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BE108);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Fog_setDefaults);
 #ifdef SKIP_ASM
 /**
  * Resets the current values to the constructor's defaults: m_FogDensity to 0, m_FogNear to 3000, m_FogFar to 30000 and
@@ -5374,7 +5374,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BE108);
  *
  * @param fog  the in-game data
  */
-extern "C" void func_002BE108(tWPInGameData_Fog* fog) {
+extern "C" void tWPInGameData_Fog_setDefaults(tWPInGameData_Fog* fog) {
     (fog->m_FogNear) = 3000.0f;
     (fog->m_FogFar) = 30000.0f;
     (fog->m_FogColourR) = 0.43f;
@@ -5386,7 +5386,7 @@ extern "C" void func_002BE108(tWPInGameData_Fog* fog) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BE140);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_LightGlow_setDefaults);
 #ifdef SKIP_ASM
 /**
  * Resets the current values to the constructor's defaults: m_LightGlowCutoff, m_LightGlowCutoffScale,
@@ -5398,7 +5398,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BE140);
  *
  * @param lightGlow  the in-game data
  */
-extern "C" void func_002BE140(tWPInGameData_LightGlow* lightGlow) {
+extern "C" void tWPInGameData_LightGlow_setDefaults(tWPInGameData_LightGlow* lightGlow) {
     lightGlow->m_LightGlowCutoff = 1.0f;
     lightGlow->m_LightGlowCutoffScale = 1.0f;
     lightGlow->m_LightGlowCopyIntensity = 1.0f;
@@ -5411,7 +5411,7 @@ extern "C" void func_002BE140(tWPInGameData_LightGlow* lightGlow) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BE170);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_ScreenTint_setDefaults);
 #ifdef SKIP_ASM
 /**
  * Resets the current values to the constructor's defaults: the tint scale (R, G, B) to 1.0f and the tint offset (R, G,
@@ -5422,7 +5422,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BE170);
  *
  * @param screenTint  the in-game data
  */
-extern "C" void func_002BE170(tWPInGameData_ScreenTint* screenTint) {
+extern "C" void tWPInGameData_ScreenTint_setDefaults(tWPInGameData_ScreenTint* screenTint) {
     screenTint->m_ScreenTintScaleR = 1.0f;
     screenTint->m_ScreenTintScaleG = 1.0f;
     screenTint->m_ScreenTintScaleB = 1.0f;
@@ -5434,7 +5434,7 @@ extern "C" void func_002BE170(tWPInGameData_ScreenTint* screenTint) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BE198);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SkyBox_setDefaults);
 #ifdef SKIP_ASM
 /**
  * Resets the current values to the constructor's defaults: m_SkyBoxRotation to 0; the m_last copies are left alone.
@@ -5444,14 +5444,14 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BE198);
  *
  * @param skyBox  the in-game data
  */
-extern "C" void func_002BE198(tWPInGameData_SkyBox* skyBox) {
+extern "C" void tWPInGameData_SkyBox_setDefaults(tWPInGameData_SkyBox* skyBox) {
     *(int*)&skyBox->m_SkyBoxRotation = 0;
     *(int*)&skyBox->m_wpTravelDistance = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BE1A8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Sun_setDefaults);
 #ifdef SKIP_ASM
 /**
  * Resets the current values to the constructor's defaults: m_SunPitchOffset and m_SunYawOffset to 0, the sun colour (R,
@@ -5462,7 +5462,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BE1A8);
  *
  * @param sun  the in-game data
  */
-extern "C" void func_002BE1A8(tWPInGameData_Sun* sun) {
+extern "C" void tWPInGameData_Sun_setDefaults(tWPInGameData_Sun* sun) {
     *(int*)&sun->m_SunPitchOffset = 0;
     *(int*)&sun->m_SunYawOffset = 0;
     sun->m_SunColorR = 1.0f;
@@ -5477,7 +5477,7 @@ extern "C" void func_002BE1A8(tWPInGameData_Sun* sun) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BE1E0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Surface_setDefaults);
 #ifdef SKIP_ASM
 /**
  * Resets the current values to the constructor's defaults: m_SnowSparkleDensity to 1.0f; the m_last copies are left
@@ -5488,14 +5488,14 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BE1E0);
  *
  * @param surface  the in-game data
  */
-extern "C" void func_002BE1E0(tWPInGameData_Surface* surface) {
+extern "C" void tWPInGameData_Surface_setDefaults(tWPInGameData_Surface* surface) {
     (*(int*)&surface->m_wpTravelDistance) = 0;
     (surface->m_SnowSparkleDensity) = 1.0f;
 }
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BE1F8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Lighting_setDefaults);
 #ifdef SKIP_ASM
 extern tWPNameField D_004A53D0;
 struct sPairSet_002BE1F8
@@ -5524,7 +5524,7 @@ struct sPairSet_002BE1F8
  *
  * @param lighting  the in-game data
  */
-extern "C" void func_002BE1F8(tWPInGameData_Lighting* lighting)
+extern "C" void tWPInGameData_Lighting_setDefaults(tWPInGameData_Lighting* lighting)
 {
     (*(&lighting->m_LightIrradianceName)) = D_004A53D0;
     (*(&lighting->m_ShadowIrradianceName)) = D_004A53D0;
@@ -5537,7 +5537,7 @@ extern "C" void func_002BE1F8(tWPInGameData_Lighting* lighting)
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BE258);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Weather_setDefaults);
 #ifdef SKIP_ASM
 /**
  * Resets the current values to the constructor's defaults: m_FlakeSize 6, m_Temperature 10, m_SnowFlurries,
@@ -5549,7 +5549,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BE258);
  *
  * @param weather  the in-game data
  */
-extern "C" void func_002BE258(tWPInGameData_Weather* weather) {
+extern "C" void tWPInGameData_Weather_setDefaults(tWPInGameData_Weather* weather) {
     *(int*)&weather->m_SnowIntensity = 0;
     weather->m_FlakeSize = 6.0f;
     *(int*)&weather->m_WindIntensity = 0;
@@ -5574,7 +5574,7 @@ extern "C" void func_002BE258(tWPInGameData_Weather* weather) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BE2C8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Danger_setDefaults);
 #ifdef SKIP_ASM
 /**
  * Resets the current values to the constructor's defaults: m_Level and m_PointRate to 0; the m_last copies are left
@@ -5585,7 +5585,7 @@ INCLUDE_ASM("bx/seg_1BA100", func_002BE2C8);
  *
  * @param danger  the in-game data
  */
-extern "C" void func_002BE2C8(tWPInGameData_Danger* danger) {
+extern "C" void tWPInGameData_Danger_setDefaults(tWPInGameData_Danger* danger) {
     danger->m_Level = 0;
     *(int*)&danger->m_PointRate = 0;
     *(int*)&danger->m_wpTravelDistance = 0;
@@ -5618,18 +5618,18 @@ extern "C" void tWPInGameData_MusicTrigger_readFromReplayFrame(tWPInGameData_Mus
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BE378);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Mix_readFromReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Reads m_MixPreset and then m_wpTravelDistance (4 bytes each) back from a replay frame through the frame's virtual
  * read (slot 2 of its vtable, cReplayFramePtr_read for a cReplayFramePtr).
  *
- * Slot 65 of tWPInGameData_Mix's vtable D_004858C0; the order matches the class's writeToReplayFrame (func_002BF3E0).
+ * Slot 65 of tWPInGameData_Mix's vtable D_004858C0; the order matches the class's writeToReplayFrame (tWPInGameData_Mix_writeToReplayFrame).
  *
  * @param mix  the in-game data (passed as an address)
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void func_002BE378(int mix, void **frame) {
+extern "C" void tWPInGameData_Mix_readFromReplayFrame(int mix, void **frame) {
     void *temp_3;
     void *temp_3_2;
 
@@ -5641,19 +5641,19 @@ extern "C" void func_002BE378(int mix, void **frame) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BE3E0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Ambience_readFromReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Reads m_BankID and then m_wpTravelDistance (4 bytes each) back from a replay frame through the frame's virtual read
  * (slot 2 of its vtable, cReplayFramePtr_read for a cReplayFramePtr).
  *
  * Slot 65 of tWPInGameData_Ambience's vtable D_00485688; the order matches the class's writeToReplayFrame
- * (func_002BF448).
+ * (tWPInGameData_Ambience_writeToReplayFrame).
  *
  * @param ambience  the in-game data (passed as an address)
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void func_002BE3E0(int ambience, void **frame) {
+extern "C" void tWPInGameData_Ambience_readFromReplayFrame(int ambience, void **frame) {
     void *temp_3;
     void *temp_3_2;
 
@@ -5665,19 +5665,19 @@ extern "C" void func_002BE3E0(int ambience, void **frame) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BE448);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Speech_readFromReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Reads m_SpeechID and then m_wpTravelDistance (4 bytes each) back from a replay frame through the frame's virtual read
  * (slot 2 of its vtable, cReplayFramePtr_read for a cReplayFramePtr).
  *
  * Slot 65 of tWPInGameData_Speech's vtable D_00485450; the order matches the class's writeToReplayFrame
- * (func_002BF4B0).
+ * (tWPInGameData_Speech_writeToReplayFrame).
  *
  * @param speech  the in-game data (passed as an address)
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void func_002BE448(int speech, void **frame) {
+extern "C" void tWPInGameData_Speech_readFromReplayFrame(int speech, void **frame) {
     void *temp_3;
     void *temp_3_2;
 
@@ -5689,19 +5689,19 @@ extern "C" void func_002BE448(int speech, void **frame) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BE4B0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Camera_readFromReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Reads m_DrawDistance and then m_wpTravelDistance (4 bytes each) back from a replay frame through the frame's virtual
  * read (slot 2 of its vtable, cReplayFramePtr_read for a cReplayFramePtr).
  *
  * Slot 65 of tWPInGameData_Camera's vtable D_00485218; the order matches the class's writeToReplayFrame
- * (func_002BF518).
+ * (tWPInGameData_Camera_writeToReplayFrame).
  *
  * @param camera  the in-game data (passed as an address)
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void func_002BE4B0(int camera, void **frame) {
+extern "C" void tWPInGameData_Camera_readFromReplayFrame(int camera, void **frame) {
     void *temp_3;
     void *temp_3_2;
 
@@ -5820,19 +5820,19 @@ extern "C" void tWPInGameData_ScreenTint_readFromReplayFrame(tWPInGameData_Scree
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BE9D0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SkyBox_readFromReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Reads m_SkyBoxRotation and then m_wpTravelDistance (4 bytes each) back from a replay frame through the frame's
  * virtual read (slot 2 of its vtable, cReplayFramePtr_read for a cReplayFramePtr).
  *
  * Slot 65 of tWPInGameData_SkyBox's vtable D_00484938; the order matches the class's writeToReplayFrame
- * (func_002BFA38).
+ * (tWPInGameData_SkyBox_writeToReplayFrame).
  *
  * @param skyBox  the in-game data (passed as an address)
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void func_002BE9D0(int skyBox, void **frame) {
+extern "C" void tWPInGameData_SkyBox_readFromReplayFrame(int skyBox, void **frame) {
     void *temp_3;
     void *temp_3_2;
 
@@ -5885,19 +5885,19 @@ extern "C" void tWPInGameData_Sun_readFromReplayFrame(tWPInGameData_Sun* self, S
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BEC60);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Surface_readFromReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Reads m_SnowSparkleDensity and then m_wpTravelDistance (4 bytes each) back from a replay frame through the frame's
  * virtual read (slot 2 of its vtable, cReplayFramePtr_read for a cReplayFramePtr).
  *
  * Slot 65 of tWPInGameData_Surface's vtable D_004844C8; the order matches the class's writeToReplayFrame
- * (func_002BFCC8).
+ * (tWPInGameData_Surface_writeToReplayFrame).
  *
  * @param surface  the in-game data (passed as an address)
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void func_002BEC60(int surface, void **frame) {
+extern "C" void tWPInGameData_Surface_readFromReplayFrame(int surface, void **frame) {
     void *temp_3;
     void *temp_3_2;
 
@@ -6054,18 +6054,18 @@ extern "C" void tWPInGameData_MusicTrigger_writeToReplayFrame(tWPInGameData_Musi
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BF3E0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Mix_writeToReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Writes m_MixPreset and then m_wpTravelDistance (4 bytes each) to a replay frame through the frame's virtual write
  * (slot 1 of its vtable, cReplayFramePtr_write for a cReplayFramePtr).
  *
- * Slot 64 of tWPInGameData_Mix's vtable D_004858C0; func_002BE378 reads them back in the same order.
+ * Slot 64 of tWPInGameData_Mix's vtable D_004858C0; tWPInGameData_Mix_readFromReplayFrame reads them back in the same order.
  *
  * @param mix  the in-game data (passed as an address)
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void func_002BF3E0(int mix, void **frame) {
+extern "C" void tWPInGameData_Mix_writeToReplayFrame(int mix, void **frame) {
     void *temp_3;
     void *temp_3_2;
 
@@ -6077,18 +6077,18 @@ extern "C" void func_002BF3E0(int mix, void **frame) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BF448);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Ambience_writeToReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Writes m_BankID and then m_wpTravelDistance (4 bytes each) to a replay frame through the frame's virtual write (slot
  * 1 of its vtable, cReplayFramePtr_write for a cReplayFramePtr).
  *
- * Slot 64 of tWPInGameData_Ambience's vtable D_00485688; func_002BE3E0 reads them back in the same order.
+ * Slot 64 of tWPInGameData_Ambience's vtable D_00485688; tWPInGameData_Ambience_readFromReplayFrame reads them back in the same order.
  *
  * @param ambience  the in-game data (passed as an address)
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void func_002BF448(int ambience, void **frame) {
+extern "C" void tWPInGameData_Ambience_writeToReplayFrame(int ambience, void **frame) {
     void *temp_3;
     void *temp_3_2;
 
@@ -6100,18 +6100,18 @@ extern "C" void func_002BF448(int ambience, void **frame) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BF4B0);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Speech_writeToReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Writes m_SpeechID and then m_wpTravelDistance (4 bytes each) to a replay frame through the frame's virtual write
  * (slot 1 of its vtable, cReplayFramePtr_write for a cReplayFramePtr).
  *
- * Slot 64 of tWPInGameData_Speech's vtable D_00485450; func_002BE448 reads them back in the same order.
+ * Slot 64 of tWPInGameData_Speech's vtable D_00485450; tWPInGameData_Speech_readFromReplayFrame reads them back in the same order.
  *
  * @param speech  the in-game data (passed as an address)
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void func_002BF4B0(int speech, void **frame) {
+extern "C" void tWPInGameData_Speech_writeToReplayFrame(int speech, void **frame) {
     void *temp_3;
     void *temp_3_2;
 
@@ -6123,18 +6123,18 @@ extern "C" void func_002BF4B0(int speech, void **frame) {
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BF518);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Camera_writeToReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Writes m_DrawDistance and then m_wpTravelDistance (4 bytes each) to a replay frame through the frame's virtual write
  * (slot 1 of its vtable, cReplayFramePtr_write for a cReplayFramePtr).
  *
- * Slot 64 of tWPInGameData_Camera's vtable D_00485218; func_002BE4B0 reads them back in the same order.
+ * Slot 64 of tWPInGameData_Camera's vtable D_00485218; tWPInGameData_Camera_readFromReplayFrame reads them back in the same order.
  *
  * @param camera  the in-game data (passed as an address)
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void func_002BF518(int camera, void **frame) {
+extern "C" void tWPInGameData_Camera_writeToReplayFrame(int camera, void **frame) {
     void *temp_3;
     void *temp_3_2;
 
@@ -6253,18 +6253,18 @@ extern "C" void tWPInGameData_ScreenTint_writeToReplayFrame(tWPInGameData_Screen
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BFA38);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_SkyBox_writeToReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Writes m_SkyBoxRotation and then m_wpTravelDistance (4 bytes each) to a replay frame through the frame's virtual
  * write (slot 1 of its vtable, cReplayFramePtr_write for a cReplayFramePtr).
  *
- * Slot 64 of tWPInGameData_SkyBox's vtable D_00484938; func_002BE9D0 reads them back in the same order.
+ * Slot 64 of tWPInGameData_SkyBox's vtable D_00484938; tWPInGameData_SkyBox_readFromReplayFrame reads them back in the same order.
  *
  * @param skyBox  the in-game data (passed as an address)
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void func_002BFA38(int skyBox, void **frame) {
+extern "C" void tWPInGameData_SkyBox_writeToReplayFrame(int skyBox, void **frame) {
     void *temp_3;
     void *temp_3_2;
 
@@ -6317,18 +6317,18 @@ extern "C" void tWPInGameData_Sun_writeToReplayFrame(tWPInGameData_Sun* self, St
 #endif
 
 //100%
-INCLUDE_ASM("bx/seg_1BA100", func_002BFCC8);
+INCLUDE_ASM("bx/seg_1BA100", tWPInGameData_Surface_writeToReplayFrame);
 #ifdef SKIP_ASM
 /**
  * Writes m_SnowSparkleDensity and then m_wpTravelDistance (4 bytes each) to a replay frame through the frame's virtual
  * write (slot 1 of its vtable, cReplayFramePtr_write for a cReplayFramePtr).
  *
- * Slot 64 of tWPInGameData_Surface's vtable D_004844C8; func_002BEC60 reads them back in the same order.
+ * Slot 64 of tWPInGameData_Surface's vtable D_004844C8; tWPInGameData_Surface_readFromReplayFrame reads them back in the same order.
  *
  * @param surface  the in-game data (passed as an address)
  * @param frame  the replay frame (a cReplayFramePtr)
  */
-extern "C" void func_002BFCC8(int surface, void **frame) {
+extern "C" void tWPInGameData_Surface_writeToReplayFrame(int surface, void **frame) {
     void *temp_3;
     void *temp_3_2;
 

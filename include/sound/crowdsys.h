@@ -6,12 +6,12 @@
 // one-shot cheers (TRICK / FALL / ANTICIPATE sample lists from data/config/crowd.inf, per crowd intensity).
 // EA source d:/ssx/code/source/sound/crowdsys.cpp (preview assert strings: "gpCrowdSys", "mpCrowdInstances",
 // "mViewPort >= 0", "mCrowdObjectsInfo[ crowdObjectHandle ].pCrowdObjectPos != NULL", "mNumCrowdAmbience", ...).
-// Retail methods: sound/soundsys unit 0x2A4BA8..0x2A77F8, plus the out-of-line inline CROWD_GetData (func_002BAD18,
+// Retail methods: sound/soundsys unit 0x2A4BA8..0x2A77F8, plus the out-of-line inline CROWD_GetData (cCrowdSys_CROWD_GetData,
 // bx/seg_1BA100).
 //   cCrowdSys : cMidiSys (0x0) : cBankSys, virtual cBankManager
 // cCrowdSys non-virtual part 0x118 [R]: its ctor cCrowdSys_cCrowdSys (inchrg != 0) puts cSoundSys at this + 0x118 and
 // cBankManager at this + 0x120 (vtables D_00483818 / D_00483838 have deltas -0x118 / -0x120), stores vtable
-// D_004837F8 at 0xC (_vt$9cCrowdSys: slot 1 cBankSys's func_002BA6B0, slot 2 pure virtual) and itself in
+// D_004837F8 at 0xC (_vt$9cCrowdSys: slot 1 cBankSys's cBankSys_SFX_Play2D, slot 2 pure virtual) and itself in
 // D_004A36F8 (EA name gpCrowdSys). In cSSXAudio the next base, cMusicSys, starts at 0x118 (sound/ssxaudio.h). The struct
 // below is the NON-VIRTUAL part. The preview's cCrowdSys / cCrowdInstance offsets agree with retail (asserts checked
 // at preview 0x275AF8..0x278E0C).

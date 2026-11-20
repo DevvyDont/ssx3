@@ -467,7 +467,7 @@ extern "C" int func_00145C38(void* self, int a1);
 extern "C" void func_00145CB0(void* self, int a1, int a2);
 extern "C" void cBENewPlayerInterface_setFirstTimeOnTrack(void* self, int a1, int a2, int a3);
 extern "C" void func_00147658(void* self, int a1, int a2);
-extern "C" void func_0017AC98(void* bg, int idx);
+extern "C" void cBackgroundMan_setActiveImage(void* bg, int idx);
 extern "C" void func_00256088();
 extern "C" void func_002560B0();
 extern "C" void func_00255FA0(void* comm);
@@ -878,7 +878,7 @@ extern "C" void cDebugMenuScreen_update(sLS_B1B0* self)
         } else if (dir == 2) {
             self->f8C30 = (self->f8C30 + bgCount_B4E0((sBgMan_17ACC8*)self->bg) + 1) % (bgCount_B4E0((sBgMan_17ACC8*)self->bg) + 1) - 1;
         }
-        func_0017AC98(self->bg, self->f8C30);
+        cBackgroundMan_setActiveImage(self->bg, self->f8C30);
         break;
     case 10: {
         if (dir != 2 && dir != 3) {

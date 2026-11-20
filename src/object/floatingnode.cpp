@@ -192,7 +192,7 @@ extern "C" void cFloatingNode_restoreOverlapSystem(cFloatingNode* self)
 //100%
 INCLUDE_ASM("object/floatingnode", cFloatingNode_makeAnimMats);
 #ifdef SKIP_ASM
-extern "C" void func_0031BE50(float* s, float* c, float angle); // sincos
+extern "C" void fSinCos(float* s, float* c, float angle); // sincos
 
 struct sQuad_F120 {
     float x, y, z, w;
@@ -348,9 +348,9 @@ extern "C" void cFloatingNode_makeAnimMats(cFloatingNode* self, sMat_F120* mat, 
     rot[2] = 0.0f;
     // Rotation from the tilt angles (same construction as cMeshAnimFrame_update), translated by pos.
     float sx, cx, sy, cy, sz, cz;
-    func_0031BE50(&sx, &cx, rot[0]);
-    func_0031BE50(&sy, &cy, rot[1]);
-    func_0031BE50(&sz, &cz, rot[2]);
+    fSinCos(&sx, &cx, rot[0]);
+    fSinCos(&sy, &cy, rot[1]);
+    fSinCos(&sz, &cz, rot[2]);
     float sxsy = sx * sy;
     float cxsy = cx * sy;
     float cxsz = cx * sz;

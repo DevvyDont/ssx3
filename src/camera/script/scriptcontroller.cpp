@@ -136,7 +136,7 @@ extern "C" void cScriptCameraController_addCamera(char* self, char* cam)
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_001692D8);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptCameraController_removeCamera);
 #ifdef SKIP_ASM
 struct sScrAlgoNode {
     int key;              // 0x0
@@ -149,25 +149,25 @@ struct sScrAlgoList {
     int count;            // 0x4
 };
 
-extern "C" void func_0015CA50(sScrAlgoList* list, sScrAlgoNode* node);
+extern "C" void cCameraAlgoList_remove(sScrAlgoList* list, sScrAlgoNode* node);
 
 /**
  * Removes a script camera's algorithm from the controller.
  *
  * Only when the flag at +0x18 is set (cScriptCameraController_addCamera sets it): finds the node of AlgorithmList whose
- * algorithm is the one stored at +0x1C of @p algo, removes it with func_0015CA50, and clears the flag when the list
+ * algorithm is the one stored at +0x1C of @p algo, removes it with cCameraAlgoList_remove, and clears the flag when the list
  * is then empty.
  *
  * @param algo  the script camera object (On Tour's cScriptObjCamera)
  */
-extern "C" void func_001692D8(void* self, void* algo)
+extern "C" void cScriptCameraController_removeCamera(void* self, void* algo)
 {
     if (*(int*)((char*)self + 0x18) != 0) {
         sScrAlgoList* list = *(sScrAlgoList**)((char*)self + 0x8);
         for (sScrAlgoNode* n = list->head; n != 0; n = n->next) {
             int k = *(int*)((char*)algo + 0x1C);
             if (n->key == k) {
-                func_0015CA50(list, n);
+                cCameraAlgoList_remove(list, n);
                 break;
             }
         }
@@ -200,8 +200,8 @@ extern "C" void cScriptCameraController_addAlgorithm(void* self, void* algo)
 INCLUDE_ASM("camera/script/scriptcontroller", cScriptCameraController_update);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-// func_001694B0 returns a pointer (the unit declares it int); bind a pointer-returning alias.
-char* func_001694B0_K2(void* self) __asm__("func_001694B0__FPv");
+// cScriptAlgorithm_getScriptObj returns a pointer (the unit declares it int); bind a pointer-returning alias.
+char* cScriptAlgorithm_getScriptObj_K2(void* self) __asm__("cScriptAlgorithm_getScriptObj__FPv");
 
 class cScrCamAlgoK2 {
 public:
@@ -227,13 +227,13 @@ struct sScrAlgoNodeK2 {
  * Updates the blend weight of each script camera algorithm and runs it.
  *
  * For each node the weight is smoothstep(t) = 3t^2 - 2t^3 (capped at 1) of the time at +0x18 of the object
- * func_001694B0 returns for the algorithm; then virtual slot 5 runs the algorithm.
+ * cScriptAlgorithm_getScriptObj returns for the algorithm; then virtual slot 5 runs the algorithm.
  */
 extern "C" void cScriptCameraController_update(void* self)
 {
     sScrAlgoNodeK2* n = **(sScrAlgoNodeK2***)((char*)self + 0x8);
     while (n != 0) {
-        float progress = *(float*)(func_001694B0_K2(n->algo) + 0x18);
+        float progress = *(float*)(cScriptAlgorithm_getScriptObj_K2(n->algo) + 0x18);
         float progressSq = progress * progress;
         float smoothed = progressSq * 3.0f - progressSq * 2.0f * progress;
         n->t = progress;
@@ -317,14 +317,14 @@ void cScriptAlgorithm_setScriptObj(void* self, int val)
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_001694B0__FPv);
+INCLUDE_ASM("camera/script/scriptcontroller", cScriptAlgorithm_getScriptObj__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns a script camera algorithm's script object (+0x14, set by cScriptAlgorithm_setScriptObj__FPvi).
  *
  * @return the script object (On Tour's cScriptObjCamera*); cScriptCameraController_update reads its time at +0x18
  */
-int func_001694B0(void* self)
+int cScriptAlgorithm_getScriptObj(void* self)
 {
     return *(int*)((char*)self + 0x14);
 }
@@ -586,9 +586,9 @@ extern sM_9828 D_004FF1A0_9828 __asm__("t4mat_Identity");
 extern sV_9828 D_004FF140_9828 __asm__("t4vect_XAxis");
 extern sV_9828 D_004FF150_9828 __asm__("t4vect_YAxis");
 extern sV_9828 D_004FF160_9828 __asm__("t4vect_ZAxis");
-extern "C" void func_0031BE50(float* s, float* c, float angle);
-extern "C" sPair_9828 func_0031B748_9828(sM_9828* m) __asm__("func_0031B748");
-extern "C" sV_9828 func_00160228_9828(char* p, float a, float b) __asm__("func_00160228");
+extern "C" void fSinCos(float* s, float* c, float angle);
+extern "C" sPair_9828 tPose_tPose_9828(sM_9828* m) __asm__("tPose_tPose");
+extern "C" sV_9828 cCameraJitterer_getPositionalJitter_9828(char* p, float a, float b) __asm__("cCameraJitterer_getPositionalJitter");
 extern "C" float cCameraJitterer_getRollJitter(void* self);
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
@@ -687,7 +687,7 @@ static inline sV_9828 Add_9828(const sV_9828& a, const sV_9828& b)
 
 static inline void SinCos_9828(float* s, float* c, float angle)
 {
-    func_0031BE50(s, c, angle);
+    fSinCos(s, c, angle);
 }
 
 static inline void RotAxis_9828(sM_9828* m, const sV_9828& axis, float angle)
@@ -730,9 +730,9 @@ static inline void RotAxis_9828(sM_9828* m, const sV_9828& axis, float angle)
  * Returns the camera pose: Position plus jitter, turned by Roll, Pitch and Heading.
  *
  * Starts from t4mat_Identity translated to Position (+0x30) plus the jitterer's (+0x74) positional jitter for Heading
- * (+0x44) and Pitch (+0x48) (func_00160228, On Tour cCameraJitterer::getPositionalJitter), then rotates it about
+ * (+0x44) and Pitch (+0x48) (cCameraJitterer_getPositionalJitter, On Tour cCameraJitterer::getPositionalJitter), then rotates it about
  * t4vect_XAxis by Roll (+0x40) plus cCameraJitterer_getRollJitter, about t4vect_YAxis by -Pitch and about t4vect_ZAxis
- * by Heading, and splits the matrix into a position and a rotation quaternion with func_0031B748. The four script
+ * by Heading, and splits the matrix into a position and a rotation quaternion with tPose_tPose. The four script
  * algorithms share this body; only the jitterer offset differs.
  *
  * @param algorithm  the cScriptManualAlgorithm (this)
@@ -742,11 +742,11 @@ extern "C" sPair_9828 cScriptManualAlgorithm_getPose(char* algorithm)
 {
     sM_9828 mat;
     vu0CopyMtx_9828(&mat, &D_004FF1A0_9828);
-    vu0TransMtx_9828(&mat, Add_9828(*(sV_9828*)(algorithm + 0x30), func_00160228_9828(algorithm + 0x74, *(float*)(algorithm + 0x44), *(float*)(algorithm + 0x48))));
+    vu0TransMtx_9828(&mat, Add_9828(*(sV_9828*)(algorithm + 0x30), cCameraJitterer_getPositionalJitter_9828(algorithm + 0x74, *(float*)(algorithm + 0x44), *(float*)(algorithm + 0x48))));
     RotAxis_9828(&mat, D_004FF140_9828, *(float*)(algorithm + 0x40) + cCameraJitterer_getRollJitter(algorithm + 0x74));
     RotAxis_9828(&mat, D_004FF150_9828, -*(float*)(algorithm + 0x48));
     RotAxis_9828(&mat, D_004FF160_9828, *(float*)(algorithm + 0x44));
-    return func_0031B748_9828(&mat);
+    return tPose_tPose_9828(&mat);
 }
 #endif
 
@@ -815,7 +815,7 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptPointAlgorithm_update);
 // PORT: PS2-only VU0 inline asm; needs a C fallback off-PS2.
 float* func_0027C2A8(void* cam);
 extern "C" void func_0027C300(void* cam, void* out);
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void cCameraJitterer_updatePositionalJitter(void* self, float v);
 extern "C" void cCameraJitterer_updateRollJitter(void* self, float v);
 
@@ -940,8 +940,8 @@ extern "C" void cScriptPointAlgorithm_update(char* algorithm)
     self->Roll = self->FrameInfo.roll * 0.01745329424738884f + *(float*)(scriptObj + 0x70);
     self->Target = mtxMulVec_169DB0(baseTransform, sVec4_169DB0(self->FrameInfo.targetX, self->FrameInfo.targetY, self->FrameInfo.targetZ, 1.0f));
     float sinHead, cosHead, sinPitch, cosPitch;
-    func_0031BE50(&sinHead, &cosHead, self->Heading);
-    func_0031BE50(&sinPitch, &cosPitch, self->Pitch);
+    fSinCos(&sinHead, &cosHead, self->Heading);
+    fSinCos(&sinPitch, &cosPitch, self->Pitch);
     sVec4_169DB0 look(cosPitch * cosHead, cosPitch * sinHead, sinPitch, 0.0f);
     self->Position = Sub_169DB0(self->Target, Scale_169DB0(look, self->FrameInfo.targetDistance));
     cCameraJitterer_updatePositionalJitter(algorithm + 0x74, self->FrameInfo.jitterFocus);
@@ -969,9 +969,9 @@ extern sM_9F88 D_004FF1A0_9F88 __asm__("t4mat_Identity");
 extern sV_9F88 D_004FF140_9F88 __asm__("t4vect_XAxis");
 extern sV_9F88 D_004FF150_9F88 __asm__("t4vect_YAxis");
 extern sV_9F88 D_004FF160_9F88 __asm__("t4vect_ZAxis");
-extern "C" void func_0031BE50(float* s, float* c, float angle);
-extern "C" sPair_9F88 func_0031B748_9F88(sM_9F88* m) __asm__("func_0031B748");
-extern "C" sV_9F88 func_00160228_9F88(char* p, float a, float b) __asm__("func_00160228");
+extern "C" void fSinCos(float* s, float* c, float angle);
+extern "C" sPair_9F88 tPose_tPose_9F88(sM_9F88* m) __asm__("tPose_tPose");
+extern "C" sV_9F88 cCameraJitterer_getPositionalJitter_9F88(char* p, float a, float b) __asm__("cCameraJitterer_getPositionalJitter");
 extern "C" float cCameraJitterer_getRollJitter(void* self);
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
@@ -1070,7 +1070,7 @@ static inline sV_9F88 Add_9F88(const sV_9F88& a, const sV_9F88& b)
 
 static inline void SinCos_9F88(float* s, float* c, float angle)
 {
-    func_0031BE50(s, c, angle);
+    fSinCos(s, c, angle);
 }
 
 static inline void RotAxis_9F88(sM_9F88* m, const sV_9F88& axis, float angle)
@@ -1113,9 +1113,9 @@ static inline void RotAxis_9F88(sM_9F88* m, const sV_9F88& axis, float angle)
  * Returns the camera pose: Position plus jitter, turned by Roll, Pitch and Heading.
  *
  * Starts from t4mat_Identity translated to Position (+0x30) plus the jitterer's (+0x74) positional jitter for Heading
- * (+0x44) and Pitch (+0x48) (func_00160228, On Tour cCameraJitterer::getPositionalJitter), then rotates it about
+ * (+0x44) and Pitch (+0x48) (cCameraJitterer_getPositionalJitter, On Tour cCameraJitterer::getPositionalJitter), then rotates it about
  * t4vect_XAxis by Roll (+0x40) plus cCameraJitterer_getRollJitter, about t4vect_YAxis by -Pitch and about t4vect_ZAxis
- * by Heading, and splits the matrix into a position and a rotation quaternion with func_0031B748. The four script
+ * by Heading, and splits the matrix into a position and a rotation quaternion with tPose_tPose. The four script
  * algorithms share this body; only the jitterer offset differs.
  *
  * @param algorithm  the cScriptPointAlgorithm (this)
@@ -1125,11 +1125,11 @@ extern "C" sPair_9F88 cScriptPointAlgorithm_getPose(char* algorithm)
 {
     sM_9F88 mat;
     vu0CopyMtx_9F88(&mat, &D_004FF1A0_9F88);
-    vu0TransMtx_9F88(&mat, Add_9F88(*(sV_9F88*)(algorithm + 0x30), func_00160228_9F88(algorithm + 0x74, *(float*)(algorithm + 0x44), *(float*)(algorithm + 0x48))));
+    vu0TransMtx_9F88(&mat, Add_9F88(*(sV_9F88*)(algorithm + 0x30), cCameraJitterer_getPositionalJitter_9F88(algorithm + 0x74, *(float*)(algorithm + 0x44), *(float*)(algorithm + 0x48))));
     RotAxis_9F88(&mat, D_004FF140_9F88, *(float*)(algorithm + 0x40) + cCameraJitterer_getRollJitter(algorithm + 0x74));
     RotAxis_9F88(&mat, D_004FF150_9F88, -*(float*)(algorithm + 0x48));
     RotAxis_9F88(&mat, D_004FF160_9F88, *(float*)(algorithm + 0x44));
-    return func_0031B748_9F88(&mat);
+    return tPose_tPose_9F88(&mat);
 }
 #endif
 
@@ -1419,9 +1419,9 @@ extern sM_A868 D_004FF1A0_A868 __asm__("t4mat_Identity");
 extern sV_A868 D_004FF140_A868 __asm__("t4vect_XAxis");
 extern sV_A868 D_004FF150_A868 __asm__("t4vect_YAxis");
 extern sV_A868 D_004FF160_A868 __asm__("t4vect_ZAxis");
-extern "C" void func_0031BE50(float* s, float* c, float angle);
-extern "C" sPair_A868 func_0031B748_A868(sM_A868* m) __asm__("func_0031B748");
-extern "C" sV_A868 func_00160228_A868(char* p, float a, float b) __asm__("func_00160228");
+extern "C" void fSinCos(float* s, float* c, float angle);
+extern "C" sPair_A868 tPose_tPose_A868(sM_A868* m) __asm__("tPose_tPose");
+extern "C" sV_A868 cCameraJitterer_getPositionalJitter_A868(char* p, float a, float b) __asm__("cCameraJitterer_getPositionalJitter");
 extern "C" float cCameraJitterer_getRollJitter(void* self);
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
@@ -1520,7 +1520,7 @@ static inline sV_A868 Add_A868(const sV_A868& a, const sV_A868& b)
 
 static inline void SinCos_A868(float* s, float* c, float angle)
 {
-    func_0031BE50(s, c, angle);
+    fSinCos(s, c, angle);
 }
 
 static inline void RotAxis_A868(sM_A868* m, const sV_A868& axis, float angle)
@@ -1563,9 +1563,9 @@ static inline void RotAxis_A868(sM_A868* m, const sV_A868& axis, float angle)
  * Returns the camera pose: Position plus jitter, turned by Roll, Pitch and Heading.
  *
  * Starts from t4mat_Identity translated to Position (+0x30) plus the jitterer's (+0x70) positional jitter for Heading
- * (+0x44) and Pitch (+0x48) (func_00160228, On Tour cCameraJitterer::getPositionalJitter), then rotates it about
+ * (+0x44) and Pitch (+0x48) (cCameraJitterer_getPositionalJitter, On Tour cCameraJitterer::getPositionalJitter), then rotates it about
  * t4vect_XAxis by Roll (+0x40) plus cCameraJitterer_getRollJitter, about t4vect_YAxis by -Pitch and about t4vect_ZAxis
- * by Heading, and splits the matrix into a position and a rotation quaternion with func_0031B748. The four script
+ * by Heading, and splits the matrix into a position and a rotation quaternion with tPose_tPose. The four script
  * algorithms share this body; only the jitterer offset differs.
  *
  * @param algorithm  the cScriptTargetAlgorithm (this)
@@ -1575,11 +1575,11 @@ extern "C" sPair_A868 cScriptTargetAlgorithm_getPose(char* algorithm)
 {
     sM_A868 mat;
     vu0CopyMtx_A868(&mat, &D_004FF1A0_A868);
-    vu0TransMtx_A868(&mat, Add_A868(*(sV_A868*)(algorithm + 0x30), func_00160228_A868(algorithm + 0x70, *(float*)(algorithm + 0x44), *(float*)(algorithm + 0x48))));
+    vu0TransMtx_A868(&mat, Add_A868(*(sV_A868*)(algorithm + 0x30), cCameraJitterer_getPositionalJitter_A868(algorithm + 0x70, *(float*)(algorithm + 0x44), *(float*)(algorithm + 0x48))));
     RotAxis_A868(&mat, D_004FF140_A868, *(float*)(algorithm + 0x40) + cCameraJitterer_getRollJitter(algorithm + 0x70));
     RotAxis_A868(&mat, D_004FF150_A868, -*(float*)(algorithm + 0x48));
     RotAxis_A868(&mat, D_004FF160_A868, *(float*)(algorithm + 0x44));
-    return func_0031B748_A868(&mat);
+    return tPose_tPose_A868(&mat);
 }
 #endif
 
@@ -1620,7 +1620,7 @@ INCLUDE_ASM("camera/script/scriptcontroller", cScriptRelativeAlgorithm_snap);
 float* func_0027C6A0(void* cam);
 extern "C" char* cSSXScriptEngine_GetSubjectRider(void* self, int a1, int a2);
 extern "C" void func_0027C6F8(void* cam, void* out);
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" float func_0031C228(float x);
 extern "C" void cCameraJitterer_updatePositionalJitter(void* self, float v);
 extern "C" void cCameraJitterer_updateRollJitter(void* self, float v);
@@ -1835,8 +1835,8 @@ extern "C" void cScriptRelativeAlgorithm_snap(char* algorithm)
     char* scriptObj = *(char**)(algorithm + 0x14);
     headingAngle += *(float*)(scriptObj + 0x78);
     pitchAngle += *(float*)(scriptObj + 0x74);
-    func_0031BE50(&sinHead, &cosHead, headingAngle);
-    func_0031BE50(&sinPitch, &cosPitch, pitchAngle);
+    fSinCos(&sinHead, &cosHead, headingAngle);
+    fSinCos(&sinPitch, &cosPitch, pitchAngle);
     sVec4_16AD98 look(cosPitch * cosHead, cosPitch * sinHead, -sinPitch, 0.0f);
     self->Position = Sub_16AD98(self->Target, Scale_16AD98(look, k));
     cCameraJitterer_updatePositionalJitter(algorithm + 0x70, self->FrameInfo.jitterFocus);
@@ -2115,8 +2115,8 @@ extern "C" void cScriptRelativeAlgorithm_update(char* algorithm)
     self->Target = Add_B180(Add_B180(*rp, Scale_B180(vec_B180(rider + 0x1B0), self->FrameInfo.targetLeadDistance * rot.y)),
                          Scale_B180(vec_B180(rider + 0x1C0), self->FrameInfo.targetLeadHeight * rot.x));
     float sinHead, cosHead, sinPitch, cosPitch;
-    func_0031BE50(&sinHead, &cosHead, headingAngle);
-    func_0031BE50(&sinPitch, &cosPitch, pitchAngle);
+    fSinCos(&sinHead, &cosHead, headingAngle);
+    fSinCos(&sinPitch, &cosPitch, pitchAngle);
     sVec4_B180 look(cosPitch * cosHead, cosPitch * sinHead, -sinPitch, 0.0f);
     sVec4_B180 idealPos = Sub_B180(self->Target, Scale_B180(look, k));
     sVec4_B180 nt = Add_B180(Scale_B180(idealPos, header[5]), Scale_B180(self->Position, 1.0f - header[5]));
@@ -2158,9 +2158,9 @@ extern sM_B7B8 D_004FF1A0_B7B8 __asm__("t4mat_Identity");
 extern sV_B7B8 D_004FF140_B7B8 __asm__("t4vect_XAxis");
 extern sV_B7B8 D_004FF150_B7B8 __asm__("t4vect_YAxis");
 extern sV_B7B8 D_004FF160_B7B8 __asm__("t4vect_ZAxis");
-extern "C" void func_0031BE50(float* s, float* c, float angle);
-extern "C" sPair_B7B8 func_0031B748_B7B8(sM_B7B8* m) __asm__("func_0031B748");
-extern "C" sV_B7B8 func_00160228_B7B8(char* p, float a, float b) __asm__("func_00160228");
+extern "C" void fSinCos(float* s, float* c, float angle);
+extern "C" sPair_B7B8 tPose_tPose_B7B8(sM_B7B8* m) __asm__("tPose_tPose");
+extern "C" sV_B7B8 cCameraJitterer_getPositionalJitter_B7B8(char* p, float a, float b) __asm__("cCameraJitterer_getPositionalJitter");
 extern "C" float cCameraJitterer_getRollJitter(void* self);
 
 // PORT: PS2-only VU0 inline asm (64-byte matrix copy).
@@ -2259,7 +2259,7 @@ static inline sV_B7B8 Add_B7B8(const sV_B7B8& a, const sV_B7B8& b)
 
 static inline void SinCos_B7B8(float* s, float* c, float angle)
 {
-    func_0031BE50(s, c, angle);
+    fSinCos(s, c, angle);
 }
 
 static inline void RotAxis_B7B8(sM_B7B8* m, const sV_B7B8& axis, float angle)
@@ -2302,9 +2302,9 @@ static inline void RotAxis_B7B8(sM_B7B8* m, const sV_B7B8& axis, float angle)
  * Returns the camera pose: Position plus jitter, turned by Roll, Pitch and Heading.
  *
  * Starts from t4mat_Identity translated to Position (+0x30) plus the jitterer's (+0x70) positional jitter for Heading
- * (+0x44) and Pitch (+0x48) (func_00160228, On Tour cCameraJitterer::getPositionalJitter), then rotates it about
+ * (+0x44) and Pitch (+0x48) (cCameraJitterer_getPositionalJitter, On Tour cCameraJitterer::getPositionalJitter), then rotates it about
  * t4vect_XAxis by Roll (+0x40) plus cCameraJitterer_getRollJitter, about t4vect_YAxis by -Pitch and about t4vect_ZAxis
- * by Heading, and splits the matrix into a position and a rotation quaternion with func_0031B748. The four script
+ * by Heading, and splits the matrix into a position and a rotation quaternion with tPose_tPose. The four script
  * algorithms share this body; only the jitterer offset differs.
  *
  * @param algorithm  the cScriptRelativeAlgorithm (this)
@@ -2314,11 +2314,11 @@ extern "C" sPair_B7B8 cScriptRelativeAlgorithm_getPose(char* algorithm)
 {
     sM_B7B8 mat;
     vu0CopyMtx_B7B8(&mat, &D_004FF1A0_B7B8);
-    vu0TransMtx_B7B8(&mat, Add_B7B8(*(sV_B7B8*)(algorithm + 0x30), func_00160228_B7B8(algorithm + 0x70, *(float*)(algorithm + 0x44), *(float*)(algorithm + 0x48))));
+    vu0TransMtx_B7B8(&mat, Add_B7B8(*(sV_B7B8*)(algorithm + 0x30), cCameraJitterer_getPositionalJitter_B7B8(algorithm + 0x70, *(float*)(algorithm + 0x44), *(float*)(algorithm + 0x48))));
     RotAxis_B7B8(&mat, D_004FF140_B7B8, *(float*)(algorithm + 0x40) + cCameraJitterer_getRollJitter(algorithm + 0x70));
     RotAxis_B7B8(&mat, D_004FF150_B7B8, -*(float*)(algorithm + 0x48));
     RotAxis_B7B8(&mat, D_004FF160_B7B8, *(float*)(algorithm + 0x44));
-    return func_0031B748_B7B8(&mat);
+    return tPose_tPose_B7B8(&mat);
 }
 #endif
 
@@ -2558,14 +2558,14 @@ extern "C" void func_0016BEC0(float* dist)
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016BEE8__FPv);
+INCLUDE_ASM("camera/script/scriptcontroller", cCameraTriggerList_cCameraTriggerList__FPv);
 #ifdef SKIP_ASM
 /**
  * Constructs a camera trigger list: clears its first word (the trigger array pointer).
  *
  * @return @p self
  */
-void* func_0016BEE8(void* self)
+void* cCameraTriggerList_cCameraTriggerList(void* self)
 {
     *(int*)self = 0;
     return self;
@@ -2573,7 +2573,7 @@ void* func_0016BEE8(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/script/scriptcontroller", func_0016BEF8);
+INCLUDE_ASM("camera/script/scriptcontroller", cCameraTriggerList__cCameraTriggerList);
 #ifdef SKIP_ASM
 void operator_delete(int* ptr);
 
@@ -2582,7 +2582,7 @@ void operator_delete(int* ptr);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void func_0016BEF8(void* self, int flags)
+extern "C" void cCameraTriggerList__cCameraTriggerList(void* self, int flags)
 {
     if (flags & 1) {
         operator_delete((int*)self);

@@ -41,7 +41,7 @@ CHECK_SIZE(cSPOKEChaseAlgorithm, 0x3A0);
 
 // cSUPERPIPEChaseAlgorithm (0x3B0; On Tour 0x3A0). [R] cMemMan_alloc(0x3B0, "SUPERPIPE Chase Camera Algorithm") then
 // the ctor cSUPERPIPEChaseAlgorithm_cSUPERPIPEChaseAlgorithm(this, point1, point2) (type 0x43 = CAMERA_ALGORITHM_CHASE_SUPERPIPE = 67, vtable cSUPERPIPEChaseAlgorithm_vtbl);
-// the factory builds both points on the stack (func_00170240, func_001707B0) from the superpipe it is given.
+// the factory builds both points on the stack (cCTBoundObjLine_worldPoint1, cCTBoundObjLine_worldPoint2) from the superpipe it is given.
 // [P] the preview's _vt$24cSUPERPIPEChaseAlgorithm matches cSUPERPIPEChaseAlgorithm_vtbl. Methods: dtor cSUPERPIPEChaseAlgorithm__cSUPERPIPEChaseAlgorithm__FPv (1), snap
 // cSUPERPIPEChaseAlgorithm_snap (3), update cSUPERPIPEChaseAlgorithm_update (5), getRaceCamFinalPhaseData cSUPERPIPEChaseAlgorithm_getRaceCamFinalPhaseData (7), getRestDrop cSUPERPIPEChaseAlgorithm_getRestDrop
 // (13); non-virtual getIdealPosition cSUPERPIPEChaseAlgorithm_getIdealPosition and getIdealTargetPos cSUPERPIPEChaseAlgorithm_getIdealTargetPos (a0 = result, a1 = this).

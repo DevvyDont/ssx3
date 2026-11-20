@@ -527,8 +527,8 @@ extern "C" void cWorldRider__cWorldRider(void* self, int flags);
 extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
 extern "C" void cWipeoutMotion_updateBoardSphereTree(cWipeoutMotion* self);
 extern "C" float func_00336850_137138(void* self, void* q, void* out, int a3) __asm__("func_00336850");
-extern "C" void func_00329B40_137138(void* tree, const t4Vector* d) __asm__("func_00329B40");
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void cRiderSphereTree_ApplyOffset_137138(void* tree, const t4Vector* d) __asm__("cRiderSphereTree_ApplyOffset");
+extern "C" void fSinCos(float* s, float* c, float angle);
 float AIrandf(float lo, float hi);
 extern t4Vector D_004FF120_137138 __asm__("t4vect_Zero");
 
@@ -654,7 +654,7 @@ extern "C" void func_00137138(cWipeoutMotion* vself)
     }
     t4Vector push = vu0Scale_137138(vu0Scale_137138(hit.normal, 1.100000023841858f), d);
     vu0AddEq_137138((self->mRider)->mRootPoseOverridePos, push);
-    func_00329B40_137138(((void*)self->BoardSphereTree), &push);
+    cRiderSphereTree_ApplyOffset_137138(((void*)self->BoardSphereTree), &push);
     // The binary copies the segment back into the local before moving it (the copy is never read).
     seg = (*(sSeg_137138*)&self->BoardIntersectBox);
     vu0AddEq_137138((*(sSeg_137138*)&self->BoardIntersectBox).a, push);
@@ -679,8 +679,8 @@ extern "C" void func_00137138(cWipeoutMotion* vself)
             float pitch = AIrandf(-1.5707963705062866f, 1.5707963705062866f);
             float yaw = AIrandf(-3.1415927410125732f, 3.1415927410125732f);
             float sp, cp, sy, cy;
-            func_0031BE50(&sp, &cp, pitch);
-            func_0031BE50(&sy, &cy, yaw);
+            fSinCos(&sp, &cp, pitch);
+            fSinCos(&sy, &cy, yaw);
             float deg = AIrandf(45.0f, 180.0f);
             vu0AddEq_137138(self->BoardAngVelocity,
                             vu0Scale_137138(sVec4c_137138(cp * sy, cp * cy, sp, 0.0f), deg * 0.01745329424738884f));
@@ -724,7 +724,7 @@ struct sRadii_7550 {
 };
 extern const sRadii_7550 D_00458220;
 
-extern "C" void func_00329A90(void* tree, int n, sVec4_7550* pos, float* radii, sVec4_7550* center, float radius);
+extern "C" void cRiderSphereTree_Update(void* tree, int n, sVec4_7550* pos, float* radii, sVec4_7550* center, float radius);
 
 // PORT: PS2-only VU0 inline asm (non-volatile) (vector times scalar).
 static inline sVec4_7550 vu0Scale_7550(const sVec4_7550& v, float s)
@@ -786,7 +786,7 @@ static inline sVec4_7550 xAxis_7550(const sBone_7550* b)
  *
  * Takes the rider's mAnimModel bone mBoneBoardChild (+0x8A4) and the model's scale (+0x140), and places four sphere
  * centres along the bone's x axis at +70, +30, -30 and -70 scaled units from the bone position, with radii from
- * D_00458220. func_00329A90 then refits BoardSphereTree around them, centred on the bone with radius scale * 90.
+ * D_00458220. cRiderSphereTree_Update then refits BoardSphereTree around them, centred on the bone with radius scale * 90.
  */
 extern "C" void cWipeoutMotion_updateBoardSphereTree(cWipeoutMotion* self)
 {
@@ -801,7 +801,7 @@ extern "C" void cWipeoutMotion_updateBoardSphereTree(cWipeoutMotion* self)
     pts[1] = vu0Add_7550(bone->pos, vu0Scale_7550(boardAxis, 30.0f));
     pts[2] = vu0Sub_7550(bone->pos, vu0Scale_7550(boardAxis, 30.0f));
     pts[3] = vu0Sub_7550(bone->pos, vu0Scale_7550(boardAxis, 70.0f));
-    func_00329A90(self->BoardSphereTree, 4, pts, radii.r, &bone->pos,
+    cRiderSphereTree_Update(self->BoardSphereTree, 4, pts, radii.r, &bone->pos,
                   *(float*)(*(char**)((char*)self->mRider + 0x780) + 0x140) * 90.0f);
 }
 #endif
@@ -1645,7 +1645,7 @@ extern "C" void cWipeoutMotion_resolveGroundMotion(void* vself)
 //100%
 INCLUDE_ASM("ai/motion/wipeoutmotion", cWipeoutMotion_intersectGround);
 #ifdef SKIP_ASM
-extern "C" void* func_0032E100(void* seg, const sVec4WG& a, const sVec4WG& b, int n, float r);
+extern "C" void* cWorldLine_cWorldLine(void* seg, const sVec4WG& a, const sVec4WG& b, int n, float r);
 extern "C" float func_003342D0(void* world, void* seg, void* hit, int flags);
 
 // PORT: PS2-only VU0 inline asm (vector times scalar).
@@ -1698,7 +1698,7 @@ struct sVEntry_138960 { short delta; short index; void (*fn)(void*, void*); };
 /**
  * Probes the ground under the wiped-out rider along @p dir and records the patch it hits.
  *
- * Builds a capsule (func_0032E100, radius 0.575) from mPosition - 200 x @p dir to mPosition + 200 x @p dir and tests it
+ * Builds a capsule (cWorldLine_cWorldLine, radius 0.575) from mPosition - 200 x @p dir to mPosition + 200 x @p dir and tests it
  * against the rider's mOverlapList with mLineHint (func_003342D0). On a hit with a patch object it stores the patch's
  * resource id (+0x150) in mGroundPolyId, the hit's u/v in unk_AAC / unk_AB0 and the patch's flags (+0xA) in unk_2D4
  * (else mGroundPolyId = -1), and calls the hit object's owner's virtual slot 42 with the hit.
@@ -1712,7 +1712,7 @@ extern "C" float cWipeoutMotion_intersectGround(void* self, char* hit, sVec4WG* 
     char* rider = *(char**)((char*)self + 0x40);
     char seg[176];
     sVec4WG* pt = (sVec4WG*)(rider + 0x110);
-    func_0032E100(seg, vu0Sub_138960(*pt, vu0Scale_138960(*dir, 200.0f)), vu0Add_138960(*pt, vu0Scale_138960(*dir, 200.0f)), 2, 0.574999988079071f);
+    cWorldLine_cWorldLine(seg, vu0Sub_138960(*pt, vu0Scale_138960(*dir, 200.0f)), vu0Add_138960(*pt, vu0Scale_138960(*dir, 200.0f)), 2, 0.574999988079071f);
     char* probeRider = *(char**)((char*)self + 0x40);
     float hitDist = func_003342D0(*(void**)(probeRider + 0x860), seg, hit, *(int*)(probeRider + 0x864));
     if (hitDist >= 0.0f)

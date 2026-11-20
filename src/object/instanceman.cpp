@@ -333,7 +333,7 @@ extern "C" void cAnimFrame_getDeriv(char* self, sImV4_351660* vel, sImV4_351660*
 //100%
 INCLUDE_ASM("object/instanceman", cMeshAnimFrame_update);
 #ifdef SKIP_ASM
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 extern "C" void* cAnimFrame_update(void* self);
 
 struct sImInst_351800 {
@@ -349,7 +349,7 @@ struct sImInst_351800 {
  *
  * Calls cAnimFrame_update(self) without a time: On Tour's update(float time) passes it on, and here it reaches
  * cAnimFrame_update untouched in $f12 (a port must pass it). The matrix is the X-Y-Z Euler rotation of minus the
- * rotation values (converted to radians, func_0031BE50 sine / cosine) with the translation in row 3.
+ * rotation values (converted to radians, fSinCos sine / cosine) with the translation in row 3.
  */
 extern "C" void cMeshAnimFrame_update(sImInst_351800* self)
 {
@@ -359,9 +359,9 @@ extern "C" void cMeshAnimFrame_update(sImInst_351800* self)
     rotRad[0] = -self->rot[0] * 0.01745329424738884f;
     rotRad[1] = -self->rot[1] * 0.01745329424738884f;
     rotRad[2] = -self->rot[2] * 0.01745329424738884f;
-    func_0031BE50(&sc[0][0], &sc[0][1], rotRad[0]);
-    func_0031BE50(&sc[1][0], &sc[1][1], rotRad[1]);
-    func_0031BE50(&sc[2][0], &sc[2][1], rotRad[2]);
+    fSinCos(&sc[0][0], &sc[0][1], rotRad[0]);
+    fSinCos(&sc[1][0], &sc[1][1], rotRad[1]);
+    fSinCos(&sc[2][0], &sc[2][1], rotRad[2]);
     float sx = sc[0][0];
     float sy = sc[1][0];
     float cx = sc[0][1];
@@ -739,7 +739,7 @@ struct sImPair {
     sImV4 rot;
 };
 
-extern "C" sImPair func_0031B748(sImMtx* m);
+extern "C" sImPair tPose_tPose(sImMtx* m);
 
 struct sImInst {
     char pad_0x00[0xC];
@@ -819,7 +819,7 @@ extern "C" sImInst* func_00351B40(sImInst* self, void* a1, void* a2, sImDef* def
         }
     }
     for (int i = 0; i < skel->count; i++) {
-        sImPair p = func_0031B748(&mats[i]);
+        sImPair p = tPose_tPose(&mats[i]);
         self->rot[i] = p.rot;
         self->pos[i] = p.pos;
     }
@@ -1032,7 +1032,7 @@ extern "C" void func_00352230(void* debris)
 //100%
 INCLUDE_ASM("object/instanceman", cMeshAnimNode_update);
 #ifdef SKIP_ASM
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 extern char* cAppMan_TheAppMan;
 
 struct sV4_352500 {
@@ -1140,7 +1140,7 @@ extern "C" void cMeshAnimNode_update(sDebris_352500* self)
         char* skel = *(char**)(self->model + 0x80);
         for (int i = 0; i < *(int*)(skel + 4); i++) {
             float sinHalf, cosHalf;
-            func_0031BE50(&sinHalf, &cosHalf, self->spin[i] * 0.5f);
+            fSinCos(&sinHalf, &cosHalf, self->spin[i] * 0.5f);
             sV4_352500* quat = &self->rot[i];
             *quat = QMul_352500(*quat, sQ_352500(cosHalf, sinHalf * self->axis[i].x, sinHalf * self->axis[i].y, sinHalf * self->axis[i].z));
             NormalizeEq_352500(*quat);

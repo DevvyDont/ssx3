@@ -51,7 +51,7 @@ extern "C" void cActiveTriggerList_clearFlags(cActiveTriggerList* self)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/triggeralgorithms", func_0016C6B0);
+INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_find);
 #ifdef SKIP_ASM
 /**
  * Finds the node of an active camera-trigger list that holds a given trigger.
@@ -61,7 +61,7 @@ INCLUDE_ASM("camera/trigger/triggeralgorithms", func_0016C6B0);
  * @param key  the camera trigger to look for (On Tour tCameraTrigger*)
  * @return the node, or 0 when the trigger is not listed
  */
-extern "C" sTriggerNode* func_0016C6B0(cActiveTriggerList* self, void* key)
+extern "C" sTriggerNode* cActiveTriggerList_find(cActiveTriggerList* self, void* key)
 {
     sTriggerNode* node = self->head;
     if (node != 0) {
@@ -77,7 +77,7 @@ extern "C" sTriggerNode* func_0016C6B0(cActiveTriggerList* self, void* key)
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/triggeralgorithms", func_0016C6E0);
+INCLUDE_ASM("camera/trigger/triggeralgorithms", cActiveTriggerList_find1);
 #ifdef SKIP_ASM
 /**
  * Finds the trigger with a given id in an active camera-trigger list.
@@ -87,7 +87,7 @@ INCLUDE_ASM("camera/trigger/triggeralgorithms", func_0016C6E0);
  * @param key  the trigger id to look for (On Tour triggerID)
  * @return the trigger, or 0 when none is listed with that id
  */
-extern "C" void* func_0016C6E0(cActiveTriggerList* self, void* key)
+extern "C" void* cActiveTriggerList_find1(cActiveTriggerList* self, void* key)
 {
     sTriggerNode* node = self->head;
     if (node != 0) {
@@ -161,29 +161,29 @@ extern "C" sTriggerNode* cActiveTriggerList_remove(cActiveTriggerList* self, sTr
 #endif
 
 //100%
-INCLUDE_ASM("camera/trigger/triggeralgorithms", func_0016C800);
+INCLUDE_ASM("camera/trigger/triggeralgorithms", cCameraTriggerMan_cCameraTriggerMan);
 #ifdef SKIP_ASM
-void* func_0016BEE8(void* self);
-void* func_0016C5D0(void* self);
+void* cCameraTriggerList_cCameraTriggerList(void* self);
+void* cActiveTriggerList_cActiveTriggerList(void* self);
 extern "C" void* cCameraTriggerStack_cCameraTriggerStack(void* self);
 
 /**
  * Constructs the camera trigger manager: its trigger list, two active trigger lists and two trigger stacks.
  *
- * Runs func_0016BEE8 on the trigger list (+0x0), func_0016C5D0 on the active lists at +0x14 and +0x18 and
+ * Runs cCameraTriggerList_cCameraTriggerList on the trigger list (+0x0), cActiveTriggerList_cActiveTriggerList on the active lists at +0x14 and +0x18 and
  * cCameraTriggerStack_cCameraTriggerStack on the stacks at +0x1C and +0x3C. The unit's static initializer func_00175A20
  * calls it on gCamTriggerMan.
  *
  * @return @p self
  */
-extern "C" void* func_0016C800(void* self)
+extern "C" void* cCameraTriggerMan_cCameraTriggerMan(void* self)
 {
     char* cursor;
     int i;
-    func_0016BEE8(self);
+    cCameraTriggerList_cCameraTriggerList(self);
     cursor = (char*)self + 0x14;
     for (i = 1; i != -1; i--, cursor += 4) {
-        func_0016C5D0(cursor);
+        cActiveTriggerList_cActiveTriggerList(cursor);
     }
     cursor = (char*)self + 0x1C;
     for (i = 1; i != -1; i--, cursor += 0x20) {
@@ -198,13 +198,13 @@ INCLUDE_ASM("camera/trigger/triggeralgorithms", cCameraTriggerMan__cCameraTrigge
 #ifdef SKIP_ASM
 extern "C" void cCameraTriggerMan_purge(void* self);
 extern "C" void cActiveTriggerList__cActiveTriggerList(void* self, int flags);
-extern "C" void func_0016BEF8(void* self, int flags);
+extern "C" void cCameraTriggerList__cCameraTriggerList(void* self, int flags);
 
 /**
  * Destroys the camera trigger manager: purges it and destroys its member lists.
  *
  * Calls cCameraTriggerMan_purge, runs cActiveTriggerList__cActiveTriggerList on the two active lists (+0x14,
- * +0x18) from last to first, destroys the embedded trigger list with func_0016BEF8(self, 2) and frees the object
+ * +0x18) from last to first, destroys the embedded trigger list with cCameraTriggerList__cCameraTriggerList(self, 2) and frees the object
  * when @p flags bit 0 is set.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
@@ -219,7 +219,7 @@ extern "C" void cCameraTriggerMan__cCameraTriggerMan(void* self, int flags)
             cActiveTriggerList__cActiveTriggerList(activeList, 0);
         }
     }
-    func_0016BEF8(self, 2);
+    cCameraTriggerList__cCameraTriggerList(self, 2);
     if (flags & 1) {
         operator_delete((int*)self);
     }

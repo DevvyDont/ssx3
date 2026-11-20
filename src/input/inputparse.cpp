@@ -138,37 +138,37 @@ extern "C" tIdentifier* cInputMapParser_lookupIdentifierName(cInputMapParser* se
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00321AD0);
+INCLUDE_ASM("input/inputparse", cInputMapParser_configToRegister);
 #ifdef SKIP_ASM
 /**
  * Converts a config index into an input register number: index + 0x40.
  *
- * Registers 0x40..0x5F are the config values that func_00325260 reads through func_00325430. The index is declared as a
+ * Registers 0x40..0x5F are the config values that cInputExec_getRegister reads through cInputExec_getConfig. The index is declared as a
  * pointer but is a plain number.
  *
  * @param varIndex  the config index (On Tour config)
  * @return the register number
  */
-extern "C" void* func_00321AD0(void* self, void* varIndex)
+extern "C" void* cInputMapParser_configToRegister(void* self, void* varIndex)
 {
     return (char*)varIndex + 0x40;
 }
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00321AD8);
+INCLUDE_ASM("input/inputparse", cInputMapParser_buttonToRegister);
 #ifdef SKIP_ASM
 /**
  * Converts a button and button modifier into an input register number: 0x60 + button x 6 + modifier.
  *
- * func_00325260 decodes these registers back into (button, modifier) for func_003252F8; the 6 is On Tour's
+ * cInputExec_getRegister decodes these registers back into (button, modifier) for cInputExec_getButton; the 6 is On Tour's
  * kButtonModifier_Num.
  *
  * @param inputIndex  the button index (On Tour button)
  * @param modifier  the button modifier, 0..5 (On Tour eButtonModifiers)
  * @return the register number
  */
-extern "C" int func_00321AD8(void* self, int inputIndex, int modifier)
+extern "C" int cInputMapParser_buttonToRegister(void* self, int inputIndex, int modifier)
 {
     return inputIndex * 6 + modifier + 0x60;
 }
@@ -675,7 +675,7 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_parseExpression);
 extern "C" void cInputMapParser_readToken(cInputMapParser* self);
 extern "C" void cInputMapParser_error(void* self, const char* fmt, ...);
 extern "C" void cInputMapParser_freeParseNode(void* self, void* node);
-extern "C" void* func_003215F8(void* self);
+extern "C" void* cInputMapParser_newParseNode(void* self);
 extern "C" void* cInputMapParser_parseOr(cInputMapParser* self);
 extern char D_0048DFA8[];
 
@@ -730,7 +730,7 @@ extern "C" void* cInputMapParser_parseExpression(cInputMapParser* self)
         cInputMapParser_freeParseNode(self, thenExpr);
         return elseExpr;
     }
-    sExprNode_00323268* n = (sExprNode_00323268*)func_003215F8(self);
+    sExprNode_00323268* n = (sExprNode_00323268*)cInputMapParser_newParseNode(self);
     n->type = 5;
     n->cond = cond;
     n->a = thenExpr;
@@ -744,7 +744,7 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_parseOr);
 #ifdef SKIP_ASM
 extern "C" void cInputMapParser_readToken(cInputMapParser* self);
 extern "C" void cInputMapParser_freeParseNode(void* self, void* node);
-extern "C" void* func_003215F8(void* self);
+extern "C" void* cInputMapParser_newParseNode(void* self);
 extern "C" void* cInputMapParser_parseAnd(cInputMapParser* self);
 
 struct sOrNode_003233B8 {
@@ -760,7 +760,7 @@ struct sOrNode_003233B8 {
  * Parses an OR expression: one or more AND expressions joined by the `||` token (token 12).
  *
  * Folds constants (node type 4): a true constant operand turns the result into the constant 1.0 and a false one
- * is dropped. Other operands are joined into type-6 OR nodes taken from the node pool (func_003215F8). If an
+ * is dropped. Other operands are joined into type-6 OR nodes taken from the node pool (cInputMapParser_newParseNode). If an
  * operand fails to parse, the nodes built so far are freed.
  *
  * @return the expression's parse node, or 0 on a parse error
@@ -798,7 +798,7 @@ extern "C" void* cInputMapParser_parseOr(cInputMapParser* self)
             cInputMapParser_freeParseNode(self, left);
             left = right;
         } else {
-            sOrNode_003233B8* n = (sOrNode_003233B8*)func_003215F8(self);
+            sOrNode_003233B8* n = (sOrNode_003233B8*)cInputMapParser_newParseNode(self);
             n->a = left;
             n->b = right;
             n->type = 6;
@@ -814,7 +814,7 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_parseAnd);
 #ifdef SKIP_ASM
 extern "C" void cInputMapParser_readToken(cInputMapParser* self);
 extern "C" void cInputMapParser_freeParseNode(void* self, void* node);
-extern "C" void* func_003215F8(void* self);
+extern "C" void* cInputMapParser_newParseNode(void* self);
 extern "C" void* cInputMapParser_parseCompare(cInputMapParser* self);
 
 struct sAndNode_00323540 {
@@ -864,7 +864,7 @@ extern "C" void* cInputMapParser_parseAnd(cInputMapParser* self)
             cInputMapParser_freeParseNode(self, left);
             left = right;
         } else {
-            sAndNode_00323540* n = (sAndNode_00323540*)func_003215F8(self);
+            sAndNode_00323540* n = (sAndNode_00323540*)cInputMapParser_newParseNode(self);
             n->a = left;
             n->b = right;
             n->type = 7;
@@ -955,7 +955,7 @@ extern "C" void* cInputMapParser_parseCompare(cInputMapParser* self)
             }
             cInputMapParser_freeParseNode(self, right);
         } else {
-            sCmpNode_003236D8* n = (sCmpNode_003236D8*)func_003215F8(self);
+            sCmpNode_003236D8* n = (sCmpNode_003236D8*)cInputMapParser_newParseNode(self);
             n->a = left;
             n->type = op;
             n->b = right;
@@ -970,7 +970,7 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_parseSum);
 #ifdef SKIP_ASM
 extern "C" void cInputMapParser_readToken(cInputMapParser* self);
 extern "C" void cInputMapParser_freeParseNode(void* self, void* node);
-extern "C" void* func_003215F8(void* self);
+extern "C" void* cInputMapParser_newParseNode(void* self);
 extern "C" void* cInputMapParser_parseProduct(cInputMapParser* self);
 
 struct sAddNode_00323900 {
@@ -1033,14 +1033,14 @@ extern "C" void* cInputMapParser_parseSum(cInputMapParser* self)
                 if (op == 0xF) {
                     right->value = -right->value;
                 }
-                sAddNode_00323900* n = (sAddNode_00323900*)func_003215F8(self);
+                sAddNode_00323900* n = (sAddNode_00323900*)cInputMapParser_newParseNode(self);
                 n->a = left;
                 n->type = 0xE;
                 n->b = right;
                 left = n;
             }
         } else {
-            sAddNode_00323900* n = (sAddNode_00323900*)func_003215F8(self);
+            sAddNode_00323900* n = (sAddNode_00323900*)cInputMapParser_newParseNode(self);
             n->a = left;
             n->type = op;
             n->b = right;
@@ -1055,7 +1055,7 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_parseProduct);
 #ifdef SKIP_ASM
 extern "C" void cInputMapParser_readToken(cInputMapParser* self);
 extern "C" void cInputMapParser_freeParseNode(void* self, void* node);
-extern "C" void* func_003215F8(void* self);
+extern "C" void* cInputMapParser_newParseNode(void* self);
 extern "C" void* cInputMapParser_parseTerm(cInputMapParser* self);
 
 struct sMulNode_00323A68 {
@@ -1118,14 +1118,14 @@ extern "C" void* cInputMapParser_parseProduct(cInputMapParser* self)
                 if (op == 17) {
                     right->value = 1.0f / right->value;
                 }
-                sMulNode_00323A68* n = (sMulNode_00323A68*)func_003215F8(self);
+                sMulNode_00323A68* n = (sMulNode_00323A68*)cInputMapParser_newParseNode(self);
                 n->a = left;
                 n->type = 0x10;
                 n->b = right;
                 left = n;
             }
         } else {
-            sMulNode_00323A68* n = (sMulNode_00323A68*)func_003215F8(self);
+            sMulNode_00323A68* n = (sMulNode_00323A68*)cInputMapParser_newParseNode(self);
             n->a = left;
             n->type = op;
             n->b = right;
@@ -1201,7 +1201,7 @@ again:
                 }
                 cInputMapParser_readToken(self);
             }
-            node = (sTermNode_3BD8*)func_003215F8(self);
+            node = (sTermNode_3BD8*)cInputMapParser_newParseNode(self);
             node->type = 2;
             node->index = input;
             node->b = mod;
@@ -1210,7 +1210,7 @@ again:
         cfg = cInputMapParser_lookupConfigName(self, name);
         if (cfg >= 0) {
             cInputMapParser_readToken(self);
-            node = (sTermNode_3BD8*)func_003215F8(self);
+            node = (sTermNode_3BD8*)cInputMapParser_newParseNode(self);
             node->type = 3;
             node->index = cfg;
             return node;
@@ -1239,12 +1239,12 @@ again:
             }
             type = ((sTermNode_3BD8*)identifier->Expression)->type;
             if (type == 4) {
-                node = (sTermNode_3BD8*)func_003215F8(self);
+                node = (sTermNode_3BD8*)cInputMapParser_newParseNode(self);
                 node->type = type;
                 node->value = ((sTermNode_3BD8*)identifier->Expression)->value;
                 return node;
             }
-            node = (sTermNode_3BD8*)func_003215F8(self);
+            node = (sTermNode_3BD8*)cInputMapParser_newParseNode(self);
             node->type = 1;
             node->a = identifier;
             node->b = mod2;
@@ -1253,7 +1253,7 @@ again:
         cInputMapParser_error(self, str_Unexpected_identifier_pct_s, name);
         return 0;
     case 11:
-        node = (sTermNode_3BD8*)func_003215F8(self);
+        node = (sTermNode_3BD8*)cInputMapParser_newParseNode(self);
         node->type = 4;
         node->value = self->TokenValue;
         cInputMapParser_readToken(self);
@@ -1270,7 +1270,7 @@ again:
             operand->value = -operand->value;
             return operand;
         }
-        node = (sTermNode_3BD8*)func_003215F8(self);
+        node = (sTermNode_3BD8*)cInputMapParser_newParseNode(self);
         node->type = 18;
         node->a = operand;
         return node;
@@ -1283,7 +1283,7 @@ again:
             operand->value = operand->value == 0.0f ? 1.0f : 0.0f;
             return operand;
         }
-        node = (sTermNode_3BD8*)func_003215F8(self);
+        node = (sTermNode_3BD8*)cInputMapParser_newParseNode(self);
         node->type = 19;
         node->a = operand;
         return node;
@@ -1352,7 +1352,7 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_parseBinaryFunc);
 extern "C" void cInputMapParser_readToken(cInputMapParser* self);
 extern "C" void* cInputMapParser_parseExpression(cInputMapParser* self);
 extern "C" void cInputMapParser_error(void* self, const char* fmt, ...);
-extern "C" void* func_003215F8(void* self);
+extern "C" void* cInputMapParser_newParseNode(void* self);
 extern "C" void cInputMapParser_freeParseNode(void* self, void* node);
 extern "C" float func_0031C228(float x);
 extern "C" float func_0040DA10(float x);
@@ -1452,7 +1452,7 @@ extern "C" void* cInputMapParser_parseBinaryFunc(cInputMapParser* self, int op)
         cInputMapParser_freeParseNode(self, secondArg);
         return firstArg;
     }
-    sBinNode_4138* n = (sBinNode_4138*)func_003215F8(self);
+    sBinNode_4138* n = (sBinNode_4138*)cInputMapParser_newParseNode(self);
     n->type = op;
     n->a = firstArg;
     n->b = secondArg;
@@ -1464,8 +1464,8 @@ extern "C" void* cInputMapParser_parseBinaryFunc(cInputMapParser* self, int op)
 INCLUDE_ASM("input/inputparse", cInputMapParser_parseUnaryFunc);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" float func_0031BF60(float x);
-extern "C" float func_0031C040(float x);
+extern "C" float fSin(float x);
+extern "C" float fCos(float x);
 
 struct sUnNode_43A0 {
     int type;
@@ -1550,10 +1550,10 @@ extern "C" void* cInputMapParser_parseUnaryFunc(cInputMapParser* self, int op)
             operand->value = func_0031C228(operand->value);
             break;
         case 25:
-            operand->value = func_0031BF60(operand->value);
+            operand->value = fSin(operand->value);
             break;
         case 26:
-            operand->value = func_0031C040(operand->value);
+            operand->value = fCos(operand->value);
             break;
         case 27:
             operand->value = func_0040D758(operand->value);
@@ -1581,7 +1581,7 @@ extern "C" void* cInputMapParser_parseUnaryFunc(cInputMapParser* self, int op)
         }
         return operand;
     }
-    sUnNode_43A0* n = (sUnNode_43A0*)func_003215F8(self);
+    sUnNode_43A0* n = (sUnNode_43A0*)cInputMapParser_newParseNode(self);
     n->type = op;
     n->a = operand;
     return n;
@@ -1637,8 +1637,8 @@ INCLUDE_ASM("input/inputparse", cInputMapParser_compileParseNode);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cInputMapParser_error(void* self, const char* fmt, ...);
-extern "C" int func_00321AD0_i(void* self, void* var) __asm__("func_00321AD0");
-extern "C" int func_00321AD8(void* self, int a1, int a2);
+extern "C" int cInputMapParser_configToRegister_i(void* self, void* var) __asm__("cInputMapParser_configToRegister");
+extern "C" int cInputMapParser_buttonToRegister(void* self, int a1, int a2);
 extern "C" int cInputMapParser_compileBinaryNode_K(cInputMapParser* self, void* node, int* dst, void* code, int cap, int op, int a6) __asm__("cInputMapParser_compileBinaryNode");
 extern "C" int cInputMapParser_compileUnaryNode_K(cInputMapParser* self, void* node, int* dst, void* code, int cap, int op, int a6) __asm__("cInputMapParser_compileUnaryNode");
 extern char str_opcode_buffer_overflow[];
@@ -1720,7 +1720,7 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* vno
     case 1:
         return cInputMapParser_compileParseNode(self, ((sVar_324678*)node->a)->expr, dst, code, cap, node->b != 5 ? node->b : defaultModifier);
     case 2: {
-        int idx = func_00321AD8(self, node->index, node->b == 5 ? defaultModifier : node->b);
+        int idx = cInputMapParser_buttonToRegister(self, node->index, node->b == 5 ? defaultModifier : node->b);
         if (*dst == -1) {
             *dst = idx;
             return 0;
@@ -1737,7 +1737,7 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* vno
     }
     case 3:
         if (*dst == -1) {
-            *dst = func_00321AD0_i(self, node->a);
+            *dst = cInputMapParser_configToRegister_i(self, node->a);
             return 0;
         }
         if (cap <= 0) {
@@ -1746,7 +1746,7 @@ extern "C" int cInputMapParser_compileParseNode(cInputMapParser* self, void* vno
         }
         code->r.op = 1;
         code->r.dst = *dst;
-        code->r.src = func_00321AD0_i(self, node->a);
+        code->r.src = cInputMapParser_configToRegister_i(self, node->a);
         code->r.arg = 0;
         return 1;
     case 5: {
@@ -1957,17 +1957,17 @@ extern "C" int cInputMapParser_compileUnaryNode(cInputMapParser* self, void* nod
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00325250__FPv);
+INCLUDE_ASM("input/inputparse", cInputExec_cInputExec__FPv);
 #ifdef SKIP_ASM
 /**
  * Constructs an input map evaluator: sets its default button modifier (+0x0) to 0.
  *
  * cInputMap_getValue, cInputMap_getState and their modifier overloads build a 0x190-byte evaluator on the stack with it
- * before running func_00325450.
+ * before running cInputExec_execute.
  *
  * @return @p self
  */
-void* func_00325250(void* self)
+void* cInputExec_cInputExec(void* self)
 {
     *(int*)self = 0;
     return self;
@@ -1975,42 +1975,42 @@ void* func_00325250(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00325260);
+INCLUDE_ASM("input/inputparse", cInputExec_getRegister);
 #ifdef SKIP_ASM
 struct sInputParse_325260 {
     int pad[2];
     float v[0x40];
 };
-extern "C" float func_003252F8(void* self, int idx, int sel);
-extern "C" float func_00325430(void* self, int a1);
+extern "C" float cInputExec_getButton(void* self, int idx, int sel);
+extern "C" float cInputExec_getConfig(void* self, int a1);
 
 /**
  * Reads an input register: a temporary, a config value or a button.
  *
- * Registers 0..0x3F are the temporaries (+0x8), 0x40..0x5F the config values (func_00325430) and 0x60.. buttons: id -
- * 0x60 is split into button = n / 6 and modifier = n % 6 for func_003252F8. Numbers from 0x60 + 924 up read as 0.
+ * Registers 0..0x3F are the temporaries (+0x8), 0x40..0x5F the config values (cInputExec_getConfig) and 0x60.. buttons: id -
+ * 0x60 is split into button = n / 6 and modifier = n % 6 for cInputExec_getButton. Numbers from 0x60 + 924 up read as 0.
  *
  * @param id  the register number
  * @return the register's value
  */
-extern "C" float func_00325260(sInputParse_325260* self, unsigned int id)
+extern "C" float cInputExec_getRegister(sInputParse_325260* self, unsigned int id)
 {
     if (id < 0x40) {
         return self->v[id];
     }
     if (id - 0x40 < 0x20) {
-        return func_00325430(self, id - 0x40);
+        return cInputExec_getConfig(self, id - 0x40);
     }
     id -= 0x60;
     if (id < 924) {
-        return func_003252F8(self, (int)id / 6, (int)id % 6);
+        return cInputExec_getButton(self, (int)id / 6, (int)id % 6);
     }
     return 0.0f;
 }
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_003252E8);
+INCLUDE_ASM("input/inputparse", cInputExec_getTempReg);
 #ifdef SKIP_ASM
 struct sInputParse_003252E8 {
     int pad[2];
@@ -2025,14 +2025,14 @@ struct sInputParse_003252E8 {
  * @param i  the temporary register index
  * @return the register's address
  */
-extern "C" void* func_003252E8(void* self, int i)
+extern "C" void* cInputExec_getTempReg(void* self, int i)
 {
     return &((sInputParse_003252E8*)self)->a[i];
 }
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_003252F8);
+INCLUDE_ASM("input/inputparse", cInputExec_getButton);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct sInputEntry3252F8 {
@@ -2086,8 +2086,8 @@ static inline unsigned int GetD3252F8(sInputList3252F8* l, int idx)
     return 0;
 }
 
-// PORT: the unit declares func_003252F8 as (void*, int, int); the definition takes an unsigned kind.
-float func_003252F8_impl(sInputParse3252F8* self, int idx, unsigned int kind) __asm__("func_003252F8");
+// PORT: the unit declares cInputExec_getButton as (void*, int, int); the definition takes an unsigned kind.
+float cInputExec_getButton_impl(sInputParse3252F8* self, int idx, unsigned int kind) __asm__("cInputExec_getButton");
 
 /**
  * Reads one button of the pad being evaluated, as its analogue value or as one of its state flags.
@@ -2101,7 +2101,7 @@ float func_003252F8_impl(sInputParse3252F8* self, int idx, unsigned int kind) __
  * @param kind  the button modifier, 0..5
  * @return the value
  */
-float func_003252F8_impl(sInputParse3252F8* self, int idx, unsigned int kind)
+float cInputExec_getButton_impl(sInputParse3252F8* self, int idx, unsigned int kind)
 {
     switch (kind) {
     case 0:
@@ -2118,24 +2118,24 @@ float func_003252F8_impl(sInputParse3252F8* self, int idx, unsigned int kind)
     case 4:
         return (float)GetD3252F8(self->list, idx);
     case 5:
-        return func_003252F8_impl(self, idx, self->defKind);
+        return cInputExec_getButton_impl(self, idx, self->defKind);
     }
     return 0.0f;
 }
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00325430);
+INCLUDE_ASM("input/inputparse", cInputExec_getConfig);
 #ifdef SKIP_ASM
 /**
  * Returns one of an input map evaluator's config values; config 0 always reads 0.
  *
- * The values are floats from +0x108. func_00321010 and func_00321188 fill configs 1..8.
+ * The values are floats from +0x108. cInputMap_getValue1 and cInputMap_getState1 fill configs 1..8.
  *
  * @param varIndex  the config index
  * @return the value, or 0.0 for config 0
  */
-extern "C" float func_00325430(void* self, int varIndex)
+extern "C" float cInputExec_getConfig(void* self, int varIndex)
 {
     if (varIndex == 0) {
         return 0.0f;
@@ -2146,7 +2146,7 @@ extern "C" float func_00325430(void* self, int varIndex)
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00325450);
+INCLUDE_ASM("input/inputparse", cInputExec_execute);
 #ifdef SKIP_ASM
 struct sInputVM_325450 {
     int defKind;        // 0x0
@@ -2154,8 +2154,8 @@ struct sInputVM_325450 {
     float regs[0x40];   // 0x8
 };
 
-// PORT: func_00325260 is declared with its own self struct earlier in the unit.
-extern "C" float func_00325260_vm(sInputVM_325450* self, unsigned int id) __asm__("func_00325260");
+// PORT: cInputExec_getRegister is declared with its own self struct earlier in the unit.
+extern "C" float cInputExec_getRegister_vm(sInputVM_325450* self, unsigned int id) __asm__("cInputExec_getRegister");
 
 /**
  * Runs a compiled input map statement against a controller pad and returns its result.
@@ -2165,7 +2165,7 @@ extern "C" float func_00325260_vm(sInputVM_325450* self, unsigned int id) __asm_
  * (relative jumps), 4 Or, 5 And, 6..11 the comparisons (>, >=, <, <=, ==, !=) giving 1.0 or 0.0, 12..15 + - x /, 16
  * Max, 17 Min, 18 Pow (computed as exp(log(x) x y), so a negative base gives NaN), 19 Atan2, 20 Atan, 21 Sin, 22 Cos,
  * 23 Exp, 24 Log, 25 Floor, 26 Ceil, 27 Abs, 28 Sqrt, 29 MinRadian (wraps an angle into [-pi, pi)), 30 Neg and 31 Not.
- * Operands are read with func_00325260 and results written through func_003252E8. Unknown op-codes are skipped. The
+ * Operands are read with cInputExec_getRegister and results written through cInputExec_getTempReg. Unknown op-codes are skipped. The
  * encoder is cInputMapParser_compileParseNode.
  *
  * @param list  the controller pad to read (On Tour cInputPad*)
@@ -2173,7 +2173,7 @@ extern "C" float func_00325260_vm(sInputVM_325450* self, unsigned int id) __asm_
  * @return the value of register 0 when End is reached
  */
 // Runs one compiled input expression (see cInputMapParser_compileParseNode for the encoder); returns register 0.
-extern "C" float func_00325450(sInputVM_325450* self, void* list, sInsn_324678* code)
+extern "C" float cInputExec_execute(sInputVM_325450* self, void* list, sInsn_324678* code)
 {
     int pc = 0;
     int done = 0;
@@ -2183,17 +2183,17 @@ extern "C" float func_00325450(sInputVM_325450* self, void* list, sInsn_324678* 
         pc++;
         switch (ins->r.op) {
         case 0: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
             *destSlot = code[pc++].f;
             break;
         }
         case 1: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            *destSlot = func_00325260_vm(self, ins->r.src);
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            *destSlot = cInputExec_getRegister_vm(self, ins->r.src);
             break;
         }
         case 2:
-            if (func_00325260_vm(self, ins->j.reg) != 0.0f) {
+            if (cInputExec_getRegister_vm(self, ins->j.reg) != 0.0f) {
                 break;
             }
         case 3:
@@ -2201,8 +2201,8 @@ extern "C" float func_00325450(sInputVM_325450* self, void* list, sInsn_324678* 
             break;
         case 4: {
             unsigned int boolResult = 0;
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            if (func_00325260_vm(self, ins->r.src) != 0.0f || func_00325260_vm(self, ins->r.arg) != 0.0f) {
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            if (cInputExec_getRegister_vm(self, ins->r.src) != 0.0f || cInputExec_getRegister_vm(self, ins->r.arg) != 0.0f) {
                 boolResult = 1;
             }
             *destSlot = boolResult;
@@ -2210,156 +2210,156 @@ extern "C" float func_00325450(sInputVM_325450* self, void* list, sInsn_324678* 
         }
         case 5: {
             unsigned int boolResult = 0;
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            if (func_00325260_vm(self, ins->r.src) != 0.0f && func_00325260_vm(self, ins->r.arg) != 0.0f) {
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            if (cInputExec_getRegister_vm(self, ins->r.src) != 0.0f && cInputExec_getRegister_vm(self, ins->r.arg) != 0.0f) {
                 boolResult = 1;
             }
             *destSlot = boolResult;
             break;
         }
         case 6: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            float lhs = func_00325260_vm(self, ins->r.src);
-            *destSlot = (lhs > func_00325260_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            float lhs = cInputExec_getRegister_vm(self, ins->r.src);
+            *destSlot = (lhs > cInputExec_getRegister_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
             break;
         }
         case 7: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            float lhs = func_00325260_vm(self, ins->r.src);
-            *destSlot = (lhs >= func_00325260_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            float lhs = cInputExec_getRegister_vm(self, ins->r.src);
+            *destSlot = (lhs >= cInputExec_getRegister_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
             break;
         }
         case 8: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            float lhs = func_00325260_vm(self, ins->r.src);
-            *destSlot = (lhs < func_00325260_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            float lhs = cInputExec_getRegister_vm(self, ins->r.src);
+            *destSlot = (lhs < cInputExec_getRegister_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
             break;
         }
         case 9: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            float lhs = func_00325260_vm(self, ins->r.src);
-            *destSlot = (lhs <= func_00325260_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            float lhs = cInputExec_getRegister_vm(self, ins->r.src);
+            *destSlot = (lhs <= cInputExec_getRegister_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
             break;
         }
         case 10: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            float lhs = func_00325260_vm(self, ins->r.src);
-            *destSlot = (lhs == func_00325260_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            float lhs = cInputExec_getRegister_vm(self, ins->r.src);
+            *destSlot = (lhs == cInputExec_getRegister_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
             break;
         }
         case 11: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            float lhs = func_00325260_vm(self, ins->r.src);
-            *destSlot = (lhs != func_00325260_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            float lhs = cInputExec_getRegister_vm(self, ins->r.src);
+            *destSlot = (lhs != cInputExec_getRegister_vm(self, ins->r.arg)) ? 1.0f : 0.0f;
             break;
         }
         case 12: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            float lhs = func_00325260_vm(self, ins->r.src);
-            *destSlot = lhs + func_00325260_vm(self, ins->r.arg);
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            float lhs = cInputExec_getRegister_vm(self, ins->r.src);
+            *destSlot = lhs + cInputExec_getRegister_vm(self, ins->r.arg);
             break;
         }
         case 13: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            float lhs = func_00325260_vm(self, ins->r.src);
-            *destSlot = lhs - func_00325260_vm(self, ins->r.arg);
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            float lhs = cInputExec_getRegister_vm(self, ins->r.src);
+            *destSlot = lhs - cInputExec_getRegister_vm(self, ins->r.arg);
             break;
         }
         case 14: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            float lhs = func_00325260_vm(self, ins->r.src);
-            *destSlot = lhs * func_00325260_vm(self, ins->r.arg);
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            float lhs = cInputExec_getRegister_vm(self, ins->r.src);
+            *destSlot = lhs * cInputExec_getRegister_vm(self, ins->r.arg);
             break;
         }
         case 15: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            float lhs = func_00325260_vm(self, ins->r.src);
-            *destSlot = lhs / func_00325260_vm(self, ins->r.arg);
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            float lhs = cInputExec_getRegister_vm(self, ins->r.src);
+            *destSlot = lhs / cInputExec_getRegister_vm(self, ins->r.arg);
             break;
         }
         case 16: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            *destSlot = (func_00325260_vm(self, ins->r.src) > func_00325260_vm(self, ins->r.arg))
-                ? func_00325260_vm(self, ins->r.src) : func_00325260_vm(self, ins->r.arg);
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            *destSlot = (cInputExec_getRegister_vm(self, ins->r.src) > cInputExec_getRegister_vm(self, ins->r.arg))
+                ? cInputExec_getRegister_vm(self, ins->r.src) : cInputExec_getRegister_vm(self, ins->r.arg);
             break;
         }
         case 17: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            *destSlot = (func_00325260_vm(self, ins->r.src) < func_00325260_vm(self, ins->r.arg))
-                ? func_00325260_vm(self, ins->r.src) : func_00325260_vm(self, ins->r.arg);
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            *destSlot = (cInputExec_getRegister_vm(self, ins->r.src) < cInputExec_getRegister_vm(self, ins->r.arg))
+                ? cInputExec_getRegister_vm(self, ins->r.src) : cInputExec_getRegister_vm(self, ins->r.arg);
             break;
         }
         case 18: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            float lhs = func_00325260_vm(self, ins->r.src);
-            *destSlot = pow_4138(lhs, func_00325260_vm(self, ins->r.arg));
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            float lhs = cInputExec_getRegister_vm(self, ins->r.src);
+            *destSlot = pow_4138(lhs, cInputExec_getRegister_vm(self, ins->r.arg));
             break;
         }
         case 19: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            float lhs = func_00325260_vm(self, ins->r.src);
-            *destSlot = atan2_4138(lhs, func_00325260_vm(self, ins->r.arg));
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            float lhs = cInputExec_getRegister_vm(self, ins->r.src);
+            *destSlot = atan2_4138(lhs, cInputExec_getRegister_vm(self, ins->r.arg));
             break;
         }
         case 20: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            *destSlot = func_0031C228(func_00325260_vm(self, ins->r.src));
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            *destSlot = func_0031C228(cInputExec_getRegister_vm(self, ins->r.src));
             break;
         }
         case 21: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            *destSlot = func_0031BF60(func_00325260_vm(self, ins->r.src));
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            *destSlot = fSin(cInputExec_getRegister_vm(self, ins->r.src));
             break;
         }
         case 22: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            *destSlot = func_0031C040(func_00325260_vm(self, ins->r.src));
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            *destSlot = fCos(cInputExec_getRegister_vm(self, ins->r.src));
             break;
         }
         case 23: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            *destSlot = func_0040D758(func_00325260_vm(self, ins->r.src));
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            *destSlot = func_0040D758(cInputExec_getRegister_vm(self, ins->r.src));
             break;
         }
         case 24: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            *destSlot = func_0040DA10(func_00325260_vm(self, ins->r.src));
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            *destSlot = func_0040DA10(cInputExec_getRegister_vm(self, ins->r.src));
             break;
         }
         case 25: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            *destSlot = floor_43A0(func_00325260_vm(self, ins->r.src));
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            *destSlot = floor_43A0(cInputExec_getRegister_vm(self, ins->r.src));
             break;
         }
         case 26: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            *destSlot = ceil_43A0(func_00325260_vm(self, ins->r.src));
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            *destSlot = ceil_43A0(cInputExec_getRegister_vm(self, ins->r.src));
             break;
         }
         case 27: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            *destSlot = abs_43A0(func_00325260_vm(self, ins->r.src));
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            *destSlot = abs_43A0(cInputExec_getRegister_vm(self, ins->r.src));
             break;
         }
         case 28: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            *destSlot = sqrt_43A0(func_00325260_vm(self, ins->r.src));
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            *destSlot = sqrt_43A0(cInputExec_getRegister_vm(self, ins->r.src));
             break;
         }
         case 29: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            float x = func_00325260_vm(self, ins->r.src);
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            float x = cInputExec_getRegister_vm(self, ins->r.src);
             *destSlot = x - floor_43A0(x * 0.159154937f + 0.5f) * 6.28318548f;
             break;
         }
         case 30: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            *destSlot = -func_00325260_vm(self, ins->r.src);
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            *destSlot = -cInputExec_getRegister_vm(self, ins->r.src);
             break;
         }
         case 31: {
-            float* destSlot = (float*)func_003252E8(self, ins->r.dst);
-            *destSlot = (func_00325260_vm(self, ins->r.src) == 0.0f) ? 1.0f : 0.0f;
+            float* destSlot = (float*)cInputExec_getTempReg(self, ins->r.dst);
+            *destSlot = (cInputExec_getRegister_vm(self, ins->r.src) == 0.0f) ? 1.0f : 0.0f;
             break;
         }
         case 32:
@@ -2367,7 +2367,7 @@ extern "C" float func_00325450(sInputVM_325450* self, void* list, sInsn_324678* 
             break;
         }
     } while (!done);
-    return func_00325260_vm(self, 0);
+    return cInputExec_getRegister_vm(self, 0);
 }
 #endif
 
@@ -2651,8 +2651,8 @@ extern "C" void cInputPreProcessor_readChar(void* self, sParseStream* isrc)
 //100%
 INCLUDE_ASM("input/inputparse", cInputPreProcessor_skipCComment);
 #ifdef SKIP_ASM
-// PORT: func_00326A20__FPv is called with (self, s, a2, a3, msg) here; bind the 5-arg form to that symbol.
-void func_00326A20_5(void* self, sParseStream* s, int a2, int a3, const char* msg) __asm__("func_00326A20__FPv");
+// PORT: cInputPreProcessor_error__FPv is called with (self, s, a2, a3, msg) here; bind the 5-arg form to that symbol.
+void cInputPreProcessor_error_5(void* self, sParseStream* s, int a2, int a3, const char* msg) __asm__("cInputPreProcessor_error__FPv");
 extern char str_unexpected_EOF_in_comment[];
 
 /**
@@ -2660,7 +2660,7 @@ extern char str_unexpected_EOF_in_comment[];
  *
  * Reads characters (the current one is at +0xC) until the closing star-slash: each newline inside counts a line on
  * @p isrc (+0xC) and is written out, and a comment without newlines is replaced by one space. When the input ends first
- * it calls the error reporter func_00326A20 with "unexpected EOF in comment"; that function is an empty stub in retail,
+ * it calls the error reporter cInputPreProcessor_error with "unexpected EOF in comment"; that function is an empty stub in retail,
  * so nothing is reported.
  *
  * @param isrc      the input source (On Tour tInputSource); its line counter (+0xC) is advanced
@@ -2693,7 +2693,7 @@ extern "C" void cInputPreProcessor_skipCComment(void* self, sParseStream* isrc, 
         cInputPreProcessor_readChar(self, isrc);
     }
 error:
-    func_00326A20_5(self, isrc, path, fileName, str_unexpected_EOF_in_comment);
+    cInputPreProcessor_error_5(self, isrc, path, fileName, str_unexpected_EOF_in_comment);
 }
 #endif
 
@@ -2702,15 +2702,15 @@ INCLUDE_ASM("input/inputparse", cInputPreProcessor_skipCppComment);
 #ifdef SKIP_ASM
 struct sParseStream;
 extern "C" void cInputPreProcessor_readChar(void* self, sParseStream* s);
-// PORT: func_00326A20__FPv is called with (self, s, a2, a3, msg) here; bind the 5-arg form to that symbol.
-void func_00326A20_5(void* self, sParseStream* s, int a2, int a3, const char* msg) __asm__("func_00326A20__FPv");
+// PORT: cInputPreProcessor_error__FPv is called with (self, s, a2, a3, msg) here; bind the 5-arg form to that symbol.
+void cInputPreProcessor_error_5(void* self, sParseStream* s, int a2, int a3, const char* msg) __asm__("cInputPreProcessor_error__FPv");
 extern char str_unexpected_EOF_in_comment[];
 
 /**
  * Skips a line comment up to the end of the line.
  *
  * Reads characters until a newline, which is counted on @p isrc, written out and consumed; reports "unexpected EOF in
- * comment" through func_00326A20 when the input ends first.
+ * comment" through cInputPreProcessor_error when the input ends first.
  *
  * @param isrc   the input source (On Tour tInputSource)
  * @param path  the file path, for the error message
@@ -2732,7 +2732,7 @@ extern "C" void cInputPreProcessor_skipCppComment(void* self, sParseStream* isrc
         cInputPreProcessor_readChar(self, isrc);
     }
 error:
-    func_00326A20_5(self, isrc, path, fileName, str_unexpected_EOF_in_comment);
+    cInputPreProcessor_error_5(self, isrc, path, fileName, str_unexpected_EOF_in_comment);
 }
 #endif
 
@@ -2767,8 +2767,8 @@ extern "C" void cInputPreProcessor_writeTagLine(void* self, int a1, int a2);
 extern "C" void cInputPreProcessor_readFile(void* self, int a1, int a2);
 extern "C" void cInputPreProcessor_skipToEOL(void* self, sParseStream* s);
 extern "C" int func_004165A8(const char* a, const char* b);
-// PORT: func_00326A20__FPv is called with (self, s, a2, a3, msg) here; bind the 5-arg form to that symbol.
-void func_00326A20_5(void* self, sParseStream* s, int a2, int a3, const char* msg) __asm__("func_00326A20__FPv");
+// PORT: cInputPreProcessor_error__FPv is called with (self, s, a2, a3, msg) here; bind the 5-arg form to that symbol.
+void cInputPreProcessor_error_5(void* self, sParseStream* s, int a2, int a3, const char* msg) __asm__("cInputPreProcessor_error__FPv");
 
 static inline int isWS_3266E8(int c)
 {
@@ -2801,7 +2801,7 @@ extern "C" void cInputPreProcessor_readCmdLine(void* self, sParseStream* isrc, i
     while (isWS_3266E8(ch = *(int*)((char*)self + 0xC)))
         cInputPreProcessor_readChar(self, isrc);
     if (ch <= 0) {
-        func_00326A20_5(self, isrc, path, fn, "unexpected EOF in pre-processor command");
+        cInputPreProcessor_error_5(self, isrc, path, fn, "unexpected EOF in pre-processor command");
         return;
     }
     char* wordPtr = word;
@@ -2817,7 +2817,7 @@ extern "C" void cInputPreProcessor_readCmdLine(void* self, sParseStream* isrc, i
         while (isWS_3266E8(ch = *(int*)((char*)self + 0xC)))
             cInputPreProcessor_readChar(self, isrc);
         if (ch != '"') {
-            func_00326A20_5(self, isrc, path, fn, "illegal 'include' directive");
+            cInputPreProcessor_error_5(self, isrc, path, fn, "illegal 'include' directive");
             cInputPreProcessor_skipToEOL(self, isrc);
             return;
         }
@@ -2826,7 +2826,7 @@ extern "C" void cInputPreProcessor_readCmdLine(void* self, sParseStream* isrc, i
         while (*(int*)((char*)self + 0xC) != '"') {
             int nameChar = *(int*)((char*)self + 0xC);
             if (nameChar < 0 || nameChar == '\n') {
-                func_00326A20_5(self, isrc, path, fn, "illegal 'include' directive");
+                cInputPreProcessor_error_5(self, isrc, path, fn, "illegal 'include' directive");
                 cInputPreProcessor_skipToEOL(self, isrc);
                 return;
             }
@@ -2838,7 +2838,7 @@ extern "C" void cInputPreProcessor_readCmdLine(void* self, sParseStream* isrc, i
         while (isWS_3266E8(ch = *(int*)((char*)self + 0xC)))
             cInputPreProcessor_readChar(self, isrc);
         if (ch >= 0 && ch != '\n') {
-            func_00326A20_5(self, isrc, path, fn, "illegal 'include' directive");
+            cInputPreProcessor_error_5(self, isrc, path, fn, "illegal 'include' directive");
             cInputPreProcessor_skipToEOL(self, isrc);
             return;
         }
@@ -2850,14 +2850,14 @@ extern "C" void cInputPreProcessor_readCmdLine(void* self, sParseStream* isrc, i
         cInputPreProcessor_writeTagLine(self, *(int*)((char*)isrc + 0xC), (int)buf);
         cInputPreProcessor_readChar(self, isrc);
     } else {
-        func_00326A20_5(self, isrc, path, fn, "illegal pre-processor directive");
+        cInputPreProcessor_error_5(self, isrc, path, fn, "illegal pre-processor directive");
         cInputPreProcessor_skipToEOL(self, isrc);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326A20__FPv);
+INCLUDE_ASM("input/inputparse", cInputPreProcessor_error__FPv);
 #ifdef SKIP_ASM
 /**
  * Does nothing: the input preprocessor's error report, compiled out of this build.
@@ -2865,32 +2865,32 @@ INCLUDE_ASM("input/inputparse", func_00326A20__FPv);
  * cInputPreProcessor_skipCComment, cInputPreProcessor_skipCppComment and cInputPreProcessor_readCmdLine call it with
  * the input source, path, file name and a message such as "unexpected EOF in comment"; the arguments are ignored.
  */
-void func_00326A20(void* self)
+void cInputPreProcessor_error(void* self)
 {
 }
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326A28);
+INCLUDE_ASM("input/inputparse", cPadCache_init);
 #ifdef SKIP_ASM
-extern "C" int func_00326D60(void* p, int n);
+extern "C" int cPadDevice_construct(void* p, int n);
 
 /**
  * Initialises the pad cache: creates the pad devices and resets the ring buffer positions.
  *
- * Stores the count func_00326D60 returns for the device array (+0x2EEC, up to 4) in +0x2EE8, sets the read position
+ * Stores the count cPadDevice_construct returns for the device array (+0x2EEC, up to 4) in +0x2EE8, sets the read position
  * (+0x2EE0) to 29 and the write position (+0x2EE4) to 0. Called by cSSXApp_init.
  */
-extern "C" void func_00326A28(void* self)
+extern "C" void cPadCache_init(void* self)
 {
-    *(int*)((char*)self + 0x2EE8) = func_00326D60((char*)self + 0x2EEC, 4);
+    *(int*)((char*)self + 0x2EE8) = cPadDevice_construct((char*)self + 0x2EEC, 4);
     *(int*)((char*)self + 0x2EE0) = 29;
     *(int*)((char*)self + 0x2EE4) = 0;
 }
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326A68);
+INCLUDE_ASM("input/inputparse", cPadCache_purge);
 #ifdef SKIP_ASM
 struct sVEntry00326A68 {
     short delta;
@@ -2914,7 +2914,7 @@ struct sOwner00326A68 {
  * Calls each non-null device's virtual destructor (slot 1) with flags 3, which frees it. The array entries and the
  * count (+0x2EE8) are left as they were. Called by cSSXApp_purge.
  */
-extern "C" void func_00326A68(sOwner00326A68* self)
+extern "C" void cPadCache_purge(sOwner00326A68* self)
 {
     int i;
     for (i = 0; i < self->count; i++) {
@@ -2927,26 +2927,26 @@ extern "C" void func_00326A68(sOwner00326A68* self)
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326AE0);
+INCLUDE_ASM("input/inputparse", cPadCache_clearAllVibrations);
 #ifdef SKIP_ASM
-extern "C" void func_00326CF0(void* p);
+extern "C" void cPadDevice_clearAllVibrations(void* p);
 
 /**
  * Stops the vibration of every pad device of the pad cache.
  *
- * Calls func_00326CF0 on each device. Called by cGame_update and cGame_updateUI.
+ * Calls cPadDevice_clearAllVibrations on each device. Called by cGame_update and cGame_updateUI.
  */
-extern "C" void func_00326AE0(void* self)
+extern "C" void cPadCache_clearAllVibrations(void* self)
 {
     int i;
     for (i = 0; i < *(int*)((char*)self + 0x2EE8); i++) {
-        func_00326CF0(((void**)((char*)self + 0x2EEC))[i]);
+        cPadDevice_clearAllVibrations(((void**)((char*)self + 0x2EEC))[i]);
     }
 }
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326B48);
+INCLUDE_ASM("input/inputparse", cPadCache_nextInput);
 #ifdef SKIP_ASM
 struct sInputSlot_00326B48 {
     int value;
@@ -2968,7 +2968,7 @@ struct sInputParse_00326B48 {
  * @param controllerCache  the pad cache (this)
  * @return 1 when it advanced, 0 when no newer frame is cached
  */
-extern "C" int func_00326B48(sInputParse_00326B48* controllerCache)
+extern "C" int cPadCache_nextInput(sInputParse_00326B48* controllerCache)
 {
     unsigned int next = (controllerCache->head + 1) % 30;
     if (next == controllerCache->tail) {
@@ -3043,7 +3043,7 @@ extern "C" int cPadCache_flush(sInputParse_00326C60* self)
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326CA0);
+INCLUDE_ASM("input/inputparse", cPadCache_numButtons);
 #ifdef SKIP_ASM
 struct sInputSlot_00326CA0 {
     int value;
@@ -3059,12 +3059,12 @@ struct sInputParse_00326CA0 {
  * Returns how many button values a pad delivered in the pad cache's current input frame.
  *
  * Reads the count word of line (read position +0x2EE0), pad @p i. Called by cSSXApp_preUpdate and
- * cPreStartScreen_update together with func_00326CC8.
+ * cPreStartScreen_update together with cPadCache_buttonValues.
  *
  * @param i  the pad index (On Tour pad)
  * @return the number of button values
  */
-extern "C" int func_00326CA0(void* self, int i)
+extern "C" int cPadCache_numButtons(void* self, int i)
 {
     sInputParse_00326CA0* controllerCache = (sInputParse_00326CA0*)self;
     return controllerCache->slots[controllerCache->bank][i].value;
@@ -3072,7 +3072,7 @@ extern "C" int func_00326CA0(void* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326CC8);
+INCLUDE_ASM("input/inputparse", cPadCache_buttonValues);
 #ifdef SKIP_ASM
 struct sInputSlot_00326CC8 {
     int value;
@@ -3092,7 +3092,7 @@ struct sInputParse_00326CC8 {
  * @param i  the pad index (On Tour pad)
  * @return the address of the values
  */
-extern "C" void* func_00326CC8(void* self, int i)
+extern "C" void* cPadCache_buttonValues(void* self, int i)
 {
     sInputParse_00326CC8* controllerCache = (sInputParse_00326CC8*)self;
     return controllerCache->slots[controllerCache->bank][i].data;
@@ -3100,7 +3100,7 @@ extern "C" void* func_00326CC8(void* self, int i)
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326CF0);
+INCLUDE_ASM("input/inputparse", cPadDevice_clearAllVibrations);
 #ifdef SKIP_ASM
 struct sVEntry00326CF0 {
     short delta;
@@ -3115,11 +3115,11 @@ typedef void (*SetFn00326CF0)(void*, int, float);
  * Stops a pad device's vibration: sets every actuator to 0.
  *
  * Calls the device's virtual setActuator (slot 4) with level 0.0 for each actuator it reports through slot 3. Called by
- * func_00326AE0 and func_00125B18.
+ * cPadCache_clearAllVibrations and func_00125B18.
  *
  * @param inputPad  the pad device (this)
  */
-extern "C" void func_00326CF0(void* inputPad)
+extern "C" void cPadDevice_clearAllVibrations(void* inputPad)
 {
     sVEntry00326CF0** self = (sVEntry00326CF0**)inputPad;
     int i;
@@ -3130,23 +3130,23 @@ extern "C" void func_00326CF0(void* inputPad)
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326D60);
+INCLUDE_ASM("input/inputparse", cPadDevice_construct);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* func_00326DF0(void* self, int a1, int a2);
+extern "C" void* cPS2PadDevice_cPS2PadDevice(void* self, int a1, int a2);
 extern char str_PS2Pad[];
 
 /**
  * Creates the PS2 pad devices: one per controller port, at most two.
  *
- * Clamps @p n to 2 and fills @p inputPads[i] with a 0x180-byte "PS2Pad" allocation constructed by func_00326DF0 for
+ * Clamps @p n to 2 and fills @p inputPads[i] with a 0x180-byte "PS2Pad" allocation constructed by cPS2PadDevice_cPS2PadDevice for
  * port i, slot 0.
  *
  * @param inputPads  the array to fill (On Tour pads)
  * @param n  its capacity (On Tour maxpads)
  * @return the number of devices created
  */
-extern "C" int func_00326D60(void* inputPads, int n)
+extern "C" int cPadDevice_construct(void* inputPads, int n)
 {
     void** arr = (void**)inputPads;
     int i;
@@ -3154,14 +3154,14 @@ extern "C" int func_00326D60(void* inputPads, int n)
         n = 2;
     }
     for (i = 0; i < n; i++) {
-        arr[i] = func_00326DF0(cMemMan_alloc(0x180, str_PS2Pad, 0x4000000, 0), i, 0);
+        arr[i] = cPS2PadDevice_cPS2PadDevice(cMemMan_alloc(0x180, str_PS2Pad, 0x4000000, 0), i, 0);
     }
     return n;
 }
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326DF0);
+INCLUDE_ASM("input/inputparse", cPS2PadDevice_cPS2PadDevice);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
 extern void* D_0048E488[];
@@ -3170,13 +3170,13 @@ extern void* D_0048E488[];
  * Constructs a PS2 pad device for a controller port and slot.
  *
  * Installs the vtable D_0048E488, stores @p port (+0x4) and @p slot (+0x8), zeroes 36 bytes at +0xC and the sampling state
- * words +0x48..+0x5C (state 0: the port is opened on the next sample). Called by func_00326D60.
+ * words +0x48..+0x5C (state 0: the port is opened on the next sample). Called by cPadDevice_construct.
  *
  * @param port  the controller port
  * @param slot  the multitap slot
  * @return @p self
  */
-extern "C" void* func_00326DF0(void* self, int port, int slot)
+extern "C" void* cPS2PadDevice_cPS2PadDevice(void* self, int port, int slot)
 {
     *(void***)self = D_0048E488;
     *(int*)((char*)self + 0x4) = port;
@@ -3193,7 +3193,7 @@ extern "C" void* func_00326DF0(void* self, int port, int slot)
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326E50);
+INCLUDE_ASM("input/inputparse", cPS2PadDevice__cPS2PadDevice);
 #ifdef SKIP_ASM
 extern "C" int func_003FF8F0(int a, int b);
 void operator_delete(int* ptr);
@@ -3208,7 +3208,7 @@ extern char cPadDevice_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void func_00326E50(void* self, int flags)
+extern "C" void cPS2PadDevice__cPS2PadDevice(void* self, int flags)
 {
     *(void***)self = D_0048E488;
     func_003FF8F0(*(int*)((char*)self + 0x4), *(int*)((char*)self + 0x8));
@@ -3220,7 +3220,7 @@ extern "C" void func_00326E50(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00326EB0);
+INCLUDE_ASM("input/inputparse", cPS2PadDevice_sampleButtons);
 #ifdef SKIP_ASM
 extern "C" int func_003FF708(int port, int slot, void* buf);
 extern "C" int func_003FFA58(int port, int slot, unsigned char* data);
@@ -3279,7 +3279,7 @@ static inline float Analog_326EB0(int v)
  * @param out  receives up to 24 button values
  * @return 24 when the pad was read, otherwise 0
  */
-extern "C" int func_00326EB0(sPad_326EB0* self, float* out)
+extern "C" int cPS2PadDevice_sampleButtons(sPad_326EB0* self, float* out)
 {
     unsigned char data[32];
     int ok = 0;
@@ -3469,7 +3469,7 @@ extern "C" int func_00326EB0(sPad_326EB0* self, float* out)
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00327738__FPv);
+INCLUDE_ASM("input/inputparse", cPS2PadDevice_numActuators__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 2: a PS2 pad has two vibration actuators.
@@ -3478,14 +3478,14 @@ INCLUDE_ASM("input/inputparse", func_00327738__FPv);
  *
  * @return 2
  */
-int func_00327738(void* self)
+int cPS2PadDevice_numActuators(void* self)
 {
     return 0x2;
 }
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00327740);
+INCLUDE_ASM("input/inputparse", cPS2PadDevice_setActuator);
 #ifdef SKIP_ASM
 static inline int clamp_327740(int v, int lo, int hi)
 {
@@ -3503,13 +3503,13 @@ static inline int clamp_327740(int v, int lo, int hi)
  * Sets one of a PS2 pad's vibration motors.
  *
  * Actuator 1 is the on/off motor: +0x30 = (@p level != 0). Any other actuator sets the variable motor: +0x38 = level x
- * 205 + 50 clamped to 50..255, or 0 when @p level is 0. func_00326EB0 sends changed values to the pad. Slot 4 of
+ * 205 + 50 clamped to 50..255, or 0 when @p level is 0. cPS2PadDevice_sampleButtons sends changed values to the pad. Slot 4 of
  * D_0048E488.
  *
  * @param mode  the actuator index (On Tour act)
  * @param level  the strength, 0..1 (On Tour frequency)
  */
-extern "C" void func_00327740(void* self, int mode, float level)
+extern "C" void cPS2PadDevice_setActuator(void* self, int mode, float level)
 {
     if (mode == 1) {
         *(int*)((char*)self + 0x30) = level != 0.0f;
@@ -3594,7 +3594,7 @@ void* cAIFwdDiffCache_cAIFwdDiffCache(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("input/inputparse", func_00327828);
+INCLUDE_ASM("input/inputparse", cAIFwdDiffCache__cAIFwdDiffCache);
 #ifdef SKIP_ASM
 void cMemMan_free(void* ptr);
 void operator_delete(int* ptr);
@@ -3607,7 +3607,7 @@ void operator_delete(int* ptr);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object
  */
-extern "C" void func_00327828(void* self, int flags)
+extern "C" void cAIFwdDiffCache__cAIFwdDiffCache(void* self, int flags)
 {
     if (*(void**)self != 0) {
         cMemMan_free(*(void**)self);

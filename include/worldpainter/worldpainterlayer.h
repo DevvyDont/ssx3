@@ -3,25 +3,25 @@
 
 // The streamed world-painter data of one world section: a tWPHeader followed by m_iNumLayers layer slots
 // (tWPLayerPtr), each pointing at a cWorldPainterLayer = a quad tree (worldpainter/quadtree.h) plus a regions table.
-// The file stores offsets; cWorldPainterSection::resolve (func_002BB5F0) turns each slot into a pointer
+// The file stores offsets; cWorldPainterSection::resolve (cWorldPainterSection_resolve) turns each slot into a pointer
 // (relative to the header) and calls cWorldPainterLayer::resolve (cWorldPainterLayer_resolve), which does the same for the
 // layer's tree (relative to the layer, then cQuadTree::resolve) and for every region's data pointer
 // (-1 -> 0). A layer is selected by tWorldPainterRegionType::m_layer; a quad-tree leaf's key is a region index;
 // the region's m_iRegionType is compared with tWorldPainterRegionType::m_id and its data (a tWPData_*,
 // worldpainter/worldpainterquery.h) is blended into the query's tWPInGameData (cWorldPainterQuery::queryPosition).
 //
-// Sizes [R]/[O]: tWPHeader 0x8 (layer slots start at header + 8: func_002BB5F0, cWorldPainterQuery_queryPosition), cWorldPainterLayer
+// Sizes [R]/[O]: tWPHeader 0x8 (layer slots start at header + 8: cWorldPainterSection_resolve, cWorldPainterQuery_queryPosition), cWorldPainterLayer
 // 0xC (On Tour: cWorldPainterLayer and tWPLayer both 0xC), tWPRegion 0x8 (8-byte stride in cWorldPainterLayer_resolve and
 // cWorldPainterQuery_lookupRegion), tWPLayerPtr 0x4. No vtables, no bases. EA's source: d:/ssx/code/source/worldpainter/
 // worldpainterlayer.h / worldpainterlayer.cpp (preview asserts "m_iQuadTreeOffset >= 0", "m_iRegionOffset >= 0",
 // "this->getQuadTree()", "iRegionIndex < getNumRegions()"). cWorldPainterLayer methods: see methods.txt.
 //
 // A FLAT layout, like main/game.h. Evidence tags:
-//   [R] retail's resolve functions cWorldPainterLayer_resolve (cWorldPainterLayer::resolve) and func_002BB5F0
+//   [R] retail's resolve functions cWorldPainterLayer_resolve (cWorldPainterLayer::resolve) and cWorldPainterSection_resolve
 //       (cWorldPainterSection::resolve);
 //   [P] the July 2003 preview's assert strings (worldpainterlayer.h/.cpp, worldpainterman.cpp);
-//   [U] how retail code uses the field (getQuadTreeContents func_002BAF90, lookupRegion cWorldPainterQuery_lookupRegion,
-//       queryPosition cWorldPainterQuery_queryPosition, cWorldPainterMan::render func_002BB6E0);
+//   [U] how retail code uses the field (getQuadTreeContents cWorldPainterLayer_getQuadTreeContents, lookupRegion cWorldPainterQuery_lookupRegion,
+//       queryPosition cWorldPainterQuery_queryPosition, cWorldPainterMan::render cWorldPainterMan_render);
 //   [O] SSX On Tour's DWARF (tWPHeader, tWPLayer, tWPLayerPtr, tWPRegion): same members and offsets; its
 //       unions are anonymous, so the union member names below that are not in an assert are ours.
 

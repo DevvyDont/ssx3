@@ -1866,7 +1866,7 @@ extern "C" void cDebugLobbyScreen_draw(sDebugFE17E5C8* self)
 //100%
 INCLUDE_ASM("fe/debugfe", cHeartBeat_update);
 #ifdef SKIP_ASM
-extern "C" float func_0031BF60(float x);
+extern "C" float fSin(float x);
 
 struct sVec2_17F2D0 {
     float x, y;
@@ -1928,7 +1928,7 @@ extern "C" void cHeartBeat_update(void* heartBeat)
 {
     sFirefly_17F2D0* self = (sFirefly_17F2D0*)heartBeat;
     for (int i = 0; i < 2; i++) {
-        sVec2_17F2D0 posStep(func_0031BF60(self->phase.x), func_0031BF60(self->phase.y));
+        sVec2_17F2D0 posStep(fSin(self->phase.x), fSin(self->phase.y));
         posStep += 1.899999976158142f;
         posStep *= 0.03200000151991844f;
         {
@@ -1944,8 +1944,8 @@ extern "C" void cHeartBeat_update(void* heartBeat)
         self->pos.x = wrap_17F2D0(self->pos.x);
         self->pos.y = wrap_17F2D0(self->pos.y);
         self->head = (self->head + 1) % 64;
-        sVec2_17F2D0 pt(func_0031BF60(self->pos.x) * 20.0f + 550.0f,
-                        func_0031BF60(self->pos.y) * 20.0f + 420.0f);
+        sVec2_17F2D0 pt(fSin(self->pos.x) * 20.0f + 550.0f,
+                        fSin(self->pos.y) * 20.0f + 420.0f);
         self->trail[self->head] = pt;
     }
 }

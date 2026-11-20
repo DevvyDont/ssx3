@@ -991,13 +991,13 @@ void func_00392DE8(void* self, int val)
 //100%
 INCLUDE_ASM("render/font", func_00392DF0);
 #ifdef SKIP_ASM
-extern "C" float func_0031BF60(float a);
+extern "C" float fSin(float a);
 
 extern "C" void* func_00392DF0(void* self)
 {
     int i;
     for (i = 0; i < 640; i++) {
-        ((float*)self)[i] = func_0031BF60((float)i * 0.01227184571325779f);
+        ((float*)self)[i] = fSin((float)i * 0.01227184571325779f);
     }
     return self;
 }
@@ -3541,7 +3541,7 @@ void cPS2GraphicsMan_PopView(void* self)
 //100%
 INCLUDE_ASM("render/font", cPS2GraphicsMan_SetView);
 #ifdef SKIP_ASM
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 extern char t4mat_Identity[];
 extern float t4vect_XAxis[4];
 extern float t4vect_YAxis[4];
@@ -3599,7 +3599,7 @@ static inline void Rotate_5750(void* self, float* axis, float angle)
     float s;
     float c;
     char* top = *(char**)((char*)self + 0x13e4);
-    func_0031BE50(&s, &c, angle);
+    fSinCos(&s, &c, angle);
     float t = 1.0f - c;
     float x = axis[0];
     float y = axis[1];
@@ -3868,11 +3868,11 @@ struct sFontRotMat {
     float m[4][4];
 } __attribute__((aligned(16)));
 
-extern "C" void func_0031BE50(float* s, float* c, float angle);
+extern "C" void fSinCos(float* s, float* c, float angle);
 
 /**
  * Rotates the top view matrix by @p angle about @p axis: builds the axis-angle rotation matrix (sin and cos from
- * func_0031BE50) and concatenates it onto the top matrix with VU0, then clears mMatricesValid.
+ * fSinCos) and concatenates it onto the top matrix with VU0, then clears mMatricesValid.
  *
  * On Tour's RotateView(float deg, const t4Vector& axis) takes degrees and the reverse order; here the axis comes
  * first and the angle goes straight to the sincos helper.
@@ -3888,7 +3888,7 @@ extern "C" void cPS2GraphicsMan_RotateView(cPS2GraphicsMan* self, float* axis, f
     float sinA;
     float cosA;
     char* top = (char*)self->mCurrentView;
-    func_0031BE50(&sinA, &cosA, angle);
+    fSinCos(&sinA, &cosA, angle);
     float oneMinusCos = 1.0f - cosA;
     float x = axis[0];
     float y = axis[1];

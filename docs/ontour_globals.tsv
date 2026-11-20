@@ -4765,3 +4765,4 @@ ps2_addr	name	previous	source	evidence
 0046B808	cFEStateNet_vtbl	D_0046B808	preview	stored by the cFEStateNet ctor (0x1A8500); slot 1 is its dtor, slot 6 cFEStateNet_onGainFocus; the online front-end states' base vtable
 0047D7D0	cStartScreen_vtbl	D_0047D7D0	ontour	stored by cStartScreen_cStartScreen (0x232AE0, which builds/x/name_map.tsv matches to the preview's __12cStartScreen); its slots are cStartScreen's load/purge/loseFocus/gainFocus/update/render
 0047D788	cGameLoadScreen_vtbl	D_0047D788	ontour	the vtable of the 0x18-byte module func_00232930 allocates with the tag "cGameLoadScreen" (On Tour's cGameLoadScreen is 0x18 bytes); its slots are cGameLoadScreen's load/purge/loseFocus/gainFocus/update/render
+0045C3F0	cCTObject_vtbl	D_0045C3F0	preview	the July 2003 preview names this vtable _vt$9cCTObject (builds/x/v2/vtables_v2.tsv); the camera bound-object constructors store it first, as the base class vtable, before the derived class's
