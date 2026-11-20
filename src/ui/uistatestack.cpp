@@ -69,7 +69,6 @@ static inline void cUIStateStack_pushPopup_cover(cUIStateStack_pushPopup_sState*
  *
  * @param st  the popup state to push (On Tour pPushState)
  */
-// Pushes a state, covering its parent if it has one, else the current top of the stack.
 extern "C" void cUIStateStack_pushPopup(cList* self, cUIStateStack_pushPopup_sState* st)
 {
     cUIStateStack_pushPopup_sState* top = st->parent;
@@ -236,7 +235,6 @@ static inline int cUIStateStack_pushCheck_stateId(cUIStateStack_pushCheck_sState
  *
  * @param st  the state to push (On Tour pPushState)
  */
-// Pushes a state, first marking every pinned state on top as covered (id 7) and suspended.
 extern "C" void cUIStateStack_pushCheck(cList* self, cUIStateStack_pushCheck_sState* st)
 {
     int covered = 0;
@@ -296,6 +294,15 @@ struct func_0039F600_node {
 static inline void func_0039F600_setId(func_0039F600_node* n, int v) { n->id = v; }
 static inline void func_0039F600_setB7(func_0039F600_node* n, int v) { n->b7 = v; }
 
+/**
+ * Closes the popups on top of a state stack down to a pop floor; returns the state where it stopped.
+ *
+ * Walks from the top while the state is a popup (bit 0) without the pop-floor bit (15); each one below mode 6 is set to
+ * mode 7 (closed) and pending delete. The challenge popup code calls it.
+ *
+ * @param list  the state stack (its main list)
+ * @return the first non-popup or pop-floor state, or null
+ */
 extern "C" func_0039F600_node* func_0039F600(cList* list)
 {
     func_0039F600_node* n = (func_0039F600_node*)cList_first(list);
@@ -336,6 +343,14 @@ struct func_0039F698_node {
 static inline void func_0039F698_setId(func_0039F698_node* n, int v) { n->id = v; }
 static inline void func_0039F698_setB7(func_0039F698_node* n, int v) { n->b7 = v; }
 
+/**
+ * Closes all popups on top of a state stack; returns the first non-popup state.
+ *
+ * Each popup below mode 6 is set to mode 7 (closed) and pending delete. The trophy and file screens call it.
+ *
+ * @param list  the state stack (its main list)
+ * @return the first non-popup state, or null
+ */
 extern "C" func_0039F698_node* func_0039F698(cList* list)
 {
     func_0039F698_node* n = (func_0039F698_node*)cList_first(list);
@@ -375,6 +390,14 @@ struct func_0039F718_node {
 static inline void func_0039F718_setId(func_0039F718_node* n, int v) { n->id = v; }
 static inline void func_0039F718_setB7(func_0039F718_node* n, int v) { n->b7 = v; }
 
+/**
+ * Closes all popups on top of a state stack and the state under them; returns the state below that.
+ *
+ * Each closed state below mode 6 is set to mode 7 and pending delete. The pause and profile save screens call it.
+ *
+ * @param list  the state stack (its main list)
+ * @return the next state down, or null
+ */
 extern "C" func_0039F718_node* func_0039F718(cList* list)
 {
     func_0039F718_node* n = (func_0039F718_node*)cList_first(list);
@@ -420,7 +443,16 @@ static inline void Set39F7B8(sUIState39F7B8* s, int on)
     }
 }
 
-// Sets the active flag on every state in a chain (and the last one if requested), skipping types >= 6.
+/**
+ * Sets the visible bit of a chain of states, from @p state down through the states that have a parent.
+ *
+ * Walks next links while the state's parent (+0x20) is set, then also the last one when @p last is nonzero; states in
+ * mode 6 or above are left alone. func_0039ECB0 uses it on a popup's parent chain.
+ *
+ * @param state  the first state of the chain
+ * @param on  1 to show, 0 to hide
+ * @param last  nonzero to include the state without a parent
+ */
 extern "C" void func_0039F7B8(void* self, sUIState39F7B8* state, int on, int last)
 {
     if (state == 0) {
@@ -515,6 +547,12 @@ static inline void func_0039F8C8_purge(cList* list)
     }
 }
 
+/**
+ * Destroys the non-explicit states of a state stack's main and explicit lists.
+ *
+ * Each state without the explicit bit (6) gets virtual slot 5, then is deleted through slot 1 with 3. func_0039E9D8
+ * calls it first.
+ */
 extern "C" void func_0039F8C8(cList* self)
 {
     func_0039F8C8_purge(self);
@@ -592,6 +630,13 @@ void* cList_first(cList*);
 //100%
 INCLUDE_ASM("ui/uistatestack", func_0039FAE8);
 #ifdef SKIP_ASM
+/**
+ * Returns the top state of a state stack (the first node of its main list).
+ *
+ * func_00259230 and a file-screen function use it on an engine's +0x18.
+ *
+ * @return the top state, or null
+ */
 extern "C" void* func_0039FAE8(void* self)
 {
     return cList_first((cList*)self);
@@ -601,6 +646,14 @@ extern "C" void* func_0039FAE8(void* self)
 //100%
 INCLUDE_ASM("ui/uistatestack", func_0039FB08);
 #ifdef SKIP_ASM
+/**
+ * Copies the first 8 bytes of each of four 16-byte blocks (offsets 0x0, 0x10, 0x20, 0x30) from @p src to @p dst.
+ *
+ * Nothing in the retail code references it.
+ *
+ * @param dst  the destination
+ * @param src  the source
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" void func_0039FB08(void *dst, void *src) {
     (*(long long *)((char*)(dst) + (0))) = (long long) (*(long long *)((char*)(src) + (0)));
@@ -799,6 +852,13 @@ INCLUDE_ASM("ui/uistatestack", cUIThing_setFrameByPercent);
 #ifdef SKIP_ASM
 extern "C" int cUIAnimation_getNumFrames(void* obj);
 
+/**
+ * Sets a UI thing's animation frame (+0xA of mpAnim) to its frame count times @p fraction, truncated.
+ *
+ * Does nothing without an animation. The count comes from cUIAnimation_getNumFrames.
+ *
+ * @param fraction  the position in the animation, 0..1
+ */
 extern "C" void cUIThing_setFrameByPercent(cUIThing* self, float fraction)
 {
     void* obj = self->mpAnim;
@@ -813,6 +873,14 @@ INCLUDE_ASM("ui/uistatestack", cUIThing_isLastAnimFrame);
 #ifdef SKIP_ASM
 extern "C" int cUIAnimation_isLastFrame(int);
 
+/**
+ * Returns whether a UI thing's animation (mpAnim) is on its last frame; false without an animation.
+ *
+ * Uses cUIAnimation_isLastFrame.
+ *
+ * @param uiThing  the UI thing
+ * @return 1 at the last frame, else 0
+ */
 extern "C" int cUIThing_isLastAnimFrame(cUIThing* uiThing) {
     int temp_4;
     int var_2;
@@ -868,7 +936,6 @@ struct sState39FE00 {
  *
  * @param def  the object's record in the screen data (On Tour pObj, a tUIBaseObject)
  */
-// Initialises a UI state from its definition record (id, layer, flags) and points it at the following data.
 extern "C" void cUIThing_setUIData(sState39FE00* self, sStateDef39FE00* def)
 {
     self->id = def->id;

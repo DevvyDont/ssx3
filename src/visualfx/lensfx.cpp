@@ -100,6 +100,18 @@ extern void* D_00487EE8[];
 struct sLensFx;
 extern "C" void func_002ECAF0(sLensFx* self);
 
+/**
+ * Constructs a rider's bolt-on effect set ("cBoltOnFXInterface"): the attached particle emitters its equipment carries.
+ *
+ * Installs the vtable D_00487EE8 at +0xC4, marks the set dirty (+0x0 = 1), stores the rider (+0x4) and the
+ * attached-emitter owner (+0xC), clears the character pointer (+0x8) and empties the 15 entries (+0x10, 0xC bytes each:
+ * emitter index, item, kind) through func_002EC9D0 and func_002ECAF0. cRider_cRider builds it on 200 bytes with the
+ * rider's mAttachedEmitterFX and stores it as mBoltOnFX.
+ *
+ * @param a1  the rider
+ * @param a2  the attached-emitter owner the emitters are created in
+ * @return @p self
+ */
 extern "C" void* func_002EC9E0(void* self, int a1, int a2)
 {
     *(void***)((char*)self + 0xC4) = D_00487EE8;
@@ -124,6 +136,17 @@ extern void* D_00487EE8[];
 struct sLensFx;
 extern "C" void func_002ECAF0(sLensFx* self);
 
+/**
+ * Constructs a front-end character's bolt-on effect set ("cBoltOnFXInterface"), keyed by a character id instead of a
+ * rider.
+ *
+ * Same as func_002EC9E0 except that it stores a pointer to the character id (+0x8) and leaves the rider (+0x4) 0.
+ * cFERider_init builds it on 200 bytes.
+ *
+ * @param a1  pointer to the character id
+ * @param a2  the attached-emitter owner the emitters are created in
+ * @return @p self
+ */
 extern "C" void* func_002ECA68(void* self, int a1, int a2)
 {
     *(void***)((char*)self + 0xC4) = D_00487EE8;
@@ -155,6 +178,11 @@ struct sLensFx {
     sLensEntry entries[15];
 };
 
+/**
+ * Marks all 15 entries of a bolt-on effect set as free (emitter index -1).
+ *
+ * The two constructors func_002EC9E0 and func_002ECA68 call it.
+ */
 extern "C" void func_002ECAF0(sLensFx* self)
 {
     int i;
@@ -171,6 +199,15 @@ extern void* D_00487EE8[];
 extern "C" void func_002F2218(int a, int id);
 void operator_delete(int* ptr);
 
+/**
+ * Destroys a bolt-on effect set: releases every attached emitter it still holds, then frees the object when asked.
+ *
+ * Re-installs the vtable D_00487EE8, releases each used entry's emitter from the owner (+0xC) with func_002F2218 and
+ * marks it free, then frees the object with operator_delete when bit 0 of @p flags is set. It is the destructor slot of
+ * D_00487EE8.
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_002ECB28(sLensFx* self, int flags)
 {
     *(void***)((char*)self + 0xC4) = D_00487EE8;
@@ -203,6 +240,17 @@ struct func_002ECBC0_sMgr {
 
 extern "C" int func_002ECC28(void* self, int a1, int a2);
 
+/**
+ * Returns the entry of a bolt-on effect set that holds an emitter of @p kind on @p itemId, creating one when there is
+ * none.
+ *
+ * Searches the 15 entries for a used one with item +0x4 == @p itemId and kind +0x8 == @p kind; otherwise func_002ECC28
+ * creates it. func_002ECCB8 calls it.
+ *
+ * @param kind  the particle effect kind
+ * @param itemId  the item (attach point) id
+ * @return the entry index
+ */
 extern "C" int func_002ECBC0(func_002ECBC0_sMgr* self, int kind, int itemId)
 {
     int i;
@@ -220,6 +268,17 @@ INCLUDE_ASM("visualfx/lensfx", func_002ECC28);
 #ifdef SKIP_ASM
 extern "C" int func_002F2130(int a, int x, int y);
 
+/**
+ * Creates an attached emitter of a given kind on an item in the first free entry of a bolt-on effect set.
+ *
+ * The emitter comes from func_002F2130 on the owner (+0xC); the entry stores its index, @p y as the item (+0x4) and @p
+ * x as the kind (+0x8). Returns 0 when all 15 entries are in use, so the caller then marks entry 0.
+ *
+ * @param lensMgr  the bolt-on effect set
+ * @param x  the particle effect kind
+ * @param y  the item (attach point) id
+ * @return the entry index, or 0 when full
+ */
 extern "C" int func_002ECC28(void* lensMgr, int x, int y)
 {
     sLensFx* self = (sLensFx*)lensMgr;
@@ -274,6 +333,20 @@ struct sLensMgr_CCB8 {
     sLensEntry entries[15];     // 0x10
 };
 
+/**
+ * Rebuilds a bolt-on effect set from the character's equipment: makes sure every needed emitter exists and releases the
+ * rest.
+ *
+ * Finds the character record: for a rider (+0x4) func_0014AD50 with its kRiderVt_getAIIndex and the id from
+ * cRider_getCheatIdentity (cRider_getIdentity below 10); for a front-end character (+0x8) func_0014AD28 with the
+ * current UI state's +0x44 and the id. Then walks the character's 0x38-byte bolt definitions (func_0014D988 count,
+ * func_0014D998) and, for each one with a kind (+0x11, not -1) whose part is fitted (the record's table at +0x288 for
+ * slot +0x4; normal characters below 10 also need flag 0x10), marks func_002ECBC0's entry for each of its two items
+ * (+0x12, +0x13) as used; kinds of 50 and up use kinds k-50 and k-49. Unused entries' emitters are released with
+ * func_002F2218. Clears the dirty flag (+0x0).
+ *
+ * @param vself  the bolt-on effect set (this)
+ */
 extern "C" void func_002ECCB8(void* vself)
 {
     sLensMgr_CCB8* self = (sLensMgr_CCB8*)vself;
@@ -346,6 +419,11 @@ INCLUDE_ASM("visualfx/lensfx", func_002ECF78);
 #ifdef SKIP_ASM
 extern "C" void func_002ECCB8(void* self);
 
+/**
+ * Rebuilds a bolt-on effect set (func_002ECCB8) when it is marked dirty (+0x0).
+ *
+ * cRider_updateSplitMiscFX and cFERider_update call it each frame.
+ */
 extern "C" void func_002ECF78(void* self)
 {
     if (*(int*)self != 0) {
@@ -505,6 +583,15 @@ struct sLensLerp_D1D0 {
     sLerpV4_D1D0 b;
 };
 
+/**
+ * Blends a render state's two colours toward new targets: 90% of the way, or all the way when @p full is set.
+ *
+ * The colours are at +0x28 and +0x38 of the 0xF0-byte cRenderStateMan_m_state row. cRenderStateMan_update calls it.
+ *
+ * @param targetA  the target for the colour at +0x28
+ * @param targetB  the target for the colour at +0x38
+ * @param full  nonzero to jump straight to the targets
+ */
 extern "C" void func_002ED1D0(sLensLerp_D1D0* self, const sLerpV4_D1D0* targetA, const sLerpV4_D1D0* targetB, int full)
 {
     float weight = 0.8999999761581421f;
@@ -543,6 +630,15 @@ struct sLensLerp {
     sLerpV4 b;
 };
 
+/**
+ * Blends a render state's two colours toward new targets by @p weight.
+ *
+ * The colours at +0x28 and +0x38 become colour * (1 - @p weight) + target * @p weight. cRenderStateMan_update calls it.
+ *
+ * @param targetA  the target for the colour at +0x28
+ * @param targetB  the target for the colour at +0x38
+ * @param weight  the blend weight, 0..1
+ */
 extern "C" void func_002ED338(sLensLerp* self, const sLerpV4* targetA, const sLerpV4* targetB, float weight)
 {
     float keep = 1.0f - weight;
@@ -629,6 +725,21 @@ static inline sV4_DB20 Sample_DB20(float u, float v, short tex)
     return vt[58].fn((char*)GrMan + vt[58].delta, u, v, tex, 1);
 }
 
+/**
+ * Samples a world patch's textures at a point and derives the two colours for the render state from them.
+ *
+ * Does nothing for a null patch or one whose texture page is not loaded (world cache checks). Of the patch's three
+ * layers (3 type bits each at +0xC), a type-5 layer is sampled at the patch rectangle (+0x10..+0x1C) point given by @p
+ * tx, @p ty clamped to 0..1, and a type-1 layer at the UV interpolated from the corner values (+0x20..+0x3C), wrapped
+ * to 0..1; samples come from GrMan virtual slot 58 with the layer texture (+0x1A0). Then *@p o4 = (type-1 sample -
+ * type-5 sample) * D_004FAB00 * (2 * type-5 sample.x) and *@p o5 = *@p o4 / type-1 sample, with both alphas (x) set to
+ * 0.5. cRenderStateMan_update and tAvalancheNode_calculate call it.
+ *
+ * @param tx  u position on the patch, 0..1
+ * @param ty  v position on the patch, 0..1
+ * @param o4  receives the first colour
+ * @param o5  receives the second colour
+ */
 extern "C" void func_002EDB20(sLensSrc_DB20* self, float tx, float ty, sV4_DB20* o4, sV4_DB20* o5)
 {
     sV4_DB20 a(0.0f, 0.0f, 0.0f, 0.0f);
@@ -680,6 +791,14 @@ static inline float clamp_DF00(float f, float lo, float hi)
     return lo;
 }
 
+/**
+ * Maps a colour's luminance to a 0..1 factor: 0 at or below 0.1, 1 at or above 0.45, ((lum - 0.1) / 0.35)^0.6 between.
+ *
+ * The luminance is 0.299 r + 0.587 g + 0.114 b of the floats at +0x4, +0x8, +0xC (an a, r, g, b colour); the power uses
+ * func_0040D758 (expf) of func_0040DA10 (logf) times 0.6. cRenderStateMan_update calls it.
+ *
+ * @return the factor, 0..1
+ */
 extern "C" float func_002EDF00(void* self)
 {
     float lum = *(float*)((char*)self + 0x4) * 0.29899999499320984f
@@ -703,6 +822,14 @@ extern char D_lensTable_DFB8[] __asm__("cRenderStateMan_m_state");
 //100%
 INCLUDE_ASM("visualfx/lensfx", func_002EDFB8);
 #ifdef SKIP_ASM
+/**
+ * Returns the irradiance of render state @p index: the address of its row's +0x50 in cRenderStateMan_m_state.
+ *
+ * cRider_SetRiderLights copies it for the rider's kRiderVt_getAIIndex.
+ *
+ * @param index  the render state (view) index
+ * @return pointer to the row's irradiance block
+ */
 extern "C" void* func_002EDFB8(int index)
 {
     return D_lensTable_DFB8 + 0x50 + index * 0xf0;
@@ -715,6 +842,13 @@ INCLUDE_ASM("visualfx/lensfx", func_002EDFD0);
 extern char D_005047F8[];
 extern "C" int cIrradianceDataBase_GetIDByName(void*, void*);
 
+/**
+ * Resolves an irradiance name field in place: replaces its first word with the name's id and sets +0x4 to 0x123400 to
+ * mark it resolved.
+ *
+ * Looks the name up with cIrradianceDataBase_GetIDByName in the irradiance database D_005047F8. func_002EE010 calls it
+ * on first use.
+ */
 extern "C" void func_002EDFD0(void* self)
 {
     *(int*)self = cIrradianceDataBase_GetIDByName(D_005047F8, self);
@@ -730,6 +864,15 @@ extern "C" void* func_0038ABF8(void* self, int i);
 extern int D_004A43C4;
 
 extern "C" void* func_002EE010_r(void* self) __asm__("func_002EE010");
+/**
+ * Returns the irradiance record for an irradiance name field, resolving the name on first use.
+ *
+ * A field not yet tagged 0x123400 at +0x4 is resolved with func_002EDFD0, or, when its name is empty, gives the default
+ * id D_004A43C4. The record comes from func_0038ABF8 on the irradiance database D_005047F8. func_002EE2F8,
+ * func_002EE318, func_002EE340, func_002EE368 and func_002EE390 call it.
+ *
+ * @return the irradiance record
+ */
 extern "C" void* func_002EE010_r(void* self)
 {
     if (*(int*)((char*)self + 4) != 0x123400) {
@@ -769,6 +912,15 @@ struct sLensFxSlot {
 
 extern sLensFxSlot cRenderStateMan_m_state[];
 
+/**
+ * Returns the sun's pitch offset for render state @p i.
+ *
+ * Calls virtual slot 27 of the state's world-painter query object m_query[5] (+0x14) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. The sun processing func_002F4DB8 uses it.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EE070(int i)
 {
     sLensFxSlot* s = &cRenderStateMan_m_state[i];
@@ -782,6 +934,15 @@ INCLUDE_ASM("visualfx/lensfx", func_002EE0B8);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
+/**
+ * Returns the sun's yaw offset for render state @p i.
+ *
+ * Calls virtual slot 28 of the state's world-painter query object m_query[5] (+0x14) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. The sun processing func_002F4DB8 uses it.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EE0B8(int i)
 {
     sLensFxSlot* s = &cRenderStateMan_m_state[i];
@@ -795,6 +956,15 @@ INCLUDE_ASM("visualfx/lensfx", func_002EE100);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
+/**
+ * Returns the sun colour's red for render state @p i.
+ *
+ * Calls virtual slot 29 of the state's world-painter query object m_query[5] (+0x14) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. The sun draw func_002F4A08 uses it.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EE100(int i)
 {
     sLensFxSlot* s = &cRenderStateMan_m_state[i];
@@ -808,6 +978,15 @@ INCLUDE_ASM("visualfx/lensfx", func_002EE148);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
+/**
+ * Returns the sun colour's green for render state @p i.
+ *
+ * Calls virtual slot 30 of the state's world-painter query object m_query[5] (+0x14) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. The sun draw func_002F4A08 uses it.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EE148(int i)
 {
     sLensFxSlot* s = &cRenderStateMan_m_state[i];
@@ -821,6 +1000,15 @@ INCLUDE_ASM("visualfx/lensfx", func_002EE190);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
+/**
+ * Returns the sun colour's blue for render state @p i.
+ *
+ * Calls virtual slot 31 of the state's world-painter query object m_query[5] (+0x14) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. The sun draw func_002F4A08 uses it.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EE190(int i)
 {
     sLensFxSlot* s = &cRenderStateMan_m_state[i];
@@ -834,6 +1022,15 @@ INCLUDE_ASM("visualfx/lensfx", func_002EE1D8);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
+/**
+ * Returns the sun's intensity for render state @p i.
+ *
+ * Calls virtual slot 32 of the state's world-painter query object m_query[5] (+0x14) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. The sun draw func_002F4A08 uses it.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EE1D8(int i)
 {
     sLensFxSlot* s = &cRenderStateMan_m_state[i];
@@ -847,6 +1044,16 @@ INCLUDE_ASM("visualfx/lensfx", func_002EE220);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
+/**
+ * Returns the sun type for render state @p i (an integer; -1 for no sun).
+ *
+ * Calls virtual slot 33 of the state's world-painter query object m_query[5] (+0x14) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. The sun draw func_002F4A08 uses it as a texture choice; the sun
+ * processing func_002F4DB8 treats -1 for state 6 as no sun.
+ *
+ * @param i  the render state (view) index
+ * @return the sun type
+ */
 extern "C" int func_002EE220(int i)
 {
     sLensFxSlot* s = &cRenderStateMan_m_state[i];
@@ -860,6 +1067,15 @@ INCLUDE_ASM("visualfx/lensfx", func_002EE268);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
+/**
+ * Returns the lens-flare intensity for render state @p i.
+ *
+ * Calls virtual slot 34 of the state's world-painter query object m_query[5] (+0x14) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. func_002F4690 uses it.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EE268(int i)
 {
     sLensFxSlot* s = &cRenderStateMan_m_state[i];
@@ -873,6 +1089,15 @@ INCLUDE_ASM("visualfx/lensfx", func_002EE2B0);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
+/**
+ * Returns the sun's radius for render state @p i.
+ *
+ * Calls virtual slot 35 of the state's world-painter query object m_query[5] (+0x14) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. The sun draw func_002F4A08 uses it as the sprite size.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EE2B0(int i)
 {
     sLensFxSlot* s = &cRenderStateMan_m_state[i];
@@ -889,6 +1114,14 @@ extern "C" void func_002EE010(void* p);
 // $gp-relative object at gp+0x24C0 (no symbol in the target)
 extern int D_004A55B0;
 
+/**
+ * Returns the irradiance record for the custom irradiance name (the name field D_004A55B0), through func_002EE010.
+ *
+ * The name is the one cRenderStateMan_setCustomIrradiance sets. The world light code (func_002F5400) uses the result as
+ * a light target. The C declaration says void; the record is passed through in the return register.
+ *
+ * @return the irradiance record
+ */
 extern "C" void func_002EE2F8(void)
 {
     func_002EE010(&D_004A55B0);
@@ -901,6 +1134,16 @@ INCLUDE_ASM("visualfx/lensfx", func_002EE318);
 extern "C" void func_002EE010(void* p);
 extern "C" void* func_002EF0E8(void);
 
+/**
+ * Returns the light irradiance record for a render state: the record for the name field func_002EF0E8 returns, through
+ * func_002EE010.
+ *
+ * func_002EF0E8 reads query accessor slot 37 (the light irradiance name in On Tour's accessor order), or gives the
+ * custom name D_004A55B0 while D_004A3B64 is set. The C definition declares no parameters and a void result: the render
+ * state index in a0 reaches func_002EF0E8 untouched and the record comes back in v0. cRenderStateMan_update calls it.
+ *
+ * @return the irradiance record
+ */
 extern "C" void func_002EE318(void)
 {
     func_002EE010(func_002EF0E8());
@@ -913,6 +1156,16 @@ INCLUDE_ASM("visualfx/lensfx", func_002EE340);
 extern "C" void func_002EE010(void* p);
 extern "C" void* func_002EF140(void);
 
+/**
+ * Returns the shadow irradiance record for a render state: the record for the name field func_002EF140 returns, through
+ * func_002EE010.
+ *
+ * func_002EF140 reads query accessor slot 38 (the shadow irradiance name in On Tour's accessor order), or gives the
+ * custom name D_004A55B0 while D_004A3B64 is set. The C definition declares no parameters and a void result: the render
+ * state index in a0 reaches func_002EF140 untouched and the record comes back in v0. cRenderStateMan_update calls it.
+ *
+ * @return the irradiance record
+ */
 extern "C" void func_002EE340(void)
 {
     func_002EE010(func_002EF140());
@@ -925,6 +1178,16 @@ INCLUDE_ASM("visualfx/lensfx", func_002EE368);
 extern "C" void func_002EE010(void* p);
 extern "C" void* func_002EF198(void);
 
+/**
+ * Returns the tunnel irradiance record for a render state: the record for the name field func_002EF198 returns, through
+ * func_002EE010.
+ *
+ * func_002EF198 reads query accessor slot 39 (the tunnel irradiance name in On Tour's accessor order), or gives the
+ * custom name D_004A55B0 while D_004A3B64 is set. The C definition declares no parameters and a void result: the render
+ * state index in a0 reaches func_002EF198 untouched and the record comes back in v0. cRenderStateMan_update calls it.
+ *
+ * @return the irradiance record
+ */
 extern "C" void func_002EE368(void)
 {
     func_002EE010(func_002EF198());
@@ -936,6 +1199,17 @@ INCLUDE_ASM("visualfx/lensfx", func_002EE390);
 #ifdef SKIP_ASM
 extern "C" void* func_002EF1F0();
 
+/**
+ * Returns the object irradiance record for a render state: the record for the name field func_002EF1F0 returns, through
+ * func_002EE010.
+ *
+ * func_002EF1F0 reads query accessor slot 40 (the object irradiance name in On Tour's accessor order), or gives the
+ * custom name D_004A55B0 while D_004A3B64 is set. The C definition declares no parameters and a void result: the render
+ * state index in a0 reaches func_002EF1F0 untouched and the record comes back in v0. Nothing in the retail code
+ * references it.
+ *
+ * @return the irradiance record
+ */
 extern "C" void func_002EE390(void)
 {
     func_002EE010(func_002EF1F0());
@@ -947,6 +1221,16 @@ INCLUDE_ASM("visualfx/lensfx", func_002EE3B8);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
+/**
+ * Returns the draw distance for render state @p i.
+ *
+ * Calls virtual slot 6 of the state's world-painter query object m_query[0] (+0x0) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cCamera_updateCamMat clamps the far plane to it and
+ * cVisualEffectsMan_commonUpdate stores it.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EE3B8(int i)
 {
     sLensFxSlot* s = &cRenderStateMan_m_state[i];
@@ -960,6 +1244,16 @@ INCLUDE_ASM("visualfx/lensfx", func_002EE400);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
+/**
+ * Returns the sky box rotation for render state @p i.
+ *
+ * Calls virtual slot 26 of the state's world-painter query object m_query[4] (+0x10) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cGame_update sets cAppMan_TheAppMan +0x34 when it is above 0.9
+ * for state 6.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EE400(int i)
 {
     sLensFxSlot* s = &cRenderStateMan_m_state[i];
@@ -973,6 +1267,16 @@ INCLUDE_ASM("visualfx/lensfx", func_002EE448);
 #ifdef SKIP_ASM
 extern int D_004A3B60;
 
+/**
+ * Returns the snow intensity for render state @p i, reduced inside tunnels.
+ *
+ * Calls virtual slot 43 of the state's world-painter query object m_query[8] (+0x20) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. The value is scaled by (1 - the row's +0x24, On Tour m_inTunnel),
+ * and is 0 while D_004A3B60 is set. cSnowFall_update uses it as snow parameter 0.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EE448(int i)
 {
     if (D_004A3B60 == 0) {
@@ -989,6 +1293,15 @@ INCLUDE_ASM("visualfx/lensfx", func_002EE4C0);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
+/**
+ * Returns the snow flake size for render state @p i.
+ *
+ * Calls virtual slot 44 of the state's world-painter query object m_query[8] (+0x20) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cSnowFall_update uses it as snow parameter 4.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EE4C0(int i)
 {
     sLensFxSlot* s = &cRenderStateMan_m_state[i];
@@ -1002,6 +1315,16 @@ INCLUDE_ASM("visualfx/lensfx", func_002EE508);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
+/**
+ * Returns the wind intensity for render state @p i, reduced inside tunnels.
+ *
+ * Calls virtual slot 45 of the state's world-painter query object m_query[8] (+0x20) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. The value is scaled by (1 - the row's +0x24). cSnowFall_update
+ * uses it as snow parameter 1 (wind strength).
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EE508(int i)
 {
     sLensFxSlot* s = &cRenderStateMan_m_state[i];
@@ -1015,6 +1338,16 @@ INCLUDE_ASM("visualfx/lensfx", func_002EE570);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
+/**
+ * Returns the wind direction angle for render state @p i, in degrees.
+ *
+ * Calls virtual slot 46 of the state's world-painter query object m_query[8] (+0x20) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cSnowFall_update uses it as snow parameter 5 (the wind angle) and
+ * cRider_updateWind reads it too.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EE570(int i)
 {
     sLensFxSlot* s = &cRenderStateMan_m_state[i];
@@ -1028,6 +1361,16 @@ INCLUDE_ASM("visualfx/lensfx", func_002EE5B8);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
+/**
+ * Returns the snow flurry amount for render state @p i.
+ *
+ * Calls virtual slot 49 of the state's world-painter query object m_query[8] (+0x20) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cSnowFall_update uses it as snow parameter 6, the mix of random
+ * flurries into the wind.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EE5B8(int i)
 {
     sLensFxSlot* s = &cRenderStateMan_m_state[i];
@@ -1041,6 +1384,16 @@ INCLUDE_ASM("visualfx/lensfx", func_002EE600);
 #ifdef SKIP_ASM
 extern int D_004A3B60;
 
+/**
+ * Returns the snow fluff intensity for render state @p i.
+ *
+ * Calls virtual slot 51 of the state's world-painter query object m_query[8] (+0x20) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. It is 0 while D_004A3B60 is set. cSnowFall_update uses it as snow
+ * parameter 2, the flake count of mode-1 (fluff) boxes.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EE600(int i)
 {
     if (D_004A3B60 == 0) {
@@ -1057,6 +1410,16 @@ INCLUDE_ASM("visualfx/lensfx", func_002EE660);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
+/**
+ * Returns the snow fluff wind intensity for render state @p i.
+ *
+ * Calls virtual slot 52 of the state's world-painter query object m_query[8] (+0x20) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cSnowFall_update uses it as snow parameter 3, the wind strength
+ * of mode-1 (fluff) boxes.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EE660(int i)
 {
     sLensFxSlot* s = &cRenderStateMan_m_state[i];
@@ -1070,6 +1433,16 @@ INCLUDE_ASM("visualfx/lensfx", func_002EE6A8);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
+/**
+ * Returns the snow gravity multiplier for render state @p i.
+ *
+ * Calls virtual slot 50 of the state's world-painter query object m_query[8] (+0x20) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cSnowFall_update uses it as snow parameter 7, the fall-speed
+ * factor.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EE6A8(int i)
 {
     sLensFxSlot* s = &cRenderStateMan_m_state[i];
@@ -1083,6 +1456,16 @@ INCLUDE_ASM("visualfx/lensfx", func_002EE6F0);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
+/**
+ * Returns the temperature for render state @p i (accessor slot 48).
+ *
+ * Calls virtual slot 48 of the state's world-painter query object m_query[8] (+0x20) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. func_002E1120 fades the rider's head puffs out as it rises from
+ * -5 to 20.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EE6F0(int i)
 {
     sLensFxSlot* s = &cRenderStateMan_m_state[i];
@@ -1096,6 +1479,16 @@ INCLUDE_ASM("visualfx/lensfx", func_002EE738);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
+/**
+ * Returns the lightning chance for render state @p i.
+ *
+ * Calls virtual slot 53 of the state's world-painter query object m_query[8] (+0x20) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cVisualEffectsMan_commonUpdate stores it in
+ * cScreenTint_m_LightningChance.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EE738(int i)
 {
     sLensFxSlot* s = &cRenderStateMan_m_state[i];
@@ -1109,6 +1502,16 @@ INCLUDE_ASM("visualfx/lensfx", func_002EE780);
 #ifdef SKIP_ASM
 extern sLensFxSlot cRenderStateMan_m_state[];
 
+/**
+ * Returns the snow flake colour's alpha for render state @p i.
+ *
+ * Calls virtual slot 54 of the state's world-painter query object m_query[8] (+0x20) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cSnowFall_update uses it as the first value of the first snow
+ * colour set.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EE780(int i)
 {
     sLensFxSlot* s = &cRenderStateMan_m_state[i];

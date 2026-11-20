@@ -267,8 +267,18 @@ static inline int boardTrailCanDraw_86F0(char* r)
     return ok;
 }
 
-// Decides whether the trail starts a new segment this frame: forced (state 1), the rider moved far enough
-// from the last segment, or the direction turned enough (d = dot of the new and last direction).
+/**
+ * Returns whether the board trail takes a new sample this frame, and if so remembers the rider's ground contact point.
+ *
+ * While the delay (+0xE0) is positive it counts it down and returns 0. Otherwise the trail samples when its state
+ * (+0x94) is 1, when the rider's mGroundContactPoint has moved at least 110 units from the last sample (+0xB0; 30 units
+ * when mIsInNIS is set, unk_AD0 is clear and unk_AFC is set), or when @p d is below 0.999. State 1 also sets the delay
+ * to 2. On a sample it copies mGroundContactPoint to +0xB0. cBoardTrailFX_update calls it with the dot product of the
+ * new and previous travel directions.
+ *
+ * @param d  dot product of this frame's and the last direction (1 = no turn)
+ * @return 1 when a new sample is taken, otherwise 0
+ */
 extern "C" int func_002E86F0(sBTrail_86F0* self, float d)
 {
     if (self->delay > 0) {
@@ -311,7 +321,19 @@ static inline int boardTrailCanDraw(char* r)
     if (*(int*)(r + 0xAC4) != 0 && *(int*)(r + 0xAD0) == 0) ok = *(int*)(r + 0xAFC) != 0;
     return ok;
 }
-// Picks the trail fade rate for the rider's current state; returns 0 when no trail should be drawn.
+/**
+ * Returns whether the rider lays a board trail this frame and sets the trail's fade rate (+0x9C) from the surface.
+ *
+ * In motion state 2 (wipeout, cRider_getMotionState) there is no trail when the word at mRiderHandler + 0x30 is set. In
+ * the other non-ground states it needs mIsInNIS set, unk_AD0 clear and unk_AFC and unk_B00 set. When layer 2's
+ * animation (cRiderAnimBase_getCurrentAnimID on mRiderAnim) is 22 and func_001446A0 on its sequence (+0xB0) is true for
+ * 0 but false for 1, there is no trail either.
+ *
+ * Then by mSurfaceType: 1 sets D_004A4594 (0); 0, 5, 6 and 12 set D_004A4590 (5); 2 and 13 set D_004A4598 (-20); 3 sets
+ * D_004A459C (-40). Any other surface gives no trail. cBoardTrailFX_update closes the trail when it returns 0.
+ *
+ * @return 1 when a trail is laid, otherwise 0
+ */
 extern "C" int func_002E87E8(char** self)
 {
     if (cRider_getMotionState(self[0]) == 2) {
@@ -676,7 +698,6 @@ static inline void btGrow(sBTrail_8938* self)
  * +0xA0) coloured from the rider's surface, and advances the head when func_002E86F0 (probably shouldSample)
  * agrees. A new trail starts with 3 segments.
  */
-// Updates the board trail: adds a segment at the board's current edges each frame.
 extern "C" void cBoardTrailFX_update(sBTrail_8938* self)
 {
     int prev = (self->head + kTrailNumSeg - 1) % kTrailNumSeg;
@@ -980,6 +1001,17 @@ struct sTrailStripA538 {
 };
 struct sRctxVtA538 { short delta; short index; void (*fn)(void*, sTrailStripA538*, int); };
 
+/**
+ * Draws the board trails of several riders in one batch through the graphics manager.
+ *
+ * Pushes a render state, then for each trail (a cBoardTrailFX, cRiderHandler + 0x520) with at least 2 samples (+0x90)
+ * builds a 0x14-byte strip record: the vertex ring (+0x10), the start index in the 54-entry ring derived from the head
+ * (+0x8C), the length (samples - 2, at most 48), 0 and 1 / D_004A45C8 (1/16). At most 16 strips are kept. Passes them
+ * to GrMan's virtual slot 89 (strips, count) and pops the state. cAI_render calls it with every rider's trail.
+ *
+ * @param trails  array of trail pointers
+ * @param n  number of entries in @p trails
+ */
 extern "C" void func_002EA538(char** trails, int n)
 {
     sTrailStripA538 strips[16];
@@ -1105,6 +1137,16 @@ struct sTrailFade {
     float time;
 };
 
+/**
+ * Starts the transition out of cut-scene mode over @p fadeTime.
+ *
+ * In state 0 (regular mode) it does nothing. From state 1 (cut-scene mode) it starts from 0; a transition already going
+ * out (state 2) keeps its progress and one going in (state 3) is reversed, both rescaled to @p fadeTime. The elapsed
+ * time is +0x14 and the length +0x18; the state (+0x10) becomes 2. tNISList_PlayNextScript calls it on the game's
+ * CutSceneTransitionMan.
+ *
+ * @param fadeTime  transition length
+ */
 extern "C" void func_002EA780(sTrailFade* self, float fadeTime)
 {
     switch (self->state) {
@@ -1179,6 +1221,15 @@ extern "C" void cCutSceneTransitionMan_ForceToCutSceneMode(void* self)
 //100%
 INCLUDE_ASM("visualfx/boardtrailfx", func_002EA8B8);
 #ifdef SKIP_ASM
+/**
+ * Counts a pause or resume request for the cut-scene transition.
+ *
+ * While a transition runs (state +0x10 is 2 or 3) it clears the pause count (+0x1C). Otherwise @p up increments the
+ * count and a zero @p up decrements it when positive. tNISList_DoPause calls it with 1 and 0 on the game's
+ * CutSceneTransitionMan.
+ *
+ * @param up  nonzero to pause, zero to resume
+ */
 extern "C" void func_002EA8B8(void* self, int up)
 {
     int state = *(int*)((char*)self + 0x10);
@@ -1676,6 +1727,13 @@ extern float D_004A3B3C;
 extern float D_004A3B40;
 extern float D_004A3B44;
 
+/**
+ * Reads the screen rectangle from the graphics manager and stores the transition texture coordinates derived from it.
+ *
+ * Calls cGraphicsMan_TheGraphicsMan's virtual slot 42, which returns a float array r, and sets D_004A3B3C = r[1],
+ * D_004A3B40 = r[1] + r[2] and D_004A3B44 = r[2]. cFade_TObj_Draw, cWipe_TObj_Draw and cCircle_TObj_Draw use these as
+ * the texture rectangle; cTransitionMan_render calls it before drawing.
+ */
 extern "C" void func_002EB8F0(void)
 {
     cPS2GraphicsMan* obj = cGraphicsMan_TheGraphicsMan;
@@ -1749,6 +1807,18 @@ struct func_002EBBA8_sObj {
     int b;                       // 0x18
 };
 
+/**
+ * Constructs a wipe transition object with a colour and a horizontal and vertical direction.
+ *
+ * Runs the cTransitionObj base constructor func_002E4D70, installs cWipe_TObj_vtbl and stores the colour (+0x4) and the
+ * directions (+0x14, +0x18), which cWipe_TObj_Draw uses to slide the rectangle in.
+ * cSSXScriptEngine_MakeTransitionObject builds it on 0x1C bytes with (-1, 0), (1, 0), (0, -1) or (0, 1).
+ *
+ * @param v  the colour (alpha first)
+ * @param a  horizontal direction: -1, 0 or 1
+ * @param b  vertical direction: -1, 0 or 1
+ * @return @p self
+ */
 extern "C" func_002EBBA8_sObj* func_002EBBA8(func_002EBBA8_sObj* self, const func_002EBBA8_sVec4& v, int a, int b)
 {
     func_002EBBA8_sVec4 vecCopy = v;
@@ -1832,6 +1902,18 @@ struct sTrailVec_002EBD88 { float x, y, z, w; };
 
 extern void* cCircle_TObj_vtbl[];
 
+/**
+ * Constructs a circle transition object with a colour and an explicit circle centre.
+ *
+ * Runs the cTransitionObj base constructor func_002E4D70, installs cCircle_TObj_vtbl and stores the colour (+0x4) and
+ * the centre (+0x14, +0x18) that cCircle_TObj_Draw closes the circle around. Nothing in the retail code references it;
+ * func_002EBE20 is the variant with a random centre.
+ *
+ * @param rect  the colour (alpha first)
+ * @param posX  centre x in screen units (0..640)
+ * @param posY  centre y in screen units (0..480)
+ * @return @p self
+ */
 extern "C" void* func_002EBD88(void* self, sTrailVec_002EBD88 rect, float posX, float posY)
 {
     func_002E4D70(self);
@@ -1854,6 +1936,16 @@ extern void* cCircle_TObj_vtbl[];
 
 struct sBtRectBE20 { float x, y, w, h; };
 
+/**
+ * Constructs a circle transition object with a colour and a random circle centre.
+ *
+ * Runs the cTransitionObj base constructor func_002E4D70, installs cCircle_TObj_vtbl, stores the colour (+0x4) and
+ * picks the centre with BXrand: x = (rand % 1000) * 0.64 (+0x14) and y = (rand % 1000) * 0.48 (+0x18), so within the
+ * 640x480 screen. cSSXScriptEngine_MakeTransitionObject builds it on 0x1C bytes.
+ *
+ * @param rect  the colour (alpha first)
+ * @return @p self
+ */
 extern "C" void* func_002EBE20(void* self, sBtRectBE20 rect)
 {
     func_002E4D70_r(self);

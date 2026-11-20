@@ -98,6 +98,15 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EE8A0);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
+/**
+ * Returns the snow fluff colour's alpha for render state @p i.
+ *
+ * Calls virtual slot 58 of the state's world-painter query object m_query[8] (+0x20) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cSnowFall_update uses it as .x of the second snow colour set.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EE8A0(int i)
 {
     sRSMEntry* e = &cRenderStateMan_m_state[i];
@@ -112,6 +121,15 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EE8E8);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
+/**
+ * Returns the snow fluff colour's red for render state @p i.
+ *
+ * Calls virtual slot 59 of the state's world-painter query object m_query[8] (+0x20) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cSnowFall_update uses it as .y of the second snow colour set.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EE8E8(int i)
 {
     sRSMEntry* e = &cRenderStateMan_m_state[i];
@@ -126,6 +144,15 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EE930);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
+/**
+ * Returns the snow fluff colour's green for render state @p i.
+ *
+ * Calls virtual slot 60 of the state's world-painter query object m_query[8] (+0x20) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cSnowFall_update uses it as .z of the second snow colour set.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EE930(int i)
 {
     sRSMEntry* e = &cRenderStateMan_m_state[i];
@@ -140,6 +167,15 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EE978);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
+/**
+ * Returns the snow fluff colour's blue for render state @p i.
+ *
+ * Calls virtual slot 61 of the state's world-painter query object m_query[8] (+0x20) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cSnowFall_update uses it as .w of the second snow colour set.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EE978(int i)
 {
     sRSMEntry* e = &cRenderStateMan_m_state[i];
@@ -154,6 +190,16 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EE9C0);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
+/**
+ * Returns the fog density for render state @p i.
+ *
+ * Calls virtual slot 7 of the state's world-painter query object m_query[1] (+0x4) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cVisualEffectsMan_commonUpdate stores it in cDepthFog_m_Density
+ * (for the camera's state) and in its per-state table.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EE9C0(int i)
 {
     sRSMEntry* e = &cRenderStateMan_m_state[i];
@@ -168,6 +214,16 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EEA08);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
+/**
+ * Returns the fog near distance for render state @p i.
+ *
+ * Calls virtual slot 8 of the state's world-painter query object m_query[1] (+0x4) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cVisualEffectsMan_commonUpdate stores it in cDepthFog_m_NearPlane
+ * (for the camera's state) and in its per-state table.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EEA08(int i)
 {
     sRSMEntry* e = &cRenderStateMan_m_state[i];
@@ -182,6 +238,16 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EEA50);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
+/**
+ * Returns the fog far distance for render state @p i.
+ *
+ * Calls virtual slot 9 of the state's world-painter query object m_query[1] (+0x4) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cVisualEffectsMan_commonUpdate stores it in cDepthFog_m_FarPlane
+ * (for the camera's state) and in its per-state table.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EEA50(int i)
 {
     sRSMEntry* e = &cRenderStateMan_m_state[i];
@@ -196,6 +262,16 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EEA98);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
+/**
+ * Returns the fog colour's red for render state @p i.
+ *
+ * Calls virtual slot 10 of the state's world-painter query object m_query[1] (+0x4) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cVisualEffectsMan_commonUpdate stores it in the fog colour (for
+ * the camera's state) and in its per-state table.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EEA98(int i)
 {
     sRSMEntry* e = &cRenderStateMan_m_state[i];
@@ -210,6 +286,16 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EEAE0);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
+/**
+ * Returns the fog colour's green for render state @p i.
+ *
+ * Calls virtual slot 11 of the state's world-painter query object m_query[1] (+0x4) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cVisualEffectsMan_commonUpdate stores it in the fog colour (for
+ * the camera's state) and in its per-state table.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EEAE0(int i)
 {
     sRSMEntry* e = &cRenderStateMan_m_state[i];
@@ -224,6 +310,16 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EEB28);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
+/**
+ * Returns the fog colour's blue for render state @p i.
+ *
+ * Calls virtual slot 12 of the state's world-painter query object m_query[1] (+0x4) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cVisualEffectsMan_commonUpdate stores it in the fog colour (for
+ * the camera's state) and in its per-state table.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EEB28(int i)
 {
     sRSMEntry* e = &cRenderStateMan_m_state[i];
@@ -238,6 +334,17 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EEB70);
 #ifdef SKIP_ASM
 extern int D_004A3B60;
 
+/**
+ * Returns the screen tint scale's red for render state @p i (1 while D_004A3B60 is set).
+ *
+ * Calls virtual slot 20 of the state's world-painter query object m_query[3] (+0xC) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. It returns 1 instead while the flag D_004A3B60 is set
+ * (world-script events set it with bit 4 and clear it with bit 8). cVisualEffectsMan_commonUpdate stores it in
+ * cScreenTint_m_ColourR and in its per-state table.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EEB70(int i)
 {
     if (D_004A3B60 == 0) {
@@ -255,6 +362,17 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EEBD0);
 #ifdef SKIP_ASM
 extern int D_004A3B60;
 
+/**
+ * Returns the screen tint scale's green for render state @p i (1 while D_004A3B60 is set).
+ *
+ * Calls virtual slot 21 of the state's world-painter query object m_query[3] (+0xC) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. It returns 1 instead while the flag D_004A3B60 is set
+ * (world-script events set it with bit 4 and clear it with bit 8). cVisualEffectsMan_commonUpdate stores it in
+ * cScreenTint_m_ColourG and in its per-state table.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EEBD0(int i)
 {
     if (D_004A3B60 == 0) {
@@ -272,6 +390,17 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EEC30);
 #ifdef SKIP_ASM
 extern int D_004A3B60;
 
+/**
+ * Returns the screen tint scale's blue for render state @p i (1 while D_004A3B60 is set).
+ *
+ * Calls virtual slot 22 of the state's world-painter query object m_query[3] (+0xC) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. It returns 1 instead while the flag D_004A3B60 is set
+ * (world-script events set it with bit 4 and clear it with bit 8). cVisualEffectsMan_commonUpdate stores it in
+ * cScreenTint_m_ColourB and in its per-state table.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EEC30(int i)
 {
     if (D_004A3B60 == 0) {
@@ -289,6 +418,17 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EEC90);
 #ifdef SKIP_ASM
 extern int D_004A3B60;
 
+/**
+ * Returns the screen tint offset's red for render state @p i (0 while D_004A3B60 is set).
+ *
+ * Calls virtual slot 23 of the state's world-painter query object m_query[3] (+0xC) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. It returns 0 instead while the flag D_004A3B60 is set
+ * (world-script events set it with bit 4 and clear it with bit 8). cVisualEffectsMan_commonUpdate stores it in
+ * cScreenTint_m_FillR and in its per-state table.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EEC90(int i)
 {
     if (D_004A3B60 == 0) {
@@ -306,6 +446,17 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EECF0);
 #ifdef SKIP_ASM
 extern int D_004A3B60;
 
+/**
+ * Returns the screen tint offset's green for render state @p i (0 while D_004A3B60 is set).
+ *
+ * Calls virtual slot 24 of the state's world-painter query object m_query[3] (+0xC) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. It returns 0 instead while the flag D_004A3B60 is set
+ * (world-script events set it with bit 4 and clear it with bit 8). cVisualEffectsMan_commonUpdate stores it in
+ * cScreenTint_m_FillG and in its per-state table.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EECF0(int i)
 {
     if (D_004A3B60 == 0) {
@@ -323,6 +474,17 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EED50);
 #ifdef SKIP_ASM
 extern int D_004A3B60;
 
+/**
+ * Returns the screen tint offset's blue for render state @p i (0 while D_004A3B60 is set).
+ *
+ * Calls virtual slot 25 of the state's world-painter query object m_query[3] (+0xC) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. It returns 0 instead while the flag D_004A3B60 is set
+ * (world-script events set it with bit 4 and clear it with bit 8). cVisualEffectsMan_commonUpdate stores it in
+ * cScreenTint_m_FillB and in its per-state table.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EED50(int i)
 {
     if (D_004A3B60 == 0) {
@@ -340,6 +502,16 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EEDB0);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
+/**
+ * Returns the light glow cutoff for render state @p i.
+ *
+ * Calls virtual slot 13 of the state's world-painter query object m_query[2] (+0x8) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cVisualEffectsMan_commonUpdate stores it in
+ * cLightGlow_m_PS2MinIntensity.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EEDB0(int i)
 {
     sRSMEntry* e = &cRenderStateMan_m_state[i];
@@ -354,6 +526,16 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EEDF8);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
+/**
+ * Returns the light glow cutoff scale for render state @p i.
+ *
+ * Calls virtual slot 14 of the state's world-painter query object m_query[2] (+0x8) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cVisualEffectsMan_commonUpdate stores it in
+ * cLightGlow_m_PS2ModIntensity.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EEDF8(int i)
 {
     sRSMEntry* e = &cRenderStateMan_m_state[i];
@@ -368,6 +550,16 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EEE40);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
+/**
+ * Returns the light glow copy intensity for render state @p i.
+ *
+ * Calls virtual slot 15 of the state's world-painter query object m_query[2] (+0x8) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cVisualEffectsMan_commonUpdate stores it in
+ * cLightGlow_m_PS2CopyIntensity.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EEE40(int i)
 {
     sRSMEntry* e = &cRenderStateMan_m_state[i];
@@ -382,6 +574,16 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EEE88);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
+/**
+ * Returns the light glow source intensity for render state @p i.
+ *
+ * Calls virtual slot 16 of the state's world-painter query object m_query[2] (+0x8) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cVisualEffectsMan_commonUpdate stores it in
+ * cLightGlow_m_PS2FrameSrcScale.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EEE88(int i)
 {
     sRSMEntry* e = &cRenderStateMan_m_state[i];
@@ -396,6 +598,16 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EEED0);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
+/**
+ * Returns the light glow frame intensity for render state @p i.
+ *
+ * Calls virtual slot 17 of the state's world-painter query object m_query[2] (+0x8) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cVisualEffectsMan_commonUpdate stores it in
+ * cLightGlow_m_PS2FrameDstScale.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EEED0(int i)
 {
     sRSMEntry* e = &cRenderStateMan_m_state[i];
@@ -410,6 +622,16 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EEF18);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
+/**
+ * Returns the light glow's second blend intensity for render state @p i.
+ *
+ * Calls virtual slot 18 of the state's world-painter query object m_query[2] (+0x8) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cVisualEffectsMan_commonUpdate stores it in
+ * cLightGlow_m_PS2IntensityTex2.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EEF18(int i)
 {
     sRSMEntry* e = &cRenderStateMan_m_state[i];
@@ -424,6 +646,16 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EEF60);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
+/**
+ * Returns the light glow's third blend intensity for render state @p i.
+ *
+ * Calls virtual slot 19 of the state's world-painter query object m_query[2] (+0x8) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cVisualEffectsMan_commonUpdate stores it in
+ * cLightGlow_m_PS2IntensityTex3.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EEF60(int i)
 {
     sRSMEntry* e = &cRenderStateMan_m_state[i];
@@ -438,6 +670,16 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EEFA8);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
+/**
+ * Returns the rim light intensity offset for render state @p i (accessor slot 42).
+ *
+ * Calls virtual slot 42 of the state's world-painter query object m_query[7] (+0x1C) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cRider_SetRiderLights passes it with the rider's
+ * kRiderVt_getAIIndex to func_00389CB8.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EEFA8(int i)
 {
     sRSMEntry* e = &cRenderStateMan_m_state[i];
@@ -452,6 +694,15 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EEFF0);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
+/**
+ * Returns the ambient light intensity offset for render state @p i.
+ *
+ * Calls virtual slot 41 of the state's world-painter query object m_query[7] (+0x1C) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cRenderStateMan_update uses it.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EEFF0(int i)
 {
     sRSMEntry* e = &cRenderStateMan_m_state[i];
@@ -466,6 +717,16 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EF038);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
+/**
+ * Returns the snow sparkle density for render state @p i, reduced inside tunnels.
+ *
+ * Calls virtual slot 36 of the state's world-painter query object m_query[6] (+0x18) of cRenderStateMan_m_state[@p i]
+ * (0xF0-byte rows) and scales the value it points to by (1 - the row's +0x24, On Tour m_inTunnel).
+ * cVisualEffectsMan_commonUpdate stores it in its per-state table.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EF038(int i)
 {
     sRSMEntry* entry = &cRenderStateMan_m_state[i];
@@ -480,6 +741,15 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EF0A0);
 #ifdef SKIP_ASM
 extern sRSMEntry cRenderStateMan_m_state[];
 
+/**
+ * Returns the wind intensity felt by players for render state @p i.
+ *
+ * Calls virtual slot 47 of the state's world-painter query object m_query[8] (+0x20) (cRenderStateMan_m_state[@p i],
+ * 0xF0-byte rows) and returns the value it points to. cRider_updateWind uses it.
+ *
+ * @param i  the render state (view) index
+ * @return the value
+ */
 extern "C" float func_002EF0A0(int i)
 {
     sRSMEntry* e = &cRenderStateMan_m_state[i];
@@ -495,6 +765,16 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EF0E8);
 extern int D_004A3B64;
 extern int D_004A55B0;
 
+/**
+ * Returns the light irradiance name field for render state @p i, or the custom one while a custom irradiance is set.
+ *
+ * While D_004A3B64 is set (cRenderStateMan_setCustomIrradiance) it returns the custom name field D_004A55B0; otherwise
+ * it calls virtual slot 37 of the state's world-painter query object m_query[7] (+0x1C) of cRenderStateMan_m_state[@p
+ * i] and returns the pointer it gives. func_002EE318 calls it.
+ *
+ * @param i  the render state (view) index
+ * @return the name field
+ */
 extern "C" void* func_002EF0E8(int i)
 {
     if (D_004A3B64 != 0) {
@@ -515,6 +795,16 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EF140);
 extern int D_004A3B64;
 extern int D_004A55B0;
 
+/**
+ * Returns the shadow irradiance name field for render state @p i, or the custom one while a custom irradiance is set.
+ *
+ * While D_004A3B64 is set (cRenderStateMan_setCustomIrradiance) it returns the custom name field D_004A55B0; otherwise
+ * it calls virtual slot 38 of the state's world-painter query object m_query[7] (+0x1C) of cRenderStateMan_m_state[@p
+ * i] and returns the pointer it gives. func_002EE340 calls it.
+ *
+ * @param i  the render state (view) index
+ * @return the name field
+ */
 extern "C" void* func_002EF140(int i)
 {
     if (D_004A3B64 != 0) {
@@ -535,6 +825,16 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EF198);
 extern int D_004A3B64;
 extern int D_004A55B0;
 
+/**
+ * Returns the tunnel irradiance name field for render state @p i, or the custom one while a custom irradiance is set.
+ *
+ * While D_004A3B64 is set (cRenderStateMan_setCustomIrradiance) it returns the custom name field D_004A55B0; otherwise
+ * it calls virtual slot 39 of the state's world-painter query object m_query[7] (+0x1C) of cRenderStateMan_m_state[@p
+ * i] and returns the pointer it gives. func_002EE368 calls it.
+ *
+ * @param i  the render state (view) index
+ * @return the name field
+ */
 extern "C" void* func_002EF198(int i)
 {
     if (D_004A3B64 != 0) {
@@ -555,6 +855,16 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EF1F0);
 extern int D_004A3B64;
 extern int D_004A55B0;
 
+/**
+ * Returns the object irradiance name field for render state @p i, or the custom one while a custom irradiance is set.
+ *
+ * While D_004A3B64 is set (cRenderStateMan_setCustomIrradiance) it returns the custom name field D_004A55B0; otherwise
+ * it calls virtual slot 40 of the state's world-painter query object m_query[7] (+0x1C) of cRenderStateMan_m_state[@p
+ * i] and returns the pointer it gives. func_002EE390 calls it.
+ *
+ * @param i  the render state (view) index
+ * @return the name field
+ */
 extern "C" void* func_002EF1F0(int i)
 {
     if (D_004A3B64 != 0) {
@@ -1274,6 +1584,13 @@ INCLUDE_ASM("visualfx/renderstateman", func_002EFF90);
 #ifdef SKIP_ASM
 extern void* D_004A3B78;
 
+/**
+ * Returns the visual effects manager (D_004A3B78), which cVisualEffectsMan_cVisualEffectsMan records.
+ *
+ * Nothing in the retail code references it.
+ *
+ * @return the manager
+ */
 extern "C" int func_002EFF90(void) {
     return (*(int*)&D_004A3B78);
 }
@@ -1507,6 +1824,13 @@ INCLUDE_ASM("visualfx/renderstateman", func_002F0360);
 #ifdef SKIP_ASM
 extern void* D_004A3B80;
 
+/**
+ * Returns the AI visual effects manager (D_004A3B80), which cAIVisualEffectsMan_cAIVisualEffectsMan records.
+ *
+ * Nothing in the retail code references it.
+ *
+ * @return the manager
+ */
 extern "C" int func_002F0360(void) {
     return (*(int*)&D_004A3B80);
 }
@@ -1537,6 +1861,12 @@ extern "C" void* cAIVisualEffectsMan_cAIVisualEffectsMan(void* self)
 //100%
 INCLUDE_ASM("visualfx/renderstateman", func_002F0388);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * It sits between cAIVisualEffectsMan_cAIVisualEffectsMan and cAIVisualEffectsMan_construct; nothing in the retail code
+ * references it.
+ */
 extern "C" void func_002F0388(void) {
 
 }

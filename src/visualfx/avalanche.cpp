@@ -275,8 +275,6 @@ static inline void Reset_5778(sAvAct_5778* self)
  * @return the frame data: position, colour (packed bytes / 128, alpha = m_emitterAlphaScale) and rotation at
  *         t
  */
-// Steps the active node's path up to the frame at time t (emitting debris for the skipped frames while
-// it is emitting) and returns the interpolated position, colour and orientation at t.
 extern "C" tFrameData_5778 tActiveAvalancheNode_getFrameData(sAvAct_5778* self, float currTime)
 {
     tActiveAvalancheNode_calculateScale_Data(self, currTime);
@@ -391,6 +389,16 @@ static inline sVec4_6290 vScale_6290(const sVec4_6290& v, float s)
     return r;
 }
 
+/**
+ * Returns the colour of the avalanche node bound to an instance, alpha first.
+ *
+ * The node is cAvalanche_m_nodeList[high byte of the instance's ushort at +0x92]. When the node has an active node
+ * (+0x114) it returns that active node's colour (+0xC0..+0xCF) reordered as (w, x, y, z). Otherwise, when it has a
+ * packed history (+0xFC), it returns (1, r, g, b) from the first record's colour bytes 3..5 divided by 128 (then scaled
+ * by D_004A3AA8, 1.0). With neither it returns t4vect_Origin. Nothing in the retail code references it.
+ *
+ * @return the colour as (alpha, red, green, blue)
+ */
 extern "C" sVec4_6290 func_002D6290(void* self)
 {
     char* node = ((char**)cAvalanche_m_nodeList)[*(unsigned short*)((char*)self + 0x92) >> 8];
@@ -575,6 +583,15 @@ static inline int isBad_64D8(const float* f)
     return r;
 }
 
+/**
+ * Limits an avalanche node's velocity to 70 units and replaces a non-finite velocity with (10, 10, 10, 0).
+ *
+ * When the 4-component length of @p v exceeds D_004A3A94 (70), the vector is normalised and scaled to 70. Then, if any
+ * component is +-infinity or a quiet NaN (bit patterns 0x7F800000, 0x7FC00000, 0xFF800000, 0xFFC00000), the whole
+ * vector is reset. tAvalancheNode_calculate calls it.
+ *
+ * @param v  the velocity, changed in place
+ */
 extern "C" void func_002D64D8(void* self, sVec4_64D8* v)
 {
     if (D_004A3A94 < vLen_64D8(*v))
@@ -1025,6 +1042,22 @@ extern "C" void FILESYS_writesync(void* a, void* b, void* data, int size, int pr
 void* operator_new_tag(unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char str_buffer[];
 
+/**
+ * Writes @p rows units of @p stride bytes to an open file, reversing the bytes of each unit unless @p direct is set.
+ *
+ * With @p direct it writes the data as it is; otherwise it copies it into a temporary buffer (operator new tagged
+ * "buffer") with each unit's bytes reversed, writes that and frees it. Both paths use FILESYS_writesync with priority
+ * 100. cAvalanche_SaveData1 calls it for every field of the avalanche data file, passing direct 1 for the byte-sized
+ * packed history records.
+ *
+ * @param direct  nonzero to write the bytes unchanged; zero to byte-swap each unit
+ * @param a  the file handle
+ * @param b  the file offset to write at
+ * @param src  the data
+ * @param stride  bytes per unit
+ * @param rows  number of units
+ * @return the number of bytes written (@p stride * @p rows)
+ */
 extern "C" int func_002D82A0(int direct, void* a, void* b, char* src, int stride, int rows)
 {
     if (direct) {
@@ -1188,7 +1221,6 @@ extern "C" void cAvalanche_resolveDataPointers(void);
  * bytes are read into it (header included), so the read runs 8 bytes past the allocation. With a bad magic
  * the file is not closed. Clears D_004A3A4C (On Tour m_Load) and resolves the data pointers.
  */
-// Loads the avalanche data file for the current mountain (magic 0x2BEEF00, then the data size) into a fresh buffer.
 extern "C" void cAvalanche_LoadData(void)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -1510,7 +1542,6 @@ static inline void SetBits_8A00(int& w, int mask, int shift, int v)
  *
  * @param nodep  the tActiveAvalancheNode; nothing happens without an avalanche node
  */
-// Draws the debris particles of an avalanche node.
 extern "C" void tActiveAvalancheNode_renderLines(void* nodep)
 {
     sNode_8A00* node = (sNode_8A00*)nodep;
@@ -1965,6 +1996,17 @@ struct sAvGroup9538 {
 };
 extern void* cAvalanche_m_avalancheList;
 
+/**
+ * Sets the emitter parameters of the avalanche node bound to an instance and marks it as having an emitter.
+ *
+ * Searches every avalanche in cAvalanche_m_avalancheList (linked through +0x8) and each one's node list (+0x4, linked
+ * through +0xF4) for the node whose instance (+0xF8) is @p id. Nodes of type 2 (+0xF0) are left alone; otherwise it
+ * sets the emitter flag (+0xF2) to 1 and copies the 0xD8 bytes of @p params over the node's start. Stops at the first
+ * match. The world script function func_00305F40 calls it.
+ *
+ * @param id  the instance record the node belongs to
+ * @param params  the 0xD8-byte emitter parameters to copy
+ */
 extern "C" void func_002D9538(int id, sAvParams9538* params)
 {
     for (sAvGroup9538* group = (sAvGroup9538*)cAvalanche_m_avalancheList; group != 0; group = group->next) {
@@ -2001,6 +2043,15 @@ extern "C" void tAvalanche_calculate(void* self)
 //100%
 INCLUDE_ASM("visualfx/avalanche", func_002D96B0);
 #ifdef SKIP_ASM
+/**
+ * Returns the node of this avalanche bound to an instance, or 0.
+ *
+ * Walks the node list (+0x4, linked through +0xF4) for the node whose instance (+0xF8) equals @p id. Nothing in the
+ * retail code references it.
+ *
+ * @param id  the instance record to look for
+ * @return the matching node, or 0
+ */
 extern "C" void* func_002D96B0(void* self, int id)
 {
     for (void* n = *(void**)((char*)self + 0x4); n != 0; n = *(void**)((char*)n + 0xF4)) {
@@ -2050,7 +2101,16 @@ struct sAv_9738 {
     char pad10[0x100];
     sAvEnt_9738 ents[64];    // 0x110
 };
-// Records (a, depth of stop in the node list) while there is room for it.
+/**
+ * Records a ground collision in this avalanche's table: a time and the position of @p stop in the node list.
+ *
+ * Does nothing once the count (+0xE) reaches 64. Otherwise counts the nodes from the list head (+0x4) up to @p stop
+ * (through +0xF4) and stores (@p a, that index) as the next 4-byte entry at +0x110. tAvalancheNode_calculate calls it;
+ * the entries are later sorted with func_002D5750.
+ *
+ * @param a  the time to record (stored as a short)
+ * @param stop  the node that hit the ground
+ */
 extern "C" void func_002D9738(sAv_9738* self, int a, sAvNode_9738* stop)
 {
     if (self->count < 64) {
@@ -2393,6 +2453,16 @@ static inline void vu0ScaleMatrixAV(sAvMatrix* dst, sAvMatrix* src, float s)
         : "memory");
 }
 
+/**
+ * Builds the world transform of the active avalanche node bound to an instance.
+ *
+ * Searches the 64 cAvalanche_m_activeNodes for one whose node (+0x2E0) has instance (+0xF8) @p id, then writes its
+ * rotation (+0x70) scaled by its scale (+0xB0) to @p out with the position (+0x60) as row 3. Leaves @p out unchanged
+ * when there is no match. func_002D1CF0 (util/objectinterface) forwards to it.
+ *
+ * @param id  the instance record to look for
+ * @param out  receives the transform
+ */
 extern "C" void func_002D9C00(int id, sAvMatrix* out)
 {
     int i;
@@ -2431,6 +2501,16 @@ public:
     virtual void v01(void* data, int size);
 };
 
+/**
+ * Writes the avalanche replay state to a replay stream: the id and current time of each of the 16 active-avalanche
+ * slots.
+ *
+ * For each slot of cAvalanche_m_activeAvalanches it stores the avalanche's id (first word of the slot's avalanche) or
+ * -1 when the slot is empty, and the slot's time (+0x18) or 0. The 0x80-byte block goes out through the stream's first
+ * virtual function (data, size). cReplay_saveFrame calls it.
+ *
+ * @param stream  the replay stream
+ */
 extern "C" void func_002D9CB0(func_002D9CB0_cStream* stream)
 {
     func_002D9CB0_sSave state;
@@ -2760,6 +2840,22 @@ static inline void vDivEq_A1C0(sVec4_A1C0& v, float s)
         : "f"(s));
 }
 
+/**
+ * Gathers the active avalanche nodes near a position: their average position and scale, the nearest distance, their
+ * count and whether any is a type-2 node.
+ *
+ * Walks each in-use slot of cAvalanche_m_activeAvalanches and its active-node list (slot +0x4, linked through +0x2E4),
+ * skipping nodes without a source node (+0x2E0). Every node whose 4-component distance from (@p p, 1) is below
+ * 225000000 is summed: position (+0x60) into +0x0, scale (+0xB0) into +0x10, count +0x18, and the type-2 flag (+0x1C,
+ * source node +0xF0 == 2). +0x14 gets the smallest distance (999999 when none). The sums are then divided by the count.
+ *
+ * Likely bug: the threshold 225000000 is 15000 squared but is compared with a plain distance. With no node in range it
+ * divides by a zero count. Callers: cDangerMan_CalcAppliedDangerLevel (src/ai/control/handplantcontrol.cpp) and two
+ * functions of src/sound/soundsys.cpp.
+ *
+ * @param p  the position to measure from
+ * @return the 0x20-byte summary: average position, average scale, nearest distance, node count, type-2 flag
+ */
 // PORT: g++ `<?` (min) operator.
 extern "C" sAvInfo_A1C0 func_002DA1C0(sVec3_A1C0 p)
 {

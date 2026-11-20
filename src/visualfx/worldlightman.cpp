@@ -303,7 +303,27 @@ static inline sLightRef_5400* GetRef_5400(char* o, int slot)
     return vt[slot].fn(o + vt[slot].delta);
 }
 
-// Finds (or allocates) the cached light set for obj, refreshing it when obj has moved.
+/**
+ * Returns an instance's cached real-time lighting, finding or creating its light-cache entry and relighting it when the
+ * instance is new or has moved.
+ *
+ * The entry is looked up by the instance id (+0x78) in the 32-chain hash at +0x3210 (chain (id >> 8) & 0x1F); a new one
+ * comes from the 32 entries at +0x210 (count +0x3290) or, when they are used up, from func_002F59D0, the least recently
+ * used. Its tick (+0x4) becomes cAppMan_TheAppMan +0x18. The position is the translation of cInstanceNode_buildMeshMat
+ * when the instance has a mesh node (+0xC), else the instance's +0x40; with @p force it is re-read for a known entry,
+ * which relights after a move of more than 10 and reloads its irradiance after more than 500.
+ *
+ * On a relight the entry's overlap node (+0xC0, taken from func_002F5A70 unless it still belongs to this entry) gets a
+ * 2000-unit box around the position, rebuilt with cOverlapList_gettyped when new or left. A reload sets the target
+ * irradiance (+0xD0) to func_002EE2F8's custom one while D_004A3B64 is set; otherwise it queries the world painter
+ * (+0x4) at the position and uses the object irradiance name (accessor 40), else the light irradiance name (37), else
+ * the default D_004A43C4. The current set (+0x10) is then the target plus the 4 strongest lights of the overlap list
+ * (func_002F5AF0). func_002F5148 calls it with bit 12 of the instance's +0x8 as @p force.
+ *
+ * @param obj  the instance record
+ * @param force  nonzero for a moving instance: re-check its position
+ * @return the entry's current light set (+0x10)
+ */
 extern "C" sLightSet_5400* func_002F5400(sMan_5400* self, char* obj, int force)
 {
     unsigned int key = *(unsigned int*)(obj + 0x78);
@@ -412,6 +432,14 @@ struct sWorldLight {
     char pad14[0x2C];
 };
 
+/**
+ * Invalidates the world light manager's 8 overlap nodes (id -1), so the next relight rebuilds their light lists.
+ *
+ * The parameter is the manager itself: the 0x40-byte records start with the id at +0x10, the overlap nodes at +0x10.
+ * func_003AD1A8 (world script cache) calls it on the game's WorldLightMan.
+ *
+ * @param lights  the world light manager (this), walked as 0x40-byte overlap nodes
+ */
 extern "C" void func_002F5998(sWorldLight* lights)
 {
     unsigned int i;
@@ -439,6 +467,17 @@ struct sWorldLightMan {
     sWorldLightNode* heads[32];
 };
 
+/**
+ * Takes the least recently used light-cache entry for reuse: the one of the 32 with the lowest tick, unlinked from its
+ * hash chain.
+ *
+ * Entries with a tick (+0x4) of @p priority or more are never picked. The chain is (id >> 8) & 0x1F of the entry's
+ * first word; the entry is unlinked through its next (+0x170) and prev (+0x174) links. func_002F5400 calls it when all
+ * 32 entries are in use.
+ *
+ * @param priority  the current tick (cAppMan_TheAppMan +0x18)
+ * @return the entry, or null when every tick is at least @p priority
+ */
 extern "C" sWorldLightNode* func_002F59D0(sWorldLightMan* self, int priority)
 {
     sWorldLightNode* best = 0;
@@ -498,6 +537,15 @@ struct cWorldLightMan_5A70 {
 
 // The unit declares this function as `sBox_5400* func_002F5A70(sMan_5400*, int)` (line ~198); define it under its own types.
 extern "C" tOverlapListNode_5A70* cWorldLightMan_evictOverlapNode_5A70(cWorldLightMan_5A70* self, int iCurrentTick) __asm__("func_002F5A70");
+/**
+ * Takes an overlap node for reuse: the first free one (id -1) of the 8, else the one with the oldest tick.
+ *
+ * Nodes with a tick of @p iCurrentTick or more are never picked. func_002F5400 calls it when an entry needs an overlap
+ * node.
+ *
+ * @param iCurrentTick  the current tick (cAppMan_TheAppMan +0x18)
+ * @return the node, or null when none qualifies
+ */
 extern "C" tOverlapListNode_5A70* cWorldLightMan_evictOverlapNode_5A70(cWorldLightMan_5A70* self, int iCurrentTick)
 {
     tOverlapListNode_5A70* pNode = 0;
@@ -523,6 +571,17 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F5AF0);
 extern "C" void func_002F5B68(void* self, void* a1, void* a2, void** out, int count);
 extern "C" void func_0038A6A8(void* a, void* b, void* c);
 
+/**
+ * Adds the strongest lights of an overlap list at a point to a light set.
+ *
+ * func_002F5B68 picks up to @p count lights (at most 32) by intensity at @p pos; each found one is added to @p
+ * particleSys with func_0038A6A8. func_002F5400 calls it with 4 lights and the cache entry's light set.
+ *
+ * @param pos  the point to light
+ * @param a2  the overlap list to search
+ * @param particleSys  the light set (irradiance) to add the lights to
+ * @param count  the maximum number of lights
+ */
 extern "C" void func_002F5AF0(void* self, void* pos, void* a2, void* particleSys, int count)
 {
     void* buf[32];
@@ -552,7 +611,20 @@ struct sLightMgr_5B68 {
     sLight_5B68* lights[1];     // 0x214
 };
 
-// Keeps the `max` best-scoring type-6 lights in out[], sorted by descending score.
+/**
+ * Picks the up to @p max strongest lights of an overlap list at a point, best first.
+ *
+ * Walks the list's records (count +0x210, pointers from +0x214) of resource type 6 (+0x8), scores each with
+ * func_002F5D30 and keeps the best @p max in @p outp in descending order (cleared to null first); a light must beat the
+ * weakest kept score, and scores of 0 or less never count. Called by func_002F5AF0 and cRider_updateActiveLights (8
+ * lights at the rider's hips).
+ *
+ * @param a  the world light manager (passed on to func_002F5D30)
+ * @param b  the point to light
+ * @param mgrp  the overlap list
+ * @param outp  receives the lights; @p max entries
+ * @param max  how many lights to keep, at most 32
+ */
 extern "C" void func_002F5B68(void* a, void* b, void* mgrp, void** outp, int max)
 {
     sLightMgr_5B68* mgr = (sLightMgr_5B68*)mgrp;
@@ -677,6 +749,21 @@ static inline float Pow_5D30(float x, int n)
     }
 }
 
+/**
+ * Returns a light's intensity at a point, by light type: 0 ambient, 1 spot, 2 point, 3 none.
+ *
+ * Type (+0x10) 0 returns the scale (+0x18). Type 1 and 2 need the point within the radius (+0x1C, func_002F6168); the
+ * result is scale * intensity (+0x14) * the falloff (with s = 100 / distance below 1: s, s^2 or s^3 for falloff 1, 2 or
+ * 3 at +0x64, else 1) * the distance fade (1, or 1 - (distance - 3750) * 0.0008 for a radius of 5000 or more past
+ * 3750). A spot (type 1) also needs the cosine to the light direction at least the outer value (+0x60) and multiplies
+ * by cosine^n (n = +0x65) inside the inner value (+0x5C), else by inner^n scaled linearly between outer and inner.
+ * Anything else gives 0. Likely bug: for a radius above 5000 the fade turns negative past a distance of 5000.
+ *
+ * @param a  the world light manager (passed on to func_002F6168)
+ * @param point  the point to light
+ * @param lp  the light record
+ * @return the intensity
+ */
 extern "C" float func_002F5D30(void* a, void* point, void* lp)
 {
     sLight_5D30* light = (sLight_5D30*)lp;
@@ -734,6 +821,20 @@ struct func_002F6168_sLight {
     func_002F6168_sVec3 pos;    // 0x38
 };
 
+/**
+ * Measures a point against a light: fails outside the light's radius, else returns the distance, its inverse and the
+ * cosine to the light's direction.
+ *
+ * Uses the light's position (+0x38), radius (+0x1C) and direction (+0x2C); the cosine is -(offset . direction) /
+ * distance, written only when @p outDot is not null. A zero distance gives distance and inverse 1.
+ *
+ * @param point  the point
+ * @param light  the light record
+ * @param outDist  receives the distance
+ * @param outInvDist  receives 1 / distance
+ * @param outDot  receives the cosine, or null
+ * @return 1 when the point is within the radius, else 0
+ */
 extern "C" int func_002F6168(void* self, func_002F6168_sVec3* point, func_002F6168_sLight* light,
                              float* outDist, float* outInvDist, float* outDot)
 {
@@ -1130,6 +1231,16 @@ extern int D_004A3BC0;
 extern "C" void func_002F6B28(void* self);
 extern "C" int func_002F6B38(void* self);
 
+/**
+ * Advances a cheat effect's code state machine (m_cheatState) by this frame's cheat input, then clears the input.
+ *
+ * The input is func_002F6B38's bits 0x10, 0x20 and 0x40 of m_misc (set by cCheatFX_setCheatInput), cleared by
+ * func_002F6B28. With no input it clears the held bit 0 of m_misc; while bit 0 is set further input is ignored, so each
+ * press counts once. State -1 (off): 0x40 starts the code (state, index, count and misc 0). State 0: 0x10 counts up
+ * m_count; 0x20 compares m_count with D_00445E30[m_index] and either advances m_index (after 9 steps state 1) or drops
+ * back to -1. State 1: exactly 0x60 sets D_004A3BC0 to 8; otherwise 0x40 toggles bit 1 of m_misc. cCheatFX_update calls
+ * it.
+ */
 extern "C" void func_002F6910(sWLCode6910* self)
 {
     int r = func_002F6B38(self);
@@ -1245,6 +1356,11 @@ extern "C" void cCheatFX_setCheatInput(cCheatFX* self, int type)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F6B28);
 #ifdef SKIP_ASM
+/**
+ * Clears a cheat effect's pending cheat input (bits 0x10, 0x20, 0x40 of m_cheatState.m_misc).
+ *
+ * func_002F6910 calls it after reading the input.
+ */
 extern "C" void func_002F6B28(void* self)
 {
     unsigned char* flagByte = (unsigned char*)((char*)self + 0x7);
@@ -1255,6 +1371,13 @@ extern "C" void func_002F6B28(void* self)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F6B38);
 #ifdef SKIP_ASM
+/**
+ * Returns a cheat effect's pending cheat input: bits 0x10, 0x20 and 0x40 of m_cheatState.m_misc.
+ *
+ * func_002F6910 reads it.
+ *
+ * @return the input bits
+ */
 extern "C" int func_002F6B38(void* self)
 {
     return *(unsigned char*)((char*)self + 0x7) & 0x70;
@@ -1264,6 +1387,13 @@ extern "C" int func_002F6B38(void* self)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F6B48);
 #ifdef SKIP_ASM
+/**
+ * Returns @p self unchanged.
+ *
+ * The definition is variadic, so it first spills the argument registers. Nothing in the retail code references it.
+ *
+ * @return @p self
+ */
 extern "C" void* func_002F6B48(void* self, ...)
 {
     return self;
@@ -1426,6 +1556,20 @@ static inline void initE(int* p, int n)
 // arrays and fx objects (vertlist, collisionvertlist, cAvalanche_m_activeNodes), the render-state
 // entries (cRenderStateMan_m_state) and the light colour presets.
 void sti_002F6B88(int init, int prio) __asm__("func_002F6B88");
+/**
+ * Runs the static constructors (@p init nonzero) or destructors (@p init 0) of this visual-effects unit's globals.
+ *
+ * Acts only for @p prio 0xFFFF. Construction fills the colour preset table D_004D57B0..D_004D5B60 (a, r, g, b), sets
+ * the region type constants kWPR_MusicTrigger..kWPR_Danger to 0..13, constructs vertlist (2048), collisionvertlist (64)
+ * and cAvalanche_m_activeNodes (64, each with a cDynamicColourEmitter at +0xD0), sets D_004A55AC to 2 pi, constructs
+ * the 8 cRenderStateMan_m_state rows, clears the custom irradiance name D_004A55B0, copies presets into the colours
+ * D_004FAAF0..D_004FAC80 and sets D_004A55B8, D_004A55BC to 320, 240. Destruction runs
+ * tActiveAvalancheNode__tActiveAvalancheNode on the 64 active avalanche nodes, last first. func_002F8370 and
+ * func_002F8390 call it.
+ *
+ * @param init  nonzero to construct, 0 to destroy
+ * @param prio  the init priority; only 0xFFFF does anything
+ */
 void sti_002F6B88(int init, int prio)
 {
     if (prio == 0xFFFF) {
@@ -1779,6 +1923,13 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7A50);
 #ifdef SKIP_ASM
 extern char t4mat_Identity[];
 
+/**
+ * Returns the identity matrix t4mat_Identity.
+ *
+ * Nothing in the retail code references it.
+ *
+ * @return pointer to t4mat_Identity
+ */
 extern "C" void* func_002F7A50()
 {
     return t4mat_Identity;
@@ -1787,6 +1938,11 @@ extern "C" void* func_002F7A50()
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7A60);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * Nothing in the retail code references it.
+ */
 extern "C" void func_002F7A60(void) {
 
 }
@@ -1795,6 +1951,14 @@ extern "C" void func_002F7A60(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7A68__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs a particle emitter in place; there is nothing to initialise, so it returns @p self.
+ *
+ * The cStaticEmitter and cDynamicEmitter constructors run it on their embedded emitter (+0x10, +0x20), and
+ * cBoardSparkFX_cBoardSparkFX on a fresh 336-byte "Board_Spark_Emitter" block before tParticleEmitter_randomize.
+ *
+ * @return @p self
+ */
 void* func_002F7A68(void* self)
 {
     return self;
@@ -1804,6 +1968,14 @@ void* func_002F7A68(void* self)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7A70);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the int at +0x4 of @p arg0 is greater than 0.
+ *
+ * Nothing in the retail code references it.
+ *
+ * @param arg0  the object to test
+ * @return 1 when +0x4 > 0, else 0
+ */
 extern "C" int func_002F7A70(void *arg0) {
     return (*(int *)((char*)(arg0) + (4))) > 0;
 }
@@ -1811,6 +1983,16 @@ extern "C" int func_002F7A70(void *arg0) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7A80);
 #ifdef SKIP_ASM
+/**
+ * Copies an 8-byte value out of a two-level table into @p out.
+ *
+ * The value is at @p arg1 +0xC (base) + @p arg1 +0x8 * 0x70 + (@p arg1 +0xB4 - 1) * 0x10. Nothing in the retail code
+ * references it.
+ *
+ * @param out  receives the 8-byte value
+ * @param arg1  the object holding the base pointer and the two indices
+ * @return @p out
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" long long *func_002F7A80(long long *out, void *arg1) {
     *out = (*(long long *)((char*)((((*(int *)((char*)(arg1) + (0xB4))) * 0x10) + (((*(int *)((char*)(arg1) + (8))) * 0x70) + (*(int *)((char*)(arg1) + (0xC)))))) + (-0x10)));
@@ -1820,6 +2002,12 @@ extern "C" long long *func_002F7A80(long long *out, void *arg1) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7AB0);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * It is paired with func_002F7AB8, which forwards to the cBoardWakeFX function cBoardWakeFX_readFromReplayFrame.
+ * Nothing in the retail code references it.
+ */
 extern "C" void func_002F7AB0(void) {
 
 }
@@ -1829,6 +2017,12 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7AB8);
 #ifdef SKIP_ASM
 extern "C" void cBoardWakeFX_readFromReplayFrame();
 
+/**
+ * Calls cBoardWakeFX_readFromReplayFrame, passing its argument registers through untouched.
+ *
+ * Despite its name, cBoardWakeFX_readFromReplayFrame sits between the cBoardWakeFX destructor and update, where On Tour
+ * declares reset. Nothing in the retail code references it.
+ */
 extern "C" void func_002F7AB8(void) {
     cBoardWakeFX_readFromReplayFrame();
 }
@@ -1836,6 +2030,12 @@ extern "C" void func_002F7AB8(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7AD8);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * It is paired with func_002F7AE0, which forwards to the cBoardSparkFX function cBoardSparkFX_readFromReplayFrame.
+ * Nothing in the retail code references it.
+ */
 extern "C" void func_002F7AD8(void) {
 
 }
@@ -1845,6 +2045,12 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7AE0);
 #ifdef SKIP_ASM
 extern "C" void cBoardSparkFX_readFromReplayFrame();
 
+/**
+ * Calls cBoardSparkFX_readFromReplayFrame, passing its argument registers through untouched.
+ *
+ * Despite its name, cBoardSparkFX_readFromReplayFrame sits between the cBoardSparkFX destructor and update, where On
+ * Tour declares reset. Nothing in the retail code references it.
+ */
 extern "C" void func_002F7AE0(void) {
     cBoardSparkFX_readFromReplayFrame();
 }
@@ -1852,6 +2058,12 @@ extern "C" void func_002F7AE0(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7B00);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * It is paired with func_002F7B08, which forwards to the cBoardTrailFX function cBoardTrailFX_reset. Nothing in the
+ * retail code references it.
+ */
 extern "C" void func_002F7B00(void) {
 
 }
@@ -1861,6 +2073,11 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7B08);
 #ifdef SKIP_ASM
 extern "C" void cBoardTrailFX_reset();
 
+/**
+ * Calls cBoardTrailFX_reset, passing its argument registers through untouched.
+ *
+ * Nothing in the retail code references it.
+ */
 extern "C" void func_002F7B08(void) {
     cBoardTrailFX_reset();
 }
@@ -1868,6 +2085,12 @@ extern "C" void func_002F7B08(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7B28);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * It is paired with func_002F7B30, which forwards to the cAngerFX function func_002D4BE0. Nothing in the retail code
+ * references it.
+ */
 extern "C" void func_002F7B28(void) {
 
 }
@@ -1877,6 +2100,12 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7B30);
 #ifdef SKIP_ASM
 extern "C" void func_002D4BE0();
 
+/**
+ * Calls func_002D4BE0, passing its argument registers through untouched.
+ *
+ * func_002D4BE0 is the cAngerFX function after its constructor and destructor. Nothing in the retail code references
+ * it.
+ */
 extern "C" void func_002F7B30(void) {
     func_002D4BE0();
 }
@@ -1884,6 +2113,12 @@ extern "C" void func_002F7B30(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7B50);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * It is paired with func_002F7B58, which forwards to the cPlayerIndicatorFX function
+ * cPlayerIndicatorFX_readFromReplayFrame. Nothing in the retail code references it.
+ */
 extern "C" void func_002F7B50(void) {
 
 }
@@ -1893,6 +2128,12 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7B58);
 #ifdef SKIP_ASM
 extern "C" void cPlayerIndicatorFX_readFromReplayFrame();
 
+/**
+ * Calls cPlayerIndicatorFX_readFromReplayFrame, passing its argument registers through untouched.
+ *
+ * Despite its name, cPlayerIndicatorFX_readFromReplayFrame sits between the cPlayerIndicatorFX destructor and update,
+ * where On Tour declares reset. Nothing in the retail code references it.
+ */
 extern "C" void func_002F7B58(void) {
     cPlayerIndicatorFX_readFromReplayFrame();
 }
@@ -1900,6 +2141,12 @@ extern "C" void func_002F7B58(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7B78);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * It is paired with func_002F7B80, which forwards to the cAirStreamerFX function cAirStreamerFX_readFromReplayFrame.
+ * Nothing in the retail code references it.
+ */
 extern "C" void func_002F7B78(void) {
 
 }
@@ -1909,6 +2156,12 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7B80);
 #ifdef SKIP_ASM
 extern "C" void cAirStreamerFX_readFromReplayFrame();
 
+/**
+ * Calls cAirStreamerFX_readFromReplayFrame, passing its argument registers through untouched.
+ *
+ * Despite its name, cAirStreamerFX_readFromReplayFrame sits between the cAirStreamerFX destructor and update, where On
+ * Tour declares reset. Nothing in the retail code references it.
+ */
 extern "C" void func_002F7B80(void) {
     cAirStreamerFX_readFromReplayFrame();
 }
@@ -1916,6 +2169,12 @@ extern "C" void func_002F7B80(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7BA0);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * It is paired with func_002F7BA8, which forwards to the cPunchFX function cPunchFX_readFromReplayFrame. Nothing in the
+ * retail code references it.
+ */
 extern "C" void func_002F7BA0(void) {
 
 }
@@ -1925,6 +2184,12 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7BA8);
 #ifdef SKIP_ASM
 extern "C" void cPunchFX_readFromReplayFrame();
 
+/**
+ * Calls cPunchFX_readFromReplayFrame, passing its argument registers through untouched.
+ *
+ * Despite its name, cPunchFX_readFromReplayFrame sits between the cPunchFX destructor and update, where On Tour
+ * declares reset. Nothing in the retail code references it.
+ */
 extern "C" void func_002F7BA8(void) {
     cPunchFX_readFromReplayFrame();
 }
@@ -1932,6 +2197,14 @@ extern "C" void func_002F7BA8(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7BC8);
 #ifdef SKIP_ASM
+/**
+ * Returns @p arg0 + 4.
+ *
+ * Nothing in the retail code references it.
+ *
+ * @param arg0  the base address
+ * @return @p arg0 + 4
+ */
 extern "C" int func_002F7BC8(int arg0) {
     return arg0 + 4;
 }
@@ -1939,6 +2212,14 @@ extern "C" int func_002F7BC8(int arg0) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7BD0);
 #ifdef SKIP_ASM
+/**
+ * Sets the lens effect manager's view count (+0x6490).
+ *
+ * The lens code reads it as the number of views to process. Nothing in the retail code references it.
+ *
+ * @param arg0  the lens effect manager
+ * @param arg1  the number of views
+ */
 extern "C" void func_002F7BD0(void *arg0, int arg1) {
     (*(int *)((char*)(arg0) + (0x6490))) = arg1;
 }
@@ -1946,6 +2227,15 @@ extern "C" void func_002F7BD0(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7BD8);
 #ifdef SKIP_ASM
+/**
+ * Sets the lens effect manager's lock flag (+0x6494).
+ *
+ * cGame_renderLightHalos sets the same flag to 1 while it adds and renders halos and back to 0 after. Nothing in the
+ * retail code references it.
+ *
+ * @param arg0  the lens effect manager
+ * @param arg1  the flag
+ */
 extern "C" void func_002F7BD8(void *arg0, int arg1) {
     (*(int *)((char*)(arg0) + (0x6494))) = arg1;
 }
@@ -1954,6 +2244,14 @@ extern "C" void func_002F7BD8(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7BE0);
 #ifdef SKIP_ASM
+/**
+ * Returns whether a replay's state (its first word) is 0.
+ *
+ * cVisualEffectsMan_commonUpdate calls it on the game's Replay: lightning is enabled when the state is 1 or this
+ * returns true.
+ *
+ * @return 1 when the state is 0, else 0
+ */
 extern "C" int func_002F7BE0(void* self)
 {
     return *(unsigned int*)self == 0;
@@ -1966,6 +2264,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7BF0);
 extern void* D_00488680[];
 void operator_delete(int*);
 
+/**
+ * Destroys a visual effect: re-installs the base vtable D_00488680 and frees the object when bit 0 of @p flags is set.
+ *
+ * It is the destructor slot of D_00488680, whose next slots are func_002F7C20__FPv, func_002F7C28__FPv and
+ * cVisualEffect_deferredRender__FPv.
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_002F7BF0(void* self, int flags)
 {
     *(void***)self = D_00488680;
@@ -1978,6 +2284,11 @@ extern "C" void func_002F7BF0(void* self, int flags)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7C20__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base visual effect's per-frame update.
+ *
+ * It is the slot after the destructor in D_00488680 and in the effect vtables built on it (D_00487EB8 and others).
+ */
 void func_002F7C20(void* self)
 {
 }
@@ -1986,6 +2297,11 @@ void func_002F7C20(void* self)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7C28__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base visual effect's render.
+ *
+ * It is the slot after func_002F7C20__FPv in D_00488680 and in the effect vtables built on it.
+ */
 void func_002F7C28(void* self)
 {
 }
@@ -2008,6 +2324,13 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7C38);
 extern void* cAvalanche_vtbl[];
 extern "C" void* cAvalanche_init(void* self);
 
+/**
+ * Constructs an avalanche manager: installs cAvalanche_vtbl and runs cAvalanche_init.
+ *
+ * Nothing in the retail code references it.
+ *
+ * @return @p self
+ */
 extern "C" void* func_002F7C38(void* self)
 {
     *(void***)self = cAvalanche_vtbl;
@@ -2020,6 +2343,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7C70);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_Enable;
 
+/**
+ * Returns the address of the avalanche setting cAvalanche_m_Enable.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to cAvalanche_m_Enable
+ */
 extern "C" int *func_002F7C70(void) {
     return &cAvalanche_m_Enable;
 }
@@ -2029,6 +2360,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7C80);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_Recalc;
 
+/**
+ * Returns the address of the avalanche setting cAvalanche_m_Recalc.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to cAvalanche_m_Recalc
+ */
 extern "C" int *func_002F7C80(void) {
     return &cAvalanche_m_Recalc;
 }
@@ -2038,6 +2377,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7C90);
 #ifdef SKIP_ASM
 extern int D_004A3A38;
 
+/**
+ * Returns the address of the avalanche setting D_004A3A38 (the word after cAvalanche_m_Recalc).
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to D_004A3A38
+ */
 extern "C" int *func_002F7C90(void) {
     return &D_004A3A38;
 }
@@ -2047,6 +2394,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7CA0);
 #ifdef SKIP_ASM
 extern int D_004A3A3C;
 
+/**
+ * Returns the address of the avalanche setting D_004A3A3C.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to D_004A3A3C
+ */
 extern "C" int *func_002F7CA0(void) {
     return &D_004A3A3C;
 }
@@ -2056,6 +2411,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7CB0);
 #ifdef SKIP_ASM
 extern int D_004A3A40;
 
+/**
+ * Returns the address of the avalanche setting D_004A3A40.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to D_004A3A40
+ */
 extern "C" int *func_002F7CB0(void) {
     return &D_004A3A40;
 }
@@ -2065,6 +2428,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7CC0);
 #ifdef SKIP_ASM
 extern int D_004A3A44;
 
+/**
+ * Returns the address of the avalanche setting D_004A3A44.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to D_004A3A44
+ */
 extern "C" int *func_002F7CC0(void) {
     return &D_004A3A44;
 }
@@ -2074,6 +2445,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7CD0);
 #ifdef SKIP_ASM
 extern int D_004A3A48;
 
+/**
+ * Returns the address of the avalanche setting D_004A3A48.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to D_004A3A48
+ */
 extern "C" int *func_002F7CD0(void) {
     return &D_004A3A48;
 }
@@ -2083,6 +2462,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7CE0);
 #ifdef SKIP_ASM
 extern int D_004A3A4C;
 
+/**
+ * Returns the address of the avalanche setting D_004A3A4C.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to D_004A3A4C
+ */
 extern "C" int *func_002F7CE0(void) {
     return &D_004A3A4C;
 }
@@ -2092,6 +2479,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7CF0);
 #ifdef SKIP_ASM
 extern int D_004A3A50;
 
+/**
+ * Returns the address of the avalanche setting D_004A3A50.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to D_004A3A50
+ */
 extern "C" int *func_002F7CF0(void) {
     return &D_004A3A50;
 }
@@ -2101,6 +2496,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7D00);
 #ifdef SKIP_ASM
 extern int D_004A3A54;
 
+/**
+ * Returns the address of the avalanche setting D_004A3A54.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to D_004A3A54
+ */
 extern "C" int *func_002F7D00(void) {
     return &D_004A3A54;
 }
@@ -2110,6 +2513,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7D10);
 #ifdef SKIP_ASM
 extern int D_004A3A58;
 
+/**
+ * Returns the address of the avalanche setting D_004A3A58 (the word before cAvalanche_m_Trigger).
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to D_004A3A58
+ */
 extern "C" int *func_002F7D10(void) {
     return &D_004A3A58;
 }
@@ -2119,6 +2530,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7D20);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_Trigger;
 
+/**
+ * Returns the address of the avalanche setting cAvalanche_m_Trigger.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to cAvalanche_m_Trigger
+ */
 extern "C" int *func_002F7D20(void) {
     return &cAvalanche_m_Trigger;
 }
@@ -2128,6 +2547,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7D30);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_Update;
 
+/**
+ * Returns the address of the avalanche setting cAvalanche_m_Update.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to cAvalanche_m_Update
+ */
 extern "C" int *func_002F7D30(void) {
     return &cAvalanche_m_Update;
 }
@@ -2137,6 +2564,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7D40);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_UpdateTimeStep;
 
+/**
+ * Returns the address of the avalanche setting cAvalanche_m_UpdateTimeStep.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to cAvalanche_m_UpdateTimeStep
+ */
 extern "C" int *func_002F7D40(void) {
     return &cAvalanche_m_UpdateTimeStep;
 }
@@ -2146,6 +2581,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7D50);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_RotationalVelocityScale;
 
+/**
+ * Returns the address of the avalanche setting cAvalanche_m_RotationalVelocityScale.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to cAvalanche_m_RotationalVelocityScale
+ */
 extern "C" int *func_002F7D50(void) {
     return &cAvalanche_m_RotationalVelocityScale;
 }
@@ -2155,6 +2598,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7D60);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_RandomBounceChance;
 
+/**
+ * Returns the address of the avalanche setting cAvalanche_m_RandomBounceChance.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to cAvalanche_m_RandomBounceChance
+ */
 extern "C" int *func_002F7D60(void) {
     return &cAvalanche_m_RandomBounceChance;
 }
@@ -2164,6 +2615,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7D70);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_RandomBounceVelocityScaleXY;
 
+/**
+ * Returns the address of the avalanche setting cAvalanche_m_RandomBounceVelocityScaleXY.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to cAvalanche_m_RandomBounceVelocityScaleXY
+ */
 extern "C" int *func_002F7D70(void) {
     return &cAvalanche_m_RandomBounceVelocityScaleXY;
 }
@@ -2173,6 +2632,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7D80);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_RandomBounceVelocityScaleZ;
 
+/**
+ * Returns the address of the avalanche setting cAvalanche_m_RandomBounceVelocityScaleZ.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to cAvalanche_m_RandomBounceVelocityScaleZ
+ */
 extern "C" int *func_002F7D80(void) {
     return &cAvalanche_m_RandomBounceVelocityScaleZ;
 }
@@ -2182,6 +2649,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7D90);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_RandomBounceVelocityScale;
 
+/**
+ * Returns the address of the avalanche setting cAvalanche_m_RandomBounceVelocityScale.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to cAvalanche_m_RandomBounceVelocityScale
+ */
 extern "C" int *func_002F7D90(void) {
     return &cAvalanche_m_RandomBounceVelocityScale;
 }
@@ -2191,6 +2666,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7DA0);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_AvalancheId;
 
+/**
+ * Returns the address of the avalanche setting cAvalanche_m_AvalancheId.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to cAvalanche_m_AvalancheId
+ */
 extern "C" int *func_002F7DA0(void) {
     return &cAvalanche_m_AvalancheId;
 }
@@ -2200,6 +2683,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7DB0);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_Gravity;
 
+/**
+ * Returns the address of the avalanche setting cAvalanche_m_Gravity.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to cAvalanche_m_Gravity
+ */
 extern "C" int *func_002F7DB0(void) {
     return &cAvalanche_m_Gravity;
 }
@@ -2209,6 +2700,15 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7DC0);
 #ifdef SKIP_ASM
 extern int D_004A3A84;
 
+/**
+ * Returns the address of the avalanche setting D_004A3A84 (the word between cAvalanche_m_Gravity and
+ * cAvalanche_m_NormalVelocityScale).
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to D_004A3A84
+ */
 extern "C" int *func_002F7DC0(void) {
     return &D_004A3A84;
 }
@@ -2218,6 +2718,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7DD0);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_NormalVelocityScale;
 
+/**
+ * Returns the address of the avalanche setting cAvalanche_m_NormalVelocityScale.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to cAvalanche_m_NormalVelocityScale
+ */
 extern "C" int *func_002F7DD0(void) {
     return &cAvalanche_m_NormalVelocityScale;
 }
@@ -2227,6 +2735,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7DE0);
 #ifdef SKIP_ASM
 extern int D_004A3A8C;
 
+/**
+ * Returns the address of the avalanche setting D_004A3A8C (the word after cAvalanche_m_NormalVelocityScale).
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to D_004A3A8C
+ */
 extern "C" int *func_002F7DE0(void) {
     return &D_004A3A8C;
 }
@@ -2236,6 +2752,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7DF0);
 #ifdef SKIP_ASM
 extern int D_004A3A90;
 
+/**
+ * Returns the address of the avalanche setting D_004A3A90.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to D_004A3A90
+ */
 extern "C" int *func_002F7DF0(void) {
     return &D_004A3A90;
 }
@@ -2245,6 +2769,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7E00);
 #ifdef SKIP_ASM
 extern int D_004A3A94;
 
+/**
+ * Returns the address of the avalanche setting D_004A3A94.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to D_004A3A94
+ */
 extern "C" int *func_002F7E00(void) {
     return &D_004A3A94;
 }
@@ -2254,6 +2786,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7E10);
 #ifdef SKIP_ASM
 extern int D_004A3A98;
 
+/**
+ * Returns the address of the avalanche setting D_004A3A98.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to D_004A3A98
+ */
 extern "C" int *func_002F7E10(void) {
     return &D_004A3A98;
 }
@@ -2263,6 +2803,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7E20);
 #ifdef SKIP_ASM
 extern int D_004A3A9C;
 
+/**
+ * Returns the address of the avalanche setting D_004A3A9C.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to D_004A3A9C
+ */
 extern "C" int *func_002F7E20(void) {
     return &D_004A3A9C;
 }
@@ -2272,6 +2820,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7E30);
 #ifdef SKIP_ASM
 extern int D_004A3AA0;
 
+/**
+ * Returns the address of the avalanche setting D_004A3AA0.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to D_004A3AA0
+ */
 extern "C" int *func_002F7E30(void) {
     return &D_004A3AA0;
 }
@@ -2281,6 +2837,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7E40);
 #ifdef SKIP_ASM
 extern int D_004A3AA4;
 
+/**
+ * Returns the address of the avalanche setting D_004A3AA4.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to D_004A3AA4
+ */
 extern "C" int *func_002F7E40(void) {
     return &D_004A3AA4;
 }
@@ -2290,6 +2854,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7E50);
 #ifdef SKIP_ASM
 extern int D_004A3AA8;
 
+/**
+ * Returns the address of the avalanche setting D_004A3AA8.
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to D_004A3AA8
+ */
 extern "C" int *func_002F7E50(void) {
     return &D_004A3AA8;
 }
@@ -2299,6 +2871,14 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7E60);
 #ifdef SKIP_ASM
 extern int D_004A3AAC;
 
+/**
+ * Returns the address of the avalanche setting D_004A3AAC (the word before cAvalanche_m_avalancheList).
+ *
+ * The C definition takes no arguments; the accessor's this register is ignored. Nothing in the retail code references
+ * it.
+ *
+ * @return pointer to D_004A3AAC
+ */
 extern "C" int *func_002F7E60(void) {
     return &D_004A3AAC;
 }
@@ -2308,6 +2888,11 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7E70);
 #ifdef SKIP_ASM
 extern "C" void cAvalanche_reset();
 
+/**
+ * Calls cAvalanche_reset, passing its argument registers through untouched.
+ *
+ * Nothing in the retail code references it.
+ */
 extern "C" void func_002F7E70(void) {
     cAvalanche_reset();
 }
@@ -2317,6 +2902,13 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7E90);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_fileDataDeleteable;
 
+/**
+ * Returns cAvalanche_m_fileDataDeleteable.
+ *
+ * Nothing in the retail code references it.
+ *
+ * @return the flag
+ */
 extern "C" int func_002F7E90(void) {
     return cAvalanche_m_fileDataDeleteable;
 }
@@ -2326,6 +2918,13 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7E98);
 #ifdef SKIP_ASM
 extern int cAvalanche_m_badCookie;
 
+/**
+ * Returns cAvalanche_m_badCookie.
+ *
+ * Nothing in the retail code references it.
+ *
+ * @return the flag
+ */
 extern "C" int func_002F7E98(void) {
     return cAvalanche_m_badCookie;
 }
@@ -2333,6 +2932,12 @@ extern "C" int func_002F7E98(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7EA0);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * It is paired with func_002F7EA8, which forwards to the cSpeedBoostFX function cSpeedBoostFX_readFromReplayFrame.
+ * Nothing in the retail code references it.
+ */
 extern "C" void func_002F7EA0(void) {
 
 }
@@ -2342,6 +2947,12 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7EA8);
 #ifdef SKIP_ASM
 extern "C" void cSpeedBoostFX_readFromReplayFrame();
 
+/**
+ * Calls cSpeedBoostFX_readFromReplayFrame, passing its argument registers through untouched.
+ *
+ * Despite its name, cSpeedBoostFX_readFromReplayFrame sits between the cSpeedBoostFX destructor and update, where On
+ * Tour declares reset. Nothing in the retail code references it.
+ */
 extern "C" void func_002F7EA8(void) {
     cSpeedBoostFX_readFromReplayFrame();
 }
@@ -2349,6 +2960,12 @@ extern "C" void func_002F7EA8(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7EC8);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * It is paired with func_002F7ED0, which forwards to the cTrickBoostFX function cTrickBoostFX_readFromReplayFrame__FPv.
+ * Nothing in the retail code references it.
+ */
 extern "C" void func_002F7EC8(void) {
 
 }
@@ -2358,6 +2975,12 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7ED0);
 #ifdef SKIP_ASM
 extern "C" void cTrickBoostFX_readFromReplayFrame__FPv();
 
+/**
+ * Calls cTrickBoostFX_readFromReplayFrame__FPv, passing its argument registers through untouched.
+ *
+ * Despite its name, cTrickBoostFX_readFromReplayFrame__FPv sits between the cTrickBoostFX destructor and update, where
+ * On Tour declares reset. Nothing in the retail code references it.
+ */
 extern "C" void func_002F7ED0(void) {
     cTrickBoostFX_readFromReplayFrame__FPv();
 }
@@ -2365,6 +2988,11 @@ extern "C" void func_002F7ED0(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7EF0);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * Nothing in the retail code references it.
+ */
 extern "C" void func_002F7EF0(void) {
 
 }
@@ -2372,6 +3000,11 @@ extern "C" void func_002F7EF0(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7EF8);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * Nothing in the retail code references it.
+ */
 extern "C" void func_002F7EF8(void) {
 
 }
@@ -2383,6 +3016,15 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7F00);
 extern void* D_00488680[];
 void operator_delete(int*);
 
+/**
+ * Destroys the "PowerUpFXToggles" visual effect: falls back to the base vtable D_00488680 and frees the object when bit
+ * 0 of @p flags is set.
+ *
+ * It is the destructor slot of D_00488330, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
+ * effect it allocates as "PowerUpFXToggles".
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_002F7F00(void* self, int flags)
 {
     *(void***)self = D_00488680;
@@ -2443,6 +3085,15 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F7F90);
 extern void* D_00488680[];
 void operator_delete(int*);
 
+/**
+ * Destroys the "SplashToggles" visual effect: falls back to the base vtable D_00488680 and frees the object when bit 0
+ * of @p flags is set.
+ *
+ * It is the destructor slot of D_004882B0, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
+ * effect it allocates as "SplashToggles".
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_002F7F90(void* self, int flags)
 {
     *(void***)self = D_00488680;
@@ -2455,6 +3106,14 @@ extern "C" void func_002F7F90(void* self, int flags)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7FC0);
 #ifdef SKIP_ASM
+/**
+ * Returns the int at +0xA0 of @p arg0.
+ *
+ * Nothing in the retail code references it.
+ *
+ * @param arg0  the object
+ * @return the value
+ */
 extern "C" int func_002F7FC0(void *arg0) {
     return (*(int *)((char*)(arg0) + (0xA0)));
 }
@@ -2462,6 +3121,11 @@ extern "C" int func_002F7FC0(void *arg0) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7FC8);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * Nothing in the retail code references it.
+ */
 extern "C" void func_002F7FC8(void) {
 
 }
@@ -2469,6 +3133,11 @@ extern "C" void func_002F7FC8(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7FD0);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * Nothing in the retail code references it.
+ */
 extern "C" void func_002F7FD0(void) {
 
 }
@@ -2476,6 +3145,15 @@ extern "C" void func_002F7FD0(void) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7FD8);
 #ifdef SKIP_ASM
+/**
+ * Returns whether a transition is playing (+0x44) of a screen transition manager.
+ *
+ * It reads the flag cTransitionMan_StartTransition sets to 1 when it starts and checks to end a running one. Nothing in
+ * the retail code references it.
+ *
+ * @param arg0  the transition manager
+ * @return the playing flag
+ */
 extern "C" int func_002F7FD8(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x44)));
 }
@@ -2483,6 +3161,15 @@ extern "C" int func_002F7FD8(void *arg0) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7FE0);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the manager is still requesting its screen grab (+0x64) of a screen transition manager.
+ *
+ * It reads the flag cTransitionMan_StartTransition sets with a screen grab, right after the using-screen-grab flag
+ * (+0x60). Nothing in the retail code references it.
+ *
+ * @param arg0  the transition manager
+ * @return the requesting flag
+ */
 extern "C" int func_002F7FE0(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x64)));
 }
@@ -2490,6 +3177,14 @@ extern "C" int func_002F7FE0(void *arg0) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7FE8);
 #ifdef SKIP_ASM
+/**
+ * Returns the initiator of the current transition (+0x78) of a screen transition manager.
+ *
+ * It reads the initiator cTransitionMan_StartTransition stores. Nothing in the retail code references it.
+ *
+ * @param arg0  the transition manager
+ * @return the initiator
+ */
 extern "C" int func_002F7FE8(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x78)));
 }
@@ -2498,6 +3193,14 @@ extern "C" int func_002F7FE8(void *arg0) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7FF0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the view index the manager serves (+0x74) of a screen transition manager.
+ *
+ * It reads the view index cTransitionMan_cTransitionMan stores. It is the slot after func_002E4C90 in the
+ * cTransitionMan script-object vtable D_00488100.
+ *
+ * @return the view index
+ */
 int func_002F7FF0(void* self)
 {
     return *(int*)((char*)self + 0x74);
@@ -2507,6 +3210,14 @@ int func_002F7FF0(void* self)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F7FF8);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the transition uses the screen grab texture (+0x60) of a screen transition manager.
+ *
+ * It reads the useScreenGrab flag cTransitionMan_StartTransition stores. Nothing in the retail code references it.
+ *
+ * @param arg0  the transition manager
+ * @return the flag
+ */
 extern "C" int func_002F7FF8(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x60)));
 }
@@ -2566,6 +3277,15 @@ struct sLightVec_002F8060 { float x, y, z, w; };
 extern void* cFade_TObj_vtbl[];
 void func_002E4D70(void* self);
 
+/**
+ * Constructs a fade transition object of a colour.
+ *
+ * Runs the transition object constructor func_002E4D70, installs cFade_TObj_vtbl and stores @p v (a, r, g, b) at +0x4.
+ * Nothing in the retail code references it.
+ *
+ * @param v  the fade colour
+ * @return @p self
+ */
 extern "C" void* func_002F8060(void* self, sLightVec_002F8060 v)
 {
     func_002E4D70(self);
@@ -2628,6 +3348,15 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F8138);
 extern void* D_00488680[];
 void operator_delete(int*);
 
+/**
+ * Destroys the "SnowfallToggles" visual effect: falls back to the base vtable D_00488680 and frees the object when bit
+ * 0 of @p flags is set.
+ *
+ * It is the destructor slot of D_00488050, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
+ * effect it allocates as "SnowfallToggles".
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_002F8138(void* self, int flags)
 {
     *(void***)self = D_00488680;
@@ -2651,6 +3380,15 @@ void cSnowFall_writeToReplayFrame(void* self)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F8170);
 #ifdef SKIP_ASM
+/**
+ * Returns whether bit @p n of the 64-bit word at @p bits is set.
+ *
+ * Nothing in the retail code references it.
+ *
+ * @param bits  the 64-bit flag word
+ * @param n  the bit number, 0..63
+ * @return 1 when the bit is set, else 0
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" int func_002F8170(unsigned long* bits, int n)
 {
@@ -2665,6 +3403,15 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F8188);
 extern void* D_00488680[];
 void operator_delete(int*);
 
+/**
+ * Destroys the "BoardTrail" visual effect: falls back to the base vtable D_00488680 and frees the object when bit 0 of
+ * @p flags is set.
+ *
+ * It is the destructor slot of D_00487FA8, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
+ * effect it allocates as "BoardTrail".
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_002F8188(void* self, int flags)
 {
     *(void***)self = D_00488680;
@@ -2696,6 +3443,15 @@ void* cCutSceneTransitionMan__cCutSceneTransitionMan(void* self)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F81D8);
 #ifdef SKIP_ASM
+/**
+ * Returns the state (+0x10) of a cut-scene transition manager.
+ *
+ * The state is the one cCutSceneTransitionMan_StartCutScene switches on (0 regular, 1 cut scene, 2 going out, 3 going
+ * in). Nothing in the retail code references it.
+ *
+ * @param arg0  the cut-scene transition manager
+ * @return the state
+ */
 extern "C" int func_002F81D8(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x10)));
 }
@@ -2703,6 +3459,13 @@ extern "C" int func_002F81D8(void *arg0) {
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F81E0);
 #ifdef SKIP_ASM
+/**
+ * Stores 1 in the int at @p arg0.
+ *
+ * Nothing in the retail code references it.
+ *
+ * @param arg0  the int to set
+ */
 extern "C" void func_002F81E0(int *arg0) {
     *arg0 = 1;
 }
@@ -2714,6 +3477,15 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F81F0);
 extern void* D_00488680[];
 void operator_delete(int*);
 
+/**
+ * Destroys the "LightGlow" visual effect: falls back to the base vtable D_00488680 and frees the object when bit 0 of
+ * @p flags is set.
+ *
+ * It is the destructor slot of D_00487EB8, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
+ * effect it allocates as "LightGlow".
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_002F81F0(void* self, int flags)
 {
     *(void***)self = D_00488680;
@@ -2729,6 +3501,15 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F8220);
 extern void* D_00488680[];
 void operator_delete(int*);
 
+/**
+ * Destroys the "DepthFog" visual effect: falls back to the base vtable D_00488680 and frees the object when bit 0 of @p
+ * flags is set.
+ *
+ * It is the destructor slot of D_00487E88, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
+ * effect it allocates as "DepthFog".
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_002F8220(void* self, int flags)
 {
     *(void***)self = D_00488680;
@@ -2744,6 +3525,15 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F8250);
 extern void* D_00488680[];
 void operator_delete(int*);
 
+/**
+ * Destroys the "HeightFog" visual effect: falls back to the base vtable D_00488680 and frees the object when bit 0 of
+ * @p flags is set.
+ *
+ * It is the destructor slot of D_00487E58, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
+ * effect it allocates as "HeightFog".
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_002F8250(void* self, int flags)
 {
     *(void***)self = D_00488680;
@@ -2759,6 +3549,15 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F8280);
 extern void* D_00488680[];
 void operator_delete(int*);
 
+/**
+ * Destroys the "Shadow" visual effect: falls back to the base vtable D_00488680 and frees the object when bit 0 of @p
+ * flags is set.
+ *
+ * It is the destructor slot of D_00487E28, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
+ * effect it allocates as "Shadow".
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_002F8280(void* self, int flags)
 {
     *(void***)self = D_00488680;
@@ -2774,6 +3573,15 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F82B0);
 extern void* D_00488680[];
 void operator_delete(int*);
 
+/**
+ * Destroys the "SnowSurface" visual effect: falls back to the base vtable D_00488680 and frees the object when bit 0 of
+ * @p flags is set.
+ *
+ * It is the destructor slot of D_00487DF8, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
+ * effect it allocates as "SnowSurface".
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_002F82B0(void* self, int flags)
 {
     *(void***)self = D_00488680;
@@ -2789,6 +3597,15 @@ INCLUDE_ASM("visualfx/worldlightman", func_002F82E0);
 extern void* D_00488680[];
 void operator_delete(int*);
 
+/**
+ * Destroys the "Flags" visual effect: falls back to the base vtable D_00488680 and frees the object when bit 0 of @p
+ * flags is set.
+ *
+ * It is the destructor slot of D_00487DC8, the vtable cPS2VisualEffectsMan_cPS2VisualEffectsMan installs on the 4-byte
+ * effect it allocates as "Flags".
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_002F82E0(void* self, int flags)
 {
     *(void***)self = D_00488680;
@@ -2847,6 +3664,13 @@ extern "C" void* func_002F6B88(int, int);
 //99.38%
 INCLUDE_ASM("visualfx/worldlightman", func_002F8370__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs this unit's static constructors: func_002F6B88(1, 0xFFFF).
+ *
+ * It is listed in the global constructor table (with func_002F9818__FPv and func_002FAE18__FPv).
+ *
+ * @return nothing useful (func_002F6B88 returns void)
+ */
 void* func_002F8370(void* self)
 {
     return func_002F6B88(1, 0xffff);
@@ -2858,6 +3682,13 @@ extern "C" void* func_002F6B88(int, int);
 //99.38%
 INCLUDE_ASM("visualfx/worldlightman", func_002F8390__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs this unit's static destructors: func_002F6B88(0, 0xFFFF).
+ *
+ * It is listed in the global destructor table.
+ *
+ * @return nothing useful (func_002F6B88 returns void)
+ */
 void* func_002F8390(void* self)
 {
     return func_002F6B88(0, 0xffff);
@@ -2940,6 +3771,12 @@ struct sLightSet_83B0 {
 
 extern sLightSet_83B0* D_004A3BB0;
 
+/**
+ * Fills attached-emitter types 0 to 9 of the table D_004A3BB0 (0x110-byte particle data records).
+ *
+ * func_002F17D0 allocates the 20-record table (5440 bytes, "AttachedEmitterTypeData") and then calls this and
+ * func_002F9838 (types 10 to 19). func_002F2130 creates attached emitters from it by kind.
+ */
 extern "C" void func_002F83B0(void)
 {
     sLightSet_83B0* s = D_004A3BB0;
@@ -3629,6 +4466,11 @@ extern "C" void func_002F83B0(void)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F8FF8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * func_002F1810 calls it, with func_002FA5F8__FPv, before freeing the attached-emitter type table D_004A3BB0.
+ */
 void func_002F8FF8(void* self)
 {
 }
@@ -3637,6 +4479,13 @@ void func_002F8FF8(void* self)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F9000);
 #ifdef SKIP_ASM
+/**
+ * Returns @p self unchanged.
+ *
+ * The definition is variadic, so it first spills the argument registers. Nothing in the retail code references it.
+ *
+ * @return @p self
+ */
 extern "C" void* func_002F9000(void* self, ...)
 {
     return self;
@@ -3714,6 +4563,15 @@ extern sColor_2F9040 D_004FB000;
 // The unit declares func_002F9040 later as returning void*; bind this body by asm label.
 extern "C" void func_002F9040_impl(int initialize, int priority) __asm__("func_002F9040");
 
+/**
+ * Runs the static constructors of a second copy of the visual-effects colour presets (D_004FAC90..D_004FB000).
+ *
+ * Acts only for @p priority 0xFFFF with @p initialize set: builds the 56 (a, r, g, b) colours, the same presets
+ * func_002F6B88 writes to D_004D57B0 onward. func_002F9818__FPv calls it.
+ *
+ * @param initialize  nonzero to construct; 0 does nothing
+ * @param priority  the init priority; only 0xFFFF does anything
+ */
 extern "C" void func_002F9040_impl(int initialize, int priority)
 {
     if (priority == 0xFFFF && initialize != 0) {
@@ -3782,6 +4640,11 @@ extern "C" void* func_002F9040(int, int);
 //99.38%
 INCLUDE_ASM("visualfx/worldlightman", func_002F9818__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs func_002F9040(1, 0xFFFF): a global constructor listed in the constructor table.
+ *
+ * @return nothing useful (func_002F9040 returns void)
+ */
 void* func_002F9818(void* self)
 {
     return func_002F9040(1, 0xffff);
@@ -3865,6 +4728,11 @@ struct sLightSet_9838 {
 
 extern sLightSet_9838* D_004A3BB0_9838 __asm__("D_004A3BB0");
 
+/**
+ * Fills attached-emitter types 10 to 19 of the table D_004A3BB0 (0x110-byte particle data records).
+ *
+ * func_002F17D0 calls it right after func_002F83B0 (types 0 to 9).
+ */
 extern "C" void func_002F9838(void)
 {
     sLightSet_9838* s = D_004A3BB0_9838;
@@ -4554,6 +5422,11 @@ extern "C" void func_002F9838(void)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002FA5F8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * func_002F1810 calls it after func_002F8FF8__FPv, before freeing the attached-emitter type table D_004A3BB0.
+ */
 void func_002FA5F8(void* self)
 {
 }
@@ -4562,6 +5435,13 @@ void func_002FA5F8(void* self)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002FA600);
 #ifdef SKIP_ASM
+/**
+ * Returns @p self unchanged.
+ *
+ * The definition is variadic, so it first spills the argument registers. Nothing in the retail code references it.
+ *
+ * @return @p self
+ */
 extern "C" void* func_002FA600(void* self, ...)
 {
     return self;
@@ -4637,6 +5517,15 @@ extern sColor_2FA640 D_004FB380;
 // The unit declares func_002FA640 later as returning void*; bind this body by asm label.
 extern "C" void func_002FA640_impl(int initialize, int priority) __asm__("func_002FA640");
 
+/**
+ * Runs the static constructors of a third copy of the visual-effects colour presets (56 colours from D_004FB010).
+ *
+ * Acts only for @p priority 0xFFFF with @p initialize set; the same presets as func_002F9040. func_002FAE18__FPv calls
+ * it.
+ *
+ * @param initialize  nonzero to construct; 0 does nothing
+ * @param priority  the init priority; only 0xFFFF does anything
+ */
 extern "C" void func_002FA640_impl(int initialize, int priority)
 {
     if (priority == 0xFFFF && initialize != 0) {
@@ -4705,6 +5594,11 @@ extern "C" void* func_002FA640(int, int);
 //99.38%
 INCLUDE_ASM("visualfx/worldlightman", func_002FAE18__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs func_002FA640(1, 0xFFFF): a global constructor listed in the constructor table.
+ *
+ * @return nothing useful (func_002FA640 returns void)
+ */
 void* func_002FAE18(void* self)
 {
     return func_002FA640(1, 0xffff);

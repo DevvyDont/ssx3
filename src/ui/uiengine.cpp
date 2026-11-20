@@ -31,6 +31,15 @@ INCLUDE_ASM("ui/uiengine", func_00397B08);
 #ifdef SKIP_ASM
 extern "C" void* cList_cList(void* self);
 
+/**
+ * Constructs a UI engine: clears its interface pointers and builds its state stack, animation bank and texture bank.
+ *
+ * Zeroes the six interface pointers (+0x0..+0x14), constructs the state stack's two lists (+0x18, +0x34), clears
+ * +0x58..+0x68 and points the animation bank (+0x54) and texture bank (+0x6C) back at the engine. cFE_cFE and the
+ * load-screen loaders build their UI with it.
+ *
+ * @return @p self
+ */
 extern "C" void* func_00397B08(void* self)
 {
     *(int*)((char*)self + 0x0) = 0;
@@ -87,6 +96,16 @@ struct func_00397B70_sSelf {
     cUIEngOwnC* c;
 };
 
+/**
+ * Destroys a UI engine: deletes its custom, input and sound interfaces, frees its data and destroys its texture bank
+ * and state stack.
+ *
+ * Deletes +0x0, +0xC and +0x14 through their virtual destructors and frees the loaded data (+0x4); the font and locale
+ * interfaces (+0x8, +0x10) are left alone. Then func_00398078 destroys the texture bank (+0x58) and func_0039E9D8 the
+ * state stack (+0x18); bit 0 of @p flags frees the engine.
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_00397B70(void* self, int flags)
 {
     func_00397B70_sSelf* fields = (func_00397B70_sSelf*)self;
@@ -296,6 +315,14 @@ static inline void setF4_20_7DF8(sUIRS_7DF8* rs, int v) { rs->f4_20 = v; }
 static inline void setF4_12_7DF8(sUIRS_7DF8* rs, int v) { rs->f4_12 = v; }
 static inline void setF4_2_7DF8(sUIRS_7DF8* rs, int v) { rs->f4_2 = v; }
 
+/**
+ * Draws a UI engine's 2D layer: sets up a 640x480 screen-space view and renders the state stack.
+ *
+ * Pushes a copy of the draw state and resets it to sDrawState_s_defaultDrawState, sets a 0..640 x 0..480 view (z -1..1)
+ * and the identity matrix t4mat_Identity through GrMan virtuals, sets the 2D draw-state bits, then renders the state
+ * stack (+0x18) with func_0039EBE0 and pops the draw state. cRealFE_render, the load screens and the game and app
+ * render code call it each frame.
+ */
 extern "C" void func_00397DF8(void* self)
 {
     cUICtx_7DF8* ctx = D_004A289C_7df8;
@@ -324,6 +351,11 @@ void func_0039ECA8(void*);
 //100%
 INCLUDE_ASM("ui/uiengine", func_00398018);
 #ifdef SKIP_ASM
+/**
+ * Draws a UI engine's 3D layer: calls func_0039ECA8__FPv (empty) on the state stack (+0x18).
+ *
+ * cRealFE_render calls it just before func_00397DF8.
+ */
 extern "C" void func_00398018(void* self)
 {
     func_0039ECA8((char*)self + 0x18);
@@ -341,6 +373,12 @@ struct sVEntry398038 {
 
 extern "C" void func_0039F100(void*);
 
+/**
+ * Updates a UI engine: polls its input object (+0xC, virtual slot 46), then updates the state stack (func_0039F100 on
+ * +0x18).
+ *
+ * cRealFE_update, cFELoadScreen_update, the game loader and the app's UI loops call it.
+ */
 extern "C" void func_00398038(void* self)
 {
     void* obj = *(void**)((char*)self + 0xC);
@@ -360,6 +398,14 @@ struct sVEntry398078 {
 };
 extern void* GrMan_uiengine __asm__("GrMan");
 
+/**
+ * Destroys a UI texture bank: releases its textures through the graphics manager and frees its arrays.
+ *
+ * Each of the +0x8 texture ids in the array at +0x4 goes to GrMan virtual slot 50; the id array and the element array
+ * (+0xC) are freed; bit 0 of @p flags frees the bank. func_00397B70 runs it on the engine's +0x58.
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_00398078(void* self, int flags)
 {
     int i;
@@ -545,6 +591,15 @@ struct sUiEntry_83B8 {
     int key;            // 0x1C
 };
 
+/**
+ * Returns the texture of the UI texture bank element with hash name @p key, or 0.
+ *
+ * Searches the bank's +0x10 elements (0x20 bytes each, from +0xC) for one whose +0x1C equals @p key and returns its
+ * first word. Nothing in the retail code references it.
+ *
+ * @param key  the element hash name
+ * @return the texture, or 0 when not found
+ */
 extern "C" int func_003983B8(char* self, int key)
 {
     int count = *(int*)(self + 0x10);
@@ -573,6 +628,15 @@ struct s3983F0 {
     signed char count;
 };
 
+/**
+ * Returns the font of the font-interface entry with hash name @p key, or 0.
+ *
+ * Searches the up to 4 entries (0xC bytes from +0x4; count at +0x34) for hash @p key and returns its font (+0x8). The
+ * HUD (cOVStateHUD1P_onCreateScreen) and trophy screens fetch the "fefont" font with it.
+ *
+ * @param key  the font hash name
+ * @return the font, or 0 when not found
+ */
 extern "C" int func_003983F0(s3983F0* self, int key)
 {
     signed char i;
@@ -591,6 +655,12 @@ INCLUDE_ASM("ui/uiengine", func_00398438);
 #ifdef SKIP_ASM
 extern "C" void func_003916C0(int h, int a);
 
+/**
+ * Releases all fonts of a font interface and empties it.
+ *
+ * Each entry with a font (+0x8) has it destroyed with func_003916C0(font, 3); every entry's name and hash are cleared
+ * and the count (+0x34) goes to 0. cSSXApp_purge calls it.
+ */
 extern "C" void func_00398438(s3983F0* self)
 {
     for (int i = 0; i < self->count; i++) {
@@ -623,6 +693,16 @@ static inline void uiFontSetHashName(s3983F0Entry* e, unsigned int hash)
     e->key = hash;
 }
 
+/**
+ * Fills font-interface entry @p index with a font file name and hash name and counts it, unless 4 entries are already
+ * used.
+ *
+ * cSSXApp_initload adds "fefont" and "hudfont" with it; func_003984E8 adds the entries of a font table.
+ *
+ * @param index  the entry to fill, 0..3
+ * @param pszFontName  the font file name
+ * @param hashID  the font hash name
+ */
 extern "C" void func_003984B0_impl(s3983F0* self, int index, char* pszFontName, unsigned int hashID)
 {
     if (self->count < 4) {
@@ -642,6 +722,14 @@ struct sChunkHdr_3984E8 {
     unsigned int count;
 };
 
+/**
+ * Points a font interface at a font table and adds each of its records as a font entry.
+ *
+ * Stores @p hdr at +0x0; each record (after the 4-byte count) has its hash name at +0x0, its size at +0x4 and the file
+ * name from +0x8, and goes to func_003984B0 with its index. Nothing in the C code calls it directly.
+ *
+ * @param hdr  the font table: a count followed by the records
+ */
 extern "C" void func_003984E8(sChunkHdr_3984E8** self, sChunkHdr_3984E8* hdr)
 {
     char* rec = (char*)hdr + 4;
@@ -975,7 +1063,6 @@ struct sUIData8998 {
  *
  * @param data  the icon's record (On Tour tUIBaseObject* pUIBase)
  */
-// Copies the widget's clip/alignment bits, looks up its item and sets its size (stored in 1/100 units).
 extern "C" void cUIIcon_setUIData(cUIIcon* self, sUIData8998* data)
 {
     cUIThing_setUIData_8998(((sUIObj8998*)self), data);
@@ -989,6 +1076,14 @@ extern "C" void cUIIcon_setUIData(cUIIcon* self, sUIData8998* data)
 //100%
 INCLUDE_ASM("ui/uiengine", func_00398A60__FPvT0);
 #ifdef SKIP_ASM
+/**
+ * Swaps two floats.
+ *
+ * cUIIcon_render2D uses it to flip a quad's u or v coordinates.
+ *
+ * @param first  the first float
+ * @param second  the second float
+ */
 void func_00398A60(void* first, void* second)
 {
     float saved = *(float*)first;
@@ -1170,7 +1265,6 @@ static inline sV4_8A78 Xform_8A78(const sM33_8A78& m, const sV4_8A78& v)
  * @param x  parent x offset
  * @param y  parent y offset
  */
-// cUIIcon: draws the icon as a textured quad at (x, y), rotated about its position.
 extern "C" void cUIIcon_render2D(cUIIcon_8A78* self, float x, float y)
 {
     sVtx_8A78 verts[4];
@@ -1468,8 +1562,6 @@ static inline int isClear_9970(int flags)
  * @param in  the input (On Tour const cUIInput* pInput)
  * @return 1 when the input was used, else 0 (On Tour returns bool)
  */
-// List input: up/down move the current item (wrapping when flag 0x80 is set; flag 1 swaps the directions),
-// accept notifies; the listener gets the result.
 extern "C" int cUIListBox_onInput(cUIListBox* self, void* in)
 {
     if (self->mNumEntries == 0)

@@ -199,8 +199,6 @@ static inline void playEvent_B000(char* thing, int which)
  * @param in  the input (On Tour const cUIInput*)
  * @return 1 when the menu used the input, otherwise 0
  */
-// 2D menu input: the focused child gets the input first; then up/down/left/right move the selection
-// (by row or by column), the paging slots move the focus between items, accept notifies.
 extern "C" int cUIMenu_onInput(cUIMenu* self, void* in)
 {
     if (((self->mAttr >> 5) & 1) || (char*)self->mpSelected == 0) {
@@ -396,6 +394,14 @@ extern "C" void cUIMenu_setScrollableMenu(cUIMenu* self, char NumItems)
 //100%
 INCLUDE_ASM("ui/uimenu", func_0039B7A8);
 #ifdef SKIP_ASM
+/**
+ * Sets a menu's scroll bar (+0x9C).
+ *
+ * Nothing in the retail code references it.
+ *
+ * @param menu  the menu
+ * @param scrollBar  the scroll bar widget
+ */
 extern "C" void func_0039B7A8(void *menu, int scrollBar) {
     (*(int *)((char*)(menu) + (0x9C))) = scrollBar;
 }
@@ -873,8 +879,6 @@ static inline int focusMove_BED8(char* self, int dir)
  * @param in  the input (On Tour const cUIInput* pInput)
  * @return 1 when the pair used the input, otherwise the second widget's answer (0 without one)
  */
-// Menu input: up/down move the selection (with transition frames and wrap events), accept notifies, else
-// the sub-handler gets the input.
 extern "C" int cUIPair_onInput(cUIPair* self, void* in)
 {
     int result = 0;

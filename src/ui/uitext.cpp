@@ -552,6 +552,16 @@ struct func_003A1030_sVEntry {
     void (*fn)(void*);
 };
 
+/**
+ * Returns the size of a UI text's string at its font and scale.
+ *
+ * Refreshes the text first (virtual slot 16) when it has no string (+0xB4) or bit 2 of +0x14 is clear; then measures
+ * the string with func_003921F0 using cUIText_getFont and mScale and returns the measured rectangle's far corner (+0x8,
+ * +0xC) as x and y. Without a string or font it returns t3vect_Zero. cFEStateUberTrick_updateTrickMenu uses it to size
+ * the trick menu.
+ *
+ * @param out  receives the size (x, y)
+ */
 extern "C" void func_003A1030(void* self, func_003A1030_sVec3* out)
 {
     if (*(int*)((char*)self + 0xB4) == 0 || ((*(int*)((char*)self + 0x14) >> 2) & 1) == 0) {
@@ -580,6 +590,13 @@ struct func_003A10F0_sVEntry {
     void (*fn)(void*);
 };
 
+/**
+ * Returns a UI text's line count (+0xA8), refreshing the text first (virtual slot 16) when needed.
+ *
+ * The refresh condition is the one func_003A1030 uses. Nothing in the retail code references it.
+ *
+ * @return the number of lines
+ */
 extern "C" int func_003A10F0(void* self)
 {
     if (*(int*)((char*)self + 0xB4) == 0 || ((*(int*)((char*)self + 0x14) >> 2) & 1) == 0) {
@@ -1376,6 +1393,14 @@ extern "C" void cUITextScroll_deleteLineByIndex(cUITextScroll* self, int idx)
 //100%
 INCLUDE_ASM("ui/uitext", func_003A2068);
 #ifdef SKIP_ASM
+/**
+ * Returns entry @p i of a text scroller's line table (+0xBC), or 0 when there is no table or @p i is out of range.
+ *
+ * The count is the unsigned short at +0xC8. cFEStateCredits_onRender2D uses it.
+ *
+ * @param i  the line index
+ * @return the line, or 0
+ */
 extern "C" int func_003A2068(void* self, int i)
 {
     int* arr = *(int**)((char*)self + 0xBC);
@@ -1421,6 +1446,18 @@ extern int D_004A28AC_20A0 __asm__("D_004A28AC");
 extern "C" void func_0038E118(int ctx, sQuadVtx_20A0* v, sRect_20A0* r);
 extern "C" void func_0038E200(int ctx, sQuadVtx_20A0* v, sRect_20A0* r);
 
+/**
+ * Draws a texture element as a screen quad in a rectangle with a colour.
+ *
+ * Does nothing for a negative texture (+0x0). Sets the current draw state's texture, builds 4 vertices with the
+ * element's UVs (+0xC..+0x18; flag 1 swaps u, flag 2 swaps v) and the colour scaled by 128, and submits them with
+ * func_0038E200 when flag 4 is set, else func_0038E118. Nothing in the retail code references it.
+ *
+ * @param o  the texture element
+ * @param r  the screen rectangle (x, y, w, h)
+ * @param c  the colour (a, r, g, b), 0..1
+ * @param flags  1 flip u, 2 flip v, 4 use func_0038E200
+ */
 extern "C" void func_003A20A0(sSprite_20A0* o, sRect_20A0 r, sColor_20A0 c, int flags)
 {
     int tex = o->tex;
@@ -1499,6 +1536,19 @@ extern int D_004A28AC_2220 __asm__("D_004A28AC");
 extern void func_0038E118_2220(int ctx, sQuadVtx_2220* v, sRect_2220* r) __asm__("func_0038E118");
 extern void func_0038E200_2220(int ctx, sQuadVtx_2220* v, sRect_2220* r) __asm__("func_0038E200");
 
+/**
+ * Draws the bottom @p t part of a texture element as a screen quad, like a fill gauge.
+ *
+ * The rectangle and the top v are moved down by (1 - @p t) of their height, so only the bottom part shows. Unlike
+ * func_003A20A0 it draws even a negative texture, ignores the flip flags and scales r, g, b by 255 (alpha by 128). Flag
+ * 4 selects func_0038E200 over func_0038E118. Nothing in the retail code references it.
+ *
+ * @param o  the texture element
+ * @param r  the screen rectangle (x, y, w, h)
+ * @param c  the colour (a, r, g, b), 0..1
+ * @param flags  4 uses func_0038E200
+ * @param t  the shown fraction, 0..1
+ */
 extern "C" void func_003A2220(sSprite_2220* o, sRect_2220 r, sColor_2220 c, int flags, float t)
 {
     float k = 1.0f - t;

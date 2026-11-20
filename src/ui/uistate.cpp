@@ -93,6 +93,14 @@ void operator_delete(int*);
 extern void* cList_vtbl[];
 extern void* cListNode_vtbl[];
 
+/**
+ * Destroys a UI state stack: destroys its states (func_0039F8C8), then its two lists.
+ *
+ * The lists are the main stack (+0x0) and the explicit stack (+0x1C); bit 0 of @p flags frees the object. The UI engine
+ * destructor func_00397B70 runs it on its +0x18.
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_0039E9D8(void* self, int flags)
 {
     func_0039F8C8(self);
@@ -144,6 +152,17 @@ static inline void func_0039EA90_setB5(func_0039EA90_node* n, int v) { n->bits.b
 static inline void func_0039EA90_setId(func_0039EA90_node* n, int v) { n->bits.id = v; }
 static inline void func_0039EA90_setB4(func_0039EA90_node* n, int v) { n->bits.b4 = v; }
 
+/**
+ * Enables the first non-explicit state of mode @p id on a state stack: sets it visible, enabled and first-time, mode 2
+ * (starting).
+ *
+ * Modes are bits 8..13 of the state's attribute word (+0x1C); explicit states (bit 6) are skipped. func_0039ECB0 uses
+ * it to bring up a mode-1 or mode-8 state when nothing is current.
+ *
+ * @param list  the state stack (its main list)
+ * @param id  the mode to look for
+ * @return 1 when a state was enabled, else 0
+ */
 extern "C" int func_0039EA90(cList* list, signed char id)
 {
     func_0039EA90_node* n = (func_0039EA90_node*)cList_first(list);
@@ -178,6 +197,15 @@ struct func_0039EB60_node {
     int flags; // 0x1C
 };
 
+/**
+ * Returns whether a state stack holds a non-explicit state of mode @p id.
+ *
+ * func_0039ECB0 uses it with mode 1 when a popup closes.
+ *
+ * @param list  the state stack (its main list)
+ * @param id  the mode to look for
+ * @return 1 when one exists, else 0
+ */
 extern "C" int func_0039EB60(cList* list, signed char id)
 {
     func_0039EB60_node* n = (func_0039EB60_node*)cList_first(list);
@@ -202,6 +230,11 @@ struct func_0039EBE0_sVEntry {
     void (*fn)(void*);
 };
 
+/**
+ * Draws a state stack: calls virtual slot 15 (2D render) on every visible state of the main and explicit lists.
+ *
+ * Visible is bit 3 of a state's attribute word (+0x1C). func_00397DF8 calls it on the engine's state stack.
+ */
 extern "C" void func_0039EBE0(void* self)
 {
     char* n = (char*)cList_first((cList*)self);
@@ -230,6 +263,11 @@ extern "C" void func_0039EBE0(void* self)
 //100%
 INCLUDE_ASM("ui/uistate", func_0039ECA8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the state stack's 3D render.
+ *
+ * func_00398018 calls it on the engine's state stack.
+ */
 void func_0039ECA8(void* self)
 {
 }
@@ -283,6 +321,20 @@ struct func_0039ECB0_sVEntryV {
 #define VCALL_ECB0(n, i, args...) (n)->vt[i].fn((char*)(n) + (n)->vt[i].delta , ## args)
 #define VCALLV_ECB0(n, i, args...) ((func_0039ECB0_sVEntryV*)(n)->vt)[i].fn((char*)(n) + (n)->vt[i].delta , ## args)
 
+/**
+ * Runs one pass of the UI state life cycle over the enabled states of a state stack's main list.
+ *
+ * By mode (attribute bits 8..13): 2 calls virtual slot 4 and becomes 4 (a popup also shows its parent chain with
+ * func_0039F7B8 and sends the parent event 0x15 through slot 17); 4 waits for slot 7 (passed the first-time bit) to
+ * return nonzero, then 3; 3 calls slot 6 and becomes 5; 5 calls slot 12 each pass; 6 waits for slot 10, then 7; 7 calls
+ * slots 11 and 5, becomes 8 and is disabled. A closing popup is marked pending delete, lowers its parent's popup count
+ * (re-enabling the parent at 0) and sends it event 0x16; but when a mode-1 state exists (checked unless the push-check
+ * bit 14 is set) it only hides its parent chain. A pending-delete state is unlinked and deleted (slot 1 with 3), others
+ * are hidden. When nothing is current afterwards, a mode-1 state (or else a mode-8 one) is enabled with func_0039EA90.
+ * Changed states run cUIState_updateScreens.
+ *
+ * @return nonzero when a state finished closing and none started in this pass (func_0039F100 then runs another pass)
+ */
 extern "C" int func_0039ECB0(void* self)
 {
     int popped = 0;
@@ -404,6 +456,13 @@ struct sVEntry39F100 {
     void (*fn)(void*);
 };
 
+/**
+ * Updates a state stack: runs func_0039ECB0 (a second pass when the first returns nonzero), then updates the explicit
+ * states.
+ *
+ * Every state of the explicit list (+0x1C) gets virtual slot 12 when enabled and cUIState_updateScreens. The UI engine
+ * update func_00398038 calls it.
+ */
 extern "C" void func_0039F100(void* self)
 {
     if (func_0039ECB0(self) != 0) {
@@ -443,6 +502,15 @@ struct func_0039F190_node {
 static inline void func_0039F190_setId(func_0039F190_node* n, int v) { n->id = v; }
 static inline void func_0039F190_setB7(func_0039F190_node* n, int v) { n->b7 = v; }
 
+/**
+ * Closes the top @p count states of a state stack: sets each to mode 6 (losing) and pending delete.
+ *
+ * Popups and front-end states call it with 1 to close themselves; the states then leave through func_0039ECB0.
+ *
+ * @param list  the state stack (its main list)
+ * @param count  how many states to close
+ * @return the state below the closed ones, or null
+ */
 extern "C" func_0039F190_node* func_0039F190(cList* list, int count)
 {
     func_0039F190_node* n = (func_0039F190_node*)cList_first(list);
@@ -464,6 +532,13 @@ done:
 //100%
 INCLUDE_ASM("ui/uistate", func_0039F200);
 #ifdef SKIP_ASM
+/**
+ * Closes one active state: when @p node is enabled and in mode 5 it becomes mode 6 (losing) and pending delete.
+ *
+ * Nothing in the retail code references it.
+ *
+ * @param node  the state to close
+ */
 extern "C" void func_0039F200(void* self, char* node)
 {
     int flags = *(int*)(node + 0x1C);

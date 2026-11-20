@@ -111,6 +111,13 @@ extern "C" unsigned short cUIAnimationChannel_getAnimChanType(void* self)
 //100%
 INCLUDE_ASM("ui/uianimation", func_00397298__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Points an animation channel at its channel data record (stores @p val at +0x0).
+ *
+ * cUIAnimation_cUIAnimation calls it for each channel slot with that channel's record from the animation data.
+ *
+ * @param val  the channel data record
+ */
 void func_00397298(void* self, int val)
 {
     *(int*)((char*)self + 0x0) = val;
@@ -202,6 +209,14 @@ extern "C" void cUIAnimation__cUIAnimation(void* self, int flags)
 //100%
 INCLUDE_ASM("ui/uianimation", cUIAnimation_isLastFrame);
 #ifdef SKIP_ASM
+/**
+ * Returns whether an animation's current frame (+0xA) has reached its frame count (header +0x2).
+ *
+ * cUIThing_isLastAnimFrame uses it.
+ *
+ * @param anim  the animation
+ * @return 1 at or past the last frame, else 0
+ */
 extern "C" int cUIAnimation_isLastFrame(void *anim) {
     return (*(short *)((char*)(anim) + (0xA))) >= (int) (*(unsigned short *)((char*)((*(void **)((char*)(anim) + (0)))) + (2)));
 }
@@ -209,6 +224,14 @@ extern "C" int cUIAnimation_isLastFrame(void *anim) {
 //100%
 INCLUDE_ASM("ui/uianimation", cUIAnimation_getNumFrames);
 #ifdef SKIP_ASM
+/**
+ * Returns an animation's frame count: the short at +0x2 of its header (+0x0).
+ *
+ * cUIThing_setFrameByPercent uses it.
+ *
+ * @param anim  the animation
+ * @return the number of frames
+ */
 extern "C" short cUIAnimation_getNumFrames(void **anim) {
     return (*(short *)((char*)(*anim) + (2)));
 }

@@ -64,6 +64,12 @@ INCLUDE_ASM("visualfx/angerfx", func_002D4BE0);
 #ifdef SKIP_ASM
 extern "C" void* MEM_fill(void* dst, int c, int n);
 
+/**
+ * Clears an anger effect's per-view state: fills the 0x58 bytes of its two 0x2C-byte parts (+0x4) with zeros.
+ *
+ * Calls MEM_fill. The cAngerFX constructor, cRiderHandler_resetRiderFX and cRiderHandler_readFromReplayFrame call it on
+ * the cAngerFX at cRiderHandler + 0xAF0.
+ */
 extern "C" void func_002D4BE0(cAngerFX* self)
 {
     MEM_fill(*(void**)((char*)self + 4), 0, 88);
@@ -141,6 +147,25 @@ static inline sPlayers_2D4C08* players_2D4C08()
     return (sPlayers_2D4C08*)SSXApp->Game->ViewMan;
 }
 
+/**
+ * Updates a computer rider's anger indicator, one 0x2C-byte part per viewing player.
+ *
+ * Does nothing for a human rider (cRider virtual slot kRiderVt_isHuman). For each view of the game's cGameViewMan
+ * (count at +0x10, views at +0x4) it takes the rider that view follows (view +0xA8, +0x20, +0x4) and skips empty ones.
+ * When this rider is in an NIS (mIsInNIS) or the replay (cGame Replay, first word) is in a state from 1 to 9, it zeroes
+ * the part's level (+0x0) and returns, leaving the remaining views as they are.
+ *
+ * Otherwise it stores the aggression between the two riders (cBEAggressionInterface_getAggression with both riders'
+ * kRiderVt_getAIIndex) at +0x1C and picks the colour (+0x4..+0x13): D_004D5B30 for 4 or more, D_004D5B40 for 3,
+ * D_004D5B50 for 2, D_004D5B60 below. The level moves toward 1.0 by 0.1 a frame at aggression 2 or more, otherwise
+ * toward 0 by 1/15, and the colour's first float (drawn as the alpha by func_002D5048) becomes level * 0.8.
+ *
+ * Three pulse counters follow: +0x20 (mod 41, started when the aggression changes), +0x24 (mod 31, started at
+ * aggression 4 or more while +0x20 is 0) and +0x28 (mod 24, restarted when the aggression rises, forced to 0 while
+ * either other counter runs). The glow scales +0x14 and +0x18 become the level times the products of the tables
+ * D_00488EA0/D_00488FF0/D_004890F0 and D_00488F48/D_00489070/D_00489150 indexed by the three counters.
+ * cRiderHandler_updateRiderFX and cAI_update call it on cRiderHandler + 0xAF0.
+ */
 extern "C" void func_002D4C08(sAnger_2D4C08* self)
 {
     if (riderV_2D4C08(self->rider, 8) != 0) {
@@ -357,6 +382,21 @@ static inline void rsSetB_2D5048(sGfx_2D5048* g, int mask, int shift, int v)
     g->top->flagsB = (g->top->flagsB & ~mask) | ((v << shift) & mask);
 }
 
+/**
+ * Draws a computer rider's anger indicator for the current view: a camera-facing quad above the rider's head.
+ *
+ * Does nothing for a human rider (kRiderVt_isHuman) or when the current view's part (cGameViewMan +0x14 selects it) has
+ * level 0. Takes the head position (row 3 of the mAnimModel matrix for mBoneHead), transforms it by the matrix from
+ * GrMan's virtual slot 35 and draws only when the depth z is between 0 and 2000, fading the alpha out linearly from
+ * 1500 to 2000. The quad's base sits 35 units up the camera's up axis from the head; its half-width is (glow +0x14 + z
+ * * 0.003) * 9 along the camera's right axis and its height (glow +0x18 + z * 0.003) * 18.
+ *
+ * Pushes a render state (copies the top state, then loads sDrawState_s_defaultDrawState), sets flag A bit 22 and its
+ * low two bits to 2, clears flag B bits 10-28 and sets its bits 5-9 to 7, uses texture GrMan +0xFAC, and draws four
+ * vertices (UVs 0..1; colour from the part's floats +0x8, +0xC, +0x10 times 255, alpha from +0x4 times 128 and the
+ * fade) through GrMan's virtual slot 71 before popping the state. cRiderHandler_renderRiderFX and cAI_render call it on
+ * cRiderHandler + 0xAF0.
+ */
 extern "C" void func_002D5048(sAnger_2D4C08* self)
 {
     if (riderV_2D4C08(self->rider, 8) != 0) {
@@ -443,6 +483,16 @@ extern "C" void func_002D5048(sAnger_2D4C08* self)
 //100%
 INCLUDE_ASM("visualfx/angerfx", func_002D5598);
 #ifdef SKIP_ASM
+/**
+ * Writes three floats, each truncated to an integer, into bytes 0..2 of a 10-byte packed avalanche frame record.
+ *
+ * tAvalancheNode_calculate is its only caller.
+ *
+ * @param rgb  the record
+ * @param red  value for byte 0
+ * @param green  value for byte 1
+ * @param blue  value for byte 2
+ */
 extern "C" void func_002D5598(unsigned char* rgb, float red, float green, float blue)
 {
     rgb[0] = (int)red;
@@ -456,6 +506,17 @@ INCLUDE_ASM("visualfx/angerfx", func_002D55C0);
 #ifdef SKIP_ASM
 extern float D_004A3A38;
 
+/**
+ * Writes a brightened, clamped colour into bytes 3..5 of a 10-byte packed avalanche frame record.
+ *
+ * Scales each channel by 1.3 (D_004A3A38), clamps it to 0..1 and stores it times 255. tAvalancheNode_calculate is its
+ * only caller.
+ *
+ * @param p  the record
+ * @param r  red, 0..1 before scaling
+ * @param g  green
+ * @param b  blue
+ */
 // PORT: <? (g++ min operator)
 extern "C" void func_002D55C0(unsigned char* p, float r, float g, float b)
 {
@@ -477,6 +538,19 @@ extern "C" void func_002D55C0(unsigned char* p, float r, float g, float b)
 //100%
 INCLUDE_ASM("visualfx/angerfx", func_002D5658);
 #ifdef SKIP_ASM
+/**
+ * Packs four floats into bytes 6..9 of a 10-byte packed avalanche frame record: the first three times 127, the fourth
+ * times 255.
+ *
+ * tAvalancheNode_calculate is its only caller. The parameter names say colour, but On Tour's layout makes these bytes a
+ * rotation (signed x, y, z and an unsigned fourth).
+ *
+ * @param dest  the record
+ * @param red  first value, -1..1
+ * @param green  second value, -1..1
+ * @param blue  third value, -1..1
+ * @param alpha  fourth value, 0..1
+ */
 extern "C" void func_002D5658(unsigned char* dest, float red, float green, float blue, float alpha)
 {
     dest[6] = (int)(red * 127.0f);
@@ -515,6 +589,15 @@ extern "C" void tActiveAvalancheNode__tActiveAvalancheNode(int* self, int flags)
 //100%
 INCLUDE_ASM("visualfx/angerfx", func_002D5718);
 #ifdef SKIP_ASM
+/**
+ * Compares two entries by their leading float, for qsort (ascending).
+ *
+ * tAvalancheNode_calculate passes it to func_00418EF8 (qsort) for the avalanche's 8-byte collision entries at +0x10.
+ *
+ * @param lhs  first entry
+ * @param rhs  second entry
+ * @return -1, 1 or 0 as the first float is smaller, larger or equal
+ */
 extern "C" int func_002D5718(const void* lhs, const void* rhs)
 {
     float x = *(const float*)lhs;
@@ -532,6 +615,16 @@ extern "C" int func_002D5718(const void* lhs, const void* rhs)
 //100%
 INCLUDE_ASM("visualfx/angerfx", func_002D5750);
 #ifdef SKIP_ASM
+/**
+ * Compares two entries by their leading unsigned short, for qsort (ascending).
+ *
+ * tAvalancheNode_calculate passes it to func_00418EF8 (qsort) for the avalanche's 4-byte ground-collision entries at
+ * +0x110 (filled by func_002D9738).
+ *
+ * @param lhs  first entry
+ * @param rhs  second entry
+ * @return -1, 1 or 0 as the first value is smaller, larger or equal
+ */
 extern "C" int func_002D5750(const void* lhs, const void* rhs)
 {
     unsigned short x = *(const unsigned short*)lhs;

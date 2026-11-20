@@ -50,7 +50,6 @@ extern void* cListNode_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-// Destructor of a UI screen: frees its buffers and tears down the embedded members.
 extern "C" void cUIScreen__cUIScreen(cUIScreen* self, int flags)
 {
     self->mVtbl = cUIScreen_vtbl;
@@ -279,7 +278,6 @@ void* cUIScreen_playFrame_impl(void* self, unsigned short frame, int ThreadType)
  * @param ThreadType  0 for the primary thread, otherwise an extra thread
  * @return the new thread
  */
-// cUIScreen::playFrame (On Tour name): starts a new thread at frame; a primary thread replaces the old one.
 void* cUIScreen_playFrame_impl(void* self, unsigned short frame, int ThreadType)
 {
     if (ThreadType == 0) {
@@ -351,8 +349,6 @@ struct sCmdList_C978 {
  *
  * @param thread  the thread (On Tour cUIThread* pThread)
  */
-// cUIScreen::playFrameByThread: advances the thread one frame toward its stop frame, then runs the commands of
-// the frame it was on.
 extern "C" void cUIScreen_playFrameByThread(cUIScreen* self, void *thread)
 {
     cUIThread_C870 *uiThread = (cUIThread_C870 *)thread;
@@ -580,6 +576,12 @@ void cUIScreen_parseObjectVisible(void* self)
 //100%
 INCLUDE_ASM("ui/uiscreen", func_0039CD98__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ *
+ * cUIScreen_playFrameByThread dispatches keyframe command 0x31 to it (0x30 goes to cUIScreen_parseEventTrigger); it
+ * sits between cUIScreen_parseObjectVisible__FPv and cUIScreen_parseEventTrigger.
+ */
 void func_0039CD98(void* self)
 {
 }
@@ -774,6 +776,15 @@ struct sObjRec_0039D008 {
     int key;             // 0x4
 };
 
+/**
+ * Creates the object of a UI screen whose record has hash name @p key.
+ *
+ * Walks the screen's object records (count at the start of the block at +0x38, each record sized by its +0x2 and hashed
+ * at +0x4); the match is built with cUIScreen_createObjectByStruct and gets @p key at +0x38.
+ *
+ * @param key  the object hash name
+ * @return the new object, or 0 when no record matches
+ */
 extern "C" void* func_0039D008(void* self, int key)
 {
     sObjRec_0039D008* record = (sObjRec_0039D008*)(*(char**)((char*)self + 0x38) + 4);
@@ -1635,6 +1646,13 @@ extern void* D_0046DD60[];
 //100%
 INCLUDE_ASM("ui/uiscreen", func_0039E288__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs a UI sound interface: installs the base sound-interface vtable D_0046DD60.
+ *
+ * cFESound_cFESound runs it as its base constructor, and the static gUISoundNull is built with it.
+ *
+ * @return @p self
+ */
 void* func_0039E288(void* self)
 {
     *(int*)self = (int)(void*)D_0046DD60;
@@ -1648,6 +1666,17 @@ INCLUDE_ASM("ui/uiscreen", func_0039E2A0);
 extern "C" void* cList_cList(void* self);
 extern void* D_004946C8[];
 
+/**
+ * Constructs a UI state for an engine.
+ *
+ * Links the list node to itself, installs the vtable D_004946C8, clears the hash name (+0xC), stores @p a1 (+0x10),
+ * sets the current controller to -1 (+0x14), the controller bits to 0xF (+0x15) and the attribute word (+0x1C) to 0x218
+ * (visible, first time, mode 2), clears the parent (+0x20), constructs the screen list (+0x24), clears the screen
+ * (+0x40) and sets the user number to -1 (+0x44).
+ *
+ * @param a1  the UI engine
+ * @return @p self
+ */
 extern "C" void* func_0039E2A0(void* self, int a1)
 {
     char* s = (char*)self;
@@ -1673,6 +1702,15 @@ INCLUDE_ASM("ui/uiscreen", func_0039E318);
 extern "C" void* cList_cList(void* self);
 extern void* D_004946C8[];
 
+/**
+ * Constructs a UI state for an engine with a parent state.
+ *
+ * The same as func_0039E2A0 except that the parent (+0x20) is @p a2.
+ *
+ * @param a1  the UI engine
+ * @param a2  the parent state
+ * @return @p self
+ */
 extern "C" void* func_0039E318(void* self, int a1, int a2)
 {
     char* s = (char*)self;
@@ -1703,6 +1741,13 @@ extern void* D_004946C8[];
 extern void* cList_vtbl[];
 extern void* cListNode_vtbl[];
 
+/**
+ * Destroys a UI state: destroys its screen list and list nodes, then frees it when bit 0 of @p flags is set.
+ *
+ * It is a slot of the cUIState vtable D_004946C8.
+ *
+ * @param flags  g++ destructor flags; bit 0 frees the object
+ */
 extern "C" void func_0039E390(void* self, int flags)
 {
     *(void***)((char*)self + 0x8) = D_004946C8;
@@ -1726,6 +1771,14 @@ extern "C" void* cList_destroyList(void*);
 //100%
 INCLUDE_ASM("ui/uiscreen", func_0039E438);
 #ifdef SKIP_ASM
+/**
+ * Sets controller bit @p bit of a UI state's controller mask (+0x15), or all 8 bits when @p bit is negative.
+ *
+ * Nothing in the retail code references it.
+ *
+ * @param arg0  the UI state
+ * @param bit  the controller index, or -1 for all
+ */
 extern "C" void func_0039E438(void *arg0, signed char bit) {
     if (bit < 0) {
         (*(unsigned char *)((char*)(arg0) + (0x15))) = 0xFFU;
@@ -1737,6 +1790,13 @@ extern "C" void func_0039E438(void *arg0, signed char bit) {
 //100%
 INCLUDE_ASM("ui/uiscreen", func_0039E470);
 #ifdef SKIP_ASM
+/**
+ * Clears controller bit @p bit of a UI state's controller mask (+0x15).
+ *
+ * Nothing in the retail code references it.
+ *
+ * @param bit  the controller index
+ */
 extern "C" void func_0039E470(void* self, signed char bit)
 {
     signed char mask = ~(1 << bit);
@@ -1978,6 +2038,12 @@ struct sVEntry_func_0039E778 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Hides a UI state's active screens: calls virtual slot 9 with 0 on each screen in its list (+0x24) whose flag bit 6 is
+ * set.
+ *
+ * Nothing in the retail code references it.
+ */
 extern "C" void func_0039E778(void* self)
 {
     void* n = cList_first((cList*)((char*)self + 0x24));
@@ -2007,6 +2073,12 @@ struct sVEntry_func_0039E7F0 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Shows a UI state's active screens: calls virtual slot 9 with 1 on each screen in its list (+0x24) whose flag bit 6 is
+ * set.
+ *
+ * Nothing in the retail code references it.
+ */
 extern "C" void func_0039E7F0(void* self)
 {
     void* n = cList_first((cList*)((char*)self + 0x24));

@@ -732,7 +732,6 @@ public:
  *
  * Skipped when cRenderToggles_m_DisableBoardWake is set or there are no segments; at most max - 2 segments are drawn.
  */
-// Board wake: draws the wake strip with alpha fading by the age of the newest point.
 extern "C" void cBoardWakeFX_render(sWake_DAB8* self)
 {
     if (cRenderToggles_m_DisableBoardWake != 0 || self->count == 0)
@@ -876,6 +875,23 @@ static inline float wakeLenDD30(const sVecDD30& v)
     return r;
 }
 
+/**
+ * Fills the current board wake line from the wake parameters: its spray direction, its row points and the rows' head
+ * positions.
+ *
+ * The line is +0xC[head] (head +0x8). Its age (+0x64) and first point are zeroed and its direction (+0x50) becomes 0.85
+ * * (mVelocity - forward * |mVelocity|), with forward the wake parameters' third vector (+0x80). Point i of the +0xB4
+ * rows is (side (+0x70) * t * t * 0.75 + up (+0x60) * t) * w, where t = i / (rows - 1) (times 0.9 for the last row) and
+ * w = the parameters' speed (+0x90) * (1 + 0.25 * func_002D1928(3, phase +0x38)). Row 0's entry at the head gets @p pos
+ * minus 5 * mGroundNormal and the alpha (+0x94) * 128 (+0x1C), copied to the other rows. @p width goes to the line's
+ * +0x60.
+ *
+ * cBoardWakeFX_update calls it with an extra forward-vector argument between @p pos and @p width, which this definition
+ * does not declare or use.
+ *
+ * @param pos  the wake position
+ * @param width  the value stored at the line's +0x60
+ */
 extern "C" void func_002DDD30(sWakeDD30* self, sVecDD30* pos, float width)
 {
     float w = self->f90 * (func_002D1928(3, self->phase) * 0.25f + 1.0f);
@@ -971,6 +987,17 @@ static inline float wakeClampE058(float v, float lo, float hi)
     return r;
 }
 
+/**
+ * Starts a new board wake segment: advances the ring head and sets the new entries' texture offset and ground colour.
+ *
+ * Advances the phase (+0x38) by 1/30, wrapping at 4, grows the count (+0x4) up to the maximum (+0xB8) and moves the
+ * head (+0x8) back one place in the ring. The ground colour (+0xA0) is the rider's row (kRiderVt_getAIIndex) of the
+ * 0xF0-byte table at cRenderStateMan_m_state + 0x28, doubled and clamped to 0..1. Row 0's entry at the head gets the
+ * frame counter (+0x40) * 0.5 wrapped into -32..32 and the colour * 128 as integers; rows 1..4 copy it. Then the frame
+ * counter increments.
+ *
+ * cBoardWakeFX_update calls it with a surface record and a position, which this definition does not declare or use.
+ */
 extern "C" void func_002DE058(sWake_E058* self)
 {
     self->phase += 0.03333333507180214f;
@@ -1018,6 +1045,12 @@ struct sVec4 {
 
 extern sVec4 t4vect_Zero;
 
+/**
+ * Clears a board wake's parameter block: zeroes its three vectors (+0x0, +0x10, +0x20) and the words at +0x30 and
+ * +0x34.
+ *
+ * cBoardWakeFX_readFromReplayFrame (the wake reset) calls it on cBoardWakeFX + 0x60.
+ */
 extern "C" void func_002DE368(void* self)
 {
     *(int*)((char*)self + 0x34) = 0;
@@ -1080,6 +1113,16 @@ static inline void wakeAddE398(sWakeVecE398& a, const sWakeVecE398& b)
         : "memory");
 }
 
+/**
+ * Scatters a spray emission position randomly around the board.
+ *
+ * With bias = the lean side (+0x12C, -1..1) it adds the vector at +0x50 times (bias * 55 + a random value within +-(1 -
+ * |bias|) * 55), then the vector at +0x40 times a random value in -10..10. func_002DF920 fills both vectors from the
+ * board bone's matrix rows 0 and 2. The random numbers come from the generator in D_004A3AFC. The spray updates
+ * func_002DFE88, func_002E02B8, func_002E0EE8 and func_002E1F70 call it.
+ *
+ * @param out  the position, changed in place
+ */
 extern "C" void func_002DE398(char* self, sWakeVecE398* out)
 {
     float bias = *(float*)(self + 0x12C);
@@ -1876,6 +1919,15 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002DF3B0);
 extern "C" void func_002E26B8(void* self);
 extern "C" void func_002E2550(void* self);
 
+/**
+ * Resets a rider's snow spray effect.
+ *
+ * Sets +0x120 to 0.5 and the colour (+0x90) to white, and zeroes +0x4, +0x10, +0x1C, +0x74, +0x78, +0x80 (so the bone
+ * table is looked up again), +0xE0 and the lean side +0x12C. When the stored player flag (+0x124) no longer matches
+ * whether the rider has a view (mViewIndex >= 0) it re-tunes the emitters with func_002E26B8; then it picks the
+ * emitters for the rider's detail level (func_002E2550). The cDynamicSprayFX constructor and cRiderHandler_resetRiderFX
+ * (on cRiderHandler + 0xB40) call it.
+ */
 extern "C" void func_002DF3B0(cDynamicSprayFX* self)
 {
     sVec4 white;
@@ -1925,6 +1977,13 @@ struct func_002DF448_sFx {
     int f60;                        // 0x60
 };
 
+/**
+ * Re-initialises the ten spray emitters from their spray settings and clears the re-init flag (+0x60).
+ *
+ * Emitter i (0x210 bytes each, array at +0x28) gets its virtual slot 3 called with settings set i (0xE8 bytes each,
+ * array at +0x2C) and the emitter's float at +0x58. The cDynamicSprayFX constructor calls it, and func_002DF920 does
+ * when +0x60 is set.
+ */
 extern "C" void func_002DF448(func_002DF448_sFx* self)
 {
     int i;
@@ -1964,6 +2023,14 @@ extern const char str_biceptwistright[];
 extern const char str_forearmright_b[];
 extern "C" int cAnimModel_getBoneSkelIndex(void* self, int idx, const char* name);
 
+/**
+ * Looks up the 30 rider bones the spray effect uses and marks the table as filled (+0x80 = 1).
+ *
+ * Stores cAnimModel_getBoneSkelIndex results for the rider's mAnimModel into the 0x78-byte table at +0x7C: shins, feet,
+ * thighs, hips, spine, neck, clavicles, biceps, forearms and hands by name ("shinleft_b", "footleft_b", ...). Entries
+ * 0-14 and 15-29 repeat the leg, hip and spine bones; entry 12 is "handright_b" between left-arm bones, possibly a
+ * slip. func_002DF920 calls it while +0x80 is 0.
+ */
 extern "C" void func_002DF4D0(char* self)
 {
     (*(int**)(self + 0x7C))[0] = cAnimModel_getBoneSkelIndex(*(void**)(*(char**)self + 0x780), 0, str_shinleft_b);
@@ -2137,6 +2204,24 @@ static inline sWakeVecE398 wakeRowF920(char* o, int k)
     return ((sWakeVecE398*)(*(char**)(*(char**)(o + 0x780) + 0x30) + (*(int*)(o + 0x8A4) << 6)))[k];
 }
 
+/**
+ * Updates a rider's snow spray effect for this frame: samples the rider's state, then runs each enabled emitter's
+ * update.
+ *
+ * Re-initialises the emitters when +0x60 is set (func_002DF448) and looks up the bones while +0x80 is 0
+ * (func_002DF4D0). Sets the lean side +0x12C to +-1 from PressMode, the layer-2 animation (23..28, 37, 38) and
+ * IsRidingFakie, or 0; +0xB4 = -mSlewed[0].cur * (1 - |mSlewed[3].cur|), negated when riding fakie; +0xB8 the speed
+ * (length of kRiderVt_getVelocity's vector), +0xBC its absolute value and +0xC0 the normalised mVelocity.
+ *
+ * The spray flag +0xB0 is cleared in motion states 1, 2 and 4 (cRider_getMotionState), in control state 9, or when
+ * mIsInNIS is set without (unk_AD0 clear, unk_AFC and unk_B00 set). +0x30/+0x40/+0x50/+0xA0 get rows 1, 2, 0 and 3 of
+ * the mBoneBoardChild matrix; +0xD0 the SurfPropCache record for mSurfaceType. A sharp slow-down (speed drop * 60 above
+ * 555.6 at a speed above 555.6, or at least 27.8 in the NIS case) reports a burst through func_002E23E0. The emitters
+ * are re-chosen (func_002E2550) when mLOD changed, the colour (+0x90) becomes the doubled table colour for the rider
+ * (as in func_002DE058) with alpha 1, and every emitter whose enable word (+0x174) is set runs its update: 0
+ * func_002E0EE8, 1 func_002E02B8, 3 func_002DFE88, 4 func_002E1120, 5 func_002E1598, 7 func_002E1A80, 8 func_002E1F70,
+ * 9 func_002E2260. cRiderHandler_updateRiderFX and cAI_update call it on cRiderHandler + 0xB40.
+ */
 extern "C" void func_002DF920(sWakeFxF920* self)
 {
     if (self->i60 != 0) {
@@ -2349,6 +2434,17 @@ static inline float wakeClampFE88(float v, float lo, float hi)
     return r;
 }
 
+/**
+ * Updates spray emitter 3 (+0x28 + 0x630): a side spray thrown off the board edge while carving.
+ *
+ * Runs only while spraying (+0xB0) and when a random number is below the surface record's chance (+0xD0, +0x6C). The
+ * emission point is 15 units ahead of the board (+0xA0 plus +0x30 * 15), scattered by func_002DE398. The emit chance
+ * combines the rider's lean (|mSlewed[3].cur|), the carve value +0xB4 and how far the board faces across its velocity
+ * (rider +0x3B0 against +0xC0), scaled down below a speed of about 555. The velocity mixes the rider velocity,
+ * mGroundNormal and the board's side direction with settings set 3 (+0x2C, +0x390..+0x39C), the last two scaled by the
+ * speed (+0xBC). Otherwise the emitter is updated with nothing to emit. Steps are 1/60 s
+ * (cDynamicColourEmitter_update).
+ */
 extern "C" void func_002DFE88(sWakeFxFE88* self)
 {
     void* em = self->p28 + 0x630;
@@ -2463,6 +2559,14 @@ static inline float wakeLimit0EE8()
     return 222.22222900390625f;
 }
 
+/**
+ * Updates spray emitter 0 (+0x28): a spray from the board while moving fast on a spraying surface.
+ *
+ * Emits when spraying (+0xB0), the speed (+0xBC) is above 222.2, the surface record (+0xD0) flag +0x58 is set and the
+ * word at the rider's +0x88C object + 0xA0 is clear. The emission point is 15 units ahead of the board (+0xA0 plus
+ * +0x30 * 15), scattered by func_002DE398; the velocity mixes the rider velocity and mGroundNormal with settings set 0
+ * (+0x2C, +0xD8..+0xE0), the last scaled by the speed. Otherwise the emitter is updated with nothing to emit.
+ */
 extern "C" void func_002E0EE8(sWakeFx0EE8* self)
 {
     int flag = *(int*)(*(char**)(self->obj + 0x88C) + 0xA0);
@@ -2504,6 +2608,12 @@ static inline float wakeRand10B8()
     return *(float*)&D_004A3AFC - 1.0f;
 }
 
+/**
+ * Initialises the head-puff timing: blink on (+0x18 = 1), timer (+0x20) 0 and the period (+0x24) 0.4 to 0.5 s at
+ * random.
+ *
+ * Nothing in the retail code references it; func_002E1120 runs the puffs from these fields.
+ */
 extern "C" void func_002E10B8(sWake10B8* self)
 {
     self->f18 = 1;
@@ -2658,6 +2768,17 @@ static inline float wakeClamp1120(float v, float lo, float hi)
     return r;
 }
 
+/**
+ * Updates spray emitter 4 (+0x28 + 0x840): blinking puffs in front of the rider's head.
+ *
+ * The emission point is (-3, 0, 4) in the head bone's frame (mBoneHead). Above a speed (+0xBC) of 1111.1 it emits
+ * nothing and clears the rate (+0x14). Otherwise the glow (+0x1C) jumps to 1 in animation category 30 (layer 2,
+ * cRiderAnimBase_getCurrentAnimCategory) and decays by 0.1 a second otherwise; the blink flag (+0x18) toggles every
+ * period (+0x24: 0.4 s on, 0.4 to 1.0 s off by the glow). The alpha is (glow + 0.5) * (1 - (value + 5) * 0.04), clamped
+ * to 0..2, where value is func_002EE6F0 for the rider (kRiderVt_getAIIndex), so the puffs fade out as that value rises
+ * to 20. While blinking on with alpha above 0.02 the rate grows by 18 to 24 a second and each whole unit emits one
+ * white puff with settings set 4 (+0x2C, +0x478..+0x480) plus 150 units along the head's z axis.
+ */
 extern "C" void func_002E1120(sWakeFx1120* self)
 {
     void* em = self->p28 + 0x840;
@@ -2824,6 +2945,18 @@ static inline sWakeVecE398* wakeVel1598(sWakeFx1598* self)
     return vt[2].fn(sub + vt[2].delta);
 }
 
+/**
+ * Updates spray emitters 5 and 6 (+0x28 + 0xA50, + 0xC60): the burst thrown up by a sharp slow-down.
+ *
+ * Runs while the burst strength (+0xE0) is above 27.8 and the surface record (+0xD0) flag +0x60 is set; otherwise both
+ * emitters stop and the strength is cleared. Emitter 6 is used, or emitter 5 when the surface flag +0x64 is set and the
+ * strength is above 277.8; with emitter 5 and no NIS (mIsInNIS) the burst point +0xF0 is updated by func_002F4118. The
+ * point is moved along the burst direction (+0x100) by 20 (emitter 6) or 45 and scattered by up to 25 (60 for a player
+ * on a +0x64 surface) in x and y. The level +0x4 grows with strength / 3333 (to 2 in motion state 2, 1.5 with +0x114
+ * clear, else 1), the alpha +0x120 eases toward 1 (0.5 with +0x114 set), and the velocity is the rider velocity minus
+ * 0.75 of its mGroundNormal part, times 0.4 (0.3 with +0x114 set). Below 83.3 the strength drops to 0, otherwise it is
+ * multiplied by the surface's +0x68 (times 0.4 for a non-player).
+ */
 // PORT: g++ minimum operator (<?).
 extern "C" void func_002E1598(sWakeFx1598* self)
 {
@@ -3071,6 +3204,16 @@ static inline t4Vector* wakeVel1A80(sWakeFx1A80* self)
     return vt[2].fn(sub + vt[2].delta);
 }
 
+/**
+ * Updates spray emitter 7 (+0x28 + 0xE70): snow kicked up when the board faces across its motion at speed.
+ *
+ * The threshold is (|mSlewed[0].cur| + the facing factor - 0.1) * ramp(speed 416.7..1250) squared, where the facing
+ * factor is twice |rider +0x3B0 . +0xC0| capped at 1. Emits when spraying (+0xB0), a random value in 0..0.4 is below
+ * it, the surface record flag +0x50 is set and the lean side (+0x12C) is near 0. The point is lifted along
+ * mGroundNormal by the surface's +0x54 times a random 0.5..1.5 and pulled back along mVelocity; the velocity mixes the
+ * rider velocity and mGroundNormal with settings set 7 (+0x2C, +0x730..+0x738) plus 0.3 of (the board's forward axis
+ * times -speed + mVelocity).
+ */
 extern "C" void func_002E1A80(sWakeFx1A80* self)
 {
     float d = fsAbs(vu0Dot_1A80(*(t4Vector*)(self->obj + 0x3B0), self->vC0));
@@ -3165,6 +3308,15 @@ static inline sWakeVecE398* wakeVel1F70(sWakeFx1F70* self)
     return vt[2].fn(sub + vt[2].delta);
 }
 
+/**
+ * Updates spray emitter 8 (+0x28 + 0x1080): a steady powder trail whose level follows the surface.
+ *
+ * While spraying (+0xB0) with a surface record level (+0xD0, +0x5C) of at least 0.01 the level +0x10 rises by 0.01 a
+ * frame up to that value and nothing is emitted that frame; otherwise it falls by 1/60. It drops to 0 when the speed
+ * (+0xBC) is below 277.8 or, not spraying, the velocity's z is below -3333.3. With a positive level it emits at the
+ * board (+0xA0, scattered by func_002DE398) with alpha level * 1.25 (faded as the rider falls), velocity from the rider
+ * velocity and +0x30 with settings set 8 (+0x2C, +0x818..+0x820).
+ */
 // PORT: g++ minimum/maximum operators (<?, >?).
 extern "C" void func_002E1F70(sWakeFx1F70* self)
 {
@@ -3240,6 +3392,14 @@ static inline float wakeLimit2260()
     return 83.33333587646484f;
 }
 
+/**
+ * Updates spray emitter 9 (+0x28 + 0x1290): snow shed from the rider's body bones after a fall.
+ *
+ * While the level (+0x4) is positive and the speed (+0xB8) above 83.3 it emits one particle a frame at the next of the
+ * 30 bones in the table (+0x7C, cursor +0x78), with alpha level * 1.5 and velocity mVelocity times settings set 9's
+ * +0x900 (+0x2C), and lowers the level by 1/60 unless in motion state 2 (+0xD4). Otherwise the emitter is updated at
+ * the hips bone (mBoneHips) with nothing to emit.
+ */
 // PORT: g++ maximum operator (>?).
 extern "C" void func_002E2260(sWakeFx2260* self)
 {
@@ -3361,6 +3521,21 @@ struct sWake_23E0 {
     int f124;                   // 0x124
 };
 
+/**
+ * Records a spray burst when it is stronger than the current one and far enough from it.
+ *
+ * Takes it when |@p speed| exceeds the stored strength (+0xE0) and the point is more than 180 units (100 for a player,
+ * +0x124) from the stored point (+0xF0), or the rider is in the NIS state that allows a trail (mIsInNIS set, unk_AD0
+ * clear, unk_AFC and unk_B00 set). It then stores the strength (doubled when @p b is 0), @p pos (+0xF0), @p dir
+ * (+0x100), @p a (+0x110) and @p b (+0x114). func_002DF920 reports slow-downs with @p b = 1; func_00111AA0 (wipeout
+ * impacts) passes 0. func_002E1598 plays the burst.
+ *
+ * @param pos  the burst position
+ * @param dir  the burst direction (the surface normal)
+ * @param a  the surface type
+ * @param b  1 for a slow-down spray, 0 for an impact
+ * @param speed  the burst strength
+ */
 extern "C" void func_002E23E0(sWake_23E0* self, sV4_23E0* pos, sV4_23E0* dir, int a, int b, float speed)
 {
     float s = Abs_23E0(speed);
@@ -3402,6 +3577,13 @@ struct func_002E24D0_sFx {
     func_002E24D0_sWake* wakes;     // 0x28
 };
 
+/**
+ * Draws a rider's snow spray: renders each enabled emitter that has live particles, when the rider is on screen.
+ *
+ * Does nothing unless the rider's mIsOnScreen is set. Of the ten emitters (+0x28) it renders those whose enable word
+ * (+0x174) is set and whose particle count (+0x1E0) is positive, with cDynamicColourEmitter_render mode 7.
+ * cRiderHandler_renderRiderFX and cAI_render call it on cRiderHandler + 0xB40.
+ */
 extern "C" void func_002E24D0(func_002E24D0_sFx* self)
 {
     if (*(int*)((char*)self->owner + 0xB18) != 0) {
@@ -3421,6 +3603,14 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E2550);
 #ifdef SKIP_ASM
 #define S28(off) (*(int*)((char*)*(void**)((char*)self + 0x28) + (off)))
 
+/**
+ * Chooses which spray emitters run for the rider's detail level (mLOD), which it also stores at +0x128.
+ *
+ * Sets the enable word (+0x174) of each 0x210-byte emitter at +0x28. Level 0: emitters 0, 5 and 6 on, 4 on for a player
+ * (+0x124) or in an NIS (mIsInNIS), 1, 2, 3, 7, 8 and 9 on for a player. Level 1: 0, 5 and 6 on, 1, 2, 3, 7 and 8 for a
+ * player, 4 and 9 off. Other levels: 5 on, 6 for a player, the rest off. func_002DF3B0 and func_002DF920 (when mLOD
+ * changes) call it.
+ */
 extern "C" void func_002E2550(void* self)
 {
     int mode = *(int*)((char*)*(void**)self + 0x898);
@@ -3477,6 +3667,16 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E26B8);
 #ifdef SKIP_ASM
 struct sWakeVt26B8 { short delta; short index; void (*fn)(void*, void*, float); };
 
+/**
+ * Tunes the burst emitters 5 and 6 for a player or a computer rider and re-initialises them.
+ *
+ * Stores whether the rider has a view (mViewIndex >= 0) at +0x124. Sets settings sets 5 and 6 (+0x2C, 0xE8 bytes each)
+ * at +0x10, +0x18 and +0xCC to 55, 25, 170 and 30, 20, 60 for a player, or 24.75, 5, 76.5 and 19.5, 8, 39 otherwise,
+ * then re-initialises emitters 5 and 6 through their virtual slot 3 with their settings and float +0x58. The
+ * cDynamicSprayFX constructor and func_002DF3B0 call it.
+ *
+ * @param vself  the spray effect (cDynamicSprayFX, this)
+ */
 extern "C" void func_002E26B8(void* vself)
 {
     char* self = (char*)vself;
@@ -3515,6 +3715,15 @@ extern "C" void func_002E26B8(void* vself)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E27E8);
 #ifdef SKIP_ASM
+/**
+ * Returns the radius of a light halo type: 180 for 0x10, 100 for 0x20, 350 for 0x40, otherwise 0.
+ *
+ * The halo resolver reaches it through func_003AD230 (cChunkResolve_resolveHalo); func_002E2868 draws the halos with
+ * the same sizes.
+ *
+ * @param type  the halo type bits (flags & 0x70)
+ * @return the radius
+ */
 extern "C" float func_002E27E8(int type)
 {
     switch (type) {
@@ -3532,6 +3741,14 @@ extern "C" float func_002E27E8(int type)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E2860__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs a halo: does nothing and returns @p self.
+ *
+ * cLensFxMan_cLensFxMan runs it on each of its halo slots, and the sun halo constructor (src/seg/seg_1F1548.cpp) on its
+ * base.
+ *
+ * @return @p self
+ */
 void* func_002E2860(void* self)
 {
     return self;
@@ -3692,6 +3909,19 @@ static inline void rsSetA_2868(sRsCtx_2868* ctx, int mask, int shift, int v)
     ctx->top->flagsA = (ctx->top->flagsA & ~mask) | ((v << shift) & mask);
 }
 
+/**
+ * Draws one light halo as a camera-facing sprite in the halo's colour.
+ *
+ * Does nothing unless the halo is on screen (+0x2C). The colour's red, green and blue are the halo record's (+0x20)
+ * vector at +0x10 normalised to unit length. With a z-buffer sample (+0x2E) the alpha is the record's visibility for
+ * view @p idx (+0x40 + 4 * @p idx) and the render state's flag A bits 23-24 are set to 2, otherwise the alpha is 1 with
+ * bits 23-24 = 1; bits 20-21 are cleared and bits 12-19 set to 20 either way. Skips a non-positive alpha. The halo type
+ * (record flags & 0x70) picks the texture and size: 0x10 GrMan +0x1024 at 180, 0x20 GrMan +0x1028 at 100, 0x40 GrMan
+ * +0x1024 at 350. Draws at the record's position (+0x1C) with UVs 0..1 and rotation +0x28 through GrMan virtual slot
+ * 79. func_002E3478 calls it for every halo on screen.
+ *
+ * @param idx  the view index
+ */
 extern "C" void func_002E2868(sWake_2868* self, int idx)
 {
     if (self->on == 0) {
@@ -3799,6 +4029,20 @@ static inline int clampI_2B00(int v, int lo, int hi)
     return v < lo ? lo : (v > hi ? hi : v);
 }
 
+/**
+ * Projects a light halo for a view: decides whether it is on screen and sets its z-sample rectangles, depth and angle.
+ *
+ * Clips the halo record's position (+0x20, +0x1C) with GrMan virtual slot 91: when clipped, clears +0x2C and +0x2E.
+ * Otherwise it sets +0x2C and projects the point with slot 92; at a depth (z * 2^-24) of 0.005 or less it stops there.
+ * Else it sets +0x2E, the sample rectangle +0x0..+0xC (depth * 800 by depth * 400 pixels, clamped to 16 by 8, centred
+ * on the point) and the 16 by 8 rectangle +0x10..+0x1C clamped inside the view rectangle (@p vrect +0x0..+0xC). +0x24
+ * becomes the projected depth of the point moved toward the camera by 100, 80 or 200 units by type (along the view
+ * matrix column at @p vrect +0x18, +0x28, +0x38), and +0x28 the angle (screen x mapped to -1..1) * pi/2. func_002E3338
+ * calls it for each halo of the view.
+ *
+ * @param vself  the halo
+ * @param vrect  the view information: view rectangle at +0x0, view matrix from +0x10
+ */
 extern "C" void func_002E2B00(void* vself, void* vrect)
 {
     sWake_2B00* self = (sWake_2B00*)vself;
@@ -3960,6 +4204,13 @@ extern "C" void* cLensFxMan_cLensFxMan(void* self)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E2F98__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Empties the lens manager's halo list for one view: sets its count (+0x60 + 4 * @p i) to 0.
+ *
+ * cGame_renderLightHalos calls it on the game's LensFxMan before adding the view's halos.
+ *
+ * @param i  the view index
+ */
 void func_002E2F98(void* self, int i)
 {
     *(int*)((char*)self + (i << 2) + 0x60) = 0;
@@ -3984,6 +4235,16 @@ struct sWakeFx {
     sWakePoint points[1][256];
 };
 
+/**
+ * Adds a halo record to the lens manager's list for one view.
+ *
+ * Writes the next 0x30-byte halo of view @p i (count at +0x60 + 4 * @p i): its record (+0x20) is @p v and the on-screen
+ * and sample flags and the word at +0x28 are cleared; then the count goes up. There is no bound check against the 256
+ * slots. func_002E2FF8 calls it for each record.
+ *
+ * @param v  the halo record
+ * @param i  the view index
+ */
 extern "C" void func_002E2FA8(sWakeFx* self, int v, int i)
 {
     int n = self->counts[i];
@@ -4000,6 +4261,16 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E2FF8);
 #ifdef SKIP_ASM
 extern "C" void func_002E2FA8(sWakeFx* self, int v, int i);
 
+/**
+ * Adds an array of halo records to the lens manager's list for one view (func_002E2FA8 for each).
+ *
+ * cGame_renderLightHalos calls it twice, with clip codes 0 and 2.
+ *
+ * @param vals  the halo records
+ * @param count  number of records
+ * @param ignored  the clip code, unused
+ * @param i  the view index
+ */
 extern "C" void func_002E2FF8(sWakeFx* self, int* vals, int count, int ignored, int i)
 {
     int n;
@@ -4048,6 +4319,13 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E30D0);
 extern "C" void func_002E3338(void* self, int i);
 extern "C" void func_002E3478(void* self, int i);
 
+/**
+ * Renders the light halos of one view: processes them (func_002E3338), then draws them (func_002E3478).
+ *
+ * cGame_renderLightHalos calls it on the game's LensFxMan.
+ *
+ * @param i  the view index
+ */
 extern "C" void func_002E30D0(void* self, int i)
 {
     func_002E3338(self, i);
@@ -4060,6 +4338,11 @@ extern "C" void func_002E3130(void* self);
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E3110__FPv);
 #ifdef SKIP_ASM
+/**
+ * Frame callback of the lens manager: runs func_002E3130 (the visibility sampling) on it.
+ *
+ * cLensFxMan_cLensFxMan registers it with the graphics manager, passing the manager as the parameter.
+ */
 void func_002E3110(void* self)
 {
     func_002E3130(self);
@@ -4117,6 +4400,17 @@ struct sLensSunBanks3130 {
     sSun3130 suns[2][2];        // 0x6070
 };
 
+/**
+ * Samples the z-buffer visibility of the sun and of every active light halo, per view.
+ *
+ * Does nothing while +0x6494 is set. For each of the +0x6490 views: when cLensFxMan_mbDrawSun is set and the view's sun
+ * (+0x6070, 0x210 bytes each) is active (+0x2E), stores the value from the manager's virtual slot 4 (sun, &value) at
+ * the sun's +0x204, keeping the previous bank's value when the slot returns 0. Each active halo of the view does the
+ * same into its record's visibility for that view (record +0x40 + 4 * view). The arrays have one bank, so the
+ * previous-bank read goes past it (see the code's note). func_002E3110 calls it once a frame.
+ *
+ * @param selfp  the lens manager (this)
+ */
 // FAKEMATCH: the invented zero-valued bank index `int bufferId = 0;` (as landed func_002E3478's `bank`), so retail's
 // zeroed register times 0x6000 is kept; plain form (constant bank 0, prev bank 1 through the same views) 79.77%.
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
@@ -4201,6 +4495,17 @@ static inline void vu0CopyMatrix3338(sWkMtx3338* dst, sWkMtx3338* src)
         : "memory");
 }
 
+/**
+ * Prepares one view's halos: stores the view's rectangle, matrix and projection values, then processes the sun and each
+ * halo.
+ *
+ * Fills +0x0..+0xC from GrMan virtual slot 28 (the view rectangle), copies the matrix from slot 35 to +0x10 and gets
+ * three floats into +0x50, +0x54, +0x58 from slot 30. Then processes view @p idx's sun (+0x6070 + @p idx * 0x210) with
+ * func_002F4DB8 and each of its halos with func_002E2B00. func_002E30D0 calls it.
+ *
+ * @param vself  the lens manager (this)
+ * @param idx  the view index
+ */
 extern "C" void func_002E3338(void* vself, int idx)
 {
     sWkFx3338* self = (sWkFx3338*)vself;
@@ -4260,6 +4565,17 @@ struct sBW3478Fx : sBW3478Data {
 extern int cLensFxMan_mbDrawSun;
 extern "C" void func_002F4A08(void* dst, void* src, int i);
 
+/**
+ * Draws one view's lens effects: the sun when enabled, then every on-screen light halo, between the manager's begin and
+ * end draw calls.
+ *
+ * Calls func_002F4A08 for the view's sun (+0x6070 + @p i * 0x210) when cLensFxMan_mbDrawSun is set, the manager's
+ * virtual slot 2, func_002E2868 for each halo of view @p i with +0x2C set, then virtual slot 3. func_002E30D0 calls it
+ * after func_002E3338.
+ *
+ * @param selfv  the lens manager (this)
+ * @param i  the view index
+ */
 extern "C" void func_002E3478(void* selfv, int i)
 {
     sBW3478Fx* self = (sBW3478Fx*)selfv;
@@ -5046,6 +5362,17 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E44C8);
 #ifdef SKIP_ASM
 extern "C" void cTransitionMan_StartTransition(void* self, int a1, int a2, int a3, float f0, float f1, int a4, int a5, float f2);
 
+/**
+ * Starts a transition with only an in-object: cTransitionMan_StartTransition with no out-object, no out time and no
+ * screen grab.
+ *
+ * Nothing in the retail code references it.
+ *
+ * @param a1  the initiator
+ * @param a2  the transition object to play in
+ * @param f0  the in time
+ * @param f1  the hold time
+ */
 extern "C" void func_002E44C8(void* self, int a1, int a2, float f0, float f1)
 {
     cTransitionMan_StartTransition(self, a1, a2, 0, f0, f1, 0, 0, 0.0f);
@@ -5119,6 +5446,15 @@ struct sBWVEntryR_4578 {
 
 extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
 
+/**
+ * Ends the current transition: deletes its in and out objects and resets the transition state.
+ *
+ * Does nothing unless a transition is active (+0x44). Clears +0x44 and the pause count (+0x40), deletes the in (+0x4C)
+ * and out (+0x50) objects through their deleting destructor (virtual slot 1, flags 3) and clears both pointers and
+ * +0x70. When a screen-grab handle is held (+0x6C not -1) it sets +0x7C, stores GrMan virtual slot 114's result at
+ * +0x80 and clears +0x60 and +0x64. Finally clears +0x78. Script commands, the rider and AI code, cTransitionMan_update
+ * and func_002E4C60 call it.
+ */
 extern "C" void func_002E4578(void* self)
 {
     if (*(int*)((char*)self + 0x44) != 0) {
@@ -5153,6 +5489,14 @@ extern "C" void func_002E4578(void* self)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4638);
 #ifdef SKIP_ASM
+/**
+ * Counts a pause or resume request for the running transition.
+ *
+ * With no transition active (+0x44) it clears the pause count (+0x40). Otherwise @p up increments it and a zero @p up
+ * decrements it when positive. tNISList_DoPause calls it on the transition manager.
+ *
+ * @param up  nonzero to pause, zero to resume
+ */
 extern "C" void func_002E4638(void* self, int up)
 {
     if (*(int*)((char*)self + 0x44) == 0) {
@@ -5172,6 +5516,14 @@ extern "C" void func_002E4638(void* self, int up)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4678);
 #ifdef SKIP_ASM
+/**
+ * Returns the time left in the running transition: in + hold + out time (+0x54, +0x58, +0x5C) minus the elapsed time
+ * (+0x48), not below 0.
+ *
+ * Returns 0 with no transition active (+0x44). tNISList_PlayNextScript uses it as the cut-scene fade time.
+ *
+ * @return the remaining time in seconds
+ */
 extern "C" float func_002E4678(void* self)
 {
     if (*(int*)((char*)self + 0x44) == 0) {
@@ -5433,6 +5785,12 @@ INCLUDE_ASM("visualfx/boardwakefx", func_002E4C60);
 void cScriptObject_OnEndObjectUse(void*);
 extern "C" void func_002E4578(void* self);
 
+/**
+ * Ends the transition when a player stops using the transition script object.
+ *
+ * Runs cScriptObject_OnEndObjectUse on the script object at +0x10, then func_002E4578. It sits in the
+ * cScriptObjTransition part's vtable (D_00488100) right after cTransitionMan_OnStartObjectUse.
+ */
 extern "C" void func_002E4C60(void* self)
 {
     cScriptObject_OnEndObjectUse((char*)self + 0x10);
@@ -5443,6 +5801,14 @@ extern "C" void func_002E4C60(void* self)
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4C90);
 #ifdef SKIP_ASM
+/**
+ * Returns whether both screen-grab flags (+0x60 and +0x64) are set.
+ *
+ * It fills a slot that the base cScriptObjTransition vtable leaves pure (func_00411530), in the transition manager's
+ * vtable D_00488100.
+ *
+ * @return 1 when both flags are set, otherwise 0
+ */
 extern "C" int func_002E4C90(void* self)
 {
     int result = 0;
@@ -5543,6 +5909,14 @@ extern void* cTransitionObj_vtbl[];
 //100%
 INCLUDE_ASM("visualfx/boardwakefx", func_002E4D70__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs a transition object: installs cTransitionObj_vtbl.
+ *
+ * The wipe and circle constructors (func_002EBBA8, func_002EBD88, func_002EBE20), the fade object code and
+ * cSSXScriptEngine_MakeTransitionObject run it as the base constructor.
+ *
+ * @return @p self
+ */
 void* func_002E4D70(void* self)
 {
     *(int*)self = (int)(void*)cTransitionObj_vtbl;
@@ -5796,6 +6170,19 @@ static inline sWakeVecE398 Scale_4F50(float s, const sWakeVecE398& v)
 
 // The unit declares func_002E4F50(int*, sWakeRec_5DA0*) later; define it through a typed alias.
 extern "C" void func_002E4F50_4F50(cSnowBox_4F50* self, const tWorldPainterSnowfallParameters_4F50* params) __asm__("func_002E4F50");
+/**
+ * Updates a snow box for this frame: takes its flake settings from the snowfall parameters, varies the wind and moves
+ * the box offset.
+ *
+ * Mode 0 (+0x4) takes its alpha, colour (+0xA4..+0xAC), flake count (parameter 0 * 500), wind strength (parameter 1 *
+ * 500) and +0x14 from the first parameter set; mode 1 takes the second colour set, parameter 2 * 6 flakes and parameter
+ * 3 * 250 wind. When the wind timer (+0x90) runs out the old wind (+0x30) is kept at +0x40 and a new one is picked: the
+ * strength along the parameter-5 angle, mixed with random flurries by parameter 6, for 1 to 5 seconds. The offset
+ * (+0x20) moves by the blended wind and the fall (+0x1C * parameter 7) times the frame time (1 / cAppMan_TheAppMan
+ * +0x10) and is wrapped into the box size (+0xC). cSnowFall_update calls it per box.
+ *
+ * @param params  the snowfall parameters filled by cSnowFall_update
+ */
 extern "C" void func_002E4F50_4F50(cSnowBox_4F50* self, const tWorldPainterSnowfallParameters_4F50* params)
 {
     switch (self->mode) {
@@ -5892,6 +6279,14 @@ static inline void wakeWrap5430(float& r, float v, float s)
     }
 }
 
+/**
+ * Moves a snow box's offset by the camera's movement and wraps it back into the box size.
+ *
+ * Subtracts @p delta from the offset (+0x20) and wraps each axis into the box size (+0xC). cSnowFall_render calls it
+ * with the camera's change in position.
+ *
+ * @param delta  the camera movement since the last frame
+ */
 extern "C" void func_002E5430(sWakeGrid5430* self, sWakeVec5430* delta)
 {
     wakeSub5430(self->pos, *delta);
@@ -6098,6 +6493,21 @@ static inline void wakeSubV55D8(sVec55D8& a, const sVec55D8& b)
         : "memory");
 }
 
+/**
+ * Draws one snow box: builds its draw record and hands it to the graphics manager.
+ *
+ * Does nothing while the box is inactive (+0x8). The record holds @p m times the box matrix (+0x50), the offset (+0x20)
+ * divided by the size (+0xC) and shifted by one box toward the cell (@p x, @p y, @p z) to (x+1, y+1, z+1), minus 1.5;
+ * the colour (+0xA4..+0xAC) and alpha (+0x18) times 128; the flake values +0x8, +0x98, +0x9C, +0xA0; and the cell
+ * bounds with +0x14 and the size. Type 0 (+0x4) draws through GrMan virtual slot 85, type 1 through slot 86.
+ * cSnowFall_render calls it for each box.
+ *
+ * @param p  the snow box
+ * @param m  the snow matrix
+ * @param x  minimum x of the cell
+ * @param y  minimum y of the cell
+ * @param z  minimum z of the cell
+ */
 extern "C" void func_002E55D8(int* p, sMat_6008* m, float x, float y, float z)
 {
     sCell55D8* self = (sCell55D8*)p;
@@ -7120,6 +7530,18 @@ static inline t4Vector wakeDropE6C08(sTrailE6C08* self, const t4Vector& c, const
     return wakeSubE6C08(c, wakeScaleE6C08(self->rider->mGroundNormal, wakeDotE6C08(self->rider->mGroundNormal, d) - 10.0f));
 }
 
+/**
+ * Adds this frame's sample to a rider's speed-boost trail and trims the trail to its maximum length.
+ *
+ * Works only while the maximum length (+0x4) or the current total (+0x18) is positive and the rider moves. A sample
+ * takes the ring's next slot (30 entries of 0x1C bytes at +0x50, head +0x30, count +0x14; a full ring drops its oldest
+ * length from the total) and adds the distance from the last position (+0x20, from kRiderVt_getPosition). The board's
+ * corners are the mBoneBoardChild position +-75 along its row 0 (reversed when IsRidingFakie) and +-17.5 along row 2;
+ * with PressMode one end is pushed 150 further by the layer-2 animation. Measured along the side axis (mVelocity x
+ * mGroundNormal, kept facing the previous one at +0x40), the two outermost corners are projected onto the ground plane
+ * (10 units above mGroundContactPoint) and stored as the sample's edges. Then the oldest samples are dropped while the
+ * total exceeds the maximum, keeping at least 3 when the maximum is above 1. cSpeedBoostFX_update calls it.
+ */
 extern "C" void func_002E6C08(sTrailE6C08* self)
 {
     if (0.0f < self->maxLen || 0.0f < self->total) {
@@ -7460,8 +7882,6 @@ static inline void setVtx_7A10(sWakeVtx_7A10* base, int i, float s, float t, con
  * Nothing is drawn when the trail is empty, short (under 3) or nearly transparent, or when
  * cPowerUpFXToggles_m_EnableSpeedBoostFX is off.
  */
-// Board wake: draws the two ribbons (left/right of each trail point, faded by age) and the
-// segment trail as a strip through the particle vertex buffer.
 extern "C" void cSpeedBoostFX_render(sBoardWake_7A10* self)
 {
     if (self->npts == 0 || self->f4 < 3.0f || self->alpha < 0.05f || cPowerUpFXToggles_m_EnableSpeedBoostFX == 0)

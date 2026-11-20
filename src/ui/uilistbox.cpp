@@ -110,6 +110,13 @@ struct func_0039A670_sItem {
     char pad[0x10];
 };
 
+/**
+ * Deletes all entries of a list box: frees their strings and sets the entry count and current index to 0.
+ *
+ * With bit 0x10 of the attributes (+0x74) one shared buffer at +0x9C is freed; otherwise each of the +0x318 entries
+ * (0x14 bytes from +0x9C) frees its string. Then +0x319 and +0x318 are cleared. The options, rule-select and network
+ * screens call it before refilling a list.
+ */
 extern "C" void func_0039A670(void* self)
 {
     if (*(int*)((char*)self + 0x74) & 0x10) {
