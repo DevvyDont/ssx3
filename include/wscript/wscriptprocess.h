@@ -1,0 +1,70 @@
+#ifndef WSCRIPT_WSCRIPTPROCESS_H
+#define WSCRIPT_WSCRIPTPROCESS_H
+
+// cWScriptProcess / cWScriptTask: a world-script process and its tasks. cWScriptMan_addProcess allocates a process
+// (cMemMan_alloc(0x60, "WScriptProcess")) from a world section's process definition; the constructor resolves its
+// 3 process scripts (start, update, end) and 10 event scripts and builds its "WScriptTasks" array (0x44 each), whose
+// tasks have the same script slots. The manager runs one task of a process at a time (RunningTask) and dispatches
+// the rider events (collide, jump, land, trick, wipeout, reset, collect, three custom events) to the process and to
+// its running task. Methods in wscript/wscriptprocess and wscript/wscriptman.
+//
+// FLAT layouts, like main/game.h. Member names are EA's, from SSX On Tour's PSP DWARF: cWScriptProcess derives from
+// cWScriptProcessState (0x00-0x0F) and cWScriptTask from cWScriptTaskState (0x00). Placed by:
+//   [R] the retail constructors cWScriptProcess_cWScriptProcess / cWScriptTask_cWScriptTask and initTask;
+//   [U] how retail code uses the field (every access through `this` in the methods falls on a member start);
+//   [O] On Tour's member order; sizes 0x60 and 0x44 on both sides.
+// The vtable pointers are g++ 2.95's, after the members.
+
+#include "layout.h"
+
+struct cWScriptMan;
+struct cWScriptProcess;
+struct cLunoTable;
+
+struct cWScriptTask {
+    // cWScriptTaskState
+    int State;                         // 0x00 [O] tTaskState; [U] taskEnd, abortTask, dispatchTaskEvent
+    // cWScriptTask
+    unsigned int TaskId;               // 0x04 [O]; [R] initTask; [U] getTaskId
+    char* TaskScriptCode[3];           // 0x08 [O] (const char* there); [U] taskStart, taskUpdate, taskEnd
+    char* EventScriptCode[10];         // 0x14 [O] (const char* there); [U] eventOnCollide (0x14) ... eventOnEvent3
+                                       //      (0x38)
+    cWScriptProcess* Process;          // 0x3C [O]; [R] initTask; [U] the event handlers
+    void** mVtbl;                      // 0x40 [R] ctor = the task vtable; [U] the process destructor's virtual call
+};
+
+CHECK_OFFSET(cWScriptTask, TaskId, 0x04);
+CHECK_OFFSET(cWScriptTask, EventScriptCode, 0x14);
+CHECK_OFFSET(cWScriptTask, Process, 0x3C);
+CHECK_OFFSET(cWScriptTask, mVtbl, 0x40);
+CHECK_SIZE(cWScriptTask, 0x44);
+
+struct cWScriptProcess {
+    // cWScriptProcessState
+    int State;                         // 0x00 [O]; [R] ctor = 0; [U] clearState, end, endTask
+    int NumTasks;                      // 0x04 [O]; [R] ctor = the definition's task count
+    int RunningTask;                   // 0x08 [O]; [R] ctor = NumTasks (no task running); [U] advanceToTask
+    unsigned int StateSectionId;       // 0x0C [O] cWScriptProcessState::SectionId (renamed here: the flat layout
+                                       //      also has cWScriptProcess::SectionId); no retail method touches it
+    // cWScriptProcess
+    cWScriptMan* Manager;              // 0x10 [O]; [R] ctor
+    cWScriptTask* Tasks;               // 0x14 [O]; [R] ctor's "WScriptTasks" array; [U] the destructor frees it
+    cWScriptProcess* Next;             // 0x18 [O]; [R] ctor = 0; [U] getNext, setNext (cProcessList links)
+    cLunoTable* Local;                 // 0x1C [O]; [R] ctor = 0; [U] getLocal, the destructor
+    unsigned int ProcessId;            // 0x20 [O]; [R] ctor = the definition's id; [U] getProcessId
+    unsigned int SectionId;            // 0x24 [O]; [R] ctor; [U] getSectionId, readFromReplayFrame
+    char* ProcessScriptCode[3];        // 0x28 [O] (const char* there); [U] processStart, processUpdate, processEnd
+    char* EventScriptCode[10];         // 0x34 [O] (const char* there); [U] eventOnCollide (0x34) ... eventOnEvent3
+                                       //      (0x58)
+    void** mVtbl;                      // 0x5C [R] ctor = cWScriptProcess_vtbl
+};
+
+CHECK_OFFSET(cWScriptProcess, StateSectionId, 0x0C);
+CHECK_OFFSET(cWScriptProcess, Manager, 0x10);
+CHECK_OFFSET(cWScriptProcess, SectionId, 0x24);
+CHECK_OFFSET(cWScriptProcess, ProcessScriptCode, 0x28);
+CHECK_OFFSET(cWScriptProcess, EventScriptCode, 0x34);
+CHECK_OFFSET(cWScriptProcess, mVtbl, 0x5C);
+CHECK_SIZE(cWScriptProcess, 0x60);
+
+#endif

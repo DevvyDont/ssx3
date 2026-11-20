@@ -1,4 +1,5 @@
 #include "common.h"
+#include "wscript/wscriptprocess.h"
 #include "wscript/wscriptman.h"
 #include "world/world.h"
 #include "main/game.h"
@@ -13,7 +14,7 @@ extern "C" void MEM_fill(void* dst, int value, int size);
 extern "C" int cWScriptMan_getScriptCode_2(void* self, int id) __asm__("cWScriptMan_getScriptCode");
 struct cWScriptTask_initTask_sObj;
 struct cWScriptTask_initTask_sDef;
-extern "C" void cWScriptTask_initTask(cWScriptTask_initTask_sObj* self, void* owner, cWScriptTask_initTask_sDef* def);
+extern "C" void cWScriptTask_initTask(cWScriptTask* self, void* owner, cWScriptTask_initTask_sDef* def);
 // PORT: operator_new__FUi really takes (size, tag, flags, d); bound by asm label
 void* operator new[](unsigned int size, const char* tag, int flags, int d) __asm__("operator_new__FUi");
 extern char cWScriptProcess_vtbl[];
@@ -51,29 +52,29 @@ struct sDef_307598 {
  * @param def  the 0x40-byte process definition from the world (On Tour tWScriptProcessData)
  * @return @p self
  */
-extern "C" void* cWScriptProcess_cWScriptProcess(void* self, void* man, int sectionId, sDef_307598* def)
+extern "C" void* cWScriptProcess_cWScriptProcess(cWScriptProcess* self, void* man, int sectionId, sDef_307598* def)
 {
-    *(void**)((char*)self + 0x5C) = cWScriptProcess_vtbl;
-    MEM_fill((char*)self + 0x28, 0, 0xC);
-    *(int*)((char*)self + 0x24) = sectionId;
-    *(void**)((char*)self + 0x10) = man;
-    *(int*)((char*)self + 0x20) = def->f0;
-    *(int*)((char*)self + 0x1C) = 0;
+    self->mVtbl = (void**)cWScriptProcess_vtbl;
+    MEM_fill(self->ProcessScriptCode, 0, 0xC);
+    self->SectionId = (unsigned int)sectionId;
+    self->Manager = (cWScriptMan*)man;
+    self->ProcessId = (unsigned int)def->f0;
+    self->Local = 0;
     for (int i = 0; i < 3; i++)
-        ((int*)((char*)self + 0x28))[i] = cWScriptMan_getScriptCode_2(*(void**)((char*)self + 0x10), def->a[i]);
+        self->ProcessScriptCode[i] = (char*)cWScriptMan_getScriptCode_2(self->Manager, def->a[i]);
     for (int j = 0; j < 10; j++)
-        ((int*)((char*)self + 0x34))[j] = cWScriptMan_getScriptCode_2(*(void**)((char*)self + 0x10), def->b[j]);
+        self->EventScriptCode[j] = (char*)cWScriptMan_getScriptCode_2(self->Manager, def->b[j]);
     int n = def->count;
-    *(int*)((char*)self + 0x4) = n;
-    sElem_307598** pv = (sElem_307598**)((char*)self + 0x14);
+    self->NumTasks = n;
+    sElem_307598** pv = (sElem_307598**)&self->Tasks;
     *pv = new (str_WScriptTasks, 0x20000000, 0) sElem_307598[n];
     char* ed = def->elemDefs;
-    for (int k = 0; k < *(int*)((char*)self + 0x4); k++, ed += 0x38)
-        cWScriptTask_initTask((cWScriptTask_initTask_sObj*)&(*(sElem_307598**)((char*)self + 0x14))[k], self, (cWScriptTask_initTask_sDef*)ed);
-    *(int*)((char*)self + 0x0) = 0;
-    *(int*)((char*)self + 0x8) = *(int*)((char*)self + 0x4);
-    *(int*)((char*)self + 0x18) = 0;
-    return self;
+    for (int k = 0; k < self->NumTasks; k++, ed += 0x38)
+        cWScriptTask_initTask((cWScriptTask*)&((sElem_307598*)self->Tasks)[k], self, (cWScriptTask_initTask_sDef*)ed);
+    self->State = 0;
+    self->RunningTask = self->NumTasks;
+    self->Next = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -102,19 +103,19 @@ extern char cWScriptProcess_vtbl[];
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 // PORT: array cookie arithmetic through int (pointer in int).
-extern "C" void cWScriptProcess__cWScriptProcess(void* self, int flags)
+extern "C" void cWScriptProcess__cWScriptProcess(cWScriptProcess* self, int flags)
 {
-    *(void**)((char*)self + 0x5C) = cWScriptProcess_vtbl;
-    char* arr = *(char**)((char*)self + 0x14);
+    self->mVtbl = (void**)cWScriptProcess_vtbl;
+    char* arr = (char*)self->Tasks;
     if (arr != 0) {
         char* task = (char*)(*(int*)(arr - 0x10) * 0x44 + (int)arr);
-        while (*(char**)((char*)self + 0x14) != task) {
+        while ((char*)self->Tasks != task) {
             task -= 0x44;
             ((cWScriptProcess__cWScriptProcess_cElem*)task)->v01(0);
         }
-        cMemMan_free(*(char**)((char*)self + 0x14) - 0x10);
+        cMemMan_free((char*)self->Tasks - 0x10);
     }
-    void* obj = *(void**)((char*)self + 0x1C);
+    void* obj = self->Local;
     if (obj != 0) {
         luno_cLunoTable__cLunoTable(obj, 3);
     }
@@ -210,42 +211,41 @@ static inline void VCall_003078C0(char* self, int slot)
  * @param vmsg  the event (id halfword at +0x0, data from +0x4)
  */
 // Dispatches a script event to the matching virtual handler (slots 7-16).
-extern "C" void cWScriptProcess_dispatchProcessEvent(void* vself, void* vmsg)
+extern "C" void cWScriptProcess_dispatchProcessEvent(cWScriptProcess* vself, void* vmsg)
 {
-    char* self = (char*)vself;
     unsigned short* msg = (unsigned short*)vmsg;
     switch (*msg) {
     case 0:
-        VCall_003078C0(self, 7);
+        VCall_003078C0(((char*)vself), 7);
         break;
     case 1:
-        VCall_003078C0(self, 8);
+        VCall_003078C0(((char*)vself), 8);
         break;
     case 2:
-        VCall_003078C0(self, 9);
+        VCall_003078C0(((char*)vself), 9);
         break;
     case 3:
-        *(unsigned short**)(*(char**)(self + 0x10) + 0x29C) = msg + 2;
-        VCall_003078C0(self, 10);
-        *(unsigned short**)(*(char**)(self + 0x10) + 0x29C) = 0;
+        *(unsigned short**)((char*)vself->Manager + 0x29C) = msg + 2;
+        VCall_003078C0(((char*)vself), 10);
+        *(unsigned short**)((char*)vself->Manager + 0x29C) = 0;
         break;
     case 4:
-        VCall_003078C0(self, 11);
+        VCall_003078C0(((char*)vself), 11);
         break;
     case 5:
-        VCall_003078C0(self, 12);
+        VCall_003078C0(((char*)vself), 12);
         break;
     case 6:
-        VCall_003078C0(self, 13);
+        VCall_003078C0(((char*)vself), 13);
         break;
     case 7:
-        VCall_003078C0(self, 14);
+        VCall_003078C0(((char*)vself), 14);
         break;
     case 8:
-        VCall_003078C0(self, 15);
+        VCall_003078C0(((char*)vself), 15);
         break;
     case 9:
-        VCall_003078C0(self, 16);
+        VCall_003078C0(((char*)vself), 16);
         break;
     }
 }
@@ -307,11 +307,11 @@ public:
  *
  * @param event  the event
  */
-extern "C" void cWScriptProcess_dispatchTaskEvent(cWScriptProcList* self, int event)
+extern "C" void cWScriptProcess_dispatchTaskEvent(cWScriptProcess* self, int event)
 {
-    int i = self->cur;
-    if (i < self->count) {
-        ((cWScriptProcess_dispatchTaskEvent_cObj*)self->entries)[i].v03(event);
+    int i = self->RunningTask;
+    if (i < self->NumTasks) {
+        ((cWScriptProcess_dispatchTaskEvent_cObj*)(cWScriptProcEntry*)self->Tasks)[i].v03(event);
     }
 }
 #endif
@@ -327,11 +327,11 @@ extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
  * Calls cWScriptMan_runScriptCode with the manager (+0x10), this process and the script code at +0x34, unless that is
  * null.
  */
-extern "C" void cWScriptProcess_eventOnCollide(void* self)
+extern "C" void cWScriptProcess_eventOnCollide(cWScriptProcess* self)
 {
-    void* script = *(void**)((char*)self + 0x34);
+    void* script = self->EventScriptCode[0];
     if (script != 0) {
-        cWScriptMan_runScriptCode(*(void**)((char*)self + 0x10), self, script);
+        cWScriptMan_runScriptCode(self->Manager, self, script);
     }
 }
 #endif
@@ -347,11 +347,11 @@ extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
  * Calls cWScriptMan_runScriptCode with the manager (+0x10), this process and the script code at +0x38, unless that is
  * null.
  */
-extern "C" void cWScriptProcess_eventOnJump(void* self)
+extern "C" void cWScriptProcess_eventOnJump(cWScriptProcess* self)
 {
-    void* script = *(void**)((char*)self + 0x38);
+    void* script = self->EventScriptCode[1];
     if (script != 0) {
-        cWScriptMan_runScriptCode(*(void**)((char*)self + 0x10), self, script);
+        cWScriptMan_runScriptCode(self->Manager, self, script);
     }
 }
 #endif
@@ -367,11 +367,11 @@ extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
  * Calls cWScriptMan_runScriptCode with the manager (+0x10), this process and the script code at +0x3C, unless that is
  * null.
  */
-extern "C" void cWScriptProcess_eventOnLand(void* self)
+extern "C" void cWScriptProcess_eventOnLand(cWScriptProcess* self)
 {
-    void* script = *(void**)((char*)self + 0x3c);
+    void* script = self->EventScriptCode[2];
     if (script != 0) {
-        cWScriptMan_runScriptCode(*(void**)((char*)self + 0x10), self, script);
+        cWScriptMan_runScriptCode(self->Manager, self, script);
     }
 }
 #endif
@@ -387,11 +387,11 @@ extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
  * Calls cWScriptMan_runScriptCode with the manager (+0x10), this process and the script code at +0x40, unless that is
  * null.
  */
-extern "C" void cWScriptProcess_eventOnTrick(void* self)
+extern "C" void cWScriptProcess_eventOnTrick(cWScriptProcess* self)
 {
-    void* script = *(void**)((char*)self + 0x40);
+    void* script = self->EventScriptCode[3];
     if (script != 0) {
-        cWScriptMan_runScriptCode(*(void**)((char*)self + 0x10), self, script);
+        cWScriptMan_runScriptCode(self->Manager, self, script);
     }
 }
 #endif
@@ -407,11 +407,11 @@ extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
  * Calls cWScriptMan_runScriptCode with the manager (+0x10), this process and the script code at +0x44, unless that is
  * null.
  */
-extern "C" void cWScriptProcess_eventOnWipeout(void* self)
+extern "C" void cWScriptProcess_eventOnWipeout(cWScriptProcess* self)
 {
-    void* script = *(void**)((char*)self + 0x44);
+    void* script = self->EventScriptCode[4];
     if (script != 0) {
-        cWScriptMan_runScriptCode(*(void**)((char*)self + 0x10), self, script);
+        cWScriptMan_runScriptCode(self->Manager, self, script);
     }
 }
 #endif
@@ -427,11 +427,11 @@ extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
  * Calls cWScriptMan_runScriptCode with the manager (+0x10), this process and the script code at +0x48, unless that is
  * null.
  */
-extern "C" void cWScriptProcess_eventOnReset(void* self)
+extern "C" void cWScriptProcess_eventOnReset(cWScriptProcess* self)
 {
-    void* script = *(void**)((char*)self + 0x48);
+    void* script = self->EventScriptCode[5];
     if (script != 0) {
-        cWScriptMan_runScriptCode(*(void**)((char*)self + 0x10), self, script);
+        cWScriptMan_runScriptCode(self->Manager, self, script);
     }
 }
 #endif
@@ -447,11 +447,11 @@ extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
  * Calls cWScriptMan_runScriptCode with the manager (+0x10), this process and the script code at +0x4C, unless that is
  * null.
  */
-extern "C" void cWScriptProcess_eventOnCollect(void* self)
+extern "C" void cWScriptProcess_eventOnCollect(cWScriptProcess* self)
 {
-    void* script = *(void**)((char*)self + 0x4c);
+    void* script = self->EventScriptCode[6];
     if (script != 0) {
-        cWScriptMan_runScriptCode(*(void**)((char*)self + 0x10), self, script);
+        cWScriptMan_runScriptCode(self->Manager, self, script);
     }
 }
 #endif
@@ -467,11 +467,11 @@ extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
  * Calls cWScriptMan_runScriptCode with the manager (+0x10), this process and the script code at +0x50, unless that is
  * null.
  */
-extern "C" void cWScriptProcess_eventOnEvent1(void* self)
+extern "C" void cWScriptProcess_eventOnEvent1(cWScriptProcess* self)
 {
-    void* script = *(void**)((char*)self + 0x50);
+    void* script = self->EventScriptCode[7];
     if (script != 0) {
-        cWScriptMan_runScriptCode(*(void**)((char*)self + 0x10), self, script);
+        cWScriptMan_runScriptCode(self->Manager, self, script);
     }
 }
 #endif
@@ -487,11 +487,11 @@ extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
  * Calls cWScriptMan_runScriptCode with the manager (+0x10), this process and the script code at +0x54, unless that is
  * null.
  */
-extern "C" void cWScriptProcess_eventOnEvent2(void* self)
+extern "C" void cWScriptProcess_eventOnEvent2(cWScriptProcess* self)
 {
-    void* script = *(void**)((char*)self + 0x54);
+    void* script = self->EventScriptCode[8];
     if (script != 0) {
-        cWScriptMan_runScriptCode(*(void**)((char*)self + 0x10), self, script);
+        cWScriptMan_runScriptCode(self->Manager, self, script);
     }
 }
 #endif
@@ -507,11 +507,11 @@ extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
  * Calls cWScriptMan_runScriptCode with the manager (+0x10), this process and the script code at +0x58, unless that is
  * null.
  */
-extern "C" void cWScriptProcess_eventOnEvent3(void* self)
+extern "C" void cWScriptProcess_eventOnEvent3(cWScriptProcess* self)
 {
-    void* script = *(void**)((char*)self + 0x58);
+    void* script = self->EventScriptCode[9];
     if (script != 0) {
-        cWScriptMan_runScriptCode(*(void**)((char*)self + 0x10), self, script);
+        cWScriptMan_runScriptCode(self->Manager, self, script);
     }
 }
 #endif
@@ -587,11 +587,11 @@ extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
  * Calls cWScriptMan_runScriptCode with the manager (+0x10), this process and the script code at +0x2C, unless that is
  * null.
  */
-extern "C" void cWScriptProcess_processUpdate(void* self)
+extern "C" void cWScriptProcess_processUpdate(cWScriptProcess* self)
 {
-    void* script = *(void**)((char*)self + 0x2c);
+    void* script = self->ProcessScriptCode[1];
     if (script != 0) {
-        cWScriptMan_runScriptCode(*(void**)((char*)self + 0x10), self, script);
+        cWScriptMan_runScriptCode(self->Manager, self, script);
     }
 }
 #endif
@@ -600,7 +600,7 @@ extern "C" void cWScriptProcess_processUpdate(void* self)
 INCLUDE_ASM("wscript/wscriptprocess", cWScriptProcess_processEnd);
 #ifdef SKIP_ASM
 extern "C" void cWScriptMan_runScriptCode(void* man, void* proc, void* script);
-extern "C" void cWScriptProcess_end(void* self);
+extern "C" void cWScriptProcess_end(cWScriptProcess* self);
 
 /**
  * Runs the world script process's end script and ends the process.
@@ -608,12 +608,12 @@ extern "C" void cWScriptProcess_end(void* self);
  * Sets the state (+0x0) to 3, runs the script code at +0x30 through cWScriptMan_runScriptCode when there is one and
  * calls cWScriptProcess_end.
  */
-extern "C" void cWScriptProcess_processEnd(void* self)
+extern "C" void cWScriptProcess_processEnd(cWScriptProcess* self)
 {
     *(int*)self = 3;
-    void* script = *(void**)((char*)self + 0x30);
+    void* script = self->ProcessScriptCode[2];
     if (script != 0) {
-        cWScriptMan_runScriptCode(*(void**)((char*)self + 0x10), self, script);
+        cWScriptMan_runScriptCode(self->Manager, self, script);
     }
     cWScriptProcess_end(self);
 }
@@ -632,15 +632,15 @@ extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
  * list (+0x2B8) back to the list at +0x2B4 if it is there. Then destroys the luno table at +0x1C and clears the
  * pointer.
  */
-extern "C" void cWScriptProcess_end(void* self)
+extern "C" void cWScriptProcess_end(cWScriptProcess* self)
 {
     *(int*)self = 3;
-    cWScriptMan_processEnd(*(void**)((char*)self + 0x10), self);
-    void* obj = *(void**)((char*)self + 0x1C);
+    cWScriptMan_processEnd(self->Manager, self);
+    void* obj = self->Local;
     if (obj != 0) {
         luno_cLunoTable__cLunoTable(obj, 3);
     }
-    *(void**)((char*)self + 0x1C) = 0;
+    self->Local = 0;
 }
 #endif
 
@@ -662,10 +662,10 @@ struct sVEntry00307DC8 {
  * calls its own virtual slot 6, which for cWScriptProcess (cWScriptProcess_processEnd) sets the state to 3, runs the script
  * at +0x30 and calls cWScriptProcess_end(). The task stepper cWScriptProcess_endTask calls it after the last task.
  */
-extern "C" void cWScriptProcess_processComplete(void* self)
+extern "C" void cWScriptProcess_processComplete(cWScriptProcess* self)
 {
-    if (cWScriptMan_isProcessActive(*(void**)((char*)self + 0x10), self) != 0) {
-        sVEntry00307DC8* vt = *(sVEntry00307DC8**)((char*)self + 0x5C);
+    if (cWScriptMan_isProcessActive(self->Manager, self) != 0) {
+        sVEntry00307DC8* vt = (sVEntry00307DC8*)self->mVtbl;
         vt[6].fn((char*)self + vt[6].delta);
     }
 }
@@ -851,7 +851,7 @@ public:
 };
 
 class cWScriptTask_writeToReplayFrame_cObj;
-extern "C" int cWScriptTask_writeToReplayFrame(void* a, cWScriptTask_writeToReplayFrame_cObj* obj);
+extern "C" int cWScriptTask_writeToReplayFrame(cWScriptTask* a, cWScriptTask_writeToReplayFrame_cObj* obj);
 extern "C" int cWScriptCache_getScriptBase(void* map, int id);
 extern "C" void luno_cLunoTable_writeToReplayFrame(void* obj, void* stream, int a2);
 
@@ -865,18 +865,18 @@ extern "C" void luno_cLunoTable_writeToReplayFrame(void* obj, void* stream, int 
  *
  * @param stream  the replay frame
  */
-extern "C" void cWScriptProcess_writeToReplayFrame(void* self, cWScriptProcess_writeToReplayFrame_cStream* stream)
+extern "C" void cWScriptProcess_writeToReplayFrame(cWScriptProcess* self, cWScriptProcess_writeToReplayFrame_cStream* stream)
 {
     stream->v01(self, 0x10);
-    int x = cWScriptCache_getScriptBase(cWorld_m_pTheWorld->m_pWScriptCache, *(int*)((char*)self + 0x24));
-    int has = *(void**)((char*)self + 0x1C) != 0;
+    int x = cWScriptCache_getScriptBase(cWorld_m_pTheWorld->m_pWScriptCache, (int)self->SectionId);
+    int has = self->Local != 0;
     stream->v01(&has, 4);
     if (has) {
-        luno_cLunoTable_writeToReplayFrame(*(void**)((char*)self + 0x1C), stream, x);
+        luno_cLunoTable_writeToReplayFrame(self->Local, stream, x);
     }
     int i;
-    for (i = 0; i < *(int*)((char*)self + 0x4); i++) {
-        cWScriptTask_writeToReplayFrame(*(char**)((char*)self + 0x14) + i * 68, (cWScriptTask_writeToReplayFrame_cObj*)stream);
+    for (i = 0; i < self->NumTasks; i++) {
+        cWScriptTask_writeToReplayFrame(&self->Tasks[i], (cWScriptTask_writeToReplayFrame_cObj*)stream);
     }
 }
 #endif
@@ -897,7 +897,7 @@ extern "C" void* luno_cLunoTable_cLunoTable(void* mem, int a1);
 extern "C" void luno_cLunoTable__cLunoTable(void* obj, int flags);
 extern "C" void luno_cLunoTable_readFromReplayFrame(void* obj, cWScriptProcess_readFromReplayFrame_cStream* stream, int a2);
 class cWScriptTask_readFromReplayFrame_cObj;
-extern "C" int cWScriptTask_readFromReplayFrame(void* a, cWScriptTask_readFromReplayFrame_cObj* obj);
+extern "C" int cWScriptTask_readFromReplayFrame(cWScriptTask* a, cWScriptTask_readFromReplayFrame_cObj* obj);
 
 /**
  * Reads a script process's state back from a replay frame (the reverse of cWScriptProcess_writeToReplayFrame).
@@ -909,24 +909,24 @@ extern "C" int cWScriptTask_readFromReplayFrame(void* a, cWScriptTask_readFromRe
  *
  * @param stream  the replay frame
  */
-extern "C" void cWScriptProcess_readFromReplayFrame(void* self, cWScriptProcess_readFromReplayFrame_cStream* stream)
+extern "C" void cWScriptProcess_readFromReplayFrame(cWScriptProcess* self, cWScriptProcess_readFromReplayFrame_cStream* stream)
 {
     stream->v02(self, 0x10);
-    int x = cWScriptCache_getScriptBase(cWorld_m_pTheWorld->m_pWScriptCache, *(int*)((char*)self + 0x24));
-    if (*(void**)((char*)self + 0x1C) != 0) {
-        luno_cLunoTable__cLunoTable(*(void**)((char*)self + 0x1C), 3);
+    int x = cWScriptCache_getScriptBase(cWorld_m_pTheWorld->m_pWScriptCache, (int)self->SectionId);
+    if (self->Local != 0) {
+        luno_cLunoTable__cLunoTable(self->Local, 3);
     }
-    *(void**)((char*)self + 0x1C) = 0;
+    self->Local = 0;
     int has;
     stream->v02(&has, 4);
     if (has) {
         void* localTable = luno_cLunoTable_cLunoTable(cMemMan_alloc(4, str_ProcessLocalTable, 0x20000000, 0), 8);
-        *(void**)((char*)self + 0x1C) = localTable;
+        self->Local = (cLunoTable*)localTable;
         luno_cLunoTable_readFromReplayFrame(localTable, stream, x);
     }
     int i;
-    for (i = 0; i < *(int*)((char*)self + 0x4); i++) {
-        cWScriptTask_readFromReplayFrame(*(char**)((char*)self + 0x14) + i * 68, (cWScriptTask_readFromReplayFrame_cObj*)stream);
+    for (i = 0; i < self->NumTasks; i++) {
+        cWScriptTask_readFromReplayFrame(&self->Tasks[i], (cWScriptTask_readFromReplayFrame_cObj*)stream);
     }
 }
 #endif
@@ -945,14 +945,14 @@ extern void* cWScriptTask_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cWScriptTask_cWScriptTask(void* self)
+extern "C" void* cWScriptTask_cWScriptTask(cWScriptTask* self)
 {
-    *(void***)((char*)self + 0x40) = cWScriptTask_vtbl;
+    self->mVtbl = cWScriptTask_vtbl;
     MEM_fill((char*)self + 8, 0, 0xC);
-    *(int*)((char*)self + 0x3C) = 0;
-    *(int*)((char*)self + 0x4) = 0;
+    self->Process = 0;
+    self->TaskId = (unsigned int)0;
     *(int*)self = 0;
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -986,17 +986,17 @@ struct cWScriptTask_initTask_sObj {
  * @param owner  the cWScriptProcess the task belongs to
  * @param def    the task's data record (On Tour: tWScriptTaskData)
  */
-extern "C" void cWScriptTask_initTask(cWScriptTask_initTask_sObj* self, void* owner, cWScriptTask_initTask_sDef* def)
+extern "C" void cWScriptTask_initTask(cWScriptTask* self, void* owner, cWScriptTask_initTask_sDef* def)
 {
     int i;
     int j;
-    self->owner = owner;
-    self->f4 = def->f0;
+    self->Process = (cWScriptProcess*)owner;
+    self->TaskId = (unsigned int)def->f0;
     for (i = 0; i < 3; i++) {
-        self->a[i] = cWScriptProcess_getScriptCode_2(self->owner, def->a[i]);
+        ((void**)&self->TaskScriptCode[0])[i] = cWScriptProcess_getScriptCode_2(self->Process, def->a[i]);
     }
     for (j = 0; j < 10; j++) {
-        self->b[j] = cWScriptProcess_getScriptCode_2(self->owner, def->b[j]);
+        ((void**)&self->EventScriptCode[0])[j] = cWScriptProcess_getScriptCode_2(self->Process, def->b[j]);
     }
 }
 #endif
@@ -1062,45 +1062,44 @@ static inline void VCall_003083A0(char* self, int slot)
  * @param vmsg  the event (On Tour const tWScriptEvent& event): type in the first halfword
  */
 // Same event dispatch as cWScriptProcess_dispatchProcessEvent for a running (state 2) sub-process.
-extern "C" void cWScriptTask_dispatchTaskEvent(void* vself, void* vmsg)
+extern "C" void cWScriptTask_dispatchTaskEvent(cWScriptTask* vself, void* vmsg)
 {
-    char* self = (char*)vself;
     unsigned short* msg = (unsigned short*)vmsg;
-    if (*(int*)self != 2) {
+    if (*(int*)vself != 2) {
         return;
     }
     switch (*msg) {
     case 0:
-        VCall_003083A0(self, 7);
+        VCall_003083A0(((char*)vself), 7);
         break;
     case 1:
-        VCall_003083A0(self, 8);
+        VCall_003083A0(((char*)vself), 8);
         break;
     case 2:
-        VCall_003083A0(self, 9);
+        VCall_003083A0(((char*)vself), 9);
         break;
     case 3:
-        *(unsigned short**)(*(char**)(*(char**)(self + 0x3C) + 0x10) + 0x29C) = msg + 2;
-        VCall_003083A0(self, 10);
-        *(unsigned short**)(*(char**)(*(char**)(self + 0x3C) + 0x10) + 0x29C) = 0;
+        *(unsigned short**)(*(char**)((char*)vself->Process + 0x10) + 0x29C) = msg + 2;
+        VCall_003083A0(((char*)vself), 10);
+        *(unsigned short**)(*(char**)((char*)vself->Process + 0x10) + 0x29C) = 0;
         break;
     case 4:
-        VCall_003083A0(self, 11);
+        VCall_003083A0(((char*)vself), 11);
         break;
     case 5:
-        VCall_003083A0(self, 12);
+        VCall_003083A0(((char*)vself), 12);
         break;
     case 6:
-        VCall_003083A0(self, 13);
+        VCall_003083A0(((char*)vself), 13);
         break;
     case 7:
-        VCall_003083A0(self, 14);
+        VCall_003083A0(((char*)vself), 14);
         break;
     case 8:
-        VCall_003083A0(self, 15);
+        VCall_003083A0(((char*)vself), 15);
         break;
     case 9:
-        VCall_003083A0(self, 16);
+        VCall_003083A0(((char*)vself), 16);
         break;
     }
 }
@@ -1115,11 +1114,11 @@ extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
  * Runs the task's on-collide script (EventScriptCode[0], +0x14), when it has one, through the process's script
  * manager (cWScriptMan_runScriptCode1, On Tour cWScriptMan::runScriptCode).
  */
-extern "C" void cWScriptTask_eventOnCollide(void* self)
+extern "C" void cWScriptTask_eventOnCollide(cWScriptTask* self)
 {
-    void* script = *(void**)((char*)self + 0x14);
+    void* script = self->EventScriptCode[0];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(*(void**)(*(char**)((char*)self + 0x3c) + 0x10), self, script);
+        cWScriptMan_runScriptCode1(*(void**)((char*)self->Process + 0x10), self, script);
     }
 }
 #endif
@@ -1133,11 +1132,11 @@ extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
  * Runs the task's on-jump script (EventScriptCode[1], +0x18), when it has one, through the process's script manager
  * (cWScriptMan_runScriptCode1, On Tour cWScriptMan::runScriptCode).
  */
-extern "C" void cWScriptTask_eventOnJump(void* self)
+extern "C" void cWScriptTask_eventOnJump(cWScriptTask* self)
 {
-    void* script = *(void**)((char*)self + 0x18);
+    void* script = self->EventScriptCode[1];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(*(void**)(*(char**)((char*)self + 0x3c) + 0x10), self, script);
+        cWScriptMan_runScriptCode1(*(void**)((char*)self->Process + 0x10), self, script);
     }
 }
 #endif
@@ -1151,11 +1150,11 @@ extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
  * Runs the task's on-land script (EventScriptCode[2], +0x1C), when it has one, through the process's script manager
  * (cWScriptMan_runScriptCode1, On Tour cWScriptMan::runScriptCode).
  */
-extern "C" void cWScriptTask_eventOnLand(void* self)
+extern "C" void cWScriptTask_eventOnLand(cWScriptTask* self)
 {
-    void* script = *(void**)((char*)self + 0x1c);
+    void* script = self->EventScriptCode[2];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(*(void**)(*(char**)((char*)self + 0x3c) + 0x10), self, script);
+        cWScriptMan_runScriptCode1(*(void**)((char*)self->Process + 0x10), self, script);
     }
 }
 #endif
@@ -1169,11 +1168,11 @@ extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
  * Runs the task's on-trick script (EventScriptCode[3], +0x20), when it has one, through the process's script
  * manager (cWScriptMan_runScriptCode1, On Tour cWScriptMan::runScriptCode).
  */
-extern "C" void cWScriptTask_eventOnTrick(void* self)
+extern "C" void cWScriptTask_eventOnTrick(cWScriptTask* self)
 {
-    void* script = *(void**)((char*)self + 0x20);
+    void* script = self->EventScriptCode[3];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(*(void**)(*(char**)((char*)self + 0x3c) + 0x10), self, script);
+        cWScriptMan_runScriptCode1(*(void**)((char*)self->Process + 0x10), self, script);
     }
 }
 #endif
@@ -1187,11 +1186,11 @@ extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
  * Runs the task's on-wipeout script (EventScriptCode[4], +0x24), when it has one, through the process's script
  * manager (cWScriptMan_runScriptCode1, On Tour cWScriptMan::runScriptCode).
  */
-extern "C" void cWScriptTask_eventOnWipeout(void* self)
+extern "C" void cWScriptTask_eventOnWipeout(cWScriptTask* self)
 {
-    void* script = *(void**)((char*)self + 0x24);
+    void* script = self->EventScriptCode[4];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(*(void**)(*(char**)((char*)self + 0x3c) + 0x10), self, script);
+        cWScriptMan_runScriptCode1(*(void**)((char*)self->Process + 0x10), self, script);
     }
 }
 #endif
@@ -1205,11 +1204,11 @@ extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
  * Runs the task's on-reset script (EventScriptCode[5], +0x28), when it has one, through the process's script
  * manager (cWScriptMan_runScriptCode1, On Tour cWScriptMan::runScriptCode).
  */
-extern "C" void cWScriptTask_eventOnReset(void* self)
+extern "C" void cWScriptTask_eventOnReset(cWScriptTask* self)
 {
-    void* script = *(void**)((char*)self + 0x28);
+    void* script = self->EventScriptCode[5];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(*(void**)(*(char**)((char*)self + 0x3c) + 0x10), self, script);
+        cWScriptMan_runScriptCode1(*(void**)((char*)self->Process + 0x10), self, script);
     }
 }
 #endif
@@ -1223,11 +1222,11 @@ extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
  * Runs the task's on-collect script (EventScriptCode[6], +0x2C), when it has one, through the process's script
  * manager (cWScriptMan_runScriptCode1, On Tour cWScriptMan::runScriptCode).
  */
-extern "C" void cWScriptTask_eventOnCollect(void* self)
+extern "C" void cWScriptTask_eventOnCollect(cWScriptTask* self)
 {
-    void* script = *(void**)((char*)self + 0x2c);
+    void* script = self->EventScriptCode[6];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(*(void**)(*(char**)((char*)self + 0x3c) + 0x10), self, script);
+        cWScriptMan_runScriptCode1(*(void**)((char*)self->Process + 0x10), self, script);
     }
 }
 #endif
@@ -1241,11 +1240,11 @@ extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
  * Runs the task's event-1 script (EventScriptCode[7], +0x30), when it has one, through the process's script manager
  * (cWScriptMan_runScriptCode1, On Tour cWScriptMan::runScriptCode).
  */
-extern "C" void cWScriptTask_eventOnEvent1(void* self)
+extern "C" void cWScriptTask_eventOnEvent1(cWScriptTask* self)
 {
-    void* script = *(void**)((char*)self + 0x30);
+    void* script = self->EventScriptCode[7];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(*(void**)(*(char**)((char*)self + 0x3c) + 0x10), self, script);
+        cWScriptMan_runScriptCode1(*(void**)((char*)self->Process + 0x10), self, script);
     }
 }
 #endif
@@ -1259,11 +1258,11 @@ extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
  * Runs the task's event-2 script (EventScriptCode[8], +0x34), when it has one, through the process's script manager
  * (cWScriptMan_runScriptCode1, On Tour cWScriptMan::runScriptCode).
  */
-extern "C" void cWScriptTask_eventOnEvent2(void* self)
+extern "C" void cWScriptTask_eventOnEvent2(cWScriptTask* self)
 {
-    void* script = *(void**)((char*)self + 0x34);
+    void* script = self->EventScriptCode[8];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(*(void**)(*(char**)((char*)self + 0x3c) + 0x10), self, script);
+        cWScriptMan_runScriptCode1(*(void**)((char*)self->Process + 0x10), self, script);
     }
 }
 #endif
@@ -1277,11 +1276,11 @@ extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
  * Runs the task's event-3 script (EventScriptCode[9], +0x38), when it has one, through the process's script manager
  * (cWScriptMan_runScriptCode1, On Tour cWScriptMan::runScriptCode).
  */
-extern "C" void cWScriptTask_eventOnEvent3(void* self)
+extern "C" void cWScriptTask_eventOnEvent3(cWScriptTask* self)
 {
-    void* script = *(void**)((char*)self + 0x38);
+    void* script = self->EventScriptCode[9];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(*(void**)(*(char**)((char*)self + 0x3c) + 0x10), self, script);
+        cWScriptMan_runScriptCode1(*(void**)((char*)self->Process + 0x10), self, script);
     }
 }
 #endif
@@ -1295,13 +1294,13 @@ extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
  * Starts the task once: sets its state to 1 (started) and runs its start script (TaskScriptCode[0], +0x8) when it
  * has one.
  */
-extern "C" void cWScriptTask_taskStart(void* self)
+extern "C" void cWScriptTask_taskStart(cWScriptTask* self)
 {
     if (*(int*)self != 1) {
         *(int*)self = 1;
-        void* script = *(void**)((char*)self + 0x8);
+        void* script = self->TaskScriptCode[0];
         if (script != 0) {
-            cWScriptMan_runScriptCode1(*(void**)(*(char**)((char*)self + 0x3C) + 0x10), self, script);
+            cWScriptMan_runScriptCode1(*(void**)((char*)self->Process + 0x10), self, script);
         }
     }
 }
@@ -1316,11 +1315,11 @@ extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
  * Runs the task's update script (TaskScriptCode[1], +0xC), when it has one, through the process's script manager
  * (cWScriptMan_runScriptCode1, On Tour cWScriptMan::runScriptCode).
  */
-extern "C" void cWScriptTask_taskUpdate(void* self)
+extern "C" void cWScriptTask_taskUpdate(cWScriptTask* self)
 {
-    void* script = *(void**)((char*)self + 0xc);
+    void* script = self->TaskScriptCode[1];
     if (script != 0) {
-        cWScriptMan_runScriptCode1(*(void**)(*(char**)((char*)self + 0x3c) + 0x10), self, script);
+        cWScriptMan_runScriptCode1(*(void**)((char*)self->Process + 0x10), self, script);
     }
 }
 #endif
@@ -1334,13 +1333,13 @@ extern "C" void cWScriptMan_runScriptCode1(void* man, void* proc, void* script);
  * Ends the task once: sets its state to 3 (ended) and runs its end script (TaskScriptCode[2], +0x10) when it has
  * one.
  */
-extern "C" void cWScriptTask_taskEnd(void* self)
+extern "C" void cWScriptTask_taskEnd(cWScriptTask* self)
 {
     if (*(int*)self != 3) {
         *(int*)self = 3;
-        void* script = *(void**)((char*)self + 0x10);
+        void* script = self->TaskScriptCode[2];
         if (script != 0) {
-            cWScriptMan_runScriptCode1(*(void**)(*(char**)((char*)self + 0x3C) + 0x10), self, script);
+            cWScriptMan_runScriptCode1(*(void**)((char*)self->Process + 0x10), self, script);
         }
     }
 }
@@ -1364,7 +1363,7 @@ public:
  * @param obj  the replay frame
  * @return the frame call's result
  */
-extern "C" int cWScriptTask_writeToReplayFrame(void* task, cWScriptTask_writeToReplayFrame_cObj* obj)
+extern "C" int cWScriptTask_writeToReplayFrame(cWScriptTask* task, cWScriptTask_writeToReplayFrame_cObj* obj)
 {
     return obj->v01(task, 4);
 }
@@ -1389,7 +1388,7 @@ public:
  * @param obj  the replay frame
  * @return the frame call's result
  */
-extern "C" int cWScriptTask_readFromReplayFrame(void* task, cWScriptTask_readFromReplayFrame_cObj* obj)
+extern "C" int cWScriptTask_readFromReplayFrame(cWScriptTask* task, cWScriptTask_readFromReplayFrame_cObj* obj)
 {
     return obj->v02(task, 4);
 }
@@ -1999,8 +1998,8 @@ INCLUDE_ASM("wscript/wscriptprocess", cWScriptMan_update);
 class cWScriptProcess_update_cProc;
 struct cWScriptProcList;
 extern "C" void cWScriptProcess_update(cWScriptProcess_update_cProc* self);
-extern "C" void cWScriptProcess_dispatchProcessEvent(void* proc, void* cmd);
-extern "C" void cWScriptProcess_dispatchTaskEvent(cWScriptProcList* self, int a1);
+extern "C" void cWScriptProcess_dispatchProcessEvent(cWScriptProcess* proc, void* cmd);
+extern "C" void cWScriptProcess_dispatchTaskEvent(cWScriptProcess* self, int a1);
 extern "C" void cWScriptMan_processLocalMissionCmd(cWScriptMan* self);
 extern "C" void cWScriptMan_startProcess(void* self, void* p);
 extern "C" void* cProcessList_removeHead(void* self);
@@ -2080,9 +2079,9 @@ extern "C" void cWScriptMan_update(cWScriptMan* self)
             next = *(char**)(proc + 0x18);
             self->CurrentProcess = (cWScriptProcess*)proc;
             if (event->flags & 0x20000)
-                cWScriptProcess_dispatchProcessEvent(proc, event);
+                cWScriptProcess_dispatchProcessEvent((cWScriptProcess*)proc, event);
             if (event->flags & 0x10000)
-                cWScriptProcess_dispatchTaskEvent((cWScriptProcList*)proc, (int)event);
+                cWScriptProcess_dispatchTaskEvent((cWScriptProcess*)((cWScriptProcList*)proc), (int)event);
         }
         self->Inst = 0;
         self->CurrentProcess = 0;

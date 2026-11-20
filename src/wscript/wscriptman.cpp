@@ -1,4 +1,5 @@
 #include "common.h"
+#include "wscript/wscriptprocess.h"
 #include "wscript/wscriptman.h"
 #include "render/ps2graphicsman.h"
 #include "be/beintnewrace.h"
@@ -4321,8 +4322,8 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptProcess_getNext);
  * @param process  the process
  * @return the next process, or 0 at the end of the list
  */
-extern "C" int cWScriptProcess_getNext(void *process) {
-    return (*(int *)((char*)(process) + (0x18)));
+extern "C" int cWScriptProcess_getNext(cWScriptProcess* process) {
+    return ((int)process->Next);
 }
 #endif
 //100%
@@ -4349,8 +4350,8 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptProcess_getSectionId);
  * @param process  the process
  * @return the section id
  */
-extern "C" int cWScriptProcess_getSectionId(void *process) {
-    return (*(int *)((char*)(process) + (0x24)));
+extern "C" int cWScriptProcess_getSectionId(cWScriptProcess* process) {
+    return ((int)process->SectionId);
 }
 #endif
 //100%
@@ -4364,8 +4365,8 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptProcess_setTrickDef);
  * @param process  the process
  * @param trickDef  the trick definition (passed as an int), or 0
  */
-extern "C" void cWScriptProcess_setTrickDef(void *process, int trickDef) {
-    (*(int *)((char*)((*(void **)((char*)(process) + (0x10)))) + (0x29C))) = trickDef;
+extern "C" void cWScriptProcess_setTrickDef(cWScriptProcess* process, int trickDef) {
+    (*(int *)((char*)((process->Manager)) + (0x29C))) = trickDef;
 }
 #endif
 //100%
@@ -4377,8 +4378,8 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptProcess_getLocalTable);
  * @param process  the process
  * @return the table, or 0 when the process has none
  */
-extern "C" int cWScriptProcess_getLocalTable(void *process) {
-    return (*(int *)((char*)(process) + (0x1C)));
+extern "C" int cWScriptProcess_getLocalTable(cWScriptProcess* process) {
+    return ((int)process->Local);
 }
 #endif
 //100%
@@ -4390,8 +4391,8 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptProcess_getProcessId);
  * @param process  the process
  * @return the process id
  */
-extern "C" int cWScriptProcess_getProcessId(void *process) {
-    return (*(int *)((char*)(process) + (0x20)));
+extern "C" int cWScriptProcess_getProcessId(cWScriptProcess* process) {
+    return ((int)process->ProcessId);
 }
 #endif
 
@@ -4421,9 +4422,9 @@ extern "C" void cWScriptMan_runScriptCode_a1(void* self) __asm__("cWScriptMan_ru
  * Only the manager argument is computed; the second and third arguments (the process and the script code) are passed
  * through untouched.
  */
-extern "C" void cWScriptProcess_runScriptCode(char* self)
+extern "C" void cWScriptProcess_runScriptCode(cWScriptProcess* self)
 {
-    cWScriptMan_runScriptCode_a1(*(void**)(self + 0x10));
+    cWScriptMan_runScriptCode_a1(self->Manager);
 }
 #endif
 //100%
@@ -4438,9 +4439,9 @@ extern "C" void cWScriptMan_runScriptCode1_a1(void* self) __asm__("cWScriptMan_r
  * Only the manager argument is computed; the second and third arguments (the task and the script code) are passed
  * through untouched. cWScriptMan_runScriptCode1 is the manager's task variant of cWScriptMan_runScriptCode.
  */
-extern "C" void cWScriptProcess_runScriptCode1(char* self)
+extern "C" void cWScriptProcess_runScriptCode1(cWScriptProcess* self)
 {
-    cWScriptMan_runScriptCode1_a1(*(void**)(self + 0x10));
+    cWScriptMan_runScriptCode1_a1(self->Manager);
 }
 #endif
 
@@ -4456,9 +4457,9 @@ void operator_delete(int* ptr);
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
 // deleting destructor: reset the vtable, free when bit 0 of flags is set
-extern "C" void cWScriptTask__cWScriptTask(void* self, int flags)
+extern "C" void cWScriptTask__cWScriptTask(cWScriptTask* self, int flags)
 {
-    *(void***)((char*)self + 0x40) = cWScriptTask_vtbl;
+    self->mVtbl = cWScriptTask_vtbl;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -4474,8 +4475,8 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptTask_getLocalTable);
  * @param task  the task
  * @return the process's local table, or 0
  */
-extern "C" int cWScriptTask_getLocalTable(void *task) {
-    return (*(int *)((char*)((*(void **)((char*)(task) + (0x3C)))) + (0x1C)));
+extern "C" int cWScriptTask_getLocalTable(cWScriptTask* task) {
+    return (*(int *)((char*)((task->Process)) + (0x1C)));
 }
 #endif
 //100%
@@ -4489,8 +4490,8 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptTask_getTaskId);
  * @param task  the task
  * @return the task id
  */
-extern "C" int cWScriptTask_getTaskId(void *task) {
-    return (*(int *)((char*)(task) + (4)));
+extern "C" int cWScriptTask_getTaskId(cWScriptTask* task) {
+    return ((int)task->TaskId);
 }
 #endif
 //100%
