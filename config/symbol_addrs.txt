@@ -10020,6 +10020,31 @@ cCSICubicSpline_evaluate = 0x0031D5A8; //type:func
 cCubicSplineInterpolant_cCubicSplineInterpolant = 0x0031D5E8; //type:func
 cCubicSplineInterpolant__cCubicSplineInterpolant = 0x0031D618; //type:func
 
+// fn_slots10: names by evidence (docs/function_names.tsv)
+cFEStateEventSelect_onWidgetCreate__FPv = 0x00186708; //type:func
+cFEStateEventSelect_onWidgetEvent = 0x001867A8; //type:func
+cFEStateEventSelect_onWidgetMenu = 0x00186950; //type:func
+cFEStateMemCard_onWidgetMenu__FPv = 0x00186B48; //type:func
+cFEPopupOptionReset_onWidgetMenu = 0x001DEA80; //type:func
+cOVState_HEAT_PREEVENT_onCreateScreen = 0x001FB6B8; //type:func
+cOVTemplate_Simple__cOVTemplate_Simple = 0x0021C708; //type:func
+cOVState_QUIT__cOVState_QUIT = 0x0021C928; //type:func
+cOVState_BIGCHALLENGE_FAIL__cOVState_BIGCHALLENGE_FAIL = 0x00221110; //type:func
+cOVState_TRANSPORT__cOVState_TRANSPORT = 0x00221298; //type:func
+cOVState_HEAT_PREEVENT__cOVState_HEAT_PREEVENT = 0x00221DF0; //type:func
+cOVState_SAVEREPLAY__cOVState_SAVEREPLAY = 0x00222030; //type:func
+cOVState_SAVEOPTIONS__cOVState_SAVEOPTIONS = 0x00222098; //type:func
+cBoolMenuItem__cBoolMenuItem = 0x002D3A68; //type:func
+cEnumMenuItem__cEnumMenuItem = 0x002D3A98; //type:func
+cPopMenuItem__cPopMenuItem = 0x002D3B10; //type:func
+cCommandMenuItem__cCommandMenuItem = 0x002D3B38; //type:func
+cCallbackMenuItem__cCallbackMenuItem = 0x002D3B80; //type:func
+cCharMenuItem__cCharMenuItem = 0x002D3C00; //type:func
+cTextMenuItem__cTextMenuItem = 0x002D3D20; //type:func
+cVectorTitleMenuItem__cVectorTitleMenuItem = 0x002D3EA8; //type:func
+cGraphMenuItem__cGraphMenuItem = 0x002D3F50; //type:func
+cErrorMenu__cErrorMenu = 0x002D3F78; //type:func
+
 // Spreadsheet Auto Generation
 
 cMemMan_alloc = 0x00317D70; //type:func

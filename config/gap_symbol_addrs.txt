@@ -892,11 +892,7 @@ lbl_001859B0 = 0x001859B0; //type:label
 // --- src/fe/festatecredits.cpp ---
 
 // --- src/fe/festateload.cpp ---
-func_00186708__FPv = 0x00186708; //type:func
-func_001867A8 = 0x001867A8; //type:func
-func_00186950 = 0x00186950; //type:func
 func_00186A08 = 0x00186A08; //type:func
-func_00186B48__FPv = 0x00186B48; //type:func
 
 // --- src/fe/fememcard.cpp ---
 func_00186C98 = 0x00186C98; //type:func
@@ -2202,7 +2198,6 @@ lbl_001F8D54 = 0x001F8D54; //type:label
 lbl_001F8DD0 = 0x001F8DD0; //type:label
 
 // --- src/fe/ovstatepause.cpp ---
-func_001FB6B8 = 0x001FB6B8; //type:func
 func_001FBD20 = 0x001FBD20; //type:func
 func_001FC768 = 0x001FC768; //type:func
 func_001FC878 = 0x001FC878; //type:func

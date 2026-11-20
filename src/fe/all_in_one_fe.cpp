@@ -106,7 +106,7 @@ extern "C" int cOVState_allowPauseMenu(cOVState* self) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021C708);
+INCLUDE_ASM("fe/all_in_one_fe", cOVTemplate_Simple__cOVTemplate_Simple);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cUIState__cUIState_a(void *) __asm__("cUIState__cUIState");
@@ -122,7 +122,7 @@ extern char cOVState_vtbl[];
  *
  * @param ovState  the object being destroyed
  */
-extern "C" void func_0021C708(void *ovState) {
+extern "C" void cOVTemplate_Simple__cOVTemplate_Simple(void *ovState) {
     *(char **)((char*)ovState + 8) = cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
@@ -343,7 +343,7 @@ extern "C" void func_0021C900(void *ovState) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_0021C928);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_QUIT__cOVState_QUIT);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cUIState__cUIState_a(void *) __asm__("cUIState__cUIState");
@@ -358,7 +358,7 @@ extern char cOVState_vtbl[];
  *
  * @param ovState  the object being destroyed
  */
-extern "C" void func_0021C928(void *ovState) {
+extern "C" void cOVState_QUIT__cOVState_QUIT(void *ovState) {
     *(char **)((char*)ovState + 8) = cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
@@ -3356,7 +3356,7 @@ extern "C" void *func_002210A0(void *ovState, int engine, int overlayId) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00221110);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_BIGCHALLENGE_FAIL__cOVState_BIGCHALLENGE_FAIL);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cUIState__cUIState_a(void *) __asm__("cUIState__cUIState");
@@ -3371,7 +3371,7 @@ extern char cOVState_vtbl[];
  *
  * @param ovState  the object being destroyed
  */
-extern "C" void func_00221110(void *ovState) {
+extern "C" void cOVState_BIGCHALLENGE_FAIL__cOVState_BIGCHALLENGE_FAIL(void *ovState) {
     *(char **)((char*)ovState + 8) = cOVState_vtbl;
     cUIState__cUIState_a(ovState);
 }
@@ -3511,7 +3511,7 @@ extern "C" void *func_00221228(void *ovState, int engine, int overlayId) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00221298);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_TRANSPORT__cOVState_TRANSPORT);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cUIState__cUIState_x(void*) __asm__("cUIState__cUIState");
@@ -3525,7 +3525,7 @@ extern char cOVState_vtbl[];
  *
  * @return whatever cUIState__cUIState returns
  */
-extern "C" void* func_00221298(void *self) {
+extern "C" void* cOVState_TRANSPORT__cOVState_TRANSPORT(void *self) {
     *(char**)((char*)self + 8) = cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
@@ -4596,7 +4596,7 @@ extern "C" void *func_00221DB0(void *state) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00221DF0);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_HEAT_PREEVENT__cOVState_HEAT_PREEVENT);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cUIState__cUIState_x(void*) __asm__("cUIState__cUIState");
@@ -4610,7 +4610,7 @@ extern char cOVState_vtbl[];
  *
  * @return whatever cUIState__cUIState returns
  */
-extern "C" void* func_00221DF0(void *self) {
+extern "C" void* cOVState_HEAT_PREEVENT__cOVState_HEAT_PREEVENT(void *self) {
     *(char**)((char*)self + 8) = cOVState_vtbl;
     return cUIState__cUIState_x(self);
 }
@@ -4828,7 +4828,7 @@ extern "C" void *func_00221FC8(void *ovState, int engine, int overlayId) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00222030);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_SAVEREPLAY__cOVState_SAVEREPLAY);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cFEMemCard__cFEMemCard_x(void*) __asm__("cFEMemCard__cFEMemCard");
@@ -4842,7 +4842,7 @@ extern char cOVState_SAVEREPLAY_vtbl[];
  *
  * @return what the base destructor returns
  */
-extern "C" void* func_00222030(void *self) {
+extern "C" void* cOVState_SAVEREPLAY__cOVState_SAVEREPLAY(void *self) {
     *(char**)((char*)self + 8) = cOVState_SAVEREPLAY_vtbl;
     return cFEMemCard__cFEMemCard_x(self);
 }
@@ -4871,7 +4871,7 @@ extern "C" void *func_00222058(void *ovState) {
 #endif
 
 //100%
-INCLUDE_ASM("fe/all_in_one_fe", func_00222098);
+INCLUDE_ASM("fe/all_in_one_fe", cOVState_SAVEOPTIONS__cOVState_SAVEOPTIONS);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void* cFEMemCard__cFEMemCard_x(void*) __asm__("cFEMemCard__cFEMemCard");
@@ -4885,7 +4885,7 @@ extern char cOVState_SAVEOPTIONS_vtbl[];
  *
  * @return what the base destructor returns
  */
-extern "C" void* func_00222098(void *self) {
+extern "C" void* cOVState_SAVEOPTIONS__cOVState_SAVEOPTIONS(void *self) {
     *(char**)((char*)self + 8) = cOVState_SAVEOPTIONS_vtbl;
     return cFEMemCard__cFEMemCard_x(self);
 }

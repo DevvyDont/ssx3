@@ -579,11 +579,11 @@ extern "C" int func_002D3A58(void **arg0) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3A68);
+INCLUDE_ASM("seg/seg_1D3510", cBoolMenuItem__cBoolMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
-extern "C" void func_002D3A68(void) {
+extern "C" void cBoolMenuItem__cBoolMenuItem(void) {
     cMenuItem__cMenuItem();
 }
 #endif
@@ -605,11 +605,11 @@ extern "C" void func_002D3A90(void *menuItem, int value) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3A98);
+INCLUDE_ASM("seg/seg_1D3510", cEnumMenuItem__cEnumMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
-extern "C" void func_002D3A98(void) {
+extern "C" void cEnumMenuItem__cEnumMenuItem(void) {
     cMenuItem__cMenuItem();
 }
 #endif
@@ -680,11 +680,11 @@ extern "C" int func_002D3B08(void *menuItem) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3B10);
+INCLUDE_ASM("seg/seg_1D3510", cPopMenuItem__cPopMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
-extern "C" void func_002D3B10(void) {
+extern "C" void cPopMenuItem__cPopMenuItem(void) {
     cMenuItem__cMenuItem();
 }
 #endif
@@ -698,11 +698,11 @@ extern "C" void func_002D3B30(void *menuItem, int value) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3B38);
+INCLUDE_ASM("seg/seg_1D3510", cCommandMenuItem__cCommandMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
-extern "C" void func_002D3B38(void) {
+extern "C" void cCommandMenuItem__cCommandMenuItem(void) {
     cMenuItem__cMenuItem();
 }
 #endif
@@ -748,11 +748,11 @@ extern "C" int func_002D3B78(void *menuItem) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3B80);
+INCLUDE_ASM("seg/seg_1D3510", cCallbackMenuItem__cCallbackMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
-extern "C" void func_002D3B80(void) {
+extern "C" void cCallbackMenuItem__cCallbackMenuItem(void) {
     cMenuItem__cMenuItem();
 }
 #endif
@@ -818,11 +818,11 @@ extern "C" void cSpaceMenuItem__cSpaceMenuItem(void) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3C00);
+INCLUDE_ASM("seg/seg_1D3510", cCharMenuItem__cCharMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
-extern "C" void func_002D3C00(void) {
+extern "C" void cCharMenuItem__cCharMenuItem(void) {
     cMenuItem__cMenuItem();
 }
 #endif
@@ -983,11 +983,11 @@ extern "C" void func_002D3D18(void *menuItem, int value) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3D20);
+INCLUDE_ASM("seg/seg_1D3510", cTextMenuItem__cTextMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
-extern "C" void func_002D3D20(void) {
+extern "C" void cTextMenuItem__cTextMenuItem(void) {
     cMenuItem__cMenuItem();
 }
 #endif
@@ -1119,11 +1119,11 @@ extern "C" void func_002D3EA0(void *menuItem, int value) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3EA8);
+INCLUDE_ASM("seg/seg_1D3510", cVectorTitleMenuItem__cVectorTitleMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
-extern "C" void func_002D3EA8(void) {
+extern "C" void cVectorTitleMenuItem__cVectorTitleMenuItem(void) {
     cMenuItem__cMenuItem();
 }
 #endif
@@ -1168,11 +1168,11 @@ extern "C" void func_002D3F48(void *menuItem, int value) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3F50);
+INCLUDE_ASM("seg/seg_1D3510", cGraphMenuItem__cGraphMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
-extern "C" void func_002D3F50(void) {
+extern "C" void cGraphMenuItem__cGraphMenuItem(void) {
     cMenuItem__cMenuItem();
 }
 #endif
@@ -1186,12 +1186,12 @@ extern "C" void func_002D3F70(void *menuItem, int value) {
 #endif
 
 //100%
-INCLUDE_ASM("seg/seg_1D3510", func_002D3F78);
+INCLUDE_ASM("seg/seg_1D3510", cErrorMenu__cErrorMenu);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
-extern "C" void func_002D3F78(int menu, int flags) {
+extern "C" void cErrorMenu__cErrorMenu(int menu, int flags) {
     cMenuItem__cMenuItem(menu + 356, 2);
     cMenuItem__cMenuItem(menu + 332, 2);
     cMenuItem__cMenuItem(menu + 304, 2);

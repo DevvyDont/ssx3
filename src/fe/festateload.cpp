@@ -40,7 +40,7 @@ extern "C" void cFEStateEventSelect_onCreateScreen(void* self)
 extern "C" void* cUITemplate_MAP_onWidgetCreate(void*);
 
 //100%
-INCLUDE_ASM("fe/festateload", func_00186708__FPv);
+INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onWidgetCreate__FPv);
 #ifdef SKIP_ASM
 /**
  * Forwards widget creation to the embedded map template at +0x48 (cUITemplate_MAP_onWidgetCreate()).
@@ -50,7 +50,7 @@ INCLUDE_ASM("fe/festateload", func_00186708__FPv);
  *
  * @return cUITemplate_MAP_onWidgetCreate()'s return value (it returns nothing meaningful)
  */
-void* func_00186708(void* self)
+void* cFEStateEventSelect_onWidgetCreate(void* self)
 {
     return cUITemplate_MAP_onWidgetCreate((char*)self + 0x48);
 }
@@ -108,7 +108,7 @@ extern "C" void cFEStateEventSelect_onDestroyScreen(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateload", func_001867A8);
+INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onWidgetEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 struct cUIScreen;
@@ -196,7 +196,7 @@ static inline void Opened1867A8(void* self, void* item)
  * @param obj  the widget
  * @param msg  the widget event (5 accept, 6 back)
  */
-extern "C" void func_001867A8(void* self, void* obj, int msg)
+extern "C" void cFEStateEventSelect_onWidgetEvent(void* self, void* obj, int msg)
 {
     if (msg == 5) {
         if (cUITemplate_MAP_onWidgetEvent((char*)self + 0x48, obj, 5) == 1) {
@@ -225,7 +225,7 @@ extern "C" void func_001867A8(void* self, void* obj, int msg)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateload", func_00186950);
+INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onWidgetMenu);
 #ifdef SKIP_ASM
 extern "C" int cUITemplate_MAP_onWidgetMenu(void* self, int a1, int a2);
 
@@ -238,7 +238,7 @@ extern "C" int cUITemplate_MAP_onWidgetMenu(void* self, int a1, int a2);
  * @param event  the menu event
  * @return 257 (0x101) when cUITemplate_MAP_onWidgetMenu() returns non-zero, else 0
  */
-extern "C" int func_00186950(void* self, int menu, int event)
+extern "C" int cFEStateEventSelect_onWidgetMenu(void* self, int menu, int event)
 {
     if (cUITemplate_MAP_onWidgetMenu((char*)self + 0x48, menu, event) != 0) {
         return 257;
@@ -432,14 +432,14 @@ extern "C" void cFEStateMemCard__cFEStateMemCard(void* self, int flags)
 #endif
 
 //100%
-INCLUDE_ASM("fe/festateload", func_00186B48__FPv);
+INCLUDE_ASM("fe/festateload", cFEStateMemCard_onWidgetMenu__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns 0x100 for every menu event (the onWidgetMenu slot of cFEStateMemCard_vtbl).
  *
  * @return 0x100
  */
-int func_00186B48(void* self)
+int cFEStateMemCard_onWidgetMenu(void* self)
 {
     return 0x100;
 }

@@ -5769,7 +5769,7 @@ extern "C" void cFEPopupOptionReset_onCreateScreen(void *self) {
 #endif
 
 //100%
-INCLUDE_ASM("main/all_in_one_main", func_001DEA80);
+INCLUDE_ASM("main/all_in_one_main", cFEPopupOptionReset_onWidgetMenu);
 #ifdef SKIP_ASM
 /**
  * Filters the options-reset popup's menu: returns 0x100 for @p key 7, 8 or 9 and 0x101 for any other value.
@@ -5780,7 +5780,7 @@ INCLUDE_ASM("main/all_in_one_main", func_001DEA80);
  * @param key  the menu event
  * @return 0x100 or 0x101
  */
-extern "C" int func_001DEA80(void* self, int menu, unsigned int key)
+extern "C" int cFEPopupOptionReset_onWidgetMenu(void* self, int menu, unsigned int key)
 {
     int result = 257;
     if (key < 10) {

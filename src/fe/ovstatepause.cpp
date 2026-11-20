@@ -1247,7 +1247,7 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_setCancelHighLight(void* self, int o
 }
 #endif
 
-INCLUDE_ASM("fe/ovstatepause", func_001FB6B8);
+INCLUDE_ASM("fe/ovstatepause", cOVState_HEAT_PREEVENT_onCreateScreen);
 
 //100%
 INCLUDE_ASM("fe/ovstatepause", cOVState_HEAT_PREEVENT_onGainFocus);

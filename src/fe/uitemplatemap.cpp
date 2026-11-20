@@ -737,7 +737,7 @@ INCLUDE_ASM("fe/uitemplatemap", cUITemplate_MAP_onWidgetMenu);
 /**
  * Map template's menu-event filter: events 6, 8 and 9 get 0, every other event 0x101.
  *
- * cOVState_TRANSPORT_onWidgetMenu and func_00186950 forward their menu events to it.
+ * cOVState_TRANSPORT_onWidgetMenu and cFEStateEventSelect_onWidgetMenu forward their menu events to it.
  *
  * @param menu  the menu (unused)
  * @param event  the menu event
