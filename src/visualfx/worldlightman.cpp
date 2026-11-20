@@ -574,22 +574,23 @@ extern "C" void func_0038A6A8(void* a, void* b, void* c);
 /**
  * Adds the strongest lights of an overlap list at a point to a light set.
  *
- * cWorldLightMan_IntersectLights picks up to @p count lights (at most 32) by intensity at @p pos; each found one is added to @p
- * particleSys with func_0038A6A8. cWorldLightMan_getRealTimeLights calls it with 4 lights and the cache entry's light set.
+ * cWorldLightMan_IntersectLights picks up to @p count lights (at most 32) by intensity at @p pos; each found one is
+ * added to @p irradiance with func_0038A6A8. cWorldLightMan_getRealTimeLights calls it with 4 lights and the cache
+ * entry's light set.
  *
  * @param pos  the point to light
  * @param overlapList  the overlap list to search
- * @param particleSys  the light set (irradiance) to add the lights to
+ * @param irradiance  the light set (On Tour cIrradiance&) to add the lights to
  * @param count  the maximum number of lights
  */
-extern "C" void cWorldLightMan_IntersectLights1(void* self, void* pos, void* overlapList, void* particleSys, int count)
+extern "C" void cWorldLightMan_IntersectLights1(void* self, void* pos, void* overlapList, void* irradiance, int count)
 {
     void* buf[32];
     int i;
     cWorldLightMan_IntersectLights(self, pos, overlapList, buf, count);
     for (i = 0; i < count; i++) {
         if (buf[i] != 0) {
-            func_0038A6A8(particleSys, pos, buf[i]);
+            func_0038A6A8(irradiance, pos, buf[i]);
         }
     }
 }
@@ -3698,7 +3699,7 @@ void* func_002F8390(void* self)
 //100%
 INCLUDE_ASM("visualfx/worldlightman", func_002F83B0);
 #ifdef SKIP_ASM
-struct sLightSet_83B0 {
+struct sAttachedEmitterType_83B0 {
     int unk_0;
     int unk_4;
     float unk_8;
@@ -3769,7 +3770,7 @@ struct sLightSet_83B0 {
     float unk_10C;
 };
 
-extern sLightSet_83B0* D_004A3BB0;
+extern sAttachedEmitterType_83B0* D_004A3BB0;
 
 /**
  * Fills attached-emitter types 0 to 9 of the table D_004A3BB0 (0x110-byte particle data records).
@@ -3779,7 +3780,7 @@ extern sLightSet_83B0* D_004A3BB0;
  */
 extern "C" void func_002F83B0(void)
 {
-    sLightSet_83B0* emitterTypes = D_004A3BB0;
+    sAttachedEmitterType_83B0* emitterTypes = D_004A3BB0;
     emitterTypes[0].unk_0 = 1;
     emitterTypes[0].unk_4 = 0;
     emitterTypes[0].unk_8 = -1.0f;
@@ -4655,7 +4656,7 @@ void* func_002F9818(void* self)
 INCLUDE_ASM("visualfx/worldlightman", func_002F9838);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
-struct sLightSet_9838 {
+struct sAttachedEmitterType_9838 {
     int unk_0;
     int unk_4;
     float unk_8;
@@ -4726,7 +4727,7 @@ struct sLightSet_9838 {
     float unk_10C;
 };
 
-extern sLightSet_9838* D_004A3BB0_9838 __asm__("D_004A3BB0");
+extern sAttachedEmitterType_9838* D_004A3BB0_9838 __asm__("D_004A3BB0");
 
 /**
  * Fills attached-emitter types 10 to 19 of the table D_004A3BB0 (0x110-byte particle data records).
@@ -4735,7 +4736,7 @@ extern sLightSet_9838* D_004A3BB0_9838 __asm__("D_004A3BB0");
  */
 extern "C" void func_002F9838(void)
 {
-    sLightSet_9838* emitterTypes = D_004A3BB0_9838;
+    sAttachedEmitterType_9838* emitterTypes = D_004A3BB0_9838;
     emitterTypes[10].unk_0 = 5;
     emitterTypes[10].unk_4 = 0;
     emitterTypes[10].unk_8 = -1.0f;
