@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/graphicsman.h"
 #include "world/worldview.h"
 #include "render/particle.h"
 #include "render/ps2graphicsman.h"
@@ -186,7 +187,7 @@ public:
  * Spins until the renderer is idle: while virtual slot 18 returns 0, runs the app object's (cAppMan_TheAppMan + 8) slot 11,
  * SYNCTASK_run(0), func_003E5398(0) and the app's slot 12.
  */
-extern "C" void cGraphicsMan_FlushRenderer(cPS2GraphicsMan* self)
+extern "C" void cGraphicsMan_FlushRenderer(cGraphicsMan* self)
 {
     for (;;) {
         sGmVEntryI_9C28* vt = (sGmVEntryI_9C28*)self->mVtbl;
@@ -219,7 +220,7 @@ struct sGfxVEntry95 {
  * @param texMat  passed through to slot 95 (texture matrix)
  * @param renderFlags  passed through to slot 95 (render flags)
  */
-extern "C" void cGraphicsMan_RenderModel(cPS2GraphicsMan* self, void* obj, int animMats, int texMat, int renderFlags)
+extern "C" void cGraphicsMan_RenderModel(cGraphicsMan* self, void* obj, int animMats, int texMat, int renderFlags)
 {
     sGfxVEntry95* vt = (sGfxVEntry95*)self->mVtbl;
     vt[95].fn((char*)self + vt[95].delta, obj, *(int*)((char*)obj + 0x94), (char*)obj + 0x10, animMats, texMat, renderFlags, 1.0f);
@@ -285,7 +286,7 @@ struct sGmVE_369CF8 {
  * @param Color  the vertex colours (a, r, g, b floats)
  * @param Offset  a translation added to every position
  */
-extern "C" void cGraphicsMan_RenderIndexedTriList(cPS2GraphicsMan* self, int NumTris, int NumVerts, unsigned char* Indices, sGmV3_369CF8* Positions,
+extern "C" void cGraphicsMan_RenderIndexedTriList(cGraphicsMan* self, int NumTris, int NumVerts, unsigned char* Indices, sGmV3_369CF8* Positions,
                               sGmUV_369CF8* UV, sGmV4_369CF8* Color, sGmV3_369CF8* Offset)
 {
     sGmVert_369CF8 verts[3];
@@ -348,7 +349,7 @@ INCLUDE_ASM("render/graphicsman", cGraphicsMan_UploadTextures);
 /**
  * Calls the graphics manager's virtual slot 121 (vtable entry at +0x3C8), the platform texture upload.
  */
-extern "C" void cGraphicsMan_UploadTextures(cPS2GraphicsMan* self)
+extern "C" void cGraphicsMan_UploadTextures(cGraphicsMan* self)
 {
     char* vt = (char*)self->mVtbl;
     ((void (*)(void*))*(void**)(vt + 0x3CC))((char*)self + *(short*)(vt + 0x3C8));
@@ -361,7 +362,7 @@ INCLUDE_ASM("render/graphicsman", cGraphicsMan_PurgeTextures);
 /**
  * Calls the graphics manager's virtual slot 120 (vtable entry at +0x3C0), the platform texture purge.
  */
-extern "C" void cGraphicsMan_PurgeTextures(cPS2GraphicsMan* self)
+extern "C" void cGraphicsMan_PurgeTextures(cGraphicsMan* self)
 {
     char* vt = (char*)self->mVtbl;
     ((void (*)(void*))*(void**)(vt + 0x3C4))((char*)self + *(short*)(vt + 0x3C0));
@@ -422,7 +423,7 @@ static inline sV4_A048 vu0MtxMul_A048(const sV4_A048* m, const sV4_A048& v)
  * @param color  the colour as four floats a, r, g, b in 0..1
  * @param n  the number of points (On Tour NumPoints); at most 20
  */
-extern "C" void cGraphicsMan_RenderSpline(cPS2GraphicsMan* self, sV4_A048* BezMat, float* color, int n)
+extern "C" void cGraphicsMan_RenderSpline(cGraphicsMan* self, sV4_A048* BezMat, float* color, int n)
 {
     float step = 1.0f / ((float)n - 1.0f);
     int red = (int)(color[1] * 128.0f);
@@ -642,7 +643,7 @@ static inline void gmMtxCopy_A2C0(sGmMtx_A2C0* dst, sGmMtx_A2C0* src)
  *
  * @param mat  the mesh matrix, updated in place
  */
-extern "C" void cGraphicsMan_DeformMeshMatrix(cPS2GraphicsMan* self, sGmMtx_A2C0* mat)
+extern "C" void cGraphicsMan_DeformMeshMatrix(cGraphicsMan* self, sGmMtx_A2C0* mat)
 {
     if (self->m_isInNIS[6] != 0) {
         sGmMtx_A2C0 result;

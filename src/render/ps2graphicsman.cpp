@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/graphicsman.h"
 #include "render/ps2graphicsman.h"
 
 //100%
@@ -1310,11 +1311,11 @@ static inline void gfxSetTex_691F8(sRS_691F8* r, const sTexPair_691F8& t)
  *
  * @return @p self
  */
-extern "C" void* cGraphicsMan_cGraphicsMan(char* self)
+extern "C" void* cGraphicsMan_cGraphicsMan(cGraphicsMan* self)
 {
-    *(void***)(self + 0x10D8) = cGraphicsMan_vtbl;
-    new (self + 0xE84) sGfxState_691F8;
-    *(int*)(self + 0xF44) = 0;
+    self->mVtbl = cGraphicsMan_vtbl;
+    new (((char*)self) + 0xE84) sGfxState_691F8;
+    self->mSkipNextPageFlip = 0;
     cGraphicsMan_TheGraphicsMan = (cPS2GraphicsMan*)(self);
     for (unsigned int i = 0; i < 2; i++) D_004A5A10[0].s[i] = -1;
     func_00416210(&sDrawState_s_defaultDrawState, 0, 0x10);
@@ -1338,18 +1339,18 @@ extern "C" void* cGraphicsMan_cGraphicsMan(char* self)
     }
     gfxSetTex_691F8(&sDrawState_s_defaultDrawState, D_004A5A10[0]);
     for (int k = 0; k < 4; k++) {
-        ((sRS_691F8*)(self + 0xE88))[k] = sDrawState_s_defaultDrawState;
+        ((sRS_691F8*)(((char*)self) + 0xE88))[k] = sDrawState_s_defaultDrawState;
     }
-    *(sRS_691F8**)(self + 0xE84) = (sRS_691F8*)(self + 0xE88);
+    self->m_pCurrentDrawState = (sDrawState*)((sRS_691F8*)(((char*)self) + 0xE88));
     *(sKey8_691F8*)self = D_004A5960[0];
-    *(int*)(self + 0x8) = 0;
-    MEM_fill(self + 0xF50, 0xFFFFFFFF, 344);
-    *(int*)(self + 0x270) = 1;
-    *(int*)(self + 0x26C) = 0;
-    *(int*)(self + 0x274) = 0;
-    *(int*)(self + 0xF48) = 0;
-    *(int*)(self + 0xF4C) = 0;
-    return self;
+    self->m_AIUpdatesPerRender = 0;
+    MEM_fill(((char*)self) + 0xF50, 0xFFFFFFFF, 344);
+    self->mNumViews = 1;
+    *(int*)&self->mFarPlane = 0;
+    self->mViewIndex = 0;
+    self->m_blendedMatrixHistory = 0;
+    self->m_blendedMatrixHistorySize = 0;
+    return ((char*)self);
 }
 #endif
 
@@ -1365,7 +1366,7 @@ void operator_delete(int* ptr);
  *
  * @param flags  destructor flags; bit 0 frees the object
  */
-extern "C" void cGraphicsMan__cGraphicsMan(cPS2GraphicsMan* self, int flags)
+extern "C" void cGraphicsMan__cGraphicsMan(cGraphicsMan* self, int flags)
 {
     self->mVtbl = cGraphicsMan_vtbl;
     cGraphicsMan_TheGraphicsMan = 0;
@@ -1390,7 +1391,7 @@ struct sVEntry00369610 {
  *
  * @param mask  the draw state to apply (4 words)
  */
-extern "C" void cGraphicsMan_ForceActiveDrawState(cPS2GraphicsMan* self, int* mask)
+extern "C" void cGraphicsMan_ForceActiveDrawState(cGraphicsMan* self, int* mask)
 {
     int i;
     unsigned int j;
@@ -1454,14 +1455,14 @@ struct sGfx_96C8 {
  * against the 256-entry limit (On Tour asserts mNumTexRefs < arraysize(mTexRefs)): a 257th distinct name would
  * overwrite the count.
  *
- * @param self_  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param name   the texture name
  * @return the texture id, or -1 when no texture file has the shape
  */
 // Look up (or load and cache) a texture by its 4-character name.
-extern "C" int cGraphicsMan_GetTextureID(cPS2GraphicsMan* self_, const char* name)
+extern "C" int cGraphicsMan_GetTextureID(cGraphicsMan* graphicsMan, const char* name)
 {
-    sGfx_96C8* self = (sGfx_96C8*)self_;
+    sGfx_96C8* self = (sGfx_96C8*)graphicsMan;
     char buf[0x10];
     const char* namePtr = name;
     if (*namePtr) {

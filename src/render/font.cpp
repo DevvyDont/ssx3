@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/graphicsman.h"
 #include "render/ps2bezierman.h"
 #include "render/ps2lightman.h"
 #include "render/playerlights.h"
@@ -1300,7 +1301,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetScreenOffset);
  * @param xoffset  the horizontal offset in pixels
  * @param yoffset  the vertical offset in pixels
  */
-extern "C" void cGraphicsMan_SetScreenOffset(cPS2GraphicsMan* self, int xoffset, int yoffset)
+extern "C" void cGraphicsMan_SetScreenOffset(cGraphicsMan* self, int xoffset, int yoffset)
 {
     self->m_screenOffset[0] = (float)xoffset;
     self->m_screenOffset[1] = (float)yoffset;
@@ -1315,7 +1316,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetScreenXOffset);
  *
  * @return the X offset in pixels
  */
-extern "C" int cGraphicsMan_GetScreenXOffset(cPS2GraphicsMan* self)
+extern "C" int cGraphicsMan_GetScreenXOffset(cGraphicsMan* self)
 {
     return (int)self->m_screenOffset[0];
 }
@@ -1329,7 +1330,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetScreenYOffset);
  *
  * @return the Y offset in pixels
  */
-extern "C" int cGraphicsMan_GetScreenYOffset(cPS2GraphicsMan* self)
+extern "C" int cGraphicsMan_GetScreenYOffset(cGraphicsMan* self)
 {
     return (int)self->m_screenOffset[1];
 }
@@ -1387,11 +1388,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetNumViews);
 /**
  * Sets mNumViews to @p numViews.
  *
- * @param ps2GraphicsMan  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param numViews  the number of views
  */
-extern "C" void cGraphicsMan_SetNumViews(cPS2GraphicsMan* ps2GraphicsMan, int numViews) {
-    (ps2GraphicsMan->mNumViews) = numViews;
+extern "C" void cGraphicsMan_SetNumViews(cGraphicsMan* graphicsMan, int numViews) {
+    (graphicsMan->mNumViews) = numViews;
 }
 #endif
 //100%
@@ -1400,11 +1401,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetNumViews);
 /**
  * Returns mNumViews.
  *
- * @param ps2GraphicsMan  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @return the number of views
  */
-extern "C" int cGraphicsMan_GetNumViews(cPS2GraphicsMan* ps2GraphicsMan) {
-    return (ps2GraphicsMan->mNumViews);
+extern "C" int cGraphicsMan_GetNumViews(cGraphicsMan* graphicsMan) {
+    return (graphicsMan->mNumViews);
 }
 #endif
 //100%
@@ -1413,11 +1414,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetViewIndex);
 /**
  * Sets mViewIndex to @p viewIndex.
  *
- * @param ps2GraphicsMan  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param viewIndex  the current view
  */
-extern "C" void cGraphicsMan_SetViewIndex(cPS2GraphicsMan* ps2GraphicsMan, int viewIndex) {
-    (ps2GraphicsMan->mViewIndex) = viewIndex;
+extern "C" void cGraphicsMan_SetViewIndex(cGraphicsMan* graphicsMan, int viewIndex) {
+    (graphicsMan->mViewIndex) = viewIndex;
 }
 #endif
 //100%
@@ -1426,11 +1427,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetViewIndex);
 /**
  * Returns mViewIndex.
  *
- * @param ps2GraphicsMan  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @return the current view index
  */
-extern "C" int cGraphicsMan_GetViewIndex(cPS2GraphicsMan* ps2GraphicsMan) {
-    return (ps2GraphicsMan->mViewIndex);
+extern "C" int cGraphicsMan_GetViewIndex(cGraphicsMan* graphicsMan) {
+    return (graphicsMan->mViewIndex);
 }
 #endif
 //100%
@@ -1439,12 +1440,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setSpecularTextureId);
 /**
  * Stores @p value in m_SpecularTextureId[@p idx].
  *
- * @param base  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param value  the new texture id
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  */
-extern "C" void cGraphicsMan_setSpecularTextureId(cPS2GraphicsMan* base, int value, int idx) {
-    *(int*)(((char*)base) + (idx << 2) + 0xC) = value;
+extern "C" void cGraphicsMan_setSpecularTextureId(cGraphicsMan* graphicsMan, int value, int idx) {
+    *(int*)(((char*)graphicsMan) + (idx << 2) + 0xC) = value;
 }
 #endif
 //100%
@@ -1453,12 +1454,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getSpecularTextureId);
 /**
  * Returns m_SpecularTextureId[@p idx].
  *
- * @param base  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @return the stored texture id
  */
-extern "C" int cGraphicsMan_getSpecularTextureId(cPS2GraphicsMan* base, int idx) {
-    return *(int*)(((char*)base) + (idx << 2) + 0xC);
+extern "C" int cGraphicsMan_getSpecularTextureId(cGraphicsMan* graphicsMan, int idx) {
+    return *(int*)(((char*)graphicsMan) + (idx << 2) + 0xC);
 }
 #endif
 //100%
@@ -1467,12 +1468,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setPatchSpecularTextureId);
 /**
  * Stores @p value in m_PatchSpecularTextureId[@p idx].
  *
- * @param base  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param value  the new texture id
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  */
-extern "C" void cGraphicsMan_setPatchSpecularTextureId(cPS2GraphicsMan* base, int value, int idx) {
-    *(int*)(((char*)base) + (idx << 2) + 0x2C) = value;
+extern "C" void cGraphicsMan_setPatchSpecularTextureId(cGraphicsMan* graphicsMan, int value, int idx) {
+    *(int*)(((char*)graphicsMan) + (idx << 2) + 0x2C) = value;
 }
 #endif
 //100%
@@ -1481,12 +1482,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getPatchSpecularTextureId);
 /**
  * Returns m_PatchSpecularTextureId[@p idx].
  *
- * @param base  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @return the stored texture id
  */
-extern "C" int cGraphicsMan_getPatchSpecularTextureId(cPS2GraphicsMan* base, int idx) {
-    return *(int*)(((char*)base) + (idx << 2) + 0x2C);
+extern "C" int cGraphicsMan_getPatchSpecularTextureId(cGraphicsMan* graphicsMan, int idx) {
+    return *(int*)(((char*)graphicsMan) + (idx << 2) + 0x2C);
 }
 #endif
 //100%
@@ -1495,12 +1496,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setSnowSparkleTextureId);
 /**
  * Stores @p value in m_SnowSparkleTextureId[@p idx].
  *
- * @param base  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param value  the new texture id
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  */
-extern "C" void cGraphicsMan_setSnowSparkleTextureId(cPS2GraphicsMan* base, int value, int idx) {
-    *(int*)(((char*)base) + (idx << 2) + 0x4C) = value;
+extern "C" void cGraphicsMan_setSnowSparkleTextureId(cGraphicsMan* graphicsMan, int value, int idx) {
+    *(int*)(((char*)graphicsMan) + (idx << 2) + 0x4C) = value;
 }
 #endif
 //100%
@@ -1509,12 +1510,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getSnowSparkleTextureId);
 /**
  * Returns m_SnowSparkleTextureId[@p idx].
  *
- * @param base  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @return the stored texture id
  */
-extern "C" int cGraphicsMan_getSnowSparkleTextureId(cPS2GraphicsMan* base, int idx) {
-    return *(int*)(((char*)base) + (idx << 2) + 0x4C);
+extern "C" int cGraphicsMan_getSnowSparkleTextureId(cGraphicsMan* graphicsMan, int idx) {
+    return *(int*)(((char*)graphicsMan) + (idx << 2) + 0x4C);
 }
 #endif
 //100%
@@ -1523,12 +1524,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setRimTextureId);
 /**
  * Stores @p value in m_RimTextureId[@p idx].
  *
- * @param base  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param value  the new texture id
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  */
-extern "C" void cGraphicsMan_setRimTextureId(cPS2GraphicsMan* base, int value, int idx) {
-    *(int*)(((char*)base) + (idx << 2) + 0x6C) = value;
+extern "C" void cGraphicsMan_setRimTextureId(cGraphicsMan* graphicsMan, int value, int idx) {
+    *(int*)(((char*)graphicsMan) + (idx << 2) + 0x6C) = value;
 }
 #endif
 //100%
@@ -1537,12 +1538,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getRimTextureId);
 /**
  * Returns m_RimTextureId[@p idx].
  *
- * @param base  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @return the stored texture id
  */
-extern "C" int cGraphicsMan_getRimTextureId(cPS2GraphicsMan* base, int idx) {
-    return *(int*)(((char*)base) + (idx << 2) + 0x6C);
+extern "C" int cGraphicsMan_getRimTextureId(cGraphicsMan* graphicsMan, int idx) {
+    return *(int*)(((char*)graphicsMan) + (idx << 2) + 0x6C);
 }
 #endif
 //100%
@@ -1551,12 +1552,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setisInNIS);
 /**
  * Stores @p value in m_isInNIS[@p idx].
  *
- * @param base  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param value  the new flag
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  */
-extern "C" void cGraphicsMan_setisInNIS(cPS2GraphicsMan* base, int value, int idx) {
-    *(int*)(((char*)base) + (idx << 2) + 0x8C) = value;
+extern "C" void cGraphicsMan_setisInNIS(cGraphicsMan* graphicsMan, int value, int idx) {
+    *(int*)(((char*)graphicsMan) + (idx << 2) + 0x8C) = value;
 }
 #endif
 //100%
@@ -1565,12 +1566,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getisInNIS);
 /**
  * Returns m_isInNIS[@p idx].
  *
- * @param base  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @return the stored flag
  */
-extern "C" int cGraphicsMan_getisInNIS(cPS2GraphicsMan* base, int idx) {
-    return *(int*)(((char*)base) + (idx << 2) + 0x8C);
+extern "C" int cGraphicsMan_getisInNIS(cGraphicsMan* graphicsMan, int idx) {
+    return *(int*)(((char*)graphicsMan) + (idx << 2) + 0x8C);
 }
 #endif
 //100%
@@ -1579,12 +1580,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setSnowSparkleDensity);
 /**
  * Stores @p value in m_SnowSparkleDensity[@p idx].
  *
- * @param base  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @param value  the new density
  */
-extern "C" void cGraphicsMan_setSnowSparkleDensity(cPS2GraphicsMan* base, int idx, float value) {
-    *(float*)(((char*)base) + (idx << 2) + 0xAC) = value;
+extern "C" void cGraphicsMan_setSnowSparkleDensity(cGraphicsMan* graphicsMan, int idx, float value) {
+    *(float*)(((char*)graphicsMan) + (idx << 2) + 0xAC) = value;
 }
 #endif
 //100%
@@ -1593,12 +1594,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getSnowSparkleDensity);
 /**
  * Returns m_SnowSparkleDensity[@p idx].
  *
- * @param base  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @return the stored density
  */
-extern "C" float cGraphicsMan_getSnowSparkleDensity(cPS2GraphicsMan* base, int idx) {
-    return *(float*)(((char*)base) + (idx << 2) + 0xAC);
+extern "C" float cGraphicsMan_getSnowSparkleDensity(cGraphicsMan* graphicsMan, int idx) {
+    return *(float*)(((char*)graphicsMan) + (idx << 2) + 0xAC);
 }
 #endif
 //100%
@@ -1607,12 +1608,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setDrawDistance);
 /**
  * Stores @p value in m_DrawDistance[@p idx].
  *
- * @param base  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @param value  the new distance
  */
-extern "C" void cGraphicsMan_setDrawDistance(cPS2GraphicsMan* base, int idx, float value) {
-    *(float*)(((char*)base) + (idx << 2) + 0xCC) = value;
+extern "C" void cGraphicsMan_setDrawDistance(cGraphicsMan* graphicsMan, int idx, float value) {
+    *(float*)(((char*)graphicsMan) + (idx << 2) + 0xCC) = value;
 }
 #endif
 //100%
@@ -1621,12 +1622,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getDrawDistance);
 /**
  * Returns m_DrawDistance[@p idx].
  *
- * @param base  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @return the stored distance
  */
-extern "C" float cGraphicsMan_getDrawDistance(cPS2GraphicsMan* base, int idx) {
-    return *(float*)(((char*)base) + (idx << 2) + 0xCC);
+extern "C" float cGraphicsMan_getDrawDistance(cGraphicsMan* graphicsMan, int idx) {
+    return *(float*)(((char*)graphicsMan) + (idx << 2) + 0xCC);
 }
 #endif
 //100%
@@ -1635,12 +1636,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setFogDensity);
 /**
  * Stores @p value in m_FogDensity[@p idx].
  *
- * @param base  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @param value  the new density
  */
-extern "C" void cGraphicsMan_setFogDensity(cPS2GraphicsMan* base, int idx, float value) {
-    *(float*)(((char*)base) + (idx << 2) + 0xEC) = value;
+extern "C" void cGraphicsMan_setFogDensity(cGraphicsMan* graphicsMan, int idx, float value) {
+    *(float*)(((char*)graphicsMan) + (idx << 2) + 0xEC) = value;
 }
 #endif
 //100%
@@ -1649,12 +1650,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getFogDensity);
 /**
  * Returns m_FogDensity[@p idx].
  *
- * @param base  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @return the stored density
  */
-extern "C" float cGraphicsMan_getFogDensity(cPS2GraphicsMan* base, int idx) {
-    return *(float*)(((char*)base) + (idx << 2) + 0xEC);
+extern "C" float cGraphicsMan_getFogDensity(cGraphicsMan* graphicsMan, int idx) {
+    return *(float*)(((char*)graphicsMan) + (idx << 2) + 0xEC);
 }
 #endif
 //100%
@@ -1663,12 +1664,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setFogColourR);
 /**
  * Stores @p value in m_FogColourR[@p idx].
  *
- * @param base  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @param value  the new red component
  */
-extern "C" void cGraphicsMan_setFogColourR(cPS2GraphicsMan* base, int idx, float value) {
-    *(float*)(((char*)base) + (idx << 2) + 0x10C) = value;
+extern "C" void cGraphicsMan_setFogColourR(cGraphicsMan* graphicsMan, int idx, float value) {
+    *(float*)(((char*)graphicsMan) + (idx << 2) + 0x10C) = value;
 }
 #endif
 //100%
@@ -1677,12 +1678,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getFogColourR);
 /**
  * Returns m_FogColourR[@p idx].
  *
- * @param base  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @return the stored red component
  */
-extern "C" float cGraphicsMan_getFogColourR(cPS2GraphicsMan* base, int idx) {
-    return *(float*)(((char*)base) + (idx << 2) + 0x10C);
+extern "C" float cGraphicsMan_getFogColourR(cGraphicsMan* graphicsMan, int idx) {
+    return *(float*)(((char*)graphicsMan) + (idx << 2) + 0x10C);
 }
 #endif
 //100%
@@ -1691,12 +1692,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setFogColourG);
 /**
  * Stores @p value in m_FogColourG[@p idx].
  *
- * @param base  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @param value  the new green component
  */
-extern "C" void cGraphicsMan_setFogColourG(cPS2GraphicsMan* base, int idx, float value) {
-    *(float*)(((char*)base) + (idx << 2) + 0x12C) = value;
+extern "C" void cGraphicsMan_setFogColourG(cGraphicsMan* graphicsMan, int idx, float value) {
+    *(float*)(((char*)graphicsMan) + (idx << 2) + 0x12C) = value;
 }
 #endif
 //100%
@@ -1705,12 +1706,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getFogColourG);
 /**
  * Returns m_FogColourG[@p idx].
  *
- * @param base  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @return the stored green component
  */
-extern "C" float cGraphicsMan_getFogColourG(cPS2GraphicsMan* base, int idx) {
-    return *(float*)(((char*)base) + (idx << 2) + 0x12C);
+extern "C" float cGraphicsMan_getFogColourG(cGraphicsMan* graphicsMan, int idx) {
+    return *(float*)(((char*)graphicsMan) + (idx << 2) + 0x12C);
 }
 #endif
 //100%
@@ -1719,12 +1720,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setFogColourB);
 /**
  * Stores @p value in m_FogColourB[@p idx].
  *
- * @param base  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @param value  the new blue component
  */
-extern "C" void cGraphicsMan_setFogColourB(cPS2GraphicsMan* base, int idx, float value) {
-    *(float*)(((char*)base) + (idx << 2) + 0x14C) = value;
+extern "C" void cGraphicsMan_setFogColourB(cGraphicsMan* graphicsMan, int idx, float value) {
+    *(float*)(((char*)graphicsMan) + (idx << 2) + 0x14C) = value;
 }
 #endif
 //100%
@@ -1733,12 +1734,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getFogColourB);
 /**
  * Returns m_FogColourB[@p idx].
  *
- * @param base  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @return the stored blue component
  */
-extern "C" float cGraphicsMan_getFogColourB(cPS2GraphicsMan* base, int idx) {
-    return *(float*)(((char*)base) + (idx << 2) + 0x14C);
+extern "C" float cGraphicsMan_getFogColourB(cGraphicsMan* graphicsMan, int idx) {
+    return *(float*)(((char*)graphicsMan) + (idx << 2) + 0x14C);
 }
 #endif
 //100%
@@ -1747,12 +1748,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setFogNear);
 /**
  * Stores @p value in m_FogNear[@p idx].
  *
- * @param base  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @param value  the new distance
  */
-extern "C" void cGraphicsMan_setFogNear(cPS2GraphicsMan* base, int idx, float value) {
-    *(float*)(((char*)base) + (idx << 2) + 0x16C) = value;
+extern "C" void cGraphicsMan_setFogNear(cGraphicsMan* graphicsMan, int idx, float value) {
+    *(float*)(((char*)graphicsMan) + (idx << 2) + 0x16C) = value;
 }
 #endif
 //100%
@@ -1761,12 +1762,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getFogNear);
 /**
  * Returns m_FogNear[@p idx].
  *
- * @param base  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @return the stored distance
  */
-extern "C" float cGraphicsMan_getFogNear(cPS2GraphicsMan* base, int idx) {
-    return *(float*)(((char*)base) + (idx << 2) + 0x16C);
+extern "C" float cGraphicsMan_getFogNear(cGraphicsMan* graphicsMan, int idx) {
+    return *(float*)(((char*)graphicsMan) + (idx << 2) + 0x16C);
 }
 #endif
 //100%
@@ -1775,12 +1776,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setFogFar);
 /**
  * Stores @p value in m_FogFar[@p idx].
  *
- * @param base  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @param value  the new distance
  */
-extern "C" void cGraphicsMan_setFogFar(cPS2GraphicsMan* base, int idx, float value) {
-    *(float*)(((char*)base) + (idx << 2) + 0x18C) = value;
+extern "C" void cGraphicsMan_setFogFar(cGraphicsMan* graphicsMan, int idx, float value) {
+    *(float*)(((char*)graphicsMan) + (idx << 2) + 0x18C) = value;
 }
 #endif
 //100%
@@ -1789,12 +1790,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getFogFar);
 /**
  * Returns m_FogFar[@p idx].
  *
- * @param base  the graphics manager (this)
+ * @param graphicsMan  the graphics manager (this)
  * @param idx  the render-state query id (0-7) that indexes the per-view array
  * @return the stored distance
  */
-extern "C" float cGraphicsMan_getFogFar(cPS2GraphicsMan* base, int idx) {
-    return *(float*)(((char*)base) + (idx << 2) + 0x18C);
+extern "C" float cGraphicsMan_getFogFar(cGraphicsMan* graphicsMan, int idx) {
+    return *(float*)(((char*)graphicsMan) + (idx << 2) + 0x18C);
 }
 #endif
 //100%
@@ -1806,12 +1807,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setScreenTintScaleR);
  * One of the per-view render-state set/get pairs (the eight-entry arrays cVisualEffectsMan_commonUpdate fills each
  * frame). No range check on @p idx. No caller in C; the out-of-line copy of an inline accessor.
  *
- * @param base  the graphics manager
+ * @param graphicsMan  the graphics manager
  * @param idx  the view / render-state query index (0-7)
  * @param value  the new red tint scale
  */
-extern "C" void cGraphicsMan_setScreenTintScaleR(cPS2GraphicsMan* base, int idx, float value) {
-    *(float*)(((char*)base) + (idx << 2) + 0x1AC) = value;
+extern "C" void cGraphicsMan_setScreenTintScaleR(cGraphicsMan* graphicsMan, int idx, float value) {
+    *(float*)(((char*)graphicsMan) + (idx << 2) + 0x1AC) = value;
 }
 #endif
 //100%
@@ -1839,12 +1840,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setScreenTintScaleG);
  * One of the per-view render-state set/get pairs (the eight-entry arrays cVisualEffectsMan_commonUpdate fills each
  * frame). No range check on @p idx. No caller in C; the out-of-line copy of an inline accessor.
  *
- * @param base  the graphics manager
+ * @param graphicsMan  the graphics manager
  * @param idx  the view / render-state query index (0-7)
  * @param value  the new green tint scale
  */
-extern "C" void cGraphicsMan_setScreenTintScaleG(cPS2GraphicsMan* base, int idx, float value) {
-    *(float*)(((char*)base) + (idx << 2) + 0x1CC) = value;
+extern "C" void cGraphicsMan_setScreenTintScaleG(cGraphicsMan* graphicsMan, int idx, float value) {
+    *(float*)(((char*)graphicsMan) + (idx << 2) + 0x1CC) = value;
 }
 #endif
 //100%
@@ -1872,12 +1873,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setScreenTintScaleB);
  * One of the per-view render-state set/get pairs (the eight-entry arrays cVisualEffectsMan_commonUpdate fills each
  * frame). No range check on @p idx. No caller in C; the out-of-line copy of an inline accessor.
  *
- * @param base  the graphics manager
+ * @param graphicsMan  the graphics manager
  * @param idx  the view / render-state query index (0-7)
  * @param value  the new blue tint scale
  */
-extern "C" void cGraphicsMan_setScreenTintScaleB(cPS2GraphicsMan* base, int idx, float value) {
-    *(float*)(((char*)base) + (idx << 2) + 0x1EC) = value;
+extern "C" void cGraphicsMan_setScreenTintScaleB(cGraphicsMan* graphicsMan, int idx, float value) {
+    *(float*)(((char*)graphicsMan) + (idx << 2) + 0x1EC) = value;
 }
 #endif
 //100%
@@ -1905,12 +1906,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setScreenTintOffsetR);
  * One of the per-view render-state set/get pairs (the eight-entry arrays cVisualEffectsMan_commonUpdate fills each
  * frame). No range check on @p idx. No caller in C; the out-of-line copy of an inline accessor.
  *
- * @param base  the graphics manager
+ * @param graphicsMan  the graphics manager
  * @param idx  the view / render-state query index (0-7)
  * @param value  the new red tint offset
  */
-extern "C" void cGraphicsMan_setScreenTintOffsetR(cPS2GraphicsMan* base, int idx, float value) {
-    *(float*)(((char*)base) + (idx << 2) + 0x20C) = value;
+extern "C" void cGraphicsMan_setScreenTintOffsetR(cGraphicsMan* graphicsMan, int idx, float value) {
+    *(float*)(((char*)graphicsMan) + (idx << 2) + 0x20C) = value;
 }
 #endif
 //100%
@@ -1938,12 +1939,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setScreenTintOffsetG);
  * One of the per-view render-state set/get pairs (the eight-entry arrays cVisualEffectsMan_commonUpdate fills each
  * frame). No range check on @p idx. No caller in C; the out-of-line copy of an inline accessor.
  *
- * @param base  the graphics manager
+ * @param graphicsMan  the graphics manager
  * @param idx  the view / render-state query index (0-7)
  * @param value  the new green tint offset
  */
-extern "C" void cGraphicsMan_setScreenTintOffsetG(cPS2GraphicsMan* base, int idx, float value) {
-    *(float*)(((char*)base) + (idx << 2) + 0x22C) = value;
+extern "C" void cGraphicsMan_setScreenTintOffsetG(cGraphicsMan* graphicsMan, int idx, float value) {
+    *(float*)(((char*)graphicsMan) + (idx << 2) + 0x22C) = value;
 }
 #endif
 //100%
@@ -1971,12 +1972,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setScreenTintOffsetB);
  * One of the per-view render-state set/get pairs (the eight-entry arrays cVisualEffectsMan_commonUpdate fills each
  * frame). No range check on @p idx. No caller in C; the out-of-line copy of an inline accessor.
  *
- * @param base  the graphics manager
+ * @param graphicsMan  the graphics manager
  * @param idx  the view / render-state query index (0-7)
  * @param value  the new blue tint offset
  */
-extern "C" void cGraphicsMan_setScreenTintOffsetB(cPS2GraphicsMan* base, int idx, float value) {
-    *(float*)(((char*)base) + (idx << 2) + 0x24C) = value;
+extern "C" void cGraphicsMan_setScreenTintOffsetB(cGraphicsMan* graphicsMan, int idx, float value) {
+    *(float*)(((char*)graphicsMan) + (idx << 2) + 0x24C) = value;
 }
 #endif
 //100%
@@ -2008,13 +2009,13 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetTexel);
  *
  * @return the result pointer
  */
-extern "C" void* cGraphicsMan_GetTexel(void* self)
+extern "C" void* cGraphicsMan_GetTexel(cGraphicsMan* self)
 {
     *(float*)self = 1.0f;
-    *(float*)((char*)self + 0x4) = 1.0f;
-    *(int*)((char*)self + 0x8) = 0;
-    *(float*)((char*)self + 0xc) = 1.0f;
-    return self;
+    self->m_screenOffset[1] = 1.0f;
+    self->m_AIUpdatesPerRender = 0;
+    *(float*)&self->m_SpecularTextureId[0] = 1.0f;
+    return ((void*)self);
 }
 #endif
 
@@ -2096,7 +2097,7 @@ extern sDrawState sDrawState_s_defaultDrawState;
  * Resets the current draw state (*m_pCurrentDrawState) to the default draw state sDrawState_s_defaultDrawState built by the cGraphicsMan
  * constructor.
  */
-extern "C" void cGraphicsMan_SetDefaultDrawState(cPS2GraphicsMan* self)
+extern "C" void cGraphicsMan_SetDefaultDrawState(cGraphicsMan* self)
 {
     *(self->m_pCurrentDrawState) = sDrawState_s_defaultDrawState;
 }
@@ -2110,7 +2111,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetDrawState);
  *
  * @param src  the draw state to apply
  */
-extern "C" void cGraphicsMan_SetDrawState(cPS2GraphicsMan* self, sDrawState* src)
+extern "C" void cGraphicsMan_SetDrawState(cGraphicsMan* self, sDrawState* src)
 {
     *(self->m_pCurrentDrawState) = *src;
 }
@@ -2123,11 +2124,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_CurrentDrawState);
  *
  * Identical to cGraphicsMan_CurrentDrawState1.
  *
- * @param ps2GraphicsMan  the graphics manager
+ * @param graphicsMan  the graphics manager
  * @return m_pCurrentDrawState (as an int)
  */
-extern "C" int cGraphicsMan_CurrentDrawState(cPS2GraphicsMan* ps2GraphicsMan) {
-    return ((int)ps2GraphicsMan->m_pCurrentDrawState);
+extern "C" int cGraphicsMan_CurrentDrawState(cGraphicsMan* graphicsMan) {
+    return ((int)graphicsMan->m_pCurrentDrawState);
 }
 #endif
 //100%
@@ -2138,11 +2139,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_CurrentDrawState1);
  *
  * Identical to cGraphicsMan_CurrentDrawState.
  *
- * @param ps2GraphicsMan  the graphics manager
+ * @param graphicsMan  the graphics manager
  * @return m_pCurrentDrawState (as an int)
  */
-extern "C" int cGraphicsMan_CurrentDrawState1(cPS2GraphicsMan* ps2GraphicsMan) {
-    return ((int)ps2GraphicsMan->m_pCurrentDrawState);
+extern "C" int cGraphicsMan_CurrentDrawState1(cGraphicsMan* graphicsMan) {
+    return ((int)graphicsMan->m_pCurrentDrawState);
 }
 #endif
 //100%
@@ -2153,11 +2154,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetDepthMask);
  *
  * Only bit 0 of @p enable is used.
  *
- * @param ps2GraphicsMan  the graphics manager
+ * @param graphicsMan  the graphics manager
  * @param enable  the depth mask mode (On Tour eGMDepthMaskMode); bit 0 is stored
  */
-extern "C" void cGraphicsMan_SetDepthMask(cPS2GraphicsMan* ps2GraphicsMan, int enable) {
-    int *drawState = (int*)ps2GraphicsMan->m_pCurrentDrawState;
+extern "C" void cGraphicsMan_SetDepthMask(cGraphicsMan* graphicsMan, int enable) {
+    int *drawState = (int*)graphicsMan->m_pCurrentDrawState;
     int bit = (enable << 22) & 0x400000;
     drawState[1] = (drawState[1] & ~0x400000) | bit;
 }
@@ -2170,13 +2171,13 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetDrawLayer);
  *
  * cGraphicsMan_GetDrawLayer reads the field back.
  *
- * @param ps2GraphicsMan  the graphics manager
+ * @param graphicsMan  the graphics manager
  * @param value  the draw layer (On Tour eGMDrawLayer; 5 bits)
  */
-extern "C" void cGraphicsMan_SetDrawLayer(cPS2GraphicsMan* ps2GraphicsMan, int value) {
+extern "C" void cGraphicsMan_SetDrawLayer(cGraphicsMan* graphicsMan, int value) {
     void *temp_6;
 
-    temp_6 = ((void*)ps2GraphicsMan->m_pCurrentDrawState);
+    temp_6 = ((void*)graphicsMan->m_pCurrentDrawState);
     (*(int *)((char*)(temp_6) + (8))) = (int) (((*(int *)((char*)(temp_6) + (8))) & ~0x3E0) | ((value << 5) & 0x3E0));
 }
 #endif
@@ -2194,7 +2195,7 @@ struct sFontV4 {
  * @param colour  the colour, passed by value as a 16-byte vector
  * @param idx  the constant-colour slot
  */
-extern "C" void cGraphicsMan_SetConstantColour(cPS2GraphicsMan* self, sFontV4 colour, int idx)
+extern "C" void cGraphicsMan_SetConstantColour(cGraphicsMan* self, sFontV4 colour, int idx)
 {
     // PORT: pointer arithmetic via int (index-first addu)
     *(sFontV4*)((char*)((idx << 4) + (int)self) + 0xF04) = colour;
@@ -2227,16 +2228,16 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetBlendMode);
  * Sets the blend mode of one GS context in the current draw state (*m_pCurrentDrawState): 5 bits of word 1 at bit 2 + 5
  * * @p context.
  *
- * @param ps2GraphicsMan  the graphics manager
+ * @param graphicsMan  the graphics manager
  * @param mode  the blend mode (On Tour eGMBlendMode)
  * @param context  the GS context (0 or 1)
  */
-extern "C" void cGraphicsMan_SetBlendMode(cPS2GraphicsMan* ps2GraphicsMan, int mode, int context) {
+extern "C" void cGraphicsMan_SetBlendMode(cGraphicsMan* graphicsMan, int mode, int context) {
     int temp_2;
     int temp_4;
     void *temp_7;
 
-    temp_7 = ((void*)ps2GraphicsMan->m_pCurrentDrawState);
+    temp_7 = ((void*)graphicsMan->m_pCurrentDrawState);
     temp_2 = (context * 5) + 2;
     temp_4 = 0x1F << temp_2;
     (*(int *)((char*)(temp_7) + (4))) = (int) (((*(int *)((char*)(temp_7) + (4))) & ~temp_4) | ((mode << temp_2) & temp_4));
@@ -2251,17 +2252,17 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetAlphaSort);
  * The mode goes in bits 0-1 of word 1, the key in bits 10-28 of word 2 (19 bits); cGraphicsMan_GetAlphaSort and cGraphicsMan_GetAlphaSortKey read
  * them back.
  *
- * @param ps2GraphicsMan  the graphics manager
+ * @param graphicsMan  the graphics manager
  * @param alphaSort  the alpha sort mode (On Tour eGMAlphaSort; 2 bits)
  * @param sortKey  the sort key (19 bits)
  */
-extern "C" void cGraphicsMan_SetAlphaSort(cPS2GraphicsMan* ps2GraphicsMan, int alphaSort, int sortKey) {
+extern "C" void cGraphicsMan_SetAlphaSort(cGraphicsMan* graphicsMan, int alphaSort, int sortKey) {
     void *temp_3;
     void *temp_8;
 
-    temp_8 = ((void*)ps2GraphicsMan->m_pCurrentDrawState);
+    temp_8 = ((void*)graphicsMan->m_pCurrentDrawState);
     (*(int *)((char*)(temp_8) + (4))) = (int) (((*(int *)((char*)(temp_8) + (4))) & ~3) | (alphaSort & 3));
-    temp_3 = ((void*)ps2GraphicsMan->m_pCurrentDrawState);
+    temp_3 = ((void*)graphicsMan->m_pCurrentDrawState);
     (*(int *)((char*)(temp_3) + (8))) = (int) (((*(int *)((char*)(temp_3) + (8))) & 0xE00003FF) | ((sortKey << 0xA) & 0x1FFFFC00));
 }
 #endif
@@ -2272,16 +2273,16 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetTextureClamp);
  * Sets the texture clamp mode of one GS context in the current draw state (*m_pCurrentDrawState): 2 bits of word 0 at
  * bit 2 + 2 * @p context.
  *
- * @param ps2GraphicsMan  the graphics manager
+ * @param graphicsMan  the graphics manager
  * @param mode  the clamp mode (On Tour eGMClampMode)
  * @param context  the GS context (0 or 1)
  */
-extern "C" void cGraphicsMan_SetTextureClamp(cPS2GraphicsMan* ps2GraphicsMan, int mode, int context) {
+extern "C" void cGraphicsMan_SetTextureClamp(cGraphicsMan* graphicsMan, int mode, int context) {
     int *temp_7;
     int temp_4;
     int temp_6;
 
-    temp_7 = ((int*)ps2GraphicsMan->m_pCurrentDrawState);
+    temp_7 = ((int*)graphicsMan->m_pCurrentDrawState);
     temp_6 = (context * 2) + 2;
     temp_4 = 3 << temp_6;
     *temp_7 = (*temp_7 & ~temp_4) | ((mode << temp_6) & temp_4);
@@ -2294,11 +2295,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetDmaDataPtr);
  * Stores the low 30 bits of @p value in word 3 of the current draw state (*m_pCurrentDrawState), keeping its top two
  * bits.
  *
- * @param ps2GraphicsMan  the graphics manager
+ * @param graphicsMan  the graphics manager
  * @param value  the DMA data pointer / offset to record (30 bits)
  */
-extern "C" void cGraphicsMan_SetDmaDataPtr(cPS2GraphicsMan* ps2GraphicsMan, int value) {
-    int *drawState = (int*)ps2GraphicsMan->m_pCurrentDrawState;
+extern "C" void cGraphicsMan_SetDmaDataPtr(cGraphicsMan* graphicsMan, int value) {
+    int *drawState = (int*)graphicsMan->m_pCurrentDrawState;
     int masked = value & 0x3FFFFFFF;
     drawState[3] = (drawState[3] & 0xC0000000) | masked;
 }
@@ -2311,11 +2312,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetDrawLayer);
  *
  * cGraphicsMan_SetDrawLayer sets it.
  *
- * @param ps2GraphicsMan  the graphics manager
+ * @param graphicsMan  the graphics manager
  * @return the draw layer (0-31)
  */
-extern "C" unsigned int cGraphicsMan_GetDrawLayer(cPS2GraphicsMan* ps2GraphicsMan) {
-    return (unsigned int) ((*(int *)((char*)((ps2GraphicsMan->m_pCurrentDrawState)) + (8))) & 0x3E0) >> 5;
+extern "C" unsigned int cGraphicsMan_GetDrawLayer(cGraphicsMan* graphicsMan) {
+    return (unsigned int) ((*(int *)((char*)((graphicsMan->m_pCurrentDrawState)) + (8))) & 0x3E0) >> 5;
 }
 #endif
 //100%
@@ -2326,11 +2327,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetBlendMode);
  *
  * cGraphicsMan_SetBlendMode sets it.
  *
- * @param ps2GraphicsMan  the graphics manager
+ * @param graphicsMan  the graphics manager
  * @return the blend mode (0-31)
  */
-extern "C" unsigned int cGraphicsMan_GetBlendMode(cPS2GraphicsMan* ps2GraphicsMan) {
-    return (unsigned int) ((*(int *)((char*)((ps2GraphicsMan->m_pCurrentDrawState)) + (4))) & 0x7C) >> 2;
+extern "C" unsigned int cGraphicsMan_GetBlendMode(cGraphicsMan* graphicsMan) {
+    return (unsigned int) ((*(int *)((char*)((graphicsMan->m_pCurrentDrawState)) + (4))) & 0x7C) >> 2;
 }
 #endif
 //100%
@@ -2341,11 +2342,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetAlphaSort);
  *
  * cGraphicsMan_SetAlphaSort sets it.
  *
- * @param ps2GraphicsMan  the graphics manager
+ * @param graphicsMan  the graphics manager
  * @return the alpha sort mode (0-3)
  */
-extern "C" int cGraphicsMan_GetAlphaSort(cPS2GraphicsMan* ps2GraphicsMan) {
-    return (*(int *)((char*)((ps2GraphicsMan->m_pCurrentDrawState)) + (4))) & 3;
+extern "C" int cGraphicsMan_GetAlphaSort(cGraphicsMan* graphicsMan) {
+    return (*(int *)((char*)((graphicsMan->m_pCurrentDrawState)) + (4))) & 3;
 }
 #endif
 //100%
@@ -2356,11 +2357,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetAlphaSortKey);
  *
  * cGraphicsMan_SetAlphaSort sets it.
  *
- * @param ps2GraphicsMan  the graphics manager
+ * @param graphicsMan  the graphics manager
  * @return the sort key
  */
-extern "C" unsigned int cGraphicsMan_GetAlphaSortKey(cPS2GraphicsMan* ps2GraphicsMan) {
-    return (unsigned int) ((*(int *)((char*)((ps2GraphicsMan->m_pCurrentDrawState)) + (8))) & 0x1FFFFC00) >> 10;
+extern "C" unsigned int cGraphicsMan_GetAlphaSortKey(cGraphicsMan* graphicsMan) {
+    return (unsigned int) ((*(int *)((char*)((graphicsMan->m_pCurrentDrawState)) + (8))) & 0x1FFFFC00) >> 10;
 }
 #endif
 
@@ -2460,11 +2461,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetNumTexRefs);
 /**
  * Returns the number of texture references (mNumTexRefs).
  *
- * @param ps2GraphicsMan  the graphics manager
+ * @param graphicsMan  the graphics manager
  * @return mNumTexRefs
  */
-extern "C" int cGraphicsMan_GetNumTexRefs(cPS2GraphicsMan* ps2GraphicsMan) {
-    return (ps2GraphicsMan->mNumTexRefs);
+extern "C" int cGraphicsMan_GetNumTexRefs(cGraphicsMan* graphicsMan) {
+    return (graphicsMan->mNumTexRefs);
 }
 #endif
 //100%
@@ -2475,13 +2476,13 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetTexRef);
  *
  * No range check (the preview's version asserted the index).
  *
- * @param base  the graphics manager
+ * @param graphicsMan  the graphics manager
  * @param idx  the texture reference index
  * @return a pointer to mTexRefs[@p idx]
  */
-extern "C" char* cGraphicsMan_GetTexRef(cPS2GraphicsMan* base, int idx)
+extern "C" char* cGraphicsMan_GetTexRef(cGraphicsMan* graphicsMan, int idx)
 {
-    return ((char*)base) + 0x280 + idx * 0xC;
+    return ((char*)graphicsMan) + 0x280 + idx * 0xC;
 }
 #endif
 
@@ -2715,11 +2716,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetSpecID);
 /**
  * Sets the specular texture id (mSpecTexID).
  *
- * @param ps2GraphicsMan  the graphics manager
+ * @param graphicsMan  the graphics manager
  * @param texId  the texture id
  */
-extern "C" void cGraphicsMan_SetSpecID(cPS2GraphicsMan* ps2GraphicsMan, int texId) {
-    (ps2GraphicsMan->mSpecTexID) = texId;
+extern "C" void cGraphicsMan_SetSpecID(cGraphicsMan* graphicsMan, int texId) {
+    (graphicsMan->mSpecTexID) = texId;
 }
 #endif
 //100%
@@ -2728,11 +2729,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetSpecID);
 /**
  * Returns the specular texture id (mSpecTexID).
  *
- * @param ps2GraphicsMan  the graphics manager
+ * @param graphicsMan  the graphics manager
  * @return mSpecTexID
  */
-extern "C" int cGraphicsMan_GetSpecID(cPS2GraphicsMan* ps2GraphicsMan) {
-    return (ps2GraphicsMan->mSpecTexID);
+extern "C" int cGraphicsMan_GetSpecID(cGraphicsMan* graphicsMan) {
+    return (graphicsMan->mSpecTexID);
 }
 #endif
 //100%
@@ -2773,11 +2774,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetPatchSpecID);
 /**
  * Sets the patch specular texture id (mPatchSpecTexID).
  *
- * @param ps2GraphicsMan  the graphics manager
+ * @param graphicsMan  the graphics manager
  * @param texId  the texture id
  */
-extern "C" void cGraphicsMan_SetPatchSpecID(cPS2GraphicsMan* ps2GraphicsMan, int texId) {
-    (ps2GraphicsMan->mPatchSpecTexID) = texId;
+extern "C" void cGraphicsMan_SetPatchSpecID(cGraphicsMan* graphicsMan, int texId) {
+    (graphicsMan->mPatchSpecTexID) = texId;
 }
 #endif
 //100%
@@ -2786,11 +2787,11 @@ INCLUDE_ASM("render/font", cGraphicsMan_GetPatchSpecID);
 /**
  * Returns the patch specular texture id (mPatchSpecTexID).
  *
- * @param ps2GraphicsMan  the graphics manager
+ * @param graphicsMan  the graphics manager
  * @return mPatchSpecTexID
  */
-extern "C" int cGraphicsMan_GetPatchSpecID(cPS2GraphicsMan* ps2GraphicsMan) {
-    return (ps2GraphicsMan->mPatchSpecTexID);
+extern "C" int cGraphicsMan_GetPatchSpecID(cGraphicsMan* graphicsMan) {
+    return (graphicsMan->mPatchSpecTexID);
 }
 #endif
 //100%
@@ -2799,10 +2800,10 @@ INCLUDE_ASM("render/font", cGraphicsMan_SkipNextPageFlip);
 /**
  * Requests that the next page flip be skipped: sets mSkipNextPageFlip to 1.
  *
- * @param ps2GraphicsMan  the graphics manager
+ * @param graphicsMan  the graphics manager
  */
-extern "C" void cGraphicsMan_SkipNextPageFlip(cPS2GraphicsMan* ps2GraphicsMan) {
-    (ps2GraphicsMan->mSkipNextPageFlip) = 1;
+extern "C" void cGraphicsMan_SkipNextPageFlip(cGraphicsMan* graphicsMan) {
+    (graphicsMan->mSkipNextPageFlip) = 1;
 }
 #endif
 
@@ -2831,7 +2832,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetPixelTest);
  * @param atestmode  the alpha test mode (2 bits)
  * @param aref  the alpha reference value (8 bits)
  */
-extern "C" void cGraphicsMan_SetPixelTest(cPS2GraphicsMan* self, int depthtestmode, int atestmode, int aref)
+extern "C" void cGraphicsMan_SetPixelTest(cGraphicsMan* self, int depthtestmode, int atestmode, int aref)
 {
     int sa = (depthtestmode << 23) & 0x01800000;
     *(int*)((char*)self->m_pCurrentDrawState + 4) = (*(int*)((char*)self->m_pCurrentDrawState + 4) & ~0x01800000) | sa;
@@ -2851,7 +2852,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_SetTexture);
  * @param value  the texture id to store (On Tour texid)
  * @param idx  the texture context (On Tour contextID); not range-checked
  */
-extern "C" void cGraphicsMan_SetTexture(cPS2GraphicsMan* self, short value, int idx) {
+extern "C" void cGraphicsMan_SetTexture(cGraphicsMan* self, short value, int idx) {
     *(short*)((char*)self->m_pCurrentDrawState + (idx << 1) + 0x10) = value;
 }
 #endif
@@ -2863,7 +2864,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_PushDrawState);
  * Pushes the draw-state stack: copies the current draw state into the next entry and makes that entry current. No
  * overflow check.
  */
-extern "C" void cGraphicsMan_PushDrawState(cPS2GraphicsMan* self)
+extern "C" void cGraphicsMan_PushDrawState(cGraphicsMan* self)
 {
     sDrawState* top = self->m_pCurrentDrawState;
     top[1] = top[0];
@@ -2902,7 +2903,7 @@ static inline short* sFontRS_shorts_47D8(char* st)
  *
  * @return 1 at the first difference, else 0
  */
-extern "C" int cGraphicsMan_DrawStateChanged(cPS2GraphicsMan* self)
+extern "C" int cGraphicsMan_DrawStateChanged(cGraphicsMan* self)
 {
     int i;
     unsigned int j;
@@ -2929,12 +2930,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_setEffectTexMap);
  *
  * No range check (86 entries); the preview's version asserted the index.
  *
- * @param base  the graphics manager
+ * @param graphicsMan  the graphics manager
  * @param idx  the effect id
  * @param value  the texture id
  */
-extern "C" void cGraphicsMan_setEffectTexMap(cPS2GraphicsMan* base, int idx, int value) {
-    *(int*)(((char*)base) + (idx << 2) + 0xF50) = value;
+extern "C" void cGraphicsMan_setEffectTexMap(cGraphicsMan* graphicsMan, int idx, int value) {
+    *(int*)(((char*)graphicsMan) + (idx << 2) + 0xF50) = value;
 }
 #endif
 //100%
@@ -2945,12 +2946,12 @@ INCLUDE_ASM("render/font", cGraphicsMan_getEffectTexMap);
  *
  * No range check (86 entries).
  *
- * @param base  the graphics manager
+ * @param graphicsMan  the graphics manager
  * @param idx  the effect id
  * @return the texture id (-1 when unset)
  */
-extern "C" int cGraphicsMan_getEffectTexMap(cPS2GraphicsMan* base, int idx) {
-    return *(int*)(((char*)base) + (idx << 2) + 0xF50);
+extern "C" int cGraphicsMan_getEffectTexMap(cGraphicsMan* graphicsMan, int idx) {
+    return *(int*)(((char*)graphicsMan) + (idx << 2) + 0xF50);
 }
 #endif
 //100%
