@@ -1,4 +1,5 @@
 #include "common.h"
+#include "ai/ridermetrix.h"
 #include "ai/ai.h"
 #include "online/gamecomm.h"
 #include "main/game.h"
@@ -2398,14 +2399,14 @@ extern "C" void cRiderMetrix_reset(void *);
  *
  * @return @p self
  */
-extern "C" void *cRiderMetrix_cRiderMetrix(void *self) {
-    *(int *)((char*)self + 0x1AC) = 0;
-    *(int *)((char*)self + 0x1B0) = 0;
-    *(int *)((char*)self + 0x1B4) = 0;
-    *(int *)((char*)self + 0x1C8) = 0;
-    *(float *)((char*)self + 0x1C4) = 1.0f;
+extern "C" void *cRiderMetrix_cRiderMetrix(cRiderMetrix* self) {
+    self->Rider = 0;
+    self->HUDfx = 0;
+    self->NumHUDfx = 0;
+    self->mPointsTotalInitial = 0;
+    self->mPointsMultiplier = 1.0f;
     cRiderMetrix_reset(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -2424,10 +2425,10 @@ extern "C" void operator_delete__FPi(void *);
  * @param metrix  the metrics object (this)
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cRiderMetrix__cRiderMetrix(void *metrix, int flags) {
+extern "C" void cRiderMetrix__cRiderMetrix(cRiderMetrix* metrix, int flags) {
     int temp_4;
 
-    temp_4 = (*(int *)((char*)(metrix) + (0x1B0)));
+    temp_4 = ((int)metrix->HUDfx);
     if (temp_4 != 0) {
         cMemMan_free__FPv(temp_4);
     }

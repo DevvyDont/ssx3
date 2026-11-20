@@ -1,0 +1,137 @@
+#ifndef AI_RIDERMETRIX_H
+#define AI_RIDERMETRIX_H
+
+// cRiderMetrix: one rider's trick and score tracking (the current trick's power, air, spin, grabs and bonuses, the
+// combo chain, the trick history and the run totals) plus the rider's HUD effects. cRider_addRiderMetrix allocates
+// it (cMemMan_alloc(460, "RiderMetrix")), stores it in cRider::mMetrix and links it with cRiderMetrix_linkToRider.
+// Methods: ai/ridermetrix (the ev* trick events, earnName / earnNameAndPoints, the points getters) and seg/seg_14B10
+// (constructor, destructor). No vtable, no base class.
+//
+// Size 0x1CC [R] (the allocation; On Tour 0x1F0). A FLAT layout, like main/game.h. Member names are EA's, from SSX On
+// Tour's PSP DWARF: its cRiderMetrix derives from cRiderMetrixState (0x000-0x1AB here) and adds Rider onwards.
+// Placed by:
+//   [R] retail's constructor cRiderMetrix_cRiderMetrix and cRiderMetrix_linkToRider;
+//   [U] how retail code uses the field;
+//   [O] On Tour's member order, where the fields on both sides are placed by [R] or [U].
+// Retail differs from On Tour in two ways: On Tour's three leading bools are words here, and a trick definition
+// (tTrickNameDef) is 8 bytes, not 0xC, in TrickHistory and in tRiderStats::BestTrick. Everything else is in On Tour's
+// order and sizes.
+
+#include "layout.h"
+
+struct cRider;
+struct cHUDFX;
+
+// A rider's run totals (On Tour tRiderStats, 0xB0 there: BestTrick is 8 bytes here).
+struct tRiderStats {
+    int SpinDegs;                    // 0x00 [O]; [U] earnNameAndPoints adds the trick's spin
+    int FlipDegs;                    // 0x04 [O]
+    int NumGrabs;                    // 0x08 [O]
+    int NumHandplants;               // 0x0C [O]
+    int NumRails;                    // 0x10 [O]
+    int NumTricksLanded;             // 0x14 [O]
+    int NumUberTricks;               // 0x18 [O]
+    int NumSuperUberTricks;          // 0x1C [O]
+    int NumUberGrindTricks;          // 0x20 [O]
+    int NumResets;                   // 0x24 [O]; [U] evReset counts
+    int NumWipeouts;                 // 0x28 [O]; [U] evWipeout counts
+    int NumFrags;                    // 0x2C [O]
+    int NumDeaths;                   // 0x30 [O]; [U] evWipeout
+    int NumMultipliers;              // 0x34 [O]
+    int NumComboChainLinks;          // 0x38 [O]
+    int NumPerfectLandingBonus;      // 0x3C [O]
+    int NumLastSecondLandingBonus;   // 0x40 [O]
+    float AirTime;                   // 0x44 [O]
+    float GrabTime;                  // 0x48 [O]
+    float RailDist;                  // 0x4C [O]
+    float BiggestAirTime;            // 0x50 [O]
+    float BiggestGrabTime;           // 0x54 [O]
+    float BiggestRailDist;           // 0x58 [O]
+    float BiggestHandplantTime;      // 0x5C [O]
+    float MaxSpeedCPS;               // 0x60 [O]
+    float MaxAvgSpeedCPS;            // 0x64 [O]
+    float SumSpeedCPS;               // 0x68 [O]
+    float SumTick;                   // 0x6C [O]
+    int TricksAtLevel[6];            // 0x70 [O]
+    int LongestCombo;                // 0x88 [O]
+    int BestComboPoints;             // 0x8C [O]
+    int BestTrickPoints;             // 0x90 [O]; [U] earnNameAndPoints keeps the best
+    unsigned int BestTrick[2];       // 0x94 [O] tTrickNameDef (8 bytes in retail); [U] stored with BestTrickPoints
+    int TotalPoints;                 // 0x9C [O]; [U] evAddPoints
+    int TotalStylePoints;            // 0xA0 [O]
+    int TotalPointsLostToWipeouts;   // 0xA4 [O]; [U] evWipeout
+    int TotalPointsLostToResets;     // 0xA8 [O]; [U] evReset
+};
+
+CHECK_OFFSET(tRiderStats, TricksAtLevel, 0x70);
+CHECK_OFFSET(tRiderStats, BestTrick, 0x94);
+CHECK_OFFSET(tRiderStats, TotalPointsLostToResets, 0xA8);
+CHECK_SIZE(tRiderStats, 0xAC);
+
+struct cRiderMetrix {
+    // cRiderMetrixState
+    int InitTrickIsFakie;            // 0x000 [O] (bool there)
+    int InitTrickIsPipe;             // 0x004 [O] (bool there)
+    int InitTrickIsLateSpin;         // 0x008 [O] (bool there); [U] evLateSpin
+    int InitTrickRailslideMode;      // 0x00C [O]
+    int InitTrickPressMode;          // 0x010 [O]
+    float CurTrickPower;             // 0x014 [O]; [U] earnName / earnNameAndPoints
+    float CurTrickPointMult;         // 0x018 [O]; [U] getCurTrickPointsWithMult
+    float CurTrickStylePower;        // 0x01C [O]; [U] getCurTrickStyleSubPoints
+    int CurTrickRailslideMode;       // 0x020 [O]
+    float CurTrickRailslideDist;     // 0x024 [O]
+    int CurTrickPressMode;           // 0x028 [O]
+    float CurTrickPressSec;          // 0x02C [O]
+    float CurTrickAirSec;            // 0x030 [O]
+    float CurTrickSpinAng;           // 0x034 [O]; [U] evLateSpin
+    float CurTrickFlipAng;           // 0x038 [O]; [U] evFlip
+    float CurGrabPowerPerTick;       // 0x03C [O]
+    float CurGrabHoldSec;            // 0x040 [O]
+    float CurTrickTotalGrabHoldSec;  // 0x044 [O]
+    float CurTrickMaxGrabHoldSec;    // 0x048 [O]
+    int CurTrickNumGrabs;            // 0x04C [O]
+    int CurTrickNumTweaks;           // 0x050 [O]
+    int CurTrickNumUbers;            // 0x054 [O]; [U] evUberGrindEnd
+    int CurTrickNumSuperUbers;       // 0x058 [O]
+    int CurTrickIsUber;              // 0x05C [O] (bool there)
+    int CurTrickGrabList[3];         // 0x060 [O] eTrickNameGrab[3]
+    float CurTrickUberGrindHoldSec;  // 0x06C [O]
+    int CurTrickUberGrind;           // 0x070 [O] eTrickNameUberGrind; [U] evTakeoff clears it
+    int CurTrickNumUberGrinds;       // 0x074 [O]; [U] evUberGrindEnd
+    float CurTrickHandplantHoldSec;  // 0x078 [O]; [U] evHandplantStart
+    int CurTrickHandplant;           // 0x07C [O] eTrickNameHandplant; [U] evHandplantStart
+    int CurTrickNumHandplants;       // 0x080 [O]; [U] evHandplantEnd
+    int CurTrickBonusPoints;         // 0x084 [O]
+    int CurTrickBigAirBonusLevel;    // 0x088 [O]
+    int CurTrickLongGrabBonusLevel;  // 0x08C [O]
+    int CurTrickLongPressBonusLevel; // 0x090 [O]
+    int CurTrickLongPlantBonusLevel; // 0x094 [O]
+    int CurTrickLongRailBonusLevel;  // 0x098 [O]
+    int NumCombos;                   // 0x09C [O]; [U] resetComboChain
+    int ComboPoints;                 // 0x0A0 [O]; [U] resetComboChain, losePoints
+    float ComboResetDelay;           // 0x0A4 [O]; [U] delayComboChainReset, cancelComboChainReset
+    unsigned int TrickHistory[10][2]; // 0x0A8 [O] tTrickNameDef[10] (8 bytes each in retail)
+    int TrickHistoryPtr;             // 0x0F8 [O]
+    tRiderStats Totals;              // 0x0FC [O]
+    float CurAvgSpeedCPS;            // 0x1A8 [O]
+    // cRiderMetrix
+    cRider* Rider;                   // 0x1AC [O]; [R] ctor = 0, linkToRider stores the rider
+    cHUDFX* HUDfx;                   // 0x1B0 [O]; [R] ctor = 0; linkToRider allocates 44 (0x9C each, "cHUDFX")
+    int NumHUDfx;                    // 0x1B4 [O]; [R] ctor = 0, linkToRider = 44
+    unsigned int ActiveFXListCache[2]; // 0x1B8 [O]
+    int IsActiveFXListCacheInvalid;  // 0x1C0 [O] (bool there)
+    float mPointsMultiplier;         // 0x1C4 [O]; [R] ctor = 1.0; [U] evAddPoints, getCurTrickPoints
+    int mPointsTotalInitial;         // 0x1C8 [O]; [R] ctor = 0; [U] setInitialPointsTotal
+};
+
+CHECK_OFFSET(cRiderMetrix, CurTrickPower, 0x014);
+CHECK_OFFSET(cRiderMetrix, CurTrickGrabList, 0x060);
+CHECK_OFFSET(cRiderMetrix, ComboResetDelay, 0x0A4);
+CHECK_OFFSET(cRiderMetrix, TrickHistory, 0x0A8);
+CHECK_OFFSET(cRiderMetrix, Totals, 0x0FC);
+CHECK_OFFSET(cRiderMetrix, CurAvgSpeedCPS, 0x1A8);
+CHECK_OFFSET(cRiderMetrix, Rider, 0x1AC);
+CHECK_OFFSET(cRiderMetrix, mPointsMultiplier, 0x1C4);
+CHECK_SIZE(cRiderMetrix, 0x1CC);
+
+#endif
