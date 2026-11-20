@@ -49,8 +49,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Instance);
  * @param opts  the play options
  * @return mInst
  */
-extern "C" int cSndPlayOpts_OPTS_Instance(void *opts) {
-    return *(volatile int *)((char*)opts + 0x1C);
+extern "C" int cSndPlayOpts_OPTS_Instance(cSndPlayOpts* opts) {
+    return opts->mInst;
 }
 #endif
 
@@ -63,8 +63,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Current);
  * @param opts  the play options
  * @return the current level's play options
  */
-extern "C" int cSndPlayOpts_OPTS_Current(void *opts) {
-    return (*(int *)((char*)(opts) + (0x20))) + ((*(volatile int *)((char*)(opts) + (0x1C))) * 0x18);
+extern "C" int cSndPlayOpts_OPTS_Current(cSndPlayOpts* opts) {
+    return ((int)opts->mCurrent) + ((opts->mInst) * 0x18);
 }
 #endif
 
@@ -77,8 +77,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetPos);
  * @param opts  the play options
  * @return the position vector pointer, or 0
  */
-extern "C" int cSndPlayOpts_OPTS_GetPos(void *opts) {
-    return *(int*)((char*)opts + (*(volatile int*)((char*)opts + 0x1C) << 2) + 0x24);
+extern "C" int cSndPlayOpts_OPTS_GetPos(cSndPlayOpts* opts) {
+    return *(int*)((char*)opts + (opts->mInst << 2) + 0x24);
 }
 #endif
 
@@ -91,8 +91,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetStaticPos);
  * @param opts  the play options
  * @return nonzero when the position is static
  */
-extern "C" int cSndPlayOpts_OPTS_GetStaticPos(void *opts) {
-    return (*(int**)((char*)opts + 0x34))[*(volatile int*)((char*)opts + 0x1C)];
+extern "C" int cSndPlayOpts_OPTS_GetStaticPos(cSndPlayOpts* opts) {
+    return (opts->mPosStatic)[opts->mInst];
 }
 #endif
 
@@ -105,8 +105,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetVol);
  * @param opts  the play options
  * @return the base volume
  */
-extern "C" int cSndPlayOpts_OPTS_GetVol(void *opts) {
-    return (*(int**)((char*)opts + 0x38))[*(volatile int*)((char*)opts + 0x1C)];
+extern "C" int cSndPlayOpts_OPTS_GetVol(cSndPlayOpts* opts) {
+    return (opts->mBaseVol)[opts->mInst];
 }
 #endif
 
@@ -119,8 +119,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetVolControl);
  * @param opts  the play options
  * @return the volume control, or 0
  */
-extern "C" int cSndPlayOpts_OPTS_GetVolControl(void *opts) {
-    return (*(int**)((char*)opts + 0x3C))[*(volatile int*)((char*)opts + 0x1C)];
+extern "C" int cSndPlayOpts_OPTS_GetVolControl(cSndPlayOpts* opts) {
+    return ((int*)opts->mVolControl)[opts->mInst];
 }
 #endif
 
@@ -170,8 +170,8 @@ struct sSndPlayOpts {
  * @return the callback
  */
 // cSndPlayOpts::OPTS_GetCallback (prototype name)
-extern "C" sSndCallback cSndPlayOpts_OPTS_GetCallback(sSndPlayOpts* opts) {
-    return opts->callbacks[opts->idx];
+extern "C" sSndCallback cSndPlayOpts_OPTS_GetCallback(cSndPlayOpts* opts) {
+    return opts->mCallback[opts->mInst];
 }
 #endif
 
@@ -184,8 +184,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetAzimuth);
  * @param opts  the play options
  * @return the azimuth
  */
-extern "C" unsigned short cSndPlayOpts_OPTS_GetAzimuth(void *opts) {
-    return (*(unsigned short *)((char*)((((*(volatile int *)((char*)(opts) + (0x1C))) * 0x18) + (*(int *)((char*)(opts) + (0x20))))) + (8)));
+extern "C" unsigned short cSndPlayOpts_OPTS_GetAzimuth(cSndPlayOpts* opts) {
+    return (*(unsigned short *)((char*)((((opts->mInst) * 0x18) + ((int)opts->mCurrent))) + (8)));
 }
 #endif
 
@@ -198,8 +198,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetElevation);
  * @param opts  the play options
  * @return the elevation
  */
-extern "C" short cSndPlayOpts_OPTS_GetElevation(void *opts) {
-    return (*(short *)((char*)((((*(volatile int *)((char*)(opts) + (0x1C))) * 0x18) + (*(int *)((char*)(opts) + (0x20))))) + (0xA)));
+extern "C" short cSndPlayOpts_OPTS_GetElevation(cSndPlayOpts* opts) {
+    return (*(short *)((char*)((((opts->mInst) * 0x18) + ((int)opts->mCurrent))) + (0xA)));
 }
 #endif
 
@@ -212,8 +212,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetDelay);
  * @param opts  the play options
  * @return the cDelayOpts record
  */
-extern "C" int cSndPlayOpts_OPTS_GetDelay(void *opts) {
-    return (*(int *)((char*)(opts) + (0x70))) + ((*(volatile int *)((char*)(opts) + (0x1C))) * 0x10);
+extern "C" int cSndPlayOpts_OPTS_GetDelay(cSndPlayOpts* opts) {
+    return ((int)opts->mDelay) + ((opts->mInst) * 0x10);
 }
 #endif
 
@@ -226,8 +226,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetPtr);
  * @param opts  the play options
  * @return the user pointer
  */
-extern "C" int cSndPlayOpts_OPTS_GetPtr(void *opts) {
-    return (*(int**)((char*)opts + 0x60))[*(volatile int*)((char*)opts + 0x1C)];
+extern "C" int cSndPlayOpts_OPTS_GetPtr(cSndPlayOpts* opts) {
+    return ((int*)opts->mPtr)[opts->mInst];
 }
 #endif
 
@@ -240,8 +240,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetViewport);
  * @param opts  the play options
  * @return the viewport
  */
-extern "C" int cSndPlayOpts_OPTS_GetViewport(void *opts) {
-    return (*(int**)((char*)opts + 0x64))[*(volatile int*)((char*)opts + 0x1C)];
+extern "C" int cSndPlayOpts_OPTS_GetViewport(cSndPlayOpts* opts) {
+    return (opts->mViewport)[opts->mInst];
 }
 #endif
 
@@ -254,8 +254,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetVanish);
  * @param opts  the play options
  * @return the vanish distance
  */
-extern "C" float cSndPlayOpts_OPTS_GetVanish(void *opts) {
-    return (*(float**)((char*)opts + 0x68))[*(volatile int*)((char*)opts + 0x1C)];
+extern "C" float cSndPlayOpts_OPTS_GetVanish(cSndPlayOpts* opts) {
+    return (opts->mVanish)[opts->mInst];
 }
 #endif
 
@@ -268,8 +268,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetRadius);
  * @param opts  the play options
  * @return the radius
  */
-extern "C" float cSndPlayOpts_OPTS_GetRadius(void *opts) {
-    return (*(float**)((char*)opts + 0x6C))[*(volatile int*)((char*)opts + 0x1C)];
+extern "C" float cSndPlayOpts_OPTS_GetRadius(cSndPlayOpts* opts) {
+    return (opts->mRadius)[opts->mInst];
 }
 #endif
 
@@ -282,8 +282,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetExternalVol);
  * @param opts  the play options
  * @return the flag
  */
-extern "C" int cSndPlayOpts_OPTS_GetExternalVol(void *opts) {
-    return (*(int**)((char*)opts + 0x74))[*(volatile int*)((char*)opts + 0x1C)];
+extern "C" int cSndPlayOpts_OPTS_GetExternalVol(cSndPlayOpts* opts) {
+    return (opts->mExternalVol)[opts->mInst];
 }
 #endif
 
@@ -296,8 +296,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetMapToMaxVol);
  * @param opts  the play options
  * @return the value
  */
-extern "C" int cSndPlayOpts_OPTS_GetMapToMaxVol(void *opts) {
-    return (*(int**)((char*)opts + 0x78))[*(volatile int*)((char*)opts + 0x1C)];
+extern "C" int cSndPlayOpts_OPTS_GetMapToMaxVol(cSndPlayOpts* opts) {
+    return (opts->mMapToMaxVol)[opts->mInst];
 }
 #endif
 
@@ -310,8 +310,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetCloseOnEnd);
  * @param opts  the play options
  * @return the flag
  */
-extern "C" int cSndPlayOpts_OPTS_GetCloseOnEnd(void *opts) {
-    return (*(int**)((char*)opts + 0x7C))[*(volatile int*)((char*)opts + 0x1C)];
+extern "C" int cSndPlayOpts_OPTS_GetCloseOnEnd(cSndPlayOpts* opts) {
+    return (opts->mCloseOnEnd)[opts->mInst];
 }
 #endif
 
@@ -324,8 +324,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetTwoPlayerPan);
  * @param opts  the play options
  * @return the flag
  */
-extern "C" int cSndPlayOpts_OPTS_GetTwoPlayerPan(void *opts) {
-    return (*(int**)((char*)opts + 0x80))[*(volatile int*)((char*)opts + 0x1C)];
+extern "C" int cSndPlayOpts_OPTS_GetTwoPlayerPan(cSndPlayOpts* opts) {
+    return (opts->mTwoPlayerPan)[opts->mInst];
 }
 #endif
 
@@ -338,8 +338,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_GetTwoPlayerSide);
  * @param opts  the play options
  * @return the side
  */
-extern "C" int cSndPlayOpts_OPTS_GetTwoPlayerSide(void *opts) {
-    return (*(int**)((char*)opts + 0x84))[*(volatile int*)((char*)opts + 0x1C)];
+extern "C" int cSndPlayOpts_OPTS_GetTwoPlayerSide(cSndPlayOpts* opts) {
+    return (opts->mTwoPlayerSide)[opts->mInst];
 }
 #endif
 
@@ -353,8 +353,8 @@ extern "C" void SNDplaysetdef(int);
  *
  * @param opts  the play options
  */
-extern "C" void cSndPlayOpts_OPTS_LibDefault(void *opts) {
-    SNDplaysetdef((*(int *)((char*)(opts) + (0x20))) + ((*(volatile int *)((char*)(opts) + (0x1C))) * 0x18));
+extern "C" void cSndPlayOpts_OPTS_LibDefault(cSndPlayOpts* opts) {
+    SNDplaysetdef(((int)opts->mCurrent) + ((opts->mInst) * 0x18));
 }
 #endif
 
@@ -365,8 +365,8 @@ struct S9368 { int a[6]; };
 /**
  * Copies the current level's SNDPLAYOPTS (mCurrent[mInst]) into mDefault, the record each push starts from.
  */
-extern "C" void cSndPlayOpts_OPTS_SetDefault(void *self) {
-    *(S9368*)((char*)self + 4) = *(S9368*)((char*)(*(int*)((char*)self + 0x20)) + *(volatile int*)((char*)self + 0x1C) * 0x18);
+extern "C" void cSndPlayOpts_OPTS_SetDefault(cSndPlayOpts* self) {
+    *(S9368*)&self->mDefault = *(S9368*)((char*)((int)self->mCurrent) + self->mInst * 0x18);
 }
 #endif
 
@@ -501,8 +501,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Close);
  *
  * @param opts  the play options
  */
-extern "C" void cSndPlayOpts_OPTS_Close(void *opts) {
-    *(volatile int *)((char*)opts + 0x1C) = *(volatile int *)((char*)opts + 0x1C) - 1;
+extern "C" void cSndPlayOpts_OPTS_Close(cSndPlayOpts* opts) {
+    opts->mInst = opts->mInst - 1;
 }
 #endif
 
@@ -515,8 +515,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Key);
  * @param opts  the play options
  * @param value  the key number
  */
-extern "C" void cSndPlayOpts_OPTS_Key(void *opts, signed char value) {
-    (*(signed char *)((char*)((((*(volatile int *)((char*)(opts) + (0x1C))) * 0x18) + (*(int *)((char*)(opts) + (0x20))))) + (2))) = value;
+extern "C" void cSndPlayOpts_OPTS_Key(cSndPlayOpts* opts, signed char value) {
+    (*(signed char *)((char*)((((opts->mInst) * 0x18) + ((int)opts->mCurrent))) + (2))) = value;
 }
 #endif
 
@@ -529,8 +529,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Velocity);
  * @param opts  the play options
  * @param value  the velocity
  */
-extern "C" void cSndPlayOpts_OPTS_Velocity(void *opts, signed char value) {
-    (*(signed char *)((char*)((((*(volatile int *)((char*)(opts) + (0x1C))) * 0x18) + (*(int *)((char*)(opts) + (0x20))))) + (3))) = value;
+extern "C" void cSndPlayOpts_OPTS_Velocity(cSndPlayOpts* opts, signed char value) {
+    (*(signed char *)((char*)((((opts->mInst) * 0x18) + ((int)opts->mCurrent))) + (3))) = value;
 }
 #endif
 
@@ -619,8 +619,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Bend);
  * @param opts  the play options
  * @param value  the bend
  */
-extern "C" void cSndPlayOpts_OPTS_Bend(void *opts, signed char value) {
-    (*(signed char *)((char*)((((*(volatile int *)((char*)(opts) + (0x1C))) * 0x18) + (*(int *)((char*)(opts) + (0x20))))) + (1))) = value;
+extern "C" void cSndPlayOpts_OPTS_Bend(cSndPlayOpts* opts, signed char value) {
+    (*(signed char *)((char*)((((opts->mInst) * 0x18) + ((int)opts->mCurrent))) + (1))) = value;
 }
 #endif
 
@@ -633,8 +633,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_PitchMult);
  * @param opts  the play options
  * @param value  the pitch multiplier
  */
-extern "C" void cSndPlayOpts_OPTS_PitchMult(void *opts, short value) {
-    (*(short *)((char*)((((*(volatile int *)((char*)(opts) + (0x1C))) * 0x18) + (*(int *)((char*)(opts) + (0x20))))) + (0xC))) = value;
+extern "C" void cSndPlayOpts_OPTS_PitchMult(cSndPlayOpts* opts, short value) {
+    (*(short *)((char*)((((opts->mInst) * 0x18) + ((int)opts->mCurrent))) + (0xC))) = value;
 }
 #endif
 
@@ -647,8 +647,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_DelayCount);
  * @param opts  the play options
  * @param value  the new count
  */
-extern "C" void cSndPlayOpts_OPTS_DelayCount(void *opts, int value) {
-    (*(int *)((char*)((((*(volatile int *)((char*)(opts) + (0x1C))) * 0x10) + (*(int *)((char*)(opts) + (0x70))))) + (4))) = value;
+extern "C" void cSndPlayOpts_OPTS_DelayCount(cSndPlayOpts* opts, int value) {
+    (*(int *)((char*)((((opts->mInst) * 0x10) + ((int)opts->mDelay))) + (4))) = value;
 }
 #endif
 
@@ -662,8 +662,8 @@ struct E_9BA0 { int v[4]; };
  * @param opts  the play options
  * @param value  the new time
  */
-extern "C" void cSndPlayOpts_OPTS_DelayTime(void *opts, int value) {
-    (*(E_9BA0**)((char*)opts + 0x70))[*(volatile int*)((char*)opts + 0x1C)].v[0] = value;
+extern "C" void cSndPlayOpts_OPTS_DelayTime(cSndPlayOpts* opts, int value) {
+    ((E_9BA0*)opts->mDelay)[opts->mInst].v[0] = value;
 }
 #endif
 
@@ -676,8 +676,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_DelayFeedback);
  * @param opts  the play options
  * @param value  the new feedback
  */
-extern "C" void cSndPlayOpts_OPTS_DelayFeedback(void *opts, int value) {
-    (*(int *)((char*)((((*(volatile int *)((char*)(opts) + (0x1C))) * 0x10) + (*(int *)((char*)(opts) + (0x70))))) + (8))) = value;
+extern "C" void cSndPlayOpts_OPTS_DelayFeedback(cSndPlayOpts* opts, int value) {
+    (*(int *)((char*)((((opts->mInst) * 0x10) + ((int)opts->mDelay))) + (8))) = value;
 }
 #endif
 
@@ -690,8 +690,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_DelayLevel);
  * @param opts  the play options
  * @param value  the new level
  */
-extern "C" void cSndPlayOpts_OPTS_DelayLevel(void *opts, int value) {
-    (*(int *)((char*)((((*(volatile int *)((char*)(opts) + (0x1C))) * 0x10) + (*(int *)((char*)(opts) + (0x70))))) + (0xC))) = value;
+extern "C" void cSndPlayOpts_OPTS_DelayLevel(cSndPlayOpts* opts, int value) {
+    (*(int *)((char*)((((opts->mInst) * 0x10) + ((int)opts->mDelay))) + (0xC))) = value;
 }
 #endif
 
@@ -704,8 +704,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Azimuth);
  * @param opts  the play options
  * @param value  the azimuth
  */
-extern "C" void cSndPlayOpts_OPTS_Azimuth(void *opts, short value) {
-    (*(short *)((char*)((((*(volatile int *)((char*)(opts) + (0x1C))) * 0x18) + (*(int *)((char*)(opts) + (0x20))))) + (8))) = value;
+extern "C" void cSndPlayOpts_OPTS_Azimuth(cSndPlayOpts* opts, short value) {
+    (*(short *)((char*)((((opts->mInst) * 0x18) + ((int)opts->mCurrent))) + (8))) = value;
 }
 #endif
 
@@ -718,8 +718,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Elevation);
  * @param opts  the play options
  * @param value  the elevation
  */
-extern "C" void cSndPlayOpts_OPTS_Elevation(void *opts, short value) {
-    (*(short *)((char*)((((*(volatile int *)((char*)(opts) + (0x1C))) * 0x18) + (*(int *)((char*)(opts) + (0x20))))) + (0xA))) = value;
+extern "C" void cSndPlayOpts_OPTS_Elevation(cSndPlayOpts* opts, short value) {
+    (*(short *)((char*)((((opts->mInst) * 0x18) + ((int)opts->mCurrent))) + (0xA))) = value;
 }
 #endif
 
@@ -732,8 +732,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Position);
  * @param opts  the play options
  * @param position  the position vector pointer (kept, not copied)
  */
-extern "C" void cSndPlayOpts_OPTS_Position(void *opts, int position) {
-    *(int*)((char*)opts + (*(volatile int*)((char*)opts + 0x1C) << 2) + 0x24) = position;
+extern "C" void cSndPlayOpts_OPTS_Position(cSndPlayOpts* opts, int position) {
+    *(int*)((char*)opts + (opts->mInst << 2) + 0x24) = position;
 }
 #endif
 
@@ -745,9 +745,9 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_StaticPos);
  *
  * @param opts  the play options
  */
-extern "C" void cSndPlayOpts_OPTS_StaticPos(void *opts) {
-    int *base = *(int **)((char *)opts + 0x34);
-    base[*(volatile int *)((char *)opts + 0x1C)] = 1;
+extern "C" void cSndPlayOpts_OPTS_StaticPos(cSndPlayOpts* opts) {
+    int *base = opts->mPosStatic;
+    base[opts->mInst] = 1;
 }
 #endif
 
@@ -760,8 +760,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Viewport);
  * @param opts  the play options
  * @param viewport  the viewport
  */
-extern "C" void cSndPlayOpts_OPTS_Viewport(void *opts, int viewport) {
-    (*(int**)((char*)opts + 0x64))[*(volatile int*)((char*)opts + 0x1C)] = viewport;
+extern "C" void cSndPlayOpts_OPTS_Viewport(cSndPlayOpts* opts, int viewport) {
+    (opts->mViewport)[opts->mInst] = viewport;
 }
 #endif
 
@@ -773,9 +773,9 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_LowPassCutOffFrequency);
  *
  * @param value  the cutoff frequency
  */
-extern "C" void cSndPlayOpts_OPTS_LowPassCutOffFrequency(void *self, int value) {
+extern "C" void cSndPlayOpts_OPTS_LowPassCutOffFrequency(cSndPlayOpts* self, int value) {
     int clamped = (value <= 0xFFFF) ? value : 0xFFFF;
-    *(short*)((char*)(*(volatile int*)((char*)self + 0x1C) * 0x18 + *(int*)((char*)self + 0x20)) + 0x14) = (clamped <= -1) ? 0 : clamped;
+    *(short*)((char*)(self->mInst * 0x18 + (int)self->mCurrent) + 0x14) = (clamped <= -1) ? 0 : clamped;
 }
 #endif
 
@@ -788,8 +788,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_Ptr);
  * @param opts  the play options
  * @param userPtr  the user pointer
  */
-extern "C" void cSndPlayOpts_OPTS_Ptr(void *opts, int userPtr) {
-    (*(int**)((char*)opts + 0x60))[*(volatile int*)((char*)opts + 0x1C)] = userPtr;
+extern "C" void cSndPlayOpts_OPTS_Ptr(cSndPlayOpts* opts, int userPtr) {
+    ((int*)opts->mPtr)[opts->mInst] = userPtr;
 }
 #endif
 
@@ -802,8 +802,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_VolControl);
  * @param opts  the play options
  * @param volControl  the float the sound's volume follows (a float pointer), or 0
  */
-extern "C" void cSndPlayOpts_OPTS_VolControl(void *opts, int volControl) {
-    (*(int**)((char*)opts + 0x3C))[*(volatile int*)((char*)opts + 0x1C)] = volControl;
+extern "C" void cSndPlayOpts_OPTS_VolControl(cSndPlayOpts* opts, int volControl) {
+    ((int*)opts->mVolControl)[opts->mInst] = volControl;
 }
 #endif
 
@@ -817,8 +817,8 @@ struct V8_9CE0 { int a, b; };
  * @param opts  the play options
  * @param callback  the cController member-function pointer
  */
-extern "C" void cSndPlayOpts_OPTS_Callback(char *opts, V8_9CE0 callback) {
-    V8_9CE0 *callbackBase = (V8_9CE0 *)(opts + *(volatile int *)(opts + 0x1C) * 8);
+extern "C" void cSndPlayOpts_OPTS_Callback(cSndPlayOpts* opts, V8_9CE0 callback) {
+    V8_9CE0 *callbackBase = (V8_9CE0 *)(((char*)opts) + opts->mInst * 8);
     callbackBase[8] = callback;
 }
 #endif
@@ -832,8 +832,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_ExternalVol);
  * @param opts  the play options
  * @param externalVol  the flag
  */
-extern "C" void cSndPlayOpts_OPTS_ExternalVol(void *opts, int externalVol) {
-    (*(int**)((char*)opts + 0x74))[*(volatile int*)((char*)opts + 0x1C)] = externalVol;
+extern "C" void cSndPlayOpts_OPTS_ExternalVol(cSndPlayOpts* opts, int externalVol) {
+    (opts->mExternalVol)[opts->mInst] = externalVol;
 }
 #endif
 
@@ -846,8 +846,8 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_MapToMaxVol);
  * @param opts  the play options
  * @param mapToMaxVol  the value (cSndPlayOpts_OPTS_Reset resets it to 127)
  */
-extern "C" void cSndPlayOpts_OPTS_MapToMaxVol(void *opts, int mapToMaxVol) {
-    (*(int**)((char*)opts + 0x78))[*(volatile int*)((char*)opts + 0x1C)] = mapToMaxVol;
+extern "C" void cSndPlayOpts_OPTS_MapToMaxVol(cSndPlayOpts* opts, int mapToMaxVol) {
+    (opts->mMapToMaxVol)[opts->mInst] = mapToMaxVol;
 }
 #endif
 
@@ -860,9 +860,9 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_CloseOnEnd);
  * @param opts  the play options
  * @param closeOnEnd  the flag (cSndPlayOpts_OPTS_Reset resets it to 1)
  */
-extern "C" void cSndPlayOpts_OPTS_CloseOnEnd(void *opts, int closeOnEnd) {
-    int *base = *(int **)((char *)opts + 0x7C);
-    base[*(volatile int *)((char *)opts + 0x1C)] = closeOnEnd;
+extern "C" void cSndPlayOpts_OPTS_CloseOnEnd(cSndPlayOpts* opts, int closeOnEnd) {
+    int *base = opts->mCloseOnEnd;
+    base[opts->mInst] = closeOnEnd;
 }
 #endif
 
@@ -875,9 +875,9 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_TwoPlayerPan);
  * @param opts  the play options
  * @param twoPlayerPan  the flag
  */
-extern "C" void cSndPlayOpts_OPTS_TwoPlayerPan(void *opts, int twoPlayerPan) {
-    int *base = *(int **)((char *)opts + 0x80);
-    base[*(volatile int *)((char *)opts + 0x1C)] = twoPlayerPan;
+extern "C" void cSndPlayOpts_OPTS_TwoPlayerPan(cSndPlayOpts* opts, int twoPlayerPan) {
+    int *base = opts->mTwoPlayerPan;
+    base[opts->mInst] = twoPlayerPan;
 }
 #endif
 
@@ -890,9 +890,9 @@ INCLUDE_ASM("bx/seg_1BA100", cSndPlayOpts_OPTS_TwoPlayerSide);
  * @param opts  the play options
  * @param twoPlayerSide  the side
  */
-extern "C" void cSndPlayOpts_OPTS_TwoPlayerSide(void *opts, int twoPlayerSide) {
-    int *base = *(int **)((char *)opts + 0x84);
-    base[*(volatile int *)((char *)opts + 0x1C)] = twoPlayerSide;
+extern "C" void cSndPlayOpts_OPTS_TwoPlayerSide(cSndPlayOpts* opts, int twoPlayerSide) {
+    int *base = opts->mTwoPlayerSide;
+    base[opts->mInst] = twoPlayerSide;
 }
 #endif
 

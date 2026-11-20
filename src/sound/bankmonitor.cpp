@@ -211,7 +211,7 @@ struct sSndOptsDelay {
 
 // cSndPlayOpts (prototype class, as in sound/soundsys): the play-option stack; push = cur++ and copy def into
 // ch[cur]. Field names follow sound/soundsys (ch = mCurrent, vals = mBaseVol, p70 = mDelay, ...).
-struct cSndPlayOpts {
+struct sSndPlayOptsView {
     char* vbase;                // 0x00 virtual-base pointer
     sSndOptsRec def;            // 0x04
     volatile int cur;           // 0x1C
@@ -246,7 +246,7 @@ struct sBmSlot {
 };
 
 // Sound player: a cSndPlayOpts (0x88 bytes) plus 48 monitored-sound slots; virtual base at 0x8DC.
-struct sSndPlayer : public cSndPlayOpts {
+struct sSndPlayer : public sSndPlayOptsView {
     volatile int f88;           // 0x88
     int f8C;                    // 0x8C
     volatile int busy;          // 0x90
@@ -301,7 +301,7 @@ struct sBmVoice {
 
 // sBankMonitorView: a sound player (cSndPlayOpts part at 0x0, player part up to 0x8DC) plus 64 voices;
 // virtual base at 0x8F0.
-struct sBankMonitorView : public cSndPlayOpts {  // this unit's model of cBankMonitor (sound/bankmonitor.h)
+struct sBankMonitorView : public sSndPlayOptsView {  // this unit's model of cBankMonitor (sound/bankmonitor.h)
     char pad88[0x8D8 - 0x88];
     void** vtbl;                // 0x8D8
     volatile int busy;          // 0x8DC

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/bankmonitor.h"
 
 //100%
 INCLUDE_ASM("sound/ps2soundman", cSndPlayOpts_cSndPlayOpts);
@@ -165,38 +166,38 @@ extern const sSmVtbl97C0 D_00483BE0;
  * @param flags  bit 0 frees the memory, bit 1 destroys the virtual base; 0 for a not-in-charge call
  */
 // PORT: g++ 2.95 virtual-base destruction with a stack vtable this-adjust fix-up, written out by hand.
-extern "C" void cSndPlayOpts__cSndPlayOpts(char* self, int flags)
+extern "C" void cSndPlayOpts__cSndPlayOpts(cSndPlayOpts* self, int flags)
 {
     *(const sSmVtbl97C0**)(*(char**)self + 4) = &D_00483BE0;
     if (flags == 0) {
         sSmVtbl97C0 vtableCopy = D_00483BE0;
         *(sSmVtbl97C0**)(*(char**)self + 4) = &vtableCopy;
         char* base = *(char**)self - 0x88;
-        int thisDelta = self - base;
+        int thisDelta = ((char*)self) - base;
         vtableCopy.e[1].delta = D_00483BE0.e[1].delta + thisDelta;
     }
-    if (*(void**)(self + 0x20) != 0) {
-        cMemMan_free(*(void**)(self + 0x20));
+    if (self->mCurrent != 0) {
+        cMemMan_free(self->mCurrent);
     }
-    if (*(void**)(self + 0x34) != 0) {
-        cMemMan_free(*(void**)(self + 0x34));
+    if (self->mPosStatic != 0) {
+        cMemMan_free(self->mPosStatic);
     }
-    if (*(void**)(self + 0x38) != 0) {
-        cMemMan_free(*(void**)(self + 0x38));
+    if (self->mBaseVol != 0) {
+        cMemMan_free(self->mBaseVol);
     }
-    if (*(void**)(self + 0x3C) != 0) {
-        cMemMan_free(*(void**)(self + 0x3C));
+    if (self->mVolControl != 0) {
+        cMemMan_free(self->mVolControl);
     }
-    if (*(void**)(self + 0x60) != 0) cMemMan_free(*(void**)(self + 0x60));
-    if (*(void**)(self + 0x64) != 0) cMemMan_free(*(void**)(self + 0x64));
-    if (*(void**)(self + 0x68) != 0) cMemMan_free(*(void**)(self + 0x68));
-    if (*(void**)(self + 0x6C) != 0) cMemMan_free(*(void**)(self + 0x6C));
-    if (*(void**)(self + 0x70) != 0) cMemMan_free(*(void**)(self + 0x70));
-    if (*(void**)(self + 0x74) != 0) cMemMan_free(*(void**)(self + 0x74));
-    if (*(void**)(self + 0x78) != 0) cMemMan_free(*(void**)(self + 0x78));
-    if (*(void**)(self + 0x7C) != 0) cMemMan_free(*(void**)(self + 0x7C));
-    if (*(void**)(self + 0x80) != 0) cMemMan_free(*(void**)(self + 0x80));
-    if (*(void**)(self + 0x84) != 0) cMemMan_free(*(void**)(self + 0x84));
+    if (self->mPtr != 0) cMemMan_free(self->mPtr);
+    if (self->mViewport != 0) cMemMan_free(self->mViewport);
+    if (self->mVanish != 0) cMemMan_free(self->mVanish);
+    if (self->mRadius != 0) cMemMan_free(self->mRadius);
+    if (self->mDelay != 0) cMemMan_free(self->mDelay);
+    if (self->mExternalVol != 0) cMemMan_free(self->mExternalVol);
+    if (self->mMapToMaxVol != 0) cMemMan_free(self->mMapToMaxVol);
+    if (self->mCloseOnEnd != 0) cMemMan_free(self->mCloseOnEnd);
+    if (self->mTwoPlayerPan != 0) cMemMan_free(self->mTwoPlayerPan);
+    if (self->mTwoPlayerSide != 0) cMemMan_free(self->mTwoPlayerSide);
     if (flags & 2) {
         cSoundSys__cSoundSys(*(void**)self, 0);
     }
@@ -219,14 +220,14 @@ INCLUDE_ASM("sound/ps2soundman", cSndPlayOpts_OPTS_Radius);
  * @param dist  the first distance (+0x6C)
  * @param vanish  the second distance (+0x68); negative to use @p dist
  */
-extern "C" void cSndPlayOpts_OPTS_Radius(void* self, float dist, float vanish)
+extern "C" void cSndPlayOpts_OPTS_Radius(cSndPlayOpts* self, float dist, float vanish)
 {
-    (*(float**)((char*)self + 0x6C))[*(int*)((char*)self + 0x1C)] = dist;
+    (self->mRadius)[(int)self->mInst] = dist;
     if (vanish < 0.0f) {
-        (*(float**)((char*)self + 0x68))[*(int*)((char*)self + 0x1C)] = dist;
+        (self->mVanish)[(int)self->mInst] = dist;
         return;
     }
-    (*(float**)((char*)self + 0x68))[*(int*)((char*)self + 0x1C)] = vanish;
+    (self->mVanish)[(int)self->mInst] = vanish;
 }
 #endif
 

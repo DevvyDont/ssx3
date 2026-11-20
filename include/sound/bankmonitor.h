@@ -83,6 +83,37 @@ struct cMonitorInstance {
     int mData4;             // 0x28 [O]; [U] Create
 };
 
+// cSndPlayOpts on its own (its methods: cSndPlayOpts_* in bx/seg_1BA100 and sound/ps2soundman): the same non-virtual part
+// that opens cMonitor below (0x88 bytes; the virtual base cSoundSys follows it in a complete object, so only the
+// non-virtual size is checked).
+struct cSndPlayOpts {
+    cSoundSys* mpVSoundSys;          // 0x000 [R] g++ 2.95 virtual-base pointer to cSoundSys (placed after the 0x88-byte non-virtual part in a complete object); every ctor/dtor in the chain loads it to patch the cSoundSys vptr
+    SNDPLAYOPTS mDefault;            // 0x004 [O]; [U] OPTS push copies it into mCurrent[++mInst] (func_002B35A0)
+    volatile int mInst;              // 0x01C [O] (volatile); [R] ctor; [U] every OPTS_ access indexes the arrays below with it
+    SNDPLAYOPTS* mCurrent;           // 0x020 [R] operator new[](0x60, "mCurrent") (4 levels)
+    const t4Vector* mPosition[4];    // 0x024 [O]; [U] BANKMONITOR_Create copies mPosition[mInst]
+    int* mPosStatic;                 // 0x034 [R] operator new[](0x10, "mPosStatic") (On Tour bool*: retail words)
+    int* mBaseVol;                   // 0x038 [R] operator new[](0x10, "mBaseVol")
+    float** mVolControl;             // 0x03C [R] operator new[](0x10, "mVolControl")
+    tSndCallback mCallback[4];       // 0x040 [O]; [P] OPTS_Callback stores mCallback[mInst] (sdl/sdr)
+    void** mPtr;                     // 0x060 [R] operator new[](0x10, "mPtr")
+    int* mViewport;                  // 0x064 [R] operator new[](0x10, "mViewport")
+    float* mVanish;                  // 0x068 [R] operator new[](0x10, "mVanish")
+    float* mRadius;                  // 0x06C [R] operator new[](0x10, "mRadius")
+    cDelayOpts* mDelay;              // 0x070 [R] operator new[](0x40, "mDelay")
+    int* mExternalVol;               // 0x074 [R] operator new[](0x10, "mExternalVol") (On Tour bool*); [P] OPTS_ExternalVol
+    int* mMapToMaxVol;               // 0x078 [R] operator new[](0x10, "mMapToMaxVol")
+    int* mCloseOnEnd;                // 0x07C [R] operator new[](0x10, "mCloseOnEnd") (On Tour bool*)
+    int* mTwoPlayerPan;              // 0x080 [R] operator new[](0x10, "mTwoPlayerPan") (On Tour bool*)
+    int* mTwoPlayerSide;             // 0x084 [R] operator new[](0x10, "mTwoPlayerSide")
+};
+
+CHECK_OFFSET(cSndPlayOpts, mDefault, 0x004);
+CHECK_OFFSET(cSndPlayOpts, mInst, 0x01C);
+CHECK_OFFSET(cSndPlayOpts, mCallback, 0x040);
+CHECK_OFFSET(cSndPlayOpts, mTwoPlayerSide, 0x084);
+CHECK_SIZE(cSndPlayOpts, 0x88);
+
 struct cMonitor {
     cSoundSys* mpVSoundSys;          // 0x000 [R] g++ 2.95 virtual-base pointer to cSoundSys (= this + 0x8DC in a complete cMonitor); every ctor/dtor in the chain loads it to patch the cSoundSys vptr
     // --- cSndPlayOpts (non-virtual part 0x88; ctor cSndPlayOpts_cSndPlayOpts 0x2A9350; up to 4 nested option levels)

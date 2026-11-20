@@ -3496,7 +3496,7 @@ struct sSndOptsDelay {
 // allocation tags of its ctor (sound/ps2soundman) name the arrays: ch = mCurrent, p34 = mPosStatic,
 // vals = mBaseVol, p3C = mVolControl, p60 = mPtr, p64 = mViewport, p68 = mVanish, p6C = mRadius, p70 = mDelay,
 // p74 = mExternalVol, p78 = mMapToMaxVol, p7C = mCloseOnEnd, p80 = mTwoPlayerPan, p84 = mTwoPlayerSide.
-struct cSndPlayOpts {
+struct sSndPlayOptsView {
     void* vbase;             // 0x00 virtual-base pointer
     sSndOptsRec def;         // 0x04
     volatile int cur;        // 0x1C
@@ -3528,7 +3528,7 @@ struct cSndPlayOpts {
 // cBankManager as this unit sees it: only its cSndPlayOpts part at 0x1D8 is used here.
 struct cBankManager {
     char pad0[0x1D8];
-    cSndPlayOpts sub;        // 0x1D8
+    sSndPlayOptsView sub;        // 0x1D8
 };
 
 struct sSndOwner {
@@ -3628,7 +3628,7 @@ static inline void sndRingPush(sSSXAudioView* s, int v)
 // cSndPlayOpts::OPTS_Callback (prototype name): sets the handler of the voice being pushed.
 static inline void OPTS_Callback(cBankManager* m, sSndCallback cb)
 {
-    cSndPlayOpts* s = &m->sub;
+    sSndPlayOptsView* s = &m->sub;
     s->callbacks[m->sub.cur] = cb;
 }
 
@@ -3659,7 +3659,7 @@ static inline int vcall_6310(char* o, int slot)
 
 static inline void optsVol_6310(struct cBankManager* m, int v)
 {
-    struct cSndPlayOpts* o = &m->sub;
+    struct sSndPlayOptsView* o = &m->sub;
     o->vals[m->sub.cur] = v;
     o->ch[m->sub.cur].vol = SND_MAX(0, SND_MIN(o->vals[o->cur], 0x7F));
 }
@@ -3667,7 +3667,7 @@ static inline void optsVol_6310(struct cBankManager* m, int v)
 static inline void sfxBegin_6310(struct sSSXAudioView* self, int a, int b)
 {
     struct cBankManager* m = self->mpVBankManager;
-    struct cSndPlayOpts* s = &m->sub;
+    struct sSndPlayOptsView* s = &m->sub;
     m->sub.cur++;
     s->ch[m->sub.cur] = m->sub.def;
     m->sub.tgt[m->sub.cur] = 0;
@@ -3843,7 +3843,7 @@ extern "C" void cSSXAudio_WipeoutSlideStart(cSSXAudio* vself, sSndOwner* wipeout
         }
     }
     cBankManager* bankManager = self->mpVBankManager;
-    cSndPlayOpts* playOpts = &bankManager->sub;
+    sSndPlayOptsView* playOpts = &bankManager->sub;
     bankManager->sub.cur++;
     playOpts->ch[bankManager->sub.cur] = bankManager->sub.def;
     bankManager->sub.tgt[bankManager->sub.cur] = 0;
@@ -3867,7 +3867,7 @@ extern "C" void cSSXAudio_WipeoutSlideStart(cSSXAudio* vself, sSndOwner* wipeout
     self->mBank[self->mpVBankManager->sub.cur] = 0;
     self->mPatch[self->mpVBankManager->sub.cur] = patchNum;
     cBankManager* volumeManager = *self->p118;
-    cSndPlayOpts* volumeOpts = &volumeManager->sub;
+    sSndPlayOptsView* volumeOpts = &volumeManager->sub;
     volumeOpts->vals[volumeManager->sub.cur] = vol;
     volumeOpts->ch[volumeManager->sub.cur].vol = (volumeOpts->vals[volumeOpts->cur] < 0x7F && volumeOpts->vals[volumeOpts->cur] < 0) ? 0 : (volumeOpts->vals[volumeOpts->cur] < 0x7F ? (unsigned char)volumeOpts->vals[volumeOpts->cur] : 0x7F);
     cBankManager** pp = self->p118;
@@ -4007,7 +4007,7 @@ extern "C" void cSSXAudio_WipeoutTumbleStart(cSSXAudio* vself, sSndOwner* wipeou
         }
     }
     cBankManager* bankManager = self->mpVBankManager;
-    cSndPlayOpts* playOpts = &bankManager->sub;
+    sSndPlayOptsView* playOpts = &bankManager->sub;
     bankManager->sub.cur++;
     playOpts->ch[bankManager->sub.cur] = bankManager->sub.def;
     bankManager->sub.tgt[bankManager->sub.cur] = 0;
@@ -4031,7 +4031,7 @@ extern "C" void cSSXAudio_WipeoutTumbleStart(cSSXAudio* vself, sSndOwner* wipeou
     self->mBank[self->mpVBankManager->sub.cur] = 0;
     self->mPatch[self->mpVBankManager->sub.cur] = patchNum;
     cBankManager* volManager = *self->p118;
-    cSndPlayOpts* volOpts = &volManager->sub;
+    sSndPlayOptsView* volOpts = &volManager->sub;
     volOpts->vals[volManager->sub.cur] = vol;
     volOpts->ch[volManager->sub.cur].vol = (volOpts->vals[volOpts->cur] < 0x7F && volOpts->vals[volOpts->cur] < 0) ? 0 : (volOpts->vals[volOpts->cur] < 0x7F ? (unsigned char)volOpts->vals[volOpts->cur] : 0x7F);
     cBankManager** pp = self->p118;
@@ -4291,7 +4291,7 @@ static inline void sndPushVoice(void* vself, int a, int b)
 {
     cBankSys* self = (cBankSys*)vself;
     cBankManager* m = self->mpVBankManager;
-    cSndPlayOpts* s = &m->sub;
+    sSndPlayOptsView* s = &m->sub;
     m->sub.cur++;
     s->ch[m->sub.cur] = m->sub.def;
     m->sub.tgt[m->sub.cur] = 0;
@@ -8080,7 +8080,7 @@ struct sSndVtCb { short delta; short index; void (*fn)(void*, sSndCallback); };
 static inline void sndBeginVoice(sSSXAudioView* self, int a, int b)
 {
     cBankManager* m = self->mpVBankManager;
-    cSndPlayOpts* s = &m->sub;
+    sSndPlayOptsView* s = &m->sub;
     m->sub.cur++;
     s->ch[m->sub.cur] = m->sub.def;
     m->sub.tgt[m->sub.cur] = 0;
@@ -8158,7 +8158,7 @@ extern "C" void cSSXAudio_Avalanche(cSSXAudio* vself, int on)
             cBankManager** bankManagerRef = self->p118;
             int volume = cSSXAudio_GetAvalancheVolume(self, (char*)&self->xf);
             cBankManager* volManager = *bankManagerRef;
-            cSndPlayOpts* volOpts = &volManager->sub;
+            sSndPlayOptsView* volOpts = &volManager->sub;
             volOpts->vals[volManager->sub.cur] = volume;
             volOpts->ch[volManager->sub.cur].vol = (volOpts->vals[volOpts->cur] < 0x7F && volOpts->vals[volOpts->cur] < 0) ? 0 : (volOpts->vals[volOpts->cur] < 0x7F ? (unsigned char)volOpts->vals[volOpts->cur] : 0x7F);
             cBankManager** pp = self->p118;
@@ -13096,7 +13096,7 @@ static inline void crowdBegin(void* vself, int a, int b, int closeOnEnd)
 {
     cBankSys* self = (cBankSys*)vself;
     cBankManager* m = self->mpVBankManager;
-    cSndPlayOpts* s = &m->sub;
+    sSndPlayOptsView* s = &m->sub;
     m->sub.cur++;
     s->ch[m->sub.cur] = m->sub.def;
     m->sub.tgt[m->sub.cur] = 0;
@@ -13261,7 +13261,7 @@ void func_002A4E88_c(sCrowd4E88* self)
                 }
                 {
                     cBankManager* bankMgr = D_004A36F8->mpVBankManager;
-                    cSndPlayOpts* ss = &bankMgr->sub;
+                    sSndPlayOptsView* ss = &bankMgr->sub;
                     ss->vals[bankMgr->sub.cur] = best;
                     ss->ch[bankMgr->sub.cur].vol = SND_MAX(0, SND_MIN(ss->vals[ss->cur], 0x7F));
                 }
@@ -13306,7 +13306,7 @@ void func_002A4E88_c(sCrowd4E88* self)
                     }
                     {
                         cBankManager* bankMgr = D_004A36F8->mpVBankManager;
-                        cSndPlayOpts* ss = &bankMgr->sub;
+                        sSndPlayOptsView* ss = &bankMgr->sub;
                         ss->vals[bankMgr->sub.cur] = chanDist[pCurrAmbientInfo->idx] + chanSum[pCurrAmbientInfo->idx];
                         ss->ch[bankMgr->sub.cur].vol = SND_MAX(0, SND_MIN(ss->vals[ss->cur], 0x7F));
                     }
@@ -13358,7 +13358,7 @@ void func_002A4E88_c(sCrowd4E88* self)
                 }
                 {
                     cBankManager* bankMgr = D_004A36F8->mpVBankManager;
-                    cSndPlayOpts* ss = &bankMgr->sub;
+                    sSndPlayOptsView* ss = &bankMgr->sub;
                     ss->vals[bankMgr->sub.cur] = best * outB >> 12;
                     ss->ch[bankMgr->sub.cur].vol = SND_MAX(0, SND_MIN(ss->vals[ss->cur], 0x7F));
                 }
