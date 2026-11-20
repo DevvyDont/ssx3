@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/occlusionman.h"
 #include "render/ps2graphicsman.h"
 #include "movie/mcoverlaymanager.h"
 #include "main/ssxapp.h"
@@ -5397,7 +5398,7 @@ void operator_delete(int*);
  *
  * @param flags  bit 0 frees the memory
  */
-extern "C" void cOcclusionMan__cOcclusionMan(void* self, int flags)
+extern "C" void cOcclusionMan__cOcclusionMan(cOcclusionMan* self, int flags)
 {
     if (flags & 1) {
         operator_delete((int*)self);
@@ -5408,33 +5409,21 @@ extern "C" void cOcclusionMan__cOcclusionMan(void* self, int flags)
 //100%
 INCLUDE_ASM("movie/movieplayer", cOcclusionMan_addVisCurtain);
 #ifdef SKIP_ASM
-struct sMovieNode {
-    char pad_0x0[0xbc];
-    sMovieNode* next; // 0xbc
-    sMovieNode* prev; // 0xc0
-};
-
-struct sMovieList {
-    sMovieNode* head; // 0x0
-    int count;        // 0x4
-};
-
 /**
- * Adds an occlusion curtain to the front of the manager's list (head +0x0, next +0xBC, prev +0xC0) and increments the
- * count (+0x4).
+ * Adds an occlusion curtain to the front of the manager's plane list and increments the count.
  *
- * @param list  the occlusion manager
- * @param node  the curtain record
+ * @param occlusionMan  the occlusion manager
+ * @param curtain  the curtain record
  */
-extern "C" void cOcclusionMan_addVisCurtain(sMovieList* list, sMovieNode* node)
+extern "C" void cOcclusionMan_addVisCurtain(cOcclusionMan* occlusionMan, tVisCurtainRecord* curtain)
 {
-    node->next = list->head;
-    node->prev = 0;
-    if (list->head != 0) {
-        list->head->prev = node;
+    curtain->next = occlusionMan->m_pPlanes;
+    curtain->prev = 0;
+    if (occlusionMan->m_pPlanes != 0) {
+        occlusionMan->m_pPlanes->prev = curtain;
     }
-    list->head = node;
-    list->count++;
+    occlusionMan->m_pPlanes = curtain;
+    occlusionMan->m_iNumPlanes++;
 }
 #endif
 
@@ -5442,31 +5431,31 @@ extern "C" void cOcclusionMan_addVisCurtain(sMovieList* list, sMovieNode* node)
 INCLUDE_ASM("movie/movieplayer", cOcclusionMan_removeVisCurtain);
 #ifdef SKIP_ASM
 /**
- * Unlinks an occlusion curtain from the manager's list (updating the head when it was first) and decrements the count
- * (+0x4).
+ * Unlinks an occlusion curtain from the manager's plane list (updating the head when it was first) and decrements the
+ * count.
  *
- * @param list  the occlusion manager
- * @param node  the curtain record
+ * @param occlusionMan  the occlusion manager
+ * @param curtain  the curtain record
  */
-extern "C" void cOcclusionMan_removeVisCurtain(sMovieList* list, sMovieNode* node)
+extern "C" void cOcclusionMan_removeVisCurtain(cOcclusionMan* occlusionMan, tVisCurtainRecord* curtain)
 {
-    if (node->prev != 0) {
-        node->prev->next = node->next;
+    if (curtain->prev != 0) {
+        curtain->prev->next = curtain->next;
     }
-    if (node->next != 0) {
-        node->next->prev = node->prev;
+    if (curtain->next != 0) {
+        curtain->next->prev = curtain->prev;
     }
-    if (node == list->head) {
-        list->head = node->next;
+    if (curtain == occlusionMan->m_pPlanes) {
+        occlusionMan->m_pPlanes = curtain->next;
     }
-    list->count--;
+    occlusionMan->m_iNumPlanes--;
 }
 #endif
 
 //100%
 INCLUDE_ASM("movie/movieplayer", cOcclusionMan_updateView);
 #ifdef SKIP_ASM
-extern "C" void cOcclusionMan_updateVisPlane(void* self, const void* eye, void* frustum);
+extern "C" void cOcclusionMan_updateVisPlane(cOcclusionMan* self, const void* eye, void* frustum);
 extern "C" void func_00229F88(int index, void* v, void* m);
 extern "C" void func_00418EF8(void* base, int n, int size, int (*cmp)(const void*, const void*));
 extern "C" int cOcclusionMan__VisSortFunc(const void* a, const void* b);
@@ -5672,7 +5661,7 @@ extern "C" void cOcclusionMan_updateView(sVisMgr_25C0* self, sBounds_25C0* bb)
     self->nvis = n;
     for (int i = 0; i < self->nvis; i++) {
         self->mask |= 1 << i;
-        cOcclusionMan_updateVisPlane(self, &eye, self->ents[i].view);
+        cOcclusionMan_updateVisPlane((cOcclusionMan*)self, &eye, self->ents[i].view);
         func_00229F88(i, &self->ents[i].view->normal, (char*)self->ents[i].view + 0x60);
     }
 }
@@ -5815,7 +5804,7 @@ static inline void makePlane_29B0(sFrustum_29B0* f, int i, const sVec4_29B0& eye
  * @param eyep  the eye position
  * @param frustumPtr  the curtain record
  */
-extern "C" void cOcclusionMan_updateVisPlane(void* self, const void* eyep, void* frustumPtr)
+extern "C" void cOcclusionMan_updateVisPlane(cOcclusionMan* self, const void* eyep, void* frustumPtr)
 {
     const sVec4_29B0& eye = *(const sVec4_29B0*)eyep;
     sFrustum_29B0* frustum = (sFrustum_29B0*)frustumPtr;

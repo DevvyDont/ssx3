@@ -1,4 +1,5 @@
 #include "common.h"
+#include "util/menusys.h"
 #include "render/ps2graphicsman.h"
 #include "world/world.h"
 #include "util/menu.h"
@@ -1890,11 +1891,11 @@ void cMenuSys_init(void* self);
  *
  * @return this
  */
-extern "C" void* cMenuSys_cMenuSys(void* self)
+extern "C" void* cMenuSys_cMenuSys(cMenuSys* self)
 {
     *(int*)self = 0;
     cMenuSys_init(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -1946,11 +1947,11 @@ INCLUDE_ASM("util/menu", cMenuSys_isActive);
  *
  * @return 1 when +0x0 and +0x54 are both non-zero, else 0
  */
-extern "C" int cMenuSys_isActive(void* self)
+extern "C" int cMenuSys_isActive(cMenuSys* self)
 {
     int active = 0;
     if (*(int*)self != 0) {
-        active = *(int*)((char*)self + 0x54) != 0;
+        active = self->Active != 0;
     }
     return active;
 }
@@ -1980,7 +1981,7 @@ INCLUDE_ASM("util/menu", cMenuSys_input);
 // From peak3project's fork (github.com/peak3project/ssx3).
 float cInput_getValue_f(void* pad, int axis) __asm__("cInput_getValue");
 extern "C" int func_00266BA8(void* kb, int a1, int* key, int* chr);
-extern "C" void cMenuSys_popMenu(void* p);
+extern "C" void cMenuSys_popMenu(cMenuSys* p);
 extern void* D_004A33F0;
 
 struct sVE2CC0C0 {
@@ -2047,11 +2048,11 @@ extern "C" void cMenuSys_input(sMenu2CC0C0* self)
     sVE2CC0C0* vt = *(sVE2CC0C0**)(item + 0x12C);
     switch (vt[2].fn(item + vt[2].delta)) {
     case 1:
-        cMenuSys_popMenu(self);
+        cMenuSys_popMenu((cMenuSys*)self);
         break;
     case 2:
         while (self->depth != 0) {
-            cMenuSys_popMenu(self);
+            cMenuSys_popMenu((cMenuSys*)self);
         }
         break;
     }
@@ -2238,10 +2239,10 @@ struct cMenuSys_render_sStack {
  * Sets the font's (+0x58) Scale to BaseScale * 0.85 on both axes and calls the top menu's (MenuStack[MenuDepth - 1])
  * vtable slot 5 (render). Callers check that the system is active (cMenuSys_isActive) first.
  */
-extern "C" void cMenuSys_render(void* self)
+extern "C" void cMenuSys_render(cMenuSys* self)
 {
     cMenuSys_render_sVec2 scale(0.8500000238418579f, 0.8500000238418579f);
-    char* font = *(char**)((char*)self + 0x58);
+    char* font = (char*)self->Font;
     *(float*)(font + 0x38) = *(float*)(font + 0x30) * scale.x;
     *(float*)(font + 0x3C) = *(float*)(font + 0x34) * scale.y;
     cMenuSys_render_sStack* st = (cMenuSys_render_sStack*)self;
@@ -2281,7 +2282,7 @@ struct cMenuSys_pushMenu_sStack {
  * @param stack  the menu system
  * @param item  the menu to open
  */
-extern "C" void cMenuSys_pushMenu(void* stack, void* item)
+extern "C" void cMenuSys_pushMenu(cMenuSys* stack, void* item)
 {
     cMenuSys_pushMenu_sStack* self = (cMenuSys_pushMenu_sStack*)stack;
     if (self->count != 0) {
@@ -2323,7 +2324,7 @@ struct cMenuSys_popMenu_sStack {
  *
  * @param menuSys  the menu system
  */
-extern "C" void cMenuSys_popMenu(void* menuSys)
+extern "C" void cMenuSys_popMenu(cMenuSys* menuSys)
 {
     cMenuSys_popMenu_sStack* self = (cMenuSys_popMenu_sStack*)menuSys;
     self->count--;
@@ -2769,7 +2770,7 @@ INCLUDE_ASM("util/menu", cSubMenuItem_input);
 #ifdef SKIP_ASM
 extern "C" int cMenuItem_input(void* self);
 extern "C" int cMenuItem_getKey(void** self);
-extern "C" void cMenuSys_pushMenu(void* stack, void* item);
+extern "C" void cMenuSys_pushMenu(cMenuSys* stack, void* item);
 
 /**
  * Handles input for a sub-menu item: the select command pushes the item's sub-menu onto the menu system.
@@ -2785,7 +2786,7 @@ extern "C" int cSubMenuItem_input(void* self)
 {
     int result = cMenuItem_input(self);
     if (cMenuItem_isLocked(self) == 0 && result == 0 && cMenuItem_getKey((void**)self) == 6) {
-        cMenuSys_pushMenu(*(void**)((char*)*(void**)self + 0x124), *(void**)((char*)self + 0x18));
+        cMenuSys_pushMenu((cMenuSys*)(*(void**)((char*)*(void**)self + 0x124)), *(void**)((char*)self + 0x18));
     }
     return result;
 }
@@ -2874,7 +2875,7 @@ INCLUDE_ASM("util/menu", cPopMenuItem_input);
 #ifdef SKIP_ASM
 extern "C" int cMenuItem_input(void* self);
 extern "C" int cMenuItem_getKey(void** self);
-extern "C" void cMenuSys_popMenu(void* stack);
+extern "C" void cMenuSys_popMenu(cMenuSys* stack);
 
 /**
  * Handles input for a "back" item: on select (key 6), unless locked or already handled by the base input
@@ -2886,7 +2887,7 @@ extern "C" int cPopMenuItem_input(void* self)
 {
     int result = cMenuItem_input(self);
     if (cMenuItem_isLocked(self) == 0 && result == 0 && cMenuItem_getKey((void**)self) == 6) {
-        cMenuSys_popMenu(*(void**)((char*)*(void**)self + 0x124));
+        cMenuSys_popMenu((cMenuSys*)(*(void**)((char*)*(void**)self + 0x124)));
     }
     return result;
 }

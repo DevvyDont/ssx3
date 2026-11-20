@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/feasyncmanager.h"
 #include "ui/uiengine.h"
 #include "fe/festatempcircuit.h"
 
@@ -232,12 +233,12 @@ extern char str_data_ui_mapgfx_big[];
  *
  * @return @p self
  */
-extern "C" void* cFEAsyncManager_cFEAsyncManager(void* self)
+extern "C" void* cFEAsyncManager_cFEAsyncManager(cFEAsyncManager* self)
 {
     if (BXFILE_exists(str_data_ui_mapgfx_big) != 0) {
         func_003DED50(str_data_ui_mapgfx_big, 0, 100, (char*)self + 0x58C);
     }
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -287,19 +288,19 @@ extern unsigned char D_004A1408[];
  * Each 0x11C-byte slot gets an empty name, a null data pointer, handle -1, 1 at 0x108, size 0, id -1, status 0
  * (idle) and -1 at 0x118.
  */
-extern "C" void cFEAsyncManager_Init(sMissionSlot* self)
+extern "C" void cFEAsyncManager_Init(cFEAsyncManager* self)
 {
     int i;
     for (i = 0; i < 5; i++) {
         unsigned char nulChar = D_004A1408[0];
-        self[i].f100 = 0;
-        self[i].name[0] = nulChar;
-        self[i].f104 = -1;
-        self[i].f108 = 1;
-        self[i].f10C = 0;
-        self[i].f110 = -1;
-        self[i].f114 = 0;
-        self[i].f118 = -1;
+        ((sMissionSlot*)self)[i].f100 = 0;
+        ((sMissionSlot*)self)[i].name[0] = nulChar;
+        ((sMissionSlot*)self)[i].f104 = -1;
+        ((sMissionSlot*)self)[i].f108 = 1;
+        ((sMissionSlot*)self)[i].f10C = 0;
+        ((sMissionSlot*)self)[i].f110 = -1;
+        ((sMissionSlot*)self)[i].f114 = 0;
+        ((sMissionSlot*)self)[i].f118 = -1;
     }
 }
 #endif
@@ -317,7 +318,7 @@ extern "C" void cFEAsyncManager_UnloadFEAsyncFile(void* mgr, int slot);
  *
  * @param mgr  the front-end async manager (this)
  */
-extern "C" void cFEAsyncManager_UnloadAll(void* mgr)
+extern "C" void cFEAsyncManager_UnloadAll(cFEAsyncManager* mgr)
 {
     for (int i = 0; i < 5; i++) {
         cFEAsyncManager_UnloadFEAsyncFile(mgr, i);
