@@ -1097,26 +1097,26 @@ struct sRabChannelSet {
 };
 
 /**
- * Decodes @p count compressed animation channels, starting at channel @p first, at frame index @p t into @p out.
+ * Decodes @p count compressed animation channels, starting at channel @p first, at frame index @p frameIndex into @p out.
  *
  * Each 0x14-byte channel has a type and four constants (v4, v8, vC, v10): 0 gives 0, 1 the constant v4, 2-4 a
- * polynomial in @p t of degree 1-3, 5 a line t * v4 + v8 that continues with slope vC after t = v10. Types 6-9 read a
+ * polynomial in @p frameIndex of degree 1-3, 5 a line t * v4 + v8 that continues with slope vC after t = v10. Types 6-9 read a
  * key from per-frame tables (vC is the key's column): 6 u8 per frame, 7 u8 every second frame, 8 u16 per frame (all
  * three scaled by v8 plus v4), 9 a raw float per frame. Keys are interpolated linearly to the next row by the fraction
- * of @p t (the half-frame fraction for type 7); fractions below 0.001 count as 0, and with both 0 no interpolation is
+ * of @p frameIndex (the half-frame fraction for type 7); fractions below 0.001 count as 0, and with both 0 no interpolation is
  * done. The loop tests for the end after each channel, so @p count must be at least 1.
  *
  * @param first  the first channel to decode
  * @param count  the number of channels
- * @param t  the frame index (time x 30, may be fractional)
+ * @param frameIndex  the frame index (time x 30, may be fractional)
  * @param out  receives @p count floats
  */
-extern "C" void func_00312C20(sRabChannelSet* self, int first, int count, float t, float* out)
+extern "C" void func_00312C20(sRabChannelSet* self, int first, int count, float frameIndex, float* out)
 {
-    float half = t * 0.5f;
-    int it = (int)t;
+    float half = frameIndex * 0.5f;
+    int it = (int)frameIndex;
     int ih = (int)half;
-    float frac = t - (float)it;
+    float frac = frameIndex - (float)it;
     float fracHalf = half - (float)ih;
     sRabChannel* ch = self->channels + first;
     sRabChannel* end = ch + count;
@@ -1144,23 +1144,23 @@ extern "C" void func_00312C20(sRabChannelSet* self, int first, int count, float 
                 *out++ = ch->v4;
                 break;
             case 2:
-                *out++ = t * ch->v4 + ch->v8;
+                *out++ = frameIndex * ch->v4 + ch->v8;
                 break;
             case 3:
-                *out++ = t * (t * ch->v4 + ch->v8) + ch->vC;
+                *out++ = frameIndex * (frameIndex * ch->v4 + ch->v8) + ch->vC;
                 break;
             case 4:
-                *out++ = t * (t * (t * ch->v4 + ch->v8) + ch->vC) + ch->v10;
+                *out++ = frameIndex * (frameIndex * (frameIndex * ch->v4 + ch->v8) + ch->vC) + ch->v10;
                 break;
             case 5: {
                 float split = ch->v10;
                 float a = ch->v4;
-                float b = ch->v8;
-                float c = ch->vC;
-                if (t <= split) {
-                    *out++ = t * a + b;
+                float intercept = ch->v8;
+                float tailSlope = ch->vC;
+                if (frameIndex <= split) {
+                    *out++ = frameIndex * a + intercept;
                 } else {
-                    *out++ = a * split + b + c * (t - split);
+                    *out++ = a * split + intercept + tailSlope * (frameIndex - split);
                 }
                 break;
             }
@@ -1202,23 +1202,23 @@ extern "C" void func_00312C20(sRabChannelSet* self, int first, int count, float 
                 *out++ = ch->v4;
                 break;
             case 2:
-                *out++ = t * ch->v4 + ch->v8;
+                *out++ = frameIndex * ch->v4 + ch->v8;
                 break;
             case 3:
-                *out++ = t * (t * ch->v4 + ch->v8) + ch->vC;
+                *out++ = frameIndex * (frameIndex * ch->v4 + ch->v8) + ch->vC;
                 break;
             case 4:
-                *out++ = t * (t * (t * ch->v4 + ch->v8) + ch->vC) + ch->v10;
+                *out++ = frameIndex * (frameIndex * (frameIndex * ch->v4 + ch->v8) + ch->vC) + ch->v10;
                 break;
             case 5: {
                 float split = ch->v10;
                 float a = ch->v4;
-                float b = ch->v8;
-                float c = ch->vC;
-                if (t <= split) {
-                    *out++ = t * a + b;
+                float intercept = ch->v8;
+                float tailSlope = ch->vC;
+                if (frameIndex <= split) {
+                    *out++ = frameIndex * a + intercept;
                 } else {
-                    *out++ = a * split + b + c * (t - split);
+                    *out++ = a * split + intercept + tailSlope * (frameIndex - split);
                 }
                 break;
             }
@@ -1496,35 +1496,35 @@ static inline void fire_003135B0(sRab_003135B0* self, float from, float to)
  */
 extern "C" int func_003135B0(sRab_003135B0* self, int i, float dt)
 {
-    float t0 = self->tracks[i].time;
+    float startTime = self->tracks[i].time;
     float len = self->tracks[i].length;
-    float t = t0 + self->tracks[i].speed * self->scale * dt;
+    float newTime = startTime + self->tracks[i].speed * self->scale * dt;
     if (i == 0) {
         self->triggered = 0;
         self->fC0 = 0;
         if (self->fC4 != 0) {
-            func_00313938((sAnimEvents_00313938*)self, t0);
+            func_00313938((sAnimEvents_00313938*)self, startTime);
             self->fC4 = 0;
         }
     }
     if (self->tracks[i].loop == 0) {
-        if (t <= 0.0f) {
-            t = 0.0f;
+        if (newTime <= 0.0f) {
+            newTime = 0.0f;
             if (i == 0) {
                 func_003139A8((sAnimEvents_00313938*)self);
             }
-        } else if (len <= t) {
-            t = len;
+        } else if (len <= newTime) {
+            newTime = len;
             if (i == 0) {
                 func_003139A8((sAnimEvents_00313938*)self);
             }
         }
         if (i == 0) {
-            fire_003135B0(self, t0, t);
+            fire_003135B0(self, startTime, newTime);
         }
-    } else if (t < 0.0f || len <= t) {
-        int n = (int)ffloor_003135B0(t / len);
-        t -= len * (float)n;
+    } else if (newTime < 0.0f || len <= newTime) {
+        int n = (int)ffloor_003135B0(newTime / len);
+        newTime -= len * (float)n;
         if (i == 0) {
             func_003139A8((sAnimEvents_00313938*)self);
             if (n >= 2) {
@@ -1532,25 +1532,25 @@ extern "C" int func_003135B0(sRab_003135B0* self, int i, float dt)
             } else if (n < -1) {
                 fire_003135B0(self, len, 0.0f);
             } else if (n == 1) {
-                if (t0 <= t) {
+                if (startTime <= newTime) {
                     fire_003135B0(self, 0.0f, len);
                 } else {
-                    fire_003135B0(self, t0, len);
-                    fire_003135B0(self, 0.0f, t);
+                    fire_003135B0(self, startTime, len);
+                    fire_003135B0(self, 0.0f, newTime);
                 }
             } else if (n == -1) {
-                if (t <= t0) {
+                if (newTime <= startTime) {
                     fire_003135B0(self, len, 0.0f);
                 } else {
-                    fire_003135B0(self, t0, 0.0f);
-                    fire_003135B0(self, len, t);
+                    fire_003135B0(self, startTime, 0.0f);
+                    fire_003135B0(self, len, newTime);
                 }
             }
         }
     } else if (i == 0) {
-        fire_003135B0(self, t0, t);
+        fire_003135B0(self, startTime, newTime);
     }
-    self->tracks[i].time = t;
+    self->tracks[i].time = newTime;
     return 0;
 }
 #endif

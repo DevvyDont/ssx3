@@ -284,14 +284,14 @@ extern "C" void* cBENewRaceInterface_getLocationName(void* self, int iLocation)
 INCLUDE_ASM("be/beintnewrace", func_00144C78);
 #ifdef SKIP_ASM
 /**
- * Returns the peak of location @p a1: the word at +0x54 of its cBELibrary_locationDB record (0-2).
+ * Returns the peak of location @p location: the word at +0x54 of its cBELibrary_locationDB record (0-2).
  *
- * @param a1  the location
+ * @param location  the location
  * @return the peak
  */
-extern "C" int func_00144C78(void* self, int a1)
+extern "C" int func_00144C78(void* self, int location)
 {
-    return cBELibrary_locationDB[a1].field_0x54;
+    return cBELibrary_locationDB[location].field_0x54;
 }
 #endif
 
@@ -337,18 +337,18 @@ struct sRaceEntryFull_00144CE0 {
 };
 
 /**
- * Returns the id (+0x0) of the first of the 23 cBELibrary_locationDB records whose word at +0x5C equals @p a1, or 22
+ * Returns the id (+0x0) of the first of the 23 cBELibrary_locationDB records whose word at +0x5C equals @p scriptId, or 22
  * when none does.
  *
- * @param a1  the script id
+ * @param scriptId  the script id
  * @return the location id
  */
-extern "C" int func_00144CE0(void* self, int a1)
+extern "C" int func_00144CE0(void* self, int scriptId)
 {
-    sRaceEntryFull_00144CE0* t = (sRaceEntryFull_00144CE0*)cBELibrary_locationDB;
+    sRaceEntryFull_00144CE0* locations = (sRaceEntryFull_00144CE0*)cBELibrary_locationDB;
     for (int i = 0; i < 23; i++) {
-        if (t[i].field_0x5C == a1) {
-            return t[i].field_0x0;
+        if (locations[i].field_0x5C == scriptId) {
+            return locations[i].field_0x0;
         }
     }
     return 22;
@@ -359,14 +359,14 @@ extern "C" int func_00144CE0(void* self, int a1)
 INCLUDE_ASM("be/beintnewrace", func_00144D18);
 #ifdef SKIP_ASM
 /**
- * Returns the difficulty of location @p a1: the word at +0x60 of its cBELibrary_locationDB record (0-2).
+ * Returns the difficulty of location @p location: the word at +0x60 of its cBELibrary_locationDB record (0-2).
  *
- * @param a1  the location
+ * @param location  the location
  * @return the difficulty
  */
-extern "C" int func_00144D18(void* self, int a1)
+extern "C" int func_00144D18(void* self, int location)
 {
-    return cBELibrary_locationDB[a1].field_0x60;
+    return cBELibrary_locationDB[location].field_0x60;
 }
 #endif
 
@@ -692,14 +692,14 @@ extern "C" void* func_00145398()
 INCLUDE_ASM("be/beintnewrace", func_001453B8);
 #ifdef SKIP_ASM
 /**
- * Returns the record (name first) of game mode @p a1: D_0043E7D0 + @p a1 * 0x3C.
+ * Returns the record (name first) of game mode @p gameMode: D_0043E7D0 + @p gameMode * 0x3C.
  *
- * @param a1  the game mode
+ * @param gameMode  the game mode
  * @return the mode name
  */
-extern "C" void* func_001453B8(void* self, int a1)
+extern "C" void* func_001453B8(void* self, int gameMode)
 {
-    return (char*)&D_0043E7D0 + a1 * 0x3c;
+    return (char*)&D_0043E7D0 + gameMode * 0x3c;
 }
 #endif
 
@@ -733,19 +733,19 @@ extern "C" int func_001453D0(void* self, int kind, int place, int mode)
 {
     int k = 1;
     if (kind) k = kind;
-    float m = 1.0f;
+    float difficultyScale = 1.0f;
     if (mode == 0 && place != 0)
-        m = 0.8999999761581421f;
+        difficultyScale = 0.8999999761581421f;
     else if (mode == 2 && place != 0)
-        m = 1.2000000476837158f;
+        difficultyScale = 1.2000000476837158f;
     int key = D_00535C08.value;
     for (int i = 0; i < 30; i++)
     {
         if (D_00440B38_1453D0[i].key == key && D_00440B38_1453D0[i].kind == k)
         {
-            int base = (int)(D_00440B38_1453D0[i].prize[place] * 100 * m);
-            int r = GMrand() % 200;
-            base += (int)(base * (r - 100) * 0.0005000000237487257f);
+            int base = (int)(D_00440B38_1453D0[i].prize[place] * 100 * difficultyScale);
+            int jitter = GMrand() % 200;
+            base += (int)(base * (jitter - 100) * 0.0005000000237487257f);
             return base - base % 20;
         }
     }
@@ -780,8 +780,8 @@ extern sRaceLookup_00440B38 D_00440B38[];
  */
 extern "C" int func_001454F8(void* self, int kind)
 {
-    char* g = (char*)&(*(&cBENewRaceInterface_newRace));
-    unsigned char mode = *(unsigned char*)(g + 0x4A);
+    char* newRaceDb = (char*)&(*(&cBENewRaceInterface_newRace));
+    unsigned char mode = *(unsigned char*)(newRaceDb + 0x4A);
     if (mode >= 6 && mode < 12)
     {
         return func_00145600(self, (signed char)mode, kind);
@@ -790,7 +790,7 @@ extern "C" int func_001454F8(void* self, int kind)
     {
         kind = 1;
     }
-    int key = *(int*)(g + 0x40);
+    int key = *(int*)(newRaceDb + 0x40);
     for (int i = 0; i < 30; i++)
     {
         if (D_00440B38[i].key == key && D_00440B38[i].kind == kind)
@@ -824,15 +824,15 @@ struct sRaceTableEntry_00440D18
 extern sRaceTableEntry_00440D18 D_00440D18[];
 
 /**
- * Returns the goal of peak event @p a1 at tier @p a2: the halfword at +0x4 of D_00440D18[(@p a1 - 6) * 3 + @p a2].
+ * Returns the goal of peak event @p gameEvent at tier @p tier: the halfword at +0x4 of D_00440D18[(@p gameEvent - 6) * 3 + @p tier].
  *
- * @param a1  the game event, 6-11
- * @param a2  the tier, 0-2
+ * @param gameEvent  the game event, 6-11
+ * @param tier  the tier, 0-2
  * @return the goal
  */
-extern "C" int func_001455D0(void* self, int a1, int a2)
+extern "C" int func_001455D0(void* self, int gameEvent, int tier)
 {
-    return D_00440D18[a2 + (a1 - 6) * 3].field_0x4;
+    return D_00440D18[tier + (gameEvent - 6) * 3].field_0x4;
 }
 #endif
 
@@ -842,16 +842,16 @@ INCLUDE_ASM("be/beintnewrace", func_00145600);
 extern sRaceTableEntry_00440D18 D_00440D18[];
 
 /**
- * Returns the time limit of peak event @p a1 at tier @p a2: the halfword at +0x6 of
- * D_00440D18[(@p a1 - 6) * 3 + @p a2].
+ * Returns the time limit of peak event @p gameEvent at tier @p tier: the halfword at +0x6 of
+ * D_00440D18[(@p gameEvent - 6) * 3 + @p tier].
  *
- * @param a1  the game event, 6-11
- * @param a2  the tier, 0-2
+ * @param gameEvent  the game event, 6-11
+ * @param tier  the tier, 0-2
  * @return the time limit
  */
-extern "C" int func_00145600(void* self, int a1, int a2)
+extern "C" int func_00145600(void* self, int gameEvent, int tier)
 {
-    return D_00440D18[a2 + (a1 - 6) * 3].field_0x6;
+    return D_00440D18[tier + (gameEvent - 6) * 3].field_0x6;
 }
 #endif
 
@@ -861,16 +861,16 @@ INCLUDE_ASM("be/beintnewrace", func_00145630);
 extern sRaceTableEntry_00440D18 D_00440D18[];
 
 /**
- * Returns the reward of peak event @p a1 at tier @p a2: the halfword at +0x12 of D_00440D18[(@p a1 - 6) * 3 + @p a2],
+ * Returns the reward of peak event @p gameEvent at tier @p tier: the halfword at +0x12 of D_00440D18[(@p gameEvent - 6) * 3 + @p tier],
  * times 100.
  *
- * @param a1  the game event, 6-11
- * @param a2  the tier, 0-2
+ * @param gameEvent  the game event, 6-11
+ * @param tier  the tier, 0-2
  * @return the money
  */
-extern "C" int func_00145630(void* self, int a1, int a2)
+extern "C" int func_00145630(void* self, int gameEvent, int tier)
 {
-    return D_00440D18[a2 + (a1 - 6) * 3].field_0x12 * 100;
+    return D_00440D18[tier + (gameEvent - 6) * 3].field_0x12 * 100;
 }
 #endif
 
@@ -880,17 +880,17 @@ INCLUDE_ASM("be/beintnewrace", func_00145668);
 extern sRaceTableEntry_00440D18 D_00440D18[];
 
 /**
- * Returns the bonus of checkpoint @p a3 in peak event @p a1 at tier @p a2: halfword @p a3 of the five at +0x8 of
- * D_00440D18[(@p a1 - 6) * 3 + @p a2].
+ * Returns the bonus of checkpoint @p checkpoint in peak event @p gameEvent at tier @p tier: halfword @p checkpoint of the five at +0x8 of
+ * D_00440D18[(@p gameEvent - 6) * 3 + @p tier].
  *
- * @param a1  the game event, 6-11
- * @param a2  the tier, 0-2
- * @param a3  the checkpoint, 0-4
+ * @param gameEvent  the game event, 6-11
+ * @param tier  the tier, 0-2
+ * @param checkpoint  the checkpoint, 0-4
  * @return the bonus
  */
-extern "C" int func_00145668(void* self, int a1, int a2, int a3)
+extern "C" int func_00145668(void* self, int gameEvent, int tier, int checkpoint)
 {
-    return D_00440D18[a2 + (a1 - 6) * 3].field_0x8[a3];
+    return D_00440D18[tier + (gameEvent - 6) * 3].field_0x8[checkpoint];
 }
 #endif
 
@@ -949,15 +949,15 @@ extern "C" int cBENewPlayerInterface_getHumanRider(void* self, int a1);
 extern "C" int func_00145750(void* self)
 {
     void* players = cBENewPlayerInterface_getThis();
-    int c = cBENewPlayerInterface_getRiderCharID(players, cBENewPlayerInterface_getHumanRider(cBENewPlayerInterface_getThis(), 0));
+    int humanChar = cBENewPlayerInterface_getRiderCharID(players, cBENewPlayerInterface_getHumanRider(cBENewPlayerInterface_getThis(), 0));
     switch (func_00144C78(self, D_00535C08.value))
     {
     case 0:
-        return c == 3 ? 5 : 3;
+        return humanChar == 3 ? 5 : 3;
     case 1:
-        return c == 7 ? 4 : 7;
+        return humanChar == 7 ? 4 : 7;
     case 2:
-        return c == 8 ? 6 : 8;
+        return humanChar == 8 ? 6 : 8;
     }
     return 3;
 }
@@ -967,14 +967,14 @@ extern "C" int func_00145750(void* self)
 INCLUDE_ASM("be/beintnewrace", func_00145818);
 #ifdef SKIP_ASM
 /**
- * Returns the default game mode of location @p arg1: 0 for locations 0-4, 1 for 5-7, 2 for 8-10, 3 for 11-13, 4
+ * Returns the default game mode of location @p location: 0 for locations 0-4, 1 for 5-7, 2 for 8-10, 3 for 11-13, 4
  * otherwise.
  *
- * @param arg1  the location
+ * @param location  the location
  * @return the game mode
  */
-extern "C" int func_00145818(void* self, unsigned int arg1) {
-    switch (arg1) {
+extern "C" int func_00145818(void* self, unsigned int location) {
+    switch (location) {
     case 14:
     case 15:
     case 16:
@@ -1050,13 +1050,13 @@ extern "C" int func_00145870(void* self, int idx)
 INCLUDE_ASM("be/beintnewrace", func_001458C8);
 #ifdef SKIP_ASM
 /**
- * Returns the default game mode of game event @p arg1: 0->0, 1->1, 2->3, 3->2, 4->5, 5->6, 12 and 13->4, others 0.
+ * Returns the default game mode of game event @p gameEvent: 0->0, 1->1, 2->3, 3->2, 4->5, 5->6, 12 and 13->4, others 0.
  *
- * @param arg1  the game event
+ * @param gameEvent  the game event
  * @return the game mode
  */
-extern "C" int func_001458C8(void* self, unsigned int arg1) {
-    switch (arg1) {
+extern "C" int func_001458C8(void* self, unsigned int gameEvent) {
+    switch (gameEvent) {
     case 0:
         return 0;
     case 1:

@@ -460,13 +460,13 @@ extern "C" void func_00146070(void* self, int index, int kind, int value)
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    signed char c = cBENewPlayerInterface_tempPlayers[id].mCharID;
+    signed char charId = cBENewPlayerInterface_tempPlayers[id].mCharID;
     if (kind == 1) {
-        char* p = (char*)cBELibrary_profileLib + (c * 0xF88 + profile * 0x9B50);
-        ((sProfBits_146070*)(p + 0x278))->b12 = value;
+        char* profileRec = (char*)cBELibrary_profileLib + (charId * 0xF88 + profile * 0x9B50);
+        ((sProfBits_146070*)(profileRec + 0x278))->b12 = value;
     } else {
-        char* p = (char*)cBELibrary_profileLib + (c * 0xF88 + profile * 0x9B50);
-        ((sProfBits_146070*)(p + 0x278))->b13 = value;
+        char* profileRec = (char*)cBELibrary_profileLib + (charId * 0xF88 + profile * 0x9B50);
+        ((sProfBits_146070*)(profileRec + 0x278))->b13 = value;
     }
 }
 #endif
@@ -561,28 +561,28 @@ extern "C" void func_00146320(void* self, int index, int kind, int flag, int val
 {
     int profile = cBELibrary_getProfileIndex(index);
     int id = cBENewPlayerInterface_getPlayerID(index);
-    signed char c = cBENewPlayerInterface_tempPlayers[id].mCharID;
+    signed char charId = cBENewPlayerInterface_tempPlayers[id].mCharID;
     if (flag) {
         if (kind == 0) {
-            char* p = (char*)cBELibrary_profileLib + (c * 0xF88 + profile * 0x9B50);
-            ((sProfBits6320*)(p + 0x278))->b3 = value;
+            char* profileRec = (char*)cBELibrary_profileLib + (charId * 0xF88 + profile * 0x9B50);
+            ((sProfBits6320*)(profileRec + 0x278))->b3 = value;
         } else if (kind == 1) {
-            char* p = (char*)cBELibrary_profileLib + (c * 0xF88 + profile * 0x9B50);
-            ((sProfBits6320*)(p + 0x278))->b4 = value;
+            char* profileRec = (char*)cBELibrary_profileLib + (charId * 0xF88 + profile * 0x9B50);
+            ((sProfBits6320*)(profileRec + 0x278))->b4 = value;
         } else if (kind == 2) {
-            char* p = (char*)cBELibrary_profileLib + (c * 0xF88 + profile * 0x9B50);
-            ((sProfBits6320*)(p + 0x278))->b5 = value;
+            char* profileRec = (char*)cBELibrary_profileLib + (charId * 0xF88 + profile * 0x9B50);
+            ((sProfBits6320*)(profileRec + 0x278))->b5 = value;
         }
     } else {
         if (kind == 0) {
-            char* p = (char*)cBELibrary_profileLib + (c * 0xF88 + profile * 0x9B50);
-            ((sProfBits6320*)(p + 0x278))->b0 = value;
+            char* profileRec = (char*)cBELibrary_profileLib + (charId * 0xF88 + profile * 0x9B50);
+            ((sProfBits6320*)(profileRec + 0x278))->b0 = value;
         } else if (kind == 1) {
-            char* p = (char*)cBELibrary_profileLib + (c * 0xF88 + profile * 0x9B50);
-            ((sProfBits6320*)(p + 0x278))->b1 = value;
+            char* profileRec = (char*)cBELibrary_profileLib + (charId * 0xF88 + profile * 0x9B50);
+            ((sProfBits6320*)(profileRec + 0x278))->b1 = value;
         } else if (kind == 2) {
-            char* p = (char*)cBELibrary_profileLib + (c * 0xF88 + profile * 0x9B50);
-            ((sProfBits6320*)(p + 0x278))->b2 = value;
+            char* profileRec = (char*)cBELibrary_profileLib + (charId * 0xF88 + profile * 0x9B50);
+            ((sProfBits6320*)(profileRec + 0x278))->b2 = value;
         }
     }
 }
@@ -597,59 +597,59 @@ extern int cBELibrary_profileLib[];
 /**
  * Returns whether a peak's rival event is still locked for a character.
  *
- * Reads the 64-bit flag word at +0x278 of character @p c's record in the profile of @p index
+ * Reads the 64-bit flag word at +0x278 of character @p character's record in the profile of @p index
  * (cBELibrary_getProfileIndex): bit 6 + @p kind when @p flag is set, else bit 9 + @p kind.
  *
  * @param index  the rider whose profile is used (On Tour iRider)
- * @param c  the character (On Tour eBECharacters)
+ * @param character  the character (On Tour eBECharacters)
  * @param kind  the peak, 0-2; any other gives 0
  * @param flag  selects bits 6-8 when nonzero, bits 9-11 when 0 (the map passes 1 for event kind 4, 0 for kind 5)
  * @return 1 when locked, else 0
  */
 // PORT: 64-bit `long` flag word (8 bytes on EE); use int64_t off-PS2.
-extern "C" int func_001464D0(void* self, int index, int c, int kind, int flag)
+extern "C" int func_001464D0(void* self, int index, int character, int kind, int flag)
 {
     int profile = cBELibrary_getProfileIndex(index);
     if (flag) {
         switch (kind) {
         case 0:
             {
-            int off = c * 3976 + profile * 39760;
-            char* p = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(p + 0x278) >> 6) & 1;
+            int off = character * 3976 + profile * 39760;
+            char* profileRec = (char*)cBELibrary_profileLib + off;
+            return (int)(*(long*)(profileRec + 0x278) >> 6) & 1;
         }
         case 1:
             {
-            int off = c * 3976 + profile * 39760;
-            char* p = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(p + 0x278) >> 7) & 1;
+            int off = character * 3976 + profile * 39760;
+            char* profileRec = (char*)cBELibrary_profileLib + off;
+            return (int)(*(long*)(profileRec + 0x278) >> 7) & 1;
         }
         case 2:
             {
-            int off = c * 3976 + profile * 39760;
-            char* p = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(p + 0x278) >> 8) & 1;
+            int off = character * 3976 + profile * 39760;
+            char* profileRec = (char*)cBELibrary_profileLib + off;
+            return (int)(*(long*)(profileRec + 0x278) >> 8) & 1;
         }
         }
     } else {
         switch (kind) {
         case 0:
             {
-            int off = c * 3976 + profile * 39760;
-            char* p = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(p + 0x278) >> 9) & 1;
+            int off = character * 3976 + profile * 39760;
+            char* profileRec = (char*)cBELibrary_profileLib + off;
+            return (int)(*(long*)(profileRec + 0x278) >> 9) & 1;
         }
         case 1:
             {
-            int off = c * 3976 + profile * 39760;
-            char* p = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(p + 0x278) >> 10) & 1;
+            int off = character * 3976 + profile * 39760;
+            char* profileRec = (char*)cBELibrary_profileLib + off;
+            return (int)(*(long*)(profileRec + 0x278) >> 10) & 1;
         }
         case 2:
             {
-            int off = c * 3976 + profile * 39760;
-            char* p = (char*)cBELibrary_profileLib + off;
-            return (int)(*(long*)(p + 0x278) >> 11) & 1;
+            int off = character * 3976 + profile * 39760;
+            char* profileRec = (char*)cBELibrary_profileLib + off;
+            return (int)(*(long*)(profileRec + 0x278) >> 11) & 1;
         }
         }
     }
@@ -757,40 +757,40 @@ struct sProfBits_1468B0 {
  * Locks or unlocks a peak's rival event for a character.
  *
  * Writes bit 6 + @p kind (when @p flag is set) or bit 9 + @p kind of the 64-bit flag word at +0x278 of character
- * @p c's record in the profile of @p index (cBELibrary_getProfileIndex), the bit func_001464D0 reads. A peak outside
+ * @p character's record in the profile of @p index (cBELibrary_getProfileIndex), the bit func_001464D0 reads. A peak outside
  * 0-2 writes nothing.
  *
  * @param index  the rider whose profile is used (On Tour iRider)
- * @param c  the character (On Tour eBECharacters)
+ * @param character  the character (On Tour eBECharacters)
  * @param kind  the peak, 0-2
  * @param flag  selects bits 6-8 when nonzero, bits 9-11 when 0
  * @param value  1 to lock, 0 to unlock
  */
-extern "C" void func_001468B0(void* self, int index, int c, int kind, int flag, int value)
+extern "C" void func_001468B0(void* self, int index, int character, int kind, int flag, int value)
 {
     int profile = cBELibrary_getProfileIndex(index);
     if (flag) {
         switch (kind) {
         case 0:
-            ((sProfBits_1468B0*)((profile * 0x9B50 + c * 0xF88) + (char*)cBELibrary_profileLib))->b6 = value;
+            ((sProfBits_1468B0*)((profile * 0x9B50 + character * 0xF88) + (char*)cBELibrary_profileLib))->b6 = value;
             break;
         case 1:
-            ((sProfBits_1468B0*)((profile * 0x9B50 + c * 0xF88) + (char*)cBELibrary_profileLib))->b7 = value;
+            ((sProfBits_1468B0*)((profile * 0x9B50 + character * 0xF88) + (char*)cBELibrary_profileLib))->b7 = value;
             break;
         case 2:
-            ((sProfBits_1468B0*)((profile * 0x9B50 + c * 0xF88) + (char*)cBELibrary_profileLib))->b8 = value;
+            ((sProfBits_1468B0*)((profile * 0x9B50 + character * 0xF88) + (char*)cBELibrary_profileLib))->b8 = value;
             break;
         }
     } else {
         switch (kind) {
         case 0:
-            ((sProfBits_1468B0*)((profile * 0x9B50 + c * 0xF88) + (char*)cBELibrary_profileLib))->b9 = value;
+            ((sProfBits_1468B0*)((profile * 0x9B50 + character * 0xF88) + (char*)cBELibrary_profileLib))->b9 = value;
             break;
         case 1:
-            ((sProfBits_1468B0*)((profile * 0x9B50 + c * 0xF88) + (char*)cBELibrary_profileLib))->b10 = value;
+            ((sProfBits_1468B0*)((profile * 0x9B50 + character * 0xF88) + (char*)cBELibrary_profileLib))->b10 = value;
             break;
         case 2:
-            ((sProfBits_1468B0*)((profile * 0x9B50 + c * 0xF88) + (char*)cBELibrary_profileLib))->b11 = value;
+            ((sProfBits_1468B0*)((profile * 0x9B50 + character * 0xF88) + (char*)cBELibrary_profileLib))->b11 = value;
             break;
         }
     }
@@ -873,36 +873,36 @@ struct sPlayerSub_6C10 {
 };
 
 /**
- * Locks or unlocks an event for a character: bit 8 + @p arg3 (events 6-11, bits 14-19) of its profile flags.
+ * Locks or unlocks an event for a character: bit 8 + @p event (events 6-11, bits 14-19) of its profile flags.
  *
- * Writes the 64-bit flag word at +0x278 of character @p arg2's record in the profile of @p arg1
+ * Writes the 64-bit flag word at +0x278 of character @p character's record in the profile of @p rider
  * (cBELibrary_getProfileIndex), the bits cBENewPlayerInterface_isEventLocked reads. Other events write nothing.
  *
- * @param arg1  the rider whose profile is used (On Tour iRider)
- * @param arg2  the character (On Tour eBECharacters)
- * @param arg3  the game event, 6-11
- * @param arg4  1 to lock, 0 to unlock
+ * @param rider  the rider whose profile is used (On Tour iRider)
+ * @param character  the character (On Tour eBECharacters)
+ * @param event  the game event, 6-11
+ * @param locked  1 to lock, 0 to unlock
  */
-extern "C" void func_00146C10(void* self, int arg1, int arg2, int arg3, int arg4) {
-    int profile = cBELibrary_getProfileIndex(arg1);
-    switch (arg3) {
+extern "C" void func_00146C10(void* self, int rider, int character, int event, int locked) {
+    int profile = cBELibrary_getProfileIndex(rider);
+    switch (event) {
     case 6:
-        ((sPlayerSub_6C10*)((profile * 0x9B50 + arg2 * 0xF88) + (char*)cBELibrary_profileLib))->b14 = arg4;
+        ((sPlayerSub_6C10*)((profile * 0x9B50 + character * 0xF88) + (char*)cBELibrary_profileLib))->b14 = locked;
         break;
     case 7:
-        ((sPlayerSub_6C10*)((profile * 0x9B50 + arg2 * 0xF88) + (char*)cBELibrary_profileLib))->b15 = arg4;
+        ((sPlayerSub_6C10*)((profile * 0x9B50 + character * 0xF88) + (char*)cBELibrary_profileLib))->b15 = locked;
         break;
     case 8:
-        ((sPlayerSub_6C10*)((profile * 0x9B50 + arg2 * 0xF88) + (char*)cBELibrary_profileLib))->b16 = arg4;
+        ((sPlayerSub_6C10*)((profile * 0x9B50 + character * 0xF88) + (char*)cBELibrary_profileLib))->b16 = locked;
         break;
     case 9:
-        ((sPlayerSub_6C10*)((profile * 0x9B50 + arg2 * 0xF88) + (char*)cBELibrary_profileLib))->b17 = arg4;
+        ((sPlayerSub_6C10*)((profile * 0x9B50 + character * 0xF88) + (char*)cBELibrary_profileLib))->b17 = locked;
         break;
     case 10:
-        ((sPlayerSub_6C10*)((profile * 0x9B50 + arg2 * 0xF88) + (char*)cBELibrary_profileLib))->b18 = arg4;
+        ((sPlayerSub_6C10*)((profile * 0x9B50 + character * 0xF88) + (char*)cBELibrary_profileLib))->b18 = locked;
         break;
     case 11:
-        ((sPlayerSub_6C10*)((profile * 0x9B50 + arg2 * 0xF88) + (char*)cBELibrary_profileLib))->b19 = arg4;
+        ((sPlayerSub_6C10*)((profile * 0x9B50 + character * 0xF88) + (char*)cBELibrary_profileLib))->b19 = locked;
         break;
     }
 }
@@ -1085,16 +1085,16 @@ INCLUDE_ASM("be/beintplayer", func_00147138);
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
 
 /**
- * Sets a player slot's name: copies up to 12 characters of @p name into cBENewPlayerInterface_tempPlayers[@p a1].
+ * Sets a player slot's name: copies up to 12 characters of @p name into cBENewPlayerInterface_tempPlayers[@p playerIndex].
  *
  * The slot is used directly (no rider mapping); strncpy leaves a 12-character name unterminated.
  *
- * @param a1  the player slot (On Tour iPlayer)
+ * @param playerIndex  the player slot (On Tour iPlayer)
  * @param name  the new name
  */
-extern "C" void func_00147138(void* self, int a1, const char* name)
+extern "C" void func_00147138(void* self, int playerIndex, const char* name)
 {
-    strncpy(cBENewPlayerInterface_tempPlayers[a1].pad_0x00, name, 0xC);
+    strncpy(cBENewPlayerInterface_tempPlayers[playerIndex].pad_0x00, name, 0xC);
 }
 #endif
 
@@ -1978,33 +1978,33 @@ struct sCharRec_147D20 {
 extern "C" void func_00147D20(void* self, int which)
 {
     int profile = 0;
-    int c = cBELibrary_getCharacterID(0);
-    short a, b;
+    int charId = cBELibrary_getCharacterID(0);
+    short difference, level;
     if (which)
     {
-        b = (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).b0;
-        a = (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).a0;
+        level = (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).b0;
+        difference = (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).a0;
     }
     else
     {
-        b = (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).b1;
-        a = (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).a1;
+        level = (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).b1;
+        difference = (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).a1;
     }
-    a++;
-    if (a >= 2)
+    difference++;
+    if (difference >= 2)
     {
-        if (b < 2) b++;
-        a = 0;
+        if (level < 2) level++;
+        difference = 0;
     }
     if (which)
     {
-        (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).b0 = b;
-        (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).a0 = a;
+        (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).b0 = level;
+        (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).a0 = difference;
     }
     else
     {
-        (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).b1 = b;
-        (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).a1 = a;
+        (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).b1 = level;
+        (*(sCharRec_147D20*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).a1 = difference;
     }
 }
 #endif
@@ -2036,33 +2036,33 @@ struct sCharRec_147E18 {
 extern "C" void func_00147E18(void* self, int which)
 {
     int profile = 0;
-    int c = cBELibrary_getCharacterID(0);
-    short a, b;
+    int charId = cBELibrary_getCharacterID(0);
+    short difference, level;
     if (which)
     {
-        b = (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).b0;
-        a = (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).a0;
+        level = (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).b0;
+        difference = (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).a0;
     }
     else
     {
-        b = (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).b1;
-        a = (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).a1;
+        level = (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).b1;
+        difference = (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).a1;
     }
-    a--;
-    if (a < -1)
+    difference--;
+    if (difference < -1)
     {
-        if (b != 0) b--;
-        a = 0;
+        if (level != 0) level--;
+        difference = 0;
     }
     if (which)
     {
-        (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).b0 = b;
-        (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).a0 = a;
+        (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).b0 = level;
+        (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).a0 = difference;
     }
     else
     {
-        (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).b1 = b;
-        (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + c * 0xF88))).a1 = a;
+        (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).b1 = level;
+        (*(sCharRec_147E18*)((char*)cBELibrary_profileLib + (profile * 0x9B50 + charId * 0xF88))).a1 = difference;
     }
 }
 #endif
@@ -2273,19 +2273,19 @@ struct sCharStat_001482D0 {
 extern sCharStat_001482D0 D_005308D8_001482D0[] __asm__("D_005308D8");
 
 /**
- * Copies record @p c of D_005308D8, the 15-byte per-character default-stat table, into @p dst.
+ * Copies record @p character of D_005308D8, the 15-byte per-character default-stat table, into @p dst.
  *
- * The struct is returned by value: @p dst is the caller's buffer (g++ passes it first) and @p unused the stat
+ * The struct is returned by value: @p dst is the caller's buffer (g++ passes it first) and @p iface the stat
  * interface. The record has the size of On Tour's tBEStatDefault (character id, start stats, maximum stats).
  *
  * @param dst  the result buffer
- * @param unused  the stat interface (not used)
- * @param c  the character
+ * @param iface  the stat interface (not used)
+ * @param character  the character
  * @return @p dst
  */
-extern "C" sCharStat_001482D0* func_001482D0(sCharStat_001482D0* dst, int unused, int c)
+extern "C" sCharStat_001482D0* func_001482D0(sCharStat_001482D0* dst, int iface, int character)
 {
-    *dst = D_005308D8_001482D0[c];
+    *dst = D_005308D8_001482D0[character];
     return dst;
 }
 #endif
@@ -2304,17 +2304,17 @@ extern sCharStat_00148328 D_005308D8_00148328[] __asm__("D_005308D8");
  * Copies a rider's record of D_005308D8, the 15-byte per-character default-stat table, into @p dst.
  *
  * The record is the one of character cBELibrary_getCharacterID(@p rider). The struct is returned by value: @p dst is
- * the caller's buffer (g++ passes it first) and @p unused the stat interface.
+ * the caller's buffer (g++ passes it first) and @p iface the stat interface.
  *
  * @param dst  the result buffer
- * @param unused  the stat interface (not used)
+ * @param iface  the stat interface (not used)
  * @param rider  the rider
  * @return @p dst
  */
-extern "C" sCharStat_00148328* func_00148328(sCharStat_00148328* dst, int unused, int rider)
+extern "C" sCharStat_00148328* func_00148328(sCharStat_00148328* dst, int iface, int rider)
 {
-    int c = cBELibrary_getCharacterID(rider);
-    *dst = D_005308D8_00148328[c];
+    int charId = cBELibrary_getCharacterID(rider);
+    *dst = D_005308D8_00148328[charId];
     return dst;
 }
 #endif
@@ -2346,9 +2346,9 @@ extern sPlayerStatRowView_001483A0 D_00535538_view001483A0[] __asm__("D_00535538
  */
 extern "C" void func_001483A0(void* self, int rider, int value)
 {
-    int a = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
-    D_00535538_view001483A0[a].e[c].v[0] = value;
+    int profile = cBELibrary_getProfileIndex(rider);
+    int charId = cBELibrary_getCharacterID(rider);
+    D_00535538_view001483A0[profile].e[charId].v[0] = value;
 }
 #endif
 
@@ -2378,9 +2378,9 @@ extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
  */
 extern "C" signed char func_00148410(void* self, int rider)
 {
-    int a = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
-    return D_00535538_view[a].e[c].v[0];
+    int profile = cBELibrary_getProfileIndex(rider);
+    int charId = cBELibrary_getCharacterID(rider);
+    return D_00535538_view[profile].e[charId].v[0];
 }
 #endif
 
@@ -2404,9 +2404,9 @@ extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
  */
 extern "C" void func_00148470(void* self, int rider, int value)
 {
-    int a = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
-    D_00535538_view[a].e[c].v[1] = value;
+    int profile = cBELibrary_getProfileIndex(rider);
+    int charId = cBELibrary_getCharacterID(rider);
+    D_00535538_view[profile].e[charId].v[1] = value;
 }
 #endif
 
@@ -2430,9 +2430,9 @@ extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
  */
 extern "C" signed char func_001484E0(void* self, int rider)
 {
-    int a = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
-    return D_00535538_view[a].e[c].v[1];
+    int profile = cBELibrary_getProfileIndex(rider);
+    int charId = cBELibrary_getCharacterID(rider);
+    return D_00535538_view[profile].e[charId].v[1];
 }
 #endif
 
@@ -2456,9 +2456,9 @@ extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
  */
 extern "C" void func_00148540(void* self, int rider, int value)
 {
-    int a = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
-    D_00535538_view[a].e[c].v[2] = value;
+    int profile = cBELibrary_getProfileIndex(rider);
+    int charId = cBELibrary_getCharacterID(rider);
+    D_00535538_view[profile].e[charId].v[2] = value;
 }
 #endif
 
@@ -2482,9 +2482,9 @@ extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
  */
 extern "C" signed char func_001485B0(void* self, int rider)
 {
-    int a = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
-    return D_00535538_view[a].e[c].v[2];
+    int profile = cBELibrary_getProfileIndex(rider);
+    int charId = cBELibrary_getCharacterID(rider);
+    return D_00535538_view[profile].e[charId].v[2];
 }
 #endif
 
@@ -2508,9 +2508,9 @@ extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
  */
 extern "C" void func_00148610(void* self, int rider, int value)
 {
-    int a = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
-    D_00535538_view[a].e[c].v[3] = value;
+    int profile = cBELibrary_getProfileIndex(rider);
+    int charId = cBELibrary_getCharacterID(rider);
+    D_00535538_view[profile].e[charId].v[3] = value;
 }
 #endif
 
@@ -2534,9 +2534,9 @@ extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
  */
 extern "C" signed char func_00148680(void* self, int rider)
 {
-    int a = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
-    return D_00535538_view[a].e[c].v[3];
+    int profile = cBELibrary_getProfileIndex(rider);
+    int charId = cBELibrary_getCharacterID(rider);
+    return D_00535538_view[profile].e[charId].v[3];
 }
 #endif
 
@@ -2560,9 +2560,9 @@ extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
  */
 extern "C" void func_001486E0(void* self, int rider, int value)
 {
-    int a = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
-    D_00535538_view[a].e[c].v[4] = value;
+    int profile = cBELibrary_getProfileIndex(rider);
+    int charId = cBELibrary_getCharacterID(rider);
+    D_00535538_view[profile].e[charId].v[4] = value;
 }
 #endif
 
@@ -2586,9 +2586,9 @@ extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
  */
 extern "C" signed char func_00148750(void* self, int rider)
 {
-    int a = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
-    return D_00535538_view[a].e[c].v[4];
+    int profile = cBELibrary_getProfileIndex(rider);
+    int charId = cBELibrary_getCharacterID(rider);
+    return D_00535538_view[profile].e[charId].v[4];
 }
 #endif
 
@@ -2612,9 +2612,9 @@ extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
  */
 extern "C" void func_001487B0(void* self, int rider, int value)
 {
-    int a = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
-    D_00535538_view[a].e[c].v[5] = value;
+    int profile = cBELibrary_getProfileIndex(rider);
+    int charId = cBELibrary_getCharacterID(rider);
+    D_00535538_view[profile].e[charId].v[5] = value;
 }
 #endif
 
@@ -2638,9 +2638,9 @@ extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
  */
 extern "C" signed char func_00148820(void* self, int rider)
 {
-    int a = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
-    return D_00535538_view[a].e[c].v[5];
+    int profile = cBELibrary_getProfileIndex(rider);
+    int charId = cBELibrary_getCharacterID(rider);
+    return D_00535538_view[profile].e[charId].v[5];
 }
 #endif
 

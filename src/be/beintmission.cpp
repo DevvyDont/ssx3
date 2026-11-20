@@ -155,14 +155,14 @@ extern char D_004A6CA8_raw[] __asm__("cBELibrary_profileLib");
 extern "C" int func_001533F8(void* self, int rider, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
+    int characterId = cBELibrary_getCharacterID(rider);
     int sum = 0;
-    int off = idx * 12 + c * 3976 + profile * 39760;
-    char* p = D_004A6CA8_raw + off;
+    int off = idx * 12 + characterId * 3976 + profile * 39760;
+    char* record = D_004A6CA8_raw + off;
     for (int i = 0; i < 17; i++)
     {
-        sum += *(signed char*)(p + 4);
-        p += 12;
+        sum += *(signed char*)(record + 4);
+        record += 12;
     }
     return sum;
 }
@@ -189,10 +189,10 @@ extern char D_004A6CA8_raw[] __asm__("cBELibrary_profileLib");
 extern "C" int func_00153498(void* self, int rider, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
-    int off = (idx + D_005305F0[0]) * 12 + c * 3976 + profile * 39760;
-    char* p = D_004A6CA8_raw + off;
-    return *(signed char*)(p + 4);
+    int characterId = cBELibrary_getCharacterID(rider);
+    int off = (idx + D_005305F0[0]) * 12 + characterId * 3976 + profile * 39760;
+    char* record = D_004A6CA8_raw + off;
+    return *(signed char*)(record + 4);
 }
 #endif
 
@@ -216,13 +216,13 @@ extern char D_004A6CA8_raw[] __asm__("cBELibrary_profileLib");
 extern "C" int func_00153520(void* self, int rider, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
+    int characterId = cBELibrary_getCharacterID(rider);
     int sum = 0;
-    int off = idx * 12 + c * 3976 + profile * 39760;
-    char* p = D_004A6CA8_raw + off;
+    int off = idx * 12 + characterId * 3976 + profile * 39760;
+    char* record = D_004A6CA8_raw + off;
     for (int i = 0; i < 1; i++)
     {
-        sum += *(signed char*)(p + i * 12 + 4);
+        sum += *(signed char*)(record + i * 12 + 4);
     }
     return sum;
 }
@@ -404,12 +404,12 @@ extern char D_004A6CA8_raw[] __asm__("cBELibrary_profileLib");
 extern "C" char* func_00153858(void* self, int rider, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
-    char* b = D_004A6CA8_raw + c * 3976;
+    int characterId = cBELibrary_getCharacterID(rider);
+    char* characterBase = D_004A6CA8_raw + characterId * 3976;
     // PORT: pointer held as int (index-first addu)
-    char* p = (char*)(profile * 0x9B50 + (int)b);
-    char* q = p + (D_005305F0[0] * 12 + 4);
-    return q + idx * 12 + 4;
+    char* charProfile = (char*)(profile * 0x9B50 + (int)characterBase);
+    char* currentRecord = charProfile + (D_005305F0[0] * 12 + 4);
+    return currentRecord + idx * 12 + 4;
 }
 #endif
 
@@ -433,12 +433,12 @@ extern char D_004A6CAC[];
 extern "C" int func_001538E8(void* self, int rider, int bit, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
-    int off = profile * 39760 + c * 3976 + D_005305F0[0] * 12;
-    char* p = D_004A6CAC + (idx * 12 + off);
-    p = p + (bit / 32) * 4;
+    int characterId = cBELibrary_getCharacterID(rider);
+    int off = profile * 39760 + characterId * 3976 + D_005305F0[0] * 12;
+    char* recordCursor = D_004A6CAC + (idx * 12 + off);
+    recordCursor = recordCursor + (bit / 32) * 4;
     int mask = 1 << bit;
-    return (*(unsigned int*)(p + 4) & mask) != 0;
+    return (*(unsigned int*)(recordCursor + 4) & mask) != 0;
 }
 #endif
 
@@ -471,21 +471,21 @@ extern char D_004A6CA8_raw[] __asm__("cBELibrary_profileLib");
 extern "C" void func_001539A8(void* self, int rider, int idx, sBits8_1539A8* src)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
+    int characterId = cBELibrary_getCharacterID(rider);
     int bb = cBELibrary_raceDB.base * 12;
-    *(sBits8_1539A8*)(D_004A6CB0_raw + (idx * 12 + (c * 0xF88 + profile * 0x9B50 + bb))) = *src;
+    *(sBits8_1539A8*)(D_004A6CB0_raw + (idx * 12 + (characterId * 0xF88 + profile * 0x9B50 + bb))) = *src;
     int count = 0;
     for (int i = 0; i < 64; i++) {
         int off = i / 32 * 4;
         off += idx * 12;
         off += cBELibrary_raceDB.base * 12;
-        off += c * 3976;
+        off += characterId * 3976;
         off += profile * 39760;
         if (*(unsigned int*)(D_004A6CB0_raw + off) & (1 << i))
             count++;
     }
-    char* p = D_004A6CA8_raw + ((idx + cBELibrary_raceDB.base) * 12 + c * 3976 + profile * 39760);
-    *(signed char*)(p + 4) = count;
+    char* record = D_004A6CA8_raw + ((idx + cBELibrary_raceDB.base) * 12 + characterId * 3976 + profile * 39760);
+    *(signed char*)(record + 4) = count;
 }
 #endif
 
@@ -535,8 +535,8 @@ extern sEconBitsChar_00153B00 D_004A6CAC_bits153B00[][10] __asm__("D_004A6CAC");
 extern "C" void func_00153B00(void* self, int rider, int bit, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
-    int off = profile * 39760 + c * 3976 + D_005305B0_3B00[16] * 12;
+    int characterId = cBELibrary_getCharacterID(rider);
+    int off = profile * 39760 + characterId * 3976 + D_005305B0_3B00[16] * 12;
     // PORT: address accumulated in an int (base symbol unknown to alias analysis).
     int addr = idx * 12 + off;
     addr += (int)D_004A6CAC_bits153B00;
@@ -544,12 +544,12 @@ extern "C" void func_00153B00(void* self, int rider, int bit, int idx)
     addr += (bit / 32) * 4;
     *(unsigned int*)addr |= 1 << bit;
     int n = 0;
-    for (int b = 0; b < 64; b++)
+    for (int scanBit = 0; scanBit < 64; scanBit++)
     {
-        if (D_004A6CAC_bits153B00[profile][c].recs[D_005305B0_3B00[16]][idx].bits[b / 32] & (1 << b))
+        if (D_004A6CAC_bits153B00[profile][characterId].recs[D_005305B0_3B00[16]][idx].bits[scanBit / 32] & (1 << scanBit))
             n++;
     }
-    D_004A6CA8_econ153B00[profile][c].records[idx + D_005305B0_3B00[16]].count = n;
+    D_004A6CA8_econ153B00[profile][characterId].records[idx + D_005305B0_3B00[16]].count = n;
 }
 #endif
 
@@ -1457,16 +1457,16 @@ extern char D_004A6CAC[];
  */
 extern "C" void func_001547E8(void* self, void* stream)
 {
-    int c = cBELibrary_getCharacterID(0);
+    int characterId = cBELibrary_getCharacterID(0);
     char* base = D_004A6CAC;
-    int off = c * 3976;
-    sSerVEntry_001547E8* e = &(*(sSerVEntry_001547E8**)stream)[1];
-    e->fn((char*)stream + e->delta, base + off, 276);
-    e = &(*(sSerVEntry_001547E8**)stream)[1];
+    int off = characterId * 3976;
+    sSerVEntry_001547E8* writeEntry = &(*(sSerVEntry_001547E8**)stream)[1];
+    writeEntry->fn((char*)stream + writeEntry->delta, base + off, 276);
+    writeEntry = &(*(sSerVEntry_001547E8**)stream)[1];
     char* base2 = base + 0x114;
-    e->fn((char*)stream + e->delta, base2 + off, 352);
-    e = &(*(sSerVEntry_001547E8**)stream)[1];
-    e->fn((char*)stream + e->delta, (char*)self + 8, 4);
+    writeEntry->fn((char*)stream + writeEntry->delta, base2 + off, 352);
+    writeEntry = &(*(sSerVEntry_001547E8**)stream)[1];
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 8, 4);
 }
 #endif
 
@@ -1491,16 +1491,16 @@ extern char D_004A6CAC[];
  */
 extern "C" void func_00154898(void* self, void* stream)
 {
-    int c = cBELibrary_getCharacterID(0);
+    int characterId = cBELibrary_getCharacterID(0);
     char* base = D_004A6CAC;
-    int off = c * 3976;
-    sSerVEntry_00154898* e = &(*(sSerVEntry_00154898**)stream)[2];
-    e->fn((char*)stream + e->delta, base + off, 276);
-    e = &(*(sSerVEntry_00154898**)stream)[2];
+    int off = characterId * 3976;
+    sSerVEntry_00154898* readEntry = &(*(sSerVEntry_00154898**)stream)[2];
+    readEntry->fn((char*)stream + readEntry->delta, base + off, 276);
+    readEntry = &(*(sSerVEntry_00154898**)stream)[2];
     char* base2 = base + 0x114;
-    e->fn((char*)stream + e->delta, base2 + off, 352);
-    e = &(*(sSerVEntry_00154898**)stream)[2];
-    e->fn((char*)stream + e->delta, (char*)self + 8, 4);
+    readEntry->fn((char*)stream + readEntry->delta, base2 + off, 352);
+    readEntry = &(*(sSerVEntry_00154898**)stream)[2];
+    readEntry->fn((char*)stream + readEntry->delta, (char*)self + 8, 4);
 }
 #endif
 

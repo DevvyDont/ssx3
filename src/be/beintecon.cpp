@@ -73,13 +73,13 @@ int cBELibrary_getCharacterID(int);
  */
 extern "C" int func_00150960(void* self, int rider)
 {
-    int a = cBELibrary_getProfileIndex(rider);
-    int b = cBELibrary_getCharacterID(rider);
-    int bOff = b * 3976;
-    int aOff = a * 39760;
+    int profileSlot = cBELibrary_getProfileIndex(rider);
+    int characterId = cBELibrary_getCharacterID(rider);
+    int bOff = characterId * 3976;
+    int aOff = profileSlot * 39760;
     int off = bOff + aOff;
-    char* p = (char*)cBELibrary_profileLib + off;
-    return *(int*)(p + 0xAC4);
+    char* charProfile = (char*)cBELibrary_profileLib + off;
+    return *(int*)(charProfile + 0xAC4);
 }
 #endif
 
@@ -160,25 +160,25 @@ INCLUDE_ASM("be/beintecon", func_00150A90);
 extern int cBELibrary_profileLib[];
 
 /**
- * Adds @p amount to the money (+0xAC4) and the total money earned (+0xAC8) of character @p b in profile slot @p a.
+ * Adds @p amount to the money (+0xAC4) and the total money earned (+0xAC8) of character @p characterId in profile slot @p humanIndex.
  *
- * @param a  the profile slot (0 or 1; 2 and up do nothing and return 0)
- * @param b  the character
+ * @param humanIndex  the profile slot (0 or 1; 2 and up do nothing and return 0)
+ * @param characterId  the character
  * @param amount  the money earned
  * @return the new money, or 0
  */
-extern "C" int func_00150A90(void* self, int a, int b, int amount)
+extern "C" int func_00150A90(void* self, int humanIndex, int characterId, int amount)
 {
-    if (a >= 2) {
+    if (humanIndex >= 2) {
         return 0;
     }
-    int bOff = b * 3976;
-    int aOff = a * 39760;
+    int bOff = characterId * 3976;
+    int aOff = humanIndex * 39760;
     int off = bOff + aOff;
-    char* p = (char*)cBELibrary_profileLib + off;
-    *(int*)(p + 0xAC4) += amount;
-    *(int*)(p + 0xAC8) += amount;
-    return *(int*)(p + 0xAC4);
+    char* charProfile = (char*)cBELibrary_profileLib + off;
+    *(int*)(charProfile + 0xAC4) += amount;
+    *(int*)(charProfile + 0xAC8) += amount;
+    return *(int*)(charProfile + 0xAC4);
 }
 #endif
 
@@ -298,58 +298,58 @@ public:
 extern "C" cBEIface_0C20* cBEStatInterface_getThis();
 int func_00150E50(void* self, int a1);
 /**
- * Buys one point of attribute @p arg3 for character @p arg2 of profile slot @p arg1, if affordable.
+ * Buys one point of attribute @p attribute for character @p characterId of profile slot @p humanIndex, if affordable.
  *
  * The seven attribute bytes start at +0xBDF of the character profile. The price is func_00150E50(points / 5 - 1);
  * when the money (+0xAC4) covers it and the attribute is not at 55, the money drops by the price, the attribute rises
  * by 1 and the stat interface's vtable slot 2 runs.
  *
- * @param arg1  the profile slot (2 and up return 0)
- * @param arg2  the character
- * @param arg3  the attribute, 0-6 (others read a null pointer)
+ * @param humanIndex  the profile slot (2 and up return 0)
+ * @param characterId  the character
+ * @param attribute  the attribute, 0-6 (others read a null pointer)
  * @return 1 if bought, else 0
  */
-extern "C" int func_00150C20(void* self, int arg1, int arg2, unsigned int arg3) {
-    signed char *p;
+extern "C" int func_00150C20(void* self, int humanIndex, int characterId, unsigned int attribute) {
+    signed char *attribLevel;
     int cur;
     int cost;
 
-    if (arg1 >= 2) {
+    if (humanIndex >= 2) {
         return 0;
     }
     {
-        p = 0;
-        cur = ((sEconRec_0C20*)((arg1 * 0x9B50 + arg2 * 0xF88) + (char*)cBELibrary_profileLib))->unk_AC4;
-        switch (arg3) {
+        attribLevel = 0;
+        cur = ((sEconRec_0C20*)((humanIndex * 0x9B50 + characterId * 0xF88) + (char*)cBELibrary_profileLib))->unk_AC4;
+        switch (attribute) {
         case 0:
-            p = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[arg1][arg2].f[0];
+            attribLevel = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[0];
             break;
         case 1:
-            p = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[arg1][arg2].f[1];
+            attribLevel = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[1];
             break;
         case 2:
-            p = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[arg1][arg2].f[2];
+            attribLevel = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[2];
             break;
         case 3:
-            p = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[arg1][arg2].f[3];
+            attribLevel = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[3];
             break;
         case 4:
-            p = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[arg1][arg2].f[4];
+            attribLevel = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[4];
             break;
         case 5:
-            p = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[arg1][arg2].f[5];
+            attribLevel = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[5];
             break;
         case 6:
-            p = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[arg1][arg2].f[6];
+            attribLevel = &((sEconRec_0C20(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[6];
             break;
         }
-        cost = func_00150E50(self, *p / 5 - 1);
-        if (cur < cost || *p == 55) {
+        cost = func_00150E50(self, *attribLevel / 5 - 1);
+        if (cur < cost || *attribLevel == 55) {
             return 0;
         }
-        sEconRec_0C20* r = (sEconRec_0C20*)((arg2 * 0xF88 + arg1 * 0x9B50) + (char*)cBELibrary_profileLib);
-        r->unk_AC4 = r->unk_AC4 - cost;
-        *p = (unsigned char)*p + 1;
+        sEconRec_0C20* charProfile = (sEconRec_0C20*)((characterId * 0xF88 + humanIndex * 0x9B50) + (char*)cBELibrary_profileLib);
+        charProfile->unk_AC4 = charProfile->unk_AC4 - cost;
+        *attribLevel = (unsigned char)*attribLevel + 1;
         cBEStatInterface_getThis()->v2();
         return 1;
     }
@@ -371,14 +371,14 @@ struct sEconTable {
 };
 
 /**
- * Returns the price of an attribute point at level @p a1: the second word of entry @p a1 of D_00440550.
+ * Returns the price of an attribute point at level @p levelIndex: the second word of entry @p levelIndex of D_00440550.
  *
- * @param a1  the level index (callers pass level - 1)
+ * @param levelIndex  the level index (callers pass level - 1)
  * @return the price
  */
-int func_00150E50(void* self, int a1)
+int func_00150E50(void* self, int levelIndex)
 {
-    return ((sEconTable*)D_00440550)->entries[a1].value;
+    return ((sEconTable*)D_00440550)->entries[levelIndex].value;
 }
 #endif
 
@@ -392,38 +392,38 @@ struct sEcon0E68 { int a; int b; };
 extern sEcon0E68 D_00440550_0E68[] __asm__("D_00440550");
 
 /**
- * Refunds one point of attribute @p kind for character @p c of slot @p profile, unless the attribute is at 5.
+ * Refunds one point of attribute @p kind for character @p characterId of slot @p profile, unless the attribute is at 5.
  *
  * Adds the price D_00440550[(points - 1) / 5] to the money (+0xAC4), then increments the attribute byte (+0xBDF +
  * @p kind) instead of decrementing it (likely a bug; nothing calls this function).
  *
  * @param profile  the profile slot (2 and up return 0)
- * @param c  the character
+ * @param characterId  the character
  * @param kind  the attribute, 0-6
  * @return 1 if refunded, else 0
  */
-extern "C" int func_00150E68(void* self, int profile, int c, unsigned int kind)
+extern "C" int func_00150E68(void* self, int profile, int characterId, unsigned int kind)
 {
-    char* p;
+    char* attribLevel;
     if (profile >= 2) return 0;
-    p = 0;
+    attribLevel = 0;
     switch (kind) {
-    case 0: p = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][c].s[0xBDF]; break;
-    case 1: p = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][c].s[0xBE0]; break;
-    case 2: p = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][c].s[0xBE1]; break;
-    case 3: p = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][c].s[0xBE2]; break;
-    case 4: p = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][c].s[0xBE3]; break;
-    case 5: p = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][c].s[0xBE4]; break;
-    case 6: p = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][c].s[0xBE5]; break;
+    case 0: attribLevel = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][characterId].s[0xBDF]; break;
+    case 1: attribLevel = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][characterId].s[0xBE0]; break;
+    case 2: attribLevel = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][characterId].s[0xBE1]; break;
+    case 3: attribLevel = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][characterId].s[0xBE2]; break;
+    case 4: attribLevel = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][characterId].s[0xBE3]; break;
+    case 5: attribLevel = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][characterId].s[0xBE4]; break;
+    case 6: attribLevel = &((sProf0E68 (*)[10])cBELibrary_profileLib)[profile][characterId].s[0xBE5]; break;
     }
-    if (*p == 5) return 0;
+    if (*attribLevel == 5) return 0;
     {
-        int v = D_00440550_0E68[(*p - 1) / 5].b;
-        int off = c * 3976 + profile * 39760;
-        char* q = (char*)cBELibrary_profileLib + off;
-        *(int*)(q + 0xAC4) += v;
+        int refund = D_00440550_0E68[(*attribLevel - 1) / 5].b;
+        int off = characterId * 3976 + profile * 39760;
+        char* charProfile = (char*)cBELibrary_profileLib + off;
+        *(int*)(charProfile + 0xAC4) += refund;
     }
-    (*p)++;
+    (*attribLevel)++;
     return 1;
 }
 #endif
@@ -457,20 +457,20 @@ extern sEconPrize_151040 D_004405A0[];
 extern "C" int func_00151040(void* self, int medal, int key, int place)
 {
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
-    int r = 0;
+    int reward = 0;
     if ((unsigned int)(place - 6) < 6)
     {
         switch (medal)
         {
         case 0:
         case 1:
-            r = func_00145630(race, place, 2);
+            reward = func_00145630(race, place, 2);
             break;
         case 2:
-            r = func_00145630(race, place, 1);
+            reward = func_00145630(race, place, 1);
             break;
         case 3:
-            r = func_00145630(race, place, 0);
+            reward = func_00145630(race, place, 0);
             break;
         }
     }
@@ -482,21 +482,21 @@ extern "C" int func_00151040(void* self, int medal, int key, int place)
             switch (medal)
             {
             case 0:
-                r = D_004405A0[i].prize[0] * 100;
+                reward = D_004405A0[i].prize[0] * 100;
                 break;
             case 1:
-                r = D_004405A0[i].prize[1] * 100;
+                reward = D_004405A0[i].prize[1] * 100;
                 break;
             case 2:
-                r = D_004405A0[i].prize[2] * 100;
+                reward = D_004405A0[i].prize[2] * 100;
                 break;
             case 3:
-                r = D_004405A0[i].prize[3] * 100;
+                reward = D_004405A0[i].prize[3] * 100;
                 break;
             }
         }
     }
-    return r;
+    return reward;
 }
 #endif
 
@@ -557,47 +557,47 @@ struct sEconRec {
     char pad1[0xF88 - 0xBDF - 7];
 };
 /**
- * Returns the attribute-cost table price for the next point of attribute @p arg3 of character @p arg2 in slot @p arg1:
+ * Returns the attribute-cost table price for the next point of attribute @p attribute of character @p characterId in slot @p humanIndex:
  * D_00440550[(points + 1) / 5].
  *
  * Note func_00150C20 charges D_00440550[points / 5 - 1] instead.
  *
- * @param arg1  the profile slot (2 and up return 0)
- * @param arg2  the character
- * @param arg3  the attribute, 0-6
+ * @param humanIndex  the profile slot (2 and up return 0)
+ * @param characterId  the character
+ * @param attribute  the attribute, 0-6
  * @return the price
  */
-extern "C" int func_001511E8(void* self, int arg1, int arg2, unsigned int arg3) {
-    signed char *p;
-    if (arg1 >= 2) {
+extern "C" int func_001511E8(void* self, int humanIndex, int characterId, unsigned int attribute) {
+    signed char *attribLevel;
+    if (humanIndex >= 2) {
         return 0;
     }
     {
-        p = 0;
-        switch (arg3) {
+        attribLevel = 0;
+        switch (attribute) {
         case 0:
-            p = &((sEconRec(*)[10])cBELibrary_profileLib)[arg1][arg2].f[0];
+            attribLevel = &((sEconRec(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[0];
             break;
         case 1:
-            p = &((sEconRec(*)[10])cBELibrary_profileLib)[arg1][arg2].f[1];
+            attribLevel = &((sEconRec(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[1];
             break;
         case 2:
-            p = &((sEconRec(*)[10])cBELibrary_profileLib)[arg1][arg2].f[2];
+            attribLevel = &((sEconRec(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[2];
             break;
         case 3:
-            p = &((sEconRec(*)[10])cBELibrary_profileLib)[arg1][arg2].f[3];
+            attribLevel = &((sEconRec(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[3];
             break;
         case 4:
-            p = &((sEconRec(*)[10])cBELibrary_profileLib)[arg1][arg2].f[4];
+            attribLevel = &((sEconRec(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[4];
             break;
         case 5:
-            p = &((sEconRec(*)[10])cBELibrary_profileLib)[arg1][arg2].f[5];
+            attribLevel = &((sEconRec(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[5];
             break;
         case 6:
-            p = &((sEconRec(*)[10])cBELibrary_profileLib)[arg1][arg2].f[6];
+            attribLevel = &((sEconRec(*)[10])cBELibrary_profileLib)[humanIndex][characterId].f[6];
             break;
         }
-        return ((sEconTable*)D_00440550)->entries[(*p + 1) / 5].value;
+        return ((sEconTable*)D_00440550)->entries[(*attribLevel + 1) / 5].value;
     }
 }
 #endif
@@ -703,10 +703,10 @@ extern "C" void func_001513B8(void* vself)
     sEconItems_1513B8* self = (sEconItems_1513B8*)vself;
     void* db = D_004A6750;
     int n = func_0014DC40(db, self->kind);
-    sEconGroup_1513B8* g = (sEconGroup_1513B8*)func_0014DC50(db, self->kind);
-    for (int i = 0; i < n; i++, g++)
+    sEconGroup_1513B8* prizeGroup = (sEconGroup_1513B8*)func_0014DC50(db, self->kind);
+    for (int i = 0; i < n; i++, prizeGroup++)
     {
-        func_00151C90(self, g->prize, 1);
+        func_00151C90(self, prizeGroup->prize, 1);
     }
     int j;
     for (j = 0; j < self->count; j++)
@@ -715,19 +715,19 @@ extern "C" void func_001513B8(void* vself)
         if (it->flags & 0x10)
             it->flags |= 0x26;
     }
-    int m = func_0014D988(db, self->kind);
-    sEconDef_1513B8* d = (sEconDef_1513B8*)func_0014D998(db, self->kind);
+    int numDefs = func_0014D988(db, self->kind);
+    sEconDef_1513B8* itemDef = (sEconDef_1513B8*)func_0014D998(db, self->kind);
     int changed = 0;
-    for (int i = 0; i < m; i++, d++)
+    for (int i = 0; i < numDefs; i++, itemDef++)
     {
-        if (Price_1513B8(d) == 0)
+        if (Price_1513B8(itemDef) == 0)
         {
-            Find_1513B8(self, d->id)->flags |= 2;
+            Find_1513B8(self, itemDef->id)->flags |= 2;
         }
-        else if (Price_1513B8(d) == -1)
+        else if (Price_1513B8(itemDef) == -1)
         {
-            Find_1513B8(self, d->id)->flags |= 2;
-            func_00151C90(self, d->id, 1);
+            Find_1513B8(self, itemDef->id)->flags |= 2;
+            func_00151C90(self, itemDef->id, 1);
             changed = 1;
         }
     }
@@ -1087,7 +1087,7 @@ struct sEconItems_151A88
 extern "C" void func_00151A88(sEconItems_151A88* self, int k)
 {
     void* db = D_004A6750;
-    sEconDef_151A88* d = (sEconDef_151A88*)func_0014D998(db, k);
+    sEconDef_151A88* itemDef = (sEconDef_151A88*)func_0014D998(db, k);
     int n = func_0014D988(db, k);
     self->kind = k;
     self->count = n;
@@ -1096,13 +1096,13 @@ extern "C" void func_00151A88(sEconItems_151A88* self, int k)
     int i;
     for (i = 0; i < D_004A11E8; i++)
         self->lookup[i] = -1;
-    for (i = 0; i < n; i++, d++)
+    for (i = 0; i < n; i++, itemDef++)
     {
-        sEconItem_151A88* p = &self->items[i];
-        p->flags = 0;
-        int id = d->id;
-        p->id = id;
-        self->lookup[d->id] = i;
+        sEconItem_151A88* itemSlot = &self->items[i];
+        itemSlot->flags = 0;
+        int id = itemDef->id;
+        itemSlot->id = id;
+        self->lookup[itemDef->id] = i;
     }
     for (i = n; i < 525; i++)
     {

@@ -624,13 +624,13 @@ extern "C" t4Vector func_00310458(cAnimModel* model, int id, int index)
         if (part->id == id)
         {
             sAmPoint_0458* pt = (sAmPoint_0458*)((index << 4) + (int)part->unk_3C);
-            t4Matrix* m = (t4Matrix*)(((pt->bone + part->firstBone) << 6) + (int)model->unk_034);
-            t4Vector v;
-            v.x = pt->x;
-            v.y = pt->y;
-            v.z = pt->z;
-            v.w = 1.0f;
-            return amMulMat_0458(m, v);
+            t4Matrix* boneMatrix = (t4Matrix*)(((pt->bone + part->firstBone) << 6) + (int)model->unk_034);
+            t4Vector localPoint;
+            localPoint.x = pt->x;
+            localPoint.y = pt->y;
+            localPoint.z = pt->z;
+            localPoint.w = 1.0f;
+            return amMulMat_0458(boneMatrix, localPoint);
         }
     }
     return t4vect_Origin;

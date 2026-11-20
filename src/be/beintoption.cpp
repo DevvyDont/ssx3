@@ -131,16 +131,16 @@ public:
  */
 extern "C" void func_0014F458(void* self)
 {
-    sOptBits_0014F458* o = D_00535610_v0014F458;
-    o->a = 10;
-    o->b = 10;
-    o->c = 10;
-    o->d = 0;
-    o->e = 0;
-    o->f = 1;
-    o->g = 1;
-    o->h = 1;
-    o->w1a = 1;
+    sOptBits_0014F458* options = D_00535610_v0014F458;
+    options->a = 10;
+    options->b = 10;
+    options->c = 10;
+    options->d = 0;
+    options->e = 0;
+    options->f = 1;
+    options->g = 1;
+    options->h = 1;
+    options->w1a = 1;
     ((cBEOptionInterfaceV_0014F458*)cBEOptionInterface_instance)->apply();
 }
 #endif
@@ -288,11 +288,11 @@ extern char D_00535617[][0x40];
  */
 extern "C" char* func_0014F6A8(void* self, int i)
 {
-    char* s = D_00535617[i];
-    if (strlen(s) == 0) {
+    char* message = D_00535617[i];
+    if (strlen(message) == 0) {
         return 0;
     }
-    return s;
+    return message;
 }
 #endif
 
@@ -319,9 +319,9 @@ extern "C" void func_0014F6E8(void* self, int i)
 {
     char* obj = (char*)SSXApp->FELocale;
     sVEntry_0014F6E8* vt = *(sVEntry_0014F6E8**)(obj + 0x4);
-    char* o2 = obj + vt[4].delta;
-    int h = cBEOptionInterface_getDefaultQuickKeyMessageHashValue(self, i);
-    void* text = vt[4].fn(o2, h);
+    char* localeThis = obj + vt[4].delta;
+    int hashValue = cBEOptionInterface_getDefaultQuickKeyMessageHashValue(self, i);
+    void* text = vt[4].fn(localeThis, hashValue);
     USTR_strcpyW(D_00535617[i], text);
 }
 #endif
@@ -369,8 +369,8 @@ extern "C" int func_0014F870();
  */
 extern "C" int func_0014F7A8(int i)
 {
-    int c = ((sOptionTriplesView_0014F7A8*)&D_005308B8)->triples[i].c;
-    return func_0014F870() - c;
+    int headStart = ((sOptionTriplesView_0014F7A8*)&D_005308B8)->triples[i].c;
+    return func_0014F870() - headStart;
 }
 #endif
 
@@ -420,8 +420,8 @@ extern sOptionGlobal_005308B8 D_005308B8;
  */
 extern "C" int func_0014F810(int i)
 {
-    sOptionView_005308B8* g = (sOptionView_005308B8*)&D_005308B8;
-    if (g->triples[i].a != 0 || g->triples[i].b != 0 || g->triples[i].c != 0 || g->field_0x18 != 0 || g->field_0x1C != 0)
+    sOptionView_005308B8* rules = (sOptionView_005308B8*)&D_005308B8;
+    if (rules->triples[i].a != 0 || rules->triples[i].b != 0 || rules->triples[i].c != 0 || rules->field_0x18 != 0 || rules->field_0x1C != 0)
     {
         return 1;
     }
@@ -450,12 +450,12 @@ extern sOptionGlobal_005308B8 D_005308B8;
  */
 extern "C" int func_0014F870()
 {
-    int m = D_005308B8.field_0x1C;
-    if (m < D_005308B8.field_0x8)
-        m = D_005308B8.field_0x8;
-    if (m < D_005308B8.field_0x14)
-        m = D_005308B8.field_0x14;
-    return m;
+    int maxHeadStart = D_005308B8.field_0x1C;
+    if (maxHeadStart < D_005308B8.field_0x8)
+        maxHeadStart = D_005308B8.field_0x8;
+    if (maxHeadStart < D_005308B8.field_0x14)
+        maxHeadStart = D_005308B8.field_0x14;
+    return maxHeadStart;
 }
 #endif
 
@@ -474,10 +474,10 @@ struct sOptionTriple_0014F898 {
 // Swaps the two 12-byte triples at the start of D_005308B8.
 extern "C" void func_0014F898()
 {
-    sOptionTriple_0014F898* t = (sOptionTriple_0014F898*)&D_005308B8;
-    sOptionTriple_0014F898 tmp = t[0];
-    t[0] = t[1];
-    t[1] = tmp;
+    sOptionTriple_0014F898* records = (sOptionTriple_0014F898*)&D_005308B8;
+    sOptionTriple_0014F898 firstRecord = records[0];
+    records[0] = records[1];
+    records[1] = firstRecord;
 }
 #endif
 

@@ -329,12 +329,12 @@ INCLUDE_ASM("be/bedbreward", func_0015BB88);
 extern char D_00535C0C[];
 
 /**
- * Sets cBENewRaceInterface_newRace.iRaceTime to @p v (@p self is unused).
+ * Sets cBENewRaceInterface_newRace.iRaceTime to @p raceTime (@p self is unused).
  *
- * @param v  the race time
+ * @param raceTime  the race time
  */
-extern "C" void func_0015BB88(void* self, int v) {
-    *(int*)D_00535C0C = v;
+extern "C" void func_0015BB88(void* self, int raceTime) {
+    *(int*)D_00535C0C = raceTime;
 }
 #endif
 //100%
@@ -403,16 +403,16 @@ extern char D_00535C08[];
 extern int D_004A11B8;
 
 /**
- * Sets the race's location: cBENewRaceInterface_newRace.iLocationIdx = @p v, and sets the flag D_004A11B8 to 1.
+ * Sets the race's location: cBENewRaceInterface_newRace.iLocationIdx = @p locationIndex, and sets the flag D_004A11B8 to 1.
  *
  * D_004A11B8 is read by func_0015BC00 and cleared by func_0015BC08 (it sits where On Tour keeps
  * cBENewRaceInterface::bIsBamLocation). @p self is unused.
  *
- * @param v  the location index
+ * @param locationIndex  the location index
  */
-extern "C" void func_0015BBD8(void* self, int v)
+extern "C" void func_0015BBD8(void* self, int locationIndex)
 {
-    *(int*)D_00535C08 = v;
+    *(int*)D_00535C08 = locationIndex;
     D_004A11B8 = 1;
 }
 #endif
@@ -1016,8 +1016,8 @@ extern char D_00535612[];
  */
 extern "C" int func_0015C148(void)
 {
-    int v = *(short*)D_00535612;
-    return v & 1;
+    int upperHalf = *(short*)D_00535612;
+    return upperHalf & 1;
 }
 #endif
 //100%
@@ -1088,13 +1088,13 @@ INCLUDE_ASM("be/bedbreward", func_0015C1E0);
 extern char D_00535615[];
 
 /**
- * Stores @p v as the signed byte at cBEOptionInterface_mOption + 5 (where On Tour keeps the vertical screen offset
+ * Stores @p vertDelta as the signed byte at cBEOptionInterface_mOption + 5 (where On Tour keeps the vertical screen offset
  * iVtDelta). @p self is unused.
  *
- * @param v  the new value
+ * @param vertDelta  the new value
  */
-extern "C" void func_0015C1E0(void* self, int v) {
-    *(char*)D_00535615 = v;
+extern "C" void func_0015C1E0(void* self, int vertDelta) {
+    *(char*)D_00535615 = vertDelta;
 }
 #endif
 //100%
@@ -1103,13 +1103,13 @@ INCLUDE_ASM("be/bedbreward", func_0015C1F0);
 extern char D_00535616[];
 
 /**
- * Stores @p v as the signed byte at cBEOptionInterface_mOption + 6 (where On Tour keeps the horizontal screen offset
+ * Stores @p horzDelta as the signed byte at cBEOptionInterface_mOption + 6 (where On Tour keeps the horizontal screen offset
  * iHzDelta). @p self is unused.
  *
- * @param v  the new value
+ * @param horzDelta  the new value
  */
-extern "C" void func_0015C1F0(void* self, int v) {
-    *(char*)D_00535616 = v;
+extern "C" void func_0015C1F0(void* self, int horzDelta) {
+    *(char*)D_00535616 = horzDelta;
 }
 #endif
 //100%
@@ -1213,10 +1213,10 @@ extern char D_00534B34[];
 /**
  * Sets cBENetworkInterface_networkOpt.bIsRankedGame (D_00534B34). @p self is unused.
  *
- * @param v  nonzero for a ranked game
+ * @param isRanked  nonzero for a ranked game
  */
-extern "C" void func_0015C298(void* self, int v) {
-    *(int*)D_00534B34 = v;
+extern "C" void func_0015C298(void* self, int isRanked) {
+    *(int*)D_00534B34 = isRanked;
 }
 #endif
 //100%
@@ -1242,10 +1242,10 @@ extern char D_00534B38[];
  * Sets cBENetworkInterface_networkOpt.bIsHost (D_00534B38): whether this console hosts the online game. @p self is
  * unused.
  *
- * @param v  nonzero when hosting
+ * @param isHost  nonzero when hosting
  */
-extern "C" void func_0015C2B8(void* self, int v) {
-    *(int*)D_00534B38 = v;
+extern "C" void func_0015C2B8(void* self, int isHost) {
+    *(int*)D_00534B38 = isHost;
 }
 #endif
 //100%
@@ -1270,10 +1270,10 @@ extern char D_00534B3C[];
 /**
  * Sets cBENetworkInterface_networkOpt.iPort (D_00534B3C), the network port. @p self is unused.
  *
- * @param v  the port
+ * @param port  the port
  */
-extern "C" void func_0015C2D8(void* self, int v) {
-    *(int*)D_00534B3C = v;
+extern "C" void func_0015C2D8(void* self, int port) {
+    *(int*)D_00534B3C = port;
 }
 #endif
 //100%
@@ -1298,10 +1298,10 @@ extern char D_00534B40[];
 /**
  * Sets cBENetworkInterface_networkOpt.fLatency (D_00534B40), the measured network latency.
  *
- * @param v  the latency
+ * @param latency  the latency
  */
-extern "C" void func_0015C2F8(float v) {
-    *(float*)D_00534B40 = v;
+extern "C" void func_0015C2F8(float latency) {
+    *(float*)D_00534B40 = latency;
 }
 #endif
 //100%
@@ -1326,10 +1326,10 @@ extern char D_00534D44[];
 /**
  * Sets cBENetworkInterface_networkOpt.iClientID (D_00534D44). @p self is unused.
  *
- * @param v  the client id
+ * @param clientID  the client id
  */
-extern "C" void func_0015C318(void* self, int v) {
-    *(int*)D_00534D44 = v;
+extern "C" void func_0015C318(void* self, int clientID) {
+    *(int*)D_00534D44 = clientID;
 }
 #endif
 //100%
@@ -1461,10 +1461,10 @@ extern char D_00534E58[];
  * Sets cBENetworkInterface_networkOpt.MyCharacterID (D_00534E58): this player's character in the online race.
  * @p self is unused.
  *
- * @param v  the character id
+ * @param characterID  the character id
  */
-extern "C" void func_0015C3D8(void* self, int v) {
-    *(int*)D_00534E58 = v;
+extern "C" void func_0015C3D8(void* self, int characterID) {
+    *(int*)D_00534E58 = characterID;
 }
 #endif
 //100%
@@ -1490,10 +1490,10 @@ extern char D_00534E5C[];
  * Sets cBENetworkInterface_networkOpt.OpponentCharacterID (D_00534E5C): the remote player's character. @p self is
  * unused.
  *
- * @param v  the character id
+ * @param characterID  the character id
  */
-extern "C" void func_0015C3F8(void* self, int v) {
-    *(int*)D_00534E5C = v;
+extern "C" void func_0015C3F8(void* self, int characterID) {
+    *(int*)D_00534E5C = characterID;
 }
 #endif
 //100%

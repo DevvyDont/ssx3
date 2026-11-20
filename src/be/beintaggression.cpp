@@ -331,9 +331,9 @@ extern "C" void func_001560A0(void* self, void* stream)
         int profile = cBELibrary_getProfileIndex(i);
         for (int j = 0; j < 10; j++)
         {
-            int c = cBELibrary_getCharacterID(i);
+            int characterId = cBELibrary_getCharacterID(i);
             sStreamVE_1560A0* vt2 = *(sStreamVE_1560A0**)stream;
-            vt2[1].fn((char*)stream + vt2[1].delta, &cBELibrary_profileLib[profile][c].aggression[j], 3);
+            vt2[1].fn((char*)stream + vt2[1].delta, &cBELibrary_profileLib[profile][characterId].aggression[j], 3);
         }
     }
 }

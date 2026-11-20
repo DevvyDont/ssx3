@@ -142,10 +142,10 @@ extern char D_00530EC0_raw[] __asm__("D_00530EC0");
 extern "C" int func_0014FD80(void* self, int rider, int idx, int value)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
-    int off = idx * 6 + c * 0x1FE + profile * 5100;
-    char* p = D_00530EC0_raw + off;
-    p[1] = value;
+    int characterId = cBELibrary_getCharacterID(rider);
+    int off = idx * 6 + characterId * 0x1FE + profile * 5100;
+    char* entry = D_00530EC0_raw + off;
+    entry[1] = value;
     return 1;
 }
 #endif
@@ -183,8 +183,8 @@ extern sBagtEntries D_00530EC0_e[3][10] __asm__("D_00530EC0");
 extern "C" int func_0014FE08(void* self, int rider, int idx, int bit)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
-    D_00530EC0_e[profile][c].e[idx].flags &= ~(1 << bit);
+    int characterId = cBELibrary_getCharacterID(rider);
+    D_00530EC0_e[profile][characterId].e[idx].flags &= ~(1 << bit);
     return 1;
 }
 #endif
@@ -214,23 +214,23 @@ extern sPad20 D_0045AEB8;
  */
 extern "C" int func_0014FEA8(void* self, int rider, int idx, int second)
 {
-    char* t = (char*)&D_0045AEB8 + idx * 0x14;
-    if (*(unsigned short*)(t + 0xC) == 0)
+    char* grabInfo = (char*)&D_0045AEB8 + idx * 0x14;
+    if (*(unsigned short*)(grabInfo + 0xC) == 0)
         return -1;
     int profile = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
-    int r;
+    int characterId = cBELibrary_getCharacterID(rider);
+    int variant;
     if (second)
     {
-        char* p = D_00530EC0_raw + (idx * 6 + c * 0x1FE + profile * 5100);
-        r = (unsigned char)p[1];
+        char* entry = D_00530EC0_raw + (idx * 6 + characterId * 0x1FE + profile * 5100);
+        variant = (unsigned char)entry[1];
     }
     else
     {
-        char* p = D_00530EC0_raw + (idx * 6 + c * 0x1FE + profile * 5100);
-        r = (unsigned char)p[0];
+        char* entry = D_00530EC0_raw + (idx * 6 + characterId * 0x1FE + profile * 5100);
+        variant = (unsigned char)entry[0];
     }
-    return r;
+    return variant;
 }
 #endif
 
@@ -262,12 +262,12 @@ extern sBagInfo_FF90 D_0045AEB8_FF90[] __asm__("D_0045AEB8");
  */
 extern "C" int func_0014FF90(void* self, int rider, int idx, int* count)
 {
-    int r = D_0045AEB8_FF90[idx].value;
-    unsigned short c;
-    c = D_0045AEB8_FF90[idx].count;
-    *count = c;
+    int uberTable = D_0045AEB8_FF90[idx].value;
+    unsigned short uberCount;
+    uberCount = D_0045AEB8_FF90[idx].count;
+    *count = uberCount;
     ASSERT_FF90(count != 0);
-    return r;
+    return uberTable;
 }
 #endif
 
@@ -294,8 +294,8 @@ extern sBagtEntries D_00530EC0_e[3][10] __asm__("D_00530EC0");
 extern "C" int func_0014FFB8(void* self, int rider, int idx, int bit)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
-    return (D_00530EC0_e[profile][c].e[idx].flags >> bit) & 1;
+    int characterId = cBELibrary_getCharacterID(rider);
+    return (D_00530EC0_e[profile][characterId].e[idx].flags >> bit) & 1;
 }
 #endif
 
@@ -322,8 +322,8 @@ extern sBagtEntries D_00530EC0_e[3][10] __asm__("D_00530EC0");
 extern "C" int func_00150048(void* self, int rider, int idx, int bit)
 {
     int profile = cBELibrary_getProfileIndex(rider);
-    int c = cBELibrary_getCharacterID(rider);
-    return (D_00530EC0_e[profile][c].e[idx].flags2 >> bit) & 1;
+    int characterId = cBELibrary_getCharacterID(rider);
+    return (D_00530EC0_e[profile][characterId].e[idx].flags2 >> bit) & 1;
 }
 #endif
 
@@ -334,17 +334,17 @@ extern sPad20 D_0045AEB8;
 INCLUDE_ASM("be/beintbagt", func_001500D8);
 #ifdef SKIP_ASM
 /**
- * Returns the start animation of grab @p a2: the halfword at +0x0 of its 0x14-byte record in D_0045AEB8.
+ * Returns the start animation of grab @p grabIndex: the halfword at +0x0 of its 0x14-byte record in D_0045AEB8.
  *
- * cSpinControl_isGrabPlaying plays it when a grab begins. @p a1 is unused.
+ * cSpinControl_isGrabPlaying plays it when a grab begins. @p rider is unused.
  *
- * @param a1  the rider (unused)
- * @param a2  the grab
+ * @param rider  the rider (unused)
+ * @param grabIndex  the grab
  * @return the animation id
  */
-extern "C" unsigned short func_001500D8(void* self, int a1, int a2)
+extern "C" unsigned short func_001500D8(void* self, int rider, int grabIndex)
 {
-    return *(unsigned short*)((char*)&D_0045AEB8 + a2 * 0x14);
+    return *(unsigned short*)((char*)&D_0045AEB8 + grabIndex * 0x14);
 }
 #endif
 
@@ -352,18 +352,18 @@ extern "C" unsigned short func_001500D8(void* self, int a1, int a2)
 INCLUDE_ASM("be/beintbagt", func_001500F8);
 #ifdef SKIP_ASM
 /**
- * Returns the held (looping) animation of grab @p a2: the halfword at +0x2 of its record in D_0045AEB8.
+ * Returns the held (looping) animation of grab @p grabIndex: the halfword at +0x2 of its record in D_0045AEB8.
  *
- * 438 means none. @p a1 is unused.
+ * 438 means none. @p rider is unused.
  *
- * @param a1  the rider (unused)
- * @param a2  the grab
+ * @param rider  the rider (unused)
+ * @param grabIndex  the grab
  * @return the animation id
  */
-extern "C" unsigned short func_001500F8(void* self, int a1, int a2)
+extern "C" unsigned short func_001500F8(void* self, int rider, int grabIndex)
 {
-    char* p = (char*)&D_0045AEB8 + a2 * 0x14;
-    return *(unsigned short*)(p + 0x2);
+    char* grabInfo = (char*)&D_0045AEB8 + grabIndex * 0x14;
+    return *(unsigned short*)(grabInfo + 0x2);
 }
 #endif
 
@@ -371,17 +371,17 @@ extern "C" unsigned short func_001500F8(void* self, int a1, int a2)
 INCLUDE_ASM("be/beintbagt", func_00150118);
 #ifdef SKIP_ASM
 /**
- * Returns the trick id of grab @p a2: the halfword at +0x4 of its record in D_0045AEB8, scored when the grab is held
- * and released. @p a1 is unused.
+ * Returns the trick id of grab @p grabIndex: the halfword at +0x4 of its record in D_0045AEB8, scored when the grab is held
+ * and released. @p rider is unused.
  *
- * @param a1  the rider (unused)
- * @param a2  the grab
+ * @param rider  the rider (unused)
+ * @param grabIndex  the grab
  * @return the trick id
  */
-extern "C" unsigned short func_00150118(void* self, int a1, int a2)
+extern "C" unsigned short func_00150118(void* self, int rider, int grabIndex)
 {
-    char* p = (char*)&D_0045AEB8 + a2 * 0x14;
-    return *(unsigned short*)(p + 0x4);
+    char* grabInfo = (char*)&D_0045AEB8 + grabIndex * 0x14;
+    return *(unsigned short*)(grabInfo + 0x4);
 }
 #endif
 
@@ -389,16 +389,16 @@ extern "C" unsigned short func_00150118(void* self, int a1, int a2)
 INCLUDE_ASM("be/beintbagt", func_00150138);
 #ifdef SKIP_ASM
 /**
- * Returns the tweak animation of grab @p a2: the halfword at +0x6 of its record in D_0045AEB8. @p a1 is unused.
+ * Returns the tweak animation of grab @p grabIndex: the halfword at +0x6 of its record in D_0045AEB8. @p rider is unused.
  *
- * @param a1  the rider (unused)
- * @param a2  the grab
+ * @param rider  the rider (unused)
+ * @param grabIndex  the grab
  * @return the animation id
  */
-extern "C" unsigned short func_00150138(void* self, int a1, int a2)
+extern "C" unsigned short func_00150138(void* self, int rider, int grabIndex)
 {
-    char* p = (char*)&D_0045AEB8 + a2 * 0x14;
-    return *(unsigned short*)(p + 0x6);
+    char* grabInfo = (char*)&D_0045AEB8 + grabIndex * 0x14;
+    return *(unsigned short*)(grabInfo + 0x6);
 }
 #endif
 
@@ -406,17 +406,17 @@ extern "C" unsigned short func_00150138(void* self, int a1, int a2)
 INCLUDE_ASM("be/beintbagt", func_00150158);
 #ifdef SKIP_ASM
 /**
- * Returns the held tweak animation of grab @p a2: the halfword at +0x8 of its record in D_0045AEB8 (438 = none).
- * @p a1 is unused.
+ * Returns the held tweak animation of grab @p grabIndex: the halfword at +0x8 of its record in D_0045AEB8 (438 = none).
+ * @p rider is unused.
  *
- * @param a1  the rider (unused)
- * @param a2  the grab
+ * @param rider  the rider (unused)
+ * @param grabIndex  the grab
  * @return the animation id
  */
-extern "C" unsigned short func_00150158(void* self, int a1, int a2)
+extern "C" unsigned short func_00150158(void* self, int rider, int grabIndex)
 {
-    char* p = (char*)&D_0045AEB8 + a2 * 0x14;
-    return *(unsigned short*)(p + 0x8);
+    char* grabInfo = (char*)&D_0045AEB8 + grabIndex * 0x14;
+    return *(unsigned short*)(grabInfo + 0x8);
 }
 #endif
 
@@ -424,16 +424,16 @@ extern "C" unsigned short func_00150158(void* self, int a1, int a2)
 INCLUDE_ASM("be/beintbagt", func_00150178);
 #ifdef SKIP_ASM
 /**
- * Returns the trick id of grab @p a2's tweak: the halfword at +0xA of its record in D_0045AEB8. @p a1 is unused.
+ * Returns the trick id of grab @p grabIndex's tweak: the halfword at +0xA of its record in D_0045AEB8. @p rider is unused.
  *
- * @param a1  the rider (unused)
- * @param a2  the grab
+ * @param rider  the rider (unused)
+ * @param grabIndex  the grab
  * @return the trick id
  */
-extern "C" unsigned short func_00150178(void* self, int a1, int a2)
+extern "C" unsigned short func_00150178(void* self, int rider, int grabIndex)
 {
-    char* p = (char*)&D_0045AEB8 + a2 * 0x14;
-    return *(unsigned short*)(p + 0xa);
+    char* grabInfo = (char*)&D_0045AEB8 + grabIndex * 0x14;
+    return *(unsigned short*)(grabInfo + 0xa);
 }
 #endif
 
@@ -693,64 +693,64 @@ extern "C" void MEM_fill(void*, int, int);
  * sale) also drops the second chosen variant. cBECharProfileDB_init calls it.
  *
  * @param mode  the character (selects the starting choices)
- * @param e  the record's first entries (6 bytes each)
+ * @param entries  the record's first entries (6 bytes each)
  */
-extern "C" void func_00150558(int mode, sBagtSlot0558* e)
+extern "C" void func_00150558(int mode, sBagtSlot0558* entries)
 {
     int i;
-    MEM_fill(e, 0, 90);
+    MEM_fill(entries, 0, 90);
     switch (mode) {
     case 0:
-        e[0].a = 1; e[0].b = 3; e[1].a = 0; e[1].b = 2; e[2].a = 0; e[2].b = 2;
-        e[3].a = 1; e[3].b = 2; e[4].a = 0; e[4].b = 7; e[9].a = 1; e[9].b = 3;
+        entries[0].a = 1; entries[0].b = 3; entries[1].a = 0; entries[1].b = 2; entries[2].a = 0; entries[2].b = 2;
+        entries[3].a = 1; entries[3].b = 2; entries[4].a = 0; entries[4].b = 7; entries[9].a = 1; entries[9].b = 3;
         break;
     case 1:
-        e[0].a = 0; e[0].b = 2; e[1].a = 0; e[1].b = 2; e[2].a = 1; e[2].b = 3;
-        e[3].a = 0; e[3].b = 3; e[4].a = 1; e[4].b = 2; e[9].a = 0; e[9].b = 9;
+        entries[0].a = 0; entries[0].b = 2; entries[1].a = 0; entries[1].b = 2; entries[2].a = 1; entries[2].b = 3;
+        entries[3].a = 0; entries[3].b = 3; entries[4].a = 1; entries[4].b = 2; entries[9].a = 0; entries[9].b = 9;
         break;
     case 2:
-        e[0].a = 1; e[0].b = 3; e[1].a = 1; e[1].b = 3; e[2].a = 0; e[2].b = 2;
-        e[3].a = 0; e[3].b = 2; e[4].a = 0; e[4].b = 8; e[9].a = 1; e[9].b = 3;
+        entries[0].a = 1; entries[0].b = 3; entries[1].a = 1; entries[1].b = 3; entries[2].a = 0; entries[2].b = 2;
+        entries[3].a = 0; entries[3].b = 2; entries[4].a = 0; entries[4].b = 8; entries[9].a = 1; entries[9].b = 3;
         break;
     case 3:
-        e[0].a = 1; e[0].b = 2; e[1].a = 0; e[1].b = 3; e[2].a = 0; e[2].b = 3;
-        e[3].a = 1; e[3].b = 2; e[4].a = 0; e[4].b = 2; e[9].a = 1; e[9].b = 6;
+        entries[0].a = 1; entries[0].b = 2; entries[1].a = 0; entries[1].b = 3; entries[2].a = 0; entries[2].b = 3;
+        entries[3].a = 1; entries[3].b = 2; entries[4].a = 0; entries[4].b = 2; entries[9].a = 1; entries[9].b = 6;
         break;
     case 4:
-        e[0].a = 1; e[0].b = 3; e[1].a = 1; e[1].b = 2; e[2].a = 0; e[2].b = 2;
-        e[3].a = 1; e[3].b = 2; e[4].a = 1; e[4].b = 10; e[9].a = 1; e[9].b = 3;
+        entries[0].a = 1; entries[0].b = 3; entries[1].a = 1; entries[1].b = 2; entries[2].a = 0; entries[2].b = 2;
+        entries[3].a = 1; entries[3].b = 2; entries[4].a = 1; entries[4].b = 10; entries[9].a = 1; entries[9].b = 3;
         break;
     case 5:
-        e[0].a = 0; e[0].b = 2; e[1].a = 0; e[1].b = 3; e[2].a = 0; e[2].b = 2;
-        e[3].a = 0; e[3].b = 2; e[4].a = 0; e[4].b = 3; e[9].a = 1; e[9].b = 7;
+        entries[0].a = 0; entries[0].b = 2; entries[1].a = 0; entries[1].b = 3; entries[2].a = 0; entries[2].b = 2;
+        entries[3].a = 0; entries[3].b = 2; entries[4].a = 0; entries[4].b = 3; entries[9].a = 1; entries[9].b = 7;
         break;
     case 6:
-        e[0].a = 0; e[0].b = 2; e[1].a = 0; e[1].b = 2; e[2].a = 1; e[2].b = 3;
-        e[3].a = 0; e[3].b = 3; e[4].a = 1; e[4].b = 2; e[9].a = 0; e[9].b = 8;
+        entries[0].a = 0; entries[0].b = 2; entries[1].a = 0; entries[1].b = 2; entries[2].a = 1; entries[2].b = 3;
+        entries[3].a = 0; entries[3].b = 3; entries[4].a = 1; entries[4].b = 2; entries[9].a = 0; entries[9].b = 8;
         break;
     case 7:
-        e[0].a = 1; e[0].b = 3; e[1].a = 1; e[1].b = 2; e[2].a = 0; e[2].b = 2;
-        e[3].a = 1; e[3].b = 3; e[4].a = 0; e[4].b = 9; e[9].a = 0; e[9].b = 2;
+        entries[0].a = 1; entries[0].b = 3; entries[1].a = 1; entries[1].b = 2; entries[2].a = 0; entries[2].b = 2;
+        entries[3].a = 1; entries[3].b = 3; entries[4].a = 0; entries[4].b = 9; entries[9].a = 0; entries[9].b = 2;
         break;
     case 8:
-        e[0].a = 1; e[0].b = 3; e[1].a = 1; e[1].b = 2; e[2].a = 0; e[2].b = 3;
-        e[3].a = 1; e[3].b = 2; e[4].a = 0; e[4].b = 3; e[9].a = 0; e[9].b = 10;
+        entries[0].a = 1; entries[0].b = 3; entries[1].a = 1; entries[1].b = 2; entries[2].a = 0; entries[2].b = 3;
+        entries[3].a = 1; entries[3].b = 2; entries[4].a = 0; entries[4].b = 3; entries[9].a = 0; entries[9].b = 10;
         break;
     default:
-        e[0].a = 0; e[0].b = 2; e[1].a = 1; e[1].b = 3; e[2].a = 0; e[2].b = 3;
-        e[3].a = 1; e[3].b = 3; e[4].a = 1; e[4].b = 6; e[9].a = 1; e[9].b = 2;
+        entries[0].a = 0; entries[0].b = 2; entries[1].a = 1; entries[1].b = 3; entries[2].a = 0; entries[2].b = 3;
+        entries[3].a = 1; entries[3].b = 3; entries[4].a = 1; entries[4].b = 6; entries[9].a = 1; entries[9].b = 2;
         break;
     }
     for (i = 0; i < 15; i++) {
         int j;
-        e[i].c = 0;
-        e[i].d = 0;
+        entries[i].c = 0;
+        entries[i].d = 0;
         for (j = 0; j < D_0045AEB8_bagt[i].count; j++) {
-            e[i].c |= 1 << j;
-            e[i].d |= 1 << j;
+            entries[i].c |= 1 << j;
+            entries[i].d |= 1 << j;
         }
-        e[i].d &= 0xFFFC;
-        e[i].c = (e[i].c & 0xFFFC) & ~(1 << e[i].b);
+        entries[i].d &= 0xFFFC;
+        entries[i].c = (entries[i].c & 0xFFFC) & ~(1 << entries[i].b);
     }
 }
 #endif

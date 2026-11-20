@@ -362,15 +362,15 @@ extern sNetSlot_0014EB08 D_005308B8[];
  */
 extern "C" void func_0014EB08(void)
 {
-    sNetSlot_0014EB08 tmp = D_005308B8[0];
+    sNetSlot_0014EB08 firstRecord = D_005308B8[0];
     D_005308B8[0].y = D_005308B8[1].y;
     D_005308B8[0].c = D_005308B8[1].c;
     D_005308B8[0].a = D_005308B8[1].a;
     D_005308B8[0].x = D_005308B8[1].x;
-    D_005308B8[1].y = tmp.y;
-    D_005308B8[1].c = tmp.c;
-    D_005308B8[1].a = tmp.a;
-    D_005308B8[1].x = tmp.x;
+    D_005308B8[1].y = firstRecord.y;
+    D_005308B8[1].c = firstRecord.c;
+    D_005308B8[1].a = firstRecord.a;
+    D_005308B8[1].x = firstRecord.x;
 }
 #endif
 
