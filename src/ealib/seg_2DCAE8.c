@@ -8,6 +8,16 @@ extern unsigned char *func_004187E8_BAE8(void *, void *, unsigned int, int, void
 extern char func_003DBAC8_BAE8[] __asm__("func_003DBAC8");
 
 int func_003DBAE8_impl(short key, unsigned char *p) __asm__("func_003DBAE8");
+/**
+ * Looks a string id up in a locale file's index: returns the entry's string number (its second little-endian halfword),
+ * or -1 when the id is not there.
+ *
+ * Binary search (func_004187E8, comparator func_003DBAC8) over the index's 4-byte entries from +0x10, count at +0x8.
+ *
+ * @param key  the string id
+ * @param indexTable  the index chunk
+ * @return the string number, or -1
+ */
 int func_003DBAE8_impl(short key, unsigned char *indexTable) {
     short k = key;
     unsigned char *n = indexTable + 8;
@@ -30,6 +40,17 @@ typedef struct { unsigned char b[4]; } W_BB68;
 static inline unsigned rd_BB68(unsigned char *p) {
     return p[3] << 24 | p[2] << 16 | p[1] << 8 | p[0];
 }
+/**
+ * Returns string @p idx of a locale file's current language, or 0 when it is out of range.
+ *
+ * A file with an index (flag bit 0 at +0x8) maps @p idx through it first (func_003DBAE8, index chunk at the offset in
+ * +0x4). The language block is entry [language id +0xE] of the offset table at +0x10; the string offsets follow its
+ * +0x10, count at +0xC. All values are little-endian.
+ *
+ * @param table  the locale file
+ * @param idx  the string id (number, or hashed id when indexed)
+ * @return the string, or 0
+ */
 unsigned char *func_003DBB68(unsigned char *table, int idx) {
     unsigned char *block;
     if (table[8] & 1) {
@@ -48,6 +69,12 @@ unsigned char *func_003DBB68(unsigned char *table, int idx) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DBC98);
 #ifdef SKIP_ASM
+/**
+ * Returns @p value unchanged (a locale file needs no set-up). No callers.
+ *
+ * @param value  the value
+ * @return @p value
+ */
 int func_003DBC98(int value) {
     return value;
 }
@@ -81,6 +108,13 @@ int USTR_length(unsigned short *str) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DBCD8);
 #ifdef SKIP_ASM
+/**
+ * Returns the index of the first @p wanted character in a UCS-2 string, or 0xFFFF when it is absent.
+ *
+ * @param str  the string
+ * @param wanted  the character
+ * @return the index, or 0xFFFF
+ */
 int func_003DBCD8(unsigned short *str, int wanted) {
     int i;
     unsigned short key = wanted;
@@ -108,6 +142,15 @@ extern int func_003DBDD0_BD18(const unsigned short *, const unsigned short *, in
 
 /* Index of sub in s (UCS-2), or 0xFFFF. */
 int func_003DBD18_impl(const unsigned short *s, const unsigned short *sub) __asm__("func_003DBD18");
+/**
+ * Returns the index of the first occurrence of @p sub in UCS-2 string @p s, or 0xFFFF.
+ *
+ * Compares @p sub's length (USTR_length) at each position with func_003DBDD0.
+ *
+ * @param s  the string to search
+ * @param sub  the string to find
+ * @return the index, or 0xFFFF
+ */
 int func_003DBD18_impl(const unsigned short *s, const unsigned short *sub) {
     int n = USTR_length_BD18(sub);
     int i;
@@ -125,6 +168,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DBDB0);
 #ifdef SKIP_ASM
 extern void func_003DBDD0(int, int, int);
 
+/**
+ * Compares two UCS-2 strings: func_003DBDD0 with no length limit (0x7FFFFFFF). Declared void, but its callers (e.g.
+ * cMoviePlayer's file list) use the result left in the return register.
+ *
+ * @param lhs  the first string
+ * @param rhs  the second string
+ */
 void func_003DBDB0(int lhs, int rhs) {
     func_003DBDD0(lhs, rhs, 0x7FFFFFFF);
 }
@@ -136,6 +186,15 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DBDD0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 /* UCS-2 strncmp. */
 int func_003DBDD0_impl(const unsigned short *a, const unsigned short *b, int n) __asm__("func_003DBDD0");
+/**
+ * Compares up to @p n characters of two UCS-2 strings; returns the difference of the first pair that differs, 0 when
+ * equal (stopping at the end of @p lhs).
+ *
+ * @param lhs  the first string
+ * @param rhs  the second string
+ * @param n  the maximum number of characters
+ * @return the difference, 0 when equal
+ */
 int func_003DBDD0_impl(const unsigned short *lhs, const unsigned short *rhs, int n) {
     int i;
     int diff = 0;
@@ -231,6 +290,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DBED0);
 #ifdef SKIP_ASM
 extern void func_003DBEF0(int, int, int, int);
 
+/**
+ * Formats a UCS-2 string with one insert: func_003DBEF0 with no second string.
+ *
+ * @param dst  the output
+ * @param fmt  the format, with "%1"
+ * @param insert1  the string for "%1"
+ */
 void func_003DBED0(int dst, int fmt, int insert1) {
     func_003DBEF0(dst, fmt, insert1, 0);
 }
@@ -244,6 +310,14 @@ extern void ucopy_BEF0(unsigned short *, unsigned short *) __asm__("USTR_copy");
 extern int ulen_BEF0(unsigned short *) __asm__("USTR_length");
 
 void fBEF0_BEF0(unsigned short *d, unsigned short *s, unsigned short *a2, unsigned short *a3) __asm__("func_003DBEF0");
+/**
+ * Formats a UCS-2 string: copies @p fmt to @p dst, replacing "%1" with @p insert1 and "%2" with @p insert2.
+ *
+ * @param dst  the output
+ * @param fmt  the format
+ * @param insert1  the string for "%1"
+ * @param insert2  the string for "%2"
+ */
 void fBEF0_BEF0(unsigned short *dst, unsigned short *fmt, unsigned short *insert1, unsigned short *insert2) {
     unsigned short cur, next;
     unsigned short *insert;
@@ -280,6 +354,16 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DBFD8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 unsigned short *func_003DBFD8_BFD8(unsigned short *out, unsigned int n, unsigned int base, unsigned short *digits) __asm__("func_003DBFD8");
+/**
+ * Writes an unsigned number backwards in a base from a digit table, ending at @p out; returns the first character
+ * written.
+ *
+ * @param out  the end of the output buffer
+ * @param n  the value
+ * @param base  the base
+ * @param digits  the digit characters
+ * @return the start of the digits
+ */
 unsigned short *func_003DBFD8_BFD8(unsigned short *out, unsigned int n, unsigned int base, unsigned short *digits) {
     if (n == 0) {
         *--out = digits[0];
@@ -298,6 +382,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DC038);
 #ifdef SKIP_ASM
 extern void func_003DBFD8(int, int);
 
+/**
+ * Writes a signed number backwards (its magnitude, through func_003DBFD8). Only two arguments are declared; the base
+ * and digit table reach func_003DBFD8 in the untouched argument registers.
+ *
+ * @param out  the end of the output buffer
+ * @param value  the value
+ */
 void func_003DC038(int out, int value) {
     if (value < 0) {
         value = -value;
@@ -313,6 +404,15 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DC068);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern char *fcvt_C068(int, int, int *, int *) __asm__("fcvt");
 extern int strlen_C068(char *) __asm__("strlen");
+/**
+ * Writes a double backwards with @p prec decimals: the digits from fcvt, a '.' before the decimals, zeros where fcvt
+ * gave fewer digits; returns the first character written.
+ *
+ * @param dst  the end of the output buffer
+ * @param val  the value
+ * @param prec  the number of decimals
+ * @return the start of the text
+ */
 unsigned short *func_003DC068(unsigned short *dst, int val, int prec) {
     int exp, sign;
     int i = 0;
@@ -681,6 +781,12 @@ void USTR_sprintf(char *dst, const char *fmt, ...) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DCA40);
 #ifdef SKIP_ASM
+/**
+ * Copies a C string to a UCS-2 string, decoding "\xHHHH" escapes (4 lowercase hex digits) into one character each.
+ *
+ * @param dst  the UCS-2 output
+ * @param src  the C string
+ */
 void func_003DCA40(short *dst, char *src) {
     while (*src != 0) {
         int ok = 0;
@@ -870,6 +976,11 @@ extern char D_00519AC4_CDE0[] __asm__("D_00519AC4");
 extern int *D_00519AE4_CDE0[] __asm__("D_00519AE4");
 extern int D_00519AE8_CDE0[] __asm__("D_00519AE8");
 
+/**
+ * Shuts the file system down: calls func_003E44B0, frees and closes every added archive (FILESYS_closesync on its
+ * file), releases the mutex (func_003E56E0), clears the command manager's state and frees its memory block (D_00519AE8)
+ * through the free callback.
+ */
 void func_003DCDE0(void) {
     int *n;
     func_003E44B0_CDE0();
@@ -894,6 +1005,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DCE90);
 struct H_CE90 { unsigned int v; };
 extern char *D_00519AD8_CE90[] __asm__("D_00519AD8");
 
+/**
+ * Returns the status (+0x8) of a file operation, or -3 when the handle is stale (its low 20 bits no longer match the
+ * slot named by its low byte).
+ *
+ * @param h  the operation handle
+ * @return the status, or -3
+ */
 int func_003DCE90(struct H_CE90 h) {
     struct H_CE90 c;
     unsigned int u = h.v;
@@ -915,6 +1033,12 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DCF10);
 extern int D_00519AD8_CF10[] __asm__("D_00519AD8");
 typedef struct { unsigned char a, b, c, d; } T_CF10;
 
+/**
+ * Returns the error code (+0xC) of a file operation (no handle check).
+ *
+ * @param arg0  the operation handle
+ * @return the error code
+ */
 int func_003DCF10(T_CF10 arg0) {
     return *(int *)((char*)(D_00519AD8_CF10[0]) + arg0.d * 0x30 + 0xC);
 }
@@ -927,6 +1051,12 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DCF40);
 extern int D_00519AD8_CF40[] __asm__("D_00519AD8");
 typedef struct { unsigned char a, b, c, d; } T_CF40;
 
+/**
+ * Returns the user data (+0x14) of a file operation (no handle check).
+ *
+ * @param arg0  the operation handle
+ * @return the user data
+ */
 int func_003DCF40(T_CF40 arg0) {
     return *(int *)((char*)(D_00519AD8_CF40[0]) + arg0.d * 0x30 + 0x14);
 }
@@ -988,6 +1118,15 @@ extern void MUTEX_lock_CFC0(void *) __asm__("MUTEX_lock");
 extern void MUTEX_unlock_CFC0(void *) __asm__("MUTEX_unlock");
 
 void func_003DCFC0_impl(struct H_CFC0 h, int prio) __asm__("func_003DCFC0");
+/**
+ * Changes a pending file operation's priority (+0x10) and moves it to its place in the priority-ordered queue.
+ *
+ * Does nothing for a stale handle. The queue is re-sorted only when two or more operations are queued, the operation is
+ * not the running one, it is not busy (+0x8) and the priority changed. Runs under the file system's mutex.
+ *
+ * @param h  the operation handle
+ * @param prio  the new priority
+ */
 void func_003DCFC0_impl(struct H_CFC0 h, int prio) {
     struct H_CFC0 c;
     Ent_CFC0 *e;
@@ -1266,6 +1405,17 @@ extern char *f_strncpy_D438(char *, char *, int) __asm__("strncpy");
 extern void f_Exec_D438(int *) __asm__("iFILESYS_ExecCommand");
 struct R_D438 { unsigned flags; int pad4, pad8; int wC; int w10; int w14; int w18; int pad1C, pad20; char *w24; };
 
+/**
+ * Queues a file-exists operation (type 8) for a path; returns its handle.
+ *
+ * Takes an operation (func_003DE670) and a handle slot (func_003DE800) for the name; without a free slot the error is
+ * set to 2 (func_003DE668). The name is copied into the slot and the operation is run (iFILESYS_ExecCommand).
+ *
+ * @param arg0  the path
+ * @param arg1  the priority
+ * @param arg2  the user data
+ * @return the operation handle
+ */
 int func_003DD438(char *arg0, int arg1, int arg2) {
     struct R_D438 *r = (struct R_D438 *)f_E670_D438();
     r->w14 = arg2;
@@ -1418,6 +1568,17 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DD720);
 #ifdef SKIP_ASM
 extern void func_003DE668();
 
+/**
+ * Queues a write operation (type 5) on an open file; returns its handle. A null file sets error 6 (func_003DE668).
+ *
+ * @param file  the file handle
+ * @param offset  the file offset
+ * @param buffer  the data
+ * @param size  the byte count
+ * @param priority  the priority
+ * @param userData  the user data
+ * @return the operation handle
+ */
 int func_003DD720(int file, int offset, int buffer, int size, int priority, int userData) {
     char *cmd = (char *)func_003DE670();
     *(int *)(cmd + 0x14) = userData;
@@ -1443,6 +1604,15 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DD7E0);
 extern int *func_003DE670_D7E0() __asm__("func_003DE670");
 extern void func_003DE668_D7E0(int *) __asm__("func_003DE668");
 
+/**
+ * Creates a size operation (type 6) for an open file; returns its handle. The size (the handle's +0x4) is stored as the
+ * result (+0x18) and the operation completes at once; a null file sets error 6 instead.
+ *
+ * @param file  the file handle
+ * @param priority  the priority
+ * @param userData  the user data
+ * @return the operation handle
+ */
 int func_003DD7E0(int *file, int priority, int userData) {
     int *temp_2;
 
@@ -1467,6 +1637,15 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DD878);
 extern int *func_003DE670();
 extern void iFILESYS_ExecCommand(int);
 
+/**
+ * Queues an operation of type 7 that carries no file and no data (a no-op that completes in queue order); returns its
+ * handle. The first argument is not used.
+ *
+ * @param a0  unused (a file device)
+ * @param priority  the priority
+ * @param userData  the user data
+ * @return the operation handle
+ */
 int func_003DD878(int a0, int priority, int userData) {
     int *cmd = func_003DE670();
     cmd[5] = userData;
@@ -1512,6 +1691,17 @@ extern char D_00495D68_D8E8[] __asm__("D_00495D68");
 extern void iFILESYS_ExecCommand_D8E8(void *) __asm__("iFILESYS_ExecCommand");
 extern char func_003DD8E8_D8E8[] __asm__("func_003DD8E8");
 
+/**
+ * Read callback of adding an archive: completes the read and checks the BIG header; reads the whole header when it is
+ * larger than the buffer, else links the archive (D_00519AB0 +0x34) and runs the add operation.
+ *
+ * A buffer that does not hold a BIG header (BIG_typeofheader 0) is freed. A larger header gets a new buffer of
+ * BIG_sizeofheader bytes and another FILESYS_read with this callback.
+ *
+ * @param a0  the read operation's handle
+ * @param a1  its status
+ * @param s  the archive record
+ */
 void func_003DD8E8(int a0, int a1, struct sFsNode *s) {
     int n, k;
     struct sFsHd *t;
@@ -1554,6 +1744,14 @@ extern void FILESYS_callbackop_DA10(unsigned int, void *) __asm__("FILESYS_callb
 extern void iFILESYS_ExecCommand_DA10(int) __asm__("iFILESYS_ExecCommand");
 extern char func_003DD8E8_DA10[] __asm__("func_003DD8E8");
 
+/**
+ * Open callback of adding an archive: on success reads the first 0x800 bytes into the record's buffer with callback
+ * func_003DD8E8; on failure sets error 4 on the add operation and runs it.
+ *
+ * @param h  the open operation's handle
+ * @param a  its status (1 = opened)
+ * @param b  the archive record
+ */
 void func_003DDA10(struct H_DA10 h, int a, int *b) {
     int x = *(int *)(((unsigned char *)&h)[3] * 0x30 + D_00519AD8_DA10[0] + 0x10);
     int r = FILESYS_completeop_DA10(h.v);
@@ -1585,6 +1783,19 @@ extern int FILESYS_open_DAC0(char *, int, int, R_DAC0 *) __asm__("FILESYS_open")
 extern void fCF70_DAC0(int, void *) __asm__("FILESYS_callbackop");
 extern char func_003DDA10_DAC0[] __asm__("func_003DDA10");
 
+/**
+ * Queues adding a BIG archive (type 9); returns the operation handle.
+ *
+ * An archive already added under that name is linked to the operation, which runs at once. Quirk: that path returns the
+ * operation's address, not its handle (On Tour's returns the handle). Otherwise an 0x18-byte record and an 0x800 buffer
+ * are allocated (gFileSysOpts alloc) and the file is opened with callback func_003DDA10.
+ *
+ * @param name  the archive path
+ * @param b  the memory flags
+ * @param c  the priority
+ * @param d  the user data
+ * @return the operation handle
+ */
 int func_003DDAC0(char *name, int b, int c, int d) {
     Q_DAC0 *q = D_00519AE4_DAC0;
     C_DAC0 *p = func_003DE670_DAC0();
@@ -1615,6 +1826,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DDC00);
 extern void FILESYS_completeop();
 extern void iFILESYS_ExecCommand(int);
 
+/**
+ * Close callback of removing an archive: completes the close and runs the remove operation (@p userData).
+ *
+ * @param request  the close operation's handle
+ * @param status  its status
+ * @param userData  the remove operation
+ */
 void func_003DDC00(int request, int status, int userData) {
     FILESYS_completeop();
     iFILESYS_ExecCommand(userData);
@@ -1636,6 +1854,18 @@ extern void func_003DDC00_DC30(int, int, int) __asm__("func_003DDC00");
 extern G_DC30 D_00519AB0_DC30 __asm__("D_00519AB0");
 extern int (*D_00450C10_DC30[])(void *) __asm__("gFileSysOpts");
 
+/**
+ * Queues removing a BIG archive (type 10); returns the operation handle.
+ *
+ * Error 7 when the archive is still loading (+0x8), 8 (and status -2) when a file opened from it is still open, 5 when
+ * it is not in the archive list. The record and its buffer are freed and the file closed with callback func_003DDC00.
+ * Quirk: an archive missing from the list still has its (null) node unlinked and freed.
+ *
+ * @param a0  the archive handle
+ * @param a1  the priority
+ * @param a2  the user data
+ * @return the operation handle
+ */
 int func_003DDC30(char *a0, int a1, int a2) {
     N_DC30 *prev;
     N_DC30 *n;
@@ -1719,6 +1949,12 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DDE50);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00519AB8_DE50[] __asm__("D_00519AB8");
 void iFILESYS_ExecCommand_DE50(int) __asm__("iFILESYS_ExecCommand");
+/**
+ * Sets the file system's run limit (D_00519AB0 +0x8: queued operations run only while their priority is at most this)
+ * and restarts the queue (iFILESYS_ExecCommand(0)).
+ *
+ * @param a  the priority limit
+ */
 void func_003DDE50(int a) {
     D_00519AB8_DE50[0] = a;
     iFILESYS_ExecCommand_DE50(0);
@@ -1740,6 +1976,16 @@ extern int D_00450C48_DE78[] __asm__("D_00450C48");
 extern char D_00519AF0_DE78[] __asm__("D_00519AF0");
 extern char D_00495D78_DE78[] __asm__("D_00495D78");
 
+/**
+ * Sets the file system's current path (D_00519AF0) from @p a.
+ *
+ * With the 3-character device prefix (D_00450C08) the call is ignored when the device mode (D_00450C48 & 3) is 2, else
+ * device 1 is selected (D_00450C44) and the prefix skipped; with the host root prefix (D_00450C50) it is ignored unless
+ * mode bit 2 is set, else device 2 is selected. The rest is copied and, when it fits, ends with '/'. ps2main passes
+ * "cd:".
+ *
+ * @param a  the path
+ */
 void func_003DDE78(char *a) {
     int n, len;
     n = strlen_DE78(D_00450C50_DE78[0]);
@@ -1768,6 +2014,11 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DDF80);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char D_00519AF0_DF80[] __asm__("D_00519AF0");
 void strncpy_DF80(char *, char *, int) __asm__("strncpy");
+/**
+ * Copies the file system's current path (D_00519AF0, up to 0x100 bytes) to @p dst.
+ *
+ * @param dst  the output buffer
+ */
 void func_003DDF80(char *dst) {
     strncpy_DF80(dst, D_00519AF0_DF80, 0x100);
 }
@@ -1989,6 +2240,9 @@ void iFILESYS_CommandCompleteCallback_impl(int ok) {
 }
 #endif
 
+/**
+ * Does nothing. No callers.
+ */
 void func_003DE4C8(void) {
 }
 
@@ -2063,6 +2317,9 @@ int FILESYS_bypassqueuefileinfo(char *name, int flags, int *out) {
 }
 #endif
 
+/**
+ * Does nothing: the file operation error report, empty in this build. The op creators call it after setting an error.
+ */
 void func_003DE668(void) {
 }
 
@@ -2075,6 +2332,12 @@ extern int D_00450C0C_E670 __asm__("D_00450C0C");
 extern void MUTEX_unlock_E670(void *) __asm__("MUTEX_unlock");
 
 struct sFsCmd *func_003DE670_impl(void) __asm__("func_003DE670");
+/**
+ * Takes a free file operation (D_00519AB0 +0x28, 0x30 bytes each) under the mutex: marks it in use and stamps its index
+ * and a new 20-bit id (D_00450C0C, wrapping to 1). Spins forever when none is free.
+ *
+ * @return the operation
+ */
 struct sFsCmd *func_003DE670_impl(void) {
     int i = 0;
     int t;
@@ -2133,6 +2396,11 @@ struct G_E800 { int f0; int count; char pad[0xC]; char mutex[0x18]; struct Slot_
 extern struct G_E800 D_00519AB0_E800 __asm__("D_00519AB0");
 
 struct Slot_E800 *func_003DE800_impl(void) __asm__("func_003DE800");
+/**
+ * Takes a free file handle slot (D_00519AB0 +0x2C, 0x110 bytes each) under the mutex. Spins forever when none is free.
+ *
+ * @return the handle slot
+ */
 struct Slot_E800 *func_003DE800_impl(void) {
     int i;
     MUTEX_lock(D_00519AC4_E800);
@@ -2178,6 +2446,12 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DE910);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00450C10_E910[4] __asm__("gFileSysOpts");
 
+/**
+ * Sets the file system's allocate and free callbacks (gFileSysOpts +0x4 and +0x8).
+ *
+ * @param arg0  the allocate function
+ * @param arg1  the free function
+ */
 void func_003DE910(int arg0, int arg1) {
     D_00450C10_E910[1] = arg0;
     D_00450C10_E910[2] = arg1;
@@ -2196,6 +2470,13 @@ extern int D_00450C50_E928[] __asm__("D_00450C50");
 extern void MEM_clear_E928(int, int) __asm__("MEM_clear");
 extern void MEM_copy_E928(int *, void *, int) __asm__("MEM_copy");
 
+/**
+ * Copies the file system's options (gFileSysOpts) to the caller's record, whose first word is its size; a record of 37
+ * bytes or more is cleared first. Refreshes the copied fields from the live settings first.
+ *
+ * @param arg0  the options record (size first)
+ * @return 1
+ */
 int func_003DE928(int *arg0) {
     int n = *arg0;
     if (n >= 37) {
@@ -2222,6 +2503,13 @@ extern int D_00450C50_E9B8[] __asm__("D_00450C50");
 extern void MEM_clear_E9B8(void *, int) __asm__("MEM_clear");
 extern void MEM_copy_E9B8(void *, int *, int) __asm__("MEM_copy");
 
+/**
+ * Takes the file system's options from the caller's record (size first; a short record clears the 36-byte options
+ * first) and applies them to the live settings (D_00450C58, D_00450C50).
+ *
+ * @param arg0  the options record (size first)
+ * @return 1
+ */
 int func_003DE9B8(int *arg0) {
     if (*arg0 < 36) {
         MEM_clear_E9B8(&D_00450C10_E9B8, 36);
@@ -2245,6 +2533,15 @@ struct S_EA48 { volatile int e, a, b, d, r, n; int c; int (*fn)(int, int, int, i
 extern int FILESYS_completeop_EA48(int) __asm__("FILESYS_completeop");
 extern char func_003DEA48_EA48[] __asm__("func_003DEA48");
 
+/**
+ * Chunk callback of a blocking transfer: completes the chunk, advances buffer, offset and total by its size, and starts
+ * the next chunk (at most 0x8000 bytes) through the job's transfer function with this callback, until the bytes run out
+ * or a chunk comes back short. Clears the remaining count when it stops.
+ *
+ * @param request  the chunk operation's handle
+ * @param mode  its status (1 = done)
+ * @param job  the transfer job
+ */
 void func_003DEA48(int request, int mode, struct S_EA48 *job) {
     int n = FILESYS_completeop_EA48(request);
     job->h = 0;
@@ -2332,6 +2629,16 @@ extern int func_003DCE90_EBF0(int) __asm__("func_003DCE90");
 extern int FILESYS_completeop_EBF0(int) __asm__("FILESYS_completeop");
 
 int func_003DEBF0_impl(int a0, int a1, int a2, int *a3) __asm__("func_003DEBF0");
+/**
+ * Opens a file and waits: returns 1 when the open succeeded (status 1) and stores the file handle (0 when the operation
+ * could not be queued).
+ *
+ * @param name  the path
+ * @param mode  the open mode flags
+ * @param priority  the priority
+ * @param outHandle  receives the file handle
+ * @return 1 on success, else 0
+ */
 int func_003DEBF0_impl(int name, int mode, int priority, int *outHandle) {
     int ok = 0;
     int request = FILESYS_open_EBF0(name, mode, priority, 0);
@@ -2431,6 +2738,13 @@ void FILESYS_waitop_ECF8(int) __asm__("FILESYS_waitop");
 int FILESYS_completeop_ECF8(int) __asm__("FILESYS_completeop");
 int func_003DD7E0_ECF8(int, int, int) __asm__("func_003DD7E0");
 
+/**
+ * Returns a file's size, waiting for the size operation (func_003DD7E0); 0 when it could not be queued.
+ *
+ * @param file  the file handle
+ * @param priority  the priority
+ * @return the size in bytes
+ */
 int func_003DECF8(int file, int priority) {
     int temp_2;
     int var_2 = 0;
@@ -2453,6 +2767,16 @@ extern void FILESYS_waitop_ED50(int) __asm__("FILESYS_waitop");
 extern int func_003DCE90_ED50(int) __asm__("func_003DCE90");
 extern int FILESYS_completeop_ED50(int) __asm__("FILESYS_completeop");
 
+/**
+ * Adds a BIG archive and waits: returns 1 when it was added (status 1) and stores the archive handle (0 when the
+ * operation could not be queued). The game mounts its .big files with it.
+ *
+ * @param name  the archive path
+ * @param allocFlags  the memory flags
+ * @param priority  the priority
+ * @param outResult  receives the archive handle
+ * @return 1 on success, else 0
+ */
 int func_003DED50(int name, int allocFlags, int priority, int *outResult) {
     int ok = 0;
     int request = func_003DDAC0_ED50(name, allocFlags, priority, 0);
@@ -2475,6 +2799,13 @@ void FILESYS_waitop_EDC0(int) __asm__("FILESYS_waitop");
 int FILESYS_completeop_EDC0(int) __asm__("FILESYS_completeop");
 int func_003DDC30_EDC0(int, int, int) __asm__("func_003DDC30");
 
+/**
+ * Removes a BIG archive and waits; returns nonzero when the operation completed with a nonzero result.
+ *
+ * @param file  the archive handle
+ * @param priority  the priority
+ * @return nonzero on success, 0 when it failed or could not be queued
+ */
 int func_003DEDC0(int file, int priority) {
     int temp_2;
     int var_2 = 0;
@@ -2496,6 +2827,13 @@ void FILESYS_waitop_EE18(int) __asm__("FILESYS_waitop");
 int FILESYS_completeop_EE18(int) __asm__("FILESYS_completeop");
 int func_003DD438_EE18(int, int, int) __asm__("func_003DD438");
 
+/**
+ * Returns whether a file exists, waiting for the exists operation (func_003DD438).
+ *
+ * @param name  the path
+ * @param priority  the priority
+ * @return nonzero when it exists
+ */
 int func_003DEE18(int name, int priority) {
     int temp_2;
     int var_2 = 0;
@@ -2720,6 +3058,13 @@ extern void FILESYS_completeop_F0B8(int) __asm__("FILESYS_completeop");
 
 /* Callback (third argument is the stream); later code takes its address as void (*)(void *). */
 void func_003DF0B8_impl(int arg0, int arg1, struct sReq *s) __asm__("func_003DF0B8");
+/**
+ * Close callback of an asynchronous file load: completes the close and finishes the request (finishrequest).
+ *
+ * @param arg0  the close operation's handle
+ * @param arg1  its status
+ * @param s  the load request
+ */
 void func_003DF0B8_impl(int arg0, int arg1, struct sReq *s) {
     FILESYS_completeop_F0B8(s->f1C);
     finishrequest(s);
@@ -2736,6 +3081,15 @@ extern int FILESYS_close(int, int, void *);
 extern int FILESYS_read(int, int, int, int, int, void *);
 extern void func_003DF0B8(void *);
 
+/**
+ * Read callback of an asynchronous file load: adds the chunk to the bytes read and the destination, then reads the next
+ * chunk (at most 0x8000 bytes, priority 99) with this callback, or closes the file (callback func_003DF0B8) once a
+ * chunk comes back short or the request was cancelled (+0x10).
+ *
+ * @param request  the read operation's handle
+ * @param status  its status
+ * @param job  the load request
+ */
 void func_003DF0F0(int request, int status, int *job) {
     int n = FILESYS_completeop_F0F0(*(volatile int *)&job[7]);
     job[2] += n;
@@ -2811,6 +3165,17 @@ extern char func_003DF0B8_F2C0[] __asm__("func_003DF0B8");
 extern char func_003DF0F0_F2C0[] __asm__("func_003DF0F0");
 extern char loadfilesizecallback_F2C0[] __asm__("loadfilesizecallback");
 
+/**
+ * Open callback of an asynchronous file load: stores the file handle (+0x20) and starts the next step; a failed open
+ * finishes the request.
+ *
+ * A cancelled request (+0x10) closes the file (func_003DF0B8); a load into a given address (+0x14 clear) reads the
+ * first chunk (func_003DF0F0); otherwise it asks for the file size first (func_003DD7E0, then loadfilesizecallback).
+ *
+ * @param a  the open operation's handle
+ * @param b  its status
+ * @param s  the load request
+ */
 void func_003DF2C0(int a, int b, struct sReq *s) {
     int n = FILESYS_completeop_F2C0(s->f1C);
     s->f20 = n;
@@ -2845,6 +3210,15 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DF3C0);
 extern int FILESYS_completeop_F3C0(int) __asm__("FILESYS_completeop");
 struct Q_F3C0 { int w0; int p1; int f8; int pc; int f10; int p14; int p18; volatile int h; int f20; int f24; int f28; int f2c; };
 
+/**
+ * Read callback of an asynchronous read (func_003DF808): adds the chunk to the bytes read and the destination, and
+ * reads the next chunk (at most 0x8000 bytes, priority 99) with this callback; a short chunk or a cancel (+0x10)
+ * finishes the request instead. The file stays open.
+ *
+ * @param a  the read operation's handle
+ * @param b  its status
+ * @param s  the read request
+ */
 void func_003DF3C0(int a, int b, struct Q_F3C0 *s) {
     int n = FILESYS_completeop_F3C0(s->h);
     int x;
@@ -3001,6 +3375,18 @@ extern void func_003DF2C0_F748(void) __asm__("func_003DF2C0");
 extern int D_00519BF8_F748[] __asm__("freequeue");
 struct Q_F748 { int w0; int p1[1]; int f8; int fc; int f10; int f14; int f18; volatile int h; int p2[1]; int f24; int f28; int f2c; };
 
+/**
+ * Starts loading a whole file asynchronously into a caller buffer; returns the request id, or 0 when no request is free
+ * or the open could not be queued.
+ *
+ * Takes a free request (queuefetch, newrequestid), clears its state, sets the destination and size limit and opens the
+ * file (priority 100) with callback func_003DF2C0.
+ *
+ * @param a  the path
+ * @param b  the destination
+ * @param c  the destination size
+ * @return the request id, or 0
+ */
 int func_003DF748(int a, int b, int c) {
     struct Q_F748 *p = (struct Q_F748 *)queuefetch((void **)D_00519BF8_F748);
     if (p == 0) return 0;
@@ -3031,6 +3417,16 @@ extern void fEF40_F808(char *) __asm__("newrequestid");
 extern char D_9BF8_F808[] __asm__("freequeue");
 extern char fF3C0_F808[] __asm__("func_003DF3C0");
 
+/**
+ * Starts an asynchronous read from an open file into a buffer; returns the request id, or 0 when no request is free or
+ * the read could not be queued. Reads in chunks of at most 0x8000 bytes through func_003DF3C0.
+ *
+ * @param file  the file handle
+ * @param offset  the file offset
+ * @param buffer  the destination
+ * @param size  the byte count
+ * @return the request id, or 0
+ */
 int func_003DF808(int file, int offset, int buffer, int size) {
     char *job = fEED8_F808(D_9BF8_F808);
     if (job != 0) {
@@ -3064,6 +3460,13 @@ extern char D_00519C08_9C08[] __asm__("hlafile_mutex");
 extern char *locaterequest_F8E8(int) __asm__("locaterequest");
 
 void func_003DF8E8_impl(int h, void (*fn)(int)) __asm__("func_003DF8E8");
+/**
+ * Sets the done callback (+0x18) of an asynchronous file request; calls it at once when the request has already
+ * finished (no operation pending). Does nothing for an unknown request or one that already has a callback.
+ *
+ * @param h  the request id
+ * @param fn  the callback, given the request id
+ */
 void func_003DF8E8_impl(int h, void (*fn)(int)) {
     char *e = locaterequest_F8E8(h);
     int done;
@@ -3238,6 +3641,14 @@ int validatehandle_impl(int **handle, int **strmptr, int ***tapptr) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DFC08);
 #ifdef SKIP_ASM
+/**
+ * Returns whether @p addr lies in the ring-buffer range [@p start, @p end); a range with @p end below @p start wraps.
+ *
+ * @param start  the range start
+ * @param end  the range end
+ * @param addr  the address to test
+ * @return 1 when inside, else 0
+ */
 int func_003DFC08(unsigned int start, unsigned int end, unsigned int addr) {
     int inside;
     if (end >= start) {
@@ -3263,6 +3674,14 @@ void MUTEX_lock(void *);
 void MUTEX_unlock_FC48(void *) __asm__("MUTEX_unlock");
 void func_003DCFC0_FC48(int, int) __asm__("func_003DCFC0");
 
+/**
+ * Lowers a stream's buffer usage (+0x4C) by @p size under its mutex; when that takes it below the greedy level (+0x44)
+ * the greedy state (+0x48) is set and, while the stream is reading (state +0x38 == 1), its read operation gets the high
+ * priority again (func_003DCFC0 with +0x40).
+ *
+ * @param stream  the stream header
+ * @param size  the bytes released
+ */
 void func_003DFC48(char *stream, int size) {
     char *mutex;
     int old, nw, lim;
@@ -3359,6 +3778,14 @@ void queuerequest(char *strm, char *req) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DFDD0);
 #ifdef SKIP_ASM
+/**
+ * Returns a stream's request with this id (slot = low byte, 0x124 bytes each from +0x14, count +0x18) when the id
+ * matches and the request is in use (+0x4); otherwise 0.
+ *
+ * @param stream  the stream header
+ * @param requestId  the request id
+ * @return the request, or 0
+ */
 void *func_003DFDD0(void *stream, int requestId) {
     int temp_3;
     void *temp_2;
@@ -3378,6 +3805,13 @@ void *func_003DFDD0(void *stream, int requestId) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003DFE18);
 #ifdef SKIP_ASM
+/**
+ * Unlinks a request from a stream's queue (first +0x5C, last +0x64, current +0x60 moves to a neighbour) and pushes it
+ * on the free list (+0x68), marking it unused.
+ *
+ * @param stream  the stream header
+ * @param n  the request
+ */
 void func_003DFE18(char *stream, char *n) {
     if (n == *(char **)(stream + 0x5C)) {
         *(int *)(stream + 0x5C) = *(int *)(n + 0xC);
@@ -3407,6 +3841,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003DFE88);
 struct E_FE88 { int mask; int value; int result; };
 struct T_FE88 { char pad[0x1C]; struct E_FE88 *ents; int count; };
 
+/**
+ * Returns the tap for a stream chunk: the first filter (+0x1C, count +0x20) whose mask/value matches the chunk's type,
+ * or -2.
+ *
+ * @param table  the stream header
+ * @param key  the chunk header (type first)
+ * @return the tap number, or -2
+ */
 int func_003DFE88(struct T_FE88 *table, int *key) {
     int i;
     int k = *key;
@@ -3431,6 +3873,17 @@ extern void MUTEX_unlock_FED0(void *) __asm__("MUTEX_unlock");
 
 struct E_FED0 { int a; int b; int count; char *first; };
 
+/**
+ * Hands the newly read chunks of a stream to its taps; returns 1 when the current request's end chunk was reached.
+ *
+ * Walks the chunk headers from +0x54 while a whole header and chunk are in (up to +0x58). A size with a top byte set
+ * marks a padding chunk. The end chunk (type = the current request's +0x11C) is padded to 64 bytes. Each chunk is
+ * tagged with its tap (func_003DFE88) and added to the tap's byte count, the stream's usage (+0x4C) goes up (clearing
+ * the greedy state at the level) and +0x54 moves on; a chunk with no tap is marked -2. A cancelled request (state 4)
+ * stops the walk.
+ *
+ * @return 1 at the end chunk, else 0
+ */
 int func_003DFED0(char *self) {
     char *current;
     char *rec;
@@ -3511,6 +3964,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E00D8);
 int FILESYS_completeop_00D8(int) __asm__("FILESYS_completeop");
 void func_003E03D0_00D8(void *, int) __asm__("func_003E03D0");
 
+/**
+ * Open callback of a stream: completes the open, stores the file handle (+0x16C) and, when it opened, restarts the
+ * stream (func_003E03D0 with the high priority +0x40).
+ *
+ * @param request  the open operation's handle
+ * @param status  its status
+ * @param stream  the stream header
+ */
 void func_003E00D8(int request, int status, char *stream) {
     int temp_2;
 
@@ -3530,6 +3991,14 @@ void FILESYS_callbackop_0118(int, void *) __asm__("FILESYS_callbackop");
 void FILESYS_completeop_0118(int) __asm__("FILESYS_completeop");
 int FILESYS_open_0118(void *, int, int, void *) __asm__("FILESYS_open");
 
+/**
+ * Close callback of a stream: completes the close and opens the next file (+0x6C, high priority +0x40) with callback
+ * func_003E00D8.
+ *
+ * @param request  the close operation's handle
+ * @param status  its status
+ * @param stream  the stream header
+ */
 void func_003E0118(int request, int status, char *stream) {
     int temp_2;
 
@@ -3554,6 +4023,19 @@ extern int fFED0_0170(char *) __asm__("func_003DFED0");
 extern void f0270_0170(char *, int) __asm__("startnextrequest");
 extern void f03D0_0170(char *, int) __asm__("func_003E03D0");
 
+/**
+ * Read callback of a stream: accounts the bytes read, hands complete chunks to the taps (func_003DFED0) and starts the
+ * next read or the next request.
+ *
+ * A memory request (+0x10 == 1) counts its whole read size; a file request counts what the read returned
+ * (FILESYS_completeop). The request is done at its end (+0x118), on a short read, at its end chunk, or when cancelled
+ * (state 4); then it is marked done (3, unless cancelled) and startnextrequest runs. Otherwise the stream restarts at
+ * one below the high priority (func_003E03D0).
+ *
+ * @param request  the read operation's handle
+ * @param status  its status
+ * @param stream  the stream header
+ */
 void func_003E0170(int request, int status, char *stream) {
     char *current = *(char **)(stream + 0x60);
     int n;
@@ -3700,6 +4182,18 @@ extern void func_003E0170_03D0(int, int, struct S_03D0 *) __asm__("func_003E0170
 extern int FILESYS_read_03D0(int, int, char *, int, int, struct S_03D0 *) __asm__("FILESYS_read");
 extern void FILESYS_callbackop_03D0(int, void (*)(int, int, struct S_03D0 *)) __asm__("FILESYS_callbackop");
 
+/**
+ * Restarts a stream's reading: drops consumed chunks, frees finished requests, makes room in the buffer and starts the
+ * next read of the current request.
+ *
+ * Skips the wrap (-1) and released (-2) chunks at the start (+0x50). Under the mutex, frees (func_003DFE18) the first
+ * requests whose data has been consumed. With less than a read block (+0x17C) free at the end, the unread data is moved
+ * to the buffer start (MEM_copy, 64-byte aligned) and a wrap marker left; when even that leaves no room the state
+ * (+0x38) becomes 2 (stalled). A memory request (+0x10 == 1) is copied in and its read callback (func_003E0170) called
+ * directly; a file request reads a block at @p arg1 priority with that callback.
+ *
+ * @param arg1  the read priority
+ */
 void func_003E03D0(struct S_03D0 *self, int arg1) {
     int *p;
     char *rd;
@@ -3931,6 +4425,17 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E0948);
 struct T_0948 { int a, b, c; };
 extern int fFBD0_0948(int, void *, void *) __asm__("validatehandle");
 
+/**
+ * Sets filter @p channel (1-based) of an idle stream: chunks whose type & @p a2 equals @p a3 go to tap @p a4 (-1 and -2
+ * are special targets). The last filter may only be the catch-all (mask and value 0). Ignored unless the stream is idle
+ * (state 0) and the tap is valid.
+ *
+ * @param handle  the stream handle
+ * @param channel  the filter number
+ * @param a2  the type mask
+ * @param a3  the type value
+ * @param a4  the tap number
+ */
 void func_003E0948(int handle, int channel, int a2, int a3, int a4) {
     char *stream;
     int entry;
@@ -3990,6 +4495,13 @@ void STREAM_destroy(int handle) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E0AD8);
 #ifdef SKIP_ASM
+/**
+ * Sets a stream's two read priorities: low (+0x3C) and high (+0x40).
+ *
+ * @param handle  the stream handle
+ * @param priority  the low priority
+ * @param lowBufPriority  the high priority (used while the buffer is below the greedy level)
+ */
 void func_003E0AD8(int handle, int priority, int lowBufPriority) {
     int *stream;
     int *entry;
@@ -4007,6 +4519,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E0B28);
 extern int validatehandle(int, void *, void *);
 extern void func_003E0B98(int, int);
 
+/**
+ * Sets a stream's greedy level (+0x44); when the buffer usage (+0x4C) moves across it, the greedy state follows
+ * (func_003E0B98).
+ *
+ * @param handle  the stream handle
+ * @param threshold  the new greedy level in bytes
+ */
 void func_003E0B28(int handle, int threshold) {
     char *stream;
     int entry;
@@ -4029,6 +4548,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E0B98);
 typedef struct { char pad[0x38]; volatile int s38; int pad3C; int f40; char pad44[4]; int f48; char pad4C[0x128]; int f174; } O_0B98;
 extern void func_003DCFC0(int, int);
 
+/**
+ * Sets a stream's greedy state (+0x48); turning it on while the stream reads (state 1) raises its pending read to the
+ * high priority (func_003DCFC0 with +0x40).
+ *
+ * @param arg0  the stream handle
+ * @param arg1  the greedy state
+ */
 void func_003E0B98(int arg0, int arg1) {
     O_0B98 *o;
     int x;
@@ -4052,6 +4578,13 @@ extern int validatehandle_0BF8(int, void *, void *) __asm__("validatehandle");
 
 struct E_0BF8 { int w[4]; };
 
+/**
+ * Returns the handle of a stream's tap @p k (1-based; its 0x10-byte entry at +0x24), or 0 for a bad handle or tap.
+ *
+ * @param handle  the stream handle
+ * @param k  the tap number
+ * @return the tap handle, or 0
+ */
 struct E_0BF8 *func_003E0BF8(int handle, int k) {
     char *loc[2];
 
@@ -4070,6 +4603,12 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E0C58);
 #ifdef SKIP_ASM
 extern int validatehandle(int, void *, void *);
 
+/**
+ * Returns the tap number (+0x4) of a tap handle, or 0 for a bad handle.
+ *
+ * @param handle  the tap handle
+ * @return the tap number, or 0
+ */
 int func_003E0C58(int handle) {
     int loc[2];
 
@@ -4148,6 +4687,19 @@ extern void MUTEX_lock_0D80(char *) __asm__("MUTEX_lock");
 extern void MUTEX_unlock_0D80(char *) __asm__("MUTEX_unlock");
 extern void startnextrequest_0D80(char *, int) __asm__("startnextrequest");
 
+/**
+ * Queues a memory block on a stream; returns the request id, or 0 for a bad handle or no free request.
+ *
+ * With @p n 0 the length runs up to and including the chunk whose type is @p key. The request (memory kind, +0x10 = 1)
+ * keeps the data (+0x114), length (+0x118) and end chunk type (+0x11C); an idle stream starts reading
+ * (startnextrequest).
+ *
+ * @param handle  the stream handle
+ * @param data  the chunk data
+ * @param n  the length in bytes, or 0 to find it from @p key
+ * @param key  the end chunk type
+ * @return the request id, or 0
+ */
 int func_003E0D80(int handle, int *data, int n, int key) {
     char *stream;
     int entry;
@@ -4190,6 +4742,17 @@ extern void MUTEX_unlock_0E90(void *) __asm__("MUTEX_unlock");
 extern int func_003E12E0_0E90(char *) __asm__("func_003E12E0");
 extern void func_003E13E8_0E90(char *, int) __asm__("func_003E13E8");
 
+/**
+ * Cancels a stream request and throws away the chunks it already delivered.
+ *
+ * A request not yet started is just freed; a running one is marked cancelled (4). For each tap with data, chunks of the
+ * request's range (from its start, or the stream data start for the first request, up to the next request's start or
+ * the data tail) that belong to the tap are released: marked -2 and taken off the tap's count and the buffer usage
+ * (func_003DFC48). A tap whose read position is inside the range is drained through func_003E12E0 / func_003E13E8.
+ *
+ * @param hnd  the stream handle
+ * @param id  the request id
+ */
 void func_003E0E90(int hnd, int id) {
     char *st;
     char *q;
@@ -4301,6 +4864,13 @@ extern void func_003DFC48_1110(volatile HEAP_1110 *, int) __asm__("func_003DFC48
 extern void func_003DFE18_1110(volatile HEAP_1110 *, int) __asm__("func_003DFE18");
 extern void func_003E0E90_1110(int, int) __asm__("func_003E0E90");
 
+/**
+ * Stops a stream: cancels its started requests (func_003E0E90), frees the queued ones, marks the current one cancelled,
+ * empties every tap, gives back the whole buffer usage and marks every buffered chunk released. A stalled stream (state
+ * 2) gets its buffer reset (or the tail padded to 64 bytes) and goes idle.
+ *
+ * @param arg0  the stream handle
+ */
 void func_003E1110(int arg0) {
     volatile HEAP_1110 *heap;
     int other;
@@ -4368,6 +4938,14 @@ typedef struct { int f0; int mtx[11]; B_12E0 *f30; } M_12E0;
 extern int validatehandle_12E0(int, M_12E0 **, H_12E0 **) __asm__("validatehandle");
 extern void MUTEX_lock_12E0(void *) __asm__("MUTEX_lock");
 extern void MUTEX_unlock_12E0(void *) __asm__("MUTEX_unlock");
+/**
+ * Returns the next chunk for a tap and moves the tap on: takes the tap's read position (+0xC), clears the tap tag in
+ * its size, lowers the tap's count (+0x8) and, while data is left, finds the next chunk tagged for the tap (following
+ * wrap markers). Returns 0 for a bad handle or an empty tap.
+ *
+ * @param a0  the tap handle
+ * @return the chunk, or 0
+ */
 B_12E0 *func_003E12E0(int a0) {
     M_12E0 *m;
     H_12E0 *h;
@@ -4412,6 +4990,14 @@ extern void fMLK_13E8(char *) __asm__("MUTEX_lock");
 extern void fMUL_13E8(char *) __asm__("MUTEX_unlock");
 extern void f03D0_13E8(char *, int) __asm__("func_003E03D0");
 
+/**
+ * Gives a chunk back to its stream: marks it released (-2), lowers the buffer usage (func_003DFC48) and restarts a
+ * stalled stream (state 2 to 1; func_003E03D0 with the high priority when greedy, else the low one). Chunks outside the
+ * buffer or already released are ignored.
+ *
+ * @param handle  the tap handle
+ * @param chunk  the chunk
+ */
 void func_003E13E8(int handle, unsigned int chunk) {
     char *stream;
     int entry;
@@ -4437,6 +5023,12 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E14C8);
 #ifdef SKIP_ASM
 extern int validatehandle(int, void *, void *);
 
+/**
+ * Returns the bytes a tap has ready (+0x8), or 0 for a bad handle.
+ *
+ * @param handle  the tap handle
+ * @return the byte count
+ */
 int func_003E14C8(int handle) {
     int loc[2];
 
@@ -4452,6 +5044,12 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E14F8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 
+/**
+ * Returns a stream's state (+0x38: 0 idle, 1 reading, 2 stalled for room), or 0 for a bad handle.
+ *
+ * @param handle  the stream or tap handle
+ * @return the state
+ */
 int func_003E14F8(int handle) {
     int loc[2];
 
@@ -4465,6 +5063,12 @@ int func_003E14F8(int handle) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1530);
 #ifdef SKIP_ASM
+/**
+ * Returns whether a stream has ended for a tap: the stream is idle and the tap has nothing left (+0x8 == 0).
+ *
+ * @param handle  the tap handle
+ * @return 1 at the end, else 0 (also for a bad handle)
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 int func_003E1530(int handle) {
     int loc[2];
@@ -4482,6 +5086,12 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1580);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int validatehandle_1580(void *, void *, void *) __asm__("validatehandle");
 
+/**
+ * Returns a stream's buffer size: buffer end (+0x34) minus the actual buffer start (+0x2C); 0 for a bad handle.
+ *
+ * @param handle  the stream handle
+ * @return the size in bytes
+ */
 int func_003E1580(void *handle) {
     char *stream;
     int entry;
@@ -4498,6 +5108,12 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E15B8);
 #ifdef SKIP_ASM
 extern int validatehandle(int, void *, void *);
 
+/**
+ * Returns a stream's buffer usage (+0x4C), or 0 for a bad handle.
+ *
+ * @param handle  the stream handle
+ * @return the bytes in use
+ */
 int func_003E15B8(int handle) {
     int loc[2];
 
@@ -4518,6 +5134,13 @@ struct LL_15E8 { int w0; int p1; int p2; struct P_15E8 *next; };
 struct R_15E8 { struct G_15E8 *g; int *s; };
 extern int func_003DFC08();
 
+/**
+ * Returns the id of the request a tap is currently reading: the queued request whose data range holds the tap's read
+ * position, found under the mutex. 0 for a bad handle or an empty tap.
+ *
+ * @param a  the tap handle
+ * @return the request id, or 0
+ */
 int func_003E15E8(int a) {
     struct R_15E8 r;
     struct LL_15E8 *cur;
@@ -4544,6 +5167,14 @@ int func_003E15E8(int a) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E16B0);
 #ifdef SKIP_ASM
+/**
+ * Returns the state (+0x4) of a stream request (1 queued, 3 done, 4 cancelled), or 0 for a bad handle or an unknown
+ * request.
+ *
+ * @param handle  the stream handle
+ * @param requestId  the request id
+ * @return the state, or 0
+ */
 int func_003E16B0(int handle, int requestId) {
     int *stream;
     int *entry;
@@ -4566,6 +5197,12 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1700);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00450C38_1700[] __asm__("sync_priority");
 void func_003DEE18_1700(int, int) __asm__("func_003DEE18");
+/**
+ * Returns whether a file exists: func_003DEE18 at the synchronous priority (sync_priority). Declared void; the result is
+ * left in the return register.
+ *
+ * @param a  the path
+ */
 void func_003E1700(int a) {
     func_003DEE18_1700(a, D_00450C38_1700[0]);
 }
@@ -4576,6 +5213,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1728);
 #ifdef SKIP_ASM
 extern int func_003DEBF0(int, int, int, void *);
 
+/**
+ * File-size step for FILESYS_atomic: opens the file named in the argument block, reads its size and closes it.
+ *
+ * @param priority  the priority (the size and close run one below it)
+ * @param namePtr  the argument block; word 0 is the path
+ * @return the size, 0 when the file does not open
+ */
 int func_003E1728(int priority, int *namePtr) {
     int file;
     int size;
@@ -4597,6 +5241,12 @@ void FILESYS_atomic_1798(void (*)(void), int, int, void *) __asm__("FILESYS_atom
 void func_003E1728_1798(void) __asm__("func_003E1728");
 extern int D_00450C38_1798[] __asm__("sync_priority");
 
+/**
+ * Returns a file's size through FILESYS_atomic (func_003E1728, sync priority), with 1 in the argument block's fourth
+ * word. Declared void; the result is left in the return register.
+ *
+ * @param arg0  the path
+ */
 void func_003E1798(int arg0) {
     int buf[8];
 
@@ -4614,6 +5264,12 @@ void FILESYS_atomic_17D8(void (*)(void), int, int, void *) __asm__("FILESYS_atom
 void func_003E1728_17D8(void) __asm__("func_003E1728");
 extern int D_00450C38_17D8[] __asm__("sync_priority");
 
+/**
+ * Returns a file's size through FILESYS_atomic (func_003E1728, sync priority), with 0 in the argument block's fourth
+ * word. Declared void; the result is left in the return register.
+ *
+ * @param arg0  the path
+ */
 void func_003E17D8(int arg0) {
     int buf[8];
 
@@ -4629,6 +5285,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1810);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int (*D_00450C14_1810[])(int, int, int) __asm__("D_00450C14");
 
+/**
+ * Whole-file load step for FILESYS_atomic: opens the file, allocates its size through the allocate callback
+ * (D_00450C14, with the flags in word 4), reads it and closes it; returns the buffer, or 0.
+ *
+ * @param a  the priority (the rest runs one below it)
+ * @param b  the argument block: path, then flags at word 4
+ * @return the loaded data, or 0
+ */
 int func_003E1810(int a, int *b) {
     int sp0;
     int r, c;
@@ -4711,6 +5375,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1948);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int (*D_00450C14_1948[])(int, int, int) __asm__("D_00450C14");
 
+/**
+ * Whole-file load step for FILESYS_atomic that also reports the size: like func_003E1810, storing the size in word 2 of
+ * the argument block.
+ *
+ * @param a  the priority
+ * @param b  the argument block: path, size out at word 2, flags at word 4
+ * @return the loaded data, or 0
+ */
 int func_003E1948(int a, int *b) {
     int sp0;
     int r, c;
@@ -4739,6 +5411,15 @@ extern int FILESYS_atomic_1A10(void (*)(void), int, int, void*) __asm__("FILESYS
 extern int D_00450C38_0C38[] __asm__("sync_priority");
 extern void func_003E1948_1948(void) __asm__("func_003E1948");
 
+/**
+ * Loads a whole file into allocated memory and reports its size: runs func_003E1948 through FILESYS_atomic at the sync
+ * priority (fourth word 1, flags in word 4).
+ *
+ * @param arg0  the path
+ * @param arg1  receives the size, or 0
+ * @param arg2  the allocation flags
+ * @return the data, or 0
+ */
 int func_003E1A10(int arg0, int *arg1, int arg2) {
     FLS_args_1A10 s;
     int r;
@@ -4801,6 +5482,14 @@ typedef struct { int h; int s; int n; } B_1AD0;
 
 // The unit later declares func_003E1AD0 as a data array; define this one under a local name.
 int func_003E1AD0_impl(int a, B_1AD0 *b) __asm__("func_003E1AD0");
+/**
+ * Load-at step for FILESYS_atomic: opens the file and reads up to the block's maximum (any size when 0 or less) into
+ * its address; returns the bytes read, 0 when the file does not open.
+ *
+ * @param priority  the priority
+ * @param loadReq  the argument block {path, address, maximum}
+ * @return the bytes read
+ */
 int func_003E1AD0_impl(int priority, B_1AD0 *loadReq) {
     int file;
     int n = loadReq->n;
@@ -4878,6 +5567,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E1C00);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int FILE_loadz_1C00(int, int) __asm__("FILE_loadz");
 
+/**
+ * Batch load step for FILESYS_atomic: loads each name of the batch with FILE_loadz (batch flags at +0xC) into its
+ * buffer slot; returns 1 when all loaded. The first argument (the priority) is not used.
+ *
+ * @param arg0  the priority (unused)
+ * @param batch  {count, names, buffers, flags}
+ * @return 1 when every file loaded, else 0
+ */
 int func_003E1C00(void *arg0, void *batch) {
     int offset;
     int index;
@@ -4906,6 +5603,16 @@ typedef struct Args_1C98 { int a0, a1, a2, a3, a4; } Args_1C98;
 extern int FILESYS_atomic_1C98(void (*)(void), int, int, Args_1C98 *) __asm__("FILESYS_atomic");
 extern int D_00450C38_0C38[] __asm__("sync_priority");
 
+/**
+ * Loads several files into allocated memory in one FILESYS_atomic run (func_003E1C00), fifth word 1; returns 1 when all
+ * loaded, 0 for a count of 0 or less.
+ *
+ * @param arg0  the number of files
+ * @param arg1  the names
+ * @param arg2  receives the buffers
+ * @param arg3  the allocation flags
+ * @return 1 on success, else 0
+ */
 int func_003E1C98(int arg0, int arg1, int arg2, int arg3) {
     Args_1C98 args;
 
@@ -4930,6 +5637,16 @@ typedef struct Args_1D00 { int a0, a1, a2, a3, a4; } Args_1D00;
 extern int FILESYS_atomic_1D00(void (*)(void), int, int, Args_1D00 *) __asm__("FILESYS_atomic");
 extern int D_00450C38_0C38[] __asm__("sync_priority");
 
+/**
+ * Loads several files in one FILESYS_atomic run (func_003E1C00), fifth word 0; otherwise as func_003E1C98. The batch
+ * step ignores that word, so both behave the same.
+ *
+ * @param arg0  the number of files
+ * @param arg1  the names
+ * @param arg2  receives the buffers
+ * @param arg3  the allocation flags
+ * @return 1 on success, else 0
+ */
 int func_003E1D00(int arg0, int arg1, int arg2, int arg3) {
     Args_1D00 args;
 
@@ -4962,6 +5679,15 @@ extern int BIG_sizeofheader_1D68(char *) __asm__("BIG_sizeofheader");
 extern void MEM_copy_1D68(char *, char *, int) __asm__("MEM_copy");
 
 
+/**
+ * BIG header load step for FILESYS_atomic: reads the first 2704 bytes of an archive into allocated memory and, when the
+ * header is larger (BIG_sizeofheader), reallocates and reads the rest; returns the header, or 0 when the file does not
+ * open, the memory runs out or it is not a BIG file (BIG_typeofheader 0).
+ *
+ * @param a  the priority
+ * @param b  the argument block: path, flags at word 2
+ * @return the header, or 0
+ */
 int func_003E1D68(int a, int *b) {
     int sp0;
     if (func_003DEBF0(b[0], 1, a, &sp0)) {
@@ -5006,6 +5732,13 @@ void FILESYS_atomic_1EC8(void (*)(void), int, int, void *) __asm__("FILESYS_atom
 void func_003E1D68_1EC8(void) __asm__("func_003E1D68");
 extern int D_00450C38_1EC8[] __asm__("sync_priority");
 
+/**
+ * Loads a BIG archive's header through FILESYS_atomic (func_003E1D68, sync priority), fourth word 1. Declared void; the
+ * header is left in the return register.
+ *
+ * @param arg0  the archive path
+ * @param arg1  the allocation flags
+ */
 void func_003E1EC8(int arg0, int arg1) {
     int buf[8];
 
@@ -5024,6 +5757,12 @@ void FILESYS_atomic_1F08(void (*)(void), int, int, void *) __asm__("FILESYS_atom
 void func_003E1D68_1F08(void) __asm__("func_003E1D68");
 extern int D_00450C38_1F08[] __asm__("sync_priority");
 
+/**
+ * Loads a BIG archive's header through FILESYS_atomic (func_003E1D68, sync priority), fourth word 0. Declared void.
+ *
+ * @param arg0  the archive path
+ * @param arg1  the allocation flags
+ */
 void func_003E1F08(int arg0, int arg1) {
     int buf[8];
 
@@ -5045,6 +5784,15 @@ extern int func_00427D60_1F48(char *, int) __asm__("func_00427D60");
 extern void func_00427FE8_1F48(int) __asm__("func_00427FE8");
 extern void func_00428600_1F48(int, char *, int) __asm__("func_00428600");
 
+/**
+ * Writes @p len bytes to a host file (the host root D_00450C50 is prefixed unless the name has it), in 4 KB writes,
+ * ignoring write errors; returns 1 when the file opened.
+ *
+ * @param name  the file name
+ * @param data  the data
+ * @param len  the byte count
+ * @return 1 when the file opened, else 0
+ */
 unsigned int func_003E1F48(char *name, char *data, int len) {
     char buf[256];
     int fd;
@@ -5082,6 +5830,14 @@ extern int func_00427D60_2030(char *, int) __asm__("func_00427D60");
 extern int func_00427FE8_2030(int) __asm__("func_00427FE8");
 extern int func_00428600_2030(int, char *, int) __asm__("func_00428600");
 
+/**
+ * Writes @p len bytes to a host file like func_003E1F48, but returns 0 as soon as a write or the close fails.
+ *
+ * @param name  the file name
+ * @param data  the data
+ * @param len  the byte count
+ * @return 1 on success, else 0
+ */
 unsigned int func_003E2030(char *name, char *data, int len) {
     char buf[256];
     int fd;
@@ -5121,6 +5877,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E2130);
 int FILE_loadatz_2130(int, void *, int) __asm__("FILE_loadatz");
 int unpacksizez_2130(void *) __asm__("unpacksizez");
 
+/**
+ * Returns a packed file's unpacked size: loads its first 0x80 bytes (FILE_loadatz) and reads the size from the pack
+ * header (unpacksizez); 0 when the load fails.
+ *
+ * @param arg0  the path
+ * @return the unpacked size, or 0
+ */
 int func_003E2130(int arg0) {
     char buf[0x80];
     int var_2;
@@ -5140,6 +5903,12 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E2168);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void FILE_loadatz_2168(int, char *, int) __asm__("FILE_loadatz");
 void unpacksizez_2168(char *) __asm__("unpacksizez");
+/**
+ * Returns a packed file's unpacked size like func_003E2130, without checking the load. Declared void; the size is left
+ * in the return register.
+ *
+ * @param a  the path
+ */
 void func_003E2168(int a) {
     char buf[0x80];
     FILE_loadatz_2168(a, buf, 0x80);
@@ -5320,6 +6089,14 @@ static inline int low_2490(unsigned char *t, int c) {
     return r;
 }
 
+/**
+ * Compares two strings ignoring case (upper-case letters per the ctype table D_00499C81 fold to lower case); returns
+ * the difference at the first mismatch, 0 when equal.
+ *
+ * @param a  the first string
+ * @param b  the second string
+ * @return the difference
+ */
 int func_003E2490(signed char *a, signed char *b) {
     unsigned char *t = D_00499C81_2490;
     signed char *p = a;
@@ -5436,6 +6213,12 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E2740);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void BIG_debuginfo_2740(int, int *, int) __asm__("BIG_debuginfo");
+/**
+ * Returns the version number of a BIG archive (the first value BIG_debuginfo reports), or 0.
+ *
+ * @param bigFile  the archive header
+ * @return the version
+ */
 int func_003E2740(int bigFile) {
     int x = 0;
     BIG_debuginfo_2740(bigFile, &x, 0);
@@ -5546,6 +6329,10 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E2CE0);
 #ifdef SKIP_ASM
 extern void BIG_locateentryz();
 
+/**
+ * Looks up a BIG archive entry by name or number: passes its five arguments (archive, name, number, offset out, size
+ * out) straight to BIG_locateentryz and returns its result (the entry name, or 0). Declared void(void).
+ */
 void func_003E2CE0(void) {
     BIG_locateentryz();
 }
@@ -5557,6 +6344,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E2D00);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003E2CE0_2D00(int, int, int, void *, int) __asm__("func_003E2CE0");
 
+/**
+ * Returns the offset of a named entry in a BIG archive (through func_003E2CE0), or 0 for no name or no such entry.
+ *
+ * @param arg0  the archive header
+ * @param arg1  the entry name
+ * @return the offset, or 0
+ */
 int func_003E2D00(arg0, arg1)
 int arg0;
 int arg1;
@@ -5577,6 +6371,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E2D30);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void BIG_locateentryz_2D30(int, int, int, void *, int) __asm__("BIG_locateentryz");
 
+/**
+ * Returns the offset of a named entry in a BIG archive, calling BIG_locateentryz directly; 0 for no name or no such
+ * entry.
+ *
+ * @param arg0  the archive header
+ * @param arg1  the entry name
+ * @return the offset, or 0
+ */
 int func_003E2D30(arg0, arg1)
 int arg0;
 int arg1;
@@ -5597,6 +6399,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E2D60);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int f_2D60_cb(int, int, int, int *, int) __asm__("func_003E2CE0");
 
+/**
+ * Returns a pointer to entry number @p x of a BIG archive (header + offset, through func_003E2CE0), or 0.
+ *
+ * @param base  the archive (its header first)
+ * @param x  the entry number
+ * @return the entry data, or 0
+ */
 int func_003E2D60(int base, int x) {
     int out;
     if (f_2D60_cb(base, 0, x, &out, 0) != 0)
@@ -5611,6 +6420,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E2DA8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int f_2DA8_cb(int, int, int, int *, int) __asm__("BIG_locateentryz");
 
+/**
+ * Returns a pointer to entry number @p x of a BIG archive (header + offset, through BIG_locateentryz), or 0.
+ *
+ * @param base  the archive (its header first)
+ * @param x  the entry number
+ * @return the entry data, or 0
+ */
 int func_003E2DA8(int base, int x) {
     int out;
     if (f_2DA8_cb(base, 0, x, &out, 0) != 0)
@@ -5624,6 +6440,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E2DF0);
 #ifdef SKIP_ASM
 extern int func_003E2D00();
 
+/**
+ * Returns a pointer to a named entry of a BIG archive (header + func_003E2D00's offset), or 0. Declared with one
+ * parameter; the name passes through in the second argument register.
+ *
+ * @param bigBase  the archive (its header first)
+ * @return the entry data, or 0
+ */
 int func_003E2DF0(int bigBase) {
     int temp_2;
 
@@ -5637,6 +6460,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E2E20);
 #ifdef SKIP_ASM
 extern int func_003E2D30();
 
+/**
+ * Returns a pointer to a named entry of a BIG archive (header + func_003E2D30's offset), or 0. Declared with one
+ * parameter; the name passes through in the second argument register.
+ *
+ * @param bigBase  the archive (its header first)
+ * @return the entry data, or 0
+ */
 int func_003E2E20(int bigBase) {
     int temp_2;
 
@@ -5652,6 +6482,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E2E50);
 extern int func_003E2DF0_2E50(int, signed char *) __asm__("func_003E2DF0");
 extern signed char *strchr_2E50(signed char *, int) __asm__("strchr");
 
+/**
+ * Looks up a comma-separated list of entry names in a BIG archive, storing each entry pointer (func_003E2DF0, 0 when
+ * missing) in turn in @p out. The commas are cut and put back, so @p names must be writable.
+ *
+ * @param bigBase  the archive (its header first)
+ * @param names  the entry names, separated by commas
+ * @param out  receives one pointer per name
+ */
 void func_003E2E50(int bigBase, signed char *names, int *out) {
     signed char *temp_2;
     signed char *name = names;
@@ -5674,6 +6512,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E2EE0);
 extern int BIG_typeofheader_2EE0(unsigned char *) __asm__("BIG_typeofheader");
 
 int func_003E2EE0_impl(unsigned char *h) __asm__("func_003E2EE0");
+/**
+ * Returns the number of entries in a BIG archive: the big-endian halfword at +0x4 for header type 1, the big-endian
+ * word at +0x8 for types 2 and 3 (BIG_typeofheader), else 0.
+ *
+ * @param header  the archive header
+ * @return the entry count
+ */
 int func_003E2EE0_impl(unsigned char *header) {
     int fileCount = 0;
     int headerType = BIG_typeofheader_2EE0(header);
@@ -5696,6 +6541,15 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E2F70);
 char *strcpy(char *, const char *);
 char *func_003E2CE0_2F70(int, int, int, int, int) __asm__("func_003E2CE0");
 
+/**
+ * Copies the name of entry number @p index of a BIG archive (func_003E2CE0) into @p dst; returns @p dst, or 0 with an
+ * empty @p dst when there is no such entry.
+ *
+ * @param bigBase  the archive header
+ * @param index  the entry number
+ * @param dst  receives the name
+ * @return @p dst, or 0
+ */
 char *func_003E2F70(int bigBase, int index, char *dst) {
     char *entryName = func_003E2CE0_2F70(bigBase, 0, index, 0, 0);
     char *result;
@@ -5717,6 +6571,15 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E2FC8);
 char *strcpy(char *, const char *);
 char *BIG_locateentryz_2FC8(int, int, int, int, int) __asm__("BIG_locateentryz");
 
+/**
+ * Copies the name of entry number @p index of a BIG archive (BIG_locateentryz) into @p dst; returns @p dst, or 0 with
+ * an empty @p dst when there is no such entry.
+ *
+ * @param bigBase  the archive header
+ * @param index  the entry number
+ * @param dst  receives the name
+ * @return @p dst, or 0
+ */
 char *func_003E2FC8(int bigBase, int index, char *dst) {
     char *entryName = BIG_locateentryz_2FC8(bigBase, 0, index, 0, 0);
     char *result;
@@ -5740,6 +6603,14 @@ extern void func_003E33B0(void);
 extern int D_00450C44_3020[] __asm__("D_00450C44");
 extern int D_00450C48_3020[] __asm__("D_00450C48");
 
+/**
+ * Starts the file device layer: clears the device flags (D_00450C48), adds the host read task func_003E33B0 as a sync
+ * task and marks the host device available (flag 2); with a disc it also marks the disc (flag 1) and makes it the
+ * default device (D_00450C44 = 1), otherwise the host is the default (2). The first argument is not used.
+ *
+ * @param arg0  the maximum open files (unused)
+ * @param arg1  nonzero when the CD file table was built
+ */
 void func_003E3020(int arg0, int arg1) {
     int temp_3;
 
@@ -5775,6 +6646,19 @@ extern char *D_00450C3C;
 extern int D_00450C44;
 
 void func_003E3098_i(char *path, char *out, int *kind) __asm__("func_003E3098");
+/**
+ * Turns a file name into a device path and says which device it is on (1 disc, 2 host).
+ *
+ * The default device is D_00450C44. A name with a ':' must start with "cd:" (disc; the prefix is dropped) or the host
+ * root D_00450C50 ("host0:", host; dropped too); any other prefix is refused (empty @p out) on a disc default, or
+ * unless its third character is the ':'. Host paths get the host root back in front; a name not starting with '\\', '/'
+ * or '~' gets the current directory (D_00519AF0, set by func_003DDE78) in front. Backslashes become slashes. Quirk: a
+ * refused name returns before @p kind is written, so the caller's value stays uninitialised.
+ *
+ * @param path  the file name
+ * @param out  receives the device path (256 bytes)
+ * @param kind  receives the device, or 0
+ */
 void func_003E3098_i(char *path, char *out, int *kind) {
     int k;
     out[0] = 0;
@@ -5818,6 +6702,19 @@ extern void func_003E3098(int, char *, int *);
 extern int func_003E4508_3208(char *, int, int *) __asm__("func_003E4508");
 extern int func_00427D60(char *, int);
 
+/**
+ * Opens a file on its device; returns 1 with the device handle (device in the top byte, 1 disc or 2 host) in
+ * @p out, or 0.
+ *
+ * The name is resolved by func_003E3098. Disc files are looked up in the CD file table (func_003E4508). Host files are
+ * opened by open mode (flags & 7): 1 read-only (1), 0 read-write appending (0x103), 2 read-write creating (0x203), 6
+ * read-write creating and truncating (0x603); any other mode gives -1.
+ *
+ * @param path  the file name
+ * @param flags  the open flags
+ * @param out  receives the device handle
+ * @return 1 when it opened, else 0
+ */
 int func_003E3208(int path, unsigned int flags, int *out) {
     char buf[256];
     int kind;
@@ -5869,6 +6766,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E32F8);
 extern void func_00427FE8(int);
 extern int D_00450C40_0C40[] __asm__("D_00450C40");
 
+/**
+ * Closes a device handle: a host file is closed (forgetting it as the last-read file D_00450C40); disc handles need
+ * nothing. Returns 0.
+ *
+ * @param arg0  the device handle
+ * @return 0
+ */
 int func_003E32F8(int arg0) {
     int temp_16;
     int temp_5;
@@ -5894,6 +6798,17 @@ struct S_3350 { int a, b, c, d, e; };
 extern volatile struct S_3350 D_00519C20_3350 __asm__("D_00519C20");
 extern int func_003E4648(int);
 
+/**
+ * Starts a read on a device handle. A disc read goes to func_003E4648 (the other arguments pass through in their
+ * registers) and its result is returned. A host read is only recorded (D_00519C20) for the sync task func_003E33B0,
+ * which does it and completes the command; returns 1.
+ *
+ * @param arg0  the device handle
+ * @param arg1  the destination
+ * @param arg2  the file offset
+ * @param arg3  the byte count
+ * @return 1 for a host read, else the disc read's result
+ */
 int func_003E3350(int arg0, int arg1, int arg2, int arg3) {
     int lo = arg0 & 0xFFFFFF;
     if ((arg0 >> 24) == 1) {
@@ -5919,6 +6834,13 @@ extern int func_004283A0_33B0(int, int, int) __asm__("func_004283A0");
 extern void iFILESYS_CommandCompleteCallback_33B0(int) __asm__("iFILESYS_CommandCompleteCallback");
 
 int func_003E33B0_i(void) __asm__("func_003E33B0");
+/**
+ * Sync task of the host device: does the read func_003E3350 recorded. It seeks unless the file and offset are where the
+ * last read ended (D_00450C40, D_00450C4C), reads, remembers the new position and completes the command
+ * (iFILESYS_CommandCompleteCallback, success when every byte was read). Returns 0.
+ *
+ * @return 0
+ */
 int func_003E33B0_i(void) {
     int r;
     int ok;
@@ -5940,6 +6862,18 @@ int func_003E33B0_i(void) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3478);
 #ifdef SKIP_ASM
+/**
+ * Writes to a host file: seeks to @p offset, writes and completes the command as a success
+ * (iFILESYS_CommandCompleteCallback(1)) whatever happened. Returns 0. Quirk: the remembered read position (D_00450C40,
+ * D_00450C4C) is not cleared, so a later read of the same file at that position skips its seek and reads after the
+ * written data.
+ *
+ * @param handle  the device handle
+ * @param buffer  the data
+ * @param offset  the file offset
+ * @param size  the byte count
+ * @return 0
+ */
 int func_003E3478(int handle, int buffer, int offset, int size) {
     int fileDesc = handle & 0xFFFFFF;
     func_00428168(fileDesc, offset, 0);
@@ -5955,6 +6889,12 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E34E8);
 extern void func_003E48D8(int, int, int, int);
 extern void func_00428168(int, int, int);
 
+/**
+ * Returns the size of an open file: a disc file's from the CD file table (func_003E48D8), a host file's by seeking to
+ * its end. Declared void; the size is left in the return register.
+ *
+ * @param handle  the device handle
+ */
 void func_003E34E8(int handle) {
     int temp_4;
 
@@ -5970,6 +6910,12 @@ void func_003E34E8(int handle) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3538);
 #ifdef SKIP_ASM
+/**
+ * Returns the start sector of an open disc file (from the CD file table, func_003E48D8), or 0 for a host file.
+ *
+ * @param handle  the device handle
+ * @return the sector, or 0
+ */
 int func_003E3538(int handle) {
     int sp0;
     int idx = handle & 0xFFFFFF;
@@ -5987,6 +6933,13 @@ int func_003E3538(int handle) {
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3588);
 #ifdef SKIP_ASM
 void iSignalSema_3588(int) __asm__("iSignalSema");
+/**
+ * Alarm handler of func_003E35B0: signals the waiting semaphore and re-enables interrupts.
+ *
+ * @param a  the alarm id
+ * @param b  the alarm time
+ * @param c  the semaphore
+ */
 void func_003E3588(int a, int b, int c) {
     iSignalSema_3588(c);
     // PORT: MIPS sync + EE ei (no C equivalent)
@@ -6003,6 +6956,12 @@ extern void cb_35B0(void) __asm__("func_003E3588");
 extern void SetAlarm_35B0(int, void (*)(void), int) __asm__("SetAlarm");
 extern int CreateSema_35B0(Cfg_35B0 *) __asm__("CreateSema");
 
+/**
+ * Sleeps the calling thread for @p arg0 alarm ticks (H-sync periods): sets an alarm (handler func_003E3588) that
+ * signals a new semaphore, waits on it and deletes it.
+ *
+ * @param arg0  the delay in H-sync periods
+ */
 void func_003E35B0(unsigned short arg0) {
     Cfg_35B0 c;
     int temp_2;
@@ -6031,6 +6990,13 @@ extern void func_00401718_3618(int) __asm__("func_00401718");
 extern void func_00402450_3618(int) __asm__("func_00402450");
 extern void func_00401BF0_3618(int) __asm__("func_00401BF0");
 extern int func_00402300_3618(void) __asm__("func_00402300");
+/**
+ * Reads one disc sector, the one at the CD state's sector (D_00519C40 +0x2C), into the sector buffer D_00519C80 and
+ * returns it. Retries until the read reports no error, waiting 480 ticks between polls; every 10 failures the CD is
+ * initialised again (func_00401718(0), media mode from D_00450C58 +0x8).
+ *
+ * @return the sector buffer
+ */
 char *func_003E3618(void) {
     int n = 10;
     int r;
@@ -6061,6 +7027,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E36F8);
 #ifdef SKIP_ASM
 extern int strlen();
 
+/**
+ * Hashes a string for the CD file table: from @p seed, hash = hash * 33 + byte for each byte from the last to the
+ * first. Quirk: an empty string reads the byte before it.
+ *
+ * @param str  the string
+ * @param seed  the starting value
+ * @return the hash
+ */
 int func_003E36F8(unsigned int str, int seed) {
     int hash = seed;
     signed char *cursor = (signed char *)(str + strlen(str)) - 1;
@@ -6083,6 +7057,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3968);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0051ED80_3968[] __asm__("D_0051ED80");
 
+/**
+ * Sort comparator of the CD file table: orders entries by their first word (the name hash), unsigned; equal hashes
+ * return 0 and count a collision in D_0051ED80.
+ *
+ * @param a  the first entry
+ * @param b  the second entry
+ * @return -1, 0 or 1
+ */
 int func_003E3968(unsigned int *a, unsigned int *b) {
     long d = (long)*a - (long)*b;
     if (d < 0) return -1;
@@ -6103,6 +7085,20 @@ extern void func_003E3968_39A8(void) __asm__("func_003E3968");
 extern int D_00450C58_39A8[] __asm__("D_00450C58");
 extern int D_0051ED80_39A8[] __asm__("D_0051ED80");
 
+/**
+ * Builds the sorted CD file table from the raw directory list and returns the hash seed it settled on.
+ *
+ * Each 0x108-byte source entry (path, sector, size) becomes {hash of the path (func_003E36F8), sector, size, then the
+ * path when D_00450C58 +0x4, the name length, is above 0} in entries of name length + 0xC bytes, sorted by hash
+ * (func_00418EF8 with func_003E3968). On any equal hashes the seed becomes seed * 101 + 7 and it starts over. Quirks:
+ * two identical paths hash alike for every seed, so the loop never ends; the path is copied with no length limit.
+ *
+ * @param src  the directory list
+ * @param dst  the file table
+ * @param n  the number of files
+ * @param seed  the first hash seed
+ * @return the seed used
+ */
 int func_003E39A8(char *src, char *dst, int n, int seed) {
     int done = 0;
     char *d;
@@ -6144,6 +7140,9 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3AD8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00519C40_3AD8[] __asm__("D_00519C40");
 void iSignalSema_3AD8(int) __asm__("iSignalSema");
+/**
+ * CD callback: wakes the CD reader thread (func_003E3BE0) by signalling its semaphore (D_00519C40 +0xC).
+ */
 void func_003E3AD8(void) {
     iSignalSema_3AD8(D_00519C40_3AD8[3]);
 }
@@ -6157,6 +7156,11 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E3B00);
 extern int D_00519C40_3B00[] __asm__("D_00519C40");
 extern int func_00401DF8_3B00(int, int, int, int *) __asm__("func_00401DF8");
 extern void func_004013E8_3B00(int) __asm__("func_004013E8");
+/**
+ * Issues the CD read of the current step: sectors +0x30 from sector +0x2C into the sector buffer (+0x3C) when flag bit
+ * 0 is set, else straight into the destination (+0x34). Up to three tries, waiting and syncing between them; it sets
+ * flag 2 (reading) on success or flags 2 and 4 (failed, for the recovery in func_003E4000) otherwise.
+ */
 void func_003E3B00(void) {
     int *q = &D_00519C40_3B00[8];
     int *p = D_00519C40_3B00;
@@ -6223,6 +7227,16 @@ extern void MEM_copy_2190(int, int, int) __asm__("MEM_copy");
 extern void iFILESYS_CommandCompleteCallback_33B0(int) __asm__("iFILESYS_CommandCompleteCallback");
 
 void func_003E3BE0_impl(void) __asm__("func_003E3BE0");
+/**
+ * CD reader thread: waits on the semaphore for each finished CD command and moves the current disc read on.
+ *
+ * On a CD error (or flag 8) a read in progress is retried while its retry count (+0x10) lasts, else flagged as failed
+ * (4). After a step read into the sector buffer (flag bit 0), the wanted bytes are copied to the destination and that
+ * sector is remembered (+0x14). While bytes are left (+0x24) it plans the next step (a part sector or an unaligned
+ * destination goes through the sector buffer one sector at a time, otherwise whole sectors go straight in) and issues
+ * it (func_003E3B00); when none are left it clears the reading flag and completes the command
+ * (iFILESYS_CommandCompleteCallback(1)). Never returns.
+ */
 void func_003E3BE0_impl(void) {
     struct sC40Read *s = &D_00519C40.f20;
 
@@ -6306,6 +7320,14 @@ extern struct CdState_3D78 D_00519C40_3D78 __asm__("D_00519C40");
 extern int D_00450C58[];
 extern char D_0051A480[];
 
+/**
+ * Recovers a failed disc read synchronously. Removes the CD callback, then, until no error is left: initialises the CD
+ * again (shutting it down when that fails), sets the media mode, waits (480 ticks per attempt so far), test-reads
+ * sector 0x10 and reads the current step's sectors one at a time. Then it restarts the CD callback thread, installs
+ * func_003E3AD8 again and signals the reader so the read carries on. Returns 0.
+ *
+ * @return 0
+ */
 int func_003E3D78(void) {
     struct CdReq_3D78 req;
     int tries;
@@ -6366,6 +7388,12 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4000);
 extern int D_00519C40_4000[] __asm__("D_00519C40");
 void func_003E3D78_4000(void) __asm__("func_003E3D78");
 
+/**
+ * Sync task of the CD file system: when a read has failed (flags 2 and 4 both set) it clears them and recovers the read
+ * (func_003E3D78). Returns 0.
+ *
+ * @return 0
+ */
 int func_003E4000(void) {
     int t = D_00519C40_4000[0];
     if ((t & 6) == 6) {
@@ -6471,6 +7499,22 @@ extern int D_004A30F0;
 extern struct IsoDirRec_4040 *func_003E3618_4040(void) __asm__("func_003E3618");
 extern void func_003E3758_4040(unsigned int, unsigned int) __asm__("func_003E3758");
 
+/**
+ * Starts the CD file system and builds its file table; returns the number of files, or 0.
+ *
+ * Fails (0) when the CD does not initialise or the disc is not a PS2 CD or DVD (disc types 18, 20). It reads the disc's
+ * TOC (func_00401FD8), sets the read mode and sector 0x10 and lists every file into a temporary table (n * 264 bytes,
+ * gFileSysOpts allocator): from the built-in file list (gFileSysOpts +0x20; the 7-character device prefix and the
+ * 2-character version suffix are dropped and backslashes become slashes), or by walking the ISO 9660 directories
+ * (func_003E3758) from the root or from the root directory D_00450C58 names. More than @p n files fails. Otherwise it
+ * builds the sorted hash table into @p files (func_003E39A8, seed D_00450C70), creates the semaphore and the reader
+ * thread func_003E3BE0 (priority 12), starts the CD callback thread, installs func_003E3AD8 and adds the sync task
+ * func_003E4000.
+ *
+ * @param n  the table capacity
+ * @param files  the file table
+ * @return the number of files, or 0
+ */
 unsigned int func_003E4040(unsigned int n, void *files) {
     struct ThreadParam_4040 tp;
     struct SemaParam_4040 sp;
@@ -6589,6 +7633,10 @@ extern void DeleteSema(int);
 extern int D_00519C40_9C40[] __asm__("D_00519C40");
 extern void func_003E4000_4000(void) __asm__("func_003E4000");
 
+/**
+ * Shuts the CD file system down: removes its sync task (func_003E4000) and the CD callback, terminates and deletes the
+ * reader thread, deletes its semaphore and shuts the CD down (func_00401718(5)).
+ */
 void func_003E44B0(void) {
     SYNCTASK_del_44B0(func_003E4000_4000);
     func_004008A0(0);

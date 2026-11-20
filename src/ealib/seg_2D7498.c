@@ -23,6 +23,18 @@ static __inline__ void clear_6498(unsigned long key) {
 }
 
 int func_003D6498_6498(unsigned short *arg0, unsigned int arg1) __asm__("func_003D6498");
+/**
+ * Registers a speech bank in the first free of the 8 bank slots (D_0044FFB8) under a key, unless one with the same ids
+ * is already registered.
+ *
+ * Only data whose first halfword is 3075 (0xC03) is taken. Its two ids (bytes +0x8 and +0x9, read by func_003DA3A8)
+ * must not match a registered bank's. The slot gets the data and @p arg1; then every bank registered under that key has
+ * its usage bytes reset to 0xFF (the inlined func_003D6618), even when no slot was free.
+ *
+ * @param arg0  the speech bank data
+ * @param arg1  the key (channel) it is registered under
+ * @return 1 when registered, 0 otherwise
+ */
 int func_003D6498_6498(unsigned short *arg0, unsigned int arg1) {
     int a, b;
     int i;
@@ -58,6 +70,12 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D6618);
 struct E_6618 { unsigned char *p; unsigned int x; };
 extern struct E_6618 D_0044FFB8_6618[] __asm__("D_0044FFB8");
 
+/**
+ * Resets the usage bytes of every registered speech bank with a key: sets the +0x12 bytes that follow the bank's header
+ * and its +0x10 halfword table (at ((+0x10 * 2 + 3) & ~3) + 0x18) to 0xFF.
+ *
+ * @param key  the key the banks were registered under
+ */
 void func_003D6618(unsigned long key) {
     int i, j;
     for (i = 0; i < 8; i++) {
@@ -78,6 +96,13 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D66C0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int func_003D6498_66C0(void *arg0, unsigned int arg1) __asm__("func_003D6498");
 
+/**
+ * Registers a speech bank under key @p key (func_003D6498) when the key is below 8.
+ *
+ * @param data  the speech bank data
+ * @param key  the key, 0..7
+ * @return 1 when registered, 0 otherwise
+ */
 int func_003D66C0(void *data, unsigned int key) {
     int registered = 0;
     if (key < 8) {
@@ -93,6 +118,13 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D66F0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0044FFB8_FFB8[] __asm__("D_0044FFB8");
 
+/**
+ * Unregisters the speech bank registered with this data and key: clears its slot in D_0044FFB8.
+ *
+ * @param arg0  the speech bank data (0 does nothing)
+ * @param arg1  the key it was registered under
+ * @return 1 when found, 0 otherwise
+ */
 int func_003D66F0(int arg0, int arg1) {
     int i;
     if (arg0 == 0) {
@@ -113,6 +145,11 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D6748);
 #ifdef SKIP_ASM
 extern void func_003D6498(int, int);
 
+/**
+ * Registers a speech bank under key 0 (func_003D6498) and discards the result.
+ *
+ * @param data  the speech bank data
+ */
 void func_003D6748(int data) {
     func_003D6498(data, 0);
 }
@@ -124,6 +161,12 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D6768);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0044FFA8_6768[4] __asm__("D_0044FFA8");
 
+/**
+ * Returns the speech driver's callback block D_0044FFA8 (+0x8 is the time source; SPCH_Init stores func_003E4E98
+ * there).
+ *
+ * @return D_0044FFA8
+ */
 int *func_003D6768(void) {
     return D_0044FFA8_6768;
 }
@@ -132,6 +175,15 @@ int *func_003D6768(void) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D6778);
 #ifdef SKIP_ASM
+/**
+ * Returns a speech buffer size in bytes: @p arg0 * @p arg1 / 8 bytes per second, then / 10 for mode 1 or * 2 / 7 for
+ * mode 2 (SPCH_Init asks for 22050 Hz, 16 bits, mode 1).
+ *
+ * @param arg0  the sample rate
+ * @param arg1  the bits per sample
+ * @param mode  0 one second, 1 a tenth, 2 two sevenths
+ * @return the size in bytes
+ */
 int func_003D6778(int arg0, int arg1, unsigned int mode) {
     int result = arg0 * arg1 / 8;
     switch (mode) {
@@ -158,6 +210,10 @@ extern int D_004A4820;
 void func_003D6D30(void);
 void func_003D8278(void);
 
+/**
+ * Shuts the speech driver down when it is initialised (D_004A4820 == 0x01789A34): clears the marker and the callback
+ * block D_0044FF90, then func_003D6D30 and func_003D8278 (clears the bank slots).
+ */
 void func_003D67F8(void) {
     if (D_004A4820 == 0x01789A34) {
         D_004A4820 = 0;
@@ -193,6 +249,20 @@ void func_003D8278(void);
 void func_003D6D40(void);
 void func_003D71D8(void);
 
+/**
+ * Initialises the speech driver: installs the play callback and buffers, resets every table and sets the initialised
+ * marker.
+ *
+ * D_0044FF90 gets @p arg0 as its first word (the rest cleared) and D_0044FFA8 is cleared; D_004A482C = func_003D76F0,
+ * D_004A4834 = @p arg1, D_004A4838 = @p arg2. func_003DB790 seeds its tables with @p arg1, then func_003D9A40,
+ * func_003DA3C0(0), the 8 words at D_004506A0, func_003D8278 (bank slots), the 8 entries of D_00450660 (0xFFFF, 0),
+ * func_003D6D40 and func_003D71D8 are reset. Finally D_004A4820 = 0x01789A34.
+ *
+ * @param arg0  the play callback (SPCH_Init passes func_002AF8A8)
+ * @param arg1  the seed (SPCH_Init's "rNum")
+ * @param arg2  the work buffer from func_003D6778
+ * @return 1
+ */
 int func_003D6840(int arg0, int arg1, int arg2) {
     int i;
     long j;
@@ -230,6 +300,13 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D6940);
 struct S_6940 { int pad0; int a; int b; };
 extern struct S_6940 D_0044FF90_6940 __asm__("D_0044FF90");
 extern int D_004A4820;
+/**
+ * Installs the speech driver's two hooks, when it is initialised (D_004A4820 == 0x01789A34): D_0044FF90 +0x4, the
+ * condition hook func_003DB208 asks, and +0x8, the tag event hook func_003DB040 and func_003DAE48 call. No callers.
+ *
+ * @param x  the condition hook (+0x4)
+ * @param y  the tag event hook (+0x8)
+ */
 void func_003D6940(int x, int y) {
     if (D_004A4820 == 0x01789A34) {
         D_0044FF90_6940.a = x;
@@ -244,6 +321,12 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D6968);
 extern int D_0044FFA0[];
 extern int D_004A4820;
 
+/**
+ * Installs the speech driver's retry hook D_0044FFA0 (D_0044FF90 +0x10, called by func_003DA418 when a request builds
+ * nothing) when the driver is initialised. No callers.
+ *
+ * @param arg0  the hook
+ */
 void func_003D6968(int arg0) {
     if (D_004A4820 == 0x01789A34) {
         D_0044FFA0[0] = arg0;
@@ -257,6 +340,12 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D6988);
 extern int D_0044FF9C[];
 extern int D_004A4820;
 
+/**
+ * Installs the speech driver's approve hook D_0044FF9C (D_0044FF90 +0xC, asked by func_003D7EC8 before a request plays)
+ * when the driver is initialised. No callers.
+ *
+ * @param arg0  the hook
+ */
 void func_003D6988(int arg0) {
     if (D_004A4820 == 0x01789A34) {
         D_0044FF9C[0] = arg0;
@@ -272,6 +361,9 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D69A8);
 struct E_69A8 { unsigned short h; int w; };
 extern struct E_69A8 D_00450660_69A8[] __asm__("D_00450660");
 
+/**
+ * Resets the 8 speech channel entries of D_00450660: id 0xFFFF and word 0.
+ */
 void func_003D69A8(void) {
     long i;
     for (i = 0; i < 8; i++) {
@@ -307,6 +399,18 @@ static inline unsigned char *tail_69F0(unsigned char *s) {
     return s + ((s[5] * (n + 2) + 0xF) & 0x3FFC) + n * 4;
 }
 
+/**
+ * Adds a speech table (bank) to the driver's table list (D_004A4824, D_004A4828 slots); returns its slot or -1.
+ *
+ * A table with a history (byte +0x6) is refused while its history area is in use (position byte not 0 or an entry not
+ * 0xFF). It goes into the first free slot; a table with the random-subset flag (0x80 in +0x4) first gets the rows of
+ * subset (seed D_004A4834 % subset count) marked in its row bitmask (the inlined func_003D6F80). The table layout: +0x4
+ * low nibble column count, +0x5 row count, rows of count + 2 bytes and 4 bytes per column, then the subset count and
+ * bitmask, then the history.
+ *
+ * @param shp  the speech table
+ * @return the slot, or -1 (no list, no free slot or history in use)
+ */
 int func_003D69F0(unsigned char *shp) {
     int ret;
     int i, j, w, extra, c, cnt, bit;
@@ -373,6 +477,14 @@ extern int D_004A4834_6BC0 __asm__("D_004A4834");
 void func_003D7038(unsigned char *p);
 void func_003D6F80(unsigned char *p);
 
+/**
+ * Sets the speech driver's seed (D_004A4834) and re-draws the random subset of every registered random-subset table.
+ *
+ * For tables with flag 0x80 (+0x4) func_003D7038 clears the row bitmask and func_003D6F80 marks the new subset. Does
+ * nothing when the driver is not initialised (D_004A4820 == 0).
+ *
+ * @param arg0  the new seed
+ */
 void func_003D6BC0(int arg0) {
     int i;
     unsigned char *p;
@@ -394,6 +506,12 @@ void func_003D6BC0(int arg0) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D6C58);
 #ifdef SKIP_ASM
+/**
+ * Returns the memory a speech table list of @p arg0 slots needs: 4 bytes each (SPCH_Init asks for 500).
+ *
+ * @param arg0  the number of slots
+ * @return the size in bytes
+ */
 int func_003D6C58(int arg0) {
     return arg0 * 4;
 }
@@ -406,6 +524,12 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D6C60);
 extern int *D_004A4824_6C60 __asm__("D_004A4824");
 extern int D_004A4828_6C60 __asm__("D_004A4828");
 
+/**
+ * Sets up the speech table list: D_004A4828 = @p arg0 slots at @p arg1 (D_004A4824), all cleared.
+ *
+ * @param arg0  the number of slots
+ * @param arg1  the slot memory (func_003D6C58 bytes), or 0
+ */
 void func_003D6C60(int arg0, int *arg1) {
     int i;
 
@@ -425,6 +549,11 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D6CA0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int *D_004A4824_6CA0 __asm__("D_004A4824");
 
+/**
+ * Clears slot @p arg0 of the speech table list (the cSpeechBank destructor's release). No range check.
+ *
+ * @param arg0  the slot
+ */
 void func_003D6CA0(int arg0) {
     if (D_004A4824_6CA0 != 0) {
         D_004A4824_6CA0[arg0] = 0;
@@ -439,6 +568,12 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D6CC0);
 extern int D_004A4820;
 extern int *D_004A4824_6CC0 __asm__("D_004A4824");
 
+/**
+ * Returns the speech table in slot @p arg0, or 0 when the driver is not initialised or has no list. No range check.
+ *
+ * @param arg0  the slot
+ * @return the table, or 0
+ */
 int func_003D6CC0(int arg0) {
     int r = 0;
     if (D_004A4820 == 0x01789A34 && D_004A4824_6CC0 != 0) {
@@ -454,6 +589,14 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D6CF8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char **D_004A4824_6CF8 __asm__("D_004A4824");
 
+/**
+ * Returns whether @p arg1 is below the entry count (halfword +0xA) of the speech table in slot @p arg0; 0 when the
+ * count is 0xFFFF, the slot is negative or there is no list.
+ *
+ * @param arg0  the slot
+ * @param arg1  the entry index to check
+ * @return 1 when in range, else 0
+ */
 int func_003D6CF8(int arg0, unsigned int arg1) {
     int r = 0;
     unsigned short *p;
@@ -474,6 +617,9 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D6D30);
 extern int D_004A4824;
 extern int D_004A4828;
 
+/**
+ * Forgets the speech table list (D_004A4824 and its count D_004A4828 cleared). Used by func_003D67F8 at shutdown.
+ */
 void func_003D6D30(void) {
     D_004A4824 = 0;
     D_004A4828 = 0;
@@ -486,6 +632,10 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D6D40);
 extern int D_004A4824;
 extern int D_004A4828;
 
+/**
+ * Forgets the speech table list (D_004A4824 and its count D_004A4828 cleared); the same body as func_003D6D30, used by
+ * func_003D6840 at init.
+ */
 void func_003D6D40(void) {
     D_004A4824 = 0;
     D_004A4828 = 0;
@@ -499,6 +649,12 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D6D50);
 extern unsigned short **D_004A4824_6D50 __asm__("D_004A4824");
 extern int D_004A4828_6D50 __asm__("D_004A4828");
 
+/**
+ * Returns the slot of the first registered speech table whose id (first halfword) is @p arg0, or -1.
+ *
+ * @param arg0  the table id
+ * @return the slot, or -1
+ */
 int func_003D6D50(unsigned short arg0) {
     unsigned short **p;
     short i;
@@ -523,6 +679,13 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D6DB8);
 extern unsigned short **D_004A4824_6DB8 __asm__("D_004A4824");
 extern int D_004A4828_6DB8 __asm__("D_004A4828");
 
+/**
+ * Returns the slot of the registered speech table whose two first halfwords are @p arg0 and @p arg1, or -1.
+ *
+ * @param arg0  the table id
+ * @param arg1  the second halfword (a sub id)
+ * @return the slot, or -1
+ */
 int func_003D6DB8(unsigned short arg0, unsigned short arg1) {
     short i;
     unsigned short *p;
@@ -542,6 +705,14 @@ int func_003D6DB8(unsigned short arg0, unsigned short arg1) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D6E30);
 #ifdef SKIP_ASM
+/**
+ * Returns how recently a speech table picked @p key: 1 for the latest entry of its history ring, 2 the one before, ...;
+ * 0 when it is not in the history or the table keeps none (byte +0x6).
+ *
+ * @param node  the speech table
+ * @param key  the row it picked
+ * @return the recency, 0 when absent
+ */
 int func_003D6E30(unsigned char *node, int key) {
     int cnt = node[6];
     int recency = 0;
@@ -578,6 +749,13 @@ int func_003D6E30(unsigned char *node, int key) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D6EE8);
 #ifdef SKIP_ASM
+/**
+ * Records @p key in a speech table's history ring (length byte +0x6; position byte, then the entries) and advances the
+ * position, wrapping at the length. Tables without a history are left alone.
+ *
+ * @param node  the speech table
+ * @param key  the row just picked
+ */
 void func_003D6EE8(unsigned char *node, int key) {
     int colCount;
     int maskBytes;
@@ -616,6 +794,14 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D6F80);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern unsigned int D_004A4834_6F80 __asm__("D_004A4834");
 
+/**
+ * Marks a random-subset speech table's current subset in its row bitmask.
+ *
+ * With c the subset count (first byte after the rows), subset r = seed D_004A4834 % c covers rows r * rows / c up to (r
+ * + 1) * rows / c, whose bits are set. Nothing when c is 0.
+ *
+ * @param shp  the speech table
+ */
 void func_003D6F80(unsigned char *shp) {
     int j, w, c, cnt, bit;
     unsigned char *t;
@@ -647,6 +833,11 @@ void func_003D6F80(unsigned char *shp) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D7038);
 #ifdef SKIP_ASM
+/**
+ * Clears a random-subset speech table's row bitmask, when its subset count is not 0.
+ *
+ * @param node  the speech table
+ */
 void func_003D7038(unsigned char *node) {
     int n = node[4] & 0xF;
     int rowCount = node[5];
@@ -671,6 +862,11 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D70B0);
 extern int *D_004A4824_4824 __asm__("D_004A4824");
 extern int D_004A4828_4828 __asm__("D_004A4828");
 
+/**
+ * Returns the first free slot of the speech table list, or -1.
+ *
+ * @return the slot, or -1
+ */
 int func_003D70B0(void) {
     int i;
     int r = -1;
@@ -704,6 +900,16 @@ static __inline__ unsigned short *lookup_7110(unsigned char *base, unsigned shor
     return 0;
 }
 
+/**
+ * Finds a speech event's entry in the speech bank registered for its ids: returns the entry or 0.
+ *
+ * @p arg0 holds the entry id (halfword +0x0) and the bank ids (+0x2 and +0x3, compared with bank bytes +0x9 and +0x8).
+ * The first of the 8 bank slots (D_0044FFB8) that matches is searched: its entries (count +0x10, word offsets at +0x18)
+ * are compared on their first halfword.
+ *
+ * @param arg0  the 4-byte key {entry id, bank ids}
+ * @return the bank entry, or 0
+ */
 unsigned short *func_003D7110(unsigned char *arg0) {
     struct E_7110 *res;
     struct E_7110 *e = D_0044FFB8_7110;
@@ -739,6 +945,10 @@ extern struct G_71D8 D_0044FFF8_71D8 __asm__("D_0044FFF8");
 extern int D_004A4840;
 extern short D_004A4844;
 
+/**
+ * Resets the speech driver's request state (D_0044FFF8): the 8 channel words (0, -1, -1), the count, and 16 request
+ * records (cleared, +0x7 = 0xFF, 20 data words zeroed); D_004A4840 and D_004A4844 are cleared too.
+ */
 void func_003D71D8(void) {
     int i, j;
     for (i = 0; i < 8; i++) {
@@ -773,6 +983,18 @@ extern struct G_72A0 D_0044FFF8_72A0 __asm__("D_0044FFF8");
 int func_003DB9A0(void);
 void func_003D7C38(unsigned int);
 
+/**
+ * Finds a speech request record (D_0044FFF8, 16 of 0x60 bytes from +0x64) for a new request: returns its index or -1.
+ *
+ * Takes a free record first. Otherwise it evicts (func_003D7C38) a chain-head record whose lifetime (header +0x2, when
+ * not 0) has passed, then any chain-head record on channel @p arg1 whose priority (header +0x4) is not above
+ * @p arg0, which is freed in place. With @p arg2 set the channel's latest request (+0x40 [channel]) is never taken.
+ *
+ * @param arg0  the new request's priority
+ * @param arg1  the channel
+ * @param arg2  nonzero to keep the channel's latest request
+ * @return the record index, or -1
+ */
 int func_003D72A0(unsigned int arg0, int arg1, int arg2) {
     int i;
     int ret = -1;
@@ -823,6 +1045,14 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D76F0);
 #ifdef SKIP_ASM
 int func_003D7418(unsigned char *arg0);
 
+/**
+ * Posts a speech request: copies the packed key @p a0 (func_003D8008) and @p n further int arguments into a 20-word
+ * buffer and hands it to func_003D7418, the request queue. func_003D6840 installs it as D_004A482C, the game's speech
+ * post function.
+ *
+ * @param a0  the packed speech key
+ * @param n  the number of extra arguments
+ */
 // PORT: SN-specific va_start (gcc 2.95 EE EABI form); use <stdarg.h> off-PS2.
 void func_003D76F0(int a0, int n, ...) {
     int buf[20];
@@ -874,6 +1104,19 @@ done:
     return found;
 }
 
+/**
+ * Picks the queued speech request to play next on a channel: returns its record index or -1.
+ *
+ * Looks at the chain-head records (+0x6C == 0) in use on @p arg1. Expired ones (age past the header's lifetime +0x2,
+ * age measured from func_003DB9A0 + D_004A483C) are dropped with func_003D7C38. With @p list only ids (header +0x0) in
+ * it count. When the channel's mode (D_004506A0) is 1, a request with header flag 1 (+0xA) is skipped while its
+ * priority is below its bank's threshold (+0x16). The best has the highest priority (+0x4), then the smallest age, then
+ * the highest sequence number (+0x68).
+ *
+ * @param list  the allowed ids {count, ids}, or 0 for any
+ * @param arg1  the channel
+ * @return the record index, or -1
+ */
 int func_003D7760(struct L_7760 *list, int arg1) {
     int best = -1;
     unsigned int bestAge = 0xFFFFFFFF;
@@ -952,6 +1195,16 @@ struct B_7A50 { unsigned char pad[6]; unsigned char b6; unsigned char lo : 4; si
 unsigned short *func_003D7110(unsigned char *arg0);
 int func_003D7760_7A50(struct L_7A50 *list, int arg1) __asm__("func_003D7760");
 
+/**
+ * Picks the next speech request for a channel, preferring the follow-ups the channel's current line allows.
+ *
+ * When the channel's current line (D_00450660 [@p idx]) is set and its bank entry (func_003D7110) has flag 0x10 at
+ * +0xA, the entry carries a follow-up id list (after its tables) and func_003D7760 is asked with that list first; with
+ * no list, or when the list gives nothing, any request is taken.
+ *
+ * @param idx  the channel
+ * @return the record index, or -1
+ */
 int func_003D7A50(int idx) {
     struct L_7A50 list;
     int ok = 0;
@@ -998,6 +1251,10 @@ struct G_7B98 { int z[8]; int a[8]; int b[8]; int n; struct R_7B98 r[16]; };
 extern struct G_7B98 D_0044FFF8_7B98 __asm__("D_0044FFF8");
 void func_003D69A8(void);
 
+/**
+ * Cancels every queued speech request: frees the records in use, resets each channel's count (+0x0) and its two request
+ * words (+0x20 and +0x40, -1), and the channel lines (func_003D69A8).
+ */
 void func_003D7B98(void) {
     int i;
     for (i = 0; i < 16; i++) {
@@ -1026,6 +1283,14 @@ struct R_7C38 { unsigned int f0; unsigned short h; unsigned char c; unsigned cha
 struct G_7C38 { int z[8]; int a[8]; int b[8]; int n; struct R_7C38 r[16]; };
 extern struct G_7C38 D_0044FFF8_7C38 __asm__("D_0044FFF8");
 
+/**
+ * Frees speech request @p arg0 and the continuation records chained after it (+0x6E links, +0x6C set).
+ *
+ * Only a chain head (+0x6C == 0) below 16 is freed. The channel's request words (+0x20 and +0x40) pointing at it, or
+ * the first at a continuation, become -1, and the channel's count drops by one (not below 0).
+ *
+ * @param arg0  the record index
+ */
 void func_003D7C38(unsigned int arg0) {
     int d;
     int j = -1;
@@ -1074,6 +1339,15 @@ struct G_7D58 { int z[8]; int a[8]; int b[8]; int n; struct R_7D58 r[16]; };
 extern struct G_7D58 D_0044FFF8_7D58 __asm__("D_0044FFF8");
 void func_003D7C38(unsigned int);
 
+/**
+ * Prunes a channel's queue before speech request @p idx plays.
+ *
+ * Clears the flag D_0044FFF8 +0x60, then looks at the other chain-head requests on the same channel. Older ones
+ * (earlier time +0x64, or the same time and a lower sequence number) are dropped (func_003D7C38) unless their header
+ * has flag 4 (+0xA); a newer one whose header +0x9 is 100 sets the flag.
+ *
+ * @param idx  the record about to play
+ */
 void func_003D7D58(int idx) {
     int i;
     unsigned int f;
@@ -1122,6 +1396,17 @@ void func_003D9A40(void);
 int func_003DA418(int);
 
 int func_003D7EC8_7EC8(int a) __asm__("func_003D7EC8");
+/**
+ * Starts the next queued speech on channel @p a; returns the build result (0 when nothing started).
+ *
+ * Does nothing when the channel has no requests. Requests are picked with func_003D7A50 and offered to the approve hook
+ * (D_0044FF90 +0xC, given the packed key); a refused one is dropped and the next tried. The chosen request prunes the
+ * queue (func_003D7D58), the play list is reset (func_003D9A40) and func_003DA418 adds the request and its chained
+ * continuations until one fails. The request is then freed.
+ *
+ * @param a  the channel
+ * @return the last func_003DA418 result, 0 when none
+ */
 int func_003D7EC8_7EC8(int a) {
     int r = 0;
     int done = 0;
@@ -1161,6 +1446,15 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D8008);
 #ifdef SKIP_ASM
 typedef struct { short a; signed char b; signed char c; } D8008_S;
 
+/**
+ * Packs a speech key: @p arg0 in byte 3, @p arg1 in byte 2 and @p arg2 in the low halfword (the bank entry id). The two
+ * bytes are matched against a bank's +0x8 and +0x9 ids (func_003D7110).
+ *
+ * @param arg0  the bank id
+ * @param arg1  the sub id
+ * @param arg2  the entry id
+ * @return the packed key
+ */
 int func_003D8008(int arg0, int arg1, int arg2) {
     D8008_S packed;
     packed.c = arg0;
@@ -1176,6 +1470,12 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D8028);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0044FFF8_8028[128] __asm__("D_0044FFF8");
 
+/**
+ * Returns the number of speech requests queued on a channel (D_0044FFF8 [@p arg0]).
+ *
+ * @param arg0  the channel
+ * @return the count
+ */
 int func_003D8028(int arg0) {
     return D_0044FFF8_8028[arg0];
 }
@@ -1190,6 +1490,13 @@ int func_003DA3F0_8040(void) __asm__("func_003DA3F0");
 int func_003D7EC8_8040(int) __asm__("func_003D7EC8");
 int func_003D9BD8_8040(int) __asm__("func_003D9BD8");
 
+/**
+ * Updates speech channel @p arg0: when its play list still has lines (func_003DA3F0) or a new request starts
+ * (func_003D7EC8), plays the list (func_003D9BD8). Guarded against re-entry by D_004A484C.
+ *
+ * @param arg0  the channel
+ * @return func_003D9BD8's result, 0 when nothing played or re-entered
+ */
 int func_003D8040(int arg0) {
     int r = 0;
     if (D_004A484C_8040 == 0) {
@@ -1215,6 +1522,13 @@ int func_003DA418(int);
 void func_003D7C38(unsigned int);
 void func_003D9BD8(int);
 
+/**
+ * Plays channel @p x's latest speech request at once: when both of its request words (+0x20, +0x40) are valid, the play
+ * list is reset (func_003D9A40), filled from the latest request (func_003DA418), the request freed, and the list played
+ * (func_003D9BD8) when it was filled. Guarded against re-entry by D_004A484C.
+ *
+ * @param x  the channel
+ */
 void func_003D80B0(int x) {
     if (D_004A484C_80B0 == 0) {
         unsigned int a = D_0044FFF8_80B0.a[x];
@@ -1244,6 +1558,13 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D8158);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_004506A0_8158[128] __asm__("D_004506A0");
 
+/**
+ * Sets a speech channel's mode (D_004506A0 [@p arg1]); mode 1 makes func_003D7760 enforce the bank's priority threshold
+ * for flagged requests.
+ *
+ * @param arg0  the mode
+ * @param arg1  the channel
+ */
 void func_003D8158(int arg0, int arg1) {
     D_004506A0_8158[arg1] = arg0;
 }
@@ -1254,6 +1575,9 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D8170);
 #ifdef SKIP_ASM
 extern void func_003D7EC8(int);
 
+/**
+ * Starts the next queued speech on channel 0 (func_003D7EC8(0)) and discards the result.
+ */
 void func_003D8170(void) {
     func_003D7EC8(0);
 }
@@ -1268,6 +1592,9 @@ extern void func_003D9BD8(int);
 extern int func_003DA3F0(int);
 extern int D_004A484C_484C __asm__("D_004A484C");
 
+/**
+ * Updates speech channel 0 (the body of func_003D8040 for channel 0, without a result).
+ */
 void func_003D8190(void) {
     if (D_004A484C_484C == 0) {
         D_004A484C_484C = 1;
@@ -1288,6 +1615,15 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D81F0);
 struct E82B0 { unsigned char *p; int x; };
 extern struct E82B0 D_0044FFB8_82B0[] __asm__("D_0044FFB8");
 
+/**
+ * Looks up the key the speech bank for a speech key was registered under (func_003D6498's key).
+ *
+ * The bank is the first of the 8 bank slots (D_0044FFB8) whose ids (+0x9, +0x8) match key bytes 2 and 3.
+ *
+ * @param arg0  the 4-byte speech key
+ * @param arg1  receives the bank's registration key when found
+ * @return 1 when found, else 0
+ */
 int func_003D81F0(unsigned char *arg0, int *arg1) {
     struct E82B0 *res;
     struct E82B0 *e = D_0044FFB8_82B0;
@@ -1320,6 +1656,9 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D8278);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0044FFB8_8278[] __asm__("D_0044FFB8");
 
+/**
+ * Clears the 8 speech bank slots (D_0044FFB8: data and key).
+ */
 void func_003D8278(void) {
     int *var_2;
     int var_3;
@@ -1341,6 +1680,12 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D82B0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern struct E82B0 D_0044FFB8_82B0[] __asm__("D_0044FFB8");
 
+/**
+ * Returns halfword +0x14 of the speech bank registered for a speech key (matched as in func_003D81F0), or 0.
+ *
+ * @param arg0  the 4-byte speech key
+ * @return the bank's +0x14 value, 0 when no bank matches
+ */
 unsigned short func_003D82B0(unsigned char *arg0) {
     struct E82B0 *res;
     struct E82B0 *e = D_0044FFB8_82B0;
@@ -1372,6 +1717,13 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D8330);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern struct E82B0 D_0044FFB8_82B0[] __asm__("D_0044FFB8");
 
+/**
+ * Looks up the sub id (+0x9) of the speech bank registered for a speech key (matched as in func_003D81F0).
+ *
+ * @param arg0  the 4-byte speech key
+ * @param arg1  receives the bank's +0x9 byte when found
+ * @return 1 when found, else 0
+ */
 int func_003D8330(unsigned char *arg0, int *arg1) {
     struct E82B0 *res;
     struct E82B0 *e = D_0044FFB8_82B0;
@@ -1405,6 +1757,13 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D83B8);
 struct E_83B8 { unsigned char *p; int x; };
 extern struct E_83B8 D_0044FFB8_83B8[] __asm__("D_0044FFB8");
 
+/**
+ * Looks up the usage bytes of the speech bank registered for a speech key (the area func_003D6618 resets).
+ *
+ * @param arg0  the 4-byte speech key
+ * @param arg1  receives the bank's usage area when found
+ * @return 1 when found, else 0
+ */
 int func_003D83B8(unsigned char *arg0, unsigned char **arg1) {
     struct E_83B8 *res;
     struct E_83B8 *e = D_0044FFB8_83B8;
@@ -1435,6 +1794,14 @@ done:
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D8460);
 #ifdef SKIP_ASM
+/**
+ * Returns the entry of a speech bank whose first halfword is @p key, or 0. The entries are reached through the word
+ * offsets at +0x18 (count +0x10). The same search is inlined in func_003D7110.
+ *
+ * @param header  the speech bank data
+ * @param key  the entry id
+ * @return the entry, or 0
+ */
 unsigned short *func_003D8460(void *header, int key) {
     int var_7;
     unsigned short *var_2;
@@ -1470,6 +1837,14 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D84A0);
 struct E_84A0 { unsigned char *p; int x; };
 extern struct E_84A0 D_0044FFB8_84A0[] __asm__("D_0044FFB8");
 
+/**
+ * Finds the speech bank slot (D_0044FFB8) for a speech key: the first whose ids (+0x9, +0x8) match key bytes 2 and 3.
+ * The same search is inlined in func_003D7110 and its siblings.
+ *
+ * @param arg0  the 4-byte speech key
+ * @param pres  receives the slot when found
+ * @return 1 when found, else 0
+ */
 int func_003D84A0(unsigned char *arg0, struct E_84A0 **pres) {
     struct E_84A0 *e = D_0044FFB8_84A0;
     int found = 0;
@@ -1495,6 +1870,13 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D8500);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S_8500 { unsigned int z[8]; unsigned int a[8]; unsigned int b[8]; };
 extern struct S_8500 D_0044FFF8_8500 __asm__("D_0044FFF8");
+/**
+ * Returns whether speech channel @p i has both request words (+0x20 and +0x40 [channel]) set, the test func_003D80B0
+ * makes before it plays the latest request.
+ *
+ * @param i  the channel
+ * @return 1 when both are valid indices (below 16), else 0
+ */
 int func_003D8500(int i) {
     int r = D_0044FFF8_8500.a[i] < 0x10;
     if (D_0044FFF8_8500.b[i] >= 0x10) r = 0;
@@ -1505,6 +1887,11 @@ int func_003D8500(int i) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D8530);
 #ifdef SKIP_ASM
+/**
+ * Clears an id list {count, ids} as func_003D7760 takes it.
+ *
+ * @param arg0  the list
+ */
 void func_003D8530(void *arg0) {
     *(int *)((char *)arg0 + 0) = 0;
     *(int *)((char *)arg0 + 4) = 0;
@@ -1514,6 +1901,13 @@ void func_003D8530(void *arg0) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D8540);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the low halfword of @p wantedId is in an id list {count, ids}: the test func_003D7760 inlines.
+ *
+ * @param wantedId  the id
+ * @param list  the list
+ * @return 1 when present, else 0
+ */
 int func_003D8540(int wantedId, int *list) {
     unsigned key = wantedId & 0xFFFF;
     int i;
@@ -1537,6 +1931,20 @@ struct K_85C8 { unsigned char b[4]; };
 struct Rule_85C8 { int pad0; signed char n; unsigned char pad5[3]; unsigned char k[8]; unsigned char c[4]; int m[4]; };
 int func_003D83B8(unsigned char *arg0, unsigned char **arg1);
 
+/**
+ * Returns whether a set of tag values meets a rule's column conditions (up to 4; a rule with 5 or more fails).
+ *
+ * For each condition i the value @p vals [i] must be below 32 and its bit must be in the rule's mask (+0x14 [i]). Its
+ * kind (+0x8 [i]) then decides: 0 or 0xFE pass; 0xFF compares through +0x10 [i], either (bit 0x80) with the object's
+ * variable word [low 7 bits] or with that byte of the usage area of the bank named by the key at @p tbl
+ * (func_003D83B8); any other kind needs the bit in argument word @p tbl [kind].
+ *
+ * @param obj  the phrase template (its variable words follow the slot list)
+ * @param rule  the condition rule
+ * @param tbl  the request arguments (word 0 is the speech key)
+ * @param vals  the tag values to test
+ * @return 1 when every condition holds, else 0
+ */
 int func_003D85C8(unsigned char *obj, struct Rule_85C8 *rule, unsigned char *tbl, unsigned char *vals) {
     int ok = 1;
     int n = rule->n;
@@ -1593,6 +2001,18 @@ int func_003D85C8(unsigned char *obj, struct Rule_85C8 *rule, unsigned char *tbl
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003D8780);
 #ifdef SKIP_ASM
+/**
+ * Returns whether row @p idx of a speech table may be picked, given the previous pick.
+ *
+ * Rows past the row count (+0x5) fail. When @p state [1] holds a previous row (not -1) below the entry count (+0xA),
+ * the transition bit (previous * rows + @p idx) of the matrix after the subset area and history must be set. A
+ * random-subset table (flag 0x80) also needs @p idx's bit in its current subset.
+ *
+ * @param state  the selection state; halfword +0x2 is the previous row or -1
+ * @param node  the speech table
+ * @param idx  the row
+ * @return nonzero when allowed
+ */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 int func_003D8780(short *state, unsigned char *node, int idx) {
     int w = node[5];
@@ -1652,6 +2072,16 @@ extern unsigned int D_004506E0_8CB0[] __asm__("D_004506E0");
 
 #define WEIGHT_8CB0(p) ((*(p) & 0x1F) * D_004506E0_8CB0[*(p) >> 5])
 
+/**
+ * Orders the options of a set by weighted random draw, without repeats, into @p out.
+ *
+ * The set has +0x6 options reached through the halfword word-offsets at +0xC; an option's weight is its first byte's
+ * low 5 bits times the scale D_004506E0 [its top 3 bits]. Options are drawn with func_003DB5C0(total, -1) and removed
+ * from the pool; the zero-weight options follow at the end.
+ *
+ * @param h  the option set
+ * @param out  receives the option indices in order
+ */
 void func_003D8CB0(struct H_8CB0 *h, unsigned char *out) {
     int w[100];
     int n = h->n;
@@ -1700,6 +2130,19 @@ struct sTblEnt { unsigned short a; unsigned short b; };
 struct sLayer { char pad[4]; unsigned char cnt; unsigned char n5; unsigned char n6; char pad7; unsigned char list[1]; };
 struct sCond { unsigned short id; unsigned char idx; unsigned char mode; signed char n; char pad5[3]; unsigned char a[8]; unsigned char b[4]; unsigned int m[4]; };
 
+/**
+ * Checks a phrase's chosen rows against its shared variables: returns 1 when they agree, 0 on a conflict or an
+ * unreadable row.
+ *
+ * Clears the template's variable words (+0x5 of them after the slot list) and each slot's done flag, then passes over
+ * the slots until every one is done. For each condition column with a variable (+0x10 bit 0x80), kind 0xFE binds the
+ * variable to the chosen row's tag bit (func_003DB838) and kind 0xFF requires the tag bit in it; a slot that needs a
+ * variable not bound yet waits for the next pass. Quirk: a variable no slot binds makes it loop forever.
+ *
+ * @param h  the selection set
+ * @param l  the phrase template
+ * @return 1 when consistent, else 0
+ */
 int func_003D8E58(struct sSelSet *h, struct sLayer *l) {
     struct sShapeInfo o;
     int ok = 1;
@@ -1859,6 +2302,22 @@ static __inline__ int resolve_9088(struct sCond *p, struct sTblEnt *tbl, struct 
     return 1;
 }
 
+/**
+ * Builds the candidate rows of every slot of a phrase template for a request; returns 1 on success.
+ *
+ * Fails when the template has 13 or more slots (+0x4 >> 2), when its kind (+0x4 & 3) does not suit @p mode (1 needs
+ * mode 2, 2 needs another mode, 0 suits any) or when @p flags fails its care mask (func_003DB3B8). Each slot whose
+ * required variables are set gets its speech table (by id, by id and an argument word, or by id with an entry check;
+ * func_003D6D50, func_003D6DB8, func_003D6CF8) and its candidates from func_003D88C8 into the shared row list. Up to
+ * 200 passes are made until all slots resolve.
+ *
+ * @param hdr  the phrase template
+ * @param tbl  the request arguments
+ * @param flags  the request's flag byte
+ * @param ignoreMask  flag bits not compared
+ * @param mode  the request mode
+ * @return 1 when every slot has candidates, else 0
+ */
 int func_003D9088(struct sSelSet *self, unsigned char *hdr, struct sTblEnt *tbl, int flags, int ignoreMask, int mode) {
     int ret = 1;
     int all;
@@ -1970,6 +2429,18 @@ static inline int next_93C0(unsigned char *h, struct sSel *e) {
     return wrap;
 }
 
+/**
+ * Searches the slots' candidate combinations for one that fits: returns 1 when found, 0 when all were tried.
+ *
+ * Starts each slot at its first candidate and steps through the combinations, last slot fastest (the inlined
+ * func_003DAC20). A combination fits when its total length is at most @p thr percent of the buffer (D_004A4838; the
+ * inlined func_003DA910, skipped when @p thr is 0) and, for a template with variables, func_003D8E58 accepts it.
+ *
+ * @param l  the phrase template
+ * @param h  the selection set
+ * @param thr  the length limit in percent of the buffer, 0 for none
+ * @return 1 when a combination fits, else 0
+ */
 int func_003D93C0(struct sLayer *l, struct sSelSet *h, int thr) {
     int ok = 0;
     int of = 0;
@@ -2061,6 +2532,21 @@ static __inline__ void apply_95B8(void *a0, struct H_95B8 *h, struct L_95B8 *l) 
     }
 }
 
+/**
+ * Chooses the rows a phrase plays from its slots' candidates; returns 1 on success.
+ *
+ * In mode 1, or for a template with variables, each slot's candidates are shuffled (func_003DB5C0) and the combinations
+ * searched (func_003D93C0, with no length limit in mode 2). Otherwise each slot takes a random candidate (func_003DB5C0
+ * keyed by its table, so recent picks repeat less), and an empty slot fails. Bind columns without a variable (kind
+ * 0xFE) then store the chosen tags in the bank's usage area (func_003D83B8 for @p a0).
+ *
+ * @param a0  the speech key
+ * @param h  the selection set
+ * @param l  the phrase template
+ * @param mode  the request mode
+ * @param thr  the length limit in percent of the buffer
+ * @return 1 on success, else 0
+ */
 int func_003D95B8(void *a0, struct H_95B8 *h, struct L_95B8 *l, int mode, int thr) {
     int ok;
     int i;
@@ -2118,6 +2604,20 @@ static __inline__ void clearBit_9830(unsigned char *s, int bit) {
     *p &= ~(1 << (bit - q * 8));
 }
 
+/**
+ * Sends a phrase's lines to the speech play callback and returns their total length as a percentage of the buffer.
+ *
+ * Does nothing without a play callback (D_0044FF90 +0x0, func_002AF8A8). Each of the template's slots takes a play list
+ * entry from @p a2 (D_00450700): table and row. A random-subset table drops the row from its subset when D_004A4830 is
+ * set. The message holds the table slot, the row's start (plus the repeat index times the table length when set), its
+ * length, the key, the bank's sub id (func_003D8330) and registration key (func_003D81F0) and the table's +0x2
+ * halfword. The row is then recorded in the table's history (func_003D6EE8).
+ *
+ * @param h  the phrase template
+ * @param k  the speech key
+ * @param a2  the first play list entry
+ * @return the total length * 100 / D_004A4838 (0 without a buffer size)
+ */
 int func_003D9830(unsigned char *h, struct sKey4 *k, int a2) {
     struct sShapeInfo o;
     struct sFF90Msg m;
@@ -2190,6 +2690,10 @@ struct R9A40 { int f0; int f4; unsigned char b8; unsigned char b9; unsigned char
 struct G9A40 { int f0, f4, f8; struct Q9A40 q[0x30]; struct R9A40 r[8]; };
 extern struct G9A40 D_00450700_9A40 __asm__("D_00450700");
 
+/**
+ * Resets the speech play list (D_00450700): channel -1, both counts 0, the 8 phrase records cleared and the 0x30 line
+ * entries set to (-1, -1, 0, 0).
+ */
 void func_003D9A40(void) {
     int i;
     D_00450700_9A40.f0 = -1;
@@ -2222,6 +2726,21 @@ struct E_9AC8 { unsigned short x; unsigned short y; unsigned short z; unsigned c
 struct H_9AC8 { struct E_9AC8 ent[12]; char pad[2]; unsigned char tbl[1]; };
 extern struct G_9AC8 D_00450700_9AC8 __asm__("D_00450700");
 
+/**
+ * Appends a built phrase to the speech play list (D_00450700) for channel @p id, when the list is free or already that
+ * channel's.
+ *
+ * Takes phrase record n (count +0x4, at most 8): the channel, the bank event entry, the template, the variant index and
+ * the request's 20 argument words, marked used (+0x9). Each template slot then appends a line entry (table slot, the
+ * slot's index value, chosen row) after the existing ones (+0x8).
+ *
+ * @param h  the selection set holding the chosen rows
+ * @param id  the channel
+ * @param a2  the bank event entry
+ * @param a3  the phrase template (the event's variant)
+ * @param a4  the variant index
+ * @param a5  the request's argument words
+ */
 void func_003D9AC8(struct H_9AC8 *h, int id, int a2, unsigned char *a3, int a4, int *a5) {
     int n;
     int i;
@@ -2325,6 +2844,18 @@ static __inline__ int reqOwned_9BD8(int x) {
 }
 
 int func_003D9BD8_impl(int id) __asm__("func_003D9BD8");
+/**
+ * Plays the speech play list when it belongs to channel @p id, then clears it (func_003D9A40); returns the number of
+ * lines sent.
+ *
+ * For each phrase record: the event hooks run for the event's tags (func_003DB040) and for each slot's chosen tags (the
+ * inlined func_003DAE48), both through D_0044FF90 +0x8, and func_003D9830 sends the lines to the play callback. The
+ * first phrase updates the channel's current line (D_00450660): the same entry id counts a repeat, another one replaces
+ * it with count 1.
+ *
+ * @param id  the channel
+ * @return the number of lines sent, 0 when the list is not this channel's
+ */
 int func_003D9BD8_impl(int id) {
     struct sKey4 key;
     int ret = 0;
@@ -2369,6 +2900,16 @@ struct T_9ED0 {
 struct B_9ED0 {
     unsigned char a, b, c;
 };
+/**
+ * Returns whether a phrase template's set variables agree with the request: each set variable word i must share a bit
+ * with request word @p masks [b] of the event's constraint i (3-byte entries after its tag events, count in the high
+ * nibble of +0x7).
+ *
+ * @param h  the bank event entry
+ * @param a1  the phrase template
+ * @param masks  the request's argument words
+ * @return 1 when they agree, else 0
+ */
 int func_003D9ED0(struct H_9ED0 *h, unsigned char *a1, int *masks) {
     struct T_9ED0 t;
     int *m;
@@ -2399,6 +2940,13 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003D9FB0);
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DA3A8);
 #ifdef SKIP_ASM
+/**
+ * Reads a speech bank's two ids: bytes +0x8 and +0x9.
+ *
+ * @param data  the speech bank data
+ * @param arg1  receives the bank id (+0x8)
+ * @param arg2  receives the sub id (+0x9)
+ */
 void func_003DA3A8(void *data, int *arg1, int *arg2) {
     *arg1 = (int) (*(unsigned char *)((char*)(data) + (8)));
     *arg2 = (int) (*(unsigned char *)((char*)(data) + (9)));
@@ -2410,6 +2958,11 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DA3C0);
 #ifdef SKIP_ASM
 extern int D_004A483C;
 
+/**
+ * Sets the speech clock offset D_004A483C, added to the time source when func_003D7760 ages requests.
+ *
+ * @param arg0  the offset
+ */
 void func_003DA3C0(int arg0) {
     D_004A483C = arg0;
 }
@@ -2420,6 +2973,13 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DA3C8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern unsigned int D_004506E0_A3C8[] __asm__("D_004506E0");
+/**
+ * Returns an option's weight from its first byte: the low 5 bits times the scale D_004506E0 [top 3 bits] (as in
+ * func_003D8CB0).
+ *
+ * @param a  the option's first byte
+ * @return the weight
+ */
 unsigned int func_003DA3C8(unsigned int a) {
     a &= 0xFF;
     return (a & 0x1F) * D_004506E0_A3C8[a >> 5];
@@ -2432,6 +2992,12 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DA3F0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct S_A3F0 { int a; int b; int c; };
 extern struct S_A3F0 D_00450700_A3F0 __asm__("D_00450700");
+/**
+ * Returns whether the speech play list belongs to channel @p x and holds phrases.
+ *
+ * @param x  the channel
+ * @return 1 when it has phrases for @p x, else 0
+ */
 int func_003DA3F0(int x) {
     int r = 0;
     if (D_00450700_A3F0.a == x)
@@ -2452,6 +3018,16 @@ struct T_A418 { char head[0x74]; struct E_A418 e[16]; };
 extern struct T_A418 D_0044FFF8_A418 __asm__("D_0044FFF8");
 extern int func_003D9FB0_A418(struct E_A418 *) __asm__("func_003D9FB0");
 
+/**
+ * Builds speech request @p idx into the play list (func_003D9FB0); returns the result, negative results as 0.
+ *
+ * When nothing gets built and the retry hook (D_0044FF90 +0x10, installed by func_003D6968) is set, the hook is called
+ * with attempt 0, 1, ... and the request's argument words, and each non-negative answer is followed by another build,
+ * while nothing is built and the hook returns more than 0.
+ *
+ * @param idx  the request record
+ * @return the build result, at least 0
+ */
 int func_003DA418(int idx) {
     struct E_A418 *e = &D_0044FFF8_A418.e[idx];
     int r;
@@ -2479,6 +3055,14 @@ int func_003DA418(int idx) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DA4E0);
 #ifdef SKIP_ASM
+/**
+ * Binds a rule's variables: for each condition of kind 0xFE (+0x8 [i]) whose target (+0x10 [i]) has bit 0x80, ORs bit
+ * @p values [i] into the phrase template's variable word [target & 0x7F].
+ *
+ * @param node  the phrase template
+ * @param rule  the condition rule (count at +0x4)
+ * @param values  the chosen tag values
+ */
 void func_003DA4E0(unsigned char *node, unsigned char *rule, unsigned char *values) {
     int i;
     signed char n;
@@ -2514,6 +3098,12 @@ struct S_A578 {
     char pad2[3];
     unsigned char arr[1];
 };
+/**
+ * Returns whether any of a rule's conditions (count +0x4, kinds from +0x8) is a bind (kind 0xFE).
+ *
+ * @param rule  the condition rule
+ * @return 1 when it binds, else 0
+ */
 int func_003DA578(struct S_A578 *rule) {
     int i;
     int found = 0;
@@ -2533,6 +3123,18 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DA5C8);
 #ifdef SKIP_ASM
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 enum E_A5C8 { E_A5C8_0, E_A5C8_1, E_A5C8_2 };
+/**
+ * Resolves a phrase slot's speech table from its reference; the out-of-line copy of the step func_003D9088 inlines.
+ *
+ * Kind @p ref [3] 0 finds the table by id (func_003D6D50); 1 by id and the halfword of argument word [@p ref [2]]
+ * (func_003D6DB8, index below 20); 2 by id, with that argument word as an entry index that must be in range
+ * (func_003D6CF8) and is stored in @p out [1].
+ *
+ * @param ref  the slot reference {id, argument index, kind}
+ * @param tbl  the request's argument words
+ * @param out  receives the table slot and the entry index (-1 when unused)
+ * @return 1 when a table was found, else 0
+ */
 int func_003DA5C8(unsigned char *ref, unsigned int *tbl, short *out) {
     unsigned int idx = ref[2];
     int kind = ref[3];
@@ -2569,6 +3171,13 @@ int func_003DA5C8(unsigned char *ref, unsigned int *tbl, short *out) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DA6B0);
 #ifdef SKIP_ASM
+/**
+ * Clears row @p index's bit in a random-subset speech table's subset mask (marks it used), as func_003D9830 does
+ * inline.
+ *
+ * @param node  the speech table
+ * @param index  the row
+ */
 void func_003DA6B0(char *node, int index) {
     int temp_8;
     int temp_3;
@@ -2584,6 +3193,13 @@ void func_003DA6B0(char *node, int index) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DA718);
 #ifdef SKIP_ASM
+/**
+ * Returns bit @p index of a byte-packed bit array (nonzero when set).
+ *
+ * @param bits  the bit array
+ * @param index  the bit
+ * @return the masked byte, nonzero when the bit is set
+ */
 int func_003DA718(unsigned char *bits, int index) {
     int temp_3 = index / 8;
     unsigned char mask = 1 << (index - temp_3 * 8);
@@ -2594,6 +3210,15 @@ int func_003DA718(unsigned char *bits, int index) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DA750);
 #ifdef SKIP_ASM
+/**
+ * Returns the transition bit for row @p bit after the previous row (@p state +0x2) in a speech table's matrix: the test
+ * func_003D8780 inlines. 0 when the previous row is not below the entry count (+0xA).
+ *
+ * @param state  the selection state
+ * @param node  the speech table
+ * @param bit  the row
+ * @return nonzero when the transition is allowed
+ */
 int func_003DA750(char *state, unsigned char *node, int bit) {
     int current = *(short *)(state + 2);
     int res = 0;
@@ -2628,6 +3253,13 @@ struct S_A810 {
     signed char buf[1];
 };
 
+/**
+ * Appends a row to a selection set's candidate list (count +0x61, at most 200; rows from +0x62).
+ *
+ * @param list  the selection set
+ * @param value  the row
+ * @return 1 when added, 0 when the list is full
+ */
 int func_003DA810(struct S_A810 *list, int value) {
     int added = 0;
     if (list->n < 200U) {
@@ -2646,6 +3278,15 @@ struct S_A848 {
     char pad[8];
     unsigned char arr[1];
 };
+/**
+ * Returns whether a speech table suits a slot condition: for each table column whose condition kind (+0x8 [i]) names an
+ * argument word (not 0, 0xFE or 0xFF), the table's column mask (after its rows) must share a bit with that word.
+ *
+ * @param sel  the slot condition
+ * @param node  the speech table
+ * @param masks  the request's argument words
+ * @return 1 when it suits, else 0
+ */
 int func_003DA848(struct S_A848 *sel, unsigned char *node, int *masks) {
     int *colMasks;
     int n;
@@ -2678,6 +3319,12 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DA8E0);
 #ifdef SKIP_ASM
 extern int D_004A4838;
 
+/**
+ * Returns a length as a percentage of the speech buffer size D_004A4838 (0 when the size is 0).
+ *
+ * @param arg0  the length
+ * @return the percentage
+ */
 int func_003DA8E0(int arg0) {
     int var_2;
 
@@ -2700,6 +3347,14 @@ extern int func_003DB838_A910(unsigned char *, int, struct O_A910 *) __asm__("fu
 extern unsigned char **D_004A4824_A910 __asm__("D_004A4824");
 extern int D_004A4838;
 
+/**
+ * Returns the total length of a selection's current rows as a percentage of the speech buffer size D_004A4838; the
+ * out-of-line copy of the helper func_003D93C0 inlines.
+ *
+ * @param a0  the phrase template
+ * @param h  the selection set
+ * @return the percentage
+ */
 int func_003DA910(unsigned char *a0, struct H_A910 *h) {
     struct O_A910 o;
     int total = 0;
@@ -2727,6 +3382,14 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DA9C8);
 struct E_A9C8 { unsigned short h; int w; };
 extern struct E_A9C8 D_00450660_A9C8[] __asm__("D_00450660");
 
+/**
+ * Returns whether a bank entry may play again on a channel: 0 when it is the channel's current line (D_00450660) and
+ * its repeat limit (+0x8, when above 0) has been reached.
+ *
+ * @param p  the bank event entry
+ * @param idx  the channel
+ * @return 1 when allowed, else 0
+ */
 int func_003DA9C8(char *p, int idx) {
     int r = 1;
     if (*(unsigned short *)p == D_00450660_A9C8[idx].h) {
@@ -2744,6 +3407,14 @@ int func_003DA9C8(char *p, int idx) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DAA10);
 #ifdef SKIP_ASM
+/**
+ * Returns whether a phrase template's kind (+0x4 & 3) suits a request mode: kind 0 always, 1 only in mode 2, 2 in any
+ * other mode. The check func_003D9088 inlines.
+ *
+ * @param node  the phrase template
+ * @param mode  the request mode
+ * @return 1 when it suits, else 0
+ */
 int func_003DAA10(void *node, int mode) {
     int temp_3;
 
@@ -2758,6 +3429,11 @@ int func_003DAA10(void *node, int mode) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DAA50);
 #ifdef SKIP_ASM
+/**
+ * Clears a phrase template's variable words (+0x5 of them, after the slot list and +0x6 words).
+ *
+ * @param node  the phrase template
+ */
 void func_003DAA50(unsigned char *node) {
     int *maskTable;
     int i;
@@ -2778,6 +3454,14 @@ struct S_AAB0 {
     unsigned char a[8];
     unsigned char b[8];
 };
+/**
+ * Returns whether every variable a rule requires (kind 0xFF with target bit 0x80) is already set in the phrase
+ * template; the check func_003D9088 inlines.
+ *
+ * @param node  the phrase template
+ * @param rule  the condition rule
+ * @return 1 when all are set, else 0
+ */
 int func_003DAAB0(unsigned char *node, struct S_AAB0 *rule) {
     int ok = 1;
     int i;
@@ -2810,6 +3494,13 @@ struct E_AB58 { char pad[4]; unsigned char off; unsigned char cnt; char pad2[2];
 struct H_AB58 { struct E_AB58 ent[12]; char pad[2]; unsigned char tbl[1]; };
 extern int func_003DB5C0(int, int);
 
+/**
+ * Shuffles each slot's candidate rows in a selection set (Fisher-Yates with func_003DB5C0), as func_003D95B8 does
+ * inline.
+ *
+ * @param node  the phrase template (slot count in +0x4 >> 2)
+ * @param selSet  the selection set
+ */
 void func_003DAB58(unsigned char *node, struct H_AB58 *selSet) {
     int i = 0;
     int j;
@@ -2842,6 +3533,14 @@ struct E_AC20 {
     unsigned char cur;
     unsigned char pad2;
 };
+/**
+ * Steps a selection's slots to the next combination of candidates, last slot fastest (an odometer); returns 1 when it
+ * wrapped past the last combination. The step func_003D93C0 inlines.
+ *
+ * @param node  the phrase template (slot count in +0x4 >> 2)
+ * @param slots  the selection slots
+ * @return 1 on wrap, else 0
+ */
 int func_003DAC20(unsigned char *node, struct E_AC20 *slots) {
     int wrap = 0;
     int done = 0;
@@ -2873,6 +3572,13 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DACA8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003DB5C0_ACA8(unsigned char, short) __asm__("func_003DB5C0");
 
+/**
+ * Picks a random candidate for a selection slot: current (+0x6) = first (+0x4) + func_003DB5C0(count +0x5, keyed by the
+ * slot's table +0x0).
+ *
+ * @param arg0  the selection slot
+ * @return 1
+ */
 int func_003DACA8(void *arg0) {
     (*(signed char *)((char*)(arg0) + (6))) = (signed char) ((*(unsigned char *)((char*)(arg0) + (4))) + func_003DB5C0_ACA8((*(unsigned char *)((char*)(arg0) + (5))), (*(short *)((char*)(arg0) + (0)))));
     return 1;
@@ -2892,6 +3598,14 @@ extern int func_003D83B8_ACE8(void *, unsigned char **) __asm__("func_003D83B8")
 extern int func_003DB838_ACE8(unsigned char *, int, struct O_ACE8 *) __asm__("func_003DB838");
 extern unsigned char **D_004A4824_ACE8 __asm__("D_004A4824");
 
+/**
+ * Stores the chosen rows' tags for a phrase's bind columns (kind 0xFE without a variable) in the usage area of the bank
+ * for @p a0 (func_003D83B8); the step func_003D95B8 inlines.
+ *
+ * @param a0  the speech key
+ * @param h  the selection set
+ * @param l  the phrase template
+ */
 void func_003DACE8(void *a0, struct H_ACE8 *h, struct L_ACE8 *l) {
     struct O_ACE8 o;
     unsigned char *out;
@@ -2930,6 +3644,18 @@ int func_003DB838(unsigned char *shp, int idx, struct sShapeInfo *out);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003DB3E0_AE48(int, int) __asm__("func_003DB3E0");
 
+/**
+ * Reports a phrase's tag hits to the event hook D_0044FF90 +0x8 (installed by func_003D6940); func_003D9BD8 inlines it.
+ *
+ * For each slot of @p l and each of the 4 tag bytes at its condition's +0xC that is not 0xFF, the event entry's tag
+ * (func_003DB3E0) is reported with the bit of the matching column of the slot's chosen row (the play list entry
+ * @p a3 + slot) and the bank's sub id (func_003D8330).
+ *
+ * @param a0  the speech key
+ * @param a1  the bank event entry
+ * @param l  the phrase template
+ * @param a3  the phrase's first play list entry
+ */
 void func_003DAE48(void *a0, int a1, struct sLayer *l, int a3) {
     struct sShapeInfo o;
     int out;
@@ -2968,6 +3694,11 @@ void func_003DAE48(void *a0, int a1, struct sLayer *l, int a3) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DAFD0);
 #ifdef SKIP_ASM
+/**
+ * Clears a selection set: both counts (+0x60, +0x61) and the 12 slots' done flags.
+ *
+ * @param arg0  the selection set
+ */
 void func_003DAFD0(void *arg0) {
     int var_3;
     signed char *var_2;
@@ -2989,6 +3720,12 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DB008);
 #ifdef SKIP_ASM
 extern int func_003DB5C0(int, int);
 
+/**
+ * Rolls a percentage chance: returns 1 when func_003DB5C0(100, -1) is below byte +0x1 of @p arg0.
+ *
+ * @param arg0  the record holding the chance in percent at +0x1
+ * @return 1 when the roll passes, else 0
+ */
 int func_003DB008(unsigned char *arg0) {
     return func_003DB5C0(100, -1) < (int) arg0[1];
 }
@@ -3016,6 +3753,18 @@ struct Ev_B040 {
     int type;
 };
 
+/**
+ * Reports a bank event's tag events to the event hook D_0044FF90 +0x8 (installed by func_003D6940).
+ *
+ * Does nothing without the hook. The event's tag entries (3 bytes: tag id, argument index, type; count in the low
+ * nibble of +0x7, after the +0x6 variant offsets) of type 0 or 3 are reported when variant @p idx's template uses that
+ * argument (the test func_003DB440 makes): hook(key, tag id, argument word, the bank's sub id from func_003D8330).
+ *
+ * @param ctx  the speech key
+ * @param data  the bank event entry
+ * @param idx  the variant index
+ * @param tbl  the request's argument words
+ */
 void func_003DB040(unsigned char *ctx, unsigned char *data, int idx, int *tbl) {
     struct Ev_B040 ev;
     int time;
@@ -3090,6 +3839,19 @@ struct T_B208 { int a, b, c; };
 struct F_B208 { int pad; int (*cb)(unsigned char *, int, int, int); int pad2[3]; };
 extern struct F_B208 D_0044FF90_B208 __asm__("D_0044FF90");
 
+/**
+ * Asks the condition hook (D_0044FF90 +0x4) about each of a bank event's tags; returns the bits of those that hold.
+ *
+ * Tags are taken by argument index 1 to 19 (the hook gets that argument word), then those with index 0 (value 0). Tag j
+ * answers in bit 7 - j: a positive answer sets it in the result; a negative one, or no hook, sets it in
+ * @p negmask instead.
+ *
+ * @param a0  the speech key
+ * @param h  the bank event entry
+ * @param vals  the request's argument words
+ * @param negmask  receives the bits of tags the hook could not answer
+ * @return the bits of the tags that hold
+ */
 int func_003DB208(unsigned char *a0, struct H_B208 *h, int *vals, unsigned char *negmask) {
     struct T_B208 t;
     int out;
@@ -3146,6 +3908,15 @@ int func_003DB208(unsigned char *a0, struct H_B208 *h, int *vals, unsigned char 
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DB3B8);
 #ifdef SKIP_ASM
+/**
+ * Returns whether a request's flag byte matches a phrase template's flag value (+0x3) on its care bits (+0x2) minus
+ * @p ignoreMask.
+ *
+ * @param flags  the request's flag byte
+ * @param ignoreMask  bits not compared
+ * @param node  the phrase template
+ * @return 1 when they match, else 0
+ */
 int func_003DB3B8(unsigned char flags, unsigned char ignoreMask, unsigned char *node) {
     int careMask = node[2] & ~ignoreMask;
     return ((node[3] ^ flags) & careMask) == 0;
@@ -3156,6 +3927,13 @@ int func_003DB3B8(unsigned char flags, unsigned char ignoreMask, unsigned char *
 INCLUDE_ASM("ealib/seg_2D7498", func_003DB3E0);
 #ifdef SKIP_ASM
 typedef struct { char pad[6]; unsigned char n; } H_B3E0;
+/**
+ * Returns the tag id (first byte) of a bank event's tag entry @p idx, or -1 when @p idx is 8 or more.
+ *
+ * @param header  the bank event entry
+ * @param idx  the tag entry
+ * @return the tag id, or -1
+ */
 int func_003DB3E0(H_B3E0 *header, unsigned int idx) {
     int triple[3];
     int result = -1;
@@ -3175,6 +3953,14 @@ int func_003DB3E0(H_B3E0 *header, unsigned int idx) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DB440);
 #ifdef SKIP_ASM
+/**
+ * Returns whether any slot of a phrase template uses argument word @p wantedId, as its table argument (+0x2) or in one
+ * of its four condition kinds (+0x8); the test func_003DB040 inlines.
+ *
+ * @param node  the phrase template
+ * @param wantedId  the argument index
+ * @return 1 when used, else 0
+ */
 int func_003DB440(unsigned char *node, int wantedId) {
     int i, j;
     int found = 0;
@@ -3203,6 +3989,14 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DB4D0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern unsigned int D_00450B70_B4D0[6] __asm__("D_00450B70");
 
+/**
+ * Advances the speech random generator and returns its top word.
+ *
+ * The state is six words at D_00450B70: the last one is incremented every call and added, with carries, into the words
+ * above it.
+ *
+ * @return the new top word
+ */
 unsigned int func_003DB4D0(void) {
     unsigned int s, c, n;
 
@@ -3249,6 +4043,18 @@ extern Hist_B5C0 D_00450B88_B5C0[] __asm__("D_00450B88");
 extern int D_004A4858;
 extern unsigned int func_003DB4D0(void);
 
+/**
+ * Returns a random number below @p range; with a key it tries to avoid the key's recent results.
+ *
+ * Without a key (-1) one draw is returned. Otherwise up to 32 draws are made until one is not among the last min(@p
+ * range / 2, 10) results kept for that key in the 32-entry history (D_00450B88), keeping the draw whose repeat is
+ * oldest; the kept value is recorded under the key. Quirk: it returns the last draw rather than the kept value, so
+ * after 32 repeating draws the history records a value that was not returned.
+ *
+ * @param range  the number of values
+ * @param key  the history key (a table slot), or -1
+ * @return the drawn value
+ */
 int func_003DB5C0(int range, int key) {
     int half = range / 2;
     int tries = 0;
@@ -3324,6 +4130,12 @@ extern struct P_B790 D_00450B88_B790[32] __asm__("D_00450B88");
 extern unsigned int D_00450B70_B790[6] __asm__("D_00450B70");
 extern int D_004A4858;
 
+/**
+ * Seeds the speech random generator from @p seed (D_00450B70, six words from seed + (seed << 16) and fixed constants)
+ * and clears its 32-entry history (D_00450B88, 0xFFFF) and position (D_004A4858).
+ *
+ * @param seed  the seed (SPCH_Init's "rNum")
+ */
 void func_003DB790(int seed) {
     int i;
     unsigned int v;
@@ -3352,6 +4164,19 @@ void func_003DB790(int seed) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DB838);
 #ifdef SKIP_ASM
+/**
+ * Reads row @p idx of a speech table: its sample start, length and column tags; returns 1, or 0 for a row past the row
+ * count (+0x5).
+ *
+ * A row is 2 start bytes then one tag per column (+0x4 low nibble). An alias row (start bit 0x80) takes its start from
+ * the row its second byte names. Starts are scaled by (+0x7 + 1) << 8; the length runs to the next row that is not an
+ * alias, or to the table's total (+0x8) after the last row. @p info is reset first (start -1, tags 0xFF).
+ *
+ * @param shp  the speech table
+ * @param idx  the row
+ * @param info  receives length, start, column count and tags
+ * @return 1 when the row exists, else 0
+ */
 int func_003DB838(unsigned char *shp, int idx, struct sShapeInfo *info) {
     unsigned char *row;
     unsigned char *next;
@@ -3412,6 +4237,11 @@ int func_003DB838(unsigned char *shp, int idx, struct sShapeInfo *info) {
 INCLUDE_ASM("ealib/seg_2D7498", func_003DB978);
 #ifdef SKIP_ASM
 struct S_B978 { int a; int b; int c; unsigned char r, g, bl, al; };
+/**
+ * Resets a speech row info: length 0, start -1, column count 0, tags 0xFF.
+ *
+ * @param info  the row info
+ */
 void func_003DB978(struct S_B978 *info) {
     info->b = -1; info->a = 0; info->c = 0; info->r = 0xFF; info->g = 0xFF; info->bl = 0xFF; info->al = 0xFF;
 }
@@ -3422,6 +4252,12 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DB9A0);
 #ifdef SKIP_ASM
 extern int (*D_0044FFB0[])();
 
+/**
+ * Returns the speech clock: the time source D_0044FFB0 (D_0044FFA8 +0x8, func_003E4E98 from SPCH_Init), or 0 when none
+ * is set.
+ *
+ * @return the time
+ */
 int func_003DB9A0(void) {
     int r = 0;
     if (D_0044FFB0[0] != 0) {
@@ -3437,6 +4273,16 @@ INCLUDE_ASM("ealib/seg_2D7498", func_003DB9D8);
 static __inline__ int get32_B9D8(unsigned char *q) {
     return (q[3] << 24) | (q[2] << 16) | (q[1] << 8) | q[0];
 }
+/**
+ * Returns a value of a locale (.loc) file's header, read little-endian: state 0 the current language id (+0xE), 1 the
+ * language count (+0xC), 2 the current language's string count (+0xC of the language block whose offset is entry
+ * [language id] of the table at +0x10), 3 whether it has an index (bit 0 of the flags +0x8); 0 for other states.
+ * cLocaleFile_loadFile reads state 2.
+ *
+ * @param table  the locale file
+ * @param sel  the state
+ * @return the value
+ */
 int func_003DB9D8(unsigned char *table, int sel) {
     unsigned char *block;
 
@@ -3458,6 +4304,13 @@ int func_003DB9D8(unsigned char *table, int sel) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DBAA8);
 #ifdef SKIP_ASM
+/**
+ * Sets a value of a locale file's header: only state 0, the current language id (+0xE, little-endian), is writable.
+ *
+ * @param table  the locale file
+ * @param which  the state
+ * @param value  the new value
+ */
 void func_003DBAA8(void *table, int which, unsigned int value) {
     if (which == 0) {
         *(unsigned short *)((char *)table + 0xE) = value;
@@ -3470,6 +4323,14 @@ void func_003DBAA8(void *table, int which, unsigned int value) {
 //100%
 INCLUDE_ASM("ealib/seg_2D7498", func_003DBAC8);
 #ifdef SKIP_ASM
+/**
+ * Compares a string id with a locale index entry's little-endian id halfword (the binary search's comparator in
+ * func_003DBAE8).
+ *
+ * @param key  the string id
+ * @param entry  the index entry
+ * @return the difference, negative when @p key sorts first
+ */
 int func_003DBAC8(unsigned short *key, void *entry) {
     return *key - (((*(unsigned char *)((char*)(entry) + (1))) << 8) | (*(unsigned char *)((char*)(entry) + (0))));
 }

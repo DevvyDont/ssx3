@@ -22613,6 +22613,24 @@ struct S_DE68 {
 };
 extern int func_0041605C_DE68(void *, void *, int) __asm__("func_0041605C");
 extern void decodemut_DE68(void *) __asm__("decodemut");
+/**
+ * Decodes up to @p max samples of a fed MicroTalk (UTK) stream into a float buffer and advances the caller's pointer.
+ *
+ * The decoder (0xD68 bytes, made by CMTBLKDecf_CMTBLKDecf and fed by CMTBLKDecf_Feed) keeps one decoded 432-sample frame at
+ * +0x684; +0xD44 counts the samples of it not yet handed out and +0xD54 the samples left in the whole fed block.
+ * Returns 0 when +0xD54 is 0. Otherwise copies min(max, +0xD54) floats out (func_0041605C, a memcpy) to *@p arg1
+ * (+0xD4C is the write cursor), decoding the next frame with decodemut whenever the current one runs out. With
+ * codec version 1 (+0xD64, set by func_003CE0D8) the stream is the revision with raw PCM patches: after each frame the
+ * bit reader is backed up one byte, and when the previous frame's marker byte was 0xEE (+0xD60) a big-endian offset
+ * (+0xD52) and count (+0xD50) follow, then that many big-endian 16-bit samples that overwrite the decoded frame from
+ * that offset; the next byte is checked for 0xEE again and the bit reader restarts after it. Quirk: *@p arg1 itself is
+ * not advanced; the caller adds the returned count.
+ *
+ * @param s  the decoder
+ * @param arg1  points to the float output pointer (read once into +0xD4C)
+ * @param max  the most samples to produce
+ * @return the number of samples written (0 at the end of the fed data)
+ */
 int func_003CDE68(struct S_DE68 *s, char **arg1, int max) {
     int chunk = s->cnt;
     int n, rem;
@@ -22678,6 +22696,15 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CE078);
 #ifdef SKIP_ASM
 struct V3_E078 { int a; int b; int c; };
 
+/**
+ * Returns a snapshot of a MicroTalk decoder's resumable state.
+ *
+ * The 12-byte result holds the bit-reader shift register (+0x4), the samples left in the decoded frame (+0xD44) and the
+ * whole-init flag (+0xD5C, which makes the next CMTBLKDecf_Feed re-read the codec header). func_003CE0B8 restores it;
+ * SFILTER_unpackmtfinit and SFILTER_unpackmtlfinit take one, set the flag and put it back.
+ *
+ * @return the snapshot {shift register, frames left, whole-init flag}
+ */
 struct V3_E078 func_003CE078(char *self) {
     struct V3_E078 snapshot;
     snapshot.a = *(int *)(self + 4);
@@ -22690,6 +22717,15 @@ struct V3_E078 func_003CE078(char *self) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CE0B8);
 #ifdef SKIP_ASM
+/**
+ * Restores a MicroTalk decoder's resumable state from a snapshot.
+ *
+ * Copies the shift register to +0x4, the frames-left count to +0xD44 and the whole-init flag to +0xD5C (the layout
+ * func_003CE078 returns). The third argument the callers pass (0) is not declared or used here.
+ *
+ * @param decoder  the decoder
+ * @param snapshot  the 12-byte state from func_003CE078
+ */
 void func_003CE0B8(void *decoder, void *snapshot) {
     (*(int *)((char*)(decoder) + (4))) = (int) (*(int *)((char*)(snapshot) + (0)));
     (*(int *)((char*)(decoder) + (0xD5C))) = (int) (*(int *)((char*)(snapshot) + (8)));
@@ -22700,6 +22736,14 @@ void func_003CE0B8(void *decoder, void *snapshot) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CE0D8);
 #ifdef SKIP_ASM
+/**
+ * Sets a MicroTalk decoder's codec version (+0xD64): 1 enables the revision with 0xEE-marked raw PCM patches.
+ *
+ * SFILTER_unpackmtfinit passes 0 for stream revisions below 3 and 1 otherwise; CMTBLKDecf_CMTBLKDecf defaults it to 1.
+ *
+ * @param decoder  the decoder
+ * @param arg1  the codec version (0 or 1)
+ */
 void func_003CE0D8(void *decoder, int arg1) {
     (*(int *)((char*)(decoder) + (0xD64))) = arg1;
 }
@@ -22713,6 +22757,16 @@ extern char D_0050A8E8_E0E0[] __asm__("D_0050A8E8");
 typedef struct { char pad[0x28]; short f; char pad2[0x62]; } R_E0E0;
 typedef struct { R_E0E0 arr[100]; } W_E0E0;
 
+/**
+ * Returns the master voice of a voice: the channel's link (+0x28) when it has one, else the voice itself.
+ *
+ * The channel is entry @p arg0 + D_0050A8E8 +0x2F + D_0050A8E8 +0x30 of the driver's channel table (D_0050A8E8 +0x1F0,
+ * 0x8C bytes each); a link of -1 means the voice is its own master. Used by the unpack setup callbacks (SFILTER_unpackmtpfinit,
+ * SFILTER_unpackxapfinit) before func_003CE378.
+ *
+ * @param arg0  the voice number
+ * @return the channel index of the master voice (biased by the two reserved counts)
+ */
 int func_003CE0E0(int arg0) {
     char *p = D_0050A8E8_E0E0;
     int temp_2;
@@ -22734,6 +22788,16 @@ struct E_E118 { char pad[0x28]; short f28; char pad2[0x8C - 0x2A]; };
 struct R_E118 { struct E_E118 e[1]; };
 
 int func_003CE118_impl(int arg0) __asm__("func_003CE118");
+/**
+ * Returns which sample channel (1-5) of its master voice a voice is, or 0 when it has no master.
+ *
+ * Looks up the voice's channel entry (index @p arg0 + D_0050A8E8 +0x2F + +0x30 in the table at D_0050A8E8 +0x1F0); when
+ * its master link (+0x28) is set, scans the master's member list (shorts at +0x6..+0xE) for this channel and returns
+ * the 1-based slot. Quirk: the master's own channel (slot 0) also returns 0.
+ *
+ * @param arg0  the voice number
+ * @return the sample channel within the group, 0 for the master or an unlinked voice
+ */
 int func_003CE118_impl(int arg0) {
     short *var_3;
     int temp_2;
@@ -22759,6 +22823,14 @@ int func_003CE118_impl(int arg0) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CE198);
 #ifdef SKIP_ASM
+/**
+ * Returns 0: the platform layer needs no extra memory per packet player.
+ *
+ * Added to the packet player's own overhead by SNDPKTPLAY_overhead and skipped at the start of the player memory by
+ * SNDPKTPLAY_create.
+ *
+ * @return 0
+ */
 int func_003CE198(void) {
     return 0;
 }
@@ -22767,6 +22839,13 @@ int func_003CE198(void) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CE1A0);
 #ifdef SKIP_ASM
+/**
+ * Returns 0: creating a packet player needs no platform work.
+ *
+ * SNDPKTPLAY_create fails with -6 if it is negative.
+ *
+ * @return 0
+ */
 int func_003CE1A0(void) {
     return 0;
 }
@@ -22775,6 +22854,13 @@ int func_003CE1A0(void) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CE1A8);
 #ifdef SKIP_ASM
+/**
+ * Returns 0: destroying a packet player needs no platform work.
+ *
+ * Called by SNDPKTPLAY_destroy before it clears the player's slot (D_005157B8 +0x304).
+ *
+ * @return 0
+ */
 int func_003CE1A8(void) {
     return 0;
 }
@@ -22813,6 +22899,27 @@ extern void SNDPLATFORM_lowpass_E1B0(int, int) __asm__("SNDPLATFORM_lowpass");
 extern void SNDPLATFORM_highpass_E1B0(int, int) __asm__("SNDPLATFORM_highpass");
 extern void MIX_play_E1B0(int) __asm__("MIX_play");
 
+/**
+ * Starts a packet-player voice on the software mixer: sets up each of its channels, applies the play options and starts
+ * them.
+ *
+ * Only for a mixer voice: the channel entry (D_0050A8E8 +0x1F0, index @p idx) must lack flag 8 and have flag 4 in
+ * +0x24. For each of its +0x23 channels (shorts at +0x4, biased by D_0050A8E8 +0x2F/+0x30) MIX_playinit prepares the
+ * mixer voice from the sample representation (@p arg6 +3), the channel's sample pointer (@p arg7 +0x18 + 4*i), the
+ * channel count, +0x14 and the attribute byte @p arg7 +7. Then, on the first channel, SNDPLATFORM_setpitch (pitch),
+ * func_003C38E0 (azimuth), SNDPLATFORM_setfxlevel (send, 0), and SNDPLATFORM_timemult, func_003C30C8, SNDPLATFORM_lowpass and SNDPLATFORM_highpass
+ * with the four option values; finally MIX_play starts each channel. The packet handle is unused.
+ *
+ * @param arg0  the packet player handle (unused)
+ * @param idx  the voice
+ * @param arg2  the time multiplier (play options +0xE)
+ * @param arg3  the play option at +0x12
+ * @param arg4  the low-pass cutoff (play options +0x14)
+ * @param arg5  the high-pass cutoff (play options +0x16)
+ * @param arg6  the sample format (+3: sample representation)
+ * @param arg7  the sample attributes (+7: platform version, +0x18: per-channel sample data)
+ * @return 0
+ */
 int func_003CE1B0(int arg0, int idx, int arg2, int arg3, int arg4, int arg5, A6_E1B0 *arg6, A7_E1B0 *arg7) {
     E_E1B0 *e;
     int i;
@@ -22854,6 +22961,15 @@ extern struct s7B8 D_005157B8;
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int SNDVOICEI_get_E378(int arg0) __asm__("SNDVOICEI_get");
 
+/**
+ * Returns the packet player whose voice is a given channel, or -1.
+ *
+ * Scans the packet player slots (D_005157B8 +0x304, D_0050A8E8 setup.cfg.f26 of them) for a live one whose voice handle
+ * (+0x0) resolves through SNDVOICEI_get to @p key.
+ *
+ * @param key  the channel (a master voice from func_003CE0E0)
+ * @return the packet player handle, -1 if none
+ */
 int func_003CE378(int key) {
     int i;
     for (i = 0; i < D_0050A8E8.setup.cfg.f26; i++) {
@@ -23125,6 +23241,19 @@ typedef struct {
     char dirty;
 } sFir_E7C0;
 
+/**
+ * Computes the 5 coefficients of a symmetric windowed-sinc FIR filter of the given type and marks the filter dirty.
+ *
+ * Type 2 is a low-pass with normalised cutoff +0xF8, type 3 a high-pass at +0xF4 (clamped to 0.8, as for type 4), type
+ * 4 a band-pass between them. Each coefficient c[k] (+0xE0) is sin(pi*i*f)/(pi*i) (SNDI_sin, SNDI_cos for the
+ * band-pass), shaped by a Hamming window 0.54 - 0.46cos(i*pi/4); the high-pass spectrally inverts the low-pass. The
+ * coefficients are then divided by the absolute gain of the 9-tap symmetric kernel (the high-pass by its alternating
+ * sum). Sets +0xFC (dirty) first. Its callers SFILTER_modifyHPFFIR8, func_003CEED0 and func_003CEFF8 set the cutoffs from
+ * fixed-point ratios and pass 3, 2 or 4 respectively.
+ *
+ * @param p  the filter state (+0xE0 coefficients, +0xF4 low cutoff, +0xF8 high cutoff, +0xFC dirty)
+ * @param type  2 low-pass, 3 high-pass, 4 band-pass
+ */
 void func_003CE7C0(sFir_E7C0 *p, int type) {
     /* order stays in $19: the target tests it with slti/beqz and folds order & 1 only via nonzero_bits */
     int order = 4;
@@ -23199,6 +23328,16 @@ void func_003CE7C0(sFir_E7C0 *p, int type) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CEB90);
 #ifdef SKIP_ASM
+/**
+ * Resets an FIR filter state: clears its 8-sample history and the always-zero entries of its coefficient matrix.
+ *
+ * The state (16-byte aligned, +0x20 inside a filter node) holds a 12x4 float matrix at +0x0 that func_003CEBE8 fills
+ * from the 5 coefficients, and the last 8 input samples at +0xC0..+0xDC. This zeroes the history and the matrix cells
+ * outside the band (+0x4..+0xC, +0x18, +0x1C, +0x2C, +0x90, +0xA0, +0xA4, +0xB0..+0xB8). Called by the FIR node
+ * constructors SFILTER_createHPFFIR8, func_003CEE88 and func_003CEFB0.
+ *
+ * @param arg0  the FIR state
+ */
 void func_003CEB90(void *arg0) {
     (*(int *)((char*)(arg0) + (0xC0))) = 0;
     (*(int *)((char*)(arg0) + (0xC4))) = 0;
@@ -23226,6 +23365,19 @@ void func_003CEB90(void *arg0) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CEBE8);
 #ifdef SKIP_ASM
+/**
+ * Runs a symmetric 9-tap FIR filter over @p n float samples from @p src to @p dst on VU0, 16 samples per pass.
+ *
+ * When the dirty flag (+0xFC) is set it first expands the 5 coefficients (+0xE0, from func_003CE7C0) into the banded
+ * 12x4 matrix at +0x0 and clears the flag. The VU0 macro-mode loop then turns each quad of new samples, with the 8
+ * previous ones (history at +0xC0), into 4 outputs, and stores the last 8 inputs back into the history. Quirk: @p n
+ * must be a positive multiple of 16; the loop only stops when the source pointer lands exactly on the end.
+ *
+ * @param filter  the FIR state (16-byte aligned)
+ * @param n  the number of samples
+ * @param src  the input floats (16-byte aligned)
+ * @param dst  the output floats (16-byte aligned)
+ */
 // PORT: PS2-only VU0 inline asm (FIR filter over 4-float blocks: 12x4 banded matrix times sliding window).
 void func_003CEBE8(char *filter, int n, int src, int dst) {
     if (*(signed char *)(filter + 0xFC) != 0) {
@@ -23372,6 +23524,20 @@ void func_003CEBE8(char *filter, int n, int src, int dst) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003CEE08);
 #ifdef SKIP_ASM
 extern void func_003CEBE8(char *, int, int, int);
+/**
+ * Filter-graph callback of the low-pass FIR node: pulls @p count frames from its input node and low-passes them.
+ *
+ * The input node (+0x8) is called through its first word as (node, count, dst, src, requester +0x1A), which writes into
+ * @p src; when there is no input node, or it returned more than 0, func_003CEBE8 filters @p count frames from
+ * @p src to @p dst with the node's FIR state (+0x20). Quirk: unlike func_003CEF20 and SFILTER_hpfFIR8 it filters and
+ * returns the full @p count even when the input produced fewer frames (but more than 0). Installed by func_003CEE88.
+ *
+ * @param node  the low-pass filter node
+ * @param count  the number of frames wanted
+ * @param src  the buffer the input fills
+ * @param dst  the output buffer
+ * @return @p count, or the input's result when it is 0 or less
+ */
 int func_003CEE08(char *node, int count, int src, int dst) {
     int **obj = *(int ***)(node + 8);
     int result;
@@ -23391,6 +23557,14 @@ typedef struct { void *vt; int f4; int f8; int fc; int f10; int f14; char pad18[
 extern void func_003CEB90(void *);
 extern void func_003CEE08_x(void) __asm__("func_003CEE08");
 
+/**
+ * Initialises a low-pass FIR filter node: installs func_003CEE08 as its filter function and resets it.
+ *
+ * Clears the restore function (+0x4), the four links (+0x8..+0x14) and the clean flag (+0x1B), then resets the FIR
+ * state at +0x20 with func_003CEB90. func_003CC070 calls it for effect type 2, followed by func_003CEED0.
+ *
+ * @return 0
+ */
 int func_003CEE88(S_EE88 *self) {
     self->vt = func_003CEE08_x;
     self->f8 = 0;
@@ -23410,7 +23584,15 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CEED0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern void func_003CE7C0_A9D8(void *, int) __asm__("func_003CE7C0");
-// Sets the ratio at 0x118 from two fixed-point values, then calls func_003CE7C0 with 2.
+/**
+ * Sets a low-pass FIR node's cutoff from fixed-point parameters and recomputes its coefficients.
+ *
+ * The cutoff (+0x118, the FIR state's high cutoff) becomes 2 * (params[0] >> 8) / (params[1] >> 8), the cutoff
+ * frequency over the sample rate (func_003CC070 passes freq << 8 and rate << 8); then func_003CE7C0 recomputes the
+ * state at +0x20 as a low-pass (type 2).
+ *
+ * @param params  [0] cutoff frequency << 8, [1] sample rate << 8
+ */
 void func_003CEED0(char *self, int *params) {
     *(float *)(self + 0x118) = ((float)(params[0] >> 8) * 2.0f) / (float)(params[1] >> 8);
     func_003CE7C0_A9D8(self + 0x20, 2);
@@ -23424,6 +23606,19 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CEF20);
 // Identical copy of SFILTER_hpfFIR8.
 extern void func_003CEBE8_EF20(void *, int, int, int) __asm__("func_003CEBE8");
 
+/**
+ * Filter-graph callback of the band-pass FIR node: pulls up to @p count frames from its input node and filters them.
+ *
+ * The input node (+0x8) is called as (node, count, dst, src, requester +0x1A) and fills @p src; its result (or
+ * @p count without an input) is how many frames func_003CEBE8 filters into @p dst. A byte-for-byte copy of
+ * SFILTER_hpfFIR8. Installed by func_003CEFB0.
+ *
+ * @param node  the band-pass filter node
+ * @param count  the number of frames wanted
+ * @param src  the buffer the input fills
+ * @param dst  the output buffer
+ * @return the frames produced, or the input's result when it is 0 or less
+ */
 int func_003CEF20(char *node, int count, int src, int dst) {
     int (**obj)(void *, int, int, int, int);
     int n;
@@ -23449,6 +23644,14 @@ typedef struct { void *vt; int f4; int f8; int fc; int f10; int f14; char pad18[
 extern void func_003CEB90(void *);
 extern void func_003CEF20_x(void) __asm__("func_003CEF20");
 
+/**
+ * Initialises a band-pass FIR filter node: installs func_003CEF20 as its filter function and resets it.
+ *
+ * Clears the restore function (+0x4), the links (+0x8..+0x14) and the clean flag (+0x1B), then resets the FIR state at
+ * +0x20 with func_003CEB90. func_003CC070 calls it for effect type 4, followed by func_003CEFF8.
+ *
+ * @return 0
+ */
 int func_003CEFB0(S_EFB0 *self) {
     self->vt = func_003CEF20_x;
     self->f8 = 0;
@@ -23468,7 +23671,15 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CEFF8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern void func_003CE7C0_A9D8(void *, int) __asm__("func_003CE7C0");
-// Sets both ratios at 0x114/0x118 from fixed-point values over a common divisor, then calls func_003CE7C0 with 4.
+/**
+ * Sets a band-pass FIR node's two cutoffs from fixed-point parameters and recomputes its coefficients.
+ *
+ * Low cutoff (+0x114) = (params[0] >> 7) / (params[2] >> 8) and high cutoff (+0x118) = (params[1] >> 7) / (params[2] >>
+ * 8), i.e. twice each frequency over the sample rate; then func_003CE7C0 recomputes the state at +0x20 as a band-pass
+ * (type 4).
+ *
+ * @param params  [0] low frequency << 8, [1] high frequency << 8, [2] sample rate << 8
+ */
 void func_003CEFF8(char *self, int *params) {
     float x = (float)(params[0] >> 7), y = (float)(params[1] >> 7), divisor = (float)(params[2] >> 8);
     *(float *)(self + 0x114) = x / divisor;
@@ -23483,6 +23694,18 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CF060);
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct S3CF060 { char p0[8]; int *obj; char p1[0xE]; unsigned char f1A; char p2[1]; float f1C; };
 int func_003CF060_C(struct S3CF060 *self, int n, float *src, float *dst) __asm__("func_003CF060");
+/**
+ * Filter-graph callback of the gain node: pulls @p n frames from its input node and scales them by the node's gain.
+ *
+ * The input node (+0x8) is called as (node, n, dst, src, requester +0x1A) and fills @p src; a result of 0 or less is
+ * returned as is. Then a VU0 loop writes dst[k] = src[k] * gain (+0x1C), 16 floats per pass. Quirk: it scales the full
+ * @p n even when the input produced fewer frames, and @p n must be a multiple of 16. Installed by func_003CF128.
+ *
+ * @param n  the number of frames
+ * @param src  the buffer the input fills
+ * @param dst  the output buffer
+ * @return @p n, or the input's result when it is 0 or less
+ */
 // PORT: hand-written VU0 loop (trapping add/addi have no gcc 2.95 pattern; the block moves its operands into fixed
 // $4/$6/$7 and the scale through $2 itself): dst[k] = src[k] * self->f1C over n floats, 16 per pass. A port replaces it
 // with the C loop.
@@ -23531,6 +23754,15 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CF128);
 #ifdef SKIP_ASM
 extern void func_003CF060();
 
+/**
+ * Initialises a gain filter node: installs func_003CF060 as its filter function, clears the links and the gain.
+ *
+ * Clears the restore function (+0x4), the links (+0x8..+0x14), the clean flag (+0x1B) and the gain (+0x1C).
+ * func_003CC070 calls it for effect type 6, followed by func_003CF158.
+ *
+ * @param node  the node
+ * @return 0
+ */
 int func_003CF128(void *node) {
     (*(int *)((char*)(node) + (8))) = 0;
     (*(void (**)())((char*)(node) + (0))) = func_003CF060;
@@ -23547,6 +23779,12 @@ int func_003CF128(void *node) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF158);
 #ifdef SKIP_ASM
+/**
+ * Sets a gain filter node's gain (+0x1C) to params[0] / 256.
+ *
+ * @param node  the gain node
+ * @param params  [0] the gain in 24.8 fixed point
+ */
 void func_003CF158(void *node, int *params) {
     (*(float *)((char*)(node) + (0x1C))) = (float) ((float) *params * 0.00390625f);
 }
@@ -23560,6 +23798,19 @@ struct S3CF178 { char p0[8]; int *f8; int *fC; char p1[0xC]; void *f1C; int f20;
 extern void ff_F178(void *) __asm__("SNDMEMI_free");
 extern void *fa_F178(int) __asm__("func_003B5C60");
 int func_003CF178_C(struct S3CF178 *self, int n, int a2, float *a3) __asm__("func_003CF178");
+/**
+ * Filter-graph callback of the mixer node: sums its two input nodes into @p a3.
+ *
+ * First grows the scratch buffer (+0x1C, capacity +0x20 frames) to @p n floats (SNDMEMI_free, func_003B5C60). The first
+ * input (+0x8) is called with requester 1 and writes @p n frames into @p a3; the second (+0xC) with requester 2 into
+ * the scratch buffer; a result of 0 or less from either is returned at once. A VU0 loop then adds the scratch buffer
+ * into @p a3, 16 floats per pass. Installed by func_003CF2C0; func_003CF298 frees the buffer.
+ *
+ * @param n  the number of frames
+ * @param a2  the source buffer, passed through to both inputs
+ * @param a3  the output buffer
+ * @return @p n, or an input's result when it is 0 or less
+ */
 // PORT: hand-written VU0 loop (trapping add/addi have no gcc 2.95 pattern; the block moves its operands into fixed
 // $4/$5/$6 itself): a3[k] += self->f1C[k] over n floats, 16 per pass. A port replaces it with the C loop.
 int func_003CF178_C(struct S3CF178 *self, int n, int a2, float *a3) {
@@ -23617,6 +23868,13 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CF298);
 #ifdef SKIP_ASM
 extern void SNDMEMI_free(int);
 
+/**
+ * Frees a mixer node's scratch buffer (+0x1C) with SNDMEMI_free, if it has one. The node's restore function.
+ *
+ * Quirk: the pointer and its capacity (+0x20) are not cleared.
+ *
+ * @param node  the mixer node
+ */
 void func_003CF298(void *node) {
     int temp_4;
 
@@ -23634,6 +23892,15 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CF2C0);
 void func_003CF178_F2C0(void) __asm__("func_003CF178");
 void func_003CF298_F2C0(void) __asm__("func_003CF298");
 
+/**
+ * Initialises a mixer filter node: installs func_003CF178 as its filter and func_003CF298 as its restore function.
+ *
+ * Clears the links (+0x8..+0x14), the clean flag (+0x1B), the scratch buffer (+0x1C) and its capacity (+0x20).
+ * func_003CC070 calls it for effect type 8.
+ *
+ * @param node  the node
+ * @return 0
+ */
 int func_003CF2C0(char *node) {
     *(void (**)(void))(node + 4) = func_003CF298_F2C0;
     *(void (**)(void))(node + 0) = func_003CF178_F2C0;
@@ -23652,6 +23919,19 @@ int func_003CF2C0(char *node) {
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF300);
 #ifdef SKIP_ASM
 struct S_F300 { char p0[0x1C]; int f1C; float f20; float f24; float f28; float f2C; float f30; char p34[4]; float f38; float f3C; };
+/**
+ * Runs a two-pole resonator over @p n float samples, or copies them through when its parameters are out of range.
+ *
+ * Active when the bandwidth (+0x24) is below 2 * rate / pi and the centre frequency (+0x20) is above 0 and below rate /
+ * 2 (rate: +0x1C). Then y = a0 * (x + 1e-20) + 2 * r * cos(theta) * y1 - r * r * y2 with gain a0 (+0x30), pole radius r
+ * (+0x28), cos(theta) (+0x2C) and the last two outputs y1 (+0x38) and y2 (+0x3C), which it updates; the 1e-20 keeps
+ * denormals away. Called by func_003CF408.
+ *
+ * @param sv  the resonator state
+ * @param n  the number of samples
+ * @param in_  the input floats
+ * @param out_  the output floats
+ */
 void func_003CF300(void *sv, int n, int in_, int out_) {
     struct S_F300 *s = (struct S_F300 *)sv;
     float *in = (float *)in_;
@@ -23689,6 +23969,18 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CF408);
 #ifdef SKIP_ASM
 extern void func_003CF300(void *, int, int, int);
 
+/**
+ * Filter-graph callback of the resonator node: pulls up to @p count frames from its input node and resonates them.
+ *
+ * The input node (+0x8) is called as (node, count, arg3, arg2, requester +0x1A) and fills @p arg2; its result (or
+ * @p count without an input) is how many frames func_003CF300 processes into @p arg3. Installed by func_003CF498.
+ *
+ * @param node  the resonator node
+ * @param count  the number of frames wanted
+ * @param arg2  the buffer the input fills
+ * @param arg3  the output buffer
+ * @return the frames produced, or the input's result when it is 0 or less
+ */
 int func_003CF408(char *node, int count, int arg2, int arg3) {
     int (**obj)(void *, int, int, int, int);
     int n;
@@ -23712,6 +24004,15 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CF498);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void func_003CF408_F498(void) __asm__("func_003CF408");
 
+/**
+ * Initialises a resonator filter node: installs func_003CF408 as its filter function and clears its history.
+ *
+ * Clears the restore function (+0x4), the links (+0x8..+0x14), the clean flag (+0x1B), the input sample (+0x34) and the
+ * two previous outputs (+0x38, +0x3C). func_003CC070 calls it for effect type 5, followed by func_003CF4D0.
+ *
+ * @param effect  the node
+ * @return 0
+ */
 int func_003CF498(char *effect) {
     *(int *)(effect + 8) = 0;
     *(void (**)(void))(effect + 0) = func_003CF408_F498;
@@ -23733,6 +24034,17 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CF4D0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern float f_C840_F4D0(float) __asm__("SNDI_cos");
 extern float f_FA98_F4D0(float) __asm__("func_003CFA98");
+/**
+ * Configures a resonator filter node from fixed-point parameters: centre frequency, sample rate, bandwidth and gain.
+ *
+ * Stores the rate (params[1] >> 8) at +0x1C, the centre frequency (params[0] >> 8) at +0x20 and the bandwidth
+ * (params[2] >> 8) at +0x24. The pole radius r = 1 - bw * pi / rate goes to +0x28, the cosine term 2r / (1 + r^2) *
+ * cos(2 * pi * freq / rate) (SNDI_cos) to +0x2C, and the gain (1 - r^2) * (params[3] / 256) * func_003CFA98(-c^2)
+ * (about sqrt(1 - c^2)) to +0x30. func_003CC070 calls it after func_003CF498 for effect type 5.
+ *
+ * @param effect  the resonator node
+ * @param params  [0] centre frequency << 8, [1] sample rate << 8, [2] bandwidth << 8, [3] gain in 24.8
+ */
 void func_003CF4D0(void *effect, void *params) {
     float fa, fb, fc, fd, radiusSq, radius, cosCoef;
     int ia = (*(int *)((char*)params + 0)) >> 8;
@@ -23763,6 +24075,20 @@ extern int func_003B5C60_F5D0(int) __asm__("func_003B5C60");
 extern void SNDMEMI_free_F5D0(int) __asm__("SNDMEMI_free");
 extern void func_003C51E8_F5D0(char *, char *, int) __asm__("func_003C51E8");
 
+/**
+ * Filter-graph callback of the splitter node: feeds one input to two consumers, pulling it once and replaying a copy.
+ *
+ * If the "must empty" flag (+0x24) is set it is cleared and "is empty" (+0x26) is set. The copy buffer (+0x1C) grows to
+ * @p n floats when its capacity (+0x20) is smaller (SNDMEMI_free, func_003B5C60). When empty, the input node (+0x8) is
+ * called as (node, n, dst, workBuf, 1) and fills @p workBuf, which func_003C51E8 copies to @p dst and into the copy
+ * buffer, and the flag is cleared; otherwise the copy buffer goes to @p dst and "must empty" is set, so the next call
+ * pulls fresh input. Installed by func_003CF6F8.
+ *
+ * @param n  the number of frames
+ * @param workBuf  the buffer the input fills
+ * @param dst  the output buffer
+ * @return @p n, or the input's result when it is 0 or less
+ */
 int func_003CF5D0(char *self, int n, char *workBuf, char *dst) {
     int bytes, oldBuf, result;
     int *obj;
@@ -23801,6 +24127,13 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CF6D0);
 #ifdef SKIP_ASM
 extern void SNDMEMI_free(int);
 
+/**
+ * Frees a splitter node's copy buffer (+0x1C) with SNDMEMI_free, if it has one. The node's restore function.
+ *
+ * Quirk: the pointer and its capacity (+0x20) are not cleared.
+ *
+ * @param effect  the splitter node
+ */
 void func_003CF6D0(void *effect) {
     int temp_4;
 
@@ -23819,6 +24152,14 @@ typedef struct { void *vt; void *f4; int f8; int fc; int f10; int f14; char pad1
 extern void f_F6F8_a(void) __asm__("func_003CF5D0");
 extern void f_F6F8_b(void) __asm__("func_003CF6D0");
 
+/**
+ * Initialises a splitter filter node: installs func_003CF5D0 as its filter and func_003CF6D0 as its restore function.
+ *
+ * Sets "is empty" (+0x26) to 1 and clears the links (+0x8..+0x14), the clean flag (+0x1B), the copy buffer (+0x1C), its
+ * capacity (+0x20) and "must empty" (+0x24). func_003CC070 calls it for effect type 9.
+ *
+ * @return 0
+ */
 int func_003CF6F8(S_F6F8 *self) {
 self->f26 = 1;
     self->f4 = f_F6F8_b;
@@ -23841,6 +24182,16 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CF740);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void func_003C51E8_F740(void *, void *, int) __asm__("func_003C51E8");
 
+/**
+ * Filter-graph callback of the source node: copies @p n floats from its data pointer (+0x1C) to @p dst and advances it.
+ *
+ * The copy is func_003C51E8 of n * 4 bytes; nothing checks the end of the data. Installed by func_003CF798.
+ *
+ * @param n  the number of frames
+ * @param workBuf  unused
+ * @param dst  the output buffer
+ * @return @p n
+ */
 int func_003CF740(char *self, int n, int workBuf, void *dst) {
     func_003C51E8_F740(dst, *(char **)(self + 0x1C), n * 4);
     *(char **)(self + 0x1C) += n * 4;
@@ -23854,6 +24205,14 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CF798);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 void func_003CF740_F798(void) __asm__("func_003CF740");
 
+/**
+ * Points a source filter node at its sample data and installs func_003CF740 as its filter function.
+ *
+ * Stores @p buffer at +0x1C and clears the restore function (+0x4). Called by func_003CBC58.
+ *
+ * @param effect  the source node
+ * @param buffer  the float samples it will hand out
+ */
 void func_003CF798(void *effect, int buffer) {
     *(int *)((char *)effect + 0x1C) = buffer;
     *(int *)((char *)effect + 4) = 0;
@@ -23864,6 +24223,15 @@ void func_003CF798(void *effect, int buffer) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CF7B0);
 #ifdef SKIP_ASM
+/**
+ * Resets a source filter node: clears its links (+0x8..+0x14), the clean flag (+0x1B) and the data pointer (+0x1C).
+ *
+ * Quirk: it installs no filter function; func_003CF798 does that when the data is attached. func_003CC070 calls it for
+ * effect type 0.
+ *
+ * @param effect  the source node
+ * @return 0
+ */
 int func_003CF7B0(void *effect) {
     (*(int *)((char*)(effect) + (8))) = 0;
     (*(int *)((char*)(effect) + (0xC))) = 0;
@@ -23881,6 +24249,20 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CF7D0);
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct S3CF7D0 { char p0[8]; int *obj; char p1[0xE]; unsigned char f1A; char p2[1]; float *f1C; int f20; int f24; int f28; int f2C; float f30[4]; };
 int func_003CF7D0_C(struct S3CF7D0 *self, int n, float *a2, float *a3) __asm__("func_003CF7D0");
+/**
+ * Filter-graph callback of the echo node: pulls frames from its input and runs them through a feedback delay line.
+ *
+ * The input node (+0x8) is called as (node, n, a3, a2, requester +0x1A) and fills @p a2 (a result of 0 or less is
+ * returned). Then, in chunks that stop at the end of the circular delay line (+0x1C, length +0x28, position +0x24), a
+ * VU0 loop computes per sample d' = d * k.x + in, out = d' * k.y + d with k the quad at +0x30 (feedback, negative
+ * feedback from func_003CF9D8, so an all-pass), writing d' back into the line and out to @p a3. Quirk: it processes the
+ * full @p n even when the input produced fewer frames; chunks must be multiples of 16. Installed by func_003CF998.
+ *
+ * @param n  the number of frames
+ * @param a2  the buffer the input fills
+ * @param a3  the output buffer
+ * @return @p n, or the input's result when it is 0 or less
+ */
 // PORT: hand-written VU0 loop (trapping add/addi have no gcc 2.95 pattern; the block moves its operands into fixed
 // $4..$8 itself): per chunk, a delay-line step d' = d * f.x + in, out = d' * f.y + d with f = self->f30, d' written back
 // to the delay line at self->f1C + pos and out to dst, 16 floats per pass. A port replaces it with the C loop.
@@ -23972,6 +24354,12 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CF958);
 #ifdef SKIP_ASM
 void SNDMEMI_free(int);
 
+/**
+ * Frees an echo node's delay line: SNDMEMI_free on the allocation (+0x20), then clears it and the aligned pointer
+ * (+0x1C). The node's restore function; func_003CF9D8 also calls it before reallocating.
+ *
+ * @param effect  the echo node
+ */
 void func_003CF958(char *effect) {
     int temp_4;
 
@@ -23991,6 +24379,15 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CF998);
 void func_003CF7D0_F998(void) __asm__("func_003CF7D0");
 void func_003CF958_F998(void) __asm__("func_003CF958");
 
+/**
+ * Initialises an echo filter node: installs func_003CF7D0 as its filter and func_003CF958 as its restore function.
+ *
+ * Clears the links (+0x8..+0x14), the clean flag (+0x1B) and both delay-line pointers (+0x1C, +0x20). func_003CC070
+ * calls it for effect type 7, followed by func_003CF9D8.
+ *
+ * @param effect  the node
+ * @return 0
+ */
 int func_003CF998(char *effect) {
     *(void (**)(void))(effect + 4) = func_003CF958_F998;
     *(void (**)(void))(effect + 0) = func_003CF7D0_F998;
@@ -24013,6 +24410,16 @@ extern void f_F958_F9D8(void) __asm__("func_003CF958");
 extern int f_FB38_F9D8(int, int) __asm__("func_003CFB38");
 extern char *f_5C60_F9D8(int) __asm__("func_003B5C60");
 extern void f_6210_F9D8(char *, int, int) __asm__("func_00416210");
+/**
+ * Configures an echo node: sets its feedback and allocates a zeroed delay line of a prime multiple of 16 samples.
+ *
+ * Frees any old line (func_003CF958). The feedback (params[0] >> 1) / 127 goes to +0x30 and its negation to +0x34. The
+ * length func_003CFB38(rate, delay ms) is stored at +0x28; func_003B5C60 allocates length * 4 + 16 bytes (+0x20), the
+ * 16-byte aligned start goes to +0x1C and is cleared (func_00416210); the position (+0x24) restarts at 0.
+ *
+ * @param effect  the echo node
+ * @param params  [0] feedback level (0..254), [1] sample rate << 8, [2] delay in ms << 8
+ */
 void func_003CF9D8(void *effect, void *params) {
     float temp_f0;
     int gain;
@@ -24045,6 +24452,15 @@ void func_003CF9D8(void *effect, void *params) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CFA98);
 #ifdef SKIP_ASM
+/**
+ * Returns an 8-term series approximation of sqrt(1 + @p fparg0), good for small arguments.
+ *
+ * The terms are 1 + x/2 - x^2/8 + x^3/16 - 5x^4/128 ... built by multiplying each by -0.25, -0.5, -0.625, -0.7, -0.75
+ * and -0.7857 times x. func_003CF4D0 uses it for sqrt(1 - c^2).
+ *
+ * @param fparg0  x
+ * @return about sqrt(1 + x)
+ */
 float func_003CFA98(float fparg0) {
     float temp_f0;
     float temp_f1;
@@ -24068,6 +24484,13 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CFB38);
 #ifdef SKIP_ASM
 extern int func_003CFB98(int, int);
 
+/**
+ * Returns a delay length in samples that is 16 times a prime: func_003CFB98(rate, delay / 16) * 16.
+ *
+ * @param rate  the sample rate
+ * @param delayMs  the delay in milliseconds
+ * @return the length in samples, a multiple of 16
+ */
 int func_003CFB38(int rate, int delayMs) {
     return func_003CFB98(rate, delayMs / 16) * 16;
 }
@@ -24076,6 +24499,12 @@ int func_003CFB38(int rate, int delayMs) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003CFB68);
 #ifdef SKIP_ASM
+/**
+ * Returns the integer square root of @p n (the largest i with i * i <= n), found by counting up from 0.
+ *
+ * @param n  a non-negative number
+ * @return floor(sqrt(n))
+ */
 int func_003CFB68(int n) {
     int i = 0, sq;
     for (;;) {
@@ -24095,6 +24524,16 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CFB98);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003CFB68_FB98(int) __asm__("func_003CFB68");
 
+/**
+ * Returns the smallest prime number of samples at least @p duration ms long at @p rate (at least 3).
+ *
+ * Converts to samples (duration * rate / 1000) and tests candidates by trial division up to func_003CFB68's integer
+ * square root + 1, stepping by 1 until one has no divisor.
+ *
+ * @param rate  the sample rate
+ * @param duration  the length in milliseconds
+ * @return the prime sample count
+ */
 int func_003CFB98(int rate, int duration) {
     int lim;
     int length;
@@ -24126,6 +24565,13 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D0B18);
 typedef struct { int a, b, c, d; } E_0B18;
 typedef struct { int p0, p1, p2; unsigned lo : 16; unsigned idx : 6; unsigned hi : 10; E_0B18 e[1]; } Q_0B18;
 
+/**
+ * Appends a 16-byte item to a path event: copies @p src to the item slot the event's 6-bit count (+0xC bits 16-21)
+ * points at, after the 16-byte header, and increments the count. No bounds check.
+ *
+ * @param queue  the event (header followed by its items)
+ * @param src  the item to append
+ */
 void func_003D0B18(Q_0B18 *queue, E_0B18 *src) {
     E_0B18 *arr = queue->e;
     unsigned i = queue->idx;
@@ -24140,6 +24586,19 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D0B78);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 void func_003D0B78_impl(char *base, int n, char *lim) __asm__("func_003D0B78");
+/**
+ * Marks items of a path event as skipped (flag 0x4000000 in +0x8) between unmatched block ends.
+ *
+ * Walks the 16-byte items after @p base up to @p lim. Items of type 1 (byte +0x9) open a nested block when bits
+ * 0x300000 of +0x8 are 0x100000 and close one when they are 0x200000 or 0x300000; a close at nesting depth 0 counts
+ * @p n down. Every item reached while @p n is below 1 is flagged, and the walk stops once @p n is below 0: with
+ * @p n = 0 it flags up to and including the first unmatched end, with 1 from after the first up to the second. The path
+ * interpreter (func_003CFC30) passes the current item's own skip bit as @p n.
+ *
+ * @param base  the current item
+ * @param n  the number of unmatched block ends to pass before flagging
+ * @param lim  the event's last item
+ */
 void func_003D0B78_impl(char *base, int n, char *lim) {
     int depth = 0;
     char *e = base + 0x10;
@@ -24169,6 +24628,13 @@ void func_003D0B78_impl(char *base, int n, char *lim) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D0C20);
 #ifdef SKIP_ASM
+/**
+ * Marks the items after @p base as skipped (flag 0x4000000 in +0x8), up to the next item of type 1 (byte +0x9) or
+ * @p limit. Called by the path interpreter (func_003CFC30).
+ *
+ * @param base  the current item
+ * @param limit  the event's last item
+ */
 void func_003D0C20(unsigned char *base, unsigned char *limit) {
     unsigned char *entry = base + 0x10;
 
@@ -24182,6 +24648,12 @@ void func_003D0C20(unsigned char *base, unsigned char *limit) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D0C78);
 #ifdef SKIP_ASM
+/**
+ * Marks the item right after @p base as skipped (flag 0x4000000 in +0x8), if it is not past @p limit.
+ *
+ * @param base  the current item
+ * @param limit  the event's last item
+ */
 void func_003D0C78(int base, unsigned int limit) {
     unsigned int temp_4;
 
@@ -24198,6 +24670,13 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D0CA0);
 extern void func_003D0CC8(int);
 extern int func_003D5290();
 
+/**
+ * Computes the play state of a path voice: func_003D0CC8 on the voice func_003D5290 finds.
+ *
+ * Quirk: declared without parameters and void, it hands its caller's first argument (the voice id, still in $a0) to
+ * func_003D5290 untouched and leaves func_003D0CC8's result in the return register. Only referenced from the unwind
+ * table.
+ */
 void func_003D0CA0(void) {
     func_003D0CC8(func_003D5290());
 }
@@ -24212,6 +24691,16 @@ extern int D_0044F438_0CC8[] __asm__("D_0044F438");
 extern char *D_0044F420_0CC8[] __asm__("D_0044F420");
 int func_003D0CC8_0CC8(char *arg0) __asm__("func_003D0CC8");
 
+/**
+ * Works out and stores a path voice's play state (+0x100): 2 idle, 3 waiting, 4 due, 7 playing, 5 near the end.
+ *
+ * A voice with a pending start tick (+0x4C) is 4 once the path tick D_0044F438 has reached it and 3 before. Otherwise a
+ * voice with a current node (+0x36 >= 0) is 7, or 5 when func_003D32B8 fills its timing and the voice's position
+ * (+0x24) plus the selected player's +0xC has reached the node's end (field 6 of that result). Everything else is 2.
+ *
+ * @param arg0  the path voice (sPathVoice), or 0
+ * @return the state, 1 for a null voice
+ */
 int func_003D0CC8_0CC8(char *arg0) {
     int buf[8];
     unsigned int t;
@@ -24260,6 +24749,20 @@ extern int func_003D5450_0D70(int) __asm__("func_003D5450");
 
 static inline unsigned int has_0D70(unsigned int a, unsigned int b) { return a & b; }
 
+/**
+ * Sets a value on every voice of the path players a mask selects, keeping the previous one: +0x1 = @p val, old +0x1 to
+ * +0x2.
+ *
+ * Returns -18 unless the path system is up (D_0044F42C) and idle (D_0044F430 clear, func_003D5450(-1) non-zero). Only
+ * values below 0x80 are applied; each of the 4 players (D_00517610) that is in use (+0x34) and shares a class bit
+ * (0xF0000000) and a group bit (0x0F000000) with @p mask is selected with func_003D5450 and all 24 of its voices
+ * (+0x58) are updated, whatever the low mask bits say. Clears the selection (D_0044F430, D_0044F420) at the end.
+ * func_002B2120 calls it for 0x11000001, passing its own second argument through.
+ *
+ * @param mask  the path id mask (class, group and voice bits)
+ * @param val  the new value (0..0x7F)
+ * @return 0, or -18 when the system is not ready
+ */
 int func_003D0D70(unsigned int mask, unsigned int val) {
     int i, j;
     if (D_0044F42C_0D70 == 0 || D_0044F430_0D70 != 0 || func_003D5450_0D70(-1) == 0) {
@@ -24309,6 +24812,19 @@ extern void func_003D1F80_0ED0(unsigned int, int) __asm__("func_003D1F80");
 
 static inline unsigned int has_0ED0(unsigned int a, unsigned int b) { return a & b; }
 
+/**
+ * Queues a type-4 item for the path players a mask selects: builds a one-item event and posts a copy to each.
+ *
+ * Returns -18 unless the path system is up and idle (D_0044F42C, D_0044F430, func_003D5450(-1)). The item gets
+ * @p mask at +0x0, type 4 (+0x9), -1 at +0x8 and +0xE and @p val at +0xC; func_003D0B18 appends it to a cleared 16-byte
+ * event header. For each player in use whose class and group bits overlap @p mask, func_003D5450 selects it,
+ * PATHI_copyevent copies the event into the player's buffer and func_003D1F80 schedules the copy. Clears the selection
+ * at the end.
+ *
+ * @param mask  the path id mask
+ * @param val  the value stored in the item (+0xC)
+ * @return 0, or -18 when the system is not ready
+ */
 int func_003D0ED0(unsigned int mask, int val) {
     struct B_0ED0 b;
     struct A_0ED0 a;
@@ -24357,6 +24873,17 @@ extern void func_002AF7A0_1038(int, int) __asm__("func_002AF7A0");
 
 static inline unsigned int has_1038(unsigned int a, unsigned int b) { return a & b; }
 
+/**
+ * Pauses or resumes the voices of the path players a mask selects (func_002AF7A0 on each voice's sound, +0x3 = @p val).
+ *
+ * Does nothing unless the path system is up and idle. A mask of -1 also stores @p val as the global state (D_0044F42D).
+ * For each player in use whose class and group bits overlap @p mask (selected with func_003D5450), every voice whose
+ * bit is set in the low 24 bits of @p mask gets func_002AF7A0(+0x54, val) and +0x3 = val. Clears the selection at the
+ * end. func_002B2018 passes 1 after setting the stream pitch to 0, func_002B2070 passes 0 after restoring it.
+ *
+ * @param mask  the path id mask
+ * @param val  1 to pause, 0 to resume
+ */
 void func_003D1038(unsigned int mask, unsigned char val) {
     int i, j;
     if (D_0044F42C_1038 == 0) return;
@@ -24438,6 +24965,23 @@ extern int f_F2F0_11B8(int, int *, int *, int) __asm__("func_002AF2F0");
 extern void f_1658_11B8(char *, char *, int) __asm__("func_003D1658");
 
 int func_003D11B8_impl(unsigned int id, struct Info_11B8 *info) __asm__("func_003D11B8");
+/**
+ * Fills a status block for the path voice an id names: the current node, part and the position within it.
+ *
+ * Returns -18 unless the path system is up and idle. The block (11 words) starts as -1 for node, part and the last two
+ * fields and 0 elsewhere. When func_003D5290 finds the voice and func_003D4BB0 accepts its group, func_002AF2F0 on the
+ * voice's sound (+0x54) gives the current request, its offset and length: the block gets the length (+0x18), offset +
+ * length (+0xC) and the voice's node (+0x36 to +0x24). The request is looked up in the voice's request table (+0xFC,
+ * +0x20 bits 14-18 entries) for the node (+0x0) and part (+0x8); the node's format word gives a channel divisor (bits
+ * 20-23) and multiplier (bits 24-27) for the per-channel totals (+0x10, +0x14) and the remainders of the length (+0x1C,
+ * +0x20). When the request is not in the table it prints "( %.8s ) PATH_status - currentrequest %d not found"
+ * (func_003D1658, if D_0044F43C has 0x100) with the voice's name.
+ *
+ * @param id  the path id
+ * @param info  the status block to fill
+ * @return the current request (also when it is missing from the table), -8 when there is no voice or request, a
+ * negative func_002AF2F0 error, or -18 when the system is not ready
+ */
 int func_003D11B8_impl(unsigned int id, struct Info_11B8 *info) {
     int ret;
     struct S_11B8 *s;
@@ -24532,6 +25076,15 @@ extern void func_002AF838_1470(int) __asm__("func_002AF838");
 
 static inline unsigned int has_1470(unsigned int a, unsigned int b) { return a & b; }
 
+/**
+ * Stops every voice of the path players a mask selects: func_002AF838 on each voice's sound (+0x54) and node +0x36 =
+ * -1.
+ *
+ * Does nothing unless the path system is up and idle. Players are matched by class and group bits only; all 24 voices
+ * of each are stopped. Clears the selection (D_0044F420, D_0044F430) at the end.
+ *
+ * @param mask  the path id mask
+ */
 void func_003D1470(unsigned int mask) {
     int i, j;
     if (D_0044F42C_1470 == 0) return;
@@ -24560,6 +25113,16 @@ void func_003D1470(unsigned int mask) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D15C8);
 #ifdef SKIP_ASM
+/**
+ * Sets the play position (+0x24) of the path voice func_003D5290 finds to @p value & 0xFFFF.
+ *
+ * func_003D5290 is called without arguments here, so it gets @p mask from $a0. func_002B2140 calls it for 0x11000001,
+ * passing its own second argument through.
+ *
+ * @param mask  the path id (reaches func_003D5290 through the register)
+ * @param value  the new position
+ * @return 0, or -8 when no voice matches
+ */
 int func_003D15C8(int mask, int value) {
     char *channel = (char *)func_003D5290();
     if (channel == 0) {
@@ -24577,6 +25140,12 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D1608);
 extern unsigned int D_0044F430_1608[] __asm__("D_0044F430");
 extern void func_00411310_1608(int, ...) __asm__("func_00411310") __attribute__((noreturn));
 
+/**
+ * Fatal-error handler of the path library: sets D_0044F430 to -1 (busy, so every entry point refuses) and calls
+ * func_00411310(0), which exits. The printf-style arguments are ignored.
+ *
+ * @param a  the format string (ignored)
+ */
 void func_003D1608(int a, ...) {
     D_0044F430_1608[0] = 0xFFFFFFFF;
     func_00411310_1608(0);
@@ -24586,6 +25155,13 @@ void func_003D1608(int a, ...) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D1658);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the path library's debug print, compiled out (the format and arguments are ignored).
+ *
+ * Called with messages such as "PATHI_copyevent : can't add new event..." when D_0044F43C enables them.
+ *
+ * @param fmt  the printf format (ignored)
+ */
 void func_003D1658(int fmt, ...) {
 }
 #endif
@@ -24593,10 +25169,18 @@ void func_003D1658(int fmt, ...) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D1690);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: a second compiled-out printf-style debug hook of the path library.
+ *
+ * @param a  the format string (ignored)
+ */
 void func_003D1690(int a, ...) {
 }
 #endif
 
+/**
+ * Does nothing (an empty hook of the path library).
+ */
 void func_003D16C8(void) {
 }
 
@@ -24607,6 +25191,12 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D16D0);
 extern int D_0044F43C_16D0[4] __asm__("D_0044F43C");
 
 int func_003D16D0_16D0(void) __asm__("func_003D16D0");
+/**
+ * Returns the path library's debug-message flags (D_0044F43C; 0x100 after func_003D2290, 0x120 enables the
+ * PATHI_copyevent message).
+ *
+ * @return the flags
+ */
 int func_003D16D0_16D0(void) {
     return D_0044F43C_16D0[0];
 }
@@ -24615,11 +25205,20 @@ int func_003D16D0_16D0(void) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D16E0);
 #ifdef SKIP_ASM
+/**
+ * Returns @p value unchanged.
+ *
+ * @param value  any value
+ * @return @p value
+ */
 int func_003D16E0(int value) {
     return value;
 }
 #endif
 
+/**
+ * Does nothing (an empty hook of the path library).
+ */
 void func_003D16E8(void) {
 }
 
@@ -24628,9 +25227,6 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D16F0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-// Same walk as func_003D1038: allocates a voice for program prog in each bank
-// matching mask and registers it in the 16-entry list of every bank sharing the
-// top mask bits. Returns 0, -8 (none registered), -13 (full/bad prog) or -18.
 struct H_16F0 { int f0; int f4; int f8; };
 struct E_16F0 { int w0; int w4; int w8; unsigned int wC; };
 struct Hdr_16F0 { char pad[0xF]; unsigned char bF; };
@@ -24646,6 +25242,22 @@ extern int func_002AF370_16F0(void) __asm__("func_002AF370");
 
 static inline unsigned int has_16F0(unsigned int a, unsigned int b) { return a & b; }
 
+/**
+ * Posts a path event: copies event definition @p prog of the path data and queues it on every player of its group.
+ *
+ * Returns -18 unless the path system is up and idle. Bits 8-11 of @p prog pick the group (0x1000000 << n) and the low
+ * byte the event. For each player in use that has that group bit and shares class and group bits with @p mask, it is
+ * selected (func_003D5450); an event number at or above the path data's event count (+0xF) fails with -13, and an event
+ * whose definition (data +0x34, offsets +0x40) is disabled (0x20000000 in +0xC) is skipped. Otherwise PATHI_copyevent
+ * copies it into the player's buffer and the copy, stamped with the current time (func_002AF370) at +0x0 and +0x8,
+ * joins the pending list (+0xDC, count +0x91C) of every player in use with the same class and group byte (a full list
+ * gives -13). Likely bug: PATHI_copyevent's 0 (buffer full) is not checked, so the stamp is written through a null
+ * pointer. func_002B20C8 posts the music events with mask -1.
+ *
+ * @param mask  the path id mask (-1 for all)
+ * @param prog  the event: group in bits 8-11, event number in the low byte
+ * @return 0, -8 when nothing was queued, -13 for a bad event or a full list, -18 when the system is not ready
+ */
 int func_003D16F0(unsigned int mask, short prog) {
     int r = 0;
     unsigned int bit;
@@ -24711,6 +25323,15 @@ extern char D_00517610_1940[] __asm__("D_00517610");
 
 struct P_1940 { char pad[0xDC]; int a[16]; };
 
+/**
+ * Cancels the pending events of the path players a mask selects (func_003D1BA8 with mode 2).
+ *
+ * Does nothing unless the path system is up and idle. Players are matched by class and group bits. Likely bug:
+ * func_003D1BA8 shifts the pending list down over the removed slot, but the loop moves on to the next slot, so only
+ * every other pending event is cancelled (func_003D1E80 steps back after a removal). Clears the selection at the end.
+ *
+ * @param mask  the path id mask
+ */
 void func_003D1940(unsigned int mask) {
     int i, j;
     unsigned int fl, t, u;
@@ -24753,6 +25374,15 @@ extern struct G_1A88 *D_0044F420_1A88 __asm__("D_0044F420");
 extern struct E_1A88 D_00517610_1A88[] __asm__("D_00517610");
 extern int func_003D5450_1A88(int) __asm__("func_003D5450");
 
+/**
+ * Returns the number of pending events of the first path player in use whose group bits overlap @p mask.
+ *
+ * Returns -18 unless the path system is up and idle; counts the non-null slots of the player's pending list (+0xDC, 16
+ * entries) and clears the selection.
+ *
+ * @param mask  the path id mask (only the group bits 0x0F000000 count)
+ * @return the number of pending events, or -18
+ */
 int func_003D1A88(unsigned int mask) {
     int cnt = 0;
     int i, j;
@@ -24789,6 +25419,17 @@ extern struct G_1BA8 *D_0044F420_1BA8 __asm__("D_0044F420");
 extern void (*D_0044F428_1BA8)(struct H_1BA8 *, int) __asm__("D_0044F428");
 extern void func_0041605C_1BA8(void *, void *, int) __asm__("func_0041605C");
 
+/**
+ * Removes pending event @p idx from the selected path player (D_0044F420), freeing its storage.
+ *
+ * An event stored in the player's own event buffer (+0x11C..+0x91C) is removed by moving the rest of the buffer down
+ * over it (func_0041605C) and adjusting the other 17 slot pointers that lay above it; any other event goes to the
+ * release hook D_0044F428 (if set) with @p mode. The slot list (+0xDC) is then shifted down and the count (+0x91C)
+ * decremented.
+ *
+ * @param idx  the pending slot (0..15)
+ * @param mode  why it ends, passed to the release hook (1 timed out, 2 cancelled, 3 finished)
+ */
 void func_003D1BA8(int idx, int mode) {
     struct H_1BA8 *v = D_0044F420_1BA8->slots[idx];
     int size = (v->hE & 0x3F) * 16 + 16;
@@ -24831,6 +25472,17 @@ extern struct G_1D28 *D_0044F420_1D28 __asm__("D_0044F420");
 extern unsigned int D_0044F438_1D28 __asm__("D_0044F438");
 extern int func_003CFC30_1D28(struct E_1D28 *, struct P_1D28 *) __asm__("func_003CFC30");
 
+/**
+ * Runs the due items of pending event @p n of the selected path player; returns how many it got through.
+ *
+ * From the event's current item (+0xC bits 22-27) to its item count (bits 16-21): an item time (+0x4) earlier than the
+ * event's start (+0x0) is made absolute by adding the path tick D_0044F438, and an item whose time has passed is
+ * flagged skipped (0x4000000 in +0x8). Items not skipped are executed by func_003CFC30; the first that returns 0 (not
+ * ready yet) stops the walk. Each item passed advances the current index and stamps the event's +0x8 with the tick.
+ *
+ * @param n  the pending slot
+ * @return the number of items executed or skipped
+ */
 int func_003D1D28(int n) {
     struct E_1D28 *e = D_0044F420_1D28->arr[n];
     unsigned int i = e->idx;
@@ -24958,6 +25610,15 @@ extern void f_1BA8_1E80(int, int) __asm__("func_003D1BA8");
 extern int f_1D28_1E80(int) __asm__("func_003D1D28");
 
 int func_003D1E80_impl(void) __asm__("func_003D1E80");
+/**
+ * Services the selected path player's pending events: drops finished and timed-out ones and runs the rest.
+ *
+ * Slots at or past the count (+0x91C) are cleared. An event whose current item reached its item count is removed with
+ * mode 3 (func_003D1BA8), one with a timeout (+0x4) whose start (+0x0) plus timeout is before the tick D_0044F438 with
+ * mode 1, and the loop steps back to re-check the slot; others run through func_003D1D28.
+ *
+ * @return the total number of items processed
+ */
 int func_003D1E80_impl(void) {
     int i;
     int sum = 0;
@@ -24995,6 +25656,16 @@ struct P_1F80 { char pad[0x30]; unsigned int m_a; int m_b; char pad2[0xDC - 0x38
 extern int f2AF370_1F80(void) __asm__("func_002AF370");
 extern struct P_1F80 D_7610_1F80[4] __asm__("D_00517610");
 
+/**
+ * Queues an already copied path event on every player in use whose class and group bits include @p mask's top byte.
+ *
+ * The event's start (+0x0) and last-run (+0x8) times are set to the current time (func_002AF370) and it is appended to
+ * each matching player's pending list (+0xDC, count +0x91C).
+ *
+ * @param mask  the path id mask (only the top byte counts)
+ * @param entry  the event (from PATHI_copyevent)
+ * @return 0, -8 when no player matched, -13 at once when a list is full
+ */
 int func_003D1F80(unsigned int mask, char *entry) {
     unsigned int groupMask = mask & 0xFF000000;
     int i, ret = -8;
@@ -25075,6 +25746,16 @@ struct I2138 { int w0; int w4; unsigned int w8; int wC; };
 struct E2138 { char pad[0xC]; unsigned char b; char padd; unsigned short h; struct I2138 items[1]; };
 extern struct E2138 **D_0044F420_2138[] __asm__("D_0044F420");
 
+/**
+ * Returns the skip bit of the first item of a given type in the selected player's pending events of the same number.
+ *
+ * Looks through the 16 pending slots for an event whose number (byte +0xC) matches @p arg0's and whose items include
+ * one of type @p arg1 (byte +0x9); returns bit 26 (0x4000000, skipped) of that item's +0x8, else 0.
+ *
+ * @param arg0  an event (its number at +0xC)
+ * @param arg1  the item type to look for
+ * @return 1 when that item is skipped, 0 otherwise or when not found
+ */
 int func_003D2138(char *arg0, int arg1) {
     int i;
     unsigned int j;
@@ -25101,6 +25782,16 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D21C0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern char *D_0044F420_f420[] __asm__("D_0044F420");
 
+/**
+ * Enables or disables an event definition in the selected player's path data: sets bit 29 (0x20000000) of its +0xC to
+ * @p arg1 & 1.
+ *
+ * The definition is found through the event number at @p arg0 +0xC: path data (+0x34) plus 4 times the event's offset
+ * (+0x40 table). func_003D16F0 skips disabled events; func_003D2218 re-enables them all.
+ *
+ * @param arg0  an event (its number at +0xC)
+ * @param arg1  1 to disable, 0 to enable
+ */
 void func_003D21C0(char *arg0, int arg1) {
     char *g = D_0044F420_f420[0];
     char *p = *(char **)(g + 0x34) + (*(short *)(*(char **)(g + 0x40) + *(unsigned char *)(arg0 + 0xC) * 2) * 4);
@@ -25120,6 +25811,10 @@ extern struct sPath *D_0044F420;
 
 struct E_2218 { int w0; int w4; int w8; unsigned int wC; };
 
+/**
+ * Re-enables every event definition in the selected player's path data: clears bit 29 (0x20000000) of each one's +0xC,
+ * for the event count at data byte +0xF.
+ */
 void func_003D2218(void) {
     int i;
     for (i = 0; i < ((unsigned char *)D_0044F420->f34)[0xF]; i++) {
@@ -25150,6 +25845,15 @@ extern unsigned int D_0044F430;
 extern int D_0044F43C;                  /* flags */
 
 
+/**
+ * Initialises the path library: clears the 4 players and marks the system ready.
+ *
+ * Returns -18 while a selection is active (D_0044F430). Each player (D_00517610, 0x928 bytes) gets its in-use flag
+ * (+0x34), +0x924 and its 24 voice pointers (+0x58) cleared; then D_0044F42C = 1 (initialised), the debug flags
+ * D_0044F43C = 0x100, the selection D_0044F420 and the global pause D_0044F42D are reset.
+ *
+ * @return 0, or -18
+ */
 int func_003D2290(void) {
     int i, j;
     if (D_0044F430 != 0) return -18;
@@ -25195,6 +25899,20 @@ extern void fAE690_2A68(int) __asm__("func_002AE690");
 
 static inline int isOff_2A68(unsigned int m, int b) { return ((m >> b) & 1) == 0; }
 struct sPathVoice *func_003D2A68_impl(unsigned int mask) __asm__("func_003D2A68");
+/**
+ * Closes the first path voice a mask names, and shuts the player (and the path system) down when nothing is left.
+ *
+ * Returns 0 unless the path system is up and idle. Finds the first player in use whose class and group bits overlap
+ * @p mask and, in it, the first voice whose bit is set in @p mask; the slot (+0x58) is cleared and func_002AE690
+ * releases the voice's sound (+0x54). When that player has no voices left (func_003D5330) its in-use flag (+0x34) and
+ * +0xB8 are cleared and func_003D4C40 re-sorts the players; when no group has voices any more and a voice was closed,
+ * func_002AE100 stops the bank monitor's service and D_0044F42C is cleared. Likely bug: when nothing matches, the
+ * "player empty" step still runs on the stale selection D_0044F420 (the loop index is 4, so func_003D5330 finds no
+ * voices). The music monitor closes 0x11000001 and 0x11000002 on destruction.
+ *
+ * @param mask  the path id mask
+ * @return the closed voice, or 0
+ */
 struct sPathVoice *func_003D2A68_impl(unsigned int mask) {
     struct sPathVoice *e = 0;
     int i, j;
@@ -25258,6 +25976,19 @@ static inline int bitclear_2C20(int x) {
     return !(x & 1);
 }
 
+/**
+ * Returns a rounded scale of a path voice's last stream-segment ratio: (int)(ratio * @p arg1 + 0.5).
+ *
+ * Returns -18 unless the path system is up and idle. func_003D4BB0 selects the player with exactly @p m's top byte
+ * (else 0). The voice is the lowest set bit of @p m's low 24 bits; past the data's voice count (byte +0xD of the path
+ * data +0x34) it returns 0. For each entry pair of the voice's table (player +0x4C) the ratio is ((e[2] - e[0]) << 7) /
+ * e[1]. Likely bug: the largest ratio is tracked but the last one is scaled; also both early returns of 0 leave the
+ * busy flag D_0044F430 set, so later calls get -18.
+ *
+ * @param m  the path id
+ * @param arg1  the multiplier
+ * @return the rounded product, 0 when the player or voice is missing, -18 when the system is not ready
+ */
 int func_003D2C20(int m, int arg1) {
     float ratio, max;
     unsigned int i;
@@ -25315,6 +26046,21 @@ extern int D_0044F420_2DF8[] __asm__("D_0044F420");
 extern unsigned char D_0044F42C_2DF8[] __asm__("D_0044F42C");
 extern int D_0044F430_2DF8[] __asm__("D_0044F430");
 
+/**
+ * Requests part @p idx on a path voice, first evicting a buffered part when the voice's limits would be exceeded.
+ *
+ * Returns -18 unless the path system is up and idle. With the voice (func_003D5290) and its request table
+ * (func_003D4A50: count +0x0, policy +0x2, limits +0x4 and +0x8, then 12-byte entries), a policy other than 2 checks
+ * the voice's totals (+0x104, +0x108) plus the part's sizes against the limits: policy 1 releases the entry with the
+ * smallest first word (func_003D3140) unless that is @p idx itself (then it returns 0), policy 0 lets func_002AE3A8
+ * free the oldest. Then func_002AE298 records the request on the voice's sound (+0x54) with +0x5C, @p idx and
+ * @p arg2. Likely bug: the early return for a self-eviction leaves the busy flag D_0044F430 set.
+ *
+ * @param h  the path id
+ * @param idx  the part to request
+ * @param arg2  the caller's handle, stored with the request
+ * @return func_002AE298's result, 0 when nothing was requested, -18 when the system is not ready
+ */
 int func_003D2DF8(int h, int idx, int arg2) {
     int ret = 0;
     struct T_2DF8 *t;
@@ -25369,6 +26115,9 @@ ok:
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D2FA0);
 #ifdef SKIP_ASM
+/**
+ * Calls the empty hook func_003D16C8.
+ */
 void func_003D2FA0(void) {
     func_003D16C8();
 }
@@ -25379,6 +26128,9 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D2FC0);
 #ifdef SKIP_ASM
 extern void func_003D16D0();
 
+/**
+ * Calls func_003D16D0 (which reads the debug flags D_0044F43C) and discards the value.
+ */
 void func_003D2FC0(void) {
     func_003D16D0();
 }
@@ -25391,6 +26143,12 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D2FE0);
 extern unsigned char D_0044F42C_2FE0 __asm__("D_0044F42C");
 extern int D_0044F430_2FE0 __asm__("D_0044F430");
 int func_003D2A68(int);
+/**
+ * Shuts the path system down: func_003D2A68(-1), then clears the initialised (D_0044F42C) and busy (D_0044F430) flags.
+ * Quirk: func_003D2A68 closes only the first voice it finds.
+ *
+ * @return 0
+ */
 int func_003D2FE0(void) {
     func_003D2A68(-1);
     D_0044F42C_2FE0 = 0;
@@ -25399,6 +26157,9 @@ int func_003D2FE0(void) {
 }
 #endif
 
+/**
+ * Does nothing (an empty hook of the path library).
+ */
 void func_003D3010(void) {
 }
 
@@ -25409,6 +26170,14 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D3018);
 extern int D_0044F424_3018[4] __asm__("D_0044F424");
 extern int D_0044F428_3018[4] __asm__("D_0044F428");
 
+/**
+ * Installs the path library's two callbacks: the node-change callback (D_0044F424, called by func_003D3900 with the
+ * selected id and the new node) and the event release callback (D_0044F428, called by func_003D1BA8 for events outside
+ * the player's buffer).
+ *
+ * @param arg0  the node-change callback, or 0
+ * @param arg1  the event release callback, or 0
+ */
 void func_003D3018(int arg0, int arg1) {
     D_0044F424_3018[0] = arg0;
     D_0044F428_3018[0] = arg1;
@@ -25418,6 +26187,14 @@ void func_003D3018(int arg0, int arg1) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D3030);
 #ifdef SKIP_ASM
+/**
+ * Returns the sound-monitor index (+0x54) of the path voice func_003D5290 finds, or -8.
+ *
+ * Declared without parameters: the caller's id reaches func_003D5290 through $a0 (func_002B2488 passes 0x11000001,
+ * func_003D53B8 its mask).
+ *
+ * @return the voice's monitor index, or -8 when no voice matches
+ */
 int func_003D3030(void) {
     char *temp_2;
 
@@ -25435,6 +26212,16 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D3058);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_002AE478_3058() __asm__("func_002AE478");
 
+/**
+ * Returns the memory a path player needs for @p n voices: func_002AE478's monitor size + 272 + 16 * n, rounded down to
+ * 16 and plus 16.
+ *
+ * func_002AE478 is called without arguments here, so it gets @p n and the caller's second argument through the
+ * registers (the music monitor calls func_003D3058(1, 0) for its "PathfinderOverlay" buffer).
+ *
+ * @param n  the number of voices
+ * @return the size in bytes
+ */
 int func_003D3058(int n) {
     int size = func_002AE478_3058() + 272;
     size += n * 0x10;
@@ -25453,6 +26240,18 @@ extern int D_0044F420_30A8[] __asm__("D_0044F420");
 extern unsigned char D_0044F42C_30A8[] __asm__("D_0044F42C");
 extern int D_0044F430_30A8[] __asm__("D_0044F430");
 
+/**
+ * Gives a path voice's sound monitor a memory-resident copy of its data: func_002AE768(monitor index, @p arg1,
+ * @p arg2).
+ *
+ * The monitor index is the voice's +0x54 (-8 when func_003D5290 finds no voice, which func_002AE768 rejects). Stream
+ * requests below the limit are then read from the buffer instead of the file. Does nothing unless the path system is up
+ * and idle; clears the selection at the end.
+ *
+ * @param arg0  the path id
+ * @param arg1  the buffer
+ * @param arg2  the stream offset limit the buffer covers (in the monitor's units)
+ */
 void func_003D30A8(int arg0, int arg1, int arg2) {
     int var_4;
     void *temp_2;
@@ -25482,6 +26281,15 @@ extern unsigned char D_0044F42C_3140[] __asm__("D_0044F42C");
 extern int D_0044F430_3140[] __asm__("D_0044F430");
 int func_003D3140_3140(int arg0, int arg1) __asm__("func_003D3140");
 
+/**
+ * Releases request @p arg1 of a path voice's sound monitor (func_002AE328 on the voice's +0x54).
+ *
+ * Returns -18 unless the path system is up and idle; clears the selection at the end.
+ *
+ * @param arg0  the path id
+ * @param arg1  the request index
+ * @return func_002AE328's result, 0 when no voice matches, -18 when the system is not ready
+ */
 int func_003D3140_3140(int arg0, int arg1) {
     int r;
     char *t;
@@ -25516,6 +26324,16 @@ extern unsigned char D_0044F42C_31E8[] __asm__("D_0044F42C");
 extern int D_0044F430_31E8[] __asm__("D_0044F430");
 extern int D_0044F420_31E8[] __asm__("D_0044F420");
 
+/**
+ * Sets the two look-ahead times of every path player in use whose group bits overlap @p a: +0xC (used by the normal
+ * service pass) and +0x10 (used by the 'B' pass of func_003D4F10).
+ *
+ * Does nothing unless the path system is up and idle; clears the selection at the end.
+ *
+ * @param a  the path id mask (only the group bits 0x0F000000 count)
+ * @param b  the look-ahead for +0xC
+ * @param c  the look-ahead for +0x10
+ */
 void func_003D31E8(unsigned int a, int b, int c) {
     int i;
     if (D_0044F42C_31E8[0] != 0 && D_0044F430_31E8[0] == 0) {
@@ -25540,6 +26358,11 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D32A8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_0044ED48_32A8[4] __asm__("D_0044ED48");
 
+/**
+ * Returns the address of D_0044ED48 (a 16-byte block of the path library).
+ *
+ * @return D_0044ED48
+ */
 int *func_003D32A8(void) {
     return D_0044ED48_32A8;
 }
@@ -25593,6 +26416,22 @@ extern int fAEC58_32B8(int, unsigned int *, unsigned int *) __asm__("func_002AEC
 
 int func_003D32B8_32B8(struct V_32B8 *v, struct O_32B8 *o) __asm__("func_003D32B8");
 
+/**
+ * Works out where a path voice is within its current node: returns the segment index and optionally fills the timing.
+ *
+ * The node record is the selected player's path data (+0x34) at 4 * its offset (+0x38 table) for the voice's node
+ * (+0x36); its length entry is player table +0x50 [record +0x0 - 1]. The segment length is that length divided by the
+ * node's channel count times multiplier (bits 24-27 and 20-23 of record +0x4) when the multiplier is set; the
+ * per-channel length divides by bits 20-23 only. func_002AEC58 gives the voice's stream positions (+0x54). For a voice
+ * on a channel (+0x20 bits 4-8 > 0) of a node with flag 2 (+0xC) the start is offset by +0x40 per remaining channel and
+ * the end is length - start. @p o gets the multiplier (bits 0-3), record +0x8 bits 4-7, the segment index (bits 8-15),
+ * the segment length (+0x4), per-channel length (+0x8), total (+0xC), the distance to the next segment boundary
+ * (+0x10), per-channel length minus the end position (+0x14) and the start (+0x18).
+ *
+ * @param v  the path voice
+ * @param o  the timing to fill, or 0
+ * @return the index of the segment the voice is in
+ */
 int func_003D32B8_32B8(struct V_32B8 *v, struct O_32B8 *o) {
     struct E_32B8 *e;
     struct T_32B8 t;
@@ -25654,6 +26493,19 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D37A0);
 extern struct sPath *D_0044F420;
 
 struct R_37A0 { signed char lo; signed char hi; short v; };
+/**
+ * Picks the node that follows path node @p arg0 for a selector value, from the node's branch table.
+ *
+ * The node record (selected player's data +0x34 at its +0x38 offset) names its voice (bits 16-20 of word 0). When that
+ * voice is repeating this node (+0x2C), the selector becomes the voice's remaining repeat count (+0x20 low bits), which
+ * is decremented for nodes with a repeat count (bits 28-31) and ends the repeat (+0x2C = -1) when it passes 0. The
+ * branches (4 bytes each from record +0x10, count in bits 12-16 of word 1) hold a selector range and a target: the
+ * first range containing the selector wins, else the branch with the nearest range edge.
+ *
+ * @param arg0  the current node
+ * @param arg1  the selector value (0..127)
+ * @return the next node, or -1 when the node has no branches
+ */
 int func_003D37A0(int arg0, int arg1) {
     struct sPath *g = D_0044F420;
     int r = -1;
@@ -25768,6 +26620,22 @@ extern void f0B18_3900(void *, void *) __asm__("func_003D0B18");
 extern char *fcopy_3900(void *) __asm__("PATHI_copyevent");
 extern int f1F80_3900(unsigned int, char *) __asm__("func_003D1F80");
 
+/**
+ * Follows a path from node @p start through its control nodes until it reaches a playable node, and returns that node.
+ *
+ * Every node number is first remapped through node @p id's list (func_003D3C90). While the record's type (+0x0) is 0 or
+ * less: type 0 makes it the voice's current record (+0x30); when its +0x8 bits 10-14 name a cue, a timed type-6 item
+ * (time tick + 9632, cue index, flag from player table +0x54) is built (func_003D0B18), copied (PATHI_copyevent) and
+ * queued (func_003D1F80); a random-selector flag (+0x4 bits 17-19 == 2) draws the selector from the tick, and the
+ * node-change callback D_0044F424 (func_003D3018) is called. Type -1 starts a repeat on its voice (+0x2C node, count
+ * from bits 28-31), type -2 draws a random selector, type -3 queues the event its +0xC names. The next node is
+ * func_003D37A0's branch for the selector, which then reverts to @p vel.
+ *
+ * @param id  the node whose remap list applies
+ * @param start  the first node
+ * @param vel  the selector value
+ * @return the playable node reached (remapped)
+ */
 int func_003D3900(int id, int start, int vel) {
     struct Ev_3900 ev;
     struct Q_3900 q;
@@ -25844,6 +26712,17 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D3C90);
 // Looks up id's remap list in the table at D_0044F420 and returns what value maps to, or value.
 struct T_3C90 { char pad[0x34]; int *words; short *index; char pad2[0xC]; int *ranges; };
 extern struct T_3C90 *D_0044F420_3C90 __asm__("D_0044F420");
+/**
+ * Remaps a node number through node @p id's remap list; returns @p value unchanged when there is none.
+ *
+ * The list number is byte +0x4 of the node's record (selected player's data +0x34 at its +0x38 offset); 0 means no
+ * list. The list's words lie between ranges (player +0x48) [k - 1] and [k]; each maps its high half to its low half,
+ * applied in order, so mappings can chain. A negative @p id returns @p value.
+ *
+ * @param id  the node owning the list
+ * @param value  the node number to remap
+ * @return the remapped node number
+ */
 int func_003D3C90(int id, int value) {
     struct T_3C90 *t;
     int *words;
@@ -25902,6 +26781,17 @@ extern int f_3900_3D20(int, int, int) __asm__("func_003D3900");
 extern void f_4050_3D20(int) __asm__("func_003D4050");
 extern int f_41A8_3D20(struct V_3D20 *) __asm__("func_003D41A8");
 
+/**
+ * Moves path voice @p idx of the selected player on to its next node and queues it, or hands the path to another voice.
+ *
+ * Saves the voice and the pending-event count. A voice on a channel of a node with flag 2 (+0xC) stays on that node for
+ * the next channel; otherwise func_003D37A0 picks the branch for its selector (+0x1), and func_003D3900 walks the
+ * control nodes. If the node reached belongs to another existing voice, this voice stops (+0x36 = -1) and func_003D4050
+ * posts the hand-over; otherwise the node becomes the voice's (+0x36) and func_003D41A8 queues it. When that fails
+ * (negative, other than -9999) the voice and the event count are restored.
+ *
+ * @param idx  the voice slot (0..23)
+ */
 void func_003D3D20(int idx) {
     struct V_3D20 save;
     struct V_3D20 *v;
@@ -25976,6 +26866,17 @@ struct M_4050 {
 struct G_4050 { char pad[0x58]; int a[1]; };
 struct B_4050 { char pad[0x18]; int w18; char rest[4]; };
 
+/**
+ * Posts an event that starts path node @p idx on its own voice, after the current voice's segment when one is playing.
+ *
+ * Does nothing when the node's voice slot (record +0x2 bits 0-4) is empty. The event, for id 0x11000000 | (1 << voice)
+ * (always class 1, group 0), gets a type-2 item timed 10 before the current voice's segment start (func_003D32B8 on
+ * voice player +0x0) when the player's current voice (+0x0) is set, then a type-4 item for node @p idx (+0xC) with the
+ * node's bits 21-26 at +0x8. PATHI_copyevent copies it and func_003D1F80 queues the copy.
+ *
+ * @param idx  the node
+ * @return the queued copy, or 0
+ */
 int func_003D4050(int idx) {
     struct M_4050 m;
     struct M_4050 a;
@@ -26026,6 +26927,15 @@ static inline int get_4898(char *arr, int i) {
     return *(int *)(arr + i * 8);
 }
 
+/**
+ * Returns the first word of path node @p arg0's length entry, or 0.
+ *
+ * Valid nodes are below the path data's node count (+0x12); the record's +0x0 is the 1-based index into the player's
+ * length table (+0x50, 8 bytes per entry), 0 meaning none.
+ *
+ * @param arg0  the node
+ * @return the entry's first word, 0 for an invalid node or no entry
+ */
 int func_003D4898(int arg0) {
     int var_7;
     A_4898 *a;
@@ -26060,6 +26970,15 @@ struct S_4900 {
 };
 extern int func_003D32B8(int, struct S_4900 *);
 
+/**
+ * Returns how far a path voice is from its next segment boundary, and optionally the segment length.
+ *
+ * Uses func_003D32B8's timing; a negative result there would give length 0 and -1.
+ *
+ * @param a0  the path voice
+ * @param a1  receives the segment length, or 0
+ * @return the distance to the next segment boundary
+ */
 int func_003D4900(int a0, int *a1) {
     struct S_4900 s;
 
@@ -26079,6 +26998,13 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D4950);
 #ifdef SKIP_ASM
 extern int func_002AEAA8(int, unsigned int);
 
+/**
+ * Returns the total amount a path voice has queued on its sound monitor: the sum of func_002AEAA8 over the voice's
+ * request entries (+0x20 bits 14-18), skipping negative results.
+ *
+ * @param arg0  the path voice
+ * @return the total
+ */
 int func_003D4950(char *arg0) {
     int temp_2;
     int total = 0;
@@ -26100,6 +27026,18 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D49D0);
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Returns v of the entry whose a/b byte is closest to t (first 127-or-better wins), -1 for an empty table.
 struct E_49D0 { signed char a; signed char b; unsigned short v; };
+/**
+ * Returns the target of the branch whose selector range edge is nearest @p target, or -1 for an empty table.
+ *
+ * Each 4-byte entry holds a low and a high selector byte and a target; the distance is the smaller of the two edge
+ * distances and the first entry under 0x7F that improves on the best wins. The same search is inlined in func_003D37A0
+ * as its fallback.
+ *
+ * @param n  the number of entries
+ * @param target  the selector value
+ * @param tab  the branch entries
+ * @return the chosen target, -1 when @p n is 0 or less
+ */
 int func_003D49D0(int n, int target, struct E_49D0 *tab) {
     int best;
     struct E_49D0 *bp = tab;
@@ -26129,6 +27067,13 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D4A50);
 struct E_4A50 { char pad[0x30]; unsigned mask; int w34; char pad2[0x8EC]; int *tab; };
 extern struct E_4A50 D_00517610_4A50[] __asm__("D_00517610");
 
+/**
+ * Returns the request table of the path voice an id names: player +0x924 [voice] for the lowest voice bit of
+ * @p arg0, in the first player with tables, in use, sharing class and group bits.
+ *
+ * @param arg0  the path id
+ * @return the voice's request table, or 0
+ */
 int func_003D4A50(unsigned arg0) {
     unsigned i, b;
     unsigned hi = arg0 & 0xF0000000;
@@ -26159,6 +27104,12 @@ extern struct sPath *D_0044F420;
 
 static inline int valid_4B00(struct sPathVoice *e) { return e->f36 >= 0 && e->f30 != 0; }
 
+/**
+ * Records the selected path player's leading voice: the active voice with the largest position (+0x24).
+ *
+ * Active means not paused (+0x3 == 0) with a node (+0x36 >= 0) and a record (+0x30). The player's +0x0 gets its index
+ * (-1 when none), +0x4 its position and +0x8 bits 21-26 of its record's first word.
+ */
 void func_003D4B00(void) {
     int i;
     D_0044F420->f00 = -1;
@@ -26195,6 +27146,12 @@ static inline int select_4BB0(int i) {
     if (i != -1) D_0044F430_4BB0 = 0;
     return D_0044F430_4BB0;
 }
+/**
+ * Selects the path player in use whose id (+0x30) equals @p id exactly (the inlined func_003D5450).
+ *
+ * @param id  the player id (class and group byte)
+ * @return the selected id, 0 when no player matches
+ */
 int func_003D4BB0(int id) {
     int i;
     for (i = 0; i < 4; i++) {
@@ -26218,6 +27175,10 @@ struct E_4C40 {
 };
 extern struct E_4C40 D_00517610_4C40[4] __asm__("D_00517610");
 
+/**
+ * Sorts the path players (D_00517610, 0x928 bytes each) that have path data (+0x34) by id (+0x30), lowest first, by
+ * swapping whole records. Players without data stay where they are. Called by func_003D2A68 when a player empties.
+ */
 void func_003D4C40(void) {
     struct E_4C40 tmp;
     int i;
@@ -26284,6 +27245,19 @@ extern void func_003D5A98_4F10(struct Str_4F10 *s) __asm__("func_003D5A98");
 extern void func_003D5CC0_4F10(struct Str_4F10 *s) __asm__("func_003D5CC0");
 extern void func_003D5EE8_4F10(struct Str_4F10 *s) __asm__("func_003D5EE8");
 
+/**
+ * Services the voices of the selected path player for one pass: runs their ramps and moves due voices to their next
+ * node.
+ *
+ * The pass kind is D_0044F434 ('B' or ' ', set by func_003D5128); its look-ahead is the player's +0x10 for 'B' and +0xC
+ * otherwise, and a normal pass first services the pending events (func_003D1E80) and afterwards repeats that until it
+ * does nothing. For each voice not paused (+0x3), one with a node and a record runs its three ramps (func_003D5A98,
+ * func_003D5CC0, func_003D5EE8 when +0xD, +0x15, +0x1D are set). Voices of the other pass kind (+0x2F) or without a
+ * node stop there. A voice with a release time (+0x4C) has its hold released (func_002AE9F8) once tick + look-ahead / 2
+ * reaches it. Otherwise, when its monitor is streaming (func_002AEBD0), it advances (func_003D3D20) once tick +
+ * position + look-ahead passes its end time (+0x48), or, without one, once the queued amount (func_003D4950) no longer
+ * exceeds its position (+0x24); +0xE becomes -1 first when it was 0 and func_002AF428 reports 0.
+ */
 void func_003D4F10(void) {
     int isB = D_0044F434_4F10 == 'B';
     unsigned int step;
@@ -26382,6 +27356,16 @@ static inline unsigned int select_5128(int i) {
 
 void func_003D5128_5128(unsigned char) __asm__("func_003D5128");
 void func_003D5128_impl(unsigned char k) __asm__("func_003D5128");
+/**
+ * Runs one service tick of the path system over every player in use, unless it is paused, down or busy.
+ *
+ * Does nothing when the global pause (D_0044F42D) is set, the system is not initialised (D_0044F42C) or a selection is
+ * active (D_0044F430). Stores the pass kind @p k in D_0044F434, marks the system busy, reads the tick D_0044F438 from
+ * func_002AF370 and brackets the work with func_002AEFA8(0) / (1). Each player in use is selected and gets
+ * func_003D4B00 (leading voice) and func_003D4F10 (voice service). Clears the selection at the end.
+ *
+ * @param k  the pass kind: ' ' (func_003D54C8) or 'B' (func_003D54E8)
+ */
 void func_003D5128_impl(unsigned char k) {
     unsigned char i;
     if (D_0044F42D_5128 != 0) return;
@@ -26413,6 +27397,15 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D5290);
    from every use in this unit; field names are their offsets. */
 extern struct sPath D_00517610[4];
 
+/**
+ * Returns the path voice an id names: in the first player in use whose id shares a class bit (0xF0000000) and a group
+ * bit (0x0F000000) with @p arg0, the voice (+0x58) for the lowest set bit of the low 24 bits.
+ *
+ * Quirk: once a player matches, an empty slot for that bit returns 0 without trying other players.
+ *
+ * @param arg0  the path id
+ * @return the voice (sPathVoice), or 0
+ */
 int func_003D5290(unsigned arg0) {
     unsigned i, b;
     unsigned hi = arg0 & 0xF0000000;
@@ -26441,6 +27434,13 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D5330);
 struct E_5330 { char pad00[0x30]; unsigned int f30; int f34; char pad38[0x20]; int w[24]; char padB8[0x928 - 0xB8]; };
 extern struct E_5330 D_00517610_5330[] __asm__("D_00517610");
 
+/**
+ * Counts the voices in use (+0x58, 24 slots) of the path players in use whose group bit (0x1000000 << player index) is
+ * set in @p mask.
+ *
+ * @param mask  group bits, one per player slot
+ * @return the number of voices
+ */
 int func_003D5330(unsigned int mask) {
     int n = 0;
     int i;
@@ -26467,6 +27467,17 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D53B8);
 extern int func_003D11B8_53B8(int, int *) __asm__("func_003D11B8");
 extern int func_003D3030_53B8(int) __asm__("func_003D3030");
 
+/**
+ * Returns the id of a playing path voice for a group and voice slot, trying class 2 before class 1; 0 when neither has
+ * a voice with a current node.
+ *
+ * The id is (0x10000000 << class) | (0x1000000 << @p groupIndex) | (1 << @p channelIndex); func_003D3030 must find a
+ * voice and func_003D11B8 must report a node.
+ *
+ * @param groupIndex  the player group (0..3)
+ * @param channelIndex  the voice slot (0..23)
+ * @return the id, or 0
+ */
 int func_003D53B8(int groupIndex, int channelIndex) {
     int info[12];
     int i;
@@ -26493,6 +27504,16 @@ struct E_5450 { char pad[0x30]; int f30; int f34; char pad2[0x928 - 0x38]; };
 extern struct E_5450 D_00517610_5450[] __asm__("D_00517610");
 extern unsigned int D_0044F430_5450 __asm__("D_0044F430");
 extern struct E_5450 *D_0044F420_5450 __asm__("D_0044F420");
+/**
+ * Selects path player @p i (D_0044F420 and its id in D_0044F430), or with -1 just marks the system busy.
+ *
+ * A clear D_0044F430 becomes -1 first. A player index below 4 that is in use (+0x34) is selected and its id returned;
+ * -1 leaves the busy mark; any other value clears D_0044F430. Every path entry point calls it with -1 first and fails
+ * with -18 when it returns 0 or the system was already busy.
+ *
+ * @param i  the player (0..3), or -1
+ * @return the selected id, -1 for busy, 0 when the player is not in use
+ */
 int func_003D5450(int i) {
     if (D_0044F430_5450 == 0) D_0044F430_5450 = 0xFFFFFFFF;
     if ((unsigned int)i < 4 && D_00517610_5450[i].f34 != 0) {
@@ -26510,6 +27531,9 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D54C8);
 #ifdef SKIP_ASM
 extern void func_003D5128(int);
 
+/**
+ * Runs a normal path service tick: func_003D5128(' ').
+ */
 void func_003D54C8(void) {
     func_003D5128(0x20);
 }
@@ -26520,6 +27544,9 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D54E8);
 #ifdef SKIP_ASM
 extern void func_003D5128(int);
 
+/**
+ * Runs a 'B' path service tick: func_003D5128('B'), which services only the voices flagged for it (+0x2F).
+ */
 void func_003D54E8(void) {
     func_003D5128(66);
 }
@@ -26544,6 +27571,16 @@ extern void func_003D62C8_5508(void *, int) __asm__("func_003D62C8");
 
 static inline unsigned int has_5508(unsigned int a, unsigned int b) { return a & b; }
 
+/**
+ * Sets a level (0..100) on the voices a path id mask selects, through func_003D62C8.
+ *
+ * Does nothing unless the path system is up and idle. @p val is clamped to 0..100; a mask of -1 also stores it as the
+ * global level D_0044F42E. For each player in use sharing class and group bits with @p mask, every voice whose bit is
+ * set gets func_003D62C8(voice, val). Clears the selection at the end. The music monitor calls it for 0x11000002.
+ *
+ * @param mask  the path id mask
+ * @param val  the level, clamped to 0..100
+ */
 void func_003D5508(unsigned int mask, signed char val) {
     int i, j;
     if (D_0044F42C_5508 == 0) return;
@@ -26587,6 +27624,17 @@ extern void func_003D6318_5698(void *, int, int, int) __asm__("func_003D6318");
 
 static inline unsigned int has_5698(unsigned int a, unsigned int b) { return a & b; }
 
+/**
+ * Fades the voices a path id mask selects to a volume over a time (func_003D6318 on each).
+ *
+ * Does nothing unless the path system is up and idle. For each player in use sharing class and group bits with
+ * @p mask, every voice whose bit is set gets func_003D6318(voice, @p a, @p b, player +0x18) (the fourth value is
+ * ignored there). Clears the selection at the end.
+ *
+ * @param mask  the path id mask
+ * @param a  the target volume (0..127)
+ * @param b  the fade time in ms
+ */
 void func_003D5698(unsigned int mask, int a, int b) {
     int i, j;
     if (D_0044F42C_5698 == 0) return;
@@ -26627,6 +27675,17 @@ extern void func_003D6360_5800(void *, int, int, int) __asm__("func_003D6360");
 
 static inline unsigned int has_5800(unsigned int a, unsigned int b) { return a & b; }
 
+/**
+ * Sets the effect-send target of the voices a path id mask selects (func_003D6360 on each).
+ *
+ * Does nothing unless the path system is up and idle. Each selected voice gets func_003D6360(voice, @p a, @p b, player
+ * +0x18): the send target +0x16 = @p a and, when the player's +0x18 is not negative, +0x15 = that value;
+ * @p b is not used. Clears the selection at the end.
+ *
+ * @param mask  the path id mask
+ * @param a  the send target
+ * @param b  unused by the callee
+ */
 void func_003D5800(unsigned int mask, int a, int b) {
     int i, j;
     if (D_0044F42C_5800 == 0) return;
@@ -26660,6 +27719,17 @@ extern void func_002AF6C0_5968(int, int) __asm__("func_002AF6C0");
 extern void func_002AF838_5968(int) __asm__("func_002AF838");
 extern int D_0044F420_5968[] __asm__("D_0044F420");
 
+/**
+ * Settles the volume fades of the selected path player's voices in a mask, stopping voices that faded to silence.
+ *
+ * For each voice whose bit is set and that has a node (+0x36 >= 0): when it has a fade target (+0xE >= 0) scaled by its
+ * level (+0x4, percent) equal to the monitor's current volume (func_002AF428), a target of 0 stops the voice
+ * (func_002AF838, node -1) and any other target applies the node volume (+0x34 scaled by +0x4) with func_002AF6C0; a
+ * voice without a target gets the node volume directly (when not negative). The target is then cleared (-1). A fade
+ * still in progress is left alone.
+ *
+ * @param mask  the voice bits
+ */
 void func_003D5968(unsigned int mask) {
     int i;
     for (i = 0; i < 0x18; i++) {
@@ -26705,6 +27775,17 @@ extern unsigned int D_0044F438;         /* tick */
 extern int func_002AF6C0_5A98(int, int) __asm__("func_002AF6C0");
 
 void func_003D5A98_impl(struct sPathVoice *v) __asm__("func_003D5A98");
+/**
+ * Steps a path voice's volume ramp: sets the volume along the curve, or the node volume once the ramp has run out.
+ *
+ * The ramp goes from +0xC to +0xE starting at tick +0x8; its length and curve come from the selected player's first
+ * ramp setting (+0x14 duration, +0x18 mode). With t the elapsed fraction: when t >= 1 the volume becomes the node
+ * volume +0x34 (func_002AF6C0 on the monitor +0x54) and the ramp and +0x34 are cleared to -1. Otherwise the curve value
+ * (mode 1: 1 - t, 2: 1 - t^2, 3: 1 / t / 25; t is mirrored for a rising ramp) gives min(start, end) + |end - start| *
+ * value, applied only when the value is within 0..1.
+ *
+ * @param v  the path voice
+ */
 void func_003D5A98_impl(struct sPathVoice *v) {
     struct {
         unsigned mode : 7;
@@ -26781,6 +27862,14 @@ extern unsigned int D_0044F438;         /* tick */
 extern int func_002AF4E0(int, int, int);
 
 void func_003D5CC0_impl(struct sPathVoice *v) __asm__("func_003D5CC0");
+/**
+ * Steps a path voice's effect-send ramp: the same curve as func_003D5A98 on +0x14 -> +0x16 from tick +0x10, with the
+ * player's second ramp setting (+0x1C, +0x20), applied with func_002AF4E0 (bus 0).
+ *
+ * When the ramp has run out the target +0x16 is applied and +0x14..+0x16 are cleared to -1, +0x10 to 0.
+ *
+ * @param v  the path voice
+ */
 void func_003D5CC0_impl(struct sPathVoice *v) {
     struct {
         unsigned mode : 7;
@@ -26855,6 +27944,14 @@ extern unsigned int D_0044F438;         /* tick */
 extern int func_002AF580(int, int);
 
 void func_003D5EE8_impl(struct sPathVoice *v) __asm__("func_003D5EE8");
+/**
+ * Steps a path voice's dry-level ramp: the same curve as func_003D5A98 on +0x1C -> +0x1E from tick +0x18, with the
+ * player's third ramp setting (+0x24, +0x28), applied with func_002AF580.
+ *
+ * When the ramp has run out the target +0x1E is applied and +0x1C..+0x1E are cleared to -1, +0x18 to 0.
+ *
+ * @param v  the path voice
+ */
 void func_003D5EE8_impl(struct sPathVoice *v) {
     struct {
         unsigned mode : 7;
@@ -26926,6 +28023,14 @@ extern unsigned char D_f42C_6108[] __asm__("D_0044F42C");
 extern int D_f430_6108[] __asm__("D_0044F430");
 extern struct P_6108 D_7610_6108[4] __asm__("D_00517610");
 
+/**
+ * Sets the volume-ramp duration (+0x14) of every path player in use whose group bits overlap @p mask.
+ *
+ * Does nothing unless the path system is up and idle; clears the selection at the end.
+ *
+ * @param mask  the path id mask (only the group bits count)
+ * @param value  the ramp duration in ticks
+ */
 void func_003D6108(int mask, int value) {
     int i;
     if (D_f42C_6108[0] != 0 && D_f430_6108[0] == 0 && f5450_6108(-1) != 0) {
@@ -26952,6 +28057,14 @@ extern unsigned char D_f42C_61E8[] __asm__("D_0044F42C");
 extern int D_f430_61E8[] __asm__("D_0044F430");
 extern struct P_61E8 D_7610_61E8[4] __asm__("D_00517610");
 
+/**
+ * Sets the volume-ramp curve mode (+0x18) of every path player in use whose group bits overlap @p mask.
+ *
+ * Does nothing unless the path system is up and idle; clears the selection at the end.
+ *
+ * @param mask  the path id mask (only the group bits count)
+ * @param value  the curve mode (1 linear, 2 quadratic, 3 inverse)
+ */
 void func_003D61E8(int mask, int value) {
     int i;
     if (D_f42C_61E8[0] != 0 && D_f430_61E8[0] == 0 && f5450_61E8(-1) != 0) {
@@ -26972,6 +28085,13 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D62C8);
 #ifdef SKIP_ASM
 extern void func_002AF6C0(int, int);
 
+/**
+ * Sets a path voice's level (+0x4, percent) and, when no fade target is pending (+0xE < 0), applies node volume +0x34
+ * times the level / 100 with func_002AF6C0.
+ *
+ * @param channel  the path voice
+ * @param volume  the level, 0..100
+ */
 void func_003D62C8(void *channel, signed char volume) {
     (*(signed char *)((char*)(channel) + (4))) = volume;
     if ((*(signed char *)((char*)(channel) + (0xE))) < 0) {
@@ -26986,6 +28106,13 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D6318);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int func_003D6318_cb(int, int, int, char) __asm__("func_002AF608");
 
+/**
+ * Starts a volume fade on a path voice: target +0xE = @p level, +0xD = 0, and func_002AF608 fades the monitor to
+ * @p level times the voice level (+0x4) / 100 over @p w ms.
+ *
+ * @param level  the target volume
+ * @param w  the fade time in ms
+ */
 void func_003D6318(char *self, int level, int w) {
     int x;
     self[0xE] = level;
@@ -26998,6 +28125,14 @@ void func_003D6318(char *self, int level, int w) {
 //100%
 INCLUDE_ASM("ealib/seg_2B4578", func_003D6360);
 #ifdef SKIP_ASM
+/**
+ * Sets a path voice's effect-send target (+0x16) to @p arg1 and, when @p arg3 is not negative, +0x15 to @p arg3.
+ *
+ * @param channel  the path voice
+ * @param arg1  the send target
+ * @param arg2  unused
+ * @param arg3  the value for +0x15, ignored when negative (func_003D5800 passes the player's +0x18)
+ */
 void func_003D6360(void *channel, int arg1, int arg2, int arg3) {
     *(signed char *)((char *)channel + 0x16) = arg1;
     if (arg3 >= 0) {
@@ -27014,6 +28149,15 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D6378);
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 extern int func_002AF428(int);
 
+/**
+ * Starts a volume ramp on a path voice from its current volume to @p a.
+ *
+ * Stamps the start tick (+0x8 = D_0044F438), stores @p b at +0xD, the current volume (func_002AF428) at +0xC and
+ * @p a as the target (+0xE) and node volume (+0x34). func_003D5A98 then steps it.
+ *
+ * @param a  the target volume
+ * @param b  the ramp flag kept at +0xD
+ */
 void func_003D6378(char *self, int a, int b) {
     int t;
     int q;
@@ -27034,6 +28178,15 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D63F8);
 extern int D_0044F438_63F8[] __asm__("D_0044F438");
 extern signed char f_63F8_cb(int) __asm__("func_002AF4B0");
 
+/**
+ * Starts an effect-send ramp on a path voice from its current send level (func_002AF4B0) to @p a.
+ *
+ * Stamps the start tick (+0x10), stores @p b at +0x15, the current level at +0x14 and the target at +0x16;
+ * func_003D5CC0 steps it.
+ *
+ * @param a  the target send level
+ * @param b  the ramp flag kept at +0x15
+ */
 void func_003D63F8(char *self, int a, int b) {
     signed char t;
     *(int *)(self + 0x10) = D_0044F438_63F8[0];
@@ -27051,6 +28204,15 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003D6448);
 extern int D_0044F438_6448[] __asm__("D_0044F438");
 extern signed char f_6448_cb(int) __asm__("func_002AF480");
 
+/**
+ * Starts a dry-level ramp on a path voice from its current dry level (func_002AF480) to @p a.
+ *
+ * Stamps the start tick (+0x18), stores @p b at +0x1D, the current level at +0x1C and the target at +0x1E;
+ * func_003D5EE8 steps it.
+ *
+ * @param a  the target dry level
+ * @param b  the ramp flag kept at +0x1D
+ */
 void func_003D6448(char *self, int a, int b) {
     signed char t;
     *(int *)(self + 0x18) = D_0044F438_6448[0];
