@@ -454,6 +454,22 @@ struct sTarget00345C90 {
 };
 
 
+/**
+ * Constructs a dynamic particle modifier attached to mesh @p bone of @p owner.
+ *
+ * Runs cEffectModifier_cEffectModifier(self, owner), installs cDynamicParticleModifier_vtbl, constructs the embedded
+ * Emitter (cDynamicEmitter_vtbl), stores ParticleData = @p t, Mesh = @p bone and Offset = *@p pos, copies the data's
+ * velocity (+0x48..+0x50) into InitVel and then zeroes it in @p t itself, clears Fade, sets up the emitter
+ * (cBaseClass_DynamicEmitter_setupEmitter with -1), places it (cDynamicParticleModifier_updatePosition), counts it in
+ * D_004A3FFC and clears Complete. cMoveNode_addEffectModifier's caller allocates it (624 bytes,
+ * "DynamicParticleModifier").
+ *
+ * @param t  the particle data record (its velocity is consumed)
+ * @param owner  the owning instance
+ * @param bone  the mesh to follow
+ * @param pos  offset from that mesh
+ * @return @p self
+ */
 extern "C" cDynamicParticleModifier* cDynamicParticleModifier_cDynamicParticleModifier1(cDynamicParticleModifier* self, sTarget00345C90* t, int owner, int bone, sVec4_00345C90* pos)
 {
     cEffectModifier_cEffectModifier((cEffectModifier*)self, owner);
@@ -856,7 +872,6 @@ INCLUDE_ASM("object/effectlink", cHaloModifier_update);
 /**
  * Spins a halo: adds the integer step (+0x2C) to its angle in degrees (+0x30), resetting it to 0 at +/-360.
  */
-// Advance a rotation angle (degrees) by an integer step, wrapping to 0 at +/-360.
 extern "C" void cHaloModifier_update(void* self)
 {
     float angle = *(float*)((char*)self + 0x30) + (float)*(int*)((char*)self + 0x2c);

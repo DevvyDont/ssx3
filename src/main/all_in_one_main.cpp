@@ -5425,7 +5425,6 @@ struct sList_E7B0 {
  *
  * @return @p self
  */
-// Front-end state constructor: clears the state fields, sets the vtable, the name string and an empty list.
 extern "C" void* cFEStateNet_cFEStateNet1(cFEStateNet* self)
 {
     // An unused 16-byte local is needed to reproduce the 0x40-byte frame.
@@ -5617,6 +5616,12 @@ INCLUDE_ASM("main/all_in_one_main", cFEBlankPopup__cFEBlankPopup);
 extern "C" void* cFEStateNet__cFEStateNet_E918(void*) __asm__("cFEStateNet__cFEStateNet");
 extern void* cFEBlankPopup_vtbl[];
 
+/**
+ * Destroys a blank popup state: installs cFEBlankPopup_vtbl (+0x8) and runs cFEStateNet__cFEStateNet, which receives
+ * the caller's destructor flags in its second register.
+ *
+ * @return cFEStateNet__cFEStateNet's result
+ */
 extern "C" void* cFEBlankPopup__cFEBlankPopup(void *self) {
     *(void***)((char*)self + 8) = cFEBlankPopup_vtbl;
     return cFEStateNet__cFEStateNet_E918(self);
@@ -5773,7 +5778,6 @@ INCLUDE_ASM("main/all_in_one_main", func_001DEA80);
  * @param key  the menu event
  * @return 0x100 or 0x101
  */
-// Key filter: keys 7, 8 and 9 return 0x100, every other key 0x101.
 extern "C" int func_001DEA80(void* self, int menu, unsigned int key)
 {
     int result = 257;

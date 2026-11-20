@@ -100,6 +100,16 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getTrophy);
 #ifdef SKIP_ASM
 extern "C" void* cBERewardInterface_getDB(cBERewardInterface* self);
 
+/**
+ * Returns the trophy record for @p trophyId on @p peakId: the 12-byte entry trophyId * 3 + peakId of the reward
+ * database's trophy table (cBERewardInterface_getDB +0x8, On Tour's mpTrophies).
+ *
+ * Its first word is the trophy name string (the trophy room prints it), the second a sound id.
+ *
+ * @param peakId  the peak, 0-2
+ * @param trophyId  the trophy
+ * @return the trophy record
+ */
 extern "C" char* cBERewardInterface_getTrophy(cBERewardInterface* self, int peakId, int trophyId)
 {
     return *(char**)((char*)cBERewardInterface_getDB(self) + 0x8) + (trophyId * 3 + peakId) * 0xC;
@@ -111,6 +121,14 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getMedal);
 #ifdef SKIP_ASM
 extern "C" void* cBERewardInterface_getDB(cBERewardInterface* self);
 
+/**
+ * Returns the medal record for @p trophyId and @p medalId: the 12-byte entry trophyId * 4 + medalId of the reward
+ * database's medal table (cBERewardInterface_getDB +0xC, On Tour's mpMedals).
+ *
+ * @param trophyId  first index (four medals per entry)
+ * @param medalId  medal within it
+ * @return the medal record
+ */
 extern "C" char* cBERewardInterface_getMedal(cBERewardInterface* self, int trophyId, int medalId)
 {
     return *(char**)((char*)cBERewardInterface_getDB(self) + 0xC) + (trophyId * 4 + medalId) * 0xC;
@@ -122,6 +140,14 @@ INCLUDE_ASM("be/beintreward", cBERewardInterface_getPeakPass);
 #ifdef SKIP_ASM
 extern "C" void* cBERewardInterface_getDB(cBERewardInterface* self);
 
+/**
+ * Returns the peak pass record for @p charId and @p peakId: the 8-byte entry charId * 3 + peakId of the reward
+ * database's peak pass table (cBERewardInterface_getDB +0x10, On Tour's mpPeakPasses).
+ *
+ * @param peakId  the peak, 0-2
+ * @param charId  the character
+ * @return the peak pass record
+ */
 extern "C" char* cBERewardInterface_getPeakPass(cBERewardInterface* self, int peakId, int charId)
 {
     return *(char**)((char*)cBERewardInterface_getDB(self) + 0x10) + (charId * 3 + peakId) * 8;
@@ -131,6 +157,12 @@ extern "C" char* cBERewardInterface_getPeakPass(cBERewardInterface* self, int pe
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getTrophies);
 #ifdef SKIP_ASM
+/**
+ * Returns the reward database's trophy table (cBERewardInterface_getDB +0x8, On Tour's mpTrophies).
+ *
+ * @param rewardInterface  the reward interface
+ * @return the trophy records
+ */
 extern "C" int cBERewardInterface_getTrophies(cBERewardInterface* rewardInterface) {
     return (*(int *)((char*)(cBERewardInterface_getDB(rewardInterface)) + (8)));
 }
@@ -138,6 +170,12 @@ extern "C" int cBERewardInterface_getTrophies(cBERewardInterface* rewardInterfac
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getMedals);
 #ifdef SKIP_ASM
+/**
+ * Returns the reward database's medal table (cBERewardInterface_getDB +0xC, On Tour's mpMedals).
+ *
+ * @param rewardInterface  the reward interface
+ * @return the medal records
+ */
 extern "C" int cBERewardInterface_getMedals(cBERewardInterface* rewardInterface) {
     return (*(int *)((char*)(cBERewardInterface_getDB(rewardInterface)) + (0xC)));
 }
@@ -145,6 +183,12 @@ extern "C" int cBERewardInterface_getMedals(cBERewardInterface* rewardInterface)
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getPeakPasses);
 #ifdef SKIP_ASM
+/**
+ * Returns the reward database's peak pass table (cBERewardInterface_getDB +0x10, On Tour's mpPeakPasses).
+ *
+ * @param rewardInterface  the reward interface
+ * @return the peak pass records
+ */
 extern "C" int cBERewardInterface_getPeakPasses(cBERewardInterface* rewardInterface) {
     return (*(int *)((char*)(cBERewardInterface_getDB(rewardInterface)) + (0x10)));
 }
@@ -152,6 +196,12 @@ extern "C" int cBERewardInterface_getPeakPasses(cBERewardInterface* rewardInterf
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getPosters);
 #ifdef SKIP_ASM
+/**
+ * Returns the reward database's poster table (cBERewardInterface_getDB +0x14, On Tour's mpPosters).
+ *
+ * @param rewardInterface  the reward interface
+ * @return the poster records
+ */
 extern "C" int cBERewardInterface_getPosters(cBERewardInterface* rewardInterface) {
     return (*(int *)((char*)(cBERewardInterface_getDB(rewardInterface)) + (0x14)));
 }
@@ -159,6 +209,12 @@ extern "C" int cBERewardInterface_getPosters(cBERewardInterface* rewardInterface
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getTradingCards);
 #ifdef SKIP_ASM
+/**
+ * Returns the reward database's trading card table (cBERewardInterface_getDB +0x18, On Tour's mpTradingCards).
+ *
+ * @param rewardInterface  the reward interface
+ * @return the trading card records
+ */
 extern "C" int cBERewardInterface_getTradingCards(cBERewardInterface* rewardInterface) {
     return (*(int *)((char*)(cBERewardInterface_getDB(rewardInterface)) + (0x18)));
 }
@@ -166,6 +222,12 @@ extern "C" int cBERewardInterface_getTradingCards(cBERewardInterface* rewardInte
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getConceptArts);
 #ifdef SKIP_ASM
+/**
+ * Returns the reward database's concept-art table (cBERewardInterface_getDB +0x1C, On Tour's mpConceptArts).
+ *
+ * @param rewardInterface  the reward interface
+ * @return the concept-art records
+ */
 extern "C" int cBERewardInterface_getConceptArts(cBERewardInterface* rewardInterface) {
     return (*(int *)((char*)(cBERewardInterface_getDB(rewardInterface)) + (0x1C)));
 }
@@ -173,6 +235,12 @@ extern "C" int cBERewardInterface_getConceptArts(cBERewardInterface* rewardInter
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getToys);
 #ifdef SKIP_ASM
+/**
+ * Returns the reward database's toy table (cBERewardInterface_getDB +0x20, On Tour's mpToys).
+ *
+ * @param rewardInterface  the reward interface
+ * @return the toy records
+ */
 extern "C" int cBERewardInterface_getToys(cBERewardInterface* rewardInterface) {
     return (*(int *)((char*)(cBERewardInterface_getDB(rewardInterface)) + (0x20)));
 }
@@ -180,6 +248,12 @@ extern "C" int cBERewardInterface_getToys(cBERewardInterface* rewardInterface) {
 //100%
 INCLUDE_ASM("be/beintreward", cBERewardInterface_getVideos);
 #ifdef SKIP_ASM
+/**
+ * Returns the reward database's video table (cBERewardInterface_getDB +0x24, On Tour's mpVideos).
+ *
+ * @param rewardInterface  the reward interface
+ * @return the video records
+ */
 extern "C" int cBERewardInterface_getVideos(cBERewardInterface* rewardInterface) {
     return (*(int *)((char*)(cBERewardInterface_getDB(rewardInterface)) + (0x24)));
 }

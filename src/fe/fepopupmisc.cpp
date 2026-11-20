@@ -657,6 +657,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateOnlineMainMenu_cFEStateOnlineMainMenu1);
 #ifdef SKIP_ASM
 extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 
+/**
+ * Constructs the online main menu without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then installs
+ * cFEStateOnlineMainMenu_vtbl.
+ *
+ * @return @p self
+ */
 extern "C" void *cFEStateOnlineMainMenu_cFEStateOnlineMainMenu1(cFEStateNet* self) {
     cFEStateNet_cFEStateNet(self, 0, 0);
     (self->mVtbl) = cFEStateOnlineMainMenu_vtbl;
@@ -704,6 +710,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopu
 #ifdef SKIP_ASM
 extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 
+/**
+ * Constructs the quick-play popup without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then clears
+ * mbSearching and installs cFEStateNetQuickPlayPopup_vtbl.
+ *
+ * @return @p self
+ */
 extern "C" void *cFEStateNetQuickPlayPopup_cFEStateNetQuickPlayPopup1(cFEStateNetQuickPlayPopup* self) {
     cFEStateNet_cFEStateNet(self, 0, 0);
     (self->mbSearching) = 0;
@@ -752,6 +764,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetSSXWorld_cFEStateNetSSXWorld1);
 #ifdef SKIP_ASM
 extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 
+/**
+ * Constructs the SSX World state without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then installs
+ * cFEStateNetSSXWorld_vtbl.
+ *
+ * @return @p self
+ */
 extern "C" void *cFEStateNetSSXWorld_cFEStateNetSSXWorld1(cFEStateNet* self) {
     cFEStateNet_cFEStateNet(self, 0, 0);
     (self->mVtbl) = cFEStateNetSSXWorld_vtbl;
@@ -785,6 +803,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetQuickMessages_cFEStateNetQuickMessages1
 #ifdef SKIP_ASM
 extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 
+/**
+ * Constructs the quick-messages state without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then installs
+ * cFEStateNetQuickMessages_vtbl.
+ *
+ * @return @p self
+ */
 extern "C" void *cFEStateNetQuickMessages_cFEStateNetQuickMessages1(cFEStateNetQuickMessages* self) {
     cFEStateNet_cFEStateNet(self, 0, 0);
     (self->mVtbl) = cFEStateNetQuickMessages_vtbl;
@@ -833,6 +857,12 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateLobbyMenu_vtbl[];
 extern int cBXString_EmptyString;
 
+/**
+ * Constructs the lobby menu without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then installs
+ * cFEStateLobbyMenu_vtbl and sets mszChannelName and mszRoomName to cBXString_EmptyString.
+ *
+ * @return @p self
+ */
 extern "C" void* cFEStateLobbyMenu_cFEStateLobbyMenu1(cFEStateLobbyMenu* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
@@ -876,6 +906,12 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateNetCreateRoomPopup_vtbl[];
 extern int cBXString_EmptyString;
 
+/**
+ * Constructs the create-room popup without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then installs
+ * cFEStateNetCreateRoomPopup_vtbl and sets mszRoomName, mszChannelName and mszPassword to cBXString_EmptyString.
+ *
+ * @return @p self
+ */
 extern "C" void* cFEStateNetCreateRoomPopup_cFEStateNetCreateRoomPopup1(cFEStateNetCreateRoomPopup* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
@@ -932,6 +968,12 @@ extern "C" void* func_0039E390(void*);
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetCreateRoomPopup_getRoomName);
 #ifdef SKIP_ASM
+/**
+ * Returns the room name entered in the popup, mszRoomName (+0x6DC).
+ *
+ * @param roomPopup  the create-room popup
+ * @return the room name string
+ */
 extern "C" int cFEStateNetCreateRoomPopup_getRoomName(void *roomPopup) {
     return (*(int *)((char*)(roomPopup) + (0x6DC)));
 }
@@ -939,6 +981,12 @@ extern "C" int cFEStateNetCreateRoomPopup_getRoomName(void *roomPopup) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetCreateRoomPopup_getChannelName);
 #ifdef SKIP_ASM
+/**
+ * Returns the popup's channel name, mszChannelName (+0x6E0).
+ *
+ * @param roomPopup  the create-room popup
+ * @return the channel name string
+ */
 extern "C" int cFEStateNetCreateRoomPopup_getChannelName(void *roomPopup) {
     return (*(int *)((char*)(roomPopup) + (0x6E0)));
 }
@@ -946,6 +994,12 @@ extern "C" int cFEStateNetCreateRoomPopup_getChannelName(void *roomPopup) {
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetCreateRoomPopup_getPassword);
 #ifdef SKIP_ASM
+/**
+ * Returns the password entered in the popup, mszPassword (+0x6E4).
+ *
+ * @param roomPopup  the create-room popup
+ * @return the password string
+ */
 extern "C" int cFEStateNetCreateRoomPopup_getPassword(void *roomPopup) {
     return (*(int *)((char*)(roomPopup) + (0x6E4)));
 }
@@ -3215,6 +3269,13 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEUseExistingAccount_vtbl[];
 extern int cBXString_EmptyString;
 
+/**
+ * Constructs the use-existing-account state without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then
+ * installs cFEUseExistingAccount_vtbl, sets mszEmail to cBXString_EmptyString and clears unk_6D0 and
+ * mpTextForgotPassword.
+ *
+ * @return @p self
+ */
 extern "C" void* cFEUseExistingAccount_cFEUseExistingAccount1(cFEUseExistingAccount* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
@@ -3252,6 +3313,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateSelectPersona_cFEStateSelectPersona1);
 #ifdef SKIP_ASM
 extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 
+/**
+ * Constructs the persona selection state without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then installs
+ * cFEStateSelectPersona_vtbl.
+ *
+ * @return @p self
+ */
 extern "C" void *cFEStateSelectPersona_cFEStateSelectPersona1(cFEStateSelectPersona* self) {
     cFEStateNet_cFEStateNet(self, 0, 0);
     (self->mVtbl) = cFEStateSelectPersona_vtbl;
@@ -3315,6 +3382,12 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateChallengePopup_vtbl[];
 extern int D_00441268[];
 
+/**
+ * Constructs the challenge popup without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then installs
+ * cFEStateChallengePopup_vtbl, points mpEventOptions at the default table D_00441268 and clears mbChallengeSent.
+ *
+ * @return @p self
+ */
 extern "C" void* cFEStateChallengePopup_cFEStateChallengePopup1(cFEStateChallengePopup* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
@@ -3377,6 +3450,12 @@ extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateChallengeReceivedPopup_vtbl[];
 extern int cBXString_EmptyString;
 
+/**
+ * Constructs the challenge-received popup without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then
+ * installs cFEStateChallengeReceivedPopup_vtbl and sets mszChallenger to cBXString_EmptyString.
+ *
+ * @return @p self
+ */
 extern "C" void* cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup1(cFEStateChallengeReceivedPopup* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
@@ -3439,6 +3518,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateOnlineCharacterSelect_cFEStateOnlineCharac
 #ifdef SKIP_ASM
 extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 
+/**
+ * Constructs the online character select without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then clears
+ * mbConfirmed and installs cFEStateOnlineCharacterSelect_vtbl.
+ *
+ * @return @p self
+ */
 extern "C" void *cFEStateOnlineCharacterSelect_cFEStateOnlineCharacterSelect1(cFEStateOnlineCharacterSelect* self) {
     cFEStateNet_cFEStateNet(self, 0, 0);
     (self->mbConfirmed) = 0;
@@ -3472,6 +3557,14 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateNetConfig_cFEStateNetConfig1);
 extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateNetConfig_vtbl[];
 
+/**
+ * Constructs the network configuration state without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then
+ * installs cFEStateNetConfig_vtbl and clears its fields: miSelectedSetting, miNumSettings, unk_6D8, unk_6DC,
+ * mpLBAdapters, mpLBSettings, unk_6F0, mpMenuConfig, mpConfigRectangle, mpNoConfiguration, unk_700, mpustrPopupText and
+ * the three mpustrAuthError entries.
+ *
+ * @return @p self
+ */
 extern "C" void* cFEStateNetConfig_cFEStateNetConfig1(cFEStateNetConfig* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
@@ -3531,6 +3624,13 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateAuthDNAS_cFEStateAuthDNAS1);
 extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateAuthDNAS_vtbl[];
 
+/**
+ * Constructs the DNAS authentication state without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then
+ * installs cFEStateAuthDNAS_vtbl, clears mpAuth, mpTextAuth, miState and mpustrText, and sets unk_6F4 to 2 and unk_6F8
+ * to 30.
+ *
+ * @return @p self
+ */
 extern "C" void* cFEStateAuthDNAS_cFEStateAuthDNAS1(cFEStateAuthDNAS* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
@@ -3609,6 +3709,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateAuthDNASError_cFEStateAuthDNASError1);
 extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateAuthDNASError_vtbl[];
 
+/**
+ * Constructs the DNAS authentication error popup without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then
+ * installs cFEStateAuthDNASError_vtbl and clears mpustrTitle, mpustrBody and mpustrFooter.
+ *
+ * @return @p self
+ */
 extern "C" void* cFEStateAuthDNASError_cFEStateAuthDNASError1(cFEStateAuthDNASError* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
@@ -3828,6 +3934,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateCreateDuplicate_cFEStateCreateDuplicate1);
 #ifdef SKIP_ASM
 extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 
+/**
+ * Constructs the duplicate-account popup without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then installs
+ * cFEStateCreateDuplicate_vtbl.
+ *
+ * @return @p self
+ */
 extern "C" void *cFEStateCreateDuplicate_cFEStateCreateDuplicate1(cFEStateCreateDuplicate* self) {
     cFEStateNet_cFEStateNet(self, 0, 0);
     (self->mVtbl) = cFEStateCreateDuplicate_vtbl;
@@ -3875,6 +3987,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateLogin_cFEStateLogin1);
 extern "C" void* cFEStateNet_cFEStateNet(void*, int, int);
 extern void* cFEStateLogin_vtbl[];
 
+/**
+ * Constructs the login state without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then clears
+ * mpustrDisconnect and installs cFEStateLogin_vtbl.
+ *
+ * @return @p self
+ */
 extern "C" void* cFEStateLogin_cFEStateLogin1(cFEStateLogin* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
@@ -3992,6 +4110,12 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateRelogin_cFEStateRelogin1);
 extern "C" void* cFEStateLogin_cFEStateLogin(void* self, int);
 extern void* cFEStateRelogin_vtbl[];
 
+/**
+ * Constructs the relogin state without an engine: cFEStateLogin_cFEStateLogin(self, 0), then installs
+ * cFEStateRelogin_vtbl (+0x8).
+ *
+ * @return @p self
+ */
 extern "C" void* cFEStateRelogin_cFEStateRelogin1(void* self)
 {
     cFEStateLogin_cFEStateLogin(self, 0);
@@ -4003,6 +4127,12 @@ extern "C" void* cFEStateRelogin_cFEStateRelogin1(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRelogin__cFEStateRelogin__FPv);
 #ifdef SKIP_ASM
+/**
+ * Destroys the relogin state: installs cFEStateRelogin_vtbl (+0x8) and runs the login state's destructor
+ * (cFEStateLogin__cFEStateLogin), which receives the caller's destructor flags in its second register.
+ *
+ * @return cFEStateLogin__cFEStateLogin's result
+ */
 void* cFEStateRelogin__cFEStateRelogin(void* self)
 {
     *(int*)((char*)self + 0x8) = (int)(void*)cFEStateRelogin_vtbl;
@@ -4013,6 +4143,11 @@ void* cFEStateRelogin__cFEStateRelogin(void* self)
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateRelogin_onLoseTransition__FPv);
 #ifdef SKIP_ASM
+/**
+ * Lets the transition away from the relogin state proceed at once.
+ *
+ * @return 1
+ */
 int cFEStateRelogin_onLoseTransition(void* self)
 {
     return 0x1;
@@ -4041,6 +4176,13 @@ static inline void InitVec_E0F60(void* self, const sAlloc_E0F60& a = sAlloc_E0F6
     *(int*)((char*)self + 0x6F0) = 0;
 }
 
+/**
+ * Constructs the messenger state without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then installs its
+ * vtable D_00467F28, sets mszFoundName, mszSearchName and unk_6E0 to cBXString_EmptyString and clears the three words
+ * at +0x6E8 (a vector's begin, end and capacity).
+ *
+ * @return @p self
+ */
 extern "C" void* cFEStateNetMessenger_cFEStateNetMessenger1(cFEStateNetMessenger* self)
 {
     cFEStateNet_cFEStateNet(self, 0, 0);
@@ -4057,6 +4199,11 @@ extern "C" void* cFEStateNetMessenger_cFEStateNetMessenger1(cFEStateNetMessenger
 //100%
 INCLUDE_ASM("fe/fepopupmisc", cFEStateNetMessenger_onLoseTransition__FPv);
 #ifdef SKIP_ASM
+/**
+ * Lets the transition away from the messenger proceed at once.
+ *
+ * @return 1
+ */
 int cFEStateNetMessenger_onLoseTransition(void* self)
 {
     return 0x1;
@@ -4103,6 +4250,12 @@ public:
     virtual void v32();
 };
 
+/**
+ * Publishes the messenger presence through its own vtable slot 32 (func_001A3E30, which reports the player as "in the
+ * messenger") and lets the transition proceed.
+ *
+ * @return 1
+ */
 extern "C" int cFEStateNetMessenger_onGainTransition(cFEStateNetMessenger* self)
 {
     ((cFEStateNetMessenger_onGainTransition_cObj*)self)->v32();

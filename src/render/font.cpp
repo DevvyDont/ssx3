@@ -387,6 +387,20 @@ static inline int fontGetTex1E30(void* s)
     return *(int*)((char*)s + 0x60);
 }
 
+/**
+ * Draws a 16-bit (Unicode) string with the font at a screen position, with a drop shadow when the font has a shadow
+ * offset.
+ *
+ * The Unicode counterpart of cFont_text: binds the font's TextureID as texture 0 of the current draw state and offsets
+ * the position by Offset * Scale. With a nonzero ShadowOffset it first draws the text at the shadow offset in
+ * ShadowColor, with the draw state's 5-bit field at bits 5-9 of word 2 lowered by one (not below 0), then restores that
+ * field; the text itself is drawn in Color. Both draws go through graphics manager virtual slot 81 (func_00379028) with
+ * Scale and UVScale.
+ *
+ * @param x  the screen x
+ * @param y  the screen y
+ * @param m  the 0-terminated 16-bit string
+ */
 extern "C" void func_00391E30(cFont* self, float x, float y, void* m)
 {
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
@@ -533,6 +547,23 @@ static inline tGlyph* sFontRes21F0_find(cFont* font, int c)
     return (font->MissingGlyph);
 }
 
+/**
+ * Measures a 16-bit (Unicode) string: fills a bounding rectangle at the given scale and returns its right edge.
+ *
+ * The Unicode counterpart of cFont_textExtent. Looks up each character's glyph (linear range, binary search above
+ * LastLinearCode, MissingGlyph when not found; codes below FirstCode are skipped) and grows the rectangle from the
+ * glyph offsets and sizes times @p sx / @p sy; the right edge uses the glyph's width, or its advance when @p mono is
+ * set. Then x0 is added to x1 and y0 to y1, and the ShadowOffset widens the rectangle on its side. Without @p r_ a
+ * local rectangle is used.
+ *
+ * @param f_  the font (this)
+ * @param s  the 0-terminated 16-bit string
+ * @param r_  the rectangle (x0, y0, x1, y1) to fill, or null
+ * @param mono  nonzero to measure each character by its advance instead of its glyph width
+ * @param sx  the horizontal scale
+ * @param sy  the vertical scale
+ * @return the rectangle's x1 (the text width including the shadow)
+ */
 // PORT: g++ `<?`/`>?` (min/max) operators, removed in GCC 4.3.
 extern "C" float func_003921F0(cFont* f_, const unsigned short* s, void* r_, int mono, float sx, float sy)
 {
@@ -616,7 +647,24 @@ static inline float fabs_2430(float x)
     return r;
 }
 
-// Copy as much of str into dst as fits in width; returns where the next line starts (0 when done).
+/**
+ * Copies as much of a string as fits in a width, breaking at a word boundary, and returns where the rest starts.
+ *
+ * The width is reduced by |ShadowOffset x| (not below 0). Characters are copied into @p dst while their measured width
+ * (glyph extents times @p sx, with the previous glyph's trailing advance added) stays below @p width. When a space is
+ * reached with the text already too wide, @p dst is cut after the last whole word and the spaces after it are skipped.
+ * When the width runs out inside the first word, @p dst is cut before the current character. Copying also stops at
+ * @p max - 1 characters; if the text still fits at that point the function returns 0 as if the whole string had been
+ * copied (the rest is dropped).
+ *
+ * @param f_  the font (this)
+ * @param str  the 0-terminated source string
+ * @param dst  the buffer for the part that fits (0-terminated)
+ * @param max  the size of @p dst in characters
+ * @param sx  the horizontal scale
+ * @param width  the available width
+ * @return the start of the remaining text, or 0 when everything copied fits
+ */
 extern "C" char* func_00392430(cFont* f_, const char* str, char* dst, int max, float sx, float width)
 {
     cFont* font = f_;
@@ -709,7 +757,22 @@ static inline float fabs_2680(float x)
     return r;
 }
 
-// Unicode version of func_00392430: copies as much of str into dst as fits in width; returns the next line start (0 when done).
+/**
+ * Copies as much of a 16-bit (Unicode) string as fits in a width, breaking at a word boundary, and returns where the
+ * rest starts.
+ *
+ * The Unicode counterpart of func_00392430, with the same rules: the width is reduced by |ShadowOffset x|, the text is
+ * cut after the last whole word (skipping the spaces that follow) or inside the first word when no word fits, and
+ * copying stops at @p max - 1 characters, in which case a text that still fits returns 0 and the rest is dropped.
+ *
+ * @param f_  the font (this)
+ * @param sx  the horizontal scale
+ * @param width  the available width
+ * @param str  the 0-terminated source string
+ * @param dst  the buffer for the part that fits (0-terminated)
+ * @param max  the size of @p dst in characters
+ * @return the start of the remaining text, or 0 when everything copied fits
+ */
 extern "C" unsigned short* func_00392680(cFont* f_, float sx, float width, const unsigned short* str, unsigned short* dst, int max)
 {
     cFont* font = f_;
@@ -773,6 +836,14 @@ INCLUDE_ASM("render/font", func_00392908);
 #ifdef SKIP_ASM
 extern "C" float cFont_textExtent(cFont* self, const char* str, void* out, int n, float sx, float sy);
 
+/**
+ * Draws a string centred on x: measures it with cFont_textExtent at the font's Scale and draws it with cFont_text at x
+ * minus half the width.
+ *
+ * @param x  the centre x
+ * @param y  the screen y
+ * @param str  the 0-terminated string
+ */
 extern "C" void func_00392908(cFont* self, float x, float y, const char* str)
 {
     float w = cFont_textExtent(self, str, 0, 0, self->Scale[0], self->Scale[1]);
@@ -783,6 +854,14 @@ extern "C" void func_00392908(cFont* self, float x, float y, const char* str)
 //100%
 INCLUDE_ASM("render/font", func_00392980);
 #ifdef SKIP_ASM
+/**
+ * Draws a 16-bit (Unicode) string centred on x: measures it with func_003921F0 at the font's Scale and draws it with
+ * func_00391E30 at x minus half the width.
+ *
+ * @param str  the 0-terminated 16-bit string
+ * @param x  the centre x
+ * @param y  the screen y
+ */
 extern "C" void func_00392980(cFont* self, const unsigned short* str, float x, float y)
 {
     float w = func_003921F0(self, str, 0, 0, self->Scale[0], self->Scale[1]);
@@ -824,6 +903,14 @@ INCLUDE_ASM("render/font", func_00392A60);
 #ifdef SKIP_ASM
 extern "C" float cFont_textExtent(cFont* self, const char* str, void* out, int n, float sx, float sy);
 
+/**
+ * Draws a string right-aligned at x: measures it with cFont_textExtent at the font's Scale and draws it with cFont_text
+ * at x minus the width.
+ *
+ * @param str  the 0-terminated string
+ * @param x  the right edge x
+ * @param y  the screen y
+ */
 extern "C" void func_00392A60(cFont* self, const char* str, float x, float y)
 {
     float w = cFont_textExtent(self, str, 0, 0, self->Scale[0], self->Scale[1]);
@@ -834,6 +921,14 @@ extern "C" void func_00392A60(cFont* self, const char* str, float x, float y)
 //100%
 INCLUDE_ASM("render/font", func_00392AD0);
 #ifdef SKIP_ASM
+/**
+ * Draws a 16-bit (Unicode) string right-aligned at x: measures it with func_003921F0 at the font's Scale and draws it
+ * with func_00391E30 at x minus the width.
+ *
+ * @param str  the 0-terminated 16-bit string
+ * @param x  the right edge x
+ * @param y  the screen y
+ */
 extern "C" void func_00392AD0(cFont* self, const unsigned short* str, float x, float y)
 {
     float w = func_003921F0(self, str, 0, 0, self->Scale[0], self->Scale[1]);
@@ -896,6 +991,16 @@ static inline tGlyph* findGlyph(cFont* font, int c)
     return (font->MissingGlyph);
 }
 
+/**
+ * Returns the unscaled advance of a character's glyph, or 0 when the font has no glyph for it.
+ *
+ * Finds the glyph (codes below FirstCode have none; up to LastLinearCode it is indexed directly, above that a binary
+ * search by code, falling back to MissingGlyph).
+ *
+ * @param font  the font (this)
+ * @param c  the character
+ * @return the glyph's advance, or 0.0
+ */
 extern "C" float func_00392BA8(cFont* font, char c)
 {
     tGlyph* glyph = findGlyph((font), c);
@@ -908,6 +1013,16 @@ extern "C" float func_00392BA8(cFont* font, char c)
 //100%
 INCLUDE_ASM("render/font", func_00392C60);
 #ifdef SKIP_ASM
+/**
+ * Returns the unscaled advance of a 16-bit (Unicode) character's glyph, or 0 when the font has no glyph for it.
+ *
+ * The same glyph lookup as func_00392BA8 (direct index up to LastLinearCode, binary search above, MissingGlyph as the
+ * fallback, nothing below FirstCode).
+ *
+ * @param font  the font (this)
+ * @param c  the character code
+ * @return the glyph's advance, or 0.0
+ */
 extern "C" float func_00392C60(cFont* font, unsigned short c)
 {
     tGlyph* glyph = findGlyph((font), c);
@@ -945,6 +1060,12 @@ extern "C" void cPlayerLights_Clear(cPlayerLights* self)
 //100%
 INCLUDE_ASM("render/font", func_00392D58);
 #ifdef SKIP_ASM
+/**
+ * Adds a colour's R, G and B to mExtraAmbientLight.
+ *
+ * @param playerLights  the player lights (this)
+ * @param colour  the colour to add (three floats R, G, B)
+ */
 extern "C" void func_00392D58(cPlayerLights* playerLights, void *colour) {
     (playerLights->mExtraAmbientLight.R) = (float) ((playerLights->mExtraAmbientLight.R) + (*(float *)((char*)(colour) + (0))));
     (playerLights->mExtraAmbientLight.G) = (float) ((playerLights->mExtraAmbientLight.G) + (*(float *)((char*)(colour) + (4))));
@@ -974,6 +1095,12 @@ extern "C" void cPlayerLights_AddDirectional(cPlayerLights* self, sFontQuad* dir
 //100%
 INCLUDE_ASM("render/font", func_00392DE0);
 #ifdef SKIP_ASM
+/**
+ * Sets mPlayerIsAdditive to @p value.
+ *
+ * @param playerLights  the player lights (this)
+ * @param value  the new flag
+ */
 extern "C" void func_00392DE0(cPlayerLights* playerLights, int value) {
     (playerLights->mPlayerIsAdditive) = value;
 }
@@ -982,6 +1109,13 @@ extern "C" void func_00392DE0(cPlayerLights* playerLights, int value) {
 //100%
 INCLUDE_ASM("render/font", func_00392DE8__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Sets the cPlayerLights flag mBoardIsAdditive (the word at +0xA4) to @p val.
+ *
+ * cTrickBoostFX_update sets it to 1 on the rider's player lights before adding a directional light.
+ *
+ * @param val  the new flag
+ */
 void func_00392DE8(void* self, int val)
 {
     *(int*)((char*)self + 0xA4) = val;
@@ -993,6 +1127,13 @@ INCLUDE_ASM("render/font", func_00392DF0);
 #ifdef SKIP_ASM
 extern "C" float fSin(float a);
 
+/**
+ * Fills a 640-entry float table with sines: entry i = fSin(i * 2 * pi / 512), so it covers one and a quarter turns.
+ *
+ * Called from the render unit's static initialiser (__sti__all_in_one_render_cpp).
+ *
+ * @return @p self (the table)
+ */
 extern "C" void* func_00392DF0(void* self)
 {
     int i;
@@ -1006,6 +1147,20 @@ extern "C" void* func_00392DF0(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00392E60);
 #ifdef SKIP_ASM
+/**
+ * Opens a VIF unpack block in a packet builder: records the unpack settings and reserves one quadword for the STCYCL
+ * and UNPACK codes that func_00392E98 writes when the block is closed.
+ *
+ * Stores the current write position as the block start (+0x8), @p cycleLength at +0x18, @p writeLength at +0x1C,
+ * @p unpackMode at +0x20, @p vuAddr at +0x24 and whether @p vuAddr is nonzero at +0x28 (the UNPACK's FLG bit), sets the
+ * open flag at +0x2C and advances the write position (+0x0) by 0x10.
+ *
+ * @param packet  the packet builder
+ * @param writeLength  the STCYCL write length (WL)
+ * @param cycleLength  the STCYCL cycle length (CL)
+ * @param unpackMode  the UNPACK format (vn/vl bits, 0-15)
+ * @param vuAddr  the VU memory address to unpack to
+ */
 extern "C" void func_00392E60(void *packet, int writeLength, int cycleLength, int unpackMode, int vuAddr) {
     int cur = *(int *)packet;
     *(int *)((char*)packet + 0x8) = cur;
@@ -1040,6 +1195,16 @@ static inline long packWord_2E98(int y, int n, int x, int mode, int mask)
     return (long)(y | ((n << 16) | (x ? mask : 0)) | ((mode | 0x60) << 24)) << 32;
 }
 
+/**
+ * Closes the VIF unpack block opened by func_00392E60: writes its STCYCL and UNPACK codes at the block start.
+ *
+ * With a negative @p count the element count comes from the bytes written since the block start (minus the 16-byte
+ * header) divided by the element size of the unpack mode (12, 6, 3, 16, 8, 4 or 2 bytes; mode 2 counts bytes), then
+ * scaled by max(CL, WL) / min(CL, WL). The STCYCL word is CL | WL << 8 and the UNPACK word carries the VU address, the
+ * count (low 8 bits), the FLG bit when the address was nonzero and the mode. Clears the open flag.
+ *
+ * @param count  the number of elements, or negative to compute it
+ */
 extern "C" void func_00392E98(sFontPkt_2E98* self, int count)
 {
     int n;
@@ -1084,6 +1249,11 @@ extern "C" void func_00392E98(sFontPkt_2E98* self, int count)
 //100%
 INCLUDE_ASM("render/font", func_00393008);
 #ifdef SKIP_ASM
+/**
+ * Returns @p self unchanged, ignoring any further arguments (a variadic no-op).
+ *
+ * @return @p self
+ */
 extern "C" void* func_00393008(void* self, ...)
 {
     return self;
@@ -1168,6 +1338,11 @@ extern "C" int cGraphicsMan_GetScreenYOffset(cPS2GraphicsMan* self)
 //100%
 INCLUDE_ASM("render/font", func_00394008__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (an empty stub). It fills slot 16 of the cGraphicsMan vtable (cGraphicsMan_vtbl), which cPS2GraphicsMan
+ * (cPS2GraphicsMan_vtbl) inherits, between the clear-colour slot 15 (cPS2GraphicsMan_SetScreenClearColour in the PS2 vtable) and
+ * IsRenderReady (slot 17).
+ */
 void func_00394008(void* self)
 {
 }
@@ -1209,6 +1384,12 @@ int cGraphicsMan_IsRenderIdle(void* self)
 //100%
 INCLUDE_ASM("render/font", func_00394020);
 #ifdef SKIP_ASM
+/**
+ * Sets mNumViews to @p numViews.
+ *
+ * @param ps2GraphicsMan  the graphics manager (this)
+ * @param numViews  the number of views
+ */
 extern "C" void func_00394020(cPS2GraphicsMan* ps2GraphicsMan, int numViews) {
     (ps2GraphicsMan->mNumViews) = numViews;
 }
@@ -1216,6 +1397,12 @@ extern "C" void func_00394020(cPS2GraphicsMan* ps2GraphicsMan, int numViews) {
 //100%
 INCLUDE_ASM("render/font", func_00394028);
 #ifdef SKIP_ASM
+/**
+ * Returns mNumViews.
+ *
+ * @param ps2GraphicsMan  the graphics manager (this)
+ * @return the number of views
+ */
 extern "C" int func_00394028(cPS2GraphicsMan* ps2GraphicsMan) {
     return (ps2GraphicsMan->mNumViews);
 }
@@ -1223,6 +1410,12 @@ extern "C" int func_00394028(cPS2GraphicsMan* ps2GraphicsMan) {
 //100%
 INCLUDE_ASM("render/font", func_00394030);
 #ifdef SKIP_ASM
+/**
+ * Sets mViewIndex to @p viewIndex.
+ *
+ * @param ps2GraphicsMan  the graphics manager (this)
+ * @param viewIndex  the current view
+ */
 extern "C" void func_00394030(cPS2GraphicsMan* ps2GraphicsMan, int viewIndex) {
     (ps2GraphicsMan->mViewIndex) = viewIndex;
 }
@@ -1230,6 +1423,12 @@ extern "C" void func_00394030(cPS2GraphicsMan* ps2GraphicsMan, int viewIndex) {
 //100%
 INCLUDE_ASM("render/font", func_00394038);
 #ifdef SKIP_ASM
+/**
+ * Returns mViewIndex.
+ *
+ * @param ps2GraphicsMan  the graphics manager (this)
+ * @return the current view index
+ */
 extern "C" int func_00394038(cPS2GraphicsMan* ps2GraphicsMan) {
     return (ps2GraphicsMan->mViewIndex);
 }
@@ -1237,6 +1436,13 @@ extern "C" int func_00394038(cPS2GraphicsMan* ps2GraphicsMan) {
 //100%
 INCLUDE_ASM("render/font", func_00394040);
 #ifdef SKIP_ASM
+/**
+ * Stores @p value in m_SpecularTextureId[@p idx].
+ *
+ * @param base  the graphics manager (this)
+ * @param value  the new texture id
+ * @param idx  the render-state query id (0-7) that indexes the per-view array
+ */
 extern "C" void func_00394040(cPS2GraphicsMan* base, int value, int idx) {
     *(int*)(((char*)base) + (idx << 2) + 0xC) = value;
 }
@@ -1244,6 +1450,13 @@ extern "C" void func_00394040(cPS2GraphicsMan* base, int value, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_00394050);
 #ifdef SKIP_ASM
+/**
+ * Returns m_SpecularTextureId[@p idx].
+ *
+ * @param base  the graphics manager (this)
+ * @param idx  the render-state query id (0-7) that indexes the per-view array
+ * @return the stored texture id
+ */
 extern "C" int func_00394050(cPS2GraphicsMan* base, int idx) {
     return *(int*)(((char*)base) + (idx << 2) + 0xC);
 }
@@ -1251,6 +1464,13 @@ extern "C" int func_00394050(cPS2GraphicsMan* base, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_00394060);
 #ifdef SKIP_ASM
+/**
+ * Stores @p value in m_PatchSpecularTextureId[@p idx].
+ *
+ * @param base  the graphics manager (this)
+ * @param value  the new texture id
+ * @param idx  the render-state query id (0-7) that indexes the per-view array
+ */
 extern "C" void func_00394060(cPS2GraphicsMan* base, int value, int idx) {
     *(int*)(((char*)base) + (idx << 2) + 0x2C) = value;
 }
@@ -1258,6 +1478,13 @@ extern "C" void func_00394060(cPS2GraphicsMan* base, int value, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_00394070);
 #ifdef SKIP_ASM
+/**
+ * Returns m_PatchSpecularTextureId[@p idx].
+ *
+ * @param base  the graphics manager (this)
+ * @param idx  the render-state query id (0-7) that indexes the per-view array
+ * @return the stored texture id
+ */
 extern "C" int func_00394070(cPS2GraphicsMan* base, int idx) {
     return *(int*)(((char*)base) + (idx << 2) + 0x2C);
 }
@@ -1265,6 +1492,13 @@ extern "C" int func_00394070(cPS2GraphicsMan* base, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_00394080);
 #ifdef SKIP_ASM
+/**
+ * Stores @p value in m_SnowSparkleTextureId[@p idx].
+ *
+ * @param base  the graphics manager (this)
+ * @param value  the new texture id
+ * @param idx  the render-state query id (0-7) that indexes the per-view array
+ */
 extern "C" void func_00394080(cPS2GraphicsMan* base, int value, int idx) {
     *(int*)(((char*)base) + (idx << 2) + 0x4C) = value;
 }
@@ -1272,6 +1506,13 @@ extern "C" void func_00394080(cPS2GraphicsMan* base, int value, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_00394090);
 #ifdef SKIP_ASM
+/**
+ * Returns m_SnowSparkleTextureId[@p idx].
+ *
+ * @param base  the graphics manager (this)
+ * @param idx  the render-state query id (0-7) that indexes the per-view array
+ * @return the stored texture id
+ */
 extern "C" int func_00394090(cPS2GraphicsMan* base, int idx) {
     return *(int*)(((char*)base) + (idx << 2) + 0x4C);
 }
@@ -1279,6 +1520,13 @@ extern "C" int func_00394090(cPS2GraphicsMan* base, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_003940A0);
 #ifdef SKIP_ASM
+/**
+ * Stores @p value in m_RimTextureId[@p idx].
+ *
+ * @param base  the graphics manager (this)
+ * @param value  the new texture id
+ * @param idx  the render-state query id (0-7) that indexes the per-view array
+ */
 extern "C" void func_003940A0(cPS2GraphicsMan* base, int value, int idx) {
     *(int*)(((char*)base) + (idx << 2) + 0x6C) = value;
 }
@@ -1286,6 +1534,13 @@ extern "C" void func_003940A0(cPS2GraphicsMan* base, int value, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_003940B0);
 #ifdef SKIP_ASM
+/**
+ * Returns m_RimTextureId[@p idx].
+ *
+ * @param base  the graphics manager (this)
+ * @param idx  the render-state query id (0-7) that indexes the per-view array
+ * @return the stored texture id
+ */
 extern "C" int func_003940B0(cPS2GraphicsMan* base, int idx) {
     return *(int*)(((char*)base) + (idx << 2) + 0x6C);
 }
@@ -1293,6 +1548,13 @@ extern "C" int func_003940B0(cPS2GraphicsMan* base, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_003940C0);
 #ifdef SKIP_ASM
+/**
+ * Stores @p value in m_isInNIS[@p idx].
+ *
+ * @param base  the graphics manager (this)
+ * @param value  the new flag
+ * @param idx  the render-state query id (0-7) that indexes the per-view array
+ */
 extern "C" void func_003940C0(cPS2GraphicsMan* base, int value, int idx) {
     *(int*)(((char*)base) + (idx << 2) + 0x8C) = value;
 }
@@ -1300,6 +1562,13 @@ extern "C" void func_003940C0(cPS2GraphicsMan* base, int value, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_003940D0);
 #ifdef SKIP_ASM
+/**
+ * Returns m_isInNIS[@p idx].
+ *
+ * @param base  the graphics manager (this)
+ * @param idx  the render-state query id (0-7) that indexes the per-view array
+ * @return the stored flag
+ */
 extern "C" int func_003940D0(cPS2GraphicsMan* base, int idx) {
     return *(int*)(((char*)base) + (idx << 2) + 0x8C);
 }
@@ -1307,6 +1576,13 @@ extern "C" int func_003940D0(cPS2GraphicsMan* base, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_003940E0);
 #ifdef SKIP_ASM
+/**
+ * Stores @p value in m_SnowSparkleDensity[@p idx].
+ *
+ * @param base  the graphics manager (this)
+ * @param idx  the render-state query id (0-7) that indexes the per-view array
+ * @param value  the new density
+ */
 extern "C" void func_003940E0(cPS2GraphicsMan* base, int idx, float value) {
     *(float*)(((char*)base) + (idx << 2) + 0xAC) = value;
 }
@@ -1314,6 +1590,13 @@ extern "C" void func_003940E0(cPS2GraphicsMan* base, int idx, float value) {
 //100%
 INCLUDE_ASM("render/font", func_003940F0);
 #ifdef SKIP_ASM
+/**
+ * Returns m_SnowSparkleDensity[@p idx].
+ *
+ * @param base  the graphics manager (this)
+ * @param idx  the render-state query id (0-7) that indexes the per-view array
+ * @return the stored density
+ */
 extern "C" float func_003940F0(cPS2GraphicsMan* base, int idx) {
     return *(float*)(((char*)base) + (idx << 2) + 0xAC);
 }
@@ -1321,6 +1604,13 @@ extern "C" float func_003940F0(cPS2GraphicsMan* base, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_00394100);
 #ifdef SKIP_ASM
+/**
+ * Stores @p value in m_DrawDistance[@p idx].
+ *
+ * @param base  the graphics manager (this)
+ * @param idx  the render-state query id (0-7) that indexes the per-view array
+ * @param value  the new distance
+ */
 extern "C" void func_00394100(cPS2GraphicsMan* base, int idx, float value) {
     *(float*)(((char*)base) + (idx << 2) + 0xCC) = value;
 }
@@ -1328,6 +1618,13 @@ extern "C" void func_00394100(cPS2GraphicsMan* base, int idx, float value) {
 //100%
 INCLUDE_ASM("render/font", func_00394110);
 #ifdef SKIP_ASM
+/**
+ * Returns m_DrawDistance[@p idx].
+ *
+ * @param base  the graphics manager (this)
+ * @param idx  the render-state query id (0-7) that indexes the per-view array
+ * @return the stored distance
+ */
 extern "C" float func_00394110(cPS2GraphicsMan* base, int idx) {
     return *(float*)(((char*)base) + (idx << 2) + 0xCC);
 }
@@ -1335,6 +1632,13 @@ extern "C" float func_00394110(cPS2GraphicsMan* base, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_00394120);
 #ifdef SKIP_ASM
+/**
+ * Stores @p value in m_FogDensity[@p idx].
+ *
+ * @param base  the graphics manager (this)
+ * @param idx  the render-state query id (0-7) that indexes the per-view array
+ * @param value  the new density
+ */
 extern "C" void func_00394120(cPS2GraphicsMan* base, int idx, float value) {
     *(float*)(((char*)base) + (idx << 2) + 0xEC) = value;
 }
@@ -1342,6 +1646,13 @@ extern "C" void func_00394120(cPS2GraphicsMan* base, int idx, float value) {
 //100%
 INCLUDE_ASM("render/font", func_00394130);
 #ifdef SKIP_ASM
+/**
+ * Returns m_FogDensity[@p idx].
+ *
+ * @param base  the graphics manager (this)
+ * @param idx  the render-state query id (0-7) that indexes the per-view array
+ * @return the stored density
+ */
 extern "C" float func_00394130(cPS2GraphicsMan* base, int idx) {
     return *(float*)(((char*)base) + (idx << 2) + 0xEC);
 }
@@ -1349,6 +1660,13 @@ extern "C" float func_00394130(cPS2GraphicsMan* base, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_00394140);
 #ifdef SKIP_ASM
+/**
+ * Stores @p value in m_FogColourR[@p idx].
+ *
+ * @param base  the graphics manager (this)
+ * @param idx  the render-state query id (0-7) that indexes the per-view array
+ * @param value  the new red component
+ */
 extern "C" void func_00394140(cPS2GraphicsMan* base, int idx, float value) {
     *(float*)(((char*)base) + (idx << 2) + 0x10C) = value;
 }
@@ -1356,6 +1674,13 @@ extern "C" void func_00394140(cPS2GraphicsMan* base, int idx, float value) {
 //100%
 INCLUDE_ASM("render/font", func_00394150);
 #ifdef SKIP_ASM
+/**
+ * Returns m_FogColourR[@p idx].
+ *
+ * @param base  the graphics manager (this)
+ * @param idx  the render-state query id (0-7) that indexes the per-view array
+ * @return the stored red component
+ */
 extern "C" float func_00394150(cPS2GraphicsMan* base, int idx) {
     return *(float*)(((char*)base) + (idx << 2) + 0x10C);
 }
@@ -1363,6 +1688,13 @@ extern "C" float func_00394150(cPS2GraphicsMan* base, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_00394160);
 #ifdef SKIP_ASM
+/**
+ * Stores @p value in m_FogColourG[@p idx].
+ *
+ * @param base  the graphics manager (this)
+ * @param idx  the render-state query id (0-7) that indexes the per-view array
+ * @param value  the new green component
+ */
 extern "C" void func_00394160(cPS2GraphicsMan* base, int idx, float value) {
     *(float*)(((char*)base) + (idx << 2) + 0x12C) = value;
 }
@@ -1370,6 +1702,13 @@ extern "C" void func_00394160(cPS2GraphicsMan* base, int idx, float value) {
 //100%
 INCLUDE_ASM("render/font", func_00394170);
 #ifdef SKIP_ASM
+/**
+ * Returns m_FogColourG[@p idx].
+ *
+ * @param base  the graphics manager (this)
+ * @param idx  the render-state query id (0-7) that indexes the per-view array
+ * @return the stored green component
+ */
 extern "C" float func_00394170(cPS2GraphicsMan* base, int idx) {
     return *(float*)(((char*)base) + (idx << 2) + 0x12C);
 }
@@ -1377,6 +1716,13 @@ extern "C" float func_00394170(cPS2GraphicsMan* base, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_00394180);
 #ifdef SKIP_ASM
+/**
+ * Stores @p value in m_FogColourB[@p idx].
+ *
+ * @param base  the graphics manager (this)
+ * @param idx  the render-state query id (0-7) that indexes the per-view array
+ * @param value  the new blue component
+ */
 extern "C" void func_00394180(cPS2GraphicsMan* base, int idx, float value) {
     *(float*)(((char*)base) + (idx << 2) + 0x14C) = value;
 }
@@ -1384,6 +1730,13 @@ extern "C" void func_00394180(cPS2GraphicsMan* base, int idx, float value) {
 //100%
 INCLUDE_ASM("render/font", func_00394190);
 #ifdef SKIP_ASM
+/**
+ * Returns m_FogColourB[@p idx].
+ *
+ * @param base  the graphics manager (this)
+ * @param idx  the render-state query id (0-7) that indexes the per-view array
+ * @return the stored blue component
+ */
 extern "C" float func_00394190(cPS2GraphicsMan* base, int idx) {
     return *(float*)(((char*)base) + (idx << 2) + 0x14C);
 }
@@ -1391,6 +1744,13 @@ extern "C" float func_00394190(cPS2GraphicsMan* base, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_003941A0);
 #ifdef SKIP_ASM
+/**
+ * Stores @p value in m_FogNear[@p idx].
+ *
+ * @param base  the graphics manager (this)
+ * @param idx  the render-state query id (0-7) that indexes the per-view array
+ * @param value  the new distance
+ */
 extern "C" void func_003941A0(cPS2GraphicsMan* base, int idx, float value) {
     *(float*)(((char*)base) + (idx << 2) + 0x16C) = value;
 }
@@ -1398,6 +1758,13 @@ extern "C" void func_003941A0(cPS2GraphicsMan* base, int idx, float value) {
 //100%
 INCLUDE_ASM("render/font", func_003941B0);
 #ifdef SKIP_ASM
+/**
+ * Returns m_FogNear[@p idx].
+ *
+ * @param base  the graphics manager (this)
+ * @param idx  the render-state query id (0-7) that indexes the per-view array
+ * @return the stored distance
+ */
 extern "C" float func_003941B0(cPS2GraphicsMan* base, int idx) {
     return *(float*)(((char*)base) + (idx << 2) + 0x16C);
 }
@@ -1405,6 +1772,13 @@ extern "C" float func_003941B0(cPS2GraphicsMan* base, int idx) {
 //100%
 INCLUDE_ASM("render/font", func_003941C0);
 #ifdef SKIP_ASM
+/**
+ * Stores @p value in m_FogFar[@p idx].
+ *
+ * @param base  the graphics manager (this)
+ * @param idx  the render-state query id (0-7) that indexes the per-view array
+ * @param value  the new distance
+ */
 extern "C" void func_003941C0(cPS2GraphicsMan* base, int idx, float value) {
     *(float*)(((char*)base) + (idx << 2) + 0x18C) = value;
 }
@@ -1412,6 +1786,13 @@ extern "C" void func_003941C0(cPS2GraphicsMan* base, int idx, float value) {
 //100%
 INCLUDE_ASM("render/font", func_003941D0);
 #ifdef SKIP_ASM
+/**
+ * Returns m_FogFar[@p idx].
+ *
+ * @param base  the graphics manager (this)
+ * @param idx  the render-state query id (0-7) that indexes the per-view array
+ * @return the stored distance
+ */
 extern "C" float func_003941D0(cPS2GraphicsMan* base, int idx) {
     return *(float*)(((char*)base) + (idx << 2) + 0x18C);
 }
@@ -3030,6 +3411,11 @@ int cPS2GraphicsMan_GetNumDisplayModes(void* self)
 //100%
 INCLUDE_ASM("render/font", cPS2GraphicsMan_GetDTV__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the DTV setting held in unk_5A4C.
+ *
+ * @return the word at unk_5A4C
+ */
 int cPS2GraphicsMan_GetDTV(void* self)
 {
     return *(int*)((char*)self + 0x5A4C);
@@ -3039,6 +3425,11 @@ int cPS2GraphicsMan_GetDTV(void* self)
 //100%
 INCLUDE_ASM("render/font", cPS2GraphicsMan_GetDisplayMode__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns CurrentDisplayMode (-1 until a mode has been set).
+ *
+ * @return the current display mode index
+ */
 int cPS2GraphicsMan_GetDisplayMode(void* self)
 {
     return *(int*)((char*)self + 0x59C8);
@@ -3095,6 +3486,13 @@ struct sFontVEntry23 {
     void (*fn)(void*, int, float, float, float, float);
 };
 
+/**
+ * Sets the viewport window from a rectangle: calls virtual slot 23 (cPS2GraphicsMan_SetViewportWindow) with
+ * @p applyScreenOffset and the four floats of @p rect.
+ *
+ * @param rect  x, y, width and height (four floats)
+ * @param applyScreenOffset  passed through as the slot's first argument
+ */
 extern "C" void cPS2GraphicsMan_SetViewportWindow1(cPS2GraphicsMan* self, float* rect, int applyScreenOffset)
 {
     sFontVEntry23* vt = (sFontVEntry23*)self->mVtbl;
@@ -3497,7 +3895,6 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_PushView);
  * Pushes the view matrix stack: copies the top matrix (mCurrentView) into the next 0x40-byte slot with VU0, advances
  * mCurrentView to it and increments mViewDepth. No overflow check.
  */
-// Matrix stack push: duplicate the top 4x4 matrix into the next slot, then advance.
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
 extern "C" void cPS2GraphicsMan_PushView(cPS2GraphicsMan* self)
 {
@@ -3683,8 +4080,18 @@ static inline void Translate_5750(void* self, void* v)
         : "memory");
 }
 
-// Builds the view matrix on top of the stack: identity with y/z swapped, rotations about x, z, y,
-// then a translation by -pos.
+/**
+ * Builds the view matrix in *mCurrentView from a camera position and three rotation angles.
+ *
+ * Loads t4mat_Identity, swaps the Y and Z axes (elements 5 and 10 become 0, 6 and 9 become 1), then multiplies in
+ * rotations by -@p rx about t4vect_XAxis, -@p ry about t4vect_ZAxis and -@p rz about t4vect_YAxis (VU0 code), and
+ * finally translates by -@p pos (its w is kept). Clears mMatricesValid so the combined matrices are rebuilt.
+ *
+ * @param pos  the camera position
+ * @param rx  the rotation about the X axis, in radians
+ * @param ry  the rotation applied about the Z axis after the axis swap, in radians
+ * @param rz  the rotation applied about the Y axis after the axis swap, in radians
+ */
 extern "C" void cPS2GraphicsMan_SetView(cPS2GraphicsMan* self, sVec_5750* pos, float rx, float ry, float rz)
 {
     LoadIdentity_5750(self);
@@ -3705,7 +4112,11 @@ extern "C" void cPS2GraphicsMan_SetView(cPS2GraphicsMan* self, sVec_5750* pos, f
 //100%
 INCLUDE_ASM("render/font", cPS2GraphicsMan_SetView1);
 #ifdef SKIP_ASM
-// Load matrix m into the top of the matrix stack and clear the cached flag at 0x6b90.
+/**
+ * Copies the 4x4 matrix @p viewMat into *mCurrentView (VU0 quadword copy) and clears mMatricesValid.
+ *
+ * @param viewMat  the view matrix to load
+ */
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
 extern "C" void cPS2GraphicsMan_SetView1(cPS2GraphicsMan* self, void* viewMat)
 {
@@ -3752,8 +4163,6 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_AppendView);
  *
  * @param mat  the 4x4 matrix to append (On Tour m)
  */
-// Multiply the top of the matrix stack by m in place (top = top * m) and clear
-// the cached flag at 0x6b90.
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply); the PC port needs a plain matrix multiply.
 extern "C" void cPS2GraphicsMan_AppendView(cPS2GraphicsMan* self, void* mat)
 {
@@ -3803,8 +4212,6 @@ extern char t4mat_Identity[];
 /**
  * Sets the top view matrix (mCurrentView) to t4mat_Identity.
  */
-// Load the matrix t4mat_Identity (likely identity) into the top of the matrix stack
-// and clear the cached flag at 0x6b90.
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
 extern "C" void cPS2GraphicsMan_IdentityView(cPS2GraphicsMan* self)
 {
@@ -3835,8 +4242,6 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_TranslateView);
  *
  * @param pos  the translation as a 4-vector (On Tour pos)
  */
-// Translate the top matrix of the stack: row 3 = top * v (v is a 4-vector),
-// then clear the cached flag at 0x6b90.
 // PORT: PS2-only VU0 inline asm (vmula/vmadd matrix-vector product); the PC port
 // needs a C fallback.
 extern "C" void cPS2GraphicsMan_TranslateView(cPS2GraphicsMan* self, void* pos)
@@ -3880,7 +4285,6 @@ extern "C" void fSinCos(float* s, float* c, float angle);
  * @param axis  the rotation axis (x, y, z; assumed unit length)
  * @param angle  the rotation angle
  */
-// Multiply the top of the matrix stack by a rotation of `angle` about `axis`.
 // PORT: PS2-only VU0 inline asm (4x4 matrix multiply); the PC port needs a plain matrix multiply.
 extern "C" void cPS2GraphicsMan_RotateView(cPS2GraphicsMan* self, float* axis, float angle)
 {

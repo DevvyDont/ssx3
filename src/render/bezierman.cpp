@@ -141,6 +141,12 @@ void* cPS2BezierMan_Reset(void* self)
 //100%
 INCLUDE_ASM("render/bezierman", func_0038B178__FPv);
 #ifdef SKIP_ASM
+/**
+ * Empties the four patch queues: zeroes mNum4x4Patches, mNum6x6Patches, mNum8x8Patches and mNumMixedPatches.
+ *
+ * It sits in slot 17 of the cPS2BezierMan vtable (cPSPBezierMan_vtbl), between the shadow switches and
+ * cPS2BezierMan_DrawPatches; func_0038D638 calls it through that slot from cPS2BezierMan_Init.
+ */
 void func_0038B178(void* self)
 {
     *(int*)((char*)self + 0x458) = 0;
@@ -174,6 +180,22 @@ struct sBezObj_B190 {
     unsigned short tex8;    // 0x1AA
 };
 
+/**
+ * Queues one Bezier patch for drawing in the list that matches its four edge LODs.
+ *
+ * When all four bytes of @p t are equal, the patch goes to the uniform list for that LOD: 4 to m4x4Patches (at most
+ * 900, mLod 0, unk_0C = tex4, the halfword at +0x1A6 of the patch record), 6 to m6x6Patches (at most 220, mLod 1, tex6
+ * at +0x1A8) and 8 to m8x8Patches (at most 50, mLod 2, tex8 at +0x1AA); any other uniform value is dropped. Otherwise
+ * it goes to mMixedPatches (at most 75) with mLod 2 when any edge is 8 (else 0), unk_0C = tex8 and the four edge LODs
+ * copied into mEdgeLods. Each entry stores @p o in mpPatch and @p extra in unk_04. A full list drops the patch
+ * silently. This is slot 22 of the cPS2BezierMan vtable (cPSPBezierMan_vtbl).
+ *
+ * @param bezierMan  the patch manager (this)
+ * @param o  the patch record
+ * @param t  the four edge LODs (4, 6 or 8 each)
+ * @param unused  ignored
+ * @param extra  stored in the entry's unk_04 (used as the patch's program/table index when the patch is drawn)
+ */
 extern "C" void func_0038B190(cPS2BezierMan* bezierMan, sBezObj_B190* o, unsigned char* t, int unused, int extra)
 {
     if (t[0] == t[2] && t[1] == t[3] && t[0] == t[1]) {
@@ -890,7 +912,17 @@ static inline void setVert_C590(sBezVert_C590* v, const sV3_C590& p, const sUV_C
     v->rgba[3] = 0x80;
 }
 
-// Draws the n x n patch grid as strips: rows, then columns.
+/**
+ * Draws an @p n x @p n grid of patch points as strips: first each row, then each column.
+ *
+ * Every point becomes a vertex at (x, y, z, 1) with texture coordinates (u, v, 1) and colour 0x80 in all four channels;
+ * each row or column of @p n vertices goes to graphics manager virtual slot 73 (func_00381AD0). The vertex buffer holds
+ * 64 entries. No caller references it in this build.
+ *
+ * @param pts  the n * n grid points, row-major
+ * @param uvs  the matching texture coordinates
+ * @param n  the grid size (points per row and column)
+ */
 extern "C" void func_0038C590(sV3_C590* pts, sUV_C590* uvs, int n)
 {
     sBezVert_C590 verts[64];
@@ -915,6 +947,19 @@ extern "C" void func_0038C590(sV3_C590* pts, sUV_C590* uvs, int n)
 //100%
 INCLUDE_ASM("render/bezierman", func_0038C788);
 #ifdef SKIP_ASM
+/**
+ * Builds the cached VIF/DMA packet for patch cache entry @p idx of LOD @p type in the VIF cache.
+ *
+ * The packet goes at mVifCachePos[type] + idx * 256, written through the uncached (0x30000000) mapping, for an n x n
+ * patch with n = type * 2 + 4. It sets STMOD 0, STROW (0, 0, 1.0, 1.0) and the STMASK patterns, then has the DMA
+ * reference three per-vertex arrays: n * n V3-32 positions to VU address 0x00 from the table at +0x58/+0x5C/+0x60 (12
+ * bytes per vertex) and two V2-32 coordinate sets to 0x40 and 0x80 from +0x64/+0x68/+0x6C and +0x70/+0x74/+0x78 (8
+ * bytes per vertex), and ends with a DMA ret tag. Any other @p type gives address 0. Called by
+ * cPS2BezierMan_DrawPatches for newly cached patches.
+ *
+ * @param type  the LOD list: 0 = 4x4, 1 = 6x6, 2 = 8x8
+ * @param idx  the cache entry index
+ */
 // PORT: builds a DMA/VIF/GIF packet in uncached (0x30000000) memory; addresses held in int and packed into 64-bit words.
 extern "C" void func_0038C788(void* self, int type, int idx)
 {
@@ -1006,6 +1051,16 @@ struct sBezVec4_CA08 {
     float x, y, z, w;
 };
 
+/**
+ * Tests a patch's bounding box against the projective textures and leaves the hit mask as the result.
+ *
+ * Builds the box corners (+0x158/+0x15C/+0x160 and +0x164/+0x168/+0x16C of the patch record, w = 1.0) and calls
+ * func_0037DF88 on cGraphicsMan_TheGraphicsMan, which sets bit i for each projective texture i whose clip test (slot
+ * 93) does not reject the box. The C body is void, but that mask stays in the return register: func_0038CA70 and
+ * func_0038CE20 read it through an int-returning alias and pass it to func_0038D448.
+ *
+ * @param obj  the patch record (a scratchpad copy)
+ */
 extern "C" void func_0038CA08(void* self, void* obj)
 {
     char* objData = (char*)obj;
@@ -1080,6 +1135,25 @@ extern "C" void* func_0038F708(void* obj, int a1, int a2);
 extern "C" void func_0038D168(void* self, int a1, void* obj, int kind, void* tbl, void* patch, unsigned int* handle);
 extern "C" void func_0038D448(void* self, int kind, void* tbl, void* patch, int a4, unsigned int* handle);
 
+/**
+ * Emits one cached uniform-LOD patch into the frame's packet stream, or defers it to be drawn grouped by texture.
+ *
+ * Copies the 432-byte patch record to the scratchpad (func_0038F708). The shine pass runs when the record's flags at
+ * +0xC have 0x600000 set and the debug switch D_004A44D8 is clear; for the 8x8 list (@p kind 2) the projector pass runs
+ * when func_0038CA08 finds projective textures and D_004A44DC is clear. Flag bits 0x180000 select bits 2-3 of the
+ * current draw state's word 0 (0x80000 = 8, 0x100000 = 4, both = 0xC; none clears them). If any of these apply the
+ * patch is drawn now: the texture ids from +0x1A0/+0x1A2 go into the draw state, a DMA call to the cached packet
+ * (mVifCachePos[kind] + sub * 256) and an MSCAL of the program from str_at_HP[kind] are written at *@p handle, the
+ * packet is registered in the graphics manager's draw ring (when it holds fewer than 2600 records) and then
+ * func_0038D168 and func_0038D448 add their passes. Otherwise the texture ids, @p kind, the cache address and @p patch
+ * are appended to the deferred list at +0x5364 (no bounds check; it has room for 1170 entries, the sum of the three
+ * uniform lists).
+ *
+ * @param kind  the LOD list: 0 = 4x4, 1 = 6x6, 2 = 8x8
+ * @param sub  the cache entry index
+ * @param patch  the queued patch entry (record pointer, program index)
+ * @param handle  the packet write cursor, advanced past what is written
+ */
 // PORT: uncached (0x30000000) pointers held in int.
 extern "C" void func_0038CA70(sBezMan_CA70* self, int kind, int sub, sPatch_CA70* patch, unsigned int* handle)
 {
@@ -1221,6 +1295,23 @@ extern "C" void* func_0038F708(void* obj, int a1, int a2);
 extern "C" void func_0038D168(void* self, int a1, void* obj, int kind, void* tbl, void* patch, unsigned int* handle);
 extern "C" void func_0038D448(void* self, int kind, void* tbl, void* patch, int a4, unsigned int* handle);
 
+/**
+ * Emits one cached mixed-LOD patch into the frame's packet stream (always immediately; mixed patches are never
+ * deferred).
+ *
+ * Works like func_0038CA70 with the 8x8 programs (D_00504960): copies the patch record to the scratchpad, sets the
+ * texture ids from +0x1A0/+0x1A2 and the draw-state bits from flags 0x180000, and decides the shine pass (flags
+ * 0x600000, debug switch D_004A44D8) and the projector pass (func_0038CA08, debug switch D_004A44DC). When @p ext is
+ * not null it first uploads the four bytes at @p ext as one V4-8 element to VU address 0xD0 and the 16 control-point
+ * quadwords at +0x40 of the patch record (by DMA reference) to 0xC0. Then it writes the call to the cached packet
+ * (mVifCachePos[2] + sub * 256) and an MSCAL, registers the packet in the draw ring (fewer than 2600 records) and runs
+ * func_0038D168 and func_0038D448 as enabled.
+ *
+ * @param sub  the cache entry index
+ * @param patch  the queued patch entry (record pointer, program index)
+ * @param ext  the four edge LODs to upload, or null
+ * @param handle  the packet write cursor, advanced past what is written
+ */
 // PORT: uncached (0x30000000) pointers held in int.
 extern "C" void func_0038CE20(sBezMan_CE20* self, int sub, sPatch_CE20* patch, int* ext, unsigned int* handle)
 {
@@ -1375,6 +1466,26 @@ static inline void QueueRecord_D168(sGfx_D168* gfx, unsigned int buf, unsigned i
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
 // PORT: builds a DMA/VIF packet in uncached (0x30000000) memory; addresses held in int and packed into 64-bit words.
 extern "C" void func_0038D168_impl(void* self, void* patch, void* obj, int type, char* progs, void* prog, unsigned int* handle) __asm__("func_0038D168");
+/**
+ * Adds the shine (specular) pass for one patch: a pushed draw state, the patch's vectors and the shine matrix, and the
+ * shine program.
+ *
+ * Pushes a copy of the current draw state. The vector array comes from the table at +0x1C4/+0x1C8/+0x1CC for @p type
+ * (0xC0, 432 or 0x300 bytes per patch, indexed by the word at +8 of @p patch). Sets texture 0 to none and texture 1 to
+ * the halfword at +0x1A4 of @p obj, or the graphics manager's mSpecTexID when that is negative; sets bits 0x30 of word
+ * 0 and the blend field of word 1 (0x880 with flag 0x400000 at +0xC, else 0x100). The packet unpacks the n * n V3-32
+ * vectors to VU address 0x40, the shine matrix at +0x360 (built by cPS2BezierMan_DrawPatches) to 0x80 and ends with an
+ * MSCAL of the program from
+ * @p progs[extra + 8]. It is registered in the draw ring with flag 1 (fewer than 2600 records), then the draw state is
+ * popped.
+ *
+ * @param patch  the patch-cache entry whose word at +8 selects the vector data
+ * @param obj  the patch record (scratchpad copy)
+ * @param type  the LOD list: 0 = 4x4, 1 = 6x6, 2 = 8x8
+ * @param progs  the microprogram address table for the list
+ * @param prog  the queued patch entry, whose extra index selects the program
+ * @param handle  the packet write cursor, advanced past what is written
+ */
 extern "C" void func_0038D168_impl(void* self, void* patch, void* obj, int type, char* progs, void* prog, unsigned int* handle)
 {
     char* s = (char*)self;
@@ -1531,6 +1642,20 @@ static inline void QueueRecord_D448(sGfx_D448* gfx, unsigned int buf, unsigned i
     }
 }
 
+/**
+ * Adds one projector pass per projective texture whose bit is set in @p mask.
+ *
+ * For each projective texture i below mNumProjTextures with bit i set, binds its texture id (tProjTexInfo unk_94) as
+ * texture 1, sets bits 0x30 of the draw state's word 0, and writes a packet that unpacks the info's unk_50 matrix to VU
+ * address 0x80 and runs the program from @p tbl[extra + 6] (MSCAL), registering it in the draw ring with flag 1 (fewer
+ * than 2600 records).
+ *
+ * @param kind  unused
+ * @param tbl  the microprogram address table for the patch's list
+ * @param patch  the queued patch entry, whose extra index selects the program
+ * @param mask  one bit per projective texture to apply (func_0038CA08's result)
+ * @param handle  the packet write cursor, advanced past what is written
+ */
 // PORT: uncached (0x30000000) pointers held in int; PS2-only VU0 asm.
 // One projector pass per light whose bit is set in mask: UNPACK the light matrix, then MSCAL the patch program.
 extern "C" void func_0038D448(void* self, int kind, void* tbl, void* patch, int mask, unsigned int* handle)
@@ -1590,6 +1715,11 @@ public:
     virtual void v17();
 };
 
+/**
+ * Calls virtual slot 17 of the patch manager (func_0038B178, which empties the patch queues).
+ *
+ * cPS2BezierMan_Init calls it after setting up the caches.
+ */
 extern "C" void func_0038D638(cBezierVirt* self)
 {
     self->v17();
@@ -1599,6 +1729,9 @@ extern "C" void func_0038D638(cBezierVirt* self)
 //100%
 INCLUDE_ASM("render/bezierman", func_0038D660__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (an empty stub); cPS2BezierMan_Purge calls it first.
+ */
 void func_0038D660(void* self)
 {
 }
@@ -1607,6 +1740,14 @@ void func_0038D660(void* self)
 //100%
 INCLUDE_ASM("render/bezierman", func_0038D668);
 #ifdef SKIP_ASM
+/**
+ * Seeds the VU0 random-number register from *@p seed and stores the next random value back in *@p seed.
+ *
+ * Loads the float bits into VF3, runs vrinit R and vrnext.x, and writes VF3.x back; vrnext gives a float in [1, 2) with
+ * random mantissa bits. No caller references it in this build.
+ *
+ * @param seed  the seed in, the new random value out
+ */
 // PORT: PS2-only VU0 random-number unit (R register); the PC port needs a C PRNG.
 extern "C" void func_0038D668(float* seed)
 {
@@ -1673,6 +1814,22 @@ static inline void CopyQuads_D690(char** pp, sQuad_D690* src, int n)
     *pp = (char*)d;
 }
 
+/**
+ * Adds the snow-sparkle pass for one patch whose record has flag 0x800000, with a sparkle count from its size.
+ *
+ * The count is the squared diagonal of the patch's bounding box (+0x158..+0x16C) times D_004A4348 * 3.333e-7 times
+ * m_SnowSparkleDensity[6] of the graphics manager, halved when the entry's level at +8 is below 2 (never the case from
+ * func_0038D968, which only passes LOD-2 entries); nothing is drawn when it is not positive. The count goes into the
+ * word at +0x43C. The packet (opened and closed with func_0038F460 / func_0038F668 on D_004A4474) unpacks 22 V4-32
+ * quadwords to VU address 0: the 16 control points at +0x40 of the record, the effect matrix at +0x3E0 and the two
+ * quadwords at +0x420 that cPS2BezierMan_DrawPatches fills (colour 128 and D_004A434C..D_004A4354, then the count),
+ * then MSCALs the program at D_1460 and flushes. It is registered in the draw ring with flag 0 (fewer than 2600
+ * records).
+ *
+ * @param obj  the patch record (scratchpad copy)
+ * @param patch  the queued patch entry
+ * @param handle  the packet write cursor, set to the end of the packet plus 0x10
+ */
 // PORT: uncached (0x30000000) pointers and VU microprogram addresses held in int.
 extern "C" void func_0038D690(void* self, void* obj, void* patch, unsigned int* handle)
 {
@@ -1774,6 +1931,16 @@ extern "C" void func_0037D968(sCtx_D968* ctx);
 extern "C" void* func_0038F708(void* obj, int a1, int a2);
 extern "C" void func_0038D690(void* self, void* obj, void* patch, unsigned int* handle);
 
+/**
+ * Runs the snow-sparkle pass (func_0038D690) over the 8x8 patches and the mixed patches with an LOD-8 edge.
+ *
+ * Returns at once when the debug switch D_004A44E0 is set. Otherwise pushes a copy of the draw state, binds
+ * _EffectTexMap[m_SnowSparkleTextureId[6]] as its texture, sets the sparkle blend and state bits, refreshes the
+ * matrices with func_0037D968 when mMatricesValid is 0, then copies each patch record to the scratchpad (func_0038F708)
+ * and adds its pass; finally pops the draw state. Called at the end of cPS2BezierMan_DrawPatches.
+ *
+ * @param a1  the packet write cursor
+ */
 extern "C" void func_0038D968(sBezMan_D968* self, unsigned int* a1)
 {
     if (D_004A44E0 != 0) {

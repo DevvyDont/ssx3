@@ -1249,8 +1249,6 @@ extern "C" void cReplay_writeCheckSum(cReplay* self);
  * @param size  receives the bytes in the block (0 when done)
  * @return 1 when a block was produced, 0 when the save is complete
  */
-// Runs the replay-cache writer state machine until the 16 KB block is full or the stream is done (state 11);
-// returns the block and its size, or 0 if there was nothing to write.
 extern "C" int cReplay_getSaveData(cReplay* self, char** block, int* size)
 {
     if (self->WriteState == 11) {
@@ -2013,6 +2011,14 @@ void operator_delete(int* p);
 
 extern void* cReplayFramePtr_vtbl[];
 
+/**
+ * Destroys a replay frame: installs the base cReplayFramePtr_vtbl and frees the object (operator_delete) when
+ * @p flags bit 0 is set.
+ *
+ * Slot 7 of cReplayFrame_vtbl; the replay block itself is not freed here.
+ *
+ * @param flags  bit 0 frees the memory
+ */
 extern "C" void cReplayFrame__cReplayFrame(int* self, int flags)
 {
     *(void**)self = cReplayFramePtr_vtbl;
@@ -2570,7 +2576,6 @@ void operator_delete(int* p);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-// Deleting-destructor tail: free self when bit 0 of the g++ 2.95 in-charge flag is set.
 extern "C" void cInSeq__cInSeq(int* self, int flags)
 {
     if (flags & 1) {
@@ -3085,7 +3090,6 @@ struct sCacheTrack_2F28 {
  * @param currFrameNum  the sequence's current frame (On Tour currFrameNum)
  * @return 0 when no key is active or pending, otherwise 1
  */
-// Drops finished events and plays every record whose start time has been reached.
 extern "C" int cScriptPlayerChannelBlock_Update(sCacheTrack_2F28* self, int* flags, float currFrameNum)
 {
     float zeroF;
@@ -3629,7 +3633,6 @@ struct sCacheTrack_3698 {
  * @param dt  the frames since the last update (On Tour frameDelta)
  * @return 0 when no key is active or pending, otherwise 1
  */
-// Advances running events by dt, drops finished ones and starts every record that is due.
 extern "C" int cScriptPlayerChannelObject_Update(sCacheTrack_3698* self, int* flags, float frameDelta, float dt)
 {
     float zeroF;
@@ -4277,7 +4280,6 @@ public:
  * @param jump   nonzero to visit every key between @p prev and @p time
  * @return the last cScriptPlayerEntity_DoFrameUpdate result (1 when not playing)
  */
-// Plays the track from prev to time; when jumping, stops at every channel event in between.
 extern "C" int cScriptPlayerEntity_Update(cScriptPlayerEntity* self_, float prev, float time, float speed, int jump)
 {
     cScriptPlayerEntity* self = self_;

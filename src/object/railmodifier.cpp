@@ -2031,7 +2031,6 @@ static inline sRmMat33 MulI_E248(const sRmMat33& a, const sRmInertiaOwner_E248* 
  * Turns the body's orientation quaternion (+0x40) into a rotation R and stores R * InvBodyMOI * R^T (InvBodyMOI at
  * +0x280) as the rigid body's InvMOI (+0x80), ready for cRigidBody_updateImplicit.
  */
-// World-space inertia: rotT * inertia * rot, with rot from the body quaternion (self + 0x40).
 extern "C" void cRollerModifier_updateMOI(void* self)
 {
     sM44_E248 rotMat4;
@@ -2632,8 +2631,6 @@ INCLUDE_ASM("object/railmodifier", cTexFlipModifier_update);
  * random 0.25..1.0 (BXrand mantissa trick), switches to type 1 and steps forward. Ends with cTexFlipModifier_setTexIndex (On Tour
  * setTexIndex). The comment above the definition calls the timer a rail timer; it is the tex-flip one.
  */
-// Advances the rail timer; each whole step moves to the next/previous frame (mode 0), or alternates between a
-// fixed 10-per-second step (mode 1) and a random 25..100% rate (mode 2).
 extern "C" void cTexFlipModifier_update(cTexFlipModifier* self)
 {
     if (!(0.0f < self->Speed)) {
@@ -4668,6 +4665,11 @@ int cTransformModifier_isRootTransformDirty(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cTransformModifier_getRootTransform__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 0: a plain transform modifier has no root transform of its own.
+ *
+ * @return 0
+ */
 int cTransformModifier_getRootTransform(void* self)
 {
     return 0;
@@ -5803,7 +5805,6 @@ extern char t4mat_Identity[];
 /**
  * Resets a mesh animation frame's FrameMatrix (+0x90) to t4mat_Identity.
  */
-// Copy the 4x4 matrix t4mat_Identity into self+0x90.
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
 extern "C" void cMeshAnimFrame_init(void* self)
 {
@@ -7060,6 +7061,11 @@ int cAvaSplineModifier_getTransformType(void* self)
 //100%
 INCLUDE_ASM("object/railmodifier", cAvaSplineModifier_getRootTransform__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of the modifier's Transform matrix (+0x40).
+ *
+ * @return the root transform
+ */
 void* cAvaSplineModifier_getRootTransform(void* self)
 {
     return (char*)self + 0x40;
@@ -8339,7 +8345,6 @@ struct sRmGsPacket {
  * @param aref  alpha reference
  * @param ctx  GS context (0 or 1)
  */
-// GS TEST register (TEST_1 = 0x47, TEST_2 = 0x48), as in libgraph's SCE_GS_SET_TEST.
 extern "C" void func_003626D8(sRmGsPacket* pkt, int ztest, int atest, unsigned int aref, int ctx)
 {
     ulong reg;
@@ -8474,9 +8479,6 @@ INCLUDE_ASM("object/railmodifier", func_00362978);
  * @param packet  start of the packet
  * @param tail  address of its closing tag
  */
-// Append a DMA packet to a chain: the first one becomes the head, later ones are
-// linked by patching the previous tail's tag (via the uncached-accelerated
-// mirror, | 0x30000000) into a NEXT tag pointing at the new packet.
 // PORT: 64-bit DMA tag writes (ulong) and addresses held in int.
 extern "C" void func_00362978(void* self, int packet, int tail)
 {
@@ -8778,8 +8780,6 @@ static inline void addEntry_2DE8(sRmBatch_2DE8* self, sRmEntry_2DE8* e, unsigned
  *
  * @param vself  the defer manager
  */
-// DeferMan_BuildBuckets (REF n2-render-layer.md): streams the draw records through the scratchpad in
-// chunks and files each into a bucket by (state, textures, matrix); new buckets get a sort key.
 // PORT: (int) of a pointer for hashing.
 extern "C" void func_00362DE8(void* vself)
 {
@@ -8899,8 +8899,6 @@ static inline void resetState_3490(sRail20_2CC8* d)
  * @param path  second chain cursor
  * @param out2  receives the second chain position after the type-9 pass
  */
-// Draws the sorted batch: counts texture use, splits the sorted list into three passes by
-// blend mode, then emits each node's DMA chain (closing the VIF/GIF chains between passes).
 // PORT: DMA tags written as 64-bit words through uncached (| 0x30000000 / | 0x20000000) addresses held in int.
 extern "C" void func_00363490(sRmBatch_3490* self, int* pktAddr, int* out1, int* path, int* out2)
 {
@@ -9207,7 +9205,6 @@ extern "C" void func_0038F6A8(void* ring);
  * The 4 x 257 histogram lives in the scratchpad ring (func_0038F460) and D_00505B70 is the swap buffer; after the
  * fourth pass the sorted items are back in place.
  */
-// 4-pass 8-bit radix sort of the item list at self+0x67CA8 (count at +0x67CA4).
 extern "C" void func_00364050(char* self)
 {
     void* ring = D_004A4474;
@@ -9702,8 +9699,6 @@ static inline void putQw_4CD0(ulong*& p, const void* src, int n)
  * @param w3  per-draw chain address (state word 3 bits 0-29)
  * @param pp  DMA chain cursor
  */
-// Per material type, emits the VU1 microprogram CALL and its constant header (mode 0), the matrix
-// header only (mode 1), or the per-draw CALL (mode 2, types 6 and 7).
 // PORT: 64-bit DMA/VIF/GIF words (ulong), 128-bit copies (cQuad128), addresses held in int.
 extern "C" void func_00364CD0(void* vself, int type, int mode, unsigned int w3, ulong** pp)
 {
@@ -10288,7 +10283,6 @@ static inline int railFloorLog2_60A8(int x)
  * @param selfp  the allocator
  * @param idx  block index
  */
-// Links node idx into its size-class list (list A ordered by field_0x0, list B by size).
 extern "C" void func_003660A8(void* selfp, int idx)
 {
     sRailNodeMan* self = (sRailNodeMan*)selfp;
@@ -10484,7 +10478,6 @@ struct sRailLink6548 {
  * The next used block is found before each free, as freeing merges neighbours. func_00367360 (the texture manager's
  * purge) runs it on both of its allocators.
  */
-// Walks the rail's link list and calls func_003663D8 on every enabled link without flag bit 1.
 extern "C" void func_00366548(void* self)
 {
     char* heap = (char*)self;
@@ -10525,7 +10518,6 @@ struct sRailLink6618 {
 /**
  * Frees every used block of an allocator, clearing its lock bit (flag bit 1) first.
  */
-// Walks the rail's link list, clearing flag bit 1 and calling func_003663D8 on every enabled link.
 extern "C" void func_00366618(void* self)
 {
     char* heap = (char*)self;
@@ -10659,7 +10651,6 @@ struct sRailLink6888 {
  *
  * @return the block index, or -1 when no block is free
  */
-// Returns the index of the disabled link with the largest f4 (at least 0), or -1.
 extern "C" int func_00366888(void* self)
 {
     char* heapBase = (char*)self;

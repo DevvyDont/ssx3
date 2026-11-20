@@ -796,7 +796,6 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEStateRewardsRoom_onWidgetMenu);
  * @param key  the menu event
  * @return 0x100 for events 8 and 9, otherwise 0x101
  */
-// Key filter: keys 8 and 9 return 0x100, every other key 0x101.
 extern "C" int cFEStateRewardsRoom_onWidgetMenu(cFEStateRewardsRoom* self, int pMenu, unsigned int key)
 {
     int result = 257;
@@ -850,6 +849,15 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEStateRelogin_cFEStateRelogin);
 extern "C" void* cFEStateLogin_cFEStateLogin(void* self);
 extern void* cFEStateRelogin_vtbl[];
 
+/**
+ * Constructs the relogin state: runs cFEStateLogin_cFEStateLogin, installs cFEStateRelogin_vtbl (+0x8) and sets
+ * mHashName (+0xC) to 52.
+ *
+ * The C call passes only @p self, so the caller's engine argument (cRealFE passes its UI) reaches the login constructor
+ * unchanged.
+ *
+ * @return @p self
+ */
 extern "C" void* cFEStateRelogin_cFEStateRelogin(void* self)
 {
     cFEStateLogin_cFEStateLogin(self);
@@ -867,6 +875,10 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern char str_248lobby_reconnect[];
 
+/**
+ * Creates the relogin screen: adds the "248lobby_reconnect" screen to the engine (+0x10) with
+ * cUIEngine_addScreenByHashName, stores it in the screen pointer (+0x40) and plays it from frame 0.
+ */
 extern "C" void cFEStateRelogin_onCreateScreen(void* self)
 {
     void* engine = *(void**)((char*)self + 0x10);
@@ -887,6 +899,12 @@ void cUIText_setUnicodeStringByID(cUIText* self, int id);
 extern char str_TextReconnecting[];
 extern char str_kT_POPUPCMNReconnecting[];
 
+/**
+ * Fills in the relogin screen's text: the widget named "TextReconnecting" (hash at +0x38) gets the localised
+ * "kT_POPUPCMNReconnecting" string (cUIText_setUnicodeStringByID).
+ *
+ * @param item  the widget being created
+ */
 extern "C" void cFEStateRelogin_onWidgetCreate(void* self, cUIText* item)
 {
     int id = *(int*)((char*)item + 0x38);
@@ -954,6 +972,14 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEStateRelogin_onPopupEvent);
 extern "C" int func_001A9668(void* self, void* a1, int a2);
 extern "C" int cFEStateLogin_onPopupEvent(void* self, void* a1, int a2);
 
+/**
+ * Handles a popup event: popup id 258 (+0x18) goes to func_001A9668 (close the popups and push a new login), every
+ * other popup to the login state's handler (cFEStateLogin_onPopupEvent).
+ *
+ * @param popup  the popup state
+ * @param event  the popup event
+ * @return the handler's result
+ */
 extern "C" int cFEStateRelogin_onPopupEvent(void* self, void* popup, int event)
 {
     int result;
@@ -1424,7 +1450,6 @@ struct sVE_59A0 {
  * cBESaveInterface_getSaveProfileSize). The first time (+0x210 and +0x208 clear), also shows the manager's current message through
  * virtual slot 36 and sets +0x210.
  */
-// Memory-card "save" step: builds the save-file title for the current mode and starts the save; on first entry shows the saving dialog.
 extern "C" void cFEMemCard_writeStart(void)
 {
     char name[144];
@@ -1745,7 +1770,6 @@ struct sMemCard_1D5F40 {
  *
  * @return 0 when the save interface rejected the data, else 1
  */
-// Memory-card load/save step: applies the loaded sound options, then frees the transfer buffer.
 extern "C" int cFEMemCard_readDone()
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 5);

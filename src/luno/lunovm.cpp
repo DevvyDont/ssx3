@@ -1119,6 +1119,17 @@ static inline int lunoKeyEquals_50E0(cLunoValue* a, cLunoValue* b)
     return 0;
 }
 
+/**
+ * Looks up integer key @p intKey in a Luno table and returns the value stored under it, or luno_gLunoNil.
+ *
+ * Starts at hash bucket intKey % modulus of the table's node array and follows the chain (+0x18) while the bucket is in
+ * use. Each node key is compared with a temporary index key (type 3): equal types compare the words, a float key (type
+ * 2) matches an int (type 1) by value, and an index matches an int; the temporary is destroyed
+ * (luno_cLunoVar__cLunoVar) after each comparison.
+ *
+ * @param intKey  the integer key
+ * @return the node's value, or &luno_gLunoNil when absent
+ */
 extern "C" cLunoValue* luno_cLunoTable_get(cLunoTableRef* self, unsigned int intKey)
 {
     cLunoTable* hashTable = self->table;
@@ -1183,7 +1194,6 @@ static inline int lunoKeyEquals(cLunoValue* a, cLunoValue* b)
  * @param key  the key value
  * @return the stored value, or luno_gLunoNil
  */
-// Table lookup: returns the value stored under key, or the nil value.
 extern "C" cLunoValue* luno_cLunoTable_get1(cLunoTableRef* self, cLunoValue* key)
 {
     cLunoTable* hashTable = self->table;
@@ -1268,7 +1278,6 @@ static inline int lunoKeyEquals_set(cLunoValue* a, cLunoValue* b)
  * @param key  the key value
  * @param val  the value to store (nil removes a chained entry)
  */
-// Table store: sets key to val (a nil value removes a chained entry); nil keys are ignored.
 extern "C" void luno_cLunoTable_set(cLunoTableRef* self, cLunoValue* key, cLunoValue* val)
 {
     if (key->type == 0) {
@@ -1749,8 +1758,6 @@ INCLUDE_ASM("luno/lunovm", luno_cLunoVar_operatorPlus);
  * @param rhs  the right operand
  * @return @p self
  */
-// Value add (for-loop step): same-type int/float/symbol add, float+int
-// gives float, int+float gives int; anything else gives nil.
 extern "C" cLunoValue* luno_cLunoVar_operatorPlus(cLunoValue* self, const cLunoValue& lhs, const cLunoValue& rhs)
 {
     if (rhs.type == lhs.type) {

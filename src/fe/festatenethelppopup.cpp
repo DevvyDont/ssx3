@@ -418,6 +418,13 @@ struct sNetHelpPopup_DA510 {
     int b[7];
 };
 
+/**
+ * Sets option row @p optionNum of the help popup: its text id (table at +0x68) and its button icon (table at +0x84).
+ *
+ * @param optionNum  the row, 0-6
+ * @param textId  the text id (hash of a "kT_HELP..." name)
+ * @param iconIndex  the button icon to show next to it
+ */
 void cFEStateNetHelpPopup_setOption(void* self, int optionNum, int textId, int iconIndex)
 {
     sNetHelpPopup_DA510* popup = (sNetHelpPopup_DA510*)self;
@@ -429,6 +436,11 @@ void cFEStateNetHelpPopup_setOption(void* self, int optionNum, int textId, int i
 //100%
 INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_setNumHelpOptions__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Sets how many option rows the help popup shows (+0x48).
+ *
+ * @param numOptions  the number of rows set with cFEStateNetHelpPopup_setOption (up to 7)
+ */
 void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int numOptions)
 {
     *(int*)((char*)self + 0x48) = numOptions;
@@ -438,6 +450,16 @@ void cFEStateNetHelpPopup_setNumHelpOptions(void* self, int numOptions)
 //100%
 INCLUDE_ASM("fe/festatenethelppopup", cFEStateNetHelpPopup_setDescription__FPvii);
 #ifdef SKIP_ASM
+/**
+ * Sets description line @p descriptionNum of the help popup (the text-id table at +0x58, three entries) to
+ * @p description.
+ *
+ * Callers pass GetHashValue32 of a "kT_HELP..." text name; the popup stops at the first 0 entry when it builds its
+ * text.
+ *
+ * @param descriptionNum  the line, 0-2
+ * @param description  the text id (hash)
+ */
 void cFEStateNetHelpPopup_setDescription(void* self, int descriptionNum, int description)
 {
     *(int*)((char*)self + (descriptionNum << 2) + 0x58) = description;

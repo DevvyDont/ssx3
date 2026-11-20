@@ -49,6 +49,20 @@ INCLUDE_ASM("util/statemachine", func_002C7038);
 extern char str_pct_04d_pct_02d_pct_02d[];
 extern char str_pct_02d_pct_02d_pct_04d[];
 
+/**
+ * Formats a date into @p dst, in one of three orders.
+ *
+ * Mode 0 prints "yyyy:mm:dd" (str_pct_04d_pct_02d_pct_02d, year, month, day), mode 1 "mm:dd:yyyy" and mode 2
+ * "dd:mm:yyyy" (both str_pct_02d_pct_02d_pct_04d). Any other mode copies an uninitialised buffer. The text goes to
+ * @p dst through func_002C25B8(), a bounded copy of 16-bit units, as in cConsoleConfig_setTimeString.
+ *
+ * @param dst  destination buffer
+ * @param size  most units func_002C25B8() copies
+ * @param day  day of the month
+ * @param month  month, 1-12
+ * @param year  year
+ * @param mode  0 year first, 1 month first, 2 day first
+ */
 extern "C" void func_002C7038(void* self, char* dst, int size, int day, int month, int year, int mode)
 {
     char buf[0x40];
@@ -71,6 +85,14 @@ INCLUDE_ASM("util/statemachine", func_002C7100);
 #ifdef SKIP_ASM
 extern "C" void func_002C73C0(void*);
 
+/**
+ * Brings the console clock up to date (func_002C73C0) and returns the time: hour (+0x8), minute (+0xC) and second
+ * (+0x10).
+ *
+ * @param hour  receives the hour
+ * @param minute  receives the minute
+ * @param second  receives the second
+ */
 extern "C" void func_002C7100(void *self, int *hour, int *minute, int *second) {
     func_002C73C0(self);
     *hour = (*(int *)((char*)(self) + (8)));
@@ -83,6 +105,14 @@ INCLUDE_ASM("util/statemachine", func_002C7160);
 #ifdef SKIP_ASM
 extern "C" void func_002C73C0(void*);
 
+/**
+ * Brings the console clock up to date (func_002C73C0) and returns the date: day (+0x1C), month (+0x18) and year
+ * (+0x14).
+ *
+ * @param day  receives the day of the month
+ * @param month  receives the month
+ * @param year  receives the year
+ */
 extern "C" void func_002C7160(void *self, int *day, int *month, int *year) {
     func_002C73C0(self);
     *day = (*(int *)((char*)(self) + (0x1C)));
@@ -93,6 +123,12 @@ extern "C" void func_002C7160(void *self, int *day, int *month, int *year) {
 //100%
 INCLUDE_ASM("util/statemachine", func_002C71C0);
 #ifdef SKIP_ASM
+/**
+ * Tells whether @p year is a Gregorian leap year: divisible by 4, and not by 100 unless also by 400.
+ *
+ * @param year  the year
+ * @return 1 for a leap year, else 0
+ */
 extern "C" int func_002C71C0(void* self, int year) {
     int leap;
 
@@ -112,6 +148,14 @@ INCLUDE_ASM("util/statemachine", func_002C7208);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int func_002C71C0(void* self, int a1);
 
+/**
+ * Returns the number of days in @p month of @p year: 28 or 29 for February (func_002C71C0), otherwise 31 or 30 by the
+ * alternating rule shifted after July (31 for odd months up to 7 and even months from 8 on).
+ *
+ * @param month  month, 1-12
+ * @param year  year, for February
+ * @return days in that month
+ */
 extern "C" int func_002C7208(int self, int month, int year)
 {
     int m = month;
@@ -128,6 +172,17 @@ INCLUDE_ASM("util/statemachine", func_002C7260);
 #ifdef SKIP_ASM
 extern "C" int func_002C7208(int, int, int);
 
+/**
+ * Adds @p count days to the date @p day / @p month / @p year, carrying into the next month and year.
+ *
+ * Moves a month at a time (func_002C7208 gives each month's length), restarting at day 1 and wrapping month 13 to 1 of
+ * the next year. Does nothing for @p count <= 0.
+ *
+ * @param day  day of the month, updated
+ * @param month  month, updated
+ * @param year  year, updated
+ * @param count  days to add
+ */
 extern "C" void func_002C7260(int self, int *day, int *month, int *year, int count) {
     int dim;
     int newMonth;
@@ -159,6 +214,18 @@ extern "C" void func_002C7260(int self, int *day, int *month, int *year, int cou
 //100%
 INCLUDE_ASM("util/statemachine", func_002C7328);
 #ifdef SKIP_ASM
+/**
+ * Adds @p add seconds to the time @p hour : @p min : @p sec and returns the whole days that overflowed.
+ *
+ * Converts to seconds, adds, splits off the days (86400 s each) and writes back hour, minute and second. Negative
+ * totals are not handled.
+ *
+ * @param sec  seconds, updated
+ * @param min  minutes, updated
+ * @param hour  hours, updated
+ * @param add  seconds to add
+ * @return the number of days carried
+ */
 extern "C" int func_002C7328(void* self, int* sec, int* min, int* hour, int add) {
     int total;
     int rem;
@@ -180,6 +247,14 @@ INCLUDE_ASM("util/statemachine", func_002C73C0);
 extern "C" int func_002C7328_v(void*, int*, int*, int*, int) __asm__("func_002C7328");
 extern "C" void func_002C7260_v(void*, int*, int*, int*, int) __asm__("func_002C7260");
 
+/**
+ * Advances the console clock by the whole seconds elapsed since the last advance.
+ *
+ * The elapsed seconds are (SSXApp + 0x18, the current tick - the start tick +0x20) / SSXApp + 0x10 (ticks per second).
+ * When at least one has passed it sets the start tick to now (so the sub-second remainder is dropped and the clock
+ * slowly falls behind), adds them to second/minute/hour (func_002C7328 on +0x10/+0xC/+0x8) and adds the carried days to
+ * day/month/year (func_002C7260 on +0x1C/+0x18/+0x14).
+ */
 extern "C" void func_002C73C0(void* self) {
     int rem;
     int now;
@@ -420,6 +495,19 @@ INCLUDE_ASM("util/statemachine", func_002C76C0);
         }                                                       \
     }
 
+/**
+ * Decompresses an EA HUFF stream from @p packbuf into @p unpackbuf and returns the uncompressed length.
+ *
+ * EA's HUFF_decompress (Huffman codes plus a clue byte for run lengths and explicit bytes): reads the 16-bit type (bit
+ * 0x100: skip a stored length), the 24-bit unpacked length and the clue byte, the per-bit-length code counts and the
+ * leapfrog-coded symbol table, builds 8-bit fast lookup tables, then decodes with an 8-bit fast path and a 16-bit
+ * compare path. The clue introduces a run of the previous byte, the end of the stream, or an explicit byte. Type 13051
+ * then undoes a byte delta and 13563 a double delta. A null @p packbuf returns 0. func_002C85A0 calls it.
+ *
+ * @param packbuf  compressed data
+ * @param unpackbuf  output buffer, large enough for the unpacked length
+ * @return the unpacked length
+ */
 // FAKEMATCH: stand-in constant `leap[nextchar] = !leapdelta;` for the leap-table store's literal 1; plain form 99.63%.
 // leapdelta is always 0 once `while (leapdelta)` exits, so the value is 1 and behaviour is unchanged. cse1 leaves `!leapdelta`
 // unfolded, so loop.c sees no invariant QImode 1 for combine_movables to merge into the SImode 1 of GETNUM's `1 << n`; that 1

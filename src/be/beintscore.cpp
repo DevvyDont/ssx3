@@ -572,6 +572,14 @@ signed char cBEScoreInterface_getCurrentHighlightLevel(void* self, int highlight
 //100%
 INCLUDE_ASM("be/beintscore", cBEScoreInterface_isBetterMedal);
 #ifdef SKIP_ASM
+/**
+ * Tells whether @p newMedal beats @p currentMedal: never when the new one is -1 (none), always when the current one is
+ * -1, otherwise when its id is lower (lower ids are better medals).
+ *
+ * @param currentMedal  the medal held so far, or -1
+ * @param newMedal  the medal just won, or -1
+ * @return 1 when the new medal is better, else 0
+ */
 extern "C" int cBEScoreInterface_isBetterMedal(void* self, int currentMedal, int newMedal)
 {
     if (newMedal == -1) {
@@ -587,6 +595,13 @@ extern "C" int cBEScoreInterface_isBetterMedal(void* self, int currentMedal, int
 //100%
 INCLUDE_ASM("be/beintscore", cBEScoreInterface_convertRankToMedal);
 #ifdef SKIP_ASM
+/**
+ * Converts a finishing rank to a medal id: rank 0, 1, 2 (first to third) give medals 1, 2, 3; any other rank gives -1
+ * (no medal).
+ *
+ * @param rank  the finishing position, 0 for first
+ * @return the medal id, or -1
+ */
 extern "C" int cBEScoreInterface_convertRankToMedal(void* self, int rank)
 {
     switch (rank) {

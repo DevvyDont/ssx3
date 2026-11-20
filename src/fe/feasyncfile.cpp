@@ -1513,7 +1513,6 @@ extern "C" void* func_001A8E40_3(void* self, int a1, int a2) __asm__("func_001A8
  * @param msgId  event type
  * @param data  the event
  */
-// While the popup is shown, routes its 0x807 result to func_001A4E28; otherwise to the base handler.
 extern "C" void func_001A4FB0(cFEStateNetMessenger* self, int msgId, int data)
 {
     if (self->mAttrState & 6) {
@@ -1557,7 +1556,6 @@ extern "C" void func_001A4FB0(cFEStateNetMessenger* self, int a1, int a2);
  * @param eventData  the event
  * @return 0, or func_001A8E40's result for unhandled events
  */
-// Message handler: refreshes the file list on most results, otherwise forwards to the base handler.
 extern "C" void* func_001A5010(cFEStateNetMessenger* self, int eventType, int eventData)
 {
     switch (eventType) {
@@ -2719,8 +2717,6 @@ static inline void* GetSession_001A6F70()
  * Walks the BuddyMan roster (func_00262598, func_002625C8); the challenge and message checks are func_00263128 and
  * func_00262A38. No caller or vtable reference was found.
  */
-// Walks the buddy list (BuddyMan_mBuddyMan, created on demand): for each named entry for which func_00262400 is set,
-// calls func_00261EF8(name, 2, buf) when neither func_00263128 nor func_00262A38 knows the name yet.
 extern "C" void func_001A6F70(void)
 {
     char buf[0x10];
@@ -4598,9 +4594,6 @@ extern "C" int func_001A8E40_impl(void* self, int msg, void* data) __asm__("func
  * @param data  the event
  * @return 0
  */
-// Message handler of the online screens (cFEStateNet): 277/278 -> func_001A9930; 220 opens cFEStateLobbyMenu when the
-// lobby isn't busy (func_0025DA90), 239 cFEStateOnlineMainMenu; 258 with the tag 'time' (0x74696D65) ->
-// func_001A8F98, else a popup; 221-225 go to the child state at +0x20 (its virtual slot 24).
 extern "C" int func_001A8E40_impl(void* self, int msg, void* data)
 {
     char* obj = (char*)self;
@@ -5262,7 +5255,6 @@ extern "C" void cFEStateNet_onPopupEvent_impl(void* self, int popup, int a2) __a
  * @param popup  the popup state that sent the event
  * @param event  popup event (15 + chosen option, 20 back, 21 keyboard text, 22 the popup is gone)
  */
-// Routes a closed popup to the handler for its message id.
 extern "C" void cFEStateNet_onPopupEvent_impl(void* self, int popup, int event)
 {
     if (popup == *(int*)((char*)self + 0x69C)) {
@@ -5741,7 +5733,6 @@ static inline void* GetSession_1A9CC0()
  * @param owner  unused
  * @param data  the error event (type 258)
  */
-// Builds the popup for an online error reply (four-character code at data+8).
 extern "C" void func_001A9CC0(cFEStateNet* self, void** popup, void* owner, void* data)
 {
     int resetNetwork = 0;
@@ -6472,7 +6463,6 @@ extern char str_kT_POPUPCMNExitedChallenge[];
  *
  * @param err  the event type
  */
-// Shows an error popup with the message matching the error code.
 extern "C" void func_001AB178(cFEStateNet* self, int err)
 {
     void* popup = func_001A9C50(self);
@@ -6532,7 +6522,6 @@ extern char str_kT_POPUPCMNExitedChallenge[];
  *
  * @param err  the event type
  */
-// Shows an error popup with the message matching the error code.
 extern "C" void func_001AB288(cFEStateNet* self, int err)
 {
     void* popup = func_001A9C50(self);
@@ -7028,6 +7017,14 @@ INCLUDE_ASM("fe/feasyncfile", cFEBlankPopup_cFEBlankPopup);
 extern "C" void* cFEStateNet_cFEStateNet(void* self);
 extern void* cFEBlankPopup_vtbl[];
 
+/**
+ * Constructs a blank popup state: runs cFEStateNet_cFEStateNet and installs cFEBlankPopup_vtbl.
+ *
+ * The C call passes only @p self, so the caller's engine and owner arguments reach the base constructor in their
+ * registers unchanged.
+ *
+ * @return @p self
+ */
 extern "C" void* cFEBlankPopup_cFEBlankPopup(cFEStateNet* self)
 {
     cFEStateNet_cFEStateNet(self);
@@ -7044,6 +7041,12 @@ extern char str_Blank[];
 extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int hash, int a3);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
 
+/**
+ * Creates the popup's screen: adds the "Blank" screen (cUIEngine_addScreenByHashName with its hash) to mpEngine, stores
+ * it in mpScreen and plays it from frame 0 (cUIScreen_playFrame).
+ *
+ * @return cUIScreen_playFrame's result, or 0 when no screen was added
+ */
 extern "C" void* cFEBlankPopup_onCreateScreen(cFEStateNet* self)
 {
     void* engine = self->mpEngine;
@@ -7452,7 +7455,6 @@ extern char str_kT_210Password[];
  * @param pWidget  the widget (On Tour pWidget)
  * @param msg  the widget event (On Tour Event)
  */
-// Message handler for the network-config menu.
 extern "C" void cFEUseExistingAccount_onWidgetEvent(cFEUseExistingAccount* self, void* pWidget, unsigned int msg)
 {
     switch (msg) {
@@ -8208,7 +8210,6 @@ extern char str_kT_POPUP220DeleteFinal[];
  * @param pWidget  the widget (On Tour pWidget)
  * @param Event  the widget event (On Tour Event)
  */
-// Message handler for the persona-select screen.
 extern "C" void cFEStateSelectPersona_onWidgetEvent(cFEStateSelectPersona* selfp, void* pWidget, int Event)
 {
     switch (Event) {
@@ -8453,9 +8454,6 @@ struct sVE1ADA30 {
  * @param data  the event
  * @return -1 when handled here, else func_001A8E40's result
  */
-// Lobby/server message handler (cFEStateNet virtual slot 31) of the persona-selection screen (cFEStateSelectPersona):
-// 217 shows the "selecting persona" popup, 260 an EA Messenger error popup; unknown ids go to cFEStateNet's handler
-// func_001A8E40. Returns -1 when handled.
 extern "C" int func_001ADA30(cFEStateSelectPersona* self, int msgId, int data)
 {
     switch (msgId) {
@@ -8619,7 +8617,6 @@ public:
  * @param owner  the parent state (On Tour pParentState)
  * @return @p self
  */
-// Derived state constructor: sets the vtable and defaults, then resets the new-race interface (mode 0, event 0).
 extern "C" void* cFEStateChallengePopup_cFEStateChallengePopup(cFEStateChallengePopup* self, void* engine, void* owner)
 {
     cFEStateNet_cFEStateNet_DDD0(self, engine, owner);
@@ -8795,7 +8792,6 @@ extern char D_004412B8[];
  *
  * @param pPrevState  the state that had focus before (On Tour pPrevState)
  */
-// Refreshes the race-options screen and picks the mode title for the current game mode.
 extern "C" void cFEStateChallengePopup_onGainFocus(cFEStateChallengePopup* self, int pPrevState)
 {
     cFEStateNet_onGainFocus((cFEStateNet*)self, pPrevState);
@@ -8852,7 +8848,6 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateChallengePopup_onWidgetMenu);
  * @param key  the menu event (On Tour Event)
  * @return 0x100 for events 8 and 9, else 0x101
  */
-// Key filter: keys 8 and 9 return 0x100, every other key 0x101.
 extern "C" int cFEStateChallengePopup_onWidgetMenu(cFEStateChallengePopup* self, int pMenu, unsigned int key)
 {
     int result = 257;
@@ -9148,7 +9143,6 @@ static inline void commit_E7A0(char* iface)
  * @param pWidget  the widget (On Tour pWidget); null is ignored
  * @param msg  the widget event (On Tour Event)
  */
-// Message handler for the race-options screen.
 extern "C" void cFEStateChallengePopup_onWidgetEvent(cFEStateChallengePopup* self, void* pWidget, int msg)
 {
     if (pWidget == 0) {
@@ -9666,7 +9660,6 @@ extern const char str_cFEStateOnlineCharacterSelect[];
  * @param data  the event (pointer passed as int)
  * @return 0, or func_001A8E40's result
  */
-// Message handler: opens the next screen, shows error popups, or forwards to the base handler.
 extern "C" void* func_001AF470(cFEStateChallengePopup* self, int msgId, int data)
 {
     switch (msgId) {
@@ -10195,7 +10188,6 @@ static inline void vcall_FE68(void* p)
  * the network interface (committing both), and fills the screen (func_001B0850, func_0025E6D0, func_001AF930). The
  * comment above it ("race-setup screen") is loose.
  */
-// Creates the race-setup screen and applies the selected online race settings.
 extern "C" void cFEStateChallengeReceivedPopup_onCreateScreen(cFEStateChallengeReceivedPopup* self)
 {
     sVE_FE68* vt = (sVE_FE68*)self->mVtbl;
@@ -10638,7 +10630,6 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateChallengeReceivedPopup_onWidgetMenu);
  * @param key  the menu event (On Tour Event)
  * @return 0x100 for events 8 and 9, else 0x101
  */
-// Key filter: keys 8 and 9 return 0x100, every other key 0x101.
 extern "C" int cFEStateChallengeReceivedPopup_onWidgetMenu(cFEStateChallengeReceivedPopup* self, int pMenu, unsigned int key)
 {
     int result = 257;
@@ -10687,7 +10678,6 @@ extern const char str_cFEStateOnlineCharacterSelect[];
  * @param data  the event (pointer passed as int)
  * @return 0, or func_001A8E40's result
  */
-// Message handler: starts the memory-card task, shows error popups, or forwards to the base handler.
 extern "C" void* func_001B0708(cFEStateChallengeReceivedPopup* self, int msgId, int data)
 {
     switch (msgId) {
@@ -11450,7 +11440,6 @@ extern const char str_cFEStateBraggingRights[];
  * @param eventData  the event
  * @return 0, or func_001A8E40's result
  */
-// Message handler for the profile list: select/scroll, error popups, and opening the follow-up screens.
 extern "C" void* func_001B15D8(cFEStateOnlineCharacterSelect* self, int eventType, int eventData)
 {
     void* obj;
@@ -12971,7 +12960,6 @@ extern char str_kT_POPUP235SubmittingAbuse[];
  * @param popup  the popup state
  * @param kind  popup event (15 + chosen option, 20 back, 22 the popup is gone)
  */
-// Memory-card result handler: runs the follow-up for each result; on 19 shows the failure popup.
 extern "C" void func_001B35B0(cFEStateChatRoom* self, void* popup, int kind)
 {
     int messengerErr;
@@ -13227,9 +13215,6 @@ extern char str_kT_BTNOK[];
  * @param data  the event (pointer passed as int)
  * @return 0, or func_001A8E40's result
  */
-// Lobby/server message handler (cFEStateNet virtual slot 31) of the chat room (cFEStateChatRoom): 220 opens the lobby
-// menu (cFEStateLobbyMenu) unless the lobby is busy, 232 shows the abuse-report popup; unknown ids go to cFEStateNet's
-// handler func_001A8E40.
 extern "C" void* func_001B3A30(cFEStateChatRoom* self, int msgId, int data)
 {
     switch (msgId) {
@@ -13676,7 +13661,6 @@ static inline int VCall1B41A8(int slot)
  * to state 0, which (idle) calls the object's slot 5 with D_004A1B80. States 6 -> 7, 7 (idle) func_002C67E8, -> 8,
  * 8 (idle) func_001B45E8 (connect with the chosen setting). Ends with the cFEStateNet update (cFEStateNet_onUpdate).
  */
-// Per-frame update for the online-login screen: steps the login state machine on the network object.
 extern "C" void cFEStateNetConfig_onUpdate(cFEStateNetConfig* self)
 {
     if (D_004A1B78_p != 0) {
@@ -14945,7 +14929,6 @@ struct sVE1B5A58 {
  * @param popup  the popup state
  * @param event  popup event (15 + chosen option, 20 back, 22 the popup is gone)
  */
-// Tracks a pending flag; on 0x10/0x14 restarts the memory-card task and resets the list.
 extern "C" void func_001B5A58(cFEStateNetConfig* self, void* popup, int event)
 {
     switch (event) {
@@ -15118,7 +15101,6 @@ extern "C" void func_001B5A58(cFEStateNetConfig* self, void* a1, int a2);
  * @param pPopup  the popup state that sent the event (On Tour pPopup)
  * @param Event  the popup event (On Tour Event; 0xF + i option i chosen, 0x14 back, 0x16 closed)
  */
-// Dispatches a message to the matching handler, falling back to the base handler.
 extern "C" void cFEStateNetConfig_onPopupEvent(cFEStateNetConfig* self, void* pPopup, int Event)
 {
     switch (*(int*)((char*)pPopup + 0x18)) {
@@ -15875,7 +15857,6 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateAuthDNAS_onWidgetMenu);
  * @param key  the menu event (On Tour Event)
  * @return 0x100 for events 8 and 9, else 0x101
  */
-// Key filter: keys 8 and 9 return 0x100, every other key 0x101.
 extern "C" int cFEStateAuthDNAS_onWidgetMenu(cFEStateAuthDNAS* self, int pMenu, unsigned int key)
 {
     int result = 257;
@@ -16199,7 +16180,6 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateAuthDNASError_onWidgetMenu);
  * @param key  the menu event (On Tour Event)
  * @return 0x100 for events 8 and 9, else 0x101
  */
-// Key filter: keys 8 and 9 return 0x100, every other key 0x101.
 extern "C" int cFEStateAuthDNASError_onWidgetMenu(cFEStateAuthDNASError* self, int pMenu, unsigned int key)
 {
     int result = 257;
@@ -17057,7 +17037,6 @@ extern "C" void func_001B7C70(cFEStateNetAccountMem* self);
  * (func_001B77A8 .. func_001B7C70); the popup-wait states 7, 13, 21 and 25 call func_002659E8 on the card; 28 and
  * 29 do nothing.
  */
-// Polls the memory card, then runs the step handler for the current memory-card state.
 extern "C" void cFEStateNetAccountMem_onUpdate(cFEStateNetAccountMem* self)
 {
     func_00265A68(D_004A33D0);
@@ -18154,7 +18133,6 @@ extern char str_kT_CMNNo[];
  * @param popup  the popup state
  * @param event  popup event (15 + chosen option, 20 back, 22 the popup is gone)
  */
-// Tracks a pending flag across messages; on 0x16 either asks for confirmation or opens the next screen.
 extern "C" void func_001B92C8(cFEStateCreateStep1* self, void* popup, int event)
 {
     switch (event) {
@@ -19351,7 +19329,6 @@ extern "C" void func_001BAED8(cFEStateCreateStep2* self, void* a1, int a2);
  * @param pPopup  the popup state that sent the event (On Tour pPopup)
  * @param Event  the popup event (On Tour Event)
  */
-// Dispatches a message to the matching handler, falling back to the base handler.
 extern "C" void cFEStateCreateStep2_onPopupEvent(cFEStateCreateStep2* self, void* pPopup, int Event)
 {
     switch (*(int*)((char*)pPopup + 0x18)) {
@@ -19590,7 +19567,6 @@ extern char str_kT_BTNCancel[];
  * @param popup  the popup that sent the event
  * @param event  the popup event
  */
-// Tracks a pending flag; on 0x16 shows either the confirm popup or the network-connect popup.
 extern "C" void func_001BAED8(cFEStateCreateStep2* self, void* popup, int event)
 {
     switch (event) {
@@ -20985,7 +20961,6 @@ extern char str_kT_BTNCancel[];
  * @param popup  the popup that sent the event
  * @param event  the popup event
  */
-// Tracks a pending flag; on 0x16 shows either the confirm popup or the network-connect popup.
 extern "C" void func_001BC990(cFEStateCreateDuplicate* self, void* popup, int event)
 {
     switch (event) {
@@ -21481,7 +21456,6 @@ struct cState_D1B8 {
  * @param pWidget  the widget (On Tour pWidget)
  * @param msg  the widget event (On Tour Event)
  */
-// Message handler for the profile-select screen.
 extern "C" void cFEStateLobbyMenu_onWidgetEvent(cState_D1B8* self, char* pWidget, int msg)
 {
     switch (msg) {
@@ -21752,9 +21726,6 @@ struct sFE1BD738 {
  * @param data  the event's message, passed as an int
  * @return 0 for the handled ids, else func_001A8E40's result
  */
-// Lobby/server message handler (cFEStateNet virtual slot 31) of the lobby menu (cFEStateLobbyMenu): 223 picks the
-// channel (miSelectedChannel) from the room list, 220/228 open the chat room (cFEStateChatRoom), 258 handles room
-// results (func_001BD848); unknown ids go to cFEStateNet's handler func_001A8E40.
 extern "C" void* func_001BD738(cFEStateLobbyMenu* self, int msgId, int data)
 {
     switch (msgId) {
@@ -23972,7 +23943,6 @@ public:
  * @param pWidget  the widget (On Tour pWidget); null is ignored
  * @param Event  the widget event (On Tour Event)
  */
-// Memory-card async state message handler: creates the next screen or shows an error popup.
 extern "C" void cFEStateOnlineMainMenu_onWidgetEvent(cFEStateNet* self, void* pWidget, unsigned int Event)
 {
     if (pWidget == 0) {
@@ -24240,6 +24210,14 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateOnlineAgreement_cFEStateOnlineAgreement1);
 extern void* cFEStateOnlineAgreement_vtbl[];
 extern "C" void* cFEStateNet_cFEStateNet(void* self);
 
+/**
+ * Constructs the online agreement (terms of service) state: runs cFEStateNet_cFEStateNet, sets mHashName to 67,
+ * installs cFEStateOnlineAgreement_vtbl and clears mpTOSLines and miNextTOSLine.
+ *
+ * The C call passes only @p self, so the caller's engine and owner arguments reach the base constructor unchanged.
+ *
+ * @return @p self
+ */
 extern "C" void* cFEStateOnlineAgreement_cFEStateOnlineAgreement1(cFEStateOnlineAgreement* self)
 {
     cFEStateNet_cFEStateNet(self);
@@ -24284,6 +24262,12 @@ extern void* cFEStateOnlineAgreement_vtbl[];
 // PORT: cFEStateNet_cFEStateNet takes (self, a1, a2); the unit declares it with one arg
 void* cFEStateNet_cFEStateNet_3(void* self, int a1, int a2) __asm__("cFEStateNet_cFEStateNet");
 
+/**
+ * Constructs the online agreement state without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then clears
+ * mpTOSLines and miNextTOSLine and installs cFEStateOnlineAgreement_vtbl (mHashName is not set).
+ *
+ * @return @p self
+ */
 extern "C" void* cFEStateOnlineAgreement_cFEStateOnlineAgreement2(cFEStateOnlineAgreement* self)
 {
     cFEStateNet_cFEStateNet_3(self, 0, 0);
@@ -24649,7 +24633,6 @@ extern const char str_cFEStateNetSSXWorld[];
  * @param pWidget  the widget, as an int (On Tour pWidget); null is ignored
  * @param msg  the widget event (On Tour Event)
  */
-// On confirm (msg 5/6), opens the screen that matches this menu's id; other messages go to the base handler.
 extern "C" void cFEStateOnlineAgreement_onWidgetEvent(cFEStateOnlineAgreement* self, int pWidget, unsigned int msg)
 {
     void* obj;
@@ -25272,7 +25255,6 @@ struct cFEObj_001C19C8 {
  * @param eventData  the event's data
  * @return 0 for the handled ids, else func_001A8E40's result
  */
-// Message handler: on 0xE7 confirms (if armed) or closes the screen; other ids as in the sibling handlers.
 extern "C" void* func_001C19C8(cFEStateNetQuickPlayPopup* self, int netEvent, int eventData)
 {
     switch (netEvent) {
@@ -26357,6 +26339,12 @@ INCLUDE_ASM("fe/feasyncfile", cFEStateStats_cFEStateStats1);
 #ifdef SKIP_ASM
 extern void* cFEStateStats_vtbl[];
 
+/**
+ * Constructs the online stats state without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then clears
+ * miMode, miFocusMenu and miFirstResult and the four words at +0x6D0, and installs cFEStateStats_vtbl.
+ *
+ * @return @p self
+ */
 extern "C" void* cFEStateStats_cFEStateStats1(cFEStateStats* self)
 {
     cFEStateNet_cFEStateNet_3(self, 0, 0);
@@ -26855,7 +26843,6 @@ static inline int isButton_3668(cObj_3668* w, char* name)
  * @param w  the widget (On Tour pWidget); null is ignored
  * @param msg  the widget event (On Tour Event)
  */
-// Widget events of the online leaderboard screen: page buttons, row highlight and row selection.
 extern "C" void cFEStateStats_onWidgetEvent(cFEStateStats* self, cObj_3668* w, int msg)
 {
     cObj_3668* shownObj;
@@ -27110,7 +27097,6 @@ static inline cFEVObj_001C3EE8* Find_001C3EE8(void* self, char* name)
  *
  * @param mode  0 overall, 1 race, 2 freestyle
  */
-// Switches the screen between modes 0, 1 and 2: three button highlights, three widgets shown or hidden, the caption text.
 extern "C" void func_001C3EE8(cFEStateStats* self, int mode)
 {
     int changed = self->miMode != mode;
@@ -27699,7 +27685,6 @@ extern char str_pct_02d_pct_02d_pct_02d[];
  * @param buf  the output text buffer
  * @param frames  the time in 1/60 s frames
  */
-// Formats a frame count (60 fps) as hours:minutes:seconds.milliseconds, dropping the hours when zero.
 extern "C" void func_001C4F58(cFEStateStats* self, char* buf, int frames)
 {
     float seconds = frames * (1.0f / 60.0f);
@@ -27748,6 +27733,12 @@ extern void* cFEStateNetNews_vtbl[];
 // PORT: cFEStateNet_cFEStateNet takes (self, a1, a2); the unit declares it with one arg
 void* cFEStateNet_cFEStateNet_3(void* self, int a1, int a2) __asm__("cFEStateNet_cFEStateNet");
 
+/**
+ * Constructs a cFEStateNetNews without an engine or owner: cFEStateNet_cFEStateNet(self, 0, 0), then installs
+ * cFEStateNetNews_vtbl.
+ *
+ * @return @p self
+ */
 extern "C" void* cFEStateNetNews_cFEStateNetNews1(cFEStateNet* self)
 {
     cFEStateNet_cFEStateNet_3(self, 0, 0);

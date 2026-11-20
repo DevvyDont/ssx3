@@ -110,8 +110,9 @@ struct cPS2GraphicsMan {
     int m_SnowSparkleTextureId[8];  // 0x04C [O]; [U] ditto
     int m_RimTextureId[8];          // 0x06C [O]; [U] ditto
     int m_isInNIS[8];               // 0x08C [O]; [U] cVisualEffectsMan_commonUpdate stores [i]
-    float m_SnowSparkleDensity[8];  // 0x0AC [O]; [U] cVisualEffectsMan_commonUpdate stores [i]
-    float m_DrawDistance[8];        // 0x0CC [O]; [U] ditto; func_0038D690 reads [6]
+    float m_SnowSparkleDensity[8];  // 0x0AC [O]; [U] cVisualEffectsMan_commonUpdate stores [i]; func_0038D690 reads [6]
+                                    //       (+0xC4) as the patch subdivision scale
+    float m_DrawDistance[8];        // 0x0CC [O]; [U] ditto
     float m_FogDensity[8];          // 0x0EC [O]; [U] ditto
     float m_FogColourR[8];          // 0x10C [O]; [U] ditto
     float m_FogColourG[8];          // 0x12C [O]; [U] ditto

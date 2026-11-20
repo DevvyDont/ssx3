@@ -131,6 +131,15 @@ INCLUDE_ASM("mem/memstd", func_00251998);
 #ifdef SKIP_ASM
 extern "C" void func_003E56E0(void*);
 
+/**
+ * Removes memory class @p id from the class table: deletes its mutex (func_003E56E0) when the class is locked, zeroes
+ * the 80-byte class record and clears its slot in D_004D2438 (id & 63).
+ *
+ * The blocks inside the class are not freed.
+ *
+ * @param id  memory class id
+ * @return 1 when the class existed, else 0
+ */
 extern "C" int func_00251998(int id)
 {
     void** slot = &D_004D2438[id & 0x3F];
@@ -163,6 +172,15 @@ struct sMemClass_251A08 {
     sMemNode_251A08* first;     // 0x8
 };
 
+/**
+ * Frees every block of memory class @p id: walks its block list from the first block and calls MEM_free on the data
+ * (block + 0x10) of each block not flagged 0xC000 (free or sentinel), stopping when a free fails.
+ *
+ * The walk reads each block's next pointer after freeing it.
+ *
+ * @param id  memory class id
+ * @return 1, or the failing MEM_free's result
+ */
 extern "C" void* func_00251A08(int id)
 {
     sMemClass_251A08* cls = (sMemClass_251A08*)D_004D2438[id & 0x3F];
@@ -178,6 +196,11 @@ extern "C" void* func_00251A08(int id)
 //100%
 INCLUDE_ASM("mem/memstd", func_00251A80);
 #ifdef SKIP_ASM
+/**
+ * Returns the first unused memory class id: the first empty slot of D_004D2438 from 2 on (0x40 when all are used).
+ *
+ * @return a free class id, or 64
+ */
 extern "C" int func_00251A80(void)
 {
     int i = 2;
@@ -197,6 +220,15 @@ INCLUDE_ASM("mem/memstd", func_00251AC0);
 extern int D_004A2E78_1AC0 __asm__("D_004A2E78");
 // Release-build assert (compiled out); EA code asserts its pointers
 #define ASSERT_1AC0(cond) do { } while (0)
+/**
+ * Returns the size of the largest free block of memory class @p id (0 means the default class D_004A2E78).
+ *
+ * Walks the free list from the class head, keeping the block with the largest size - 16, until it meets the sentinel
+ * (tag 0x4253). Returns that block's size field, header included, or 0 when there is none.
+ *
+ * @param id  memory class id, or 0
+ * @return the largest free block's size
+ */
 extern "C" int func_00251AC0(int id)
 {
     if (id == 0) {
@@ -233,6 +265,13 @@ extern int D_004A2E78_1B50 __asm__("D_004A2E78");
 
 // Release-build assert (compiled out); EA code asserts its pointers
 #define ASSERT_1B50(cond) do { } while (0)
+/**
+ * Returns the total free memory of memory class @p id (0 means the default class D_004A2E78): the sum of size - 16 over
+ * its free list up to the sentinel (tag 0x4253).
+ *
+ * @param id  memory class id, or 0
+ * @return the free bytes
+ */
 extern "C" int func_00251B50(int id)
 {
     if (id == 0) {
@@ -264,8 +303,13 @@ struct sMemClass_251BB0 {
     sMemNode_251BB0* first;     // 0x8
 };
 
-// Finds the block whose data area (node + 0x10, size bytes) holds addr, searching the node list of each
-// of the 64 memory classes; returns its data pointer, or 0 if not found or the block is flagged (0xC000).
+/**
+ * Finds the block that contains address @p addr: searches the block list of every memory class for a block whose data
+ * (block + 0x10, size bytes) holds it.
+ *
+ * @param addr  any address
+ * @return the block's data pointer, or 0 when none holds it or the block is free or a sentinel (flags 0xC000)
+ */
 extern "C" void* func_00251BB0(unsigned int addr)
 {
     int i;
@@ -306,6 +350,15 @@ struct sMemClass_251C38 {
 int func_00252658(void* self);
 extern "C" int strcasecmp(int, int);
 
+/**
+ * Finds a block by name: searches the block lists of every memory class for a block whose name (func_00252658) matches
+ * @p name case-insensitively (strcasecmp).
+ *
+ * func_00252658 returns 0 in this build (no block names), so the search never matches.
+ *
+ * @param name  the block name
+ * @return the block's data pointer, or 0
+ */
 extern "C" void* func_00251C38(int name)
 {
     int i;
@@ -330,6 +383,11 @@ extern "C" void* func_00251C38(int name)
 //100%
 INCLUDE_ASM("mem/memstd", func_00251CF0);
 #ifdef SKIP_ASM
+/**
+ * Returns 0; a stub in this build (the first of the three stubs before MEM_initadr).
+ *
+ * @return 0
+ */
 extern "C" int func_00251CF0(void) {
     return 0;
 }
@@ -337,6 +395,11 @@ extern "C" int func_00251CF0(void) {
 //100%
 INCLUDE_ASM("mem/memstd", func_00251CF8);
 #ifdef SKIP_ASM
+/**
+ * Returns 0; a stub in this build (the second of the three stubs before MEM_initadr).
+ *
+ * @return 0
+ */
 extern "C" int func_00251CF8(void) {
     return 0;
 }
@@ -344,6 +407,9 @@ extern "C" int func_00251CF8(void) {
 //100%
 INCLUDE_ASM("mem/memstd", func_00251D00);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (the last of the three stubs before MEM_initadr).
+ */
 extern "C" void func_00251D00(void) {
 
 }
@@ -617,6 +683,14 @@ INCLUDE_ASM("mem/memstd", func_00252248);
 extern int D_004A2E74;
 extern "C" int func_003E6240(void* p, int size, int flags);
 
+/**
+ * Checks a free-list link: it must point at a readable 0x18-byte block (func_003E6240) tagged as free (0x4246) or as a
+ * sentinel (0x4253).
+ *
+ * On failure sets the memory error code D_004A2E74 to 1.
+ *
+ * @return 1 when the link is valid, else 0
+ */
 extern "C" int func_00252248(void* self)
 {
     int ok = 0;
@@ -652,6 +726,16 @@ static inline unsigned int readBE32_002522B0(unsigned char* p)
     return (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
 }
 
+/**
+ * Checks one heap block's integrity by its tag and records the failure kind in D_004A2E74.
+ *
+ * A sentinel (0x4253) needs flag 0x8000 (else error 2); a free block (0x4246) with flag 0x4000 needs valid next and
+ * previous links (func_00252248); an allocated block (0x424D) with flag 0x2000 needs the big-endian end marker "BEND"
+ * just past its data (else error 3); any other tag is error 4. MEM_printclassf prints its result.
+ *
+ * @param blk  the block header
+ * @return 1 when the block is consistent, else 0
+ */
 // PORT: the block-end address is computed as size + (int)blk (pointer held in int) to get the target's addu operand order.
 extern "C" int func_002522B0(sMemBlock002522B0* blk)
 {
@@ -686,6 +770,11 @@ extern "C" int func_002522B0(sMemBlock002522B0* blk)
 //100%
 INCLUDE_ASM("mem/memstd", func_002523A0);
 #ifdef SKIP_ASM
+/**
+ * Returns 1: the heap validation is a stub in this build.
+ *
+ * @return 1
+ */
 extern "C" int func_002523A0(void) {
     return 1;
 }
@@ -747,6 +836,18 @@ static inline void Unlink_2523D0(sMemNode_2523D0* b)
     n->prev = p;
 }
 
+/**
+ * Frees a block of the EA heap, merging it with free neighbours, and puts it on the class's sorted free list.
+ *
+ * The class comes from the block's type word (data - 0xE, & 63). Under the class mutex when locked, it absorbs a free
+ * previous block and a free next block (unlinking them and retagging them 0x424F), then re-places the start right after
+ * the previous block's used size plus its tail (func_00252960), rounded up to the class's size alignment (+0x28), and
+ * inserts the block into the address-sorted free list, searching from whichever end is nearer. The block becomes tag
+ * 0x4246 with flag 0x4000. A null @p mem does nothing.
+ *
+ * @param mem  the data pointer returned by the allocator
+ * @return 1
+ */
 // PORT: pointer arithmetic done in int (see func_00252660).
 extern "C" int func_002523D0(void* mem)
 {
@@ -837,6 +938,12 @@ extern "C" void MUTEX_unlock(void* mutex);
 extern "C" int cMemMan_internalBlockSize(int);
 extern void* cMemMan_m_mutex[16];
 
+/**
+ * Returns the size of a memory-manager block: cMemMan_internalBlockSize under the cMemMan_m_mutex lock.
+ *
+ * @param memBlock  the block's data pointer
+ * @return the block size
+ */
 extern "C" int func_002525F8(int memBlock) {
     int result;
 
@@ -849,6 +956,12 @@ extern "C" int func_002525F8(int memBlock) {
 //100%
 INCLUDE_ASM("mem/memstd", func_00252648);
 #ifdef SKIP_ASM
+/**
+ * Returns an EA heap block's data size, the int stored at @p allocation - 0xC.
+ *
+ * @param allocation  the block's data pointer
+ * @return the size in bytes
+ */
 extern "C" int func_00252648(void *allocation) {
     return (*(int *)((char*)(allocation) + (-0xC)));
 }
@@ -856,6 +969,12 @@ extern "C" int func_00252648(void *allocation) {
 //100%
 INCLUDE_ASM("mem/memstd", func_00252650);
 #ifdef SKIP_ASM
+/**
+ * Returns an EA heap block's type word (class id and flags), the halfword at @p allocation - 0xE.
+ *
+ * @param allocation  the block's data pointer
+ * @return the type word
+ */
 extern "C" unsigned short func_00252650(void *allocation) {
     return (*(unsigned short *)((char*)(allocation) + (-0xE)));
 }
@@ -864,6 +983,13 @@ extern "C" unsigned short func_00252650(void *allocation) {
 //100%
 INCLUDE_ASM("mem/memstd", func_00252658__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 0: block names are not stored in this build.
+ *
+ * MEM_find, MEM_printclassf and func_002523D0 ask it for a block's name.
+ *
+ * @return 0
+ */
 int func_00252658(void* self)
 {
     return 0;
@@ -877,6 +1003,15 @@ struct sMemUnalignedInt {
     int value;
 } __attribute__((packed));
 
+/**
+ * Returns an EA heap block's comment word: when its type word (@p allocation - 0xE) has flag 0x800, the unaligned int
+ * stored 4 bytes past the end of its data (@p allocation + size + 4), else 0.
+ *
+ * MEM_printclassf prints it as the block comment.
+ *
+ * @param allocation  the block's data pointer
+ * @return the stored value, or 0
+ */
 // PORT: pointer arithmetic done in int; a plain `(char*)p - 0xE` makes gcc 2.95
 // emit the offset as unsigned 0xFFFFFFF2 (addiu -0x8000 / 0x7ff2 split).
 extern "C" int func_00252660(void* allocation)
@@ -892,6 +1027,14 @@ extern "C" int func_00252660(void* allocation)
 //100%
 INCLUDE_ASM("mem/memstd", func_00252688);
 #ifdef SKIP_ASM
+/**
+ * Stores @p trailerValue in an EA heap block's comment slot (4 bytes past the end of its data), when its type word has
+ * flag 0x800.
+ *
+ * @param allocation  the block's data pointer
+ * @param trailerValue  the value to store
+ * @return 1 when stored, else 0
+ */
 // PORT: pointer arithmetic done in int (see func_00252660).
 extern "C" int func_00252688(void* allocation, int trailerValue)
 {
@@ -912,6 +1055,15 @@ extern "C" void MUTEX_unlock(void* mutex);
 extern "C" void* cMemMan_internalResizeBlock(void* block, int size);
 extern void* cMemMan_m_mutex[16];
 
+/**
+ * Resizes a memory-manager block: cMemMan_internalResizeBlock under the cMemMan_m_mutex lock.
+ *
+ * The sound bank monitor installs it as its resize hook (D_004A3790).
+ *
+ * @param block  the block's data pointer
+ * @param size  the new size
+ * @return the (possibly moved) block
+ */
 extern "C" void* func_002526B8(void* block, int size)
 {
     void* newBlock;
@@ -960,6 +1112,19 @@ static inline void Unlink_252718(sMemNode_252718* b)
     n->prev = p;
 }
 
+/**
+ * Resizes an EA heap block in place, absorbing a free block after it and splitting off any large remainder.
+ *
+ * Under the class mutex when locked: a free next block is unlinked (tag 0x424F) and merged. The wanted size (8 at
+ * least; -1 means 0x40000000, i.e. as much as possible) plus the class tail (func_00252960) is rounded to the class
+ * alignment and capped at the space up to the next block. MEM_move moves the tail data to the new end, the block size
+ * is updated, and a remainder of more than 0x40 bytes becomes a new free block (MEM_initblock) inserted into the
+ * address-sorted free list. The data never moves.
+ *
+ * @param mem  the block's data pointer
+ * @param size  the new size
+ * @return @p mem
+ */
 // PORT: pointer arithmetic done in int (see func_00252660).
 extern "C" void* func_00252718(void* mem, int size)
 {
@@ -1040,6 +1205,13 @@ extern "C" void* func_00252718(void* mem, int size)
 //100%
 INCLUDE_ASM("mem/memstd", func_00252960);
 #ifdef SKIP_ASM
+/**
+ * Returns the per-block tail size of memory class @p id: the class record's int at +0x30 (MEMCLASS_create's hdr).
+ *
+ * @param unused  ignored (callers pass 0 or a block name)
+ * @param id  memory class id (masked with 63)
+ * @return the tail bytes each block of the class reserves
+ */
 extern "C" int func_00252960(int unused, int id)
 {
     return *(int*)((char*)D_004D2438[id & 0x3F] + 0x30);
@@ -1210,6 +1382,25 @@ static inline void RemoveFree_2A10(sMemNode_2A10* blk)
 // Allocates size bytes from the class picked by flags, aligned so that (p + offset) is aligned;
 // retries while the out-of-memory callback asks for it.
 extern "C" char* func_00252A10_impl(void* name, int size, int align, int offset, int flags, int unused) __asm__("func_00252A10");
+/**
+ * Allocates @p size bytes from the EA heap class @p flags selects, aligned so that data + @p offset is aligned.
+ *
+ * Flags 0 means the default class D_004A2E78; bit 0x200 picks the largest fitting free block (func_00253170 style)
+ * instead of the first (func_00253100 style), bit 0x100 searches and places from the top, bit 0x400 uses the class's
+ * big alignment (+0x2C) when @p align is 0. The size grows by the class tail (func_00252960), 8 at least. The chosen
+ * free block is unlinked, the data placed at its aligned start (or end, from the top), a remainder of more than
+ * alignment + 0x30 becomes a new free block, and MEM_initblock writes the header with the class's header size (+0x30)
+ * and @p flags. When nothing fits, the out-of-memory callback D_004A2E7C (0, size, flags) is asked and a result of 1
+ * retries. Runs under the class mutex when the class is locked. A negative size returns 0.
+ *
+ * @param name  the block's name (not stored)
+ * @param size  bytes wanted
+ * @param align  alignment, or 0 for the class default
+ * @param offset  offset within the block that must be aligned
+ * @param flags  memory class id and placement flags
+ * @param unused  abort-on-failure flag, ignored here
+ * @return the data pointer, or 0
+ */
 extern "C" char* func_00252A10_impl(void* name, int size, int align, int offset, int flags, int unused)
 {
     sMemHdr_2A10 save;
@@ -1299,6 +1490,17 @@ void* MEM_allocaligna_6(void*, int, int, int, int, int) __asm__("MEM_allocaligna
 // forwards 5 args (see func_00253AD0); the real body is bound by asm label.
 void* func_00252F60_impl(void* a0, int a1, int a2, int a3, int a4) __asm__("func_00252F60__FPv");
 
+/**
+ * Allocates an aligned block that aborts on failure: MEM_allocaligna(@p name, @p size, @p alignment, @p hdrSize,
+ * @p memType, 1).
+ *
+ * @param name  the block's name
+ * @param size  bytes wanted
+ * @param alignment  alignment
+ * @param hdrSize  aligned offset (header bytes)
+ * @param memType  memory class and flags
+ * @return MEM_allocaligna's result
+ */
 void* func_00252F60_impl(void* name, int size, int alignment, int hdrSize, int memType)
 {
     return MEM_allocaligna_6(name, size, alignment, hdrSize, memType, 1);
@@ -1310,6 +1512,16 @@ INCLUDE_ASM("mem/memstd", func_00252F80);
 #ifdef SKIP_ASM
 extern "C" void func_00252A10(int, int, int, int, int, int);
 
+/**
+ * Allocates an aligned block from the EA heap, aborting on failure: func_00252A10(@p name, @p size, @p alignment,
+ * @p hdrSize, @p memType, 1).
+ *
+ * @param name  the block's name
+ * @param size  bytes wanted
+ * @param alignment  alignment
+ * @param hdrSize  aligned offset (header bytes)
+ * @param memType  memory class and flags
+ */
 extern "C" void func_00252F80(int name, int size, int alignment, int hdrSize, int memType) {
     func_00252A10(name, size, alignment, hdrSize, memType, 1);
 }
@@ -1340,6 +1552,14 @@ extern "C" void* MEM_alloc(void* name, int size, int memtype)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("mem/memstd", func_00252FC8);
 #ifdef SKIP_ASM
+/**
+ * Allocates a block from the EA heap with 128-byte alignment, aborting on failure: func_00252A10(@p name, @p size,
+ * 0x80, 0, @p memType, 1).
+ *
+ * @param name  the block's name
+ * @param size  bytes wanted
+ * @param memType  memory class and flags
+ */
 extern "C" void func_00252FC8(int name, int size, int memType)
 {
     func_00252A10(name, size, 0x80, 0, memType, 1);
@@ -1348,6 +1568,14 @@ extern "C" void func_00252FC8(int name, int size, int memType)
 //100%
 INCLUDE_ASM("mem/memstd", func_00252FF0);
 #ifdef SKIP_ASM
+/**
+ * Allocates a block that returns 0 instead of aborting on failure: MEM_allocaligna(@p name, @p size, 0, 0,
+ * @p memType, 0), with the class's default alignment.
+ *
+ * @param name  the block's name
+ * @param size  bytes wanted
+ * @param memType  memory class and flags
+ */
 extern "C" void func_00252FF0(void* name, int size, int memType)
 {
     MEM_allocaligna_6(name, size, 0, 0, memType, 0);
@@ -1358,6 +1586,14 @@ INCLUDE_ASM("mem/memstd", func_00253018);
 #ifdef SKIP_ASM
 extern "C" void func_00252A10(int, int, int, int, int, int);
 
+/**
+ * Allocates a block from the EA heap that returns 0 instead of aborting: func_00252A10(@p name, @p size, 0, 0,
+ * @p memType, 0).
+ *
+ * @param name  the block's name
+ * @param size  bytes wanted
+ * @param memType  memory class and flags
+ */
 extern "C" void func_00253018(int name, int size, int memType) {
     func_00252A10(name, size, 0, 0, memType, 0);
 }
@@ -1365,6 +1601,12 @@ extern "C" void func_00253018(int name, int size, int memType) {
 //100%
 INCLUDE_ASM("mem/memstd", func_00253040);
 #ifdef SKIP_ASM
+/**
+ * Allocates @p size bytes, unnamed, from the default class, aborting on failure: MEM_allocaligna(0, @p size, 0, 0, 0,
+ * 1).
+ *
+ * @param size  bytes wanted
+ */
 extern "C" void func_00253040(int size)
 {
     MEM_allocaligna_6(0, size, 0, 0, 0, 1);
@@ -1375,6 +1617,12 @@ INCLUDE_ASM("mem/memstd", func_00253070);
 #ifdef SKIP_ASM
 extern "C" void func_00252A10(int, int, int, int, int, int);
 
+/**
+ * Allocates @p size bytes, unnamed, from the EA heap's default class, aborting on failure: func_00252A10(0, @p size, 0,
+ * 0, 0, 1).
+ *
+ * @param size  bytes wanted
+ */
 extern "C" void func_00253070(int size) {
     func_00252A10(0, size, 0, 0, 0, 1);
 }
@@ -1382,6 +1630,12 @@ extern "C" void func_00253070(int size) {
 //100%
 INCLUDE_ASM("mem/memstd", func_002530A0);
 #ifdef SKIP_ASM
+/**
+ * Allocates @p size bytes, unnamed, from the default class, returning 0 instead of aborting: MEM_allocaligna(0,
+ * @p size, 0, 0, 0, 0).
+ *
+ * @param size  bytes wanted
+ */
 extern "C" void func_002530A0(int size)
 {
     MEM_allocaligna_6(0, size, 0, 0, 0, 0);
@@ -1392,6 +1646,12 @@ INCLUDE_ASM("mem/memstd", func_002530D0);
 #ifdef SKIP_ASM
 extern "C" void func_00252A10(int, int, int, int, int, int);
 
+/**
+ * Allocates @p size bytes, unnamed, from the EA heap's default class, returning 0 instead of aborting: func_00252A10(0,
+ * @p size, 0, 0, 0, 0).
+ *
+ * @param size  bytes wanted
+ */
 extern "C" void func_002530D0(int size) {
     func_00252A10(0, size, 0, 0, 0, 0);
 }
@@ -1399,6 +1659,17 @@ extern "C" void func_002530D0(int size) {
 //100%
 INCLUDE_ASM("mem/memstd", func_00253100);
 #ifdef SKIP_ASM
+/**
+ * Returns the first free block of the EA heap class @p cls that holds at least @p size bytes (size field, header
+ * included), walking the free list from the head forwards, or backwards when @p back is nonzero.
+ *
+ * The sentinel (tag 0x4253) stops the walk; reaching it returns 0. func_00252A10 inlines the same search.
+ *
+ * @param cls  the memory class
+ * @param size  minimum block size
+ * @param back  nonzero to search from the top of memory down
+ * @return the block, or 0
+ */
 extern "C" sMemNode_251718* func_00253100(sMemClass_251718* cls, int size, int back)
 {
     sMemNode_251718* n = &cls->head;
@@ -1417,6 +1688,17 @@ extern "C" sMemNode_251718* func_00253100(sMemClass_251718* cls, int size, int b
 //100%
 INCLUDE_ASM("mem/memstd", func_00253170);
 #ifdef SKIP_ASM
+/**
+ * Returns the largest free block of the EA heap class @p cls whose data (size - 16) exceeds @p size - 1, walking the
+ * free list forwards, or backwards when @p dir is nonzero, up to the sentinel (tag 0x4253).
+ *
+ * func_00252A10 inlines the same search for its best-fit mode (flag 0x200).
+ *
+ * @param cls  the memory class
+ * @param size  minimum data size
+ * @param dir  nonzero to walk the list backwards
+ * @return the block, or 0 when none is big enough
+ */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 // Largest block in the class whose payload exceeds size - 1, walking forward
 // (dir 0) or backward; 0 if none.
@@ -1459,6 +1741,16 @@ extern "C" sMemNode_251718* func_00253170(sMemClass_251718* cls, int size, int d
 //100%
 INCLUDE_ASM("mem/memstd", func_00253230);
 #ifdef SKIP_ASM
+/**
+ * Returns the total free data bytes of the EA heap class @p cls: the sum of size - 16 over its free list up to the
+ * sentinel (tag 0x4253).
+ *
+ * Both directions give the same total; @p back only chooses which end the walk starts from.
+ *
+ * @param cls  the memory class
+ * @param back  nonzero to walk the list backwards
+ * @return the free bytes
+ */
 extern "C" int func_00253230(sMemClass_251718* cls, int back)
 {
     int total = 0;
@@ -1485,6 +1777,15 @@ extern "C" int func_00253230(sMemClass_251718* cls, int back)
 //100%
 INCLUDE_ASM("mem/memstd", func_002532B0);
 #ifdef SKIP_ASM
+/**
+ * Inserts block @p blk into the address-sorted free list of the EA heap class @p cls.
+ *
+ * Sets the block's size to the distance to the next block in memory (end), finds its place by walking from the list end
+ * nearer to its address, links it in, and tags it free (0x4246, flag 0x4000). func_00252A10 inlines the same code.
+ *
+ * @param cls  the memory class
+ * @param blk  the block to insert
+ */
 extern "C" void func_002532B0(sMemClass_251D50* cls, sMemNode_251D50* blk)
 {
     sMemNode_251D50* nextNode = &cls->head;
@@ -1522,6 +1823,12 @@ struct sMemBlock {
     sMemBlock* prev;
 };
 
+/**
+ * Takes block @p blk off the EA heap's free list: unlinks it (next/prev), tags it 0x424F and clears its free flag
+ * (0x4000).
+ *
+ * @param blk  the free block
+ */
 extern "C" void func_00253368(sMemBlock* blk) {
     sMemBlock* prev = blk->prev;
     sMemBlock* next = blk->next;
@@ -1535,6 +1842,12 @@ extern "C" void func_00253368(sMemBlock* blk) {
 //100%
 INCLUDE_ASM("mem/memstd", func_00253390);
 #ifdef SKIP_ASM
+/**
+ * Fills a movie play-options block with its defaults: play speed (+0x20) 1.0, draw layer (+0x1C) 31, and every other
+ * word (video file +0x0, audio file +0x4, flags +0x8..+0x14, memory type +0x18) 0.
+ *
+ * Callers (cVidEngine_ReadyVideo, cRealFE's movie start, the rewards video player) fill it in before func_002534A8.
+ */
 extern "C" void func_00253390(void* self)
 {
     *(float*)((char*)self + 0x20) = 1.0f;
@@ -1554,6 +1867,14 @@ INCLUDE_ASM("mem/memstd", func_002533C8);
 #ifdef SKIP_ASM
 extern "C" void func_00253AA0();
 
+/**
+ * Constructs a movie player (0x44 bytes): installs the movie memory callbacks (func_00253AA0), sets the play options
+ * (+0x14) to their defaults (func_00253390), copies the default play speed (+0x34) to the speed (+0x10) and clears the
+ * finished (+0x0), paused (+0x8) and frame (+0xC) words, the decoder (+0x38), the video driver (+0x3C) and the
+ * new-frame flag (+0x40).
+ *
+ * @return @p self
+ */
 extern "C" void* func_002533C8(void* self)
 {
     func_00253AA0();
@@ -1574,6 +1895,11 @@ INCLUDE_ASM("mem/memstd", func_00253418);
 void operator_delete(int*);
 extern "C" void func_002535F8(void* self);
 
+/**
+ * Destroys a movie player: releases everything (func_002535F8) and frees the object when @p flags bit 0 is set.
+ *
+ * @param flags  bit 0 frees the memory (callers pass 3)
+ */
 extern "C" void func_00253418(void* self, int flags)
 {
     func_002535F8(self);
@@ -1593,6 +1919,12 @@ struct func_00253460_sInfo {
 
 extern "C" void func_002534A8(void* self, void* info);
 
+/**
+ * Opens the movie @p v with default play options: purges the player (func_002535F8), fills a play-options block with
+ * defaults (func_00253390), sets its video file to @p v and opens it (func_002534A8).
+ *
+ * @param v  the video file name
+ */
 extern "C" void func_00253460(void* self, int v)
 {
     func_00253460_sInfo info;
@@ -1631,6 +1963,18 @@ struct sMemCfg_2534A8 {
 };
 
 extern "C" int func_002534A8_impl(void* self, sMemCfg_2534A8* cfg) __asm__("func_002534A8");
+/**
+ * Opens a movie: purges the player (func_002535F8), copies the 0x24-byte play options @p cfg to +0x14 and creates the
+ * REAL decoder (+0x38).
+ *
+ * Copies the options' play speed (+0x34) to the speed (+0x10). The decoder memory (0x78 bytes) comes from the movie
+ * allocator table D_00509430. With an audio file name (+0x18, non-empty) it builds the decoder with func_003ADE08
+ * (video +0x14, 0x60000, audio file, 0x20000), else with func_003ADDC0 (video, 0x80000); both also get whether the
+ * options word +0x24 is set and whether the word +0x1C is clear. Callers then start it with func_00253860.
+ *
+ * @param cfg  the play options (filled from func_00253390's defaults)
+ * @return 1 (always)
+ */
 extern "C" int func_002534A8_impl(void* self, sMemCfg_2534A8* cfg)
 {
     func_002535F8(self);
@@ -1705,6 +2049,14 @@ struct sStream002535F8 {
     int f40;
 };
 
+/**
+ * Releases the player's movie resources and resets its state.
+ *
+ * With a decoder (+0x38) and a video driver (+0x3C) it first flushes the renderer (graphics manager slot 19,
+ * cGraphicsMan_FlushRenderer); a pending frame (+0x40, +0xC) goes back to the decoder (RCMP_DECODER_ReleaseFrame). The
+ * driver is deleted (vtable slot 1, flags 3) and the active-player count D_004A2E9C decremented, the decoder is deleted
+ * (func_003AE300, flags 3), and the finished, redraw, paused, frame and new-frame words are cleared.
+ */
 extern "C" void func_002535F8(void* self)
 {
     sStream002535F8* s = (sStream002535F8*)self;
@@ -1744,6 +2096,14 @@ extern "C" void* func_00254368(void* a0, int a1, int a2, int a3);
 int func_003AE938(void*);
 int func_003AE958_i(void*) __asm__("func_003AE958__FPv");
 
+/**
+ * Starts playback: fetches the first frame (func_003AE450(decoder, 1, 33)) into +0xC and sets the new-frame flag
+ * (+0x40), pauses the decoder (func_003AE938), creates the video driver for that frame (func_00254368 with the
+ * decoder's +0x64, the frame, cGraphicsMan_TheGraphicsMan and the draw layer +0x30) into +0x3C, resumes the decoder
+ * (func_003AE958) and increments the active-player count D_004A2E9C.
+ *
+ * Clears the finished (+0x0) and redraw (+0x4) words first.
+ */
 extern "C" void func_002536C8(void* self)
 {
     char* s = (char*)self;
@@ -1786,6 +2146,15 @@ struct sWorld_253748 {
     sVE0_253748* vt;            // 0x10D8
 };
 
+/**
+ * Plays the whole movie before returning, when a decoder (+0x38) exists.
+ *
+ * Starts playback (func_002536C8), then until finished (+0x0): draws the frame (driver slot 5 when redraw +0x4 is set,
+ * else slot 4 with the frame +0xC), shows it (graphics manager slot 20, cPS2GraphicsMan_DrawFrame), runs
+ * SYNCTASK_run(0) and func_003E5398(0), and when the decoder is due (func_003AE780) completes the draw (driver slot 6)
+ * and fetches the next frame for the decoder's time (+0x48, func_003AE6C8). Without a frame it asks func_003AE860
+ * whether the movie has finished. Clears the new-frame flag (+0x40) at the end.
+ */
 extern "C" void func_00253748(void* self)
 {
     sStream002535F8* s = (sStream002535F8*)self;
@@ -1829,6 +2198,11 @@ INCLUDE_ASM("mem/memstd", func_00253860);
 #ifdef SKIP_ASM
 extern "C" void func_002536C8(void* self);
 
+/**
+ * Starts asynchronous playback: when a decoder (+0x38) exists, starts it (func_002536C8).
+ *
+ * @return 1 when started, 0 without a decoder
+ */
 extern "C" int func_00253860(void* self)
 {
     if (*(void**)((char*)self + 0x38) == 0) {
@@ -1853,6 +2227,15 @@ public:
     virtual void v05();
 };
 
+/**
+ * Draws the movie for this frame, when a decoder (+0x38) and a video driver (+0x3C) exist.
+ *
+ * Redraws the last image (driver slot 5) when @p force is set, when paused (+0x8), when no new frame is waiting (+0x40)
+ * and redraw (+0x4) is set, or when the movie has finished (+0x0); otherwise draws the current frame (driver slot 4
+ * with +0xC) and clears the new-frame flag.
+ *
+ * @param force  nonzero to redraw the previous image
+ */
 extern "C" void func_00253890(void* self, int force)
 {
     if (*(void**)((char*)self + 0x38) == 0) {
@@ -1924,6 +2307,10 @@ INCLUDE_ASM("mem/memstd", func_002539E0);
 #ifdef SKIP_ASM
 int func_003AE938(void*);
 
+/**
+ * Pauses the movie: when a decoder (+0x38) and a driver (+0x3C) exist and it is neither finished (+0x0) nor already
+ * paused (+0x8), pauses the decoder (func_003AE938) and sets the paused word.
+ */
 extern "C" void func_002539E0(void* self)
 {
     void* handle = *(void**)((char*)self + 0x38);
@@ -1940,6 +2327,10 @@ INCLUDE_ASM("mem/memstd", func_00253A40);
 #ifdef SKIP_ASM
 void func_003AE958(void*);
 
+/**
+ * Resumes a paused movie: when a decoder (+0x38) and a driver (+0x3C) exist, it has not finished (+0x0) and it is
+ * paused (+0x8), resumes the decoder (func_003AE958) and clears the paused word.
+ */
 extern "C" void func_00253A40(void* self)
 {
     void* handle = *(void**)((char*)self + 0x38);
@@ -1964,6 +2355,11 @@ struct sMemAllocFuncs {
 };
 extern sMemAllocFuncs D_00509430;
 
+/**
+ * Installs the movie memory callbacks in D_00509430: allocate func_00253AD0, free func_00253AF8, memory type 0x400.
+ *
+ * The decoder and video driver code allocate through this table.
+ */
 extern "C" void func_00253AA0()
 {
     D_00509430.alloc = func_00253AD0;
@@ -1980,6 +2376,17 @@ void* func_00252F60_5(void* a0, int a1, int a2, int a3, int a4) __asm__("func_00
 // PORT: the unit declares this as (int size); the body uses 5 args (prototype mismatch).
 void* func_00253AD0_impl(void* a0, int a1, int align, int a3, int a4) __asm__("func_00253AD0");
 
+/**
+ * Movie allocation callback: allocates through func_00252F60 (MEM_allocaligna with abort) with at least 64-byte
+ * alignment.
+ *
+ * @param a0  the block's name
+ * @param a1  bytes wanted
+ * @param align  alignment, raised to 64
+ * @param a3  header bytes
+ * @param a4  memory class and flags
+ * @return the new block
+ */
 void* func_00253AD0_impl(void* a0, int a1, int align, int a3, int a4)
 {
     if (align < 64) {
@@ -1994,6 +2401,11 @@ extern "C" void* MEM_free(void* self);
 //99.29%
 INCLUDE_ASM("mem/memstd", func_00253AF8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Movie free callback: releases the block @p self through MEM_free.
+ *
+ * @return MEM_free's result
+ */
 void* func_00253AF8(void* self)
 {
     return MEM_free(self);
@@ -2003,6 +2415,12 @@ void* func_00253AF8(void* self)
 //100%
 INCLUDE_ASM("mem/memstd", func_00253B18);
 #ifdef SKIP_ASM
+/**
+ * Returns @p value unchanged, ignoring any further arguments (a variadic no-op).
+ *
+ * @param value  the value returned
+ * @return @p value
+ */
 extern "C" int func_00253B18(int value, ...)
 {
     return value;
@@ -2023,6 +2441,15 @@ extern char D_004D2538[], D_004D2548[], D_004D2558[], D_004D2568[], D_004D2578[]
 
 // PORT: the unit declares func_00253B58 as void*(int, int); it returns nothing.
 extern "C" void func_00253B58_impl(int initialize, int priority) __asm__("func_00253B58");
+/**
+ * Static initialiser of the movie player's unit: when @p initialize is set and @p priority is 0xFFFF, constructs 56
+ * four-float constants (D_004D2538..D_004D28A8, colour-like values between 0 and 1).
+ *
+ * func_00254330 calls it as the unit's global constructor; func_00254E60 builds an identical table for the next unit.
+ *
+ * @param initialize  nonzero to construct (0 would be destruction, which has nothing to do)
+ * @param priority  init priority; only 0xFFFF does anything
+ */
 extern "C" void func_00253B58_impl(int initialize, int priority)
 {
     if (priority == 0xFFFF && initialize != 0) {
@@ -2091,6 +2518,11 @@ extern "C" void* func_00253B58(int, int);
 //99.38%
 INCLUDE_ASM("mem/memstd", func_00254330__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs the movie player unit's static initialisation: func_00253B58(1, 0xFFFF).
+ *
+ * @return whatever func_00253B58 left in the return register
+ */
 void* func_00254330(void* self)
 {
     return func_00253B58(1, 0xffff);
@@ -2100,6 +2532,14 @@ void* func_00254330(void* self)
 //100%
 INCLUDE_ASM("mem/memstd", func_00254350);
 #ifdef SKIP_ASM
+/**
+ * Returns floor(log2(@p x)) for a positive @p x, read from the exponent of its float conversion.
+ *
+ * For values above 2^24 the float rounding can round up to the next power of two.
+ *
+ * @param x  a positive integer
+ * @return the index of its highest set bit
+ */
 extern "C" int func_00254350(int x)
 {
     float fv = (float)x;
@@ -2118,6 +2558,16 @@ extern "C" void* func_00254410(void* self, void* a0, int a1, int a2, int a3);
 // takes (tag, size, align, d, flags) (see func_00252F60 / func_00253AD0).
 typedef void* (*tMemAlloc5_00254368)(void*, int, int, int, int);
 
+/**
+ * Creates the movie's video driver: allocates 84 bytes from the movie allocator table D_00509430 and constructs the
+ * tiled-texture driver in it (func_00254410).
+ *
+ * @param a0  the decoder (handed to RCMP_DECODER_ReleaseFrame later)
+ * @param a1  the first frame
+ * @param a2  the graphics manager (cGraphicsMan_TheGraphicsMan)
+ * @param a3  the draw layer
+ * @return the new driver
+ */
 extern "C" void* func_00254368(void* a0, int a1, int a2, int a3)
 {
     void* p = ((tMemAlloc5_00254368)D_00509430.alloc)(D_004A2EA0, 84, 0, 0, D_00509430.field_0x8);
@@ -2128,6 +2578,13 @@ extern "C" void* func_00254368(void* a0, int a1, int a2, int a3)
 //100%
 INCLUDE_ASM("mem/memstd", func_002543F0);
 #ifdef SKIP_ASM
+/**
+ * Sets the video driver's screen position: +0x40, +0x44, +0x48 = @p posX, @p posY, @p posZ.
+ *
+ * @param posX  left edge
+ * @param posY  top edge
+ * @param posZ  depth
+ */
 extern "C" void func_002543F0(void* self, float posX, float posY, float posZ)
 {
     *(float*)((char*)self + 0x40) = posX;
@@ -2139,6 +2596,12 @@ extern "C" void func_002543F0(void* self, float posX, float posY, float posZ)
 //100%
 INCLUDE_ASM("mem/memstd", func_00254400__FPvff);
 #ifdef SKIP_ASM
+/**
+ * Sets the video driver's scale: +0x4C (width) and +0x50 (height) = @p scaleX, @p scaleY.
+ *
+ * @param scaleX  horizontal scale
+ * @param scaleY  vertical scale
+ */
 void func_00254400(void* self, float scaleX, float scaleY)
 {
     *(float*)((char*)self + 0x4c) = scaleX;
@@ -2229,6 +2692,23 @@ struct sTexSheet_4410 {
 // PORT: the unit declares this as (void*, void*, int, int, int); typed body bound by asm label.
 extern "C" void* func_00254410_body(sTexSheet_4410* self, void* owner, char* res, cRend_4410* rend, int a3) __asm__("func_00254410");
 
+/**
+ * Constructs the movie's tiled-texture video driver over the first frame and uploads the frame as textures.
+ *
+ * Stores the decoder (+0x0), the vtable D_00480270 and the graphics manager (+0x8), reads the frame image header
+ * (@p res + 4; data at header + 0x10, or at its offset +0x10 when flag 0x1000 is set). The image is cut into 16-pixel
+ * columns (+0x1C) and power-of-two row heights (+0x24, count +0x20, func_00254350); each tile (12 bytes from the movie
+ * allocator) gets a texture from graphics manager slot 47 (cPS2GraphicsMan_AddTexture1) and func_0037D090. The tile table (+0x14,
+ * name "VD: VD_TEXTURE_POINTER") holds +0x18 entries. Centres the image on the screen (func_002543F0 with the screen
+ * width and height from slots 10/11, depth D_004A2EB0), sets the scale to 1 (func_00254400) and stores the draw layer
+ * (+0x3C).
+ *
+ * @param owner  the decoder
+ * @param res  the first frame
+ * @param rend  the graphics manager
+ * @param a3  the draw layer
+ * @return @p self
+ */
 extern "C" void* func_00254410_body(sTexSheet_4410* self, void* owner, char* res, cRend_4410* rend, int a3)
 {
     self->owner = owner;
@@ -2307,6 +2787,16 @@ struct sTexCache_2547B8 {
     int count;
 };
 
+/**
+ * Destroys the tiled-texture video driver: removes each tile's texture (graphics manager slot 50,
+ * cPS2GraphicsMan_RemoveTexture), marks it -1 and frees the tile through D_00509430, frees the tile table
+ * (cMemMan_free), returns a held frame (+0xC) to the decoder (RCMP_DECODER_ReleaseFrame), installs the base vtable
+ * D_004802B0 and, when @p flags bit 0 is set, frees the object through the movie free hook.
+ *
+ * Vtable slot 1 of D_00480270.
+ *
+ * @param flags  bit 0 frees the memory
+ */
 extern "C" void func_002547B8(sTexCache_2547B8* self, int flags)
 {
     self->vt = D_00480270;
@@ -2458,6 +2948,17 @@ struct sMesh_2548D0 {
 
 // PORT: the unit declares func_002548D0 as returning void*, but it returns nothing (v0 is left as is); bind the real signature.
 extern "C" void func_002548D0_impl(void* p) __asm__("func_002548D0");
+/**
+ * Draws the driver's tiles as screen quads: waits until the renderer is ready (graphics manager slot 17), sets a
+ * full-screen viewport (slot 26) and the identity view (slot 34), puts the draw layer (+0x3C) into the render state,
+ * then emits one 4-vertex strip (slot 71, cPS2GraphicsMan_RenderTriStrip) per tile.
+ *
+ * Tiles are laid out column by column from the position (+0x40, +0x44, +0x48, offset by half a pixel): each column 16 *
+ * scale X (+0x4C) wide, each row its height (+0x24 table) times scale Y (+0x50), with grey (0x80) vertex colour and
+ * full UVs, and the tile's texture set as the current one.
+ *
+ * @param p  the video driver
+ */
 extern "C" void func_002548D0_impl(void* p)
 {
     sMesh_2548D0* self = (sMesh_2548D0*)p;
@@ -2590,6 +3091,14 @@ struct sMesh_254C48 {
     int widths[1];
 };
 
+/**
+ * Draws a new movie frame: uploads the frame's pixels (@p res + 4 header, data as in func_00254410) into each tile's
+ * texture (graphics manager slot 49, func_0037D318) and draws the tiles (func_002548D0).
+ *
+ * Remembers @p res in +0xC when it is non-null, though it then reads it unconditionally. Vtable slot 4 of D_00480270.
+ *
+ * @param res  the frame
+ */
 extern "C" void func_00254C48(sMesh_254C48* self, void* res)
 {
     if (res != 0) {
@@ -2623,6 +3132,11 @@ extern "C" void* func_002548D0(void* self);
 //99.29%
 INCLUDE_ASM("mem/memstd", func_00254DA0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Redraws the last frame's tiles (func_002548D0). Vtable slot 5 of D_00480270.
+ *
+ * @return whatever func_002548D0 left in the return register
+ */
 void* func_00254DA0(void* self)
 {
     return func_002548D0(self);
@@ -2640,6 +3154,12 @@ struct sMemStdVEntry {
 
 extern "C" void RCMP_DECODER_ReleaseFrame(void*, void*);
 
+/**
+ * Finishes the frame: waits until the renderer is idle (graphics manager slot 18, cPS2GraphicsMan_IsRenderIdle), then
+ * hands the held frame (+0xC) back to the decoder (+0x0, RCMP_DECODER_ReleaseFrame) and clears it.
+ *
+ * Vtable slot 6 of D_00480270.
+ */
 extern "C" void func_00254DC0(void* self)
 {
     void* rend;
@@ -2659,6 +3179,12 @@ extern "C" void func_00254DC0(void* self)
 //100%
 INCLUDE_ASM("mem/memstd", func_00254E20);
 #ifdef SKIP_ASM
+/**
+ * Returns @p value unchanged, ignoring any further arguments (a variadic no-op; the next unit's copy of func_00253B18).
+ *
+ * @param value  the value returned
+ * @return @p value
+ */
 extern "C" int func_00254E20(int value, ...)
 {
     return value;
@@ -2677,6 +3203,15 @@ extern char D_004D28B8[], D_004D28C8[], D_004D28D8[], D_004D28E8[], D_004D28F8[]
 
 // PORT: the unit declares func_00254E60 as void*(int, int); it returns nothing.
 extern "C" void func_00254E60_impl(int initialize, int priority) __asm__("func_00254E60");
+/**
+ * Static initialiser of the video driver's unit: when @p initialize is set and @p priority is 0xFFFF, constructs the
+ * same 56 four-float constants as func_00253B58, into D_004D28B8..D_004D2C28.
+ *
+ * func_002557C0 calls it as the unit's global constructor.
+ *
+ * @param initialize  nonzero to construct
+ * @param priority  init priority; only 0xFFFF does anything
+ */
 extern "C" void func_00254E60_impl(int initialize, int priority)
 {
     if (priority == 0xFFFF && initialize != 0) {
@@ -2746,6 +3281,12 @@ INCLUDE_ASM("mem/memstd", func_00255638);
 extern void* D_004802B0[];
 void operator_delete(int*);
 
+/**
+ * Destroys a base video driver: installs the base vtable D_004802B0 and frees the object (operator_delete) when
+ * @p flags bit 0 is set.
+ *
+ * @param flags  bit 0 frees the memory
+ */
 extern "C" void func_00255638(void* self, int flags)
 {
     *(void***)((char*)self + 0x4) = D_004802B0;
@@ -2758,6 +3299,9 @@ extern "C" void func_00255638(void* self, int flags)
 //100%
 INCLUDE_ASM("mem/memstd", func_00255668__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base video driver's default for vtable slot 6 of D_004802B0.
+ */
 void func_00255668(void* self)
 {
 }
@@ -2768,6 +3312,14 @@ extern "C" void* func_00254E60(int, int);
 //100%
 INCLUDE_ASM("mem/memstd", func_00255670);
 #ifdef SKIP_ASM
+/**
+ * Allocates @p arg0 bytes through the movie allocator table (D_00509430's allocate with name D_004A2EA0 and memory type
+ * +0x8); the video driver's class operator new.
+ *
+ * The result is left in the return register.
+ *
+ * @param arg0  bytes wanted
+ */
 extern "C" void func_00255670(int arg0) {
     (*(int (**)(int *, int, int, int, int))((char*)(&(*(int*)&D_00509430)) + (0)))(&(*(int*)&D_004A2EA0), arg0, 0, 0, (*(int *)((char*)(&(*(int*)&D_00509430)) + (8))));
 }
@@ -2775,6 +3327,11 @@ extern "C" void func_00255670(int arg0) {
 //100%
 INCLUDE_ASM("mem/memstd", func_002556B0);
 #ifdef SKIP_ASM
+/**
+ * Allocates @p arg0 bytes through the movie allocator table, like func_00255670; the video driver's array operator new.
+ *
+ * @param arg0  bytes wanted
+ */
 extern "C" void func_002556B0(int arg0) {
     (*(int (**)(int *, int, int, int, int))((char*)(&(*(int*)&D_00509430)) + (0)))(&(*(int*)&D_004A2EA0), arg0, 0, 0, (*(int *)((char*)(&(*(int*)&D_00509430)) + (8))));
 }
@@ -2782,6 +3339,16 @@ extern "C" void func_002556B0(int arg0) {
 //100%
 INCLUDE_ASM("mem/memstd", func_002556F0);
 #ifdef SKIP_ASM
+/**
+ * Allocates @p size bytes through the movie allocator table with the caller's name, alignment, header size and memory
+ * type; the video driver's operator new with allocation arguments.
+ *
+ * @param size  bytes wanted
+ * @param tag  the block's name
+ * @param align  alignment
+ * @param d  header bytes
+ * @param flags  memory class and flags
+ */
 extern "C" void func_002556F0(int size, void* tag, int align, int d, int flags)
 {
     ((tMemAlloc5_00254368)D_00509430.alloc)(tag, size, align, d, flags);
@@ -2790,6 +3357,16 @@ extern "C" void func_002556F0(int size, void* tag, int align, int d, int flags)
 //100%
 INCLUDE_ASM("mem/memstd", func_00255720);
 #ifdef SKIP_ASM
+/**
+ * Allocates @p size bytes through the movie allocator table with the caller's name, alignment, header size and memory
+ * type; the array form of func_002556F0.
+ *
+ * @param size  bytes wanted
+ * @param tag  the block's name
+ * @param align  alignment
+ * @param d  header bytes
+ * @param flags  memory class and flags
+ */
 extern "C" void func_00255720(int size, void* tag, int align, int d, int flags)
 {
     ((tMemAlloc5_00254368)D_00509430.alloc)(tag, size, align, d, flags);
@@ -2798,6 +3375,9 @@ extern "C" void func_00255720(int size, void* tag, int align, int d, int flags)
 //100%
 INCLUDE_ASM("mem/memstd", func_00255750);
 #ifdef SKIP_ASM
+/**
+ * Frees @p self through the movie free hook (D_00509434); the video driver's operator delete.
+ */
 extern "C" void func_00255750(void* self)
 {
     D_00509434[0](self);
@@ -2806,6 +3386,9 @@ extern "C" void func_00255750(void* self)
 //100%
 INCLUDE_ASM("mem/memstd", func_00255778);
 #ifdef SKIP_ASM
+/**
+ * Frees @p self through the movie free hook (D_00509434); the video driver's array operator delete.
+ */
 extern "C" void func_00255778(void* self)
 {
     D_00509434[0](self);
@@ -2814,6 +3397,12 @@ extern "C" void func_00255778(void* self)
 //100%
 INCLUDE_ASM("mem/memstd", func_002557A0);
 #ifdef SKIP_ASM
+/**
+ * Returns @p value: the placement form of operator new (the size in @p self is ignored).
+ *
+ * @param value  the place to construct at
+ * @return @p value
+ */
 extern "C" int func_002557A0(void* self, int value) {
     return value;
 }
@@ -2821,6 +3410,9 @@ extern "C" int func_002557A0(void* self, int value) {
 //100%
 INCLUDE_ASM("mem/memstd", func_002557A8);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the placement form of operator delete.
+ */
 extern "C" void func_002557A8(void) {
 
 }
@@ -2828,6 +3420,12 @@ extern "C" void func_002557A8(void) {
 //100%
 INCLUDE_ASM("mem/memstd", func_002557B0);
 #ifdef SKIP_ASM
+/**
+ * Returns @p value: the array placement form of operator new.
+ *
+ * @param value  the place to construct at
+ * @return @p value
+ */
 extern "C" int func_002557B0(void* self, int value) {
     return value;
 }
@@ -2835,6 +3433,9 @@ extern "C" int func_002557B0(void* self, int value) {
 //100%
 INCLUDE_ASM("mem/memstd", func_002557B8);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the array placement form of operator delete.
+ */
 extern "C" void func_002557B8(void) {
 
 }
@@ -2843,6 +3444,11 @@ extern "C" void func_002557B8(void) {
 //99.38%
 INCLUDE_ASM("mem/memstd", func_002557C0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs the video driver unit's static initialisation: func_00254E60(1, 0xFFFF).
+ *
+ * @return whatever func_00254E60 left in the return register
+ */
 void* func_002557C0(void* self)
 {
     return func_00254E60(1, 0xffff);
@@ -2854,6 +3460,11 @@ extern void* cCommChannel_vtbl[];
 //100%
 INCLUDE_ASM("mem/memstd", func_002557E0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs a comm channel: clears mChannelOpen and mError and installs cCommChannel_vtbl in mVtbl.
+ *
+ * @return @p self
+ */
 void* func_002557E0(void* self)
 {
     int zero = 0;
@@ -2886,6 +3497,11 @@ extern "C" void cCommChannel__cCommChannel(cCommChannel* self, int flags)
 //100%
 INCLUDE_ASM("mem/memstd", func_00255830__FPv);
 #ifdef SKIP_ASM
+/**
+ * Opens the channel: clears mError and sets mChannelOpen to 1.
+ *
+ * @return 1
+ */
 int func_00255830(void* self)
 {
     int one = 1;

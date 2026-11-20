@@ -24,6 +24,15 @@ extern "C" void* func_002D9C00(void* self);
 //100%
 INCLUDE_ASM("util/objectinterface", func_002D1CF0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Gets an instance's avalanche-spline transform: forwards to func_002D9C00 with @p self and, in the second register,
+ * the output.
+ *
+ * cAvaSplineModifier's update calls it with its Instance and its Transform (+0x40). This definition declares only the
+ * first argument.
+ *
+ * @return func_002D9C00's result
+ */
 void* func_002D1CF0(void* self)
 {
     return func_002D9C00(self);
@@ -140,6 +149,17 @@ extern char D_828[];
 
 struct sQ128 { float v[4]; } __attribute__((aligned(16)));
 
+/**
+ * Tells whether @p box is hidden behind one of the active occluders, using a VU0 microprogram.
+ *
+ * Walks the occluders of SSXApp->Game->OcclusionMan (count at +0x10C, enable mask at +0x110, entry i's pointer at +0x8
+ * + 8i): for each enabled one it loads five quadwords of its data (+0x50) and @p box into vf1-vf6, runs the VU0 micro
+ * routine at 0x828 (vcallmsr) and reads vi1; a result of 1 means occluded. cMoveNode's render skips drawing when it
+ * returns 1.
+ *
+ * @param box  the bounds to test (one quadword)
+ * @return 1 when an occluder hides it, else 0
+ */
 // PORT: PS2-only VU0 microprogram call (ctc2/vcallmsr/cfc2); the PC port needs a C version.
 extern "C" int func_002D2058(sQ128* box)
 {
@@ -181,6 +201,11 @@ INCLUDE_ASM("util/objectinterface", func_002D20F8);
 #ifdef SKIP_ASM
 extern void* D_004A3A00;
 
+/**
+ * Returns the stats manager, D_004A3A00 (set by func_002D21C0).
+ *
+ * @return the stats manager (On Tour's global gSSXStatsMan)
+ */
 extern "C" int func_002D20F8(void) {
     return (*(int*)&D_004A3A00);
 }
@@ -193,6 +218,14 @@ extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, in
 extern const char str_SSXStatsMan_b[];
 extern "C" void* func_002D21C0(void* p);
 
+/**
+ * Creates the stats manager: allocates its one byte with cMemMan_alloc (tag "SSXStatsMan") and constructs it
+ * (func_002D21C0, which stores it in D_004A3A00).
+ *
+ * The game load calls it.
+ *
+ * @return the new stats manager
+ */
 extern "C" void* func_002D2100(void)
 {
     return func_002D21C0(cMemMan_alloc(1, str_SSXStatsMan_b, 0, 0));
@@ -202,6 +235,9 @@ extern "C" void* func_002D2100(void)
 //100%
 INCLUDE_ASM("util/objectinterface", func_002D2138);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: an empty stats-manager camera stepper (the first of two).
+ */
 extern "C" void func_002D2138(void) {
 
 }
@@ -209,6 +245,9 @@ extern "C" void func_002D2138(void) {
 //100%
 INCLUDE_ASM("util/objectinterface", func_002D2140);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: an empty stats-manager camera stepper (the second of two).
+ */
 extern "C" void func_002D2140(void) {
 
 }
@@ -219,6 +258,14 @@ INCLUDE_ASM("util/objectinterface", func_002D2148);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern long long t4vect_Zero;
 
+/**
+ * Returns the zero vector (t4vect_Zero, a quadword copy) through the hidden return pointer @p vec.
+ *
+ * The first of three identical stats-manager vector stubs (func_002D2148, func_002D2160, func_002D2178).
+ *
+ * @param vec  where the vector is returned
+ * @return @p vec
+ */
 extern "C" long long *func_002D2148(long long *vec) {
     *vec = t4vect_Zero;
     return vec;
@@ -230,6 +277,12 @@ INCLUDE_ASM("util/objectinterface", func_002D2160);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern long long t4vect_Zero;
 
+/**
+ * Returns the zero vector (t4vect_Zero) through the hidden return pointer @p vec; identical to func_002D2148.
+ *
+ * @param vec  where the vector is returned
+ * @return @p vec
+ */
 extern "C" long long *func_002D2160(long long *vec) {
     *vec = t4vect_Zero;
     return vec;
@@ -241,6 +294,12 @@ INCLUDE_ASM("util/objectinterface", func_002D2178);
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern long long t4vect_Zero;
 
+/**
+ * Returns the zero vector (t4vect_Zero) through the hidden return pointer @p vec; identical to func_002D2148.
+ *
+ * @param vec  where the vector is returned
+ * @return @p vec
+ */
 extern "C" long long *func_002D2178(long long *vec) {
     *vec = t4vect_Zero;
     return vec;
@@ -249,6 +308,11 @@ extern "C" long long *func_002D2178(long long *vec) {
 //100%
 INCLUDE_ASM("util/objectinterface", func_002D2190);
 #ifdef SKIP_ASM
+/**
+ * Returns 0.0 (a stats-manager float stub, the first of two).
+ *
+ * @return 0.0
+ */
 extern "C" float func_002D2190(void) {
     return 0.0f;
 }
@@ -256,6 +320,11 @@ extern "C" float func_002D2190(void) {
 //100%
 INCLUDE_ASM("util/objectinterface", func_002D21A0);
 #ifdef SKIP_ASM
+/**
+ * Returns 0.0 (a stats-manager float stub, the second of two).
+ *
+ * @return 0.0
+ */
 extern "C" float func_002D21A0(void) {
     return 0.0f;
 }
@@ -288,6 +357,12 @@ INCLUDE_ASM("util/objectinterface", func_002D21C0);
 #ifdef SKIP_ASM
 extern void* D_004A3A00;
 
+/**
+ * Constructs the stats manager: stores @p p in D_004A3A00, the global func_002D20F8 returns.
+ *
+ * @param p  the object being constructed
+ * @return @p p
+ */
 extern "C" void* func_002D21C0(void* p)
 {
     D_004A3A00 = p;
@@ -307,6 +382,13 @@ union uFloatBits_002D21D0 {
     unsigned int u;
 };
 
+/**
+ * Writes @p value to the byte stream @p stream as 4 little-endian bytes of its bit pattern and advances the stream.
+ *
+ * @param stream  pointer to the write cursor
+ * @param value  the float to write
+ * @return 4, the bytes written
+ */
 int func_002D21D0_impl(signed char **stream, float value)
 {
     uFloatBits_002D21D0 floatBits;
@@ -324,6 +406,13 @@ int func_002D21D0_impl(signed char **stream, float value)
 //100%
 INCLUDE_ASM("util/objectinterface", func_002D2210);
 #ifdef SKIP_ASM
+/**
+ * Writes @p value to the byte stream @p stream as 4 little-endian bytes and advances the stream.
+ *
+ * @param stream  pointer to the write cursor
+ * @param value  the value to write
+ * @return 4, the bytes written
+ */
 extern "C" int func_002D2210(signed char **stream, unsigned int value)
 {
     signed char *cursor = *stream;
@@ -340,6 +429,12 @@ INCLUDE_ASM("util/objectinterface", func_002D2248);
 #ifdef SKIP_ASM
 extern "C" void func_002D21D0(void* self, float v);
 
+/**
+ * Writes the 3 floats of @p vec3 to the byte stream @p self (func_002D21D0 each).
+ *
+ * @param vec3  three floats
+ * @return 12, the bytes written
+ */
 extern "C" int func_002D2248(void* self, float* vec3)
 {
     int i;
@@ -354,6 +449,12 @@ INCLUDE_ASM("util/objectinterface", func_002D22A8);
 #ifdef SKIP_ASM
 extern "C" void func_002D21D0(void* self, float v);
 
+/**
+ * Writes the 4 floats of @p vec4 to the byte stream @p self (func_002D21D0 each).
+ *
+ * @param vec4  four floats
+ * @return 16, the bytes written
+ */
 extern "C" int func_002D22A8(void* self, float* vec4)
 {
     int i;
@@ -368,6 +469,12 @@ INCLUDE_ASM("util/objectinterface", func_002D2308);
 #ifdef SKIP_ASM
 extern "C" void func_002D21D0(void* self, float v);
 
+/**
+ * Writes the 16 floats of @p matrix to the byte stream @p self (func_002D21D0 each).
+ *
+ * @param matrix  a 4x4 float matrix
+ * @return 64, the bytes written
+ */
 extern "C" int func_002D2308(void* self, float* matrix)
 {
     int i;
@@ -382,6 +489,13 @@ INCLUDE_ASM("util/objectinterface", func_002D2368);
 #ifdef SKIP_ASM
 extern "C" void func_002D21D0(void* self, float v);
 
+/**
+ * Writes the 4 floats of @p quat to the byte stream @p self, element 3 first, then elements 0, 1 and 2 (func_002D21D0
+ * each).
+ *
+ * @param quat  four floats
+ * @return 16, the bytes written
+ */
 extern "C" int func_002D2368(void* self, float* quat)
 {
     func_002D21D0(self, quat[3]);
@@ -394,6 +508,13 @@ extern "C" int func_002D2368(void* self, float* quat)
 //100%
 INCLUDE_ASM("util/objectinterface", func_002D23C8);
 #ifdef SKIP_ASM
+/**
+ * Writes the byte @p value to the byte stream @p stream and advances it by one.
+ *
+ * @param stream  pointer to the write cursor
+ * @param value  the byte
+ * @return 1
+ */
 extern "C" int func_002D23C8(signed char **stream, signed char value) {
     **stream = value;
     *stream += 1;
@@ -406,6 +527,14 @@ INCLUDE_ASM("util/objectinterface", func_002D23E8);
 extern "C" int func_002D23C8(signed char **arg0, signed char arg1);
 extern "C" unsigned int strlen(const char* s);
 
+/**
+ * Writes the string @p str and its terminating 0 to the byte stream @p out (func_002D23C8 per byte; strlen is
+ * re-evaluated every iteration).
+ *
+ * @param out  pointer to the write cursor
+ * @param str  the string
+ * @return the bytes written, strlen + 1
+ */
 extern "C" int func_002D23E8(signed char** out, const char* str)
 {
     unsigned int i;
@@ -427,6 +556,14 @@ struct sStr_2478 {
     signed char* data;
 };
 
+/**
+ * Writes a sized data block to the byte stream @p out: the block's byte count (func_002D2210), then that many bytes of
+ * its data (func_002D23C8).
+ *
+ * @param out  pointer to the write cursor
+ * @param pp  reference to the block pointer (a count, then a byte pointer)
+ * @return the bytes written, 4 + count
+ */
 extern "C" int func_002D2478(signed char** out, sStr_2478** pp)
 {
     unsigned int i;

@@ -31,6 +31,11 @@ void* cMCOverlayManager_getManager()
 //100%
 INCLUDE_ASM("movie/movieplayer", func_0023C850);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the memory-card overlay manager has been created (cMCOverlayManager_instance is set).
+ *
+ * @return 1 when the instance exists, else 0
+ */
 extern "C" int func_0023C850(void) {
     return cMCOverlayManager_instance != 0;
 }
@@ -74,6 +79,12 @@ extern "C" int cMCOverlayManager_isManagerDone(cMCOverlayManager* self)
 //100%
 INCLUDE_ASM("movie/movieplayer", func_0023C8A8);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the manager's load has finished: mState is 35 (On Tour's kMCOverlay_LoadDone).
+ *
+ * @param manager  the overlay manager
+ * @return 1 when loaded, else 0
+ */
 extern "C" int func_0023C8A8(void *manager) {
     return (*(int *)((char*)(manager) + (0x130))) == 35;
 }
@@ -81,6 +92,12 @@ extern "C" int func_0023C8A8(void *manager) {
 //100%
 INCLUDE_ASM("movie/movieplayer", func_0023C8B8);
 #ifdef SKIP_ASM
+/**
+ * Returns mSaved, set when the manager's last save completed.
+ *
+ * @param manager  the overlay manager
+ * @return mSaved
+ */
 extern "C" int func_0023C8B8(void *manager) {
     return (*(int *)((char*)(manager) + (0xDC)));
 }
@@ -90,6 +107,11 @@ INCLUDE_ASM("movie/movieplayer", func_0023C8C0);
 #ifdef SKIP_ASM
 extern int cMCOverlayManager_mSaveInProgress;
 
+/**
+ * Tells whether a memory-card write is in progress (cMCOverlayManager_mSaveInProgress is set).
+ *
+ * @return 1 while saving, else 0
+ */
 extern "C" int func_0023C8C0(void) {
     return cMCOverlayManager_mSaveInProgress != 0;
 }
@@ -139,6 +161,16 @@ struct sMovieVEntry_23C8F0 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Prepares a memory-card read of file type @p mode (0 replay, 1 profile, 2 settings).
+ *
+ * Stores mFileType, switches to the device-select action (cMCOverlayManager_SetAction(1)), sets mSaveProfileID to -1
+ * and mSave to 0, sets mMaxFiles (4 replays, 6 profiles, 1 settings file) and the card's data size (mpMemCard slot 19:
+ * 0x80000 for replays, else cBESaveInterface_getSaveProfileSize / cBESaveInterface_getSaveGameSize), then writes the
+ * search pattern "<product code>-<type>*" (func_00241AA0, func_00241D40) into mMatch.
+ *
+ * @param mode  the file type
+ */
 extern "C" void func_0023C8F0(void* self, int mode)
 {
     char desc[0x200];
@@ -213,6 +245,10 @@ struct sMovieVEntry {
     void (*fn)(void*);
 };
 
+/**
+ * Closes the current card read: calls mpMemCard's vtable slot 32 (On Tour's cMemCard::SetReadClose by declaration
+ * order).
+ */
 extern "C" void func_0023CA70(void* self)
 {
     void* obj = *(void**)((char*)self + 0x434);
@@ -234,6 +270,12 @@ struct sMovieVEntryCAA0 {
 // second argument (callers pass it in $5); the real body is bound by asm label.
 void func_0023CAA0_impl(void* self, int a) __asm__("func_0023CAA0");
 
+/**
+ * Sets the size of the file to read or write: passes @p size to mpMemCard's slot 19 (SetDataSize by On Tour's cMemCard
+ * order) and stores it in mSize.
+ *
+ * @param size  the file's data size
+ */
 void func_0023CAA0_impl(void* self, int size)
 {
     void* obj = *(void**)((char*)self + 0x434);
@@ -266,6 +308,15 @@ struct sMovieVEntry_23CAE8 {
     void (*fn)(void*, int);
 };
 
+/**
+ * Prepares a memory-card write of file type @p mode for profile @p profileId.
+ *
+ * As func_0023C8F0, but sets mSave to 1 and mSaveProfileID to @p profileId: stores mFileType, switches to the
+ * device-select action, sets mMaxFiles and the card's data size by type and builds mMatch.
+ *
+ * @param mode  the file type (0 replay, 1 profile, 2 settings)
+ * @param profileId  the profile to save, or -1
+ */
 extern "C" void func_0023CAE8(void* self, int mode, int profileId)
 {
     char desc[0x200];
@@ -307,6 +358,10 @@ extern "C" void func_0023CAE8(void* self, int mode, int profileId)
 //100%
 INCLUDE_ASM("movie/movieplayer", func_0023CC20);
 #ifdef SKIP_ASM
+/**
+ * Closes the current card write when one was started (mWriteInProgress): calls mpMemCard's slot 43 (SetWriteClose by On
+ * Tour's cMemCard order).
+ */
 extern "C" void func_0023CC20(void* self)
 {
     if (*(int*)((char*)self + 0x118) != 0) {
@@ -322,6 +377,11 @@ extern "C" void* func_0023CAA0(void* self);
 //99.29%
 INCLUDE_ASM("movie/movieplayer", func_0023CC58__FPv);
 #ifdef SKIP_ASM
+/**
+ * Sets the size of the file to write: forwards to func_0023CAA0 (the size arrives in the second argument register).
+ *
+ * @return whatever func_0023CAA0 left in the return register
+ */
 void* func_0023CC58(void* self)
 {
     return func_0023CAA0(self);
@@ -346,6 +406,15 @@ struct sLocVEntry_23CC78 {
     void* (*fn)(void*, int);
 };
 
+/**
+ * Writes the title of file slot @p n, as a 16-bit string, into @p dst.
+ *
+ * For replays (mFileType 0) and profiles (1) prints "<type name> <n + 1>" (str_pct_spct_d_b widened, the type name from
+ * func_00241D40); for settings (2) copies the localised "kT_OVGameOptions" text (FELocale slot 4 with its hash).
+ *
+ * @param n  the file slot
+ * @param dst  16-bit destination buffer
+ */
 extern "C" void func_0023CC78(void* self, int n, char* dst)
 {
     char name[0x100];
@@ -484,6 +553,10 @@ INCLUDE_ASM("movie/movieplayer", func_0023D5A8);
 #ifdef SKIP_ASM
 extern "C" void* cMemCard_CreateInstance(void);
 
+/**
+ * Creates the manager's memory card (cMemCard_CreateInstance into mpMemCard), zeroes mStackDepth and sets mFlash to 1.0
+ * and mFlashStep to 1/60.
+ */
 extern "C" void func_0023D5A8(void* self)
 {
     char* manager = (char*)self;
@@ -569,6 +642,16 @@ static inline bool isState_23D660(char* s, int k)
     return *(int*)(s + 0x130) == k;
 }
 
+/**
+ * Runs the manager's device-select action for one frame (cMCOverlayManager_update calls it for action 1).
+ *
+ * Updates the card (mpMemCard slot 3); while mCheckCard is set it waits for the card to go idle (slot 11) and then
+ * clears it. Fills mMaxDevices on first use (cMCOverlayManager_getMaxDevicesSupported). Once the card is idle it
+ * switches back to the load/save action (SetAction(0)) and, unless mState is 49, 50, 51, 52 or 54 (the init checks),
+ * sets state 3 through vtable slot 1 (cMCOverlayManager_SetState). Then runs the init state handlers:
+ * cMCOverlayManager_UpdateInitCardsCheck (49), cMCOverlayManager_UpdateInitFileCheck (51) or
+ * cMCOverlayManager_UpdateInitFileCheckDevice (54).
+ */
 extern "C" void func_0023D660(void* self)
 {
     char* manager = (char*)self;
@@ -610,6 +693,12 @@ extern "C" void func_0023D660(void* self)
 //100%
 INCLUDE_ASM("movie/movieplayer", func_0023D7A8);
 #ifdef SKIP_ASM
+/**
+ * Tells whether a card status error that matters to a load is unacknowledged: mCurrDeviceStateAck is clear and
+ * mCurrDeviceStateLast has a bit set other than "full" (4) and "unformatted" (0x10).
+ *
+ * @return 1 for an unacknowledged error, else 0
+ */
 extern "C" int func_0023D7A8(void* self)
 {
     int deviceState = *(int*)((char*)self + 0x43C);
@@ -1435,6 +1524,17 @@ static inline void notify_E8A0(char* s, int v)
     d->fn(s + d->delta, v);
 }
 
+/**
+ * Checks the selected card and moves the manager to the matching state through vtable slot 1
+ * (cMCOverlayManager_SetState).
+ *
+ * Uses mpMemCard's status slots (by On Tour's cMemCard order: 53 IsAvailable, 49 IsInvalid, 51 IsDamaged, 59
+ * IsWrongDevice, 55 IsFormatted, 58 IsEncodingCorrect). With no usable card: state 5 when it is invalid, damaged or the
+ * wrong device, else state 4 unless already there. With a formatted, correctly encoded, undamaged card: state 6 when
+ * @p flag is set. Otherwise (or when not) state 7 for a save (mSave) or 29 for a load.
+ *
+ * @param flag  nonzero to go to state 6 (reading the card) when the card is good
+ */
 extern "C" void func_0023E8A0(void* self, int flag)
 {
     char* manager = (char*)self;
@@ -2437,6 +2537,11 @@ extern "C" void cMCOverlayManager_setSelectedDevice(cMCOverlayManager* self)
 //100%
 INCLUDE_ASM("movie/movieplayer", func_0023FB18__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Sets mSelectedDevice to @p val.
+ *
+ * @param val  the device index
+ */
 void func_0023FB18(void* self, int val)
 {
     *(int*)((char*)self + 0x428) = val;
@@ -3727,6 +3832,15 @@ struct sMovieVEntry0FB0 {
     int (*fn)(void*, int, int, int);
 };
 
+/**
+ * Starts writing a file to the card: sets cMCOverlayManager_mSaveInProgress, calls mpMemCard's slot 36 (the first of On
+ * Tour's three cMemCard::StartFileSlotWrite overloads) with @p a, @p data and @p size, and stores @p size in
+ * mSavedSize.
+ *
+ * @param a  the file to write (the slot's first argument)
+ * @param data  the data
+ * @param size  the data size
+ */
 extern "C" void func_00240FB0(void* self, int a, int data, int size)
 {
     void* memCard = *(void**)((char*)self + 0x434);
@@ -3748,6 +3862,14 @@ struct sMovieVEntry1000 {
     int (*fn)(void*, int, int, int);
 };
 
+/**
+ * Starts writing a file to the card under a 16-bit name: sets cMCOverlayManager_mSaveInProgress, calls mpMemCard's slot
+ * 37 (a cMemCard::StartFileSlotWrite overload) with @p fileName, @p data and @p size, and stores @p size in mSavedSize.
+ *
+ * @param fileName  the file name (16-bit string)
+ * @param data  the data
+ * @param size  the data size
+ */
 extern "C" void func_00241000(void* self, int fileName, int data, int size)
 {
     void* memCard = *(void**)((char*)self + 0x434);
@@ -3767,6 +3889,14 @@ struct sMovieVEntry1050 {
     int (*fn)(void*, int, int, int);
 };
 
+/**
+ * Starts writing a file to the card: sets cMCOverlayManager_mSaveInProgress, calls mpMemCard's slot 38 (the third
+ * cMemCard::StartFileSlotWrite overload) with @p a, @p data and @p size, and stores @p size in mSavedSize.
+ *
+ * @param a  the file to write (the slot's first argument)
+ * @param data  the data
+ * @param size  the data size
+ */
 extern "C" void func_00241050(void* self, int a, int data, int size)
 {
     void* memCard = *(void**)((char*)self + 0x434);
@@ -3800,6 +3930,12 @@ struct sMovieVEntry_2410D0 {
     int (*fn)(void*);
 };
 
+/**
+ * Returns the number of file slots: mMaxFiles, capped at the card's own limit (mpMemCard slot 68, GetMaxFiles by On
+ * Tour's cMemCard order).
+ *
+ * @return the usable file count
+ */
 extern "C" int func_002410D0(void* self)
 {
     char* manager = (char*)self;
@@ -3825,6 +3961,13 @@ struct sMovieVEntry1138 {
     void (*fn)(void*, int, int);
 };
 
+/**
+ * Writes the next block of save data: adds @p size to mSavedSize, sets cMCOverlayManager_mSaveInProgress and passes
+ * @p data and @p size to mpMemCard's slot 41 (WriteData by On Tour's cMemCard order).
+ *
+ * @param data  the block
+ * @param size  its size
+ */
 extern "C" void func_00241138(void* self, int data, int size)
 {
     void* memCard = *(void**)((char*)self + 0x434);
@@ -3921,6 +4064,10 @@ struct sMovieVEntry1240b {
     void (*fn)(void*, int);
 };
 
+/**
+ * Fails the current read: tells the card (mpMemCard slot 33, SetReadFailed by On Tour's cMemCard order), sets state 36
+ * through vtable slot 1 (cMCOverlayManager_SetState) and calls callbackReadFailed.
+ */
 extern "C" void func_00241240(void* self)
 {
     void* memCard = *(void**)((char*)self + 0x434);
@@ -3950,6 +4097,11 @@ extern "C" void func_00241000_r(void* self, char* text, int a, int b) __asm__("f
 extern int cMCOverlayManager_mSaveInProgress;
 extern char str_pct_s_pct_spct_04d_b[];
 
+/**
+ * Saves the game settings: sets cMCOverlayManager_mSaveInProgress, generates the save data
+ * (cBESaveInterface_generateSaveGame) and its size, and starts writing it (func_00241000) under the title "<product
+ * code>-<type name><file cursor + 1>" (str_pct_s_pct_spct_04d_b; type name of file type 2).
+ */
 extern "C" void func_002412A0(void* self)
 {
     char text[130];
@@ -3976,6 +4128,13 @@ struct sMovieVEntry1380 {
     void (*fn)(void*);
 };
 
+/**
+ * Starts the manager's card check.
+ *
+ * Sets mCheckAllowed, clears mSaved, mCurrCheckDevice and mFileCursor, sets mLastCheckDevice, mSaveProfileID and
+ * mLastMountedDevice to -1, selects device 0 (func_0023FB18, cMCOverlayManager_setSelectedDevice), sets mCheckCard,
+ * puts mState to 2 (On Tour's kMCOverlay_CheckCardsWait) and updates the card (mpMemCard slot 3).
+ */
 extern "C" void func_00241380(void* self)
 {
     int one = 1;
@@ -4224,6 +4383,10 @@ extern "C" void cMCOverlayManager_OnHighlightPrevDevice(cMCOverlayManager* self)
 //100%
 INCLUDE_ASM("movie/movieplayer", func_00241678);
 #ifdef SKIP_ASM
+/**
+ * Moves the file cursor (mFileCursor) back one slot; at slot 0 it wraps to the last slot (func_002410D0 - 1) when
+ * mWrapItems is set.
+ */
 extern "C" void func_00241678(void* self)
 {
     int n = *(int*)((char*)self + 0xF8);
@@ -4237,6 +4400,10 @@ extern "C" void func_00241678(void* self)
 //100%
 INCLUDE_ASM("movie/movieplayer", func_002416C0);
 #ifdef SKIP_ASM
+/**
+ * Moves the file cursor (mFileCursor) forward one slot; at the last slot (func_002410D0 - 1) it wraps to 0 when
+ * mWrapItems is set.
+ */
 extern "C" void func_002416C0(void* self)
 {
     int n = func_002410D0(self) - 1;
@@ -4411,6 +4578,13 @@ struct sMP1928 {
     sMPSlot1928 slots[1];
 };
 
+/**
+ * Prints device @p i's free space as "<iFreeSpace> Free" (str_pct_d_pct_s with str_Free, both widened) into @p out,
+ * when the device is valid, formatted, correctly encoded and plugged in (mDevices[i]).
+ *
+ * @param i  the device
+ * @param out  16-bit destination buffer
+ */
 extern "C" void func_00241928(sMP1928* self, int i, void* out)
 {
     if (self->slots[i].d != 0 && self->slots[i].a != 0 && self->slots[i].b != 0 && self->slots[i].c != 0) {
@@ -4426,6 +4600,12 @@ extern "C" void func_00241928(sMP1928* self, int i, void* out)
 //100%
 INCLUDE_ASM("movie/movieplayer", func_002419D8);
 #ifdef SKIP_ASM
+/**
+ * Returns mDevices[@p device].iFreeSpace.
+ *
+ * @param device  the device
+ * @return its free space
+ */
 extern "C" int func_002419D8(void* self, int device)
 {
     char* deviceBase = (char*)self + device * 0xe0;
@@ -4485,6 +4665,11 @@ extern "C" void func_002C2540(void*, void*);
 //100%
 INCLUDE_ASM("movie/movieplayer", func_00241AA0);
 #ifdef SKIP_ASM
+/**
+ * Writes the game's product code "BASLUS-20772" (D_0047C3A8), widened to 16 bits (func_002C2540), into @p self.
+ *
+ * Callers pass a buffer size as well, which is ignored.
+ */
 extern "C" void func_00241AA0(void* self)
 {
     func_002C2540(self, &D_0047C3A8);
@@ -4667,6 +4852,13 @@ extern char str_REP[];
 extern char str_GAM[];
 extern char str_SET[];
 
+/**
+ * Writes the three-letter name of file type @p mode, widened to 16 bits, into @p buf: "REP" (0, replay), "GAM" (1,
+ * profile) or "SET" (2, settings); other types leave it untouched.
+ *
+ * @param mode  the file type
+ * @param buf  16-bit destination buffer
+ */
 extern "C" void func_00241D40(void* self, int mode, void* buf)
 {
     switch (mode) {
@@ -4686,6 +4878,11 @@ extern "C" void func_00241D40(void* self, int mode, void* buf)
 //100%
 INCLUDE_ASM("movie/movieplayer", func_00241DC0);
 #ifdef SKIP_ASM
+/**
+ * Returns 0x30 (the character '0').
+ *
+ * @return 0x30
+ */
 extern "C" int func_00241DC0(void) {
     return 0x30;
 }
@@ -5044,7 +5241,6 @@ extern int cMCOverlayManager_mSaveInProgress;
  *
  * @return @p self
  */
-// cMCOverlayManager constructor body: resets the state, the 45 state handlers (0x00-0xB0) and the device records.
 extern "C" void* cMCOverlayManager_cMCOverlayManager(cMCOverlayManager* self)
 {
     int* w = (int*)self;
@@ -5196,6 +5392,11 @@ INCLUDE_ASM("movie/movieplayer", func_00242518);
 #ifdef SKIP_ASM
 void operator_delete(int*);
 
+/**
+ * Destroys the occlusion manager, which has nothing to release: frees it (operator_delete) when @p flags bit 0 is set.
+ *
+ * @param flags  bit 0 frees the memory
+ */
 extern "C" void func_00242518(void* self, int flags)
 {
     if (flags & 1) {
@@ -5218,6 +5419,13 @@ struct sMovieList {
     int count;        // 0x4
 };
 
+/**
+ * Adds an occlusion curtain to the front of the manager's list (head +0x0, next +0xBC, prev +0xC0) and increments the
+ * count (+0x4).
+ *
+ * @param list  the occlusion manager
+ * @param node  the curtain record
+ */
 extern "C" void func_00242540(sMovieList* list, sMovieNode* node)
 {
     node->next = list->head;
@@ -5233,6 +5441,13 @@ extern "C" void func_00242540(sMovieList* list, sMovieNode* node)
 //100%
 INCLUDE_ASM("movie/movieplayer", func_00242570);
 #ifdef SKIP_ASM
+/**
+ * Unlinks an occlusion curtain from the manager's list (updating the head when it was first) and decrements the count
+ * (+0x4).
+ *
+ * @param list  the occlusion manager
+ * @param node  the curtain record
+ */
 extern "C" void func_00242570(sMovieList* list, sMovieNode* node)
 {
     if (node->prev != 0) {
@@ -5393,6 +5608,20 @@ static inline sMtx_25C0* camMtx_25C0()
     return ((tCamMtxP_25C0)((sCamVt_25C0*)ps2GraphicsMan->mVtbl)[0x23].fn)((char*)ps2GraphicsMan + ((sCamVt_25C0*)ps2GraphicsMan->mVtbl)[0x23].delta);
 }
 
+/**
+ * Picks the occlusion curtains for this view: the nearest two that the camera box @p bb overlaps and that face the
+ * camera.
+ *
+ * Clears the active count (+0x10C) and mask (+0x110); returns when no curtains are registered (+0x4). Takes the eye
+ * position from the graphics manager's view (slot 35, cPS2GraphicsMan_GetView) and a matrix from slot 43. Each curtain
+ * whose bounds (+0xA0..+0xB4) overlap @p bb, survive cPS2GraphicsMan_ClipBoundBox (slot 93) and face the eye (the dot
+ * product with its normal +0x50 is not positive) goes into the in-view table (+0x8, count +0x108) with its squared
+ * distance. The table is sorted nearest first (func_00418EF8 with func_00242978); for the first two it sets the mask
+ * bit, builds the clip planes (func_002429B0) and hands them to func_00229F88. Likely bug: the in-view table has 32
+ * entries and the count is not checked.
+ *
+ * @param bb  the camera's bounding box
+ */
 extern "C" void func_002425C0(sVisMgr_25C0* self, sBounds_25C0* bb)
 {
     self->nvis = 0;
@@ -5452,7 +5681,13 @@ extern "C" void func_002425C0(sVisMgr_25C0* self, sBounds_25C0* bb)
 //100%
 INCLUDE_ASM("movie/movieplayer", func_00242978);
 #ifdef SKIP_ASM
-// qsort-style comparator: orders by the float at +0x4, ascending.
+/**
+ * Compares two in-view entries by their distance (+0x4), nearest first, for the sort in func_002425C0.
+ *
+ * @param lhs  first entry
+ * @param rhs  second entry
+ * @return -1, 0 or 1
+ */
 extern "C" int func_00242978(const void* lhs, const void* rhs)
 {
     float fa = *(float*)((char*)lhs + 0x4);
@@ -5573,6 +5808,13 @@ static inline void makePlane_29B0(sFrustum_29B0* f, int i, const sVec4_29B0& eye
     f->plane[i].d = n.w;
 }
 
+/**
+ * Builds the four clip planes of an occlusion curtain (+0x60) from the eye position and the curtain's corners (+0x10,
+ * one plane per edge: corner 0-1, 1-2, 2-3, 3-0).
+ *
+ * @param eyep  the eye position
+ * @param frustumPtr  the curtain record
+ */
 extern "C" void func_002429B0(void* self, const void* eyep, void* frustumPtr)
 {
     const sVec4_29B0& eye = *(const sVec4_29B0*)eyep;
