@@ -48,6 +48,9 @@ struct sOptions_0014F2A8
 extern sOptions_0014F2A8 cBEOptionInterface_mOption;
 extern sOptions_0014F2A8 D_00535898;
 
+/**
+ * Commits the options: copies cBEOptionInterface_mOption (0x288 bytes) into the saved copy D_00535898.
+ */
 extern "C" void func_0014F2A8(void)
 {
     D_00535898 = cBEOptionInterface_mOption;
@@ -60,6 +63,9 @@ INCLUDE_ASM("be/beintoption", func_0014F360);
 extern sOptions_0014F2A8 cBEOptionInterface_mOption;
 extern sOptions_0014F2A8 D_00535898;
 
+/**
+ * Drops option changes: copies the saved copy D_00535898 back into cBEOptionInterface_mOption (0x288 bytes).
+ */
 extern "C" void func_0014F360(void)
 {
     cBEOptionInterface_mOption = D_00535898;
@@ -116,6 +122,13 @@ public:
     virtual void apply();
 };
 
+/**
+ * Resets the sound options and submits them.
+ *
+ * In the first option word: music, speech and effects volumes 10, sound mode 0, audio mix 0, arcade effects, DJ speech
+ * and voice chat on; the low two bits of the second word become 1. Then calls the option interface's vtable slot 1
+ * (func_0014F2A8).
+ */
 extern "C" void func_0014F458(void* self)
 {
     sOptBits_0014F458* o = D_00535610_v0014F458;
@@ -160,6 +173,13 @@ public:
     virtual void apply();
 };
 
+/**
+ * Resets the game options and submits them.
+ *
+ * Widescreen mode follows the console configuration (SSXApp->ConsoleConfig +0x24: 1 gives 2, 2 gives 1, else 0);
+ * language, metric units and the replay option become 0, brightness 9, and the screen offsets (mOption +5, +6) 0. Then
+ * calls the option interface's vtable slot 1 (func_0014F2A8).
+ */
 extern "C" void func_0014F4F8(void* self)
 {
     switch (*(int*)((char*)SSXApp->ConsoleConfig + 0x24))
@@ -203,6 +223,9 @@ public:
     virtual void apply();
 };
 
+/**
+ * Resets the HUD option (bits 30-31 of the first option word) to 0 and submits (vtable slot 1, func_0014F2A8).
+ */
 extern "C" void func_0014F600(void* self)
 {
     D_00535610_v0014F600[0].top = 0;
@@ -220,6 +243,9 @@ public:
     virtual void apply();
 };
 
+/**
+ * Submits the options (the option interface's vtable slot 1, func_0014F2A8) without changing any.
+ */
 extern "C" void func_0014F648(void* self)
 {
     ((cBEOptionInterfaceV_0014F648*)cBEOptionInterface_instance)->apply();
@@ -253,6 +279,13 @@ INCLUDE_ASM("be/beintoption", func_0014F6A8);
 extern "C" unsigned int strlen(const char* s);
 extern char D_00535617[][0x40];
 
+/**
+ * Returns the player's quick-chat message @p i (the 64-byte entry D_00535617[@p i], cBEOptionInterface_mOption +7), or
+ * null when it is empty.
+ *
+ * @param i  the message slot, 0-9
+ * @return the message, or 0
+ */
 extern "C" char* func_0014F6A8(void* self, int i)
 {
     char* s = D_00535617[i];
@@ -275,6 +308,13 @@ struct sVEntry_0014F6E8
     void* (*fn)(void*, int);
 };
 
+/**
+ * Restores quick-chat message @p i to its default: looks up cBEOptionInterface_getDefaultQuickKeyMessageHashValue(@p i)
+ * in the front-end locale (SSXApp->FELocale's vtable slot 4) and copies the text into D_00535617[@p i] with
+ * USTR_strcpyW.
+ *
+ * @param i  the message slot, 0-9
+ */
 extern "C" void func_0014F6E8(void* self, int i)
 {
     char* obj = (char*)SSXApp->FELocale;
@@ -291,6 +331,9 @@ INCLUDE_ASM("be/beintoption", func_0014F758);
 #ifdef SKIP_ASM
 extern "C" void func_0014F6E8(void* self, int i);
 
+/**
+ * Restores all ten quick-chat messages to their defaults (func_0014F6E8 for slots 0-9).
+ */
 extern "C" void func_0014F758(void* self)
 {
     for (int i = 0; i < 10; i++)
@@ -317,6 +360,13 @@ struct sOptionGlobal_005308B8;
 extern sOptionGlobal_005308B8 D_005308B8;
 extern "C" int func_0014F870();
 
+/**
+ * Returns how long player @p i is held at the start: the largest head start (func_0014F870) minus the player's own
+ * (word +8 of record @p i of the rules block D_005308B8).
+ *
+ * @param i  the player, 0 or 1
+ * @return the delay in seconds
+ */
 extern "C" int func_0014F7A8(int i)
 {
     int c = ((sOptionTriplesView_0014F7A8*)&D_005308B8)->triples[i].c;
@@ -330,6 +380,12 @@ INCLUDE_ASM("be/beintoption", func_0014F7E8);
 extern "C" int func_0014F870();
 extern int D_005308D4[]; // D_005308B8 + 0x1C, addressed through its own symbol
 
+/**
+ * Returns how long the AI riders are held at the start: the largest head start (func_0014F870) minus the AI head start
+ * (D_005308D4, the rules block's word at +0x1C).
+ *
+ * @return the delay in seconds
+ */
 extern "C" int func_0014F7E8(void* self)
 {
     return func_0014F870() - D_005308D4[0];
@@ -355,6 +411,13 @@ struct sOptionView_005308B8 {
 struct sOptionGlobal_005308B8;
 extern sOptionGlobal_005308B8 D_005308B8;
 
+/**
+ * Tells whether any rule is set for player @p i: a nonzero word in record @p i of the rules block D_005308B8 or in the
+ * "my rules" pair (+0x18, +0x1C).
+ *
+ * @param i  the player, 0 or 1
+ * @return 1 when any is set, else 0
+ */
 extern "C" int func_0014F810(int i)
 {
     sOptionView_005308B8* g = (sOptionView_005308B8*)&D_005308B8;
@@ -379,6 +442,12 @@ struct sOptionGlobal_005308B8 {
 };
 extern sOptionGlobal_005308B8 D_005308B8;
 
+/**
+ * Returns the largest head start in the rules block D_005308B8: the maximum of the AI head start (+0x1C) and the two
+ * records' head starts (+0x8, +0x14).
+ *
+ * @return the largest head start, in seconds
+ */
 extern "C" int func_0014F870()
 {
     int m = D_005308B8.field_0x1C;
@@ -399,6 +468,9 @@ struct sOptionTriple_0014F898 {
     int c;
 };
 
+/**
+ * Swaps the two 12-byte bragging-rights records at the start of the rules block D_005308B8 (all three words of each).
+ */
 // Swaps the two 12-byte triples at the start of D_005308B8.
 extern "C" void func_0014F898()
 {

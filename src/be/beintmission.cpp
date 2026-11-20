@@ -37,6 +37,13 @@ INCLUDE_ASM("be/beintmission", func_001532F0);
 #ifdef SKIP_ASM
 extern signed char D_0043FA70[];
 
+/**
+ * Returns the number of collectibles in 17 consecutive sections starting at @p start: the sum of D_0043FA70[@p start]
+ * .. D_0043FA70[@p start + 16] (the per-section totals).
+ *
+ * @param start  the first section
+ * @return the total
+ */
 extern "C" int func_001532F0(void* self, int start)
 {
     int sum = 0;
@@ -53,6 +60,13 @@ INCLUDE_ASM("be/beintmission", func_00153330);
 extern signed char D_0043FA70[];
 extern int D_005305F0[];
 
+/**
+ * Returns the collectible total of section @p start + the race's location (cBELibrary_raceDB +0x40, D_005305F0):
+ * D_0043FA70[@p start + location].
+ *
+ * @param start  the offset from the race's location
+ * @return the total
+ */
 extern "C" int func_00153330(void* self, int start)
 {
     return D_0043FA70[start + D_005305F0[0]];
@@ -64,6 +78,12 @@ INCLUDE_ASM("be/beintmission", func_00153350);
 #ifdef SKIP_ASM
 extern signed char D_0043FA70[];
 
+/**
+ * Returns the number of collectibles in location @p start: D_0043FA70[@p start] (a one-iteration sum).
+ *
+ * @param start  the location
+ * @return the total
+ */
 extern "C" int func_00153350(void* self, int start)
 {
     int sum = 0;
@@ -122,6 +142,16 @@ int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 extern char D_004A6CA8_raw[] __asm__("cBELibrary_profileLib");
 
+/**
+ * Returns how many collectibles @p rider has found in 17 consecutive sections starting at @p idx.
+ *
+ * Sums the count byte of the rider's 12-byte collect records (profile +0x4 + section * 12; On Tour
+ * tBEProfileCollectBits {cTotalCollected, uiCollectedBits[2]}) for sections @p idx .. @p idx + 16.
+ *
+ * @param rider  the rider (selects profile slot and character)
+ * @param idx  the first section
+ * @return the count
+ */
 extern "C" int func_001533F8(void* self, int rider, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
@@ -148,6 +178,14 @@ extern int D_005305F0[];
 // Byte view of the profile table; the unit declares cBELibrary_profileLib later with a struct type.
 extern char D_004A6CA8_raw[] __asm__("cBELibrary_profileLib");
 
+/**
+ * Returns how many collectibles @p rider has found in section @p idx + the race's location (D_005305F0): the count
+ * byte of that collect record.
+ *
+ * @param rider  the rider (selects profile slot and character)
+ * @param idx  the offset from the race's location
+ * @return the count
+ */
 extern "C" int func_00153498(void* self, int rider, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
@@ -167,6 +205,14 @@ int cBELibrary_getCharacterID(int);
 // Byte view of the profile table; the unit declares cBELibrary_profileLib later with a struct type.
 extern char D_004A6CA8_raw[] __asm__("cBELibrary_profileLib");
 
+/**
+ * Returns how many collectibles @p rider has found in location @p idx: the count byte of its collect record (a
+ * one-iteration sum).
+ *
+ * @param rider  the rider (selects profile slot and character)
+ * @param idx  the location
+ * @return the count
+ */
 extern "C" int func_00153520(void* self, int rider, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
@@ -255,6 +301,16 @@ struct sEconChar_00153688
 extern sMissionEntry_0043D950 cBELibrary_locationDB[];
 extern sEconChar_00153688 cBELibrary_profileLib[][10];
 
+/**
+ * Returns how many collectibles character @p character of profile slot @p profile has found on peak @p owner.
+ *
+ * Sums the collect-record count bytes of the 22 locations whose cBELibrary_locationDB entry has @p owner at +0x54.
+ *
+ * @param profile  the profile slot
+ * @param character  the character
+ * @param owner  the peak
+ * @return the count
+ */
 extern "C" int func_00153688(void* self, int profile, int character, int owner)
 {
     int sum = 0;
@@ -337,6 +393,14 @@ int cBELibrary_getCharacterID(int);
 extern int D_005305F0[];
 extern char D_004A6CA8_raw[] __asm__("cBELibrary_profileLib");
 
+/**
+ * Returns the address of the found-collectible bits (two words) of @p rider's collect record for section @p idx + the
+ * race's location (D_005305F0).
+ *
+ * @param rider  the rider (selects profile slot and character)
+ * @param idx  the offset from the race's location
+ * @return the bit words
+ */
 extern "C" char* func_00153858(void* self, int rider, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
@@ -357,6 +421,15 @@ int cBELibrary_getCharacterID(int);
 extern int D_005305F0[];
 extern char D_004A6CAC[];
 
+/**
+ * Tells whether collectible @p bit (0-63) is marked found in @p rider's collect record for section @p idx + the race's
+ * location (D_005305F0).
+ *
+ * @param rider  the rider (selects profile slot and character)
+ * @param bit  the collectible's bit, 0-63
+ * @param idx  the offset from the race's location
+ * @return 1 if found, else 0
+ */
 extern "C" int func_001538E8(void* self, int rider, int bit, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
@@ -387,6 +460,14 @@ extern sCfg_1539A8 cBELibrary_raceDB;
 extern char D_004A6CB0_raw[] __asm__("D_004A6CB0");
 extern char D_004A6CA8_raw[] __asm__("cBELibrary_profileLib");
 
+/**
+ * Replaces the found-collectible bits of @p rider's collect record for section @p idx + the race's location
+ * (cBELibrary_raceDB +0x40) with the two words at @p src, and sets the record's count to the number of set bits.
+ *
+ * @param rider  the rider (selects profile slot and character)
+ * @param idx  the offset from the race's location
+ * @param src  the new bit words
+ */
 extern "C" void func_001539A8(void* self, int rider, int idx, sBits8_1539A8* src)
 {
     int profile = cBELibrary_getProfileIndex(rider);
@@ -443,6 +524,14 @@ struct sEconBitsChar_00153B00
 };
 extern sEconBitsChar_00153B00 D_004A6CAC_bits153B00[][10] __asm__("D_004A6CAC");
 
+/**
+ * Marks collectible @p bit found in @p rider's collect record for section @p idx + the race's location
+ * (cBELibrary_raceDB +0x40) and sets the record's count to the number of set bits.
+ *
+ * @param rider  the rider (selects profile slot and character)
+ * @param bit  the collectible's bit, 0-63
+ * @param idx  the offset from the race's location
+ */
 extern "C" void func_00153B00(void* self, int rider, int bit, int idx)
 {
     int profile = cBELibrary_getProfileIndex(rider);
@@ -525,6 +614,14 @@ public:
     virtual void v4(int a);
 };
 
+/**
+ * Looks up a mission's short description in the front-end locale: SSXApp->FELocale's vtable slot 4 with the text id at
+ * +0x8 of the mission's cBELibrary_missionInfo record (index from func_00154240).
+ *
+ * Declared void here; the locale call's result is left in $v0, as in cBEMissionInterface_getMissionName.
+ *
+ * @param id  the mission id
+ */
 extern "C" void func_00153CD8(void* self, int id)
 {
     int i = func_00154240(self, id);
@@ -599,6 +696,12 @@ INCLUDE_ASM("be/beintmission", func_00153DD0);
 int cBELibrary_getCharacterID(int);
 extern "C" int func_00154240(void* self, int id);
 
+/**
+ * Tells whether a mission is ready: bit 1 of its flag word (+0x118 + index * 4 of rider 0's character in profile 0).
+ *
+ * @param id  the mission id
+ * @return 1 or 0
+ */
 extern "C" int func_00153DD0(void* self, int id)
 {
     int i = func_00154240(self, id);
@@ -663,6 +766,13 @@ INCLUDE_ASM("be/beintmission", func_00153ED8);
 int cBELibrary_getCharacterID(int);
 extern "C" int func_00154240(void* self, int id);
 
+/**
+ * Tells whether a mission's map icon is shown: bit 4 of its flag word (+0x118 + index * 4 of rider 0's character in
+ * profile 0).
+ *
+ * @param id  the mission id
+ * @return 1 or 0
+ */
 extern "C" int func_00153ED8(void* self, int id)
 {
     int i = func_00154240(self, id);
@@ -688,6 +798,12 @@ struct sMissionDefView_00153F30
 extern sMissionDefView_00153F30 D_0043EE10_v00153F30[] __asm__("cBELibrary_missionInfo");
 extern "C" int func_00154240(void* self, int id);
 
+/**
+ * Returns the word at +0x10 of a mission's cBELibrary_missionInfo record (index from func_00154240), its location.
+ *
+ * @param id  the mission id
+ * @return the location
+ */
 extern "C" int func_00153F30(void* self, int id)
 {
     int i = func_00154240(self, id);
@@ -709,6 +825,12 @@ struct sMissionDefView_00153F68
 extern sMissionDefView_00153F68 D_0043EE10_v00153F68[] __asm__("cBELibrary_missionInfo");
 extern "C" int func_00154240(void* self, int id);
 
+/**
+ * Returns the word at +0x14 of a mission's cBELibrary_missionInfo record (index from func_00154240).
+ *
+ * @param id  the mission id
+ * @return the value
+ */
 extern "C" int func_00153F68(void* self, int id)
 {
     int i = func_00154240(self, id);
@@ -738,6 +860,13 @@ extern sMissionDefView_0043EE10 D_0043EE10_view[] __asm__("cBELibrary_missionInf
 
 extern "C" int func_00154240(void* self, int id);
 
+/**
+ * Returns the halfword at +0x18 of a mission's cBELibrary_missionInfo record (index from func_00154240), its
+ * difficulty level.
+ *
+ * @param id  the mission id
+ * @return the level, 1-3
+ */
 extern "C" short func_00153FA0(void* self, int id)
 {
     int i = func_00154240(self, id);
@@ -778,6 +907,13 @@ INCLUDE_ASM("be/beintmission", func_00154010);
 int cBELibrary_getCharacterID(int);
 extern "C" int func_00154240(void* self, int id);
 
+/**
+ * Sets bit 0 (locked) of a mission's flag word (+0x118 + index * 4 of rider 0's character in profile 0) to
+ * @p value & 1.
+ *
+ * @param id  the mission id
+ * @param value  1 to lock
+ */
 extern "C" void func_00154010(void* self, int id, int value)
 {
     int i = func_00154240(self, id);
@@ -794,6 +930,13 @@ INCLUDE_ASM("be/beintmission", func_00154080);
 int cBELibrary_getCharacterID(int);
 extern "C" int func_00154240(void* self, int id);
 
+/**
+ * Sets bit 1 (ready) of a mission's flag word (+0x118 + index * 4 of rider 0's character in profile 0) to
+ * @p value & 1.
+ *
+ * @param id  the mission id
+ * @param value  1 for ready
+ */
 extern "C" void func_00154080(void* self, int id, int value)
 {
     int i = func_00154240(self, id);
@@ -810,6 +953,13 @@ INCLUDE_ASM("be/beintmission", func_001540F0);
 int cBELibrary_getCharacterID(int);
 extern "C" int func_00154240(void* self, int id);
 
+/**
+ * Sets bit 2 (available) of a mission's flag word (+0x118 + index * 4 of rider 0's character in profile 0) to
+ * @p value & 1.
+ *
+ * @param id  the mission id
+ * @param value  1 for available
+ */
 extern "C" void func_001540F0(void* self, int id, int value)
 {
     int i = func_00154240(self, id);
@@ -826,6 +976,13 @@ INCLUDE_ASM("be/beintmission", func_00154160);
 int cBELibrary_getCharacterID(int);
 extern "C" int func_00154240(void* self, int id);
 
+/**
+ * Sets bit 3 (completed) of a mission's flag word (+0x118 + index * 4 of rider 0's character in profile 0) to
+ * @p value & 1.
+ *
+ * @param id  the mission id
+ * @param value  1 for completed
+ */
 extern "C" void func_00154160(void* self, int id, int value)
 {
     int i = func_00154240(self, id);
@@ -842,6 +999,13 @@ INCLUDE_ASM("be/beintmission", func_001541D0);
 int cBELibrary_getCharacterID(int);
 extern "C" int func_00154240(void* self, int id);
 
+/**
+ * Sets bit 4 (icon shown) of a mission's flag word (+0x118 + index * 4 of rider 0's character in profile 0) to
+ * @p value & 1.
+ *
+ * @param id  the mission id
+ * @param value  1 to show the icon
+ */
 extern "C" void func_001541D0(void* self, int id, int value)
 {
     int i = func_00154240(self, id);
@@ -866,6 +1030,12 @@ struct sMissionDef_0043EE10
 
 extern sMissionDef_0043EE10 cBELibrary_missionInfo[];
 
+/**
+ * Returns the index of mission @p id in cBELibrary_missionInfo (88 entries), or -1 when it is not there.
+ *
+ * @param id  the mission id
+ * @return the index, or -1
+ */
 extern "C" int func_00154240(void* self, int id)
 {
     for (int i = 0; i < 88; i++) {
@@ -923,6 +1093,13 @@ INCLUDE_ASM("be/beintmission", func_001542E0);
 #ifdef SKIP_ASM
 extern "C" int cBEMissionInterface_isMissionCompleted(void* self, int id);
 
+/**
+ * Counts the missions of location @p group (record +0x10) that rider 0's character has completed
+ * (cBEMissionInterface_isMissionCompleted).
+ *
+ * @param group  the location
+ * @return the number completed
+ */
 extern "C" int func_001542E0(void* self, int group)
 {
     int n = 0;
@@ -1220,6 +1397,12 @@ INCLUDE_ASM("be/beintmission", func_001547A0);
 #ifdef SKIP_ASM
 extern sMissionDef_0043EE10 cBELibrary_missionInfo[];
 
+/**
+ * Returns the halfword at +0x22 of mission @p id's cBELibrary_missionInfo record, or 0 when the id is unknown.
+ *
+ * @param id  the mission id
+ * @return the value (the sound system uses it as the mission's audio kind)
+ */
 extern "C" int func_001547A0(void* self, int id)
 {
     for (int i = 0; i < 88; i++) {
@@ -1234,6 +1417,9 @@ extern "C" int func_001547A0(void* self, int id)
 //100%
 INCLUDE_ASM("be/beintmission", func_001547D8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ */
 void func_001547D8(void* self)
 {
 }
@@ -1242,6 +1428,9 @@ void func_001547D8(void* self)
 //100%
 INCLUDE_ASM("be/beintmission", func_001547E0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ */
 void func_001547E0(void* self)
 {
 }
@@ -1258,6 +1447,14 @@ struct sSerVEntry_001547E8 {
 
 extern char D_004A6CAC[];
 
+/**
+ * Writes the mission state of rider 0's character (profile 0) to a replay stream: its 23 collect records (0x114
+ * bytes from profile +0x4), its 88 mission flag words (0x160 bytes from +0x118), then the interface's word at +0x8.
+ *
+ * Each write is vtable slot 1 of @p stream; func_00154898 reads the same layout.
+ *
+ * @param stream  the replay frame stream
+ */
 extern "C" void func_001547E8(void* self, void* stream)
 {
     int c = cBELibrary_getCharacterID(0);
@@ -1284,6 +1481,14 @@ struct sSerVEntry_00154898 {
 
 extern char D_004A6CAC[];
 
+/**
+ * Reads the mission state of rider 0's character (profile 0) back from a replay stream: 23 collect records (0x114
+ * bytes), 88 mission flag words (0x160 bytes), then the interface's word at +0x8.
+ *
+ * Each read is vtable slot 2 of @p stream.
+ *
+ * @param stream  the replay frame stream
+ */
 extern "C" void func_00154898(void* self, void* stream)
 {
     int c = cBELibrary_getCharacterID(0);

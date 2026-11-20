@@ -33,6 +33,9 @@ INCLUDE_ASM("be/beintnetwork", func_0014E130);
 // The submitted copy of the network options (discard restores it).
 extern tBENetworkDB D_00535088;
 
+/**
+ * Commits the network options: copies cBENetworkInterface_networkOpt into the saved copy D_00535088.
+ */
 extern "C" void func_0014E130(void)
 {
     D_00535088 = cBENetworkInterface_networkOpt;
@@ -44,6 +47,9 @@ INCLUDE_ASM("be/beintnetwork", func_0014E1F8);
 #ifdef SKIP_ASM
 extern tBENetworkDB D_00535088;
 
+/**
+ * Drops changes to the network options: copies the saved copy D_00535088 back into cBENetworkInterface_networkOpt.
+ */
 extern "C" void func_0014E1F8(void)
 {
     cBENetworkInterface_networkOpt = D_00535088;
@@ -345,6 +351,15 @@ struct sNetSlot_0014EB08
 
 extern sNetSlot_0014EB08 D_005308B8[];
 
+/**
+ * Swaps most of the two 12-byte bragging-rights records at the start of the rules block D_005308B8 (see
+ * func_0015C228).
+ *
+ * Exchanges bit 0 and bit 3 of each record's flag word and its second and third words (starting points, head-start
+ * seconds); flag bits 1-2 and 4-31 stay.
+ * cBENetworkInterface_preInitBE swaps them before the online handshake and cBENetworkInterface_postInitBE swaps them
+ * back (both pass self, which is ignored).
+ */
 extern "C" void func_0014EB08(void)
 {
     sNetSlot_0014EB08 tmp = D_005308B8[0];
@@ -365,6 +380,14 @@ extern char D_00534FC8[16];
 //100%
 INCLUDE_ASM("be/beintnetwork", func_0014EBB8);
 #ifdef SKIP_ASM
+/**
+ * Copies @p src into the opponent-name buffer at cBENetworkInterface_networkOpt +0x498 (D_00534FC8, 16 bytes; strcpy,
+ * no length check), which func_0015C5A8 returns.
+ *
+ * The lobby code passes the opponent's persona name.
+ *
+ * @param src  the name
+ */
 extern "C" void func_0014EBB8(cBENetworkInterface* self, const char* src)
 {
     strcpy(D_00534FC8, src);
@@ -376,6 +399,14 @@ extern char D_00534FB8[16];
 //100%
 INCLUDE_ASM("be/beintnetwork", func_0014EBD8);
 #ifdef SKIP_ASM
+/**
+ * Copies @p src into this player's name buffer at cBENetworkInterface_networkOpt +0x488 (D_00534FB8, 16 bytes;
+ * strcpy, no length check), which func_0015C5B8 returns.
+ *
+ * The lobby code passes the local persona name.
+ *
+ * @param src  the name
+ */
 extern "C" void func_0014EBD8(cBENetworkInterface* self, const char* src)
 {
     strcpy(D_00534FB8, src);
@@ -493,6 +524,12 @@ struct sNetChar_0014EE28
 
 extern sNetChar_0014EE28 D_00530970[];
 
+/**
+ * Returns @p rider's character record (D_00530970 + character * 0x88), whose first field is the character's name.
+ *
+ * @param rider  the rider (cBELibrary_getCharacterID selects the record)
+ * @return the name
+ */
 extern "C" void* func_0014EE28(void* self, int rider)
 {
     return &D_00530970[cBELibrary_getCharacterID(rider)];
@@ -556,6 +593,14 @@ struct sNetEntry88_00530990
 extern sNetEntry8_0043FA38 D_0043FA38[];
 extern sNetEntry88_00530990 D_00530990[];
 
+/**
+ * Returns a rider name for character @p player: the cheat character's name D_0043FA38[@p index] when @p index is
+ * 10-29, else the text at +0x20 of the character's record (D_00530990 = D_00530970 + 0x20).
+ *
+ * @param player  the character id
+ * @param index  the cheat character id (0 for none)
+ * @return the name
+ */
 extern "C" void* func_0014EEC8(void* self, int player, int index)
 {
     if (index >= 10 && index < 30) {
@@ -578,6 +623,12 @@ struct sNetChar_0014EF00
 
 extern sNetChar_0014EF00 D_005309A0[];
 
+/**
+ * Returns the 16-byte text at +0x30 of @p rider's character record (D_005309A0 = D_00530970 + 0x30).
+ *
+ * @param rider  the rider (cBELibrary_getCharacterID selects the record)
+ * @return the text
+ */
 extern "C" void* func_0014EF00(void* self, int rider)
 {
     return &D_005309A0[cBELibrary_getCharacterID(rider)];

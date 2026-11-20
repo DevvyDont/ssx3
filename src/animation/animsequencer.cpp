@@ -126,6 +126,16 @@ struct sNode_00313B38 {
     sNode_00313B38* next;
 };
 
+/**
+ * Removes the sequence's first timed trigger with event id @p id and time @p time.
+ *
+ * Walks the trigger list at +0xAC (16-byte nodes: id, end-trigger flag, time, next); a node matches when its id and
+ * time are equal and its end-trigger flag is 0. The match is unlinked and freed with operator_delete. Counterpart of
+ * cAnimSequence_addTrigger, as cAnimSequence_removeEndTrigger is of cAnimSequence_addEndTrigger.
+ *
+ * @param id  the trigger's event id
+ * @param time  the time the trigger fires at
+ */
 extern "C" void func_00313B38(char* self, int id, float time) {
     sNode_00313B38** link;
     for (link = (sNode_00313B38**)(self + 0xAC); *link != 0; link = &(*link)->next) {
@@ -254,6 +264,16 @@ extern "C" void cAnimSequence_setSubAnim(void* self, int i, int anim)
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00313CF0);
 #ifdef SKIP_ASM
+/**
+ * Sets the current time of sub-animation slot @p index and sets the flag at +0xC4.
+ *
+ * The slots are 0x1C bytes from +0x4 (see cAnimSequence_setSubAnim); the time is at +0x4 of the slot. The +0xC4 flag
+ * is also set by cAnimSequence_setSubAnim when it activates a slot. cAnimSequencer_playAndHold and playAndLoop use it
+ * for the start time; riders use it to jump to a frame.
+ *
+ * @param index  the sub-animation slot
+ * @param val  the time in seconds
+ */
 extern "C" void func_00313CF0(void* self, int index, float val)
 {
     char* slot = (char*)self + index * 0x1c;
@@ -265,6 +285,16 @@ extern "C" void func_00313CF0(void* self, int index, float val)
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00313D10);
 #ifdef SKIP_ASM
+/**
+ * Sets the time scale (playback speed) of sub-animation slot @p index of @p sequence.
+ *
+ * Stores @p fparg0 at +0x8 of the 0x1C-byte slot (at +0xC + index * 0x1C of the sequence), the field
+ * cAnimSequence_setSubAnim resets to 1.
+ *
+ * @param sequence  the animation sequence
+ * @param index  the sub-animation slot
+ * @param fparg0  the time scale
+ */
 extern "C" void func_00313D10(int sequence, int index, float fparg0) {
     (*(float *)((char*)(((index * 0x1C) + sequence)) + (0xC))) = fparg0;
 }
@@ -273,6 +303,15 @@ extern "C" void func_00313D10(int sequence, int index, float fparg0) {
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00313D28);
 #ifdef SKIP_ASM
+/**
+ * Sets the blend weight of sub-animation slot @p index.
+ *
+ * Stores @p val at +0x10 of the 0x1C-byte slot (+0x14 + index * 0x1C); func_00313D70 multiplies it into the slot's net
+ * weight. seg_1218 cross-fades two slots with it (w and 1 - w).
+ *
+ * @param index  the sub-animation slot
+ * @param val  the weight, normally 0-1
+ */
 extern "C" void func_00313D28(void* self, int index, float val)
 {
     char* slot = (char*)self + index * 0x1c;
@@ -283,6 +322,15 @@ extern "C" void func_00313D28(void* self, int index, float val)
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00313D40);
 #ifdef SKIP_ASM
+/**
+ * Sets the play type of sub-animation slot @p index: 0 plays once and holds the last frame, 1 loops.
+ *
+ * Stores @p val at +0x18 of the 0x1C-byte slot (+0x1C + index * 0x1C). cAnimSequencer_playAndHold passes 0 and
+ * cAnimSequencer_playAndLoop 1.
+ *
+ * @param index  the sub-animation slot
+ * @param val  the play type (0 hold, 1 loop)
+ */
 extern "C" void func_00313D40(void* self, int index, int val)
 {
     char* slot = (char*)self + index * 0x1c;
@@ -293,6 +341,15 @@ extern "C" void func_00313D40(void* self, int index, int val)
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00313D58);
 #ifdef SKIP_ASM
+/**
+ * Marks sub-animation slot @p index of @p sequence inactive.
+ *
+ * Clears the active flag at +0x14 of the 0x1C-byte slot (+0x18 + index * 0x1C); cAnimSequencer_getAnimBlendFrames
+ * skips inactive slots, and cAnimSequence_setSubAnim reinitialises the slot the next time it fills it.
+ *
+ * @param sequence  the animation sequence
+ * @param index  the sub-animation slot
+ */
 extern "C" void func_00313D58(int sequence, int index) {
     (*(int *)((char*)(((index * 0x1C) + sequence)) + (0x18))) = 0;
 }
@@ -321,6 +378,16 @@ struct sSeq_00313D70
     float fadeIn;  // 0xA8
 };
 
+/**
+ * Returns the effective blend weight of sub-animation slot @p i, with the sequence's start and end fades applied.
+ *
+ * The weight is the sequence's weight (+0x94) times the slot's weight (+0x10 of the slot). While the slot's time is
+ * below the start fade time (+0xA8) it is limited to time / start fade; while the time left (the slot's length at +0xC
+ * minus its time) is below the end fade time (+0xA4) it is limited to time left / end fade.
+ *
+ * @param i  the sub-animation slot
+ * @return the net weight
+ */
 // PORT: g++ <? (min) operator, removed in GCC 4.3.
 extern "C" float func_00313D70(sSeq_00313D70* self, int i)
 {
@@ -357,6 +424,17 @@ static inline void Ser_313DD0(char* s, void* p, int n)
 
 class cAsStream;
 
+/**
+ * Writes an animation sequence to @p stream: its fields, then the number of triggers and each trigger.
+ *
+ * Each write goes through the stream's first virtual (vtable slot 1: data, size). Fields written: +0x0 (id, 4),
+ * +0x4 (the three sub-animation slots, 84), +0x60 (0x20), +0x80, +0x84, +0x88 (8), +0x90 .. +0xA8 (4 each), +0xB0
+ * (0x10), +0xC0 and +0xC4. Then the count of the trigger list at +0xAC and each 16-byte trigger node, next pointer
+ * included. func_00314050 reads the same format back.
+ *
+ * @param node  the sequence to write
+ * @param stream  the output stream
+ */
 extern "C" void func_00313DD0(void* node, cAsStream* stream)
 {
     char* self = (char*)node;
@@ -412,6 +490,17 @@ static inline void Read_314050(char* s, void* p, int n)
     e->fn(s + e->delta, p, n);
 }
 
+/**
+ * Reads an animation sequence from @p stream in the format func_00313DD0 writes, rebuilding its trigger list.
+ *
+ * Each read goes through the stream's second virtual (vtable slot 2: data, size), into the same fields func_00313DD0
+ * writes. Then it reads the trigger count and, for each trigger, allocates a 16-byte node tagged "AnimTrigger"
+ * (cMemMan_alloc, flags 0x20000000), reads it and appends it to the list at +0xAC, keeping file order. The read next
+ * pointer of the last node is not cleared, so the list relies on the saved value being 0.
+ *
+ * @param node  the sequence to fill (zeroed by the caller)
+ * @param stream  the input stream
+ */
 extern "C" void func_00314050(void* node, void* stream)
 {
     char* self = (char*)node;
@@ -515,6 +604,14 @@ struct sSequencer_00314368 {
     sSeqNode_00314368* mFirstSequence; // 0x4
 };
 
+/**
+ * Appends @p node at the end of the sequencer's list (+0x4, linked through +0xC8) and increments the count (+0x0).
+ *
+ * Clears the node's next pointer. cAnimSequencer_newSequence links new sequences at the head instead; func_00314880
+ * uses this to keep the saved order.
+ *
+ * @param node  the sequence to append
+ */
 extern "C" void func_00314368(sSequencer_00314368* self, sSeqNode_00314368* node)
 {
     if (self->mFirstSequence != 0)
@@ -549,6 +646,14 @@ struct sSequencer_003143C8 {
     sSeqNode_003143C8* mFirstSequence; // 0x4
 };
 
+/**
+ * Unlinks @p node from the sequencer's list (+0x4, linked through +0xC8) and decrements the count (+0x0).
+ *
+ * The node is not freed; its next pointer is cleared. Likely bug: a node that is not in the list ends the search with a
+ * null predecessor, which is then written through.
+ *
+ * @param node  the sequence to unlink
+ */
 extern "C" void func_003143C8(sSequencer_003143C8* self, sSeqNode_003143C8* node)
 {
     if (self->mFirstSequence == node) {
@@ -915,6 +1020,14 @@ struct sSequencer_003147F0 {
 
 extern "C" void func_00313DD0(void* node, cAsStream* s);
 
+/**
+ * Writes the sequencer to @p stream: its 4-byte count, then each of its sequences (func_00313DD0) in list order.
+ *
+ * The count goes through the stream's first virtual (vtable slot 1). func_00104D68 writes a rider's six sequencers
+ * with it; func_00314880 reads the format back.
+ *
+ * @param stream  the output stream
+ */
 extern "C" void func_003147F0(sSequencer_003147F0* self, cAsStream* stream)
 {
     stream->serialize(self, 4);
@@ -951,6 +1064,16 @@ struct sSeqNode_314880
     sSeqNode_314880() {}
 };
 
+/**
+ * Reads a sequencer from @p stream in the format func_003147F0 writes, recreating each sequence.
+ *
+ * Reads the count through the stream's second virtual (vtable slot 2) and zeroes the sequencer's count (+0x0), then for
+ * each sequence allocates 0xD0 bytes tagged "AnimSequence" (flags 0x20000000), zero-fills them (MEM_fill), reads the
+ * sequence (func_00314050) and appends it (func_00314368). The list head (+0x4) is not cleared here: func_00104DE0
+ * empties the sequencer with cAnimSequencer_expireAll first.
+ *
+ * @param stream  the input stream
+ */
 extern "C" void func_00314880(void* self, void* stream)
 {
     int n;
@@ -970,6 +1093,14 @@ extern "C" void func_00314880(void* self, void* stream)
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00314978__FPv);
 #ifdef SKIP_ASM
+/**
+ * Constructs an empty MDF archive wrapper: clears the owned-file pointer at +0x0 and returns @p self.
+ *
+ * ai/rider and fe/feridermanager build a local one, attach archive data (func_00314A18, func_00314A40) and destroy it
+ * with func_00314988.
+ *
+ * @return @p self
+ */
 void* func_00314978(void* self)
 {
     *(int*)self = 0;
@@ -983,6 +1114,13 @@ INCLUDE_ASM("animation/animsequencer", func_00314988);
 void operator_delete(int* ptr);
 extern "C" void func_003149D0(void** self);
 
+/**
+ * Destroys an MDF archive wrapper: releases it with func_003149D0, then frees @p self if bit 0 of @p flags is set.
+ *
+ * Callers with a local archive pass 2 (no delete).
+ *
+ * @param flags  bit 0: delete the object itself
+ */
 extern "C" void func_00314988(int* self, int flags)
 {
     func_003149D0((void**)self);
@@ -998,6 +1136,12 @@ INCLUDE_ASM("animation/animsequencer", func_003149D0);
 #ifdef SKIP_ASM
 void cMemMan_free(void* ptr);
 
+/**
+ * Releases the archive: frees the owned file buffer (+0x0) with cMemMan_free if there is one and zeroes all four words.
+ *
+ * The four words are the owned buffer, the archive header (+0x4), the model part table (+0x8) and the data base (+0xC).
+ * Archives attached without ownership (func_00314A40) have 0 at +0x0, so nothing is freed.
+ */
 extern "C" void func_003149D0(void** self)
 {
     if (self[0] != 0)
@@ -1019,6 +1163,13 @@ INCLUDE_ASM("animation/animsequencer", func_00314A18__FPvi);
 // PORT: asm label (same binding the unit uses for func_00314AA0's two-argument body).
 void func_00314AA0_impl(void* self, char* data) __asm__("func_00314AA0");
 
+/**
+ * Attaches archive data that the wrapper will own: stores @p data at +0x0 (freed by func_003149D0) and links it.
+ *
+ * Linking (func_00314AA0) sets the header, part table and data pointers from @p data.
+ *
+ * @param data  the MDF archive in memory
+ */
 void func_00314A18(void* self, int data)
 {
     *(int*)self = data;
@@ -1029,6 +1180,14 @@ void func_00314A18(void* self, int data)
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00314A40__FPv);
 #ifdef SKIP_ASM
+/**
+ * Attaches archive data without taking ownership: clears the owned pointer at +0x0 and links the archive.
+ *
+ * The archive pointer arrives in the second argument register, which this matched body does not declare; it passes
+ * through unchanged to func_00314AA0. fe/feridermanager calls it with the archive data.
+ *
+ * @return what func_00314AA0 leaves in the return register (callers ignore it)
+ */
 void* func_00314A40(void* self)
 {
     *(int*)self = 0;
@@ -1043,6 +1202,14 @@ INCLUDE_ASM("animation/animsequencer", func_00314A60);
 void func_00314AA0_impl(void* self, char* data) __asm__("func_00314AA0");
 extern "C" char *FILE_loadpack(int, int);
 
+/**
+ * Loads an MDF archive file into memory, owns the buffer (+0x0) and links it.
+ *
+ * Loads with FILE_loadpack(@p name, @p flags), then func_00314AA0 sets the header, part table and data pointers.
+ *
+ * @param name  the archive's file name
+ * @param flags  memory flags for the load
+ */
 extern "C" void func_00314A60(void *self, int name, int flags) {
     char *data = FILE_loadpack(name, flags);
     *(char **)self = data;
@@ -1059,6 +1226,14 @@ INCLUDE_ASM("animation/animsequencer", func_00314AA0);
 // the symbol without changing the callers' prototype.
 // PORT: asm labels are GCC/Clang-only; the port should give callers the real signature.
 void func_00314AA0_impl(void* self, char* data) __asm__("func_00314AA0");
+/**
+ * Points the wrapper at archive @p data: header (+0x4), part table (+0x8) and packed data base (+0xC).
+ *
+ * The part table starts at @p data plus the short at +0x6 of the header; the data base at @p data plus the int at
+ * +0x8. Called by func_00314A18, func_00314A40 and func_00314A60 after they set the owned pointer.
+ *
+ * @param data  the MDF archive header
+ */
 void func_00314AA0_impl(void* self, char* data)
 {
     *(char**)((char*)self + 0x4) = data;
@@ -1070,6 +1245,11 @@ void func_00314AA0_impl(void* self, char* data)
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00314AC0);
 #ifdef SKIP_ASM
+/**
+ * Returns the number of model parts in the archive (the header's short at +0x4), or 0 when no archive is linked.
+ *
+ * @return the model part count
+ */
 extern "C" short func_00314AC0(void *self) {
     char *header = *(char **)((char *)self + 4);
     if (header != 0) {
@@ -1083,6 +1263,15 @@ INCLUDE_ASM("animation/animsequencer", func_00314AE0);
 #ifdef SKIP_ASM
 extern "C" int strcasecmp(const char* a, const char* b);
 
+/**
+ * Returns 1 if the archive has a model part named @p name (case-insensitive), else 0.
+ *
+ * Compares @p name with each 0x60-byte entry of the part table (+0x8), for the header's part count. Unlike
+ * func_00314AC0 it does not check for a missing header.
+ *
+ * @param name  the part name to look for
+ * @return 1 when found, else 0
+ */
 extern "C" int func_00314AE0(char* self, const char* name) {
     int i;
     for (i = 0; i < *(short*)(*(char**)(self + 4) + 4); i++) {
@@ -1097,6 +1286,14 @@ INCLUDE_ASM("animation/animsequencer", func_00314B70);
 #ifdef SKIP_ASM
 extern "C" int strcasecmp(const char* a, const char* b);
 
+/**
+ * Returns the archive's 0x60-byte header of the model part named @p name (case-insensitive), or 0 if none.
+ *
+ * The pointer is into the archive's part table (+0x8); unlike cMdfArchive_getModelPart nothing is copied or unpacked.
+ *
+ * @param name  the part name to look for
+ * @return the part header inside the archive, or 0
+ */
 extern "C" char* func_00314B70(char* self, const char* name) {
     int i;
     for (i = 0; i < *(short*)(*(char**)(self + 4) + 4); i++) {
@@ -1152,6 +1349,15 @@ extern "C" void* cMdfArchive_getModelPart(sMdfArchive* self, const char* name)
 //100%
 INCLUDE_ASM("animation/animsequencer", func_00314C98);
 #ifdef SKIP_ASM
+/**
+ * Returns the 0x60-byte header of model part @p index inside the archive's part table (+0x8), without copying it.
+ *
+ * cMdfArchive_getModelPartByIndex returns an unpacked heap copy instead. No bounds check.
+ *
+ * @param archive  the archive wrapper
+ * @param index  the part index
+ * @return the part header inside the archive
+ */
 extern "C" int func_00314C98(void *archive, int index) {
     return (*(int *)((char*)(archive) + (8))) + (index * 0x60);
 }

@@ -47,6 +47,15 @@ struct sProfileMasks_001523E8
 };
 extern const sProfileMasks_001523E8 D_0045A7C0;
 
+/**
+ * Returns whether the character has visited any location of peak @p kind (0-2).
+ *
+ * Tests the visited-location bits at +0xACC (cBECharProfileDB_setLocationVisited) against the peak's mask: 0x64923,
+ * 0x18924C or 0x21A490 (from D_0045A7C0). No range check on @p kind.
+ *
+ * @param kind  the peak, 0-2
+ * @return 1 when a location of that peak was visited, else 0
+ */
 extern "C" int func_001523E8(void* self, int kind)
 {
     sProfileMasks_001523E8 masks = D_0045A7C0;
@@ -105,6 +114,18 @@ static inline int IsBetter_00152460(int stat, sScoreStat_00152460* s, unsigned i
     }
 }
 
+/**
+ * Records @p value as the character's best for a location and event if it beats the stored one; returns 1 if so.
+ *
+ * The record is the 8-byte entry at +0xAD0 that cBELibrary_getScoreType(@p locationId, @p stat) selects (as in
+ * cBECharProfileDB_getScoreStats); type 26 (none) and @p value 0 return 0. For @p stat 0, 4, 6, 7 and 8 lower is
+ * better (times), for the rest higher (points); an empty record (0) always takes the value.
+ *
+ * @param locationId  the location
+ * @param stat  the event kind, which also decides whether lower or higher is better
+ * @param value  the new score or time
+ * @return 1 when the record was updated, else 0
+ */
 extern "C" int func_00152460(sCharProfile_00152460* self, int locationId, int stat, unsigned int value)
 {
     int type = cBELibrary_getScoreType(locationId, stat);
@@ -154,6 +175,19 @@ struct sEventDef_00152528
 };
 extern sEventDef_00152528 cBELibrary_locationDB[];
 
+/**
+ * Records finishing place @p place for an event in the character's profile; returns 1 when it is a new best.
+ *
+ * Nothing happens for @p place -1 or a pair without a record (cBELibrary_getScoreType gives 26). Otherwise the record
+ * at +0xAD0 is marked done and its count incremented for places 0 and 1. A place not better than the stored best
+ * returns 0. The first place stored (best still -1) also bumps the medal counters of the location's category
+ * (cBELibrary_locationDB[@p ev] +0x54): the first counter for @p mode 0, the second for modes 1-3.
+ *
+ * @param ev  the location
+ * @param mode  the event kind
+ * @param place  the finishing place / medal (0 best), or -1 for none
+ * @return 1 when the best place was updated, else 0
+ */
 extern "C" int func_00152528(sCharProfile_00152528* self, int ev, int mode, int place)
 {
     if (place != -1)

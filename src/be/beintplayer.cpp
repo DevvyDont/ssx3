@@ -117,6 +117,12 @@ struct sCharEntryBits_00145A98 {
 extern sCharEntryBits_00145A98 D_00534FE0_bits[] __asm__("cBENewPlayerInterface_tempPlayers");
 extern sCharEntryBits_00145A98 D_00535B20_bits[] __asm__("cBELibrary_playerDB");
 
+/**
+ * Commits part of the player table: for each of the six entries, copies flag bit 1 (vibration) and the 12-byte name
+ * from cBENewPlayerInterface_tempPlayers to cBELibrary_playerDB.
+ *
+ * cBENewPlayerInterface_submit runs it instead of the whole-table copy while the interface's word at +0x8 is clear.
+ */
 extern "C" void func_00145A98(void)
 {
     for (int i = 0; i < 6; i++)
@@ -190,6 +196,15 @@ int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
 extern int cBELibrary_profileLib[];
 
+/**
+ * Returns a rider's first-time-in-career flag: the word at +0 of its character record in cBELibrary_profileLib.
+ *
+ * The record is profile cBELibrary_getProfileIndex(@p index), character tempPlayers[getPlayerID(@p index)].mCharID.
+ * Starting the career with the flag set opens on location 14, where the rider starts at the back-country drop-off.
+ *
+ * @param index  the rider (On Tour iRider)
+ * @return the flag word
+ */
 extern "C" int func_00145C38(void* self, int index)
 {
     int profile = cBELibrary_getProfileIndex(index);
@@ -208,6 +223,14 @@ int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
 extern int cBELibrary_profileLib[];
 
+/**
+ * Sets a rider's first-time-in-career flag: the word at +0 of its character record in cBELibrary_profileLib.
+ *
+ * The record is profile cBELibrary_getProfileIndex(@p index), character tempPlayers[getPlayerID(@p index)].mCharID.
+ *
+ * @param index  the rider (On Tour iRider)
+ * @param value  the new flag
+ */
 extern "C" void func_00145CB0(void* self, int index, int value)
 {
     int profile = cBELibrary_getProfileIndex(index);
@@ -292,6 +315,16 @@ struct sProfileSlot_00145E68 {
     char data[0xF88];
 };
 
+/**
+ * Returns whether a rider's character has visited any location of a peak.
+ *
+ * Passes the rider's character record (profile cBELibrary_getProfileIndex(@p index), character
+ * tempPlayers[getPlayerID(@p index)].mCharID) to func_001523E8, which tests its visited-location mask.
+ *
+ * @param index  the rider (On Tour iRider)
+ * @param kind  the peak, 0-2
+ * @return 1 when visited, else 0
+ */
 extern "C" int func_00145E68(void* self, int index, int kind)
 {
     int profile = cBELibrary_getProfileIndex(index);
@@ -313,6 +346,18 @@ struct sProfileSlot_00145EF0 {
     char data[0xF88];
 };
 
+/**
+ * Returns whether a rider's character has a result for an event on a location: the first byte of its score record.
+ *
+ * The record is cBECharProfileDB_getScoreStats(@p locationId, @p event) on the rider's character record (profile
+ * cBELibrary_getProfileIndex(@p index), character tempPlayers[getPlayerID(@p index)].mCharID). There is no null
+ * check: for a pair with no score record getScoreStats returns 0 and the byte is read from address 0.
+ *
+ * @param index  the rider (On Tour iRider)
+ * @param locationId  the location (On Tour eBELocationID)
+ * @param event  the game event (On Tour eBEGameEvent)
+ * @return 1 when the byte is nonzero, else 0
+ */
 extern "C" int func_00145EF0(void* self, int index, int locationId, int event)
 {
     int profile = cBELibrary_getProfileIndex(index);
@@ -401,6 +446,16 @@ struct sProfBits_146070 {
     unsigned long b13 : 1;
 };
 
+/**
+ * Locks or unlocks a peak for a rider's character: bit 12 of its profile flags for peak 1, bit 13 for any other.
+ *
+ * The flags are the 64-bit word at +0x278 of the character record (profile cBELibrary_getProfileIndex(@p index),
+ * character tempPlayers[getPlayerID(@p index)].mCharID), the bits cBENewPlayerInterface_isPeakLocked reads.
+ *
+ * @param index  the rider (On Tour iRider)
+ * @param kind  the peak (0-based): 1, or 2 (any other value also writes bit 13)
+ * @param value  1 to lock, 0 to unlock
+ */
 extern "C" void func_00146070(void* self, int index, int kind, int value)
 {
     int profile = cBELibrary_getProfileIndex(index);
@@ -423,6 +478,17 @@ int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
 extern int cBELibrary_profileLib[];
 
+/**
+ * Returns whether a rider's character has played a peak's rival challenge.
+ *
+ * Reads the 64-bit flag word at +0x278 of the character record (profile cBELibrary_getProfileIndex(@p index),
+ * character tempPlayers[getPlayerID(@p index)].mCharID): bit 3 + @p kind when @p flag is set, else bit @p kind.
+ *
+ * @param index  the rider (On Tour iRider)
+ * @param kind  the peak, 0-2; any other gives 0
+ * @param flag  selects bits 3-5 when nonzero, bits 0-2 when 0 (the end-of-event script passes game mode == 0)
+ * @return the bit, 0 or 1
+ */
 // PORT: 64-bit `long` flag word (8 bytes on EE); use int64_t off-PS2.
 extern "C" int func_00146150(void* self, int index, int kind, int flag)
 {
@@ -479,6 +545,18 @@ struct sProfBits6320 {
     unsigned long b5 : 1;
 };
 
+/**
+ * Sets or clears the played mark of a peak's rival challenge for a rider's character.
+ *
+ * Writes bit 3 + @p kind (when @p flag is set) or bit @p kind of the 64-bit flag word at +0x278 of the character record
+ * (profile cBELibrary_getProfileIndex(@p index), character tempPlayers[getPlayerID(@p index)].mCharID), the bit
+ * func_00146150 reads. A peak outside 0-2 writes nothing.
+ *
+ * @param index  the rider (On Tour iRider)
+ * @param kind  the peak, 0-2
+ * @param flag  selects bits 3-5 when nonzero, bits 0-2 when 0
+ * @param value  the new bit
+ */
 extern "C" void func_00146320(void* self, int index, int kind, int flag, int value)
 {
     int profile = cBELibrary_getProfileIndex(index);
@@ -516,6 +594,18 @@ INCLUDE_ASM("be/beintplayer", func_001464D0);
 int cBELibrary_getProfileIndex(int);
 extern int cBELibrary_profileLib[];
 
+/**
+ * Returns whether a peak's rival event is still locked for a character.
+ *
+ * Reads the 64-bit flag word at +0x278 of character @p c's record in the profile of @p index
+ * (cBELibrary_getProfileIndex): bit 6 + @p kind when @p flag is set, else bit 9 + @p kind.
+ *
+ * @param index  the rider whose profile is used (On Tour iRider)
+ * @param c  the character (On Tour eBECharacters)
+ * @param kind  the peak, 0-2; any other gives 0
+ * @param flag  selects bits 6-8 when nonzero, bits 9-11 when 0 (the map passes 1 for event kind 4, 0 for kind 5)
+ * @return 1 when locked, else 0
+ */
 // PORT: 64-bit `long` flag word (8 bytes on EE); use int64_t off-PS2.
 extern "C" int func_001464D0(void* self, int index, int c, int kind, int flag)
 {
@@ -580,6 +670,17 @@ struct sTrackInfo_1466A0 {
 };
 extern sTrackInfo_1466A0 cBELibrary_locationDB[];
 
+/**
+ * Returns whether the rival event of the current peak is still locked for a rider's character.
+ *
+ * The peak is the word at +0x54 of the current location's cBELibrary_locationDB record (location: cBELibrary_raceDB
+ * +0x40). When the committed game mode (cBELibrary_raceDB byte +0x48) is 5, reads bit 6 + peak of the 64-bit flag word
+ * at +0x278 of the character record (profile cBELibrary_getProfileIndex(@p index), character
+ * tempPlayers[getPlayerID(@p index)].mCharID), else bit 9 + peak. A peak outside 0-2 gives 0.
+ *
+ * @param index  the rider (On Tour iRider)
+ * @return 1 when locked, else 0
+ */
 // PORT: 64-bit `long` flag word (8 bytes on EE); use int64_t off-PS2.
 extern "C" int func_001466A0(void* self, int index)
 {
@@ -652,6 +753,19 @@ struct sProfBits_1468B0 {
     char pad1[0xF88 - 0x280];
 };
 
+/**
+ * Locks or unlocks a peak's rival event for a character.
+ *
+ * Writes bit 6 + @p kind (when @p flag is set) or bit 9 + @p kind of the 64-bit flag word at +0x278 of character
+ * @p c's record in the profile of @p index (cBELibrary_getProfileIndex), the bit func_001464D0 reads. A peak outside
+ * 0-2 writes nothing.
+ *
+ * @param index  the rider whose profile is used (On Tour iRider)
+ * @param c  the character (On Tour eBECharacters)
+ * @param kind  the peak, 0-2
+ * @param flag  selects bits 6-8 when nonzero, bits 9-11 when 0
+ * @param value  1 to lock, 0 to unlock
+ */
 extern "C" void func_001468B0(void* self, int index, int c, int kind, int flag, int value)
 {
     int profile = cBELibrary_getProfileIndex(index);
@@ -758,6 +872,17 @@ struct sPlayerSub_6C10 {
     char pad1[0xF88 - 0x280];
 };
 
+/**
+ * Locks or unlocks an event for a character: bit 8 + @p arg3 (events 6-11, bits 14-19) of its profile flags.
+ *
+ * Writes the 64-bit flag word at +0x278 of character @p arg2's record in the profile of @p arg1
+ * (cBELibrary_getProfileIndex), the bits cBENewPlayerInterface_isEventLocked reads. Other events write nothing.
+ *
+ * @param arg1  the rider whose profile is used (On Tour iRider)
+ * @param arg2  the character (On Tour eBECharacters)
+ * @param arg3  the game event, 6-11
+ * @param arg4  1 to lock, 0 to unlock
+ */
 extern "C" void func_00146C10(void* self, int arg1, int arg2, int arg3, int arg4) {
     int profile = cBELibrary_getProfileIndex(arg1);
     switch (arg3) {
@@ -877,6 +1002,15 @@ extern "C" int cBENewPlayerInterface_getHumanRider(void* self, int second)
 //100%
 INCLUDE_ASM("be/beintplayer", func_00146F40);
 #ifdef SKIP_ASM
+/**
+ * Sets a rider's name: copies up to 12 characters of @p name into its player entry.
+ *
+ * The entry is cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(@p index)]; strncpy leaves a
+ * 12-character name unterminated.
+ *
+ * @param index  the rider
+ * @param name  the new name
+ */
 extern "C" void func_00146F40(void* self, int index, const char* name)
 {
     strncpy((char*)&cBENewPlayerInterface_tempPlayers[cBENewPlayerInterface_getPlayerID(index)], name, 0xC);
@@ -897,6 +1031,18 @@ extern char str_JOUEUR_pct_d[];
 extern char str_SPIELER_pct_d[];
 extern char str_JUGADOR_pct_d[];
 
+/**
+ * Returns rider @p idx's display name, first giving an empty name a default "player n" text in the menu language.
+ *
+ * In a network game (cBENetworkInterface_networkOpt word 0 set) riders 0 and 1 use the online names: on the host
+ * (bIsHost, +0x8) rider 0 is this player's name (+0x488) and rider 1 the opponent's (+0x498), on the other console the
+ * reverse. Otherwise, when the name of the rider's entry (tempPlayers[getPlayerID(@p idx)]) is empty, formats
+ * str_PLAYER_pct_d, str_JOUEUR_pct_d, str_SPIELER_pct_d or str_JUGADOR_pct_d with @p idx + 1 into it, by the language
+ * field (bits 22-24 of cBEOptionInterface_mOption[0]; a language above 3 leaves it empty), and returns that name.
+ *
+ * @param idx  the rider
+ * @return the name string
+ */
 // Returns the display name for player idx (network names in a net game, else a default "Player N").
 extern "C" char* func_00146F88(void* self, int idx)
 {
@@ -938,6 +1084,14 @@ INCLUDE_ASM("be/beintplayer", func_00147138);
 #ifdef SKIP_ASM
 extern "C" char* strncpy(char* dst, const char* src, unsigned int n);
 
+/**
+ * Sets a player slot's name: copies up to 12 characters of @p name into cBENewPlayerInterface_tempPlayers[@p a1].
+ *
+ * The slot is used directly (no rider mapping); strncpy leaves a 12-character name unterminated.
+ *
+ * @param a1  the player slot (On Tour iPlayer)
+ * @param name  the new name
+ */
 extern "C" void func_00147138(void* self, int a1, const char* name)
 {
     strncpy(cBENewPlayerInterface_tempPlayers[a1].pad_0x00, name, 0xC);
@@ -1158,6 +1312,15 @@ extern "C" void cBENewPlayerInterface_setRiderCheatCharID(void* self, int index,
 //100%
 INCLUDE_ASM("be/beintplayer", func_00147410);
 #ifdef SKIP_ASM
+/**
+ * Returns the cheat character a rider appears as (0 for none).
+ *
+ * Signed byte +0x12 of cBENewPlayerInterface_tempPlayers[getPlayerID(@p index)], the field
+ * cBENewPlayerInterface_setRiderCheatCharID writes.
+ *
+ * @param index  the rider (On Tour iRider)
+ * @return the cheat character id
+ */
 extern "C" signed char func_00147410(void* self, int index)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -1219,6 +1382,12 @@ signed char cBENewPlayerInterface_getPlayerCharID(void* self, int index)
 //100%
 INCLUDE_ASM("be/beintplayer", func_001474A8);
 #ifdef SKIP_ASM
+/**
+ * Sets the cheat character of player slot @p playerId: byte +0x12 of cBENewPlayerInterface_tempPlayers[@p playerId].
+ *
+ * @param playerId  the player slot (On Tour iPlayer)
+ * @param value  the cheat character id, 0 for none
+ */
 extern "C" void func_001474A8(void* self, int playerId, int value)
 {
     char* playerEntry = (char*)&cBENewPlayerInterface_tempPlayers[0] + playerId * 0x1c;
@@ -1229,6 +1398,12 @@ extern "C" void func_001474A8(void* self, int playerId, int value)
 //100%
 INCLUDE_ASM("be/beintplayer", func_001474C8);
 #ifdef SKIP_ASM
+/**
+ * Returns the cheat character of player slot @p playerId: signed byte +0x12 of cBENewPlayerInterface_tempPlayers.
+ *
+ * @param playerId  the player slot (On Tour iPlayer)
+ * @return the cheat character id, 0 for none
+ */
 extern "C" signed char func_001474C8(void* self, int playerId)
 {
     char* playerEntry = (char*)&cBENewPlayerInterface_tempPlayers[0] + playerId * 0x1c;
@@ -1247,6 +1422,15 @@ struct sPlayerCharFlags_0x10 {
     unsigned int rest : 28;
 };
 
+/**
+ * Returns whether a rider's pad vibration is on: flag bit 1 at +0x10 of its player entry.
+ *
+ * The entry is cBENewPlayerInterface_tempPlayers[getPlayerID(@p index)]; cBENewPlayerInterface_defaultCtrl sets the
+ * bit for every entry.
+ *
+ * @param index  the rider (On Tour iRider)
+ * @return 1 when on, else 0
+ */
 extern "C" int func_001474E8(void* self, int index)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -1266,6 +1450,12 @@ struct sPlayerCharFlags_00147528 {
     unsigned int rest : 28;
 };
 
+/**
+ * Turns a rider's pad vibration on or off: flag bit 1 at +0x10 of tempPlayers[getPlayerID(@p index)].
+ *
+ * @param index  the rider (On Tour iRider)
+ * @param value  the new setting
+ */
 extern "C" void func_00147528(void* self, int index, int value)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -1277,6 +1467,15 @@ extern "C" void func_00147528(void* self, int index, int value)
 //100%
 INCLUDE_ASM("be/beintplayer", func_00147580);
 #ifdef SKIP_ASM
+/**
+ * Returns flag bit 3 at +0x10 of a rider's player entry (tempPlayers[getPlayerID(@p index)]).
+ *
+ * The bit is set once the world script has opened the message center (func_001E3510), after which func_001E3570 stops
+ * offering it.
+ *
+ * @param index  the rider (On Tour iRider)
+ * @return the bit, 0 or 1
+ */
 extern "C" int func_00147580(void* self, int index)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -1296,6 +1495,12 @@ struct sPlayerCharFlags_001475C0 {
     unsigned int rest : 28;
 };
 
+/**
+ * Sets or clears flag bit 3 at +0x10 of a rider's player entry (tempPlayers[getPlayerID(@p index)]).
+ *
+ * @param index  the rider (On Tour iRider)
+ * @param value  the new bit
+ */
 extern "C" void func_001475C0(void* self, int index, int value)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -1324,6 +1529,12 @@ extern "C" signed char cBENewPlayerInterface_getControllerMapping(void* self, in
 //100%
 INCLUDE_ASM("be/beintplayer", func_00147658);
 #ifdef SKIP_ASM
+/**
+ * Sets a rider's button layout: byte +0x13 of cBENewPlayerInterface_tempPlayers[getPlayerID(@p index)].
+ *
+ * @param index  the rider (On Tour iRider)
+ * @param value  the controller mapping id
+ */
 extern "C" void func_00147658(void* self, int index, int value)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -1342,6 +1553,12 @@ struct sPlayerCharEntryExt_7698 {
 };
 extern sPlayerCharEntryExt_7698 D_00534FE0_ext[] __asm__("cBENewPlayerInterface_tempPlayers");
 
+/**
+ * Returns the word at +0x14 of a rider's player entry (cBENewPlayerInterface_tempPlayers[getPlayerID(@p index)]).
+ *
+ * @param index  the rider
+ * @return the word
+ */
 extern "C" int func_00147698(void* self, int index)
 {
     return D_00534FE0_ext[cBENewPlayerInterface_getPlayerID(index)].field_0x14;
@@ -1358,6 +1575,12 @@ struct sPlayerCharEntryExt_76D8 {
 };
 extern sPlayerCharEntryExt_76D8 D_00534FE0_ext_76D8[] __asm__("cBENewPlayerInterface_tempPlayers");
 
+/**
+ * Sets the word at +0x14 of a rider's player entry (cBENewPlayerInterface_tempPlayers[getPlayerID(@p index)]).
+ *
+ * @param index  the rider
+ * @param value  the new word
+ */
 extern "C" void func_001476D8(void* self, int index, int value)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -1374,6 +1597,12 @@ struct sPlayerCharEntryExt_7718 {
 };
 extern sPlayerCharEntryExt_7718 D_00534FE0_ext_7718[] __asm__("cBENewPlayerInterface_tempPlayers");
 
+/**
+ * Returns the word at +0x18 of a rider's player entry (cBENewPlayerInterface_tempPlayers[getPlayerID(@p index)]).
+ *
+ * @param index  the rider
+ * @return the word
+ */
 extern "C" int func_00147718(void* self, int index)
 {
     return D_00534FE0_ext_7718[cBENewPlayerInterface_getPlayerID(index)].field_0x18;
@@ -1389,6 +1618,12 @@ struct sPlayerCharEntryExt_7758 {
 };
 extern sPlayerCharEntryExt_7758 D_00534FE0_ext_7758[] __asm__("cBENewPlayerInterface_tempPlayers");
 
+/**
+ * Sets the word at +0x18 of a rider's player entry (cBENewPlayerInterface_tempPlayers[getPlayerID(@p index)]).
+ *
+ * @param index  the rider
+ * @param value  the new word
+ */
 extern "C" void func_00147758(void* self, int index, int value)
 {
     int id = cBENewPlayerInterface_getPlayerID(index);
@@ -1421,6 +1656,15 @@ struct sPlayerFlags_001477B0 {
     char pad_0x14[0x1C - 0x14];
 };
 
+/**
+ * Returns flag bit 0 of player slot @p index's entry, or -1 when the slot has no controller.
+ *
+ * The slot indexes cBENewPlayerInterface_tempPlayers directly; a controller id (+0xC) of -1 gives -1, otherwise the
+ * result is bit 0 of the flags at +0x10.
+ *
+ * @param index  the player slot
+ * @return -1, 0 or 1
+ */
 extern "C" int func_001477B0(void* self, int index)
 {
     if (cBENewPlayerInterface_tempPlayers[index].field_0xc == -1) {
@@ -1498,6 +1742,14 @@ int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
 extern int cBELibrary_profileLib[];
 
+/**
+ * Returns the message list of a rider's character: +0xE38 of its character record in cBELibrary_profileLib.
+ *
+ * The record is profile cBELibrary_getProfileIndex(@p index), character tempPlayers[getPlayerID(@p index)].mCharID.
+ *
+ * @param index  the rider
+ * @return a pointer into the character record
+ */
 extern "C" void* func_00147908(void* self, int index)
 {
     int profile = cBELibrary_getProfileIndex(index);
@@ -1515,6 +1767,16 @@ int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
 extern int cBELibrary_profileLib[];
 
+/**
+ * Tests message flag @p bit of a rider's character: bit @p bit of the bit array at +0xF08 of its character record.
+ *
+ * The record is profile cBELibrary_getProfileIndex(@p index), character tempPlayers[getPlayerID(@p index)].mCharID;
+ * the word is @p bit / 32 and the mask 1 << @p bit (shift taken mod 32). No range check.
+ *
+ * @param index  the rider
+ * @param bit  the flag number
+ * @return 1 when set, else 0
+ */
 extern "C" int func_00147980(void* self, int index, int bit)
 {
     int profile = cBELibrary_getProfileIndex(index);
@@ -1535,6 +1797,16 @@ int cBELibrary_getProfileIndex(int);
 int cBENewPlayerInterface_getPlayerID(int index);
 extern int cBELibrary_profileLib[];
 
+/**
+ * Sets or clears message flag @p bit of a rider's character, in the bit array at +0xF08 of its character record.
+ *
+ * The record is profile cBELibrary_getProfileIndex(@p index), character tempPlayers[getPlayerID(@p index)].mCharID.
+ * No range check.
+ *
+ * @param index  the rider
+ * @param bit  the flag number
+ * @param on  nonzero sets the flag, 0 clears it
+ */
 extern "C" void func_00147A30(void* self, int index, int bit, int on)
 {
     int profile = cBELibrary_getProfileIndex(index);
@@ -1568,6 +1840,15 @@ struct sProfileSlot_func_00147B20 {
     sPair_func_00147B20 e[1];
 };
 
+/**
+ * Returns the first word of pair @p slot in the 8-byte pair array at +0xBA0 of a rider's character record.
+ *
+ * The record is profile cBELibrary_getProfileIndex(@p index), character tempPlayers[getPlayerID(@p index)].mCharID.
+ *
+ * @param index  the rider
+ * @param slot  the pair index (no range check)
+ * @return the word at +0xBA0 + @p slot * 8
+ */
 extern "C" int func_00147B20(void* self, int index, int slot)
 {
     int profile = cBELibrary_getProfileIndex(index);
@@ -1593,6 +1874,15 @@ struct sProfileSlot_func_00147BB0 {
     sPair_func_00147BB0 e[1];
 };
 
+/**
+ * Returns the second word of pair @p slot in the 8-byte pair array at +0xBA0 of a rider's character record.
+ *
+ * The record is profile cBELibrary_getProfileIndex(@p index), character tempPlayers[getPlayerID(@p index)].mCharID.
+ *
+ * @param index  the rider
+ * @param slot  the pair index (no range check)
+ * @return the word at +0xBA4 + @p slot * 8
+ */
 extern "C" int func_00147BB0(void* self, int index, int slot)
 {
     int profile = cBELibrary_getProfileIndex(index);
@@ -1608,6 +1898,15 @@ INCLUDE_ASM("be/beintplayer", func_00147C40);
 int cBELibrary_getCharacterID(int);
 extern int cBELibrary_profileLib[];
 
+/**
+ * Sets a difficulty level of the first profile's current character and resets its win/loss streak.
+ *
+ * The character is cBELibrary_getCharacterID(0) in profile 0 of cBELibrary_profileLib. With @p flag set, stores
+ * @p value in the short at +0x280 and clears +0x282; otherwise the pair at +0x284 / +0x286.
+ *
+ * @param value  the level, 0-2 (func_00147D20 caps it at 2)
+ * @param flag  picks the pair: nonzero +0x280, 0 +0x284
+ */
 extern "C" void func_00147C40(void* self, int value, int flag)
 {
     int charId = cBELibrary_getCharacterID(0);
@@ -1628,6 +1927,14 @@ INCLUDE_ASM("be/beintplayer", func_00147CB8);
 #ifdef SKIP_ASM
 int cBELibrary_getCharacterID(int);
 
+/**
+ * Returns a difficulty level of the first profile's current character (cBELibrary_getCharacterID(0), profile 0).
+ *
+ * The short at +0x280 of the character record when @p which is set, else the one at +0x284.
+ *
+ * @param which  picks the pair: nonzero +0x280, 0 +0x284 (cComputer passes game mode == 0)
+ * @return the level, 0-2
+ */
 extern "C" short func_00147CB8(void* self, int which)
 {
     int charId = cBELibrary_getCharacterID(0);
@@ -1659,6 +1966,15 @@ struct sCharRec_147D20 {
     char pad288[0xF88 - 0x288];
 };
 
+/**
+ * Records a win toward a difficulty level of the first profile's current character.
+ *
+ * Adds 1 to the streak short (+0x282 when @p which is set, else +0x286) of the character cBELibrary_getCharacterID(0)
+ * in profile 0; when it reaches 2 the streak resets to 0 and the level before it (+0x280 / +0x284) goes up by one, to
+ * at most 2. The game mode code calls it after a career win.
+ *
+ * @param which  picks the pair: nonzero +0x280 / +0x282, 0 +0x284 / +0x286
+ */
 extern "C" void func_00147D20(void* self, int which)
 {
     int profile = 0;
@@ -1708,6 +2024,15 @@ struct sCharRec_147E18 {
     char pad288[0xF88 - 0x288];
 };
 
+/**
+ * Records a loss toward a difficulty level of the first profile's current character.
+ *
+ * Takes 1 from the streak short (+0x282 when @p which is set, else +0x286) of the character
+ * cBELibrary_getCharacterID(0) in profile 0; when it falls to -2 the streak resets to 0 and the level before it
+ * (+0x280 / +0x284) goes down by one, to no less than 0. The game mode code calls it after a career loss.
+ *
+ * @param which  picks the pair: nonzero +0x280 / +0x282, 0 +0x284 / +0x286
+ */
 extern "C" void func_00147E18(void* self, int which)
 {
     int profile = 0;
@@ -1748,6 +2073,15 @@ INCLUDE_ASM("be/beintplayer", func_00147F10);
 int cBELibrary_getCharacterID(int);
 extern int cBELibrary_profileLib[];
 
+/**
+ * Returns the win/loss streak beside a difficulty level of the first profile's current character.
+ *
+ * The short at +0x282 (when @p flag is set) or +0x286 of the record of cBELibrary_getCharacterID(0) in profile 0; the
+ * win and loss counters func_00147D20 and func_00147E18 move it.
+ *
+ * @param flag  picks the pair: nonzero +0x282, 0 +0x286
+ * @return the streak, -1 to 1
+ */
 extern "C" short func_00147F10(void* self, int flag)
 {
     int charId = cBELibrary_getCharacterID(0);
@@ -1874,6 +2208,16 @@ INCLUDE_ASM("be/beintplayer", func_00148158);
 int cBELibrary_getCharacterID(int);
 extern int cBELibrary_profileLib[];
 
+/**
+ * Returns one of the seven attribute bytes of a profile's current character, or -1 for an unknown attribute.
+ *
+ * Reads signed byte +0xBDF + @p stat of the record of character cBELibrary_getCharacterID(@p profile) in profile
+ * @p profile of cBELibrary_profileLib.
+ *
+ * @param profile  the human, used both as the profile index and to look up the character (On Tour iHuman)
+ * @param stat  the attribute, 0-6 (On Tour eBEAttributes)
+ * @return the attribute value, or -1
+ */
 // Returns one of a character's seven stat levels for the given profile, or -1.
 extern "C" int func_00148158(void* self, int profile, unsigned int stat)
 {
@@ -1928,6 +2272,17 @@ struct sCharStat_001482D0 {
 };
 extern sCharStat_001482D0 D_005308D8_001482D0[] __asm__("D_005308D8");
 
+/**
+ * Copies record @p c of D_005308D8, the 15-byte per-character default-stat table, into @p dst.
+ *
+ * The struct is returned by value: @p dst is the caller's buffer (g++ passes it first) and @p unused the stat
+ * interface. The record has the size of On Tour's tBEStatDefault (character id, start stats, maximum stats).
+ *
+ * @param dst  the result buffer
+ * @param unused  the stat interface (not used)
+ * @param c  the character
+ * @return @p dst
+ */
 extern "C" sCharStat_001482D0* func_001482D0(sCharStat_001482D0* dst, int unused, int c)
 {
     *dst = D_005308D8_001482D0[c];
@@ -1945,6 +2300,17 @@ struct sCharStat_00148328 {
 };
 extern sCharStat_00148328 D_005308D8_00148328[] __asm__("D_005308D8");
 
+/**
+ * Copies a rider's record of D_005308D8, the 15-byte per-character default-stat table, into @p dst.
+ *
+ * The record is the one of character cBELibrary_getCharacterID(@p rider). The struct is returned by value: @p dst is
+ * the caller's buffer (g++ passes it first) and @p unused the stat interface.
+ *
+ * @param dst  the result buffer
+ * @param unused  the stat interface (not used)
+ * @param rider  the rider
+ * @return @p dst
+ */
 extern "C" sCharStat_00148328* func_00148328(sCharStat_00148328* dst, int unused, int rider)
 {
     int c = cBELibrary_getCharacterID(rider);
@@ -1969,6 +2335,15 @@ struct sPlayerStatRowView_001483A0 {
 };
 extern sPlayerStatRowView_001483A0 D_00535538_view001483A0[] __asm__("D_00535538");
 
+/**
+ * Sets a rider's speed stat: byte 0 of its 7-byte record in D_00535538.
+ *
+ * The record is [cBELibrary_getProfileIndex(@p rider)][cBELibrary_getCharacterID(@p rider)] (10 characters per
+ * profile); byte 0 is On Tour's tBEStatDB::cSpeed. cBEStatInterface_setStatLevel stores level x 5 here.
+ *
+ * @param rider  the rider (On Tour iRider)
+ * @param value  the stat value
+ */
 extern "C" void func_001483A0(void* self, int rider, int value)
 {
     int a = cBELibrary_getProfileIndex(rider);
@@ -1992,6 +2367,15 @@ struct sPlayerStatRowView_00148410 {
 };
 extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
 
+/**
+ * Returns a rider's speed stat: byte 0 of its 7-byte record in D_00535538.
+ *
+ * The record is [cBELibrary_getProfileIndex(@p rider)][cBELibrary_getCharacterID(@p rider)] (10 characters per
+ * profile); byte 0 is On Tour's tBEStatDB::cSpeed.
+ *
+ * @param rider  the rider (On Tour iRider)
+ * @return the stat value
+ */
 extern "C" signed char func_00148410(void* self, int rider)
 {
     int a = cBELibrary_getProfileIndex(rider);
@@ -2009,6 +2393,15 @@ int cBELibrary_getCharacterID(int);
 
 extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
 
+/**
+ * Sets a rider's acceleration stat: byte 1 of its 7-byte record in D_00535538.
+ *
+ * The record is [cBELibrary_getProfileIndex(@p rider)][cBELibrary_getCharacterID(@p rider)] (10 characters per
+ * profile); byte 1 is On Tour's tBEStatDB::cAccel. cBEStatInterface_setStatLevel stores level x 5 here.
+ *
+ * @param rider  the rider (On Tour iRider)
+ * @param value  the stat value
+ */
 extern "C" void func_00148470(void* self, int rider, int value)
 {
     int a = cBELibrary_getProfileIndex(rider);
@@ -2026,6 +2419,15 @@ int cBELibrary_getCharacterID(int);
 
 extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
 
+/**
+ * Returns a rider's acceleration stat: byte 1 of its 7-byte record in D_00535538.
+ *
+ * The record is [cBELibrary_getProfileIndex(@p rider)][cBELibrary_getCharacterID(@p rider)] (10 characters per
+ * profile); byte 1 is On Tour's tBEStatDB::cAccel.
+ *
+ * @param rider  the rider (On Tour iRider)
+ * @return the stat value
+ */
 extern "C" signed char func_001484E0(void* self, int rider)
 {
     int a = cBELibrary_getProfileIndex(rider);
@@ -2043,6 +2445,15 @@ int cBELibrary_getCharacterID(int);
 
 extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
 
+/**
+ * Sets a rider's trick stat: byte 2 of its 7-byte record in D_00535538.
+ *
+ * The record is [cBELibrary_getProfileIndex(@p rider)][cBELibrary_getCharacterID(@p rider)] (10 characters per
+ * profile); byte 2 is On Tour's tBEStatDB::cTrick. cBEStatInterface_setStatLevel stores level x 5 here.
+ *
+ * @param rider  the rider (On Tour iRider)
+ * @param value  the stat value
+ */
 extern "C" void func_00148540(void* self, int rider, int value)
 {
     int a = cBELibrary_getProfileIndex(rider);
@@ -2060,6 +2471,15 @@ int cBELibrary_getCharacterID(int);
 
 extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
 
+/**
+ * Returns a rider's trick stat: byte 2 of its 7-byte record in D_00535538.
+ *
+ * The record is [cBELibrary_getProfileIndex(@p rider)][cBELibrary_getCharacterID(@p rider)] (10 characters per
+ * profile); byte 2 is On Tour's tBEStatDB::cTrick.
+ *
+ * @param rider  the rider (On Tour iRider)
+ * @return the stat value
+ */
 extern "C" signed char func_001485B0(void* self, int rider)
 {
     int a = cBELibrary_getProfileIndex(rider);
@@ -2077,6 +2497,15 @@ int cBELibrary_getCharacterID(int);
 
 extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
 
+/**
+ * Sets a rider's edging stat: byte 3 of its 7-byte record in D_00535538.
+ *
+ * The record is [cBELibrary_getProfileIndex(@p rider)][cBELibrary_getCharacterID(@p rider)] (10 characters per
+ * profile); byte 3 is On Tour's tBEStatDB::cEdging. cBEStatInterface_setStatLevel stores level x 5 here.
+ *
+ * @param rider  the rider (On Tour iRider)
+ * @param value  the stat value
+ */
 extern "C" void func_00148610(void* self, int rider, int value)
 {
     int a = cBELibrary_getProfileIndex(rider);
@@ -2094,6 +2523,15 @@ int cBELibrary_getCharacterID(int);
 
 extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
 
+/**
+ * Returns a rider's edging stat: byte 3 of its 7-byte record in D_00535538.
+ *
+ * The record is [cBELibrary_getProfileIndex(@p rider)][cBELibrary_getCharacterID(@p rider)] (10 characters per
+ * profile); byte 3 is On Tour's tBEStatDB::cEdging.
+ *
+ * @param rider  the rider (On Tour iRider)
+ * @return the stat value
+ */
 extern "C" signed char func_00148680(void* self, int rider)
 {
     int a = cBELibrary_getProfileIndex(rider);
@@ -2111,6 +2549,15 @@ int cBELibrary_getCharacterID(int);
 
 extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
 
+/**
+ * Sets a rider's spin stat: byte 4 of its 7-byte record in D_00535538.
+ *
+ * The record is [cBELibrary_getProfileIndex(@p rider)][cBELibrary_getCharacterID(@p rider)] (10 characters per
+ * profile); byte 4 is On Tour's tBEStatDB::cSpin. cBEStatInterface_setStatLevel stores level x 5 here.
+ *
+ * @param rider  the rider (On Tour iRider)
+ * @param value  the stat value
+ */
 extern "C" void func_001486E0(void* self, int rider, int value)
 {
     int a = cBELibrary_getProfileIndex(rider);
@@ -2128,6 +2575,15 @@ int cBELibrary_getCharacterID(int);
 
 extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
 
+/**
+ * Returns a rider's spin stat: byte 4 of its 7-byte record in D_00535538.
+ *
+ * The record is [cBELibrary_getProfileIndex(@p rider)][cBELibrary_getCharacterID(@p rider)] (10 characters per
+ * profile); byte 4 is On Tour's tBEStatDB::cSpin.
+ *
+ * @param rider  the rider (On Tour iRider)
+ * @return the stat value
+ */
 extern "C" signed char func_00148750(void* self, int rider)
 {
     int a = cBELibrary_getProfileIndex(rider);
@@ -2145,6 +2601,15 @@ int cBELibrary_getCharacterID(int);
 
 extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
 
+/**
+ * Sets a rider's toughness stat: byte 5 of its 7-byte record in D_00535538.
+ *
+ * The record is [cBELibrary_getProfileIndex(@p rider)][cBELibrary_getCharacterID(@p rider)] (10 characters per
+ * profile); byte 5 is On Tour's tBEStatDB::cToughness. cBEStatInterface_setStatLevel stores level x 5 here.
+ *
+ * @param rider  the rider (On Tour iRider)
+ * @param value  the stat value
+ */
 extern "C" void func_001487B0(void* self, int rider, int value)
 {
     int a = cBELibrary_getProfileIndex(rider);
@@ -2162,6 +2627,15 @@ int cBELibrary_getCharacterID(int);
 
 extern sPlayerStatRowView_00148410 D_00535538_view[] __asm__("D_00535538");
 
+/**
+ * Returns a rider's toughness stat: byte 5 of its 7-byte record in D_00535538.
+ *
+ * The record is [cBELibrary_getProfileIndex(@p rider)][cBELibrary_getCharacterID(@p rider)] (10 characters per
+ * profile); byte 5 is On Tour's tBEStatDB::cToughness.
+ *
+ * @param rider  the rider (On Tour iRider)
+ * @return the stat value
+ */
 extern "C" signed char func_00148820(void* self, int rider)
 {
     int a = cBELibrary_getProfileIndex(rider);

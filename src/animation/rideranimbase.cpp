@@ -68,6 +68,13 @@ extern "C" void cRiderAnimBase__cRiderAnimBase(cRiderAnimBase* self, int flags)
 //100%
 INCLUDE_ASM("animation/rideranimbase", func_003119E8);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of animation sequencer @p slot of the rider animation (Sequencer + @p slot * 8).
+ *
+ * @param riderAnim  the cRiderAnimBase
+ * @param slot  the sequencer slot, 0-5
+ * @return the sequencer, as an int
+ */
 extern "C" int func_003119E8(void *riderAnim, int slot) {
     return (*(int *)((char*)(riderAnim) + (0x50))) + (slot * 8);
 }
@@ -78,6 +85,15 @@ INCLUDE_ASM("animation/rideranimbase", func_003119F8);
 extern "C" int* cAIAnimEventMap_getAnimPlayAttr(int anim);
 extern int D_0044AF80[];
 
+/**
+ * Returns the name of the sequencer that AI anim @p anim plays on.
+ *
+ * Word 3 of the anim's attribute record (cAIAnimEventMap_getAnimPlayAttr) is the sequencer slot; the name comes from
+ * D_0044AF80: "GraftCycle", "Graft", "Body", "HeadRel2nd", "TorsoRel2nd", "LegsRel2nd".
+ *
+ * @param anim  the AI anim id
+ * @return the sequencer name (as an int)
+ */
 extern "C" int func_003119F8(void* self, int anim)
 {
     int i = cAIAnimEventMap_getAnimPlayAttr(anim)[3];
@@ -91,6 +107,12 @@ INCLUDE_ASM("animation/rideranimbase", func_00311A30);
 // func_00311860 is matched as (void) but this caller passes the anim in $4.
 extern "C" const char* func_00311860_anim(int anim) __asm__("func_00311860");
 
+/**
+ * Returns the name of AI anim @p anim via func_00311860, which in this build always returns str_error.
+ *
+ * @param anim  the AI anim id (passed through; func_00311860 ignores it)
+ * @return str_error
+ */
 extern "C" const char* func_00311A30(void* self, int anim)
 {
     return func_00311860_anim(anim);
@@ -359,6 +381,13 @@ extern "C" void cRiderAnimBase_changeOrientationOffset(cRiderAnimBase* self, sRa
 //100%
 INCLUDE_ASM("animation/rideranimbase", func_00311D88);
 #ifdef SKIP_ASM
+/**
+ * Sets the flip flag (+0x80) of every playing sequence in all six sequencers to @p value.
+ *
+ * Only the sequences change; IsFlipped of the rider animation itself is not written (func_003158D8 sets that).
+ *
+ * @param value  nonzero to mirror the animations
+ */
 // Sets the field at 0x80 of every sequence node of all 6 sequencers.
 extern "C" void func_00311D88(sRiderAnimBase* self, int value)
 {
@@ -378,6 +407,13 @@ extern "C" void func_00311D88(sRiderAnimBase* self, int value)
 //100%
 INCLUDE_ASM("animation/rideranimbase", func_00311E38);
 #ifdef SKIP_ASM
+/**
+ * Stops everything on sequencer @p i: expires all its sequences and sets CurrentAnimID[@p i] to 0x1B6 (no anim).
+ *
+ * Uses cAnimSequencer_expireAll on Sequencer + @p i * 8. cRiderAnimBase_blendOutAll fades them out instead.
+ *
+ * @param i  the sequencer slot, 0-5
+ */
 // Resets sequencer i and marks its slot empty (0x1B6 = no anim, see cRiderAnimBase_getCurrentAnimCategory).
 extern "C" void func_00311E38(sRiderAnimBase* self, int i)
 {
@@ -804,6 +840,18 @@ struct sAnimKey00312820 {
     unsigned short pad;
 };
 
+/**
+ * Returns the time in seconds of tag number @p frame in the clip that AI anim @p anim plays, or -1 if it has fewer.
+ *
+ * Maps the AI anim to a game animation with the virtual at vtable slot 4 (0 when that gives 519, no game anim), then
+ * through the map (+0x1030) of cGameAnimMap_TheGameAnimMap to a bank and clip of cAnimDataBase_TheAnimDataBase. The
+ * clip's 0x14-byte record holds the first tag (u16 at +0x10) and tag count (u16 at +0x12); tag frames are u16 values
+ * in the bank's table at +0x10, converted at 30 frames per second. ai/computer uses tags 1 and 2 as trick markers.
+ *
+ * @param anim  the AI anim id
+ * @param frame  the tag number in the clip
+ * @return the tag's time in seconds, -1 when the clip has no such tag, 0 when the anim has no game animation
+ */
 extern "C" float func_00312820(char* self, int anim, int frame)
 {
     sVEntry00312820* vt = *(sVEntry00312820**)(self + 0x58);
@@ -926,6 +974,15 @@ int cRiderAnimBase_getCurrentAnimID(void* self, int i)
 //100%
 INCLUDE_ASM("animation/rideranimbase", func_00312AB0);
 #ifdef SKIP_ASM
+/**
+ * Returns how far the newest sequence of sequencer @p i has played: its first sub-animation's time over its length.
+ *
+ * Takes sequence 0 (cAnimSequencer_getSequence) of Sequencer[@p i] and divides its time (+0x8) by its total time
+ * (+0x10). There is no check for an empty sequencer.
+ *
+ * @param i  the sequencer slot, 0-5
+ * @return the fraction played, 0-1
+ */
 extern "C" float func_00312AB0(void* self, int i)
 {
     cAnimSequencer* seqs = *(cAnimSequencer**)((char*)self + 0x50);
@@ -961,6 +1018,19 @@ void cAnimSequence_fadeWeight(cAnimSequence* self, float weight, float target);
 extern "C" void cAnimSequencer_expire(void* seq, void* node);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 
+/**
+ * Replaces sequence @p node with AI anim @p anim, carrying the old sequence's blend weight and fade over.
+ *
+ * Saves the node's current weight (+0x94), target weight (+0x98) and fade time left (+0x9C), expires it
+ * (cAnimSequencer_expire), plays @p anim with cRiderAnimBase_play(anim, 0, -1 = default blend), then gives the new
+ * first sequence of @p seq the old current weight as both current and target weight and, if a fade was running,
+ * restarts it with cAnimSequence_fadeWeight(old target, old time left).
+ *
+ * @param seq  the sequencer the sequence plays on
+ * @param node  the sequence to replace
+ * @param anim  the AI anim to play
+ * @return @p anim
+ */
 extern "C" int func_00312B18(void* self, cAnimSequencer* seq, char* node, int anim)
 {
     float w = *(float*)(node + 0x94);
@@ -985,6 +1055,16 @@ INCLUDE_ASM("animation/rideranimbase", func_00312BD0);
 extern "C" void func_00144670(void* self, int bit);
 extern "C" void cRiderAnimBase_play(void* self, int anim, int flags, float blend);
 
+/**
+ * Clears event bit 63 of sequence @p rider's event flags (+0xB0) and plays AI anim @p anim with the default blend-in.
+ *
+ * The bit is cleared with func_00144670 (the same clear-and-mark-changed operation as func_003159B8); the anim starts
+ * with cRiderAnimBase_play(anim, 0, -1). Unlike func_00312B18 the old sequence is left to blend out.
+ *
+ * @param sequencer  the sequencer the sequence plays on (unused)
+ * @param rider  the sequence (cAnimSequence) that ended; the name is misleading
+ * @param anim  the AI anim to play
+ */
 extern "C" void func_00312BD0(void* self, void* sequencer, void* rider, int anim)
 {
     func_00144670((char*)rider + 0xB0, 0x3F);
@@ -1016,6 +1096,21 @@ struct sRabChannelSet {
     unsigned char count9;    // 0x17
 };
 
+/**
+ * Decodes @p count compressed animation channels, starting at channel @p first, at frame index @p t into @p out.
+ *
+ * Each 0x14-byte channel has a type and four constants (v4, v8, vC, v10): 0 gives 0, 1 the constant v4, 2-4 a
+ * polynomial in @p t of degree 1-3, 5 a line t * v4 + v8 that continues with slope vC after t = v10. Types 6-9 read a
+ * key from per-frame tables (vC is the key's column): 6 u8 per frame, 7 u8 every second frame, 8 u16 per frame (all
+ * three scaled by v8 plus v4), 9 a raw float per frame. Keys are interpolated linearly to the next row by the fraction
+ * of @p t (the half-frame fraction for type 7); fractions below 0.001 count as 0, and with both 0 no interpolation is
+ * done. The loop tests for the end after each channel, so @p count must be at least 1.
+ *
+ * @param first  the first channel to decode
+ * @param count  the number of channels
+ * @param t  the frame index (time x 30, may be fractional)
+ * @param out  receives @p count floats
+ */
 extern "C" void func_00312C20(sRabChannelSet* self, int first, int count, float t, float* out)
 {
     float half = t * 0.5f;
@@ -1321,6 +1416,17 @@ inline sRiderAnim_00313508::sRiderAnim_00313508(int o)
     uC4 = 0;
 }
 
+/**
+ * Constructs an animation sequence with id @p owner (stored at +0x0) and default state; returns @p self.
+ *
+ * The three sub-animations are marked inactive, the orientation offset (+0x60) becomes tPose_Identity, the bone mask
+ * (+0x88) -1, flip and priority (+0x80, +0x84) 0, time scale (+0x90), current and target weight (+0x94, +0x98) 1, and
+ * the fade timer, fade-out-expire flag, fade times, trigger list (+0xAC), event flags (+0xB0, +0xB8) and the flags at
+ * +0xC0 and +0xC4 are cleared. The local struct names value/target/remaining/notify for +0x94 .. +0xA0.
+ *
+ * @param owner  the sequence id (the AI anim id for rider sequences)
+ * @return @p self
+ */
 extern "C" sRiderAnim_00313508* func_00313508(sRiderAnim_00313508* self, int owner)
 {
     return new (self) sRiderAnim_00313508(owner);
@@ -1374,6 +1480,20 @@ static inline void fire_003135B0(sRab_003135B0* self, float from, float to)
     func_00313868((sAnimEvents_00313868*)self, from, to);
 }
 
+/**
+ * Advances sub-animation @p i of the sequence by @p dt, holding or wrapping at its ends and firing its triggers.
+ *
+ * The step is dt x the slot's time scale (+0x8 of the slot) x the sequence's time scale (+0x90). For slot 0 only: the
+ * just-changed event bits (+0xB8) and the end flag (+0xC0) are cleared first, and if the +0xC4 flag is set (by
+ * func_00313CF0) the triggers at the old time fire (func_00313938) and the flag is cleared. A hold slot (type 0)
+ * clamps to [0, length] and at either end sets the end triggers (func_003139A8); a loop slot outside the range is
+ * wrapped by whole lengths, the end triggers are set, and the timed triggers over the wrapped span fire
+ * (func_00313868, split at the wrap point). Triggers fire only for slot 0. Stores the new time in the slot.
+ *
+ * @param i  the sub-animation slot, 0-2
+ * @param dt  the time step
+ * @return always 0
+ */
 extern "C" int func_003135B0(sRab_003135B0* self, int i, float dt)
 {
     float t0 = self->tracks[i].time;
@@ -1447,6 +1567,17 @@ struct sBlend_00313800
     int notify;      // 0xA0
 };
 
+/**
+ * Steps the sequence's weight fade by @p dt; returns 1 when the fade ends on a sequence marked to expire.
+ *
+ * While the fade time left (+0x9C) is nonzero the current weight (+0x94) moves linearly toward the target (+0x98):
+ * by dt / time left of the remaining difference. When @p dt reaches the time left the weight snaps to the target, the
+ * timer is cleared, and the result is 1 if the fade-out-expire flag (+0xA0, set by cAnimSequence_fadeOutAndExpire) is
+ * set.
+ *
+ * @param dt  the time step
+ * @return 1 when a fade-out-and-expire just finished, else 0
+ */
 // Moves value toward target over the remaining time; returns 1 when the blend
 // finishes and notify is set.
 extern "C" int func_00313800(sBlend_00313800* self, float dt)
@@ -1493,6 +1624,15 @@ struct sAnimEvents_00313868
     ulong triggered;                // 0xB8
 };
 
+/**
+ * Fires every timed trigger whose time lies in (@p from, @p to], or in [@p to, @p from) when playing backwards.
+ *
+ * Walks the trigger list (+0xAC) and skips end triggers. Firing sets the trigger's id bit in the event flags (+0xB0)
+ * and, if it was clear, also in the just-changed flags (+0xB8). Does nothing when @p from equals @p to.
+ *
+ * @param from  the time before the step
+ * @param to  the time after the step
+ */
 // Fires every kind-0 event whose time lies in (from, to] (or [to, from) when
 // playing backwards).
 // PORT: ulong is 64-bit here
@@ -1547,6 +1687,13 @@ struct sAnimEvents_00313938
     int dirty;                      // 0xC0
 };
 
+/**
+ * Fires every timed trigger whose time equals @p time exactly (used after the playback time is set directly).
+ *
+ * Sets each match's id bit in the event flags (+0xB0) and, if newly set, in the just-changed flags (+0xB8).
+ *
+ * @param time  the time to check
+ */
 // PORT: ulong is 64-bit here
 extern "C" void func_00313938(sAnimEvents_00313938* self, float time)
 {
@@ -1566,6 +1713,11 @@ extern "C" void func_00313938(sAnimEvents_00313938* self, float time)
 //100%
 INCLUDE_ASM("animation/rideranimbase", func_003139A8);
 #ifdef SKIP_ASM
+/**
+ * Marks the sequence ended (+0xC0 = 1) and fires every end trigger of its list (+0xAC).
+ *
+ * Each end trigger's id bit is set in the event flags (+0xB0) and, if newly set, in the just-changed flags (+0xB8).
+ */
 // PORT: ulong is 64-bit here
 extern "C" void func_003139A8(sAnimEvents_00313938* self)
 {

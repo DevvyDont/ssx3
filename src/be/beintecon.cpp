@@ -64,6 +64,13 @@ INCLUDE_ASM("be/beintecon", func_00150960);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
+/**
+ * Returns @p rider's money: the word at +0xAC4 of its character profile (cBELibrary_profileLib, 0x9B50 bytes per
+ * profile slot, 0xF88 per character).
+ *
+ * @param rider  the rider (selects profile slot and character)
+ * @return the money
+ */
 extern "C" int func_00150960(void* self, int rider)
 {
     int a = cBELibrary_getProfileIndex(rider);
@@ -128,6 +135,13 @@ extern "C" int cBEEconInterface_getTotalMoneyEarned1(void* self, int rider)
 //100%
 INCLUDE_ASM("be/beintecon", func_00150A58);
 #ifdef SKIP_ASM
+/**
+ * Sets the money (+0xAC4) of character @p characterId in profile slot @p profileIndex; does nothing for slots >= 2.
+ *
+ * @param profileIndex  the profile slot (only 0 and 1 are stored)
+ * @param characterId  the character
+ * @param value  the new amount
+ */
 extern "C" void func_00150A58(void* self, int profileIndex, int characterId, int value)
 {
     if (profileIndex < 2) {
@@ -145,6 +159,14 @@ INCLUDE_ASM("be/beintecon", func_00150A90);
 #ifdef SKIP_ASM
 extern int cBELibrary_profileLib[];
 
+/**
+ * Adds @p amount to the money (+0xAC4) and the total money earned (+0xAC8) of character @p b in profile slot @p a.
+ *
+ * @param a  the profile slot (0 or 1; 2 and up do nothing and return 0)
+ * @param b  the character
+ * @param amount  the money earned
+ * @return the new money, or 0
+ */
 extern "C" int func_00150A90(void* self, int a, int b, int amount)
 {
     if (a >= 2) {
@@ -166,6 +188,13 @@ INCLUDE_ASM("be/beintecon", func_00150AE0);
 int cBELibrary_getProfileIndex(int);
 int cBELibrary_getCharacterID(int);
 
+/**
+ * Adds @p amount to @p rider's money and total earned: func_00150A90 with the rider's profile slot and character.
+ *
+ * @param rider  the rider
+ * @param amount  the money earned
+ * @return the new money, or 0 for profile slots >= 2
+ */
 extern "C" int func_00150AE0(void* self, int rider, int amount)
 {
     int profile = cBELibrary_getProfileIndex(rider);
@@ -178,6 +207,16 @@ INCLUDE_ASM("be/beintecon", func_00150B48);
 #ifdef SKIP_ASM
 extern int cBELibrary_profileLib[];
 
+/**
+ * Subtracts @p amount from the money (+0xAC4) of character @p characterId in profile slot @p profileIndex.
+ *
+ * The total earned (+0xAC8) is left alone; there is no check that the balance covers the amount.
+ *
+ * @param profileIndex  the profile slot (0 or 1; 2 and up do nothing and return 0)
+ * @param characterId  the character
+ * @param amount  the money spent
+ * @return the money left, or 0
+ */
 extern "C" int func_00150B48(void* self, int profileIndex, int characterId, int amount)
 {
     if (profileIndex >= 2) {
@@ -204,6 +243,18 @@ struct sPeakBits_0B88 {
     unsigned long rest : 50;
 };
 
+/**
+ * Unlocks or locks peak @p peak (1 or 2) for character @p characterId of profile slot @p profileIndex: stores
+ * !@p unlocked in bit 12 (peak 1) or 13 (peak 2) of the profile's flag word at +0x278.
+ *
+ * Other peak numbers change nothing.
+ *
+ * @param profileIndex  the profile slot (0 or 1; 2 and up return 0)
+ * @param characterId  the character
+ * @param peak  the peak, 1 or 2
+ * @param unlocked  nonzero to unlock
+ * @return 1, or 0 for profile slots >= 2
+ */
 // Sets the locked state of a peak for a profile/character: stores the inverse of `unlocked`.
 extern "C" int func_00150B88(void* self, int profileIndex, int characterId, int peak, int unlocked)
 {
@@ -246,6 +297,18 @@ public:
 };
 extern "C" cBEIface_0C20* cBEStatInterface_getThis();
 int func_00150E50(void* self, int a1);
+/**
+ * Buys one point of attribute @p arg3 for character @p arg2 of profile slot @p arg1, if affordable.
+ *
+ * The seven attribute bytes start at +0xBDF of the character profile. The price is func_00150E50(points / 5 - 1);
+ * when the money (+0xAC4) covers it and the attribute is not at 55, the money drops by the price, the attribute rises
+ * by 1 and the stat interface's vtable slot 2 runs.
+ *
+ * @param arg1  the profile slot (2 and up return 0)
+ * @param arg2  the character
+ * @param arg3  the attribute, 0-6 (others read a null pointer)
+ * @return 1 if bought, else 0
+ */
 extern "C" int func_00150C20(void* self, int arg1, int arg2, unsigned int arg3) {
     signed char *p;
     int cur;
@@ -307,6 +370,12 @@ struct sEconTable {
     sEconEntry entries[1];
 };
 
+/**
+ * Returns the price of an attribute point at level @p a1: the second word of entry @p a1 of D_00440550.
+ *
+ * @param a1  the level index (callers pass level - 1)
+ * @return the price
+ */
 int func_00150E50(void* self, int a1)
 {
     return ((sEconTable*)D_00440550)->entries[a1].value;
@@ -322,6 +391,17 @@ struct sProf0E68 { char s[0xF88]; };
 struct sEcon0E68 { int a; int b; };
 extern sEcon0E68 D_00440550_0E68[] __asm__("D_00440550");
 
+/**
+ * Refunds one point of attribute @p kind for character @p c of slot @p profile, unless the attribute is at 5.
+ *
+ * Adds the price D_00440550[(points - 1) / 5] to the money (+0xAC4), then increments the attribute byte (+0xBDF +
+ * @p kind) instead of decrementing it (likely a bug; nothing calls this function).
+ *
+ * @param profile  the profile slot (2 and up return 0)
+ * @param c  the character
+ * @param kind  the attribute, 0-6
+ * @return 1 if refunded, else 0
+ */
 extern "C" int func_00150E68(void* self, int profile, int c, unsigned int kind)
 {
     char* p;
@@ -363,6 +443,17 @@ struct sEconPrize_151040
 };
 extern sEconPrize_151040 D_004405A0[];
 
+/**
+ * Returns the prize money for medal @p medal.
+ *
+ * For @p place 6-11: func_00145630(race, @p place, tier) with tier 2 for medals 0-1, 1 for medal 2 and 0 for medal 3.
+ * Otherwise the D_004405A0 row (17 rows) whose key is @p key, column @p medal, times 100. 0 when nothing matches.
+ *
+ * @param medal  the medal, 0-3
+ * @param key  the track key matched against D_004405A0
+ * @param place  the event (6-11 are the peak events)
+ * @return the money
+ */
 extern "C" int func_00151040(void* self, int medal, int key, int place)
 {
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
@@ -412,6 +503,12 @@ extern "C" int func_00151040(void* self, int medal, int key, int place)
 //100%
 INCLUDE_ASM("be/beintecon", func_00151178);
 #ifdef SKIP_ASM
+/**
+ * Returns the cash a collectible is worth on peak @p level: 1000 for 1, 2000 for 2, otherwise 500.
+ *
+ * @param level  the peak, 0-2
+ * @return the cash
+ */
 extern "C" int func_00151178(void* self, int level)
 {
     switch (level)
@@ -430,6 +527,12 @@ extern "C" int func_00151178(void* self, int level)
 //100%
 INCLUDE_ASM("be/beintecon", func_001511B0);
 #ifdef SKIP_ASM
+/**
+ * Returns the cash a mission of difficulty @p level pays: 4000 for 2, 6000 for 3, otherwise 2000.
+ *
+ * @param level  the mission level, 1-3
+ * @return the cash
+ */
 extern "C" int func_001511B0(void* self, int level)
 {
     switch (level)
@@ -453,6 +556,17 @@ struct sEconRec {
     signed char f[7];
     char pad1[0xF88 - 0xBDF - 7];
 };
+/**
+ * Returns the attribute-cost table price for the next point of attribute @p arg3 of character @p arg2 in slot @p arg1:
+ * D_00440550[(points + 1) / 5].
+ *
+ * Note func_00150C20 charges D_00440550[points / 5 - 1] instead.
+ *
+ * @param arg1  the profile slot (2 and up return 0)
+ * @param arg2  the character
+ * @param arg3  the attribute, 0-6
+ * @return the price
+ */
 extern "C" int func_001511E8(void* self, int arg1, int arg2, unsigned int arg3) {
     signed char *p;
     if (arg1 >= 2) {
@@ -494,6 +608,12 @@ INCLUDE_ASM("be/beintecon", func_00151368);
 void cMemMan_free(void*);
 void operator_delete(int*);
 
+/**
+ * Destroys a character profile: frees its item lookup table (+0x288, from func_00151A88) and clears the pointer; with
+ * @p flags & 1 also frees the object.
+ *
+ * @param flags  bit 0: operator_delete the object
+ */
 extern "C" void func_00151368(void* self, int flags)
 {
     void* buffer = *(void**)((char*)self + 0x288);
@@ -568,6 +688,16 @@ static inline int Price_1513B8(sEconDef_1513B8* d)
     return p;
 }
 
+/**
+ * Applies a character profile's starting item ownership: grants each group prize, marks owned items, and marks free
+ * or built-in items.
+ *
+ * For the character kind (+0xBC0) from the item database D_004A6750: owns each group's prize item (func_00151C90);
+ * owned items (flag 0x10) get flags 0x26; items priced 0 get flag 2, and items priced -1 also become owned. If any
+ * did, owned items get flags 6 and the others lose flag 4. cBECharProfileDB_init and func_00151A88 call it.
+ *
+ * @param vself  the character profile
+ */
 extern "C" void func_001513B8(void* vself)
 {
     sEconItems_1513B8* self = (sEconItems_1513B8*)vself;
@@ -632,6 +762,11 @@ struct sEconItems_001515B8
     sEconItem_001515B8 items[1];
 };
 
+/**
+ * Copies each item's flag 4 into its flag 0x10 for a character profile's item list (+0x28C count, items at +0x290).
+ *
+ * The save-file loader calls it for every loaded profile.
+ */
 extern "C" void func_001515B8(sEconItems_001515B8* self)
 {
     int n = self->count;
@@ -875,6 +1010,15 @@ struct sEcon_001519E0
     sEconColor_001519E0 colors[10];  // 0xBC1
 };
 
+/**
+ * Resets a character profile's ten relation records (+0xBC1, 3 bytes each) to the default D_004A1218, then marks a
+ * friend and an enemy.
+ *
+ * Record D_004406FC[@p k].lo becomes state 0, level 0; record D_004406FC[@p k].hi state 3, level 2 (the aggression
+ * states of cBEAggressionInterface_applyAggression).
+ *
+ * @param k  the character the profile belongs to
+ */
 extern "C" void func_001519E0(sEcon_001519E0* self, int k)
 {
     sEconColor_001519E0 def = D_004A1218[0];
@@ -930,6 +1074,16 @@ struct sEconItems_151A88
     signed char kind;           // 0xBC0
 };
 
+/**
+ * Rebuilds a character profile's item list for character @p k from the item database and applies the starting
+ * ownership.
+ *
+ * Sets the kind (+0xBC0) and count (+0x28C) from D_004A6750; allocates the id-to-slot lookup (+0x288, D_004A11E8
+ * shorts, "Profile_Bolts_Map") on first use and fills it with -1; gives each item a slot with flags 0 and clears the
+ * rest of the 525 slots to id -1. Ends with func_001513B8.
+ *
+ * @param k  the character
+ */
 extern "C" void func_00151A88(sEconItems_151A88* self, int k)
 {
     void* db = D_004A6750;
@@ -982,6 +1136,9 @@ static inline unsigned int clearBits_151BD0(unsigned int f, unsigned int m)
     return f & ~m;
 }
 
+/**
+ * Normalises a character profile's item flags: items with flag 0x20 get flags 0x16; the others lose flags 0x10 and 4.
+ */
 extern "C" void func_00151BD0(sEconItems_151BD0* self)
 {
     for (int i = 0; i < self->count; i++) {
@@ -994,6 +1151,12 @@ extern "C" void func_00151BD0(sEconItems_151BD0* self)
 //100%
 INCLUDE_ASM("be/beintecon", func_00151C20);
 #ifdef SKIP_ASM
+/**
+ * Returns the item id in slot @p i of a profile's item list (+0x290), or -1 when @p i is past the count (+0x28C).
+ *
+ * @param i  the slot
+ * @return the item id, or -1
+ */
 extern "C" short func_00151C20(void* self, int i)
 {
     if (i >= *(int*)((char*)self + 0x28C))
@@ -1019,6 +1182,14 @@ struct sEconItems_00151C48
     sEconItem_00151C48 items[1];
 };
 
+/**
+ * Sets or clears flag 2 of item @p id in a character profile's item list (through the lookup at +0x288).
+ *
+ * An id with no slot dereferences a null pointer.
+ *
+ * @param id  the item id
+ * @param on  nonzero to set the flag
+ */
 extern "C" void func_00151C48(sEconItems_00151C48* self, int id, int on)
 {
     int idx = self->lookup[id];
@@ -1109,6 +1280,18 @@ static inline sEconDef_151C90* getDef_151C90(sEconDefs_151C90* db, int i)
     return &db->defs[i];
 }
 
+/**
+ * Marks item @p id owned or not (flag 0x10) in a character profile, cascading to related items.
+ *
+ * Owning an item whose definition has flag 1 first un-owns the other members of its group (those owned or with flag
+ * 8); un-owning one that was owned (or has flag 8) un-owns its dependants. A real change then applies the item's links
+ * (func_00151EF0). Returns 0 as soon as a nested change fails.
+ *
+ * @param selfp  the character profile
+ * @param id  the item id
+ * @param on  nonzero to own
+ * @return 1 on success, 0 on failure
+ */
 // Sets item id owned/unowned; turning on cascades turn-offs to conflicting items (def flag 1), turning off
 // cascades to dependent items (owned before or def flag 8). Then applies the item's links; 0 on failure.
 extern "C" int func_00151C90(void* selfp, int id, int on)
@@ -1233,6 +1416,18 @@ static inline sEconDef_151EF0* getDef_151EF0(sEconDefs_151EF0* db, int i)
     return &db->defs[i];
 }
 
+/**
+ * Applies the dependency links of item @p id for the given owned state: each link may own or un-own another item.
+ *
+ * Links come from func_0014DB40. A link is skipped when its target is -1, when its condition item's owned state
+ * differs from the link's, or when the target is already in the wanted state (unless it is owned and its definition
+ * has flag 8). A link to @p id itself only sets its flag; others go through func_00151C90.
+ *
+ * @param selfp  the character profile
+ * @param id  the item id
+ * @param on  the item's new owned state
+ * @return 1 on success, 0 if a nested change failed
+ */
 // Sets item id owned/unowned and applies its dependency links (cascading through func_00151C90); 0 on failure.
 extern "C" int func_00151EF0(void* selfp, int id, int on)
 {
@@ -1313,6 +1508,12 @@ static inline sEconItem_001520E8* getItem_001520E8(sEconItems_001520E8* self, in
     return 0;
 }
 
+/**
+ * Re-applies the links of every owned item whose definition has flag 0x1000, and reports whether there were any.
+ *
+ * @param changed  receives 1 when at least one such item was owned, else 0
+ * @return 1 on success, 0 if applying links failed
+ */
 extern "C" int func_001520E8(sEconItems_001520E8* self, int* changed)
 {
     void* db = func_0014BDB8(self);
@@ -1384,6 +1585,14 @@ static inline sEconItem_1521F0* Find_1521F0(sEconItems_1521F0* self, int id)
     return 0;
 }
 
+/**
+ * Gives a character profile each group's prize item when none of the group's owned items has definition flag 0x10.
+ *
+ * For each group of the character kind: lists the group's items (func_0014D608) and, if no owned item has flag 0x10,
+ * owns the group's prize (func_00151C90).
+ *
+ * @return 1, or 0 when a prize could not be owned
+ */
 extern "C" int func_001521F0(sEconItems_1521F0* self)
 {
     int i = 0;
@@ -1425,6 +1634,12 @@ static inline bool testFlag_152340(unsigned int flags, unsigned int mask)
     return (flags & mask) != 0;
 }
 
+/**
+ * Tells whether item @p id is owned (flag 0x10) in a character profile's item list (no check for a missing id).
+ *
+ * @param id  the item id
+ * @return true when owned
+ */
 extern "C" bool func_00152340(void* self, int id)
 {
     int idx = (*(short**)((char*)self + 0x288))[id];
@@ -1435,6 +1650,14 @@ extern "C" bool func_00152340(void* self, int id)
 //100%
 INCLUDE_ASM("be/beintecon", func_00152368);
 #ifdef SKIP_ASM
+/**
+ * Tells whether item @p id has every flag in @p mask set in a character profile's item list (no check for a missing
+ * id).
+ *
+ * @param id  the item id
+ * @param mask  the flags to test
+ * @return true when all are set
+ */
 extern "C" bool func_00152368(void* self, int id, unsigned int mask)
 {
     int idx = (*(short**)((char*)self + 0x288))[id];

@@ -79,6 +79,9 @@ struct sRaceSettings_00144928
 
 extern sRaceSettings_00144928 cBELibrary_raceDB;
 
+/**
+ * Commits the race being set up: copies cBENewRaceInterface_newRace (0x4C bytes) into cBELibrary_raceDB.
+ */
 extern "C" void func_00144928(void)
 {
     cBELibrary_raceDB = *(sRaceSettings_00144928*)&cBENewRaceInterface_newRace.playerID[0];
@@ -90,6 +93,9 @@ INCLUDE_ASM("be/beintnewrace", func_001449E8);
 #ifdef SKIP_ASM
 extern sRaceSettings_00144928 cBELibrary_raceDB;
 
+/**
+ * Drops changes to the race being set up: copies cBELibrary_raceDB back into cBENewRaceInterface_newRace (0x4C bytes).
+ */
 extern "C" void func_001449E8(void)
 {
     *(sRaceSettings_00144928*)&cBENewRaceInterface_newRace.playerID[0] = cBELibrary_raceDB;
@@ -199,6 +205,12 @@ extern "C" int cBENewRaceInterface_getLocationID()
 //100%
 INCLUDE_ASM("be/beintnewrace", func_00144BF0);
 #ifdef SKIP_ASM
+/**
+ * Returns the name of the race's location: +0x4 of its 0x64-byte cBELibrary_locationDB record (D_0043D954 +
+ * newRace.iLocationIdx * 0x64).
+ *
+ * @return the name
+ */
 extern "C" void* func_00144BF0()
 {
     return (char*)&D_0043D954 + D_00535C08.value * 0x64;
@@ -210,6 +222,11 @@ INCLUDE_ASM("be/beintnewrace", func_00144C10);
 #ifdef SKIP_ASM
 extern char str_Snow_Jam[];
 
+/**
+ * Returns the short name of the race's location: +0x24 of its cBELibrary_locationDB record.
+ *
+ * @return the short name
+ */
 extern "C" void* func_00144C10(void* self)
 {
     return str_Snow_Jam + D_00535C08.value * 100;
@@ -220,6 +237,13 @@ INCLUDE_ASM("be/beintnewrace", func_00144C30);
 #ifdef SKIP_ASM
 extern char str_BAM[];
 
+/**
+ * Returns the big-file (archive) name of location @p i: +0x44 of its cBELibrary_locationDB record ("BAM" for the
+ * first).
+ *
+ * @param i  the location
+ * @return the archive name
+ */
 extern "C" void* func_00144C30(void* self, int i)
 {
     return str_BAM + i * 100;
@@ -259,6 +283,12 @@ extern "C" void* cBENewRaceInterface_getLocationName(void* self, int iLocation)
 //100%
 INCLUDE_ASM("be/beintnewrace", func_00144C78);
 #ifdef SKIP_ASM
+/**
+ * Returns the peak of location @p a1: the word at +0x54 of its cBELibrary_locationDB record (0-2).
+ *
+ * @param a1  the location
+ * @return the peak
+ */
 extern "C" int func_00144C78(void* self, int a1)
 {
     return cBELibrary_locationDB[a1].field_0x54;
@@ -268,6 +298,11 @@ extern "C" int func_00144C78(void* self, int a1)
 //100%
 INCLUDE_ASM("be/beintnewrace", func_00144C98);
 #ifdef SKIP_ASM
+/**
+ * Returns the peak of the race's location: the word at +0x54 of its cBELibrary_locationDB record (0-2).
+ *
+ * @return the peak
+ */
 extern "C" int func_00144C98()
 {
     return cBELibrary_locationDB[D_00535C08.value].field_0x54;
@@ -301,6 +336,13 @@ struct sRaceEntryFull_00144CE0 {
     int field_0x60;
 };
 
+/**
+ * Returns the id (+0x0) of the first of the 23 cBELibrary_locationDB records whose word at +0x5C equals @p a1, or 22
+ * when none does.
+ *
+ * @param a1  the script id
+ * @return the location id
+ */
 extern "C" int func_00144CE0(void* self, int a1)
 {
     sRaceEntryFull_00144CE0* t = (sRaceEntryFull_00144CE0*)cBELibrary_locationDB;
@@ -316,6 +358,12 @@ extern "C" int func_00144CE0(void* self, int a1)
 //100%
 INCLUDE_ASM("be/beintnewrace", func_00144D18);
 #ifdef SKIP_ASM
+/**
+ * Returns the difficulty of location @p a1: the word at +0x60 of its cBELibrary_locationDB record (0-2).
+ *
+ * @param a1  the location
+ * @return the difficulty
+ */
 extern "C" int func_00144D18(void* self, int a1)
 {
     return cBELibrary_locationDB[a1].field_0x60;
@@ -580,6 +628,12 @@ INCLUDE_ASM("be/beintnewrace", func_00145340);
 extern signed char D_00535C12[];
 extern sPad16 D_0043E97C;
 
+/**
+ * Returns the name of the race's game event: +0x4 of its 0x54-byte cBELibrary_gameEventDB record (D_0043E97C +
+ * newRace.cGameEvent * 0x54).
+ *
+ * @return the event name
+ */
 extern "C" void* func_00145340()
 {
     return (char*)&D_0043E97C + D_00535C12[0] * 0x54;
@@ -589,6 +643,12 @@ extern "C" void* func_00145340()
 //100%
 INCLUDE_ASM("be/beintnewrace", func_00145360);
 #ifdef SKIP_ASM
+/**
+ * Returns the name of game event @p i: +0x4 of its cBELibrary_gameEventDB record (D_0043E97C + @p i * 0x54).
+ *
+ * @param i  the game event
+ * @return the event name
+ */
 extern "C" void* func_00145360(void* self, int i)
 {
     return (char*)&D_0043E97C + i * 0x54;
@@ -601,6 +661,11 @@ INCLUDE_ASM("be/beintnewrace", func_00145378);
 extern signed char D_00535C11[];
 extern char str_World_Circuit[]; // 0x43-byte records at an odd address
 
+/**
+ * Returns the name of the race's game path: str_World_Circuit + newRace.cGamePath * 67 (67-byte records).
+ *
+ * @return the path name
+ */
 extern "C" void* func_00145378()
 {
     return str_World_Circuit + D_00535C11[0] * 67;
@@ -612,6 +677,11 @@ INCLUDE_ASM("be/beintnewrace", func_00145398);
 #ifdef SKIP_ASM
 extern signed char D_00535C10[];
 
+/**
+ * Returns the record (name first) of the race's game mode: D_0043E7D0 + newRace.cGameMode * 0x3C.
+ *
+ * @return the mode name
+ */
 extern "C" void* func_00145398()
 {
     return (char*)&D_0043E7D0 + D_00535C10[0] * 0x3c;
@@ -621,6 +691,12 @@ extern "C" void* func_00145398()
 //100%
 INCLUDE_ASM("be/beintnewrace", func_001453B8);
 #ifdef SKIP_ASM
+/**
+ * Returns the record (name first) of game mode @p a1: D_0043E7D0 + @p a1 * 0x3C.
+ *
+ * @param a1  the game mode
+ * @return the mode name
+ */
 extern "C" void* func_001453B8(void* self, int a1)
 {
     return (char*)&D_0043E7D0 + a1 * 0x3c;
@@ -642,6 +718,17 @@ struct sPrizeRow_1453D0
 // Typed view of D_00440B38 (declared later in this unit with another layout).
 extern sPrizeRow_1453D0 D_00440B38_1453D0[] __asm__("D_00440B38");
 
+/**
+ * Returns a simulated rider's score for round @p kind: the D_00440B38 row of the race's location and that round,
+ * column @p place, times 100, randomised by up to +-5% and rounded down to a multiple of 20.
+ *
+ * Difficulty 0 scales by 0.9 and 2 by 1.2, except for column 0. Round 0 counts as 1. -1 when no row matches.
+ *
+ * @param kind  the round (heat)
+ * @param place  the rider column
+ * @param mode  the difficulty, 0-2
+ * @return the score, or -1
+ */
 extern "C" int func_001453D0(void* self, int kind, int place, int mode)
 {
     int k = 1;
@@ -681,6 +768,16 @@ struct sRaceLookup_00440B38
 };
 extern sRaceLookup_00440B38 D_00440B38[];
 
+/**
+ * Returns the time limit of round @p kind, in the units the game mode multiplies by 60.
+ *
+ * For game events 6-11 (newRace +0x4A) it is func_00145600(event, @p kind). Otherwise the halfword at +0x10 of the
+ * D_00440B38 row for the race's location and the round (round 0 counts as 1), falling back to
+ * cBENewRaceInterface_mNextLocation's row; -1 when neither exists.
+ *
+ * @param kind  the round
+ * @return the time limit, or -1
+ */
 extern "C" int func_001454F8(void* self, int kind)
 {
     char* g = (char*)&(*(&cBENewRaceInterface_newRace));
@@ -726,6 +823,13 @@ struct sRaceTableEntry_00440D18
 
 extern sRaceTableEntry_00440D18 D_00440D18[];
 
+/**
+ * Returns the goal of peak event @p a1 at tier @p a2: the halfword at +0x4 of D_00440D18[(@p a1 - 6) * 3 + @p a2].
+ *
+ * @param a1  the game event, 6-11
+ * @param a2  the tier, 0-2
+ * @return the goal
+ */
 extern "C" int func_001455D0(void* self, int a1, int a2)
 {
     return D_00440D18[a2 + (a1 - 6) * 3].field_0x4;
@@ -737,6 +841,14 @@ INCLUDE_ASM("be/beintnewrace", func_00145600);
 #ifdef SKIP_ASM
 extern sRaceTableEntry_00440D18 D_00440D18[];
 
+/**
+ * Returns the time limit of peak event @p a1 at tier @p a2: the halfword at +0x6 of
+ * D_00440D18[(@p a1 - 6) * 3 + @p a2].
+ *
+ * @param a1  the game event, 6-11
+ * @param a2  the tier, 0-2
+ * @return the time limit
+ */
 extern "C" int func_00145600(void* self, int a1, int a2)
 {
     return D_00440D18[a2 + (a1 - 6) * 3].field_0x6;
@@ -748,6 +860,14 @@ INCLUDE_ASM("be/beintnewrace", func_00145630);
 #ifdef SKIP_ASM
 extern sRaceTableEntry_00440D18 D_00440D18[];
 
+/**
+ * Returns the reward of peak event @p a1 at tier @p a2: the halfword at +0x12 of D_00440D18[(@p a1 - 6) * 3 + @p a2],
+ * times 100.
+ *
+ * @param a1  the game event, 6-11
+ * @param a2  the tier, 0-2
+ * @return the money
+ */
 extern "C" int func_00145630(void* self, int a1, int a2)
 {
     return D_00440D18[a2 + (a1 - 6) * 3].field_0x12 * 100;
@@ -759,6 +879,15 @@ INCLUDE_ASM("be/beintnewrace", func_00145668);
 #ifdef SKIP_ASM
 extern sRaceTableEntry_00440D18 D_00440D18[];
 
+/**
+ * Returns the bonus of checkpoint @p a3 in peak event @p a1 at tier @p a2: halfword @p a3 of the five at +0x8 of
+ * D_00440D18[(@p a1 - 6) * 3 + @p a2].
+ *
+ * @param a1  the game event, 6-11
+ * @param a2  the tier, 0-2
+ * @param a3  the checkpoint, 0-4
+ * @return the bonus
+ */
 extern "C" int func_00145668(void* self, int a1, int a2, int a3)
 {
     return D_00440D18[a2 + (a1 - 6) * 3].field_0x8[a3];
@@ -776,6 +905,16 @@ struct sRacePair_001456A0
 
 extern sRacePair_001456A0 D_00440E80[];
 
+/**
+ * Returns the target for location @p idx and event @p mode from D_00440E80, or -1.
+ *
+ * Events 6-11 give -1. Below location 14 it is entry @p idx's second halfword (times 100 unless @p mode is 0); from
+ * 14 on, @p mode 4 gives entry @p idx's value, @p mode 5 entry @p idx + 3's times 100, others -1.
+ *
+ * @param idx  the location
+ * @param mode  the event
+ * @return the target, or -1
+ */
 extern "C" int func_001456A0(void* self, int idx, int mode)
 {
     if (mode == 9 || mode == 10 || mode == 11 || mode == 6 || mode == 7 || mode == 8)
@@ -801,6 +940,12 @@ void* cBENewPlayerInterface_getThis();
 signed char cBENewPlayerInterface_getRiderCharID(void* self, int riderIndex);
 extern "C" int cBENewPlayerInterface_getHumanRider(void* self, int a1);
 
+/**
+ * Returns the rival character of the current peak (func_00144C78 of the race's location): 3 on peak 0, 7 on peak 1,
+ * 8 on peak 2, or 5, 4, 6 when the human rider already plays that character; 3 otherwise.
+ *
+ * @return the rival's character id
+ */
 extern "C" int func_00145750(void* self)
 {
     void* players = cBENewPlayerInterface_getThis();
@@ -821,6 +966,13 @@ extern "C" int func_00145750(void* self)
 //100%
 INCLUDE_ASM("be/beintnewrace", func_00145818);
 #ifdef SKIP_ASM
+/**
+ * Returns the default game mode of location @p arg1: 0 for locations 0-4, 1 for 5-7, 2 for 8-10, 3 for 11-13, 4
+ * otherwise.
+ *
+ * @param arg1  the location
+ * @return the game mode
+ */
 extern "C" int func_00145818(void* self, unsigned int arg1) {
     switch (arg1) {
     case 14:
@@ -854,6 +1006,13 @@ extern "C" int func_00145818(void* self, unsigned int arg1) {
 //100%
 INCLUDE_ASM("be/beintnewrace", func_00145870);
 #ifdef SKIP_ASM
+/**
+ * Returns the default game event of location @p idx: 0 for locations 0-4, 1 for 5-7, 3 for 8-10, 2 for 11-13, 12
+ * otherwise.
+ *
+ * @param idx  the location
+ * @return the game event
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int func_00145870(void* self, int idx)
 {
@@ -890,6 +1049,12 @@ extern "C" int func_00145870(void* self, int idx)
 //100%
 INCLUDE_ASM("be/beintnewrace", func_001458C8);
 #ifdef SKIP_ASM
+/**
+ * Returns the default game mode of game event @p arg1: 0->0, 1->1, 2->3, 3->2, 4->5, 5->6, 12 and 13->4, others 0.
+ *
+ * @param arg1  the game event
+ * @return the game mode
+ */
 extern "C" int func_001458C8(void* self, unsigned int arg1) {
     switch (arg1) {
     case 0:

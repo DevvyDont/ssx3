@@ -82,6 +82,14 @@ struct sMdfEntry_314D98 {
 };
 extern void* cGameAnimMap_TheGameAnimMap;
 
+/**
+ * Constructs the game-animation map and makes it the global cGameAnimMap_TheGameAnimMap; returns @p self.
+ *
+ * The 518-entry member array has an empty constructor, so nothing else is written (cGameAnimMap_initMap fills it).
+ * main/ssxapp allocates the 6216-byte object (tag "GameAnimMap").
+ *
+ * @return @p self
+ */
 extern "C" void* func_00314D98(void* self)
 {
     new (self) sMdfEntry_314D98[518];
@@ -96,6 +104,11 @@ INCLUDE_ASM("animation/mdfarchive", func_00314DB0);
 // cGameAnimMap_TheGameAnimMap is declared void* earlier in the unit.
 void operator_delete(int* ptr);
 
+/**
+ * Destroys the game-animation map: clears cGameAnimMap_TheGameAnimMap and frees @p self if bit 0 of @p flags is set.
+ *
+ * @param flags  bit 0: delete the object itself
+ */
 extern "C" void func_00314DB0(int* self, int flags)
 {
     cGameAnimMap_TheGameAnimMap = 0;
@@ -154,6 +167,14 @@ struct sMdfIndex_00314E88
     int order[0x206];           // 0x818
 };
 
+/**
+ * Returns the game-animation index whose name hash is @p hash, or -1 if none.
+ *
+ * Binary search over the 518 hashes (+0x0) in the order (+0x818) that cGameAnimMap_initMap sorted them into.
+ *
+ * @param hash  the name hash (GetHashValue32 of a D_0048CFC0 name such as "G_GATEROCK")
+ * @return the game-animation index 0-517, or -1
+ */
 // Binary search for `hash`; returns its entry index, or -1.
 extern "C" int func_00314E88(sMdfIndex_00314E88* self, unsigned int hash)
 {
@@ -184,6 +205,14 @@ extern "C" int func_00314E88(sMdfIndex_00314E88* self, unsigned int hash)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("animation/mdfarchive", func_00314EF0);
 #ifdef SKIP_ASM
+/**
+ * Maps the game animation with name hash @p hash to @p value, if such a game animation exists.
+ *
+ * Looks the hash up with func_00314E88 and stores @p value in the 518-entry map at +0x1030. Unknown hashes are ignored.
+ *
+ * @param hash  the animation's name hash
+ * @param value  the animation id to map it to (bank in the low 8 bits, index in the upper 24), or kAnimIDInvalid
+ */
 extern "C" void func_00314EF0(sMdfIndex_00314E88* self, unsigned int hash, void* value)
 {
     int i = func_00314E88(self, hash);
@@ -209,6 +238,15 @@ static inline void SetIndex_00314F30(sMdfHandle_00314F30* h, int v) { h->index =
 // PORT: func_00314EF0's value slot receives the handle struct by value here.
 void func_00314EF0_handle(sMdfIndex_00314E88* self, unsigned int hash, sMdfHandle_00314F30 value) __asm__("func_00314EF0");
 
+/**
+ * Maps every animation of an animation bank into the game-animation map.
+ *
+ * For each animation i of @p list (count: short at +0x2 of its header at +0x4; 0x14-byte entries at +0x8 with the
+ * name hash first) calls func_00314EF0 with the hash and the id (@p kind in the low 8 bits, i above them).
+ *
+ * @param kind  the bank number stored in each id
+ * @param list  the animation data source (cAdfDataSource) of the bank
+ */
 extern "C" void func_00314F30(sMdfIndex_00314E88* self, int kind, char* list)
 {
     sMdfHandle_00314F30 handle;
@@ -226,6 +264,13 @@ INCLUDE_ASM("animation/mdfarchive", func_00314FE8);
 #ifdef SKIP_ASM
 extern void* kAnimIDInvalid;
 
+/**
+ * Unmaps every animation of an animation bank: sets each of its name hashes to kAnimIDInvalid (func_00314EF0).
+ *
+ * Same walk as func_00314F30 over @p list's animation table; called before the bank is unloaded.
+ *
+ * @param list  the animation data source (cAdfDataSource) of the bank
+ */
 extern "C" void func_00314FE8(sMdfIndex_00314E88* self, char* list)
 {
     for (int i = 0; i < *(short*)(*(char**)(list + 4) + 2); i++)
@@ -241,6 +286,14 @@ INCLUDE_ASM("animation/mdfarchive", func_00315070);
 #ifdef SKIP_ASM
 extern char str_error[];
 
+/**
+ * Returns the name of the first game animation mapped to @p value, or str_error when none is.
+ *
+ * Linear search of the 518-entry map at +0x1030; the name comes from D_0048CFC0 (e.g. "G_GATEROCK").
+ *
+ * @param value  the animation id to look for
+ * @return the game animation's name, or str_error
+ */
 extern "C" char* func_00315070(char* self, void* value)
 {
     for (int i = 0; i < 518; i++)

@@ -36,6 +36,9 @@ void* cBEAggressionInterface_getThis()
 //100%
 INCLUDE_ASM("be/beintaggression", func_00155AA0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the aggression interface's submit (slot 1 of its vtable D_0045AC48).
+ */
 void func_00155AA0(void* self)
 {
 }
@@ -44,6 +47,9 @@ void func_00155AA0(void* self)
 //100%
 INCLUDE_ASM("be/beintaggression", func_00155AA8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the aggression interface's discard (slot 2 of its vtable D_0045AC48).
+ */
 void func_00155AA8(void* self)
 {
 }
@@ -69,6 +75,18 @@ struct sAggrCharProfile {
 
 extern sAggrCharProfile cBELibrary_profileLib[][10];
 
+/**
+ * Returns how @p rider feels about @p targetRider: the state byte of @p rider's relation record for the target's
+ * character, or 2 when the target is the rival of the current peak.
+ *
+ * The record is cBELibrary_profileLib[profile of @p rider][character of @p rider].aggression[character of
+ * @p targetRider] (3 bytes: state, level, ticks; see cBEAggressionInterface_applyAggression). The rival comes from
+ * func_00145750 on the new-race interface.
+ *
+ * @param targetRider  the rider being looked at
+ * @param rider  the rider whose feelings are read
+ * @return the relation state (0-3; On Tour friend, neutral, rival, enemy)
+ */
 extern "C" int func_00155AB0(void* self, int targetRider, int rider)
 {
     int profile = cBELibrary_getProfileIndex(rider);
@@ -90,6 +108,17 @@ extern "C" int func_00145750(void* race);
 
 extern sAggrCharProfile cBELibrary_profileLib[][10];
 
+/**
+ * Returns how aggressive @p rider is toward @p targetRider: the level byte of @p rider's relation record for the
+ * target's character, or 3 when the target is the rival of the current peak (func_00145750).
+ *
+ * Same record as func_00155AB0; the level is the record's tick count / 5, clamped by its state
+ * (cBEAggressionInterface_applyAggression).
+ *
+ * @param targetRider  the rider being looked at
+ * @param rider  the rider whose aggression is read
+ * @return the aggression level (0-4; On Tour none, mild, moderate, hard, chase)
+ */
 extern "C" int func_00155B50(void* self, int targetRider, int rider)
 {
     int profile = cBELibrary_getProfileIndex(rider);
@@ -209,6 +238,15 @@ struct sRaceSettings_155E58 {
 };
 extern sRaceSettings_155E58 cBELibrary_raceDB;
 
+/**
+ * Lets every rider's aggression cool down: each relation loses 3 ticks (not below 0) and its level is recomputed.
+ *
+ * For each of the race's riders (cBELibrary_raceDB +0x30) and each of the 10 characters, the relation record's ticks
+ * become ticks - 3 and the level ticks / 5, then the state clamps them as in cBEAggressionInterface_applyAggression
+ * (state 0 caps at level 2, state 1 moves to state 3 at level 4, state 2 stays within 1-3, state 3 drops to state 1 at
+ * level 0 and caps at 4). Every relation is reported to func_001E2A08(character, ticks) unless the game-path byte
+ * (cBELibrary_raceDB +0x49) is set.
+ */
 // Re-clamps every player's aggression level towards the other riders to the limits of its current state.
 extern "C" void func_00155E58(void)
 {
@@ -274,6 +312,15 @@ extern int D_005305E0[];
 
 struct sStreamVE_1560A0 { short delta; short index; void (*fn)(void*, void*, int); };
 
+/**
+ * Writes the aggression state to a replay stream: the rider count (D_005305E0, 4 bytes), then for each rider its
+ * profile's ten 3-byte relation records (one per character).
+ *
+ * Each write goes through vtable slot 1 of @p stream (the write method, as in cBEInterface_writeToReplayFrame).
+ * func_001561B0 reads the same layout.
+ *
+ * @param stream  the replay frame stream
+ */
 extern "C" void func_001560A0(void* self, void* stream)
 {
     int n = D_005305E0[0];
@@ -300,6 +347,14 @@ int cBELibrary_getCharacterID(int);
 
 struct sStreamVE_1561B0 { short delta; short index; void (*fn)(void*, void*, int); };
 
+/**
+ * Reads the aggression state back from a replay stream: a rider count (4 bytes), then for each of that many riders
+ * its profile's ten 3-byte relation records.
+ *
+ * Each read goes through vtable slot 2 of @p stream (the read method). The count read is not stored anywhere.
+ *
+ * @param stream  the replay frame stream
+ */
 extern "C" void func_001561B0(void* self, void* stream)
 {
     int n;
@@ -325,6 +380,13 @@ INCLUDE_ASM("be/beintaggression", func_001562B8);
 extern int cBE_currentState;
 extern char* cBE_aBEState[];
 
+/**
+ * Moves the back end to the next state: calls the current state's onExit, makes @p self's nextState current and calls
+ * the new state's onEnter.
+ *
+ * The states are cBE_aBEState[cBE_currentState]; onExit and onEnter are vtable slots 3 and 4 (vtable pointer at +0x4
+ * of each state).
+ */
 extern "C" void func_001562B8(int *self) {
     char* obj;
     char* vtbl;

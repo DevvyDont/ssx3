@@ -75,6 +75,11 @@ INCLUDE_ASM("be/be", func_0014DD48);
 #ifdef SKIP_ASM
 extern int cBE_BEInitialized;
 
+/**
+ * Returns whether the back end has been initialised: 1 when cBE_BEInitialized is nonzero, else 0.
+ *
+ * @return 1 or 0
+ */
 extern "C" int func_0014DD48(void) {
     return cBE_BEInitialized != 0;
 }
@@ -150,6 +155,15 @@ extern void* cBE_library;
 extern "C" void func_00149A88(void* p, char c);
 extern "C" void func_0014FC40(char c);
 
+/**
+ * Starts a fresh profile in slot @p playerIndex: resets its library entry and its BAGT interface state.
+ *
+ * Calls func_00149A88(cBE_library, @p playerIndex) when the library exists (clears the player entry, gives it the
+ * default player name, re-inits its profile and resets the new-player, stat and BAGT interfaces), then
+ * func_0014FC40(@p playerIndex). fe/fereal resets slots 0-2 this way when the back end has to be cleared.
+ *
+ * @param playerIndex  the profile slot
+ */
 extern "C" void func_0014DE28(void* self, char playerIndex)
 {
     if (cBE_library)
@@ -194,6 +208,9 @@ INCLUDE_ASM("be/be", func_0014DEE8);
 #ifdef SKIP_ASM
 extern "C" void func_0014A078(int);
 
+/**
+ * Calls func_0014A078 with cBE_library; that function's body is empty in this build, so this does nothing.
+ */
 extern "C" void func_0014DEE8(void) {
     func_0014A078((*(int*)&cBE_library));
 }
@@ -220,6 +237,14 @@ public:
 // PORT: cBE_getInterface__Fv is called with (be, kind) here; bind the 2-arg form to that symbol.
 cBEReplayIface* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 
+/**
+ * Writes the back end's replay state to @p stream: cBE_currentState (4 bytes), then every interface's own data.
+ *
+ * For each of the 14 interface kinds that cBE_getInterface returns, calls that interface's writeToReplayFrame
+ * virtual (vtable slot 3) with @p stream. cBE_readFromReplayFrame reads it back.
+ *
+ * @param stream  the replay output stream
+ */
 extern "C" void func_0014DF08(void* self, cBEReplayStream* stream)
 {
     stream->write(&cBE_currentState, 4);
@@ -281,6 +306,15 @@ int cBE_getDataSize_self(void* be) __asm__("cBE_getDataSize");
 extern "C" int func_003E62D0(void* buf, int size, int seed);
 extern "C" void* memcpy(void*, const void*, unsigned int);
 
+/**
+ * Fills the save buffer @p buf with the back-end state and stores a checksum in its last 4 bytes.
+ *
+ * func_0014A188 copies the race database, player entries, profiles and other state blocks into @p buf; then
+ * func_003E62D0 checksums the first cBE_getDataSize() - 4 bytes with seed 64490 and the result is copied to the end.
+ * fe/festatetrophyroom saves the memory card buffer this way.
+ *
+ * @param buf  the save buffer, cBE_getDataSize() bytes
+ */
 extern "C" void func_0014E050(void* self, char* buf)
 {
     func_0014A188(buf);

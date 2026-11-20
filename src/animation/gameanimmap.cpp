@@ -14,6 +14,14 @@ void cGameAnimMap_testResolve()
 //100%
 INCLUDE_ASM("animation/gameanimmap", func_003150B8);
 #ifdef SKIP_ASM
+/**
+ * Returns @p self; any further arguments (it is variadic) are spilled to the stack and ignored.
+ *
+ * Only the register save area of a varargs function remains, so this is probably a compiled-out debug helper. No
+ * callers or data references to it were found.
+ *
+ * @return @p self
+ */
 extern "C" void* func_003150B8(void* self, ...)
 {
     return self;
@@ -83,6 +91,16 @@ extern float D_004FE780[4];
 extern float D_004FE790[4];
 extern int kAnimIDInvalid;
 void sti_003150F8(int init, int prio) __asm__("func_003150F8");
+/**
+ * Static initializer of this unit's first group of globals: sets kAnimIDInvalid to -1 and fills 56 float tables.
+ *
+ * Runs only for @p init nonzero and @p prio 0xFFFF (g++'s static initialization and destruction routine; called by
+ * func_00315A00 with 1, 0xFFFF). kAnimIDInvalid gets all bits set (its low byte first, then the upper 24 bits); the
+ * tables D_004FE420 .. D_004FE790 (four floats each) get constant values.
+ *
+ * @param init  nonzero to initialize (0 would be destruction; nothing is done then)
+ * @param prio  the initialization priority; only 0xFFFF (the default) does anything
+ */
 void sti_003150F8(int init, int prio)
 {
     if (prio == 0xFFFF && init) {
@@ -322,6 +340,12 @@ extern "C" void* func_003150F8(int, int);
 //100%
 INCLUDE_ASM("animation/gameanimmap", func_003158B8);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider animation's FrameRateFactor (the playback-rate factor copied into each sequence it starts).
+ *
+ * @param riderAnim  the cRiderAnimBase
+ * @return FrameRateFactor
+ */
 extern "C" float func_003158B8(void *riderAnim) {
     return (*(float *)((char*)(riderAnim) + (0x1C)));
 }
@@ -329,6 +353,12 @@ extern "C" float func_003158B8(void *riderAnim) {
 //100%
 INCLUDE_ASM("animation/gameanimmap", func_003158C0);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider animation's 64-bit GraftMask (the bone mask copied into each sequence it starts).
+ *
+ * @param riderAnim  the cRiderAnimBase
+ * @return GraftMask
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" long func_003158C0(void *riderAnim) {
     return (*(long *)((char*)(riderAnim) + (0x20)));
@@ -337,6 +367,12 @@ extern "C" long func_003158C0(void *riderAnim) {
 //100%
 INCLUDE_ASM("animation/gameanimmap", func_003158C8);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of the rider animation's OrientationOffset (the tPose at +0x30).
+ *
+ * @param riderAnim  the cRiderAnimBase (passed as an int)
+ * @return @p riderAnim + 0x30
+ */
 extern "C" int func_003158C8(int riderAnim) {
     return riderAnim + 0x30;
 }
@@ -344,6 +380,12 @@ extern "C" int func_003158C8(int riderAnim) {
 //100%
 INCLUDE_ASM("animation/gameanimmap", func_003158D0);
 #ifdef SKIP_ASM
+/**
+ * Returns the rider animation's IsFlipped flag (mirrored animations).
+ *
+ * @param riderAnim  the cRiderAnimBase
+ * @return IsFlipped
+ */
 extern "C" int func_003158D0(void *riderAnim) {
     return (*(int *)((char*)(riderAnim) + (0x18)));
 }
@@ -351,6 +393,14 @@ extern "C" int func_003158D0(void *riderAnim) {
 //100%
 INCLUDE_ASM("animation/gameanimmap", func_003158D8);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider animation's IsFlipped flag; only sequences started afterwards pick it up.
+ *
+ * func_00311D88 also changes the flag of the sequences already playing.
+ *
+ * @param riderAnim  the cRiderAnimBase
+ * @param isFlipped  nonzero to mirror the animations
+ */
 extern "C" void func_003158D8(void *riderAnim, int isFlipped) {
     (*(int *)((char*)(riderAnim) + (0x18))) = isFlipped;
 }
@@ -358,6 +408,12 @@ extern "C" void func_003158D8(void *riderAnim, int isFlipped) {
 //100%
 INCLUDE_ASM("animation/gameanimmap", func_003158E0);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider animation's FrameRateFactor (the playback-rate factor copied into each sequence it starts).
+ *
+ * @param riderAnim  the cRiderAnimBase
+ * @param fparg0  the new factor
+ */
 extern "C" void func_003158E0(void *riderAnim, float fparg0) {
     (*(float *)((char*)(riderAnim) + (0x1C))) = fparg0;
 }
@@ -370,6 +426,15 @@ extern "C" void fSinCos(float *, float *, float);
 extern t4Vector t4vect_Origin;
 extern t4Vector t4vect_ZAxis;
 
+/**
+ * Sets the rider animation's OrientationOffset to a pure turn of @p angle about the heading axis.
+ *
+ * Position (+0x30) becomes t4vect_Origin; rotation (+0x40) the quaternion of -@p angle about t4vect_ZAxis (half-angle
+ * sine and cosine from fSinCos). cRiderAnimBase_changeHeadingOffset applies the same transform on top of the
+ * playing sequences instead.
+ *
+ * @param angle  the heading offset (applied with the opposite sign)
+ */
 extern "C" void func_003158E8(void *self, float angle) {
     t4Vector rotation;
     float sinHalf;
@@ -388,6 +453,12 @@ extern "C" void func_003158E8(void *self, float angle) {
 //100%
 INCLUDE_ASM("animation/gameanimmap", func_00315988);
 #ifdef SKIP_ASM
+/**
+ * Copies the 32-byte pose @p offset (position, rotation) into the rider animation's OrientationOffset (+0x30).
+ *
+ * @param riderAnim  the cRiderAnimBase
+ * @param offset  the new orientation offset (tPose)
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" void func_00315988(void *riderAnim, void *offset) {
     (*(long long *)((char*)(riderAnim) + (0x30))) = (long long) (*(long long *)((char*)(offset) + (0)));
@@ -397,6 +468,12 @@ extern "C" void func_00315988(void *riderAnim, void *offset) {
 //100%
 INCLUDE_ASM("animation/gameanimmap", func_003159A0);
 #ifdef SKIP_ASM
+/**
+ * Sets the rider animation's 64-bit GraftMask (the bones the sequences it starts may drive).
+ *
+ * @param riderAnim  the cRiderAnimBase
+ * @param graftMask  the new mask
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" void func_003159A0(void *riderAnim, long graftMask) {
     (*(long *)((char*)(riderAnim) + (0x20))) = graftMask;
@@ -405,6 +482,11 @@ extern "C" void func_003159A0(void *riderAnim, long graftMask) {
 //100%
 INCLUDE_ASM("animation/gameanimmap", func_003159A8);
 #ifdef SKIP_ASM
+/**
+ * Resets the rider animation's GraftMask to -1 (all bits set: no bone is excluded).
+ *
+ * @param riderAnim  the cRiderAnimBase
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" void func_003159A8(void *riderAnim) {
     (*(long *)((char*)(riderAnim) + (0x20))) = -1;
@@ -413,6 +495,15 @@ extern "C" void func_003159A8(void *riderAnim) {
 //100%
 INCLUDE_ASM("animation/gameanimmap", func_003159B8);
 #ifdef SKIP_ASM
+/**
+ * Clears bit @p bit of the first 64-bit word of @p bits and, if it was set, sets it in the second word.
+ *
+ * The pair is an event flag set: word 0 says which events are set, word 1 which changed since last cleared (the
+ * layout of cAnimSequence's event flags at +0xB0).
+ *
+ * @param bits  the two 64-bit words
+ * @param bit  the bit number, 0-63
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" void func_003159B8(long* bits, int bit)
 {
@@ -425,6 +516,13 @@ extern "C" void func_003159B8(long* bits, int bit)
 //100%
 INCLUDE_ASM("animation/gameanimmap", func_003159E8);
 #ifdef SKIP_ASM
+/**
+ * Returns whether bit @p bit of the first 64-bit word of @p bits is set (see func_003159B8).
+ *
+ * @param bits  the event flag words
+ * @param bit  the bit number, 0-63
+ * @return true when the bit is set
+ */
 // PORT: 64-bit `long` (8 bytes on EE, 4 on Windows); use int64_t/uint64_t off-PS2.
 extern "C" bool func_003159E8(long* bits, int bit)
 {
@@ -436,6 +534,11 @@ extern "C" bool func_003159E8(long* bits, int bit)
 //99.38%
 INCLUDE_ASM("animation/gameanimmap", func_00315A00__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs this unit's first static initializer: func_003150F8(1, 0xFFFF) (a g++ global-constructor entry).
+ *
+ * @return what func_003150F8 leaves in the return register (unused)
+ */
 void* func_00315A00(void* self)
 {
     return func_003150F8(1, 0xffff);
@@ -531,6 +634,17 @@ extern float D_004FEFD0[4];
 extern float D_004FEFE0[4];
 extern float D_004FEFF0[4];
 void sti_00315A20(int init, int prio) __asm__("func_00315A20");
+/**
+ * Static initializer of this unit's second group of globals: fills 83 float tables (D_004FE920 .. ) with constants.
+ *
+ * Runs only for @p init nonzero and @p prio 0xFFFF (called by func_00316878 with 1, 0xFFFF). The tables are four or
+ * eight floats; the eight-float ones read as four (x, y) points of a piecewise curve (e.g. D_004FE920 = (0, 0.2),
+ * (0.4, 0.4), (0.6, 0.4), (1, 0.2)), and the AI code reaches several through pointers in .sdata (D_004A1114 ->
+ * D_004FE920, D_004A111C -> D_004FE940).
+ *
+ * @param init  nonzero to initialize (0 would be destruction; nothing is done then)
+ * @param prio  the initialization priority; only 0xFFFF (the default) does anything
+ */
 void sti_00315A20(int init, int prio)
 {
     if (prio == 0xFFFF && init) {
@@ -983,6 +1097,11 @@ extern "C" void* func_00315A20(int, int);
 //99.38%
 INCLUDE_ASM("animation/gameanimmap", func_00316878__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs this unit's second static initializer: func_00315A20(1, 0xFFFF) (a g++ global-constructor entry).
+ *
+ * @return what func_00315A20 leaves in the return register (unused)
+ */
 void* func_00316878(void* self)
 {
     return func_00315A20(1, 0xffff);

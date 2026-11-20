@@ -134,6 +134,9 @@ extern "C" float cBECharacterInterface_getScale(void* self, int riderIndex)
 //100%
 INCLUDE_ASM("be/beintcharacter", func_0014F100);
 #ifdef SKIP_ASM
+/**
+ * Does nothing.
+ */
 extern "C" void func_0014F100(void) {
 
 }
@@ -143,6 +146,13 @@ INCLUDE_ASM("be/beintcharacter", func_0014F108);
 #ifdef SKIP_ASM
 extern char D_005309BC[];
 
+/**
+ * Returns the 16-byte text at +0x4C of @p riderIndex's character record (D_00530970, 0x88-byte entries; D_005309BC =
+ * +0x4C).
+ *
+ * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
+ * @return the text
+ */
 extern "C" void* func_0014F108(void* self, int riderIndex)
 {
     return D_005309BC + cBELibrary_getCharacterID(riderIndex) * 136;
@@ -162,6 +172,12 @@ struct sCharEntryView {
 };
 extern sCharEntryView D_00530970_flags[] __asm__("D_00530970");
 
+/**
+ * Tests the word at +0x5C of @p riderIndex's character record (D_00530970, 0x88-byte entries).
+ *
+ * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
+ * @return true when the word is nonzero
+ */
 extern "C" bool func_0014F138(void* self, int riderIndex)
 {
     return D_00530970_flags[cBELibrary_getCharacterID(riderIndex)].field_0x5C != 0;
@@ -173,6 +189,12 @@ INCLUDE_ASM("be/beintcharacter", func_0014F170);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern sCharEntryView D_00530970_flags[] __asm__("D_00530970");
 
+/**
+ * Returns the word at +0x60 of @p riderIndex's character record (D_00530970, 0x88-byte entries).
+ *
+ * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
+ * @return the value
+ */
 extern "C" int func_0014F170(void* self, int riderIndex)
 {
     return D_00530970_flags[cBELibrary_getCharacterID(riderIndex)].field_0x60;
@@ -183,6 +205,13 @@ INCLUDE_ASM("be/beintcharacter", func_0014F1B0);
 #ifdef SKIP_ASM
 extern char D_005309D4[];
 
+/**
+ * Returns the 16-byte text at +0x64 of @p riderIndex's character record (D_00530970, 0x88-byte entries; D_005309D4 =
+ * +0x64).
+ *
+ * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
+ * @return the text
+ */
 extern "C" void* func_0014F1B0(void* self, int riderIndex)
 {
     return D_005309D4 + cBELibrary_getCharacterID(riderIndex) * 136;
@@ -193,6 +222,13 @@ INCLUDE_ASM("be/beintcharacter", func_0014F1E0);
 #ifdef SKIP_ASM
 extern char D_005309E4[];
 
+/**
+ * Returns the 16-byte text at +0x74 of @p riderIndex's character record (D_00530970, 0x88-byte entries; D_005309E4 =
+ * +0x74).
+ *
+ * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
+ * @return the text
+ */
 extern "C" void* func_0014F1E0(void* self, int riderIndex)
 {
     return D_005309E4 + cBELibrary_getCharacterID(riderIndex) * 136;
@@ -204,6 +240,12 @@ INCLUDE_ASM("be/beintcharacter", func_0014F210);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern sCharEntryView D_00530970_flags[] __asm__("D_00530970");
 
+/**
+ * Returns the word at +0x84 (the last) of @p riderIndex's character record (D_00530970, 0x88-byte entries).
+ *
+ * @param riderIndex  the rider (cBELibrary_getCharacterID selects the record)
+ * @return the value
+ */
 extern "C" int func_0014F210(void* self, int riderIndex)
 {
     return D_00530970_flags[cBELibrary_getCharacterID(riderIndex)].field_0x84;

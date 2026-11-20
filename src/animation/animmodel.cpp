@@ -62,6 +62,14 @@ struct sAnimModelList {
     int items[1];  // 0x64
 };
 
+/**
+ * Appends @p item to the model's int array at +0x64 and increments its count at +0x60 (no bounds check).
+ *
+ * cRider_loadRider calls it on the rider's mAnimModel for each 0x108-byte entry of its load list (mLoadList), passing
+ * the entry's word at +0x104, then calls cAnimModel_compile.
+ *
+ * @param item  the value to append
+ */
 void func_0030DB70(void* self, int item)
 {
     sAnimModelList* list = (sAnimModelList*)self;
@@ -72,6 +80,14 @@ void func_0030DB70(void* self, int item)
 //100%
 INCLUDE_ASM("animation/animmodel", func_0030DB90);
 #ifdef SKIP_ASM
+/**
+ * Compares two records by their first int: returns *self - *other (qsort-style comparator).
+ *
+ * cAnimModel_compile passes it to func_00418EF8 to sort the model's 0x58-byte parts by sAnimModelPart::id.
+ *
+ * @param other  the second record
+ * @return negative, zero or positive as the first int of @p self is below, equal to or above that of @p other
+ */
 extern "C" int func_0030DB90(void* self, void* other)
 {
     return *(int*)self - *(int*)other;
@@ -106,6 +122,15 @@ INCLUDE_ASM("animation/animmodel", cAnimModel_compile);
 //100%
 INCLUDE_ASM("animation/animmodel", func_0030E9E0);
 #ifdef SKIP_ASM
+/**
+ * Enables model part number @p i: ORs the part's mask into the model's mask and marks LOD slot @p channel used.
+ *
+ * Does nothing when @p i > maxPartIndex, partIndex is null or partIndex[i] is negative (no such part). A negative
+ * @p channel marks all four lods[] slots used. func_0030EA80 is the reverse; ai/rider uses both to show and hide parts.
+ *
+ * @param i  the part number (index into partIndex)
+ * @param channel  the LOD slot 0-3 to enable, or negative for all four
+ */
 // PORT: ulong is 64-bit here
 extern "C" void func_0030E9E0(cAnimModel* self, int i, int channel)
 {
@@ -141,6 +166,16 @@ extern "C" void func_0030E9E0(cAnimModel* self, int i, int channel)
 //100%
 INCLUDE_ASM("animation/animmodel", func_0030EA80);
 #ifdef SKIP_ASM
+/**
+ * Disables model part number @p i: clears the part's mask bits from the model's mask and its LOD slot @p channel.
+ *
+ * Does nothing when @p i > maxPartIndex, partIndex is null or partIndex[i] is negative. A negative @p channel clears
+ * used on all four lods[] slots; a single slot is cleared alone, and if any other slot of the part is still used the
+ * part's mask is OR'd back into the model's mask. Reverse of func_0030E9E0.
+ *
+ * @param i  the part number (index into partIndex)
+ * @param channel  the LOD slot 0-3 to disable, or negative for all four
+ */
 // PORT: ulong is 64-bit here
 extern "C" void func_0030EA80(cAnimModel* self, int i, int channel)
 {
@@ -184,6 +219,9 @@ extern "C" void func_0030EA80(cAnimModel* self, int i, int channel)
 //100%
 INCLUDE_ASM("animation/animmodel", func_0030EB60);
 #ifdef SKIP_ASM
+/**
+ * Disables every part of the model: clears used on all four lods[] slots of each of the numParts parts and zeroes mask.
+ */
 // PORT: ulong is 64-bit here
 extern "C" void func_0030EB60(cAnimModel* self)
 {
@@ -564,6 +602,17 @@ struct sAmPoint_0458 {
     int bone;
 };
 
+/**
+ * Returns point @p index of the part whose id is @p id, transformed by its bone matrix, or t4vect_Origin if none.
+ *
+ * The part's point table (unk_3C) holds 16-byte entries: x, y, z and a bone number relative to the part's firstBone.
+ * The point (x, y, z, 1) is multiplied on VU0 by the matrix of bone firstBone + bone in unk_034.
+ *
+ * @param model  the animated model
+ * @param id  the sAnimModelPart::id to look for
+ * @param index  the point's index in the part's table
+ * @return the transformed point, or t4vect_Origin when no part has @p id
+ */
 // Returns point `index` of the part with this id, transformed by its bone matrix (unk_034),
 // or t4vect_Origin when no part has the id.
 extern "C" t4Vector func_00310458(cAnimModel* model, int id, int index)
@@ -1156,6 +1205,14 @@ void operator_delete(int*);
 // func_00311110 ignores its argument (matched as (void)); the call here passes self in a0.
 extern "C" void func_00311110_self(void* self) __asm__("func_00311110");
 
+/**
+ * Destroys the animation database: clears cAnimDataBase_TheAnimDataBase and frees the channel cache.
+ *
+ * Calls func_00311110 (passing @p self, which it ignores) and frees @p self with operator_delete when bit 0 of
+ * @p flags is set. Reverse of cAnimDataBase_cAnimDataBase.
+ *
+ * @param flags  bit 0: delete the object itself
+ */
 extern "C" void func_00311088(void* self, int flags)
 {
     cAnimDataBase_TheAnimDataBase = 0;
@@ -1208,6 +1265,14 @@ struct sAnimNode_311110
 extern sAnimNode_311110* D_004FE7A0_311110[] __asm__("D_004FE7A0");
 extern sAnimNode_311110* D_004FE860_311110[] __asm__("D_004FE860");
 
+/**
+ * Frees the animation channel cache: every allocated bucket of D_004FE7A0, its nodes' data and the bucket itself.
+ *
+ * For each of the 48 buckets that is non-null, each of its 20 nodes (0x24 bytes) gets its owner's byte at +0x5 set to
+ * 0xFF (no cached node) and its data freed with cMemMan_free; then the bucket array is freed and D_004FE7A0[bank] and
+ * D_004FE860[bank] (the bucket's current node) are zeroed. Called by func_00311088 and before animation data is
+ * unloaded (scripter/scanimmgr, fe/fereal, ai/ai).
+ */
 extern "C" void func_00311110(void)
 {
     for (int bank = 0; bank < 48; bank++)
@@ -1241,6 +1306,15 @@ INCLUDE_ASM("animation/animmodel", func_00311220);
 #ifdef SKIP_ASM
 extern "C" void cAdfDataSource_populateFromData(void* self, char* data);
 
+/**
+ * Constructs an animation data source over @p data that is already in memory, and returns @p self.
+ *
+ * Zeroes the first word (the loaded-file pointer that func_003112C8 frees, so the caller keeps ownership of @p data)
+ * and calls cAdfDataSource_populateFromData(@p self, @p data). scripter/scanimmgr uses it for banks it has loaded.
+ *
+ * @param data  the animation file data
+ * @return @p self
+ */
 extern "C" void* func_00311220(void* self, char* data)
 {
     *(int*)self = 0;
@@ -1254,6 +1328,15 @@ INCLUDE_ASM("animation/animmodel", func_00311250);
 #ifdef SKIP_ASM
 extern "C" char* FILE_loadpack(void* src, int flags);
 
+/**
+ * Constructs an animation data source by loading file @p src, and returns @p self.
+ *
+ * Loads the file with FILE_loadpack(@p src, 0), keeps the buffer in the first word (freed by func_003112C8) and calls
+ * cAdfDataSource_populateFromData on it. ai/ai and fe/fereal create their animation banks with it.
+ *
+ * @param src  the file name of the animation bank
+ * @return @p self
+ */
 extern "C" void* func_00311250(char** self, void* src)
 {
     char* data = FILE_loadpack(src, 0);
@@ -1290,6 +1373,13 @@ INCLUDE_ASM("animation/animmodel", func_003112C8);
 void cMemMan_free(void*);
 void operator_delete(int*);
 
+/**
+ * Destroys an animation data source: frees its loaded file buffer (the first word) when there is one.
+ *
+ * Frees @p self with operator_delete when bit 0 of @p flags is set; callers pass 3.
+ *
+ * @param flags  bit 0: delete the object itself
+ */
 extern "C" void func_003112C8(void* self, int flags)
 {
     void* data = *(void**)self;
