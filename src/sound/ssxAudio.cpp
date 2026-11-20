@@ -2,6 +2,8 @@
 #include "sound/ssxaudio.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
+#include "ai/ai.h"
+#include "ai/player.h"
 
 //100%
 INCLUDE_ASM("sound/ssxAudio", SSXAUDIO_Init);
@@ -732,75 +734,58 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_GetFocusRider);
 extern "C" int cSSXAudio_ReplayMode(void* self);
 extern "C" char* cAudioInterface_getAI();
 
-struct sAudVoice5D98 {
-    char pad_0x0[0xEC];
-    int prio;           // 0xEC
-    char pad_0xF0[0x870 - 0xF0];
-    int id;             // 0x870
-    int active;         // 0x874
-    int f878;
-    int enabled;        // 0x87C
-};
-
-struct sAudSys5D98 {
-    char pad_0x0[0x28];
-    sAudVoice5D98* voices[6];   // 0x28
-    char* cur;                  // 0x40
-    char pad_0x44[0x78 - 0x44];
-    int numVoices;              // 0x78
-    int numUsed;                // 0x7C
-};
-
-static inline int sAudVoice5D98_isOn(sAudVoice5D98* self)
+static inline int isLocalHuman(cRider* rider)
 {
-    return self->active && self->enabled;
+    return rider->mIsHuman && rider->mIsLocal;
 }
 
 /**
  * Returns the rider the audio should follow for a viewport.
  *
- * In replay mode (cSSXAudio_ReplayMode) it is the replay's current rider. Otherwise, from the AI's rider list (cAudioInterface_getAI):
- * -1 picks the active rider with the lowest value at +0xEC (the race leader), -2 the first active rider, any other
- * value the rider whose +0x870 equals it. A rider counts as active when +0x874 and +0x87C are both set. Falls back to
- * rider 0. The fork's C returns the pointer as an int.
+ * In replay mode (cSSXAudio_ReplayMode) it is player 0's rider (cAI Players[0]->mRider, 0 without a player).
+ * Otherwise, from cAI's Riders (cAudioInterface_getAI): -1 picks, among the first NumberOfPlayersAllocated riders,
+ * the local human (mIsHuman and mIsLocal) with the lowest +0xEC value; -2 the first local human of all
+ * NumberOfRidersAllocated riders; any other value the rider whose mViewIndex equals it. Falls back to Riders[0].
+ * The fork's C returns the pointer as an int.
  *
- * @param which  viewport/player index, or -1 for the leader, -2 for the first active rider (On Tour viewport)
+ * @param which  viewport index (On Tour viewport), or -1 / -2 as above
  * @return the rider (cRider*)
  */
-// PORT: returns a voice pointer; the unit declares the return type as int.
+// PORT: returns a rider pointer; the unit declares the return type as int.
 extern "C" int cSSXAudio_GetFocusRider(void* self, int which)
 {
     if (cSSXAudio_ReplayMode(self) != 0) {
-        char* cur = ((sAudSys5D98*)cAudioInterface_getAI())->cur;
-        return cur ? *(int*)(cur + 0x18) : 0;
+        cPlayer* player = ((cAI*)cAudioInterface_getAI())->Players[0];
+        return player ? (int)player->mRider : 0;
     }
     if (which == -1) {
         int best = 0;
         int bestPrio = 30000;
-        for (int i = 0; i < ((sAudSys5D98*)cAudioInterface_getAI())->numUsed; i++) {
-            sAudVoice5D98* curRider = ((sAudSys5D98*)cAudioInterface_getAI())->voices[i];
-            if (sAudVoice5D98_isOn(curRider) && curRider->prio < bestPrio) {
-                bestPrio = curRider->prio;
+        for (int i = 0; i < ((cAI*)cAudioInterface_getAI())->NumberOfPlayersAllocated; i++) {
+            cRider* curRider = ((cAI*)cAudioInterface_getAI())->Riders[i];
+            if (isLocalHuman(curRider) && curRider->unk_0EC < bestPrio) {
+                bestPrio = curRider->unk_0EC;
                 best = i;
             }
         }
-        return (int)((sAudSys5D98*)cAudioInterface_getAI())->voices[best];
+        return (int)((cAI*)cAudioInterface_getAI())->Riders[best];
     }
     if (which == -2) {
-        for (int i = 0; i < ((sAudSys5D98*)cAudioInterface_getAI())->numVoices; i++) {
-            sAudVoice5D98* curRider = ((sAudSys5D98*)cAudioInterface_getAI())->voices[i];
-            if (sAudVoice5D98_isOn(curRider))
+        for (int i = 0; i < ((cAI*)cAudioInterface_getAI())->NumberOfRidersAllocated; i++) {
+            cRider* curRider = ((cAI*)cAudioInterface_getAI())->Riders[i];
+            if (isLocalHuman(curRider))
                 return (int)curRider;
         }
     } else {
-        for (int i = 0; i < ((sAudSys5D98*)cAudioInterface_getAI())->numVoices; i++) {
-            sAudVoice5D98* curRider = ((sAudSys5D98*)cAudioInterface_getAI())->voices[i];
-            if (curRider->id == which)
+        for (int i = 0; i < ((cAI*)cAudioInterface_getAI())->NumberOfRidersAllocated; i++) {
+            cRider* curRider = ((cAI*)cAudioInterface_getAI())->Riders[i];
+            if (curRider->mViewIndex == which)
                 return (int)curRider;
         }
     }
-    return (int)((sAudSys5D98*)cAudioInterface_getAI())->voices[0];
+    return (int)((cAI*)cAudioInterface_getAI())->Riders[0];
 }
+
 #endif
 
 //100%
@@ -1143,8 +1128,8 @@ public:
 extern "C" void cSSXAudio_InGameInit(char* self)
 {
     void* be = cBE_getInterface_Fv(cBE_getBE(), 13);
-    char* bm = cAudioInterface_getAI();
-    void* rider = cRider_getIdentity(*(void**)(bm + 0x28));
+    cAI* ai = (cAI*)cAudioInterface_getAI();
+    void* rider = cRider_getIdentity(ai->Riders[0]);
     int radioPlaylist = cBERewardInterface_getPlayList(be, 0, (int)rider);
     func_0028BF78(self, cBERewardInterface_getRadioMode(be, 0, (int)rider));
     func_0028C2D0(self, radioPlaylist);
@@ -1185,7 +1170,7 @@ extern "C" void cSSXAudio_InGameInit(char* self)
         int* firstTimeFlag = (int*)(self + 0x579C);
         do {
             void* iface = cBE_getInterface_Fv(cBE_getBE(), 1);
-            char* playerRider = *(char**)(cAudioInterface_getAI() + 0x28);
+            char* playerRider = (char*)((cAI*)cAudioInterface_getAI())->Riders[0];
             *firstTimeFlag = cBENewPlayerInterface_isFirstTimeOnTrack(iface, ((cSSXAudio_InGameInit_cObj*)(playerRider + 0x6C0))->v6(), i);
             i++;
             firstTimeFlag++;
@@ -1535,10 +1520,10 @@ extern "C" void func_002871B0(void* self)
     cSSXAudio_EndUberSpin(self, 0);
     func_00287F00(self, 3, 0.5f, 1.0f);
     cWorldTriggerManager_ResetStates(gWorldTriggerManager);
-    int n = *(int*)(cAudioInterface_getAI() + 0x78);
+    int n = ((cAI*)cAudioInterface_getAI())->NumberOfRidersAllocated;
     for (; i < n; i++) {
-        func_00296E20(self, *(int*)(cAudioInterface_getAI() + (i << 2) + 0x28));
-        func_00297438(self, *(int*)(cAudioInterface_getAI() + (i << 2) + 0x28));
+        func_00296E20(self, (int)((cAI*)cAudioInterface_getAI())->Riders[i]);
+        func_00297438(self, (int)((cAI*)cAudioInterface_getAI())->Riders[i]);
     }
     *(int*)((char*)self + 0x6074) = 0;
     *(int*)((char*)self + 0x6078) = 0;

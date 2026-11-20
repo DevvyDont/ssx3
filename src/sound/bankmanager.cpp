@@ -1,5 +1,6 @@
 #include "common.h"
 #include "main/ssxapp.h"
+#include "ai/ai.h"
 
 //100%
 INCLUDE_ASM("sound/bankmanager", cBankInstance_AllocMem);
@@ -1966,8 +1967,8 @@ extern "C" void func_0028E8C0(void* vself, int id, int a2)
             func_002ADDE0(**(char***)(self + 0x118) + 0x1D8, D_004A3650_E8C0->v);
             func_002ADDE0(**(char***)(self + 0x118) + 0x1D8, D_004A3658_E8C0->v);
             cSSXAudio_StopTone(self, 5.029983997344971f);
-            func_00296E20(self, *(int*)(cAudioInterface_getAI() + 0x28));
-            func_00297438(self, *(int*)(cAudioInterface_getAI() + 0x28));
+            func_00296E20(self, (int)((cAI*)cAudioInterface_getAI())->Riders[0]);
+            func_00297438(self, (int)((cAI*)cAudioInterface_getAI())->Riders[0]);
             cSSXAudio_EndUberSpin(self, 0);
             if (func_0028D960(self)) {
                 int flag = 1;

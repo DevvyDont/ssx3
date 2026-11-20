@@ -9,6 +9,7 @@
 #include "scripter/ssxscriptengine.h"
 #include "main/ssxapp.h"
 #include "ai/rider.h"
+#include "ai/ai.h"
 
 //100%
 INCLUDE_ASM("sound/soundsys", cBankSys_cBankSys);
@@ -1535,8 +1536,8 @@ extern "C" void func_00292B48(void* self);
 extern "C" void cSSXAudio_BeginAllRiderSound(cSSXAudio* self)
 {
     func_00292B48(self);
-    for (int i = 0; i < *(int*)((char*)cAudioInterface_getAI() + 0x78); i++) {
-        cSSXAudio_BeginRiderSound(self, *(int*)((char*)cAudioInterface_getAI() + (i << 2) + 0x28));
+    for (int i = 0; i < ((cAI*)cAudioInterface_getAI())->NumberOfRidersAllocated; i++) {
+        cSSXAudio_BeginRiderSound(self, (int)((cAI*)cAudioInterface_getAI())->Riders[i]);
     }
     *(int*)((char*)self + 0x5830) = 0;
 }
@@ -2521,8 +2522,8 @@ extern "C" void cSSXAudio_UpdateLift(cSSXAudio* self)
 {
     sSnd4860* audio = (sSnd4860*)self;
     for (int i = 0; i < 6; i++) {
-        if (audio->vals[i] != 0 && i < *(int*)((char*)cAudioInterface_getAI() + 0x78)) {
-            char* rider = *(char**)((char*)cAudioInterface_getAI() + (i << 2) + 0x28);
+        if (audio->vals[i] != 0 && i < ((cAI*)cAudioInterface_getAI())->NumberOfRidersAllocated) {
+            char* rider = (char*)((cAI*)cAudioInterface_getAI())->Riders[i];
             if (rider != 0) {
                 cSSXAudio_LiftWithAirTime(self, rider);
                 continue;
