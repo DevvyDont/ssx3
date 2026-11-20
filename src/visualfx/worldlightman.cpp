@@ -1,4 +1,5 @@
 #include "common.h"
+#include "visualfx/transitionman.h"
 #include "bx/math3d.h"
 #include "visualfx/fog.h"
 #include "ai/riderhandler.h"
@@ -3156,8 +3157,8 @@ INCLUDE_ASM("visualfx/worldlightman", cTransitionMan_IsTransitionActive);
  * @param transitionMan  the transition manager
  * @return the playing flag
  */
-extern "C" int cTransitionMan_IsTransitionActive(void *transitionMan) {
-    return (*(int *)((char*)(transitionMan) + (0x44)));
+extern "C" int cTransitionMan_IsTransitionActive(cTransitionMan* transitionMan) {
+    return (transitionMan->mbPlayingTransition);
 }
 #endif
 //100%
@@ -3172,8 +3173,8 @@ INCLUDE_ASM("visualfx/worldlightman", cTransitionMan_IsWaitingForScreenGrab);
  * @param transitionMan  the transition manager
  * @return the requesting flag
  */
-extern "C" int cTransitionMan_IsWaitingForScreenGrab(void *transitionMan) {
-    return (*(int *)((char*)(transitionMan) + (0x64)));
+extern "C" int cTransitionMan_IsWaitingForScreenGrab(cTransitionMan* transitionMan) {
+    return (transitionMan->mRequestingScreenGrab);
 }
 #endif
 //100%
@@ -3187,8 +3188,8 @@ INCLUDE_ASM("visualfx/worldlightman", cTransitionMan_GetTransitionInitiator);
  * @param transitionMan  the transition manager
  * @return the initiator
  */
-extern "C" int cTransitionMan_GetTransitionInitiator(void *transitionMan) {
-    return (*(int *)((char*)(transitionMan) + (0x78)));
+extern "C" int cTransitionMan_GetTransitionInitiator(cTransitionMan* transitionMan) {
+    return (transitionMan->mCurrentInitiator);
 }
 #endif
 
@@ -3220,8 +3221,8 @@ INCLUDE_ASM("visualfx/worldlightman", cTransitionMan_IsUsingTexture);
  * @param transitionMan  the transition manager
  * @return the flag
  */
-extern "C" int cTransitionMan_IsUsingTexture(void *transitionMan) {
-    return (*(int *)((char*)(transitionMan) + (0x60)));
+extern "C" int cTransitionMan_IsUsingTexture(cTransitionMan* transitionMan) {
+    return (transitionMan->mUsingScreenGrab);
 }
 #endif
 

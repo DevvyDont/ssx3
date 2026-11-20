@@ -1,4 +1,5 @@
 #include "common.h"
+#include "visualfx/transitionman.h"
 #include "be/beintnewrace.h"
 #include "visualfx/snowbox.h"
 #include "ai/riderhandler.h"
@@ -5215,28 +5216,28 @@ extern void* cTransitionMan_vtbl[];
  * @param viewIndex  the view it serves (On Tour viewIndex)
  * @return this
  */
-extern "C" void* cTransitionMan_cTransitionMan(void* self, void* bucket, int viewIndex)
+extern "C" void* cTransitionMan_cTransitionMan(cTransitionMan* self, void* bucket, int viewIndex)
 {
     cObjNode_cObjNode1(self, bucket);
     cScriptObjTransition_cScriptObjTransition((char*)self + 0x10);
-    *(int*)((char*)self + 0x74) = viewIndex;
-    *(int*)((char*)self + 0x40) = 0;
-    *(int*)((char*)self + 0x44) = 0;
-    *(int*)((char*)self + 0x4C) = 0;
-    *(int*)((char*)self + 0x50) = 0;
-    *(int*)((char*)self + 0x60) = 0;
-    *(int*)((char*)self + 0x64) = 0;
-    *(int*)((char*)self + 0x68) = 0;
-    *(int*)((char*)self + 0x70) = 0;
-    *(int*)((char*)self + 0x78) = 0;
-    *(int*)((char*)self + 0x7C) = 0;
-    *(int*)((char*)self + 0x80) = 0;
-    *(void***)((char*)self + 0x1C) = D_00488100;
-    *(void***)((char*)self + 0xC) = cTransitionMan_vtbl;
-    *(int*)((char*)self + 0x6C) = -1;
+    self->mViewIndex = viewIndex;
+    self->mNumPause = 0;
+    self->mbPlayingTransition = 0;
+    self->mTransitionIn = 0;
+    self->mTransitionOut = 0;
+    self->mUsingScreenGrab = 0;
+    self->mRequestingScreenGrab = 0;
+    *(int*)&self->mScreenGrabHandle = 0;
+    self->mExternalTimePercentage = 0;
+    self->mCurrentInitiator = 0;
+    self->mRequestingDelete = 0;
+    self->mRequestDeleteFrame = 0;
+    self->mScriptVtbl = D_00488100;
+    self->mVtbl = cTransitionMan_vtbl;
+    self->mScreenGrabHandle.mTextureId = -1;
     cTransitionObj_InitializeBuffers();
     cScriptObject_InitScriptObject((char*)self + 0x10);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -5250,7 +5251,7 @@ struct sBWVEntry1 {
 };
 
 extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
-extern "C" void cTransitionMan_EndTransition(void* self);
+extern "C" void cTransitionMan_EndTransition(cTransitionMan* self);
 extern "C" void cScriptObject_DeInitScriptObject(void* self);
 extern "C" void cScriptObject__cScriptObject(void* self, int flags);
 extern "C" void cObjNode__cObjNode(void* self, int flags);
@@ -5264,17 +5265,17 @@ extern "C" void cObjNode__cObjNode(void* self, int flags);
  * @param self   the transition manager
  * @param flags  g++ destructor flags, passed on (bit 0 frees the object)
  */
-extern "C" void cTransitionMan__cTransitionMan(void* self, int flags)
+extern "C" void cTransitionMan__cTransitionMan(cTransitionMan* self, int flags)
 {
-    *(void***)((char*)self + 0x1C) = D_00488100;
-    *(void***)((char*)self + 0xC) = cTransitionMan_vtbl;
+    self->mScriptVtbl = D_00488100;
+    self->mVtbl = cTransitionMan_vtbl;
     char* scriptObj = (char*)self + 0x10;
     cTransitionMan_EndTransition(self);
-    if (*(int*)((char*)self + 0x7C) != 0) {
+    if (self->mRequestingDelete != 0) {
         char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
         sBWVEntry1* removeScreenGrab = &(*(sBWVEntry1**)(obj + 0x10D8))[60];
         removeScreenGrab->fn(obj + removeScreenGrab->delta, (char*)self + 0x68);
-        *(int*)((char*)self + 0x7C) = 0;
+        self->mRequestingDelete = 0;
     }
     cScriptObject_DeInitScriptObject(scriptObj);
     cScriptObject__cScriptObject(scriptObj, 0);
@@ -5298,7 +5299,7 @@ struct sBWVEntryI4370 {
 };
 
 extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGraphicsMan");
-extern "C" void cTransitionMan_EndTransition(void* self);
+extern "C" void cTransitionMan_EndTransition(cTransitionMan* self);
 
 // PORT: later callers declare this as void (and an int alias); the body returns int.
 extern "C" int cTransitionMan_StartTransition_def(void* self, int a1, void* o1, void* o2, float f0, float f1, float f2, int a4, int a5) __asm__("cTransitionMan_StartTransition");
@@ -5325,7 +5326,7 @@ extern "C" int cTransitionMan_StartTransition_def(void* self, int a1, void* o1, 
 extern "C" int cTransitionMan_StartTransition_def(void* self, int initiator, void* transitionIn, void* transitionOut, float inTime, float holdTime, float outTime, int useScreenGrab, int externalTimePercentage)
 {
     if (*(int*)((char*)self + 0x44) != 0) {
-        cTransitionMan_EndTransition(self);
+        cTransitionMan_EndTransition((cTransitionMan*)self);
     }
     *(int*)((char*)self + 0x78) = initiator;
     *(int*)((char*)self + 0x70) = externalTimePercentage;
@@ -5382,7 +5383,7 @@ extern "C" void cTransitionMan_StartTransition(void* self, int a1, int a2, int a
  * @param inTime  the in time
  * @param holdTime  the hold time
  */
-extern "C" void cTransitionMan_StartTransitionIn(void* self, int initiator, int transitionIn, float inTime, float holdTime)
+extern "C" void cTransitionMan_StartTransitionIn(cTransitionMan* self, int initiator, int transitionIn, float inTime, float holdTime)
 {
     cTransitionMan_StartTransition(self, initiator, transitionIn, 0, inTime, holdTime, 0, 0, 0.0f);
 }
@@ -5405,13 +5406,13 @@ extern "C" int cTransitionMan_StartTransition_i(void* self, int a1, int a2, int 
  * @param outTime  length of the out part (On Tour outTime)
  * @return cTransitionMan_StartTransition's result, or 1 when added to a running transition
  */
-extern "C" int cTransitionMan_StartTransitionOut(void* self, int initiator, int transition, float outTime)
+extern "C" int cTransitionMan_StartTransitionOut(cTransitionMan* self, int initiator, int transition, float outTime)
 {
-    if (*(int*)((char*)self + 0x44) == 0) {
+    if (self->mbPlayingTransition == 0) {
         return cTransitionMan_StartTransition_i(self, initiator, 0, transition, 0.0f, 0.0f, 0, 0, outTime);
     }
-    *(int*)((char*)self + 0x50) = transition;
-    *(float*)((char*)self + 0x5C) = outTime;
+    self->mTransitionOut = (cTransitionObj*)transition;
+    self->mfOutTime = outTime;
     return 1;
 }
 #endif
@@ -5432,7 +5433,7 @@ extern "C" void cTransitionMan_StartTransition(void* self, int a1, int a2, int a
  * @param externalTimePercentage  optional float that drives the progress from outside (On Tour externalTimePercentage)
  * @param transitionTime  length of the transition (On Tour transitionTime)
  */
-extern "C" void cTransitionMan_StartTransitionScreenGrab(void* self, int initiator, int transition, int externalTimePercentage, float transitionTime)
+extern "C" void cTransitionMan_StartTransitionScreenGrab(cTransitionMan* self, int initiator, int transition, int externalTimePercentage, float transitionTime)
 {
     cTransitionMan_StartTransition(self, initiator, 0, transition, 0.0f, 0.0f, 1, externalTimePercentage, transitionTime);
 }
@@ -5464,33 +5465,33 @@ extern char* cGraphicsMan_TheGraphicsMan_boardwakefx __asm__("cGraphicsMan_TheGr
  * +0x80 and clears +0x60 and +0x64. Finally clears +0x78. Script commands, the rider and AI code, cTransitionMan_update
  * and cTransitionMan_OnEndObjectUse call it.
  */
-extern "C" void cTransitionMan_EndTransition(void* self)
+extern "C" void cTransitionMan_EndTransition(cTransitionMan* self)
 {
-    if (*(int*)((char*)self + 0x44) != 0) {
-        *(int*)((char*)self + 0x44) = 0;
-        *(int*)((char*)self + 0x40) = 0;
-        char* object = *(char**)((char*)self + 0x4C);
+    if (self->mbPlayingTransition != 0) {
+        self->mbPlayingTransition = 0;
+        self->mNumPause = 0;
+        char* object = (char*)self->mTransitionIn;
         if (object != 0) {
             sBWVEntryI_4578* entry = &(*(sBWVEntryI_4578**)object)[1];
             entry->fn(object + entry->delta, 3);
         }
-        *(char**)((char*)self + 0x4C) = 0;
-        object = *(char**)((char*)self + 0x50);
+        self->mTransitionIn = 0;
+        object = (char*)self->mTransitionOut;
         if (object != 0) {
             sBWVEntryI_4578* entry = &(*(sBWVEntryI_4578**)object)[1];
             entry->fn(object + entry->delta, 3);
         }
-        *(char**)((char*)self + 0x50) = 0;
-        *(int*)((char*)self + 0x70) = 0;
-        if (~*(int*)((char*)self + 0x6C) != 0) {
+        self->mTransitionOut = 0;
+        self->mExternalTimePercentage = 0;
+        if (~self->mScreenGrabHandle.mTextureId != 0) {
             char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
-            *(int*)((char*)self + 0x7C) = 1;
+            self->mRequestingDelete = 1;
             sBWVEntryR_4578* entry = &(*(sBWVEntryR_4578**)(obj + 0x10D8))[114];
-            *(int*)((char*)self + 0x80) = entry->fn(obj + entry->delta);
-            *(int*)((char*)self + 0x64) = 0;
-            *(int*)((char*)self + 0x60) = 0;
+            self->mRequestDeleteFrame = entry->fn(obj + entry->delta);
+            self->mRequestingScreenGrab = 0;
+            self->mUsingScreenGrab = 0;
         }
-        *(int*)((char*)self + 0x78) = 0;
+        self->mCurrentInitiator = 0;
     }
 }
 #endif
@@ -5506,18 +5507,18 @@ INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_PauseTransition);
  *
  * @param up  nonzero to pause, zero to resume
  */
-extern "C" void cTransitionMan_PauseTransition(void* self, int up)
+extern "C" void cTransitionMan_PauseTransition(cTransitionMan* self, int up)
 {
-    if (*(int*)((char*)self + 0x44) == 0) {
-        *(int*)((char*)self + 0x40) = 0;
+    if (self->mbPlayingTransition == 0) {
+        self->mNumPause = 0;
         return;
     }
     if (up) {
-        *(int*)((char*)self + 0x40) += 1;
+        self->mNumPause += 1;
         return;
     }
-    if (*(int*)((char*)self + 0x40) != 0) {
-        *(int*)((char*)self + 0x40) -= 1;
+    if (self->mNumPause != 0) {
+        self->mNumPause -= 1;
     }
 }
 #endif
@@ -5533,13 +5534,13 @@ INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_GetTransitionTimeLeft);
  *
  * @return the remaining time in seconds
  */
-extern "C" float cTransitionMan_GetTransitionTimeLeft(void* self)
+extern "C" float cTransitionMan_GetTransitionTimeLeft(cTransitionMan* self)
 {
-    if (*(int*)((char*)self + 0x44) == 0) {
+    if (self->mbPlayingTransition == 0) {
         return 0.0f;
     }
-    float remaining = *(float*)((char*)self + 0x54) + *(float*)((char*)self + 0x58)
-            + *(float*)((char*)self + 0x5C) - *(float*)((char*)self + 0x48);
+    float remaining = self->mfInTime + self->mfHoldTime
+            + self->mfOutTime - self->mfCurrentTime;
     if (remaining < 0.0f) {
         return 0.0f;
     }
@@ -5563,27 +5564,27 @@ struct sWkVtB46C8 { short delta; short index; void (*fn)(void*, void*); };
  * (+0x44) and not paused (+0x40), the time (+0x48) is set from +0x3C when +0x18 is positive, from a tracked
  * value (+0x70) times the total length, or else advanced by one frame (1 / frame rate).
  */
-extern "C" void cTransitionMan_update(char* self)
+extern "C" void cTransitionMan_update(cTransitionMan* self)
 {
     char* ctx = cGraphicsMan_TheGraphicsMan_boardwakefx;
-    if (*(int*)(self + 0x7C) != 0) {
+    if (self->mRequestingDelete != 0) {
         sWkVtA46C8* vt = *(sWkVtA46C8**)(ctx + 0x10D8);
-        if (vt[114].fn(ctx + vt[114].delta) - *(int*)(self + 0x80) >= 3) {
+        if (vt[114].fn(ctx + vt[114].delta) - self->mRequestDeleteFrame >= 3) {
             sWkVtB46C8* vt2 = *(sWkVtB46C8**)(ctx + 0x10D8);
-            vt2[60].fn(ctx + vt2[60].delta, self + 0x68);
-            *(int*)(self + 0x7C) = 0;
+            vt2[60].fn(ctx + vt2[60].delta, ((char*)self) + 0x68);
+            self->mRequestingDelete = 0;
         }
     }
-    if (*(int*)(self + 0x44) == 0) return;
-    if (*(int*)(self + 0x40) != 0) return;
-    if (*(int*)(self + 0x18) > 0) {
-        *(float*)(self + 0x48) = *(float*)(self + 0x3C);
-    } else if (*(float**)(self + 0x70) != 0) {
-        *(float*)(self + 0x48) = **(float**)(self + 0x70) * (*(float*)(self + 0x54) + *(float*)(self + 0x58) + *(float*)(self + 0x5C));
+    if (self->mbPlayingTransition == 0) return;
+    if (self->mNumPause != 0) return;
+    if (self->mInUse > 0) {
+        self->mfCurrentTime = self->mInfo.currTime;
+    } else if (self->mExternalTimePercentage != 0) {
+        self->mfCurrentTime = *self->mExternalTimePercentage * (self->mfInTime + self->mfHoldTime + self->mfOutTime);
     } else {
-        *(float*)(self + 0x48) += 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
+        self->mfCurrentTime += 1.0f / (float)*(int*)(cAppMan_TheAppMan + 0x10);
     }
-    if (*(float*)(self + 0x54) + *(float*)(self + 0x58) + *(float*)(self + 0x5C) <= *(float*)(self + 0x48)) {
+    if (self->mfInTime + self->mfHoldTime + self->mfOutTime <= self->mfCurrentTime) {
         cTransitionMan_EndTransition(self);
     }
 }
@@ -5682,36 +5683,36 @@ static inline int fadeTex47E8(sFade47E8* self)
  * is released when the hold ends. At an alpha of 0.93 or more it also resets the world painter
  * (cWorldPainterMan_reset).
  */
-extern "C" void cTransitionMan_render(sFade47E8* self)
+extern "C" void cTransitionMan_render(cTransitionMan* self)
 {
-    if (self->rider != *(int*)((char*)SSXApp->Game->ViewMan + 0x14)) {
+    if (self->mViewIndex != *(int*)((char*)SSXApp->Game->ViewMan + 0x14)) {
         return;
     }
     FigureOutTransitionUVs();
     sRsCtx47E8* ctx = (sRsCtx47E8*)cGraphicsMan_TheGraphicsMan_boardwakefx;
-    if (self->active == 0) {
+    if (self->mbPlayingTransition == 0) {
         return;
     }
-    float curTime = self->time;
-    if (self->pending != 0 && self->fadeIn + self->hold <= curTime) {
+    float curTime = self->mfCurrentTime;
+    if (self->mRequestingScreenGrab != 0 && self->mfInTime + self->mfHoldTime <= curTime) {
         sRsVtP47E8* vt = (sRsVtP47E8*)ctx->vtable;
-        vt[61].fn((char*)ctx + vt[61].delta, &self->ref);
-        self->pending = 0;
+        vt[61].fn((char*)ctx + vt[61].delta, (int*)&self->mScreenGrabHandle);
+        self->mRequestingScreenGrab = 0;
     }
     char* transition;
     float alpha;
-    if (self->o1 == 0) {
-        alpha = 1.0f - (curTime - self->hold) / self->fadeOut;
-        transition = self->o2;
-    } else if (curTime < self->fadeIn || self->o2 == 0) {
-        alpha = curTime / self->fadeIn;
-        transition = self->o1;
-    } else if (curTime < self->fadeIn + self->hold) {
+    if ((char*)self->mTransitionIn == 0) {
+        alpha = 1.0f - (curTime - self->mfHoldTime) / self->mfOutTime;
+        transition = (char*)self->mTransitionOut;
+    } else if (curTime < self->mfInTime || (char*)self->mTransitionOut == 0) {
+        alpha = curTime / self->mfInTime;
+        transition = (char*)self->mTransitionIn;
+    } else if (curTime < self->mfInTime + self->mfHoldTime) {
         alpha = 1.0f;
-        transition = self->o1;
+        transition = (char*)self->mTransitionIn;
     } else {
-        alpha = 1.0f - (curTime - (self->fadeIn + self->hold)) / self->fadeOut;
-        transition = self->o2;
+        alpha = 1.0f - (curTime - (self->mfInTime + self->mfHoldTime)) / self->mfOutTime;
+        transition = (char*)self->mTransitionOut;
     }
     float clamped = wakeClampE058(alpha, 0.0f, 1.0f);
     if (clamped >= 0.93f) {
@@ -5733,12 +5734,12 @@ extern "C" void cTransitionMan_render(sFade47E8* self)
     rsSet047E8(ctx, 0xC, 2, 3);
     rsSetA47E8(ctx, 0x3, 0, 2);
     rsSetB47E8(ctx, 0x1FFFFC00, 10, 0);
-    if (self->useTex != 0) {
-        ctx->top->tex = fadeTex47E8(self);
+    if (self->mUsingScreenGrab != 0) {
+        ctx->top->tex = fadeTex47E8(((sFade47E8*)self));
     } else {
         ctx->top->tex = -1;
     }
-    if (self->useTex == 0 || self->pending == 0) {
+    if (self->mUsingScreenGrab == 0 || self->mRequestingScreenGrab == 0) {
         sFadeVt47E8* ov = *(sFadeVt47E8**)transition;
         ov[2].fn(transition + ov[2].delta, clamped);
     }
@@ -5763,7 +5764,7 @@ struct sWakeParams_4B98 {
 void cScriptObject_OnStartObjectUse(void* self);
 extern "C" int cSSXScriptEngine_MakeTransitionObject(void* tbl, int mode, int id);
 extern "C" void cTransitionMan_StartTransition(void* self, int a1, int a2, int a3, float f0, float f1, int a4, int a5, float f2);
-extern "C" void cTransitionMan_StartTransitionScreenGrab(void* self, int a1, int a3, int a5, float f2);
+extern "C" void cTransitionMan_StartTransitionScreenGrab(cTransitionMan* self, int a1, int a3, int a5, float f2);
 
 /**
  * Starts the transition a script object describes when a player starts using it.
@@ -5773,18 +5774,18 @@ extern "C" void cTransitionMan_StartTransitionScreenGrab(void* self, int a1, int
  * with in, hold and out times from +0x34, +0x30 and +0x2C. Type 7 starts a screen-grab transition with one object and
  * the time at +0x34. The level at +0x3C is then copied to +0x48.
  */
-extern "C" void cTransitionMan_OnStartObjectUse(void* self)
+extern "C" void cTransitionMan_OnStartObjectUse(cTransitionMan* self)
 {
     sWakeParams_4B98* transitionInfo = (sWakeParams_4B98*)((char*)self + 0x28);
     cScriptObject_OnStartObjectUse((char*)self + 0x10);
-    if (*(int*)((char*)self + 0x28) != 7) {
-        int transitionIn = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, *(int*)((char*)self + 0x28), *(int*)((char*)self + 0x38));
-        int transitionOut = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, *(int*)((char*)self + 0x28), *(int*)((char*)self + 0x38));
-        cTransitionMan_StartTransition(self, 2, transitionIn, transitionOut, *(float*)((char*)self + 0x34), *(float*)((char*)self + 0x30), 0, 0, *(float*)((char*)self + 0x2C));
+    if (self->mInfo.transition != 7) {
+        int transitionIn = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, self->mInfo.transition, self->mInfo.transitionColour);
+        int transitionOut = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, self->mInfo.transition, self->mInfo.transitionColour);
+        cTransitionMan_StartTransition(self, 2, transitionIn, transitionOut, self->mInfo.outTime, self->mInfo.holdTime, 0, 0, self->mInfo.inTime);
     } else {
-        cTransitionMan_StartTransitionScreenGrab(self, 2, cSSXScriptEngine_MakeTransitionObject(ScriptEngine, 7, *(int*)((char*)self + 0x38)), 0, *(float*)((char*)self + 0x34));
+        cTransitionMan_StartTransitionScreenGrab(self, 2, cSSXScriptEngine_MakeTransitionObject(ScriptEngine, 7, self->mInfo.transitionColour), 0, self->mInfo.outTime);
     }
-    *(float*)((char*)self + 0x48) = transitionInfo->level;
+    self->mfCurrentTime = transitionInfo->level;
 }
 #endif
 
@@ -5792,7 +5793,7 @@ extern "C" void cTransitionMan_OnStartObjectUse(void* self)
 INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_OnEndObjectUse);
 #ifdef SKIP_ASM
 void cScriptObject_OnEndObjectUse(void*);
-extern "C" void cTransitionMan_EndTransition(void* self);
+extern "C" void cTransitionMan_EndTransition(cTransitionMan* self);
 
 /**
  * Ends the transition when a player stops using the transition script object.
@@ -5800,7 +5801,7 @@ extern "C" void cTransitionMan_EndTransition(void* self);
  * Runs cScriptObject_OnEndObjectUse on the script object at +0x10, then cTransitionMan_EndTransition. It sits in the
  * cScriptObjTransition part's vtable (D_00488100) right after cTransitionMan_OnStartObjectUse.
  */
-extern "C" void cTransitionMan_OnEndObjectUse(void* self)
+extern "C" void cTransitionMan_OnEndObjectUse(cTransitionMan* self)
 {
     cScriptObject_OnEndObjectUse((char*)self + 0x10);
     cTransitionMan_EndTransition(self);
@@ -5818,11 +5819,11 @@ INCLUDE_ASM("visualfx/boardwakefx", cTransitionMan_IsTransitionPending);
  *
  * @return 1 when both flags are set, otherwise 0
  */
-extern "C" int cTransitionMan_IsTransitionPending(void* self)
+extern "C" int cTransitionMan_IsTransitionPending(cTransitionMan* self)
 {
     int result = 0;
-    if (*(int*)((char*)self + 0x60) != 0) {
-        result = *(int*)((char*)self + 0x64) != 0;
+    if (self->mUsingScreenGrab != 0) {
+        result = self->mRequestingScreenGrab != 0;
     }
     return result;
 }

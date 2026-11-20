@@ -1,4 +1,6 @@
 #include "common.h"
+#include "intersect/worldsphtree.h"
+#include "intersect/worldsphere.h"
 #include "object/rollermodifier.h"
 #include "object/boostmodifier.h"
 #include "world/world.h"
@@ -73,10 +75,10 @@ extern void* cWorldSphTree_vtbl[];
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cWorldSphTree__cWorldSphTree(void* self, int flags)
+extern "C" void cWorldSphTree__cWorldSphTree(cWorldSphTree* self, int flags)
 {
-    *(void***)((char*)self + 0x50) = cWorldSphTree_vtbl;
-    operator_delete(*(int**)((char*)self + 0x68));
+    self->mVtbl = cWorldSphTree_vtbl;
+    operator_delete((int*)self->localTree);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -131,18 +133,18 @@ extern "C" float SphereTree_GetRadius(void* self);
  * @param hi  the box's maximum corner (On Tour bMax)
  * @return 0 when the sphere's bounding box lies wholly beyond one face, otherwise 1
  */
-extern "C" int cWorldSphTree_IsInBoxTransformed(void* self, float* lo, float* hi)
+extern "C" int cWorldSphTree_IsInBoxTransformed(cWorldSphTree* self, float* lo, float* hi)
 {
     sV4_330540 ext;
-    float rx = SphereTree_GetRadius(*(void**)((char*)self + 0x60));
-    float ry = SphereTree_GetRadius(*(void**)((char*)self + 0x60));
-    float rz = SphereTree_GetRadius(*(void**)((char*)self + 0x60));
+    float rx = SphereTree_GetRadius(self->st);
+    float ry = SphereTree_GetRadius(self->st);
+    float rz = SphereTree_GetRadius(self->st);
     ext.x = rx;
     ext.y = ry;
     ext.z = rz;
     ext.w = 0.0f;
-    sV4_330540 mx = add_330540(*(sV4_330540*)(*(char**)((char*)self + 0x60) + 0x80), ext);
-    sV4_330540 mn = sub_330540(*(sV4_330540*)(*(char**)((char*)self + 0x60) + 0x80), ext);
+    sV4_330540 mx = add_330540(*(sV4_330540*)((char*)self->st + 0x80), ext);
+    sV4_330540 mn = sub_330540(*(sV4_330540*)((char*)self->st + 0x80), ext);
     float lx = lo[0];
     float tx = mx.x;
     if (tx < lx && mn.x < lx) return 0;
@@ -171,11 +173,11 @@ extern "C" float SphereTree_GetRadius(void* self);
  *
  * @return 2 * radius, or -1.0 for a low-detail wrapper
  */
-extern "C" float cWorldSphTree_GetIdealParam(void* self)
+extern "C" float cWorldSphTree_GetIdealParam(cWorldSphTree* self)
 {
     float idealParam;
     if (*(int*)self != 0) {
-        idealParam = SphereTree_GetRadius(*(void**)((char*)self + 0x60)) * 2.0f;
+        idealParam = SphereTree_GetRadius(self->st) * 2.0f;
     } else {
         idealParam = -1.0f;
     }
@@ -198,12 +200,12 @@ extern "C" void SphereTree_TransformRel(void* p, void* a, float f);
  * @param mat  the transform (On Tour const t4Matrix& mat)
  * @param scale  the uniform scale (On Tour scale)
  */
-extern "C" void cWorldSphTree_Transform(void* self, t4Matrix* mat, float scale)
+extern "C" void cWorldSphTree_Transform(cWorldSphTree* self, t4Matrix* mat, float scale)
 {
-    bxSphereTree_operatorE(*(void**)((char*)self + 0x68), *(void**)((char*)self + 0x60));
-    *(void**)((char*)self + 0x60) = *(void**)((char*)self + 0x68);
-    SphereTree_TransformRel(*(void**)((char*)self + 0x60), mat, scale);
-    *(int*)((char*)self + 0x4) = 1;
+    bxSphereTree_operatorE(self->localTree, self->st);
+    self->st = (bxSphereTree*)((void*)self->localTree);
+    SphereTree_TransformRel(self->st, mat, scale);
+    self->isTransformed = 1;
 }
 #endif
 
@@ -290,10 +292,10 @@ extern "C" int SphereTree_IsTriCollision(void* tree, int a1, int a2, int a3, int
  * @param outLen  receives the penetration depth (On Tour param)
  * @return nonzero on a collision, otherwise 0
  */
-extern "C" int cWorldSphTree_IsTriInt(void* self, int vertA, int vertB, int vertC, int n, int ipos, sWsVec4* outDir, float* outLen)
+extern "C" int cWorldSphTree_IsTriInt(cWorldSphTree* self, int vertA, int vertB, int vertC, int n, int ipos, sWsVec4* outDir, float* outLen)
 {
     sWsVec4 hitDir;
-    int hit = SphereTree_IsTriCollision(*(void**)((char*)self + 0x60), vertA, vertB, vertC, n, &hitDir, ipos);
+    int hit = SphereTree_IsTriCollision(self->st, vertA, vertB, vertC, n, &hitDir, ipos);
     if (hit != 0) {
         float len = wsLength_330788(hitDir);
         *outLen = len;
@@ -363,10 +365,10 @@ extern "C" int bxSphereTree_Is2SidedTriCollision(void* tree, int a1, int a2, int
  * @param outLen  receives the penetration depth (On Tour param)
  * @return nonzero on a collision, otherwise 0
  */
-extern "C" int cWorldSphTree_Is2SidedTriInt(void* self, int vertA, int vertB, int vertC, int n, int ipos, sWsVec4* outDir, float* outLen)
+extern "C" int cWorldSphTree_Is2SidedTriInt(cWorldSphTree* self, int vertA, int vertB, int vertC, int n, int ipos, sWsVec4* outDir, float* outLen)
 {
     sWsVec4 hitDir;
-    int hit = bxSphereTree_Is2SidedTriCollision(*(void**)((char*)self + 0x60), vertA, vertB, vertC, n, &hitDir, ipos);
+    int hit = bxSphereTree_Is2SidedTriCollision(self->st, vertA, vertB, vertC, n, &hitDir, ipos);
     if (hit != 0) {
         float len = wsLength_330828(hitDir);
         *outLen = len;
@@ -433,9 +435,9 @@ extern "C" int SphereTree_IsTreeCollision(void* self, void* other, void* a2, voi
  * @param hit  receives the intersection (On Tour tIntersectInfo* ti); direction normalised, length stored
  * @return 1 on a hit (SphereTree_IsTreeCollision), otherwise 0
  */
-extern "C" int cWorldSphTree_IsSphTreeInt(void* self, void* tree, sWsHit_3308C8* hit)
+extern "C" int cWorldSphTree_IsSphTreeInt(cWorldSphTree* self, void* tree, sWsHit_3308C8* hit)
 {
-    if (SphereTree_IsTreeCollision(*(void**)((char*)self + 0x60), tree, &hit->dir, hit) != 0) {
+    if (SphereTree_IsTreeCollision(self->st, tree, &hit->dir, hit) != 0) {
         float len = wsLength_3308C8(hit->dir);
         hit->len = len;
         wsDivEq_3308C8(hit->dir, len);
@@ -503,9 +505,9 @@ extern "C" int SphereTree_IsBoxCollision(void* self, void* a1, void* a2, void* a
  * @param hit  receives the intersection (On Tour tIntersectInfo* ti); direction normalised, length stored
  * @return 1 on a hit (SphereTree_IsBoxCollision), otherwise 0
  */
-extern "C" int cWorldSphTree_IsBoxInt(void* self, void* bMin, void* bMax, sWsHit_330950* hit)
+extern "C" int cWorldSphTree_IsBoxInt(cWorldSphTree* self, void* bMin, void* bMax, sWsHit_330950* hit)
 {
-    if (SphereTree_IsBoxCollision(*(void**)((char*)self + 0x60), bMin, bMax, &hit->dir, hit) != 0) {
+    if (SphereTree_IsBoxCollision(self->st, bMin, bMax, &hit->dir, hit) != 0) {
         float len = wsLength_330950(hit->dir);
         hit->len = len;
         wsDivEq_330950(hit->dir, len);
@@ -5112,12 +5114,12 @@ INCLUDE_ASM("intersect/worldsphtree", cWorldSphere_GetIdealParam);
  *
  * @return 2 * the radius at offset 0x70, or -1.0 if the first word is 0
  */
-extern "C" float cWorldSphere_GetIdealParam(void* self)
+extern "C" float cWorldSphere_GetIdealParam(cWorldSphere* self)
 {
     if (*(int*)self == 0) {
         return -1.0f;
     }
-    return *(float*)((char*)self + 0x70) * 2.0f;
+    return self->rad * 2.0f;
 }
 #endif
 

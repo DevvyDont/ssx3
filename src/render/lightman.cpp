@@ -1,4 +1,5 @@
 #include "common.h"
+#include "render/2drender.h"
 #include "render/ps2lightman.h"
 #include "render/font.h"
 #include "render/ps2graphicsman.h"
@@ -427,7 +428,7 @@ struct sLmQuadCtx_E118 {
  * @param verts  the four vertices
  * @param rect  the rectangle {x, y, w, h}
  */
-extern "C" void c2DRender_drawRect(void* self, sLmQuadVtx_E118* verts, float* rect)
+extern "C" void c2DRender_drawRect(c2DRender* self, sLmQuadVtx_E118* verts, float* rect)
 {
     verts[0].pos = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
     verts[1].pos = sLmQuadVec4_E118(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
@@ -454,7 +455,7 @@ INCLUDE_ASM("render/lightman", c2DRender_drawRotRect);
  * @param verts  the four vertices
  * @param rect  the rectangle {x, y, w, h}
  */
-extern "C" void c2DRender_drawRotRect(void* self, sLmQuadVtx_E118* verts, float* rect)
+extern "C" void c2DRender_drawRotRect(c2DRender* self, sLmQuadVtx_E118* verts, float* rect)
 {
     verts[1].pos = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
     verts[3].pos = sLmQuadVec4_E118(rect[0] + rect[2], rect[1], 0.0f, 1.0f);
@@ -483,7 +484,7 @@ extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
  * @param rect  the rectangle {x, y, w, h}
  * @param mat  the 3x3 transform
  */
-extern "C" void c2DRender_drawRect1(void* self, sLmQuadVtx_E118* verts, float* rect, float* mat)
+extern "C" void c2DRender_drawRect1(c2DRender* self, sLmQuadVtx_E118* verts, float* rect, float* mat)
 {
     sLmQuadVec4_E118* corner0 = &verts[0].pos;
     sLmQuadVec4_E118* corner1 = &verts[1].pos;
@@ -521,7 +522,7 @@ extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
  * @param rect  the rectangle {x, y, w, h}
  * @param mat  the 3x3 transform
  */
-extern "C" void c2DRender_drawRotRect1(void* self, sLmQuadVtx_E118* verts, float* rect, float* mat)
+extern "C" void c2DRender_drawRotRect1(c2DRender* self, sLmQuadVtx_E118* verts, float* rect, float* mat)
 {
     sLmQuadVec4_E118* corner0 = &verts[0].pos;
     sLmQuadVec4_E118* corner1 = &verts[1].pos;
@@ -557,7 +558,7 @@ INCLUDE_ASM("render/lightman", c2DRender_drawRect2);
  * @param rect  the rectangle {x, y, w, h}
  * @param uv  the UV rectangle {u, v, w, h}
  */
-extern "C" void c2DRender_drawRect2(void* self, sLmQuadVtx_E118* vtx, float* rect, float* uv)
+extern "C" void c2DRender_drawRect2(c2DRender* self, sLmQuadVtx_E118* vtx, float* rect, float* uv)
 {
     vtx[0].pos = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
     vtx[0].s = uv[0];
@@ -593,7 +594,7 @@ INCLUDE_ASM("render/lightman", c2DRender_drawRotRect2);
  * @param rect  the rectangle {x, y, w, h}
  * @param uv  the UV rectangle {u, v, w, h}
  */
-extern "C" void c2DRender_drawRotRect2(void* self, sLmQuadVtx_E118* vtx, float* rect, float* uv)
+extern "C" void c2DRender_drawRotRect2(c2DRender* self, sLmQuadVtx_E118* vtx, float* rect, float* uv)
 {
     vtx[0].pos = sLmQuadVec4_E118(rect[0], rect[1], 0.0f, 1.0f);
     vtx[0].s = uv[0] + uv[2];
@@ -632,7 +633,7 @@ extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
  * @param uv  the UV rectangle {u, v, w, h}
  * @param mat  the 3x3 transform
  */
-extern "C" void c2DRender_drawRect3(void* self, sLmQuadVtx_E118* vtx, float* rect, float* uv, float* mat)
+extern "C" void c2DRender_drawRect3(c2DRender* self, sLmQuadVtx_E118* vtx, float* rect, float* uv, float* mat)
 {
     sLmQuadVec4_E118* corner0 = &vtx[0].pos;
     sLmQuadVec4_E118* corner1 = &vtx[1].pos;
@@ -679,7 +680,7 @@ extern "C" sLmQuadVec4_E118 func_0038E0A8(float* p, float* m);
  * @param uv  the UV rectangle {u, v, w, h}
  * @param mat  the 3x3 transform
  */
-extern "C" void c2DRender_drawRotRect3(void* self, sLmQuadVtx_E118* vtx, float* rect, float* uv, float* mat)
+extern "C" void c2DRender_drawRotRect3(c2DRender* self, sLmQuadVtx_E118* vtx, float* rect, float* uv, float* mat)
 {
     sLmQuadVec4_E118* corner0 = &vtx[0].pos;
     sLmQuadVec4_E118* corner1 = &vtx[1].pos;
@@ -750,7 +751,7 @@ struct sLmQuadCtx {
  * @param col  the colour {a, r, g, b} in 0..1
  * @param z  the depth
  */
-extern "C" void c2DRender_drawRect4(void* self, float* topLeft, float* bottomRight, float* col, float z)
+extern "C" void c2DRender_drawRect4(c2DRender* self, float* topLeft, float* bottomRight, float* col, float z)
 {
     sLmQuadVtx verts[4];
     float zero = 0.0f;
@@ -797,7 +798,7 @@ INCLUDE_ASM("render/lightman", c2DRender_drawLine);
  * @param end  the second end point
  * @param col  the colour {a, r, g, b} in 0..1
  */
-extern "C" void c2DRender_drawLine(void* self, sLmQuadVec4_E118* start, sLmQuadVec4_E118* end, float* col)
+extern "C" void c2DRender_drawLine(c2DRender* self, sLmQuadVec4_E118* start, sLmQuadVec4_E118* end, float* col)
 {
     sLmQuadVtx_E118 verts[2];
     int red = (int)(col[1] * 255.0f);

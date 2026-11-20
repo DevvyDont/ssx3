@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/animcombonode.h"
 #include "object/multiparticle.h"
 #include "object/splinemodifier.h"
 #include "object/physicsmodifier.h"
@@ -940,26 +941,26 @@ struct sMP8C80 {
 // spelling matches.
 // cAnimComboNode::cAnimComboNode(int bucket, tInstanceRecord* pInstance, const tMakeAnimComboData* adata)
 // (SSX On Tour symbols; frame counts are scaled by 1/30, and f0 is then divided by the cAppMan tick rate like ticks2secs).
-extern "C" void* cAnimComboNode_cAnimComboNode1(sMP8C80* self, int bucket, sMPOwner8C80* pInstance, const sMPDesc8C80* adata)
+extern "C" void* cAnimComboNode_cAnimComboNode1(cAnimComboNode* self, int bucket, sMPOwner8C80* pInstance, const sMPDesc8C80* adata)
 {
     cAnimObjectNode_cAnimObjectNode1_8C80((char*)self + 0x18, bucket, 3, pInstance, adata);
-    self->vt54 = D_0048EC28;
-    float* rate = &self->f8;
+    self->mVtbl = (void**)D_0048EC28;
+    float* rate = &self->FromTime2;
     char* pModel = pInstance->p80;
     *rate = (adata->f28 < 0.0f ? adata->f10 : adata->f28) * 0.03333333507180214f;
-    uFloat8C80* life = (uFloat8C80*)&self->fC;
+    uFloat8C80* life = (uFloat8C80*)&self->ToTime2;
     life->v = adata->f2C < 0.0f ? *(float*)(pModel + 0x14) : adata->f2C * 0.03333333507180214f;
     int fps = *(int*)(cAppMan_TheAppMan + 0x10);
-    self->f0 = adata->f30 * 0.03333333507180214f / (float)fps;
-    self->b16 = adata->f34 != 0;
-    self->b17 = adata->f34 < 0;
-    int n = self->n74;
-    sMPElem8C80** slot = &self->elems84;
+    self->AnimSpeed2 = adata->f30 * 0.03333333507180214f / (float)fps;
+    self->Stop = adata->f34 != 0;
+    self->StopInPlace = adata->f34 < 0;
+    int n = self->NumAnimMeshes;
+    sMPElem8C80** slot = (sMPElem8C80**)&self->ComboXform;
     *slot = new (operator_new_tag(n << 6, str_ComboXform, 0x20000000, 0)) sMPElem8C80[n];
-    self->b14 = 0;
-    self->b15 = 0;
-    self->f4 = 0;
-    return self;
+    self->AnimActive2 = 0;
+    self->AnimComplete2 = 0;
+    *(int*)&self->CurrTime2 = 0;
+    return ((sMP8C80*)self);
 }
 #endif
 
@@ -967,7 +968,7 @@ extern "C" void* cAnimComboNode_cAnimComboNode1(sMP8C80* self, int bucket, sMPOw
 INCLUDE_ASM("object/multiparticle", cAnimComboNode_cAnimComboNode);
 #ifdef SKIP_ASM
 extern "C" void* cAnimObjectNode_cAnimObjectNode(void* self, void* a, void* stream);
-extern "C" void cAnimComboNode_setComboXform(void* self);
+extern "C" void cAnimComboNode_setComboXform(cAnimComboNode* self);
 extern char D_0048EC28[];
 extern char str_ComboXform[];
 
@@ -995,17 +996,16 @@ struct sParticle_8DB0 {
  * @param stream  replay frame to read from (On Tour cBxReplayFrame*)
  * @return @p self
  */
-extern "C" void* cAnimComboNode_cAnimComboNode(void* self, void* bucket, void* stream)
+extern "C" void* cAnimComboNode_cAnimComboNode(cAnimComboNode* self, void* bucket, void* stream)
 {
-    char* selfBytes = (char*)self;
-    sParticle_8DB0** pp = (sParticle_8DB0**)(selfBytes + 0x84);
-    cAnimObjectNode_cAnimObjectNode(selfBytes + 0x18, bucket, stream);
-    *(void**)(selfBytes + 0x54) = D_0048EC28;
+    sParticle_8DB0** pp = (sParticle_8DB0**)(((char*)self) + 0x84);
+    cAnimObjectNode_cAnimObjectNode(((char*)self) + 0x18, bucket, stream);
+    self->mVtbl = (void**)D_0048EC28;
     sStreamVE_8DB0* vt = *(sStreamVE_8DB0**)stream;
     vt[2].fn((char*)stream + vt[2].delta, self, 0x18);
-    *pp = new (str_ComboXform, 0x20000000, 0) sParticle_8DB0[*(int*)(selfBytes + 0x74)];
+    *pp = new (str_ComboXform, 0x20000000, 0) sParticle_8DB0[self->NumAnimMeshes];
     cAnimComboNode_setComboXform(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -1025,10 +1025,10 @@ extern char D_0048EC28[];
  *
  * @param flags  destructor flags
  */
-extern "C" void cAnimComboNode__cAnimComboNode(void* self, int flags)
+extern "C" void cAnimComboNode__cAnimComboNode(cAnimComboNode* self, int flags)
 {
-    *(void**)((char*)self + 0x54) = D_0048EC28;
-    void* buf = *(void**)((char*)self + 0x84);
+    self->mVtbl = (void**)D_0048EC28;
+    void* buf = self->ComboXform;
     if (buf != 0) {
         cMemMan_free(buf);
     }
@@ -1056,41 +1056,40 @@ extern "C" int func_0034EBA0(void* p);
  *
  * @return 0 when the frame-update script asks to stop updating, else 1
  */
-extern "C" int cAnimComboNode_updateNode(void* self)
+extern "C" int cAnimComboNode_updateNode(cAnimComboNode* self)
 {
-    char* comboNode = (char*)self;
-    *(float*)(comboNode + 0x3C) = 10000000000.0f;
-    *(float*)(comboNode + 0x40) = 10000000000.0f;
-    if (*(signed char*)(comboNode + 0x15) == 0) {
-        if (*(signed char*)(comboNode + 0x14) != 0) {
-            int countdown = *(int*)(comboNode + 0x24);
+    self->FrameStart = 10000000000.0f;
+    self->FrameEnd = 10000000000.0f;
+    if (*(signed char*)&self->AnimComplete2 == 0) {
+        if (*(signed char*)&self->AnimActive2 != 0) {
+            int countdown = self->Delay;
             if (countdown >= 0) {
                 if (countdown > 0) {
-                    *(int*)(comboNode + 0x24) = countdown - 1;
+                    self->Delay = countdown - 1;
                 } else {
-                    float pos = *(float*)(comboNode + 0x4) + *(float*)(comboNode + 0x0);
-                    float max = *(float*)(comboNode + 0xC);
-                    float frameTime = *(float*)(comboNode + 0x34);
-                    *(float*)(comboNode + 0x3C) = frameTime;
-                    *(float*)(comboNode + 0x40) = frameTime;
-                    *(float*)(comboNode + 0x4) = pos;
+                    float pos = self->CurrTime2 + self->AnimSpeed2;
+                    float max = self->ToTime2;
+                    float frameTime = self->CurrTime;
+                    self->FrameStart = frameTime;
+                    self->FrameEnd = frameTime;
+                    self->CurrTime2 = pos;
                     if (max <= pos) {
-                        *(float*)(comboNode + 0x4) = max;
-                        if (*(signed char*)(comboNode + 0x16) != 0) {
-                            *(signed char*)(comboNode + 0x15) = 1;
+                        self->CurrTime2 = max;
+                        if (*(signed char*)&self->Stop != 0) {
+                            *(signed char*)&self->AnimComplete2 = 1;
                         }
-                        *(signed char*)(comboNode + 0x14) = 0;
+                        *(signed char*)&self->AnimActive2 = 0;
                     }
-                    if (func_0034EBA0(comboNode + 0x34) == 0) {
+                    if (func_0034EBA0(((char*)self) + 0x34) == 0) {
                         return 0;
                     }
                 }
             }
         } else {
-            cAnimObjectNode_updateNode(comboNode + 0x18);
+            cAnimObjectNode_updateNode(((char*)self) + 0x18);
             return 1;
         }
-        *(unsigned short*)(comboNode + 0x5A) |= 1;
+        self->Flags |= 1;
     }
     return 1;
 }
@@ -1114,7 +1113,7 @@ extern "C" void cMoveNode_updateIntersectInfo(void* self, void* out);
  *
  * @param out  the intersection info (On Tour tIntersectInfo& intInfo)
  */
-extern "C" void cAnimComboNode_updateIntersectInfo(void* self, void* out)
+extern "C" void cAnimComboNode_updateIntersectInfo(cAnimComboNode* self, void* out)
 {
     cMoveNode_updateIntersectInfo((char*)self + 0x48, out);
     *(sMpQuad*)((char*)out + 0x20) = t4vect_Zero;
@@ -1126,7 +1125,7 @@ extern "C" void cAnimComboNode_updateIntersectInfo(void* self, void* out)
 INCLUDE_ASM("object/multiparticle", cAnimComboNode_signal);
 #ifdef SKIP_ASM
 extern "C" void cAnimObjectNode_signal(void*);
-extern "C" void cAnimComboNode_setComboXform(void*);
+extern "C" void cAnimComboNode_setComboXform(cAnimComboNode*);
 
 /**
  * Handles a signal on an anim combo node: signal 130 starts the second time range.
@@ -1137,14 +1136,14 @@ extern "C" void cAnimComboNode_setComboXform(void*);
  *
  * @param msg  signal id
  */
-extern "C" void cAnimComboNode_signal(void* self, int msg)
+extern "C" void cAnimComboNode_signal(cAnimComboNode* self, int msg)
 {
     if (msg == 130) {
-        if (*(unsigned short*)((char*)self + 0x14) == 0) {
-            *(float*)((char*)self + 0x10) = *(float*)((char*)self + 0x38);
+        if (*(unsigned short*)&self->AnimActive2 == 0) {
+            self->ComboTime = self->CacheTime;
             cAnimComboNode_setComboXform(self);
-            *(char*)((char*)self + 0x14) = 1;
-            *(float*)((char*)self + 0x4) = *(float*)((char*)self + 0x8);
+            self->AnimActive2 = 1;
+            self->CurrTime2 = self->FromTime2;
         }
     } else {
         cAnimObjectNode_signal((char*)self + 0x18);
@@ -1222,7 +1221,7 @@ struct sMp_9030 {
  * @param vself  the anim combo node
  */
 // Gathers the world matrices of the model's active parts into the matrix buffer at 0x84.
-extern "C" void cAnimComboNode_setComboXform(void* vself)
+extern "C" void cAnimComboNode_setComboXform(cAnimComboNode* vself)
 {
     sMp_9030* self = (sMp_9030*)vself;
     if (self->count <= 0) {
@@ -1252,9 +1251,9 @@ extern "C" void cInstanceNode_loseFocus(void*);
  * Calls cInstanceNode_loseFocus() on the node at offset 0x48 only while byte 0x15 is 0; the update sets that
  * byte when the animation reaches its end with byte 0x16 set.
  */
-extern "C" void cAnimComboNode_loseFocus(void* self)
+extern "C" void cAnimComboNode_loseFocus(cAnimComboNode* self)
 {
-    if (*(signed char*)((char*)self + 0x15) == 0) {
+    if (*(signed char*)&self->AnimComplete2 == 0) {
         cInstanceNode_loseFocus((char*)self + 0x48);
     }
 }
@@ -1277,7 +1276,7 @@ extern "C" void cAnimObjectNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param obj  replay stream to write to
  */
-extern "C" void cAnimComboNode_writeToReplayFrame(void* self, void* obj)
+extern "C" void cAnimComboNode_writeToReplayFrame(cAnimComboNode* self, void* obj)
 {
     cAnimObjectNode_writeToReplayFrame((char*)self + 0x18, obj);
     sVEntry003590F0* vt = *(sVEntry003590F0**)obj;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/fencenode.h"
 #include "ui/uithing.h"
 #include "bx/math3d.h"
 #include "world/world.h"
@@ -1130,9 +1131,9 @@ static inline float fabs_C8E8(float x)
 extern void* cFenceNode_vtbl[];
 extern sVec4_C8E8 t4vect_XAxis;
 extern "C" void* cInstanceNode_cInstanceNode1(void* self, int a1, int type, void* obj);
-extern "C" void cFenceNode_setupFence(void* self);
-extern "C" void cFenceNode_setForce(void* self, float dt);
-extern "C" void cFenceNode_makeNeighbour(char* self, char* obj, int flag);
+extern "C" void cFenceNode_setupFence(cFenceNode* self);
+extern "C" void cFenceNode_setForce(cFenceNode* self, float dt);
+extern "C" void cFenceNode_makeNeighbour(cFenceNode* self, char* obj, int flag);
 
 /**
  * Constructs a fence node (node type 9) for a fence instance that was hit, and sets it swinging.
@@ -1150,23 +1151,23 @@ extern "C" void cFenceNode_makeNeighbour(char* self, char* obj, int flag);
  * @param info  intersect info of the hit
  * @return self
  */
-extern "C" cFenceNode_C8E8* cFenceNode_cFenceNode1(cFenceNode_C8E8* self, int bucket, void* pInst, tMakeFenceData_C8E8* tdata, char* info)
+extern "C" cFenceNode_C8E8* cFenceNode_cFenceNode1(cFenceNode* self, int bucket, void* pInst, tMakeFenceData_C8E8* tdata, char* info)
 {
     float force;
-    cInstanceNode_cInstanceNode1(self, bucket, 9, pInst);
-    self->State.w[0] = 0xFFFFFFFF;
-    self->vtable = cFenceNode_vtbl;
-    new (self->Verts) t3Vector_C8E8[16];
-    self->State = *tdata;
-    self->field_0x30 = 0;
-    self->field_0x2c = 0;
-    self->field_0x34 = 0;
-    self->State.w[0] = 0xFFFFFFFF;
+    cInstanceNode_cInstanceNode1(((cFenceNode_C8E8*)self), bucket, 9, pInst);
+    ((unsigned int*)&self->FenceData)[0] = 0xFFFFFFFF;
+    self->mVtbl = cFenceNode_vtbl;
+    new (((t3Vector_C8E8*)&self->Verts[0])) t3Vector_C8E8[16];
+    (*(tMakeFenceData_C8E8*)&self->FenceData) = *tdata;
+    *(int*)&self->ForceMax = 0;
+    *(int*)&self->Force = 0;
+    *(int*)&self->ForceStep = 0;
+    ((unsigned int*)&self->FenceData)[0] = 0xFFFFFFFF;
     cFenceNode_setupFence(self);
-    self->field_0x38 = 0;
-    self->field_0x3c = 0;
+    self->NextPropTime = 0;
+    self->PrevPropTime = 0;
     if (self->GridMesh != 0) {
-        sVec4_C8E8 dir = Normalize_C8E8(MulMat_C8E8((sMat_C8E8*)(self->Instance + 0x10), &t4vect_XAxis));
+        sVec4_C8E8 dir = Normalize_C8E8(MulMat_C8E8((sMat_C8E8*)((char*)self->Instance + 0x10), &t4vect_XAxis));
         float speed = fabs_C8E8(*(float*)(info + 0x30));
         force = Dot_C8E8(dir, *(sVec4_C8E8*)(info + 0x10));
         force = speed * (force * 0.0010000000474974513f);
@@ -1175,11 +1176,11 @@ extern "C" cFenceNode_C8E8* cFenceNode_cFenceNode1(cFenceNode_C8E8* self, int bu
         force = force * 0.0010000000474974513f * fabs_C8E8(*(float*)(info + 0x30));
     }
     cFenceNode_setForce(self, force);
-    if (self->NextInstance != 0)
-        cFenceNode_makeNeighbour((char*)self, self->NextInstance, 1);
-    if (self->PrevInstance != 0)
-        cFenceNode_makeNeighbour((char*)self, self->PrevInstance, 0);
-    return self;
+    if ((char*)self->NextInstance != 0)
+        cFenceNode_makeNeighbour(self, (char*)self->NextInstance, 1);
+    if ((char*)self->PrevInstance != 0)
+        cFenceNode_makeNeighbour(self, (char*)self->PrevInstance, 0);
+    return ((cFenceNode_C8E8*)self);
 }
 #endif
 
@@ -1209,8 +1210,8 @@ struct sFlagSet_CAB8 {
 };
 
 extern "C" void* cInstanceNode_cInstanceNode1(void* self, int a1, int type, void* obj);
-extern "C" void cFenceNode_setupFence(void* self);
-extern "C" void cFenceNode_setForce(void* self, float dt);
+extern "C" void cFenceNode_setupFence(cFenceNode* self);
+extern "C" void cFenceNode_setForce(cFenceNode* self, float dt);
 extern void* cFenceNode_vtbl[];
 
 // PORT: the unit declares this as void (callers ignore the result); bound by asm label.
@@ -1240,8 +1241,8 @@ extern "C" sFlagSet_CAB8* cFenceNode_cFenceNode2_ctor(sFlagSet_CAB8* self, int b
     self->field_0x2c = 0;
     self->field_0x34 = 0;
     self->block.w[0] = 0xFFFFFFFF;
-    cFenceNode_setupFence(self);
-    cFenceNode_setForce(self, dt);
+    cFenceNode_setupFence((cFenceNode*)self);
+    cFenceNode_setForce((cFenceNode*)self, dt);
     self->field_0x38 = 4;
     self->field_0x3c = 4;
     return self;
@@ -1266,11 +1267,10 @@ struct sFlagSetVEntryCB80 {
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cFenceNode__cFenceNode(void* self, int flags)
+extern "C" void cFenceNode__cFenceNode(cFenceNode* self, int flags)
 {
-    char* fenceNode = (char*)self;
-    *(void***)(fenceNode + 0xC) = cFenceNode_vtbl;
-    void* gridMesh = *(void**)(fenceNode + 0x40);
+    self->mVtbl = cFenceNode_vtbl;
+    void* gridMesh = self->GridMesh;
     if (gridMesh != 0) {
         char* mgr = cGraphicsMan_TheGraphicsMan;
         sFlagSetVEntryCB80* vt = *(sFlagSetVEntryCB80**)(mgr + 0x10D8);
@@ -1284,7 +1284,7 @@ extern "C" void cFenceNode__cFenceNode(void* self, int flags)
 INCLUDE_ASM("object/flagset", cFenceNode_cFenceNode);
 #ifdef SKIP_ASM
 extern "C" void* cInstanceNode_cInstanceNode(void* self, void* a1, void* stream);
-extern "C" void cFenceNode_setupFence(void* self);
+extern "C" void cFenceNode_setupFence(cFenceNode* self);
 extern void* cFenceNode_vtbl[];
 
 struct sFlagSetVEntry_CBE8 {
@@ -1307,16 +1307,16 @@ struct sFlagElem_CBE8 {
  * @param stream  the replay frame (On Tour cBxReplayFrame* data)
  * @return @p self
  */
-extern "C" void* cFenceNode_cFenceNode(void* self, void* bucket, void* stream)
+extern "C" void* cFenceNode_cFenceNode(cFenceNode* self, void* bucket, void* stream)
 {
     cInstanceNode_cInstanceNode(self, bucket, stream);
-    *(unsigned int*)((char*)self + 0x1C) = 0xFFFFFFFF;
-    *(void***)((char*)self + 0xC) = cFenceNode_vtbl;
+    self->FenceData.InstId = 0xFFFFFFFF;
+    self->mVtbl = cFenceNode_vtbl;
     new ((char*)self + 0x40) sFlagElem_CBE8[16];
     sFlagSetVEntry_CBE8* vtEntry = &(*(sFlagSetVEntry_CBE8**)stream)[2];
     vtEntry->fn((char*)stream + vtEntry->delta, (char*)self + 0x1C, 36);
     cFenceNode_setupFence(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -1340,7 +1340,7 @@ public:
 
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cFenceNode_cFenceNode2(void* self, int a1, void* obj, void* pos, int flag, float force);
-extern "C" void cFenceNode_neighbourCollide(void* self, int flag, float force);
+extern "C" void cFenceNode_neighbourCollide(cFenceNode* self, int flag, float force);
 extern char str_Fence_b[];
 
 // PORT: SN abs.s asm helper (PS2 FPU).
@@ -1363,19 +1363,19 @@ static inline float fabs_34CC80(float x)
  * @param obj  neighbour instance record (NextInstance or PrevInstance)
  * @param flag  1 for the next neighbour, 0 for the previous
  */
-extern "C" void cFenceNode_makeNeighbour(char* self, char* obj, int flag)
+extern "C" void cFenceNode_makeNeighbour(cFenceNode* self, char* obj, int flag)
 {
-    if (*(int*)(self + 0x40) == 0) {
+    if ((int)self->GridMesh == 0) {
         return;
     }
     if (obj == 0) {
         return;
     }
     float force;
-    if (*(float*)(self + 0x34) < 0.0f) {
-        force = *(float*)(self + 0x30) * 0.4f;
+    if (self->ForceStep < 0.0f) {
+        force = self->ForceMax * 0.4f;
     } else {
-        force = *(float*)(self + 0x30) * -0.4f;
+        force = self->ForceMax * -0.4f;
     }
     cFlagObj_CC80* node = *(cFlagObj_CC80**)(obj + 0xC);
     if (node != 0) {
@@ -1386,7 +1386,7 @@ extern "C" void cFenceNode_makeNeighbour(char* self, char* obj, int flag)
             return;
         }
         if (flag != 0) {
-            char* neighbor = *(char**)(self + 0x104);
+            char* neighbor = (char*)self->NextInstance;
             if (neighbor == 0) {
                 return;
             }
@@ -1394,9 +1394,9 @@ extern "C" void cFenceNode_makeNeighbour(char* self, char* obj, int flag)
             if (neighborNode == 0) {
                 return;
             }
-            cFenceNode_neighbourCollide(neighborNode, flag, force);
+            cFenceNode_neighbourCollide((cFenceNode*)neighborNode, flag, force);
         } else {
-            char* neighbor = *(char**)(self + 0x108);
+            char* neighbor = (char*)self->PrevInstance;
             if (neighbor == 0) {
                 return;
             }
@@ -1404,11 +1404,11 @@ extern "C" void cFenceNode_makeNeighbour(char* self, char* obj, int flag)
             if (neighborNode == 0) {
                 return;
             }
-            cFenceNode_neighbourCollide(neighborNode, 0, force);
+            cFenceNode_neighbourCollide((cFenceNode*)neighborNode, 0, force);
         }
     } else if (0.25f <= fabs_34CC80(force)) {
         void* fence = cMemMan_alloc(268, str_Fence_b, 0x20000000, 0);
-        cFenceNode_cFenceNode2(fence, 1, obj, self + 0x1C, flag, force);
+        cFenceNode_cFenceNode2(fence, 1, obj, ((char*)self) + 0x1C, flag, force);
     }
 }
 #endif
@@ -1416,7 +1416,7 @@ extern "C" void cFenceNode_makeNeighbour(char* self, char* obj, int flag)
 //100%
 INCLUDE_ASM("object/flagset", cFenceNode_neighbourCollide);
 #ifdef SKIP_ASM
-extern "C" void cFenceNode_setForce(void* self, float dt);
+extern "C" void cFenceNode_setForce(cFenceNode* self, float dt);
 
 /**
  * Applies a force arriving from a neighbouring fence and arms the propagation timer for that side.
@@ -1427,16 +1427,16 @@ extern "C" void cFenceNode_setForce(void* self, float dt);
  * @param on  1 when the force came through the next neighbour, 0 for the previous
  * @param dt  force to apply
  */
-extern "C" void cFenceNode_neighbourCollide(void* self, int on, float dt)
+extern "C" void cFenceNode_neighbourCollide(cFenceNode* self, int on, float dt)
 {
     cFenceNode_setForce(self, dt);
     if (on) {
-        if (*(int*)((char*)self + 0x38) == 0) {
-            *(int*)((char*)self + 0x38) = 4;
+        if (self->NextPropTime == 0) {
+            self->NextPropTime = 4;
         }
     } else {
-        if (*(int*)((char*)self + 0x3C) == 0) {
-            *(int*)((char*)self + 0x3C) = 4;
+        if (self->PrevPropTime == 0) {
+            self->PrevPropTime = 4;
         }
     }
 }
@@ -1445,8 +1445,8 @@ extern "C" void cFenceNode_neighbourCollide(void* self, int on, float dt)
 //100%
 INCLUDE_ASM("object/flagset", cFenceNode_update);
 #ifdef SKIP_ASM
-extern "C" void cFenceNode_makeNeighbour(char* self, char* obj, int flag);
-extern "C" void cFenceNode_updateGrid(void* self);
+extern "C" void cFenceNode_makeNeighbour(cFenceNode* self, char* obj, int flag);
+extern "C" void cFenceNode_updateGrid(cFenceNode* self);
 
 struct sFlagVE_34CE48 {
     short delta;
@@ -1470,41 +1470,41 @@ static inline float fabs_34CE48(float x)
  * of a
  * swing the amplitude halves; once it and the angle are near 0 the node expires (slot 34).
  */
-extern "C" void cFenceNode_update(char* self)
+extern "C" void cFenceNode_update(cFenceNode* self)
 {
-    if (*(int*)(self + 0x38) > 0) {
-        if (--*(int*)(self + 0x38) == 0) {
-            cFenceNode_makeNeighbour(self, *(char**)(self + 0x104), 1);
+    if (self->NextPropTime > 0) {
+        if (--self->NextPropTime == 0) {
+            cFenceNode_makeNeighbour(self, (char*)self->NextInstance, 1);
         }
     }
-    if (*(int*)(self + 0x3C) > 0) {
-        if (--*(int*)(self + 0x3C) == 0) {
-            cFenceNode_makeNeighbour(self, *(char**)(self + 0x108), 0);
+    if (self->PrevPropTime > 0) {
+        if (--self->PrevPropTime == 0) {
+            cFenceNode_makeNeighbour(self, (char*)self->PrevInstance, 0);
         }
     }
-    char* osc = self + 0x1C;
-    *(float*)(self + 0x2C) += *(float*)(self + 0x34);
-    if (*(float*)(self + 0x30) < 0.01f && fabs_34CE48(*(float*)(osc + 0x10)) < 0.01f) {
-        sFlagVE_34CE48* vt = *(sFlagVE_34CE48**)(self + 0xC);
-        vt[34].fn(self + vt[34].delta, 1);
+    char* osc = ((char*)self) + 0x1C;
+    self->Force += self->ForceStep;
+    if (self->ForceMax < 0.01f && fabs_34CE48(*(float*)(osc + 0x10)) < 0.01f) {
+        sFlagVE_34CE48* vt = (sFlagVE_34CE48*)self->mVtbl;
+        vt[34].fn(((char*)self) + vt[34].delta, 1);
         return;
     }
-    if (0.0f <= *(float*)(self + 0x34)) {
-        if (*(float*)(self + 0x2C) >= *(float*)(self + 0x30)) {
-            float amplitude = *(float*)(self + 0x30);
-            *(float*)(self + 0x2C) = amplitude;
+    if (0.0f <= self->ForceStep) {
+        if (self->Force >= self->ForceMax) {
+            float amplitude = self->ForceMax;
+            self->Force = amplitude;
             float halfAmp = amplitude * 0.5f;
-            *(float*)(self + 0x30) = halfAmp;
-            *(float*)(self + 0x34) = -halfAmp * 0.1f;
+            self->ForceMax = halfAmp;
+            self->ForceStep = -halfAmp * 0.1f;
         }
     } else {
-        float amplitude = *(float*)(self + 0x30);
+        float amplitude = self->ForceMax;
         float na = -amplitude;
-        if (*(float*)(self + 0x2C) <= na) {
-            *(float*)(self + 0x2C) = na;
+        if (self->Force <= na) {
+            self->Force = na;
             float halfAmp = amplitude * 0.5f;
-            *(float*)(self + 0x30) = halfAmp;
-            *(float*)(self + 0x34) = halfAmp * 0.1f;
+            self->ForceMax = halfAmp;
+            self->ForceStep = halfAmp * 0.1f;
         }
     }
     cFenceNode_updateGrid(self);
@@ -1596,7 +1596,7 @@ struct sFlagSet_CF98 {
  *
  * @param fenceNode  the fence node
  */
-extern "C" void cFenceNode_updateGrid(void* fenceNode)
+extern "C" void cFenceNode_updateGrid(cFenceNode* fenceNode)
 {
     sFlagSet_CF98* self = (sFlagSet_CF98*)fenceNode;
     if (self->mesh == 0) {
@@ -1632,7 +1632,7 @@ extern "C" void cFenceNode_updateGrid(void* fenceNode)
 INCLUDE_ASM("object/flagset", cFenceNode_setupFence);
 #ifdef SKIP_ASM
 extern char* cGraphicsMan_TheGraphicsMan;
-extern "C" void cFenceNode_updateGrid(void* self);
+extern "C" void cFenceNode_updateGrid(cFenceNode* self);
 
 struct sFsV3_D1E8 {
     float x, y, z;
@@ -1708,7 +1708,7 @@ struct sFlagSet_D1E8 {
  *
  * @param fenceNode  the fence node
  */
-extern "C" void cFenceNode_setupFence(void* fenceNode)
+extern "C" void cFenceNode_setupFence(cFenceNode* fenceNode)
 {
     sFlagSet_D1E8* self = (sFlagSet_D1E8*)fenceNode;
     self->obj104 = 0;
@@ -1741,14 +1741,14 @@ extern "C" void cFenceNode_setupFence(void* fenceNode)
     }
     sFsMesh_D1E8* gridMesh = self->mesh;
     gridMesh->vt[6].fn((char*)gridMesh + gridMesh->vt[6].delta, pos, col, uv);
-    cFenceNode_updateGrid(self);
+    cFenceNode_updateGrid((cFenceNode*)self);
 }
 #endif
 
 //100%
 INCLUDE_ASM("object/flagset", cFenceNode_onCollide);
 #ifdef SKIP_ASM
-extern "C" void cFenceNode_setForce(void* self, float dt);
+extern "C" void cFenceNode_setForce(cFenceNode* self, float dt);
 
 struct sFsVec4_D650 {
     float x, y, z, w;
@@ -1782,15 +1782,14 @@ static inline float fsDot_D650(const sFsVec4_D650& a, const sFsVec4_D650& b)
  *
  * @param obj  the collision info (On Tour const tCollideInfo* tc)
  */
-extern "C" void cFenceNode_onCollide(void* self, void* obj)
+extern "C" void cFenceNode_onCollide(cFenceNode* self, void* obj)
 {
-    char* node = (char*)self;
     char* hitInfo = (char*)obj;
-    if (*(float*)(node + 0x30) >= 1.0f) return;
+    if (self->ForceMax >= 1.0f) return;
     float dot = fsDot_D650(*(sFsVec4_D650*)(hitInfo + 0x20), *(sFsVec4_D650*)(hitInfo + 0x10));
     cFenceNode_setForce(self, dot * 0.0010000000474974513f * *(float*)(hitInfo + 0x30));
-    if (*(int*)(node + 0x38) == 0) *(int*)(node + 0x38) = 4;
-    if (*(int*)(node + 0x3C) == 0) *(int*)(node + 0x3C) = 4;
+    if (self->NextPropTime == 0) self->NextPropTime = 4;
+    if (self->PrevPropTime == 0) self->PrevPropTime = 4;
 }
 #endif
 
@@ -1820,7 +1819,7 @@ static inline float fabs_34D6F0(float x)
  * @param vself  the fence node
  * @param force  force to add (sign gives the direction when at rest)
  */
-extern "C" void cFenceNode_setForce(void* vself, float force)
+extern "C" void cFenceNode_setForce(cFenceNode* vself, float force)
 {
     sFlag34D6F0* self = (sFlag34D6F0*)vself;
     self->wind += fabs_34D6F0(force);
@@ -1849,15 +1848,15 @@ INCLUDE_ASM("object/flagset", cFenceNode_render);
  * loaded.
  */
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
-extern "C" void cFenceNode_render(char* self)
+extern "C" void cFenceNode_render(cFenceNode* self)
 {
-    if (!IsLoaded_34B9B0(*(sModel_34B9B0**)(self + 0x18))) {
+    if (!IsLoaded_34B9B0((sModel_34B9B0*)self->Instance)) {
         return;
     }
     char* ctx = cGraphicsMan_TheGraphicsMan;
     float one = 1.0f;
     {
-        sModel_34B9B0* model = *(sModel_34B9B0**)(self + 0x18);
+        sModel_34B9B0* model = (sModel_34B9B0*)self->Instance;
         sVE93_34B9B0* vt = *(sVE93_34B9B0**)(ctx + 0x10D8);
         char* thisp = ctx + vt[93].delta;
         sVec4_34B9B0 boxMin(*(float*)((char*)model + 0x60), *(float*)((char*)model + 0x64), *(float*)((char*)model + 0x68), one);
@@ -1873,9 +1872,9 @@ extern "C" void cFenceNode_render(char* self)
     sRS_34B9B0* renderState = TOP_34B9B0(ctx);
     TOP_34B9B0(ctx) = renderState + 1;
     ((int*)renderState)[6] = (((int*)renderState)[6] & ~0x7C) | 0x14;
-    sModel_34B9B0* model = *(sModel_34B9B0**)(self + 0x18);
+    sModel_34B9B0* model = (sModel_34B9B0*)self->Instance;
     char* pos = (char*)model + 0x10;
-    char* gridMesh = *(char**)(self + 0x40);
+    char* gridMesh = (char*)self->GridMesh;
     if (gridMesh != 0) {
         sVE7_34B9B0* hv = *(sVE7_34B9B0**)(gridMesh + 4);
         hv[7].fn(gridMesh + hv[7].delta, pos, *(void**)((char*)model + 0x94), 0);
@@ -1903,7 +1902,7 @@ extern "C" void cInstanceNode_writeToReplayFrame(void* self, void* stream);
  *
  * @param stream  the replay frame (On Tour cBxReplayFrame* data)
  */
-extern "C" void cFenceNode_writeToReplayFrame(void* self, void* stream)
+extern "C" void cFenceNode_writeToReplayFrame(cFenceNode* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     sSerVEntry_0034D960* vt = *(sSerVEntry_0034D960**)stream;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "object/animcombonode.h"
 #include "world/worldview.h"
 #include "object/uvscrollmodifier.h"
 #include "object/transformmodifier.h"
@@ -7604,18 +7605,18 @@ INCLUDE_ASM("object/railmodifier", cAnimComboNode_getAnimDir);
  *
  * @return 1 or -1
  */
-extern "C" int cAnimComboNode_getAnimDir(void* self)
+extern "C" int cAnimComboNode_getAnimDir(cAnimComboNode* self)
 {
     int direction;
-    if (*(signed char*)((char*)self + 0x14) != 0) {
+    if (*(signed char*)&self->AnimActive2 != 0) {
         direction = -1;
-        if (*(float*)((char*)self + 0x0) >= 0.0f) {
+        if (self->AnimSpeed2 >= 0.0f) {
             direction = 1;
         }
         return direction;
     }
     direction = -1;
-    if (*(float*)((char*)self + 0x28) >= 0.0f) {
+    if (self->AnimSpeed >= 0.0f) {
         direction = 1;
     }
     return direction;
