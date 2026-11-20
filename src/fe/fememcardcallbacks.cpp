@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/fememcard.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -66,7 +67,7 @@ int GetHashValue32(char* str);
 extern void* cFEMemCard_mInstance;
 extern char str_kT_MEMOVLoadDone[];
 extern char str_kT_CMNContinue[];
-extern "C" void cFEMemCard_SetLoadPressed(void*, int);
+extern "C" void cFEMemCard_SetLoadPressed(cFEMemCard*, int);
 
 struct sVEntryR1D67C8 {
     short delta;
@@ -93,7 +94,7 @@ struct sVEntryVR1D67C8 {
  */
 extern "C" void cFEMemCard_callbackReadSuccess(void)
 {
-    cFEMemCard_SetLoadPressed(cFEMemCard_mInstance, 0);
+    cFEMemCard_SetLoadPressed((cFEMemCard*)cFEMemCard_mInstance, 0);
     char* fe = (char*)cFEMemCard_mInstance;
     *(int*)(fe + 0x1B4) = 1;
     *(int*)(fe + 0x1A8) = 0;
@@ -1349,24 +1350,23 @@ public:
  * @param passUpdate  passUpdate: nonzero lets updates pass to the screen below
  * @param snowFlake  nonzero for the snowflake variant
  */
-extern "C" void cFEMemCard_getPopup(void* self_, int displayText, int yesOnly, int noButtons, int layerOffset, int passUpdate, int snowFlake)
+extern "C" void cFEMemCard_getPopup(cFEMemCard* self_, int displayText, int yesOnly, int noButtons, int layerOffset, int passUpdate, int snowFlake)
 {
-    char* self = (char*)self_;
     if (*(int*)((char*)cFEMemCard_mInstance + 0x19C) != 22) {
-        *(int*)(self + 0x210) = 0;
+        self_->mIsStatusPopupOn = 0;
     }
-    cPopup_8530* existingPopup = *(cPopup_8530**)(self + 0x218);
+    cPopup_8530* existingPopup = (cPopup_8530*)self_->mStatusPopup;
     if (existingPopup != 0) {
         existingPopup->v28(displayText, yesOnly, noButtons, layerOffset, passUpdate, snowFlake);
     } else {
         void* mem = cMemMan_alloc(3068, str_cFEPopupConfirm, 0x100, 0);
         void* engine = *(void**)((char*)cFEMemCard_mInstance + 0x10);
         cPopup_8530* n = (cPopup_8530*)cFEPopupConfirm_cFEPopupConfirm_8530(mem, engine, cFEMemCard_mInstance, displayText, yesOnly, noButtons, layerOffset, passUpdate, snowFlake);
-        *(cPopup_8530**)(self + 0x218) = n;
-        cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, n);
+        self_->mStatusPopup = (cFEPopupConfirm*)n;
+        cUIStateStack_pushPopup((char*)self_->mpEngine + 0x18, n);
     }
     if (*(int*)((char*)cFEMemCard_mInstance + 0x19C) == 1) {
-        (*(cPopup_8530**)(self + 0x218))->v25(1);
+        ((cPopup_8530*)self_->mStatusPopup)->v25(1);
     }
 }
 #endif
@@ -1415,19 +1415,19 @@ struct sVEntry001D86B0 {
     void (*fn)(void*);
 };
 
-extern "C" void cFEMemCard_SetLoadPressed(void*, int);
+extern "C" void cFEMemCard_SetLoadPressed(cFEMemCard*, int);
 
 /**
  * Starts the load: records the load request, sets +0x1A8 and screen state 5 (loading), and shows the status popup.
  *
  * Calls cFEMemCard_SetLoadPressed(@p self, 1), then vtable slot 47 (cFEMemCard_displayStatusPopup).
  */
-extern "C" void cFEMemCard_startLoad(void* self)
+extern "C" void cFEMemCard_startLoad(cFEMemCard* self)
 {
     cFEMemCard_SetLoadPressed(self, 1);
-    *(int*)((char*)self + 0x1A8) = 1;
-    sVEntry001D86B0* vt = *(sVEntry001D86B0**)((char*)self + 8);
-    *(int*)((char*)self + 0x1C0) = 5;
+    self->mIsProcessing = 1;
+    sVEntry001D86B0* vt = (sVEntry001D86B0*)self->mVtbl;
+    self->mState = 5;
     vt[47].fn((char*)self + vt[47].delta);
 }
 #endif
@@ -1437,7 +1437,7 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_onPopupEvent);
 #ifdef SKIP_ASM
 extern void* cFEMemCard_mInstance;
 extern "C" void* cSSXApp_getMCManager(void* app);
-extern "C" void cFEMemCard_SetLoadPressed(void*, int);
+extern "C" void cFEMemCard_SetLoadPressed(cFEMemCard*, int);
 extern "C" void cFEMemCard_callbackSaveFileCorrupt(void);
 extern "C" void cUIStateStack_pop(void* list, int a1);
 
@@ -1601,7 +1601,7 @@ extern "C" void cFEMemCard_onPopupEvent(void* self_, int popup, int button)
             break;
         case 16:
             *(int*)(self + 0x1E8) = 0;
-            cFEMemCard_SetLoadPressed(self, 0);
+            cFEMemCard_SetLoadPressed((cFEMemCard*)self, 0);
             if (*(int*)(self + 0x1DC) != 0) {
                 *(int*)(self + 0x1A8) = 1;
             } else {
@@ -1655,7 +1655,7 @@ extern "C" void cFEMemCard_onPopupEvent(void* self_, int popup, int button)
 //100%
 INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_cancel);
 #ifdef SKIP_ASM
-extern "C" void cFEMemCard_SetLoadPressed(void*, int);
+extern "C" void cFEMemCard_SetLoadPressed(cFEMemCard*, int);
 
 /**
  * Cancels the memory-card screen's operation: clears its request words, sets the cancel word and screen state 2.
@@ -1664,18 +1664,18 @@ extern "C" void cFEMemCard_SetLoadPressed(void*, int);
  * words and the load request (cFEMemCard_SetLoadPressed 0); sets the cancel word (+0x1E4) that
  * cFEMemCard_isCancelPressed returns and the screen state (+0x1C0) to 2.
  */
-extern "C" void cFEMemCard_cancel(void* self)
+extern "C" void cFEMemCard_cancel(cFEMemCard* self)
 {
-    *(int*)((char*)self + 0x1A8) = 0;
-    *(int*)((char*)self + 0x1F0) = 0;
-    *(int*)((char*)self + 0x1EC) = 0;
-    *(int*)((char*)self + 0x1B0) = 0;
-    *(int*)((char*)self + 0x1E4) = 1;
+    self->mIsProcessing = 0;
+    self->mIsOverwriteOK = 0;
+    self->mIsRetryPressed = 0;
+    self->mIsLoadWait = 0;
+    self->mIsCancelPressed = 1;
     cFEMemCard_SetLoadPressed(self, 0);
-    *(int*)((char*)self + 0x1C0) = 2;
-    *(int*)((char*)self + 0x1E0) = 0;
-    *(int*)((char*)self + 0x1E8) = 0;
-    *(int*)((char*)self + 0x1DC) = 0;
+    self->mState = 2;
+    self->mIsDeletePressed = 0;
+    self->mIsFormatPressed = 0;
+    self->mIsSavePressed = 0;
 }
 #endif
 
@@ -1722,29 +1722,29 @@ struct sVEntryK1D8C50 {
  * @param input  the UI input (On Tour cUIInput* pInput)
  * @return 1 when left or right was pressed, otherwise 0
  */
-extern "C" int cFEMemCard_onInputBegin(void* self, void* input)
+extern "C" int cFEMemCard_onInputBegin(cFEMemCard* self, void* input)
 {
     int handled = 0;
-    if (*(int*)((char*)self + 0x1A8) == 1)
+    if (self->mIsProcessing == 1)
         return 0;
     sVEntryK1D8C50* vt = *(sVEntryK1D8C50**)((char*)input + 8);
     if (vt[19].fn((char*)input + vt[19].delta)) {
         handled = 1;
-        *(int*)((char*)self + 0x1FC) = handled;
-        if (*(void**)((char*)self + 0x40)) {
-            unsigned short frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(str_left_arr));
+        self->mDoPrevMemCard = handled;
+        if (self->mpScreen) {
+            unsigned short frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_left_arr));
             if (frame != 0xFFFF)
-                cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame, 1);
+                cUIScreen_playFrame(self->mpScreen, frame, 1);
         }
     } else {
         sVEntryK1D8C50* vt2 = *(sVEntryK1D8C50**)((char*)input + 8);
         if (vt2[20].fn((char*)input + vt2[20].delta)) {
             handled = 1;
-            *(int*)((char*)self + 0x1F8) = handled;
-            if (*(void**)((char*)self + 0x40)) {
-                unsigned short frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(str_right_arr));
+            self->mDoNextMemCard = handled;
+            if (self->mpScreen) {
+                unsigned short frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_right_arr));
                 if (frame != 0xFFFF)
-                    cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame, 1);
+                    cUIScreen_playFrame(self->mpScreen, frame, 1);
             }
         }
     }
@@ -1771,15 +1771,15 @@ extern "C" void cMCOverlayManager_GetMessage(void*, unsigned short*, int);
  * (vtable slot 36) with yes-only, no-buttons and snowflake set, then sets the status-popup flag (+0x210); cFEMemCard_onUpdate
  * refreshes the text every frame while that flag is set.
  */
-extern "C" void cFEMemCard_displayStatusPopup(void* self)
+extern "C" void cFEMemCard_displayStatusPopup(cFEMemCard* self)
 {
     unsigned short buf[800];
     void* obj = cSSXApp_getMCManager(SSXApp);
-    *(int*)((char*)self + 0x19C) = 22;
+    self->mPopupType = 22;
     cMCOverlayManager_GetMessage(obj, buf, 800);
-    sVEntry001D8D68* vt = *(sVEntry001D8D68**)((char*)self + 8);
+    sVEntry001D8D68* vt = (sVEntry001D8D68*)self->mVtbl;
     vt[36].fn((char*)self + vt[36].delta, buf, 1, 1, 0, 0, 1);
-    *(int*)((char*)self + 0x210) = 1;
+    self->mIsStatusPopupOn = 1;
 }
 #endif
 
@@ -1992,9 +1992,9 @@ extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
  * (flag bit 5), picks the first highlightable item; selects that index with cUIMenu_setSelectedByIndex (index 0
  * when none is highlightable) and stores it at +0x1C4.
  */
-extern "C" void cFEMemCard_setMenuHighlight(void* self)
+extern "C" void cFEMemCard_setMenuHighlight(cFEMemCard* self)
 {
-    void* menu = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_onmenu));
+    void* menu = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_onmenu));
     if (menu != 0) {
         void* item = *(void**)((char*)menu + 0xA0);
         int idx = *(unsigned char*)((char*)menu + 0x95);
@@ -2003,10 +2003,10 @@ extern "C" void cFEMemCard_setMenuHighlight(void* self)
         }
         if (idx != 0xFF) {
             cUIMenu_setSelectedByIndex(menu, idx);
-            *(int*)((char*)self + 0x1C4) = idx;
+            self->mSlot = idx;
         } else {
             cUIMenu_setSelectedByIndex(menu, 0);
-            *(int*)((char*)self + 0x1C4) = 0;
+            self->mSlot = 0;
         }
     }
 }
@@ -2031,16 +2031,16 @@ extern "C" void* cSSXApp_getMCManager(void* app);
  *
  * @param on  nonzero when load was pressed
  */
-extern "C" void cFEMemCard_SetLoadPressed(void* self, int on)
+extern "C" void cFEMemCard_SetLoadPressed(cFEMemCard* self, int on)
 {
-    *(int*)((char*)self + 0x1F4) = on;
+    self->mIsLoadPressed = on;
     if (on) {
         char* mcManager = (char*)cSSXApp_getMCManager(SSXApp);
         char* obj = *(char**)(mcManager + 0x434);
         sVEntry001D9308* vt = *(sVEntry001D9308**)obj;
         vt[14].fn(obj + vt[14].delta, *(void**)(mcManager + 0xF8), (char*)self + 0x9C);
     } else {
-        *(short*)((char*)self + 0x9C) = 0;
+        *(short*)&self->mLastLoadFileName[0] = 0;
     }
 }
 #endif
@@ -2061,11 +2061,11 @@ struct sVEntry001D9368 {
  * with 1. Fills vtable entry 31 (+0xFC) of the memory-card states (cFEStateMemCard, cFEStateProfileLoad,
  * cFEStateOptionsDeviceSelect), between the empty update entries and the skip handler.
  */
-extern "C" void cFEMemCard_updateStart(void* self)
+extern "C" void cFEMemCard_updateStart(cFEMemCard* self)
 {
-    if (*(int*)((char*)self + 0x214) != 1) {
-        *(int*)((char*)self + 0x214) = 1;
-        sVEntry001D9368* vt = *(sVEntry001D9368**)((char*)self + 8);
+    if (self->mScreenStatus != 1) {
+        self->mScreenStatus = 1;
+        sVEntry001D9368* vt = (sVEntry001D9368*)self->mVtbl;
         vt[35].fn((char*)self + vt[35].delta, 1);
     }
 }
@@ -2137,9 +2137,9 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_onLoseTransition);
  *
  * @return 1 when the screen state is 6, else 0
  */
-extern "C" int cFEMemCard_onLoseTransition(void* self)
+extern "C" int cFEMemCard_onLoseTransition(cFEMemCard* self)
 {
-    return *(int*)((char*)self + 0x1c0) == 6;
+    return self->mState == 6;
 }
 #endif
 
@@ -2161,11 +2161,11 @@ extern "C" void cUIThing_playAnimation(void* obj, void* anim, int a, int b, int 
  * @param objName   name of the widget to animate
  * @param animName  name of the animation to play
  */
-extern "C" void cFEMemCard_triggerArrowPulse(void* self, char* objName, char* animName)
+extern "C" void cFEMemCard_triggerArrowPulse(cFEMemCard* self, char* objName, char* animName)
 {
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(objName));
+    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(objName));
     if (obj != 0) {
-        void* bank = (char*)*(void**)((char*)self + 0x10) + 0x50;
+        void* bank = (char*)self->mpEngine + 0x50;
         void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(animName));
         if (anim != 0) {
             cUIThing_playAnimation(obj, anim, 3, 0, 1);
@@ -2219,25 +2219,25 @@ struct sVEntryF1D9470 {
  *
  * @param state  the display state, 1 to 3 (On Tour gotoScreenState)
  */
-extern "C" void cFEMemCard_triggerDisplayState(char* self, int state)
+extern "C" void cFEMemCard_triggerDisplayState(cFEMemCard* self, int state)
 {
     unsigned short buf[0x100];
     int frame = 0xFFFF;
-    *(int*)(self + 0x214) = state;
+    self->mScreenStatus = state;
     switch (state) {
     case 1: {
-        char* widget = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_onmenu));
+        char* widget = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_onmenu));
         if (widget) {
             sVEntryT1D9470* vt = *(sVEntryT1D9470**)(widget + 8);
             vt[7].fn(widget + vt[7].delta, 0);
         }
-        widget = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_offmenu));
+        widget = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_offmenu));
         if (widget) {
             sVEntryT1D9470* vt = *(sVEntryT1D9470**)(widget + 8);
             vt[7].fn(widget + vt[7].delta, 1);
         }
-        frame = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(str_off));
-        char* text = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_text_box_message));
+        frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_off));
+        char* text = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_text_box_message));
         if (text) {
             unsigned short* str = (unsigned short*)operator_new_tag(1600, str_Temp_String, 0x100, 0);
             char* mp = (char*)cSSXApp_getMCManager(SSXApp);
@@ -2255,18 +2255,18 @@ extern "C" void cFEMemCard_triggerDisplayState(char* self, int state)
     }
     case 2: {
         char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-        char* widget = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_onmenu));
+        char* widget = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_onmenu));
         if (widget) {
             sVEntryT1D9470* vt = *(sVEntryT1D9470**)(widget + 8);
             vt[7].fn(widget + vt[7].delta, 0);
         }
-        widget = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_offmenu));
+        widget = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_offmenu));
         if (widget) {
             sVEntryT1D9470* vt = *(sVEntryT1D9470**)(widget + 8);
             vt[7].fn(widget + vt[7].delta, 1);
         }
-        frame = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(str_file_display));
-        char* text = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_text_box_message));
+        frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_file_display));
+        char* text = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_text_box_message));
         if (text) {
             unsigned short* str = (unsigned short*)operator_new_tag(1600, str_Temp_String, 0x100, 0);
             cMCOverlayManager_getDeviceNumberString(mp, buf, *(int*)(mp + 0x428));
@@ -2282,22 +2282,22 @@ extern "C" void cFEMemCard_triggerDisplayState(char* self, int state)
         break;
     }
     case 3: {
-        char* widget = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_onmenu));
+        char* widget = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_onmenu));
         if (widget) {
             sVEntryT1D9470* vt = *(sVEntryT1D9470**)(widget + 8);
             vt[7].fn(widget + vt[7].delta, 1);
         }
-        widget = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_offmenu));
+        widget = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_offmenu));
         if (widget) {
             sVEntryT1D9470* vt = *(sVEntryT1D9470**)(widget + 8);
             vt[7].fn(widget + vt[7].delta, 0);
         }
-        frame = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(str_on));
+        frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_on));
         break;
     }
     }
     if (frame != 0xFFFF)
-        cUIScreen_jumpToFrame(*(void**)(self + 0x40), frame);
+        cUIScreen_jumpToFrame(self->mpScreen, frame);
 }
 #endif
 
@@ -2313,7 +2313,7 @@ INCLUDE_ASM("fe/fememcardcallbacks", cFEMemCard_checkNextAvailableDevice);
  * @param back  nonzero to step backwards
  * @return 1 when idx + 1 (or idx - 1) is a valid device index, otherwise -1
  */
-extern "C" int cFEMemCard_checkNextAvailableDevice(void* self, void* list, int idx, int back)
+extern "C" int cFEMemCard_checkNextAvailableDevice(cFEMemCard* self, void* list, int idx, int back)
 {
     int step = 1;
     if (back) {
@@ -2347,10 +2347,10 @@ extern char str_text_box_message[];
  * Runs the base cUIState_onGainFocus(), then looks up "text box message" (str_text_box_message) on mpScreen (+0x40) and
  * calls its setVisible (cUIThing vtable slot 9) with 0.
  */
-extern "C" void cFEMemCard_onGainFocus(void* self)
+extern "C" void cFEMemCard_onGainFocus(cFEMemCard* self)
 {
     cUIState_onGainFocus(self);
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_text_box_message));
+    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_text_box_message));
     if (obj != 0) {
         sVEntry001D9818* vt = *(sVEntry001D9818**)((char*)obj + 8);
         vt[9].fn((char*)obj + vt[9].delta, 0);
@@ -2408,12 +2408,12 @@ static inline bool IsModeK1D9880(char* mp, int m) { return *(int*)(mp + 0x130) =
  *
  * @return 1 when all the checks pass, else 0
  */
-extern "C" int cFEMemCard_displayFileOK(void* self)
+extern "C" int cFEMemCard_displayFileOK(cFEMemCard* self)
 {
     int allowed = 0;
     int one = 1;
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-    int st = *(int*)((char*)self + 0x1C0);
+    int st = self->mState;
     if (st != 0 && st != 6 && *(int*)(mp + 0x340) != 0 && *(int*)(mp + 0xE0) == 0
         && (*(cMovieStreamK1D9880**)(mp + 0x434))->v11() == 0) {
         if (!IsModeK1D9880(mp, 6) && !IsModeK1D9880(mp, 1)) {
@@ -2442,20 +2442,20 @@ extern char str_read_buffer[];
  *
  * @param size  size of the buffer in bytes (On Tour iSize)
  */
-extern "C" void cFEMemCard_createReadBuffer(void* self, unsigned int size)
+extern "C" void cFEMemCard_createReadBuffer(cFEMemCard* self, unsigned int size)
 {
-    if (*(int*)((char*)self + 0x228) == 1) {
-        void* buf = *(void**)((char*)self + 0x1D4);
+    if (self->mBufferState == 1) {
+        void* buf = self->mpStartReadBuffer;
         if (buf != 0) {
             cMemMan_free(buf);
         }
-        *(void**)((char*)self + 0x1D4) = 0;
-        *(int*)((char*)self + 0x228) = 0;
+        self->mpStartReadBuffer = 0;
+        self->mBufferState = 0;
     }
     void* readBuffer = operator_new_tag(size, str_read_buffer, 0x100, 0);
-    *(void**)((char*)self + 0x1D0) = readBuffer;
-    *(void**)((char*)self + 0x1D4) = readBuffer;
-    *(int*)((char*)self + 0x228) = 1;
+    self->mpReadBuffer = (char*)readBuffer;
+    self->mpStartReadBuffer = (char*)readBuffer;
+    self->mBufferState = 1;
 }
 #endif
 

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/fememcard.h"
 #include "ui/uiengine.h"
 #include "fe/festaterewardsroom.h"
 #include "online/lobbyman.h"
@@ -1036,7 +1037,7 @@ extern "C" void func_001D5280(void* self, void* item, int msg)
 INCLUDE_ASM("fe/festatetrophyroom", func_001D5330);
 #ifdef SKIP_ASM
 extern "C" void* cUIState_cUIState(void* self);
-extern "C" void cFEMemCard_initFEMemCard(void* self, int a1);
+extern "C" void cFEMemCard_initFEMemCard(cFEMemCard* self, int a1);
 extern void* cOVState_vtbl[];
 extern void* cFEMemCard_vtbl[];
 extern unsigned short D_004A1390[];
@@ -1055,18 +1056,18 @@ extern unsigned short D_004A1390[];
  * @param overlayId  the overlay id stored in mOVID
  * @return @p self
  */
-extern "C" void* func_001D5330(void* self, int engine, int memCardType, int overlayId)
+extern "C" void* func_001D5330(cFEMemCard* self, int engine, int memCardType, int overlayId)
 {
     cUIState_cUIState(self);
-    *(int*)((char*)self + 0x98) = overlayId;
-    *(void***)((char*)self + 0x8) = cOVState_vtbl;
-    *(int*)((char*)self + 0x48) = 0;
-    *(int*)((char*)self + 0x4C) = 0;
-    *(int*)((char*)self + 0x54) = 0;
+    self->mOVID = overlayId;
+    self->mVtbl = cOVState_vtbl;
+    self->mDoneTransition = 0;
+    self->mAllowPauseMenu = 0;
+    self->mRemovePDA = 0;
     *(unsigned short*)((char*)self + 0x58) = D_004A1390[0];
-    *(void***)((char*)self + 0x8) = cFEMemCard_vtbl;
+    self->mVtbl = cFEMemCard_vtbl;
     cFEMemCard_initFEMemCard(self, memCardType);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -1074,7 +1075,7 @@ extern "C" void* func_001D5330(void* self, int engine, int memCardType, int over
 INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_cFEMemCard);
 #ifdef SKIP_ASM
 extern "C" void* cUIState_cUIState(void* self);
-extern "C" void cFEMemCard_initFEMemCard(void* self, int a1);
+extern "C" void cFEMemCard_initFEMemCard(cFEMemCard* self, int a1);
 extern void* cOVState_vtbl[];
 extern void* cFEMemCard_vtbl[];
 extern unsigned short D_004A1390[];
@@ -1090,18 +1091,18 @@ extern unsigned short D_004A1390[];
  * @param iType  what the screen is for (On Tour iType)
  * @return @p self
  */
-extern "C" void* cFEMemCard_cFEMemCard(void* self, int pEngine, int iType)
+extern "C" void* cFEMemCard_cFEMemCard(cFEMemCard* self, int pEngine, int iType)
 {
     cUIState_cUIState(self);
-    *(int*)((char*)self + 0x98) = 0;
-    *(void***)((char*)self + 0x8) = cOVState_vtbl;
-    *(int*)((char*)self + 0x48) = 0;
-    *(int*)((char*)self + 0x4C) = 0;
-    *(int*)((char*)self + 0x54) = 0;
+    self->mOVID = 0;
+    self->mVtbl = cOVState_vtbl;
+    self->mDoneTransition = 0;
+    self->mAllowPauseMenu = 0;
+    self->mRemovePDA = 0;
     *(unsigned short*)((char*)self + 0x58) = D_004A1390[0];
-    *(void***)((char*)self + 0x8) = cFEMemCard_vtbl;
+    self->mVtbl = cFEMemCard_vtbl;
     cFEMemCard_initFEMemCard(self, iType);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -1122,11 +1123,11 @@ extern "C" void cUIState__cUIState(void* self, int flags);
  *
  * @param flags  the g++ delete flags, passed on to cUIState__cUIState
  */
-extern "C" void cFEMemCard__cFEMemCard(void* self, int flags)
+extern "C" void cFEMemCard__cFEMemCard(cFEMemCard* self, int flags)
 {
-    *(void***)((char*)self + 8) = cFEMemCard_vtbl;
+    self->mVtbl = cFEMemCard_vtbl;
     cFEMemCard_mInstance = 0;
-    *(void***)((char*)self + 8) = cOVState_vtbl;
+    self->mVtbl = cOVState_vtbl;
     cUIState__cUIState(self, flags);
 }
 #endif
@@ -1144,7 +1145,7 @@ INCLUDE_ASM("fe/festatetrophyroom", cFEMemCard_onWidgetMenu);
  * @param key  the menu event
  * @return 0x100 for events 8 and 9, otherwise 0x101
  */
-extern "C" int cFEMemCard_onWidgetMenu(void* self, int menu, unsigned int key)
+extern "C" int cFEMemCard_onWidgetMenu(cFEMemCard* self, int menu, unsigned int key)
 {
     int result = 257;
     if (key < 10) {
@@ -1243,13 +1244,12 @@ extern char cFEMemCard_callbackCardChanged_a5488[] __asm__("cFEMemCard_callbackC
  * @param self_  the memory-card screen (this)
  * @param mode  the save kind: 0 profile, 1 replay, 2 settings (On Tour iType)
  */
-extern "C" void cFEMemCard_initFEMemCard(void* self_, int mode)
+extern "C" void cFEMemCard_initFEMemCard(cFEMemCard* self_, int mode)
 {
-    char* self = (char*)self_;
     void* gapp = SSXApp;
-    cFEMemCard_mInstance = self;
-    *(int*)(self + 0x1C0) = 0;
-    *(int*)(self + 0x214) = 0;
+    cFEMemCard_mInstance = ((char*)self_);
+    self_->mState = 0;
+    self_->mScreenStatus = 0;
     char* app = (char*)cSSXApp_getMCManager(gapp);
     *(void**)(app + 0x0) = cFEMemCard_writeStart_a5488;
     *(void**)(app + 0x18) = cFEMemCard_readStart_a5488;
@@ -1291,51 +1291,51 @@ extern "C" void cFEMemCard_initFEMemCard(void* self_, int mode)
     *(void**)(app + 0x5C) = cFEMemCard_callbackConfirmNoFreeBlocks_a5488;
     *(void**)(app + 0xA0) = cFEMemCard_callbackFileExists_a5488;
     *(void**)(app + 0xA8) = cFEMemCard_callbackCardChanged_a5488;
-    *(int*)(self + 0x19C) = 25;
-    *(int*)(self + 0x1BC) = mode;
-    *(int*)(self + 0x1A8) = 0;
-    *(int*)(self + 0x1AC) = 0;
-    *(int*)(self + 0x1B0) = 0;
-    *(int*)(self + 0x1B4) = 0;
-    *(int*)(self + 0x1B8) = 0;
-    *(int*)(self + 0x1C4) = 0;
-    *(int*)(self + 0x1CC) = 0;
-    *(int*)(self + 0x1D8) = 0;
-    *(int*)(self + 0x1DC) = 0;
-    *(int*)(self + 0x1E0) = 0;
-    *(int*)(self + 0x1E4) = 0;
-    *(int*)(self + 0x1E8) = 0;
-    *(int*)(self + 0x1EC) = 0;
-    *(int*)(self + 0x1F0) = 0;
-    *(int*)(self + 0x1F4) = 0;
-    *(int*)(self + 0x1F8) = 0;
-    *(int*)(self + 0x1FC) = 0;
-    *(int*)(self + 0x200) = 0;
-    *(int*)(self + 0x204) = 0;
-    *(int*)(self + 0x208) = 0;
-    *(int*)(self + 0x20C) = 0;
-    *(int*)(self + 0x210) = 0;
-    *(int*)(self + 0x218) = 0;
-    *(int*)(self + 0x21C) = 0;
-    *(int*)(self + 0x1A0) = 0;
-    *(int*)(self + 0x1A4) = 0;
-    *(int*)(self + 0x220) = 0;
-    *(int*)(self + 0x224) = 0;
-    *(int*)(self + 0x228) = 0;
-    *(int*)(self + 0x1D4) = 0;
-    *(int*)(self + 0x1D0) = 0;
-    *(int*)(self + 0x1C8) = 0;
-    *(short*)(self + 0x9C) = 0;
+    self_->mPopupType = 25;
+    self_->mType = mode;
+    self_->mIsProcessing = 0;
+    self_->mIsDone = 0;
+    self_->mIsLoadWait = 0;
+    self_->mIsLoadDoneOK = 0;
+    self_->mIsInvalidConfirmed = 0;
+    self_->mSlot = 0;
+    self_->mPlayerIdx = 0;
+    self_->mIsManagerStarted = 0;
+    self_->mIsSavePressed = 0;
+    self_->mIsDeletePressed = 0;
+    self_->mIsCancelPressed = 0;
+    self_->mIsFormatPressed = 0;
+    self_->mIsRetryPressed = 0;
+    self_->mIsOverwriteOK = 0;
+    self_->mIsLoadPressed = 0;
+    self_->mDoNextMemCard = 0;
+    self_->mDoPrevMemCard = 0;
+    self_->mLoadBEData = 0;
+    self_->mAutoLoadOn = 0;
+    self_->mAutoSaveOn = 0;
+    self_->mFirstCheck = 0;
+    self_->mIsStatusPopupOn = 0;
+    self_->mStatusPopup = 0;
+    self_->mLastSelectedDevice = 0;
+    self_->mProcessingKeyboard = 0;
+    self_->mpKeyboard = 0;
+    self_->mDeleteButtonActive = 0;
+    self_->mMainButtonActive = 0;
+    self_->mBufferState = 0;
+    self_->mpStartReadBuffer = 0;
+    self_->mpReadBuffer = 0;
+    self_->mIsReplayAlloc = 0;
+    *(short*)&self_->mLastLoadFileName[0] = 0;
     cMCOverlayManager_ManagerGainState(app);
     cBE_getInterface_Fv(cBE_getBE(), 5);
-    if (*(int*)(self + 0x1BC) == 2)
+    if (self_->mType == 2)
     {
         int n = cBESaveInterface_getSaveGameSize_r();
         cMCOverlayManager_writeSetSize_2(app, n);
         cMCOverlayManager_readSetSize(app, n);
         cMCOverlayManager_readSetFileType(app, 2);
     }
-    else if (*(int*)(self + 0x1BC) == 1)
+    else if (self_->mType == 1)
     {
         cMCOverlayManager_writeSetSize_2(app, 0x80000);
         cMCOverlayManager_readSetSize(app, 0x80000);
@@ -1354,7 +1354,7 @@ extern "C" void cFEMemCard_initFEMemCard(void* self_, int mode)
     cMCOverlayManager_getFileName(app, *(int*)(app + 0xB4), saveType, 0x100);
     func_002C2540(format, str_pct_s_pct_s_c);
     func_00241AA0(productCode, 0x100);
-    sprintf1(self + 0x11C, format, productCode, saveType);
+    sprintf1(((char*)self_) + 0x11C, format, productCode, saveType);
 }
 #endif
 
@@ -1381,14 +1381,14 @@ extern "C" void cMCOverlayManager_cleanUp(void* self);
  * (cBESaveInterface_releaseBuffer). If the memory card manager is active (+0x434), cleans it up (cMCOverlayManager_cleanUp, cMCOverlayManager_ManagerLoseState,
  * cMCOverlayManager_purge). A buffer this screen allocated (+0x228 == 1) is freed. Ends with cOVState_onDestroyScreen.
  */
-extern "C" void cFEMemCard_onDestroyScreen(void* self)
+extern "C" void cFEMemCard_onDestroyScreen(cFEMemCard* self)
 {
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 5);
-    if (*(int*)((char*)self + 0x1BC) == 1 && *(int*)((char*)self + 0x228) == 2 && *(int*)((char*)self + 0x1B4) == 0) {
+    if (self->mType == 1 && self->mBufferState == 2 && self->mIsLoadDoneOK == 0) {
         cBESaveInterface_releaseReplayBuffer(iface);
-        *(int*)((char*)self + 0x1D4) = 0;
-        *(int*)((char*)self + 0x1D0) = 0;
-        *(int*)((char*)self + 0x228) = 0;
+        self->mpStartReadBuffer = 0;
+        self->mpReadBuffer = 0;
+        self->mBufferState = 0;
     }
     cBESaveInterface_releaseBuffer(iface);
     char* app = (char*)cSSXApp_getMCManager(SSXApp);
@@ -1397,13 +1397,13 @@ extern "C" void cFEMemCard_onDestroyScreen(void* self)
         cMCOverlayManager_ManagerLoseState(app);
         cMCOverlayManager_purge(app);
     }
-    if (*(int*)((char*)self + 0x228) == 1) {
-        *(int*)((char*)self + 0x228) = 0;
-        if (*(void**)((char*)self + 0x1D4) != 0) {
-            cMemMan_free(*(void**)((char*)self + 0x1D4));
+    if (self->mBufferState == 1) {
+        self->mBufferState = 0;
+        if (self->mpStartReadBuffer != 0) {
+            cMemMan_free(self->mpStartReadBuffer);
         }
-        *(int*)((char*)self + 0x1D4) = 0;
-        *(int*)((char*)self + 0x1D0) = 0;
+        self->mpStartReadBuffer = 0;
+        self->mpReadBuffer = 0;
     }
     cOVState_onDestroyScreen(self);
 }

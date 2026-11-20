@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/bxscriptengine.h"
 #include "scripter/ssxscriptengine.h"
 
 //100%
@@ -28,16 +29,16 @@ struct sBXSlot {
  * @param maxUniqueAnimPlayers  passed to cInSeq_cInSeq() as its script limit (cInSeq's maxScripts)
  * @param size  InSeq heap size in bytes (On Tour heapSize)
  */
-extern "C" void cBXScriptEngine_SetupBXEngine(void* self, int count, int maxUniqueAnimPlayers, int size)
+extern "C" void cBXScriptEngine_SetupBXEngine(cBXScriptEngine* self, int count, int maxUniqueAnimPlayers, int size)
 {
-    *(void**)((char*)self + 0x2BC) = operator_new_tag(size, str_InSeqHeap, 0, 0);
-    *(void**)((char*)self + 0x2B8) = cInSeq_cInSeq(cMemMan_alloc(0x20, str_InSeq, 0, 0),
-        *(void**)((char*)self + 0x2BC), size, maxUniqueAnimPlayers, (char*)self + 0x2AC);
-    *(int*)((char*)self + 0x2B4) = count;
-    *(sBXSlot**)((char*)self + 0x2B0) = (sBXSlot*)operator_new_tag(count * 8, str_BXScriptDatabase, 0, 0);
-    for (int i = 0; i < *(int*)((char*)self + 0x2B4); i++) {
-        (*(sBXSlot**)((char*)self + 0x2B0))[i].a = 0;
-        (*(sBXSlot**)((char*)self + 0x2B0))[i].b = 0;
+    self->mpInSeqHeap = (char*)operator_new_tag(size, str_InSeqHeap, 0, 0);
+    self->mpInSeq = (cInSeq*)cInSeq_cInSeq(cMemMan_alloc(0x20, str_InSeq, 0, 0),
+        self->mpInSeqHeap, size, maxUniqueAnimPlayers, (char*)self + 0x2AC);
+    self->mScriptDatabaseSize = count;
+    self->mpScriptDatabase = (tBXScriptState*)((sBXSlot*)operator_new_tag(count * 8, str_BXScriptDatabase, 0, 0));
+    for (int i = 0; i < self->mScriptDatabaseSize; i++) {
+        ((sBXSlot*)self->mpScriptDatabase)[i].a = 0;
+        ((sBXSlot*)self->mpScriptDatabase)[i].b = 0;
     }
 }
 #endif
@@ -48,8 +49,8 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_PurgeBXEngine);
 struct sScriptEngine282390;
 struct sScriptEngine2823F0;
 struct sScriptEngine2B8;
-extern "C" void cBXScriptEngine_StopScriptAll(sScriptEngine282390* self);
-extern "C" void cBXScriptEngine_ReleaseRequestAll(sScriptEngine2823F0* self);
+extern "C" void cBXScriptEngine_StopScriptAll(cBXScriptEngine* self);
+extern "C" void cBXScriptEngine_ReleaseRequestAll(cBXScriptEngine* self);
 extern "C" void cBXScriptEngine_ResetInstVars(sScriptEngine2B8* self);
 extern "C" void cScriptDatabaseObject_RemoveObjectAll(void* self);
 extern "C" void cInSeq__cInSeq(void* obj, int flags);
@@ -62,25 +63,25 @@ void cMemMan_free(void*);
  * script, releases every script request, removes every database object, frees the database and zeroes its size,
  * destroys mpInSeq (destructor flags 3), frees mpInSeqHeap, and finally calls cBXScriptEngine_ResetInstVars().
  */
-extern "C" void cBXScriptEngine_PurgeBXEngine(void* self)
+extern "C" void cBXScriptEngine_PurgeBXEngine(cBXScriptEngine* self)
 {
-    if (*(void**)((char*)self + 0x2B0) != 0) {
-        cBXScriptEngine_StopScriptAll((sScriptEngine282390*)self);
-        cBXScriptEngine_ReleaseRequestAll((sScriptEngine2823F0*)self);
+    if (self->mpScriptDatabase != 0) {
+        cBXScriptEngine_StopScriptAll(self);
+        cBXScriptEngine_ReleaseRequestAll(self);
         cScriptDatabaseObject_RemoveObjectAll(self);
-        if (*(void**)((char*)self + 0x2B0) != 0) {
-            cMemMan_free(*(void**)((char*)self + 0x2B0));
+        if (self->mpScriptDatabase != 0) {
+            cMemMan_free(self->mpScriptDatabase);
         }
-        *(void**)((char*)self + 0x2B0) = 0;
-        *(int*)((char*)self + 0x2B4) = 0;
-        if (*(void**)((char*)self + 0x2B8) != 0) {
-            cInSeq__cInSeq(*(void**)((char*)self + 0x2B8), 3);
+        self->mpScriptDatabase = 0;
+        self->mScriptDatabaseSize = 0;
+        if (self->mpInSeq != 0) {
+            cInSeq__cInSeq(self->mpInSeq, 3);
         }
-        *(void**)((char*)self + 0x2B8) = 0;
-        if (*(void**)((char*)self + 0x2BC) != 0) {
-            cMemMan_free(*(void**)((char*)self + 0x2BC));
+        self->mpInSeq = 0;
+        if (self->mpInSeqHeap != 0) {
+            cMemMan_free(self->mpInSeqHeap);
         }
-        *(void**)((char*)self + 0x2BC) = 0;
+        self->mpInSeqHeap = 0;
         cBXScriptEngine_ResetInstVars((sScriptEngine2B8*)self);
     }
 }
@@ -91,7 +92,7 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_Update);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" void cInSeq_UpdateFrame(void* obj);
-extern "C" void cBXScriptEngine_UpdatePendingRequestState(void* self, void* script);
+extern "C" void cBXScriptEngine_UpdatePendingRequestState(cBXScriptEngine* self, void* script);
 
 struct sScriptSlot_2820B0 {
     int f0;
@@ -116,23 +117,23 @@ static inline void slotNop_2820B0(void* self, void* slot) {}
  * pending-state handler by request type: type 1 goes to cBXScriptEngine_UpdatePendingRequestState, the others to slotNop_2820B0 (On Tour does this
  * in UpdatePendingRequestState).
  */
-extern "C" void cBXScriptEngine_Update(sScriptEngine_2820B0* self)
+extern "C" void cBXScriptEngine_Update(cBXScriptEngine* self)
 {
     int i;
-    cInSeq_UpdateFrame(self->obj2B8);
+    cInSeq_UpdateFrame(self->mpInSeq);
     for (i = 0; i < 16; i++) {
-        sScriptSlot_2820B0* request = &self->slots[i];
+        sScriptSlot_2820B0* request = &((sScriptSlot_2820B0*)&self->mScriptRequests[0])[i];
         if (request->state == 0) {
             continue;
         }
         if (request->state == 1) {
             switch (request->type) {
-            case 0: slotNop_2820B0(self, request); break;
+            case 0: slotNop_2820B0(((sScriptEngine_2820B0*)self), request); break;
             case 1: cBXScriptEngine_UpdatePendingRequestState(self, request); break;
-            case 2: slotNop_2820B0(self, request); break;
-            case 3: slotNop_2820B0(self, request); break;
-            case 4: slotNop_2820B0(self, request); break;
-            case 5: slotNop_2820B0(self, request); break;
+            case 2: slotNop_2820B0(((sScriptEngine_2820B0*)self), request); break;
+            case 3: slotNop_2820B0(((sScriptEngine_2820B0*)self), request); break;
+            case 4: slotNop_2820B0(((sScriptEngine_2820B0*)self), request); break;
+            case 5: slotNop_2820B0(((sScriptEngine_2820B0*)self), request); break;
             }
         }
     }
@@ -153,9 +154,9 @@ struct sSlot282150 { int value; int pad; };
  * @param index  the script index
  * @return 1 when attached, 0 when the slot was taken
  */
-extern "C" int cBXScriptEngine_AttachScript(void* self, int value, int index)
+extern "C" int cBXScriptEngine_AttachScript(cBXScriptEngine* self, int value, int index)
 {
-    sSlot282150* slots = *(sSlot282150**)((char*)self + 0x2b0);
+    sSlot282150* slots = (sSlot282150*)self->mpScriptDatabase;
     if (slots[index].value != 0) {
         return 0;
     }
@@ -175,9 +176,9 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_DetachScript);
  * @param index  the script index
  * @return the detached script data, or 0 when the slot was empty
  */
-extern "C" int cBXScriptEngine_DetachScript(void* self, int index)
+extern "C" int cBXScriptEngine_DetachScript(cBXScriptEngine* self, int index)
 {
-    sSlot282150* slots = *(sSlot282150**)((char*)self + 0x2b0);
+    sSlot282150* slots = (sSlot282150*)self->mpScriptDatabase;
     int old = slots[index].value;
     if (old == 0) {
         return 0;
@@ -191,7 +192,7 @@ extern "C" int cBXScriptEngine_DetachScript(void* self, int index)
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_RequestAnimationScript);
 #ifdef SKIP_ASM
 struct sBxsThreadHdr;
-extern "C" sBxsThreadHdr* cBXScriptEngine_CreateNewRequest(void* self, int a1);
+extern "C" sBxsThreadHdr* cBXScriptEngine_CreateNewRequest(cBXScriptEngine* self, int a1);
 extern "C" int cInSeq_ReadyPlayer(void* self, void* src);
 // PORT: the unit declares cInSeq_GetPlayer(int), but it really takes (self, id).
 void* cInSeq_GetPlayer_2(void* self, int id) __asm__("cInSeq_GetPlayer");
@@ -238,16 +239,16 @@ struct sBXThread21A0 {
  * @param userData  user data stored with the request
  * @return the request handle (+0x1C), or -1 when the data cannot be had
  */
-extern "C" int cBXScriptEngine_RequestAnimationScript(void* self, int idx, int userData)
+extern "C" int cBXScriptEngine_RequestAnimationScript(cBXScriptEngine* self, int idx, int userData)
 {
-    sBXSlot21A0* scriptState = &(*(sBXSlot21A0**)((char*)self + 0x2B0))[idx];
+    sBXSlot21A0* scriptState = &((sBXSlot21A0*)self->mpScriptDatabase)[idx];
     sBXThread21A0* request = (sBXThread21A0*)cBXScriptEngine_CreateNewRequest(self, 1);
     if (scriptState->data == 0) {
         int one = 1;
         request->pending = idx;
         request->state = one;
         request->f12 = one;
-        sBxsVEntry21A0* vtableEntry = &(*(sBxsVEntry21A0**)((char*)self + 0x2A8))[7];
+        sBxsVEntry21A0* vtableEntry = &((sBxsVEntry21A0*)self->mVtbl)[7];
         if (vtableEntry->fn((char*)self + vtableEntry->delta, idx) == 0) {
             request->state = 7;
             cBXScriptEngine_ResetRequest(self, request);
@@ -256,8 +257,8 @@ extern "C" int cBXScriptEngine_RequestAnimationScript(void* self, int idx, int u
     } else {
         request->slot = idx;
         request->state = 2;
-        int id = cInSeq_ReadyPlayer(*(void**)((char*)self + 0x2B8), scriptState->data);
-        void* obj = cInSeq_GetPlayer_2(*(void**)((char*)self + 0x2B8), id);
+        int id = cInSeq_ReadyPlayer(self->mpInSeq, scriptState->data);
+        void* obj = cInSeq_GetPlayer_2(self->mpInSeq, id);
         request->owner = obj;
         cScriptPlayerMain_SetUserData(obj, (int)request);
         scriptState->uses++;
@@ -270,7 +271,7 @@ extern "C" int cBXScriptEngine_RequestAnimationScript(void* self, int idx, int u
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_PlayScript);
 #ifdef SKIP_ASM
-extern "C" void* cBXScriptEngine_GetRequest(void* self, int a1);
+extern "C" void* cBXScriptEngine_GetRequest(cBXScriptEngine* self, int a1);
 extern "C" void cInSeq_Play(void* cache, void* data, int a2);
 
 /**
@@ -285,7 +286,7 @@ extern "C" void cInSeq_Play(void* cache, void* data, int a2);
  * @param loop  passed to cInSeq_Play
  * @return the request state afterwards, or 0 for a free handle
  */
-extern "C" int cBXScriptEngine_PlayScript(void* self, int id, int value, int loop)
+extern "C" int cBXScriptEngine_PlayScript(cBXScriptEngine* self, int id, int value, int loop)
 {
     char* request = (char*)cBXScriptEngine_GetRequest(self, id);
     if (request == 0) {
@@ -298,7 +299,7 @@ extern "C" int cBXScriptEngine_PlayScript(void* self, int id, int value, int loo
     *(short*)(request + 0x10) = value;
     if (*(int*)(request + 0x20) == 1) {
         *(int*)(request + 0x4) = 3;
-        cInSeq_Play(*(void**)((char*)self + 0x2B8), **(void***)request, loop);
+        cInSeq_Play(self->mpInSeq, **(void***)request, loop);
     }
     return *(int*)(request + 0x4);
 }
@@ -307,7 +308,7 @@ extern "C" int cBXScriptEngine_PlayScript(void* self, int id, int value, int loo
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_StopScript);
 #ifdef SKIP_ASM
-extern "C" void* cBXScriptEngine_GetRequest(void* self, int a1);
+extern "C" void* cBXScriptEngine_GetRequest(cBXScriptEngine* self, int a1);
 extern "C" void cInSeq_Stop(void* cache, void* data);
 
 /**
@@ -320,12 +321,12 @@ extern "C" void cInSeq_Stop(void* cache, void* data);
  *
  * @param requestHandle  the request handle
  */
-extern "C" void cBXScriptEngine_StopScript(void* self, int requestHandle)
+extern "C" void cBXScriptEngine_StopScript(cBXScriptEngine* self, int requestHandle)
 {
     char* request = (char*)cBXScriptEngine_GetRequest(self, requestHandle);
     char* obj = *(char**)request;
     if (obj != 0 && *(int*)(obj + 0x20) != 0 && *(int*)(request + 0x20) == 1) {
-        cInSeq_Stop(*(void**)((char*)self + 0x2B8), *(void**)obj);
+        cInSeq_Stop(self->mpInSeq, *(void**)obj);
     }
 }
 #endif
@@ -333,7 +334,7 @@ extern "C" void cBXScriptEngine_StopScript(void* self, int requestHandle)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_StopScriptAll);
 #ifdef SKIP_ASM
-extern "C" void cBXScriptEngine_StopScript(void* self, int id);
+extern "C" void cBXScriptEngine_StopScript(cBXScriptEngine* self, int id);
 
 struct sScriptSlot282390 {
     int active;
@@ -354,10 +355,10 @@ struct sScriptEngine282390 {
  * calls cBXScriptEngine_StopScript() with the request's id (+0x1C), which stops that script in the InSeq sequencer when it
  * is running.
  */
-extern "C" void cBXScriptEngine_StopScriptAll(sScriptEngine282390* self)
+extern "C" void cBXScriptEngine_StopScriptAll(cBXScriptEngine* self)
 {
     for (int i = 0; i < 16; i++) {
-        sScriptSlot282390* slot = &self->slots[i];
+        sScriptSlot282390* slot = &((sScriptSlot282390*)&self->mScriptRequests[0])[i];
         if (slot->active != 0) {
             cBXScriptEngine_StopScript(self, slot->id);
         }
@@ -389,12 +390,12 @@ struct sScriptEngine2823F0 {
  * set; that runs the request type's cleanup, releases its script object and database reference and returns
  * the slot to the free list.
  */
-extern "C" void cBXScriptEngine_ReleaseRequestAll(sScriptEngine2823F0* self)
+extern "C" void cBXScriptEngine_ReleaseRequestAll(cBXScriptEngine* self)
 {
     for (int i = 0; i < 16; i++) {
-        sScriptSlot2823F0* slot = &self->slots[i];
+        sScriptSlot2823F0* slot = &((sScriptSlot2823F0*)&self->mScriptRequests[0])[i];
         if (slot->state != 0) {
-            cBXScriptEngine_ReleaseRequest(self, slot->id);
+            cBXScriptEngine_ReleaseRequest(((sScriptEngine2823F0*)self), slot->id);
         }
     }
 }
@@ -403,7 +404,7 @@ extern "C" void cBXScriptEngine_ReleaseRequestAll(sScriptEngine2823F0* self)
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_ForcePlayUpdate);
 #ifdef SKIP_ASM
-extern "C" void* cBXScriptEngine_GetRequest(void* self, int a1);
+extern "C" void* cBXScriptEngine_GetRequest(cBXScriptEngine* self, int a1);
 extern "C" void cScriptPlayerMain_UpdateFrame(void* p);
 
 /**
@@ -416,7 +417,7 @@ extern "C" void cScriptPlayerMain_UpdateFrame(void* p);
  * @param requestHandle  the request handle
  * @return 1 if the player was updated, 0 for an unknown or idle request
  */
-extern "C" int cBXScriptEngine_ForcePlayUpdate(void* self, int requestHandle)
+extern "C" int cBXScriptEngine_ForcePlayUpdate(cBXScriptEngine* self, int requestHandle)
 {
     void* request = cBXScriptEngine_GetRequest(self, requestHandle);
     if (request == 0) {
@@ -473,7 +474,7 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_SetRequestUserData);
  * @param val  the new user data
  * @return the previous user data
  */
-extern "C" int cBXScriptEngine_SetRequestUserData(void* self, char* obj, int val)
+extern "C" int cBXScriptEngine_SetRequestUserData(cBXScriptEngine* self, char* obj, int val)
 {
     char* request = *(char**)(obj + 0xC);
     int old = *(int*)(request + 0xC);
@@ -493,7 +494,7 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_SetRequestUserData1);
  * @param val  the new user data
  * @return the previous user data
  */
-extern "C" int cBXScriptEngine_SetRequestUserData1(void* self, int requestHandle, int val)
+extern "C" int cBXScriptEngine_SetRequestUserData1(cBXScriptEngine* self, int requestHandle, int val)
 {
     char* request = (char*)cBXScriptEngine_GetRequest(self, requestHandle);
     int old = *(int*)(request + 0xC);
@@ -506,7 +507,7 @@ extern "C" int cBXScriptEngine_SetRequestUserData1(void* self, int requestHandle
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_ReleaseRequest);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void cBXScriptEngine_StopScript(void* self, int id);
+extern "C" void cBXScriptEngine_StopScript(cBXScriptEngine* self, int id);
 int cScriptPlayerMain_SetUserData(void* obj, int a);
 extern "C" void cInSeq_RecyclePlayer(void* mgr, int handle);
 void cBXScriptEngine_ResetRequest(void* self, void* slot);
@@ -590,7 +591,7 @@ extern "C" int cBXScriptEngine_ReleaseRequest_impl(sScriptEngine_282540* self, i
     case 3:
     case 4:
     case 5:
-        cBXScriptEngine_StopScript(self, id);
+        cBXScriptEngine_StopScript((cBXScriptEngine*)self, id);
         break;
     case 0:
     case 2:
@@ -624,8 +625,8 @@ extern "C" void cInSeq_PauseAll(int);
  *
  * @param engine  the script engine
  */
-extern "C" void cBXScriptEngine_PauseAll(void *engine) {
-    cInSeq_PauseAll((*(int *)((char*)(engine) + (0x2B8))));
+extern "C" void cBXScriptEngine_PauseAll(cBXScriptEngine* engine) {
+    cInSeq_PauseAll(((int)engine->mpInSeq));
 }
 #endif
 //100%
@@ -638,8 +639,8 @@ extern "C" void cInSeq_ResumeAll(int);
  *
  * @param engine  the script engine
  */
-extern "C" void cBXScriptEngine_ResumeAll(void *engine) {
-    cInSeq_ResumeAll((*(int *)((char*)(engine) + (0x2B8))));
+extern "C" void cBXScriptEngine_ResumeAll(cBXScriptEngine* engine) {
+    cInSeq_ResumeAll(((int)engine->mpInSeq));
 }
 #endif
 
@@ -657,7 +658,7 @@ extern "C" void cScriptPlayerMain_Pause(void* self);
  *
  * @param requestHandle  the request handle (0-15)
  */
-extern "C" void cBXScriptEngine_PauseScript(void* self, int requestHandle)
+extern "C" void cBXScriptEngine_PauseScript(cBXScriptEngine* self, int requestHandle)
 {
     char* request = (char*)self + (requestHandle * 0x24 + 0x2c0);
     cScriptPlayerMain_Pause(*(void**)request);
@@ -681,7 +682,7 @@ extern "C" void cScriptPlayerMain_Resume(void* self);
  *
  * @param requestHandle  the request handle (0-15)
  */
-extern "C" void cBXScriptEngine_ResumeScript(void* self, int requestHandle)
+extern "C" void cBXScriptEngine_ResumeScript(cBXScriptEngine* self, int requestHandle)
 {
     char* request = (char*)self + (requestHandle * 0x24 + 0x2c0);
     cScriptPlayerMain_Resume(*(void**)request);
@@ -718,8 +719,8 @@ extern "C" int cBXScriptEngine_GetScriptEngine(void) {
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_GetRequestState);
 #ifdef SKIP_ASM
-extern "C" void* cBXScriptEngine_GetRequest(void* self, int a1);
-extern "C" void cBXScriptEngine_UpdatePendingRequestState(void* self, void* script);
+extern "C" void* cBXScriptEngine_GetRequest(cBXScriptEngine* self, int a1);
+extern "C" void cBXScriptEngine_UpdatePendingRequestState(cBXScriptEngine* self, void* script);
 
 /**
  * Returns the state of script request @p requestHandle, first promoting it if its data has arrived.
@@ -730,7 +731,7 @@ extern "C" void cBXScriptEngine_UpdatePendingRequestState(void* self, void* scri
  * @param requestHandle  the request handle
  * @return the request state (+0x4), or 0 for a free handle
  */
-extern "C" int cBXScriptEngine_GetRequestState(void* self, int requestHandle)
+extern "C" int cBXScriptEngine_GetRequestState(cBXScriptEngine* self, int requestHandle)
 {
     char* request = (char*)cBXScriptEngine_GetRequest(self, requestHandle);
     if (request == 0) {
@@ -754,7 +755,7 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_GetRequestScriptIndex);
  * @param requestHandle  the request handle
  * @return the script index, or -1 for a free handle
  */
-extern "C" int cBXScriptEngine_GetRequestScriptIndex(void* self, int requestHandle)
+extern "C" int cBXScriptEngine_GetRequestScriptIndex(cBXScriptEngine* self, int requestHandle)
 {
     char* request = (char*)cBXScriptEngine_GetRequest(self, requestHandle);
     if (request == 0) return -1;
@@ -766,8 +767,8 @@ extern "C" int cBXScriptEngine_GetRequestScriptIndex(void* self, int requestHand
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_IsRequestPlaybackEnding);
 #ifdef SKIP_ASM
-extern "C" void* cBXScriptEngine_GetRequest(void* self, int a1);
-extern "C" void cBXScriptEngine_UpdatePendingRequestState(void* self, void* script);
+extern "C" void* cBXScriptEngine_GetRequest(cBXScriptEngine* self, int a1);
+extern "C" void cBXScriptEngine_UpdatePendingRequestState(cBXScriptEngine* self, void* script);
 
 /**
  * Returns whether script request @p requestHandle is playing its end.
@@ -778,7 +779,7 @@ extern "C" void cBXScriptEngine_UpdatePendingRequestState(void* self, void* scri
  * @param requestHandle  the request handle
  * @return 1 when ending, else 0 (also for a free handle)
  */
-extern "C" int cBXScriptEngine_IsRequestPlaybackEnding(void* self, int requestHandle)
+extern "C" int cBXScriptEngine_IsRequestPlaybackEnding(cBXScriptEngine* self, int requestHandle)
 {
     char* request = (char*)cBXScriptEngine_GetRequest(self, requestHandle);
     if (request == 0) {
@@ -877,18 +878,18 @@ struct sBXThread282908 {
  *
  * @param script  the request record (an mScriptRequests entry)
  */
-extern "C" void cBXScriptEngine_UpdatePendingRequestState(void* self, void* script)
+extern "C" void cBXScriptEngine_UpdatePendingRequestState(cBXScriptEngine* self, void* script)
 {
     sBXThread282908* request = (sBXThread282908*)script;
     int idx = request->pending;
-    sBXSlot282908* scriptState = &(*(sBXSlot282908**)((char*)self + 0x2B0))[idx];
+    sBXSlot282908* scriptState = &((sBXSlot282908*)self->mpScriptDatabase)[idx];
     if (scriptState->data == 0) return;
     request->slot = idx;
     request->pending = -1;
     request->state = 2;
     request->f12 = 0;
-    int id = cInSeq_ReadyPlayer(*(void**)((char*)self + 0x2B8), scriptState->data);
-    void* obj = cInSeq_GetPlayer_2(*(void**)((char*)self + 0x2B8), id);
+    int id = cInSeq_ReadyPlayer(self->mpInSeq, scriptState->data);
+    void* obj = cInSeq_GetPlayer_2(self->mpInSeq, id);
     request->owner = obj;
     cScriptPlayerMain_SetUserData(obj, (int)request);
     if (request->time > 0.0f) {
@@ -917,10 +918,10 @@ struct sBxsVEntry10 {
  *
  * @param pPlayer  the cScriptPlayerMain that started
  */
-extern "C" void cBXScriptEngine_OnInSeqPlay(void* self, void* pPlayer)
+extern "C" void cBXScriptEngine_OnInSeqPlay(cBXScriptEngine* self, void* pPlayer)
 {
     char* request = *(char**)((char*)pPlayer + 0xC);
-    sBxsVEntry10* vt = *(sBxsVEntry10**)((char*)self + 0x2A8);
+    sBxsVEntry10* vt = (sBxsVEntry10*)self->mVtbl;
     vt[10].fn((char*)self + vt[10].delta, pPlayer, *(int*)(request + 0x8), *(int*)(request + 0xC));
     *(int*)(request + 0x4) = 4;
 }
@@ -948,10 +949,10 @@ extern "C" void cBXScriptEngine_ReleaseRequest(void* self, int id);
  *
  * @param msg  the cScriptPlayerMain that stopped
  */
-extern "C" void cBXScriptEngine_OnInSeqStop(void* self, void* msg)
+extern "C" void cBXScriptEngine_OnInSeqStop(cBXScriptEngine* self, void* msg)
 {
     char* request = *(char**)((char*)msg + 0xC);
-    sVEntry282A18* vt = *(sVEntry282A18**)((char*)self + 0x2A8);
+    sVEntry282A18* vt = (sVEntry282A18*)self->mVtbl;
     vt[11].fn((char*)self + vt[11].delta, msg, *(int*)(request + 0x8), *(int*)(request + 0xC));
     *(int*)(request + 0x4) = 2;
     if (*(short*)(request + 0x10) != 0) {
@@ -986,7 +987,7 @@ public:
  * @param entityType  the entity type passed to the match test
  * @return the matching script entity, or 0
  */
-extern "C" cBxsHandler2A80* cBXScriptEngine_OnInSeqRequestEntityCommInterface(void* self, void* ctx, int entityType)
+extern "C" cBxsHandler2A80* cBXScriptEngine_OnInSeqRequestEntityCommInterface(cBXScriptEngine* self, void* ctx, int entityType)
 {
     cBxsHandler2A80* buf[30];
     cBxsHandler2A80* found = 0;
@@ -1011,7 +1012,7 @@ struct sBxsThreadHdr {
     int handle;     // 0x8
 };
 
-extern "C" sBxsThreadHdr* cBXScriptEngine_CreateNewRequest(void* self, int a1);
+extern "C" sBxsThreadHdr* cBXScriptEngine_CreateNewRequest(cBXScriptEngine* self, int a1);
 // PORT: the setter's mangled signature is (void*, int); a pointer is passed as int.
 int cScriptPlayerMain_SetUserData(void* self, int a1);
 
@@ -1025,7 +1026,7 @@ int cScriptPlayerMain_SetUserData(void* self, int a1);
  *
  * @param obj  the InSeq player (cScriptPlayerMain)
  */
-extern "C" void cBXScriptEngine_OnInSeqRemoteScriptPlayerReady(void* self, void* obj)
+extern "C" void cBXScriptEngine_OnInSeqRemoteScriptPlayerReady(cBXScriptEngine* self, void* obj)
 {
     sBxsThreadHdr* request = cBXScriptEngine_CreateNewRequest(self, 1);
     request->state = 2;
@@ -1047,7 +1048,7 @@ void cBXScriptEngine_ResetRequest(void* self, void* v);
  *
  * @param ctx  the InSeq player (cScriptPlayerMain)
  */
-extern "C" void cBXScriptEngine_OnInSeqRemoteScriptPlayerDiscard(void* self, void* ctx)
+extern "C" void cBXScriptEngine_OnInSeqRemoteScriptPlayerDiscard(cBXScriptEngine* self, void* ctx)
 {
     void* request = *(void**)((char*)ctx + 0xC);
     *(int*)((char*)request + 0x4) = 7;
@@ -1081,7 +1082,7 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_GetRequestUserData1);
  * @param requestHandle  the request handle
  * @return the request's user data
  */
-extern "C" int cBXScriptEngine_GetRequestUserData1(void* self, int requestHandle)
+extern "C" int cBXScriptEngine_GetRequestUserData1(cBXScriptEngine* self, int requestHandle)
 {
     return *(int*)((char*)cBXScriptEngine_GetRequest(self, requestHandle) + 0xC);
 }
@@ -1107,7 +1108,7 @@ int cBXScriptEngine_GetRequestHandleFromPlayer(void* self, void* player)
 //100%
 INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_GetRequestPlayerByReqHandle);
 #ifdef SKIP_ASM
-extern "C" void* cBXScriptEngine_GetRequest(void* self, int a1);
+extern "C" void* cBXScriptEngine_GetRequest(cBXScriptEngine* self, int a1);
 
 /**
  * Returns the script player of a request handle.
@@ -1118,7 +1119,7 @@ extern "C" void* cBXScriptEngine_GetRequest(void* self, int a1);
  * @param requestHandle  the request handle
  * @return the request's player (an int in this view), or 0 for an unknown handle
  */
-extern "C" int cBXScriptEngine_GetRequestPlayerByReqHandle(void* self, int requestHandle)
+extern "C" int cBXScriptEngine_GetRequestPlayerByReqHandle(cBXScriptEngine* self, int requestHandle)
 {
     int* request = (int*)cBXScriptEngine_GetRequest(self, requestHandle);
     if (request == 0) {
@@ -1175,7 +1176,7 @@ struct sBxsEngineThreads {
  * @param requestType  the request type (1 = animation)
  * @return the record, or 0 when all 16 are in use
  */
-extern "C" sBxsThreadHdr* cBXScriptEngine_CreateNewRequest(void* self, int requestType)
+extern "C" sBxsThreadHdr* cBXScriptEngine_CreateNewRequest(cBXScriptEngine* self, int requestType)
 {
     sBxsEngineThreads* engine = (sBxsEngineThreads*)self;
     int i = 0;
@@ -1232,7 +1233,7 @@ INCLUDE_ASM("scripter/bxscriptengine", cBXScriptEngine_GetRequest);
  * @param requestHandle  the request handle (0-15)
  * @return the record, or 0 when it is free
  */
-extern "C" void* cBXScriptEngine_GetRequest(void* self, int requestHandle)
+extern "C" void* cBXScriptEngine_GetRequest(cBXScriptEngine* self, int requestHandle)
 {
     char* request = (char*)self + (requestHandle * 0x24 + 0x2c0);
     return *(int*)(request + 0x20) != 0 ? request : 0;

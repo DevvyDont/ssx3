@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sound/streamsys.h"
 
 //100%
 INCLUDE_ASM("sound/streamsys", cStreamInstance_cStreamInstance);
@@ -786,39 +787,38 @@ extern const sSsVtblBA648 D_004839B8_A648 __asm__("D_004839B8");
  * @param flags  bit 1: destroy the virtual bases; bit 0: delete the object
  */
 // PORT: g++ 2.95 virtual-base destruction with stack vtable this-adjust fix-ups, written out by hand.
-extern "C" void cStreamSys__cStreamSys(void* streamSysObj, int flags)
+extern "C" void cStreamSys__cStreamSys(cStreamSys* streamSysObj, int flags)
 {
-    char* self = (char*)streamSysObj;
-    *(const sSsVtblAA648**)(*(char**)(*(char**)self + 0x1D8) + 4) = &D_00483998_A648;
-    *(void***)(*(char**)self + 0xAB0) = cBankMonitor_vtbl;
-    *(const sSsVtblBA648**)(*(char**)self + 0x1D4) = &D_004839B8_A648;
+    *(const sSsVtblAA648**)(*(char**)(*(char**)streamSysObj + 0x1D8) + 4) = &D_00483998_A648;
+    *(void***)(*(char**)streamSysObj + 0xAB0) = cBankMonitor_vtbl;
+    *(const sSsVtblBA648**)(*(char**)streamSysObj + 0x1D4) = &D_004839B8_A648;
     if (flags == 0) {
         sSsVtblAA648 soundSysVtbl = D_00483998_A648;
-        *(sSsVtblAA648**)(*(char**)(*(char**)self + 0x1D8) + 4) = &soundSysVtbl;
-        char* base1 = *(char**)(*(char**)self + 0x1D8) - 0xC;
-        int soundSysDelta = self - base1;
+        *(sSsVtblAA648**)(*(char**)(*(char**)streamSysObj + 0x1D8) + 4) = &soundSysVtbl;
+        char* base1 = *(char**)(*(char**)streamSysObj + 0x1D8) - 0xC;
+        int soundSysDelta = ((char*)streamSysObj) - base1;
         soundSysVtbl.e[1].delta = D_00483998_A648.e[1].delta + soundSysDelta;
         sSsVtblBA648 bankMgrVtbl = D_004839B8_A648;
-        *(sSsVtblBA648**)(*(char**)self + 0x1D4) = &bankMgrVtbl;
-        char* base2 = *(char**)self - 0x14;
-        int bankMgrDelta = self - base2;
+        *(sSsVtblBA648**)(*(char**)streamSysObj + 0x1D4) = &bankMgrVtbl;
+        char* base2 = *(char**)streamSysObj - 0x14;
+        int bankMgrDelta = ((char*)streamSysObj) - base2;
         bankMgrVtbl.e[1].delta = D_004839B8_A648.e[1].delta + bankMgrDelta;
     }
-    for (int i = 0; i < *(int*)(self + 4); i++) {
-        void* streamInst = (*(void***)(self + 8))[i];
+    for (int i = 0; i < streamSysObj->mNumStreams; i++) {
+        void* streamInst = ((void**)streamSysObj->mStreamInstance)[i];
         if (streamInst != 0) {
             cStreamInstance__cStreamInstance(streamInst, 3);
         }
     }
-    if (*(void**)(self + 8) != 0) {
-        cMemMan_free(*(void**)(self + 8));
+    if (streamSysObj->mStreamInstance != 0) {
+        cMemMan_free(streamSysObj->mStreamInstance);
     }
     if (flags & 2) {
-        cBankManager__cBankManager(*(void**)self, 0);
-        cSoundSys__cSoundSys(*(void**)(*(char**)self + 0x1D8), 0);
+        cBankManager__cBankManager(*(void**)streamSysObj, 0);
+        cSoundSys__cSoundSys(*(void**)(*(char**)streamSysObj + 0x1D8), 0);
     }
     if (flags & 1) {
-        operator_delete((int*)self);
+        operator_delete((int*)streamSysObj);
     }
 }
 #endif
@@ -837,9 +837,9 @@ extern char str_StreamBuffer[];
  * @param heap  the memory type
  * @param extra  the extra buffer space
  */
-extern "C" void cStreamSys_STREAM_CreateInstance(void* self, int idx, int heap, int extra)
+extern "C" void cStreamSys_STREAM_CreateInstance(cStreamSys* self, int idx, int heap, int extra)
 {
-    sStreamInst_99D8** slot = (sStreamInst_99D8**)((idx << 2) + *(int*)((char*)self + 0x8));
+    sStreamInst_99D8** slot = (sStreamInst_99D8**)((idx << 2) + (int)self->mStreamInstance);
     void* mem = cMemMan_alloc(132, str_StreamBuffer, heap, 0);
     *slot = cStreamInstance_cStreamInstance((sStreamInst_99D8*)mem, (sSsPlayer_99D8*)(*(char**)self + 0x1D8), heap, extra);
 }
@@ -863,9 +863,9 @@ extern "C" sStreamInst_99D8* cStreamInstance_cStreamInstance1(sStreamInst_99D8* 
  * @param n  the maximum number of requests
  * @param maxChunks  the maximum number of chunks
  */
-extern "C" void cStreamSys_STREAM_CreateInstance1(void* self, int idx, int heap, char* mem, int size, int n, int maxChunks)
+extern "C" void cStreamSys_STREAM_CreateInstance1(cStreamSys* self, int idx, int heap, char* mem, int size, int n, int maxChunks)
 {
-    sStreamInst_99D8** slot = (sStreamInst_99D8**)((idx << 2) + *(int*)((char*)self + 0x8));
+    sStreamInst_99D8** slot = (sStreamInst_99D8**)((idx << 2) + (int)self->mStreamInstance);
     void* obj = cMemMan_alloc(132, str_StreamBuffer, heap, 0);
     *slot = cStreamInstance_cStreamInstance1((sStreamInst_99D8*)obj, (sSsPlayer_99D8*)(*(char**)self + 0x1D8), mem, size, n, maxChunks);
 }
@@ -875,7 +875,7 @@ extern "C" void cStreamSys_STREAM_CreateInstance1(void* self, int idx, int heap,
 INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_Create);
 #ifdef SKIP_ASM
 extern "C" void* func_00416210(void* dst, int c, int n);
-extern "C" void cStreamSys_STREAM_CreateInstance(void* self, int a1, int a2, int a3);
+extern "C" void cStreamSys_STREAM_CreateInstance(cStreamSys* self, int a1, int a2, int a3);
 
 struct sEntry_A910 {
     signed char kind;
@@ -947,7 +947,7 @@ extern "C" void cStreamSys_STREAM_Create(sMgr_A910** self, int streamIndex, int 
     st->a78[bankMgr->st.depth] = 127;
     st->a7C[bankMgr->st.depth] = 1;
     (*self)->st.a3C[(*self)->st.depth] = volControl;
-    cStreamSys_STREAM_CreateInstance(self, streamIndex, memType, buffSpace);
+    cStreamSys_STREAM_CreateInstance((cStreamSys*)self, streamIndex, memType, buffSpace);
     (*self)->st.depth--;
 }
 #endif
@@ -963,9 +963,9 @@ extern "C" void cStreamInstance_SetBigFile(void*, int);
  * @param i  the stream index
  * @param val  the big-file name
  */
-extern "C" void cStreamSys_STREAM_SetBigFile(void* self, int i, int val)
+extern "C" void cStreamSys_STREAM_SetBigFile(cStreamSys* self, int i, int val)
 {
-    void* stream = (*(void***)((char*)self + 0x8))[i];
+    void* stream = ((void**)self->mStreamInstance)[i];
     if (stream != 0) {
         cStreamInstance_SetBigFile(stream, val);
     }
@@ -982,13 +982,13 @@ extern "C" void cStreamInstance__cStreamInstance(void* e, int a1);
  *
  * @param i  the stream index
  */
-extern "C" void cStreamSys_STREAM_Destroy(void* self, int i)
+extern "C" void cStreamSys_STREAM_Destroy(cStreamSys* self, int i)
 {
-    void* stream = (*(void***)((char*)self + 0x8))[i];
+    void* stream = ((void**)self->mStreamInstance)[i];
     if (stream != 0) {
         cStreamInstance__cStreamInstance(stream, 3);
     }
-    (*(void***)((char*)self + 0x8))[i] = 0;
+    ((void**)self->mStreamInstance)[i] = 0;
 }
 #endif
 
@@ -1000,10 +1000,10 @@ extern "C" void cStreamInstance_Update(void* e);
 /**
  * Updates every stream instance (cStreamInstance_Update); cController_Update calls it each frame.
  */
-extern "C" void cStreamSys_STREAM_Update(void* self)
+extern "C" void cStreamSys_STREAM_Update(cStreamSys* self)
 {
-    for (int i = 0; i < *(int*)((char*)self + 0x4); i++) {
-        void* stream = (*(void***)((char*)self + 0x8))[i];
+    for (int i = 0; i < self->mNumStreams; i++) {
+        void* stream = ((void**)self->mStreamInstance)[i];
         if (stream != 0) {
             cStreamInstance_Update(stream);
         }
@@ -1019,11 +1019,11 @@ extern "C" void cStreamInstance_Pause(void* p);
 /**
  * Pauses every stream instance (cStreamInstance_Pause).
  */
-extern "C" void cStreamSys_STREAM_Pause(void* self)
+extern "C" void cStreamSys_STREAM_Pause(cStreamSys* self)
 {
     int i;
-    for (i = 0; i < *(int*)((char*)self + 0x4); i++) {
-        void* stream = *(void**)((char*)*(void**)((char*)self + 0x8) + i * 4);
+    for (i = 0; i < self->mNumStreams; i++) {
+        void* stream = *(void**)((char*)self->mStreamInstance + i * 4);
         if (stream != 0) {
             cStreamInstance_Pause(stream);
         }
@@ -1038,11 +1038,11 @@ extern "C" void cStreamInstance_Resume(void* p);
 /**
  * Resumes every stream instance (cStreamInstance_Resume).
  */
-extern "C" void cStreamSys_STREAM_Resume(void* self)
+extern "C" void cStreamSys_STREAM_Resume(cStreamSys* self)
 {
     int i;
-    for (i = 0; i < *(int*)((char*)self + 0x4); i++) {
-        void* stream = *(void**)((char*)*(void**)((char*)self + 0x8) + i * 4);
+    for (i = 0; i < self->mNumStreams; i++) {
+        void* stream = *(void**)((char*)self->mStreamInstance + i * 4);
         if (stream != 0) {
             cStreamInstance_Resume(stream);
         }
@@ -1064,9 +1064,9 @@ extern "C" int cStreamInstance_Queue(void* e, int a, int b, int c);
  * @param offset  the offset in the file
  * @return the request handle, or -1
  */
-extern "C" int cStreamSys_STREAM_Queue(void* self, int i, int holdTime, int buf, int offset)
+extern "C" int cStreamSys_STREAM_Queue(cStreamSys* self, int i, int holdTime, int buf, int offset)
 {
-    void* stream = (*(void***)((char*)self + 0x8))[i];
+    void* stream = ((void**)self->mStreamInstance)[i];
     if (stream != 0) {
         return cStreamInstance_Queue(stream, holdTime, buf, offset);
     }
@@ -1088,9 +1088,9 @@ extern "C" int cStreamInstance_Queue1(void*, int, int, int);
  * @param offset  the offset in the element
  * @return the request handle, or -1
  */
-extern "C" int cStreamSys_STREAM_Queue1(void* self, int idx, int holdTime, int element, int offset)
+extern "C" int cStreamSys_STREAM_Queue1(cStreamSys* self, int idx, int holdTime, int element, int offset)
 {
-    void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
+    void* stream = *(void**)((char*)self->mStreamInstance + idx * 4);
     if (stream != 0) {
         return cStreamInstance_Queue1(stream, holdTime, element, offset);
     }
@@ -1109,9 +1109,9 @@ extern "C" int cStreamInstance_Requests(void*);
  * @param i  the stream index
  * @return the count
  */
-extern "C" int cStreamSys_STREAM_Requests(void* self, int i)
+extern "C" int cStreamSys_STREAM_Requests(cStreamSys* self, int i)
 {
-    void* stream = (*(void***)((char*)self + 0x8))[i];
+    void* stream = ((void**)self->mStreamInstance)[i];
     if (stream != 0) {
         return cStreamInstance_Requests(stream);
     }
@@ -1127,9 +1127,9 @@ INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_Purge);
  *
  * @param i  the stream index
  */
-extern "C" void cStreamSys_STREAM_Purge(void* self, int i)
+extern "C" void cStreamSys_STREAM_Purge(cStreamSys* self, int i)
 {
-    void* stream = (*(void***)((char*)self + 0x8))[i];
+    void* stream = ((void**)self->mStreamInstance)[i];
     if (stream != 0) {
         cStreamInstance_Purge(stream);
     }
@@ -1147,10 +1147,10 @@ extern "C" float cStreamInstance_GetTimeRemaining(void* self);
  * @param i  the stream index (negative gives 0)
  * @return the time
  */
-extern "C" float cStreamSys_STREAM_TimeRemaining(void* self, int i)
+extern "C" float cStreamSys_STREAM_TimeRemaining(cStreamSys* self, int i)
 {
     void* stream;
-    if (i < 0 || (stream = (*(void***)((char*)self + 0x8))[i]) == 0) {
+    if (i < 0 || (stream = ((void**)self->mStreamInstance)[i]) == 0) {
         return 0.0f;
     }
     return cStreamInstance_GetTimeRemaining(stream);
@@ -1168,10 +1168,10 @@ extern "C" float cStreamInstance_GetRequestLength(void*);
  * @param idx  the stream index (negative gives 0)
  * @return the length
  */
-extern "C" float cStreamSys_STREAM_RequestLength(void* self, int idx)
+extern "C" float cStreamSys_STREAM_RequestLength(cStreamSys* self, int idx)
 {
     void* stream;
-    if (idx < 0 || (stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4)) == 0) {
+    if (idx < 0 || (stream = *(void**)((char*)self->mStreamInstance + idx * 4)) == 0) {
         return 0.0f;
     }
     return cStreamInstance_GetRequestLength(stream);
@@ -1189,9 +1189,9 @@ extern "C" int cStreamInstance_IsBufferFilled(void*, int);
  * @param minVal  the amount (milliseconds)
  * @return 1 or 0
  */
-extern "C" int cStreamSys_STREAM_IsBufferFilled(void* self, int idx, int minVal)
+extern "C" int cStreamSys_STREAM_IsBufferFilled(cStreamSys* self, int idx, int minVal)
 {
-    void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
+    void* stream = *(void**)((char*)self->mStreamInstance + idx * 4);
     return stream != 0 ? cStreamInstance_IsBufferFilled(stream, minVal) : 0;
 }
 #endif
@@ -1206,9 +1206,9 @@ extern "C" int cStreamInstance_IsCurrRequestedRead(void*);
  * @param idx  the stream index
  * @return 1 or 0
  */
-extern "C" int cStreamSys_STREAM_IsCurrRequestedRead(void* self, int idx)
+extern "C" int cStreamSys_STREAM_IsCurrRequestedRead(cStreamSys* self, int idx)
 {
-    void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
+    void* stream = *(void**)((char*)self->mStreamInstance + idx * 4);
     return stream != 0 ? cStreamInstance_IsCurrRequestedRead(stream) : 0;
 }
 #endif
@@ -1224,7 +1224,7 @@ int SNDSTRM_requeststatus_pbuf(int h, int* out) __asm__("SNDSTRM_requeststatus")
  * @param handle  the request handle
  * @return 1 or 0
  */
-extern "C" int cStreamSys_STREAM_IsRequestedDequeued(void* self, int handle)
+extern "C" int cStreamSys_STREAM_IsRequestedDequeued(cStreamSys* self, int handle)
 {
     int st[4];
     int result;
@@ -1246,7 +1246,7 @@ int SNDSTRM_requeststatus_pbuf(int h, int* out) __asm__("SNDSTRM_requeststatus")
  * @param handle  the request handle
  * @return 1 or 0
  */
-extern "C" int cStreamSys_STREAM_IsRequestedPlaying(void* self, int handle)
+extern "C" int cStreamSys_STREAM_IsRequestedPlaying(cStreamSys* self, int handle)
 {
     int st[4];
     int result;
@@ -1268,9 +1268,9 @@ extern "C" int cStreamInstance_Playing(void*);
  * @param i  the stream index
  * @return 1 or 0
  */
-extern "C" int cStreamSys_STREAM_Playing(void* self, int i)
+extern "C" int cStreamSys_STREAM_Playing(cStreamSys* self, int i)
 {
-    void* stream = (*(void***)((char*)self + 0x8))[i];
+    void* stream = ((void**)self->mStreamInstance)[i];
     if (stream != 0) {
         return cStreamInstance_Playing(stream);
     }
@@ -1288,9 +1288,9 @@ extern "C" void cStreamInstance_ReleaseHold(void*);
  *
  * @param idx  the stream index
  */
-extern "C" void cStreamSys_STREAM_ReleaseHold(void* self, int idx)
+extern "C" void cStreamSys_STREAM_ReleaseHold(cStreamSys* self, int idx)
 {
-    void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
+    void* stream = *(void**)((char*)self->mStreamInstance + idx * 4);
     if (stream != 0) {
         cStreamInstance_ReleaseHold(stream);
     }
@@ -1307,9 +1307,9 @@ extern "C" void cStreamInstance_ReleaseHold1(void*, int);
  * @param idx  the stream index
  * @param requestHandle  the request
  */
-extern "C" void cStreamSys_STREAM_ReleaseHold1(void* self, int idx, int requestHandle)
+extern "C" void cStreamSys_STREAM_ReleaseHold1(cStreamSys* self, int idx, int requestHandle)
 {
-    void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
+    void* stream = *(void**)((char*)self->mStreamInstance + idx * 4);
     if (stream != 0) {
         cStreamInstance_ReleaseHold1(stream, requestHandle);
     }
@@ -1325,9 +1325,9 @@ INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_SetVolControl);
  * @param i  the stream index
  * @param val  the volume control
  */
-extern "C" void cStreamSys_STREAM_SetVolControl(void* self, int i, int val)
+extern "C" void cStreamSys_STREAM_SetVolControl(cStreamSys* self, int i, int val)
 {
-    void* stream = (*(void***)((char*)self + 0x8))[i];
+    void* stream = ((void**)self->mStreamInstance)[i];
     if (stream != 0) {
         *(int*)((char*)stream + 0x10) = val;
     }
@@ -1343,9 +1343,9 @@ INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_SetBaseVolume);
  * @param idx  the stream index
  * @param val  the volume
  */
-extern "C" void cStreamSys_STREAM_SetBaseVolume(void* self, int idx, int val)
+extern "C" void cStreamSys_STREAM_SetBaseVolume(cStreamSys* self, int idx, int val)
 {
-    void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
+    void* stream = *(void**)((char*)self->mStreamInstance + idx * 4);
     if (stream != 0) {
         cStreamInstance_SetBaseVolume(stream, val);
     }
@@ -1360,9 +1360,9 @@ INCLUDE_ASM("sound/streamsys", cStreamSys_STREAM_GetHandle);
  * @param idx  the stream index
  * @return the handle, or -1
  */
-extern "C" int cStreamSys_STREAM_GetHandle(void* self, int idx)
+extern "C" int cStreamSys_STREAM_GetHandle(cStreamSys* self, int idx)
 {
-    void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
+    void* stream = *(void**)((char*)self->mStreamInstance + idx * 4);
     if (stream != 0) {
         return *(int*)((char*)stream + 0x8);
     }
@@ -1381,9 +1381,9 @@ extern "C" int cStreamInstance_GetCurrActiveSampleHandle(void*);
  * @param i  the stream index
  * @return the request handle, or -1
  */
-extern "C" int cStreamSys_STREAM_GetCurrActiveSampleHandle(void* self, int i)
+extern "C" int cStreamSys_STREAM_GetCurrActiveSampleHandle(cStreamSys* self, int i)
 {
-    void* stream = (*(void***)((char*)self + 0x8))[i];
+    void* stream = ((void**)self->mStreamInstance)[i];
     if (stream != 0) {
         return cStreamInstance_GetCurrActiveSampleHandle(stream);
     }
@@ -1417,7 +1417,7 @@ extern "C" void SNDSTRM_modifyhold(int, int);
  * @param monitorInst  the monitor instance
  * @return 1
  */
-extern "C" int cStreamSys_STREAM_ReleaseHoldCallback(void* self, void* monitorInst)
+extern "C" int cStreamSys_STREAM_ReleaseHoldCallback(cStreamSys* self, void* monitorInst)
 {
     SNDSTRM_modifyhold(*(int*)((char*)monitorInst + 0x1C), 0);
     return 1;
@@ -1435,9 +1435,9 @@ extern "C" int cStreamInstance_TimeMult(void*, int);
  * @param multAmount  the multiplier
  * @return the driver's result, or -1
  */
-extern "C" int cStreamSys_STREAM_TimeMult(void* self, int idx, int multAmount)
+extern "C" int cStreamSys_STREAM_TimeMult(cStreamSys* self, int idx, int multAmount)
 {
-    void* stream = *(void**)(*(char**)((char*)self + 0x8) + idx * 4);
+    void* stream = *(void**)((char*)self->mStreamInstance + idx * 4);
     return stream != 0 ? cStreamInstance_TimeMult(stream, multAmount) : -1;
 }
 #endif
@@ -1537,7 +1537,7 @@ INCLUDE_ASM("sound/streamsys", cController__cController);
 void operator_delete(int* ptr);
 extern "C" void cBankManager__cBankManager(void* self, int flags);
 extern "C" void cCrowdSys__cCrowdSys(void* self, int flags);
-extern "C" void cStreamSys__cStreamSys(void* self, int flags);
+extern "C" void cStreamSys__cStreamSys(cStreamSys* self, int flags);
 extern "C" void cSoundSys__cSoundSys(void* self, int flags);
 extern "C" void cSpeechSys__cSpeechSys(char* self, int flags);
 extern "C" void func_002B3398(char* self, int flags);
@@ -1604,7 +1604,7 @@ extern "C" void cController__cController(char* self, int flags)
     func_002B3398(mon, 0);
     cCrowdSys__cCrowdSys(self, 0);
     if (flags & 2) {
-        cStreamSys__cStreamSys(*(void**)(self + 0x118), 0);
+        cStreamSys__cStreamSys((cStreamSys*)(*(void**)(self + 0x118)), 0);
         cBankManager__cBankManager(**(void***)(self + 0x118), 0);
         cSoundSys__cSoundSys(*(void**)(**(char***)(self + 0x118) + 0x1D8), 0);
     }
@@ -1754,7 +1754,7 @@ INCLUDE_ASM("sound/streamsys", cController_Update);
 #ifdef SKIP_ASM
 extern "C" void cAsyncSys_ASYNCSYS_Update(void* snd);
 extern "C" void func_002A6D18(void* self);
-extern "C" void cStreamSys_STREAM_Update(void* self);
+extern "C" void cStreamSys_STREAM_Update(cStreamSys* self);
 extern "C" void func_002B0C78(void* self);
 extern "C" void func_002B4388(void* self);
 
@@ -1779,7 +1779,7 @@ extern "C" void cController_Update(void* self, float frameTime)
     entry->fn(bankMon + entry->delta, frameTime);
     func_002B4388(sys);
     func_002B0C78((char*)self + 0x5560);
-    cStreamSys_STREAM_Update(*sys);
+    cStreamSys_STREAM_Update((cStreamSys*)(*sys));
 }
 #endif
 

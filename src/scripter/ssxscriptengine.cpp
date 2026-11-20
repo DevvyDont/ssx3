@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/bxscriptengine.h"
 #include "scripter/scriptobjcamera.h"
 #include "scripter/scriptdatabaseobject.h"
 #include "render/ps2graphicsman.h"
@@ -4263,7 +4264,7 @@ extern cScriptDatabaseObject* cScriptDatabaseObject_mpDatabaseObject;
  */
 extern "C" void cScriptDatabaseObject__cScriptDatabaseObject(cScriptDatabaseObject* self, int flags)
 {
-    *(void**)((char*)self + 0x2A8) = cScriptDatabaseObject_vtbl;
+    self->mVtbl = (void**)cScriptDatabaseObject_vtbl;
     cScriptDatabaseObject_RemoveObjectAll(self);
     cScriptDatabaseObject_mpDatabaseObject = 0;
     if (flags & 1) {
@@ -4393,7 +4394,7 @@ extern "C" void cScriptDatabaseObject_RemoveObjectAll(cScriptDatabaseObject* sel
     int i;
     for (i = 0; i < 20; i++) {
         if (((int*)self)[i] != 0) {
-            sVEntry0027D050* vt = *(sVEntry0027D050**)((char*)self + 0x2A8);
+            sVEntry0027D050* vt = (sVEntry0027D050*)self->mVtbl;
             vt[3].fn((char*)self + vt[3].delta, i);
         }
     }
@@ -4579,9 +4580,9 @@ struct sScriptEng0050 {
  * @param entity  the script entity
  * @return the player ID, or -1
  */
-extern "C" int cScriptDatabaseObject_GetPlayerIDByEntity(sScriptEng0050* self, void* entity)
+extern "C" int cScriptDatabaseObject_GetPlayerIDByEntity(cScriptDatabaseObject* self, void* entity)
 {
-    sVar0050* record = &self->vars[*(int*)((char*)entity + 0x4)];
+    sVar0050* record = &((sVar0050*)&self->mEntityDatabase[0])[*(int*)((char*)entity + 0x4)];
     if (record->type != 1) {
         return -1;
     }
@@ -4821,18 +4822,18 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_GetAvailableEntiti
  * @param max  the most to list
  * @return the number listed
  */
-extern "C" int cScriptDatabaseObject_GetAvailableEntities(sScriptEng0050* self, int key, int* out, int max)
+extern "C" int cScriptDatabaseObject_GetAvailableEntities(cScriptDatabaseObject* self, int key, int* out, int max)
 {
     int n = 0;
     int i = 0;
-    sVar0050* record = self->vars;
+    sVar0050* record = ((sVar0050*)&self->mEntityDatabase[0]);
     while (i < 30 && n != max) {
         if (record->a != 0 && record->type != 1 && (record->e < 0 || record->e == key)) {
             *out++ = record->a;
             n++;
         }
         i++;
-        if (i < 30) record = &self->vars[i];
+        if (i < 30) record = &((sVar0050*)&self->mEntityDatabase[0])[i];
     }
     return n;
 }
@@ -4929,7 +4930,7 @@ struct sSeVEntryD688 {
 extern "C" void cScriptObjCamera_SetCameraEntity(cScriptObjCamera* self, void* anim)
 {
     if (anim != 0) {
-        int id = cScriptDatabaseObject_GetPlayerIDByEntity((sScriptEng0050*)cScriptDatabaseObject_GetDatabaseObject(), anim);
+        int id = cScriptDatabaseObject_GetPlayerIDByEntity((cScriptDatabaseObject*)((sScriptEng0050*)cScriptDatabaseObject_GetDatabaseObject()), anim);
         if (self->mpCameraEntity != 0) {
             sSeVEntryD688* vt = (sSeVEntryD688*)self->mVtbl;
             vt[5].fn(((char*)self) + vt[5].delta, self->mPlayerID);
@@ -7127,7 +7128,7 @@ extern "C" int cScriptObjCameraManager_GetCameraObjectByTrack(void* self, int i)
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_DoCameraTransition);
 #ifdef SKIP_ASM
 extern "C" cScriptDatabaseObject* cScriptDatabaseObject_GetDatabaseObject(void);
-extern "C" int cScriptDatabaseObject_GetPlayerIDByEntity(sScriptEng0050* self, void* a1);
+extern "C" int cScriptDatabaseObject_GetPlayerIDByEntity(cScriptDatabaseObject* self, void* a1);
 void cScriptObjCamera_SetCameraWeight(void* self, float val);
 extern "C" void cScriptObjCameraManager_SetupCameraObject(void* self, int a1, int a2);
 // PORT: cScriptObjCameraManager_GetCameraObjectByTrack is defined returning int, but it returns a pointer here; bound by asm label.
@@ -7201,7 +7202,7 @@ extern "C" void cScriptObjCameraManager_DoCameraTransition(void* self, int* info
             *(int*)((char*)self + 0xE8) = 0;
             return;
         }
-        int id = cScriptDatabaseObject_GetPlayerIDByEntity((sScriptEng0050*)cScriptDatabaseObject_GetDatabaseObject(), (char*)self + 0x10);
+        int id = cScriptDatabaseObject_GetPlayerIDByEntity((cScriptDatabaseObject*)((sScriptEng0050*)cScriptDatabaseObject_GetDatabaseObject()), (char*)self + 0x10);
         cScriptObjTransition_SetTransition_f(*pf, id, node->kind->a, currFrame - (float)node->start, (float)node->len, 0.0f, 0.0f);
     }
     else if (k > 0)
@@ -7212,7 +7213,7 @@ extern "C" void cScriptObjCameraManager_DoCameraTransition(void* self, int* info
             *(int*)((char*)self + 0xE8) = 0;
             return;
         }
-        int id = cScriptDatabaseObject_GetPlayerIDByEntity((sScriptEng0050*)cScriptDatabaseObject_GetDatabaseObject(), (char*)self + 0x10);
+        int id = cScriptDatabaseObject_GetPlayerIDByEntity((cScriptDatabaseObject*)((sScriptEng0050*)cScriptDatabaseObject_GetDatabaseObject()), (char*)self + 0x10);
         cScriptObjTransition_SetTransition1(*pf, id, node->kind->a, node->kind->b, currFrame - (float)node->start, (float)node->kind->d, (float)node->len, (float)node->kind->c);
     }
 }
@@ -7232,16 +7233,16 @@ extern void* D_004A34E8;
  *
  * @return @p self
  */
-extern "C" void* cBXScriptEngine_cBXScriptEngine(void* self)
+extern "C" void* cBXScriptEngine_cBXScriptEngine(cBXScriptEngine* self)
 {
     cScriptDatabaseObject_cScriptDatabaseObject((cScriptDatabaseObject*)self);
-    *(void**)((char*)self + 0x2AC) = D_00482450;
-    *(void**)((char*)self + 0x2A8) = cBXScriptEngine_vtbl;
-    D_004A34E8 = self;
-    *(int*)((char*)self + 0x2B0) = 0;
-    *(int*)((char*)self + 0x2B4) = 0;
+    self->mInSeqCommVtbl = (void**)D_00482450;
+    self->mVtbl = (void**)cBXScriptEngine_vtbl;
+    D_004A34E8 = ((void*)self);
+    self->mpScriptDatabase = 0;
+    self->mScriptDatabaseSize = 0;
     cBXScriptEngine_ResetInstVars(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -7261,10 +7262,10 @@ extern void* D_004A34E8;
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cBXScriptEngine__cBXScriptEngine(void* self, int flags)
+extern "C" void cBXScriptEngine__cBXScriptEngine(cBXScriptEngine* self, int flags)
 {
-    *(void**)((char*)self + 0x2AC) = D_00482450;
-    *(void**)((char*)self + 0x2A8) = cBXScriptEngine_vtbl;
+    self->mInSeqCommVtbl = (void**)D_00482450;
+    self->mVtbl = (void**)cBXScriptEngine_vtbl;
     cBXScriptEngine_PurgeBXEngine(self);
     D_004A34E8 = 0;
     cScriptDatabaseObject__cScriptDatabaseObject((cScriptDatabaseObject*)self, flags);

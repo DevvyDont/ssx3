@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/fememcard.h"
 #include "fe/feinput.h"
 #include "fe/festatecredits.h"
 #include "fe/festatetransition.h"
@@ -4156,17 +4157,17 @@ extern unsigned short D_004A1390[];
  *
  * @return @p self
  */
-extern "C" void *cFEMemCard_cFEMemCard1(void *self) {
+extern "C" void *cFEMemCard_cFEMemCard1(cFEMemCard* self) {
     cUIState_cUIState_DE18(self, 0);
-    *(int *)((char *)self + 0x98) = 0;
-    *(int *)((char *)self + 0x48) = 0;
-    *(int **)((char *)self + 8) = cOVState_vtbl;
-    *(int *)((char *)self + 0x4C) = 0;
-    *(int *)((char *)self + 0x54) = 0;
+    self->mOVID = 0;
+    self->mDoneTransition = 0;
+    self->mVtbl = (void**)cOVState_vtbl;
+    self->mAllowPauseMenu = 0;
+    self->mRemovePDA = 0;
     unsigned short emptyChar = D_004A1390[0];
-    *(int **)((char *)self + 8) = cFEMemCard_vtbl;
+    self->mVtbl = (void**)cFEMemCard_vtbl;
     *(unsigned short *)((char *)self + 0x58) = emptyChar;
-    return self;
+    return ((void*)self);
 }
 #endif
 

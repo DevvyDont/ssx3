@@ -1,4 +1,5 @@
 #include "common.h"
+#include "scripter/bxscriptengine.h"
 #include "scripter/scriptobjcamera.h"
 #include "scripter/ssxscriptengine.h"
 
@@ -259,8 +260,8 @@ INCLUDE_ASM("scripter/all_in_one_scripter", cBXScriptEngine_GetScriptDatabaseSiz
  * @param bxEngine  the script engine (cSSXScriptEngine)
  * @return mScriptDatabaseSize
  */
-extern "C" int cBXScriptEngine_GetScriptDatabaseSize(void *bxEngine) {
-    return (*(int *)((char*)(bxEngine) + (0x2B4)));
+extern "C" int cBXScriptEngine_GetScriptDatabaseSize(cBXScriptEngine* bxEngine) {
+    return (bxEngine->mScriptDatabaseSize);
 }
 #endif
 
