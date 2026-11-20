@@ -275,6 +275,13 @@ extern char D_00528FC0[];       /* buffer shared by func_0040B400 / func_0040B5B
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FD810);
 #ifdef SKIP_ASM
+/**
+ * Holds the DNAS module's import table: the body is 59 words of game function and data addresses (printf-style output,
+ * thread, semaphore, cache, SIF RPC, alarm, interrupt and GS calls, several data blocks), followed by a bare return.
+ *
+ * func_003FCFD8 relocates the module's references into its "reloctable" symbol to the matching words here; the table
+ * ends at func_003FD908.
+ */
 // From peak3project's fork (github.com/peak3project/ssx3); peak3 spelled the table as raw numbers.
 // PORT: PS2-only, not code: a function whose body is an asm table of the addresses of 59 functions and data objects
 // (the compiler adds the `jr $31; nop` after it). The loader func_003FCFD8 hands it, with its end marker func_003FD908,
@@ -345,6 +352,10 @@ void func_003FD810(void) {
 }
 #endif
 
+/**
+ * Empty function that marks the end of the DNAS import table func_003FD810 (func_003FCFD8 uses the distance between the
+ * two as the table size).
+ */
 void func_003FD908(void) {
 }
 
@@ -357,6 +368,19 @@ extern void func_00424880(int);
 extern void SetGsCrt(int, int, int);
 extern int GsPutIMR(int);
 void *func_003FDAA0(void);
+/**
+ * Resets or re-initialises the GS display (the state block D_00451550, see func_003FDAA0).
+ *
+ * Mode 0: resets the GS (CSR 0x200), stores the interlace, video mode and field/frame setting and the GS revision (CSR
+ * bits 16..23), masks GS interrupts (GsPutIMR 0xFF00), removes the interrupt handler recorded in the block from INTC
+ * line 2 and calls SetGsCrt. Mode 1: only flushes the GS (CSR 0x100). Mode 5: like mode 0 without the reset, the mask
+ * and the handler removal. func_0037BD98 calls it.
+ *
+ * @param mode  0, 1 or 5
+ * @param interlace  interlace flag (bit 0 goes to SetGsCrt)
+ * @param videoMode  video mode
+ * @param frameMode  nonzero for frame mode
+ */
 void func_003FD910(short mode, short interlace, short videoMode, short frameMode) {
     struct S3FD910 *gsState;
     int e;
@@ -396,6 +420,11 @@ void func_003FD910(short mode, short interlace, short videoMode, short frameMode
 INCLUDE_ASM("seg/seg_2FE810", func_003FDAA0);
 #ifdef SKIP_ASM
 extern char D_00451550[];
+/**
+ * Returns the GS state block D_00451550 (settings stored by func_003FD910; SNDPLATFORM_init reads it too).
+ *
+ * @return the block
+ */
 void *func_003FDAA0(void) {
     return D_00451550;
 }
@@ -406,7 +435,10 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FDAB0);
 #ifdef SKIP_ASM
 typedef unsigned int u_long128_DAB0 __attribute__((mode(TI))); /* PORT: Sony's u_long128 (eetypes.h) */
 extern u_long128_DAB0 D_00451560[2]; /* VIF1 init codes sent to the VIF1 FIFO */
-/* Reset VIF1 and the GIF and send the VIF1 init codes (libgraph sceGsResetPath). */
+/**
+ * Resets the drawing path to the GS: VIF1 reset with its errors masked, VU1 reset (FBRST bit 9), two quadwords from
+ * D_00451560 into the VIF1 FIFO, then a GIF reset. cPS2GraphicsMan_Init calls it. Sony's libgraph sceGsResetPath.
+ */
 void func_003FDAB0(void) {
     *(volatile int *)0x10003C10 = 1;    /* VIF1_FBRST */
     *(volatile int *)0x10003C20 = 2;    /* VIF1_ERR */
@@ -533,7 +565,13 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FDE30);
 #ifdef SKIP_ASM
 extern void func_00425C60();
 extern char D_004977D8[];
-/* wait for the channel's STR bit to clear; after 0x1000000 polls log and force-stop it */
+/**
+ * Waits for a DMA channel to finish (its CHCR STR bit to clear). After 0x1000000 polls it prints "libdma: sync timeout"
+ * and force-stops the channel (func_003FE5C8), which ends the wait.
+ *
+ * @param d  the channel's registers
+ * @param m  ignored (func_003FE558 passes its mode)
+ */
 void func_003FDE30(d, m)
     sDmaChan *d;
     int m;
@@ -556,7 +594,17 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FDEA0);
 extern char D_004977D8[];
 extern void func_003FDEA0_log(char *) __asm__("func_00425C60");
 extern int func_003FE5C8();
-/* wait until the channel's MADR reaches lim (tmo polls, default 0x1000000) */
+/**
+ * Waits until a DMA channel's MADR reaches @p lim.
+ *
+ * Polls up to @p tmo times (0x1000000 when 0); past that, every further poll prints "libdma: sync timeout" and
+ * force-stops the channel. Quirk: the loop's only exit is MADR reaching @p lim, so a stopped channel that never gets
+ * there loops forever.
+ *
+ * @param d  the channel's registers
+ * @param lim  address to wait for
+ * @param tmo  poll limit, or 0 for the default
+ */
 void func_003FDEA0(sDmaChan *d, unsigned lim, int tmo) {
     int t = 0x1000000;
     if (tmo)
@@ -573,6 +621,13 @@ void func_003FDEA0(sDmaChan *d, unsigned lim, int tmo) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FDF28);
 #ifdef SKIP_ASM
+/**
+ * Converts a scratchpad address (0x7xxxxxxx) into the form DMA registers take (low 28 bits with bit 31 set); other
+ * addresses pass through.
+ *
+ * @param addr  the address
+ * @return the DMA address
+ */
 unsigned func_003FDF28(unsigned addr) {
     if ((addr >> 28) == 7) {
         addr &= 0xFFFFFFF;
@@ -585,6 +640,12 @@ unsigned func_003FDF28(unsigned addr) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FDF50);
 #ifdef SKIP_ASM
+/**
+ * Zeroes @p n bytes at @p dst.
+ *
+ * @param dst  destination
+ * @param n  byte count
+ */
 void func_003FDF50(char *dst, int n) {
     while (n--)
         *dst++ = 0;
@@ -594,6 +655,12 @@ void func_003FDF50(char *dst, int n) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FDF88);
 #ifdef SKIP_ASM
+/**
+ * Returns the register block address of DMA channel @p n (table D_00451590), or 0 for a channel above 9.
+ *
+ * @param n  channel number
+ * @return the register address, or 0
+ */
 int func_003FDF88(unsigned n) {
     return n < 10 ? D_00451590[n] : 0;
 }
@@ -605,6 +672,16 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FDFB0);
 extern int D_004977F0[];
 extern void func_003FDF50(char *, int);
 extern int func_003FE090(sDmaEnv *);
+/**
+ * Resets the DMA controller.
+ *
+ * Clears CHCR, MADR, TADR, ASR0, ASR1 and SADR of every channel enabled in D_004977F0, clears the D_STAT status flags
+ * and turns off its interrupt masks (writing back the set mask bits toggles them), applies an all-zero environment
+ * (func_003FE090) and, when @p a is 1, sets the DMA enable bit of D_CTRL. cPS2GraphicsMan_Init calls it.
+ *
+ * @param a  1 to enable DMA afterwards
+ * @return the D_CTRL enable bit as it was on entry
+ */
 int func_003FDFB0(int a) {
     sDmaEnv env;
     int i;
@@ -638,6 +715,15 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FE090);
 extern unsigned char D_00497818[];
 extern unsigned char D_00497828[];
 extern unsigned char D_00497838[];
+/**
+ * Applies a DMA environment to the controller registers and keeps a copy in D_005261D0.
+ *
+ * D_CTRL gets the stall source, stall drain and MFIFO fields from the tables D_00497818 / D_00497828 / D_00497838 and
+ * the release cycle (0 turns release off); D_PCR, D_SQWC, D_RBOR and D_RBSR come from the other fields.
+ *
+ * @param p  the environment
+ * @return 0, or -1 .. -4 when the stall source, stall drain, MFIFO or release-cycle field is out of range
+ */
 int func_003FE090(sDmaEnv *p) {
     unsigned c;
     unsigned pcr;
@@ -679,6 +765,12 @@ int func_003FE090(sDmaEnv *p) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE268);
 #ifdef SKIP_ASM
+/**
+ * Copies the DMA environment last applied (D_005261D0) into @p d.
+ *
+ * @param d  destination
+ * @return @p d
+ */
 sDmaEnv *func_003FE268(sDmaEnv *d) {
     *d = D_005261D0;
     return d;
@@ -688,6 +780,12 @@ sDmaEnv *func_003FE268(sDmaEnv *d) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE2A0);
 #ifdef SKIP_ASM
+/**
+ * Writes the DMA stall address register D_STADR and returns its previous value.
+ *
+ * @param newValue  new value
+ * @return the old value
+ */
 int func_003FE2A0(int newValue) {
     volatile int *stadrReg = (volatile int *)0x1000E060;
     int oldValue = *stadrReg;
@@ -701,6 +799,15 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FE2B8);
 #ifdef SKIP_ASM
 extern unsigned func_003FDF28(unsigned);
 extern void func_003FDE30();
+/**
+ * Starts a source-chain DMA transfer: waits for the channel (func_003FDE30), sets TADR to @p addr (DMA form), QWC 0 and
+ * CHCR to chain mode, from memory, started.
+ *
+ * TADR is written only when it does not read back as 0xFFFFFFFF.
+ *
+ * @param dmaChan  the channel's registers
+ * @param addr  first DMA tag
+ */
 void func_003FE2B8(sDmaChan *dmaChan, unsigned addr) {
     unsigned physAddr = func_003FDF28(addr);
     func_003FDE30(dmaChan);
@@ -714,6 +821,14 @@ void func_003FE2B8(sDmaChan *dmaChan, unsigned addr) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE320);
 #ifdef SKIP_ASM
+/**
+ * Starts a normal-mode DMA transfer from memory: waits for the channel, sets MADR (unless it reads back 0xFFFFFFFF) and
+ * QWC, and starts it.
+ *
+ * @param dmaChan  the channel's registers
+ * @param addr  source address
+ * @param qwordCount  quadword count
+ */
 void func_003FE320(sDmaChan *dmaChan, unsigned addr, int qwordCount) {
     unsigned physAddr = func_003FDF28(addr);
     func_003FDE30(dmaChan);
@@ -727,6 +842,13 @@ void func_003FE320(sDmaChan *dmaChan, unsigned addr, int qwordCount) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE398);
 #ifdef SKIP_ASM
+/**
+ * Starts an interleave-mode DMA transfer from memory (as func_003FE320, CHCR mode 2).
+ *
+ * @param dmaChan  the channel's registers
+ * @param addr  source address
+ * @param qwordCount  quadword count
+ */
 void func_003FE398(sDmaChan *dmaChan, unsigned addr, int qwordCount) {
     unsigned physAddr = func_003FDF28(addr);
     func_003FDE30(dmaChan);
@@ -741,6 +863,12 @@ void func_003FE398(sDmaChan *dmaChan, unsigned addr, int qwordCount) {
 INCLUDE_ASM("seg/seg_2FE810", func_003FE410);
 #ifdef SKIP_ASM
 extern void func_003FDE30();
+/**
+ * Starts a chain-mode DMA transfer into memory: waits for the channel, clears QWC and starts it in chain mode with the
+ * direction bit clear (to memory).
+ *
+ * @param dmaChan  the channel's registers
+ */
 void func_003FE410(sDmaChan *dmaChan) {
     func_003FDE30(dmaChan);
     dmaChan->qwc = 0;
@@ -751,6 +879,14 @@ void func_003FE410(sDmaChan *dmaChan) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE458);
 #ifdef SKIP_ASM
+/**
+ * Starts a normal-mode DMA transfer into memory: waits for the channel, sets MADR (unless it reads back 0xFFFFFFFF) and
+ * QWC, and starts it with the direction bit clear.
+ *
+ * @param dmaChan  the channel's registers
+ * @param addr  destination address
+ * @param qwordCount  quadword count
+ */
 void func_003FE458(sDmaChan *dmaChan, unsigned addr, int qwordCount) {
     unsigned physAddr = func_003FDF28(addr);
     int chcrBits;
@@ -766,6 +902,13 @@ void func_003FE458(sDmaChan *dmaChan, unsigned addr, int qwordCount) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE4D8);
 #ifdef SKIP_ASM
+/**
+ * Starts an interleave-mode DMA transfer into memory (as func_003FE458, CHCR mode 2).
+ *
+ * @param dmaChan  the channel's registers
+ * @param addr  destination address
+ * @param qwordCount  quadword count
+ */
 void func_003FE4D8(sDmaChan *dmaChan, unsigned addr, int qwordCount) {
     unsigned physAddr = func_003FDF28(addr);
     int chcrBits;
@@ -782,6 +925,14 @@ void func_003FE4D8(sDmaChan *dmaChan, unsigned addr, int qwordCount) {
 INCLUDE_ASM("seg/seg_2FE810", func_003FE558);
 #ifdef SKIP_ASM
 extern void func_003FDE30(sDmaChan *, int);
+/**
+ * Checks or waits for a DMA channel: mode 1 returns its STR (busy) bit; any other mode waits for it (func_003FDE30) and
+ * returns 0.
+ *
+ * @param dmaChan  the channel's registers
+ * @param mode  1 to poll, else wait
+ * @return the busy bit, or 0
+ */
 int func_003FE558(sDmaChan *dmaChan, int mode) {
     if (mode == 1)
         return ((unsigned)dmaChan->chcr >> 8) & 1;
@@ -794,6 +945,16 @@ int func_003FE558(sDmaChan *dmaChan, int mode) {
 INCLUDE_ASM("seg/seg_2FE810", func_003FE590);
 #ifdef SKIP_ASM
 extern void func_003FDEA0(sDmaChan *, unsigned, int);
+/**
+ * Checks or waits for a DMA channel's progress: mode 1 returns whether MADR is still below @p n; any other mode waits
+ * until it is not (func_003FDEA0 with poll limit @p x) and returns 0.
+ *
+ * @param dmaChan  the channel's registers
+ * @param n  address to reach
+ * @param mode  1 to poll, else wait
+ * @param x  poll limit for the wait (0 for the default)
+ * @return 1 while below, or 0
+ */
 int func_003FE590(sDmaChan *dmaChan, unsigned n, int mode, int x) {
     if (mode == 1)
         return (unsigned)dmaChan->madr < n;
@@ -807,7 +968,13 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FE5C8);
 #ifdef SKIP_ASM
 extern int func_0042C078();
 extern void func_0042C0C0(void);
-/* force-stop a channel: suspend DMA (D_ENABLEW), clear CHCR.STR, restore */
+/**
+ * Force-stops a DMA channel: with interrupts disabled, suspends all DMA through D_ENABLEW (bit 16) unless already
+ * suspended, clears the channel's STR bit, restores D_ENABLEW and re-enables interrupts if they were on.
+ *
+ * @param dmaChan  the channel's registers
+ * @return the channel's CHCR before the stop
+ */
 int func_003FE5C8(sDmaChan *dmaChan) {
     int x, enabler, intrState;
     unsigned oldChcr;
@@ -828,6 +995,13 @@ int func_003FE5C8(sDmaChan *dmaChan) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE660);
 #ifdef SKIP_ASM
+/**
+ * Writes a DMA CHCR register and returns its previous STR bit.
+ *
+ * @param reg  the register
+ * @param newValue  new value
+ * @return bit 8 of the old value
+ */
 unsigned func_003FE660(unsigned *reg, unsigned newValue) {
     unsigned oldValue = *reg;
     *reg = newValue;
@@ -848,6 +1022,11 @@ static inline unsigned int vu0_cfc2_678(void)
 	.set reorder" : "=r"(v));
     return v;
 }
+/**
+ * Returns whether VU0 is running a microprogram (VPU-STAT bits 0..3 equal to 1: busy, no stop condition).
+ *
+ * @return 1 when running
+ */
 int func_003FE678(void) {
     return (vu0_cfc2_678() & 0xF) == 1;
 }
@@ -872,6 +1051,9 @@ static inline void vu0_ctc2_vi28_690(unsigned int v)
 	ctc2.ni %0, $vi28
 	.set reorder" : : "r"(v));
 }
+/**
+ * Resets VU0 (FBRST bit 1).
+ */
 void func_003FE690(void) {
     vu0_ctc2_vi28_690(vu0_cfc2_vi28_690() | 0x2);
 }
@@ -897,6 +1079,11 @@ static inline void vu0_ctc2_vi28_6A8(unsigned int v)
 	ctc2.ni %0, $vi28
 	.set reorder" : : "r"(v));
 }
+/**
+ * Stops VU0: forces a break (FBRST bit 0) when it is running.
+ *
+ * @return 1 when VU0 is now stopped or idle (states 0, 3, 4 of func_003FE7D8), 0 when it is halted by a D or T bit
+ */
 int func_003FE6A8(void) {
     int result = 0;
     switch (func_003FE7D8_6A8()) {
@@ -920,6 +1107,11 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FE708);
 extern int func_003FE7D8(void);
 extern int func_003FE828(void);
 extern void func_003FE818(int);
+/**
+ * Resumes VU0 after a D-bit, T-bit or forced stop: restarts it at its TPC (func_003FE828, func_003FE818).
+ *
+ * @return 1 when restarted, 0 when it was not stopped
+ */
 int func_003FE708(void) {
     int result = 0;
     int n = func_003FE7D8();
@@ -948,6 +1140,11 @@ static inline void vu0_ctc2_758(unsigned int v)
 {
     __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi28\n\t.set reorder" : : "r"(v));
 }
+/**
+ * Enables or disables VU0's D-bit stops (FBRST bit 2).
+ *
+ * @param enable  1 to enable
+ */
 void func_003FE758(int enable) {
     unsigned int ctrlBits = vu0_cfc2_758();
     if (enable == 1)
@@ -973,6 +1170,11 @@ static inline void vu0_ctc2_788(unsigned int v)
 {
     __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi28\n\t.set reorder" : : "r"(v));
 }
+/**
+ * Enables or disables VU0's T-bit stops (FBRST bit 3).
+ *
+ * @param enable  1 to enable
+ */
 void func_003FE788(int enable) {
     unsigned int ctrlBits = vu0_cfc2_788();
     if (enable == 1)
@@ -994,6 +1196,11 @@ static inline unsigned int vu0_cfc2_vi28_7B8(void)
     __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi28\n\t.set reorder" : "=r"(v));
     return v;
 }
+/**
+ * Returns whether VU0's D-bit stops are enabled (FBRST bit 2).
+ *
+ * @return 1 or 0
+ */
 int func_003FE7B8(void) {
     return (vu0_cfc2_vi28_7B8() >> 2) & 1;
 }
@@ -1012,6 +1219,11 @@ static inline unsigned int vu0_cfc2_7C8(void)
 	.set reorder" : "=r"(v));
     return v;
 }
+/**
+ * Returns whether VU0's T-bit stops are enabled (FBRST bit 3).
+ *
+ * @return 1 or 0
+ */
 int func_003FE7C8(void) {
     return (vu0_cfc2_7C8() >> 3) & 1;
 }
@@ -1030,6 +1242,11 @@ static inline unsigned int vu0_cfc2_vi29_7D8(void)
 	.set reorder" : "=r"(v));
     return v;
 }
+/**
+ * Returns VU0's state from VPU-STAT: 1 stopped by a D bit, 2 by a T bit, 3 by a forced break, 4 running, 0 idle.
+ *
+ * @return the state
+ */
 int func_003FE7D8(void) {
     unsigned int vpuStat = vu0_cfc2_vi29_7D8();
     if (vpuStat & 2)
@@ -1045,7 +1262,11 @@ int func_003FE7D8(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FE818);
 #ifdef SKIP_ASM
-/* Start the VU0 micro program at address `addr` (low 16 bits) through $vi27 (CMSAR0). */
+/**
+ * Starts VU0 at a microprogram address (CMSAR0, then vcallmsr).
+ *
+ * @param addr  start address (low 16 bits)
+ */
 /* PORT: PS2-only VU0 macro-mode ctc2 + vcallmsr. */
 void func_003FE818(int addr) {
     __asm__ volatile("ctc2 %0, $vi27\n\tvcallmsr $vi27" : : "r"(addr & 0xFFFF));
@@ -1065,6 +1286,11 @@ static inline unsigned int vu0_cfc2_828(void)
 	.set reorder" : "=r"(v));
     return v;
 }
+/**
+ * Returns VU0's TPC (the address it stopped at), low 16 bits.
+ *
+ * @return the address
+ */
 int func_003FE828(void) {
     return vu0_cfc2_828() & 0xFFFF;
 }
@@ -1086,7 +1312,15 @@ typedef struct {
     unsigned short vi[16];
 } sVu0Cnd;
 extern int func_003FE678(void);
-/* Snapshot the VU0 registers into *cnd (libdev sceDevVu0GetCnd); fails while VU0 is running. */
+/**
+ * Saves VU0's registers into @p cnd unless VU0 is running (Sony's libdev sceDevVu0GetCnd).
+ *
+ * Stores the status, MAC, clipping, R, I and Q registers and VI00..VI15. Quirk: the 32 vector registers are stored from
+ * address 0, not into @p cnd (the retail base register is 0).
+ *
+ * @param cnd  destination
+ * @return 1, or 0 when VU0 is running
+ */
 int func_003FE838(sVu0Cnd *cnd) {
     unsigned int regValue;
     if (func_003FE678() != 0)
@@ -1158,7 +1392,13 @@ typedef struct {
     unsigned short vi[16];
 } sVu0Cnd_E998;
 extern int func_003FE678(void);
-/* Load the VU0 registers from *cnd (libdev sceDevVu0PutCnd); fails while VU0 is running. */
+/**
+ * Loads VU0's registers from @p cnd unless VU0 is running: VF00..VF31, then status, MAC, clipping, R, I, Q and
+ * VI00..VI15 (Sony's libdev sceDevVu0PutCnd).
+ *
+ * @param cnd  source
+ * @return 1, or 0 when VU0 is running
+ */
 int func_003FE998(sVu0Cnd_E998 *cnd) {
     u_long128_E998 *vf = cnd->vf;
     unsigned int regValue;
@@ -1256,6 +1496,12 @@ static inline unsigned int vu0_cfc2_vi29_EB08(void)
     __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi29\n\t.set reorder" : "=r"(v));
     return v;
 }
+/**
+ * Returns 1 when VU0 or VU1 is running a microprogram with no stop condition (VPU-STAT low nibble or bits 8..11 equal
+ * to 1).
+ *
+ * @return 1 or 0
+ */
 int func_003FEB08(void) {
     unsigned int vpuStat = vu0_cfc2_vi29_EB08();
     if ((vpuStat & 0xF) == 1)
@@ -1279,6 +1525,13 @@ static inline void vu0_write_qword_EB38(unsigned int addr, Q3EB38_i v)
     __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi1\n\tqmfc2.ni %1, $vf1\n\tqmtc2.ni %2, $vf1\n\tctc2.ni %3, $vi1\n\tvsqi.xyzw $vf1, ($vi1++)\n\tctc2.ni %0, $vi1\n\tqmtc2.ni %1, $vf1\n\t.set reorder"
                      : "=&r"(vi), "=&r"(vf) : "r"(v), "r"(addr));
 }
+/**
+ * Writes one quadword into VU0 memory at quadword address @p addr (VU1's registers are mapped there from 0x400),
+ * restoring VI01 and VF01 afterwards.
+ *
+ * @param addr  quadword address
+ * @param value  the quadword
+ */
 void func_003FEB38(unsigned short addr, Q3EB38 value) {
     vu0_write_qword_EB38(addr, value.q);
 }
@@ -1294,6 +1547,12 @@ typedef int Q3EB78_i __attribute__((mode(TI)));
 typedef union { Q3EB78_i q; unsigned long d[2]; int w[4]; short h[8]; } Q3EB78;
 /* Read the qword at VU0 data address `addr` through $vi1/$vf1, restoring both. */
 Q3EB78 func_003FEB78_impl(unsigned short addr) __asm__("func_003FEB78");
+/**
+ * Reads one quadword from VU0 memory at quadword address @p addr, restoring VI01 and VF01 afterwards.
+ *
+ * @param addr  quadword address
+ * @return the quadword
+ */
 Q3EB78 func_003FEB78_impl(unsigned short addr) {
     unsigned int vi;
     unsigned long vf;
@@ -1327,6 +1586,9 @@ static inline void vu0_ctc2_vi28_BC0(unsigned int v)
 	ctc2.ni %0, $vi28
 	.set reorder" : : "r"(v));
 }
+/**
+ * Resets VU1 (FBRST bit 9).
+ */
 void func_003FEBC0(void) {
     vu0_ctc2_vi28_BC0(vu0_cfc2_vi28_BC0() | 0x200);
 }
@@ -1352,6 +1614,11 @@ static inline void vu0_ctc2_vi28_BD8(unsigned int v)
 	ctc2.ni %0, $vi28
 	.set reorder" : : "r"(v));
 }
+/**
+ * Stops VU1: forces a break (FBRST bit 8) when it is running.
+ *
+ * @return 1 when VU1 is now stopped or idle (states 0, 3, 4 of func_003FED08), 0 when it is halted by a D or T bit
+ */
 int func_003FEBD8(void) {
     int result = 0;
     switch (func_003FED08_BD8()) {
@@ -1375,6 +1642,11 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FEC38);
 extern int func_003FED08(void);
 extern unsigned short func_003FED60(void);
 extern void func_003FED50(int);
+/**
+ * Resumes VU1 after a D-bit, T-bit or forced stop: restarts it at its TPC (func_003FED60, func_003FED50).
+ *
+ * @return 1 when restarted, 0 when it was not stopped
+ */
 int func_003FEC38(void) {
     int result = 0;
     int n = func_003FED08();
@@ -1403,6 +1675,11 @@ static inline void vu0_ctc2_C88(unsigned int v)
 {
     __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi28\n\t.set reorder" : : "r"(v));
 }
+/**
+ * Enables or disables VU1's D-bit stops (FBRST bit 10).
+ *
+ * @param enable  1 to enable
+ */
 void func_003FEC88(int enable) {
     unsigned int ctrlBits = vu0_cfc2_C88();
     if (enable == 1)
@@ -1428,6 +1705,11 @@ static inline void vu0_ctc2_CB8(unsigned int v)
 {
     __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi28\n\t.set reorder" : : "r"(v));
 }
+/**
+ * Enables or disables VU1's T-bit stops (FBRST bit 11).
+ *
+ * @param enable  1 to enable
+ */
 void func_003FECB8(int enable) {
     unsigned int ctrlBits = vu0_cfc2_CB8();
     if (enable == 1)
@@ -1451,6 +1733,11 @@ static inline unsigned int vu0_cfc2_CE8(void)
 	.set reorder" : "=r"(v));
     return v;
 }
+/**
+ * Returns whether VU1's D-bit stops are enabled (FBRST bit 10).
+ *
+ * @return 1 or 0
+ */
 int func_003FECE8(void) {
     return (vu0_cfc2_CE8() >> 10) & 1;
 }
@@ -1469,6 +1756,11 @@ static inline unsigned int vu0_cfc2_CF8(void)
 	.set reorder" : "=r"(v));
     return v;
 }
+/**
+ * Returns whether VU1's T-bit stops are enabled (FBRST bit 11).
+ *
+ * @return 1 or 0
+ */
 int func_003FECF8(void) {
     return (vu0_cfc2_CF8() >> 11) & 1;
 }
@@ -1485,6 +1777,11 @@ static inline unsigned int vu0_cfc2_vi29_ED08(void)
     __asm__ volatile(".set noreorder\n\tcfc2.ni %0, $vi29\n\t.set reorder" : "=r"(v));
     return v;
 }
+/**
+ * Returns VU1's state from VPU-STAT: 1 stopped by a D bit, 2 by a T bit, 3 by a forced break, 4 running, 0 idle.
+ *
+ * @return the state
+ */
 int func_003FED08(void) {
     unsigned int vpuStat = vu0_cfc2_vi29_ED08();
     int state;
@@ -1511,6 +1808,11 @@ static inline void vu0_ctc2_D50(unsigned int v)
 {
     __asm__ volatile(".set noreorder\n\tctc2.ni %0, $vi31\n\t.set reorder" : : "r"(v));
 }
+/**
+ * Starts VU1 at a microprogram address (writes CMSAR1).
+ *
+ * @param value  start address (low 16 bits)
+ */
 void func_003FED50(int value) {
     vu0_ctc2_D50(value & 0xFFFF);
 }
@@ -1520,6 +1822,11 @@ void func_003FED50(int value) {
 INCLUDE_ASM("seg/seg_2FE810", func_003FED60);
 #ifdef SKIP_ASM
 extern void func_003FEB78(void *, int);
+/**
+ * Returns VU1's TPC (the address it stopped at), read from VU0 memory quadword 0x43A.
+ *
+ * @return the address
+ */
 unsigned short func_003FED60(void) {
     unsigned short value;
     func_003FEB78(&value, 1082);
@@ -1536,6 +1843,13 @@ typedef struct { Q3ED88 a[32]; int b[7]; short c[16]; } S3ED88;
 extern int e3ED88_a(void) __asm__("func_003FEB08");
 extern Q3ED88 e3ED88_b(unsigned short) __asm__("func_003FEB78");
 int func_003FED88_impl(S3ED88 *s) __asm__("func_003FED88");
+/**
+ * Saves VU1's registers into @p cnd unless a VU is running (func_003FEB08), reading them through VU0 memory: VF00..VF31
+ * (0x400..0x41F), the control registers at 0x430..0x432 and 0x434..0x437, and VI00..VI15 (0x420..0x42F).
+ *
+ * @param cnd  destination
+ * @return 1, or 0 when a VU is running
+ */
 int func_003FED88_impl(S3ED88 *cnd) {
     unsigned i;
     if (e3ED88_a() != 0)
@@ -1565,6 +1879,13 @@ typedef struct { Q3EF18 a[32]; unsigned b[7]; unsigned short c[16]; } S3EF18;
 extern int e3EF18_a(void) __asm__("func_003FEB08");
 extern void e3EF18_b(unsigned short, Q3EF18) __asm__("func_003FEB38");
 int func_003FEF18_impl(S3EF18 *s) __asm__("func_003FEF18");
+/**
+ * Loads VU1's registers from @p cnd unless a VU is running, writing them through VU0 memory (the layout of
+ * func_003FED88).
+ *
+ * @param cnd  source
+ * @return 1, or 0 when a VU is running
+ */
 int func_003FEF18_impl(S3EF18 *cnd) {
     unsigned i;
     Q3EF18 value;
@@ -1600,6 +1921,9 @@ int func_003FEF18_impl(S3EF18 *cnd) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FF060);
 #ifdef SKIP_ASM
+/**
+ * Resets VIF0 and masks its DMA-tag and command errors (FBRST 1, ERR 6).
+ */
 void func_003FF060(void) {
     *(volatile int *)0x10003810 = 1;
     *(volatile int *)0x10003820 = 6;
@@ -1610,6 +1934,12 @@ void func_003FF060(void) {
 INCLUDE_ASM("seg/seg_2FE810", func_003FF088);
 #ifdef SKIP_ASM
 extern int func_003FF160(void);
+/**
+ * Stops VIF0 when it is busy: mode 0 forces a break (FBRST 2), mode 1 requests a stop (FBRST 4).
+ *
+ * @param mode  0 or 1
+ * @return 1, or 0 when VIF0 is idle or already stopped
+ */
 int func_003FF088(int mode) {
     int vifState = func_003FF160();
     if (vifState == 0) return 0;
@@ -1627,6 +1957,11 @@ int func_003FF088(int mode) {
 INCLUDE_ASM("seg/seg_2FE810", func_003FF0F0);
 #ifdef SKIP_ASM
 extern int func_003FF160(void);
+/**
+ * Lets a stopped VIF0 continue (FBRST 8).
+ *
+ * @return 1, or 0 when it was not stopped
+ */
 int func_003FF0F0(void) {
     if (func_003FF160() != 1)
         return 0;
@@ -1638,6 +1973,14 @@ int func_003FF0F0(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FF130);
 #ifdef SKIP_ASM
+/**
+ * Sets VIF0's error masks (ERR): the interrupt-bit, DMA-tag-error and command-error masks.
+ *
+ * @param maskInt  bit 0
+ * @param maskTagErr  bit 1
+ * @param maskCmdErr  bit 2
+ * @return the value written
+ */
 unsigned func_003FF130(unsigned maskInt, unsigned maskTagErr, unsigned maskCmdErr) {
     unsigned errReg = maskInt | (maskTagErr << 1) | (maskCmdErr << 2);
     *(volatile unsigned *)0x10003820 = errReg;
@@ -1648,6 +1991,11 @@ unsigned func_003FF130(unsigned maskInt, unsigned maskTagErr, unsigned maskCmdEr
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FF150);
 #ifdef SKIP_ASM
+/**
+ * Returns VIF0's ERR register.
+ *
+ * @return the register
+ */
 int func_003FF150(void) {
     return *(volatile int *)0x10003820;
 }
@@ -1656,6 +2004,12 @@ int func_003FF150(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FF160);
 #ifdef SKIP_ASM
+/**
+ * Returns VIF0's state from its STAT register: 0 idle, 1 stopped (stop, force-break or interrupt stall), 2 waiting, 3
+ * error, 4 running.
+ *
+ * @return the state
+ */
 int func_003FF160(void) {
     int vifStat = *(volatile int *)0x10003800;
     if (!(vifStat & 3)) {
@@ -1677,6 +2031,13 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FF1B0);
 struct S3FF1B0 { int w[11]; short h[4]; char c[4]; };
 extern int func_003FF160(void);
 #define R(a) (*(volatile int *)(a))
+/**
+ * Saves VIF0's registers into @p cnd when it is idle or stopped: R0..R3, C0..C3, MASK, CODE, STAT, ITOP, ITOPS, MARK,
+ * NUM, ERR, the two CYCLE bytes and MODE.
+ *
+ * @param cnd  destination
+ * @return 1, or 0 when VIF0 is busy
+ */
 int func_003FF1B0(struct S3FF1B0 *cnd) {
     unsigned cycleReg = *(volatile unsigned *)0x10003840;
     if ((unsigned)func_003FF160() >= 2)
@@ -1709,6 +2070,13 @@ int func_003FF1B0(struct S3FF1B0 *cnd) {
 INCLUDE_ASM("seg/seg_2FE810", func_003FF330);
 #ifdef SKIP_ASM
 typedef int i128 __attribute__((mode(TI)));
+/**
+ * Writes up to @p n quadwords into the VIF0 FIFO, stopping early when STAT bit 28 is set.
+ *
+ * @param src  the quadwords
+ * @param n  how many
+ * @return the number written
+ */
 int func_003FF330(i128 *src, int n) {
     int sentCount = 0;
     while (n--) {
@@ -1738,7 +2106,17 @@ extern int sceSifSetDma(sSifDmaData *sdd, int len);    /* sceSifSetDma */
 extern void func_00424698(int *, int *);                /* SyncDCache */
 extern void func_00425C60();                            /* printf */
 extern char D_00497888[];
-/* Send the slot's 0x20-byte actuator block to the IOP (into the half of its buffer picked by the block's counter). */
+/**
+ * Sends a pad port/slot's 32-byte command block (D_00526250 +0x4) to the IOP pad driver over SIF DMA.
+ *
+ * Returns 0 while the previous transfer is still pending. Otherwise increments the block's counter (word 0), writes it
+ * back from the cache and DMAs it into one of two alternating 32-byte areas at +0x8. Prints "libpad: sceSifSetDma
+ * faild" (when D_004515CC is set) on a pending or failed transfer.
+ *
+ * @param port  pad port
+ * @param slot  pad slot
+ * @return 1 when sent, else 0
+ */
 int func_003FF390(int port, int slot) {
     sSifDmaData dma[16];
     int *act;
@@ -1778,6 +2156,17 @@ extern char D_004978F8[];
 extern int func_00400740(void);
 extern void func_00425C60();
 extern int func_003FF5E8_a(int) __asm__("func_003FF5E8");
+/**
+ * Starts the pad library.
+ *
+ * Sets D_004515C8, binds the pad driver's two SIF RPC servers 0x80000100 and 0x80000101 (retrying with a busy wait),
+ * and checks the driver's version (func_00400740): with a major version other than 4 it prints "libpad: Module version
+ * mismatch [libpad.a = 4.0, padman.irx = ...]" (when D_004515CC is set) and fails. Then initialises (func_003FF5E8).
+ * systemInit calls it with 0.
+ *
+ * @param a  passed on to func_003FF5E8, which ignores it
+ * @return func_003FF5E8's result, or 0 on a version mismatch
+ */
 int func_003FF4A8(int a) {
     int i;
     int v;
@@ -1813,6 +2202,11 @@ int func_003FF4A8(int a) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FF5E8);
 #ifdef SKIP_ASM
+/**
+ * Initialises the pad driver: marks every port/slot closed and clears two of its words, then sends RPC command 16.
+ *
+ * @return the driver's reply (word 3), or 0 when the call fails
+ */
 int func_003FF5E8(void) {
     int i;
     for (i = 0; i < 4; i++) {
@@ -1834,6 +2228,11 @@ int func_003FF5E8(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FF688);
 #ifdef SKIP_ASM
+/**
+ * Ends the pad driver: RPC command 15; a reply of 1 clears D_004515C8.
+ *
+ * @return the reply (word 3), or 0 when the call fails
+ */
 int func_003FF688(void) {
     int v;
     D_00526440[0] = 15;
@@ -1851,6 +2250,13 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FF708);
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FF8F0);
 #ifdef SKIP_ASM
+/**
+ * Closes a pad port/slot: RPC command 14, then marks it closed. cPS2PadDevice's destructor calls it.
+ *
+ * @param a  port
+ * @param b  slot
+ * @return the reply (word 3); 0 when not open or the call fails
+ */
 int func_003FF8F0(int a, int b) {
     if (!D_00526250[a][b].open)
         return 0;
@@ -1869,6 +2275,14 @@ int func_003FF8F0(int a, int b) {
 INCLUDE_ASM("seg/seg_2FE810", func_003FF9A8);
 #ifdef SKIP_ASM
 extern void func_00424698(int *, int *);
+/**
+ * Returns the newer of the two 0x80-byte pad frames in a port/slot's DMA area (the one with the higher frame counter at
+ * +0x58), after syncing the cache over the area (func_00424698).
+ *
+ * @param a  port
+ * @param b  slot
+ * @return the frame
+ */
 sPadFrame *func_003FF9A8(int a, int b) {
     sPadFrame *p;
     int c;
@@ -1882,6 +2296,13 @@ sPadFrame *func_003FF9A8(int a, int b) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FFA08);
 #ifdef SKIP_ASM
+/**
+ * Returns the frame counter of a port/slot's newest pad frame.
+ *
+ * @param a  port
+ * @param b  slot
+ * @return the counter, or 0 when not open
+ */
 int func_003FFA08(int a, int b) {
     if (!D_00526250[a][b].open) return 0;
     return func_003FF9A8(a, b)->frame;
@@ -1895,6 +2316,15 @@ struct B128 { char b[128]; };
 extern int func_0042C078();
 extern void func_0042C0C0();
 extern int func_0041605C_k() __asm__("func_0041605C");
+/**
+ * Reads a port/slot's newest pad data: copies the newest frame with interrupts disabled, then its data (length at
+ * +0x60) to @p c. cPS2PadDevice_sampleButtons calls it.
+ *
+ * @param a  port
+ * @param b  slot
+ * @param c  destination
+ * @return the data length, or 0 when not open
+ */
 int func_003FFA58(int a, int b, int c) {
     struct B128 s;
     int *q;
@@ -1914,6 +2344,14 @@ int func_003FFA58(int a, int b, int c) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FFBC0);
 #ifdef SKIP_ASM
+/**
+ * Returns a port/slot's pad state (frame byte +0x70; names in func_003FFC38). STABLE (6) while a request is BUSY (2) is
+ * reported as EXECCMD (5).
+ *
+ * @param a  port
+ * @param b  slot
+ * @return the state, or 99 when not open
+ */
 int func_003FFBC0(int a, int b) {
     unsigned char *p;
     if (!D_00526250[a][b].open)
@@ -1931,6 +2369,13 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FFC38);
 extern char *D_004515D0[];
 extern char D_004979A8[];
 extern char *strcpy(char *, const char *);
+/**
+ * Copies the name of pad state @p i: DISCONNECT, FINDCTP1, EXECCMD, STABLE, ERROR for 0, 2, 5, 6, 7; empty for the
+ * others and for 8 or more.
+ *
+ * @param i  the state
+ * @param dst  receives the name
+ */
 void func_003FFC38(unsigned i, char *dst) {
     if (i < 8) {
         strcpy(dst, D_004515D0[i]);
@@ -1943,6 +2388,14 @@ void func_003FFC38(unsigned i, char *dst) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FFC70);
 #ifdef SKIP_ASM
+/**
+ * Sets the request state (frame byte +0x71) of a port/slot's newest pad frame; the command senders set BUSY (2).
+ *
+ * @param a  port
+ * @param b  slot
+ * @param c  the request state
+ * @return 1, or 0 when not open
+ */
 int func_003FFC70(int a, int b, int c) {
     if (!D_00526250[a][b].open)
         return 0;
@@ -1954,6 +2407,13 @@ int func_003FFC70(int a, int b, int c) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FFCD8);
 #ifdef SKIP_ASM
+/**
+ * Returns the request state (frame byte +0x71) of a port/slot: 0 COMPLETE, 1 FAILED, 2 BUSY.
+ *
+ * @param a  port
+ * @param b  slot
+ * @return the request state, or 0 when not open
+ */
 int func_003FFCD8(int a, int b) {
     if (!D_00526250[a][b].open) return 0;
     return func_003FF9A8(a, b)->reqState;
@@ -1966,6 +2426,13 @@ INCLUDE_ASM("seg/seg_2FE810", func_003FFD28);
 extern char *D_004515F0[];
 extern char D_004979A8[];
 extern char *strcpy(char *, const char *);
+/**
+ * Copies the name of request state @p i: COMPLETE, FAILED, BUSY; empty for 4 or more. Quirk: entry 3 of the table
+ * D_004515F0 is a null pointer, so @p i = 3 copies from address 0.
+ *
+ * @param i  the request state
+ * @param dst  receives the name
+ */
 void func_003FFD28(unsigned i, char *dst) {
     if (i < 4) {
         strcpy(dst, D_004515F0[i]);
@@ -1978,6 +2445,18 @@ void func_003FFD28(unsigned i, char *dst) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FFD60);
 #ifdef SKIP_ASM
+/**
+ * Returns actuator information of a port/slot's pad (frame +0x30, four 4-byte entries; count at +0x6A).
+ *
+ * Needs a valid frame (+0x72 == 1) with byte +0x64 at least 2. @p c -1 returns the count; otherwise @p d 1..4 picks
+ * byte 0..3 of entry @p c. cPS2PadDevice_sampleButtons calls it.
+ *
+ * @param a  port
+ * @param b  slot
+ * @param c  entry index, or -1
+ * @param d  which byte (1..4)
+ * @return the value, or 0
+ */
 int func_003FFD60(int a, int b, int c, int d) {
     sPadFrame *p;
     if (!D_00526250[a][b].open) return 0;
@@ -2003,6 +2482,16 @@ int func_003FFD60(int a, int b, int c, int d) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FFE80);
 #ifdef SKIP_ASM
+/**
+ * Returns actuator-combination information of a port/slot's pad (frame +0x40; count at +0x6B), like func_003FFD60;
+ * @p d -1..2 picks byte 0..3 of entry @p c.
+ *
+ * @param a  port
+ * @param b  slot
+ * @param c  entry index, or -1 for the count
+ * @param d  which byte (-1..2)
+ * @return the value, or 0
+ */
 int func_003FFE80(int a, int b, int c, int d) {
     sPadFrame *p;
     if (!D_00526250[a][b].open) return 0;
@@ -2028,6 +2517,19 @@ int func_003FFE80(int a, int b, int c, int d) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_003FFFA0);
 #ifdef SKIP_ASM
+/**
+ * Returns mode information of a port/slot's pad.
+ *
+ * @p term 1: the current controller id (frame byte +0x65 >> 4; 0 for 0xF3); 2: the current mode's id from the mode
+ * table (+0x50, indexed by +0x69); 3: the current mode index; 4: the mode count (+0x68) for @p offs -1, else mode
+ * @p offs's id. Terms 2..4 give 0 when byte +0x64 is 1. cPS2PadDevice_sampleButtons calls it.
+ *
+ * @param port  pad port
+ * @param slot  pad slot
+ * @param term  what to return (1..4)
+ * @param offs  mode index for term 4, or -1
+ * @return the value; 0 when not open, the frame is not valid or a request is BUSY
+ */
 // scePadInfoMode(port, slot, term, offs)
 int func_003FFFA0(int port, int slot, int term, int offs) {
     sPadFrame *p;
@@ -2061,6 +2563,15 @@ int func_003FFFA0(int port, int slot, int term, int offs) {
 INCLUDE_ASM("seg/seg_2FE810", func_004000D8);
 #ifdef SKIP_ASM
 extern int func_003FFC70(int, int, int);
+/**
+ * Sets a port/slot's main mode: RPC command 6 with the mode and lock words; on success marks the request BUSY.
+ *
+ * @param a  port
+ * @param b  slot
+ * @param c  mode index
+ * @param d  lock setting
+ * @return the reply (word 5), or 0 when the call fails
+ */
 int func_004000D8(int a, int b, int c, int d) {
     int v;
     D_00526440[3] = c;
@@ -2081,6 +2592,15 @@ int func_004000D8(int a, int b, int c, int d) {
 INCLUDE_ASM("seg/seg_2FE810", func_00400190);
 #ifdef SKIP_ASM
 extern int s0_F390(int, int) __asm__("func_003FF390");
+/**
+ * Sends 6 actuator values to a port/slot's pad: copies them into its command block (+0xC, with words 1 and 2 set to 1
+ * and 6) and sends it (func_003FF390). Needs a valid frame.
+ *
+ * @param a  port
+ * @param b  slot
+ * @param src  the 6 values
+ * @return 1 when sent, else 0
+ */
 int func_00400190(int a, int b, unsigned char *src) {
     int i;
     int ok;
@@ -2105,6 +2625,14 @@ int func_00400190(int a, int b, unsigned char *src) {
 INCLUDE_ASM("seg/seg_2FE810", func_00400250);
 #ifdef SKIP_ASM
 extern int func_003FFC70(int, int, int);
+/**
+ * Sets a port/slot's actuator alignment: RPC command 8 with 6 bytes; on success marks the request BUSY.
+ *
+ * @param port  pad port
+ * @param slot  pad slot
+ * @param data  the 6 alignment bytes
+ * @return the reply (word 5), or 0 when the call fails
+ */
 int func_00400250(int port, int slot, unsigned char *data) {
     int i;
     unsigned char *d;
@@ -2126,6 +2654,14 @@ int func_00400250(int port, int slot, unsigned char *data) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00400328);
 #ifdef SKIP_ASM
+/**
+ * Returns the little-endian word at frame +0x79 of a port/slot's pad (0x3FFFF when all pressure-sensitive buttons are
+ * available, per func_00400490). Needs a valid frame with bytes +0x64 and +0x66 at least 2.
+ *
+ * @param a  port
+ * @param b  slot
+ * @return the word, or 0
+ */
 int func_00400328(int a, int b) {
     sPadFrame *p;
     if (!D_00526250[a][b].open)
@@ -2145,6 +2681,14 @@ int func_00400328(int a, int b) {
 INCLUDE_ASM("seg/seg_2FE810", func_004003E0);
 #ifdef SKIP_ASM
 extern int func_003FFC70(int, int, int);
+/**
+ * Sends a port/slot's button mask (RPC command 10); on success marks the request BUSY.
+ *
+ * @param a  port
+ * @param b  slot
+ * @param c  the mask (func_004004F0 passes 0xFFF, func_00400548 0)
+ * @return the reply (word 4), or 0 when the call fails
+ */
 int func_004003E0(int a, int b, int c) {
     int v;
     D_00526440[3] = c;
@@ -2164,6 +2708,13 @@ int func_004003E0(int a, int b, int c) {
 INCLUDE_ASM("seg/seg_2FE810", func_00400490);
 #ifdef SKIP_ASM
 extern int func_00400328(int, int);
+/**
+ * Returns whether a port/slot's pad reports the full pressure-sensitive mask 0x3FFFF (func_00400328).
+ *
+ * @param a  port
+ * @param b  slot
+ * @return 1 or 0
+ */
 int func_00400490(int a, int b) {
     if (!D_00526250[a][b].open) return 0;
     return func_00400328(a, b) == 0x3FFFF;
@@ -2174,6 +2725,13 @@ int func_00400490(int a, int b) {
 INCLUDE_ASM("seg/seg_2FE810", func_004004F0);
 #ifdef SKIP_ASM
 extern int func_004003E0(int, int, int);
+/**
+ * Turns on all pressure-sensitive buttons of a port/slot (func_004003E0 with mask 0xFFF).
+ *
+ * @param a  port
+ * @param b  slot
+ * @return func_004003E0's result, or 0 when not open
+ */
 int func_004004F0(int a, int b) {
     if (!D_00526250[a][b].open) return 0;
     return func_004003E0(a, b, 0xFFF);
@@ -2184,6 +2742,13 @@ int func_004004F0(int a, int b) {
 INCLUDE_ASM("seg/seg_2FE810", func_00400548);
 #ifdef SKIP_ASM
 extern int func_004003E0(int, int, int);
+/**
+ * Turns off the pressure-sensitive buttons of a port/slot (func_004003E0 with mask 0). Nothing in retail calls it.
+ *
+ * @param a  port
+ * @param b  slot
+ * @return func_004003E0's result, or 0 when not open
+ */
 int func_00400548(int a, int b) {
     if (!D_00526250[a][b].open) return 0;
     return func_004003E0(a, b, 0);
@@ -2195,6 +2760,15 @@ INCLUDE_ASM("seg/seg_2FE810", func_004005A0);
 #ifdef SKIP_ASM
 struct P12 { char b[12]; } __attribute__((packed));
 extern int func_003FFC70(int, int, int);
+/**
+ * Sends RPC command 11 with a 12-byte block for a port/slot; on success marks the request BUSY. Nothing in retail calls
+ * it.
+ *
+ * @param a  port
+ * @param b  slot
+ * @param c  the 12-byte block
+ * @return the reply (word 7), or 0 when the call fails
+ */
 int func_004005A0(int a, int b, struct P12 *c) {
     D_00526440[1] = a;
     D_00526440[0] = 11;
@@ -2211,6 +2785,11 @@ int func_004005A0(int a, int b, struct P12 *c) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00400670);
 #ifdef SKIP_ASM
+/**
+ * Sends pad RPC command 12. Nothing in retail calls it.
+ *
+ * @return the reply (word 3), or 0 when the call fails
+ */
 int func_00400670(void) {
     D_00526440[0] = 12;
     if (func_00426D18(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
@@ -2222,6 +2801,12 @@ int func_00400670(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_004006D8);
 #ifdef SKIP_ASM
+/**
+ * Sends pad RPC command 13 with one argument. Nothing in retail calls it.
+ *
+ * @param a  the argument
+ * @return the reply (word 3), or 0 when the call fails
+ */
 int func_004006D8(int a) {
     D_00526440[1] = a;
     D_00526440[0] = 13;
@@ -2234,6 +2819,11 @@ int func_004006D8(int a) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00400740);
 #ifdef SKIP_ASM
+/**
+ * Asks the pad driver for its version (RPC command 18); func_003FF4A8 requires major version 4 (bits 8..15).
+ *
+ * @return the version, or 0 when the call fails
+ */
 int func_00400740(void) {
     D_00526440[0] = 18;
     if (func_00426D18(D_00526200, 1, 0, D_00526440, 128, D_00526440, 128, 0, 0) < 0)
@@ -2245,6 +2835,12 @@ int func_00400740(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_004007A8);
 #ifdef SKIP_ASM
+/**
+ * Sends pad RPC command 20 with one argument. Nothing in retail calls it.
+ *
+ * @param a  the argument
+ * @return the reply (word 2), or 0 when the call fails
+ */
 int func_004007A8(int a) {
     D_00526440[1] = a;
     D_00526440[0] = 20;
@@ -2261,6 +2857,13 @@ INCLUDE_ASM("seg/seg_2FE810", func_00400810);
 #define SYNC_0810() __asm__ volatile("sync")
 #define EI_0810() __asm__ volatile("ei")
 extern void iSignalSema(int);
+/**
+ * Alarm handler of the delay func_00400838: signals the semaphore it waits on, then sync and ei.
+ *
+ * @param alarmId  alarm id (unused)
+ * @param ticks  alarm time (unused)
+ * @param sema  the semaphore
+ */
 void func_00400810(int alarmId, int ticks, int sema) {
     iSignalSema(sema);
     SYNC_0810();

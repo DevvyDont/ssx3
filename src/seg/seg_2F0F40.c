@@ -110,6 +110,18 @@ extern char* cDirtysock_tag_TagFieldFind(const char* tag, const char* key);
 extern int cDirtysock_tag_TagFieldGetString(const char* data, char* buf, int len, const char* defval);
 extern int cDirtysock_tag_TagFieldDelete(char* tag, const char* key);
 extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key, const char* val);
+/**
+ * Splits the sender of a received buddy message into user, domain and resource fields and hands it to the message
+ * callback as a 'chat' message.
+ *
+ * Copies the message's tag text (@p ev[3]) into a 0x800-byte local buffer, reads its USER field, and rewrites it:
+ * "user@domain/resource" becomes USER=user, DOMN=domain and RSRC=resource (each part only when its separator is
+ * present). Then points ev[3] at the rewritten buffer, sets the message kind ev[0] to 'chat' and calls the receive
+ * callback at +0x4B0 with the user data at +0x4AC (both set by func_003F17C8). func_003F17D8 calls it for a 'RECV'
+ * packet when that callback is set.
+ *
+ * @param ev  the message being dispatched: kind at [0], tag text at [3] (replaced by a pointer to a stack buffer)
+ */
 void func_003F0198(char* self, int* ev) {
     char tag[0x800];
     char name[0x100];
@@ -154,6 +166,21 @@ extern int cDirtysock_tag_TagFieldGetString(const char* data, char* buf, int len
 extern int cDirtysock_tag_TagFieldGetFourCC(const char* data, int def);
 extern int func_004165A8(const char*, const char*);
 extern int func_003EFE20(char*, int, short*, int, char*, int);
+/**
+ * Fills a roster entry's presence (show state, product, presence text, language) from a 'PGET' presence packet.
+ *
+ * Entry layout used here: +0x40 product name (20 bytes), +0x54 presence text (80), +0xA4 two-letter language code plus
+ * NUL, +0xA7 show index, +0xA8 flags. The show index is the position of the packet's SHOW text in D_004512C0 ("DISC",
+ * "CHAT", "AWAY", "XA", "DND", "PASS"; 0 when none matches, via strcmp func_004165A8). A PROD field sets flag 0x2000
+ * and its text is the presence text; then the product name comes from func_003EFE20 (the product-key/language string
+ * table, empty in retail) and the language is our own first language (+0x30C). Without PROD, it reads the STAT field,
+ * takes its 'P' sub-field as the product key, and looks for a sub-field named by each of our languages (+0x308 codes at
+ * +0x30C) in turn: the first found gives the presence text and the language. When none is found the language is
+ * whatever func_003EFE20 matches for all our languages (0 in retail).
+ *
+ * @param ev  the received packet (tag text at +0xC)
+ * @param out  the roster entry to fill
+ */
 void func_003F02D0(char* self, char* ev, char* out) {
     char key[3];
     char buf[0x100];
@@ -233,6 +260,15 @@ extern char str_STAT_b[];
 extern char str_PROD_b[];
 extern int cDirtysock_tag_TagFieldSetFourCC(char* dst, int len, const char* key, int val);
 extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key, const char* val);
+/**
+ * Sends the buddy client's presence to the server as a 'PSET' packet.
+ *
+ * When a product key is set (+0x1C) it is stored as the 'P' field of the status text at +0x140. The packet is the base
+ * presence at +0x240 (RSRC and SHOW, built by func_003F15C8) plus STAT (+0x140) and PROD (+0x40) when those are
+ * non-empty, sent with func_003F00D8. Clears the pending-send time at +0x2C0.
+ *
+ * @param p  the BuddyApi state
+ */
 void func_003F0568(char* p) {
     char buf[0x200];
     if (*(int*)(p + 0x1C)) {
@@ -253,6 +289,16 @@ void func_003F0568(char* p) {
 //100%
 INCLUDE_ASM("seg/seg_2F0F40", func_003F0610);
 #ifdef SKIP_ASM
+/**
+ * Sets the buddy client's connection state and reports it to the connect callback.
+ *
+ * Stores @p state at +0x8 and, when the connect callback at +0x4C4 is set, calls it with a {'conn', state, 0, 0}
+ * message and the user data at +0x4C0. States used: 0 idle, 1 connecting, 2 host lookup failed, 3 connect timed out, 5
+ * online, 6 connection lost.
+ *
+ * @param buddyApi  the BuddyApi state
+ * @param state  the new state
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 void func_003F0610(int* buddyApi, int state) {
     int event[4];
@@ -275,6 +321,21 @@ struct S0658E { int f0, f4, f8, fC, f10; };
 struct S0658 { int pad[5]; int f14; int pad2[(0x4C8-0x18)/4]; struct S0658E e[1]; };
 extern int D_004512B0[];
 extern int func_003F5D88(int);
+/**
+ * Arms one of the buddy client's three pending-request slots (0 add, 1 delete, 2 send).
+ *
+ * The slot is the 0x14-byte record at +0x4C8 + @p idx * 0x14: its kind becomes D_004512B0[idx] ('addu', 'delu',
+ * 'send'), its sequence number the next value of the request counter at +0x14 (which starts at 100), and it keeps the
+ * callback, its user data and a deadline of now (func_003F5D88) + @p ms * 1000 (0 when @p ms is not positive).
+ * func_003F17D8 drops the connection when a deadline passes while the callback is still set. Callers pass 600, so
+ * @p ms is in seconds.
+ *
+ * @param p  the BuddyApi state
+ * @param idx  slot index (0 add, 1 delete, 2 send)
+ * @param a  callback for the request's reply
+ * @param b  user data passed to the callback
+ * @param ms  timeout in seconds
+ */
 void func_003F0658(struct S0658* p, int idx, int a, int b, int ms) {
     int t = 0;
     if (ms > 0) {
@@ -297,6 +358,17 @@ extern void* func_002591E8(int);
 extern void func_00416210(void*, int, int);
 extern int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src);
 extern int func_003F5478(int);
+/**
+ * Creates a buddy client (BuddyApi) state block.
+ *
+ * Allocates 0x50C bytes with func_002591E8 and zero-fills them, copies @p product to +0x314 and @p version to +0x354
+ * (both sent in the 'AUTH' login), creates the packet session with func_003F5478(0x8000) at +0x4 and starts the request
+ * counter (+0x14) at 100. BuddyMan's func_002614E8 calls it with version "2003-10-20".
+ *
+ * @param product  product name sent as PROD
+ * @param version  version text sent as VERS
+ * @return the new state, or 0 when the allocation fails
+ */
 int* func_003F0710(const char* product, const char* version) {
     int* buddyApi = (int*)func_002591E8(1292);
     if (buddyApi) {
@@ -326,6 +398,14 @@ extern int func_003F0B50(struct S07A0*);
 extern void func_003F0BE0(struct S07A0*);
 extern void func_003F55B8(int);
 extern void func_00259210(void*);
+/**
+ * Destroys a buddy client.
+ *
+ * Destroys a pending host lookup (the object at +0x0, through its slot +0xC), disconnects (func_003F0B50), frees the
+ * roster (func_003F0BE0), destroys the packet session at +0x4 (func_003F55B8) and frees the state with func_00259210.
+ *
+ * @param p  the BuddyApi state
+ */
 void func_003F07A0(struct S07A0* p) {
     if (p->obj) {
         p->obj->fn(p->obj);
@@ -341,6 +421,12 @@ void func_003F07A0(struct S07A0* p) {
 //100%
 INCLUDE_ASM("seg/seg_2F0F40", func_003F0800);
 #ifdef SKIP_ASM
+/**
+ * Returns the buddy client's connection state (+0x8; see func_003F0610).
+ *
+ * @param buddyApi  the BuddyApi state
+ * @return the state
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 int func_003F0800(int* buddyApi) {
     return buddyApi[2];
@@ -350,6 +436,16 @@ int func_003F0800(int* buddyApi) {
 //100%
 INCLUDE_ASM("seg/seg_2F0F40", func_003F0808);
 #ifdef SKIP_ASM
+/**
+ * Installs the buddy client's debug-print hook.
+ *
+ * Stores the context at +0x504 and the print function at +0x508; func_003EFED0 and the "send: "/"recv: " traces call it
+ * with the context and the formatted text when it is set. Nothing in retail calls this.
+ *
+ * @param buddyApi  the BuddyApi state
+ * @param debugContext  first argument passed to the print function
+ * @param debugFunc  the print function (0 disables tracing)
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 void func_003F0808(int* buddyApi, int debugContext, int debugFunc) {
     buddyApi[1284 / 4] = debugContext;
@@ -360,6 +456,21 @@ void func_003F0808(int* buddyApi, int debugContext, int debugFunc) {
 //100%
 INCLUDE_ASM("seg/seg_2F0F40", func_003F0818);
 #ifdef SKIP_ASM
+/**
+ * Sets the buddy client's presence text, product key, languages and name policy before connecting.
+ *
+ * Copies @p src to +0x2C8 (0x40 bytes, sent as PRES at login) and stores @p key at +0x1C (the product key; BuddyMan
+ * passes 'ssx3'). Parses up to four two-letter language codes from @p langCodes into the 16-bit codes at +0x30C,
+ * stopping at the first character below 'a', and stores their count at +0x308. Stores @p x at +0x18: when it is 0,
+ * buddy names containing '.' are rejected (func_003F0E38, func_003F11F8) or skipped (roster updates).
+ *
+ * @param buddyApi  the BuddyApi state
+ * @param src  presence text
+ * @param key  product key
+ * @param langCodes  concatenated lower-case language codes ("en", ...)
+ * @param x  nonzero to allow names that contain '.'
+ * @return 0
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 int func_003F0818(char* buddyApi, const char* src, int key, char* langCodes, int x) {
     short* langSlot;
@@ -404,6 +515,27 @@ extern int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src);
 extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key, const char* val);
 extern int func_003F3A98(int, int);
 extern int func_003F5D88(int);
+/**
+ * Starts connecting the buddy client to a buddy server and prepares the login packet.
+ *
+ * Disconnects first (func_003F0B50), stores the connect callback (+0x4C4), its user data (+0x4C0) and the port (+0x10),
+ * and builds the 'AUTH' tag text at +0x394: PROD (+0x314), VERS (+0x354), PRES (+0x2C8), then the login. A login
+ * without ':' is a login key: USER = @p nick, LKEY = login. Otherwise "user:secret" gives USER = user followed by
+ * @p nick (when it fits in 0x100), and LKEY = secret without its leading '$' or PASS = secret. Copies @p nick into
+ * +0x494 (0x10 bytes, the resource sent as LRSC), dropping a leading '/' (an overlapping strcpy) and cutting at the
+ * next '/'. Then starts the host lookup (+0x0 = func_003F3A98(@p serverName, @p ms * 1000)), reports state 1
+ * (connecting), sets the connect deadline +0xC to now + @p ms * 1000 and the last show state +0x2C4 to -1.
+ * func_003F17D8 finishes the connection.
+ *
+ * @param serverName  buddy server host name
+ * @param port  buddy server port
+ * @param ms  timeout in seconds (BuddyMan passes 30)
+ * @param host  the login: "user:password", "user:$key" or a bare key
+ * @param nick  the resource ("/cso/" + resource from BuddyMan)
+ * @param cb  connect callback ('conn' state changes and the 'auth' reply)
+ * @param ctx  user data for the callback
+ * @return 0
+ */
 int func_003F08E8(char* self, int serverName, int port, int ms, char* host, char* nick, int cb, int ctx) {
     char tag[0x100];
     char loginCopy[0x100];
@@ -468,6 +600,16 @@ void func_003F00D8_0B50(int* p, int a, int b) __asm__("func_003F00D8");
 
 extern int D_004A4AE8[];
 extern int func_003F5738(int);
+/**
+ * Disconnects the buddy client.
+ *
+ * Destroys a pending host lookup object (+0x0), sends 'DISC' with empty data (func_003F00D8), closes the packet session
+ * (func_003F5738 on +0x4), reports state 6 when the client was online (5) and then state 0, clears the connect callback
+ * (+0x4C4) and frees the roster (func_003F0BE0).
+ *
+ * @param p  the BuddyApi state
+ * @return 0
+ */
 int func_003F0B50(struct S07A0* p) {
     if (p->obj) {
         p->obj->fn(p->obj);
@@ -493,6 +635,16 @@ extern int func_003EE9A0(int);
 extern void* func_003EE480(int, int);
 extern void func_003EE820(int);
 extern void func_003EE260(int);
+/**
+ * Frees the buddy client's roster.
+ *
+ * When a roster list exists (+0x4A8), frees every entry (taking ids out of the name table +0x4A4 with func_003EE9A0 and
+ * removing the entries from the list with func_003EE480), calls the roster callback (+0x4B8, user data +0x4B4) with a
+ * {'rost', 0, 0, roster} message, destroys the name table (func_003EE820) and the list (func_003EE260), and clears both
+ * pointers and the roster callback and its user data.
+ *
+ * @param sp  the BuddyApi state
+ */
 void func_003F0BE0(struct S07A0* sp) {
     int* buddyApi = (int*)sp;
     int event[4];
@@ -535,6 +687,18 @@ extern int cDirtysock_tag_TagFieldSetNumber(char* dst, int len, const char* key,
 extern int func_003EE778(int, int);
 extern int func_003EE1E8(int, int, int);
 extern int func_003EE600(int, int);
+/**
+ * Creates the buddy roster and requests the buddy and ignore lists, once.
+ *
+ * When no roster exists (+0x4A8): stores the roster callback at +0x4B8 and its user data at +0x4B4, creates the name
+ * table +0x4A4 (func_003EE778(1000, 2000)) and the roster list (func_003EE1E8(100, 100, 0)), and sends two 'RGET'
+ * packets with LRSC = the resource (+0x494) and PRES = "Y": LIST "B" (buddies) as ID 1 and LIST "I" (ignored users) as
+ * ID 2. Marks the roster changed (func_003EE600). BuddyMan's onconnect calls it after a successful 'auth'.
+ *
+ * @param a  roster callback ('rost' changes, 'endr' when the lists are complete)
+ * @param b  user data for the callback
+ * @return the roster list
+ */
 void* func_003F0C90(char* self, int a, int b) {
     char buf[0x100];
     if (*(int*)(self + 0x4A8) == 0) {
@@ -564,6 +728,12 @@ void* func_003F0C90(char* self, int a, int b) {
 //100%
 INCLUDE_ASM("seg/seg_2F0F40", func_003F0E30);
 #ifdef SKIP_ASM
+/**
+ * Returns the buddy client's roster list (+0x4A8; 0 before func_003F0C90).
+ *
+ * @param buddyApi  the BuddyApi state
+ * @return the roster list
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 int func_003F0E30(int* buddyApi) {
     return buddyApi[1192 / 4];
@@ -592,6 +762,22 @@ extern char str_GROUP[];
 extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key, const char* val);
 extern int cDirtysock_tag_TagFieldSetNumber(char* dst, int len, const char* key, int val);
 typedef struct { char b[0xB8]; } Ent_0E38;
+/**
+ * Adds a user to the buddy list, the ignore list and/or the presence subscriptions.
+ *
+ * Returns -3 for a missing record, no flags (+0xA8), an empty name or a name containing '/' or '@' (or '.', unless
+ * +0x18 allows it). Arms request slot 0 ('addu') with func_003F0658. Without a roster it stops there (returns 0).
+ * Otherwise finds the entry by name (func_003EEC88) or adds a 0xB8-byte copy of @p e to the roster and name table, ORs
+ * the flags in and clears +0xAC. Flag 4 sends 'RADD' with LIST "B", PRES "Y", USER and GROUP (+0x20); flag 0x200 sends
+ * 'RADD' with LIST "I"; both carry LRSC and ID = the slot's sequence number (+0x4CC), mark the entry pending (flag
+ * 0x10000) and store that number in +0xAC for the reply. Flag 0x800000 sends 'PADD' with USER.
+ *
+ * @param e  the entry to add: name at +0x0, group at +0x20, flags at +0xA8
+ * @param a  callback for the 'addu' reply
+ * @param b  user data for the callback
+ * @param c  timeout in seconds
+ * @return 0, or -3 when the record is refused
+ */
 int func_003F0E38(char* self, char* e, int a, int b, int c) {
     char buf[0x100];
     char* ent;
@@ -668,6 +854,21 @@ extern int func_003EEC88(int, int);
 extern int func_003EE468(int, int);
 extern void func_003EED08(int, char*);
 extern void* func_003EE480(int, int);
+/**
+ * Removes a user from the buddy list, the ignore list and/or the presence subscriptions.
+ *
+ * Returns -2 without a record or a roster, -3 for a name containing '/' or '@' (or '.', unless +0x18 allows it). Arms
+ * request slot 1 ('delu') with func_003F0658. When the name is in the roster, clears from its entry the flags that
+ * @p name's +0xA8 also has: flag 4 sends 'RDEL' with ID = the slot's sequence number (+0x4E0), LRSC, LIST "B", PRES
+ * "Y", USER and GROUP; flag 0x200 sends 'RDEL' with LIST "I"; flag 0x800000 sends 'PDEL'. An entry left without any of
+ * the flags 0x100204 is taken out of the name table and freed.
+ *
+ * @param name  the record: name at +0x0, group at +0x20, flags to remove at +0xA8
+ * @param a  callback for the 'delu' reply
+ * @param b  user data for the callback
+ * @param ms  timeout in seconds
+ * @return 0 when the entry was found, else -2 or -3
+ */
 int func_003F11F8(char* self, char* name, int a, int b, int ms) {
     char buf[0x100];
     int ret = -2;
@@ -729,6 +930,13 @@ INCLUDE_ASM("seg/seg_2F0F40", func_003F14D8);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_003EEC88(int, int);
 extern int func_003EE468(int, int);
+/**
+ * Finds a roster entry by user name.
+ *
+ * @param buddyApi  the BuddyApi state
+ * @param buddyName  the user name
+ * @return the entry (0xB8 bytes), or 0 when there is no roster or no such name
+ */
 int func_003F14D8(int* buddyApi, int buddyName) {
     int rosterEntry = 0;
     if (buddyApi[1188 / 4] && buddyName) {
@@ -744,6 +952,11 @@ int func_003F14D8(int* buddyApi, int buddyName) {
 //100%
 INCLUDE_ASM("seg/seg_2F0F40", func_003F1538);
 #ifdef SKIP_ASM
+/**
+ * Clears the buddy client's presence product text (+0x40) and status text (+0x140).
+ *
+ * @param buddyApi  the BuddyApi state
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 void func_003F1538(char* buddyApi) {
     buddyApi[0x40] = 0;
@@ -756,6 +969,12 @@ INCLUDE_ASM("seg/seg_2F0F40", func_003F1548);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int cDirtysock_tag_TagFieldDupl(char* dst, int len, const char* src);
+/**
+ * Sets the product text sent as PROD in the presence (+0x40, 0x100 bytes), when a presence text was set (+0x2C8).
+ *
+ * @param buddyApi  the BuddyApi state
+ * @param src  the product text
+ */
 void func_003F1548(char* buddyApi, const char* src) {
     if (buddyApi[0x2C8]) {
         cDirtysock_tag_TagFieldDupl(buddyApi + 0x40, 0x100, src);
@@ -768,6 +987,15 @@ INCLUDE_ASM("seg/seg_2F0F40", func_003F1578);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key, const char* val);
+/**
+ * Sets one language's status text in the presence status (STAT, +0x140).
+ *
+ * Only when @p key is exactly two characters and @p val is not empty. BuddyMan passes ("is playing SSX 3", "en").
+ *
+ * @param buddyApi  the BuddyApi state
+ * @param val  the status text
+ * @param key  two-letter language code
+ */
 void func_003F1578(char* buddyApi, const char* val, const char* key) {
     if (key[0] && key[1] && !key[2] && val[0]) {
         cDirtysock_tag_TagFieldSetString(buddyApi + 0x140, 0x100, key, val);
@@ -785,6 +1013,20 @@ extern char str_SHOW[];
 extern int cDirtysock_tag_TagFieldSetString(char* dst, int len, const char* key, const char* val);
 extern int func_003F5D88(int);
 extern void func_003F0568(char*);
+/**
+ * Sets the buddy client's resource and show state and sends the presence now or after a delay.
+ *
+ * Rebuilds the base presence at +0x240 (0x80 bytes): RSRC = @p s and SHOW = D_004512C0[@p st] ("CHAT", "AWAY", "XA",
+ * "DND", "PASS" for 1..5, else "DISC"). With no send pending (+0x2C0 == 0) schedules one at now + @p d; a show state
+ * different from the last one (+0x2C4) is recorded and sent at once. Sends with func_003F0568 when the time has come;
+ * otherwise func_003F17D8 sends it later.
+ *
+ * @param p  the BuddyApi state
+ * @param s  resource text
+ * @param st  show state index
+ * @param d  delay in ticks of func_003F5D88 (BuddyMan passes 2000)
+ * @return 0
+ */
 int func_003F15C8(char* p, char* s, int st, int d) {
     unsigned int now = func_003F5D88(*(int*)(p + 4));
     int v;
@@ -821,6 +1063,19 @@ extern char str_SUBJ_b[];
 extern int D_004A4AE8[];
 extern char* cDirtysock_tag_TagFieldFind(const char* tag, const char* key);
 extern int cDirtysock_tag_TagFieldGetString(const char* data, char* buf, int len, const char* defval);
+/**
+ * Sends a private message to the buddy server ('SEND').
+ *
+ * Refused (-3) when the BODY field is 0x40 characters or longer or a SUBJ field has text. Otherwise arms request slot 2
+ * ('send') with func_003F0658 and sends @p tag as a 'SEND' packet.
+ *
+ * @param p  the BuddyApi state
+ * @param tag  the message tag text (BODY, USER, ...)
+ * @param a  callback for the 'send' reply
+ * @param b  user data for the callback
+ * @param c  timeout in seconds
+ * @return 0, or -3 when refused
+ */
 int func_003F16D8(int* p, char* tag, int a, int b, int c) {
     if (cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(tag, str_BODY_b), 0, 0, (char*)D_004A4AE8) < 0x40) {
         if (cDirtysock_tag_TagFieldGetString(cDirtysock_tag_TagFieldFind(tag, str_SUBJ_b), 0, 0, (char*)D_004A4AE8) <= 0) {
@@ -836,6 +1091,15 @@ int func_003F16D8(int* p, char* tag, int a, int b, int c) {
 //100%
 INCLUDE_ASM("seg/seg_2F0F40", func_003F17C8);
 #ifdef SKIP_ASM
+/**
+ * Installs the buddy client's receive callback (+0x4B0) and its user data (+0x4AC).
+ *
+ * The callback gets 'chat' messages (func_003F0198) and 'admn' messages from func_003F17D8.
+ *
+ * @param buddyApi  the BuddyApi state
+ * @param a  the callback
+ * @param b  its user data
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 void func_003F17C8(int* buddyApi, int a, int b) {
     buddyApi[1200 / 4] = a;
@@ -919,6 +1183,25 @@ struct Conn_17D8 {
     int f508;
 };
 typedef struct { char b[0xB8]; } Ent_17D8;
+/**
+ * Runs the buddy client: finishes connecting, enforces timeouts, and dispatches every received packet.
+ *
+ * While connecting, polls the host lookup object (+0x0): on success connects the session (func_003F5638 with its
+ * address and the port), traces "connecting to %08x:%d" and sends the 'AUTH' login (+0x394); on failure reports state
+ * 2; either way destroys the object. A passed connect deadline (+0xC) reports state 3. Online (state 5) it sends a
+ * delayed presence when due (+0x2C0, func_003F0568) and drops the connection (func_003F5738, state 6) when a pending
+ * request's deadline passes. In states 3 and 6 every pending request's callback gets its kind with result -4.
+ *
+ * Then reads packets with func_003F5A70 until none is left (each released with func_003F5C38): type -1 reports state 5
+ * (result -1) or 6 (0xFEFEFEFE); 'PING' is echoed; 'AUTH' goes to the connect callback as 'auth' (clearing the
+ * deadline; an error disconnects with func_003F0B50); 'RECV' goes to func_003F0198 and 'ADMN' to the receive callback
+ * as 'admn'; 'SEND' completes request slot 2. 'RGET' with ID 2 gives the expected ignore-list size; 'ROST' adds or
+ * updates a roster entry (ID 1 flag 4, ID 2 flag 0x200, clears 0x100000, copies GROUP), counting down the ignore list
+ * to send 'endr' to the roster callback. 'PGET' refreshes an entry's presence (func_003F02D0) and traces "PRES: ..."
+ * when it changed. 'RADD' completes the pending add whose ID matches the entry's +0xAC: an error frees the entry, else
+ * the name is replaced by FUSR when given; the slot 0 callback gets 'addu' either way. 'RDEL' with slot 1's ID
+ * completes it as 'delu'. Finally, when the roster changed (func_003EE620), the roster callback gets 'rost'.
+ */
 void func_003F17D8(struct Conn_17D8* self) {
     char name[0x20];
     struct Ev_17D8 ev;
@@ -1140,6 +1423,15 @@ INCLUDE_ASM("seg/seg_2F0F40", func_003F2220);
 #define MD5_I(x, y, z) ((y) ^ ((x) | ~(z)))
 #define MD5_STEP(f, a, b, c, d, x, s, ac)     { (a) += f((b), (c), (d)) + (x) + (unsigned int)(ac);       (a) = ((a) << (s)) | ((a) >> (32 - (s)));       (a) += (b); }
 struct Md5Ctx;
+/**
+ * Runs the MD5 compression function on the 64-byte block buffered in an MD5 context.
+ *
+ * Loads the block (+0x14) as sixteen little-endian words, runs the four MD5 rounds of sixteen steps with the standard
+ * constants and shifts, and adds the result into the state words (+0x4..+0x10). func_003F3128 calls it each time the
+ * buffer fills.
+ *
+ * @param ctx  the MD5 context: byte count, four state words, 64-byte block
+ */
 void func_003F2220(struct Md5Ctx* ctx) {
     unsigned int* st = (unsigned int*)ctx;
     unsigned int x[16];
@@ -1236,6 +1528,11 @@ void func_003F2220(struct Md5Ctx* ctx) {
 //100%
 INCLUDE_ASM("seg/seg_2F0F40", func_003F30F0);
 #ifdef SKIP_ASM
+/**
+ * Initialises an MD5 context: byte count 0 and the standard state words 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476.
+ *
+ * @param md5Ctx  the context
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 void func_003F30F0(unsigned int* md5Ctx) {
     md5Ctx[0] = 0;
@@ -1256,6 +1553,16 @@ struct Md5Ctx {
     unsigned char buf[64];
 };
 extern void func_003F2220(struct Md5Ctx*);
+/**
+ * Feeds bytes into an MD5 context.
+ *
+ * A negative @p len means @p data is NUL-terminated (its length is counted). Bytes are appended to the block buffer one
+ * at a time, counting them in +0x0, and func_003F2220 hashes each full 64-byte block.
+ *
+ * @param ctx  the MD5 context
+ * @param data  bytes to hash
+ * @param len  byte count, or negative for a C string
+ */
 void func_003F3128(struct Md5Ctx* ctx, unsigned char* data, int len) {
     unsigned int idx;
     unsigned char* cursor;

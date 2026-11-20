@@ -8,6 +8,19 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F31F8);
 extern char *D_004A4B98;
 extern void f2220(void *) __asm__("func_003F2220");
 typedef struct { unsigned count; unsigned st[4]; unsigned char buf[64]; } sMd5;
+/**
+ * Finishes an MD5 hash and writes the digest as 16 raw bytes or as 32 lower-case hex characters.
+ *
+ * Pads the buffered block with 0x80 and zeros up to byte 56 (hashing a full block with func_003F2220 on the way),
+ * stores the message length in bits (byte count << 3) little-endian in bytes 56..63 and hashes the last block. Then
+ * walks the 16 digest bytes of the state words: @p n == 16 writes them raw; @p n > 32 writes two hex digits each
+ * (digits from D_004A4B98) and a NUL. Likely bug: for any other positive @p n the zero-fill loop never decrements
+ * @p n, so it writes zeros forever.
+ *
+ * @param ctx  the MD5 context
+ * @param out  digest output
+ * @param n  output size: 16 for raw bytes, more than 32 for hex text
+ */
 void func_003F31F8(sMd5 *ctx, unsigned char *out, int n) {
     unsigned char c = 0x80;
     unsigned w = 0;
@@ -66,6 +79,21 @@ extern char D_0051EEF8[];
 
 extern int D_004A4B9C;
 extern char str_hello_world[];
+/**
+ * Keys a CRC-mixed byte-permutation stream cipher state (0x108 bytes: 256-byte permutation, index byte at +0x100, CRC
+ * word at +0x104).
+ *
+ * On first use it also keys the shared state D_0051EEF8 with "hello world", 10 rounds. A non-negative @p rounds resets
+ * the state to the identity permutation with index and CRC 0; a negative one keeps the current state and uses -@p
+ * rounds. Then, for rounds * 256 steps, it mixes the next key byte and the current permutation byte into a CRC-32
+ * (table D_00496C08) and swaps the current slot with the slot the CRC's low byte names. A negative @p klen means
+ * @p key is NUL-terminated; an empty key leaves the permutation as it is.
+ *
+ * @param s  the cipher state
+ * @param key  key bytes
+ * @param klen  key length, or negative for a C string
+ * @param rounds  number of 256-step passes; negative continues without resetting
+ */
 void func_003F33B0(unsigned char *s, unsigned char *key, int klen, int rounds) {
     int i;
     int lim;
@@ -119,6 +147,17 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F3530);
 /* Globals used by several functions. */
 extern unsigned D_00496C08[];
 
+/**
+ * XORs @p n bytes of a buffer with the keystream of the cipher state keyed by func_003F33B0.
+ *
+ * Per byte: advances the index (+0x100), folds the permutation byte there into the CRC word (+0x104) with the CRC-32
+ * table D_00496C08, swaps the permutation bytes at the index and at the CRC's low byte, and XORs the buffer byte with
+ * the permutation byte at the difference of the two swapped values. Saves the index and CRC back.
+ *
+ * @param s  the cipher state
+ * @param buf  bytes to encrypt or decrypt in place
+ * @param n  byte count
+ */
 void func_003F3530(unsigned char *s, unsigned char *buf, int n) {
     unsigned char i = s[0x100];
     unsigned j = *(unsigned *)(s + 0x104);
@@ -146,6 +185,23 @@ extern char D_0051EEF8[];
 extern void f33B0w(void *, int, int, int) __asm__("func_003F33B0");
 extern void f3530w(void *, unsigned char *, int) __asm__("func_003F3530");
 extern char str_ru_paranoid[];
+/**
+ * Encrypts a text into a fixed-length printable string (the inverse of func_003F3748).
+ *
+ * Keys a local cipher state with the key (func_003F33B0), and also stirs the key and "ru paranoid?" into the shared
+ * state D_0051EEF8. Writes @p n - 1 characters and a NUL: each input character (anything outside 0x20..0x7E becomes
+ * 0x7F, which also marks the end of the input) is shifted by a keystream byte mod 96 into the range 0x20..0x7F; after
+ * the input's NUL the rest is random padding drawn from the shared state, so the output length does not reveal the
+ * text's. func_003E8B10 uses it to send the PASS field as "~" + this encoding under the 16-byte session key.
+ *
+ * @param out  output buffer
+ * @param n  output buffer size
+ * @param in  text to encrypt (may equal @p out)
+ * @param a  key bytes
+ * @param b  key length, or negative for a C string
+ * @param c  key rounds
+ * @return 0
+ */
 int func_003F35D0(char *out, int n, unsigned char *in, int a, int b, int c) {
     unsigned char ctx[272];
     unsigned char ch;
@@ -180,6 +236,21 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F3748);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern void f33B0(void *, int, int, int) __asm__("func_003F33B0");
 extern void f3530(void *, unsigned char *, int) __asm__("func_003F3530");
+/**
+ * Decrypts a string made by func_003F35D0.
+ *
+ * Keys a local cipher state (func_003F33B0) and shifts each input character back by a keystream byte mod 96, stopping
+ * at the input's NUL, at a decoded 0x7F (the end marker) or after @p n - 1 characters, then NUL-terminates. Nothing in
+ * retail calls it.
+ *
+ * @param out  output buffer
+ * @param n  output buffer size
+ * @param in  encrypted text
+ * @param key  key bytes
+ * @param keyLen  key length, or negative for a C string
+ * @param rounds  key rounds
+ * @return 0
+ */
 int func_003F3748(char *out, int n, unsigned char *in, int key, int keyLen, int rounds) {
     unsigned char ctx[272];
     unsigned char k;
@@ -214,6 +285,14 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F3860);
 extern char D_0051F000[];
 extern int func_003F4C98(char *, int, int);
 extern int f4C68g(char *, int, int, int, int, int, int, int, int, int *) __asm__("func_003F4C68");
+/**
+ * Polls a host-name lookup made by func_003F39C8 (its "done" function, slot +0x8).
+ *
+ * Asks the IOP 'name'/'done' for the lookup id at +0x58 and waits for the answer into +0x0; when that is positive
+ * (resolved) it also fetches 'name'/'addr' into +0x4.
+ *
+ * @return 0 while pending, positive when resolved, negative on failure
+ */
 int func_003F3860(int *self) {
     int id = self[88 / 4];
     func_003F4C98(D_0051F000, 'name', 'done');
@@ -233,6 +312,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F3940);
 extern char D_0051F010[];
 extern int func_003F4C98(char *, int, int);
 extern void func_00256BD8(int *);
+/**
+ * Frees a host-name lookup made by func_003F39C8 (its "free" function, slot +0xC).
+ *
+ * Sends 'name'/'free' for the lookup id at +0x58 without waiting, then frees the object with func_00256BD8.
+ */
 void func_003F3940(int *self) {
     int v = self[88 / 4];
     func_003F4C98(D_0051F010, 'name', 'free');
@@ -254,6 +338,18 @@ extern int f4C68k(char *, int, int, int, int, int, int, int, int, int *) __asm__
 extern int func_003F3860(int *);
 extern void func_003F3940(int *);
 int *f39C8impl(int a, int b) __asm__("func_003F39C8");
+/**
+ * Starts an asynchronous host-name lookup on the IOP and returns its lookup object.
+ *
+ * Allocates a zeroed 92-byte object with RpcAlloc, installs func_003F3860 as its done function (+0x8) and func_003F3940
+ * as its free function (+0xC), and sends 'name'/'look' with the host name and the timeout, waiting for the IOP's lookup
+ * id into +0x58. The caller polls the done function until it is nonzero, then reads the address at +0x4 and calls the
+ * free function.
+ *
+ * @param a  host name text
+ * @param b  timeout (passed through to the IOP)
+ * @return the lookup object, or 0 when the allocation fails
+ */
 int *f39C8impl(int a, int b) {
     int f;
     int *p = RpcAlloc(92);
@@ -275,6 +371,16 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F3A98);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_003F39C8(void);
+/**
+ * Starts a host-name lookup: forwards both arguments to func_003F39C8 and returns its lookup object.
+ *
+ * Used by BuddyApi's connect (func_003F08E8) and by LobbyMan; both poll the object's done function (slot +0x8) and free
+ * it through slot +0xC.
+ *
+ * @param hostName  host name text
+ * @param timeoutMs  timeout
+ * @return the lookup object, or 0
+ */
 int func_003F3A98(void* hostName, int timeoutMs) { return func_003F39C8(); }
 #endif
 
@@ -283,6 +389,14 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F3AB8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_003F39C8(void);
+/**
+ * Resolves a host name synchronously: starts a lookup (func_003F39C8, arguments passed through), spins on its done
+ * function until it is nonzero, frees it and returns the address.
+ *
+ * Nothing in retail calls it.
+ *
+ * @return the resolved address, or 0 when the lookup could not be started (also 0 when the lookup failed)
+ */
 int func_003F3AB8(void) {
     int *hostLookup;
     int resolvedAddr = 0;
@@ -311,6 +425,17 @@ extern void f5000(int) __asm__("func_003F5000");
 extern int func_003F4D68(void);
 extern int func_003F4C98(char *, int, int);
 extern int f4C68e(char *, int, int, int, int, int, int, int, int, int *) __asm__("func_003F4C68");
+/**
+ * Starts the IOP network module ('netw'/'crea') once.
+ *
+ * Returns -1 when it is already open (D_004A4BA0). If the IOP request queue is not running (func_003F5470) it starts it
+ * (func_003F5000) and fetches the IOP's service directory (func_003F4D68). Then sends 'netw'/'crea' with the parameter
+ * text and the argument '1731', waits for the module handle into D_004A4BA4 and sets D_004A4BA0. The cCommSystem
+ * constructor calls it with "www.ea.com".
+ *
+ * @param a  startup parameter text
+ * @return 0, or -1 when already started
+ */
 int func_003F3B18(int a) {
     char buf[16];
     if (D_004A4BA0 != 0) return -1;
@@ -334,6 +459,16 @@ extern int D_004A4BA4;
 
 extern int func_003F4C98(char *, int, int);
 extern int func_003F4C68b(char *, int, int, int, int, int, int, int, int, int *) __asm__("func_003F4C68");
+/**
+ * Fetches the list of network configurations from the IOP ('netw'/'list').
+ *
+ * Sends the device text (@p self) and waits for up to @p b 0x100-byte entries into @p a (flags 5: kick the IOP and
+ * write back the buffer). cCommSystem fills cCommSystem_mNetConns (10 entries) with it.
+ *
+ * @param a  output list of 0x100-byte configuration entries
+ * @param b  capacity in entries
+ * @return the number of entries
+ */
 int func_003F3BC8(int self, int a, int b) {
     char buf[16];
     int out;
@@ -353,6 +488,16 @@ extern int D_004A4BA4;
 
 extern int func_003F4C98(char *, int, int);
 extern int f4C68s(char *, int, int, int, int, int, int, int, int, int *) __asm__("func_003F4C68");
+/**
+ * Starts connecting with a network configuration ('netw'/'star').
+ *
+ * Sends the configuration text (a NUL-terminated string) and waits for the IOP's result. Both arms of the original
+ * branch on @p a are identical (see the FAKEMATCH note). cCommSystem passes the text at +0x80 of the chosen
+ * cCommSystem_mNetConns entry.
+ *
+ * @param a  configuration text
+ * @return the IOP's result
+ */
 // NOTE: retail had a branch on `a` whose two paths were identical (jump2
 // cross-jumped them after sched2, leaving only a block boundary before the
 // 'netw'/'star' setup). The original condition is unknown.
@@ -381,6 +526,19 @@ extern int D_004A4BA4;
 
 extern int func_003F4C98(char *, int, int);
 extern int f4C68m(char *, int, int, int, int, int, int, int, int, int *) __asm__("func_003F4C68");
+/**
+ * Answers a network-status query by its four-character selector.
+ *
+ * 'open' returns the started flag D_004A4BA0 without asking the IOP. The others send 'netw'/'stat' with a selector and
+ * wait for the answer: 'onln' is whether 'host' is nonzero; 'conn' (flags 5, with @p a / @p b as a reply buffer)
+ * returns the connection state; 'host' and 'addr' return those words; 'macx' copies the MAC address into @p a and
+ * returns 0; 'type' returns the interface type word and 'bbnd' its bit 2 (broadband). Any other selector returns -1.
+ *
+ * @param tag  selector ('open', 'onln', 'conn', 'host', 'addr', 'macx', 'type', 'bbnd')
+ * @param a  reply buffer for 'conn', 'macx' and 'type'
+ * @param b  reply buffer size
+ * @return the selected status, or -1 for an unknown selector
+ */
 int func_003F3CC0(int tag, int a, int b) {
     char buf[16];
     int o20;
@@ -433,6 +591,14 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F3F78);
 extern char D_004512E8[];
 extern const char str_0123456789abcdefUSBD_IRX[];
 extern void f3CC0(int, unsigned char *, int) __asm__("func_003F3CC0");
+/**
+ * Returns the console's MAC address as text: "$" followed by twelve lower-case hex digits.
+ *
+ * Built once into the static buffer D_004512E8 from func_003F3CC0('macx'); later calls return the cached text. LobbyMan
+ * sends it as the MID tag and cCommSystem copies it.
+ *
+ * @return the static MAC text
+ */
 char *func_003F3F78(void) {
     unsigned char b[16];
     if (D_004512E8[0] == 0) {
@@ -464,6 +630,13 @@ extern int D_004A4BA4;
 
 extern int func_003F4C98(char *, int, int);
 extern int func_003F4C68(char *, int, int, int, int, int, int, int, int, int);
+/**
+ * Asks the IOP network module to disconnect ('netw'/'shut') and waits for it.
+ *
+ * cCommSystem calls it when it drops its net connection; func_003F4118 calls it before destroying the module.
+ *
+ * @return 0
+ */
 int func_003F40B8(void) {
     char buf[16];
     func_003F4C98(buf, 'netw', 'shut');
@@ -483,6 +656,14 @@ extern int D_004A4BA4;
 extern int func_003F40B8(void);
 extern int func_003F4C98(char *, int, int);
 extern int func_003F4C68(char *, int, int, int, int, int, int, int, int, int);
+/**
+ * Shuts the IOP network module down: disconnects (func_003F40B8), sends 'netw'/'dest' and clears the started flag
+ * D_004A4BA0.
+ *
+ * Nothing in retail calls it.
+ *
+ * @return 0, or -1 when the module was not started
+ */
 int func_003F4118(void) {
     char buf[16];
     if (D_004A4BA0 == 0) return -1;
@@ -499,6 +680,13 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F4198);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_003F4DE8(void);
+/**
+ * Returns the millisecond tick (func_003F4DE8).
+ *
+ * Nothing in retail calls it.
+ *
+ * @return milliseconds since the IOP queue's timer started
+ */
 int func_003F4198(void) { return func_003F4DE8(); }
 #endif
 
@@ -508,6 +696,13 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F41B8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern unsigned int func_003F4DE8u(void) __asm__("func_003F4DE8");
+/**
+ * Busy-waits for @p n milliseconds of func_003F4DE8 ticks (0 means 5).
+ *
+ * Nothing in retail calls it.
+ *
+ * @param n  milliseconds to wait
+ */
 void func_003F41B8(int n) {
     if (n == 0) n = 5;
     if (n > 0) {
@@ -526,6 +721,15 @@ struct sTick { void (*fn)(int, int); int arg; };
 
 extern struct sTick D_0051F030[16];
 
+/**
+ * Registers an idle callback for NetConnIdle in the first free of the 16 slots of D_0051F030.
+ *
+ * NetConnIdle calls each registered function with its argument and the current tick.
+ *
+ * @param fn  the callback
+ * @param arg  its argument
+ * @return 0, or -1 when all slots are taken
+ */
 int func_003F4210(void (*fn)(int, int), int arg) {
     int i;
     struct sTick *p = D_0051F030;
@@ -548,6 +752,13 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F4250);
 /* D_0051F030: the periodic callbacks run by NetConnIdle (fn 0 = free slot). */
 extern struct sTick D_0051F030[16];
 
+/**
+ * Removes an idle callback registered with func_003F4210 (the slot whose function and argument both match).
+ *
+ * @param fn  the callback
+ * @param arg  its argument
+ * @return 0, or -1 when no slot matches
+ */
 int func_003F4250(void (*fn)(int, int), int arg) {
     int i;
     struct sTick *p = D_0051F030;
@@ -605,12 +816,29 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F4330);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_003F4DE8(void);
+/**
+ * Returns the millisecond tick (func_003F4DE8).
+ *
+ * LobbyApi code (func_003E94F0) uses it to time its pings.
+ *
+ * @return milliseconds since the IOP queue's timer started
+ */
 int func_003F4330(void) { return func_003F4DE8(); }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F4350);
 #ifdef SKIP_ASM
+/**
+ * Compares two byte strings: @p n bytes, or up to the NUL of @p lhs when @p n is negative.
+ *
+ * Nothing in retail calls it.
+ *
+ * @param lhs  first string
+ * @param rhs  second string
+ * @param n  byte count, or negative for C strings
+ * @return the difference of the first differing bytes, or 0 when equal
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 int func_003F4350(unsigned char *lhs, unsigned char *rhs, int n) {
     int diff;
@@ -631,6 +859,12 @@ int func_003F4350(unsigned char *lhs, unsigned char *rhs, int n) {
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F43D0);
 #ifdef SKIP_ASM
+/**
+ * Does nothing and returns 1 (a printf-style debug stub; nothing in retail calls it).
+ *
+ * @param a  first argument (ignored)
+ * @return 1
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 int func_003F43D0(int a, ...) { return 1; }
 #endif
@@ -685,8 +919,17 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F4410);
 #define EI_2F41() __asm__ volatile("ei")
 #define SYNC_2F41() __asm__ volatile("sync")
 
-/* The SIF queue's interrupt handler (installed by func_003F5000 through func_00423A90 with cause 2 and arg = the queue):
-   it adds the Count cycles since the last update to the queue's total. */
+/**
+ * Interrupt handler that extends the COP0 Count register into the IOP queue's 64-bit cycle total.
+ *
+ * Installed by func_003F5000 for interrupt cause 2 with the queue D_0051F0C0 as its argument: adds the Count cycles
+ * since the last update (+0x4DF8) to the total (+0x4E00), stores the new Count, then syncs and re-enables interrupts.
+ * func_003F4DE8 turns the total into milliseconds.
+ *
+ * @param cause  interrupt cause (unused)
+ * @param handlerArg  the queue
+ * @return 0
+ */
 // FAKEMATCH: the Count read is wrapped in `do { ... } while (0)`; its loop notes make sched1 treat the next insn as a
 // barrier, so the volatile `total` load issues before `c - last` as in retail; plain form 84.62%.
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
@@ -717,6 +960,17 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F4448);
 extern int f4C50(int) __asm__("func_00424C50");
 extern int f3B80(int, void *, void *) __asm__("func_00423B80");
 void func_003F4448(int a, int b, struct sSifQueue *s);
+/**
+ * Alarm handler that wakes the IOP queue thread when a reply has arrived, re-arming itself while requests are pending.
+ *
+ * Forgets the alarm id that fired (+0x4DEC, armed by func_003F4528; +0x4DF0, its own). While requests are outstanding,
+ * wakes the queue thread (+0x4DE8, func_00424C50) when the oldest one's reply key matches, and sets a new 16-tick alarm
+ * (func_00423B80) when none is armed.
+ *
+ * @param a  id of the alarm that fired
+ * @param b  alarm time (unused)
+ * @param s  the queue (D_0051F0C0)
+ */
 void func_003F4448(int a, int b, struct sSifQueue *s) {
     if (a == s->h4DEC) s->h4DEC = -1;
     if (a == s->h4DF0) s->h4DF0 = -1;
@@ -734,6 +988,10 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F44F8);
 extern int func_003F4A78(void);
 extern int SleepThread(void);
 extern volatile int D_004A5B04;
+/**
+ * Entry point of the IOP queue thread (created by func_003F5000): forever processes arrived replies (func_003F4A78) and
+ * sleeps, with D_004A5B04 set while it sleeps.
+ */
 void func_003F44F8(void) {
     while (1) {
         func_003F4A78();
@@ -772,7 +1030,31 @@ extern unsigned int strlen(const char *);
 /* Writes back the D-cache over [a, a + n). */
 static __inline__ void f4528_wb(int a, int n) { func_00424698(a, a + n); }
 
-/* Queues one SIF request: copies the send data into the EE ring, fills a[head], DMAs both to the IOP. Returns the key. */
+/**
+ * Queues a request to an IOP service and sends it over SIF DMA; optionally blocks until the reply.
+ *
+ * @p cl is a service handle resolved by func_003F4C98 (+0xC is the service's IOP id; -1 without one). @p dst must be
+ * 16-byte aligned (its size is rounded down to 16). A negative @p size means @p data is a C string; flag 2 makes
+ * @p data a {len, ptr} list ending with len 0, gathered into one payload. Under the queue semaphore, while the ring is
+ * full it pumps replies (func_003F4A78). It takes room in the 64-byte-aligned payload area (-1 when none), records the
+ * completion (@p fn, @p out, flags, thread id) in the callback ring, copies the payload, fills the request record
+ * (payload address and size, reply buffer and size, @p fno, @p a3, service id, key) and DMAs payload and record to the
+ * IOP (sceSifSetDma, retried every tick until accepted). Flag 4 writes the reply buffer back from the cache first; flag
+ * 1 sends SIF command 1 to kick the IOP. With @p fn == 1 it arms the wake alarm (func_003F4448) and sleeps until
+ * func_003F4A78 stores the reply's result in *@p out and wakes it.
+ *
+ * @param cl  service handle
+ * @param flags  1 kick the IOP, 2 gather list, 4 write back the reply buffer
+ * @param fno  target object id on the IOP (module or session handle)
+ * @param a3  call argument word
+ * @param data  payload
+ * @param size  payload size, or negative for a C string
+ * @param dst  reply buffer (IOP writes it by DMA)
+ * @param dstsize  reply buffer size
+ * @param fn  completion: 0 none, 1 block and store the result, else a callback
+ * @param out  result pointer (or the callback's last argument)
+ * @return the request's key, or -1 on error
+ */
 int func_003F4528(struct sSifClient_4528 *cl, int flags, int fno, int a3, char *data, int size, int dst, int dstsize,
                   int fn, int *out) {
     struct sSifQueue *g = &D_0051F0C0;
@@ -893,6 +1175,17 @@ extern volatile int D_004A5B00;
 extern int WaitSema(int);
 extern int SignalSema(int);
 extern int WakeupThread(int);
+/**
+ * Completes every IOP request whose reply has arrived, in order.
+ *
+ * While the oldest request's reply key matches its request key (checked again under the queue semaphore): a blocking
+ * request (completion 1) gets the reply's result word (+0x14) in its result pointer and its thread is woken after the
+ * semaphore is released; a callback completion is called with the key, flags, the reply words +0x10 and +0x14, the
+ * payload address and size, the reply words +0x8 and +0xC and the result pointer. The payload area up to that request
+ * is freed and the tail advances. Called by the queue thread, NetConnIdle and senders waiting for room.
+ *
+ * @return the number of requests completed
+ */
 int func_003F4A78(void) {
     struct sSifQueue *g = &D_0051F0C0;
     int n = 0;
@@ -946,6 +1239,22 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F4C68);
 // ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 extern int func_003F4528_4C68(int, int, int, int, int, int, int, int, int, int, int) __asm__("func_003F4528");
 int func_003F4C68_impl(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9) __asm__("func_003F4C68");
+/**
+ * Sends an IOP request: forwards its ten arguments to func_003F4528 (passing the call argument a second time as an
+ * eleventh).
+ *
+ * @param a0  service handle (from func_003F4C98)
+ * @param a1  flags (1 kick, 2 gather list, 4 write back the reply buffer)
+ * @param a2  target object id on the IOP
+ * @param a3  call argument word
+ * @param a4  payload
+ * @param a5  payload size, or negative for a C string
+ * @param a6  reply buffer
+ * @param a7  reply buffer size
+ * @param a8  completion: 0 none, 1 block, else a callback
+ * @param a9  result pointer
+ * @return the request's key, or -1
+ */
 int func_003F4C68_impl(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, int a8, int a9) {
     int unused[12];
     return func_003F4528_4C68(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, a3);
@@ -962,6 +1271,19 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F4C98);
 extern struct sSifQueue D_0051F0C0;
 
 int f4C98impl(struct sSifEnt *c, int k1, int k2) __asm__("func_003F4C98");
+/**
+ * Resolves an IOP service by its module and function tags into a 16-byte handle, caching the result.
+ *
+ * When the handle already holds the same tags and its cached index still names a directory entry (index < 129) with the
+ * same id and module tag, returns 0. Otherwise stores the tags and searches the service directory (+0x4D88 .. +0x4D8C
+ * of D_0051F0C0, fetched by func_003F4D68) for the pair: found, it copies the entry's index and IOP id and returns 1;
+ * not found, it clears both and returns -1.
+ *
+ * @param c  the handle: index, module tag, function tag, IOP id
+ * @param k1  module tag ('netw', 'name', 'sess', ...)
+ * @param k2  function tag ('crea', 'look', 'send', ...)
+ * @return 0 cached, 1 found, -1 unknown service
+ */
 int f4C98impl(struct sSifEnt *c, int k1, int k2) {
     struct sSifQueue *g = &D_0051F0C0;
     struct sSifEnt *e;
@@ -1000,6 +1322,15 @@ extern struct sSifQueue D_0051F0C0;
 
 extern int func_003F4C68d(int *, int, int, int, int, int, int, int, int, int) __asm__("func_003F4C68");
 extern int func_003F4A78(void);
+/**
+ * Fetches the IOP's service directory into the queue and waits until every queued request has completed.
+ *
+ * Sends a blocking request to the fixed directory service (a handle whose IOP id is 1) with the directory area of
+ * D_0051F0C0 (+0x4D88 .. +0x4D8C, 0x800 bytes) as the reply buffer, then pumps replies (func_003F4A78) until the ring
+ * is empty. func_003F4C98 searches that directory. Called by func_003F3B18 right after starting the queue.
+ *
+ * @return 0
+ */
 int func_003F4D68(void) {
     int t[4];
     t[3] = 1;
@@ -1017,6 +1348,15 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F4DE8);
 #define MFC0_COUNT_2F41(v) __asm__ volatile("mfc0 %0, $9" : "=r"(v))
 
 extern long func_00411538_4DE8(long, long) __asm__("func_00411538");
+/**
+ * Returns the time in milliseconds since the IOP queue's timer started.
+ *
+ * Reads a consistent snapshot of the last Count value (+0x4DF8) and the 64-bit cycle total (+0x4E00) kept by the
+ * interrupt handler func_003F4410 (re-reading while either changes), adds the Count cycles since that update and
+ * divides by 0x48000 (294,912 cycles per millisecond at the EE's 294.912 MHz) with func_00411538.
+ *
+ * @return the tick in milliseconds
+ */
 // FAKEMATCH: `t = cnt; t = last;` (a dead read of the volatile local cnt into t, which then carries last into the
 // test) reproduces retail's `lw v1,0(sp); lw v1,4(sp)`; plain form 96.97% (volatile locals kept: retail stores each
 // snapshot to the stack and reloads it; without them 43.24%).
@@ -1045,12 +1385,30 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F4E80);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_00424698(int, int);
+/**
+ * Writes a memory range back from the data cache (func_00424698 over @p start .. @p start + @p size).
+ *
+ * @param start  first address
+ * @param size  byte count
+ * @return func_00424698's result
+ */
 int func_003F4E80(int start, int size) { return func_00424698(start, start + size); }
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F4EA0);
 #ifdef SKIP_ASM
+/**
+ * Checks a block in shared memory written by the IOP and returns its tag and size.
+ *
+ * Reads the 16-byte header through the uncached mapping: +0x0 link, +0x8 tag, +0xC payload size. Returns -1 when the
+ * link is 0 or the size is outside 0..0x8000; -2 when the link does not point just past the 16-byte-rounded payload or
+ * the linked block's own link does not point back; -3 when the linked block's tag differs. func_003E6B10 uses it.
+ *
+ * @param blockAddr  address of the block header
+ * @param out  receives the payload size (may be 0)
+ * @return the block's tag, or -1, -2 or -3
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 int func_003F4EA0(unsigned blockAddr, int *out) {
     unsigned *header = (unsigned *)((blockAddr & 0xFFFFFFF) | 0x20000000);
@@ -1085,6 +1443,14 @@ extern struct sSifQueue D_0051F0C0;
 extern struct { unsigned char b; char pad[11]; int w; } D_00451340;
 extern void FlushCache(int);
 extern void func_004261B0(int, void *, int, int, int, int);
+/**
+ * Checks that the IOP side of the request queue answers.
+ *
+ * Clears the flag byte at the start of D_0051F0C0, sends SIF command 1 (func_004261B0) carrying the flag's address + 1,
+ * and spins (flushing the cache) until the IOP sets the flag or 50,000,000 Count cycles (about 170 ms) pass.
+ *
+ * @return 1 when the IOP answered, 0 on timeout
+ */
 int func_003F4F40(void) {
     int r;
     unsigned start;
@@ -1139,6 +1505,19 @@ extern int func_004248E8(int);
 extern void StartThread(int, void *);
 extern int func_003F4410(int, void *);
 
+/**
+ * Starts the EE-IOP request queue D_0051F0C0.
+ *
+ * Fails (-1) when the IOP does not answer (func_003F4F40). Zeroes the queue and lays out its uncached areas: service
+ * directory (0x800 bytes), request ring and reply ring (0x200 each), payload area (0x4000), DMA-id words and the
+ * completion ring. Allocates the IOP-side copy (func_0042ABA0, -2 on failure), DMAs a 0x40-byte header describing the
+ * areas and then the request ring (sceSifSetDma, -3 / -4 on failure), initialises SIF commands (func_00425D38) and
+ * sends command 1 with the IOP address. Creates the queue semaphore and the queue thread (func_003F44F8, priority 10,
+ * 0x2000-byte stack D_00523F00; -5 on failure), installs the Count handler func_003F4410 on interrupt 2 and enables it,
+ * starts the thread and sets the started flag D_004A4BB0.
+ *
+ * @return 0, or -1 .. -5 on failure
+ */
 int func_003F5000(void) {
     struct sSifQueue *g = &D_0051F0C0;
     struct sSifHdr_5000 hdr;
@@ -1259,6 +1638,14 @@ extern void RemoveIntcHandler(int, int);
 extern void TerminateThread(int);
 extern void DeleteThread(int);
 extern void DeleteSema(int);
+/**
+ * Stops the EE-IOP request queue: releases its alarms, removes the interrupt handler, terminates and deletes the queue
+ * thread, deletes the semaphore and clears the started flag D_004A4BB0.
+ *
+ * Nothing in retail calls it.
+ *
+ * @return 0
+ */
 int func_003F53F8(void) {
     struct sSifQueue *q = &D_0051F0C0;
     if (q->h4DEC >= 0) func_00423B30(q->h4DEC);
@@ -1278,6 +1665,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F5470);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_004A4BB0;
 
+/**
+ * Returns whether the EE-IOP request queue has been started (D_004A4BB0, set by func_003F5000).
+ *
+ * @return the started flag
+ */
 int func_003F5470(void) {
     return D_004A4BB0;
 }
@@ -1296,6 +1688,17 @@ extern void FlushCache(int);
 extern void func_00256BD8(int *);
 extern int func_003F4C98(char *, int, int);
 extern int func_003F4C68(char *, int, int, int, int, int, int, int, int, int);
+/**
+ * Creates a network packet session on the IOP ('sess'/'crea').
+ *
+ * Clamps @p size to 0x1000..0x2000 and allocates a 156-byte header plus the buffers with RpcAlloc: a 64-byte-aligned
+ * 0x20-byte address block (+0x4) and, 0x40 bytes after it, the receive buffer (+0x18) of @p size bytes (+0x14). Zeroes
+ * both and writes them back from the cache, then waits for the IOP session id into +0x0; with id 0 the block is freed
+ * and 0 returned. BuddyApi (func_003F0710) creates its session with 0x8000, clamped to 0x2000.
+ *
+ * @param size  receive buffer size
+ * @return the session, or 0
+ */
 int *func_003F5478(int size) {
     int *p;
 
@@ -1330,6 +1733,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F55B8);
 extern char D_00525F10[];
 extern int func_003F4C98(char *, int, int);
 extern void func_00256BD8(int *);
+/**
+ * Destroys a network packet session: sends 'sess'/'dest' for its id and waits, then frees it (func_00256BD8).
+ *
+ * @param p  the session
+ */
 void func_003F55B8(int *p) {
     func_003F4C98(D_00525F10, 'sess', 'dest');
     func_003F4C68(D_00525F10, 1, *p, 0, 0, 0, 0, 0, 1, 0);
@@ -1349,6 +1757,17 @@ extern int func_00424698(int, int);
    completion) writes f8 / fC / f10, so they are volatile in every accessor. */
 struct sSess { int f0; int f4; volatile int f8; volatile int fC; volatile int f10; int f14; unsigned char *f18; };
 typedef struct { unsigned short family; unsigned short port; int addr; int z8; int zC; } SA5638;
+/**
+ * Connects a network packet session to an IPv4 address and port ('sess'/'conn', not waited for).
+ *
+ * Returns -1 when the session's address block (+0x4) is already in use (family set). Otherwise fills it as a
+ * sockaddr_in (family 2, big-endian port and address), writes it back from the cache, sends it and clears the
+ * received-byte count (+0x10). func_003F5738 disconnects.
+ *
+ * @param addr  IPv4 address (host order)
+ * @param port  port
+ * @return 0, or -1 when already connected
+ */
 int func_003F5638(struct sSess *self, unsigned addr, int port) {
     unsigned v;
     if (((SA5638 *)self->f4)->family != 0) return -1;
@@ -1383,6 +1802,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F5738);
 extern char D_00525F30[];
 extern int func_003F4C98(char *, int, int);
 extern void func_00416210b(int, int, int) __asm__("func_00416210");
+/**
+ * Disconnects a network packet session ('sess'/'disc', not waited for), zeroes its address block (+0x4) and clears the
+ * received-byte count (+0x10).
+ *
+ * @return 0
+ */
 int func_003F5738(struct sSess *self) {
     func_003F4C98(D_00525F30, 'sess', 'disc');
     func_003F4C68(D_00525F30, 0, self->f0, 0, 0, 0, 0, 0, 0, 0);
@@ -1402,6 +1827,17 @@ extern char D_00525F40[];
 extern int func_003F4C98(char *, int, int);
 extern int c57_4C68(char *, int, int, int, int, int, B57C8 *, int, int, int) __asm__("func_003F4C68");
 int func_003F57C8_impl(struct sSess *self, int key) __asm__("func_003F57C8");
+/**
+ * Returns one field of a network packet session's status.
+ *
+ * Fetches the 0x20-byte status from the IOP ('sess'/'stat', waiting) into the address block (+0x4), then returns by
+ * @p key: 'port' / 'addr' the peer's port and address (bytes 2-3 / 4-7, big-endian), 'lprt' / 'ladr' the local port and
+ * address (bytes 0x12-0x13 / 0x14-0x17), 'ibuf' the bytes received and not yet read (+0x10); 0 for anything else.
+ * Nothing in retail calls it.
+ *
+ * @param key  selector ('port', 'addr', 'lprt', 'ladr', 'ibuf')
+ * @return the selected value
+ */
 int func_003F57C8_impl(struct sSess *self, int key) {
     func_003F4C98(D_00525F40, 'sess', 'stat');
     c57_4C68(D_00525F40, 0, self->f0, 0, 0, 0, (B57C8 *)self->f4, 0x20, 1, 0);
@@ -1424,6 +1860,9 @@ int func_003F57C8_impl(struct sSess *self, int key) {
 }
 #endif
 
+/**
+ * Does nothing (an empty per-session update hook; func_003F17D8 and func_003F5910 call it).
+ */
 void func_003F5908(void) {
 }
 
@@ -1437,6 +1876,19 @@ extern char D_00525F50[];
 extern int func_003F4C98(char *, int, int);
 extern int c59_4C68(char *, int, int, int, IO5910 *, int, int, int, int, int) __asm__("func_003F4C68");
 extern void c59_5908(int *) __asm__("func_003F5908");
+/**
+ * Sends one packet on a network packet session ('sess'/'send', not waited for).
+ *
+ * The packet is a 12-byte big-endian header (kind, argument, total length = data length + 12) followed by the data,
+ * sent as a two-piece gather list. A negative @p len means @p str is a C string sent with its NUL. BuddyApi sends its
+ * tag-text commands this way (kind 'AUTH', 'PSET', ...).
+ *
+ * @param a  packet kind (four characters)
+ * @param b  packet argument word
+ * @param str  packet data
+ * @param len  data length, or negative for a C string
+ * @return 0
+ */
 int func_003F5910(int *self, int a, int b, char *str, int len) {
     unsigned char hdr[12];
     IO5910 io;
@@ -1476,6 +1928,21 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F5A50);
 /* A network session (func_003F5A70 / func_003F5C38 read from its receive buffer f18). */
 
 int func_003F5A50_cb(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int len, struct sSess *self) __asm__("func_003F5A50");
+/**
+ * Completion callback of a session's 'sess'/'recv' request: records how many bytes arrived.
+ *
+ * Called by func_003F4A78 with the reply's words; stores the received length (the eighth argument, reply word +0xC) in
+ * +0x10 and clears the read offset (+0xC) and the receive-pending flag (+0x8).
+ *
+ * @param a0  request key (unused)
+ * @param a1  request flags (unused)
+ * @param a2  reply word +0x10 (unused)
+ * @param a3  reply result word (unused)
+ * @param a4  payload address (unused)
+ * @param a5  payload size (unused)
+ * @param a6  reply word +0x8 (unused)
+ * @param len  number of bytes received
+ */
 int func_003F5A50_cb(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int len, struct sSess *self) {
     self->f10 = len;
     self->fC = 0;
@@ -1497,6 +1964,20 @@ extern int func_003F4C98(char *, int, int);
 extern void a70_47D8(unsigned char *, unsigned char *) __asm__("func_004247D8");
 extern int a70_4C68(char *, int, int, int, int, int, unsigned char *, int, int, int) __asm__("func_003F4C68");
 extern int func_003F5A50(void);
+/**
+ * Peeks at the next received packet of a network packet session, starting a new receive when all are read.
+ *
+ * When every received byte has been read (+0xC >= +0x10) and no receive is pending (+0x8), it marks one pending,
+ * invalidates the cache over the receive buffer, resets the counts and sends 'sess'/'recv' with the receive buffer and
+ * func_003F5A50 as completion; then returns -1. Otherwise it parses the 12-byte header at the read offset: kind and
+ * argument (big-endian) go to *@p o1 / *@p o2, and *@p o3 points at the data, NUL-terminated by overwriting its last
+ * byte (or at an empty string when there is none). The packet stays unread; func_003F5C38 consumes it.
+ *
+ * @param o1  receives the packet kind (may be 0)
+ * @param o2  receives the packet argument (may be 0)
+ * @param o3  receives the data pointer (may be 0)
+ * @return the data length, or -1 when no packet is waiting
+ */
 int func_003F5A70(struct sSess *self, unsigned *o1, unsigned *o2, char **o3) {
     int n;
     if (self->fC >= self->f10) {
@@ -1541,6 +2022,19 @@ extern int func_003F4C98(char *, int, int);
 extern int c38_4C68(char *, int, int, int, int, int, unsigned char *, int, int, int) __asm__("func_003F4C68");
 extern int func_003F5A50(void);
 int func_003F5C38_impl(struct sSess *self, int a, int b, char *buf, int max) __asm__("func_003F5C38");
+/**
+ * Reads and consumes the next received packet of a network packet session.
+ *
+ * Peeks with func_003F5A70 (kind and argument to @p a / @p b), copies up to @p max data bytes into @p buf when given,
+ * and advances the read offset past the packet. When that empties the buffer and no receive is pending it starts the
+ * next 'sess'/'recv' as func_003F5A70 does. BuddyApi passes no outputs, just to drop the packet it peeked.
+ *
+ * @param a  receives the packet kind (may be 0)
+ * @param b  receives the packet argument (may be 0)
+ * @param buf  data output (may be 0)
+ * @param max  data output size
+ * @return the data length, or -1 when no packet is waiting
+ */
 int func_003F5C38_impl(struct sSess *self, int a, int b, char *buf, int max) {
     int t;
     int n = c38_5A70(self, a, b, 0);
@@ -1569,6 +2063,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F5D88);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_003F4DE8(void);
+/**
+ * Returns the millisecond tick (func_003F4DE8); the session argument its callers pass is ignored.
+ *
+ * @return milliseconds since the IOP queue's timer started
+ */
 int func_003F5D88(void) { return func_003F4DE8(); }
 #endif
 
@@ -1605,6 +2104,17 @@ extern char *strcpy(char *, const char *);
 extern char* strcat(char *, const char *);
 extern int fBA68(char *, int, const char *) __asm__("func_0042BA68");
 extern char D_00497038[], str_USBKB_IRX_b[];
+/**
+ * Loads the USB driver modules USBD.IRX and USBKB.IRX from a directory.
+ *
+ * With @p name 0 it only marks both module ids in D_00525F80 as -1 and returns 0. Otherwise loads @p name + "USBD.IRX"
+ * without arguments and @p name + "USBKB.IRX" with @p str as its argument text (func_0042BA68, the SIF module loader),
+ * keeping the ids in D_00525F80.fd[0] and fd[1]. Called by the USB keyboard setup func_003F61D0.
+ *
+ * @param name  directory prefix of the IRX files, or 0
+ * @param str  argument text for USBKB.IRX
+ * @return 0, or -1 when @p str is 0 or a load fails
+ */
 int func_003F5DA8(char *name, char *str) {
     char path[0x100];
     if (name == 0) {
@@ -1631,6 +2141,13 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F5E90);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_0042B438(int, int, int, int *);
 extern int func_0042B640(int);
+/**
+ * Stops and unloads an IOP module by its id (func_0042B438, then func_0042B640).
+ *
+ * @param handle  module id (nothing is done when negative)
+ * @param errorValue  value to return when either call fails
+ * @return 0, or @p errorValue on failure
+ */
 int func_003F5E90(int handle, int errorValue) {
     int buf[4];
     int result = 0;
@@ -1652,6 +2169,13 @@ extern struct sKb D_00525F80;
 
 extern char D_00525F88[];
 extern int sceUsbKbGetInfo(char *);
+/**
+ * Starts an asynchronous USB keyboard connection query.
+ *
+ * Copies each keyboard's connected flag (D_00525F80 +0x10) to the previous flags (+0x94), then asks for the keyboard
+ * info (sceUsbKbGetInfo into +0x8); when the request is accepted sets the state (+0x9C) to 1 and the busy flag (+0xA0).
+ * func_003F5F88 finishes it.
+ */
 void func_003F5F08(void) {
     int i;
     char *p;
@@ -1674,6 +2198,15 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F5F88);
 extern struct sKb D_00525F80;
 
 extern int f810(int, int *) __asm__("func_0040C810");
+/**
+ * Finishes the USB keyboard connection query started by func_003F5F08.
+ *
+ * Polls the request without waiting (func_0040C810 with mode 1). When it has finished, calls the connect callback
+ * (+0xBC) with (keyboard, connected) for every keyboard whose connected flag changed, and clears the busy flag and the
+ * state.
+ *
+ * @return the poll result: nonzero while the query is still running
+ */
 int func_003F5F88(void) {
     int tmp;
     int r;
@@ -1697,6 +2230,13 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6040);
    max-connect word handed to func_0040C028; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
 extern struct sKb D_00525F80;
 
+/**
+ * Finds the next connected USB keyboard, starting at @p i and wrapping, whose read buffer is not holding unread data
+ * (ready flag at +0x88 of its 0x8C-byte buffer clear).
+ *
+ * @param i  keyboard to start from
+ * @return the keyboard index, or -1 when there is none
+ */
 int func_003F6040(int i) {
     int c;
     for (c = 0; c < D_00525F80.cnt; c++) {
@@ -1720,6 +2260,12 @@ extern struct sKb D_00525F80;
 
 extern int func_003F6040(int);
 extern int sceUsbKbRead(int, int *);
+/**
+ * Starts reading the next USB keyboard that has room (func_003F6040 from the one after the current, +0xA4).
+ *
+ * Makes it current, remembers its buffer's first two words (LED and modifier state, +0xAC / +0xB0) and starts an
+ * asynchronous read into the buffer (sceUsbKbRead); when accepted sets the state to 2 and the busy flag.
+ */
 void func_003F60B8(void) {
     int id = func_003F6040(D_00525F80.cur + 1);
     int *e;
@@ -1746,6 +2292,15 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6138);
 extern struct sKb D_00525F80;
 
 extern int f810(int, int *) __asm__("func_0040C810");
+/**
+ * Finishes the USB keyboard read started by func_003F60B8.
+ *
+ * Waits for the read to finish (func_0040C810 with mode 0, the blocking wait). Then marks the current keyboard's buffer
+ * ready (+0x88 = 1) if it holds key codes or its LED / modifier words changed from the remembered ones, and clears the
+ * busy flag and the state.
+ *
+ * @return 0, or func_0040C810's error (-1 when the keyboard library is not running)
+ */
 int func_003F6138(void) {
     int tmp;
     int r;
@@ -1764,6 +2319,11 @@ int func_003F6138(void) {
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F61C8);
 #ifdef SKIP_ASM
+/**
+ * Default idle hook of the USB keyboard reader: does nothing and returns 0 (never claims the update).
+ *
+ * @return 0
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 int func_003F61C8(void) { return 0; }
 #endif
@@ -1787,6 +2347,23 @@ extern void f6358(int, int) __asm__("func_003F6358");
 extern int f61C8(int) __asm__("func_003F61C8");
 // The keyboard state block sits 0x90 bytes below the max-connect word passed to func_0040C028.
 static inline struct sKb *ctl(void) { return (struct sKb *)((char *)D_00526010 - 0x90); }
+/**
+ * Starts the USB keyboard reader.
+ *
+ * Loads the USB modules (func_003F5DA8 with @p name / @p str) and initialises the keyboard library (func_0040C028 with
+ * the max-connect word D_00526010, capped at 8). Clears every keyboard's connected and previous flags and the ready
+ * flag of each 0x8C-byte buffer in @p ents, resets the current keyboard, sets the info-refresh period and counter to 60
+ * updates, installs the callbacks (defaults func_003F6358 and func_003F61C8) and runs one connection query to
+ * completion (func_003F5F08, then func_003F5F88 until done). The USB keyboard reader object (func_002667E8) calls it
+ * with no module path, so the modules are expected to be loaded already (initOnline loads them).
+ *
+ * @param name  directory of USBD.IRX / USBKB.IRX, or 0 to skip loading
+ * @param str  argument text for USBKB.IRX
+ * @param ents  read buffers, 0x8C bytes per keyboard
+ * @param cb1  called with (keyboard, connected) when a keyboard connects or disconnects (0 for func_003F6358)
+ * @param cb2  idle hook polled by func_003F63F0 (0 for func_003F61C8)
+ * @return 0, or -1 when a module or the library fails to start
+ */
 int func_003F61D0(char *name, char *str, unsigned char *ents, void (*cb1)(int, int), int (*cb2)(int)) {
     int i;
     if (func_003F5DA8(name, str) < 0) return -1;
@@ -1821,6 +2398,12 @@ extern struct sKb D_00525F80;
 
 extern int func_0040C220(void);
 extern int func_003F5E90_62F8(int, int) __asm__("func_003F5E90");
+/**
+ * Shuts the USB keyboard reader down: ends the keyboard library (func_0040C220) and unloads USBKB.IRX and USBD.IRX
+ * (func_003F5E90 with error values 1 and 2).
+ *
+ * @return 0, or the OR of the error values of the unloads that failed
+ */
 int func_003F62F8(void) {
     int r;
     func_0040C220();
@@ -1835,6 +2418,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6348);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_00526010[];
 
+/**
+ * Returns the number of USB keyboards the reader handles (the max-connect word D_00526010).
+ *
+ * @return the keyboard count
+ */
 int func_003F6348(void) { return D_00526010[0]; }
 #endif
 
@@ -1848,6 +2436,15 @@ extern void func_0040C810(int, int *);
 extern void func_0040D4A0(int);
 extern void func_0040C728(int, int, int);
 extern void func_0040C770(int, int);
+/**
+ * Default connect callback of the USB keyboard reader: sets up a keyboard that has just connected.
+ *
+ * When @p on is set: LED status 1 and LED mode 1 (each waited for with func_0040C810), clears its buffered keys
+ * (func_0040D4A0), sets key repeat to delay 30, rate 2 (func_0040C728) and the code type to 0 (func_0040C770).
+ *
+ * @param keyboard  keyboard index
+ * @param on  nonzero when it connected
+ */
 void func_003F6358(int keyboard, int on) {
     int res;
     if (on) {
@@ -1867,6 +2464,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F63E0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_00526038[];
+/**
+ * Sets how many reader updates pass between USB keyboard connection queries (D_00525F80 +0xB8).
+ *
+ * @param a0  the period in updates
+ */
 void func_003F63E0(int a0) { D_00526038[0] = a0; }
 #endif
 
@@ -1884,6 +2486,14 @@ extern int func_003F6138(void);
 extern void func_003F5F08(void);
 extern void func_003F60B8(void);
 void func_003F63F0_63F0(void) __asm__("func_003F63F0");
+/**
+ * Runs one step of the USB keyboard reader.
+ *
+ * By state (+0x9C): 1 finishes a connection query (func_003F5F88), 2 finishes a read (func_003F6138), 3 polls the idle
+ * hook with 1 until it returns nonzero. When idle (state 0), a nonzero idle hook with 0 moves to state 3; otherwise the
+ * counter (+0xB4) advances, and past the period (+0xB8) it restarts at 0 and queries the connections (func_003F5F08),
+ * else it starts reading the next keyboard (func_003F60B8).
+ */
 void func_003F63F0_63F0(void) {
     switch (D_00525F80.st) {
     case 1: func_003F5F88(); break;
@@ -1909,6 +2519,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F64E0);
    max-connect word handed to func_0040C028; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
 extern struct sKb D_00525F80;
 
+/**
+ * Takes a USB keyboard's read buffer when it holds unread data.
+ *
+ * @param n  keyboard index
+ * @return the 0x8C-byte buffer (its ready flag is cleared), or 0 when nothing new arrived
+ */
 unsigned char *func_003F64E0(int n) {
     int off = n * 140;
     if (D_00525F80.ents[off + 136] == 1) {
@@ -1927,6 +2543,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6520);
    max-connect word handed to func_0040C028; ents[] are 0x8C-byte read buffers with a ready flag at +0x88. */
 extern struct sKb D_00525F80;
 
+/**
+ * Returns whether a USB keyboard is connected (its flag at D_00525F80 +0x10).
+ *
+ * @param a0  keyboard index
+ * @return 1 when connected, else 0
+ */
 int func_003F6520(int a0) { return D_00525F80.v[a0] != 0; }
 #endif
 
@@ -1937,6 +2559,13 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6538);
 extern void func_003F63F0(void);
 extern int func_003F6520(int);
 extern int func_003F6348(void);
+/**
+ * Runs the USB keyboard reader once (func_003F63F0) and returns 1 when any keyboard is connected, else 0.
+ *
+ * Nothing in retail calls it.
+ *
+ * @return 1 when a keyboard is connected
+ */
 int func_003F6538(void) {
     int i;
     func_003F63F0();
@@ -1952,6 +2581,13 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F65A0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern short D_004513DC[], D_0045133A[], D_00451350[];
+/**
+ * Returns the 2-byte key-map entry for a USB key code in the alternate layout: codes 46..53 use D_004513DC, codes
+ * 135..139 D_0045133A, every other code the default map D_00451350 (all indexed by the code).
+ *
+ * @param c  USB HID key code
+ * @return the key-map entry
+ */
 short *func_003F65A0(unsigned int c) {
     if (c - 46 < 8) return &D_004513DC[c];
     if (c - 135 >= 5) return &D_00451350[c];
@@ -1965,6 +2601,17 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F65F8);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern short D_00451420[], D_00451350[];
 extern short *func_003F65A0(unsigned int);
+/**
+ * Translates a USB key code to its virtual-key byte (byte 1 of its key-map entry).
+ *
+ * With Num Lock on (bit 0 of the LED word at @p flags) the keypad codes 89..99 use D_00451420; otherwise map mode 0
+ * uses the default map D_00451350 and any other mode the alternate one (func_003F65A0).
+ *
+ * @param out  receives the virtual-key byte
+ * @param flags  the keyboard read buffer (LED word first)
+ * @param mode  key-map mode
+ * @param c  USB HID key code
+ */
 void func_003F65F8(char *out, char *flags, int mode, int c) {
     unsigned char *p;
     unsigned int t;
@@ -1987,6 +2634,17 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6670);
 extern unsigned char D_00451458[];
 extern int f268(int, int, int, int) __asm__("func_0040D268");
 void func_003F6670_impl(unsigned char *self, int *fl, int kb, unsigned code) __asm__("func_003F6670");
+/**
+ * Translates a USB key code to its character, stored in byte 1 of the output pair @p self.
+ *
+ * Keypad codes 84..99 come from D_00451458 ("/*-+" first); the digit and period keys (89 and up) give 0 unless Num Lock
+ * (bit 0 of @p fl[0]) is on. Other codes go through func_0040D268 with the layout @p kb, the modifier word
+ * @p fl[1] and the LED word; results of 0x100 or more give 0.
+ *
+ * @param fl  the keyboard read buffer: LED word, modifier word
+ * @param kb  keyboard layout passed to func_0040D268
+ * @param code  USB HID key code
+ */
 void func_003F6670_impl(unsigned char *self, int *fl, int kb, unsigned code) {
     unsigned t = code - 84;
     if (t < 0x10) {
@@ -2006,6 +2664,18 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6700);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 int func_003F6700_impl(unsigned flags, unsigned key, unsigned *out) __asm__("func_003F6700");
+/**
+ * Tests a modifier key, named by its Windows virtual-key code, in a USB keyboard modifier word.
+ *
+ * VK_LWIN 91 bit 0x8, VK_RWIN 92 bit 0x80, VK_SHIFT 16 and VK_LSHIFT 160 bit 0x2, VK_RSHIFT 161 bit 0x20, VK_CONTROL 17
+ * bits 0x11, VK_LCONTROL 162 bit 0x1, VK_RCONTROL 163 bit 0x10, VK_MENU 18 and VK_LMENU 164 bit 0x4, VK_RMENU 165 bit
+ * 0x40. Quirk: VK_SHIFT and VK_MENU only test the left key, while VK_CONTROL tests both.
+ *
+ * @param flags  modifier word
+ * @param key  virtual-key code
+ * @param out  receives the masked bits when @p key is a modifier
+ * @return 1 when @p key is a modifier, else 0
+ */
 int func_003F6700_impl(unsigned flags, unsigned key, unsigned *out) {
     int ok = 1;
     unsigned v = 0;
@@ -2031,6 +2701,15 @@ int func_003F6700_impl(unsigned flags, unsigned key, unsigned *out) {
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F67E0);
 #ifdef SKIP_ASM
+/**
+ * Tests a lock key, named by its Windows virtual-key code, in a USB keyboard LED word: VK_NUMLOCK 144 bit 0x1,
+ * VK_CAPITAL 20 bit 0x2, VK_SCROLL 145 bit 0x4.
+ *
+ * @param lockFlags  LED word
+ * @param mode  virtual-key code
+ * @param out  receives the masked bit when @p mode is a lock key
+ * @return 1 when @p mode is a lock key, else 0
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 int func_003F67E0(int lockFlags, unsigned int mode, int *out) {
     int handled = 1;
@@ -2055,6 +2734,19 @@ typedef struct { int a; int b; int pad; unsigned short t[1]; } S6838;
 extern int f6700(int, int, int *) __asm__("func_003F6700");
 extern int f67E0(int, int, int *) __asm__("func_003F67E0");
 extern void f65F8(char *, S6838 *, int, int) __asm__("func_003F65F8");
+/**
+ * Returns whether a virtual key is down in a USB keyboard read buffer.
+ *
+ * Modifier keys are tested in the modifier word (func_003F6700) and lock keys in the LED word (func_003F67E0); any
+ * other key compares the virtual-key byte of the buffer's @p idx-th key code (func_003F65F8) with @p virtKey. The
+ * keyboard reader update (func_002668E8) asks it for VK_SHIFT (0x10).
+ *
+ * @param kbdState  the read buffer: LED word, modifier word, count, key codes
+ * @param mapMode  key-map mode for func_003F65F8
+ * @param idx  index of the key code to test
+ * @param virtKey  virtual-key code
+ * @return nonzero when the key is down
+ */
 int func_003F6838(S6838 *kbdState, int mapMode, int idx, int virtKey) {
     int res = 0;
     char buf[8];
@@ -2076,6 +2768,15 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F68F0);
 extern char D_004A5B10;
 extern void func_003F65F8(char *, char *, int, int);
 extern void func_003F6670(char *, char *, int, int);
+/**
+ * Translates one key code of a USB keyboard read buffer into the static pair D_004A5B10: virtual-key byte
+ * (func_003F65F8) and character (func_003F6670).
+ *
+ * @param a  the read buffer (key codes from +0xC)
+ * @param b  key-map mode / layout
+ * @param c  index of the key code
+ * @return D_004A5B10 (overwritten by the next call)
+ */
 char *func_003F68F0(char *a, int b, int c) {
     unsigned int v = *(unsigned short *)(a + (c << 1) + 12);
     func_003F65F8(&D_004A5B10, a, b, v);
@@ -2102,6 +2803,19 @@ extern struct sRpcSend D_00526080[];
 extern int f6F08(int *) __asm__("func_00426F08");
 extern int f6D18(int *, int, int, struct sRpcSend *, int, int, int, int, int) __asm__("func_00426D18");
 void func_003F6960_impl(int a, int b, int c, int d, int e) __asm__("func_003F6960");
+/**
+ * Calls the voice-chat IOP module (VOIPF) through its SIF RPC client.
+ *
+ * Only when bound (D_004A5B14): waits for the previous call to finish (func_00426F08), puts two words in the send
+ * buffer D_00526080 and calls RPC function @p a (func_00426D18 on the client D_00526100, 0x80-byte send buffer),
+ * retrying until the call is accepted.
+ *
+ * @param a  RPC function number
+ * @param b  first argument word
+ * @param c  second argument word
+ * @param d  receive buffer
+ * @param e  receive buffer size
+ */
 void func_003F6960_impl(int a, int b, int c, int d, int e) {
     struct sRpcSend *r = D_00526080;
     if (D_004A5B14) {
@@ -2134,6 +2848,12 @@ extern int *D_004A5B18;
 
 extern int func_00426B48(int *, int, int);
 extern void func_003F6960b(int, int, int, int *, int) __asm__("func_003F6960");
+/**
+ * Binds the voice-chat SIF RPC client (server id 567, func_00426B48) and registers the status word with the module.
+ *
+ * Marks the client bound first, keeps an uncached pointer to D_005261C0 in D_004A5B18 and sends it with RPC function 0.
+ * initOnline calls it when VOIPF.IRX loaded. Quirk: the bind result is not checked.
+ */
 void func_003F6A40(void) {
     int *p;
     D_004A5B14 = 1;
@@ -2152,6 +2872,9 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6AB0);
    send buffer. */
 extern unsigned char D_004A5B14;
 
+/**
+ * Marks the voice-chat RPC client unbound (D_004A5B14 = 0), which turns every later call into a no-op.
+ */
 void func_003F6AB0(void) { D_004A5B14 = 0; }
 #endif
 
@@ -2162,6 +2885,16 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6AB8);
 extern int D_00526140[];
 
 extern int func_003F6960(int, int, int, int *, int);
+/**
+ * Connects voice chat to a peer: RPC function 2 with the address and the two 16-bit ports packed in one word.
+ *
+ * The voice manager (func_00266D58) passes ports 6000 / 6000.
+ *
+ * @param a  peer address
+ * @param b  first port (low half)
+ * @param c  second port (high half)
+ * @return no meaningful value (func_003F6960 returns nothing)
+ */
 int func_003F6AB8(int a, unsigned short b, int c) { return func_003F6960(2, a, b | (c << 16), D_00526140, 0x80); }
 #endif
 
@@ -2172,6 +2905,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6AF0);
 extern int D_00526140[];
 
 extern int func_003F6960(int, int, int, int *, int);
+/**
+ * Stops voice chat: RPC function 3.
+ *
+ * @return no meaningful value (func_003F6960 returns nothing)
+ */
 int func_003F6AF0(void) { return func_003F6960(3, 0, 0, D_00526140, 0x80); }
 #endif
 
@@ -2182,6 +2920,9 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6B20);
 extern int D_00526140[];
 
 extern int func_003F6960(int, int, int, int *, int);
+/**
+ * Turns the voice on: RPC function 4.
+ */
 void func_003F6B20() { func_003F6960(4, 0, 0, D_00526140, 0x80); }
 #endif
 
@@ -2192,6 +2933,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6B50);
 extern int D_00526140[];
 
 extern int func_003F6960(int, int, int, int *, int);
+/**
+ * Turns the voice off: RPC function 5.
+ *
+ * @return no meaningful value (func_003F6960 returns nothing)
+ */
 int func_003F6B50(void) { return func_003F6960(5, 0, 0, D_00526140, 0x80); }
 #endif
 
@@ -2200,6 +2946,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6B80);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_003F6C40(void);
+/**
+ * Returns bit 0 of the voice module's status word (func_003F6C40).
+ *
+ * @return the bit
+ */
 int func_003F6B80(void) { return func_003F6C40() & 1; }
 #endif
 
@@ -2211,6 +2962,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6BA0);
 extern int D_00526140[];
 
 extern void func_003F6960b(int, int, int, int *, int) __asm__("func_003F6960");
+/**
+ * Reads the voice level and its maximum from the voice module: RPC function 7, then the first two received words.
+ *
+ * @param a  receives the level
+ * @param b  receives the maximum
+ */
 void func_003F6BA0(int *a, int *b) {
     func_003F6960b(7, 0, 0, D_00526140, 0x80);
     *a = D_00526140[0];
@@ -2225,6 +2982,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6C10);
 extern int D_00526140[];
 
 extern int func_003F6960(int, int, int, int *, int);
+/**
+ * Sets the voice level: RPC function 6 with the level and the maximum.
+ *
+ * @param a  voice level
+ * @param b  maximum level
+ */
 void func_003F6C10(int a, int b) { func_003F6960(6, a, b, D_00526140, 0x80); }
 #endif
 
@@ -2234,6 +2997,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6C40);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int *D_004A5B18;
 
+/**
+ * Returns the voice module's status word, which the IOP writes into D_005261C0 (read through the uncached pointer
+ * D_004A5B18).
+ *
+ * @return the status word
+ */
 int func_003F6C40(void) { return *D_004A5B18; }
 #endif
 
@@ -2243,6 +3012,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6C50);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char D_004A4BC0;
 
+/**
+ * Sets the network-account library's started flag D_004A4BC0 (func_003F7EE0 calls it first).
+ *
+ * @return 0
+ */
 int func_003F6C50(void) { D_004A4BC0 = 1; return 0; }
 #endif
 
@@ -2252,6 +3026,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6C60);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char D_004A4BC0;
 
+/**
+ * Clears the network-account library's started flag D_004A4BC0 (func_003F7F18 calls it last).
+ *
+ * @return 0
+ */
 int func_003F6C60(void) { D_004A4BC0 = 0; return 0; }
 #endif
 
@@ -2304,6 +3083,16 @@ extern struct sNetAcct *D_004A4BC4;
 extern struct sNetAcct *f6728(int, int, int) __asm__("func_00266728");
 extern unsigned f6210x(struct sNetAcct *, int, int) __asm__("func_00416210");
 int func_003F6C70_impl(int *arg) __asm__("func_003F6C70");
+/**
+ * Creates the network-account session D_004A4BC4 (0x14C bytes).
+ *
+ * Allocates it from the heap @p arg[1] with func_00266728 and zeroes it, keeps the heap (+0x140), copies the 17
+ * memory-card callbacks from the table @p arg[0] into its head, and sets it idle: operation 4 (+0xD0, +0x104), mode 10
+ * (+0xD8), phase 5 (+0xEC), +0x148 and +0x138 0, +0x13C -1 (so +0x138 is the port list {0, -1} for func_003F6DC8).
+ *
+ * @param arg  {callback table, heap}
+ * @return 0
+ */
 int func_003F6C70_impl(int *arg) {
     struct sNetAcct *d;
     struct sNetAcct *e;
@@ -2333,6 +3122,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6D98);
 extern struct sNetAcct *D_004A4BC4;
 
 extern int func_00266760(int, char *, int, int);
+/**
+ * Frees the network-account session D_004A4BC4 back to its heap (func_00266760) and clears the pointer.
+ *
+ * @return 0
+ */
 int func_003F6D98(void) {
     func_00266760(D_004A4BC4->heap, (char *)D_004A4BC4, 332, 4);
     D_004A4BC4 = 0;
@@ -2355,6 +3149,15 @@ extern int fB800(void) __asm__("func_003FB800");
 extern int fC0E8(void *) __asm__("func_003FC0E8");
 extern int func_003F8178_6DC8(int) __asm__("func_003F8178");
 typedef struct { int a; int *p; struct sNetAcct *d; K6DC8 *buf; int len; int r; int v; } R6DC8;
+/**
+ * Opens the save-record manager for the network-account session (func_003FC0E8).
+ *
+ * Passes: at most 2 records, the port list at +0x138 (port 0 only), the session's 17 card callbacks, the 26-byte cipher
+ * key "Copyright Electronic Arts" (with its NUL), the XOR cipher interface (func_003FB800) and the session's heap. The
+ * result goes through func_003F8178.
+ *
+ * @return the mapped error, 0 on success
+ */
 int func_003F6DC8(void) {
     K6DC8 buf;
     R6DC8 req;
@@ -2377,6 +3180,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6E70);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_003FC260(void);
 extern int func_003F8178(int);
+/**
+ * Closes the save-record manager (func_003FC260) and returns the error mapped by func_003F8178.
+ *
+ * @return the mapped error, 0 on success
+ */
 int func_003F6E70(void) { return func_003F8178(func_003FC260()); }
 #endif
 
@@ -2389,6 +3197,14 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6E98);
 extern struct sNetAcct *D_004A4BC4;
 
 extern int func_003F7990(int);
+/**
+ * Starts a network-account operation when the session is idle (operation word +0xD0 == 4), with func_003F7990.
+ *
+ * Operations: 0 create the account save, 1 save the name and password, 2 load them, 3 delete the save.
+ *
+ * @param a  the operation
+ * @return 0, or 22 when an operation is already running
+ */
 int func_003F6E98(int a) {
     int r = 0;
     if (D_004A4BC4->st == 4) {
@@ -2408,6 +3224,16 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6EE0);
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
 extern struct sNetAcct *D_004A4BC4;
 
+/**
+ * Advances the running network-account operation (installed at +0xD4 by func_003F7990, called by func_003F80E0).
+ *
+ * Returns 0xF when idle. In a card mode (below 9) it runs the step function (+0xDC, func_003F6F68); in mode 9 it calls
+ * the dispatcher (+0xE8, func_003F7328) to choose the first mode. Likely bug: *@p out is cleared before @p out is
+ * checked for 0.
+ *
+ * @param out  receives 1 while running, 2 when the operation has finished
+ * @return 0 or an error code
+ */
 int func_003F6EE0(int *out) {
     int err = 0; struct sNetAcct *d;
     *out = 0;
@@ -2430,6 +3256,18 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F6F68);
 extern struct sNetAcct *D_004A4BC4;
 extern int func_003F7D98(void);
 typedef struct { unsigned char b[0x18]; } B6F68;
+/**
+ * Runs one step of the current network-account mode through its phase (+0xEC).
+ *
+ * Phase 4 begins (saving the phase block to +0x10C) and moves to 0; phase 0 calls the start function (+0xF0), then goes
+ * to 1, or on failure to 2, running the step once more for its cleanup and finishing (func_003F7D98); phase 1 polls
+ * (+0xF4, func_003F7708) and finishes when the card work is done (@p out 2), failing like phase 0; phase 2 calls +0xF8;
+ * phase 5 returns 0x10, anything else 17. Then a finished step calls the next-mode handler (+0xE0) and a failed one the
+ * error handler (+0xE4). Likely bug: *@p out is written before @p out is checked for 0.
+ *
+ * @param out  receives 1 while running, 2 when the mode finished
+ * @return 0 or an error code
+ */
 int func_003F6F68(int *out) {
     int t0;
     int st;
@@ -2507,6 +3345,14 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F71B8);
 extern struct sNetAcct *D_004A4BC4;
 
 extern int f7A60c(int, int) __asm__("func_003F7A60");
+/**
+ * Error handler of network-account modes 0..5: keeps the error in +0x148, clears it and switches to mode 7 (close the
+ * save) so the operation reports the error after closing.
+ *
+ * @param a  receives 1 (still running)
+ * @param b  the error; cleared
+ * @return func_003F7A60's result
+ */
 int func_003F71B8(int *a, int *b) {
     *a = 1;
     D_004A4BC4->f148 = *b;
@@ -2520,6 +3366,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F71F8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_003F7BD0(void);
+/**
+ * Error handler of network-account modes 6 and 8: returns the session to idle (func_003F7BD0).
+ *
+ * @return 0
+ */
 int func_003F71F8(void) { return func_003F7BD0(); }
 #endif
 
@@ -2534,6 +3385,17 @@ extern struct sNetAcct *D_004A4BC4;
 
 extern int f7A60c(int, int) __asm__("func_003F7A60");
 int func_003F7218_impl(int *a, int *b) __asm__("func_003F7218");
+/**
+ * Next-mode handler of network-account modes 0..5: picks the following card step of the operation.
+ *
+ * Mode 0 (create) goes to 1 (open); mode 1 goes to 2 (write ACCT) for operations 0 and 1 or to 4 (read ACCT) for
+ * operation 2; 2 goes to 3 (write PASS), 4 to 5 (read PASS), and 3 and 5 to 6 (close). Enters the new mode with
+ * func_003F7A60, saving the current phase block. Any other case fails with 0xC.
+ *
+ * @param a  receives 1 (still running), or 0 on failure
+ * @param b  receives the error on failure
+ * @return func_003F7A60's result, or 0xC
+ */
 int func_003F7218_impl(int *a, int *b) {
     int x; int err = 0xC;
     *a = 1;
@@ -2557,6 +3419,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F72C8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_003F7BD0(void);
+/**
+ * Next-mode handler of network-account modes 6 and 8: returns the session to idle and reports the operation finished.
+ *
+ * @param a  receives 2 (finished)
+ */
 void func_003F72C8(int *a) { func_003F7BD0(); *a = 2; }
 #endif
 
@@ -2569,6 +3436,14 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F72F8);
 extern struct sNetAcct *D_004A4BC4;
 
 extern int func_003F7BD0(void);
+/**
+ * Handler of network-account mode 7 (closing after an error): hands back the error kept in +0x148, clears it and
+ * returns the session to idle.
+ *
+ * @param a  status output (not written)
+ * @param b  receives the kept error
+ * @return func_003F7BD0's result (0)
+ */
 int func_003F72F8(int a, int *b) {
     *b = D_004A4BC4->f148;
     D_004A4BC4->f148 = 0;
@@ -2586,6 +3461,17 @@ extern struct sNetAcct *D_004A4BC4;
 
 extern int f7A60c(int, int) __asm__("func_003F7A60");
 int func_003F7328_impl(int *a, int *b) __asm__("func_003F7328");
+/**
+ * Mode-9 dispatcher of the network-account session: enters the first card mode of the operation.
+ *
+ * Operation 0 starts with mode 0 (create the save), operations 1 and 2 with mode 1 (open it), operation 3 with mode 8
+ * (delete it); entered with func_003F7A60, saving the phase block. Outside mode 9 or for another operation it fails
+ * with 0xC.
+ *
+ * @param a  receives 1 (still running), or 0 on failure
+ * @param b  receives the error on failure
+ * @return func_003F7A60's result, or 0xC
+ */
 int func_003F7328_impl(int *a, int *b) {
     int ret;
     if (D_004A4BC4->cur.mode == 9) {
@@ -2617,6 +3503,12 @@ extern char str_slogin[];
 extern int func_003F77F8(void);
 extern int func_003FC390(char *, int, int);
 extern int func_003F8178_73A8(int) __asm__("func_003F8178");
+/**
+ * Start function of network-account mode 0: creates the "slogin" save on any port (func_003FC390), with func_003F77F8
+ * as completion.
+ *
+ * @return the error mapped by func_003F8178
+ */
 int func_003F73A8(void) {
     struct sNetAcct *p = D_004A4BC4;
     p->cur.fFC = func_003F77F8;
@@ -2639,6 +3531,12 @@ extern char str_slogin[];
 extern int func_003F7820_73F0(void) __asm__("func_003F7820");
 extern int func_003FC4C8_73F0(int, int, int) __asm__("func_003FC4C8");
 extern int func_003F8178_73F0(int) __asm__("func_003F8178");
+/**
+ * Start function of network-account mode 1: opens the "slogin" save on any port (func_003FC4C8), with func_003F7820 as
+ * completion.
+ *
+ * @return the error mapped by func_003F8178
+ */
 int func_003F73F0(void) {
     struct sNetAcct *p = D_004A4BC4;
     p->cur.fFC = func_003F7820_73F0;
@@ -2660,6 +3558,12 @@ extern char str_slogin[];
 
 extern int func_003FC3C0(char *, int, int);
 extern int func_003F8178_7438(int) __asm__("func_003F8178");
+/**
+ * Start function of network-account mode 8: deletes the "slogin" save on any port (func_003FC3C0), without a
+ * completion.
+ *
+ * @return the error mapped by func_003F8178
+ */
 int func_003F7438(void) {
     struct sNetAcct *p = D_004A4BC4;
     p->cur.fFC = 0;
@@ -2685,6 +3589,15 @@ extern char fn78E0[] __asm__("func_003F78E0");
 extern int func_003FCE10(char *, int, int, int);
 extern int fC548(struct sMcParams *, int, int, int, int) __asm__("func_003FC548");
 extern int func_003F8178_7478(int) __asm__("func_003F8178");
+/**
+ * Start function of network-account mode 2: writes the user name as the save's 'ACCT' record.
+ *
+ * Allocates a 17-byte record buffer (func_003FCE10, into +0x144), copies the name (+0xA8) into it and starts the write
+ * (func_003FC548 with the open save's parameters at +0x44). Completion func_003F78E0 and error cleanup func_003F7920
+ * free the buffer.
+ *
+ * @return the error mapped by func_003F8178
+ */
 int func_003F7478(void) {
     int r;
     struct sNetAcct *d = D_004A4BC4;
@@ -2716,6 +3629,13 @@ extern char fn7900[] __asm__("func_003F7900");
 extern int func_003FCE10(char *, int, int, int);
 extern int fC548(struct sMcParams *, int, int, int, int) __asm__("func_003FC548");
 extern int func_003F8178_7528(int) __asm__("func_003F8178");
+/**
+ * Start function of network-account mode 3: writes the password as the save's 'PASS' record.
+ *
+ * Like func_003F7478 with the password (+0xB9); completion func_003F7900 and cleanup func_003F7958 free the buffer.
+ *
+ * @return the error mapped by func_003F8178
+ */
 int func_003F7528(void) {
     int r;
     struct sNetAcct *d = D_004A4BC4;
@@ -2746,6 +3666,14 @@ extern char fn7840[] __asm__("func_003F7840");
 extern int func_003FCE10(char *, int, int, int);
 extern int func_003FC708(struct sMcParams *, int, int, int, int);
 extern int func_003F8178_75D8(int) __asm__("func_003F8178");
+/**
+ * Start function of network-account mode 4: reads the save's 'ACCT' record into a new 17-byte buffer (+0x144) with
+ * func_003FC708.
+ *
+ * Completion func_003F7840 copies it to the caller's output; cleanup func_003F7920 frees it.
+ *
+ * @return the error mapped by func_003F8178
+ */
 int func_003F75D8(void) {
     int r;
     struct sNetAcct *d = D_004A4BC4;
@@ -2774,6 +3702,14 @@ extern char fn7890[] __asm__("func_003F7890");
 extern int func_003FCE10(char *, int, int, int);
 extern int func_003FC708(struct sMcParams *, int, int, int, int);
 extern int func_003F8178_7658(int) __asm__("func_003F8178");
+/**
+ * Start function of network-account mode 5: reads the save's 'PASS' record into a new 17-byte buffer (+0x144) with
+ * func_003FC708.
+ *
+ * Completion func_003F7890 copies it to the caller's output + 0x11; cleanup func_003F7958 frees it.
+ *
+ * @return the error mapped by func_003F8178
+ */
 int func_003F7658(void) {
     int r;
     struct sNetAcct *d = D_004A4BC4;
@@ -2799,6 +3735,11 @@ extern struct sNetAcct *D_004A4BC4;
 
 extern int func_003FC4E8(char *);
 extern int func_003F8178_76D8(int) __asm__("func_003F8178");
+/**
+ * Start function of network-account modes 6 and 7: closes the open save (func_003FC4E8 with its parameters at +0x44).
+ *
+ * @return the error mapped by func_003F8178
+ */
 int func_003F76D8(void) {
     struct sNetAcct *p = D_004A4BC4;
     p->cur.fFC = 0;
@@ -2818,6 +3759,15 @@ extern struct sNetAcct *D_004A4BC4;
 
 extern int func_003FCA40(int *, int *);
 extern int func_003F8178_7708(int) __asm__("func_003F8178");
+/**
+ * Poll function of every network-account card mode: polls the save-record manager (func_003FCA40).
+ *
+ * Status 1 (busy) is passed on; status 2 (done) first runs the mode's completion (+0xFC) once; status 0 gives error 23
+ * and anything else 18. When the poll itself fails, the mode's cleanup (+0x100) runs once instead.
+ *
+ * @param out  receives 1 while busy, 2 when done
+ * @return 0 or the mapped error
+ */
 int func_003F7708(int *out) {
     int st[2];
     int err;
@@ -2860,6 +3810,11 @@ int func_003F7708(int *out) {
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F77F0);
 #ifdef SKIP_ASM
+/**
+ * Phase-2 function of the network-account card modes: does nothing.
+ *
+ * @return 0
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 int func_003F77F0(void) { return 0; }
 #endif
@@ -2875,6 +3830,12 @@ extern struct sNetAcct *D_004A4BC4;
 
 extern int func_003FC990(struct sMcParams *);
 extern int func_003F8178_77F8(int) __asm__("func_003F8178");
+/**
+ * Completion of network-account mode 0: copies the save-record manager's open-save parameters (func_003FC990) into the
+ * session (+0x44).
+ *
+ * @return the error mapped by func_003F8178
+ */
 int func_003F77F8(void) { return func_003F8178_77F8(func_003FC990(&D_004A4BC4->params)); }
 #endif
 
@@ -2883,6 +3844,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F7820);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_003F77F8(void);
+/**
+ * Completion of network-account mode 1: the same as func_003F77F8 (stores the open-save parameters).
+ *
+ * @return the error mapped by func_003F8178
+ */
 int func_003F7820(void) { return func_003F77F8(); }
 #endif
 
@@ -2896,6 +3862,10 @@ extern struct sNetAcct *D_004A4BC4;
 
 /* A 0x11-byte name copied as a block. */
 extern int func_003F7920(int);
+/**
+ * Completion of network-account mode 4: copies the 17 bytes read for 'ACCT' to the caller's output (+0xCC) and frees
+ * the record buffer (func_003F7920).
+ */
 void func_003F7840(void) {
     struct sName17 *dst = (struct sName17 *)D_004A4BC4->out;
     *dst = *(struct sName17 *)D_004A4BC4->f144;
@@ -2913,6 +3883,10 @@ extern struct sNetAcct *D_004A4BC4;
 
 /* A 0x11-byte name copied as a block. */
 extern int func_003F7958(int);
+/**
+ * Completion of network-account mode 5: copies the 17 bytes read for 'PASS' to the caller's output + 0x11 and frees the
+ * record buffer (func_003F7958).
+ */
 void func_003F7890(void) {
     struct sName17 *dst = (struct sName17 *)(D_004A4BC4->out + 0x11);
     *dst = *(struct sName17 *)D_004A4BC4->f144;
@@ -2925,6 +3899,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F78E0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_003F7920(int);
+/**
+ * Completion of network-account mode 2: frees the record buffer (func_003F7920).
+ *
+ * @return the error mapped by func_003F8178
+ */
 int func_003F78E0(void) { return func_003F7920(0); }
 #endif
 
@@ -2933,6 +3912,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F7900);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_003F7958(int);
+/**
+ * Completion of network-account mode 3: frees the record buffer (func_003F7958).
+ *
+ * @return the error mapped by func_003F8178
+ */
 int func_003F7900(void) { return func_003F7958(0); }
 #endif
 
@@ -2947,6 +3931,12 @@ extern struct sNetAcct *D_004A4BC4;
 
 extern int func_003FCF00(int, int, int, int);
 extern int func_003F8178_7920(int) __asm__("func_003F8178");
+/**
+ * Frees the network-account record buffer (+0x144, 17 bytes) with func_003FCF00. Used for the 'ACCT' modes.
+ *
+ * @param unused  ignored (callers pass 0)
+ * @return the error mapped by func_003F8178
+ */
 int func_003F7920(int unused) { return func_003F8178_7920(func_003FCF00((int)D_004A4BC4->f144, D_004A4BC4->heap, 17, 0)); }
 #endif
 
@@ -2961,6 +3951,13 @@ extern struct sNetAcct *D_004A4BC4;
 
 extern int func_003FCF00(int, int, int, int);
 extern int func_003F8178_7958(int) __asm__("func_003F8178");
+/**
+ * Frees the network-account record buffer (+0x144, 17 bytes) with func_003FCF00; identical to func_003F7920 and used
+ * for the 'PASS' modes.
+ *
+ * @param unused  ignored (callers pass 0)
+ * @return the error mapped by func_003F8178
+ */
 int func_003F7958(int unused) { return func_003F8178_7958(func_003FCF00((int)D_004A4BC4->f144, D_004A4BC4->heap, 17, 0)); }
 #endif
 
@@ -2976,6 +3973,16 @@ extern struct sNetAcct *D_004A4BC4;
 extern char fn6EE0[] __asm__("func_003F6EE0");
 extern char fn7328[] __asm__("func_003F7328");
 int f7990(unsigned a) __asm__("func_003F7990");
+/**
+ * Begins network-account operation @p a.
+ *
+ * Stores it in +0xD0 and +0x104, installs the operation poll func_003F6EE0 at +0xD4 (only for operations below 4), and
+ * sets mode 9 (choose the first card step) with phase 4, the dispatcher func_003F7328 at +0xE8 and every other handler
+ * cleared.
+ *
+ * @param a  operation (0 create, 1 save, 2 load, 3 delete)
+ * @return 0, or 0xF for an unknown operation
+ */
 int f7990(unsigned a) {
     int r = 0;
     unsigned i;
@@ -3012,6 +4019,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F7A30);
 extern struct sNetAcct *D_004A4BC4;
 
 extern int func_003F7BD0(void);
+/**
+ * Ends the network-account operation: marks the session idle (operation 4), removes the operation poll and the
+ * dispatcher and returns to mode 10 (func_003F7BD0).
+ *
+ * @return 0
+ */
 int func_003F7A30(void) {
     struct sNetAcct *p = D_004A4BC4;
     p->st = 4;
@@ -3045,6 +4058,18 @@ int func_003F72F8(int a, int *b);
 extern int func_003F6F68();
 extern int func_003F7218();
 extern int func_003F7C00(void);
+/**
+ * Enters a network-account card mode.
+ *
+ * Sets the mode (+0xD8), optionally saving the whole phase block to +0x10C, installs the step function func_003F6F68,
+ * the next-mode handler (modes 0..5 func_003F7218, 6 and 8 func_003F72C8, 7 func_003F72F8) and the error handler (0..5
+ * func_003F71B8, 6 and 8 func_003F71F8, 7 func_003F72F8), then the mode's card functions (func_003F7C00). Modes: 0
+ * create the save, 1 open it, 2 / 3 write ACCT / PASS, 4 / 5 read them, 6 and 7 close, 8 delete.
+ *
+ * @param mode  the mode
+ * @param copy  nonzero to save the phase block first
+ * @return 0, or 13 for a mode of 9 or more
+ */
 int func_003F7A60(int mode, unsigned char copy) {
     int err = 0;
     D_004A4BC4->cur.mode = mode;
@@ -3096,6 +4121,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F7BD0);
 extern struct sNetAcct *D_004A4BC4;
 
 extern int func_003F7D98(void);
+/**
+ * Returns the network-account session to mode 10 (idle) with no step, next-mode or error handler, and finishes the
+ * phase (func_003F7D98).
+ *
+ * @return 0
+ */
 int func_003F7BD0(void) {
     struct sNetAcct *p = D_004A4BC4;
     p->cur.mode = 10;
@@ -3146,6 +4177,15 @@ int func_003F7658(void);
 int func_003F75D8(void);
 
 typedef struct { unsigned char b[0x18]; } B7C00;
+/**
+ * Installs the card functions of the current network-account mode and resets its phase to 4.
+ *
+ * Start function (+0xF0): mode 0 func_003F73A8, 1 func_003F73F0, 2 func_003F7478, 3 func_003F7528, 4 func_003F75D8, 5
+ * func_003F7658, 6 and 7 func_003F76D8, 8 func_003F7438. Poll (+0xF4) func_003F7708, phase-2 function (+0xF8)
+ * func_003F77F0; completion and cleanup (+0xFC, +0x100) cleared. Also copies the phase word to the saved block.
+ *
+ * @return 0, or 13 for a mode of 9 or more
+ */
 int func_003F7C00(void) {
     int r;
     unsigned i;
@@ -3187,6 +4227,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F7D98);
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
 extern struct sNetAcct *D_004A4BC4;
 
+/**
+ * Finishes the current network-account mode's phase: phase 5, with the start, poll and phase-2 functions, the
+ * completion and the cleanup cleared.
+ *
+ * @return 0
+ */
 int func_003F7D98(void) {
     unsigned int i;
     int *p;
@@ -3212,6 +4258,14 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F7DE0);
 typedef struct { int **p; } W7DE0;
 typedef struct { char pad[0xC]; int (*f0)(void); int (*f1)(int, int); int (*f2)(W7DE0 **); } V7DE0;
 extern V7DE0 *fB5E8(void) __asm__("func_003FB5E8");
+/**
+ * Checks the embedded save icon: its 10606 bytes must have the CRC-32 0x0836C71D.
+ *
+ * Runs the CRC interface from func_003FB5E8 (reset, update over @p a, final) and compares the digest.
+ *
+ * @param a  the icon data (view.ico)
+ * @return 0 when it matches, 21 when the CRC differs, 0x18 when the CRC interface fails
+ */
 int func_003F7DE0(int a) {
     int err = 0;
     V7DE0 *o = fB5E8();
@@ -3236,6 +4290,16 @@ int func_003F7DE0(int a) {
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F7E90);
 #ifdef SKIP_ASM
+/**
+ * Copies a C string into a buffer of @p n bytes, always NUL-terminating it (strncpy-like but bounded by @p n - 1).
+ *
+ * Does nothing when either pointer is 0, @p n is 0 or the two are the same.
+ *
+ * @param dst  destination
+ * @param src  source
+ * @param n  destination size
+ * @return @p dst
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 char *func_003F7E90(char *dst, char *src, int n) {
     char *dstCursor;
@@ -3257,6 +4321,14 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F7EE0);
 extern int func_003F6C50(void);
 extern int func_003F6C70(int);
 extern int func_003F6DC8(void);
+/**
+ * Starts the network-account library: sets its started flag (func_003F6C50), creates the session (func_003F6C70) and
+ * opens the save-record manager (func_003F6DC8).
+ *
+ * The shared-login manager (func_00265950) passes {its 17 memory-card callbacks, 0}.
+ *
+ * @param initParams  {callback table, heap}
+ */
 void func_003F7EE0(int initParams) {
     func_003F6C50();
     func_003F6C70(initParams);
@@ -3271,6 +4343,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F7F18);
 extern int func_003F6E70(void);
 extern int func_003F6D98(void);
 extern int func_003F6C60(void);
+/**
+ * Stops the network-account library: closes the save-record manager (func_003F6E70), frees the session (func_003F6D98)
+ * and clears the started flag (func_003F6C60). The shared-login manager (func_002659C0) calls it.
+ *
+ * @return 0
+ */
 int func_003F7F18(void) {
     func_003F6E70();
     func_003F6D98();
@@ -3293,6 +4371,17 @@ int func_003F6E98_7F48(int a) __asm__("func_003F6E98");
 extern char* f7E90(char *, int, int) __asm__("func_003F7E90");
 extern int func_003F7DE0_7F48(int) __asm__("func_003F7DE0");
 extern int f8258(int) __asm__("func_003F8258");
+/**
+ * Starts creating the network-account save (operation 0) with a user name and password.
+ *
+ * Copies the name (17 bytes) and password (17 bytes at +0x11) from @p b into the session, checks the icon data
+ * (func_003F7DE0), builds the save description (func_003F8258) and starts the operation (func_003F6E98(0)). Likely bug:
+ * it refuses (7) only when both arguments are 0, so a 0 @p b is copied from.
+ *
+ * @param a  the save icon data (view.ico, 10606 bytes)
+ * @param b  the 34-byte account buffer: name, password at +0x11
+ * @return 0 or an error code
+ */
 int func_003F7F48(int a, int b) {
     int err = 0;
     if (a == 0 && b == 0) {
@@ -3321,6 +4410,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8000);
 extern struct sNetAcct *D_004A4BC4;
 
 extern int func_003F6E98(int);
+/**
+ * Starts loading the network-account save (operation 2) into a 34-byte buffer: name at +0, password at +0x11.
+ *
+ * @param a  the output buffer (kept at +0xCC)
+ * @return 0, 7 when @p a is 0, or 22 when busy
+ */
 int func_003F8000(char *a) {
     int r = 0;
     if (a == 0) {
@@ -3346,6 +4441,14 @@ extern struct sNetAcct *D_004A4BC4;
 
 extern char *func_003F7E90_8048(char *, char *, int) __asm__("func_003F7E90");
 extern int func_003F6E98(int);
+/**
+ * Starts saving a user name and password to the network-account save (operation 1).
+ *
+ * Copies the name and the password (at +0x11) from the buffer into the session first.
+ *
+ * @param name  the 34-byte account buffer
+ * @return 0, 7 when @p name is 0, or 22 when busy
+ */
 int func_003F8048(char *name) {
     int r = 0;
     if (name == 0) {
@@ -3364,6 +4467,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F80C0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_003F6E98(int);
+/**
+ * Starts deleting the network-account save (operation 3).
+ *
+ * @return 0, or 22 when busy
+ */
 int func_003F80C0(void) { return func_003F6E98(3); }
 #endif
 
@@ -3376,6 +4484,15 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F80E0);
 extern struct sNetAcct *D_004A4BC4;
 
 extern int func_003F7A30(void);
+/**
+ * Polls the running network-account operation.
+ *
+ * Unless idle, runs the operation poll (+0xD4, func_003F6EE0); when it finishes (status 2) or fails, the session goes
+ * back to idle (func_003F7A30). The shared-login manager (func_00265A68) calls it every frame.
+ *
+ * @param out  receives 0 when idle, 1 while running, 2 when finished
+ * @return 0 or an error code (7 when @p out is 0)
+ */
 int func_003F80E0(int *out) {
     int err = 0;
     int v;
@@ -3405,6 +4522,15 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8178);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 int func_003F8178(int a);
+/**
+ * Maps a save-record manager error (card-layer errors are offset by 100) to a network-account error code.
+ *
+ * 0 to 0; 104 to 1; 103 to 2; 114 to 3; 108 to 4; 3, 7 and 110 to 5; 9 to 6; 1 to 19; 2 to 20; 4 to 7; 6 and 107 to 11;
+ * anything else to 0x18.
+ *
+ * @param sysError  the manager's error
+ * @return the account error
+ */
 int func_003F8178(int sysError) {
     switch (sysError) {
     case 0: return 0;
@@ -3434,6 +4560,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8200);
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
 extern struct sNetAcct *D_004A4BC4;
 
+/**
+ * Stores the last network-account operation started (+0x104) in *@p a0.
+ *
+ * @param a0  output
+ * @return 0
+ */
 int func_003F8200(int *a0) { *a0 = D_004A4BC4->f104; return 0; }
 #endif
 
@@ -3445,6 +4577,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8218);
    phase (mode + handler slots); handler slots hold untyped code addresses (callers cast them). */
 extern struct sNetAcct *D_004A4BC4;
 
+/**
+ * Stores the mode kept in the saved phase block (+0x10C) in *@p a0.
+ *
+ * @param a0  output
+ * @return 0
+ */
 int func_003F8218(int *a0) { *a0 = D_004A4BC4->saved.mode; return 0; }
 #endif
 
@@ -3453,6 +4591,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8230);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_003FCF98(int, int);
+/**
+ * Stores the on-card size of a 34-byte account record (func_003FCF98) through @p sizeOut.
+ *
+ * @param sizeOut  output pointer (declared int)
+ * @return 0
+ */
 int func_003F8230(int sizeOut) { func_003FCF98(34, sizeOut); return 0; }
 #endif
 
@@ -3499,6 +4643,17 @@ extern char str_view_ico[];         /* "view.ico" */
 extern void func_003FA380(char *src, unsigned short *dst);
 extern int func_003FCDC8(sMcSaveParam_8258 *);
 
+/**
+ * Builds the network-account save's description and hands it to the save-record manager (func_003FCDC8).
+ *
+ * Fills the icon.sys header: magic "PS2D", title "EA Login" converted to Shift-JIS (func_003FA380), line break at 16,
+ * transparency 0x60, two blue background corners, light directions, colours and ambient from D_00497320 / D_00497350 /
+ * D_00497380, and "view.ico" as the list, copy and delete icon. Then stores the icon data pointer and size 10606 and
+ * the record size 34.
+ *
+ * @param port  the icon data (not a port; named after the field it fills)
+ * @return 0, 7 when @p port is 0, or the error mapped by func_003F8178
+ */
 int func_003F8258(int port) {
     sMcSaveParam_8258 p;
     iconIVECTOR_8258 bgcolor[4];
@@ -3540,6 +4695,12 @@ int func_003F8258(int port) {
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F8550);
 #ifdef SKIP_ASM
+/**
+ * Returns the index of the lowest of the low 8 bits set in @p mask (8 when none is).
+ *
+ * @param mask  slot bit mask
+ * @return the slot index
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 int func_003F8550(unsigned mask) {
     int i = 0;
@@ -3556,6 +4717,12 @@ int func_003F8550(unsigned mask) {
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F8588);
 #ifdef SKIP_ASM
+/**
+ * Returns the index of the highest of the low 8 bits set in @p mask (-1 when none is).
+ *
+ * @param mask  slot bit mask
+ * @return the slot index
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 int func_003F8588(unsigned mask) {
     int i = 7;
@@ -3587,6 +4754,13 @@ struct sMcReq {
 
 extern struct sMcReq *D_004A4BD8;
 
+/**
+ * Returns the next usable memory-card slot after the request's current one (+0x10 of D_004A4BD8).
+ *
+ * @param v  usable-slot bit mask
+ * @param dir  0 to search upward, 1 downward
+ * @return the slot, -1 when there is none, or 18 for another @p dir
+ */
 int func_003F85C0(unsigned short v, int dir) {
     short i = D_004A4BD8->body.slot;
     int r;
@@ -3608,6 +4782,13 @@ int func_003F85C0(unsigned short v, int dir) {
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F86B8);
 #ifdef SKIP_ASM
+/**
+ * Counts the bits set among the low 8 of a usable-unit mask (the number of memory-card units the request layer may
+ * use).
+ *
+ * @param mask  unit bit mask
+ * @return the number of units
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 int func_003F86B8(unsigned short mask) {
     int count = 0; int i = 0;
@@ -3625,6 +4806,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F86F0);
 extern struct sMcReq *D_004A4BD8;
 
 void func_003F86F0_impl(int a) __asm__("func_003F86F0");
+/**
+ * Records the memory-card request's error (D_004A4BD8 +0x8), unless the request is already one of the cleanup
+ * operations 11..13, which keep the error that caused them.
+ *
+ * @param a  the error (0 clears it)
+ */
 void func_003F86F0_impl(int a) {
     struct sMcReq *p = D_004A4BD8;
     if ((unsigned)(p->op - 11) >= 3) p->f08 = a;
@@ -3638,6 +4825,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8710);
 /* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
 extern struct sMcReq *D_004A4BD8;
 
+/**
+ * Returns the error recorded for the memory-card request (D_004A4BD8 +0x8, set by func_003F86F0).
+ *
+ * @return the recorded error
+ */
 int func_003F8710(void) { return D_004A4BD8->f08; }
 #endif
 
@@ -3679,6 +4871,16 @@ struct sMcDrv {
 
 extern struct sMcDrv *D_004A4BDC;
 
+/**
+ * Starts the cleanup of a failed memory-card request that has a file open: operation 11, state 24, flushing the file
+ * (driver callback +0x38 with the descriptor in the request body).
+ *
+ * func_003F9130 then closes the file and releases the unit, and the request ends with the recorded error.
+ *
+ * @param a  ignored (callers pass the request body)
+ * @param out  receives 1 (still running)
+ * @return 0
+ */
 int func_003F8720(int a, int *out) {
     struct sMcReq *d;
     struct sMcDrv *e;
@@ -3702,6 +4904,14 @@ extern struct sMcReq *D_004A4BD8;
 /* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
 extern struct sMcDrv *D_004A4BDC;
 
+/**
+ * Starts the cleanup of a failed memory-card request at the close step: operation 12, state 25, closing the file
+ * (driver callback +0x1C with the descriptor in the request body).
+ *
+ * @param a  ignored (callers pass the request body)
+ * @param out  receives 1 (still running)
+ * @return 0
+ */
 int func_003F8768(int a, int *out) {
     struct sMcReq *d;
     struct sMcDrv *e;
@@ -3725,6 +4935,14 @@ extern struct sMcReq *D_004A4BD8;
 /* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
 extern struct sMcDrv *D_004A4BDC;
 
+/**
+ * Starts the cleanup of a failed memory-card request at the last step: operation 13, state 26, releasing the card unit
+ * (driver callback +0x14).
+ *
+ * @param a  the card unit code
+ * @param out  receives 1 (still running)
+ * @return 0
+ */
 int func_003F87B0(int a, int *out) {
     struct sMcReq *d;
     struct sMcDrv *e;
@@ -3741,6 +4959,12 @@ int func_003F87B0(int a, int *out) {
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F87F8);
 #ifdef SKIP_ASM
+/**
+ * Result check of memory-card request state 0 (entry 0 of the per-state table D_004514A0): accepts any result.
+ *
+ * @param a0  result of the finished card call
+ * @return @p a0
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 int func_003F87F8(int a0) { return a0; }
 #endif
@@ -3752,6 +4976,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8800);
 /* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
 extern struct sMcReq *D_004A4BD8;
 
+/**
+ * Result check of memory-card request state 1 (unit check): accepts results 0, 3 and 17.
+ *
+ * @param a  result of the finished card call
+ * @return @p a, 18 when the request is not in state 1, or 0x10 for any other result
+ */
 int func_003F8800(int a) {
     if (D_004A4BD8->st != 1) return 18;
     if (a != 0 && a != 3 && a != 17) return 0x10;
@@ -3766,6 +4996,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8838);
 /* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
 extern struct sMcReq *D_004A4BD8;
 
+/**
+ * Result check of memory-card request state 2 (directory search): accepts results 0, 3, 4, 9 and 17.
+ *
+ * @param a  result of the finished card call
+ * @return @p a, 18 when the request is not in state 2, or 0x10 for any other result
+ */
 int func_003F8838(int a) {
     if (D_004A4BD8->st != 2) return 18;
     if (a != 0 && a != 4 && a != 3 && a != 9 && a != 17) return 0x10;
@@ -3780,6 +5016,16 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8880);
 /* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
 extern struct sMcReq *D_004A4BD8;
 
+/**
+ * Result check of the memory-card read, write and seek states (27, 28, 29 and the create steps 7 and 11): accepts
+ * results 0, 3, 4, 9, 10, 13, 14 and 17.
+ *
+ * Quirk: the per-state table also maps state 15 here, which this check rejects (state 15 is never entered), and it
+ * accepts state 24, whose table entry is func_003F8908.
+ *
+ * @param a  result of the finished card call
+ * @return @p a, 18 for another state, or 0x10 for any other result
+ */
 int func_003F8880(int a) {
     int m = D_004A4BD8->st;
     if (m != 27 && m != 29 && m != 0x1C && m != 7 && m != 11 && m != 0x18) return 18;
@@ -3795,6 +5041,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8908);
 /* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
 extern struct sMcReq *D_004A4BD8;
 
+/**
+ * Result check of the memory-card flush states (8, 12, 16 and 24): accepts results 0, 3, 4, 9 and 17.
+ *
+ * @param a  result of the finished card call
+ * @return @p a, 18 for another state, or 0x10 for any other result
+ */
 int func_003F8908(int a) {
     int m = D_004A4BD8->st;
     if (m != 0x18 && m != 8 && m != 0xC && m != 0x10) return 18;
@@ -3810,6 +5062,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8968);
 /* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
 extern struct sMcReq *D_004A4BD8;
 
+/**
+ * Result check of the memory-card close states (9, 13, 17 and 25): accepts results 0, 3, 4, 9 and 17.
+ *
+ * @param a  result of the finished card call
+ * @return @p a, 18 for another state, or 0x10 for any other result
+ */
 int func_003F8968(int a) {
     int m = D_004A4BD8->st;
     if (m != 25 && m != 9 && m != 13 && m != 17) return 18;
@@ -3825,6 +5083,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F89C8);
 /* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
 extern struct sMcReq *D_004A4BD8;
 
+/**
+ * Result check of memory-card request state 26 (unit released): accepts results 0, 3, 9 and 17.
+ *
+ * @param a  result of the finished card call
+ * @return @p a, 18 for another state, or 0x10 for any other result
+ */
 int func_003F89C8(int a) {
     if (D_004A4BD8->st != 26) return 18;
     if (a != 0 && a != 3 && a != 9 && a != 17) return 0x10;
@@ -3839,6 +5103,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8A08);
 /* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
 extern struct sMcReq *D_004A4BD8;
 
+/**
+ * Result check of memory-card request state 5 (directory created): accepts results 0, 3, 8, 9, 14 and 17.
+ *
+ * @param a  result of the finished card call
+ * @return @p a, 18 for another state, or 0x10 for any other result
+ */
 int func_003F8A08(int a) {
     if (D_004A4BD8->st != 5) return 18;
     if (a != 0 && a != 3 && a != 9 && a != 0xE && a != 8 && a != 17) return 0x10;
@@ -3853,6 +5123,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8A58);
 /* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
 extern struct sMcReq *D_004A4BD8;
 
+/**
+ * Result check of the memory-card file-open states (6, 10, 14 and 22): accepts results 0, 3, 4, 9, 13 and 17.
+ *
+ * @param a  result of the finished card call
+ * @return @p a, 18 for another state, or 0x10 for any other result
+ */
 int func_003F8A58(int a) {
     int m = D_004A4BD8->st;
     if (m != 22 && m != 6 && m != 0xE && m != 10) return 18;
@@ -3868,6 +5144,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8AC0);
 /* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
 extern struct sMcReq *D_004A4BD8;
 
+/**
+ * Result check of the memory-card file-delete states (19..21): accepts results 0, 3, 4, 5, 6, 9, 13 and 17.
+ *
+ * @param a  result of the finished card call
+ * @return @p a, 18 for another state, or 0x10 for any other result
+ */
 int func_003F8AC0(int a) {
     if ((unsigned)(D_004A4BD8->st - 19) >= 3) return 18;
     if (a != 0 && a != 3 && a != 4 && a != 9 && a != 13 && a != 6 && a != 5 && a != 17) return 0x10;
@@ -3882,6 +5164,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8B28);
 /* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
 extern struct sMcReq *D_004A4BD8;
 
+/**
+ * Result check of memory-card request state 18 (directory deleted): accepts results 0, 3, 4, 9, 13 and 17.
+ *
+ * @param a  result of the finished card call
+ * @return @p a, 18 for another state, or 0x10 for any other result
+ */
 int func_003F8B28(int a) {
     if (D_004A4BD8->st != 18) return 18;
     if (a != 0 && a != 3 && a != 4 && a != 9 && a != 13 && a != 17) return 0x10;
@@ -3896,6 +5184,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8B78);
 /* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
 extern struct sMcReq *D_004A4BD8;
 
+/**
+ * Result check of memory-card request state 3 (free space read): accepts results 0, 3 and 17.
+ *
+ * @param a  result of the finished card call
+ * @return @p a, 18 for another state, or 0x10 for any other result
+ */
 int func_003F8B78(int a) {
     int m = D_004A4BD8->st;
     if (m != 3) return 18;
@@ -3911,6 +5205,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8BB0);
 /* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
 extern struct sMcReq *D_004A4BD8;
 
+/**
+ * Result check of memory-card request state 4 (second space query): accepts results 0, 3 and 17.
+ *
+ * @param a  result of the finished card call
+ * @return @p a, 18 for another state, or 0x10 for any other result
+ */
 int func_003F8BB0(int a) {
     if (D_004A4BD8->st != 4) return 18;
     if (a != 0 && a != 3 && a != 17) return 0x10;
@@ -3925,6 +5225,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8BE8);
 /* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
 extern struct sMcReq *D_004A4BD8;
 
+/**
+ * Result check of memory-card request state 23: accepts results 0, 3, 4, 9 and 17. No request step enters state 23.
+ *
+ * @param a  result of the finished card call
+ * @return @p a, 18 for another state, or 0x10 for any other result
+ */
 int func_003F8BE8(int a) {
     if (D_004A4BD8->st != 23) return 18;
     if (a != 0 && a != 3 && a != 4 && a != 9 && a != 17) return 0x10;
@@ -3935,6 +5241,13 @@ int func_003F8BE8(int a) {
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003F8C30);
 #ifdef SKIP_ASM
+/**
+ * Step handler of memory-card request operation 0 (entry 0 of the per-operation table D_00451468): passes the result
+ * on.
+ *
+ * @param a0  the checked result
+ * @return @p a0
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 int func_003F8C30(int a0) { return a0; }
 #endif
@@ -3953,6 +5266,21 @@ extern int func_003F8710(void);
 extern int func_003F87B0(int a, int *out);
 extern char *func_003FA7A0(char *dst, int unused, char *src);
 extern void fA818(char *, char *, int, char *) __asm__("func_003FA818");
+/**
+ * Step handler of the memory-card open operations (3: search the usable units, 6: one unit).
+ *
+ * Unit checked (state 1): searches the directory for "*" + the save name (state 2); with no card (3) operation 3 tries
+ * the next usable unit in the search direction. Search done: when found, builds the directory and file names
+ * ("PSCD10088" + name) and opens dir/file with mode 3 (state 22); when not found records error 4 and releases the unit
+ * (state 26). Open done: keeps the descriptor in the request body and finishes (10 when it is negative). Unit released:
+ * finishes with the recorded error, or for operation 3 with an error tries the next unit. Failures go to the release
+ * cleanup (func_003F87B0).
+ *
+ * @param a  checked result of the finished card call
+ * @param out  receives 1 while running, 2 when finished
+ * @param c  the poll's result word (search: 1 found / 0 not; open: the descriptor)
+ * @return 0 or an error code
+ */
 int func_003F8C38(int a, int *out, int *c) {
     int op;
     int slot;
@@ -4055,6 +5383,18 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F8EF8);
 extern struct sMcReq *D_004A4BD8;
 
 extern void f86F0(int) __asm__("func_003F86F0");
+/**
+ * Step handler of the memory-card seek, write and read operations (8, 9, 10).
+ *
+ * Seek (state 27) finishes on success; write and read (states 28, 29) finish with 0 when the byte count equals the
+ * request's expected count (+0x70), else 10. A failed call records the error and starts the flush cleanup
+ * (func_003F8720).
+ *
+ * @param a  checked result of the finished card call
+ * @param out  receives 1 while running, 2 when finished
+ * @param c  the poll's result word (bytes moved)
+ * @return 0 or an error code
+ */
 int func_003F8EF8(int a, int *out, int *c) {
     int op;
     if (out == 0) return 18;
@@ -4098,6 +5438,16 @@ extern struct sMcReq *D_004A4BD8;
 extern struct sMcDrv *D_004A4BDC;
 
 extern void f86F0(int) __asm__("func_003F86F0");
+/**
+ * Step handler of the memory-card close operation (7): flush done (state 24) closes the file (25), close done releases
+ * the unit (26), release done finishes. A failed step records the error and continues with the matching cleanup
+ * (func_003F8768, func_003F87B0).
+ *
+ * @param a  checked result of the finished card call
+ * @param out  receives 1 while running, 2 when finished
+ * @param c  the poll's result word (only checked for 0)
+ * @return 0 or an error code
+ */
 int func_003F8FF0(int a, int *out, int c) {
     if (out == 0) return 18;
     if (c == 0) return 18;
@@ -4145,6 +5495,15 @@ extern struct sMcReq *D_004A4BD8;
 extern struct sMcDrv *D_004A4BDC;
 
 extern int func_003F8710(void);
+/**
+ * Step handler of the memory-card cleanup operations (11..13): flush (state 24), then close (25), then release the unit
+ * (26), and finish with the recorded error (func_003F8710), whatever each step returned.
+ *
+ * @param a  checked result of the finished card call (ignored)
+ * @param out  receives 1 while running, 2 when finished
+ * @param c  the poll's result word (only checked for 0)
+ * @return 0 while running, the recorded error when finished, or 18 for a bad state
+ */
 int func_003F9130(int a, int *out, int c) {
     if (out == 0 || c == 0 || (unsigned)(D_004A4BD8->op - 11) > 2) return 18;
     *out = 1;
@@ -4175,6 +5534,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F9208);
 /* D_004A4BDC: the memory-card driver (0x42C bytes): callbacks and per-op / per-state handler tables. */
 extern struct sMcDrv *D_004A4BDC;
 
+/**
+ * Returns whether the memory-card request layer is open (its driver block D_004A4BDC exists).
+ *
+ * @return 1 when open, else 0
+ */
 int func_003F9208(void) { return D_004A4BDC != 0; }
 #endif
 
@@ -4198,6 +5562,20 @@ extern int (*D_004514A0[])(int, int, int);      /* per-state handler table */
 
 /* The unit's later caller declares this (int, int, int). */
 int func_003F9218_impl(int *ports, struct sMcCallbacks *cb, int heap) __asm__("func_003F9218");
+/**
+ * Opens the memory-card request layer.
+ *
+ * Checks the arguments (every one of the 17 callbacks must be set), allocates the 1068-byte driver block D_004A4BDC and
+ * the 116-byte request D_004A4BD8 from @p heap, builds the usable-unit mask from @p ports (a -1-terminated list of unit
+ * codes 0..7, or 9 for all eight; at most 8 entries), copies the callbacks to driver +0x4..+0x44 and installs the
+ * per-operation and per-state tables D_00451468 / D_004514A0. Quirk: on the second allocation failure the driver block
+ * stays allocated and set.
+ *
+ * @param ports  the unit-code list
+ * @param cb  the 17 memory-card callbacks
+ * @param heap  heap for the blocks
+ * @return 0; 1 when already open, 0xC for bad arguments, 9 for a bad unit code, 7 when an allocation fails
+ */
 int func_003F9218_impl(int *ports, struct sMcCallbacks *cb, int heap) {
     int *p;
     unsigned char n = 0;
@@ -4264,6 +5642,12 @@ extern struct sMcDrv *D_004A4BDC;
 
 extern int func_003F9208(void);
 extern int func_00266760(int, char *, int, int);
+/**
+ * Closes the memory-card request layer: clears the 17 callbacks and the request, frees the request and the driver block
+ * to the driver's heap and clears both pointers.
+ *
+ * @return 0, or 2 when the layer is not open
+ */
 int func_003F9530(void) {
     struct sMcDrv *e;
     struct sMcReq *s;
@@ -4305,6 +5689,13 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003F95E8);
 /* D_004A4BD8: the pending memory-card request (0x74 bytes). body is a copy of the caller's parameter block. */
 extern struct sMcReq *D_004A4BD8;
 
+/**
+ * Copies the current memory-card request body (0x60 bytes: file descriptor, unit code, directory and file names, save
+ * name) to @p dst.
+ *
+ * @param dst  destination
+ * @return 0, or 0xC when @p dst is 0
+ */
 int func_003F95E8(char *dst) {
     if (dst == 0) return 0xC;
     __builtin_memcpy(dst, &D_004A4BD8->body, 0x60);
@@ -4333,6 +5724,20 @@ extern void c9698_B2F8(int) __asm__("func_003FB2F8");
 extern unsigned c9698_6210(void *, int, int) __asm__("func_00416210");
 extern char *strcpy(char *, const char *);
 int func_003F9698(char *str, int a, int b);
+/**
+ * Starts a memory-card request that deletes the save @p str.
+ *
+ * With unit -1 it searches the usable units (operation 2) from the lowest (@p b 0) or the highest (@p b 1), or uses the
+ * only one (operation 5); otherwise it uses unit @p a (operation 5). Clears the body and the recorded error, stores the
+ * name and direction, calls the start hook func_003FB2F8 and the unit-check callback (driver +0x10), and enters state
+ * 1. func_003FAE50 runs the steps.
+ *
+ * @param str  the save name
+ * @param a  card unit code, or -1 for any usable unit
+ * @param b  search direction (0 upward, 1 downward)
+ * @return 0; 2 when the layer is not open, 0xC for a bad name or direction, 9 for a bad unit, 11 when the unit is not
+ * usable, 13 when a request is running
+ */
 int func_003F9698(char *str, int a, int b) {
     int v;
     int t;
@@ -4405,6 +5810,16 @@ extern void c9818_B2F8(int) __asm__("func_003FB2F8");
 extern unsigned c9818_6210(void *, int, int) __asm__("func_00416210");
 extern char *strcpy(char *, const char *);
 int func_003F9818(char *str, int a, int b);
+/**
+ * Starts a memory-card request that creates the save @p str (operations 1 / 4).
+ *
+ * Like func_003F9698, with a name limit: names of 0x18 characters or more give 0xC. func_003FA8F8 runs the steps.
+ *
+ * @param str  the save name
+ * @param a  card unit code, or -1 for any usable unit
+ * @param b  search direction (0 upward, 1 downward)
+ * @return 0 or the error codes of func_003F9698
+ */
 int func_003F9818(char *str, int a, int b) {
     int v;
     int t;
@@ -4476,6 +5891,16 @@ extern void c99b8_B2F8(int) __asm__("func_003FB2F8");
 extern unsigned c99b8_6210(void *, int, int) __asm__("func_00416210");
 extern char *strcpy(char *, const char *);
 int func_003F99B8_impl(char *str, int a, int b) __asm__("func_003F99B8");
+/**
+ * Starts a memory-card request that opens the save @p str (operations 3 / 6).
+ *
+ * Like func_003F9698; func_003F8C38 runs the steps.
+ *
+ * @param str  the save name
+ * @param a  card unit code, or -1 for any usable unit
+ * @param b  search direction (0 upward, 1 downward)
+ * @return 0 or the error codes of func_003F9698
+ */
 int func_003F99B8_impl(char *str, int a, int b) {
     int v;
     int t;
@@ -4538,6 +5963,13 @@ extern struct sMcDrv *D_004A4BDC;
 
 extern int f9208(void) __asm__("func_003F9208");
 int func_003F9B38_impl(int *src) __asm__("func_003F9B38");
+/**
+ * Starts a memory-card request that closes an open save file (operation 7): copies the request body from @p src, enters
+ * state 24 and flushes the file (driver +0x38 with the descriptor @p src[0]). func_003F8FF0 runs the steps.
+ *
+ * @param src  the 0x60-byte request body of the open file
+ * @return 0; 2 when the layer is not open, 0xC when @p src is 0, 13 when a request is running
+ */
 int func_003F9B38_impl(int *src) {
     if (f9208() == 0) return 2;
     if (src == 0) return 0xC;
@@ -4566,6 +5998,17 @@ extern int func_003F9208(void);
 extern void c9c48_86F0(int) __asm__("func_003F86F0");
 extern int func_003FA6E8_9C48(void) __asm__("func_003FA6E8");
 int func_003F9C48_impl(int *src, int a, int b) __asm__("func_003F9C48");
+/**
+ * Starts a memory-card request that seeks in an open save file (operation 8, state 27).
+ *
+ * Copies the body from @p src; with origin 0 seeks to @p a plus the base offset (func_003FA6E8, 0) from the start,
+ * otherwise passes @p a and @p b on. Keeps the target in +0x70.
+ *
+ * @param src  the 0x60-byte request body of the open file
+ * @param a  offset
+ * @param b  seek origin
+ * @return 0; 2 when the layer is not open, 0xC when @p src is 0, 13 when a request is running
+ */
 int func_003F9C48_impl(int *src, int a, int b) {
     struct sMcReq *s;
     struct sMcReq *t;
@@ -4610,6 +6053,15 @@ extern int func_003F9208(void);
 
 extern void f86F0(int) __asm__("func_003F86F0");
 int func_003F9DC0_impl(int *src, int a, int b) __asm__("func_003F9DC0");
+/**
+ * Starts a memory-card request that reads from an open save file (operation 10, state 29): read callback (driver +0x2C)
+ * with the descriptor, @p a and @p b; @p b is kept as the expected count.
+ *
+ * @param src  the 0x60-byte request body of the open file
+ * @param a  destination buffer
+ * @param b  byte count
+ * @return 0; 2 when the layer is not open, 0xC when @p src is 0, 13 when a request is running
+ */
 int func_003F9DC0_impl(int *src, int a, int b) {
     struct sMcReq *s;
     struct sMcReq *t;
@@ -4644,6 +6096,15 @@ extern struct sMcDrv *D_004A4BDC;
 extern int func_003F9208(void);
 extern void f86F0(int) __asm__("func_003F86F0");
 int func_003F9F00_impl(int *src, int a, int b) __asm__("func_003F9F00");
+/**
+ * Starts a memory-card request that writes to an open save file (operation 9, state 28): write callback (driver +0x30)
+ * with the descriptor, @p a and @p b; @p b is kept as the expected count.
+ *
+ * @param src  the 0x60-byte request body of the open file
+ * @param a  source buffer
+ * @param b  byte count
+ * @return 0; 2 when the layer is not open, 0xC when @p src is 0, 13 when a request is running
+ */
 int func_003F9F00_impl(int *src, int a, int b) {
     struct sMcReq *s;
     struct sMcReq *t;
@@ -4678,6 +6139,19 @@ extern struct sMcDrv *D_004A4BDC;
 extern int func_003F9208(void);
 
 extern void fB2F8w(int) __asm__("func_003FB2F8");
+/**
+ * Polls the memory-card request layer and advances the running request.
+ *
+ * Calls the poll callback (driver +0x40). When the card call has finished (status 2), checks its result with the
+ * current state's entry of the per-state table (10 ends the request, 0x10 is returned) and runs the operation's step
+ * handler. When that finishes the request, calls the hook func_003FB2F8 for operations 2, 5, 7 and 11..13 and clears
+ * the operation and state.
+ *
+ * @param p  receives the status: 0 idle, 1 running, 2 finished
+ * @param q  receives the card call's result word
+ * @return the result; 2 when the layer is not open, 13 without a poll callback, 0xC for a 0 argument, 0xF when the card
+ * is idle but a request is pending
+ */
 int func_003FA040(int *p, int *q) {
     int r;
     if (func_003F9208() == 0) return 2;
@@ -4716,6 +6190,13 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FA1D0);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_003F9208(void);
 extern int func_003FA708(unsigned int, int);
+/**
+ * Decodes a memory-card unit code into its port and slot (func_003FA708). The game's card callbacks call it.
+ *
+ * @param unitIndex  unit code 0..7
+ * @param portSlot  receives the port and slot bytes
+ * @return 0; 12 when @p portSlot is 0, 2 when the layer is not open, 9 for a code of 8 or more
+ */
 int func_003FA1D0(unsigned int unitIndex, int portSlot) {
     if (portSlot == 0) return 12;
     if (func_003F9208() == 0) return 2;
@@ -4737,6 +6218,13 @@ extern int func_003F9208(void);
 extern void fA6A8(char *, int *, int *) __asm__("func_003FA6A8");
 extern int fB308(char *) __asm__("func_003FB308");
 int func_003FA240_impl(char *src) __asm__("func_003FA240");
+/**
+ * Stores the save description (976 bytes: icon data pointer and size, the icon.sys block, the record size at +0x3CC) in
+ * the driver block (+0x50) and computes the space a new save needs into +0x420 / +0x424 (func_003FA6A8).
+ *
+ * @param src  the description
+ * @return 0; 0xC when @p src is 0, 2 when the layer is not open
+ */
 int func_003FA240_impl(char *src) {
     if (src == 0) return 0xC;
     if (func_003F9208() == 0) return 2;
@@ -4751,6 +6239,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FA360);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_3FB278(void);
+/**
+ * Directory-entry filter the game's search callback uses: accepts every entry (func_003FB278).
+ *
+ * @param name  the entry name (ignored)
+ * @return 1
+ */
 int func_003FA360(char* name) { return func_003FB278(); }
 #endif
 
@@ -4760,6 +6254,16 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FA380);
 // From peak3project's fork (github.com/peak3project/ssx3).
 typedef struct { unsigned char b[33]; } T_A380;
 extern T_A380 D_004973B0;
+/**
+ * Converts an ASCII string to full-width Shift-JIS, as icon.sys titles need.
+ *
+ * Letters and digits map to 0x8260.. / 0x8281.. / 0x824F..; other printable characters to 0x81xx through the table
+ * D_004973B0; Shift-JIS lead bytes 0x81..0x98 copy their two-byte character through. Each character is stored
+ * byte-swapped (big-endian in memory). Quirk: no terminator is written; func_003F8258 converts into a zeroed buffer.
+ *
+ * @param src  ASCII text
+ * @param dst  Shift-JIS output
+ */
 void func_003FA380(char *src, unsigned short *dst) {
     T_A380 tbl = D_004973B0;
     unsigned char i = 0;
@@ -4792,7 +6296,13 @@ void func_003FA380(char *src, unsigned short *dst) {
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003FA4F0);
 #ifdef SKIP_ASM
-/* Shift-JIS full-width -> ASCII: the inverse of func_003FA380 (same 33-byte punctuation table). */
+/**
+ * Converts a full-width Shift-JIS string (byte-swapped, as func_003FA380 writes it) back to ASCII and NUL-terminates
+ * it. Stops at the first character it cannot map. Nothing in retail calls it.
+ *
+ * @param src  Shift-JIS text
+ * @param dst  ASCII output
+ */
 void func_003FA4F0(unsigned short *src, char *dst) {
     T_A380 tbl = D_004973B0;
     unsigned char i = 0;
@@ -4839,6 +6349,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FA6A8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_3FB280(void);
+/**
+ * Forwards to func_003FB280 (the space a new save needs) with the caller's arguments.
+ *
+ * @return no meaningful value (func_003FB280 returns nothing)
+ */
 int func_003FA6A8(void) { return func_003FB280(); }
 #endif
 
@@ -4847,6 +6362,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FA6C8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_3FB2C8(void);
+/**
+ * Forwards to func_003FB2C8 (fetch the CRC interface) with the caller's argument.
+ *
+ * @return no meaningful value (func_003FB2C8 returns nothing)
+ */
 int func_003FA6C8(void) { return func_003FB2C8(); }
 #endif
 
@@ -4855,6 +6375,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FA6E8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_3FB300(void);
+/**
+ * Returns the base offset of seeks in a save file (func_003FB300, always 0).
+ *
+ * @return 0
+ */
 int func_003FA6E8(void) { return func_003FB300(); }
 #endif
 
@@ -4864,6 +6389,13 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FA708);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 void func_003FA708_impl(unsigned a, unsigned char *p) __asm__("func_003FA708");
+/**
+ * Splits a memory-card unit code into port and slot bytes: codes 0..3 are port 0 slots 0..3, codes 4..7 port 1 slots
+ * 0..3. Other codes leave the output untouched.
+ *
+ * @param a  unit code
+ * @param p  receives port, slot
+ */
 void func_003FA708_impl(unsigned a, unsigned char *p) {
     switch (a) {
     case 0: p[0] = 0; p[1] = 0; break;
@@ -4885,6 +6417,14 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FA7A0);
 extern unsigned char D_004A4BE0[];
 extern void func_00416210(char *, int, int);
 extern void func_0041605C(char *, char *, int);
+/**
+ * Builds the directory-search pattern for a save: "*" followed by the save name, in a zeroed 32-byte buffer.
+ *
+ * @param dst  pattern buffer (32 bytes)
+ * @param unused  ignored (callers pass the save description)
+ * @param src  the save name
+ * @return the end of the pattern
+ */
 char *func_003FA7A0(char *dst, int unused, char *src) {
     char *p = dst + 1;
     func_00416210(dst, 0, 0x20);
@@ -4904,6 +6444,15 @@ extern K9 D_00497400;
 extern void f6210(char *, int, int) __asm__("func_00416210");
 extern void f605C(char *, char *, int) __asm__("func_0041605C");
 void func_003FA818_impl(char *a, char *b, int unused, char *str) __asm__("func_003FA818");
+/**
+ * Builds a save's directory name and file name, both "PSCD10088" followed by the save name, each in a zeroed 32-byte
+ * buffer.
+ *
+ * @param a  receives the directory name
+ * @param b  receives the file name
+ * @param unused  ignored (callers pass the save description)
+ * @param str  the save name
+ */
 void func_003FA818_impl(char *a, char *b, int unused, char *str) {
     char *p;
     f6210(a, 0, 0x20);
@@ -4934,7 +6483,22 @@ extern char str_icon_sys_b[];   /* "icon.sys" */
 extern void fA8F8_86F0(int) __asm__("func_003F86F0");
 extern char *fA8F8_A7A0(char *, char *, char *) __asm__("func_003FA7A0");
 
-/* Per-op handler for ops 1 and 4 (D_00451468): steps the request through its states. */
+/**
+ * Step handler of the memory-card create operations (1: search the usable units, 4: one unit); the per-op handler
+ * table D_00451468 holds it for ops 1 and 4.
+ *
+ * Unit check, then a search for the save (it must not exist: error 8), the free space (at least driver +0x420 bytes,
+ * else 14), a second query against +0x424 and the directory ("PSCD10088" + name). Then creates the main file dir/dir
+ * (mode 515), flushes and closes it; writes the icon data to view.ico and the 964-byte icon.sys block from the save
+ * description, each opened, written, flushed and closed; and releases the unit. With no card (3) operation 1 tries the
+ * next usable unit; when the unit is released with an error it does too. Failures go to the flush, close or release
+ * cleanup (func_003F8720, func_003F8768, func_003F87B0).
+ *
+ * @param a  checked result of the finished card call
+ * @param st  receives 1 while running, 2 when finished
+ * @param res  the poll's result word
+ * @return 0 or an error code
+ */
 int func_003FA8F8(int a, int *st, int *res) {
     char path[80];
     int r;
@@ -5180,7 +6744,20 @@ extern char str_icon_sys_b[];   /* "icon.sys" */
 extern void fAE50_86F0(int) __asm__("func_003F86F0");
 extern char *fAE50_A7A0(char *, char *, char *) __asm__("func_003FA7A0");
 
-/* Per-op handler for ops 2 and 5 (D_00451468): steps the request through its states. */
+/**
+ * Step handler of the memory-card delete operations (2: search the usable units, 5: one unit); the per-op handler
+ * table D_00451468 holds it for ops 2 and 5.
+ *
+ * Unit check, then a search for the save; when found, copies its name (driver callback +0x44) and deletes icon.sys,
+ * view.ico and the main file in its directory, then the directory, and releases the unit. Not finding a file (4) is
+ * ignored; no card (3) skips to releasing the unit; other errors are recorded while the deletes go on. Not finding the
+ * save records error 4. Operation 2 tries the next usable unit after an error.
+ *
+ * @param a  checked result of the finished card call
+ * @param st  receives 1 while running, 2 when finished
+ * @param res  the poll's result word
+ * @return 0 or an error code
+ */
 int func_003FAE50(int a, int *st, int *res) {
     char path[80];
 
@@ -5307,6 +6884,11 @@ int func_003FAE50(int a, int *st, int *res) {
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003FB278);
 #ifdef SKIP_ASM
+/**
+ * Returns 1 (the save-entry filter behind func_003FA360 accepts everything).
+ *
+ * @return 1
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 int func_003FB278(void) { return 1; }
 #endif
@@ -5316,6 +6898,14 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB280);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 static inline unsigned roundup_kb(unsigned v) { if (v & 0x3FF) return ((v >> 10) + 1) << 10; return (v >> 10) << 10; }
+/**
+ * Computes the space a new save needs: the record size (+0x3CC) and the icon size (+0x4) of the save description, each
+ * rounded up to 1 KB, plus 5120 bytes; @p kind is set to 3.
+ *
+ * @param p  the save description
+ * @param out  receives the byte count
+ * @param kind  receives 3 (compared with the second space query)
+ */
 void func_003FB280(char *p, int *out, int *kind) {
     unsigned a = roundup_kb(*(unsigned *)(p + 0x3CC));
     unsigned b = roundup_kb(*(unsigned *)(p + 4));
@@ -5329,18 +6919,31 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB2C8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char *func_003FB5E8(void);
+/**
+ * Stores the CRC interface (func_003FB5E8, D_00497508) through @p a when it is not 0.
+ *
+ * @param a  output pointer
+ */
 void func_003FB2C8(char **a) {
     char *r = func_003FB5E8();
     if (a) *a = r;
 }
 #endif
 
+/**
+ * Empty hook of the memory-card request layer (called with 1 when a request starts and 0 when some finish).
+ */
 void func_003FB2F8(void) {
 }
 
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003FB300);
 #ifdef SKIP_ASM
+/**
+ * Returns 0 (the base offset of seeks in a save file).
+ *
+ * @return 0
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 int func_003FB300(void) { return 0; }
 #endif
@@ -5348,6 +6951,12 @@ int func_003FB300(void) { return 0; }
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003FB308);
 #ifdef SKIP_ASM
+/**
+ * Checks the save description pointer: 0 when set, 12 when 0.
+ *
+ * @param a0  the description
+ * @return 0 or 12
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 int func_003FB308(int a0) { return a0 ? 0 : 12; }
 #endif
@@ -5355,6 +6964,12 @@ int func_003FB308(int a0) { return a0 ? 0 : 12; }
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003FB318);
 #ifdef SKIP_ASM
+/**
+ * Computes one entry of the CRC-32 table: eight shifts of @p crc with the reflected polynomial 0xEDB88320.
+ *
+ * @param crc  the table index
+ * @return the table entry
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 unsigned int func_003FB318(unsigned int crc) {
     unsigned char i = 8;
@@ -5374,6 +6989,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB358);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern unsigned int func_003FB318(unsigned int);
+/**
+ * Fills a 256-entry CRC-32 table (func_003FB318 for each index).
+ *
+ * @param table  the table
+ */
 void func_003FB358(unsigned int *table) {
     unsigned int i;
     for (i = 0; i < 256; i++) {
@@ -5394,6 +7014,13 @@ extern struct sCrc D_00451518;
 
 extern int func_00266728(int, int, int);
 extern void func_003FB358b(int) __asm__("func_003FB358");
+/**
+ * Starts the CRC interface D_00451518: allocates its 1 KB table from @p a, fills it, and resets the digest (all ones)
+ * and the output block.
+ *
+ * @param a  heap
+ * @return 0; 5 when already started, 1 when the allocation fails
+ */
 int func_003FB3A0(unsigned a) {
     int r;
     if (D_00451518.table != 0) return 5;
@@ -5417,6 +7044,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB430);
 extern struct sCrc D_00451518;
 
 extern int func_00266760(int, char *, int, int);
+/**
+ * Stops the CRC interface: frees its table to the heap it came from.
+ *
+ * @return 0, or 6 when not started
+ */
 int func_003FB430(void) {
     struct sCrc *p = &D_00451518;
     if (D_00451518.table == 0) return 6;
@@ -5433,6 +7065,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB480);
 /* D_00451518: the CRC-32 state (func_003FB3A0 allocates the 0x400-byte table). */
 extern struct sCrc D_00451518;
 
+/**
+ * Returns whether the CRC interface is started (its table exists). Slot 2 of the CRC interface D_00497508.
+ *
+ * @return 1 when started, else 0
+ */
 int func_003FB480(void) { return D_00451518.table != 0; }
 #endif
 
@@ -5444,6 +7081,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB490);
 /* D_00451518: the CRC-32 state (func_003FB3A0 allocates the 0x400-byte table). */
 extern struct sCrc D_00451518;
 
+/**
+ * Resets the CRC-32 digest to all ones. Slot 3 of the CRC interface.
+ *
+ * @return 0, or 6 when not started
+ */
 int func_003FB490(void) {
     unsigned long long v = 0xFFFFFFFF;
     if (D_00451518.table == 0) return 6;
@@ -5459,6 +7101,13 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB4C0);
 /* D_00451518: the CRC-32 state (func_003FB3A0 allocates the 0x400-byte table). */
 extern struct sCrc D_00451518;
 
+/**
+ * Adds @p n bytes to the CRC-32 digest (table-driven, reflected). Slot 4 of the CRC interface.
+ *
+ * @param buf  the data
+ * @param n  byte count
+ * @return 0; 6 when not started, 2 when @p buf is 0
+ */
 int func_003FB4C0(unsigned char *buf, unsigned n) {
     unsigned crc = D_00451518.crc;
     unsigned i;
@@ -5479,6 +7128,15 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB558);
 extern struct sCrc D_00451518;
 
 extern int D_004A5B1C;
+/**
+ * Finishes the CRC-32 digest. Slot 5 of the CRC interface.
+ *
+ * Stores the inverted digest in D_004A5B1C and points the output block (size 4, then that pointer, at +0x4 of
+ * D_00451518) at it.
+ *
+ * @param out  receives the output block
+ * @return 0; 6 when not started, 2 when @p out is 0
+ */
 int func_003FB558(int **out) {
     struct sCrc *p = &D_00451518;
     if (D_00451518.table == 0) return 6;
@@ -5498,6 +7156,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB5B0);
 /* D_00451518: the CRC-32 state (func_003FB3A0 allocates the 0x400-byte table). */
 extern struct sCrc D_00451518;
 
+/**
+ * Returns the digest size of the CRC interface (4 bytes). Slot 6 of the CRC interface.
+ *
+ * @param out  receives 4
+ * @return 0; 6 when not started, 2 when @p out is 0
+ */
 int func_003FB5B0(int *out) {
     if (D_00451518.table == 0) return 6;
     if (out == 0) return 2;
@@ -5511,6 +7175,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB5E8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char D_00497508[];
+/**
+ * Returns the CRC interface D_00497508: start (func_003FB3A0), stop, started, reset, update, finish, digest size.
+ *
+ * @return the interface table
+ */
 char *func_003FB5E8(void) { return D_00497508; }
 #endif
 
@@ -5520,6 +7189,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB5F8);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_004A4BF0;
 
+/**
+ * Starts the XOR cipher interface (slot 0 of D_00497528): moves it from stopped (state 4) to started without a key (6).
+ *
+ * @return 0, or 3 when it is not stopped
+ */
 int func_003FB5F8(void) {
     if (D_004A4BF0 != 4) return 3;
     D_004A4BF0 = 6;
@@ -5541,6 +7215,11 @@ extern unsigned char *D_004A4BEC;
 
 extern int D_004A4BF0;
 
+/**
+ * Stops the XOR cipher interface (slot 1): forgets the key and returns to state 4.
+ *
+ * @return 0
+ */
 int func_003FB620(void) {
     D_004A4BE4 = 0;
     D_004A4BE8 = 0;
@@ -5556,6 +7235,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB640);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int D_004A4BF0;
 
+/**
+ * Returns whether the XOR cipher interface is started (state not 4). Slot 2.
+ *
+ * @return 1 when started
+ */
 int func_003FB640(void) { return D_004A4BF0 != 4; }
 #endif
 
@@ -5573,6 +7257,14 @@ extern unsigned char *D_004A4BEC;
 
 extern int D_004A4BF0;
 
+/**
+ * Sets the XOR cipher key (slot 3): the key runs from @p a for @p b bytes and the position restarts at its first byte
+ * (state 5).
+ *
+ * @param a  key bytes (kept by pointer)
+ * @param b  key length
+ * @return 0; 2 for a 0 argument, 4 when stopped
+ */
 int func_003FB650(unsigned char *a, int b) {
     if (a == 0 || b == 0) return 2;
     if (D_004A4BF0 == 4) return 4;
@@ -5598,6 +7290,14 @@ extern unsigned char *D_004A4BEC;
 
 extern int D_004A4BF0;
 
+/**
+ * Encrypts @p n bytes in place (slot 4): XORs each with the next key byte, wrapping to the key's start, and continues
+ * from the key position the previous call left (state 7).
+ *
+ * @param buf  the data
+ * @param n  byte count
+ * @return 0; 2 for a 0 argument, or the current state when it is neither keyed (5) nor encrypting (7)
+ */
 int func_003FB6A0(unsigned char *buf, unsigned n) {
     unsigned i;
     if (buf == 0 || n == 0) return 2;
@@ -5626,6 +7326,14 @@ extern unsigned char *D_004A4BEC;
 
 extern int D_004A4BF0;
 
+/**
+ * Decrypts @p n bytes in place (slot 5): the same XOR as func_003FB6A0, allowed when keyed (5) or decrypting (8), and
+ * leaves state 8.
+ *
+ * @param buf  the data
+ * @param n  byte count
+ * @return 0; 2 for a 0 argument, or the current state when it is neither 5 nor 8
+ */
 int func_003FB730(unsigned char *buf, unsigned n) {
     unsigned i;
     if (buf == 0 || n == 0) return 2;
@@ -5652,6 +7360,11 @@ extern unsigned char *D_004A4BEC;
 
 extern int D_004A4BF0;
 
+/**
+ * Rewinds the XOR cipher to the key's first byte and back to state 5 (slot 6); does nothing unless a key is set.
+ *
+ * @return 0
+ */
 int func_003FB7C0(void) {
     if (D_004A4BF0 == 5 || D_004A4BF0 == 7 || D_004A4BF0 == 8) {
         D_004A4BF0 = 5;
@@ -5666,6 +7379,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB800);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char D_00497528[];
+/**
+ * Returns the XOR cipher interface D_00497528: start, stop, started, set key, encrypt, decrypt, rewind.
+ *
+ * @return the interface table
+ */
 char *func_003FB800(void) { return D_00497528; }
 #endif
 
@@ -5675,6 +7393,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB810);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 char *func_003FB810_impl(char *p) __asm__("func_003FB810");
+/**
+ * Offsets an error of the memory-card request layer into the save-record manager's range: nonzero codes get 100 added.
+ *
+ * @param p  the error (declared as a pointer)
+ * @return 0, or @p p + 100
+ */
 char *func_003FB810_impl(char *p) {
     if (p == 0) return 0;
     return p + 100;
@@ -5687,6 +7411,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB828);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 char *func_003FB828_impl(char *p) __asm__("func_003FB828");
+/**
+ * Offsets an XOR cipher error into the save-record manager's range: nonzero codes get 200 added.
+ *
+ * @param p  the error (declared as a pointer)
+ * @return 0, or @p p + 200
+ */
 char *func_003FB828_impl(char *p) {
     if (p == 0) return 0;
     return p + 200;
@@ -5699,6 +7429,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB840);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
 char *func_003FB840_impl(char *p) __asm__("func_003FB840");
+/**
+ * Offsets a CRC interface error into the save-record manager's range: nonzero codes get 300 added.
+ *
+ * @param p  the error (declared as a pointer)
+ * @return 0, or @p p + 300
+ */
 char *func_003FB840_impl(char *p) {
     if (p == 0) return 0;
     return p + 300;
@@ -5708,6 +7444,14 @@ char *func_003FB840_impl(char *p) {
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003FB858);
 #ifdef SKIP_ASM
+/**
+ * Returns the allocation alignment (4) and size granularity (1) of a save-record memory type; all five types are the
+ * same.
+ *
+ * @param memType  memory type
+ * @param x  receives the alignment
+ * @param y  receives the granularity
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 void func_003FB858(unsigned memType, int *x, int *y) {
     int sx = 4, sy = 1;
@@ -5730,6 +7474,14 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB898);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern void func_003FB858b(int, int *, int *) __asm__("func_003FB858");
 int func_003FB898(int a, int b);
+/**
+ * Returns the block size of a save record: @p size plus its 12-byte header, rounded up to the type's granularity
+ * (func_003FB858, which is 1, so @p size + 12).
+ *
+ * @param size  record data size
+ * @param memType  memory type
+ * @return the block size
+ */
 int func_003FB898(int size, int memType) {
     int x = 4;
     unsigned y = 1;
@@ -5750,6 +7502,13 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB910);
 extern char str_TAG_SENTINELTAG_SENTINELTAG_SENTINEL[];
 
 extern int func_00415FC8(int, char *, int);
+/**
+ * Returns the 12-byte header in front of a save-record buffer from func_003FCE10.
+ *
+ * @param userPtr  the record buffer
+ * @param checkTag  nonzero to require the header to still hold "TAG_SENTINEL"
+ * @return @p userPtr - 12, or 0 when the check fails
+ */
 int func_003FB910(int userPtr, int checkTag) {
     int header = userPtr - 0xC;
     if (checkTag & 0xFF) {
@@ -5765,6 +7524,14 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB958);
 // From peak3project's fork (github.com/peak3project/ssx3).
 typedef struct { char b[4]; } W3FB958;
 typedef struct { W3FB958 x, y; } V3FB958;
+/**
+ * Fills a 12-byte save-record header: key word, size word, then the 4 CRC bytes.
+ *
+ * @param dst  the header
+ * @param a  record key
+ * @param b  record size
+ * @param c  record CRC
+ */
 void func_003FB958(W3FB958 *dst, int a, int b, W3FB958 *c) {
     V3FB958 t;
     *(int *)&t.x = a;
@@ -5781,6 +7548,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FB9A0);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern char str_TAG_SENTINELTAG_SENTINELTAG_SENTINEL[];
 
+/**
+ * Writes "TAG_SENTINEL" (12 bytes) back into a save-record header area.
+ *
+ * @param dst  the header
+ */
 void func_003FB9A0(char *dst) {
     __builtin_memcpy(dst, str_TAG_SENTINELTAG_SENTINELTAG_SENTINEL, 12);
 }
@@ -5789,6 +7561,14 @@ void func_003FB9A0(char *dst) {
 //100%
 INCLUDE_ASM("seg/seg_2F41F8", func_003FB9D0);
 #ifdef SKIP_ASM
+/**
+ * Splits a 12-byte save-record header into its key, size and CRC words; outputs may be 0.
+ *
+ * @param src  the header
+ * @param outWord0  receives the key
+ * @param outWord1  receives the size
+ * @param outWord2  receives the CRC
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 void func_003FB9D0(char *src, char *outWord0, char *outWord1, char *outWord2) {
     if (outWord0) __builtin_memcpy(outWord0, src, 4);
@@ -5835,6 +7615,13 @@ struct sMcState {
 
 extern struct sMcState *D_004A5B20;
 
+/**
+ * Finds the @p n-th entry with key @p key in the open save's record table (D_004A5B20 +0x9C, +0x94 entries).
+ *
+ * @param key  record key
+ * @param n  index among the entries with that key
+ * @return the entry (key, offset, size, CRC), or 0
+ */
 struct sMcEnt *func_003FBA20(int key, int n) {
     struct sMcState *s = D_004A5B20;
     struct sMcEnt *end = s->f9C + s->f94;
@@ -5858,6 +7645,13 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FBA78);
    block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
 extern struct sMcState *D_004A5B20;
 
+/**
+ * Sets the CRC of the @p n-th record-table entry with key @p key.
+ *
+ * @param key  record key
+ * @param n  index among the entries with that key
+ * @param val  the CRC
+ */
 void func_003FBA78(int key, int n, int *val) {
     struct sMcState *s = D_004A5B20;
     struct sMcEnt *end = s->f9C + s->f94;
@@ -5880,6 +7674,17 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FBAD0);
 #include "fakematch.h"
 extern struct sMcState *D_004A5B20;
 
+/**
+ * Appends an entry to the open save's record table.
+ *
+ * The entry gets the next file offset (+0x98; 0 for the first), @p key, @p size and the CRC; the next offset moves past
+ * its 12-byte header and data and is pre-stored in the following entry.
+ *
+ * @param key  record key
+ * @param size  record size
+ * @param val  record CRC
+ * @return the entry's file offset, or the unchanged next offset when the table is full
+ */
 // FAKEMATCH: FM_OPAQUE(e) after the e->c store hides that e == t, so the pre-if `t = &f9C[f94]` (v0) is copied into e (a3) at the join as in retail; e->c is stored through an int view (retail reloads D_004A5B20 after that store, which a struct-field store lets sched hoist); plain form 67.84% (91.38% with the struct-field store).
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
 int func_003FBAD0(int key, int size, int *val) {
@@ -5915,6 +7720,14 @@ extern struct sMcState *D_004A5B20;
 
 extern int func_003FB840c(int) __asm__("func_003FB840");
 int func_003FBB50_impl(int a, int b, int c) __asm__("func_003FBB50");
+/**
+ * Computes the CRC-32 of a buffer through the CRC interface (+0x70): reset, update, finish.
+ *
+ * @param a  the data
+ * @param b  byte count
+ * @param c  receives the output block (size, then a pointer to the digest)
+ * @return 0, or the CRC error + 300
+ */
 int func_003FBB50_impl(int a, int b, int c) {
     struct sMcIfB *vt = D_004A5B20->f70;
     int r = vt->f0C(a, b, c);
@@ -5938,6 +7751,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FBBE0);
 extern struct sMcState *D_004A5B20;
 
 extern int func_003FBB50(void *, int, int **);
+/**
+ * Computes the CRC-32 of the open save's record table (16 bytes per entry) into @p out; 0 when the table is empty.
+ *
+ * @param out  receives the 4 digest bytes
+ */
 void func_003FBBE0(struct sMcKey *out) {
     struct sMcState *s = D_004A5B20;
     int *r;
@@ -5962,6 +7780,14 @@ extern struct sMcState *D_004A5B20;
 
 extern int fB828b(int) __asm__("func_003FB828");
 int func_003FBC40_impl(int x, int y) __asm__("func_003FBC40");
+/**
+ * Encrypts a buffer with the save cipher (+0x6C): sets the stored key (+0x64, +0x68), encrypts, rewinds. Does nothing
+ * without a cipher.
+ *
+ * @param x  the data
+ * @param y  byte count
+ * @return 0, or the cipher error + 200
+ */
 int func_003FBC40_impl(int x, int y) {
     int r;
     if (D_004A5B20->f6C == 0) return 0;
@@ -5988,6 +7814,13 @@ extern struct sMcState *D_004A5B20;
 
 extern int fB828(int) __asm__("func_003FB828");
 int func_003FBCD8_impl(int x, int y) __asm__("func_003FBCD8");
+/**
+ * Decrypts a buffer with the save cipher: as func_003FBC40 with the decrypt slot.
+ *
+ * @param x  the data
+ * @param y  byte count
+ * @return 0, or the cipher error + 200
+ */
 int func_003FBCD8_impl(int x, int y) {
     int r;
     if (D_004A5B20->f6C == 0) return 0;
@@ -6012,6 +7845,15 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FBD70);
 extern struct sMcState *D_004A5B20;
 
 extern int func_003F99B8(int, int, int);
+/**
+ * Starts opening a save (func_003F99B8) as save-record operation @p d at step 4, with an empty record table.
+ *
+ * @param a  the save name
+ * @param b  card unit code, or -1 for any usable unit
+ * @param c  search direction
+ * @param d  the operation (4 open, 5 reopen and verify)
+ * @return 0, or the request error + 100
+ */
 int func_003FBD70(int a, int b, int c, int d) {
     int r = func_003F99B8(a, b, c);
     struct sMcState *p = D_004A5B20;
@@ -6033,6 +7875,11 @@ extern struct sMcState *D_004A5B20;
 
 extern int func_003F9C48(struct sMcState *, int, int);
 extern int func_003FB810(int);
+/**
+ * Save-record step 9: seeks to the start of the open save file to read its record headers.
+ *
+ * @return 0, or the request error + 100
+ */
 int func_003FBDB8(void) {
     struct sMcState *p = D_004A5B20;
     p->f78 = 9;
@@ -6052,6 +7899,11 @@ extern struct sMcState *D_004A5B20;
 extern int func_003FB898_BDF0(int, int) __asm__("func_003FB898");
 extern int func_003F9DC0(struct sMcState *, int, int);
 extern int func_003FB810(int);
+/**
+ * Save-record step 7: reads the next 12-byte record header of the open file into the header buffer (+0x80).
+ *
+ * @return 0, or the request error + 100
+ */
 int func_003FBDF0(void) {
     struct sMcState *p = D_004A5B20;
     p->f78 = 7;
@@ -6074,6 +7926,12 @@ extern int fBCD8(int, int) __asm__("func_003FBCD8");
 extern void fB9D0(int, int *, int *, char *) __asm__("func_003FB9D0");
 extern int fBAD0(int, int, char *) __asm__("func_003FBAD0");
 extern int f9C48(struct sMcState *, int, int) __asm__("func_003F9C48");
+/**
+ * Save-record step 11: decrypts the record header just read, adds the record to the table (func_003FBAD0) and seeks
+ * past its data to the next header.
+ *
+ * @return 0, the cipher or request error, or 5 when the table is full
+ */
 int func_003FBE40(void) {
     int x[2];
     int r;
@@ -6108,6 +7966,14 @@ extern int func_003FB910(int, int);
 extern void fB958(int, int, int, char *) __asm__("func_003FB958");
 extern int fBC40(int, int) __asm__("func_003FBC40");
 extern int f9F00(struct sMcState *, int, int) __asm__("func_003F9F00");
+/**
+ * Save-record step 6: writes a record.
+ *
+ * Fills the header in front of the record buffer (+0x7C; 4 when its sentinel is gone) with the key, size and CRC,
+ * encrypts the header and the data, and writes both (func_003F9F00).
+ *
+ * @return 0, the cipher error, or the request error + 100
+ */
 int func_003FBED0(void) {
     int h;
     int r;
@@ -6138,6 +8004,11 @@ extern int func_003FB910(int, int);
 extern int func_003FB898_BF80(int, int) __asm__("func_003FB898");
 extern int func_003F9DC0(struct sMcState *, int, int);
 extern int func_003FB810(int);
+/**
+ * Save-record step 10: reads a record's header and data into the header in front of the record buffer.
+ *
+ * @return 0, or the request error + 100
+ */
 int func_003FBF80(void) {
     struct sMcState *p = D_004A5B20;
     int r;
@@ -6163,6 +8034,12 @@ extern int fBCD8(int, int) __asm__("func_003FBCD8");
 extern void fB9D0(int, int *, int *, char *) __asm__("func_003FB9D0");
 extern int fBB50(int, int, P3FBFE0 **) __asm__("func_003FBB50");
 extern int f5FC8(int, char *, int) __asm__("func_00415FC8");
+/**
+ * Verifies a record just read: decrypts its header, checks the key (11) and size (110), decrypts the data and compares
+ * its CRC-32 with the header's.
+ *
+ * @return 0 when the record is valid, 10 when the CRC differs, 11 or 110, or the cipher / CRC error
+ */
 int func_003FBFE0(void) {
     L3FBFE0 x; int h; int r; int err = 10; int hh;
     x.p = 0; hh = D_004A5B20->f7C; x.b = 0;
@@ -6191,6 +8068,11 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FC0D8);
    block; f9C points to f94 entries; f6C / f70 are the two driver interfaces. Field names are offsets. */
 extern struct sMcState *D_004A5B20;
 
+/**
+ * Returns whether the save-record manager D_004A5B20 is open.
+ *
+ * @return 1 when open
+ */
 int func_003FC0D8(void) { return D_004A5B20 != 0; }
 #endif
 
@@ -6213,6 +8095,18 @@ extern void *c0e8_6728(int, int, int) __asm__("func_00266728");
 extern void c0e8_A6C8(struct sMcIfB **) __asm__("func_003FA6C8");
 extern int func_003FCE10(char *, int, int, int);
 extern void func_0041605C(char *, char *, int);
+/**
+ * Opens the save-record manager.
+ *
+ * @p p holds: +0x0 the record limit, +0x4 the card unit list, +0x8 the 17 card callbacks, +0xC / +0x10 the cipher key
+ * and its length, +0x14 the cipher interface (may be 0), +0x18 the heap. Opens the request layer (func_003F9218),
+ * allocates the 172-byte state, starts the CRC interface and the cipher, copies the key, allocates the record table (16
+ * bytes per record) and the 12-byte header buffer (+0x80). Likely bug: the header buffer is allocated from +0xA0 before
+ * +0xA0 is set to the heap.
+ *
+ * @param p  the open parameters
+ * @return 0; 1 when already open, 6 when an allocation fails, or a layer error offset by 100 / 200 / 300
+ */
 int func_003FC0E8(P0E8 *p) {
     int r;
     struct sMcIfA *cb;
@@ -6268,6 +8162,12 @@ extern int c260_B828(int) __asm__("func_003FB828");
 extern int c260_B840(int) __asm__("func_003FB840");
 extern int c260_B810(int, struct sMcState *) __asm__("func_003FB810");
 extern int c260_9530(void) __asm__("func_003F9530");
+/**
+ * Closes the save-record manager: frees the header buffer, the record table and the key, stops the cipher and the CRC
+ * interface, closes the request layer (func_003F9530) and frees the state.
+ *
+ * @return 0; 2 when not open, or a layer error offset by 100 / 200 / 300
+ */
 int func_003FC260(void) {
     int r;
     int v;
@@ -6309,6 +8209,14 @@ extern struct sMcState *D_004A5B20;
 
 extern int func_003F9818(char *str, int a, int b);
 extern int func_003FB810(int);
+/**
+ * Starts creating a save (save-record operation 1, func_003F9818).
+ *
+ * @param str  the save name
+ * @param a  card unit code, or -1 for any usable unit
+ * @param b  search direction
+ * @return 0, or the request error + 100
+ */
 int func_003FC390(char *str, int a, int b) {
     struct sMcState *p = D_004A5B20;
     p->f74 = 1;
@@ -6327,6 +8235,14 @@ extern struct sMcState *D_004A5B20;
 
 extern int func_003F9698(char *str, int a, int b);
 extern int func_003FB810(int);
+/**
+ * Starts deleting a save (save-record operation 2, func_003F9698).
+ *
+ * @param str  the save name
+ * @param a  card unit code, or -1 for any usable unit
+ * @param b  search direction
+ * @return 0, or the request error + 100
+ */
 int func_003FC3C0(char *str, int a, int b) {
     struct sMcState *p = D_004A5B20;
     p->f74 = 2;
@@ -6346,6 +8262,14 @@ extern struct sMcState *D_004A5B20;
 
 extern int fBD70(char *, int, int, int) __asm__("func_003FBD70");
 int func_003FC3F0_impl(struct sMcParams *a) __asm__("func_003FC3F0");
+/**
+ * Starts reopening a save from parameters kept from an earlier open (operation 5): copies them, opens the save by its
+ * name (+0x48) on its unit (+0x4); when the headers have been read, the record table's CRC must equal the kept one
+ * (+0x60).
+ *
+ * @param a  the kept 100-byte save parameters
+ * @return 0, or the request error + 100
+ */
 int func_003FC3F0_impl(struct sMcParams *a) {
     D_004A5B20->params = *a;
     return fBD70((char *)a + 0x48, a->w[1], -1, 5);
@@ -6357,6 +8281,14 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FC4C8);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern int func_003FBD70(int, int, int, int);
+/**
+ * Starts opening a save and reading its record table (save-record operation 4, func_003FBD70).
+ *
+ * @param a  the save name
+ * @param b  card unit code, or -1 for any usable unit
+ * @param c  search direction
+ * @return 0, or the request error + 100
+ */
 int func_003FC4C8(int a, int b, int c) { return func_003FBD70(a, b, c, 4); }
 #endif
 
@@ -6372,6 +8304,13 @@ extern struct sMcState *D_004A5B20;
 extern int func_003F9B38(char *);
 extern int func_003FB810(int);
 extern void func_003FBBE0b(char *) __asm__("func_003FBBE0");
+/**
+ * Starts closing an open save (save-record operation 3): stores the record table's CRC in the caller's parameters
+ * (+0x60) and the manager's, clears the table and closes the file (func_003F9B38).
+ *
+ * @param x  the save parameters
+ * @return 0, or the request error + 100
+ */
 int func_003FC4E8(char *x) {
     struct sMcState *p;
     func_003FBBE0b(x + 0x60);
@@ -6406,6 +8345,20 @@ extern int fBAD0w(int, int, void *) __asm__("func_003FBAD0");
 extern void fBA78w(int, int, void *) __asm__("func_003FBA78");
 extern void fBBE0w(void *) __asm__("func_003FBBE0");
 extern int f9C48w(void *, int, int) __asm__("func_003F9C48");
+/**
+ * Starts writing a record to an open save (save-record operation 6).
+ *
+ * Copies the save parameters, computes the data's CRC and either updates the @p b-th record with key @p a or appends a
+ * new one at the end of the file; recomputes the table CRC into @p p +0x60 and seeks to the record's offset.
+ * func_003FBED0 then writes it. Quirk: when the CRC computation fails it reaches its end without a return value.
+ *
+ * @param p  the open save's parameters
+ * @param a  record key
+ * @param b  index among the records with that key
+ * @param c  the record data (a buffer from func_003FCE10)
+ * @param d  data size
+ * @return 0, or the request error + 100
+ */
 int func_003FC548(S64C548 *p, int a, int b, int c, int d) {
     int *r[4];
     int v;
@@ -6449,6 +8402,17 @@ struct sMcEnt *func_003FBA20(int key, int n);
 
 extern int c708_9C48(void *, int, int) __asm__("func_003F9C48");
 int func_003FC708_impl(struct sMcParams *src, int a, int b, int c, int d) __asm__("func_003FC708");
+/**
+ * Starts reading a record of an open save (save-record operation 8): finds the @p b-th record with key @p a and seeks
+ * to it. func_003FBF80 then reads it and func_003FBFE0 checks it.
+ *
+ * @param src  the open save's parameters
+ * @param a  record key
+ * @param b  index among the records with that key
+ * @param c  the destination (a buffer from func_003FCE10)
+ * @param d  expected data size
+ * @return 0; 7 when there is no such record, 110 when its size differs, or the request error + 100
+ */
 int func_003FC708_impl(struct sMcParams *src, int a, int b, int c, int d) {
     struct sMcState *s = D_004A5B20;
     struct sMcEnt *r;
@@ -6479,6 +8443,14 @@ extern struct sMcState *D_004A5B20;
 
 extern int func_003FC0D8(void);
 int func_003FC850_impl(int a, int key, int *out) __asm__("func_003FC850");
+/**
+ * Counts the records with key @p key in the open save.
+ *
+ * @param a  the save parameters (only checked for 0)
+ * @param key  record key
+ * @param out  receives the count
+ * @return 0; 2 when the manager is not open, 4 for a 0 argument
+ */
 int func_003FC850_impl(int a, int key, int *out) {
     struct sMcState *s;
     struct sMcEnt *e, *end;
@@ -6508,6 +8480,15 @@ struct sMcEnt *func_003FBA20(int key, int n);
 
 extern int func_003FC0D8(void);
 int func_003FC8F8_impl(int a, int b, int c, int *out) __asm__("func_003FC8F8");
+/**
+ * Returns the size of the @p c-th record with key @p b in the open save.
+ *
+ * @param a  the save parameters (only checked for 0)
+ * @param b  record key
+ * @param c  index among the records with that key
+ * @param out  receives the size (0 when not found)
+ * @return 0; 7 when not found, 2 when the manager is not open, 4 for a 0 argument
+ */
 int func_003FC8F8_impl(int a, int b, int c, int *out) {
     int err = 0;
     struct sMcEnt *entry;
@@ -6532,6 +8513,12 @@ INCLUDE_ASM("seg/seg_2F41F8", func_003FC990);
 extern struct sMcState *D_004A5B20;
 
 int func_003FC990_impl(struct sMcParams *dst) __asm__("func_003FC990");
+/**
+ * Copies the open save's 100-byte parameters (request body and table CRC) to @p dst.
+ *
+ * @param dst  destination
+ * @return 0, or 4 when @p dst is 0
+ */
 int func_003FC990_impl(struct sMcParams *dst) {
     if (dst == 0) return 4;
     *dst = D_004A5B20->params;
@@ -6553,6 +8540,20 @@ extern int func_003FBCD8(int, int);
 extern void fCA40_B9A0(int) __asm__("func_003FB9A0");
 extern int fCA40_5FC8(void *, void *, int) __asm__("func_00415FC8");
 
+/**
+ * Polls the save-record manager and runs the next step of its operation.
+ *
+ * Polls the request layer (func_003FA040). Write: after the seek writes the record (func_003FBED0); after the write
+ * checks the count, decrypts the data back and recomputes the table CRC. Read: after the seek reads the record
+ * (func_003FBF80); after the read checks the count and verifies it (func_003FBFE0). Open / reopen: after the open seeks
+ * to the start; then reads header after header (func_003FBDF0, func_003FBE40) until the file or the table ends (a
+ * just-created save has none), and finishes with the table CRC (reopen: 9 when it differs from the kept one). Other
+ * operations finish when the request does.
+ *
+ * @param st  receives 1 while running, 2 when finished
+ * @param res  the request's result word; receives the record size after a read or write
+ * @return 0 or an error code (request errors + 100)
+ */
 int func_003FCA40(int *st, int *res) {
     int r;
     int key;
