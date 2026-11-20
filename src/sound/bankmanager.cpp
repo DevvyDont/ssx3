@@ -67,6 +67,15 @@ public:
     virtual void stop(int id);
 };
 
+/**
+ * Unloads the bank and frees the memory it was given.
+ *
+ * Calls cBankInstance_Unload; then, when the allocation location at +0x8 is non-zero: for location 2 (sound memory) it
+ * frees the sound-memory handle at +0xC through cPS2SoundManager_DeallocSoundMem (the virtual of the shared cSoundSys's
+ * pManager, reached from gpBankManager's cBankMonitor) and sets the handle to -1; it then MEM_frees the main-memory
+ * data at +0x10 and zeroes the data pointer, the size at +0x14 and the location. Called by cBankInstance__cBankInstance
+ * and, by bank index, by func_0028BDE0.
+ */
 extern "C" void func_0028B650(void* self)
 {
     cBankInstance_Unload(self);
@@ -87,6 +96,17 @@ extern "C" void func_0028B650(void* self)
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028B6C8);
 #ifdef SKIP_ASM
+/**
+ * Makes bank @p dst share the memory of bank @p src.
+ *
+ * Links @p dst into @p src's ring of sharing banks (the next pointer at +0x18 and prev at +0x1C): after @p src when
+ * @p src is already in a ring, else @p src and @p dst become a two-bank ring. When @p src has an allocation (location
+ * at +0x8 non-zero), copies the location, the main-memory data and size (+0x10, +0x14) and the sound-memory handle
+ * (+0xC) into @p dst. Called by func_0028BE08 with two banks of the manager's array.
+ *
+ * @param dst  the bank that shares
+ * @param src  the bank whose memory is shared
+ */
 extern "C" void func_0028B6C8(void *dst, void *src) {
     int flag;
 
@@ -125,6 +145,14 @@ struct sBankNode {
     sBankNode* prev;
 };
 
+/**
+ * Takes the bank out of the ring of banks sharing one block of memory.
+ *
+ * Does nothing when next is null. Otherwise it sets the sound-memory handle unkC to -1, zeroes the main-memory data
+ * unk10, its size unk14 and the location unk8 (nothing is freed), and unlinks the bank: when next == prev (a two-bank
+ * ring) the other bank's next and prev are cleared, otherwise the neighbours are joined. Its own next and prev are then
+ * cleared. Called by cBankInstance__cBankInstance and, by bank index, by func_0028BE38.
+ */
 extern "C" void func_0028B730(sBankNode* self)
 {
     if (self->next != 0) {
@@ -151,6 +179,16 @@ INCLUDE_ASM("sound/bankmanager", func_0028B788);
 extern "C" void func_0028B7E0(void*);
 extern "C" int SNDbankadd(void* sema, int a1);
 
+/**
+ * Attaches a bank image already in main memory to the bank.
+ *
+ * Calls func_0028B7E0 to drop any attached bank, stores @p mainMemData and @p mainMemSize at +0x10 and +0x14, registers
+ * the image with SNDbankadd (the bank handle goes to +0x4) and sets the status word at +0x0 to 1 (loaded). Called, by
+ * bank index, by func_0028BE60 (from cScriptSoundBankManager_LinkBank and func_00286CA8).
+ *
+ * @param mainMemData  address of the bank image in main memory
+ * @param mainMemSize  size of the image in bytes
+ */
 extern "C" void func_0028B788(void* self, int mainMemData, int mainMemSize)
 {
     func_0028B7E0(self);
@@ -166,6 +204,13 @@ INCLUDE_ASM("sound/bankmanager", func_0028B7E0);
 #ifdef SKIP_ASM
 extern "C" int SNDbankremove(int id);
 
+/**
+ * Detaches the bank attached by func_0028B788.
+ *
+ * Sets the status word at +0x0 to 0; when the bank handle at +0x4 is not -1 it removes the bank with SNDbankremove and
+ * sets the handle to -1; then it zeroes the main-memory data (+0x10) and size (+0x14) without freeing them. Called by
+ * func_0028B788 and, by bank index, by func_0028BE90.
+ */
 extern "C" void func_0028B7E0(void* self)
 {
     *(int*)self = 0;
@@ -183,6 +228,15 @@ INCLUDE_ASM("sound/bankmanager", func_0028B830);
 #ifdef SKIP_ASM
 extern "C" int func_004165A8(void*, void*);
 
+/**
+ * Returns whether the bank holds the loaded file @p name.
+ *
+ * True only when the status word at +0x0 is 1 (loaded) and func_004165A8 (strcmp) finds @p name equal to the bank's
+ * filename at +0x20. func_0028BC58 and func_0028BD10 use it to skip reloading a bank that is already loaded.
+ *
+ * @param name  file name to compare
+ * @return 1 when the bank is loaded from @p name, else 0
+ */
 extern "C" int func_0028B830(void* self, void* name)
 {
     int status = *(int*)self;
@@ -489,6 +543,18 @@ INCLUDE_ASM("sound/bankmanager", func_0028BC58);
 extern "C" void cAsyncSys_ASYNCSYS_Cancel(void* self, int i);
 extern "C" void cBankInstance_SyncLoad(void* bank, void* id, int a3);
 
+/**
+ * Loads bank file @p id into bank slot @p i now, unless that slot already holds it.
+ *
+ * The slots are 0x60-byte bank instances in the array at +0xACC. When func_0028B830 says slot @p i is not loaded from
+ * @p id, it cancels any queued asynchronous load of the slot (cAsyncSys_ASYNCSYS_Cancel) and loads it synchronously
+ * with cBankInstance_SyncLoad. Callers pass the cBankManager reached through cMusicSys's mpVStreamSys
+ * (cSSXAudio_InGameLoad, func_00285FB0, func_0029F3F8, func_0028F700).
+ *
+ * @param i  bank slot index
+ * @param id  bank file name
+ * @param mainMemFlag  passed to cBankInstance_SyncLoad (callers pass 0)
+ */
 extern "C" void func_0028BC58(void* self, int i, void* id, int mainMemFlag)
 {
     int off = i * 0x60;
@@ -504,6 +570,11 @@ INCLUDE_ASM("sound/bankmanager", func_0028BCE8);
 #ifdef SKIP_ASM
 extern "C" void cBankInstance_Unload(void*);
 
+/**
+ * Unloads bank slot @p i: calls cBankInstance_Unload on the 0x60-byte bank instance @p i of the array at +0xACC.
+ *
+ * @param i  bank slot index
+ */
 extern "C" void func_0028BCE8(void* self, int i)
 {
     cBankInstance_Unload((char*)*(void**)((char*)self + 0xACC) + i * 0x60);
@@ -518,6 +589,18 @@ extern "C" void cAsyncSys_ASYNCSYS_QueueLoad(void* self, int i, void* id, int a3
 
 struct sBankInst60 { char pad0[8]; int f8; char pad1[0x60 - 0xC]; };
 
+/**
+ * Queues an asynchronous load of bank file @p id into bank slot @p i, unless that slot already holds it.
+ *
+ * When func_0028B830 says slot @p i (a 0x60-byte bank instance of the array at +0xACC) is not loaded from @p id, it
+ * cancels any queued load of the slot (cAsyncSys_ASYNCSYS_Cancel) and calls cAsyncSys_ASYNCSYS_QueueLoad with the
+ * slot's allocation location (+0x8 of the instance) and @p a3. Called from func_002B43D8 (with 0x100) and
+ * func_0029B818.
+ *
+ * @param i  bank slot index
+ * @param id  bank file name
+ * @param a3  main-memory allocation flags for the load
+ */
 extern "C" void func_0028BD10(void* self, int i, void* id, int a3)
 {
     if (func_0028B830((char*)*(void**)((char*)self + 0xACC) + i * 0x60, id) == 0) {
@@ -532,6 +615,18 @@ INCLUDE_ASM("sound/bankmanager", func_0028BDA8);
 #ifdef SKIP_ASM
 extern "C" void* cBankInstance_AllocMem(void* inst, int a, int b, int c);
 
+/**
+ * Allocates memory for bank slot @p i: forwards to cBankInstance_AllocMem on the 0x60-byte bank instance @p i of the
+ * array at +0xACC and returns its result.
+ *
+ * cSSXAudio_InGameLoad uses it to reserve slots 3 (0x19000 bytes) and 12 (0x6A400 bytes) of main memory.
+ *
+ * @param i  bank slot index
+ * @param mainMemSize  bytes of main memory
+ * @param soundMemSize  bytes of sound memory
+ * @param memFlags  allocation flags
+ * @return cBankInstance_AllocMem's result
+ */
 extern "C" void* func_0028BDA8(void* self, int i, int mainMemSize, int soundMemSize, int memFlags)
 {
     return cBankInstance_AllocMem((char*)*(void**)((char*)self + 0xACC) + i * 0x60, mainMemSize, soundMemSize, memFlags);
@@ -543,6 +638,13 @@ INCLUDE_ASM("sound/bankmanager", func_0028BDE0);
 #ifdef SKIP_ASM
 extern "C" void func_0028B650(void*);
 
+/**
+ * Frees the memory of bank slot @p i: calls func_0028B650 on the 0x60-byte bank instance @p i of the array at +0xACC.
+ *
+ * cSSXAudio_InGamePurge uses it for slots 3 and 12, which cSSXAudio_InGameLoad allocated with func_0028BDA8.
+ *
+ * @param i  bank slot index
+ */
 extern "C" void func_0028BDE0(void* self, int i)
 {
     func_0028B650((char*)*(void**)((char*)self + 0xACC) + i * 0x60);
@@ -554,6 +656,13 @@ INCLUDE_ASM("sound/bankmanager", func_0028BE08);
 #ifdef SKIP_ASM
 extern "C" void func_0028B6C8(void* dst, void* src);
 
+/**
+ * Makes bank slot @p i share the memory of bank slot @p j: calls func_0028B6C8 with those two 0x60-byte bank instances
+ * of the array at +0xACC.
+ *
+ * @param i  bank slot that shares
+ * @param j  bank slot whose memory is shared
+ */
 extern "C" void func_0028BE08(void* self, int i, int j)
 {
     func_0028B6C8((char*)*(void**)((char*)self + 0xACC) + i * 0x60, (char*)*(void**)((char*)self + 0xACC) + j * 0x60);
@@ -562,6 +671,12 @@ extern "C" void func_0028BE08(void* self, int i, int j)
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028BE38);
 #ifdef SKIP_ASM
+/**
+ * Takes bank slot @p i out of its sharing ring: calls func_0028B730 on the 0x60-byte bank instance @p i of the array at
+ * +0xACC.
+ *
+ * @param i  bank slot index
+ */
 extern "C" void func_0028BE38(void* self, int i)
 {
     func_0028B730((sBankNode*)((char*)*(void**)((char*)self + 0xACC) + i * 0x60));
@@ -573,6 +688,16 @@ INCLUDE_ASM("sound/bankmanager", func_0028BE60);
 #ifdef SKIP_ASM
 extern "C" void func_0028B788(void* inst, int a, int b);
 
+/**
+ * Attaches a bank image in main memory to bank slot @p i: calls func_0028B788 on the 0x60-byte bank instance @p i of
+ * the array at +0xACC.
+ *
+ * Called by cScriptSoundBankManager_LinkBank and func_00286CA8.
+ *
+ * @param i  bank slot index
+ * @param mainMemData  address of the bank image
+ * @param mainMemSize  size of the image in bytes
+ */
 extern "C" void func_0028BE60(void* self, int i, int mainMemData, int mainMemSize)
 {
     func_0028B788((char*)*(void**)((char*)self + 0xACC) + i * 0x60, mainMemData, mainMemSize);
@@ -584,6 +709,14 @@ INCLUDE_ASM("sound/bankmanager", func_0028BE90);
 #ifdef SKIP_ASM
 extern "C" void func_0028B7E0(void*);
 
+/**
+ * Detaches the bank image from bank slot @p i: calls func_0028B7E0 on the 0x60-byte bank instance @p i of the array at
+ * +0xACC.
+ *
+ * Called by cScriptSoundBankManager_UnlinkBank and cSSXAudio_UnAttachAudioBank.
+ *
+ * @param i  bank slot index
+ */
 extern "C" void func_0028BE90(void* self, int i)
 {
     func_0028B7E0((char*)*(void**)((char*)self + 0xACC) + i * 0x60);
@@ -695,6 +828,25 @@ struct sCfg_BF78 {
 };
 extern sCfg_BF78 D_00535610_BF78 __asm__("cBEOptionInterface_mOption");
 
+/**
+ * Switches the radio mode (unk_608C) to @p state and restarts the music when the current song no longer fits it.
+ *
+ * Does nothing when unk_608C already equals @p state; otherwise stores it. cSSXAudio_InGameInit passes
+ * cBERewardInterface_getRadioMode's result, whose On Tour type eRadioModeID has 0 radio, 1 request line, 2 mountain, 3
+ * playlist; the audio options menu passes its selection.
+ *
+ * Mode 0 activates the songs of MusicSys.mDefaultActiveMap (func_002B4070), re-applies the arcade SFX setting from bit
+ * 17 of cBEOptionInterface_mOption's flags (cSSXAudio_SetArcadeSFX), and, in game with MusicSys.mSongPlaying set and a
+ * current song id (func_002B49E0) of 101-103 (a peak ambience), picks a new song (func_0028D488) and restarts with
+ * func_0028CF98(self, 0, 0, -1, 0). Modes 1 and 3 do the same with mRadioPlayList, returning early when that is 0, when
+ * the song id is 1-3, or when the current song is still active (func_002B4AF0) and its id is not 301. Mode 2 turns the
+ * arcade SFX off and, in game unless the song id is already 101-103, calls func_0028CF98(self, 0, 0, -1, 0) (which
+ * starts the peak ambience in this mode) and clears mInBigChallenge and mCurBigChallengeType.
+ *
+ * The option block is copied whole (0x288 bytes) to the stack just to read its flags.
+ *
+ * @param state  the new radio mode
+ */
 extern "C" void func_0028BF78(char* self, int state)
 {
     if (*(int*)(self + 0x608C) == state)
@@ -781,6 +933,18 @@ static inline void bmRestartC2D0(char* self)
     func_0028CF98(self, 0, 0, -1, 0);
 }
 
+/**
+ * Sets the radio playlist mask mRadioPlayList to @p key and, in radio modes 1 and 3, restarts the music from it.
+ *
+ * When @p key differs from mRadioPlayList it is stored, and in modes 1 and 3 (unk_608C) func_002B4070 rebuilds the
+ * active songs from it (the mask reaches it in the second argument register; the call is declared with one argument).
+ * In modes 1 and 3, changed or not, it then does what func_0028BF78 does for those modes: in game with
+ * MusicSys.mSongPlaying set, unless the current song id (func_002B49E0) is 1-3 or the current song is still active
+ * (func_002B4AF0) with an id other than 301 (0x12D), it picks a new song (func_0028D488) and calls func_0028CF98(self,
+ * 0, 0, -1, 0). Called by cSSXAudio_InGameInit and cFEStateRequestLine_onWidgetEvent.
+ *
+ * @param key  the new playlist mask, one bit per song (64-bit)
+ */
 // PORT: 64-bit `long` key.
 extern "C" void func_0028C2D0(char* self, long key)
 {
@@ -895,6 +1059,22 @@ static inline void bmPush_C430(sMgr_C430** self, int kind, int data)
 #define BM_MIN_C430(a, b) ((a) < (b) ? (a) : (b))
 #define BM_MAX_C430(a, b) ((a) >= (b) ? (a) : (b))
 
+/**
+ * Plays one beat of the current song's loop bank: cSSXAudio's override of cMusicSys virtual slot 1, which cMusicSys
+ * leaves pure (word 3 of cSSXAudio's cMusicSys vtable D_00483688).
+ *
+ * The cMusicSys timed callback func_002B4540 forwards to it with the cMonitorInstance that func_002B4568 created: mPtr
+ * the cSongInstance, mData1 a random phrase start (func_002B2500), mData2 the beat index, mData3 the beat length in ms.
+ * With the song's cSongConfiguration it wraps mData2 to 0 at mBeatsPerPhrase (and plays nothing when that is <= 0),
+ * pushes a play-option level on the cBankManager (the inlined SFX_Begin: bank = the song's unk_34, patch = mData1 +
+ * mData2, delay defaults 100, 0, 90, 50), points the level's volume control at unk_60A0, scales its volume by
+ * mAsynclevel / 100 (clamped to 0..127), copies the song's delay settings in with func_002B2850 and plays it with
+ * cBankSys_SFX_End. It then increments mData2 and sets mCountReset to mData3, so the monitor calls back one beat later.
+ *
+ * @param p  the cSSXAudio (this, adjusted from its cMusicSys base)
+ * @param cue  the cMonitorInstance that fired
+ * @return 0
+ */
 extern "C" int func_0028C430(void* p, sCue_C430* cue)
 {
     sMgr_C430** self = (sMgr_C430**)p;
@@ -936,6 +1116,14 @@ end:
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028C8C0__FPvi);
 #ifdef SKIP_ASM
+/**
+ * Sets unk_6250 to @p val.
+ *
+ * func_0028C8C8 counts unk_6250 down by one per call while it is positive; no retail code reads it otherwise. The only
+ * caller (main/gamestate) passes 120.
+ *
+ * @param val  the new count
+ */
 void func_0028C8C0(void* self, int val)
 {
     *(int*)((char*)self + 0x6250) = val;
@@ -1018,6 +1206,24 @@ static inline float bmSpeed_C8C8(sBmC8C8* self, sRiderC8C8* rider)
     return 0.0f;
 }
 
+/**
+ * Updates the wind sound and the music volume for the focus rider's air time; called every frame from func_00285BF8.
+ *
+ * Counts unk_6250 down. For the focus rider (cSSXAudio_GetFocusRider(-1)) in motion state 1 with its mAirPredictor's
+ * state (+0xAC, On Tour SimState) 1 or 3, the air time is the predictor's +0x98 (On Tour TotalAirTime), cached in
+ * unk_6244 on the first frame (unk_6248 cleared); while D_004A361C is 1 the cached value is reused; otherwise it is 0.
+ * The local spd holds this air time, not a speed. unk_60A0 is set to the music volume (func_00287968(self, 1, 0)), and
+ * D_004A3620 takes last frame's D_004A361C, which is cleared. Above 3.9995 s, when the song's mDuckToLoops
+ * (func_002B4878) is 1, func_002A4168 and func_002A41D8 are false and no rider event runs (func_0028D898), the song is
+ * driven too (local play). Outside replays, above 2 s: D_004A361C = 1; unk_6248 keeps the largest current air time
+ * (+0xA0), and unk_624C, set on the first frame, is that plus max((+0x9C - +0xA0) / 2, 0.5). From their ratio and a
+ * volume falling with the air time (20..127) it sets mWindVolume (then scaled by the SFX volume, control 5) and, with
+ * play, the song's base volume (func_002B3C98) and overlay level (unk_60A0 via func_002B3D10). On the first such frame
+ * it starts the wind (func_002910E0) and, with play, func_002B4620 true and the radio on (func_0028D960), sends music
+ * event 7 through MusicSys.mVtbl slot 3. Otherwise, after an airborne frame, it ends the wind (cSSXAudio_EndWind),
+ * sends event 8 when func_002B46E8 reports the song's unk_4C set (and the radio is on) and clears it with
+ * func_002B4708; then it restores base volume 127 and the overlay level.
+ */
 extern "C" void func_0028C8C8(sBmC8C8* self)
 {
     if (self->f6250 > 0)
@@ -1146,6 +1352,13 @@ struct sBmVtCD48 {
 typedef void (*tBmLoadCD48)(void*, void*, int, void*, int);
 typedef int (*tBmSetCD48)(void*, int);
 
+/**
+ * Starts the "pktrans" music: cGFTrackStartState_preloadUpdate calls it while a track loads.
+ *
+ * Through MusicSys.mVtbl slot 2 (cSSXAudio's func_0028F478) it starts the song "pktrans" with 12, the music volume
+ * control (func_00287968(self, 1, 0)) and 1; tags it 401 (func_002B49C0), sends music event 1 through slot 4
+ * (func_0028F3C8) and starts it with func_002B3C28 (passing 0x7F, which that function's declaration does not take).
+ */
 extern "C" void func_0028CD48(void* self)
 {
     char* mon = (char*)self + 0x118;
@@ -1173,6 +1386,16 @@ struct sRace_28CDF8 {
     int tracks[8];
 };
 
+/**
+ * Starts the character tune for the podium (cGFPodiumState_gainFocus).
+ *
+ * Does nothing in a replay (cSSXAudio_ReplayMode), in radio mode 2 (unk_608C), unless SSXApp's GameModeMan is in heat 3
+ * (iHeatNum), or when the first entry of the rank table D_00536730 is 3 or more. The character
+ * iCharacters[D_00536708[0]] (0-9) selects music event 10, 2, 8, 1, 5, 9, 3, 7, 4 or 6; other values do nothing. It
+ * stores MusicSys.mCurrentSongNum in unk_62AC, starts the song "chartune" through MusicSys.mVtbl slot 2 (12, the music
+ * volume control, 0), tags it 201 (func_002B49C0), sends the event through slot 4, sets the song's unk_5C
+ * (func_002B4A08) so that only forced events apply, and starts it with func_002B3C28.
+ */
 extern "C" void func_0028CDF8(char* self)
 {
     if (cSSXAudio_ReplayMode(self) != 0) {
@@ -1251,7 +1474,27 @@ static inline void bmLoad_CF98(void* self, char* name, int bank, int id)
     func_002B49C0(mon, id);
 }
 
-// Starts the menu / in-game music bank for the current state.
+/**
+ * Starts the music for the current radio mode and race location.
+ *
+ * Returns at once in a replay (cSSXAudio_ReplayMode) unless unk_6294 is set. Clears unk_6280 and the rider-event words
+ * at 0x623C and 0x6240 (func_0028D630) and sets unk_62A0 to -1. Songs are started through MusicSys.mVtbl slot 2 with
+ * 12, a volume control (func_00287968) and 0, tagged with func_002B49C0, and given events through slot 4.
+ *
+ * In radio mode 2 (unk_608C) it starts the ambience "Peak1Amb", "Peak2Amb" or "Peak3Amb" by @p type, or, when that is
+ * -1, by func_002A1E20 of the race location (1, 2, anything else), on the ambient control (8) and tagged 101-103; then
+ * func_002B46D0, sets unk_6280 to 1 and calls func_002B3CC0(0) and func_002B3C28. Else, at location 17 or above with @p
+ * a2 and @p a4 zero and func_002A42C8 false, it starts the theme "Peak1", "Peak2" or "Peak3" (by the location) on the
+ * music control, tagged 1-3, func_002B3CC0(1), event 12 and func_002B3C28. Otherwise it starts the current song of the
+ * active list (null name), with MusicSys.mCurrentSongNum saved in unk_62A4 and the song's SEDVALUE (func_002B4908) in
+ * unk_5778, func_002B3CC0(1), event @p a1 (36 when @p a4 is set at location 17 or above), then func_0028F108 with the
+ * focus rider (cSSXAudio_GetFocusRider(-1)).
+ *
+ * @param a1  music event sent to the playlist song (callers pass 0 or 36)
+ * @param a2  non-zero skips the peak theme (func_0028E100 passes 1)
+ * @param type  peak for radio mode 2 (1, 2, else 3), or -1 to take it from the location
+ * @param a4  non-zero skips the peak theme and selects event 36 on the peaks; cFEStateRequestLine_onWidgetMenu passes 1
+ */
 extern "C" void func_0028CF98(void* self, int a1, int a2, int type, int a4)
 {
     if (cSSXAudio_ReplayMode(self) != 0 && *(int*)((char*)self + 0x6294) == 0) {
@@ -1315,6 +1558,15 @@ extern "C" unsigned int func_002ADF60(void* rng);
 extern "C" int func_0028D8A0(void* self);
 extern "C" void func_002B42B8(void* q, int a, int b);
 
+/**
+ * Picks a new random song from the active list, avoiding the one func_0028CF98 last started.
+ *
+ * Sets MusicSys.mCurrentSongNum to a random index (func_002ADF60) scaled to mNumFESongs, then steps it 1 to 11 times
+ * (random) to the next active song of the category func_0028D8A0 picks (func_002B42B8 with the filter on). If it ends
+ * on the song saved in unk_62A4, it steps once more in that category and, if still the same, once without the filter.
+ *
+ * @param vself  the cSSXAudio
+ */
 extern "C" void func_0028D488(void* vself)
 {
     char* self = (char*)vself;
@@ -1341,6 +1593,15 @@ extern "C" int func_002B49E0(void* monitor);
 extern "C" int func_002A1E20(void* self, int id);
 extern "C" void func_0028CF98(void* self, int a1, int a2, int a3, int a4);
 
+/**
+ * Restarts the music when the playing peak ambience does not belong to location @p id.
+ *
+ * Does nothing while unk_6284 is 23 (its idle value). Otherwise func_002A1E20 maps @p id to its peak (1, 2, else 3,
+ * expecting song id 101, 102 or 103) and, when the current song id (func_002B49E0) differs, calls func_0028CF98(self,
+ * 0, 0, peak, 0). The only caller, func_0028E8C0, passes unk_6284.
+ *
+ * @param id  a race location id
+ */
 extern "C" void func_0028D5A0(void* self, int id)
 {
     int cur;
@@ -1372,6 +1633,19 @@ extern "C" int cSSXAudio_GetFocusRider(void* self, int which);
 struct sBmVt630 { short delta; short index; int (*fn)(void*); };
 struct sBmVt630b { short delta; short index; int (*fn)(void*, int); };
 
+/**
+ * Starts rider music event @p id for the rider @p obj, which then owns the rider-event slot.
+ *
+ * Does nothing during a big challenge (mInBigChallenge or mBigChallengeStarting) or when the event in the word at
+ * 0x623C is already @p id. With no owner (unk_62A0 == -1) only the focus rider (cSSXAudio_GetFocusRider(-1)) can start
+ * one, and its AI index (virtual slot 7 of the cRider vtable at +0x6C0) becomes unk_62A0; otherwise @p obj must have
+ * the owner's AI index. It then sends the previous event + 1 (if one was running) and @p id through MusicSys.mVtbl slot
+ * 4, stores
+ * @p id at 0x623C and clears the word at 0x6240. Called by func_0028D988.
+ *
+ * @param id  the music event
+ * @param obj  the rider (cRider*)
+ */
 extern "C" void func_0028D630(void* self, int id, void* obj)
 {
     int ok;
@@ -1416,6 +1690,16 @@ extern "C" void func_0028D7D8(void* self, void* a1);
 
 struct sVtEnt { short delta; short index; int (*fn)(void*); };
 
+/**
+ * Ends rider music event @p id for the owning rider @p obj, or records it as the follow-up of the running one.
+ *
+ * Does nothing when the word at 0x6240 already holds @p id or when @p obj is not the owner (its AI index, cRider
+ * virtual slot 7, differs from unk_62A0; no owner counts as not). When the running event (word at 0x623C) is @p id, @p
+ * id is stored at 0x6240; otherwise func_0028D7D8 releases the slot. Called by func_0028D988.
+ *
+ * @param id  the music event
+ * @param obj  the rider (cRider*)
+ */
 extern "C" void func_0028D740(void* self, int id, void* obj)
 {
     int ok;
@@ -1450,6 +1734,16 @@ struct sBmVtD7D8 {
 // PORT: the unit declares func_0028D7D8 as returning void; it really returns 0/1.
 int func_0028D7D8_impl(void* self, void* obj) __asm__("func_0028D7D8");
 
+/**
+ * Releases the rider-event slot that func_0028D630 gave to a rider and ends its music event.
+ *
+ * With @p obj null, or when @p obj's AI index (cRider virtual slot 7) equals the owner unk_62A0, it sets unk_62A0 to
+ * -1; then, if an event is running (word at 0x623C), it sends that event + 1 through MusicSys.mVtbl slot 4 and clears
+ * the words at 0x623C and 0x6240. The unit declares it void although it returns the flag.
+ *
+ * @param obj  the rider (cRider*), or null to release unconditionally
+ * @return 1 when the slot was released, else 0
+ */
 int func_0028D7D8_impl(void* self, void* obj)
 {
     int ok = 0;
@@ -1484,6 +1778,11 @@ int func_0028D7D8_impl(void* self, void* obj)
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028D898__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the running rider music event (the word at 0x623C that func_0028D630 sets; 0 when none).
+ *
+ * @return the event id, or 0
+ */
 int func_0028D898(void* self)
 {
     return *(int*)((char*)self + 0x623C);
@@ -1504,6 +1803,15 @@ extern "C" int func_002A4158(void* self, int id);
 extern "C" int func_002A41C8(void* self, int id);
 extern "C" int func_002A4238(void* self, int id);
 
+/**
+ * Returns the song category (0-4) for the race in progress.
+ *
+ * From cBENewRaceInterface's location and game event: 0 when func_002A4318 (game events 6-8) or func_002A40E0 (location
+ * below 5) holds, 1 for func_002A4368 (events 9-11) or func_002A4158 (locations 5-7), 2 for func_002A41C8 (8-10), 3 for
+ * func_002A4238 (11-13), else 4; the event tests come first. func_0028D488 filters songs by it (mCategory).
+ *
+ * @return the category index
+ */
 extern "C" int func_0028D8A0(void* self)
 {
     int id = *cBENewRaceInterface_getLocation(cBE_getInterface_Fv(cBE_getBE(), 0));
@@ -1530,6 +1838,11 @@ extern "C" int func_0028D8A0(void* self)
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028D960);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the radio plays music: 1 when the radio mode unk_608C is 0, 1 or 3, 0 for 2 (mountain) and above 3.
+ *
+ * @return 1 or 0
+ */
 extern "C" int func_0028D960(void* self)
 {
     unsigned int state = *(unsigned int*)((char*)self + 0x608c);
@@ -1545,6 +1858,14 @@ INCLUDE_ASM("sound/bankmanager", func_0028D988);
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028DEF0);
 #ifdef SKIP_ASM
+/**
+ * Stores @p newValue in unk_629C and returns whether it differed from the old value.
+ *
+ * Callers pass 11, 13 and 18; func_0028DF08 resets the field to -1.
+ *
+ * @param newValue  the new value
+ * @return 1 when the value changed, else 0
+ */
 extern "C" int func_0028DEF0(void* self, int newValue)
 {
     int old = *(int*)((char*)self + 0x629c);
@@ -1556,6 +1877,9 @@ extern "C" int func_0028DEF0(void* self, int newValue)
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028DF08__FPv);
 #ifdef SKIP_ASM
+/**
+ * Sets unk_629C to -1, so that the next func_0028DEF0 call reports a change.
+ */
 void func_0028DF08(void* self)
 {
     *(int*)((char*)self + 0x629C) = -1;
@@ -1586,6 +1910,18 @@ struct sBmVtDF18 {
 
 typedef int (*tBmSetDF18)(void*, int);
 
+/**
+ * Switches to the next song unless func_002A10C0 says speech 10 is playing; otherwise retries later unless @p quiet.
+ *
+ * When func_002A10C0(self, 10) is 0: fades the song out over 2 s (func_002B3D48) unless unk_62B8 is set, sends music
+ * event 18 through MusicSys.mVtbl slot 4, picks a new song (func_0028D488) and adds two timed callbacks to the
+ * cBankManager's cBankMonitor (func_002ADCA0): func_0028E088 after 2000 with data 1, 1 and func_0028E548 after 1500
+ * with data 3 and the new song's SEDVALUE (func_002B4908). Otherwise, unless @p quiet, it adds func_0028E068 after 100,
+ * which calls this again quietly.
+ *
+ * @param quiet  non-zero: don't schedule a retry
+ * @return 1 when the switch started, else 0
+ */
 // PORT: 64-bit long sound key
 extern "C" int func_0028DF18(void* self, int quiet)
 {
@@ -1614,6 +1950,11 @@ extern "C" int func_0028DF18(void* self, int quiet)
 //100%
 INCLUDE_ASM("sound/bankmanager", func_0028E068);
 #ifdef SKIP_ASM
+/**
+ * Retries func_0028DF18 quietly: the timed callback func_0028DF18 schedules when it cannot switch songs yet.
+ *
+ * @return 1 when func_0028DF18 started the switch, else 0
+ */
 extern "C" int func_0028E068(void* self)
 {
     return func_0028DF18(self, 1) != 0;
@@ -1624,6 +1965,16 @@ INCLUDE_ASM("sound/bankmanager", func_0028E088);
 #ifdef SKIP_ASM
 extern "C" int func_002B2550(int);
 
+/**
+ * Timed callback that asks func_0028E100 to act once the old song has stopped.
+ *
+ * When there is no current song (MusicSys.mCurrent) or func_002B2550 of it returns -1, or when @p event's mData2
+ * (+0x20) is 1, it sets unk_6274 to 1 and unk_6278 to @p event's mData1 (+0x1C) and returns 1; otherwise it returns 0.
+ * func_0028DF18 schedules it with data 1, 1.
+ *
+ * @param event  the cMonitorInstance that fired
+ * @return 1 when the request was posted, else 0
+ */
 extern "C" int func_0028E088(char *self, char *event) {
     int obj;
     int eventValue;
@@ -1695,6 +2046,18 @@ static inline void bmLoadBank_E100(char* self, int t)
     func_002B3C28(mon, 0x7F);
 }
 
+/**
+ * Carries out the music request that func_0028E088 posted; called every frame from func_00285BF8 while
+ * mAudioUpdateState is 6.
+ *
+ * Does nothing unless unk_6274 is set; it is cleared at the end. Request 0 (unk_6278): when the radio plays music
+ * (func_0028D960), starts the peak theme for unk_6284's location (resetting unk_6284 to 23), or for the race location
+ * when unk_6284 is already 23: "Peak1", "Peak2" or "Peak3" by func_002A1E20 (1, 2, else 3), on the music control,
+ * tagged 1-3, event 12 and func_002B3C28. Request 2: when the radio plays music and unk_6284 is not 23: at locations
+ * 14-16 (func_002A4030) a new song (func_0028D488) and func_0028CF98(self, 36, 1, -1, 0), otherwise the peak theme for
+ * unk_6284; unk_6284 is reset to 23. Request 4: func_0028CF98(self, 0, 0, -1, 0). Other requests: when the radio plays
+ * music, func_0028CF98 with event 36 for request 3, else 0.
+ */
 extern "C" void func_0028E100(char* self)
 {
     if (*(int*)(self + 0x6274) == 0)

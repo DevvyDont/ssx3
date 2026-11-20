@@ -211,7 +211,12 @@ struct cSSXAudio {
     char unk_6088[0x4];                 // 0x6088 [U] func_0028F5B8 (to the map screen) sets it,
                                         //        func_0028F678 reads and clears it: likely On Tour's
                                         //        mPausedSFXForMapScreen
-    int unk_608C;                       // 0x608C [R] ctor 0; [U] read by 6 methods (func_00285FB0, cSSXAudio_FrontEndPurge, func_00287410, cSSXAudio_SetArcadeSFX, cSSXAudio_NeedWPAmbience, func_0029D6E0), == 2 selects a radio path; retail accessor 0x2BAD68 (lw); probably the preview's GetRadioModeID (0x6134) field
+    int unk_608C;                       // 0x608C [R] ctor 0; [U] func_0028BF78 sets it (switching the radio mode
+                                        //        restarts the music) and 11 methods read it (func_00285FB0,
+                                        //        cSSXAudio_FrontEndPurge, cSSXAudio_NeedWPAmbience, func_0028CF98,
+                                        //        ...); retail accessor 0x2BAD68; the radio mode: values 0..3 as
+                                        //        On Tour's eRadioModeID (cSSXAudio_NeedWPAmbience tests 2,
+                                        //        kRADIOMODE_MOUNTAIN); likely the preview's GetRadioModeID (0x6134)
     int unk_6090;                       // 0x6090 [R] ctor 0; [U] func_00285FB0 copies unk_608C into it, cSSXAudio_FrontEndPurge tests == 2
     char unk_6094[0x4];                 // 0x6094 no retail access seen (or padding)
     unsigned long mRadioPlayList;       // 0x6098 PORT: 64-bit long; [P] GetRadioPlayList (preview 0x6138, retail 0x2BAD70 ld 0x6098; layout_xlate pair-seen); [R] ctor sd 0
@@ -219,8 +224,13 @@ struct cSSXAudio {
     char mPlayListName[20][20];         // 0x60A4 [P] GetPlayListName(int) returns this + 0x60A4 + i * 20 (retail 0x2BAD80; preview 0x6144)
     int mNumPlayLists;                  // 0x6234 [P] GetNumPlayLists (preview 0x62D4, same -0xA0 shift; retail accessor 0x2BAD78); [U] func_00289470 counts them
     int mPlayListIndex;                 // 0x6238 [P] GetPlayListIndex (preview 0x62D8; retail accessor 0x2BAD98); [U] func_00289520 stores it
-    char unk_623C[0x14];                // 0x623C no retail access seen (or padding)
-    int unk_6250;                       // 0x6250 [R] ctor 0
+    int unk_623C;                       // 0x623C [U] the running rider music event: func_0028D630 starts it,
+                                        //        func_0028D898 returns it, func_0028D740 / func_0028D7D8 end it,
+                                        //        func_0028CF98 clears it
+    int unk_6240;                       // 0x6240 [U] the event to follow it: func_0028D740 records it
+    char unk_6244[0xC];                 // 0x6244 no retail access seen (or padding)
+    int unk_6250;                       // 0x6250 [R] ctor 0; [U] func_0028C8C8 counts it down, func_0028C8C0 sets
+                                        //        it; nothing reads it otherwise
     int unk_6254;                       // 0x6254 [R] ctor 0; [U] func_002A4770; retail accessor 0x2BAD30 sets it to 1
     int unk_6258;                       // 0x6258 [U] func_002A2E50
     void* unk_625C[2];                  // 0x625C [U] cSSXAudio_InGameInit (InGameInit) creates two objects, cSSXAudio_InGameDeInit (InGameDeInit) frees them
@@ -410,6 +420,8 @@ CHECK_OFFSET(cSSXAudio, mPlayListName, 0x60A4);
 CHECK_OFFSET(cSSXAudio, mNumPlayLists, 0x6234);
 CHECK_OFFSET(cSSXAudio, mPlayListIndex, 0x6238);
 CHECK_OFFSET(cSSXAudio, unk_623C, 0x623C);
+CHECK_OFFSET(cSSXAudio, unk_6240, 0x6240);
+CHECK_OFFSET(cSSXAudio, unk_6244, 0x6244);
 CHECK_OFFSET(cSSXAudio, unk_6250, 0x6250);
 CHECK_OFFSET(cSSXAudio, unk_6254, 0x6254);
 CHECK_OFFSET(cSSXAudio, unk_6258, 0x6258);
