@@ -787,10 +787,10 @@ static inline bool valid_30A060(int* id) { return *id != -1; }
  */
 extern "C" void cWScriptMan_doOnCollideScript(cWScriptMan* self, void* collideInfo, void* intersectInfo, void* obj)
 {
-    int saved = *(int*)self;
+    int saved = self->Being;
     {
         sVE_30A060* vt = *(sVE_30A060**)obj;
-        *(int*)self = vt[7].fn((char*)obj + vt[7].delta);
+        self->Being = vt[7].fn((char*)obj + vt[7].delta);
     }
     self->Inst = (tInstanceRecord*)(*(int*)((char*)intersectInfo + 0x50));
     self->CollideInfo = (tCollideInfo*)collideInfo;
@@ -804,7 +804,7 @@ extern "C" void cWScriptMan_doOnCollideScript(cWScriptMan* self, void* collideIn
         if (SSXApp->Game->mCurrentStateID != 4) {
             char* rider = obj ? (char*)obj - 0x6C0 : 0;
             if (*(int*)(rider + 0x480) != 0) {
-                *(int*)self = saved;
+                self->Being = saved;
                 goto done;
             }
         }
@@ -848,7 +848,7 @@ extern "C" void cWScriptMan_doOnCollideScript(cWScriptMan* self, void* collideIn
             vt[41].fn(instObj + vt[41].delta, 0.5f);
         }
     }
-    *(int*)self = saved;
+    self->Being = saved;
 done:
     self->CollideInfo = 0;
     self->IntersectInfo = 0;
@@ -1383,9 +1383,9 @@ extern "C" int cWScriptMan_doMissionCmd(cWScriptMan* self, unsigned int id, unsi
             return 0;
         }
     }
-    int saved = *(int*)self;
+    int saved = self->Being;
     if (ctx != -1) {
-        *(int*)self = ctx;
+        self->Being = ctx;
     }
     switch (cmd) {
     case 0:
@@ -1400,7 +1400,7 @@ extern "C" int cWScriptMan_doMissionCmd(cWScriptMan* self, unsigned int id, unsi
         int replayState = *(int*)SSXApp->Game->Replay;
         int busy = replayState != 0 && replayState < 10;
         if (!busy) {
-            tMissionMenuQueue_addEntry_a(self->MissionMenuQueue, id, cmd, *(int*)self);
+            tMissionMenuQueue_addEntry_a(self->MissionMenuQueue, id, cmd, self->Being);
         }
         break;
     }
@@ -1528,7 +1528,7 @@ extern "C" int cWScriptMan_doMissionCmd(cWScriptMan* self, unsigned int id, unsi
         result = cBEMissionInterface_isMissionCompleted(iface, id) != 0;
         break;
     }
-    *(int*)self = saved;
+    self->Being = saved;
     return result;
 }
 #endif
@@ -2351,7 +2351,7 @@ extern "C" void cWScriptMan_cancelLocalMission(cWScriptMan* self)
     cReplay_reset(SSXApp->Game->Replay);
     cReplay_startRace((int*)SSXApp->Game->Replay);
     char* riders = (char*)SSXApp->Game->AI;
-    cRider_resetForMission(*(void**)(riders + (*(int*)self << 2) + 0x28));
+    cRider_resetForMission(*(void**)(riders + (self->Being << 2) + 0x28));
     self->LocalMissionCmd = 3;
     self->LocalMissionCmdId = (unsigned int)((int)self->LocalMissionId);
     self->LocalMissionId = 0xFFFFFFFF;
@@ -2404,7 +2404,7 @@ extern "C" void cWScriptMan_quitLocalMission(cWScriptMan* self)
     cReplay_reset(SSXApp->Game->Replay);
     cReplay_startRace((int*)SSXApp->Game->Replay);
     char* riders = (char*)SSXApp->Game->AI;
-    cRider_resetForMission(*(void**)(riders + (*(int*)self << 2) + 0x28));
+    cRider_resetForMission(*(void**)(riders + (self->Being << 2) + 0x28));
     self->LocalMissionCmd = 4;
     self->LocalMissionCmdId = (unsigned int)((int)self->LocalMissionId);
     self->LocalMissionId = 0xFFFFFFFF;
@@ -3892,8 +3892,8 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_setTrickDef);
  * @param wscriptMan  the script manager
  * @param trickDef  the trick definition (a pointer passed as an int), or 0 to clear it
  */
-extern "C" void cWScriptMan_setTrickDef(void *wscriptMan, int trickDef) {
-    (*(int *)((char*)(wscriptMan) + (0x29C))) = trickDef;
+extern "C" void cWScriptMan_setTrickDef(cWScriptMan* wscriptMan, tTrickNameDef* trickDef) {
+    wscriptMan->TrickDef = trickDef;
 }
 #endif
 //100%
@@ -4167,8 +4167,8 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_setInst);
  * @param wscriptMan  the script manager
  * @param inst  the instance record (passed as an int), or 0
  */
-extern "C" void cWScriptMan_setInst(void *wscriptMan, int inst) {
-    (*(int *)((char*)(wscriptMan) + (0x290))) = inst;
+extern "C" void cWScriptMan_setInst(cWScriptMan* wscriptMan, tInstanceRecord* inst) {
+    wscriptMan->Inst = inst;
 }
 #endif
 //100%
@@ -4209,8 +4209,8 @@ INCLUDE_ASM("wscript/wscriptman", cWScriptMan_setCurrentTask);
  * @param wscriptMan  the script manager
  * @param task  the task (passed as an int), or 0
  */
-extern "C" void cWScriptMan_setCurrentTask(void *wscriptMan, int task) {
-    (*(int *)((char*)(wscriptMan) + (0x2A8))) = task;
+extern "C" void cWScriptMan_setCurrentTask(cWScriptMan* wscriptMan, cWScriptTask* task) {
+    wscriptMan->CurrentTask = task;
 }
 #endif
 //100%
