@@ -5557,7 +5557,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelSpline_GetValue__FPv);
  */
 void* cScriptPlayerChannelSpline_GetValue(void* self)
 {
-    return (char*)self + 0x1C;
+    return &((cScriptPlayerChannelSpline*)self)->mCurrKeyValue;
 }
 #endif
 
@@ -5641,7 +5641,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelBlock_GetValue__FPv);
  */
 void* cScriptPlayerChannelBlock_GetValue(void* self)
 {
-    return (char*)self + 0x28;
+    return &((cScriptPlayerChannelBlock*)self)->mNumActiveBlocks;
 }
 #endif
 
@@ -5711,7 +5711,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelEvent_GetValue__FPv);
  */
 void* cScriptPlayerChannelEvent_GetValue(void* self)
 {
-    return (char*)self + 0x20;
+    return &((cScriptPlayerChannelEvent*)self)->mNumActiveEvents;
 }
 #endif
 
@@ -5781,7 +5781,7 @@ INCLUDE_ASM("replay/replaycache", cScriptPlayerChannelObject_GetValue__FPv);
  */
 void* cScriptPlayerChannelObject_GetValue(void* self)
 {
-    return (char*)self + 0x24;
+    return &((cScriptPlayerChannelObject*)self)->mNumActiveObjects;
 }
 #endif
 

@@ -2070,7 +2070,7 @@ INCLUDE_ASM("render/font", cGraphicsMan_ActiveDrawState__FPv);
  */
 void* cGraphicsMan_ActiveDrawState(void* self)
 {
-    return (char*)self + 0xED8;
+    return &((cGraphicsMan*)self)->m_activeDrawState;
 }
 #endif
 
@@ -4107,7 +4107,7 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetTVDisplayFormat__FPv);
  */
 void* cPS2GraphicsMan_GetTVDisplayFormat(void* self)
 {
-    return (char*)self + 0x6B94;
+    return &((cPS2GraphicsMan*)self)->mTVDisplayFormat;
 }
 #endif
 
@@ -4291,7 +4291,7 @@ INCLUDE_ASM("render/font", cPS2GraphicsMan_GetIrradiance__FPv);
  */
 void* cPS2GraphicsMan_GetIrradiance(void* self)
 {
-    return (char*)self + 0x6BB0;
+    return &((cPS2GraphicsMan*)self)->mIrradianceInfo;
 }
 #endif
 

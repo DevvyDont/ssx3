@@ -309,7 +309,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_MusicTrigger_Type
  */
 void* tWPInGameData_MusicTrigger_Type(void* self)
 {
-    return (char*)self + 0x8;
+    return &((tWPInGameData_MusicTrigger*)self)->m_Type;
 }
 #endif
 
@@ -323,7 +323,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_MusicTrigger_Valu
  */
 void* tWPInGameData_MusicTrigger_Value(void* self)
 {
-    return (char*)self + 0x10;
+    return &((tWPInGameData_MusicTrigger*)self)->m_Value;
 }
 #endif
 
@@ -337,7 +337,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Mix_MixPreset__FP
  */
 void* tWPInGameData_Mix_MixPreset(void* self)
 {
-    return (char*)self + 0x8;
+    return &((tWPInGameData_Mix*)self)->m_MixPreset;
 }
 #endif
 
@@ -351,7 +351,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Ambience_BankID__
  */
 void* tWPInGameData_Ambience_BankID(void* self)
 {
-    return (char*)self + 0x8;
+    return &((tWPInGameData_Ambience*)self)->m_BankID;
 }
 #endif
 
@@ -365,7 +365,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Speech_SpeechID__
  */
 void* tWPInGameData_Speech_SpeechID(void* self)
 {
-    return (char*)self + 0x8;
+    return &((tWPInGameData_Speech*)self)->m_SpeechID;
 }
 #endif
 
@@ -379,7 +379,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Camera_DrawDistan
  */
 void* tWPInGameData_Camera_DrawDistance(void* self)
 {
-    return (char*)self + 0x8;
+    return &((tWPInGameData_Camera*)self)->m_DrawDistance;
 }
 #endif
 
@@ -393,7 +393,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Fog_FogDensity__F
  */
 void* tWPInGameData_Fog_FogDensity(void* self)
 {
-    return (char*)self + 0x8;
+    return &((tWPInGameData_Fog*)self)->m_FogDensity;
 }
 #endif
 
@@ -407,7 +407,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Fog_FogNear__FPv)
  */
 void* tWPInGameData_Fog_FogNear(void* self)
 {
-    return (char*)self + 0x10;
+    return &((tWPInGameData_Fog*)self)->m_FogNear;
 }
 #endif
 
@@ -421,7 +421,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Fog_FogFar__FPv);
  */
 void* tWPInGameData_Fog_FogFar(void* self)
 {
-    return (char*)self + 0x18;
+    return &((tWPInGameData_Fog*)self)->m_FogFar;
 }
 #endif
 
@@ -435,7 +435,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Fog_FogColourR__F
  */
 void* tWPInGameData_Fog_FogColourR(void* self)
 {
-    return (char*)self + 0x20;
+    return &((tWPInGameData_Fog*)self)->m_FogColourR;
 }
 #endif
 
@@ -449,7 +449,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Fog_FogColourG__F
  */
 void* tWPInGameData_Fog_FogColourG(void* self)
 {
-    return (char*)self + 0x28;
+    return &((tWPInGameData_Fog*)self)->m_FogColourG;
 }
 #endif
 
@@ -463,7 +463,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Fog_FogColourB__F
  */
 void* tWPInGameData_Fog_FogColourB(void* self)
 {
-    return (char*)self + 0x30;
+    return &((tWPInGameData_Fog*)self)->m_FogColourB;
 }
 #endif
 
@@ -477,7 +477,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_LightGlow_LightGl
  */
 void* tWPInGameData_LightGlow_LightGlowCutoff(void* self)
 {
-    return (char*)self + 0x8;
+    return &((tWPInGameData_LightGlow*)self)->m_LightGlowCutoff;
 }
 #endif
 
@@ -491,7 +491,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_LightGlow_LightGl
  */
 void* tWPInGameData_LightGlow_LightGlowCutoffScale(void* self)
 {
-    return (char*)self + 0x10;
+    return &((tWPInGameData_LightGlow*)self)->m_LightGlowCutoffScale;
 }
 #endif
 
@@ -505,7 +505,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_LightGlow_LightGl
  */
 void* tWPInGameData_LightGlow_LightGlowCopyIntensity(void* self)
 {
-    return (char*)self + 0x18;
+    return &((tWPInGameData_LightGlow*)self)->m_LightGlowCopyIntensity;
 }
 #endif
 
@@ -519,7 +519,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_LightGlow_LightGl
  */
 void* tWPInGameData_LightGlow_LightGlowSourceIntensity(void* self)
 {
-    return (char*)self + 0x20;
+    return &((tWPInGameData_LightGlow*)self)->m_LightGlowSourceIntensity;
 }
 #endif
 
@@ -533,7 +533,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_LightGlow_LightGl
  */
 void* tWPInGameData_LightGlow_LightGlowFrameIntensity(void* self)
 {
-    return (char*)self + 0x28;
+    return &((tWPInGameData_LightGlow*)self)->m_LightGlowFrameIntensity;
 }
 #endif
 
@@ -547,7 +547,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_LightGlow_LightGl
  */
 void* tWPInGameData_LightGlow_LightGlowBlend2(void* self)
 {
-    return (char*)self + 0x30;
+    return &((tWPInGameData_LightGlow*)self)->m_LightGlowBlend2;
 }
 #endif
 
@@ -561,7 +561,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_LightGlow_LightGl
  */
 void* tWPInGameData_LightGlow_LightGlowBlend3(void* self)
 {
-    return (char*)self + 0x38;
+    return &((tWPInGameData_LightGlow*)self)->m_LightGlowBlend3;
 }
 #endif
 
@@ -575,7 +575,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_ScreenTint_Screen
  */
 void* tWPInGameData_ScreenTint_ScreenTintScaleR(void* self)
 {
-    return (char*)self + 0x8;
+    return &((tWPInGameData_ScreenTint*)self)->m_ScreenTintScaleR;
 }
 #endif
 
@@ -589,7 +589,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_ScreenTint_Screen
  */
 void* tWPInGameData_ScreenTint_ScreenTintScaleG(void* self)
 {
-    return (char*)self + 0x10;
+    return &((tWPInGameData_ScreenTint*)self)->m_ScreenTintScaleG;
 }
 #endif
 
@@ -603,7 +603,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_ScreenTint_Screen
  */
 void* tWPInGameData_ScreenTint_ScreenTintScaleB(void* self)
 {
-    return (char*)self + 0x18;
+    return &((tWPInGameData_ScreenTint*)self)->m_ScreenTintScaleB;
 }
 #endif
 
@@ -617,7 +617,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_ScreenTint_Screen
  */
 void* tWPInGameData_ScreenTint_ScreenTintOffsetR(void* self)
 {
-    return (char*)self + 0x20;
+    return &((tWPInGameData_ScreenTint*)self)->m_ScreenTintOffsetR;
 }
 #endif
 
@@ -631,7 +631,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_ScreenTint_Screen
  */
 void* tWPInGameData_ScreenTint_ScreenTintOffsetG(void* self)
 {
-    return (char*)self + 0x28;
+    return &((tWPInGameData_ScreenTint*)self)->m_ScreenTintOffsetG;
 }
 #endif
 
@@ -645,7 +645,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_ScreenTint_Screen
  */
 void* tWPInGameData_ScreenTint_ScreenTintOffsetB(void* self)
 {
-    return (char*)self + 0x30;
+    return &((tWPInGameData_ScreenTint*)self)->m_ScreenTintOffsetB;
 }
 #endif
 
@@ -659,7 +659,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_SkyBox_SkyBoxRota
  */
 void* tWPInGameData_SkyBox_SkyBoxRotation(void* self)
 {
-    return (char*)self + 0x8;
+    return &((tWPInGameData_SkyBox*)self)->m_SkyBoxRotation;
 }
 #endif
 
@@ -673,7 +673,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Sun_SunPitchOffse
  */
 void* tWPInGameData_Sun_SunPitchOffset(void* self)
 {
-    return (char*)self + 0x8;
+    return &((tWPInGameData_Sun*)self)->m_SunPitchOffset;
 }
 #endif
 
@@ -687,7 +687,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Sun_SunYawOffset_
  */
 void* tWPInGameData_Sun_SunYawOffset(void* self)
 {
-    return (char*)self + 0x10;
+    return &((tWPInGameData_Sun*)self)->m_SunYawOffset;
 }
 #endif
 
@@ -701,7 +701,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Sun_SunColorR__FP
  */
 void* tWPInGameData_Sun_SunColorR(void* self)
 {
-    return (char*)self + 0x18;
+    return &((tWPInGameData_Sun*)self)->m_SunColorR;
 }
 #endif
 
@@ -715,7 +715,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Sun_SunColorG__FP
  */
 void* tWPInGameData_Sun_SunColorG(void* self)
 {
-    return (char*)self + 0x20;
+    return &((tWPInGameData_Sun*)self)->m_SunColorG;
 }
 #endif
 
@@ -729,7 +729,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Sun_SunColorB__FP
  */
 void* tWPInGameData_Sun_SunColorB(void* self)
 {
-    return (char*)self + 0x28;
+    return &((tWPInGameData_Sun*)self)->m_SunColorB;
 }
 #endif
 
@@ -743,7 +743,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Sun_SunIntensity_
  */
 void* tWPInGameData_Sun_SunIntensity(void* self)
 {
-    return (char*)self + 0x30;
+    return &((tWPInGameData_Sun*)self)->m_SunIntensity;
 }
 #endif
 
@@ -757,7 +757,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Sun_SunType__FPv)
  */
 void* tWPInGameData_Sun_SunType(void* self)
 {
-    return (char*)self + 0x38;
+    return &((tWPInGameData_Sun*)self)->m_SunType;
 }
 #endif
 
@@ -771,7 +771,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Sun_LensIntensity
  */
 void* tWPInGameData_Sun_LensIntensity(void* self)
 {
-    return (char*)self + 0x40;
+    return &((tWPInGameData_Sun*)self)->m_LensIntensity;
 }
 #endif
 
@@ -785,7 +785,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Sun_SunRadius__FP
  */
 void* tWPInGameData_Sun_SunRadius(void* self)
 {
-    return (char*)self + 0x48;
+    return &((tWPInGameData_Sun*)self)->m_SunRadius;
 }
 #endif
 
@@ -799,7 +799,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Surface_SnowSpark
  */
 void* tWPInGameData_Surface_SnowSparkleDensity(void* self)
 {
-    return (char*)self + 0x8;
+    return &((tWPInGameData_Surface*)self)->m_SnowSparkleDensity;
 }
 #endif
 
@@ -813,7 +813,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Lighting_LightIrr
  */
 void* tWPInGameData_Lighting_LightIrradianceName(void* self)
 {
-    return (char*)self + 0x8;
+    return &((tWPInGameData_Lighting*)self)->m_LightIrradianceName;
 }
 #endif
 
@@ -827,7 +827,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Lighting_ShadowIr
  */
 void* tWPInGameData_Lighting_ShadowIrradianceName(void* self)
 {
-    return (char*)self + 0x18;
+    return &((tWPInGameData_Lighting*)self)->m_ShadowIrradianceName;
 }
 #endif
 
@@ -841,7 +841,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Lighting_TunnelIr
  */
 void* tWPInGameData_Lighting_TunnelIrradianceName(void* self)
 {
-    return (char*)self + 0x28;
+    return &((tWPInGameData_Lighting*)self)->m_TunnelIrradianceName;
 }
 #endif
 
@@ -855,7 +855,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Lighting_ObjectIr
  */
 void* tWPInGameData_Lighting_ObjectIrradianceName(void* self)
 {
-    return (char*)self + 0x38;
+    return &((tWPInGameData_Lighting*)self)->m_ObjectIrradianceName;
 }
 #endif
 
@@ -869,7 +869,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Lighting_AmbientL
  */
 void* tWPInGameData_Lighting_AmbientLightIntensityOffset(void* self)
 {
-    return (char*)self + 0x48;
+    return &((tWPInGameData_Lighting*)self)->m_AmbientLightIntensityOffset;
 }
 #endif
 
@@ -883,7 +883,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Lighting_RimLight
  */
 void* tWPInGameData_Lighting_RimLightIntensityOffset(void* self)
 {
-    return (char*)self + 0x50;
+    return &((tWPInGameData_Lighting*)self)->m_RimLightIntensityOffset;
 }
 #endif
 
@@ -897,7 +897,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Weather_SnowInten
  */
 void* tWPInGameData_Weather_SnowIntensity(void* self)
 {
-    return (char*)self + 0x8;
+    return &((tWPInGameData_Weather*)self)->m_SnowIntensity;
 }
 #endif
 
@@ -911,7 +911,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Weather_FlakeSize
  */
 void* tWPInGameData_Weather_FlakeSize(void* self)
 {
-    return (char*)self + 0x10;
+    return &((tWPInGameData_Weather*)self)->m_FlakeSize;
 }
 #endif
 
@@ -925,7 +925,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Weather_WindInten
  */
 void* tWPInGameData_Weather_WindIntensity(void* self)
 {
-    return (char*)self + 0x18;
+    return &((tWPInGameData_Weather*)self)->m_WindIntensity;
 }
 #endif
 
@@ -939,7 +939,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Weather_WindRotat
  */
 void* tWPInGameData_Weather_WindRotation(void* self)
 {
-    return (char*)self + 0x20;
+    return &((tWPInGameData_Weather*)self)->m_WindRotation;
 }
 #endif
 
@@ -953,7 +953,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Weather_PlayerWin
  */
 void* tWPInGameData_Weather_PlayerWindIntensity(void* self)
 {
-    return (char*)self + 0x28;
+    return &((tWPInGameData_Weather*)self)->m_PlayerWindIntensity;
 }
 #endif
 
@@ -967,7 +967,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Weather_Temperatu
  */
 void* tWPInGameData_Weather_Temperature(void* self)
 {
-    return (char*)self + 0x30;
+    return &((tWPInGameData_Weather*)self)->m_Temperature;
 }
 #endif
 
@@ -981,7 +981,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Weather_SnowFlurr
  */
 void* tWPInGameData_Weather_SnowFlurries(void* self)
 {
-    return (char*)self + 0x38;
+    return &((tWPInGameData_Weather*)self)->m_SnowFlurries;
 }
 #endif
 
@@ -995,7 +995,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Weather_SnowGravi
  */
 void* tWPInGameData_Weather_SnowGravityMultiplier(void* self)
 {
-    return (char*)self + 0x40;
+    return &((tWPInGameData_Weather*)self)->m_SnowGravityMultiplier;
 }
 #endif
 
@@ -1009,7 +1009,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Weather_SnowFluff
  */
 void* tWPInGameData_Weather_SnowFluffItensity(void* self)
 {
-    return (char*)self + 0x48;
+    return &((tWPInGameData_Weather*)self)->m_SnowFluffItensity;
 }
 #endif
 
@@ -1023,7 +1023,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Weather_SnowFluff
  */
 void* tWPInGameData_Weather_SnowFluffWindIntensity(void* self)
 {
-    return (char*)self + 0x50;
+    return &((tWPInGameData_Weather*)self)->m_SnowFluffWindIntensity;
 }
 #endif
 
@@ -1037,7 +1037,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Weather_Lightning
  */
 void* tWPInGameData_Weather_LightningChance(void* self)
 {
-    return (char*)self + 0x58;
+    return &((tWPInGameData_Weather*)self)->m_LightningChance;
 }
 #endif
 
@@ -1051,7 +1051,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Weather_SnowFlake
  */
 void* tWPInGameData_Weather_SnowFlakeColourA(void* self)
 {
-    return (char*)self + 0x60;
+    return &((tWPInGameData_Weather*)self)->m_SnowFlakeColourA;
 }
 #endif
 
@@ -1065,7 +1065,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Weather_SnowFlake
  */
 void* tWPInGameData_Weather_SnowFlakeColourR(void* self)
 {
-    return (char*)self + 0x68;
+    return &((tWPInGameData_Weather*)self)->m_SnowFlakeColourR;
 }
 #endif
 
@@ -1079,7 +1079,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Weather_SnowFlake
  */
 void* tWPInGameData_Weather_SnowFlakeColourG(void* self)
 {
-    return (char*)self + 0x70;
+    return &((tWPInGameData_Weather*)self)->m_SnowFlakeColourG;
 }
 #endif
 
@@ -1093,7 +1093,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Weather_SnowFlake
  */
 void* tWPInGameData_Weather_SnowFlakeColourB(void* self)
 {
-    return (char*)self + 0x78;
+    return &((tWPInGameData_Weather*)self)->m_SnowFlakeColourB;
 }
 #endif
 
@@ -1107,7 +1107,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Weather_SnowFluff
  */
 void* tWPInGameData_Weather_SnowFluffColourA(void* self)
 {
-    return (char*)self + 0x80;
+    return &((tWPInGameData_Weather*)self)->m_SnowFluffColourA;
 }
 #endif
 
@@ -1121,7 +1121,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Weather_SnowFluff
  */
 void* tWPInGameData_Weather_SnowFluffColourR(void* self)
 {
-    return (char*)self + 0x88;
+    return &((tWPInGameData_Weather*)self)->m_SnowFluffColourR;
 }
 #endif
 
@@ -1135,7 +1135,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Weather_SnowFluff
  */
 void* tWPInGameData_Weather_SnowFluffColourG(void* self)
 {
-    return (char*)self + 0x90;
+    return &((tWPInGameData_Weather*)self)->m_SnowFluffColourG;
 }
 #endif
 
@@ -1149,7 +1149,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Weather_SnowFluff
  */
 void* tWPInGameData_Weather_SnowFluffColourB(void* self)
 {
-    return (char*)self + 0x98;
+    return &((tWPInGameData_Weather*)self)->m_SnowFluffColourB;
 }
 #endif
 
@@ -1163,7 +1163,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Danger_Level__FPv
  */
 void* tWPInGameData_Danger_Level(void* self)
 {
-    return (char*)self + 0x8;
+    return &((tWPInGameData_Danger*)self)->m_Level;
 }
 #endif
 
@@ -1177,7 +1177,7 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tWPInGameData_Danger_PointRate_
  */
 void* tWPInGameData_Danger_PointRate(void* self)
 {
-    return (char*)self + 0x10;
+    return &((tWPInGameData_Danger*)self)->m_PointRate;
 }
 #endif
 

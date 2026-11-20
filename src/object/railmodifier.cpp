@@ -6451,7 +6451,7 @@ INCLUDE_ASM("object/railmodifier", cFloatingNode_getNodeState__FPv);
  */
 void* cFloatingNode_getNodeState(void* self)
 {
-    return (char*)self + 0x2C;
+    return &((cFloatingNode*)self)->ZSpring;
 }
 #endif
 
@@ -6669,7 +6669,7 @@ INCLUDE_ASM("object/railmodifier", cPositionModifier_getBoundBox__FPv);
  */
 void* cPositionModifier_getBoundBox(void* self)
 {
-    return (char*)self + 0x10;
+    return &((cPositionModifier*)self)->BoundBox;
 }
 #endif
 
@@ -6878,7 +6878,7 @@ INCLUDE_ASM("object/railmodifier", cMagnetModifier_getBoundBox__FPv);
  */
 void* cMagnetModifier_getBoundBox(void* self)
 {
-    return (char*)self + 0x20;
+    return &((cMagnetModifier*)self)->BoundBox;
 }
 #endif
 
@@ -6995,7 +6995,7 @@ INCLUDE_ASM("object/railmodifier", cAvaSplineModifier_getBoundBox__FPv);
  */
 void* cAvaSplineModifier_getBoundBox(void* self)
 {
-    return (char*)self + 0x10;
+    return &((cAvaSplineModifier*)self)->BoundBox;
 }
 #endif
 
@@ -7068,7 +7068,7 @@ INCLUDE_ASM("object/railmodifier", cAvaSplineModifier_getRootTransform__FPv);
  */
 void* cAvaSplineModifier_getRootTransform(void* self)
 {
-    return (char*)self + 0x40;
+    return &((cAvaSplineModifier*)self)->Transform;
 }
 #endif
 
@@ -7128,7 +7128,7 @@ INCLUDE_ASM("object/railmodifier", cSplineModifier_getBoundBox__FPv);
  */
 void* cSplineModifier_getBoundBox(void* self)
 {
-    return (char*)self + 0x10;
+    return &((cSplineModifier*)self)->BoundBox;
 }
 #endif
 
@@ -7453,7 +7453,7 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier_getBoundBox__FPv);
  */
 void* cRollerModifier_getBoundBox(void* self)
 {
-    return (char*)self + 0x220;
+    return &((cRollerModifier*)self)->boundbox;
 }
 #endif
 
@@ -7495,7 +7495,7 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier_getRootTransform__FPv);
  */
 void* cRollerModifier_getRootTransform(void* self)
 {
-    return (char*)self + 0x240;
+    return &((cRollerModifier*)self)->Transform;
 }
 #endif
 
@@ -7512,7 +7512,7 @@ INCLUDE_ASM("object/railmodifier", cRollerModifier_getRootTransform1__FPv);
  */
 void* cRollerModifier_getRootTransform1(void* self)
 {
-    return (char*)self + 0x240;
+    return &((cRollerModifier*)self)->Transform;
 }
 #endif
 
