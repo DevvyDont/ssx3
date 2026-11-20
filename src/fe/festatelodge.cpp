@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatebuyattrib.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -740,22 +741,21 @@ struct sLodgeStats_4728 {
  * @param engine  the UI engine
  * @return @p stateMemory
  */
-extern "C" void* cFEStateBuyAttrib_cFEStateBuyAttrib(void* stateMemory, int engine)
+extern "C" void* cFEStateBuyAttrib_cFEStateBuyAttrib(cFEStateBuyAttrib* stateMemory, int engine)
 {
     sLodgeStats_4728* self = (sLodgeStats_4728*)stateMemory;
-    char* stateBytes = (char*)stateMemory;
     func_0039E2A0_4728(self, engine);
-    *(int*)(stateBytes + 0xC) = 41;
-    *(void***)(stateBytes + 0x8) = cFEStateBuyAttrib_vtbl;
-    *(signed char*)(stateBytes + 0x44) = 0;
-    *(unsigned char*)(stateBytes + 0x15) = cFECustom_getPlayerCtrlMask_4728(**(void***)(stateBytes + 0x10), 0);
+    stateMemory->mHashName = 41;
+    stateMemory->mVtbl = cFEStateBuyAttrib_vtbl;
+    stateMemory->mUserNum = 0;
+    stateMemory->mCtrlBits = cFECustom_getPlayerCtrlMask_4728(*(void**)stateMemory->mpEngine, 0);
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 3);
-    MEM_fill(stateBytes + 0x84, 0, 0x1C);
+    MEM_fill(((char*)stateMemory) + 0x84, 0, 0x1C);
     for (int i = 0; i < 7; i++) {
         self->base[i] = cBEStatInterface_getStatFromProfile_4728(iface, 0, D_004780B0[i]);
         self->level[i] = (signed char)(cBEStatInterface_getStatFromProfile_4728(iface, 0, D_004780B0[i]) / 5);
     }
-    return stateMemory;
+    return ((void*)stateMemory);
 }
 #endif
 

@@ -1,4 +1,8 @@
 #include "common.h"
+#include "fe/festateruleselect.h"
+#include "fe/festateriderbio.h"
+#include "fe/festatepreviewreward.h"
+#include "fe/festatemountainroom.h"
 #include "fe/festaterewards.h"
 #include "fe/festatenet.h"
 #include "fe/festatelogin.h"
@@ -428,11 +432,11 @@ extern void* cFEStateRiderBio_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateRiderBio_cFEStateRiderBio1(void* self)
+extern "C" void* cFEStateRiderBio_cFEStateRiderBio1(cFEStateRiderBio* self)
 {
     func_0039E2A0(self, 0);
-    *(void***)((char*)self + 0x8) = cFEStateRiderBio_vtbl;
-    return self;
+    self->mVtbl = cFEStateRiderBio_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -471,11 +475,11 @@ extern void* cFEStateRuleSelect_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateRuleSelect_cFEStateRuleSelect1(void* self)
+extern "C" void* cFEStateRuleSelect_cFEStateRuleSelect1(cFEStateRuleSelect* self)
 {
     func_0039E2A0(self, 0);
-    *(void***)((char*)self + 0x8) = cFEStateRuleSelect_vtbl;
-    return self;
+    self->mVtbl = cFEStateRuleSelect_vtbl;
+    return ((void*)self);
 }
 #endif
 
@@ -2115,11 +2119,11 @@ extern void* cFEStatePreviewReward_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStatePreviewReward_cFEStatePreviewReward1(void* self)
+extern "C" void* cFEStatePreviewReward_cFEStatePreviewReward1(cFEStatePreviewReward* self)
 {
     func_0039E2A0(self, 0);
-    *(void***)((char*)self + 0x8) = cFEStatePreviewReward_vtbl;
-    return self;
+    self->mVtbl = cFEStatePreviewReward_vtbl;
+    return ((void*)self);
 }
 #endif
 //100%
@@ -2278,11 +2282,11 @@ extern void* cFEStateMountainRoom_vtbl[];
  *
  * @return @p self
  */
-extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom1(void* self)
+extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom1(cFEStateMountainRoom* self)
 {
     func_0039E2A0(self, 0);
-    *(void***)((char*)self + 0x8) = cFEStateMountainRoom_vtbl;
-    return self;
+    self->mVtbl = cFEStateMountainRoom_vtbl;
+    return ((void*)self);
 }
 #endif
 //100%
@@ -2326,9 +2330,9 @@ public:
  *
  * Calls its setVisible with 0, as cFEStateMountainRoom_onInputBegin does to close the pass view. No null check.
  */
-extern "C" void cFEStateMountainRoom_hidePass(void* self)
+extern "C" void cFEStateMountainRoom_hidePass(cFEStateMountainRoom* self)
 {
-    (*(cUIThing**)((char*)self + 0x48))->setVisible(0);
+    ((cUIThing*)self->mpPassGroup)->setVisible(0);
 }
 #endif
 //100%
@@ -2343,11 +2347,11 @@ INCLUDE_ASM("fe/fepopupmisc", cFEStateMountainRoom_isPassVisible);
  * @param mountainRoom  the mountain-room state
  * @return 1 when the pass is shown, else 0
  */
-extern "C" int cFEStateMountainRoom_isPassVisible(void *mountainRoom) {
+extern "C" int cFEStateMountainRoom_isPassVisible(cFEStateMountainRoom* mountainRoom) {
     int var_2;
     void *temp_3;
 
-    temp_3 = (*(void **)((char*)(mountainRoom) + (0x48)));
+    temp_3 = ((void*)mountainRoom->mpPassGroup);
     var_2 = 0;
     if (temp_3 != 0) {
         var_2 = ((int) (*(int *)((char*)(temp_3) + (0x14))) >> 6) & 1;

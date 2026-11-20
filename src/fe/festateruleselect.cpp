@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festateruleselect.h"
 
 //100%
 INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_setupMenu);
@@ -17,8 +18,8 @@ extern "C" unsigned char cUIListBox_addEntryByStringID(void* box, int id, int id
 extern "C" unsigned char cUIListBox_addEntryByAsciiString(void* box, const char* str, unsigned int data);
 extern "C" int cUIListBox_getEntryByData(void* self, int key, unsigned char* out);
 extern "C" void cUIListBox_setCurrentEntryByIndex(void* self, int v);
-extern "C" int cFEStateRuleSelect_getBEData(void* self, int rule);
-extern "C" void cFEStateRuleSelect_updateMenuColor(void* self);
+extern "C" int cFEStateRuleSelect_getBEData(cFEStateRuleSelect* self, int rule);
+extern "C" void cFEStateRuleSelect_updateMenuColor(cFEStateRuleSelect* self);
 extern char str_0b[];
 extern char str_0t[];
 extern char str_Menu[];
@@ -95,7 +96,7 @@ static inline void* find_1388(sRuleSel_1388* self, char* name)
  * @param first  first rule shown (On Tour MenuOffset)
  */
 // Fills the 11 rule rows (name text plus the option list box) starting at the given scroll row.
-extern "C" void cFEStateRuleSelect_setupMenu(void* self_, signed char first)
+extern "C" void cFEStateRuleSelect_setupMenu(cFEStateRuleSelect* self_, signed char first)
 {
     sRuleSel_1388* self = (sRuleSel_1388*)self_;
     signed char i = 0;
@@ -159,7 +160,7 @@ extern "C" void cFEStateRuleSelect_setupMenu(void* self_, signed char first)
             }
             if (rule != 0) {
                 unsigned char out;
-                cUIListBox_getEntryByData(lb, cFEStateRuleSelect_getBEData(self, rule), &out);
+                cUIListBox_getEntryByData(lb, cFEStateRuleSelect_getBEData((cFEStateRuleSelect*)self, rule), &out);
                 cUIListBox_setCurrentEntryByIndex(lb, out);
             } else {
                 SetVisible_1388(lb, 0);
@@ -189,7 +190,7 @@ extern "C" void cFEStateRuleSelect_setupMenu(void* self_, signed char first)
     int frameIndex = cUIScreen_getFrameByLabel((cUIScreen*)self->screen, GetHashValue32(frame));
     if (frameIndex != 0xFFFF)
         cUIScreen_playFrame(self->screen, frameIndex, 1);
-    cFEStateRuleSelect_updateMenuColor(self);
+    cFEStateRuleSelect_updateMenuColor((cFEStateRuleSelect*)self);
 }
 #endif
 
@@ -206,7 +207,7 @@ extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag)
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-extern "C" void cFEStateRuleSelect_setupMenu(void* self, signed char a1);
+extern "C" void cFEStateRuleSelect_setupMenu(cFEStateRuleSelect* self, signed char a1);
 extern "C" void cUIMenu_setScrollableMenu(void* menu, int count);
 extern "C" void MEM_fill(void* dst, int c, int n);
 extern char str_11my_rules[];
@@ -311,7 +312,7 @@ extern "C" void cFEStateRuleSelect_onCreateScreen(sRuleSel_19188* self)
         *disableCounter-- = 0;
     self->count = count;
     MEM_fill(D_005308B8, 0, 0x20);
-    cFEStateRuleSelect_setupMenu(self, 0);
+    cFEStateRuleSelect_setupMenu((cFEStateRuleSelect*)self, 0);
     sUIObj_19188* menu = (sUIObj_19188*)find_19188(self, str_Menu);
     if (menu != 0) {
         menu->flags |= 0x80;
@@ -364,7 +365,7 @@ INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_onWidgetEvent);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cUIStateStack_pushSpecial(void* stack, void* state, int a2, int a3);
 extern "C" void* func_001887A0(void* mem, void* owner, int a2);
-extern "C" void cFEStateRuleSelect_updateBE(void* self, int idx, int a2);
+extern "C" void cFEStateRuleSelect_updateBE(cFEStateRuleSelect* self, int idx, int a2);
 struct sRuleSel_2380;
 extern "C" void cFEStateRuleSelect_checkConflictForMenu(sRuleSel_2380* self, void* item);
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
@@ -399,7 +400,7 @@ struct sMsg_1C68 {
  * @param msg  the widget (its rule at +0x18), or 0
  * @param type  widget event number (On Tour Event)
  */
-extern "C" void cFEStateRuleSelect_onWidgetEvent(char* self, sMsg_1C68* msg, unsigned int type)
+extern "C" void cFEStateRuleSelect_onWidgetEvent(cFEStateRuleSelect* self, sMsg_1C68* msg, unsigned int type)
 {
     if (msg == 0) {
         return;
@@ -407,20 +408,20 @@ extern "C" void cFEStateRuleSelect_onWidgetEvent(char* self, sMsg_1C68* msg, uns
     switch (type) {
     case 5:
         if (msg->info[6] == 0) {
-            char* custom = **(char***)(self + 0x10);
+            char* custom = *(char**)self->mpEngine;
             sVE_1C68* vt = *(sVE_1C68**)(custom + 0x4);
-            void* st = vt[4].fn(custom + vt[4].delta, self, msg->id);
+            void* st = vt[4].fn(custom + vt[4].delta, ((char*)self), msg->id);
             if (st) {
-                cUIStateStack_push(*(char**)(self + 0x10) + 0x18, st);
+                cUIStateStack_push((char*)self->mpEngine + 0x18, st);
             }
         }
         break;
     case 6: {
-        char* custom = **(char***)(self + 0x10);
+        char* custom = *(char**)self->mpEngine;
         sVE_1C68* vt = *(sVE_1C68**)(custom + 0x4);
-        void* st = vt[5].fn(custom + vt[5].delta, self, msg->id);
+        void* st = vt[5].fn(custom + vt[5].delta, ((char*)self), msg->id);
         if (st) {
-            cUIStateStack_push(*(char**)(self + 0x10) + 0x18, st);
+            cUIStateStack_push((char*)self->mpEngine + 0x18, st);
         }
         MEM_fill(D_005308B8, 0, 0x20);
         break;
@@ -432,9 +433,9 @@ extern "C" void cFEStateRuleSelect_onWidgetEvent(char* self, sMsg_1C68* msg, uns
         break;
     }
     case 7: {
-        char* st = (char*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), *(void**)(self + 0x10), 1);
+        char* st = (char*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), self->mpEngine, 1);
         *(int*)(st + 0x1C) = (*(int*)(st + 0x1C) & ~0x3F00) | 0x100;
-        cUIStateStack_pushSpecial(*(char**)(self + 0x10) + 0x18, st, 0, 0);
+        cUIStateStack_pushSpecial((char*)self->mpEngine + 0x18, st, 0, 0);
         break;
     }
     }
@@ -453,7 +454,7 @@ extern char D_004A13A0[];
  * @param msg  the pair (On Tour cUIPair* pPair)
  * @return 0x101 for the pair named "0", otherwise 0x100
  */
-extern "C" int cFEStateRuleSelect_onWidgetPair(void* self, void* msg)
+extern "C" int cFEStateRuleSelect_onWidgetPair(cFEStateRuleSelect* self, void* msg)
 {
     int id = *(int*)((char*)msg + 0x38);
     return (id == GetHashValue32(D_004A13A0)) ? 257 : 0x100;
@@ -466,7 +467,7 @@ INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_onWidgetMenu);
 struct cUIScreen;
 struct cUIText;
 int GetHashValue32(char* str);
-extern "C" void cFEStateRuleSelect_setupMenu(void* self, signed char idx);
+extern "C" void cFEStateRuleSelect_setupMenu(cFEStateRuleSelect* self, signed char idx);
 int cUIScreen_getFrameByLabel(cUIScreen* self, int hash);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cUIScreen_playFrame(void* self, unsigned short frame, int flag);
@@ -504,18 +505,18 @@ static inline void SetVisible_1E48(char* o, int on)
  * @return for event 1, 1 when the rule is enabled and 0 when it is disabled; 0x100 for event 9; otherwise
  *         0x101
  */
-extern "C" int cFEStateRuleSelect_onWidgetMenu(char* self, void* pMenu, unsigned int type, int idx)
+extern "C" int cFEStateRuleSelect_onWidgetMenu(cFEStateRuleSelect* self, void* pMenu, unsigned int type, int idx)
 {
     switch (type) {
     case 9:
         return 0x100;
     case 1: {
-        int sel = (*(signed char**)(self + 0x48))[idx];
+        int sel = ((signed char*)self->mpGameEventMapping)[idx];
         int play = 0;
-        char* arrowLeft = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_arrw_left));
-        char* arrowRight = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_arrw_right));
-        int locked = *(signed char*)(self + sel + 0x51) < 1;
-        cUIText* textHelp = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_rule_help));
+        char* arrowLeft = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_arrw_left));
+        char* arrowRight = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_arrw_right));
+        int locked = *(signed char*)(((char*)self) + sel + 0x51) < 1;
+        cUIText* textHelp = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_rule_help));
         if (locked && textHelp) {
             cUIText_setUnicodeStringByID(textHelp, GetHashValue32(D_00441058[sel]));
         }
@@ -534,9 +535,9 @@ extern "C" int cFEStateRuleSelect_onWidgetMenu(char* self, void* pMenu, unsigned
             __builtin_memcpy(label, D_004A1708, 7);
         }
         if (play) {
-            int frameIndex = cUIScreen_getFrameByLabel(*(cUIScreen**)(self + 0x40), GetHashValue32(label));
+            int frameIndex = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(label));
             if (frameIndex != 0xFFFF) {
-                cUIScreen_playFrame(*(void**)(self + 0x40), frameIndex, 1);
+                cUIScreen_playFrame(self->mpScreen, frameIndex, 1);
             }
         }
         return locked;
@@ -567,7 +568,7 @@ extern int D_005308D4_2088[] __asm__("D_005308D4");
  * @param idx  the rule id (1-14)
  * @param ruleValue  the new value: the list box's entry data
  */
-extern "C" void cFEStateRuleSelect_updateBE(void* self, int idx, int ruleValue)
+extern "C" void cFEStateRuleSelect_updateBE(cFEStateRuleSelect* self, int idx, int ruleValue)
 {
     switch (idx) {
     case 4:
@@ -635,7 +636,7 @@ extern int D_005308D4[];
  * @param rule  the rule id (1-14)
  * @return the rule's flag (0 or 1) or rule 2's value, or -1 for an unknown rule
  */
-extern "C" int cFEStateRuleSelect_getBEData(void* self, int rule)
+extern "C" int cFEStateRuleSelect_getBEData(cFEStateRuleSelect* self, int rule)
 {
     switch (rule) {
     case 4:
@@ -677,8 +678,8 @@ extern "C" int cFEStateRuleSelect_getBEData(void* self, int rule)
 INCLUDE_ASM("fe/festateruleselect", cFEStateRuleSelect_checkConflictForMenu);
 #ifdef SKIP_ASM
 extern "C" int cUIListBox_getCurrentEntryData(void* self);
-extern "C" void cFEStateRuleSelect_updateBE(void* self, int idx, int a2);
-extern "C" void cFEStateRuleSelect_updateMenuColor(void* self);
+extern "C" void cFEStateRuleSelect_updateBE(cFEStateRuleSelect* self, int idx, int a2);
+extern "C" void cFEStateRuleSelect_updateMenuColor(cFEStateRuleSelect* self);
 extern int D_004410C8[];
 
 struct sRuleSel_2380 {
@@ -716,11 +717,11 @@ extern "C" void cFEStateRuleSelect_checkConflictForMenu(sRuleSel_2380* self, voi
             int bit = 1 << i;
             if ((bit & mask) == 0) {
                 self->count[i] += 1;
-                cFEStateRuleSelect_updateBE(self, i, 0);
+                cFEStateRuleSelect_updateBE((cFEStateRuleSelect*)self, i, 0);
             }
         }
     }
-    cFEStateRuleSelect_updateMenuColor(self);
+    cFEStateRuleSelect_updateMenuColor((cFEStateRuleSelect*)self);
 }
 #endif
 
@@ -760,19 +761,18 @@ extern char str_0t[];
  *
  * @param selfp  the rule select state
  */
-extern "C" void cFEStateRuleSelect_updateMenuColor(void* selfp)
+extern "C" void cFEStateRuleSelect_updateMenuColor(cFEStateRuleSelect* selfp)
 {
-    char* self = (char*)selfp;
     char name0[16];
     char name1[16];
     __builtin_memcpy(name0, str_0b, 3);
     __builtin_memcpy(name1, str_0t, 3);
-    signed char n = *(signed char*)(self + 0x50) < 12 ? *(signed char*)(self + 0x50) : 11;
+    signed char n = *(signed char*)&selfp->mcArraySize < 12 ? *(signed char*)&selfp->mcArraySize : 11;
     for (signed char i = 0; i < n; i++) {
-        sObj_2488* listBox = (sObj_2488*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name0));
-        sObj_2488* textBox = (sObj_2488*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name1));
+        sObj_2488* listBox = (sObj_2488*)cUIScreen_getObjectByHashName(selfp->mpScreen, GetHashValue32(name0));
+        sObj_2488* textBox = (sObj_2488*)cUIScreen_getObjectByHashName(selfp->mpScreen, GetHashValue32(name1));
         if (listBox && textBox) {
-            if (*(signed char*)(self + listBox->idx + 0x51) > 0) {
+            if (*(signed char*)(((char*)selfp) + listBox->idx + 0x51) > 0) {
                 textBox->vt[25].fn((char*)textBox + textBox->vt[25].delta, 1);
                 textBox->q88 = D_004C66C8;
                 textBox->vt[8].fn((char*)textBox + textBox->vt[8].delta, 1);

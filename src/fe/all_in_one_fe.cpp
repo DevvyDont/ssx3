@@ -1,4 +1,6 @@
 #include "common.h"
+#include "fe/festatebuyattrib.h"
+#include "fe/festatecareerstats.h"
 #include "fe/messagecenter.h"
 #include "render/ps2graphicsman.h"
 #include "fe/ovstate.h"
@@ -3077,8 +3079,8 @@ extern char D_0046D0D0[];
  * body as cFEState's own destructor cFEState__cFEState, so the class tears down nothing of its own. The g++ delete
  * flags reach func_0039E390() untouched in the second argument register.
  */
-extern "C" void cFEStateBuyAttrib__cFEStateBuyAttrib(void *self) {
-    *(char **)((char*)self + 8) = D_0046D0D0;
+extern "C" void cFEStateBuyAttrib__cFEStateBuyAttrib(cFEStateBuyAttrib* self) {
+    self->mVtbl = (void**)D_0046D0D0;
     func_0039E390_a(self);
 }
 #endif
@@ -3119,8 +3121,8 @@ extern char D_0046D0D0[];
  * body as cFEState's own destructor cFEState__cFEState, so the class tears down nothing of its own. The g++ delete
  * flags reach func_0039E390() untouched in the second argument register.
  */
-extern "C" void cFEStateCareerStats__cFEStateCareerStats(void *self) {
-    *(char **)((char*)self + 8) = D_0046D0D0;
+extern "C" void cFEStateCareerStats__cFEStateCareerStats(cFEStateCareerStats* self) {
+    self->mVtbl = (void**)D_0046D0D0;
     func_0039E390_a(self);
 }
 #endif

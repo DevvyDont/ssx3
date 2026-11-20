@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatecharselect.h"
 
 //100%
 INCLUDE_ASM("fe/festatedebug", cScreenKeyboard_initScreenKeyboard);
@@ -239,24 +240,24 @@ extern void* cFEStateCharSelect_vtbl[];
  * @param count  the rider slot choosing now (0 = first player); stored as mUserNum
  * @return @p self
  */
-extern "C" void* cFEStateCharSelect_cFEStateCharSelect(void* self, void* owner, int count)
+extern "C" void* cFEStateCharSelect_cFEStateCharSelect(cFEStateCharSelect* self, void* owner, int count)
 {
     signed char n = count;
     int i = 0;
     unsigned char mask = 0xFF;
     func_0039E2A0(self, owner);
-    *(void***)((char*)self + 0x8) = cFEStateCharSelect_vtbl;
-    *(int*)((char*)self + 0xC) = 9;
-    *(int*)((char*)self + 0x54) = 1;
-    *(signed char*)((char*)self + 0x44) = n;
-    *(int*)((char*)self + 0x48) = 0;
-    *(int*)((char*)self + 0x4C) = 0;
-    void* mgr = **(void***)((char*)self + 0x10);
+    self->mVtbl = cFEStateCharSelect_vtbl;
+    self->mHashName = 9;
+    self->mbIsFirst = 1;
+    self->mUserNum = n;
+    self->mpSelectedCharWidget = 0;
+    self->mCheatCharID = 0;
+    void* mgr = *(void**)self->mpEngine;
     for (; i < n; i++) {
         mask &= ~cFECustom_getPlayerCtrlMask(mgr, i);
     }
-    *(unsigned char*)((char*)self + 0x15) = mask;
-    return self;
+    self->mCtrlBits = mask;
+    return ((void*)self);
 }
 #endif
 

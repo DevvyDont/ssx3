@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatepreviewreward.h"
 #include "fe/festaterewards.h"
 #include "render/ps2graphicsman.h"
 #include "main/ssxapp.h"
@@ -1088,8 +1089,8 @@ extern "C" void cFEStateRewardGalleryBase_buyReward(cFEStateRewardGalleryBase* s
 INCLUDE_ASM("fe/festaterewards", cFEStateRewardGalleryBase_showReward);
 #ifdef SKIP_ASM
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
-extern "C" void* cFEStatePreviewReward_cFEStatePreviewReward(void* self, void* engine, void* owner, int player);
-extern "C" void cFEStatePreviewReward_setReward(void* self, int kind, void* data);
+extern "C" void* cFEStatePreviewReward_cFEStatePreviewReward(cFEStatePreviewReward* self, void* engine, void* owner, int player);
+extern "C" void cFEStatePreviewReward_setReward(cFEStatePreviewReward* self, int kind, void* data);
 extern "C" void* cFEStateVideoPlayer_cFEStateVideoPlayer(void* self, void* engine, void* owner, signed char idx);
 extern "C" void cFEStateVideoPlayer_setVideoSourceFiles(void* self, const char* a, const char* b);
 extern "C" void cUIStateStack_pushPopup(void* stack, void* state);
@@ -1120,9 +1121,9 @@ extern "C" void cFEStateRewardGalleryBase_showReward(cFEStateRewardGalleryBase* 
     case 4:
     case 5:
     case 7:
-        nextState = cFEStatePreviewReward_cFEStatePreviewReward(cMemMan_alloc(0x78, str_cFEStatePreviewReward, 0, 0), self->mpEngine, self,
+        nextState = cFEStatePreviewReward_cFEStatePreviewReward((cFEStatePreviewReward*)cMemMan_alloc(0x78, str_cFEStatePreviewReward, 0, 0), self->mpEngine, self,
                           self->mUserNum);
-        cFEStatePreviewReward_setReward(nextState, self->mRewardType, data);
+        cFEStatePreviewReward_setReward((cFEStatePreviewReward*)nextState, self->mRewardType, data);
         break;
     case 6:
         nextState = cFEStateVideoPlayer_cFEStateVideoPlayer(cMemMan_alloc(640, str_cFEStateVideoPlayer, 0, 0), self->mpEngine, self,
@@ -2562,27 +2563,27 @@ struct sRewardState_1AA0 {
  * @param player  user number
  * @return @p self
  */
-extern "C" void* cFEStatePreviewReward_cFEStatePreviewReward(void* self, void* engine, void* owner, int player)
+extern "C" void* cFEStatePreviewReward_cFEStatePreviewReward(cFEStatePreviewReward* self, void* engine, void* owner, int player)
 {
     signed char idx = player;
     int i;
     func_0039E318(self, engine, owner);
-    *(int*)((char*)self + 0xC) = 0x30;
-    *(void***)((char*)self + 0x8) = cFEStatePreviewReward_vtbl;
-    *(signed char*)((char*)self + 0x44) = idx;
-    *(unsigned char*)((char*)self + 0x15) = cFECustom_getPlayerCtrlMask(**(void***)((char*)self + 0x10), idx);
+    self->mHashName = 0x30;
+    self->mVtbl = cFEStatePreviewReward_vtbl;
+    self->mUserNum = idx;
+    self->mCtrlBits = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, idx);
     for (i = 0; i < 3; i++) {
         ((sRewardState_1AA0*)self)->a[i] = 0;
         ((sRewardState_1AA0*)self)->b[i] = 0;
     }
-    *(int*)((char*)self + 0x60) = 0;
-    *(int*)((char*)self + 0x64) = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1),
-                                                                         *(signed char*)((char*)self + 0x44));
-    *(int*)((char*)self + 0x68) = -1;
-    *(int*)((char*)self + 0x6C) = -1;
-    *(int*)((char*)self + 0x70) = -1;
-    *(int*)((char*)self + 0x74) = -1;
-    return self;
+    self->mpReward = 0;
+    self->mCharID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1),
+                                                                         self->mUserNum);
+    self->mRewardType = -1;
+    self->mTextureFileIndex = -1;
+    self->mTextureID = -1;
+    self->mOrientation = -1;
+    return ((void*)self);
 }
 #endif
 
@@ -2606,22 +2607,22 @@ extern "C" void func_0039E390(void* self, int flags);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cFEStatePreviewReward__cFEStatePreviewReward(void* self, int flags)
+extern "C" void cFEStatePreviewReward__cFEStatePreviewReward(cFEStatePreviewReward* self, int flags)
 {
-    *(void***)((char*)self + 8) = cFEStatePreviewReward_vtbl;
-    int id = *(int*)((char*)self + 0x70);
+    self->mVtbl = cFEStatePreviewReward_vtbl;
+    int id = self->mTextureID;
     if (id >= 0) {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVEntry001D1B68* vt = (sVEntry001D1B68*)ps2GraphicsMan->mVtbl;
         vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, id);
     }
-    int slot = *(int*)((char*)self + 0x6C);
+    int slot = self->mTextureFileIndex;
     if (slot >= 0) {
-        func_0019DC20((char*)SSXApp->RealFE + 0x1A70, *(int*)((char*)self + 0x64), slot);
+        func_0019DC20((char*)SSXApp->RealFE + 0x1A70, self->mCharID, slot);
     }
-    *(int*)((char*)self + 0x6C) = -1;
-    *(int*)((char*)self + 0x70) = -1;
-    *(void***)((char*)self + 8) = D_0046D0D0;
+    self->mTextureFileIndex = -1;
+    self->mTextureID = -1;
+    self->mVtbl = D_0046D0D0;
     func_0039E390(self, flags);
 }
 #endif
@@ -2639,15 +2640,15 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 /**
  * Creates the reward preview screen ("130rewardposter") and sets flag 8 on its "Menu" object.
  */
-extern "C" void cFEStatePreviewReward_onCreateScreen(void* self)
+extern "C" void cFEStatePreviewReward_onCreateScreen(cFEStatePreviewReward* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_130rewardposter), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Menu));
+    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu));
     if (obj != 0) {
         *(int*)((char*)obj + 0x90) |= 8;
     }
@@ -2827,7 +2828,7 @@ INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_onWidgetMenu);
  * @param event  menu event number (On Tour Event)
  * @return 0x100 for events 6, 8 and 9, otherwise 0x101
  */
-extern "C" int cFEStatePreviewReward_onWidgetMenu(void* self, int menu, unsigned int event)
+extern "C" int cFEStatePreviewReward_onWidgetMenu(cFEStatePreviewReward* self, int menu, unsigned int event)
 {
     switch (event) {
     case 6:
@@ -2842,7 +2843,7 @@ extern "C" int cFEStatePreviewReward_onWidgetMenu(void* self, int menu, unsigned
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_onUpdate);
 #ifdef SKIP_ASM
-extern "C" void cFEStatePreviewReward_updateTextureLoad(void* self);
+extern "C" void cFEStatePreviewReward_updateTextureLoad(cFEStatePreviewReward* self);
 extern "C" void* cUIState_onUpdate(void* self);
 
 /**
@@ -2852,9 +2853,9 @@ extern "C" void* cUIState_onUpdate(void* self);
  * is handed to GrMan, the slot is released and set to -1 and the preview widget shows it. Then runs the base
  * UI-state update cUIState_onUpdate().
  */
-extern "C" void cFEStatePreviewReward_onUpdate(void* self)
+extern "C" void cFEStatePreviewReward_onUpdate(cFEStatePreviewReward* self)
 {
-    if (*(int*)((char*)self + 0x6C) >= 0) {
+    if (self->mTextureFileIndex >= 0) {
         cFEStatePreviewReward_updateTextureLoad(self);
     }
     cUIState_onUpdate(self);
@@ -2893,11 +2894,11 @@ extern sDefObj_1FF0 gUISoundNull;
  * @param obj  the input (On Tour cUIInput* pInput)
  * @return 1 when the preview closes, otherwise 0
  */
-extern "C" int cFEStatePreviewReward_onInputBegin(void* self, void* obj)
+extern "C" int cFEStatePreviewReward_onInputBegin(cFEStatePreviewReward* self, void* obj)
 {
     sVE_1FF0a* vt = *(sVE_1FF0a**)((char*)obj + 8);
     if (vt[6].fn((char*)obj + vt[6].delta) != 0) {
-    sDefObj_1FF0* sound = *(sDefObj_1FF0**)(*(char**)((char*)self + 0x10) + 0x14);
+    sDefObj_1FF0* sound = *(sDefObj_1FF0**)((char*)self->mpEngine + 0x14);
     if (sound == 0) {
         sound = &gUISoundNull;
     }
@@ -2912,8 +2913,8 @@ extern "C" int cFEStatePreviewReward_onInputBegin(void* self, void* obj)
             vt2[9].fn(bitmap + vt2[9].delta, 0);
         }
     }
-    cUIScreen_playFrame(*(void**)((char*)self + 0x40), cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(str_TransitionOut)), 1);
-    func_0039F190((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
+    cUIScreen_playFrame(self->mpScreen, cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut)), 1);
+    func_0039F190((char*)self->mpEngine + 0x18, 1);
     return 1;
     }
     return 0;
@@ -2923,7 +2924,7 @@ extern "C" int cFEStatePreviewReward_onInputBegin(void* self, void* obj)
 //100%
 INCLUDE_ASM("fe/festaterewards", cFEStatePreviewReward_setReward);
 #ifdef SKIP_ASM
-extern "C" void cFEStatePreviewReward_loadTexture(void* self, int a1);
+extern "C" void cFEStatePreviewReward_loadTexture(cFEStatePreviewReward* self, int a1);
 
 /**
  * Sets the reward the preview shows and starts loading its picture.
@@ -2935,10 +2936,10 @@ extern "C" void cFEStatePreviewReward_loadTexture(void* self, int a1);
  * @param kind  the reward type (3 posters, 4 trading cards, 5 art, 6 videos, 7 toys)
  * @param data  the 16-byte reward record
  */
-extern "C" void cFEStatePreviewReward_setReward(void* self, int kind, void* data)
+extern "C" void cFEStatePreviewReward_setReward(cFEStatePreviewReward* self, int kind, void* data)
 {
-    *(int*)((char*)self + 0x68) = kind;
-    *(void**)((char*)self + 0x60) = data;
+    self->mRewardType = kind;
+    self->mpReward = data;
     switch (kind) {
     case 3:
         cFEStatePreviewReward_loadTexture(self, *(int*)((char*)data + 4));
@@ -2969,9 +2970,9 @@ extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a
  *
  * @param id  the picture file name (the reward record's word at +4), passed as an int
  */
-extern "C" void cFEStatePreviewReward_loadTexture(void* self, int id)
+extern "C" void cFEStatePreviewReward_loadTexture(cFEStatePreviewReward* self, int id)
 {
-    *(int*)((char*)self + 0x6C) = func_0019DA10((char*)SSXApp->RealFE + 0x1A70, *(int*)((char*)self + 0x64), id, 9, 1, 0);
+    self->mTextureFileIndex = func_0019DA10((char*)SSXApp->RealFE + 0x1A70, self->mCharID, id, 9, 1, 0);
 }
 #endif
 
@@ -3010,27 +3011,27 @@ struct sVEK1D2198 {
  * mpTextureElem 0 and the frame is shown (setVisible 1). Called by cFEStatePreviewReward_onUpdate while the slot is >=
  * 0.
  */
-extern "C" void cFEStatePreviewReward_updateTextureLoad(void* self)
+extern "C" void cFEStatePreviewReward_updateTextureLoad(cFEStatePreviewReward* self)
 {
     char* mgr = (char*)SSXApp->RealFE + 0x1A70;
-    if (func_0019E238(mgr, *(int*)((char*)self + 0x64), *(int*)((char*)self + 0x6C)) == 0)
+    if (func_0019E238(mgr, self->mCharID, self->mTextureFileIndex) == 0)
         return;
-    sData001CFFF8* data = func_0019E2B0(mgr, *(int*)((char*)self + 0x64), *(int*)((char*)self + 0x6C));
+    sData001CFFF8* data = func_0019E2B0(mgr, self->mCharID, self->mTextureFileIndex);
     char* shapeHeader = (char*)data + data->tbl[0].off;
     short shapeWidth = *(short*)(shapeHeader + 4);
     short shapeHeight = *(short*)(shapeHeader + 6);
     if (shapeHeight < shapeWidth)
-        *(int*)((char*)self + 0x74) = 1;
+        self->mOrientation = 1;
     else if (shapeWidth < shapeHeight)
-        *(int*)((char*)self + 0x74) = 2;
+        self->mOrientation = 2;
     else
-        *(int*)((char*)self + 0x74) = 0;
+        self->mOrientation = 0;
     sEntry001CFFF8 ent;
     SHAPE_name(data, 0, &ent);
     ent.name[4] = 0;
-    *(int*)((char*)self + 0x70) = ((cGame001CFFF8*)GrMan)->v46(shapeHeader, &ent, 0, 1, -1);
-    func_0019DC20(mgr, *(int*)((char*)self + 0x64), *(int*)((char*)self + 0x6C));
-    *(int*)((char*)self + 0x6C) = -1;
+    self->mTextureID = ((cGame001CFFF8*)GrMan)->v46(shapeHeader, &ent, 0, 1, -1);
+    func_0019DC20(mgr, self->mCharID, self->mTextureFileIndex);
+    self->mTextureFileIndex = -1;
     sSelfK1D2198* previewState = (sSelfK1D2198*)self;
     char* bitmapWidget = previewState->a48[previewState->kind];
     if (bitmapWidget != 0 && previewState->a54[previewState->kind] != 0) {

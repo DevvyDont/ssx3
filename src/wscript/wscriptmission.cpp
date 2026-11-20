@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festateubertrick.h"
 
 //100%
 INCLUDE_ASM("wscript/wscriptmission", cFEStateUberTrick_updateTrickMenu);
@@ -94,10 +95,9 @@ static inline void setTab_3DE0(char* t, int c)
  *
  * @param vself  the store state
  */
-extern "C" void cFEStateUberTrick_updateTrickMenu(void* vself)
+extern "C" void cFEStateUberTrick_updateTrickMenu(cFEStateUberTrick* vself)
 {
-    char* self = (char*)vself;
-    void* screen = cList_first((cList*)(self + 0x24));
+    void* screen = cList_first((cList*)(((char*)vself) + 0x24));
     char* labels[9];
     char* marks[9];
     for (int i = 0; i < 9; i++) {
@@ -128,15 +128,15 @@ extern "C" void cFEStateUberTrick_updateTrickMenu(void* vself)
     int count;
     int cur;
     int slot = 1;
-    char* rider = *(char**)(*(char**)(self + 0x4C) + 0xA0);
+    char* rider = *(char**)((char*)vself->mpMainMenu + 0xA0);
     if (rider != 0)
         slot = *(signed char*)(rider + 0x18);
     int shown = 0;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 6);
-    sGateEntry_3DE0* tbl = (sGateEntry_3DE0*)func_0014FF90(iface, *(signed char*)(self + 0x44), slot, &count);
-    cur = func_0014FEA8(iface, *(signed char*)(self + 0x44), slot, 1);
+    sGateEntry_3DE0* tbl = (sGateEntry_3DE0*)func_0014FF90(iface, vself->mUserNum, slot, &count);
+    cur = func_0014FEA8(iface, vself->mUserNum, slot, 1);
     for (int j = 0; j < count; j++) {
-        if (func_00150048(iface, *(signed char*)(self + 0x44), slot, j)) {
+        if (func_00150048(iface, vself->mUserNum, slot, j)) {
             char* uiObj = labels[shown];
             if (uiObj != 0) {
                 cUIText_setAsciiString((cUIText*)uiObj, func_00116938(tbl[j].name));
@@ -147,23 +147,23 @@ extern "C" void cFEStateUberTrick_updateTrickMenu(void* vself)
             uiObj = marks[shown];
             if (uiObj != 0) {
                 uiCall_3DE0(uiObj, 9, 1);
-                if (func_0014FFB8(iface, *(signed char*)(self + 0x44), slot, j))
-                    setHighlight_3DE0(uiObj, *(int*)(self + 0x5C));
+                if (func_0014FFB8(iface, vself->mUserNum, slot, j))
+                    setHighlight_3DE0(uiObj, (int)vself->mpDollarSign);
                 else if (cur == j)
-                    setHighlight_3DE0(uiObj, *(int*)(self + 0x54));
+                    setHighlight_3DE0(uiObj, (int)vself->mpCheckmark);
                 else
-                    setHighlight_3DE0(uiObj, *(int*)(self + 0x58));
+                    setHighlight_3DE0(uiObj, (int)vself->mpCheckbox);
             }
             shown++;
         }
     }
     int ca = 0;
     int cb = 0;
-    int iconL2 = lookup_3DE0(self, str_bsl2);
-    int iconL1 = lookup_3DE0(self, str_bsl1);
-    int iconR1 = lookup_3DE0(self, str_bsr1);
-    int iconR2 = lookup_3DE0(self, str_bsr2);
-    int iconSquare = lookup_3DE0(self, str_square_NML);
+    int iconL2 = lookup_3DE0(((char*)vself), str_bsl2);
+    int iconL1 = lookup_3DE0(((char*)vself), str_bsl1);
+    int iconR1 = lookup_3DE0(((char*)vself), str_bsr1);
+    int iconR2 = lookup_3DE0(((char*)vself), str_bsr2);
+    int iconSquare = lookup_3DE0(((char*)vself), str_square_NML);
     switch (slot) {
     case 1:
         ca = iconL1;

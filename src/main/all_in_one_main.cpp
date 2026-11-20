@@ -1,4 +1,6 @@
 #include "common.h"
+#include "fe/festatecharselect.h"
+#include "fe/festateubertrick.h"
 #include "fe/popupinfo.h"
 #include "fe/keyboardpopup.h"
 #include "fe/screenpopup.h"
@@ -2752,8 +2754,8 @@ extern void* D_0046D0D0[];
  * The g++ destructor flags are not declared here; they stay in the second argument register for func_0039E390
  * (bit 0 frees).
  */
-extern "C" void cFEStateCharSelect__cFEStateCharSelect(void *self) {
-    *(void***)((char*)self + 8) = D_0046D0D0;
+extern "C" void cFEStateCharSelect__cFEStateCharSelect(cFEStateCharSelect* self) {
+    self->mVtbl = D_0046D0D0;
     func_0039E390_DD840(self);
 }
 #endif
@@ -2860,8 +2862,8 @@ extern void* D_0046D0D0[];
  * The g++ delete flags pass through in the second argument register. D_0046CCC0 is the vtable cFEStateUberTrick_cFEStateUberTrick stores in
  * the state allocated as "cFEStateUberTrick".
  */
-extern "C" void cFEStateUberTrick__cFEStateUberTrick(void *self) {
-    *(void***)((char*)self + 8) = D_0046D0D0;
+extern "C" void cFEStateUberTrick__cFEStateUberTrick(cFEStateUberTrick* self) {
+    self->mVtbl = D_0046D0D0;
     func_0039E390_DD8F0(self);
 }
 #endif

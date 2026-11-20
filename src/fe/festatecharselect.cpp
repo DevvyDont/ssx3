@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatecharselect.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -21,11 +22,11 @@ extern "C" void cFERider_setVisible(void* self, int a1);
  * and a field of view of 0.436 (25 degrees). Calls cFERider_setVisible with 0 on the user's front-end rider, sets
  * +0x80 to 1, +0x5C to -1 and +0x58 and +0x60 to 0.
  */
-extern "C" void cFEStateCharSelect_onCreateScreen(void* self)
+extern "C" void cFEStateCharSelect_onCreateScreen(cFEStateCharSelect* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_08sel_char), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -42,11 +43,11 @@ extern "C" void cFEStateCharSelect_onCreateScreen(void* self)
     lookAt.w = 1.0f;
     cSimpleCamera_setupCamWithPosAndTarget((char*)cam + 0x10, &pos, &lookAt);
     cam->fov = 0.4363323450088501f;
-    cFERider_setVisible(cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
-    *(int*)((char*)self + 0x80) = 1;
-    *(float*)((char*)self + 0x5C) = -1.0f;
-    *(int*)((char*)self + 0x58) = 0;
-    *(int*)((char*)self + 0x60) = 0;
+    cFERider_setVisible(cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum), 0);
+    self->mbDraw3D = 1;
+    self->mPan = -1.0f;
+    *(int*)&self->mZoom = 0;
+    *(int*)&self->mPlayerRotation = 0;
 }
 #endif
 
@@ -67,12 +68,12 @@ void* cUIState_onDestroyScreen(void* self);
  * The rider (cFE::mRiderManager slot for mUserNum) gets cFERider_setVisible with 0, then cUIState_onDestroyScreen()
  * runs.
  */
-extern "C" void cFEStateCharSelect_onDestroyScreen(void* self)
+extern "C" void cFEStateCharSelect_onDestroyScreen(cFEStateCharSelect* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     char* mgr = (char*)SSXApp->RealFE;
     if (mgr != 0 && D_00535C11[0] != 0) {
-        cFERider_setVisible(cFERiderManager_getHuman1(mgr + 0xB0, *(signed char*)((char*)self + 0x44)), 0);
+        cFERider_setVisible(cFERiderManager_getHuman1(mgr + 0xB0, self->mUserNum), 0);
     }
     cUIState_onDestroyScreen(self);
 }
@@ -96,11 +97,11 @@ extern "C" void cFEStateCharSelect_updateWidget(void* self, int index, signed ch
  * @param on  the state's first-time flag as passed by the state stack; nonzero on the transition's first call
  * @return always 0
  */
-extern "C" int cFEStateCharSelect_onGainTransition(void* self, int on)
+extern "C" int cFEStateCharSelect_onGainTransition(cFEStateCharSelect* self, int on)
 {
     if (on != 0) {
-        int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
-        cFEStateCharSelect_updateWidget(self, *(signed char*)((char*)self + 0x44), id);
+        int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
+        cFEStateCharSelect_updateWidget(self, self->mUserNum, id);
     }
     return 0;
 }
@@ -118,7 +119,7 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
 extern "C" void cFERiderManager_setHumanCharacter(void* self, int idx, int a2, int a3);
 extern "C" void* cFERiderManager_getHuman1(void* self, int a1);
-extern "C" void cFEStateCharSelect_updateCharacter3DPos(void* self);
+extern "C" void cFEStateCharSelect_updateCharacter3DPos(cFEStateCharSelect* self);
 extern "C" void cUIState_onGainFocus(void* self, int a1);
 extern signed char D_00440F68[];
 extern char str_Menu[];
@@ -132,20 +133,20 @@ extern char str_Menu[];
  *
  * @param pPrevState  the state that had focus before, passed on
  */
-extern "C" void cFEStateCharSelect_onGainFocus(void* self, int pPrevState)
+extern "C" void cFEStateCharSelect_onGainFocus(cFEStateCharSelect* self, int pPrevState)
 {
     int i = 0;
-    int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
+    int id = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
     for (; i < 10; i++) {
         if (D_00440F68[i] == id) {
-            void* menu = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Menu));
+            void* menu = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu));
             if (menu != 0)
                 cUIMenu_setSelectedByIndex(menu, i);
             break;
         }
     }
-    cFERiderManager_setHumanCharacter((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44), D_00440F68[0], 0);
-    char* feRider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44));
+    cFERiderManager_setHumanCharacter((char*)SSXApp->RealFE + 0xB0, self->mUserNum, D_00440F68[0], 0);
+    char* feRider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum);
     *(int*)(feRider + 0xCCC) = 0;
     cFEStateCharSelect_updateCharacter3DPos(self);
     cUIState_onGainFocus(self, pPrevState);
@@ -171,7 +172,7 @@ void* cFEStateCharSelect_onRender2D(void* self)
 //100%
 INCLUDE_ASM("fe/festatecharselect", cFEStateCharSelect_onUpdate);
 #ifdef SKIP_ASM
-extern "C" void cFEStateCharSelect_updateCharacter3DPos(void* self);
+extern "C" void cFEStateCharSelect_updateCharacter3DPos(cFEStateCharSelect* self);
 extern "C" void* cUIState_onUpdate(void* self);
 
 /**
@@ -181,7 +182,7 @@ extern "C" void* cUIState_onUpdate(void* self);
  * asks for it. cUIState_onUpdate() is the base UI-state update, which dispatches controller input to the state and
  * its screens.
  */
-extern "C" void cFEStateCharSelect_onUpdate(void* self)
+extern "C" void cFEStateCharSelect_onUpdate(cFEStateCharSelect* self)
 {
     cFEStateCharSelect_updateCharacter3DPos(self);
     cUIState_onUpdate(self);
@@ -236,19 +237,19 @@ static inline float clamp_1450(float v, float lo, float hi)
  * @param pInput  the input object
  * @return 1 when any of the values changed, else 0
  */
-extern "C" int cFEStateCharSelect_onInputBegin(char* self, char* pInput)
+extern "C" int cFEStateCharSelect_onInputBegin(cFEStateCharSelect* self, char* pInput)
 {
     int changed = 0;
     if (padBtn_1450(pInput, 35)) {
-        *(float*)(self + 0x60) += padAxis_1450(pInput, 38) * 3.0f;
-        if (*(float*)(self + 0x60) >= 360.0f) {
-            float angle = *(float*)(self + 0x60);
+        self->mPlayerRotation += padAxis_1450(pInput, 38) * 3.0f;
+        if (self->mPlayerRotation >= 360.0f) {
+            float angle = self->mPlayerRotation;
             do
                 angle -= 360.0f;
             while (angle >= 360.0f);
-            *(float*)(self + 0x60) = angle;
+            self->mPlayerRotation = angle;
         }
-        float angle = *(float*)(self + 0x60);
+        float angle = self->mPlayerRotation;
         float minAngle = 0.0f;
         if (angle < minAngle) {
             float wrapped;
@@ -256,16 +257,16 @@ extern "C" int cFEStateCharSelect_onInputBegin(char* self, char* pInput)
                 wrapped = angle + 360.0f;
                 angle = wrapped;
             } while (wrapped < minAngle);
-            *(float*)(self + 0x60) = wrapped;
+            self->mPlayerRotation = wrapped;
         }
         changed = 1;
     }
     if (padBtn_1450(pInput, 33)) {
-        *(float*)(self + 0x58) = clamp_1450(*(float*)(self + 0x58) + padAxis_1450(pInput, 36) * -0.10000000149011612f, 0.0f, 1.0f);
+        self->mZoom = clamp_1450(self->mZoom + padAxis_1450(pInput, 36) * -0.10000000149011612f, 0.0f, 1.0f);
         changed = 1;
     }
     if (padBtn_1450(pInput, 34)) {
-        *(float*)(self + 0x5C) = clamp_1450(*(float*)(self + 0x5C) + padAxis_1450(pInput, 37) * -0.10000000149011612f, -1.0f, 1.0f);
+        self->mPan = clamp_1450(self->mPan + padAxis_1450(pInput, 37) * -0.10000000149011612f, -1.0f, 1.0f);
         changed = 1;
     }
     return changed;
@@ -323,7 +324,7 @@ static inline void refresh_1620(sWidget_1620* w)
  *
  * @param w  the widget being created
  */
-extern "C" void cFEStateCharSelect_onWidgetCreate(char* self, sWidget_1620* w)
+extern "C" void cFEStateCharSelect_onWidgetCreate(cFEStateCharSelect* self, sWidget_1620* w)
 {
     int hashName = w->hash;
     if (hashName == GetHashValue32(str_names_menu)) {
@@ -338,7 +339,7 @@ extern "C" void cFEStateCharSelect_onWidgetCreate(char* self, sWidget_1620* w)
     }
     if (hashName == GetHashValue32(str_titlesel_character_multi)) {
         if (D_00535C11[0] == 2) {
-            switch (*(signed char*)(self + 0x44)) {
+            switch (self->mUserNum) {
             case 0:
                 cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_TITLEPlayer1SelectCharacter));
                 break;
@@ -460,50 +461,50 @@ static inline void refresh_17E8(sIface_17E8* iface)
  * @param event  the widget event
  */
 // Character select: widget event handler.
-extern "C" void cFEStateCharSelect_onWidgetEvent(sCharSel_17E8* self, sObj_17E8* widget, int event)
+extern "C" void cFEStateCharSelect_onWidgetEvent(cFEStateCharSelect* self, sObj_17E8* widget, int event)
 {
     if (widget == 0)
         return;
     switch (event) {
     case 5: {
         int on = 1;
-        char* feRider = riderSlot_17E8(self);
+        char* feRider = riderSlot_17E8(((sCharSel_17E8*)self));
         *(int*)(feRider + 0xC20) = on;
         *(int*)(feRider + 0xC1C) = 0;
-        int rider = self->rider;
-        int player = self->player;
+        int rider = self->mUserNum;
+        int player = self->mCurrentCtrl;
         int ch = D_00440F68[widget->id];
-        int board = self->board;
+        int board = self->mCheatCharID;
         sIface_17E8* iface = (sIface_17E8*)cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewPlayerInterface_setPlayerCtrlID(iface, rider, player);
         cBENewPlayerInterface_setPlayerCharID(iface, rider, ch);
         cBENewPlayerInterface_setPlayerCheatCharID(iface, rider, board);
         refresh_17E8(iface);
-        unsigned char mask = on << self->player;
-        cFECustom_setPlayerCtrlMask(*(void**)self->engine, self->rider, mask);
-        void* st = (*(cStateFactory_17E8**)self->engine)->onSelect(self, widget->id);
+        unsigned char mask = on << self->mCurrentCtrl;
+        cFECustom_setPlayerCtrlMask(*(void**)(char*)self->mpEngine, self->mUserNum, mask);
+        void* st = (*(cStateFactory_17E8**)(char*)self->mpEngine)->onSelect(((sCharSel_17E8*)self), widget->id);
         if (st != 0)
-            cUIStateStack_push(self->engine + 0x18, st);
-        cFERider_setVisible(riderSlot_17E8(self), 0);
-        self->dirty = 0;
+            cUIStateStack_push((char*)self->mpEngine + 0x18, st);
+        cFERider_setVisible(riderSlot_17E8(((sCharSel_17E8*)self)), 0);
+        self->mbDraw3D = 0;
         break;
     }
     case 6: {
-        void* st = (*(cStateFactory_17E8**)self->engine)->onBack(self, widget->id);
+        void* st = (*(cStateFactory_17E8**)(char*)self->mpEngine)->onBack(((sCharSel_17E8*)self), widget->id);
         if (st != 0) {
-            cUIStateStack_push(self->engine + 0x18, st);
-            cFERider_setVisible(riderSlot_17E8(self), 0);
-            self->dirty = 0;
+            cUIStateStack_push((char*)self->mpEngine + 0x18, st);
+            cFERider_setVisible(riderSlot_17E8(((sCharSel_17E8*)self)), 0);
+            self->mbDraw3D = 0;
         }
         break;
     }
     case 1: {
         widget->setVisible(1);
-        cFEStateCharSelect_updateWidget(self, self->rider, D_00440F68[widget->id]);
-        int rider = self->rider;
-        int player = self->player;
+        cFEStateCharSelect_updateWidget(((sCharSel_17E8*)self), self->mUserNum, D_00440F68[widget->id]);
+        int rider = self->mUserNum;
+        int player = self->mCurrentCtrl;
         int ch = D_00440F68[widget->id];
-        int board = self->board;
+        int board = self->mCheatCharID;
         sIface_17E8* iface = (sIface_17E8*)cBE_getInterface_Fv(cBE_getBE(), 1);
         cBENewPlayerInterface_setPlayerCtrlID(iface, rider, player);
         cBENewPlayerInterface_setPlayerCharID(iface, rider, ch);
@@ -519,26 +520,26 @@ extern "C" void cFEStateCharSelect_onWidgetEvent(sCharSel_17E8* self, sObj_17E8*
         break;
     case 7: {
         sIface_17E8* iface = (sIface_17E8*)cBE_getInterface_Fv(cBE_getBE(), 1);
-        cBENewPlayerInterface_setPlayerCtrlID(iface, self->rider, self->player);
+        cBENewPlayerInterface_setPlayerCtrlID(iface, self->mUserNum, self->mCurrentCtrl);
         refresh_17E8(iface);
-        char* st = (char*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), self->engine, 1);
+        char* st = (char*)func_001887A0(cMemMan_alloc(84, str_FEOptions, 0x100, 0), (char*)self->mpEngine, 1);
         *(int*)(st + 0x1C) = (*(int*)(st + 0x1C) & ~0x3F00) | 0x100;
-        cUIStateStack_pushSpecial(self->engine + 0x18, st, 0, 0);
-        cFERider_setVisible(riderSlot_17E8(self), 0);
-        self->dirty = 0;
+        cUIStateStack_pushSpecial((char*)self->mpEngine + 0x18, st, 0, 0);
+        cFERider_setVisible(riderSlot_17E8(((sCharSel_17E8*)self)), 0);
+        self->mbDraw3D = 0;
         break;
     }
     case 8: {
         sIface_17E8* iface = (sIface_17E8*)cBE_getInterface_Fv(cBE_getBE(), 1);
-        cBENewPlayerInterface_setPlayerCtrlID(iface, self->rider, self->player);
+        cBENewPlayerInterface_setPlayerCtrlID(iface, self->mUserNum, self->mCurrentCtrl);
         refresh_17E8(iface);
-        void* st = cFEStateProfileLoad_cFEStateProfileLoad(cMemMan_alloc(640, str_cFEStateProfileLoad, 0x100, 0), self->engine, 2, 1 << self->player);
-        cUIStateStack_push(self->engine + 0x18, st);
-        char* top = *(char**)self->engine;
+        void* st = cFEStateProfileLoad_cFEStateProfileLoad(cMemMan_alloc(640, str_cFEStateProfileLoad, 0x100, 0), (char*)self->mpEngine, 2, 1 << self->mCurrentCtrl);
+        cUIStateStack_push((char*)self->mpEngine + 0x18, st);
+        char* top = *(char**)(char*)self->mpEngine;
         if (top != 0)
             *(int*)(top + 0xC) = 9;
-        cFERider_setVisible(riderSlot_17E8(self), 0);
-        self->dirty = 0;
+        cFERider_setVisible(riderSlot_17E8(((sCharSel_17E8*)self)), 0);
+        self->mbDraw3D = 0;
         break;
     }
     }
@@ -721,18 +722,17 @@ static inline sQuat_181EF0 AxisAngle_181EF0(const sQuat_181EF0& axis, float angl
  *
  * @param vself  the character-select state
  */
-extern "C" void cFEStateCharSelect_updateCharacter3DPos(void* vself)
+extern "C" void cFEStateCharSelect_updateCharacter3DPos(cFEStateCharSelect* vself)
 {
-    char* self = (char*)vself;
-    char* rider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44));
+    char* rider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, vself->mUserNum);
     int ok = 0;
     if (*(unsigned int*)rider < 10 && *(int*)(rider + 0xCB8) != 0) {
         ok = *(int*)(rider + 0xCB4) != 0;
     }
-    if (ok && *(int*)(self + 0x80) != 0) {
+    if (ok && vself->mbDraw3D != 0) {
         sQuat_181EF0 pos;
         sXform_181EF0 xf;
-        float ang = *(float*)(self + 0x60);
+        float ang = vself->mPlayerRotation;
         {
             sQuat_181EF0 position;
             position.x = 136.0f;
@@ -752,14 +752,14 @@ extern "C" void cFEStateCharSelect_updateCharacter3DPos(void* vself)
         ang *= 0.01745329424738884f;
         xf.rot = QuatMul_181EF0(xf.rot, AxisAngle_181EF0(t4vect_ZAxis, ang));
         cFERider_setPose(rider, &xf);
-        if (*(int*)(self + 0x54) != 0) {
+        if (vself->mbIsFirst != 0) {
             void* anim = *(void**)(rider + 0xC);
             if (anim != 0) {
                 cRiderAnimBase_reset(anim);
                 cRiderAnimBase_play(anim, 434, 0, -1.0f);
             }
             *(int*)(rider + 0xCCC) = 0;
-            *(int*)(self + 0x54) = 0;
+            vself->mbIsFirst = 0;
         }
         {
             sQuat_181EF0 position;

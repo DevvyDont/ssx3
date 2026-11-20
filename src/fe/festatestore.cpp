@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festateubertrick.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -35,7 +36,7 @@ public:
  *
  * @param on  nonzero to show, zero to hide (On Tour v)
  */
-extern "C" void cFEStateUberTrick_costVisible(void* self, int on)
+extern "C" void cFEStateUberTrick_costVisible(cFEStateUberTrick* self, int on)
 {
     void* screen = cList_first((cList*)((char*)self + 0x24));
     cWidget_00184668* costNum = (cWidget_00184668*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_cost_num));
@@ -92,7 +93,7 @@ extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
  *
  * @param on  1 to show, 0 to hide
  */
-extern "C" void cFEStateUberTrick_previewVisible(void* self, int on)
+extern "C" void cFEStateUberTrick_previewVisible(cFEStateUberTrick* self, int on)
 {
     void* screen = cList_first((cList*)((char*)self + 0x24));
     cWidget_00184780* w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_btext5));
@@ -126,7 +127,7 @@ extern char str_InstBtn2[];
  *
  * @param on  nonzero to show, zero to hide (On Tour v)
  */
-extern "C" void cFEStateUberTrick_trickVisible(void* self, int on)
+extern "C" void cFEStateUberTrick_trickVisible(cFEStateUberTrick* self, int on)
 {
     void* screen = cList_first((cList*)((char*)self + 0x24));
     cWidget_00184780* w = (cWidget_00184780*)cUIScreen_getObjectByHashName(screen, GetHashValue32(str_To_Execute_info));
@@ -172,8 +173,8 @@ extern "C" void cSimpleCamera_setupCamWithPosAndTarget(void* cam, void* a, void*
 extern "C" void* cUITextureBank_getElementByHashname(void* list, int hash);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void func_0028F140(void* p, int a);
-extern "C" void cFEStateUberTrick_costVisible(void* self, int on);
-extern "C" void cFEStateUberTrick_previewVisible(void* self, int on);
+extern "C" void cFEStateUberTrick_costVisible(cFEStateUberTrick* self, int on);
+extern "C" void cFEStateUberTrick_previewVisible(cFEStateUberTrick* self, int on);
 extern char str_66ut_btnmap[];
 extern char str_empty_box[];
 extern char str_checkbox[];
@@ -200,21 +201,21 @@ struct sVE_1849B0 {
  * mpDollarSign), sets the sound bank manager's mode 5 (func_0028F140 on cAudioInterface_bxAudio()) and hides the cost display
  * (cFEStateUberTrick_costVisible) and cFEStateUberTrick_previewVisible's objects. onCreateScreen slot (+0x24) of the vtable D_0046CCC0.
  */
-extern "C" void cFEStateUberTrick_onCreateScreen(void* self)
+extern "C" void cFEStateUberTrick_onCreateScreen(cFEStateUberTrick* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_66ut_btnmap), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0)
         cUIScreen_playFrame(screen, 0, 0);
     char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
-    signed char charID = cBENewPlayerInterface_getPlayerCharID(player, *(signed char*)((char*)self + 0x44));
+    signed char charID = cBENewPlayerInterface_getPlayerCharID(player, self->mUserNum);
     {
         sVE_1849B0* vt = *(sVE_1849B0**)(player + 0xC);
         vt[2].fn(player + vt[2].delta);
     }
-    cFERiderManager_setHumanCharacter((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44), charID, 0);
-    cFERiderManager_setHumanVisible((char*)SSXApp->RealFE + 0xB0, *(signed char*)((char*)self + 0x44), 0);
+    cFERiderManager_setHumanCharacter((char*)SSXApp->RealFE + 0xB0, self->mUserNum, charID, 0);
+    cFERiderManager_setHumanVisible((char*)SSXApp->RealFE + 0xB0, self->mUserNum, 0);
     char* realFe = (char*)SSXApp->RealFE;
     sVec4_1849B0 camPos;
     sVec4_1849B0 lookAt;
@@ -232,19 +233,19 @@ extern "C" void cFEStateUberTrick_onCreateScreen(void* self)
     cSimpleCamera_setupCamWithPosAndTarget(realFe + 0x10, &camPos, &lookAt);
     *(float*)(realFe + 0x10) = 0.4363323450088501f;
     {
-        char* uiEngine = *(char**)((char*)self + 0x10);
+        char* uiEngine = (char*)self->mpEngine;
         int iconHash = GetHashValue32(str_empty_box);
-        *(void**)((char*)self + 0x58) = cUITextureBank_getElementByHashname(uiEngine + 0x58, iconHash);
+        self->mpCheckbox = (cTextureElement*)cUITextureBank_getElementByHashname(uiEngine + 0x58, iconHash);
     }
     {
-        char* uiEngine = *(char**)((char*)self + 0x10);
+        char* uiEngine = (char*)self->mpEngine;
         int iconHash = GetHashValue32(str_checkbox);
-        *(void**)((char*)self + 0x54) = cUITextureBank_getElementByHashname(uiEngine + 0x58, iconHash);
+        self->mpCheckmark = (cTextureElement*)cUITextureBank_getElementByHashname(uiEngine + 0x58, iconHash);
     }
     {
-        char* uiEngine = *(char**)((char*)self + 0x10);
+        char* uiEngine = (char*)self->mpEngine;
         int iconHash = GetHashValue32(str_yell_dollar_sign);
-        *(void**)((char*)self + 0x5C) = cUITextureBank_getElementByHashname(uiEngine + 0x58, iconHash);
+        self->mpDollarSign = (cTextureElement*)cUITextureBank_getElementByHashname(uiEngine + 0x58, iconHash);
     }
     func_0028F140(cAudioInterface_bxAudio(), 5);
     cFEStateUberTrick_costVisible(self, 0);
@@ -264,11 +265,11 @@ void* cUIState_onDestroyScreen(void* self);
  * The rider is hidden with cFERiderManager_setHumanVisible (user mUserNum, 0) on RealFE + 0xB0, skipped when there is no front end.
  * onDestroyScreen slot (+0x2C) of the vtable D_0046CCC0.
  */
-extern "C" void cFEStateUberTrick_onDestroyScreen(void* self)
+extern "C" void cFEStateUberTrick_onDestroyScreen(cFEStateUberTrick* self)
 {
     char* mgr = (char*)SSXApp->RealFE;
     if (mgr != 0) {
-        cFERiderManager_setHumanVisible(mgr + 0xB0, *(signed char*)((char*)self + 0x44), 0);
+        cFERiderManager_setHumanVisible(mgr + 0xB0, self->mUserNum, 0);
     }
     cUIState_onDestroyScreen(self);
 }
@@ -287,7 +288,7 @@ extern "C" void cFEStateUberTrick_updateTrickMenu(void* self);
  * @param on  non-zero to refill the trick list
  * @return 0
  */
-extern "C" int cFEStateUberTrick_onGainTransition(void* self, int on)
+extern "C" int cFEStateUberTrick_onGainTransition(cFEStateUberTrick* self, int on)
 {
     if (on != 0) {
         cFEStateUberTrick_updateTrickMenu(self);
@@ -321,15 +322,15 @@ extern "C" void cUIState_onGainFocus(void* self, int a1);
  *
  * @param prevState  the state that had focus before, passed on to cUIState_onGainFocus
  */
-extern "C" void cFEStateUberTrick_onGainFocus(void* self, int prevState)
+extern "C" void cFEStateUberTrick_onGainFocus(cFEStateUberTrick* self, int prevState)
 {
     sObj00184BE0* menu;
     cFEStateUberTrick_activateMainMenu(self);
-    menu = *(sObj00184BE0**)((char*)self + 0x4C);
+    menu = (sObj00184BE0*)self->mpMainMenu;
     if (menu != 0) {
         menu->vt[7].fn((char*)menu + menu->vt[7].delta, 1);
     }
-    menu = *(sObj00184BE0**)((char*)self + 0x50);
+    menu = (sObj00184BE0*)self->mpTrickMenu;
     if (menu != 0) {
         menu->vt[7].fn((char*)menu + menu->vt[7].delta, 0);
     }
@@ -403,10 +404,10 @@ static inline sQuat_184C60 AxisAngle_184C60(const sQuat_184C60& axis, float angl
  * -205, 63) turned 1.0821 rad (62 degrees) about Z (the X and Y turns are 0; fSinCos gives the sines) with
  * cFERider_setPose, shows it (cFERiderManager_setHumanVisible with 1) and sets +0x48. onUpdate slot (+0x64) of the vtable D_0046CCC0.
  */
-extern "C" void cFEStateUberTrick_onUpdate(char* self)
+extern "C" void cFEStateUberTrick_onUpdate(cFEStateUberTrick* self)
 {
-    if (*(int*)(self + 0x48) == 0) {
-        char* rider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44));
+    if (self->mbModelVisible == 0) {
+        char* rider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum);
         int ok = 0;
         if (*(unsigned int*)rider < 10 && *(int*)(rider + 0xCB8) != 0) {
             ok = *(int*)(rider + 0xCB4) != 0;
@@ -428,7 +429,7 @@ extern "C" void cFEStateUberTrick_onUpdate(char* self)
                 position.w = 1.0f;
                 pos = position;
                 xf.pos = position;
-                *(int*)(self + 0x48) = 1;
+                self->mbModelVisible = 1;
                 xf.rot.x = 0.0f;
                 xf.rot.y = 0.0f;
                 xf.rot.z = 0.0f;
@@ -438,10 +439,10 @@ extern "C" void cFEStateUberTrick_onUpdate(char* self)
             xf.rot = QuatMul_184C60(xf.rot, AxisAngle_184C60(t4vect_YAxis, 0.0f));
             xf.rot = QuatMul_184C60(xf.rot, AxisAngle_184C60(t4vect_ZAxis, 1.082104206085205f));
             cFERider_setPose(rider, &xf);
-            cFERiderManager_setHumanVisible((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44), 1);
+            cFERiderManager_setHumanVisible((char*)SSXApp->RealFE + 0xB0, self->mUserNum, 1);
         }
     }
-    cUIState_onUpdate(self);
+    cUIState_onUpdate(((char*)self));
 }
 #endif
 
@@ -482,22 +483,22 @@ struct sVE_4F40 {
  * @param item  the popup (the cUIStateBuyPopup)
  * @param msg  the popup event
  */
-extern "C" void cFEStateUberTrick_onPopupEvent(void* self, void* item, int msg)
+extern "C" void cFEStateUberTrick_onPopupEvent(cFEStateUberTrick* self, void* item, int msg)
 {
     switch (msg) {
     case 21:
         break;
     case 22:
         if (*(int*)((char*)item + 0x6C) != 0) {
-            int charID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), *(signed char*)((char*)self + 0x44));
-            cBEEconInterface_reduceMoney(cBE_getInterface_Fv(cBE_getBE(), 11), *(signed char*)((char*)self + 0x44), charID, *(int*)((char*)item + 0x48));
-            int entryIndex = *(signed char*)(*(char**)(*(char**)((char*)self + 0x4C) + 0xA0) + 0x18);
-            int flagBit = *(signed char*)(*(char**)(*(char**)((char*)self + 0x50) + 0xA0) + 0x18);
+            int charID = cBENewPlayerInterface_getPlayerCharID(cBE_getInterface_Fv(cBE_getBE(), 1), self->mUserNum);
+            cBEEconInterface_reduceMoney(cBE_getInterface_Fv(cBE_getBE(), 11), self->mUserNum, charID, *(int*)((char*)item + 0x48));
+            int entryIndex = *(signed char*)(*(char**)((char*)self->mpMainMenu + 0xA0) + 0x18);
+            int flagBit = *(signed char*)(*(char**)((char*)self->mpTrickMenu + 0xA0) + 0x18);
             void* pi = cBE_getInterface_Fv(cBE_getBE(), 6);
-            func_0014FE08(pi, *(signed char*)((char*)self + 0x44), entryIndex, flagBit);
+            func_0014FE08(pi, self->mUserNum, entryIndex, flagBit);
             sVE_4F40* vt = *(sVE_4F40**)((char*)pi + 0xC);
             vt[1].fn((char*)pi + vt[1].delta);
-            void* helpText = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_custom));
+            void* helpText = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_custom));
             if (helpText != 0) {
                 cUIText_setUnicodeStringByID((cUIText*)helpText, GetHashValue32(str_kT_66HELPCustomUber));
             }
@@ -547,7 +548,7 @@ static inline int Is_185080(int id, char* s)
  *
  * @param widget  the widget just created (On Tour pWidget)
  */
-extern "C" void cFEStateUberTrick_onWidgetCreate(void* self, void* widget)
+extern "C" void cFEStateUberTrick_onWidgetCreate(cFEStateUberTrick* self, void* widget)
 {
     cUIText* text = (cUIText*)widget;
     for (int i = 0; i < 6; i++) {
@@ -585,9 +586,9 @@ extern "C" void cFEStateUberTrick_onWidgetCreate(void* self, void* widget)
     if (Is_185080(*(int*)((char*)widget + 0x38), str_done)) {
         *(int*)((char*)widget + 0x18) = -1;
     } else if (Is_185080(*(int*)((char*)widget + 0x38), str_MenuMain)) {
-        *(void**)((char*)self + 0x4C) = widget;
+        self->mpMainMenu = (cUIMenu*)widget;
     } else if (Is_185080(*(int*)((char*)widget + 0x38), str_MenuTrick)) {
-        *(void**)((char*)self + 0x50) = widget;
+        self->mpTrickMenu = (cUIMenu*)widget;
     }
 }
 #endif
@@ -603,8 +604,8 @@ void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 int cBENewPlayerInterface_getPlayerCharID(void* self, int index);
 struct cUIText;
 void cUIText_setUnicodeStringByID(cUIText* t, int id);
-extern "C" void cFEStateUberTrick_costVisible(void* self, int on);
-extern "C" void cFEStateUberTrick_trickVisible(void* self, int on);
+extern "C" void cFEStateUberTrick_costVisible(cFEStateUberTrick* self, int on);
+extern "C" void cFEStateUberTrick_trickVisible(cFEStateUberTrick* self, int on);
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern "C" void cRiderAnimBase_play(void* anim, int id, int a2, float t);
 extern "C" void cUIMenu_setSelectedByIndex(void* menu, unsigned char idx);
@@ -620,7 +621,7 @@ extern "C" int cBEEconInterface_getMoney(void* iface, int a1, int charID);
 extern "C" void cFEStateUberTrick_activateMainMenu(void* self);
 extern "C" void cFEStateUberTrick_activateTrickMenu(void* self);
 extern "C" void cFEStateUberTrick_updateTrickMenuEntry(void* self);
-extern "C" void cFEStateUberTrick_previewVisible(void* self, int on);
+extern "C" void cFEStateUberTrick_previewVisible(cFEStateUberTrick* self, int on);
 extern "C" void* cFERiderManager_getHuman1(void* self, int idx);
 extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(void* mem, void* owner, void* state, int a3);
 extern "C" void cUIStateStack_pushPopup(void* list, void* item);
@@ -734,129 +735,129 @@ static inline void Back_185268(char* self)
  * @param item  the widget that sent the event
  * @param msg  the widget event
  */
-extern "C" void cFEStateUberTrick_onWidgetEvent(char* self, char* item, int msg)
+extern "C" void cFEStateUberTrick_onWidgetEvent(cFEStateUberTrick* self, char* item, int msg)
 {
     switch (msg) {
     case 5:
-        if (*(char**)(item + 0x40) == *(char**)(self + 0x4C)) {
+        if (*(char**)(item + 0x40) == (char*)self->mpMainMenu) {
             if (Is_185268(*(int*)(item + 0x38), str_done)) {
-                Back_185268(self);
+                Back_185268(((char*)self));
             } else {
-                SetActive_185268(*(char**)(self + 0x4C), 0);
-                cUIMenu_setSelectedByIndex(*(void**)(self + 0x50), 0);
-                SetActive_185268(*(char**)(self + 0x50), 1);
-                cFEStateUberTrick_activateTrickMenu(self);
+                SetActive_185268((char*)self->mpMainMenu, 0);
+                cUIMenu_setSelectedByIndex(self->mpTrickMenu, 0);
+                SetActive_185268((char*)self->mpTrickMenu, 1);
+                cFEStateUberTrick_activateTrickMenu(((char*)self));
                 cFEStateUberTrick_costVisible(self, 1);
                 cFEStateUberTrick_previewVisible(self, 1);
             }
-        } else if (*(char**)(item + 0x40) == *(char**)(self + 0x50)) {
-            char* categoryItem = *(char**)(*(char**)(self + 0x4C) + 0xA0);
-            char* trickItem = *(char**)(*(char**)(self + 0x50) + 0xA0);
+        } else if (*(char**)(item + 0x40) == (char*)self->mpTrickMenu) {
+            char* categoryItem = *(char**)((char*)self->mpMainMenu + 0xA0);
+            char* trickItem = *(char**)((char*)self->mpTrickMenu + 0xA0);
             if (categoryItem != 0 && trickItem != 0) {
                 int ai = *(signed char*)(categoryItem + 0x18);
                 int bi = *(signed char*)(trickItem + 0x18);
                 char* pi = (char*)cBE_getInterface_Fv(cBE_getBE(), 6);
                 cBE_getInterface_Fv(cBE_getBE(), 0);
-                if (func_00150048(pi, *(signed char*)(self + 0x44), ai, bi) && !func_0014FFB8(pi, *(signed char*)(self + 0x44), ai, bi)) {
-                    func_0014FD80(pi, *(signed char*)(self + 0x44), ai, bi);
+                if (func_00150048(pi, self->mUserNum, ai, bi) && !func_0014FFB8(pi, self->mUserNum, ai, bi)) {
+                    func_0014FD80(pi, self->mUserNum, ai, bi);
                     sVE_185268* vt = *(sVE_185268**)(pi + 0xC);
                     ((int (*)(void*))vt[1].fn)(pi + vt[1].delta);
-                    cFEStateUberTrick_updateTrickMenu(self);
+                    cFEStateUberTrick_updateTrickMenu(((char*)self));
                 } else if (D_00535C11[0] != 0) {
-                    PlaySound_185268(self, 4);
-                } else if (func_0014FFB8(pi, *(signed char*)(self + 0x44), ai, bi)) {
+                    PlaySound_185268(((char*)self), 4);
+                } else if (func_0014FFB8(pi, self->mUserNum, ai, bi)) {
                     char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
-                    signed char charID = cBENewPlayerInterface_getPlayerCharID(player, *(signed char*)(self + 0x44));
+                    signed char charID = cBENewPlayerInterface_getPlayerCharID(player, self->mUserNum);
                     {
                         sVE_185268* vt = *(sVE_185268**)(player + 0xC);
                         ((void (*)(void*))vt[2].fn)(player + vt[2].delta);
                     }
-                    int points = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), *(signed char*)(self + 0x44), charID);
+                    int points = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), self->mUserNum, charID);
                     int n;
-                    sTrick_185268* tbl = func_0014FF90(pi, *(signed char*)(self + 0x44), ai, &n);
+                    sTrick_185268* tbl = func_0014FF90(pi, self->mUserNum, ai, &n);
                     int trick = func_00116938(tbl[bi].id);
                     if (points >= tbl[bi].cost) {
-                        void* popup = cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, str_UITRICKBUY, 0x100, 0), *(void**)(self + 0x10), self, *(signed char*)(self + 0x44));
+                        void* popup = cUIStateBuyPopup_cUIStateBuyPopup(cMemMan_alloc(0x70, str_UITRICKBUY, 0x100, 0), self->mpEngine, ((char*)self), self->mUserNum);
                         cUIStateBuyPopup_initBuyTrick(popup, trick, tbl[bi].cost, points);
-                        cUIStateStack_pushPopup(*(char**)(self + 0x10) + 0x18, popup);
+                        cUIStateStack_pushPopup((char*)self->mpEngine + 0x18, popup);
                     } else {
-                        PlaySound_185268(self, 4);
+                        PlaySound_185268(((char*)self), 4);
                     }
                 }
             }
         }
         break;
     case 6:
-        if (*(char**)(item + 0x40) == *(char**)(self + 0x50)) {
-            SetActive_185268(*(char**)(self + 0x4C), 1);
-            SetActive_185268(*(char**)(self + 0x50), 0);
+        if (*(char**)(item + 0x40) == (char*)self->mpTrickMenu) {
+            SetActive_185268((char*)self->mpMainMenu, 1);
+            SetActive_185268((char*)self->mpTrickMenu, 0);
             {
-                cUIObj_185268* trickSelection = *(cUIObj_185268**)(*(char**)(self + 0x50) + 0xA0);
+                cUIObj_185268* trickSelection = *(cUIObj_185268**)((char*)self->mpTrickMenu + 0xA0);
                 if (trickSelection != 0)
                     trickSelection->SetColor(sColor_185268(1.0f, 0.0f, 0.0f, 0.0f));
             }
-            cUIMenu_setSelectedByIndex(*(void**)(self + 0x50), 0xFF);
-            cFEStateUberTrick_activateMainMenu(self);
+            cUIMenu_setSelectedByIndex(self->mpTrickMenu, 0xFF);
+            cFEStateUberTrick_activateMainMenu(((char*)self));
             cFEStateUberTrick_costVisible(self, 0);
             cFEStateUberTrick_previewVisible(self, 0);
         } else {
-            Back_185268(self);
+            Back_185268(((char*)self));
         }
         break;
     case 7:
-        if (*(char**)(item + 0x40) == *(char**)(self + 0x50)) {
-            char* categoryItem = *(char**)(*(char**)(self + 0x4C) + 0xA0);
-            char* trickItem = *(char**)(*(char**)(self + 0x50) + 0xA0);
+        if (*(char**)(item + 0x40) == (char*)self->mpTrickMenu) {
+            char* categoryItem = *(char**)((char*)self->mpMainMenu + 0xA0);
+            char* trickItem = *(char**)((char*)self->mpTrickMenu + 0xA0);
             if (categoryItem != 0 && trickItem != 0) {
                 char* pi = (char*)cBE_getInterface_Fv(cBE_getBE(), 6);
                 int bi = *(signed char*)(trickItem + 0x18);
                 int ai = *(signed char*)(categoryItem + 0x18);
                 int n = 0;
-                sTrick_185268* tbl = func_0014FF90(pi, *(signed char*)(self + 0x44), ai, &n);
-                if (*(int*)(self + 0x48) != 0) {
-                    char* feRider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44));
+                sTrick_185268* tbl = func_0014FF90(pi, self->mUserNum, ai, &n);
+                if (self->mbModelVisible != 0) {
+                    char* feRider = (char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum);
                     cRiderAnimBase_play(*(void**)(feRider + 0xC), tbl[bi].anim, 0, -1.0f);
                 }
             }
         }
         break;
     case 1:
-        *(int*)((char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44)) + 0xCD0) = 1;
-        if (*(char**)(item + 0x40) == *(char**)(self + 0x4C)) {
-            if (*(void**)(self + 0x50) != 0 && *(int*)(item + 0x18) != -1) {
+        *(int*)((char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum) + 0xCD0) = 1;
+        if (*(char**)(item + 0x40) == (char*)self->mpMainMenu) {
+            if (self->mpTrickMenu != 0 && *(int*)(item + 0x18) != -1) {
                 cFEStateUberTrick_trickVisible(self, 1);
-                cFEStateUberTrick_updateTrickMenu(self);
-                cUIText* helpText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_helptext_choose));
+                cFEStateUberTrick_updateTrickMenu(((char*)self));
+                cUIText* helpText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_choose));
                 if (helpText != 0)
                     cUIText_setUnicodeStringByID(helpText, GetHashValue32(str_kT_66HELPChooseCat));
             } else {
                 cFEStateUberTrick_trickVisible(self, 0);
-                cUIText* helpText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_helptext_choose));
+                cUIText* helpText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_choose));
                 if (helpText != 0)
                     cUIText_setUnicodeStringByID(helpText, GetHashValue32(str_kT_FEHELPAcceptTrick));
             }
-        } else if (*(char**)(self + 0x50) != 0 && *(char**)(item + 0x40) == *(char**)(self + 0x50)) {
-            cUIText* helpText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_helptext_custom));
-            char* categoryItem = *(char**)(*(char**)(self + 0x4C) + 0xA0);
-            char* trickItem = *(char**)(*(char**)(self + 0x50) + 0xA0);
+        } else if ((char*)self->mpTrickMenu != 0 && *(char**)(item + 0x40) == (char*)self->mpTrickMenu) {
+            cUIText* helpText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_custom));
+            char* categoryItem = *(char**)((char*)self->mpMainMenu + 0xA0);
+            char* trickItem = *(char**)((char*)self->mpTrickMenu + 0xA0);
             if (categoryItem != 0 && trickItem != 0 && helpText != 0) {
                 int ai = *(signed char*)(categoryItem + 0x18);
                 int bi = *(signed char*)(trickItem + 0x18);
                 char* pi = (char*)cBE_getInterface_Fv(cBE_getBE(), 6);
                 cBE_getInterface_Fv(cBE_getBE(), 0);
-                if (func_00150048(pi, *(signed char*)(self + 0x44), ai, bi) && !func_0014FFB8(pi, *(signed char*)(self + 0x44), ai, bi)) {
+                if (func_00150048(pi, self->mUserNum, ai, bi) && !func_0014FFB8(pi, self->mUserNum, ai, bi)) {
                     cUIText_setUnicodeStringByID(helpText, GetHashValue32(str_kT_66HELPCustomUber));
                 } else if (D_00535C11[0] == 0) {
-                    if (func_0014FFB8(pi, *(signed char*)(self + 0x44), ai, bi)) {
+                    if (func_0014FFB8(pi, self->mUserNum, ai, bi)) {
                         char* player = (char*)cBE_getInterface_Fv(cBE_getBE(), 1);
-                        signed char charID = cBENewPlayerInterface_getPlayerCharID(player, *(signed char*)(self + 0x44));
+                        signed char charID = cBENewPlayerInterface_getPlayerCharID(player, self->mUserNum);
                         {
                             sVE_185268* vt = *(sVE_185268**)(player + 0xC);
                             ((void (*)(void*))vt[2].fn)(player + vt[2].delta);
                         }
-                        int points = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), *(signed char*)(self + 0x44), charID);
+                        int points = cBEEconInterface_getMoney(cBE_getInterface_Fv(cBE_getBE(), 11), self->mUserNum, charID);
                         int n;
-                        sTrick_185268* tbl = func_0014FF90(pi, *(signed char*)(self + 0x44), ai, &n);
+                        sTrick_185268* tbl = func_0014FF90(pi, self->mUserNum, ai, &n);
                         if (points >= tbl[bi].cost)
                             cUIText_setUnicodeStringByID(helpText, GetHashValue32(str_kT_FEHELPTrickAvailBuy));
                         else
@@ -865,12 +866,12 @@ extern "C" void cFEStateUberTrick_onWidgetEvent(char* self, char* item, int msg)
                 } else {
                     cUIText_setUnicodeStringByID(helpText, GetHashValue32(str_kT_FEHELPTrickBuyCTM));
                 }
-                cFEStateUberTrick_updateTrickMenuEntry(self);
+                cFEStateUberTrick_updateTrickMenuEntry(((char*)self));
             }
         }
         break;
     case 2:
-        *(int*)((char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, *(signed char*)(self + 0x44)) + 0xCD0) = 0;
+        *(int*)((char*)cFERiderManager_getHuman1((char*)SSXApp->RealFE + 0xB0, self->mUserNum) + 0xCD0) = 0;
         break;
     }
 }
@@ -889,9 +890,9 @@ INCLUDE_ASM("fe/festatestore", cFEStateUberTrick_onWidgetMenu);
  * @param event  the menu event
  * @return 0x100 or 0x101 as above
  */
-extern "C" int cFEStateUberTrick_onWidgetMenu(void* self, int menu, unsigned int event)
+extern "C" int cFEStateUberTrick_onWidgetMenu(cFEStateUberTrick* self, int menu, unsigned int event)
 {
-    if (menu == *(int*)((char*)self + 0x50)) {
+    if (menu == (int)self->mpTrickMenu) {
         switch (event) {
         case 9:
             return 0x100;

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festateubertrick.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -346,18 +347,18 @@ extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
  * @param userNum  the user number
  * @return @p self
  */
-extern "C" void* cFEStateUberTrick_cFEStateUberTrick(void* self, int engine, int userNum)
+extern "C" void* cFEStateUberTrick_cFEStateUberTrick(cFEStateUberTrick* self, int engine, int userNum)
 {
     signed char idx = userNum;
     func_0039E2A0(self);
-    *(void***)((char*)self + 0x8) = D_0046CCC0;
-    *(int*)((char*)self + 0xC) = 18;
-    *(signed char*)((char*)self + 0x44) = idx;
-    *(char*)((char*)self + 0x15) = cFECustom_getPlayerCtrlMask(**(void***)((char*)self + 0x10), idx);
-    *(int*)((char*)self + 0x4C) = 0;
-    *(int*)((char*)self + 0x50) = 0;
-    *(int*)((char*)self + 0x48) = 0;
-    return self;
+    self->mVtbl = D_0046CCC0;
+    self->mHashName = 18;
+    self->mUserNum = idx;
+    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, idx);
+    self->mpMainMenu = 0;
+    self->mpTrickMenu = 0;
+    self->mbModelVisible = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -392,21 +393,21 @@ public:
  * (setVisible, vtable slot 9); objects that are missing are skipped. cFEStateUberTrick_activateTrickMenu does the opposite. Called when the
  * state gains focus (cFEStateUberTrick_onGainFocus) and when the trick menu is left (event 6 in cFEStateUberTrick_onWidgetEvent).
  */
-extern "C" void cFEStateUberTrick_activateMainMenu(void* self)
+extern "C" void cFEStateUberTrick_activateMainMenu(cFEStateUberTrick* self)
 {
-    cUIObj_183B08* hiliteRight = (cUIObj_183B08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_hilite_right));
+    cUIObj_183B08* hiliteRight = (cUIObj_183B08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_hilite_right));
     if (hiliteRight != 0) {
         hiliteRight->setVisible(0);
     }
-    cUIObj_183B08* hiliteLeft = (cUIObj_183B08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_hilite_left));
+    cUIObj_183B08* hiliteLeft = (cUIObj_183B08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_hilite_left));
     if (hiliteLeft != 0) {
         hiliteLeft->setVisible(1);
     }
-    cUIObj_183B08* helpChoose = (cUIObj_183B08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_choose));
+    cUIObj_183B08* helpChoose = (cUIObj_183B08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_choose));
     if (helpChoose != 0) {
         helpChoose->setVisible(1);
     }
-    cUIObj_183B08* helpCustom = (cUIObj_183B08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_custom));
+    cUIObj_183B08* helpCustom = (cUIObj_183B08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_custom));
     if (helpCustom != 0) {
         helpCustom->setVisible(0);
     }
@@ -444,21 +445,21 @@ public:
  * (setVisible, vtable slot 9); objects that are missing are skipped. cFEStateUberTrick_activateMainMenu does the opposite. Called when a
  * category is accepted (event 5 in cFEStateUberTrick_onWidgetEvent).
  */
-extern "C" void cFEStateUberTrick_activateTrickMenu(void* self)
+extern "C" void cFEStateUberTrick_activateTrickMenu(cFEStateUberTrick* self)
 {
-    cUIObj_183C08* hiliteRight = (cUIObj_183C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_hilite_right));
+    cUIObj_183C08* hiliteRight = (cUIObj_183C08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_hilite_right));
     if (hiliteRight != 0) {
         hiliteRight->setVisible(1);
     }
-    cUIObj_183C08* hiliteLeft = (cUIObj_183C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_hilite_left));
+    cUIObj_183C08* hiliteLeft = (cUIObj_183C08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_hilite_left));
     if (hiliteLeft != 0) {
         hiliteLeft->setVisible(0);
     }
-    cUIObj_183C08* helpChoose = (cUIObj_183C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_choose));
+    cUIObj_183C08* helpChoose = (cUIObj_183C08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_choose));
     if (helpChoose != 0) {
         helpChoose->setVisible(0);
     }
-    cUIObj_183C08* helpCustom = (cUIObj_183C08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_helptext_custom));
+    cUIObj_183C08* helpCustom = (cUIObj_183C08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext_custom));
     if (helpCustom != 0) {
         helpCustom->setVisible(1);
     }

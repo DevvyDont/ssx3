@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festatemountainroom.h"
 #include "render/ps2graphicsman.h"
 #include "main/ssxapp.h"
 
@@ -64,15 +65,15 @@ struct sMountainRoomK2678 {
  * @param idx  the player number (On Tour userNum)
  * @return @p self
  */
-extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(void* self, void* ui, int idx)
+extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(cFEStateMountainRoom* self, void* ui, int idx)
 {
     signed char pl = idx;
     func_0039E2A0_Room(self, (int)ui);
-    *(int*)((char*)self + 0xC) = 43;
-    *(void***)((char*)self + 0x8) = cFEStateMountainRoom_vtbl;
+    self->mHashName = 43;
+    self->mVtbl = cFEStateMountainRoom_vtbl;
     sMountainRoomK2678* room = (sMountainRoomK2678*)self;
     room->player = pl;
-    *(char*)((char*)self + 0x15) = cFECustom_getPlayerCtrlMask(**(void***)((char*)self + 0x10), pl);
+    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, pl);
     room->f48 = 0;
     room->f50 = 0;
     room->f54 = 0;
@@ -117,7 +118,7 @@ extern "C" void* cFEStateMountainRoom_cFEStateMountainRoom(void* self, void* ui,
     room->fAC = cUITextureBank_getElementByHashname((char*)ui + 0x58, GetHashValue32(str_dot_loc_arrow));
     room->fA8 = cUITextureBank_getElementByHashname((char*)ui + 0x58, GetHashValue32(str_dot_visit_arrow));
     cFEStateMountainRoom_loadPeakPass_Room(self);
-    return self;
+    return ((void*)self);
 }
 #endif
 
@@ -141,21 +142,21 @@ extern "C" void func_0039E390(void* self, int flags);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-extern "C" void cFEStateMountainRoom__cFEStateMountainRoom(void* self, int flags)
+extern "C" void cFEStateMountainRoom__cFEStateMountainRoom(cFEStateMountainRoom* self, int flags)
 {
-    *(void***)((char*)self + 8) = cFEStateMountainRoom_vtbl;
-    int slot = *(int*)((char*)self + 0xBC);
+    self->mVtbl = cFEStateMountainRoom_vtbl;
+    int slot = self->mTextureFileIndex;
     if (slot >= 0) {
-        func_0019DC20((char*)SSXApp->RealFE + 0x1A70, *(int*)((char*)self + 0xB0), slot);
-        *(int*)((char*)self + 0xBC) = -1;
+        func_0019DC20((char*)SSXApp->RealFE + 0x1A70, self->mCharID, slot);
+        self->mTextureFileIndex = -1;
     }
-    int id = *(int*)((char*)self + 0xC4);
+    int id = self->mFrontTextureID;
     if (id >= 0) {
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         sVEntry001D28F8* vt = (sVEntry001D28F8*)ps2GraphicsMan->mVtbl;
         vt[50].fn((char*)ps2GraphicsMan + vt[50].delta, id);
     }
-    *(void***)((char*)self + 8) = D_0046D0D0;
+    self->mVtbl = D_0046D0D0;
     func_0039E390(self, flags);
 }
 #endif
@@ -183,23 +184,23 @@ extern char D_004A1508[];
  * Creates the mountain room screen ("125mountainroom"), labels the peak numbers 1-3, and calls
  * func_0028F140(.., 7) on the audio system.
  */
-extern "C" void cFEStateMountainRoom_onCreateScreen(void* self)
+extern "C" void cFEStateMountainRoom_onCreateScreen(cFEStateMountainRoom* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_125mountainroom), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cUIText* textObj1 = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Numb_1));
+    cUIText* textObj1 = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Numb_1));
     if (textObj1 != 0) {
         cUIText_setAsciiString(textObj1, D_004A14F8);
     }
-    cUIText* textObj2 = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Numb_2));
+    cUIText* textObj2 = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Numb_2));
     if (textObj2 != 0) {
         cUIText_setAsciiString(textObj2, D_004A1500);
     }
-    cUIText* textObj3 = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Numb_3));
+    cUIText* textObj3 = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Numb_3));
     if (textObj3 != 0) {
         cUIText_setAsciiString(textObj3, D_004A1508);
     }
@@ -210,7 +211,7 @@ extern "C" void cFEStateMountainRoom_onCreateScreen(void* self)
 //100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onGainFocus);
 #ifdef SKIP_ASM
-extern "C" void cFEStateMountainRoom_updateMarkers(void* self);
+extern "C" void cFEStateMountainRoom_updateMarkers(cFEStateMountainRoom* self);
 extern "C" void cFEState_onGainFocus(void* self, int a1);
 
 /**
@@ -221,7 +222,7 @@ extern "C" void cFEState_onGainFocus(void* self, int a1);
  *
  * @param pPrevState  the state that had focus before (On Tour: pPrevState), passed on to cFEState_onGainFocus()
  */
-extern "C" void cFEStateMountainRoom_onGainFocus(void* self, int pPrevState)
+extern "C" void cFEStateMountainRoom_onGainFocus(cFEStateMountainRoom* self, int pPrevState)
 {
     cFEStateMountainRoom_updateMarkers(self);
     cFEState_onGainFocus(self, pPrevState);
@@ -309,32 +310,31 @@ static inline void setW_2AD0(char* s, int off, sWidget_2AD0* w)
  *
  * @param w  the widget being created
  */
-extern "C" void cFEStateMountainRoom_onWidgetCreate(void* self, sWidget_2AD0* w)
+extern "C" void cFEStateMountainRoom_onWidgetCreate(cFEStateMountainRoom* self, sWidget_2AD0* w)
 {
-    char* state = (char*)self;
     int widgetHash = w->hash;
     if (widgetHash == GetHashValue32(str_screentitle)) {
         cUIText_setUnicodeStringByID((cUIText*)w, GetHashValue32(str_kT_TITLETrophyRoom));
         return;
     }
     if (widgetHash == GetHashValue32(str_Group_peak_pass)) {
-        setW_2AD0(state, 72, w);
+        setW_2AD0(((char*)self), 72, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_Front)) {
-        setW_2AD0(state, 76, w);
+        setW_2AD0(((char*)self), 76, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_peak_pass)) {
-        *(sWidget_2AD0**)(state + 0x50) = w;
+        self->mpPassIcon = (cUIIcon*)w;
         return;
     }
     if (widgetHash == GetHashValue32(str_level_numb_back) || widgetHash == GetHashValue32(str_level_numb_front)) {
         char buf[20];
         *(sName5_2AD0*)buf = D_00467298[0];
         func_00416210(buf + 5, 0, 15);
-        char* eng = *(char**)(state + 0x10);
-        buf[2] = *(unsigned char*)(state + 0xB8) + '0';
+        char* eng = (char*)self->mpEngine;
+        buf[2] = *(unsigned char*)&self->mLevel + '0';
         int hash = GetHashValue32(buf);
         int texElem = cUITextureBank_getElementByHashname(eng + 0x58, hash);
         w->f78 = -1;
@@ -342,83 +342,83 @@ extern "C" void cFEStateMountainRoom_onWidgetCreate(void* self, sWidget_2AD0* w)
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_race_0)) {
-        setW_2AD0(state, 88, w);
+        setW_2AD0(((char*)self), 88, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_race_1)) {
-        setW_2AD0(state, 92, w);
+        setW_2AD0(((char*)self), 92, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_race_2)) {
-        setW_2AD0(state, 0x60, w);
+        setW_2AD0(((char*)self), 0x60, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_race_3)) {
-        setW_2AD0(state, 100, w);
+        setW_2AD0(((char*)self), 100, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_race_4)) {
-        setW_2AD0(state, 104, w);
+        setW_2AD0(((char*)self), 104, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_slopestyle_0)) {
-        setW_2AD0(state, 108, w);
+        setW_2AD0(((char*)self), 108, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_slopestyle_1)) {
-        setW_2AD0(state, 0x70, w);
+        setW_2AD0(((char*)self), 0x70, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_slopestyle_2)) {
-        setW_2AD0(state, 116, w);
+        setW_2AD0(((char*)self), 116, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_superpipe_0)) {
-        setW_2AD0(state, 144, w);
+        setW_2AD0(((char*)self), 144, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_superpipe_1)) {
-        setW_2AD0(state, 148, w);
+        setW_2AD0(((char*)self), 148, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_superpipe_2)) {
-        setW_2AD0(state, 152, w);
+        setW_2AD0(((char*)self), 152, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_racebackcountry_0)) {
-        setW_2AD0(state, 0x78, w);
+        setW_2AD0(((char*)self), 0x78, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_racebackcountry_1)) {
-        setW_2AD0(state, 0x7C, w);
+        setW_2AD0(((char*)self), 0x7C, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_racebackcountry_2)) {
-        setW_2AD0(state, 0x80, w);
+        setW_2AD0(((char*)self), 0x80, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_freestylebackcountry_0)) {
-        setW_2AD0(state, 132, w);
+        setW_2AD0(((char*)self), 132, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_freestylebackcountry_1)) {
-        setW_2AD0(state, 136, w);
+        setW_2AD0(((char*)self), 136, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_freestylebackcountry_2)) {
-        setW_2AD0(state, 140, w);
+        setW_2AD0(((char*)self), 140, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_bigair_0)) {
-        setW_2AD0(state, 156, w);
+        setW_2AD0(((char*)self), 156, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_bigair_1)) {
-        setW_2AD0(state, 160, w);
+        setW_2AD0(((char*)self), 160, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_mrk_bigair_2)) {
-        setW_2AD0(state, 164, w);
+        setW_2AD0(((char*)self), 164, w);
         return;
     }
     if (widgetHash == GetHashValue32(str_Peak_pass_text)) {
@@ -438,7 +438,7 @@ extern "C" void cFEStateMountainRoom_onWidgetCreate(void* self, sWidget_2AD0* w)
         return;
     }
     if (widgetHash == GetHashValue32(str_helptext)) {
-        setW_2AD0(state, 84, w);
+        setW_2AD0(((char*)self), 84, w);
         return;
     }
 }
@@ -465,18 +465,18 @@ static inline int IsShown1D2EA0(char* self)
  * @return 1 when the peak pass was shown and is closed, otherwise 0
  */
 // Lodge menu: when the detail panel is shown and the widget accepts, plays the select sound and closes the panel.
-extern "C" int cFEStateMountainRoom_onInputBegin(char* self, char* widget)
+extern "C" int cFEStateMountainRoom_onInputBegin(cFEStateMountainRoom* self, char* widget)
 {
-    if (IsShown1D2EA0(self)) {
+    if (IsShown1D2EA0(((char*)self))) {
     sVEi1D2EA0* wvt = *(sVEi1D2EA0**)(widget + 8);
     if (wvt[6].fn(widget + wvt[6].delta)) {
-        char* snd = *(char**)(*(char**)(self + 0x10) + 0x14);
+        char* snd = *(char**)((char*)self->mpEngine + 0x14);
         if (snd == 0) {
             snd = &gUISoundNull;
         }
         sVEv1D2EA0* svt = *(sVEv1D2EA0**)snd;
         svt[2].fn(snd + svt[2].delta, 3);
-        char* w = *(char**)(self + 0x48);
+        char* w = (char*)self->mpPassGroup;
         sVEv1D2EA0* vt = *(sVEv1D2EA0**)(w + 8);
         vt[9].fn(w + vt[9].delta, 0);
     }
@@ -497,7 +497,7 @@ INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onWidgetMenu);
  * @return 0x100 for events 8 and 9, otherwise 0x101
  */
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int cFEStateMountainRoom_onWidgetMenu(void* self, int menu, unsigned int key)
+extern "C" int cFEStateMountainRoom_onWidgetMenu(cFEStateMountainRoom* self, int menu, unsigned int key)
 {
     int result = 257;
     if (key < 10) {
@@ -558,7 +558,7 @@ struct sText_MR {
  * @param msg  widget event number (On Tour Event)
  */
 // Widget events of the mountain-room menu: opens sub-screens and updates the description text.
-extern "C" void cFEStateMountainRoom_onWidgetEvent(char* self, char* w, unsigned int msg)
+extern "C" void cFEStateMountainRoom_onWidgetEvent(cFEStateMountainRoom* self, char* w, unsigned int msg)
 {
     if (w == 0) {
         return;
@@ -567,25 +567,25 @@ extern "C" void cFEStateMountainRoom_onWidgetEvent(char* self, char* w, unsigned
     case 5: {
         int idx = *(int*)(w + 0x18);
         if (idx == 0) {
-            cFEStateMountainRoom_showPassFront_MR(self);
+            cFEStateMountainRoom_showPassFront_MR(((char*)self));
             break;
         }
-        sFactory_MR* factory = **(sFactory_MR***)(self + 0x10);
-        void* nextState = factory->vt[4].fn((char*)factory + factory->vt[4].delta, self, idx - 1);
-        cUIStateStack_push_MR(*(char**)(self + 0x10) + 0x18, nextState);
+        sFactory_MR* factory = *(sFactory_MR**)self->mpEngine;
+        void* nextState = factory->vt[4].fn((char*)factory + factory->vt[4].delta, ((char*)self), idx - 1);
+        cUIStateStack_push_MR((char*)self->mpEngine + 0x18, nextState);
         break;
     }
     case 6: {
-        sFactory_MR* factory = **(sFactory_MR***)(self + 0x10);
-        void* nextState = factory->vt[5].fn((char*)factory + factory->vt[5].delta, self, *(int*)(w + 0x18));
+        sFactory_MR* factory = *(sFactory_MR**)self->mpEngine;
+        void* nextState = factory->vt[5].fn((char*)factory + factory->vt[5].delta, ((char*)self), *(int*)(w + 0x18));
         if (nextState == 0) {
             break;
         }
-        cUIStateStack_push_MR(*(char**)(self + 0x10) + 0x18, nextState);
+        cUIStateStack_push_MR((char*)self->mpEngine + 0x18, nextState);
         break;
     }
     case 1: {
-        if (*(void**)(self + 0x54) == 0) {
+        if (self->mpHelpText == 0) {
             break;
         }
         int stringId = 0;
@@ -597,23 +597,23 @@ extern "C" void cFEStateMountainRoom_onWidgetEvent(char* self, char* w, unsigned
             stringId = GetHashValue32(str_kT_HELPViewTrophies);
             break;
         case 2:
-            if (*(int*)(self + 0xB4) > 0) {
+            if (self->mPeakNum > 0) {
                 stringId = GetHashValue32(str_kT_HELPViewTrophies);
             } else {
                 stringId = GetHashValue32(str_kT_MAPHELPLockedPeak2);
             }
             break;
         case 3:
-            if (*(int*)(self + 0xB4) >= 2) {
+            if (self->mPeakNum >= 2) {
                 stringId = GetHashValue32(str_kT_HELPViewTrophies);
             } else {
                 stringId = GetHashValue32(str_kT_MAPHELPLockedPeak3);
             }
             break;
         }
-        sText_MR* helpText = *(sText_MR**)(self + 0x54);
+        sText_MR* helpText = (sText_MR*)self->mpHelpText;
         helpText->vt[9].fn((char*)helpText + helpText->vt[9].delta, 1);
-        cUIText_setUnicodeStringByID(*(cUIText**)(self + 0x54), stringId);
+        cUIText_setUnicodeStringByID(self->mpHelpText, stringId);
         break;
     }
     }
@@ -623,7 +623,7 @@ extern "C" void cFEStateMountainRoom_onWidgetEvent(char* self, char* w, unsigned
 //100%
 INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_onUpdate);
 #ifdef SKIP_ASM
-extern "C" void cFEStateMountainRoom_updateTextureLoad(void* self);
+extern "C" void cFEStateMountainRoom_updateTextureLoad(cFEStateMountainRoom* self);
 extern "C" void* cUIState_onUpdate(void* self);
 
 /**
@@ -633,9 +633,9 @@ extern "C" void* cUIState_onUpdate(void* self);
  * handed to GrMan under the name "pass" and attached to the widget at 0x50, and the slot is released. Then runs
  * the base UI-state update cUIState_onUpdate().
  */
-extern "C" void cFEStateMountainRoom_onUpdate(void* self)
+extern "C" void cFEStateMountainRoom_onUpdate(cFEStateMountainRoom* self)
 {
-    if (~*(int*)((char*)self + 0xBC) != 0) {
+    if (~self->mTextureFileIndex != 0) {
         cFEStateMountainRoom_updateTextureLoad(self);
     }
     cUIState_onUpdate(self);
@@ -655,12 +655,12 @@ extern "C" int func_0019DA10(void* self, int bank, int id, int a3, int a4, int a
  * arguments 10, 1, 0, and keeps the returned slot at +0xBC. cFEStateMountainRoom_onUpdate finishes the load through
  * cFEStateMountainRoom_updateTextureLoad.
  */
-extern "C" void cFEStateMountainRoom_loadPeakPass(void* self)
+extern "C" void cFEStateMountainRoom_loadPeakPass(cFEStateMountainRoom* self)
 {
-    if (*(int*)((char*)self + 0xBC) < 0) {
-        void* item = *(void**)((char*)self + 0xC0);
+    if (self->mTextureFileIndex < 0) {
+        void* item = self->mpPeakPassInfo;
         if (item != 0) {
-            *(int*)((char*)self + 0xBC) = func_0019DA10((char*)SSXApp->RealFE + 0x1A70, *(int*)((char*)self + 0xB0), *(int*)((char*)item + 4), 10, 1, 0);
+            self->mTextureFileIndex = func_0019DA10((char*)SSXApp->RealFE + 0x1A70, self->mCharID, *(int*)((char*)item + 4), 10, 1, 0);
         }
     }
 }
@@ -671,7 +671,7 @@ INCLUDE_ASM("fe/ovstatelodge", cFEStateMountainRoom_updateTextureLoad);
 #ifdef SKIP_ASM
 extern "C" int func_0019E238(void* mgr, int bank, int i);
 extern "C" void* func_0019E2B0(void* mgr, int bank, int i);
-extern "C" void cFEStateMountainRoom_showPassFront(void* self);
+extern "C" void cFEStateMountainRoom_showPassFront(cFEStateMountainRoom* self);
 extern char str_pass[];
 
 struct sVE_31C0 {
@@ -703,39 +703,38 @@ static inline int isActive_31C0(sWidget_31C0* w)
  *
  * @param vself  the mountain-room state (this)
  */
-extern "C" void cFEStateMountainRoom_updateTextureLoad(void* vself)
+extern "C" void cFEStateMountainRoom_updateTextureLoad(cFEStateMountainRoom* vself)
 {
-    char* self = (char*)vself;
     char* mgr = (char*)SSXApp->RealFE + 0x1A70;
-    if (*(void**)(self + 0x50) == 0) {
+    if (vself->mpPassIcon == 0) {
         return;
     }
-    if (func_0019E238(mgr, *(int*)(self + 0xB0), *(int*)(self + 0xBC)) == 0) {
+    if (func_0019E238(mgr, vself->mCharID, vself->mTextureFileIndex) == 0) {
         return;
     }
-    char* fileData = (char*)func_0019E2B0(mgr, *(int*)(self + 0xB0), *(int*)(self + 0xBC));
+    char* fileData = (char*)func_0019E2B0(mgr, vself->mCharID, vself->mTextureFileIndex);
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     sVE_31C0* vt = (sVE_31C0*)ps2GraphicsMan->mVtbl;
     int id = vt[46].fn((char*)ps2GraphicsMan + vt[46].delta, fileData + *(int*)(fileData + 0x14), str_pass, 0, 1, -1);
-    char* snd = *(char**)(self + 0x50);
-    *(int*)(self + 0xC4) = id;
+    char* snd = (char*)vself->mpPassIcon;
+    vself->mFrontTextureID = id;
     *(int*)(snd + 0x78) = id;
     *(int*)(snd + 0x7C) = 0;
-    sWidget_31C0* passGroup = *(sWidget_31C0**)(self + 0x48);
+    sWidget_31C0* passGroup = (sWidget_31C0*)vself->mpPassGroup;
     if (isActive_31C0(passGroup)) {
         int both = 0;
         if (isActive_31C0(passGroup)) {
-            sWidget_31C0* passFrontGroup = *(sWidget_31C0**)(self + 0x4C);
+            sWidget_31C0* passFrontGroup = (sWidget_31C0*)vself->mpPassFrontGroup;
             if (passFrontGroup != 0) {
                 both = (passFrontGroup->flags >> 6) & 1;
             }
         }
         if (!both) {
-            cFEStateMountainRoom_showPassFront(self);
+            cFEStateMountainRoom_showPassFront(vself);
         }
     }
-    func_0019DC20(mgr, *(int*)(self + 0xB0), *(int*)(self + 0xBC));
-    *(int*)(self + 0xBC) = -1;
+    func_0019DC20(mgr, vself->mCharID, vself->mTextureFileIndex);
+    vself->mTextureFileIndex = -1;
 }
 #endif
 
@@ -754,15 +753,15 @@ struct sVEntry_cFEStateMountainRoom_showPassFront {
  *
  * Both through virtual slot 9 (show) of the widget's vtable at +0x8 with 1.
  */
-extern "C" void cFEStateMountainRoom_showPassFront(void* self)
+extern "C" void cFEStateMountainRoom_showPassFront(cFEStateMountainRoom* self)
 {
     {
-        void* obj = *(void**)((char*)self + 0x48);
+        void* obj = self->mpPassGroup;
         sVEntry_cFEStateMountainRoom_showPassFront* vt = *(sVEntry_cFEStateMountainRoom_showPassFront**)((char*)obj + 0x8);
         vt[9].fn((char*)obj + vt[9].delta, 1);
     }
-    if (*(int*)((char*)self + 0xC4) >= 0) {
-        void* obj = *(void**)((char*)self + 0x4C);
+    if (self->mFrontTextureID >= 0) {
+        void* obj = self->mpPassFrontGroup;
         sVEntry_cFEStateMountainRoom_showPassFront* vt = *(sVEntry_cFEStateMountainRoom_showPassFront**)((char*)obj + 0x8);
         vt[9].fn((char*)obj + vt[9].delta, 1);
     }
@@ -838,7 +837,7 @@ static inline void wColour_3340(cWidget_3340* w, int col)
  *
  * @param mountainRoom  the mountain-room state (this)
  */
-extern "C" void cFEStateMountainRoom_updateMarkers(void* mountainRoom)
+extern "C" void cFEStateMountainRoom_updateMarkers(cFEStateMountainRoom* mountainRoom)
 {
     sLodge_3340* self = (sLodge_3340*)mountainRoom;
     int n0 = 0;

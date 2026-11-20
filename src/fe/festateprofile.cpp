@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/festateriderbio.h"
 #include "be/beintnewrace.h"
 #include "main/ssxapp.h"
 
@@ -1476,15 +1477,15 @@ extern "C" unsigned char cFECustom_getPlayerCtrlMask(void* self, int a1);
  * @param userNum  the user number
  * @return @p self
  */
-extern "C" void* cFEStateRiderBio_cFEStateRiderBio(void* self, int engine, int userNum)
+extern "C" void* cFEStateRiderBio_cFEStateRiderBio(cFEStateRiderBio* self, int engine, int userNum)
 {
     signed char idx = userNum;
     func_0039E2A0(self);
-    *(void***)((char*)self + 0x8) = cFEStateRiderBio_vtbl;
-    *(int*)((char*)self + 0xC) = 0xF;
-    *(signed char*)((char*)self + 0x44) = idx;
-    *(char*)((char*)self + 0x15) = cFECustom_getPlayerCtrlMask(**(void***)((char*)self + 0x10), idx);
-    return self;
+    self->mVtbl = cFEStateRiderBio_vtbl;
+    self->mHashName = 0xF;
+    self->mUserNum = idx;
+    *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask(*(void**)self->mpEngine, idx);
+    return ((void*)self);
 }
 #endif
 
