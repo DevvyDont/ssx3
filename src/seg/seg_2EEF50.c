@@ -11,32 +11,32 @@ extern unsigned char D_004963C0[];
  * A string that starts with " or ' ends at the matching quote, an unquoted one at the first control character (below
  * 0x20). Characters are compared through the upper-case table D_004963C0. No retail code calls it.
  *
- * @param a  the first string
- * @param b  the second string (not checked for null)
- * @return -1 when @p a is null or empty, else the difference of the first differing characters (0 when equal)
+ * @param leftText  the first string
+ * @param rightText  the second string (not checked for null)
+ * @return -1 when @p leftText is null or empty, else the difference of the first differing characters (0 when equal)
  */
-int func_003EDF50(char *a, char *b) {
+int func_003EDF50(char *leftText, char *rightText) {
     unsigned qa, qb;
     unsigned ca, cb;
-    if (a == 0 || *a == 0) return -1;
-    if (*a == '"' || *a == '\'') {
-        qa = *(unsigned char *)a;
-        a++;
+    if (leftText == 0 || *leftText == 0) return -1;
+    if (*leftText == '"' || *leftText == '\'') {
+        qa = *(unsigned char *)leftText;
+        leftText++;
     } else {
         qa = 0;
     }
-    if (*b == '"' || *b == '\'') {
-        qb = *(unsigned char *)b;
-        b++;
+    if (*rightText == '"' || *rightText == '\'') {
+        qb = *(unsigned char *)rightText;
+        rightText++;
     } else {
         qb = 0;
     }
     do {
-        ca = D_004963C0[(int)*a];
-        a++;
+        ca = D_004963C0[(int)*leftText];
+        leftText++;
         if (ca == qa || (ca < 0x20 && qa == 0)) ca = 0;
-        cb = D_004963C0[(int)*b];
-        b++;
+        cb = D_004963C0[(int)*rightText];
+        rightText++;
         if (cb == qb || (cb < 0x20 && qb == 0)) cb = 0;
     } while (ca == cb && ca != 0);
     return ca - cb;
@@ -776,24 +776,24 @@ extern unsigned char D_00496A58[];
  * Both strings go through D_00496A58, which upper-cases letters and maps characters 1 to 0x20 to 1; those are skipped.
  * Used as the hash tables' default key compare.
  *
- * @param a  the first string
- * @param b  the second string
+ * @param leftText  the first string
+ * @param rightText  the second string
  * @return the difference of the first differing characters, or 0 when equal
  */
-int func_003EEAB8(unsigned char* a, unsigned char* b) {
-    int c1, c2, d;
+int func_003EEAB8(unsigned char* leftText, unsigned char* rightText) {
+    int leftChar, rightChar, charDiff;
     do {
         do {
-            c1 = D_00496A58[*a++];
-        } while (c1 == 1);
+            leftChar = D_00496A58[*leftText++];
+        } while (leftChar == 1);
         do {
-            c2 = D_00496A58[*b++];
-        } while (c2 == 1);
-        d = c1 - c2;
-        if (d != 0) {
-            return d;
+            rightChar = D_00496A58[*rightText++];
+        } while (rightChar == 1);
+        charDiff = leftChar - rightChar;
+        if (charDiff != 0) {
+            return charDiff;
         }
-    } while (c1 != 0);
+    } while (leftChar != 0);
     return 0;
 }
 #endif
@@ -1141,22 +1141,22 @@ extern void func_0040BFE0(void*);
  */
 int func_003EF090(void) {
     func_003EF090_clock c;
-    int a;
-    int b;
+    int firstSecs;
+    int secondSecs;
     if (D_004A4A94 == -1) {
         *(long*)&c = 0;
         c.day = 2;
         c.month = 1;
         c.year = 1;
         func_0040BFD8(&c);
-        a = BCD(c.day) * 86400 + BCD(c.hour) * 3600 + BCD(c.minute) * 60 + BCD(c.second);
+        firstSecs = BCD(c.day) * 86400 + BCD(c.hour) * 3600 + BCD(c.minute) * 60 + BCD(c.second);
         *(long*)&c = 0;
         c.day = 2;
         c.month = 1;
         c.year = 1;
         func_0040BFE0(&c);
-        b = BCD(c.day) * 86400 + BCD(c.hour) * 3600 + BCD(c.minute) * 60 + BCD(c.second);
-        D_004A4A94 = b - a;
+        secondSecs = BCD(c.day) * 86400 + BCD(c.hour) * 3600 + BCD(c.minute) * 60 + BCD(c.second);
+        D_004A4A94 = secondSecs - firstSecs;
     }
     return D_004A4A94;
 }
@@ -1566,17 +1566,17 @@ char* func_003EFCD8_p(char* s, int* lo, int* hi) __asm__("func_003EFCD8");
 /**
  * Parses one "lo:hi" hexadecimal range from a list, skipping a following comma.
  *
- * @param s  the text
+ * @param rangeText  the text
  * @param lo  receives the start
  * @param hi  receives the end
  * @return the position after the range, or 0 when the ':' is missing
  */
-char* func_003EFCD8_p(char* s, int* lo, int* hi) {
-    s = func_003EFC68(s, lo);
-    if (*s++ != ':') return 0;
-    s = func_003EFC68(s, hi);
-    if (*s == ',') s++;
-    return s;
+char* func_003EFCD8_p(char* rangeText, int* lo, int* hi) {
+    rangeText = func_003EFC68(rangeText, lo);
+    if (*rangeText++ != ':') return 0;
+    rangeText = func_003EFC68(rangeText, hi);
+    if (*rangeText == ',') rangeText++;
+    return rangeText;
 }
 #endif
 
@@ -1595,34 +1595,34 @@ extern unsigned int D_004A4A9C;
  *
  * Starts an MD5 context (func_003F30F0, the 0x67452301... constants), adds the range-list text (func_003F3128), then
  * parses its "lo:hi," entries (func_003EFCD8) until one is empty and adds every range with lo < hi inside [D_004A4A98,
- * D_004A4A9C) (0x00100000 to 0x02000000); then adds the text again and finishes into @p c (func_003F31F8).
+ * D_004A4A9C) (0x00100000 to 0x02000000); then adds the text again and finishes into @p digestOut (func_003F31F8).
  * LobbyMan_onauthentication calls it.
  *
- * @param a  the range-list text
- * @param b  its length
- * @param c  the digest output
- * @param d  the digest output size
+ * @param rangeSpec  the range-list text
+ * @param specLen  its length
+ * @param digestOut  the digest output
+ * @param digestLen  the digest output size
  */
-void func_003EFD30(unsigned int a, int b, int c, int d) {
+void func_003EFD30(unsigned int rangeSpec, int specLen, int digestOut, int digestLen) {
     char buf[96];
     unsigned int lo, hi;
     unsigned int orig;
     func_003F30F0(buf);
-    orig = a;
-    func_003F3128(buf, orig, b);
+    orig = rangeSpec;
+    func_003F3128(buf, orig, specLen);
     if (orig) {
         do {
-            a = func_003EFCD8(a, &lo, &hi);
+            rangeSpec = func_003EFCD8(rangeSpec, &lo, &hi);
             if (!lo || !hi) {
                 break;
             }
             if (lo >= D_004A4A98 && hi < D_004A4A9C && lo < hi) {
                 func_003F3128(buf, lo, hi - lo);
             }
-        } while (a);
+        } while (rangeSpec);
     }
-    func_003F3128(buf, orig, b);
-    func_003F31F8(buf, c, d);
+    func_003F3128(buf, orig, specLen);
+    func_003F31F8(buf, digestOut, digestLen);
 }
 #endif
 

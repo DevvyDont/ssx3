@@ -17,20 +17,20 @@ struct Cubic_D5A8 {
  * With t = @p x - X0 (+0x10) it returns A t^3 + B t^2 + C t + D from the segment's coefficients (+0x0 to +0xC, On Tour
  * cCSICubicSpline).
  *
- * @param p  the segment (A, B, C, D, X0)
+ * @param spline  the segment (A, B, C, D, X0)
  * @param x  where to evaluate
  * @return the cubic's value
  */
-extern "C" float func_0031D5A8(Cubic_D5A8 *p, float x) {
-    float t = x - p->x0;
-    float a = p->a;
-    float b = p->b;
-    float c = p->c;
-    float d = p->d;
-    float t2 = t * t;
-    float r = c * t + d;
-    r += b * t2;
-    return t * a * t2 + r;
+extern "C" float func_0031D5A8(Cubic_D5A8 *spline, float x) {
+    float relX = x - spline->x0;
+    float coefA = spline->a;
+    float coefB = spline->b;
+    float coefC = spline->c;
+    float coefD = spline->d;
+    float relXSq = relX * relX;
+    float lowerTerms = coefC * relX + coefD;
+    lowerTerms += coefB * relXSq;
+    return relX * coefA * relXSq + lowerTerms;
 }
 #endif
 

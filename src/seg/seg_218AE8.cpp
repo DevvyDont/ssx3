@@ -171,10 +171,10 @@ extern int D_004A3E80;
  *
  * func_00317D18 reads it back; no retail code calls either.
  *
- * @param arg0  the new mask
+ * @param mask  the new mask
  */
-extern "C" void func_00317D10(int arg0) {
-    D_004A3E80 = arg0;
+extern "C" void func_00317D10(int mask) {
+    D_004A3E80 = mask;
 }
 #endif
 

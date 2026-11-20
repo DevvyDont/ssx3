@@ -186,11 +186,11 @@ extern "C" void func_003194F0(cBXString_94F0* self)
 {
     cBXString_copyBeforeWrite(self);
     char* end = 0;
-    char* p;
-    for (p = self->str; *p != 0; p++) {
+    char* scanPos;
+    for (scanPos = self->str; *scanPos != 0; scanPos++) {
         if (end == 0)
-            end = p;
-        if (!(D_00499C81[(int)*p] & 8))
+            end = scanPos;
+        if (!(D_00499C81[(int)*scanPos] & 8))
             end = 0;
     }
     if (end != 0) {
@@ -222,11 +222,11 @@ extern unsigned char D_00499C81[];
 extern "C" void func_00319578(cBXString_9578* self)
 {
     cBXString_copyBeforeWrite(self);
-    char* p = self->str;
-    while (D_00499C81[(int)*p] & 8)
-        p++;
-    int len = *(int*)(self->str - 8) - (p - self->str);
-    func_0041610C(self->str, p, len + 1);
+    char* textStart = self->str;
+    while (D_00499C81[(int)*textStart] & 8)
+        textStart++;
+    int len = *(int*)(self->str - 8) - (textStart - self->str);
+    func_0041610C(self->str, textStart, len + 1);
     *(int*)(self->str - 8) = len;
 }
 #endif

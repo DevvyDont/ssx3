@@ -26,41 +26,41 @@ void func_003EFF40_impl(char *self, char *x, struct I_FF40 *info) __asm__("func_
  * @param info  the packet: [1] command tag, [2] kind, [3] text
  */
 void func_003EFF40_impl(char *self, char *x, struct I_FF40 *info) {
-    int a, b;
+    int cmdTag, kindTag;
     int n, flag;
     int cr;
-    char *p;
-    char *s = info->fC;
+    char *scanPos;
+    char *bodyText = info->fC;
 
-    b = info->f8;
-    if (b == 0) b = 0x2D2D2D2D;
-    a = info->f4;
-    if (a == -1) {
-        a = 0x2A2A2A2A;
-        if (b == -1) {
-            b = 0x636F6E6E;
-        } else if (b == (int)0xFEFEFEFE) {
-            b = 0x64697363;
+    kindTag = info->f8;
+    if (kindTag == 0) kindTag = 0x2D2D2D2D;
+    cmdTag = info->f4;
+    if (cmdTag == -1) {
+        cmdTag = 0x2A2A2A2A;
+        if (kindTag == -1) {
+            kindTag = 0x636F6E6E;
+        } else if (kindTag == (int)0xFEFEFEFE) {
+            kindTag = 0x64697363;
         } else {
-            b = 0x2D2D2D2D;
+            kindTag = 0x2D2D2D2D;
         }
     }
-    func_003EFED0(self, D_00496B58_FF40, x, a >> 24, a >> 16, a >> 8, a, b >> 24, b >> 16, b >> 8, b);
+    func_003EFED0(self, D_00496B58_FF40, x, cmdTag >> 24, cmdTag >> 16, cmdTag >> 8, cmdTag, kindTag >> 24, kindTag >> 16, kindTag >> 8, kindTag);
     n = 0;
     flag = 0;
-    if (*s != 0 && *s < 0x7F) {
+    if (*bodyText != 0 && *bodyText < 0x7F) {
         cr = 13;
-        p = s;        do {
-            unsigned char c = *p;
-            char ch = *p;
+        scanPos = bodyText;        do {
+            unsigned char curByte = *scanPos;
+            char ch = *scanPos;
             if (ch < 0x20) {
-                if ((unsigned)(c - 9) < 2) continue;
+                if ((unsigned)(curByte - 9) < 2) continue;
                 if (ch != cr) {
                     flag = 1;
                     break;
                 }
             }
-        } while (p++, n++, *p != 0 && *p < 0x7F);
+        } while (scanPos++, n++, *scanPos != 0 && *scanPos < 0x7F);
     }
     if (n == 0) {
         func_003EFED0(self, D_00496B70_FF40);
@@ -69,7 +69,7 @@ void func_003EFF40_impl(char *self, char *x, struct I_FF40 *info) {
     } else if (n >= 513) {
         func_003EFED0(self, D_00496B90_FF40);
     } else {
-        func_003EFED0(self, D_004A4AD0_FF40, s);
+        func_003EFED0(self, D_004A4AD0_FF40, bodyText);
     }
 }
 #endif

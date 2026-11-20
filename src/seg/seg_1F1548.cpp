@@ -693,21 +693,21 @@ extern "C" void cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter();
 extern char D_004881E8[];
 
 /**
- * Constructs an attached dynamic emitter (0x210 bytes, "cAttachedDynamicEmitter") on @p arg0 and returns it.
+ * Constructs an attached dynamic emitter (0x210 bytes, "cAttachedDynamicEmitter") on @p emitter and returns it.
  *
  * Runs the cBaseClass_DynamicEmitter constructor, then installs the subclass vtable D_004881E8 (+0x1F8) and zeroes the
  * attach-bone index (+0x200), the stopped flag (+0x204) and the pulse phase (+0x208). func_002F2130 is its only caller.
  *
- * @param arg0  the memory to construct in
- * @return the constructed emitter (@p arg0)
+ * @param emitter  the memory to construct in
+ * @return the constructed emitter (@p emitter)
  */
-extern "C" void *func_002F1768(void *arg0) {
+extern "C" void *func_002F1768(void *emitter) {
     cBaseClass_DynamicEmitter_cBaseClass_DynamicEmitter();
-    *(int *)((char*)arg0 + 0x200) = 0;
-    *(char **)((char*)arg0 + 0x1F8) = D_004881E8;
-    *(int *)((char*)arg0 + 0x204) = 0;
-    *(int *)((char*)arg0 + 0x208) = 0;
-    return arg0;
+    *(int *)((char*)emitter + 0x200) = 0;
+    *(char **)((char*)emitter + 0x1F8) = D_004881E8;
+    *(int *)((char*)emitter + 0x204) = 0;
+    *(int *)((char*)emitter + 0x208) = 0;
+    return emitter;
 }
 #endif
 
@@ -723,11 +723,11 @@ extern char D_004881E8[];
  * Slot 4 of D_004881E8. The g++ delete flags arrive in the second argument register, which this body leaves alone, so
  * cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter receives them and frees the object when bit 0 is set.
  *
- * @param arg0  the emitter
+ * @param emitter  the emitter
  */
-extern "C" void func_002F17A8(void *arg0) {
-    *(char **)((char*)arg0 + 0x1F8) = D_004881E8;
-    cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(arg0);
+extern "C" void func_002F17A8(void *emitter) {
+    *(char **)((char*)emitter + 0x1F8) = D_004881E8;
+    cBaseClass_DynamicEmitter__cBaseClass_DynamicEmitter(emitter);
 }
 #endif
 
@@ -791,20 +791,20 @@ extern char D_004881D0[];
  * The attached-emitter FX object (0xA8 bytes, "AttachedEmitterFX"): +0x0 bones-looked-up flag, +0x4 26 bone indices,
  * +0x6C 10 emitter slots, +0x94 model, +0x98 cRider, +0x9C front-end rider, +0xA0 spread flag, +0xA4 vtable D_004881D0.
  *
- * Clears the model and the front-end rider, stores @p arg1 as the rider (+0x98) and the vtable, then sets the object up
+ * Clears the model and the front-end rider, stores @p rider as the rider (+0x98) and the vtable, then sets the object up
  * with func_002F18D8. The cRider constructor builds one into mAttachedEmitterFX.
  *
- * @param arg0  the memory to construct in (0xA8 bytes)
- * @param arg1  the owning cRider
- * @return the constructed object (@p arg0)
+ * @param emitterFx  the memory to construct in (0xA8 bytes)
+ * @param rider  the owning cRider
+ * @return the constructed object (@p emitterFx)
  */
-extern "C" void *func_002F1850(void *arg0, int arg1) {
-    *(int *)((char*)arg0 + 0x94) = 0;
-    *(int *)((char*)arg0 + 0x9C) = 0;
-    *(char **)((char*)arg0 + 0xA4) = D_004881D0;
-    *(int *)((char*)arg0 + 0x98) = arg1;
-    func_002F18D8(arg0);
-    return arg0;
+extern "C" void *func_002F1850(void *emitterFx, int rider) {
+    *(int *)((char*)emitterFx + 0x94) = 0;
+    *(int *)((char*)emitterFx + 0x9C) = 0;
+    *(char **)((char*)emitterFx + 0xA4) = D_004881D0;
+    *(int *)((char*)emitterFx + 0x98) = rider;
+    func_002F18D8(emitterFx);
+    return emitterFx;
 }
 #endif
 
@@ -818,21 +818,21 @@ extern char D_004881D0[];
 /**
  * Constructs an attached-emitter FX object for a front-end rider and returns it.
  *
- * Like func_002F1850, but the cRider slot (+0x98) stays 0 and @p arg1 goes to +0x9C; after the set-up (func_002F18D8)
+ * Like func_002F1850, but the cRider slot (+0x98) stays 0 and @p feRider goes to +0x9C; after the set-up (func_002F18D8)
  * it also clears the spread flag (func_002F1A00). The front-end rider builds one at its +0xC70.
  *
- * @param arg0  the memory to construct in (0xA8 bytes)
- * @param arg1  the owning front-end rider
- * @return the constructed object (@p arg0)
+ * @param emitterFx  the memory to construct in (0xA8 bytes)
+ * @param feRider  the owning front-end rider
+ * @return the constructed object (@p emitterFx)
  */
-extern "C" void *func_002F1890(void *arg0, int arg1) {
-    *(int *)((char*)arg0 + 0x94) = 0;
-    *(int *)((char*)arg0 + 0x98) = 0;
-    *(int *)((char*)arg0 + 0x9C) = arg1;
-    *(char **)((char*)arg0 + 0xA4) = D_004881D0;
-    func_002F18D8(arg0);
-    func_002F1A00(arg0);
-    return arg0;
+extern "C" void *func_002F1890(void *emitterFx, int feRider) {
+    *(int *)((char*)emitterFx + 0x94) = 0;
+    *(int *)((char*)emitterFx + 0x98) = 0;
+    *(int *)((char*)emitterFx + 0x9C) = feRider;
+    *(char **)((char*)emitterFx + 0xA4) = D_004881D0;
+    func_002F18D8(emitterFx);
+    func_002F1A00(emitterFx);
+    return emitterFx;
 }
 #endif
 
@@ -848,15 +848,15 @@ extern int D_004A3BB4;
  * The first instance (the count D_004A3BB4 still 0) loads the shared type table with func_002F17D0; the count then goes
  * up by one.
  *
- * @param arg0  the attached-emitter FX object
+ * @param emitterFx  the attached-emitter FX object
  */
-extern "C" void func_002F18D8(void *arg0) {
+extern "C" void func_002F18D8(void *emitterFx) {
     if (D_004A3BB4 == 0) {
         func_002F17D0();
     }
     D_004A3BB4 += 1;
     for (int i = 9; i >= 0; i--)
-        *(int *)((char*)arg0 + 0x6C + i * 4) = 0;
+        *(int *)((char*)emitterFx + 0x6C + i * 4) = 0;
 }
 #endif
 
@@ -880,30 +880,30 @@ struct Obj1940 : Base1940 {
  *
  * Slot 1 of the vtable D_004881D0 (restored at +0xA4 first). Drops the instance count D_004A3BB4 and calls
  * func_002F1810 when it reaches 0, then deletes every emitter in the 10 slots (+0x6C) through its virtual destructor
- * and clears the slot. Frees the object when bit 0 of @p arg1 is set.
+ * and clears the slot. Frees the object when bit 0 of @p flags is set.
  *
- * @param arg0  the attached-emitter FX object
- * @param arg1  the g++ destructor flags (bit 0: free the memory)
+ * @param emitterFx  the attached-emitter FX object
+ * @param flags  the g++ destructor flags (bit 0: free the memory)
  */
-extern "C" void func_002F1940(void *arg0, int arg1) {
-    int c = D_004A3BB4 - 1;
-    *(char **)((char*)arg0 + 0xA4) = D_004881D0;
-    D_004A3BB4 = c;
-    if (c == 0) {
+extern "C" void func_002F1940(void *emitterFx, int flags) {
+    int remaining = D_004A3BB4 - 1;
+    *(char **)((char*)emitterFx + 0xA4) = D_004881D0;
+    D_004A3BB4 = remaining;
+    if (remaining == 0) {
         func_002F1810();
     }
-    Obj1940 **p = (Obj1940 **)((char*)arg0 + 0x6C);
+    Obj1940 **slot = (Obj1940 **)((char*)emitterFx + 0x6C);
     int n = 9;
     do {
-        if (*p != 0) {
-            delete *p;
+        if (*slot != 0) {
+            delete *slot;
         }
-        *p = 0;
+        *slot = 0;
         n--;
-        p++;
+        slot++;
     } while (n >= 0);
-    if (arg1 & 1) {
-        operator_delete((int *)arg0);
+    if (flags & 1) {
+        operator_delete((int *)emitterFx);
     }
 }
 #endif
@@ -918,10 +918,10 @@ INCLUDE_ASM("seg/seg_1F1548", func_002F19F0);
  * calls it with its new cAnimModel.
  *
  * @param emitterFx  the attached-emitter FX object
- * @param arg1  the cAnimModel the emitters follow
+ * @param model  the cAnimModel the emitters follow
  */
-extern "C" void func_002F19F0(void *emitterFx, int arg1) {
-    (*(int *)((char*)(emitterFx) + (0x94))) = arg1;
+extern "C" void func_002F19F0(void *emitterFx, int model) {
+    (*(int *)((char*)(emitterFx) + (0x94))) = model;
     (*(int *)((char*)(emitterFx) + (0))) = 0;
 }
 #endif
@@ -1133,23 +1133,23 @@ extern "C" void func_002F1A08(sFxMgr_1A08* self)
         int emit = 0;
         if (self->fx[i] == 0)
             continue;
-        sFxParams_1A08* d = self->fx[i]->params;
-        if (self->fx[i]->off == 0 && d->minSpeed * 27.77777862548828f <= speed && speed <= d->maxSpeed * 27.77777862548828f)
+        sFxParams_1A08* typeData = self->fx[i]->params;
+        if (self->fx[i]->off == 0 && typeData->minSpeed * 27.77777862548828f <= speed && speed <= typeData->maxSpeed * 27.77777862548828f)
             emit = 1;
-        if (d->chance < 0.99f && d->chance < randf_1150())
+        if (typeData->chance < 0.99f && typeData->chance < randf_1150())
             emit = 0;
-        if (d->pulse < 0.99f) {
-            self->fx[i]->phase += d->pulseRate * 0.01666666753590107f;
+        if (typeData->pulse < 0.99f) {
+            self->fx[i]->phase += typeData->pulseRate * 0.01666666753590107f;
             if (self->fx[i]->phase >= 4.0f)
                 self->fx[i]->phase -= 4.0f;
-            if (d->pulse < (perlinNoise(3, self->fx[i]->phase) + 1.0f) * 0.5f)
+            if (typeData->pulse < (perlinNoise(3, self->fx[i]->phase) + 1.0f) * 0.5f)
                 emit = 0;
         }
         sVec4_1150 pos = bonePos_1A08(self->model, self->h[self->fx[i]->bone]);
         {
-            float ox = d->offX;
-            float oy = d->offY;
-            float oz = d->offZ;
+            float ox = typeData->offX;
+            float oy = typeData->offY;
+            float oz = typeData->offZ;
             sVec4_1150 off;
             off.x = ox;
             off.y = oy;
@@ -1174,32 +1174,32 @@ extern "C" void func_002F1A08(sFxMgr_1A08* self)
             off.y *= *(float*)(self->model + 0x144);
             off.z *= *(float*)(self->model + 0x148);
             if (off.x != 0.0f || off.y != 0.0f || off.z != 0.0f) {
-                sMat_1150 m;
-                CopyMat_1150(&m, &(*(sMat_1150**)(self->model + 0x30))[self->h[self->fx[i]->bone]]);
-                m.r[3] = t4vect_Zero;
-                off = mul_1A08(m, off);
+                sMat_1150 boneMatrix;
+                CopyMat_1150(&boneMatrix, &(*(sMat_1150**)(self->model + 0x30))[self->h[self->fx[i]->bone]]);
+                boneMatrix.r[3] = t4vect_Zero;
+                off = mul_1A08(boneMatrix, off);
                 addEq_1A08(pos, off);
             }
         }
         if (emit) {
-            sVec4_1150 v = add_1A08(add_1A08(scale_1A08(vel, d->velScale), scale_1A08(nrm, d->nrmScale)),
-                                    scale_1A08(scale_1A08(nrm, d->nrmSpeedScale), speed));
-            if (d->dirX != 0.0f || d->dirY != 0.0f || d->dirZ != 0.0f) {
-                sMat_1150 m;
-                CopyMat_1150(&m, &(*(sMat_1150**)(self->model + 0x30))[self->h[self->fx[i]->bone]]);
-                m.r[3] = t4vect_Zero;
-                float dx = d->dirX;
-                float dy = d->dirY;
-                float dz = d->dirZ;
+            sVec4_1150 emitVel = add_1A08(add_1A08(scale_1A08(vel, typeData->velScale), scale_1A08(nrm, typeData->nrmScale)),
+                                    scale_1A08(scale_1A08(nrm, typeData->nrmSpeedScale), speed));
+            if (typeData->dirX != 0.0f || typeData->dirY != 0.0f || typeData->dirZ != 0.0f) {
+                sMat_1150 boneMatrix;
+                CopyMat_1150(&boneMatrix, &(*(sMat_1150**)(self->model + 0x30))[self->h[self->fx[i]->bone]]);
+                boneMatrix.r[3] = t4vect_Zero;
+                float dx = typeData->dirX;
+                float dy = typeData->dirY;
+                float dz = typeData->dirZ;
                 sVec4_1150 dir;
                 dir.x = dx;
                 dir.y = dy;
                 dir.z = dz;
                 dir.w = 1.0f;
-                dir = mul_1A08(m, dir);
-                addEq_1A08(v, dir);
+                dir = mul_1A08(boneMatrix, dir);
+                addEq_1A08(emitVel, dir);
             }
-            cBaseClass_DynamicEmitter_updateBASE(self->fx[i], &pos, &v, 1, 0.01666666753590107f);
+            cBaseClass_DynamicEmitter_updateBASE(self->fx[i], &pos, &emitVel, 1, 0.01666666753590107f);
         } else {
             cBaseClass_DynamicEmitter_updateBASE(self->fx[i], &pos, 0, 0, 0.01666666753590107f);
         }
@@ -1244,8 +1244,8 @@ extern "C" void func_002F2088(sOwner_2088* self)
             int level = 7;
             if (self->b != 0)
                 level = (self->b->fC2C < 0) ? 22 : self->b->fC2C + 1;
-            sRiderInfo_2088* r = self->b;
-            if ((self->a != 0 && self->a->fB18 != 0) || (r != 0 && r->fCC8 != 0))
+            sRiderInfo_2088* feRider = self->b;
+            if ((self->a != 0 && self->a->fB18 != 0) || (feRider != 0 && feRider->fCC8 != 0))
                 cDynamicEmitter_render(self->items[i], level);
         }
     }
@@ -1269,30 +1269,30 @@ extern int D_004A3BB0;
 /**
  * Creates an attached dynamic emitter of a type on a bone in the first free emitter slot.
  *
- * Builds it with cMemMan_alloc(528, "cAttachedDynamicEmitter") and func_002F1768, stores @p arg2 as its bone (+0x200),
- * clears its stopped flag (+0x204) and points it (+0x20C) at type record @p arg1 of D_004A3BB0 (0x110 bytes each), then
+ * Builds it with cMemMan_alloc(528, "cAttachedDynamicEmitter") and func_002F1768, stores @p boneIndex as its bone (+0x200),
+ * clears its stopped flag (+0x204) and points it (+0x20C) at type record @p typeIndex of D_004A3BB0 (0x110 bytes each), then
  * calls its virtual setupEmitter (slot 3) with that record and the emitter's current seed (m_emitter.SeedX0) and its
  * virtual reset (slot 2). The bolt-on FX code (func_002ECC28) calls it.
  *
- * @param arg0  the attached-emitter FX object
- * @param arg1  the emitter type (record index in D_004A3BB0)
- * @param arg2  the attach point (index into the 26 bone indices)
+ * @param emitterFx  the attached-emitter FX object
+ * @param typeIndex  the emitter type (record index in D_004A3BB0)
+ * @param boneIndex  the attach point (index into the 26 bone indices)
  * @return the slot index (0-9), or -1 when all 10 slots are used
  */
-extern "C" int func_002F2130(void *arg0, int arg1, int arg2) {
-    Obj2130 **p = (Obj2130 **)((char*)arg0 + 0x6C);
+extern "C" int func_002F2130(void *emitterFx, int typeIndex, int boneIndex) {
+    Obj2130 **slot = (Obj2130 **)((char*)emitterFx + 0x6C);
     int i;
-    for (i = 0; i < 10; i++, p++) {
-        if (*p == 0) {
+    for (i = 0; i < 10; i++, slot++) {
+        if (*slot == 0) {
             Obj2130 *n = (Obj2130 *)func_002F1768(cMemMan_alloc(528, str_cAttachedDynamicEmitter, 0, 0));
-            int t = D_004A3BB0 + arg1 * 272;
-            *p = n;
-            *(int *)((char*)*p + 0x200) = arg2;
-            *(int *)((char*)*p + 0x204) = 0;
-            *(int *)((char*)*p + 0x20C) = t;
-            Obj2130 *o = *p;
-            o->v2(*(int *)((char*)o + 0x20C), *(float *)((char*)o + 0x58));
-            (*p)->v1();
+            int typeData = D_004A3BB0 + typeIndex * 272;
+            *slot = n;
+            *(int *)((char*)*slot + 0x200) = boneIndex;
+            *(int *)((char*)*slot + 0x204) = 0;
+            *(int *)((char*)*slot + 0x20C) = typeData;
+            Obj2130 *emitter = *slot;
+            emitter->v2(*(int *)((char*)emitter + 0x20C), *(float *)((char*)emitter + 0x58));
+            (*slot)->v1();
             return i;
         }
     }
@@ -1564,27 +1564,27 @@ extern "C" void func_002F2598_2598(sPart_2598* p, const sV2_2598& pos, sV2_2598*
  * Rotation Overall Change"); the tint is a random blend of "Drop Tint Min" (D_005046E0) and "Drop Tint Max"
  * (D_005046F0). Sets the drop active and its age to 0.
  *
- * @param p  the drop
+ * @param drop  the drop
  * @param pos  the screen position
  * @param range  the largest width (x) and height (y)
  */
-extern "C" void func_002F2598_2598(sPart_2598* p, const sV2_2598& pos, sV2_2598* range)
+extern "C" void func_002F2598_2598(sPart_2598* drop, const sV2_2598& pos, sV2_2598* range)
 {
     float maxY = range->y;
     float maxX = range->x;
     float x = randRange_2598(D_004A4294_2598.v, maxX);
-    float v = x + randRange_2598(-D_004A429C_2598.v, D_004A429C_2598.v);
-    float y = (v >= D_004A4294_2598.v) ? (v <? maxY) : D_004A4294_2598.v; // PORT: g++ <? operator
-    p->age = 0;
-    p->life = randRange_2598(D_004A428C_2598.v, D_004A4290_2598.v);
-    p->active = 1;
-    p->size = sV2_2598(x, y);
-    p->pos = pos;
-    p->vel = D_004A5960[0];
-    p->angle = randf_2598() * 360.0f;
-    p->spin = randRange_2598(-D_004A42CC_2598.v, D_004A42CC_2598.v);
-    float t = randf_2598();
-    p->color = D_005046E0 * (1.0f - t) + D_005046F0 * t;
+    float rawHeight = x + randRange_2598(-D_004A429C_2598.v, D_004A429C_2598.v);
+    float y = (rawHeight >= D_004A4294_2598.v) ? (rawHeight <? maxY) : D_004A4294_2598.v; // PORT: g++ <? operator
+    drop->age = 0;
+    drop->life = randRange_2598(D_004A428C_2598.v, D_004A4290_2598.v);
+    drop->active = 1;
+    drop->size = sV2_2598(x, y);
+    drop->pos = pos;
+    drop->vel = D_004A5960[0];
+    drop->angle = randf_2598() * 360.0f;
+    drop->spin = randRange_2598(-D_004A42CC_2598.v, D_004A42CC_2598.v);
+    float tintMix = randf_2598();
+    drop->color = D_005046E0 * (1.0f - tintMix) + D_005046F0 * tintMix;
 }
 #endif
 
@@ -1688,41 +1688,41 @@ extern "C" void func_002F2810_2810(sPart_2810* p, float t) __asm__("func_002F281
  *
  * Ages it by 1/60, jiggles the velocity by random amounts ("Drop Min/Max Velocity Jiggle X/Y", D_004A42A0..AC) and
  * pushes it away from the screen centre (D_004A55B8, D_004A55BC) by a random "Drop Min/Max Push Off Speed" scaled by
- * how far @p t is above "Min Velocity For Pushoff" (D_004A4288) towards 120 (clamped 0-1). The size grows by a random
+ * how far @p cameraSpeed is above "Min Velocity For Pushoff" (D_004A4288) towards 120 (clamped 0-1). The size grows by a random
  * "Drop Min/Max Size Growth", the speed is capped at "Drop Maximum Velocity" and the position moves by the velocity
  * scaled per axis by a random "Drop Min/Max Velocity Usage" factor.
  *
- * @param p  the drop
- * @param t  the camera speed (km/h) from cSplashManager_update
+ * @param drop  the drop
+ * @param cameraSpeed  the camera speed (km/h) from cSplashManager_update
  */
-extern "C" void func_002F2810_2810(sPart_2810* p, float t)
+extern "C" void func_002F2810_2810(sPart_2810* drop, float cameraSpeed)
 {
-    p->age += 0.016666667f;
-    addRand_2810(p->vel.x, D_004A42A0_2810.v, D_004A42A4_2810.v);
-    addRand_2810(p->vel.y, D_004A42A8_2810.v, D_004A42AC_2810.v);
-    sV2_2810 dir = Normalize_2810(sV2_2810(p->pos.x - D_004A55B8_2810.v, p->pos.y - D_004A55BC_2810.v));
-    float k = clamp_2810((t - D_004A4288_2810.v) / (120.0f - D_004A4288_2810.v), 0.0f, 1.0f);
+    drop->age += 0.016666667f;
+    addRand_2810(drop->vel.x, D_004A42A0_2810.v, D_004A42A4_2810.v);
+    addRand_2810(drop->vel.y, D_004A42A8_2810.v, D_004A42AC_2810.v);
+    sV2_2810 dir = Normalize_2810(sV2_2810(drop->pos.x - D_004A55B8_2810.v, drop->pos.y - D_004A55BC_2810.v));
+    float k = clamp_2810((cameraSpeed - D_004A4288_2810.v) / (120.0f - D_004A4288_2810.v), 0.0f, 1.0f);
     {
-        sV2_2810 a = dir * k * randRange_2810(D_004A42B8_2810.v, D_004A42BC_2810.v);
-        p->vel.x += a.x;
-        p->vel.y += a.y;
+        sV2_2810 push = dir * k * randRange_2810(D_004A42B8_2810.v, D_004A42BC_2810.v);
+        drop->vel.x += push.x;
+        drop->vel.y += push.y;
     }
-    float speed = Length2_2810(p->vel.x, p->vel.y);
-    addRand_2810(p->size.x, D_004A42B0_2810.v, D_004A42B4_2810.v);
-    addRand_2810(p->size.y, D_004A42B0_2810.v, D_004A42B4_2810.v);
+    float speed = Length2_2810(drop->vel.x, drop->vel.y);
+    addRand_2810(drop->size.x, D_004A42B0_2810.v, D_004A42B4_2810.v);
+    addRand_2810(drop->size.y, D_004A42B0_2810.v, D_004A42B4_2810.v);
     float maxSpeed = D_004A42C0_2810.v;
     if (speed > maxSpeed) {
-        sV2_2810& v = p->vel;
-        v = (speed != 0.0f ? sV2_2810(p->vel.x * (1.0f / speed), p->vel.y * (1.0f / speed)) : v) * maxSpeed;
+        sV2_2810& velocity = drop->vel;
+        velocity = (speed != 0.0f ? sV2_2810(drop->vel.x * (1.0f / speed), drop->vel.y * (1.0f / speed)) : velocity) * maxSpeed;
     }
     {
-        sV2_2810 d = randScale_2810(p->vel.x, p->vel.y, D_004A42C4_2810.v, D_004A42C8_2810.v);
-        p->pos.x += d.x;
-        p->pos.y += d.y;
+        sV2_2810 step = randScale_2810(drop->vel.x, drop->vel.y, D_004A42C4_2810.v, D_004A42C8_2810.v);
+        drop->pos.x += step.x;
+        drop->pos.y += step.y;
     }
-    if (p->age >= p->life || p->pos.x + p->size.x <= 0.0f || 640.0f <= p->pos.x - p->size.x
-        || p->pos.y + p->size.y <= 0.0f || 480.0f <= p->pos.y - p->size.y) {
-        p->active = 0;
+    if (drop->age >= drop->life || drop->pos.x + drop->size.x <= 0.0f || 640.0f <= drop->pos.x - drop->size.x
+        || drop->pos.y + drop->size.y <= 0.0f || 480.0f <= drop->pos.y - drop->size.y) {
+        drop->active = 0;
     }
 }
 #endif
@@ -1873,13 +1873,13 @@ extern "C" void func_002F2C30_impl(char* obj, sVec2_2C30* off)
     // The life ratio time/duration is written out twice (fade, then rotation);
     // CSE turns the second division into the mov.s copy retail has.
     float fade = *(float*)(obj + 0x1C) / *(float*)(obj + 0x20);
-    sVec4_2C30 c = *(sVec4_2C30*)(obj + 0x24);
+    sVec4_2C30 colour = *(sVec4_2C30*)(obj + 0x24);
     fade = 1.0f - fade * fade;
-    c.x *= fade;
+    colour.x *= fade;
     float ang = lerp_2C30(*(float*)(obj + 0x34), *(float*)(obj + 0x38), *(float*)(obj + 0x1C) / *(float*)(obj + 0x20));
     int id = GrMan->_EffectTexMap[66];
     setId_2C30(((char*)GrMan->m_pCurrentDrawState), id);
-    ((cRender_2C30*)cGraphicsMan_TheGraphicsMan)->DrawSprite(sVec4_2C30(sVec2_2C30(*(float*)(obj + 4) + off->x, *(float*)(obj + 8) + off->y), 0.0f, 1.0f), obj + 0xC, &D_004A54F0, &D_004A5500, &c, 1, ang * 0.01745329424738884f);
+    ((cRender_2C30*)cGraphicsMan_TheGraphicsMan)->DrawSprite(sVec4_2C30(sVec2_2C30(*(float*)(obj + 4) + off->x, *(float*)(obj + 8) + off->y), 0.0f, 1.0f), obj + 0xC, &D_004A54F0, &D_004A5500, &colour, 1, ang * 0.01745329424738884f);
 }
 #endif
 
@@ -1988,33 +1988,33 @@ extern "C" void func_002F2D70_2D70(sPart_2D70* p, const sV2_2D70& pos, int n) __
  * 0-360 degrees and its change within +/- D_004A4318. Clears the jiggle timer and direction (+0x40..+0x48) and +0x0 (On
  * Tour mNumSpawned), and sets the crystal active.
  *
- * @param p  the crystal
+ * @param crystal  the crystal
  * @param pos  the screen position
  * @param n  its number within the group (0 for the first)
  */
-extern "C" void func_002F2D70_2D70(sPart_2D70* p, const sV2_2D70& pos, int n)
+extern "C" void func_002F2D70_2D70(sPart_2D70* crystal, const sV2_2D70& pos, int n)
 {
     float x = randRange_2D70(D_004A42E0_2D70.v, D_004A42E4_2D70.v);
-    float v = x + randSym_2D70(D_004A42E8_2D70.v);
-    float y = clamp_2D70(v, D_004A42E0_2D70.v, D_004A42E4_2D70.v);
+    float rawHeight = x + randSym_2D70(D_004A42E8_2D70.v);
+    float y = clamp_2D70(rawHeight, D_004A42E0_2D70.v, D_004A42E4_2D70.v);
     for (int i = 0; i < n; i++) {
         x *= 0.699999988079071f;
         y *= 0.699999988079071f;
     }
-    p->age = 0;
-    p->life = randRange_2D70(D_004A42D8_2D70.v, D_004A42DC_2D70.v);
-    p->active = 1;
-    p->size = sV2_2D70(x, y);
-    p->pos = pos;
-    p->vel = D_004A5960_2D70[0];
-    float t = randf_2D70();
-    p->color = D_00504700 * (1.0f - t) + D_00504710 * t;
-    p->angle = randf_2D70() * 360.0f;
-    p->spin = randSym_2D70(D_004A4318_2D70.v);
-    p->f40 = 0;
-    p->f44 = 0;
-    p->f48 = 0;
-    p->dead = 0;
+    crystal->age = 0;
+    crystal->life = randRange_2D70(D_004A42D8_2D70.v, D_004A42DC_2D70.v);
+    crystal->active = 1;
+    crystal->size = sV2_2D70(x, y);
+    crystal->pos = pos;
+    crystal->vel = D_004A5960_2D70[0];
+    float tintMix = randf_2D70();
+    crystal->color = D_00504700 * (1.0f - tintMix) + D_00504710 * tintMix;
+    crystal->angle = randf_2D70() * 360.0f;
+    crystal->spin = randSym_2D70(D_004A4318_2D70.v);
+    crystal->f40 = 0;
+    crystal->f44 = 0;
+    crystal->f48 = 0;
+    crystal->dead = 0;
 }
 #endif
 
@@ -2119,43 +2119,43 @@ extern "C" void func_002F3030_3030(sPart_3030* p, float t) __asm__("func_002F303
  * Ages it by 1/60; when its jiggle timer (+0x40) runs out it picks a new one ("Crsytal Min/Max Time In One Jiggle
  * Direction") and a new random jiggle (+0x44, +0x48, "Crystal Min/Max Velocity Jiggle X/Y") that is added to the
  * velocity every frame. It is pushed away from the screen centre (D_004A55B8, D_004A55BC) by a random "Crystal Min/Max
- * Push Off Speed" scaled by how far @p t is above "Min Velocity For Pushoff" towards 120 (clamped 0-1), grows by a
+ * Push Off Speed" scaled by how far @p cameraSpeed is above "Min Velocity For Pushoff" towards 120 (clamped 0-1), grows by a
  * random "Crystal Min/Max Size Growth", has its speed capped at "Crystal Maximum Velocity" and moves by its velocity.
  *
- * @param p  the crystal
- * @param t  the camera speed (km/h) from cSplashManager_update
+ * @param crystal  the crystal
+ * @param cameraSpeed  the camera speed (km/h) from cSplashManager_update
  */
-extern "C" void func_002F3030_3030(sPart_3030* p, float t)
+extern "C" void func_002F3030_3030(sPart_3030* crystal, float cameraSpeed)
 {
-    p->f40 -= 0.016666667f;
-    p->age += 0.016666667f;
-    if (p->f40 < 0.0f) {
-        p->f40 = randRange_3030(D_004A42FC_3030.v, D_004A4300_3030.v);
-        p->f44 = randRange_3030(D_004A42EC_3030.v, D_004A42F0_3030.v);
-        p->f48 = randRange_3030(D_004A42F4_3030.v, D_004A42F8_3030.v);
+    crystal->f40 -= 0.016666667f;
+    crystal->age += 0.016666667f;
+    if (crystal->f40 < 0.0f) {
+        crystal->f40 = randRange_3030(D_004A42FC_3030.v, D_004A4300_3030.v);
+        crystal->f44 = randRange_3030(D_004A42EC_3030.v, D_004A42F0_3030.v);
+        crystal->f48 = randRange_3030(D_004A42F4_3030.v, D_004A42F8_3030.v);
     }
-    p->vel.x += p->f44;
-    p->vel.y += p->f48;
-    sV2_3030 dir = Normalize_3030(sV2_3030(p->pos.x - D_004A55B8_3030.v, p->pos.y - D_004A55BC_3030.v));
-    float k = clamp_3030((t - D_004A4288_3030.v) / (120.0f - D_004A4288_3030.v), 0.0f, 1.0f);
+    crystal->vel.x += crystal->f44;
+    crystal->vel.y += crystal->f48;
+    sV2_3030 dir = Normalize_3030(sV2_3030(crystal->pos.x - D_004A55B8_3030.v, crystal->pos.y - D_004A55BC_3030.v));
+    float k = clamp_3030((cameraSpeed - D_004A4288_3030.v) / (120.0f - D_004A4288_3030.v), 0.0f, 1.0f);
     {
-        sV2_3030 a = dir * k * randRange_3030(D_004A430C_3030.v, D_004A4310_3030.v);
-        p->vel.x += a.x;
-        p->vel.y += a.y;
+        sV2_3030 push = dir * k * randRange_3030(D_004A430C_3030.v, D_004A4310_3030.v);
+        crystal->vel.x += push.x;
+        crystal->vel.y += push.y;
     }
-    float speed = Length2_3030(p->vel.x, p->vel.y);
-    addRand_3030(p->size.x, D_004A4304_3030.v, D_004A4308_3030.v);
-    addRand_3030(p->size.y, D_004A4304_3030.v, D_004A4308_3030.v);
+    float speed = Length2_3030(crystal->vel.x, crystal->vel.y);
+    addRand_3030(crystal->size.x, D_004A4304_3030.v, D_004A4308_3030.v);
+    addRand_3030(crystal->size.y, D_004A4304_3030.v, D_004A4308_3030.v);
     float maxSpeed = D_004A4314_3030.v;
     if (speed > maxSpeed) {
-        sV2_3030& v = p->vel;
-        v = (speed != 0.0f ? sV2_3030(p->vel.x * (1.0f / speed), p->vel.y * (1.0f / speed)) : v) * maxSpeed;
+        sV2_3030& velocity = crystal->vel;
+        velocity = (speed != 0.0f ? sV2_3030(crystal->vel.x * (1.0f / speed), crystal->vel.y * (1.0f / speed)) : velocity) * maxSpeed;
     }
-    p->pos.x += p->vel.x;
-    p->pos.y += p->vel.y;
-    if (p->age >= p->life || p->pos.x + p->size.x <= 0.0f || 640.0f <= p->pos.x - p->size.x
-        || p->pos.y + p->size.y <= 0.0f || 480.0f <= p->pos.y - p->size.y) {
-        p->active = 0;
+    crystal->pos.x += crystal->vel.x;
+    crystal->pos.y += crystal->vel.y;
+    if (crystal->age >= crystal->life || crystal->pos.x + crystal->size.x <= 0.0f || 640.0f <= crystal->pos.x - crystal->size.x
+        || crystal->pos.y + crystal->size.y <= 0.0f || 480.0f <= crystal->pos.y - crystal->size.y) {
+        crystal->active = 0;
     }
 }
 #endif
@@ -2260,10 +2260,10 @@ extern "C" void func_002F3418(sEm_3418* self, const sV2_3418* off)
         D_004A5520_3418 = 1.0f;
         D_004A5524_3418 = 1.0f;
     }
-    float r = self->f20 / self->f24;
+    float fade = self->f20 / self->f24;
     sV4_3418 col = self->col;
-    r = 1.0f - r * r;
-    col.x *= r;
+    fade = 1.0f - fade * fade;
+    col.x *= fade;
     *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = ((sWorld_3418*)GrMan)->GetFB();
     ((cGfx_3418*)cGraphicsMan_TheGraphicsMan)->DrawX((self->f38 + self->f20 / self->f24 * self->f3C) * 0.01745329424738884f, sPos_3418(self->f8 + off->x, self->fC + off->y), self->f10, *(sV2_3418*)&D_004A5510_3418, *(sV2_3418*)&D_004A5520_3418, col, 1);
 }
@@ -2386,14 +2386,14 @@ static inline float randRange_3640(float lo, float hi)
 /**
  * Adds a group of @p n ice crystals around a screen position to the splash manager.
  *
- * Each crystal, while fewer than "Max Crystals" (D_004A4258) are active (+0x18), goes to @p p plus a random offset
+ * Each crystal, while fewer than "Max Crystals" (D_004A4258) are active (+0x18), goes to @p basePos plus a random offset
  * within +/- "Crystal Group Spacing X/Y" (D_004A42D0, D_004A42D4) and is started by func_002F2D70 with its number in
  * the group; the active count then grows.
  *
- * @param p  the group position
+ * @param basePos  the group position
  * @param n  how many crystals to add
  */
-extern "C" void func_002F3640(sEmit_3640* self, sVec2_3640* p, int n)
+extern "C" void func_002F3640(sEmit_3640* self, sVec2_3640* basePos, int n)
 {
     for (int i = 0; i < n; i++) {
         if (self->count < D_004A4258) {
@@ -2401,8 +2401,8 @@ extern "C" void func_002F3640(sEmit_3640* self, sVec2_3640* p, int n)
             off.x = randRange_3640(-D_004A42D0, D_004A42D0);
             off.y = randRange_3640(-D_004A42D4, D_004A42D4);
             sVec2_3640 pos;
-            pos.x = p->x + off.x;
-            pos.y = p->y + off.y;
+            pos.x = basePos->x + off.x;
+            pos.y = basePos->y + off.y;
             func_002F2D70(&self->parts[self->count], &pos, i);
             self->count++;
         }
@@ -2425,15 +2425,15 @@ extern "C" void func_002F37A8_37A8(void *arg0, S37A8 *arg1, void *arg2) __asm__(
  * Starts the next free drop (0x3C bytes from +0x1C) with func_002F2598 and bumps the active drop count (+0x14).
  * cSplashManager_update (a crystal shedding a drop) and func_002F3810 call it.
  *
- * @param arg0  the splash manager
- * @param arg1  the drop position (copied)
- * @param arg2  the largest drop size
+ * @param splashManager  the splash manager
+ * @param basePos  the drop position (copied)
+ * @param maxSize  the largest drop size
  */
-extern "C" void func_002F37A8_37A8(void *arg0, S37A8 *arg1, void *arg2) {
-    int n = *(int *)((char*)arg0 + 0x14);
+extern "C" void func_002F37A8_37A8(void *splashManager, S37A8 *basePos, void *maxSize) {
+    int n = *(int *)((char*)splashManager + 0x14);
     if (n < D_004A4254) {
-        func_002F2598((char*)arg0 + (n * 0x3C + 0x1C), *arg1, arg2);
-        *(int *)((char*)arg0 + 0x14) = *(int *)((char*)arg0 + 0x14) + 1;
+        func_002F2598((char*)splashManager + (n * 0x3C + 0x1C), *basePos, maxSize);
+        *(int *)((char*)splashManager + 0x14) = *(int *)((char*)splashManager + 0x14) + 1;
     }
 }
 #endif
@@ -2492,10 +2492,10 @@ extern "C" void func_002F3810(char* self)
             n -= k;
             func_002F3640_3810(self, &pos, k);
         } else {
-            sVec2_3810 v;
-            v.x = D_004A4298;
-            v.y = D_004A4298;
-            func_002F37A8(self, &pos, &v);
+            sVec2_3810 dropSize;
+            dropSize.x = D_004A4298;
+            dropSize.y = D_004A4298;
+            func_002F37A8(self, &pos, &dropSize);
             n--;
         }
     }
@@ -2957,22 +2957,22 @@ extern float D_004A427C;
 /**
  * Adds screen splashes for a snow impact near the view's camera.
  *
- * Nearness is 1 - (distance from the last camera position (+0x1010) to @p p) / "Farthest Impact Distance" (D_004A4270).
+ * Nearness is 1 - (distance from the last camera position (+0x1010) to @p impactPos) / "Farthest Impact Distance" (D_004A4270).
  * When that is positive and the last snowfall intensity (+0x1028) is above "Lowest Snowfall For Impacts", it adds
  * nearness * clamp((@p speed * 0.036 - "Lowest Impact Intensity") / (120 - that), 0, 1) * "Impact Multiplier" to the
  * splash counter (+0x1024).
  *
- * @param p  the impact position
+ * @param impactPos  the impact position
  * @param speed  the impact strength (times 0.036, km/h)
  */
-extern "C" void func_002F4260(char* self, sV4_4260* p, float speed)
+extern "C" void func_002F4260(char* self, sV4_4260* impactPos, float speed)
 {
-    float k = 1.0f - Length_4260(Sub_4260(*(sV4_4260*)(self + 0x1010), *p)) / D_004A4270;
+    float k = 1.0f - Length_4260(Sub_4260(*(sV4_4260*)(self + 0x1010), *impactPos)) / D_004A4270;
     if (k > 0.0f && *(float*)(self + 0x1028) > D_004A4278) {
         float lo = D_004A4274;
-        float t = (speed * 0.036f - lo) / (120.0f - lo);
-        float c = (t >= 0.0f) ? (t <? 1.0f) : 0.0f;
-        *(float*)(self + 0x1024) += k * c * D_004A427C;
+        float impactRamp = (speed * 0.036f - lo) / (120.0f - lo);
+        float impactWeight = (impactRamp >= 0.0f) ? (impactRamp <? 1.0f) : 0.0f;
+        *(float*)(self + 0x1024) += k * impactWeight * D_004A427C;
     }
 }
 #endif
@@ -2986,17 +2986,17 @@ extern float D_004A4284;
 /**
  * Records the view's snowfall intensity and adds screen splashes for heavy snowfall.
  *
- * Stores @p arg1 as the last snowfall intensity (+0x1028). Above "Lowest Snowfall Amount" (D_004A4280) it adds @p arg1
+ * Stores @p intensity as the last snowfall intensity (+0x1028). Above "Lowest Snowfall Amount" (D_004A4280) it adds @p intensity
  * * (last camera speed (+0x1020) + 10) * "Snowfall Multiplier" / 130 to the splash counter (+0x1024). The board-wake
  * code calls it per view with the snow intensity.
  *
- * @param arg0  the splash manager
- * @param arg1  the snowfall intensity
+ * @param splashManager  the splash manager
+ * @param intensity  the snowfall intensity
  */
-extern "C" void func_002F4330(void *arg0, float arg1) {
-    *(float *)((char*)arg0 + 0x1028) = arg1;
-    if (D_004A4280 < arg1) {
-        *(float *)((char*)arg0 + 0x1024) += arg1 * (*(float *)((char*)arg0 + 0x1020) + 10.0f) * (D_004A4284 * 0.007692307699471712f);
+extern "C" void func_002F4330(void *splashManager, float intensity) {
+    *(float *)((char*)splashManager + 0x1028) = intensity;
+    if (D_004A4280 < intensity) {
+        *(float *)((char*)splashManager + 0x1024) += intensity * (*(float *)((char*)splashManager + 0x1020) + 10.0f) * (D_004A4284 * 0.007692307699471712f);
     }
 }
 #endif
@@ -3376,11 +3376,11 @@ extern "C" void func_002F4A08(sSun_4A08* self, sV4_4A08* vp, int flag)
     if (self->visible == 0)
         return;
     int id = !flag ? 6 : 7;
-    float r = cRenderStateMan_SunColorR(id);
-    float g = cRenderStateMan_SunColorG(id);
-    float b = cRenderStateMan_SunColorB(id);
+    float sunRed = cRenderStateMan_SunColorR(id);
+    float sunGreen = cRenderStateMan_SunColorG(id);
+    float sunBlue = cRenderStateMan_SunColorB(id);
     sV4_4A08 col;
-    col = sV4_4A08(1.0f, r, g, b);
+    col = sV4_4A08(1.0f, sunRed, sunGreen, sunBlue);
     col.x *= self->intensity * cRenderStateMan_SunIntensity(id);
     float size = cRenderStateMan_SunRadius(id);
     int tex = cRenderStateMan_SunType(id);

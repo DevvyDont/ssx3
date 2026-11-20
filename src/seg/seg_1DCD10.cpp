@@ -690,15 +690,15 @@ extern "C" void func_002DC7B0(cPS2FogParticleMan* list)
     int left = list->miNumSphere;
     int start = 0;
     int max = (D_004A4474_C7B0->size - 4) * 2 / 5 - 1;
-    sGfx_C7B0* g = D_004A5B80_C7B0;
+    sGfx_C7B0* graphicsMan = D_004A5B80_C7B0;
     if (left <= 0) return;
     float one = 1.0f;
     do {
         int n = max;
-        unsigned int buf = g->bufAddr;
+        unsigned int buf = graphicsMan->bufAddr;
         if (left < n) n = left;
-        unsigned long* p = func_0038F460_C7B0(D_004A4474_C7B0, buf, -1, 0);
-        int pad;
+        unsigned long* packet = func_0038F460_C7B0(D_004A4474_C7B0, buf, -1, 0);
+        int oddCount;
         int qwc;
         float st0[2];
         float st1[2];
@@ -707,49 +707,49 @@ extern "C" void func_002DC7B0(cPS2FogParticleMan* list)
         st1[0] = one;
         st1[1] = one;
         if ((n & 1) == 0) {
-            pad = 0;
+            oddCount = 0;
             qwc = (n * 5 >> 1) + 3;
         } else {
-            pad = 1;
+            oddCount = 1;
             qwc = (n * 5 >> 1) + 4;
         }
-        p[0] = (qwc + 1) | 0x10000000;
-        p[1] = 0;
-        p[2] = 0;
-        p[3] = (unsigned long)(qwc | 0x50000000) << 32;
-        p[4] = ((unsigned long)0x14000000 << 32) | 0x8001;
-        p[5] = 0;
-        p[6] = 86;
-        p[7] = 0;
-        p[8] = (n | 0x8000) | ((unsigned long)43008 << 47);
-        p[9] = 0x52512;
+        packet[0] = (qwc + 1) | 0x10000000;
+        packet[1] = 0;
+        packet[2] = 0;
+        packet[3] = (unsigned long)(qwc | 0x50000000) << 32;
+        packet[4] = ((unsigned long)0x14000000 << 32) | 0x8001;
+        packet[5] = 0;
+        packet[6] = 86;
+        packet[7] = 0;
+        packet[8] = (n | 0x8000) | ((unsigned long)43008 << 47);
+        packet[9] = 0x52512;
         int rest = left - n;
-        p += 10;
+        packet += 10;
         for (int i = start; i < start + n; i++) {
             tFogSprite* fogSprite = &((&list->mSprites[0]))[((sSort_C7B0*)D_00537AC0)[i].idx];
-            float q = fogSprite->mTopLeft.w;
-            p[0] = FBits_C7B0(st0[0] * q) | ((unsigned long)FBits_C7B0(st0[1] * q) << 32);
-            p[1] = (int)fogSprite->mColour[1] | ((unsigned long)(int)fogSprite->mColour[2] << 8) | ((unsigned long)(int)fogSprite->mColour[3] << 16) | ((unsigned long)(int)fogSprite->mColour[0] << 24) | ((unsigned long)FBits_C7B0(q) << 32);
-            p[2] = (int)fogSprite->mTopLeft.x | ((unsigned long)(int)fogSprite->mTopLeft.y << 16) | ((unsigned long)(int)(fogSprite->mTopLeft.z * q) << 32);
-            p[3] = FBits_C7B0(st1[0] * q) | ((unsigned long)FBits_C7B0(st1[1] * q) << 32);
-            p[4] = (int)fogSprite->mBottomRight.x | ((unsigned long)(int)fogSprite->mBottomRight.y << 16) | ((unsigned long)(int)(fogSprite->mBottomRight.z * q) << 32);
-            p += 5;
+            float invW = fogSprite->mTopLeft.w;
+            packet[0] = FBits_C7B0(st0[0] * invW) | ((unsigned long)FBits_C7B0(st0[1] * invW) << 32);
+            packet[1] = (int)fogSprite->mColour[1] | ((unsigned long)(int)fogSprite->mColour[2] << 8) | ((unsigned long)(int)fogSprite->mColour[3] << 16) | ((unsigned long)(int)fogSprite->mColour[0] << 24) | ((unsigned long)FBits_C7B0(invW) << 32);
+            packet[2] = (int)fogSprite->mTopLeft.x | ((unsigned long)(int)fogSprite->mTopLeft.y << 16) | ((unsigned long)(int)(fogSprite->mTopLeft.z * invW) << 32);
+            packet[3] = FBits_C7B0(st1[0] * invW) | ((unsigned long)FBits_C7B0(st1[1] * invW) << 32);
+            packet[4] = (int)fogSprite->mBottomRight.x | ((unsigned long)(int)fogSprite->mBottomRight.y << 16) | ((unsigned long)(int)(fogSprite->mBottomRight.z * invW) << 32);
+            packet += 5;
         }
-        if (pad) *p++ = 0;
-        unsigned int next = func_0038F668_C7B0(D_004A4474_C7B0, p, 4);
-        sRing_C7B0* ring = g->ring;
-        sRS_C7B0* rs = g->top;
+        if (oddCount) *packet++ = 0;
+        unsigned int next = func_0038F668_C7B0(D_004A4474_C7B0, packet, 4);
+        sRing_C7B0* ring = graphicsMan->ring;
+        sRS_C7B0* rs = graphicsMan->top;
         if (ring->count < 2600) {
             rs->f8 = (rs->f8 & ~0x1F) | (*(int*)((char*)ring + 0x69CC4) & 0x1F);
             int key = *(int*)((char*)ring + 0x69CC0);
-            sEnt_C7B0* e = (sEnt_C7B0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
-            e->rs = *rs;
-            e->buf = buf;
-            e->next = next;
-            e->key = key;
-            e->flag = 0;
+            sEnt_C7B0* ringEntry = (sEnt_C7B0*)((ring->count++ << 7) + ((unsigned int)ring->ents | 0x30000000));
+            ringEntry->rs = *rs;
+            ringEntry->buf = buf;
+            ringEntry->next = next;
+            ringEntry->key = key;
+            ringEntry->flag = 0;
         }
-        g->bufAddr = next + 0x10;
+        graphicsMan->bufAddr = next + 0x10;
         left = rest;
         start += n;
     } while (left > 0);

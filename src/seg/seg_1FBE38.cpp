@@ -100,10 +100,10 @@ struct Ent_B060 { int idx; int val; int pad; int type; };
  * 1) on the instance from the block.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_B060 func_002FB060(int n, Ent_B060 *e) {
+extern "C" V3_B060 func_002FB060(int n, Ent_B060 *params) {
     if (D_004A55C0 == 0) {
         D_B060[0] = 0xFFFFFFFF;
         ((int*)D_B060)[1] = 1;
@@ -123,37 +123,37 @@ extern "C" V3_B060 func_002FB060(int n, Ent_B060 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_B060(buf, D_B060, 44);
-    Ent_B060 *x = e;
+    Ent_B060 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00445E70[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_B060 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s)
-            r = 0;
+        char *inst;
+        if (!section)
+            inst = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_B060(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     if (obj == 0)
         return D_004C9098_B060;
-    void *p = *(void**)(obj + 0xC);
-    if (p && checkActiveNode(p, 2, buf))
+    void *activeNode = *(void**)(obj + 0xC);
+    if (activeNode && checkActiveNode(activeNode, 2, buf))
         return D_004C9098_B060;
     cAnimDeltaNode_cAnimDeltaNode1_B060(cMemMan_alloc(0x70, D_00489658_B060, 0x20000000, 0), 1, obj, buf);
     return D_004C9098_B060;
@@ -196,10 +196,10 @@ struct Ent_B270 { int idx; int val; int pad; int type; };
  * 1) on the instance from the block.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_B270 func_002FB270(int n, Ent_B270 *e) {
+extern "C" V3_B270 func_002FB270(int n, Ent_B270 *params) {
     if (D_004A55C4 == 0) {
         D_B270[0] = 0xFFFFFFFF;
         ((int*)D_B270)[1] = 1;
@@ -223,37 +223,37 @@ extern "C" V3_B270 func_002FB270(int n, Ent_B270 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_B270(buf, D_B270, 60);
-    Ent_B270 *x = e;
+    Ent_B270 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00445E98[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_B270 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s)
-            r = 0;
+        char *inst;
+        if (!section)
+            inst = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_B270(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     if (obj == 0)
         return D_004C9098_B270;
-    void *p = *(void**)(obj + 0xC);
-    if (p && checkActiveNode(p, 3, buf))
+    void *activeNode = *(void**)(obj + 0xC);
+    if (activeNode && checkActiveNode(activeNode, 3, buf))
         return D_004C9098_B270;
     cAnimComboNode_cAnimComboNode1_B270(cMemMan_alloc(136, D_00489668_B270, 0x20000000, 0), 1, obj, buf);
     return D_004C9098_B270;
@@ -295,10 +295,10 @@ struct Ent_B498 { int idx; int val; int pad; int type; };
  * bucket 1) on the instance from the block.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_B498 func_002FB498(int n, Ent_B498 *e) {
+extern "C" V3_B498 func_002FB498(int n, Ent_B498 *params) {
     if (D_004A55C8 == 0) {
         D_B498[0] = 0xFFFFFFFF;
         *(float*)&D_B498[1] = 0.6000000238418579f;
@@ -318,37 +318,37 @@ extern "C" V3_B498 func_002FB498(int n, Ent_B498 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_B498(buf, D_B498, 44);
-    Ent_B498 *x = e;
+    Ent_B498 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00445ED0[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_B498 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s)
-            r = 0;
+        char *inst;
+        if (!section)
+            inst = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_B498(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     if (obj == 0)
         return D_004C9098_B498;
-    void *p = *(void**)(obj + 0xC);
-    if (p && checkActiveNode(p, 4, buf))
+    void *activeNode = *(void**)(obj + 0xC);
+    if (activeNode && checkActiveNode(activeNode, 4, buf))
         return D_004C9098_B498;
     cAnimTeeterNode_cAnimTeeterNode1_B498(cMemMan_alloc(0x80, D_00489678_B498, 0x20000000, 0), 1, obj, buf);
     return D_004C9098_B498;
@@ -390,10 +390,10 @@ struct Ent_B6B8 { int idx; int val; int pad; int type; };
  * the instance from the block.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_B6B8 func_002FB6B8(int n, Ent_B6B8 *e) {
+extern "C" V3_B6B8 func_002FB6B8(int n, Ent_B6B8 *params) {
     if (D_004A55CC == 0) {
         D_B6B8[0] = 0xFFFFFFFF;
         *(float*)&D_B6B8[1] = 100.0f;
@@ -416,37 +416,37 @@ extern "C" V3_B6B8 func_002FB6B8(int n, Ent_B6B8 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_B6B8(buf, D_B6B8, 52);
-    Ent_B6B8 *x = e;
+    Ent_B6B8 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00445EF8[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_B6B8 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s)
-            r = 0;
+        char *inst;
+        if (!section)
+            inst = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_B6B8(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     if (obj == 0)
         return D_004C9098_B6B8;
-    void *p = *(void**)(obj + 0xC);
-    if (p && checkActiveNode(p, 15, buf))
+    void *activeNode = *(void**)(obj + 0xC);
+    if (activeNode && checkActiveNode(activeNode, 15, buf))
         return D_004C9098_B6B8;
     cConveyorNode_cConveyorNode_B6B8(cMemMan_alloc(72, D_00489688_B6B8, 0x20000000, 0), 1, obj, buf);
     return D_004C9098_B6B8;
@@ -487,10 +487,10 @@ struct Ent_B8D0 { int idx; int val; int pad; int type; };
  * instance from the block.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_B8D0 func_002FB8D0(int n, Ent_B8D0 *e) {
+extern "C" V3_B8D0 func_002FB8D0(int n, Ent_B8D0 *params) {
     if (D_004A55D0 == 0) {
         D_B8D0[0] = 0xFFFFFFFF;
         ((int*)D_B8D0)[1] = 3;
@@ -502,37 +502,37 @@ extern "C" V3_B8D0 func_002FB8D0(int n, Ent_B8D0 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_B8D0(buf, D_B8D0, 12);
-    Ent_B8D0 *x = e;
+    Ent_B8D0 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_004A3BE0_B8D0[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_B8D0 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s)
-            r = 0;
+        char *inst;
+        if (!section)
+            inst = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_B8D0(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     if (obj == 0)
         return D_004C9098_B8D0;
-    void *p = *(void**)(obj + 0xC);
-    if (p && checkActiveNode(p, 7, buf))
+    void *activeNode = *(void**)(obj + 0xC);
+    if (activeNode && checkActiveNode(activeNode, 7, buf))
         return D_004C9098_B8D0;
     cCounterNode_cCounterNode1_B8D0(cMemMan_alloc(36, D_004A3BE8_B8D0, 0x20000000, 0), 1, obj, buf);
     return D_004C9098_B8D0;
@@ -574,10 +574,10 @@ struct Ent_BAB0 { int idx; int val; int pad; int type; };
  * on the instance from the block.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_BAB0 func_002FBAB0(int n, Ent_BAB0 *e) {
+extern "C" V3_BAB0 func_002FBAB0(int n, Ent_BAB0 *params) {
     if (D_004A55D4 == 0) {
         D_BAB0[0] = 0xFFFFFFFF;
         *(float*)&D_BAB0[1] = 10.0f;
@@ -594,37 +594,37 @@ extern "C" V3_BAB0 func_002FBAB0(int n, Ent_BAB0 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_BAB0(buf, D_BAB0, 32);
-    Ent_BAB0 *x = e;
+    Ent_BAB0 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00445F28[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_BAB0 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s)
-            r = 0;
+        char *inst;
+        if (!section)
+            inst = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_BAB0(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     if (obj == 0)
         return D_004C9098_BAB0;
-    void *p = *(void**)(obj + 0xC);
-    if (p && checkActiveNode(p, 14, buf))
+    void *activeNode = *(void**)(obj + 0xC);
+    if (activeNode && checkActiveNode(activeNode, 14, buf))
         return D_004C9098_BAB0;
     cFloatingNode_cFloatingNode_BAB0(cMemMan_alloc(0x7C, D_00489698_BAB0, 0x20000000, 0), 1, obj, buf);
     return D_004C9098_BAB0;
@@ -666,10 +666,10 @@ struct Ent_BCB8 { int idx; int val; int pad; int type; };
  * bucket 1, node type 1) on the instance from the block.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_BCB8 func_002FBCB8(int n, Ent_BCB8 *e) {
+extern "C" V3_BCB8 func_002FBCB8(int n, Ent_BCB8 *params) {
     if (D_004A55D8 == 0) {
         D_BCB8[0] = 0xFFFFFFFF;
         ((int*)D_BCB8)[1] = 1;
@@ -689,37 +689,37 @@ extern "C" V3_BCB8 func_002FBCB8(int n, Ent_BCB8 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_BCB8(buf, D_BCB8, 44);
-    Ent_BCB8 *x = e;
+    Ent_BCB8 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00445F48[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_BCB8 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s)
-            r = 0;
+        char *inst;
+        if (!section)
+            inst = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_BCB8(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     if (obj == 0)
         return D_004C9098_BCB8;
-    void *p = *(void**)(obj + 0xC);
-    if (p && checkActiveNode(p, 1, buf))
+    void *activeNode = *(void**)(obj + 0xC);
+    if (activeNode && checkActiveNode(activeNode, 1, buf))
         return D_004C9098_BCB8;
     cAnimObjectNode_cAnimObjectNode1_BCB8(cMemMan_alloc(108, D_004896A8_BCB8, 0x20000000, 0), 1, 1, obj, buf);
     return D_004C9098_BCB8;
@@ -761,10 +761,10 @@ struct Ent_BEC8 { int idx; int val; int pad; int type; };
  * instance from the block.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_BEC8 func_002FBEC8(int n, Ent_BEC8 *e) {
+extern "C" V3_BEC8 func_002FBEC8(int n, Ent_BEC8 *params) {
     if (D_004A55DC == 0) {
         D_BEC8[0] = 0xFFFFFFFF;
         ((int*)D_BEC8)[1] = 0;
@@ -783,37 +783,37 @@ extern "C" V3_BEC8 func_002FBEC8(int n, Ent_BEC8 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_BEC8(buf, D_BEC8, 36);
-    Ent_BEC8 *x = e;
+    Ent_BEC8 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00445F70[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_BEC8 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s)
-            r = 0;
+        char *inst;
+        if (!section)
+            inst = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_BEC8(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     if (obj == 0)
         return D_004C9098_BEC8;
-    void *p = *(void**)(obj + 0xC);
-    if (p && checkActiveNode(p, 8, buf))
+    void *activeNode = *(void**)(obj + 0xC);
+    if (activeNode && checkActiveNode(activeNode, 8, buf))
         return D_004C9098_BEC8;
     cBoostNode_cBoostNode1_BEC8(cMemMan_alloc(80, D_004A3BF0_BEC8, 0x20000000, 0), 1, 8, obj, buf);
     return D_004C9098_BEC8;
@@ -854,10 +854,10 @@ struct Ent_C0D0 { int idx; int val; int pad; int type; };
  * ForceVisible != 0 as its arguments on the instance from the block.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_C0D0 func_002FC0D0(int n, Ent_C0D0 *e) {
+extern "C" V3_C0D0 func_002FC0D0(int n, Ent_C0D0 *params) {
     if (D_004A55E0 == 0) {
         D_C0D0[0] = 0xFFFFFFFF;
         ((int*)D_C0D0)[1] = 0;
@@ -870,37 +870,37 @@ extern "C" V3_C0D0 func_002FC0D0(int n, Ent_C0D0 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_C0D0(buf, D_C0D0, 16);
-    Ent_C0D0 *x = e;
+    Ent_C0D0 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00445F90[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_C0D0 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s)
-            r = 0;
+        char *inst;
+        if (!section)
+            inst = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_C0D0(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     if (obj == 0)
         return D_004C9098_C0D0;
-    void *p = *(void**)(obj + 0xC);
-    if (p && checkActiveNode(p, 17, buf))
+    void *activeNode = *(void**)(obj + 0xC);
+    if (activeNode && checkActiveNode(activeNode, 17, buf))
         return D_004C9098_C0D0;
     cObjectNode_cObjectNode_C0D0(cMemMan_alloc(44, D_004A3BF8_C0D0, 0x20000000, 0), 1, obj, buf[1], buf[2] != 0);
     return D_004C9098_C0D0;
@@ -1006,10 +1006,10 @@ struct Ent_C420 { int idx; int val; int pad; int type; };
  * func_002FC2C0, which acts by Type (0 dead node, 1 delete the node and flag the instance, 3 restore node).
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_C420 func_002FC420(int n, Ent_C420 *e) {
+extern "C" V3_C420 func_002FC420(int n, Ent_C420 *params) {
     if (D_004A55E4 == 0) {
         D_C420[0] = 0xFFFFFFFF;
         ((int*)D_C420)[1] = 0;
@@ -1020,37 +1020,37 @@ extern "C" V3_C420 func_002FC420(int n, Ent_C420 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_C420(buf, D_C420, 12);
-    Ent_C420 *x = e;
+    Ent_C420 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = (&D_004A3C00)[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_C420 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s)
-            r = 0;
+        char *inst;
+        if (!section)
+            inst = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_C420(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     if (obj == 0)
         return D_004C9098_C420;
-    void *p = *(void**)(obj + 0xC);
-    if (!p || !checkActiveNode(p, 6, buf))
+    void *activeNode = *(void**)(obj + 0xC);
+    if (!activeNode || !checkActiveNode(activeNode, 6, buf))
         func_002FC2C0_C420(obj, buf);
     return D_004C9098_C420;
 }
@@ -1259,10 +1259,10 @@ struct Ent_C9C8 { int idx; int val; int pad; int type; };
  * the block.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_C9C8 func_002FC9C8(int n, Ent_C9C8 *e) {
+extern "C" V3_C9C8 func_002FC9C8(int n, Ent_C9C8 *params) {
     if (D_004A55F0 == 0) {
         D_C9C8[0] = 0xFFFFFFFF;
         ((int*)D_C9C8)[1] = 1;
@@ -1299,37 +1299,37 @@ extern "C" V3_C9C8 func_002FC9C8(int n, Ent_C9C8 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_C9C8(buf, D_C9C8, 108);
-    Ent_C9C8 *x = e;
+    Ent_C9C8 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00445FC0[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_C9C8 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s)
-            r = 0;
+        char *inst;
+        if (!section)
+            inst = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_C9C8(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     if (obj == 0)
         return D_004C9098_C9C8;
-    void *p = *(void**)(obj + 0xC);
-    if (p && checkActiveNode(p, 10, buf))
+    void *activeNode = *(void**)(obj + 0xC);
+    if (activeNode && checkActiveNode(activeNode, 10, buf))
         return D_004C9098_C9C8;
     cFlagNode_cFlagNode1_C9C8(cMemMan_alloc(0x1C, D_004A3C08_C9C8, 0x20000000, 0), 1, obj, buf);
     return D_004C9098_C9C8;
@@ -1367,11 +1367,11 @@ extern "C" int checkActiveNode(void*, int, void*);
  *
  * @param ret  where the returned script value is stored
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
 // PORT: struct return written with the hidden return pointer explicit.
-extern "C" V3_CC20* func_002FCC20(V3_CC20* ret, int n, Ent_CC20 *e) {
+extern "C" V3_CC20* func_002FCC20(V3_CC20* ret, int n, Ent_CC20 *params) {
     if (D_004A55F4 == 0) {
         D_CC20[0] = 0xFFFFFFFF;
         *(float*)&D_CC20[2] = 0.5f;
@@ -1383,24 +1383,24 @@ extern "C" V3_CC20* func_002FCC20(V3_CC20* ret, int n, Ent_CC20 *e) {
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
     MEM_copy_CC20(buf, D_CC20, 16);
-    Ent_CC20 *x = e;
+    Ent_CC20 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00446028[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = D_00446028[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_CC20 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
+        if (!section || (i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
         else
             obj = (char*)(i << 2);
@@ -1716,10 +1716,10 @@ struct Ent_D420 { int idx; int val; int pad; int type; };
  * bytes, bucket 1, no old node) is built on the instance with the block.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_D420 func_002FD420(int n, Ent_D420 *e) {
+extern "C" V3_D420 func_002FD420(int n, Ent_D420 *params) {
     if (D_004A5604 == 0) {
         ((int*)D_D420)[0] = 1;
         ((int*)D_D420)[1] = 0;
@@ -1784,28 +1784,28 @@ extern "C" V3_D420 func_002FD420(int n, Ent_D420 *e) {
     unsigned *buf = (unsigned*)cMemMan_alloc(0xE0, D_00489718_D420, 0x20000000, 0);
     buf[54] = 0xFFFFFFFF;
     MEM_copy_D420(buf, D_D420, 0xE0);
-    Ent_D420 *x = e;
+    Ent_D420 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_004460B0[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[54];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_D420 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
-        if (!s)
+        if (!section)
             r = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_D420(i);
             r = t;
         }
@@ -1815,9 +1815,9 @@ extern "C" V3_D420 func_002FD420(int n, Ent_D420 *e) {
         operator_delete((int*)buf);
         return D_004C9098_D420;
     }
-    void *p = *(void**)(obj + 0xC);
-    if (p) {
-        int r = checkActiveNode(p, 13, buf);
+    void *activeNode = *(void**)(obj + 0xC);
+    if (activeNode) {
+        int r = checkActiveNode(activeNode, 13, buf);
         if (r != 0) {
             if (r > 0)
                 operator_delete((int*)buf);
@@ -1910,10 +1910,10 @@ struct Ent_D758 { int idx; int val; int pad; int type; };
  * not checked either.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_D758 func_002FD758(int n, Ent_D758 *e) {
+extern "C" V3_D758 func_002FD758(int n, Ent_D758 *params) {
     if (D_004A5608 == 0) {
         D_D758[0] = 0xFFFFFFFF;
         ((int*)D_D758)[1] = -1;
@@ -1929,37 +1929,37 @@ extern "C" V3_D758 func_002FD758(int n, Ent_D758 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_D758(buf, D_D758, 24);
-    Ent_D758 *x = e;
+    Ent_D758 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00446190[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = D_00446190[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_D758 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
+        if (!section || (i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
         else
             obj = (char*)(i << 2);
     }
-    O_D758 *p = *(O_D758**)(obj + 0xC);
-    if (p) {
-        if (p->v16()) {
+    O_D758 *activeNode = *(O_D758**)(obj + 0xC);
+    if (activeNode) {
+        if (activeNode->v16()) {
             int k = buf[1];
             if (k != -1) {
                 V4_D758 pos = *shape_D758(k)->v05();
-                M4_D758 *m = shape_D758(buf[1])->v06();
-                vAddTo_D758(pos, mtxApply_D758(m, V4_D758(*(float*)&buf[2], *(float*)&buf[3], *(float*)&buf[4], 0.0f)));
-                cMoveNode_addPosition_D758(p, &pos);
+                M4_D758 *riderTransform = shape_D758(buf[1])->v06();
+                vAddTo_D758(pos, mtxApply_D758(riderTransform, V4_D758(*(float*)&buf[2], *(float*)&buf[3], *(float*)&buf[4], 0.0f)));
+                cMoveNode_addPosition_D758(activeNode, &pos);
             }
         }
     }
@@ -2002,10 +2002,10 @@ struct Ent_D9F8 { int idx; int val; int pad; int type; };
  * Quirk: an instance that is not found is not checked; its node is read through a null pointer.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_D9F8 func_002FD9F8(int n, Ent_D9F8 *e) {
+extern "C" V3_D9F8 func_002FD9F8(int n, Ent_D9F8 *params) {
     if (D_004A560C == 0) {
         D_D9F8[0] = 0xFFFFFFFF;
         D_D9F8[1] = 0xFFFFFFFF;
@@ -2023,49 +2023,49 @@ extern "C" V3_D9F8 func_002FD9F8(int n, Ent_D9F8 *e) {
     buf64[0] = 0xFFFFFFFF;
     buf64[1] = 0xFFFFFFFF;
     MEM_copy_D9F8(buf, D_D9F8, 28);
-    Ent_D9F8 *x = e;
+    Ent_D9F8 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_004461A8[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_D9F8 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s)
-            r = 0;
+        char *inst;
+        if (!section)
+            inst = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_D9F8(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     unsigned id2 = buf[1];
     if (~id2 != 0) {
-        char *s2 = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id2 & 0xFF];
-        unsigned i2;
-        char *o2;
-        if (!s2 || (i2 = ((unsigned*)*(char**)(s2 + 0x1C))[id2 >> 8] >> 8) == 0)
-            o2 = 0;
+        char *parentSection = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id2 & 0xFF];
+        unsigned parentRef;
+        char *parentInst;
+        if (!parentSection || (parentRef = ((unsigned*)*(char**)(parentSection + 0x1C))[id2 >> 8] >> 8) == 0)
+            parentInst = 0;
         else
-            o2 = (char*)(i2 << 2);
-        O_D9F8 *q = o2 ? *(O_D9F8**)(o2 + 0xC) : 0;
-        if (q && !q->v10(6)) {
-            O_D9F8 *p = *(O_D9F8**)(obj + 0xC);
-            if (p && p->v16()) {
-                int k = *(int*)((char*)q + 0x18);
-                V4_D9F8 v(*(float*)&buf[3], *(float*)&buf[4], *(float*)&buf[5], 0.0f);
-                cMoveNode_addParent_D9F8(p, k, buf[2], &v);
+            parentInst = (char*)(parentRef << 2);
+        O_D9F8 *parentNode = parentInst ? *(O_D9F8**)(parentInst + 0xC) : 0;
+        if (parentNode && !parentNode->v10(6)) {
+            O_D9F8 *activeNode = *(O_D9F8**)(obj + 0xC);
+            if (activeNode && activeNode->v16()) {
+                int k = *(int*)((char*)parentNode + 0x18);
+                V4_D9F8 offset(*(float*)&buf[3], *(float*)&buf[4], *(float*)&buf[5], 0.0f);
+                cMoveNode_addParent_D9F8(activeNode, k, buf[2], &offset);
             }
         }
     }
@@ -2109,10 +2109,10 @@ struct Ent_DC60 { int idx; int val; int pad; int type; };
  * Quirk: an instance that is not found is not checked; its node is read through a null pointer.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_DC60 func_002FDC60(int n, Ent_DC60 *e) {
+extern "C" V3_DC60 func_002FDC60(int n, Ent_DC60 *params) {
     if (D_004A5610 == 0) {
         D_DC60[0] = 0xFFFFFFFF;
         D_DC60[1] = 0xFFFFFFFF;
@@ -2130,49 +2130,49 @@ extern "C" V3_DC60 func_002FDC60(int n, Ent_DC60 *e) {
     buf64[0] = 0xFFFFFFFF;
     buf64[1] = 0xFFFFFFFF;
     MEM_copy_DC60(buf, D_DC60, 28);
-    Ent_DC60 *x = e;
+    Ent_DC60 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_004461C0[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_DC60 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s)
-            r = 0;
+        char *inst;
+        if (!section)
+            inst = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_DC60(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     if (~buf[1] != 0) {
-        O_DC60 *q = *(O_DC60**)(obj + 0xC);
-        if (q && !q->v10(6)) {
+        O_DC60 *parentNode = *(O_DC60**)(obj + 0xC);
+        if (parentNode && !parentNode->v10(6)) {
             unsigned id2 = buf[1];
-            char *s2 = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id2 & 0xFF];
-            unsigned i2;
-            char *o2;
-            if (!s2 || (i2 = ((unsigned*)*(char**)(s2 + 0x1C))[id2 >> 8] >> 8) == 0)
-                o2 = 0;
+            char *childSection = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id2 & 0xFF];
+            unsigned childRef;
+            char *childInst;
+            if (!childSection || (childRef = ((unsigned*)*(char**)(childSection + 0x1C))[id2 >> 8] >> 8) == 0)
+                childInst = 0;
             else
-                o2 = (char*)(i2 << 2);
-            O_DC60 *p = o2 ? *(O_DC60**)(o2 + 0xC) : 0;
-            if (p && p->v16()) {
-                int k = *(int*)((char*)q + 0x18);
-                V4_DC60 v(*(float*)&buf[3], *(float*)&buf[4], *(float*)&buf[5], 0.0f);
-                cMoveNode_addParent_DC60(p, k, buf[2], &v);
+                childInst = (char*)(childRef << 2);
+            O_DC60 *childNode = childInst ? *(O_DC60**)(childInst + 0xC) : 0;
+            if (childNode && childNode->v16()) {
+                int k = *(int*)((char*)parentNode + 0x18);
+                V4_DC60 offset(*(float*)&buf[3], *(float*)&buf[4], *(float*)&buf[5], 0.0f);
+                cMoveNode_addParent_DC60(childNode, k, buf[2], &offset);
             }
         }
     }
@@ -2392,10 +2392,10 @@ struct Ent_E2C0 { int idx; int val; int pad; int type; };
  * Quirk: an instance that is not found is not checked; its node is read through a null pointer.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_E2C0 func_002FE2C0(int n, Ent_E2C0 *e) {
+extern "C" V3_E2C0 func_002FE2C0(int n, Ent_E2C0 *params) {
     if (D_004A561C == 0) {
         D_E2C0[0] = 0xFFFFFFFF;
         ((int*)D_E2C0)[1] = 5;
@@ -2418,32 +2418,32 @@ extern "C" V3_E2C0 func_002FE2C0(int n, Ent_E2C0 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_E2C0(buf, D_E2C0, 52);
-    Ent_E2C0 *x = e;
+    Ent_E2C0 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00446238[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = D_00446238[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_E2C0 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
+        if (!section || (i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
         else
             obj = (char*)(i << 2);
     }
-    O_E2C0 *p = *(O_E2C0**)(obj + 0xC);
-    if (p) {
-        if (p->v16())
-            cMoveNode_addUVScroll_E2C0(p, buf);
+    O_E2C0 *activeNode = *(O_E2C0**)(obj + 0xC);
+    if (activeNode) {
+        if (activeNode->v16())
+            cMoveNode_addUVScroll_E2C0(activeNode, buf);
     }
     return D_004C9098_E2C0;
 }
@@ -2479,10 +2479,10 @@ struct Ent_E4A8 { int idx; int val; int pad; int type; };
  * Quirk: an instance that is not found is not checked; its node is read through a null pointer.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_E4A8 func_002FE4A8(int n, Ent_E4A8 *e) {
+extern "C" V3_E4A8 func_002FE4A8(int n, Ent_E4A8 *params) {
     if (D_004A5620 == 0) {
         D_E4A8[0] = 0xFFFFFFFF;
         ((int*)D_E4A8)[1] = 0;
@@ -2496,32 +2496,32 @@ extern "C" V3_E4A8 func_002FE4A8(int n, Ent_E4A8 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_E4A8(buf, D_E4A8, 24);
-    Ent_E4A8 *x = e;
+    Ent_E4A8 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00446268[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = D_00446268[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_E4A8 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
+        if (!section || (i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
         else
             obj = (char*)(i << 2);
     }
-    O_E4A8 *p = *(O_E4A8**)(obj + 0xC);
-    if (p) {
-        if (p->v16())
-            cMoveNode_addTexFlip_E4A8(p, buf);
+    O_E4A8 *activeNode = *(O_E4A8**)(obj + 0xC);
+    if (activeNode) {
+        if (activeNode->v16())
+            cMoveNode_addTexFlip_E4A8(activeNode, buf);
     }
     return D_004C9098_E4A8;
 }
@@ -2558,10 +2558,10 @@ struct Ent_E668 { int idx; int val; int pad; int type; };
  * Quirk: an instance that is not found is not checked; its node is read through a null pointer.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_E668 func_002FE668(int n, Ent_E668 *e) {
+extern "C" V3_E668 func_002FE668(int n, Ent_E668 *params) {
     if (D_004A5624 == 0) {
         D_E668[0] = 0xFFFFFFFF;
         ((int*)D_E668)[1] = 1;
@@ -2580,32 +2580,32 @@ extern "C" V3_E668 func_002FE668(int n, Ent_E668 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_E668(buf, D_E668, 36);
-    Ent_E668 *x = e;
+    Ent_E668 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00446280[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = D_00446280[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_E668 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
+        if (!section || (i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
         else
             obj = (char*)(i << 2);
     }
-    O_E668 *p = *(O_E668**)(obj + 0xC);
-    if (p) {
-        if (p->v16())
-            cMoveNode_addBoost_E668(p, buf);
+    O_E668 *activeNode = *(O_E668**)(obj + 0xC);
+    if (activeNode) {
+        if (activeNode->v16())
+            cMoveNode_addBoost_E668(activeNode, buf);
     }
     return D_004C9098_E668;
 }
@@ -2861,10 +2861,10 @@ struct Ent_EE98 { int idx; int val; int pad; int type; };
  * Quirk: an instance that is not found is not checked; its node is read through a null pointer.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_EE98 func_002FEE98(int n, Ent_EE98 *e) {
+extern "C" V3_EE98 func_002FEE98(int n, Ent_EE98 *params) {
     if (D_004A562C == 0) {
         ((int*)D_EE98)[0] = 1;
         ((int*)D_EE98)[1] = 0;
@@ -2933,15 +2933,15 @@ extern "C" V3_EE98 func_002FEE98(int n, Ent_EE98 *e) {
     unsigned *buf = (unsigned*)cMemMan_alloc(0xF0, D_00489750_EE98, 0x20000000, 0);
     buf[54] = 0xFFFFFFFF;
     MEM_copy_EE98(buf, D_EE98, 0xF0);
-    Ent_EE98 *x = e;
+    Ent_EE98 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00446380[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     if (*(float*)&buf[7] > *(float*)&buf[5])
         *(float*)&buf[7] = *(float*)&buf[5];
@@ -2950,18 +2950,18 @@ extern "C" V3_EE98 func_002FEE98(int n, Ent_EE98 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_EE98 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
+        if (!section || (i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
         else
             obj = (char*)(i << 2);
     }
-    O_EE98 *p = *(O_EE98**)(obj + 0xC);
-    if (p && p->v16()) {
+    O_EE98 *activeNode = *(O_EE98**)(obj + 0xC);
+    if (activeNode && activeNode->v16()) {
         float one = 1.0f;
-        V4_EE98 v(*(float*)&buf[56], *(float*)&buf[57], *(float*)&buf[58], one);
-        cMoveNode_addDynamicParticle_EE98(p, buf, buf[55], &v);
+        V4_EE98 offset(*(float*)&buf[56], *(float*)&buf[57], *(float*)&buf[58], one);
+        cMoveNode_addDynamicParticle_EE98(activeNode, buf, buf[55], &offset);
         return D_004C9098_EE98;
     }
     operator_delete((int*)buf);
@@ -3081,10 +3081,10 @@ struct Ent_F390 { int idx; int val; int pad; int type; };
  * "FloatRail") on the instance from the block.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_F390 func_002FF390(int n, Ent_F390 *e) {
+extern "C" V3_F390 func_002FF390(int n, Ent_F390 *params) {
     if (D_004A5634 == 0) {
         D_F390[0] = 0xFFFFFFFF;
         D_F390[1] = 0xFFFFFFFF;
@@ -3123,37 +3123,37 @@ extern "C" V3_F390 func_002FF390(int n, Ent_F390 *e) {
     buf64[7] = 0xFFFFFFFF;
     buf64[8] = 0xFFFFFFFF;
     MEM_copy_F390(buf, D_F390, 88);
-    Ent_F390 *x = e;
+    Ent_F390 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00446480[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_F390 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s)
-            r = 0;
+        char *inst;
+        if (!section)
+            inst = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_F390(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     if (obj == 0)
         return D_004C9098_F390;
-    void *p = *(void**)(obj + 0xC);
-    if (p && checkActiveNode(p, 20, buf))
+    void *activeNode = *(void**)(obj + 0xC);
+    if (activeNode && checkActiveNode(activeNode, 20, buf))
         return D_004C9098_F390;
     cFloatRailNode_cFloatRailNode_F390(cMemMan_alloc(0x80, D_00489768_F390, 0x20000000, 0), obj, buf);
     return D_004C9098_F390;
@@ -3197,10 +3197,10 @@ struct Ent_F5E8 { int idx; int val; int pad; int type; };
  * 0x80, "SpringRail") on the instance from the block, after scaling TorqueScale by 0.001.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_F5E8 func_002FF5E8(int n, Ent_F5E8 *e) {
+extern "C" V3_F5E8 func_002FF5E8(int n, Ent_F5E8 *params) {
     if (D_004A5638 == 0) {
         D_F5E8[0] = 0xFFFFFFFF;
         D_F5E8[1] = 0xFFFFFFFF;
@@ -3239,37 +3239,37 @@ extern "C" V3_F5E8 func_002FF5E8(int n, Ent_F5E8 *e) {
     buf64[7] = 0xFFFFFFFF;
     buf64[8] = 0xFFFFFFFF;
     MEM_copy_F5E8(buf, D_F5E8, 88);
-    Ent_F5E8 *x = e;
+    Ent_F5E8 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_004464D8[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_F5E8 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s)
-            r = 0;
+        char *inst;
+        if (!section)
+            inst = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_F5E8(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     if (obj == 0)
         return D_004C9098_F5E8;
-    void *p = *(void**)(obj + 0xC);
-    if (p && checkActiveNode(p, 21, buf))
+    void *activeNode = *(void**)(obj + 0xC);
+    if (activeNode && checkActiveNode(activeNode, 21, buf))
         return D_004C9098_F5E8;
     *(float*)&buf[20] *= 0.0010000000474974513f;
     cSpringRailNode_cSpringRailNode_F5E8(cMemMan_alloc(0x80, D_00489778_F5E8, 0x20000000, 0), obj, buf);
@@ -3306,10 +3306,10 @@ extern T12_F850 D_004FBAE8_F850 __asm__("D_004FBAE8");
  * cRider_flagEventWorld(SSXApp->Game->AI->Riders[Being], EventId, Arg); the rider slot is not checked.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_F850 func_002FF850(int n, Ent_F850* e) {
+extern "C" R12_F850 func_002FF850(int n, Ent_F850* params) {
     if (D_004A563C_F850 == 0) {
         D_004FBAE8_F850.a = -1;
         D_004A563C_F850 = 1;
@@ -3318,22 +3318,22 @@ extern "C" R12_F850 func_002FF850(int n, Ent_F850* e) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004FBAE8_F850.f = Flag_F850(D_004FBAE8_F850.f);
     }
-    int v[4] __attribute__((aligned(16)));
-    int* vp = v;
+    int block[4] __attribute__((aligned(16)));
+    int* vp = block;
     MEM_copy(vp, &D_004FBAE8_F850, 16);
-    Ent_F850* p = e;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_00446530_F850[k] && D_00446530_F850[k] == 2)
-            *(float*)d = (float)p->val;
+    Ent_F850* curArg = params;
+    for (int i = 0; i < n; i++, curArg++) {
+        int k = curArg->idx;
+        int* slot = (int*)((k << 2) + (int)vp);
+        if (curArg->kind != D_00446530_F850[k] && D_00446530_F850[k] == 2)
+            *(float*)slot = (float)curArg->val;
         else
-            *d = p->val;
+            *slot = curArg->val;
     }
     if (vp[0] == -1)
         vp[0] = *D_004A3DD8_F850;
-    char* o = *(char**)(D_004A28A8_F850 + 0x84);
-    char* base = *(char**)(o + 0xC);
+    char* game = *(char**)(D_004A28A8_F850 + 0x84);
+    char* base = *(char**)(game + 0xC);
     cRider_flagEventWorld(*(int*)(base + (vp[0] << 2) + 0x28), vp[1], *(float*)&vp[2]);
     return D_004C9098_F850;
 }
@@ -3378,10 +3378,10 @@ struct Ent_F9A8 { int idx; int val; int pad; int type; };
  * Quirk: an instance that is not found is not checked; its node is read through a null pointer.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_F9A8 func_002FF9A8(int n, Ent_F9A8 *e) {
+extern "C" V3_F9A8 func_002FF9A8(int n, Ent_F9A8 *params) {
     if (D_004A5640 == 0) {
         D_F9A8[0] = 0xFFFFFFFF;
         ((int*)D_F9A8)[1] = -1;
@@ -3393,20 +3393,20 @@ extern "C" V3_F9A8 func_002FF9A8(int n, Ent_F9A8 *e) {
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
     MEM_copy_F9A8(buf, D_F9A8, 16);
-    Ent_F9A8 *x = e;
+    Ent_F9A8 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00446540[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = D_00446540[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     char *obj = look_F9A8(buf[0]);
-    O_F9A8 *p = *(O_F9A8**)(obj + 0xC);
-    if (p)
-        p->v36(buf[1], *(float*)&buf[2]);
+    O_F9A8 *activeNode = *(O_F9A8**)(obj + 0xC);
+    if (activeNode)
+        activeNode->v36(buf[1], *(float*)&buf[2]);
     return D_004C9098_F9A8;
 }
 #endif
@@ -3444,10 +3444,10 @@ struct Ent_FB50 { int idx; int val; int pad; int type; };
  * flags 3). Then a cHideNode (cHideNode_cHideNode, cMemMan_alloc 0x1C, "Hide") is built on the instance.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_FB50 func_002FFB50(int n, Ent_FB50 *e) {
+extern "C" V3_FB50 func_002FFB50(int n, Ent_FB50 *params) {
     if (D_004A5650_FB50 == 0) {
         D_004A5648_FB50 = 0xFFFFFFFF;
         D_004A5650_FB50 = 1;
@@ -3458,40 +3458,40 @@ extern "C" V3_FB50 func_002FFB50(int n, Ent_FB50 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_FB50(buf, &D_004A5648_FB50, 8);
-    Ent_FB50 *x = e;
+    Ent_FB50 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_004A3C10_FB50[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_FB50 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s)
-            r = 0;
+        char *inst;
+        if (!section)
+            inst = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_FB50(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     if (obj == 0)
         return D_004C9098_FB50;
-    O_FB50 *p = *(O_FB50**)(obj + 0xC);
-    if (p) {
-        if (p->v10(16) || p->v10(6))
+    O_FB50 *activeNode = *(O_FB50**)(obj + 0xC);
+    if (activeNode) {
+        if (activeNode->v10(16) || activeNode->v10(6))
             return D_004C9098_FB50;
-        p->v01(3);
+        activeNode->v01(3);
     }
     cHideNode_cHideNode_FB50(cMemMan_alloc(0x1C, D_004A3C18_FB50, 0x20000000, 0), obj);
     return D_004C9098_FB50;
@@ -3536,10 +3536,10 @@ struct Ent_FD58 { int idx; int val; int pad; int type; };
  * (16, virtual isType), that node is deleted (virtual slot 1, flags 3).
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_FD58 func_002FFD58(int n, Ent_FD58 *e) {
+extern "C" V3_FD58 func_002FFD58(int n, Ent_FD58 *params) {
     if (D_004A5660 == 0) {
         D_FD58 = 0xFFFFFFFF;
         D_004A5660 = 1;
@@ -3549,22 +3549,22 @@ extern "C" V3_FD58 func_002FFD58(int n, Ent_FD58 *e) {
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
     MEM_copy_FD58(buf, &D_FD58, 8);
-    Ent_FD58 *x = e;
+    Ent_FD58 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = (&D_004A3C20)[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = (&D_004A3C20)[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     char *obj = look_FD58(buf[0]);
     if (obj) {
-        O_FD58 *p = *(O_FD58**)(obj + 0xC);
-        if (p) {
-            if (p->v10(0x10))
-                p->v01(3);
+        O_FD58 *activeNode = *(O_FD58**)(obj + 0xC);
+        if (activeNode) {
+            if (activeNode->v10(0x10))
+                activeNode->v01(3);
         }
     }
     return D_004C9098_FD58;
@@ -3601,10 +3601,10 @@ struct Ent_FF00 { int idx; int val; int pad; int type; };
  * cSSXAudio_WorldSound(cAudioInterface_bxAudio(), instance, SoundId) plays it.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_FF00 func_002FFF00(int n, Ent_FF00 *e) {
+extern "C" V3_FF00 func_002FFF00(int n, Ent_FF00 *params) {
     if (D_004A5664 == 0) {
         D_FF00[0] = 0xFFFFFFFF;
         D_FF00[1] = 0xFFFFFFFF;
@@ -3615,36 +3615,36 @@ extern "C" V3_FF00 func_002FFF00(int n, Ent_FF00 *e) {
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
     MEM_copy_FF00(buf, D_FF00, 12);
-    Ent_FF00 *x = e;
+    Ent_FF00 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = (&D_004A3C28)[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_FF00 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s)
-            r = 0;
+        char *inst;
+        if (!section)
+            inst = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_FF00(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     if (obj) {
-        int b1 = buf[1];
-        cSSXAudio_WorldSound_FF00(cAudioInterface_bxAudio_FF00(), obj, b1);
+        int soundId = buf[1];
+        cSSXAudio_WorldSound_FF00(cAudioInterface_bxAudio_FF00(), obj, soundId);
     }
     return D_004C9098_FF00;
 }
@@ -3680,10 +3680,10 @@ struct Ent_00A8 { int idx; int val; int pad; int type; };
  * cSSXAudio_AttachSound(cAudioInterface_bxAudio(), instance, SoundId, Mesh) attaches it.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_00A8 func_003000A8(int n, Ent_00A8 *e) {
+extern "C" V3_00A8 func_003000A8(int n, Ent_00A8 *params) {
     if (D_004A5668 == 0) {
         D_00A8[0] = 0xFFFFFFFF;
         D_00A8[1] = 0xFFFFFFFF;
@@ -3695,37 +3695,37 @@ extern "C" V3_00A8 func_003000A8(int n, Ent_00A8 *e) {
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
     MEM_copy_00A8(buf, D_00A8, 16);
-    Ent_00A8 *x = e;
+    Ent_00A8 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00446550[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_00A8 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s)
-            r = 0;
+        char *inst;
+        if (!section)
+            inst = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_00A8(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     if (obj) {
-        int b1 = buf[1];
-        int b2 = buf[2];
-        cSSXAudio_AttachSound_00A8(cAudioInterface_bxAudio_00A8(), obj, b1, b2);
+        int soundId = buf[1];
+        int meshIndex = buf[2];
+        cSSXAudio_AttachSound_00A8(cAudioInterface_bxAudio_00A8(), obj, soundId, meshIndex);
     }
     return D_004C9098_00A8;
 }
@@ -3761,10 +3761,10 @@ struct Ent_0260 { int idx; int val; int pad; int type; };
  * cSSXAudio_DetachSound(cAudioInterface_bxAudio(), instance, SoundId, Mesh) detaches it.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_0260 func_00300260(int n, Ent_0260 *e) {
+extern "C" V3_0260 func_00300260(int n, Ent_0260 *params) {
     if (D_004A566C == 0) {
         D_0260[0] = 0xFFFFFFFF;
         D_0260[1] = 0xFFFFFFFF;
@@ -3776,37 +3776,37 @@ extern "C" V3_0260 func_00300260(int n, Ent_0260 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_0260(buf, D_0260, 16);
-    Ent_0260 *x = e;
+    Ent_0260 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00446560[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_0260 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s)
-            r = 0;
+        char *inst;
+        if (!section)
+            inst = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_0260(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     if (obj) {
-        int b1 = buf[1];
-        int b2 = buf[2];
-        cSSXAudio_DetachSound_0260(cAudioInterface_bxAudio_0260(), obj, b1, b2);
+        int soundId = buf[1];
+        int meshIndex = buf[2];
+        cSSXAudio_DetachSound_0260(cAudioInterface_bxAudio_0260(), obj, soundId, meshIndex);
     }
     return D_004C9098_0260;
 }
@@ -3841,10 +3841,10 @@ struct Ent_0418 { int idx; int val; int pad; int type; };
  * Quirk: an instance that is not found is not checked; its node is read through a null pointer.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_0418 func_00300418(int n, Ent_0418 *e) {
+extern "C" V3_0418 func_00300418(int n, Ent_0418 *params) {
     if (D_004A5670 == 0) {
         D_0418[0] = 0xFFFFFFFF;
         ((int*)D_0418)[1] = 0;
@@ -3855,35 +3855,35 @@ extern "C" V3_0418 func_00300418(int n, Ent_0418 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_0418(buf, D_0418, 12);
-    Ent_0418 *x = e;
+    Ent_0418 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = (&D_004A3C30)[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = (&D_004A3C30)[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_0418 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
+        if (!section || (i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
         else
             obj = (char*)(i << 2);
     }
-    O_0418 *p = *(O_0418**)(obj + 0xC);
-    if (p) {
-        int b1 = buf[1];
-        if (b1 == 0)
-            p->v34(0);
-        else if (b1 == 1)
-            p->v34(1);
+    O_0418 *activeNode = *(O_0418**)(obj + 0xC);
+    if (activeNode) {
+        int expireType = buf[1];
+        if (expireType == 0)
+            activeNode->v34(0);
+        else if (expireType == 1)
+            activeNode->v34(1);
     }
     return D_004C9098_0418;
 }
@@ -3918,10 +3918,10 @@ struct Ent_05E8 { int idx; int val; int pad; int type; };
  * Quirk: an instance that is not found is not checked; its node is read through a null pointer.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_05E8 func_003005E8(int n, Ent_05E8 *e) {
+extern "C" V3_05E8 func_003005E8(int n, Ent_05E8 *params) {
     if (D_004A5680 == 0) {
         D_05E8 = 0xFFFFFFFF;
         D_004A5680 = 1;
@@ -3931,15 +3931,15 @@ extern "C" V3_05E8 func_003005E8(int n, Ent_05E8 *e) {
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
     MEM_copy_05E8(buf, &D_05E8, 8);
-    Ent_05E8 *x = e;
+    Ent_05E8 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = (&D_004A3C38)[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = (&D_004A3C38)[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
@@ -3947,16 +3947,16 @@ extern "C" V3_05E8 func_003005E8(int n, Ent_05E8 *e) {
         obj = *(char**)(*(char**)&D_004A3DD8_05E8 + 0x290);
     } else {
         char *tb = *(char**)((char*)cWorld_m_pTheWorld->m_pWorldCache + 8);
-        char *s = *(char**)(tb + (id & 0xFF) * 4);
+        char *section = *(char**)(tb + (id & 0xFF) * 4);
         unsigned i;
-        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
+        if (!section || (i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
         else
             obj = (char*)(i << 2);
     }
-    O_05E8 *o = *(O_05E8**)(obj + 0xC);
-    if (o)
-        o->v35();
+    O_05E8 *activeNode = *(O_05E8**)(obj + 0xC);
+    if (activeNode)
+        activeNode->v35();
     return D_004C9098_05E8;
 }
 #endif
@@ -3995,10 +3995,10 @@ struct Ent_0770 { int idx; int val; int pad; int type; };
  * through its virtual transport (cRider_transport, slot 10).
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_0770 func_00300770(int n, Ent_0770 *e) {
+extern "C" V3_0770 func_00300770(int n, Ent_0770 *params) {
     if (D_004A5690_0770 == 0) {
         D_004A5688_0770 = 0xFFFFFFFF;
         D_004A5690_0770 = 1;
@@ -4009,41 +4009,41 @@ extern "C" V3_0770 func_00300770(int n, Ent_0770 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_0770(buf, &D_004A5688_0770, 8);
-    Ent_0770 *x = e;
+    Ent_0770 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_004A3C40_0770[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)((char*)D_004A3DD8_0770 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s)
-            r = 0;
+        char *inst;
+        if (!section)
+            inst = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_0770(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     int k = *D_004A3DD8_0770;
     if (k >= 0 && obj) {
-        O_0770 *p = *(O_0770**)(obj + 0xC);
-        void *v = obj + 0x10;
-        if (p)
-            v = p->v24();
+        O_0770 *activeNode = *(O_0770**)(obj + 0xC);
+        void *rootTransform = obj + 0x10;
+        if (activeNode)
+            rootTransform = activeNode->v24();
         Lvl_0770 *lvl = *(Lvl_0770**)(*(char**)(D_004A28A8_0770 + 0x84) + 0xC);
-        ((Sh_0770*)(lvl->sh[k] + 0x6C0))->v10(v);
+        ((Sh_0770*)(lvl->sh[k] + 0x6C0))->v10(rootTransform);
     }
     return D_004C9098_0770;
 }
@@ -4083,10 +4083,10 @@ struct Ent_0948 { int idx; int val; int pad; int type; };
  * its virtual initForMission (cRider_initForMission, slot 12).
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_0948 func_00300948(int n, Ent_0948 *e) {
+extern "C" V3_0948 func_00300948(int n, Ent_0948 *params) {
     if (D_004A56A0_0948 == 0) {
         D_004A5698_0948 = 0xFFFFFFFF;
         D_004A56A0_0948 = 1;
@@ -4097,41 +4097,41 @@ extern "C" V3_0948 func_00300948(int n, Ent_0948 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_0948(buf, &D_004A5698_0948, 8);
-    Ent_0948 *x = e;
+    Ent_0948 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_004A3C48_0948[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)((char*)D_004A3DD8_0948 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s)
-            r = 0;
+        char *inst;
+        if (!section)
+            inst = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_0948(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     int k = *D_004A3DD8_0948;
     if (k >= 0 && obj) {
-        O_0948 *p = *(O_0948**)(obj + 0xC);
-        void *v = obj + 0x10;
-        if (p)
-            v = p->v24();
+        O_0948 *activeNode = *(O_0948**)(obj + 0xC);
+        void *rootTransform = obj + 0x10;
+        if (activeNode)
+            rootTransform = activeNode->v24();
         Lvl_0948 *lvl = *(Lvl_0948**)(*(char**)(D_004A28A8_0948 + 0x84) + 0xC);
-        ((Sh_0948*)(lvl->sh[k] + 0x6C0))->v12(v);
+        ((Sh_0948*)(lvl->sh[k] + 0x6C0))->v12(rootTransform);
     }
     return D_004C9098_0948;
 }
@@ -4164,10 +4164,10 @@ extern T12_0B20 D_004FBB48_0B20 __asm__("D_004FBB48");
  * values do nothing.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_0B20 func_00300B20(int n, Ent_0B20* e) {
+extern "C" R12_0B20 func_00300B20(int n, Ent_0B20* params) {
     if (D_004A56A4_0B20 == 0) {
         D_004FBB48_0B20.a = -1;
         D_004FBB48_0B20.b = 1;
@@ -4175,18 +4175,18 @@ extern "C" R12_0B20 func_00300B20(int n, Ent_0B20* e) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004FBB48_0B20.f = Flag_0B20(D_004FBB48_0B20.f);
     }
-    unsigned v[4] __attribute__((aligned(16)));
-    unsigned* vp = v;
+    unsigned block[4] __attribute__((aligned(16)));
+    unsigned* vp = block;
     vp[0] = 0xFFFFFFFFu;
     MEM_copy(vp, &D_004FBB48_0B20, 12);
-    Ent_0B20* p = e;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_004A3C50_0B20[k] && D_004A3C50_0B20[k] == 2)
-            *(float*)d = (float)p->val;
+    Ent_0B20* curArg = params;
+    for (int i = 0; i < n; i++, curArg++) {
+        int k = curArg->idx;
+        int* slot = (int*)((k << 2) + (int)vp);
+        if (curArg->kind != D_004A3C50_0B20[k] && D_004A3C50_0B20[k] == 2)
+            *(float*)slot = (float)curArg->val;
         else
-            *d = p->val;
+            *slot = curArg->val;
     }
     if (~vp[0] != 0) {
         int y = vp[1];
@@ -4228,10 +4228,10 @@ struct Ent_0C78 { int idx; int val; int pad; int type; };
  * Other values do nothing.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_0C78 func_00300C78(int n, Ent_0C78 *e) {
+extern "C" V3_0C78 func_00300C78(int n, Ent_0C78 *params) {
     if (D_004A56A8 == 0) {
         D_0C78[0] = 0xFFFFFFFF;
         ((int*)D_0C78)[1] = 0;
@@ -4241,15 +4241,15 @@ extern "C" V3_0C78 func_00300C78(int n, Ent_0C78 *e) {
     unsigned buf64[3];
     unsigned *buf = buf64;
     MEM_copy_0C78(buf, D_0C78, 12);
-    Ent_0C78 *x = e;
+    Ent_0C78 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = (&D_004A3C58)[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = (&D_004A3C58)[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     switch ((int)buf[1]) {
@@ -4295,10 +4295,10 @@ extern T12u_0E28 D_004FBB68_0E28 __asm__("D_004FBB68");
  * When PoolId is not -1, cWScriptMan_collectPool(cWScriptMan_TheWScriptMan, PoolId, PoolSize) runs.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_0E28 func_00300E28(int n, Ent_0E28* e) {
+extern "C" R12_0E28 func_00300E28(int n, Ent_0E28* params) {
     if (D_004A56AC_0E28 == 0) {
         D_004FBB68_0E28.a = 0xFFFFFFFFu;
         D_004FBB68_0E28.b = 1;
@@ -4306,17 +4306,17 @@ extern "C" R12_0E28 func_00300E28(int n, Ent_0E28* e) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004FBB68_0E28.f = Flag_0E28(D_004FBB68_0E28.f);
     }
-    int v[4] __attribute__((aligned(16)));
-    int* vp = v;
+    int block[4] __attribute__((aligned(16)));
+    int* vp = block;
     MEM_copy(vp, &D_004FBB68_0E28, 12);
-    Ent_0E28* p = e;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_004A3C60_0E28[k] && D_004A3C60_0E28[k] == 2)
-            *(float*)d = (float)p->val;
+    Ent_0E28* curArg = params;
+    for (int i = 0; i < n; i++, curArg++) {
+        int k = curArg->idx;
+        int* slot = (int*)((k << 2) + (int)vp);
+        if (curArg->kind != D_004A3C60_0E28[k] && D_004A3C60_0E28[k] == 2)
+            *(float*)slot = (float)curArg->val;
         else
-            *d = p->val;
+            *slot = curArg->val;
     }
     unsigned x = vp[0];
     if (x != 0xFFFFFFFFu)
@@ -4353,10 +4353,10 @@ struct Ent_0F50 { int idx; int val; int pad; int type; };
  * When PoolId is not -1, cWScriptMan_collectInst(cWScriptMan_TheWScriptMan, PoolId, &InstId1, 20) runs.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_0F50 func_00300F50(int n, Ent_0F50 *e) {
+extern "C" V3_0F50 func_00300F50(int n, Ent_0F50 *params) {
     if (D_56B0_0F50 == 0) {
         D_0F50[0] = 0xFFFFFFFF;
         D_0F50[1] = 0xFFFFFFFF;
@@ -4406,15 +4406,15 @@ extern "C" V3_0F50 func_00300F50(int n, Ent_0F50 *e) {
     buf64[19] = 0xFFFFFFFF;
     buf64[20] = 0xFFFFFFFF;
     MEM_copy_0F50(buf, D_0F50, 88);
-    Ent_0F50 *x = e;
+    Ent_0F50 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00446570_0F50[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = D_00446570_0F50[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     if (buf[0] != 0xFFFFFFFF)
         cWScriptMan_collectInst_0F50(D_004A3DD8_0F50, buf[0], buf + 1, 20);
@@ -4533,10 +4533,10 @@ extern T12_12F0 D_004FBBE0_12F0 __asm__("D_004FBBE0");
  * returned as an int script value (type 1); otherwise nil. The value is built in the hidden result slot self.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to an int script value, or nil
  */
-extern "C" void* func_003012F0(void* self, int n, Ent_12F0* e) {
+extern "C" void* func_003012F0(void* self, int n, Ent_12F0* params) {
     if (D_004A56B8_12F0 == 0) {
         D_004FBBE0_12F0.a = -1;
         D_004FBBE0_12F0.b = -1;
@@ -4544,23 +4544,23 @@ extern "C" void* func_003012F0(void* self, int n, Ent_12F0* e) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004FBBE0_12F0.f = Flag_12F0(D_004FBBE0_12F0.f);
     }
-    int v[4] __attribute__((aligned(16)));
-    int* vp = v;
+    int block[4] __attribute__((aligned(16)));
+    int* vp = block;
     MEM_copy(vp, &D_004FBBE0_12F0, 12);
-    Ent_12F0* p = e;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_004A3C70_12F0[k] && D_004A3C70_12F0[k] == 2)
-            *(float*)d = (float)p->val;
+    Ent_12F0* curArg = params;
+    for (int i = 0; i < n; i++, curArg++) {
+        int k = curArg->idx;
+        int* slot = (int*)((k << 2) + (int)vp);
+        if (curArg->kind != D_004A3C70_12F0[k] && D_004A3C70_12F0[k] == 2)
+            *(float*)slot = (float)curArg->val;
         else
-            *d = p->val;
+            *slot = curArg->val;
     }
     unsigned x = vp[0];
     if (x != 0xFFFFFFFFu) {
-        int r = cWScriptMan_doMissionCmd_12F0(D_004A3DD8_12F0, x, vp[1], -1);
+        int cmdResult = cWScriptMan_doMissionCmd_12F0(D_004A3DD8_12F0, x, vp[1], -1);
         *(int*)((char*)self + 8) = 1;
-        *luno_cLunoVar_castInt(self) = r;
+        *luno_cLunoVar_castInt(self) = cmdResult;
     } else {
         *(R12_12F0*)self = D_004C9098_12F0;
     }
@@ -4618,14 +4618,14 @@ extern int D_004A3C78_1440[2] __asm__("D_004A3C78");
  * world-cache section and the rest an instance in it. The instance is resolved but not used; Cmd is ignored.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
 // FAKEMATCH: the dead lookup of the object for the packed reference id buf[0] (`obj`, never used: in retail only its
 // `lw; nor` survive, the branch being removed after register allocation; the release build's user was debug code);
 // plain form 97.22%.
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
-extern "C" cLunoValue_1440 func_00301440(int n, sBindArg_1FBE38_1440* e) {
+extern "C" cLunoValue_1440 func_00301440(int n, sBindArg_1FBE38_1440* params) {
     if (D_004A56BC_1440 == 0) {
         D_004FBBF0_1440.a = 0xFFFFFFFF;
         // NOTE: guarded static-local init; the trailing empty member's value-init copies its byte through a stack temp (lbu; sb 0(sp)).
@@ -4637,24 +4637,24 @@ extern "C" cLunoValue_1440 func_00301440(int n, sBindArg_1FBE38_1440* e) {
     unsigned* buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy(buf, &D_004FBBF0_1440, 12);
-    sBindArg_1FBE38_1440* x = e;
+    sBindArg_1FBE38_1440* x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_004A3C78_1440[idx];
-        unsigned* d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = D_004A3C78_1440[idx];
+        unsigned* slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = D_004A3DD8_1440->f290;
     } else {
-        sRefSet_1440 *s = ((sRefWorld_1440*)cWorld_m_pTheWorld->m_pWorldCache)->sets[id & 0xFF];
+        sRefSet_1440 *section = ((sRefWorld_1440*)cWorld_m_pTheWorld->m_pWorldCache)->sets[id & 0xFF];
         unsigned i;
-        if (!s || (i = s->refs[id >> 8] >> 8) == 0)
+        if (!section || (i = section->refs[id >> 8] >> 8) == 0)
             obj = 0;
         else
             obj = (char*)(i << 2);
@@ -4692,33 +4692,33 @@ extern Flag_1560 D_004A56C4_1560 __asm__("D_004A56C4");
  * -1. The value is built in the hidden result slot self.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to an int script value
  */
-extern "C" void* func_00301560(void* self, int n, Ent_1560* e) {
+extern "C" void* func_00301560(void* self, int n, Ent_1560* params) {
     if (D_004A56C8_1560 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004A56C4_1560 = Flag_1560(D_004A56C4_1560);
         D_004A56C0_1560 = -1;
         D_004A56C8_1560 = 1;
     }
-    int v[4] __attribute__((aligned(16)));
-    int* vp = v;
+    int block[4] __attribute__((aligned(16)));
+    int* vp = block;
     MEM_copy(vp, &D_004A56C0_1560, 8);
-    Ent_1560* p = e;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_004A3C80_1560[k] && D_004A3C80_1560[k] == 2)
-            *(float*)d = (float)p->val;
+    Ent_1560* curArg = params;
+    for (int i = 0; i < n; i++, curArg++) {
+        int k = curArg->idx;
+        int* slot = (int*)((k << 2) + (int)vp);
+        if (curArg->kind != D_004A3C80_1560[k] && D_004A3C80_1560[k] == 2)
+            *(float*)slot = (float)curArg->val;
         else
-            *d = p->val;
+            *slot = curArg->val;
     }
     unsigned x = vp[0];
     if (x != 0xFFFFFFFFu) {
-        int r = cWScriptMan_collectCount(D_004A3DD8_1560, x);
+        int collected = cWScriptMan_collectCount(D_004A3DD8_1560, x);
         *(int*)((char*)self + 8) = 1;
-        *luno_cLunoVar_castInt(self) = r;
+        *luno_cLunoVar_castInt(self) = collected;
     } else {
         *(int*)((char*)self + 8) = 1;
         *luno_cLunoVar_castInt(self) = 0;
@@ -4767,10 +4767,10 @@ struct Ent_1680 { int idx; int val; int pad; int type; };
  *
  * @param ret  the result slot
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" V3_1680* func_00301680(V3_1680 *ret, int n, Ent_1680 *e) {
+extern "C" V3_1680* func_00301680(V3_1680 *ret, int n, Ent_1680 *params) {
     if (D_004A56D8 == 0) {
         D_1680 = 0xFFFFFFFF;
         D_004A56D8 = 1;
@@ -4780,30 +4780,30 @@ extern "C" V3_1680* func_00301680(V3_1680 *ret, int n, Ent_1680 *e) {
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
     MEM_copy_1680(buf, &D_1680, 8);
-    Ent_1680 *x = e;
+    Ent_1680 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = (&D_004A3C88)[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = (&D_004A3C88)[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     char *obj = look_1680(buf[0]);
-    float v;
+    float animFrame;
     if (obj) {
-        O_1680 *p = *(O_1680**)(obj + 0xC);
-        if (p)
-            v = p->v30();
+        O_1680 *activeNode = *(O_1680**)(obj + 0xC);
+        if (activeNode)
+            animFrame = activeNode->v30();
         else
-            v = -1.0f;
+            animFrame = -1.0f;
         ((int*)ret)[2] = 2;
-        *luno_cLunoVar_castFloat_1680(ret) = v;
+        *luno_cLunoVar_castFloat_1680(ret) = animFrame;
     } else {
-        v = -1.0f;
+        animFrame = -1.0f;
         ((int*)ret)[2] = 2;
-        *luno_cLunoVar_castFloat_1680(ret) = v;
+        *luno_cLunoVar_castFloat_1680(ret) = animFrame;
     }
     return ret;
 }
@@ -4849,10 +4849,10 @@ struct Ent_1830 { int idx; int val; int pad; int type; };
  *
  * @param ret  the result slot
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" V3_1830* func_00301830(V3_1830 *ret, int n, Ent_1830 *e) {
+extern "C" V3_1830* func_00301830(V3_1830 *ret, int n, Ent_1830 *params) {
     if (D_004A56E8 == 0) {
         D_1830 = 0xFFFFFFFF;
         D_004A56E8 = 1;
@@ -4862,39 +4862,39 @@ extern "C" V3_1830* func_00301830(V3_1830 *ret, int n, Ent_1830 *e) {
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
     MEM_copy_1830(buf, &D_1830, 8);
-    Ent_1830 *x = e;
+    Ent_1830 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = (&D_004A3C90)[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = (&D_004A3C90)[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_1830 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
-            r = 0;
+        char *inst;
+        if (!section || (i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8) == 0)
+            inst = 0;
         else
-            r = (char*)(i << 2);
-        obj = r;
+            inst = (char*)(i << 2);
+        obj = inst;
     }
     if (obj) {
-        O_1830 *p = *(O_1830**)(obj + 0xC);
-        int v;
-        if (p)
-            v = p->v31();
+        O_1830 *activeNode = *(O_1830**)(obj + 0xC);
+        int animDir;
+        if (activeNode)
+            animDir = activeNode->v31();
         else
-            v = 0;
+            animDir = 0;
         ((int*)ret)[2] = 1;
-        *luno_cLunoVar_castInt(ret) = v;
+        *luno_cLunoVar_castInt(ret) = animDir;
     } else {
         ((int*)ret)[2] = 1;
         *luno_cLunoVar_castInt(ret) = 0;
@@ -4933,10 +4933,10 @@ struct Ent_19C8 { int idx; int val; int pad; int type; };
  *
  * @param ret  the result slot
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" V3_19C8* func_003019C8(V3_19C8 *ret, int n, Ent_19C8 *e) {
+extern "C" V3_19C8* func_003019C8(V3_19C8 *ret, int n, Ent_19C8 *params) {
     if (D_004A56EC == 0) {
         D_19C8[0] = 0xFFFFFFFF;
         *(float*)&D_19C8[1] = -1.0f;
@@ -4947,38 +4947,38 @@ extern "C" V3_19C8* func_003019C8(V3_19C8 *ret, int n, Ent_19C8 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_19C8(buf, D_19C8, 12);
-    Ent_19C8 *x = e;
+    Ent_19C8 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = (&D_004A3C98)[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = (&D_004A3C98)[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_19C8 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
+        if (!section || (i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
         else
             obj = (char*)(i << 2);
     }
     if (obj) {
-        O_19C8 *p = *(O_19C8**)(obj + 0xC);
-        float f = *(float*)&buf[1];
-        int v;
-        if (p)
-            v = p->v32(f * 0.03333333507180214f);
+        O_19C8 *activeNode = *(O_19C8**)(obj + 0xC);
+        float frameArg = *(float*)&buf[1];
+        int eventHit;
+        if (activeNode)
+            eventHit = activeNode->v32(frameArg * 0.03333333507180214f);
         else
-            v = 0;
+            eventHit = 0;
         ((int*)ret)[2] = 1;
-        *luno_cLunoVar_castInt(ret) = v;
+        *luno_cLunoVar_castInt(ret) = eventHit;
     } else {
         ((int*)ret)[2] = 1;
         *luno_cLunoVar_castInt(ret) = 0;
@@ -5014,27 +5014,27 @@ struct Ent_1B88 { int idx; int val; int pad; int kind; };
  * hidden result slot self.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to int 0
  */
-extern "C" void* func_00301B88(void* self, int n, Ent_1B88* e) {
+extern "C" void* func_00301B88(void* self, int n, Ent_1B88* params) {
     if (D_004A56F8_1B88 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004A56F4_1B88 = Flag_1B88(D_004A56F4_1B88);
         D_004A56F0_1B88 = -1;
         D_004A56F8_1B88 = 1;
     }
-    int v[4] __attribute__((aligned(16)));
-    int* vp = v;
+    int block[4] __attribute__((aligned(16)));
+    int* vp = block;
     MEM_copy(vp, &D_004A56F0_1B88, 8);
-    Ent_1B88* p = e;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_004A3CA0_1B88[k] && D_004A3CA0_1B88[k] == 2)
-            *(float*)d = (float)p->val;
+    Ent_1B88* curArg = params;
+    for (int i = 0; i < n; i++, curArg++) {
+        int k = curArg->idx;
+        int* slot = (int*)((k << 2) + (int)vp);
+        if (curArg->kind != D_004A3CA0_1B88[k] && D_004A3CA0_1B88[k] == 2)
+            *(float*)slot = (float)curArg->val;
         else
-            *d = p->val;
+            *slot = curArg->val;
     }
     cWScriptMan_gotoTask(D_004A3DD8_1B88, vp[0]);
     *(int*)((char*)self + 8) = 1;
@@ -5070,27 +5070,27 @@ struct Ent_1C80 { int idx; int val; int pad; int kind; };
  * hidden result slot self.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to int 0
  */
-extern "C" void* func_00301C80(void* self, int n, Ent_1C80* e) {
+extern "C" void* func_00301C80(void* self, int n, Ent_1C80* params) {
     if (D_004A5708_1C80 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004A5704_1C80 = Flag_1C80(D_004A5704_1C80);
         D_004A5700_1C80 = -1;
         D_004A5708_1C80 = 1;
     }
-    int v[4] __attribute__((aligned(16)));
-    int* vp = v;
+    int block[4] __attribute__((aligned(16)));
+    int* vp = block;
     MEM_copy(vp, &D_004A5700_1C80, 8);
-    Ent_1C80* p = e;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_004A3CA8_1C80[k] && D_004A3CA8_1C80[k] == 2)
-            *(float*)d = (float)p->val;
+    Ent_1C80* curArg = params;
+    for (int i = 0; i < n; i++, curArg++) {
+        int k = curArg->idx;
+        int* slot = (int*)((k << 2) + (int)vp);
+        if (curArg->kind != D_004A3CA8_1C80[k] && D_004A3CA8_1C80[k] == 2)
+            *(float*)slot = (float)curArg->val;
         else
-            *d = p->val;
+            *slot = curArg->val;
     }
     cWScriptMan_advanceToTask(D_004A3DD8_1C80, vp[0]);
     *(int*)((char*)self + 8) = 1;
@@ -5138,10 +5138,10 @@ struct Ent_1D78 { int idx; int val; int pad; int type; };
  * The rider slot is not checked for -1 or an empty entry.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to int 1 or 0
  */
-extern "C" void* func_00301D78(void* self, int n, Ent_1D78 *e) {
+extern "C" void* func_00301D78(void* self, int n, Ent_1D78 *params) {
     if (D_004A5718_1D78 == 0) {
         D_004A5710_1D78 = 0xFFFFFFFF;
         D_004A5718_1D78 = 1;
@@ -5152,28 +5152,28 @@ extern "C" void* func_00301D78(void* self, int n, Ent_1D78 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_1D78(buf, &D_004A5710_1D78, 8);
-    Ent_1D78 *x = e;
+    Ent_1D78 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_004A3CB0_1D78[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)((char*)D_004A3DD8_1D78 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
         char *r;
-        if (!s)
+        if (!section)
             r = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_1D78(i);
             r = t;
         }
@@ -5182,11 +5182,11 @@ extern "C" void* func_00301D78(void* self, int n, Ent_1D78 *e) {
     if (obj) {
         int found = 1;
         char *lvl = *(char**)(*(char**)(D_004A28A8_1D78 + 0x84) + 0xC);
-        char *q = *(char**)(lvl + (*D_004A3DD8_1D78 << 2) + 0x28);
-        char *a = q ? q + 0x6C0 : 0;
-        char *r = a ? a - 0x6C0 : 0;
-        Chk_1D78 *c = (Chk_1D78*)(r + 0x6C0);
-        if (c->v03(obj)) {
+        char *riderEntry = *(char**)(lvl + (*D_004A3DD8_1D78 << 2) + 0x28);
+        char *riderPart = riderEntry ? riderEntry + 0x6C0 : 0;
+        char *r = riderPart ? riderPart - 0x6C0 : 0;
+        Chk_1D78 *riderIface = (Chk_1D78*)(r + 0x6C0);
+        if (riderIface->v03(obj)) {
             *(int*)((char*)self + 8) = found;
             *luno_cLunoVar_castInt_1D78(self) = found;
             goto done;
@@ -5225,27 +5225,27 @@ extern R12_1F48 D_004C9098_1F48 __asm__("luno_gLunoNil");
  * Calls func_00303D88(Path), which has an empty body in this build, so the game path is not changed.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_1F48 func_00301F48(int n, Ent_1F48* e) {
+extern "C" R12_1F48 func_00301F48(int n, Ent_1F48* params) {
     if (D_004A5728_1F48 == 0) {
         D_004A5720_1F48 = -1;
         D_004A5728_1F48 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004A5724_1F48 = Flag_1F48(D_004A5724_1F48);
     }
-    int v[4] __attribute__((aligned(16)));
-    int* vp = v;
+    int block[4] __attribute__((aligned(16)));
+    int* vp = block;
     MEM_copy(vp, &D_004A5720_1F48, 8);
-    Ent_1F48* p = e;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_004A3CB8_1F48[k] && D_004A3CB8_1F48[k] == 2)
-            *(float*)d = (float)p->val;
+    Ent_1F48* curArg = params;
+    for (int i = 0; i < n; i++, curArg++) {
+        int k = curArg->idx;
+        int* slot = (int*)((k << 2) + (int)vp);
+        if (curArg->kind != D_004A3CB8_1F48[k] && D_004A3CB8_1F48[k] == 2)
+            *(float*)slot = (float)curArg->val;
         else
-            *d = p->val;
+            *slot = curArg->val;
     }
     func_00303D88_1F48(vp[0]);
     return D_004C9098_1F48;
@@ -5481,10 +5481,10 @@ struct Ent_2490 { int idx; int val; int pad; int type; };
  * on the node's modifier block (+0x1C) when it has one; other types do nothing.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_2490 func_00302490(int n, Ent_2490 *e) {
+extern "C" V3_2490 func_00302490(int n, Ent_2490 *params) {
     if (D_5734_2490 == 0) {
         D_4FBC30_2490.a = 0xFFFFFFFF;
         D_4FBC30_2490.b = -1;
@@ -5496,47 +5496,47 @@ extern "C" V3_2490 func_00302490(int n, Ent_2490 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_2490(buf, &D_4FBC30_2490, 12);
-    Ent_2490 *x = e;
+    Ent_2490 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = (&D_3CC8_2490)[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = (&D_3CC8_2490)[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_2490 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
-            r = 0;
+        char *inst;
+        if (!section || (i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8) == 0)
+            inst = 0;
         else
-            r = (char*)(i << 2);
-        obj = r;
+            inst = (char*)(i << 2);
+        obj = inst;
     }
     if (obj) {
-        O_2490 *p = *(O_2490**)(obj + 0xC);
+        O_2490 *activeNode = *(O_2490**)(obj + 0xC);
         int mode = buf[1];
-        if (p) {
-            if (p->v16()) {
-                char *c = *(char**)(obj + 0xC);
+        if (activeNode) {
+            if (activeNode->v16()) {
+                char *moveNode = *(char**)(obj + 0xC);
                 switch (mode) {
                 case 0: {
-                    char *q = *(char**)(c + 0x1C);
-                    if (q)
-                        tModifierBlock_fadeEffectModifier_2490(q);
+                    char *modBlock = *(char**)(moveNode + 0x1C);
+                    if (modBlock)
+                        tModifierBlock_fadeEffectModifier_2490(modBlock);
                     break;
                 }
                 case 1: {
-                    char *q = *(char**)(c + 0x1C);
-                    if (q)
-                        tModifierBlock_remHaloModifier_2490(q);
+                    char *modBlock = *(char**)(moveNode + 0x1C);
+                    if (modBlock)
+                        tModifierBlock_remHaloModifier_2490(modBlock);
                     break;
                 }
                 }
@@ -5770,40 +5770,40 @@ extern Flag_2968 D_004A576C_2968 __asm__("D_004A576C");
  * an instance in it), or to 0 when it is not found. -1 is not special here: it looks in section 0xFF.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_2968 func_00302968(int n, Ent_2968* e) {
+extern "C" R12_2968 func_00302968(int n, Ent_2968* params) {
     if (D_004A5770_2968 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004A576C_2968 = Flag_2968(D_004A576C_2968);
         D_004A5768_2968 = -1;
         D_004A5770_2968 = 1;
     }
-    unsigned v[4] __attribute__((aligned(16)));
-    unsigned* vp = v;
+    unsigned block[4] __attribute__((aligned(16)));
+    unsigned* vp = block;
     vp[0] = 0xFFFFFFFFu;
     MEM_copy(vp, &D_004A5768_2968, 8);
-    Ent_2968* p = e;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_004A3CE8_2968[k] && D_004A3CE8_2968[k] == 2)
-            *(float*)d = (float)p->val;
+    Ent_2968* curArg = params;
+    for (int i = 0; i < n; i++, curArg++) {
+        int k = curArg->idx;
+        int* slot = (int*)((k << 2) + (int)vp);
+        if (curArg->kind != D_004A3CE8_2968[k] && D_004A3CE8_2968[k] == 2)
+            *(float*)slot = (float)curArg->val;
         else
-            *d = p->val;
+            *slot = curArg->val;
     }
-    char* g = D_004A3DD8_2968;
+    char* scriptMan = D_004A3DD8_2968;
     unsigned x = vp[0];
     char** tbl = *(char***)((char*)cWorld_m_pTheWorld->m_pWorldCache + 8);
-    char* e0 = tbl[x & 0xFF];
+    char* section = tbl[x & 0xFF];
     unsigned w;
-    int r;
-    if (e0 == 0 || (w = (*(unsigned**)(e0 + 0x1C))[x >> 8] >> 8) == 0)
-        r = 0;
+    int inst;
+    if (section == 0 || (w = (*(unsigned**)(section + 0x1C))[x >> 8] >> 8) == 0)
+        inst = 0;
     else
-        r = w << 2;
-    *(int*)(g + 0x290) = r;
+        inst = w << 2;
+    *(int*)(scriptMan + 0x290) = inst;
     return D_004C9098_2968;
 }
 #endif
@@ -5836,10 +5836,10 @@ extern T12_2AC0 D_004FBC40_2AC0 __asm__("D_004FBC40");
  * it, 0 stops it, 2 ends its task, 18 ends it.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_2AC0 func_00302AC0(int n, Ent_2AC0* e) {
+extern "C" R12_2AC0 func_00302AC0(int n, Ent_2AC0* params) {
     if (D_004A5774_2AC0 == 0) {
         D_004FBC40_2AC0.a = -1;
         D_004FBC40_2AC0.b = 0;
@@ -5847,17 +5847,17 @@ extern "C" R12_2AC0 func_00302AC0(int n, Ent_2AC0* e) {
         D_004FBC40_2AC0.f = Flag_2AC0(D_004FBC40_2AC0.f);
         D_004A5774_2AC0 = 1;
     }
-    int v[4] __attribute__((aligned(16)));
-    int* vp = v;
+    int block[4] __attribute__((aligned(16)));
+    int* vp = block;
     MEM_copy(vp, &D_004FBC40_2AC0, 12);
-    Ent_2AC0* p = e;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_004A3CF0_2AC0[k] && D_004A3CF0_2AC0[k] == 2)
-            *(float*)d = (float)p->val;
+    Ent_2AC0* curArg = params;
+    for (int i = 0; i < n; i++, curArg++) {
+        int k = curArg->idx;
+        int* slot = (int*)((k << 2) + (int)vp);
+        if (curArg->kind != D_004A3CF0_2AC0[k] && D_004A3CF0_2AC0[k] == 2)
+            *(float*)slot = (float)curArg->val;
         else
-            *d = p->val;
+            *slot = curArg->val;
     }
     cWScriptMan_doProcessCmd(D_004A3DD8_2AC0, vp[0], vp[1]);
     return D_004C9098_2AC0;
@@ -5891,27 +5891,27 @@ extern Flag_2BD8 D_004A577C_2BD8 __asm__("D_004A577C");
  * Calls cWScriptMan_doMissionCmd(cWScriptMan_TheWScriptMan, MissionId, 0, -1); -1 is the current mission.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_2BD8 func_00302BD8(int n, Ent_2BD8* e) {
+extern "C" R12_2BD8 func_00302BD8(int n, Ent_2BD8* params) {
     if (D_004A5780_2BD8 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004A577C_2BD8 = Flag_2BD8(D_004A577C_2BD8);
         D_004A5778_2BD8 = -1;
         D_004A5780_2BD8 = 1;
     }
-    int v[4] __attribute__((aligned(16)));
-    int* vp = v;
+    int block[4] __attribute__((aligned(16)));
+    int* vp = block;
     MEM_copy(vp, &D_004A5778_2BD8, 8);
-    Ent_2BD8* p = e;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_004A3CF8_2BD8[k] && D_004A3CF8_2BD8[k] == 2)
-            *(float*)d = (float)p->val;
+    Ent_2BD8* curArg = params;
+    for (int i = 0; i < n; i++, curArg++) {
+        int k = curArg->idx;
+        int* slot = (int*)((k << 2) + (int)vp);
+        if (curArg->kind != D_004A3CF8_2BD8[k] && D_004A3CF8_2BD8[k] == 2)
+            *(float*)slot = (float)curArg->val;
         else
-            *d = p->val;
+            *slot = curArg->val;
     }
     cWScriptMan_doMissionCmd(D_004A3DD8_2BD8, vp[0], 0, -1);
     return D_004C9098_2BD8;
@@ -5945,27 +5945,27 @@ extern Flag_2CE8 D_004A578C_2CE8 __asm__("D_004A578C");
  * Calls cWScriptMan_doProcessCmd(cWScriptMan_TheWScriptMan, ProcessId, 0); -1 is the current process.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_2CE8 func_00302CE8(int n, Ent_2CE8* e) {
+extern "C" R12_2CE8 func_00302CE8(int n, Ent_2CE8* params) {
     if (D_004A5790_2CE8 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004A578C_2CE8 = Flag_2CE8(D_004A578C_2CE8);
         D_004A5788_2CE8 = -1;
         D_004A5790_2CE8 = 1;
     }
-    int v[4] __attribute__((aligned(16)));
-    int* vp = v;
+    int block[4] __attribute__((aligned(16)));
+    int* vp = block;
     MEM_copy(vp, &D_004A5788_2CE8, 8);
-    Ent_2CE8* p = e;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_004A3D00_2CE8[k] && D_004A3D00_2CE8[k] == 2)
-            *(float*)d = (float)p->val;
+    Ent_2CE8* curArg = params;
+    for (int i = 0; i < n; i++, curArg++) {
+        int k = curArg->idx;
+        int* slot = (int*)((k << 2) + (int)vp);
+        if (curArg->kind != D_004A3D00_2CE8[k] && D_004A3D00_2CE8[k] == 2)
+            *(float*)slot = (float)curArg->val;
         else
-            *d = p->val;
+            *slot = curArg->val;
     }
     cWScriptMan_doProcessCmd(D_004A3DD8_2CE8, vp[0], 0);
     return D_004C9098_2CE8;
@@ -5999,27 +5999,27 @@ extern Flag_2DF0 D_004A579C_2DF0 __asm__("D_004A579C");
  * Calls cWScriptMan_doProcessCmd(cWScriptMan_TheWScriptMan, ProcessId, 2); -1 is the current process.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_2DF0 func_00302DF0(int n, Ent_2DF0* e) {
+extern "C" R12_2DF0 func_00302DF0(int n, Ent_2DF0* params) {
     if (D_004A57A0_2DF0 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004A579C_2DF0 = Flag_2DF0(D_004A579C_2DF0);
         D_004A5798_2DF0 = -1;
         D_004A57A0_2DF0 = 1;
     }
-    int v[4] __attribute__((aligned(16)));
-    int* vp = v;
+    int block[4] __attribute__((aligned(16)));
+    int* vp = block;
     MEM_copy(vp, &D_004A5798_2DF0, 8);
-    Ent_2DF0* p = e;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_004A3D08_2DF0[k] && D_004A3D08_2DF0[k] == 2)
-            *(float*)d = (float)p->val;
+    Ent_2DF0* curArg = params;
+    for (int i = 0; i < n; i++, curArg++) {
+        int k = curArg->idx;
+        int* slot = (int*)((k << 2) + (int)vp);
+        if (curArg->kind != D_004A3D08_2DF0[k] && D_004A3D08_2DF0[k] == 2)
+            *(float*)slot = (float)curArg->val;
         else
-            *d = p->val;
+            *slot = curArg->val;
     }
     cWScriptMan_doProcessCmd(D_004A3DD8_2DF0, vp[0], 2);
     return D_004C9098_2DF0;
@@ -6063,32 +6063,32 @@ extern "C" int cRider_getMissionInt_2EF8(D_2EF8*, int) __asm__("cRider_getMissio
  * The rider slot is not checked for -1 or an empty entry.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to the int answer
  */
 // Script call: maps the script condition id to a rider condition and returns whether the current rider meets it.
-extern "C" void* func_00302EF8(void* self, int n, Ent_2EF8* e) {
+extern "C" void* func_00302EF8(void* self, int n, Ent_2EF8* params) {
     if (D_004A57B0_2EF8 == 0) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004A57B0_2EF8 = 1;
         D_004A57A8_2EF8 = 0;
         D_004A57AC_2EF8 = Flag_2EF8(D_004A57AC_2EF8);
     }
-    int v[4] __attribute__((aligned(16)));
-    int* vp = v;
+    int block[4] __attribute__((aligned(16)));
+    int* vp = block;
     MEM_copy(vp, &D_004A57A8_2EF8, 8);
-    Ent_2EF8* p = e;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
+    Ent_2EF8* curArg = params;
+    for (int i = 0; i < n; i++, curArg++) {
+        int k = curArg->idx;
         int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_004A3D10_2EF8[k] && D_004A3D10_2EF8[k] == 2)
-            *(float*)d = (float)p->val;
+        if (curArg->kind != D_004A3D10_2EF8[k] && D_004A3D10_2EF8[k] == 2)
+            *(float*)d = (float)curArg->val;
         else
-            *d = p->val;
+            *d = curArg->val;
     }
-    D_2EF8* r = (*(Tab_2EF8**)(*(char**)(D_004A28A8_2EF8 + 0x84) + 0xC))->arr[*(int*)D_004A3DD8_2EF8];
-    B_2EF8* b = r;
-    D_2EF8* d = (D_2EF8*)b;
+    D_2EF8* riderEntry = (*(Tab_2EF8**)(*(char**)(D_004A28A8_2EF8 + 0x84) + 0xC))->arr[*(int*)D_004A3DD8_2EF8];
+    B_2EF8* riderIface = riderEntry;
+    D_2EF8* d = (D_2EF8*)riderIface;
     int res;
     switch (vp[0]) {
     case 3: res = cRider_getMissionInt_2EF8(d, 0); break;
@@ -6155,10 +6155,10 @@ struct Ent_3130 { int idx; int val; int pad; int type; };
  *
  * @param ret  the result slot
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" V3_3130* func_00303130(V3_3130 *ret, int n, Ent_3130 *e) {
+extern "C" V3_3130* func_00303130(V3_3130 *ret, int n, Ent_3130 *params) {
     if (D_004A57B4 == 0) {
         D_3130[0] = 0xFFFFFFFF;
         D_3130[1] = 1;
@@ -6169,15 +6169,15 @@ extern "C" V3_3130* func_00303130(V3_3130 *ret, int n, Ent_3130 *e) {
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
     MEM_copy_3130(buf, D_3130, 12);
-    Ent_3130 *x = e;
+    Ent_3130 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = (&D_004A3D18)[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = (&D_004A3D18)[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     char *obj = look_3130(buf[0]);
     if (obj && *(int*)(obj + 0xC)) {
@@ -6233,10 +6233,10 @@ static inline float len_32C0(const Vec_32C0 &v) {
  * @return self
  */
 extern "C" void* func_003032C0(void* self) {
-    D_32C0 *r = (*(Tab_32C0**)(*(char**)(D_004A28A8_32C0 + 0x84) + 0xC))->arr[*(int*)D_004A3DD8_32C0];
-    B_32C0 *b = r;
-    D_32C0 *d = (D_32C0*)b;
-    float len = len_32C0(*d->v02());
+    D_32C0 *riderEntry = (*(Tab_32C0**)(*(char**)(D_004A28A8_32C0 + 0x84) + 0xC))->arr[*(int*)D_004A3DD8_32C0];
+    B_32C0 *riderIface = riderEntry;
+    D_32C0 *rider = (D_32C0*)riderIface;
+    float len = len_32C0(*rider->v02());
     float res = len * *(float*)(D_004A28A8_32C0 + 0x14);
     *(int*)((char*)self + 8) = 2;
     *(float*)luno_cLunoVar_castFloat(self) = res;
@@ -6285,10 +6285,10 @@ static inline float len_3380(const Vec_3380 &v) {
  * @return self
  */
 extern "C" void* func_00303380(void* self) {
-    D_3380 *r = (*(Tab_3380**)(*(char**)(D_004A28A8_3380 + 0x84) + 0xC))->arr[*(int*)D_004A3DD8_3380];
-    B_3380 *b = r;
-    D_3380 *d = (D_3380*)b;
-    float len = len_3380(*d->v02());
+    D_3380 *riderEntry = (*(Tab_3380**)(*(char**)(D_004A28A8_3380 + 0x84) + 0xC))->arr[*(int*)D_004A3DD8_3380];
+    B_3380 *riderIface = riderEntry;
+    D_3380 *rider = (D_3380*)riderIface;
+    float len = len_3380(*rider->v02());
     *(int*)((char*)self + 8) = 2;
     *(float*)luno_cLunoVar_castFloat(self) = len;
     return self;
@@ -6327,13 +6327,13 @@ static inline void setInt_3430(cLunoValue* r, const unsigned& v) {
  * @return @p ret
  */
 extern "C" cLunoValue* func_00303430(cLunoValue* ret) {
-    char *p = cWScriptMan_TheWScriptMan->f290;
-    unsigned v;
-    if (p)
-        v = *(unsigned*)(p + 0x78);
+    char *curInst = cWScriptMan_TheWScriptMan->f290;
+    unsigned instId;
+    if (curInst)
+        instId = *(unsigned*)(curInst + 0x78);
     else
-        v = 0xFFFFFFFF;
-    setInt_3430(ret, v);
+        instId = 0xFFFFFFFF;
+    setInt_3430(ret, instId);
     return ret;
 }
 #endif
@@ -6355,14 +6355,14 @@ extern "C" unsigned cWScriptProcess_getRunningTaskId_3490(char*) __asm__("cWScri
  * @return self
  */
 extern "C" void* func_00303490(void* self) {
-    char *p = *(char**)(D_004A3DD8_3490 + 0x2A4);
-    unsigned v;
-    if (p)
-        v = cWScriptProcess_getRunningTaskId_3490(p);
+    char *curProcess = *(char**)(D_004A3DD8_3490 + 0x2A4);
+    unsigned taskId;
+    if (curProcess)
+        taskId = cWScriptProcess_getRunningTaskId_3490(curProcess);
     else
-        v = 0xFFFFFFFF;
+        taskId = 0xFFFFFFFF;
     *(int*)((char*)self + 8) = 3;
-    *luno_cLunoVar_castIndex_3490(self) = v;
+    *luno_cLunoVar_castIndex_3490(self) = taskId;
     return self;
 }
 #endif
@@ -6391,16 +6391,16 @@ extern "C" int cRider_getMissionInt_34F8(D_34F8*, int) __asm__("cRider_getMissio
  * @return self
  */
 extern "C" void* func_003034F8(void* self) {
-    D_34F8 *r = (*(Tab_34F8**)(*(char**)(D_004A28A8_34F8 + 0x84) + 0xC))->arr[*(int*)D_004A3DD8_34F8];
-    B_34F8 *b = r;
-    D_34F8 *d = (D_34F8*)b;
-    unsigned v;
-    if (cRider_getMissionInt_34F8(d, 4))
-        v = *(unsigned*)(*(char**)((char*)d + 0x77C) + 0xD4);
+    D_34F8 *riderEntry = (*(Tab_34F8**)(*(char**)(D_004A28A8_34F8 + 0x84) + 0xC))->arr[*(int*)D_004A3DD8_34F8];
+    B_34F8 *riderIface = riderEntry;
+    D_34F8 *rider = (D_34F8*)riderIface;
+    unsigned splineId;
+    if (cRider_getMissionInt_34F8(rider, 4))
+        splineId = *(unsigned*)(*(char**)((char*)rider + 0x77C) + 0xD4);
     else
-        v = 0xFFFFFFFF;
+        splineId = 0xFFFFFFFF;
     *(int*)((char*)self + 8) = 1;
-    *luno_cLunoVar_castInt(self) = v;
+    *luno_cLunoVar_castInt(self) = splineId;
     return self;
 }
 #endif
@@ -6432,10 +6432,10 @@ extern T12_3598 D_004FBC60_3598 __asm__("D_004FBC60");
  * Returns AIrandf(Lo, Hi) as a float script value in the hidden result slot self.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to the random float
  */
-extern "C" void* func_00303598(void* self, int n, Ent_3598* e) {
+extern "C" void* func_00303598(void* self, int n, Ent_3598* params) {
     if (D_004A57B8_3598 == 0) {
         D_004FBC60_3598.a = 0;
         D_004FBC60_3598.b = 1.0f;
@@ -6443,21 +6443,21 @@ extern "C" void* func_00303598(void* self, int n, Ent_3598* e) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004FBC60_3598.f = Flag_3598(D_004FBC60_3598.f);
     }
-    float v[4] __attribute__((aligned(16)));
-    float* vp = v;
+    float block[4] __attribute__((aligned(16)));
+    float* vp = block;
     MEM_copy(vp, &D_004FBC60_3598, 12);
-    Ent_3598* p = e;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_004A3D20_3598[k] && D_004A3D20_3598[k] == 2)
-            *(float*)d = (float)p->val;
+    Ent_3598* curArg = params;
+    for (int i = 0; i < n; i++, curArg++) {
+        int k = curArg->idx;
+        int* slot = (int*)((k << 2) + (int)vp);
+        if (curArg->kind != D_004A3D20_3598[k] && D_004A3D20_3598[k] == 2)
+            *(float*)slot = (float)curArg->val;
         else
-            *d = p->val;
+            *slot = curArg->val;
     }
-    float r = AIrandf(vp[0], vp[1]);
+    float randValue = AIrandf(vp[0], vp[1]);
     *(int*)((char*)self + 8) = 2;
-    *(float*)luno_cLunoVar_castFloat(self) = r;
+    *(float*)luno_cLunoVar_castFloat(self) = randValue;
     return self;
 }
 #endif
@@ -6489,31 +6489,31 @@ struct Ent_36B0 { int idx; int val; int pad; int kind; };
  * the default -1), as an int in the hidden result slot self.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to the field value
  */
-extern "C" void* func_003036B0(void* self, int n, Ent_36B0* e) {
+extern "C" void* func_003036B0(void* self, int n, Ent_36B0* params) {
     if (D_004A57C8_36B0 == 0) {
         D_004A57C0_36B0 = -1;
         D_004A57C8_36B0 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004A57C4_36B0 = Flag_36B0(D_004A57C4_36B0);
     }
-    int v[4] __attribute__((aligned(16)));
-    int* vp = v;
+    int block[4] __attribute__((aligned(16)));
+    int* vp = block;
     MEM_copy(vp, &D_004A57C0_36B0, 8);
-    Ent_36B0* p = e;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_004A3D28_36B0[k] && D_004A3D28_36B0[k] == 2)
-            *(float*)d = (float)p->val;
+    Ent_36B0* curArg = params;
+    for (int i = 0; i < n; i++, curArg++) {
+        int k = curArg->idx;
+        int* slot = (int*)((k << 2) + (int)vp);
+        if (curArg->kind != D_004A3D28_36B0[k] && D_004A3D28_36B0[k] == 2)
+            *(float*)slot = (float)curArg->val;
         else
-            *d = p->val;
+            *slot = curArg->val;
     }
-    int r = cWScriptMan_getCurrentTrick(D_004A3DD8_36B0, *D_004A3DD8_36B0, vp[0]);
+    int trickField = cWScriptMan_getCurrentTrick(D_004A3DD8_36B0, *D_004A3DD8_36B0, vp[0]);
     *(int*)((char*)self + 8) = 1;
-    *luno_cLunoVar_castInt(self) = r;
+    *luno_cLunoVar_castInt(self) = trickField;
     return self;
 }
 #endif
@@ -6553,10 +6553,10 @@ struct Ent_37B0 { int idx; int val; int pad; int kind; };
  * The rider slot is not checked for -1 or an empty entry.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to the int answer
  */
-extern "C" void* func_003037B0(void* self, int n, Ent_37B0* e)
+extern "C" void* func_003037B0(void* self, int n, Ent_37B0* params)
 {
     if (D_004A57D8_37B0 == 0) {
         D_004A57D0_37B0 = -1;
@@ -6564,43 +6564,43 @@ extern "C" void* func_003037B0(void* self, int n, Ent_37B0* e)
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004A57D4_37B0 = Flag_37B0(D_004A57D4_37B0);
     }
-    int v[4] __attribute__((aligned(16)));
-    int* vp = v;
+    int block[4] __attribute__((aligned(16)));
+    int* vp = block;
     MEM_copy(vp, &D_004A57D0_37B0, 8);
-    Ent_37B0* p = e;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_004A3D30_37B0[k] && D_004A3D30_37B0[k] == 2)
-            *(float*)d = (float)p->val;
+    Ent_37B0* curArg = params;
+    for (int i = 0; i < n; i++, curArg++) {
+        int k = curArg->idx;
+        int* slot = (int*)((k << 2) + (int)vp);
+        if (curArg->kind != D_004A3D30_37B0[k] && D_004A3D30_37B0[k] == 2)
+            *(float*)slot = (float)curArg->val;
         else
-            *d = p->val;
+            *slot = curArg->val;
     }
     char* lvl = *(char**)(*(char**)(D_004A28A8_37B0 + 0x84) + 0xC);
-    char* q = *(char**)(lvl + (*D_004A3DD8_37B0 << 2) + 0x28);
-    char* a = q ? q + 0x6C0 : 0;
-    char* r = a ? a - 0x6C0 : 0;
+    char* riderEntry = *(char**)(lvl + (*D_004A3DD8_37B0 << 2) + 0x28);
+    char* riderPart = riderEntry ? riderEntry + 0x6C0 : 0;
+    char* rider = riderPart ? riderPart - 0x6C0 : 0;
     int res;
     switch (vp[0]) {
-    case 3: res = cRider_getMissionInt_37B0(r, 0); break;
-    case 4: res = cRider_getMissionInt_37B0(r, 1); break;
-    case 1: res = cRider_getMissionInt_37B0(r, 2); break;
-    case 0: res = cRider_getMissionInt_37B0(r, 3); break;
-    case 2: res = cRider_getMissionInt_37B0(r, 4); break;
-    case 5: res = cRider_getMissionInt_37B0(r, 5); break;
-    case 6: res = cRider_getMissionInt_37B0(r, 6); break;
-    case 7: res = cRider_getMissionInt_37B0(r, 7); break;
-    case 9: res = cRider_getMissionInt_37B0(r, 8); break;
-    case 10: res = cRider_getMissionInt_37B0(r, 9); break;
-    case 11: res = cRider_getMissionInt_37B0(r, 10); break;
-    case 12: res = cRider_getMissionInt_37B0(r, 11); break;
-    case 13: res = cRider_getMissionInt_37B0(r, 12); break;
-    case 14: res = cRider_getMissionInt_37B0(r, 13); break;
-    case 15: res = cRider_getMissionInt_37B0(r, 14); break;
-    case 16: res = cRider_getMissionInt_37B0(r, 15); break;
-    case 17: res = cRider_getMissionInt_37B0(r, 16); break;
-    case 8: res = cRider_getMissionInt_37B0(r, 17); break;
-    case 18: res = cRider_getMissionInt_37B0(r, 18); break;
+    case 3: res = cRider_getMissionInt_37B0(rider, 0); break;
+    case 4: res = cRider_getMissionInt_37B0(rider, 1); break;
+    case 1: res = cRider_getMissionInt_37B0(rider, 2); break;
+    case 0: res = cRider_getMissionInt_37B0(rider, 3); break;
+    case 2: res = cRider_getMissionInt_37B0(rider, 4); break;
+    case 5: res = cRider_getMissionInt_37B0(rider, 5); break;
+    case 6: res = cRider_getMissionInt_37B0(rider, 6); break;
+    case 7: res = cRider_getMissionInt_37B0(rider, 7); break;
+    case 9: res = cRider_getMissionInt_37B0(rider, 8); break;
+    case 10: res = cRider_getMissionInt_37B0(rider, 9); break;
+    case 11: res = cRider_getMissionInt_37B0(rider, 10); break;
+    case 12: res = cRider_getMissionInt_37B0(rider, 11); break;
+    case 13: res = cRider_getMissionInt_37B0(rider, 12); break;
+    case 14: res = cRider_getMissionInt_37B0(rider, 13); break;
+    case 15: res = cRider_getMissionInt_37B0(rider, 14); break;
+    case 16: res = cRider_getMissionInt_37B0(rider, 15); break;
+    case 17: res = cRider_getMissionInt_37B0(rider, 16); break;
+    case 8: res = cRider_getMissionInt_37B0(rider, 17); break;
+    case 18: res = cRider_getMissionInt_37B0(rider, 18); break;
     default: res = 0; break;
     }
     *(int*)((char*)self + 8) = 1;
@@ -6639,10 +6639,10 @@ struct Ent_39F0 { int idx; int val; int pad; int type; };
  * manager D_004A3FF0; other values do nothing.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_39F0 func_003039F0(int n, Ent_39F0 *e) {
+extern "C" V3_39F0 func_003039F0(int n, Ent_39F0 *params) {
     if (D_004A57DC == 0) {
         D_39F0[0] = 0xFFFFFFFF;
         ((int*)D_39F0)[1] = -1;
@@ -6653,34 +6653,34 @@ extern "C" V3_39F0 func_003039F0(int n, Ent_39F0 *e) {
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
     MEM_copy_39F0(buf, D_39F0, 12);
-    Ent_39F0 *x = e;
+    Ent_39F0 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = (&D_004A3D38)[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = (&D_004A3D38)[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_39F0 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
+        if (!section || (i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
         else
             obj = (char*)(i << 2);
     }
     if (obj) {
-        int b1 = buf[1];
+        int crowdCmd = buf[1];
         int w = *(int*)(obj + 0x78);
-        if (b1 == 0)
+        if (crowdCmd == 0)
             func_00343C60_39F0(D_004A3FF0_39F0, w);
-        else if (b1 == 1)
+        else if (crowdCmd == 1)
             func_00343F38_39F0(D_004A3FF0_39F0, w);
     }
     return D_004C9098_39F0;
@@ -6719,10 +6719,10 @@ struct Ent_3BA0 { int idx; int val; int pad; int type; };
  * nothing.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_3BA0 func_00303BA0(int n, Ent_3BA0 *e) {
+extern "C" V3_3BA0 func_00303BA0(int n, Ent_3BA0 *params) {
     if (D_57E0_3BA0 == 0) {
         D_4FBC80_3BA0.a = 0xFFFFFFFF;
         D_4FBC80_3BA0.b = -1;
@@ -6736,40 +6736,40 @@ extern "C" V3_3BA0 func_00303BA0(int n, Ent_3BA0 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_3BA0(buf, &D_4FBC80_3BA0, 20);
-    Ent_3BA0 *x = e;
+    Ent_3BA0 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_004465D8_3BA0[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = D_004465D8_3BA0[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_3BA0 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
+        if (!section || (i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
         else
             obj = (char*)(i << 2);
     }
     if (obj) {
         int mode = buf[1];
-        int a = buf[2];
-        int b = buf[3];
-        unsigned h = *(unsigned*)(obj + 0x78);
+        int meshIndex = buf[2];
+        int contextIndex = buf[3];
+        unsigned instId = *(unsigned*)(obj + 0x78);
         if (mode == 0)
-            func_00229820_3BA0(D_004A2A00_3BA0, h, a, b);
+            func_00229820_3BA0(D_004A2A00_3BA0, instId, meshIndex, contextIndex);
         else if (mode == 1) {
         } else if (mode == 2)
-            func_00229788_3BA0(D_004A2A00_3BA0, h, a, b);
+            func_00229788_3BA0(D_004A2A00_3BA0, instId, meshIndex, contextIndex);
         else if (mode == 3)
-            func_002297D8_3BA0(D_004A2A00_3BA0, h, a, b);
+            func_002297D8_3BA0(D_004A2A00_3BA0, instId, meshIndex, contextIndex);
     }
     return D_004C9098_3BA0;
 }
@@ -6926,10 +6926,10 @@ struct Tab_3F80 { char pad[0x28]; D_3F80 *arr[1]; };
 extern "C" V3_3F80 func_00303F80(void) {
     int slot = *(int*)D_004A3DD8_3F80;
     if (slot != -1) {
-        D_3F80 *r = (*(Tab_3F80**)(*(char**)(D_004A28A8_3F80 + 0x84) + 0xC))->arr[slot];
-        B_3F80 *b = r;
-        D_3F80 *d = (D_3F80*)b;
-        *(int*)((char*)d + 0x3FC) = 1;
+        D_3F80 *riderEntry = (*(Tab_3F80**)(*(char**)(D_004A28A8_3F80 + 0x84) + 0xC))->arr[slot];
+        B_3F80 *riderIface = riderEntry;
+        D_3F80 *rider = (D_3F80*)riderIface;
+        *(int*)((char*)rider + 0x3FC) = 1;
     }
     return D_004C9098_3F80;
 }
@@ -6963,10 +6963,10 @@ extern T12_3FF0 D_004FBC98_3FF0 __asm__("D_004FBC98");
  * MissionPoints and MissionPointsGoal.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_3FF0 func_00303FF0(int n, Ent_3FF0* e) {
+extern "C" R12_3FF0 func_00303FF0(int n, Ent_3FF0* params) {
     if (D_004A57E4_3FF0 == 0) {
         D_004FBC98_3FF0.a = 0;
         D_004FBC98_3FF0.b = -1;
@@ -6974,17 +6974,17 @@ extern "C" R12_3FF0 func_00303FF0(int n, Ent_3FF0* e) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004FBC98_3FF0.f = Flag_3FF0(D_004FBC98_3FF0.f);
     }
-    int v[4] __attribute__((aligned(16)));
-    int* vp = v;
+    int block[4] __attribute__((aligned(16)));
+    int* vp = block;
     MEM_copy(vp, &D_004FBC98_3FF0, 12);
-    Ent_3FF0* p = e;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_004A3D40_3FF0[k] && D_004A3D40_3FF0[k] == 2)
-            *(float*)d = (float)p->val;
+    Ent_3FF0* curArg = params;
+    for (int i = 0; i < n; i++, curArg++) {
+        int k = curArg->idx;
+        int* slot = (int*)((k << 2) + (int)vp);
+        if (curArg->kind != D_004A3D40_3FF0[k] && D_004A3D40_3FF0[k] == 2)
+            *(float*)slot = (float)curArg->val;
         else
-            *d = p->val;
+            *slot = curArg->val;
     }
     cWScriptMan_updateMissionPoints(D_004A3DD8_3FF0, vp[0], vp[1]);
     return D_004C9098_3FF0;
@@ -7019,10 +7019,10 @@ extern T12_4100 D_004FBCA8_4100 __asm__("D_004FBCA8");
  * MissionCount and MissionCountMax.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_4100 func_00304100(int n, Ent_4100* e) {
+extern "C" R12_4100 func_00304100(int n, Ent_4100* params) {
     if (D_004A57E8_4100 == 0) {
         D_004FBCA8_4100.a = 0;
         D_004A57E8_4100 = 1;
@@ -7030,17 +7030,17 @@ extern "C" R12_4100 func_00304100(int n, Ent_4100* e) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004FBCA8_4100.f = Flag_4100(D_004FBCA8_4100.f);
     }
-    int v[4] __attribute__((aligned(16)));
-    int* vp = v;
+    int block[4] __attribute__((aligned(16)));
+    int* vp = block;
     MEM_copy(vp, &D_004FBCA8_4100, 12);
-    Ent_4100* p = e;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_004A3D48_4100[k] && D_004A3D48_4100[k] == 2)
-            *(float*)d = (float)p->val;
+    Ent_4100* curArg = params;
+    for (int i = 0; i < n; i++, curArg++) {
+        int k = curArg->idx;
+        int* slot = (int*)((k << 2) + (int)vp);
+        if (curArg->kind != D_004A3D48_4100[k] && D_004A3D48_4100[k] == 2)
+            *(float*)slot = (float)curArg->val;
         else
-            *d = p->val;
+            *slot = curArg->val;
     }
     cWScriptMan_updateMissionCount(D_004A3DD8_4100, vp[0], vp[1]);
     return D_004C9098_4100;
@@ -7075,10 +7075,10 @@ extern T12_4210 D_004FBCB8_4210 __asm__("D_004FBCB8");
  * MissionTicks and MissionTicksDir.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_4210 func_00304210(int n, Ent_4210* e) {
+extern "C" R12_4210 func_00304210(int n, Ent_4210* params) {
     if (D_004A57EC_4210 == 0) {
         D_004FBCB8_4210.a = 0;
         D_004FBCB8_4210.b = -1;
@@ -7086,17 +7086,17 @@ extern "C" R12_4210 func_00304210(int n, Ent_4210* e) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004FBCB8_4210.f = Flag_4210(D_004FBCB8_4210.f);
     }
-    int v[4] __attribute__((aligned(16)));
-    int* vp = v;
+    int block[4] __attribute__((aligned(16)));
+    int* vp = block;
     MEM_copy(vp, &D_004FBCB8_4210, 12);
-    Ent_4210* p = e;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_004A3D50_4210[k] && D_004A3D50_4210[k] == 2)
-            *(float*)d = (float)p->val;
+    Ent_4210* curArg = params;
+    for (int i = 0; i < n; i++, curArg++) {
+        int k = curArg->idx;
+        int* slot = (int*)((k << 2) + (int)vp);
+        if (curArg->kind != D_004A3D50_4210[k] && D_004A3D50_4210[k] == 2)
+            *(float*)slot = (float)curArg->val;
         else
-            *d = p->val;
+            *slot = curArg->val;
     }
     cWScriptMan_updateMissionTicks(D_004A3DD8_4210, vp[0], vp[1]);
     return D_004C9098_4210;
@@ -7167,10 +7167,10 @@ void cWScriptMan_updateMissionHeight(void*, int, void*);
  * MissionHeightBeing and MissionHeightInstId.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" cLunoValue func_00304320(int n, sBindArg_1FBE38* e) {
+extern "C" cLunoValue func_00304320(int n, sBindArg_1FBE38* params) {
     if (D_004A57F8_4320 == 0) {
         D_004A57F0_4320 = 0xFFFFFFFF;
         D_004A57F8_4320 = 1;
@@ -7181,15 +7181,15 @@ extern "C" cLunoValue func_00304320(int n, sBindArg_1FBE38* e) {
     unsigned* buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy(buf, &D_004A57F0_4320, 8);
-    sBindArg_1FBE38* x = e;
+    sBindArg_1FBE38* x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_004A3D58_4320[idx];
-        unsigned* d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned* slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     int gv = curProcess_4320()->being;
     unsigned id = buf[0];
@@ -7197,17 +7197,17 @@ extern "C" cLunoValue func_00304320(int n, sBindArg_1FBE38* e) {
     if (~id == 0) {
         obj = curProcess_4320()->f290;
     } else {
-        sRefSet *s = ((sRefWorld*)cWorld_m_pTheWorld->m_pWorldCache)->sets[id & 0xFF];
+        sRefSet *section = ((sRefWorld*)cWorld_m_pTheWorld->m_pWorldCache)->sets[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s)
-            r = 0;
+        char *inst;
+        if (!section)
+            inst = 0;
         else {
-            i = s->refs[id >> 8] >> 8;
+            i = section->refs[id >> 8] >> 8;
             char *t = refToObj_1FBE38(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     if (obj)
         cWScriptMan_updateMissionHeight(curProcess_4320(), gv, obj);
@@ -7244,30 +7244,30 @@ extern Flag_44A8 D_004A5804_44A8 __asm__("D_004A5804");
  * the current game-mode handler.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_44A8 func_003044A8(int n, Ent_44A8* e) {
+extern "C" R12_44A8 func_003044A8(int n, Ent_44A8* params) {
     if (D_004A5808_44A8 == 0) {
         D_004A5800_44A8 = -1;
         D_004A5808_44A8 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004A5804_44A8 = Flag_44A8(D_004A5804_44A8);
     }
-    int v[4] __attribute__((aligned(16)));
-    int* vp = v;
+    int block[4] __attribute__((aligned(16)));
+    int* vp = block;
     MEM_copy(vp, &D_004A5800_44A8, 8);
-    Ent_44A8* p = e;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_004A3D60_44A8[k] && D_004A3D60_44A8[k] == 2)
-            *(float*)d = (float)p->val;
+    Ent_44A8* curArg = params;
+    for (int i = 0; i < n; i++, curArg++) {
+        int k = curArg->idx;
+        int* slot = (int*)((k << 2) + (int)vp);
+        if (curArg->kind != D_004A3D60_44A8[k] && D_004A3D60_44A8[k] == 2)
+            *(float*)slot = (float)curArg->val;
         else
-            *d = p->val;
+            *slot = curArg->val;
     }
-    int b = *D_004A3DD8_44A8;
-    cGameModeMan_riderGateHit(*(int*)(D_004A28A8_44A8 + 0xC0), b, vp[0]);
+    int beingIndex = *D_004A3DD8_44A8;
+    cGameModeMan_riderGateHit(*(int*)(D_004A28A8_44A8 + 0xC0), beingIndex, vp[0]);
     return D_004C9098_44A8;
 }
 #endif
@@ -7312,10 +7312,10 @@ struct Ent_45B8 { int idx; int val; int pad; int type; };
  * the block) and passes it to cWScriptMan_updateMissionTrick, which sets MissionTrickEnable and MissionTrick.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_45B8 func_003045B8(int n, Ent_45B8 *e) {
+extern "C" V3_45B8 func_003045B8(int n, Ent_45B8 *params) {
     if (D_580C_45B8 == 0) {
         D_4FBCC8_45B8.a0 = 0;
         D_4FBCC8_45B8.a1 = 0;
@@ -7341,15 +7341,15 @@ extern "C" V3_45B8 func_003045B8(int n, Ent_45B8 *e) {
     Rec_45B8 *buf = &rec;
     MEM_copy_45B8(buf, &D_4FBCC8_45B8, 68);
     BF_45B8 bf;
-    Ent_45B8 *x = e;
+    Ent_45B8 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00446650_45B8[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = D_00446650_45B8[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     bf.f0 = buf->a0;
     bf.f1 = buf->a1;
@@ -7403,10 +7403,10 @@ struct Ent_4980 { int idx; int val; int pad; int type; };
  * Quirk: an instance that is not found is not checked; its node is read through a null pointer.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_4980 func_00304980(int n, Ent_4980 *e) {
+extern "C" V3_4980 func_00304980(int n, Ent_4980 *params) {
     if (D_004A5810 == 0) {
         D_4980[0] = 0xFFFFFFFF;
         *(float*)&D_4980[1] = 1.0f;
@@ -7417,33 +7417,33 @@ extern "C" V3_4980 func_00304980(int n, Ent_4980 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_4980(buf, D_4980, 12);
-    Ent_4980 *x = e;
+    Ent_4980 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = (&D_004A3D68)[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = (&D_004A3D68)[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_4980 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
+        if (!section || (i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
         else
             obj = (char*)(i << 2);
     }
-    O_4980 *p = *(O_4980**)(obj + 0xC);
-    if (p == 0)
+    O_4980 *activeNode = *(O_4980**)(obj + 0xC);
+    if (activeNode == 0)
         return D_004C9098_4980;
-    if (p->v16())
-        cMoveNode_addFade(p, buf);
+    if (activeNode->v16())
+        cMoveNode_addFade(activeNode, buf);
     return D_004C9098_4980;
 }
 #endif
@@ -7476,27 +7476,27 @@ extern Flag_4B38 D_004A581C_4B38 __asm__("D_004A581C");
  * Calls cReplay_eventWScript(SSXApp->Game->Replay, cWScriptMan_TheWScriptMan->Being, Cmd).
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_4B38 func_00304B38(int n, Ent_4B38* e) {
+extern "C" R12_4B38 func_00304B38(int n, Ent_4B38* params) {
     if (D_004A5820_4B38 == 0) {
         D_004A5818_4B38 = -1;
         D_004A5820_4B38 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004A581C_4B38 = Flag_4B38(D_004A581C_4B38);
     }
-    int v[4] __attribute__((aligned(16)));
-    int* vp = v;
+    int block[4] __attribute__((aligned(16)));
+    int* vp = block;
     MEM_copy(vp, &D_004A5818_4B38, 8);
-    Ent_4B38* p = e;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_004A3D70_4B38[k] && D_004A3D70_4B38[k] == 2)
-            *(float*)d = (float)p->val;
+    Ent_4B38* curArg = params;
+    for (int i = 0; i < n; i++, curArg++) {
+        int k = curArg->idx;
+        int* slot = (int*)((k << 2) + (int)vp);
+        if (curArg->kind != D_004A3D70_4B38[k] && D_004A3D70_4B38[k] == 2)
+            *(float*)slot = (float)curArg->val;
         else
-            *d = p->val;
+            *slot = curArg->val;
     }
     cReplay_eventWScript(*(int*)(*(char**)(D_004A28A8_4B38 + 0x84) + 0x28), *D_004A3DD8_4B38, vp[0]);
     return D_004C9098_4B38;
@@ -7536,10 +7536,10 @@ static inline Vec_4C50 pos_4C50(char *o) { return *(Vec_4C50*)(o + 0x40); }
  * instance's position z (+0x40), 0 when the rider slot is empty, and 0 when the instance is not found.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to the height difference
  */
-extern "C" void* func_00304C50(void* self, int n, Ent_4C50 *e) {
+extern "C" void* func_00304C50(void* self, int n, Ent_4C50 *params) {
     if (D_5830_4C50 == 0) {
         D_5828_4C50 = 0xFFFFFFFF;
         D_5830_4C50 = 1;
@@ -7550,12 +7550,12 @@ extern "C" void* func_00304C50(void* self, int n, Ent_4C50 *e) {
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
     MEM_copy(buf, &D_5828_4C50, 8);
-    Ent_4C50 *x = e;
+    Ent_4C50 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = (&D_3D78_4C50)[idx];
+        int keywordType = (&D_3D78_4C50)[idx];
         unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != keywordType && keywordType == 2)
             *(float*)d = (float)x->val;
         else
             *d = x->val;
@@ -7566,28 +7566,28 @@ extern "C" void* func_00304C50(void* self, int n, Ent_4C50 *e) {
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_4C50 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
-            r = 0;
+        char *inst;
+        if (!section || (i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8) == 0)
+            inst = 0;
         else
-            r = (char*)(i << 2);
-        obj = r;
+            inst = (char*)(i << 2);
+        obj = inst;
     }
     if (obj) {
         D_4C50 *rr = (*(Tab_4C50**)(*(char**)(D_004A28A8_4C50 + 0x84) + 0xC))->arr[slot];
-        B_4C50 *b = rr;
-        D_4C50 *d = (D_4C50*)b;
-        float v;
+        B_4C50 *riderIface = rr;
+        D_4C50 *d = (D_4C50*)riderIface;
+        float heightDiff;
         if (d) {
             float z = d->v05()->z;
-            v = z - pos_4C50(obj).z;
+            heightDiff = z - pos_4C50(obj).z;
         }
         else
-            v = 0.0f;
+            heightDiff = 0.0f;
         *(int*)((char*)self + 8) = 2;
-        *(float*)luno_cLunoVar_castFloat(self) = v;
+        *(float*)luno_cLunoVar_castFloat(self) = heightDiff;
     } else {
         *(int*)((char*)self + 8) = 2;
         *(int*)luno_cLunoVar_castFloat(self) = 0;
@@ -7626,10 +7626,10 @@ struct Ent_4E38 { int idx; int val; int pad; int type; };
  * Quirk: an instance that is not found is not checked; its node is read through a null pointer.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_4E38 func_00304E38(int n, Ent_4E38 *e) {
+extern "C" V3_4E38 func_00304E38(int n, Ent_4E38 *params) {
     if (D_004A5834 == 0) {
         D_4E38[0] = 0xFFFFFFFF;
         *(float*)&D_4E38[1] = 1.0f;
@@ -7640,33 +7640,33 @@ extern "C" V3_4E38 func_00304E38(int n, Ent_4E38 *e) {
     unsigned *buf = buf64;
     buf64[0] = 0xFFFFFFFF;
     MEM_copy_4E38(buf, D_4E38, 12);
-    Ent_4E38 *x = e;
+    Ent_4E38 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = (&D_004A3D80)[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = (&D_004A3D80)[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_4E38 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
+        if (!section || (i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
         else
             obj = (char*)(i << 2);
     }
-    O_4E38 *p = *(O_4E38**)(obj + 0xC);
-    if (p == 0)
+    O_4E38 *activeNode = *(O_4E38**)(obj + 0xC);
+    if (activeNode == 0)
         return D_004C9098_4E38;
-    if (p->v16())
-        cMoveNode_addDebounce_4E38(p, buf);
+    if (activeNode->v16())
+        cMoveNode_addDebounce_4E38(activeNode, buf);
     return D_004C9098_4E38;
 }
 #endif
@@ -7696,10 +7696,10 @@ extern R12_4FF0 D_004C9098_4FF0 __asm__("luno_gLunoNil");
  * No camera call follows; the block is unused.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_4FF0 func_00304FF0(int n, Ent_4FF0* e) {
+extern "C" R12_4FF0 func_00304FF0(int n, Ent_4FF0* params) {
     if (D_004A5838_4FF0 == 0) {
         D_004FBD30_4FF0.a = 0;
         D_004A5838_4FF0 = 1;
@@ -7707,17 +7707,17 @@ extern "C" R12_4FF0 func_00304FF0(int n, Ent_4FF0* e) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004FBD30_4FF0.f = Flag_4FF0(D_004FBD30_4FF0.f);
     }
-    int v[4] __attribute__((aligned(16)));
-    int* vp = v;
+    int block[4] __attribute__((aligned(16)));
+    int* vp = block;
     MEM_copy(vp, &D_004FBD30_4FF0, 12);
-    Ent_4FF0* p = e;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_004A3D88_4FF0[k] && D_004A3D88_4FF0[k] == 2)
-            *(float*)d = (float)p->val;
+    Ent_4FF0* curArg = params;
+    for (int i = 0; i < n; i++, curArg++) {
+        int k = curArg->idx;
+        int* slot = (int*)((k << 2) + (int)vp);
+        if (curArg->kind != D_004A3D88_4FF0[k] && D_004A3D88_4FF0[k] == 2)
+            *(float*)slot = (float)curArg->val;
         else
-            *d = p->val;
+            *slot = curArg->val;
     }
     return D_004C9098_4FF0;
 }
@@ -7930,10 +7930,10 @@ static inline t4Vector trans_50F0(const t4Matrix *m) { return m->row[3]; }
  * distance 0.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" cLunoValue func_003050F0(int n, sBindArg_1FBE38 *e) {
+extern "C" cLunoValue func_003050F0(int n, sBindArg_1FBE38 *params) {
     if (D_004A583C == 0) {
         D_004FBD40_50F0.keyword = 0;
         D_004FBD40_50F0.useObj = 1;
@@ -7947,12 +7947,12 @@ extern "C" cLunoValue func_003050F0(int n, sBindArg_1FBE38 *e) {
     Rec_50F0 *buf = &rec;
     rec.id = 0xFFFFFFFF;
     MEM_copy(buf, &D_004FBD40_50F0, 20);
-    sBindArg_1FBE38 *x = e;
+    sBindArg_1FBE38 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00446690[idx];
+        int keywordType = D_00446690[idx];
         unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
+        if (x->type != keywordType && keywordType == 2)
             *(float*)d = (float)x->val;
         else
             *d = x->val;
@@ -7963,12 +7963,12 @@ extern "C" cLunoValue func_003050F0(int n, sBindArg_1FBE38 *e) {
         if (~id == 0) {
             obj = cWScriptMan_TheWScriptMan->f290;
         } else {
-            sRefSet *s = ((sRefWorld*)cWorld_m_pTheWorld->m_pWorldCache)->sets[id & 0xFF];
+            sRefSet *section = ((sRefWorld*)cWorld_m_pTheWorld->m_pWorldCache)->sets[id & 0xFF];
             char *r;
-            if (!s)
+            if (!section)
                 r = 0;
             else
-                r = refToObj_1FBE38(s->refs[id >> 8] >> 8);
+                r = refToObj_1FBE38(section->refs[id >> 8] >> 8);
             obj = r;
         }
     }
@@ -7982,8 +7982,8 @@ extern "C" cLunoValue func_003050F0(int n, sBindArg_1FBE38 *e) {
             for (int i = 0; i < np; i++) {
                 const t4Vector *rp = game->race->players[i]->rider->getPosition();
                 cInstanceNode_1FBE38 *node = *(cInstanceNode_1FBE38**)(obj + 0xC);
-                t4Matrix *m = node ? node->v24() : (t4Matrix*)(obj + 0x10);
-                t4Vector d = vSub_1FBE38(*rp, trans_50F0(m));
+                t4Matrix *rootTransform = node ? node->v24() : (t4Matrix*)(obj + 0x10);
+                t4Vector d = vSub_1FBE38(*rp, trans_50F0(rootTransform));
                 float dist = vLen_1FBE38(d);
                 cRider_1FBE38 *r = game->race->players[i]->rider;
                 int view = r->mViewIndex;
@@ -8035,10 +8035,10 @@ struct Ent_5478 { int idx; int val; int pad; int type; };
  * Speed.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_5478 func_00305478(int n, Ent_5478 *e) {
+extern "C" V3_5478 func_00305478(int n, Ent_5478 *params) {
     if (D_5840_5478 == 0) {
         D_4FBD58_5478.id = 0xFFFFFFFF;
         D_4FBD58_5478.a = 400.0f;
@@ -8051,33 +8051,33 @@ extern "C" V3_5478 func_00305478(int n, Ent_5478 *e) {
     Rec_5478 *buf = &rec;
     rec.id = 0xFFFFFFFF;
     MEM_copy_5478(buf, &D_4FBD58_5478, 0x10);
-    Ent_5478 *x = e;
+    Ent_5478 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_004466A0_5478[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = D_004466A0_5478[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf->id;
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_5478 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
+        if (!section || (i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
         else
             obj = (char*)(i << 2);
     }
     if (obj) {
-        O_5478 *p = *(O_5478**)(obj + 0xC);
-        if (p) {
-            if (p->v16())
-                cMoveNode_addMagnet_5478(p, p->v24(), buf->a, buf->b);
+        O_5478 *activeNode = *(O_5478**)(obj + 0xC);
+        if (activeNode) {
+            if (activeNode->v16())
+                cMoveNode_addMagnet_5478(activeNode, activeNode->v24(), buf->a, buf->b);
         }
     }
     return D_004C9098_5478;
@@ -8114,10 +8114,10 @@ struct Ent_5660 { int idx; int val; int pad; int type; };
  * Quirk: an empty rider slot is not checked; its virtual call goes through a null pointer.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_5660 func_00305660(int n, Ent_5660 *e) {
+extern "C" V3_5660 func_00305660(int n, Ent_5660 *params) {
     if (D_004A5850 == 0) {
         D_5660 = 0xFFFFFFFF;
         D_004A5850 = 1;
@@ -8127,22 +8127,22 @@ extern "C" V3_5660 func_00305660(int n, Ent_5660 *e) {
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
     MEM_copy_5660(buf, &D_5660, 8);
-    Ent_5660 *x = e;
+    Ent_5660 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = (&D_004A3D90)[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = (&D_004A3D90)[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     int k = *D_004A3DD8_5660;
     if (k != -1) {
-        int k4 = k * 4;
+        int slotOffset = k * 4;
         char *lvl = *(char**)(*(char**)(D_004A28A8_5660 + 0x84) + 0xC);
-        char *q = *(char**)(lvl + k4 + 0x28);
-        Sh_5660 *sh = q ? (Sh_5660*)(q + 0x6C0) : 0;
+        char *riderEntry = *(char**)(lvl + slotOffset + 0x28);
+        Sh_5660 *sh = riderEntry ? (Sh_5660*)(riderEntry + 0x6C0) : 0;
         if (sh->v08())
             func_00390EC8_5660(0.0f);
     }
@@ -8179,10 +8179,10 @@ struct Ent_57C0 { int idx; int val; int pad; int type; };
  * node (virtual isMoveNode), cMoveNode_addHalo gets the block.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_57C0 func_003057C0(int n, Ent_57C0 *e) {
+extern "C" V3_57C0 func_003057C0(int n, Ent_57C0 *params) {
     if (D_5854_57C0 == 0) {
         D_4FBD68_57C0.id = 0xFFFFFFFF;
         D_4FBD68_57C0.a = 0;
@@ -8201,33 +8201,33 @@ extern "C" V3_57C0 func_003057C0(int n, Ent_57C0 *e) {
     Rec_57C0 *buf = &rec;
     rec.id = 0xFFFFFFFF;
     MEM_copy_57C0(buf, &D_4FBD68_57C0, 40);
-    Ent_57C0 *x = e;
+    Ent_57C0 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_004466B0_57C0[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = D_004466B0_57C0[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf->id;
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_57C0 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
+        if (!section || (i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
         else
             obj = (char*)(i << 2);
     }
     if (obj) {
-        O_57C0 *p = *(O_57C0**)(obj + 0xC);
-        if (p) {
-            if (p->v16())
-                cMoveNode_addHalo_57C0(p, buf);
+        O_57C0 *activeNode = *(O_57C0**)(obj + 0xC);
+        if (activeNode) {
+            if (activeNode->v16())
+                cMoveNode_addHalo_57C0(activeNode, buf);
         }
     }
     return D_004C9098_57C0;
@@ -8284,10 +8284,10 @@ extern "C" void cAvalanche_addAvalancheNode(int, void*, float, float, float, flo
  * cAvalanche_addAvalancheNode(avalanche id, instance, type, life, fade-in, fade-out, speed) adds it.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" cLunoValue func_003059A0(int n, sBindArg_1FBE38* e) {
+extern "C" cLunoValue func_003059A0(int n, sBindArg_1FBE38* params) {
     if (D_004A5858_59A0 == 0) {
         D_004FBD90_59A0.head = 0;
         D_004FBD90_59A0.id[7] = D_004FBD90_59A0.id[6] = D_004FBD90_59A0.id[5] = D_004FBD90_59A0.id[4] = D_004FBD90_59A0.id[3] = D_004FBD90_59A0.id[2] = D_004FBD90_59A0.id[1] = D_004FBD90_59A0.id[0] = 0xFFFFFFFF;
@@ -8304,14 +8304,14 @@ extern "C" cLunoValue func_003059A0(int n, sBindArg_1FBE38* e) {
     Rec_59A0* vp = &rec;
     rec.id[7] = rec.id[6] = rec.id[5] = rec.id[4] = rec.id[3] = rec.id[2] = rec.id[1] = rec.id[0] = 0xFFFFFFFF;
     MEM_copy(vp, &D_004FBD90_59A0, 200);
-    sBindArg_1FBE38* x = e;
+    sBindArg_1FBE38* x = params;
     for (int i = 0; i < n; i++, x++) {
         int k = x->idx;
-        int* d = (int*)((k << 2) + (int)vp);
+        int* slot = (int*)((k << 2) + (int)vp);
         if (x->type != D_004466D8_59A0[k] && D_004466D8_59A0[k] == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     int head = vp->head;
     int* cp = vp->cnt;
@@ -8322,15 +8322,15 @@ extern "C" cLunoValue func_003059A0(int n, sBindArg_1FBE38* e) {
     for (int i = 0; i < 8; i++) {
         unsigned id = vp->id[i];
         if (id != 0xFFFFFFFF) {
-            sRefSet *s = ((sRefWorld*)cWorld_m_pTheWorld->m_pWorldCache)->sets[id & 0xFF];
-            char *r;
-            if (!s)
-                r = 0;
+            sRefSet *section = ((sRefWorld*)cWorld_m_pTheWorld->m_pWorldCache)->sets[id & 0xFF];
+            char *inst;
+            if (!section)
+                inst = 0;
             else {
-                unsigned j = s->refs[id >> 8] >> 8;
-                r = conv_59A0(j);
+                unsigned j = section->refs[id >> 8] >> 8;
+                inst = conv_59A0(j);
             }
-            cAvalanche_addAvalancheNode(head, r, *f0, *f1, *f2, *f3, *cp);
+            cAvalanche_addAvalancheNode(head, inst, *f0, *f1, *f2, *f3, *cp);
         }
         cp++; f3++; f2++; f1++; f0++;
     }
@@ -8365,31 +8365,31 @@ extern Flag_5C88 D_004A5864_5C88 __asm__("D_004A5864");
  * Calls cAvalanche_triggerAvalanche with the avalanche id when cAvalanche_m_badCookie is 0.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_5C88 func_00305C88(int n, Ent_5C88* e) {
+extern "C" R12_5C88 func_00305C88(int n, Ent_5C88* params) {
     if (D_004A5868_5C88 == 0) {
         D_004A5868_5C88 = 1;
         D_004A5860_5C88 = 0;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004A5864_5C88 = Flag_5C88(D_004A5864_5C88);
     }
-    int v[4] __attribute__((aligned(16)));
-    int* vp = v;
+    int block[4] __attribute__((aligned(16)));
+    int* vp = block;
     MEM_copy(vp, &D_004A5860_5C88, 8);
-    Ent_5C88* p = e;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_004A3D98_5C88[k] && D_004A3D98_5C88[k] == 2)
-            *(float*)d = (float)p->val;
+    Ent_5C88* curArg = params;
+    for (int i = 0; i < n; i++, curArg++) {
+        int k = curArg->idx;
+        int* slot = (int*)((k << 2) + (int)vp);
+        if (curArg->kind != D_004A3D98_5C88[k] && D_004A3D98_5C88[k] == 2)
+            *(float*)slot = (float)curArg->val;
         else
-            *d = p->val;
+            *slot = curArg->val;
     }
-    int a = vp[0];
+    int avalancheId = vp[0];
     if (D_004A3AC4_5C88 == 0)
-        cAvalanche_triggerAvalanche(a);
+        cAvalanche_triggerAvalanche(avalancheId);
     return D_004C9098_5C88;
 }
 #endif
@@ -8425,10 +8425,10 @@ struct Ent_5D90 { int idx; int val; int pad; int type; };
  * node (virtual isMoveNode), cMoveNode_addAvaSpline gets the node and the instance (which it does not read).
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_5D90 func_00305D90(int n, Ent_5D90 *e) {
+extern "C" V3_5D90 func_00305D90(int n, Ent_5D90 *params) {
     if (D_004A5878 == 0) {
         D_5D90 = 0xFFFFFFFF;
         D_004A5878 = 1;
@@ -8438,38 +8438,38 @@ extern "C" V3_5D90 func_00305D90(int n, Ent_5D90 *e) {
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
     MEM_copy_5D90(buf, &D_5D90, 8);
-    Ent_5D90 *x = e;
+    Ent_5D90 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = (&D_004A3DA0)[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_5D90 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s)
-            r = 0;
+        char *inst;
+        if (!section)
+            inst = 0;
         else {
-            i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_5D90(i);
-            r = t;
+            inst = t;
         }
-        obj = r;
+        obj = inst;
     }
     if (obj) {
-        O_5D90 *p = *(O_5D90**)(obj + 0xC);
-        if (p) {
-            if (p->v16())
-                cMoveNode_addAvaSpline_5D90(p, obj);
+        O_5D90 *activeNode = *(O_5D90**)(obj + 0xC);
+        if (activeNode) {
+            if (activeNode->v16())
+                cMoveNode_addAvaSpline_5D90(activeNode, obj);
         }
     }
     return D_004C9098_5D90;
@@ -8511,95 +8511,95 @@ struct Ent_5F40 { int idx; int val; int pad; int type; };
  * cAvalanche_setAvalancheNodeEmitterData copies the parameters to its node.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_5F40 func_00305F40(int n, Ent_5F40 *e) {
+extern "C" V3_5F40 func_00305F40(int n, Ent_5F40 *params) {
     if (D_587C_5F40 == 0) {
-        Rec_5F40 &r = D_4FBE58_5F40;
+        Rec_5F40 &defaultBlock = D_4FBE58_5F40;
         float zero = 0.0f;
         float one = 1.0f;
-        r.a = 1;
-        r.b = 0;
-        r.c = -1.0f;
-        r.d = one;
-        r.e = 4.0f;
-        r.m[0] = zero;
-        r.m[1] = zero;
-        r.m[2] = zero;
-        r.m[3] = zero;
-        r.m[4] = zero;
-        r.m[5] = zero;
-        r.m[6] = zero;
-        r.m[7] = zero;
-        r.m[8] = zero;
-        r.m[9] = zero;
-        r.m[10] = zero;
-        r.m[11] = zero;
-        r.m[12] = zero;
-        r.m[13] = zero;
-        r.m[14] = zero;
-        r.m[15] = zero;
-        r.m[16] = zero;
-        r.m[17] = zero;
-        r.m[18] = zero;
-        r.m[19] = zero;
-        r.m[20] = zero;
-        r.m[21] = zero;
-        r.m[22] = zero;
-        r.m[23] = zero;
-        r.m[24] = zero;
-        r.m[25] = zero;
-        r.m[26] = zero;
-        r.m[27] = zero;
-        r.v[0] = one;
-        r.v[1] = zero;
-        r.v[2] = zero;
-        r.v[3] = zero;
-        r.v[4] = one;
-        r.v[5] = one;
-        r.v[6] = one;
-        r.v[7] = one;
-        r.v[8] = one;
-        r.v[9] = zero;
-        r.v[10] = zero;
-        r.v[11] = zero;
-        r.v[12] = one;
-        r.v[13] = zero;
-        r.v[14] = zero;
-        r.v[15] = zero;
-        r.k = 16;
-        r.l = 0;
-        r.n = zero;
-        r.o = 1;
-        r.p = 20.0f;
-        r.id = 0xFFFFFFFF;
+        defaultBlock.a = 1;
+        defaultBlock.b = 0;
+        defaultBlock.c = -1.0f;
+        defaultBlock.d = one;
+        defaultBlock.e = 4.0f;
+        defaultBlock.m[0] = zero;
+        defaultBlock.m[1] = zero;
+        defaultBlock.m[2] = zero;
+        defaultBlock.m[3] = zero;
+        defaultBlock.m[4] = zero;
+        defaultBlock.m[5] = zero;
+        defaultBlock.m[6] = zero;
+        defaultBlock.m[7] = zero;
+        defaultBlock.m[8] = zero;
+        defaultBlock.m[9] = zero;
+        defaultBlock.m[10] = zero;
+        defaultBlock.m[11] = zero;
+        defaultBlock.m[12] = zero;
+        defaultBlock.m[13] = zero;
+        defaultBlock.m[14] = zero;
+        defaultBlock.m[15] = zero;
+        defaultBlock.m[16] = zero;
+        defaultBlock.m[17] = zero;
+        defaultBlock.m[18] = zero;
+        defaultBlock.m[19] = zero;
+        defaultBlock.m[20] = zero;
+        defaultBlock.m[21] = zero;
+        defaultBlock.m[22] = zero;
+        defaultBlock.m[23] = zero;
+        defaultBlock.m[24] = zero;
+        defaultBlock.m[25] = zero;
+        defaultBlock.m[26] = zero;
+        defaultBlock.m[27] = zero;
+        defaultBlock.v[0] = one;
+        defaultBlock.v[1] = zero;
+        defaultBlock.v[2] = zero;
+        defaultBlock.v[3] = zero;
+        defaultBlock.v[4] = one;
+        defaultBlock.v[5] = one;
+        defaultBlock.v[6] = one;
+        defaultBlock.v[7] = one;
+        defaultBlock.v[8] = one;
+        defaultBlock.v[9] = zero;
+        defaultBlock.v[10] = zero;
+        defaultBlock.v[11] = zero;
+        defaultBlock.v[12] = one;
+        defaultBlock.v[13] = zero;
+        defaultBlock.v[14] = zero;
+        defaultBlock.v[15] = zero;
+        defaultBlock.k = 16;
+        defaultBlock.l = 0;
+        defaultBlock.n = zero;
+        defaultBlock.o = 1;
+        defaultBlock.p = 20.0f;
+        defaultBlock.id = 0xFFFFFFFF;
         D_587C_5F40 = 1;
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
-        r.f = Tag_5F40(r.f);
+        defaultBlock.f = Tag_5F40(defaultBlock.f);
     }
     Rec_5F40 rec;
     Rec_5F40 *buf = &rec;
     rec.id = 0xFFFFFFFF;
     MEM_copy_5F40(buf, &D_4FBE58_5F40, 0xE0);
-    Ent_5F40 *x = e;
+    Ent_5F40 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_004467A0_5F40[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = D_004467A0_5F40[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf->id;
     if (~id != 0) {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         char *obj;
-        if (!s)
+        if (!section)
             obj = 0;
         else
-            obj = conv_5F40(((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8);
+            obj = conv_5F40(((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8);
         cAvalanche_setAvalancheNodeEmitterData_5F40(obj, buf);
     }
     return D_004C9098_5F40;
@@ -8730,10 +8730,10 @@ extern T12_6300 D_004FBF38_6300 __asm__("D_004FBF38");
  * cBE_getInterface call before it has no effect.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" R12_6300 func_00306300(int n, Ent_6300* e) {
+extern "C" R12_6300 func_00306300(int n, Ent_6300* params) {
     if (D_004A588C_6300 == 0) {
         D_004FBF38_6300.a = 0;
         D_004A588C_6300 = 1;
@@ -8741,17 +8741,17 @@ extern "C" R12_6300 func_00306300(int n, Ent_6300* e) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004FBF38_6300.f = Flag_6300(D_004FBF38_6300.f);
     }
-    int v[4] __attribute__((aligned(16)));
-    int* vp = v;
+    int block[4] __attribute__((aligned(16)));
+    int* vp = block;
     MEM_copy(vp, &D_004FBF38_6300, 12);
-    Ent_6300* p = e;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_004A3DB0_6300[k] && D_004A3DB0_6300[k] == 2)
-            *(float*)d = (float)p->val;
+    Ent_6300* curArg = params;
+    for (int i = 0; i < n; i++, curArg++) {
+        int k = curArg->idx;
+        int* slot = (int*)((k << 2) + (int)vp);
+        if (curArg->kind != D_004A3DB0_6300[k] && D_004A3DB0_6300[k] == 2)
+            *(float*)slot = (float)curArg->val;
         else
-            *d = p->val;
+            *slot = curArg->val;
     }
     int x = vp[0];
     int y = vp[1];
@@ -8790,10 +8790,10 @@ struct Ent_6438 { int idx; int val; int pad; int type; };
  * it (a dead instance is skipped).
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_6438 func_00306438(int n, Ent_6438 *e) {
+extern "C" V3_6438 func_00306438(int n, Ent_6438 *params) {
     if (D_004A5890 == 0) {
         D_6438[0] = 0xFFFFFFFF;
         *(float*)&D_6438[1] = 1000.0f;
@@ -8805,34 +8805,34 @@ extern "C" V3_6438 func_00306438(int n, Ent_6438 *e) {
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
     MEM_copy_6438(buf, D_6438, 16);
-    Ent_6438 *x = e;
+    Ent_6438 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00446880[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = D_00446880[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_6438 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
+        if (!section || (i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8) == 0)
             obj = 0;
         else
             obj = (char*)(i << 2);
     }
     if (obj) {
-        float f1 = *(float*)&buf[1];
-        float f2 = *(float*)&buf[2];
-        int tmp[1];
-        tmp[0] = *(int*)(obj + 0x78);
-        func_00101728_6438(*(void**)(*(char**)(*(char**)(D_004A28A8_6438 + 0x84) + 0xC) + 0xA8), tmp, f1, f2);
+        float radius = *(float*)&buf[1];
+        float delay = *(float*)&buf[2];
+        int instIdBuf[1];
+        instIdBuf[0] = *(int*)(obj + 0x78);
+        func_00101728_6438(*(void**)(*(char**)(*(char**)(D_004A28A8_6438 + 0x84) + 0xC) + 0xA8), instIdBuf, radius, delay);
     }
     return D_004C9098_6438;
 }
@@ -8876,10 +8876,10 @@ struct Ent_65E8 { int idx; int val; int pad; int type; };
  * manager (SSXApp->Game->AI +0xA8) deletes its tracked danger record (cDangerMan_DeleteTrackedDangerElemRecord).
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_65E8 func_003065E8(int n, Ent_65E8 *e) {
+extern "C" V3_65E8 func_003065E8(int n, Ent_65E8 *params) {
     if (D_004A58A0 == 0) {
         D_65E8 = 0xFFFFFFFF;
         D_004A58A0 = 1;
@@ -8889,20 +8889,20 @@ extern "C" V3_65E8 func_003065E8(int n, Ent_65E8 *e) {
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
     MEM_copy_65E8(buf, &D_65E8, 8);
-    Ent_65E8 *x = e;
+    Ent_65E8 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = (&D_004A3DB8)[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = (&D_004A3DB8)[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     char *obj = look_65E8(buf[0]);
     if (obj) {
-        int tmp[1]; tmp[0] = *(int*)(obj + 0x78);
-        func_00101888_65E8(*(void**)(*(char**)(*(char**)(D_004A28A8_65E8 + 0x84) + 0xC) + 0xA8), tmp);
+        int instIdBuf[1]; instIdBuf[0] = *(int*)(obj + 0x78);
+        func_00101888_65E8(*(void**)(*(char**)(*(char**)(D_004A28A8_65E8 + 0x84) + 0xC) + 0xA8), instIdBuf);
     }
     return D_004C9098_65E8;
 }
@@ -8946,10 +8946,10 @@ struct Ent_6770 { int idx; int val; int pad; int type; };
  * zone is already active.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_6770 func_00306770(int n, Ent_6770 *e) {
+extern "C" V3_6770 func_00306770(int n, Ent_6770 *params) {
     if (D_004A58A4 == 0) {
         D_6770[0] = 0xFFFFFFFF;
         D_6770[1] = 0;
@@ -8960,34 +8960,34 @@ extern "C" V3_6770 func_00306770(int n, Ent_6770 *e) {
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
     MEM_copy_6770(buf, D_6770, 12);
-    Ent_6770 *x = e;
+    Ent_6770 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = (&D_004A3DC0)[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = (&D_004A3DC0)[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_6770 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
-            r = 0;
+        char *inst;
+        if (!section || (i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8) == 0)
+            inst = 0;
         else
-            r = (char*)(i << 2);
-        obj = r;
+            inst = (char*)(i << 2);
+        obj = inst;
     }
 
     if (obj) {
-        int b1 = buf[1];
-        func_00101900_6770(*(void**)(*(char**)(*(char**)(D_004A28A8_6770 + 0x84) + 0xC) + 0xA8), obj + 0x78, b1);
+        int zoneLevel = buf[1];
+        func_00101900_6770(*(void**)(*(char**)(*(char**)(D_004A28A8_6770 + 0x84) + 0xC) + 0xA8), obj + 0x78, zoneLevel);
     }
     return D_004C9098_6770;
 }
@@ -9021,10 +9021,10 @@ struct Ent_6908 { int idx; int val; int pad; int type; };
  * manager (SSXApp->Game->AI +0xA8) drops one reference to its zone and frees the zone at zero.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_6908 func_00306908(int n, Ent_6908 *e) {
+extern "C" V3_6908 func_00306908(int n, Ent_6908 *params) {
     if (D_004A58B0 == 0) {
         D_6908 = 0xFFFFFFFF;
         D_004A58B0 = 1;
@@ -9034,29 +9034,29 @@ extern "C" V3_6908 func_00306908(int n, Ent_6908 *e) {
     unsigned *buf = buf64;
     buf[0] = 0xFFFFFFFF;
     MEM_copy_6908(buf, &D_6908, 8);
-    Ent_6908 *x = e;
+    Ent_6908 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = (&D_004A3DC8)[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = (&D_004A3DC8)[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[0];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_6908 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
-            r = 0;
+        char *inst;
+        if (!section || (i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8) == 0)
+            inst = 0;
         else
-            r = (char*)(i << 2);
-        obj = r;
+            inst = (char*)(i << 2);
+        obj = inst;
     }
     if (obj)
         func_00101970_6908(*(void**)(*(char**)(*(char**)(D_004A28A8_6908 + 0x84) + 0xC) + 0xA8), obj + 0x78);
@@ -9209,10 +9209,10 @@ struct Ent_6CB0 { int idx; int val; int pad; int type; };
  * cMultiParticleMan_remInst.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return the nil script value (luno_gLunoNil)
  */
-extern "C" V3_6CB0 func_00306CB0(int n, Ent_6CB0 *e) {
+extern "C" V3_6CB0 func_00306CB0(int n, Ent_6CB0 *params) {
     if (D_004A58B8 == 0) {
         ((int*)D_6CB0)[0] = 0;
         D_6CB0[1] = 0xFFFFFFFF;
@@ -9224,29 +9224,29 @@ extern "C" V3_6CB0 func_00306CB0(int n, Ent_6CB0 *e) {
     unsigned *buf = buf64;
     buf64[1] = 0xFFFFFFFF;
     MEM_copy_6CB0(buf, D_6CB0, 16);
-    Ent_6CB0 *x = e;
+    Ent_6CB0 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
-        int t = D_00446970[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
-        if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+        int keywordType = D_00446970[idx];
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
+        if (x->type != keywordType && keywordType == 2)
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
     unsigned id = buf[1];
     char *obj;
     if (~id == 0) {
         obj = *(char**)(D_004A3DD8_6CB0 + 0x290);
     } else {
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
         unsigned i;
-        char *r;
-        if (!s || (i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8) == 0)
-            r = 0;
+        char *inst;
+        if (!section || (i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8) == 0)
+            inst = 0;
         else
-            r = (char*)(i << 2);
-        obj = r;
+            inst = (char*)(i << 2);
+        obj = inst;
     }
     if (obj) {
         if (buf[2] == 0)
@@ -9290,10 +9290,10 @@ struct Ent_6E68 { int idx; int val; int pad; int type; };
  *
  * @param ret  the result slot
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return @p ret
  */
-extern "C" V3_6E68* func_00306E68(V3_6E68 *ret, int n, Ent_6E68 *e) {
+extern "C" V3_6E68* func_00306E68(V3_6E68 *ret, int n, Ent_6E68 *params) {
     if (D_004A58BC == 0) {
         D_6E68[0] = 0xFFFFFFFF;
         D_6E68[1] = 0xFFFFFFFF;
@@ -9307,27 +9307,27 @@ extern "C" V3_6E68* func_00306E68(V3_6E68 *ret, int n, Ent_6E68 *e) {
     buf64[1] = 0xFFFFFFFF;
     buf64[2] = 0xFFFFFFFF;
     MEM_copy_6E68(buf, D_6E68, 16);
-    Ent_6E68 *x = e;
+    Ent_6E68 *x = params;
     for (int i = 0; i < n; i++, x++) {
         int idx = x->idx;
         int t = D_00446980[idx];
-        unsigned *d = (unsigned*)((idx << 2) + (int)buf);
+        unsigned *slot = (unsigned*)((idx << 2) + (int)buf);
         if (x->type != t && t == 2)
-            *(float*)d = (float)x->val;
+            *(float*)slot = (float)x->val;
         else
-            *d = x->val;
+            *slot = x->val;
     }
-    int b1 = buf[1];
-    int b2 = buf[2];
-    int r = cWScriptMan_checkGate_6E68(D_004A3DD8_6E68, buf[0], b1, b2);
-    if (r == 1) {
+    int gateId = buf[1];
+    int nextGateId = buf[2];
+    int gateResult = cWScriptMan_checkGate_6E68(D_004A3DD8_6E68, buf[0], gateId, nextGateId);
+    if (gateResult == 1) {
         unsigned id = buf[1];
         char *obj;
-        char *s = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
-        if (!s) {
+        char *section = (*(char***)((char*)(char*)cWorld_m_pTheWorld->m_pWorldCache + 8))[id & 0xFF];
+        if (!section) {
             obj = 0;
         } else {
-            unsigned i = ((unsigned*)*(char**)(s + 0x1C))[id >> 8] >> 8;
+            unsigned i = ((unsigned*)*(char**)(section + 0x1C))[id >> 8] >> 8;
             char *t = conv_6E68(i);
             obj = t;
         }
@@ -9335,7 +9335,7 @@ extern "C" V3_6E68* func_00306E68(V3_6E68 *ret, int n, Ent_6E68 *e) {
             cSSXAudio_WorldSound_6E68(cAudioInterface_bxAudio_6E68(), obj, 92);
     }
     ((int*)ret)[2] = 1;
-    *luno_cLunoVar_castInt(ret) = r;
+    *luno_cLunoVar_castInt(ret) = gateResult;
     return ret;
 }
 #endif
@@ -9367,10 +9367,10 @@ extern T12_7020 D_004FC070_7020 __asm__("D_004FC070");
  * slot self.
  *
  * @param n  the number of script arguments
- * @param e  the script arguments (each: field index, value, value type)
+ * @param params  the script arguments (each: field index, value, value type)
  * @return self, set to int 1 or 0
  */
-extern "C" void* func_00307020(void* self, int n, Ent_7020* e) {
+extern "C" void* func_00307020(void* self, int n, Ent_7020* params) {
     if (D_004A58C0_7020 == 0) {
         D_004FC070_7020.a = 0;
         D_004A58C0_7020 = 1;
@@ -9378,21 +9378,21 @@ extern "C" void* func_00307020(void* self, int n, Ent_7020* e) {
         // NOTE: guarded static-local init; the target copies the trailing byte through its copy ctor (lbu; sb back; sb 0(sp)).
         D_004FC070_7020.f = Flag_7020(D_004FC070_7020.f);
     }
-    int v[4] __attribute__((aligned(16)));
-    int* vp = v;
+    int block[4] __attribute__((aligned(16)));
+    int* vp = block;
     MEM_copy(vp, &D_004FC070_7020, 12);
-    Ent_7020* p = e;
-    for (int i = 0; i < n; i++, p++) {
-        int k = p->idx;
-        int* d = (int*)((k << 2) + (int)vp);
-        if (p->kind != D_004A3DD0_7020[k] && D_004A3DD0_7020[k] == 2)
-            *(float*)d = (float)p->val;
+    Ent_7020* curArg = params;
+    for (int i = 0; i < n; i++, curArg++) {
+        int k = curArg->idx;
+        int* slot = (int*)((k << 2) + (int)vp);
+        if (curArg->kind != D_004A3DD0_7020[k] && D_004A3DD0_7020[k] == 2)
+            *(float*)slot = (float)curArg->val;
         else
-            *d = p->val;
+            *slot = curArg->val;
     }
-    bool r = func_001E3570(vp[0], vp[1]) != 0;
+    bool iconShown = func_001E3570(vp[0], vp[1]) != 0;
     *(int*)((char*)self + 8) = 1;
-    *luno_cLunoVar_castInt(self) = r;
+    *luno_cLunoVar_castInt(self) = iconShown;
     return self;
 }
 #endif

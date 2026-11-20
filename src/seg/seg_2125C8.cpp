@@ -83,7 +83,7 @@ unsigned int AIrand();
 /**
  * Picks the game animation for an AI animation id: a weighted random choice among the id's variants that pass a filter.
  *
- * The id's run of variants (start, count) comes from @p t's range table, built by cAIAnimEventMap_initMaps; the
+ * The id's run of variants (start, count) comes from @p eventMap's range table, built by cAIAnimEventMap_initMaps; the
  * variants are 12-byte entries of D_00449960 (value, weight, flags). An id with one variant returns its value without
  * checking the filter. Otherwise the weights of the variants whose flags contain every bit of @p mask are summed,
  * AIrand() % total is drawn and reduced by each eligible weight in turn, and the first variant that brings it to 0 or
@@ -93,26 +93,26 @@ unsigned int AIrand();
  * the first eligible variant gets one draw more than its weight and the last one draw fewer (likely bug: < 0 was
  * meant).
  *
- * @param t  the AI animation event map (only its range table is read)
+ * @param eventMap  the AI animation event map (only its range table is read)
  * @param idx  the AI animation id
  * @param mask  the filter bits a variant must have
  * @return the chosen variant's value (a game animation data id)
  */
-extern "C" int func_00311710(RangeTable_15E0* t, int idx, int mask)
+extern "C" int func_00311710(RangeTable_15E0* eventMap, int idx, int mask)
 {
-    int start = t->r[idx].start;
+    int start = eventMap->r[idx].start;
     int i, end, total;
-    if (t->r[idx].count == 1) return D_00449960[start].value;
-    end = start + t->r[idx].count;
+    if (eventMap->r[idx].count == 1) return D_00449960[start].value;
+    end = start + eventMap->r[idx].count;
     total = 0;
     for (int j = start; j < end; j++) {
         if ((D_00449960[j].flags & mask) == mask) total += D_00449960[j].weight;
     }
-    int r = AIrand() % total;
+    int roll = AIrand() % total;
     for (i = start; i < end; i++) {
         if ((D_00449960[i].flags & mask) == mask) {
-            r -= D_00449960[i].weight;
-            if (r <= 0) return D_00449960[i].value;
+            roll -= D_00449960[i].weight;
+            if (roll <= 0) return D_00449960[i].value;
         }
     }
     return D_00449960[end - 1].value;
