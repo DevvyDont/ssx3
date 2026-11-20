@@ -4863,13 +4863,13 @@ cTransformModifier_getRootTransform__FPv = 0x00360BB8; //type:func
 cAvaSplineModifier_getRootTransform__FPv = 0x00361B10; //type:func
 tParticleEmitter_setVelocity = 0x0036D020; //type:func
 tParticleEmitter_setVelocity1 = 0x0036D1F0; //type:func
-cPS2GraphicsMan_SetDisplayMode = 0x003764C0; //type:func
+cPS2GraphicsMan_SetDisplayMode1 = 0x003764C0; //type:func
 cPS2GraphicsMan_DrawString3D = 0x00378808; //type:func
 cPS2GraphicsMan_SetNewTextureData = 0x0037D0B0; //type:func
 cPS2GraphicsMan_RenderModel = 0x0037E238; //type:func
 cPS2GraphicsMan_RenderDynamicParticleEmitter = 0x003807A0; //type:func
 cPS2GraphicsMan_RenderDynamicParticleEmitter1 = 0x00380CE0; //type:func
-cPS2GraphicsMan_GetDisplayMode__FPv = 0x00395328; //type:func
+cPS2GraphicsMan_GetDisplayMode1__FPv = 0x00395328; //type:func
 
 // fn_slots9: names by evidence (docs/function_names.tsv)
 cFEStateRelogin_onCreateScreen = 0x001D5078; //type:func

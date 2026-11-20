@@ -4018,14 +4018,14 @@ int cPS2GraphicsMan_GetDTV(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", cPS2GraphicsMan_GetDisplayMode__FPv);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_GetDisplayMode1__FPv);
 #ifdef SKIP_ASM
 /**
  * Returns CurrentDisplayMode (-1 until a mode has been set).
  *
  * @return the current display mode index
  */
-int cPS2GraphicsMan_GetDisplayMode(void* self)
+int cPS2GraphicsMan_GetDisplayMode1(void* self)
 {
     return *(int*)((char*)self + 0x59C8);
 }

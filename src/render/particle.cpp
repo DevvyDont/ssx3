@@ -3346,7 +3346,7 @@ struct sVEntry00376468 {
 /**
  * Switches to the display mode that matches a resolution and pixel formats.
  *
- * Calls its own virtual slot 123 (func_003762F8) to find the mode, then slot 4 (cPS2GraphicsMan_SetDisplayMode) with
+ * Calls its own virtual slot 123 (func_003762F8) to find the mode, then slot 4 (cPS2GraphicsMan_SetDisplayMode1) with
  * the index. Declared with only @p self: the caller's width, height, format and id arguments are passed on untouched in
  * their registers to slot 123. Slot 122 of cPS2GraphicsMan_vtbl.
  *
@@ -3365,7 +3365,7 @@ extern "C" void* func_00376468(cPS2GraphicsMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetDisplayMode);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetDisplayMode1);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From peak3project's fork (github.com/peak3project/ssx3).
@@ -3402,7 +3402,7 @@ int func_0037BD98_3764C0(void* self, unsigned int a1, unsigned int a2, unsigned 
  * @param idx  the display-mode index (records of 0xA4 bytes)
  * @return 1, always
  */
-extern "C" int cPS2GraphicsMan_SetDisplayMode(sPartTexCache_3764C0* self, int idx)
+extern "C" int cPS2GraphicsMan_SetDisplayMode1(sPartTexCache_3764C0* self, int idx)
 {
     if (self->cur == idx) {
         return 1;
@@ -6859,7 +6859,7 @@ struct sParticleTarget_37BD98 {
  * PSMCT24, from the display buffer over a1 * a2 + w * h when only the display format is, else from the z buffer over w
  * * h. Finally it flushes the data cache, waits for the next vertical sync on GS CSR (0x12001000), calls
  * func_003FD910(@p resetMode, @p interlaceMode, @p flag ? 80 : 2, @p fieldMode) and func_003E6690(@p flag ? 3 : 1), and sets the display
- * registers with func_00382AF0(self, 0, 1). cPS2GraphicsMan_SetDisplayMode calls it.
+ * registers with func_00382AF0(self, 0, 1). cPS2GraphicsMan_SetDisplayMode1 calls it.
  *
  * @param displayWidth  display width in pixels
  * @param displayHeight  display height in pixels
