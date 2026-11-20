@@ -71,7 +71,7 @@ extern "C" void* cAI_cAI(cAI* self)
     *(void**)&self->mRaceHandler = cAIStateHandler_vtbl;
     *(void**)&self->mEndRaceHandler = D_00458500;
     *(void**)&self->mShutdownHandler = cShutdownHandler_vtbl;
-    sAIState_1286A0** slot = (sAIState_1286A0**)((char*)&self->FocusMan);
+    sAIState_1286A0** slot = (sAIState_1286A0**)&self->FocusMan;
     *slot = new (str_FocusMan, 0, 0) sAIState_1286A0;
     self->DangerMan = (cDangerMan*)(new (str_DangerMan, 0, 0) sAIObj_1286A0(self));
     self->RaceRankType = 0;
@@ -2620,7 +2620,7 @@ INCLUDE_ASM("ai/ai", cAI_setPodiumActorList);
  */
 extern "C" void cAI_setPodiumActorList(cAI* self, int* src)
 {
-    int* dst = (int*)((char*)&self->PodiumActorList);
+    int* dst = (int*)&self->PodiumActorList;
     for (int i = 0; i < 2; i++)
     {
         dst[i] = src[i];
@@ -2638,7 +2638,7 @@ INCLUDE_ASM("ai/ai", cAI_getPodiumActorList);
  */
 extern "C" void cAI_getPodiumActorList(cAI* self, int* dst)
 {
-    int* src = (int*)((char*)&self->PodiumActorList);
+    int* src = (int*)&self->PodiumActorList;
     for (int i = 0; i < 2; i++)
     {
         dst[i] = src[i];
@@ -5364,7 +5364,7 @@ static inline sFx_12F230* initFx_12F230(sFx_12F230* p, const sColor_12F230& col)
  */
 extern "C" void cResetControl_gainFocus(cResetControl* self)
 {
-    int* flag = (int*)((char*)&self->FadePercent);
+    int* flag = (int*)&self->FadePercent;
     *flag = 0;
     *(int*)(cRiderAnimBase_getCurrentAnimSequence(self->mRider->mRiderAnim, 2) + 0x90) = 0;
     if (cResetControl_shouldTransition(self))

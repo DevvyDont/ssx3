@@ -1005,7 +1005,7 @@ extern "C" void* cFlexBridgeNode_cFlexBridgeNode(cFlexBridgeNode* self, int buck
 {
     cInstanceNode_cInstanceNode1(self, bucket, 5, pInst);
     self->mVtbl = cFlexBridgeNode_vtbl;
-    cSpring_cSpring((char*)self + 0x50);
+    cSpring_cSpring((char*)&self->Mesh);
     self->TextureId = 12;
     self->RailHeight = 100.0f;
     sEffV3_346350 pts[4];
@@ -1017,7 +1017,7 @@ extern "C" void* cFlexBridgeNode_cFlexBridgeNode(cFlexBridgeNode* self, int buck
     span.x = pts[1].x - pts[0].x;
     span.y = pts[1].y - pts[0].y;
     span.z = pts[1].z - pts[0].z;
-    cSpring_setupSpring((char*)self + 0x50, tdata, sqrtf_346350(span.x * span.x + span.y * span.y + span.z * span.z));
+    cSpring_setupSpring((char*)&self->Mesh, tdata, sqrtf_346350(span.x * span.x + span.y * span.y + span.z * span.z));
     cFlexBridgeNode_setupGrid(self);
     cFlexBridgeNode_initSpringNodes(self);
     cFlexBridgeNode_updateGrid(self);
@@ -1056,10 +1056,10 @@ struct sEffectLinkVEntry64E0 {
  */
 extern "C" void* cFlexBridgeNode_cFlexBridgeNode1(cFlexBridgeNode* self, void* bucket, void* stream)
 {
-    void* payload = (char*)self + 0x20;
+    void* payload = (char*)&self->BottomLeftOffset;
     cInstanceNode_cInstanceNode(self, bucket, stream);
     self->mVtbl = cFlexBridgeNode_vtbl;
-    cSpring_cSpring1((char*)self + 0x50, stream);
+    cSpring_cSpring1((char*)&self->Mesh, stream);
     cFlexBridgeNode_setupGrid(self);
     sEffectLinkVEntry64E0* readEntry = &(*(sEffectLinkVEntry64E0**)stream)[2];
     readEntry->fn((char*)stream + readEntry->delta, payload, 0x30);

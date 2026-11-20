@@ -692,7 +692,7 @@ INCLUDE_ASM("sound/ssxAudio", cSSXAudio_SetAudioUpdateState);
  */
 extern "C" void cSSXAudio_SetAudioUpdateState(cSSXAudio* self, int State)
 {
-    int* updateState = (int*)((char*)&self->mAudioUpdateState);
+    int* updateState = (int*)&self->mAudioUpdateState;
     if (*updateState != State) {
         *updateState = State;
     }
@@ -1306,9 +1306,9 @@ extern "C" void cSSXAudio_InGameDeInit(cSSXAudio* self)
     cSSXAudio_StopAllRiderSounds(self);
     saDeleteObj((void**)((char*)self + 0x625C));
     saDeleteObj((void**)((char*)self + 0x6260));
-    saDeleteObj((void**)((char*)&self->mpAmbienceQuery));
+    saDeleteObj((void**)&self->mpAmbienceQuery);
     saDeleteObj((void**)((char*)self + 0x5FA4));
-    saDeleteObj((void**)((char*)&self->mpMixQuery));
+    saDeleteObj((void**)&self->mpMixQuery);
     saDeleteObj((void**)((char*)self + 0x6C84));
     cSSXAudio_ResetAttachedSounds(self);
     cSSXAudio_MixVolume(self, 0);
@@ -3688,15 +3688,15 @@ extern "C" void cSSXAudio_ReactToWPAmbienceEvent(cSSXAudio* self, cRider* rider,
     int id = *vt[4].fn((char*)obj + vt[4].delta);
     if (id == -1) return;
     if (id == 0x1F) {
-        if (func_002B49E0((char*)self + 0x118) != 101) {
+        if (func_002B49E0((char*)&self->MusicSys) != 101) {
             func_0028CF98(self, 0, 0, 1, 0);
         }
     } else if (id == 0x20) {
-        if (func_002B49E0((char*)self + 0x118) != 102) {
+        if (func_002B49E0((char*)&self->MusicSys) != 102) {
             func_0028CF98(self, 0, 0, 2, 0);
         }
     } else if (id != 33) {
-        char* mon = (char*)self + 0x118;
+        char* mon = (char*)&self->MusicSys;
         sSaVt99F8b* vb = (sSaVt99F8b*)self->MusicSys.mVtbl;
         vb[4].fn(mon + vb[4].delta, id);
     }
@@ -3796,11 +3796,11 @@ extern "C" void func_002A4550(void*);
 extern "C" void cSSXAudio_ResumeAudio(cSSXAudio* self)
 {
     if (self->mAudioPaused != 0) {
-        func_002B3A98((char*)self + 0x118);
+        func_002B3A98((char*)&self->MusicSys);
         cSSXAudio_ResumeSFX(self);
         self->mAudioPaused = 0;
         if (self->unk_5828 != 0) {
-            func_002B11B0((char*)self + 0x5560, 0);
+            func_002B11B0((char*)&self->SpeechSys, 0);
             func_002A4550(self);
             self->unk_5828 = 0;
         }

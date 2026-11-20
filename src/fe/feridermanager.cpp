@@ -753,7 +753,7 @@ static inline void AddTo_F418(sVec_F418& dst, const sVec_F418& b)
  */
 extern "C" void cFERider_translate(cFERider* self, sVec_F418* delta)
 {
-    sVec_F418* pos = (sVec_F418*)((char*)self + 0xC30);
+    sVec_F418* pos = (sVec_F418*)&self->mPose;
     sVec_F418* rot = (sVec_F418*)((char*)self + 0xC40);
     AddTo_F418(*pos, Rot_F418(*rot, *delta));
     cFERider_updateModelPose(self);
@@ -893,7 +893,7 @@ static inline void AddTo_F578(sVec_F578& dst, const sVec_F578& b)
  */
 extern "C" void cFERider_translateBoard(cFERider* self, sVec_F578* delta)
 {
-    sVec_F578* pos = (sVec_F578*)((char*)self + 0xC50);
+    sVec_F578* pos = (sVec_F578*)&self->mBoardPose;
     sVec_F578* rot = (sVec_F578*)((char*)self + 0xC60);
     AddTo_F578(*pos, Rot_F578(*rot, *delta));
     cFERider_updateModelPose(self);

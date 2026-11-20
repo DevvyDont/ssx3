@@ -5219,7 +5219,7 @@ extern void* cTransitionMan_vtbl[];
 extern "C" void* cTransitionMan_cTransitionMan(cTransitionMan* self, void* bucket, int viewIndex)
 {
     cObjNode_cObjNode1(self, bucket);
-    cScriptObjTransition_cScriptObjTransition((char*)self + 0x10);
+    cScriptObjTransition_cScriptObjTransition((char*)&self->mObjType);
     self->mViewIndex = viewIndex;
     self->mNumPause = 0;
     self->mbPlayingTransition = 0;
@@ -5236,7 +5236,7 @@ extern "C" void* cTransitionMan_cTransitionMan(cTransitionMan* self, void* bucke
     self->mVtbl = cTransitionMan_vtbl;
     self->mScreenGrabHandle.mTextureId = -1;
     cTransitionObj_InitializeBuffers();
-    cScriptObject_InitScriptObject((char*)self + 0x10);
+    cScriptObject_InitScriptObject((char*)&self->mObjType);
     return ((void*)self);
 }
 #endif
@@ -5269,12 +5269,12 @@ extern "C" void cTransitionMan__cTransitionMan(cTransitionMan* self, int flags)
 {
     self->mScriptVtbl = D_00488100;
     self->mVtbl = cTransitionMan_vtbl;
-    char* scriptObj = (char*)self + 0x10;
+    char* scriptObj = (char*)&self->mObjType;
     cTransitionMan_EndTransition(self);
     if (self->mRequestingDelete != 0) {
         char* obj = cGraphicsMan_TheGraphicsMan_boardwakefx;
         sBWVEntry1* removeScreenGrab = &(*(sBWVEntry1**)(obj + 0x10D8))[60];
-        removeScreenGrab->fn(obj + removeScreenGrab->delta, (char*)self + 0x68);
+        removeScreenGrab->fn(obj + removeScreenGrab->delta, (char*)&self->mScreenGrabHandle);
         self->mRequestingDelete = 0;
     }
     cScriptObject_DeInitScriptObject(scriptObj);
@@ -5776,8 +5776,8 @@ extern "C" void cTransitionMan_StartTransitionScreenGrab(cTransitionMan* self, i
  */
 extern "C" void cTransitionMan_OnStartObjectUse(cTransitionMan* self)
 {
-    sWakeParams_4B98* transitionInfo = (sWakeParams_4B98*)((char*)self + 0x28);
-    cScriptObject_OnStartObjectUse((char*)self + 0x10);
+    sWakeParams_4B98* transitionInfo = (sWakeParams_4B98*)&self->mInfo;
+    cScriptObject_OnStartObjectUse((char*)&self->mObjType);
     if (self->mInfo.transition != 7) {
         int transitionIn = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, self->mInfo.transition, self->mInfo.transitionColour);
         int transitionOut = cSSXScriptEngine_MakeTransitionObject(ScriptEngine, self->mInfo.transition, self->mInfo.transitionColour);
@@ -5803,7 +5803,7 @@ extern "C" void cTransitionMan_EndTransition(cTransitionMan* self);
  */
 extern "C" void cTransitionMan_OnEndObjectUse(cTransitionMan* self)
 {
-    cScriptObject_OnEndObjectUse((char*)self + 0x10);
+    cScriptObject_OnEndObjectUse((char*)&self->mObjType);
     cTransitionMan_EndTransition(self);
 }
 #endif

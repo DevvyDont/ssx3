@@ -35,7 +35,7 @@ extern "C" void cFEStateEventSelect_onCreateScreen(cFEStateEventSelect* self)
     }
     void* main = self->mpScreen;
     cUITemplate_MAP_mMapStyle = 0;
-    cUITemplate_MAP_onCreateScreen((char*)self + 0x48, main, self);
+    cUITemplate_MAP_onCreateScreen((char*)&self->mMap, main, self);
 }
 #endif
 
@@ -86,7 +86,7 @@ extern "C" void cUITemplate_MAP_onGainFocus(void* tmpl);
 extern "C" void cFEStateEventSelect_onGainFocus(cFEStateEventSelect* self)
 {
     cUIState_onGainFocus(self);
-    cUITemplate_MAP_onGainFocus((char*)self + 0x48);
+    cUITemplate_MAP_onGainFocus((char*)&self->mMap);
 }
 #endif
 
@@ -105,7 +105,7 @@ extern "C" void cUITemplate_MAP_onDestroyScreen(void* tmpl);
 extern "C" void cFEStateEventSelect_onDestroyScreen(cFEStateEventSelect* self)
 {
     cUIState_onDestroyScreen(self);
-    cUITemplate_MAP_onDestroyScreen((char*)self + 0x48);
+    cUITemplate_MAP_onDestroyScreen((char*)&self->mMap);
 }
 #endif
 
@@ -201,7 +201,7 @@ static inline void Opened1867A8(void* self, void* item)
 extern "C" void cFEStateEventSelect_onWidgetEvent(cFEStateEventSelect* self, cUIThing* obj, int msg)
 {
     if (msg == 5) {
-        if (cUITemplate_MAP_onWidgetEvent((char*)self + 0x48, obj, 5) == 1) {
+        if (cUITemplate_MAP_onWidgetEvent((char*)&self->mMap, obj, 5) == 1) {
             if (IsQuick1867A8()) {
                 PlayIntro1867A8(self);
                 cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
@@ -211,7 +211,7 @@ extern "C" void cFEStateEventSelect_onWidgetEvent(cFEStateEventSelect* self, cUI
             }
         }
     } else if (msg == 6) {
-        if (cUITemplate_MAP_onWidgetEvent((char*)self + 0x48, obj, 6) == 1) {
+        if (cUITemplate_MAP_onWidgetEvent((char*)&self->mMap, obj, 6) == 1) {
             if (IsQuick1867A8()) {
                 PlayIntro1867A8(self);
                 cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
@@ -221,7 +221,7 @@ extern "C" void cFEStateEventSelect_onWidgetEvent(cFEStateEventSelect* self, cUI
             }
         }
     } else {
-        cUITemplate_MAP_onWidgetEvent((char*)self + 0x48, obj, msg);
+        cUITemplate_MAP_onWidgetEvent((char*)&self->mMap, obj, msg);
     }
 }
 #endif
@@ -242,7 +242,7 @@ extern "C" int cUITemplate_MAP_onWidgetMenu(void* self, int a1, int a2);
  */
 extern "C" int cFEStateEventSelect_onWidgetMenu(cFEStateEventSelect* self, int menu, int event)
 {
-    if (cUITemplate_MAP_onWidgetMenu((char*)self + 0x48, menu, event) != 0) {
+    if (cUITemplate_MAP_onWidgetMenu((char*)&self->mMap, menu, event) != 0) {
         return 257;
     }
     return 0;
@@ -259,7 +259,7 @@ INCLUDE_ASM("fe/festateload", cFEStateEventSelect_onInputBegin);
  */
 extern "C" void cFEStateEventSelect_onInputBegin(cFEStateEventSelect* self)
 {
-    cUITemplate_MAP_onInputBegin((char*)self + 0x48);
+    cUITemplate_MAP_onInputBegin((char*)&self->mMap);
 }
 #endif
 
@@ -277,7 +277,7 @@ void cUIState_onInputAlways_2(void* self, int a1) __asm__("cUIState_onInputAlway
  */
 extern "C" void cFEStateEventSelect_onInputAlways(cFEStateEventSelect* self, int pInput)
 {
-    cUITemplate_MAP_onInputAlways((char*)self + 0x48, pInput);
+    cUITemplate_MAP_onInputAlways((char*)&self->mMap, pInput);
     cUIState_onInputAlways_2(self, pInput);
 }
 #endif
@@ -296,7 +296,7 @@ extern "C" void cUITemplate_MAP_onUpdate(void* tmpl);
 extern "C" void cFEStateEventSelect_onUpdate(cFEStateEventSelect* self)
 {
     cUIState_onUpdate(self);
-    cUITemplate_MAP_onUpdate((char*)self + 0x48);
+    cUITemplate_MAP_onUpdate((char*)&self->mMap);
 }
 #endif
 

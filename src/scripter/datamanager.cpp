@@ -385,7 +385,7 @@ void cCircularBuffer_Reset(void* self);
  */
 extern "C" void* tNISList_tNISList(tNISList* self)
 {
-    void* list = (char*)self + 0xC;
+    void* list = (char*)&self->mList;
     cCircularBuffer_cCircularBuffer(list);
     cCircularBuffer_Reset(list);
     self->mNextPendingScriptIndex = -1;
@@ -683,13 +683,13 @@ int cCircularBuffer_GetNumEntries_count(void* list) __asm__("cCircularBuffer_Get
 extern "C" int tNISList_TransferFromNISList(tNISList* self, void* other)
 {
     int cmd[8];
-    int n = cCircularBuffer_GetNumEntries_count((char*)self + 0xC);
+    int n = cCircularBuffer_GetNumEntries_count((char*)&self->mList);
     if (*(int*)((char*)other + 0xA4) == 3) {
         return 0;
     }
     if (cCircularBuffer_GetNumEntries_count((char*)other + 0xC) != 0) {
         while (cCircularBuffer_RemoveFromHead((char*)other + 0xC, cmd) != 0) {
-            cCircularBuffer_AddToTail((char*)self + 0xC, cmd);
+            cCircularBuffer_AddToTail((char*)&self->mList, cmd);
         }
         tNISList_Reset((tNISList*)other, 1);
         if (self->mState != 0 && self->mNextPendingScriptIndex < 0) {
@@ -1149,7 +1149,7 @@ int cCircularBuffer_GetNumEntries_count(void* list) __asm__("cCircularBuffer_Get
  */
 extern "C" int tNISList_GetScriptCategory(tNISList* self, int i)
 {
-    void* list = (char*)self + 0xC;
+    void* list = (char*)&self->mList;
     if (i < cCircularBuffer_GetNumEntries_count(list) && *(int*)cCircularBuffer_operatorIndex(list, i) < 0x1C) {
         return *(int*)cCircularBuffer_operatorIndex(list, i);
     }
@@ -1174,7 +1174,7 @@ int cCircularBuffer_GetNumEntries_count(void* list) __asm__("cCircularBuffer_Get
  */
 extern "C" int tNISList_GetVideoCategory(tNISList* self, int i)
 {
-    void* list = (char*)self + 0xC;
+    void* list = (char*)&self->mList;
     if (i < cCircularBuffer_GetNumEntries_count(list) && *(int*)cCircularBuffer_operatorIndex(list, i) >= 29) {
         return *(int*)cCircularBuffer_operatorIndex(list, i);
     }
@@ -1200,7 +1200,7 @@ int cCircularBuffer_GetNumEntries_count(void* list) __asm__("cCircularBuffer_Get
  */
 extern "C" int tNISList_GetScriptIndex(tNISList* self, int i)
 {
-    void* list = (char*)self + 0xC;
+    void* list = (char*)&self->mList;
     if (i >= cCircularBuffer_GetNumEntries_count(list)) {
         return -1;
     }
@@ -1236,7 +1236,7 @@ int cCircularBuffer_GetNumEntries_count(void* list) __asm__("cCircularBuffer_Get
  */
 extern "C" void* tNISList_GetScriptPlayer(tNISList* self, int i)
 {
-    void* list = (char*)self + 0xC;
+    void* list = (char*)&self->mList;
     if (i < cCircularBuffer_GetNumEntries_count(list)) {
         void* item = cCircularBuffer_operatorIndex(list, i);
         if (tNISList_IsVideo(self, item) == 0) {
@@ -1294,7 +1294,7 @@ extern "C" int tNISList_GetPlayState(tNISList* self)
     if (self->mState != 3) return 0;
     if (self->mNumPause != 0) return 3;
     if (self->mDoSkip == 0) {
-        void* list = (char*)self + 0xC;
+        void* list = (char*)&self->mList;
         if (*(int*)((char*)cCircularBuffer_operatorIndex(list, 0) + 0x8) & 8) {
             if (self->mInScriptTransition == 0) return 2;
             if (self->mTransitionWaitFrames - 1 > 0) return 2;
@@ -1513,7 +1513,7 @@ extern "C" int tNISList_IsSkipAllowed(tNISList* self)
         return 0;
     }
     int allowed = 0;
-    void* headEntry = cCircularBuffer_operatorIndex((char*)self + 0xC, 0);
+    void* headEntry = cCircularBuffer_operatorIndex((char*)&self->mList, 0);
     if (*(int*)((char*)headEntry + 0x8) & 1) {
         allowed = self->mPausedOnNextScriptLoading == 0;
     }
@@ -1537,7 +1537,7 @@ extern "C" int tNISList_IsPauseMenuAllowed(tNISList* self)
     if (self->mState != 3) {
         return 1;
     }
-    void* entry = cCircularBuffer_operatorIndex((char*)self + 0xC, 0);
+    void* entry = cCircularBuffer_operatorIndex((char*)&self->mList, 0);
     return (*(int*)((char*)entry + 0x8) >> 2) & 1;
 }
 #endif
@@ -1559,7 +1559,7 @@ extern "C" int tNISList_IsPendingScriptReady(tNISList* self)
         return 0;
     }
     int idx = self->mNextPendingScriptIndex;
-    void* list = (char*)self + 0xC;
+    void* list = (char*)&self->mList;
     if (idx < 0) {
         return 1;
     }
@@ -1608,7 +1608,7 @@ extern "C" int tNISList_IsPlayingScriptOwner(tNISList* self, cScriptPlayerMain* 
     if (self->mState != 3) {
         return 0;
     }
-    void* headEntry = cCircularBuffer_operatorIndex((char*)self + 0xC, 0);
+    void* headEntry = cCircularBuffer_operatorIndex((char*)&self->mList, 0);
     if (tNISList_IsVideo(self, headEntry) != 0) {
         return 0;
     }
@@ -1946,7 +1946,7 @@ extern "C" void tNISList_WaitOnPendingNextScript(tNISList* self)
 {
     int idx = self->mNextPendingScriptIndex;
     if (idx >= 0) {
-        void* list = (char*)self + 0xC;
+        void* list = (char*)&self->mList;
         char* nextEntry = (char*)cCircularBuffer_operatorIndex(list, idx);
         int ok;
         if (tNISList_IsVideo(self, nextEntry) == 0) {
@@ -1977,7 +1977,7 @@ extern "C" int cBXScriptEngine_GetRequestState(void* self, int a1);
 extern "C" void tNISList_CheckOnLoading(tNISList* self)
 {
     if (self->mState == 1) {
-        char* headEntry = (char*)cCircularBuffer_operatorIndex((char*)self + 0xC, 0);
+        char* headEntry = (char*)cCircularBuffer_operatorIndex((char*)&self->mList, 0);
         if (tNISList_IsVideo(self, headEntry) == 0) {
             int requestState = cBXScriptEngine_GetRequestState(*(void**)self, *(int*)(headEntry + 0xC));
             if (requestState == 2) {

@@ -168,7 +168,7 @@ struct sSeqNode313BA8
 extern "C" void cAnimSequence_removeEndTrigger(cAnimSequence* self, int key)
 {
     sSeqNode313BA8** pp;
-    for (pp = (sSeqNode313BA8**)((char*)self + 0xAC); *pp != 0; pp = &(*pp)->next)
+    for (pp = (sSeqNode313BA8**)&self->Triggers; *pp != 0; pp = &(*pp)->next)
     {
         if ((*pp)->key == key)
         {

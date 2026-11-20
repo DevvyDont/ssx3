@@ -112,7 +112,7 @@ extern "C" void cUIEngine__cUIEngine(cUIEngine* self, int flags)
     }
     delete ((cUIEngOwnB*)fields->mpInput);
     delete ((cUIEngOwnC*)fields->mpSound);
-    cUITextureBank__cUITextureBank((cUITextureBank*)((char*)&self->mTextureBank), 2);
+    cUITextureBank__cUITextureBank((cUITextureBank*)&self->mTextureBank, 2);
     cUIStateStack__cUIStateStack((char*)&self->mStateStack, 2);
     if (flags & 1) {
         operator_delete((int*)self);
@@ -147,7 +147,7 @@ extern "C" int cUIEngine_loadFile(cUIEngine* self, int id)
     // PORT: the font setter stores the data pointer in an int.
     cUIAnimationBank_setData((char*)&self->mAnimBank, (int)(file + *(int*)(file + 0x8)));
     file = self->mpData;
-    cUITextureBank_setData((cUITextureBank*)((char*)&self->mTextureBank), id, file + *(int*)(file + 0x10));
+    cUITextureBank_setData((cUITextureBank*)&self->mTextureBank, id, file + *(int*)(file + 0x10));
     return 1;
 }
 #endif
@@ -814,7 +814,7 @@ extern "C" void cUIGroup_setFocus(cUIGroup* self, int on)
     focusOp.arg = on;
     cList_traverseFlat_f((char*)&self->mList, &focusOp);
     focusOp.vt = cListOperator_vtbl;
-    ((cUIGroup_setFocus_sFlags*)((char*)&self->mAttr))->on = (on != 0);
+    ((cUIGroup_setFocus_sFlags*)&self->mAttr)->on = (on != 0);
 }
 #endif
 
@@ -845,7 +845,7 @@ extern "C" void* cUIGroup_getObjectByHashName(cUIGroup* self, int id)
     if (cUIThing_getObjectByHashName(self, id) != 0) {
         return ((void*)self);
     }
-    void* n = cList_first((cList*)((char*)&self->mList));
+    void* n = cList_first((cList*)&self->mList);
     if (n != 0) {
         do {
             cUIGroup_getObjectByHashName_sVEntry* vtEntry = &(*(cUIGroup_getObjectByHashName_sVEntry**)((char*)n + 8))[14];
@@ -881,7 +881,7 @@ struct cUIGroup_updateLocale_sVEntry {
  */
 extern "C" void cUIGroup_updateLocale(cUIGroup* self)
 {
-    void* n = cList_first((cList*)((char*)&self->mList));
+    void* n = cList_first((cList*)&self->mList);
     if (n != 0) {
         do {
             cUIGroup_updateLocale_sVEntry* vt = *(cUIGroup_updateLocale_sVEntry**)((char*)n + 8);
@@ -943,7 +943,7 @@ struct cUIGroup_render3D_sVEntry {
  */
 extern "C" void cUIGroup_render3D(cUIGroup* self, int pRenCon)
 {
-    void* n = cList_first((cList*)((char*)&self->mList));
+    void* n = cList_first((cList*)&self->mList);
     if (n != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
             cUIGroup_render3D_sVEntry* vt = *(cUIGroup_render3D_sVEntry**)((char*)n + 8);
@@ -971,7 +971,7 @@ struct cUIGroup_render2D_sVEntry {
  */
 extern "C" void cUIGroup_render2D(cUIGroup* self, float x, float y)
 {
-    void* n = cList_first((cList*)((char*)&self->mList));
+    void* n = cList_first((cList*)&self->mList);
     if (n != 0) {
         do {
             if ((*(int*)((char*)n + 0x14) >> 6) & 1) {
@@ -1008,7 +1008,7 @@ struct cUIGroup_update_sVEntry {
  */
 extern "C" void cUIGroup_update(cUIGroup* self, unsigned short ev)
 {
-    void* n = cList_first((cList*)((char*)&self->mList));
+    void* n = cList_first((cList*)&self->mList);
     if (n != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
             cUIGroup_update_sVEntry* vt = *(cUIGroup_update_sVEntry**)((char*)n + 8);

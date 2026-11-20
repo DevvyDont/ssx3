@@ -17,6 +17,7 @@
 // words, and has 0x10 more bytes of state objects. Unnamed fields are unk_XXX; rename only with evidence.
 
 #include "layout.h"
+#include "main/gamestate.h"
 
 struct cAI;
 struct cWorld;
@@ -98,8 +99,23 @@ struct cGame {
     cMenuSys* MenuSys;                           // 0x0A4 [P] getMenuSys; [R] "MenuSys"
     cBigFile* mpTrackBigFile;                    // 0x0A8 [R] "BigFile"
     int mUpdateTick;                             // 0x0AC [O]; zeroed by cGame_load
-    char mStates[0x14C];                         // 0x0B0 [R] the cGF*State game-flow objects (constructed in place by
-                                                 //       cGame_cGame; On Tour: mEventStartState ... mReplayStartState)
+    cGFEventStartState mEventStartState;         // 0x0B0 [O] game-flow states in On Tour's order; [R] retail offsets
+                                                 //       from cGame_cGame, which builds each in place
+    cGFPreEventState mPreEventState;             // 0x0D0 [O]
+    cGFGateState mGateState;                     // 0x0E0 [O]
+    cGFRidingState mRidingState;                 // 0x0F0 [O]
+    cGFFinishlineState mFinishlineState;         // 0x100 [O]
+    cGFEndState mEndState;                       // 0x118 [O]
+    cGFPostEventState mPostEventState;           // 0x128 [O]
+    cGFEndWaitState mEndWaitState;               // 0x138 [O]
+    cGFTransportWaitState mTransportWaitState;   // 0x148 [O]
+    cGFTrackStartState mTrackStartState;         // 0x158 [O]
+    cGFSectionLoadState mSectionLoadState;       // 0x178 [O]
+    cGFPodiumState mPodiumState;                 // 0x18C [O]
+    cGFNextHeatState mNextHeatState;             // 0x19C [O]
+    cGFUserSelectState mUserSelectState;         // 0x1B8 [O]
+    cGFSessionTeleportState mSessionTeleportState;// 0x1DC [O]
+    cGFReplayStartState mReplayStartState;       // 0x1EC [O]
     cGameState* mPrevState;                      // 0x1FC [O]
     cGameState* mCurrentState;                   // 0x200 [P] getCurrentStateInstance
     cGameState* mPreloadingState;                // 0x204 [O]
@@ -121,7 +137,22 @@ CHECK_OFFSET(cGame, TransitionMan, 0x5C);
 CHECK_OFFSET(cGame, SplashManager, 0x68);
 CHECK_OFFSET(cGame, ViewMan, 0x84);
 CHECK_OFFSET(cGame, MenuSys, 0xA4);
-CHECK_OFFSET(cGame, mStates, 0xB0);
+CHECK_OFFSET(cGame, mEventStartState, 0xB0);
+CHECK_OFFSET(cGame, mPreEventState, 0xD0);
+CHECK_OFFSET(cGame, mGateState, 0xE0);
+CHECK_OFFSET(cGame, mRidingState, 0xF0);
+CHECK_OFFSET(cGame, mFinishlineState, 0x100);
+CHECK_OFFSET(cGame, mEndState, 0x118);
+CHECK_OFFSET(cGame, mPostEventState, 0x128);
+CHECK_OFFSET(cGame, mEndWaitState, 0x138);
+CHECK_OFFSET(cGame, mTransportWaitState, 0x148);
+CHECK_OFFSET(cGame, mTrackStartState, 0x158);
+CHECK_OFFSET(cGame, mSectionLoadState, 0x178);
+CHECK_OFFSET(cGame, mPodiumState, 0x18C);
+CHECK_OFFSET(cGame, mNextHeatState, 0x19C);
+CHECK_OFFSET(cGame, mUserSelectState, 0x1B8);
+CHECK_OFFSET(cGame, mSessionTeleportState, 0x1DC);
+CHECK_OFFSET(cGame, mReplayStartState, 0x1EC);
 CHECK_OFFSET(cGame, mPrevState, 0x1FC);
 CHECK_OFFSET(cGame, mCurrentStateID, 0x214);
 CHECK_OFFSET(cGame, PauseOwner, 0x228);

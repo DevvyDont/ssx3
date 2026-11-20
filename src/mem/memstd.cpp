@@ -1879,7 +1879,7 @@ extern "C" void cMoviePlayer_SetSSXREALDefaults();
 extern "C" void* cMoviePlayer_cMoviePlayer(cMoviePlayer* self)
 {
     cMoviePlayer_SetSSXREALDefaults();
-    tMoviePlayOptions_SetDefaults((cMoviePlayer*)((char*)self + 0x14));
+    tMoviePlayOptions_SetDefaults((cMoviePlayer*)&self->m_PlayOp);
     self->m_fSpeed = self->m_PlayOp.fPlaySpeed;
     self->m_pPlayer = 0;
     self->m_pVd = 0;

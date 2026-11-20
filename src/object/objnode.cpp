@@ -100,7 +100,7 @@ extern "C" void* cTypeObjNode_cTypeObjNode(cTypeObjNode* self, void* bucket, voi
     cObjNode_cObjNode_3((cObjNode*)self, bucket, stream);
     self->mVtbl = cTypeObjNode_vtbl;
     sObjNodeVEntry4788* vt = *(sObjNodeVEntry4788**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x10, 4);
+    vt[2].fn((char*)stream + vt[2].delta, (char*)&self->ObjNodeType, 4);
     D_0044AFF0[self->ObjNodeType]++;
     return ((void*)self);
 }
@@ -191,7 +191,7 @@ extern "C" void* cSortObjNode_cSortObjNode(cSortObjNode* self, void* bucket, voi
     cTypeObjNode_cTypeObjNode((cTypeObjNode*)self, bucket, stream);
     self->mVtbl = cSortObjNode_vtbl;
     sVEntryCSortObjNode* vt = *(sVEntryCSortObjNode**)stream;
-    vt[2].fn((char*)stream + vt[2].delta, (char*)self + 0x14, 4);
+    vt[2].fn((char*)stream + vt[2].delta, (char*)&self->SortIndex, 4);
     return ((void*)self);
 }
 #endif
@@ -232,7 +232,7 @@ public:
  */
 extern "C" void cTypeObjNode_writeToReplayFrame(cTypeObjNode* self, cTypeObjNode_writeToReplayFrame_cObj* obj)
 {
-    obj->write((char*)self + 0x10, 4);
+    obj->write((char*)&self->ObjNodeType, 4);
 }
 #endif
 
@@ -247,7 +247,7 @@ INCLUDE_ASM("object/objnode", cSortObjNode_writeToReplayFrame);
 extern "C" void cSortObjNode_writeToReplayFrame(cSortObjNode* self, cTypeObjNode_writeToReplayFrame_cObj* obj)
 {
     cTypeObjNode_writeToReplayFrame((cTypeObjNode*)self, obj);
-    obj->write((char*)self + 0x14, 4);
+    obj->write((char*)&self->SortIndex, 4);
 }
 #endif
 

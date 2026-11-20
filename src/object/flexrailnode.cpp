@@ -45,7 +45,7 @@ extern "C" void cFlexRailNode_addSpaceHash(cFlexRailNode* self)
     sHashCell_8B90* cell = (sHashCell_8B90*)cObjectInterface_getNash();
     sHashNode_8B90* node = (sHashNode_8B90*)self->Node;
     sHashKey_8B90 key;
-    nash_Nash_findkey(&key, (char*)self + 0x30);
+    nash_Nash_findkey(&key, (char*)&self->BoundBox);
     sHashCell_8B90* cellX = key.x < 0 ? cell + 4 : cell;
     sHashCell_8B90* cellXY = key.y < 0 ? cellX + 2 : cellX;
     sHashCell_8B90* cellXYZ = key.z < 0 ? cellXY + 1 : cellXY;
@@ -97,7 +97,7 @@ extern "C" void cFlexRailNode_remSpaceHash(cFlexRailNode* self)
     sHashNode_8B90* node = (sHashNode_8B90*)self->Node;
     (*(int*)((char*)cell + 0xA0))++;
     sHashKey_8B90 key;
-    nash_Nash_findkey(&key, (char*)self + 0x30);
+    nash_Nash_findkey(&key, (char*)&self->BoundBox);
     sHashCellR_8C48* cellX = key.x < 0 ? cell + 4 : cell;
     sHashCellR_8C48* cellXY = key.y < 0 ? cellX + 2 : cellX;
     sHashCellR_8C48* cellXYZ = key.z < 0 ? cellXY + 1 : cellXY;
@@ -785,7 +785,7 @@ extern "C" void cFloatRailNode_writeToReplayFrame(cFloatRailNode* self, void* st
 {
     cFlexRailNode_writeToReplayFrame(self, stream);
     sFlexRailVEntry9AD0* writeFn = &(*(sFlexRailVEntry9AD0**)stream)[1];
-    writeFn->fn((char*)stream + writeFn->delta, (char*)self + 0x60, 0xC);
+    writeFn->fn((char*)stream + writeFn->delta, (char*)&self->LSpring, 0xC);
     writeFn = &(*(sFlexRailVEntry9AD0**)stream)[1];
     writeFn->fn((char*)stream + writeFn->delta, self->Nodes, self->NumNodes * 80);
 }
@@ -1659,7 +1659,7 @@ extern "C" void cSpringRailNode_writeToReplayFrame(cSpringRailNode* self, void* 
 {
     cFlexRailNode_writeToReplayFrame(self, stream);
     sFlexRailVEntryAC10* writeFn = &(*(sFlexRailVEntryAC10**)stream)[1];
-    writeFn->fn((char*)stream + writeFn->delta, (char*)self + 0x60, 0xC);
+    writeFn->fn((char*)stream + writeFn->delta, (char*)&self->ASpring, 0xC);
     writeFn = &(*(sFlexRailVEntryAC10**)stream)[1];
     writeFn->fn((char*)stream + writeFn->delta, self->Nodes, self->NumNodes * 0x60);
 }

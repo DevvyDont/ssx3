@@ -1183,7 +1183,7 @@ extern "C" void cFEStatePeakRoom_onWidgetEvent(cFEStatePeakRoom* self, cUIThing*
     case 6: {
         int id = (self->mPeakNum << 16) | item->mMiscData;
         for (int i = 0; i < 4; i++) {
-            sItem_001D3C80* listItem = ((sItem_001D3C80**)((char*)&self->mpTrophyIcons))[i];
+            sItem_001D3C80* listItem = ((sItem_001D3C80**)&self->mpTrophyIcons)[i];
             if (listItem != 0) {
                 listItem->vt[9].fn((char*)listItem + listItem->vt[9].delta, 0);
             }

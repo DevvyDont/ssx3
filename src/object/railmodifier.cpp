@@ -417,7 +417,7 @@ extern "C" void cInstanceNode_buildMeshMat(void* model, int bone, sRmMat44C5A0* 
 extern "C" void cRailModifier_getInvMat(cRailModifier* self, sRmMat44C5A0* mat)
 {
     cInstanceNode_buildMeshMat(self->Instance, self->Mesh, mat);
-    sRmMat44C5A0* src = (sRmMat44C5A0*)((char*)&self->XForm);
+    sRmMat44C5A0* src = (sRmMat44C5A0*)&self->XForm;
     sRmMat44C5A0 copy;
     sRmMat44C5A0 product;
     vu0MulMatC5A0(&product, mat, src);

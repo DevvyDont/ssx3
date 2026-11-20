@@ -2713,7 +2713,7 @@ extern "C" void* cFEStateNetHelpPopup_cFEStateNetHelpPopup(cFEStateNetHelpPopup*
 {
     cUIState_cUIState1(self, engine, owner);
     self->mVtbl = (void**)cFEStateNetHelpPopup_vtbl;
-    new ((char*)self + 0x54) sMcSlot9D48[7];
+    new ((char*)&self->muiScreenName) sMcSlot9D48[7];
     self->miReleasedCount = 0;
     self->mbReferEventsToParent = 0;
     self->mHashName = 76;

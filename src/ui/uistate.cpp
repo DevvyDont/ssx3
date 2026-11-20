@@ -28,7 +28,7 @@ struct sVEntry39E8B8 {
  */
 extern "C" void cUIState_hideObjSafe(cUIState* self, char* name)
 {
-    cListNode* n = cList_first((cList*)((char*)&self->mScreens));
+    cListNode* n = cList_first((cList*)&self->mScreens);
     if (n != 0) {
         do {
             void* obj = cUIScreen_getObjectByHashName(n, GetHashValue32(name));
@@ -69,7 +69,7 @@ struct sVEntry39E948 {
  */
 extern "C" void cUIState_showObjSafe(cUIState* self, char* name)
 {
-    cListNode* n = cList_first((cList*)((char*)&self->mScreens));
+    cListNode* n = cList_first((cList*)&self->mScreens);
     if (n != 0) {
         do {
             void* obj = cUIScreen_getObjectByHashName(n, GetHashValue32(name));
@@ -248,7 +248,7 @@ extern "C" void cUIStateStack_render2D(cUIStateStack* self)
             n = *(char**)(n + 4);
         } while (!cListNode_isSentinel((cListNode*)n));
     }
-    n = (char*)cList_first((cList*)((char*)&self->mExplicitStack));
+    n = (char*)cList_first((cList*)&self->mExplicitStack);
     if (n != 0) {
         do {
             if ((*(int*)(n + 0x1C) >> 3) & 1) {
@@ -469,7 +469,7 @@ extern "C" void cUIStateStack_update(cUIStateStack* self)
     if (cUIStateStack_updateLoop(self) != 0) {
         cUIStateStack_updateLoop(self);
     }
-    cListNode* n = cList_first((cList*)((char*)&self->mExplicitStack));
+    cListNode* n = cList_first((cList*)&self->mExplicitStack);
     if (n != 0) {
         do {
             if ((*(int*)((char*)n + 0x1C) >> 5) & 1) {

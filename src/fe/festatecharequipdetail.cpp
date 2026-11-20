@@ -2320,8 +2320,8 @@ extern "C" void func_0019B618(cFEStateCharEquip* self, int reset, int select)
 {
     if (self->mpMenu == 0)
         return;
-    cUIObj_B618** nameWidgets = (cUIObj_B618**)((char*)self + 0x8C);
-    cUIObj_B618** checkWidgets = (cUIObj_B618**)((char*)self + 0xA4);
+    cUIObj_B618** nameWidgets = (cUIObj_B618**)&self->mpBoltNameWidgets;
+    cUIObj_B618** checkWidgets = (cUIObj_B618**)&self->mpBoltCheckWidgets;
     for (int i = 0; i < 6; i++) {
         nameWidgets[i]->setVisible(0);
         checkWidgets[i]->setVisible(0);
@@ -4869,7 +4869,7 @@ void operator_delete(int* p);
  */
 extern "C" void cFERider__cFERider(cFERider* self, int flags)
 {
-    sSlot0019E498* slot = (sSlot0019E498*)((char*)self + 0x1C);
+    sSlot0019E498* slot = (sSlot0019E498*)&self->mTextureRefs;
     cFERider_purge(self);
     int i;
     int none = -1;

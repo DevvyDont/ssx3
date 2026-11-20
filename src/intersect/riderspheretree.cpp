@@ -2097,7 +2097,7 @@ extern "C" int SphereTree_IsSphereCollision(SphereTree* self, t4Vector* spherePo
     if (*(int*)((char*)tree + 0x8) != 0) {
         *(int*)((char*)self->treeInfo + 0x28) = SphereTree_AllocBuf(tree);
     }
-    return SphereTree_isSphereCollision(self, spherePos, sphereRadius, (t4Vector*)((char*)self + 0x80), 0, 0, outPush, outContact);
+    return SphereTree_isSphereCollision(self, spherePos, sphereRadius, (t4Vector*)&self->transCenter, 0, 0, outPush, outContact);
 }
 #endif
 
@@ -2124,7 +2124,7 @@ extern "C" int SphereTree_IsBoxCollision(SphereTree* self, t3Vector* boxMin, t3V
     if (*(int*)((char*)tree + 0x8) != 0) {
         *(int*)((char*)self->treeInfo + 0x28) = SphereTree_AllocBuf(tree);
     }
-    return SphereTree_isBoxCollision(self, boxMin, boxMax, (t4Vector*)((char*)self + 0x80), 0, 0, outPos, outNormal);
+    return SphereTree_isBoxCollision(self, boxMin, boxMax, (t4Vector*)&self->transCenter, 0, 0, outPos, outNormal);
 }
 #endif
 
@@ -2168,7 +2168,7 @@ extern "C" int SphereTree_IsPlaneCollision(SphereTree* self, sVecArg_C9B8* plane
     }
     SphereTree_populateSortAxis_v(self, zeroW_C9B8(*plane));
     self->worstCase = 0.0f;
-    SphereTree_checkPlaneCollision(self, plane, (t4Vector*)((char*)self + 0x80), 0, 0, outPush, outContact);
+    SphereTree_checkPlaneCollision(self, plane, (t4Vector*)&self->transCenter, 0, 0, outPush, outContact);
     if (self->worstCase < 0.0f) {
         return 1;
     }
@@ -2205,7 +2205,7 @@ extern "C" int SphereTree_IsTriCollision(SphereTree* self, t4Vector* point1, t4V
     }
     SphereTree_populateSortAxis(self, (t4Vector*)uNorm);
     self->worstCase = 0.0f;
-    SphereTree_checkTriCollision(self, point1, point2, point3, uNorm, (char*)self + 0x80, 0, 0, overlap, loc);
+    SphereTree_checkTriCollision(self, point1, point2, point3, uNorm, (char*)&self->transCenter, 0, 0, overlap, loc);
     if (self->worstCase < 0.0f) {
         return 1;
     }
@@ -2240,7 +2240,7 @@ extern "C" int SphereTree_IsTreeCollision(SphereTree* self, void* other, t4Vecto
     if (*(int*)((char*)tree + 0x8) != 0) {
         *(int*)((char*)*(void**)((char*)other + 0x98) + 0x28) = SphereTree_AllocBuf(tree);
     }
-    return SphereTree_isTreeCollision(self, other, (t4Vector*)((char*)self + 0x80), 0, 0, outPush, outContact);
+    return SphereTree_isTreeCollision(self, other, (t4Vector*)&self->transCenter, 0, 0, outPush, outContact);
 }
 #endif
 
@@ -4708,8 +4708,8 @@ extern "C" int cWorldSphere_IsInBoxTransformed(cWorldSphere* self, sSphereVec4* 
     rv.y = rad;
     rv.z = rad;
     rv.w = 0;
-    sSphereVec4 hi = sphereCapsuleAdd((sSphereVec4*)((char*)self + 0x60), &rv);
-    sSphereVec4 lo = sphereCapsuleSub((sSphereVec4*)((char*)self + 0x60), &rv);
+    sSphereVec4 hi = sphereCapsuleAdd((sSphereVec4*)&self->cen, &rv);
+    sSphereVec4 lo = sphereCapsuleSub((sSphereVec4*)&self->cen, &rv);
     if ((mn->x > hi.x && lo.x < mn->x) || (mx->x < hi.x && mx->x < lo.x) ||
         (mn->y > hi.y && lo.y < mn->y) || (mx->y < hi.y && mx->y < lo.y) ||
         (mn->z > hi.z && lo.z < mn->z) || (mx->z < hi.z && mx->z < lo.z)) {
@@ -4757,7 +4757,7 @@ static inline sSphereVec4 sphereMtxMulVec(sSphereVec4* m, sSphereVec4* v)
  */
 extern "C" void cWorldSphere_Transform(cWorldSphere* self, sSphereVec4* mat, float scale)
 {
-    sSphereVec4 newCenter = sphereMtxMulVec(mat, (sSphereVec4*)((char*)self + 0x80));
+    sSphereVec4 newCenter = sphereMtxMulVec(mat, (sSphereVec4*)&self->origCen);
     self->isTransformed = 1;
     *(sSphereVec4*)&self->cen = newCenter;
     self->rad = scale * self->origRad;
@@ -4840,7 +4840,7 @@ extern "C" int SphereTree_IsSphereCollision(SphereTree* self, t4Vector* a1, floa
  */
 extern "C" int cWorldSphere_IsSphTreeInt(cWorldSphere* self, void* tree, sSphereHit_32FDB0* hit)
 {
-    if (SphereTree_IsSphereCollision((SphereTree*)tree, (t4Vector*)((char*)self + 0x60), self->rad, (t4Vector*)(&hit->dir), (t4Vector*)hit) != 0) {
+    if (SphereTree_IsSphereCollision((SphereTree*)tree, (t4Vector*)&self->cen, self->rad, (t4Vector*)(&hit->dir), (t4Vector*)hit) != 0) {
         float len = sphereLength_32FDB0(hit->dir);
         hit->len = len;
         sphereDivEq_32FDB0(hit->dir, len);
@@ -4865,7 +4865,7 @@ extern "C" int gIsBoxSphereInt(void* a, void* b, void* center, void* box, void* 
  */
 extern "C" int cWorldSphere_IsBoxInt(cWorldSphere* self, void* bMin, void* bMax, void* box)
 {
-    return gIsBoxSphereInt(bMin, bMax, (char*)self + 0x60, box, (char*)box + 0x10, (char*)box + 0x40,
+    return gIsBoxSphereInt(bMin, bMax, (char*)&self->cen, box, (char*)box + 0x10, (char*)box + 0x40,
                          self->rad) != 0;
 }
 #endif
@@ -5166,7 +5166,7 @@ extern "C" int cWorldSphere_edgeSphereCollision(cWorldSphere* self, sSphereVec4*
     tri[1] = *vert1;
     tri[2] = *vert2;
     for (int i = 0; i < 3; i++) {
-        pt = closestPointOnLine_v(&tri[i], &tri[(i + 1) % 3], (sSphereVec4*)((char*)self + 0x60));
+        pt = closestPointOnLine_v(&tri[i], &tri[(i + 1) % 3], (sSphereVec4*)&self->cen);
         float dist = vu0Length_30250(vu0Sub_30250(*(sSphereVec4*)&self->cen, pt));
         if (dist < self->rad) {
             return 1;

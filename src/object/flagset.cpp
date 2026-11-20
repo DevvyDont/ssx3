@@ -1313,9 +1313,9 @@ extern "C" void* cFenceNode_cFenceNode(cFenceNode* self, void* bucket, void* str
     cInstanceNode_cInstanceNode(self, bucket, stream);
     self->FenceData.InstId = 0xFFFFFFFF;
     self->mVtbl = cFenceNode_vtbl;
-    new ((char*)self + 0x40) sFlagElem_CBE8[16];
+    new ((char*)&self->GridMesh) sFlagElem_CBE8[16];
     sFlagSetVEntry_CBE8* vtEntry = &(*(sFlagSetVEntry_CBE8**)stream)[2];
-    vtEntry->fn((char*)stream + vtEntry->delta, (char*)self + 0x1C, 36);
+    vtEntry->fn((char*)stream + vtEntry->delta, (char*)&self->FenceData, 36);
     cFenceNode_setupFence(self);
     return ((void*)self);
 }
@@ -1907,7 +1907,7 @@ extern "C" void cFenceNode_writeToReplayFrame(cFenceNode* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     sSerVEntry_0034D960* vt = *(sSerVEntry_0034D960**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x1C, 36);
+    vt[1].fn((char*)stream + vt[1].delta, (char*)&self->FenceData, 36);
 }
 #endif
 

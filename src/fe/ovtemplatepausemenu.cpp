@@ -174,7 +174,7 @@ extern "C" int cOVTemplate_PauseMenu_onGainTransition(cOVTemplate_PauseMenu* sel
         }
         for (int i = 0; i < 8; i++) {
             if (i < self->mPauseMenuNumOptions) {
-                sprintf(buf, str_pct_s_group, D_00441C30[((int*)((char*)&self->mPauseMenuOptions))[i]]);
+                sprintf(buf, str_pct_s_group, D_00441C30[((int*)&self->mPauseMenuOptions)[i]]);
                 char* obj = (char*)cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(buf));
                 if (obj != 0) {
                     sVEnt_001F8448* vt = *(sVEnt_001F8448**)(obj + 8);
@@ -223,7 +223,7 @@ extern "C" void cOVTemplate_PauseMenu_onGainFocus(cOVTemplate_PauseMenu* self, i
 {
     char buf[32];
     char* obj;
-    int* sel = (int*)((char*)&self->mPauseMenuOptions);
+    int* sel = (int*)&self->mPauseMenuOptions;
     char* flags = (char*)&self->mPauseOptionUnlocked;
     int i = 0;
     while (i < 8 && (sprintf(buf, D_004A2138, i),
@@ -667,7 +667,7 @@ extern "C" void cOVState_PAUSE_COMPETE_onCreateScreen(cOVTemplate_PauseMenu* sel
     int i;
     self->mPauseMenuNumOptions = 6;
     for (i = 0; i < self->mPauseMenuNumOptions; i++) {
-        ((int*)((char*)&self->mPauseMenuOptions))[i] = D_00478160[i];
+        ((int*)&self->mPauseMenuOptions)[i] = D_00478160[i];
     }
     self->mPauseMenuType = 1;
     cOVTemplate_PauseMenu_onCreateScreen(self);
@@ -694,7 +694,7 @@ extern "C" void cOVState_PAUSE_BIGCHAL_onCreateScreen(cOVTemplate_PauseMenu* sel
     int i;
     self->mPauseMenuNumOptions = 6;
     for (i = 0; i < self->mPauseMenuNumOptions; i++) {
-        ((int*)((char*)&self->mPauseMenuOptions))[i] = D_00478178[i];
+        ((int*)&self->mPauseMenuOptions)[i] = D_00478178[i];
     }
     self->mPauseMenuType = 2;
     cOVTemplate_PauseMenu_onCreateScreen(self);
@@ -721,7 +721,7 @@ extern "C" void cOVState_PAUSE_FREERIDE_onCreateScreen(cOVTemplate_PauseMenu* se
     int i;
     self->mPauseMenuNumOptions = 7;
     for (i = 0; i < self->mPauseMenuNumOptions; i++) {
-        ((int*)((char*)&self->mPauseMenuOptions))[i] = D_00478140[i];
+        ((int*)&self->mPauseMenuOptions)[i] = D_00478140[i];
     }
     self->mPauseMenuType = 3;
     cOVTemplate_PauseMenu_onCreateScreen(self);
@@ -748,7 +748,7 @@ extern "C" void cOVState_PAUSE_SPOKE_onCreateScreen(cOVTemplate_PauseMenu* self)
     int i;
     self->mPauseMenuNumOptions = 5;
     for (i = 0; i < self->mPauseMenuNumOptions; i++) {
-        ((int*)((char*)&self->mPauseMenuOptions))[i] = D_00478190[i];
+        ((int*)&self->mPauseMenuOptions)[i] = D_00478190[i];
     }
     self->mPauseMenuType = 4;
     cOVTemplate_PauseMenu_onCreateScreen(self);
@@ -775,7 +775,7 @@ extern "C" void cOVState_PAUSE_QUICKPLAY_onCreateScreen(cOVTemplate_PauseMenu* s
     int i;
     self->mPauseMenuNumOptions = 5;
     for (i = 0; i < self->mPauseMenuNumOptions; i++) {
-        ((int*)((char*)&self->mPauseMenuOptions))[i] = D_004781A8[i];
+        ((int*)&self->mPauseMenuOptions)[i] = D_004781A8[i];
     }
     self->mPauseMenuType = 5;
     cOVTemplate_PauseMenu_onCreateScreen(self);
@@ -807,7 +807,7 @@ extern "C" void cOVState_PAUSE_ONLINE_onCreateScreen(cOVTemplate_PauseMenu* self
     }
     int i;
     for (i = 0; i < self->mPauseMenuNumOptions; i++) {
-        ((int*)((char*)&self->mPauseMenuOptions))[i] = items[i];
+        ((int*)&self->mPauseMenuOptions)[i] = items[i];
     }
     self->mPauseMenuType = 6;
     cOVTemplate_PauseMenu_onCreateScreen(self);

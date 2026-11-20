@@ -196,7 +196,7 @@ extern "C" void cBankInstance_Attach(cBankInstance* self, int mainMemData, int m
     cBankInstance_UnAttach(self);
     self->mpMainMemData = (char*)mainMemData;
     self->mMainMemDataSize = mainMemSize;
-    SNDbankadd((char*)self + 0x4, mainMemData);
+    SNDbankadd((char*)&self->mBankHandle, mainMemData);
     *(int*)self = 1;
 }
 #endif
@@ -245,7 +245,7 @@ extern "C" int cBankInstance_IsBankLoaded(cBankInstance* self, void* name)
     if (status != 1) {
         return 0;
     }
-    if (func_004165A8(name, (char*)self + 0x20) != 0) {
+    if (func_004165A8(name, (char*)&self->mBankFilename) != 0) {
         status = 0;
     }
     return status;
@@ -371,7 +371,7 @@ extern "C" void cBankInstance_OnEndAsyncLoad(cBankInstance* self, int id, int fl
     } else {
         *(int*)self = 0;
     }
-    strcpy((char*)self + 0x20, (const char*)name);
+    strcpy((char*)&self->mBankFilename, (const char*)name);
 }
 #endif
 

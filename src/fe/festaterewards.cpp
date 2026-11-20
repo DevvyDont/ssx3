@@ -3269,11 +3269,11 @@ extern "C" char* strcpy(char* dst, const char* src);
  */
 extern "C" void cFEStateVideoPlayer_setVideoSourceFiles(cFEStateVideoPlayer* self, const char* videoFile, const char* audioFile)
 {
-    strcpy((char*)self + 0x48, videoFile);
+    strcpy((char*)&self->mVideoFileName, videoFile);
     if (audioFile != 0) {
-        strcpy((char*)self + 0x148, audioFile);
+        strcpy((char*)&self->mAudioFileName, audioFile);
     } else {
-        *((char*)self + 0x148) = 0;
+        *((char*)&self->mAudioFileName) = 0;
     }
 }
 #endif
@@ -3297,7 +3297,7 @@ extern "C" void cFEStateVideoPlayer_Start(cFEStateVideoPlayer* self)
 {
     func_002B3A70((char*)cAudioInterface_bxAudio() + 0x118);
     self->mOptions.bSoundOn = 1;
-    cMoviePlayer_init(self->mpMoviePlayer, (char*)self + 0x24C);
+    cMoviePlayer_init(self->mpMoviePlayer, (char*)&self->mOptions);
     cMoviePlayer_asyncPlay(self->mpMoviePlayer);
     self->mRenderOnce = 0;
     self->mUpdatedOnce = 0;

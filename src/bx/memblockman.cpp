@@ -1088,7 +1088,7 @@ extern "C" void func_0031A3C0(void* buf);
 extern "C" void cPS2ExecutionMan_prepause(cPS2ExecutionMan* self)
 {
     if ((int)self->mpLoadModule != 0) {
-        func_0031A3C0((char*)self + 0x14080);
+        func_0031A3C0((char*)&self->mVU0State);
     }
 }
 #endif
@@ -1105,7 +1105,7 @@ INCLUDE_ASM("bx/memblockman", cPS2ExecutionMan_postpause);
 extern "C" void cPS2ExecutionMan_postpause(cPS2ExecutionMan* self)
 {
     if ((int)self->mpLoadModule != 0) {
-        func_0031A308((char*)self + 0x14080);
+        func_0031A308((char*)&self->mVU0State);
     }
 }
 #endif

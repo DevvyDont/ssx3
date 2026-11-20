@@ -32,7 +32,7 @@ extern "C" void cUIStateStack_pushExplicit(cUIStateStack* self, cUIStateStack_pu
 {
     *(int*)((char*)state + 0x1C) |= 0x60;
     state->onCreateScreen();
-    cList_addToEnd((cList*)((char*)&self->mExplicitStack), (cListNode*)state);
+    cList_addToEnd((cList*)&self->mExplicitStack, (cListNode*)state);
 }
 #endif
 
@@ -558,7 +558,7 @@ static inline void cUIStateStack_destroyStates_purge(cList* list)
 extern "C" void cUIStateStack_destroyStates(cUIStateStack* self)
 {
     cUIStateStack_destroyStates_purge(((cList*)self));
-    cUIStateStack_destroyStates_purge((cList*)((char*)&self->mExplicitStack));
+    cUIStateStack_destroyStates_purge((cList*)&self->mExplicitStack);
 }
 #endif
 
@@ -585,7 +585,7 @@ extern "C" void* cUIStateStack_findState(cUIStateStack* self, int id)
             n = *(char**)(n + 4);
         }
     }
-    n = (char*)cList_first((cList*)((char*)&self->mExplicitStack));
+    n = (char*)cList_first((cList*)&self->mExplicitStack);
     if (n != 0) {
         while (!cListNode_isSentinel((cListNode*)n)) {
             if (*(int*)(n + 0xC) == id) {

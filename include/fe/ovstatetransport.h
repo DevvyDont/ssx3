@@ -24,6 +24,7 @@
 //   [O] SSX On Tour's DWARF (class cOVState_TRANSPORT / cUITemplate_MAP).
 
 #include "layout.h"
+#include "fe/uitemplatemap.h"
 
 struct cListNode;
 struct cUIEngine;
@@ -64,11 +65,10 @@ struct cOVState_TRANSPORT {
     int mOVID;                      // 0x098 [O] tOVStateEnum; [R] the ctor's id (33 from
                                     //       cOVStateManager_triggerOverlay)
     // --- cOVState_TRANSPORT
-    char mMap[0x2F4];               // 0x09C [O] cUITemplate_MAP mMap (On Tour 0x124; retail 0x2F4: its bools,
-                                    //       including the two bool[8][3][3] tables, are words); [R] the ctors run
-                                    //       cUITemplate_MAP_init on it; [U] every method passes &mMap to the
-                                    //       same-named cUITemplate_MAP_* method (cUITemplate_MAP's own accesses reach
-                                    //       0x2F0). Raw until cUITemplate_MAP has a header
+    cUITemplate_MAP mMap;           // 0x09C [O] (On Tour 0x124; retail 0x2F4: its bools, including the two
+                                    //       bool[3][3][8] tables, are words); [R] the ctors run cUITemplate_MAP_init
+                                    //       on it; [U] every method passes &mMap to the same-named cUITemplate_MAP_*
+                                    //       method
 };
 
 CHECK_OFFSET(cOVState_TRANSPORT, mpPrev, 0x0);

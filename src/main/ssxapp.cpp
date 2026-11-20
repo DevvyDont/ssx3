@@ -783,7 +783,7 @@ extern "C" int cSSXApp_preUpdate(cSSXApp* self)
         for (i = 0; i < 2; i++) {
             int valueCount = cPadCache_numButtons(PadCache, i);
             void* values = cPadCache_buttonValues(PadCache, i);
-            cInputPad_update(((void**)((char*)&self->InputPads))[i], valueCount, values);
+            cInputPad_update(((void**)&self->InputPads)[i], valueCount, values);
         }
         return 1;
     }

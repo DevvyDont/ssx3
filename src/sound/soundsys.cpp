@@ -7053,23 +7053,23 @@ extern "C" void cSSXAudio_CountdownBeep(cSSXAudio* self, int mode)
     if (cSSXAudio_ReplayMode(self) != 0) {
         return;
     }
-    char* mon = (char*)self + 0x118;
+    char* mon = (char*)&self->MusicSys;
     sndC420AddVoice(self, mon, 0, 78, 5);
     if (mode == 3) {
-        int st = func_002B49E0((char*)self + 0x118);
+        int st = func_002B49E0((char*)&self->MusicSys);
         if (st == 201 || st == 1 || st == 2 || st == 3) {
             if (self->unk_627C != 0) {
-                func_002B3D48((char*)self + 0x118, 2.0f);
+                func_002B3D48((char*)&self->MusicSys, 2.0f);
             }
         }
     }
     if (mode == 1) {
-        int st = func_002B49E0((char*)self + 0x118);
+        int st = func_002B49E0((char*)&self->MusicSys);
         if (self->MusicSys.mSongPlaying == 0 || st == 201 || st == 1 || st == 2 || st == 3) {
             if (self->unk_627C != 0) {
                 func_0028D488(self);
                 func_0028CF98(self, 0, 0, -1, 0);
-                func_002B3A70((char*)self + 0x118);
+                func_002B3A70((char*)&self->MusicSys);
             }
         }
     }
@@ -7899,7 +7899,7 @@ struct sSndVtEntD8E0 { short delta; short index; void (*fn)(void*, int); };
 extern "C" void cSSXAudio_BigChallengeComplete(cSSXAudio* self)
 {
     if (self->mInBigChallenge != 0) {
-        char* musicSys = (char*)self + 0x118;
+        char* musicSys = (char*)&self->MusicSys;
         sSndVtEntD8E0* entry = &((sSndVtEntD8E0*)self->MusicSys.mVtbl)[4];
         entry->fn(musicSys + entry->delta, 39);
         self->mCurBigChallengeType = 0;
@@ -7938,7 +7938,7 @@ extern "C" void cSSXAudio_BigChallengeFailed(cSSXAudio* self, int keep)
         cSSXAudio_WipeoutSlideEnd((cSSXAudio*)self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
         cSSXAudio_WipeoutTumbleEnd((cSSXAudio*)self, ((cAI*)cAudioInterface_getAI())->Riders[0]);
         cSSXAudio_EndUberSpin((cSSXAudio*)self, 0);
-        char* musicSys = (char*)self + 0x118;
+        char* musicSys = (char*)&self->MusicSys;
         sSndVtEnt* vtblEntry = &((sSndVtEnt*)self->MusicSys.mVtbl)[4];
         vtblEntry->fn(musicSys + vtblEntry->delta, 39);
         self->mCurBigChallengeType = 0;
@@ -8153,7 +8153,7 @@ extern "C" void cSSXAudio_Avalanche(cSSXAudio* vself, int on)
             }
             sndBeginVoice(self, 8, 2);
             cBankManager** bankManagerRef = self->p118;
-            int volume = cSSXAudio_GetAvalancheVolume((cSSXAudio*)self, (tAvalanchePositionalData*)((char*)&self->xf));
+            int volume = cSSXAudio_GetAvalancheVolume((cSSXAudio*)self, (tAvalanchePositionalData*)&self->xf);
             cBankManager* volManager = *bankManagerRef;
             sSndPlayOptsView* volOpts = &volManager->sub;
             volOpts->vals[volManager->sub.cur] = volume;
@@ -13853,7 +13853,7 @@ extern "C" void func_002A6648(cCrowdInstance* vself, int idx)
     tCrowdData* crowdData = &((&D_004A36F8->mCrowdData[0]))[idx];
     vself->mAmbientCheerIntensity = idx;
     vself->unk_188 = crowdData->mAttack + crowdData->mDecay;
-    int cheerSample = func_002A4CA0((sSndRandList*)((char*)&crowdData->mFall));
+    int cheerSample = func_002A4CA0((sSndRandList*)&crowdData->mFall);
     if (cheerSample == 0) return;
     func_002A8450((char**)D_004A36F8, vself->unk_0D8, cheerSample);
     sSnd6648Mgr* posMgr = (sSnd6648Mgr*)D_004A36F8->mpVBankManager;

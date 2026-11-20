@@ -1644,7 +1644,7 @@ struct S78 { char x[0xB]; };
  * @return the song name
  */
 extern "C" void *cMusicSys_MUSIC_SongName(cMusicSys* musicSys) {
-    return (S78 *)((char*)&musicSys->mSongName) + musicSys->mCurrentSongNum;
+    return (S78 *)&musicSys->mSongName + musicSys->mCurrentSongNum;
 }
 #endif
 

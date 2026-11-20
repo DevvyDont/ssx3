@@ -359,7 +359,7 @@ extern "C" void cUIMenu_render2D(cUIMenu* self, float x, float y)
     if (scrollBar != 0) {
         cUIScrollBar_setValues(scrollBar, self->mScrollItemOffset, self->mScrollItemNumVisible, self->mScrollItemNum);
     }
-    void* n = cList_first((cList*)((char*)&self->mList));
+    void* n = cList_first((cList*)&self->mList);
     if (n != 0) {
         do {
             if ((*(int*)((char*)n + 0x14) >> 6) & 1) {
@@ -614,7 +614,7 @@ struct cUIPair_setVisible_sVEntry {
  */
 extern "C" void cUIPair_setVisible(cUIPair* self, int on)
 {
-    ((cUIPair_setVisible_sFlags*)((char*)&self->mAttr))->on = (on != 0);
+    ((cUIPair_setVisible_sFlags*)&self->mAttr)->on = (on != 0);
     cUIThing* entry = self->mpEntry;
     if (entry != 0) {
         cUIPair_setVisible_sVEntry* vt = *(cUIPair_setVisible_sVEntry**)((char*)entry + 8);

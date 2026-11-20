@@ -76,7 +76,7 @@ extern "C" void* cScreenPopup_cScreenPopup(cScreenPopup* self, cUIEngine* engine
     self->mpBackGroundShadow = 0;
     self->mpBackGroundBlack = 0;
     for (int i = 0; i < 5; i++)
-        ((int*)((char*)&self->mpOptions))[i] = 0;
+        ((int*)&self->mpOptions)[i] = 0;
     self->meBackgroundType = 0;
     *(sVec3_58E8*)&self->mvCurrentScale[0] = sVec3_58E8(1.0f, 1.0f, 1.0f);
     self->mbCenterOptions = 0;
@@ -232,7 +232,7 @@ extern "C" int cScreenPopup_onGainTransition(cScreenPopup* self, int first)
         bgScale.g = 0.2f;
         bgScale.b = 1.0f;
         self->mbFirstGainTran = 1;
-        cScreenPopup_initScreenPopup(self, (cPopupInfo*)((char*)&self->info));
+        cScreenPopup_initScreenPopup(self, (cPopupInfo*)&self->info);
         cScreenPopup_scaleBackground(self, (sColor_7738*)&bgScale);
         if (self->meBackgroundType == 1)
             cScreenPopup_SetTextObjectsAlpha(self, 0.0f);
@@ -305,7 +305,7 @@ extern "C" void cScreenPopup_redrawPopup(cScreenPopup* self)
 {
     if (self->mbFirstGainTran != 0) {
         cScreenPopup_restoreElements(self);
-        cScreenPopup_initScreenPopup(self, (cPopupInfo*)((char*)&self->info));
+        cScreenPopup_initScreenPopup(self, (cPopupInfo*)&self->info);
         sColor5DD8 bgScale = *(sColor5DD8*)&self->mvCurrentScale[0];
         cScreenPopup_scaleBackground(self, (sColor_7738*)&bgScale);
         sVEntry001C5DD8* vt = (sVEntry001C5DD8*)self->mVtbl;
@@ -536,7 +536,7 @@ extern "C" void cScreenPopup_FillObjectPointers(cScreenPopup* self)
         sprintf(name, str_Optionpct_d, i);
         sObj_6260* uiObj = find_6260(self, name);
         if (uiObj != 0)
-            ((sObj_6260**)((char*)&self->mpOptions))[i] = uiObj;
+            ((sObj_6260**)&self->mpOptions)[i] = uiObj;
     }
 }
 #undef POS_6260
@@ -757,7 +757,7 @@ extern "C" void cScreenPopup_initScreenPopup(cScreenPopup* self, cPopupInfo* inf
     else
         *(sVec3_6B08*)&self->mvCurSize[0] = sVec3_6B08(300.0f, 0.0f, 0.0f);
     for (int i = 0; i < 5; i++)
-        ((sVec3_6B08*)((char*)&self->mtConfirmation))[i] = *cPopupInfo_getPopupConfirmation(info, i);
+        ((sVec3_6B08*)&self->mtConfirmation)[i] = *cPopupInfo_getPopupConfirmation(info, i);
     sVec3_6B08 offset = *(sVec3_6B08*)&info->mvOffset[0];
     *(sVec3_6B08*)&self->mvOffset[0] = offset;
     cScreenPopup_createTitleBar(self, info);
@@ -844,7 +844,7 @@ extern "C" int cScreenPopup_handleEntryBox(cScreenPopup* self, cPopupInfo* infop
             sVec3_6D30 boxPos = pos;
             boxPos.x = boxPos.x + w + 10.0f;
             *(sVec3_6D30*)((char*)((cUIObj_6D30*)screenPopup->mpEnterBox) + 0x44) = boxPos;
-            cScreenPopup_increaseBoxSize(self, (float*)((char*)&self->mvCurSize), size);
+            cScreenPopup_increaseBoxSize(self, (float*)&self->mvCurSize, size);
             ((cUIObj_6D30*)screenPopup->mpEnterBox)->setStatic(0);
             ((cUIObj_6D30*)screenPopup->mpEnterBox)->setVisible(1);
         }
@@ -874,7 +874,7 @@ extern "C" int cScreenPopup_handleEntryBox(cScreenPopup* self, cPopupInfo* infop
         ((cUIObj_6D30*)screenPopup->mpEnterBoxBackground)->setVisible(0);
     }
     cScreenPopup_getStringSize3(self, ((cUIObj_6D30*)screenPopup->mpEnterBox), size);
-    cScreenPopup_increaseBoxSize(self, (float*)((char*)&self->mvCurSize), size);
+    cScreenPopup_increaseBoxSize(self, (float*)&self->mvCurSize, size);
     return 0;
 }
 #endif
@@ -1101,7 +1101,7 @@ extern "C" void cScreenPopup_FillOptions(cScreenPopup* self, cPopupInfo* infop)
             cScreenPopup_getStringSize(self, (cUIText*)itemObj, it, item);
             if (self->mvLargestOption[0] < item[2])
                 self->mvLargestOption[0] = item[2];
-            cScreenPopup_increaseBoxSize(self, (float*)((char*)&self->mvCurSize), size);
+            cScreenPopup_increaseBoxSize(self, (float*)&self->mvCurSize, size);
             itemObj->setStatic(0);
             itemObj->setVisible(1);
         }
@@ -1825,7 +1825,7 @@ extern "C" void cScreenPopup_createTitleBar(cScreenPopup* self, cPopupInfo* pInf
 {
     cUIText* text = self->mpTitleText;
     if (text != 0) {
-        int* info = (int*)((char*)&pInfo->mtTitle);
+        int* info = (int*)&pInfo->mtTitle;
         if (pInfo->mtTitle.eType != 0) {
             float item[4];
             cScreenPopup_setTextString2(self, text, info);
@@ -1835,7 +1835,7 @@ extern "C" void cScreenPopup_createTitleBar(cScreenPopup* self, cPopupInfo* pInf
                 vt[9].fn(titleText + vt[9].delta, 1);
             }
             cScreenPopup_getStringSize(self, self->mpTitleText, info, item);
-            cScreenPopup_increaseBoxSize(self, (float*)((char*)&self->mvCurSize), item);
+            cScreenPopup_increaseBoxSize(self, (float*)&self->mvCurSize, item);
             self->mvCurSize[1] += 5.0f;
             if (self->mbCenterText != 0) {
                 cScreenPopup_changePivot(self, self->mpTitleText, 17, 0.0f);
@@ -3485,14 +3485,14 @@ extern "C" void* cUIStateBuyPopup_cUIStateBuyPopup(cUIStateBuyPopup* self, cUIEn
 {
     cUIState_cUIState1(self, engine, owner);
     self->mVtbl = cUIStateBuyPopup_vtbl;
-    cBuyPopupInfo_clear((cBuyPopupInfo*)((char*)&self->mInfo));
+    cBuyPopupInfo_clear((cBuyPopupInfo*)&self->mInfo);
     self->mUserNum = idx;
     self->mHashName = 7;
     void* custom = *(void**)self->mpEngine;
     if (custom != 0) {
         *(char*)&self->mCtrlBits = cFECustom_getPlayerCtrlMask(custom, idx);
     }
-    cBuyPopupInfo_clear((cBuyPopupInfo*)((char*)&self->mInfo));
+    cBuyPopupInfo_clear((cBuyPopupInfo*)&self->mInfo);
     return ((void*)self);
 }
 #endif

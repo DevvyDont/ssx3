@@ -1758,52 +1758,52 @@ extern "C" void cGame_updateState(cGame* self_)
     if (self->mPendingPreloadStateID != 0) {
         switch (self->mPendingPreloadStateID) {
     case 1:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)((char*)&self->mStates);
+        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mEventStartState;
         break;
     case 2:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)((char*)self + 0xD0);
+        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mPreEventState;
         break;
     case 3:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)((char*)self + 0xE0);
+        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mGateState;
         break;
     case 4:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)((char*)self + 0xF0);
+        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mRidingState;
         break;
     case 5:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)((char*)self + 0x100);
+        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mFinishlineState;
         break;
     case 6:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)((char*)self + 0x118);
+        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mEndState;
         break;
     case 7:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)((char*)self + 0x128);
+        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mPostEventState;
         break;
     case 8:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)((char*)self + 0x138);
+        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mEndWaitState;
         break;
     case 9:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)((char*)self + 0x148);
+        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mTransportWaitState;
         break;
     case 10:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)((char*)self + 0x158);
+        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mTrackStartState;
         break;
     case 11:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)((char*)self + 0x178);
+        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mSectionLoadState;
         break;
     case 12:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)((char*)self + 0x18C);
+        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mPodiumState;
         break;
     case 13:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)((char*)self + 0x19C);
+        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mNextHeatState;
         break;
     case 14:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)((char*)self + 0x1B8);
+        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mUserSelectState;
         break;
     case 15:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)((char*)self + 0x1DC);
+        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mSessionTeleportState;
         break;
     case 16:
-        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)((char*)self + 0x1EC);
+        (*(cGameState_0F40**)&self->mPreloadingState) = (cGameState_0F40*)&self->mReplayStartState;
         break;
         }
         self->mPreloadStateID = self->mPendingPreloadStateID;
@@ -1822,67 +1822,67 @@ extern "C" void cGame_updateState(cGame* self_)
     (*(cGameState_0F40**)&self->mPrevState) = ((cGameState_0F40*)self->mCurrentState);
     switch (next) {
     case 1:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)((char*)&self->mStates);
+        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mEventStartState;
         self->mCurrentStateID = 1;
         break;
     case 2:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)((char*)self + 0xD0);
+        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mPreEventState;
         self->mCurrentStateID = 2;
         break;
     case 3:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)((char*)self + 0xE0);
+        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mGateState;
         self->mCurrentStateID = 3;
         break;
     case 4:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)((char*)self + 0xF0);
+        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mRidingState;
         self->mCurrentStateID = 4;
         break;
     case 5:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)((char*)self + 0x100);
+        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mFinishlineState;
         self->mCurrentStateID = 5;
         break;
     case 6:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)((char*)self + 0x118);
+        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mEndState;
         self->mCurrentStateID = 6;
         break;
     case 7:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)((char*)self + 0x128);
+        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mPostEventState;
         self->mCurrentStateID = 7;
         break;
     case 8:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)((char*)self + 0x138);
+        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mEndWaitState;
         self->mCurrentStateID = 8;
         break;
     case 9:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)((char*)self + 0x148);
+        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mTransportWaitState;
         self->mCurrentStateID = 9;
         break;
     case 10:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)((char*)self + 0x158);
+        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mTrackStartState;
         self->mCurrentStateID = 10;
         break;
     case 11:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)((char*)self + 0x178);
+        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mSectionLoadState;
         self->mCurrentStateID = 11;
         break;
     case 12:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)((char*)self + 0x18C);
+        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mPodiumState;
         self->mCurrentStateID = 12;
         break;
     case 13:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)((char*)self + 0x19C);
+        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mNextHeatState;
         self->mCurrentStateID = 13;
         break;
     case 14:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)((char*)self + 0x1B8);
+        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mUserSelectState;
         self->mCurrentStateID = 14;
         break;
     case 15:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)((char*)self + 0x1DC);
+        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mSessionTeleportState;
         self->mCurrentStateID = 15;
         break;
     case 16:
-        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)((char*)self + 0x1EC);
+        (*(cGameState_0F40**)&self->mCurrentState) = (cGameState_0F40*)&self->mReplayStartState;
         self->mCurrentStateID = 16;
         break;
     }
@@ -2070,21 +2070,21 @@ extern "C" void cGame_writeToReplayFrame(cGame* self, cStream_00231348* stream)
     stream->write((char*)&self->mPrevStateID, 4);
     stream->write((char*)&self->mPendingStateID, 4);
     stream->write((char*)&self->mPendingStateStartupFlag, 4);
-    cGFEventStartState_writeToReplayFrame((char*)&self->mStates, stream);
-    cGFPreEventState_writeToReplayFrame_s((char*)self + 0xD0, stream);
-    cGFGateState_writeToReplayFrame_s((char*)self + 0xE0, stream);
-    cGFRidingState_writeToReplayFrame_s((char*)self + 0xF0, stream);
-    cGFFinishlineState_writeToReplayFrame((char*)self + 0x100, stream);
-    cGFEndState_writeToReplayFrame_s((char*)self + 0x118, stream);
-    cGFPostEventState_writeToReplayFrame_s((char*)self + 0x128, stream);
-    cGFEndWaitState_writeToReplayFrame_s((char*)self + 0x138, stream);
-    cGFTransportWaitState_writeToReplayFrame_s((char*)self + 0x148, stream);
-    cGFTrackStartState_writeToReplayFrame((char*)self + 0x158, stream);
-    cGFSectionLoadState_writeToReplayFrame_s((char*)self + 0x178, stream);
-    cGFPodiumState_writeToReplayFrame_s((char*)self + 0x18C, stream);
-    cGFNextHeatState_writeToReplayFrame((char*)self + 0x19C, stream);
-    cGFUserSelectState_writeToReplayFrame((char*)self + 0x1B8, stream);
-    cGFSessionTeleportState_writeToReplayFrame_s((char*)self + 0x1DC, stream);
+    cGFEventStartState_writeToReplayFrame((char*)&self->mEventStartState, stream);
+    cGFPreEventState_writeToReplayFrame_s((char*)&self->mPreEventState, stream);
+    cGFGateState_writeToReplayFrame_s((char*)&self->mGateState, stream);
+    cGFRidingState_writeToReplayFrame_s((char*)&self->mRidingState, stream);
+    cGFFinishlineState_writeToReplayFrame((char*)&self->mFinishlineState, stream);
+    cGFEndState_writeToReplayFrame_s((char*)&self->mEndState, stream);
+    cGFPostEventState_writeToReplayFrame_s((char*)&self->mPostEventState, stream);
+    cGFEndWaitState_writeToReplayFrame_s((char*)&self->mEndWaitState, stream);
+    cGFTransportWaitState_writeToReplayFrame_s((char*)&self->mTransportWaitState, stream);
+    cGFTrackStartState_writeToReplayFrame((char*)&self->mTrackStartState, stream);
+    cGFSectionLoadState_writeToReplayFrame_s((char*)&self->mSectionLoadState, stream);
+    cGFPodiumState_writeToReplayFrame_s((char*)&self->mPodiumState, stream);
+    cGFNextHeatState_writeToReplayFrame((char*)&self->mNextHeatState, stream);
+    cGFUserSelectState_writeToReplayFrame((char*)&self->mUserSelectState, stream);
+    cGFSessionTeleportState_writeToReplayFrame_s((char*)&self->mSessionTeleportState, stream);
 }
 #endif
 
@@ -2160,72 +2160,72 @@ extern "C" void cGame_readFromReplayFrame(cGame* self_, cStream_14D0* stream)
     stream->read(&self->mPrevStateID, 4);
     stream->read(&self->mPendingStateID, 4);
     stream->read(&self->mPendingStateStartupFlag, 4);
-    cGFEventStartState_readFromReplayFrame((char*)&self->mStates, stream);
-    cGFPreEventState_readFromReplayFrame_14D0((char*)self + 0xD0, stream);
-    cGFGateState_readFromReplayFrame_14D0((char*)self + 0xE0, stream);
-    cGFRidingState_readFromReplayFrame_14D0((char*)self + 0xF0, stream);
-    cGFFinishlineState_readFromReplayFrame((char*)self + 0x100, stream);
-    cGFEndState_readFromReplayFrame_14D0((char*)self + 0x118, stream);
-    cGFPostEventState_readFromReplayFrame_14D0((char*)self + 0x128, stream);
-    cGFEndWaitState_readFromReplayFrame_14D0((char*)self + 0x138, stream);
-    cGFTransportWaitState_readFromReplayFrame_14D0((char*)self + 0x148, stream);
-    cGFTrackStartState_readFromReplayFrame((char*)self + 0x158, stream);
-    cGFSectionLoadState_readFromReplayFrame_14D0((char*)self + 0x178, stream);
-    cGFPodiumState_readFromReplayFrame_14D0((char*)self + 0x18C, stream);
-    cGFNextHeatState_readFromReplayFrame((char*)self + 0x19C, stream);
-    cGFUserSelectState_readFromReplayFrame((char*)self + 0x1B8, stream);
-    cGFSessionTeleportState_readFromReplayFrame_14D0((char*)self + 0x1DC, stream);
+    cGFEventStartState_readFromReplayFrame((char*)&self->mEventStartState, stream);
+    cGFPreEventState_readFromReplayFrame_14D0((char*)&self->mPreEventState, stream);
+    cGFGateState_readFromReplayFrame_14D0((char*)&self->mGateState, stream);
+    cGFRidingState_readFromReplayFrame_14D0((char*)&self->mRidingState, stream);
+    cGFFinishlineState_readFromReplayFrame((char*)&self->mFinishlineState, stream);
+    cGFEndState_readFromReplayFrame_14D0((char*)&self->mEndState, stream);
+    cGFPostEventState_readFromReplayFrame_14D0((char*)&self->mPostEventState, stream);
+    cGFEndWaitState_readFromReplayFrame_14D0((char*)&self->mEndWaitState, stream);
+    cGFTransportWaitState_readFromReplayFrame_14D0((char*)&self->mTransportWaitState, stream);
+    cGFTrackStartState_readFromReplayFrame((char*)&self->mTrackStartState, stream);
+    cGFSectionLoadState_readFromReplayFrame_14D0((char*)&self->mSectionLoadState, stream);
+    cGFPodiumState_readFromReplayFrame_14D0((char*)&self->mPodiumState, stream);
+    cGFNextHeatState_readFromReplayFrame((char*)&self->mNextHeatState, stream);
+    cGFUserSelectState_readFromReplayFrame((char*)&self->mUserSelectState, stream);
+    cGFSessionTeleportState_readFromReplayFrame_14D0((char*)&self->mSessionTeleportState, stream);
     switch (self->mCurrentStateID) {
     case 0:
         (*(cGameState_14D0**)&self->mCurrentState) = 0;
         break;
     case 1:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)&self->mStates);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mEventStartState;
         break;
     case 2:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0xD0);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mPreEventState;
         break;
     case 3:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0xE0);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mGateState;
         break;
     case 4:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0xF0);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mRidingState;
         break;
     case 5:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0x100);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mFinishlineState;
         break;
     case 6:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0x118);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mEndState;
         break;
     case 7:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0x128);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mPostEventState;
         break;
     case 8:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0x138);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mEndWaitState;
         break;
     case 9:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0x148);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mTransportWaitState;
         break;
     case 10:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0x158);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mTrackStartState;
         break;
     case 11:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0x178);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mSectionLoadState;
         break;
     case 12:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0x18C);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mPodiumState;
         break;
     case 13:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0x19C);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mNextHeatState;
         break;
     case 14:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0x1B8);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mUserSelectState;
         break;
     case 15:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0x1DC);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mSessionTeleportState;
         break;
     case 16:
-        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)((char*)self + 0x1EC);
+        (*(cGameState_14D0**)&self->mCurrentState) = (cGameState_14D0*)&self->mReplayStartState;
         break;
     default:
         (*(cGameState_14D0**)&self->mCurrentState) = 0;
@@ -2234,52 +2234,52 @@ extern "C" void cGame_readFromReplayFrame(cGame* self_, cStream_14D0* stream)
     }
     switch (self->mPrevStateID) {
     case 1:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)&self->mStates);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mEventStartState;
         break;
     case 2:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0xD0);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mPreEventState;
         break;
     case 3:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0xE0);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mGateState;
         break;
     case 4:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0xF0);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mRidingState;
         break;
     case 5:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0x100);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mFinishlineState;
         break;
     case 6:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0x118);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mEndState;
         break;
     case 7:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0x128);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mPostEventState;
         break;
     case 8:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0x138);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mEndWaitState;
         break;
     case 9:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0x148);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mTransportWaitState;
         break;
     case 10:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0x158);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mTrackStartState;
         break;
     case 11:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0x178);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mSectionLoadState;
         break;
     case 12:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0x18C);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mPodiumState;
         break;
     case 13:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0x19C);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mNextHeatState;
         break;
     case 14:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0x1B8);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mUserSelectState;
         break;
     case 15:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0x1DC);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mSessionTeleportState;
         break;
     case 16:
-        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)((char*)self + 0x1EC);
+        (*(cGameState_14D0**)&self->mPrevState) = (cGameState_14D0*)&self->mReplayStartState;
         break;
     default:
         self->mPrevStateID = 0;

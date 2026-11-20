@@ -5562,7 +5562,7 @@ extern "C" void* func_001A9C50(cFEStateNet* self)
         self->mpPopup = (cScreenPopup*)popup;
         *(int*)((char*)popup + 0x178) = 0;
     } else {
-        cPopupInfo_clear((cPopupInfo*)((char*)&cur->info));
+        cPopupInfo_clear((cPopupInfo*)&cur->info);
         *(int*)((char*)self->mpPopup + 0x178) = 0;
     }
     return self->mpPopup;
@@ -15025,7 +15025,7 @@ extern "C" void func_001B5BD8(cFEStateNetConfig* self, void* popup, unsigned int
             createConfigText->v06(0);
             createConfigText->v11(sColor1B5BD8(1.0f, 0.5f, 0.5f, 0.5f));
         }
-        ((sFlags1B5BD8*)((char*)&self->mAttrState))->mode = 7;
+        ((sFlags1B5BD8*)&self->mAttrState)->mode = 7;
         break;
     }
     case 16:
@@ -22228,7 +22228,7 @@ extern "C" void func_001BDFD8(cFEStateLobbyMenu* self)
 {
     int i;
     for (i = 0; i < 4; i++) {
-        ((cFEVObj_001BDFD8**)((char*)&self->mpChannelArrow))[i]->v09(0);
+        ((cFEVObj_001BDFD8**)&self->mpChannelArrow)[i]->v09(0);
     }
 }
 #endif

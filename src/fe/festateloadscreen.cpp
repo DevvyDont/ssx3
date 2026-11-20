@@ -922,9 +922,9 @@ extern "C" void cGFFinishlineState_writeToReplayFrame(cGFFinishlineState* self, 
 {
     cGameState_writeToReplayFrame_2(self, stream);
     sVEntry_cGFFinishlineState_writeToReplayFrame* writeEntry = &(*(sVEntry_cGFFinishlineState_writeToReplayFrame**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x10, 4);
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->mSubState, 4);
     writeEntry = &(*(sVEntry_cGFFinishlineState_writeToReplayFrame**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x14, 4);
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->mShowEventResultsDelay, 4);
 }
 #endif
 
@@ -949,9 +949,9 @@ extern "C" void cGFFinishlineState_readFromReplayFrame(cGFFinishlineState* self,
 {
     cGameState_readFromReplayFrame_2(self, stream);
     sVEntry_cGFFinishlineState_readFromReplayFrame* readEntry = &(*(sVEntry_cGFFinishlineState_readFromReplayFrame**)stream)[2];
-    readEntry->fn((char*)stream + readEntry->delta, (char*)self + 0x10, 4);
+    readEntry->fn((char*)stream + readEntry->delta, (char*)&self->mSubState, 4);
     readEntry = &(*(sVEntry_cGFFinishlineState_readFromReplayFrame**)stream)[2];
-    readEntry->fn((char*)stream + readEntry->delta, (char*)self + 0x14, 4);
+    readEntry->fn((char*)stream + readEntry->delta, (char*)&self->mShowEventResultsDelay, 4);
 }
 #endif
 
@@ -1398,13 +1398,13 @@ extern "C" void cGFEventStartState_writeToReplayFrame(cGFEventStartState* self, 
 {
     cGameState_writeToReplayFrame_2(self, stream);
     sVEntry_cGFEventStartState_writeToReplayFrame* writeEntry = &(*(sVEntry_cGFEventStartState_writeToReplayFrame**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x10, 4);
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->mPurgeCPURiders, 4);
     writeEntry = &(*(sVEntry_cGFEventStartState_writeToReplayFrame**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x14, 4);
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->mHasTransitionNIS, 4);
     writeEntry = &(*(sVEntry_cGFEventStartState_writeToReplayFrame**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x1C, 4);
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->mSubState, 4);
     writeEntry = &(*(sVEntry_cGFEventStartState_writeToReplayFrame**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x8, 4);
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->mOverlayDone, 4);
 }
 #endif
 
@@ -1432,13 +1432,13 @@ extern "C" void cGFEventStartState_readFromReplayFrame(cGFEventStartState* self,
 {
     cGameState_readFromReplayFrame_2(self, stream);
     sVEntry_cGFEventStartState_readFromReplayFrame* readEntry = &(*(sVEntry_cGFEventStartState_readFromReplayFrame**)stream)[2];
-    readEntry->fn((char*)stream + readEntry->delta, (char*)self + 0x10, 4);
+    readEntry->fn((char*)stream + readEntry->delta, (char*)&self->mPurgeCPURiders, 4);
     readEntry = &(*(sVEntry_cGFEventStartState_readFromReplayFrame**)stream)[2];
-    readEntry->fn((char*)stream + readEntry->delta, (char*)self + 0x14, 4);
+    readEntry->fn((char*)stream + readEntry->delta, (char*)&self->mHasTransitionNIS, 4);
     readEntry = &(*(sVEntry_cGFEventStartState_readFromReplayFrame**)stream)[2];
-    readEntry->fn((char*)stream + readEntry->delta, (char*)self + 0x1C, 4);
+    readEntry->fn((char*)stream + readEntry->delta, (char*)&self->mSubState, 4);
     readEntry = &(*(sVEntry_cGFEventStartState_readFromReplayFrame**)stream)[2];
-    readEntry->fn((char*)stream + readEntry->delta, (char*)self + 0x8, 4);
+    readEntry->fn((char*)stream + readEntry->delta, (char*)&self->mOverlayDone, 4);
 }
 #endif
 

@@ -30,7 +30,7 @@ extern const char str_ReplayCache[];
  */
 extern "C" void* cReplay_addCache(cReplay* self)
 {
-    void** slot = (void**)((char*)&self->InputCache);
+    void** slot = (void**)&self->InputCache;
     for (int i = 0; i < 2; i++, slot++) {
         if (*slot == 0) {
             return *slot = cReplayCache_cReplayCache(cMemMan_alloc(0x10, str_ReplayCache, 0, 0));
@@ -54,7 +54,7 @@ extern "C" void cReplayCache__cReplayCache(void* p, int mode);
 extern "C" void cReplay_removeCache(cReplay* self, void* pCache)
 {
     if (pCache != 0) {
-        void** slot = (void**)((char*)&self->InputCache);
+        void** slot = (void**)&self->InputCache;
         for (int i = 0; i < 2; i++, slot++) {
             if (*slot == pCache) {
                 if (*slot != 0) {
@@ -460,7 +460,7 @@ INCLUDE_ASM("replay/replaycache", cReplay_cancelMarkInstantReplay);
 // the 2026-11-14 ruling (portable, behaviour-preserving steering only); replace it when an honest spelling matches.
 extern "C" void cReplay_cancelMarkInstantReplay(cReplay* self)
 {
-    int* on = (int*)((char*)&self->InstantReplayFrame);
+    int* on = (int*)&self->InstantReplayFrame;
     int markFrame = *on;
     if (markFrame != 0) {
         int x = SSXApp->Game->AI->NumberOfPlayersAllocated;

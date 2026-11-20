@@ -6069,7 +6069,7 @@ static inline void setRateMax_1AA0(sFloat_1AA0* dst, float v, char* info)
 // Animated float constructor: range and start value (frames -> seconds), optional random start and speed.
 extern "C" void* cAnimObjectNode_cAnimObjectNode1(cAnimObjectNode* self, int bucket, int nodeType, char* obj, sSphFloatDef_1AA0* def)
 {
-    cAnimNode_cAnimNode((char*)self + 0x1C, bucket, nodeType, obj, def->f24 != 0);
+    cAnimNode_cAnimNode((char*)&self->CurrTime, bucket, nodeType, obj, def->f24 != 0);
     self->mVtbl = D_00490B10;
     float frameTime = 0.0f;
     char* info = *(char**)(obj + 0x80);
@@ -6137,7 +6137,7 @@ extern void* D_00490B10[];
  */
 extern "C" void* cAnimObjectNode_cAnimObjectNode(cAnimObjectNode* self, int bucket, sVEntry00341C80** stream)
 {
-    cAnimNode_cAnimNode1((char*)self + 0x1C, bucket, stream);
+    cAnimNode_cAnimNode1((char*)&self->CurrTime, bucket, stream);
     self->mVtbl = D_00490B10;
     (*stream)[2].fn((char*)stream + (*stream)[2].delta, self, 0x1C);
     self->Flags |= 1;
@@ -6163,7 +6163,7 @@ extern void* D_00490B10[];
 extern "C" void cAnimObjectNode__cAnimObjectNode(cAnimObjectNode* self, int flags)
 {
     self->mVtbl = D_00490B10;
-    cAnimNode__cAnimNode((char*)self + 0x1C, 0);
+    cAnimNode__cAnimNode((char*)&self->CurrTime, 0);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -6223,7 +6223,7 @@ extern "C" int cAnimObjectNode_updateNode(cAnimObjectNode* self)
                 cAnimObjectNode_updateOnce(self);
                 break;
             }
-            if (func_0034EBA0((char*)self + 0x1C) == 0) {
+            if (func_0034EBA0((char*)&self->CurrTime) == 0) {
                 return 0;
             }
         }
@@ -6473,7 +6473,7 @@ struct sVEntry_cAnimObjectNode_writeToReplayFrame {
  */
 extern "C" void cAnimObjectNode_writeToReplayFrame(cAnimObjectNode* self, void* stream)
 {
-    cAnimNode_writeToReplayFrame((char*)self + 0x1C, stream);
+    cAnimNode_writeToReplayFrame((char*)&self->CurrTime, stream);
     sVEntry_cAnimObjectNode_writeToReplayFrame* vt = *(sVEntry_cAnimObjectNode_writeToReplayFrame**)stream;
     vt[1].fn((char*)stream + vt[1].delta, self, 0x1C);
 }

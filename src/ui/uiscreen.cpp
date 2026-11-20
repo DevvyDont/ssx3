@@ -662,7 +662,7 @@ extern "C" void cUIScreen_parseScreenFocusGain(cUIScreen* self)
 {
     cUIState* state = self->mpState;
     if (state != 0) {
-        ((sUIFlags1C*)((char*)&state->mAttrState))->mode = 3;
+        ((sUIFlags1C*)&state->mAttrState)->mode = 3;
     }
 }
 #endif
@@ -680,7 +680,7 @@ extern "C" void cUIScreen_parseScreenFocusLose(cUIScreen* self)
     cUIGroup_setFocus(&self->mRootGroup, 0);
     cUIState* state = self->mpState;
     if (state != 0) {
-        ((sUIFlags1C*)((char*)&state->mAttrState))->mode = 6;
+        ((sUIFlags1C*)&state->mAttrState)->mode = 6;
     }
 }
 #endif
@@ -714,7 +714,7 @@ extern "C" void cUIScreen_parseScreenEnd(cUIScreen* self, void* pFrame, void* pK
     *(unsigned int*)((char*)pThread + 0x10) &= 0xFEFFFFFFU;
     cUIState* state = self->mpState;
     if (state != 0) {
-        ((sUIFlags1C*)((char*)&state->mAttrState))->mode = 7;
+        ((sUIFlags1C*)&state->mAttrState)->mode = 7;
     }
 }
 #endif
@@ -1135,7 +1135,7 @@ extern "C" void cUIScreen_update(cUIScreen* self)
     if (thread != 0) {
         frame = *(unsigned short*)((char*)thread + 0xC);
     } else {
-        thread = cList_first((cList*)((char*)&self->mThreads));
+        thread = cList_first((cList*)&self->mThreads);
         if (thread != 0) {
             frame = *(unsigned short*)((char*)thread + 0xC);
         }
@@ -1837,7 +1837,7 @@ struct sVEntry39E4C0 {
  */
 extern "C" void cUIState_onGainFocus(cUIState* self)
 {
-    void* n = cList_first((cList*)((char*)&self->mScreens));
+    void* n = cList_first((cList*)&self->mScreens);
     if (n != 0) {
         sVEntry39E4C0* vt = (sVEntry39E4C0*)self->mVtbl;
         vt[13].fn((char*)self + vt[0xD].delta, (char*)n + 0x40);
@@ -1990,7 +1990,7 @@ struct sVEntry39E6B8b {
  */
 extern "C" void cUIState_onRender2D(cUIState* self)
 {
-    void* n = cList_first((cList*)((char*)&self->mScreens));
+    void* n = cList_first((cList*)&self->mScreens);
     if (n != 0) {
         sVEntry39E6B8a* vt = (sVEntry39E6B8a*)self->mVtbl;
         vt[0xE].fn((char*)self + vt[0xE].delta);
@@ -2020,7 +2020,7 @@ INCLUDE_ASM("ui/uiscreen", cUIState_addScreen);
  */
 extern "C" void cUIState_addScreen(cUIState* self, cListNode* node)
 {
-    cList_addToEnd((cList*)((char*)&self->mScreens), node);
+    cList_addToEnd((cList*)&self->mScreens, node);
 }
 #endif
 
@@ -2046,7 +2046,7 @@ struct sVEntry_cUIState_hideScreens {
  */
 extern "C" void cUIState_hideScreens(cUIState* self)
 {
-    void* n = cList_first((cList*)((char*)&self->mScreens));
+    void* n = cList_first((cList*)&self->mScreens);
     if (n != 0) {
         do {
             char* obj = (char*)n + 0x40;
@@ -2081,7 +2081,7 @@ struct sVEntry_cUIState_showScreens {
  */
 extern "C" void cUIState_showScreens(cUIState* self)
 {
-    void* n = cList_first((cList*)((char*)&self->mScreens));
+    void* n = cList_first((cList*)&self->mScreens);
     if (n != 0) {
         do {
             char* obj = (char*)n + 0x40;
@@ -2109,7 +2109,7 @@ extern "C" void cUIScreen_update(cUIScreen*);
  */
 extern "C" void cUIState_updateScreens(cUIState* self)
 {
-    void* n = cList_first((cList*)((char*)&self->mScreens));
+    void* n = cList_first((cList*)&self->mScreens);
     if (n != 0) {
         do {
             cUIScreen_update((cUIScreen*)n);

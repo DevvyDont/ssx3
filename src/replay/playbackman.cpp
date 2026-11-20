@@ -521,7 +521,7 @@ extern "C" void cPlaybackMan_saveFrame(cPlaybackMan* self)
         desc.type = one;
         desc.a = 0;
         desc.b = 0;
-        cReplay_saveFrame1((cReplay*)(*(void**)((char*)self->Game + 0x28)), (char*)self + 0x14,
+        cReplay_saveFrame1((cReplay*)(*(void**)((char*)self->Game + 0x28)), (char*)&self->SaveFramePtr,
                       (sPbBytes4*)&desc);
         self->SaveFrame = one;
     }
@@ -546,7 +546,7 @@ extern "C" void cReplay_restoreFrame1_2(void* replay, void* frame) __asm__("cRep
 extern "C" void* cPlaybackMan_restoreFrame(cPlaybackMan* self)
 {
     if (self->SaveFrame) {
-        cReplay_restoreFrame1_2(*(void**)((char*)self->Game + 0x28), (char*)self + 0x14);
+        cReplay_restoreFrame1_2(*(void**)((char*)self->Game + 0x28), (char*)&self->SaveFramePtr);
     }
 }
 #endif

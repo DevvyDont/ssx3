@@ -331,7 +331,7 @@ extern "C" void* cWorldMemoryMan_cWorldMemoryMan(cWorldMemoryMan* self)
     cWorldBlockAllocator_init((char*)self + 0x28, D_0044C1E0[2].count, D_0044C1E0[2].blockSize);
     int i;
     for (i = 63; i >= 0; i--) {
-        ((int*)((char*)&self->m_pSectionAllocator))[i] = 0;
+        ((int*)&self->m_pSectionAllocator)[i] = 0;
     }
     return ((void*)self);
 }
@@ -392,7 +392,7 @@ struct cWorldMemoryMan_sSection {
 // PORT: the section pointer is passed as int (the callee's mangled name is __FPvii).
 extern "C" void cWorldMemoryMan_activateSectionMem(cWorldMemoryMan* self, int index, int section)
 {
-    void** mem = (void**)((char*)&self->m_pSectionAllocator);
+    void** mem = (void**)&self->m_pSectionAllocator;
     void** slot = &mem[index];
     *slot = cSectionBlockAllocator_cSectionBlockAllocator(cMemMan_alloc(20, str_Section_Allocator, 0x20000000, 0),
                           (int)((cWorldMemoryMan_sSection*)self + section), index);
@@ -817,7 +817,7 @@ extern "C" void cStreamMan_update(void* p);
  */
 extern "C" void cWorldCache_update(cWorldCache* self)
 {
-    cWorldView_update((cWorldView*)((char*)&self->m_WorldView));
+    cWorldView_update((cWorldView*)&self->m_WorldView);
     cWorldCache_updatePages(self);
     cStreamMan_update((char*)&self->m_StreamMan);
 }

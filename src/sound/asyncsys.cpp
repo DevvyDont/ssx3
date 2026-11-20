@@ -1194,7 +1194,7 @@ extern "C" void cBankInstance_SyncLoad(cBankInstance* self, const char* file, in
     if (self->mAllocLocation == 2) {
         (**(cSndStream_B320***)(gpBankManager + 0x1D8))->v6(self->mSoundMemHandle);
     }
-    switch (SNDbankadd((char*)self + 0x4, (int)data)) {
+    switch (SNDbankadd((char*)&self->mBankHandle, (int)data)) {
     case 7: {
         int headerSize = SNDbankheadersize(self->mBankHandle);
         if (self->mAllocLocation == 2) {
@@ -1224,7 +1224,7 @@ extern "C" void cBankInstance_SyncLoad(cBankInstance* self, const char* file, in
         break;
     }
     (**(cSndStream_B320***)(gpBankManager + 0x1D8))->v7();
-    strcpy((char*)self + 0x20, file);
+    strcpy((char*)&self->mBankFilename, file);
 }
 #endif
 

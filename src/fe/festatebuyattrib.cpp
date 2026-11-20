@@ -460,7 +460,7 @@ extern "C" void cFEStateBuyAttrib_updateCostPerLevel(cFEStateBuyAttrib* self)
 {
     char buf[32];
     int i;
-    int* levels = (int*)((char*)&self->mExperienceLevel);
+    int* levels = (int*)&self->mExperienceLevel;
     void* iface = cBE_getInterface_Fv(cBE_getBE(), 11);
     for (i = 0; i < 7; i++, levels++) {
         sprintf(buf, str_costpct_d, i);

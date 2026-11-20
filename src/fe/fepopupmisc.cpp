@@ -242,9 +242,9 @@ extern "C" void cFEPopupScreenPos_onCreateScreen(cFEPopupScreenPos* self)
     }
     void* be = cBE_getBE();
     cBE_getInterface_Fv(be, 4);
-    int* offsetX = (int*)((char*)&self->mX);
+    int* offsetX = (int*)&self->mX;
     *offsetX = optB6_EE10(D_00535610_EE10);
-    int* p4C = (int*)((char*)&self->mY);
+    int* p4C = (int*)&self->mY;
     *p4C = optB5_EE10(D_00535610_EE10);
 }
 #endif
@@ -1035,7 +1035,7 @@ extern "C" void* cFEStateNetHelpPopup_cFEStateNetHelpPopup1(cFEStateNetHelpPopup
 {
     cUIState_cUIState(self, 0);
     self->mVtbl = cFEStateNetHelpPopup_vtbl;
-    new ((char*)self + 0x20) sSlot_F900[7];
+    new ((char*)&self->mpParentState) sSlot_F900[7];
     return ((void*)self);
 }
 #endif
@@ -7801,7 +7801,7 @@ extern "C" void cOVState_MESSAGECENTER_onWidgetEvent(cOVState_MESSAGECENTER* sel
     case 1: {
         int i;
         for (i = 0; i < 8; i++) {
-            void* subjectText = ((void**)((char*)&self->mpSubject))[i];
+            void* subjectText = ((void**)&self->mpSubject)[i];
             sVEntry001E4200* vt = *(sVEntry001E4200**)((char*)subjectText + 8);
             vt[5].fn((char*)subjectText + vt[5].delta, 0);
         }

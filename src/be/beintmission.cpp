@@ -1468,7 +1468,7 @@ extern "C" void cBEMissionInterface_writeToReplayFrame(cBEMissionInterface* self
     char* base2 = base + 0x114;
     writeEntry->fn((char*)stream + writeEntry->delta, base2 + off, 352);
     writeEntry = &(*(sSerVEntry_001547E8**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 8, 4);
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->bIsActive, 4);
 }
 #endif
 
@@ -1502,7 +1502,7 @@ extern "C" void cBEMissionInterface_readFromReplayFrame(cBEMissionInterface* sel
     char* base2 = base + 0x114;
     readEntry->fn((char*)stream + readEntry->delta, base2 + off, 352);
     readEntry = &(*(sSerVEntry_00154898**)stream)[2];
-    readEntry->fn((char*)stream + readEntry->delta, (char*)self + 8, 4);
+    readEntry->fn((char*)stream + readEntry->delta, (char*)&self->bIsActive, 4);
 }
 #endif
 

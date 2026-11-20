@@ -30,9 +30,9 @@ extern "C" void* cDebounceNode_cDebounceNode(cDebounceNode* self, void* bucket, 
     cMoveNode_cMoveNode(self, bucket, stream);
     self->mVtbl = (void**)cDebounceNode_vtbl;
     sDebounceVEntry2D10* readEntry = &(*(sDebounceVEntry2D10**)stream)[2];
-    readEntry->fn((char*)stream + readEntry->delta, (char*)self + 0x2C, 4);
+    readEntry->fn((char*)stream + readEntry->delta, (char*)&self->Life, 4);
     readEntry = &(*(sDebounceVEntry2D10**)stream)[2];
-    readEntry->fn((char*)stream + readEntry->delta, (char*)self + 0x30, 4);
+    readEntry->fn((char*)stream + readEntry->delta, (char*)&self->Type, 4);
     return ((void*)self);
 }
 #endif
@@ -197,9 +197,9 @@ extern "C" void cDebounceNode_writeToReplayFrame(cDebounceNode* self, void* stre
 {
     cMoveNode_writeToReplayFrame(self, stream);
     sDebounceVEntry2FA8* writeEntry = &(*(sDebounceVEntry2FA8**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x2C, 4);
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->Life, 4);
     writeEntry = &(*(sDebounceVEntry2FA8**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x30, 4);
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->Type, 4);
 }
 #endif
 

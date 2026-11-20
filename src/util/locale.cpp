@@ -39,7 +39,7 @@ extern "C" void cFELocale_addFile(cFELocale* self, int lang)
 {
     signed char i = lang;
     if (i >= 0) {
-        cFELocale_sFiles* arr = (cFELocale_sFiles*)((char*)self + 8);
+        cFELocale_sFiles* arr = (cFELocale_sFiles*)&self->mpLocaleFile;
         if (arr->items[i] == 0) {
             cFELocale_sFile* file = (cFELocale_sFile*)operator new(20, str_LocaleFile, 0, 0);
             arr->items[i] = file;
@@ -69,7 +69,7 @@ struct s195A50Arr {
  */
 extern "C" void cFELocale_deleteFile(cFELocale* self, signed char i)
 {
-    s195A50Arr* arr = (s195A50Arr*)((char*)self + 8);
+    s195A50Arr* arr = (s195A50Arr*)&self->mpLocaleFile;
     if (arr->items[i] != 0) {
         cLocaleFile__cLocaleFile(arr->items[i], 3);
         arr->items[i] = 0;
@@ -352,7 +352,7 @@ extern "C" const char* cFELocale_getStringByHash(cFELocale* self, int key)
             }
         }
     }
-    char* buf = (char*)self + 0x5A;
+    char* buf = (char*)&self->TempString;
     sprintf2(buf, str_sp);
     return buf;
 }
@@ -380,7 +380,7 @@ struct cFELocale_getStringByIndex_sArr {
  */
 extern "C" void* cFELocale_getStringByIndex(cFELocale* self, void* stringIndex)
 {
-    cFELocale_getStringByIndex_sArr* arr = (cFELocale_getStringByIndex_sArr*)((char*)self + 8);
+    cFELocale_getStringByIndex_sArr* arr = (cFELocale_getStringByIndex_sArr*)&self->mpLocaleFile;
     signed char i;
     for (i = 0; i < 20; i++) {
         if (arr->items[i] != 0) {

@@ -4430,7 +4430,7 @@ extern int cFEStateOptionsController_vtbl[];
 extern "C" void *cFEStateOptionsController_cFEStateOptionsController(cFEStateOptionsController* self) {
     cUIState_cUIState_E080(self, 0);
     self->mVtbl = (void**)cFEStateOptionsController_vtbl;
-    *((char *)self + 0x50) = 0;
+    *((char*)&self->mVibrateOn) = 0;
     return ((void*)self);
 }
 #endif
@@ -5115,7 +5115,7 @@ extern int cFEStateEventSelect_vtbl[];
 extern "C" void *cFEStateEventSelect_cFEStateEventSelect(cFEStateEventSelect* self) {
     cUIState_cUIState_E4E8(self, 0);
     self->mVtbl = (void**)cFEStateEventSelect_vtbl;
-    cUITemplate_MAP_init_E4E8((char *)self + 0x48);
+    cUITemplate_MAP_init_E4E8((char*)&self->mMap);
     return ((void*)self);
 }
 #endif

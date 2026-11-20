@@ -121,11 +121,11 @@ extern "C" void* cFELocale_cFELocale(cFELocale* self)
     *(char*)&self->mLanguage = 0;
     *(char*)&self->mNumLanguages = 0;
     self->mVtbl = cUILocaleInterface_vtbl;
-    tAttrLocale_tAttrLocale((char*)self + 3);
+    tAttrLocale_tAttrLocale((char*)&self->mAttrLocale);
     *(char*)&self->mModule = 0;
     self->mVtbl = cFELocale_vtbl;
     *(char*)&self->mNumLanguages = 4;
-    func_00416210((char*)self + 8, 0, 80);
+    func_00416210((char*)&self->mpLocaleFile, 0, 80);
     return ((void*)self);
 }
 #endif

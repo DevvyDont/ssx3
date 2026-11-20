@@ -476,7 +476,7 @@ struct cUIVector_setSize_sCount74 {
  */
 extern "C" void cUIVector_setSize(cUIVector* self, t3Vector* off)
 {
-    if (((cUIVector_setSize_sCount74*)((char*)&self->mAttrVector))->count == 4) {
+    if (((cUIVector_setSize_sCount74*)&self->mAttrVector)->count == 4) {
         signed char i;
         for (i = 1; i < 4; i++) {
             (self->mpVertexPosition)[i] = (self->mpVertexPosition)[0];
@@ -864,7 +864,7 @@ extern "C" void cList__cList(cList* self, int flags)
     self->mVtbl = cList_vtbl;
     cList_destroyList(self);
     self->mEnd.mVtbl = cListNode_vtbl;
-    cListNode_destroyListNode((cListNode*)((char*)&self->mEnd));
+    cListNode_destroyListNode((cListNode*)&self->mEnd);
     self->mStart.mVtbl = cListNode_vtbl;
     cListNode_destroyListNode((cListNode*)self);
     if (flags & 1) {
@@ -1054,7 +1054,7 @@ INCLUDE_ASM("ui/uivector", cUIThing_setActive);
  */
 extern "C" void cUIThing_setActive(cUIThing* self, int enable)
 {
-    ((sUIVectorFlags*)((char*)&self->mAttr))->bit1 = enable;
+    ((sUIVectorFlags*)&self->mAttr)->bit1 = enable;
 }
 #endif
 
@@ -1070,7 +1070,7 @@ INCLUDE_ASM("ui/uivector", cUIThing_setCached);
  */
 extern "C" void cUIThing_setCached(cUIThing* self, int enable)
 {
-    ((sUIVectorFlags*)((char*)&self->mAttr))->bit2 = enable;
+    ((sUIVectorFlags*)&self->mAttr)->bit2 = enable;
 }
 #endif
 
@@ -1086,7 +1086,7 @@ INCLUDE_ASM("ui/uivector", cUIThing_setEnabled);
  */
 extern "C" void cUIThing_setEnabled(cUIThing* self, int enable)
 {
-    ((sUIVectorFlags*)((char*)&self->mAttr))->bit3 = enable;
+    ((sUIVectorFlags*)&self->mAttr)->bit3 = enable;
 }
 #endif
 
@@ -1102,7 +1102,7 @@ INCLUDE_ASM("ui/uivector", cUIThing_setFocus);
  */
 extern "C" void cUIThing_setFocus(cUIThing* self, int enable)
 {
-    ((sUIVectorFlags*)((char*)&self->mAttr))->bit4 = enable;
+    ((sUIVectorFlags*)&self->mAttr)->bit4 = enable;
 }
 #endif
 
@@ -1118,7 +1118,7 @@ INCLUDE_ASM("ui/uivector", cUIThing_setStatic);
  */
 extern "C" void cUIThing_setStatic(cUIThing* self, int enable)
 {
-    ((sUIVectorFlags*)((char*)&self->mAttr))->bit5 = enable;
+    ((sUIVectorFlags*)&self->mAttr)->bit5 = enable;
 }
 #endif
 
@@ -1134,7 +1134,7 @@ INCLUDE_ASM("ui/uivector", cUIThing_setVisible);
  */
 extern "C" void cUIThing_setVisible(cUIThing* self, int enable)
 {
-    ((sUIVectorFlags*)((char*)&self->mAttr))->bit6 = enable;
+    ((sUIVectorFlags*)&self->mAttr)->bit6 = enable;
 }
 #endif
 
@@ -1158,7 +1158,7 @@ struct sUIVectorFlags8 {
  */
 extern "C" void cUIThing_setWrap(cUIThing* self, int enable)
 {
-    ((sUIVectorFlags8*)((char*)&self->mAttr))->bit7 = enable;
+    ((sUIVectorFlags8*)&self->mAttr)->bit7 = enable;
 }
 #endif
 //100%
@@ -1824,7 +1824,7 @@ INCLUDE_ASM("ui/uivector", cUIIcon_setIconFlip);
  */
 extern "C" void cUIIcon_setIconFlip(cUIIcon* self, int enable)
 {
-    ((sUIVectorFlags*)((char*)&self->mAttrIcon))->bit1 = enable;
+    ((sUIVectorFlags*)&self->mAttrIcon)->bit1 = enable;
 }
 #endif
 //100%
@@ -1857,7 +1857,7 @@ struct sUIVectorFlagsB {
  */
 extern "C" void cUIIcon_setIconRotate(cUIIcon* self, int enable)
 {
-    ((sUIVectorFlagsB*)((char*)&self->mAttrIcon))->bits23 = enable;
+    ((sUIVectorFlagsB*)&self->mAttrIcon)->bits23 = enable;
 }
 #endif
 //100%
@@ -2303,7 +2303,7 @@ INCLUDE_ASM("ui/uivector", cUIMenu_setFlipInput);
  */
 extern "C" void cUIMenu_setFlipInput(cUIMenu* self, int enable)
 {
-    ((sUIVectorFlags*)((char*)&self->mAttrMenu))->bit1 = enable;
+    ((sUIVectorFlags*)&self->mAttrMenu)->bit1 = enable;
 }
 #endif
 //100%
@@ -2330,7 +2330,7 @@ INCLUDE_ASM("ui/uivector", cUIMenu_setDisableDirSound);
  */
 extern "C" void cUIMenu_setDisableDirSound(cUIMenu* self, int enable)
 {
-    ((sUIVectorFlags*)((char*)&self->mAttrMenu))->bit3 = enable;
+    ((sUIVectorFlags*)&self->mAttrMenu)->bit3 = enable;
 }
 #endif
 //100%
@@ -2751,7 +2751,7 @@ INCLUDE_ASM("ui/uivector", cUIListBox_setShadow);
  * @param enable  non-zero to draw a shadow
  */
 extern "C" void cUIListBox_setShadow(cUIListBox* self, int enable) {
-    ((sUIVectorFlags*)((char*)&self->mAttrListBox))->bit2 = enable;
+    ((sUIVectorFlags*)&self->mAttrListBox)->bit2 = enable;
 }
 #endif
 
@@ -2779,7 +2779,7 @@ INCLUDE_ASM("ui/uivector", cUIListBox_setUseStaticColour);
  */
 extern "C" void cUIListBox_setUseStaticColour(cUIListBox* self, int enable)
 {
-    ((sUIVectorFlags*)((char*)&self->mAttrListBox))->bit5 = enable;
+    ((sUIVectorFlags*)&self->mAttrListBox)->bit5 = enable;
 }
 #endif
 
@@ -2807,7 +2807,7 @@ INCLUDE_ASM("ui/uivector", cUIListBox_setWrapping);
  */
 extern "C" void cUIListBox_setWrapping(cUIListBox* self, int enable)
 {
-    ((sUIVectorFlags8*)((char*)&self->mAttr))->bit7 = enable;
+    ((sUIVectorFlags8*)&self->mAttr)->bit7 = enable;
 }
 #endif
 //100%
@@ -3953,7 +3953,7 @@ INCLUDE_ASM("ui/uivector", cUIText_setShadow);
  */
 extern "C" void cUIText_setShadow(cUIText* self, int enable)
 {
-    ((sUIVectorFlags*)((char*)&self->mAttrText))->bit2 = enable;
+    ((sUIVectorFlags*)&self->mAttrText)->bit2 = enable;
 }
 #endif
 
@@ -3967,7 +3967,7 @@ INCLUDE_ASM("ui/uivector", cUIText_setUnicode);
  */
 extern "C" void cUIText_setUnicode(cUIText* self, int enable)
 {
-    ((sUIVectorFlags*)((char*)&self->mAttrText))->bit3 = enable;
+    ((sUIVectorFlags*)&self->mAttrText)->bit3 = enable;
 }
 #endif
 
@@ -3982,7 +3982,7 @@ INCLUDE_ASM("ui/uivector", cUIText_setUseStaticColour);
  */
 extern "C" void cUIText_setUseStaticColour(cUIText* self, int enable)
 {
-    ((sUIVectorFlags*)((char*)&self->mAttrText))->bit4 = enable;
+    ((sUIVectorFlags*)&self->mAttrText)->bit4 = enable;
 }
 #endif
 
@@ -3997,7 +3997,7 @@ INCLUDE_ASM("ui/uivector", cUIText_setUseDisabledColour);
  */
 extern "C" void cUIText_setUseDisabledColour(cUIText* self, int enable)
 {
-    ((sUIVectorFlags*)((char*)&self->mAttrText))->bit5 = enable;
+    ((sUIVectorFlags*)&self->mAttrText)->bit5 = enable;
 }
 #endif
 
@@ -4012,7 +4012,7 @@ INCLUDE_ASM("ui/uivector", cUIText_setEllipses);
  */
 extern "C" void cUIText_setEllipses(cUIText* self, int enable)
 {
-    ((sUIVectorFlags*)((char*)&self->mAttrText))->bit6 = enable;
+    ((sUIVectorFlags*)&self->mAttrText)->bit6 = enable;
 }
 #endif
 
@@ -4548,7 +4548,7 @@ extern "C" void cUITextScroll__cUITextScroll(cUITextScroll* self, int flags)
     self->mList.mEnd.mVtbl = cListNode_vtbl;
     cListNode_destroyListNode((cListNode*)((char*)self + 0x98));
     self->mList.mStart.mVtbl = cListNode_vtbl;
-    cListNode_destroyListNode((cListNode*)((char*)&self->mList));
+    cListNode_destroyListNode((cListNode*)&self->mList);
     cUIThing__cUIThing_dtor(self, flags);
 }
 #endif
@@ -4619,7 +4619,7 @@ INCLUDE_ASM("ui/uivector", cUITextScroll_setShadow);
  */
 extern "C" void cUITextScroll_setShadow(cUITextScroll* self, int enable)
 {
-    ((sUIVectorFlags*)((char*)&self->mAttrTextScroll))->bit3 = enable;
+    ((sUIVectorFlags*)&self->mAttrTextScroll)->bit3 = enable;
 }
 #endif
 
@@ -4633,7 +4633,7 @@ INCLUDE_ASM("ui/uivector", cUITextScroll_setUnicode);
  */
 extern "C" void cUITextScroll_setUnicode(cUITextScroll* self, int enable)
 {
-    ((sUIVectorFlags*)((char*)&self->mAttrTextScroll))->bit4 = enable;
+    ((sUIVectorFlags*)&self->mAttrTextScroll)->bit4 = enable;
 }
 #endif
 

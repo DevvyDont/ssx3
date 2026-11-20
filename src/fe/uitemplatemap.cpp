@@ -3035,7 +3035,7 @@ extern "C" void cOVState_TRANSPORT_onCreateScreen(cOVState_TRANSPORT* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
     cOVState_onCreateScreen(self);
-    cUITemplate_MAP_onCreateScreen((cUITemplate_MAP*)((char*)&self->mMap), self->mpScreen, (cUIState*)self);
+    cUITemplate_MAP_onCreateScreen(&self->mMap, self->mpScreen, (cUIState*)self);
 }
 #endif
 
@@ -3090,7 +3090,7 @@ extern "C" void cUITemplate_MAP_onGainFocus(cUITemplate_MAP* self);
 extern "C" void cOVState_TRANSPORT_onGainFocus(cOVState_TRANSPORT* self)
 {
     cUIState_onGainFocus(self);
-    cUITemplate_MAP_onGainFocus((cUITemplate_MAP*)((char*)&self->mMap));
+    cUITemplate_MAP_onGainFocus(&self->mMap);
 }
 #endif
 
@@ -3106,7 +3106,7 @@ extern "C" void cOVState_onDestroyScreen(void* self);
  */
 extern "C" void cOVState_TRANSPORT_onDestroyScreen(cOVState_TRANSPORT* self)
 {
-    cUITemplate_MAP_onDestroyScreen((cUITemplate_MAP*)((char*)&self->mMap));
+    cUITemplate_MAP_onDestroyScreen(&self->mMap);
     cOVState_onDestroyScreen(self);
 }
 #endif
@@ -3148,7 +3148,7 @@ INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onWidgetMenu);
  */
 extern "C" int cOVState_TRANSPORT_onWidgetMenu(cOVState_TRANSPORT* self, int menu, int event)
 {
-    if (cUITemplate_MAP_onWidgetMenu((cUITemplate_MAP*)((char*)&self->mMap), menu, event) != 0) {
+    if (cUITemplate_MAP_onWidgetMenu(&self->mMap, menu, event) != 0) {
         return 257;
     }
     return 0;
@@ -3198,7 +3198,7 @@ extern "C" void cUITemplate_MAP_onUpdate(cUITemplate_MAP* self);
 extern "C" void cOVState_TRANSPORT_onUpdate(cOVState_TRANSPORT* self)
 {
     cOVState_onUpdate(self);
-    cUITemplate_MAP_onUpdate((cUITemplate_MAP*)((char*)&self->mMap));
+    cUITemplate_MAP_onUpdate(&self->mMap);
 }
 #endif
 

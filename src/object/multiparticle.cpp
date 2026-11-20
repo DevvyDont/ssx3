@@ -638,7 +638,7 @@ static inline void remove_8780(char* w, void* item, const sMpBox_8780* box)
 // Removes every particle node of slot 'idx' from the world's spatial tree.
 extern "C" void cRailManNode_disableRail(cRailManNode* self, int idx)
 {
-    sMpRef_8780 ref = ((sMpRef_8780*)((char*)self + 0x18))[idx];
+    sMpRef_8780 ref = ((sMpRef_8780*)&self->RailInfo)[idx];
     sMpPart_8780* part = (sMpPart_8780*)ref.get(*cObjectInterface_getWorld_8780());
     char* node = part->first;
     for (int i = 0; i < part->count; i++) {
@@ -749,7 +749,7 @@ static inline void insert_8998(char* w, void* item, const sMpBox_8998* box)
 // Re-inserts every particle node of slot 'idx' into the world's spatial tree, then frees the slot.
 extern "C" void cRailManNode_enableRail(cRailManNode* self, int idx)
 {
-    sMpRef_8998 ref = ((sMpRef_8998*)((char*)self + 0x18))[idx];
+    sMpRef_8998 ref = ((sMpRef_8998*)&self->RailInfo)[idx];
     sMpPart_8998* part = (sMpPart_8998*)ref.get(*cObjectInterface_getWorld_8998());
     char* node = part->first;
     for (int i = 0; i < part->count; i++) {
@@ -765,7 +765,7 @@ extern "C" void cRailManNode_enableRail(cRailManNode* self, int idx)
         insert_8998(cObjectInterface_getNash(), node, &box);
         node = *(char**)(node + 0x64);
     }
-    ((unsigned int*)((char*)self + 0x18))[idx] = 0xFFFFFFFF;
+    ((unsigned int*)((char*)&self->RailInfo))[idx] = 0xFFFFFFFF;
 }
 #endif
 
@@ -861,7 +861,7 @@ extern "C" void cRailManNode_writeToReplayFrame(cRailManNode* self, void* stream
 {
     cSortObjNode_writeToReplayFrame(self, stream);
     sSerVEntry_00358C30* vt = *(sSerVEntry_00358C30**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x18, 0x200);
+    vt[1].fn((char*)stream + vt[1].delta, (char*)&self->RailInfo, 0x200);
 }
 #endif
 
@@ -941,7 +941,7 @@ struct sMP8C80 {
 // (SSX On Tour symbols; frame counts are scaled by 1/30, and f0 is then divided by the cAppMan tick rate like ticks2secs).
 extern "C" void* cAnimComboNode_cAnimComboNode1(cAnimComboNode* self, int bucket, sMPOwner8C80* pInstance, const sMPDesc8C80* adata)
 {
-    cAnimObjectNode_cAnimObjectNode1_8C80((char*)self + 0x18, bucket, 3, pInstance, adata);
+    cAnimObjectNode_cAnimObjectNode1_8C80((char*)&self->AnimType, bucket, 3, pInstance, adata);
     self->mVtbl = (void**)D_0048EC28;
     float* rate = &self->FromTime2;
     char* pModel = pInstance->p80;
@@ -1030,7 +1030,7 @@ extern "C" void cAnimComboNode__cAnimComboNode(cAnimComboNode* self, int flags)
     if (buf != 0) {
         cMemMan_free(buf);
     }
-    cAnimObjectNode__cAnimObjectNode((char*)self + 0x18, 0);
+    cAnimObjectNode__cAnimObjectNode((char*)&self->AnimType, 0);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -1144,7 +1144,7 @@ extern "C" void cAnimComboNode_signal(cAnimComboNode* self, int msg)
             self->CurrTime2 = self->FromTime2;
         }
     } else {
-        cAnimObjectNode_signal((char*)self + 0x18);
+        cAnimObjectNode_signal((char*)&self->AnimType);
     }
 }
 #endif
@@ -1276,7 +1276,7 @@ extern "C" void cAnimObjectNode_writeToReplayFrame(void* self, void* stream);
  */
 extern "C" void cAnimComboNode_writeToReplayFrame(cAnimComboNode* self, void* obj)
 {
-    cAnimObjectNode_writeToReplayFrame((char*)self + 0x18, obj);
+    cAnimObjectNode_writeToReplayFrame((char*)&self->AnimType, obj);
     sVEntry003590F0* vt = *(sVEntry003590F0**)obj;
     vt[1].fn((char*)obj + vt[1].delta, self, 0x18);
 }

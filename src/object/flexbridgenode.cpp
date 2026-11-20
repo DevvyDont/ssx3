@@ -923,7 +923,7 @@ extern "C" void cFlexBridgeNode_updateGrid(cFlexBridgeNode*);
  */
 extern "C" void cFlexBridgeNode_update(cFlexBridgeNode* self)
 {
-    cSpring_update((char*)self + 0x50);
+    cSpring_update((char*)&self->Mesh);
     cFlexBridgeNode_updateGrid(self);
 }
 #endif
@@ -1316,9 +1316,9 @@ extern "C" void cSpring_writeToReplayFrame(void* p, void* stream);
 extern "C" void cFlexBridgeNode_writeToReplayFrame(cFlexBridgeNode* self, void* stream)
 {
     cInstanceNode_writeToReplayFrame(self, stream);
-    cSpring_writeToReplayFrame((char*)self + 0x50, stream);
+    cSpring_writeToReplayFrame((char*)&self->Mesh, stream);
     sFlexBridgeVEntry7D38* vt = *(sFlexBridgeVEntry7D38**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x20, 0x30);
+    vt[1].fn((char*)stream + vt[1].delta, (char*)&self->BottomLeftOffset, 0x30);
 }
 #endif
 
@@ -2004,7 +2004,7 @@ extern "C" void cFlexRailNode_writeToReplayFrame(cFlexRailNode* self, void* stre
 {
     cInstanceNode_writeToReplayFrame(self, stream);
     sSerVEntry_00348B40* vt = *(sSerVEntry_00348B40**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x20, 0x30);
+    vt[1].fn((char*)stream + vt[1].delta, (char*)&self->NumNodes, 0x30);
 }
 #endif
 

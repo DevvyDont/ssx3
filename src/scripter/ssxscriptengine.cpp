@@ -478,7 +478,7 @@ extern "C" int cSSXScriptEngine_ForcePlayUpdate(cSSXScriptEngine* self, int key)
 {
     int result = cBXScriptEngine_ForcePlayUpdate(self, key);
     if (result != 0) {
-        sScrSlot8AD0* slot = (sScrSlot8AD0*)((char*)&self->mObjectCameraManager);
+        sScrSlot8AD0* slot = (sScrSlot8AD0*)&self->mObjectCameraManager;
         for (int i = 0; i < 2; i++, slot++) {
             sSsxVEntry8AD0* vt = (sSsxVEntry8AD0*)self->mVtbl;
             int id = slot->id;
@@ -6531,7 +6531,7 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_GetScriptEntity)
 extern "C" void* cScriptObjCameraManager_GetScriptEntity(cScriptObjCameraManager* self, int index)
 {
     if (index == 0) {
-        return (char*)self + 0x10;
+        return (char*)&self->mEntityVtbl;
     }
     return (char*)self + (index * 0x14 + 0x8);
 }
@@ -6551,7 +6551,7 @@ void cScriptObjCamera_SetCameraManager(void* self, int val);
  */
 extern "C" int cScriptObjCameraManager_AddCameraObject(cScriptObjCameraManager* self, cScriptObjCamera* obj)
 {
-    void** slots = (void**)((char*)self + 0xD0);
+    void** slots = (void**)&self->mpCameraObjects;
     for (int i = 0; i < 2; i++) {
         if (slots[i] == 0) {
             slots[i] = ((void*)obj);
@@ -6686,7 +6686,7 @@ extern "C" void cScriptObjCameraManager_OnStartObjectUse(cScriptObjCameraManager
     cScriptObjCameraManager_ResetScriptManagementVars(self);
     // PORT: pointer passed as int
     if (cSSXScriptEngine_IsPlayingNISListPlayer(ScriptEngine, (int)cBXScriptEngine_GetRequestPlayerByPlayerID_2(ScriptEngine, val)) != 0) {
-        cFocusMan_addbox(SSXApp->Game->AI->FocusMan, (char*)self + 0x100);
+        cFocusMan_addbox(SSXApp->Game->AI->FocusMan, (char*)&self->mFocusBox);
         self->mUseFocusBox = 1;
     }
     cScriptObject_OnStartObjectUse_2(self, val);
@@ -7208,24 +7208,24 @@ extern "C" void cScriptObjCameraManager_DoCameraTransition(cScriptObjCameraManag
     int k = node->kind->a;
     if (k >= 7)
     {
-        void** pf = (void**)((char*)self + 0xD8);
+        void** pf = (void**)&self->mpTransitionObject;
         if (*pf == 0)
         {
             self->mInTransition = 0;
             return;
         }
-        int id = cScriptDatabaseObject_GetPlayerIDByEntity((cScriptDatabaseObject*)((sScriptEng0050*)cScriptDatabaseObject_GetDatabaseObject()), (char*)self + 0x10);
+        int id = cScriptDatabaseObject_GetPlayerIDByEntity((cScriptDatabaseObject*)((sScriptEng0050*)cScriptDatabaseObject_GetDatabaseObject()), (char*)&self->mEntityVtbl);
         cScriptObjTransition_SetTransition_f(*pf, id, node->kind->a, currFrame - (float)node->start, (float)node->len, 0.0f, 0.0f);
     }
     else if (k > 0)
     {
-        void** pf = (void**)((char*)self + 0xD8);
+        void** pf = (void**)&self->mpTransitionObject;
         if (*pf == 0)
         {
             self->mInTransition = 0;
             return;
         }
-        int id = cScriptDatabaseObject_GetPlayerIDByEntity((cScriptDatabaseObject*)((sScriptEng0050*)cScriptDatabaseObject_GetDatabaseObject()), (char*)self + 0x10);
+        int id = cScriptDatabaseObject_GetPlayerIDByEntity((cScriptDatabaseObject*)((sScriptEng0050*)cScriptDatabaseObject_GetDatabaseObject()), (char*)&self->mEntityVtbl);
         cScriptObjTransition_SetTransition1(*pf, id, node->kind->a, node->kind->b, currFrame - (float)node->start, (float)node->kind->d, (float)node->len, (float)node->kind->c);
     }
 }
