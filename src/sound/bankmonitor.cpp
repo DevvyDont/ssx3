@@ -1086,7 +1086,7 @@ INCLUDE_ASM("sound/bankmonitor", cMonitor_MONITOR_GetFreeInstance);
 extern "C" int cMonitor_MONITOR_GetFreeInstance(cMonitor* self, int n)
 {
     for (int i = 0; i < 48; i++) {
-        if (cMonitorInstance_IsFree((cMonitorInstance*)((char*)self + 0x98 + i * 0x2C)) != 0) {
+        if (cMonitorInstance_IsFree((cMonitorInstance*)((char*)&self->mMonitorInstance + i * 0x2C)) != 0) {
             if (--n == 0) {
                 return i;
             }
@@ -1162,7 +1162,7 @@ extern "C" void cMonitorInstance_Reset(cMonitorInstance*);
  */
 extern "C" void cMonitor_MONITOR_DestroyAll(cMonitor* self)
 {
-    char* instance = (char*)self + 0x98;
+    char* instance = (char*)&self->mMonitorInstance;
     int i;
     for (i = 47; i >= 0; i--) {
         cMonitorInstance_Reset((cMonitorInstance*)instance);

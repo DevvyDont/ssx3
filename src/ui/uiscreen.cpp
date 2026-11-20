@@ -1138,7 +1138,7 @@ extern "C" void cUIScreen_update(cUIScreen* self)
             frame = *(unsigned short*)((char*)thread + 0xC);
         }
     }
-    cUIGroup_update((char*)self + 0x40, frame);
+    cUIGroup_update((char*)&self->mRootGroup, frame);
 }
 #endif
 

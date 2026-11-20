@@ -2131,7 +2131,7 @@ public:
  */
 extern "C" void cPositionModifier_writeToReplayFrame(cPositionModifier* self, cPositionModifier_writeToReplayFrame_cObj* obj)
 {
-    obj->v01((char*)self + 0x10, 0x40);
+    obj->v01((char*)&self->BoundBox, 0x40);
 }
 #endif
 
@@ -2193,7 +2193,7 @@ extern "C" void* cParentModifier_cParentModifier(cParentModifier* self, void* st
     cPositionModifier_cPositionModifier2(self, stream);
     self->mVtbl = (void**)cParentModifier_vtbl;
     sMnVEntrySer7090* readEntry = &(*(sMnVEntrySer7090**)stream)[2];
-    readEntry->fn((char*)stream + readEntry->delta, (char*)self + 0x90, 4);
+    readEntry->fn((char*)stream + readEntry->delta, (char*)&self->Mesh, 4);
     sMnVEntryRd7090* readPtrEntry = &(*(sMnVEntryRd7090**)stream)[3];
     self->ParentInst = (tInstanceRecord*)readPtrEntry->fn((char*)stream + readPtrEntry->delta);
     return ((void*)self);
@@ -2371,7 +2371,7 @@ extern "C" void cParentModifier_writeToReplayFrame(cParentModifier* self, void* 
 {
     cPositionModifier_writeToReplayFrame((cPositionModifier*)self, (cPositionModifier_writeToReplayFrame_cObj*)stream);
     sMnVEntry7278a* vt1 = *(sMnVEntry7278a**)stream;
-    vt1[1].fn((char*)stream + vt1[1].delta, (char*)self + 0x90, 4);
+    vt1[1].fn((char*)stream + vt1[1].delta, (char*)&self->Mesh, 4);
     sMnVEntry7278b* vt2 = *(sMnVEntry7278b**)stream;
     vt2[5].fn((char*)stream + vt2[5].delta, self->ParentInst);
 }
@@ -2453,14 +2453,14 @@ extern char cMagnetModifier_vtbl[];
  */
 extern "C" void* cMagnetModifier_cMagnetModifier1(cMagnetModifier* self, void* stream)
 {
-    char* payload = (char*)self + 0x10;
+    char* payload = (char*)&self->Offset;
     *(void**)self = cMagnetModifier_vtbl;
     sMnVEntryRd7358* readInstFn = &(*(sMnVEntryRd7358**)stream)[3];
     self->Instance = (tInstanceRecord*)readInstFn->fn((char*)stream + readInstFn->delta);
     sMnVEntrySer7358* readFn = &(*(sMnVEntrySer7358**)stream)[2];
     readFn->fn((char*)stream + readFn->delta, payload, 80);
     readFn = &(*(sMnVEntrySer7358**)stream)[2];
-    readFn->fn((char*)stream + readFn->delta, (char*)self + 0x60, 0x40);
+    readFn->fn((char*)stream + readFn->delta, (char*)&self->Transform, 0x40);
     self->RootTransformDirty = 1;
     return ((void*)self);
 }
@@ -2660,9 +2660,9 @@ extern "C" void cMagnetModifier_writeToReplayFrame(cMagnetModifier* self, void* 
     sMnVEntryPtr76D0* writePtrEntry = &(*(sMnVEntryPtr76D0**)stream)[5];
     writePtrEntry->fn((char*)stream + writePtrEntry->delta, self->Instance);
     sMnVEntrySer76D0* writeEntry = &(*(sMnVEntrySer76D0**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x10, 80);
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->Offset, 80);
     writeEntry = &(*(sMnVEntrySer76D0**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x60, 0x40);
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->Transform, 0x40);
 }
 #endif
 
@@ -2734,7 +2734,7 @@ void* cObjectInterface_getAvaSplineTransform_2(void*, void*) __asm__("cObjectInt
  */
 extern "C" void* cAvaSplineModifier_cAvaSplineModifier1(cAvaSplineModifier* self, void* stream)
 {
-    char* payload = (char*)self + 0x10;
+    char* payload = (char*)&self->BoundBox;
     *(void***)self = cAvaSplineModifier_vtbl;
     sMnVEntryRd7798* readInstFn = &(*(sMnVEntryRd7798**)stream)[3];
     self->Instance = (tInstanceRecord*)readInstFn->fn((char*)stream + readInstFn->delta);
@@ -2788,7 +2788,7 @@ extern "C" void cAvaSplineModifier_writeToReplayFrame(cAvaSplineModifier* self, 
     sMnVEntry7848a* vt1 = *(sMnVEntry7848a**)stream;
     vt1[5].fn((char*)stream + vt1[5].delta, self->Instance);
     sMnVEntry7848b* vt2 = *(sMnVEntry7848b**)stream;
-    vt2[1].fn((char*)stream + vt2[1].delta, (char*)self + 0x10, 0x30);
+    vt2[1].fn((char*)stream + vt2[1].delta, (char*)&self->BoundBox, 0x30);
 }
 #endif
 

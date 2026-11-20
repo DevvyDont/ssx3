@@ -894,8 +894,8 @@ extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cF
 extern "C" void cFEStateLobbyMenu__cFEStateLobbyMenu(cFEStateLobbyMenu* self, int flags)
 {
     self->mVtbl = cFEStateLobbyMenu_vtbl;
-    cBXString__cBXString((char*)self + 0xB80, 2);
-    cBXString__cBXString((char*)self + 0x76C, 2);
+    cBXString__cBXString((char*)&self->mszRoomName, 2);
+    cBXString__cBXString((char*)&self->mszChannelName, 2);
     cFEStateNet__cFEStateNet_dtor(self, flags);
 }
 #endif
@@ -942,9 +942,9 @@ extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cF
 extern "C" void cFEStateNetCreateRoomPopup__cFEStateNetCreateRoomPopup(cFEStateNetCreateRoomPopup* self, int flags)
 {
     self->mVtbl = cFEStateNetCreateRoomPopup_vtbl;
-    cBXString__cBXString((char*)self + 0x6E4, 2);
-    cBXString__cBXString((char*)self + 0x6E0, 2);
-    cBXString__cBXString((char*)self + 0x6DC, 2);
+    cBXString__cBXString((char*)&self->mszPassword, 2);
+    cBXString__cBXString((char*)&self->mszChannelName, 2);
+    cBXString__cBXString((char*)&self->mszRoomName, 2);
     cFEStateNet__cFEStateNet_dtor(self, flags);
 }
 #endif
@@ -3492,7 +3492,7 @@ extern "C" void cFEStateChallengeReceivedPopup__cFEStateChallengeReceivedPopup(c
     void* obj = self->mpParentState;
     sVEntry001E0A50* vt = *(sVEntry001E0A50**)((char*)obj + 8);
     vt[32].fn((char*)obj + vt[32].delta);
-    cBXString__cBXString((char*)self + 0x6D0, 2);
+    cBXString__cBXString((char*)&self->mszChallenger, 2);
     cFEStateNet__cFEStateNet_dtor(self, flags);
 }
 #endif
@@ -3848,9 +3848,9 @@ extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cF
 extern "C" void cFEStateCreateStep1__cFEStateCreateStep1(cFEStateCreateStep1* self, int flags)
 {
     self->mVtbl = cFEStateCreateStep1_vtbl;
-    cBXString__cBXString((char*)self + 0x6DC, 2);
-    cBXString__cBXString((char*)self + 0x6D8, 2);
-    cBXString__cBXString((char*)self + 0x6D4, 2);
+    cBXString__cBXString((char*)&self->mszSavedMail, 2);
+    cBXString__cBXString((char*)&self->mszSavedConfirm, 2);
+    cBXString__cBXString((char*)&self->mszSavedPassword, 2);
     cFEStateNet__cFEStateNet_dtor(self, flags);
 }
 #endif

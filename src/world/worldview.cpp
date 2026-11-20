@@ -178,7 +178,7 @@ extern "C" int cWorldView_activateSection(cWorldView* self, unsigned int i)
     tStreamDataHeader* list = self->mp_Hdr;
     if (list != 0 && i < (unsigned int)list->m_uiNumSections) {
         int off = i << 3;
-        char* base = (char*)self + 0x14;
+        char* base = (char*)&self->mp_SectionState;
         cWorldView_activateSection_sEntry* entry = (cWorldView_activateSection_sEntry*)(base + off);
         int st = entry->state;
         if (st == 5) {

@@ -3044,7 +3044,7 @@ extern "C" void cOVState_TRANSPORT_onCreateScreen(cOVState_TRANSPORT* self)
         cUIScreen_playFrame(screen, 0, 0);
     }
     cOVState_onCreateScreen(self);
-    cUITemplate_MAP_onCreateScreen((char*)self + 0x9C, self->mpScreen, self);
+    cUITemplate_MAP_onCreateScreen((char*)&self->mMap, self->mpScreen, self);
 }
 #endif
 
@@ -3157,7 +3157,7 @@ INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onWidgetMenu);
  */
 extern "C" int cOVState_TRANSPORT_onWidgetMenu(cOVState_TRANSPORT* self, int menu, int event)
 {
-    if (cUITemplate_MAP_onWidgetMenu((char*)self + 0x9C, menu, event) != 0) {
+    if (cUITemplate_MAP_onWidgetMenu((char*)&self->mMap, menu, event) != 0) {
         return 257;
     }
     return 0;

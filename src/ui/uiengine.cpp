@@ -118,7 +118,7 @@ extern "C" void cUIEngine__cUIEngine(cUIEngine* self, int flags)
     delete fields->b;
     delete fields->c;
     cUITextureBank__cUITextureBank((cUITextureBank*)((char*)self + 0x58), 2);
-    cUIStateStack__cUIStateStack((char*)self + 0x18, 2);
+    cUIStateStack__cUIStateStack((char*)&self->mStateStack, 2);
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -150,7 +150,7 @@ extern "C" int cUIEngine_loadFile(cUIEngine* self, int id)
     char* file = (char*)FILE_load(name, 0);
     self->mpData = file;
     // PORT: the font setter stores the data pointer in an int.
-    cUIAnimationBank_setData((char*)self + 0x50, (int)(file + *(int*)(file + 0x8)));
+    cUIAnimationBank_setData((char*)&self->mAnimBank, (int)(file + *(int*)(file + 0x8)));
     file = self->mpData;
     cUITextureBank_setData((cUITextureBank*)((char*)self + 0x58), id, file + *(int*)(file + 0x10));
     return 1;
@@ -817,7 +817,7 @@ extern "C" void cUIGroup_setFocus(cUIGroup* self, int on)
     focusOp.vt = cListOperator_vtbl;
     focusOp.vt = cListOpSetFocus_vtbl;
     focusOp.arg = on;
-    cList_traverseFlat_f((char*)self + 0x74, &focusOp);
+    cList_traverseFlat_f((char*)&self->mList, &focusOp);
     focusOp.vt = cListOperator_vtbl;
     ((cUIGroup_setFocus_sFlags*)((char*)self + 0x14))->on = (on != 0);
 }
@@ -926,7 +926,7 @@ extern "C" int cUIGroup_onInput(cUIGroup* self, int pInput)
     inputOp.vt = cListOperator_vtbl;
     inputOp.vt = cListOpOnInput_vtbl;
     inputOp.arg = pInput;
-    int handled = cList_traverseFlat((char*)self + 0x74, &inputOp);
+    int handled = cList_traverseFlat((char*)&self->mList, &inputOp);
     inputOp.vt = cListOperator_vtbl;
     return handled != 0;
 }

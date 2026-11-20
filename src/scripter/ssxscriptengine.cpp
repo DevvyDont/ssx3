@@ -1497,10 +1497,10 @@ extern "C" void cSSXScriptEngine_OnDetachData(cSSXScriptEngine* self, void* obj,
         cBXScriptEngine_DetachScript(self, *(int*)((char*)GetSSXScriptHeader1(obj) + 0x18));
         break;
     case 1:
-        cScriptAnimBankManager_UnlinkBank((char*)self + 0xA28, id);
+        cScriptAnimBankManager_UnlinkBank((char*)&self->mAnimationBankManager, id);
         break;
     case 2:
-        cScriptSoundBankManager_UnlinkBank1((char*)self + 0xA38, id);
+        cScriptSoundBankManager_UnlinkBank1((char*)&self->mSoundBankManager, id);
         break;
     }
 }
@@ -2828,7 +2828,7 @@ extern "C" void cSSXScriptEngine_PurgeScriptBank(cSSXScriptEngine* self, int i)
     char* slot = (char*)self + (i * 16 + 0x628);
     int key = *(int*)slot;
     if (key != 0) {
-        void* bankData = cDataManager_DetachData((char*)self + 0x51C, key);
+        void* bankData = cDataManager_DetachData((char*)&self->mMaxDataInstances, key);
         if (*(int*)(slot + 0xC) != 0 && bankData != 0) {
             cMemMan_free(bankData);
         }
@@ -2963,7 +2963,7 @@ extern "C" void cSSXScriptEngine_ProcessAsyncLoadScriptBankComplete(cSSXScriptEn
             sprintf(buf, str_asyncpct_08d, ssxScriptBankInfo->dataIdentifier);
             (*(int*)&ssxScriptBankInfo->asyncHandle) = 0;
             self->mCurrAttachingBankNum = i;
-            (*(int*)&ssxScriptBankInfo->dataBankHandle) = cDataManager_AttachData((char*)self + 0x51C, buf, loaded.data, loaded.size);
+            (*(int*)&ssxScriptBankInfo->dataBankHandle) = cDataManager_AttachData((char*)&self->mMaxDataInstances, buf, loaded.data, loaded.size);
             self->mCurrAttachingBankNum = 10;
             return;
         }

@@ -95,7 +95,7 @@ extern const char str_ssb[];
 extern "C" int cStreamMan_init(cStreamMan* self, const char* name, int id)
 {
     *(int*)self = id;
-    sprintf((char*)self + 4, str_pct_spct_s_e, name, str_ssb);
+    sprintf((char*)&self->m_filename, str_pct_spct_s_e, name, str_ssb);
     return 1;
 }
 #endif
@@ -177,7 +177,7 @@ extern "C" int STREAM_queuefile(int h, void* p, int a, int tag);
 extern "C" int cStreamMan_addStreamRequest(cStreamMan* self, int uiHullID, int uiNumHullChunk, int uiFileOffset)
 {
     if (self->m_bActive == 0) {
-        int streamReq = STREAM_queuefile(self->m_streamHandle, (char*)self + 0x4, uiFileOffset, 0x444E4543);
+        int streamReq = STREAM_queuefile(self->m_streamHandle, (char*)&self->m_filename, uiFileOffset, 0x444E4543);
         self->m_streamRequest = streamReq;
         if (streamReq != 0) {
             self->m_ActiveHull = uiHullID;

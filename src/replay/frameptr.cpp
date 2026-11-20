@@ -597,11 +597,11 @@ void cReplay_setReplayState(void* self, int state);
  */
 extern "C" void* cReplay_cReplay(cReplay* self)
 {
-    char* frame = (char*)self + 0x2C;
+    char* frame = (char*)&self->Frames;
     for (int i = 15; i != -1; i--, frame += 0x38) {
         cReplayFrame_cReplayFrame(frame);
     }
-    char* highlight = (char*)self + 0x494;
+    char* highlight = (char*)&self->Highlight;
     cReplayFrameList_cReplayFrameList((char*)self + 0x3B0);
     cReplayFrameList_cReplayFrameList((char*)self + 0x3BC);
     for (int i = 1; i != -1; i--, highlight += 0xB4) {

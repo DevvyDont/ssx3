@@ -90,7 +90,7 @@ struct sFrameDesc270130 {
  */
 extern "C" void* cReplay_allocReplayFrame(cReplay* self)
 {
-    void* list = (char*)self + 0x3BC;
+    void* list = (char*)&self->FreeFrameList;
     if (self->FreeFrameList.NumFrames <= 0) {
         cReplay_freeOneReplayFrame(self);
     }
@@ -166,9 +166,9 @@ extern "C" void cReplayFrameList_addFrame(void* list, void* node);
  */
 extern "C" void cReplay_freeReplayFrame(cReplay* self, void* node)
 {
-    cReplayFrameList_remFrame((char*)self + 0x3B0, node);
+    cReplayFrameList_remFrame((char*)&self->FrameList, node);
     cReplayFrame_clearFrame(node);
-    cReplayFrameList_addFrame((char*)self + 0x3BC, node);
+    cReplayFrameList_addFrame((char*)&self->FreeFrameList, node);
 }
 #endif
 
@@ -794,7 +794,7 @@ extern "C" void cReplay_eventChapter(cReplay* self, int key, int bit)
         int slot = findPlayerId(key);
         if (slot >= 0 && bit >= 0 && bit < self->MaxChapters) {
             int off = slot << 2;
-            char* base = (char*)self + 0x5FC;
+            char* base = (char*)&self->Chapters;
             int* chapterBits = (int*)(base + off);
             if (cReplay_eventChapter_isClear(*chapterBits, bit)) {
                 unsigned char* headFrame = (unsigned char*)self->FrameList.Head;
@@ -1645,7 +1645,7 @@ extern "C" void cReplay_writeSetup(cReplay* self, signed char* data, int size);
  */
 extern "C" void cReplay_writeCheckSum(cReplay* self)
 {
-    MEM_copy(self->WriteTmp, (char*)self + 0x680, 8);
+    MEM_copy(self->WriteTmp, (char*)&self->WriteCheckSum, 8);
     cReplay_writeSetup(self, (signed char*)self->WriteTmp, 8);
     self->WriteState += 1;
 }

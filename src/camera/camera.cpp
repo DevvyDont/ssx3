@@ -123,7 +123,7 @@ extern "C" void cCamera__cCamera(cCamera* self, int flags)
     delete (cCamPartK2*)self->ManualController;
     delete (cCamPartK2*)self->ChaseController;
     delete (cCamPartK2*)self->ScriptController;
-    cDEFAULT_3ChaseAlgorithm__cDEFAULT_3ChaseAlgorithm_2((char*)self + 0xC0, 2);
+    cDEFAULT_3ChaseAlgorithm__cDEFAULT_3ChaseAlgorithm_2((char*)&self->ResultAlgorithm, 2);
     self->mVtbl = cSimpleCamera_vtbl;
     if (flags & 1)
     {
@@ -3499,9 +3499,9 @@ void cLookAtChaseAlgorithm__cLookAtChaseAlgorithm_dtor(void* self, int flags) __
 extern "C" void cSplineCamAlgorithm__cSplineCamAlgorithm(cSplineCamAlgorithm* self, int flags)
 {
     self->mVtbl = cSplineCamAlgorithm_vtbl;
-    cCubicSplineInterpolant__cCubicSplineInterpolant((char*)self + 0x3A8, 2);
-    cCubicSplineInterpolant__cCubicSplineInterpolant((char*)self + 0x39C, 2);
-    cCubicSplineInterpolant__cCubicSplineInterpolant((char*)self + 0x390, 2);
+    cCubicSplineInterpolant__cCubicSplineInterpolant((char*)&self->ZOfT, 2);
+    cCubicSplineInterpolant__cCubicSplineInterpolant((char*)&self->YOfT, 2);
+    cCubicSplineInterpolant__cCubicSplineInterpolant((char*)&self->XOfT, 2);
     cLookAtChaseAlgorithm__cLookAtChaseAlgorithm_dtor(self, flags);
 }
 #endif

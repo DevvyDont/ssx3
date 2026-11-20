@@ -6499,7 +6499,7 @@ extern "C" void func_002613C8(BuddyMan* self)
     if (idx >= 0) {
         bool ok = !*(bool*)&self->mState;
         if (ok) {
-            func_00261248(self, self, idx, (char*)self + 0x44, (char*)self + 0x64, (int)self->mResource);
+            func_00261248(self, self, idx, (char*)&self->mUserName, (char*)&self->mPassword, (int)self->mResource);
         }
     }
 }

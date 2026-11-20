@@ -315,9 +315,9 @@ extern "C" void cMultiParticle_writeToReplayFrame(cMultiParticle* self, void* st
     writeEntry->fn((char*)stream + writeEntry->delta, self->Particle, 216);
     cStaticEmitter_writeToReplayFrame(self->Emitter, stream);
     writeEntry = &(*(sSerVEntry_58380**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x40, 0x10);
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->Offset, 0x10);
     writeEntry = &(*(sSerVEntry_58380**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x20, 0x20);
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->BoundBox, 0x20);
     if (self->NumInst > 0) {
         writeEntry = &(*(sSerVEntry_58380**)stream)[1];
         writeEntry->fn((char*)stream + writeEntry->delta, (int*)self->InstIds, self->NumInst << 2);

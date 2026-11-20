@@ -948,7 +948,7 @@ extern void* cWScriptTask_vtbl[];
 extern "C" void* cWScriptTask_cWScriptTask(cWScriptTask* self)
 {
     self->mVtbl = cWScriptTask_vtbl;
-    MEM_fill((char*)self + 8, 0, 0xC);
+    MEM_fill((char*)&self->TaskScriptCode, 0, 0xC);
     self->Process = 0;
     self->TaskId = (unsigned int)0;
     *(int*)self = 0;

@@ -747,9 +747,9 @@ extern "C" int cWorldCache_init(cWorldCache* self, const char* name, int pNash)
     self->mp_ChunkResolve = (cChunkResolve*)x;
     sVE_7FC0* vt = *(sVE_7FC0**)(x + 8);
     vt[2].fn(x + vt[2].delta, pNash);
-    if (cStreamMan_init((char*)self + 0x300, name, self) == 0)
+    if (cStreamMan_init((char*)&self->m_StreamMan, name, self) == 0)
         return 0;
-    int viewOk = cWorldView_init_p((char*)self + 0x10, self->mp_DataHeader, self);
+    int viewOk = cWorldView_init_p((char*)&self->m_WorldView, self->mp_DataHeader, self);
     if (viewOk == 0)
         return 0;
     cWorldCache_initPageMap((cWorldCache_initPageMap_sCache*)self);

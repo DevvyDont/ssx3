@@ -1308,7 +1308,7 @@ public:
  */
 extern "C" void cCheatFX_writeToReplayFrame(cCheatFX* self, cCheatFX_writeToReplayFrame_cObj* stream)
 {
-    stream->v01((char*)self + 4, 4);
+    stream->v01((char*)&self->m_cheatState, 4);
 }
 #endif
 
@@ -1322,7 +1322,7 @@ INCLUDE_ASM("visualfx/worldlightman", cCheatFX_readFromReplayFrame);
  */
 extern "C" void cCheatFX_readFromReplayFrame(cCheatFX* self, cCheatFX_writeToReplayFrame_cObj* stream)
 {
-    stream->v02((char*)self + 4, 4);
+    stream->v02((char*)&self->m_cheatState, 4);
 }
 #endif
 

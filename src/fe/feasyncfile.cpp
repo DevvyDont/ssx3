@@ -1122,7 +1122,7 @@ extern "C" void func_001A4810(cFEStateNetMessenger* self, void* text)
         *(int*)((char*)popup + 0x14C) = 3;
         *(int*)((char*)popup + 0x164) = 0;
         func_001A9BC0((cFEStateNet*)self, popup);
-        cBXString_operatorE1((char*)self + 0x6D4, name);
+        cBXString_operatorE1((char*)&self->mszSearchName, name);
         func_0025E6D0(LobbyMan_mLobbyMan, name);
     }
 }
@@ -1379,7 +1379,7 @@ extern char str_kT_POPUP279UserFound[];
  */
 extern "C" void func_001A4CE8(cFEStateNetMessenger* self, void* src)
 {
-    cBXString_operatorE((char*)self + 0x6D0, (char*)src + 0x8);
+    cBXString_operatorE((char*)&self->mszFoundName, (char*)src + 0x8);
     self->unk_6D8 = *(int*)((char*)src + 0x10);
     void* popup = func_001A9C50((cFEStateNet*)self);
     int three = 3;
@@ -1458,7 +1458,7 @@ extern "C" void func_001A4E28(cFEStateNetMessenger* self, void* msg)
 {
     switch (*(int*)((char*)msg + 8)) {
     case 0x69706572: {
-        char* buf = (char*)self + 0x9C;
+        char* buf = (char*)&self->mustrMessage;
         int one = 1;
         int three = 3;
         char* obj = (char*)SSXApp->FELocale;
@@ -7108,7 +7108,7 @@ extern "C" void cFEStateNet__cFEStateNet_dtor(void* self, int flags) __asm__("cF
 extern "C" void cFEUseExistingAccount__cFEUseExistingAccount(cFEUseExistingAccount* self, int flags)
 {
     self->mVtbl = cFEUseExistingAccount_vtbl;
-    cBXString__cBXString((char*)self + 0x6DC, 2);
+    cBXString__cBXString((char*)&self->mszEmail, 2);
     cFEStateNet__cFEStateNet_dtor(self, flags);
 }
 #endif
@@ -7615,7 +7615,7 @@ extern "C" void func_001AC9C0(cFEUseExistingAccount* self, void* popup, int even
     if (event == 0xF) {
         int three = 3;
         cFEStateNet_onPopupEvent(self, popup, 0xF);
-        cBXString_operatorE1((char*)self + 0x6DC, *(const char**)((char*)popup + 0x2B0));
+        cBXString_operatorE1((char*)&self->mszEmail, *(const char**)((char*)popup + 0x2B0));
         void* newPopup = func_001A9C50((cFEStateNet*)self);
         *(int*)((char*)newPopup + 0xBC) = 0;
         *(int*)((char*)newPopup + 0xC4) = GetHashValue32(str_kT_POPUP204RequestAccount);
@@ -8130,13 +8130,13 @@ extern "C" void func_001AD3E8(cFEStateSelectPersona* self, cUIText* text)
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
     int i = 0;
     for (; i < lobbyMan->mNumPersonas; i++) {
-        cUIText* item = cList_getByIndex((char*)text + 0x74, i);
+        cUIText* item = cList_getByIndex((char*)&text->mAttrText, i);
         *(int*)((char*)item + 0x18) = i;
         cUIText_setAsciiString(item, ((const char**)&lobbyMan->mPersonas[0])[i]);
         ((cFEVObj_001AD3E8*)item)->v09(1);
     }
     for (; i < 4; i++) {
-        cUIText* item = cList_getByIndex((char*)text + 0x74, i);
+        cUIText* item = cList_getByIndex((char*)&text->mAttrText, i);
         *(int*)((char*)item + 0x18) = i;
         cUIText_setUnicodeStringByID(item, GetHashValue32(str_kT_220CreateNewPersona));
         ((cFEVObj_001AD3E8*)item)->v09(1);
@@ -10101,7 +10101,7 @@ extern "C" void* cFEStateChallengeReceivedPopup_cFEStateChallengeReceivedPopup(c
 {
     cFEStateNet_cFEStateNet_3(self, pEngine, pParentState);
     self->mVtbl = cFEStateChallengeReceivedPopup_vtbl;
-    cBXString_cBXString2((char*)self + 0x6D0, name);
+    cBXString_cBXString2((char*)&self->mszChallenger, name);
     self->mbAccepted = 0;
     self->mHashName = 0x40;
     D_004A4E88 = 0;
@@ -14050,7 +14050,7 @@ struct sVE_001B47C0 {
 extern "C" void func_001B47C0(cFEStateNetConfig* self, int cardSlot)
 {
     char buf[32];
-    char* str = (char*)self + 0x71C;
+    char* str = (char*)&self->mustrPopupText;
     usprintf(buf, str_pct_d_b, cardSlot);
     char* locale = (char*)SSXApp->FELocale;
     sVE_001B47C0* vt = *(sVE_001B47C0**)(locale + 4);
@@ -14124,14 +14124,14 @@ extern "C" void func_001B4888(cFEStateNetConfig* self, int popupId, int cardErro
     switch (cardError) {
     case 2:
         if (cardSlot == -1) {
-            char* dst = (char*)self + 0x71C;
+            char* dst = (char*)&self->mustrPopupText;
             cardSlot = 1;
             int name = Loc1B4888(str_kT_POPUPCMNYourNetwork);
             sprintf1_1B4888(dst, Loc1B4888(str_kT_MEMFENotDetectedFile), cardSlot, name);
             *(char**)((char*)popup + 0xC4) = dst;
             *(int*)((char*)popup + 0xC0) = cardSlot;
         } else {
-            char* dst = (char*)self + 0x71C;
+            char* dst = (char*)&self->mustrPopupText;
             int name = Loc1B4888(str_kT_POPUPCMNYourNetwork);
             sprintf1_1B4888(dst, Loc1B4888(str_kT_MEMFENotDetectedFile), cardSlot + 1, name);
             *(char**)((char*)popup + 0xC4) = dst;
@@ -14141,7 +14141,7 @@ extern "C" void func_001B4888(cFEStateNetConfig* self, int popupId, int cardErro
         break;
     case 20: {
         usprintf_1B4888(buf, str_pct_d_b, cardSlot + 1);
-        char* dst = (char*)self + 0x71C;
+        char* dst = (char*)&self->mustrPopupText;
         sprintf1_1B4888(dst, Loc1B4888(str_kT_MEMOVNotFormattedPS2), buf);
         *(char**)((char*)popup + 0xC4) = dst;
         *(int*)((char*)popup + 0xC0) = 1;
@@ -14149,7 +14149,7 @@ extern "C" void func_001B4888(cFEStateNetConfig* self, int popupId, int cardErro
     }
     case 0x18: {
         usprintf_1B4888(buf, str_pct_d_b, cardSlot + 1);
-        char* dst = (char*)self + 0x71C;
+        char* dst = (char*)&self->mustrPopupText;
         int name = Loc1B4888(str_kT_POPUPCMNYourNetwork);
         sprintf1_1B4888(dst, Loc1B4888(str_kT_MEMFECorruptPS2), name, buf);
         *(char**)((char*)popup + 0xC4) = dst;
@@ -16236,9 +16236,9 @@ static inline void SetNames_001B6ED0(char* buf1, char* buf2, const char* a, cons
 // PORT: the unit declares the two name pointers as int
 extern "C" void* cFEStateNetAccountMem_cFEStateNetAccountMem(cFEStateNetAccountMem* self, int pEngine, void* owner, int mode, int name, int name2)
 {
-    char* buf1 = (char*)self + 0x6E0;
+    char* buf1 = (char*)&self->mszUserName;
     cFEBlankPopup_cFEBlankPopup((cFEStateNet*)self);
-    char* buf2 = (char*)self + 0x6F1;
+    char* buf2 = (char*)&self->mszPassword;
     self->mVtbl = cFEStateNetAccountMem_vtbl;
     *((char*)self + 0x6E0) = 0;
     *((char*)self + 0x6F1) = 0;
@@ -18896,9 +18896,9 @@ extern "C" void cBXString_Reset(void* self);
 extern "C" void func_001BA178(cFEStateCreateStep1* self)
 {
     if (self->mbEditAccount == 0) {
-        cBXString_operatorE((char*)self + 0x6D4, (char*)self->mpAccount + 0x4);
-        cBXString_operatorE((char*)self + 0x6D8, (char*)self->mpAccount + 0x8);
-        cBXString_operatorE((char*)self + 0x6DC, (char*)self->mpAccount + 0xC);
+        cBXString_operatorE((char*)&self->mszSavedPassword, (char*)self->mpAccount + 0x4);
+        cBXString_operatorE((char*)&self->mszSavedConfirm, (char*)self->mpAccount + 0x8);
+        cBXString_operatorE((char*)&self->mszSavedMail, (char*)self->mpAccount + 0xC);
         char* account = (char*)self->mpAccount;
         self->miSavedSpam[0] = *(int*)(account + 0x38);
         self->miSavedSpam[1] = *(int*)(account + 0x3C);
@@ -21216,7 +21216,7 @@ extern "C" int cFEStateLobbyMenu_onGainTransition(cFEStateLobbyMenu* self, int r
             }
             cUIListBox_setCurrentEntryByIndex(list, *(unsigned char*)&self->miSelectedRoom);
         }
-        char* ids = (char*)self + 0x718;
+        char* ids = (char*)&self->mpChannelPair;
         cUIMenu_setSelectedByIndex(self->mpMenuRoomMenus, self->miSelectedChannel);
         func_001BE3A8(self, *(int*)(ids + (self->miSelectedChannel << 2)));
         func_001BE720(self);
@@ -21845,7 +21845,7 @@ extern "C" void func_001BD8C8(cFEStateLobbyMenu* self, int msgPtr)
     }
     case 0x70617373:
         if (self->mbRoomHasPassword == 0) {
-            char* buf = (char*)self + 0x780;
+            char* buf = (char*)&self->mustrPopupText;
             char* name = self->mszRoomName;
             char* obj = (char*)SSXApp->FELocale;
             sVEntry_001BD8C8* vt = *(sVEntry_001BD8C8**)(obj + 4);
@@ -22771,7 +22771,7 @@ extern "C" void cFEStateNetCreateRoomPopup_onWidgetCreate(cFEStateNetCreateRoomP
         cUIListBox_addEntryByStringID(text, GetHashValue32(str_kT_POPUP232Advanced), 1);
         cUIListBox_addEntryByStringID(text, GetHashValue32(str_kT_POPUP232Elite), 0);
         cUIListBox_addEntryByStringID(text, GetHashValue32(str_kT_POPUP232Voice), 3);
-        cBXString_operatorE1((char*)self + 0x6E0, D_004A1A6C);
+        cBXString_operatorE1((char*)&self->mszChannelName, D_004A1A6C);
         self->mpLBChannelName = (cUIListBox*)text;
     } else if (id == GetHashValue32(str_EnterRoomName)) {
         cUIText_setAsciiString(text, D_004A1408);
@@ -22889,16 +22889,16 @@ extern "C" void cFEStateNetCreateRoomPopup_onWidgetEvent(cFEStateNetCreateRoomPo
         if (obj == (char*)self->mpLBChannelName) {
             switch (cUIListBox_getCurrentEntryData(obj)) {
             case 0:
-                cBXString_operatorE1((char*)self + 0x6E0, D_004A1A60);
+                cBXString_operatorE1((char*)&self->mszChannelName, D_004A1A60);
                 break;
             case 1:
-                cBXString_operatorE1((char*)self + 0x6E0, D_004A1A64);
+                cBXString_operatorE1((char*)&self->mszChannelName, D_004A1A64);
                 break;
             case 2:
-                cBXString_operatorE1((char*)self + 0x6E0, D_004A1A6C);
+                cBXString_operatorE1((char*)&self->mszChannelName, D_004A1A6C);
                 break;
             case 3:
-                cBXString_operatorE1((char*)self + 0x6E0, D_004A1A68);
+                cBXString_operatorE1((char*)&self->mszChannelName, D_004A1A68);
                 break;
             }
         }
@@ -22907,11 +22907,11 @@ extern "C" void cFEStateNetCreateRoomPopup_onWidgetEvent(cFEStateNetCreateRoomPo
         char* keyboard = (char*)self->mpKeyboard;
         switch (*(int*)(keyboard + 0x18)) {
         case 1:
-            cBXString_operatorE1((char*)self + 0x6DC, keyboard + 0x74);
+            cBXString_operatorE1((char*)&self->mszRoomName, keyboard + 0x74);
             cUIText_setAsciiString(self->mpTextRoomName, (const char*)self->mszRoomName);
             break;
         case 2:
-            cBXString_operatorE1((char*)self + 0x6E4, keyboard + 0x74);
+            cBXString_operatorE1((char*)&self->mszPassword, keyboard + 0x74);
             cUIText_setAsciiString(self->mpTextPassword, (const char*)self->mszPassword);
             break;
         }
@@ -28113,12 +28113,12 @@ extern sVec3_1C5630 t3vect_Zero;
  */
 extern "C" void cPopupInfo_clear(cPopupInfo* self)
 {
-    char* confirmEntry = (char*)self + 0x54;
-    char* optionName = (char*)self + 0x24;
-    func_00416210((char*)self + 0x4, 0, 8);
-    func_00416210((char*)self + 0xC, 0, 8);
-    func_00416210((char*)self + 0x14, 0, 8);
-    func_00416210((char*)self + 0x1C, 0, 8);
+    char* confirmEntry = (char*)&self->mtConfirmation;
+    char* optionName = (char*)&self->mtOptionNames;
+    func_00416210((char*)&self->mtMessage, 0, 8);
+    func_00416210((char*)&self->mtTitle, 0, 8);
+    func_00416210((char*)&self->mtEntryBoxTitle, 0, 8);
+    func_00416210((char*)&self->mtEntryBoxInitial, 0, 8);
     int i;
     for (i = 4; i >= 0; i--) {
         func_00416210(optionName, 0, 8);
@@ -28126,7 +28126,7 @@ extern "C" void cPopupInfo_clear(cPopupInfo* self)
         func_00416210(confirmEntry, 0, 0xC);
         confirmEntry += 0xC;
     }
-    func_00416210((char*)self + 0x4C, 0, 8);
+    func_00416210((char*)&self->mtPostPending, 0, 8);
     self->mbPassUpdate = 0;
     self->mbReceivePrev = 1;
     self->mbCenterText = 1;

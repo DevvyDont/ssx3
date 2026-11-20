@@ -500,7 +500,7 @@ extern "C" void cInputMapParser_error(cInputMapParser* self, const char* fmt, ..
     char buf[0x400];
     cInputMapParser_error_va_list ap;
     cInputMapParser_error_va_start(ap);
-    vsprintf(buf + sprintf(buf, str_pct_s_pct_d, (char*)self + 0xC, self->LineNumber), fmt, ap);
+    vsprintf(buf + sprintf(buf, str_pct_s_pct_d, (char*)&self->FileName, self->LineNumber), fmt, ap);
     self->ErrorFlag = 1;
 }
 #endif

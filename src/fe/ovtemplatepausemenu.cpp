@@ -239,7 +239,7 @@ extern "C" void cOVTemplate_PauseMenu_onGainFocus(cOVTemplate_PauseMenu* self, i
     char buf[32];
     char* obj;
     int* sel = (int*)((char*)self + 0x9C);
-    char* flags = (char*)self + 0xD8;
+    char* flags = (char*)&self->mPauseOptionUnlocked;
     int i = 0;
     while (i < 8 && (sprintf(buf, D_004A2138, i),
                      obj = (char*)cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(buf)),

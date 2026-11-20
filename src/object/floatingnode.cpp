@@ -776,7 +776,7 @@ extern "C" void cFloatingNode_writeToReplayFrame(cFloatingNode* self, void* stre
     sFloatingVEntryFA88* vtEntry = &(*(sFloatingVEntryFA88**)stream)[1];
     vtEntry->fn((char*)stream + vtEntry->delta, &has, 4);
     vtEntry = &(*(sFloatingVEntryFA88**)stream)[1];
-    vtEntry->fn((char*)stream + vtEntry->delta, (char*)self + 0x2C, 72);
+    vtEntry->fn((char*)stream + vtEntry->delta, (char*)&self->ZSpring, 72);
 }
 #endif
 

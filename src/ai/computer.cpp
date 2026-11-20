@@ -2809,16 +2809,16 @@ extern "C" void cRiderHandler_loseMotionState(cRiderHandler* self, int a1)
         cGroundMotion_loseFocus(self, a1);
         break;
     case 1:
-        cAirMotion_loseFocus_a1((char*)self + 0x20, a1);
+        cAirMotion_loseFocus_a1((char*)&self->AirMotion, a1);
         break;
     case 2:
-        cWipeoutMotion_loseFocus_a1((char*)self + 0x30, a1);
+        cWipeoutMotion_loseFocus_a1((char*)&self->WipeoutMotion, a1);
         break;
     case 4:
-        cRailslideMotion_loseFocus((char*)self + 0xB0, a1);
+        cRailslideMotion_loseFocus((char*)&self->RailslideMotion, a1);
         break;
     case 5:
-        cHandplantMotion_loseFocus((char*)self + 0x110, a1);
+        cHandplantMotion_loseFocus((char*)&self->HandplantMotion, a1);
         break;
     }
 }
@@ -2855,16 +2855,16 @@ extern "C" void cRiderHandler_gainMotionState(cRiderHandler* self, int prev)
         cGroundMotion_gainFocus(self, prev);
         break;
     case 1:
-        cAirMotion_gainFocus((char*)self + 0x20, prev);
+        cAirMotion_gainFocus((char*)&self->AirMotion, prev);
         break;
     case 2:
-        cWipeoutMotion_gainFocus((char*)self + 0x30, prev);
+        cWipeoutMotion_gainFocus((char*)&self->WipeoutMotion, prev);
         break;
     case 4:
-        cRailslideMotion_gainFocus((char*)self + 0xB0, prev);
+        cRailslideMotion_gainFocus((char*)&self->RailslideMotion, prev);
         break;
     case 5:
-        cHandplantMotion_gainFocus((char*)self + 0x110, prev);
+        cHandplantMotion_gainFocus((char*)&self->HandplantMotion, prev);
         break;
     }
 }
@@ -2999,28 +2999,28 @@ extern "C" void cRiderHandler_loseControlState(cRiderHandler* self, int a1)
 {
     switch (self->ControlState) {
     case 0:
-        cCruiseControl_loseFocus((char*)self + 0x1C0, a1);
+        cCruiseControl_loseFocus((char*)&self->CruiseControl, a1);
         break;
     case 1:
-        cBoardPressControl_loseFocus((char*)self + 0x1D0, a1);
+        cBoardPressControl_loseFocus((char*)&self->BoardPressControl, a1);
         break;
     case 2:
-        cPrewindControl_loseFocus_a1((char*)self + 0x1F0, a1);
+        cPrewindControl_loseFocus_a1((char*)&self->PrewindControl, a1);
         break;
     case 4:
-        cNaturalAirControl_loseFocus((char*)self + 0x210, a1);
+        cNaturalAirControl_loseFocus((char*)&self->NaturalAirControl, a1);
         break;
     case 5:
-        cSpinControl_loseFocus((char*)self + 0x230, a1);
+        cSpinControl_loseFocus((char*)&self->SpinControl, a1);
         break;
     case 7:
-        cRailslideControl_loseFocus((char*)self + 0x2B0, a1);
+        cRailslideControl_loseFocus((char*)&self->RailslideControl, a1);
         break;
     case 8:
-        cWipeoutControl_loseFocus((char*)self + 0x2C0, a1);
+        cWipeoutControl_loseFocus((char*)&self->WipeoutControl, a1);
         break;
     case 11:
-        cHandplantControl_loseFocus((char*)self + 0x370, a1);
+        cHandplantControl_loseFocus((char*)&self->HandplantControl, a1);
         break;
     case 3: case 6: case 9: case 10: case 12: case 13:
         break;
@@ -3063,34 +3063,34 @@ extern "C" void cRiderHandler_gainControlState(cRiderHandler* self, int prev)
         cBoardPressControl_gainFocus((char*)self + 0x1D0);
         break;
     case 2:
-        cPrewindControl_gainFocus((char*)self + 0x1F0, prev);
+        cPrewindControl_gainFocus((char*)&self->PrewindControl, prev);
         break;
     case 4:
-        cNaturalAirControl_gainFocus((char*)self + 0x210, prev);
+        cNaturalAirControl_gainFocus((char*)&self->NaturalAirControl, prev);
         break;
     case 5:
-        cSpinControl_gainFocus((char*)self + 0x230, prev);
+        cSpinControl_gainFocus((char*)&self->SpinControl, prev);
         break;
     case 6:
-        cGateControl_gainFocus((char*)self + 0x290, prev);
+        cGateControl_gainFocus((char*)&self->GateControl, prev);
         break;
     case 7:
-        cRailslideControl_gainFocus((char*)self + 0x2B0, prev);
+        cRailslideControl_gainFocus((char*)&self->RailslideControl, prev);
         break;
     case 8:
-        cWipeoutControl_gainFocus((char*)self + 0x2C0, prev);
+        cWipeoutControl_gainFocus((char*)&self->WipeoutControl, prev);
         break;
     case 9:
-        cResetControl_gainFocus((char*)self + 0x350, prev);
+        cResetControl_gainFocus((char*)&self->ResetControl, prev);
         break;
     case 10:
-        cFinishLineControl_gainFocus((char*)self + 0x360, prev);
+        cFinishLineControl_gainFocus((char*)&self->FinishLineControl, prev);
         break;
     case 11:
-        cHandplantControl_gainFocus((char*)self + 0x370, prev);
+        cHandplantControl_gainFocus((char*)&self->HandplantControl, prev);
         break;
     case 12:
-        cUberGrindControl_gainFocus((char*)self + 0x390, prev);
+        cUberGrindControl_gainFocus((char*)&self->UberGrindControl, prev);
         break;
     case 3:
     case 13:
@@ -3129,43 +3129,43 @@ extern "C" void cRiderHandler_updateControl(cRiderHandler* self, int cmd)
 {
     switch (self->ControlState) {
     case 0:
-        cCruiseControl_update((char*)self + 0x1C0, cmd);
+        cCruiseControl_update((char*)&self->CruiseControl, cmd);
         break;
     case 1:
-        cBoardPressControl_update((char*)self + 0x1D0, cmd);
+        cBoardPressControl_update((char*)&self->BoardPressControl, cmd);
         break;
     case 2:
-        cPrewindControl_update((char*)self + 0x1F0, cmd);
+        cPrewindControl_update((char*)&self->PrewindControl, cmd);
         break;
     case 3:
-        cBumpControl_update((char*)self + 0x200, cmd);
+        cBumpControl_update((char*)&self->BumpControl, cmd);
         break;
     case 4:
-        cNaturalAirControl_update((char*)self + 0x210, cmd);
+        cNaturalAirControl_update((char*)&self->NaturalAirControl, cmd);
         break;
     case 5:
-        cSpinControl_update((char*)self + 0x230, cmd);
+        cSpinControl_update((char*)&self->SpinControl, cmd);
         break;
     case 6:
-        cGateControl_update((char*)self + 0x290, cmd);
+        cGateControl_update((char*)&self->GateControl, cmd);
         break;
     case 7:
-        cRailslideControl_update((char*)self + 0x2B0, cmd);
+        cRailslideControl_update((char*)&self->RailslideControl, cmd);
         break;
     case 8:
-        cWipeoutControl_update((char*)self + 0x2C0, cmd);
+        cWipeoutControl_update((char*)&self->WipeoutControl, cmd);
         break;
     case 9:
-        cResetControl_update((char*)self + 0x350, cmd);
+        cResetControl_update((char*)&self->ResetControl, cmd);
         break;
     case 10:
-        cFinishLineControl_update((char*)self + 0x360, cmd);
+        cFinishLineControl_update((char*)&self->FinishLineControl, cmd);
         break;
     case 11:
-        cHandplantControl_update((char*)self + 0x370, cmd);
+        cHandplantControl_update((char*)&self->HandplantControl, cmd);
         break;
     case 12:
-        cUberGrindControl_update((char*)self + 0x390, cmd);
+        cUberGrindControl_update((char*)&self->UberGrindControl, cmd);
         break;
     case 13:
         break;

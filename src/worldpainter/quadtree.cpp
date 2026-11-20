@@ -130,7 +130,7 @@ extern "C" void* cQuadTree_getLeaf(cQuadTree* self, float fx, float fz)
     int x = (int)((fx - self->m_offsetX) * *(float*)self);
     int z = (int)((fz - self->m_offsetY) * *(float*)self);
     if ((unsigned int)x > 0x7FFF || (unsigned int)z > 0x7FFF) {
-        return (char*)self + 0x18;
+        return (char*)&self->m_defaultNode;
     }
     unsigned short ux = x << 1;
     unsigned short uz = z << 1;
@@ -3964,7 +3964,7 @@ extern "C" char* strcpy(char* dst, const char* src);
 extern "C" void cPS2MemCard_SetFileSlotInfo(cPS2MemCard* self, const char* name, int flag)
 {
     if (flag == 0) {
-        strcpy((char*)self + 0x14C0, name);
+        strcpy((char*)&self->mSourceIconPath, name);
     }
 }
 #endif

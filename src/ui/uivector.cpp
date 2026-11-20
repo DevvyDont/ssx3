@@ -2177,7 +2177,7 @@ extern "C" void* cUIGroup_traverseRecurse(cUIGroup* self, cUIGroup_traverseRecur
     if (fn->v02(self) != 0) {
         return ((void*)self);
     }
-    return cList_traverseRecurse((char*)self + 0x74, fn);
+    return cList_traverseRecurse((char*)&self->mList, fn);
 }
 #endif
 

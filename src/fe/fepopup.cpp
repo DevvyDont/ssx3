@@ -52,7 +52,7 @@ extern "C" void* cScreenPopup_cScreenPopup(cScreenPopup* self, void* engine, voi
     self->mbPassUpdate = 0;
     self->miLayerOffset = 0;
     for (int j = 0; j < 5; j++)
-        func_00416210((char*)self + 0x2D0 + j * 12, 0, 12);
+        func_00416210((char*)&self->mtConfirmation + j * 12, 0, 12);
     self->mbReceivePrev = 1;
     self->mpBackGroundWhite = 0;
     self->mpBackGroundRed = 0;
@@ -104,9 +104,9 @@ extern "C" void cUIState__cUIState(void* self, int flags);
 extern "C" void cScreenPopup__cScreenPopup(cScreenPopup* self, int flags)
 {
     self->mVtbl = cScreenPopup_vtbl;
-    cBXString__cBXString((char*)self + 0x2B4, 2);
-    cBXString__cBXString((char*)self + 0x2B0, 2);
-    cPopupInfo__cPopupInfo((char*)self + 0xBC, 2);
+    cBXString__cBXString((char*)&self->mszStaticText, 2);
+    cBXString__cBXString((char*)&self->mszInputText, 2);
+    cPopupInfo__cPopupInfo((char*)&self->info, 2);
     cUIState__cUIState(self, flags);
 }
 #endif
@@ -837,7 +837,7 @@ extern "C" int cScreenPopup_handleEntryBox(cScreenPopup* self, void* infop)
             ((cUIObj_6D30*)screenPopup->mpStaticBox)->setVisible(1);
         }
         if (((cUIObj_6D30*)screenPopup->mpEnterBox) != 0) {
-            cScreenPopup_setTextString1(self, (char*)self + 0x2B0, info + 7);
+            cScreenPopup_setTextString1(self, (char*)&self->mszInputText, info + 7);
             sVec3_6D30 boxPos = pos;
             boxPos.x = boxPos.x + w + 10.0f;
             *(sVec3_6D30*)((char*)((cUIObj_6D30*)screenPopup->mpEnterBox) + 0x44) = boxPos;
@@ -901,7 +901,7 @@ extern "C" void cScreenPopup_handlePostPending(cScreenPopup* self, void* pInfo)
             sVec3_7040 textPos = *(sVec3_7040*)&self->mvPosTitle[0];
             textPos.y += self->mvCurSize[1];
             *(sVec3_7040*)(postText + 0x44) = textPos;
-            cScreenPopup_getTextBoxWrapSize(self, (char*)pInfo + 0x4C, (char*)self + 0x260, 0, 10.0f);
+            cScreenPopup_getTextBoxWrapSize(self, (char*)pInfo + 0x4C, (char*)&self->mvCurSize, 0, 10.0f);
             if (self->mbCenterText != 0) {
                 cScreenPopup_changePivot(self, self->mpPostText, 17, 0.0f);
             }
@@ -1014,7 +1014,7 @@ extern "C" void cScreenPopup_setPopupMessage(cScreenPopup* self, void* pInfo)
             if (wrapSize.x > self->mvCurSize[0])
                 cScreenPopup_setTextObjectSize(self, &wrapSize);
         }
-        cScreenPopup_getTextBoxWrapSize(self, message, (char*)self + 0x260, 1, 10.0f);
+        cScreenPopup_getTextBoxWrapSize(self, message, (char*)&self->mvCurSize, 1, 10.0f);
         if (self->mbCenterText != 0)
             cScreenPopup_changePivot(self, self->mpMessageText, 17, 0.0f);
     }
@@ -3284,9 +3284,9 @@ extern "C" void MEM_fill(void* dst, int value, int size);
  */
 extern "C" void cBuyPopupInfo_clear(cBuyPopupInfo* self)
 {
-    MEM_fill((char*)self + 0x14, 0, 8);
-    MEM_fill((char*)self + 0xC, 0, 8);
-    MEM_fill((char*)self + 0x1C, 0, 8);
+    MEM_fill((char*)&self->mItemType, 0, 8);
+    MEM_fill((char*)&self->mItemName, 0, 8);
+    MEM_fill((char*)&self->mQuestion, 0, 8);
     self->mCost = 0;
     self->mMoney = 0;
     self->mCreditsLeft = 0;
@@ -3819,7 +3819,7 @@ extern "C" void cKeyboardPopup__cKeyboardPopup(cKeyboardPopup* self, int flags)
         cMemMan_free(ustrStatic);
         self->mpustrStatic = 0;
     }
-    cBXString__cBXString((char*)self + 0x424, 2);
+    cBXString__cBXString((char*)&self->mszStatic, 2);
     cUIState__cUIState(self, flags);
 }
 #endif
@@ -4015,7 +4015,7 @@ extern "C" void cKeyboardPopup_updateEdit(cKeyboardPopup* self, int a1);
 extern "C" void cKeyboardPopup_setInputText(cKeyboardPopup* self, const char* str)
 {
     int one = 1;
-    char* buf = (char*)self + 0x74;
+    char* buf = (char*)&self->mszEditString;
     self->mbSetInputText = one;
     strcpy(buf, str);
     self->miCursorPos = strlen(buf);
@@ -4967,7 +4967,7 @@ extern "C" int strlen(const char* s);
 extern "C" void cKeyboardPopup_AddAsciiEdit(cKeyboardPopup* self, int value)
 {
     char asciiChar = value;
-    char* buf = (char*)self + 0x74;
+    char* buf = (char*)&self->mszEditString;
     int len = strlen(buf);
     int cur = self->miCursorPos;
     buf[cur] = asciiChar;
@@ -5339,7 +5339,7 @@ extern "C" void* cBXString_operatorE1(void* self, const char* str);
 extern "C" void cKeyboardPopup_setStatic2(cKeyboardPopup* self, const char* str)
 {
     if (self->mpScreen == 0) {
-        cBXString_operatorE1((char*)self + 0x424, str);
+        cBXString_operatorE1((char*)&self->mszStatic, str);
         return;
     }
     cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_StaticValue));
@@ -6407,7 +6407,7 @@ extern "C" void cKeyboardPopup_handleQuickKeyPress(cKeyboardPopup* self, int key
         strcpy(buf, msg);
     }
     buf[room] = 0;
-    strcat((char*)self + 0x74, buf);
+    strcat((char*)&self->mszEditString, buf);
     int len = strlen((char*)self + 0x74);
     int n = len - 1;
     self->miCursorPos = n;

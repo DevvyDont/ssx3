@@ -24,9 +24,9 @@ void cAppMan__cAppMan(void* self, int flags);
  */
 extern "C" void cSSXApp__cSSXApp(cSSXApp* self, int flags)
 {
-    cBXString__cBXString((char*)self + 0xCC, 2);
-    cBXString__cBXString((char*)self + 0xC8, 2);
-    cBXString__cBXString((char*)self + 0xC4, 2);
+    cBXString__cBXString((char*)&self->CommandLineTrack, 2);
+    cBXString__cBXString((char*)&self->Password, 2);
+    cBXString__cBXString((char*)&self->UserName, 2);
     cAppMan__cAppMan(self, flags);
 }
 #endif

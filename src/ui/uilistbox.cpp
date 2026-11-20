@@ -466,7 +466,7 @@ extern "C" unsigned char cUIMenu_getNext(cUIMenu* self)
                 sUIVtAB50* vt = *(sUIVtAB50**)(owner + 8);
                 if (vt[20].fn(owner + vt[20].delta, self, 1, i) != 0) return i;
             } else {
-                char* item = (char*)cList_getByIndex((char*)self + 0x74, i);
+                char* item = (char*)cList_getByIndex((char*)&self->mList, i);
                 int bits = *(int*)(item + 0x14) >> 5;
                 if ((bits & 1) == 0) return i;
             }
@@ -514,7 +514,7 @@ extern "C" unsigned char cUIMenu_getPrev(cUIMenu* self)
                     return i;
                 }
             } else {
-                void* item = cList_getByIndex((char*)self + 0x74, i);
+                void* item = cList_getByIndex((char*)&self->mList, i);
                 int bits = *(int*)((char*)item + 0x14);
                 if (((bits >> 5) & 1) == 0) {
                     return i;

@@ -2080,11 +2080,11 @@ extern "C" void cGame_writeToReplayFrame(cGame* self, cStream_00231348* stream)
 {
     ((cSerObj_00231348*)self->FlagManager)->serialize(stream);
     ((cSerObj_00231348*)self->SnowFall)->serialize(stream);
-    stream->write((char*)self + 0x214, 4);
-    stream->write((char*)self + 0x218, 4);
-    stream->write((char*)self + 0x210, 4);
-    stream->write((char*)self + 0x21C, 4);
-    cGFEventStartState_writeToReplayFrame((char*)self + 0xB0, stream);
+    stream->write((char*)&self->mCurrentStateID, 4);
+    stream->write((char*)&self->mPrevStateID, 4);
+    stream->write((char*)&self->mPendingStateID, 4);
+    stream->write((char*)&self->mPendingStateStartupFlag, 4);
+    cGFEventStartState_writeToReplayFrame((char*)&self->mStates, stream);
     cGFPreEventState_writeToReplayFrame_s((char*)self + 0xD0, stream);
     cGFGateState_writeToReplayFrame_s((char*)self + 0xE0, stream);
     cGFRidingState_writeToReplayFrame_s((char*)self + 0xF0, stream);

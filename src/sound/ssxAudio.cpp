@@ -1012,7 +1012,7 @@ extern "C" void cSSXAudio_FrontEndPurge(cSSXAudio* self)
     if (self->unk_608C == 2 || self->unk_6090 == 2) {
         func_002B3AC0((char*)self + 0x118);
     } else {
-        func_002B3D48((char*)self + 0x118, 1.0f);
+        func_002B3D48((char*)&self->MusicSys, 1.0f);
     }
     cSSXAudio_SetAudioUpdateState(self, 0);
     cMonitor_MONITOR_DestroyAll(*(char**)self->MusicSys.mpVStreamSys + 0x1D8);
@@ -1314,7 +1314,7 @@ extern "C" void cSSXAudio_InGameDeInit(cSSXAudio* self)
     char* obj = in + 0x1D8;
     cSSXAudio_FrontEndPurge_vte* vt = *(cSSXAudio_FrontEndPurge_vte**)(in + 0xAB0);
     vt[2].fn(obj + vt[2].delta);
-    func_002B11B0((char*)self + 0x5560, 0);
+    func_002B11B0((char*)&self->SpeechSys, 0);
 }
 #endif
 
@@ -1422,7 +1422,7 @@ extern "C" void cSSXAudio_UnAttachAudioBank(cSSXAudio* self, unsigned int handle
         cBankMonitor_BANKMONITOR_StopBank(bm, id, 0.0f);
     }
     int off = slot << 2;
-    char* tbl = (char*)self + 0x6C70;
+    char* tbl = (char*)&self->mTrackBankLoaded;
     int* bankEntry = (int*)(tbl + off);
     if (*bankEntry != 0) {
         cBankManager_BANK_UnAttach(*(void**)self->MusicSys.mpVStreamSys, slot + 8);
@@ -3399,7 +3399,7 @@ extern "C" void func_00289520(cSSXAudio* self, const char* name)
             char* key = FileParser_GetName(parser);
             if (strcasecmp(str_SONG, key) == 0) {
                 FileParser_AssignString(parser, str_SONG, buf);
-                func_002B3EE8((char*)self + 0x118, buf);
+                func_002B3EE8((char*)&self->MusicSys, buf);
             }
         }
     }

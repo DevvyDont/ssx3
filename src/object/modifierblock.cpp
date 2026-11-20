@@ -1072,7 +1072,7 @@ extern "C" void tModifierBlock_readFromReplayFrame(tModifierBlock* self, sMbStre
         cEffectLink_append(&self->Effect, effect);
     }
     for (i = 0; i < hdr.numB; i++) {
-        cRailLink_append((char*)self + 0x1C, cRailModifier_cRailModifier1(cMemMan_alloc(144, str_RailModifier, 0x20000000, 0), stream));
+        cRailLink_append((char*)&self->Rail, cRailModifier_cRailModifier1(cMemMan_alloc(144, str_RailModifier, 0x20000000, 0), stream));
     }
 }
 #endif

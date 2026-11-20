@@ -332,7 +332,7 @@ public:
  */
 extern "C" void cRailModifier_writeToReplayFrame(cRailModifier* self, cStream0035C540* stream)
 {
-    stream->v01((char*)self + 0x10, 0x30);
+    stream->v01((char*)&self->BoundBox, 0x30);
     stream->v05(self->Instance);
 }
 #endif
@@ -2361,7 +2361,7 @@ extern "C" void cRollerModifier_collide(cRollerModifier* self)
 {
     sHitEDC8 hit;
     char tree[0x70];
-    cWorldSphTree_cWorldSphTree(tree, (char*)self + 0xE0, 1);
+    cWorldSphTree_cWorldSphTree(tree, (char*)&self->SphTree, 1);
     float zeroF = 0.0f;
     float overlap = cBXNash_terrainIntersect1_EDC8(cObjectInterface_getNash(), tree, &hit, (char*)self + 0x2C0);
     overlap -= SphereTree_GetResolution((char*)self + 0xE0);
@@ -2754,7 +2754,7 @@ public:
  */
 extern "C" void cTexFlipModifier_writeToReplayFrame(cTexFlipModifier* self, cStream0035F688* stream)
 {
-    stream->v01((char*)self + 0x0, 0x18);
+    stream->v01((char*)&self->Type, 0x18);
     stream->v05(self->Instance);
 }
 #endif
@@ -6737,7 +6737,7 @@ extern "C" void* cPositionModifier_getRootTransform(cPositionModifier* self)
         sRailVEntry1940* vt = *(sRailVEntry1940**)self;
         vt[3].fn((char*)self + vt[3].delta);
     }
-    return (char*)self + 0x50;
+    return (char*)&self->Transform;
 }
 #endif
 
@@ -6960,7 +6960,7 @@ extern "C" void* cMagnetModifier_getRootTransform(cMagnetModifier* self)
         sRailVEntry1A60* vt = *(sRailVEntry1A60**)self;
         vt[3].fn((char*)self + vt[3].delta);
     }
-    return (char*)self + 0x60;
+    return (char*)&self->Transform;
 }
 #endif
 
@@ -7211,7 +7211,7 @@ extern "C" void* cSplineModifier_getRootTransform(cSplineModifier* self)
         sRailVEntry1B90* vt = *(sRailVEntry1B90**)self;
         vt[3].fn((char*)self + vt[3].delta);
     }
-    return (char*)self + 0x60;
+    return (char*)&self->Transform;
 }
 #endif
 

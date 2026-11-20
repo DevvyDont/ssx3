@@ -431,7 +431,7 @@ extern "C" unsigned char cUIMenu_findFirstHighlightable(cUIMenu* self, unsigned 
 {
     unsigned char i = start == 0xFF ? 0 : start;
     for (; i < self->mScrollItemNum; i++) {
-        void* item = cList_getByIndex((char*)self + 0x74, i);
+        void* item = cList_getByIndex((char*)&self->mList, i);
         if (*(int*)&self->mAttrMenu & 4) {
             char* mgr = *(char**)((char*)self->mpScreen + 0xD0);
             cUIMenu_findFirstHighlightable_sVEntry* vt = *(cUIMenu_findFirstHighlightable_sVEntry**)(mgr + 8);

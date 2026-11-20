@@ -457,7 +457,7 @@ extern "C" void MUTEX_unlock(void *);
  * @return the element
  */
 extern "C" int *cCommSystem_allocCommMsgElem(cCommSystem* pool) {
-    void *mutex = (char*)pool + 4;
+    void *mutex = (char*)&pool->mCommMsgAllocMutex;
     MUTEX_lock(mutex);
     int *node = (int*)pool->mFree;
     pool->mFree = (tCommMsgElem*)((int *)*node);
@@ -483,7 +483,7 @@ extern "C" void MUTEX_unlock(void *);
  * @param node  the element
  */
 extern "C" void cCommSystem_freeCommMsgElem(cCommSystem* pool, void *node) {
-    void *mutex = (char*)pool + 4;
+    void *mutex = (char*)&pool->mCommMsgAllocMutex;
     MUTEX_lock(mutex);
     void *head = pool->mFree;
     *(int *)((char*)node + 4) = 0;

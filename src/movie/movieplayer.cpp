@@ -514,7 +514,7 @@ extern "C" void cMCOverlayManager_setTitleString(cMCOverlayManager* self, int n)
     char* memCard = (char*)self->mpMemCard;
     sMovieVEntry_23CDB0* mvt = *(sMovieVEntry_23CDB0**)memCard;
     mvt[45].fn(memCard + mvt[45].delta, out);
-    strcpy1((char*)self + 0x234, out);
+    strcpy1((char*)&self->mActiveTitleString, out);
 }
 #endif
 

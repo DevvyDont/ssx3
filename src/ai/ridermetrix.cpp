@@ -2213,7 +2213,7 @@ extern "C" float cRiderMetrix_evLateSpin(cRiderMetrix* self, int isFakieInit)
         self->InitTrickPressMode = 0;
         self->CurGrabHoldSec = -1.0f;
         self->InitTrickIsLateSpin = 1;
-        MEM_fill((char*)self + 0x60, 0, 0xC);
+        MEM_fill((char*)&self->CurTrickGrabList, 0, 0xC);
     }
     cRiderMetrix_cancelComboChainReset(self);
     return powerUp;

@@ -2975,7 +2975,7 @@ extern "C" void cStaticEmitter_readFromReplayFrame(cStaticEmitter* self, cStream
     stream->v02(&buf, 0xC);
     self->Duration = buf.a;
     self->Emitter.EndTime = buf.b;
-    tParticleEmitter_calcBoundBox((char*)self + 0x10, (char*)self + 0x160);
+    tParticleEmitter_calcBoundBox((char*)&self->Emitter, (char*)self + 0x160);
     self->m_initialized = buf.c;
 }
 #endif

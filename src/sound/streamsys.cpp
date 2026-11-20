@@ -169,8 +169,8 @@ extern "C" int FILE_loadbigheader(const char* name, int a1);
 extern "C" void cStreamInstance_SetBigFile(cStreamInstance* self, int name)
 {
     if (BXFILE_exists((const char*)name) != 0) {
-        strcpy((char*)self + 0x14, (const char*)name);
-        self->mBigHeader = (char*)FILE_loadbigheader((char*)self + 0x14, self->mMemAllocType);
+        strcpy((char*)&self->mBigFileName, (const char*)name);
+        self->mBigHeader = (char*)FILE_loadbigheader((char*)&self->mBigFileName, self->mMemAllocType);
     }
 }
 #endif

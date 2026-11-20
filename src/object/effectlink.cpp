@@ -418,13 +418,13 @@ extern "C" void cParticleModifier_writeToReplayFrame(cParticleModifier* self, vo
 {
     cEffectModifier_writeToReplayFrame((cEffectModifier*)self, stream);
     sEffectLinkVEntry5BF0* writeEntry = &(*(sEffectLinkVEntry5BF0**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x1E4, 4);
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->Complete, 4);
     if (self->Complete == 0) {
         writeEntry = &(*(sEffectLinkVEntry5BF0**)stream)[1];
         writeEntry->fn((char*)stream + writeEntry->delta, self->ParticleData, 216);
         writeEntry = &(*(sEffectLinkVEntry5BF0**)stream)[1];
-        writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x10, 0x40);
-        cStaticEmitter_writeToReplayFrame((char*)self + 0x50, stream);
+        writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->Transform, 0x40);
+        cStaticEmitter_writeToReplayFrame((char*)&self->Emitter, stream);
     }
 }
 #endif
@@ -709,7 +709,7 @@ extern "C" void cDynamicEmitter_render(void*, int);
 extern "C" void cDynamicParticleModifier_render(cDynamicParticleModifier* self)
 {
     if (self->Complete == 0) {
-        cDynamicEmitter_render((char*)self + 0x60, 7);
+        cDynamicEmitter_render((char*)&self->Emitter, 7);
     }
 }
 #endif
@@ -737,11 +737,11 @@ extern "C" void cDynamicParticleModifier_writeToReplayFrame(cDynamicParticleModi
 {
     cEffectModifier_writeToReplayFrame((cEffectModifier*)self, stream);
     sEffectLinkVEntry60A0* writeEntry = &(*(sEffectLinkVEntry60A0**)stream)[1];
-    writeEntry->fn((char*)stream + writeEntry->delta, (char*)self + 0x10, 80);
+    writeEntry->fn((char*)stream + writeEntry->delta, (char*)&self->Mesh, 80);
     if (self->Complete == 0) {
         writeEntry = &(*(sEffectLinkVEntry60A0**)stream)[1];
         writeEntry->fn((char*)stream + writeEntry->delta, self->ParticleData, 216);
-        cBaseClass_DynamicEmitter_writeToReplayFrame((char*)self + 0x60, stream);
+        cBaseClass_DynamicEmitter_writeToReplayFrame((char*)&self->Emitter, stream);
     }
 }
 #endif

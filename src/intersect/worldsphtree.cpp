@@ -7035,7 +7035,7 @@ extern "C" void* cBoostModifier_cBoostModifier1(cBoostModifier* self, sVEntry003
 {
     self->Active = 1;
     self->mVtbl = cBoostModifier_vtbl;
-    ((ReadFn00342808)(*stream)[2].fn)((char*)stream + (*stream)[2].delta, (char*)self + 0x10, 0x30);
+    ((ReadFn00342808)(*stream)[2].fn)((char*)stream + (*stream)[2].delta, (char*)&self->Boost, 0x30);
     self->Instance = (tInstanceRecord*)((ReadIntFn00342808)(*stream)[3].fn)((char*)stream + (*stream)[3].delta);
     return ((void*)self);
 }
@@ -7286,7 +7286,7 @@ extern "C" void cBoostModifier_writeToReplayFrame(cBoostModifier* self, void* st
 {
     cPhysicsModifier_writeToReplayFrame(self, stream);
     sVEntry_cBoostModifier_writeToReplayFrame* vt = *(sVEntry_cBoostModifier_writeToReplayFrame**)stream;
-    vt[1].fn((char*)stream + vt[1].delta, (char*)self + 0x10, 0x30);
+    vt[1].fn((char*)stream + vt[1].delta, (char*)&self->Boost, 0x30);
     sVEntry1_cBoostModifier_writeToReplayFrame* vt1 = *(sVEntry1_cBoostModifier_writeToReplayFrame**)stream;
     vt1[5].fn((char*)stream + vt1[5].delta, (int)self->Instance);
 }

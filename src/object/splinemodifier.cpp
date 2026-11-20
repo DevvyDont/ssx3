@@ -46,7 +46,7 @@ extern "C" cSplineModifier* cSplineModifier_cSplineModifier(cSplineModifier* sel
     self->Spline.Seg = 0;
     self->Spline.SegIndex = 0;
     self->Spline.Length = 0;
-    stream->v02((char*)self + 0x10, 80);
+    stream->v02((char*)&self->BoundBox, 80);
     cSpline_readFromReplayFrame(follower, stream);
     (*(sSmQuad_95D8*)&self->Dir) = t4vect_Zero;
     (*(sSmQuad_95D8*)&self->DDir) = t4vect_Zero;
@@ -589,7 +589,7 @@ static inline void vu0AddTo_9CF8(sSmVec4_9CF8& a, const sSmVec4_9CF8& b)
  */
 extern "C" void cSplineModifier_updateIntersectInfo(cSplineModifier* self, sSmBody_9CF8* body)
 {
-    char* sub = (char*)self + 0x10;
+    char* sub = (char*)&self->BoundBox;
     if (self->Start == 0) {
         return;
     }
@@ -670,8 +670,8 @@ extern "C" void cSpline_writeToReplayFrame(void* self, cStream00359F30* stream);
  */
 extern "C" void cSplineModifier_writeToReplayFrame(cSplineModifier* self, cStream00359F30* stream)
 {
-    stream->v01((char*)self + 0x10, 80);
-    cSpline_writeToReplayFrame((char*)self + 0xD8, stream);
+    stream->v01((char*)&self->BoundBox, 80);
+    cSpline_writeToReplayFrame((char*)&self->Spline, stream);
 }
 #endif
 
@@ -791,7 +791,7 @@ extern "C" cMultiSplineModifier* cMultiSplineModifier_cMultiSplineModifier1(cMul
     self->Spline.Seg = 0;
     self->Spline.SegIndex = 0;
     self->Spline.Length = 0;
-    stream->v02((char*)self + 0x4, 52);
+    stream->v02((char*)&self->NumModels, 52);
     cSpline_readFromReplayFrame_A118(follower, stream);
     self->Instance = (tInstanceRecord*)stream->v03();
     cMultiSplineModifier_allocNodes(self);
@@ -1993,8 +1993,8 @@ extern "C" void cSpline_writeToReplayFrame(void* self, cStream00359F30* stream);
  */
 extern "C" void cMultiSplineModifier_writeToReplayFrame(cMultiSplineModifier* self, cStream0035B5A8* stream)
 {
-    stream->v01((char*)self + 0x4, 52);
-    cSpline_writeToReplayFrame((char*)self + 0x48, (cStream00359F30*)stream);
+    stream->v01((char*)&self->NumModels, 52);
+    cSpline_writeToReplayFrame((char*)&self->Spline, (cStream00359F30*)stream);
     stream->v05(self->Instance);
     for (int i = 0; i < self->NumModels; i++) {
         stream->v01(((char**)self->NodeInst)[i] + 0x78, 4);

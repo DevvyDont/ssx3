@@ -2649,7 +2649,7 @@ extern "C" void cFont_loadFont(cFont* self, const char* name, int flags)
 {
     void* data;
 
-    sprintf((char*)self + 0x64, str_font_pct_24s, name);
+    sprintf((char*)&self->FontName, str_font_pct_24s, name);
     data = FILE_load(name, flags ^ 0x100);
     cFont_linkFont(self, data, flags);
     if (data != 0) {
