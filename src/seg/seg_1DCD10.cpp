@@ -211,6 +211,14 @@ extern "C" void cFXLoader__cFXLoader(int *self, int flags) {
 INCLUDE_ASM("seg/seg_1DCD10", func_002DBF80);
 #ifdef SKIP_ASM
 extern char cFogParticleMan_vtbl[];
+/**
+ * Constructs the base fog-sprite manager: clears the sprite count miNumSphere (+0) and stores cFogParticleMan_vtbl at
+ * +4.
+ *
+ * cGame_loadTrack calls it on the 0x3010-byte cPS2FogParticleMan block, then stores the derived vtable.
+ *
+ * @return the object
+ */
 extern "C" void *func_002DBF80(int *self) {
     self[0] = 0;
     *(char**)((char*)self + 4) = cFogParticleMan_vtbl;
@@ -305,6 +313,14 @@ extern "C" void cFogParticleMan_render(cFogParticleMan* self) {
 //100%
 INCLUDE_ASM("seg/seg_1DCD10", func_002DC168);
 #ifdef SKIP_ASM
+/**
+ * Compares two fog sort keys by their view depth (miZ, +4), for the qsort in cFogParticleMan_render: the deeper key
+ * sorts first.
+ *
+ * @param lhs  the first key
+ * @param rhs  the second key
+ * @return 1 when @p lhs is nearer, -1 when it is farther, 0 when equal
+ */
 extern "C" int func_002DC168(void *lhs, void *rhs) {
     int temp_3;
     int temp_4;
@@ -547,6 +563,23 @@ static inline int outcode_C190(const sCtx_C190* g, const sV4_C190& v)
     return code;
 }
 
+/**
+ * Adds fog sprites for a list of fog-sphere instances.
+ *
+ * Uses cGraphicsMan_TheGraphicsMan (refreshing its matrices with func_0037D968 when +0x6B90 is 0). For each instance it
+ * projects the centre of its bounding box (+0x68, +0x74) with the view matrix; at a depth of 25000 or more the instance
+ * is skipped, beyond 18000 it fades out linearly. Each point of each part of its mesh (+0x64) is projected with view *
+ * instance matrix (+0x10); points at a depth of 500 or less, or behind, are skipped, and the fade ramps in up to 2500.
+ * Each remaining point gets a sort key in D_00537AC0 (index and depth) and a sprite in mSprites: corners from the
+ * point's size (+0x18) scaled by +0x6AF0 / +0x6B04, colour alpha * 128 then the point's colour * 128. With @p clip set,
+ * a sprite whose two corners lie outside the same clip edge is dropped. miNumSphere counts the sprites; nothing checks
+ * it against the 256 sprites of the manager. It is word 5 (slot 2) of D_004882E0.
+ *
+ * @param out  the fog-sprite manager
+ * @param objs  the instances
+ * @param n  how many
+ * @param clip  nonzero to drop sprites outside the clip rectangle
+ */
 extern "C" void func_002DC190(cPS2FogParticleMan* out, sObj_C190** objs, int n, int clip)
 {
     sCtx_C190* g = D_C190;

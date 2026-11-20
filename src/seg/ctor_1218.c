@@ -6,8 +6,14 @@ INCLUDE_ASM("seg/ctor_1218", func_00100218);
 extern void func_00414780(void* p);
 extern char D_0043CE00[];
 
-/* Static constructor (last .ctors entry, D_0043CEE4): registers D_0043CE00 with func_00414780. The object was
-   built as C at -O0 (frame pointer, unfilled delay slots), so its unit has its own flags. */
+/**
+ * Unregisters, at exit, the frame-info object crt0 registered at startup.
+ *
+ * Passes D_0043CE00, the key crt0 hands to func_00414728 together with the object D_004A5D48, to func_00414780, which
+ * unlinks the object registered under that key from the list D_0052ADE8 and frees its table. It is the last entry (word
+ * 12) of the global destructor table D_0043CEE4, whose other entries run the units' static destructors. The unit was
+ * built as C at -O0 (frame pointer, unfilled delay slots), so it has its own flags.
+ */
 void func_00100218(void)
 {
     func_00414780(D_0043CE00);

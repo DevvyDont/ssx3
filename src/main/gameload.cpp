@@ -1628,7 +1628,7 @@ extern "C" void cGame_update(cGame* self)
 INCLUDE_ASM("main/gameload", func_00230E90);
 #ifdef SKIP_ASM
 /**
- * Does nothing.
+ * Does nothing: an empty function that returns at once. Nothing in the build references it.
  */
 extern "C" void func_00230E90(void) {
 

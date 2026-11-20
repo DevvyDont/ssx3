@@ -7660,6 +7660,20 @@ extern char D_00499C81_4508[] __asm__("D_00499C81");
 extern int D_00519C40_4508[] __asm__("D_00519C40");
 
 int func_003E4508_4508(char *path, int unused, int *out) __asm__("func_003E4508");
+/**
+ * Looks a path up in the disc's hashed file table and gives its 1-based entry number.
+ *
+ * Builds a normalised copy of @p path in a 256-byte buffer: exactly one leading '/', every '\\' turned into '/', and
+ * lower-case letters upper-cased (flag 2 of the ctype table D_00499C81). Hashes it with func_003E36F8 (seed word 6 of
+ * the file-system state D_00519C40) and binary-searches (func_004187E8, called bsearch-style) the entry table (word 14,
+ * D_00519C78) of word 1 entries, each D_00450C5C + 12 bytes, comparing the hashes with func_003E3968. Used by
+ * FILEDEV_open, which tags the number with device 1 in the top byte, and by func_003E4968.
+ *
+ * @param path  the file path ('/' or '\\' separated)
+ * @param unused  the open-mode flags FILEDEV_open passes (not used)
+ * @param out  receives the 1-based entry number, or 0 when not found
+ * @return 1 when found, 0 otherwise
+ */
 // FAKEMATCH: register pin `register int slash FM_REG("$2") = '/'; buf[0] = slash;` (fakematch.h) breaks the
 // local-alloc tie between the '/' constant for buf[0] and the first path char c0 (retail: v0 / v1, ours swapped); plain form 99.62%.
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
@@ -7717,6 +7731,19 @@ extern char *strncpy(char *, const char *, int);
 
 int func_003E48D8_48D8(int, char *, int *, int *) __asm__("func_003E48D8");
 
+/**
+ * Reads one entry of the disc file table by its 1-based number.
+ *
+ * Entries sit in the table D_00519C78, each D_00450C5C + 12 bytes: +4 the start sector, +8 the size, then the stored
+ * name (D_00450C5C bytes, copied with strncpy). Every output pointer may be 0. FILEDEV_getsize calls it for the size of
+ * an open disc file (device 1) and FILEDEV_getstartsector for its start sector.
+ *
+ * @param arg0  the 1-based entry number
+ * @param arg1  receives the stored name, or 0
+ * @param arg2  receives the size (+8), or 0
+ * @param arg3  receives the start sector (+4), or 0
+ * @return the entry's size (+8)
+ */
 int func_003E48D8_48D8(int arg0, char *arg1, int *arg2, int *arg3) {
     char *e;
     e = D_00519C78_48D8[0] + (arg0 - 1) * (D_00450C5C_48D8[0] + 0xC);
@@ -7741,6 +7768,15 @@ extern int func_003E4508(int, int, int *);
 extern int D_00450C5C_0C5C[] __asm__("D_00450C5C");
 extern int D_00519C78_9C78[] __asm__("D_00519C78");
 
+/**
+ * Returns the disc file-table entry for a path, or 0 when the table has none.
+ *
+ * Finds the entry number with func_003E4508 and turns it into a pointer into D_00519C78 (entries of D_00450C5C + 12
+ * bytes).
+ *
+ * @param a0  the file path
+ * @return the entry (start sector at +4, size at +8, name at +0xC), or 0
+ */
 int func_003E4968(int a0) {
     int sp0;
     int r;
@@ -7798,6 +7834,15 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4A30);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00450C78_4A30[] __asm__("D_00450C78");
 
+/**
+ * Registers a routine to run at exit, once.
+ *
+ * Does nothing when @p a is already in the 64-entry exit table D_00450C78 (the routines REAL_restore runs); otherwise
+ * stores it in the first empty slot, and drops it silently when the table is full. The timer setup func_003E4AF0
+ * registers its teardown func_003E4D68 here; the sound library (func_003B5478) registers one too.
+ *
+ * @param a  the routine to call at exit
+ */
 void func_003E4A30(int a) {
     int i;
     for (i = 0; i < 0x40; i++) {
@@ -7819,6 +7864,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4AA0);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern void (*D_00450C78[64])(void);     /* exit handlers (REAL_restore runs them) */
+/**
+ * Removes a routine from the exit table.
+ *
+ * Clears the first slot of the 64-entry table D_00450C78 (the routines REAL_restore runs) that holds @p a; does nothing
+ * when it isn't there. The counterpart of func_003E4A30. Nothing in the build calls it.
+ *
+ * @param a  the routine to remove
+ */
 void func_003E4AA0(void (*a)(void)) {
     int i;
     for (i = 0; i < 0x40; i++) {
@@ -7854,6 +7907,24 @@ extern unsigned short D_00450DE0;
 #define T1_MODE_4AF0 (*(volatile int *)0x10000810)
 #define T1_COMP_4AF0 (*(volatile int *)0x10000820)
 
+/**
+ * Starts the library tick timer at a requested rate and returns the rate it actually runs at.
+ *
+ * When the interrupt handler is already installed (D_00450DDC) it only returns D_00450DC8. A @p hz of 0 means 100. It
+ * picks EE timer 1's clock for the rate (bus clock / 256 below 196 Hz, / 16 below 3150 Hz, / 1 above: 0x8CA00, 0x8CA000
+ * or 0x8CA0000 counts a second), stores the compare period in D_00450DE0 and the resulting rate in D_00450DC8, programs
+ * T1 (count 0, the compare value, the clock mode | 0x180: compare interrupt and count enable), installs func_003E4DB8
+ * as the INTC 10 (timer 1) handler (func_00423A80) and enables it (func_004248E8). While the H-blank rate D_00450DA0 is
+ * still 0 it calibrates the video mode: it counts H-blanks on timer 0 (mode 0x83) over one second of ticks and passes 1
+ * (15701-15799, NTSC), 2 (15576-15674, PAL) or 3 (28801-31999) to func_003E6690. Finally it registers the teardown
+ * func_003E4D68 with func_003E4A30. systemInit calls it with 60.
+ *
+ * Likely bug: after the calibration both saved timer-0 values (the count and the mode) are written back to T0_COUNT
+ * (0x10000000), so timer 0's mode stays 0x83.
+ *
+ * @param hz  the wanted tick rate in Hz (0 means 100)
+ * @return the tick rate in effect (D_00450DC8)
+ */
 int func_003E4AF0(int hz) {
     int mode;
     int count;
@@ -7923,6 +7994,12 @@ extern void RemoveIntcHandler(int, int);
 extern void func_00424880(int);
 extern int D_00450DDC_0DDC[] __asm__("D_00450DDC");
 
+/**
+ * Stops the library tick timer.
+ *
+ * When a handler is installed (D_00450DDC) it clears T1_MODE (0x10000810), disables INTC 10 with func_00424880, removes
+ * the handler with RemoveIntcHandler and clears D_00450DDC. func_003E4AF0 registers it as an exit routine.
+ */
 void func_003E4D68(void) {
     volatile int *reg;
 
@@ -7951,6 +8028,17 @@ extern void (*D_00450DA8[8])(void);             /* tmrsub */
 #define T1_MODE (*(volatile int *)0x10000810)
 #define T1_COMP (*(volatile int *)0x10000820)
 
+/**
+ * Handles the EE timer 1 compare interrupt: one library tick.
+ *
+ * Moves the compare value on by one period (D_00450DE0) from where the count stands, resets T1_COUNT and acknowledges
+ * the interrupt (T1_MODE | 0x400), increments the tick counters D_00450DCC and D_00450DD0, then calls each of the 8
+ * timer routines in D_00450DA8 that is set, with D_00450DE4 set to 1 around the call (the thread and mutex code checks
+ * it to pick the interrupt-safe kernel calls). Re-enables interrupts (sync.l, ei) before returning. Installed by
+ * func_003E4AF0.
+ *
+ * @return 0
+ */
 int func_003E4DB8(void) {
     int i;
 
@@ -7977,6 +8065,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4E98);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern volatile int D_00450DCC;
 
+/**
+ * Returns the library tick counter.
+ *
+ * D_00450DCC, incremented by the timer interrupt func_003E4DB8 at the rate func_003E4AF0 set (func_003E5008 returns
+ * it). Used for timeouts throughout the library, the sound code and the quadtree loader.
+ *
+ * @return the current tick count
+ */
 int func_003E4E98(void)
 {
     return D_00450DCC;
@@ -7989,6 +8085,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4EA8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00450DEC_4EA8[] __asm__("D_00450DEC");
 
+/**
+ * Returns the ticks elapsed since the previous call.
+ *
+ * Stores the current tick count (func_003E4E98) in D_00450DEC and returns it minus the value stored last time.
+ *
+ * @return ticks since the last call (since the reset in func_003E4EE8 on the first call)
+ */
 int func_003E4EA8(void) {
     int old = D_00450DEC_4EA8[0];
     int now = func_003E4E98();
@@ -8005,6 +8108,12 @@ extern int D_00450DE8_4EE8[] __asm__("D_00450DE8");
 extern int D_00450DEC_4EE8[] __asm__("D_00450DEC");
 extern volatile int D_00450DCC_4EE8[] __asm__("D_00450DCC");
 
+/**
+ * Resets the tick bookkeeping to zero.
+ *
+ * Clears the last-call mark D_00450DEC (func_003E4EA8), the tick counter D_00450DCC and the deadline D_00450DE8
+ * (func_003E4F08 / func_003E4F80).
+ */
 // Resets the timer state.
 void func_003E4EE8(void) {
     int *p = D_00450DE8_4EE8;
@@ -8021,6 +8130,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4F08);
 int func_003E4E98_4F08(void) __asm__("func_003E4E98");
 extern int D_00450DE8_4F08[] __asm__("D_00450DE8");
 
+/**
+ * Sets the tick deadline a number of ticks from now.
+ *
+ * Stores the current tick count (func_003E4E98) plus @p arg0 in D_00450DE8; func_003E4F80 tests it and func_003E4F40
+ * waits for it.
+ *
+ * @param arg0  ticks from now
+ */
 void func_003E4F08(int arg0) {
     int *p = D_00450DE8_4F08;
     *p = func_003E4E98_4F08() + arg0;
@@ -8035,6 +8152,12 @@ extern int func_003E4F80();
 extern void SYNCTASK_run_4F40(int) __asm__("SYNCTASK_run");
 extern void func_003E5398_4F40(int) __asm__("func_003E5398");
 
+/**
+ * Waits for the tick deadline set by func_003E4F08.
+ *
+ * Until func_003E4F80 reports it reached, runs the sync tasks (SYNCTASK_run(0)) and yields the thread
+ * (func_003E5398(0)) on each pass.
+ */
 void func_003E4F40(void) {
     while (func_003E4F80() == 0) {
         SYNCTASK_run_4F40(0);
@@ -8050,6 +8173,13 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4F80);
 extern int func_003E4E98();
 extern int D_00450DE8_4F80[] __asm__("D_00450DE8");
 
+/**
+ * Tells whether the tick deadline has been reached.
+ *
+ * Compares the current tick count (func_003E4E98) with the deadline D_00450DE8 set by func_003E4F08.
+ *
+ * @return 1 when the deadline is now or past, 0 before it
+ */
 int func_003E4F80(void) {
     int r = func_003E4E98() - D_00450DE8_4F80[0]; if (r > -1) return 1; return 0;
 }
@@ -8062,6 +8192,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E4FB0);
 void SYNCTASK_run_4FB0(int) __asm__("SYNCTASK_run");
 void func_003E5398_4FB0(int) __asm__("func_003E5398");
 
+/**
+ * Waits a number of library ticks, running the sync tasks meanwhile.
+ *
+ * Until the tick counter (func_003E4E98) reaches the start plus @p ticks it calls SYNCTASK_run(0) and yields the thread
+ * with func_003E5398(0). cAsyncSys_ASYNCSYS_DeInit waits 2 ticks this way.
+ *
+ * @param ticks  the number of ticks to wait
+ */
 void func_003E4FB0(int ticks) {
     int end = func_003E4E98() + ticks;
     while (func_003E4E98() - end < 0) {
@@ -8077,6 +8215,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5008);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00450DC8_5008[4] __asm__("D_00450DC8");
 
+/**
+ * Returns the library tick rate in ticks per second.
+ *
+ * D_00450DC8, as set by func_003E4AF0. THREAD_yieldticks and the millisecond timers in seg_2AEDC0 divide by it to
+ * convert ticks.
+ *
+ * @return ticks per second
+ */
 int func_003E5008(void) {
     return D_00450DC8_5008[0];
 }
@@ -8092,6 +8238,13 @@ extern void MUTEX_create_5018(void *) __asm__("MUTEX_create");
 extern int D_00450DF8_5018[] __asm__("D_00450DF8");
 extern int D_0051ED88_5018[] __asm__("D_0051ED88");
 
+/**
+ * Sets up the thread layer for the main thread.
+ *
+ * Records the calling thread in the main-thread record D_00450DF8 (signature 0x50533254 'PS2T', then the id from
+ * GetThreadId), sets that thread's priority to 100 and creates the library mutex D_0051ED88 with MUTEX_create. Called
+ * by systemInit.
+ */
 void func_003E5018(void) {
     int t = GetThreadId_5018();
     D_00450DF8_5018[0] = 0x50533254;
@@ -8110,6 +8263,12 @@ extern void MEM_clear_5068(int *, int) __asm__("MEM_clear");
 extern int D_00450DF8_5068[] __asm__("D_00450DF8");
 extern int D_0051ED88_5068[] __asm__("D_0051ED88");
 
+/**
+ * Shuts the thread layer down.
+ *
+ * Destroys the library mutex D_0051ED88 (func_003E56E0) and clears the 8-byte main-thread record D_00450DF8 that
+ * func_003E5018 filled. Nothing in the build calls it.
+ */
 void func_003E5068(void) {
     func_003E56E0(D_0051ED88_5068);
     MEM_clear_5068(D_00450DF8_5068, 8);
@@ -8121,6 +8280,17 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5098);
 #ifdef SKIP_ASM
 extern void func_003E50C8(int, int, int, int, int, int);
 
+/**
+ * Creates and starts a thread without a start parameter.
+ *
+ * Calls func_003E50C8 with the same arguments and a start parameter of 0.
+ *
+ * @param arg0  the thread record to fill
+ * @param arg1  the thread's entry routine
+ * @param arg2  the stack base
+ * @param arg3  the stack size in bytes
+ * @param arg4  the priority code (97-103, anything else means 100)
+ */
 void func_003E5098(int arg0, int arg1, int arg2, int arg3, int arg4) {
     func_003E50C8(arg0, arg1, 0, arg2, arg3, arg4);
 }
@@ -8145,6 +8315,22 @@ struct sReq_50C8 {
 };
 
 int func_003E50C8_a(int *self, int arg1, int arg2, int arg3, int arg4, int arg5) __asm__("func_003E50C8");
+/**
+ * Creates a kernel thread and starts it with a parameter.
+ *
+ * Fills a ThreadParam on the stack (entry @p arg1, stack @p arg3 / @p arg4, gp D_004A30F0, initial priority @p arg5
+ * when it is 97, 98, 99, 101, 102 or 103, else 100) and calls CreateThread. The id goes to the record's +4 even on
+ * failure; on success the record's +0 gets the signature 0x50533254 ('PS2T') and the thread is started with StartThread
+ * and @p arg2. func_003E5098 calls it with a parameter of 0; the quadtree loader (func_002C29D0) starts its thread
+ * here.
+ *
+ * @param arg1  the entry routine
+ * @param arg2  the parameter StartThread passes to it
+ * @param arg3  the stack base
+ * @param arg4  the stack size in bytes
+ * @param arg5  the priority code (97-103; anything else means 100)
+ * @return 1 when the thread was created and started, 0 otherwise
+ */
 int func_003E50C8_a(int *self, int arg1, int arg2, int arg3, int arg4, int arg5) {
     struct sReq_50C8 req;
     int r;
@@ -8197,6 +8383,16 @@ extern void iTerminateThread_51A0(int) __asm__("iTerminateThread");
 extern int D_00450DE4_51A0[] __asm__("D_00450DE4");
 
 void func_003E51A0_51A0(char *arg0) __asm__("func_003E51A0");
+/**
+ * Ends and deletes a thread.
+ *
+ * Takes the thread id from the record's +4, or the calling thread's when @p arg0 is -1, and reads its status
+ * (iReferThreadStatus inside the timer interrupt, flag D_00450DE4, else ReferThreadStatus). A thread that is running,
+ * ready, waiting or suspended (status & 0xF) is terminated (iTerminateThread / TerminateThread) and deleted; a dormant
+ * one (status & 0x10) is only deleted.
+ *
+ * @param arg0  the thread record, or -1 for the calling thread
+ */
 void func_003E51A0_51A0(char *arg0) {
     int h;
     int st[12];
@@ -8231,11 +8427,20 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5268);
 #ifdef SKIP_ASM
 extern void func_003E51A0();
 
+/**
+ * Destroys a thread through func_003E51A0.
+ *
+ * Calls func_003E51A0 without loading an argument, so whatever the caller left in the first argument register is passed
+ * through (the C declares no parameter). Nothing in the build calls it.
+ */
 void func_003E5268(void) {
     func_003E51A0();
 }
 #endif
 
+/**
+ * Does nothing: an empty function that returns at once. Nothing in the build references it.
+ */
 void func_003E5288(void) {
 }
 
@@ -8244,6 +8449,16 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5290);
 #ifdef SKIP_ASM
 extern void func_00424C50(int);
 
+/**
+ * Kernel alarm handler that wakes the thread THREAD_yieldticks put to sleep.
+ *
+ * THREAD_yieldticks sets an alarm with this handler and its own thread id as the argument, then sleeps; on expiry this
+ * passes that id (@p c) to func_00424C50.
+ *
+ * @param a  the alarm id (unused)
+ * @param b  the alarm time (unused)
+ * @param c  the argument given to SetAlarm: the sleeping thread's id
+ */
 void func_003E5290(int a, int b, int c) {
     func_00424C50(c);
 }
@@ -8312,6 +8527,16 @@ extern void ReferThreadStatus_5398(int, void *) __asm__("ReferThreadStatus");
 extern void RotateThreadReadyQueue_5398(int) __asm__("RotateThreadReadyQueue");
 
 void func_003E5398_impl(int ms) __asm__("func_003E5398");
+/**
+ * Yields the calling thread, for a number of milliseconds or just once.
+ *
+ * With @p ms nonzero it converts the milliseconds to ticks (ms * D_00450DC8 / 1000, at least 1) and sleeps with
+ * THREAD_yieldticks. With 0 it rotates the ready queue at the thread's current priority (inside the timer interrupt,
+ * flag D_00450DE4, with iReferThreadStatus and func_00424CE8; else ReferThreadStatus and RotateThreadReadyQueue),
+ * letting other threads of that priority run. Loading and streaming loops call it with 0 while they wait.
+ *
+ * @param ms  milliseconds to sleep, or 0 to yield once
+ */
 void func_003E5398_impl(int ms) {
     int info[12];
     if (ms != 0) {
@@ -8336,6 +8561,16 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5440);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00450DFC_0DFC[] __asm__("D_00450DFC");
 
+/**
+ * Tells whether a thread is the calling thread.
+ *
+ * For a null @p arg0 it compares GetThreadId with the main thread's id (D_00450DFC, set by func_003E5018); -1 always
+ * matches; otherwise it compares with the record's +4. The file and stream code uses it with 0 to run the sync tasks
+ * only on the main thread.
+ *
+ * @param arg0  the thread record, 0 for the main thread, or -1 for the calling thread
+ * @return 1 when it is the calling thread, 0 otherwise
+ */
 int func_003E5440(char *arg0) {
     int cur = GetThreadId();
     if (arg0 == 0) {
@@ -8358,6 +8593,16 @@ extern void iReferThreadStatus(int, void *);
 extern int D_00450DE4_5498[] __asm__("D_00450DE4");
 extern int D_00450DFC_5498[] __asm__("D_00450DFC");
 
+/**
+ * Returns a thread's current priority.
+ *
+ * Picks the id like func_003E5508 (0: main thread D_00450DFC, -1: calling thread, else the record's +4) and reads the
+ * current-priority word (6) of its status (iReferThreadStatus inside the timer interrupt, else ReferThreadStatus).
+ * Nothing in the build calls it.
+ *
+ * @param a0  the thread record, 0 for the main thread, or -1 for the calling thread
+ * @return the thread's current priority
+ */
 int func_003E5498(int *a0) {
     int sp[12];
     int t;
@@ -8387,6 +8632,16 @@ extern int GetThreadId_5508(void) __asm__("GetThreadId");
 extern int D_00450DE4_5508[] __asm__("D_00450DE4");
 extern int D_00450DFC_5508[] __asm__("D_00450DFC");
 
+/**
+ * Changes a thread's priority.
+ *
+ * Picks the id (0: main thread D_00450DFC, -1: calling thread, else the record's +4) and calls iChangeThreadPriority
+ * inside the timer interrupt (flag D_00450DE4), ChangeThreadPriority otherwise.
+ *
+ * @param arg0  the thread record, 0 for the main thread, or -1 for the calling thread
+ * @param arg1  the new kernel priority
+ * @return 1
+ */
 int func_003E5508(void *arg0, int arg1) {
     int var_4;
 
@@ -8415,6 +8670,15 @@ extern void iReferThreadStatus(int, void *);
 extern int D_00450DE4_0DE4[] __asm__("D_00450DE4");
 typedef struct { int pad; int f4; } A_5580;
 
+/**
+ * Tells whether a thread has stopped running.
+ *
+ * Reads the status of the record's thread (+4; iReferThreadStatus inside the timer interrupt, else ReferThreadStatus).
+ * Nothing in the build calls it.
+ *
+ * @param arg0  the thread record
+ * @return 1 when the thread is dormant (status bit 0x10) or the status is 0, else 0
+ */
 int func_003E5580(A_5580 *arg0) {
     struct { int v; char rest[44]; } st;
     int r;
@@ -8440,6 +8704,19 @@ extern void THREAD_yieldticks_55E0(int) __asm__("THREAD_yieldticks");
 extern int func_003E4E98_55E0() __asm__("func_003E4E98");
 extern void ReferThreadStatus_55E0(int, int *) __asm__("ReferThreadStatus");
 
+/**
+ * Waits for a thread to finish.
+ *
+ * Polls the record's thread (+4) with ReferThreadStatus and stops when it is dormant (bit 0x10) or gone (status 0),
+ * yielding with THREAD_yieldticks(0) between polls. A @p timeout of 0 waits for ever.
+ *
+ * Likely bug: with a nonzero timeout the loop only continues while the deadline (start tick + @p timeout) is already
+ * past (deadline < now), so before the deadline it gives up after one yield.
+ *
+ * @param task  the thread record
+ * @param timeout  ticks to wait, or 0 for no limit
+ * @return 1 when the thread ended up dormant, 0 otherwise
+ */
 int func_003E55E0(int *task, int timeout) {
     int sp[12];
     int threadId;
@@ -8461,6 +8738,9 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5678);
 #ifdef SKIP_ASM
 extern void ExitDeleteThread();
 
+/**
+ * Ends the calling thread and deletes it (ExitDeleteThread). Nothing in the build calls it.
+ */
 void func_003E5678(void) {
     ExitDeleteThread();
 }
@@ -8493,6 +8773,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E56E0);
 #ifdef SKIP_ASM
 extern void DeleteSema(int);
 
+/**
+ * Destroys a mutex by deleting its kernel semaphore (DeleteSema on +0xC).
+ *
+ * Used for the library mutex (func_003E5068), memory classes (MEMCLASS_remove), the file system, async files, streams,
+ * the quadtree loader and cCommSystem's destructor.
+ *
+ * @param arg0  the mutex
+ */
 void func_003E56E0(void *arg0) {
     DeleteSema((*(int *)((char*)(arg0) + (0xC))));
 }
@@ -8692,6 +8980,15 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5A10);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int SYNCTASK_run_5A10(int) __asm__("SYNCTASK_run");
 
+/**
+ * Runs the sync tasks for up to a number of ticks or until one reports something.
+ *
+ * Calls SYNCTASK_run(0) repeatedly while the tick counter (func_003E4E98) is below the start plus @p ticks and the last
+ * result was 0. Nothing in the build calls it.
+ *
+ * @param ticks  the time limit in ticks
+ * @return the last SYNCTASK_run result (0 when the time ran out first)
+ */
 int func_003E5A10(int ticks) {
     int deadline;
     int result;
@@ -8821,6 +9118,11 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E5C60);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00451008_5C60[4] __asm__("PRINTinitialized");
 
+/**
+ * Marks the debug print system uninitialised.
+ *
+ * Clears PRINTinitialized when it is set, so the next print call runs PRINT_init again. Nothing in the build calls it.
+ */
 void func_003E5C60(void) {
     if (D_00451008_5C60[0] != 0) {
         D_00451008_5C60[0] = 0;
@@ -8947,6 +9249,15 @@ extern void PRINT_init(void);
 extern char D_00451250_1250[] __asm__("PRINTdevicelist");
 extern int D_00451008_1008[] __asm__("PRINTinitialized");
 
+/**
+ * Tells whether a debug print device is enabled.
+ *
+ * Runs PRINT_init first when printing is not set up, then returns bit 0 of the device's flags (PRINTdevicelist entry,
+ * +8). Nothing in the build calls it.
+ *
+ * @param a0  the device index (0-7)
+ * @return 1 when the device is enabled, 0 otherwise
+ */
 int func_003E5E38(int a0) {
     char *b;
     if (D_00451008_1008[0] == 0) {
@@ -8966,6 +9277,17 @@ extern void PRINT_init(void);
 extern struct S_5E88 D_00451250_5E88[] __asm__("PRINTdevicelist");
 extern int D_00451008_5E88[] __asm__("PRINTinitialized");
 
+/**
+ * Installs a debug print device: its name and its output routine.
+ *
+ * Runs PRINT_init first when printing is not set up, then stores @p a1 and @p a2 in the device's PRINTdevicelist entry
+ * (+0 and +4; device 2 is preset to "debugger" with func_003E6428). The device's enable flag is left as it was. Nothing
+ * in the build calls it.
+ *
+ * @param a0  the device index (0-7)
+ * @param a1  the device name
+ * @param a2  the routine that receives (channel, text) for every message
+ */
 void func_003E5E88(int a0, int a1, int a2) {
     if (D_00451008_5E88[0] == 0) {
         PRINT_init();
@@ -9006,6 +9328,15 @@ extern struct P_5F48 D_00450E08_5F48[] __asm__("PRINTchannellist");
 extern int D_00451008_5F48[] __asm__("PRINTinitialized");
 void PRINT_init_5F48(void) __asm__("PRINT_init");
 
+/**
+ * Tells whether a debug print channel is enabled.
+ *
+ * Runs PRINT_init first when printing is not set up, then returns bit 0 of the channel's flags (PRINTchannellist entry,
+ * +4). Nothing in the build calls it.
+ *
+ * @param arg0  the channel index (0-63)
+ * @return 1 when the channel is enabled, 0 otherwise
+ */
 int func_003E5F48(int arg0) {
     if (D_00451008_5F48[0] == 0) {
         PRINT_init_5F48();
@@ -9022,6 +9353,15 @@ extern int D_00450E08_0E08[] __asm__("PRINTchannellist");
 extern int D_00451008_1008[] __asm__("PRINTinitialized");
 void PRINT_init_5F98(void) __asm__("PRINT_init");
 
+/**
+ * Sets a debug print channel's name.
+ *
+ * Runs PRINT_init first when printing is not set up, then stores @p arg1 in the channel's PRINTchannellist entry (+0;
+ * the preset ones are "all", "real", "alert", "general" and so on). Nothing in the build calls it.
+ *
+ * @param arg0  the channel index (0-63)
+ * @param arg1  the channel name
+ */
 void func_003E5F98(int arg0, int arg1) {
     if (D_00451008_1008[0] == 0) {
         PRINT_init_5F98();
@@ -9040,6 +9380,16 @@ extern int D_00451008_5FF0[] __asm__("PRINTinitialized");
 extern E_5FF0 D_00451250_5FF0[] __asm__("PRINTdevicelist");
 extern void PRINT_init_5FF0(void) __asm__("PRINT_init");
 
+/**
+ * Sends text straight to one debug print device.
+ *
+ * Runs PRINT_init first when printing is not set up, then calls the device's output routine (PRINTdevicelist entry +4)
+ * with @p a and @p b when it has one, whether or not the device or channel is enabled. Nothing in the build calls it.
+ *
+ * @param i  the device index (0-7)
+ * @param a  the channel number passed to the routine
+ * @param b  the text
+ */
 void func_003E5FF0(int i, int a, int b) {
     E_5FF0 *e;
     if (D_00451008_5FF0[0] == 0) PRINT_init_5FF0();
@@ -9155,6 +9505,15 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E61F8);
 #ifdef SKIP_ASM
 extern void MEM_move(int, int);
 
+/**
+ * Copies memory with the source first: MEM_move with the two pointers swapped (bcopy order).
+ *
+ * The byte count is not touched: it passes through in the third argument register to MEM_move (the C declares only two
+ * parameters). Nothing in the build calls it.
+ *
+ * @param src  the source
+ * @param dst  the destination
+ */
 void func_003E61F8(int src, int dst) {
     MEM_move(dst, src);
 }
@@ -9181,6 +9540,16 @@ void MEM_clear(int dest, int count) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6240);
 #ifdef SKIP_ASM
+/**
+ * Tells whether an address lies in a region the EE can use.
+ *
+ * Valid: main RAM above the kernel (0x00100000-0x07FFFFFF), the register area 0x10000000-0x14000000, the uncached
+ * (0x20100000-0x27FFFFFF) and uncached-accelerated (0x30100000-0x37FFFFFF) RAM mirrors, and the scratchpad
+ * (0x70000000-0x70003FFF). memstd's checkfree uses it to vet free-list pointers.
+ *
+ * @param addr  the address
+ * @return 1 when valid, 0 otherwise
+ */
 int func_003E6240(unsigned int addr) {
     int valid = 0;
     if (addr - 0x100000 <= 0x7EFFFFF || addr - 0x10000000 <= 0x4000000 ||
@@ -9197,6 +9566,11 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E62B0);
 #ifdef SKIP_ASM
 extern int D_00450DA4[];
 
+/**
+ * Breaks into the debugger (break 6) when the debug-break switch D_00450DA4 is set; does nothing otherwise.
+ *
+ * Called on error paths in seg_2AEDC0 (func_003ADEC8, func_003AED40).
+ */
 void func_003E62B0(void) {
     if (D_00450DA4[0] != 0) {
         __asm__ volatile("break 6");  // PORT: trap
@@ -9210,6 +9584,18 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E62D0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern unsigned short D_00451018_1018[] __asm__("D_00451018");
 
+/**
+ * Computes a table-driven CRC-16 of a block of bytes.
+ *
+ * For each byte: crc = D_00451018[(crc ^ byte) & 0xFF] ^ (crc >> 8), starting from @p arg2. Every caller uses seed
+ * 64490 (0xFBEA): the save-game and profile checks (cBESaveInterface, cBE_writeToData), the trophy-room memory card
+ * read and memstd's block checks.
+ *
+ * @param arg0  the data
+ * @param arg1  the number of bytes
+ * @param arg2  the starting value
+ * @return the CRC (16 bits)
+ */
 int func_003E62D0(unsigned char *arg0, int arg1, int arg2) {
     unsigned char *p;
     unsigned int crc;
@@ -9233,7 +9619,17 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6328);
 #ifdef SKIP_ASM
 extern int D_00451218[];
 
-/* Shell sort of keys[] (descending) carrying vals[] along, gap table D_00451218 (same as BXSORT_shell). */
+/**
+ * Shell-sorts an array of keys in descending order, moving a second array along with it.
+ *
+ * Starts at the largest gap in the table D_00451218 (the same as BXSORT_shell's) below @p n and works down to gap 1,
+ * inserting each key / value pair among the earlier ones with larger or equal keys. cAI_UpdateRankingPlacement uses it
+ * to order the riders.
+ *
+ * @param n  the number of entries
+ * @param keys  the keys, sorted in place (largest first)
+ * @param vals  the values moved with their keys
+ */
 void func_003E6328(int n, int *keys, int *vals) {
     int k = 1;
     int gap;
@@ -9270,6 +9666,15 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6428);
 #ifdef SKIP_ASM
 extern void func_004175C8(int);
 
+/**
+ * Output routine of the "debugger" print device: passes the text to func_004175C8.
+ *
+ * PRINTdevicelist presets device 2 with the name "debugger" and this routine; PRINT_vstring calls it for every message
+ * on an enabled channel while the device is enabled.
+ *
+ * @param a  the print channel (unused)
+ * @param b  the text
+ */
 void func_003E6428(int a, int b) {
     func_004175C8(b);
 }
@@ -9475,6 +9880,15 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6690);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern int D_00450DA0_0DA0[] __asm__("D_00450DA0");
 
+/**
+ * Sets the H-blank rate used for timing from a video mode.
+ *
+ * Stores the line rate in D_00450DA0: 15750 for mode 1 (NTSC), 15625 for 2 (PAL), 28800 for 3 (the 31 kHz modes); any
+ * other value leaves it. THREAD_yieldticks converts ticks to H-blank counts with it. Called by the timer calibration in
+ * func_003E4AF0, by systemInit with 1 and by func_0037BD98 (3 or 1).
+ *
+ * @param arg0  the video mode (1 NTSC, 2 PAL, 3 31 kHz)
+ */
 void func_003E6690(int arg0) {
     switch (arg0) {
     case 1:
@@ -9500,8 +9914,23 @@ extern int func_003F4C98_66F0(int *, int, int) __asm__("func_003F4C98");
 extern void func_003F4E80_66F0(int, int) __asm__("func_003F4E80");
 extern void func_00416210_66F0(char *, int, int) __asm__("func_00416210");
 
-/* One RPC block: a 0x180-byte header followed by three 64-byte-aligned buffers (n bytes, 0x150 bytes, 4 bytes).
-   `buf` is advanced in place, so the 0x158 store is not forwarded to the first call (it reloads the field). */
+/**
+ * Creates a DirtySock game link on the IOP and returns its EE-side block.
+ *
+ * Allocates @p n + 916 bytes with RpcAlloc and zeroes them: a 0x180-byte header followed by three 64-byte-aligned
+ * buffers, the receive buffer (@p n bytes; address +0x16C, size +0x168), the 336-byte status copy area (+0x158) and a
+ * 4-byte word (+0x17C) where the IOP reports its send-buffer read position. Sets the status flag +4 to -1 (no status
+ * read yet) and the send window +0x174 to @p n, passes the three buffers to func_003F4E80, then sends 'gmlk'/'crea'
+ * (func_003F4C98 binds the request to that command, func_003F4C68 sends it) with @p arg0, @p n and the address of the
+ * +0x17C word, waiting for the IOP's link reference, which lands in the block's +0. The channel (cDSockChannel) keeps
+ * the block as mGameLink; @p arg1 is not sent.
+ *
+ * @param arg0  the connection (comm ref) from func_003E6FC8
+ * @param arg1  owner value (unused)
+ * @param n  the receive buffer size in bytes (the channel passes 9084)
+ * @return the link block
+ */
+// `buf` is advanced in place, so the 0x158 store is not forwarded to the first call (it reloads the field).
 char *func_003E66F0(int arg0, int arg1, int n) {
     int msg[4];
     int size;
@@ -9561,6 +9990,23 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6878);
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct S_6878 { int f0; int f4; char pad[0x158 - 8]; int f158; };
 
+/**
+ * Completion routine of the asynchronous game-link status request (func_003E6958).
+ *
+ * Copies the 336-byte status the IOP wrote into the block's status area (+0x158, read through the uncached mirror
+ * 0x20000000) to the block's +8 and clears the busy flag +4. The SIF reply dispatcher passes it the request key, its
+ * argument, the reply words and the reply data; only the block (the last argument) is used.
+ *
+ * @param a0  the request key (unused)
+ * @param a1  the callback argument (unused)
+ * @param a2  a reply word (unused)
+ * @param a3  the reply's result word (unused)
+ * @param a4  the reply data address (unused)
+ * @param a5  the reply data length (unused)
+ * @param a6  a reply word (unused)
+ * @param a7  a reply word (unused)
+ * @return 0
+ */
 int func_003E6878(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, struct S_6878 *self) {
     char *src = (char *)((self->f158 & 0x0FFFFFFF) | 0x20000000);
     __builtin_memcpy((char *)self + 8, src, 336);
@@ -9580,6 +10026,16 @@ extern int func_003F4C98_6958(int *, int, int) __asm__("func_003F4C98");
 extern int func_003E6878_6958(int, int, int, int, int, int, int, int, G_6958 *) __asm__("func_003E6878");
 extern int D_0051EEA8_6958[] __asm__("D_0051EEA8");
 
+/**
+ * Returns the game link's latest status, starting a refresh when none is in flight.
+ *
+ * The status is the 336-byte copy at the block's +8. The busy flag +4 is -1 on a new link: then the first 'gmlk'/'stat'
+ * request is sent and waited for (mode 1, completion 1) and copied in with func_003E6878 at once. When it is 0 (idle),
+ * it is set to 1 and an asynchronous request goes out (into D_0051EEA8) with func_003E6878 as completion, which copies
+ * the status and clears the flag; the caller gets the previous copy meanwhile.
+ *
+ * @return the link's status copy (block +8)
+ */
 char *func_003E6958(G_6958 *self) {
     int was = 0;
     if (self->f4 == -1) {
@@ -9607,6 +10063,18 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6A70);
 typedef struct { char b[4]; } U4_6A70;
 extern void func_0041605C_6A70(short *, int, int) __asm__("func_0041605C");
 
+/**
+ * Looks at the next packet in the game link's receive buffer without consuming it.
+ *
+ * When @p outPacket is not null: if the read position (+0x160) is before the end of the received data (+0x164) it
+ * copies the packet's 4-byte header from the uncached receive buffer (+0x16C) into the buffer *@p outPacket points to,
+ * then the whole packet (its length is the header's first halfword) with func_0041605C; otherwise it sets *@p outPacket
+ * to 0. func_003E6B10 uses it for single-packet reads.
+ *
+ * @param block  the link block
+ * @param outPacket  points to the destination packet buffer pointer, or 0 to only ask for the count
+ * @return the number of received bytes not yet read
+ */
 int func_003E6A70(char *block, short **outPacket) {
     if (outPacket != 0) {
         int readPos = *(int *)(block + 0x160);
@@ -9634,6 +10102,20 @@ extern void *func_0041605C_6B10(short *, int, int) __asm__("func_0041605C");
 extern int D_0051EEB8_6B10[] __asm__("D_0051EEB8");
 
 int func_003E6B10_impl(char *self, short *out, int n) __asm__("func_003E6B10");
+/**
+ * Reads packets from the game link's receive buffer, asking the IOP for more once it is drained.
+ *
+ * When nothing is buffered (end +0x164 negative) it asks func_003F4EA0 whether the IOP filled the receive buffer
+ * (+0x16C); a fill with a new id (compared with +0x15C) sets the read position +0x160 to 0x10 (past the fill header)
+ * and the end to the fill length + 0x10. With data waiting, @p n of 1 copies one packet into @p out (func_003E6A70) and
+ * advances by its length; any other @p n copies all the waiting bytes when they fit in @p n (nothing otherwise). Once
+ * the buffer is consumed it resets the positions (0, -1), stamps +0x170 with func_003F4DE8 and sends 'gmlk'/'recv'
+ * (into D_0051EEB8) for the next fill.
+ *
+ * @param out  the destination buffer
+ * @param n  1 to read one packet, otherwise the buffer size in bytes
+ * @return the number of bytes copied (0 when nothing was read)
+ */
 int func_003E6B10_impl(char *self, short *out, int n) {
     int loc;
     int ret = 0;
@@ -9721,6 +10203,17 @@ extern void func_003F4C98_6D78(int *, int, int) __asm__("func_003F4C98");
 extern int D_0051EED8_6D78[] __asm__("D_0051EED8");
 
 int func_003E6D78_impl(int *p, int b, int c) __asm__("func_003E6D78");
+/**
+ * Sends a control request to the game link on the IOP and returns its answer.
+ *
+ * Sends 'gmlk'/'ctrl' (into D_0051EED8) with the link's IOP reference (*@p p), @p b and the 4 bytes of @p c, and waits
+ * for the result. Nothing in the build calls it.
+ *
+ * @param p  the link block (its +0 is the IOP reference)
+ * @param b  the control selector
+ * @param c  the value
+ * @return the IOP's result
+ */
 int func_003E6D78_impl(int *p, int b, int c) {
     int out;
 
@@ -9737,6 +10230,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6E08);
 extern void func_003F4C68_6E08(int *, int, int, int, int, int, int, int, int, int *) __asm__("func_003F4C68");
 extern void func_003F4C98_6E08(int *, int, int) __asm__("func_003F4C98");
 
+/**
+ * Creates a DirtySock game-util (connection setup) object on the IOP.
+ *
+ * Sends 'gmut'/'crea' and waits for the IOP's reference. cDSockChannel_connect and cDSockChannel_listen store it as
+ * mGameUtil; LobbyMan's func_0025A650 creates its mpConfig with it to advertise the persona.
+ *
+ * @return the IOP game-util reference
+ */
 int func_003E6E08(void) {
     int msg[4];
     int result;
@@ -9777,6 +10278,11 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E6ED8);
 extern void func_003F4C68_6ED8(int *, int, int, int, int, int, int, int, int, int) __asm__("func_003F4C68");
 extern int func_003F4C98_6ED8(int *, int, int) __asm__("func_003F4C98");
 
+/**
+ * Resets a game-util object on the IOP ('gmut'/'rset', waited for). Nothing in the build calls it.
+ *
+ * @param handle  the IOP game-util reference
+ */
 void func_003E6ED8(int handle) {
     int msg[4];
 
@@ -9793,6 +10299,17 @@ extern int func_003F4C68_6F40(int *, int, int, int, int, int, int, int, int, int
 extern void func_003F4C98_6F40(int *, int, int) __asm__("func_003F4C98");
 
 int func_003E6F40_impl(int a, int b, int c) __asm__("func_003E6F40");
+/**
+ * Starts a game-util connection (listen or connect) on the IOP.
+ *
+ * Sends 'gmut'/'conn' with @p handle, @p b and the string @p c (length -1: up to its terminator) and waits for the
+ * result. The connection is picked up later with func_003E6FC8.
+ *
+ * @param handle  the IOP game-util reference
+ * @param b  the connection kind (listen or connect, as the channel passes it)
+ * @param c  the address string the channel formats
+ * @return the IOP's result
+ */
 int func_003E6F40_impl(int handle, int b, int c) {
     int msg[4];
     int result;
@@ -9811,6 +10328,15 @@ extern int func_003F4C68_6FC8(void *, int, int, int, int, int, int, int, int, in
 extern void func_003F4C98_6FC8(void *, int, int) __asm__("func_003F4C98");
 struct S_6FC8 { int a[4]; int out; };
 
+/**
+ * Asks the IOP whether a game-util connection has completed.
+ *
+ * Sends 'gmut'/'comp' and waits for the answer: the connection (comm reference) once it is up, which func_00256A58
+ * passes to func_003E66F0 to create the game link.
+ *
+ * @param handle  the IOP game-util reference
+ * @return the comm reference, or 0 while still connecting
+ */
 int func_003E6FC8(int handle) {
     struct S_6FC8 msg;
 
@@ -9828,6 +10354,15 @@ extern int func_003F4C68_7038(int *, int, int, int, int, int, int, int, int, int
 extern void func_003F4C98_7038(int *, int, int) __asm__("func_003F4C98");
 
 int func_003E7038_impl(int a, int b) __asm__("func_003E7038");
+/**
+ * Queries a game-util object's status on the IOP.
+ *
+ * Sends 'gmut'/'stat' with @p handle and @p b and waits for the result. Nothing in the build calls it.
+ *
+ * @param handle  the IOP game-util reference
+ * @param b  the status selector
+ * @return the IOP's answer
+ */
 int func_003E7038_impl(int handle, int b) {
     int msg[4];
     int result;
@@ -9845,6 +10380,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E70B8);
 extern void func_003F4C68_70B8(int *, int, int, int, int, int, int, int, int, int) __asm__("func_003F4C68");
 extern int func_003F4C98_70B8(int *, int, int) __asm__("func_003F4C98");
 
+/**
+ * Sends a game-util status request to the IOP and ignores the answer.
+ *
+ * Sends 'gmut'/'stat' with @p handle and no selector, with no result pointer. Same command as func_003E7038; nothing in
+ * the build calls it.
+ *
+ * @param handle  the IOP game-util reference
+ */
 void func_003E70B8(int handle) {
     int msg[4];
 
@@ -9862,6 +10405,16 @@ extern int func_003F4C98_7120(int *, int, int) __asm__("func_003F4C98");
 extern int sprintf_7120(char *, int *, int, int) __asm__("sprintf");
 extern int D_004A4860_7120[] __asm__("D_004A4860");
 
+/**
+ * Advertises a name of a given kind on the network through the IOP game util.
+ *
+ * Joins @p arg1 and @p arg2 with a tab ("%s\t%s", D_004A4860) and sends the text with 'gmut'/'advt'. LobbyMan's
+ * func_0025A650 calls it with its config util, "SSX-PS2-2004" and the persona name.
+ *
+ * @param arg0  the IOP game-util reference
+ * @param arg1  the advert kind (game id string)
+ * @param arg2  the advertised name
+ */
 void func_003E7120(int arg0, int arg1, int arg2) {
     char sp10[256];
     int sp110[4];
@@ -9879,6 +10432,11 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E71B0);
 extern void func_003F4C68_71B0(int *, int, int, int, int, int, int, int, int, int) __asm__("func_003F4C68");
 extern int func_003F4C98_71B0(int *, int, int) __asm__("func_003F4C98");
 
+/**
+ * Withdraws the game util's network advert ('gmut'/'with', waited for). Nothing in the build calls it.
+ *
+ * @param handle  the IOP game-util reference
+ */
 void func_003E71B0(int handle) {
     int msg[4];
 
@@ -9896,6 +10454,17 @@ extern void func_003F4C98_7218(int *, int, int) __asm__("func_003F4C98");
 extern char D_004A4868_7218[] __asm__("D_004A4868");
 
 int func_003E7218_impl(int a, int b, char *c) __asm__("func_003E7218");
+/**
+ * Looks up the address of an advertised name through the IOP game util.
+ *
+ * Sends 'gmut'/'loca' with @p a and the string @p c (an empty string when null) and waits for the address. @p b is not
+ * sent. LobbyMan's func_0025A730 uses it to find a persona's host.
+ *
+ * @param a  the IOP game-util reference
+ * @param b  the advert kind (unused)
+ * @param c  the name to locate, or null for ""
+ * @return the address found (0 when none)
+ */
 int func_003E7218_impl(int a, int b, char *c) {
     int sp10[4];
     int sp20;
@@ -9918,6 +10487,18 @@ extern void func_003F4C98_72A0(int *, int, int) __asm__("func_003F4C98");
 extern char D_004A4868_72A0[] __asm__("D_004A4868");
 
 int func_003E72A0_impl(int a, char *b, int c, int d) __asm__("func_003E72A0");
+/**
+ * Queries the network adverts of a kind through the IOP game util.
+ *
+ * Sends 'gmut'/'quer' (mode 5) with @p a, the kind string @p b (empty when null) and the output buffer @p c / @p d, and
+ * waits for the result. Nothing in the build calls it.
+ *
+ * @param a  the IOP game-util reference
+ * @param b  the advert kind, or null for ""
+ * @param c  receives the adverts found
+ * @param d  the size of @p c in bytes
+ * @return the number of adverts found
+ */
 int func_003E72A0_impl(int a, char *b, int c, int d) {
     int sp10[4];
     int sp20;
@@ -9941,6 +10522,15 @@ extern int func_003F4C98_7340(int *, int, int) __asm__("func_003F4C98");
 extern char *RpcAlloc_7340(int) __asm__("RpcAlloc");
 extern void *memset_7340(void *, int, int) __asm__("func_00416210");
 
+/**
+ * Creates a ping object on the IOP and returns its EE-side block.
+ *
+ * Allocates and zeroes 2132 bytes with RpcAlloc, stores the 64-byte-aligned address of its 2 KB response buffer at
+ * +0x10 (block + 0x53 & ~0x3F) and sends 'ping'/'crea', waiting for the IOP reference into +0xC. The lobby
+ * (func_003E7FF0) keeps one at +4 and cGameComm one at +0x140; func_003E73E0 destroys it.
+ *
+ * @return the ping block
+ */
 char *func_003E7340(void) {
     int buf[4];
     char *block = RpcAlloc_7340(2132);
@@ -9961,6 +10551,13 @@ extern int func_003F4C68_73E0(void *, int, int, int, int, int, int, int, int, in
 extern void func_003F4C98_73E0(void *, int, int) __asm__("func_003F4C98");
 struct S_73E0 { int a[4]; };
 
+/**
+ * Destroys a ping object made by func_003E7340.
+ *
+ * Sends 'ping'/'dest' with its IOP reference (+0xC) without waiting, then frees the block with func_00256BD8.
+ *
+ * @param block  the ping block
+ */
 void func_003E73E0(void *block) {
     struct S_73E0 msg;
 
@@ -9978,6 +10575,19 @@ extern int func_003F4C68_7450(int *, int, int, int, int, int, int, int, int, int
 extern void func_003F4C98_7450(int *, int, int) __asm__("func_003F4C98");
 
 int func_003E7450_impl(char *o, int a, int b, int c) __asm__("func_003E7450");
+/**
+ * Sends a ping request through a ping object.
+ *
+ * Sends 'ping'/'requ' with the block's IOP reference (+0xC), @p a, @p b and @p c, and waits for the result. The lobby
+ * pings servers and players with a tag payload (func_003E8DC0), cGameComm_update and the pause-overlay check
+ * (func_002583A8) use it too; replies are collected with func_003E7500.
+ *
+ * @param block  the ping block
+ * @param a  the address to ping
+ * @param b  the payload
+ * @param c  the payload length in bytes
+ * @return the IOP's result
+ */
 int func_003E7450_impl(char *block, int a, int b, int c) {
     int msg[4];
     int result;
@@ -9994,6 +10604,24 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E74E8);
 // From peak3project's fork (github.com/peak3project/ssx3).
 struct S_7500 { volatile int f0; volatile int f4; int f8; int fC; char *f10; };   /* f0 length, f4 busy: set by this RPC callback */
 
+/**
+ * Completion routine of the ping-response request sent by func_003E7500.
+ *
+ * Stores @p a7 (the byte count the IOP wrote into the response buffer) in the block's +0 and clears its busy flag +4.
+ * The SIF reply dispatcher passes it the request key, its argument, the reply words and the reply data; the rest is
+ * unused.
+ *
+ * @param a0  the request key (unused)
+ * @param a1  the callback argument (unused)
+ * @param a2  a reply word (unused)
+ * @param a3  the reply's result word (unused)
+ * @param a4  the reply data address (unused)
+ * @param a5  the reply data length (unused)
+ * @param a6  a reply word (unused)
+ * @param a7  the number of response bytes received
+ * @param out  the ping block
+ * @return 0
+ */
 int func_003E74E8(int a0, int a1, int a2, int a3, int a4, int a5, int a6, int a7, struct S_7500 *out)
 {
     out->f0 = a7;
@@ -10016,6 +10644,21 @@ extern void func_003F4C68_7500(int *, int, int, int, int, int, char *, int, void
 extern char func_003E74E8_7500[] __asm__("func_003E74E8");
 
 int func_003E7500_impl(struct S_7500 *self, char *buf, int *a2, int *a3) __asm__("func_003E7500");
+/**
+ * Collects a ping reply, if one has arrived, and keeps a response request outstanding.
+ *
+ * When the block holds a reply (+0 > 0 bytes in the 2 KB buffer +0x10): the result is its first word; the 16-byte
+ * header is copied to @p a3 and the payload (up to *@p a2 bytes, *@p a2 updated) to @p buf; then the count and the time
+ * stamp +8 are cleared. Then, when no request is in flight (+4 == 0) and no reply waits, it sends a new 'ping'/'resp'
+ * request (into D_0051EEE8) with the 2 KB buffer and func_003E74E8 as completion, at most once per 6 units of
+ * func_003F4DE8 (+8 holds the last send) and, for a fresh buffer, after passing it to func_004247D8 and marking the
+ * count -1.
+ *
+ * @param buf  receives the reply payload, or 0
+ * @param a2  in: the size of @p buf; out: the payload bytes copied (or 0 to skip the payload)
+ * @param a3  receives the 16-byte reply header (round-trip time, address, ...), or 0
+ * @return the reply's first word (the round-trip time), 0 when no reply was waiting
+ */
 int func_003E7500_impl(struct S_7500 *self, char *buf, int *a2, int *a3) {
     int res = 0;
 
@@ -10058,6 +10701,15 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E76A8);
 #ifdef SKIP_ASM
 extern void func_004186C8_76A8(char *, const char *, char *) __asm__("func_004186C8");
 
+/**
+ * Formats a debug message for the lobby and hands it to the lobby's debug routine.
+ *
+ * Formats @p fmt and the variable arguments into a 4 KB buffer (func_004186C8, vsprintf-style) and, when a routine is
+ * set at +0x548, calls it with the data word +0x544 and the text (both given to func_003E7FF0). Used for the
+ * "connecting to %08x:%d" note, the incoming-message dump func_003E8FD0 and the server ping timeout.
+ *
+ * @param fmt  printf-style format; the arguments follow
+ */
 // PORT: SN-specific va_start
 void func_003E76A8(char *self, const char *fmt, ...) {
     char buf[0x1000];
@@ -10078,6 +10730,20 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7718);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void *func_002591E8_7718(int) __asm__("func_002591E8");
 
+/**
+ * Queues a pending-request record on the lobby and returns it.
+ *
+ * Allocates a 68-byte record (func_002591E8): +0 a request id taken from the counter +0x54C (which then advances, kept
+ * below 2^31), +4 the command @p tag, +0x38 / +0x3C the completion routine and its context. It is linked into the
+ * request list +0x53C in front of the first 'ping' record, so command requests stay ahead of pings. The lobby's command
+ * (func_003E8B10), connect (func_003E8260) and ping (func_003E8DC0) routines use it.
+ *
+ * @param lobby  the lobby
+ * @param tag  the command FourCC ('auth', 'skey', 'ping', ...)
+ * @param arg2  the routine to call when the reply arrives
+ * @param arg3  the context passed to it
+ * @return the record, or 0 when the allocation failed
+ */
 void *func_003E7718(char *lobby, int tag, int arg2, int arg3) {
     char **pp;
     char *n;
@@ -10117,6 +10783,17 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E77F0);
 typedef struct N_77F0 { int pad0; int key; int w[14]; struct N_77F0 *next; } N_77F0;
 extern void *memset_77F0(void *, int, unsigned int) __asm__("func_00416210");
 extern void func_00259210_77F0(void *) __asm__("func_00259210");
+/**
+ * Takes the first pending-request record off the lobby's list when it matches a command.
+ *
+ * Clears @p dst (68 bytes) and, when the head of the request list +0x53C has the command @p key (or @p key is 'DQUE',
+ * which takes any), unlinks it, copies it into @p dst and frees it (func_00259210). func_003E95C8 uses it to find the
+ * completion routine of each reply; func_003E7AC0 drains the list with 'DQUE'.
+ *
+ * @param dst  receives the record (all zero when none was taken)
+ * @param key  the reply's command FourCC, or 'DQUE' for any
+ * @return nonzero while records remain on the list
+ */
 int func_003E77F0(char *self, N_77F0 *dst, int key) {
     N_77F0 *n;
     memset_77F0(dst, 0, 68);
@@ -10139,6 +10816,20 @@ struct L_7918 { char pad[0x53C]; struct N_7918 *head; int cnt; };
 extern int func_004165A8_7918(char *, char *) __asm__("func_004165A8");
 extern void func_00259210_7918(void *) __asm__("func_00259210");
 
+/**
+ * Takes a matching ping record off the lobby's request list.
+ *
+ * Walks the list +0x53C for a 'ping' record that either has address @p id and the name @p name (func_004165A8), or,
+ * when @p id is -1, a deadline (+0xC) before @p cutoff. The first match is unlinked, copied into @p out, freed and the
+ * outstanding-ping count +0x540 decremented. Used by func_003E7C40 for replies and for timeouts.
+ *
+ * @param list  the lobby
+ * @param out  receives the record
+ * @param name  the pinged name (ignored when @p id is -1)
+ * @param id  the pinged address, or -1 to look for an expired ping
+ * @param cutoff  the current time, for expired pings
+ * @return 1 when a record was taken, 0 otherwise
+ */
 int func_003E7918(struct L_7918 *list, struct N_7918 *out, char *name, int id, int cutoff) {
     struct N_7918 **pp = &list->head;
     struct N_7918 *n;
@@ -10165,6 +10856,11 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7AC0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 int func_003E77F0_7AC0(int, void *, int) __asm__("func_003E77F0");
 
+/**
+ * Drops every pending request record of the lobby (func_003E77F0 with 'DQUE' until the list is empty).
+ *
+ * @param lobby  the lobby
+ */
 void func_003E7AC0(int lobby) {
     char buf[80];
     while (func_003E77F0_7AC0(lobby, buf, 0x44515545) != 0) {
@@ -10182,6 +10878,17 @@ extern int func_003EEEE8(int);
 extern void sprintf(void *, int *, int);
 extern int D_004A4870_7B00[] __asm__("D_004A4870");
 
+/**
+ * Updates a room's user count in the lobby's room list.
+ *
+ * When the room list (slot 0: index +0x310, list +0x314) exists, finds room @p arg1 (func_003EEEE8, func_003EE468) and,
+ * if its count (+0x10) differs from @p arg2, stores the count, writes it as text at +0x14 ("%d") and puts the record
+ * back (func_003EE3E0). func_003E95C8 calls it for "+who", "+pop", "+usr" and move / room replies.
+ *
+ * @param arg0  the lobby
+ * @param arg1  the room id
+ * @param arg2  the room's user count
+ */
 void func_003E7B00(void *arg0, int arg1, int arg2) {
     int temp_2;
     int temp_4;
@@ -10213,6 +10920,13 @@ struct S_7BA0 { int h; int f4; void (*fn)(void *, struct M_7BA0 *, int); int fC;
 struct O_7BA0 { char pad[0x310]; struct S_7BA0 s[8]; };
 
 void func_003E7BA0_impl(struct O_7BA0 *self) __asm__("func_003E7BA0");
+/**
+ * Notifies the owners of the lobby's lists that changed.
+ *
+ * For each of the 8 list slots (+0x310, 0x14 bytes each: index, list, routine, context) that is open and has a routine,
+ * when func_003EE620 reports changes on its list (> 0) it calls the routine with the lobby, an event (type 2, the slot
+ * number, 0, the list) and the slot's context. Called from func_003E95C8.
+ */
 void func_003E7BA0_impl(struct O_7BA0 *self) {
     int i;
     for (i = 0; i < 8; i++) {
@@ -10271,6 +10985,16 @@ struct Rec_7C40 {
 
 extern int func_003E7918_7C40(char *, struct Rec_7C40 *, char *, int, int) __asm__("func_003E7918");
 
+/**
+ * Handles ping replies and expired pings for the lobby.
+ *
+ * For every reply func_003E7500 delivers on the lobby's ping object (+4) it reads the reply's "ORIG" address and
+ * "NAME"; the matching pending ping (func_003E7918) gets its routine called with a 'ping' event whose tags carry NAME,
+ * ADDR and PING (the round-trip time). The time is also written as "%dms" into the room-list entry with that address
+ * (slot 0, +0x64 / +0x5C) and the user-list entry with that name (slot 1, +8 / +0x28), each followed by
+ * func_003EE600(list, 1). Then every ping whose deadline has passed (protocol time from func_003F5D88) is completed
+ * with code -1 and PING 0.
+ */
 void func_003E7C40(char *self) {
     int info[2];
     char buf[0x100];
@@ -10343,6 +11067,14 @@ void func_003E7C40(char *self) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7F58);
 #ifdef SKIP_ASM
+/**
+ * Resets the lobby's server-ping state.
+ *
+ * Clears the failure count +0x20 and the next-ping time +0x18, and sets the last ping result +0x1C to -1 (none). See
+ * func_003E94F0.
+ *
+ * @param lobby  the lobby
+ */
 void func_003E7F58(void *lobby) {
     (*(unsigned *)((char*)(lobby) + (0x20))) = 0;
     (*(unsigned *)((char*)(lobby) + (0x18))) = 0;
@@ -10353,6 +11085,17 @@ void func_003E7F58(void *lobby) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E7F70);
 #ifdef SKIP_ASM
+/**
+ * Drops the lobby connection with a reason and reports it.
+ *
+ * Sets the state +0xC to 'term', ORs @p flags into the event flags +8, resets the server-ping state (func_003E7F58) and
+ * calls the connection routine (+0x52C, context +0x530) with an event of type 3, kind 'disc' and code @p reason.
+ * func_003E95C8 calls it on timeouts ('time', 0x800), lost connections and failed logins ('auth', 2).
+ *
+ * @param lobby  the lobby
+ * @param reason  the code passed in the 'disc' event
+ * @param flags  the event flags to raise
+ */
 void func_003E7F70(char *lobby, int reason, int flags) {
     int sp[4];
     int (*fn)(char *, int *, int);
@@ -10382,6 +11125,19 @@ extern int func_003F5478_7FF0(int) __asm__("func_003F5478");
 extern int func_003E7340_7FF0(void) __asm__("func_003E7340");
 extern void func_003E80C0_7FF0(void *) __asm__("func_003E80C0");
 
+/**
+ * Creates a lobby client object (1360 bytes) and returns it.
+ *
+ * Zeroes the block and stores the default tags (+0x34, 256 bytes): @p arg0 is duplicated as tags when it contains '=',
+ * otherwise stored as the "VERS" tag. Creates the lobby protocol (func_003F5478(0x8000), +0) and a ping object
+ * (func_003E7340, +4), stores the debug routine and its data (+0x548, +0x544; see func_003E76A8) and resets everything
+ * with func_003E80C0. LobbyMan (func_0025A948) creates its mpLobbyApi with it.
+ *
+ * @param arg0  the default tags, or a version string, or 0
+ * @param arg1  data passed to the debug routine
+ * @param arg2  the debug output routine, or 0
+ * @return the lobby, or 0 when the allocation failed
+ */
 void *func_003E7FF0(char *arg0, int arg1, int arg2) {
     char *r;
     int t;
@@ -10420,6 +11176,16 @@ extern void func_003F5738_80C0(int) __asm__("func_003F5738");
 struct E_80C0 { int a, b, c, d, e; };
 struct S_80C0 { int f0, f4, f8, fC; char pad[0x310 - 0x10]; struct E_80C0 e[8]; char pad2[0x53C - 0x3B0]; char *f53C; int f540; char pad3[0x54C - 0x544]; int f54C; };
 
+/**
+ * Disconnects the lobby and clears its state.
+ *
+ * Sets the state +0xC to 'offl', disconnects the protocol (func_003F5738), empties and frees the entries of every open
+ * list slot (+0x310), frees all pending request records (+0x53C), resets the server-ping state (func_003E7F58) and
+ * clears the outstanding-ping count +0x540 and the request id counter +0x54C. Used by func_003E7FF0, func_003E81C8 and
+ * LobbyMan's disconnect.
+ *
+ * @param s  the lobby
+ */
 void func_003E80C0(struct S_80C0 *s) {
     int i, t;
     char *p;
@@ -10458,6 +11224,12 @@ struct S_81C8 { int h; int f4; int pad[3]; };
 struct O_81C8 { int f0; int f4; char pad[0x310 - 8]; struct S_81C8 s[8]; };
 
 void func_003E81C8_impl(struct O_81C8 *self) __asm__("func_003E81C8");
+/**
+ * Destroys a lobby made by func_003E7FF0.
+ *
+ * Disconnects it (func_003E80C0), destroys every open list slot's index and list (func_003EE820, func_003EE260), the
+ * ping object (func_003E73E0) and the protocol (func_003F55B8), then frees the lobby (func_00259210).
+ */
 void func_003E81C8_impl(struct O_81C8 *self) {
     int i;
     func_003E80C0_81C8(self);
@@ -10479,6 +11251,17 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8248);
 typedef struct { int a; int b; } E8248_pair;
 typedef struct { char pad[0x514]; E8248_pair e[1]; } E8248_S;
 
+/**
+ * Sets one of the lobby's five event routines (+0x514 + 8 * @p i: routine, context).
+ *
+ * Slot 0 receives every message, 1 chat messages, 3 connection events and 4 game-session ("play") events
+ * (func_003E95C8); LobbyMan (func_0025A948) installs 0, 1, 3 and 4.
+ *
+ * @param table  the lobby
+ * @param i  the routine slot (0-4)
+ * @param a  the routine
+ * @param b  its context
+ */
 void func_003E8248(E8248_S *table, int i, int a, int b) {
     table->e[i].a = a;
     table->e[i].b = b;
@@ -10502,6 +11285,22 @@ extern int D_00495F30_8260[] __asm__("D_00495F30");
 
 struct S_8260 { int f0, f4, f8, fC, f10, f14; char pad[0x34 - 0x18]; char f34[0x3B0 - 0x34]; int f3B0, f3B4; char f3B8; char pad2[0x50C - 0x3B9]; int f50C; };
 
+/**
+ * Starts connecting the lobby to a server.
+ *
+ * Stores the address (+0x3B4) and port (+0x3B0), drops pending requests (func_003E7AC0), clears the snapshot counter
+ * +0x50C, resets the server-ping state and queues an 'skey' request record with the routine and context (returns -1
+ * when that fails). Then reconnects the protocol (func_003F5738, func_003F5638), prints "connecting to %08x:%d" through
+ * func_003E76A8, sends '@dir' with the default tags (+0x34), sets the state +0xC to 'rdir', the timeout +0x10 to now +
+ * 120000 and +0x14 to now, and clears the server-down text +0x3B8. LobbyMan calls it with port 11000.
+ *
+ * @param s  the lobby
+ * @param a1  the server address
+ * @param a2  the server port
+ * @param a3  the routine to call when the session key exchange completes
+ * @param a4  its context
+ * @return 0, or -1 when the request record could not be made
+ */
 int func_003E8260(struct S_8260 *s, int a1, int a2, int a3, int a4) {
     char buf[0x100];
     s->f3B4 = a1;
@@ -10549,6 +11348,18 @@ extern char D_004A48D0[];
 struct S_8368 { int h; int f4; int a; int b; int pad; };
 struct O_8368 { int lobby; char pad[0x8]; int state; char pad2[0x300]; struct S_8368 s[8]; };
 
+/**
+ * Opens or closes one of the lobby's list slots and returns the slot's list.
+ *
+ * Opening (@p on nonzero) a closed slot creates its index (func_003EE778(1000, 2000)) and list (func_003EE1E8(100, 100,
+ * 0)); closing an open one frees its entries and destroys both. For slots 0 (rooms), 1 (users) and 2 (ranks), when the
+ * lobby is connected (state not 'offl', 'rdir' or 'conn') it tells the server with a 'sele' command "ROOMS=1",
+ * "USERS=1" or "RANKS=1" ("=0" when closing). Nothing in the build calls it.
+ *
+ * @param i  the list slot (0-7)
+ * @param on  nonzero to open, 0 to close
+ * @return the slot's list (0 when closed or @p i is out of range)
+ */
 int func_003E8368(struct O_8368 *self, unsigned int i, int on) {
     char buf[256];
     int r;
@@ -10612,6 +11423,18 @@ struct S_85B0 { int h; int f4; int a; int b; int pad; };
 struct O_85B0 { char pad[0x310]; struct S_85B0 s[8]; };
 
 int func_003E85B0_impl(struct O_85B0 *self, unsigned int i, int a, int b) __asm__("func_003E85B0");
+/**
+ * Opens one of the lobby's list slots with a change routine and returns its list.
+ *
+ * Stores the routine and context in the slot (+0x310 + 0x14 * @p i, +8 / +0xC), creates the index (func_003EE778(1000,
+ * 2000)) and the list (func_003EE1E8(100, 100, 0)) and links them (func_003EE768). Does not check whether the slot was
+ * already open. LobbyMan opens the room, user and rank lists (slots 0-2) and rank snapshots (slot 4) with it.
+ *
+ * @param i  the list slot (0-7)
+ * @param a  the routine func_003E7BA0 calls when the list changes
+ * @param b  its context
+ * @return the new list, or 0 when @p i is out of range
+ */
 int func_003E85B0_impl(struct O_85B0 *self, unsigned int i, int a, int b) {
     int r = 0;
     if (i < 8) {
@@ -10632,6 +11455,15 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8650);
 typedef struct { int a, b, c, d, e; } Q_8650;
 typedef struct { char pad[0x314]; Q_8650 q[8]; } S_8650;
 
+/**
+ * Changes a lobby list slot's change routine and context, and returns its list.
+ *
+ * @param table  the lobby
+ * @param i  the list slot (0-7)
+ * @param arg2  the new routine
+ * @param arg3  its context
+ * @return the slot's list, or 0 when @p i is out of range
+ */
 int func_003E8650(S_8650 *table, unsigned int i, int arg2, int arg3) {
     int r = 0;
     if (i < 8U) {
@@ -10657,6 +11489,16 @@ extern void func_00259210_8688(void *) __asm__("func_00259210");
 extern void func_003EE820_8688(int) __asm__("func_003EE820");
 extern void func_003EE260_8688(int) __asm__("func_003EE260");
 
+/**
+ * Destroys a list opened with func_003E85B0.
+ *
+ * Frees every entry (through the index func_003EE770 returns for the list), destroys the index and the list; when the
+ * slot still refers to this list its index and list words are cleared. The slot's routine and context are cleared in
+ * any case. LobbyMan closes its room, user, rank and snapshot lists with it.
+ *
+ * @param i  the list slot (0-7)
+ * @param h  the list
+ */
 void func_003E8688(T_8688 *self, unsigned int i, int h) {
     int iter;
     int item;
@@ -10692,6 +11534,17 @@ struct O_8778 { char pad[0x310]; struct S_8778 s[8]; };
 struct B_8778 { char b[0xA8]; };
 
 int func_003E8778_impl(struct O_8778 *self, unsigned int i, char *arg) __asm__("func_003E8778");
+/**
+ * Adds an entry to one of the lobby's keyed lists (slots 3-7), unless its name is already there.
+ *
+ * Slot 3 takes a name: a zeroed 312-byte record is made with the name at +8. Slots 4-7 take a 168-byte record, copied,
+ * keyed by its name at +8. The record is added to the slot's list (func_003EE320) and indexed by name (func_003EEB30).
+ * Nothing in the build calls it.
+ *
+ * @param i  the list slot (3-7)
+ * @param arg  the name (slot 3) or the record to copy (slots 4-7)
+ * @return 1 when added, 0 when the name was present, -1 when @p i is invalid or the slot is closed
+ */
 int func_003E8778_impl(struct O_8778 *self, unsigned int i, char *arg) {
     if (i < 8) {
         if (self->s[i].h == 0) {
@@ -10741,6 +11594,16 @@ struct S_8968 { int h; int f4; int a; int b; int pad; };
 struct O_8968 { char pad[0x310]; struct S_8968 s[8]; };
 
 int func_003E8968_impl(struct O_8968 *self, unsigned int i, int arg) __asm__("func_003E8968");
+/**
+ * Removes a named entry from one of the lobby's keyed lists (slots 3-7).
+ *
+ * Looks the name up in the slot's index (func_003EEC88), removes it (func_003EED08) and frees the entry taken from the
+ * list (func_003EE480). Nothing in the build calls it.
+ *
+ * @param i  the list slot (3-7)
+ * @param arg  the entry's name
+ * @return 1 when removed, 0 when not found, -1 when @p i is invalid or the slot is closed
+ */
 int func_003E8968_impl(struct O_8968 *self, unsigned int i, int arg) {
     int r;
     if (i < 8) {
@@ -10767,6 +11630,14 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8A28);
 #ifdef SKIP_ASM
 extern int func_003EEC88(int, int);
 
+/**
+ * Tells whether a lobby list slot's index holds a name.
+ *
+ * @param lobby  the lobby
+ * @param slot  the list slot (0-7)
+ * @param arg2  the name or key to look up (func_003EEC88)
+ * @return 1 when present, 0 when not, -1 when @p slot is invalid or closed
+ */
 int func_003E8A28(int lobby, unsigned int slot, int arg2) {
     int temp_4;
 
@@ -10783,6 +11654,17 @@ int func_003E8A28(int lobby, unsigned int slot, int arg2) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8A70);
 #ifdef SKIP_ASM
+/**
+ * Returns one of the lobby's text fields by FourCC.
+ *
+ * 'user' or 'acct': the account name from the login reply (+0x134); 'pers': the persona (+0x174); 'room': the room name
+ * (+0x1C0); 'play': the game-session record (+0x200) when its WHEN time (+0x2CC) is set; 'down': the server-down
+ * message (+0x3B8) when not empty.
+ *
+ * @param lobby  the lobby
+ * @param k  the field FourCC
+ * @return the field, or 0 when unknown or empty
+ */
 char *func_003E8A70(char *lobby, int k) {
     if (k == 0x75736572 || k == 0x61636374) return lobby + 0x134;
     if (k == 0x70657273) return lobby + 0x174;
@@ -10796,6 +11678,13 @@ char *func_003E8A70(char *lobby, int k) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8AF8);
 #ifdef SKIP_ASM
+/**
+ * Clears a lobby field by FourCC: for 'play' it zeroes the game session's WHEN time (+0x2CC), so func_003E8A70 stops
+ * returning the session. Other keys do nothing.
+ *
+ * @param lobby  the lobby
+ * @param key  the field FourCC
+ */
 void func_003E8AF8(void *lobby, int key) {
     if (key == 0x706C6179) {
         (*(int *)((char*)(lobby) + (0x2CC))) = 0;
@@ -10841,6 +11730,23 @@ struct O_8B10 {
     int f50C;
 };
 
+/**
+ * Sends a command to the lobby server and returns its request id.
+ *
+ * Allowed only in the states 'idle', 'auth', 'acct' and 'skey' (else -1). Queues a request record with the routine and
+ * context (func_003E7718; -2 when that fails). For 'auth', 'acct' and 'pass' the tags are copied, the lobby's default
+ * tags (+0x34) merged in (func_003ECB00) and PASS replaced: without a session key (+0x24 empty) by TagFieldSetCrypt
+ * with the MASK text from the '@dir' reply (+0x4BC) plus a MASK tag holding its SESS number (+0x4B8); with one by '~'
+ * and the password encrypted with it (func_003F35D0). A 'snap' command empties the list slot named by its CHAN tag
+ * (4-7), clears +0x508 and counts a pending snapshot (+0x50C). The command goes out with func_003F5910. LobbyMan's
+ * requests (func_0025B608 and others) use it.
+ *
+ * @param cmd  the command FourCC
+ * @param tags  the command's tag text
+ * @param a3  the routine for the reply, or 0
+ * @param a4  its context
+ * @return the request id, -1 in the wrong state, -2 when the record could not be made
+ */
 int func_003E8B10(struct O_8B10 *self, int cmd, char *tags, int a3, int a4) {
     char buf[0x200];
     char str[0x20];
@@ -10889,6 +11795,16 @@ int func_003E8B10(struct O_8B10 *self, int cmd, char *tags, int a3, int a4) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8D70);
 #ifdef SKIP_ASM
+/**
+ * Cancels the reply routine of pending lobby requests.
+ *
+ * Clears the routine (+0x38) of every queued request record with id @p entryId, or of all of them for -1; the records
+ * stay queued. LobbyMan uses it to abandon requests it timed out.
+ *
+ * @param lobby  the lobby
+ * @param entryId  the request id, or -1 for all
+ * @return 1 when at least one record matched, 0 otherwise
+ */
 int func_003E8D70(void *lobby, int entryId) {
     int var_6;
     void **var_4;
@@ -10928,6 +11844,22 @@ extern int func_003E7450_8DC0(int, int, char *, int) __asm__("func_003E7450");
 extern char D_004A4880_8DC0[] __asm__("str_NAME_b");
 extern char D_004A4890_8DC0[] __asm__("str_ADDR_b");
 
+/**
+ * Pings a host through the lobby's ping object and returns the ping's request id.
+ *
+ * Only in the states 'conn', 'idle', 'auth' and 'acct' (-1 otherwise), with a ping object (+4; -2) and fewer than 64
+ * pings outstanding (+0x540; -3). Queues a 'ping' record (func_003E7718; -4 when that fails) with the address, the
+ * deadline (protocol time + @p x) and the name, then sends the ping with NAME and ADDR tags (func_003E7450) and counts
+ * it. The routine gets the 'ping' event built by func_003E7C40. LobbyMan pings players with a 5000 timeout;
+ * func_003E9590 pings the server.
+ *
+ * @param name  the host's name
+ * @param addr  the host's address
+ * @param x  the timeout, in protocol time units
+ * @param a4  the routine for the result
+ * @param a5  its context
+ * @return the ping's request id, or a negative error
+ */
 int func_003E8DC0(S_8DC0 *self, char *name, int addr, int x, int a4, int a5) {
     char buf[0x100];
     N_8DC0 *n;
@@ -10952,6 +11884,17 @@ int func_003E8DC0(S_8DC0 *self, char *name, int addr, int x, int a4, int a5) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8F08);
 #ifdef SKIP_ASM
+/**
+ * Returns one of the lobby's status values by FourCC.
+ *
+ * 'stat': the state +0xC; 'rflg': the room flags +0x1BC; 'extn': the external address +0x4FC; 'locl': the local address
+ * +0x500; 'inat': 1 when both addresses are known and differ (behind NAT); 'more': +0x504 (from the 'sele' reply's
+ * MORE); 'slot': +0x510 (its SLOTS).
+ *
+ * @param lobby  the lobby
+ * @param key  the value FourCC
+ * @return the value, or 0 for an unknown key
+ */
 int func_003E8F08(char *lobby, unsigned key) {
     int extAddr, localAddr;
     if (key == 0x73746174) return *(int *)(lobby + 0xC);
@@ -10976,6 +11919,15 @@ int func_003E8F08(char *lobby, unsigned key) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003E8FB8);
 #ifdef SKIP_ASM
+/**
+ * Takes the lowest pending event flag off the lobby and returns it.
+ *
+ * Clears the lowest set bit of the event flags +8 (set by func_003E95C8 and func_003E7F70) and returns that bit, 0 when
+ * none is set. LobbyMan's update polls it.
+ *
+ * @param lobby  the lobby
+ * @return the event bit taken, or 0
+ */
 int func_003E8FB8(void *lobby) {
     int temp_2;
     int temp_3;
@@ -10999,6 +11951,17 @@ extern char D_00495F78_8FD0[] __asm__("D_00495F78");
 extern char D_00495F88_8FD0[] __asm__("D_00495F88");
 extern char D_004A48F0_8FD0[] __asm__("D_004A48F0");
 
+/**
+ * Prints an incoming lobby message for debugging.
+ *
+ * Prints "recv: %c%c%c%c/%c%c%c%c" through func_003E76A8 with the event's kind and code FourCCs (kind -1 shows as
+ * '****' with code 'conn', 'disc' or '----'; a 0 code shows as '----'), then the text: " [null data]" when empty, "
+ * [binary data]" when it has control characters other than tab, newline and return, " [long data]" when over 240
+ * characters, otherwise the text itself. LobbyMan_onincomingmsg calls it.
+ *
+ * @param out  the lobby (for its debug routine)
+ * @param p  the event (+4 kind, +8 code, +0xC text)
+ */
 void func_003E8FD0(void *out, int *p) {
     int a = p[1];
     int b = p[2];
@@ -11052,6 +12015,17 @@ extern int func_003EED08_9160(int, void *) __asm__("func_003EED08");
 extern void *func_003EE480_9160(int, int) __asm__("func_003EE480");
 extern char D_004A48F8_9160[] __asm__("D_004A48F8") __attribute__((aligned(8)));
 
+/**
+ * Ranks the entries of the lobby's rank list and drops those below a cut-off.
+ *
+ * Works on list slot 2 (+0x338 index, +0x33C list; -1 when not open). Builds a histogram of the scores (8192 shorts);
+ * entries with a score outside 1-8191 get 500 and the name "bogus". Turning the counts into ranks from the top, once
+ * more than @p limit entries are counted the lower scores are zeroed (when the list holds that many). Every remaining
+ * entry gets its rank at +4; the zeroed ones are removed from the index and the list. Nothing in the build calls it.
+ *
+ * @param limit  how many top entries to keep
+ * @return the number of ranked entries kept
+ */
 int func_003E9160(char *self, int limit) {
     int b = *(int *)(self + 0x33C);
     int a = *(int *)(self + 0x338);
@@ -11133,6 +12107,21 @@ extern int strlen(const char *);
 extern int func_00416B18(const char *, const char *, int);
 
 int func_003E9378_impl(char *self, int limit, unsigned int mask, unsigned int val, char *name, int def) __asm__("func_003E9378");
+/**
+ * Picks a room in the lobby's room list for joining.
+ *
+ * Among the room-list entries (slot 0) whose flags (+8) masked with @p mask equal @p val and whose name begins with
+ * @p name, prefers the fullest room below @p limit percent full (users T at +0x10 * 100 / limit L at +0xC), otherwise
+ * the emptiest. It first calls func_003EE600 on the room list with func_003EE620's result. Nothing in the build calls
+ * it.
+ *
+ * @param limit  the fullness limit in percent
+ * @param mask  the flag bits to test
+ * @param val  the value they must have
+ * @param name  the room-name prefix, or 0 for any
+ * @param def  the index returned when no room matches
+ * @return the chosen room's index in the list, or @p def
+ */
 int func_003E9378_impl(char *self, int limit, unsigned int mask, unsigned int val, char *name, int def) {
     int i;
     int best = -1;
@@ -11182,6 +12171,17 @@ extern int func_003F4330_94F0(void) __asm__("func_003F4330");
 extern char D_00495F98_94F0[] __asm__("D_00495F98");
 extern char D_004A4898_94F0[] __asm__("str_PING_b");
 
+/**
+ * Ping routine for the lobby's server pings (installed by func_003E9590).
+ *
+ * Handles 'ping' events only. A PING of 0 (timeout) prints "server ICMP timeout" and counts a failure (+0x20): after 3
+ * the count restarts at 0, otherwise the next ping is due at once (+0x18 = func_003F4330()). A nonzero PING is stored
+ * (+0x1C, later reported to the server in '~png' replies) and the next ping is scheduled 30000 later with the failure
+ * count cleared.
+ *
+ * @param arg0  the lobby
+ * @param arg1  the event (+4 kind, +0xC tag text)
+ */
 void func_003E94F0(void *arg0, void *arg1) {
     int n;
     if (*(int *)((char *)arg1 + 4) == 0x70696E67) {
@@ -11211,6 +12211,12 @@ extern void func_003E8DC0_9590(void *, void *, int, int, void *, int) __asm__("f
 extern char D_004A4900_9590[] __asm__("D_004A4900");
 extern char func_003E94F0_9590[] __asm__("func_003E94F0");
 
+/**
+ * Pings the lobby server: func_003E8DC0 with the name "@server", the server address (+0x3B4), a 3000 timeout and
+ * func_003E94F0 as the routine. Called by func_003E95C8 after the redirect.
+ *
+ * @param arg0  the lobby
+ */
 void func_003E9590(void *arg0) {
     func_003E8DC0_9590(arg0, D_004A4900_9590, *(int *)((char *)arg0 + 0x3B4), 3000, func_003E94F0_9590, 0);
 }
@@ -11406,6 +12412,22 @@ extern char D_004A4A58_95C8[] __asm__("D_004A4A58");
 extern char D_004A4A60_95C8[] __asm__("D_004A4A60");
 extern char D_004A4A68_95C8[] __asm__("D_004A4A68");
 
+/**
+ * Runs the lobby client: timeouts, pings and every message from the server.
+ *
+ * Does nothing without a protocol (+0). Unless offline it tracks the inactivity timeout (+0x10; 60 s after each
+ * message, a gap over 5000 extends it) and disconnects with 'time' (func_003E7F70) when it passes; stops in the 'term'
+ * and 'offl' states. Handles ping replies (func_003E7C40), then reads each message (func_003F5A70): '~png' keep-alives
+ * are answered (with the last server ping as TIME), anything else goes to event routine 0 and to the matching request
+ * record's routine (func_003E77F0). The protocol flow: in 'rdir' the '@dir' reply gives the real server (ADDR, PORT,
+ * SESS, MASK; or the DOWN text and flag 0x400) and moves to 'conn' with a server ping (func_003E9590); the connection
+ * sends 'skey' with "Public Key"; the 'skey' / 'sele' reply stores the session key and enters 'idle' (flag 1,
+ * connection routine 3); 'auth' / 'acct' replies store the account name and external address (flag 2); 'sele' stores
+ * MORE and SLOTS; 'pers' the persona. Server pushes: "+ses" fills the game session and calls routine 4; "+msg" calls
+ * routine 1 with 'chat', 'cast' or 'priv'; "+who", "+rom", "+pop", "+usr", "+rnk" and "+snp" maintain the room, user,
+ * rank and snapshot lists (flags 8, 0x20, 0x40, 0x80); 'move' / 'room' replies update the current room. Finally
+ * notifies changed lists (func_003E7BA0). LobbyMan's update calls it.
+ */
 void func_003E95C8(struct Lob_95C8 *self)
 {
     char buf[0x100];
@@ -11806,6 +12828,16 @@ void func_003E95C8(struct Lob_95C8 *self)
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003EAE68);
 #ifdef SKIP_ASM
+/**
+ * Reads an unsigned decimal number from the start of a string.
+ *
+ * Accumulates the leading digits into *@p out (0 when there are none) and returns the position after them. The tag time
+ * parser (cDirtysock_tag_TagFieldGetTime) reads its date fields with it.
+ *
+ * @param str  the text
+ * @param out  receives the number
+ * @return the first character after the digits
+ */
 unsigned char *func_003EAE68(unsigned char *str, int *out) {
     unsigned int chr;
 
@@ -11840,6 +12872,17 @@ struct sTm_3EAEB8 {
     int isdst;
 };
 
+/**
+ * Converts seconds since 1970 into calendar fields (UTC) and returns @p tm.
+ *
+ * Fills seconds, minutes, hours, day of the month (1-based), month (0-based), year since 1900 and day of the year; the
+ * weekday is not set and isdst is 0. Leap years follow the Gregorian rules; the month lengths come from D_004969E0.
+ * Used by the tag time routines (TagFieldSetEpoch and others) and by func_003EB090.
+ *
+ * @param tm  the 9-word time structure to fill
+ * @param t  seconds since 1970-01-01 (unsigned)
+ * @return @p tm
+ */
 // Seconds since 1970 -> broken-down time (no wday). D_004969E0 holds two rows of month
 // lengths: row 0 is picked for a 366-day year, row 1 for a 365-day year.
 struct sTm_3EAEB8* func_003EAEB8(struct sTm_3EAEB8* tm, long t)
@@ -11893,6 +12936,15 @@ INCLUDE_ASM("ealib/seg_2DCAE8", func_003EB090);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 // From candidtheartist's fork (github.com/candidtheartist/ssx3), via its pull request to this repository.
 extern void func_003EAEB8_B090(int *, unsigned long) __asm__("func_003EAEB8");
+/**
+ * Converts calendar fields back into seconds since 1970 by binary search.
+ *
+ * Searches 0 to 0xFFFFFFFF with func_003EAEB8, comparing year, month, day, hour, minute and second in that order. Used
+ * by cDirtysock_tag_TagFieldGetTime and two other tag time helpers.
+ *
+ * @param key  the time fields (as func_003EAEB8 fills them)
+ * @return the matching seconds, or 0 when the fields name no exact time
+ */
 unsigned long func_003EB090(int *key) {
     int buf[12];
     unsigned int lo = 0;
@@ -11919,6 +12971,11 @@ unsigned long func_003EB090(int *key) {
 //100%
 INCLUDE_ASM("ealib/seg_2DCAE8", func_003EB190);
 #ifdef SKIP_ASM
+/**
+ * Returns 0. Nothing in the build references it.
+ *
+ * @return 0
+ */
 int func_003EB190(void) {
     return 0;
 }

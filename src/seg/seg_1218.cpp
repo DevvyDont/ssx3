@@ -83,6 +83,16 @@ static inline sVec4_0250 vNorm_0250(const sVec4_0250& v)
     return r;
 }
 
+/**
+ * Returns how steeply a direction runs along the computer rider's slope, scaled by its accuracy setting.
+ *
+ * Takes the rider (pointer at +0x18), removes from @p direction its component along the rider's side axis (+0x1A0),
+ * normalizes the rest and returns the negated dot product with the rider's up axis (+0x1C0). When the float at +0xDF4
+ * is not 1.0 the result is multiplied by 0.12667641 and by that value. Nothing in the build references it.
+ *
+ * @param direction  the direction to measure
+ * @return the slope value
+ */
 extern "C" float func_00100250(void* self, const sVec4_0250* direction)
 {
     char* rider = *(char**)((char*)self + 0x18);
@@ -237,6 +247,19 @@ static inline float Atan2_0348(float y, float x)
 static inline cObj_0348* Obj_0348(char* self) { return (cObj_0348*)(*(char**)(self + 0x18) + 0x6C0); }
 
 extern "C" float func_00100348_0348(char* self, sV4_0348* target) __asm__("func_00100348");
+/**
+ * Returns the steering amount that turns the computer rider towards a point.
+ *
+ * The up axis is the rider's +0x1C0 (t4vect_ZAxis when its z is not positive), the forward axis comes from the rider's
+ * +0x6C0 object (virtual GetDir) and the side axis is their cross product. The direction from that object's position
+ * (virtual GetPos) to @p target is flattened (z = 0), normalized, made perpendicular to the up axis and normalized
+ * again; its angle is atan2 of its side and forward parts (func_0031C228 for the arctangent). The result is |angle| *
+ * 6.2897024: 0 below 0.02, at most 0.98, with the angle's sign. The cruise routines multiply it by 31 for the command's
+ * turn field.
+ *
+ * @param target  the point to steer towards
+ * @return the turn amount, -0.98 to 0.98
+ */
 extern "C" float func_00100348_0348(char* self, sV4_0348* target)
 {
     sV4_0348 up = *(sV4_0348*)(*(char**)(self + 0x18) + 0x1C0);
@@ -328,6 +351,14 @@ struct sCam_0610 {
 // PORT: the unit later declares func_00100610 with the out-pointer spelled out; same symbol, by-value return here
 sV4_0610 func_00100610_0610(char* self) __asm__("func_00100610");
 
+/**
+ * Returns the point the computer rider steers towards.
+ *
+ * Takes the rider (pointer at +0x18) and returns its +0x4B0 point plus a tenth of the vector from +0x110 to +0x490. The
+ * cruise routines hand it to func_00100348 for the turn amount.
+ *
+ * @return the target point
+ */
 sV4_0610 func_00100610_0610(char* self)
 {
     sV4_0610 toTarget = Sub_0610((*(sCam_0610**)(self + 0x18))->target, (*(sCam_0610**)(self + 0x18))->pos);
@@ -417,6 +448,22 @@ static inline float Len_0680(const sV4_0680& v)
     return r;
 }
 
+/**
+ * Fills a cruise command that follows the path, and switches the computer rider's cruise logic when needed.
+ *
+ * Sets the command's turn field from func_00100348 towards func_00100610's point (times 31). Then, in order: -
+ * func_0010BB18 (speed in +0xDF0, zone flag): more than 138.9 over that speed sets the brake field to 31 when in the
+ * zone; more than 138.9 under it crouches (cComputer_setupRecklessCrouch in the zone, else cComputer_setupCrouch). -
+ * otherwise func_0010BBF8 (direction flag): fills the board-press field, the opposite way for the first 60 ticks
+ * (counter +0xE40, then -1) and the given way after that. - otherwise clears +0xE40, sets bit 17 when the rider's
+ * +0x2F8 is at least 0.9, its +0x2F0 is positive and +0xDF8 is over 50, and crouches. Last, a jump event
+ * (cComputer_checkForJumpEvent) clears the target index +0xE70 and selects cruise entry 0; a target found by
+ * cComputer_checkForTargets selects entry 3 when attacking, or entry 2 when that rider's AI (its +0x6C0 object, virtual
+ * 7) returns 0. The entry's pointer-to-member goes to +0xF44 and its index to +0xF38. This function is entry 1 of the
+ * table D_0043CF20.
+ *
+ * @param pad  the cruise command to fill
+ */
 extern "C" void func_00100680_0680(char* self, sPad_0680* pad)
 {
     sV4_0680 v;
@@ -1182,6 +1229,17 @@ static inline sObj_13A8* lookup_13A8(unsigned int id)
     return 0;
 }
 
+/**
+ * Updates the danger tracking: one rider's danger zones, the per-rider countdowns and the tracked danger elements.
+ *
+ * When danger zones exist (list +0xB58), tests the rider whose index is at +0xB5C (0 past the rider count) against each
+ * zone's instance (the rider's virtual isIntersecting). The highest zone level found goes into that rider's record
+ * (+0x70C, 12 bytes per rider) with a 60-tick countdown, then the record's applied level is recomputed
+ * (cDangerMan_CalcAppliedDangerLevel). Each of the 6 records with a level counts down and is cleared at 0. Then each
+ * used element of the 64 tracked ones (+4, 0x1C bytes, state 2 = free): in state 1 its delay (+4) drops by 1/60 and it
+ * is deleted (cDangerMan_DeleteTrackedDangerElemRecord) at 0; when its instance is gone or dead it enters state 1,
+ * otherwise its position is copied from the instance. It ends with an empty loop over the riders. cAI_update calls it.
+ */
 // cDangerMan::Update(void) (SSX On Tour symbols; riders are cAI::getRider/getNumRiders, the zone lookup is
 // cWorld::getTheWorld()->getInstanceResource(id)).
 extern "C" void func_001013A8(sMgr_13A8* self)
@@ -1405,6 +1463,18 @@ static inline sObj_1728* lookup_1728(unsigned int id)
     return 0;
 }
 
+/**
+ * Starts tracking a world instance as a danger element.
+ *
+ * Does nothing when the instance (looked up by id in the world cache) is missing or dead. Otherwise drops any element
+ * with the same id (func_00101888), takes the first free element (state 2) of the 64 and fills it: state 0, the id,
+ * @p x and @p y, and the instance's position; the element count +0x704 goes up. Nothing happens when all are in use.
+ * DangerStartFunc calls it.
+ *
+ * @param idp  the instance id
+ * @param x  stored in the element's first word
+ * @param y  how long, in seconds, the element stays after its instance is gone (func_001013A8 counts it down)
+ */
 extern "C" void func_00101728(sMgr_1728* self, unsigned int* idp, float x, float y)
 {
     cComp_1728* instNode = lookup_1728(*idp)->comp;
@@ -1436,6 +1506,14 @@ INCLUDE_ASM("seg/seg_1218", func_00101888);
 #ifdef SKIP_ASM
 void cDangerMan_DeleteTrackedDangerElemRecord(void*, void*);
 
+/**
+ * Stops tracking the danger element of an instance.
+ *
+ * Walks the used elements of the 64 and deletes the first one with the id (cDangerMan_DeleteTrackedDangerElemRecord).
+ * func_00101728 and DangerEndFunc call it.
+ *
+ * @param idp  the instance id
+ */
 extern "C" void func_00101888(sMgr_1728* self, unsigned int* idp)
 {
     int n = self->count;
@@ -1461,6 +1539,17 @@ INCLUDE_ASM("seg/seg_1218", func_00101900);
 struct N_1900 { int key; int val; int refs; N_1900 *next; };
 struct P_1900 { char pad[0xB54]; N_1900 *freelist; N_1900 *used; };
 
+/**
+ * Adds a danger zone for an instance, or one more reference to it.
+ *
+ * When the zone list (+0xB58) already holds the id, its reference count goes up. Otherwise a node is taken from the
+ * free list (+0xB54; there is no check for an empty list) and put at the front of the zone list with the id, @p level
+ * and one reference. func_001013A8 tests riders against these zones. EnableDangerZoneFunc calls it.
+ *
+ * @param dangerMan  the danger manager
+ * @param instId  the zone's instance id
+ * @param level  the zone's danger level
+ */
 extern "C" void func_00101900(P_1900 *dangerMan, int *instId, int level) {
     N_1900 *currActiveZone;
     N_1900 *n;
@@ -1494,6 +1583,14 @@ struct sSelf_1970 {
     sNode_1970* freeList;
     sNode_1970* used;
 };
+/**
+ * Drops one reference to an instance's danger zone, and frees the zone at zero.
+ *
+ * The freed node goes back to the free list (+0xB54). When no zone is left, the zone level and applied level of all 6
+ * rider records are cleared. DisableDangerZoneFunc calls it.
+ *
+ * @param key  the zone's instance id
+ */
 extern "C" void func_00101970(sSelf_1970* self, int* key) {
     sNode_1970* prev = 0;
     sNode_1970* n = self->used;
@@ -1519,6 +1616,15 @@ extern "C" void func_00101970(sSelf_1970* self, int* key) {
 //100%
 INCLUDE_ASM("seg/seg_1218", func_00101A10);
 #ifdef SKIP_ASM
+/**
+ * Returns a rider's applied danger level (the second word of its 12-byte record at +0x70C, set by func_001013A8).
+ *
+ * cRider_updateDangerLevel calls it with the rider's mAIIndex.
+ *
+ * @param dangerMan  the danger manager
+ * @param aiIndex  the rider's index
+ * @return the applied danger level
+ */
 extern "C" int func_00101A10(int dangerMan, int aiIndex) {
     return (*(int *)((char*)(((aiIndex * 0xC) + dangerMan)) + (0x710)));
 }
@@ -1544,6 +1650,17 @@ struct sList_1A28 {
 extern int cWScriptMan_TheWScriptMan;
 extern "C" int cWScriptMan_isFocusInstance(int, sLink_1A28*);
 
+/**
+ * Adds a world cell's focus instances to a list, and optionally those of every cell below it.
+ *
+ * Each instance in the cell's list (+0x20) that cWScriptMan_isFocusInstance accepts is appended to @p list (count at
+ * +0, then the pointers; no bound check). With @p recurse the same is done for each of the eight children, recursively.
+ * The cell visitor func_00144368 and func_00101B60 call it.
+ *
+ * @param list  the instance list to append to
+ * @param node  the cell (eight child pointers, then the instance list)
+ * @param recurse  nonzero to take the instances of all cells below too
+ */
 extern "C" void func_00101A28(sList_1A28* list, sNode_1A28* node, int recurse)
 {
     sLink_1A28* item;
@@ -1769,6 +1886,18 @@ static inline void Visit(const FocusCallback& cb, const sNashTree* tree, int k)
     }
 }
 
+/**
+ * Updates which world instances are in focus around the focus positions, and runs their focus scripts.
+ *
+ * Builds a box of plus and minus D_004A61E0 around each focus position (count +0, entries of 0x20 bytes at +0x10). It
+ * returns early unless a position moved 2000 or more since the last pass, 20 AI ticks (AITick) have passed, or there
+ * was no pass yet (+0xD0 negative). Then it walks the eight roots of the game's nash cell tree (game +0x20): cells
+ * crossing a box add their instances (func_00101A28), whole subtrees once below level 14. It stores the tick and the
+ * positions. Instances newly in focus get flag 0x100; flag 0x200 follows the pass parity (+0xD4), and instances of the
+ * previous pass (+0xD8 count, +0xDC list) not seen again lose 0x100. The new list replaces the old one (MEM_copy). The
+ * instances that left focus are sorted (func_0013FAD8) and get cWScriptMan_downFocusScript, then those that entered get
+ * cWScriptMan_upFocusScript. cAI_update calls it.
+ */
 extern "C" void func_00101B60(sFocusBoxes* self)
 {
     sFocusList list;
@@ -1858,6 +1987,16 @@ struct S_32C0 {
     void *arr[8];
 };
 
+/**
+ * Puts an instance into the focus manager's in-focus list.
+ *
+ * Sets the in-focus flag 0x100 in the instance's flags (+8) and sets its parity flag 0x200 to match the manager's pass
+ * parity (+0xD4: cleared when that is nonzero, set when it is 0), as func_00101B60 does, then appends it to the list
+ * (+0xD8 count, +0xDC entries; no bound check). cObjectInterface_addToFocusBox uses it.
+ *
+ * @param focusMan  the focus manager
+ * @param instance  the instance record
+ */
 extern "C" void func_001032C0(S_32C0 *focusMan, void *instance) {
     int temp_3;
     int temp_6;
@@ -2323,6 +2462,16 @@ extern "C" int func_001446B8(void*, int);
 extern "C" void func_00144670(void*, int);
 extern "C" void func_00104CC8(void*, int);
 
+/**
+ * Plays the sounds tagged on the frames a rider animation just passed.
+ *
+ * The tag count and tag words come from cAnimDataBase_TheAnimDataBase (bank = id & 0xFF, entry = id >> 8 of the
+ * sequence's animation id at +4). For each tag whose event the sequence's +0xB0 object reports through func_001446A0
+ * and func_001446B8, and whose tag word has bit 15 set, it clears the event (func_00144670) and plays the sound
+ * (func_00104CC8 with the low 15 bits). cRiderAnim_updateRule calls it for local human riders.
+ *
+ * @param sequence  the animation sequence
+ */
 extern "C" void func_00103AA0(void* self, sObj_3AA0* sequence)
 {
     int n = cAnimDataBase_TheAnimDataBase->banks[sequence->id & 0xFF]->ents[sequence->id >> 8].count;
@@ -2350,6 +2499,22 @@ extern "C" void cAnimSequence_setSubAnim(void*, int, int);
 extern "C" void cAnimSequence_setSubAnimTime(void*, int, float);
 extern "C" int cAnimSequence_updateWeight(void*, float);
 extern "C" void cAnimSequencer_expire(void*, void*);
+/**
+ * Shows one of two animations at the point a signed weight selects, then advances the sequence's blend.
+ *
+ * For a negative @p weight sub-animation 0 becomes @p negAnim, otherwise @p posAnim (each mapped through the table at
+ * +0x1030 of cGameAnimMap_TheGameAnimMap), at |weight| times the sequence's length (+0x10). Then the blend weight
+ * advances by @p dt / 60 (cAnimSequence_updateWeight); when that reports the end, the sequence is expired
+ * (cAnimSequencer_expire).
+ *
+ * @param x  the sequencer
+ * @param anim  the sequence
+ * @param posAnim  the game animation for positive weights
+ * @param negAnim  the game animation for negative weights
+ * @param dt  the time step, multiplied by 1/60
+ * @param weight  the slider position, -1 to 1
+ * @return 1 when the sequence was expired, else 0
+ */
 extern "C" int func_00103BE0(void* self, void* x, char* anim, int posAnim, int negAnim, float dt, float weight)
 {
     if (weight < 0.0f) {
@@ -2379,6 +2544,23 @@ extern "C" void cAnimSequence_setSubAnimWeight(void*, int, float);
 extern "C" int cAnimSequence_updateWeight(void*, float);
 extern "C" void cAnimSequencer_expire(void*, void*);
 
+/**
+ * Blends a centre animation cycle with its negative or positive variant by a signed weight.
+ *
+ * Sub-animation 0 becomes @p cenAnim; sub-animation 1 becomes @p posAnim when @p w is positive, otherwise @p negAnim
+ * (and w is negated); the weights are 1 - w and w (ids mapped through the table at +0x1030 of
+ * cGameAnimMap_TheGameAnimMap). Sub-animation 0 loops (type 1) and advances by @p dt / 60; sub-animation 1 follows at
+ * the same fraction of its own length (+0x2C). Then the blend weight advances, expiring the sequence at its end.
+ *
+ * @param x  the sequencer
+ * @param anim  the sequence
+ * @param negAnim  the game animation for negative weights
+ * @param cenAnim  the centre game animation
+ * @param dt  the time step, multiplied by 1/60
+ * @param w  the weight, -1 to 1
+ * @param posAnim  the game animation for positive weights
+ * @return 1 when the sequence was expired, else 0
+ */
 extern "C" int func_00103CC8(void* self, void* x, char* anim, int negAnim, int cenAnim, float dt, float w, int posAnim)
 {
     cAnimSequence_setSubAnim(anim, 0, *(int*)(cGameAnimMap_TheGameAnimMap + cenAnim * 4 + 0x1030));
@@ -2414,6 +2596,27 @@ extern "C" void cAnimSequence_setSubAnimWeight(void*, int, float);
 extern "C" int cAnimSequence_updateWeight(void*, float);
 extern "C" void cAnimSequencer_expire(void*, void*);
 
+/**
+ * Blends two neighbouring animation cycles out of five, chosen by a signed weight.
+ *
+ * Above 0.5 it blends @p posEndAnim with @p posMidAnim (w = (weight - 0.5) * 2), above 0 @p posMidAnim with @p cenAnim
+ * (w = 2 * weight), above -0.5 @p cenAnim with @p negMidAnim (w = 2 * weight + 1), otherwise @p negMidAnim with
+ * @p negEndAnim (w = (weight + 1) * 2). The first goes to sub-animation 0 (replaced only when it changes, keeping its
+ * time fraction), the second to sub-animation 1; the weights are w and 1 - w. Sub-animation 0 loops and advances by
+ * @p dt / 60, sub-animation 1 follows at the same fraction of its length, then the blend weight advances, expiring the
+ * sequence at its end.
+ *
+ * @param x  the sequencer
+ * @param anim  the sequence
+ * @param negEndAnim  the game animation at weight -1
+ * @param negMidAnim  the game animation at weight -0.5
+ * @param cenAnim  the game animation at weight 0
+ * @param posMidAnim  the game animation at weight 0.5
+ * @param posEndAnim  the game animation at weight 1
+ * @param dt  the time step, multiplied by 1/60
+ * @param weight  the weight, -1 to 1
+ * @return 1 when the sequence was expired, else 0
+ */
 extern "C" int func_00103E28(void* self, void* x, char* anim, int negEndAnim, int negMidAnim, int cenAnim, int posMidAnim, int posEndAnim, float dt, float weight)
 {
     int from, to;
@@ -2466,6 +2669,20 @@ extern "C" void cAnimSequence_setSubAnimTime(void*, int, float);
 extern "C" int cAnimSequence_updateWeight(void*, float);
 extern "C" void cAnimSequencer_expire(void*, void*);
 
+/**
+ * Plays an animation once and then switches the sequence to a looping one.
+ *
+ * While sub-animation 0 is @p intoAnim (mapped through the table at +0x1030 of cGameAnimMap_TheGameAnimMap) it plays
+ * once (type 0) by @p dt / 60, and once its time reaches its length it becomes @p cycleAnim, looping (type 1) from time
+ * 0. Otherwise sub-animation 0 just advances. Then the blend weight advances, expiring the sequence at its end.
+ *
+ * @param x  the sequencer
+ * @param anim  the sequence
+ * @param intoAnim  the game animation played first
+ * @param dt  the time step, multiplied by 1/60
+ * @param cycleAnim  the looping game animation that follows
+ * @return 1 when the sequence was expired, else 0
+ */
 extern "C" int func_00103FF8(void* self, void* x, char* anim, int intoAnim, float dt, int cycleAnim)
 {
     if (*(int*)(anim + 4) == *(int*)(cGameAnimMap_TheGameAnimMap + intoAnim * 4 + 0x1030)) {
@@ -2493,6 +2710,18 @@ INCLUDE_ASM("seg/seg_1218", func_00104110);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00103CC8_4110(void*, void*, int*, int, int, int, float, float) __asm__("func_00103CC8");
 
+/**
+ * Update rule 3 of cRiderAnim_updateRule: a three-way cruise blend.
+ *
+ * The weight is the rider's (+0x60) +0x1FC, negated when the rider's +0x320 is set. Sequence 7 blends game animations
+ * 17 / 15 / 16, sequence 10 26 / 23 / 25, any other 26 / 24 / 25 (negative / centre / positive) with func_00103CC8.
+ *
+ * @param riderAnim  the rider animation object
+ * @param sequencer  the sequencer
+ * @param sequence  the sequence (first word: its animation id)
+ * @param deltaTime  the time step
+ * @return func_00103CC8's result: 1 when the sequence was expired
+ */
 extern "C" int func_00104110(void *riderAnim, void *sequencer, int *sequence, float deltaTime) {
     float var_f13;
     void *temp_3;
@@ -2516,6 +2745,18 @@ extern "C" int func_00104110(void *riderAnim, void *sequencer, int *sequence, fl
 INCLUDE_ASM("seg/seg_1218", func_00104178);
 #ifdef SKIP_ASM
 extern "C" int func_00103E28(void* self, void* x, char* anim, int i0, int i1, int i2, int i3, int i4, float dt, float v);
+/**
+ * Update rule 4 of cRiderAnim_updateRule: a five-way cruise blend.
+ *
+ * The weight is the rider's (+0x60) +0x1FC, negated when the rider's +0x320 is set. The sequence picks the five game
+ * animations (negative end, negative middle, centre, positive middle, positive end): 6 gives 14 13 10 11 12, 8 gives 22
+ * 21 18 19 20, 14 gives 32 31 27 29 30, 15 gives 32 31 28 29 30, any other 9 8 5 6 7. They go to func_00103E28.
+ *
+ * @param x  the sequencer
+ * @param anim  the sequence (first word: its animation id)
+ * @param dt  the time step
+ * @return func_00103E28's result: 1 when the sequence was expired
+ */
 extern "C" int func_00104178(char* self, void* x, int* anim, float dt)
 {
     char* rider = *(char**)(self + 0x60);
@@ -2545,6 +2786,18 @@ INCLUDE_ASM("seg/seg_1218", func_00104238);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00103CC8_4238(void*, void*, int*, int, int, int, float, float) __asm__("func_00103CC8");
 
+/**
+ * Update rule 5 of cRiderAnim_updateRule: a three-way rail blend.
+ *
+ * The weight is the rider's (+0x60) +0x238, negated when the rider's +0x320 is set. Sequence 18 blends game animations
+ * 65 / 63 / 64, sequence 19 68 / 66 / 67, any other 71 / 69 / 70 (negative / centre / positive) with func_00103CC8. The
+ * C declares no result, but func_00103CC8's is left in the return register.
+ *
+ * @param riderAnim  the rider animation object
+ * @param sequencer  the sequencer
+ * @param sequence  the sequence (first word: its animation id)
+ * @param deltaTime  the time step
+ */
 extern "C" void func_00104238(void *riderAnim, void *sequencer, int *sequence, float deltaTime) {
     int var_7;
     int var_8;
@@ -2584,6 +2837,18 @@ INCLUDE_ASM("seg/seg_1218", func_001042A8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00103CC8_42A8(void*, void*, char*, int, int, int, float, float) __asm__("func_00103CC8");
 
+/**
+ * Update rule 6 of cRiderAnim_updateRule: a three-way brake blend.
+ *
+ * The weight is the rider's (+0x60) +0x214, negated when the rider's +0x320 is 0 (the other rules negate when it is
+ * set). It blends game animations 36 / 33 / 34 (negative / centre / positive) with func_00103CC8. The C declares no
+ * result, but func_00103CC8's is left in the return register.
+ *
+ * @param riderAnim  the rider animation object
+ * @param sequencer  the sequencer
+ * @param sequence  the sequence
+ * @param dt  the time step
+ */
 extern "C" void func_001042A8(void *riderAnim, void *sequencer, char *sequence, float dt) {
     float var_f13;
     void *temp_3;
@@ -2603,6 +2868,18 @@ INCLUDE_ASM("seg/seg_1218", func_001042E0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00103BE0_42E0(void *, void *, int *, int, int, float, float) __asm__("func_00103BE0");
 
+/**
+ * Update rule 10 of cRiderAnim_updateRule: a positive / negative slider.
+ *
+ * Sequence 218 uses game animations 362 / 363, 226 371 / 372, 234 380 / 381, any other 389 / 390 (positive / negative),
+ * with the rider's (+0x60) +0x238 as the weight, through func_00103BE0.
+ *
+ * @param riderAnim  the rider animation object
+ * @param sequencer  the sequencer
+ * @param sequence  the sequence (first word: its animation id)
+ * @param deltaTime  the time step
+ * @return func_00103BE0's result: 1 when the sequence was expired
+ */
 extern "C" int func_001042E0(void *riderAnim, void *sequencer, int *sequence, float deltaTime) {
     int x = *sequence;
     if (x == 218) {
@@ -2628,6 +2905,17 @@ static inline float vAbs_4358(float x)
     __asm__("abs.s %0,%1" : "=f"(r) : "f"(x));
     return r;
 }
+/**
+ * Update rule 7 of cRiderAnim_updateRule: sets the animation's frame from the rider's prewind amounts.
+ *
+ * The time of sub-animation 0 is the larger of |rider +0x2A4| and |rider +0x2B0| (rider at +0x60) times the sequence's
+ * length. Then the blend weight advances by @p dt / 60, expiring the sequence at its end.
+ *
+ * @param x  the sequencer
+ * @param anim  the sequence
+ * @param dt  the time step
+ * @return 1 when the sequence was expired, else 0
+ */
 extern "C" int func_00104358(char* self, void* x, char* anim, float dt) {
     char* rider = *(char**)(self + 0x60);
     float absSlew15 = vAbs_4358(*(float*)(rider + 0x2A4));
@@ -2659,6 +2947,19 @@ static inline float clamp_43F8(float v, float lo, float hi)
     return (v >= lo) ? (v <? hi) : lo;
 }
 
+/**
+ * Update rule 11 of cRiderAnim_updateRule: adjusts an air animation by the rider's control amounts.
+ *
+ * Sequences 297-304 select a looping sub-animation 1 (game animations 165-172; 165 for others). The amount is the
+ * larger of |rider +0x298| and |rider +0x28C| (rider at +0x60), clamped to 0..1: sub-animation 1 gets weight 0.25 +
+ * 0.75 * amount and sub-animation 0 the rest, sub-animation 0's time is the amount times the length, and sub-animation
+ * 1 advances by @p dt / 60. Then the blend weight advances, expiring the sequence at its end.
+ *
+ * @param x  the sequencer
+ * @param anim  the sequence (first word: its animation id)
+ * @param dt  the time step
+ * @return 1 when the sequence was expired, else 0
+ */
 extern "C" int func_001043F8(char* self, void* x, char* anim, float dt)
 {
     int slot = 165;
@@ -2699,6 +3000,16 @@ INCLUDE_ASM("seg/seg_1218", func_001045B8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00103FF8_45B8(int, int, int, int, int) __asm__("func_00103FF8");
 
+/**
+ * Update rule 12 of cRiderAnim_updateRule: plays game animation 137 once, then loops 138 (func_00103FF8).
+ *
+ * The time step is passed on untouched in its register, and func_00103FF8's result is left in the return register
+ * although the C declares none.
+ *
+ * @param riderAnim  the rider animation object
+ * @param sequencer  the sequencer
+ * @param sequence  the sequence
+ */
 extern "C" void func_001045B8(int riderAnim, int sequencer, int sequence) {
     func_00103FF8_45B8(riderAnim, sequencer, sequence, 137, 138);
 }
@@ -2707,6 +3018,17 @@ extern "C" void func_001045B8(int riderAnim, int sequencer, int sequence) {
 //100%
 INCLUDE_ASM("seg/seg_1218", func_001045D8);
 #ifdef SKIP_ASM
+/**
+ * Update rule 8 of cRiderAnim_updateRule: sets the animation's frame from the rider's gate state.
+ *
+ * The time of sub-animation 0 is the sequence's length times the float at +0x2A0 of the rider's +0x77C object (rider at
+ * +0x60). Then the blend weight advances by @p dt / 60, expiring the sequence at its end.
+ *
+ * @param x  the sequencer
+ * @param anim  the sequence
+ * @param dt  the time step
+ * @return 1 when the sequence was expired, else 0
+ */
 extern "C" int func_001045D8(char* self, void* x, char* anim, float dt) {
     cAnimSequence_setSubAnimTime(anim, 0, *(float*)(anim + 0x10) * *(float*)(*(char**)(*(char**)(self + 0x60) + 0x77C) + 0x2A0));
     if (cAnimSequence_updateWeight(anim, dt * 0.01666666753590107f) != 0) {
@@ -2723,6 +3045,18 @@ INCLUDE_ASM("seg/seg_1218", func_00104660);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00103BE0_4660(void *, void *, int *, int, int, float, float) __asm__("func_00103BE0");
 
+/**
+ * Update rule 9 of cRiderAnim_updateRule: a positive / negative slider for handplants.
+ *
+ * Sequence 45 uses game animations 353 / 352, any other 347 / 346 (positive / negative), with the rider's (+0x60)
+ * +0x244 as the weight, through func_00103BE0.
+ *
+ * @param riderAnim  the rider animation object
+ * @param sequencer  the sequencer
+ * @param sequence  the sequence (first word: its animation id)
+ * @param deltaTime  the time step
+ * @return func_00103BE0's result: 1 when the sequence was expired
+ */
 extern "C" int func_00104660(void *riderAnim, void *sequencer, int *sequence, float deltaTime) {
     float w = (*(float *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x244)));
 
@@ -2738,6 +3072,17 @@ INCLUDE_ASM("seg/seg_1218", func_001046B0);
 #ifdef SKIP_ASM
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
 extern "C" int func_00103CC8(void* self, void* x, char* anim, int a, int b, float dt, float w, int c);
+/**
+ * Update rule 15 of cRiderAnim_updateRule: a three-way board-press balance blend.
+ *
+ * The weight is 2 * (rider +0x274) - 1 (rider at +0x60), clamped to -1..1. Sequence 28 blends game animations 49 / 48 /
+ * 50, any other 60 / 58 / 59 (negative / centre / positive) with func_00103CC8.
+ *
+ * @param x  the sequencer
+ * @param anim  the sequence (first word: its animation id)
+ * @param dt  the time step
+ * @return func_00103CC8's result: 1 when the sequence was expired
+ */
 extern "C" int func_001046B0(char* self, void* x, int* anim, float dt)
 {
     float centeredSlew = *(float*)(*(char**)(self + 0x60) + 0x274);
@@ -2767,6 +3112,17 @@ static inline float clamp_4728(float v, float lo, float hi)
 {
     return (v >= lo) ? (v <? hi) : lo;
 }
+/**
+ * Update rule 14 of cRiderAnim_updateRule: sets the board-press animation's frame from the rider's press amount.
+ *
+ * The amount is the rider's (+0x60) +0x268; sequences 25 and 33 use 1 minus it, clamped to 0..1. Sub-animation 0's time
+ * is the amount times the length. Then the blend weight advances by @p dt / 60, expiring the sequence at its end.
+ *
+ * @param x  the sequencer
+ * @param anim  the sequence (first word: its animation id)
+ * @param dt  the time step
+ * @return 1 when the sequence was expired, else 0
+ */
 extern "C" int func_00104728(char* self, void* x, char* anim, float dt) {
     float framePercent;
     int animId = *(int*)anim;
@@ -2799,6 +3155,17 @@ static inline float clamp_47F0(float v, float lo, float hi)
 {
     return (v >= lo) ? (v <? hi) : lo;
 }
+/**
+ * Update rule 13 of cRiderAnim_updateRule: sets the board-press pivot animation's frame from the rider's pivot amount.
+ *
+ * The amount is |rider +0x280| (rider at +0x60); sequences 37 and 38 use 1 minus it. Clamped to 0..1, times the length,
+ * it sets sub-animation 0's time. Then the blend weight advances by @p dt / 60, expiring the sequence at its end.
+ *
+ * @param x  the sequencer
+ * @param anim  the sequence (first word: its animation id)
+ * @param dt  the time step
+ * @return 1 when the sequence was expired, else 0
+ */
 extern "C" int func_001047F0(char* self, void* x, char* anim, float dt) {
     float framePercent;
     int animId = *(int*)anim;
@@ -2823,6 +3190,18 @@ INCLUDE_ASM("seg/seg_1218", func_001048C0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cAnimSequence_updateSubAnim_48C0(void*, int, float) __asm__("cAnimSequence_updateSubAnim");
+/**
+ * Update rule 0 of cRiderAnim_updateRule: advances the animation.
+ *
+ * Sub-animation 0 advances by @p dt / 60 (cAnimSequence_updateSubAnim); unless that reports the end, the blend weight
+ * advances too. When either reports the end the sequence is expired (cAnimSequencer_expire). func_00104940 and
+ * func_001049C0 have the same code.
+ *
+ * @param x  the sequencer
+ * @param anim  the sequence
+ * @param dt  the time step
+ * @return 1 when the sequence was expired, else 0
+ */
 extern "C" int func_001048C0(void* self, void* x, void* anim, float dt) {
     float stepTime = dt * 0.01666666753590107f;
     int done;
@@ -2844,6 +3223,17 @@ INCLUDE_ASM("seg/seg_1218", func_00104940);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cAnimSequence_updateSubAnim_4940(void*, int, float) __asm__("cAnimSequence_updateSubAnim");
+/**
+ * Update rule 1 of cRiderAnim_updateRule: advances the animation (the same code as func_001048C0).
+ *
+ * Sub-animation 0 advances by @p dt / 60; unless that reports the end, the blend weight advances too. When either
+ * reports the end the sequence is expired.
+ *
+ * @param x  the sequencer
+ * @param anim  the sequence
+ * @param dt  the time step
+ * @return 1 when the sequence was expired, else 0
+ */
 extern "C" int func_00104940(void* self, void* x, void* anim, float dt) {
     float stepTime = dt * 0.01666666753590107f;
     int done;
@@ -2865,6 +3255,17 @@ INCLUDE_ASM("seg/seg_1218", func_001049C0);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cAnimSequence_updateSubAnim_49C0(void*, int, float) __asm__("cAnimSequence_updateSubAnim");
+/**
+ * Update rule 2 of cRiderAnim_updateRule: advances the animation (the same code as func_001048C0).
+ *
+ * Sub-animation 0 advances by @p dt / 60; unless that reports the end, the blend weight advances too. When either
+ * reports the end the sequence is expired.
+ *
+ * @param x  the sequencer
+ * @param anim  the sequence
+ * @param dt  the time step
+ * @return 1 when the sequence was expired, else 0
+ */
 extern "C" int func_001049C0(void* self, void* x, void* anim, float dt) {
     float stepTime = dt * 0.01666666753590107f;
     int done;
@@ -2887,6 +3288,16 @@ INCLUDE_ASM("seg/seg_1218", func_00104A40);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cRiderAnimBase_playInto_4A40(int, int, int, int) __asm__("cRiderAnimBase_playInto");
 
+/**
+ * Expire rule 1 of cRiderAnim_expireRule: plays animation 287 into the sequencer (cRiderAnimBase_playInto).
+ *
+ * cRiderAnimBase_playInto's result is left in the return register (cRiderAnim_expireRule stores it) although the C
+ * declares none.
+ *
+ * @param riderAnim  the rider animation object
+ * @param sequencer  the sequencer
+ * @param sequence  the expired sequence
+ */
 extern "C" void func_00104A40(int riderAnim, int sequencer, int sequence) {
     cRiderAnimBase_playInto_4A40(riderAnim, sequencer, sequence, 287);
 }
@@ -2899,6 +3310,17 @@ INCLUDE_ASM("seg/seg_1218", func_00104A60);
 // From peak3project's fork (github.com/peak3project/ssx3).
 extern "C" int cRiderAnimBase_playInto_4A60(void*, void*, int*, int) __asm__("cRiderAnimBase_playInto");
 
+/**
+ * Expire rule 2 of cRiderAnim_expireRule: plays the follow-on animation matching the expired one.
+ *
+ * Sequences 271 / 285 play 291; 272, 280, 281, 286 play 292; 269, 278, 283 play 289; 270, 279, 284 play 290; 273-276
+ * play 293-296 (cRiderAnimBase_playInto). Any other returns 438 without playing.
+ *
+ * @param riderAnim  the rider animation object
+ * @param sequencer  the sequencer
+ * @param sequence  the expired sequence (first word: its animation id)
+ * @return cRiderAnimBase_playInto's result, or 438
+ */
 // Plays the landing animation that matches the current trick state.
 extern "C" int func_00104A60(void* riderAnim, void* sequencer, int* sequence)
 {
@@ -2930,6 +3352,17 @@ INCLUDE_ASM("seg/seg_1218", func_00104B48);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cRiderAnimBase_playBlendIn_4B48(void*, int, int, int) __asm__("cRiderAnimBase_playBlendIn");
 
+/**
+ * Expire rule 5 of cRiderAnim_expireRule: blends into an air animation.
+ *
+ * Plays animation 436 (cRiderAnimBase_playBlendIn) when the object is linked to a front-end rider (+0x64, see
+ * func_00104D50), otherwise 287.
+ *
+ * @param riderAnim  the rider animation object
+ * @param sequencer  the sequencer
+ * @param sequence  the expired sequence
+ * @return cRiderAnimBase_playBlendIn's result
+ */
 extern "C" int func_00104B48(void *riderAnim, int sequencer, int sequence) {
     if (*(int *)((char*)riderAnim + 0x64) != 0) {
         return cRiderAnimBase_playBlendIn_4B48(riderAnim, sequencer, sequence, 436);
@@ -2944,6 +3377,16 @@ INCLUDE_ASM("seg/seg_1218", func_00104B78);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cRiderAnimBase_playInto_4B78(int, int, int, int) __asm__("cRiderAnimBase_playInto");
 
+/**
+ * Expire rule 3 of cRiderAnim_expireRule: plays animation 5 into the sequencer (cRiderAnimBase_playInto).
+ *
+ * cRiderAnimBase_playInto's result is left in the return register (cRiderAnim_expireRule stores it) although the C
+ * declares none.
+ *
+ * @param riderAnim  the rider animation object
+ * @param sequencer  the sequencer
+ * @param sequence  the expired sequence
+ */
 extern "C" void func_00104B78(int riderAnim, int sequencer, int sequence) {
     cRiderAnimBase_playInto_4B78(riderAnim, sequencer, sequence, 5);
 }
@@ -2955,6 +3398,16 @@ INCLUDE_ASM("seg/seg_1218", func_00104B98);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cRiderAnimBase_playInto_4B98(int, int, int, int) __asm__("cRiderAnimBase_playInto");
 
+/**
+ * Expire rule 7 of cRiderAnim_expireRule: plays animation 3 into the sequencer (cRiderAnimBase_playInto).
+ *
+ * cRiderAnimBase_playInto's result is left in the return register (cRiderAnim_expireRule stores it) although the C
+ * declares none.
+ *
+ * @param riderAnim  the rider animation object
+ * @param sequencer  the sequencer
+ * @param sequence  the expired sequence
+ */
 extern "C" void func_00104B98(int riderAnim, int sequencer, int sequence) {
     cRiderAnimBase_playInto_4B98(riderAnim, sequencer, sequence, 3);
 }
@@ -2966,6 +3419,16 @@ INCLUDE_ASM("seg/seg_1218", func_00104BB8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cRiderAnimBase_playInto_4BB8(int, int, int, int) __asm__("cRiderAnimBase_playInto");
 
+/**
+ * Expire rule 8 of cRiderAnim_expireRule: plays animation 19 into the sequencer (cRiderAnimBase_playInto).
+ *
+ * cRiderAnimBase_playInto's result is left in the return register (cRiderAnim_expireRule stores it) although the C
+ * declares none.
+ *
+ * @param riderAnim  the rider animation object
+ * @param sequencer  the sequencer
+ * @param sequence  the expired sequence
+ */
 extern "C" void func_00104BB8(int riderAnim, int sequencer, int sequence) {
     cRiderAnimBase_playInto_4BB8(riderAnim, sequencer, sequence, 19);
 }
@@ -2977,6 +3440,16 @@ INCLUDE_ASM("seg/seg_1218", func_00104BD8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cRiderAnimBase_playBlendIn_4BD8(void *, int, int, int) __asm__("cRiderAnimBase_playBlendIn");
 
+/**
+ * Expire rule 9 of cRiderAnim_expireRule: blends into a board-press animation.
+ *
+ * Plays animation 28 (cRiderAnimBase_playBlendIn) when the rider's (+0x60) +0x330 is 1, otherwise 36.
+ *
+ * @param riderAnim  the rider animation object
+ * @param sequencer  the sequencer
+ * @param sequence  the expired sequence
+ * @return cRiderAnimBase_playBlendIn's result
+ */
 extern "C" int func_00104BD8(void *riderAnim, int sequencer, int sequence) {
     if ((*(int *)((char*)((*(void **)((char*)(riderAnim) + (0x60)))) + (0x330))) == 1) {
         return cRiderAnimBase_playBlendIn_4BD8(riderAnim, sequencer, sequence, 0x1C);
@@ -2991,6 +3464,16 @@ INCLUDE_ASM("seg/seg_1218", func_00104C18);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cRiderAnimBase_playBlendIn_4C18(int, int, int, int) __asm__("cRiderAnimBase_playBlendIn");
 
+/**
+ * Expire rule 4 of cRiderAnim_expireRule: blends into animation 5 (cRiderAnimBase_playBlendIn).
+ *
+ * cRiderAnimBase_playBlendIn's result is left in the return register (cRiderAnim_expireRule stores it) although the C
+ * declares none.
+ *
+ * @param riderAnim  the rider animation object
+ * @param sequencer  the sequencer
+ * @param sequence  the expired sequence
+ */
 extern "C" void func_00104C18(int riderAnim, int sequencer, int sequence) {
     cRiderAnimBase_playBlendIn_4C18(riderAnim, sequencer, sequence, 5);
 }
@@ -3002,6 +3485,16 @@ INCLUDE_ASM("seg/seg_1218", func_00104C38);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cRiderAnimBase_playBlendIn_4C38(int, int, int*, int) __asm__("cRiderAnimBase_playBlendIn");
 
+/**
+ * Expire rule 6 of cRiderAnim_expireRule: blends into a rail animation.
+ *
+ * Sequence 69 blends into animation 20, 70 into 19, any other into 18 (cRiderAnimBase_playBlendIn). Its result is left
+ * in the return register (cRiderAnim_expireRule stores it) although the C declares none.
+ *
+ * @param riderAnim  the rider animation object
+ * @param sequencer  the sequencer
+ * @param sequence  the expired sequence (first word: its animation id)
+ */
 extern "C" void func_00104C38(int riderAnim, int sequencer, int *sequence) {
     int var_7;
     switch (*sequence) {
@@ -3025,6 +3518,16 @@ INCLUDE_ASM("seg/seg_1218", func_00104C80);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cRiderAnimBase_playBlendIn_4C80(int, int, int, int) __asm__("cRiderAnimBase_playBlendIn");
 
+/**
+ * Expire rule 10 of cRiderAnim_expireRule: blends into animation 434 (cRiderAnimBase_playBlendIn).
+ *
+ * cRiderAnimBase_playBlendIn's result is left in the return register (cRiderAnim_expireRule stores it) although the C
+ * declares none.
+ *
+ * @param riderAnim  the rider animation object
+ * @param sequencer  the sequencer
+ * @param sequence  the expired sequence
+ */
 extern "C" void func_00104C80(int riderAnim, int sequencer, int sequence) {
     cRiderAnimBase_playBlendIn_4C80(riderAnim, sequencer, sequence, 434);
 }
@@ -3033,6 +3536,14 @@ extern "C" void func_00104C80(int riderAnim, int sequencer, int sequence) {
 //100%
 INCLUDE_ASM("seg/seg_1218", func_00104CA0);
 #ifdef SKIP_ASM
+/**
+ * Expire rule 0 of cRiderAnim_expireRule: expires the sequence (cAnimSequencer_expire) and plays nothing.
+ *
+ * @param riderAnim  the rider animation object
+ * @param sequencer  the sequencer
+ * @param sequence  the expired sequence
+ * @return 438, the value func_00104A60 also returns when it plays nothing
+ */
 extern "C" int func_00104CA0(int riderAnim, void* sequencer, void* sequence) {
     cAnimSequencer_expire(sequencer, sequence);
     return 438;
@@ -3046,6 +3557,15 @@ INCLUDE_ASM("seg/seg_1218", func_00104CC8);
 extern "C" void cSSXAudio_PlayAniTag_4CC8(int, int, int) __asm__("cSSXAudio_PlayAniTag");
 extern int gSSXAudio_seg_1218 __asm__("gSSXAudio");
 
+/**
+ * Plays an animation sound tag for the rider: cSSXAudio_PlayAniTag(gSSXAudio, rider, id & 0xFFFF) when the rider
+ * (+0x60) is set.
+ *
+ * func_00103AA0 calls it.
+ *
+ * @param riderAnim  the rider animation object
+ * @param soundId  the sound tag
+ */
 extern "C" void func_00104CC8(void *riderAnim, int soundId) {
     int temp_2 = (*(int *)((char*)(riderAnim) + (0x60)));
     int maskedSoundId = soundId & 0xFFFF;
@@ -3114,6 +3634,15 @@ extern "C" void cRiderAnim_linkToRider(void *riderAnim, void *rider) {
 //100%
 INCLUDE_ASM("seg/seg_1218", func_00104D50);
 #ifdef SKIP_ASM
+/**
+ * Links the rider animation object to a front-end rider instead of a game rider.
+ *
+ * Stores @p arg1 at +0x64, clears the rider pointer +0x60 and copies the word at +8 of @p arg1 into +0x54.
+ * cFERider_compileModel calls it; func_00104B48 tests +0x64.
+ *
+ * @param riderAnim  the rider animation object
+ * @param arg1  the front-end rider
+ */
 extern "C" void func_00104D50(void *riderAnim, void *arg1) {
     (*(void **)((char*)(riderAnim) + (0x64))) = arg1;
     (*(int *)((char*)(riderAnim) + (0x60))) = 0;
@@ -3129,6 +3658,14 @@ public:
     virtual void write(void* src, int n);  // slot 1 (slot 2 is read)
 };
 extern "C" void cAnimSequencer_writeToReplayFrame(void*, cStream_4D68*);
+/**
+ * Writes the rider animation state into a replay frame.
+ *
+ * Writes the object's first 80 bytes through the stream's virtual write, then each of the 6 sequencers (8 bytes each,
+ * array at +0x50) with cAnimSequencer_writeToReplayFrame. cRiderHandler_writeToReplayFrame calls it.
+ *
+ * @param stream  the replay frame stream
+ */
 extern "C" void func_00104D68(char* self, cStream_4D68* stream) {
     stream->write(self, 80);
     for (int i = 0; i < 6; i++) {
@@ -3147,6 +3684,15 @@ public:
 };
 extern "C" void cAnimSequencer_expireAll(void*);
 extern "C" void cAnimSequencer_readFromReplayFrame(void*, cStream_4DE0*);
+/**
+ * Restores the rider animation state from a replay frame.
+ *
+ * Reads the object's first 80 bytes through the stream's virtual Read, then for each of the 6 sequencers (array at
+ * +0x50) drops what it plays (cAnimSequencer_expireAll) and reads it (cAnimSequencer_readFromReplayFrame).
+ * cRiderHandler_readFromReplayFrame calls it.
+ *
+ * @param stream  the replay frame stream
+ */
 extern "C" void func_00104DE0(char* self, cStream_4DE0* stream) {
     stream->Read(self, 80);
     for (int i = 0; i < 6; i++) {
@@ -3375,6 +3921,21 @@ static inline int Facing_4E70(char* self, const sHit_4E70& h)
 
 #define IDS_4E70 ((unsigned int*)(self + 0x5B8))
 
+/**
+ * Tests the rider against static objects and returns the distance of the contact it picks.
+ *
+ * Gets up to 64 hits from cOverlapList_staticObjectIntersect (overlap list +0x860); returns -1.0 when there are none.
+ * The distinct surface ids of the hits are kept at +0x5B8, ended by 0xFFFFFFFF (func_00108C28 reads them). The pick
+ * prefers wall hits (triangle flag 1 with a nonzero first value), then hits whose normal points back towards the
+ * rider's sphere-tree centre (+0xAA0, +0x10), then the smallest |distance - height| (the query's virtual Height); ties
+ * go to the lower surface id, or the lower owner order (+0x150) when neither has a surface. The pick is copied to
+ * @p out; with two or more hits its normal becomes the normalized sum of the wall hits' normals (when longer than
+ * 0.001). Then the surface's object gets the hit through its virtual OnHit.
+ *
+ * @param sc  the intersection query
+ * @param out  receives the chosen hit
+ * @return the chosen hit's distance, or -1.0 when nothing was hit
+ */
 extern "C" float func_00104E70(char* self, cScope_4E70* sc, sHit_4E70* out)
 {
     int nIds = 0;
@@ -4272,6 +4833,14 @@ extern "C" void cRiderSphereTree_ApplyOffset(void* p, const t4Vector* d);
 // PORT: the unit declares func_00106538(void*, const t4Vector&) for its callers; same symbol.
 extern "C" void func_00106538_6538(char* self, const t4Vector* d) __asm__("func_00106538");
 
+/**
+ * Moves the rider by an offset out of a collision.
+ *
+ * Adds @p offset to the vectors at +0x110, +0x9D0, +0x400 and +0x410 and to the sphere tree (+0xAA0,
+ * cRiderSphereTree_ApplyOffset).
+ *
+ * @param offset  the offset
+ */
 extern "C" void func_00106538_6538(char* self, const t4Vector* offset)
 {
     AddEq_6538(*(t4Vector*)(self + 0x110), *offset);
@@ -4416,6 +4985,16 @@ static inline void Rotate_65B0(char* self, const sV4_65B0& axis, float angle)
 }
 
 extern "C" void func_001065B0_impl(char* self, char* arg) __asm__("func_001065B0");
+/**
+ * Turns the rider away from a surface it hit.
+ *
+ * n is the normalized cross product of the up axis (+0x1C0) and the hit normal (@p arg + 0x10), and the in-plane
+ * direction is up x n. The angle is atan2 of the forward axis (+0x1B0) against n and the in-plane direction. A positive
+ * angle below 110 degrees (1.9198622 rad) gives a turn of min(110 degrees - angle, 20 degrees), mirrored for negative
+ * angles; the orientation quaternion (+0x120) is then rotated about the up axis by minus that turn.
+ *
+ * @param arg  the hit (normal at +0x10)
+ */
 extern "C" void func_001065B0_impl(char* self, char* arg)
 {
     sV4_65B0 n = Norm_65B0(Cross_65B0(Up_65B0(self), *(sV4_65B0*)(arg + 0x10)));
@@ -6170,6 +6749,20 @@ static inline sV4_86B8 Fwd_86B8(const sNode_86B8* n)
 }
 
 extern "C" int func_001086B8_86B8(char* self, sV4_86B8* tgt, sV4_86B8* dir) __asm__("func_001086B8");
+/**
+ * Tells whether the rider's board reaches a rail.
+ *
+ * The board's axis and position come from the path node (+0x780 path, node index +0x8A0; axis from the node's
+ * quaternion, position plus +0x9D0). With the blend +0x25C, the reach is lerp(30, 50) and the half length lerp(100,
+ * 170) (lerp(50, 170) when +0x330 is set), less the reach. It returns 1 when the board segment's point nearest @p tgt
+ * is within reach. Otherwise, unless @p dir is almost parallel to the board (1 - d * d < 0.001), it takes the board
+ * point nearest the rail line, finds the spline nearest it (cOverlapList_splineIntersect, overlap list +0x860, range
+ * 300) and returns 1 when that point is within reach.
+ *
+ * @param tgt  the rail point
+ * @param dir  the rail direction
+ * @return 1 when the board reaches the rail, else 0
+ */
 extern "C" int func_001086B8_86B8(char* self, sV4_86B8* tgt, sV4_86B8* dir)
 {
     sNode_86B8* n = &(*(sPath_86B8**)(self + 0x780))->nodes[*(int*)(self + 0x8A0)];
@@ -6340,6 +6933,16 @@ extern "C" int cRider_isRailLandSuccess(cRider* self, sVec4_8A48* tgt)
 INCLUDE_ASM("seg/seg_1218", func_00108C28);
 #ifdef SKIP_ASM
 struct S_8C28 { char pad[0x5B8]; unsigned arr[64]; };
+/**
+ * Tells whether the rider's last static-object test hit an instance.
+ *
+ * Compares the instance's id (+0x78) with the ids at +0x5B8 that func_00104E70 records (at most 64, ended by
+ * 0xFFFFFFFF). Virtual slot 3 (word 7) of the rider vtables.
+ *
+ * @param arg0  the rider
+ * @param arg1  the instance
+ * @return 1 when the id is listed, else 0
+ */
 extern "C" int func_00108C28(S_8C28 *arg0, void *arg1) {
     int i = 0;
     if (~arg0->arr[0]) {
@@ -6516,6 +7119,11 @@ INCLUDE_ASM("seg/seg_1218", func_00108F88);
 #ifdef SKIP_ASM
 extern "C" void cComputer_Init();
 
+/**
+ * Calls cComputer_Init, passing its own first argument register through (the C declares no parameters).
+ *
+ * Nothing in the build references it.
+ */
 extern "C" void func_00108F88(void) {
     cComputer_Init();
 }
@@ -6527,6 +7135,14 @@ INCLUDE_ASM("seg/seg_1218", func_00108FA8);
 // From peak3project's fork (github.com/peak3project/ssx3).
 #include "seg/seg_1218_classes.h"
 
+/**
+ * Destroys a computer rider (compiler-generated destructor).
+ *
+ * Destroys the object's parts in reverse order (calling the out-of-line destructors of the FX and wipeout-motion parts,
+ * inlining the others), then the cRider virtual base (cRider__cRider) when called for the most-derived object, and
+ * frees the memory (operator_delete__FPi) when the delete flag is set. It fills the destructor slot of the vtables
+ * D_00458618 and D_00458660.
+ */
 // Compiler-generated: the composite's parts are destroyed in reverse order (the out-of-line part destructors
 // are called, the others are inlined), then the cRider virtual base when this is the most-derived object.
 // Needs -fno-rtti for this unit: the retail vtables carry no typeinfo pointer, and every level here stores
@@ -6755,6 +7371,16 @@ extern "C" int cComputer_checkForReset(void*);
 extern "C" int cComputer_checkForBlock(void*);
 extern "C" int cComputer_checkForPunching(void*, int*);
 
+/**
+ * Fills the computer rider's cruise command.
+ *
+ * Sets bit 12 of the command from cComputer_checkForReset and clears +0xE20. When cComputer_checkForPunching finds a
+ * punch it sets bit 19 (its flag set) or bit 18 (flag clear); otherwise when cComputer_checkForBlock is true it sets
+ * both. Then it calls the current cruise logic, the pointer-to-member at +0xF44 (set from D_0043CF20), with the
+ * command. cComputer_getControlCmd calls it.
+ *
+ * @param f  the cruise command
+ */
 extern "C" void func_0010A960(cObj_A960* self, sFlags_A960* f)
 {
     int t;
@@ -7311,6 +7937,14 @@ extern "C" void cComputer_getNaturalAirCmd(cComputer* self, sPad_B590* cmd)
 //100%
 INCLUDE_ASM("seg/seg_1218", func_0010B750);
 #ifdef SKIP_ASM
+/**
+ * Fills the computer rider's wipeout command: bit 12 is set from cComputer_checkForReset, the rest is kept.
+ *
+ * cComputer_getControlCmd calls it.
+ *
+ * @param computer  the computer rider
+ * @param controlCmd  the command word
+ */
 extern "C" void func_0010B750(cComputer* computer, int *controlCmd) {
     *controlCmd = (*controlCmd & ~0x1000) | ((cComputer_checkForReset(computer) & 1) << 0xC);
 }
@@ -7439,6 +8073,18 @@ extern "C" int cComputer_checkForJumpEvent(cComputer* self, float* approachSpeed
 INCLUDE_ASM("seg/seg_1218", func_0010BB18);
 #ifdef SKIP_ASM
 struct sHit_BB18 { int type; int val; float lim; int d; };
+/**
+ * Looks for a speed marker on the computer rider's path just ahead.
+ *
+ * Asks the rider's path object (+0xAB8, virtual at +0xC of its +0x34 table) for up to 12 markers between the rider's
+ * path distance (+0x4C0) and +0x4C4 plus 600. For the first marker of type 17 it stores the marker's value times
+ * 27.77778 in @p out and in @p ok whether the marker's limit is at most +0x4C4, and returns 1.
+ *
+ * @param self_  the computer rider
+ * @param out  receives the speed
+ * @param ok  receives 1 when the rider is inside the zone
+ * @return 1 when a speed marker was found, else 0
+ */
 extern "C" int func_0010BB18(cComputer* self_, float* out, int* ok) {
     sHit_BB18 buf[12];
     char* rider = (char*)self_->mRider;
@@ -7460,6 +8106,16 @@ extern "C" int func_0010BB18(cComputer* self_, float* out, int* ok) {
 INCLUDE_ASM("seg/seg_1218", func_0010BBF8);
 #ifdef SKIP_ASM
 struct sHit_BBF8 { int type; int val; int d[2]; };
+/**
+ * Looks for a board-press marker on the computer rider's path just ahead.
+ *
+ * Asks the rider's path object (+0xAB8) for up to 12 markers between the path distance (+0x4C0) and +0x4C4 plus 50. For
+ * the first marker of type 19 it stores in @p out whether its value is positive and returns 1; @p out is 0 otherwise.
+ *
+ * @param self_  the computer rider
+ * @param out  receives 1 for a positive marker value
+ * @return 1 when a marker was found, else 0
+ */
 extern "C" int func_0010BBF8(cComputer* self_, int* out) {
     sHit_BBF8 buf[12];
     char* rider = (char*)self_->mRider;
@@ -7481,6 +8137,14 @@ extern "C" int func_0010BBF8(cComputer* self_, int* out) {
 INCLUDE_ASM("seg/seg_1218", func_0010BC98);
 #ifdef SKIP_ASM
 struct sHit_BC98 { int type; int d[3]; };
+/**
+ * Tells whether the computer rider's path has a marker of type 15 at its current position.
+ *
+ * Asks the rider's path object (+0xAB8) for up to 12 markers between the path distance (+0x4C0) and +0x4C4. Nothing in
+ * the build references it.
+ *
+ * @return 1 when such a marker was found, else 0
+ */
 extern "C" int func_0010BC98(cComputer* self) {
     sHit_BC98 buf[12];
     char* rider = (char*)self->mRider;

@@ -75,6 +75,15 @@ extern "C" void* HUFF_about(void)
 //100%
 INCLUDE_ASM("seg/seg_1C9348", func_002C8468);
 #ifdef SKIP_ASM
+/**
+ * Reads a big-endian unsigned number of @p n bytes.
+ *
+ * func_002C84A0 and func_002C8550 read the header fields of HUFF-compressed data with it.
+ *
+ * @param bytes  the first byte
+ * @param n  how many bytes to read (0 gives 0)
+ * @return the value
+ */
 extern "C" unsigned func_002C8468(unsigned char *bytes, int n) {
     unsigned value = 0;
     while (n--) {
@@ -89,6 +98,15 @@ INCLUDE_ASM("seg/seg_1C9348", func_002C84A0);
 #ifdef SKIP_ASM
 extern "C" unsigned func_002C8468(unsigned char *p, int n);
 
+/**
+ * Tells whether a buffer starts with a HUFF compression header.
+ *
+ * Reads the first two bytes (big-endian, func_002C8468) and gives 100 for the ids 0x30FB, 0x31FB, 0x32FB, 0x33FB,
+ * 0x34FB and 0x35FB, else 0. Nothing in the build calls it.
+ *
+ * @param compressed  the compressed data
+ * @return 100 for a HUFF header, else 0
+ */
 extern "C" int func_002C84A0(unsigned char *compressed) {
     int confidence = 0;
     if (func_002C8468(compressed, 2) == 12539
@@ -108,6 +126,15 @@ INCLUDE_ASM("seg/seg_1C9348", func_002C8550);
 #ifdef SKIP_ASM
 extern "C" unsigned func_002C8468(unsigned char *p, int n);
 
+/**
+ * Reads the uncompressed size from a HUFF compression header.
+ *
+ * Reads the 2-byte id (func_002C8468); when bit 0x100 is set the 3-byte big-endian size at offset 5 is read, otherwise
+ * the one at offset 2. The C declares no return value, but the code returns the last read (it is left in the return
+ * register). Nothing in the build calls it.
+ *
+ * @param compressed  the compressed data
+ */
 extern "C" void func_002C8550(unsigned char *compressed) {
     if (func_002C8468(compressed, 2) & 0x100) {
         func_002C8468(compressed + 5, 3);
@@ -122,6 +149,17 @@ INCLUDE_ASM("seg/seg_1C9348", func_002C85A0);
 #ifdef SKIP_ASM
 extern "C" int HUFF_decompress(int, int);
 
+/**
+ * Decompresses HUFF data into a buffer: returns HUFF_decompress(@p packBuf, @p unpackBuf).
+ *
+ * @p b is not used. The replay code (cReplayFramePtr_loadBlock, cPlaybackMan_setupFile, cReplayCache_load) calls it
+ * with 0 there.
+ *
+ * @param packBuf  the compressed data
+ * @param b  not used (callers pass 0)
+ * @param unpackBuf  the output buffer
+ * @return what HUFF_decompress returns
+ */
 extern "C" int func_002C85A0(int packBuf, int b, int unpackBuf) {
     return HUFF_decompress(packBuf, unpackBuf);
 }

@@ -5277,7 +5277,7 @@ extern "C" void func_001E12F0(void)
 INCLUDE_ASM("fe/fepopupmisc", func_001E1450);
 #ifdef SKIP_ASM
 /**
- * Does nothing.
+ * Does nothing: an empty function that returns at once. Nothing in the build references it.
  */
 extern "C" void func_001E1450(void) {
 

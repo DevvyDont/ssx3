@@ -130,6 +130,11 @@ extern "C" void cAI_AIStateUpdate(cAI* self) {
 }
 #endif
 
+/**
+ * Does nothing: the game-init state handler's enter step (slot 1, word 3, of its vtable D_004585C8).
+ *
+ * cAI_AIStateUpdate calls it with the handler and the AI when the AI enters the game-init state.
+ */
 extern "C" void func_00113CB8(void) {
 }
 
@@ -138,17 +143,38 @@ INCLUDE_ASM("seg/seg_14B10", func_00113CC0);
 #ifdef SKIP_ASM
 extern "C" void cAI_setAIState(cAI*, int);
 
+/**
+ * The game-init state handler's update step: moves the AI on to state 2 (cAI_setAIState(ai, 2)).
+ *
+ * Slot 3 (word 7) of the handler's vtable D_004585C8; cAI_AIStateUpdate runs it every AI tick.
+ *
+ * @param stateHandler  the handler (unused)
+ * @param aiObj  the AI
+ */
 extern "C" void func_00113CC0(void *stateHandler, void *aiObj) {
     cAI_setAIState((cAI*)aiObj, 2);
 }
 #endif
 
+/**
+ * Does nothing: the game-init state handler's exit step (slot 2, word 5, of its vtable D_004585C8).
+ *
+ * cAI_AIStateUpdate calls it with the handler and the AI when the AI leaves the game-init state.
+ */
 extern "C" void func_00113CE0(void) {
 }
 
 //100%
 INCLUDE_ASM("seg/seg_14B10", func_00113CE8);
 #ifdef SKIP_ASM
+/**
+ * The freeride state handler's enter step: clears the AI's ComputerRidersActive (+0x14).
+ *
+ * Slot 1 (word 3) of the handler's vtable D_004585A0; cAI_AIStateUpdate calls it when the AI enters the state.
+ *
+ * @param stateHandler  the handler (unused)
+ * @param aiObj  the AI
+ */
 extern "C" void func_00113CE8(void *stateHandler, void *aiObj) {
     (*(int *)((char*)(aiObj) + (0x14))) = 0;
 }
@@ -159,26 +185,57 @@ INCLUDE_ASM("seg/seg_14B10", func_00113CF0);
 #ifdef SKIP_ASM
 extern "C" void cAI_setAIState(cAI*, int);
 
+/**
+ * The freeride state handler's update step: moves the AI on to state 5, the race state (cAI_setAIState(ai, 5)).
+ *
+ * Slot 3 (word 7) of the handler's vtable D_004585A0; cAI_AIStateUpdate runs it every AI tick.
+ *
+ * @param stateHandler  the handler (unused)
+ * @param aiObj  the AI
+ */
 extern "C" void func_00113CF0(void *stateHandler, void *aiObj) {
     cAI_setAIState((cAI*)aiObj, 5);
 }
 #endif
 
+/**
+ * Does nothing: the freeride state handler's exit step (slot 2, word 5, of its vtable D_004585A0).
+ *
+ * cAI_AIStateUpdate calls it with the handler and the AI when the AI leaves the freeride state.
+ */
 extern "C" void func_00113D10(void) {
 }
 
 //100%
 INCLUDE_ASM("seg/seg_14B10", func_00113D18);
 #ifdef SKIP_ASM
+/**
+ * The pre-race state handler's enter step: clears the AI's EventTimerTick (+0xC) and the handler's word +4.
+ *
+ * Slot 1 (word 3) of the handler's vtable D_00458550; cAI_AIStateUpdate calls it when the AI enters the state.
+ *
+ * @param stateHandler  the handler
+ * @param aiObj  the AI
+ */
 extern "C" void func_00113D18(void *stateHandler, void *aiObj) {
     (*(int *)((char*)(aiObj) + (0xC))) = 0;
     (*(int *)((char*)(stateHandler) + (4))) = 0;
 }
 #endif
 
+/**
+ * Does nothing: the pre-race state handler's update step (slot 3, word 7, of its vtable D_00458550).
+ *
+ * cAI_AIStateUpdate runs it every AI tick in the pre-race state.
+ */
 extern "C" void func_00113D28(void) {
 }
 
+/**
+ * Does nothing: the pre-race state handler's exit step (slot 2, word 5, of its vtable D_00458550).
+ *
+ * cAI_AIStateUpdate calls it when the AI leaves the pre-race state.
+ */
 extern "C" void func_00113D30(void) {
 }
 
@@ -292,6 +349,12 @@ INCLUDE_ASM("seg/seg_14B10", func_00113E18);
 #ifdef SKIP_ASM
 extern "C" void cGameComm_gameEnded(int);
 
+/**
+ * The end-race state handler's enter step: tells the online game layer the game has ended.
+ *
+ * Calls cGameComm_gameEnded on cGameComm_mGameComm when an online game comm exists. Slot 1 (word 3) of the handler's
+ * vtable D_00458500; it is called with the handler and the AI but uses neither, so the C view takes no parameters.
+ */
 extern "C" void func_00113E18(void) {
     if (cGameComm_mGameComm != 0) {
         cGameComm_gameEnded((int)cGameComm_mGameComm);
@@ -299,9 +362,19 @@ extern "C" void func_00113E18(void) {
 }
 #endif
 
+/**
+ * Does nothing: the end-race state handler's update step (slot 3, word 7, of its vtable D_00458500).
+ *
+ * cAI_AIStateUpdate runs it every AI tick in the end-race state.
+ */
 extern "C" void func_00113E40(void) {
 }
 
+/**
+ * Does nothing: the end-race state handler's exit step (slot 2, word 5, of its vtable D_00458500).
+ *
+ * cAI_AIStateUpdate calls it when the AI leaves the end-race state.
+ */
 extern "C" void func_00113E48(void) {
 }
 
@@ -323,9 +396,19 @@ extern "C" void cShutdownHandler_OnGainState(int self, int ai) {
 }
 #endif
 
+/**
+ * Does nothing: the shutdown state handler's update step (slot 3, word 7, of cShutdownHandler_vtbl).
+ *
+ * cAI_AIStateUpdate runs it every AI tick in the shutdown state.
+ */
 extern "C" void func_00113E70(void) {
 }
 
+/**
+ * Does nothing: the shutdown state handler's exit step (slot 2, word 5, of cShutdownHandler_vtbl).
+ *
+ * cAI_AIStateUpdate calls it when the AI leaves the shutdown state.
+ */
 extern "C" void func_00113E78(void) {
 }
 
@@ -804,6 +887,26 @@ static inline int Flags_4298(char* r) { return *(short*)(r + 0x2D4); }
 
 #define VEL_4298 (*(sV4_4298*)(self + 0x1E0))
 
+/**
+ * Adds a jump's pop to the rider's velocity (+0x1E0) and reports the takeoff.
+ *
+ * A negative @p speedFactor (the resolve routines pass -1) sets the ground motion's (+0x77C) +0x14 to -1 and uses a
+ * fixed pop of 0.1634; otherwise the pop is speedFactor squared times a speed-dependent amount, clamped to
+ * 361.2..708.4. In motion state 4 the pop goes along the up axis (+0x1C0). Otherwise it goes along normalized (+0x370 +
+ * 0.2 * +0x3A0), unless the slope term (+0x378 between cos 50 and cos 70 degrees), +0x3A8 and the vertical speed are
+ * all non-negative: then the velocity turns towards the side direction (blend up to 0.95, by the side vector's z
+ * between sin 0 and sin 20 degrees) and half the pop is added. It reports the jump (cReplay_eventJump,
+ * cWScriptMan_eventJump) and adds cRiderMetrix_evTakeoff's boost (cRider_flagEventBoostPowerUp).
+ *
+ * After that: on steep ground the part of the change that opposes the old horizontal velocity is taken back, scaled in
+ * between 0.5 and 0.7 of the top speed (+0x2E4). The flat heading of +0x380 (t4vect_XAxis when zero) goes to +0x3C0;
+ * when the slope +0x388 is within 0.05 of 0 the velocity loses its heading part, the position (+0x110) moves 4 along it
+ * and, without surface flag 0x20 (+0x2D4), the velocity is scaled by 0.8. The speed is capped at +0x2E4 and, for a
+ * nonnegative factor with +0x434 outside 11-13, scaled by 0.694 rising to 1 over the time since the ground motion
+ * gained focus. Last it stores a side-speed value at +0x5A4 and whether @p speedFactor is positive at +0x5A8.
+ *
+ * @param speedFactor  the jump strength, 0 to 1, or negative for a fixed small pop
+ */
 // Applies the rider's push (speedFactor in [0, 1]; negative = no push) and the slope/heading corrections.
 extern "C" void func_00114298(char* self, float speedFactor)
 {
@@ -1574,6 +1677,15 @@ extern "C" int cBE_getBE();
 extern "C" int cBE_getInterface__Fv(int, int);
 extern "C" float cBECharacterInterface_getScale(int, int);
 
+/**
+ * Returns how far the rider's start position moves forward for its character's size.
+ *
+ * The value is the character's scale (cBECharacterInterface_getScale on BE interface 2, for the rider's +0x86C) times
+ * 90, minus 90. cRider_putAtDropOffBC, cRider_initPath and cRider_DoInSeqAnimUpdate add it along the rider's front.
+ *
+ * @param rider  the rider
+ * @return the offset (0 at scale 1)
+ */
 extern "C" float func_00115B08(void *rider) {
     return (cBECharacterInterface_getScale(cBE_getInterface__Fv(cBE_getBE(), 2), (*(int *)((char*)(rider) + (0x86C)))) * 90.0f) - 90.0f;
 }
@@ -1910,6 +2022,15 @@ INCLUDE_ASM("seg/seg_14B10", func_00116378);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cRider_setControlState_6378(void *, int) __asm__("cRider_setControlState__FPv");
 
+/**
+ * Puts the rider into control state 10 once the value at +0x470 is not negative (cRider_setControlState).
+ *
+ * The control updates (cCruiseControl_update, cPrewindControl_update, cBumpControl_update, cBoardPressControl_update)
+ * call it.
+ *
+ * @param rider  the rider
+ * @return 1 when the state was set, else 0
+ */
 extern "C" int func_00116378(void *rider) {
     if (*(float *)((char*)rider + 0x470) >= 0.0f) {
         cRider_setControlState_6378(rider, 10);
@@ -2061,6 +2182,11 @@ extern "C" int cRider_checkForPunch(cRider* self, int isLeft, int isRight)
 }
 #endif
 
+/**
+ * Does nothing: an empty function that returns at once.
+ *
+ * cRider_doRailslideModeOrientation calls it with the rider as its last step; the C declares no parameters.
+ */
 extern "C" void func_00116930(void) {
 }
 
@@ -2069,6 +2195,15 @@ INCLUDE_ASM("seg/seg_14B10", func_00116938);
 #ifdef SKIP_ASM
 extern int D_0043D160[];
 
+/**
+ * Returns a grab's name text: entry @p arg0 of the table D_0043D160 ("", "Combo Grab ", "", "Indy ", "Method ", ...),
+ * the table gGenTrickName builds trick names from.
+ *
+ * cFEStateUberTrick_onWidgetEvent and cFEStateUberTrick_updateTrickMenu use it.
+ *
+ * @param arg0  the table index
+ * @return the name (as an int)
+ */
 extern "C" int func_00116938(int arg0) {
     return D_0043D160[arg0];
 }
@@ -2249,6 +2384,14 @@ extern "C" void gGenMonsterTrickReqName(char* buf, int trick, int size)
 //100%
 INCLUDE_ASM("seg/seg_14B10", func_00116FA8);
 #ifdef SKIP_ASM
+/**
+ * Sets up a HUD effect slot as empty: its ID (+0) becomes 52, the value cHUDFX_update stores when an effect expires.
+ *
+ * The cRiderMetrix HUD slots are built with it (cRiderMetrix_linkToRider).
+ *
+ * @param arg0  the effect slot
+ * @return @p arg0
+ */
 extern "C" int* func_00116FA8(int *arg0) {
     *arg0 = 52;
     return arg0;
@@ -2360,6 +2503,19 @@ INCLUDE_ASM("seg/seg_14B10", func_00117138);
 #ifdef SKIP_ASM
 extern "C" void cHUDFX_copyDispStr(cHUDFX*, signed char *);
 
+/**
+ * Starts a HUD effect showing a text, timed by an animation position rather than a decay limit.
+ *
+ * Copies @p displayStr (cHUDFX_copyDispStr) and sets the ID (+0) to @p fxId, the data (+0xC) to @p data, the current
+ * decay (+8) to -@p fparg0, the decay limit (+4) to -1 (no limit, so cHUDFX_update leaves it) and the number (+0x14) to
+ * 0. The text counterpart of func_001171A8; nothing in the build references it.
+ *
+ * @param hudFx  the effect slot
+ * @param fxId  the effect
+ * @param displayStr  the text to show
+ * @param data  the effect's data
+ * @param fparg0  the animation position (stored negated)
+ */
 extern "C" void func_00117138(char *hudFx, int fxId, signed char *displayStr, int data, float fparg0) {
     cHUDFX_copyDispStr((cHUDFX*)hudFx, displayStr);
     *(int *)(hudFx + 0) = fxId;
@@ -2378,6 +2534,20 @@ extern "C" void cHUDFX_copyDispStr(cHUDFX*, signed char *);
 extern signed char D_004A5E20[];
 extern char str_pct_d[];
 
+/**
+ * Starts a HUD effect showing a number, timed by an animation position rather than a decay limit.
+ *
+ * Formats @p arg2 with "%d" into the shared buffer D_004A5E20 and copies it as the text (cHUDFX_copyDispStr). Sets the
+ * number (+0x14) to @p arg2, the ID (+0) to @p arg1, the current decay (+8) to -@p fparg0, the data (+0xC) to
+ * @p arg3 and the decay limit (+4) to -1 (no limit). cRiderMetrix_updateStaticHUD, cRiderMetrix_evCollectMultiplier and
+ * cRiderMetrix_addToComboChain use it.
+ *
+ * @param arg0  the effect slot
+ * @param arg1  the effect
+ * @param arg2  the number to show
+ * @param fparg0  the animation position (stored negated)
+ * @param arg3  the effect's data
+ */
 // Variant of func_00117138 that names the entry from a number (formatted into a shared buffer).
 extern "C" void func_001171A8(char *arg0, int arg1, int arg2, float fparg0, int arg3) {
     sprintf((char*)D_004A5E20, str_pct_d, arg2);

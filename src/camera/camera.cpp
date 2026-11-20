@@ -9812,10 +9812,12 @@ extern "C" int cCameraController_getType(int *controller) {
 INCLUDE_ASM("camera/camera", cCameraController_getBlendType);
 #ifdef SKIP_ASM
 /**
- * Returns BlendType.
+ * Returns the controller's BlendType.
  *
- * @param chaseCameraController  the controller (any cCameraController)
- * @return the blend type (an eCamBlendType)
+ * Declared on cChaseCameraController but reads the field every cCameraController has.
+ *
+ * @param chaseCameraController  the controller
+ * @return BlendType (an eCamBlendType)
  */
 extern "C" int cCameraController_getBlendType(cChaseCameraController* chaseCameraController) {
     return (chaseCameraController->BlendType);
@@ -9825,10 +9827,12 @@ extern "C" int cCameraController_getBlendType(cChaseCameraController* chaseCamer
 INCLUDE_ASM("camera/camera", cCameraController_getAlgorithmList);
 #ifdef SKIP_ASM
 /**
- * Returns AlgorithmList.
+ * Returns the controller's AlgorithmList.
  *
- * @param chaseCameraController  the controller (any cCameraController)
- * @return the algorithm list (a cCameraAlgoList*)
+ * Declared on cChaseCameraController but reads the field every cCameraController has.
+ *
+ * @param chaseCameraController  the controller
+ * @return AlgorithmList (a cCameraAlgoList pointer, returned as int)
  */
 extern "C" int cCameraController_getAlgorithmList(cChaseCameraController* chaseCameraController) {
     return ((int)chaseCameraController->AlgorithmList);

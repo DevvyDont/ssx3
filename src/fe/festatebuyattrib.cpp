@@ -689,7 +689,7 @@ extern "C" void cFEStateBuyAttrib_buyExperience(cFEStateBuyAttrib* buyState)
 INCLUDE_ASM("fe/festatebuyattrib", func_001F54A8);
 #ifdef SKIP_ASM
 /**
- * Does nothing.
+ * Does nothing: an empty function that returns at once. Nothing in the build references it.
  */
 extern "C" void func_001F54A8(void) {
 

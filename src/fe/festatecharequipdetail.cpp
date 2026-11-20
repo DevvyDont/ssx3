@@ -2813,7 +2813,7 @@ extern "C" int func_0019BEE8(void* self)
 INCLUDE_ASM("fe/festatecharequipdetail", func_0019BFE0);
 #ifdef SKIP_ASM
 /**
- * Does nothing.
+ * Does nothing: an empty function that returns at once. Nothing in the build references it.
  */
 extern "C" void func_0019BFE0(void) {
 

@@ -33,6 +33,12 @@ INCLUDE_ASM("seg/seg_156860", func_00255898);
 #ifdef SKIP_ASM
 extern "C" void cCommSystem__cCommSystem(int, int);
 
+/**
+ * Destroys the online connection manager, if there is one.
+ *
+ * Runs cCommSystem__cCommSystem on cCommSystem_mCommSystem with flags 3 (destroy and free) and clears the pointer.
+ * cFEStateMainMenu_onCreateScreen and the debug menu screen call it.
+ */
 extern "C" void func_00255898(void) {
     if (cCommSystem_mCommSystem != 0) {
         cCommSystem__cCommSystem((int)cCommSystem_mCommSystem, 3);
@@ -178,6 +184,16 @@ struct sComm_5A20 {
     int type;                 // 0x30
 };
 
+/**
+ * Runs the online connection manager: brings the network interface up and updates the channels.
+ *
+ * Calls NetConnIdle, then by the state (+0x20): in 2 (connect requested), once the 'onln' status is 0 it starts the
+ * selected configuration (NetConnConnect with the name at +0x80 of its cCommSystem_mNetConns entry) and moves to 3. In
+ * 3, once 'onln' and 'host' are set it moves to 4 with an 1800-frame timeout and stores the 'type' status (+0x30) and a
+ * 'bbnd' answer of 1 (+0x2C); a 'conn' status starting with '-' fails the connection (func_00255FE8). In 4 it moves to
+ * 5 once func_00256038 reports a local address. In 5 each channel gets its virtual update. The timeout (+0x24) counts
+ * down every call and fails the connection with 'time' when it runs out.
+ */
 extern "C" void func_00255A20(sComm_5A20* self)
 {
     int i;
@@ -282,6 +298,16 @@ extern "C" int cCommSystem_openDSockChannel(void **slots, int addr, int port, in
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00255CC8);
 #ifdef SKIP_ASM
+/**
+ * Closes and deletes one of the connection manager's channels.
+ *
+ * When the channel is open (its first word nonzero) it calls its virtual disconnect (cDSockChannel_vtbl slot 2), then
+ * its virtual destructor with flags 3, and clears the slot. cRealFE_loadStartState and the game-connection code call
+ * it.
+ *
+ * @param commSystem  the connection manager
+ * @param channelIndex  the channel slot
+ */
 extern "C" void func_00255CC8(char *commSystem, int channelIndex) {
     void **slot = (void **)(commSystem + channelIndex * 4);
     char *channel = (char *)*slot;
@@ -303,6 +329,13 @@ extern "C" void func_00255CC8(char *commSystem, int channelIndex) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00255D38);
 #ifdef SKIP_ASM
+/**
+ * Tells whether a channel slot of the connection manager holds a channel.
+ *
+ * @param commSystem  the connection manager
+ * @param channelIndex  the channel slot
+ * @return 1 when the slot is set, else 0
+ */
 extern "C" int func_00255D38(void *commSystem, int channelIndex) {
     return *(int *)((char*)commSystem + (channelIndex << 2)) != 0;
 }
@@ -311,6 +344,15 @@ extern "C" int func_00255D38(void *commSystem, int channelIndex) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00255D50);
 #ifdef SKIP_ASM
+/**
+ * Returns whether a channel is connected (the channel's virtual isConnected, slot 4 of cDSockChannel_vtbl).
+ *
+ * The channel slot is not checked for null. The debug lobby screens and the game-connection update call it.
+ *
+ * @param commSystem  the connection manager
+ * @param channelIndex  the channel slot
+ * @return the channel's answer
+ */
 extern "C" int func_00255D50(void *commSystem, int channelIndex) {
     char *obj = *(char **)((char*)commSystem + (channelIndex << 2));
     char *vt = *(char **)(obj + 8);
@@ -321,6 +363,15 @@ extern "C" int func_00255D50(void *commSystem, int channelIndex) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00255D88);
 #ifdef SKIP_ASM
+/**
+ * Returns a channel's latency (the channel's virtual getLatency, slot 5 of cDSockChannel_vtbl).
+ *
+ * cGameComm_update and func_00258360 use it.
+ *
+ * @param commSystem  the connection manager
+ * @param channelIndex  the channel slot
+ * @return the latency
+ */
 extern "C" float func_00255D88(int commSystem, int channelIndex) {
     char *obj = *(char **)(commSystem + (channelIndex << 2));
     char *vt = *(char **)(obj + 8);
@@ -331,6 +382,17 @@ extern "C" float func_00255D88(int commSystem, int channelIndex) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00255DC0);
 #ifdef SKIP_ASM
+/**
+ * Reads a packet from a channel (the channel's virtual readPacket, slot 7 of cDSockChannel_vtbl).
+ *
+ * func_00257CD8 reads the game packets with it.
+ *
+ * @param commSystem  the connection manager
+ * @param channelIndex  the channel slot
+ * @param data  the buffer
+ * @param maxSize  the buffer size
+ * @return the channel's result: nonzero when a packet was read
+ */
 extern "C" int func_00255DC0(void *commSystem, int channelIndex, int data, int maxSize) {
     char *obj = *(char **)((char*)commSystem + (channelIndex << 2));
     char *vt = *(char **)(obj + 8);
@@ -341,6 +403,17 @@ extern "C" int func_00255DC0(void *commSystem, int channelIndex, int data, int m
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00255E00);
 #ifdef SKIP_ASM
+/**
+ * Writes a packet to a channel (the channel's virtual writePacket, slot 8 of cDSockChannel_vtbl).
+ *
+ * func_00257E98, cGameComm_updateWriteQueue and the game-connection code send with it.
+ *
+ * @param commSystem  the connection manager
+ * @param channelIndex  the channel slot
+ * @param data  the packet
+ * @param size  its size in bytes
+ * @return the channel's result: nonzero when the packet was taken
+ */
 extern "C" int func_00255E00(void *commSystem, int channelIndex, int data, int size) {
     char *obj = *(char **)((char*)commSystem + (channelIndex << 2));
     char *vt = *(char **)(obj + 8);
@@ -351,6 +424,15 @@ extern "C" int func_00255E00(void *commSystem, int channelIndex, int data, int s
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00255E40);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the connection or a channel has failed.
+ *
+ * Returns 1 when the connection error (+0x28, set by func_00255FE8) is set, otherwise the channel's error word (+4).
+ *
+ * @param commSystem  the connection manager
+ * @param channelIndex  the channel slot
+ * @return nonzero on an error
+ */
 extern "C" int func_00255E40(void *commSystem, int channelIndex) {
     if ((*(int *)((char*)(commSystem) + (0x28))) != 0) {
         return 1;
@@ -365,6 +447,15 @@ INCLUDE_ASM("seg/seg_156860", func_00255E68);
 extern "C" void MUTEX_lock(void *);
 extern "C" void MUTEX_unlock(void *);
 
+/**
+ * Takes a message element from the connection manager's pool.
+ *
+ * Pops the head of the free list (+0x18) with the mutex at +4 held and clears the element's link word. There is no
+ * check for an empty list. Nothing in the build calls it.
+ *
+ * @param pool  the connection manager
+ * @return the element
+ */
 extern "C" int *func_00255E68(void *pool) {
     void *mutex = (char*)pool + 4;
     MUTEX_lock(mutex);
@@ -382,6 +473,15 @@ INCLUDE_ASM("seg/seg_156860", func_00255EC0);
 extern "C" void MUTEX_lock(void *);
 extern "C" void MUTEX_unlock(void *);
 
+/**
+ * Returns a message element to the connection manager's pool.
+ *
+ * With the mutex at +4 held it clears the element's size (+4) and offset (+8) and pushes it onto the free list (+0x18).
+ * Nothing in the build calls it.
+ *
+ * @param pool  the connection manager
+ * @param node  the element
+ */
 extern "C" void func_00255EC0(void *pool, void *node) {
     void *mutex = (char*)pool + 4;
     MUTEX_lock(mutex);
@@ -402,6 +502,16 @@ extern "C" int NetConnQuery_5F20(int, void *, int) __asm__("NetConnQuery");
 extern char cCommSystem_mNetConns[];
 extern int cCommSystem_mNumNetConn;
 
+/**
+ * Reads the list of network configurations into cCommSystem_mNetConns.
+ *
+ * Asks for up to 10 entries (NetConnQuery with @p arg1 and the 0x100-byte records of cCommSystem_mNetConns) and stores
+ * the count in cCommSystem_mNumNetConn. The debug menu screen and func_001B4CD8 call it.
+ *
+ * @param arg0  the connection manager (not used)
+ * @param arg1  passed to NetConnQuery first
+ * @return 1
+ */
 extern "C" int func_00255F20(void *arg0, int arg1) {
     cCommSystem_mNumNetConn = NetConnQuery_5F20(arg1, cCommSystem_mNetConns, 10);
     return 1;
@@ -413,6 +523,16 @@ INCLUDE_ASM("seg/seg_156860", func_00255F50);
 #ifdef SKIP_ASM
 extern "C" void func_00255FA0(void *);
 
+/**
+ * Starts bringing the network interface up with one of the listed configurations.
+ *
+ * Disconnects first (func_00255FA0), stores the configuration index (+0x1C), sets the interface type (+0x30) to 1, the
+ * timeout (+0x24) to 9000 frames, the state (+0x20) to 2 (connect requested, see func_00255A20) and clears the
+ * broadband flag (+0x2C).
+ *
+ * @param commSystem  the connection manager
+ * @param configIndex  the cCommSystem_mNetConns entry
+ */
 extern "C" void func_00255F50(void *commSystem, int configIndex) {
     func_00255FA0(commSystem);
     (*(int *)((char*)(commSystem) + (0x1C))) = configIndex;
@@ -428,6 +548,14 @@ INCLUDE_ASM("seg/seg_156860", func_00255FA0);
 #ifdef SKIP_ASM
 extern "C" void NetConnDisconnect();
 
+/**
+ * Takes the network interface down.
+ *
+ * When a configuration is active (+0x1C not negative) it clears it to -1 and stops it (NetConnDisconnect). Then it
+ * clears the timeout (+0x24) and the error (+0x28) and sets the state (+0x20) to 1, idle.
+ *
+ * @param commSystem  the connection manager
+ */
 extern "C" void func_00255FA0(void *commSystem) {
     if ((*(int *)((char*)(commSystem) + (0x1C))) >= 0) {
         (*(int *)((char*)(commSystem) + (0x1C))) = -1;
@@ -444,6 +572,15 @@ INCLUDE_ASM("seg/seg_156860", func_00255FE8);
 #ifdef SKIP_ASM
 extern "C" void NetConnDisconnect();
 
+/**
+ * Records a failed connection.
+ *
+ * Stops the active configuration as func_00255FA0 does, stores @p errorCode (+0x28), sets the state (+0x20) to 6 and
+ * clears the timeout. func_00255A20 calls it with the 'conn' status or 'time'.
+ *
+ * @param commSystem  the connection manager
+ * @param errorCode  the error ('time' or a status starting with '-')
+ */
 extern "C" void func_00255FE8(void *commSystem, int errorCode) {
     if ((*(int *)((char*)(commSystem) + (0x1C))) >= 0) {
         (*(int *)((char*)(commSystem) + (0x1C))) = -1;
@@ -461,6 +598,14 @@ INCLUDE_ASM("seg/seg_156860", func_00256038);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int NetConnStatus_6038(int, int, int) __asm__("NetConnStatus");
 
+/**
+ * Reads the console's local network address.
+ *
+ * Stores the 'addr' status (NetConnStatus) in @p localAddr when any of its upper 24 bits is set, otherwise 0.
+ *
+ * @param commSystem  the connection manager (not used)
+ * @param localAddr  receives the address, or 0
+ */
 extern "C" void func_00256038(void *commSystem, int *localAddr) {
     int temp_2;
 
@@ -480,6 +625,11 @@ extern "C" void func_0031B008_6088(void *, int, void *) __asm__("func_0031B008")
 extern char str_cdrom0_NETGUI_NTGUI_ELF_1[];
 extern int D_004A2EC0;
 
+/**
+ * Starts the network configuration program "cdrom0:\NETGUI\NTGUI.ELF;1" (func_0031B008 with 1 and D_004A2EC0).
+ *
+ * func_001B5BD8 and the debug menu screen call it.
+ */
 extern "C" void func_00256088(void) {
     func_0031B008_6088(str_cdrom0_NETGUI_NTGUI_ELF_1, 1, &D_004A2EC0);
 }
@@ -502,6 +652,13 @@ extern char str_DNASMAN[];
 
 static inline int ge3_60B0(int *o) { return *o >= 3; }
 
+/**
+ * Runs a DNAS authentication to the end, waiting in a loop (debug menu).
+ *
+ * Creates a 2640-byte "DNASMAN" object (func_002561B8), starts it (func_00256258 with 0) and updates it (func_002563F8,
+ * SYNCTASK_run, THREAD_yieldticks(1)) until its state reaches 3, then starts the check (func_002562D0) and updates it
+ * until state 5. Then it frees the buffers (func_002563A8) and deletes the object. cDebugMenuScreen_update calls it.
+ */
 extern "C" void func_002560B0(void) {
     int *dnasMan = func_002561B8_60B0(cMemMan_alloc_60B0(2640, str_DNASMAN, 0x20000000, 0));
     func_00256258_60B0(dnasMan, 0);
@@ -531,6 +688,11 @@ extern "C" void FILESYS_addbigsync_6188(void *, int, int, void *) __asm__("FILES
 extern char str_data_config_slusovf_big[];
 extern int D_004A2ED4;
 
+/**
+ * Adds the archive "data/config/slusovf.big" to the file system (FILESYS_addbigsync with 0, 100 and D_004A2ED4).
+ *
+ * cSSXApp_initload calls it.
+ */
 extern "C" void func_00256188(void) {
     FILESYS_addbigsync_6188(str_data_config_slusovf_big, 0, 100, &D_004A2ED4);
 }
@@ -541,6 +703,14 @@ INCLUDE_ASM("seg/seg_156860", func_002561B8);
 #ifdef SKIP_ASM
 extern "C" void func_00256228();
 
+/**
+ * Constructs a DNAS authentication object (func_00256228 clears it) and returns it.
+ *
+ * cFEStateAuthDNAS_onCreateScreen and func_002560B0 call it on a 2640-byte block.
+ *
+ * @param dnasMan  the object
+ * @return @p dnasMan
+ */
 extern "C" int func_002561B8(int dnasMan) {
     func_00256228();
     return dnasMan;
@@ -554,6 +724,12 @@ INCLUDE_ASM("seg/seg_156860", func_002561E0);
 extern "C" void func_00256250_61E0(int *) __asm__("func_00256250");
 extern "C" void operator_delete__FPi(int *);
 
+/**
+ * Destroys a DNAS authentication object (func_00256250, which does nothing) and frees it when bit 0 of @p flags is set.
+ *
+ * @param dnasMan  the object
+ * @param flags  bit 0: free the memory
+ */
 extern "C" void func_002561E0(int *dnasMan, int flags) {
     func_00256250_61E0(dnasMan);
     if (flags & 1) {
@@ -565,6 +741,11 @@ extern "C" void func_002561E0(int *dnasMan, int flags) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00256228);
 #ifdef SKIP_ASM
+/**
+ * Clears a DNAS authentication object: state (+0) and the words +4 to +0x14 become 0, the file handle (+0x18) -1.
+ *
+ * @param arg0  the object
+ */
 extern "C" void func_00256228(void *arg0) {
     (*(int *)((char*)(arg0) + (4))) = 0;
     (*(int *)((char*)(arg0) + (8))) = 0;
@@ -576,6 +757,9 @@ extern "C" void func_00256228(void *arg0) {
 }
 #endif
 
+/**
+ * Does nothing: the body of the DNAS authentication object's destructor (func_002561E0 calls it).
+ */
 extern "C" void func_00256250(void) {
 }
 
@@ -588,6 +772,14 @@ extern int D_004803E8[];
 extern int D_004A2EE0[];
 extern "C" void *operator_new__FUi_6258(unsigned int, int *, int, int) __asm__("operator_new__FUi");
 
+/**
+ * Starts a DNAS authentication: begins loading its program file.
+ *
+ * Stores @p arg1 at +0x20, clears +0x14 and +0x1C, sets the state (+0) to 1, allocates a 0x195000-byte "ElfData" buffer
+ * (+4) and starts loading "OVERLAY.DAT" into it (ASYNCFILE_loadat; handle at +0x18). func_002563F8 continues.
+ *
+ * @param arg1  the mode, passed on to the authentication (+0x20)
+ */
 extern "C" void func_00256258(char *self, int arg1) {
     *(int *)(self + 0x20) = arg1;
     *(int *)(self + 0x14) = 0;
@@ -611,6 +803,13 @@ extern "C" char *NetConnMAC();
 extern "C" void func_003FD0D8(void *);
 extern "C" char *strcpy(char *, const char *);
 
+/**
+ * Starts the DNAS check itself once the program and data are loaded.
+ *
+ * Clears +0x1C and the 160-byte parameter block at +0x24, then fills it: the data buffer (+0xC) and size (+0x10), the
+ * key D_004A2ED8, 8, the text from NetConnMAC, "SLUS_20772", the mode (+0x20) and 1. Sets the state (+0) to 4 and
+ * starts the module (func_003FD0D8, the DirtyDnasRelInit entry). func_002563F8 continues.
+ */
 extern "C" void func_002562D0(int *self)
 {
     self[7] = 0;
@@ -637,6 +836,11 @@ INCLUDE_ASM("seg/seg_156860", func_002563A8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern void cMemMan_free__FPv_63A8(int) __asm__("cMemMan_free__FPv");
 
+/**
+ * Frees a DNAS authentication object's buffers: the data (+0xC) and the program (+4), clearing each pointer.
+ *
+ * @param dnasMan  the object
+ */
 extern "C" void func_002563A8(void *dnasMan) {
     int temp_4;
     int temp_4_2;
@@ -662,6 +866,11 @@ extern "C" void func_00256460(char* self);
 extern "C" void func_00256510(char* self);
 extern "C" void func_002565E0(char* self);
 
+/**
+ * Advances a DNAS authentication by its state (+0).
+ *
+ * State 1 runs func_00256460, 2 runs func_00256510, 4 runs func_002565E0; states 0, 3 and 5 wait.
+ */
 extern "C" void func_002563F8(char* self)
 {
     switch (*(int*)self) {
@@ -694,6 +903,13 @@ extern "C" int ASYNCFILE_loadat_6460(char *, void *, int) __asm__("ASYNCFILE_loa
 extern char str_AuthData[];
 extern char str_CONFIG_DAT[];
 
+/**
+ * DNAS state 1: once "OVERLAY.DAT" has loaded, links it and starts loading "CONFIG.DAT".
+ *
+ * When the load (+0x18) is done it releases it with the size in +8 and, for a nonzero size, links the program
+ * (func_003FCFD8, which resolves DirtyDnasRelInit / Updt / Exit). On success it allocates a 64 KB "AuthData" buffer
+ * (+0xC), starts loading "CONFIG.DAT" into it and sets the state to 2.
+ */
 extern "C" void func_00256460(char *self) {
     if (ASYNCFILE_getstatus_6460(*(int *)(self + 0x18)) == 1) {
         *(int *)(self + 8) = 0;
@@ -721,6 +937,12 @@ extern "C" void ASYNCFILE_release_6510(int, int, void *) __asm__("ASYNCFILE_rele
 struct K6510 { unsigned char b[4]; };
 extern K6510 D_004A2EE8[];
 
+/**
+ * DNAS state 2: once "CONFIG.DAT" has loaded, decodes it.
+ *
+ * When the load (+0x18) is done it releases it with the size in +0x10; for a nonzero size it sets the state to 3 and
+ * XORs every byte of the data (+0xC) with the 4-byte key D_004A2EE8, repeating.
+ */
 extern "C" void func_00256510(char *self) {
     if (ASYNCFILE_getstatus_6510(*(int *)(self + 0x18)) == 1) {
         *(int *)(self + 0x10) = 0;
@@ -751,6 +973,13 @@ extern "C" void MEM_fill_65E0(char *, int, int) __asm__("MEM_fill");
 extern "C" int func_003FD128_65E0(char *) __asm__("func_003FD128");
 extern "C" void USTR_copy_65E0(char *, char *) __asm__("USTR_copy");
 
+/**
+ * DNAS state 4: once the check is finished, collects its result.
+ *
+ * When func_003FD100 (the module's update) returns 0 it clears the 908-byte result block at +0xC4, gets the result
+ * (func_003FD128), copies three wide strings of it (+0xCC, +0x10C, +0x20C) to +0x450, +0x650 and +0x850 (USTR_copy),
+ * stores whether the result was 0 at +0x1C and sets the state to 5.
+ */
 extern "C" void func_002565E0(char *self) {
     if (func_003FD100_65E0(*(int *)(self + 0x14)) == 0) {
         char *infoBuf = self + 0xC4;
@@ -780,6 +1009,15 @@ INCLUDE_ASM("seg/seg_156860", func_00256698);
 void cCommChannel_cCommChannel(void *);
 extern char cDSockChannel_vtbl[];
 
+/**
+ * Constructs a DirtySock channel.
+ *
+ * Runs the cCommChannel constructor, stores cDSockChannel_vtbl (+8), sets the float at +0x10 to 0.1 and clears the
+ * state (+0xC) and the words +0x14, +0x18 and +0x1C.
+ *
+ * @param channel  the channel
+ * @return @p channel
+ */
 extern "C" void *func_00256698(void *channel) {
     cCommChannel_cCommChannel(channel);
     (*(char **)((char*)(channel) + (8))) = cDSockChannel_vtbl;
@@ -1034,6 +1272,14 @@ INCLUDE_ASM("seg/seg_156860", func_00256A58);
 extern "C" int func_003E66F0(int, int, int);
 extern "C" int func_003E6FC8(int);
 
+/**
+ * Checks whether a DirtySock channel's pending connection has completed.
+ *
+ * When func_003E6FC8 (on the utility object at +0x18) returns a connection, it creates a game link on it (func_003E66F0
+ * with 0 and 9084) at +0x1C and, when that worked, sets the state (+0xC) to 2.
+ *
+ * @param channel  the channel
+ */
 extern "C" void func_00256A58(void *channel) {
     int temp_2;
     int temp_2_2;
@@ -1138,6 +1384,14 @@ INCLUDE_ASM("seg/seg_156860", func_00256BD8);
 #ifdef SKIP_ASM
 extern "C" void cMemMan_free__FPv();
 
+/**
+ * Frees a buffer from RpcAlloc (cMemMan_free) unless it is null.
+ *
+ * The DirtySock code (NetGameLinkDestroy, func_003E73E0, func_003F55B8 and others) frees its blocks with it. The C
+ * declares cMemMan_free without arguments; the buffer passes through in its register.
+ *
+ * @param buffer  the buffer, or 0
+ */
 extern "C" void func_00256BD8(int buffer) {
     if (buffer != 0) {
         cMemMan_free__FPv();
@@ -1170,6 +1424,12 @@ INCLUDE_ASM("seg/seg_156860", func_00256C50);
 #ifdef SKIP_ASM
 extern "C" void func_00256EE0(int, int);
 
+/**
+ * Destroys the online game link, if there is one.
+ *
+ * Runs func_00256EE0 on cGameComm_mGameComm with flags 3 (destroy and free) and clears the pointer. The front-end
+ * online screens and the lobby code call it.
+ */
 extern "C" void func_00256C50(void) {
     if (cGameComm_mGameComm != 0) {
         func_00256EE0((int)cGameComm_mGameComm, 3);
@@ -1420,6 +1680,14 @@ static inline int* Pop_6EE0(PacketQueue_6EE0* q)
     return q->slots[q->rd++ % 32];
 }
 
+/**
+ * Destroys an online game link.
+ *
+ * Frees the buffer at +0x3EC, the packet being received (+0x134) and every packet left in the four queues at +0x144
+ * (func_002581B8), destroys the ping object (+0x140, func_003E73E0) and frees the object when bit 0 of @p flags is set.
+ *
+ * @param flags  bit 0: free the memory
+ */
 // PORT: the unit declares this as (int, int)
 extern "C" void func_00256EE0(int self, int flags)
 {
@@ -1790,6 +2058,15 @@ extern "C" void cGameComm_setCommError(cGameComm* self) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00257750);
 #ifdef SKIP_ASM
+/**
+ * Counts down the game link's overlay and pause timeouts.
+ *
+ * Only without an error display, while not alone, and with no error or no race in progress: mOverlayTimeout counts down
+ * when positive unless both players are in the pause menu, and mPauseTimeout counts down when positive.
+ * cGameComm_update calls it.
+ *
+ * @param gameComm  the game link
+ */
 extern "C" void func_00257750(cGameComm* gameComm) {
     if (gameComm->mDisplayError == 0 && gameComm->mAlone == 0 && (gameComm->mError == 0 || gameComm->mRaceInProgress == 0)) {
         int overlayTimeout = gameComm->mOverlayTimeout;
@@ -1815,6 +2092,17 @@ extern "C" void cGameComm_setCommError(cGameComm* self);
 extern "C" void cGameComm_displayError(cGameComm* self);
 extern "C" void cGameComm_updateDisplayError(cGameComm* self);
 
+/**
+ * Checks the game link for errors and starts the error display; returns whether there is one.
+ *
+ * In order: a running error display is updated (cGameComm_updateDisplayError); an existing error returns 1; a remote
+ * end of game, a channel error (func_00255E40, also cGameComm_setCommError), 3 or more of the local or remote counts
+ * +0x54 / +0x58 (mCheating 3), 6 or more pauses (mCheating 2), mStallTimer reaching 3600 or the link timeout +0x94
+ * running out (+0x2C set, cGameComm_setCommError) each show the error (cGameComm_displayError) and return 1.
+ *
+ * @param gameComm  the game link
+ * @return 1 when there is an error, else 0
+ */
 extern "C" int func_002577C8(cGameComm* gameComm)
 {
     if (gameComm->mDisplayError > 0) {
@@ -1952,6 +2240,17 @@ extern "C" void cGameComm_setCommError(cGameComm* self);
 extern "C" void cGameComm_displayError(cGameComm* self);
 extern int D_004A3ED0;
 
+/**
+ * Watches the game link for a stalled or silent peer.
+ *
+ * Without mCheating[0] and with the local player not in the pause menu: once the start gate is up and the peer is not
+ * paused or unpausing, it counts mStallThreshold and +0x60; in AI states 4 and 5 mStallTimer grows once mStallThreshold
+ * reaches 10 (mStallCount counts each time it reaches 10). At 60 for +0x60 mWaitingMessage is set. During a race a
+ * desync, or 1800 frames of +0x5C (counted while the peer is not paused), raise the comm error and show it. Last, when
+ * D_004A3ED0 is set, mCheating[0] becomes 1 and the error is shown.
+ *
+ * @param gameComm  the game link
+ */
 extern "C" void func_00257A80(cGameComm* gameComm)
 {
     if (gameComm->mCheating[0] != 0) return;
@@ -2079,6 +2378,16 @@ static inline int queueFull_7CD8(PacketQueue_7BD8* q)
 // Moves received packets into their channel queue. A packet that cannot be
 // fetched is freed; the whole fetch sits in the loop condition, as in the original.
 extern "C" void func_00257CD8_7CD8(Conn_7CD8* c) __asm__("func_00257CD8");
+/**
+ * Moves received packets into the game link's per-type queues.
+ *
+ * While the link is not busy (+4): a packet already held (+0x134) or a new one (func_00258188, filled by func_00255DC0
+ * from the link's channel +0x6C, up to 0xF0 bytes) goes to the queue of its type byte (+0x144, 32 slots each); a packet
+ * that could not be filled is deleted and the loop ends. It also stops, keeping the packet held, when that queue has 31
+ * or more packets.
+ *
+ * @param c  the game link
+ */
 extern "C" void func_00257CD8_7CD8(Conn_7CD8* c)
 {
     while (c->busy == 0
@@ -2151,6 +2460,18 @@ struct Conn_7E98 {
 
 // PORT: the unit declares this void(void*, int, int, int); the target returns a status
 extern "C" int func_00257E98_impl(char* self, int type, const void* data, int len) __asm__("func_00257E98");
+/**
+ * Sends a packet to the peer, queueing it when it cannot go out now.
+ *
+ * Returns 0 while the link is busy (+4). Otherwise flushes the write queue (cGameComm_updateWriteQueue), builds the
+ * packet: type byte, flags 0, size @p len + 4 and the data. When the write queue (+0x364 / +0x368) is empty and the
+ * channel (+0x6C) takes it (func_00255E00) it is sent at once; otherwise a copy (func_00258188) is queued.
+ *
+ * @param type  the packet type
+ * @param data  the data
+ * @param len  the data size (at most 0xEC)
+ * @return 1 when sent or queued, 0 when busy
+ */
 extern "C" int func_00257E98_impl(char* self, int type, const void* data, int len)
 {
     Packet_7E98 pkt;
@@ -2224,6 +2545,15 @@ struct sGameComm_7F98 {
     int f500[60];
 };
 
+/**
+ * Handles the command packets received from the peer.
+ *
+ * Reads 12-byte packets of type 3 (cGameComm_readPacket) and by the command byte: 0 (pause) arms the link timeout
+ * (func_00258870, 3660, forced) unless locally paused, marks the peer paused and counts its pauses (+0x50); 1 (unpause)
+ * clears the peer's pause, resets the pause timeout to 1200 when running and arms 1800 frames or
+ * cGameComm_setUnPauseTimer; 2 counts +0x58; 3 sets +0x3F4; 4 stores the peer's tick (+0x40C) and checksum in the ring
+ * at +0x500; 5 marks the peer as exited (+0x88, +0x14), records the end time (+0x3C) and may set +0x8C.
+ */
 extern "C" void func_00257F98(sGameComm_7F98* self)
 {
     sGamePacket_7F98 msg;
@@ -2289,6 +2619,16 @@ INCLUDE_ASM("seg/seg_156860", func_00258160);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int cGameComm_readPacket_8160(int, int, int, int) __asm__("cGameComm_readPacket");
 
+/**
+ * Reads a text message from the peer (a packet of type 1, cGameComm_readPacket).
+ *
+ * The chat screens (cOVState_onUpdate_HandleIncomingChat and the trophy screen) call it with a 65-byte buffer.
+ *
+ * @param gameComm  the game link
+ * @param data  the buffer
+ * @param maxSize  its size
+ * @return 1 when a message was read, else 0
+ */
 extern "C" int func_00258160(int gameComm, int data, int maxSize) {
     return cGameComm_readPacket_8160(gameComm, 1, data, maxSize) > 0;
 }
@@ -2301,6 +2641,13 @@ INCLUDE_ASM("seg/seg_156860", func_00258188);
 extern "C" void *cMemMan_alloc_8188(unsigned int, void *, unsigned int, int) __asm__("cMemMan_alloc");
 extern char str_tGameCommPacket[];
 
+/**
+ * Allocates a 0xF0-byte game packet ("tGameCommPacket", cMemMan_alloc).
+ *
+ * The C declares no parameters; callers pass the game link, which is not used.
+ *
+ * @return the packet
+ */
 extern "C" void *func_00258188(void) {
     return cMemMan_alloc_8188(0xF0, str_tGameCommPacket, 0x20000000, 0);
 }
@@ -2311,6 +2658,12 @@ INCLUDE_ASM("seg/seg_156860", func_002581B8);
 #ifdef SKIP_ASM
 extern "C" void operator_delete__FPi(int *);
 
+/**
+ * Frees a game packet (operator delete).
+ *
+ * @param gameComm  the game link (not used)
+ * @param packet  the packet
+ */
 extern "C" void func_002581B8(cGameComm* gameComm, int *packet) {
     operator_delete__FPi(packet);
 }
@@ -2319,6 +2672,12 @@ extern "C" void func_002581B8(cGameComm* gameComm, int *packet) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_002581D8);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the game link's large read has finished (mAsyncReadData is 0).
+ *
+ * @param gameComm  the game link
+ * @return 1 when no read is pending
+ */
 extern "C" int func_002581D8(cGameComm* gameComm) {
     return ((int)gameComm->mAsyncReadData) == 0;
 }
@@ -2327,6 +2686,15 @@ extern "C" int func_002581D8(cGameComm* gameComm) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_002581E8);
 #ifdef SKIP_ASM
+/**
+ * Starts a large read into a buffer: stores @p data (mAsyncReadData) and @p size (mAsyncReadSize).
+ *
+ * func_002581F8 fills it piece by piece.
+ *
+ * @param gameComm  the game link
+ * @param data  the buffer
+ * @param size  bytes to read
+ */
 extern "C" void func_002581E8(void *gameComm, int data, int size) {
     (*(int *)((char*)(gameComm) + (0x124))) = data;
     (*(int *)((char*)(gameComm) + (0x128))) = size;
@@ -2338,6 +2706,14 @@ INCLUDE_ASM("seg/seg_156860", func_002581F8);
 #ifdef SKIP_ASM
 extern "C" int cGameComm_readPacket(cGameComm*, int, int, int);
 
+/**
+ * Continues a large read: fills the pending buffer from packets of type 2.
+ *
+ * While a buffer is pending it reads pieces of at most 236 bytes (cGameComm_readPacket), advancing the buffer and
+ * reducing the size, until no packet is waiting or the size reaches 0 (then the read is cleared).
+ *
+ * @param gameComm  the game link
+ */
 extern "C" void func_002581F8(cGameComm* gameComm) {
     int readData;
     while ((readData = (int)gameComm->mAsyncReadData) != 0) {
@@ -2358,6 +2734,12 @@ extern "C" void func_002581F8(cGameComm* gameComm) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00258280);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the game link's large write has finished (mAsyncWriteData is 0).
+ *
+ * @param gameComm  the game link
+ * @return 1 when no write is pending
+ */
 extern "C" int func_00258280(cGameComm* gameComm) {
     return ((int)gameComm->mAsyncWriteData) == 0;
 }
@@ -2366,6 +2748,15 @@ extern "C" int func_00258280(cGameComm* gameComm) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00258290);
 #ifdef SKIP_ASM
+/**
+ * Starts a large write from a buffer: stores @p data (mAsyncWriteData) and @p size (mAsyncWriteSize).
+ *
+ * func_002582A0 sends it piece by piece.
+ *
+ * @param gameComm  the game link
+ * @param data  the buffer
+ * @param size  bytes to send
+ */
 extern "C" void func_00258290(void *gameComm, int data, int size) {
     (*(int *)((char*)(gameComm) + (0x12C))) = data;
     (*(int *)((char*)(gameComm) + (0x130))) = size;
@@ -2378,6 +2769,14 @@ INCLUDE_ASM("seg/seg_156860", func_002582A0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00257E98_82A0(void *, int, int, int) __asm__("func_00257E98");
 
+/**
+ * Continues a large write: sends the next piece of the pending buffer as a packet of type 2.
+ *
+ * Only when the write queue is empty: sends at most 236 bytes (func_00257E98) and, when that worked, advances the
+ * buffer and reduces the size, clearing the write when it reaches 0.
+ *
+ * @param gameComm  the game link
+ */
 extern "C" void func_002582A0(cGameComm* gameComm) {
     int writeData = (int)gameComm->mAsyncWriteData;
     if (writeData != 0 && gameComm->mWriteQueue.mTail == gameComm->mWriteQueue.mHead) {
@@ -2401,6 +2800,14 @@ INCLUDE_ASM("seg/seg_156860", func_00258330);
 #ifdef SKIP_ASM
 // PORT: g++ >?/<? (min/max) operator, removed in GCC 4.3.
 
+/**
+ * Sets the game link's latency (mLatency) to the larger of the two measured latencies, at least one frame period
+ * (SSXApp +0x14).
+ *
+ * cGameComm_setState calls it.
+ *
+ * @param gameComm  the game link
+ */
 extern "C" void func_00258330(cGameComm* gameComm) {
     char *app = (char*)SSXApp;
     float latency1 = gameComm->mNetLatency[1];
@@ -2419,6 +2826,15 @@ INCLUDE_ASM("seg/seg_156860", func_00258360);
 #ifdef SKIP_ASM
 extern "C" float func_00255D88(int, int);
 
+/**
+ * Returns the game link's input latency: the channel's latency (func_00255D88 on channel +0x6C) plus mNumSamples frame
+ * periods (SSXApp +0x14).
+ *
+ * cInputSync_preupdate divides it by the frame period.
+ *
+ * @param gameComm  the game link
+ * @return the latency
+ */
 extern "C" float func_00258360(cGameComm* gameComm) {
     return func_00255D88((int)cCommSystem_mCommSystem, (gameComm->unk_06C)) + ((float) (gameComm->mNumSamples) * (*(float *)((char*)(SSXApp) + (0x14))));
 }
@@ -2442,6 +2858,17 @@ struct S83A8 {
     int h140;
 };
 
+/**
+ * Starts pinging a server through the game link's ping object.
+ *
+ * Only when no ping is running (+0x138 not positive): clears the ping count (+0xB8), stores the address (+0xC0), sends
+ * the first ping "SSXPingServer" (func_003E7450 on the ping object +0x140, size 0xE) and keeps its id, sets +0xBC to 4,
+ * the running time (+0x138) to @p arg2 * 60 frames and clears +0x13C. +0x13C is set when the connection is not
+ * broadband. The online-error pause screen calls it with the lobby server's address and 3.
+ *
+ * @param arg1  the server address
+ * @param arg2  how long to ping, in seconds
+ */
 extern "C" void func_002583A8(cGameComm* self, int arg1, int arg2) {
     if (self->unk_138 <= 0) {
         self->unk_0B8 = 0;
@@ -2643,6 +3070,15 @@ extern "C" void cGameComm_sendPauseCmd(cGameComm* self, int pause) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00258870);
 #ifdef SKIP_ASM
+/**
+ * Arms the game link's link timeout (+0x94, which func_002577C8 counts down).
+ *
+ * Stores @p arg1 when @p arg2 is set, when neither player is in the pause menu, or once the start gate is up.
+ *
+ * @param gameComm  the game link
+ * @param arg1  the timeout in frames (1800, 3600 or 3660)
+ * @param arg2  nonzero to store it in any case
+ */
 extern "C" void func_00258870(cGameComm* gameComm, int arg1, int arg2) {
     if ((arg2 != 0) || (((gameComm->mPauseMenu[1]) == 0) && ((gameComm->mPauseMenu[0]) == 0)) || ((gameComm->mGameStartGate) != 0)) {
         (gameComm->unk_094) = arg1;
@@ -2681,6 +3117,13 @@ extern "C" void cGameComm_setUnPauseTimer(cGameComm* self) {
 //100%
 INCLUDE_ASM("seg/seg_156860", func_00258950);
 #ifdef SKIP_ASM
+/**
+ * Lets the local player finish the race alone: clears mWaitingMessage and the peer's pause flag, sets mAlone.
+ *
+ * cAI_finishRemotePlayer calls it.
+ *
+ * @param gameComm  the game link
+ */
 extern "C" void func_00258950(cGameComm* gameComm) {
     (gameComm->mWaitingMessage) = 0;
     (gameComm->mAlone) = 1;
@@ -2830,6 +3273,14 @@ INCLUDE_ASM("seg/seg_156860", func_00258BC8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00257E98_8BC8(void *, int, void *, int) __asm__("func_00257E98");
 
+/**
+ * Tells the peer that this player has left the game: unless there is an error, sends command 5 (a 12-byte packet of
+ * type 3, func_00257E98).
+ *
+ * cGameComm_gameExit calls it.
+ *
+ * @param gameComm  the game link
+ */
 extern "C" void func_00258BC8(cGameComm* gameComm) {
     if ((gameComm->mError) == 0) {
         char buf[12];
@@ -2845,6 +3296,14 @@ INCLUDE_ASM("seg/seg_156860", func_00258C00);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_00257E98_8C00(void *, int, void *, int) __asm__("func_00257E98");
 
+/**
+ * Sends command 2 to the peer and counts it locally (+0x54).
+ *
+ * Only without an error and while connected. The peer counts these in +0x58 (func_00257F98); func_002577C8 treats 3 or
+ * more on either side as cheating (mCheating 3). func_0020CA10 calls it.
+ *
+ * @param gameComm  the game link
+ */
 extern "C" void func_00258C00(cGameComm* gameComm) {
     if (gameComm->mError == 0 && gameComm->mConnected != 0) {
         char buf[12];
@@ -2861,6 +3320,15 @@ INCLUDE_ASM("seg/seg_156860", func_00258C50);
 extern "C" void func_00257E98(void *, int, int, int);
 extern "C" int strlen(int);
 
+/**
+ * Sends a text message to the peer (a packet of type 1 with the terminating zero), when there is no error and the link
+ * is connected.
+ *
+ * The trophy screen's chat sends with it; func_00258160 reads these.
+ *
+ * @param gameComm  the game link
+ * @param message  the text
+ */
 extern "C" void func_00258C50(cGameComm* gameComm, int message) {
     if (((gameComm->mError) == 0) && ((gameComm->mConnected) != 0)) {
         func_00257E98(gameComm, 1, message, strlen(message) + 1);
@@ -3009,6 +3477,18 @@ static inline int& RingAt_8F20(Ring_8F20* r, int frame)
     return r->v[(frame / 60) % 60];
 }
 
+/**
+ * Exchanges the race's sync checksum with the peer and flags a desync.
+ *
+ * Only in game state 5 (or 3 when +0x214 is 3), with input sync on, no error, connected and not yet desynced: stores
+ * @p value in the local ring (+0x410, 60 slots, one per 60 frames) and @p frame as the local tick. Unless one is in
+ * flight it sends the checksum as command 4 (func_00257E98); an answered one is cleared. Once both ticks are known it
+ * compares the local and peer rings (+0x500) at the lower tick and sets mDesync when they differ.
+ *
+ * @param gameComm  the game link
+ * @param frame  the AI tick
+ * @param value  the checksum
+ */
 extern "C" void func_00258F20(cGameComm* gameComm, int frame, int value)
 {
     char* gs = (char*)SSXApp->Game;
@@ -3065,6 +3545,18 @@ struct VEnt_9098 {
     void (*fn)(char*);
 };
 
+/**
+ * Starts the peer-to-peer race connection for the lobby's game.
+ *
+ * Takes the peer's address from LobbyMan (the opponent's when hosting, else the host's), stores player 0's character
+ * (BE interface 1) in D_00534E58[0], gives BE interface 7 the opponent and the persona (func_0014EBB8, func_0014EBD8)
+ * and calls its virtual slot 1. Then it calls func_002639E0 with the peer address and the host flag. LobbyMan_onplaymsg
+ * calls it with func_002591D0's object.
+ *
+ * @param a0  the game-connection object
+ * @param a1  passed to func_002639E0 as the controller id
+ * @param a2  passed to func_002639E0 as its cancel flag
+ */
 extern "C" void func_00259098(int a0, int a1, int a2)
 {
     LobbyMan* lobbyMan = LobbyMan_mLobbyMan;
@@ -3089,6 +3581,11 @@ INCLUDE_ASM("seg/seg_156860", func_00259198);
 #ifdef SKIP_ASM
 extern char str_en[];
 
+/**
+ * Returns the language code "en" for the lobby tags.
+ *
+ * @return "en"
+ */
 extern "C" char *func_00259198(void) {
     return str_en;
 }
@@ -3099,6 +3596,11 @@ INCLUDE_ASM("seg/seg_156860", func_002591A8);
 #ifdef SKIP_ASM
 extern char str_US[];
 
+/**
+ * Returns the country code "US". Nothing in the build calls it.
+ *
+ * @return "US"
+ */
 extern "C" char *func_002591A8(void) {
     return str_US;
 }
@@ -3108,6 +3610,11 @@ extern "C" char *func_002591A8(void) {
 INCLUDE_ASM("seg/seg_156860", func_002591B8);
 #ifdef SKIP_ASM
 
+/**
+ * Returns the front end's connection manager (cRealFE + 0xB5AB0, built by cConnMan_cConnMan).
+ *
+ * @return the connection manager (as an int)
+ */
 extern "C" int func_002591B8(void) {
     return ((int)SSXApp->RealFE) + 0xB5AB0;
 }
@@ -3117,6 +3624,11 @@ extern "C" int func_002591B8(void) {
 INCLUDE_ASM("seg/seg_156860", func_002591D0);
 #ifdef SKIP_ASM
 
+/**
+ * Returns the front end's game-connection manager (cRealFE + 0xB5ABC, built by cGameConnMan_cGameConnMan).
+ *
+ * @return the game-connection manager (as an int)
+ */
 extern "C" int func_002591D0(void) {
     return ((int)SSXApp->RealFE) + 0xB5ABC;
 }
@@ -3129,6 +3641,14 @@ INCLUDE_ASM("seg/seg_156860", func_002591E8);
 extern "C" void *operator_new_91E8(unsigned int, void *, unsigned int, int) __asm__("operator_new__FUi");
 extern char str_Lobby_b[];
 
+/**
+ * Allocates a block for the lobby code (operator new with the name "Lobby" and type 0x20000000).
+ *
+ * The LobbyApi, buddy and list code allocate with it; func_00259210 frees.
+ *
+ * @param size  bytes to allocate
+ * @return the block
+ */
 extern "C" void *func_002591E8(unsigned int size) {
     return operator_new_91E8(size, str_Lobby_b, 0x20000000, 0);
 }
@@ -3139,6 +3659,13 @@ INCLUDE_ASM("seg/seg_156860", func_00259210);
 #ifdef SKIP_ASM
 extern "C" void cMemMan_free__FPv();
 
+/**
+ * Frees a block from func_002591E8 (cMemMan_free) unless it is null.
+ *
+ * The C declares cMemMan_free without arguments; the block passes through in its register.
+ *
+ * @param buffer  the block, or 0
+ */
 extern "C" void func_00259210(int buffer) {
     if (buffer != 0) {
         cMemMan_free__FPv();
@@ -3151,6 +3678,14 @@ INCLUDE_ASM("seg/seg_156860", func_00259230);
 #ifdef SKIP_ASM
 extern "C" void *cUIStateStack_getTopState(int);
 
+/**
+ * Passes an event to the front end's top screen.
+ *
+ * When the front end exists, takes the top state of its state stack (cUIStateStack_getTopState) and calls its virtual
+ * at +0xC4 with the event's first word and the event. func_0017D260 calls it.
+ *
+ * @param event  the event (first word: its id)
+ */
 extern "C" void func_00259230(int *event) {
     void *obj = SSXApp->RealFE;
     if (obj != 0) {

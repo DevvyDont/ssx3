@@ -1399,10 +1399,10 @@ extern "C" void cGraphicsMan_SetNumViews(cGraphicsMan* graphicsMan, int numViews
 INCLUDE_ASM("render/font", cGraphicsMan_GetNumViews);
 #ifdef SKIP_ASM
 /**
- * Returns mNumViews.
+ * Returns the graphics manager's mNumViews (the number of views rendered; the constructor sets 1).
  *
- * @param graphicsMan  the graphics manager (this)
- * @return the number of views
+ * @param graphicsMan  the graphics manager
+ * @return mNumViews
  */
 extern "C" int cGraphicsMan_GetNumViews(cGraphicsMan* graphicsMan) {
     return (graphicsMan->mNumViews);
@@ -1425,10 +1425,10 @@ extern "C" void cGraphicsMan_SetViewIndex(cGraphicsMan* graphicsMan, int viewInd
 INCLUDE_ASM("render/font", cGraphicsMan_GetViewIndex);
 #ifdef SKIP_ASM
 /**
- * Returns mViewIndex.
+ * Returns the graphics manager's mViewIndex (the view being worked on; the constructor sets 0).
  *
- * @param graphicsMan  the graphics manager (this)
- * @return the current view index
+ * @param graphicsMan  the graphics manager
+ * @return mViewIndex
  */
 extern "C" int cGraphicsMan_GetViewIndex(cGraphicsMan* graphicsMan) {
     return (graphicsMan->mViewIndex);

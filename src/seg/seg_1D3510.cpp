@@ -73,6 +73,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D2628);
 #ifdef SKIP_ASM
 extern "C" int get_float(int, int);
 
+/**
+ * Reads four floats from a byte stream into four consecutive floats (four get_float calls).
+ *
+ * @param src  the read cursor, advanced 16 bytes
+ * @param out  receives the four floats
+ * @return the bytes read (16)
+ */
 extern "C" int func_002D2628(int src, int out) {
     int temp_2;
     int outCursor;
@@ -97,6 +104,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D2690);
 #ifdef SKIP_ASM
 extern "C" int get_float(int, int);
 
+/**
+ * Reads sixteen floats from a byte stream into sixteen consecutive floats (16 get_float calls).
+ *
+ * @param src  the read cursor, advanced 64 bytes
+ * @param out  receives the floats
+ * @return the bytes read (64)
+ */
 extern "C" int func_002D2690(int src, int out) {
     int temp_2;
     int outCursor;
@@ -122,6 +136,15 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D26F8);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 struct V4_26F8 { float x, y, z, w; } __attribute__((aligned(16)));
 extern "C" int get_float_26F8(void*, void*) __asm__("get_float");
+/**
+ * Reads four floats from a byte stream into a 16-byte aligned vector, the first one read going to the last component.
+ *
+ * The floats are read in the order w, x, y, z (four get_float calls) and stored as x, y, z, w.
+ *
+ * @param src  the read cursor, advanced 16 bytes
+ * @param out  receives the vector
+ * @return the bytes read (16)
+ */
 extern "C" int func_002D26F8(void *src, V4_26F8 *out) {
     float readW, readX, readY, readZ;
     V4_26F8 result;
@@ -142,6 +165,15 @@ extern "C" int func_002D26F8(void *src, V4_26F8 *out) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D2790);
 #ifdef SKIP_ASM
+/**
+ * Reads one byte from a byte stream and advances the cursor.
+ *
+ * get_string and get_data read with it.
+ *
+ * @param cursor  the read cursor, advanced 1 byte
+ * @param out  receives the byte
+ * @return 1, the bytes read
+ */
 extern "C" int func_002D2790(unsigned char **cursor, unsigned char *out) {
     *out = **cursor;
     *cursor += 1;
@@ -222,6 +254,14 @@ extern "C" int get_data(unsigned char **src, Data_2868 **out) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D2948);
 #ifdef SKIP_ASM
+/**
+ * Returns its first argument.
+ *
+ * It is variadic: the prologue stores the other argument registers (integer and float) to the stack and nothing reads
+ * them. Nothing in the build references it; func_002D4080 is the same code.
+ *
+ * @return @p self
+ */
 extern "C" int func_002D2948(int self, ...) {
     return self;
 }
@@ -234,6 +274,12 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3788);
 #ifdef SKIP_ASM
 void operator_delete(int *);
 extern void* D_004871E8[];
+/**
+ * Destroys a memory-card object of the base class: stores the base vtable D_004871E8 back at +0 and frees the object
+ * when bit 0 of @p flags is set.
+ *
+ * @param flags  bit 0: free the memory
+ */
 extern "C" void func_002D3788(void ***self, int flags) {
     *self = D_004871E8;
     if (flags & 1) operator_delete((int*)self);
@@ -243,20 +289,46 @@ extern "C" void func_002D3788(void ***self, int flags) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D37B8);
 #ifdef SKIP_ASM
+/**
+ * Returns 1.
+ *
+ * It is word 53 (slot 26) of both D_004871E8 (the base memory-card vtable) and cPS2MemCard_vtbl, which does not
+ * override it.
+ *
+ * @return 1
+ */
 extern "C" int func_002D37B8(void) {
     return 1;
 }
 #endif
 
+/**
+ * Does nothing.
+ *
+ * It is word 55 (slot 27) of both D_004871E8 (the base memory-card vtable) and cPS2MemCard_vtbl.
+ */
 extern "C" void func_002D37C0(void) {
 }
 
+/**
+ * Does nothing.
+ *
+ * It is word 57 (slot 28) of both D_004871E8 (the base memory-card vtable) and cPS2MemCard_vtbl.
+ */
 extern "C" void func_002D37C8(void) {
 }
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D37D0);
 #ifdef SKIP_ASM
+/**
+ * Returns 0.
+ *
+ * It is word 149 (slot 74) of D_004871E8, the base memory-card vtable; cPS2MemCard_vtbl overrides that slot with
+ * cPS2MemCard_FileExistsError.
+ *
+ * @return 0
+ */
 extern "C" int func_002D37D0(void) {
     return 0;
 }
@@ -282,6 +354,15 @@ extern "C" int cPS2MemCard_GetDevice(cPS2MemCard* pS2MemCard) {
 INCLUDE_ASM("seg/seg_1D3510", func_002D37E0);
 #ifdef SKIP_ASM
 struct VEnt_37E0 { short delta; short idx; int (*fn)(void*, int); };
+/**
+ * Tells whether the card in the current port (mDevice) is not a PS2 memory card: calls the card's virtual slot 48 (word
+ * 97, cPS2MemCard_IsInvalid) with mDevice.
+ *
+ * It is word 99 (slot 49) of cPS2MemCard_vtbl. The C declares no return value; the call's result is left in the return
+ * register.
+ *
+ * @param pS2MemCard  the memory card
+ */
 extern "C" void func_002D37E0(cPS2MemCard* pS2MemCard) {
     VEnt_37E0 *vtEntry = (VEnt_37E0*)(*(char **)pS2MemCard + 0x180);
     vtEntry->fn((char*)pS2MemCard + vtEntry->delta, pS2MemCard->mDevice);
@@ -292,6 +373,15 @@ extern "C" void func_002D37E0(cPS2MemCard* pS2MemCard) {
 INCLUDE_ASM("seg/seg_1D3510", func_002D3810);
 #ifdef SKIP_ASM
 struct VEnt_3810 { short delta; short idx; int (*fn)(void*, int); };
+/**
+ * Tells whether the card in the current port (mDevice) is usable: calls the card's virtual slot 52 (word 105,
+ * cPS2MemCard_IsAvailable) with mDevice.
+ *
+ * It is word 107 (slot 53) of cPS2MemCard_vtbl. The C declares no return value; the call's result is left in the return
+ * register.
+ *
+ * @param pS2MemCard  the memory card
+ */
 extern "C" void func_002D3810(cPS2MemCard* pS2MemCard) {
     VEnt_3810 *vtEntry = (VEnt_3810*)(*(char **)pS2MemCard + 0x1A0);
     vtEntry->fn((char*)pS2MemCard + vtEntry->delta, pS2MemCard->mDevice);
@@ -359,6 +449,18 @@ struct Obj_3840 {
   virtual void v55();
   virtual int v56(int);
 };
+/**
+ * Tells whether the card in a port is ready for use.
+ *
+ * Through the card's own virtual slots, with port @p x: not slot 48 (word 97, cPS2MemCard_IsInvalid), not slot 50 (word
+ * 101, func_002C67A8__FPv, which always returns 0), slot 56 (word 113, cPS2MemCard_IsFormatted) and slot 52 (word 105,
+ * cPS2MemCard_IsAvailable). The first call is declared without the port; it is still in its register. It is word 109
+ * (slot 54) of cPS2MemCard_vtbl; the profile and options screens call it through the vtable before using a card.
+ *
+ * @param pS2MemCard  the memory card
+ * @param x  the port (0 or 1)
+ * @return 1 when every test passes, else 0
+ */
 extern "C" int func_002D3840(cPS2MemCard* pS2MemCard, int x) {
     int ok = 0;
     if (!((Obj_3840*)pS2MemCard)->v48() && !((Obj_3840*)pS2MemCard)->v50(x) && ((Obj_3840*)pS2MemCard)->v56(x)) {
@@ -372,6 +474,15 @@ extern "C" int func_002D3840(cPS2MemCard* pS2MemCard, int x) {
 INCLUDE_ASM("seg/seg_1D3510", func_002D38F0);
 #ifdef SKIP_ASM
 struct VEnt_38F0 { short delta; short idx; int (*fn)(void*, int); };
+/**
+ * Tells whether the card in the current port (mDevice) is formatted: calls the card's virtual slot 56 (word 113,
+ * cPS2MemCard_IsFormatted) with mDevice.
+ *
+ * It is word 111 (slot 55) of cPS2MemCard_vtbl. The C declares no return value; the call's result is left in the return
+ * register.
+ *
+ * @param pS2MemCard  the memory card
+ */
 extern "C" void func_002D38F0(cPS2MemCard* pS2MemCard) {
     VEnt_38F0 *vtEntry = (VEnt_38F0*)(*(char **)pS2MemCard + 0x1C0);
     vtEntry->fn((char*)pS2MemCard + vtEntry->delta, pS2MemCard->mDevice);
@@ -381,6 +492,11 @@ extern "C" void func_002D38F0(cPS2MemCard* pS2MemCard) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3920);
 #ifdef SKIP_ASM
+/**
+ * Returns 0: word 119 (slot 59) of cPS2MemCard_vtbl.
+ *
+ * @return 0
+ */
 extern "C" int func_002D3920(void) {
     return 0;
 }
@@ -389,6 +505,11 @@ extern "C" int func_002D3920(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3928);
 #ifdef SKIP_ASM
+/**
+ * Returns 0: word 121 (slot 60) of cPS2MemCard_vtbl.
+ *
+ * @return 0
+ */
 extern "C" int func_002D3928(void) {
     return 0;
 }
@@ -399,6 +520,14 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3930);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cPS2MemCard_CardChanged_3930(void*, int) __asm__("cPS2MemCard_CardChanged");
+/**
+ * Tells whether the card in the current port has changed: calls cPS2MemCard_CardChanged with mDevice (a direct call).
+ *
+ * It is word 127 (slot 63) of cPS2MemCard_vtbl. The C declares no return value; the call's result is left in the return
+ * register.
+ *
+ * @param pS2MemCard  the memory card
+ */
 extern "C" void func_002D3930(cPS2MemCard* pS2MemCard) {
     cPS2MemCard_CardChanged_3930(pS2MemCard, (pS2MemCard->mDevice));
 }
@@ -409,6 +538,14 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3950);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cPS2MemCard_GetStatus_3950(void*, int, int) __asm__("cPS2MemCard_GetStatus");
+/**
+ * Writes the status line of the card in the current port: calls cPS2MemCard_GetStatus with mDevice and @p outText.
+ *
+ * It is word 129 (slot 64) of cPS2MemCard_vtbl.
+ *
+ * @param pS2MemCard  the memory card
+ * @param outText  the 16-bit text buffer
+ */
 extern "C" void func_002D3950(cPS2MemCard* pS2MemCard, int outText) {
     cPS2MemCard_GetStatus_3950(pS2MemCard, (pS2MemCard->mDevice), outText);
 }
@@ -417,6 +554,14 @@ extern "C" void func_002D3950(cPS2MemCard* pS2MemCard, int outText) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3970);
 #ifdef SKIP_ASM
+/**
+ * Returns the number of save-file slots, mMaxFiles (6 after a reset).
+ *
+ * It is word 137 (slot 68) of cPS2MemCard_vtbl.
+ *
+ * @param pS2MemCard  the memory card
+ * @return mMaxFiles
+ */
 extern "C" int func_002D3970(cPS2MemCard* pS2MemCard) {
     return (pS2MemCard->mMaxFiles);
 }
@@ -425,6 +570,13 @@ extern "C" int func_002D3970(cPS2MemCard* pS2MemCard) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3978);
 #ifdef SKIP_ASM
+/**
+ * Returns 2, the number of memory-card ports.
+ *
+ * It is word 139 (slot 69) of cPS2MemCard_vtbl.
+ *
+ * @return 2
+ */
 extern "C" int func_002D3978(void) {
     return 2;
 }
@@ -434,6 +586,16 @@ extern "C" int func_002D3978(void) {
 INCLUDE_ASM("seg/seg_1D3510", func_002D3980);
 #ifdef SKIP_ASM
 struct VEnt_3980 { short delta; short idx; void (*fn)(void*, int, int, int); };
+/**
+ * Passes its three arguments on to the card's virtual slot 70 (word 141, cPS2MemCard_GetDeviceName).
+ *
+ * cPS2MemCard_GetDeviceName reads only the port and the buffer. It is word 143 (slot 71) of cPS2MemCard_vtbl.
+ *
+ * @param pS2MemCard  the memory card
+ * @param a1  the port
+ * @param a2  the 16-bit buffer for the name
+ * @param a3  passed on as the third argument
+ */
 extern "C" void func_002D3980(cPS2MemCard* pS2MemCard, int a1, int a2, int a3) {
     VEnt_3980 *vtEntry = (VEnt_3980*)(*(char **)pS2MemCard + 0x230);
     vtEntry->fn((char*)pS2MemCard + vtEntry->delta, a1, a2, a3);
@@ -443,6 +605,11 @@ extern "C" void func_002D3980(cPS2MemCard* pS2MemCard, int a1, int a2, int a3) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D39A8);
 #ifdef SKIP_ASM
+/**
+ * Returns 0: word 145 (slot 72) of cPS2MemCard_vtbl.
+ *
+ * @return 0
+ */
 extern "C" int func_002D39A8(void) {
     return 0;
 }
@@ -451,6 +618,14 @@ extern "C" int func_002D39A8(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D39B0);
 #ifdef SKIP_ASM
+/**
+ * Returns unk_03C, the outcome flag of the last card operation (cPS2MemCard_Update sets it to 0 or 1).
+ *
+ * It is word 151 (slot 75) of cPS2MemCard_vtbl.
+ *
+ * @param pS2MemCard  the memory card
+ * @return unk_03C
+ */
 extern "C" int func_002D39B0(cPS2MemCard* pS2MemCard) {
     return (pS2MemCard->unk_03C);
 }
@@ -461,6 +636,13 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D39B8);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cPS2MemCard_GetLastError_39B8(void*, int) __asm__("cPS2MemCard_GetLastError");
+/**
+ * Returns the last libmc result of the current port: calls cPS2MemCard_GetLastError with mDevice (+0xC).
+ *
+ * The C declares no return value; the call's result is left in the return register. Nothing in the build calls it.
+ *
+ * @param memCard  the memory card
+ */
 extern "C" void func_002D39B8(void *memCard) {
     cPS2MemCard_GetLastError_39B8(memCard, (*(int *)((char*)(memCard) + (0xC))));
 }
@@ -469,17 +651,36 @@ extern "C" void func_002D39B8(void *memCard) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D39D8);
 #ifdef SKIP_ASM
+/**
+ * Returns the memory card's state word mState (+4).
+ *
+ * Nothing in the build calls it.
+ *
+ * @param memCard  the memory card
+ * @return mState
+ */
 extern "C" int func_002D39D8(void *memCard) {
     return (*(int *)((char*)(memCard) + (4)));
 }
 #endif
 
+/**
+ * Does nothing. Nothing in the build references it.
+ */
 extern "C" void func_002D39E0(void) {
 }
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D39E8);
 #ifdef SKIP_ASM
+/**
+ * Returns the number of directory entries read from the card, mNumDirTable (+0x54).
+ *
+ * Nothing in the build calls it.
+ *
+ * @param memCard  the memory card
+ * @return mNumDirTable
+ */
 extern "C" int func_002D39E8(void *memCard) {
     return (*(int *)((char*)(memCard) + (0x54)));
 }
@@ -490,17 +691,35 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D39F0);
 #ifdef SKIP_ASM
 extern int D_004A3940;
 
+/**
+ * Returns D_004A3940, the static word where the memory-card code keeps the last libmc result.
+ *
+ * Nothing in the build calls it.
+ *
+ * @return D_004A3940
+ */
 extern "C" int func_002D39F0(void) {
     return D_004A3940;
 }
 #endif
 
+/**
+ * Does nothing: the base menu item's word 17 (slot 8), which the menu-item vtables without an override share.
+ *
+ * cIntMenuItem_vtbl, cFloatMenuItem_vtbl and cCharMenuItem_vtbl put their own functions in that slot.
+ */
 extern "C" void func_002D39F8(void) {
 }
 
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3A00);
 #ifdef SKIP_ASM
+/**
+ * Sets a menu item's ID (+8).
+ *
+ * @param arg0  the menu item
+ * @param arg1  the new ID
+ */
 extern "C" void func_002D3A00(void *arg0, int arg1) {
     (*(int *)((char*)(arg0) + (8))) = arg1;
 }
@@ -509,6 +728,12 @@ extern "C" void func_002D3A00(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3A08);
 #ifdef SKIP_ASM
+/**
+ * Returns a menu item's ID (+8).
+ *
+ * @param arg0  the menu item
+ * @return the ID
+ */
 extern "C" int func_002D3A08(void *arg0) {
     return (*(int *)((char*)(arg0) + (8)));
 }
@@ -517,6 +742,12 @@ extern "C" int func_002D3A08(void *arg0) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3A10);
 #ifdef SKIP_ASM
+/**
+ * Sets a menu item's Arg word (+0xC).
+ *
+ * @param arg0  the menu item
+ * @param arg1  the new value
+ */
 extern "C" void func_002D3A10(void *arg0, int arg1) {
     (*(int *)((char*)(arg0) + (0xC))) = arg1;
 }
@@ -525,6 +756,12 @@ extern "C" void func_002D3A10(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3A18);
 #ifdef SKIP_ASM
+/**
+ * Returns a menu item's Arg word (+0xC).
+ *
+ * @param arg0  the menu item
+ * @return Arg
+ */
 extern "C" int func_002D3A18(void *arg0) {
     return (*(int *)((char*)(arg0) + (0xC)));
 }
@@ -533,6 +770,12 @@ extern "C" int func_002D3A18(void *arg0) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3A20);
 #ifdef SKIP_ASM
+/**
+ * Returns the menu a menu item belongs to (Menu, +0; cMenu_addItem fills it).
+ *
+ * @param arg0  the menu item
+ * @return the menu
+ */
 extern "C" int func_002D3A20(int *arg0) {
     return *arg0;
 }
@@ -541,6 +784,13 @@ extern "C" int func_002D3A20(int *arg0) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3A28);
 #ifdef SKIP_ASM
+/**
+ * Returns one of a menu's items: Items[@p arg1] (+0xC + 4 * index). The index is not checked.
+ *
+ * @param arg0  the menu
+ * @param arg1  the item index
+ * @return the item
+ */
 extern "C" int func_002D3A28(char *arg0, int arg1) {
     return *(int *)(arg0 + (arg1 << 2) + 0xC);
 }
@@ -549,6 +799,12 @@ extern "C" int func_002D3A28(char *arg0, int arg1) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3A38);
 #ifdef SKIP_ASM
+/**
+ * Returns the number of items in a menu (NumItems, +0).
+ *
+ * @param arg0  the menu
+ * @return NumItems
+ */
 extern "C" int func_002D3A38(int *arg0) {
     return *arg0;
 }
@@ -557,6 +813,12 @@ extern "C" int func_002D3A38(int *arg0) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3A40);
 #ifdef SKIP_ASM
+/**
+ * Returns the menu system that shows a menu (MenuSys, +0x124; cMenu_onGainFocus sets it).
+ *
+ * @param arg0  the menu
+ * @return MenuSys
+ */
 extern "C" int func_002D3A40(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x124)));
 }
@@ -565,6 +827,12 @@ extern "C" int func_002D3A40(void *arg0) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3A48);
 #ifdef SKIP_ASM
+/**
+ * Returns the font of a menu's menu system: the word at +0x58 of MenuSys (+0x124).
+ *
+ * @param arg0  the menu
+ * @return the font
+ */
 extern "C" int func_002D3A48(void *arg0) {
     return (*(int *)((char*)((*(void **)((char*)(arg0) + (0x124)))) + (0x58)));
 }
@@ -573,6 +841,13 @@ extern "C" int func_002D3A48(void *arg0) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3A58);
 #ifdef SKIP_ASM
+/**
+ * Returns the font of the menu system that shows a menu item: the word at +0x58 of the MenuSys (+0x124) of the item's
+ * Menu (+0).
+ *
+ * @param arg0  the menu item
+ * @return the font
+ */
 extern "C" int func_002D3A58(void **arg0) {
     return (*(int *)((char*)((*(void **)((char*)(*arg0) + (0x124)))) + (0x58)));
 }
@@ -583,6 +858,12 @@ INCLUDE_ASM("seg/seg_1D3510", cBoolMenuItem__cBoolMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
+/**
+ * Destroys an on/off menu item: passes the object and the destructor flags on to cMenuItem__cMenuItem (they stay in
+ * their registers; the C declares no parameters).
+ *
+ * It is word 3 (slot 1) of cBoolMenuItem_vtbl.
+ */
 extern "C" void cBoolMenuItem__cBoolMenuItem(void) {
     cMenuItem__cMenuItem();
 }
@@ -591,6 +872,12 @@ extern "C" void cBoolMenuItem__cBoolMenuItem(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3A88);
 #ifdef SKIP_ASM
+/**
+ * Sets the flag an on/off menu item toggles (the flag pointer, +0x20).
+ *
+ * @param menuItem  the on/off item
+ * @param value  the flag's address
+ */
 extern "C" void func_002D3A88(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x20))) = value;
 }
@@ -599,6 +886,12 @@ extern "C" void func_002D3A88(void *menuItem, int value) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3A90);
 #ifdef SKIP_ASM
+/**
+ * Sets an on/off menu item's caption (+0x14).
+ *
+ * @param menuItem  the on/off item
+ * @param value  the caption text
+ */
 extern "C" void func_002D3A90(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
@@ -609,6 +902,12 @@ INCLUDE_ASM("seg/seg_1D3510", cEnumMenuItem__cEnumMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
+/**
+ * Destroys a list-choice menu item: passes the object and the destructor flags on to cMenuItem__cMenuItem (they stay in
+ * their registers; the C declares no parameters).
+ *
+ * It is word 3 (slot 1) of cEnumMenuItem_vtbl.
+ */
 extern "C" void cEnumMenuItem__cEnumMenuItem(void) {
     cMenuItem__cMenuItem();
 }
@@ -617,6 +916,14 @@ extern "C" void cEnumMenuItem__cEnumMenuItem(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3AB8);
 #ifdef SKIP_ASM
+/**
+ * Sets the entries a list-choice menu item offers: the entry count (+0x18) and the table of {name, value} entries
+ * (+0x1C).
+ *
+ * @param menuItem  the list-choice item
+ * @param arg1  the number of entries
+ * @param arg2  the entries, 8 bytes each
+ */
 extern "C" void func_002D3AB8(void *menuItem, int arg1, int arg2) {
     (*(int *)((char*)(menuItem) + (0x18))) = arg1;
     (*(int *)((char*)(menuItem) + (0x1C))) = arg2;
@@ -626,6 +933,12 @@ extern "C" void func_002D3AB8(void *menuItem, int arg1, int arg2) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3AC8);
 #ifdef SKIP_ASM
+/**
+ * Sets the int a list-choice menu item sets (the value pointer, +0x20).
+ *
+ * @param menuItem  the list-choice item
+ * @param value  the int's address
+ */
 extern "C" void func_002D3AC8(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x20))) = value;
 }
@@ -634,6 +947,12 @@ extern "C" void func_002D3AC8(void *menuItem, int value) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3AD0);
 #ifdef SKIP_ASM
+/**
+ * Sets a list-choice menu item's caption (+0x14).
+ *
+ * @param menuItem  the list-choice item
+ * @param value  the caption text
+ */
 extern "C" void func_002D3AD0(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
@@ -642,6 +961,12 @@ extern "C" void func_002D3AD0(void *menuItem, int value) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3AD8);
 #ifdef SKIP_ASM
+/**
+ * Returns a list-choice menu item's caption (+0x14).
+ *
+ * @param menuItem  the list-choice item
+ * @return the caption
+ */
 extern "C" int func_002D3AD8(void *menuItem) {
     return (*(int *)((char*)(menuItem) + (0x14)));
 }
@@ -666,6 +991,12 @@ extern "C" void cSubMenuItem__cSubMenuItem(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3B00);
 #ifdef SKIP_ASM
+/**
+ * Sets the sub-menu a sub-menu item opens (+0x18).
+ *
+ * @param menuItem  the sub-menu item
+ * @param value  the sub-menu
+ */
 extern "C" void func_002D3B00(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
@@ -674,6 +1005,12 @@ extern "C" void func_002D3B00(void *menuItem, int value) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3B08);
 #ifdef SKIP_ASM
+/**
+ * Returns the sub-menu a sub-menu item opens (+0x18).
+ *
+ * @param menuItem  the sub-menu item
+ * @return the sub-menu
+ */
 extern "C" int func_002D3B08(void *menuItem) {
     return (*(int *)((char*)(menuItem) + (0x18)));
 }
@@ -684,6 +1021,12 @@ INCLUDE_ASM("seg/seg_1D3510", cPopMenuItem__cPopMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
+/**
+ * Destroys a "back" menu item: passes the object and the destructor flags on to cMenuItem__cMenuItem (they stay in
+ * their registers; the C declares no parameters).
+ *
+ * It is word 3 (slot 1) of cPopMenuItem_vtbl.
+ */
 extern "C" void cPopMenuItem__cPopMenuItem(void) {
     cMenuItem__cMenuItem();
 }
@@ -692,6 +1035,12 @@ extern "C" void cPopMenuItem__cPopMenuItem(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3B30);
 #ifdef SKIP_ASM
+/**
+ * Sets a "back" menu item's caption (+0x14).
+ *
+ * @param menuItem  the "back" item
+ * @param value  the caption text
+ */
 extern "C" void func_002D3B30(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
@@ -702,6 +1051,12 @@ INCLUDE_ASM("seg/seg_1D3510", cCommandMenuItem__cCommandMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
+/**
+ * Destroys a command menu item: passes the object and the destructor flags on to cMenuItem__cMenuItem (they stay in
+ * their registers; the C declares no parameters).
+ *
+ * It is word 3 (slot 1) of cCommandMenuItem_vtbl.
+ */
 extern "C" void cCommandMenuItem__cCommandMenuItem(void) {
     cMenuItem__cMenuItem();
 }
@@ -710,6 +1065,12 @@ extern "C" void cCommandMenuItem__cCommandMenuItem(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3B58);
 #ifdef SKIP_ASM
+/**
+ * Sets a command menu item's state text (+0x18), shown next to its caption.
+ *
+ * @param menuItem  the command item
+ * @param value  the text
+ */
 extern "C" void func_002D3B58(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
@@ -718,6 +1079,12 @@ extern "C" void func_002D3B58(void *menuItem, int value) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3B60);
 #ifdef SKIP_ASM
+/**
+ * Sets a command menu item's caption (+0x14).
+ *
+ * @param menuItem  the command item
+ * @param value  the caption text
+ */
 extern "C" void func_002D3B60(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
@@ -726,6 +1093,12 @@ extern "C" void func_002D3B60(void *menuItem, int value) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3B68);
 #ifdef SKIP_ASM
+/**
+ * Returns a command menu item's caption (+0x14).
+ *
+ * @param menuItem  the command item
+ * @return the caption
+ */
 extern "C" int func_002D3B68(void *menuItem) {
     return (*(int *)((char*)(menuItem) + (0x14)));
 }
@@ -734,6 +1107,12 @@ extern "C" int func_002D3B68(void *menuItem) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3B70);
 #ifdef SKIP_ASM
+/**
+ * Sets a command menu item's data word (+0x20).
+ *
+ * @param menuItem  the command item
+ * @param value  the data
+ */
 extern "C" void func_002D3B70(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x20))) = value;
 }
@@ -742,6 +1121,12 @@ extern "C" void func_002D3B70(void *menuItem, int value) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3B78);
 #ifdef SKIP_ASM
+/**
+ * Returns a command menu item's data word (+0x20).
+ *
+ * @param menuItem  the command item
+ * @return the data
+ */
 extern "C" int func_002D3B78(void *menuItem) {
     return (*(int *)((char*)(menuItem) + (0x20)));
 }
@@ -752,6 +1137,12 @@ INCLUDE_ASM("seg/seg_1D3510", cCallbackMenuItem__cCallbackMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
+/**
+ * Destroys a callback menu item: passes the object and the destructor flags on to cMenuItem__cMenuItem (they stay in
+ * their registers; the C declares no parameters).
+ *
+ * It is word 3 (slot 1) of cCallbackMenuItem_vtbl.
+ */
 extern "C" void cCallbackMenuItem__cCallbackMenuItem(void) {
     cMenuItem__cMenuItem();
 }
@@ -760,6 +1151,12 @@ extern "C" void cCallbackMenuItem__cCallbackMenuItem(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3BA0);
 #ifdef SKIP_ASM
+/**
+ * Sets a callback menu item's caption (+0x14).
+ *
+ * @param menuItem  the callback item
+ * @param value  the caption text
+ */
 extern "C" void func_002D3BA0(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
@@ -768,6 +1165,12 @@ extern "C" void func_002D3BA0(void *menuItem, int value) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3BA8);
 #ifdef SKIP_ASM
+/**
+ * Returns a callback menu item's caption (+0x14).
+ *
+ * @param menuItem  the callback item
+ * @return the caption
+ */
 extern "C" int func_002D3BA8(void *menuItem) {
     return (*(int *)((char*)(menuItem) + (0x14)));
 }
@@ -790,6 +1193,12 @@ extern "C" void cNullMenuItem__cNullMenuItem(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3BD0);
 #ifdef SKIP_ASM
+/**
+ * Sets a text-only menu item's text (+0x14).
+ *
+ * @param menuItem  the text-only item
+ * @param value  the text
+ */
 extern "C" void func_002D3BD0(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
@@ -798,6 +1207,12 @@ extern "C" void func_002D3BD0(void *menuItem, int value) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3BD8);
 #ifdef SKIP_ASM
+/**
+ * Stores a text pointer at +0x18 of a text-only menu item (cNullMenuItem_cNullMenuItem does not set this word).
+ *
+ * @param menuItem  the text-only item
+ * @param value  the text
+ */
 extern "C" void func_002D3BD8(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
@@ -822,6 +1237,12 @@ INCLUDE_ASM("seg/seg_1D3510", cCharMenuItem__cCharMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
+/**
+ * Destroys a signed-byte menu item: passes the object and the destructor flags on to cMenuItem__cMenuItem (they stay in
+ * their registers; the C declares no parameters).
+ *
+ * It is word 3 (slot 1) of cCharMenuItem_vtbl.
+ */
 extern "C" void cCharMenuItem__cCharMenuItem(void) {
     cMenuItem__cMenuItem();
 }
@@ -830,6 +1251,12 @@ extern "C" void cCharMenuItem__cCharMenuItem(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3C20);
 #ifdef SKIP_ASM
+/**
+ * Sets the signed byte a signed-byte menu item edits (the value pointer, +0x18).
+ *
+ * @param menuItem  the signed-byte item
+ * @param value  the byte's address
+ */
 extern "C" void func_002D3C20(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
@@ -838,6 +1265,12 @@ extern "C" void func_002D3C20(void *menuItem, int value) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3C28);
 #ifdef SKIP_ASM
+/**
+ * Sets a signed-byte menu item's caption (+0x14).
+ *
+ * @param menuItem  the signed-byte item
+ * @param value  the caption text
+ */
 extern "C" void func_002D3C28(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
@@ -862,6 +1295,12 @@ extern "C" void cIntMenuItem__cIntMenuItem(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3C50);
 #ifdef SKIP_ASM
+/**
+ * Sets the int an int menu item edits (the variable's address, +0x18).
+ *
+ * @param menuItem  the int item
+ * @param value  the int's address
+ */
 extern "C" void func_002D3C50(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
@@ -870,6 +1309,12 @@ extern "C" void func_002D3C50(void *menuItem, int value) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3C58);
 #ifdef SKIP_ASM
+/**
+ * Sets an int menu item's caption (+0x14).
+ *
+ * @param menuItem  the int item
+ * @param value  the caption text
+ */
 extern "C" void func_002D3C58(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
@@ -894,6 +1339,12 @@ extern "C" void cFloatMenuItem__cFloatMenuItem(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3C80);
 #ifdef SKIP_ASM
+/**
+ * Sets the float a float menu item edits (the variable's address, +0x18).
+ *
+ * @param menuItem  the float item
+ * @param value  the float's address
+ */
 extern "C" void func_002D3C80(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
@@ -902,6 +1353,13 @@ extern "C" void func_002D3C80(void *menuItem, int value) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3C88);
 #ifdef SKIP_ASM
+/**
+ * Sets a float menu item's range: minimum (+0x1C) and maximum (+0x20).
+ *
+ * @param menuItem  the float item
+ * @param fparg0  the minimum
+ * @param fparg1  the maximum
+ */
 extern "C" void func_002D3C88(void *menuItem, float fparg0, float fparg1) {
     (*(float *)((char*)(menuItem) + (0x1C))) = fparg0;
     (*(float *)((char*)(menuItem) + (0x20))) = fparg1;
@@ -911,6 +1369,12 @@ extern "C" void func_002D3C88(void *menuItem, float fparg0, float fparg1) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3C98);
 #ifdef SKIP_ASM
+/**
+ * Sets a float menu item's caption (+0x14).
+ *
+ * @param menuItem  the float item
+ * @param value  the caption text
+ */
 extern "C" void func_002D3C98(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
@@ -919,6 +1383,14 @@ extern "C" void func_002D3C98(void *menuItem, int value) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3CA0);
 #ifdef SKIP_ASM
+/**
+ * Sets how a float menu item shows its value: the display scale (+0x24) and offset (+0x28); the item shows scale *
+ * value + offset.
+ *
+ * @param menuItem  the float item
+ * @param fparg0  the scale
+ * @param fparg1  the offset
+ */
 extern "C" void func_002D3CA0(void *menuItem, float fparg0, float fparg1) {
     (*(float *)((char*)(menuItem) + (0x24))) = fparg0;
     (*(float *)((char*)(menuItem) + (0x28))) = fparg1;
@@ -928,6 +1400,14 @@ extern "C" void func_002D3CA0(void *menuItem, float fparg0, float fparg1) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3CB0);
 #ifdef SKIP_ASM
+/**
+ * Writes a new value into the float a float menu item edits (through the value pointer, +0x18).
+ *
+ * The value is stored as given, without the display scale and offset.
+ *
+ * @param menuItem  the float item
+ * @param fparg0  the new value
+ */
 extern "C" void func_002D3CB0(void *menuItem, float fparg0) {
     *(*(float **)((char*)(menuItem) + (0x18))) = fparg0;
 }
@@ -936,6 +1416,12 @@ extern "C" void func_002D3CB0(void *menuItem, float fparg0) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3CC0);
 #ifdef SKIP_ASM
+/**
+ * Returns a float menu item's value as displayed: scale (+0x24) * the edited float (through +0x18) + offset (+0x28).
+ *
+ * @param menuItem  the float item
+ * @return the displayed value
+ */
 extern "C" float func_002D3CC0(void *menuItem) {
     return ((*(float *)((char*)(menuItem) + (0x24))) * *(*(float **)((char*)(menuItem) + (0x18)))) + (*(float *)((char*)(menuItem) + (0x28)));
 }
@@ -960,6 +1446,12 @@ extern "C" void cAngleMenuItem__cAngleMenuItem(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3D00);
 #ifdef SKIP_ASM
+/**
+ * Sets the float an angle menu item edits (the value pointer, +0x18).
+ *
+ * @param menuItem  the angle item
+ * @param value  the float's address
+ */
 extern "C" void func_002D3D00(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
@@ -968,6 +1460,13 @@ extern "C" void func_002D3D00(void *menuItem, int value) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3D08);
 #ifdef SKIP_ASM
+/**
+ * Sets an angle menu item's range: minimum (+0x1C) and maximum (+0x20).
+ *
+ * @param menuItem  the angle item
+ * @param fparg0  the minimum
+ * @param fparg1  the maximum
+ */
 extern "C" void func_002D3D08(void *menuItem, float fparg0, float fparg1) {
     (*(float *)((char*)(menuItem) + (0x1C))) = fparg0;
     (*(float *)((char*)(menuItem) + (0x20))) = fparg1;
@@ -977,6 +1476,12 @@ extern "C" void func_002D3D08(void *menuItem, float fparg0, float fparg1) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3D18);
 #ifdef SKIP_ASM
+/**
+ * Sets an angle menu item's caption (+0x14).
+ *
+ * @param menuItem  the angle item
+ * @param value  the caption text
+ */
 extern "C" void func_002D3D18(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
@@ -987,6 +1492,12 @@ INCLUDE_ASM("seg/seg_1D3510", cTextMenuItem__cTextMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
+/**
+ * Destroys a text-entry menu item: passes the object and the destructor flags on to cMenuItem__cMenuItem (they stay in
+ * their registers; the C declares no parameters).
+ *
+ * It is word 3 (slot 1) of cTextMenuItem_vtbl.
+ */
 extern "C" void cTextMenuItem__cTextMenuItem(void) {
     cMenuItem__cMenuItem();
 }
@@ -995,6 +1506,12 @@ extern "C" void cTextMenuItem__cTextMenuItem(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3D40);
 #ifdef SKIP_ASM
+/**
+ * Returns a text-entry menu item's text: the address of its 16-byte buffer (+0x18).
+ *
+ * @param menuItem  the text-entry item
+ * @return the buffer address
+ */
 extern "C" int func_002D3D40(int menuItem) {
     return menuItem + 0x18;
 }
@@ -1005,6 +1522,14 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D3D48);
 #ifdef SKIP_ASM
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" int func_00416958_3D48(char*, int, int) __asm__("func_00416958");
+/**
+ * Sets a text-entry menu item's text: clears the 16-byte buffer at +0x18 and copies @p text into it with func_00416958
+ * (at most 15 characters).
+ *
+ * @param menuItem  the text-entry item
+ * @param text  the new text
+ * @return what func_00416958 returns
+ */
 extern "C" int func_002D3D48(char *menuItem, int text) {
     char *textBuf = menuItem + 0x18;
     *textBuf = 0;
@@ -1080,6 +1605,12 @@ extern "C" void cRGBTitleMenuItem__cRGBTitleMenuItem(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3E18);
 #ifdef SKIP_ASM
+/**
+ * Sets the title text of a colour editor's title row (+0x18).
+ *
+ * @param menuItem  the title row
+ * @param value  the title text
+ */
 extern "C" void func_002D3E18(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
@@ -1113,6 +1644,12 @@ extern "C" void cARGBMenuItem__cARGBMenuItem(int menuItem, int flags) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3EA0);
 #ifdef SKIP_ASM
+/**
+ * Sets a colour editor menu item's caption: the title text (+0x18) of its embedded title row (+0x640), i.e. +0x658.
+ *
+ * @param menuItem  the colour editor item
+ * @param value  the caption text
+ */
 extern "C" void func_002D3EA0(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x658))) = value;
 }
@@ -1123,6 +1660,12 @@ INCLUDE_ASM("seg/seg_1D3510", cVectorTitleMenuItem__cVectorTitleMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
+/**
+ * Destroys a vector title menu item: passes the object and the destructor flags on to cMenuItem__cMenuItem (they stay
+ * in their registers; the C declares no parameters).
+ *
+ * It is word 3 (slot 1) of cVectorTitleMenuItem_vtbl.
+ */
 extern "C" void cVectorTitleMenuItem__cVectorTitleMenuItem(void) {
     cMenuItem__cMenuItem();
 }
@@ -1131,6 +1674,12 @@ extern "C" void cVectorTitleMenuItem__cVectorTitleMenuItem(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3EC8);
 #ifdef SKIP_ASM
+/**
+ * Sets a vector title menu item's caption (+0x18).
+ *
+ * @param menuItem  the vector title item
+ * @param value  the caption text
+ */
 extern "C" void func_002D3EC8(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x18))) = value;
 }
@@ -1162,6 +1711,12 @@ extern "C" void cVectorMenuItem__cVectorMenuItem(int menuItem, int flags) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3F48);
 #ifdef SKIP_ASM
+/**
+ * Sets a vector editor menu item's caption: the caption (+0x18) of its embedded title row (+0x654), i.e. +0x66C.
+ *
+ * @param menuItem  the vector editor item
+ * @param value  the caption text
+ */
 extern "C" void func_002D3F48(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x66C))) = value;
 }
@@ -1172,6 +1727,12 @@ INCLUDE_ASM("seg/seg_1D3510", cGraphMenuItem__cGraphMenuItem);
 #ifdef SKIP_ASM
 extern "C" void cMenuItem__cMenuItem();
 
+/**
+ * Destroys a graph menu item: passes the object and the destructor flags on to cMenuItem__cMenuItem (they stay in their
+ * registers; the C declares no parameters).
+ *
+ * It is word 3 (slot 1) of cGraphMenuItem_vtbl.
+ */
 extern "C" void cGraphMenuItem__cGraphMenuItem(void) {
     cMenuItem__cMenuItem();
 }
@@ -1180,6 +1741,12 @@ extern "C" void cGraphMenuItem__cGraphMenuItem(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D3F70);
 #ifdef SKIP_ASM
+/**
+ * Sets a graph menu item's caption (+0x14).
+ *
+ * @param menuItem  the graph item
+ * @param value  the caption text
+ */
 extern "C" void func_002D3F70(void *menuItem, int value) {
     (*(int *)((char*)(menuItem) + (0x14))) = value;
 }
@@ -1191,6 +1758,16 @@ INCLUDE_ASM("seg/seg_1D3510", cErrorMenu__cErrorMenu);
 extern "C" void cMenuItem__cMenuItem(int, int);
 extern "C" void cMenu__cMenu(int, int);
 
+/**
+ * Destroys an error menu.
+ *
+ * Destroys its three embedded items in reverse order of construction, each with cMenuItem__cMenuItem and flags 2: the
+ * "back" item (+0x164), the space (+0x14C) and the text item (+0x130). Then runs cMenu__cMenu with @p flags. It is word
+ * 3 (slot 1) of D_004867B0, the vtable cErrorMenu_cErrorMenu installs.
+ *
+ * @param menu  the error menu
+ * @param flags  passed to cMenu__cMenu (bit 0: free the memory)
+ */
 extern "C" void cErrorMenu__cErrorMenu(int menu, int flags) {
     cMenuItem__cMenuItem(menu + 356, 2);
     cMenuItem__cMenuItem(menu + 332, 2);
@@ -1223,6 +1800,15 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D4008);
 #ifdef SKIP_ASM
 extern int (*D_004A54BC)(int, int);
 
+/**
+ * Compares two menu-item pointers for cMenu_sortItems: calls the comparison function in D_004A54BC with the two items.
+ *
+ * cMenu_sortItems stores its comparison function in D_004A54BC and passes this function to the qsort func_00418EF8. The
+ * C declares no return value; the comparison's result is left in the return register.
+ *
+ * @param arg0  points to the first item pointer
+ * @param arg1  points to the second item pointer
+ */
 extern "C" void func_002D4008(int *arg0, int *arg1) {
     D_004A54BC(*arg0, *arg1);
 }
@@ -1233,6 +1819,14 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D4030);
 #ifdef SKIP_ASM
 void operator_delete(int *);
 extern void* D_00487480[];
+/**
+ * Destroys a console configuration object: stores the vtable D_00487480 at +0x34 and frees the object when bit 0 of
+ * @p flags is set.
+ *
+ * It is word 3 (slot 1) of D_00487480. Its code is the same as cPS2ConsoleConfig__cPS2ConsoleConfig.
+ *
+ * @param flags  bit 0: free the memory
+ */
 extern "C" void func_002D4030(char *self, int flags) {
     *(void***)(self + 0x34) = D_00487480;
     if (flags & 1) operator_delete((int*)self);
@@ -1244,6 +1838,11 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D4060);
 #ifdef SKIP_ASM
 extern "C" void func_002D2988(int, int);
 
+/**
+ * Runs a static initializer of this unit: func_002D2988 with initialize 1 and priority 0xFFFF.
+ *
+ * It is word 24 of the global constructor table D_0043CE38 (walked by func_0040FBE0).
+ */
 extern "C" void func_002D4060(void) {
     func_002D2988(1, 0xFFFF);
 }
@@ -1252,6 +1851,14 @@ extern "C" void func_002D4060(void) {
 //100%
 INCLUDE_ASM("seg/seg_1D3510", func_002D4080);
 #ifdef SKIP_ASM
+/**
+ * Returns its first argument.
+ *
+ * It is variadic: the prologue stores the other argument registers (integer and float) to the stack and nothing reads
+ * them. Nothing in the build references it; func_002D2948 is the same code.
+ *
+ * @return @p self
+ */
 extern "C" int func_002D4080(int self, ...) {
     return self;
 }
@@ -1332,6 +1939,15 @@ extern sColor_40C0 D_004D5740;
 extern sColor_40C0 D_004D5750;
 extern sColor_40C0 D_004D5760;
 
+/**
+ * Constructs this unit's static four-float values (a g++ static-initialization function).
+ *
+ * Only for @p initialize nonzero and @p priority 0xFFFF: fills the 56 16-byte values D_004D53F0 to D_004D5760 with
+ * their constant floats, and sets both bit-fields of D_004A54C0 (8 and 24 bits) to -1. func_002D48D0 calls it.
+ *
+ * @param initialize  nonzero to construct
+ * @param priority  the init priority; only 0xFFFF does anything
+ */
 extern "C" void func_002D40C0(int initialize, int priority)
 {
     if (priority == 0xFFFF && initialize != 0) {
@@ -1401,6 +2017,11 @@ INCLUDE_ASM("seg/seg_1D3510", func_002D48D0);
 #ifdef SKIP_ASM
 extern "C" void func_002D40C0(int, int);
 
+/**
+ * Runs a static initializer of this unit: func_002D40C0 with initialize 1 and priority 0xFFFF.
+ *
+ * It is word 25 of the global constructor table D_0043CE38 (walked by func_0040FBE0).
+ */
 extern "C" void func_002D48D0(void) {
     func_002D40C0(1, 0xFFFF);
 }
