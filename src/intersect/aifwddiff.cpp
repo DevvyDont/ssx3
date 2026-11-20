@@ -705,8 +705,8 @@ struct sBox_00328360 {
  * minimum sits exactly on the upper corner. Callers walk a 0 cell whole (for camera triggers descend) and a 2
  * cell child by child (nash_privy_QueryHelper_helpX), so in practice every overlapping cell takes the crossing path.
  *
- * Called by cCameraTriggerMan_checkCollisions (camera triggers), OverlapInstancesCallback_operatorCall and the other octree queries (func_00331450, func_00332DB8,
- * func_00335D78, func_00336F30, func_003378C0), once per root cell.
+ * Called once per root cell by cCameraTriggerMan_checkCollisions (camera triggers) and the octree queries
+ * func_00330BA8, func_00331450, func_00331E90, func_00332DB8, func_00335D78, func_00336F30 and func_00337A48.
  *
  * @param cell  the cell key: level, x, y, z (On Tour CellKey, this)
  * @param box  the query box: min at +0x0, max at +0x10

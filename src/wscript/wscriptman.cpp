@@ -3182,6 +3182,18 @@ static inline void Pair_C8D8(sPair_C8D8* p)
 
 extern "C" void func_0030C8D8_impl(int init, int prio) __asm__("func_0030C8D8");
 
+/**
+ * Builds wscriptman.cpp's static constants (this unit's g++ static initialisation routine).
+ *
+ * Acts only when @p init is nonzero and @p prio is 0xFFFF; there is no destruction branch. Fills the 56 four-float
+ * constants D_004FC080..D_004FC3F0 (the same values every unit's static initialiser starts with, as in path/pathsys),
+ * gives the key D_004A58C8 -1 in both its 8-bit index and 24-bit id fields, zeroes the two-word D_004A58D0, numbers
+ * the 14 keys D_004A58D8..D_004A5940 from 0 to 13 (index and id alike), then sets the unit's own two constants
+ * D_004FC400 = (1, 0.2, 0.2, 0.7) and D_004FC410 = (0.5, 0.9, 0.9, 0.9). func_0030D498 runs it with (1, 0xFFFF).
+ *
+ * @param init  nonzero to build the constants
+ * @param prio  initialisation priority; nothing happens unless it is 0xFFFF (the default)
+ */
 // Static initialisation of the colour tables and colour keys.
 extern "C" void func_0030C8D8_impl(int init, int prio)
 {
@@ -3441,6 +3453,15 @@ extern "C" void func_0030C8D8_impl(int init, int prio)
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D238);
 #ifdef SKIP_ASM
+/**
+ * Stores @p arg1 in the first word of @p arg0 and @p arg2 in the second.
+ *
+ * An out-of-line inline method emitted after this unit's static initialiser; nothing in the build calls it.
+ *
+ * @param arg0  the two-word object to fill
+ * @param arg1  value for the word at +0x0
+ * @param arg2  value for the word at +0x4
+ */
 extern "C" void func_0030D238(void *arg0, int arg1, int arg2) {
     (*(int *)((char*)(arg0) + (0))) = arg1;
     (*(int *)((char*)(arg0) + (4))) = arg2;
@@ -3449,6 +3470,15 @@ extern "C" void func_0030D238(void *arg0, int arg1, int arg2) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D248);
 #ifdef SKIP_ASM
+/**
+ * Returns @p arg0 unchanged.
+ *
+ * One of three identical out-of-line copies here (func_0030D248, func_0030D250, func_0030D258), the shape of an
+ * empty inline constructor that returns this; nothing in the build calls it.
+ *
+ * @param arg0  the value to return
+ * @return @p arg0
+ */
 extern "C" int func_0030D248(int arg0) {
     return arg0;
 }
@@ -3456,6 +3486,15 @@ extern "C" int func_0030D248(int arg0) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D250);
 #ifdef SKIP_ASM
+/**
+ * Returns @p arg0 unchanged.
+ *
+ * Identical to func_0030D248 and func_0030D258 (the shape of an empty inline constructor that returns this); nothing in
+ * the build calls it.
+ *
+ * @param arg0  the value to return
+ * @return @p arg0
+ */
 extern "C" int func_0030D250(int arg0) {
     return arg0;
 }
@@ -3463,6 +3502,15 @@ extern "C" int func_0030D250(int arg0) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D258);
 #ifdef SKIP_ASM
+/**
+ * Returns @p arg0 unchanged.
+ *
+ * Identical to func_0030D248 and func_0030D250 (the shape of an empty inline constructor that returns this); nothing in
+ * the build calls it.
+ *
+ * @param arg0  the value to return
+ * @return @p arg0
+ */
 extern "C" int func_0030D258(int arg0) {
     return arg0;
 }
@@ -3470,6 +3518,15 @@ extern "C" int func_0030D258(int arg0) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D260);
 #ifdef SKIP_ASM
+/**
+ * Sets the script manager's current trick definition (On Tour TrickDef, +0x29C) to @p trickDef.
+ *
+ * Out-of-line copy of an inline accessor; func_003078C0 writes the same field directly around a trick event, and
+ * func_0030AF08 reads the trick's fields through it.
+ *
+ * @param wscriptMan  the script manager
+ * @param trickDef  the trick definition (a pointer passed as an int), or 0 to clear it
+ */
 extern "C" void func_0030D260(void *wscriptMan, int trickDef) {
     (*(int *)((char*)(wscriptMan) + (0x29C))) = trickDef;
 }
@@ -3477,6 +3534,14 @@ extern "C" void func_0030D260(void *wscriptMan, int trickDef) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D268);
 #ifdef SKIP_ASM
+/**
+ * Returns the script manager's mission-points enable flag (On Tour MissionPointsEnable, +0x4).
+ *
+ * cWScriptMan_update clears the flag every frame.
+ *
+ * @param wscriptMan  the script manager
+ * @return the flag word, nonzero when the points display is enabled
+ */
 extern "C" int func_0030D268(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (4)));
 }
@@ -3484,6 +3549,12 @@ extern "C" int func_0030D268(void *wscriptMan) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D270);
 #ifdef SKIP_ASM
+/**
+ * Returns the script manager's current mission points (On Tour MissionPoints, +0x8).
+ *
+ * @param wscriptMan  the script manager
+ * @return the points
+ */
 extern "C" int func_0030D270(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (8)));
 }
@@ -3491,6 +3562,12 @@ extern "C" int func_0030D270(void *wscriptMan) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D278);
 #ifdef SKIP_ASM
+/**
+ * Returns the script manager's mission points goal (On Tour MissionPointsGoal, +0xC).
+ *
+ * @param wscriptMan  the script manager
+ * @return the points goal
+ */
 extern "C" int func_0030D278(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0xC)));
 }
@@ -3498,6 +3575,14 @@ extern "C" int func_0030D278(void *wscriptMan) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D280);
 #ifdef SKIP_ASM
+/**
+ * Returns the script manager's mission-count enable flag (On Tour MissionCountEnable, +0x10).
+ *
+ * cWScriptMan_update clears the flag every frame.
+ *
+ * @param wscriptMan  the script manager
+ * @return the flag word, nonzero when the count display is enabled
+ */
 extern "C" int func_0030D280(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x10)));
 }
@@ -3505,6 +3590,12 @@ extern "C" int func_0030D280(void *wscriptMan) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D288);
 #ifdef SKIP_ASM
+/**
+ * Returns the script manager's current mission count (On Tour MissionCount, +0x14).
+ *
+ * @param wscriptMan  the script manager
+ * @return the count
+ */
 extern "C" int func_0030D288(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x14)));
 }
@@ -3512,6 +3603,12 @@ extern "C" int func_0030D288(void *wscriptMan) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D290);
 #ifdef SKIP_ASM
+/**
+ * Returns the script manager's mission count maximum (On Tour MissionCountMax, +0x18).
+ *
+ * @param wscriptMan  the script manager
+ * @return the maximum count
+ */
 extern "C" int func_0030D290(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x18)));
 }
@@ -3519,6 +3616,14 @@ extern "C" int func_0030D290(void *wscriptMan) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D298);
 #ifdef SKIP_ASM
+/**
+ * Returns the script manager's mission-clock enable flag (On Tour MissionTicksEnable, +0x1C).
+ *
+ * cWScriptMan_update clears the flag every frame.
+ *
+ * @param wscriptMan  the script manager
+ * @return the flag word, nonzero when the clock display is enabled
+ */
 extern "C" int func_0030D298(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x1C)));
 }
@@ -3526,6 +3631,12 @@ extern "C" int func_0030D298(void *wscriptMan) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D2A0);
 #ifdef SKIP_ASM
+/**
+ * Returns the script manager's current mission clock in ticks (On Tour MissionTicks, +0x20).
+ *
+ * @param wscriptMan  the script manager
+ * @return the tick count
+ */
 extern "C" int func_0030D2A0(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x20)));
 }
@@ -3533,6 +3644,12 @@ extern "C" int func_0030D2A0(void *wscriptMan) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D2A8);
 #ifdef SKIP_ASM
+/**
+ * Returns the direction of the script manager's mission clock (On Tour MissionTicksDir, +0x24).
+ *
+ * @param wscriptMan  the script manager
+ * @return the clock direction word
+ */
 extern "C" int func_0030D2A8(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x24)));
 }
@@ -3540,6 +3657,14 @@ extern "C" int func_0030D2A8(void *wscriptMan) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D2B0);
 #ifdef SKIP_ASM
+/**
+ * Returns the script manager's mission-height enable flag (On Tour MissionHeightEnable, +0x28).
+ *
+ * cWScriptMan_update clears the flag every frame.
+ *
+ * @param wscriptMan  the script manager
+ * @return the flag word, nonzero when the height display is enabled
+ */
 extern "C" int func_0030D2B0(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x28)));
 }
@@ -3547,6 +3672,14 @@ extern "C" int func_0030D2B0(void *wscriptMan) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D2B8);
 #ifdef SKIP_ASM
+/**
+ * Returns the script manager's mission-trick enable flag (On Tour MissionTrickEnable, +0x34).
+ *
+ * cWScriptMan_update clears the flag every frame.
+ *
+ * @param wscriptMan  the script manager
+ * @return the flag word, nonzero when the trick display is enabled
+ */
 extern "C" int func_0030D2B8(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x34)));
 }
@@ -3554,6 +3687,12 @@ extern "C" int func_0030D2B8(void *wscriptMan) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D2C0);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of the script manager's mission trick record (On Tour MissionTrick, +0x38).
+ *
+ * @param wscriptMan  the script manager
+ * @return @p wscriptMan + 0x38
+ */
 extern "C" int func_0030D2C0(int wscriptMan) {
     return wscriptMan + 0x38;
 }
@@ -3561,6 +3700,12 @@ extern "C" int func_0030D2C0(int wscriptMan) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D2C8);
 #ifdef SKIP_ASM
+/**
+ * Sets the script manager's local mission id (On Tour LocalMissionId, +0x2A0) to @p missionId.
+ *
+ * @param wscriptMan  the script manager
+ * @param missionId  the mission id to store
+ */
 extern "C" void func_0030D2C8(void *wscriptMan, int missionId) {
     (*(int *)((char*)(wscriptMan) + (0x2A0))) = missionId;
 }
@@ -3568,6 +3713,12 @@ extern "C" void func_0030D2C8(void *wscriptMan, int missionId) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D2D0);
 #ifdef SKIP_ASM
+/**
+ * Returns the script manager's local mission id (On Tour LocalMissionId, +0x2A0).
+ *
+ * @param wscriptMan  the script manager
+ * @return the mission id
+ */
 extern "C" int func_0030D2D0(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x2A0)));
 }
@@ -3577,6 +3728,13 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D2D8);
 #ifdef SKIP_ASM
 extern int cWScriptMan_TheWScriptMan;
 
+/**
+ * Returns the world script manager singleton, cWScriptMan_TheWScriptMan.
+ *
+ * Out-of-line copy of an inline accessor that other units inline (seg/seg_1FBE38).
+ *
+ * @return the manager
+ */
 extern "C" int func_0030D2D8(void) {
     return cWScriptMan_TheWScriptMan;
 }
@@ -3584,6 +3742,14 @@ extern "C" int func_0030D2D8(void) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D2E0);
 #ifdef SKIP_ASM
+/**
+ * Returns the script manager's current instance record (On Tour Inst, +0x290).
+ *
+ * cWScriptMan_update sets it to the instance an event refers to while the event is dispatched.
+ *
+ * @param wscriptMan  the script manager
+ * @return the instance record, or 0
+ */
 extern "C" int func_0030D2E0(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x290)));
 }
@@ -3591,6 +3757,12 @@ extern "C" int func_0030D2E0(void *wscriptMan) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D2E8);
 #ifdef SKIP_ASM
+/**
+ * Returns the script manager's current being (On Tour Being, +0x0), the index of the rider scripts act on.
+ *
+ * @param arg0  the script manager
+ * @return the being index
+ */
 extern "C" int func_0030D2E8(int *arg0) {
     return *arg0;
 }
@@ -3598,6 +3770,12 @@ extern "C" int func_0030D2E8(int *arg0) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D2F0);
 #ifdef SKIP_ASM
+/**
+ * Returns the script manager's current collision info (On Tour CollideInfo, +0x294).
+ *
+ * @param wscriptMan  the script manager
+ * @return the collision info pointer
+ */
 extern "C" int func_0030D2F0(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x294)));
 }
@@ -3605,6 +3783,12 @@ extern "C" int func_0030D2F0(void *wscriptMan) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D2F8);
 #ifdef SKIP_ASM
+/**
+ * Returns the script manager's current intersection info (On Tour IntersectInfo, +0x298).
+ *
+ * @param wscriptMan  the script manager
+ * @return the intersection info pointer
+ */
 extern "C" int func_0030D2F8(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x298)));
 }
@@ -3612,6 +3796,12 @@ extern "C" int func_0030D2F8(void *wscriptMan) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D300);
 #ifdef SKIP_ASM
+/**
+ * Sets the script manager's current instance record (On Tour Inst, +0x290) to @p inst.
+ *
+ * @param wscriptMan  the script manager
+ * @param inst  the instance record (passed as an int), or 0
+ */
 extern "C" void func_0030D300(void *wscriptMan, int inst) {
     (*(int *)((char*)(wscriptMan) + (0x290))) = inst;
 }
@@ -3619,6 +3809,15 @@ extern "C" void func_0030D300(void *wscriptMan, int inst) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D308);
 #ifdef SKIP_ASM
+/**
+ * Returns the global Luno table of world section @p sectionId (the array at +0x3CC, On Tour GlobalTables).
+ *
+ * func_00308B78 allocates these tables; no bounds check.
+ *
+ * @param wscriptMan  the script manager
+ * @param sectionId  the world section index
+ * @return the section's cLunoTable, or 0 when none was allocated
+ */
 extern "C" int func_0030D308(int wscriptMan, int sectionId) {
     return (*(int *)(((char*)(wscriptMan) + (sectionId << 2)) + (0x3CC)));
 }
@@ -3626,6 +3825,12 @@ extern "C" int func_0030D308(int wscriptMan, int sectionId) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D318);
 #ifdef SKIP_ASM
+/**
+ * Returns the script manager's current task (On Tour CurrentTask, +0x2A8).
+ *
+ * @param wscriptMan  the script manager
+ * @return the task, or 0
+ */
 extern "C" int func_0030D318(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x2A8)));
 }
@@ -3633,6 +3838,12 @@ extern "C" int func_0030D318(void *wscriptMan) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D320);
 #ifdef SKIP_ASM
+/**
+ * Sets the script manager's current task (On Tour CurrentTask, +0x2A8) to @p task.
+ *
+ * @param wscriptMan  the script manager
+ * @param task  the task (passed as an int), or 0
+ */
 extern "C" void func_0030D320(void *wscriptMan, int task) {
     (*(int *)((char*)(wscriptMan) + (0x2A8))) = task;
 }
@@ -3640,6 +3851,14 @@ extern "C" void func_0030D320(void *wscriptMan, int task) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D328);
 #ifdef SKIP_ASM
+/**
+ * Returns the script manager's current process (On Tour CurrentProcess, +0x2A4).
+ *
+ * cWScriptMan_update sets it to each active process while that process handles an event or updates.
+ *
+ * @param wscriptMan  the script manager
+ * @return the process, or 0
+ */
 extern "C" int func_0030D328(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x2A4)));
 }
@@ -3647,6 +3866,15 @@ extern "C" int func_0030D328(void *wscriptMan) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D330);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the script manager's mission menu queue (+0x1C4, On Tour MissionMenuQueue) holds an entry.
+ *
+ * Compares the queue's two indices (+0x1C4 and +0x1C8; On Tour Current and Next), as tMissionMenuQueue's isReady
+ * does. ssxappdtor inlines the same test.
+ *
+ * @param wscriptMan  the script manager
+ * @return 1 when they differ, else 0
+ */
 extern "C" int func_0030D330(void *wscriptMan) {
     return (*(int *)((char*)(wscriptMan) + (0x1C4))) != (*(int *)((char*)(wscriptMan) + (0x1C8)));
 }
@@ -3654,6 +3882,11 @@ extern "C" int func_0030D330(void *wscriptMan) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D348);
 #ifdef SKIP_ASM
+/**
+ * Pops the next entry from the script manager's mission menu queue (+0x1C4) with tMissionMenuQueue_getNextEntry.
+ *
+ * The callee's result (the entry) is left as this function's result, though the C here declares none.
+ */
 extern "C" void func_0030D348(char* self)
 {
     tMissionMenuQueue_getNextEntry((cWScriptQueue*)(self + 0x1C4));
@@ -3662,6 +3895,11 @@ extern "C" void func_0030D348(char* self)
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D368);
 #ifdef SKIP_ASM
+/**
+ * Returns the current entry of the script manager's mission menu queue (+0x1C4) via tMissionMenuQueue_getEntry.
+ *
+ * The callee's result (the entry) is left as this function's result, though the C here declares none.
+ */
 extern "C" void func_0030D368(char* self)
 {
     tMissionMenuQueue_getEntry((cWScriptQueue*)(self + 0x1C4));
@@ -3670,6 +3908,12 @@ extern "C" void func_0030D368(char* self)
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D388);
 #ifdef SKIP_ASM
+/**
+ * Sets the script manager's current being (On Tour Being, +0x0) to @p arg1.
+ *
+ * @param arg0  the script manager
+ * @param arg1  the being (rider) index
+ */
 extern "C" void func_0030D388(int *arg0, int arg1) {
     *arg0 = arg1;
 }
@@ -3677,6 +3921,14 @@ extern "C" void func_0030D388(int *arg0, int arg1) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D390);
 #ifdef SKIP_ASM
+/**
+ * Returns whether @p a1 is one of the 10 process event ids (0-9, unsigned compare); @p self is not used.
+ *
+ * func_003078C0 dispatches exactly these ten ids to a process's event handlers.
+ *
+ * @param a1  the event id
+ * @return 1 when @p a1 < 10, else 0
+ */
 extern "C" int func_0030D390(void* self, unsigned int a1) {
     return a1 < 10;
 }
@@ -3684,6 +3936,11 @@ extern "C" int func_0030D390(void* self, unsigned int a1) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D398);
 #ifdef SKIP_ASM
+/**
+ * Clears a script process's state word (+0x0) to 0.
+ *
+ * @param arg0  the process
+ */
 extern "C" void func_0030D398(int *arg0) {
     *arg0 = 0;
 }
@@ -3691,6 +3948,14 @@ extern "C" void func_0030D398(int *arg0) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D3A0);
 #ifdef SKIP_ASM
+/**
+ * Returns the next process in its process list (On Tour Next, +0x18).
+ *
+ * cWScriptMan_update walks the active list through this link.
+ *
+ * @param arg0  the process
+ * @return the next process, or 0 at the end of the list
+ */
 extern "C" int func_0030D3A0(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x18)));
 }
@@ -3698,6 +3963,12 @@ extern "C" int func_0030D3A0(void *arg0) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D3A8);
 #ifdef SKIP_ASM
+/**
+ * Sets the next process in a process's list link (On Tour Next, +0x18) to @p arg1.
+ *
+ * @param arg0  the process
+ * @param arg1  the process to link after it (passed as an int), or 0
+ */
 extern "C" void func_0030D3A8(void *arg0, int arg1) {
     (*(int *)((char*)(arg0) + (0x18))) = arg1;
 }
@@ -3705,6 +3976,14 @@ extern "C" void func_0030D3A8(void *arg0, int arg1) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D3B0);
 #ifdef SKIP_ASM
+/**
+ * Returns the world section a script process belongs to (On Tour SectionId, +0x24).
+ *
+ * cWScriptProcess_cWScriptProcess stores it there.
+ *
+ * @param arg0  the process
+ * @return the section id
+ */
 extern "C" int func_0030D3B0(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x24)));
 }
@@ -3712,6 +3991,14 @@ extern "C" int func_0030D3B0(void *arg0) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D3B8);
 #ifdef SKIP_ASM
+/**
+ * Sets the trick definition of a script process's manager (+0x10, its TrickDef at +0x29C) to @p trickDef.
+ *
+ * The same store as func_0030D260, made through the process's manager pointer.
+ *
+ * @param arg0  the process
+ * @param trickDef  the trick definition (passed as an int), or 0
+ */
 extern "C" void func_0030D3B8(void *arg0, int trickDef) {
     (*(int *)((char*)((*(void **)((char*)(arg0) + (0x10)))) + (0x29C))) = trickDef;
 }
@@ -3719,6 +4006,12 @@ extern "C" void func_0030D3B8(void *arg0, int trickDef) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D3C8);
 #ifdef SKIP_ASM
+/**
+ * Returns a script process's local Luno table (On Tour Local, +0x1C).
+ *
+ * @param arg0  the process
+ * @return the table, or 0 when the process has none
+ */
 extern "C" int func_0030D3C8(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x1C)));
 }
@@ -3726,6 +4019,12 @@ extern "C" int func_0030D3C8(void *arg0) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D3D0);
 #ifdef SKIP_ASM
+/**
+ * Returns a script process's id (On Tour ProcessId, +0x20), copied from its definition by the constructor.
+ *
+ * @param arg0  the process
+ * @return the process id
+ */
 extern "C" int func_0030D3D0(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x20)));
 }
@@ -3751,6 +4050,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D3E0);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void cWScriptMan_runScriptCode_a1(void* self) __asm__("cWScriptMan_runScriptCode");
 
+/**
+ * Runs script code for a process through the process's manager: cWScriptMan_runScriptCode(+0x10, a1, a2).
+ *
+ * Only the manager argument is computed; the second and third arguments (the process and the script code) are passed
+ * through untouched.
+ */
 extern "C" void func_0030D3E0(char* self)
 {
     cWScriptMan_runScriptCode_a1(*(void**)(self + 0x10));
@@ -3762,6 +4067,12 @@ INCLUDE_ASM("wscript/wscriptman", func_0030D400);
 // PORT: PS2-only inline asm; needs a C fallback off-PS2.
 extern "C" void func_0030ADA8_a1(void* self) __asm__("func_0030ADA8");
 
+/**
+ * Runs script code for a task through the process's manager: func_0030ADA8(+0x10, a1, a2).
+ *
+ * Only the manager argument is computed; the second and third arguments (the task and the script code) are passed
+ * through untouched. func_0030ADA8 is the manager's task variant of cWScriptMan_runScriptCode.
+ */
 extern "C" void func_0030D400(char* self)
 {
     func_0030ADA8_a1(*(void**)(self + 0x10));
@@ -3792,6 +4103,12 @@ extern "C" void cWScriptTask__cWScriptTask(void* self, int flags)
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D450);
 #ifdef SKIP_ASM
+/**
+ * Returns a script task's local Luno table: that of its process (+0x3C, then the process's +0x1C).
+ *
+ * @param arg0  the task
+ * @return the process's local table, or 0
+ */
 extern "C" int func_0030D450(void *arg0) {
     return (*(int *)((char*)((*(void **)((char*)(arg0) + (0x3C)))) + (0x1C)));
 }
@@ -3799,6 +4116,14 @@ extern "C" int func_0030D450(void *arg0) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D460);
 #ifdef SKIP_ASM
+/**
+ * Returns a script task's id (On Tour TaskId, +0x4).
+ *
+ * func_00307EC0 and func_00307F58 look tasks up by it.
+ *
+ * @param arg0  the task
+ * @return the task id
+ */
 extern "C" int func_0030D460(void *arg0) {
     return (*(int *)((char*)(arg0) + (4)));
 }
@@ -3806,6 +4131,13 @@ extern "C" int func_0030D460(void *arg0) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D468);
 #ifdef SKIP_ASM
+/**
+ * Marks a script task aborted: sets its state word (+0x0) to 3.
+ *
+ * func_00307EC0 does the same to the task it leaves.
+ *
+ * @param arg0  the task
+ */
 extern "C" void func_0030D468(int *arg0) {
     *arg0 = 3;
 }
@@ -3813,6 +4145,12 @@ extern "C" void func_0030D468(int *arg0) {
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D478);
 #ifdef SKIP_ASM
+/**
+ * Returns a mission's sort key (On Tour SortKey, +0x64).
+ *
+ * @param arg0  the mission
+ * @return the sort key
+ */
 extern "C" int func_0030D478(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x64)));
 }
@@ -3837,6 +4175,12 @@ extern "C" void* func_0030C8D8(int, int);
 //100%
 INCLUDE_ASM("wscript/wscriptman", func_0030D488);
 #ifdef SKIP_ASM
+/**
+ * Returns whether a mission's scope (On Tour Scope, +0x60) is 2, i.e. the mission is local.
+ *
+ * @param arg0  the mission
+ * @return 1 when the scope is 2, else 0
+ */
 extern "C" int func_0030D488(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x60))) == 2;
 }
@@ -3845,6 +4189,13 @@ extern "C" int func_0030D488(void *arg0) {
 //99.38%
 INCLUDE_ASM("wscript/wscriptman", func_0030D498__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs this unit's static constructors: calls func_0030C8D8 with (1, 0xFFFF).
+ *
+ * Listed in the global constructor table (word at 0x0043CEAC).
+ *
+ * @return func_0030C8D8's result
+ */
 void* func_0030D498(void* self)
 {
     return func_0030C8D8(1, 0xffff);
@@ -3863,6 +4214,16 @@ struct sWSSlot8 {
     int b;
 };
 
+/**
+ * Constructs an empty animated model (cAnimModel): no parts, bones or matrices yet, and a scale of (1, 1, 1, 1).
+ *
+ * Nulls the bone matrices unk_030, unk_034 and unk_038, bones, parts, partIndex, boneChannelIndex, localPos and
+ * localRot, zeroes numParts, unk_03C, the words at +0x12C and +0x130 and the second word of each lodInfo entry, and
+ * sets unk_140 to (1, 1, 1, 1). feridermanager allocates 352 bytes tagged "AnimModel" for it, then calls
+ * func_0030D840 with (100, 15).
+ *
+ * @return @p self
+ */
 extern "C" void* func_0030D4B8(void* self)
 {
     sWSVec4 ones;
@@ -4063,6 +4424,16 @@ struct func_0030D840_sPool {
     int field_0x60; // 0x60
 };
 
+/**
+ * Sets up an animated model's part storage: allocates @p count zeroed 0x58-byte sAnimModelPart records.
+ *
+ * Stores @p count as the part capacity (+0x0) and @p a2 as numLodRefs (+0x4), allocates parts (+0xC) with operator
+ * new tagged "ModelRefs", clears them with MEM_fill, and zeroes numParts (+0x8) and the word at +0x60.
+ * feridermanager calls it with (100, 15) right after func_0030D4B8.
+ *
+ * @param count  how many parts the model can hold
+ * @param a2  refs per LOD slot (numLodRefs), how many cAnimModel_addModelPartLOD allocates
+ */
 extern "C" void func_0030D840(func_0030D840_sPool* self, int count, int a2)
 {
     self->field_0x4 = a2;

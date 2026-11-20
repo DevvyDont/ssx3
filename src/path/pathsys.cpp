@@ -123,6 +123,16 @@ struct sPathSys {
     sPathEntry3C* entries3C; // 0x14
 };
 
+/**
+ * Returns the index of track path @p entry in the path system's track path array (+0x14, 0x3C bytes each), or -1.
+ *
+ * Searches the first count (+0x10) entries by address; a null @p entry or one not in the array gives -1.
+ * cRiderHandler_writeToReplayFrame stores the rider's track path (+0xAB4) this way, and the read side turns the index
+ * back into a pointer with cPathSys_getTrackPath.
+ *
+ * @param entry  the track path to look up
+ * @return its index, or -1
+ */
 extern "C" int func_0026B508(sPathSys* self, sPathEntry3C* entry)
 {
     int i;
@@ -140,6 +150,16 @@ extern "C" int func_0026B508(sPathSys* self, sPathEntry3C* entry)
 //100%
 INCLUDE_ASM("path/pathsys", func_0026B550);
 #ifdef SKIP_ASM
+/**
+ * Returns the index of AI path @p entry in the path system's AI path array (+0xC, 0x40 bytes each), or -1.
+ *
+ * Searches the first count (+0x8) entries by address; a null @p entry or one not in the array gives -1.
+ * cRiderHandler_writeToReplayFrame stores the rider's AI path (+0xAB8) this way, and the read side turns the index back
+ * into a pointer with cPathSys_getAIPath.
+ *
+ * @param entry  the AI path to look up
+ * @return its index, or -1
+ */
 extern "C" int func_0026B550(sPathSys* self, sPathEntry40* entry)
 {
     int i;
@@ -224,6 +244,15 @@ extern "C" sPathEntry* cPathSys_getStartpoint(sPathEntryList* list, int type, in
 //100%
 INCLUDE_ASM("path/pathsys", func_0026B648);
 #ifdef SKIP_ASM
+/**
+ * Returns startpoint @p index of the path system (0x28-byte records at +0x4), or 0 when out of range.
+ *
+ * Returns 0 when the startpoint count (+0x0) is not positive, or @p index is negative or not below it.
+ *
+ * @param list  the path system
+ * @param index  the startpoint index
+ * @return the startpoint, or 0
+ */
 extern "C" int func_0026B648(void *list, int index) {
     int temp_2;
 
@@ -328,6 +357,17 @@ struct sPathSys_B7D8 {
     sPathPair_B7D8 pairs[1];    // 0x18
 };
 
+/**
+ * Reads the path file's checkpoint table into the path system's checkpoint list (+0x18, 8 bytes each).
+ *
+ * Reads the count, then per checkpoint a float into the second word (On Tour DistanceLeft) with func_0026BA88 and an
+ * int into the first (On Tour TimeBonusSec) with pathREAD_tInt32. cPathSys_resolvePaths calls it after the AI and track
+ * paths. Likely bug: the count is not limited to the list's 6 slots (On Tour skips entries past 6), so a larger count
+ * would write over the data pointer at +0x48 and beyond.
+ *
+ * @param cursor  the file data at the checkpoint count
+ * @return the number of bytes consumed
+ */
 extern "C" int func_0026B7D8(sPathSys_B7D8* self, char* cursor)
 {
     int count;
@@ -370,6 +410,18 @@ struct sPathSys_B880 {
     char* f14;                  // 0x14
 };
 
+/**
+ * Reads the path file's startpoints in place: points the startpoint array (+0x4) into the file and fills each record.
+ *
+ * Reads the count into +0x0, then for each 0x28-byte startpoint its arg (+0x0), a type code, its position (+0x8) and
+ * direction (+0x14) with func_0026BA48, and an AI path index and a track path index. The type (+0x4) becomes the
+ * position of the code in D_00445428 {-1, 0, 1} (else 0), and the indices become pointers into the AI path array
+ * (+0xC, 0x40 bytes each; stored at +0x24) and the track path array (+0x14, 0x3C bytes each; stored at +0x20), so it
+ * must run after those are loaded. cPathSys_resolvePaths calls it last.
+ *
+ * @param p  the file data at the startpoint count
+ * @return the number of bytes consumed
+ */
 extern "C" int func_0026B880(sPathSys_B880* self, char* p)
 {
     int tmp;
@@ -412,6 +464,14 @@ extern "C" void* MEM_copy(void*, void*, int);
 //100%
 INCLUDE_ASM("path/pathsys", func_0026BA48);
 #ifdef SKIP_ASM
+/**
+ * Copies a 12-byte vector (three floats) from the path file at @p src to @p dst, unless they are the same address.
+ *
+ * Used by func_0026B880 for startpoint positions and directions and by the path readers for nodes and bounds.
+ *
+ * @param dst  the destination vector
+ * @param src  the file data
+ */
 extern "C" void func_0026BA48(void* dst, void* src)
 {
     if (dst != src) {
@@ -443,6 +503,15 @@ extern "C" void pathREAD_tInt32(void* dst, void* src)
 //100%
 INCLUDE_ASM("path/pathsys", func_0026BA88);
 #ifdef SKIP_ASM
+/**
+ * Copies a 4-byte float from the path file at @p src to @p dst, unless they are the same address.
+ *
+ * Used for float fields of the path data (cTrackPath_populateData's base distance at +0x38, func_0026B7D8's
+ * checkpoint distances).
+ *
+ * @param dst  the destination float
+ * @param src  the file data
+ */
 extern "C" void func_0026BA88(void* dst, void* src)
 {
     if (dst != src) {
@@ -454,6 +523,14 @@ extern "C" void func_0026BA88(void* dst, void* src)
 //100%
 INCLUDE_ASM("path/pathsys", func_0026BAA8);
 #ifdef SKIP_ASM
+/**
+ * Returns its first argument and ignores the rest.
+ *
+ * A variadic do-nothing: it only spills the remaining argument registers (a1-a7, f12-f18) into its frame. Nothing in
+ * the build calls it.
+ *
+ * @return @p self
+ */
 extern "C" void* func_0026BAA8(void* self, ...)
 {
     return self;
@@ -558,6 +635,17 @@ extern sSlot_BAE8 D_004A5158;
 // Static initialisation of the unit's colour globals (g++ __static_initialization_and_destruction_0).
 // The unit declares func_0026BAE8 returning void*; bind this definition by asm label.
 extern "C" void func_0026BAE8_init(int initialize, int priority) __asm__("func_0026BAE8");
+/**
+ * Builds pathsys.cpp's static constants (this unit's g++ static initialisation routine).
+ *
+ * Acts only when @p initialize is nonzero and @p priority is 0xFFFF; there is no destruction branch. Fills the 56
+ * four-float constants D_004D2FB8..D_004D3328, the three-float vectors D_004D3338 (1, 0, 0.5), D_004D3348 (0.5, 0, 0),
+ * D_004D3358 (0, 0.5, 1) and D_004D3368 (0, 0, 0.5), the nine floats D_004D3378 (1, 1, 1, 0.5, 0.5, 0.5, 0.8, 0.3,
+ * 0.8), and gives the key D_004A5158 -1 in both its fields. func_0026C438 runs it with (1, 0xFFFF).
+ *
+ * @param initialize  nonzero to build the constants
+ * @param priority  initialisation priority; nothing happens unless it is 0xFFFF (the default)
+ */
 extern "C" void func_0026BAE8_init(int initialize, int priority)
 {
     if (priority == 0xFFFF && initialize != 0) {
@@ -638,6 +726,15 @@ extern "C" void func_0026BAE8_init(int initialize, int priority)
 //100%
 INCLUDE_ASM("path/pathsys", func_0026C3D0);
 #ifdef SKIP_ASM
+/**
+ * Returns a path's start point as a four-float vector: the three floats at +0xC of @p src with w = 1.
+ *
+ * Writes the result to @p dst (a struct return).
+ *
+ * @param dst  where the vector is written
+ * @param src  the path
+ * @return @p dst
+ */
 extern "C" void* func_0026C3D0(void* dst, void* src)
 {
     *(float*)((char*)dst + 0x0) = *(float*)((char*)src + 0xC);
@@ -650,6 +747,12 @@ extern "C" void* func_0026C3D0(void* dst, void* src)
 //100%
 INCLUDE_ASM("path/pathsys", func_0026C400);
 #ifdef SKIP_ASM
+/**
+ * Returns a path's event array (+0x4, On Tour Events).
+ *
+ * @param arg0  the path
+ * @return the 16-byte event nodes
+ */
 extern "C" int func_0026C400(void *arg0) {
     return (*(int *)((char*)(arg0) + (4)));
 }
@@ -657,6 +760,12 @@ extern "C" int func_0026C400(void *arg0) {
 //100%
 INCLUDE_ASM("path/pathsys", func_0026C408);
 #ifdef SKIP_ASM
+/**
+ * Returns a path's event count (+0x0, On Tour NumEvents).
+ *
+ * @param arg0  the path
+ * @return the number of events
+ */
 extern "C" int func_0026C408(int *arg0) {
     return *arg0;
 }
@@ -665,6 +774,9 @@ extern "C" int func_0026C408(int *arg0) {
 //100%
 INCLUDE_ASM("path/pathsys", func_0026C410__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (an empty out-of-line inline method).
+ */
 void func_0026C410(void* self)
 {
 }
@@ -673,6 +785,9 @@ void func_0026C410(void* self)
 //100%
 INCLUDE_ASM("path/pathsys", func_0026C418__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (an empty out-of-line inline method).
+ */
 void func_0026C418(void* self)
 {
 }
@@ -683,6 +798,12 @@ extern "C" void* func_0026BAE8(int, int);
 //100%
 INCLUDE_ASM("path/pathsys", func_0026C420);
 #ifdef SKIP_ASM
+/**
+ * Returns an AI path's attribute word (+0x38, On Tour PathAttributes).
+ *
+ * @param arg0  the AI path
+ * @return the attributes
+ */
 extern "C" int func_0026C420(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x38)));
 }
@@ -690,6 +811,12 @@ extern "C" int func_0026C420(void *arg0) {
 //100%
 INCLUDE_ASM("path/pathsys", func_0026C428);
 #ifdef SKIP_ASM
+/**
+ * Returns an AI path's reset-path flag (+0x3C, On Tour IsResetPath).
+ *
+ * @param arg0  the AI path
+ * @return nonzero for a reset path
+ */
 extern "C" int func_0026C428(void *arg0) {
     return (*(int *)((char*)(arg0) + (0x3C)));
 }
@@ -697,6 +824,12 @@ extern "C" int func_0026C428(void *arg0) {
 //100%
 INCLUDE_ASM("path/pathsys", func_0026C430);
 #ifdef SKIP_ASM
+/**
+ * Returns a track path's base distance left (+0x38, On Tour BaseDistanceLeft), the float cTrackPath_populateData reads.
+ *
+ * @param arg0  the track path
+ * @return the distance
+ */
 extern "C" float func_0026C430(void *arg0) {
     return (*(float *)((char*)(arg0) + (0x38)));
 }
@@ -705,6 +838,13 @@ extern "C" float func_0026C430(void *arg0) {
 //99.38%
 INCLUDE_ASM("path/pathsys", func_0026C438__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs this unit's static constructors: calls func_0026BAE8 with (1, 0xFFFF).
+ *
+ * Listed in the global constructor table (word at 0x0043CE7C).
+ *
+ * @return func_0026BAE8's result
+ */
 void* func_0026C438(void* self)
 {
     return func_0026BAE8(1, 0xffff);

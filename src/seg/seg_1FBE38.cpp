@@ -5933,8 +5933,8 @@ extern unsigned D_004A57F0_4320 __asm__("D_004A57F0");
 extern sBindEnd_1FBE38 D_004A57F4_4320 __asm__("D_004A57F4");
 extern int D_004A57F8_4320 __asm__("D_004A57F8");
 extern int D_004A3D58_4320[2] __asm__("D_004A3D58");
-// Inline accessor of the current script process (wscript/wscriptman func_0030D2D8 is its out-of-line copy). Calling it
-// at each use gives the shared copy of the pointer the target keeps (lw; move) instead of one cached local.
+// Inline accessor of the script manager, cWScriptMan_TheWScriptMan (wscript/wscriptman func_0030D2D8 is its
+// out-of-line copy). Calling it at each use gives the shared copy of the pointer the target keeps (lw; move) instead of one cached local.
 static inline cWScriptMan *curProcess_4320() { return cWScriptMan_TheWScriptMan; }
 void func_0030B508(void*, int, void*);
 extern "C" cLunoValue func_00304320(int n, sBindArg_1FBE38* e) {

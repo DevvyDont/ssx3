@@ -577,8 +577,9 @@ static inline int overlapBox_3309D8(const sBox_3309D8* b, const sBox_3309D8* o)
  * Walks the cell's instance list (@p tree +0x20). An instance flagged 0x20 is tested with its stored box (+0x60 min,
  * +0x6C max); one flagged 0x40 asks its object (+0xC) through virtual slot 44 whether it takes part and through slot 45
  * for its box. Each overlapping instance is appended at @p ctx list[*count] (+0x0, +0x4) and the count incremented. The
- * maximum (+0x8) is never checked, so a full list overflows. Called by the octree walkers (func_00331450,
- * func_00332DB8, func_003378C0 and others) as their cell callback.
+ * maximum (+0x8) is never checked, so a full list overflows. The octree walkers take it as their cell callback:
+ * func_00330BA8, func_00331E90, func_00332DB8, the helpX walkers func_00338920, func_0033A3D8 and func_0033B748, and
+ * func_00340A40, func_00340C20 and func_00340DC0.
  *
  * @param ctx  the callback: instance list, count pointer, maximum, query box (On Tour OverlapInstancesCallback, this)
  * @param tree  the octree cell (On Tour const Cell& cell)
@@ -673,6 +674,18 @@ static inline void queryCell_330BA8(sGrid_330BA8* grid, int i, void* box, sCtx_3
     }
 }
 
+/**
+ * Collects the instances whose bounds overlap @p box into the overlap list, walking the Nash's eight octants.
+ *
+ * Copies the Nash's (+0x0) delete count (+0xA0) to +0x4 and clears the instance count (+0x8), then runs an instance
+ * collector (array +0xC, count +0x8, maximum 0x40, @p box) over every octant that has a root cell. When
+ * nash_CellKey_proximitytest answers 0 (inside), the root goes to OverlapInstancesCallback_operatorCall and its
+ * children to func_00340A40 (whole subtrees); when it answers 2 (crossing), the cell goes to func_00338920. Finally
+ * sets the patch count (+0x10C) and the typed count (+0x210) to -1, marking those lists as not collected. Nothing in
+ * the code calls it directly.
+ *
+ * @param box  the query box: min at +0x0, max at +0x10
+ */
 extern "C" void func_00330BA8(sQuery_330BA8* self, sBox_3309D8* box)
 {
     sCtx_3309D8 ctx;
@@ -772,6 +785,18 @@ static inline int queryCell_331450(sGrid_331450* grid, int i, void* box, sCtx_33
     return r;
 }
 
+/**
+ * Collects every typed node of the octree cells that overlap @p box into the overlap list's typed list.
+ *
+ * Copies the Nash's (+0x0) delete count (+0xA0) to +0x4, clears the typed count (+0x210) and walks the eight octants
+ * with a typed collector (array +0x214, count +0x210, maximum 0x200, @p box). An inside cell
+ * (nash_CellKey_proximitytest 0) has its typed list (cell +0x28) appended and its children walked whole by
+ * func_00340B18; a crossing cell (2) goes to func_00339598. The nodes themselves are not box-tested and the maximum is
+ * never checked (likely bug: more than 0x200 typed nodes in the visited cells overrun the array). Sets the instance
+ * count (+0x8) and the patch count (+0x10C) to -1. Called by func_002F5400.
+ *
+ * @param box  the query box: min at +0x0, max at +0x10
+ */
 extern "C" void func_00331450(sQuery_331450* self, sBox_3309D8* box)
 {
     sCtx_3309D8 ctx;
@@ -894,6 +919,18 @@ static inline void queryCell_331E90(sGrid_331E90* grid, int i, sBox_3309D8* box,
     }
 }
 
+/**
+ * Collects the instances and the patches whose bounds overlap @p box into the overlap list.
+ *
+ * Copies the Nash's (+0x0) delete count (+0xA0) to +0x4 and clears the instance count (+0x8) and the patch count
+ * (+0x10C). For each of the eight octants with a root cell, nash_CellKey_proximitytest 0 (inside) runs
+ * OverlapInstancesCallback_operatorCall on the cell, appends each patch of its patch list (+0x24) whose box (+0x158
+ * min, +0x164 max) overlaps @p box to the patch array (+0x110), and walks the children whole through func_00340C20; 2
+ * (crossing) hands the cell to func_0033A3D8. The patch maximum (0x40) is stored but never checked. Sets the typed
+ * count (+0x210) to -1. Nothing in the code calls it directly.
+ *
+ * @param box  the query box: min at +0x0, max at +0x10
+ */
 extern "C" void func_00331E90(sQuery_331E90* self, sBox_3309D8* box)
 {
     sCtx2_331E90 ctx;
@@ -1034,6 +1071,19 @@ static inline void queryCell_332DB8(sGrid_332DB8* grid, int i, sBox_3309D8* box,
     }
 }
 
+/**
+ * Collects the instances, the patches and the typed nodes of the octree cells that overlap @p box into the overlap
+ * list.
+ *
+ * Copies the Nash's (+0x0) delete count (+0xA0) to +0x4 and clears all three counts. Instances go through
+ * OverlapInstancesCallback_operatorCall into +0xC (count +0x8), patches whose box (+0x158 min, +0x164 max) overlaps
+ * @p box into +0x110 (count +0x10C), and every typed node of a visited cell (cell +0x28) into +0x214 (count +0x210)
+ * with no box test and no maximum check. Inside octants (nash_CellKey_proximitytest 0) are walked whole, the children
+ * through func_00340DC0; crossing ones (2) go to func_0033B748. Called by cRider_loadRider, cRider_putAt,
+ * cRider_updateOverlapList and cRider_updateSplit1.
+ *
+ * @param box  the query box: min at +0x0, max at +0x10
+ */
 extern "C" void func_00332DB8(sQuery_332DB8* self, sBox_3309D8* box)
 {
     sCtx3_332DB8 ctx;
@@ -1211,6 +1261,26 @@ static inline void reset_333EF8(sHit_333EF8* h)
     h->v = 0;
 }
 
+/**
+ * Intersects a query with the patches and instances already in the overlap list, storing the hits; returns their count.
+ *
+ * Patches (array +0x110, count +0x10C) with both bits of 0x41 set in their flags (+0xA) and a box (+0x158 min, +0x164
+ * max) overlapping the query's box (max +0x20, min +0x30) get their forward differences from the Nash's (+0x0) AI cache
+ * (+0xA4) through cAIFwdDiffCache_GetFwdDiff and are tested with cWorldIntersectType_IsPatchInt. Each hit resets its
+ * 0x80-byte record (On Tour tIntersectInfo::Init) and stores position, normal, the patch's surface id (+0x8), the
+ * patch, the parameter, and u and v. Then instances (array +0xC, count +0x8) whose +0x88 word is set: a flag 0x20 one
+ * is box-tested against its stored box (+0x60 min, +0x6C max), a flag 0x40 one needs a non-null object (+0xC) that
+ * answers true through virtual slot 44 and whose slot 45 box overlaps; each passes to intersect_instanceIntersect (mode
+ * 2) with the room left. Patch hits are not checked against @p cap. Called by func_003342D0 and
+ * cGroundMotion_setupGroundVectors.
+ *
+ * @param vself  the overlap list
+ * @param vq  the query (On Tour cWorldIntersectType)
+ * @param vhits  out: the hit records, 0x80 bytes each
+ * @param cap  the number of records @p vhits holds
+ * @param hitCache  passed to cWorldIntersectType_IsPatchInt as its last argument (On Tour tIntHint *hint)
+ * @return the number of hits stored
+ */
 extern "C" int func_00333EF8(void* vself, void* vq, sHit_003342D0* vhits, int cap, int hitCache)
 {
     sTree_333EF8* self = (sTree_333EF8*)vself;
@@ -1310,6 +1380,21 @@ static inline int isBetter_003342D0(sHit_003342D0* a, sHit_003342D0* b)
     return *(unsigned int*)(a->tri + 0x150) < *(unsigned int*)(b->tri + 0x150);
 }
 
+/**
+ * Returns the parameter of the overlap-list terrain hit nearest the query's ideal parameter, copying the hit to
+ * @p out.
+ *
+ * Collects up to 64 hits with func_00333EF8 into a stack array and returns -1.0 when there are none. Otherwise picks
+ * the hit whose parameter (+0x40) is closest to the query's virtual slot 3 (On Tour GetIdealParam). On a tie an
+ * instance hit (+0x50) beats a patch hit (+0x54), two instances compare their +0x78 words and two patches their +0x150
+ * words, the smaller winning (On Tour orderIntersectInfo). Called by the rider motion code (cAirMotion_intersectBoard,
+ * cGroundMotion_checkWallCollisions, cWipeoutMotion_intersectGround and others).
+ *
+ * @param query  the query (On Tour cWorldIntersectType)
+ * @param out  out: the chosen hit (0x80 bytes)
+ * @param hitCache  passed through to func_00333EF8 (On Tour tIntHint *hint)
+ * @return the chosen hit's parameter, or -1.0
+ */
 extern "C" float func_003342D0(void* self, char* query, sHit_003342D0* out, int hitCache)
 {
     sHit_003342D0 hits[64];
@@ -1401,6 +1486,21 @@ static inline int overlapBox_334458(const sQuery_334458* q, const sBox_334458* o
     return r;
 }
 
+/**
+ * Intersects a query with the instances in the overlap list, storing the hits; returns their count.
+ *
+ * Walks the instance array (+0xC, count +0x8): a flag 0x20 instance is box-tested against its stored box (+0x60 min,
+ * +0x6C max), a flag 0x40 one asks its object (+0xC) through virtual slots 44 (takes part) and 45 (box). Each one that
+ * overlaps the query's box (max +0x20, min +0x30) goes to intersect_instanceIntersect with the room left, in mode 2
+ * when @p full is set and 1 otherwise. Unlike func_00333EF8 it neither skips instances whose +0x88 word is 0 nor checks
+ * the object for null. Called by func_00104E70.
+ *
+ * @param query  the query (On Tour cWorldIntersectType)
+ * @param buf  out: the hit records, 0x80 bytes each
+ * @param cap  the number of records @p buf holds
+ * @param full  nonzero selects mode 2 instead of 1 (On Tour includeridable)
+ * @return the number of hits stored
+ */
 extern "C" int func_00334458(sList_334458* self, sQuery_334458* query, char* buf, int cap, int full)
 {
     int mode = 1;
@@ -2232,6 +2332,25 @@ static inline void reset_335128(sHit_335128* h)
 // a coarse 4-segment scan, then a golden-section search.
 // The unit declares func_00335128 with an int last parameter; bind the typed definition by asm label.
 extern "C" void func_00335128_typed(sCurveObj_335128* pSplineSeg, sBox_00334680* box, sV_335128* intersectpos, bool* hit, float* intersectdist, sHit_335128* intersectinfo) __asm__("func_00335128");
+/**
+ * Finds the point of a spline segment nearest @p intersectpos and records it when it beats the best hit so far.
+ *
+ * Returns at once when the segment's box (+0x6C min, +0x78 max) misses @p box. Otherwise samples the cubic (coefficient
+ * rows at +0x10: point = rows times (w^3, w^2, w, 1)) at w = 0, 0.25 .. 1, takes the chord nearest @p intersectpos, and
+ * runs a golden-section search (ratio 0.618034, at most 24 steps, until the bracket is under 0.0005) inside the bracket
+ * D_0048E560/D_0048E578 give for that chord. When no hit is recorded yet or the result is nearer than
+ * @p intersectdist, sets @p hit and @p intersectdist and resets @p intersectinfo, storing the point, the normalised
+ * tangent there as the normal, the owner's (+0x68) +0x28 word as the surface id, the owner as the spline record and the
+ * parameter as T. Called by cOverlapList_splineIntersect, func_00337A48 and the spline octree walkers (func_0033ED60,
+ * func_003411B8).
+ *
+ * @param pSplineSeg  the spline segment
+ * @param box  the query box
+ * @param intersectpos  the point to test
+ * @param hit  in/out: whether a hit is recorded
+ * @param intersectdist  in/out: the distance of the recorded hit
+ * @param intersectinfo  out: the hit record (0x80 bytes)
+ */
 extern "C" void func_00335128_typed(sCurveObj_335128* pSplineSeg, sBox_00334680* box, sV_335128* intersectpos, bool* hit, float* intersectdist, sHit_335128* intersectinfo)
 {
     if (box->max.x < pSplineSeg->bmin[0] || box->min.x > pSplineSeg->bmax[0] ||
@@ -2408,6 +2527,19 @@ static inline void reset_335960(sHit_335960* h)
     h->v = 0;
 }
 
+/**
+ * Intersects one patch with a terrain query and appends the hit to the query's hit list.
+ *
+ * Skips the patch unless both bits of 0x41 are set in its flags (+0xA) and its box (+0x158 min, +0x164 max) overlaps
+ * the query's box (max +0x20, min +0x30). Gets its forward differences from the context's cache
+ * (cAIFwdDiffCache_GetFwdDiff), tests it with cWorldIntersectType_IsPatchInt and, on a hit, resets record *count of the
+ * hit array (On Tour tIntersectInfo::Init), stores position, normal, the patch's surface id (+0x8), the patch, the
+ * parameter, and u and v, and increments the count. The count is not checked against the maximum. Called per patch by
+ * the Nash terrain walk (func_00335D78, func_0033CCF8, func_0033DBE8, func_00340FA0).
+ *
+ * @param vctx  the terrain query: query, hit array, maximum, count pointer, hint, AI forward-difference cache
+ * @param vobj  the patch
+ */
 extern "C" void func_00335960(void* vctx, void* vobj)
 {
     sCtx_335960* ctx = (sCtx_335960*)vctx;
@@ -2506,6 +2638,18 @@ static inline void collect_335B90(sCtx_335B90* ctx, sNode_335B90* node)
     *ctx->count += intersect_instanceIntersect(ctx->q, node, ctx->buf + n * 0x80, ctx->cap - n, 2);
 }
 
+/**
+ * Intersects one instance with a terrain query and adds its hits to the query's hit list.
+ *
+ * Skips instances whose +0x88 word is 0. A flag 0x20 instance is box-tested against its stored box (+0x60 min, +0x6C
+ * max); a flag 0x40 one needs a non-null object (+0xC) that answers true through virtual slot 44 and whose slot 45 box
+ * overlaps. Each overlapping instance goes to intersect_instanceIntersect (mode 2) at record *count with the room left,
+ * and the count grows by its result. Called per instance by the Nash terrain walk (func_00335D78, func_0033CCF8,
+ * func_0033DBE8, func_00340FA0).
+ *
+ * @param vctx  the terrain query: query, hit array, maximum, count pointer
+ * @param vnode  the instance
+ */
 extern "C" void func_00335B90(void* vctx, void* vnode)
 {
     sCtx_335B90* ctx = (sCtx_335B90*)vctx;
@@ -2609,6 +2753,21 @@ static inline void queryCell_335D78(sGrid_335D78* grid, int i, sBox_335D78* box,
 
 struct sHit_00336850;
 
+/**
+ * Intersects a query with the terrain of the Nash's octree, storing the hits; returns their count.
+ *
+ * Builds a terrain query context (the query, @p hits, @p cap, a local count, @p hitCache and the AI forward-difference
+ * cache at +0xA4) and the query's box (min +0x30, max +0x20). For each of the eight octants with a root cell,
+ * nash_CellKey_proximitytest 0 (inside) feeds the cell's patch list (+0x24) to func_00335960, its instance list (+0x20)
+ * to func_00335B90 and its children to func_00340FA0; 2 (crossing) goes to func_0033CCF8. Called by func_00336850.
+ *
+ * @param vself  the Nash
+ * @param vq  the query (On Tour cWorldIntersectType)
+ * @param hits  out: the hit records, 0x80 bytes each
+ * @param cap  the number of records @p hits holds
+ * @param hitCache  passed to cWorldIntersectType_IsPatchInt for each patch (On Tour tIntHint *hint)
+ * @return the number of hits stored
+ */
 extern "C" int func_00335D78(void* vself, void* vq, sHit_00336850* hits, int cap, int hitCache)
 {
     sGrid_335D78* grid = (sGrid_335D78*)vself;
@@ -2676,6 +2835,20 @@ static inline int isBetter_00336850(sHit_00336850* a, sHit_00336850* b)
     return *(unsigned int*)(a->tri + 0x150) < *(unsigned int*)(b->tri + 0x150);
 }
 
+/**
+ * Returns the parameter of the Nash terrain hit nearest the query's ideal parameter, copying that hit to @p out.
+ *
+ * Collects up to 64 hits with func_00335D78 and returns -1.0 when there are none. Otherwise picks the hit whose
+ * parameter (+0x40) is closest to the query's virtual slot 3 (On Tour GetIdealParam); ties go to an instance hit over a
+ * patch hit, then to the smaller +0x78 (instances) or +0x150 (patches) word (On Tour orderIntersectInfo). Called on
+ * SSXApp->Game->BXNash by the camera (cCamera_avoidGround), the rider (cRider_putAt, cRider_GetNISEndPosition), the air
+ * predictor and others.
+ *
+ * @param q  the query (On Tour cWorldIntersectType)
+ * @param out  out: the chosen hit (0x80 bytes)
+ * @param a3  passed through to func_00335D78 (On Tour tIntHint *hint; cCamera_avoidGround passes its intersection hint)
+ * @return the chosen hit's parameter, or -1.0
+ */
 extern "C" float func_00336850(void* self, char* q, sHit_00336850* out, int a3)
 {
     sHit_00336850 hits[64];
@@ -2783,6 +2956,20 @@ static inline void visit_003369D8(sCell_369D8* c, char* flag, sQuery_369D8* q, s
     func_0033DBE8(flag, q, q, p, c->node, c);
 }
 
+/**
+ * Finds the terrain straight above or below @p pos; on a hit stores its position and normal and returns 1.
+ *
+ * Builds a vertical cWorldLine from 100000 below to 100000 above @p pos (precision 2, ideal parameter at 20 units above
+ * @p pos, clamped to 0..1) and a terrain query on it (64 hit records, no hint, the AI forward-difference cache at
+ * +0xA4), then walks each of the eight octants that has a root cell with func_0033DBE8. Returns 0 without hits;
+ * otherwise picks the hit whose height (z) is closest to @p pos's, ties going to an instance hit and then to the
+ * smaller +0x78 / +0x150 word, and copies that hit's position and normal out. Called by func_0027A0D8.
+ *
+ * @param pos  the point (x, y, z)
+ * @param outP  out: the hit position
+ * @param outN  out: the hit normal
+ * @return 1 on a hit, otherwise 0
+ */
 extern "C" int func_003369D8(sCell_369D8* self, float* pos, sQuad_369D8* outP, sQuad_369D8* outN)
 {
     char seg[176];
@@ -2927,6 +3114,18 @@ static inline void collect_336D40(sCtx_336D40* ctx, sNode_336D40* node, int mode
     *ctx->count += intersect_instanceIntersect(ctx->q, node, ctx->buf + n * 0x80, ctx->cap - n, mode);
 }
 
+/**
+ * Intersects one instance with a static-object query and adds its hits to the query's hit list.
+ *
+ * A flag 0x20 instance is box-tested against its stored box (+0x60 min, +0x6C max); a flag 0x40 one asks its object
+ * (+0xC) through virtual slots 44 (takes part) and 45 (box). Each overlapping instance goes to
+ * intersect_instanceIntersect at record *count with the room left, in mode 3 when the context's flag (+0x10) is set and
+ * 1 otherwise, and the count grows by its result. Unlike func_00335B90 it checks neither the +0x88 word nor a null
+ * object. Called per instance by the Nash static-object walk (func_00336F30, func_0033DFD8, func_003410C0).
+ *
+ * @param vctx  the static-object query: query, hit array, maximum, count pointer, include flag
+ * @param vnode  the instance
+ */
 extern "C" void func_00336D40(void* vctx, void* vnode)
 {
     sCtx_336D40* ctx = (sCtx_336D40*)vctx;
@@ -3023,6 +3222,21 @@ static inline void queryCell_336F30(sGrid_336F30* grid, int i, sBox_336F30* box,
 
 struct sHit_003378C0;
 
+/**
+ * Intersects a query with the instances of the Nash's octree, storing the hits; returns their count.
+ *
+ * Builds a static-object query context (the query, @p hits, @p cap, a local count, @p full) and the query's box (min
+ * +0x30, max +0x20). For each of the eight octants with a root cell, nash_CellKey_proximitytest 0 (inside) feeds the
+ * cell's instance list (+0x20) to func_00336D40 and its children to func_003410C0; 2 (crossing) goes to func_0033DFD8.
+ * Called by func_003378C0.
+ *
+ * @param vself  the Nash
+ * @param vq  the query (On Tour cWorldIntersectType)
+ * @param hits  out: the hit records, 0x80 bytes each
+ * @param cap  the number of records @p hits holds
+ * @param full  nonzero makes func_00336D40 pass mode 3 instead of 1 (On Tour includeRidable)
+ * @return the number of hits stored
+ */
 extern "C" int func_00336F30(void* vself, void* vq, sHit_003378C0* hits, int cap, int full)
 {
     sGrid_336F30* grid = (sGrid_336F30*)vself;
@@ -3089,6 +3303,19 @@ static inline int isBetter_003378C0(sHit_003378C0* a, sHit_003378C0* b)
     return *(unsigned int*)(a->tri + 0x150) < *(unsigned int*)(b->tri + 0x150);
 }
 
+/**
+ * Returns the parameter of the Nash static-object hit nearest the query's ideal parameter, copying that hit to @p out.
+ *
+ * Collects up to 128 hits with func_00336F30 and returns -1.0 when there are none. Otherwise picks the hit whose
+ * parameter (+0x40) is closest to the query's virtual slot 3 (On Tour GetIdealParam); ties go to an instance hit over a
+ * patch hit, then to the smaller +0x78 (instances) or +0x150 (patches) word. Called by tAvalancheNode_calculate and
+ * cAirPredictor_simStep.
+ *
+ * @param query  the query (On Tour cWorldIntersectType)
+ * @param out  out: the chosen hit (0x80 bytes)
+ * @param full  passed through to func_00336F30 (On Tour includeRidable)
+ * @return the chosen hit's parameter, or -1.0
+ */
 extern "C" float func_003378C0(void* self, char* query, sHit_003378C0* out, int full)
 {
     sHit_003378C0 hits[128];
@@ -3193,6 +3420,23 @@ static inline void queryCell_337A48(sGrid_337A48* grid, int i, sBox_00334680* bo
     }
 }
 
+/**
+ * Finds the rails and spline segments of the Nash's octree near @p pos and records the nearest in @p a2.
+ *
+ * Builds a box of half-size @p r around @p pos and a spline query (the point, @p a2, @p mask, a hit flag, a distance,
+ * the box). For each of the eight octants with a root cell, nash_CellKey_proximitytest 0 (inside) walks the cell's
+ * typed list (+0x28) and its children (func_003411B8); 2 (crossing) goes to func_0033ED60. Typed nodes of type 2 are
+ * tested with cRailModifier_splineIntersect, type 3 with func_00348290, and type 1 (a spline segment whose owner's
+ * +0x1C flags match @p mask) with func_00335128. Nothing in the code calls it; cOverlapList_splineIntersect does the
+ * same over an overlap list.
+ *
+ * @param grid  the Nash
+ * @param pos  the point to test
+ * @param a2  out: the nearest hit (On Tour intInfo)
+ * @param mask  which spline types to accept (On Tour splineFilterMask)
+ * @param r  the test radius
+ * @return nonzero when a hit was recorded
+ */
 extern "C" int func_00337A48(sGrid_337A48* grid, sWsVec4* pos, int a2, int mask, float r)
 {
     sBox_00334680 box;
@@ -3231,6 +3475,14 @@ extern "C" int func_00337A48(sGrid_337A48* grid, sWsVec4* pos, int a2, int mask,
 //100%
 INCLUDE_ASM("intersect/worldsphtree", func_003388E0);
 #ifdef SKIP_ASM
+/**
+ * Returns its first argument and ignores the rest.
+ *
+ * A variadic do-nothing: it only spills the remaining argument registers (a1-a7, f12-f18) into its frame. Nothing in
+ * the code calls it.
+ *
+ * @return @p self
+ */
 extern "C" void* func_003388E0(void* self, ...)
 {
     return self;
@@ -3244,6 +3496,23 @@ struct sCell_338920 {
     int x, y, z;
 };
 
+/**
+ * Walks a crossing octree cell for the overlap-list instance query: collects its instances, then visits its children.
+ *
+ * Runs OverlapInstancesCallback_operatorCall(@p ctx) on @p vnode and stops when the cell's level is 11. Otherwise
+ * splits the cell (level, x, y, z at @p vcell; size 2^level, built from the float exponent bits) into its eight
+ * children one level down, each widened by 0.2 child cell on every side. Each existing child (@p vnode +0x0..+0x1C)
+ * that overlaps @p vbox on all three axes is collected whole with @p ctx2 (the callback, then func_00340A40 for its
+ * children) when the box contains it, and recursed into otherwise. Children are visited in the key order 000, 001, 011,
+ * 010, 110, 111, 101, 100 (x, y, z). Called by func_00330BA8 for crossing root cells.
+ *
+ * @param flag  the empty helper object, only passed on to the recursion (On Tour In *this)
+ * @param ctx  the callback for crossing cells (On Tour oncross)
+ * @param ctx2  the callback for contained cells (On Tour oninside)
+ * @param vbox  the query box: min at +0x0, max at +0x10
+ * @param vnode  the cell (On Tour const Cell *)
+ * @param vcell  the cell's key: level, x, y, z (On Tour CellKey)
+ */
 extern "C" void func_00338920(char* flag, sCtx_3309D8* ctx, sCtx_3309D8* ctx2, void* vbox, void* vnode, void* vcell)
 {
     sBox_3309D8* box = (sBox_3309D8*)vbox;
@@ -3366,6 +3635,23 @@ struct sCell_339598 {
     int x, y, z;
 };
 
+/**
+ * Walks a crossing octree cell for the overlap-list typed query: collects its typed nodes, then visits its children.
+ *
+ * Appends every node of the cell's typed list (@p vnode +0x28) to @p ctx's list (count pointer +0x4), with no box test
+ * and no maximum check, and stops when the cell's level is 11. Otherwise splits the cell (level, x, y, z at @p vcell;
+ * size 2^level) into its eight children one level down, each widened by 0.2 child cell on every side. Each existing
+ * child that overlaps @p vbox on all three axes is collected whole with @p ctx2 (its typed list, then func_00340B18 for
+ * its children) when the box contains it, and recursed into otherwise, in the key order 000, 001, 011, 010, 110, 111,
+ * 101, 100. Called by func_00331450 for crossing root cells.
+ *
+ * @param flag  the empty helper object, only passed on to the recursion (On Tour In *this)
+ * @param ctx  the collector for crossing cells (On Tour oncross)
+ * @param ctx2  the collector for contained cells (On Tour oninside)
+ * @param vbox  the query box: min at +0x0, max at +0x10
+ * @param vnode  the cell (On Tour const Cell *)
+ * @param vcell  the cell's key: level, x, y, z (On Tour CellKey)
+ */
 extern "C" void func_00339598(char* flag, sCtx_3309D8* ctx, sCtx_3309D8* ctx2, void* vbox, void* vnode, void* vcell)
 {
     sBox_3309D8* box = (sBox_3309D8*)vbox;
@@ -3545,6 +3831,24 @@ struct sCell_33A3D8 {
     int x, y, z;
 };
 
+/**
+ * Walks a crossing octree cell for the overlap-list patch and instance query: collects both, then visits its children.
+ *
+ * Runs OverlapInstancesCallback_operatorCall(@p ctx) on @p vnode, then appends each patch of the cell's patch list
+ * (+0x24) whose box (+0x158 min, +0x164 max) overlaps the patch collector's box (@p ctx +0x10) to that collector's
+ * list, with no maximum check. Stops when the cell's level is 11; otherwise splits the cell (level, x, y, z at
+ * @p vcell; size 2^level) into its eight children one level down, each widened by 0.2 child cell on every side. Each
+ * existing child that overlaps @p vbox on all three axes is collected whole with @p ctx2 (then func_00340C20 for its
+ * children) when the box contains it, and recursed into otherwise, in the key order 000, 001, 011, 010, 110, 111, 101,
+ * 100. Called by func_00331E90 for crossing root cells.
+ *
+ * @param flag  the empty helper object, only passed on to the recursion (On Tour In *this)
+ * @param ctx  the instance and patch collectors for crossing cells (On Tour oncross)
+ * @param ctx2  the collectors for contained cells (On Tour oninside)
+ * @param vbox  the query box: min at +0x0, max at +0x10
+ * @param vnode  the cell (On Tour const Cell *)
+ * @param vcell  the cell's key: level, x, y, z (On Tour CellKey)
+ */
 extern "C" void func_0033A3D8(char* flag, sCtx_3309D8* ctx, sCtx_3309D8* ctx2, void* vbox, void* vnode, void* vcell)
 {
     sBox_3309D8* box = (sBox_3309D8*)vbox;
@@ -3751,6 +4055,24 @@ static inline void collect_33B748(sTree_33B748* self, sCtx_33B748* ctx)
 
 struct sCtx_340DC0;
 
+/**
+ * Walks a crossing octree cell for the overlap-list everything query: collects all three lists, then its children.
+ *
+ * Runs OverlapInstancesCallback_operatorCall on @p vnode, appends each patch of the cell's patch list (+0x24) whose box
+ * (+0x158 min, +0x164 max) overlaps the query box to the patch collector, and appends every typed node of the cell
+ * (+0x28) to the typed collector with no box test; no list's maximum is checked. Stops when the cell's level is 11;
+ * otherwise splits the cell (level, x, y, z at @p vcell; size 2^level) into its eight children one level down, each
+ * widened by 0.2 child cell on every side. Each existing child that overlaps @p vbox on all three axes is collected
+ * whole with @p vctx2 (then func_00340DC0 for its children) when the box contains it, and recursed into otherwise, in
+ * the key order 000, 001, 011, 010, 110, 111, 101, 100. Called by func_00332DB8 for crossing root cells.
+ *
+ * @param flag  the empty helper object, only passed on to the recursion (On Tour In *this)
+ * @param vctx  the instance, patch and typed collectors for crossing cells (On Tour oncross)
+ * @param vctx2  the collectors for contained cells (On Tour oninside)
+ * @param vbox  the query box: min at +0x0, max at +0x10
+ * @param vnode  the cell (On Tour const Cell *)
+ * @param vcell  the cell's key: level, x, y, z (On Tour CellKey)
+ */
 // Declared as func_00332DB8 (its caller) declares it; sCtx_340DC0 has sCtx_33B748's layout.
 extern "C" void func_0033B748(char* flag, sCtx_340DC0* vctx, sCtx_340DC0* vctx2, void* vbox, void* vnode, void* vcell)
 {
@@ -3876,6 +4198,23 @@ struct sCell_33CCF8 {
     int x, y, z;
 };
 
+/**
+ * Walks a crossing octree cell for the Nash terrain query: intersects its patches and instances, then its children.
+ *
+ * Feeds the cell's patch list (@p vnode +0x24) to func_00335960 and its instance list (+0x20) to func_00335B90 with
+ * @p ctx, and stops when the cell's level is 11. Otherwise splits the cell (level, x, y, z at @p vcell; size 2^level)
+ * into its eight children one level down, each widened by 0.2 child cell on every side. Each existing child that
+ * overlaps @p vbox on all three axes is walked whole with @p ctx2 (its lists, then func_00340FA0 for its children) when
+ * the box contains it, and recursed into otherwise, in the key order 000, 001, 011, 010, 110, 111, 101, 100. Called by
+ * func_00335D78 for crossing root cells.
+ *
+ * @param flag  the empty helper object, only passed on to the recursion (On Tour In *this)
+ * @param ctx  the terrain query for crossing cells (On Tour oncross)
+ * @param ctx2  the terrain query for contained cells (On Tour oninside)
+ * @param vbox  the query box: min at +0x0, max at +0x10
+ * @param vnode  the cell (On Tour const Cell *)
+ * @param vcell  the cell's key: level, x, y, z (On Tour CellKey)
+ */
 extern "C" void func_0033CCF8(char* flag, sCtx_335960* ctx, sCtx_335960* ctx2, void* vbox, void* vnode, void* vcell)
 {
     sBox_3309D8* box = (sBox_3309D8*)vbox;
@@ -4043,6 +4382,23 @@ static inline int Classify_DBE8(sCtx_DBE8* ctx, sCell_DBE8* c)
     return 2;
 }
 
+/**
+ * Walks an octree cell for the vertical-line terrain query: tests the cell against the line, then its children.
+ *
+ * Classifies the cell (level, x, y, z at @p vcell; size 2^level, widened by 0.2 cell) against the vertical line through
+ * the point @p vctx holds: outside when the point's x or y lies outside the cell's span, crossing otherwise. The test
+ * never answers inside (0), so the branch that walks the cell whole with @p insideQuery (func_00335960, func_00335B90,
+ * func_00340FA0) is dead. A crossing cell feeds its patch list (+0x24) to func_00335960 and its instance list (+0x20)
+ * to func_00335B90 with @p query, stops when the level is 11, and otherwise recurses into each existing child with its
+ * key, in the order 000, 100, 110, 010, 011, 111, 101, 001 (x, y, z). Called by func_003369D8 for each root cell.
+ *
+ * @param flag  the empty helper object, only passed on to the recursion (On Tour In *this)
+ * @param query  the terrain query for crossing cells (On Tour oncross)
+ * @param insideQuery  the terrain query for contained cells (On Tour oninside)
+ * @param vctx  the line test: a pointer to the point (On Tour VerticalLineProximityTest)
+ * @param vnode  the cell (On Tour const Cell *)
+ * @param vcell  the cell's key: level, x, y, z (On Tour CellKey)
+ */
 extern "C" void func_0033DBE8(char* flag, sQuery_369D8* query, sQuery_369D8* insideQuery, sCtx_369D8* vctx, void* vnode, sCell_369D8* vcell)
 {
     sCtx_DBE8* ctx = (sCtx_DBE8*)vctx;
@@ -4163,6 +4519,22 @@ static inline void collect_33DFD8(sOct_33DFD8* node, sCtx_336D40* ctx)
     if (node->child[7] != 0) func_003410C0(node->child[7], ctx);
 }
 
+/**
+ * Walks a crossing octree cell for the Nash static-object query: intersects its instances, then visits its children.
+ *
+ * Feeds the cell's instance list (@p vnode +0x20) to func_00336D40 with @p ctx and stops when the cell's level is 11.
+ * Otherwise splits the cell (level, x, y, z at @p vcell; size 2^level) into its eight children one level down, each
+ * widened by 0.2 child cell on every side. Each existing child that overlaps @p vbox on all three axes is walked whole
+ * with @p ctx2 (its instances, then func_003410C0 for its children) when the box contains it, and recursed into
+ * otherwise, in the key order 000, 001, 011, 010, 110, 111, 101, 100. Called by func_00336F30 for crossing root cells.
+ *
+ * @param flag  the empty helper object, only passed on to the recursion (On Tour In *this)
+ * @param ctx  the static-object query for crossing cells (On Tour oncross)
+ * @param ctx2  the static-object query for contained cells (On Tour oninside)
+ * @param vbox  the query box: min at +0x0, max at +0x10
+ * @param vnode  the cell (On Tour const Cell *)
+ * @param vcell  the cell's key: level, x, y, z (On Tour CellKey)
+ */
 extern "C" void func_0033DFD8(char* flag, sCtx_336D40* ctx, sCtx_336D40* ctx2, void* vbox, void* vnode, void* vcell)
 {
     sBox_3309D8* box = (sBox_3309D8*)vbox;

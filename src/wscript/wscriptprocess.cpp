@@ -42,8 +42,8 @@ struct sDef_307598 {
  * +0x34 with cWScriptMan_getScriptCode(), then allocates its "WScriptTasks" (0x44 bytes each) at +0x14 and
  * initialises each from its 0x38-byte task record with cWScriptTask_initTask().
  *
- * The state (+0x0), current task (+0x18) and local table (+0x1C) start at 0; +0x4 and +0x8 get the task
- * count.
+ * The state (+0x0), the Next process link (+0x18, On Tour Next) and the local table (+0x1C) start at 0; the task
+ * count (+0x4) and the current task index (+0x8; equal to the count while no task runs) get the task count.
  *
  * @param man  the owning cWScriptMan (On Tour manager)
  * @param sectionId  the world section the process belongs to
@@ -150,6 +150,14 @@ public:
     virtual void v05();
 };
 
+/**
+ * Updates a running script process for one frame: its current task first, then the process itself.
+ *
+ * State (+0x0) 1 becomes 2 and falls through; in state 2 the current task (index +0x8, when below the task
+ * count +0x4) gets its virtual update (slot 2, cWScriptTask_update), and if the state is still 2 afterwards the
+ * process's virtual slot 5 (cWScriptProcess_processUpdate) runs. Other states do nothing. cWScriptMan_update calls it
+ * for every active process.
+ */
 extern "C" void func_003077F8(func_003077F8_cProc* self)
 {
     switch (self->state) {
@@ -189,6 +197,17 @@ static inline void VCall_003078C0(char* self, int slot)
     vt[slot].fn(self + vt[slot].delta);
 }
 
+/**
+ * Dispatches a process event to the matching virtual handler of the process.
+ *
+ * The event's first halfword picks the handler: 0-9 call vtable slots 7-16 (cWScriptProcess_eventOnCollide, OnJump,
+ * OnLand, OnTrick, OnWipeout, OnReset, OnCollect, OnEvent1, OnEvent2, OnEvent3). For a trick (3) the manager's (+0x10)
+ * TrickDef (+0x29C) points at the event's data (+0x4) during the call and is cleared after. Other ids are ignored.
+ * cWScriptMan_update calls it for events flagged 0x20000.
+ *
+ * @param vself  the process
+ * @param vmsg  the event (id halfword at +0x0, data from +0x4)
+ */
 // Dispatches a script event to the matching virtual handler (slots 7-16).
 extern "C" void func_003078C0(void* vself, void* vmsg)
 {
@@ -279,6 +298,14 @@ public:
     virtual void v03(int a1); // 0x18
 };
 
+/**
+ * Passes a task event to the process's current task (index +0x8) through its virtual slot 3
+ * (cWScriptTask_dispatchTaskEvent), if the index is below the task count (+0x4).
+ *
+ * cWScriptMan_update calls it for events flagged 0x10000.
+ *
+ * @param a1  the event
+ */
 extern "C" void func_00307A10(cWScriptProcList* self, int a1)
 {
     int i = self->cur;
@@ -718,6 +745,15 @@ struct func_00307EC0_sProc {
     func_00307EC0_cState* states;       // 0x14
 };
 
+/**
+ * Jumps a script process to the task with id @p id: aborts the current task and starts that one.
+ *
+ * Finds the first of the task count (+0x4) tasks whose id (+0x4) is @p id; marks the current task (index +0x8, when
+ * valid) aborted (state 3), makes the found task current and calls its virtual slot 4 (cWScriptTask_taskStart). An
+ * unknown id does nothing (On Tour asserts instead). func_0030A6D8 calls it on the manager's current process.
+ *
+ * @param id  the task id to go to
+ */
 extern "C" void func_00307EC0(func_00307EC0_sProc* self, int id)
 {
     int i;
@@ -760,6 +796,15 @@ struct func_00307F58_sProc {
     func_00307F58_cElem* elems;
 };
 
+/**
+ * Advances a script process to the task with id @p id: ends the current task and starts that one.
+ *
+ * Like func_00307EC0, but the current task (index +0x8, when valid) is ended normally through its virtual slot 6
+ * (cWScriptTask_taskEnd) instead of being aborted; the found task becomes current and gets slot 4
+ * (cWScriptTask_taskStart). An unknown id does nothing. func_0030A700 calls it on the manager's current process.
+ *
+ * @param id  the task id to advance to
+ */
 extern "C" void func_00307F58(func_00307F58_sProc* self, int id)
 {
     int i;
@@ -809,6 +854,16 @@ extern "C" int func_00308760(void* a, func_00308760_cObj* obj);
 extern "C" int cWScriptCache_getScriptBase(void* map, int id);
 extern "C" void func_002257E0(void* obj, void* stream, int a2);
 
+/**
+ * Writes a script process's state to a replay frame.
+ *
+ * Writes the first 0x10 bytes (state, task count, current task index, +0xC) with the frame's first virtual, gets the
+ * section's script base with cWScriptCache_getScriptBase (cWorld_m_pTheWorld's cache, section +0x24), writes whether
+ * the process has a local table (+0x1C) and, if so, the table with func_002257E0 against that base, then each task
+ * with func_00308760. func_0030BC80 calls it for each process in a list.
+ *
+ * @param stream  the replay frame
+ */
 extern "C" void func_00308038(void* self, func_00308038_cStream* stream)
 {
     stream->v01(self, 0x10);
@@ -843,6 +898,16 @@ extern "C" void luno_cLunoTable_readFromReplayFrame(void* obj, func_00308118_cSt
 class func_00308798_cObj;
 extern "C" int func_00308798(void* a, func_00308798_cObj* obj);
 
+/**
+ * Reads a script process's state back from a replay frame (the reverse of func_00308038).
+ *
+ * Reads the first 0x10 bytes with the frame's second virtual, gets the section's script base, destroys any local
+ * table (+0x1C, flags 3) and clears it, reads the has-table flag and, if set, allocates a new 4-byte
+ * "ProcessLocalTable" cLunoTable (constructed with 8) and fills it with luno_cLunoTable_readFromReplayFrame, then
+ * reads each task with func_00308798. func_0030BEE8 calls it for each process in a list.
+ *
+ * @param stream  the replay frame
+ */
 extern "C" void func_00308118(void* self, func_00308118_cStream* stream)
 {
     stream->v02(self, 0x10);
@@ -871,6 +936,14 @@ INCLUDE_ASM("wscript/wscriptprocess", func_00308228);
 extern "C" void MEM_fill(void* dst, int value, int size);
 extern void* cWScriptTask_vtbl[];
 
+/**
+ * Constructs an empty script task: stores cWScriptTask_vtbl (vptr at +0x40) and zeroes its state, id and scripts.
+ *
+ * Clears the three task scripts (+0x8..+0x13), the process (+0x3C), the id (+0x4) and the state (+0x0).
+ * cWScriptProcess_cWScriptProcess builds its task array with it before cWScriptTask_initTask fills each task.
+ *
+ * @return @p self
+ */
 extern "C" void* func_00308228(void* self)
 {
     *(void***)((char*)self + 0x40) = cWScriptTask_vtbl;
@@ -1281,6 +1354,15 @@ public:
     virtual int v01(void* a, int b);
 };
 
+/**
+ * Writes a script task's state word (+0x0, 4 bytes) to a replay frame through the frame's first virtual.
+ *
+ * func_00308038 calls it for each of a process's tasks.
+ *
+ * @param a  the task
+ * @param obj  the replay frame
+ * @return the frame call's result
+ */
 extern "C" int func_00308760(void* a, func_00308760_cObj* obj)
 {
     return obj->v01(a, 4);
@@ -1297,6 +1379,15 @@ public:
     virtual int v02(void* a, int b);
 };
 
+/**
+ * Reads a script task's state word (+0x0, 4 bytes) back from a replay frame through the frame's second virtual.
+ *
+ * func_00308118 calls it for each of a process's tasks.
+ *
+ * @param a  the task
+ * @param obj  the replay frame
+ * @return the frame call's result
+ */
 extern "C" int func_00308798(void* a, func_00308798_cObj* obj)
 {
     return obj->v02(a, 4);
@@ -1509,6 +1600,14 @@ extern "C" void* func_00308B78(void* self);
 //100%
 INCLUDE_ASM("wscript/wscriptprocess", func_00308B58__FPv);
 #ifdef SKIP_ASM
+/**
+ * Prepares a loaded world section's scripts: allocates the section's global Luno table with func_00308B78.
+ *
+ * The section index arrives in the second argument register and is passed through untouched (the C here declares
+ * only @p self). gameload calls it on cWScriptMan_TheWScriptMan once a section's scripts are loaded.
+ *
+ * @return func_00308B78's result (the new table)
+ */
 void* func_00308B58(void* self)
 {
     return func_00308B78(self);
@@ -1525,6 +1624,16 @@ extern const char str_cLunoTable_b[];
 
 // PORT: the unit declares func_00308B78 as (void* self); the body also takes the slot index
 void* func_00308B78_impl(void* self, int i) __asm__("func_00308B78");
+/**
+ * (Re)allocates the global Luno table of world section @p i: destroys the old one (flags 3) and stores a new one.
+ *
+ * The table array starts at +0x3CC (func_0030D308 reads it); the new table is a 4-byte "cLunoTable" allocation
+ * (flags 0x20000000) constructed with 0x40. No bounds check (On Tour asserts sectionId < kMaxGlobalTables).
+ * cWScriptMan_rebuildGlobalTables calls it for every section whose script data is loaded, func_00308B58 for one.
+ *
+ * @param i  the world section index
+ * @return the new table
+ */
 void* func_00308B78_impl(void* self, int i)
 {
     char* base = (char*)self + 0x3CC;

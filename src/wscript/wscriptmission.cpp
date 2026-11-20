@@ -277,6 +277,18 @@ extern "C" sWSMEntry4520* func_0014FF90(void* iface, int player, int slot, void*
 extern "C" int cBEEconInterface_getMoney(void* iface, int player, int charID);
 extern "C" const char* getDollarString(int id);
 
+/**
+ * Refreshes the uber-trick screen's price readouts: "cost_num" shows the selected trick's cost and "have_num" the
+ * player's money.
+ *
+ * Takes the selected items' mMiscData of the category menu (+0x4C) and trick menu (+0x50), gets the category's trick
+ * table with func_0014FF90 on cBE interface 6 for the player (+0x44), and on the first screen of the state's list
+ * (+0x24) sets "cost_num" to getDollarString of the trick entry's cost (halfword at +0x6 of its 8-byte entry) and
+ * "have_num" to getDollarString of cBEEconInterface_getMoney (interface 11) for the player and their character
+ * (cBENewPlayerInterface_getPlayerCharID on interface 1). A missing text object is skipped.
+ * cFEStateUberTrick_onPopupEvent calls it after a trick is bought, cFEStateUberTrick_onWidgetEvent when a trick is
+ * highlighted.
+ */
 extern "C" void func_00184520(sWSMission4520* self)
 {
     signed char b = self->p4C->rider->slot;
