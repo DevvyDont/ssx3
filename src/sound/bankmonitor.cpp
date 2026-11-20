@@ -7464,9 +7464,11 @@ extern "C" int func_002B4AA0(void* self, int force)
 INCLUDE_ASM("sound/bankmonitor", func_002B4AE8__FPv);
 #ifdef SKIP_ASM
 /**
- * Returns mMPFFile.
+ * Returns mMPFFile, the music system's MPF data buffer.
  *
- * @return the MPF buffer
+ * Only func_002B21E0 calls it, on gMusicSys, once the MPF load has finished.
+ *
+ * @return mMPFFile
  */
 int func_002B4AE8(void* self)
 {

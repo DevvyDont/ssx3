@@ -2370,6 +2370,20 @@ struct sSndPlayOpts_C220 {
 // PORT: the unit declares func_002AC220(void*) later; the real function also takes the play options
 extern "C" void func_002AC220_impl(void* self, sSndPlayOpts_C220* opts) __asm__("func_002AC220");
 
+/**
+ * Restarts an instance's bank or MIDI sound with fresh play options.
+ *
+ * Instance fields by On Tour's names (no header here): sets mActive (+8) to 1 and mFading (+0x54) to 0. For a bank
+ * sound (type 1) or MIDI sound (type 2) it pushes a play-option level on @p opts (mInst + 1): copies mDefault into
+ * mCurrent[mInst] and resets that level's options (no position, not static, no callback, pointer, viewport, vanish and
+ * radius 0, mDelay {100, 0, 90, 50}, external volume and two-player options off, mMapToMaxVol 127, mCloseOnEnd 1), sets
+ * mVolControl to the instance's mVolControl (+0x60), mBaseVol to 0 and the level's volume to 0. Then, inside
+ * SNDSYS_entercritical / SNDSYS_leavecritical, it starts the sound from the restart info and stores the handle
+ * (mHandle, +4): SNDBANK_play(+0xC, +0x10, options) or SNDMIDI_play(options, +0xC, +0x10, -1). Finally pops the level.
+ * Streams (type 3) are left alone. cBankMonitorInstance_CheckActive calls it when a silent sound comes back in range.
+ *
+ * @param opts  the cBankMonitor whose play-option stack (mDefault, mInst, mCurrent, ...) is used
+ */
 extern "C" void func_002AC220_impl(void* self, sSndPlayOpts_C220* opts)
 {
     *(int*)((char*)self + 0x8) = 1;
@@ -2646,6 +2660,14 @@ extern "C" int cBankMonitorInstance_IsFree(void* self);
 extern "C" void cBankMonitorInstance_PitchUpdate(void* self, int a1);
 extern "C" void SNDseqresume(int h);
 
+/**
+ * Resumes an instance's sound after a pause.
+ *
+ * For a non-free instance (cBankMonitorInstance_IsFree) it restores normal pitch (cBankMonitorInstance_PitchUpdate
+ * with 0x1000) and, for a MIDI sequence (type 2), resumes it with SNDseqresume on its handle (+4). The volume that
+ * cBankMonitorInstance_Pause set to 0 is not restored here. cBankMonitor_BANKMONITOR_Resume calls it for all 64
+ * instances.
+ */
 extern "C" void func_002ACB30(void* self)
 {
     if (cBankMonitorInstance_IsFree(self) == 0) {

@@ -242,6 +242,22 @@ struct sReq_ED90
 };
 extern sReq_ED90 D_0045AAD8_ED90[][4][5] __asm__("D_0045AAD8");
 
+/**
+ * Returns the medal a profile's character has earned in one challenge of a peak's trophy list.
+ *
+ * Asks reward interface 13 (cBE_getInterface): trophy type 2 gives the collectibles medal for entry 0
+ * (cBERewardInterface_getCollectiblesMedal) and the big-challenges medal otherwise
+ * (cBERewardInterface_getBigChallengesMedal); type 3 gives the earnings medal (cBERewardInterface_getEarningsMedal);
+ * types 0 and 1 look up the entry in D_0045AAD8[peak][type][entry] and return cBERewardInterface_getTrackMedal for its
+ * track and kind. Declared void here, but every path ends in the getter's call, whose result the callers read
+ * (cFEStateTrophyRoom_updateBigArt, cFEStatePeakRoom_updateMedalsList, cFEStateMountainRoom_updateMarkers).
+ *
+ * @param arg0  profile (user) index
+ * @param arg1  character id
+ * @param arg2  peak number
+ * @param arg3  trophy type (0, 1 track challenges; 2 collectibles / big challenges; 3 earnings)
+ * @param arg4  challenge index within the trophy type
+ */
 extern "C" void func_001CED90(int arg0, int arg1, int arg2, int arg3, int arg4)
 {
     void* r = cBE_getInterface_ED90(cBE_getBE(), 13);
@@ -317,6 +333,24 @@ struct sChallenge_1CEEA0 {
     int b[4][8];             // 0x9A4
 };
 
+/**
+ * Constructs the reward gallery base state for a player.
+ *
+ * Runs cUIState_cUIState, sets mHashName to 47 and installs cFEStateRewardGalleryBase_vtbl; stores mUserNum and its
+ * controller mask (cFECustom_getPlayerCtrlMask) in mCtrlBits, mRewardType = @p a4, 4 rows by 8 columns
+ * (mMaxRewardRows, mMaxRewardColumns) and mIconsFileIndex = -2, and clears the loading state, counts, highlighter
+ * offsets, menu and text pointers and the 4 x 8 icon and icon-back tables. mCharID comes from new-player interface 1
+ * (cBENewPlayerInterface_getPlayerCharID). With @p rank set (opened in a store) mStoreNum follows the player's last hub
+ * (cBENewPlayerInterface_getLastHub: 17-18 -> 1, 19-20 -> 2, 21 -> 3, else 1); otherwise it is -1. Then it calls the
+ * interface's virtual slot 2 and reads mMoney from economy interface 11 (cBEEconInterface_getMoney). The poster,
+ * trading card, concept art, video, toy and cheat character galleries call it as their base constructor.
+ *
+ * @param parent  the UI engine
+ * @param player  user number
+ * @param rank  non-zero when the gallery is opened from a store (lodge); not a rank
+ * @param a4  reward type (3-8 from the subclasses)
+ * @return @p self
+ */
 extern "C" sChallenge_1CEEA0* func_001CEEA0(sChallenge_1CEEA0* self, void* parent, signed char player, int rank, int a4)
 {
     int i;
