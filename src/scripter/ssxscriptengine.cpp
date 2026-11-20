@@ -4213,11 +4213,11 @@ struct sScrEngine_CDD0 {
 };
 
 extern char cScriptDatabaseObject_vtbl[];
-extern void* D_004A34DC;
+extern cScriptDatabaseObject* cScriptDatabaseObject_mpDatabaseObject;
 
 /**
  * Constructs the script database: installs cScriptDatabaseObject_vtbl (+0x2A8), makes it the current database
- * (D_004A34DC), clears the 20 object slots (mpObjectDatabase) and sets the 30 entity records (mEntityDatabase, 0x14
+ * (cScriptDatabaseObject_mpDatabaseObject), clears the 20 object slots (mpObjectDatabase) and sets the 30 entity records (mEntityDatabase, 0x14
  * each) to no entity, object -1, player -1, relation 0, reserved player -1.
  *
  * @param self_  the script database (the base of the script engine)
@@ -4228,7 +4228,7 @@ extern "C" void* cScriptDatabaseObject_cScriptDatabaseObject(cScriptDatabaseObje
     sScrEngine_CDD0* self = (sScrEngine_CDD0*)self_;
     int i;
     self->vtbl = cScriptDatabaseObject_vtbl;
-    D_004A34DC = self;
+    cScriptDatabaseObject_mpDatabaseObject = self_;
     for (i = 19; i >= 0; i--) {
         self->vars[i] = 0;
     }
@@ -4249,13 +4249,13 @@ INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject__cScriptDatabaseOb
 extern "C" void cScriptDatabaseObject_RemoveObjectAll(cScriptDatabaseObject* self);
 void operator_delete(int*);
 extern char cScriptDatabaseObject_vtbl[];
-extern void* D_004A34DC;
+extern cScriptDatabaseObject* cScriptDatabaseObject_mpDatabaseObject;
 
 /**
  * Destroys the script database: removes every registered object and clears the global database pointer.
  *
  * Restores the cScriptDatabaseObject vtable (cScriptDatabaseObject_vtbl) at +0x2A8, calls cScriptDatabaseObject_RemoveObjectAll() and
- * zeroes D_004A34DC (On Tour cScriptDatabaseObject::mpDatabaseObject, the object cScriptDatabaseObject_GetDatabaseObject returns), then frees the
+ * zeroes cScriptDatabaseObject_mpDatabaseObject (On Tour cScriptDatabaseObject::mpDatabaseObject, the object cScriptDatabaseObject_GetDatabaseObject returns), then frees the
  * object when asked. cBXScriptEngine__cBXScriptEngine chains to it.
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
@@ -4264,7 +4264,7 @@ extern "C" void cScriptDatabaseObject__cScriptDatabaseObject(cScriptDatabaseObje
 {
     *(void**)((char*)self + 0x2A8) = cScriptDatabaseObject_vtbl;
     cScriptDatabaseObject_RemoveObjectAll(self);
-    D_004A34DC = 0;
+    cScriptDatabaseObject_mpDatabaseObject = 0;
     if (flags & 1) {
         operator_delete((int*)self);
     }
@@ -4542,16 +4542,16 @@ extern "C" int cScriptDatabaseObject_IsEntityInUseByPlayer(cScriptDatabaseObject
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptDatabaseObject_GetDatabaseObject);
 #ifdef SKIP_ASM
-extern void* D_004A34DC;
+extern cScriptDatabaseObject* cScriptDatabaseObject_mpDatabaseObject;
 
 /**
- * Returns the current script database object, D_004A34DC (set by its constructor cScriptDatabaseObject_cScriptDatabaseObject).
+ * Returns the current script database object, cScriptDatabaseObject_mpDatabaseObject (set by its constructor cScriptDatabaseObject_cScriptDatabaseObject).
  *
  * @return the database
  */
-extern "C" void* cScriptDatabaseObject_GetDatabaseObject()
+extern "C" cScriptDatabaseObject* cScriptDatabaseObject_GetDatabaseObject()
 {
-    return D_004A34DC;
+    return cScriptDatabaseObject_mpDatabaseObject;
 }
 #endif
 
@@ -4980,7 +4980,7 @@ void cScriptObjCamera_SetCameraWeight(void* self, float val)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCamera_IsInUseByPlayer);
 #ifdef SKIP_ASM
-extern "C" void* cScriptDatabaseObject_GetDatabaseObject(void);
+extern "C" cScriptDatabaseObject* cScriptDatabaseObject_GetDatabaseObject(void);
 extern "C" int cScriptDatabaseObject_IsEntityInUseByPlayer(cScriptDatabaseObject* self, int i, int val);
 
 /**
@@ -4995,7 +4995,7 @@ extern "C" int cScriptObjCamera_IsInUseByPlayer(void* self, int val)
     if (*(void**)((char*)self + 0x14) == 0) {
         return 0;
     }
-    return cScriptDatabaseObject_IsEntityInUseByPlayer((cScriptDatabaseObject*)cScriptDatabaseObject_GetDatabaseObject(), *(int*)(*(char**)((char*)self + 0x14) + 0x4), val);
+    return cScriptDatabaseObject_IsEntityInUseByPlayer(cScriptDatabaseObject_GetDatabaseObject(), *(int*)(*(char**)((char*)self + 0x14) + 0x4), val);
 }
 #endif
 
@@ -6651,7 +6651,7 @@ extern "C" int cScriptObjCameraManager_SetTransitionObject(void* self, void* obj
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_OnStartObjectUse);
 #ifdef SKIP_ASM
-extern "C" void* cScriptDatabaseObject_GetDatabaseObject(void);
+extern "C" cScriptDatabaseObject* cScriptDatabaseObject_GetDatabaseObject(void);
 extern "C" void cScriptObjCameraManager_ResetScriptManagementVars(void* self);
 extern "C" void cFocusMan_addbox(void* self, void* pos);
 // PORT: these two are declared (void*) but called with a second argument.
@@ -6672,7 +6672,7 @@ void cScriptObject_OnStartObjectUse_2(void* self, int val) __asm__("cScriptObjec
  */
 extern "C" void cScriptObjCameraManager_OnStartObjectUse(void* self, int val)
 {
-    cScriptDatabaseObject_MarkObjectAsReserved((cScriptDatabaseObject*)cScriptDatabaseObject_GetDatabaseObject(), *(int*)((char*)self + 0x4), val);
+    cScriptDatabaseObject_MarkObjectAsReserved(cScriptDatabaseObject_GetDatabaseObject(), *(int*)((char*)self + 0x4), val);
     cScriptObjCameraManager_ResetScriptManagementVars(self);
     // PORT: pointer passed as int
     if (cSSXScriptEngine_IsPlayingNISListPlayer(ScriptEngine, (int)cBXScriptEngine_GetRequestPlayerByPlayerID_2(ScriptEngine, val)) != 0) {
@@ -6686,7 +6686,7 @@ extern "C" void cScriptObjCameraManager_OnStartObjectUse(void* self, int val)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_OnEndObjectUse);
 #ifdef SKIP_ASM
-extern "C" void* cScriptDatabaseObject_GetDatabaseObject(void);
+extern "C" cScriptDatabaseObject* cScriptDatabaseObject_GetDatabaseObject(void);
 extern "C" void cScriptDatabaseObject_MarkObjectAsUnreserved(cScriptDatabaseObject* mgr, int id);
 extern "C" void cScriptObjCamera_SetCameraEntity(char* self, void* anim);
 extern "C" void cScriptObjCameraManager_ResetScriptManagementVars(void* self);
@@ -6723,7 +6723,7 @@ struct sSeEng1400 {
  */
 extern "C" void cScriptObjCameraManager_OnEndObjectUse(sSeEng1400* self, int playerID)
 {
-    cScriptDatabaseObject_MarkObjectAsUnreserved((cScriptDatabaseObject*)cScriptDatabaseObject_GetDatabaseObject(), self->id);
+    cScriptDatabaseObject_MarkObjectAsUnreserved(cScriptDatabaseObject_GetDatabaseObject(), self->id);
     for (int i = 0; i < 2; i++) {
         int cameraIndex = self->slots[i];
         if (cameraIndex >= 0) {
@@ -7125,7 +7125,7 @@ extern "C" int cScriptObjCameraManager_GetCameraObjectByTrack(void* self, int i)
 //100%
 INCLUDE_ASM("scripter/ssxscriptengine", cScriptObjCameraManager_DoCameraTransition);
 #ifdef SKIP_ASM
-extern "C" void* cScriptDatabaseObject_GetDatabaseObject(void);
+extern "C" cScriptDatabaseObject* cScriptDatabaseObject_GetDatabaseObject(void);
 extern "C" int cScriptDatabaseObject_GetPlayerIDByEntity(sScriptEng0050* self, void* a1);
 void cScriptObjCamera_SetCameraWeight(void* self, float val);
 extern "C" void cScriptObjCameraManager_SetupCameraObject(void* self, int a1, int a2);

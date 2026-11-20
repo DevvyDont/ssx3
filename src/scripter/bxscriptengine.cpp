@@ -1517,7 +1517,7 @@ extern "C" void cScriptDatabaseObject_MarkEntityAsUsed(void* mgr, void* self, in
 /**
  * Locks this script entity to InSeq player entity @p entity.
  *
- * Stores @p entity at +0x8 and registers the lock with the script database object (cScriptDatabaseObject_GetDatabaseObject, D_004A34DC) through
+ * Stores @p entity at +0x8 and registers the lock with the script database object (cScriptDatabaseObject_GetDatabaseObject, cScriptDatabaseObject_mpDatabaseObject) through
  * cScriptDatabaseObject_MarkEntityAsUsed, under the ID (mID) of the entity's owner player (mpOwner, +0x8).
  *
  * @param entity  the InSeq player entity (cScriptPlayerEntity)
