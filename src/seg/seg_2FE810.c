@@ -2876,6 +2876,14 @@ INCLUDE_ASM("seg/seg_2FE810", func_00400838);
 #ifdef SKIP_ASM
 extern int CreateSema(int *);
 extern void func_00400810(int, int, int);
+/**
+ * Sleeps the calling thread for @p ticks alarm ticks (horizontal-blank periods).
+ *
+ * Creates a semaphore (max count 1, initial count 0), sets a kernel alarm whose handler func_00400810 signals it, waits
+ * on it and deletes it. The libcdvd sync waits (func_004013E8, func_00401488) use it with 60 between polls.
+ *
+ * @param ticks  the delay in alarm ticks
+ */
 void func_00400838(unsigned short ticks) {
     int semaParam[6];
     int sema;
@@ -2895,6 +2903,16 @@ INCLUDE_ASM("seg/seg_2FE810", func_004008A0);
 extern int func_004013E8(int);
 extern int DIntr();
 extern void EIntr(void);
+/**
+ * Installs the libcdvd user callback that the callback thread runs when an asynchronous command ends.
+ *
+ * Fails (returns 0) while an N-command is still running (func_004013E8(1)). Otherwise, with interrupts off (DIntr /
+ * EIntr), stores @p cb in D_005264C0 and the caller's $gp in D_005264C4 (the thread func_004009A8 restores that $gp
+ * around the call) and returns the previous callback. Called with 0 by the EA CD streaming code to remove it.
+ *
+ * @param cb  the callback, given the finished command's function code; 0 to remove it
+ * @return the previous callback, or 0 when a command is busy
+ */
 void (*func_004008A0(void (*cb)(int)))(int) {
     void (*old)(int);
     int s;
@@ -2914,6 +2932,17 @@ void (*func_004008A0(void (*cb)(int)))(int) {
 INCLUDE_ASM("seg/seg_2FE810", func_00400908);
 #ifdef SKIP_ASM
 extern int iSignalSema_i(int) __asm__("iSignalSema");
+/**
+ * Finishes a libcdvd asynchronous N-command: releases the command semaphore and wakes the callback thread.
+ *
+ * Copies the pending command's function code (*@p p, the global D_00451658: 1 read, 3 get-TOC) to D_0045165C for the
+ * callback. Code 11 only clears it and the busy flag D_00451634. Otherwise it signals the N-command semaphore
+ * D_00451628 (which the issuing call left held) and, when the callback thread D_00451614 exists and a callback
+ * D_005264C0 is set, signals the thread's semaphore D_00451620; with no callback it clears the busy flag itself. Uses
+ * iSignalSema, so it runs in the SIF RPC completion (interrupt) context: func_00400B48 calls it.
+ *
+ * @param p  the pending command's function code (always &D_00451658)
+ */
 void func_00400908(int *p) {
     D_00451658 = *p;
     D_0045165C = D_00451658;
@@ -2938,6 +2967,15 @@ extern char D_004979E0[];
 extern void WaitSema(int);
 extern int ExitDeleteThread(void);
 extern void func_00425C60();
+/**
+ * Body of the libcdvd callback thread: runs the user callback each time an asynchronous command ends.
+ *
+ * Loops forever waiting on D_00451620. When D_00451658 is -1 (the shutdown request from func_00400CB8) it clears the
+ * busy flag, the pending code, the thread id D_00451614 and D_005264D4 and exits with ExitDeleteThread. Otherwise, with
+ * debug output on (D_00451610 > 0), it prints the callback and the code ("sceCdCbfunc= %d sceCdCbfunc_num= %d"), calls
+ * the callback D_005264C0 with the finished command's code D_0045165C under the $gp saved when it was installed, and
+ * clears the busy flag D_00451634. func_00400A78 creates the thread.
+ */
 void func_004009A8(void) {
     void (*fn)(int);
     for (;;) {
@@ -2972,6 +3010,18 @@ extern int CreateThread(sThreadParam *);
 extern void StartThread(int, int);
 extern void ChangeThreadPriority(int, int);
 extern void func_004009A8(void);
+/**
+ * Creates the libcdvd callback thread, or changes its priority when it already exists.
+ *
+ * The first time (D_00451614 == 0) it records the current thread id (D_005264D8) and its status (D_005264E0), fills the
+ * thread parameters D_00526510 (entry func_004009A8, stack, size, priority, gp 0), creates the thread and starts it,
+ * keeping its id in D_00451614. Later calls only call ChangeThreadPriority.
+ *
+ * @param a  the thread priority
+ * @param b  the thread's stack
+ * @param c  the stack size in bytes
+ * @return 1 when the thread was created, 0 when only its priority changed
+ */
 int func_00400A78(int a, int b, int c) {
     int ok;
     ok = 1;
@@ -2998,6 +3048,16 @@ INCLUDE_ASM("seg/seg_2FE810", func_00400B48);
 #ifdef SKIP_ASM
 struct S0B48 { int n0; int n1; unsigned char *d0; unsigned char *d1; unsigned char b0[0x40]; unsigned char b1[0x40]; };
 extern void func_00400908(int *);
+/**
+ * SIF RPC completion handler of a CD read: patches the unaligned head and tail bytes into the read buffer.
+ *
+ * The IOP returns the bytes of the read that share a 64-byte cache line with other data in a fixup block (@p a, read
+ * through its uncached alias): n0 bytes for d0 from b0 and n1 bytes for d1 from b1. Each byte is written through both
+ * the uncached and the cached address of the destination. Then func_00400908 finishes the command (&D_00451658).
+ * func_00401DF8 passes it with the fixup buffer D_00452700.
+ *
+ * @param a  the fixup block (the RPC end parameter)
+ */
 void func_00400B48(void *a) {
     struct S0B48 *s = (struct S0B48 *)((unsigned)a | 0x20000000);
     unsigned char *e;
@@ -3030,6 +3090,13 @@ INCLUDE_ASM("seg/seg_2FE810", func_00400C00);
 #ifdef SKIP_ASM
 struct QSema { int count; int max_count; int init_count; int wait_threads; int attr; int option; };
 extern int Q0C00_create(struct QSema *) __asm__("CreateSema");
+/**
+ * Creates the libcdvd semaphores the first time they are needed.
+ *
+ * When any of the N-command, S-command or third semaphore (D_00451628, D_0045162C, D_00451630) is still -1, it creates
+ * all three with count 1 and the callback thread's D_00451620 with count 0, and clears the busy flag D_00451634. Every
+ * libcdvd entry point that takes a semaphore calls it first.
+ */
 void func_00400C00(void) {
     struct QSema s;
     if (D_00451628 == -1 || D_0045162C == -1 || D_00451630 == -1) {
@@ -3054,6 +3121,13 @@ extern void cb_DC0(int) __asm__("SignalSema");
 extern void func_00426050(int);
 extern int cb_078() __asm__("DIntr");
 extern void EIntr(void);
+/**
+ * Tears down libcdvd's threads, semaphores and power-off handler (the exit mode of func_00401718).
+ *
+ * When the callback thread exists it sets the pending code D_00451658 to -1 and signals the thread so it exits itself
+ * (func_004009A8). Deletes the four semaphores and, with interrupts off, removes the SIF command handler 0x80000012
+ * (func_00426050) that func_00400E30 installed.
+ */
 void func_00400CB8(void) {
     int s;
     if (D_00451614 != 0) {
@@ -3077,6 +3151,17 @@ INCLUDE_ASM("seg/seg_2FE810", func_00400D58);
 extern int DIntr();
 extern void EIntr(void);
 extern int func_00400E30(void);
+/**
+ * Installs the power-off callback libcdvd calls when the console's power button is pressed.
+ *
+ * Installs the SIF command handler first if needed (func_00400E30, while D_00451640 < 0), then with interrupts off
+ * stores the function in D_005264C8, its argument in D_005264D0 and the caller's $gp in D_005264CC; the handler
+ * func_00400DD8 calls it. The game's func_00319930 installs func_00319910 with the power-off thread's semaphore.
+ *
+ * @param a  the callback
+ * @param b  the argument it is called with
+ * @return the previous callback
+ */
 void (*func_00400D58(void (*a)(int), int b))(int) {
     int s;
     void (*old)(int);
@@ -3096,6 +3181,12 @@ void (*func_00400D58(void (*a)(int), int b))(int) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00400DD8);
 #ifdef SKIP_ASM
+/**
+ * SIF command handler for the IOP's power-off notice (command 0x80000012): calls the power-off callback.
+ *
+ * Calls D_005264C8(D_005264D0) under the $gp saved with it, unless no callback is set or the handler is being installed
+ * (D_00451624). func_00400E30 installs it.
+ */
 void func_00400DD8(void) {
     void (*fn)(int) = D_005264C8;
     if (fn) {
@@ -3116,6 +3207,14 @@ extern int DIntr();
 extern void EIntr(void);
 extern void func_00400DD8(void);
 extern void func_00426020(int, void (*)(void), int);
+/**
+ * Installs libcdvd's SIF command handler func_00400DD8 for the power-off notice 0x80000012.
+ *
+ * Sets the in-progress flag D_00451624 around the install (func_00426020, interrupts off) and marks the handler
+ * installed (D_00451640 = 1). Called by func_00401718 and func_00400D58.
+ *
+ * @return 1
+ */
 int func_00400E30(void) {
     int s;
     D_00451624 = 1;
@@ -3147,6 +3246,20 @@ extern int func_004013E8(int);
 extern void func_00426408(int);
 extern void func_00426358(int, int);
 int f0EA8(char *out, char *name, int arg) __asm__("func_00400EA8");
+/**
+ * Looks a file up on the disc through libcdvd's search-file RPC server and fills its 0x24-byte file record.
+ *
+ * Takes the N-command semaphore D_00451628 without blocking (returns 0 when it is held or an N-command runs), binds
+ * server 0x80000597 on first use (retrying, "Libcdvd bind err CdSearchFile"), copies @p name (up to 0xFF characters)
+ * into the request D_00526540 with @p arg, writes it back from the cache and calls RPC 0. The record (sector, size,
+ * name at +8; printed with the debug strings "search name/size/loc lbn") is copied from the request's uncached alias to
+ * @p out. func_004011C0 calls it with 0.
+ *
+ * @param out  the 0x24-byte file record to fill
+ * @param name  the file's path on the disc
+ * @param arg  an extra word sent with the request
+ * @return the server's result word (non-zero when found), 0 on failure
+ */
 int f0EA8(char *out, char *name, int arg) {
     int i;
     int n;
@@ -3210,6 +3323,13 @@ int f0EA8(char *out, char *name, int arg) {
 INCLUDE_ASM("seg/seg_2FE810", func_004011C0);
 #ifdef SKIP_ASM
 extern int func_00400EA8(int, int, int);
+/**
+ * Looks a file up on the disc: func_00400EA8 with an extra request word of 0.
+ *
+ * @param a  the 0x24-byte file record to fill (sector, size, name)
+ * @param b  the file's path on the disc
+ * @return non-zero when the file was found, 0 otherwise
+ */
 int func_004011C0(int a, int b) {
     return func_00400EA8(a, b, 0);
 }
@@ -3227,6 +3347,18 @@ extern void ReferThreadStatus(int, sThreadParam *);
 extern void func_00425C60();
 extern int func_004013E8(int);
 extern void func_00426408(int);
+/**
+ * Prepares a libcdvd N-command: takes the N-command semaphore and binds the N-command RPC server.
+ *
+ * Fails (prints "Ncmd fail sema cur_cmd:%d keep_cmd:%d" in debug) when D_00451628 is already held. Records the command
+ * in D_0045161C, refreshes the caller's thread status, and fails (releasing the semaphore) while a previous N-command
+ * is still running (func_004013E8(1)). Then flushes the cache (func_00426408(0)) and binds server 0x80000595 on first
+ * use (D_0045163C), retrying on error ("Libcdvd bind err N CMD"). On success the caller holds the semaphore and must
+ * release it.
+ *
+ * @param a  the command being issued (for the debug output)
+ * @return 1 when the command may be issued, 0 otherwise
+ */
 int func_004011E0(int a) {
     int i;
     func_00400C00();
@@ -3267,6 +3399,14 @@ INCLUDE_ASM("seg/seg_2FE810", func_00401350);
 #ifdef SKIP_ASM
 extern int func_004011E0();
 extern void SignalSema(int);
+/**
+ * Asks the CD N-command server for the drive's ready state (RPC function 14).
+ *
+ * Uses func_004011E0(2) to take the N-command channel, calls the function with a 4-byte reply in D_00451680 and
+ * releases the semaphore. func_00401DF8 refuses to read when it returns 6 (not ready).
+ *
+ * @return the ready state (6 = not ready), or 0 on failure
+ */
 int func_00401350(void) {
     int v;
     if (func_004011E0(2) == 0)
@@ -3286,6 +3426,16 @@ INCLUDE_ASM("seg/seg_2FE810", func_004013E8);
 #ifdef SKIP_ASM
 extern char D_00497AB8[];
 extern void func_00425C60();
+/**
+ * Waits for or polls the end of the running libcdvd N-command.
+ *
+ * Mode 0 prints "N cmd wait" (debug) and sleeps 60 ticks at a time (func_00400838) while the busy flag D_00451634 is
+ * set or the N-command RPC client D_004527D0 is still busy (sceSifCheckStatRpc), then returns 0. Any other mode returns
+ * at once.
+ *
+ * @param a  0 to block until the command ends, otherwise only poll
+ * @return 1 while a command is still running, else 0
+ */
 int func_004013E8(int a) {
     if (a == 0) {
         if (D_00451610 > 0)
@@ -3305,6 +3455,15 @@ INCLUDE_ASM("seg/seg_2FE810", func_00401488);
 #ifdef SKIP_ASM
 extern char D_00497AC8[];
 extern void func_00425C60();
+/**
+ * Waits for or polls the end of the running libcdvd S-command.
+ *
+ * Mode 0 prints "S cmd wait" (debug) and sleeps 60 ticks at a time (func_00400838) while the S-command RPC client
+ * D_00453180 is busy (sceSifCheckStatRpc), then returns 0. Any other mode returns the busy state at once.
+ *
+ * @param a  0 to block until the command ends, otherwise only poll
+ * @return non-zero while an S-command is still running, else 0
+ */
 int func_00401488(int a) {
     if (a == 0) {
         if (D_00451610 > 0)
@@ -3329,6 +3488,18 @@ extern void ReferThreadStatus(int, sThreadParam *);
 extern void func_00425C60();
 extern int func_00401488(int);
 extern void func_00426408(int);
+/**
+ * Prepares a libcdvd S-command: takes the S-command semaphore and binds the S-command RPC server.
+ *
+ * Fails (prints "Scmd fail sema cur_cmd:%d keep_cmd:%d" in debug) when D_0045162C is already held. Records the command
+ * in D_00451618, refreshes the caller's thread status, and fails (releasing the semaphore) while an S-command still
+ * runs (func_00401488(1)). Then flushes the cache (func_00426408(0)) and binds server 0x80000593 on first use
+ * (D_0045164C), retrying on error ("Libcdvd bind err S cmd"). On success the caller holds the semaphore and must
+ * release it.
+ *
+ * @param a  the command being issued (for the debug output)
+ * @return 1 when the command may be issued, 0 otherwise
+ */
 int func_004014F8(int a) {
     int i;
     func_00400C00();
@@ -3367,6 +3538,18 @@ int func_004014F8(int a) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00401668);
 #ifdef SKIP_ASM
+/**
+ * Returns the address (or id) of one of libcdvd's internal objects, chosen by a code.
+ *
+ * 0x8001 gives the N-command semaphore id D_00451628, 0x8002 the N-command send buffer D_00451700, 0x8003 its result
+ * buffer D_00451680, 0x8004 the N-command RPC client D_004527D0; 0x8011..0x8014 give the S-command equivalents
+ * (D_0045162C, D_00452C40, D_00452800, D_00453180). Other codes give 0. These are the objects the DNAS import table
+ * func_003FD810 also exports.
+ *
+ * @param id  the object code
+ * @param out  receives the id or address (0 for an unknown code)
+ * @return 1
+ */
 int func_00401668(long id, int *out) {
     int v;
     if (id != 32769) {
@@ -3424,6 +3607,20 @@ extern int GetThreadId();
 extern void func_00425C60();
 extern void func_00426358(int, int);
 
+/**
+ * Initialises (or, in mode 5, shuts down) the CD/DVD library and binds its init RPC server.
+ *
+ * Fails while an S-command runs (func_00401488(1)). Records the current thread id, resets every RPC bind state
+ * (D_00451644, D_0045163C, D_0045164C, D_00451648, D_00451650, D_00451640) to unbound, counts the call in D_00451654,
+ * and binds server 0x80000592, retrying on error ("Libcdvd bind err %d CD_Init %d"). Sends @p mode (RPC 0, 16-byte
+ * reply in D_00452800): a reply status of 0xFE turns debug output on (D_00451610 = 1); otherwise status words 1 or 2
+ * below 0x200 make it return 2. Mode 5 prints "Libcdvd Exit", tears everything down (func_00400CB8) and marks the
+ * semaphores gone; other modes create the semaphores (func_00400C00) and install the power-off handler (func_00400E30).
+ * Called by systemInit's boot code (func_0031B008) and the EA CD code.
+ *
+ * @param mode  0 to initialise, 5 to exit
+ * @return 1 on success, 2 when the IOP side reports an old version, 0 on failure
+ */
 int func_00401718(int mode)
 {
     int i;
@@ -3511,6 +3708,17 @@ extern void SignalSema(int);
 extern int func_00401488(int);
 extern void func_00426408(int);
 extern void func_00426358(int, int);
+/**
+ * Older form of the disc-ready check: asks the disk-ready RPC server (0x8000059A) whether a disc is ready.
+ *
+ * Prints "OLD DiskReady Call" (debug), takes the S-command semaphore D_0045162C without blocking (6 when held), fails
+ * while an S-command runs, binds server 0x8000059A on first use ("Libcdvd bind err CdDiskReady"), sends @p a (RPC 0)
+ * and returns the reply word ("DiskReady ended"). func_00401BF0 falls back to it when the newer server 0x8000059C does
+ * not answer.
+ *
+ * @param a  the mode passed to the server (8 makes failures return -1 instead of 6)
+ * @return the ready state from the IOP; 6 (not ready) on failure, or -1 in mode 8
+ */
 int func_004019F8(int a) {
     int r;
     int v;
@@ -3572,6 +3780,17 @@ extern int b1_19F8(int) __asm__("func_004019F8");
 static inline int semaId1BF0(void) {
     return D_00451630;
 }
+/**
+ * Asks the IOP whether a disc is ready to read (the libcdvd disk-ready call).
+ *
+ * Prints "NEW DiskReady Call" (debug), takes the third semaphore D_00451630 without blocking and binds server
+ * 0x8000059C on first use; when that server has not appeared after 17 tries it releases the semaphore and uses the
+ * older server through func_004019F8. Sends @p a (RPC 0), returns the reply word from D_00453080 ("DiskReady ended")
+ * and releases the semaphore.
+ *
+ * @param a  the mode passed to the server (8 makes failures return -1 instead of 6)
+ * @return the ready state (6 = not ready); 6 on failure, or -1 in mode 8
+ */
 int func_00401BF0(int a) {
     int i;
     int r;
@@ -3629,6 +3848,23 @@ extern int func_004011E0();
 extern void func_00425C60();
 extern void SignalSema(int);
 extern void func_00426358(int, int);
+/**
+ * Starts an asynchronous CD/DVD sector read into memory (libcdvd N-command 1).
+ *
+ * Unless reads skip the check (bit 0 of D_00451638) it refuses when the drive reports not ready (func_00401350() == 6).
+ * Takes the N-command channel (func_004011E0(4)), fills the read command D_00451700 (sector, count, buffer, the try
+ * count, spindle control and data pattern from @p mode, the fixup buffer D_00452700 and the result word D_004527C0),
+ * writes the destination back from the cache (sectors of 2048, 2328 or 2340 bytes for data pattern 0, 1 or 2; skipped
+ * when bit 1 of D_00451638 is set) and sends RPC 1 without waiting, with func_00400B48 as the completion handler. Sets
+ * the pending code D_00451658 to 1 and the busy flag; the N-command semaphore stays held until the read ends. Prints
+ * "call cdread cmd" and "cdread end" in debug.
+ *
+ * @param lsn  the first logical sector
+ * @param sectors  the number of sectors
+ * @param buf  the destination address
+ * @param mode  the read mode: try count, spindle control, data pattern
+ * @return 1 when the read was started, 0 otherwise
+ */
 int func_00401DF8(int lsn, int sectors, int buf, unsigned char *mode) {
     int size;
     sCdReadCmd *p = (sCdReadCmd *)D_00451700;
@@ -3686,6 +3922,17 @@ INCLUDE_ASM("seg/seg_2FE810", func_00401FD8);
 extern int func_004011E0();
 extern void func_00426358(int, int);
 extern void SignalSema(int);
+/**
+ * Reads the disc's table of contents (libcdvd N-command 4) into @p dst.
+ *
+ * Takes the N-command channel (func_004011E0(8)), sends the address of the work buffer D_00526780 (written back from
+ * the cache first) and waits for the 8-byte reply in D_00451680. The pending code D_00451658 is 3 during the call.
+ * Copies 0x400 bytes (CD) or 2064 bytes (when reply word 1 is non-zero, a DVD) from the buffer's uncached alias to @p
+ * dst. The EA disc check func_003E4040 calls it after checking for a PS2 CD or DVD.
+ *
+ * @param dst  the destination (2064 bytes for a DVD)
+ * @return the reply's result word, or 0 on failure
+ */
 int func_00401FD8(char *dst) {
     int v;
     int *p = D_00451700;
@@ -3716,6 +3963,14 @@ INCLUDE_ASM("seg/seg_2FE810", func_00402268);
 #ifdef SKIP_ASM
 extern int func_004014F8();
 extern void SignalSema(int);
+/**
+ * Asks the drive what kind of disc is loaded (libcdvd S-command, RPC function 3).
+ *
+ * Takes the S-command channel (func_004014F8(1)), calls the function with a 4-byte reply in D_00452800 and releases the
+ * semaphore. The EA disc check func_003E4040 compares the result with 18 and 20 (PS2 CD and PS2 DVD).
+ *
+ * @return the disc type, or 0 on failure
+ */
 int func_00402268(void) {
     int v;
     if (func_004014F8(1) == 0)
@@ -3735,6 +3990,14 @@ INCLUDE_ASM("seg/seg_2FE810", func_00402300);
 #ifdef SKIP_ASM
 extern int func_004014F8();
 extern void SignalSema(int);
+/**
+ * Returns the drive's error code for the last command (libcdvd S-command, RPC function 4).
+ *
+ * Takes the S-command channel (func_004014F8(3)), calls the function with a 4-byte reply in D_00452800 and releases the
+ * semaphore. The EA CD driver retries a read until it returns 0.
+ *
+ * @return the error code (0 = no error), or -1 on failure
+ */
 int func_00402300(void) {
     int v;
     if (func_004014F8(3) == 0)
@@ -3754,6 +4017,16 @@ INCLUDE_ASM("seg/seg_2FE810", func_00402398);
 #ifdef SKIP_ASM
 extern int func_004014F8();
 extern void SignalSema(int);
+/**
+ * Sends libcdvd S-command 33 and returns its status word (the console power-off request).
+ *
+ * Takes the S-command channel (func_004014F8(33)), calls RPC function 33 with an 8-byte reply in D_00452800, stores
+ * reply word 1 in @p out and releases the semaphore. The power-off thread func_003198A0 repeats it until it returns
+ * non-zero with a status of 0, after shutting dev9 down.
+ *
+ * @param out  receives the status word
+ * @return the result word (non-zero on success), 0 on failure
+ */
 int func_00402398(int *out) {
     int v;
     if (func_004014F8(33) == 0)
@@ -3775,6 +4048,16 @@ INCLUDE_ASM("seg/seg_2FE810", func_00402450);
 extern int func_004014F8();
 extern void SignalSema(int);
 extern void func_00426358_p(int *, int) __asm__("func_00426358");
+/**
+ * Sets the drive's media mode (CD or DVD) with a libcdvd S-command.
+ *
+ * Takes the S-command channel (func_004014F8(34)), sends @p a with the function number and send/reply sizes held in
+ * D_004531A8, D_004531AC and D_004531B0, and returns the reply word from D_00452800. The boot code func_0031B008 and
+ * func_00319610 call it with 2; the EA CD code passes its configured media mode.
+ *
+ * @param a  the media mode (2 = DVD)
+ * @return the result word, or 0 on failure
+ */
 int func_00402450(int a) {
     int v;
     int *p = D_00452C40;
@@ -3801,6 +4084,16 @@ extern char D_00497BF8[];
 extern int func_004014F8();
 extern void SignalSema(int);
 extern void func_00425C60();
+/**
+ * Reads the console's real-time clock (libcdvd S-command, RPC function 1) into an 8-byte record.
+ *
+ * Takes the S-command channel (func_004014F8(15)), prints "Libcdvd call Clock read 1" and "... 2" around the call
+ * (debug), copies the 8 bytes after the result word of the 16-byte reply D_00452800 to @p a and releases the semaphore.
+ * systemInit and cPS2ConsoleConfig_cPS2ConsoleConfig call it.
+ *
+ * @param a  receives the 8-byte clock record
+ * @return the result word (non-zero on success), 0 on failure
+ */
 int func_00402520(struct P8 *a) {
     int v;
     if (func_004014F8(15) == 0)
@@ -3826,6 +4119,16 @@ INCLUDE_ASM("seg/seg_2FE810", func_00402618);
 extern int func_004014F8();
 extern void SignalSema(int);
 extern void func_00426358_p(int *, int) __asm__("func_00426358");
+/**
+ * Sends a disc-tray request with a libcdvd S-command (RPC function 5).
+ *
+ * Takes the S-command channel (func_004014F8(26)), sends @p a, stores reply word 1 in @p out when given and returns the
+ * reply's result word. func_0031AD20 calls it with 2 to check whether the tray has been opened.
+ *
+ * @param a  the request (2 = check the tray state)
+ * @param out  receives the tray status, may be 0
+ * @return the result word, or -1 on failure
+ */
 int func_00402618(int a, int *out) {
     int v;
     int *p = D_00452C40;
@@ -3851,6 +4154,16 @@ INCLUDE_ASM("seg/seg_2FE810", func_00402708);
 extern int DIntr();
 extern void EIntr(void);
 extern void func_00409708(void);
+/**
+ * Stops the IPU's DMA channels and resets the IPU before MPEG decoding starts.
+ *
+ * With interrupts off it holds the DMA controller (D_ENABLEW = D_ENABLER | 0x10000), clears the start bit of the
+ * IPU-from and IPU-to channels (0x1000B000 and 0x1000B400), and releases it; then zeroes both channels' QWC and resets
+ * and re-initialises the IPU (func_00409708). PS2_SONY_CODEC_INTERNAL_Init calls it right before setting the decoder up
+ * with func_004027B8.
+ *
+ * @return 1
+ */
 int func_00402708(void) {
     int intrState = DIntr();
     *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 | 0x10000;
@@ -3880,6 +4193,22 @@ extern int i7B8_2BB0(int *) __asm__("func_00402BB0");
 extern void i7B8_2D68(int *) __asm__("func_00402D68");
 extern int i7B8_3DB0(int *) __asm__("func_00403DB0");
 extern int i7B8_3DD8(int *) __asm__("func_00403DD8");
+/**
+ * Sets up an MPEG decoder in a caller-supplied work area.
+ *
+ * Clears the work area, aligns its start to 4 bytes as the decoder's internal state and fails with "The size of work
+ * area is too small" (func_004034A8) when less than 4288 bytes remain. The memory after the first 4288 bytes becomes
+ * the decoder's pool (func_00402D50 at state + 264). Resets the public fields of @p a (width, height and frame count
+ * words to 0, the 64-bit time stamps to -1) and links the state at a[16] and back at +0x858; installs the default
+ * callbacks func_00403DB0 and func_00403DD8, allocates a 0x600-byte block (func_00402D88), resets the stream state
+ * (func_00403338, func_00402B58, func_00402BB0), points the nine per-picture tables at the state's own arrays and sets
+ * the scratchpad address 0x70003600. Called by PS2_SONY_CODEC_INTERNAL_Init.
+ *
+ * @param a  the decoder handle
+ * @param buf  the work area
+ * @param size  the work area size in bytes
+ * @return 1, or 0 when the work area is too small
+ */
 // sceMpegCreate(mp, buff, size)
 int func_004027B8(int *a, int buf, int size) {
     int *p;
@@ -3969,6 +4298,11 @@ int func_004027B8(int *a, int buf, int size) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_004029C8);
 #ifdef SKIP_ASM
+/**
+ * Returns 1; an empty libmpeg entry point.
+ *
+ * @return 1
+ */
 int func_004029C8(void) {
     return 1;
 }
@@ -3978,6 +4312,18 @@ int func_004029C8(void) {
 INCLUDE_ASM("seg/seg_2FE810", func_004029D0);
 #ifdef SKIP_ASM
 extern int func_00403500(int, int, int);
+/**
+ * Hands a block of MPEG bitstream to the decoder: starts the IPU input DMA over it.
+ *
+ * Passes the decoder's internal state (mpeg[16]), @p dataAddr and the size plus 4 rounded up to 16 bytes to
+ * func_00403500, which builds the DMA tag chain and starts channel 4 (to IPU). The EA codec func_003B0B40 calls it with
+ * each chunk it has read.
+ *
+ * @param mpeg  the decoder handle
+ * @param dataAddr  the bitstream data (16-byte aligned)
+ * @param n  its size in bytes
+ * @return 1
+ */
 int func_004029D0(int *mpeg, int dataAddr, int n) {
     func_00403500(mpeg[16], dataAddr, (n + 19) / 16 * 16);
     return 1;
@@ -3988,6 +4334,18 @@ int func_004029D0(int *mpeg, int dataAddr, int n) {
 INCLUDE_ASM("seg/seg_2FE810", func_00402A10);
 #ifdef SKIP_ASM
 extern int func_00402E10(int *);
+/**
+ * Decodes the next picture into an RGB32 output buffer (with IPU colour conversion).
+ *
+ * Sets the conversion flag (+0xB0 = 1), the output address (its uncached alias, +0xD8), the macroblock count (+0xE4)
+ * and clears the RAW8 width/height words, then runs the decode loop func_00402E10. PS2_SONY_CODEC_INTERNAL_DecodeFrame
+ * calls it with (width / 16) * (height / 16) macroblocks.
+ *
+ * @param mpeg  the decoder handle
+ * @param picture  the output buffer (64-byte aligned)
+ * @param mbCount  the number of macroblocks in the picture
+ * @return func_00402E10's result: 1 when a picture (or the stream end) was reached, -1 for a misaligned buffer
+ */
 int func_00402A10(int *mpeg, unsigned picture, int mbCount) {
     int *mpegSys = (int *)mpeg[16];
     picture = (picture & 0xFFFFFFF) | 0x20000000;
@@ -4004,6 +4362,17 @@ int func_00402A10(int *mpeg, unsigned picture, int mbCount) {
 INCLUDE_ASM("seg/seg_2FE810", func_00402A58);
 #ifdef SKIP_ASM
 extern int func_00402E10(int *);
+/**
+ * Decodes the next picture into a RAW8 (unconverted YCbCr) output buffer.
+ *
+ * Like func_00402A10 but with the conversion flag (+0xB0) cleared: sets the output address (uncached, +0xD8) and
+ * macroblock count (+0xE4), clears the width/height words and runs func_00402E10.
+ *
+ * @param mpeg  the decoder handle
+ * @param picture  the output buffer (64-byte aligned)
+ * @param mbCount  the number of macroblocks in the picture
+ * @return func_00402E10's result
+ */
 int func_00402A58(int *mpeg, unsigned picture, int mbCount) {
     int *mpegSys = (int *)mpeg[16];
     picture = (picture & 0xFFFFFFF) | 0x20000000;
@@ -4020,6 +4389,18 @@ int func_00402A58(int *mpeg, unsigned picture, int mbCount) {
 INCLUDE_ASM("seg/seg_2FE810", func_00402AA0);
 #ifdef SKIP_ASM
 extern int func_00402E10(int *);
+/**
+ * Decodes the next picture into a RAW8 buffer laid out by macroblock columns and rows.
+ *
+ * Like func_00402A58, but stores the picture width and height in pixels (mbWidth * 16 at +0xDC, mbHeight * 16 at +0xE0)
+ * and the macroblock count mbWidth * mbHeight, then runs func_00402E10.
+ *
+ * @param mpeg  the decoder handle
+ * @param picture  the output buffer (64-byte aligned)
+ * @param mbWidth  the picture width in macroblocks
+ * @param mbHeight  the picture height in macroblocks
+ * @return func_00402E10's result
+ */
 int func_00402AA0(int *mpeg, unsigned picture, int mbWidth, int mbHeight) {
     int *mpegSys = (int *)mpeg[16];
     picture = (picture & 0xFFFFFFF) | 0x20000000;
@@ -4035,6 +4416,13 @@ int func_00402AA0(int *mpeg, unsigned picture, int mbWidth, int mbHeight) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402AF0);
 #ifdef SKIP_ASM
+/**
+ * Sets the decoder flag at internal +0x10A0 to 1.
+ *
+ * The flag is tested (and cleared) by the slice decoder func_00405B70.
+ *
+ * @param mpeg  the decoder handle
+ */
 void func_00402AF0(int *mpeg) {
     int *mpegSys = (int *)mpeg[16];
     mpegSys[1064] = 1;
@@ -4044,6 +4432,18 @@ void func_00402AF0(int *mpeg) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402B00);
 #ifdef SKIP_ASM
+/**
+ * Sets how many I, P and B pictures the decoder decodes (-1 = all; others are skipped).
+ *
+ * Stores the three limits at internal +0x94, +0x98 and +0x9C; sceMpeg setup (func_004027B8) initialises them to -1. The
+ * decode loop func_00402E10 passes each picture type's counter and limit to func_00403098, which skips pictures past
+ * the limit.
+ *
+ * @param mpeg  the decoder handle
+ * @param a  the I-picture limit
+ * @param b  the P-picture limit
+ * @param c  the B-picture limit
+ */
 void func_00402B00(int *mpeg, int a, int b, int c) {
     int *mpegSys = (int *)mpeg[16];
     mpegSys[37] = a;
@@ -4055,6 +4455,14 @@ void func_00402B00(int *mpeg, int a, int b, int c) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402B18);
 #ifdef SKIP_ASM
+/**
+ * Reads back the I, P and B picture decode limits (see func_00402B00).
+ *
+ * @param mpeg  the decoder handle
+ * @param a  receives the I-picture limit
+ * @param b  receives the P-picture limit
+ * @param c  receives the B-picture limit
+ */
 void func_00402B18(int *mpeg, int *a, int *b, int *c) {
     int *mpegSys = (int *)mpeg[16];
     *a = mpegSys[37];
@@ -4066,6 +4474,15 @@ void func_00402B18(int *mpeg, int *a, int *b, int *c) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402B38);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the decoder has reached the end of the stream.
+ *
+ * Returns internal word 0, which the decode loop func_00402E10 sets when no further picture is found.
+ * PS2_SONY_CODEC_INTERNAL_GetFrame checks it.
+ *
+ * @param mpeg  the decoder handle
+ * @return non-zero at the end of the stream
+ */
 int func_00402B38(int *mpeg) {
     int *mpegSys = (int *)mpeg[16];
     return mpegSys[0];
@@ -4075,6 +4492,15 @@ int func_00402B38(int *mpeg) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402B48);
 #ifdef SKIP_ASM
+/**
+ * Tells whether the decoder holds no reference picture still waiting to be output.
+ *
+ * Returns 1 when internal word 1 is 0; func_00403240 outputs the held reference picture and clears that word at the end
+ * of the stream.
+ *
+ * @param mpeg  the decoder handle
+ * @return 1 when no reference picture is pending, else 0
+ */
 int func_00402B48(int *mpeg) {
     int *mpegSys = (int *)mpeg[16];
     return mpegSys[1] == 0;
@@ -4085,6 +4511,16 @@ int func_00402B48(int *mpeg) {
 INCLUDE_ASM("seg/seg_2FE810", func_00402B58);
 #ifdef SKIP_ASM
 extern void func_00403398(int *);
+/**
+ * Resets the decoder's stream state, the IPU and its DMA channels.
+ *
+ * Clears the end flag and the reference flags (internal words 0..2), the handle's frame count (mpeg[2]) and the
+ * counters at +0xAC/+0x118, sets +0x80 to -1, stops and resets the IPU and its DMA (func_00403398) and clears the
+ * pending slice state (func_004032A8). sceMpeg setup func_004027B8 calls it.
+ *
+ * @param mpeg  the decoder handle
+ * @return 1
+ */
 int func_00402B58(int *mpeg) {
     int *mpegSys = (int *)mpeg[16];
     mpegSys[0] = 0;
@@ -4103,6 +4539,16 @@ int func_00402B58(int *mpeg) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402BB0);
 #ifdef SKIP_ASM
+/**
+ * Marks the decoder's six reference picture buffers as empty.
+ *
+ * Clears word 10 of each per-picture record the internal state points to at +0x1B8, +0x1C8, +0x1D8, +0x1BC, +0x1CC and
+ * +0x1DC (the records sceMpeg setup func_004027B8 places in the state), skipping null pointers. Called by
+ * func_004027B8.
+ *
+ * @param mpeg  the decoder handle
+ * @return 1
+ */
 int func_00402BB0(int *mpeg) {
     char *mpegSys = (char *)mpeg[16];
     int *t;
@@ -4119,6 +4565,19 @@ int func_00402BB0(int *mpeg) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402C08);
 #ifdef SKIP_ASM
+/**
+ * Installs a decoder callback of one type and returns the one it replaces.
+ *
+ * The callbacks live in the internal state at +0x0C as (function, data) pairs indexed by type: 0 error (see
+ * func_004034A8), 1 needs data (func_00402C80), 2 / 3 around the decoder's own use of the IPU DMA (func_00403AD0).
+ * PS2_SONY_CODEC_INTERNAL_Init installs func_003B0B10 for type 1.
+ *
+ * @param mpeg  the decoder handle
+ * @param n  the callback type
+ * @param fn  the callback
+ * @param cbData  the data word passed to it
+ * @return the previous callback of that type
+ */
 int func_00402C08(int *mpeg, int n, int fn, void *cbData) {
     char *mpegSys = (char *)mpeg[16];
     char *tbl = mpegSys + 0xC;
@@ -4137,6 +4596,16 @@ INCLUDE_ASM("seg/seg_2FE810", func_00402C30);
 #ifdef SKIP_ASM
 struct FA_402C30 { int (*fn)(int *, int *, int); int arg; };
 struct T_402C30 { char pad[12]; struct FA_402C30 e[1]; };
+/**
+ * Calls the decoder callback whose type is the first word of @p cbData.
+ *
+ * Looks the (function, data) pair up in the internal state's table at +0x0C and calls function(mpeg, cbData, data) when
+ * one is installed (see func_00402C08). Every libmpeg routine that reports an event goes through it.
+ *
+ * @param mpeg  the decoder handle (may be 0)
+ * @param cbData  the event: type in word 0, then its arguments
+ * @return the callback's result, or 0 when there is none
+ */
 int func_00402C30(int *mpeg, int *cbData) {
     int result = 0;
     if (mpeg) {
@@ -4155,6 +4624,15 @@ int func_00402C30(int *mpeg, int *cbData) {
 INCLUDE_ASM("seg/seg_2FE810", func_00402C80);
 #ifdef SKIP_ASM
 extern int func_00402C30(int *, int *);
+/**
+ * Raises the decoder's "needs data" callback (type 1).
+ *
+ * Builds an event block with type 1 and passes it to func_00402C30. The bitstream readers call it when the IPU input
+ * runs dry; func_00402F80 and func_004030E0 also call it for a skipped picture.
+ *
+ * @param mpeg  the decoder handle
+ * @return 1
+ */
 int func_00402C80(int *mpeg) {
     int cbData[8];
     cbData[0] = 1;
@@ -4166,6 +4644,16 @@ int func_00402C80(int *mpeg) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402CA8);
 #ifdef SKIP_ASM
+/**
+ * Turns on time-stamp interpolation with a step value.
+ *
+ * Sets the flag at internal +0x70 and stores the 64-bit step at +0x78; func_00408530 then derives a picture's time
+ * stamp from the previous one and this step when the picture carries none.
+ *
+ * @param mpeg  the decoder handle
+ * @param v  the 64-bit interpolation step
+ * @return 1
+ */
 int func_00402CA8(int *mpeg, long v) {
     int *mpegSys = (int *)mpeg[16];
     mpegSys[28] = 1;
@@ -4177,6 +4665,12 @@ int func_00402CA8(int *mpeg, long v) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402CC0);
 #ifdef SKIP_ASM
+/**
+ * Turns off time-stamp interpolation (clears the flag at internal +0x70 and the step at +0x78).
+ *
+ * @param mpeg  the decoder handle
+ * @return 1
+ */
 int func_00402CC0(int *mpeg) {
     int *mpegSys = (int *)mpeg[16];
     mpegSys[28] = 0;
@@ -4188,6 +4682,13 @@ int func_00402CC0(int *mpeg) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402CD8);
 #ifdef SKIP_ASM
+/**
+ * Sets the decoder's output picture address (internal +0xD8) without decoding.
+ *
+ * @param mpeg  the decoder handle
+ * @param v  the output address
+ * @return 1
+ */
 int func_00402CD8(int *mpeg, int v) {
     int *mpegSys = (int *)mpeg[16];
     mpegSys[54] = v;
@@ -4198,6 +4699,12 @@ int func_00402CD8(int *mpeg, int v) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402CE8);
 #ifdef SKIP_ASM
+/**
+ * Returns the decoder word at internal +0xCC (set from the current picture by func_004086C0 / func_004087D0).
+ *
+ * @param mpeg  the decoder handle
+ * @return the word at +0xCC
+ */
 int func_00402CE8(int *mpeg) {
     int *mpegSys = (int *)mpeg[16];
     return mpegSys[51];
@@ -4207,6 +4714,12 @@ int func_00402CE8(int *mpeg) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402CF8);
 #ifdef SKIP_ASM
+/**
+ * Returns the decoder word at internal +0xD0 (set from the current picture by func_004086C0 / func_004087D0).
+ *
+ * @param mpeg  the decoder handle
+ * @return the word at +0xD0
+ */
 int func_00402CF8(int *mpeg) {
     int *mpegSys = (int *)mpeg[16];
     return mpegSys[52];
@@ -4216,6 +4729,14 @@ int func_00402CF8(int *mpeg) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402D08);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of the block at internal +0xB4 of the decoder state.
+ *
+ * func_00402D18 is identical.
+ *
+ * @param mpeg  the decoder handle
+ * @return internal state + 0xB4
+ */
 char *func_00402D08(int *mpeg) {
     return (char *)mpeg[16] + 0xB4;
 }
@@ -4224,6 +4745,12 @@ char *func_00402D08(int *mpeg) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402D18);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of the block at internal +0xB4 of the decoder state (same as func_00402D08).
+ *
+ * @param mpeg  the decoder handle
+ * @return internal state + 0xB4
+ */
 char *func_00402D18(int *mpeg) {
     return (char *)mpeg[16] + 0xB4;
 }
@@ -4232,6 +4759,15 @@ char *func_00402D18(int *mpeg) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402D28);
 #ifdef SKIP_ASM
+/**
+ * Replaces the decoder flag at internal +0xE8 and returns its old value.
+ *
+ * func_00407F20 reads and clears the flag while searching for the next picture.
+ *
+ * @param mpeg  the decoder handle
+ * @param newValue  the new value
+ * @return the previous value
+ */
 int func_00402D28(int *mpeg, int newValue) {
     int *mpegSys = (int *)mpeg[16];
     int old = mpegSys[58];
@@ -4243,6 +4779,16 @@ int func_00402D28(int *mpeg, int newValue) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402D38);
 #ifdef SKIP_ASM
+/**
+ * Queues a 64-bit time stamp for the next decoded picture.
+ *
+ * Stores it at internal +0xF0 and sets the state word +0xF8 to 1; once that state reaches 2, func_00408530 hands the
+ * stamp to the next picture instead of its own and resets it to -1.
+ *
+ * @param mpeg  the decoder handle
+ * @param v  the time stamp
+ * @return 1
+ */
 int func_00402D38(int *mpeg, long v) {
     int *mpegSys = (int *)mpeg[16];
     *(long *)&mpegSys[60] = v;
@@ -4254,6 +4800,13 @@ int func_00402D38(int *mpeg, long v) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402D50);
 #ifdef SKIP_ASM
+/**
+ * Initialises a memory pool over a block: base, size, current and mark all start at the base.
+ *
+ * @param heap  the pool record (base, size, current, mark)
+ * @param base  the block's address
+ * @param size  the block's size in bytes
+ */
 void func_00402D50(int *heap, int base, int size) {
     heap[0] = base;
     heap[1] = size;
@@ -4265,6 +4818,12 @@ void func_00402D50(int *heap, int base, int size) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402D68);
 #ifdef SKIP_ASM
+/**
+ * Records the pool's current position as its mark (mark = current).
+ *
+ * @param heap  the pool record
+ * @return the new mark
+ */
 int func_00402D68(int *heap) {
     return heap[3] = heap[2];
 }
@@ -4273,6 +4832,14 @@ int func_00402D68(int *heap) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402D78);
 #ifdef SKIP_ASM
+/**
+ * Rewinds the pool to its mark, freeing everything allocated since (current = mark).
+ *
+ * func_00403748 uses it to rebuild the picture buffers for a new sequence.
+ *
+ * @param heap  the pool record
+ * @return the new current position
+ */
 int func_00402D78(int *heap) {
     return heap[2] = heap[3];
 }
@@ -4283,6 +4850,18 @@ INCLUDE_ASM("seg/seg_2FE810", func_00402D88);
 #ifdef SKIP_ASM
 extern char D_00497C48[];
 extern void func_004034A8(int *, int);
+/**
+ * Allocates an aligned block from a memory pool.
+ *
+ * Rounds the current position up to @p align and takes @p size bytes when they fit before base + size; otherwise
+ * reports "work area size is too small" through the decoder's error path (func_004034A8).
+ *
+ * @param a  the decoder state errors are reported for
+ * @param p  the pool record (base, size, current, mark)
+ * @param size  the block size in bytes
+ * @param align  the alignment in bytes
+ * @return the block's address, or 0 when the pool is exhausted
+ */
 unsigned func_00402D88(int *a, unsigned *p, unsigned size, unsigned align) {
     unsigned s = (p[2] + align - 1) / align * align;
     unsigned e = s + size;
@@ -4298,6 +4877,12 @@ unsigned func_00402D88(int *a, unsigned *p, unsigned size, unsigned align) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00402DF8);
 #ifdef SKIP_ASM
+/**
+ * Returns how many bytes are left in a memory pool (base + size - current).
+ *
+ * @param heap  the pool record
+ * @return the free bytes
+ */
 int func_00402DF8(int *heap) {
     return heap[0] + heap[1] - heap[2];
 }
@@ -4311,6 +4896,19 @@ extern void func_00403470_k() __asm__("func_00403470");
 extern int func_00403240();
 extern int func_00403098();
 extern int func_00407520();
+/**
+ * Runs the MPEG decode loop until one picture has been output or the stream ends.
+ *
+ * Fails with "image buffer needs to be aligned to 64byte boundary" (func_00403470) unless the output address (internal
+ * +0xD8) is 64-byte aligned. Otherwise it repeatedly finds the next picture (func_00407520, which returns its type: 0
+ * none, 1 I, 2 P, 3 or 4 B) and decodes it with func_00403098, passing the per-type counter (+0xA0/+0xA4/+0xA8; an I
+ * picture restarts all three) and the type's decode limit (+0x94..+0x9C). When no picture is left it flushes the held
+ * reference picture (func_00403240) and sets the end flag (word 0). Returns once a picture was output (+0x820) or the
+ * end flag is set.
+ *
+ * @param a  the decoder handle
+ * @return 1, or -1 when the output buffer is misaligned
+ */
 int func_00402E10(int *a) {
     int *p = (int *)a[16];
     int r = 0;
@@ -4370,6 +4968,20 @@ extern int s2_7F20(struct P_2F80 *, int) __asm__("func_00407F20");
 extern int s2_7DC0(struct P_2F80 *) __asm__("func_00407DC0");
 extern void s2_2C80(struct A_2F80 *) __asm__("func_00402C80");
 extern void s2_7E90(struct P_2F80 *, int, int) __asm__("func_00407E90");
+/**
+ * Decodes (or skips) one frame picture and advances the picture counters.
+ *
+ * A picture whose index is below the type's limit (or with no limit, -1) is decoded: func_00407F20(state, 0) then
+ * func_00407DC0; past the limit only func_00407F20 runs and the needs-data callback is raised (func_00402C80). Then
+ * func_00407E90 queues the output, the alternating flag +0x120 flips for frame pictures (unless skipped), the handle's
+ * frame number mpeg[2] becomes +0x118 - +0xAC, and the counters +0x118 / +0x04 advance when +0x120 is clear.
+ * func_00403098 calls it for frame pictures (+0x174 == 3).
+ *
+ * @param a  the decoder handle
+ * @param b  the index of this picture among its type
+ * @param c  the type's decode limit, -1 for none
+ * @return non-zero when the picture was decoded
+ */
 int func_00402F80(struct A_2F80 *a, int b, int c) {
     struct P_2F80 *p = a->f40;
     int t, ret;
@@ -4405,6 +5017,16 @@ struct P_3098 { char pad[0x174]; int f174; };
 struct A_3098 { char pad[0x40]; struct P_3098 *f40; };
 extern int s98_30E0(struct A_3098 *, int, int) __asm__("func_004030E0");
 extern int s98_2F80(struct A_3098 *, int, int) __asm__("func_00402F80");
+/**
+ * Decodes one picture: field pictures go to func_004030E0, frame pictures to func_00402F80.
+ *
+ * Chooses by the picture structure at internal +0x174 (3 = frame). Called by the decode loop func_00402E10.
+ *
+ * @param a  the decoder handle
+ * @param b  the index of this picture among its type
+ * @param c  the type's decode limit, -1 for none
+ * @return the chosen routine's result
+ */
 int func_00403098(struct A_3098 *a, int b, int c) {
     if (a->f40->f174 != 3) return s98_30E0(a, b, c);
     return s98_2F80(a, b, c);
@@ -4422,6 +5044,20 @@ extern void s3_2C80(struct A_30E0 *) __asm__("func_00402C80");
 extern void s3_7E90(struct P_30E0 *, int, int) __asm__("func_00407E90");
 extern int s3_7520(struct P_30E0 *) __asm__("func_00407520");
 extern void s3_3240(struct A_30E0 *) __asm__("func_00403240");
+/**
+ * Decodes (or skips) a field-picture pair: the first field, then the matching second field.
+ *
+ * Decodes the first field when the picture is within the type's limit (func_00407F20(state, 0), func_00407DC0), then
+ * finds the next picture (func_00407520); none flushes the reference picture and sets the end flag. The second field
+ * must have the other field structure (2 when +0xD4 is 1, else 1) or it returns -1. Decodes it the same way, queues the
+ * output (func_00407E90), sets the frame number mpeg[2], advances +0x118 / +0x04 and raises the needs-data callback
+ * (func_00402C80) when the pair was skipped.
+ *
+ * @param a  the decoder handle
+ * @param b  the index of this picture among its type
+ * @param c  the type's decode limit, -1 for none
+ * @return 1 when the second field was decoded, 0 otherwise, -1 for a field mismatch
+ */
 int func_004030E0(struct A_30E0 *a, int b, int c) {
     struct P_30E0 *p = a->f40;
     int flag = 0;
@@ -4471,6 +5107,15 @@ int func_004030E0(struct A_30E0 *a, int b, int c) {
 INCLUDE_ASM("seg/seg_2FE810", func_00403240);
 #ifdef SKIP_ASM
 extern void func_004032B8(int *);
+/**
+ * Outputs the reference picture still held at the end of the stream.
+ *
+ * When a reference picture is held (internal words 1 and 2), converts/outputs it (func_004032B8), sets the handle's
+ * frame number mpeg[2] to +0x118 - +0xAC and clears the held flag.
+ *
+ * @param mpeg  the decoder handle
+ * @return 1 when a picture was output, else 0
+ */
 int func_00403240(int *mpeg) {
     int *mpegSys = (int *)mpeg[16];
     int result = 0;
@@ -4488,6 +5133,13 @@ int func_00403240(int *mpeg) {
 INCLUDE_ASM("seg/seg_2FE810", func_004032A8);
 #ifdef SKIP_ASM
 extern void func_00405B48(unsigned);
+/**
+ * Puts the decoder back in MPEG-1 mode: clears the MPEG-2 flag (+0x848) and calls func_00405B48(1).
+ *
+ * The sequence extension parser func_00403BB0 sets the flag (and calls func_00405B48(0)). Called by func_00402B58.
+ *
+ * @param p  the decoder's internal state
+ */
 void func_004032A8(int *p) {
     p[530] = 0;
     func_00405B48(1);
@@ -4501,6 +5153,15 @@ extern void func_004034A8(int *, int);
 extern char D_00497CC8[];
 extern void func_004086C0(int *, int, int);
 extern void func_004087D0(int *, int, int, int);
+/**
+ * Outputs the held reference picture into the caller's buffer.
+ *
+ * Reports "the second field is missing" (func_004034A8) when a field picture is still incomplete (+0x120); otherwise
+ * converts it with func_004086C0 (frame pictures, +0x174 == 3) or func_004087D0 (field pictures), giving the picture
+ * count +0x118 minus one. Clears +0x120.
+ *
+ * @param p  the decoder's internal state
+ */
 void func_004032B8(int *p) {
     int n = p[280 / 4];
     if (p[288 / 4] != 0) {
@@ -4518,6 +5179,14 @@ void func_004032B8(int *p) {
 INCLUDE_ASM("seg/seg_2FE810", func_00403338);
 #ifdef SKIP_ASM
 extern void func_00405B48(unsigned);
+/**
+ * Lays out the decoder's scratchpad buffers.
+ *
+ * Calls func_00405B48(1), then points the two buffer pairs at scratchpad 0x70000000 / 0x70001800 (internal
+ * +0x590/+0x594) and 0x70001B00 / 0x70003300 (+0x6D0/+0x6D4) and clears +0x810. Called by sceMpeg setup func_004027B8.
+ *
+ * @param mpegSys  the decoder's internal state
+ */
 void func_00403338(int *mpegSys) {
     int scratchBase = 0x70000000;
     func_00405B48(1);
@@ -4535,6 +5204,15 @@ INCLUDE_ASM("seg/seg_2FE810", func_00403398);
 extern int DIntr_0() __asm__("DIntr");
 extern void EIntr(void);
 extern void func_00409638_2(int, int) __asm__("func_00409638");
+/**
+ * Stops the IPU, its DMA channels and the to-scratchpad DMA, and resets the IPU.
+ *
+ * Sets +0x818 and clears +0x1B0; with interrupts off holds the DMA controller (D_ENABLEW) while zeroing the CHCR of
+ * channels 3 and 4 (from/to IPU) and 9 (to scratchpad), then zeroes their QWC, resets the IPU (IPU_CTRL = 0x40000000)
+ * and calls func_00409638(0, 0). Called by func_00402B58.
+ *
+ * @param mpegSys  the decoder's internal state
+ */
 void func_00403398(int *mpegSys) {
     int intrState;
     mpegSys[2072 / 4] = 1;
@@ -4560,6 +5238,13 @@ INCLUDE_ASM("seg/seg_2FE810", func_00403460);
 #ifdef SKIP_ASM
 extern char D_00497CE8[];
 extern void func_00425C60(char *, int);
+/**
+ * Prints a decoder error message as "[MPEG ERROR]%s".
+ *
+ * The fallback of func_004034A8 when no error callback is installed.
+ *
+ * @param a  the message
+ */
 void func_00403460(int a) {
     func_00425C60(D_00497CE8, a);
 }
@@ -4570,6 +5255,15 @@ INCLUDE_ASM("seg/seg_2FE810", func_00403470);
 #ifdef SKIP_ASM
 extern int sprintf(char *, const char *, ...);
 extern void func_004034A8(int *, int);
+/**
+ * Formats a decoder error message into a 256-byte buffer and reports it (func_004034A8).
+ *
+ * The callers pass one value for the format (e.g. the misaligned address) as a third argument that this C does not
+ * declare; it still reaches sprintf because nothing between entry and the call touches the third argument register.
+ *
+ * @param mpegSys  the decoder's internal state
+ * @param fmt  the printf-style message
+ */
 void func_00403470(int *mpegSys, char *fmt) {
     char buf[256];
     sprintf(buf, fmt);
@@ -4582,6 +5276,15 @@ INCLUDE_ASM("seg/seg_2FE810", func_004034A8);
 #ifdef SKIP_ASM
 extern int func_00402C30(int *, int *);
 extern void func_00403460(int);
+/**
+ * Reports a decoder error: to the error callback when one is installed, else to the console.
+ *
+ * When the state links back to its handle (+0x858) and an error callback (type 0, +0x0C) is set, calls it with an event
+ * block of type 0 and the message (func_00402C30); otherwise prints "[MPEG ERROR]%s" (func_00403460).
+ *
+ * @param mpegSys  the decoder's internal state
+ * @param message  the message
+ */
 void func_004034A8(int *mpegSys, int message) {
     int cbData[2];
     int *mpeg = (int *)mpegSys[534];
@@ -4602,6 +5305,18 @@ extern void FlushCache(int) __asm__("FlushCache");
 extern int DIntr();
 extern void EIntr(void);
 void q3500(int base, unsigned addr, int n) __asm__("func_00403500");
+/**
+ * Starts the IPU input DMA (channel 4, chain mode) over a bitstream block.
+ *
+ * Builds DMA ref tags in the 16-byte aligned tag area at state + 0x880: one per chunk of at most 0xFFF40 bytes, ID 3
+ * (ref) for all but the last (ID 0, refe), each with the chunk's quadword count and address. Then flushes the cache
+ * and, with interrupts off, sets D4_TADR to the tags, D4_QWC to 0 and D4_CHCR to 0x105 (start, chain). func_004029D0
+ * calls it.
+ *
+ * @param base  the decoder's internal state
+ * @param addr  the bitstream data
+ * @param n  its size in bytes
+ */
 void q3500(int base, unsigned addr, int n) {
     unsigned tagBase = ((unsigned)(base + 2191) >> 4) << 4;
     long *tag = (long *)tagBase;
@@ -4630,6 +5345,14 @@ void q3500(int base, unsigned addr, int n) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00403600);
 #ifdef SKIP_ASM
+/**
+ * Fills a picture-size record: width, height and both in macroblocks (>> 4).
+ *
+ * @param picInfo  the record (words 1..4 written)
+ * @param width  the width in pixels
+ * @param height  the height in pixels
+ * @return 1
+ */
 int func_00403600(int *picInfo, int width, int height) {
     picInfo[1] = width;
     picInfo[2] = height;
@@ -4649,6 +5372,17 @@ extern int func_004072E8();
 extern void func_00403AD0();
 extern void func_00403748();
 extern void func_004076F8();
+/**
+ * Parses an MPEG sequence header and loads its quantiser matrices into the IPU.
+ *
+ * Reads the 12-bit horizontal and vertical sizes (+0x124, +0x128; "vertical size > 2800" is reported), the bit rate
+ * (+0x134) and VBV buffer size (+0x138) through func_004072E8. For each of the intra and non-intra matrices the load
+ * flag goes to +0x840 / +0x844: when set the IPU reads the matrix from the bitstream (SETIQ command 0x50000000 /
+ * 0x58000000 via func_00406DF0), otherwise the default table D_00453200 / D_00453240 is DMA'd in (func_00403AD0). Then
+ * reads the extensions and user data (func_004076F8) and sets the picture buffers up (func_00403748).
+ *
+ * @param p  the decoder's internal state
+ */
 void func_00403620(int *p) {
     unsigned v;
     int w;
@@ -4693,6 +5427,27 @@ INCLUDE_ASM("seg/seg_2FE810", func_004039F0);
 #ifdef SKIP_ASM
 static __inline__ int unc(int a) { return (a & 0x0FFFFFFF) | 0x20000000; }
 static __inline__ int adr(int base, int n) { return unc(base + n * 0x180); }
+/**
+ * Computes the uncached addresses of the Y, U and V planes for three picture slots.
+ *
+ * Slots 0 and 1 get the bases themselves; slot 2 starts w * height / 512 blocks of 0x180 bytes in. All are returned as
+ * uncached (0x20000000) addresses. Called by func_00403748.
+ *
+ * @param y0  receives slot 0's Y address
+ * @param uOut0  receives slot 0's U address
+ * @param vOut0  receives slot 0's V address
+ * @param y1  receives slot 1's Y address
+ * @param uOut1  receives slot 1's U address
+ * @param vOut1  receives slot 1's V address
+ * @param y2  receives slot 2's Y address
+ * @param uOut2  receives slot 2's U address
+ * @param vOut2  receives slot 2's V address
+ * @param y  the Y buffer
+ * @param uBuffer  the U buffer
+ * @param vBuffer  the V buffer
+ * @param w  the picture width
+ * @param height  the picture height
+ */
 void func_004039F0(int *y0, int *uOut0, int *vOut0, int *y1, int *uOut1, int *vOut1, int *y2, int *uOut2, int *vOut2,
                    int y, int uBuffer, int vBuffer, int w, int height) {
     int n;
@@ -4717,6 +5472,17 @@ extern void f3AD0_EI(void) __asm__("EIntr");
 extern int f3AD0_2C30(int, int *) __asm__("func_00402C30");
 extern void f3AD0_6E20(int *) __asm__("func_00406E20");
 extern void f3AD0_6DF0(int *, int) __asm__("func_00406DF0");
+/**
+ * Loads a default quantiser matrix into the IPU by DMA, between the stop and restart DMA callbacks.
+ *
+ * Raises callback 2 (stop DMA), waits for the IPU (func_00406E20), clears its input FIFO (BCLR), then with interrupts
+ * off points channel 4 (to IPU) at @p srcAddr for 4 quadwords and starts it (CHCR 0x101); issues @p ipuCmd
+ * (func_00406DF0), waits again and raises callback 3 (restart DMA). Called by func_00403620.
+ *
+ * @param mpegSys  the decoder's internal state
+ * @param ipuCmd  the IPU SETIQ command (0x50000000 or 0x58000000)
+ * @param srcAddr  the 64-byte matrix
+ */
 void func_00403AD0(int *mpegSys, int ipuCmd, int srcAddr) {
     int cbData[8];
     int intrState;
@@ -4743,6 +5509,16 @@ INCLUDE_ASM("seg/seg_2FE810", func_00403BB0);
 extern char D_00497D10[];
 extern char D_00497D38[];
 extern void func_00405B48(unsigned);
+/**
+ * Parses an MPEG-2 sequence extension (extension table D_00497FE0, id 1).
+ *
+ * Marks the stream as MPEG-2 (+0x848 = 1, func_00405B48(0)) and reads profile/level, progressive_sequence (+0x13C),
+ * chroma_format (+0x140; anything but 1 reports "_chroma_format needs to be 1: 420"), the size, bit-rate and VBV-size
+ * extensions, which it merges into +0x124, +0x128, +0x134 and +0x138. Profile/level other than 0x48, 0x58 or 0x44
+ * (main/simple profile at main level, main at high) reports "Unsupported profile/level".
+ *
+ * @param p  the decoder's internal state
+ */
 void func_00403BB0(int *p) {
     unsigned v;
     unsigned h;
@@ -4777,6 +5553,14 @@ void func_00403BB0(int *p) {
 INCLUDE_ASM("seg/seg_2FE810", func_00403CE0);
 #ifdef SKIP_ASM
 extern int func_004072E8(int, int);
+/**
+ * Parses an MPEG-2 sequence display extension (extension table D_00497FE0, id 2).
+ *
+ * Skips video_format; with colour_description set skips the primaries and transfer characteristics and keeps the matrix
+ * coefficients (+0x144); keeps the display width (+0x148) and height (+0x14C).
+ *
+ * @param mpegSys  the decoder's internal state
+ */
 void func_00403CE0(int *mpegSys) {
     func_004072E8((int)mpegSys, 3);
     if (func_004072E8((int)mpegSys, 1)) {
@@ -4813,6 +5597,13 @@ INCLUDE_ASM("seg/seg_2FE810", func_00403D80);
 #ifdef SKIP_ASM
 extern char D_00497D88[];
 extern void func_004034A8(int *, int);
+/**
+ * Reports "Unknown Extension" for an MPEG extension id the decoder does not handle.
+ *
+ * Entries 0 and 6 (reserved ids) of the extension handler table D_00497FE0; reports through func_004034A8.
+ *
+ * @param p  the decoder's internal state
+ */
 void func_00403D80(int *p) {
     func_004034A8(p, (int)D_00497D88);
 }
@@ -4823,6 +5614,14 @@ INCLUDE_ASM("seg/seg_2FE810", func_00403D90);
 #ifdef SKIP_ASM
 extern char D_00497DA0[];
 extern void func_004034A8(int *, int);
+/**
+ * Reports that the MPEG picture spatial scalable extension is not supported.
+ *
+ * Entry 9 of the extension handler table D_00497FE0 (MPEG-2 extension id 9); reports its "not supported" message
+ * D_00497DA0 through func_004034A8.
+ *
+ * @param p  the decoder's internal state
+ */
 void func_00403D90(int *p) {
     func_004034A8(p, (int)D_00497DA0);
 }
@@ -4833,6 +5632,14 @@ INCLUDE_ASM("seg/seg_2FE810", func_00403DA0);
 #ifdef SKIP_ASM
 extern char D_00497DD8[];
 extern void func_004034A8(int *, int);
+/**
+ * Reports that the MPEG picture temporal scalable extension is not supported.
+ *
+ * Entry 10 of the extension handler table D_00497FE0 (MPEG-2 extension id 10); reports its "not supported" message
+ * D_00497DD8 through func_004034A8.
+ *
+ * @param p  the decoder's internal state
+ */
 void func_00403DA0(int *p) {
     func_004034A8(p, (int)D_00497DD8);
 }
@@ -4842,6 +5649,15 @@ void func_00403DA0(int *p) {
 INCLUDE_ASM("seg/seg_2FE810", func_00403DB0);
 #ifdef SKIP_ASM
 extern void func_00409400(void *);
+/**
+ * Default "stop DMA" decoder callback (type 2): pauses the IPU DMA and saves its registers.
+ *
+ * Runs func_00409400 on the save block at internal +0x4C. func_004027B8 installs it; func_00403AD0 and func_00409088
+ * raise type 2 before using the IPU themselves.
+ *
+ * @param mpeg  the decoder handle
+ * @return 1
+ */
 int func_00403DB0(int *mpeg) {
     func_00409400((char *)mpeg[16] + 0x4C);
     return 1;
@@ -4852,6 +5668,14 @@ int func_00403DB0(int *mpeg) {
 INCLUDE_ASM("seg/seg_2FE810", func_00403DD8);
 #ifdef SKIP_ASM
 extern void func_004094E8(void *);
+/**
+ * Default "restart DMA" decoder callback (type 3): restores and restarts the IPU DMA.
+ *
+ * Runs func_004094E8 on the save block at internal +0x4C that func_00403DB0 filled. func_004027B8 installs it.
+ *
+ * @param mpeg  the decoder handle
+ * @return 1
+ */
 int func_00403DD8(int *mpeg) {
     func_004094E8((char *)mpeg[16] + 0x4C);
     return 1;
@@ -4875,6 +5699,24 @@ extern void q4050_4758(int *, int, int, int, int, int, int, int, int, int, int, 
 extern void q4050_5E30(int *, int *, int *, int, int) __asm__("func_00405E30");
 extern void q4050_3470(int *, char *, int) __asm__("func_00403470");
 
+/**
+ * Forms a macroblock's motion-compensated prediction (MSSG mpeg2decode's form_predictions).
+ *
+ * Clears the current macroblock record's prediction flag (+0x6BC of slot +0x810), then for a forward vector (bit 8 of
+ * @p mbtype, or any P picture) and a backward vector (bit 4) issues the predictions with func_00404758 from the forward
+ * / backward reference pictures (+0x1B8, +0x1BC, or the field references +0x1C8..+0x1DC for field pictures), by motion
+ * type: frame, field, or dual prime (vectors from func_00405E30). Backward after forward averages. An invalid motion
+ * type reports "(a)/(b)/(c) invalid motion_type(%d)" (func_00403470). Called by func_00403E00.
+ *
+ * @param p  the decoder's internal state
+ * @param bx  the macroblock's x position in pixels
+ * @param by  the macroblock's y position in pixels
+ * @param mbtype  the macroblock_type bits
+ * @param mtype  the motion type
+ * @param PMV  the motion vectors [r][s][t]
+ * @param mvfs  the motion_vertical_field_select flags
+ * @param dmv  the dual-prime differential vector
+ */
 void func_00404050(int *p, int bx, int by, int mbtype, int mtype, int PMV[2][2][2], int mvfs[2][2], int *dmv)
 {
     int DMV[2][2];
@@ -4983,6 +5825,18 @@ extern char D_00497E98[];
 extern void add_4B78(void *, void *) __asm__("func_00405AE8");
 extern void mix_4B78(void *, void *, void *) __asm__("func_00405A88");
 void f4B78(struct S4B78 *s, int n) __asm__("func_00404B78");
+/**
+ * Finishes one decoded macroblock: runs its block copy routines and merges prediction and residual.
+ *
+ * Works on macroblock record @p n (two alternate, 0x140 bytes at +0x590). When it is enabled, runs each of its count
+ * block routine pairs (fa / fb tables) on its block descriptors. A record flagged both intra (+0x130) and skipped
+ * (+0x13C) reports "intra && skip MB". Intra: func_00405AE8(dst, src); skipped: func_00405AE8(dst, the prediction
+ * +0x81C); otherwise func_00405A88 combines dst, the prediction and the residual. Called by func_00406318 and
+ * func_004060C8.
+ *
+ * @param s  the decoder's internal state
+ * @param n  the macroblock record (0 or 1)
+ */
 void f4B78(struct S4B78 *s, int n) {
     int i;
     if (s->e[n].enable != 0) {
@@ -6102,6 +6956,13 @@ void func_00405AE8(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00405B48);
 #ifdef SKIP_ASM
+/**
+ * Sets or clears the IPU's MPEG-1 mode bit (IPU_CTRL bit 23).
+ *
+ * func_004032A8 and func_00403338 set it; the sequence extension parser func_00403BB0 clears it for MPEG-2.
+ *
+ * @param mpeg1  1 for an MPEG-1 stream, 0 for MPEG-2
+ */
 void func_00405B48(unsigned mpeg1) {
     volatile unsigned *ipuCtrl = (volatile unsigned *)0x10002010;
     *ipuCtrl = (*ipuCtrl & 0xFF7FFFFF) | (mpeg1 << 23);
@@ -6119,6 +6980,18 @@ extern void EIntr(void);
 extern char D_00497EB0[];
 struct M5B70 { char pad0[0x838]; int f838; int f83C; char pad840[0x18]; int *f858; char pad85C[0x10A0 - 0x85C]; int f10A0; };
 int f5B70(struct M5B70 *p) __asm__("func_00405B70");
+/**
+ * Waits for the IPU to finish a macroblock and records its bit position; recovers from decode errors.
+ *
+ * Waits for the IPU (func_00406E20), then while the IPU-from DMA still has data and no error is flagged (IPU_CTRL bit
+ * 14), raises the needs-data callback whenever the IPU-to DMA is idle. When the stop flag +0x10A0 is set it stops both
+ * IPU DMA channels (DMA controller held, interrupts off), resets the IPU and returns 0. Otherwise it stores IPU_TOP in
+ * +0x838 and the remaining bits in the buffer (+0x83C, 32 when the top is valid). On an IPU error it reports "Error
+ * code detected(BDEC)", raises the stop/restart DMA callbacks around an IPU reset, stops channel 3 and returns 0.
+ *
+ * @param p  the decoder's internal state
+ * @return 1, or 0 after an error or a stop request
+ */
 int f5B70(struct M5B70 *p) {
     int cmd[8];
     int cmd2[8];
@@ -6183,6 +7056,14 @@ int f5B70(struct M5B70 *p) {
 INCLUDE_ASM("seg/seg_2FE810", func_00405E10);
 #ifdef SKIP_ASM
 extern int func_00406F78(int, int);
+/**
+ * Decodes a dual-prime differential motion vector (IPU VDEC with table 3).
+ *
+ * Called twice by func_00406CA0 for a dual-prime vector.
+ *
+ * @param mpegSys  the decoder's internal state
+ * @return the decoded value
+ */
 int func_00405E10(int mpegSys) {
     return func_00406F78(mpegSys, 3);
 }
@@ -6193,6 +7074,19 @@ INCLUDE_ASM("seg/seg_2FE810", func_00405E30);
 #ifdef SKIP_ASM
 #define H1(x) (((x) + ((x) > 0)) >> 1)
 #define H3(x) ((3 * (x) + ((x) > 0)) >> 1)
+/**
+ * Computes the dual-prime derived motion vectors (MSSG mpeg2decode's calc_DMV).
+ *
+ * For frame pictures (+0x174 == 3) it derives both field vectors, scaled by 1/2 and 3/2 with rounding away from zero,
+ * in the order set by top_field_first (+0x178), with the vertical -1 / +1 field corrections; for field pictures one
+ * vector, corrected by -1 (top field, +0x174 == 1) or +1. Called by func_00404050.
+ *
+ * @param mpegSys  the decoder's internal state
+ * @param outVec  receives the derived vector(s)
+ * @param in  the differential vector
+ * @param a  the horizontal motion vector
+ * @param b  the vertical motion vector
+ */
 void func_00405E30(int *mpegSys, int *outVec, int *in, int a, int b) {
     if (mpegSys[93] == 3) {
         if (mpegSys[94] != 0) {
@@ -6227,6 +7121,16 @@ extern int lx5_6F78(int *, int) __asm__("func_00406F78");
 extern int lx5_70F0(int *, int) __asm__("func_004070F0");
 extern void lx5_71F8(int *, int) __asm__("func_004071F8");
 extern void lx5_3470(int *, char *, int) __asm__("func_00403470");
+/**
+ * Decodes a macroblock_address_increment, including stuffing and escape codes.
+ *
+ * Reads VLC codes with the IPU (func_00406F78 table 0): 34 (stuffing) is skipped, 35 (escape) adds 33. A code of 0 is
+ * an error unless it is MPEG-2 stuffing (11 bits of 15, flushed with func_004071F8): it reports "Invalid
+ * macroblock_address_increment code(0x%08x)", sets the fault flag +0x11C and returns 1.
+ *
+ * @param p  the decoder's internal state
+ * @return the address increment
+ */
 int func_00405FB8(int *p) {
     int sum = 0;
     int c;
@@ -6271,6 +7175,18 @@ extern void func_00406E20(int);
 extern int func_00405B70(int *);
 extern void func_00404B78(int *, int);
 extern void func_004034A8(int *, int);
+/**
+ * Decodes all slices of the current picture.
+ *
+ * Clears the macroblock record selector (+0x810) and +0x814 and computes the picture's macroblock count (+0x12C times
+ * +0x130, halved for field pictures), then decodes slices with func_00406318 while it returns 1 or 3. Waits for the IPU
+ * and the last macroblock (func_00405B70; a stop request gives 4, an error 2), waits for the to-scratchpad DMA,
+ * finishes the last macroblock (func_00404B78) when the picture decoded cleanly and reports "= Skip to the next picture
+ * =" after results 1 or 2. Called by func_00407DC0.
+ *
+ * @param p  the decoder's internal state
+ * @return 1 when the picture decoded completely, else 0
+ */
 int func_004060C8(int *p) {
     int n;
     int r;
@@ -6372,6 +7288,19 @@ extern int func_004065D0(int *, int *, int *, int *, int *, int *, int *);
 extern int func_00406510(int *, int *, int *, int *, int *);
 extern int func_00403E00_k() __asm__("func_00403E00");
 extern void func_00404B78(int *, int);
+/**
+ * Decodes one slice: its header, then each macroblock until the next start code.
+ *
+ * The slice header comes from _sliceA0 (which returns non-zero to stop). For each macroblock: waits for the IPU
+ * (func_00405B70), reads the next address increment (func_00405FB8) when needed (23 zero bits ahead means a start code:
+ * return 3), decodes a coded macroblock's modes and vectors (func_004065D0) or sets up a skipped one (func_00406510),
+ * issues it (func_00403E00) and finishes the previous one (func_00404B78), alternating the two macroblock records
+ * (+0x810). Reports "Too many macroblocks in picture" past @p n.
+ *
+ * @param p  the decoder's internal state
+ * @param n  the number of macroblocks in the picture
+ * @return 0 at the end of the picture, 1 or 3 to continue with the next slice, 2 on an error, 4 on a stop request
+ */
 int func_00406318(int *p, int n) {
     int a;
     int b;
@@ -6447,6 +7376,21 @@ INCLUDE_ASM("seg/seg_2FE810", func_00406510);
 #ifdef SKIP_ASM
 extern char D_00497F90[];
 extern void func_004034A8(int *, int);
+/**
+ * Sets up a skipped macroblock (MSSG mpeg2decode's skipped_macroblock).
+ *
+ * Marks the current macroblock record as skipped (+0x6CC) and +0x1B0; in P pictures resets the forward vectors, sets
+ * the motion type to frame (2, frame pictures) or field (1, with both field selects set to the bottom-field flag) and
+ * clears the intra bit of the macroblock type. A skipped macroblock in an I picture reports "skiped macroblock in I
+ * picure is not allowed".
+ *
+ * @param p  the decoder's internal state
+ * @param q  the motion vectors (PMV)
+ * @param r  receives the motion type
+ * @param s  the motion_vertical_field_select flags
+ * @param t  the macroblock type (intra bit cleared)
+ * @return 1, or 0 in an I picture
+ */
 int func_00406510(int *p, int *q, int *r, int *s, int *t) {
     int ok = 1;
     int v;
@@ -6491,6 +7435,24 @@ extern void m65D0_6CA0(int *, int *, int *, int, int, int, int, int) __asm__("fu
 extern void m65D0_6DF0(int *, unsigned) __asm__("func_00406DF0");
 extern void m65D0_6E20(int *) __asm__("func_00406E20");
 extern void m65D0_8AF8(int, int) __asm__("func_00408AF8");
+/**
+ * Decodes a macroblock's modes and motion vectors and starts the IPU block decode (MSSG decode_macroblock).
+ *
+ * Puts the picture coding type into IPU_CTRL, decodes macroblock_type (func_00406F78 table 1; 0 reports "Invalid
+ * macroblock_type code: 0"), the frame/field motion type, dct_type and quantiser scale (+0x1B4), then the forward and
+ * backward vectors (func_00406B00 for MPEG-2, func_00406CA0 for MPEG-1). For coded blocks it clears the record's
+ * 0x300-byte output (func_00408AF8) and issues an IPU BDEC command; otherwise marks the record skipped. Resets the
+ * vectors after intra macroblocks without concealment vectors and for P macroblocks without a forward vector.
+ *
+ * @param p  the decoder's internal state
+ * @param mbtype  receives the macroblock_type bits
+ * @param motion_type  receives the motion type
+ * @param dct_type  receives the DCT type
+ * @param PMV  the motion vectors
+ * @param mvfs  the motion_vertical_field_select flags
+ * @param dmvector  receives the dual-prime differential vector
+ * @return 1, or 0 on an error (fault flag +0x11C set)
+ */
 int func_004065D0(int *p, int *mbtype, int *motion_type, int *dct_type, int *PMV, int *mvfs, int *dmvector) {
     int macroblock_type;
     int motion_vector_count, mv_format, dmv, mvscale;
@@ -6581,6 +7543,18 @@ int func_004065D0(int *p, int *mbtype, int *motion_type, int *dct_type, int *PMV
 INCLUDE_ASM("seg/seg_2FE810", func_00406A78);
 #ifdef SKIP_ASM
 /* MSSG mpeg2decode motion.c decode_motion_vector() */
+/**
+ * Applies a decoded motion code and residual to a motion vector predictor (MSSG decode_motion_vector).
+ *
+ * Wraps the result into the range -16 << r_size .. (16 << r_size) - 1; full-pel vectors are halved before and doubled
+ * after.
+ *
+ * @param pred  the predictor, updated in place
+ * @param r_size  the f_code minus 1
+ * @param motion_code  the decoded motion code
+ * @param motion_residual  the residual bits
+ * @param full_pel_vector  non-zero for full-pel vectors (MPEG-1)
+ */
 void func_00406A78(int *pred, int r_size, int motion_code, int motion_residual, int full_pel_vector) {
     int lim, vec;
 
@@ -6605,6 +7579,24 @@ INCLUDE_ASM("seg/seg_2FE810", func_00406B00);
 #ifdef SKIP_ASM
 extern int Q_72E8(int, int) __asm__("func_004072E8");
 extern void Q_6CA0(int, int *, int *, int, int, int, int, int) __asm__("func_00406CA0");
+/**
+ * Decodes one or two MPEG-2 motion vectors with their field selects (MSSG motion_vectors).
+ *
+ * With one vector, reads its field select (unless frame prediction or dual prime) into both entries, decodes it
+ * (func_00406CA0) and copies it to the second vector; with two, reads each field select and decodes each vector.
+ *
+ * @param mpegSys  the decoder's internal state
+ * @param x  the motion vectors
+ * @param out  the dual-prime vector
+ * @param fieldSelect  the motion_vertical_field_select flags
+ * @param idx  0 forward, 1 backward
+ * @param mvCount  the number of vectors
+ * @param k  the motion vector format (0 field, 1 frame)
+ * @param rSizeH  the horizontal f_code minus 1
+ * @param rSizeV  the vertical f_code minus 1
+ * @param dualPrime  non-zero for dual-prime prediction
+ * @param mvScale  non-zero to halve the vertical vector
+ */
 void func_00406B00(int mpegSys, int *x, int *out, int *fieldSelect, int idx, int mvCount, int k, int rSizeH, int rSizeV, int dualPrime, int mvScale) {
     int selectBit;
     int *vector;
@@ -6634,6 +7626,22 @@ extern int func_00406F78();
 extern int func_004072E8();
 extern int func_00405E10();
 extern void func_00406A78();
+/**
+ * Decodes one motion vector, horizontal then vertical (MSSG motion_vector).
+ *
+ * Each component is a motion code (func_00406F78 table 2) plus a residual of r_size bits when both are non-zero,
+ * applied with func_00406A78; the vertical one is halved around the update when @p mvScale is set. For dual prime it
+ * also reads each differential component (func_00405E10).
+ *
+ * @param mpegSys  the decoder's internal state
+ * @param x  the vector, updated in place
+ * @param out  receives the dual-prime differential vector
+ * @param rSizeH  the horizontal f_code minus 1
+ * @param rSizeV  the vertical f_code minus 1
+ * @param dualPrime  non-zero to read the dual-prime vector
+ * @param mvScale  non-zero to work on half the vertical vector
+ * @param z  non-zero for full-pel vectors
+ */
 void func_00406CA0(int mpegSys, int *x, int *out, int rSizeH, int rSizeV, int dualPrime, int mvScale, int z) {
     int motionCode;
     int residual;
@@ -6663,6 +7671,15 @@ void func_00406CA0(int mpegSys, int *x, int *out, int rSizeH, int rSizeV, int du
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00406DF0);
 #ifdef SKIP_ASM
+/**
+ * Issues an IPU command and records its table entry.
+ *
+ * Writes the command to IPU_CMD and stores D_004532C0[command >> 28] in +0x818, which the bit readers (func_004070F0
+ * and its neighbours) check to know whether IPU_TOP still holds their bits.
+ *
+ * @param p  the decoder's internal state
+ * @param a  the IPU command word
+ */
 void func_00406DF0(int *p, unsigned a) {
     volatile int *r = (volatile int *)0x10002000;
     *r = a;
@@ -6674,6 +7691,14 @@ void func_00406DF0(int *p, unsigned a) {
 INCLUDE_ASM("seg/seg_2FE810", func_00406E20);
 #ifdef SKIP_ASM
 extern int func_00402C80(int *);
+/**
+ * Waits until the IPU is no longer busy (or has flagged an error).
+ *
+ * Spins while IPU_CTRL has BUSY set and ECD clear, raising the needs-data callback (func_00402C80) every 5001 polls so
+ * the input DMA can be refilled.
+ *
+ * @param mpegSys  the decoder's internal state
+ */
 void func_00406E20(int mpegSys) {
     int n = 0;
     if ((*(volatile unsigned *)0x10002010 & 0x80004000) == 0x80000000) {
@@ -6691,6 +7716,15 @@ void func_00406E20(int mpegSys) {
 INCLUDE_ASM("seg/seg_2FE810", func_00406EC8);
 #ifdef SKIP_ASM
 extern int func_00402C80(int *);
+/**
+ * Waits for the running IPU command's result and returns IPU_CMD.
+ *
+ * Spins while IPU_CMD's BUSY bit (bit 63) is set and no error is flagged, raising the needs-data callback every 5001
+ * polls.
+ *
+ * @param mpegSys  the decoder's internal state
+ * @return the 64-bit IPU_CMD value
+ */
 long func_00406EC8(int mpegSys) {
     int n = 0;
     long cmdResult = *(volatile long *)0x10002000;
@@ -6711,6 +7745,17 @@ long func_00406EC8(int mpegSys) {
 INCLUDE_ASM("seg/seg_2FE810", func_00406F78);
 #ifdef SKIP_ASM
 extern int func_00402C80(int *);
+/**
+ * Decodes one variable-length code with the IPU (VDEC) and refreshes the bit-buffer state.
+ *
+ * Waits for the IPU, issues VDEC with the table @p cmd (0 address increment, 1 macroblock type, 2 motion code, 3
+ * dual-prime vector), waits for the result, then stores IPU_TOP (+0x838) and the bits left in the buffer (+0x83C). Sets
+ * the fault flag +0x11C when the code is 0. Raises the needs-data callback every 5001 polls.
+ *
+ * @param p  the decoder's internal state
+ * @param cmd  the VLC table
+ * @return the decoded value (low 16 bits, signed)
+ */
 int func_00406F78(int p, int cmd) {
     int m = 0;
     int n = 0;
@@ -6756,6 +7801,16 @@ INCLUDE_ASM("seg/seg_2FE810", func_004070F0);
 #ifdef SKIP_ASM
 extern int func_00402C80(int *);
 extern long func_00406EC8_k() __asm__("func_00406EC8");
+/**
+ * Peeks at the next @p n bits of the bitstream without consuming them.
+ *
+ * When the cached IPU_TOP is stale (+0x818) or has fewer than @p n bits left (+0x83C), waits for the IPU, issues FDEC 0
+ * and caches the new top word with 32 bits. Returns its top @p n bits.
+ *
+ * @param p  the decoder's internal state
+ * @param n  the number of bits (1..32)
+ * @return the bits
+ */
 int func_004070F0(int p, int n) {
     int c;
     int x;
@@ -6785,6 +7840,15 @@ INCLUDE_ASM("seg/seg_2FE810", func_004071F8);
 #ifdef SKIP_ASM
 extern int func_00402C80(int *);
 extern long func_00406EC8_k() __asm__("func_00406EC8");
+/**
+ * Skips @p v bits of the bitstream (IPU FDEC with a bit step) and caches the next top word.
+ *
+ * Like the other bit readers it first waits for the IPU, raising the needs-data callback every 5001 polls. Records the
+ * command's table entry in +0x818 and stores the new IPU_TOP in +0x838 with 32 bits available (+0x83C).
+ *
+ * @param p  the decoder's internal state
+ * @param v  the number of bits to skip (0..32)
+ */
 void func_004071F8(int p, int v) {
     int n = 0;
     int w;
@@ -6813,6 +7877,17 @@ INCLUDE_ASM("seg/seg_2FE810", func_004072E8);
 #ifdef SKIP_ASM
 extern int func_00402C80(int *);
 extern long func_00406EC8_k() __asm__("func_00406EC8");
+/**
+ * Reads and consumes the next @p n bits of the bitstream.
+ *
+ * Like the other bit readers it first waits for the IPU, raising the needs-data callback every 5001 polls. Refreshes
+ * the cached top word when it is stale or too short (FDEC 0), takes its top @p n bits, then advances the IPU by @p n
+ * bits (FDEC n) and caches the next top word.
+ *
+ * @param p  the decoder's internal state
+ * @param n  the number of bits (1..32)
+ * @return the bits read
+ */
 int func_004072E8(int p, int n) {
     int c = 0;
     int w;
@@ -6851,6 +7926,14 @@ INCLUDE_ASM("seg/seg_2FE810", func_00407438);
 extern void func_004071F8(int, int);
 extern int func_004070F0(int, int);
 extern void func_00406E20(int);
+/**
+ * Moves the bitstream to the next start code (MSSG next_start_code).
+ *
+ * Waits for the IPU, skips to a byte boundary (IPU_BP & 7), then skips a byte at a time until the next 24 bits are the
+ * start code prefix 0x000001.
+ *
+ * @param mpegSys  the decoder's internal state
+ */
 void func_00407438(int mpegSys) {
     int n;
     func_00406E20(mpegSys);
@@ -6868,6 +7951,15 @@ INCLUDE_ASM("seg/seg_2FE810", func_004074B8);
 extern void func_004071F8(int, int);
 extern int func_004072E8(int, int);
 extern void func_00407A10(int);
+/**
+ * Reads the rest of an MPEG slice header after its start code.
+ *
+ * Stores quantiser_scale_code in +0x1B4; when the extra bit is set skips intra_slice and the next 7 bits and the
+ * extra_information_slice bytes (func_00407A10). Called by _sliceA0.
+ *
+ * @param mpegSys  the decoder's internal state
+ * @return 0 (the slice vertical position extension, never read here)
+ */
 int func_004074B8(int *mpegSys) {
     mpegSys[109] = func_004072E8((int)mpegSys, 5);
     if (func_004072E8((int)mpegSys, 1)) {
@@ -6890,6 +7982,17 @@ extern void s7_3620(struct S_7520 *) __asm__("func_00403620");
 extern void s7_7AD0(struct S_7520 *) __asm__("func_00407AD0");
 extern void s7_7630(struct S_7520 *) __asm__("func_00407630");
 extern void s7_2C30(int, struct B7520 *) __asm__("func_00402C30");
+/**
+ * Reads stream headers until the next picture and returns its coding type.
+ *
+ * Loops: next start code (func_00407438), then by the 32-bit code: 0x1B3 sequence header (func_00403620), 0x1B8 group
+ * of pictures (func_00407AD0), 0x1B7 sequence end (returns 0), 0x100 picture: parses its header (func_00407630), raises
+ * callback 5 with two 64-bit stamps preset to -1 and stores what comes back in +0x828 / +0x830, and returns the picture
+ * coding type (+0x150). Called by the decode loop func_00402E10 and func_004030E0.
+ *
+ * @param a  the decoder's internal state
+ * @return the picture coding type (1 I, 2 P, 3 B, 4 D), or 0 at the sequence end
+ */
 int func_00407520(struct S_7520 *a) {
     struct B7520 b;
     for (;;) {
@@ -6924,6 +8027,16 @@ extern int func_004072E8(int, int);
 extern void func_00407A10(int);
 extern void func_004076F8(int);
 extern void func_00407A58(int, int);
+/**
+ * Parses an MPEG picture header.
+ *
+ * Reads temporal_reference (10 bits), picture_coding_type (+0x150) and vbv_delay; for P and B pictures the forward
+ * full_pel / f_code (+0x154, +0x158), for B pictures the backward ones (+0x15C, +0x160); skips the extra information
+ * (func_00407A10), reads extensions and user data (func_004076F8) and numbers the picture from its temporal reference
+ * (func_00407A58).
+ *
+ * @param mpegSys  the decoder's internal state
+ */
 void func_00407630(int *mpegSys) {
     int temporalRef = func_004072E8((int)mpegSys, 10);
     mpegSys[336 / 4] = func_004072E8((int)mpegSys, 3);
@@ -6950,6 +8063,14 @@ extern char D_00497FE0[];
 extern int func_004070F0(int, int);
 extern void func_004071F8(int, int);
 extern int func_004072E8();
+/**
+ * Reads the extension and user-data blocks that follow a header (MSSG extension_and_user_data).
+ *
+ * After moving to the next start code, loops while it is 0x1B5 (extension) or 0x1B2 (user data): an extension's 4-bit
+ * id selects its handler from a copy of the table D_00497FE0 (ids above 10 use entry 0); user data is skipped.
+ *
+ * @param p  the decoder's internal state
+ */
 void func_004076F8(int p) {
     struct PT44 t = *(struct PT44 *)D_00497FE0;
     unsigned i;
@@ -6974,6 +8095,16 @@ void func_004076F8(int p) {
 INCLUDE_ASM("seg/seg_2FE810", func_00407820);
 #ifdef SKIP_ASM
 extern int Q_72E8(int, int) __asm__("func_004072E8");
+/**
+ * Parses an MPEG-2 picture coding extension (extension table D_00497FE0, id 8).
+ *
+ * Reads the four f_codes (+0x164..+0x170), intra_dc_precision into IPU_CTRL bits 16-17, picture_structure (+0x174; the
+ * first one is also kept in +0xD4), top_field_first (+0x178), frame_pred_frame_dct (+0x17C), concealment_motion_vectors
+ * (+0x180), q_scale_type, intra_vlc_format and alternate_scan into IPU_CTRL bits 22, 21 and 20, repeat_first_field
+ * (+0x184), progressive_frame (+0x188), and skips the composite display fields.
+ *
+ * @param mpegSys  the decoder's internal state
+ */
 void func_00407820(int *mpegSys) {
     mpegSys[356 / 4] = Q_72E8((int)mpegSys, 4);
     mpegSys[360 / 4] = Q_72E8((int)mpegSys, 4);
@@ -7013,6 +8144,11 @@ INCLUDE_ASM("seg/seg_2FE810", func_00407A10);
 #ifdef SKIP_ASM
 extern void func_004071F8(int, int);
 extern int func_004072E8(int, int);
+/**
+ * Skips extra-information bytes: while the next bit is 1, skips the 8 bits after it.
+ *
+ * @param mpegSys  the decoder's internal state
+ */
 void func_00407A10(int mpegSys) {
     while (func_004072E8(mpegSys, 1))
         func_004071F8(mpegSys, 8);
@@ -7024,6 +8160,17 @@ INCLUDE_ASM("seg/seg_2FE810", func_00407A58);
 #ifdef SKIP_ASM
 struct S407A58 { char p0[0x150]; int f150; char p1[0x58]; int f1AC; char p2[0x69C]; int f84C; int f850; int f854; };
 int f_407A58(struct S407A58 *p, int n) __asm__("func_00407A58");
+/**
+ * Numbers a picture from its temporal reference and returns the highest number seen in the GOP.
+ *
+ * The picture number (+0x1AC) is the GOP's base (+0x84C) plus @p n; the running maximum is kept in +0x850. For non-B
+ * pictures with a non-zero reference it clears +0x854 and remembers the reference; a negative reference with +0x854
+ * clear would add 0x400, which cannot happen for the 10-bit value the caller reads (dead branch).
+ *
+ * @param p  the decoder's internal state
+ * @param n  the temporal reference
+ * @return the highest picture number so far
+ */
 int f_407A58(struct S407A58 *p, int n) {
     int t = 0;
     int m = 0;
@@ -7052,6 +8199,15 @@ INCLUDE_ASM("seg/seg_2FE810", func_00407AD0);
 #ifdef SKIP_ASM
 extern int func_004072E8(int, int);
 extern void func_004076F8();
+/**
+ * Parses an MPEG group-of-pictures header.
+ *
+ * Clears +0xE8, starts the GOP's picture numbering after the highest number so far (+0x84C = +0x850 + 1) and sets
+ * +0x854; skips the time code, keeps closed_gop (+0x1A4) and broken_link (+0x1A8), then reads extensions and user data
+ * (func_004076F8).
+ *
+ * @param mpegSys  the decoder's internal state
+ */
 void func_00407AD0(int *mpegSys) {
     mpegSys[232 / 4] = 0;
     mpegSys[2124 / 4] = mpegSys[2128 / 4] + 1;
@@ -7076,6 +8232,15 @@ extern void func_00406E20(int);
 extern void func_004034A8(int *, int);
 extern char D_00498010[];
 extern char D_00498038[];
+/**
+ * Parses an MPEG-2 quant matrix extension (extension table D_00497FE0, id 3).
+ *
+ * For each of the intra and non-intra load flags (stored in +0x840 / +0x844) has the IPU read the matrix from the
+ * bitstream (SETIQ 0x50000000 / 0x58000000); a chroma matrix flag reports "load_chroma_intra_quantizer_matrix == 1" or
+ * the non-intra one.
+ *
+ * @param p  the decoder's internal state
+ */
 void func_00407B70(int *p) {
     if ((p[2112 / 4] = func_004072E8((int)p, 1)) != 0) {
         func_00406E20((int)p);
@@ -7099,6 +8264,14 @@ INCLUDE_ASM("seg/seg_2FE810", func_00407C38);
 #ifdef SKIP_ASM
 struct S_7C38 { char pad[0x13C]; int f13C; char pad2[0x34]; int f174; int f178; char pad3[8]; int f184; int pad188; int f18C[3]; int f198[3]; };
 extern int sc_72E8(struct S_7C38 *, int) __asm__("func_004072E8");
+/**
+ * Parses an MPEG-2 picture display extension (extension table D_00497FE0, id 7).
+ *
+ * Reads one to three frame centre offsets (horizontal into +0x18C[i], vertical into +0x198[i]); the count follows
+ * progressive_sequence, repeat_first_field, top_field_first and the picture structure, as in MSSG mpeg2decode.
+ *
+ * @param a  the decoder's internal state
+ */
 void func_00407C38(struct S_7C38 *a) {
     int n;
     int i;
@@ -7122,6 +8295,11 @@ void func_00407C38(struct S_7C38 *a) {
 INCLUDE_ASM("seg/seg_2FE810", func_00407D30);
 #ifdef SKIP_ASM
 extern int func_004072E8(int, int);
+/**
+ * Skips an MPEG-2 copyright extension (extension table D_00497FE0, id 4): all its fields are read and dropped.
+ *
+ * @param mpegSys  the decoder's internal state
+ */
 void func_00407D30(int mpegSys) {
     func_004072E8(mpegSys, 1);
     func_004072E8(mpegSys, 8);
@@ -7143,6 +8321,16 @@ extern char D_00498068[];
 extern char D_00498088[];
 extern void func_004034A8();
 extern int func_004060C8(int *);
+/**
+ * Decodes the current picture's slices and marks its picture record decoded.
+ *
+ * A frame picture while a field is still pending reports "odd number of field pictures" and clears +0x120. The record
+ * is the frame one (+0x1C0) or the top / bottom field one (+0x1D0 / +0x1E0) by picture structure; an unknown structure
+ * reports "unknown picture sutructure". When func_004060C8 succeeds, word 10 of the record is set.
+ *
+ * @param p  the decoder's internal state
+ * @return func_004060C8's result (non-zero when decoded)
+ */
 int func_00407DC0(int *p) {
     int *q;
     int r;
@@ -7177,6 +8365,16 @@ INCLUDE_ASM("seg/seg_2FE810", func_00407E90);
 #ifdef SKIP_ASM
 extern void func_004086C0(int *, int, int);
 extern void func_004087D0(int *, int, int, int);
+/**
+ * Outputs the picture due for display after a decode, then advances the queued time stamp state.
+ *
+ * When @p flag is set: frame pictures output the backward reference (B picture) or the forward one with func_004086C0;
+ * field pictures output a field pair with func_004087D0. A queued time stamp state of 1 becomes 2 (see func_00402D38).
+ *
+ * @param mpegSys  the decoder's internal state
+ * @param n  the picture counter (output as n - 1)
+ * @param flag  non-zero to output a picture
+ */
 void func_00407E90(int *mpegSys, int n, int flag) {
     int a, b;
     if (flag) {
@@ -7232,6 +8430,18 @@ struct M7F20 {
     long t828;
     long t830;
 };
+/**
+ * Picks the picture record the next decode writes and fills it from the current headers.
+ *
+ * For B pictures it decodes into the 'next' records and checks both references are valid (clearing them after a broken
+ * link or once the reference counters reach 2 or 4); for I/P pictures it swaps the forward/backward references (first
+ * field only) and decodes into the backward one. The chosen frame/top/bottom record (by +0x174) gets state 0, the
+ * picture's time stamps (+0x828 / +0x830) and its type, structure and display fields.
+ *
+ * @param m  the decoder's internal state
+ * @param a1  non-zero for the second field of a pair
+ * @return 1 when the needed reference pictures are present, else 0
+ */
 int func_00407F20(struct M7F20 *m, int a1) {
     int lim = 4;
     struct F7F20 *x;
@@ -7323,6 +8533,16 @@ INCLUDE_ASM("seg/seg_2FE810", func_004081D8);
 extern int sprintf(char *, const char *, ...);
 extern void func_004034A8(int *, int);
 extern char D_004980A8[];
+/**
+ * Checks that the caller's output buffer is big enough for the decoded picture.
+ *
+ * With a RAW8 width/height given (+0xDC / +0xE0) both must cover the picture; otherwise the macroblock count (+0xE4)
+ * must cover its width times height in macroblocks. Reports "Too small buffer size for %dx%d picture" when it does not.
+ *
+ * @param p  the decoder's internal state
+ * @param q  the picture-size record (see func_00403600)
+ * @return 1 when it fits, else 0
+ */
 int func_004081D8(int *p, int *q) {
     char buf[256];
     int r;
@@ -7346,6 +8566,16 @@ INCLUDE_ASM("seg/seg_2FE810", func_00408278);
 struct S8278 { char pad0[0xD8]; unsigned fD8; int padDC; int fE0; int fE4; char padE8[0x174 - 0xE8]; int f174; };
 extern int DIntr();
 extern void EIntr(void);
+/**
+ * Copies a decoded picture to the RAW8 output buffer through the scratchpad.
+ *
+ * Moves the picture's macroblock rows (picture record word 4 macroblocks of 0x180 bytes each, word 3 rows) to the
+ * scratchpad (channel 9) and on to the output (+0xD8, channel 8), one row per DMA pair, waiting for each. With a RAW8
+ * width (+0xE0) the output rows are strided; field pictures copy two interleaved passes.
+ *
+ * @param s  the decoder's internal state
+ * @param p  the picture record
+ */
 void func_00408278(struct S8278 *s, unsigned *p) {
     int n;
     unsigned src = p[0] & 0x0FFFFFFF;
@@ -7401,6 +8631,13 @@ void func_00408278(struct S8278 *s, unsigned *p) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00408508);
 #ifdef SKIP_ASM
+/**
+ * Marks a picture as output: the decode loop then returns.
+ *
+ * Sets the reference state word 2 to 2 (copying +0x118 to +0xAC the first time) and the output flag +0x820.
+ *
+ * @param mpegSys  the decoder's internal state
+ */
 void func_00408508(int *mpegSys) {
     if (mpegSys[2] != 2) {
         mpegSys[2] = 2;
@@ -7417,6 +8654,22 @@ INCLUDE_ASM("seg/seg_2FE810", func_00408530);
 struct S85 { char pad0[0x70]; int f70; int pad74; long f78; int f80; int pad84; long f88; int f90; char pad94[0x5C]; long fF0; int fF8; };
 struct B85 { char pad0[0x18]; long f18; long f20; int pad28; int f2c; int f30; int f34; int f38; int f3c; int f40; };
 extern long mul85(long, long) __asm__("func_004114D0");
+/**
+ * Computes a picture's presentation and decode time stamps and its display flags.
+ *
+ * The presentation stamp is the picture's own (+0x18) unless interpolation is on (+0x70) and it has none: then the
+ * previous stamp (+0x80) plus half the step (+0x78) times the frame-period multiplier (+0x88), with the odd half-units
+ * alternated through +0x90. A queued stamp in state 2 (+0xF0 / +0xF8) overrides it and is cleared. The flags word packs
+ * progressive_sequence, progressive_frame, top_field_first, repeat_first_field, picture structure and type. The C still
+ * differs from retail in one instruction's position (97.98%).
+ *
+ * @param a  the decoder's internal state
+ * @param b  the picture record
+ * @param o1  receives the presentation stamp
+ * @param o2  receives the decode stamp
+ * @param o3  receives the flags word
+ * @return the flags word
+ */
 long func_00408530(struct S85 *a, struct B85 *b, long *o1, long *o2, long *o3) {
     long r;
     long v;
@@ -7472,6 +8725,18 @@ extern int q86_9088(struct S86C0 *, struct B86C0 *) __asm__("func_00409088");
 extern int q86_8278(struct S86C0 *, struct B86C0 *) __asm__("func_00408278");
 extern void q86_8508(struct S86C0 *) __asm__("func_00408508");
 void d86C0(struct S86C0 *a, struct B86C0 *b, int c) __asm__("func_004086C0");
+/**
+ * Outputs a decoded frame picture to the caller: time stamps, display fields, then the pixels.
+ *
+ * Writes the stamps and flags into the handle (+0x10 / +0x18 / +0x20, func_00408530), keeps the presentation stamp
+ * (+0x80) and the frame-period multiplier from D_004532E8 (+0x88), copies the record's display fields to +0xB4..+0xD0,
+ * and when the buffer is big enough (func_004081D8) and the record is decoded converts it (func_00409088, colour
+ * conversion on) or copies it (func_00408278), then marks the output (func_00408508).
+ *
+ * @param a  the decoder's internal state
+ * @param b  the picture record
+ * @param c  the picture counter (unused)
+ */
 void d86C0(struct S86C0 *a, struct B86C0 *b, int c) {
     struct R86C0 *r = (struct R86C0 *)a->f858;
     int m;
@@ -7512,6 +8777,18 @@ extern int q87_9088(struct S87D0 *, struct B87D0 *) __asm__("func_00409088");
 extern int q87_8278(struct S87D0 *, struct B87D0 *) __asm__("func_00408278");
 extern void q87_8508(struct S87D0 *) __asm__("func_00408508");
 void d87D0(struct S87D0 *a, struct B87D0 *b, struct B87D0 *c) __asm__("func_004087D0");
+/**
+ * Outputs a decoded field pair to the caller: both fields' time stamps, then the pixels.
+ *
+ * Takes the fields in display order (top field first sets 0x40 in both flag words): stamps for the first go to handle
+ * +0x10..+0x20, for the second to +0x28..+0x38. Copies the display fields to +0xB4..+0xD0 and, when the buffer is big
+ * enough and both fields are decoded, converts or copies the pair with the record's row count doubled for the call,
+ * then marks the output.
+ *
+ * @param a  the decoder's internal state
+ * @param b  the first field's record
+ * @param c  the second field's record
+ */
 void d87D0(struct S87D0 *a, struct B87D0 *b, struct B87D0 *c) {
     struct B87D0 *t, *u;
     struct R87D0 *r, *r2, *r3;
@@ -7562,6 +8839,15 @@ extern char D_00526FC0[];
 extern int q8988_C078() __asm__("DIntr");
 extern void q8988_C0C0(void) __asm__("EIntr");
 void q8988(struct P_8988 *p) __asm__("func_00408988");
+/**
+ * Starts the scratchpad DMA (channel 9, chain mode) that brings a macroblock's prediction blocks in.
+ *
+ * Builds two 48-quadword ref tags per entry of the current macroblock record (+0x810 selects it) in the uncached tag
+ * area D_00526FC0, the last one ending the chain, then with interrupts off sets the scratchpad address from the record
+ * and starts the channel. Called by func_00403E00.
+ *
+ * @param p  the decoder's internal state
+ */
 void q8988(struct P_8988 *p) {
     int i = 0;
     unsigned long long *t = (unsigned long long *)(((unsigned)D_00526FC0 & 0x0FFFFFFF) | 0x20000000);
@@ -7594,6 +8880,15 @@ INCLUDE_ASM("seg/seg_2FE810", func_00408AF8);
 #ifdef SKIP_ASM
 extern int DIntr();
 extern void EIntr(void);
+/**
+ * Starts the from-IPU DMA (channel 3) into scratchpad memory.
+ *
+ * Sets D3_MADR to the address with the scratchpad bit (0x80000000), D3_QWC to @p byteCount / 16 and starts the channel,
+ * interrupts off. func_004065D0 uses it to receive a macroblock's 0x300 bytes of decoded blocks.
+ *
+ * @param dstAddr  the scratchpad destination
+ * @param byteCount  the number of bytes
+ */
 void func_00408AF8(unsigned dstAddr, int byteCount) {
     int intrState = DIntr();
     *(volatile unsigned *)0x1000B010 = (dstAddr & 0xFFFFFFF) | 0x80000000;
@@ -7612,6 +8907,16 @@ extern void q8B80_C0C0(void) __asm__("EIntr");
 extern void q8B80_6DF0(int *, int) __asm__("func_00406DF0");
 extern int q8B80_2C30(int *, int *) __asm__("func_00402C30");
 void q8B80(int *p, unsigned addr, int n) __asm__("func_00408B80");
+/**
+ * Colour-converts up to 1023 macroblocks with the IPU (CSC) straight into the output buffer.
+ *
+ * Waits for the IPU, starts channel 3 (from IPU) to @p addr for 64 quadwords per macroblock, issues CSC with the count,
+ * raises callback 4 and waits for the DMA and the IPU to finish. Called by func_00409088.
+ *
+ * @param mpegSys  the decoder's internal state
+ * @param addr  the RGB32 output
+ * @param n  the number of macroblocks
+ */
 void q8B80(int *mpegSys, unsigned addr, int n) {
     int intrState;
     int sp[8];
@@ -7637,6 +8942,17 @@ void q8B80(int *mpegSys, unsigned addr, int n) {
 INCLUDE_ASM("seg/seg_2FE810", func_00408CA8);
 #ifdef SKIP_ASM
 struct S408CA8 { volatile int cnt; int stop; int rest; int addr; int n; };
+/**
+ * DMA channel 3 interrupt handler of a long CSC conversion: queues the next 1023-macroblock chunk.
+ *
+ * Acknowledges the channel's interrupt (D_STAT bit 3) and counts the chunk. If the channel is still busy it sets the
+ * stop flag. Otherwise it starts the next chunk (0xFFC0 quadwords and CSC 0x3FF) or the last one (the remaining
+ * macroblocks). Returns with sync and ei. func_00408DF0 installs it.
+ *
+ * @param channel  the DMA channel (unused)
+ * @param xferState  the transfer state
+ * @return 0
+ */
 int func_00408CA8(int channel, struct S408CA8 *xferState) {
     int last;
     *(volatile int *)0x1000E010 = 8;
@@ -7682,6 +8998,17 @@ extern int q8DF0_2C30(int *, int *) __asm__("func_00402C30");
 extern void q8DF0_34A8(int *, int) __asm__("func_004034A8");
 extern int func_00408CA8();
 void q8DF0(int *p, int addr, int size) __asm__("func_00408DF0");
+/**
+ * Colour-converts a large picture (1024 macroblocks or more) with the IPU, 1023 at a time.
+ *
+ * Installs func_00408CA8 as the channel 3 interrupt handler (func_00423AC0) with a transfer state on the stack, starts
+ * the first chunk (0xFFC0 quadwords, CSC 0x3FF), raises callback 4 and spins until every chunk is done. A stop reports
+ * "CSC handler error". Then waits for the IPU, disables and removes the handler.
+ *
+ * @param p  the decoder's internal state
+ * @param addr  the RGB32 output
+ * @param size  the number of macroblocks
+ */
 void q8DF0(int *p, int addr, int size) {
 
     int sp[8];
@@ -7726,6 +9053,16 @@ void q8DF0(int *p, int addr, int size) {
 INCLUDE_ASM("seg/seg_2FE810", func_00408FB0);
 #ifdef SKIP_ASM
 struct S408FB0 { unsigned f0; int f4; };
+/**
+ * DMA channel 4 interrupt handler: feeds the next chunk of a long transfer to the IPU.
+ *
+ * Acknowledges the channel's interrupt (D_STAT bit 4). With quadwords left it starts the next chunk of at most 0xFFFF
+ * from the saved address and advances it; returns with sync and ei. func_00409088 installs it.
+ *
+ * @param a  the DMA channel (unused)
+ * @param s  the transfer state: quadwords left, next address
+ * @return 1 when nothing was left, else 0
+ */
 int func_00408FB0(int a, struct S408FB0 *s) {
     unsigned n;
     *(volatile int *)0x1000E010 = 0x10;
@@ -7769,6 +9106,17 @@ extern void E_8B80(char *, int, int) __asm__("func_00408B80");
 extern void E_8DF0(char *, int, int) __asm__("func_00408DF0");
 extern void E_8FB0(void) __asm__("func_00408FB0");
 void q9088(char *d, unsigned *b) __asm__("func_00409088");
+/**
+ * Converts a decoded picture to RGB32 with the IPU and writes it to the output buffer.
+ *
+ * Raises callback 2 (stop DMA), resets the IPU after an error and clears it (BCLR), then feeds the picture's 24
+ * quadwords per macroblock to the IPU on channel 4 (in 0xFFFF-quadword chunks through the handler func_00408FB0 when
+ * larger) while func_00408B80 or, from 1024 macroblocks, func_00408DF0 runs CSC into +0xD8. Raises callback 3 (restart
+ * DMA) at the end.
+ *
+ * @param mpegSys  the decoder's internal state
+ * @param picInfo  the picture record (address, macroblock rows / columns)
+ */
 void q9088(char *mpegSys, unsigned *picInfo) {
     struct L9 xferState;
     int n = picInfo[3] * picInfo[4];
@@ -7824,6 +9172,11 @@ INCLUDE_ASM("seg/seg_2FE810", func_00409310);
 #ifdef SKIP_ASM
 extern int DIntr();
 extern void EIntr(void);
+/**
+ * Writes D3_CHCR (from-IPU DMA) with the DMA controller held and interrupts off.
+ *
+ * @param chcrValue  the new CHCR value
+ */
 void func_00409310(int chcrValue) {
     int intrState = DIntr();
     *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 | 0x10000;
@@ -7839,6 +9192,11 @@ INCLUDE_ASM("seg/seg_2FE810", func_00409388);
 #ifdef SKIP_ASM
 extern int DIntr();
 extern void EIntr(void);
+/**
+ * Writes D4_CHCR (to-IPU DMA) with the DMA controller held and interrupts off.
+ *
+ * @param chcrValue  the new CHCR value
+ */
 void func_00409388(int chcrValue) {
     int intrState = DIntr();
     *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 | 0x10000;
@@ -7855,6 +9213,14 @@ INCLUDE_ASM("seg/seg_2FE810", func_00409400);
 extern void q9400_9388(int) __asm__("func_00409388");
 extern void q9400_9310(int) __asm__("func_00409310");
 void q9400(int *p) __asm__("func_00409400");
+/**
+ * Pauses the IPU's DMA channels and saves their state and the IPU's (the stop-DMA callback's work).
+ *
+ * Stops channel 4 and saves its MADR, TADR, QWC and CHCR; waits until the IPU output FIFO is empty; stops channel 3 and
+ * saves its MADR, QWC and CHCR, then IPU_BP and IPU_CTRL. func_004094E8 undoes it.
+ *
+ * @param savedRegs  the nine-word save block
+ */
 void q9400(int *savedRegs) {
     q9400_9388(1);
     savedRegs[0] = *(volatile int *)0x1000B410;
@@ -7878,6 +9244,15 @@ INCLUDE_ASM("seg/seg_2FE810", func_004094E8);
 extern void q94E8_9388(int) __asm__("func_00409388");
 extern void q94E8_9310(int) __asm__("func_00409310");
 void q94E8(int *p) __asm__("func_004094E8");
+/**
+ * Restores and restarts the IPU DMA saved by func_00409400.
+ *
+ * Restarts channel 3 when it had data left. Clears the IPU with BCLR at the saved bit pointer, then moves channel 4's
+ * address back by the quadwords that were still in the IPU's input FIFO (IPU_BP's FP and IFC), adds them to its count
+ * and restarts it with the saved tag address.
+ *
+ * @param savedRegs  the save block
+ */
 void q94E8(int *savedRegs) {
     unsigned ipuBp = savedRegs[7];
     int e = ipuBp & 0x7F;
@@ -7906,6 +9281,15 @@ void q94E8(int *savedRegs) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00409638);
 #ifdef SKIP_ASM
+/**
+ * Waits for the IPU to finish, or reports whether it is busy.
+ *
+ * Mode 0 spins until the BUSY bit (31) of IPU_CTRL (0x10002010) clears and returns 0; mode 1 returns that bit; any
+ * other mode returns 0. The only caller, func_00403398, passes a second argument that the body ignores.
+ *
+ * @param mode  0 to wait, 1 to poll
+ * @return 1 while the IPU is busy (mode 1), else 0
+ */
 // From peak3project's fork (github.com/peak3project/ssx3).
 // NOTE: volatile = the IPU_CTRL hardware register (0x10002010), polled until BUSY clears; without it the poll is hoisted
 // (strip test 85.54). The R5900 short-loop nops in the loop come from the assembler, not from the source.
@@ -7932,6 +9316,15 @@ INCLUDE_ASM("seg/seg_2FE810", func_004096A0);
 #ifdef SKIP_ASM
 extern int DIntr(int);
 extern void EIntr(void);
+/**
+ * Writes D4_CHCR (the to-IPU DMA channel) with the DMA controller held.
+ *
+ * Calls DIntr (interrupts off; its result is ignored), sets D_ENABLEW to D_ENABLER | 0x10000, writes @p chcrValue to
+ * 0x1000B400, clears the hold bit again and calls EIntr, which turns interrupts back on even if they were off before.
+ * Same work as func_00409388; func_00409708 calls it with 1.
+ *
+ * @param chcrValue  the new CHCR value
+ */
 void func_004096A0(int chcrValue) {
     DIntr(chcrValue);
     *(volatile int *)0x1000F590 = *(volatile int *)0x1000F520 | 0x10000;
@@ -7950,6 +9343,15 @@ extern volatile i128_9708 D_00453340[];
 extern i128_9708 D_00453390[];
 extern void func_004096A0(int);
 #define WAIT_9708() while (*(volatile int *)0x10002010 < 0)
+/**
+ * Resets the IPU and loads its default quantiser matrices, colour table and thresholds.
+ *
+ * Sets D4_CHCR to 1 (func_004096A0), resets the IPU (IPU_CTRL 0x40000000) and clears its input (BCLR), waiting for BUSY
+ * to clear after each command. It then pushes eight quadwords into the IPU input FIFO (0x10007010): D_00453340[0..3]
+ * and four copies of D_00453340[4], loaded by SETIQ 0x50000000 (intra) and 0x58000000 (non-intra); then
+ * D_00453390[0..1] for SETVQ (0x60000000), and sets both thresholds to 0 (SETTH 0x90000000). It ends with another reset
+ * and BCLR. func_00402708 calls it before MPEG decoding starts.
+ */
 // FAKEMATCH: `extern volatile` view of the IPU quantiser table D_00453340 (only this function reads it), so its four
 // copies of entry 4 are reloaded for each FIFO write as in retail instead of being CSEd; plain form 97.11%.
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
@@ -7996,6 +9398,20 @@ extern void Q_sig(int) __asm__("SignalSema");
 extern void Q_log(char *) __asm__("func_00425C60");
 extern int Q_A360(int, int, int) __asm__("func_0040A360");
 extern void Q_6408(int) __asm__("func_00426408");
+/**
+ * Initialises the memory-card RPC client: creates its semaphores, binds the server and checks versions.
+ *
+ * On the first call creates the lock semaphore D_004533C4 (count 1) and the sleep semaphore D_004533C8 (count 0). Waits
+ * for any pending call (func_0040A360 in mode 0), takes the lock and calls func_00426408(0), then binds SIF RPC server
+ * 0x80000400 into D_005271C0, retrying with a 0x100000-step busy wait until the server is set; a bind error prints
+ * "bind error libmc" and hangs forever. It runs call 0xFE synchronously (12 result bytes into D_00528780) and releases
+ * the lock.
+ *
+ * A failed call clears the server and returns its error - 100. Result word 1 below 522 prints "libmc: too old release
+ * of mcserv.irx" and word 2 below 526 the same for mcman.irx; both clear the server. systemInit calls it.
+ *
+ * @return result word 0 on success, the RPC error - 100, -120 (old mcserv) or -121 (old mcman)
+ */
 // NOTE: the nops in retail's two wait loops are the assembler's R5900 short-loop padding, so the loops are plain C.
 int func_00409940(void) {
     int s[6];
@@ -8051,6 +9467,14 @@ int func_00409940(void) {
 INCLUDE_ASM("seg/seg_2FE810", func_00409B10);
 #ifdef SKIP_ASM
 extern int DeleteSema(int);
+/**
+ * Deletes the memory-card client's semaphores.
+ *
+ * When the lock semaphore D_004533C4 exists it deletes it, sets it to -1 and deletes the sleep semaphore D_004533C8
+ * (whose variable is not reset). The server binding in D_005271C0 is left as it is.
+ *
+ * @return 1
+ */
 int func_00409B10(void) {
     if (D_004533C4 >= 0) {
         DeleteSema(D_004533C4);
@@ -8064,6 +9488,16 @@ int func_00409B10(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_00409B60);
 #ifdef SKIP_ASM
+/**
+ * Returns the memory-card client block and the addresses of its result and pending-call words.
+ *
+ * Stores the address of the RPC result buffer D_00528780 in *@p a and of the pending-call code D_004533C0 in *@p b, and
+ * copies the lock semaphore D_004533C4 into D_00528780[15]. No caller in the source.
+ *
+ * @param a  receives the result buffer's address
+ * @param b  receives the pending-call word's address
+ * @return &D_005271C0, the client block
+ */
 sSifClient *func_00409B60(int *a, int *b) {
     *a = (int)D_00528780;
     *b = (int)&D_004533C0;
@@ -8077,6 +9511,17 @@ INCLUDE_ASM("seg/seg_2FE810", func_00409B90);
 #ifdef SKIP_ASM
 extern int PollSema(int);
 extern void SignalSema(int);
+/**
+ * Starts memory-card call 20 with one argument (asynchronous).
+ *
+ * Puts @p a into the origin field of the command block D_00527240. Fails with -100 when the library is not bound
+ * (D_005271C0.server is 0) and -200 when another call still holds the lock semaphore D_004533C4 (PollSema). On success
+ * it records 20 as the pending call (D_004533C0) and keeps the lock until func_0040A360 sees the call finish; when
+ * sceSifCallRpc fails it releases the lock.
+ *
+ * @param a  the call's argument
+ * @return 0 when the call started, -100 / -200 as above, otherwise sceSifCallRpc's error
+ */
 int func_00409B90(int a) {
     int r;
     if (D_005271C0.server == 0)
@@ -8098,6 +9543,16 @@ INCLUDE_ASM("seg/seg_2FE810", func_00409C48);
 #ifdef SKIP_ASM
 extern int PollSema(int);
 extern void SignalSema(int);
+/**
+ * Runs memory-card call 21 for a port synchronously and returns the server's result word.
+ *
+ * Puts @p a into the port field of D_00527240 and waits for the call (mode 0). Fails with -100 when the library is not
+ * bound (D_005271C0.server is 0) and -200 when another call still holds the lock semaphore D_004533C4 (PollSema).
+ * Releases the lock afterwards in both cases.
+ *
+ * @param a  the memory-card port
+ * @return D_00528780[0], or -100 / -200 / sceSifCallRpc's error
+ */
 int func_00409C48(int a) {
     int r;
     if (D_005271C0.server == 0)
@@ -8121,6 +9576,24 @@ INCLUDE_ASM("seg/seg_2FE810", func_00409D10);
 extern int PollSema(int);
 extern void SignalSema(int);
 extern char *strncpy(char *, const char *, int);
+/**
+ * Starts opening a file on a memory card (call 2, asynchronous).
+ *
+ * An empty or null name releases the lock and fails with -210. The name is copied into D_00527270.name (at most 1023
+ * characters, always terminated). Fills port, slot and mode of the name block D_00527270 and sends it (1044 bytes).
+ * Fails with -100 when the library is not bound (D_005271C0.server is 0) and -200 when another call still holds the
+ * lock semaphore D_004533C4 (PollSema). On success it records 2 as the pending call (D_004533C0) and keeps the lock
+ * until func_0040A360 sees the call finish; when sceSifCallRpc fails it releases the lock. The descriptor arrives as
+ * func_0040A360's result.
+ *
+ * cPS2MemCard's callers pass mode 515 (0x203) to write and 1 to read; func_00409E38 passes 0x40.
+ *
+ * @param a  the memory-card port
+ * @param b  the slot
+ * @param s_  the file path
+ * @param c  the open mode bits
+ * @return 0 when the call started, -100 / -200 / -210 as above, otherwise sceSifCallRpc's error
+ */
 int func_00409D10(int a, int b, int s_, int c) {
     char *s = (char *)s_;
     int r;
@@ -8150,6 +9623,17 @@ int func_00409D10(int a, int b, int s_, int c) {
 INCLUDE_ASM("seg/seg_2FE810", func_00409E38);
 #ifdef SKIP_ASM
 extern int func_00409D10(int, int, int, int);
+/**
+ * Starts creating a directory on a memory card.
+ *
+ * Calls func_00409D10 with mode 0x40 and, when that started, changes the pending-call code D_004533C0 from 2 to 11 so
+ * func_0040A360 reports it as a directory creation. cPS2MemCard calls it to make the save directory.
+ *
+ * @param a  the memory-card port
+ * @param b  the slot
+ * @param c  the directory path
+ * @return func_00409D10's result
+ */
 int func_00409E38(int a, int b, int c) {
     int r = func_00409D10(a, b, c, 0x40);
     if (r == 0) {
@@ -8164,6 +9648,17 @@ INCLUDE_ASM("seg/seg_2FE810", func_00409E70);
 #ifdef SKIP_ASM
 extern int PollSema(int);
 extern void SignalSema(int);
+/**
+ * Starts closing a memory-card file (call 3, asynchronous).
+ *
+ * Puts @p a into the fd field of D_00527240. Fails with -100 when the library is not bound (D_005271C0.server is 0) and
+ * -200 when another call still holds the lock semaphore D_004533C4 (PollSema). On success it records 3 as the pending
+ * call (D_004533C0) and keeps the lock until func_0040A360 sees the call finish; when sceSifCallRpc fails it releases
+ * the lock.
+ *
+ * @param a  the file descriptor
+ * @return 0 when the call started, -100 / -200 as above, otherwise sceSifCallRpc's error
+ */
 int func_00409E70(int a) {
     int r;
     if (D_005271C0.server == 0)
@@ -8185,6 +9680,19 @@ INCLUDE_ASM("seg/seg_2FE810", func_00409F28);
 #ifdef SKIP_ASM
 extern int PollSema(int);
 extern void SignalSema(int);
+/**
+ * Starts moving a memory-card file's position (call 4, asynchronous).
+ *
+ * Fills fd, offset and origin of D_00527240. Fails with -100 when the library is not bound (D_005271C0.server is 0) and
+ * -200 when another call still holds the lock semaphore D_004533C4 (PollSema). On success it records 4 as the pending
+ * call (D_004533C0) and keeps the lock until func_0040A360 sees the call finish; when sceSifCallRpc fails it releases
+ * the lock.
+ *
+ * @param a  the file descriptor
+ * @param b  the offset
+ * @param c  where the offset counts from
+ * @return 0 when the call started, -100 / -200 as above, otherwise sceSifCallRpc's error
+ */
 int func_00409F28(int a, int b, int c) {
     int r;
     if (D_005271C0.server == 0)
@@ -8207,6 +9715,15 @@ int func_00409F28(int a, int b, int c) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040A000);
 #ifdef SKIP_ASM
 struct S0A000 { int n0; int n1; char *d0; char *d1; char b0[0x40]; char b1[0x40]; };
+/**
+ * End callback of the memory-card read: copies the unaligned head and tail bytes to the destination.
+ *
+ * Reads the 0xC0-byte block @p a through the uncached mirror (| 0x20000000): two counts, two destinations and two
+ * 64-byte buffers. Copies the first count of bytes from the first buffer to the first destination and the second count
+ * from the second buffer to the second destination. func_0040A090 registers it with D_005276C0.
+ *
+ * @param a  the block the server filled (D_005276C0)
+ */
 void func_0040A000(void *a) {
     struct S0A000 *s = (struct S0A000 *)((unsigned)a | 0x20000000);
     char *d;
@@ -8230,6 +9747,21 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040A090);
 extern int PollSema(int);
 extern void SignalSema(int);
 extern void func_00426358(int, int);
+/**
+ * Starts reading from a memory-card file into a buffer (call 5, asynchronous).
+ *
+ * Fills fd, buffer, size and param (D_005276C0) of D_00527240 and writes the data cache back over the buffer and the
+ * 0xC0-byte block (func_00426358). func_0040A000 runs when the call ends and copies the bytes the server returns
+ * separately. Fails with -100 when the library is not bound (D_005271C0.server is 0) and -200 when another call still
+ * holds the lock semaphore D_004533C4 (PollSema). On success it records 5 as the pending call (D_004533C0) and keeps
+ * the lock until func_0040A360 sees the call finish; when sceSifCallRpc fails it releases the lock. The byte count
+ * arrives as func_0040A360's result.
+ *
+ * @param a  the file descriptor
+ * @param b  the destination buffer
+ * @param c  the number of bytes
+ * @return 0 when the call started, -100 / -200 as above, otherwise sceSifCallRpc's error
+ */
 int func_0040A090(int a, int b, int c) {
     int r;
     if (D_005271C0.server == 0)
@@ -8257,6 +9789,21 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040A1A8);
 extern int PollSema(int);
 extern void SignalSema(int);
 extern void FlushCache(int);
+/**
+ * Starts writing a buffer to a memory-card file (call 6, asynchronous).
+ *
+ * Up to 16 bytes travel entirely inside the command block (origin = @p n, no DMA). Longer data sends its first bytes up
+ * to the next 16-byte boundary in the command block (origin) and the rest from there by DMA (buffer, size). Copies
+ * those head bytes into D_00527240.data and flushes the cache (FlushCache(0)). Fails with -100 when the library is not
+ * bound (D_005271C0.server is 0) and -200 when another call still holds the lock semaphore D_004533C4 (PollSema). On
+ * success it records 6 as the pending call (D_004533C0) and keeps the lock until func_0040A360 sees the call finish;
+ * when sceSifCallRpc fails it releases the lock. The byte count arrives as func_0040A360's result.
+ *
+ * @param a  the file descriptor
+ * @param p  the data
+ * @param n  the number of bytes
+ * @return 0 when the call started, -100 / -200 as above, otherwise sceSifCallRpc's error
+ */
 int func_0040A1A8(int a, unsigned char *p, int n) {
     int r;
     unsigned i;
@@ -8291,6 +9838,15 @@ int func_0040A1A8(int a, unsigned char *p, int n) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040A320);
 #ifdef SKIP_ASM
 extern void iSignalSema(int);
+/**
+ * Alarm handler that wakes the thread sleeping in func_0040A328.
+ *
+ * Signals @p sema from interrupt context (iSignalSema).
+ *
+ * @param alarmId  the alarm (unused)
+ * @param ticks  the alarm's time (unused)
+ * @param sema  the semaphore to signal
+ */
 void func_0040A320(int alarmId, int ticks, int sema) {
     iSignalSema(sema);
 }
@@ -8302,6 +9858,14 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040A328);
 extern void func_0040A320(int, int, int);
 extern void SetAlarm(int, void (*)(int, int, int), int);
 extern void WaitSema(int);
+/**
+ * Sleeps for a number of horizontal-blank ticks.
+ *
+ * Sets an alarm (SetAlarm) that runs func_0040A320 with the sleep semaphore D_004533C8, then waits on that semaphore.
+ * func_0040A360 sleeps 60 ticks between polls.
+ *
+ * @param a  the number of ticks
+ */
 void func_0040A328(unsigned short a) {
     SetAlarm(a, func_0040A320, D_004533C8);
     WaitSema(D_004533C8);
@@ -8313,6 +9877,21 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040A360);
 #ifdef SKIP_ASM
 extern void SignalSema(int);
 extern void sleep_A328(int) __asm__("func_0040A328");
+/**
+ * Waits for or polls the pending memory-card call and hands back its code and result.
+ *
+ * Returns -1 when no call is pending (D_004533C0 is 0). Otherwise checks the RPC (sceSifCheckStatRpc); in mode 0 it
+ * polls until the call is done, sleeping 60 ticks between polls (func_0040A328). Stores the pending call's code in *@p
+ * p when @p p is set. When the call is done it clears D_004533C0, stores the result word D_00528780[0] in *@p q (when
+ * set) and releases the lock D_004533C4. Any mode other than 0 only polls.
+ *
+ * cPS2MemCard_Update and cPS2MemCard_CleanUp poll it; func_00409940 waits with it before re-initialising.
+ *
+ * @param a  0 to wait, otherwise poll
+ * @param p  receives the call's code, or 0
+ * @param q  receives the call's result, or 0
+ * @return 1 when the call has finished, 0 while it runs, -1 when nothing is pending
+ */
 int func_0040A360(int a, int *p, int *q) {
     int r;
     if (D_004533C0 == 0)
@@ -8339,6 +9918,14 @@ int func_0040A360(int a, int *p, int *q) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040A440);
 #ifdef SKIP_ASM
+/**
+ * End callback of func_0040A498: copies the three card-information words to the caller's variables.
+ *
+ * Reads the server's block @p a through the uncached mirror (| 0x20000000) and stores word 0 in *D_005271E8, word 1 in
+ * *D_005271EC and word 36 in *D_005271F0, each only when that pointer is set.
+ *
+ * @param a  the block the server filled (D_005276C0)
+ */
 void func_0040A440(void *a) {
     int *p = (int *)((unsigned)a | 0x20000000);
     if (D_005271E8)
@@ -8356,6 +9943,25 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040A498);
 extern int PollSema(int);
 extern void SignalSema(int);
 extern void func_00426358(int, int);
+/**
+ * Starts reading a memory card's type, free space and format state (call 1, asynchronous).
+ *
+ * Fills port and slot of D_00527240 and sets its origin, offset and size fields to 1 for each output pointer that is
+ * set, so the server knows which values are wanted. Saves the pointers in D_005271E8 / D_005271EC / D_005271F0 for
+ * func_0040A440, which the call runs at its end, and writes the 0xC0-byte block D_005276C0 back from the cache. Fails
+ * with -100 when the library is not bound (D_005271C0.server is 0) and -200 when another call still holds the lock
+ * semaphore D_004533C4 (PollSema). On success it records 1 as the pending call (D_004533C0) and keeps the lock until
+ * func_0040A360 sees the call finish; when sceSifCallRpc fails it releases the lock.
+ *
+ * cPS2MemCard's func_002C50E0 passes D_004A3938, D_004A393C and D_004A3944.
+ *
+ * @param a  the memory-card port
+ * @param b  the slot
+ * @param c  receives the card type, or 0
+ * @param d  receives the free space, or 0
+ * @param e  receives the format state, or 0
+ * @return 0 when the call started, -100 / -200 as above, otherwise sceSifCallRpc's error
+ */
 int func_0040A498(int a, int b, int *c, int *d, int *e) {
     int r;
     if (D_005271C0.server == 0)
@@ -8395,6 +10001,14 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040A618);
 #ifdef SKIP_ASM
 extern void func_0040A618_log(char *) __asm__("func_00425C60");
 extern char D_00498158[];
+/**
+ * Runs memory-card call 53 synchronously and returns the server's result word.
+ *
+ * Sends the command block D_00527240 without arguments and without taking the lock semaphore or checking that the
+ * server is bound. A failed call prints the message D_00498158 and returns -1. No caller in the source.
+ *
+ * @return D_00528780[0], or -1 when the call failed
+ */
 int func_0040A618(void) {
     if (sceSifCallRpc(&D_005271C0, 53, 0, &D_00527240, 48, D_00528780, 4, 0, 0)) {
         func_0040A618_log(D_00498158);
@@ -8411,6 +10025,27 @@ extern int PollSema(int);
 extern void SignalSema(int);
 extern char *strncpy(char *, const char *, int);
 extern void func_00426358(int, int);
+/**
+ * Starts listing a memory-card directory into an entry table (call 13, asynchronous).
+ *
+ * An empty or null name releases the lock and fails with -210. The name is copied into D_00527270.name (at most 1023
+ * characters, always terminated). Fills port, slot, mode, count (the maximum number of entries) and buffer (the table)
+ * of D_00527270, and writes the cache back over the table's 64-byte entries when the count is not negative. Fails with
+ * -100 when the library is not bound (D_005271C0.server is 0) and -200 when another call still holds the lock semaphore
+ * D_004533C4 (PollSema). On success it records 13 as the pending call (D_004533C0) and keeps the lock until
+ * func_0040A360 sees the call finish; when sceSifCallRpc fails it releases the lock. The number of entries arrives as
+ * func_0040A360's result.
+ *
+ * cPS2MemCard's func_002C4210 lists up to 6 entries and func_002C42B0 one entry.
+ *
+ * @param a  the memory-card port
+ * @param b  the slot
+ * @param s  the path or pattern
+ * @param c  the listing mode
+ * @param d  the maximum number of entries
+ * @param e  the entry table (64 bytes per entry)
+ * @return 0 when the call started, -100 / -200 / -210 as above, otherwise sceSifCallRpc's error
+ */
 int func_0040A688(int a, int b, char *s, int c, int d, int e) {
     int r;
     if (D_005271C0.server == 0)
@@ -8444,6 +10079,14 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040A7D0);
 #ifdef SKIP_ASM
 extern unsigned strlen(char *);
 extern int func_0041605C(int, int, int);
+/**
+ * End callback of func_0040A858: copies the returned current directory to the caller's buffer.
+ *
+ * When @p dst is set it copies the string in D_00527780 (read through the uncached mirror; at most 1023 characters)
+ * with func_0041605C and terminates it.
+ *
+ * @param dst  the caller's buffer, or 0
+ */
 void func_0040A7D0(void *dst) {
     char *src;
     int n;
@@ -8466,6 +10109,23 @@ extern int PollSema(int);
 extern void SignalSema(int);
 extern char *strncpy(char *, const char *, int);
 extern void func_00426358(int, int);
+/**
+ * Starts changing a memory card's current directory (call 12, asynchronous).
+ *
+ * An empty or null name releases the lock and fails with -210. The name is copied into D_00527270.name (at most 1023
+ * characters, always terminated). Fills port and slot of D_00527270 and points its buffer at D_00527780 (written back
+ * from the cache, 0x400 bytes), where the server returns the current directory; func_0040A7D0 copies it to @p u when
+ * the call ends. Fails with -100 when the library is not bound (D_005271C0.server is 0) and -200 when another call
+ * still holds the lock semaphore D_004533C4 (PollSema). On success it records 12 as the pending call (D_004533C0) and
+ * keeps the lock until func_0040A360 sees the call finish; when sceSifCallRpc fails it releases the lock. No caller in
+ * the source.
+ *
+ * @param a  the memory-card port
+ * @param b  the slot
+ * @param s  the new directory
+ * @param u  receives the current directory, or 0
+ * @return 0 when the call started, -100 / -200 / -210 as above, otherwise sceSifCallRpc's error
+ */
 int func_0040A858(int a, int b, char *s, void *u) {
     int r;
     if (D_005271C0.server == 0)
@@ -8496,6 +10156,18 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040A998);
 #ifdef SKIP_ASM
 extern int PollSema(int);
 extern void SignalSema(int);
+/**
+ * Starts formatting a memory card (call 16, asynchronous).
+ *
+ * Fills port and slot of D_00527240. Fails with -100 when the library is not bound (D_005271C0.server is 0) and -200
+ * when another call still holds the lock semaphore D_004533C4 (PollSema). On success it records 16 as the pending call
+ * (D_004533C0) and keeps the lock until func_0040A360 sees the call finish; when sceSifCallRpc fails it releases the
+ * lock.
+ *
+ * @param a  the memory-card port
+ * @param b  the slot
+ * @return 0 when the call started, -100 / -200 as above, otherwise sceSifCallRpc's error
+ */
 int func_0040A998(int a, int b) {
     int r;
     if (D_005271C0.server == 0)
@@ -8519,6 +10191,20 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040AA68);
 extern int PollSema(int);
 extern void SignalSema(int);
 extern char *strncpy(char *, const char *, int);
+/**
+ * Starts deleting a file or directory on a memory card (call 15, asynchronous).
+ *
+ * An empty or null name releases the lock and fails with -210. The name is copied into D_00527270.name (at most 1023
+ * characters, always terminated). Fills port and slot of D_00527270 and clears its mode. Fails with -100 when the
+ * library is not bound (D_005271C0.server is 0) and -200 when another call still holds the lock semaphore D_004533C4
+ * (PollSema). On success it records 15 as the pending call (D_004533C0) and keeps the lock until func_0040A360 sees the
+ * call finish; when sceSifCallRpc fails it releases the lock.
+ *
+ * @param a  the memory-card port
+ * @param b  the slot
+ * @param s  the path
+ * @return 0 when the call started, -100 / -200 / -210 as above, otherwise sceSifCallRpc's error
+ */
 int func_0040AA68(int a, int b, char *s) {
     int r;
     if (D_005271C0.server == 0)
@@ -8548,6 +10234,17 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040AB80);
 #ifdef SKIP_ASM
 extern int PollSema(int);
 extern void SignalSema(int);
+/**
+ * Starts flushing a memory-card file (call 10, asynchronous).
+ *
+ * Puts @p a into the fd field of D_00527240. Fails with -100 when the library is not bound (D_005271C0.server is 0) and
+ * -200 when another call still holds the lock semaphore D_004533C4 (PollSema). On success it records 10 as the pending
+ * call (D_004533C0) and keeps the lock until func_0040A360 sees the call finish; when sceSifCallRpc fails it releases
+ * the lock.
+ *
+ * @param a  the file descriptor
+ * @return 0 when the call started, -100 / -200 as above, otherwise sceSifCallRpc's error
+ */
 int func_0040AB80(int a) {
     int r;
     if (D_005271C0.server == 0)
@@ -8571,6 +10268,23 @@ extern int R_3DF0(int) __asm__("PollSema");
 extern void R_3DC0(int) __asm__("SignalSema");
 extern void R_4020(int) __asm__("FlushCache");
 extern char *strncpy(char *, const char *, int);
+/**
+ * Starts changing a memory-card file's information record (call 14, asynchronous).
+ *
+ * An empty or null name releases the lock and fails with -210. The name is copied into D_00527270.name (at most 1023
+ * characters, always terminated). Masks @p e to its low three bits and stores it as the mode, copies the 64-byte record
+ * *@p c into D_00527200 and points the buffer at it, then flushes the cache. Fails with -100 when the library is not
+ * bound (D_005271C0.server is 0) and -200 when another call still holds the lock semaphore D_004533C4 (PollSema). On
+ * success it records 14 as the pending call (D_004533C0) and keeps the lock until func_0040A360 sees the call finish;
+ * when sceSifCallRpc fails it releases the lock. No caller in the source.
+ *
+ * @param a  the memory-card port
+ * @param b  the slot
+ * @param s  the path
+ * @param c  the new information record
+ * @param e  which parts to change (bits 0..2)
+ * @return 0 when the call started, -100 / -200 / -210 as above, otherwise sceSifCallRpc's error
+ */
 int func_0040AC38(int a, int b, char *s, sMcDirEntry *c, int e) {
     int r;
     sSifClient *h = &D_005271C0;
@@ -8607,6 +10321,23 @@ extern int PollSema(int);
 extern void SignalSema(int);
 extern char *strncpy(char *, const char *, int);
 extern void FlushCache(int);
+/**
+ * Starts renaming a file on a memory card (call 14 with the rename flag, asynchronous).
+ *
+ * An empty or null old name, or a null new name, releases the lock and fails with -210. Sets mode 16 in D_00527270,
+ * copies the old name (at most 1023 characters) and the new name into D_00527220 (32 bytes; byte 31 cleared), the name
+ * field of the 64-byte record at D_00527200 that the buffer points at, and flushes the cache. Fails with -100 when the
+ * library is not bound (D_005271C0.server is 0) and -200 when another call still holds the lock semaphore D_004533C4
+ * (PollSema). On success it records 19 as the pending call (D_004533C0) and keeps the lock until func_0040A360 sees the
+ * call finish; when sceSifCallRpc fails it releases the lock. (19 rather than the call number). No caller in the
+ * source.
+ *
+ * @param a  the memory-card port
+ * @param b  the slot
+ * @param s  the current path
+ * @param t  the new name
+ * @return 0 when the call started, -100 / -200 / -210 as above, otherwise sceSifCallRpc's error
+ */
 int func_0040AE00(int a, int b, char *s, char *t) {
     int r;
     char *p;
@@ -8642,6 +10373,18 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040AF58);
 #ifdef SKIP_ASM
 extern int PollSema(int);
 extern void SignalSema(int);
+/**
+ * Starts memory-card call 17 for a port and slot (asynchronous).
+ *
+ * Fills port and slot of D_00527240. Fails with -100 when the library is not bound (D_005271C0.server is 0) and -200
+ * when another call still holds the lock semaphore D_004533C4 (PollSema). On success it records 17 as the pending call
+ * (D_004533C0) and keeps the lock until func_0040A360 sees the call finish; when sceSifCallRpc fails it releases the
+ * lock. No caller in the source.
+ *
+ * @param a  the memory-card port
+ * @param b  the slot
+ * @return 0 when the call started, -100 / -200 as above, otherwise sceSifCallRpc's error
+ */
 int func_0040AF58(int a, int b) {
     int r;
     if (D_005271C0.server == 0)
@@ -8665,6 +10408,20 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040B028);
 extern int PollSema(int);
 extern void SignalSema(int);
 extern char *strncpy(char *, const char *, int);
+/**
+ * Starts memory-card call 18 for a path on a port and slot (asynchronous).
+ *
+ * An empty or null name releases the lock and fails with -210. The name is copied into D_00527270.name (at most 1023
+ * characters, always terminated). Fills port and slot of D_00527270. Fails with -100 when the library is not bound
+ * (D_005271C0.server is 0) and -200 when another call still holds the lock semaphore D_004533C4 (PollSema). On success
+ * it records 18 as the pending call (D_004533C0) and keeps the lock until func_0040A360 sees the call finish; when
+ * sceSifCallRpc fails it releases the lock. No caller in the source.
+ *
+ * @param a  the memory-card port
+ * @param b  the slot
+ * @param s  the path
+ * @return 0 when the call started, -100 / -200 / -210 as above, otherwise sceSifCallRpc's error
+ */
 int func_0040B028(int a, int b, char *s) {
     int r;
     if (D_005271C0.server == 0)
@@ -8694,6 +10451,11 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040B130);
 INCLUDE_ASM("seg/seg_2FE810", func_0040B1F8);
 #ifdef SKIP_ASM
 extern int D_004533E0[];
+/**
+ * Clears the flag D_004533E0 that func_0040B130 sets when it sets up the multi-client RPC layer.
+ *
+ * Only func_00319800, which no retail code calls, calls it.
+ */
 void func_0040B1F8(void) {
     D_004533E0[0] = 0;
 }
@@ -8707,6 +10469,17 @@ struct S0B208 { int f0; struct E0B208 *tab; int n; };
 extern int DIntr_rq(void) __asm__("DIntr");
 extern void EIntr(void);
 struct E0B208 *f0B208(struct S0B208 *s) __asm__("func_0040B208");
+/**
+ * Takes a free request packet from a packet pool and gives it the next serial number.
+ *
+ * With interrupts off (DIntr; EIntr turns them back on unconditionally) it scans the pool's table for the first packet
+ * whose flags (+0x10) lack bit 0, sets them to (index << 16) | 5, points +0x14 at the packet itself and stores the pool
+ * counter's next value (+0x0) as the serial (+0x18); when that value is 1 the counter is advanced once more.
+ * func_0040B2B0 frees a packet again.
+ *
+ * @param s  the pool: serial counter, packet table, packet count
+ * @return the packet, or 0 when all are in use
+ */
 struct E0B208 *f0B208(struct S0B208 *s) {
     struct E0B208 *e;
     int i;
@@ -8747,6 +10520,13 @@ struct E0B208 *f0B208(struct S0B208 *s) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040B2B0);
 #ifdef SKIP_ASM
+/**
+ * Frees a request packet taken by func_0040B208.
+ *
+ * Clears its serial (+0x18) and the in-use bit 0 of its flags (+0x10).
+ *
+ * @param p  the packet
+ */
 void func_0040B2B0(unsigned *p) {
     p[6] = 0;
     p[4] &= 0xFFFFFFFE;
@@ -8760,6 +10540,18 @@ struct C_B2D0 { unsigned *f0; int pad4; int f8; int pad[2]; int f14; int f18; vo
 struct E_B2D0 { char pad[0x1C]; struct C_B2D0 *ctx; unsigned code; int f24; int f28; int f2C; };
 extern void iSignalSema(int);
 extern void func_0040B2B0(unsigned *);
+/**
+ * SIF command handler for the multi-client RPC layer's replies.
+ *
+ * func_0040B130 installs it. By the reply code at +0x20: 0x8000001A (call done) runs the client's end function (+0x1C)
+ * with its argument (+0x20) and signals the client lock (+0x28); 0x80000019 (bind done) stores the server (+0x24) and
+ * two buffer words (+0x14, +0x18) from the reply and signals the lock; 0x8000001D (terminate done) stores the reply
+ * word in +0x2C and signals the lock; 0x8000001C does nothing. In every case it then signals the client's wait
+ * semaphore (+0x8) when it is not negative, frees the request packet (func_0040B2B0) and clears the client's packet
+ * pointer.
+ *
+ * @param e  the reply: client at +0x1C, code at +0x20, data words from +0x24
+ */
 void func_0040B2D0(struct E_B2D0 *e) {
     struct C_B2D0 *c;
     switch (e->code) {
@@ -8796,6 +10588,16 @@ void func_0040B2D0(struct E_B2D0 *e) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040B3D8);
 #ifdef SKIP_ASM
 extern int func_0040B400(int, int, int, int, int, int);
+/**
+ * Binds a multi-client RPC client to a server with the default parameters 0x800, 0x2000 and 0x20.
+ *
+ * Calls func_0040B400 with them.
+ *
+ * @param a  the client block
+ * @param b  the server's RPC number
+ * @param c  the mode (must be 0)
+ * @return func_0040B400's result
+ */
 int func_0040B3D8(int a, int b, int c) {
     return func_0040B400(a, b, c, 0x800, 0x2000, 0x20);
 }
@@ -8814,6 +10616,28 @@ extern struct N_B400 *func_0040B208(char *);
 extern void rl_B400(struct N_B400 *) __asm__("func_0040B2B0");
 extern int func_004261B0(unsigned, struct N_B400 *, int, int, int, int);
 extern char D_00498178[];
+/**
+ * Binds a multi-client RPC client to an IOP server and waits for the answer.
+ *
+ * A mode other than 0 prints "mode must be 0 in this version." and returns -1. Creates the client's lock semaphore
+ * (+0x28, count 1) and takes it, stores the RPC number (+0x10), clears the server (+0x24) and keeps @p d, @p e and @p f
+ * at +0x30..+0x38. Takes a packet from the pool D_00528FC0 (func_0040B208), records it and its serial (+0x0, +0x4) and
+ * fills it with the number, the three parameters and the client. Creates a wait semaphore (+0x8), sends command
+ * 0x80000019 with the 64-byte packet (func_004261B0) and waits until func_0040B2D0 has stored the reply. Deletes the
+ * wait semaphore, and the lock too when no server was found (+0x24 still 0).
+ *
+ * Quirk: it returns 0 even when no server was bound; callers must check +0x24. func_0040B3D8 supplies the defaults; the
+ * DNAS import table func_003FD810 holds it.
+ *
+ * @param cc  the client block
+ * @param a  the server's RPC number
+ * @param flag  the mode (must be 0)
+ * @param d  first bind parameter (0x800 by default)
+ * @param e  second bind parameter (0x2000 by default)
+ * @param f  third bind parameter (0x20 by default)
+ * @return 0 when the request was answered, -1 for a bad mode or no free packet, -2 when the command could not be sent,
+ *   -3 when a semaphore could not be created
+ */
 int func_0040B400(int cc, int a, int flag, int d, int e, int f) {
     struct C_B400 *c = (struct C_B400 *)cc;
     int s[6];
@@ -8884,6 +10708,21 @@ extern struct O_B5B0 *b5_0040B208(char *) __asm__("func_0040B208");
 extern void b5_0040B2B0(struct O_B5B0 *) __asm__("func_0040B2B0");
 extern int b5_00423DA0(struct QSema *) __asm__("CreateSema");
 extern int b5_004261B0(int, struct O_B5B0 *, int, int, int, int) __asm__("func_004261B0");
+/**
+ * Ends a multi-client RPC client's binding and returns the server's answer.
+ *
+ * A mode other than 0 prints "mode must be 0 in this version." and returns -1. Takes the client's lock (+0x28), then a
+ * packet from D_00528FC0 and fills it with the RPC number (+0x10), the server (+0x24) and the client. Creates a wait
+ * semaphore (+0x8), sends command 0x8000001D (func_004261B0), waits for func_0040B2D0, then deletes the wait semaphore
+ * and the client's lock.
+ *
+ * Likely bug: when no packet is free it returns -1 with the lock still taken, so later calls on the client block.
+ *
+ * @param a  the client block
+ * @param b  the mode (must be 0)
+ * @return the reply word (+0x2C), -1, -2 when the command could not be sent, or -3 when the semaphore could not be
+ *   created
+ */
 int func_0040B5B0(struct O_B5B0 *a, int b) {
     struct O_B5B0 *t;
     struct QSema s;
@@ -8940,6 +10779,31 @@ extern char D_00498178[];
 extern char D_004981A0[];
 extern char D_004981D8[];
 extern char D_004981E8[];
+/**
+ * Calls a function of a bound IOP RPC server through the multi-client RPC layer.
+ *
+ * A mode other than 0 prints "mode must be 0 in this version." and returns -1, which leaves the branch for mode bit 0
+ * (no wait; packet +0x30 = whether an end function is set) unreachable. Takes the client's lock (+0x28); a send or
+ * receive buffer that is not 64-byte aligned prints D_004981A0 / D_004981E8 (with D_004981D8) and returns -1. Takes a
+ * packet from D_00528FC0, stores its serial (+0x4), @p h (+0x1C) and @p i (+0x20) in the client and the RPC number,
+ * send size, receive buffer and size, client and server in the packet. Writes the cache back over both buffers (once,
+ * with the larger size, when they are the same). Creates a wait semaphore (+0x8), sends command 0x8000001A with the
+ * packet and @p e bytes from @p d to the server's buffer (+0x14) (func_004261B0), waits for func_0040B2D0 and deletes
+ * the semaphore.
+ *
+ * Likely bug: the alignment and no-packet failures return with the client's lock still taken.
+ *
+ * @param c  the client block
+ * @param a  the function number
+ * @param flag  the mode (must be 0)
+ * @param d  the send buffer (64-byte aligned)
+ * @param e  the send size
+ * @param f  the receive buffer (64-byte aligned)
+ * @param g  the receive size
+ * @param h  the end function, or 0
+ * @param i  the end function's argument
+ * @return 0, -1, -2 when the command could not be sent, or -3 when the semaphore could not be created
+ */
 int func_0040B6D0(struct N_B6D0 *c, int a, int flag, int d, int e, int f, int g, int h, int i) {
     int s[6];
     int sem;
@@ -9019,6 +10883,14 @@ extern int sceOpen(char *, int);
 extern void sceRead(int, char *, int);
 extern void sceClose(int);
 extern char D_00498220[];
+/**
+ * Reads the console's ROM version string once and returns its buffer.
+ *
+ * While D_00453400 is still empty it opens the file D_00498220 ("rom0:ROMVER") with sceOpen (mode 1), reads 14 bytes
+ * into D_00453400 (sceRead) and closes it (sceClose). The buffer stays empty when the open fails.
+ *
+ * @return the address of D_00453400
+ */
 int func_0040B938(void) {
     int h;
     if (D_00453400[0] == 0) {
@@ -9036,6 +10908,15 @@ int func_0040B938(void) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040B9A8);
 #ifdef SKIP_ASM
 extern int func_0040B938(void);
+/**
+ * Returns whether the console is a T10000 development kit.
+ *
+ * Reads the ROM version string first when needed (func_0040B938) and tests its region character (byte 4) for 'T'. The
+ * console-setting getters func_0040B9E8 .. func_0040BC08 use it to choose the override record D_004533F8 over the OSD
+ * configuration.
+ *
+ * @return 1 for a T10000 (tool) console, else 0
+ */
 int func_0040B9A8(void) {
     if (D_00453400[0] == 0)
         func_0040B938();
@@ -9048,6 +10929,16 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040B9E8);
 #ifdef SKIP_ASM
 extern int func_0040B9A8(void);
 extern void GetOsdConfigParam(unsigned *);
+/**
+ * Returns the console's language setting.
+ *
+ * On a T10000 development kit (func_0040B9A8) it returns the override byte D_004533FC that func_0040BA48 sets.
+ * Otherwise it reads the OSD configuration (GetOsdConfigParam): Consoles whose OSD configuration has version 0 (bits
+ * 13..15) give the Japanese-language flag (bit 4)., newer ones the language field (bits 16..20). Quirk: it calls
+ * GetOsdConfigParam once more at the start, unused. cPS2ConsoleConfig_cPS2ConsoleConfig keeps 0..7 as its language.
+ *
+ * @return the language number
+ */
 int func_0040B9E8(void) {
     unsigned buf[1];
     int r;
@@ -9068,6 +10959,15 @@ int func_0040B9E8(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040BA48);
 #ifdef SKIP_ASM
+/**
+ * Sets the 8-byte console-setting record that T10000 development kits use instead of the OSD.
+ *
+ * Copies *@p p into D_004533F8: the time zone in minutes (+0x0, short), then one byte each for the aspect, date format,
+ * language, S/PDIF, summer time and time notation (read by func_0040BAE8, func_0040BA68, func_0040BB38, func_0040B9E8,
+ * func_0040BAA8, func_0040BBA0 and func_0040BC08). No caller in the source.
+ *
+ * @param p  the new settings
+ */
 void func_0040BA48(sSysConfig *p) {
     D_004533F8 = *p;
 }
@@ -9078,6 +10978,14 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040BA68);
 #ifdef SKIP_ASM
 extern int func_0040B9A8(void);
 extern void GetOsdConfigParam(unsigned *);
+/**
+ * Returns the console's screen aspect setting.
+ *
+ * On a T10000 development kit (func_0040B9A8) it returns the override byte D_004533FA that func_0040BA48 sets.
+ * Otherwise it returns the screen-type field of the OSD configuration (bits 1..2).
+ *
+ * @return the aspect setting (0..2)
+ */
 int func_0040BA68(void) {
     unsigned buf[1];
     if (func_0040B9A8())
@@ -9092,6 +11000,14 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040BAA8);
 #ifdef SKIP_ASM
 extern int func_0040B9A8(void);
 extern void GetOsdConfigParam(unsigned *);
+/**
+ * Returns the console's S/PDIF (digital audio output) setting.
+ *
+ * On a T10000 development kit (func_0040B9A8) it returns the override byte D_004533FD that func_0040BA48 sets.
+ * Otherwise it returns bit 0 of the OSD configuration. cPS2ConsoleConfig_cPS2ConsoleConfig treats 0 as enabled.
+ *
+ * @return the S/PDIF setting (0 on, 1 off)
+ */
 int func_0040BAA8(void) {
     unsigned buf[1];
     if (func_0040B9A8())
@@ -9106,6 +11022,15 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040BAE8);
 #ifdef SKIP_ASM
 extern int func_0040B9A8(void);
 extern void GetOsdConfigParam(unsigned *);
+/**
+ * Returns the console's time zone as minutes from GMT.
+ *
+ * On a T10000 development kit (func_0040B9A8) it returns the override D_004533F8.f0 that func_0040BA48 sets. Consoles
+ * whose OSD configuration has version 0 (bits 13..15) give 540 (GMT+9, Japan). Newer ones give the signed field in bits
+ * 21..31 of the OSD configuration (GetOsdConfigParam).
+ *
+ * @return the offset in minutes
+ */
 int func_0040BAE8(void) {
     unsigned buf[1];
     int r;
@@ -9125,6 +11050,15 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040BB38);
 extern int func_0040B9A8(void);
 extern void GetOsdConfigParam(unsigned *);
 extern int GetOsdConfigParam2(unsigned *, int, int);
+/**
+ * Returns the console's date format setting.
+ *
+ * On a T10000 development kit (func_0040B9A8) it returns the override byte D_004533FB that func_0040BA48 sets. Consoles
+ * whose OSD configuration has version 0 (bits 13..15) give 0. Newer ones read the second byte of the extra OSD
+ * configuration (GetOsdConfigParam2) and return its bits 6..7. cPS2ConsoleConfig_cPS2ConsoleConfig keeps 0..2.
+ *
+ * @return the date format (0..2)
+ */
 int func_0040BB38(void) {
     unsigned buf[2];
     unsigned char v;
@@ -9151,6 +11085,15 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040BBA0);
 extern int func_0040B9A8(void);
 extern void GetOsdConfigParam(unsigned *);
 extern int GetOsdConfigParam2(unsigned *, int, int);
+/**
+ * Returns whether the console's summer time (daylight saving) setting is on.
+ *
+ * On a T10000 development kit (func_0040B9A8) it returns the override byte D_004533FE that func_0040BA48 sets. Consoles
+ * whose OSD configuration has version 0 (bits 13..15) give 0. Newer ones return bit 4 of the extra OSD configuration
+ * byte (GetOsdConfigParam2).
+ *
+ * @return 1 when summer time is on, else 0
+ */
 int func_0040BBA0(void) {
     unsigned buf[2];
     unsigned char v;
@@ -9177,6 +11120,15 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040BC08);
 extern int func_0040B9A8(void);
 extern void GetOsdConfigParam(unsigned *);
 extern int GetOsdConfigParam2(unsigned *, int, int);
+/**
+ * Returns the console's time notation setting (24- or 12-hour clock).
+ *
+ * On a T10000 development kit (func_0040B9A8) it returns the override byte D_004533FF that func_0040BA48 sets. Consoles
+ * whose OSD configuration has version 0 (bits 13..15) give 0. Newer ones return bit 5 of the extra OSD configuration
+ * byte (GetOsdConfigParam2). cPS2ConsoleConfig_cPS2ConsoleConfig keeps 0 or 1.
+ *
+ * @return the time notation (0 or 1)
+ */
 int func_0040BC08(void) {
     unsigned buf[2];
     unsigned char v;
@@ -9200,6 +11152,12 @@ int func_0040BC08(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040BC70);
 #ifdef SKIP_ASM
+/**
+ * Converts a binary number from 0 to 99 into packed BCD.
+ *
+ * @param decimal  the number
+ * @return the BCD byte
+ */
 unsigned char func_0040BC70(unsigned char decimal) {
     return decimal + (decimal / 10) * 6;
 }
@@ -9208,6 +11166,12 @@ unsigned char func_0040BC70(unsigned char decimal) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040BCA0);
 #ifdef SKIP_ASM
+/**
+ * Converts a packed BCD byte into binary.
+ *
+ * @param bcd  the BCD byte
+ * @return the number
+ */
 unsigned char func_0040BCA0(unsigned char bcd) {
     unsigned char t = bcd >> 4;
     t = t * 6;
@@ -9218,6 +11182,13 @@ unsigned char func_0040BCA0(unsigned char bcd) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040BCC0);
 #ifdef SKIP_ASM
+/**
+ * Converts a console clock record's BCD fields to binary in place.
+ *
+ * Converts bytes 1..3 (second, minute, hour) and 5..7 (day, month, year) with func_0040BCA0.
+ *
+ * @param clock  the 8-byte clock record
+ */
 void func_0040BCC0(unsigned char *clock) {
     clock[7] = func_0040BCA0(clock[7]);
     clock[6] = func_0040BCA0(clock[6]);
@@ -9231,6 +11202,13 @@ void func_0040BCC0(unsigned char *clock) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040BD28);
 #ifdef SKIP_ASM
+/**
+ * Converts a console clock record's binary fields back to BCD in place.
+ *
+ * Converts bytes 1..3 (second, minute, hour) and 5..7 (day, month, year) with func_0040BC70.
+ *
+ * @param clock  the 8-byte clock record
+ */
 void func_0040BD28(unsigned char *clock) {
     clock[7] = func_0040BC70(clock[7]);
     clock[6] = func_0040BC70(clock[6]);
@@ -9247,6 +11225,14 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040BD90);
 typedef struct { char b[12]; } sDaysTbl;
 typedef struct { unsigned char stat, sec, min, hour, pad, day, month, year; } sClk;
 extern sDaysTbl D_00498230;
+/**
+ * Advances a binary clock record by one day.
+ *
+ * Uses the month lengths in D_00498230, with February 29 in years divisible by 4 (two-digit year). Past the end of the
+ * month it goes to day 1 of the next month, and after December to January of the next year (99 wraps to 0).
+ *
+ * @param a  the clock record (binary fields)
+ */
 void func_0040BD90(unsigned char *a) {
     sClk *c = (sClk *)a;
     sDaysTbl days = D_00498230;
@@ -9270,6 +11256,14 @@ void func_0040BD90(unsigned char *a) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040BE48);
 #ifdef SKIP_ASM
+/**
+ * Moves a binary clock record back by one day.
+ *
+ * Before day 1 it goes to the last day of the previous month (month lengths in D_00498230, February 29 in years
+ * divisible by 4), and before January to December of the previous year (0 wraps to 99).
+ *
+ * @param a  the clock record (binary fields)
+ */
 void func_0040BE48(unsigned char *a) {
     sClk *c = (sClk *)a;
     sDaysTbl days = D_00498230;
@@ -9294,6 +11288,11 @@ void func_0040BE48(unsigned char *a) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040BEF0);
 #ifdef SKIP_ASM
 extern void func_0040BD90(unsigned char *);
+/**
+ * Advances a binary clock record by one hour, moving to the next day at 24.
+ *
+ * @param clock  the clock record (binary fields)
+ */
 void func_0040BEF0(unsigned char *clock) {
     clock[3]++;
     if (clock[3] == 24) {
@@ -9307,6 +11306,11 @@ void func_0040BEF0(unsigned char *clock) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040BF20);
 #ifdef SKIP_ASM
 extern void func_0040BE48(unsigned char *);
+/**
+ * Moves a binary clock record back by one hour, moving to the previous day before 0.
+ *
+ * @param clock  the clock record (binary fields)
+ */
 void func_0040BF20(unsigned char *clock) {
     if (clock[3] == 0) {
         clock[3] = 23;
@@ -9324,6 +11328,17 @@ extern void func_0040BCC0(unsigned char *);
 extern void func_0040BEF0(unsigned char *);
 extern void func_0040BF20(unsigned char *);
 extern void func_0040BD28(unsigned char *);
+/**
+ * Adds a number of minutes to a BCD console clock record, carrying into hours and days.
+ *
+ * Converts the record to binary (func_0040BCC0), adds @p deltaMinutes to the minute, then moves the hour forward
+ * (func_0040BEF0) or back (func_0040BF20) by one per 60 minutes, and converts it back to BCD (func_0040BD28). Likely
+ * bug: the forward loop runs only while the minute is above 60, so a sum of exactly 60 (or 120, ...) leaves minute 60
+ * in the record. Seconds are not touched.
+ *
+ * @param clockAddr  the 8-byte clock record
+ * @param deltaMinutes  minutes to add (may be negative)
+ */
 void func_0040BF48(int clockAddr, int deltaMinutes) {
     int minutes;
     unsigned char *clock = (unsigned char *)clockAddr;
@@ -9352,6 +11367,13 @@ void func_0040BF48(int clockAddr, int deltaMinutes) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040BFD8);
 #ifdef SKIP_ASM
 extern void func_0040BF48(int, int);
+/**
+ * Converts a console clock record from Japan time to GMT.
+ *
+ * Subtracts 540 minutes (9 hours) through func_0040BF48.
+ *
+ * @param clockAddr  the BCD clock record
+ */
 void func_0040BFD8(int clockAddr) {
     func_0040BF48(clockAddr, -540);
 }
@@ -9363,6 +11385,14 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040BFE0);
 extern int func_0040BAE8(void);
 extern int func_0040BBA0(void);
 extern void func_0040BF48(int, int);
+/**
+ * Converts a console clock record from Japan time to the console's local time.
+ *
+ * Adds the time zone (func_0040BAE8) minus 540 minutes, plus 60 when summer time is on (func_0040BBA0), through
+ * func_0040BF48. cPS2ConsoleConfig_cPS2ConsoleConfig converts the clock read by func_00402520 with it.
+ *
+ * @param clockAddr  the BCD clock record
+ */
 void func_0040BFE0(int clockAddr) {
     int timeZone = func_0040BAE8();
     func_0040BF48(clockAddr, timeZone - 540 + func_0040BBA0() * 60);
@@ -9384,6 +11414,22 @@ extern int k_C810(int, int *) __asm__("func_0040C810");
 extern int k_3A80(int, int (*)(void), int) __asm__("func_00423A80");
 extern int k_48E8(int) __asm__("func_004248E8");
 extern int func_0040CF88(void);
+/**
+ * Initialises the USB keyboard client: binds its server, checks the connection count and sets up every keyboard.
+ *
+ * Calls func_00426408(0) and binds SIF RPC server 0x80000211 into D_005290A0, retrying with a busy wait until the
+ * server is set; a bind error prints "libusbkb : bind errr". Creates the semaphore D_00453438 ("libusbkb : CreateSema
+ * Error" on failure), reads the information block with sceUsbKbGetInfo and waits for it (func_0040C810). The maximum
+ * number of keyboards must be 1..127; it goes to D_00529000.n and *@p out. Takes the keyboard array from D_005291D0 and
+ * sets every keyboard to LED mode 1, code type 1, arrangement 1, raw mode off and an idle repeat. Clears the previous
+ * report, installs func_0040CF88 as INTC 3 (vertical blank) handler (func_00423A80; id in D_00529000.thread) and
+ * enables that line (func_004248E8).
+ *
+ * Every failure after the semaphore deletes it again and sets D_00453438 to -1.
+ *
+ * @param out  receives the maximum number of keyboards
+ * @return 0 on success, -1 on any failure
+ */
 int func_0040C028(int *out) {
     struct KbInfo_C028 info;
     struct QSema s;
@@ -9472,6 +11518,16 @@ extern void func_00424880(int);
 extern int DeleteSema(int);
 extern char D_00498278[];
 extern char D_004982A8[];
+/**
+ * Shuts the USB keyboard client down: removes its vertical-blank handler and deletes its semaphore.
+ *
+ * With interrupts off (DIntr; restored with EIntr when they were on) it removes the INTC 3 handler D_0052909C and, when
+ * that worked, disables the line (func_00424880). A failed removal prints "libusbkb.a : RemoveIntcHandler() --> error".
+ * Deletes the semaphore D_00453438 when it exists and sets it to -1; a failure prints "libusbkb.a : DeleteSema() -->
+ * error" and keeps the value. The server binding stays. func_003F62F8 calls it.
+ *
+ * @return 0 when both steps worked, else -1
+ */
 int func_0040C220(void) {
     int n = 0;
     int s, r;
@@ -9692,6 +11748,18 @@ int sceUsbKbSetLEDMode(int kbdNo, unsigned mode) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040C728);
 #ifdef SKIP_ASM
+/**
+ * Sets a keyboard's key-repeat delay and rate (in vertical blanks).
+ *
+ * Stores @p c as the rate and @p b as the delay of keyboard @p a's repeat state and clears its count; func_0040CF88
+ * counts and func_0040C980 repeats. Unlike its neighbours it does not check @p a against the keyboard count.
+ * func_003F6358 sets 30 and 2.
+ *
+ * @param a  the keyboard number
+ * @param b  vertical blanks before the first repeat
+ * @param c  vertical blanks between repeats
+ * @return 0, -11 for a negative delay or -12 for a negative rate
+ */
 int func_0040C728(int a, int b, int c) {
     int r;
     r = -11;
@@ -9709,6 +11777,15 @@ int func_0040C728(int a, int b, int c) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040C770);
 #ifdef SKIP_ASM
+/**
+ * Turns a keyboard's key-code translation on or off.
+ *
+ * Stores @p b in the keyboard's code type (f04), which func_0040D118 reads. func_003F6358 sets 0.
+ *
+ * @param a  the keyboard number
+ * @param b  0 raw codes, 1 translated
+ * @return 0, -11 for a bad keyboard or -12 for a bad type
+ */
 int func_0040C770(int a, unsigned b) {
 
     if (a >= D_00529000.n)
@@ -9723,6 +11800,15 @@ int func_0040C770(int a, unsigned b) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040C7C0);
 #ifdef SKIP_ASM
+/**
+ * Selects a keyboard's key layout table (0..2).
+ *
+ * Stores @p b in the keyboard's arrangement (f08), which func_0040D268 reads. func_002668A8 sets 0.
+ *
+ * @param a  the keyboard number
+ * @param b  the layout (0..2)
+ * @return 0, -11 for a bad keyboard or -12 for a bad layout
+ */
 int func_0040C7C0(int a, unsigned b) {
     if (a >= D_00529000.n)
         return -11;
@@ -9738,6 +11824,17 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040C810);
 #ifdef SKIP_ASM
 extern void kb_signal4(int) __asm__("SignalSema");
 extern int func_0040C8C0(void);
+/**
+ * Waits for or polls the pending USB keyboard call and finishes it.
+ *
+ * Mode 0 waits on the semaphore D_00453438 (signalled by func_0040C8B0 when the call ends), stores func_0040C8C0's
+ * result in *@p out and releases the semaphore. Mode 1 checks the RPC (sceSifCheckStatRpc) and, when it is done, stores
+ * func_0040C8C0's result in *@p out.
+ *
+ * @param mode  0 to wait, 1 to poll
+ * @param out  receives the call's result
+ * @return 0 when finished, 1 while busy (mode 1), -11 for another mode, -1 before initialisation
+ */
 int func_0040C810(int mode, int *out) {
     if (D_00453438 == -1)
         return -1;
@@ -9763,6 +11860,11 @@ int func_0040C810(int mode, int *out) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040C8B0);
 #ifdef SKIP_ASM
 extern void iSignalSema(int);
+/**
+ * End callback of every USB keyboard RPC: signals the semaphore D_00453438 from interrupt context.
+ *
+ * @param arg  the end-function argument (always 0, unused)
+ */
 void func_0040C8B0(void *arg) {
     iSignalSema(D_00453438);
 }
@@ -9772,6 +11874,14 @@ void func_0040C8B0(void *arg) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040C8C0);
 #ifdef SKIP_ASM
 extern int (*D_00453420[])(void);
+/**
+ * Finishes the pending USB keyboard call by running its result handler.
+ *
+ * For call codes 1..5 (D_00529000.cmd) it runs the handler D_00453420[code]; then clears the pending call and its
+ * output pointer.
+ *
+ * @return the handler's result, or 0
+ */
 int func_0040C8C0(void) {
     int r = 0;
     unsigned s = D_00529000.cmd;
@@ -9787,6 +11897,15 @@ int func_0040C8C0(void) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040C928);
 #ifdef SKIP_ASM
 struct S40C928 { int n; int m; unsigned char d[1]; };
+/**
+ * Result handler of call 1 (keyboard information): copies the reply into the caller's block.
+ *
+ * From the receive buffer D_00529140 it stores the maximum count (byte 0) and the connected count (byte 1) in the
+ * caller's block (D_00529000.out) and copies one status byte per possible keyboard from byte 2 on. Handler 1 of
+ * D_00453420.
+ *
+ * @return 0
+ */
 int func_0040C928(void) {
     struct S40C928 *p = (struct S40C928 *)D_00529098;
     unsigned char *s = D_00529140;
@@ -9811,6 +11930,24 @@ extern int func_0040D010(int);
 extern int func_0040D040(int, unsigned short);
 extern int func_0040D0B0(int, unsigned short *);
 extern int func_0040D118(int, unsigned char, unsigned char, int, unsigned short *, unsigned short *);
+/**
+ * Result handler of call 2 (read): turns the keyboard report into new key codes with key repeat.
+ *
+ * Returns -1 when the report's count byte is 0xFF. In raw mode (f0C 1) it copies LED, count and modifiers into the
+ * caller's sKbData, keeps the non-zero codes (a single 0 when none), converts them (func_0040D118) and returns.
+ *
+ * Otherwise it first advances the repeat: in state 1, once the count reaches the delay, it empties the ring
+ * (func_0040D010) and queues the repeated key (with a 0 before it when the delay is 2 or more and after it when the
+ * rate is), then enters state 2; in state 2 it queues the key again whenever the count reaches the rate. A report
+ * without keys returns one queued key (func_0040D0B0) with the previous LED and modifiers, or none. A first code of 1
+ * (roll-over error) stops the repeat and returns no keys. Otherwise it empties the ring; a first code of 0 or changed
+ * modifiers returns one 0 key and stops the repeat; else it returns only the codes missing from the previous report
+ * D_00529008 (all of them when that was empty), converts them and starts repeating the last one when delay and rate are
+ * set. With no new codes it stops the repeat once the repeated key is no longer held. The report is saved as the
+ * previous one. Handler 2 of D_00453420.
+ *
+ * @return 0, or -1 for a bad report
+ */
 int func_0040C980(void) {
     sKbData cur;
     unsigned short tmp[64];
@@ -9946,6 +12083,14 @@ int func_0040C980(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040CEF8);
 #ifdef SKIP_ASM
+/**
+ * Result handler of call 3 (location): copies the 7-byte reply into the caller's buffer.
+ *
+ * Fails when byte 6 of the receive buffer D_00529140 is not 0; otherwise copies bytes 0..6 to D_00529000.out. Handler 3
+ * of D_00453420.
+ *
+ * @return 0, or -1 when the reply reports an error
+ */
 int func_0040CEF8(void) {
     unsigned char *s = D_00529140;
     unsigned char *d = D_00529098;
@@ -9963,6 +12108,13 @@ int func_0040CEF8(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040CF48);
 #ifdef SKIP_ASM
+/**
+ * Result handler of call 4 (LED status): checks that the reply echoes the keyboard number sent.
+ *
+ * Compares byte 1 of the receive buffer with byte 1 of the send buffer. Handler 4 of D_00453420.
+ *
+ * @return 0 when they match, else -1
+ */
 int func_0040CF48(void) {
     return D_00529141[0] == D_00529101[0] ? 0 : -1;
 }
@@ -9971,6 +12123,13 @@ int func_0040CF48(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040CF68);
 #ifdef SKIP_ASM
+/**
+ * Result handler of call 5 (LED mode): checks that the reply echoes the keyboard number sent.
+ *
+ * Same test as func_0040CF48. Handler 5 of D_00453420.
+ *
+ * @return 0 when they match, else -1
+ */
 int func_0040CF68(void) {
     return D_00529141[0] == D_00529101[0] ? 0 : -1;
 }
@@ -9979,6 +12138,14 @@ int func_0040CF68(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040CF88);
 #ifdef SKIP_ASM
+/**
+ * Vertical-blank interrupt handler that counts the key-repeat time of every keyboard.
+ *
+ * For each keyboard with a delay and rate set and a repeat in progress (state 1 or 2) it increments the repeat count.
+ * Ends with sync and ei. func_0040C028 installs it on INTC 3.
+ *
+ * @return 0
+ */
 int func_0040CF88(void) {
     int i;
 
@@ -9996,6 +12163,12 @@ int func_0040CF88(void) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040D010);
 #ifdef SKIP_ASM
+/**
+ * Empties a keyboard's 4-entry key ring and clears its repeat count.
+ *
+ * @param i  the keyboard number
+ * @return 0
+ */
 int func_0040D010(int i) {
     sKbRepeat *p = &D_00529004[i].rep;
     p->n = 0;
@@ -10009,6 +12182,13 @@ int func_0040D010(int i) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040D040);
 #ifdef SKIP_ASM
+/**
+ * Queues a key code in a keyboard's 4-entry key ring.
+ *
+ * @param a  the keyboard number
+ * @param b  the key code
+ * @return 0, or -1 when the ring is full
+ */
 int func_0040D040(int a, unsigned short b) {
     sKbRepeat *q = &D_00529004[a].rep;
     if (q->n >= 4)
@@ -10024,6 +12204,13 @@ int func_0040D040(int a, unsigned short b) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040D0B0);
 #ifdef SKIP_ASM
+/**
+ * Takes the oldest key code from a keyboard's 4-entry key ring.
+ *
+ * @param a  the keyboard number
+ * @param out  receives the key code
+ * @return 0, or -1 when the ring is empty
+ */
 int func_0040D0B0(int a, unsigned short *out) {
     sKbRepeat *q = &D_00529004[a].rep;
     if (q->n <= 0)
@@ -10040,6 +12227,20 @@ int func_0040D0B0(int a, unsigned short *out) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040D118);
 #ifdef SKIP_ASM
 extern short q_0040D268(int, int, int, unsigned short) __asm__("func_0040D268");
+/**
+ * Copies a keyboard's raw key codes to an output list, converting them when its code type asks.
+ *
+ * Stops after @p n codes or at a 0 code. With code type 0 (f04) the codes are copied unchanged; with 1 each is
+ * converted by func_0040D268 using the keyboard's arrangement (f08), @p b and @p c. Any other code type writes nothing.
+ *
+ * @param idx  the keyboard number
+ * @param b  the modifier-key bits
+ * @param c  the LED state
+ * @param n  the number of codes
+ * @param src  the raw codes
+ * @param dst  receives the codes (may equal @p src)
+ * @return the number of codes written
+ */
 int func_0040D118(int idx, unsigned char b, unsigned char c, int n, unsigned short *src, unsigned short *dst) {
     sKbPort *e = &D_00529004[idx];
     int i;
@@ -10079,6 +12280,22 @@ extern char D_004987C8[];
 extern char D_00498BC8[];
 extern void u268_00425C60(char *) __asm__("func_00425C60");
 extern unsigned short u268_0040D3C0(int, int) __asm__("func_0040D3C0");
+/**
+ * Converts one raw USB key code into a character code for a key layout.
+ *
+ * @p mode picks the table D_004983C8, D_004987C8 or D_00498BC8 (each 256 plain entries, then 256 for Shift, used when
+ * @p a has a Shift bit, 0x02 or 0x20). Code 0 gives 0 and codes from 0x100 come back unchanged. A table value of 0x4000
+ * marks a keypad key, converted by func_0040D3C0 with the LED state; 0x8000 returns the raw code with bit 15 set. With
+ * Caps Lock (LED bit 1) lower-case letters turn upper-case, and back to lower-case when Shift is held too.
+ *
+ * Likely bug: another @p mode prints "Arrangement error!" and then reads the null table for codes 1..0xFF.
+ *
+ * @param mode  the layout (0..2)
+ * @param a  the modifier-key bits
+ * @param b  the LED state
+ * @param ch  the raw key code
+ * @return the character code
+ */
 unsigned short func_0040D268(int mode, int a, int b, unsigned short ch) {
     unsigned short *tbl = 0;
     unsigned short v;
@@ -10123,6 +12340,16 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040D3C0);
 #ifdef SKIP_ASM
 struct K_D3C0 { unsigned char k; unsigned char p; unsigned short v; };
 extern struct K_D3C0 D_00498FC8[2][21];
+/**
+ * Converts a keypad key's raw code for the Num Lock state.
+ *
+ * Looks the code up in the 21-entry table D_00498FC8[@p a & 1] (Num Lock is LED bit 0) and returns the matching code
+ * with bit 0x4000 set; codes not in the table come back unchanged.
+ *
+ * @param a  the LED state
+ * @param b  the raw key code
+ * @return the converted code
+ */
 unsigned short func_0040D3C0(int a, unsigned char b) {
     unsigned i;
     int r = b;
@@ -10139,6 +12366,16 @@ unsigned short func_0040D3C0(int a, unsigned char b) {
 //100%
 INCLUDE_ASM("seg/seg_2FE810", func_0040D430);
 #ifdef SKIP_ASM
+/**
+ * Switches a keyboard between converted key codes and raw reports.
+ *
+ * When the mode changes it clears the keyboard's repeat count, ring positions and repeated key and the previous
+ * report's key count. func_0040C980 returns raw reports while the mode (f0C) is 1. func_002668A8 sets 0.
+ *
+ * @param a  the keyboard number
+ * @param b  0 converted keys, 1 raw reports
+ * @return 0, -11 for a bad keyboard or -12 for a bad mode
+ */
 int func_0040D430(int a, unsigned b) {
     sKbPort *e;
     if (a >= D_00529000.n)
@@ -10163,6 +12400,17 @@ int func_0040D430(int a, unsigned b) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040D4A0);
 #ifdef SKIP_ASM
 extern void q_00425C60(char *, int) __asm__("func_00425C60");
+/**
+ * Clears a keyboard's input buffer on the IOP side and its key ring and repeat state here.
+ *
+ * Takes the semaphore D_00453438 and sends RPC 6 with the keyboard number asynchronously (func_0040C8B0 releases the
+ * semaphore when it ends), then resets the keyboard's repeat state, repeated key and ring.
+ *
+ * Quirks: a failed call prints the message of the read call (D_004982F8) and returns with the semaphore still taken.
+ *
+ * @param a  the keyboard number
+ * @return 0, -1 before initialisation, -11 for a bad keyboard or -2 when the call failed
+ */
 int func_0040D4A0(unsigned a) {
     int r;
     sKbPort *e;
@@ -10195,6 +12443,17 @@ extern int func_0040E878(float x, float *y);
 extern float func_0040F5A8(float x, float y, int iy);
 typedef union { float f; int bits; } FloatBits_D588;
 #define FLOAT_TO_BITS_D588(i, d) do { FloatBits_D588 fb_; fb_.f = (d); (i) = fb_.bits; } while (0)
+/**
+ * Returns the tangent of a float angle.
+ *
+ * Up to pi/4 (bits 0x3F490FDA) it calls func_0040F5A8(x, 0, 1) directly; infinity and NaN give NaN (x - x). Larger
+ * angles are reduced by func_0040E878 to a remainder and quadrant, and func_0040F5A8 gets the remainder with 1 for even
+ * quadrants or -1 (minus the cotangent) for odd ones. cPS2GraphicsMan_SetViewportPerspective takes the reciprocal of
+ * its result for the field of view.
+ *
+ * @param x  the angle in radians
+ * @return the tangent
+ */
 float func_0040D588(float x) {
     float y[2];
     int hx, ix;
@@ -10224,6 +12483,19 @@ extern int cmp_40D610(double, double) __asm__("dpcmp");
 extern double dpsub(double, double);
 extern int matherr_40D610(struct E40D610 *) __asm__("func_0040F878");
 extern int *func_00415FB8(void);
+/**
+ * Returns the natural logarithm of a double, with the math library's error handling.
+ *
+ * Computes it with func_0040DB58. Unless the library mode D_00499688 is -1 (IEEE), @p x is NaN (func_0040F840) or
+ * positive, it fills an error record (name D_00499070, both arguments @p x, result -3.4e38 in SVID mode 0 or 0 -
+ * D_00499680 otherwise). For 0 the type is 2 (singularity) and errno (func_00415FB8) becomes 34 in POSIX mode 2, else
+ * 33 when func_0040F878 returns 0; below 0 the type is 1 (domain) with errno 33. A non-zero err field overrides errno.
+ * The double arithmetic runs through the soft-float routines (dpcmp, dpsub). cPS2GraphicsMan_AddTexture uses it to pick
+ * a texture's mip level.
+ *
+ * @param x  the value
+ * @return the logarithm, or the error record's result
+ */
 double func_0040D610(double x) {
     struct E40D610 e;
     double zero;
@@ -10276,6 +12548,20 @@ static const float
 o_threshold_D758=  8.8721679688e+01,  /* 0x42b17180 */
 u_threshold_D758= -1.0397208405e+02;  /* 0xc2cff1b5 */
 
+	/**
+	 * Returns e raised to a float power, with the math library's overflow and underflow handling.
+	 *
+	 * Computes it with func_0040E048. Unless the library mode D_00499688 is -1, a finite @p x (func_0040F8C0) above 88.72
+	 * fills an overflow record (type 3, result 3.4e38 in SVID mode or HUGE_VAL) and one below -103.97 an underflow record
+	 * (type 4, result 0); errno (func_00415FB8) becomes 34 in POSIX mode or when func_0040F878 returns 0, a non-zero err
+	 * field overrides it, and the record's result is returned.
+	 *
+	 * Callers include cLoadTimer_update, the input-map expression code (cInputExec_execute),
+	 * cChunkResolve_calcMaxLightDistance and cRenderStateMan_calculateIrradianceBlend.
+	 *
+	 * @param x  the exponent
+	 * @return the power, or the error record's result
+	 */
 	float func_0040D758(float x)		/* wrapper expf */
 {
 	float z;
@@ -10336,6 +12622,17 @@ extern int matherr_D8D0(struct exception_D8D0 *) __asm__("func_0040F878");
 #define _LIB_VERSION_D8D0 fdlib_version_D8D0
 #define errno_D8D0 (*func_00415FB8())
 
+	/**
+	 * Returns the float remainder of x / y, with the math library's error handling for y = 0.
+	 *
+	 * Computes it with func_0040E300. Unless the library mode is -1 or either argument is NaN (func_0040F9D0), y = 0 fills
+	 * a domain record (type 1, result x in SVID mode, else NaN) and sets errno 33 in POSIX mode or when func_0040F878
+	 * returns 0. func_002B2718 (bank monitor) uses it for the position within a beat.
+	 *
+	 * @param x  the dividend
+	 * @param y  the divisor
+	 * @return the remainder, or the error record's result
+	 */
 	float func_0040D8D0(float x, float y)	/* wrapper fmodf */
 {
 	float z;
@@ -10382,6 +12679,16 @@ extern int matherr_DA10(struct exception_DA10 *) __asm__("func_0040F878");
 #define HUGE_DA10 ((float)3.40282346638528860e+38)
 #define HUGE_VAL_DA10 (D_00499680[0])
 
+	/**
+	 * Returns the natural logarithm of a float, with the math library's error handling.
+	 *
+	 * Computes it with func_0040E550. Unless the library mode is -1, @p x is NaN (func_0040F9D0) or positive, it fills an
+	 * error record (result -3.4e38 in SVID mode, else -HUGE_VAL): for 0 type 2 with errno 34 in POSIX mode (33 when
+	 * func_0040F878 returns 0), below 0 type 1 with errno 33. cRenderStateMan_calculateIrradianceBlend uses it.
+	 *
+	 * @param x  the value
+	 * @return the logarithm, or the error record's result
+	 */
 	float func_0040DA10(float x)		/* wrapper logf */
 {
 	float z;
@@ -10467,6 +12774,16 @@ Lg7_DB58 = 1.479819860511658591e-01;  /* 3FC2F112 DF3E5244 */
 
 static const double zero_DB58   =  0.0;
 
+	/**
+	 * Computes the natural logarithm of a double without error handling (the library's core routine).
+	 *
+	 * Writes @p x as 2^k * (1 + f) with 1 + f between sqrt(2)/2 and sqrt(2), approximates the logarithm of 1 + f with the
+	 * Lg1..Lg7 polynomial in s = f / (2 + f) and adds k * ln 2 as a high and a low part. 0 gives minus infinity, negative
+	 * values NaN, infinity and NaN pass through; subnormals are scaled by 2^54 first.
+	 *
+	 * @param x  the value
+	 * @return the logarithm
+	 */
 	double func_0040DB58(double x)
 {
 	double hfsq,frac,ratio,z,poly,w,evenTerms,oddTerms,dk;
@@ -10562,6 +12879,17 @@ P3_E048   =  6.6137559770e-05, /* 0x388ab355 */
 P4_E048   = -1.6533901999e-06, /* 0xb5ddea0e */
 P5_E048   =  4.1381369442e-08; /* 0x3331bb4c */
 
+	/**
+	 * Computes e to a float power without error handling (the library's core routine).
+	 *
+	 * Reduces @p x to k * ln 2 + r with |r| at most ln 2 / 2 (high and low parts from D_004991B8 / D_004991C0),
+	 * approximates e^r with the P1..P5 polynomial and scales by 2^k through the exponent bits. Above 88.72 it overflows
+	 * (huge * huge), below -103.97 it underflows (twom100 squared); below 2^-28 it returns 1 + x; infinity gives infinity
+	 * or 0 and NaN passes through.
+	 *
+	 * @param x  the exponent
+	 * @return the power
+	 */
 	float func_0040E048(float x)	/* default IEEE double exp */
 {
 	float y,hi,lo,c,t;
@@ -10649,6 +12977,17 @@ static const float one_E300 = 1.0;
 extern const float D_004991F0[];	/* Zero[] = {0.0, -0.0} */
 #define Zero_E300 D_004991F0
 
+	/**
+	 * Computes the float remainder of x / y with the sign of x, without error handling.
+	 *
+	 * Works on the integer bits: y = 0, infinite x or NaN y give NaN; |x| < |y| returns x; |x| = |y| a signed zero from
+	 * D_004991F0. Otherwise it aligns both mantissas (subnormals included), subtracts by shift and compare one bit at a
+	 * time and rebuilds the result.
+	 *
+	 * @param x  the dividend
+	 * @param y  the divisor
+	 * @return the remainder
+	 */
 	float func_0040E300(float x, float y)
 {
 	int n,hx,hy,hz,ix,iy,sx,i;
@@ -10763,6 +13102,15 @@ Lg7_E550 = 1.4798198640e-01; /* 3E178897 */
 
 static const float zero_E550   =  0.0;
 
+	/**
+	 * Computes the natural logarithm of a float without error handling (the library's core routine).
+	 *
+	 * Same method as func_0040DB58 in single precision (Lg1..Lg7, ln2 high and low parts); 0 gives minus infinity, negative
+	 * values NaN, subnormals are scaled by 2^25 first.
+	 *
+	 * @param x  the value
+	 * @return the logarithm
+	 */
 	float func_0040E550(float x)
 {
 	float hfsq,frac,ratio,z,poly,w,evenTerms,oddTerms,dk;
@@ -10857,6 +13205,18 @@ pio2_2t_E878 =  6.0770999344e-11, /* 0x2e85a308 */
 pio2_3_E878  =  6.0770943833e-11, /* 0x2e85a300 */
 pio2_3t_E878 =  6.1232342629e-17; /* 0x248d3132 */
 
+	/**
+	 * Reduces a float angle modulo pi/2: stores the remainder in y[0] + y[1] and returns the quadrant.
+	 *
+	 * Up to pi/4 the angle is the remainder (quadrant 0). Below 3pi/4 one subtraction of pi/2 (high and tail parts) does;
+	 * up to 2^7 * pi/2 it rounds n = |x| * 2/pi and subtracts n * pi/2 in up to three rounds of more precise parts,
+	 * checking the table D_00499540 for cancellation. Infinity and NaN give NaN (quadrant 0). Larger angles go to
+	 * func_0040EC58 with the bits of 2/pi (D_00499228). Negative angles negate remainder and quadrant.
+	 *
+	 * @param x  the angle
+	 * @param y  receives the remainder as two floats
+	 * @return the quadrant number n (only n & 3 matters)
+	 */
 	int func_0040E878(float x, float *y)
 {
 	float z,w,t,r,fn;
@@ -10971,6 +13331,23 @@ one_EC58    = 1.0,
 two8_EC58   =  2.5600000000e+02, /* 0x43800000 */
 twon8_EC58  =  3.9062500000e-03; /* 0x3b800000 */
 
+	/**
+	 * Reduces a huge float angle modulo pi/2 by multiplying it with enough bits of 2/pi.
+	 *
+	 * @p x holds the angle as @p nx 8-bit chunks with @p e0 the exponent of the first. It multiplies them with terms of @p
+	 * ipio2 (as floats), distils the products into 8-bit integers, takes the integer part modulo 8 as the quadrant and
+	 * recomputes with more terms while the fraction has lost precision. The fraction goes to @p y in one, two or three
+	 * floats depending on @p prec (term counts D_004995E8, pi/2 pieces D_004995F8). Uses func_0040F9F8 and func_0040F8E8.
+	 * func_0040E878 calls it.
+	 *
+	 * @param x  the input chunks
+	 * @param y  receives the remainder
+	 * @param e0  the exponent of x[0]
+	 * @param nx  the number of chunks
+	 * @param prec  the precision class (0..3)
+	 * @param ipio2  the integer bits of 2/pi
+	 * @return the quadrant (0..7)
+	 */
 	int func_0040EC58(float *x, float *y, int e0, int nx, int prec, const int *ipio2)
 {
 	int jz,jx,jv,jp,jk,carry,n,iq[20],i,j,k,m,q0,ih;
@@ -11157,6 +13534,18 @@ one_F5A8   =  1.0000000000e+00, /* 0x3f800000 */
 pio4_F5A8  =  7.8539812565e-01, /* 0x3f490fda */
 pio4lo_F5A8=  3.7748947079e-08; /* 0x33222168 */
 
+	/**
+	 * Computes the tangent, or minus the cotangent, of a reduced float angle x + y (|x| up to pi/4).
+	 *
+	 * Below 2^-28 it returns x, or -1/x (infinity for 0) when @p iy is -1. From 0.6744 it works on pi/4 - x. Otherwise it
+	 * evaluates the odd and even halves of the T[13] polynomial (D_00499648) and returns x + the correction, or for @p iy
+	 * -1 minus its reciprocal computed in high and low parts.
+	 *
+	 * @param x  the angle's high part
+	 * @param y  its low part
+	 * @param iy  1 for the tangent, -1 for minus the cotangent
+	 * @return the result
+	 */
 	float func_0040F5A8(float x, float y, int iy)
 {
 	float z,r,v,w,s;
@@ -11235,6 +13624,14 @@ do {								\
   (ix0) = ew_u.parts.msw;					\
   (ix1) = ew_u.parts.lsw;					\
 } while (0)
+/**
+ * Returns whether a double is NaN.
+ *
+ * Uses the integer bits of both words, so no comparison is needed.
+ *
+ * @param x  the value
+ * @return 1 for NaN, else 0
+ */
 int func_0040F840(double x) {
     int hx, lx;
     EXTRACT_WORDS(hx, lx, x);
@@ -11249,6 +13646,14 @@ int func_0040F840(double x) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040F878);
 #ifdef SKIP_ASM
 extern void dpcmp(long, long);
+/**
+ * Default math-error hook: returns 0, so the calling wrapper sets errno.
+ *
+ * It compares the record's first argument with itself (dpcmp; the source's NaN test) and returns 0 either way.
+ *
+ * @param errInfo  the error record
+ * @return 0
+ */
 int func_0040F878(long *errInfo) {
     long firstArg = errInfo[1];
     dpcmp(firstArg, firstArg);
@@ -11262,6 +13667,12 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040F8A0);
 typedef union { float f; int bits; } FloatBits_F8A0;
 #define FLOAT_TO_BITS_F8A0(i, d) do { FloatBits_F8A0 fb_; fb_.f = (d); (i) = fb_.bits; } while (0)
 #define BITS_TO_FLOAT_F8A0(d, i) do { FloatBits_F8A0 fb_; fb_.bits = (i); (d) = fb_.f; } while (0)
+/**
+ * Returns the absolute value of a float by clearing its sign bit.
+ *
+ * @param x  the value
+ * @return |x|
+ */
 float func_0040F8A0(float x) {
     int ix;
     FLOAT_TO_BITS_F8A0(ix, x);
@@ -11285,6 +13696,12 @@ do {								\
   gf_u.value = (d);						\
   (i) = gf_u.word;						\
 } while (0)
+/**
+ * Returns whether a float is finite (neither infinite nor NaN).
+ *
+ * @param x  the value
+ * @return 1 when finite, else 0
+ */
 int func_0040F8C0(float x) {
     int ix;
     GET_FLOAT_WORD(ix, x);
@@ -11308,6 +13725,15 @@ do {								\
 
 static const float huge_F8E8 = 1.0e30;
 
+	/**
+	 * Rounds a float down to the nearest integer value.
+	 *
+	 * Clears the fraction bits below the exponent, adding one unit first for negative non-integers; |x| < 1 gives 0 or -1,
+	 * infinity and NaN return x + x.
+	 *
+	 * @param x  the value
+	 * @return the rounded value
+	 */
 	float func_0040F8E8(float x)
 {
 	int i0,exponent;
@@ -11343,6 +13769,12 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040F9D0);
 #ifdef SKIP_ASM
 /* newlib libm isnanf (fdlibm sf_isnan.c; notice at func_0040F840) */
 /* GET_FLOAT_WORD: defined with finitef (func_0040F8C0) above */
+/**
+ * Returns whether a float is NaN.
+ *
+ * @param x  the value
+ * @return 1 for NaN, else 0
+ */
 int func_0040F9D0(float x) {
     int ix;
     GET_FLOAT_WORD(ix, x);
@@ -11360,6 +13792,17 @@ typedef union { float f; int bits; } FloatBits_F9F8;
 #define FLOAT_TO_BITS_F9F8(i, d) do { FloatBits_F9F8 fb_; fb_.f = (d); (i) = fb_.bits; } while (0)
 #define BITS_TO_FLOAT_F9F8(d, i) do { FloatBits_F9F8 fb_; fb_.bits = (i); (d) = fb_.f; } while (0)
 static const float k_2pow25_F9F8 = 3.3554432e+07f, k_2powm25_F9F8 = 2.9802322e-08f, k_big_F9F8 = 1.0e+30f, k_small_F9F8 = 1.0e-30f;
+/**
+ * Returns x * 2^n by adjusting the float's exponent bits.
+ *
+ * Subnormals are scaled by 2^25 first (a very negative @p n then gives 1e-30 * x). Infinity and NaN return x + x.
+ * Results past the range give 1e30 or 1e-30 times itself with x's sign (func_0040FB58); results that become subnormal
+ * are built with 25 extra exponent steps and scaled back.
+ *
+ * @param x  the value
+ * @param n  the power of two
+ * @return the scaled value
+ */
 float func_0040F9F8(float x, int n) {
     int k, ix;
     FLOAT_TO_BITS_F9F8(ix, x);
@@ -11400,6 +13843,13 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040FB58);
 typedef union { float f; int bits; } FloatBits_FB58;
 #define FLOAT_TO_BITS_FB58(i, d) do { FloatBits_FB58 fb_; fb_.f = (d); (i) = fb_.bits; } while (0)
 #define BITS_TO_FLOAT_FB58(d, i) do { FloatBits_FB58 fb_; fb_.bits = (i); (d) = fb_.f; } while (0)
+/**
+ * Returns x with the sign of y.
+ *
+ * @param x  the magnitude
+ * @param y  the sign source
+ * @return the combined value
+ */
 float func_0040FB58(float x, float y) {
     int ix, iy;
     FLOAT_TO_BITS_FB58(ix, x);
@@ -11413,6 +13863,14 @@ float func_0040FB58(float x, float y) {
 INCLUDE_ASM("seg/seg_2FE810", func_0040FB88);
 #ifdef SKIP_ASM
 extern void (**D_0045343C[])(void);
+/**
+ * Runs the static destructors that the list pointer D_0045343C walks, in order, once each.
+ *
+ * The pointer walks a null-terminated list and is advanced before each call, so a destructor that ends the program does
+ * not run twice. func_00411310 calls it first, passing its status, which is ignored.
+ *
+ * @param a  the status of the caller (unused)
+ */
 void func_0040FB88(int a) {
     void (**p)(void);
     while (*D_0045343C[0]) {
@@ -11444,6 +13902,11 @@ do {                                                                    \
     D_0043CE38[i] ();                                                   \
 } while (0)
 
+/**
+ * Runs the static constructors listed in D_0043CE38, last to first.
+ *
+ * The list's first word is the count, or -1 when the list is null-terminated (then it is counted first).
+ */
 void func_0040FBE0(void)
 {
   DO_GLOBAL_CTORS_BODY_FBE0;
@@ -11455,6 +13918,11 @@ INCLUDE_ASM("seg/seg_2FE810", func_0040FC90);
 #ifdef SKIP_ASM
 extern int D_0052AD98[];
 extern void func_0040FBE0(void);
+/**
+ * Runs the static constructors once (func_0040FBE0), guarded by the flag D_0052AD98.
+ *
+ * main (main_impl) calls it first; g++ inserts this call at the start of main.
+ */
 void func_0040FC90(void) {
     if (D_0052AD98[0] == 0) {
         D_0052AD98[0] = 1;
@@ -11808,6 +14276,17 @@ DItype __divdi3 (DItype u, DItype v) __asm__("func_0040FCB0");
 
 UDItype __udivmoddi4 ();
 
+/**
+ * Divides two signed 64-bit integers, truncating toward zero (GCC runtime helper).
+ *
+ * Negates negative operands while tracking the result's sign, divides the magnitudes with the inlined unsigned divider
+ * (__udivmoddi4) and negates the quotient when the signs differed. cDynamicMemMan_sYSTRIm and the printf core
+ * func_00425638 call it.
+ *
+ * @param dividend  the number divided
+ * @param divisor  the number to divide by
+ * @return the quotient
+ */
 DItype
 __divdi3 (DItype dividend, DItype divisor)
 {

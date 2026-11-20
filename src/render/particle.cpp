@@ -1298,7 +1298,9 @@ INCLUDE_ASM("render/particle", cTube_update__FPv);
  * Updates a tube effect for the frame: refreshes the shared tube vertex colours (cSimpleTube_updateColours).
  *
  * It is the update slot (slot 2) of both tube vtables, cTube_vtbl (the 4-byte "Tube" effect) and cSimpleTube_vtbl (the
- * segmented tube built by cSimpleTube_cSimpleTube). Declared as returning void* but returns nothing meaningful.
+ * segmented tube built by cSimpleTube_cSimpleTube). @p self is only passed on.
+ *
+ * @return whatever cSimpleTube_updateColours leaves in its return register (nothing meaningful)
  */
 void* cTube_update(void* self)
 {
@@ -1384,8 +1386,10 @@ extern float D_004A4238;
  * Refreshes the colour of the 262 shared tube vertices (D_00501440) when the tube colour has changed.
  *
  * Compares the cached floats D_004A4230, D_004A4234 and D_004A4238 with the tube colour ints D_004A41E0, D_004A41E4 and
- * D_004A41E8; if any differs, it writes the three ints into every vertex's red/green/blue and caches the new values.
- * @p self is not used. Declared as returning void* but returns nothing meaningful.
+ * D_004A41E8; if any differs, it writes the three ints into every vertex's r, g and b and caches the new values as
+ * floats. @p self is not used. Called by cTube_update.
+ *
+ * @return nothing meaningful: declared as returning void* but falls off the end without a return value
  */
 extern "C" void* cSimpleTube_updateColours(void* self)
 {

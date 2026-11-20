@@ -14,6 +14,13 @@
 INCLUDE_ASM("seg/seg_3113A0_eh", func_004103A0);
 #ifdef SKIP_ASM
 extern int func_00418790(void) __attribute__((noreturn));
+/**
+ * Default terminate handler: calls func_00418790 (abort) and never returns.
+ *
+ * The terminate-handler pointer D_00453440 starts out pointing here.
+ *
+ * @return never returns
+ */
 int func_004103A0(void) {
     return func_00418790();
 }
@@ -23,6 +30,12 @@ int func_004103A0(void) {
 INCLUDE_ASM("seg/seg_3113A0_eh", func_004103B0);
 #ifdef SKIP_ASM
 extern void (*D_00453440[])(void);
+/**
+ * Calls the current terminate handler D_00453440 (never returns).
+ *
+ * The exception-handling code calls it for every fatal state (no handler, no active exception, failed allocation or
+ * unwind); the pure-virtual filler func_00411530 calls it too.
+ */
 void func_004103B0(void) {
     D_00453440[0]();
 }
@@ -32,6 +45,16 @@ void func_004103B0(void) {
 INCLUDE_ASM("seg/seg_3113A0_eh", func_004103D8);
 #ifdef SKIP_ASM
 extern int func_004165A8(int, int);
+/**
+ * Returns @p obj when the catch and throw type names are the same string, else 0.
+ *
+ * Compares the names with func_004165A8.
+ *
+ * @param catchType  the catch clause's type name
+ * @param throwType  the thrown type's name
+ * @param obj  the thrown object
+ * @return @p obj on a match, else 0
+ */
 int func_004103D8(int catchType, int throwType, int obj) {
     if (func_004165A8(catchType, throwType)) {
         obj = 0;
@@ -40,6 +63,9 @@ int func_004103D8(int catchType, int throwType, int obj) {
 }
 #endif
 
+/**
+ * Does nothing.
+ */
 void func_00410408(void) {
 }
 
@@ -49,6 +75,15 @@ INCLUDE_ASM("seg/seg_3113A0_eh", func_00410410);
 extern int *func_00410410_alloc(int) __asm__("func_004188C0");
 extern void func_004103B0(void);
 extern void func_00416210(int *, int, int);
+/**
+ * Allocates and clears a new EH context with its own top element for the handler chain.
+ *
+ * Allocates 0x18 bytes (func_004188C0), calls func_004103B0 (terminate) when that fails, clears them (func_00416210)
+ * and points the dynamic handler chain (word 1) at the two-word top element at +0x10. Nothing in this single-threaded
+ * build calls it.
+ *
+ * @return the context
+ */
 int *func_00410410(void) {
     int *fullContext = func_00410410_alloc(0x18);
     if (!fullContext)
@@ -63,6 +98,11 @@ int *func_00410410(void) {
 INCLUDE_ASM("seg/seg_3113A0_eh", func_00410468);
 #ifdef SKIP_ASM
 extern int (*D_00453444[])(void);
+/**
+ * Calls the EH-context getter D_00453444 and leaves its result as this function's result.
+ *
+ * The getter starts as func_004104B8, which switches it to func_004104E0.
+ */
 void func_00410468(void) {
     D_00453444[0]();
 }
@@ -71,6 +111,14 @@ void func_00410468(void) {
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", func_00410490);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of the current exception's language-specific info pointer.
+ *
+ * Gets the EH context from the getter D_00453444 and returns the address of its info word (+0x8). The C++ runtime
+ * (func_004128A8, func_00412860 and others) reads the current exception's record through it.
+ *
+ * @return the address of the context's info word
+ */
 int *func_00410490(void) {
     return (int *)D_00453444[0]() + 2;
 }
@@ -80,6 +128,11 @@ int *func_00410490(void) {
 INCLUDE_ASM("seg/seg_3113A0_eh", func_004104B8);
 #ifdef SKIP_ASM
 extern int func_004104E0(void);
+/**
+ * First EH-context getter: switches the getter D_00453444 to func_004104E0 and calls it.
+ *
+ * Without threads there is one static context, so the switch happens on the first call.
+ */
 void func_004104B8(void) {
     int (*fp)(void) = func_004104E0;
     D_00453444[0] = fp;
@@ -94,6 +147,14 @@ extern int D_0052ADA0[];
 extern char D_0052ADB8[];
 extern int D_0052ADB0[];
 extern void *memset_4104E0(void *, int, int) __asm__("func_00416210");
+/**
+ * Returns the static EH context, clearing it on the first call.
+ *
+ * On the first call (flag D_0052ADB0) it clears the 16-byte context D_0052ADA0 and points its handler chain (word 1) at
+ * the top element D_0052ADB8.
+ *
+ * @return the address of D_0052ADA0
+ */
 int func_004104E0(void) {
     if (D_0052ADB0[0] == 0) {
         D_0052ADB0[0] = 1;
@@ -107,6 +168,13 @@ int func_004104E0(void) {
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", func_00410548);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of the EH context's dynamic handler chain.
+ *
+ * Gets the EH context from the getter D_00453444 and returns the address of word 1.
+ *
+ * @return the address of the chain pointer
+ */
 int *func_00410548(void) {
     return (int *)D_00453444[0]() + 1;
 }
@@ -119,6 +187,14 @@ extern int (*D_00453444[])(void);
 extern void func_004103B0(void);
 struct N570 { int *next; int cleanup; void *jb[3]; char pad[0x62C]; };
 void sjthrow_410570(void) __asm__("func_00410570");
+/**
+ * Throws in the setjmp/longjmp exception scheme: runs pending cleanups, then jumps to the top handler.
+ *
+ * Gets the EH context from the getter D_00453444. When the top handler of the dynamic chain has cleanups, it pushes a
+ * temporary handler (__builtin_setjmp; a throw from a cleanup ends in func_004103B0) and runs each cleanup with
+ * (argument, 2), unlinking it first, then pops the temporary handler. With no active exception (context word 2) or an
+ * empty chain it calls func_004103B0; otherwise it pops the top handler and longjmps into its buffer. Never returns.
+ */
 void sjthrow_410570(void) {
     struct N570 node;
     int *eh;
@@ -166,6 +242,14 @@ INCLUDE_ASM("seg/seg_3113A0_eh", func_004106E8);
 extern int (*D_00453444[])(void);
 extern int func_00410570(void) __attribute__((noreturn));
 struct N6E8 { int *next; int cleanup; void *jb[3]; char pad[0x62C]; };
+/**
+ * Runs the top handler's pending cleanups, pops that handler and throws on (func_00410570).
+ *
+ * Same cleanup loop as func_00410570 under a temporary handler (__builtin_setjmp), then removes the top element of the
+ * dynamic handler chain and calls func_00410570. Never returns.
+ *
+ * @return never returns
+ */
 int func_004106E8(void) {
     struct N6E8 node;
     int *eh;
@@ -202,6 +286,15 @@ __asm__(".globl D_00410790\n\t.type D_00410790,@function\n\tD_00410790 = func_00
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", func_00410800);
 #ifdef SKIP_ASM
+/**
+ * Asks the current exception's match function whether it matches a runtime type.
+ *
+ * Reads the info record through func_00410490; without a match function (its word 0) it returns 0, otherwise the
+ * function's result (info, @p rtime, 0) as 1 or 0.
+ *
+ * @param rtime  the runtime type to test
+ * @return 1 on a match, else 0
+ */
 int func_00410800(int rtime) {
     int *info = *(int **)func_00410490();
     int (*fn)(int *, int, int) = (int (*)(int *, int, int))info[0];
@@ -214,6 +307,12 @@ int func_00410800(int rtime) {
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", func_00410848);
 #ifdef SKIP_ASM
+/**
+ * Returns the version field (the short at +6) of an exception table descriptor.
+ *
+ * @param table  the descriptor
+ * @return the version
+ */
 int func_00410848(short *table) {
     return table[3];
 }
@@ -222,6 +321,12 @@ int func_00410848(short *table) {
 //100%
 INCLUDE_ASM("seg/seg_3113A0_eh", func_00410850);
 #ifdef SKIP_ASM
+/**
+ * Returns the language field (the short at +4) of an exception table descriptor.
+ *
+ * @param table  the descriptor
+ * @return the language
+ */
 int func_00410850(short *table) {
     return table[2];
 }
@@ -231,6 +336,16 @@ int func_00410850(short *table) {
 INCLUDE_ASM("seg/seg_3113A0_eh", func_00410858);
 #ifdef SKIP_ASM
 struct E410858 { unsigned start; unsigned end; int data; };
+/**
+ * Finds the handler of the innermost region containing a PC in an old-format exception table.
+ *
+ * Scans the (start, end, handler) entries up to a start of -1, keeping the region that lies within the best one so far
+ * (the later one on a tie) and stopping at the first entry past the PC once one matched.
+ *
+ * @param pc  the address
+ * @param tab  the table, or 0
+ * @return the handler address, or 0
+ */
 int func_00410858(unsigned pc, struct E410858 *tab) {
     int best, i;
     if (tab) {
@@ -254,6 +369,21 @@ INCLUDE_ASM("seg/seg_3113A0_eh", func_00410930);
 #ifdef SKIP_ASM
 struct E410930 { unsigned start; unsigned end; int val; int cb; };
 struct C410930 { int (*match)(struct C410930 *, int, int); };
+/**
+ * Finds the handler for an exception in a new-format exception table, noting cleanup-only matches.
+ *
+ * Scans the regions after the table's 8-byte header, from @p pc - 1, or on a rethrow from the entry after @p pc (then a
+ * table entry) with its end address - 1. A region with a type needs the exception's match function (@p ctx word 0) to
+ * accept it: that handler wins and clears *@p out. A region without a type is a cleanup: its handler is kept if none
+ * was found yet and the scan goes on.
+ *
+ * @param pc  the throw address, or the table entry on a rethrow
+ * @param obj  the table descriptor, or 0
+ * @param ctx  the exception's info record
+ * @param flag  non-zero for a rethrow
+ * @param out  receives 1 when only a cleanup was found, 0 for a real handler
+ * @return the handler address, or 0
+ */
 int func_00410930(unsigned pc, int obj, struct C410930 *ctx, int flag, int *out) {
     int retval = 0;
     *out = 1;
@@ -294,6 +424,17 @@ INCLUDE_ASM("seg/seg_3113A0_eh", func_00410A78);
 #ifdef SKIP_ASM
 struct S410A78 { int base; char pad[0x14]; long e[0x50]; unsigned short n; short pad2; signed char kind[1]; };
 extern int func_00418790(void);
+/**
+ * Returns the address where a frame saved a register.
+ *
+ * Follows registers saved in other registers (kind 2) to the final one; for a register saved at an offset (kind 1) it
+ * returns the frame's CFA plus that offset, otherwise it calls func_00418790 (abort).
+ *
+ * @param idx  the register number
+ * @param udata  the frame state
+ * @param z  the callee's frame state (unused)
+ * @return the save address
+ */
 int func_00410A78(int idx, struct S410A78 *udata, int z) {
     if (udata->kind[idx] == 2) {
         do {
@@ -311,6 +452,17 @@ INCLUDE_ASM("seg/seg_3113A0_eh", func_00410B00);
 #ifdef SKIP_ASM
 extern int func_00410A78();
 extern int func_0041605C(int, int, int);
+/**
+ * Copies a register's saved value from one frame's save slot to another's.
+ *
+ * Finds both slots with func_00410A78 and copies 16 bytes for registers below 31, 4 for 31..63 and 8 above
+ * (func_0041605C).
+ *
+ * @param reg  the register number
+ * @param udata  the frame to copy from
+ * @param targetUdata  the frame to copy to
+ * @return func_0041605C's result
+ */
 int func_00410B00(int reg, int udata, int targetUdata) {
     int x = func_00410A78(reg, udata, 0);
     int y = func_00410A78(reg, targetUdata, 0);
@@ -325,6 +477,18 @@ INCLUDE_ASM("seg/seg_3113A0_eh", func_00410B80);
 #ifdef SKIP_ASM
 extern int *func_00414818();
 extern long long *func_00410B80_idx() __asm__("func_00410A78");
+/**
+ * Computes the frame state of the caller of a frame.
+ *
+ * Gets the unwind information for @p framePc into @p callerBuf (func_00414818; 0 when there is none). The caller's CFA
+ * is the value its CFA register was saved with in @p udata (func_00410A78) when saved, else @p udata's CFA, plus the
+ * caller's CFA offset.
+ *
+ * @param framePc  an address inside the caller
+ * @param udata  the current frame's state
+ * @param callerBuf  the buffer for the caller's state
+ * @return the caller's frame state, or 0
+ */
 int *func_00410B80(int framePc, int *udata, int callerBuf) {
     int *callerUdata = func_00414818(framePc, callerBuf);
     unsigned short i;
@@ -343,6 +507,11 @@ int *func_00410B80(int framePc, int *udata, int callerBuf) {
 }
 #endif
 
+/**
+ * Empty hook that func_00410C18 calls when only cleanups are left to run for a throw.
+ *
+ * A debugger can stop here to see the throw before the stack is unwound.
+ */
 void func_00410C10(void) {
 }
 
@@ -364,6 +533,25 @@ extern int f_858_410C18(int, int) __asm__("func_00410858");
 /* libgcc2.c: without INCOMING_REGNO (MIPS) no register lives in a register window */
 static inline int in_reg_window_410C18(int reg, struct F410C18 *udata) { return 0; }
 int unwind_410C18(int *info, int pc, struct S410C18 *buf, struct F410C18 **pout) __asm__("func_00410C18");
+/**
+ * Finds the handler for the exception being thrown and unwinds the saved registers to its frame.
+ *
+ * Walks the callers' frames from @p pc (func_00410B80). Each frame's table is searched: from the context's rethrow
+ * entry (word 3, cleared afterwards) on a rethrow, as a new-format table (runtime id 0xFFFFFFFE, func_00410930) or an
+ * old one (func_00410858). The first cleanup-only match is remembered and the walk goes on; a real handler stops it.
+ * With only cleanups it uses the remembered one and calls func_00410C10; with nothing it calls func_004103B0
+ * (terminate). The handler goes into the context's word 0.
+ *
+ * When the handler is not in the throwing frame it walks again from @p pc, copying every register each frame saved into
+ * @p buf (func_00410B00), and at the end the return-address register when that was saved in another register. *@p pout
+ * receives the state of the frame the handler's frame called (@p buf when no unwinding was needed).
+ *
+ * @param info  the EH context
+ * @param pc  the throw address (return address - 1)
+ * @param buf  the thrower's frame state; receives the unwound registers
+ * @param pout  in: a frame-state buffer to work in; out: the frame state below the handler
+ * @return the handler address
+ */
 int unwind_410C18(int *info, int pc, struct S410C18 *buf, struct F410C18 **pout) {
     struct S410C18 first;
     struct S410C18 save;
@@ -477,6 +665,15 @@ struct S410F48 { char b[0x2F0]; } __attribute__((aligned(8)));
 extern void func_004103B0(void);
 extern struct S410F48 *get_410F48(void *, void *) __asm__("func_00414818");
 extern void *func_00410C18(void *, int, void *, void *);
+/**
+ * Throws the current exception: finds its handler and jumps there with the registers restored.
+ *
+ * Gets the EH context from the getter D_00453444 and calls func_004103B0 when no exception is active (word 2 is 0).
+ * Gets its own frame state (func_00414818; terminate when missing) with the CFA, copies it and passes its return
+ * address - 1 to func_00410C18. __builtin_eh_return then restores the handler frame's registers, moves the stack by the
+ * difference of the two CFAs and jumps to the handler. Never returns. The C++ throw helpers of seg_313800_exception
+ * call it.
+ */
 void func_00410F48(void) {
     struct S410F48 ctx0;
     struct S410F48 buf;
@@ -517,6 +714,14 @@ struct S411128 { char b[0x2F0]; } __attribute__((aligned(8)));
 extern void func_004103B0(void);
 extern struct S411128 *get_411128(void *, void *) __asm__("func_00414818");
 extern void *func_00410C18(void *, int, void *, void *);
+/**
+ * Rethrows the current exception from a given exception-table entry.
+ *
+ * Like func_00410F48, but first stores @p val in the context's rethrow index (word 3), so func_00410C18 starts its
+ * search after that region. Never returns.
+ *
+ * @param val  the table entry to rethrow out of
+ */
 void func_00411128(int val) {
     struct S411128 ctx0;
     struct S411128 buf;

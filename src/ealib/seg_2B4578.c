@@ -6612,6 +6612,19 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003BA740);
    their offsets). Some fields are also reached through their own splat symbols (declared below), which the
    functions that address them directly must keep using. */
 extern struct sA8E8Chan *D_0050AAD8;    /* D_0050A8E8.f1F0 */
+/**
+ * Recomputes a sound channel's send level to one effect bus.
+ *
+ * Takes channel @p i of D_0050AAD8 (0x8C-byte channel records), looks up its bus record with func_003B8218 (the bus
+ * number and the channel's render mode, f24), and stores f60[bus] * f61[bus] * the bus record's level byte (f02) >> 6
+ * in the channel's per-bus short f62[bus]. f61[bus] is the send level func_003B88C8 stores (0..127). The per-bus byte
+ * arrays f60/f61 are both indexed by the bus number from adjacent bases, so f60[bus + 1] is the same byte as f61[bus].
+ * Callers apply the result with SNDPLATFORM_setfxlevel; func_003B88C8, SNDBANKI_playtimbre and SNDPKTPLAY_start call
+ * it.
+ *
+ * @param busIndex  the effect bus number
+ * @param i  the channel index
+ */
 void func_003BA740(int busIndex, int i) {
     struct sA8E8Chan *channel = &D_0050AAD8[i];
     struct sA8E8Bus *busRec = func_003B8218(busIndex, channel->f24);
@@ -9164,6 +9177,18 @@ static inline void vu0StoreV8_F3E0(V4_F3E0 *d) {
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
 /* Copies n words (n >> 5 blocks of 128 bytes) through VU0 registers. The goto loop has no loop notes, so gcc
    doesn't align its label (a do-while gets an alignment slot: 94.78). */
+/**
+ * Copies a block of words through VU0 registers, 128 bytes (eight quadwords) per pass.
+ *
+ * Runs n >> 5 passes, each loading eight consecutive quadwords from @p src into vf1..vf8 and storing them to @p dst;
+ * both must be 16-byte aligned and any remainder below 32 words is not copied. The DTS encoder's analysis filterbank
+ * func_003BD220 uses it to copy a channel's filter history in and out of the work area when it cannot use scratchpad
+ * DMA.
+ *
+ * @param src  the source (16-byte aligned)
+ * @param dst  the destination (16-byte aligned)
+ * @param n  the number of 32-bit words (a multiple of 32)
+ */
 void func_003BF3E0(V4_F3E0 *src, V4_F3E0 *dst, unsigned int n) {
     register int i FM_REG("$2") = n >> 5;
 top:
@@ -9238,6 +9263,17 @@ static inline void vu0StoreV4_F440(V4_F440 *d) {
 // retail counts in v0); plain form 99.35%.
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
 /* Converts n 16-bit samples to floats, 16 per pass (n >> 4 passes). */
+/**
+ * Converts 16-bit PCM samples to floats scaled by 256, sixteen samples per pass.
+ *
+ * Runs n >> 4 passes: each loads 32 bytes of samples, widens them to 32-bit lanes as sample << 8 with MMI (pextlh,
+ * psraw), moves them to vf1..vf4, converts them to float on VU0 and stores four quadwords to @p dst. Called by the DTS
+ * encoder's analysis filterbank func_003BD220 on a channel's PCM input (all 512 samples at once, or 128 per block).
+ *
+ * @param src  the 16-bit samples (16-byte aligned)
+ * @param dst  the float output (16-byte aligned)
+ * @param n  the number of samples (a multiple of 16)
+ */
 void func_003BF440(long *src, V4_F440 *dst, unsigned int n) {
     register int i FM_REG("$2") = n >> 4;
 top:
@@ -9640,6 +9676,16 @@ static inline void vu0StoreV8_F800(V4_F800 *hi) {
 // and the counter v1; retail keeps q in a1 and the counter in v0); plain form 98.17%.
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
 /* In-place butterfly over 64 vec4 rows: front rows p[0..15], p[32..47] against mirrored back rows, four per pass. */
+/**
+ * Runs the first butterfly stage of the DTS encoder's subband transform in place on 64 vec4 rows.
+ *
+ * Four passes of four rows each: the front rows front[0..15] and front[32..47] are combined on VU0 with the mirrored
+ * back rows front[31..16] and front[63..48] (sums go to the front rows, differences to the back rows). It is the first
+ * step of the transform chain func_003BF800 .. func_003C01A0 that the analysis filterbank func_003BD220 runs on each
+ * windowed block.
+ *
+ * @param front  the 64-row block (16-byte aligned quadwords)
+ */
 void func_003BF800(V4_F800 *front) {
     int i = 4;
     register V4_F800 *back FM_REG("$5") = front + 31;
@@ -11289,6 +11335,17 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003C0858);
 #ifdef SKIP_ASM
 /* PORT: PS2-only VU0 state save; func_0031A308 without the $vi22/$vi18
    saves, and with ctc2 (not cfc2) on $vi16 as in the shipped code. */
+/**
+ * Saves the VU0 register file into a buffer (0x208 bytes used) before the sound thread uses VU0.
+ *
+ * Stores vf1..vf31 at 0x10 * (n - 1), the accumulator (read into vf1 with vmaddx after vf1 is saved) at 0x1F0 and the
+ * MAC flags ($vi17) at 0x200. The sound thread func_003C19A8 calls it and restores with func_003C08F8. It is
+ * func_0031A308 without the $vi22/$vi18 saves. Likely bug, kept from the shipped code: where the status flags should be
+ * read it does ctc2 $9, $vi16, which writes the MAC flags into the status register, and then stores the MAC flags again
+ * at 0x204.
+ *
+ * @param buf  the save area (16-byte aligned, at least 0x208 bytes)
+ */
 void func_003C0858(void* buf)
 {
     __asm__ __volatile__(
@@ -11346,6 +11403,16 @@ void func_003C07A8(int status);
 
 /* PORT: PS2-only VU0 state restore; same as func_0031A3C0 without the
    $vi22/$vi18 restore. */
+/**
+ * Restores the VU0 register file that func_003C0858 saved.
+ *
+ * Reloads the accumulator from 0x1F0 (vaddax with vf0.x), vf1..vf6, then re-creates the MAC flags from the word at
+ * 0x200 with func_003C07A8 (which preserves vf1/vf2 around its vmul), then reloads vf7..vf31. The status word at 0x204
+ * is not used. It is func_0031A3C0 without the $vi22/$vi18 restore; the sound thread func_003C19A8 calls it after
+ * mixing.
+ *
+ * @param buf  the save area written by func_003C0858
+ */
 void func_003C08F8(void* buf)
 {
     __asm__ __volatile__(
@@ -20919,7 +20986,12 @@ INCLUDE_ASM("ealib/seg_2B4578", func_003CB528);
 void func_003CB328_B528(void) __asm__("func_003CB328");
 
 /**
- * Sets up the clipping filter node: its process function becomes func_003CB328. Called by func_003C8B80.
+ * Sets up a mixer voice's clipping filter node: its process function becomes func_003CB328.
+ *
+ * Stores func_003CB328 in the node's first word, the slot SFILTER nodes call to process samples. func_003C8B80 calls it
+ * on a newly allocated 80-byte node before linking it with SFILTER_add.
+ *
+ * @param node  the filter node
  */
 void func_003CB528(void (**node)(void)) {
     *node = func_003CB328_B528;

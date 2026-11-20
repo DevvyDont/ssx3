@@ -20,6 +20,16 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", func_00414B68);
 #ifdef SKIP_ASM
 extern int D_00499A48[];
 extern int operator_delete__FPi(int *);
+/**
+ * Destroys a type_info: stores type_info's vtable and frees the object when bit 0 of the flag is set.
+ *
+ * g++ deleting-destructor shape; type_info keeps its vptr at +4, after the name pointer. Stores D_00499A48 and calls
+ * operator_delete__FPi on flag & 1. The destructors of the derived type_info classes jump here.
+ *
+ * @param p     the type_info object
+ * @param flag  destructor flags: bit 0 frees the storage
+ * @return nothing meaningful (the C reconstruction declares int)
+ */
 int func_00414B68(int *p, int flag) {
     p[1] = (int)D_00499A48;
     if (flag & 1) return operator_delete__FPi(p);
@@ -30,6 +40,16 @@ int func_00414B68(int *p, int flag) {
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00414B98);
 #ifdef SKIP_ASM
 extern int func_004165A8(int, int);
+/**
+ * Returns whether two type_info objects describe the same type.
+ *
+ * True when they are the same object or their names compare equal with func_004165A8 (strcmp), so types match across
+ * separately emitted copies.
+ *
+ * @param lhs  first type_info
+ * @param rhs  second type_info
+ * @return 1 when equal, else 0
+ */
 int func_00414B98(int *lhs, int *rhs) {
     int equal = 0;
     if (rhs == lhs || func_004165A8(*lhs, *rhs) == 0)
@@ -42,6 +62,16 @@ int func_00414B98(int *lhs, int *rhs) {
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00414BD8);
 #ifdef SKIP_ASM
 extern int D_004999D0[];
+/**
+ * Constructs a multiple-inheritance class type_info in caller-supplied storage (does nothing for null storage).
+ *
+ * Stores the name (+0), the __class_type_info vtable D_004999D0 (+4), the base list (+8) and the base count (+0xC).
+ *
+ * @param p  the storage, or null
+ * @param a  the mangled class name
+ * @param b  the base_info array
+ * @param c  number of bases
+ */
 void func_00414BD8(int *p, int a, int b, int c) {
     if (p != 0) {
         p[3] = c;
@@ -56,6 +86,16 @@ void func_00414BD8(int *p, int a, int b, int c) {
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00414C00);
 #ifdef SKIP_ASM
 extern int D_004999E8[];
+/**
+ * Constructs a single-inheritance class type_info in caller-supplied storage (does nothing for null storage).
+ *
+ * Stores the name (+0), the __si_type_info vtable D_004999E8 (+4) and the base's type_info (+8). The type_info
+ * functions of single-inheritance classes call it on first use.
+ *
+ * @param p  the storage, or null
+ * @param a  the mangled class name
+ * @param b  the base class's type_info
+ */
 void func_00414C00(int *p, int a, int b) {
     if (p != 0) {
         p[2] = b;
@@ -69,6 +109,15 @@ void func_00414C00(int *p, int a, int b) {
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00414C20);
 #ifdef SKIP_ASM
 extern int D_00499A00[];
+/**
+ * Constructs the type_info of a class without bases in caller-supplied storage (does nothing for null storage).
+ *
+ * Stores the name (+0) and the __user_type_info vtable D_00499A00 (+4). The type_info functions of classes without
+ * bases call it on first use.
+ *
+ * @param p  the storage, or null
+ * @param a  the mangled class name
+ */
 void func_00414C20(int *p, int a) {
     if (p != 0) {
         p[0] = a;
@@ -80,6 +129,17 @@ void func_00414C20(int *p, int a) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00414C40);
 #ifdef SKIP_ASM
+/**
+ * dynamic_cast step for a class without bases: returns the object pointer when the class is the desired type.
+ *
+ * Compares the type_infos with func_00414B98; fills the dcast slot (2) of the __user_type_info vtable D_00499A00.
+ *
+ * @param thisType  this class's type_info
+ * @param desired   the type_info cast to
+ * @param isPublic  unused here
+ * @param objPtr    the object pointer
+ * @return objPtr on a match, else 0
+ */
 int func_00414C40(int *thisType, int *desired, int isPublic, int objPtr) {
     if (func_00414B98(thisType, desired) == 0) objPtr = 0;
     return objPtr;
@@ -89,6 +149,21 @@ int func_00414C40(int *thisType, int *desired, int isPublic, int objPtr) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00414C70);
 #ifdef SKIP_ASM
+/**
+ * dynamic_cast step for a single-inheritance class: matches this class or recurses into the base.
+ *
+ * Returns objPtr when func_00414B98 says this class is the desired type; otherwise calls the dcast slot of the base
+ * type_info (+8) through its vtable (old-style entry: pointer at +0x14, this-delta at +0x10) with the same arguments.
+ * Fills the dcast slot of the __si_type_info vtable D_004999E8.
+ *
+ * @param thisType  this class's type_info
+ * @param desired   the type_info cast to
+ * @param isPublic  nonzero to allow only public bases
+ * @param objPtr    the object pointer
+ * @param subType   the static type of the source subobject, or null
+ * @param subPtr    the source subobject pointer
+ * @return the adjusted pointer, or 0 when the cast fails
+ */
 int func_00414C70(int *thisType, int desired, int isPublic, int objPtr, int subType, int subPtr) {
     int *baseType;
     short *vt;
@@ -120,6 +195,21 @@ __asm__("__eq__C9type_infoRC9type_info = func_00414B98\n"
 /* tinfo.cc __class_type_info::dcast (GCC runtime, GPL v2+ with the runtime linking exception) */
 }  // extern "C"  (a member function definition cannot have C linkage)
 
+/**
+ * dynamic_cast step for a class with several (or virtual) bases: searches every base for the desired type.
+ *
+ * Returns objptr when this class is the desired type. Otherwise it walks the base list (skipping non-public bases when
+ * is_public is set, following the pointer for virtual bases) and recurses into each base's dcast. Two different hits
+ * make the cast ambiguous and return 0, unless sub/subptr show that the source subobject lies in exactly one of them,
+ * which then wins. Fills the dcast slot of the __class_type_info vtable D_004999D0.
+ *
+ * @param desired    the type_info cast to
+ * @param is_public  nonzero to allow only public bases
+ * @param objptr     the object pointer
+ * @param sub        the static type of the source subobject, or null
+ * @param subptr     the source subobject pointer
+ * @return the adjusted pointer, or 0 when the cast fails or is ambiguous
+ */
 void* __class_type_info::
 dcast (const type_info& desired, int is_public, void *objptr,
        const type_info *sub, void *subptr) const
@@ -182,6 +272,15 @@ extern "C" {
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00414EE0);
 #ifdef SKIP_ASM
 extern int D_004999D0[];
+/**
+ * Constructs a multiple-inheritance class type_info: name, vtable D_004999D0, base list and base count.
+ *
+ * @param p  the object
+ * @param a  the mangled class name
+ * @param b  the base_info array
+ * @param c  number of bases
+ * @return the object
+ */
 int *func_00414EE0(int *p, int a, int b, int c) {
     p[0] = a;
     p[1] = (int)D_004999D0;
@@ -199,6 +298,14 @@ extern int D_00499A58[];
 extern int D_0053EA40[];
 extern int *func_00415018(void);
 extern void func_00414C00(int *, int, int);
+/**
+ * Returns the type_info object of class __class_type_info, building it on first use.
+ *
+ * When D_0053EA60 is still zero, builds the base's type_info (func_00415018) and constructs a single-inheritance
+ * type_info in D_0053EA60 with func_00414C00, name "17__class_type_info" (D_00499A58) and base D_0053EA40.
+ *
+ * @return the type_info object D_0053EA60
+ */
 int *func_00414F00(void) {
     if (D_0053EA60[0] == 0) {
         func_00415018();
@@ -211,6 +318,11 @@ int *func_00414F00(void) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00414F50);
 #ifdef SKIP_ASM
+/**
+ * Destroys a __class_type_info by jumping to type_info's destructor (func_00414B68).
+ *
+ * Declared without parameters: the object and destructor flags pass through in the argument registers.
+ */
 void func_00414F50(void) {
     ((void (*)(void))func_00414B68)();
 }
@@ -220,6 +332,14 @@ void func_00414F50(void) {
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00414F70);
 #ifdef SKIP_ASM
 extern int D_004999E8[];
+/**
+ * Constructs a single-inheritance class type_info: name, vtable D_004999E8 and base type_info.
+ *
+ * @param p  the object
+ * @param a  the mangled class name
+ * @param b  the base class's type_info
+ * @return the object
+ */
 int *func_00414F70(int *p, int a, int b) {
     p[0] = a;
     p[1] = (int)D_004999E8;
@@ -236,6 +356,14 @@ extern int D_00499A70[];
 extern int D_0053EA40[];
 extern int *func_00415018(void);
 extern void func_00414C00(int *, int, int);
+/**
+ * Returns the type_info object of class __si_type_info, building it on first use.
+ *
+ * When D_0053EA50 is still zero, builds the base's type_info (func_00415018) and constructs a single-inheritance
+ * type_info in D_0053EA50 with func_00414C00, name "14__si_type_info" (D_00499A70) and base D_0053EA40.
+ *
+ * @return the type_info object D_0053EA50
+ */
 int *func_00414F90(void) {
     if (D_0053EA50[0] == 0) {
         func_00415018();
@@ -248,6 +376,11 @@ int *func_00414F90(void) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00414FE0);
 #ifdef SKIP_ASM
+/**
+ * Destroys a __si_type_info by jumping to type_info's destructor (func_00414B68).
+ *
+ * Declared without parameters: the object and destructor flags pass through in the argument registers.
+ */
 void func_00414FE0(void) {
     ((void (*)(void))func_00414B68)();
 }
@@ -257,6 +390,13 @@ void func_00414FE0(void) {
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415000);
 #ifdef SKIP_ASM
 extern int D_00499A00[];
+/**
+ * Constructs the type_info of a class without bases: name and vtable D_00499A00.
+ *
+ * @param p  the object
+ * @param a  the mangled class name
+ * @return the object
+ */
 int *func_00415000(int *p, int a) {
     p[0] = a;
     p[1] = (int)D_00499A00;
@@ -272,6 +412,14 @@ extern int D_00499A88[];
 extern int D_004A5BB0[];
 extern int *func_004151F8(void);
 extern void func_00414C00(int *, int, int);
+/**
+ * Returns the type_info object of class __user_type_info, building it on first use.
+ *
+ * When D_0053EA40 is still zero, builds type_info's own type_info (func_004151F8) and constructs a single-inheritance
+ * type_info in D_0053EA40 with func_00414C00, name "16__user_type_info" (D_00499A88) and base D_004A5BB0.
+ *
+ * @return the type_info object D_0053EA40
+ */
 int *func_00415018(void) {
     if (D_0053EA40[0] == 0) {
         func_004151F8();
@@ -284,6 +432,11 @@ int *func_00415018(void) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415068);
 #ifdef SKIP_ASM
+/**
+ * Destroys a __user_type_info by jumping to type_info's destructor (func_00414B68).
+ *
+ * Declared without parameters: the object and destructor flags pass through in the argument registers.
+ */
 void func_00415068(void) {
     ((void (*)(void))func_00414B68)();
 }
@@ -294,6 +447,16 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415088);
 #ifdef SKIP_ASM
 extern int D_004998B8[];
 extern int operator_delete__FPi(int *);
+/**
+ * Destroys a bad_typeid: puts back the base exception vtable and frees the object when bit 0 of the flag is set.
+ *
+ * g++ deleting-destructor shape: stores D_004998B8 (exception's vtable) and calls operator_delete__FPi on flag & 1.
+ * Fills the destructor slot of bad_typeid's vtable D_00499A18.
+ *
+ * @param p     the bad_typeid object
+ * @param flag  destructor flags: bit 0 frees the storage
+ * @return nothing meaningful (the C reconstruction declares int)
+ */
 int func_00415088(int **p, int flag) {
     *p = D_004998B8;
     if (flag & 1) return operator_delete__FPi((int *)p);
@@ -304,6 +467,12 @@ int func_00415088(int **p, int flag) {
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_004150B8);
 #ifdef SKIP_ASM
 extern int D_00499A18[];
+/**
+ * Constructs a bad_typeid: stores its vtable (D_00499A18) and returns the object.
+ *
+ * @param p  the object to construct
+ * @return the constructed object
+ */
 int *func_004150B8(int **p) {
     *p = D_00499A18;
     return (int*)p;
@@ -318,6 +487,14 @@ extern int D_00499AA0[];
 extern int D_004A5BA8[];
 extern int *func_00412F18(void);
 extern void func_00414C00(int *, int, int);
+/**
+ * Returns the type_info object of class bad_typeid, building it on first use.
+ *
+ * When D_0053EA20 is still zero, builds exception's type_info (func_00412F18) and constructs a single-inheritance
+ * type_info in D_0053EA20 with func_00414C00, name "10bad_typeid" (D_00499AA0) and base D_004A5BA8.
+ *
+ * @return the type_info object D_0053EA20
+ */
 int *func_004150D0(void) {
     if (D_0053EA20[0] == 0) {
         func_00412F18();
@@ -332,6 +509,16 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415120);
 #ifdef SKIP_ASM
 extern int D_004998B8[];
 extern int operator_delete__FPi(int *);
+/**
+ * Destroys a bad_cast: puts back the base exception vtable and frees the object when bit 0 of the flag is set.
+ *
+ * g++ deleting-destructor shape: stores D_004998B8 (exception's vtable) and calls operator_delete__FPi on flag & 1.
+ * Fills the destructor slot of bad_cast's vtable D_00499A30.
+ *
+ * @param p     the bad_cast object
+ * @param flag  destructor flags: bit 0 frees the storage
+ * @return nothing meaningful (the C reconstruction declares int)
+ */
 int func_00415120(int **p, int flag) {
     *p = D_004998B8;
     if (flag & 1) return operator_delete__FPi((int *)p);
@@ -342,6 +529,12 @@ int func_00415120(int **p, int flag) {
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415150);
 #ifdef SKIP_ASM
 extern int D_00499A30[];
+/**
+ * Constructs a bad_cast: stores its vtable (D_00499A30) and returns the object.
+ *
+ * @param p  the object to construct
+ * @return the constructed object
+ */
 int *func_00415150(int **p) {
     *p = D_00499A30;
     return (int*)p;
@@ -356,6 +549,14 @@ extern int D_00499AB0[];
 extern int D_004A5BA8[];
 extern int *func_00412F18(void);
 extern void func_00414C00(int *, int, int);
+/**
+ * Returns the type_info object of class bad_cast, building it on first use.
+ *
+ * When D_0053EA30 is still zero, builds exception's type_info (func_00412F18) and constructs a single-inheritance
+ * type_info in D_0053EA30 with func_00414C00, name "8bad_cast" (D_00499AB0) and base D_004A5BA8.
+ *
+ * @return the type_info object D_0053EA30
+ */
 int *func_00415168(void) {
     if (D_0053EA30[0] == 0) {
         func_00412F18();
@@ -368,6 +569,13 @@ int *func_00415168(void) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_004151B8);
 #ifdef SKIP_ASM
+/**
+ * Returns whether two type_info objects describe different types (the negation of func_00414B98).
+ *
+ * @param lhs  first type_info
+ * @param rhs  second type_info
+ * @return 1 when the types differ, else 0
+ */
 int func_004151B8(int *lhs, int *rhs) {
     return func_00414B98(lhs, rhs) ^ 1;
 }
@@ -376,6 +584,12 @@ int func_004151B8(int *lhs, int *rhs) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_004151D8);
 #ifdef SKIP_ASM
+/**
+ * Returns a type_info's name string (its first word).
+ *
+ * @param typeInfo  the type_info
+ * @return the mangled type name
+ */
 int func_004151D8(int *typeInfo) {
     return *typeInfo;
 }
@@ -385,6 +599,13 @@ int func_004151D8(int *typeInfo) {
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_004151E0);
 #ifdef SKIP_ASM
 extern int D_00499A48[];
+/**
+ * Constructs a type_info: stores the name and type_info's vtable (D_00499A48, at +4) and returns the object.
+ *
+ * @param p  the object
+ * @param a  the mangled type name
+ * @return the constructed object
+ */
 int *func_004151E0(int *p, int a) {
     p[0] = a;
     p[1] = (int)D_00499A48;
@@ -398,6 +619,14 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", func_004151F8);
 extern int D_00499AC0[];
 extern int D_004A5BB0[];
 extern void func_00414C20(int *, int);
+/**
+ * Returns the type_info object of class type_info itself, building it on first use.
+ *
+ * When D_004A5BB0 is still zero, constructs a type_info for a class without bases there with func_00414C20 and the name
+ * "9type_info" (D_00499AC0).
+ *
+ * @return the type_info object D_004A5BB0
+ */
 int *func_004151F8(void) {
     if (D_004A5BB0[0] == 0)
         func_00414C20(D_004A5BB0, (int)D_00499AC0);
@@ -409,6 +638,13 @@ int *func_004151F8(void) {
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415238);
 #ifdef SKIP_ASM
 extern int func_004165A8(int, int);
+/**
+ * Returns whether one type_info sorts before another (by strcmp of their names).
+ *
+ * @param lhs  first type_info
+ * @param rhs  second type_info
+ * @return 1 when lhs's name compares less than rhs's, else 0
+ */
 int func_00415238(int *lhs, int *rhs) {
     return (unsigned)func_004165A8(*lhs, *rhs) >> 31;
 }
@@ -424,6 +660,21 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415260);
 extern "C" void*
 __throw_type_match_rtti (const void *catch_type_r, const void *throw_type_r,
 			 void *objptr) __asm__ ("func_00415260");
+/**
+ * Tests whether a thrown object can be caught by a handler of another type and returns the object pointer to bind.
+ *
+ * Equal types (func_00414B98) match as is. A class throw type is cast with its type_info's dcast, public bases only. A
+ * pointer throw type needs a pointer catch type: cv-qualifiers (attr type_infos) are stripped from both pointees and
+ * the catch side may not drop const or volatile; equal pointees match, a void pointee catches any non-function pointee,
+ * a class pointee is cast with dcast, and multi-level pointers are compared level by level with the
+ * qualification-conversion rule (a level may add const only when every outer level is const). The type tests are
+ * dynamic_casts through func_00415840. func_00412928 and func_00412B20 call it.
+ *
+ * @param catch_type_r  the handler's type_info
+ * @param throw_type_r  the thrown object's type_info
+ * @param objptr        the thrown object
+ * @return the (adjusted) object pointer on a match, 0 otherwise
+ */
 extern "C" void*
 __throw_type_match_rtti (const void *catch_type_r, const void *throw_type_r,
 			 void *objptr)
@@ -566,6 +817,17 @@ INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415728);
 extern int *func_004151F8(void);
 extern int *func_00415F48(void);
 extern int func_00415840(int, char *, int, char *, char *, void *);
+/**
+ * Returns whether a type_info describes a pointer type.
+ *
+ * Null gives false. Otherwise it dynamic_casts the type_info to the pointer type_info class with func_00415840:
+ * from-type is the object's own type_info function (vtable slot 0), to-type func_00415F48, public only, the address
+ * adjusted by the slot's delta, sub-type func_004151F8. func_00412A28 uses it to decide whether the thrown object is
+ * freed.
+ *
+ * @param typePtr  the type_info to test, or null
+ * @return 1 for a pointer type_info, else 0
+ */
 int func_00415728(int *typePtr) {
     int pointerType = 0;
     if (typePtr) {
@@ -580,6 +842,15 @@ int func_00415728(int *typePtr) {
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415778);
 #ifdef SKIP_ASM
 extern int D_00499BC8[];
+/**
+ * Constructs a pointer type_info in caller-supplied storage (does nothing for null storage).
+ *
+ * Stores the name (+0), the __pointer_type_info vtable D_00499BC8 (+4) and the pointed-to type (+8).
+ *
+ * @param p  the storage, or null
+ * @param a  the mangled type name
+ * @param b  the pointed-to type's type_info
+ */
 void func_00415778(int *p, int a, int b) {
     if (p != 0) {
         p[2] = b;
@@ -593,6 +864,17 @@ void func_00415778(int *p, int a, int b) {
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415798);
 #ifdef SKIP_ASM
 extern int D_00499BB8[];
+/**
+ * Constructs a cv-qualified type's type_info in caller-supplied storage (does nothing for null storage).
+ *
+ * Stores the name (+0), the __attr_type_info vtable D_00499BB8 (+4), the unqualified type (+8) and the qualifier bits
+ * (+0xC: 1 const, 2 volatile).
+ *
+ * @param p  the storage, or null
+ * @param a  the mangled type name
+ * @param b  qualifier bits (1 const, 2 volatile)
+ * @param c  the unqualified type's type_info
+ */
 void func_00415798(int *p, int a, int b, int c) {
     if (p != 0) {
         p[3] = b;
@@ -607,6 +889,14 @@ void func_00415798(int *p, int a, int b, int c) {
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_004157C0);
 #ifdef SKIP_ASM
 extern int D_00499B98[];
+/**
+ * Constructs the type_info of a function type in caller-supplied storage (does nothing for null storage).
+ *
+ * Stores the name (+0) and the __func_type_info vtable D_00499B98 (+4).
+ *
+ * @param p  the storage, or null
+ * @param a  the mangled type name
+ */
 void func_004157C0(int *p, int a) {
     if (p != 0) {
         p[0] = a;
@@ -619,6 +909,15 @@ void func_004157C0(int *p, int a) {
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_004157E0);
 #ifdef SKIP_ASM
 extern int D_00499B88[];
+/**
+ * Constructs the type_info of a pointer-to-member-function type in caller-supplied storage (does nothing for null
+ * storage).
+ *
+ * Stores the name (+0) and the __ptmf_type_info vtable D_00499B88 (+4).
+ *
+ * @param p  the storage, or null
+ * @param a  the mangled type name
+ */
 void func_004157E0(int *p, int a) {
     if (p != 0) {
         p[0] = a;
@@ -631,6 +930,14 @@ void func_004157E0(int *p, int a) {
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415800);
 #ifdef SKIP_ASM
 extern int D_00499B78[];
+/**
+ * Constructs the type_info of a pointer-to-data-member type in caller-supplied storage (does nothing for null storage).
+ *
+ * Stores the name (+0) and the __ptmd_type_info vtable D_00499B78 (+4).
+ *
+ * @param p  the storage, or null
+ * @param a  the mangled type name
+ */
 void func_00415800(int *p, int a) {
     if (p != 0) {
         p[0] = a;
@@ -643,6 +950,14 @@ void func_00415800(int *p, int a) {
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415820);
 #ifdef SKIP_ASM
 extern int D_00499B68[];
+/**
+ * Constructs the type_info of an array type in caller-supplied storage (does nothing for null storage).
+ *
+ * Stores the name (+0) and the __array_type_info vtable D_00499B68 (+4).
+ *
+ * @param p  the storage, or null
+ * @param a  the mangled type name
+ */
 void func_00415820(int *p, int a) {
     if (p != 0) {
         p[0] = a;
@@ -654,6 +969,20 @@ void func_00415820(int *p, int a) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415840);
 #ifdef SKIP_ASM
+/**
+ * Performs a run-time checked cast: asks the source object's dynamic type to find the target type in it.
+ *
+ * Calls fromFn for the object's dynamic type_info, then that type_info's dcast (vtable slot 2: pointer at +0x14,
+ * this-delta at +0x10) with toFn's type_info, requirePublic, the address, subFn's type_info and subPtr.
+ *
+ * @param fromFn         type_info function of the object's dynamic type
+ * @param toFn           type_info function of the target type
+ * @param requirePublic  nonzero to allow only public bases
+ * @param address        the complete object
+ * @param subFn          type_info function of the source expression's static type
+ * @param subPtr         the source pointer
+ * @return the adjusted pointer, or 0 when the cast fails
+ */
 int func_00415840(int fromFn, char *toFn, int requirePublic, char *address, char *subFn, void *subPtr) {
     char *fromType = ((char *(*)(void))fromFn)();
     int *vt = *(int **)(fromType + 4);
@@ -732,102 +1061,238 @@ public:
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_004158F0);
 #ifdef SKIP_ASM
+/**
+ * Returns the type_info object of the builtin type void, building it on first use.
+ *
+ * When the first word of D_00454158 is zero, constructs a type_info there with the name "v" (D_00499AE0, g++'s mangled
+ * code for void) and the __builtin_type_info vtable D_00499BA8.
+ *
+ * @return the type_info object D_00454158
+ */
 BUILTIN(func_004158F0, D_00454158, D_00499AE0)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415928);
 #ifdef SKIP_ASM
+/**
+ * Returns the type_info object of the builtin type long long, building it on first use.
+ *
+ * When the first word of D_00454160 is zero, constructs a type_info there with the name "x" (D_00499AE8, g++'s mangled
+ * code for long long) and the __builtin_type_info vtable D_00499BA8.
+ *
+ * @return the type_info object D_00454160
+ */
 BUILTIN(func_00415928, D_00454160, D_00499AE8)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415960);
 #ifdef SKIP_ASM
+/**
+ * Returns the type_info object of the builtin type long, building it on first use.
+ *
+ * When the first word of D_00454168 is zero, constructs a type_info there with the name "l" (D_00499AF0, g++'s mangled
+ * code for long) and the __builtin_type_info vtable D_00499BA8.
+ *
+ * @return the type_info object D_00454168
+ */
 BUILTIN(func_00415960, D_00454168, D_00499AF0)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415998);
 #ifdef SKIP_ASM
+/**
+ * Returns the type_info object of the builtin type int, building it on first use.
+ *
+ * When the first word of D_00454170 is zero, constructs a type_info there with the name "i" (D_00499AF8, g++'s mangled
+ * code for int) and the __builtin_type_info vtable D_00499BA8.
+ *
+ * @return the type_info object D_00454170
+ */
 BUILTIN(func_00415998, D_00454170, D_00499AF8)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_004159D0);
 #ifdef SKIP_ASM
+/**
+ * Returns the type_info object of the builtin type short, building it on first use.
+ *
+ * When the first word of D_00454178 is zero, constructs a type_info there with the name "s" (D_00499B00, g++'s mangled
+ * code for short) and the __builtin_type_info vtable D_00499BA8.
+ *
+ * @return the type_info object D_00454178
+ */
 BUILTIN(func_004159D0, D_00454178, D_00499B00)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415A08);
 #ifdef SKIP_ASM
+/**
+ * Returns the type_info object of the builtin type bool, building it on first use.
+ *
+ * When the first word of D_00454180 is zero, constructs a type_info there with the name "b" (D_00499B08, g++'s mangled
+ * code for bool) and the __builtin_type_info vtable D_00499BA8.
+ *
+ * @return the type_info object D_00454180
+ */
 BUILTIN(func_00415A08, D_00454180, D_00499B08)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415A40);
 #ifdef SKIP_ASM
+/**
+ * Returns the type_info object of the builtin type char, building it on first use.
+ *
+ * When the first word of D_00454188 is zero, constructs a type_info there with the name "c" (D_00499B10, g++'s mangled
+ * code for char) and the __builtin_type_info vtable D_00499BA8.
+ *
+ * @return the type_info object D_00454188
+ */
 BUILTIN(func_00415A40, D_00454188, D_00499B10)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415A78);
 #ifdef SKIP_ASM
+/**
+ * Returns the type_info object of the builtin type wchar_t, building it on first use.
+ *
+ * When the first word of D_00454190 is zero, constructs a type_info there with the name "w" (D_00499B18, g++'s mangled
+ * code for wchar_t) and the __builtin_type_info vtable D_00499BA8.
+ *
+ * @return the type_info object D_00454190
+ */
 BUILTIN(func_00415A78, D_00454190, D_00499B18)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415AB0);
 #ifdef SKIP_ASM
+/**
+ * Returns the type_info object of the builtin type long double, building it on first use.
+ *
+ * When the first word of D_00454198 is zero, constructs a type_info there with the name "r" (D_00499B20, g++'s mangled
+ * code for long double) and the __builtin_type_info vtable D_00499BA8.
+ *
+ * @return the type_info object D_00454198
+ */
 BUILTIN(func_00415AB0, D_00454198, D_00499B20)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415AE8);
 #ifdef SKIP_ASM
+/**
+ * Returns the type_info object of the builtin type double, building it on first use.
+ *
+ * When the first word of D_004541A0 is zero, constructs a type_info there with the name "d" (D_00499B28, g++'s mangled
+ * code for double) and the __builtin_type_info vtable D_00499BA8.
+ *
+ * @return the type_info object D_004541A0
+ */
 BUILTIN(func_00415AE8, D_004541A0, D_00499B28)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415B20);
 #ifdef SKIP_ASM
+/**
+ * Returns the type_info object of the builtin type float, building it on first use.
+ *
+ * When the first word of D_004541A8 is zero, constructs a type_info there with the name "f" (D_00499B30, g++'s mangled
+ * code for float) and the __builtin_type_info vtable D_00499BA8.
+ *
+ * @return the type_info object D_004541A8
+ */
 BUILTIN(func_00415B20, D_004541A8, D_00499B30)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415B58);
 #ifdef SKIP_ASM
+/**
+ * Returns the type_info object of the builtin type unsigned int, building it on first use.
+ *
+ * When the first word of D_004541B0 is zero, constructs a type_info there with the name "Ui" (D_00499B38, g++'s mangled
+ * code for unsigned int) and the __builtin_type_info vtable D_00499BA8.
+ *
+ * @return the type_info object D_004541B0
+ */
 BUILTIN(func_00415B58, D_004541B0, D_00499B38)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415B90);
 #ifdef SKIP_ASM
+/**
+ * Returns the type_info object of the builtin type unsigned long, building it on first use.
+ *
+ * When the first word of D_004541B8 is zero, constructs a type_info there with the name "Ul" (D_00499B40, g++'s mangled
+ * code for unsigned long) and the __builtin_type_info vtable D_00499BA8.
+ *
+ * @return the type_info object D_004541B8
+ */
 BUILTIN(func_00415B90, D_004541B8, D_00499B40)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415BC8);
 #ifdef SKIP_ASM
+/**
+ * Returns the type_info object of the builtin type unsigned long long, building it on first use.
+ *
+ * When the first word of D_004541C0 is zero, constructs a type_info there with the name "Ux" (D_00499B48, g++'s mangled
+ * code for unsigned long long) and the __builtin_type_info vtable D_00499BA8.
+ *
+ * @return the type_info object D_004541C0
+ */
 BUILTIN(func_00415BC8, D_004541C0, D_00499B48)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415C00);
 #ifdef SKIP_ASM
+/**
+ * Returns the type_info object of the builtin type unsigned short, building it on first use.
+ *
+ * When the first word of D_004541C8 is zero, constructs a type_info there with the name "Us" (D_00499B50, g++'s mangled
+ * code for unsigned short) and the __builtin_type_info vtable D_00499BA8.
+ *
+ * @return the type_info object D_004541C8
+ */
 BUILTIN(func_00415C00, D_004541C8, D_00499B50)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415C38);
 #ifdef SKIP_ASM
+/**
+ * Returns the type_info object of the builtin type unsigned char, building it on first use.
+ *
+ * When the first word of D_004541D0 is zero, constructs a type_info there with the name "Uc" (D_00499B58, g++'s mangled
+ * code for unsigned char) and the __builtin_type_info vtable D_00499BA8.
+ *
+ * @return the type_info object D_004541D0
+ */
 BUILTIN(func_00415C38, D_004541D0, D_00499B58)
 #endif
 
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415C70);
 #ifdef SKIP_ASM
+/**
+ * Returns the type_info object of the builtin type signed char, building it on first use.
+ *
+ * When the first word of D_004541D8 is zero, constructs a type_info there with the name "Sc" (D_00499B60, g++'s mangled
+ * code for signed char) and the __builtin_type_info vtable D_00499BA8.
+ *
+ * @return the type_info object D_004541D8
+ */
 BUILTIN(func_00415C70, D_004541D8, D_00499B60)
 #endif
 
@@ -841,6 +1306,14 @@ extern int D_00499BD8[];
 extern int D_004A5BB0[];
 extern int *func_004151F8(void);
 extern void func_00414C00(int *, int, int);
+/**
+ * Returns the type_info object of class __array_type_info, building it on first use.
+ *
+ * When D_0053EAA0 is still zero, builds type_info's own type_info (func_004151F8) and constructs a single-inheritance
+ * type_info in D_0053EAA0 with func_00414C00, name "17__array_type_info" (D_00499BD8) and base D_004A5BB0.
+ *
+ * @return the type_info object D_0053EAA0
+ */
 int *func_00415CA8(void) {
     if (D_0053EAA0[0] == 0) {
         func_004151F8();
@@ -853,6 +1326,11 @@ int *func_00415CA8(void) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415CF8);
 #ifdef SKIP_ASM
+/**
+ * Destroys a __array_type_info by jumping to type_info's destructor (func_00414B68).
+ *
+ * Declared without parameters: the object and destructor flags pass through in the argument registers.
+ */
 void func_00415CF8(void) {
     ((void (*)(void))func_00414B68)();
 }
@@ -866,6 +1344,14 @@ extern int D_00499BF0[];
 extern int D_004A5BB0[];
 extern int *func_004151F8(void);
 extern void func_00414C00(int *, int, int);
+/**
+ * Returns the type_info object of class __ptmd_type_info, building it on first use.
+ *
+ * When D_0053EAC0 is still zero, builds type_info's own type_info (func_004151F8) and constructs a single-inheritance
+ * type_info in D_0053EAC0 with func_00414C00, name "16__ptmd_type_info" (D_00499BF0) and base D_004A5BB0.
+ *
+ * @return the type_info object D_0053EAC0
+ */
 int *func_00415D18(void) {
     if (D_0053EAC0[0] == 0) {
         func_004151F8();
@@ -878,6 +1364,11 @@ int *func_00415D18(void) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415D68);
 #ifdef SKIP_ASM
+/**
+ * Destroys a __ptmd_type_info by jumping to type_info's destructor (func_00414B68).
+ *
+ * Declared without parameters: the object and destructor flags pass through in the argument registers.
+ */
 void func_00415D68(void) {
     ((void (*)(void))func_00414B68)();
 }
@@ -891,6 +1382,14 @@ extern int D_00499C08[];
 extern int D_004A5BB0[];
 extern int *func_004151F8(void);
 extern void func_00414C00(int *, int, int);
+/**
+ * Returns the type_info object of class __ptmf_type_info, building it on first use.
+ *
+ * When D_0053EA90 is still zero, builds type_info's own type_info (func_004151F8) and constructs a single-inheritance
+ * type_info in D_0053EA90 with func_00414C00, name "16__ptmf_type_info" (D_00499C08) and base D_004A5BB0.
+ *
+ * @return the type_info object D_0053EA90
+ */
 int *func_00415D88(void) {
     if (D_0053EA90[0] == 0) {
         func_004151F8();
@@ -903,6 +1402,11 @@ int *func_00415D88(void) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415DD8);
 #ifdef SKIP_ASM
+/**
+ * Destroys a __ptmf_type_info by jumping to type_info's destructor (func_00414B68).
+ *
+ * Declared without parameters: the object and destructor flags pass through in the argument registers.
+ */
 void func_00415DD8(void) {
     ((void (*)(void))func_00414B68)();
 }
@@ -916,6 +1420,14 @@ extern int D_00499C20[];
 extern int D_004A5BB0[];
 extern int *func_004151F8(void);
 extern void func_00414C00(int *, int, int);
+/**
+ * Returns the type_info object of class __func_type_info, building it on first use.
+ *
+ * When D_0053EA70 is still zero, builds type_info's own type_info (func_004151F8) and constructs a single-inheritance
+ * type_info in D_0053EA70 with func_00414C00, name "16__func_type_info" (D_00499C20) and base D_004A5BB0.
+ *
+ * @return the type_info object D_0053EA70
+ */
 int *func_00415DF8(void) {
     if (D_0053EA70[0] == 0) {
         func_004151F8();
@@ -928,6 +1440,11 @@ int *func_00415DF8(void) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415E48);
 #ifdef SKIP_ASM
+/**
+ * Destroys a __func_type_info by jumping to type_info's destructor (func_00414B68).
+ *
+ * Declared without parameters: the object and destructor flags pass through in the argument registers.
+ */
 void func_00415E48(void) {
     ((void (*)(void))func_00414B68)();
 }
@@ -941,6 +1458,14 @@ extern int D_00499C38[];
 extern int D_004A5BB0[];
 extern int *func_004151F8(void);
 extern void func_00414C00(int *, int, int);
+/**
+ * Returns the type_info object of class __builtin_type_info, building it on first use.
+ *
+ * When D_0053EAD0 is still zero, builds type_info's own type_info (func_004151F8) and constructs a single-inheritance
+ * type_info in D_0053EAD0 with func_00414C00, name "19__builtin_type_info" (D_00499C38) and base D_004A5BB0.
+ *
+ * @return the type_info object D_0053EAD0
+ */
 int *func_00415E68(void) {
     if (D_0053EAD0[0] == 0) {
         func_004151F8();
@@ -953,6 +1478,11 @@ int *func_00415E68(void) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415EB8);
 #ifdef SKIP_ASM
+/**
+ * Destroys a __builtin_type_info by jumping to type_info's destructor (func_00414B68).
+ *
+ * Declared without parameters: the object and destructor flags pass through in the argument registers.
+ */
 void func_00415EB8(void) {
     ((void (*)(void))func_00414B68)();
 }
@@ -966,6 +1496,14 @@ extern int D_00499C50[];
 extern int D_004A5BB0[];
 extern int *func_004151F8(void);
 extern void func_00414C00(int *, int, int);
+/**
+ * Returns the type_info object of class __attr_type_info, building it on first use.
+ *
+ * When D_0053EA80 is still zero, builds type_info's own type_info (func_004151F8) and constructs a single-inheritance
+ * type_info in D_0053EA80 with func_00414C00, name "16__attr_type_info" (D_00499C50) and base D_004A5BB0.
+ *
+ * @return the type_info object D_0053EA80
+ */
 int *func_00415ED8(void) {
     if (D_0053EA80[0] == 0) {
         func_004151F8();
@@ -978,6 +1516,11 @@ int *func_00415ED8(void) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415F28);
 #ifdef SKIP_ASM
+/**
+ * Destroys a __attr_type_info by jumping to type_info's destructor (func_00414B68).
+ *
+ * Declared without parameters: the object and destructor flags pass through in the argument registers.
+ */
 void func_00415F28(void) {
     ((void (*)(void))func_00414B68)();
 }
@@ -991,6 +1534,14 @@ extern int D_00499C68[];
 extern int D_004A5BB0[];
 extern int *func_004151F8(void);
 extern void func_00414C00(int *, int, int);
+/**
+ * Returns the type_info object of class __pointer_type_info, building it on first use.
+ *
+ * When D_0053EAB0 is still zero, builds type_info's own type_info (func_004151F8) and constructs a single-inheritance
+ * type_info in D_0053EAB0 with func_00414C00, name "19__pointer_type_info" (D_00499C68) and base D_004A5BB0.
+ *
+ * @return the type_info object D_0053EAB0
+ */
 int *func_00415F48(void) {
     if (D_0053EAB0[0] == 0) {
         func_004151F8();
@@ -1003,6 +1554,11 @@ int *func_00415F48(void) {
 //100%
 INCLUDE_ASM("seg/seg_315B68_tinfo", func_00415F98);
 #ifdef SKIP_ASM
+/**
+ * Destroys a __pointer_type_info by jumping to type_info's destructor (func_00414B68).
+ *
+ * Declared without parameters: the object and destructor flags pass through in the argument registers.
+ */
 void func_00415F98(void) {
     ((void (*)(void))func_00414B68)();
 }

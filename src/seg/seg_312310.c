@@ -20,6 +20,14 @@ INCLUDE_ASM("seg/seg_312310", func_00411310);
 extern void func_0040FB88(int);
 extern void func_00416FE0(void);
 extern void func_001001C8(int);
+/**
+ * Ends the program: runs the static destructors, the C library clean-up, then leaves with @p status.
+ *
+ * Calls func_0040FB88 (destructors), func_00416FE0 and func_001001C8 (the start-up code's process end) with @p status.
+ * func_003D1608 calls it as a no-return function.
+ *
+ * @param status  the status code handed on to func_001001C8
+ */
 void func_00411310(int status) {
     func_0040FB88(status);
     func_00416FE0();
@@ -228,6 +236,16 @@ typedef union
 /* libgcc2.c __muldi3 (GCC runtime, GPL v2+ with the libgcc linking exception) */
 DItype __muldi3 (DItype u, DItype v) __asm__("func_004114D0");
 
+/**
+ * Multiplies two 64-bit integers (GCC runtime helper; the R5900 has no 64-bit multiply).
+ *
+ * Multiplies the low words to 64 bits (multu) and adds the two cross products into the high word. Callers include
+ * cDynamicMemMan_sYSTRIm, func_00408530 and the soft-float multiply dpmul.
+ *
+ * @param lhs  the first factor
+ * @param rhs  the second factor
+ * @return the low 64 bits of the product
+ */
 DItype
 __muldi3 (DItype lhs, DItype rhs)
 {
@@ -249,6 +267,12 @@ __muldi3 (DItype lhs, DItype rhs)
 INCLUDE_ASM("seg/seg_312310", func_00411530);
 #ifdef SKIP_ASM
 extern void func_004103B0(void);
+/**
+ * Fills the pure virtual slots of abstract classes' vtables: calls func_004103B0 (terminate).
+ *
+ * cRiderHandler_vtbl, cChaseAlgorithm_vtbl, cScriptAlgorithm_vtbl, cFE_vtbl, cSSXApp_vtbl and many others point their
+ * pure methods here.
+ */
 void func_00411530(void) {
     func_004103B0();
 }
@@ -447,6 +471,17 @@ __udivmoddi4 (UDItype n, UDItype d, UDItype *rp)
 UDItype __udivdi3 (UDItype n, UDItype d) __asm__("func_00411538");
 
 UDItype __udivmoddi4 ();
+/**
+ * Divides two unsigned 64-bit integers (GCC runtime helper).
+ *
+ * Uses the inlined unsigned divider (__udivmoddi4): divisors that fit in 32 bits are normalised with the leading-zero
+ * table D_004997A0 and divided in 32-bit steps; larger ones need at most one quotient word. Callers include the printf
+ * core (func_00425638), strtol and the heap trim.
+ *
+ * @param n  the number divided
+ * @param divisor  the number to divide by
+ * @return the quotient
+ */
 UDItype
 __udivdi3 (UDItype n, UDItype divisor)
 {
@@ -618,6 +653,16 @@ extern void unpack_d (FLO_union_type *, fp_number_type *) __asm__("func_00411C38
 int __fpcmp_parts (fp_number_type * a, fp_number_type *b) __asm__("func_004123E8");
 
 /* fp-bit.c pack_d (GCC runtime, GPL v2+ with the libgcc linking exception): __pack_d, retail func_00411B08 */
+/**
+ * Packs an unpacked soft-float double (class, sign, exponent, fraction) into its IEEE bits.
+ *
+ * NaN keeps its fraction with the quiet bit set, infinity and zero get their fixed encodings. Exponents below the
+ * normal range shift the fraction into a denormal, ones above it give infinity; normal numbers round to nearest even on
+ * the guard bits and renormalise when the rounding carries.
+ *
+ * @param src  the unpacked number
+ * @return the double
+ */
 FLO_type
 pack_d ( fp_number_type *  src)
 {
@@ -720,6 +765,15 @@ pack_d ( fp_number_type *  src)
 INCLUDE_ASM("seg/seg_312310", func_00411C38);
 #ifdef SKIP_ASM
 /* fp-bit.c unpack_d (GCC runtime, GPL v2+ with the libgcc linking exception): __unpack_d, retail func_00411C38 */
+/**
+ * Unpacks a soft-float double into class, sign, exponent and fraction (with guard bits).
+ *
+ * Exponent 0 gives zero or a normalised denormal; the maximum exponent gives infinity or NaN (quiet or signalling by
+ * the top fraction bit); other values become normal numbers with the implicit bit restored.
+ *
+ * @param src  the double
+ * @param dst  receives the unpacked number
+ */
 void
 unpack_d (FLO_union_type * src, fp_number_type * dst)
 {
@@ -806,6 +860,18 @@ INCLUDE_ASM("seg/seg_312310", func_00411CD8);
 /* fp-bit.c _fpadd_parts (GCC runtime, GPL v2+ with the libgcc linking exception): retail func_00411CD8 */
 static fp_number_type *_fpadd_parts (fp_number_type *, fp_number_type *, fp_number_type *) __asm__("func_00411CD8");
 
+/**
+ * Adds two unpacked soft-float doubles and returns the unpacked sum.
+ *
+ * Subtraction arrives with the second operand's sign flipped. NaN operands are returned as they are, infinity minus
+ * infinity gives the NaN constant, infinities and zeros are handled first. Otherwise it aligns the smaller exponent
+ * (dropping it when too far apart), adds or subtracts the fractions by sign and normalises the result into @p tmp.
+ *
+ * @param lhs  the first operand
+ * @param rhs  the second operand
+ * @param tmp  the result buffer
+ * @return @p tmp, or one of the operands for the special cases
+ */
 static fp_number_type *
 _fpadd_parts (fp_number_type * lhs,
 	      fp_number_type * rhs,
@@ -1233,6 +1299,16 @@ int __fpcmp_parts (fp_number_type * a, fp_number_type *b);
    a>b -> +1
  */
 
+/**
+ * Compares two unpacked soft-float doubles.
+ *
+ * Either operand NaN gives 1. Infinities compare by sign, zeros are equal, then the signs, the exponents and the
+ * fractions decide (reversed for negative numbers).
+ *
+ * @param lhs  the first operand
+ * @param rhs  the second operand
+ * @return -1, 0 or 1
+ */
 int
 __fpcmp_parts (fp_number_type * lhs, fp_number_type * rhs)
 {
@@ -1445,6 +1521,13 @@ sat:
 INCLUDE_ASM("seg/seg_312310", func_00412740);
 #ifdef SKIP_ASM
 extern void func_00411C38(long *, int *);
+/**
+ * Negates a soft-float double: unpacks it, flips the sign and packs it again.
+ *
+ * The packed result from func_00411B08 is left in the return register.
+ *
+ * @param value  the double
+ */
 void func_00412740(long value) {
     int buf[8];
     func_00411C38(&value, buf);
@@ -1458,6 +1541,17 @@ INCLUDE_ASM("seg/seg_312310", func_00412778);
 #ifdef SKIP_ASM
 struct S412778 { int a, b, c; long d; };
 extern void func_00411B08(struct S412778 *);
+/**
+ * Builds a soft-float double from a class, sign, exponent and fraction.
+ *
+ * Fills an unpacked number with the four values and packs it with func_00411B08. fptodp (float to double) calls it.
+ *
+ * @param fpClass  the number class
+ * @param sign  the sign
+ * @param exponent  the unbiased exponent
+ * @param fraction  the fraction with guard bits
+ * @return the double
+ */
 void func_00412778(int fpClass, int sign, int exponent, long fraction) {
     struct S412778 parts;
     parts.a = fpClass;
