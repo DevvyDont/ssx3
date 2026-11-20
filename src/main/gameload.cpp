@@ -2804,21 +2804,21 @@ public:
     virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
     virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7();
     virtual void v8();
-    virtual unsigned int GetWidth();
-    virtual unsigned int GetHeight();
+    virtual unsigned int GetScreenWidth();
+    virtual unsigned int GetScreenHeight();
     virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14();
     virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18();
     virtual void v19();
-    virtual void BeginScene();
-    virtual void EndScene();
+    virtual void PushViewport();
+    virtual void PopViewport();
     virtual void v22(float, float, float, float, int);
     virtual void v23(); virtual void v24();
-    virtual void SetViewport(float, float, float, float, int, int, float, float);
+    virtual void SetViewportOrthographic(float, float, float, float, int, int, float, float);
     virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29();
-    virtual void Begin2D();
-    virtual void End2D();
+    virtual void PushView();
+    virtual void PopView();
     virtual void v32();
-    virtual void SetTexture(void*);
+    virtual void SetView(void*);
     virtual void v34(); virtual void v35(); virtual void v36(); virtual void v37();
     virtual void v38(); virtual void v39(); virtual void v40(); virtual void v41();
     virtual void v42(); virtual void v43(); virtual void v44(); virtual void v45();
@@ -2855,22 +2855,22 @@ extern "C" void cLoadIndicator_render(sFade_1FC0* self)
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     ((cGfx_1FC0*)ps2GraphicsMan)->stateTop[1] = ((cGfx_1FC0*)ps2GraphicsMan)->stateTop[0];
     ((cGfx_1FC0*)ps2GraphicsMan)->stateTop++;
-    ((cGfx_1FC0*)GrMan)->BeginScene();
-    ((cGfx_1FC0*)GrMan)->Begin2D();
+    ((cGfx_1FC0*)GrMan)->PushViewport();
+    ((cGfx_1FC0*)GrMan)->PushView();
     *((cGfx_1FC0*)GrMan)->stateTop = D_00501420_1FC0;
     ((cGfx_1FC0*)GrMan)->stateTop->f4_23 = 2;
     ((cGfx_1FC0*)GrMan)->stateTop->f4_20 = 0;
     ((cGfx_1FC0*)GrMan)->stateTop->f4_12 = 20;
     ((cGfx_1FC0*)GrMan)->stateTop->f4_2 = 5;
     ((cGfx_1FC0*)GrMan)->stateTop->f8_5 = 0x1F;
-    ((cGfx_1FC0*)GrMan)->SetTexture(t4mat_Identity);
+    ((cGfx_1FC0*)GrMan)->SetView(t4mat_Identity);
     {
         sVE_1FC0* vt = (sVE_1FC0*)GrMan->mVtbl;
         char* thisp = (char*)GrMan + vt[23].delta;
         void (**pfn)(void*, float, float, float, float, int) = &vt[23].fn;
-        (*pfn)(thisp, 0.0f, 0.0f, (float)((cGfx_1FC0*)GrMan)->GetWidth(), (float)((cGfx_1FC0*)GrMan)->GetHeight(), 1);
+        (*pfn)(thisp, 0.0f, 0.0f, (float)((cGfx_1FC0*)GrMan)->GetScreenWidth(), (float)((cGfx_1FC0*)GrMan)->GetScreenHeight(), 1);
     }
-    ((cGfx_1FC0*)GrMan)->SetViewport(0.0f, 0.0f, 640.0f, 480.0f, 1, 0, 0.0f, 1.0f);
+    ((cGfx_1FC0*)GrMan)->SetViewportOrthographic(0.0f, 0.0f, 640.0f, 480.0f, 1, 0, 0.0f, 1.0f);
     float s = func_0031C040(self->t * 6.2831854820251465f);
     sV2_1FC0 size((s + 1.0f) * 9.0f, 18.0f);
     sV4_1FC0 pos(599.0f, 445.0f, 0.0f, 1.0f);
@@ -2880,8 +2880,8 @@ extern "C" void cLoadIndicator_render(sFade_1FC0* self)
     sV2_1FC0 uv0(0.0f, 0.0f);
     sV2_1FC0 uv1(1.0f, 1.0f);
     ((cGfx_1FC0*)GrMan)->DrawSprite(pos, size, uv0, uv1, self->col);
-    ((cGfx_1FC0*)GrMan)->End2D();
-    ((cGfx_1FC0*)GrMan)->EndScene();
+    ((cGfx_1FC0*)GrMan)->PopView();
+    ((cGfx_1FC0*)GrMan)->PopViewport();
     ((cGfx_1FC0*)GrMan)->stateTop--;
 }
 #endif

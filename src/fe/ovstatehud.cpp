@@ -2712,21 +2712,21 @@ public:
     virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
     virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7();
     virtual void v8();
-    virtual unsigned int GetWidth();
-    virtual unsigned int GetHeight();
+    virtual unsigned int GetScreenWidth();
+    virtual unsigned int GetScreenHeight();
     virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14();
     virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18();
     virtual void v19();
-    virtual void BeginScene();
-    virtual void EndScene();
+    virtual void PushViewport();
+    virtual void PopViewport();
     virtual void v22(float, float, float, float, int);
     virtual void v23(); virtual void v24();
-    virtual void SetViewport(float, float, float, float, int, int, float, float);
+    virtual void SetViewportOrthographic(float, float, float, float, int, int, float, float);
     virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29();
-    virtual void Begin2D();
-    virtual void End2D();
+    virtual void PushView();
+    virtual void PopView();
     virtual void v32();
-    virtual void SetTexture(void*);
+    virtual void SetView(void*);
     virtual void v34(); virtual void v35(); virtual void v36(); virtual void v37();
     virtual void v38(); virtual void v39(); virtual void v40(); virtual void v41();
     virtual void v42(); virtual void v43(); virtual void v44(); virtual void v45();
@@ -2769,8 +2769,8 @@ struct sHudTimer_001F31E0 {
  *
  * Does nothing when mLoadIndicators (+0x4) is 0. Saves the render state (pushes a copy of the current draw state,
  * cPS2GraphicsMan_PushViewport, cPS2GraphicsMan_PushView), resets the draw state to sDrawState_s_defaultDrawState with
- * four bit fields of its word 1 set (2, 0, 20, 5), sets an identity view (func_00395C38 with t4mat_Identity), a
- * full-screen viewport window (func_00376A70 with the screen width and height) and func_00377458 (0, 0, 640, 480, ...).
+ * four bit fields of its word 1 set (2, 0, 20, 5), sets an identity view (cPS2GraphicsMan_SetView1 with t4mat_Identity), a
+ * full-screen viewport window (cPS2GraphicsMan_SetViewportWindow with the screen width and height) and cPS2GraphicsMan_SetViewportOrthographic (0, 0, 640, 480, ...).
  * mpLoadText is drawn with mpFont at 0.7 scale in colour (1, 1, 1, 0) (tARGB: opaque yellow) with a black shadow offset
  * by (3, 3), right-aligned at x 620 and vertically centred on y 445, with layer 31 in the draw state. Then an icon
  * sprite (texture: GrMan's word +0x1068) is drawn with cPS2GraphicsMan_DrawSprite 17 px left of the text at y 445, 18
@@ -2793,21 +2793,21 @@ extern "C" void cBXLoadIndicator_Render(sHudTimer_001F31E0* self)
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     ((cGfx_31E0*)ps2GraphicsMan)->stateTop[1] = ((cGfx_31E0*)ps2GraphicsMan)->stateTop[0];
     ((cGfx_31E0*)ps2GraphicsMan)->stateTop++;
-    ((cGfx_31E0*)GrMan)->BeginScene();
-    ((cGfx_31E0*)GrMan)->Begin2D();
+    ((cGfx_31E0*)GrMan)->PushViewport();
+    ((cGfx_31E0*)GrMan)->PushView();
     *((cGfx_31E0*)GrMan)->stateTop = D_00501420_31E0;
     ((cGfx_31E0*)GrMan)->stateTop->f4_23 = 2;
     ((cGfx_31E0*)GrMan)->stateTop->f4_20 = 0;
     ((cGfx_31E0*)GrMan)->stateTop->f4_12 = 20;
     ((cGfx_31E0*)GrMan)->stateTop->f4_2 = 5;
-    ((cGfx_31E0*)GrMan)->SetTexture(t4mat_Identity);
+    ((cGfx_31E0*)GrMan)->SetView(t4mat_Identity);
     {
         sVEntry<void(void*, float, float, float, float, int)>* vt = (sVEntry<void (void*, float, float, float, float, int)>*)GrMan->mVtbl;
         char* thisp = (char*)GrMan + vt[23].delta;
         void (**pfn)(void*, float, float, float, float, int) = &vt[23].fn;
-        (*pfn)(thisp, 0.0f, 0.0f, (float)((cGfx_31E0*)GrMan)->GetWidth(), (float)((cGfx_31E0*)GrMan)->GetHeight(), 1);
+        (*pfn)(thisp, 0.0f, 0.0f, (float)((cGfx_31E0*)GrMan)->GetScreenWidth(), (float)((cGfx_31E0*)GrMan)->GetScreenHeight(), 1);
     }
-    ((cGfx_31E0*)GrMan)->SetViewport(0.0f, 0.0f, 640.0f, 480.0f, 1, 0, 0.0f, 1.0f);
+    ((cGfx_31E0*)GrMan)->SetViewportOrthographic(0.0f, 0.0f, 640.0f, 480.0f, 1, 0, 0.0f, 1.0f);
     self->font->color = sVec4_31E0(1.0f, 1.0f, 1.0f, 0.0f);
     self->font->SetScale(0.7f, 0.7f);
     self->font->color2 = sVec4_31E0(1.0f, 0.0f, 0.0f, 0.0f);
@@ -2826,8 +2826,8 @@ extern "C" void cBXLoadIndicator_Render(sHudTimer_001F31E0* self)
     size.y = 18.0f;
     *(short*)((char*)((cGfx_31E0*)GrMan)->stateTop + 0x10) = ((cGfx_31E0*)GrMan)->GetF1068();
     ((cGfx_31E0*)GrMan)->DrawSprite(pos, size, uv0, uv1, sCol_31E0(1.0f, 1.0f, 1.0f, 1.0f));
-    ((cGfx_31E0*)GrMan)->End2D();
-    ((cGfx_31E0*)GrMan)->EndScene();
+    ((cGfx_31E0*)GrMan)->PopView();
+    ((cGfx_31E0*)GrMan)->PopViewport();
     ((cGfx_31E0*)GrMan)->stateTop--;
 }
 #endif

@@ -6248,6 +6248,14 @@ cFEStateCareerStats_initTotalEventMedal = 0x001F6F30; //type:func
 cPS2GraphicsMan_AddTexture = 0x0037C8C0; //type:func
 cPS2GraphicsMan_AddTexture1 = 0x0037CAF8; //type:func
 
+// fn_grman_view: names by evidence (docs/function_names.tsv)
+cPS2GraphicsMan_SetViewportWindow = 0x00376A70; //type:func
+cPS2GraphicsMan_SetViewportPerspective = 0x00376C58; //type:func
+cPS2GraphicsMan_SetViewportOrthographic = 0x00377458; //type:func
+cPS2GraphicsMan_SetViewportWindow1 = 0x00395370; //type:func
+cPS2GraphicsMan_SetView = 0x00395750; //type:func
+cPS2GraphicsMan_SetView1 = 0x00395C38; //type:func
+
 // Spreadsheet Auto Generation
 
 cMemMan_alloc = 0x00317D70; //type:func

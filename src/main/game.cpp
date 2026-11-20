@@ -478,23 +478,23 @@ public:
     virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
     virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7();
     virtual void v8();
-    virtual unsigned int GetWidth();
-    virtual unsigned int GetHeight();
+    virtual unsigned int GetScreenWidth();
+    virtual unsigned int GetScreenHeight();
     virtual void v11(); virtual void v12(); virtual void v13();
     virtual void v14(const sV3_C830&);
     virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18();
     virtual void v19();
-    virtual void BeginScene();
-    virtual void EndScene();
+    virtual void PushViewport();
+    virtual void PopViewport();
     virtual void v22(float, float, float, float, int);
     virtual void v23(void*, int);
     virtual void v24(float, float, float);
-    virtual void SetViewport(float, float, float, float, int, int, float, float);
+    virtual void SetViewportOrthographic(float, float, float, float, int, int, float, float);
     virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29();
-    virtual void Begin2D();
-    virtual void End2D();
+    virtual void PushView();
+    virtual void PopView();
     virtual void v32();
-    virtual void SetTexture(void*);
+    virtual void SetView(void*);
 };
 
 
@@ -580,7 +580,7 @@ extern "C" void func_002B5D78(void* p);
  * For each view of ViewMan (+0x84, count at +0x10) it selects the view, sets GrMan's viewport (slot 23) and camera
  * position (slot 24), loads the camera's matrix, sets the layer and several GS state bits, and calls
  * cBucketMan_renderBucket(gBucketMan, 3). Then it resets the viewport to the full screen (slot 22 with GrMan's width
- * and height, then SetViewport 640x480), loads t4mat_Identity, sets the debug font (+0x24) to scale 0.8, size 2 and
+ * and height, then SetViewportOrthographic 640x480), loads t4mat_Identity, sets the debug font (+0x24) to scale 0.8, size 2 and
  * colour (1, 0.8, 0.8, 0), and draws the script engine (func_002789C0(ScriptEngine)), the UI (func_00397DF8 on +0x48),
  * the load indicator (cBXLoadIndicator_Render on +0x94) and, when cMenuSys_isActive, the debug menu system (func_002CC350 on
  * +0xA4). It calls GrMan slot 14 with a zero vector and slot 19 with cDepthFog_m_Enable cleared for the call, then
@@ -597,7 +597,7 @@ extern "C" void func_0022C830(sGame_C830* self)
         sCam_C830* cam = self->views->cams[self->views->cur];
         ((cGfx_C830*)GrMan)->v23(&self->views->views[i], 1);
         ((cGfx_C830*)GrMan)->v24(cam->x, cam->y, cam->z);
-        ((cGfx_C830*)GrMan)->SetTexture(cam->tex);
+        ((cGfx_C830*)GrMan)->SetView(cam->tex);
         *(short*)((char*)((cGfx_C830*)GrMan)->stateTop + 0x12) = ((cGfx_C830*)GrMan)->GetLayer();
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         Set1_C830((cGfx_C830*)ps2GraphicsMan, 0xF80, 7, 7);
@@ -614,10 +614,10 @@ extern "C" void func_0022C830(sGame_C830* self)
         sVE_C830* vt = (sVE_C830*)GrMan->mVtbl;
         char* thisp = (char*)GrMan + vt[23].delta;
         void (**pfn)(void*, float, float, float, float, int) = &vt[23].fn;
-        (*pfn)(thisp, 0.0f, 0.0f, (float)((cGfx_C830*)GrMan)->GetWidth(), (float)((cGfx_C830*)GrMan)->GetHeight(), 1);
+        (*pfn)(thisp, 0.0f, 0.0f, (float)((cGfx_C830*)GrMan)->GetScreenWidth(), (float)((cGfx_C830*)GrMan)->GetScreenHeight(), 1);
     }
-    ((cGfx_C830*)GrMan)->SetViewport(0.0f, 0.0f, 640.0f, 480.0f, 0, 0, 0.0f, 1.0f);
-    ((cGfx_C830*)GrMan)->SetTexture(t4mat_Identity);
+    ((cGfx_C830*)GrMan)->SetViewportOrthographic(0.0f, 0.0f, 640.0f, 480.0f, 0, 0, 0.0f, 1.0f);
+    ((cGfx_C830*)GrMan)->SetView(t4mat_Identity);
     cPS2GraphicsMan* ps2GraphicsMan = GrMan;
     Set2_C830((cGfx_C830*)ps2GraphicsMan, 0x3E0, 5, 0x18);
     Set1_C830((cGfx_C830*)ps2GraphicsMan, 0x7C, 2, 5);

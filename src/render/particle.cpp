@@ -3233,7 +3233,7 @@ extern "C" void func_00376938(cPS2GraphicsMan* pS2GraphicsMan, float x, float y,
 #endif
 
 //100% - objdiff report; single-function view differs only in a relocation name
-INCLUDE_ASM("render/particle", func_00376A70);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetViewportWindow);
 #ifdef SKIP_ASM
 struct sPtVEntryI6A70 {
     short delta;
@@ -3265,7 +3265,7 @@ struct sPtGfx6A70 {
 extern "C" void func_00376938(cPS2GraphicsMan* self, float x, float y, float w, float h);
 extern "C" void func_00364B88(void* table, void* key);
 
-extern "C" void func_00376A70(sPtGfx6A70* self, float x, float y, float w, float rectHeight)
+extern "C" void cPS2GraphicsMan_SetViewportWindow(sPtGfx6A70* self, float x, float y, float w, float rectHeight)
 {
     sPtVEntryI6A70* vtEntry = &self->vtable[11];
     int height = vtEntry->fn((char*)self + vtEntry->delta);
@@ -3372,7 +3372,7 @@ extern "C" void cPS2GraphicsMan_GetViewportPerspective(cPS2GraphicsMan* self, fl
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00376C58);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetViewportPerspective);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // 4x4 float matrix (POD, 16-byte aligned).
@@ -3462,7 +3462,7 @@ static inline void ClampScale6C58(sPtGfx6C58* self, float& x, float& y)
     }
 }
 
-extern "C" void func_00376C58(sPtGfx6C58* self, float fov, float zNear, float zFar)
+extern "C" void cPS2GraphicsMan_SetViewportPerspective(sPtGfx6C58* self, float fov, float zNear, float zFar)
 {
     sPtView6C58* v = &self->views[self->curView];
     v->f20 = 0;
@@ -3749,7 +3749,7 @@ extern "C" void cPS2GraphicsMan_SetViewportZBias(sPtGfx7278* self, sPt7278* pos,
 #endif
 
 //100%
-INCLUDE_ASM("render/particle", func_00377458);
+INCLUDE_ASM("render/particle", cPS2GraphicsMan_SetViewportOrthographic);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
 // 4x4 float matrix (POD, 16-byte aligned).
@@ -3773,14 +3773,14 @@ static inline void ZScale7458(sPtGfx6C58* self, float& zscale)
     }
 }
 
-// Orthographic counterpart of func_00376C58: view-to-screen, projection and clip matrices for an off-centre box.
-extern "C" void func_00377458(sPtGfx6C58* self, float cx, float cy, float fx, float fy, float zNear, float zFar)
+// Orthographic counterpart of cPS2GraphicsMan_SetViewportPerspective: view-to-screen, projection and clip matrices for an off-centre box.
+extern "C" void cPS2GraphicsMan_SetViewportOrthographic(sPtGfx6C58* self, float cx, float cy, float fx, float fy, float zNear, float zFar)
 {
     sPtView6C58* v = &self->views[self->curView];
     v->f20 = 1;
     v->zNear = zNear;
     v->zFar = zFar;
-    // PORT: int-arithmetic view address, as in the perspective sibling func_00376C58.
+    // PORT: int-arithmetic view address, as in the perspective sibling cPS2GraphicsMan_SetViewportPerspective.
     char* p = (char*)self + self->curView * 0x230;
     float x = *(float*)(p + 0x6D20);
     float y = *(float*)(p + 0x6D24);

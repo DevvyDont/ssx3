@@ -352,10 +352,10 @@ public:
     virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23();
     virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27();
     virtual void v28(); virtual void v29();
-    virtual void Begin2D();
-    virtual void End2D();
+    virtual void PushView();
+    virtual void PopView();
     virtual void v32();
-    virtual void SetTexture(void*);
+    virtual void SetView(void*);
     virtual void v34(); virtual void v35(); virtual void v36(); virtual void v37();
     virtual void v38(); virtual void v39(); virtual void v40(); virtual void v41();
     virtual void v42(); virtual void v43(); virtual void v44(); virtual void v45();
@@ -365,7 +365,7 @@ public:
     virtual void v58(); virtual void v59(); virtual void v60(); virtual void v61();
     virtual void v62(); virtual void v63(); virtual void v64(); virtual void v65();
     virtual void v66(); virtual void v67(); virtual void v68(); virtual void v69();
-    virtual void DrawPrims(int n, sVert_EDA0* v, int flags);
+    virtual void RenderTriStrip(int n, sVert_EDA0* v, int flags);
 };
 extern sGs_EDA0 D_00501420_EDA0 __asm__("sDrawState_s_defaultDrawState");
 extern char t4mat_Identity[];
@@ -499,7 +499,7 @@ static inline float limitStep_EDA0(float v, float prev, float lim)
  * 0x6C0). First each racer's lateral offset from the viewer (its slot position minus the viewer's, clamped to +-2000)
  * is smoothed into the slot (+0x10), moving at most 46.3 per frame unless the slot is invalid, and all slots are
  * invalidated when the viewer changed since the last draw (+0x34). The drawing runs inside cPS2GraphicsMan_PushView and
- * a pushed draw state reset to sDrawState_s_defaultDrawState with an identity view (func_00395C38):
+ * a pushed draw state reset to sDrawState_s_defaultDrawState with an identity view (cPS2GraphicsMan_SetView1):
  * - "%d%%" of the course done (distance / course length, D_004A2750 + 0x10), centred at the text position
  *   (func_00392908) in the shared font at 0.6667 scale, white with a black shadow offset by (2, 2);
  * - an arrow (icon 4) at the top for each racer ahead of the window and at the bottom for each one behind it, shifted
@@ -557,14 +557,14 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
         verts[i].a = 0x80;
         verts[i].q = 1.0f;
     }
-    ((cGfx_EDA0*)GrMan)->Begin2D();
+    ((cGfx_EDA0*)GrMan)->PushView();
     ((cGfx_EDA0*)GrMan)->PushState();
     *((cGfx_EDA0*)GrMan)->stateTop = D_00501420_EDA0;
     ((cGfx_EDA0*)GrMan)->stateTop->f4_23 = 2;
     ((cGfx_EDA0*)GrMan)->stateTop->f4_20 = 0;
     ((cGfx_EDA0*)GrMan)->stateTop->f4_12 = 20;
     ((cGfx_EDA0*)GrMan)->stateTop->f4_2 = 5;
-    ((cGfx_EDA0*)GrMan)->SetTexture(t4mat_Identity);
+    ((cGfx_EDA0*)GrMan)->SetView(t4mat_Identity);
 
     float lo = myDist - 5000.0f;
     float hi = lo + 10000.0f;
@@ -646,7 +646,7 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
         verts[3].pos = corner;
         ((cGfx_EDA0*)GrMan)->stateTop->SetPrim(10);
         *(short*)((char*)((cGfx_EDA0*)GrMan)->stateTop + 0x10) = atex->GetHandle();
-        ((cGfx_EDA0*)GrMan)->DrawPrims(4, verts, 0);
+        ((cGfx_EDA0*)GrMan)->RenderTriStrip(4, verts, 0);
     }
 
     sTex_EDA0* tex = D_004C8C58_EDA0[0].tex;
@@ -687,7 +687,7 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
     verts[3].pos = corner;
     ((cGfx_EDA0*)GrMan)->stateTop->SetPrim(9);
     *(short*)((char*)((cGfx_EDA0*)GrMan)->stateTop + 0x10) = tex->GetHandle();
-    ((cGfx_EDA0*)GrMan)->DrawPrims(4, verts, 0);
+    ((cGfx_EDA0*)GrMan)->RenderTriStrip(4, verts, 0);
 
     float markY = barTop + (barBottom - barTop) * frac;
     corner.x = self->cx - 2.7497661113739014f;
@@ -717,7 +717,7 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
     }
     ((cGfx_EDA0*)GrMan)->stateTop->SetPrim(10);
     *(short*)((char*)((cGfx_EDA0*)GrMan)->stateTop + 0x10) = -1;
-    ((cGfx_EDA0*)GrMan)->DrawPrims(4, verts, 0);
+    ((cGfx_EDA0*)GrMan)->RenderTriStrip(4, verts, 0);
     for (int i = 0; i < 4; i++) {
         verts[i].r = 0x80;
         verts[i].g = 0x80;
@@ -797,7 +797,7 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
         verts[3].pos = corner;
         ((cGfx_EDA0*)GrMan)->stateTop->SetPrim(prim);
         *(short*)((char*)((cGfx_EDA0*)GrMan)->stateTop + 0x10) = iconTexture->GetHandle();
-        ((cGfx_EDA0*)GrMan)->DrawPrims(4, verts, 0);
+        ((cGfx_EDA0*)GrMan)->RenderTriStrip(4, verts, 0);
     }
 
     if (*(int*)(course + 8) != 0) {
@@ -864,11 +864,11 @@ extern "C" void func_0020EDA0(sTrophyBox_EDA0* self, char* rider)
             verts[3].pos = corner;
             ((cGfx_EDA0*)GrMan)->stateTop->SetPrim(11);
             *(short*)((char*)((cGfx_EDA0*)GrMan)->stateTop + 0x10) = iconTexture->GetHandle();
-            ((cGfx_EDA0*)GrMan)->DrawPrims(4, verts, 0);
+            ((cGfx_EDA0*)GrMan)->RenderTriStrip(4, verts, 0);
         }
     }
     ((cGfx_EDA0*)GrMan)->stateTop--;
-    ((cGfx_EDA0*)GrMan)->End2D();
+    ((cGfx_EDA0*)GrMan)->PopView();
     self->last = me;
 }
 #endif
@@ -924,10 +924,10 @@ public:
     virtual void v20(); virtual void v21(); virtual void v22(); virtual void v23();
     virtual void v24(); virtual void v25(); virtual void v26(); virtual void v27();
     virtual void v28(); virtual void v29();
-    virtual void Begin2D();
-    virtual void End2D();
+    virtual void PushView();
+    virtual void PopView();
     virtual void v32();
-    virtual void SetTexture(void*);
+    virtual void SetView(void*);
     virtual void v34(); virtual void v35(); virtual void v36(); virtual void v37();
     virtual void v38(); virtual void v39(); virtual void v40(); virtual void v41();
     virtual void v42(); virtual void v43(); virtual void v44(); virtual void v45();
@@ -937,7 +937,7 @@ public:
     virtual void v58(); virtual void v59(); virtual void v60(); virtual void v61();
     virtual void v62(); virtual void v63(); virtual void v64(); virtual void v65();
     virtual void v66(); virtual void v67(); virtual void v68(); virtual void v69();
-    virtual void DrawPrims(int n, sVert_FB40* v, int flags);
+    virtual void RenderTriStrip(int n, sVert_FB40* v, int flags);
 };
 extern sGs_FB40 D_00501420_FB40 __asm__("sDrawState_s_defaultDrawState");
 extern char t4mat_Identity[];
@@ -1081,14 +1081,14 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
     float x = self->x;
     if (right == 0)
         x += self->w;
-    ((cGfx_FB40*)GrMan)->Begin2D();
+    ((cGfx_FB40*)GrMan)->PushView();
     ((cGfx_FB40*)GrMan)->PushState();
     *((cGfx_FB40*)GrMan)->stateTop = D_00501420_FB40;
     ((cGfx_FB40*)GrMan)->stateTop->f4_23 = 2;
     ((cGfx_FB40*)GrMan)->stateTop->f4_20 = 0;
     ((cGfx_FB40*)GrMan)->stateTop->f4_12 = 20;
     ((cGfx_FB40*)GrMan)->stateTop->f4_2 = 5;
-    ((cGfx_FB40*)GrMan)->SetTexture(t4mat_Identity);
+    ((cGfx_FB40*)GrMan)->SetView(t4mat_Identity);
 
     sTex_FB40* tex = D_004C8C58_FB40[0].tex;
     float top = self->y;
@@ -1126,7 +1126,7 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
     verts[3].pos = corner;
     ((cGfx_FB40*)GrMan)->stateTop->SetPrim(9);
     *(short*)((char*)((cGfx_FB40*)GrMan)->stateTop + 0x10) = tex->GetHandle();
-    ((cGfx_FB40*)GrMan)->DrawPrims(4, verts, 0);
+    ((cGfx_FB40*)GrMan)->RenderTriStrip(4, verts, 0);
 
     float topFade = top + 60.0f;
     float bottomFade = bottom - 60.0f;
@@ -1227,7 +1227,7 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
         }
         ((cGfx_FB40*)GrMan)->stateTop->SetPrim(prim);
         *(short*)((char*)((cGfx_FB40*)GrMan)->stateTop + 0x10) = iconTexture->GetHandle();
-        ((cGfx_FB40*)GrMan)->DrawPrims(4, verts, 0);
+        ((cGfx_FB40*)GrMan)->RenderTriStrip(4, verts, 0);
     }
 
     for (int i = 0; i < 4; i++)
@@ -1327,11 +1327,11 @@ extern "C" void func_0020FB40(sTrophyBox_FB40* self, char* rider, int right)
             }
             ((cGfx_FB40*)GrMan)->stateTop->SetPrim(11);
             *(short*)((char*)((cGfx_FB40*)GrMan)->stateTop + 0x10) = iconTexture->GetHandle();
-            ((cGfx_FB40*)GrMan)->DrawPrims(4, verts, 0);
+            ((cGfx_FB40*)GrMan)->RenderTriStrip(4, verts, 0);
         }
     }
     ((cGfx_FB40*)GrMan)->stateTop--;
-    ((cGfx_FB40*)GrMan)->End2D();
+    ((cGfx_FB40*)GrMan)->PopView();
     self->last = me;
 }
 #endif

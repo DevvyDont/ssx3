@@ -3087,7 +3087,7 @@ extern "C" int cPS2GraphicsMan_GetScreenHeight(cPS2GraphicsMan* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395370);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_SetViewportWindow1);
 #ifdef SKIP_ASM
 struct sFontVEntry23 {
     short delta;
@@ -3095,7 +3095,7 @@ struct sFontVEntry23 {
     void (*fn)(void*, int, float, float, float, float);
 };
 
-extern "C" void func_00395370(cPS2GraphicsMan* self, float* rect, int applyScreenOffset)
+extern "C" void cPS2GraphicsMan_SetViewportWindow1(cPS2GraphicsMan* self, float* rect, int applyScreenOffset)
 {
     sFontVEntry23* vt = (sFontVEntry23*)self->mVtbl;
     vt[23].fn((char*)self + vt[23].delta, applyScreenOffset, rect[0], rect[1], rect[2], rect[3]);
@@ -3539,7 +3539,7 @@ void cPS2GraphicsMan_PopView(void* self)
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395750);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_SetView);
 #ifdef SKIP_ASM
 extern "C" void func_0031BE50(float* s, float* c, float angle);
 extern char t4mat_Identity[];
@@ -3685,7 +3685,7 @@ static inline void Translate_5750(void* self, void* v)
 
 // Builds the view matrix on top of the stack: identity with y/z swapped, rotations about x, z, y,
 // then a translation by -pos.
-extern "C" void func_00395750(cPS2GraphicsMan* self, sVec_5750* pos, float rx, float ry, float rz)
+extern "C" void cPS2GraphicsMan_SetView(cPS2GraphicsMan* self, sVec_5750* pos, float rx, float ry, float rz)
 {
     LoadIdentity_5750(self);
     ((float*)self->mCurrentView)[5] = 0.0f;
@@ -3703,11 +3703,11 @@ extern "C" void func_00395750(cPS2GraphicsMan* self, sVec_5750* pos, float rx, f
 #endif
 
 //100%
-INCLUDE_ASM("render/font", func_00395C38);
+INCLUDE_ASM("render/font", cPS2GraphicsMan_SetView1);
 #ifdef SKIP_ASM
 // Load matrix m into the top of the matrix stack and clear the cached flag at 0x6b90.
 // PORT: PS2-only VU0 inline asm (lqc2/sqc2 matrix copy); the PC port needs a plain 64-byte copy.
-extern "C" void func_00395C38(cPS2GraphicsMan* self, void* viewMat)
+extern "C" void cPS2GraphicsMan_SetView1(cPS2GraphicsMan* self, void* viewMat)
 {
     __asm__ __volatile__(
         ".set noreorder\n"

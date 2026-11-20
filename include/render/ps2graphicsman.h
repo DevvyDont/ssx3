@@ -76,10 +76,10 @@ struct tProjTexInfo {
 // one pushed viewport/projection state, 0x230 bytes. PushViewport (cPS2GraphicsMan_PushViewport) saves the live members listed
 // below into it, PopViewport (cPS2GraphicsMan_PopViewport) restores them.
 struct sViewportStack {
-    float unk_000[4];               // 0x000 [U] func_00376A70 (SetViewportWindow); [X] viewport x, y, w, h
-    float unk_010[3];               // 0x010 [U] func_00376C58 / func_00377458 store, cPS2GraphicsMan_GetViewportPerspective reads; [X] near?, 1.0, fov
-    float unk_01C;                  // 0x01C [U] func_00376C58 / cPS2GraphicsMan_SetViewportZBias read; [R] Init zeroes entry 0
-    int unk_020;                    // 0x020 [U] func_00376C58 / func_00377458 store; [X] projection type
+    float unk_000[4];               // 0x000 [U] cPS2GraphicsMan_SetViewportWindow (SetViewportWindow); [X] viewport x, y, w, h
+    float unk_010[3];               // 0x010 [U] cPS2GraphicsMan_SetViewportPerspective / cPS2GraphicsMan_SetViewportOrthographic store, cPS2GraphicsMan_GetViewportPerspective reads; [X] near?, 1.0, fov
+    float unk_01C;                  // 0x01C [U] cPS2GraphicsMan_SetViewportPerspective / cPS2GraphicsMan_SetViewportZBias read; [R] Init zeroes entry 0
+    int unk_020;                    // 0x020 [U] cPS2GraphicsMan_SetViewportPerspective / cPS2GraphicsMan_SetViewportOrthographic store; [X] projection type
     float unk_024;                  // 0x024 [U] copy of unk_590C
     float unk_028;                  // 0x028 [U] copy of unk_5908
     float unk_02C;                  // 0x02C [U] copy of mFar? (0x5910)
@@ -161,7 +161,7 @@ struct cPS2GraphicsMan {
     int unk_3838[2000];             // 0x3838 [U] per texture id: cPS2GraphicsMan_AddTexture1 sets 1 after creating it
     char unk_5778[0x8];             // 0x5778 padding to 16
     t4Matrix mWorld;                // 0x5780 [X] world (copy of *mCurrentView); [U] cPS2GraphicsMan_PopViewport restores it
-    t4Matrix mView;                 // 0x57C0 [X] view; [U] func_00376C58 / func_00377458 build it
+    t4Matrix mView;                 // 0x57C0 [X] view; [U] cPS2GraphicsMan_SetViewportPerspective / cPS2GraphicsMan_SetViewportOrthographic build it
     t4Matrix mGuardBandMatrix;      // 0x5800 [P] GetGuardBandMatrix returns its address (func_00395418)
     t4Vector mGuardScale;           // 0x5840 [X] guardScale (uploaded to VU1)
     t4Vector mGuardOffset;          // 0x5850 [X] guardOffset

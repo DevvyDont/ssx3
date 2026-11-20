@@ -263,7 +263,7 @@ public:
     virtual void v111();
     virtual void v112();
     virtual void v113();
-    virtual void ResetSlot(int i);
+    virtual void UpdateFullScreenEffects(int i);
 };
 
 struct sMgr_0A98 {
@@ -302,7 +302,7 @@ extern "C" void cPS2VisualEffectsMan_update(sMgr_0A98* self)
     self->objs[16]->Reset();
     for (int i = 0; i < *(int*)((char*)SSXApp->Game->ViewMan + 0x10); i++) {
         cVisualEffectsMan_commonUpdate(self, (&D_004A3BA8)[i]); // PORT: D_004A3BA8 is an int array ($gp-addressed)
-        ((cWorld_0A98*)GrMan)->ResetSlot(i);
+        ((cWorld_0A98*)GrMan)->UpdateFullScreenEffects(i);
     }
 }
 #endif
@@ -2467,17 +2467,17 @@ public:
     virtual void v8(); virtual void v9(); virtual void v10(); virtual void v11();
     virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15();
     virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19();
-    virtual void BeginScene();
-    virtual void EndScene();
+    virtual void PushViewport();
+    virtual void PopViewport();
     virtual void v22(); virtual void v23(); virtual void v24();
-    virtual void SetViewport(float, float, float, float, int, int, float, float);
+    virtual void SetViewportOrthographic(float, float, float, float, int, int, float, float);
     virtual void v26();
     virtual sV2_3E28 GetScreenSize();
     virtual void v28(); virtual void v29();
-    virtual void Begin2D();
-    virtual void End2D();
+    virtual void PushView();
+    virtual void PopView();
     virtual void v32();
-    virtual void SetTexture(void*);
+    virtual void SetView(void*);
 };
 
 
@@ -2524,12 +2524,12 @@ extern "C" void cSplashManager_render(sEmitter_3E28* self)
     }
     cPS2GraphicsMan* ps2GraphicsMan = cGraphicsMan_TheGraphicsMan;
     int i = 0;
-    ((cGfx_3E28*)ps2GraphicsMan)->BeginScene();
+    ((cGfx_3E28*)ps2GraphicsMan)->PushViewport();
     const sV2_3E28& screen = ((cGfx_3E28*)ps2GraphicsMan)->GetScreenSize();
     sV2_3E28 scr = screen;
-    ((cGfx_3E28*)ps2GraphicsMan)->SetViewport(0.0f, 0.0f, 640.0f, 480.0f, 1, 0, 0.0f, 1.0f);
-    ((cGfx_3E28*)ps2GraphicsMan)->Begin2D();
-    ((cGfx_3E28*)ps2GraphicsMan)->SetTexture(t4mat_Identity);
+    ((cGfx_3E28*)ps2GraphicsMan)->SetViewportOrthographic(0.0f, 0.0f, 640.0f, 480.0f, 1, 0, 0.0f, 1.0f);
+    ((cGfx_3E28*)ps2GraphicsMan)->PushView();
+    ((cGfx_3E28*)ps2GraphicsMan)->SetView(t4mat_Identity);
     ((cGfx_3E28*)ps2GraphicsMan)->stateTop[1] = ((cGfx_3E28*)ps2GraphicsMan)->stateTop[0];
     ((cGfx_3E28*)ps2GraphicsMan)->stateTop++;
     *((cGfx_3E28*)ps2GraphicsMan)->stateTop = sDrawState_s_defaultDrawState;
@@ -2545,8 +2545,8 @@ extern "C" void cSplashManager_render(sEmitter_3E28* self)
     for (i = 0; i < self->nParts; i++)
         func_002F3418_3E28(self->parts[i], &scr);
     ((cGfx_3E28*)ps2GraphicsMan)->stateTop--;
-    ((cGfx_3E28*)ps2GraphicsMan)->End2D();
-    ((cGfx_3E28*)ps2GraphicsMan)->EndScene();
+    ((cGfx_3E28*)ps2GraphicsMan)->PopView();
+    ((cGfx_3E28*)ps2GraphicsMan)->PopViewport();
 }
 #endif
 
@@ -2874,8 +2874,8 @@ public:
     virtual void v0(); virtual void v1(); virtual void v2(); virtual void v3();
     virtual void v4(); virtual void v5(); virtual void v6(); virtual void v7();
     virtual void v8();
-    virtual unsigned int GetWidth();
-    virtual unsigned int GetHeight();
+    virtual unsigned int GetScreenWidth();
+    virtual unsigned int GetScreenHeight();
     virtual void v11(); virtual void v12(); virtual void v13(); virtual void v14();
     virtual void v15(); virtual void v16(); virtual void v17(); virtual void v18();
     virtual void v19(); virtual void v20(); virtual void v21(); virtual void v22();
@@ -2899,8 +2899,8 @@ public:
 
 extern "C" void func_002F4690(sFlare_4690* self)
 {
-    float cx = (float)((cWorld_4690*)GrMan)->GetWidth() * 0.5f;
-    float cy = (float)((cWorld_4690*)GrMan)->GetHeight() * 0.5f;
+    float cx = (float)((cWorld_4690*)GrMan)->GetScreenWidth() * 0.5f;
+    float cy = (float)((cWorld_4690*)GrMan)->GetScreenHeight() * 0.5f;
     sV2_4690 center(cx, cy);
     sV2_4690 sun(self->sunX, self->sunY);
     sV2_4690 dir = sun - center;
@@ -2999,15 +2999,15 @@ public:
     virtual void v8(); virtual void v9(); virtual void v10(); virtual void v11();
     virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15();
     virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19();
-    virtual void BeginScene();
-    virtual void EndScene();
+    virtual void PushViewport();
+    virtual void PopViewport();
     virtual void v22(); virtual void v23(); virtual void v24();
-    virtual void SetViewport(float, float, float, float, int, int, float, float);
+    virtual void SetViewportOrthographic(float, float, float, float, int, int, float, float);
     virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29();
-    virtual void Begin2D();
-    virtual void End2D();
+    virtual void PushView();
+    virtual void PopView();
     virtual void v32();
-    virtual void SetTexture(void*);
+    virtual void SetView(void*);
     virtual void v34(); virtual void v35(); virtual void v36(); virtual void v37();
     virtual void v38(); virtual void v39(); virtual void v40(); virtual void v41();
     virtual void v42(); virtual void v43(); virtual void v44(); virtual void v45();
@@ -3054,10 +3054,10 @@ extern "C" void func_002F4A08(sSun_4A08* self, sV4_4A08* vp, int flag)
     ((cGfx_4A08*)gfx)->stateTop[1] = ((cGfx_4A08*)gfx)->stateTop[0];
     ((cGfx_4A08*)gfx)->stateTop++;
     *((cGfx_4A08*)gfx)->stateTop = D_00501420_4A08;
-    ((cGfx_4A08*)gfx)->BeginScene();
-    ((cGfx_4A08*)gfx)->SetViewport(vp->x, vp->y, vp->z, vp->w, 1, 0, 0.0f, 1.0f);
-    ((cGfx_4A08*)gfx)->Begin2D();
-    ((cGfx_4A08*)gfx)->SetTexture(t4mat_Identity);
+    ((cGfx_4A08*)gfx)->PushViewport();
+    ((cGfx_4A08*)gfx)->SetViewportOrthographic(vp->x, vp->y, vp->z, vp->w, 1, 0, 0.0f, 1.0f);
+    ((cGfx_4A08*)gfx)->PushView();
+    ((cGfx_4A08*)gfx)->SetView(t4mat_Identity);
     ((cGfx_4A08*)gfx)->stateTop->SetF22(1);
     ((cGfx_4A08*)gfx)->stateTop->f4_23 = 2;
     ((cGfx_4A08*)gfx)->stateTop->f4_20 = 0;
@@ -3072,8 +3072,8 @@ extern "C" void func_002F4A08(sSun_4A08* self, sV4_4A08* vp, int flag)
                     sV2_4A08(0.0f, 0.0f), sV2_4A08(1.0f, 1.0f), col);
     func_002F4690_4A08(self, vp);
     ((cGfx_4A08*)gfx)->stateTop--;
-    ((cGfx_4A08*)gfx)->End2D();
-    ((cGfx_4A08*)gfx)->EndScene();
+    ((cGfx_4A08*)gfx)->PopView();
+    ((cGfx_4A08*)gfx)->PopViewport();
 }
 #endif
 

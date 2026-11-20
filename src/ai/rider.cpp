@@ -4330,15 +4330,15 @@ public:
     virtual void v8(); virtual void v9(); virtual void v10(); virtual void v11();
     virtual void v12(); virtual void v13(); virtual void v14(); virtual void v15();
     virtual void v16(); virtual void v17(); virtual void v18(); virtual void v19();
-    virtual void BeginScene();
-    virtual void EndScene();
+    virtual void PushViewport();
+    virtual void PopViewport();
     virtual void v22(); virtual void v23(); virtual void v24();
-    virtual void SetViewport(float, float, float, float, int, int, float, float);
+    virtual void SetViewportOrthographic(float, float, float, float, int, int, float, float);
     virtual void v26(); virtual void v27(); virtual void v28(); virtual void v29();
-    virtual void Begin2D();
-    virtual void End2D();
+    virtual void PushView();
+    virtual void PopView();
     virtual void v32();
-    virtual void SetTexture(void*);
+    virtual void SetView(void*);
 };
 
 
@@ -4372,8 +4372,8 @@ struct sOverlay_2680 {
  * Opens and closes a 640x480 2D pass with the default draw state, drawing nothing, unless the HUD is disabled.
  *
  * Unless cRenderToggles_m_DisableHUD is set: copies the DebugFont object's +0x30 pair to +0x38, calls GrMan's
- * BeginScene and Begin2D, pushes sDrawState_s_defaultDrawState onto the draw-state stack, sets the viewport and
- * texture, two draw-state fields and the DebugFont's +0x28 pair (2, 2, then 0, 0), and ends with End2D, EndScene and a
+ * PushViewport and PushView, pushes sDrawState_s_defaultDrawState onto the draw-state stack, sets the viewport and
+ * texture, two draw-state fields and the DebugFont's +0x28 pair (2, 2, then 0, 0), and ends with PopView, PopViewport and a
  * stack pop. Nothing in the source calls it.
  */
 extern "C" void func_00122680(void)
@@ -4382,21 +4382,21 @@ extern "C" void func_00122680(void)
     if (cRenderToggles_m_DisableHUD == 0) {
         sOverlay_2680* debugFont = (sOverlay_2680*)SSXApp->Game->DebugFont;
         debugFont->f38 = debugFont->f30;
-        ((cGraphicsMan_2680*)GrMan)->BeginScene();
-        ((cGraphicsMan_2680*)GrMan)->Begin2D();
+        ((cGraphicsMan_2680*)GrMan)->PushViewport();
+        ((cGraphicsMan_2680*)GrMan)->PushView();
         cPS2GraphicsMan* ps2GraphicsMan = GrMan;
         ((cGraphicsMan_2680*)ps2GraphicsMan)->stateTop[1] = ((cGraphicsMan_2680*)ps2GraphicsMan)->stateTop[0];
         ((cGraphicsMan_2680*)ps2GraphicsMan)->stateTop++;
         *((cGraphicsMan_2680*)GrMan)->stateTop = sDrawState_s_defaultDrawState;
         *(short*)((char*)GrMan->m_pCurrentDrawState + 0x10) = -1;
-        ((cGraphicsMan_2680*)GrMan)->SetViewport(0.0f, 0.0f, 640.0f, 480.0f, 0, 0, 0.0f, 1.0f);
-        ((cGraphicsMan_2680*)GrMan)->SetTexture(t4mat_Identity);
+        ((cGraphicsMan_2680*)GrMan)->SetViewportOrthographic(0.0f, 0.0f, 640.0f, 480.0f, 0, 0, 0.0f, 1.0f);
+        ((cGraphicsMan_2680*)GrMan)->SetView(t4mat_Identity);
         ((cGraphicsMan_2680*)GrMan)->stateTop->f8_5 = 24;
         ((cGraphicsMan_2680*)GrMan)->stateTop->f4_2 = 5;
         debugFont->f28 = sV2_2680(2.0f, 2.0f);
         *(sV2v_2680*)&debugFont->f28 = sV2v_2680(0.0f, 0.0f);
-        ((cGraphicsMan_2680*)GrMan)->End2D();
-        ((cGraphicsMan_2680*)GrMan)->EndScene();
+        ((cGraphicsMan_2680*)GrMan)->PopView();
+        ((cGraphicsMan_2680*)GrMan)->PopViewport();
         ((cGraphicsMan_2680*)GrMan)->stateTop--;
         int unused[4]; // frame +16 (see FAKEMATCH above)
     }
