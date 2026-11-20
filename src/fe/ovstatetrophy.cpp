@@ -1,4 +1,5 @@
 #include "common.h"
+#include "be/beintnetwork.h"
 #include "fe/ovstateprofile.h"
 #include "render/ps2graphicsman.h"
 #include "online/gamecomm.h"
@@ -1640,13 +1641,12 @@ extern char str_ChatUpArrow_b[];
 extern char str_ChatDownArrow_b[];
 extern char str_slideroutline2_b[];
 extern char str_textScrollChat_b[];
-extern char D_00534FC8[];
 extern sRect_210940 D_004C8D08;
 
 /**
  * Builds the in-race private-message screen ("282ReadPrivateMessage") of the online chat overlay (overlay id 40).
  *
- * Shows "TextFromX" with the opponent's name (D_00534FC8, as an ASCII string). "AgreementSlider" becomes a vertical
+ * Shows "TextFromX" with the opponent's name (cBENetworkInterface_networkOpt.unk_498, as an ASCII string). "AgreementSlider" becomes a vertical
  * scroll bar (mAttr bit 0) with "ChatUpArrow", "ChatDownArrow" and "slideroutline2" as its mpUpArrow, mpDownArrow and
  * mpHideOnEmpty and meHideState 2. The chat scroller "textScrollChat" gets bit 0 of mAttrTextScroll and input map 1
  * (cUITextScroll_setInputMap), is shown, gets the wrap bit (mAttr 0x80), the colour (1, 0, 0, 0) through its virtual
@@ -1666,7 +1666,7 @@ extern "C" void func_00210940(void* self)
     {
         fromText->setVisible(1);
         cBE_getInterface_Fv(SSXApp->BE, 7);
-        cUIText_setAsciiString((cUIText*)fromText, D_00534FC8);
+        cUIText_setAsciiString((cUIText*)fromText, cBENetworkInterface_networkOpt.unk_498);
     }
     char* scrollBar = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_AgreementSlider_b));
     *(int*)(scrollBar + 0x14) |= 1;
@@ -1740,8 +1740,6 @@ extern "C" void cBXString__cBXString(void* self, int flags);
 extern "C" void cUITextScroll_addAsciiString(void* text, char* str);
 extern "C" void func_001A83D8(void* list, int keep, unsigned int sel, int a3, int pos, int a5, int a6, int trim);
 extern char str_textScrollChat_b[];
-extern char D_00534FB8[];
-extern char D_00534FC8[];
 extern char str_colon_sp_b[];
 
 struct sBXString_00210BD8 {
@@ -1754,8 +1752,8 @@ struct sBXString_00210BD8 {
  * Appends a chat line "<name>: <text>" to the chat overlay's scroller.
  *
  * Finds "textScrollChat" and does nothing without it. It saves the scroller's mLineSize, mSelectedIndex and
- * mLinesOffset, builds the line in a cBXString from our name (D_00534FB8) when @p ownMessage is set or the opponent's
- * (D_00534FC8) otherwise, ": " (str_colon_sp_b) and @p name, adds it with cUITextScroll_addAsciiString, then func_001A83D8
+ * mLinesOffset, builds the line in a cBXString from our name (cBENetworkInterface_networkOpt.unk_488) when @p ownMessage is set or the opponent's
+ * (cBENetworkInterface_networkOpt.unk_498) otherwise, ": " (str_colon_sp_b) and @p name, adds it with cUITextScroll_addAsciiString, then func_001A83D8
  * trims the scroller to 30 lines and restores its scroll state from the saved values.
  *
  * @param name  the message text
@@ -1773,14 +1771,14 @@ extern "C" void func_00210BD8(void* self, char* name, int ownMessage)
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (ownMessage != 0) {
         sBXString_00210BD8 lineText;
-        cBXString_cBXString2(&lineText, D_00534FB8);
+        cBXString_cBXString2(&lineText, cBENetworkInterface_networkOpt.unk_488);
         cBXString_Concat(&lineText, str_colon_sp_b);
         cBXString_Concat(&lineText, name);
         cUITextScroll_addAsciiString(obj, lineText.str);
         cBXString__cBXString(&lineText, 2);
     } else {
         sBXString_00210BD8 lineText;
-        cBXString_cBXString2(&lineText, D_00534FC8);
+        cBXString_cBXString2(&lineText, cBENetworkInterface_networkOpt.unk_498);
         cBXString_Concat(&lineText, str_colon_sp_b);
         cBXString_Concat(&lineText, name);
         cUITextScroll_addAsciiString(obj, lineText.str);

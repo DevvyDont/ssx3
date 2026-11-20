@@ -836,7 +836,6 @@ extern char str_FROM[];
 extern char str_ADDR[];
 extern char str_SEED[];
 extern int D_004A11B8;
-extern int D_00534B34[];
 extern char D_005308B8[];
 extern char str_NetEvent[];
 extern char str_StlBlock_b[];
@@ -885,7 +884,7 @@ struct sVEntryA1D0 { short delta; short index; int (*fn)(void*); };
  * that is not us). Unless mState is 24 or 20 (waits that expect this message) it just sets mState 25 and shuts the game
  * connection down (func_00263BA8(..., 0)). Otherwise it sets mState 25 and, when P1 is present, configures
  * cBENewRaceInterface: P2 0 or 1 selects game mode 0 or 1 (5 or 6, with event 4 or 5, when P1 is 14..16), 2 selects
- * mode 3 and 3 mode 2; sets cBENewRaceInterface_newRace.iLocationIdx = P1 and D_004A11B8 = 1, and when D_00534B34[0] is set ORs 0x1C0 into the
+ * mode 3 and 3 mode 2; sets cBENewRaceInterface_newRace.iLocationIdx = P1 and D_004A11B8 = 1, and when cBENetworkInterface_networkOpt.bIsRankedGame[0] is set ORs 0x1C0 into the
  * word at D_005308B8 + 0x18, sets no AI riders and calls the interface's virtual slot 1. Finally it starts the game
  * connection with func_00259098(..., mMatchType, 0) and posts a type-239 event. Called through the functor thunk
  * func_00268B80 (LobbyApi callback 4).
@@ -962,7 +961,7 @@ extern "C" void LobbyMan_onplaymsg(LobbyMan* self, char* msg)
         cBENewRaceInterface_newRace.iLocationIdx = ev;
         D_004A11B8 = 1;
         cBE_getInterface_Fv(((void*)(SSXApp)->BE), 7);
-        if (D_00534B34[0] != 0)
+        if (cBENetworkInterface_networkOpt.bIsRankedGame != 0)
         {
             char* cfg = D_005308B8;
             *(int*)(cfg + 0x18) |= 0x1C0;
@@ -5081,7 +5080,6 @@ extern "C" void* func_0025FB80(LobbyMan*, int, void*);
 void func_0025FB80_v(void*, int, void*) __asm__("func_0025FB80");
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern int D_005308D0[];
-extern int D_00534B34[];
 extern char str_pct_s_pct_d_pct_d_pct_d_pct_d_pct_d_pct_b[];
 extern char str_challenge[];
 
@@ -5101,7 +5099,7 @@ extern "C" void func_0025F4C0_impl(char* self, const char* name, int a2) __asm__
  *
  * Does nothing when mState is 0. Sets mIsHost to 1, assigns @p name to mOpponent and stores @p matchType in mMatchType. It
  * then formats "%s %d %d %d %d %d %d %d %d %s %d %d %d %d" into a 64-byte buffer: "challenge", the location id
- * (cBENewRaceInterface_getLocationID), cBENewRaceInterface_newRace's cGameMode and cGameEvent, D_00534B34, bits 0x40
+ * (cBENewRaceInterface_getLocationID), cBENewRaceInterface_newRace's cGameMode and cGameEvent, cBENetworkInterface_networkOpt.bIsRankedGame, bits 0x40
  * and 0x100 of D_005308D0, iNumberAI, bit 0x80 of D_005308D0, cCommSystem_getSignature(), then mStats.unk_04, unk_08,
  * unk_0C and mRank. func_0025FB80() sends it to mOpponent, and mState becomes 22. The first
  * cBE_getInterface__Fv(SSXApp->BE, 7) call's result is unused.
@@ -5121,7 +5119,7 @@ extern "C" void func_0025F4C0_impl(char* self, const char* name, int matchType)
     int flags = D_005308D0[0];
     int event = *(signed char*)(Race_25F4C0() + 0x48);
     int track = *(signed char*)(Race_25F4C0() + 0x4A);
-    int y = D_00534B34[0];
+    int y = cBENetworkInterface_networkOpt.bIsRankedGame;
     int ai = *(int*)(Race_25F4C0() + 0x3C);
     bool multipliers = (flags & 0x40) != 0;
     bool powerUps = (flags & 0x100) != 0;
@@ -5626,8 +5624,8 @@ struct sName7 {
     char c[7];
 };
 
-// The network game state cBENetworkInterface_networkOpt (D_00534B34 = +0x4 and D_00534E58 = +0x328 are their own
-// symbols).
+// The network game state cBENetworkInterface_networkOpt (be/beintnetwork.h); this unit reads bIsRankedGame (+0x4)
+// and MyCharacterID (+0x328) by name.
 struct sNetState {
     int active;                     // 0x000
     int f4;                         // 0x004
@@ -6087,7 +6085,6 @@ extern char str_NetEvent[];
 extern char str_StlBlock_b[];
 extern void* online_Event_vtbl[];
 extern void* online_ErrorEvent_vtbl[];
-extern int D_00534B34[];
 
 struct sMsgListNode0C68 {
     sMsgListNode0C68* next;
@@ -6124,7 +6121,7 @@ static inline void post_0C68(char* lst, void* msg)
  * Handles the lobby server's reply to the race results report ("rank" request).
  *
  * The callback thunk func_00268EF0 calls it (registered by func_0025FD50). A reply without an error code (the word at
- * @p msg + 0x8), or one whose error is 'rank' while the game is unranked (bIsRankedGame, D_00534B34, is 0), posts an
+ * @p msg + 0x8), or one whose error is 'rank' while the game is unranked (bIsRankedGame, cBENetworkInterface_networkOpt.bIsRankedGame, is 0), posts an
  * online::Event of type 257 on mEventList; any other error first posts an error event of type 258 (vtable online_ErrorEvent_vtbl)
  * carrying the code, then the type-257 event. It also fetches back-end interface 7 and ignores it.
  *
@@ -6133,7 +6130,7 @@ static inline void post_0C68(char* lst, void* msg)
 extern "C" void LobbyMan_onresultsreportresponse(LobbyMan* self, char* msg)
 {
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    if (*(int*)(msg + 0x8) == 0 || (*(int*)(msg + 0x8) == 0x72616E6B && D_00534B34[0] == 0)) {
+    if (*(int*)(msg + 0x8) == 0 || (*(int*)(msg + 0x8) == 0x72616E6B && cBENetworkInterface_networkOpt.bIsRankedGame == 0)) {
         int type = 257;
         int* event = (int*)operator new(8, str_NetEvent, 0x20000000, 0);
         event[0] = type;
@@ -9147,8 +9144,6 @@ extern "C" void func_00264CB8_2(void* self, int a) __asm__("func_00264CB8");
 extern "C" void* cMemMan_alloc(int size, const char* tag, unsigned int flags, int d);
 extern void* D_004A33CC;
 extern int cRealFE_mStartState;
-extern int D_00534B34[];
-extern int D_00534E58[];
 extern char str_cPreGameLoadScreen_c[];
 
 struct sVEntry_263CF0 { short delta; short index; void (*fn)(void*); };
@@ -9204,7 +9199,7 @@ extern "C" void func_00263CF0(int* self)
                 return;
             }
             cBE_getInterface_Fv(SSXApp->BE, 7);
-            func_00264030(self[1], self[2], D_00534B34[0]);
+            func_00264030(self[1], self[2], cBENetworkInterface_networkOpt.bIsRankedGame);
             func_00264CB8_2(D_004A33CC, ((int)LobbyMan_mLobbyMan->unk_08C));
             self[0] = 2;
             return;
@@ -9246,7 +9241,7 @@ extern "C" void func_00263CF0(int* self)
             func_00262768((BuddyMan*)Mgr_263CF0(), 1, 9, ((int)LobbyMan_mLobbyMan->mOpponent), 0, 0);
             void* bi7 = cBE_getInterface_Fv(SSXApp->BE, 7);
             char* bi1 = (char*)cBE_getInterface_Fv(SSXApp->BE, 1);
-            cBENewPlayerInterface_setRiderCharID(bi1, 0, D_00534E58[0]);
+            cBENewPlayerInterface_setRiderCharID(bi1, 0, cBENetworkInterface_networkOpt.MyCharacterID);
             sVEntry_263CF0* vt = *(sVEntry_263CF0**)(bi1 + 0xC);
             vt[1].fn(bi1 + vt[1].delta);
             cBENetworkInterface_backupCharProfile(bi7, 0);
@@ -9914,7 +9909,6 @@ INCLUDE_ASM("dirtysock/tagsunk", func_00264CF0);
 extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewPlayerInterface_setPlayerCharID(void* self, int a1, int charID);
-extern int D_00534E58[];
 
 struct sVE264CF0 {
     short delta;
@@ -9931,7 +9925,7 @@ struct sIf264CF0 {
  * Applies this player's character choice: player 0's character in the player interface and MyCharacterID.
  *
  * Calls cBENewPlayerInterface_setPlayerCharID(0, @p charID) and the player interface's slot-1 virtual, stores @p charID
- * in the network options' MyCharacterID (D_00534E58) and calls the network interface's slot-1 virtual.
+ * in the network options' MyCharacterID and calls the network interface's slot-1 virtual.
  *
  * @param charID  the chosen character
  */
@@ -9941,7 +9935,7 @@ extern "C" void func_00264CF0(void* self, int charID)
     cBENewPlayerInterface_setPlayerCharID(playerInterface, 0, charID);
     playerInterface->vt[1].fn((char*)playerInterface + playerInterface->vt[1].delta);
     sIf264CF0* networkInterface = (sIf264CF0*)cBE_getInterface_Fv(SSXApp->BE, 7);
-    D_00534E58[0] = charID;
+    cBENetworkInterface_networkOpt.MyCharacterID = charID;
     networkInterface->vt[1].fn((char*)networkInterface + networkInterface->vt[1].delta);
 }
 #endif

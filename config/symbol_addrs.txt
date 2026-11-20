@@ -11857,7 +11857,7 @@ cGameModeHandler_pManager = 0x004A2C70;
 cCommSystem_mCommSystem = 0x004A2EB8;
 cCommSystem_mNumNetConn = 0x004A2EBC;
 cGameComm_mGameComm = 0x004A2EEC;
-cBENetworkInterface_networkOpt = 0x00534B30;
+cBENetworkInterface_networkOpt = 0x00534B30; // size:0x4B0
 cBENewRaceInterface_newRace = 0x00535BC8; // size:0x4C
 
 // SSX On Tour (PSP, ULKS-46038) dev-build global names, round data_graphics (docs/ontour_globals.tsv)

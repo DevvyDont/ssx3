@@ -1200,235 +1200,219 @@ extern "C" int cBENetworkInterface_getIsNetworkGame(void) {
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_setIsRankedGame);
 #ifdef SKIP_ASM
-extern char D_00534B34[];
 
 /**
- * Sets cBENetworkInterface_networkOpt.bIsRankedGame (D_00534B34). @p self is unused.
+ * Sets cBENetworkInterface_networkOpt.bIsRankedGame. @p self is unused.
  *
  * @param isRanked  nonzero for a ranked game
  */
 extern "C" void cBENetworkInterface_setIsRankedGame(cBENetworkInterface* self, int isRanked) {
-    *(int*)D_00534B34 = isRanked;
+    cBENetworkInterface_networkOpt.bIsRankedGame = isRanked;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_getIsRankedGame);
 #ifdef SKIP_ASM
-extern char D_00534B34[];
 
 /**
- * Returns cBENetworkInterface_networkOpt.bIsRankedGame (D_00534B34).
+ * Returns cBENetworkInterface_networkOpt.bIsRankedGame.
  *
  * @return bIsRankedGame
  */
 extern "C" int cBENetworkInterface_getIsRankedGame(void) {
-    return *(int*)D_00534B34;
+    return cBENetworkInterface_networkOpt.bIsRankedGame;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_setIsHost);
 #ifdef SKIP_ASM
-extern char D_00534B38[];
 
 /**
- * Sets cBENetworkInterface_networkOpt.bIsHost (D_00534B38): whether this console hosts the online game. @p self is
+ * Sets cBENetworkInterface_networkOpt.bIsHost: whether this console hosts the online game. @p self is
  * unused.
  *
  * @param isHost  nonzero when hosting
  */
 extern "C" void cBENetworkInterface_setIsHost(cBENetworkInterface* self, int isHost) {
-    *(int*)D_00534B38 = isHost;
+    cBENetworkInterface_networkOpt.bIsHost = isHost;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_getIsHost);
 #ifdef SKIP_ASM
-extern char D_00534B38[];
 
 /**
- * Returns cBENetworkInterface_networkOpt.bIsHost (D_00534B38): nonzero when this console hosts the online game.
+ * Returns cBENetworkInterface_networkOpt.bIsHost: nonzero when this console hosts the online game.
  *
  * @return bIsHost
  */
 extern "C" int cBENetworkInterface_getIsHost(void) {
-    return *(int*)D_00534B38;
+    return cBENetworkInterface_networkOpt.bIsHost;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_setPort);
 #ifdef SKIP_ASM
-extern char D_00534B3C[];
 
 /**
- * Sets cBENetworkInterface_networkOpt.iPort (D_00534B3C), the network port. @p self is unused.
+ * Sets cBENetworkInterface_networkOpt.iPort, the network port. @p self is unused.
  *
  * @param port  the port
  */
 extern "C" void cBENetworkInterface_setPort(cBENetworkInterface* self, int port) {
-    *(int*)D_00534B3C = port;
+    cBENetworkInterface_networkOpt.iPort = port;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_getPort);
 #ifdef SKIP_ASM
-extern char D_00534B3C[];
 
 /**
- * Returns cBENetworkInterface_networkOpt.iPort (D_00534B3C), the network port.
+ * Returns cBENetworkInterface_networkOpt.iPort, the network port.
  *
  * @return iPort
  */
 extern "C" int cBENetworkInterface_getPort(void) {
-    return *(int*)D_00534B3C;
+    return cBENetworkInterface_networkOpt.iPort;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_setLatency);
 #ifdef SKIP_ASM
-extern char D_00534B40[];
 
 /**
- * Sets cBENetworkInterface_networkOpt.fLatency (D_00534B40), the measured network latency.
+ * Sets cBENetworkInterface_networkOpt.fLatency, the measured network latency.
  *
  * @param latency  the latency
  */
 extern "C" void cBENetworkInterface_setLatency(float latency) {
-    *(float*)D_00534B40 = latency;
+    cBENetworkInterface_networkOpt.fLatency = latency;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_getLatency);
 #ifdef SKIP_ASM
-extern char D_00534B40[];
 
 /**
- * Returns cBENetworkInterface_networkOpt.fLatency (D_00534B40), the network latency.
+ * Returns cBENetworkInterface_networkOpt.fLatency, the network latency.
  *
  * @return fLatency
  */
 extern "C" float cBENetworkInterface_getLatency(void) {
-    return *(float*)D_00534B40;
+    return cBENetworkInterface_networkOpt.fLatency;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_setClientID);
 #ifdef SKIP_ASM
-extern char D_00534D44[];
 
 /**
- * Sets cBENetworkInterface_networkOpt.iClientID (D_00534D44). @p self is unused.
+ * Sets cBENetworkInterface_networkOpt.iClientID. @p self is unused.
  *
  * @param clientID  the client id
  */
 extern "C" void cBENetworkInterface_setClientID(cBENetworkInterface* self, int clientID) {
-    *(int*)D_00534D44 = clientID;
+    cBENetworkInterface_networkOpt.iClientID = clientID;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_getClientID);
 #ifdef SKIP_ASM
-extern char D_00534D44[];
 
 /**
- * Returns cBENetworkInterface_networkOpt.iClientID (D_00534D44).
+ * Returns cBENetworkInterface_networkOpt.iClientID.
  *
  * @return iClientID
  */
 extern "C" int cBENetworkInterface_getClientID(void) {
-    return *(int*)D_00534D44;
+    return cBENetworkInterface_networkOpt.iClientID;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_setHostName);
 #ifdef SKIP_ASM
 extern "C" char* strcpy(char*, const char*);
-extern char D_00534D48[];
 
 /**
- * Copies @p name into cBENetworkInterface_networkOpt.strHostName (D_00534D48, 120 bytes; strcpy, no length check).
+ * Copies @p name into cBENetworkInterface_networkOpt.strHostName (cBENetworkInterface_networkOpt.strHostName, 120 bytes; strcpy, no length check).
  *
  * @param name  the host name
  */
 // Copies the caller's name string (a1) into a static buffer; the receiver (a0) is unused.
 extern "C" void cBENetworkInterface_setHostName(cBENetworkInterface* self, const char* name)
 {
-    strcpy(D_00534D48, name);
+    strcpy(cBENetworkInterface_networkOpt.strHostName, name);
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_getHostName);
 #ifdef SKIP_ASM
-extern char D_00534D48[];
 
 /**
- * Returns cBENetworkInterface_networkOpt.strHostName (D_00534D48).
+ * Returns cBENetworkInterface_networkOpt.strHostName.
  *
  * @return the host name buffer
  */
 extern "C" void* cBENetworkInterface_getHostName(void) {
-    return D_00534D48;
+    return cBENetworkInterface_networkOpt.strHostName;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_setGameName);
 #ifdef SKIP_ASM
 extern "C" char* strcpy(char*, const char*);
-extern char D_00534DC0[];
 
 /**
- * Copies @p name into cBENetworkInterface_networkOpt.strGameName (D_00534DC0, 120 bytes; strcpy, no length check).
+ * Copies @p name into cBENetworkInterface_networkOpt.strGameName (cBENetworkInterface_networkOpt.strGameName, 120 bytes; strcpy, no length check).
  *
  * @param name  the online game's name
  */
 // Copies the caller's name string (a1) into a static buffer; the receiver (a0) is unused.
 extern "C" void cBENetworkInterface_setGameName(cBENetworkInterface* self, const char* name)
 {
-    strcpy(D_00534DC0, name);
+    strcpy(cBENetworkInterface_networkOpt.strGameName, name);
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_getGameName);
 #ifdef SKIP_ASM
-extern char D_00534DC0[];
 
 /**
- * Returns cBENetworkInterface_networkOpt.strGameName (D_00534DC0).
+ * Returns cBENetworkInterface_networkOpt.strGameName.
  *
  * @return the game name buffer
  */
 extern "C" void* cBENetworkInterface_getGameName(void) {
-    return D_00534DC0;
+    return cBENetworkInterface_networkOpt.strGameName;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_setPassword);
 #ifdef SKIP_ASM
 extern "C" char* strcpy(char*, const char*);
-extern char D_00534E38[];
 
 /**
- * Copies @p name into cBENetworkInterface_networkOpt.strPassword (D_00534E38, 30 bytes; strcpy, no length check).
+ * Copies @p name into cBENetworkInterface_networkOpt.strPassword (cBENetworkInterface_networkOpt.strPassword, 30 bytes; strcpy, no length check).
  *
  * @param name  the game password
  */
 // Copies the caller's name string (a1) into a static buffer; the receiver (a0) is unused.
 extern "C" void cBENetworkInterface_setPassword(cBENetworkInterface* self, const char* name)
 {
-    strcpy(D_00534E38, name);
+    strcpy(cBENetworkInterface_networkOpt.strPassword, name);
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_getPassword);
 #ifdef SKIP_ASM
-extern char D_00534E38[];
 
 /**
- * Returns cBENetworkInterface_networkOpt.strPassword (D_00534E38).
+ * Returns cBENetworkInterface_networkOpt.strPassword.
  *
  * @return the password buffer
  */
 extern "C" void* cBENetworkInterface_getPassword(void) {
-    return D_00534E38;
+    return cBENetworkInterface_networkOpt.strPassword;
 }
 #endif
 //100%
@@ -1447,181 +1431,169 @@ extern "C" void cBENetworkInterface_setNetworkActive(int isActive) {
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_setMyCharacterID);
 #ifdef SKIP_ASM
-extern char D_00534E58[];
 
 /**
- * Sets cBENetworkInterface_networkOpt.MyCharacterID (D_00534E58): this player's character in the online race.
+ * Sets cBENetworkInterface_networkOpt.MyCharacterID: this player's character in the online race.
  * @p self is unused.
  *
  * @param characterID  the character id
  */
 extern "C" void cBENetworkInterface_setMyCharacterID(cBENetworkInterface* self, int characterID) {
-    *(int*)D_00534E58 = characterID;
+    cBENetworkInterface_networkOpt.MyCharacterID = characterID;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_getMyCharacterID);
 #ifdef SKIP_ASM
-extern char D_00534E58[];
 
 /**
- * Returns cBENetworkInterface_networkOpt.MyCharacterID (D_00534E58).
+ * Returns cBENetworkInterface_networkOpt.MyCharacterID.
  *
  * @return this player's character id
  */
 extern "C" int cBENetworkInterface_getMyCharacterID(void) {
-    return *(int*)D_00534E58;
+    return cBENetworkInterface_networkOpt.MyCharacterID;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_setOpponentCharacterID);
 #ifdef SKIP_ASM
-extern char D_00534E5C[];
 
 /**
- * Sets cBENetworkInterface_networkOpt.OpponentCharacterID (D_00534E5C): the remote player's character. @p self is
+ * Sets cBENetworkInterface_networkOpt.OpponentCharacterID: the remote player's character. @p self is
  * unused.
  *
  * @param characterID  the character id
  */
 extern "C" void cBENetworkInterface_setOpponentCharacterID(cBENetworkInterface* self, int characterID) {
-    *(int*)D_00534E5C = characterID;
+    cBENetworkInterface_networkOpt.OpponentCharacterID = characterID;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_getOpponentCharacterID);
 #ifdef SKIP_ASM
-extern char D_00534E5C[];
 
 /**
- * Returns cBENetworkInterface_networkOpt.OpponentCharacterID (D_00534E5C).
+ * Returns cBENetworkInterface_networkOpt.OpponentCharacterID.
  *
  * @return the remote player's character id
  */
 extern "C" int cBENetworkInterface_getOpponentCharacterID(void) {
-    return *(int*)D_00534E5C;
+    return cBENetworkInterface_networkOpt.OpponentCharacterID;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_setMyStats);
 #ifdef SKIP_ASM
 struct sBEBlk_C418 { int v[0x2B]; };
-extern sBEBlk_C418 D_00534E60;
 
 /**
- * Copies the 0xAC-byte rider stats at @p src into cBENetworkInterface_networkOpt.MyStats (D_00534E60). @p self is
+ * Copies the 0xAC-byte rider stats at @p src into cBENetworkInterface_networkOpt.MyStats. @p self is
  * unused.
  *
  * @param src  this player's rider stats (tRiderStats)
  */
 extern "C" void cBENetworkInterface_setMyStats(cBENetworkInterface* self, sBEBlk_C418* src)
 {
-    D_00534E60 = *src;
+    (*(sBEBlk_C418*)&cBENetworkInterface_networkOpt.MyStats) = *src;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_getMyStats);
 #ifdef SKIP_ASM
-extern sBEBlk_C418 D_00534E60;
 
 /**
- * Returns the address of cBENetworkInterface_networkOpt.MyStats (D_00534E60), this player's rider stats.
+ * Returns the address of cBENetworkInterface_networkOpt.MyStats, this player's rider stats.
  *
  * @return the stats block
  */
 extern "C" sBEBlk_C418* cBENetworkInterface_getMyStats(void) {
-    return &D_00534E60;
+    return (sBEBlk_C418*)&cBENetworkInterface_networkOpt.MyStats;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_setOpponentStats);
 #ifdef SKIP_ASM
-extern sBEBlk_C418 D_00534F0C;
 
 /**
- * Copies the 0xAC-byte rider stats at @p src into cBENetworkInterface_networkOpt.OpponentStats (D_00534F0C). @p self
+ * Copies the 0xAC-byte rider stats at @p src into cBENetworkInterface_networkOpt.OpponentStats. @p self
  * is unused.
  *
  * @param src  the remote player's rider stats (tRiderStats)
  */
 extern "C" void cBENetworkInterface_setOpponentStats(cBENetworkInterface* self, sBEBlk_C418* src)
 {
-    D_00534F0C = *src;
+    (*(sBEBlk_C418*)&cBENetworkInterface_networkOpt.OpponentStats) = *src;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_getOpponentStats);
 #ifdef SKIP_ASM
-extern sBEBlk_C418 D_00534F0C;
 
 /**
- * Returns the address of cBENetworkInterface_networkOpt.OpponentStats (D_00534F0C), the remote player's rider stats.
+ * Returns the address of cBENetworkInterface_networkOpt.OpponentStats, the remote player's rider stats.
  *
  * @return the stats block
  */
 extern "C" sBEBlk_C418* cBENetworkInterface_getOpponentStats(void) {
-    return &D_00534F0C;
+    return (sBEBlk_C418*)&cBENetworkInterface_networkOpt.OpponentStats;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015C5A8);
 #ifdef SKIP_ASM
-extern char D_00534FC8[];
 
 /**
- * Returns the address of the 16-byte name buffer at cBENetworkInterface_networkOpt +0x498 (D_00534FC8), the
+ * Returns the address of the 16-byte name buffer at cBENetworkInterface_networkOpt +0x498 (cBENetworkInterface_networkOpt.unk_498), the
  * opponent's name (filled by func_0014EBB8; prefixes received chat lines).
  *
  * @return the name buffer
  */
 extern "C" void* func_0015C5A8(void) {
-    return D_00534FC8;
+    return cBENetworkInterface_networkOpt.unk_498;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", func_0015C5B8);
 #ifdef SKIP_ASM
-extern char D_00534FB8[];
 
 /**
- * Returns the address of the 16-byte name buffer at cBENetworkInterface_networkOpt +0x488 (D_00534FB8), this
+ * Returns the address of the 16-byte name buffer at cBENetworkInterface_networkOpt +0x488 (cBENetworkInterface_networkOpt.unk_488), this
  * player's online name (filled by func_0014EBD8; prefixes our own chat lines).
  *
  * @return the name buffer
  */
 extern "C" void* func_0015C5B8(void) {
-    return D_00534FB8;
+    return cBENetworkInterface_networkOpt.unk_488;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_setOpponentAttributes);
 #ifdef SKIP_ASM
 struct sBEBlk7_C5C8 { char c[7]; };
-extern unsigned char D_00534FD8[];
 
 /**
- * Copies the 7 attribute bytes at @p src into cBENetworkInterface_networkOpt.oppCharacterAttributes (D_00534FD8).
+ * Copies the 7 attribute bytes at @p src into cBENetworkInterface_networkOpt.oppCharacterAttributes.
  * @p self is unused.
  *
  * @param src  the remote rider's seven attribute levels
  */
 extern "C" void cBENetworkInterface_setOpponentAttributes(cBENetworkInterface* self, sBEBlk7_C5C8* src)
 {
-    *(sBEBlk7_C5C8*)D_00534FD8 = *src;
+    *(sBEBlk7_C5C8*)&cBENetworkInterface_networkOpt.oppCharacterAttributes = *src;
 }
 #endif
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_getOpponentAttributes);
 #ifdef SKIP_ASM
-extern unsigned char D_00534FD8[];
 
 /**
- * Returns cBENetworkInterface_networkOpt.oppCharacterAttributes (D_00534FD8), the remote rider's 7 attribute bytes.
+ * Returns cBENetworkInterface_networkOpt.oppCharacterAttributes, the remote rider's 7 attribute bytes.
  *
  * @return the attribute bytes
  */
 extern "C" unsigned char* cBENetworkInterface_getOpponentAttributes(void) {
-    return D_00534FD8;
+    return cBENetworkInterface_networkOpt.oppCharacterAttributes;
 }
 #endif
 //100%
@@ -1639,10 +1611,9 @@ extern "C" int cBENetworkInterface_getRankedGameCharacterLevel(void) {
 //100%
 INCLUDE_ASM("be/bedbreward", cBENetworkInterface_getOverallOpponentLevel);
 #ifdef SKIP_ASM
-extern unsigned char D_00534FD8[];
 
 /**
- * Returns the opponent's overall level: the sum of the 7 bytes of oppCharacterAttributes (D_00534FD8) divided by 35.
+ * Returns the opponent's overall level: the sum of the 7 bytes of oppCharacterAttributes divided by 35.
  *
  * @return the overall level
  */
@@ -1650,7 +1621,7 @@ extern "C" int cBENetworkInterface_getOverallOpponentLevel(void)
 {
     int sum = 0;
     for (int i = 0; i < 7; i++) {
-        sum += D_00534FD8[i];
+        sum += cBENetworkInterface_networkOpt.oppCharacterAttributes[i];
     }
     return sum / 35;
 }

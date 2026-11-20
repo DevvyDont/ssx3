@@ -3234,7 +3234,6 @@ extern "C" void cGameComm_sendExitGame(cGameComm*);
 extern "C" void cGameComm_gameEnded(cGameComm*);
 extern "C" void cBENetworkInterface_copyProfile(void *, int, int);
 extern "C" void* cBE_getBE();
-extern int D_00534B38[];
 /**
  * Leaves the online game: resets the buddy presence, tells the peer and ends the game locally.
  *
@@ -3259,7 +3258,7 @@ extern "C" void cGameComm_gameExit(cGameComm* self) {
     cGameComm_sendExitGame(self);
     cGameComm_gameEnded(self);
     void *i = cBE_getInterface_8AE0((int)SSXApp->BE, 7);
-    if (D_00534B38[0] == 0) {
+    if (cBENetworkInterface_networkOpt.bIsHost == 0) {
         cBENetworkInterface_copyProfile(i, 1, 0);
         cIface_AE0 *beStat = (cIface_AE0*)cBE_getInterface_8AE0((int)cBE_getBE(), 3);
         beStat->v1();
@@ -3537,7 +3536,6 @@ int cBENewPlayerInterface_getPlayerCharID(void*, int);
 extern "C" void func_0014EBB8(void* iface, int v);
 extern "C" void func_0014EBD8(void* iface, int v);
 extern "C" void func_002639E0(int a, int b, int c, int d, int e);
-extern int D_00534E58[];
 
 struct VEnt_9098 {
     short delta;
@@ -3549,7 +3547,7 @@ struct VEnt_9098 {
  * Starts the peer-to-peer race connection for the lobby's game.
  *
  * Takes the peer's address from LobbyMan (the opponent's when hosting, else the host's), stores player 0's character
- * (BE interface 1) in D_00534E58[0], gives BE interface 7 the opponent and the persona (func_0014EBB8, func_0014EBD8)
+ * (BE interface 1) in cBENetworkInterface_networkOpt.MyCharacterID[0], gives BE interface 7 the opponent and the persona (func_0014EBB8, func_0014EBD8)
  * and calls its virtual slot 1. Then it calls func_002639E0 with the peer address and the host flag. LobbyMan_onplaymsg
  * calls it with func_002591D0's object.
  *
@@ -3565,7 +3563,7 @@ extern "C" void func_00259098(int peerSession, int ctrlId, int cancelFlag)
     else peerAddr = lobbyMan->mHostAddr;
     void* pi = cBE_getInterface_9098(cBE_getBE(), 1);
     char* ri = (char*)cBE_getInterface_9098(SSXApp->BE, 7);
-    D_00534E58[0] = cBENewPlayerInterface_getPlayerCharID(pi, 0);
+    cBENetworkInterface_networkOpt.MyCharacterID = cBENewPlayerInterface_getPlayerCharID(pi, 0);
     func_0014EBB8(ri, ((int)LobbyMan_mLobbyMan->mOpponent));
     func_0014EBD8(ri, ((int)LobbyMan_mLobbyMan->mPersona));
     {

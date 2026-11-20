@@ -9031,8 +9031,6 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" void cBENewRaceInterface_setNumberAI(void* iface, int n);
 extern "C" int cUIListBox_getCurrentEntryData(void* a);
-// D_00534B34 is a splat label inside cBENetworkInterface_networkOpt
-extern int D_00534B34[];
 extern char D_005308B8[];
 
 struct sVE1AE680 {
@@ -9058,7 +9056,7 @@ struct sOpts1AE680 {
 /**
  * Copies the challenge popup's option list boxes into the race setup.
  *
- * Only with a screen. mpLBRankedGame's value (non-zero) goes to the network interface's ranked flag (D_00534B34,
+ * Only with a screen. mpLBRankedGame's value (non-zero) goes to the network interface's ranked flag (cBENetworkInterface_networkOpt.bIsRankedGame,
  * bIsRankedGame), followed by that interface's vtable entry 1. mpLBMultipliers, mpLBPointIcons and mpLBPowerUps go to
  * bits 6, 7 and 8 of the race-option word at D_005308B8 + 0x18; mpLBCPURiders becomes the new-race interface's AI count
  * (cBENewRaceInterface_setNumberAI), followed by its vtable entry 1. Called from cFEStateChallengePopup_onWidgetEvent.
@@ -9067,7 +9065,7 @@ extern "C" void func_001AE680(cFEStateChallengePopup* self)
 {
     if (self->mpScreen != 0) {
         char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
-        D_00534B34[0] = cUIListBox_getCurrentEntryData(self->mpLBRankedGame) != 0;
+        cBENetworkInterface_networkOpt.bIsRankedGame = cUIListBox_getCurrentEntryData(self->mpLBRankedGame) != 0;
         sVE1AE680* vt = *(sVE1AE680**)(iface + 0xC);
         vt[1].fn(iface + vt[1].delta);
         int multipliers = cUIListBox_getCurrentEntryData(self->mpLBMultipliers);
@@ -9103,7 +9101,6 @@ extern "C" void func_001AF208_E7A0(void* self, void* item, int on) __asm__("func
 extern int cUITemplate_MAP_mPeak;
 extern int cUITemplate_MAP_mMapStyle;
 extern int D_004A2598;
-extern int D_00534B34[];
 extern char str_cFEStateEventSelect[];
 
 struct sRaceOpts_E7A0 {
@@ -9169,7 +9166,7 @@ extern "C" void cFEStateChallengePopup_onWidgetEvent(cFEStateChallengePopup* sel
             func_001AE680_E7A0((self));
             func_001AF568_E7A0((self));
             char* opts = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
-            D_00534B34[0] = cUIListBox_getCurrentEntryData_E7A0(self->mpLBRankedGame) != 0;
+            cBENetworkInterface_networkOpt.bIsRankedGame = cUIListBox_getCurrentEntryData_E7A0(self->mpLBRankedGame) != 0;
             commit_E7A0(opts);
             if (cUIListBox_getCurrentEntryData_E7A0(self->mpLBRankedGame)) {
                 D_005308B8_E7A0.bit6 = 1;
@@ -9204,7 +9201,7 @@ extern "C" void cFEStateChallengePopup_onWidgetEvent(cFEStateChallengePopup* sel
     case 9:
         if (pWidget == (void*)self->mpLBRankedGame) {
             char* opts = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
-            D_00534B34[0] = cUIListBox_getCurrentEntryData_E7A0(self->mpLBRankedGame) != 0;
+            cBENetworkInterface_networkOpt.bIsRankedGame = cUIListBox_getCurrentEntryData_E7A0(self->mpLBRankedGame) != 0;
             commit_E7A0(opts);
             func_001AF098_E7A0((self), cUIListBox_getCurrentEntryData_E7A0(self->mpLBRankedGame) != 0);
             func_001AEC60_E7A0((self), self->mbChallengeSent);
@@ -9274,7 +9271,6 @@ int GetHashValue32(char* str);
 struct cUIText;
 extern "C" cUIText* cUIScreen_getObjectByHashName(void* screen, int hash);
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
-extern int D_00534B34[];
 extern char str_PairRankedGame[];
 extern char str_PairNumCPURiders[];
 extern char str_PairPowerUps[];
@@ -9309,7 +9305,7 @@ struct sVE_001AEC60 {
  * option's pair and list box ("PairNumCPURiders"/mpLBCPURiders, "PairPowerUps"/mpLBPowerUps,
  * "PairMultipliers"/mpLBMultipliers, "PairPointIcons"/mpLBPointIcons). When unlocking, an option the event does not
  * allow (mpEventOptions [0] CPU riders, [1] power-ups, [3] multipliers, [2] point icons is 0), or any of them in a
- * ranked game (D_00534B34), is set static again right away.
+ * ranked game (cBENetworkInterface_networkOpt.bIsRankedGame), is set static again right away.
  *
  * @param on  1 to lock (challenge sent), 0 to unlock
  */
@@ -9319,7 +9315,7 @@ extern "C" void func_001AEC60(cFEStateChallengePopup* self, int on)
         return;
     }
     cBE_getInterface_Fv(SSXApp->BE, 7);
-    int locked = D_00534B34[0];
+    int locked = cBENetworkInterface_networkOpt.bIsRankedGame;
     cFEVObj_001AEC60* widget = (cFEVObj_001AEC60*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_PairRankedGame));
     if (widget != 0) {
         widget->v08(on);
@@ -10131,7 +10127,6 @@ extern "C" void func_001B0850(cFEStateChallengeReceivedPopup* self, void* iface,
 extern "C" void func_0025E6D0(void* self, const char* str);
 extern "C" void func_001AF930(void* screen);
 extern int D_004A11B8;
-extern int D_00534B34[];
 extern char str_241challenge_received_popup[];
 
 struct sVE_FE68 {
@@ -10221,7 +10216,7 @@ extern "C" void cFEStateChallengeReceivedPopup_onCreateScreen(cFEStateChallengeR
     cBENewRaceInterface_setNumberAI(be, challenge->numAI);
     vcall_FE68(be);
     void* net = cBE_getInterface_Fv_FE68(SSXApp->BE, 7);
-    D_00534B34[0] = challenge->f14;
+    cBENetworkInterface_networkOpt.bIsRankedGame = challenge->f14;
     vcall_FE68(net);
     func_001B0850(self, be, self->mpScreen);
     func_0025E6D0((char*)LobbyMan_mLobbyMan, LobbyMan_mLobbyMan->mOpponent);
@@ -10727,7 +10722,6 @@ extern "C" void* cBE_getBE();
 void* cBE_getInterface_Fv(void* be, int kind) __asm__("cBE_getInterface__Fv");
 extern "C" const char* cBENewRaceInterface_getEventName(void* track);
 extern "C" const char* cBENewRaceInterface_getLocationName1(void* track);
-extern int D_00534B34[];
 extern int D_005308D0[];
 extern char str_sp[];
 extern char str_pct_d_b[];
@@ -10746,7 +10740,7 @@ extern char str_kT_CMNNo[];
  * Fills the received-challenge screen's option texts from the race setup.
  *
  * Each is " " when @p iface is null. "TextEventResult" cBENewRaceInterface_getEventName, "TextCourseResult" cBENewRaceInterface_getLocationName1,
- * "TextRankedGameResult" Yes/No from D_00534B34; "TextPowerupsResult", "TextMultipliersResult" and
+ * "TextRankedGameResult" Yes/No from cBENetworkInterface_networkOpt.bIsRankedGame; "TextPowerupsResult", "TextMultipliersResult" and
  * "TextPointiconsResult" show "kT_CMNNo" when bit 8, 6 or 7 of D_005308D0 is set, else "kT_CMNYes";
  * "TextCPURidersResult" shows the AI count (newRace.iNumberAI) or "kT_CMNHUDNone" when it is 0 or less.
  *
@@ -10781,7 +10775,7 @@ extern "C" void func_001B0850(cFEStateChallengeReceivedPopup* self, void* iface,
             cUIText_setAsciiString(uiText, str_sp);
         } else {
             cBE_getInterface_Fv(SSXApp->BE, 7);
-            if (D_00534B34[0] != 0) {
+            if (cBENetworkInterface_networkOpt.bIsRankedGame != 0) {
                 cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_CMNYes));
             } else {
                 cUIText_setUnicodeStringByID(uiText, GetHashValue32(str_kT_CMNNo));
@@ -11738,8 +11732,6 @@ extern char str_0LeftValue[];
 extern char str_0RightValue[];
 extern char str_0LeftAttribute[];
 extern char str_0RightAttribute[];
-extern unsigned char D_00534FD8[];
-extern int D_00534B34[];
 
 class cFEVObj_001B1B98 {
 public:
@@ -11761,8 +11753,8 @@ public:
  *
  * Returns for ids of 31 or more (the name table D_004412C8 has 30 names, so id 30 would format a null pointer). The
  * panel is the widget named after the rider plus "R" or "L" ("mobyR"); it gets setVisible (@p show). When shown, the
- * right side reads the opponent's 7 attributes (oppCharacterAttributes, D_00534FD8); the left side uses 40 for each in
- * a ranked game (D_00534B34), else player 0's attributes for this rider (cBEStatInterface_getHumanSpeed .. cBEStatInterface_getHumanStability). Attribute i
+ * right side reads the opponent's 7 attributes (oppCharacterAttributes, cBENetworkInterface_networkOpt.oppCharacterAttributes); the left side uses 40 for each in
+ * a ranked game (cBENetworkInterface_networkOpt.bIsRankedGame), else player 0's attributes for this rider (cBEStatInterface_getHumanSpeed .. cBEStatInterface_getHumanStability). Attribute i
  * goes to "<i>RightValue" / "<i>LeftValue" as value / 5 (made visible) and to the progress bar "<i>RightAttribute" /
  * "<i>LeftAttribute" (mNumValues 55, cUIProgress_setValue). The widget names are built by writing the digit into those
  * shared string globals.
@@ -11798,14 +11790,14 @@ extern "C" void func_001B1B98(cFEStateOnlineCharacterSelect* self, int index, in
     if (opponentSide != 0) {
         name1 = str_0RightValue;
         name2 = str_0RightAttribute;
-        unsigned char* src = D_00534FD8;
+        unsigned char* src = cBENetworkInterface_networkOpt.oppCharacterAttributes;
         for (int j = 0; j < 7; j++) {
             stats[j] = src[j];
         }
     } else {
         name1 = str_0LeftValue;
         name2 = str_0LeftAttribute;
-        if (D_00534B34[0] != 0) {
+        if (cBENetworkInterface_networkOpt.bIsRankedGame != 0) {
             int attrValue = 40;
             for (int j = 6; j >= 0; j--) {
                 stats[j] = attrValue;
@@ -25019,8 +25011,6 @@ extern "C" void func_001C17F8(cFEStateNetQuickPlayPopup* self, int a1);
 extern "C" void func_0025EE20(void* self, void* ids, int a2);
 extern "C" void func_0025EED8(void* self);
 extern "C" int cUIListBox_getCurrentEntryData(void* a);
-// D_00534B34 is a splat label inside cBENetworkInterface_networkOpt
-extern int D_00534B34[];
 extern char str_kT_233AbortingQuickmatch[];
 extern char str_kT_BTNCancel[];
 
@@ -25089,7 +25079,7 @@ extern "C" void cFEStateNetQuickPlayPopup_onWidgetEvent(cFEStateNetQuickPlayPopu
                 int* ids = feStateNetQuickPlayPopup->miSearchOptions;
                 func_001C13E0(self, 0);
                 char* iface = (char*)cBE_getInterface_Fv(SSXApp->BE, 7);
-                D_00534B34[0] = cUIListBox_getCurrentEntryData(self->mpLBRanked) != 0;
+                cBENetworkInterface_networkOpt.bIsRankedGame = cUIListBox_getCurrentEntryData(self->mpLBRanked) != 0;
                 sVE_001C1560* vt = *(sVE_001C1560**)(iface + 0xC);
                 vt[1].fn(iface + vt[1].delta);
                 cBENewRaceInterface_setNumberAI(cBE_getInterface_Fv(SSXApp->BE, 0), 0);

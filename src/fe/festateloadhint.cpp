@@ -993,11 +993,10 @@ struct sNetState_6CF8 {
     int active;                     // 0x000
     int f4;                         // 0x004
     char pad_0x008[0x4A8 - 0x8];
-    unsigned char stats[7];         // 0x4A8 (D_00534FD8)
+    unsigned char stats[7];         // 0x4A8 (cBENetworkInterface_networkOpt.oppCharacterAttributes)
 };
-extern unsigned char D_00534FD8[];
 // Inline copy of the BE stat-block getter (cBENetworkInterface_getOpponentAttributes).
-static inline unsigned char* GetStats_6CF8() { return D_00534FD8; }
+static inline unsigned char* GetStats_6CF8() { return cBENetworkInterface_networkOpt.oppCharacterAttributes; }
 struct sLoadInfo_6CF8 {
     char pad0[0x10];
     int image[2];                   // 0x10: per-player image
@@ -1016,7 +1015,7 @@ struct sName5_6CF8 { char c[5]; };
  * With a comm system (cCommSystem_mCommSystem) and either player 1 or a ranked game
  * (cBENetworkInterface_networkOpt.bIsRankedGame): a ranked game shows level 8 and all stats 40, the rule bit shows all
  * stats 5, otherwise the level is the sum of oppCharacterAttributes / 35 and the stats come from the BE stat block
- * D_00534FD8. Writes the level ("%d") into "ranking00" or "ranking01"; for each stat i shows label "<player+1>0<i>"
+ * cBENetworkInterface_networkOpt.oppCharacterAttributes. Writes the level ("%d") into "ranking00" or "ranking01"; for each stat i shows label "<player+1>0<i>"
  * (setVisible 1, text "kT_CMNLvNum" with stat / 5) and sets bar "<player><i>pb" to range 55 (+0x80) and value stat
  * (cUIProgress_setValue()). The picture widget "<player>" takes this player's portrait texture (+0x10 or +0x14 of the
  * load screen at +0x48, loaded by func_00233640()). func_00245418() and func_002454F8() call it for players 0 and 1.

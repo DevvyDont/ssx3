@@ -277,7 +277,6 @@ struct sRiderEntry_0014E9F8 {
 };
 
 extern char D_004BA348[];
-extern int D_00534B38[];
 extern sRiderEntry_0014E9F8 D_00535B3C;
 
 /**
@@ -290,7 +289,7 @@ extern sRiderEntry_0014E9F8 D_00535B3C;
 extern "C" void cBENetworkInterface_preInitBE(cBENetworkInterface* self)
 {
     cBEProfileLib_init(D_004BA348, 0);
-    if (D_00534B38[0] == 0)
+    if (cBENetworkInterface_networkOpt.bIsHost == 0)
     {
         sRiderEntry_0014E9F8* riderEntry = &D_00535B3C;
         riderEntry[0] = riderEntry[-1];
@@ -375,13 +374,12 @@ extern "C" void func_0014EB08(void)
 #endif
 
 extern "C" char* strcpy(char*, const char*);
-extern char D_00534FC8[16];
 
 //100%
 INCLUDE_ASM("be/beintnetwork", func_0014EBB8);
 #ifdef SKIP_ASM
 /**
- * Copies @p src into the opponent-name buffer at cBENetworkInterface_networkOpt +0x498 (D_00534FC8, 16 bytes; strcpy,
+ * Copies @p src into the opponent-name buffer at cBENetworkInterface_networkOpt +0x498 (cBENetworkInterface_networkOpt.unk_498, 16 bytes; strcpy,
  * no length check), which func_0015C5A8 returns.
  *
  * The lobby code passes the opponent's persona name.
@@ -390,17 +388,16 @@ INCLUDE_ASM("be/beintnetwork", func_0014EBB8);
  */
 extern "C" void func_0014EBB8(cBENetworkInterface* self, const char* src)
 {
-    strcpy(D_00534FC8, src);
+    strcpy(cBENetworkInterface_networkOpt.unk_498, src);
 }
 #endif
 
-extern char D_00534FB8[16];
 
 //100%
 INCLUDE_ASM("be/beintnetwork", func_0014EBD8);
 #ifdef SKIP_ASM
 /**
- * Copies @p src into this player's name buffer at cBENetworkInterface_networkOpt +0x488 (D_00534FB8, 16 bytes;
+ * Copies @p src into this player's name buffer at cBENetworkInterface_networkOpt +0x488 (cBENetworkInterface_networkOpt.unk_488, 16 bytes;
  * strcpy, no length check), which func_0015C5B8 returns.
  *
  * The lobby code passes the local persona name.
@@ -409,7 +406,7 @@ INCLUDE_ASM("be/beintnetwork", func_0014EBD8);
  */
 extern "C" void func_0014EBD8(cBENetworkInterface* self, const char* src)
 {
-    strcpy(D_00534FB8, src);
+    strcpy(cBENetworkInterface_networkOpt.unk_488, src);
 }
 #endif
 
@@ -463,7 +460,7 @@ extern "C" void cBEProfileLib_restoreCharProfile(sBEPlayerData* data);
 extern "C" void cBENetworkInterface_restoreCharProfile(cBENetworkInterface* self, int idx)
 {
     cBEProfileLib_restoreCharProfile(&cBELibrary_profileLib[idx]);
-    if (D_00534B38[0] == 0)
+    if (cBENetworkInterface_networkOpt.bIsHost == 0)
     {
         cBELibrary_playerDB[0] = cBELibrary_playerDB[1];
     }

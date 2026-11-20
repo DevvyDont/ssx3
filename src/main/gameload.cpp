@@ -658,7 +658,6 @@ struct sGameRes_FA98 {
     char pad[0x330 - 0xC];
     sRec_FA98 rec[2];
 };
-extern sRec_FA98 D_00534F0C_FA98 __asm__("D_00534F0C");
 
 // Pointer array member with an inline indexer.
 struct sPtrArr_FA98 {
@@ -685,7 +684,7 @@ struct sObj20_FA98 {
  * audio and scripts.
  *
  * Sets the BE state to 0. For a ranked network game it copies each rider's 0xAC-byte record (rider +0x790 -> +0xFC;
- * host order by bIsHost) into the network options (+0x330) and D_00534F0C and calls the network interface's virtual
+ * host order by bIsHost) into the network options (+0x330) and cBENetworkInterface_networkOpt.OpponentStats and calls the network interface's virtual
  * slot 1. Then: camera-trigger cleanup, GrMan slot 19, the FE async manager (cFEAsyncManager_FlushFEAsyncTextures), every script
  * force-ended; deletes UI and InputSync, returns the cut-scene transitions to regular mode, purges and frees
  * SurfPropCache, deletes SkyBox, FogMan and LensFxMan, purges the paths (cPathSys_purgePaths) and BXNash's AI cache,
@@ -705,7 +704,7 @@ extern "C" void cGame_purge(char* self)
         int which = cBENetworkInterface_networkOpt.bIsHost;
         int other = which != 0;
         *(sRec_FA98*)((char*)&cBENetworkInterface_networkOpt + 0x330) = *(sRec_FA98*)(*(char**)(GetRider_FA98(which == 0) + 0x790) + 0xFC);
-        D_00534F0C_FA98 = *(sRec_FA98*)(*(char**)(GetRider_FA98(other) + 0x790) + 0xFC);
+        (*(sRec_FA98*)&cBENetworkInterface_networkOpt.OpponentStats) = *(sRec_FA98*)(*(char**)(GetRider_FA98(other) + 0x790) + 0xFC);
         sVEnt0_FA98* vtEntry = (sVEnt0_FA98*)(*(char**)(iface + 0xC) + 8);
         vtEntry->fn(iface + vtEntry->delta);
     }
