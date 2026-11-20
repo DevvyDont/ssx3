@@ -32,6 +32,14 @@ void* cWorldPainterMan_getQuery(void* self, cWorldPainterManArg* x)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C0AA0);
 #ifdef SKIP_ASM
+/**
+ * Blends an int value toward a target: *dst = *src when @p blend is exactly 1.0, otherwise *dst = (int)(*dst * (1 -
+ * blend) + *src * blend). Nothing in retail calls it out of line.
+ *
+ * @param dst  the value to blend (updated in place)
+ * @param src  the target value
+ * @param blend  the blend factor (0 keeps dst, 1 takes src)
+ */
 extern "C" void func_002C0AA0(tWPInGameData* self, int* dst, int* src, float blend)
 {
     if (blend == 1.0f) {
@@ -44,6 +52,14 @@ extern "C" void func_002C0AA0(tWPInGameData* self, int* dst, int* src, float ble
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C0AF0);
 #ifdef SKIP_ASM
+/**
+ * Blends a float value toward a target: *dst = *src when @p blend is exactly 1.0, otherwise *dst = *dst * (1 - blend) +
+ * *src * blend. Nothing in retail calls it out of line.
+ *
+ * @param dst  the value to blend (updated in place)
+ * @param src  the target value
+ * @param blend  the blend factor (0 keeps dst, 1 takes src)
+ */
 extern "C" void func_002C0AF0(tWPInGameData* self, float* dst, float* src, float blend)
 {
     if (blend == 1.0f) {
@@ -56,6 +72,12 @@ extern "C" void func_002C0AF0(tWPInGameData* self, float* dst, float* src, float
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C0B30);
 #ifdef SKIP_ASM
+/**
+ * Returns its first argument and ignores the rest: a variadic function whose body only spills the argument registers
+ * (a1-a3, t0-t3 and f12-f19) to its stack frame. Nothing in retail references it.
+ *
+ * @return the first argument
+ */
 extern "C" void* func_002C0B30(void* self, ...)
 {
     return self;
@@ -156,6 +178,17 @@ extern sColor_2C0B70 D_004D49A8;
 // The unit declares func_002C0B70 later as returning void*; bind this body by asm label.
 extern "C" void func_002C0B70_impl(int initialize, int priority) __asm__("func_002C0B70");
 
+/**
+ * Runs the static constructors of the world-painter query unit (g++'s static initialisation and destruction function).
+ *
+ * Only when @p initialize is nonzero and @p priority is 0xFFFF: constructs the 56 four-float colour constants
+ * D_004D4638 .. D_004D49A8, zeroes this unit's kNullNameField copy (D_004A53D0) and builds its 14 region-type constants
+ * kWPR_MusicTrigger .. kWPR_Danger (D_004A53D8 .. D_004A5440, each tWorldPainterRegionType(n, n), n = 0 .. 13). The
+ * destruction pass does nothing. func_002C1688__FPv calls it with (1, 0xFFFF).
+ *
+ * @param initialize  nonzero for the construction pass
+ * @param priority  the init priority; only 0xFFFF does anything
+ */
 extern "C" void func_002C0B70_impl(int initialize, int priority)
 {
     if (priority == 0xFFFF && initialize != 0) {
@@ -238,6 +271,9 @@ extern "C" void func_002C0B70_impl(int initialize, int priority)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1458__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: tWPInGameData's own entry in vtable slot 67 (between the pure blend and isEqual slots).
+ */
 void func_002C1458(void* self)
 {
 }
@@ -254,7 +290,6 @@ void operator_delete(int* ptr);
  *
  * @param flags  g++ destructor flags; bit 0 set frees the object's memory
  */
-// deleting destructor: reset the vtable, free when bit 0 of flags is set
 extern "C" void tWorldPainterQuery__tWorldPainterQuery(void* self, int flags)
 {
     *(void***)((char*)self + 0x4) = D_00485D30;
@@ -267,6 +302,11 @@ extern "C" void tWorldPainterQuery__tWorldPainterQuery(void* self, int flags)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1490__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_Type (this + 0x8) of a tWPInGameData_MusicTrigger (its override of vtable slot 1).
+ *
+ * @return &m_Type
+ */
 void* func_002C1490(void* self)
 {
     return (char*)self + 0x8;
@@ -276,6 +316,11 @@ void* func_002C1490(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1498__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_Value (this + 0x10) of a tWPInGameData_MusicTrigger (its override of vtable slot 2).
+ *
+ * @return &m_Value
+ */
 void* func_002C1498(void* self)
 {
     return (char*)self + 0x10;
@@ -285,6 +330,11 @@ void* func_002C1498(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C14A0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_MixPreset (this + 0x8) of a tWPInGameData_Mix (its override of vtable slot 3).
+ *
+ * @return &m_MixPreset
+ */
 void* func_002C14A0(void* self)
 {
     return (char*)self + 0x8;
@@ -294,6 +344,11 @@ void* func_002C14A0(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C14A8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_BankID (this + 0x8) of a tWPInGameData_Ambience (its override of vtable slot 4).
+ *
+ * @return &m_BankID
+ */
 void* func_002C14A8(void* self)
 {
     return (char*)self + 0x8;
@@ -303,6 +358,11 @@ void* func_002C14A8(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C14B0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_SpeechID (this + 0x8) of a tWPInGameData_Speech (its override of vtable slot 5).
+ *
+ * @return &m_SpeechID
+ */
 void* func_002C14B0(void* self)
 {
     return (char*)self + 0x8;
@@ -312,6 +372,11 @@ void* func_002C14B0(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C14B8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_DrawDistance (this + 0x8) of a tWPInGameData_Camera (its override of vtable slot 6).
+ *
+ * @return &m_DrawDistance
+ */
 void* func_002C14B8(void* self)
 {
     return (char*)self + 0x8;
@@ -321,6 +386,11 @@ void* func_002C14B8(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C14C0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_FogDensity (this + 0x8) of a tWPInGameData_Fog (its override of vtable slot 7).
+ *
+ * @return &m_FogDensity
+ */
 void* func_002C14C0(void* self)
 {
     return (char*)self + 0x8;
@@ -330,6 +400,11 @@ void* func_002C14C0(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C14C8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_FogNear (this + 0x10) of a tWPInGameData_Fog (its override of vtable slot 8).
+ *
+ * @return &m_FogNear
+ */
 void* func_002C14C8(void* self)
 {
     return (char*)self + 0x10;
@@ -339,6 +414,11 @@ void* func_002C14C8(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C14D0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_FogFar (this + 0x18) of a tWPInGameData_Fog (its override of vtable slot 9).
+ *
+ * @return &m_FogFar
+ */
 void* func_002C14D0(void* self)
 {
     return (char*)self + 0x18;
@@ -348,6 +428,11 @@ void* func_002C14D0(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C14D8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_FogColourR (this + 0x20) of a tWPInGameData_Fog (its override of vtable slot 10).
+ *
+ * @return &m_FogColourR
+ */
 void* func_002C14D8(void* self)
 {
     return (char*)self + 0x20;
@@ -357,6 +442,11 @@ void* func_002C14D8(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C14E0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_FogColourG (this + 0x28) of a tWPInGameData_Fog (its override of vtable slot 11).
+ *
+ * @return &m_FogColourG
+ */
 void* func_002C14E0(void* self)
 {
     return (char*)self + 0x28;
@@ -366,6 +456,11 @@ void* func_002C14E0(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C14E8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_FogColourB (this + 0x30) of a tWPInGameData_Fog (its override of vtable slot 12).
+ *
+ * @return &m_FogColourB
+ */
 void* func_002C14E8(void* self)
 {
     return (char*)self + 0x30;
@@ -375,6 +470,11 @@ void* func_002C14E8(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C14F0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_LightGlowCutoff (this + 0x8) of a tWPInGameData_LightGlow (its override of vtable slot 13).
+ *
+ * @return &m_LightGlowCutoff
+ */
 void* func_002C14F0(void* self)
 {
     return (char*)self + 0x8;
@@ -384,6 +484,11 @@ void* func_002C14F0(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C14F8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_LightGlowCutoffScale (this + 0x10) of a tWPInGameData_LightGlow (its override of vtable slot 14).
+ *
+ * @return &m_LightGlowCutoffScale
+ */
 void* func_002C14F8(void* self)
 {
     return (char*)self + 0x10;
@@ -393,6 +498,11 @@ void* func_002C14F8(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1500__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_LightGlowCopyIntensity (this + 0x18) of a tWPInGameData_LightGlow (its override of vtable slot 15).
+ *
+ * @return &m_LightGlowCopyIntensity
+ */
 void* func_002C1500(void* self)
 {
     return (char*)self + 0x18;
@@ -402,6 +512,11 @@ void* func_002C1500(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1508__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_LightGlowSourceIntensity (this + 0x20) of a tWPInGameData_LightGlow (its override of vtable slot 16).
+ *
+ * @return &m_LightGlowSourceIntensity
+ */
 void* func_002C1508(void* self)
 {
     return (char*)self + 0x20;
@@ -411,6 +526,11 @@ void* func_002C1508(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1510__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_LightGlowFrameIntensity (this + 0x28) of a tWPInGameData_LightGlow (its override of vtable slot 17).
+ *
+ * @return &m_LightGlowFrameIntensity
+ */
 void* func_002C1510(void* self)
 {
     return (char*)self + 0x28;
@@ -420,6 +540,11 @@ void* func_002C1510(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1518__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_LightGlowBlend2 (this + 0x30) of a tWPInGameData_LightGlow (its override of vtable slot 18).
+ *
+ * @return &m_LightGlowBlend2
+ */
 void* func_002C1518(void* self)
 {
     return (char*)self + 0x30;
@@ -429,6 +554,11 @@ void* func_002C1518(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1520__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_LightGlowBlend3 (this + 0x38) of a tWPInGameData_LightGlow (its override of vtable slot 19).
+ *
+ * @return &m_LightGlowBlend3
+ */
 void* func_002C1520(void* self)
 {
     return (char*)self + 0x38;
@@ -438,6 +568,11 @@ void* func_002C1520(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1528__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_ScreenTintScaleR (this + 0x8) of a tWPInGameData_ScreenTint (its override of vtable slot 20).
+ *
+ * @return &m_ScreenTintScaleR
+ */
 void* func_002C1528(void* self)
 {
     return (char*)self + 0x8;
@@ -447,6 +582,11 @@ void* func_002C1528(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1530__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_ScreenTintScaleG (this + 0x10) of a tWPInGameData_ScreenTint (its override of vtable slot 21).
+ *
+ * @return &m_ScreenTintScaleG
+ */
 void* func_002C1530(void* self)
 {
     return (char*)self + 0x10;
@@ -456,6 +596,11 @@ void* func_002C1530(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1538__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_ScreenTintScaleB (this + 0x18) of a tWPInGameData_ScreenTint (its override of vtable slot 22).
+ *
+ * @return &m_ScreenTintScaleB
+ */
 void* func_002C1538(void* self)
 {
     return (char*)self + 0x18;
@@ -465,6 +610,11 @@ void* func_002C1538(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1540__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_ScreenTintOffsetR (this + 0x20) of a tWPInGameData_ScreenTint (its override of vtable slot 23).
+ *
+ * @return &m_ScreenTintOffsetR
+ */
 void* func_002C1540(void* self)
 {
     return (char*)self + 0x20;
@@ -474,6 +624,11 @@ void* func_002C1540(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1548__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_ScreenTintOffsetG (this + 0x28) of a tWPInGameData_ScreenTint (its override of vtable slot 24).
+ *
+ * @return &m_ScreenTintOffsetG
+ */
 void* func_002C1548(void* self)
 {
     return (char*)self + 0x28;
@@ -483,6 +638,11 @@ void* func_002C1548(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1550__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_ScreenTintOffsetB (this + 0x30) of a tWPInGameData_ScreenTint (its override of vtable slot 25).
+ *
+ * @return &m_ScreenTintOffsetB
+ */
 void* func_002C1550(void* self)
 {
     return (char*)self + 0x30;
@@ -492,6 +652,11 @@ void* func_002C1550(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1558__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_SkyBoxRotation (this + 0x8) of a tWPInGameData_SkyBox (its override of vtable slot 26).
+ *
+ * @return &m_SkyBoxRotation
+ */
 void* func_002C1558(void* self)
 {
     return (char*)self + 0x8;
@@ -501,6 +666,11 @@ void* func_002C1558(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1560__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_SunPitchOffset (this + 0x8) of a tWPInGameData_Sun (its override of vtable slot 27).
+ *
+ * @return &m_SunPitchOffset
+ */
 void* func_002C1560(void* self)
 {
     return (char*)self + 0x8;
@@ -510,6 +680,11 @@ void* func_002C1560(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1568__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_SunYawOffset (this + 0x10) of a tWPInGameData_Sun (its override of vtable slot 28).
+ *
+ * @return &m_SunYawOffset
+ */
 void* func_002C1568(void* self)
 {
     return (char*)self + 0x10;
@@ -519,6 +694,11 @@ void* func_002C1568(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1570__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_SunColorR (this + 0x18) of a tWPInGameData_Sun (its override of vtable slot 29).
+ *
+ * @return &m_SunColorR
+ */
 void* func_002C1570(void* self)
 {
     return (char*)self + 0x18;
@@ -528,6 +708,11 @@ void* func_002C1570(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1578__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_SunColorG (this + 0x20) of a tWPInGameData_Sun (its override of vtable slot 30).
+ *
+ * @return &m_SunColorG
+ */
 void* func_002C1578(void* self)
 {
     return (char*)self + 0x20;
@@ -537,6 +722,11 @@ void* func_002C1578(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1580__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_SunColorB (this + 0x28) of a tWPInGameData_Sun (its override of vtable slot 31).
+ *
+ * @return &m_SunColorB
+ */
 void* func_002C1580(void* self)
 {
     return (char*)self + 0x28;
@@ -546,6 +736,11 @@ void* func_002C1580(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1588__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_SunIntensity (this + 0x30) of a tWPInGameData_Sun (its override of vtable slot 32).
+ *
+ * @return &m_SunIntensity
+ */
 void* func_002C1588(void* self)
 {
     return (char*)self + 0x30;
@@ -555,6 +750,11 @@ void* func_002C1588(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1590__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_SunType (this + 0x38) of a tWPInGameData_Sun (its override of vtable slot 33).
+ *
+ * @return &m_SunType
+ */
 void* func_002C1590(void* self)
 {
     return (char*)self + 0x38;
@@ -564,6 +764,11 @@ void* func_002C1590(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1598__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_LensIntensity (this + 0x40) of a tWPInGameData_Sun (its override of vtable slot 34).
+ *
+ * @return &m_LensIntensity
+ */
 void* func_002C1598(void* self)
 {
     return (char*)self + 0x40;
@@ -573,6 +778,11 @@ void* func_002C1598(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C15A0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_SunRadius (this + 0x48) of a tWPInGameData_Sun (its override of vtable slot 35).
+ *
+ * @return &m_SunRadius
+ */
 void* func_002C15A0(void* self)
 {
     return (char*)self + 0x48;
@@ -582,6 +792,11 @@ void* func_002C15A0(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C15A8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_SnowSparkleDensity (this + 0x8) of a tWPInGameData_Surface (its override of vtable slot 36).
+ *
+ * @return &m_SnowSparkleDensity
+ */
 void* func_002C15A8(void* self)
 {
     return (char*)self + 0x8;
@@ -591,6 +806,11 @@ void* func_002C15A8(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C15B0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_LightIrradianceName (this + 0x8) of a tWPInGameData_Lighting (its override of vtable slot 37).
+ *
+ * @return &m_LightIrradianceName
+ */
 void* func_002C15B0(void* self)
 {
     return (char*)self + 0x8;
@@ -600,6 +820,11 @@ void* func_002C15B0(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C15B8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_ShadowIrradianceName (this + 0x18) of a tWPInGameData_Lighting (its override of vtable slot 38).
+ *
+ * @return &m_ShadowIrradianceName
+ */
 void* func_002C15B8(void* self)
 {
     return (char*)self + 0x18;
@@ -609,6 +834,11 @@ void* func_002C15B8(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C15C0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_TunnelIrradianceName (this + 0x28) of a tWPInGameData_Lighting (its override of vtable slot 39).
+ *
+ * @return &m_TunnelIrradianceName
+ */
 void* func_002C15C0(void* self)
 {
     return (char*)self + 0x28;
@@ -618,6 +848,11 @@ void* func_002C15C0(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C15C8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_ObjectIrradianceName (this + 0x38) of a tWPInGameData_Lighting (its override of vtable slot 40).
+ *
+ * @return &m_ObjectIrradianceName
+ */
 void* func_002C15C8(void* self)
 {
     return (char*)self + 0x38;
@@ -627,6 +862,11 @@ void* func_002C15C8(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C15D0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_AmbientLightIntensityOffset (this + 0x48) of a tWPInGameData_Lighting (its override of vtable slot 41).
+ *
+ * @return &m_AmbientLightIntensityOffset
+ */
 void* func_002C15D0(void* self)
 {
     return (char*)self + 0x48;
@@ -636,6 +876,11 @@ void* func_002C15D0(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C15D8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_RimLightIntensityOffset (this + 0x50) of a tWPInGameData_Lighting (its override of vtable slot 42).
+ *
+ * @return &m_RimLightIntensityOffset
+ */
 void* func_002C15D8(void* self)
 {
     return (char*)self + 0x50;
@@ -645,6 +890,11 @@ void* func_002C15D8(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C15E0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_SnowIntensity (this + 0x8) of a tWPInGameData_Weather (its override of vtable slot 43).
+ *
+ * @return &m_SnowIntensity
+ */
 void* func_002C15E0(void* self)
 {
     return (char*)self + 0x8;
@@ -654,6 +904,11 @@ void* func_002C15E0(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C15E8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_FlakeSize (this + 0x10) of a tWPInGameData_Weather (its override of vtable slot 44).
+ *
+ * @return &m_FlakeSize
+ */
 void* func_002C15E8(void* self)
 {
     return (char*)self + 0x10;
@@ -663,6 +918,11 @@ void* func_002C15E8(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C15F0__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_WindIntensity (this + 0x18) of a tWPInGameData_Weather (its override of vtable slot 45).
+ *
+ * @return &m_WindIntensity
+ */
 void* func_002C15F0(void* self)
 {
     return (char*)self + 0x18;
@@ -672,6 +932,11 @@ void* func_002C15F0(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C15F8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_WindRotation (this + 0x20) of a tWPInGameData_Weather (its override of vtable slot 46).
+ *
+ * @return &m_WindRotation
+ */
 void* func_002C15F8(void* self)
 {
     return (char*)self + 0x20;
@@ -681,6 +946,11 @@ void* func_002C15F8(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1600__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_PlayerWindIntensity (this + 0x28) of a tWPInGameData_Weather (its override of vtable slot 47).
+ *
+ * @return &m_PlayerWindIntensity
+ */
 void* func_002C1600(void* self)
 {
     return (char*)self + 0x28;
@@ -690,6 +960,11 @@ void* func_002C1600(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1608__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_Temperature (this + 0x30) of a tWPInGameData_Weather (its override of vtable slot 48).
+ *
+ * @return &m_Temperature
+ */
 void* func_002C1608(void* self)
 {
     return (char*)self + 0x30;
@@ -699,6 +974,11 @@ void* func_002C1608(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1610__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_SnowFlurries (this + 0x38) of a tWPInGameData_Weather (its override of vtable slot 49).
+ *
+ * @return &m_SnowFlurries
+ */
 void* func_002C1610(void* self)
 {
     return (char*)self + 0x38;
@@ -708,6 +988,11 @@ void* func_002C1610(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1618__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_SnowGravityMultiplier (this + 0x40) of a tWPInGameData_Weather (its override of vtable slot 50).
+ *
+ * @return &m_SnowGravityMultiplier
+ */
 void* func_002C1618(void* self)
 {
     return (char*)self + 0x40;
@@ -717,6 +1002,11 @@ void* func_002C1618(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1620__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_SnowFluffItensity (this + 0x48) of a tWPInGameData_Weather (its override of vtable slot 51).
+ *
+ * @return &m_SnowFluffItensity
+ */
 void* func_002C1620(void* self)
 {
     return (char*)self + 0x48;
@@ -726,6 +1016,11 @@ void* func_002C1620(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1628__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_SnowFluffWindIntensity (this + 0x50) of a tWPInGameData_Weather (its override of vtable slot 52).
+ *
+ * @return &m_SnowFluffWindIntensity
+ */
 void* func_002C1628(void* self)
 {
     return (char*)self + 0x50;
@@ -735,6 +1030,11 @@ void* func_002C1628(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1630__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_LightningChance (this + 0x58) of a tWPInGameData_Weather (its override of vtable slot 53).
+ *
+ * @return &m_LightningChance
+ */
 void* func_002C1630(void* self)
 {
     return (char*)self + 0x58;
@@ -744,6 +1044,11 @@ void* func_002C1630(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1638__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_SnowFlakeColourA (this + 0x60) of a tWPInGameData_Weather (its override of vtable slot 54).
+ *
+ * @return &m_SnowFlakeColourA
+ */
 void* func_002C1638(void* self)
 {
     return (char*)self + 0x60;
@@ -753,6 +1058,11 @@ void* func_002C1638(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1640__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_SnowFlakeColourR (this + 0x68) of a tWPInGameData_Weather (its override of vtable slot 55).
+ *
+ * @return &m_SnowFlakeColourR
+ */
 void* func_002C1640(void* self)
 {
     return (char*)self + 0x68;
@@ -762,6 +1072,11 @@ void* func_002C1640(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1648__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_SnowFlakeColourG (this + 0x70) of a tWPInGameData_Weather (its override of vtable slot 56).
+ *
+ * @return &m_SnowFlakeColourG
+ */
 void* func_002C1648(void* self)
 {
     return (char*)self + 0x70;
@@ -771,6 +1086,11 @@ void* func_002C1648(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1650__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_SnowFlakeColourB (this + 0x78) of a tWPInGameData_Weather (its override of vtable slot 57).
+ *
+ * @return &m_SnowFlakeColourB
+ */
 void* func_002C1650(void* self)
 {
     return (char*)self + 0x78;
@@ -780,6 +1100,11 @@ void* func_002C1650(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1658__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_SnowFluffColourA (this + 0x80) of a tWPInGameData_Weather (its override of vtable slot 58).
+ *
+ * @return &m_SnowFluffColourA
+ */
 void* func_002C1658(void* self)
 {
     return (char*)self + 0x80;
@@ -789,6 +1114,11 @@ void* func_002C1658(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1660__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_SnowFluffColourR (this + 0x88) of a tWPInGameData_Weather (its override of vtable slot 59).
+ *
+ * @return &m_SnowFluffColourR
+ */
 void* func_002C1660(void* self)
 {
     return (char*)self + 0x88;
@@ -798,6 +1128,11 @@ void* func_002C1660(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1668__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_SnowFluffColourG (this + 0x90) of a tWPInGameData_Weather (its override of vtable slot 60).
+ *
+ * @return &m_SnowFluffColourG
+ */
 void* func_002C1668(void* self)
 {
     return (char*)self + 0x90;
@@ -807,6 +1142,11 @@ void* func_002C1668(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1670__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_SnowFluffColourB (this + 0x98) of a tWPInGameData_Weather (its override of vtable slot 61).
+ *
+ * @return &m_SnowFluffColourB
+ */
 void* func_002C1670(void* self)
 {
     return (char*)self + 0x98;
@@ -816,6 +1156,11 @@ void* func_002C1670(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1678__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_Level (this + 0x8) of a tWPInGameData_Danger (its override of vtable slot 62).
+ *
+ * @return &m_Level
+ */
 void* func_002C1678(void* self)
 {
     return (char*)self + 0x8;
@@ -825,6 +1170,11 @@ void* func_002C1678(void* self)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1680__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns &m_PointRate (this + 0x10) of a tWPInGameData_Danger (its override of vtable slot 63).
+ *
+ * @return &m_PointRate
+ */
 void* func_002C1680(void* self)
 {
     return (char*)self + 0x10;
@@ -836,6 +1186,12 @@ extern "C" void* func_002C0B70(int, int);
 //99.38%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", func_002C1688__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs the world-painter query unit's static constructors: func_002C0B70(1, 0xFFFF). It is entry 23 of the static
+ * constructor table D_0043CE38.
+ *
+ * @return func_002C0B70's return register (it returns nothing)
+ */
 void* func_002C1688(void* self)
 {
     return func_002C0B70(1, 0xffff);
@@ -850,6 +1206,13 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", tQuadTreeNode_setLeafNode);
 // with an int expression; retype it to (void*, int, int) and drop the alias if the lander prefers.
 extern "C" void tQuadTreeNode_setLeafNode_impl(void* self, int a, int b) __asm__("tQuadTreeNode_setLeafNode");
 
+/**
+ * Makes a node a leaf: stores @p key in m_key (+0x4) and @p data in m_data (+0x0). cQuadTree_cQuadTree uses it for the
+ * root.
+ *
+ * @param key  the leaf key (the region index)
+ * @param data  the leaf data pointer
+ */
 extern "C" void tQuadTreeNode_setLeafNode_impl(void* self, int key, int data)
 {
     *(int*)((char*)self + 0x4) = key;
@@ -860,6 +1223,18 @@ extern "C" void tQuadTreeNode_setLeafNode_impl(void* self, int key, int data)
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", tQuadTreeNode_setSubNodes);
 #ifdef SKIP_ASM
+/**
+ * Makes a node an inner node with four children: stores each child index shifted left by one, the first with bit 0 set
+ * (the sub-node flag) and the other three keeping their old bit 0.
+ *
+ * cQuadTree_exportTree uses it to renumber the children of exported nodes.
+ *
+ * @param node  the node (as its four 16-bit words)
+ * @param subA  the first child's node index
+ * @param subB  the second child's node index
+ * @param subC  the third child's node index
+ * @param subD  the fourth child's node index
+ */
 extern "C" void tQuadTreeNode_setSubNodes(unsigned short* node, unsigned short subA, unsigned short subB, unsigned short subC, unsigned short subD)
 {
     node[0] = (subA << 1) | 1;
@@ -872,6 +1247,11 @@ extern "C" void tQuadTreeNode_setSubNodes(unsigned short* node, unsigned short s
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", tQuadTreeNode_init);
 #ifdef SKIP_ASM
+/**
+ * Clears a quad-tree node: zeroes both of its words (a leaf with key 0 and no data).
+ *
+ * @param node  the tQuadTreeNode
+ */
 extern "C" void tQuadTreeNode_init(void *node) {
     (*(int *)((char*)(node) + (0))) = 0;
     (*(int *)((char*)(node) + (4))) = 0;
@@ -883,6 +1263,22 @@ INCLUDE_ASM("worldpainter/worldpaintermanquery", cQuadTree_cQuadTree);
 extern "C" unsigned short cQuadTree_getFreeNode();
 extern "C" void tQuadTreeNode_setLeafNode(int, int, int);
 
+/**
+ * Constructs an empty quad tree over a square area whose whole area is one leaf.
+ *
+ * Clears m_numUsedNodes, m_numNodes, m_nodes and m_freeNodes, stores the area's minimum x / y in m_offsetX / m_offsetY
+ * and 32768 / width in m_scale, takes the root node from cQuadTree_getFreeNode (which allocates the first 1024 nodes),
+ * clears m_pad and makes the root a leaf with the default key and data (tQuadTreeNode_setLeafNode), which m_defaultNode
+ * also keeps (getLeaf returns it for positions outside the grid).
+ *
+ * @param quadTree  the cQuadTree
+ * @param defaultKey  the key of the whole area (and of positions outside it)
+ * @param defaultData  the data pointer of the whole area
+ * @param fparg0  the area's minimum x in world units
+ * @param fparg1  the area's minimum y in world units
+ * @param fparg2  the area's width (and height) in world units
+ * @return @p quadTree
+ */
 extern "C" void *cQuadTree_cQuadTree(void *quadTree, int defaultKey, int defaultData, float fparg0, float fparg1, float fparg2) {
     (*(int *)((char*)(quadTree) + (0x24))) = 0;
     (*(int *)((char*)(quadTree) + (0x20))) = 0;
@@ -903,6 +1299,10 @@ extern "C" void *cQuadTree_cQuadTree(void *quadTree, int defaultKey, int default
 //100%
 INCLUDE_ASM("worldpainter/worldpaintermanquery", cQuadTree_resolve__FPv);
 #ifdef SKIP_ASM
+/**
+ * Points m_nodes and m_freeNodes at the node array stored right after the 0x28-byte tree in streamed world-painter data
+ * (this + 0x28). cWorldPainterLayer_resolve calls it.
+ */
 void cQuadTree_resolve(void* self)
 {
     void* nodes = (char*)self + 0x28;

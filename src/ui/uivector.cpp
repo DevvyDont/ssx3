@@ -157,7 +157,6 @@ extern "C" void cUIThing_setChannelData(void* self, unsigned short key, float v)
  * @param key  channel number (On Tour channel)
  * @param data    the channel's new value
  */
-// Sets a keyframed property: keys < 0x15 go to the base thing, higher keys address per-vertex position/UV/colour.
 extern "C" void cUIVector_setChannelData(cUIVector_36D0* self, unsigned short key, float data)
 {
     if (self->verts == 0) {
@@ -239,7 +238,6 @@ struct sKey_3808 {
  * @param n     number of pairs (On Tour NumChannels)
  * @param keys  the pairs, two shorts each (channel, value)
  */
-// Applies a list of (key, value) pairs: keys < 0x15 set base properties, higher keys address per-vertex data.
 extern "C" void cUIVector_setChannelDataKCP(cUIVector_3808* self, unsigned int n, sKey_3808* keys)
 {
     if (self->verts == 0) {
@@ -494,6 +492,14 @@ extern "C" void cUIVector_setSize(cUIVector* self, t3Vector* off)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A3F08);
 #ifdef SKIP_ASM
+/**
+ * Returns its first argument unchanged.
+ *
+ * A variadic function: it spills the remaining integer and float argument registers to its stack frame and uses none of
+ * them. Nothing in retail calls or references it.
+ *
+ * @return the first argument
+ */
 extern "C" void* func_003A3F08(void* self, ...)
 {
     return self;
@@ -581,6 +587,18 @@ extern sColor_3A3F48 D_00508740;
 // The unit declares func_003A3F48 later as returning void*; bind this body by asm label.
 extern "C" void func_003A3F48_impl(int initialize, int priority) __asm__("func_003A3F48");
 
+/**
+ * Constructs or tears down the UI module's static objects (g++'s static initialisation and destruction routine).
+ *
+ * Only when @p priority is 0xFFFF: with @p initialize set it constructs 59 colour constants (D_005083D0 .. D_00508740,
+ * each four floats, many 1/1/1/1 or 1/0/0/0), constructs the null UI sound interface gUISoundNull with func_0039E288
+ * and sets D_004A5A60, the default text shadow offset that uitext copies into each font, to (2, 2). With @p initialize
+ * clear it only puts the base sound-interface vtable D_0046DD60 back into gUISoundNull (its destructor). The static
+ * initialiser func_003A6648 calls it with (1, 0xFFFF), the static destructor func_003A6668 with (0, 0xFFFF).
+ *
+ * @param initialize  non-zero to construct, zero to destroy
+ * @param priority  the init priority; only 0xFFFF does anything
+ */
 extern "C" void func_003A3F48_impl(int initialize, int priority)
 {
     if (priority == 0xFFFF) {
@@ -654,6 +672,13 @@ extern "C" void func_003A3F48_impl(int initialize, int priority)
 INCLUDE_ASM("ui/uivector", func_003A4778);
 #ifdef SKIP_ASM
 extern void* cUIAnimation_vtbl[];
+/**
+ * Constructs a cUIAnimation with no data: stores cUIAnimation_vtbl in its vptr (+0x10) and returns it.
+ *
+ * Unlike cUIAnimation_cUIAnimation it sets no animation header or channels. Nothing in retail calls it.
+ *
+ * @return the object
+ */
 extern "C" void* func_003A4778(void* self) {
     *(void***)((char*)self + 0x10) = cUIAnimation_vtbl;
     return self;
@@ -662,6 +687,12 @@ extern "C" void* func_003A4778(void* self) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4790);
 #ifdef SKIP_ASM
+/**
+ * Returns the animation's hash name: the word at +0x8 of the animation header its first member points to.
+ *
+ * @param anim  the cUIAnimation
+ * @return the header's hash id
+ */
 extern "C" int func_003A4790(void **anim) {
     return (*(int *)((char*)(*anim) + (8)));
 }
@@ -669,6 +700,12 @@ extern "C" int func_003A4790(void **anim) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A47A0);
 #ifdef SKIP_ASM
+/**
+ * Sets the animation's current frame number (the short at +0xA) to @p frame.
+ *
+ * @param anim  the cUIAnimation
+ * @param frame  the frame number
+ */
 extern "C" void func_003A47A0(void *anim, short frame) {
     (*(short *)((char*)(anim) + (0xA))) = frame;
 }
@@ -746,6 +783,12 @@ extern "C" void cListNode_removeFromList(void*);
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4848);
 #ifdef SKIP_ASM
+/**
+ * Returns the list node's previous node (mpPrev).
+ *
+ * @param node  the cListNode
+ * @return mpPrev
+ */
 extern "C" int func_003A4848(int *node) {
     return *node;
 }
@@ -753,6 +796,12 @@ extern "C" int func_003A4848(int *node) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4850);
 #ifdef SKIP_ASM
+/**
+ * Returns the list node's next node (mpNext).
+ *
+ * @param listNode  the cListNode
+ * @return mpNext
+ */
 extern "C" int func_003A4850(cListNode* listNode) {
     return ((int)listNode->mpNext);
 }
@@ -760,6 +809,12 @@ extern "C" int func_003A4850(cListNode* listNode) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4858);
 #ifdef SKIP_ASM
+/**
+ * Sets the list node's previous node (mpPrev) to @p prev.
+ *
+ * @param node  the cListNode
+ * @param prev  the new previous node
+ */
 extern "C" void func_003A4858(int *node, int prev) {
     *node = prev;
 }
@@ -767,6 +822,12 @@ extern "C" void func_003A4858(int *node, int prev) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4860);
 #ifdef SKIP_ASM
+/**
+ * Sets the list node's next node (mpNext) to @p next.
+ *
+ * @param node  the cListNode
+ * @param next  the new next node
+ */
 extern "C" void func_003A4860(void *node, int next) {
     (*(int *)((char*)(node) + (4))) = next;
 }
@@ -818,6 +879,14 @@ struct sFlags_6548;
 extern "C" sFlags_6548* func_003A6548(sFlags_6548* f);
 extern void* cUIThing_vtbl[];
 
+/**
+ * Constructs a bare cUIThing: links the node to itself (mpPrev = mpNext = this), stores cUIThing_vtbl and constructs
+ * the tAttrThing word mAttr with func_003A6548; no other member is set.
+ *
+ * Unlike cUIThing_cUIThing it takes no screen or parent. Nothing in retail calls it.
+ *
+ * @return the object
+ */
 extern "C" void* func_003A4900(cUIThing* self)
 {
     self->mpNext = (cListNode*)((char*)self);
@@ -830,6 +899,12 @@ extern "C" void* func_003A4900(cUIThing* self)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4940);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the UI thing has an animation attached (mpAnim is not null).
+ *
+ * @param uiThing  the cUIThing
+ * @return 1 when mpAnim is set, else 0
+ */
 extern "C" int func_003A4940(cUIThing* uiThing) {
     return ((int)uiThing->mpAnim) != 0;
 }
@@ -837,6 +912,12 @@ extern "C" int func_003A4940(cUIThing* uiThing) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4950);
 #ifdef SKIP_ASM
+/**
+ * Returns the UI thing's current animation (mpAnim).
+ *
+ * @param uiThing  the cUIThing
+ * @return mpAnim
+ */
 extern "C" int func_003A4950(cUIThing* uiThing) {
     return ((int)uiThing->mpAnim);
 }
@@ -844,6 +925,12 @@ extern "C" int func_003A4950(cUIThing* uiThing) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4958);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the UI thing is horizontal: 1 when the orientation bit (mAttr bit 0) is clear.
+ *
+ * @param uiThing  the cUIThing
+ * @return 1 for horizontal, 0 for vertical
+ */
 extern "C" int func_003A4958(cUIThing* uiThing) {
     return ((uiThing->mAttr) ^ 1) & 1;
 }
@@ -851,6 +938,12 @@ extern "C" int func_003A4958(cUIThing* uiThing) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4968);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the UI thing is vertical: the orientation bit (mAttr bit 0).
+ *
+ * @param uiThing  the cUIThing
+ * @return 1 for vertical, 0 for horizontal
+ */
 extern "C" int func_003A4968(cUIThing* uiThing) {
     return (uiThing->mAttr) & 1;
 }
@@ -858,6 +951,12 @@ extern "C" int func_003A4968(cUIThing* uiThing) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4978);
 #ifdef SKIP_ASM
+/**
+ * Returns the UI thing's active flag (mAttr bit 1).
+ *
+ * @param uiThing  the cUIThing
+ * @return 1 when active, else 0
+ */
 extern "C" int func_003A4978(cUIThing* uiThing) {
     return ((int) (uiThing->mAttr) >> 1) & 1;
 }
@@ -865,6 +964,12 @@ extern "C" int func_003A4978(cUIThing* uiThing) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4988);
 #ifdef SKIP_ASM
+/**
+ * Returns the UI thing's cached flag (mAttr bit 2).
+ *
+ * @param uiThing  the cUIThing
+ * @return 1 when cached, else 0
+ */
 extern "C" int func_003A4988(cUIThing* uiThing) {
     return ((int) (uiThing->mAttr) >> 2) & 1;
 }
@@ -872,6 +977,12 @@ extern "C" int func_003A4988(cUIThing* uiThing) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4998);
 #ifdef SKIP_ASM
+/**
+ * Returns the UI thing's enabled flag (mAttr bit 3).
+ *
+ * @param uiThing  the cUIThing
+ * @return 1 when enabled, else 0
+ */
 extern "C" int func_003A4998(cUIThing* uiThing) {
     return ((int) (uiThing->mAttr) >> 3) & 1;
 }
@@ -879,6 +990,12 @@ extern "C" int func_003A4998(cUIThing* uiThing) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A49A8);
 #ifdef SKIP_ASM
+/**
+ * Returns the UI thing's focused flag (mAttr bit 4).
+ *
+ * @param uiThing  the cUIThing
+ * @return 1 when focused, else 0
+ */
 extern "C" int func_003A49A8(cUIThing* uiThing) {
     return ((int) (uiThing->mAttr) >> 4) & 1;
 }
@@ -886,6 +1003,12 @@ extern "C" int func_003A49A8(cUIThing* uiThing) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A49B8);
 #ifdef SKIP_ASM
+/**
+ * Returns the UI thing's static flag (mAttr bit 5).
+ *
+ * @param uiThing  the cUIThing
+ * @return 1 when static, else 0
+ */
 extern "C" int func_003A49B8(cUIThing* uiThing) {
     return ((int) (uiThing->mAttr) >> 5) & 1;
 }
@@ -893,6 +1016,12 @@ extern "C" int func_003A49B8(cUIThing* uiThing) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A49C8);
 #ifdef SKIP_ASM
+/**
+ * Returns the UI thing's visible flag (mAttr bit 6).
+ *
+ * @param uiThing  the cUIThing
+ * @return 1 when visible, else 0
+ */
 extern "C" int func_003A49C8(cUIThing* uiThing) {
     return ((int) (uiThing->mAttr) >> 6) & 1;
 }
@@ -900,6 +1029,12 @@ extern "C" int func_003A49C8(cUIThing* uiThing) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A49D8);
 #ifdef SKIP_ASM
+/**
+ * Returns the UI thing's wrap flag (mAttr bit 7).
+ *
+ * @param uiThing  the cUIThing
+ * @return 1 when wrapping is on, else 0
+ */
 extern "C" int func_003A49D8(cUIThing* uiThing) {
     int wrapBits = uiThing->mAttr >> 7;
     return wrapBits & 1;
@@ -1028,6 +1163,12 @@ extern "C" void cUIThing_setWrap(cUIThing* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4AC8);
 #ifdef SKIP_ASM
+/**
+ * Returns the UI thing's caller-defined data word (mMiscData).
+ *
+ * @param uiThing  the cUIThing
+ * @return mMiscData
+ */
 extern "C" int func_003A4AC8(cUIThing* uiThing) {
     return (uiThing->mMiscData);
 }
@@ -1035,6 +1176,12 @@ extern "C" int func_003A4AC8(cUIThing* uiThing) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4AD0);
 #ifdef SKIP_ASM
+/**
+ * Sets the UI thing's caller-defined data word (mMiscData) to @p miscData.
+ *
+ * @param uiThing  the cUIThing
+ * @param miscData  the value to store
+ */
 extern "C" void func_003A4AD0(cUIThing* uiThing, int miscData) {
     (uiThing->mMiscData) = miscData;
 }
@@ -1042,6 +1189,12 @@ extern "C" void func_003A4AD0(cUIThing* uiThing, int miscData) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4AD8);
 #ifdef SKIP_ASM
+/**
+ * Sets the UI thing's orientation bit (mAttr bit 0) to the low bit of @p orientation (0 horizontal, 1 vertical).
+ *
+ * @param uiThing  the cUIThing
+ * @param orientation  0 for horizontal, 1 for vertical
+ */
 extern "C" void func_003A4AD8(cUIThing* uiThing, int orientation) {
     (uiThing->mAttr) = (int) (((uiThing->mAttr) & ~1) | (orientation & 1));
 }
@@ -1065,6 +1218,12 @@ extern "C" void cUIThing_setColour(cUIThing* self, tARGB* in)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4B20);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of the UI thing's colour (mColour).
+ *
+ * @param uiThing  the cUIThing (as an address)
+ * @return a pointer to mColour
+ */
 extern "C" int func_003A4B20(int uiThing) {
     return uiThing + 0x1C;
 }
@@ -1072,6 +1231,11 @@ extern "C" int func_003A4B20(int uiThing) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4B28);
 #ifdef SKIP_ASM
+/**
+ * Copies the UI thing's colour (mColour) into @p out.
+ *
+ * @param out  receives the colour (a, r, g, b)
+ */
 extern "C" void func_003A4B28(cUIThing* self, tARGB* out)
 {
     *out = *(&self->mColour);
@@ -1080,6 +1244,12 @@ extern "C" void func_003A4B28(cUIThing* self, tARGB* out)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4B50);
 #ifdef SKIP_ASM
+/**
+ * Sets the UI thing's rotation in radians (mAngle.z) to @p fparg0.
+ *
+ * @param uiThing  the cUIThing
+ * @param fparg0  the angle in radians
+ */
 extern "C" void func_003A4B50(cUIThing* uiThing, float fparg0) {
     (uiThing->mAngle.z) = fparg0;
 }
@@ -1087,6 +1257,12 @@ extern "C" void func_003A4B50(cUIThing* uiThing, float fparg0) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4B58);
 #ifdef SKIP_ASM
+/**
+ * Returns the UI thing's rotation in radians (mAngle.z).
+ *
+ * @param uiThing  the cUIThing
+ * @return mAngle.z
+ */
 extern "C" float func_003A4B58(cUIThing* uiThing) {
     return (uiThing->mAngle.z);
 }
@@ -1094,6 +1270,12 @@ extern "C" float func_003A4B58(cUIThing* uiThing) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4B60);
 #ifdef SKIP_ASM
+/**
+ * Returns the UI thing's draw layer (mAttr bits 8-12, 0..31).
+ *
+ * @param uiThing  the cUIThing
+ * @return the draw layer
+ */
 extern "C" int func_003A4B60(cUIThing* uiThing) {
     return ((unsigned int) ((unsigned int)uiThing->mAttr) >> 8) & 0x1F;
 }
@@ -1101,6 +1283,12 @@ extern "C" int func_003A4B60(cUIThing* uiThing) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4B70);
 #ifdef SKIP_ASM
+/**
+ * Sets the UI thing's draw layer (mAttr bits 8-12) to the low 5 bits of @p layer.
+ *
+ * @param uiThing  the cUIThing
+ * @param layer  the draw layer (0..31)
+ */
 extern "C" void func_003A4B70(cUIThing* uiThing, int layer) {
     (uiThing->mAttr) = (int) (((uiThing->mAttr) & ~0x1F00) | ((layer & 0x1F) << 8));
 }
@@ -1108,6 +1296,12 @@ extern "C" void func_003A4B70(cUIThing* uiThing, int layer) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4B90);
 #ifdef SKIP_ASM
+/**
+ * Sets the UI thing's pivot (mAttr bits 13-18) to the low 6 bits of @p pivot.
+ *
+ * @param uiThing  the cUIThing
+ * @param pivot  the pivot code (0..63; func_003A6548 starts it at 9)
+ */
 extern "C" void func_003A4B90(cUIThing* uiThing, int pivot) {
     (uiThing->mAttr) = (int) (((uiThing->mAttr) & 0xFFF81FFF) | ((pivot & 0x3F) << 13));
 }
@@ -1115,6 +1309,12 @@ extern "C" void func_003A4B90(cUIThing* uiThing, int pivot) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4BB8);
 #ifdef SKIP_ASM
+/**
+ * Returns the UI thing's pivot (mAttr bits 13-18, 0..63).
+ *
+ * @param uiThing  the cUIThing
+ * @return the pivot code
+ */
 extern "C" int func_003A4BB8(cUIThing* uiThing) {
     return ((unsigned int) ((unsigned int)uiThing->mAttr) >> 0xD) & 0x3F;
 }
@@ -1122,6 +1322,12 @@ extern "C" int func_003A4BB8(cUIThing* uiThing) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4BC8);
 #ifdef SKIP_ASM
+/**
+ * Sets the UI thing's hash name (mHashName) to @p hashName.
+ *
+ * @param uiThing  the cUIThing
+ * @param hashName  the hashed name
+ */
 extern "C" void func_003A4BC8(cUIThing* uiThing, int hashName) {
     (uiThing->mHashName) = hashName;
 }
@@ -1129,6 +1335,12 @@ extern "C" void func_003A4BC8(cUIThing* uiThing, int hashName) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4BD0);
 #ifdef SKIP_ASM
+/**
+ * Returns the UI thing's hash name (mHashName).
+ *
+ * @param uiThing  the cUIThing
+ * @return mHashName
+ */
 extern "C" int func_003A4BD0(cUIThing* uiThing) {
     return (uiThing->mHashName);
 }
@@ -1184,6 +1396,12 @@ void cUIThing_render3D(void* self)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4BF8);
 #ifdef SKIP_ASM
+/**
+ * Sets the UI thing's parent (mpParent, at +0x40) to @p parent.
+ *
+ * @param uiThing  the cUIThing
+ * @param parent  the new parent thing
+ */
 extern "C" void func_003A4BF8(void *uiThing, int parent) {
     (*(int *)((char*)(uiThing) + (0x40))) = parent;
 }
@@ -1191,6 +1409,12 @@ extern "C" void func_003A4BF8(void *uiThing, int parent) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4C00);
 #ifdef SKIP_ASM
+/**
+ * Returns the UI thing's parent (mpParent).
+ *
+ * @param uiThing  the cUIThing
+ * @return mpParent
+ */
 extern "C" int func_003A4C00(cUIThing* uiThing) {
     return ((int)uiThing->mpParent);
 }
@@ -1250,6 +1474,12 @@ extern "C" void cUIThing_setScale(cUIThing* self, t3Vector* out)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4C88);
 #ifdef SKIP_ASM
+/**
+ * Returns the screen the UI thing belongs to (mpScreen).
+ *
+ * @param uiThing  the cUIThing
+ * @return mpScreen
+ */
 extern "C" int func_003A4C88(cUIThing* uiThing) {
     return ((int)uiThing->mpScreen);
 }
@@ -1396,6 +1626,15 @@ void operator_delete(int* ptr);
 
 extern void* D_0046DD60[];
 
+/**
+ * Destroys a UI sound interface: puts back the base sound-interface vtable D_0046DD60 and frees the object with
+ * operator_delete when bit 0 of @p flags is set.
+ *
+ * The same code as cUISoundInterface__cUISoundInterface (fe/fepopupmisc), which D_0046DD60's slot points to; nothing in
+ * retail references this copy.
+ *
+ * @param flags  bit 0 set to free the memory
+ */
 extern "C" void func_003A4DA8(int* self, int flags)
 {
     *(void***)self = D_0046DD60;
@@ -1407,6 +1646,10 @@ extern "C" void func_003A4DA8(int* self, int flags)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4DD8);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (an empty function: the base UI sound interface's play-sound method, a copy of
+ * cUISoundInterface_playSound__FPv). Nothing in retail references this copy.
+ */
 extern "C" void func_003A4DD8(void) {
 
 }
@@ -1414,6 +1657,10 @@ extern "C" void func_003A4DD8(void) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4DE0);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (an empty function: the base UI sound interface's initialise method, a copy of
+ * cUISoundInterface_soundInitialize__FPv). Nothing in retail references this copy.
+ */
 extern "C" void func_003A4DE0(void) {
 
 }
@@ -1421,6 +1668,10 @@ extern "C" void func_003A4DE0(void) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4DE8);
 #ifdef SKIP_ASM
+/**
+ * Does nothing (an empty function: the base UI sound interface's shutdown method, a copy of
+ * cUISoundInterface_soundShutdown__FPv). Nothing in retail references this copy.
+ */
 extern "C" void func_003A4DE8(void) {
 
 }
@@ -1432,6 +1683,14 @@ extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
 extern "C" void* func_0021CCC8(void* p);
 extern void* cUIIcon_vtbl[];
 
+/**
+ * Constructs a cUIIcon with no screen or parent: runs cUIThing_cUIThing(this, 0, 0), stores cUIIcon_vtbl and constructs
+ * the tAttrIcon word mAttrIcon (+0x74) with func_0021CCC8.
+ *
+ * Unlike cUIIcon_cUIIcon it leaves mTextureID and mpTextureElem unset. Nothing in retail calls it.
+ *
+ * @return the object
+ */
 extern "C" void* func_003A4DF0(cUIIcon* self)
 {
     cUIThing_cUIThing(((char*)self), 0, 0);
@@ -1501,6 +1760,15 @@ int cUIIcon_getType(void* self)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4EB0);
 #ifdef SKIP_ASM
+/**
+ * Clears the low four bits (mIconTiled, mIconFlip, mIconRotate) of a cUIIcon's tAttrIcon byte and returns it: the
+ * tAttrIcon constructor.
+ *
+ * cUIIcon's constructors use func_0021CCC8 for the same job; nothing in retail calls this copy.
+ *
+ * @param attr  the tAttrIcon (cUIIcon + 0x74)
+ * @return @p attr
+ */
 extern "C" unsigned char *func_003A4EB0(unsigned char *attr) {
     *attr &= 0xF0;
     return attr;
@@ -1509,6 +1777,12 @@ extern "C" unsigned char *func_003A4EB0(unsigned char *attr) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4EC8);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the icon is drawn tiled (mAttrIcon bit 0, mIconTiled).
+ *
+ * @param uiIcon  the cUIIcon
+ * @return 1 when tiled, else 0
+ */
 extern "C" int func_003A4EC8(cUIIcon* uiIcon) {
     return (*(int*)&uiIcon->mAttrIcon) & 1;
 }
@@ -1516,6 +1790,12 @@ extern "C" int func_003A4EC8(cUIIcon* uiIcon) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4ED8);
 #ifdef SKIP_ASM
+/**
+ * Sets the icon's tiled flag (mAttrIcon bit 0, mIconTiled) to @p tiled != 0.
+ *
+ * @param uiIcon  the cUIIcon
+ * @param tiled  non-zero to draw the texture tiled
+ */
 extern "C" void func_003A4ED8(cUIIcon* uiIcon, int tiled) {
     (*(int*)&uiIcon->mAttrIcon) = (int) (((*(int*)&uiIcon->mAttrIcon) & ~1) | (tiled != 0));
 }
@@ -1523,6 +1803,12 @@ extern "C" void func_003A4ED8(cUIIcon* uiIcon, int tiled) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4EF8);
 #ifdef SKIP_ASM
+/**
+ * Returns the icon's flip flag (mAttrIcon bit 1, mIconFlip).
+ *
+ * @param uiIcon  the cUIIcon
+ * @return 1 when flipped, else 0
+ */
 extern "C" int func_003A4EF8(cUIIcon* uiIcon) {
     return ((int) (*(int*)&uiIcon->mAttrIcon) >> 1) & 1;
 }
@@ -1530,6 +1816,11 @@ extern "C" int func_003A4EF8(cUIIcon* uiIcon) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4F08);
 #ifdef SKIP_ASM
+/**
+ * Sets the icon's flip flag (mAttrIcon bit 1, mIconFlip) to the low bit of @p enable.
+ *
+ * @param enable  1 to flip the icon, 0 not to
+ */
 extern "C" void func_003A4F08(cUIIcon* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x74))->bit1 = enable;
@@ -1538,6 +1829,13 @@ extern "C" void func_003A4F08(cUIIcon* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4F28);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the icon is drawn rotated: whether its 2-bit rotate field (mAttrIcon bits 2-3, mIconRotate) is
+ * non-zero.
+ *
+ * @param uiIcon  the cUIIcon
+ * @return 1 when rotated, else 0
+ */
 extern "C" int func_003A4F28(cUIIcon* uiIcon) {
     return ((*(int*)&uiIcon->mAttrIcon) & 0xC) != 0;
 }
@@ -1550,6 +1848,12 @@ struct sUIVectorFlagsB {
     bool bit1 : 1;
     bool bits23 : 2;
 };
+/**
+ * Sets the icon's rotate field (mAttrIcon bits 2-3, mIconRotate) to 1 when @p enable is non-zero, else to 0 (the field
+ * is written through a bool bitfield, so the value 2 is never stored).
+ *
+ * @param enable  non-zero to draw the icon rotated
+ */
 extern "C" void func_003A4F38(cUIIcon* self, int enable)
 {
     ((sUIVectorFlagsB*)((char*)self + 0x74))->bits23 = enable;
@@ -1558,6 +1862,12 @@ extern "C" void func_003A4F38(cUIIcon* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4F58);
 #ifdef SKIP_ASM
+/**
+ * Returns the icon's texture element (mpTextureElem; null when the icon draws by texture id).
+ *
+ * @param uiIcon  the cUIIcon
+ * @return mpTextureElem
+ */
 extern "C" int func_003A4F58(cUIIcon* uiIcon) {
     return ((int)uiIcon->mpTextureElem);
 }
@@ -1565,6 +1875,12 @@ extern "C" int func_003A4F58(cUIIcon* uiIcon) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4F60);
 #ifdef SKIP_ASM
+/**
+ * Makes the icon draw the texture element @p textureElem: stores it in mpTextureElem and sets mTextureID to -1.
+ *
+ * @param icon  the cUIIcon
+ * @param textureElem  the cTextureElement to draw
+ */
 extern "C" void func_003A4F60(void *icon, int textureElem) {
     (*(int *)((char*)(icon) + (0x7C))) = textureElem;
     (*(int *)((char*)(icon) + (0x78))) = -1;
@@ -1573,6 +1889,12 @@ extern "C" void func_003A4F60(void *icon, int textureElem) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4F70);
 #ifdef SKIP_ASM
+/**
+ * Returns the icon's texture id (mTextureID; -1 when it draws a texture element instead).
+ *
+ * @param uiIcon  the cUIIcon
+ * @return mTextureID
+ */
 extern "C" int func_003A4F70(cUIIcon* uiIcon) {
     return (uiIcon->mTextureID);
 }
@@ -1580,6 +1902,12 @@ extern "C" int func_003A4F70(cUIIcon* uiIcon) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4F78);
 #ifdef SKIP_ASM
+/**
+ * Makes the icon draw texture @p textureId: stores it in mTextureID and clears mpTextureElem.
+ *
+ * @param icon  the cUIIcon
+ * @param textureId  the texture id
+ */
 extern "C" void func_003A4F78(void *icon, int textureId) {
     (*(int *)((char*)(icon) + (0x78))) = textureId;
     (*(int *)((char*)(icon) + (0x7C))) = 0;
@@ -1589,6 +1917,12 @@ extern "C" void func_003A4F78(void *icon, int textureId) {
 INCLUDE_ASM("ui/uivector", func_003A4F88);
 #ifdef SKIP_ASM
 struct sVec2 { float x; float y; };
+/**
+ * Copies the icon's tile counts (mTileUV, two floats: repeats across and down) into @p out and returns @p out.
+ *
+ * @param out  the result buffer (g++'s hidden return pointer for a t2Vector returned by value)
+ * @return @p out
+ */
 extern "C" sVec2* func_003A4F88(sVec2* out, char* self)
 {
     *out = *(sVec2*)(self + 0x80);
@@ -1598,6 +1932,11 @@ extern "C" sVec2* func_003A4F88(sVec2* out, char* self)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4FA0);
 #ifdef SKIP_ASM
+/**
+ * Sets the icon's tile counts (mTileUV) from the two floats at @p in (repeats across, repeats down).
+ *
+ * @param in  the new tile counts (u, v)
+ */
 extern "C" void func_003A4FA0(cUIIcon* self, sVec2* in)
 {
     *(sVec2*)&self->mTileUV[0] = *in;
@@ -1606,6 +1945,12 @@ extern "C" void func_003A4FA0(cUIIcon* self, sVec2* in)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A4FB8);
 #ifdef SKIP_ASM
+/**
+ * Sets the icon's tile counts (mTileUV) to @p x across and @p y down.
+ *
+ * @param x  how many times the texture repeats across
+ * @param y  how many times the texture repeats down
+ */
 extern "C" void func_003A4FB8(cUIIcon* self, float x, float y)
 {
     sVec2 tileUv;
@@ -1621,6 +1966,14 @@ extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
 extern "C" void* cList_cList(void* p);
 extern void* cUIGroup_vtbl[];
 
+/**
+ * Constructs a cUIGroup with no screen or parent: runs cUIThing_cUIThing(this, 0, 0), stores cUIGroup_vtbl and
+ * constructs the child list mList (+0x74) with cList_cList.
+ *
+ * Nothing in retail calls it; cUIScreen_createObjectByStruct uses cUIGroup_cUIGroup.
+ *
+ * @return the object
+ */
 extern "C" void* func_003A4FE0(cUIGroup* self)
 {
     cUIThing_cUIThing(((char*)self), 0, 0);
@@ -1669,7 +2022,6 @@ extern "C" void cUIThing__cUIThing_2(void* self, int flag) __asm__("cUIThing__cU
  *
  * @param flag  g++ destructor flags, passed to cUIThing's destructor (bit 0 frees the object)
  */
-// Destructor: restores the vtables, destroys the two vertex lists, then the base thing.
 extern "C" void cUIGroup__cUIGroup(cUIGroup* self, int flag)
 {
     self->mVtbl = cUIGroup_vtbl;
@@ -1702,6 +2054,11 @@ INCLUDE_ASM("ui/uivector", func_003A5100);
 #ifdef SKIP_ASM
 extern "C" void cList_first__FP5cList(int);
 
+/**
+ * Returns the group's first child: cList_first__FP5cList on its child list mList (+0x74), whose result is passed back.
+ *
+ * @param group  the cUIGroup (as an address)
+ */
 extern "C" void func_003A5100(int group) {
     cList_first__FP5cList(group + 116);
 }
@@ -1711,6 +2068,12 @@ INCLUDE_ASM("ui/uivector", func_003A5120);
 #ifdef SKIP_ASM
 extern "C" void func_00397858(int);
 
+/**
+ * Returns the group's last child: func_00397858 (the list's last node) on its child list mList (+0x74), whose result is
+ * passed back.
+ *
+ * @param group  the cUIGroup (as an address)
+ */
 extern "C" void func_003A5120(int group) {
     func_00397858(group + 116);
 }
@@ -1720,6 +2083,12 @@ INCLUDE_ASM("ui/uivector", func_003A5140);
 #ifdef SKIP_ASM
 extern "C" void cList_getByIndex(int);
 
+/**
+ * Returns the group's child at an index: cList_getByIndex on its child list mList (+0x74). The index the caller passes
+ * in the second argument register goes through untouched, and the list's result is passed back.
+ *
+ * @param group  the cUIGroup (as an address)
+ */
 extern "C" void func_003A5140(int group) {
     cList_getByIndex(group + 116);
 }
@@ -1729,6 +2098,12 @@ INCLUDE_ASM("ui/uivector", func_003A5160);
 #ifdef SKIP_ASM
 extern "C" void cList_addToFront__FP5cListP9cListNode(int);
 
+/**
+ * Links a node at the front of the group's child list: cList_addToFront__FP5cListP9cListNode on mList (+0x74), with the
+ * node the caller passes in the second argument register going through untouched.
+ *
+ * @param group  the cUIGroup (as an address)
+ */
 extern "C" void func_003A5160(int group) {
     cList_addToFront__FP5cListP9cListNode(group + 116);
 }
@@ -1738,6 +2113,12 @@ INCLUDE_ASM("ui/uivector", func_003A5180);
 #ifdef SKIP_ASM
 extern "C" void cList_addToEnd__FP5cListP9cListNode(int);
 
+/**
+ * Links a node at the end of the group's child list: cList_addToEnd__FP5cListP9cListNode on mList (+0x74), with the
+ * node the caller passes in the second argument register going through untouched.
+ *
+ * @param group  the cUIGroup (as an address)
+ */
 extern "C" void func_003A5180(int group) {
     cList_addToEnd__FP5cListP9cListNode(group + 116);
 }
@@ -1855,7 +2236,6 @@ extern "C" void cUIThing__cUIThing_2(void* self, int flag) __asm__("cUIThing__cU
  *
  * @param flag  g++ destructor flags, passed to cUIThing's destructor (bit 0 frees the object)
  */
-// Second destructor variant; same body as cUIGroup__cUIGroup.
 extern "C" void cUIMenu__cUIMenu(cUIMenu* self, int flag)
 {
     self->mVtbl = cUIGroup_vtbl;
@@ -1886,6 +2266,12 @@ int cUIMenu_getType(void* self)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5338);
 #ifdef SKIP_ASM
+/**
+ * Clears the low four bits of a cUIMenu's tAttrMenu byte (mCreateThread, mFlipInput, mScrollMenu, mDisableDirSound) and
+ * returns it: the tAttrMenu constructor, run on cUIMenu + 0x90.
+ *
+ * @return the tAttrMenu
+ */
 extern "C" void* func_003A5338(void* self)
 {
     *(unsigned char*)self &= 0xf0;
@@ -1896,6 +2282,12 @@ extern "C" void* func_003A5338(void* self)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5350);
 #ifdef SKIP_ASM
+/**
+ * Returns the menu's flip-input flag (mAttrMenu bit 1, mFlipInput).
+ *
+ * @param uiMenu  the cUIMenu
+ * @return 1 when input is flipped, else 0
+ */
 extern "C" int func_003A5350(cUIMenu* uiMenu) {
     return ((int) (*(int*)&uiMenu->mAttrMenu) >> 1) & 1;
 }
@@ -1903,6 +2295,11 @@ extern "C" int func_003A5350(cUIMenu* uiMenu) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5360);
 #ifdef SKIP_ASM
+/**
+ * Sets the menu's flip-input flag (mAttrMenu bit 1, mFlipInput) to the low bit of @p enable.
+ *
+ * @param enable  1 to flip the menu's input directions, 0 not to
+ */
 extern "C" void func_003A5360(cUIMenu* self, int enable)
 {
     ((sUIVectorFlags*)((char*)self + 0x90))->bit1 = enable;
@@ -1911,6 +2308,13 @@ extern "C" void func_003A5360(cUIMenu* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5380);
 #ifdef SKIP_ASM
+/**
+ * Returns the menu's disable-direction-sound flag (mAttrMenu bit 3, mDisableDirSound): when set the menu stays silent
+ * as the selection moves.
+ *
+ * @param uiMenu  the cUIMenu
+ * @return 1 when the direction sound is off, else 0
+ */
 extern "C" int func_003A5380(cUIMenu* uiMenu) {
     return ((int) (*(int*)&uiMenu->mAttrMenu) >> 3) & 1;
 }
@@ -1931,6 +2335,13 @@ extern "C" void cUIMenu_setDisableDirSound(cUIMenu* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A53B0);
 #ifdef SKIP_ASM
+/**
+ * Returns the menu's create-thread flag (mAttrMenu bit 0, mCreateThread), which cUIMenu_onInputChangeItem passes on to
+ * cUIMenu_setSelected.
+ *
+ * @param uiMenu  the cUIMenu
+ * @return 1 when set, else 0
+ */
 extern "C" int func_003A53B0(cUIMenu* uiMenu) {
     return (*(int*)&uiMenu->mAttrMenu) & 1;
 }
@@ -1938,6 +2349,12 @@ extern "C" int func_003A53B0(cUIMenu* uiMenu) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A53C0);
 #ifdef SKIP_ASM
+/**
+ * Sets the menu's create-thread flag (mAttrMenu bit 0, mCreateThread) to @p createThread != 0.
+ *
+ * @param uiMenu  the cUIMenu
+ * @param createThread  non-zero to set the flag
+ */
 extern "C" void func_003A53C0(cUIMenu* uiMenu, int createThread) {
     (*(int*)&uiMenu->mAttrMenu) = (int) (((*(int*)&uiMenu->mAttrMenu) & ~1) | (createThread != 0));
 }
@@ -1945,6 +2362,12 @@ extern "C" void func_003A53C0(cUIMenu* uiMenu, int createThread) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A53E0);
 #ifdef SKIP_ASM
+/**
+ * Returns the menu's current item index (mScrollItemCurrent).
+ *
+ * @param uiMenu  the cUIMenu
+ * @return mScrollItemCurrent
+ */
 extern "C" unsigned char func_003A53E0(cUIMenu* uiMenu) {
     return (uiMenu->mScrollItemCurrent);
 }
@@ -1952,6 +2375,12 @@ extern "C" unsigned char func_003A53E0(cUIMenu* uiMenu) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A53E8);
 #ifdef SKIP_ASM
+/**
+ * Returns the menu's scroll offset (mScrollItemOffset), the first item shown.
+ *
+ * @param uiMenu  the cUIMenu
+ * @return mScrollItemOffset
+ */
 extern "C" unsigned char func_003A53E8(cUIMenu* uiMenu) {
     return (uiMenu->mScrollItemOffset);
 }
@@ -1959,6 +2388,12 @@ extern "C" unsigned char func_003A53E8(cUIMenu* uiMenu) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A53F0);
 #ifdef SKIP_ASM
+/**
+ * Returns the menu's item count (mScrollItemNum).
+ *
+ * @param uiMenu  the cUIMenu
+ * @return mScrollItemNum
+ */
 extern "C" unsigned char func_003A53F0(cUIMenu* uiMenu) {
     return (uiMenu->mScrollItemNum);
 }
@@ -1966,6 +2401,12 @@ extern "C" unsigned char func_003A53F0(cUIMenu* uiMenu) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A53F8);
 #ifdef SKIP_ASM
+/**
+ * Sets the menu's current item index (mScrollItemCurrent) to @p scrollItemCurrent, without touching the selection.
+ *
+ * @param uiMenu  the cUIMenu
+ * @param scrollItemCurrent  the new index
+ */
 extern "C" void func_003A53F8(cUIMenu* uiMenu, signed char scrollItemCurrent) {
     (*(signed char*)&uiMenu->mScrollItemCurrent) = scrollItemCurrent;
 }
@@ -1973,6 +2414,12 @@ extern "C" void func_003A53F8(cUIMenu* uiMenu, signed char scrollItemCurrent) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5400);
 #ifdef SKIP_ASM
+/**
+ * Sets the menu's item count (mScrollItemNum) to @p scrollItemNum.
+ *
+ * @param uiMenu  the cUIMenu
+ * @param scrollItemNum  the new count
+ */
 extern "C" void func_003A5400(cUIMenu* uiMenu, signed char scrollItemNum) {
     (*(signed char*)&uiMenu->mScrollItemNum) = scrollItemNum;
 }
@@ -1980,6 +2427,12 @@ extern "C" void func_003A5400(cUIMenu* uiMenu, signed char scrollItemNum) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5408);
 #ifdef SKIP_ASM
+/**
+ * Sets the menu's scroll offset (mScrollItemOffset, the first item shown) to @p scrollItemOffset.
+ *
+ * @param uiMenu  the cUIMenu
+ * @param scrollItemOffset  the new offset
+ */
 extern "C" void func_003A5408(cUIMenu* uiMenu, signed char scrollItemOffset) {
     (*(signed char*)&uiMenu->mScrollItemOffset) = scrollItemOffset;
 }
@@ -1987,6 +2440,12 @@ extern "C" void func_003A5408(cUIMenu* uiMenu, signed char scrollItemOffset) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5410);
 #ifdef SKIP_ASM
+/**
+ * Returns the menu's selected item (mpSelected).
+ *
+ * @param uiMenu  the cUIMenu
+ * @return mpSelected
+ */
 extern "C" int func_003A5410(cUIMenu* uiMenu) {
     return ((int)uiMenu->mpSelected);
 }
@@ -1994,6 +2453,12 @@ extern "C" int func_003A5410(cUIMenu* uiMenu) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5418);
 #ifdef SKIP_ASM
+/**
+ * Returns the menu's selected item index (mScrollItemCurrent, the same byte func_003A53E0 returns).
+ *
+ * @param uiMenu  the cUIMenu
+ * @return mScrollItemCurrent
+ */
 extern "C" unsigned char func_003A5418(cUIMenu* uiMenu) {
     return (uiMenu->mScrollItemCurrent);
 }
@@ -2005,6 +2470,14 @@ extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
 extern "C" void* func_003A5508(void* p);
 extern void* cUIPair_vtbl[];
 
+/**
+ * Constructs a cUIPair with no screen or parent: runs cUIThing_cUIThing(this, 0, 0), stores cUIPair_vtbl and constructs
+ * mAttrPair (+0x74) with func_003A5508.
+ *
+ * Unlike cUIPair_cUIPair it leaves mpEntry / mpWidget unset. Nothing in retail calls it.
+ *
+ * @return the object
+ */
 extern "C" void* func_003A5420(cUIPair* self)
 {
     cUIThing_cUIThing(((char*)self), 0, 0);
@@ -2080,6 +2553,12 @@ int cUIPair_getType(void* self)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5508);
 #ifdef SKIP_ASM
+/**
+ * Clears the two 6-bit pivot fields of a cUIPair's tAttrPair (mEntryPivot in byte 0, mWidgetPivot in byte 1) and
+ * returns it: the tAttrPair constructor, run on cUIPair + 0x74.
+ *
+ * @return the tAttrPair
+ */
 extern "C" void* func_003A5508(void* self)
 {
     *(unsigned char*)((char*)self + 0x1) &= 0xc0;
@@ -2091,6 +2570,12 @@ extern "C" void* func_003A5508(void* self)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5528);
 #ifdef SKIP_ASM
+/**
+ * Returns the pair's entry (label) object (mpEntry).
+ *
+ * @param uiPair  the cUIPair
+ * @return mpEntry
+ */
 extern "C" int func_003A5528(cUIPair* uiPair) {
     return ((int)uiPair->mpEntry);
 }
@@ -2123,6 +2608,12 @@ extern "C" void cUIPair_setEntry(cUIPair* self, void* obj)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5580);
 #ifdef SKIP_ASM
+/**
+ * Returns the pair's widget (value) object (mpWidget).
+ *
+ * @param uiPair  the cUIPair
+ * @return mpWidget
+ */
 extern "C" int func_003A5580(cUIPair* uiPair) {
     return ((int)uiPair->mpWidget);
 }
@@ -2160,6 +2651,15 @@ extern "C" unsigned char *func_003A65A0(unsigned char *arg0);
 extern "C" void *func_003A65B8(void *arg0);
 extern void* cUIListBox_vtbl[];
 
+/**
+ * Constructs a cUIListBox with no screen or parent: runs cUIThing_cUIThing(this, 0, 0), stores cUIListBox_vtbl,
+ * constructs mAttrListBox (+0x74) with func_003A65A0 and each of the 32 mpEntries (0x14 bytes from +0x98) with
+ * func_003A65B8.
+ *
+ * Unlike cUIListBox_cUIListBox it leaves mNumEntries, mCurrentEntry and the colours unset. Nothing in retail calls it.
+ *
+ * @return the object
+ */
 extern "C" void* func_003A55D8(cUIListBox* self)
 {
     int i;
@@ -2217,6 +2717,12 @@ int cUIListBox_getType(void* self)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A56A8);
 #ifdef SKIP_ASM
+/**
+ * Sets the list box's font index (mAttrListBox bits 0-1, mFont) to the low two bits of @p font.
+ *
+ * @param uiListBox  the cUIListBox
+ * @param font  the font index (0..3)
+ */
 extern "C" void func_003A56A8(cUIListBox* uiListBox, int font) {
     (*(int*)&uiListBox->mAttrListBox) = (int) (((*(int*)&uiListBox->mAttrListBox) & ~3) | (font & 3));
 }
@@ -2224,6 +2730,12 @@ extern "C" void func_003A56A8(cUIListBox* uiListBox, int font) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A56C8);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the list box draws its text with a shadow (mAttrListBox bit 2, mShadow).
+ *
+ * @param uiListBox  the cUIListBox
+ * @return 1 when shadowed, else 0
+ */
 extern "C" int func_003A56C8(cUIListBox* uiListBox) {
     return ((int) (*(int*)&uiListBox->mAttrListBox) >> 2) & 1;
 }
@@ -2245,6 +2757,12 @@ extern "C" void cUIListBox_setShadow(cUIListBox* self, int enable) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A56F8);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the list box uses its static colour (mAttrListBox bit 5, mStaticColour).
+ *
+ * @param uiListBox  the cUIListBox
+ * @return 1 when set, else 0
+ */
 extern "C" int func_003A56F8(cUIListBox* uiListBox) {
     return ((int) (*(int*)&uiListBox->mAttrListBox) >> 5) & 1;
 }
@@ -2267,6 +2785,12 @@ extern "C" void cUIListBox_setUseStaticColour(cUIListBox* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5728);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the list box wraps around at its ends: the cUIThing wrap flag (mAttr bit 7).
+ *
+ * @param uiListBox  the cUIListBox
+ * @return 1 when wrapping, else 0
+ */
 extern "C" int func_003A5728(cUIListBox* uiListBox) {
     int wrapBits = uiListBox->mAttr >> 7;
     return wrapBits & 1;
@@ -2275,6 +2799,11 @@ extern "C" int func_003A5728(cUIListBox* uiListBox) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5738);
 #ifdef SKIP_ASM
+/**
+ * Sets the list box's wrap flag (cUIThing mAttr bit 7) to the low bit of @p enable.
+ *
+ * @param enable  1 to wrap around at the ends, 0 not to
+ */
 extern "C" void func_003A5738(cUIListBox* self, int enable)
 {
     ((sUIVectorFlags8*)((char*)self + 0x14))->bit7 = enable;
@@ -2309,6 +2838,12 @@ extern "C" void cUIListBox_setStaticColour(cUIListBox* self, tARGB* in)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A57A8);
 #ifdef SKIP_ASM
+/**
+ * Returns the index of the list box's current entry (mCurrentEntry).
+ *
+ * @param uiListBox  the cUIListBox
+ * @return mCurrentEntry
+ */
 extern "C" unsigned char func_003A57A8(cUIListBox* uiListBox) {
     return (uiListBox->mCurrentEntry);
 }
@@ -2316,6 +2851,12 @@ extern "C" unsigned char func_003A57A8(cUIListBox* uiListBox) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A57B0);
 #ifdef SKIP_ASM
+/**
+ * Returns the number of entries in the list box (mNumEntries).
+ *
+ * @param uiListBox  the cUIListBox
+ * @return mNumEntries
+ */
 extern "C" unsigned char func_003A57B0(cUIListBox* uiListBox) {
     return (uiListBox->mNumEntries);
 }
@@ -2327,6 +2868,16 @@ extern "C" void* cList_cList(void* p);
 extern "C" void* func_003A65D8(void* p);
 extern void* D_004946C8[];
 
+/**
+ * Constructs a bare cUIState: links the node to itself (mpPrev = mpNext = this), stores the cUIState vtable D_004946C8,
+ * constructs the tAttrState word mAttrState with func_003A65D8 (visible, first time, mode 2) and the screen list
+ * mScreens with cList_cList.
+ *
+ * Unlike func_0039E2A0 / func_0039E318 it sets no engine, parent, controller or user fields. Nothing in retail calls
+ * it.
+ *
+ * @return the object
+ */
 extern "C" void* func_003A57B8(cUIState* self)
 {
     self->mpNext = (cListNode*)((char*)self);
@@ -2340,6 +2891,12 @@ extern "C" void* func_003A57B8(cUIState* self)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5800);
 #ifdef SKIP_ASM
+/**
+ * Sets the state's hash name (mHashName, the state id) to @p hashName.
+ *
+ * @param uiState  the cUIState
+ * @param hashName  the hashed name
+ */
 extern "C" void func_003A5800(cUIState* uiState, int hashName) {
     (uiState->mHashName) = hashName;
 }
@@ -2347,6 +2904,12 @@ extern "C" void func_003A5800(cUIState* uiState, int hashName) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5808);
 #ifdef SKIP_ASM
+/**
+ * Returns the state's hash name (mHashName, the state id).
+ *
+ * @param uiState  the cUIState
+ * @return mHashName
+ */
 extern "C" int func_003A5808(cUIState* uiState) {
     return (uiState->mHashName);
 }
@@ -2354,6 +2917,12 @@ extern "C" int func_003A5808(cUIState* uiState) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5810);
 #ifdef SKIP_ASM
+/**
+ * Returns the UI engine that owns the state (mpEngine).
+ *
+ * @param uiState  the cUIState
+ * @return mpEngine
+ */
 extern "C" int func_003A5810(cUIState* uiState) {
     return ((int)uiState->mpEngine);
 }
@@ -2361,6 +2930,12 @@ extern "C" int func_003A5810(cUIState* uiState) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5818);
 #ifdef SKIP_ASM
+/**
+ * Sets the state's current controller (mCurrentCtrl) to @p currentCtrl.
+ *
+ * @param uiState  the cUIState
+ * @param currentCtrl  the controller index (-1 for none)
+ */
 extern "C" void func_003A5818(cUIState* uiState, signed char currentCtrl) {
     (uiState->mCurrentCtrl) = currentCtrl;
 }
@@ -2368,6 +2943,12 @@ extern "C" void func_003A5818(cUIState* uiState, signed char currentCtrl) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5820);
 #ifdef SKIP_ASM
+/**
+ * Returns the state's current controller (mCurrentCtrl, sign-extended; -1 for none).
+ *
+ * @param uiState  the cUIState
+ * @return mCurrentCtrl
+ */
 extern "C" signed char func_003A5820(cUIState* uiState) {
     return (uiState->mCurrentCtrl);
 }
@@ -2375,6 +2956,12 @@ extern "C" signed char func_003A5820(cUIState* uiState) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5828);
 #ifdef SKIP_ASM
+/**
+ * Sets the state's whole controller bit mask (mCtrlBits) to @p ctrlBits.
+ *
+ * @param uiState  the cUIState
+ * @param ctrlBits  one bit per controller that may drive the state
+ */
 extern "C" void func_003A5828(cUIState* uiState, signed char ctrlBits) {
     (*(signed char*)&uiState->mCtrlBits) = ctrlBits;
 }
@@ -2382,6 +2969,12 @@ extern "C" void func_003A5828(cUIState* uiState, signed char ctrlBits) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5830);
 #ifdef SKIP_ASM
+/**
+ * Returns the state's controller bit mask (mCtrlBits).
+ *
+ * @param uiState  the cUIState
+ * @return mCtrlBits
+ */
 extern "C" unsigned char func_003A5830(cUIState* uiState) {
     return (uiState->mCtrlBits);
 }
@@ -2389,6 +2982,12 @@ extern "C" unsigned char func_003A5830(cUIState* uiState) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5838);
 #ifdef SKIP_ASM
+/**
+ * Returns the state's caller-defined data word (miMiscData).
+ *
+ * @param uiState  the cUIState
+ * @return miMiscData
+ */
 extern "C" int func_003A5838(cUIState* uiState) {
     return (uiState->miMiscData);
 }
@@ -2396,6 +2995,12 @@ extern "C" int func_003A5838(cUIState* uiState) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5840);
 #ifdef SKIP_ASM
+/**
+ * Sets the state's caller-defined data word (miMiscData) to @p miscData.
+ *
+ * @param uiState  the cUIState
+ * @param miscData  the value to store
+ */
 extern "C" void func_003A5840(cUIState* uiState, int miscData) {
     (uiState->miMiscData) = miscData;
 }
@@ -2403,6 +3008,12 @@ extern "C" void func_003A5840(cUIState* uiState, int miscData) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5848);
 #ifdef SKIP_ASM
+/**
+ * Returns the state's mode (mAttrState bits 8-13, read from byte +0x1D; the constructors start it at 2).
+ *
+ * @param uiState  the cUIState
+ * @return the mode (0..63)
+ */
 extern "C" int func_003A5848(cUIState* uiState) {
     return (*(unsigned char *)((char*)(uiState) + (0x1D))) & 0x3F;
 }
@@ -2410,6 +3021,12 @@ extern "C" int func_003A5848(cUIState* uiState) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5858);
 #ifdef SKIP_ASM
+/**
+ * Sets the state's mode (mAttrState bits 8-13) to the low six bits of @p mode.
+ *
+ * @param uiState  the cUIState
+ * @param mode  the mode (0..63)
+ */
 extern "C" void func_003A5858(cUIState* uiState, int mode) {
     (uiState->mAttrState) = (int) (((uiState->mAttrState) & ~0x3F00) | ((mode & 0x3F) << 8));
 }
@@ -2417,6 +3034,12 @@ extern "C" void func_003A5858(cUIState* uiState, int mode) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5878);
 #ifdef SKIP_ASM
+/**
+ * Returns the state's first-time flag (mAttrState bit 4).
+ *
+ * @param uiState  the cUIState
+ * @return 1 when set, else 0
+ */
 extern "C" int func_003A5878(cUIState* uiState) {
     return ((int) (uiState->mAttrState) >> 4) & 1;
 }
@@ -2424,6 +3047,12 @@ extern "C" int func_003A5878(cUIState* uiState) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5888);
 #ifdef SKIP_ASM
+/**
+ * Sets the state's first-time flag (mAttrState bit 4) to the low bit of @p firstTime.
+ *
+ * @param uiState  the cUIState
+ * @param firstTime  1 to set the flag, 0 to clear it
+ */
 extern "C" void func_003A5888(cUIState* uiState, int firstTime) {
     (uiState->mAttrState) = (int) (((uiState->mAttrState) & ~0x10) | ((firstTime & 1) * 0x10));
 }
@@ -2431,6 +3060,12 @@ extern "C" void func_003A5888(cUIState* uiState, int firstTime) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A58A8);
 #ifdef SKIP_ASM
+/**
+ * Returns the state's enabled flag (mAttrState bit 5).
+ *
+ * @param uiState  the cUIState
+ * @return 1 when enabled, else 0
+ */
 extern "C" int func_003A58A8(cUIState* uiState) {
     return ((int) (uiState->mAttrState) >> 5) & 1;
 }
@@ -2438,6 +3073,12 @@ extern "C" int func_003A58A8(cUIState* uiState) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A58B8);
 #ifdef SKIP_ASM
+/**
+ * Sets the state's enabled flag (mAttrState bit 5) to the low bit of @p enabled.
+ *
+ * @param uiState  the cUIState
+ * @param enabled  1 to enable the state, 0 to disable it
+ */
 extern "C" void func_003A58B8(cUIState* uiState, int enabled) {
     (uiState->mAttrState) = (int) (((uiState->mAttrState) & ~0x20) | ((enabled & 1) << 5));
 }
@@ -2445,6 +3086,12 @@ extern "C" void func_003A58B8(cUIState* uiState, int enabled) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A58D8);
 #ifdef SKIP_ASM
+/**
+ * Returns the state's push-check flag (mAttrState bit 14).
+ *
+ * @param uiState  the cUIState
+ * @return 1 when set, else 0
+ */
 extern "C" int func_003A58D8(cUIState* uiState) {
     return ((int) (uiState->mAttrState) >> 0xE) & 1;
 }
@@ -2452,6 +3099,12 @@ extern "C" int func_003A58D8(cUIState* uiState) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A58E8);
 #ifdef SKIP_ASM
+/**
+ * Sets the state's push-check flag (mAttrState bit 14) to the low bit of @p pushCheck.
+ *
+ * @param uiState  the cUIState
+ * @param pushCheck  1 to set the flag, 0 to clear it
+ */
 extern "C" void func_003A58E8(cUIState* uiState, int pushCheck) {
     (uiState->mAttrState) = (int) (((uiState->mAttrState) & ~0x4000) | ((pushCheck & 1) << 0xE));
 }
@@ -2459,6 +3112,12 @@ extern "C" void func_003A58E8(cUIState* uiState, int pushCheck) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5908);
 #ifdef SKIP_ASM
+/**
+ * Returns the state's pop-floor flag (mAttrState bit 15).
+ *
+ * @param uiState  the cUIState
+ * @return 1 when set, else 0
+ */
 extern "C" int func_003A5908(cUIState* uiState) {
     return ((int) (uiState->mAttrState) >> 0xF) & 1;
 }
@@ -2466,6 +3125,12 @@ extern "C" int func_003A5908(cUIState* uiState) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5918);
 #ifdef SKIP_ASM
+/**
+ * Sets the state's pop-floor flag (mAttrState bit 15) to the low bit of @p popFloor.
+ *
+ * @param uiState  the cUIState
+ * @param popFloor  1 to set the flag, 0 to clear it
+ */
 extern "C" void func_003A5918(cUIState* uiState, int popFloor) {
     (uiState->mAttrState) = (int) (((uiState->mAttrState) & 0xFFFF7FFF) | ((popFloor & 1) << 0xF));
 }
@@ -2473,6 +3138,12 @@ extern "C" void func_003A5918(cUIState* uiState, int popFloor) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5940);
 #ifdef SKIP_ASM
+/**
+ * Returns the state's explicit flag (mAttrState bit 6).
+ *
+ * @param uiState  the cUIState
+ * @return 1 when set, else 0
+ */
 extern "C" int func_003A5940(cUIState* uiState) {
     return ((int) (uiState->mAttrState) >> 6) & 1;
 }
@@ -2480,6 +3151,12 @@ extern "C" int func_003A5940(cUIState* uiState) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5950);
 #ifdef SKIP_ASM
+/**
+ * Sets the state's explicit flag (mAttrState bit 6) to the low bit of @p isExplicit.
+ *
+ * @param uiState  the cUIState
+ * @param isExplicit  1 to set the flag, 0 to clear it
+ */
 extern "C" void func_003A5950(cUIState* uiState, int isExplicit) {
     (uiState->mAttrState) = (int) (((uiState->mAttrState) & ~0x40) | ((isExplicit & 1) << 6));
 }
@@ -2487,6 +3164,12 @@ extern "C" void func_003A5950(cUIState* uiState, int isExplicit) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5970);
 #ifdef SKIP_ASM
+/**
+ * Returns the state's pending-delete flag (mAttrState bit 7).
+ *
+ * @param uiState  the cUIState
+ * @return 1 when set, else 0
+ */
 extern "C" int func_003A5970(cUIState* uiState) {
     int pendingBits = uiState->mAttrState >> 7;
     return pendingBits & 1;
@@ -2495,6 +3178,12 @@ extern "C" int func_003A5970(cUIState* uiState) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5980);
 #ifdef SKIP_ASM
+/**
+ * Sets the state's pending-delete flag (mAttrState bit 7) to the low bit of @p pendingDelete.
+ *
+ * @param uiState  the cUIState
+ * @param pendingDelete  1 to set the flag, 0 to clear it
+ */
 extern "C" void func_003A5980(cUIState* uiState, int pendingDelete) {
     (uiState->mAttrState) = (int) (((uiState->mAttrState) & ~0x80) | ((pendingDelete & 1) << 7));
 }
@@ -2502,6 +3191,12 @@ extern "C" void func_003A5980(cUIState* uiState, int pendingDelete) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A59A0);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the state has a popup open: whether its 2-bit popup count (mAttrState bits 1-2) is non-zero.
+ *
+ * @param uiState  the cUIState
+ * @return 1 when the count is non-zero, else 0
+ */
 extern "C" int func_003A59A0(cUIState* uiState) {
     return ((uiState->mAttrState) & 6) != 0;
 }
@@ -2509,6 +3204,12 @@ extern "C" int func_003A59A0(cUIState* uiState) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A59B0);
 #ifdef SKIP_ASM
+/**
+ * Returns the state's popup count (mAttrState bits 1-2, 0..3).
+ *
+ * @param uiState  the cUIState
+ * @return the popup count
+ */
 extern "C" int func_003A59B0(cUIState* uiState) {
     return ((unsigned int) ((unsigned int)uiState->mAttrState) >> 1) & 3;
 }
@@ -2516,6 +3217,12 @@ extern "C" int func_003A59B0(cUIState* uiState) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A59C0);
 #ifdef SKIP_ASM
+/**
+ * Sets the state's popup count (mAttrState bits 1-2) to the low two bits of @p popupCount.
+ *
+ * @param uiState  the cUIState
+ * @param popupCount  the count (0..3)
+ */
 extern "C" void func_003A59C0(cUIState* uiState, int popupCount) {
     (uiState->mAttrState) = (int) (((uiState->mAttrState) & ~6) | ((popupCount & 3) * 2));
 }
@@ -2552,6 +3259,12 @@ extern "C" void cUIState_decrementPopup(cUIState* self)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5A48);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the state is a popup (mAttrState bit 0).
+ *
+ * @param uiState  the cUIState
+ * @return 1 for a popup, else 0
+ */
 extern "C" int func_003A5A48(cUIState* uiState) {
     return (uiState->mAttrState) & 1;
 }
@@ -2559,6 +3272,12 @@ extern "C" int func_003A5A48(cUIState* uiState) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5A58);
 #ifdef SKIP_ASM
+/**
+ * Sets the state's popup flag (mAttrState bit 0) to the low bit of @p isPopup.
+ *
+ * @param uiState  the cUIState
+ * @param isPopup  1 to mark the state as a popup, 0 not to
+ */
 extern "C" void func_003A5A58(cUIState* uiState, int isPopup) {
     (uiState->mAttrState) = (int) (((uiState->mAttrState) & ~1) | (isPopup & 1));
 }
@@ -2566,6 +3285,12 @@ extern "C" void func_003A5A58(cUIState* uiState, int isPopup) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5A78);
 #ifdef SKIP_ASM
+/**
+ * Returns the state's visible flag (mAttrState bit 3).
+ *
+ * @param uiState  the cUIState
+ * @return 1 when visible, else 0
+ */
 extern "C" int func_003A5A78(cUIState* uiState) {
     return ((int) (uiState->mAttrState) >> 3) & 1;
 }
@@ -2573,6 +3298,12 @@ extern "C" int func_003A5A78(cUIState* uiState) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5A88);
 #ifdef SKIP_ASM
+/**
+ * Sets the state's visible flag (mAttrState bit 3) to the low bit of @p visible.
+ *
+ * @param uiState  the cUIState
+ * @param visible  1 to show the state, 0 to hide it
+ */
 extern "C" void func_003A5A88(cUIState* uiState, int visible) {
     (uiState->mAttrState) = (int) (((uiState->mAttrState) & ~8) | ((visible & 1) * 8));
 }
@@ -2581,6 +3312,10 @@ extern "C" void func_003A5A88(cUIState* uiState, int visible) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5AA8__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base cUIState's create-screen handler (vtable slot 4), which states override to set up their
+ * screens.
+ */
 void func_003A5AA8(void* self)
 {
 }
@@ -2667,6 +3402,12 @@ int cUIState_onScreenEvent(void* self)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5AE0);
 #ifdef SKIP_ASM
+/**
+ * Sets the state's parent state (mpParentState) to @p parentState.
+ *
+ * @param uiState  the cUIState
+ * @param parentState  the new parent state
+ */
 extern "C" void func_003A5AE0(void *uiState, int parentState) {
     (*(int *)((char*)(uiState) + (0x20))) = parentState;
 }
@@ -2674,6 +3415,12 @@ extern "C" void func_003A5AE0(void *uiState, int parentState) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5AE8);
 #ifdef SKIP_ASM
+/**
+ * Returns the state's parent state (mpParentState).
+ *
+ * @param uiState  the cUIState
+ * @return mpParentState
+ */
 extern "C" int func_003A5AE8(cUIState* uiState) {
     return ((int)uiState->mpParentState);
 }
@@ -2681,6 +3428,12 @@ extern "C" int func_003A5AE8(cUIState* uiState) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5AF0);
 #ifdef SKIP_ASM
+/**
+ * Returns the state's screen (mpScreen).
+ *
+ * @param uiState  the cUIState
+ * @return mpScreen
+ */
 extern "C" int func_003A5AF0(cUIState* uiState) {
     return ((int)uiState->mpScreen);
 }
@@ -2688,6 +3441,12 @@ extern "C" int func_003A5AF0(cUIState* uiState) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5AF8);
 #ifdef SKIP_ASM
+/**
+ * Sets the user (player) number the state belongs to (mUserNum) to @p userNum.
+ *
+ * @param uiState  the cUIState
+ * @param userNum  the user number (-1 for none)
+ */
 extern "C" void func_003A5AF8(cUIState* uiState, signed char userNum) {
     (uiState->mUserNum) = userNum;
 }
@@ -2695,6 +3454,12 @@ extern "C" void func_003A5AF8(cUIState* uiState, signed char userNum) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5B00);
 #ifdef SKIP_ASM
+/**
+ * Returns the user (player) number the state belongs to (mUserNum, sign-extended; -1 for none).
+ *
+ * @param uiState  the cUIState
+ * @return mUserNum
+ */
 extern "C" signed char func_003A5B00(cUIState* uiState) {
     return (uiState->mUserNum);
 }
@@ -2811,6 +3576,14 @@ extern "C" void cListNode_destroyListNode(cListNode* self);
 
 extern void* cListNode_vtbl[];
 
+/**
+ * Destroys a cUIThread: puts back cListNode_vtbl, unlinks the node from its list with cListNode_destroyListNode and
+ * frees it with operator_delete when bit 0 of @p flags is set.
+ *
+ * It is slot 1 (the destructor) of D_004946A0, the vtable cUIScreen_playFrame gives each "UIThread" it creates.
+ *
+ * @param flags  bit 0 set to free the memory
+ */
 extern "C" void func_003A5B48(int* self, int flags)
 {
     *(void***)((char*)self + 0x8) = cListNode_vtbl;
@@ -2829,6 +3602,15 @@ extern "C" void* cList_cList(void* p);
 extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
 extern void* cUIScreen_vtbl[];
 
+/**
+ * Constructs a bare cUIScreen: links the node to itself, stores cUIScreen_vtbl, constructs mAttrScreen
+ * (tAttrScreen_tAttrScreen), the thread list mThreads (cList_cList at +0x18) and the root group mRootGroup
+ * (cUIThing_cUIThing on +0x40 with no screen or parent, cUIGroup_vtbl at +0x48, its child list at +0xB4).
+ *
+ * Unlike cUIScreen_cUIScreen it sets no state, buffer or record pointers. Nothing in retail calls it.
+ *
+ * @return the object
+ */
 extern "C" void* func_003A5B98(cUIScreen* self)
 {
     self->mpNext = (cListNode*)((char*)self);
@@ -2883,6 +3665,12 @@ extern "C" void* cUIScreen_cUIScreen(cUIScreen* self, int pState)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5C98);
 #ifdef SKIP_ASM
+/**
+ * Returns the screen's hash name: the first word of its screen record (mpScreenHeader).
+ *
+ * @param uiScreen  the cUIScreen
+ * @return the record's hash name
+ */
 extern "C" int func_003A5C98(cUIScreen* uiScreen) {
     return *((int*)uiScreen->mpScreenHeader);
 }
@@ -2890,6 +3678,13 @@ extern "C" int func_003A5C98(cUIScreen* uiScreen) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5CA8);
 #ifdef SKIP_ASM
+/**
+ * Sets bit 0 (mFocused) and clears bit 1 (mBufferAlloc) of a cUIScreen's 16-bit tAttrScreen word and returns it: the
+ * tAttrScreen constructor, a copy of tAttrScreen_tAttrScreen. Nothing in retail calls this copy.
+ *
+ * @param attr  the tAttrScreen (cUIScreen + 0x14)
+ * @return @p attr
+ */
 extern "C" unsigned short *func_003A5CA8(unsigned short *attr) {
     *attr = (*attr | 1) & 0xFFFD;
     return attr;
@@ -2898,6 +3693,12 @@ extern "C" unsigned short *func_003A5CA8(unsigned short *attr) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5CC0);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the screen has focus (mAttrScreen bit 0).
+ *
+ * @param uiScreen  the cUIScreen
+ * @return 1 when focused, else 0
+ */
 extern "C" int func_003A5CC0(cUIScreen* uiScreen) {
     return (uiScreen->mAttrScreen) & 1;
 }
@@ -2905,6 +3706,12 @@ extern "C" int func_003A5CC0(cUIScreen* uiScreen) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5CD0);
 #ifdef SKIP_ASM
+/**
+ * Sets the screen's focus flag (mAttrScreen bit 0) to @p focused != 0.
+ *
+ * @param uiScreen  the cUIScreen
+ * @param focused  non-zero to give the screen focus
+ */
 extern "C" void func_003A5CD0(cUIScreen* uiScreen, int focused) {
     (uiScreen->mAttrScreen) = (int) (((uiScreen->mAttrScreen) & ~1) | (focused != 0));
 }
@@ -2914,6 +3721,12 @@ INCLUDE_ASM("ui/uivector", func_003A5CF0);
 #ifdef SKIP_ASM
 extern "C" void cList_addToEnd__FP5cListP9cListNode(int);
 
+/**
+ * Appends a UI object to the screen's root group: cList_addToEnd__FP5cListP9cListNode on mRootGroup's child list
+ * (+0xB4), with the object the caller passes in the second argument register going through untouched.
+ *
+ * @param screen  the cUIScreen (as an address)
+ */
 extern "C" void func_003A5CF0(int screen) {
     cList_addToEnd__FP5cListP9cListNode(screen + 180);
 }
@@ -2921,6 +3734,12 @@ extern "C" void func_003A5CF0(int screen) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5D10);
 #ifdef SKIP_ASM
+/**
+ * Returns the address of the screen's root group (mRootGroup, +0x40).
+ *
+ * @param screen  the cUIScreen (as an address)
+ * @return a pointer to mRootGroup
+ */
 extern "C" int func_003A5D10(int screen) {
     return screen + 0x40;
 }
@@ -2941,6 +3760,12 @@ extern "C" void cUIScreen_setVisible(cUIScreen* self, int enable)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5D38);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the screen is visible: the visible bit (bit 6) of its root group's mAttr (+0x54).
+ *
+ * @param uiScreen  the cUIScreen
+ * @return 1 when visible, else 0
+ */
 extern "C" int func_003A5D38(cUIScreen* uiScreen) {
     return ((int) (*(int *)((char*)(uiScreen) + (0x54))) >> 6) & 1;
 }
@@ -2948,6 +3773,12 @@ extern "C" int func_003A5D38(cUIScreen* uiScreen) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5D48);
 #ifdef SKIP_ASM
+/**
+ * Returns the UI engine of the screen's state (mpState's mpEngine).
+ *
+ * @param uiScreen  the cUIScreen
+ * @return the state's engine
+ */
 extern "C" int func_003A5D48(cUIScreen* uiScreen) {
     return (*(int *)((char*)((uiScreen->mpState)) + (0x10)));
 }
@@ -2955,6 +3786,12 @@ extern "C" int func_003A5D48(cUIScreen* uiScreen) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5D58);
 #ifdef SKIP_ASM
+/**
+ * Returns the state that owns the screen (mpState).
+ *
+ * @param uiScreen  the cUIScreen
+ * @return mpState
+ */
 extern "C" int func_003A5D58(cUIScreen* uiScreen) {
     return ((int)uiScreen->mpState);
 }
@@ -2966,6 +3803,14 @@ extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
 extern "C" unsigned char* func_003A65E8(unsigned char* p);
 extern void* cUIText_vtbl[];
 
+/**
+ * Constructs a cUIText with no screen or parent: runs cUIThing_cUIThing(this, 0, 0), stores cUIText_vtbl and constructs
+ * the tAttrText word mAttrText (+0x74) with func_003A65E8.
+ *
+ * Unlike func_003A0348 it leaves the colours and the string members unset. Nothing in retail calls it.
+ *
+ * @return the object
+ */
 extern "C" void* func_003A5D60(cUIText* self)
 {
     cUIThing_cUIThing(((char*)self), 0, 0);
@@ -3019,6 +3864,12 @@ int cUIText_getType(void* self)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5DF8);
 #ifdef SKIP_ASM
+/**
+ * Sets the text's font index (mAttrText bits 0-1, mFont) to the low two bits of @p fontIndex.
+ *
+ * @param uiText  the cUIText
+ * @param fontIndex  the font index (0..3)
+ */
 extern "C" void func_003A5DF8(cUIText* uiText, int fontIndex) {
     (uiText->mAttrText) = (int) (((uiText->mAttrText) & ~3) | (fontIndex & 3));
 }
@@ -3026,6 +3877,12 @@ extern "C" void func_003A5DF8(cUIText* uiText, int fontIndex) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5E18);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the text is drawn with a shadow (mAttrText bit 2, mShadow).
+ *
+ * @param uiText  the cUIText
+ * @return 1 when shadowed, else 0
+ */
 extern "C" int func_003A5E18(cUIText* uiText) {
     return ((int) (uiText->mAttrText) >> 2) & 1;
 }
@@ -3033,6 +3890,12 @@ extern "C" int func_003A5E18(cUIText* uiText) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5E28);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the text holds a Unicode (UCS-2) string (mAttrText bit 3, mUnicode).
+ *
+ * @param uiText  the cUIText
+ * @return 1 for Unicode, else 0
+ */
 extern "C" int func_003A5E28(cUIText* uiText) {
     return ((int) (uiText->mAttrText) >> 3) & 1;
 }
@@ -3040,6 +3903,13 @@ extern "C" int func_003A5E28(cUIText* uiText) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5E38);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the text uses its static colour (mAttrText bit 4), which cUIText_render2D applies when the thing is
+ * static.
+ *
+ * @param uiText  the cUIText
+ * @return 1 when set, else 0
+ */
 extern "C" int func_003A5E38(cUIText* uiText) {
     return ((int) (uiText->mAttrText) >> 4) & 1;
 }
@@ -3047,6 +3917,13 @@ extern "C" int func_003A5E38(cUIText* uiText) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5E48);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the text uses its disabled colour (mAttrText bit 5), which cUIText_render2D applies when the thing is
+ * not enabled.
+ *
+ * @param uiText  the cUIText
+ * @return 1 when set, else 0
+ */
 extern "C" int func_003A5E48(cUIText* uiText) {
     return ((int) (uiText->mAttrText) >> 5) & 1;
 }
@@ -3054,6 +3931,12 @@ extern "C" int func_003A5E48(cUIText* uiText) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5E58);
 #ifdef SKIP_ASM
+/**
+ * Returns the text's ellipses flag (mAttrText bit 6).
+ *
+ * @param uiText  the cUIText
+ * @return 1 when set, else 0
+ */
 extern "C" int func_003A5E58(cUIText* uiText) {
     return ((int) (uiText->mAttrText) >> 6) & 1;
 }
@@ -3161,6 +4044,12 @@ extern "C" void cUIText_setStaticColour(cUIText* self, tARGB* in)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A5F58);
 #ifdef SKIP_ASM
+/**
+ * Returns the text's string-table id (mStringID; 0 when the text was set directly).
+ *
+ * @param uiText  the cUIText
+ * @return mStringID
+ */
 extern "C" int func_003A5F58(cUIText* uiText) {
     return (uiText->mStringID);
 }
@@ -3171,6 +4060,12 @@ INCLUDE_ASM("ui/uivector", func_003A5F60);
 extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
 extern void* cUIScrollBar_vtbl[];
 
+/**
+ * Constructs a cUIScrollBar with no screen or parent: runs cUIThing_cUIThing(this, 0, 0) and stores cUIScrollBar_vtbl;
+ * no scroll-bar member is set. Nothing in retail calls it.
+ *
+ * @return the object
+ */
 extern "C" void* func_003A5F60(cUIScrollBar* self)
 {
     cUIThing_cUIThing(((char*)self), 0, 0);
@@ -3230,6 +4125,12 @@ int cUIScrollBar_getType(void* self)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6008);
 #ifdef SKIP_ASM
+/**
+ * Sets the scroll bar's background object (mpObjBackground) to @p background.
+ *
+ * @param scrollBar  the cUIScrollBar
+ * @param background  the background UI object
+ */
 extern "C" void func_003A6008(void *scrollBar, int background) {
     (*(int *)((char*)(scrollBar) + (0x74))) = background;
 }
@@ -3237,6 +4138,12 @@ extern "C" void func_003A6008(void *scrollBar, int background) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6010);
 #ifdef SKIP_ASM
+/**
+ * Sets the scroll bar's knob object (mpObjKnob) to @p knob.
+ *
+ * @param scrollBar  the cUIScrollBar
+ * @param knob  the knob UI object
+ */
 extern "C" void func_003A6010(void *scrollBar, int knob) {
     (*(int *)((char*)(scrollBar) + (0x78))) = knob;
 }
@@ -3244,6 +4151,12 @@ extern "C" void func_003A6010(void *scrollBar, int knob) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6018);
 #ifdef SKIP_ASM
+/**
+ * Sets the scroll bar's up-arrow object (mpUpArrow) to @p upArrow.
+ *
+ * @param scrollBar  the cUIScrollBar
+ * @param upArrow  the up-arrow UI object
+ */
 extern "C" void func_003A6018(void *scrollBar, int upArrow) {
     (*(int *)((char*)(scrollBar) + (0x7C))) = upArrow;
 }
@@ -3251,6 +4164,12 @@ extern "C" void func_003A6018(void *scrollBar, int upArrow) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6020);
 #ifdef SKIP_ASM
+/**
+ * Sets the scroll bar's down-arrow object (mpDownArrow) to @p downArrow.
+ *
+ * @param scrollBar  the cUIScrollBar
+ * @param downArrow  the down-arrow UI object
+ */
 extern "C" void func_003A6020(void *scrollBar, int downArrow) {
     (*(int *)((char*)(scrollBar) + (0x80))) = downArrow;
 }
@@ -3258,6 +4177,12 @@ extern "C" void func_003A6020(void *scrollBar, int downArrow) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6028);
 #ifdef SKIP_ASM
+/**
+ * Sets the object the scroll bar hides when there is nothing to scroll (mpHideOnEmpty) to @p hideOnEmpty.
+ *
+ * @param scrollBar  the cUIScrollBar
+ * @param hideOnEmpty  the UI object to hide
+ */
 extern "C" void func_003A6028(void *scrollBar, int hideOnEmpty) {
     (*(int *)((char*)(scrollBar) + (0x84))) = hideOnEmpty;
 }
@@ -3265,6 +4190,12 @@ extern "C" void func_003A6028(void *scrollBar, int hideOnEmpty) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6030);
 #ifdef SKIP_ASM
+/**
+ * Sets the scroll bar's hide mode (meHideState) to @p hideState.
+ *
+ * @param uiScrollBar  the cUIScrollBar
+ * @param hideState  the eScrollBarHide value
+ */
 extern "C" void func_003A6030(cUIScrollBar* uiScrollBar, int hideState) {
     (uiScrollBar->meHideState) = hideState;
 }
@@ -3275,6 +4206,12 @@ INCLUDE_ASM("ui/uivector", func_003A6038);
 extern "C" unsigned int strlen(const char*);
 extern "C" char* strcpy(char*, const char*);
 
+/**
+ * Copies @p str into the scroll bar's up-animation name (mszUpAnimation, 25 bytes); a name of 25 or more characters is
+ * not copied and the name is set to empty instead.
+ *
+ * @param str  the animation name
+ */
 extern "C" void func_003A6038(cUIScrollBar* self, char* str)
 {
     if (strlen(str) >= 25U) {
@@ -3290,6 +4227,12 @@ INCLUDE_ASM("ui/uivector", func_003A6088);
 extern "C" unsigned int strlen(const char*);
 extern "C" char* strcpy(char*, const char*);
 
+/**
+ * Copies @p str into the scroll bar's down-animation name (mszDownAnimation, 25 bytes); a name of 25 or more characters
+ * is not copied and the name is set to empty instead.
+ *
+ * @param str  the animation name
+ */
 extern "C" void func_003A6088(cUIScrollBar* self, char* str)
 {
     if (strlen(str) >= 25U) {
@@ -3302,6 +4245,12 @@ extern "C" void func_003A6088(cUIScrollBar* self, char* str)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A60D8);
 #ifdef SKIP_ASM
+/**
+ * Returns the scroll bar's current position (mValue).
+ *
+ * @param uiScrollBar  the cUIScrollBar
+ * @return mValue
+ */
 extern "C" int func_003A60D8(cUIScrollBar* uiScrollBar) {
     return (uiScrollBar->mValue);
 }
@@ -3312,6 +4261,12 @@ INCLUDE_ASM("ui/uivector", func_003A60E0);
 extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
 extern void* cUIProgress_vtbl[];
 
+/**
+ * Constructs a cUIProgress with no screen or parent: runs cUIThing_cUIThing(this, 0, 0) and stores cUIProgress_vtbl; no
+ * progress-bar member is set. Nothing in retail calls it.
+ *
+ * @return the object
+ */
 extern "C" void* func_003A60E0(cUIProgress* self)
 {
     cUIThing_cUIThing(((char*)self), 0, 0);
@@ -3362,6 +4317,12 @@ int cUIProgress_getType(void* self)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6170);
 #ifdef SKIP_ASM
+/**
+ * Sets the progress bar's background object (mpObjBackground) to @p background.
+ *
+ * @param progress  the cUIProgress
+ * @param background  the background UI object
+ */
 extern "C" void func_003A6170(void *progress, int background) {
     (*(int *)((char*)(progress) + (0x74))) = background;
 }
@@ -3369,6 +4330,12 @@ extern "C" void func_003A6170(void *progress, int background) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6178);
 #ifdef SKIP_ASM
+/**
+ * Sets the progress bar's knob object (mpObjKnob) to @p knob.
+ *
+ * @param progress  the cUIProgress
+ * @param knob  the knob UI object
+ */
 extern "C" void func_003A6178(void *progress, int knob) {
     (*(int *)((char*)(progress) + (0x78))) = knob;
 }
@@ -3376,6 +4343,12 @@ extern "C" void func_003A6178(void *progress, int knob) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6180);
 #ifdef SKIP_ASM
+/**
+ * Returns the progress bar's value (mValue).
+ *
+ * @param uiProgress  the cUIProgress
+ * @return mValue
+ */
 extern "C" int func_003A6180(cUIProgress* uiProgress) {
     return (uiProgress->mValue);
 }
@@ -3383,6 +4356,12 @@ extern "C" int func_003A6180(cUIProgress* uiProgress) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6188);
 #ifdef SKIP_ASM
+/**
+ * Sets the progress bar's number of steps (mNumValues) to @p numValues.
+ *
+ * @param uiProgress  the cUIProgress
+ * @param numValues  the step count
+ */
 extern "C" void func_003A6188(cUIProgress* uiProgress, int numValues) {
     (uiProgress->mNumValues) = numValues;
 }
@@ -3393,6 +4372,12 @@ INCLUDE_ASM("ui/uivector", func_003A6190);
 extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
 extern void* cUISlider_vtbl[];
 
+/**
+ * Constructs a cUISlider with no screen or parent: runs cUIThing_cUIThing(this, 0, 0) and stores cUISlider_vtbl; no
+ * slider member is set. Nothing in retail calls it.
+ *
+ * @return the object
+ */
 extern "C" void* func_003A6190(cUISlider* self)
 {
     cUIThing_cUIThing(((char*)self), 0, 0);
@@ -3430,6 +4415,11 @@ extern "C" void* cUISlider_cUISlider(cUISlider* self)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6220__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns 22, the UI object type of a slider (cUISlider vtable slot 21).
+ *
+ * @return 22
+ */
 int func_003A6220(void* self)
 {
     return 22;
@@ -3439,6 +4429,12 @@ int func_003A6220(void* self)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6228);
 #ifdef SKIP_ASM
+/**
+ * Returns the slider's value (mValue).
+ *
+ * @param uiSlider  the cUISlider
+ * @return mValue
+ */
 extern "C" int func_003A6228(cUISlider* uiSlider) {
     return (uiSlider->mValue);
 }
@@ -3446,6 +4442,12 @@ extern "C" int func_003A6228(cUISlider* uiSlider) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6230);
 #ifdef SKIP_ASM
+/**
+ * Sets the slider's value (mValue) to @p value, with no range check.
+ *
+ * @param uiSlider  the cUISlider
+ * @param value  the new value
+ */
 extern "C" void func_003A6230(cUISlider* uiSlider, int value) {
     (uiSlider->mValue) = value;
 }
@@ -3453,6 +4455,12 @@ extern "C" void func_003A6230(cUISlider* uiSlider, int value) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6238);
 #ifdef SKIP_ASM
+/**
+ * Sets the slider's number of steps (mNumValues) to @p numValues.
+ *
+ * @param uiSlider  the cUISlider
+ * @param numValues  the step count
+ */
 extern "C" void func_003A6238(cUISlider* uiSlider, int numValues) {
     (uiSlider->mNumValues) = numValues;
 }
@@ -3460,6 +4468,12 @@ extern "C" void func_003A6238(cUISlider* uiSlider, int numValues) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6240);
 #ifdef SKIP_ASM
+/**
+ * Sets the slider's background object (mpObjBackground) to @p background.
+ *
+ * @param slider  the cUISlider
+ * @param background  the background UI object
+ */
 extern "C" void func_003A6240(void *slider, int background) {
     (*(int *)((char*)(slider) + (0x88))) = background;
 }
@@ -3467,6 +4481,12 @@ extern "C" void func_003A6240(void *slider, int background) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6248);
 #ifdef SKIP_ASM
+/**
+ * Sets the slider's knob object (mpObjKnob) to @p knob.
+ *
+ * @param slider  the cUISlider
+ * @param knob  the knob UI object
+ */
 extern "C" void func_003A6248(void *slider, int knob) {
     (*(int *)((char*)(slider) + (0x8C))) = knob;
 }
@@ -3479,6 +4499,15 @@ extern "C" void* cList_cList(void* p);
 extern "C" unsigned char* func_003A6600(unsigned char* p);
 extern void* cUITextScroll_vtbl[];
 
+/**
+ * Constructs a cUITextScroll with no screen or parent: runs cUIThing_cUIThing(this, 0, 0), stores cUITextScroll_vtbl,
+ * constructs the tAttrTextScroll byte mAttrTextScroll (+0x74) with func_003A6600 and the line list mList (+0x8C) with
+ * cList_cList.
+ *
+ * Unlike cUITextScroll_cUITextScroll it sets no colours, input map or line state. Nothing in retail calls it.
+ *
+ * @return the object
+ */
 extern "C" void* func_003A6250(cUITextScroll* self)
 {
     cUIThing_cUIThing(((char*)self), 0, 0);
@@ -3542,6 +4571,12 @@ int cUITextScroll_getType(void* self)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6338);
 #ifdef SKIP_ASM
+/**
+ * Sets the text scroll's font index (mAttrTextScroll bits 1-2, mFont) to the low two bits of @p font.
+ *
+ * @param uiTextScroll  the cUITextScroll
+ * @param font  the font index (0..3)
+ */
 extern "C" void func_003A6338(cUITextScroll* uiTextScroll, int font) {
     (*(int*)&uiTextScroll->mAttrTextScroll) = (int) (((*(int*)&uiTextScroll->mAttrTextScroll) & ~6) | ((font & 3) * 2));
 }
@@ -3549,6 +4584,12 @@ extern "C" void func_003A6338(cUITextScroll* uiTextScroll, int font) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6358);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the text scroll draws its text with a shadow (mAttrTextScroll bit 3, mShadow).
+ *
+ * @param uiTextScroll  the cUITextScroll
+ * @return 1 when shadowed, else 0
+ */
 extern "C" int func_003A6358(cUITextScroll* uiTextScroll) {
     return ((int) (*(int*)&uiTextScroll->mAttrTextScroll) >> 3) & 1;
 }
@@ -3556,6 +4597,12 @@ extern "C" int func_003A6358(cUITextScroll* uiTextScroll) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6368);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the text scroll's lines are Unicode (mAttrTextScroll bit 4, mUnicode).
+ *
+ * @param uiTextScroll  the cUITextScroll
+ * @return 1 for Unicode, else 0
+ */
 extern "C" int func_003A6368(cUITextScroll* uiTextScroll) {
     return ((int) (*(int*)&uiTextScroll->mAttrTextScroll) >> 4) & 1;
 }
@@ -3607,6 +4654,12 @@ INCLUDE_ASM("ui/uivector", func_003A63E0);
 #ifdef SKIP_ASM
 extern "C" void cList_first__FP5cList(int);
 
+/**
+ * Returns the text scroll's first line object: cList_first__FP5cList on its list mList (+0x8C), whose result is passed
+ * back.
+ *
+ * @param textScroll  the cUITextScroll (as an address)
+ */
 extern "C" void func_003A63E0(int textScroll) {
     cList_first__FP5cList(textScroll + 140);
 }
@@ -3616,6 +4669,12 @@ INCLUDE_ASM("ui/uivector", func_003A6400);
 #ifdef SKIP_ASM
 extern "C" void func_00397858(int);
 
+/**
+ * Returns the text scroll's last line object: func_00397858 (the list's last node) on its list mList (+0x8C), whose
+ * result is passed back.
+ *
+ * @param textScroll  the cUITextScroll (as an address)
+ */
 extern "C" void func_003A6400(int textScroll) {
     func_00397858(textScroll + 140);
 }
@@ -3625,6 +4684,12 @@ INCLUDE_ASM("ui/uivector", func_003A6420);
 #ifdef SKIP_ASM
 extern "C" void cList_getByIndex(int);
 
+/**
+ * Returns the text scroll's line object at an index: cList_getByIndex on its list mList (+0x8C). The index the caller
+ * passes in the second argument register goes through untouched, and the list's result is passed back.
+ *
+ * @param textScroll  the cUITextScroll (as an address)
+ */
 extern "C" void func_003A6420(int textScroll) {
     cList_getByIndex(textScroll + 140);
 }
@@ -3634,6 +4699,12 @@ INCLUDE_ASM("ui/uivector", func_003A6440);
 #ifdef SKIP_ASM
 extern "C" void cList_addToFront__FP5cListP9cListNode(int);
 
+/**
+ * Links a node at the front of the text scroll's list: cList_addToFront__FP5cListP9cListNode on mList (+0x8C), with the
+ * node the caller passes in the second argument register going through untouched.
+ *
+ * @param textScroll  the cUITextScroll (as an address)
+ */
 extern "C" void func_003A6440(int textScroll) {
     cList_addToFront__FP5cListP9cListNode(textScroll + 140);
 }
@@ -3643,6 +4714,12 @@ INCLUDE_ASM("ui/uivector", func_003A6460);
 #ifdef SKIP_ASM
 extern "C" void cList_addToEnd__FP5cListP9cListNode(int);
 
+/**
+ * Links a node at the end of the text scroll's list: cList_addToEnd__FP5cListP9cListNode on mList (+0x8C), with the
+ * node the caller passes in the second argument register going through untouched.
+ *
+ * @param textScroll  the cUITextScroll (as an address)
+ */
 extern "C" void func_003A6460(int textScroll) {
     cList_addToEnd__FP5cListP9cListNode(textScroll + 140);
 }
@@ -3650,6 +4727,11 @@ extern "C" void func_003A6460(int textScroll) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6480);
 #ifdef SKIP_ASM
+/**
+ * Puts the text scroll into chat-window mode: sets mAttrTextScroll bit 0 (mMode). There is no way here to clear it.
+ *
+ * @param uiTextScroll  the cUITextScroll
+ */
 extern "C" void func_003A6480(cUITextScroll* uiTextScroll) {
     (*(int*)&uiTextScroll->mAttrTextScroll) = (int) ((*(int*)&uiTextScroll->mAttrTextScroll) | 1);
 }
@@ -3657,6 +4739,12 @@ extern "C" void func_003A6480(cUITextScroll* uiTextScroll) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6490);
 #ifdef SKIP_ASM
+/**
+ * Returns whether the text scroll is in chat-window mode (mAttrTextScroll bit 0, mMode).
+ *
+ * @param uiTextScroll  the cUITextScroll
+ * @return 1 in chat-window mode, else 0
+ */
 extern "C" int func_003A6490(cUITextScroll* uiTextScroll) {
     return (*(int*)&uiTextScroll->mAttrTextScroll) & 1;
 }
@@ -3664,6 +4752,12 @@ extern "C" int func_003A6490(cUITextScroll* uiTextScroll) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A64A0);
 #ifdef SKIP_ASM
+/**
+ * Copies the colour @p in into the text scroll's selected-line colour (mSelectedColour), which cUITextScroll_render2D
+ * uses for the selected line.
+ *
+ * @param in  the colour (a, r, g, b)
+ */
 extern "C" void func_003A64A0(cUITextScroll* self, tARGB* in)
 {
     *(&self->mSelectedColour) = *in;
@@ -3672,6 +4766,12 @@ extern "C" void func_003A64A0(cUITextScroll* self, tARGB* in)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A64C8);
 #ifdef SKIP_ASM
+/**
+ * Sets the scroll bar the text scroll drives (mpScrollBar) to @p scrollBar.
+ *
+ * @param textScroll  the cUITextScroll
+ * @param scrollBar  the cUIScrollBar
+ */
 extern "C" void func_003A64C8(void *textScroll, int scrollBar) {
     (*(int *)((char*)(textScroll) + (0xB8))) = scrollBar;
 }
@@ -3679,6 +4779,12 @@ extern "C" void func_003A64C8(void *textScroll, int scrollBar) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A64D0);
 #ifdef SKIP_ASM
+/**
+ * Sets the text scroll's first visible line (mLinesOffset) to @p linesOffset.
+ *
+ * @param uiTextScroll  the cUITextScroll
+ * @param linesOffset  the line index
+ */
 extern "C" void func_003A64D0(cUITextScroll* uiTextScroll, short linesOffset) {
     (*(short*)&uiTextScroll->mLinesOffset) = linesOffset;
 }
@@ -3686,6 +4792,12 @@ extern "C" void func_003A64D0(cUITextScroll* uiTextScroll, short linesOffset) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A64D8);
 #ifdef SKIP_ASM
+/**
+ * Returns the text scroll's first visible line (mLinesOffset).
+ *
+ * @param uiTextScroll  the cUITextScroll
+ * @return mLinesOffset
+ */
 extern "C" unsigned short func_003A64D8(cUITextScroll* uiTextScroll) {
     return (uiTextScroll->mLinesOffset);
 }
@@ -3693,6 +4805,12 @@ extern "C" unsigned short func_003A64D8(cUITextScroll* uiTextScroll) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A64E0);
 #ifdef SKIP_ASM
+/**
+ * Returns the number of lines in the text scroll (mLineSize).
+ *
+ * @param uiTextScroll  the cUITextScroll
+ * @return mLineSize
+ */
 extern "C" unsigned short func_003A64E0(cUITextScroll* uiTextScroll) {
     return (uiTextScroll->mLineSize);
 }
@@ -3700,6 +4818,12 @@ extern "C" unsigned short func_003A64E0(cUITextScroll* uiTextScroll) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A64E8);
 #ifdef SKIP_ASM
+/**
+ * Sets the text scroll's selected line (mSelectedIndex) to @p selectedIndex.
+ *
+ * @param uiTextScroll  the cUITextScroll
+ * @param selectedIndex  the line index
+ */
 extern "C" void func_003A64E8(cUITextScroll* uiTextScroll, short selectedIndex) {
     (*(short*)&uiTextScroll->mSelectedIndex) = selectedIndex;
 }
@@ -3707,6 +4831,12 @@ extern "C" void func_003A64E8(cUITextScroll* uiTextScroll, short selectedIndex) 
 //100%
 INCLUDE_ASM("ui/uivector", func_003A64F0);
 #ifdef SKIP_ASM
+/**
+ * Returns the text scroll's selected line (mSelectedIndex).
+ *
+ * @param uiTextScroll  the cUITextScroll
+ * @return mSelectedIndex
+ */
 extern "C" unsigned short func_003A64F0(cUITextScroll* uiTextScroll) {
     return (uiTextScroll->mSelectedIndex);
 }
@@ -3718,6 +4848,14 @@ extern "C" void* cUIThing_cUIThing(void* self, int a, int b);
 extern "C" void* func_003A6618(void* p);
 extern void* cUIVector_vtbl[];
 
+/**
+ * Constructs a cUIVector with no screen or parent: runs cUIThing_cUIThing(this, 0, 0), stores cUIVector_vtbl and
+ * constructs the tAttrVector word mAttrVector (+0x74) with func_003A6618 (no fill, no loop, no vertices).
+ *
+ * Unlike cUIVector_cUIVector it leaves the colour and vertex arrays unset. Nothing in retail calls it.
+ *
+ * @return the object
+ */
 extern "C" void* func_003A64F8(cUIVector* self)
 {
     cUIThing_cUIThing(((char*)self), 0, 0);
@@ -3759,6 +4897,16 @@ struct sFlags_6548 {
     unsigned f13 : 6;
 };
 
+/**
+ * Constructs a cUIThing's tAttrThing word and returns it: sets bit 0 (orientation: vertical), bit 1 (active), bit 3
+ * (enabled) and bit 6 (visible), clears bit 2 (cached), bit 4 (focused), bit 5 (static), bit 7 (wrap) and the 5-bit
+ * draw layer (bits 8-12), and sets the 6-bit pivot (bits 13-18) to 9.
+ *
+ * func_003A4900 runs it on mAttr (+0x14).
+ *
+ * @param f  the tAttrThing (cUIThing + 0x14)
+ * @return @p f
+ */
 extern "C" sFlags_6548* func_003A6548(sFlags_6548* f)
 {
     f->b0 = 1;
@@ -3777,6 +4925,15 @@ extern "C" sFlags_6548* func_003A6548(sFlags_6548* f)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A65A0);
 #ifdef SKIP_ASM
+/**
+ * Constructs a cUIListBox's tAttrListBox byte and returns it: sets mShadow (bit 2) and clears mFont (bits 0-1),
+ * mUnicode (bit 3), mCallback (bit 4) and mStaticColour (bit 5); bits 6-7 are kept.
+ *
+ * func_003A55D8 runs it on mAttrListBox (+0x74).
+ *
+ * @param attr  the tAttrListBox (cUIListBox + 0x74)
+ * @return @p attr
+ */
 extern "C" unsigned char *func_003A65A0(unsigned char *attr) {
     *attr = (*attr | 4) & 0xC4;
     return attr;
@@ -3785,6 +4942,15 @@ extern "C" unsigned char *func_003A65A0(unsigned char *attr) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A65B8);
 #ifdef SKIP_ASM
+/**
+ * Constructs one list-box entry (tListBoxEntry, 0x14 bytes) and returns it: zeroes mStringID, mpString, mpAsciiString,
+ * mpData and the byte mUnicodeBufferSize.
+ *
+ * func_003A55D8 runs it on each of a cUIListBox's 32 mpEntries.
+ *
+ * @param entry  the tListBoxEntry
+ * @return @p entry
+ */
 extern "C" void *func_003A65B8(void *entry) {
     (*(int *)((char*)(entry) + (0))) = 0;
     (*(int *)((char*)(entry) + (4))) = 0;
@@ -3797,6 +4963,14 @@ extern "C" void *func_003A65B8(void *entry) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A65D8);
 #ifdef SKIP_ASM
+/**
+ * Constructs a cUIState's tAttrState and returns it: stores 0x218 in the 16-bit word, i.e. visible (bit 3) and first
+ * time (bit 4) set, mode (bits 8-13) 2 and every other flag and the popup count clear.
+ *
+ * func_003A57B8 runs it on mAttrState (+0x1C).
+ *
+ * @return the object
+ */
 extern "C" void* func_003A65D8(void* self)
 {
     *(short*)self = 536;
@@ -3806,6 +4980,15 @@ extern "C" void* func_003A65D8(void* self)
 //100%
 INCLUDE_ASM("ui/uivector", func_003A65E8);
 #ifdef SKIP_ASM
+/**
+ * Constructs a cUIText's tAttrText byte and returns it: sets mShadow (bit 2) and clears mUnicode (bit 3), mStaticColour
+ * (bit 4), mDisabledColour (bit 5) and mEllipses (bit 6); the font index (bits 0-1) and bit 7 are kept.
+ *
+ * func_003A5D60 runs it on mAttrText (+0x74).
+ *
+ * @param attr  the tAttrText (cUIText + 0x74)
+ * @return @p attr
+ */
 extern "C" unsigned char *func_003A65E8(unsigned char *attr) {
     *attr = (*attr | 4) & 0x87;
     return attr;
@@ -3814,6 +4997,15 @@ extern "C" unsigned char *func_003A65E8(unsigned char *attr) {
 //100%
 INCLUDE_ASM("ui/uivector", func_003A6600);
 #ifdef SKIP_ASM
+/**
+ * Constructs a cUITextScroll's tAttrTextScroll byte and returns it: clears mMode (bit 0), mShadow (bit 3), mUnicode
+ * (bit 4) and mStaticColour (bit 5); the font index (bits 1-2) and bits 6-7 are kept.
+ *
+ * func_003A6250 runs it on mAttrTextScroll (+0x74).
+ *
+ * @param attr  the tAttrTextScroll (cUITextScroll + 0x74)
+ * @return @p attr
+ */
 extern "C" unsigned char *func_003A6600(unsigned char *attr) {
     *attr &= 0xC6;
     return attr;
@@ -3828,6 +5020,15 @@ struct sCount_6618 {
     unsigned int mode : 15;
     unsigned int count : 15;
 };
+/**
+ * Constructs a cUIVector's tAttrVector word and returns it: clears mFill (bit 0), mLoop (bit 1) and the 15-bit vertex
+ * count mNumVertices (bits 17-31); the triangle count (bits 2-16) is left as it was.
+ *
+ * func_003A64F8 runs it on mAttrVector (+0x74).
+ *
+ * @param p  the tAttrVector (cUIVector + 0x74)
+ * @return the same address
+ */
 extern "C" void* func_003A6618(void* p)
 {
     sCount_6618* self = (sCount_6618*)p;
@@ -3841,6 +5042,11 @@ extern "C" void* func_003A6618(void* p)
 //99.38%
 INCLUDE_ASM("ui/uivector", func_003A6648__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs the UI module's static constructors: func_003A3F48(1, 0xFFFF) (g++'s static initialiser for this unit).
+ *
+ * @return whatever func_003A3F48 leaves in the return register (it returns nothing)
+ */
 void* func_003A6648(void* self)
 {
     return func_003A3F48(1, 0xffff);
@@ -3852,6 +5058,11 @@ extern "C" void* func_003A3F48(int, int);
 //99.38%
 INCLUDE_ASM("ui/uivector", func_003A6668__FPv);
 #ifdef SKIP_ASM
+/**
+ * Runs the UI module's static destructors: func_003A3F48(0, 0xFFFF) (g++'s static destructor for this unit).
+ *
+ * @return whatever func_003A3F48 leaves in the return register (it returns nothing)
+ */
 void* func_003A6668(void* self)
 {
     return func_003A3F48(0, 0xffff);

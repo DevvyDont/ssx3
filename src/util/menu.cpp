@@ -61,6 +61,12 @@ INCLUDE_ASM("util/menu", func_002CA2B0);
 #ifdef SKIP_ASM
 extern "C" int func_002CA3E8(void** self);
 
+/**
+ * Returns the base menu navigation for the current key (func_002CA3E8): key 8 (Back) gives 1 (pop this menu), 7
+ * (Cancel) gives 2 (exit all menus), 0 (Up) gives 4 (previous item), 1 (Down) gives 3 (next item), anything else 0.
+ *
+ * @return the navigation result (0 none, 1 pop menu, 2 exit menus, 3 next item, 4 previous item)
+ */
 extern "C" int func_002CA2B0(void* self)
 {
     switch (func_002CA3E8((void**)self)) {
@@ -112,6 +118,9 @@ void cMenuItem_gainFocus(void* self)
 //100%
 INCLUDE_ASM("util/menu", func_002CA370__FPv);
 #ifdef SKIP_ASM
+/**
+ * Does nothing: the base menu item's loseFocus (cMenuItem_vtbl slot 7).
+ */
 void func_002CA370(void* self)
 {
 }
@@ -134,6 +143,12 @@ extern "C" int cMenuItem_isActive(void* self)
 //100%
 INCLUDE_ASM("util/menu", func_002CA388);
 #ifdef SKIP_ASM
+/**
+ * Activates or deactivates a menu item: sets bit 0 of Flags (+0x4) when @p enable is nonzero, else clears it
+ * (cMenuItem_isActive reads it).
+ *
+ * @param enable  nonzero to activate
+ */
 extern "C" void func_002CA388(void* self, int enable)
 {
     if (enable) {
@@ -163,6 +178,12 @@ extern "C" int cMenuItem_isLocked(void* self)
 //100%
 INCLUDE_ASM("util/menu", func_002CA3C0);
 #ifdef SKIP_ASM
+/**
+ * Locks or unlocks a menu item: sets bit 3 of Flags (+0x4) when @p enable is nonzero, else clears it
+ * (cMenuItem_isLocked reads it; a locked item ignores value changes).
+ *
+ * @param enable  nonzero to lock
+ */
 extern "C" void func_002CA3C0(void *self, int enable) {
     int *flags = (int *)((char *)self + 4);
 
@@ -179,6 +200,12 @@ INCLUDE_ASM("util/menu", func_002CA3E8);
 #ifdef SKIP_ASM
 int func_002CC248(void* self);
 
+/**
+ * Returns the menu system's current key: func_002CC248__FPv (the word at +0x48) on the item's menu's MenuSys
+ * (Menu->MenuSys, +0x124 of the menu).
+ *
+ * @return the key (0 Up, 1 Down, 2 Left, 3 Right, 4 / 5 left / right shift, 6 Select, 7 Cancel, 8 Back, ...)
+ */
 extern "C" int func_002CA3E8(void** self)
 {
     return func_002CC248(*(void**)((char*)*self + 0x124));
@@ -191,6 +218,12 @@ void* func_002CC260(int) __asm__("func_002CC260__FPv");
 //100%
 INCLUDE_ASM("util/menu", func_002CA408__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the menu system's left-direction input value: func_002CC260__FPv (cInput_getValue of input 0x3E) on the
+ * item's menu's MenuSys. The float comes back in f0; the C return type here is a placeholder.
+ *
+ * @return func_002CC260__FPv's result
+ */
 void* func_002CA408(void* self)
 {
     return func_002CC260(*(int*)((char*)*(void**)self + 0x124));
@@ -203,6 +236,12 @@ void* func_002CC280(int) __asm__("func_002CC280__FPv");
 //100%
 INCLUDE_ASM("util/menu", func_002CA428__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the menu system's right-direction input value: func_002CC280__FPv (cInput_getValue of input 0x3F) on the
+ * item's menu's MenuSys. The float comes back in f0; the C return type here is a placeholder.
+ *
+ * @return func_002CC280__FPv's result
+ */
 void* func_002CA428(void* self)
 {
     return func_002CC280(*(int*)((char*)*(void**)self + 0x124));
@@ -215,6 +254,12 @@ void* func_002CC2A0(int) __asm__("func_002CC2A0__FPv");
 //100%
 INCLUDE_ASM("util/menu", func_002CA448__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the menu system's up-direction input value: func_002CC2A0__FPv (cInput_getValue of input 0x40) on the item's
+ * menu's MenuSys. The float comes back in f0; the C return type here is a placeholder.
+ *
+ * @return func_002CC2A0__FPv's result
+ */
 void* func_002CA448(void* self)
 {
     return func_002CC2A0(*(int*)((char*)*(void**)self + 0x124));
@@ -227,6 +272,12 @@ void* func_002CC2C0(int) __asm__("func_002CC2C0__FPv");
 //100%
 INCLUDE_ASM("util/menu", func_002CA468__FPv);
 #ifdef SKIP_ASM
+/**
+ * Returns the menu system's down-direction input value: func_002CC2C0__FPv (cInput_getValue of input 0x41) on the
+ * item's menu's MenuSys. The float comes back in f0; the C return type here is a placeholder.
+ *
+ * @return func_002CC2C0__FPv's result
+ */
 void* func_002CA468(void* self)
 {
     return func_002CC2C0(*(int*)((char*)*(void**)self + 0x124));
@@ -703,7 +754,6 @@ void func_002CBAC8_r(void* self, const sRect_2CAD58& r) __asm__("func_002CBAC8")
  * Asks each active item for its rect, fits as many as the display height (480 minus the menu system's offset) allows
  * from the top item, then renders them, with the up and down arrows when items are hidden above or below.
  */
-// cMenu::render(void) (On Tour name)
 extern "C" void cMenu_render(sMenu_2CAD58* self)
 {
     sRect_2CAD58 total;
@@ -4327,7 +4377,6 @@ static inline float textWidth_2CEEE8(sMenuValueItem_2CEEE8* item, const char* st
  * @param item  the colour-channel menu item (this)
  * @return @p ret
  */
-// Returns the rect of a value menu item: sized for the widest of the three option labels plus the formatted value.
 extern "C" sRect_2CEEE8* cColorMenuItem_preRender(sRect_2CEEE8* ret, sMenuValueItem_2CEEE8* item)
 {
     sRect_2CEEE8 rect;

@@ -148,6 +148,13 @@ cListNode* cList_first(cList* list)
 //100%
 INCLUDE_ASM("util/list", func_00397858);
 #ifdef SKIP_ASM
+/**
+ * Returns the last node of a list: the end sentinel's mpPrev (mEnd.mpPrev, +0xC), or 0 when that node's mpPrev points
+ * to itself, which only the start sentinel of an empty list does.
+ *
+ * @param list  the cList
+ * @return the last node, or 0 for an empty list
+ */
 extern "C" int *func_00397858(void *list) {
     int *temp_2;
 
@@ -190,6 +197,11 @@ extern "C" cListNode* cList_getByIndex(cList* list, int count)
 //100%
 INCLUDE_ASM("util/list", func_003978E8);
 #ifdef SKIP_ASM
+/**
+ * Returns 0. Nothing in retail references it.
+ *
+ * @return 0
+ */
 extern "C" int func_003978E8(void) {
     return 0;
 }

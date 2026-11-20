@@ -35,7 +35,6 @@ extern "C" void cUIScreen_playFrame(void* self, unsigned short frame, int flag);
  * @param idx  the event index (On Tour char e)
  * @return 1 when the event was played, else 0 (On Tour returns bool)
  */
-// Plays keyframer event idx on the owning screen (0x5C); 0xFFFF = no event.
 extern "C" int cUIThing_playKeyframerEvent(cUIThing* self, signed char idx)
 {
     if (self->mpEvents != 0 && self->mpEvents[idx] != 0xFFFF) {
@@ -107,7 +106,6 @@ struct sUIThing0048 {
  * @param key  the channel (On Tour channel)
  * @param data  the value in the channel's units
  */
-// Sets one animatable property (position, rotation, scale, colour, frame...) from a keyframe value.
 extern "C" void cUIThing_setChannelData(cUIThing* self, unsigned short key, float data)
 {
     switch (key) {
@@ -243,6 +241,15 @@ struct sUIThingPos {
     sUIVec3 pos;            // 0x44
 };
 
+/**
+ * Writes the UI thing's absolute position, its mPosition plus the mPosition of every ancestor up the mpParent chain, to
+ * @p out.
+ *
+ * The reward galleries (cFEStateRewardGalleryBase_onGainFocus, cFEStateRewardGalleryBase_updateHighlither), the
+ * uber-trick menu and the async-file screens use it to place a highlight or another widget over a nested widget.
+ *
+ * @param out  receives the summed position (x, y, z)
+ */
 extern "C" void func_003A0290(sUIThingPos* self, sUIVec3* out)
 {
     *out = self->pos;
@@ -258,6 +265,15 @@ extern "C" void func_003A0290(sUIThingPos* self, sUIVec3* out)
 //100%
 INCLUDE_ASM("ui/uithing", func_003A0318);
 #ifdef SKIP_ASM
+/**
+ * Returns the UI thing's sound id number @p soundIndex (mSound[soundIndex]; the index is taken as a signed char).
+ *
+ * cUIMenu_onInput and cUIListBox_onInput fetch sound 0 or 1 of the selected widget with it when the selection moves or
+ * is confirmed.
+ *
+ * @param soundIndex  which of the two sounds (0 or 1)
+ * @return the sound id stored there (the cUIThing constructor stores 4 and 6)
+ */
 extern "C" int func_003A0318(void* self, int soundIndex)
 {
     self = (char*)self + ((signed char)soundIndex << 2);
@@ -268,6 +284,15 @@ extern "C" int func_003A0318(void* self, int soundIndex)
 //100%
 INCLUDE_ASM("ui/uithing", func_003A0330);
 #ifdef SKIP_ASM
+/**
+ * Stores @p sound as the UI thing's sound number @p soundIndex (mSound[soundIndex]; the index is taken as a signed
+ * char).
+ *
+ * cFEStateTitle_onWidgetCreate uses it to set a menu item's first sound to 0.
+ *
+ * @param soundIndex  which of the two sounds (0 or 1)
+ * @param sound  the sound id to store
+ */
 extern "C" void func_003A0330(void* self, int soundIndex, int sound)
 {
     self = (char*)self + ((signed char)soundIndex << 2);
@@ -300,6 +325,17 @@ struct func_003A0348_sObj {
     short fBA;
 };
 
+/**
+ * Constructs a cUIText in place and returns it.
+ *
+ * Runs the cUIThing constructor (cUIThing_cUIThing; the screen and parent the caller passes in a1/a2 go straight
+ * through), stores cUIText_vtbl, sets tAttrText's shadow bit (bit 2) and clears bits 3-6 (unicode, static colour,
+ * disabled colour, ellipses), zeroes mNumLines, mpLineOffset, mStringID, mpString, mStringSize and mLineSize, and
+ * copies the default colour D_004C66C8 into mStaticColour and mDisabledColour. cUIScreen_createObjectByStruct calls it
+ * on a 0xBC-byte "UIText" allocation; func_003A5D60 is the default constructor.
+ *
+ * @return the object
+ */
 extern "C" func_003A0348_sObj* func_003A0348(func_003A0348_sObj* self)
 {
     cUIThing_cUIThing(self);

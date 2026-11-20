@@ -59,6 +59,12 @@ struct s195A50Arr {
     void* items[4];
 };
 
+/**
+ * Deletes the locale file of entry @p i: when the entry (the pointer table at +0x8) is set, destroys and frees it with
+ * func_002C6D70(file, 3) and clears the entry.
+ *
+ * @param i  the file entry index (0 .. 19)
+ */
 extern "C" void func_00195A50(void* self, signed char i)
 {
     s195A50Arr* arr = (s195A50Arr*)((char*)self + 8);
@@ -72,6 +78,9 @@ extern "C" void func_00195A50(void* self, signed char i)
 //100%
 INCLUDE_ASM("util/locale", func_00195A98);
 #ifdef SKIP_ASM
+/**
+ * Does nothing. Nothing in retail references it.
+ */
 extern "C" void func_00195A98(void) {
 
 }
@@ -85,6 +94,16 @@ extern "C" void func_00195BE0(void* self);
 extern "C" void func_00195DE0(void* self);
 extern "C" void cFELocale_addFile(void* self, int lang);
 
+/**
+ * Switches the front-end locale to another language and reloads its string files.
+ *
+ * Does nothing when @p lang is already the language (+0x1). Otherwise it stores it and, unless bit 0 of the locale
+ * flags (+0x3, On Tour's tAttrLocale mLocaleTest) is set, deletes every file (cFELocale_deleteAllFiles), loads the
+ * common file for languages 0-3 (cFELocale_addFile; -1, which loads nothing, for any other value), then the front-end
+ * set (func_00195BE0) when the module byte (+0x58) is 1, else the in-game set (func_00195DE0). Locale vtable slot 3.
+ *
+ * @param lang  the language index (0 English, 1 French, 2 German, 3 Spanish)
+ */
 extern "C" void func_00195AA0(void* self, signed char lang)
 {
     if (*(signed char*)((char*)self + 0x1) != lang) {
@@ -155,6 +174,13 @@ INCLUDE_ASM("util/locale", func_00195BE0);
 #ifdef SKIP_ASM
 extern "C" void cFELocale_addFile(void* self, int lang);
 
+/**
+ * Loads the front-end string files for the current language: sets the module byte (+0x58) to 1 and adds file entries
+ * 4-7, 8-11 and 16-19, the one of each group that matches the language (+0x1, 0-3) with cFELocale_addFile. Any other
+ * language adds nothing.
+ *
+ * @param locale  the cFELocale
+ */
 extern "C" void func_00195BE0(void* locale)
 {
     char* self = (char*)locale;
@@ -214,6 +240,11 @@ INCLUDE_ASM("util/locale", func_00195D50);
 #ifdef SKIP_ASM
 extern "C" void func_00195A50(void* self, signed char i);
 
+/**
+ * Unloads the front-end string files: unless bit 0 of the locale flags (+0x3, mLocaleTest) is set, deletes file entries
+ * 4-7 and 16-19 with func_00195A50. Entries 8-11, which func_00195BE0 also loads, stay loaded, and the module byte is
+ * not changed.
+ */
 extern "C" void func_00195D50(void* self)
 {
     int flags = *(signed char*)((char*)self + 0x3);
@@ -235,6 +266,10 @@ INCLUDE_ASM("util/locale", func_00195DE0);
 #ifdef SKIP_ASM
 extern "C" void cFELocale_addFile(void* self, int lang);
 
+/**
+ * Loads the in-game string file for the current language: sets the module byte (+0x58) to 2 and adds file entry 12-15,
+ * the one matching the language (+0x1, 0-3), with cFELocale_addFile (-1, nothing, for any other language).
+ */
 extern "C" void func_00195DE0(void* self)
 {
     int file = -1;
@@ -262,6 +297,10 @@ INCLUDE_ASM("util/locale", func_00195E58);
 #ifdef SKIP_ASM
 extern "C" void func_00195A50(void* self, signed char i);
 
+/**
+ * Unloads the in-game string files: unless bit 0 of the locale flags (+0x3, mLocaleTest) is set, deletes file entries
+ * 12-15 with func_00195A50.
+ */
 extern "C" void func_00195E58(void* self)
 {
     int flags = *(signed char*)((char*)self + 3);
@@ -288,6 +327,17 @@ struct func_00195EB8_sLocale {
     signed char* files[20];
 };
 
+/**
+ * Returns the front-end string with a given hash.
+ *
+ * When the display mode (+0x0) is 0, searches the 20 file entries (+0x8) for loaded files whose language byte equals
+ * the current language (+0x1) and returns the first func_002C6DE0 hit. Otherwise, or when no file has it, it writes
+ * D_004A1390 (a single space) into the 16-bit buffer at +0x5A with sprintf2 and returns that buffer. Locale vtable slot
+ * 4.
+ *
+ * @param key  the string's hash (GetHashValue32 of its id)
+ * @return the string, or the buffer at +0x5A
+ */
 extern "C" const char* func_00195EB8(func_00195EB8_sLocale* self, int key)
 {
     if (self->useDefault == 0) {
@@ -318,6 +368,15 @@ struct func_00195F70_sArr {
     void* items[20];
 };
 
+/**
+ * Returns the string at an index from the first loaded locale file that has one: calls func_002C6DC0__FPv on each of
+ * the 20 file entries (+0x8) and returns the first nonzero result, or 0.
+ *
+ * Unlike func_00195EB8 it does not check the files' language. Locale vtable slot 5.
+ *
+ * @param arg  the string index
+ * @return the string, or 0
+ */
 extern "C" void* func_00195F70(void* self, void* arg)
 {
     func_00195F70_sArr* arr = (func_00195F70_sArr*)((char*)self + 8);

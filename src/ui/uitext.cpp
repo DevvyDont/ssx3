@@ -468,7 +468,6 @@ extern unsigned short gUSTRBackSlash;
  * @param self_  the text object
  * @param str    the string to store
  */
-// Stores a copy of the string and splits it into lines at CR and at doubled line-break markers.
 extern "C" void cUIText_setUnicodeStringPrivate(cUIText* self_, const unsigned short* str)
 {
     ((cUIText_3A0C70*)self_)->v05(1);
@@ -1572,7 +1571,27 @@ extern int D_004A28AC_23B8 __asm__("D_004A28AC");
 extern "C" void func_0038E5E8(int ctx, sQuadVtx_23B8* v, sRect_23B8* dst, sRect_23B8* uv);
 extern "C" void func_0038E738(int ctx, sQuadVtx_23B8* v, sRect_23B8* dst, sRect_23B8* uv);
 
-// Draws the sprite tiled tx by ty times over r (fractional tiles are cropped).
+/**
+ * Draws the texture element @p o tiled @p tx times across and @p ty times down the rectangle @p r, cropping the last
+ * partial row and column.
+ *
+ * Selects the element's texture (tex) as texture 0 of GrMan's current draw state, then returns at once if @p tx or
+ * @p ty is not positive. Each tile is r.w / tx by r.h / ty. For floor(ty) rows it draws floor(tx) full tiles plus, when
+ * @p tx has a fraction, a last tile cut to the rectangle's right edge with its texture range cut to the same fraction;
+ * when @p ty has a fraction a last row cut to the bottom edge follows. Every quad goes to the 2D renderer D_004A28AC
+ * through func_0038E5E8, or func_0038E738 (texture turned 90 degrees, so the fractions crop the other axis) when flag
+ * bit 2 is set. Flag bit 0 swaps the left and right texture coordinates (u0/u1), bit 1 the top and bottom ones (v0/v1).
+ *
+ * The four vertices get alpha = c.a * 128 and red/green/blue = c * 255; func_003A20A0 scales all four by 128, so the
+ * colour here is twice as strong. No caller in retail references it.
+ *
+ * @param o  the texture element: texture id (tex) and its texture rectangle (v0 top, u0 left, u1 right, v1 bottom)
+ * @param r  the screen rectangle to fill (x, y, w, h)
+ * @param c  the colour (a, r, g, b in 0..1)
+ * @param flags  bit 0 mirror horizontally, bit 1 mirror vertically, bit 2 draw the texture turned 90 degrees
+ * @param tx  how many times the texture repeats across (may be fractional)
+ * @param ty  how many times the texture repeats down (may be fractional)
+ */
 extern "C" void func_003A23B8(sSprite_23B8* o, sRect_23B8 r, sColor_23B8 c, int flags, float tx, float ty)
 {
     int tex = o->tex;
@@ -1717,6 +1736,22 @@ extern int D_004A28AC_2A00 __asm__("D_004A28AC");
 extern "C" void func_0038E2E8(int ctx, sQuadVtx_2A00* v, sRect_2A00* r, sMat3_2A00* m);
 extern "C" void func_0038E468(int ctx, sQuadVtx_2A00* v, sRect_2A00* r, sMat3_2A00* m);
 
+/**
+ * Draws the texture element @p o once over the rectangle @p r, with the corners transformed by the 3x3 matrix @p m.
+ *
+ * Selects the element's texture (tex) as texture 0 of GrMan's current draw state, sets the four vertices' texture
+ * coordinates to the element's rectangle (u0/u1 swapped when flag bit 0 is set, v0/v1 when bit 1 is set) and their
+ * colour to alpha = c.a * 128, red/green/blue = c * 255 (func_003A20A0 scales all four by 128), then hands the quad to
+ * the 2D renderer D_004A28AC through func_0038E2E8, or func_0038E468 (corners in the order that turns the texture 90
+ * degrees) when bit 2 is set; both transform each corner by @p m (func_0038E0A8) before submitting. No caller in retail
+ * references it.
+ *
+ * @param o  the texture element: texture id (tex) and its texture rectangle (v0 top, u0 left, u1 right, v1 bottom)
+ * @param r  the screen rectangle (x, y, w, h) before the transform
+ * @param m  the 3x3 transform applied to each corner (rows of three floats)
+ * @param c  the colour (a, r, g, b in 0..1)
+ * @param flags  bit 0 mirror horizontally, bit 1 mirror vertically, bit 2 draw the texture turned 90 degrees
+ */
 extern "C" void func_003A2A00(sSprite_2A00* o, sRect_2A00 r, sMat3_2A00 m, sColor_2A00 c, int flags)
 {
     int tex = o->tex;
@@ -1796,7 +1831,26 @@ extern int D_004A28AC_2BC8 __asm__("D_004A28AC");
 extern "C" void func_0038E880(int ctx, sQuadVtx_2BC8* v, sRect_2BC8* dst, sRect_2BC8* uv, sMat3_2BC8* m);
 extern "C" void func_0038EA60(int ctx, sQuadVtx_2BC8* v, sRect_2BC8* dst, sRect_2BC8* uv, sMat3_2BC8* m);
 
-// Tiled draw like func_003A23B8, with an extra 3x3 transform m.
+/**
+ * Draws the texture element @p o tiled @p tx times across and @p ty times down the rectangle @p r, like func_003A23B8,
+ * with every tile's corners transformed by the 3x3 matrix @p m.
+ *
+ * Selects the element's texture (tex) as texture 0 of GrMan's current draw state and returns if @p tx or @p ty is not
+ * positive. Tiles are r.w / tx by r.h / ty: floor(ty) rows of floor(tx) full tiles, a cropped last tile per row when @p
+ * tx has a fraction and a cropped last row when @p ty has one (texture ranges cut by the same fractions). Each quad
+ * goes to the 2D renderer D_004A28AC through func_0038E880, or func_0038EA60 (texture turned 90 degrees) when flag bit
+ * 2 is set; both transform the corners by @p m. Flag bit 0 swaps the left and right texture coordinates, bit 1 the top
+ * and bottom ones. Vertex colour: alpha = c.a * 128, red/green/blue = c * 255 (func_003A20A0 uses 128 for all four). No
+ * caller in retail references it.
+ *
+ * @param o  the texture element: texture id (tex) and its texture rectangle (v0 top, u0 left, u1 right, v1 bottom)
+ * @param r  the screen rectangle to fill (x, y, w, h) before the transform
+ * @param m  the 3x3 transform applied to every tile's corners
+ * @param c  the colour (a, r, g, b in 0..1)
+ * @param flags  bit 0 mirror horizontally, bit 1 mirror vertically, bit 2 draw the texture turned 90 degrees
+ * @param tx  how many times the texture repeats across (may be fractional)
+ * @param ty  how many times the texture repeats down (may be fractional)
+ */
 extern "C" void func_003A2BC8(sSprite_2BC8* o, sRect_2BC8 r, sMat3_2BC8 m, sColor_2BC8 c, int flags, float tx, float ty)
 {
     int j;
