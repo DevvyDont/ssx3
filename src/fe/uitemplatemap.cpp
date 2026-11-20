@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/ovstatetransport.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -3034,16 +3035,16 @@ extern char str_Map_b[];
  * mpScreen and this state. It is the onCreateScreen slot (+0x24) of D_004733F8, the vtable of overlay 33
  * (cOVStateManager_triggerOverlay), whose template cUITemplate_MAP_init initialises.
  */
-extern "C" void cOVState_TRANSPORT_onCreateScreen(void* self)
+extern "C" void cOVState_TRANSPORT_onCreateScreen(cOVState_TRANSPORT* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_Map_b), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
     cOVState_onCreateScreen(self);
-    cUITemplate_MAP_onCreateScreen((char*)self + 0x9C, *(void**)((char*)self + 0x40), self);
+    cUITemplate_MAP_onCreateScreen((char*)self + 0x9C, self->mpScreen, self);
 }
 #endif
 
@@ -3095,7 +3096,7 @@ extern "C" void cUITemplate_MAP_onGainFocus(void* self);
  * Transport overlay's gain-focus hook: runs cUIState_onGainFocus, then cUITemplate_MAP_onGainFocus for the template at
  * +0x9C.
  */
-extern "C" void cOVState_TRANSPORT_onGainFocus(void* self)
+extern "C" void cOVState_TRANSPORT_onGainFocus(cOVState_TRANSPORT* self)
 {
     cUIState_onGainFocus(self);
     cUITemplate_MAP_onGainFocus((char*)self + 0x9C);
@@ -3112,7 +3113,7 @@ extern "C" void cOVState_onDestroyScreen(void* self);
  * Transport overlay's screen teardown: tears down the map template at +0x9C (cUITemplate_MAP_onDestroyScreen), then runs
  * cOVState_onDestroyScreen.
  */
-extern "C" void cOVState_TRANSPORT_onDestroyScreen(void* self)
+extern "C" void cOVState_TRANSPORT_onDestroyScreen(cOVState_TRANSPORT* self)
 {
     cUITemplate_MAP_onDestroyScreen((char*)self + 0x9C);
     cOVState_onDestroyScreen(self);
@@ -3134,11 +3135,11 @@ extern "C" int cUIStateStack_pop_85B8(void* self, int a1) __asm__("cUIStateStack
  * pending-delete bit in mAttrState (bits 8-13 = 7, bit 7 set). As declared the template call only gets the template
  * (+0x9C); the widget and event reach it in the argument registers.
  */
-extern "C" void cOVState_TRANSPORT_onWidgetEvent(char* self)
+extern "C" void cOVState_TRANSPORT_onWidgetEvent(cOVState_TRANSPORT* self)
 {
-    if (cUITemplate_MAP_onWidgetEvent(self + 0x9C) == 1) {
-        cUIStateStack_pop_85B8(*(char**)(self + 0x10) + 0x18, 1);
-        *(int*)(self + 0x1C) = (*(int*)(self + 0x1C) & ~0x3F00) | 0x780;
+    if (cUITemplate_MAP_onWidgetEvent(((char*)self) + 0x9C) == 1) {
+        cUIStateStack_pop_85B8((char*)self->mpEngine + 0x18, 1);
+        self->mAttrState = (self->mAttrState & ~0x3F00) | 0x780;
     }
 }
 #endif
@@ -3154,7 +3155,7 @@ INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onWidgetMenu);
  * @param event  the menu event, passed on
  * @return 0x101 or 0
  */
-extern "C" int cOVState_TRANSPORT_onWidgetMenu(void* self, int menu, int event)
+extern "C" int cOVState_TRANSPORT_onWidgetMenu(cOVState_TRANSPORT* self, int menu, int event)
 {
     if (cUITemplate_MAP_onWidgetMenu((char*)self + 0x9C, menu, event) != 0) {
         return 257;
@@ -3170,7 +3171,7 @@ INCLUDE_ASM("fe/uitemplatemap", cOVState_TRANSPORT_onInputBegin);
 /**
  * Transport overlay's input hook: calls the map template's (cUITemplate_MAP_onInputBegin on +0x9C) and drops its result.
  */
-extern "C" void cOVState_TRANSPORT_onInputBegin(void* self)
+extern "C" void cOVState_TRANSPORT_onInputBegin(cOVState_TRANSPORT* self)
 {
     cUITemplate_MAP_onInputBegin((char*)self + 0x9c);
 }
@@ -3203,7 +3204,7 @@ extern "C" void cUITemplate_MAP_onUpdate(void* self);
 /**
  * Transport overlay's update: runs cOVState_onUpdate, then cUITemplate_MAP_onUpdate for the template at +0x9C.
  */
-extern "C" void cOVState_TRANSPORT_onUpdate(void* self)
+extern "C" void cOVState_TRANSPORT_onUpdate(cOVState_TRANSPORT* self)
 {
     cOVState_onUpdate(self);
     cUITemplate_MAP_onUpdate((char*)self + 0x9C);

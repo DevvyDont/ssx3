@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/ovstateprofile.h"
 #include "render/ps2graphicsman.h"
 #include "online/gamecomm.h"
 #include "main/game.h"
@@ -2011,16 +2012,16 @@ struct sOVTrophy_1088 {
  * @param parentOverlay  the overlay to return to (On Tour ov, kept in mParentOV)
  * @return @p self
  */
-extern "C" sOVTrophy_1088* cOVState_PROFILE_cOVState_PROFILE(sOVTrophy_1088* self, int pEngine, unsigned char ucActiveControl, int parentOverlay)
+extern "C" sOVTrophy_1088* cOVState_PROFILE_cOVState_PROFILE(cOVState_PROFILE* self, int pEngine, unsigned char ucActiveControl, int parentOverlay)
 {
     int idx = 0;
-    cFEMemCard_cFEMemCard2(self, pEngine, 0);
-    self->f0C = 36;
-    self->vtable = cOVState_PROFILE_vtbl;
-    self->f278 = parentOverlay;
-    self->f1CC = 0;
-    self->f22C = 0;
-    self->f230 = 0;
+    cFEMemCard_cFEMemCard2(((sOVTrophy_1088*)self), pEngine, 0);
+    self->mHashName = 36;
+    self->mVtbl = (void**)cOVState_PROFILE_vtbl;
+    self->mParentOV = parentOverlay;
+    self->mPlayerIdx = 0;
+    self->mIsOn = 0;
+    self->mIsHidden = 0;
     int i;
     for (i = 1; i < 9; i++) {
         ucActiveControl >>= i;
@@ -2035,11 +2036,11 @@ extern "C" sOVTrophy_1088* cOVState_PROFILE_cOVState_PROFILE(sOVTrophy_1088* sel
     if (cBENewRaceInterface_newRace[0x49] == 2) lim = 2;
     for (int n = 0; n < lim; n++) {
         if (cBENewPlayerInterface_getPlayerCtrlID(iface, n) == idx) {
-            self->f1CC = n;
+            self->mPlayerIdx = n;
             break;
         }
     }
-    return self;
+    return ((sOVTrophy_1088*)self);
 }
 #endif
 

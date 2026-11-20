@@ -1,4 +1,6 @@
 #include "common.h"
+#include "fe/ovtemplatedialog.h"
+#include "fe/ovstatereplay.h"
 #include "be/beintnetwork.h"
 #include "online/gamecomm.h"
 #include "main/game.h"
@@ -1797,22 +1799,22 @@ struct sObj_DlgCreate {
  * before quitting, others quit competition. Kinds 1 and 6 hide the "title_quitchallenge" object.
  */
 // Builds the generic dialog overlay: title/body texts depend on the dialog kind at 0x9C.
-extern "C" void cOVTemplate_Dialog_onCreateScreen(char* self)
+extern "C" void cOVTemplate_Dialog_onCreateScreen(cOVTemplate_Dialog* self)
 {
-    void* engine = *(void**)(self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_87yndialog), 0);
-    *(void**)(self + 0x40) = screen;
+    void* engine = self->mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, ((char*)self), GetHashValue32(str_87yndialog), 0);
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cOVState_onCreateScreen(self);
-    *(int*)((char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_yes_b)) + 0x18) = 0;
-    *(int*)((char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_no_b)) + 0x18) = 1;
-    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_title_quit));
-    switch (*(unsigned int*)(self + 0x9C)) {
+    cOVState_onCreateScreen(((char*)self));
+    *(int*)((char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_yes_b)) + 0x18) = 0;
+    *(int*)((char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_no_b)) + 0x18) = 1;
+    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_quit));
+    switch ((unsigned int)self->mDialogType) {
     case 1: {
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_OVRCMNQuitGame));
-        sObj_DlgCreate* quitChallengeTitle = (sObj_DlgCreate*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_title_quitchallenge));
+        sObj_DlgCreate* quitChallengeTitle = (sObj_DlgCreate*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_quitchallenge));
         quitChallengeTitle->vt[9].fn((char*)quitChallengeTitle + quitChallengeTitle->vt[9].delta, 0);
         break;
     }
@@ -1833,7 +1835,7 @@ extern "C" void cOVTemplate_Dialog_onCreateScreen(char* self)
         break;
     case 6: {
         cUIText_setUnicodeStringByID(text, GetHashValue32(str_kT_CMNSaveBeforeQuit));
-        sObj_DlgCreate* quitChallengeTitle = (sObj_DlgCreate*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_title_quitchallenge));
+        sObj_DlgCreate* quitChallengeTitle = (sObj_DlgCreate*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_quitchallenge));
         quitChallengeTitle->vt[9].fn((char*)quitChallengeTitle + quitChallengeTitle->vt[9].delta, 0);
         break;
     }
@@ -1860,11 +1862,11 @@ extern char str_Menu0000_b[];
  *
  * @param item  the widget being created; only the one whose hash name (+0x38) is "Menu0000" is touched
  */
-extern "C" void cOVTemplate_Dialog_onWidgetCreate(void* self, void* item)
+extern "C" void cOVTemplate_Dialog_onWidgetCreate(cOVTemplate_Dialog* self, void* item)
 {
     int id = *(int*)((char*)item + 0x38);
     if (id == GetHashValue32(str_Menu0000_b)) {
-        if (*(int*)((char*)self + 0x9C) == 6) {
+        if (self->mDialogType == 6) {
             cUIMenu_setSelectedByIndex(item, 0);
         } else {
             cUIMenu_setSelectedByIndex(item, 1);
@@ -1885,7 +1887,7 @@ INCLUDE_ASM("fe/ovtemplatedialog", cOVTemplate_Dialog_onWidgetMenu);
  * @param key  the menu event
  * @return 0x100 for events 8 and 9, else 0x101
  */
-extern "C" int cOVTemplate_Dialog_onWidgetMenu(void* self, int menu, unsigned int key)
+extern "C" int cOVTemplate_Dialog_onWidgetMenu(cOVTemplate_Dialog* self, int menu, unsigned int key)
 {
     int result = 257;
     if (key < 10) {
@@ -1977,7 +1979,7 @@ static inline void Pop_20D5A8()
  * @param w  the button (its index at +0x18: 0 yes, 1 no), or 0
  * @param ev  widget event number: 5 select, 6 back
  */
-extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
+extern "C" void cOVTemplate_Dialog_onWidgetEvent(cOVTemplate_Dialog* self, char* w, int ev)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     if (w == 0) {
@@ -1985,11 +1987,11 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
     }
     switch (ev) {
     case 5:
-        Play_20D5A8(self);
+        Play_20D5A8(((char*)self));
         switch (*(int*)(w + 0x18)) {
         case 0:
-            *(int*)(self + 0x54) = 1;
-            switch (*(int*)(self + 0x9C)) {
+            self->mRemovePDA = 1;
+            switch (self->mDialogType) {
             case 0: {
                 int kind = cBENewRaceInterface_newRace[0x4A];
                 if (kind >= 6 && kind <= 11) {
@@ -2030,7 +2032,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
             }
             case 1: {
                 cReplay_stopAutoReplay(SSXApp->Game->Replay);
-                *(int*)(self + 0x54) = 0;
+                self->mRemovePDA = 0;
                 cBE_getInterface_Fv(cBE_getBE(), 4);
                 if (cGameComm_mGameComm) {
                     cGameComm_localDisconnected((char*)cGameComm_mGameComm, 0);
@@ -2045,7 +2047,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
                 chk:
                 if (any) {
                     char* ui = (char*)SSXApp->Game->UI;
-                    sStFlags_20D5A8* st = (sStFlags_20D5A8*)cOVState_AUTOSAVE_cOVState_AUTOSAVE(cMemMan_alloc(564, str_Save_Profile, 0x100, 0), *(void**)(self + 0x10), 1);
+                    sStFlags_20D5A8* st = (sStFlags_20D5A8*)cOVState_AUTOSAVE_cOVState_AUTOSAVE(cMemMan_alloc(564, str_Save_Profile, 0x100, 0), self->mpEngine, 1);
                     st->mode = 1;
                     cUIStateStack_pushSpecial(ui + 0x18, st, 0, 0);
                 } else {
@@ -2091,7 +2093,7 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
             case 6: {
                 ((sSelf_D5A8*)self)->f54 = 0;
                 char* ui = (char*)SSXApp->Game->UI;
-                sStFlags_20D5A8* st = (sStFlags_20D5A8*)cOVState_PROFILE_cOVState_PROFILE(cMemMan_alloc(636, str_Save_Profile, 0x100, 0), *(void**)(self + 0x10), *(unsigned char*)(self + 0x14), 0x18);
+                sStFlags_20D5A8* st = (sStFlags_20D5A8*)cOVState_PROFILE_cOVState_PROFILE(cMemMan_alloc(636, str_Save_Profile, 0x100, 0), self->mpEngine, *(unsigned char*)&self->mCurrentCtrl, 0x18);
                 st->mode = 1;
                 cUIStateStack_pushSpecial(ui + 0x18, st, 0, 0);
                 break;
@@ -2099,8 +2101,8 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
             }
             break;
         case 1:
-            if (*(int*)(self + 0x9C) != 6) {
-                cUIStateStack_pop(*(char**)(self + 0x10) + 0x18, 1);
+            if (self->mDialogType != 6) {
+                cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
             } else {
                 ((sSelf_D5A8*)self)->f54 = 1;
                 cGame_exit(SSXApp->Game, 0);
@@ -2109,9 +2111,9 @@ extern "C" void cOVTemplate_Dialog_onWidgetEvent(char* self, char* w, int ev)
         }
         break;
     case 6:
-        if (*(int*)(self + 0x9C) != ev) {
-            Play_20D5A8(self);
-            cUIStateStack_pop(*(char**)(self + 0x10) + 0x18, 1);
+        if (self->mDialogType != ev) {
+            Play_20D5A8(((char*)self));
+            cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
         }
         break;
     }
@@ -2138,18 +2140,18 @@ extern char str_TransitionOut_b[];
  * from mpEngine's state stack (cUIStateStack_pop, On Tour cUIStateStack::pop). It is the onUpdate slot (+0x64) of
  * D_004748F8, the dialog type 1 overlay (cOVStateManager_triggerOverlay type 0x18).
  */
-extern "C" void cOVState_QUIT_onUpdate(void* self)
+extern "C" void cOVState_QUIT_onUpdate(cOVTemplate_Dialog* self)
 {
     cOVState_onUpdate(self);
     cGameComm* gameComm = cGameComm_mGameComm;
     if (gameComm != 0) {
         int ok = gameComm->mPauseTimeout == 0 || gameComm->mOverlayTimeout == 0;
         if (ok) {
-            int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(str_TransitionOut_b));
+            int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b));
             if (frame != 0xFFFF) {
-                cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame, 1);
+                cUIScreen_playFrame(self->mpScreen, frame, 1);
             }
-            cUIStateStack_pop(*(char**)((char*)self + 0x10) + 0x18, 1);
+            cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
         }
     }
 }
@@ -2185,42 +2187,42 @@ struct sVE_20DC68 { short delta; short index; void (*fn)(void*, int); };
  * save
  * replay option.
  */
-extern "C" void cOVState_REPLAY_onCreateScreen(char* self)
+extern "C" void cOVState_REPLAY_onCreateScreen(cOVState_REPLAY* self)
 {
-    *(int*)(self + 0xC) = GetHashValue32(str_64replay);
-    void* engine = *(void**)(self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_64replay), 0);
-    *(void**)(self + 0x40) = screen;
+    self->mHashName = GetHashValue32(str_64replay);
+    void* engine = self->mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, ((char*)self), GetHashValue32(str_64replay), 0);
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    cOVState_onCreateScreen(self);
-    *(int*)(self + 0xA0) = 0;
-    *(int*)(self + 0x9C) = 0;
-    cUIState_hideObjSafe(self, str_ReplayMenuPopup);
-    cUIState_hideObjSafe(self, str_showhelp);
-    if (*(int*)(self + 0xA0) != 0) {
-        cUIState_hideObjSafe(self, str_hidetimeline);
-        cUIState_showObjSafe(self, str_showtimeline);
+    cOVState_onCreateScreen(((char*)self));
+    self->mTimeLineHidden = 0;
+    self->mShowPopupMenu = 0;
+    cUIState_hideObjSafe(((char*)self), str_ReplayMenuPopup);
+    cUIState_hideObjSafe(((char*)self), str_showhelp);
+    if (self->mTimeLineHidden != 0) {
+        cUIState_hideObjSafe(((char*)self), str_hidetimeline);
+        cUIState_showObjSafe(((char*)self), str_showtimeline);
     } else {
-        cUIState_showObjSafe(self, str_hidetimeline);
-        cUIState_hideObjSafe(self, str_showtimeline);
+        cUIState_showObjSafe(((char*)self), str_hidetimeline);
+        cUIState_hideObjSafe(((char*)self), str_showtimeline);
     }
-    *(int*)(self + 0xA4) = 245;
-    *(int*)(self + 0xAC) = 245;
-    *(int*)(self + 0xB0) = 0x1E0;
-    *(int*)(self + 0xA8) = 0;
-    cOVState_REPLAY_setupCameraName(self);
+    self->mBottom_y = 245;
+    self->mMinBottom_y = 245;
+    self->mMaxBottom_y = 0x1E0;
+    self->mBottom_ydiff = 0;
+    cOVState_REPLAY_setupCameraName(((char*)self));
     if (*(int*)((char*)SSXApp->Game->Replay + 0x608) != 0) {
-        *(int*)(self + 0xB4) = 1;
+        self->mLoaded = 1;
     } else {
-        *(int*)(self + 0xB4) = 0;
+        self->mLoaded = 0;
     }
-    char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_ReplayMenu));
+    char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
     *(int*)(obj + 0x90) |= 8;
-    if (*(int*)(self + 0xB4) != 0) {
+    if (self->mLoaded != 0) {
         if (obj != 0) cUIMenu_setSelectedByIndex(obj, 2);
-        char* saveReplayOption = (char*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_option_savereplay));
+        char* saveReplayOption = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_option_savereplay));
         if (saveReplayOption != 0) {
             sVE_20DC68* vtEntry = &(*(sVE_20DC68**)(saveReplayOption + 8))[9];
             vtEntry->fn(saveReplayOption + vtEntry->delta, 0);

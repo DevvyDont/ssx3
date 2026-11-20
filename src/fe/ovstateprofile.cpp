@@ -1,4 +1,6 @@
 #include "common.h"
+#include "fe/ovstateprofile.h"
+#include "fe/ovstateautosave.h"
 #include "main/ssxapp.h"
 
 //100%
@@ -9,7 +11,7 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void cOVStateManager_addPDATemplate();
 extern "C" void cOVState_onCreateScreen(void* self);
-extern "C" void cOVState_PROFILE_initGeneral(void* self);
+extern "C" void cOVState_PROFILE_initGeneral(cOVState_PROFILE* self);
 extern char str_121Profilesave_pda[];
 
 /**
@@ -17,11 +19,11 @@ extern char str_121Profilesave_pda[];
  *
  * Adds the PDA template, numbers the slots (initGeneral) and runs cOVState_onCreateScreen.
  */
-extern "C" void cOVState_PROFILE_onCreateScreen(void* self)
+extern "C" void cOVState_PROFILE_onCreateScreen(cOVState_PROFILE* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_121Profilesave_pda), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -34,8 +36,8 @@ extern "C" void cOVState_PROFILE_onCreateScreen(void* self)
 //100%
 INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_displayStatus);
 #ifdef SKIP_ASM
-extern "C" void cOVState_PROFILE_displayOn(void* self);
-extern "C" void cOVState_PROFILE_displayOff(void* self);
+extern "C" void cOVState_PROFILE_displayOn(cOVState_PROFILE* self);
+extern "C" void cOVState_PROFILE_displayOff(cOVState_PROFILE* self);
 
 /**
  * Refreshes the profile overlay's memory-card display: the file list when the screen is in display state 3, the empty
@@ -45,12 +47,12 @@ extern "C" void cOVState_PROFILE_displayOff(void* self);
  * the action buttons. Display state +0x214 (On Tour mScreenStatus, set by cFEMemCard_triggerDisplayState) 3 runs
  * cOVState_PROFILE_displayOn, any other cOVState_PROFILE_displayOff. It is the displayStatus slot (+0xD4) of cOVState_PROFILE_vtbl.
  */
-extern "C" void cOVState_PROFILE_displayStatus(void* self)
+extern "C" void cOVState_PROFILE_displayStatus(cOVState_PROFILE* self)
 {
-    if (*(int*)((char*)self + 0x1C0) != 0) {
-        *(int*)((char*)self + 0x22C) = 1;
+    if (self->mState != 0) {
+        self->mIsOn = 1;
     }
-    if (*(int*)((char*)self + 0x214) == 3) {
+    if (self->mScreenStatus == 3) {
         cOVState_PROFILE_displayOn(self);
     } else {
         cOVState_PROFILE_displayOff(self);
@@ -63,7 +65,7 @@ INCLUDE_ASM("fe/ovstateprofile", cOVState_PROFILE_displayOff);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" void cOVState_PROFILE_displayOn(void* self);
+extern "C" void cOVState_PROFILE_displayOn(cOVState_PROFILE* self);
 extern "C" void* cSSXApp_getMCManager(void* app);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern char str_playerpct_d_b[];
@@ -209,13 +211,13 @@ struct cUIObj_11270 {
  *
  * @param vself  the profile overlay state (this)
  */
-extern "C" void cOVState_PROFILE_displayOff(void* vself)
+extern "C" void cOVState_PROFILE_displayOff(cOVState_PROFILE* vself)
 {
     cSelf_11270* self = (cSelf_11270*)vself;
     if (self->isReady() != 0) {
         if ((*(cCard_11270**)((char*)cSSXApp_getMCManager(SSXApp) + 0x434))->isPresent() != 0) {
             self->setState(3);
-            cOVState_PROFILE_displayOn(self);
+            cOVState_PROFILE_displayOn((cOVState_PROFILE*)self);
             return;
         }
     }
@@ -401,7 +403,7 @@ int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" int sprintf(char* buf, const char* fmt, ...);
 extern "C" void cFEMemCard_callbackDisplayNoCards();
-extern "C" void cOVState_PROFILE_displayOff(void* self);
+extern "C" void cOVState_PROFILE_displayOff(cOVState_PROFILE* self);
 extern "C" int cFEMemCard_checkNextAvailableDevice(void* self, void* mp, int dev, int a3);
 extern "C" void cMCOverlayManager_GetDeviceDisplayString(void* mp, int dev, unsigned short* buf, int len);
 extern "C" void cUIText_setUnicodeStringWrap(void* obj, unsigned short* s);
@@ -445,7 +447,7 @@ static inline cUIObj_1380* getObj_1380(cState_1380* self, char* name)
  * @param profileState  the profile overlay state (this)
  */
 // Refreshes the memory-card profile list: device name, then the six profile slots and the arrow hints.
-extern "C" void cOVState_PROFILE_displayOn(void* profileState)
+extern "C" void cOVState_PROFILE_displayOn(cOVState_PROFILE* profileState)
 {
     cState_1380* self = (cState_1380*)profileState;
     unsigned short buf[800];
@@ -454,7 +456,7 @@ extern "C" void cOVState_PROFILE_displayOn(void* profileState)
     if (self->v42()) {
         if (!(*(cMCSub_1380**)(mp + 0x434))->v53()) {
             cFEMemCard_callbackDisplayNoCards();
-            cOVState_PROFILE_displayOff(self);
+            cOVState_PROFILE_displayOff((cOVState_PROFILE*)self);
             return;
         }
         if (*(int*)((char*)self + 0x214) != 3)
@@ -544,25 +546,25 @@ extern char str_ps2sq_b[];
  *
  * @param show  nonzero hides the buttons (On Tour bHide): despite its name a true value means hidden
  */
-extern "C" void cOVState_PROFILE_hideActionButtons(void* self, bool show)
+extern "C" void cOVState_PROFILE_hideActionButtons(cOVState_PROFILE* self, bool show)
 {
     bool on = true;
-    if (*(int*)((char*)self + 0x22C) != 0) {
+    if (self->mIsOn != 0) {
         on = show;
     }
-    if (*(int*)((char*)self + 0x230) != on) {
+    if (self->mIsHidden != on) {
         int off = !on;
-        cUIObj_211850* xButton = (cUIObj_211850*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x_b));
+        cUIObj_211850* xButton = (cUIObj_211850*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x_b));
         if (xButton != 0) {
             xButton->setVisible(off);
         }
-        ((cUIObj_211850*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_x_save)))->setVisible(off);
-        ((cUIObj_211850*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_delete_text)))->setVisible(off);
-        cUIObj_211850* squareButton = (cUIObj_211850*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq_b));
+        ((cUIObj_211850*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_x_save)))->setVisible(off);
+        ((cUIObj_211850*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_delete_text)))->setVisible(off);
+        cUIObj_211850* squareButton = (cUIObj_211850*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq_b));
         if (squareButton != 0) {
             squareButton->setVisible(off);
         }
-        *(int*)((char*)self + 0x230) = on;
+        self->mIsHidden = on;
     }
 }
 #endif
@@ -597,11 +599,11 @@ extern char str_ps2sq_b[];
  *
  * @param on  nonzero hides the button (On Tour bHide)
  */
-extern "C" void cOVState_PROFILE_hideDeleteButton(void* self, bool on)
+extern "C" void cOVState_PROFILE_hideDeleteButton(cOVState_PROFILE* self, bool on)
 {
-    ((cUIObj_211970*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_delete_text)))->setVisible(!on);
-    ((cUIObj_211970*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq_b)))->setVisible(!on);
-    *(int*)((char*)self + 0x220) = !on;
+    ((cUIObj_211970*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_delete_text)))->setVisible(!on);
+    ((cUIObj_211970*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq_b)))->setVisible(!on);
+    self->mDeleteButtonActive = !on;
 }
 #endif
 
@@ -636,11 +638,11 @@ extern char str_x_save[];
  * @param loadBlocked  unused (On Tour bLoadHide)
  * @param on  nonzero hides the button (On Tour bSaveHide)
  */
-extern "C" void cOVState_PROFILE_hideMainButton(void* self, int loadBlocked, bool on)
+extern "C" void cOVState_PROFILE_hideMainButton(cOVState_PROFILE* self, int loadBlocked, bool on)
 {
-    cUIObj_211A08* xButton = (cUIObj_211A08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x_b));
-    ((cUIObj_211A08*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_x_save)))->setVisible(!on);
-    *(int*)((char*)self + 0x224) = !on;
+    cUIObj_211A08* xButton = (cUIObj_211A08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x_b));
+    ((cUIObj_211A08*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_x_save)))->setVisible(!on);
+    self->mMainButtonActive = !on;
     xButton->setVisible(!on);
 }
 #endif
@@ -660,16 +662,16 @@ extern "C" void cUIStateStack_popToStateInclusive(void* self);
  * cUIStateStack::popToStateInclusive) on mpEngine's state stack (+0x18). Then sets +0x1AC. It is the updateDone slot
  * (+0x10C) of cOVState_PROFILE_vtbl.
  */
-extern "C" void cOVState_PROFILE_updateDone(void* self)
+extern "C" void cOVState_PROFILE_updateDone(cOVState_PROFILE* self)
 {
-    if (*(int*)((char*)self + 0x1AC) == 0) {
-        if (*(int*)((char*)self + 0x278) == 0x18) {
+    if (self->mIsDone == 0) {
+        if (self->mParentOV == 0x18) {
             cGame_exit(SSXApp->Game, 0);
         } else {
-            cUIStateStack_popToStateInclusive(*(char**)((char*)self + 0x10) + 0x18);
+            cUIStateStack_popToStateInclusive((char*)self->mpEngine + 0x18);
         }
     }
-    *(int*)((char*)self + 0x1AC) = 1;
+    self->mIsDone = 1;
 }
 #endif
 
@@ -766,7 +768,7 @@ extern "C" void* cSSXApp_getMCManager(void* app);
  * @param key  the menu event
  * @return 0x100 or 0x101 as above
  */
-extern "C" int cOVState_PROFILE_onWidgetMenu(void* self, int menu, unsigned int key)
+extern "C" int cOVState_PROFILE_onWidgetMenu(cOVState_PROFILE* self, int menu, unsigned int key)
 {
     char* mgr = (char*)cSSXApp_getMCManager(SSXApp);
     switch (key) {
@@ -898,7 +900,7 @@ static inline void* GetText_K211BC8(char* key)
  * @param event  the widget event: 5, 6, 7, 13 or 14
  */
 // Profile screen: handles menu events (5 = name picked, 6 = back, 7 = slot chosen, 13 = name entered).
-extern "C" void cOVState_PROFILE_onWidgetEvent(void* vself, char* item, int event)
+extern "C" void cOVState_PROFILE_onWidgetEvent(cOVState_PROFILE* vself, char* item, int event)
 {
     sProfileK211BC8* self = (sProfileK211BC8*)vself;
     switch (event) {
@@ -1009,15 +1011,15 @@ extern char str_playerpct_d_b[];
  * Sets the texts "1".."6" to their own number and gives "player1".."player6" misc data 0..5; the lookups are
  * not null-checked.
  */
-extern "C" void cOVState_PROFILE_initGeneral(void* self)
+extern "C" void cOVState_PROFILE_initGeneral(cOVState_PROFILE* self)
 {
     char buf[16];
     int i;
     for (i = 1; i < 7; i++) {
         sprintf(buf, D_004A2138, i);
-        cUIText_setAsciiString((cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf)), buf);
+        cUIText_setAsciiString((cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf)), buf);
         sprintf(buf, str_playerpct_d_b, i);
-        *(int*)((char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(buf)) + 0x18) = i - 1;
+        *(int*)((char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf)) + 0x18) = i - 1;
     }
 }
 #endif
@@ -1038,16 +1040,16 @@ extern void* cOVState_AUTOSAVE_vtbl[];
  * @param iParent  the overlay to return to (On Tour iParent)
  * @return @p self
  */
-extern "C" void* cOVState_AUTOSAVE_cOVState_AUTOSAVE(void* self, void* pEngine, int iParent)
+extern "C" void* cOVState_AUTOSAVE_cOVState_AUTOSAVE(cOVState_AUTOSAVE* self, void* pEngine, int iParent)
 {
     cFEMemCard_cFEMemCard2(self, pEngine, 0);
-    *(void***)((char*)self + 0x8) = cOVState_AUTOSAVE_vtbl;
-    *(int*)((char*)self + 0xC) = 37;
-    *(int*)((char*)self + 0x208) = 1;
-    *(int*)((char*)self + 0x22C) = iParent;
-    *(int*)((char*)self + 0x1C4) = 0;
-    *(int*)((char*)self + 0x230) = 0;
-    return self;
+    self->mVtbl = cOVState_AUTOSAVE_vtbl;
+    self->mHashName = 37;
+    self->mAutoSaveOn = 1;
+    self->mParentScreen = iParent;
+    self->mSlot = 0;
+    self->mLastProcessState = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -1063,11 +1065,11 @@ extern char str_122Autosave[];
 /**
  * Creates the autosave overlay screen ("122Autosave") and runs the common overlay set-up.
  */
-extern "C" void cOVState_AUTOSAVE_onCreateScreen(void* self)
+extern "C" void cOVState_AUTOSAVE_onCreateScreen(cOVState_AUTOSAVE* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_122Autosave), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -1110,22 +1112,22 @@ struct cMCOverlayManager_2208 {
  */
 // cOVState_AUTOSAVE::onUpdate (On Tour name); cFEMemCard fields: 0x1A8 mIsProcessing, 0x1C0 mState,
 // 0x1DC mIsSavePressed, 0x1E4 mIsCancelPressed, 0x1F0 mIsOverwriteOK.
-extern "C" void cOVState_AUTOSAVE_onUpdate(void* self)
+extern "C" void cOVState_AUTOSAVE_onUpdate(cOVState_AUTOSAVE* self)
 {
     cMCOverlayManager_2208* pMC = (cMCOverlayManager_2208*)cSSXApp_getMCManager(SSXApp);
-    if (*(int*)((char*)self + 0x1C0) == 1 && !*(int*)((char*)self + 0x1A8)) {
+    if (self->mState == 1 && !self->mIsProcessing) {
         cMCOverlayManager_writeSetFileType(pMC, 1, 0);
-        *(int*)((char*)self + 0x1A8) = 1;
-        *(int*)((char*)self + 0x1DC) = 1;
-        *(int*)((char*)self + 0x1F0) = 1;
-        *(int*)((char*)self + 0x1C0) = 3;
-    } else if (*(int*)((char*)self + 0x1C0) == 3) {
+        self->mIsProcessing = 1;
+        self->mIsSavePressed = 1;
+        self->mIsOverwriteOK = 1;
+        self->mState = 3;
+    } else if (self->mState == 3) {
         if (!pMC->mDevices[pMC->mSelectedDevice].bPluggedIn || !pMC->mDevices[pMC->mSelectedDevice].bValid
             || !pMC->mDevices[pMC->mSelectedDevice].bFormatted) {
-            *(int*)((char*)self + 0x1DC) = 0;
-            *(int*)((char*)self + 0x1E4) = 1;
-            *(int*)((char*)self + 0x1A8) = 0;
-            *(int*)((char*)self + 0x1C0) = 6;
+            self->mIsSavePressed = 0;
+            self->mIsCancelPressed = 1;
+            self->mIsProcessing = 0;
+            self->mState = 6;
         }
     }
     cFEMemCard_onUpdate(self);
@@ -1164,7 +1166,7 @@ struct sObj002122E8 {
 
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
-extern "C" void cOVState_AUTOSAVE_displayOn(void* self);
+extern "C" void cOVState_AUTOSAVE_displayOn(cOVState_AUTOSAVE* self);
 extern char str_autosave_text[];
 
 /**
@@ -1173,13 +1175,13 @@ extern char str_autosave_text[];
  * Calls displayOn when the memory card state (+0x1C0) is neither 0 nor 6, else hides "autosave_text" (virtual
  * slot 9).
  */
-extern "C" void cOVState_AUTOSAVE_displayStatus(void* self)
+extern "C" void cOVState_AUTOSAVE_displayStatus(cOVState_AUTOSAVE* self)
 {
-    int status = *(int*)((char*)self + 0x1C0);
+    int status = self->mState;
     if (status != 0 && status != 6) {
         cOVState_AUTOSAVE_displayOn(self);
     } else {
-        sObj002122E8* autosaveText = (sObj002122E8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_autosave_text));
+        sObj002122E8* autosaveText = (sObj002122E8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_autosave_text));
         autosaveText->vt[9].fn((char*)autosaveText + autosaveText->vt[9].delta, 0);
     }
 }
@@ -1220,30 +1222,30 @@ public:
  * cMCOverlayManager_isManagerDone(memory card manager) 0 and state not 6, it pulses "exclam" ("@pulsingicon") and shows
  * kT_MEMAutosaving; otherwise it stops the animation and hides the text.
  */
-extern "C" void cOVState_AUTOSAVE_displayOn(void* self)
+extern "C" void cOVState_AUTOSAVE_displayOn(cOVState_AUTOSAVE* self)
 {
     void* mp = cSSXApp_getMCManager(SSXApp);
-    int processState = *(int*)((char*)self + 0x1A8);
-    if (processState == *(int*)((char*)self + 0x230)) {
+    int processState = self->mIsProcessing;
+    if (processState == self->mLastProcessState) {
         return;
     }
-    *(int*)((char*)self + 0x230) = processState;
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_exclam_b));
+    self->mLastProcessState = processState;
+    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_exclam_b));
     if (obj == 0) {
         return;
     }
-    if (*(int*)((char*)self + 0x1A8) != 0 && cMCOverlayManager_isManagerDone(mp) == 0 && *(int*)((char*)self + 0x1C0) != 6) {
-        void* bank = *(char**)((char*)self + 0x10) + 0x50;
+    if (self->mIsProcessing != 0 && cMCOverlayManager_isManagerDone(mp) == 0 && self->mState != 6) {
+        void* bank = (char*)self->mpEngine + 0x50;
         void* anim = cUIAnimationBank_getAnimationByHashName(bank, GetHashValue32(str_at_pulsingicon));
         if (anim != 0) {
             cUIThing_playAnimation(obj, anim, 9, 0, 0);
         }
-        cUIObj_2360* autosaveText = (cUIObj_2360*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_autosave_text));
+        cUIObj_2360* autosaveText = (cUIObj_2360*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_autosave_text));
         autosaveText->setVisible(1);
         cUIText_setUnicodeStringByID((cUIText*)autosaveText, GetHashValue32(str_kT_MEMAutosaving));
     } else {
         cUIThing_deleteAnimation(obj);
-        ((cUIObj_2360*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_autosave_text)))->setVisible(0);
+        ((cUIObj_2360*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_autosave_text)))->setVisible(0);
     }
 }
 #endif
@@ -1259,12 +1261,12 @@ extern "C" void cUIStateStack_popToStateInclusive(void* self);
  * When +0x1AC (On Tour mIsDone) is clear, calls cUIStateStack_popToStateInclusive (On Tour cUIStateStack::popToStateInclusive) on
  * mpEngine's state stack (+0x18); then sets +0x1AC. It is the updateDone slot (+0x10C) of cOVState_AUTOSAVE_vtbl.
  */
-extern "C" void cOVState_AUTOSAVE_updateDone(void* self)
+extern "C" void cOVState_AUTOSAVE_updateDone(cOVState_AUTOSAVE* self)
 {
-    if (*(int*)((char*)self + 0x1AC) == 0) {
-        cUIStateStack_popToStateInclusive(*(char**)((char*)self + 0x10) + 0x18);
+    if (self->mIsDone == 0) {
+        cUIStateStack_popToStateInclusive((char*)self->mpEngine + 0x18);
     }
-    *(int*)((char*)self + 0x1AC) = 1;
+    self->mIsDone = 1;
 }
 #endif
 
@@ -1300,18 +1302,18 @@ struct sVEnt_00212508 { short delta; short index; void (*fn)(void*); };
  * code): 1 exits the game, 6 pushes cFEStateTitle, 7 pushes cFEStateLodge, 0 sets up a new race (game mode 4,
  * event 0xC, the last hub into D_00535C08, D_004A11B8 = 1) and makes cPreGameLoadScreen the next module.
  */
-extern "C" void cOVState_AUTOSAVE_onDestroyScreen(void* self)
+extern "C" void cOVState_AUTOSAVE_onDestroyScreen(cOVState_AUTOSAVE* self)
 {
     cFEMemCard_onDestroyScreen(self);
-    int parentScreen = *(int*)((char*)self + 0x22C);
+    int parentScreen = self->mParentScreen;
     if (parentScreen == 1) {
         cGame_exit(SSXApp->Game, 0);
     } else if (parentScreen == 6) {
-        void* nextState = cFEStateTitle_cFEStateTitle1(cMemMan_alloc(76, str_cFEStateTitle_b, 0, 0), *(void**)((char*)self + 0x10));
-        cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, nextState);
+        void* nextState = cFEStateTitle_cFEStateTitle1(cMemMan_alloc(76, str_cFEStateTitle_b, 0, 0), self->mpEngine);
+        cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
     } else if (parentScreen == 7) {
-        void* nextState = cFEStateLodge_cFEStateLodge(cMemMan_alloc(88, str_cFEStateLodge_b, 0, 0), *(void**)((char*)self + 0x10));
-        cUIStateStack_push(*(char**)((char*)self + 0x10) + 0x18, nextState);
+        void* nextState = cFEStateLodge_cFEStateLodge(cMemMan_alloc(88, str_cFEStateLodge_b, 0, 0), self->mpEngine);
+        cUIStateStack_push((char*)self->mpEngine + 0x18, nextState);
     } else if (parentScreen == 0) {
         void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
         void* player = cBE_getInterface_Fv(cBE_getBE(), 1);

@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/ovstatereplay.h"
 #include "fe/ovstate.h"
 #include "main/game.h"
 #include "main/ssxapp.h"
@@ -33,7 +34,7 @@ public:
  *
  * @param w  the widget being created
  */
-extern "C" void cOVState_REPLAY_onWidgetCreate(void* self, cUIObj_20DE30* w)
+extern "C" void cOVState_REPLAY_onWidgetCreate(cOVState_REPLAY* self, cUIObj_20DE30* w)
 {
     int id = *(int*)((char*)w + 0x38);
     if (id == GetHashValue32(str_option_savereplay)) {
@@ -73,10 +74,10 @@ INCLUDE_ASM("fe/ovstatereplay", cOVState_REPLAY_onWidgetMenu);
  */
 // FAKEMATCH: register pin `register int r FM_REG("$2")` keeps the result in v0 (local-alloc gives v0 to the block-local temps first, so the plain r lands in a0 and is copied to v0 at the end); plain form 88.50%.
 // Byte-identical and behaves like the plain form; replace it when an honest spelling matches.
-extern "C" int cOVState_REPLAY_onWidgetMenu(void* self, int pMenu, unsigned int key)
+extern "C" int cOVState_REPLAY_onWidgetMenu(cOVState_REPLAY* self, int pMenu, unsigned int key)
 {
     register int result FM_REG("$2") = 0;
-    if (*(int*)((char*)self + 0x9c) != 0) {
+    if (self->mShowPopupMenu != 0) {
         if (key - 2 <= 3) {
             result = 257;
         }
@@ -187,42 +188,42 @@ static inline char* replay_20DF38() { return *(char**)(D_004A28A8_20DF38->game +
  * @param pInput  the UI input (pad port at +0x4)
  * @return 1 when handled here, 0 while the menu is open (the menu handles it), else cReplay_updateInput()'s result
  */
-extern "C" int cOVState_REPLAY_onInputBegin(sReplay_20DF38* self, cPad_20DF38* pInput)
+extern "C" int cOVState_REPLAY_onInputBegin(cOVState_REPLAY* self, cPad_20DF38* pInput)
 {
     cSnd_20DF38* snd = &gUISoundNull;
-    if (*(cSnd_20DF38**)(self->owner + 0x14) != 0)
-        snd = *(cSnd_20DF38**)(self->owner + 0x14);
+    if (*(cSnd_20DF38**)((char*)self->mpEngine + 0x14) != 0)
+        snd = *(cSnd_20DF38**)((char*)self->mpEngine + 0x14);
     if (pInput->port != *(int*)(replay_20DF38() + 0x28)) {
         return 1;
     }
-    if (self->paused == 0 && cInput_getState(D_004A28A8_20DF38->pads[pInput->port], 202)) {
-        if (self->pos == self->end || self->speed == 4) {
+    if (self->mShowPopupMenu == 0 && cInput_getState(D_004A28A8_20DF38->pads[pInput->port], 202)) {
+        if (self->mBottom_y == self->mMaxBottom_y || self->mBottom_ydiff == 4) {
             snd->play(2);
         }
-        self->speed = -4;
+        self->mBottom_ydiff = -4;
         return 1;
     }
-    if (self->paused == 0 && cInput_getState(D_004A28A8_20DF38->pads[pInput->port], 203)) {
-        if (self->pos == self->start || self->speed == -4) {
+    if (self->mShowPopupMenu == 0 && cInput_getState(D_004A28A8_20DF38->pads[pInput->port], 203)) {
+        if (self->mBottom_y == self->mMinBottom_y || self->mBottom_ydiff == -4) {
             snd->play(2);
         }
-        self->speed = 4;
+        self->mBottom_ydiff = 4;
         return 1;
     }
-    if (pInput->v03() && self->paused == 0) {
+    if (pInput->v03() && self->mShowPopupMenu == 0) {
         snd->play(6);
         int n = D_004A2A54 + 1;
         D_005366E8[n] = 2;
         cPauseState_Flags = D_004428F8[0];
         D_004A2A54 = n;
-        self->paused = 1;
-        char* obj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_ReplayMenu));
+        self->mShowPopupMenu = 1;
+        char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
         *(int*)(obj + 0x90) &= ~8;
         return 1;
     }
-    if (self->paused != 0 && pInput->v05()) {
+    if (self->mShowPopupMenu != 0 && pInput->v05()) {
         snd->play(6);
-        char* obj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_ReplayMenu));
+        char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
         switch (*(int*)(*(char**)(obj + 0xA0) + 0x18)) {
         case 0:
             cReplay_stopReplay(replay_20DF38());
@@ -230,13 +231,13 @@ extern "C" int cOVState_REPLAY_onInputBegin(sReplay_20DF38* self, cPad_20DF38* p
             cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
             break;
         case 1: {
-            cUIStateStack_pop(self->owner + 0x18, 1);
-            unsigned short frame = cUIScreen_getFrameByLabel((cUIScreen*)self->screen, GetHashValue32(str_TransitionOut_b));
+            cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
+            unsigned short frame = cUIScreen_getFrameByLabel((cUIScreen*)self->mpScreen, GetHashValue32(str_TransitionOut_b));
             if (frame != 0xFFFF) {
-                cUIScreen_playFrame(self->screen, frame, 1);
+                cUIScreen_playFrame(self->mpScreen, frame, 1);
             }
             cReplay_stopReplay(replay_20DF38());
-            if (self->fB4 == 0) {
+            if (self->mLoaded == 0) {
                 cReplay_startAutoReplay(replay_20DF38());
             }
             if (*(int*)(replay_20DF38() + 0x608) != 0) {
@@ -246,46 +247,46 @@ extern "C" int cOVState_REPLAY_onInputBegin(sReplay_20DF38* self, cPad_20DF38* p
             break;
         }
         case 2:
-            self->paused = 0;
+            self->mShowPopupMenu = 0;
             cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
             break;
         }
         return 1;
     }
-    if (self->paused != 0 && pInput->v06()) {
+    if (self->mShowPopupMenu != 0 && pInput->v06()) {
         snd->play(3);
         cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
-        self->paused = 0;
-        char* obj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_ReplayMenu));
+        self->mShowPopupMenu = 0;
+        char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
         *(int*)(obj + 0x90) |= 8;
         return 1;
     }
-    if (self->paused == 0 && cInput_getState(D_004A28A8_20DF38->pads[pInput->port], 204)) {
+    if (self->mShowPopupMenu == 0 && cInput_getState(D_004A28A8_20DF38->pads[pInput->port], 204)) {
         snd->play(6);
-        self->hudHidden ^= 1;
-        if (self->hudHidden != 0) {
-            cUIState_hideObjSafe(self, str_top);
-            cUIState_hideObjSafe(self, str_hidetimeline);
-            cUIState_showObjSafe(self, str_showtimeline);
+        self->mTimeLineHidden ^= 1;
+        if (self->mTimeLineHidden != 0) {
+            cUIState_hideObjSafe(((sReplay_20DF38*)self), str_top);
+            cUIState_hideObjSafe(((sReplay_20DF38*)self), str_hidetimeline);
+            cUIState_showObjSafe(((sReplay_20DF38*)self), str_showtimeline);
         } else {
-            cUIState_showObjSafe(self, str_top);
-            cUIState_showObjSafe(self, str_hidetimeline);
-            cUIState_hideObjSafe(self, str_showtimeline);
+            cUIState_showObjSafe(((sReplay_20DF38*)self), str_top);
+            cUIState_showObjSafe(((sReplay_20DF38*)self), str_hidetimeline);
+            cUIState_hideObjSafe(((sReplay_20DF38*)self), str_showtimeline);
         }
         return 1;
     }
     if (pInput->v17()) {
-        char* obj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_ReplayMenu));
-        if (obj != 0 && self->fB4 != 0 && *(unsigned char*)(obj + 0x95) == 1) {
+        char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
+        if (obj != 0 && self->mLoaded != 0 && *(unsigned char*)(obj + 0x95) == 1) {
             return 1;
         }
     } else if (pInput->v18()) {
-        char* obj = (char*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_ReplayMenu));
-        if (obj != 0 && self->fB4 != 0 && *(unsigned char*)(obj + 0x95) == 2) {
+        char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ReplayMenu));
+        if (obj != 0 && self->mLoaded != 0 && *(unsigned char*)(obj + 0x95) == 2) {
             return 1;
         }
     }
-    if (self->paused != 0) {
+    if (self->mShowPopupMenu != 0) {
         return 0;
     }
     return cReplay_updateInput(replay_20DF38(), 0);
@@ -301,8 +302,8 @@ extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cOVState_onUpdate(cOVState* self);
 extern "C" void cReplay_updateCameraSelect(void* p);
-extern "C" void cOVState_REPLAY_setupCameraName(void* self);
-extern "C" void cOVState_REPLAY_setupTicker(void* self);
+extern "C" void cOVState_REPLAY_setupCameraName(cOVState_REPLAY* self);
+extern "C" void cOVState_REPLAY_setupTicker(cOVState_REPLAY* self);
 extern char str_hidehelp[];
 extern char str_showhelp[];
 extern char str_ReplayMenuPopup[];
@@ -334,7 +335,7 @@ struct sReplay_0020E530 {
  *
  * @param vself  the replay overlay state (this)
  */
-extern "C" void cOVState_REPLAY_onUpdate(void* vself)
+extern "C" void cOVState_REPLAY_onUpdate(cOVState_REPLAY* vself)
 {
     sReplay_0020E530* self = (sReplay_0020E530*)vself;
     cOVState_onUpdate((cOVState*)self);
@@ -368,8 +369,8 @@ extern "C" void cOVState_REPLAY_onUpdate(void* vself)
     if (self->paused == 0) {
         cReplay_updateCameraSelect(SSXApp->Game->Replay);
     }
-    cOVState_REPLAY_setupCameraName(self);
-    cOVState_REPLAY_setupTicker(self);
+    cOVState_REPLAY_setupCameraName((cOVState_REPLAY*)self);
+    cOVState_REPLAY_setupTicker((cOVState_REPLAY*)self);
 }
 #endif
 
@@ -384,8 +385,8 @@ extern "C" void cUIState_showObjSafe(void* self, char* name);
 extern "C" void cUIState_hideObjSafe(void* self, char* name);
 extern "C" void cOVState_onUpdate(cOVState* self);
 extern "C" void cReplay_updateCameraSelect(void* p);
-extern "C" void cOVState_REPLAY_setupCameraName(void* self);
-extern "C" void cOVState_REPLAY_setupTicker(void* self);
+extern "C" void cOVState_REPLAY_setupCameraName(cOVState_REPLAY* self);
+extern "C" void cOVState_REPLAY_setupTicker(cOVState_REPLAY* self);
 extern char str_hidehelp[];
 extern char str_showhelp[];
 extern char str_ReplayMenuPopup[];
@@ -414,10 +415,10 @@ extern char D_004A2138[];
  * reaches.
  */
 // Shows the name of the current replay camera.
-extern "C" void cOVState_REPLAY_setupCameraName(void* self)
+extern "C" void cOVState_REPLAY_setupCameraName(cOVState_REPLAY* self)
 {
     long buf[2];
-    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_camera));
+    cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_camera));
     if (text == 0)
         return;
     unsigned int cam = *(unsigned int*)((char*)SSXApp->Game->Replay + 0x630);
@@ -454,9 +455,9 @@ struct sVec3_20E818 {
  *
  * x = 170 + 315 * PlaybackTick / EndRecordTick (0 when nothing was recorded).
  */
-extern "C" void cOVState_REPLAY_setupTicker(void* self)
+extern "C" void cOVState_REPLAY_setupTicker(cOVState_REPLAY* self)
 {
-    char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_percentcomplete));
+    char* obj = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_percentcomplete));
     if (obj != 0) {
         sVec3_20E818 pos = *(sVec3_20E818*)(obj + 0x44);
         char* replay = (char*)SSXApp->Game->Replay;

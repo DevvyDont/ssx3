@@ -1,4 +1,7 @@
 #include "common.h"
+#include "fe/ovstateenterlodge.h"
+#include "fe/ovstatetoptimes.h"
+#include "fe/ovstatebigchallenge.h"
 #include "be/beintnewrace.h"
 #include "main/ssxapp.h"
 
@@ -15,11 +18,11 @@ extern char str_98enterlodge[];
 /**
  * Builds the Enter Lodge prompt ("98enterlodge"), adds the PDA template and runs the base overlay set-up.
  */
-extern "C" void cOVState_ENTERLODGE_onCreateScreen(void* self)
+extern "C" void cOVState_ENTERLODGE_onCreateScreen(cOVState_ENTERLODGE* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_98enterlodge), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -44,13 +47,13 @@ extern "C" void cUIState_onGainFocus(void* self, void* a1);
  *
  * @param pPrevState  the state that had the focus before (passed on)
  */
-extern "C" void cOVState_ENTERLODGE_onGainFocus(void* self, void* pPrevState)
+extern "C" void cOVState_ENTERLODGE_onGainFocus(cOVState_ENTERLODGE* self, void* pPrevState)
 {
-    void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_yes_b));
+    void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_yes_b));
     if (obj != 0) {
         *(int*)((char*)obj + 0x18) = 0;
     }
-    obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_no_b));
+    obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_no_b));
     if (obj != 0) {
         *(int*)((char*)obj + 0x18) = 1;
     }
@@ -86,7 +89,7 @@ INCLUDE_ASM("fe/ovstateenterlodge", cOVState_ENTERLODGE_onWidgetMenu);
  * @return 0x100 (animation only) for events 8 and 9, else 0x101 (animation and sound)
  */
 // Key filter: keys 8 and 9 return 0x100, every other key 0x101.
-extern "C" int cOVState_ENTERLODGE_onWidgetMenu(void* self, int pMenu, unsigned int key)
+extern "C" int cOVState_ENTERLODGE_onWidgetMenu(cOVState_ENTERLODGE* self, int pMenu, unsigned int key)
 {
     int result = 257;
     if (key < 10) {
@@ -133,7 +136,7 @@ struct sSelf001F72E0 {
  * @param widget  the item (On Tour pWidget); ignored when null
  * @param msg  the widget event: 5 Cross, 6 Triangle
  */
-extern "C" void cOVState_ENTERLODGE_onWidgetEvent(sSelf001F72E0* self, void* widget, int msg)
+extern "C" void cOVState_ENTERLODGE_onWidgetEvent(cOVState_ENTERLODGE* self, void* widget, int msg)
 {
     if (widget != 0) {
         switch (msg) {
@@ -148,15 +151,15 @@ extern "C" void cOVState_ENTERLODGE_onWidgetEvent(sSelf001F72E0* self, void* wid
                 }
                 break;
             case 1:
-                self->done = 1;
-                cUIStateStack_pop(self->mgr + 0x18, 1);
+                self->mRemovePDA = 1;
+                cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
                 break;
             }
             break;
         case 6:
-            self->done = 1;
+            self->mRemovePDA = 1;
             ((sGame001F72E0*)SSXApp->Game)->flag->active = 1;
-            cUIStateStack_pop(self->mgr + 0x18, 1);
+            cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
             break;
         }
     }
@@ -175,11 +178,11 @@ extern char str_63bc_start[];
 /**
  * Builds the Big Challenge offer screen ("63bc_start") and runs the base overlay set-up.
  */
-extern "C" void cOVState_BIGCHALLENGE_START_onCreateScreen(void* self)
+extern "C" void cOVState_BIGCHALLENGE_START_onCreateScreen(cOVState_BIGCHALLENGE_START* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_63bc_start), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -211,17 +214,17 @@ extern char str_ObjText[];
  * @param gained  nonzero on the first call (On Tour bFirstTime)
  * @return always 0
  */
-extern "C" int cOVState_BIGCHALLENGE_START_onGainTransition(void* self, int gained)
+extern "C" int cOVState_BIGCHALLENGE_START_onGainTransition(cOVState_BIGCHALLENGE_START* self, int gained)
 {
     if (gained) {
         void* iface = cBE_getInterface_Fv(cBE_getBE(), 10);
-        void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_chalname));
+        void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_chalname));
         if (obj) {
-            cUIText_setUnicodeString(obj, cBEMissionInterface_getMissionName(iface, *(int*)((char*)self + 0x9C)));
+            cUIText_setUnicodeString(obj, cBEMissionInterface_getMissionName(iface, self->mMissionId));
         }
-        obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ObjText));
+        obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ObjText));
         if (obj) {
-            cUIText_setUnicodeStringWrap(obj, cBEMissionInterface_getMissionLongDesc(iface, *(int*)((char*)self + 0x9C)));
+            cUIText_setUnicodeStringWrap(obj, cBEMissionInterface_getMissionLongDesc(iface, self->mMissionId));
         }
     }
     return 0;
@@ -240,7 +243,7 @@ extern char str_no_b[];
  *
  * @param item  the widget being created
  */
-extern "C" void cOVState_BIGCHALLENGE_START_onWidgetCreate(void* self, void* item)
+extern "C" void cOVState_BIGCHALLENGE_START_onWidgetCreate(cOVState_BIGCHALLENGE_START* self, void* item)
 {
     int id = *(int*)((char*)item + 0x38);
     if (id == GetHashValue32(str_yes_b)) {
@@ -267,13 +270,13 @@ extern "C" int* tMissionMenuQueue_getNextEntry(void* list);
  * Reads the queue at cWScriptMan_TheWScriptMan + 0x1C4 with tMissionMenuQueue_getNextEntry; its entry's first word, or
  * else the local mission id at +0x2A0, is stored as the overlay's mission id (+0x9C).
  */
-extern "C" void cOVState_BIGCHALLENGE_START_getChallengeData(void* self)
+extern "C" void cOVState_BIGCHALLENGE_START_getChallengeData(cOVState_BIGCHALLENGE_START* self)
 {
     int* queueEntry = tMissionMenuQueue_getNextEntry((char*)cWScriptMan_TheWScriptMan + 0x1C4);
     if (queueEntry != 0) {
-        *(int*)((char*)self + 0x9C) = *queueEntry;
+        self->mMissionId = *queueEntry;
     } else {
-        *(int*)((char*)self + 0x9C) = *(int*)((char*)cWScriptMan_TheWScriptMan + 0x2A0);
+        self->mMissionId = *(int*)((char*)cWScriptMan_TheWScriptMan + 0x2A0);
     }
 }
 #endif
@@ -288,7 +291,7 @@ INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_START_onWidgetMenu);
  * @param Event  the menu event (6 Cross)
  * @return 0x101 for event 6, else 0
  */
-extern "C" int cOVState_BIGCHALLENGE_START_onWidgetMenu(void* self, int pMenu, int Event)
+extern "C" int cOVState_BIGCHALLENGE_START_onWidgetMenu(cOVState_BIGCHALLENGE_START* self, int pMenu, int Event)
 {
     return Event == 6 ? 257 : 0;
 }
@@ -329,7 +332,7 @@ struct sMgr_75A0 {
  * @param item  the selected item; ignored when null
  * @param msg  the widget event: 5 Cross, 6 Triangle
  */
-extern "C" void cOVState_BIGCHALLENGE_START_onWidgetEvent(void* self, void* item, int msg)
+extern "C" void cOVState_BIGCHALLENGE_START_onWidgetEvent(cOVState_BIGCHALLENGE_START* self, void* item, int msg)
 {
     if (item == 0) {
         return;
@@ -340,7 +343,7 @@ extern "C" void cOVState_BIGCHALLENGE_START_onWidgetEvent(void* self, void* item
             if (cWScriptMan_isLocalMissionActive(cWScriptMan_TheWScriptMan) != 0) {
                 cWScriptMan_restartLocalMission(cWScriptMan_TheWScriptMan);
             } else {
-                ((sMgr_75A0*)cWScriptMan_TheWScriptMan)->f2A0 = *(int*)((char*)self + 0x9C);
+                ((sMgr_75A0*)cWScriptMan_TheWScriptMan)->f2A0 = self->mMissionId;
                 cWScriptMan_startLocalMission(cWScriptMan_TheWScriptMan);
             }
             cOVStateManager_mStatus = 3;
@@ -349,7 +352,7 @@ extern "C" void cOVState_BIGCHALLENGE_START_onWidgetEvent(void* self, void* item
             break;
         }
     case 6:
-        ((sMgr_75A0*)cWScriptMan_TheWScriptMan)->f2A0 = *(int*)((char*)self + 0x9C);
+        ((sMgr_75A0*)cWScriptMan_TheWScriptMan)->f2A0 = self->mMissionId;
         cWScriptMan_cancelLocalMission(cWScriptMan_TheWScriptMan);
         cOVStateManager_mStatus = 3;
         cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
@@ -374,14 +377,14 @@ extern char str_90bc_fail[];
  * (cUIEngine_addScreenByHashName) into mpScreen, plays it from frame 0 when it exists, then runs
  * cOVState_onCreateScreen. It is the onCreateScreen slot of this overlay's vtable D_004735B0.
  */
-extern "C" void cOVState_BIGCHALLENGE_FAIL_onCreateScreen(void* self)
+extern "C" void cOVState_BIGCHALLENGE_FAIL_onCreateScreen(cOVState_BIGCHALLENGE_FAIL* self)
 {
     void* engine;
     void* screen;
-    *(int*)((char*)self + 0xC) = GetHashValue32(str_90bc_fail);
-    engine = *(void**)((char*)self + 0x10);
+    self->mHashName = GetHashValue32(str_90bc_fail);
+    engine = (void*)self->mpEngine;
     screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_90bc_fail), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -401,9 +404,9 @@ extern "C" int* tMissionMenuQueue_getNextEntry(void* list);
  * Stores the first word of tMissionMenuQueue_getNextEntry(cWScriptMan_TheWScriptMan + 0x1C4) as the mission id (+0x9C).
  * Unlike cOVState_BIGCHALLENGE_START_getChallengeData it does not check for an empty queue (likely bug if the queue can be empty: a null dereference).
  */
-extern "C" void cOVState_BIGCHALLENGE_FAIL_getChallengeData(void* self)
+extern "C" void cOVState_BIGCHALLENGE_FAIL_getChallengeData(cOVState_BIGCHALLENGE_FAIL* self)
 {
-    *(int*)((char*)self + 0x9C) = *tMissionMenuQueue_getNextEntry((char*)cWScriptMan_TheWScriptMan + 0x1C4);
+    self->mMissionId = *tMissionMenuQueue_getNextEntry((char*)cWScriptMan_TheWScriptMan + 0x1C4);
 }
 #endif
 
@@ -423,7 +426,7 @@ extern char str_info[];
  *
  * @param item  the widget being created
  */
-extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetCreate(void* self, void* item)
+extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetCreate(cOVState_BIGCHALLENGE_FAIL* self, void* item)
 {
     int id = *(int*)((char*)item + 0x38);
     if (id == GetHashValue32(str_yes_b)) {
@@ -453,7 +456,7 @@ INCLUDE_ASM("fe/ovstateenterlodge", cOVState_BIGCHALLENGE_FAIL_onWidgetMenu);
  * @param event  the menu event
  * @return 0x101 for event 6, else 0
  */
-extern "C" int cOVState_BIGCHALLENGE_FAIL_onWidgetMenu(void* self, int menu, int event)
+extern "C" int cOVState_BIGCHALLENGE_FAIL_onWidgetMenu(cOVState_BIGCHALLENGE_FAIL* self, int menu, int event)
 {
     return event == 6 ? 257 : 0;
 }
@@ -484,7 +487,7 @@ extern char str_TransitionOut_b[];
  * @param item  the widget; its misc data (+0x18) is set by cOVState_BIGCHALLENGE_FAIL_onWidgetCreate
  * @param msg  the widget event: 5 select, 6 back
  */
-extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetEvent(void* self, void* item, int msg)
+extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetEvent(cOVState_BIGCHALLENGE_FAIL* self, void* item, int msg)
 {
     if (item == 0) {
         return;
@@ -493,9 +496,9 @@ extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetEvent(void* self, void* item,
     case 5: {
         int choice = *(int*)((char*)item + 0x18);
         if (choice == 0) {
-            ((sMgr_75A0*)cWScriptMan_TheWScriptMan)->f2A0 = *(int*)((char*)self + 0x9C);
+            ((sMgr_75A0*)cWScriptMan_TheWScriptMan)->f2A0 = self->mMissionId;
             cWScriptMan_restartLocalMission(cWScriptMan_TheWScriptMan);
-            cUIStateStack_pop_r((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
+            cUIStateStack_pop_r((char*)self->mpEngine + 0x18, 1);
             cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
             cSSXAudio_SetBigChallengeStarting(cAudioInterface_bxAudio());
             return;
@@ -507,9 +510,9 @@ extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetEvent(void* self, void* item,
         break;
     }
     case 6: {
-        int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(str_TransitionOut_b));
+        int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b));
         if (frame != 0xFFFF) {
-            cUIScreen_playFrame(*(void**)((char*)self + 0x40), frame & 0xFFFF, 1);
+            cUIScreen_playFrame(self->mpScreen, frame & 0xFFFF, 1);
         }
         break;
     }
@@ -517,7 +520,7 @@ extern "C" void cOVState_BIGCHALLENGE_FAIL_onWidgetEvent(void* self, void* item,
         return;
     }
     cWScriptMan_cancelLocalMission(cWScriptMan_TheWScriptMan);
-    cUIStateStack_pop_r((char*)*(void**)((char*)self + 0x10) + 0x18, 1);
+    cUIStateStack_pop_r((char*)self->mpEngine + 0x18, 1);
     cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
 }
 #endif
@@ -598,27 +601,27 @@ static inline int Loc1F7958(char* name)
  * the time formatted by func_0020A1A8 or the points as "%d". Plays UI event 0xE.
  * func_001FD190() is declared without parameters here; retail relies on $a0 still holding the event kind.
  */
-extern "C" void cOVState_TOPTIMES_onCreateScreen(char* self)
+extern "C" void cOVState_TOPTIMES_onCreateScreen(cOVState_TOPTIMES* self)
 {
     char buf[0x40];
     char line[0x40];
     unsigned short wtext[104];
     unsigned short wfmt[0x10];
     int full;
-    *(int*)(self + 0xA0) = 0;
-    void* engine = *(void**)(self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_61toptimes), 0);
-    *(void**)(self + 0x40) = screen;
+    self->mIsNextScreenPending = 0;
+    void* engine = self->mpEngine;
+    void* screen = cUIEngine_addScreenByHashName(engine, ((char*)self), GetHashValue32(str_61toptimes), 0);
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    engine = *(void**)(self + 0x10);
-    screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_OV_darkblue), 0);
+    engine = (void*)self->mpEngine;
+    screen = cUIEngine_addScreenByHashName(engine, ((char*)self), GetHashValue32(str_OV_darkblue), 0);
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
     full = 1;
-    cOVState_onCreateScreen(self);
+    cOVState_onCreateScreen(((char*)self));
     void* race = cBE_getInterface_Fv(cBE_getBE(), 0);
     void* stats = cBE_getInterface_Fv(cBE_getBE(), 8);
     signed char* raceDB = (signed char*)((char*)&cBENewRaceInterface_newRace);
@@ -654,41 +657,41 @@ extern "C" void cOVState_TOPTIMES_onCreateScreen(char* self)
         break;
     }
     }
-    cUIText_setUnicodeString(cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_track_xxx)), wtext);
+    cUIText_setUnicodeString(cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_track_xxx)), wtext);
     signed char* newRace = (signed char*)((char*)&cBENewRaceInterface_newRace);
     int gameMode = newRace[0x48];
     if (gameMode == 0 || gameMode == 5) {
-        cUIState_showObjSafe(self, str_time);
-        cUIState_hideObjSafe(self, str_points_b);
-        cUIState_showObjSafe(self, str_top5record);
-        cUIState_hideObjSafe(self, str_top5scores);
-        cUIState_showObjSafe(self, str_helptext01);
-        cUIState_hideObjSafe(self, str_helptext02);
+        cUIState_showObjSafe(((char*)self), str_time);
+        cUIState_hideObjSafe(((char*)self), str_points_b);
+        cUIState_showObjSafe(((char*)self), str_top5record);
+        cUIState_hideObjSafe(((char*)self), str_top5scores);
+        cUIState_showObjSafe(((char*)self), str_helptext01);
+        cUIState_hideObjSafe(((char*)self), str_helptext02);
     } else {
-        cUIState_hideObjSafe(self, str_time);
-        cUIState_showObjSafe(self, str_points_b);
-        cUIState_hideObjSafe(self, str_top5record);
-        cUIState_showObjSafe(self, str_top5scores);
-        cUIState_hideObjSafe(self, str_helptext01);
-        cUIState_showObjSafe(self, str_helptext02);
+        cUIState_hideObjSafe(((char*)self), str_time);
+        cUIState_showObjSafe(((char*)self), str_points_b);
+        cUIState_hideObjSafe(((char*)self), str_top5record);
+        cUIState_showObjSafe(((char*)self), str_top5scores);
+        cUIState_hideObjSafe(((char*)self), str_helptext01);
+        cUIState_showObjSafe(((char*)self), str_helptext02);
         full = 0;
     }
-    cUIState_showObjSafe(self, str_ngca_b);
-    cUIState_showObjSafe(self, str_xba_b);
-    cUIState_showObjSafe(self, str_ps2x_b);
+    cUIState_showObjSafe(((char*)self), str_ngca_b);
+    cUIState_showObjSafe(((char*)self), str_xba_b);
+    cUIState_showObjSafe(((char*)self), str_ps2x_b);
     if (cOVStateManager_mMiscData != 0) {
-        cUIState_hideObjSafe(self, str_helptext01);
-        cUIState_hideObjSafe(self, str_helptext02);
+        cUIState_hideObjSafe(((char*)self), str_helptext01);
+        cUIState_hideObjSafe(((char*)self), str_helptext02);
     }
     for (int i = 1; i < 6; i++) {
         sprintf(buf, str_name0pct_d, i);
-        cUIText* nameText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(buf));
+        cUIText* nameText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
         cUIText_setAsciiString_i(nameText, func_00155208(stats, i - 1));
         sprintf(buf, str_with0pct_d, i);
-        cUIText* withText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(buf));
+        cUIText* withText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
         cUIText_setAsciiString_i(withText, func_00155190(stats, i - 1));
         sprintf(buf, str_time0pct_d, i);
-        cUIText* timeText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(buf));
+        cUIText* timeText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
         if (full == 1) {
             sprintf(line, func_0020A1A8(func_00155130(stats, i - 1)));
         } else {
@@ -724,7 +727,7 @@ static inline int isHashTOPTIMES(int id, char* s)
  *
  * @param w  the widget being created
  */
-extern "C" void cOVState_TOPTIMES_onWidgetCreate(void* self, cUIText* w)
+extern "C" void cOVState_TOPTIMES_onWidgetCreate(cOVState_TOPTIMES* self, cUIText* w)
 {
     int id = *(int*)((char*)w + 0x38);
     if (isHashTOPTIMES(id, str_continue)) {
@@ -778,7 +781,7 @@ static inline void LoadRider1F7F08(void* self, int n)
  *
  * @param pPrevState  the state that had the focus before (passed on)
  */
-extern "C" void cOVState_TOPTIMES_onGainFocus(void* self, void* pPrevState)
+extern "C" void cOVState_TOPTIMES_onGainFocus(cOVState_TOPTIMES* self, void* pPrevState)
 {
     cUIState_onGainFocus(self, pPrevState);
     char* prof = (char*)cBE_getInterface_Fv(cBE_getBE(), 8);
@@ -806,7 +809,7 @@ INCLUDE_ASM("fe/ovstateenterlodge", cOVState_TOPTIMES_onWidgetMenu);
  * @param Event  the menu event (6 Cross)
  * @return 0x101 for event 6, else 0
  */
-extern "C" int cOVState_TOPTIMES_onWidgetMenu(void* self, int pMenu, int Event)
+extern "C" int cOVState_TOPTIMES_onWidgetMenu(cOVState_TOPTIMES* self, int pMenu, int Event)
 {
     return Event == 6 ? 257 : 0;
 }
@@ -831,11 +834,11 @@ struct sVEntry_001F80D8 {
  * @param pWidget  the chosen item; ignored when null
  * @param Event  the widget event; only 5 (Cross) acts
  */
-extern "C" void cOVState_TOPTIMES_onWidgetEvent(void* self, void* pWidget, int Event)
+extern "C" void cOVState_TOPTIMES_onWidgetEvent(cOVState_TOPTIMES* self, void* pWidget, int Event)
 {
     if (pWidget != 0) {
         if (Event == 5) {
-            sVEntry_001F80D8* vt = *(sVEntry_001F80D8**)((char*)self + 0x8);
+            sVEntry_001F80D8* vt = (sVEntry_001F80D8*)self->mVtbl;
             vt[26].fn((char*)self + vt[26].delta);
         }
     }
@@ -857,17 +860,17 @@ extern "C" void cOVStateManager_triggerOverlay(int id);
  *
  * @param pWidget  the chosen item (On Tour: cUIThing *pWidget)
  */
-extern "C" void cOVState_TOPTIMES_handleNext(void* self, void* pWidget)
+extern "C" void cOVState_TOPTIMES_handleNext(cOVState_TOPTIMES* self, void* pWidget)
 {
-    if (*(int*)((char*)self + 0xA0) == 0) {
+    if (self->mIsNextScreenPending == 0) {
         int choice = *(int*)((char*)pWidget + 0x18);
         switch (choice) {
         case 0:
-            *(int*)((char*)self + 0xA0) = 1;
+            self->mIsNextScreenPending = 1;
             cOVStateManager_mStatus = 1;
             break;
         case 1:
-            *(int*)((char*)self + 0xA0) = choice;
+            self->mIsNextScreenPending = choice;
             cOVStateManager_triggerOverlay(19);
             break;
         }

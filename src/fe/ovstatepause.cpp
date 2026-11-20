@@ -1,4 +1,9 @@
 #include "common.h"
+#include "fe/ovstateheat.h"
+#include "fe/ovstaterewards.h"
+#include "fe/ovstatepause.h"
+#include "fe/ovstatesavereplay.h"
+#include "fe/ovstatesaveoptions.h"
 #include "online/lobbyman.h"
 #include "main/gamemode.h"
 #include "be/beintnetwork.h"
@@ -189,12 +194,12 @@ static inline char* riders_PO()
  * func_00266E30 (probably voice off / on); otherwise EATalk is hidden and made static in its static colour.
  * setStatic / setUseStaticColour are vtable slots 8 / 25 (cUIThing_setStatic / cUIText_setUseStaticColour).
  */
-extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(void* self)
+extern "C" void cOVState_PAUSE_OPTIONS_onCreateScreen(cOVState_PAUSE_OPTIONS* self)
 {
     unsigned char sel;
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_37beoptions), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
@@ -370,26 +375,26 @@ static inline bool isField_FA100(signed char* g, int off, int v)
  * 8, setStatic) and "camera 2 select" / "2lb" are greyed out (DisableTextWidget: static, alpha at most
  * 0.5). "save" is greyed out unless cGameMode is 4 (free ride in the game-flow notes).
  */
-extern "C" void cOVState_PAUSE_OPTIONS_onPreRender2D(void* self)
+extern "C" void cOVState_PAUSE_OPTIONS_onPreRender2D(cOVState_PAUSE_OPTIONS* self)
 {
     cBE_getInterface_Fv(cBE_getBE(), 0);
     cBE_getInterface_Fv(SSXApp->BE, 7);
     if (cBENetworkInterface_networkOpt.bIsNetworkGame != 0 || !isField_FA100((signed char*)cBENewRaceInterface_newRace, 73, 2)) {
-        cUIObj_FA100* pair2 = (cUIObj_FA100*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(D_004A24E0));
+        cUIObj_FA100* pair2 = (cUIObj_FA100*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(D_004A24E0));
         if (pair2 != 0) {
             pair2->setStatic(1);
         }
-        void* camSelect2 = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_camera_2_select));
+        void* camSelect2 = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_camera_2_select));
         if (camSelect2 != 0) {
             DisableTextWidget(camSelect2);
         }
-        void* label2 = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_2lb_b));
+        void* label2 = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_2lb_b));
         if (label2 != 0) {
             DisableTextWidget(label2);
         }
     }
     if (!isField_FA100((signed char*)cBENewRaceInterface_newRace, 72, 4)) {
-        void* saveItem = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_save));
+        void* saveItem = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_save));
         if (saveItem != 0) {
             DisableTextWidget(saveItem);
         }
@@ -491,7 +496,7 @@ static inline void* Sound_A238(int slot)
  * @param msg  the widget event: 5 Cross, 6 Triangle, 9 value changed
  */
 // Pause-options widget handler: msg 5 opens the sub-state, 6 pops, 9 applies a changed setting.
-extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(void* self, char* obj, unsigned int msg)
+extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(cOVState_PAUSE_OPTIONS* self, char* obj, unsigned int msg)
 {
     if (obj == 0) {
         return;
@@ -501,14 +506,14 @@ extern "C" void cOVState_PAUSE_OPTIONS_onWidgetEvent(void* self, char* obj, unsi
     case 5:
         if (IsId_A238(obj, str_save)) {
             char* stack = (char*)SSXApp->Game->UI;
-            char* st = (char*)cOVState_PROFILE_cOVState_PROFILE(cMemMan_alloc(636, str_Save_Profile, 0x100, 0), *(void**)((char*)self + 0x10),
-                                            *(unsigned char*)((char*)self + 0x14), 42);
+            char* st = (char*)cOVState_PROFILE_cOVState_PROFILE(cMemMan_alloc(636, str_Save_Profile, 0x100, 0), self->mpEngine,
+                                            *(unsigned char*)&self->mCurrentCtrl, 42);
             *(int*)(st + 0x1C) = (*(int*)(st + 0x1C) & ~0x3F00) | 0x100;
             cUIStateStack_pushSpecial(stack + 0x18, st, 0, 0);
         }
         break;
     case 6:
-        cUIStateStack_pop(*(char**)((char*)self + 0x10) + 0x18, 1);
+        cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
         break;
     case 9:
         if (IsId_A238(obj, str_0lb)) {
@@ -573,18 +578,18 @@ extern char str_TransitionOut_b[];
  * After cOVState_onUpdate(), if a cGameComm exists and its mPauseTimeout or mOverlayTimeout is 0, plays the
  * screen's "TransitionOut" frame and closes the state (cUIStateStack_pop).
  */
-extern "C" void cOVState_PAUSE_OPTIONS_onUpdate(void* self)
+extern "C" void cOVState_PAUSE_OPTIONS_onUpdate(cOVState_PAUSE_OPTIONS* self)
 {
     cOVState_onUpdate(self);
     cGameComm* gameComm = cGameComm_mGameComm;
     if (gameComm != 0) {
         int ok = gameComm->mPauseTimeout == 0 || gameComm->mOverlayTimeout == 0;
         if (ok) {
-            int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0x40), GetHashValue32(str_TransitionOut_b));
+            int frame = cUIScreen_getFrameByLabel(self->mpScreen, GetHashValue32(str_TransitionOut_b));
             if (frame != 0xFFFF) {
-                cUIScreen_playFrame(*(void**)((char*)self + 0x40), (unsigned short)frame, 1);
+                cUIScreen_playFrame(self->mpScreen, (unsigned short)frame, 1);
             }
-            cUIStateStack_pop(*(char**)((char*)self + 0x10) + 0x18, 1);
+            cUIStateStack_pop((char*)self->mpEngine + 0x18, 1);
         }
     }
 }
@@ -610,7 +615,7 @@ extern char str_save[];
  *         and sound)
  */
 // Pause-menu key filter: returns 0x100 for keys 8/9 and for key 6 unless the item is str_save, else 0x101.
-extern "C" int cOVState_PAUSE_OPTIONS_onWidgetMenu(void* self, void* menu, unsigned int key, int index)
+extern "C" int cOVState_PAUSE_OPTIONS_onWidgetMenu(cOVState_PAUSE_OPTIONS* self, void* menu, unsigned int key, int index)
 {
     switch (key) {
     case 6: {
@@ -637,7 +642,7 @@ INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_OPTIONS_onWidgetListBox);
  * @param Event  the list-box event: 0-3 moves, 4 Triangle
  * @return 0x100 (animation only) for event 4, else 0x101 (animation and sound)
  */
-extern "C" int cOVState_PAUSE_OPTIONS_onWidgetListBox(void* self, int pListBox, int Event)
+extern "C" int cOVState_PAUSE_OPTIONS_onWidgetListBox(cOVState_PAUSE_OPTIONS* self, int pListBox, int Event)
 {
     return Event != 4 ? 257 : 0x100;
 }
@@ -653,7 +658,7 @@ INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_OPTIONS_onWidgetPair);
  * @param Event  the pair event: 0 Cross, 1 Triangle
  * @return 0x100 (animation only) for event 0, else 0x101 (animation and sound)
  */
-extern "C" int cOVState_PAUSE_OPTIONS_onWidgetPair(void* self, int pPair, int Event)
+extern "C" int cOVState_PAUSE_OPTIONS_onWidgetPair(cOVState_PAUSE_OPTIONS* self, int pPair, int Event)
 {
     return Event != 0 ? 257 : 0x100;
 }
@@ -669,8 +674,8 @@ extern "C" void* cUIEngine_addScreenByHashName(void* engine, void* owner, int ha
 extern "C" void cUIScreen_playFrame(void* screen, int a1, int a2);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void cOVState_onCreateScreen(void* self);
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(void* self, bool on);
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(void* self, int visible);
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(cOVState_PAUSE_ONLINE_ERROR* self, bool on);
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(cOVState_PAUSE_ONLINE_ERROR* self, int visible);
 extern "C" void func_002583A8(void* self, int a1, int a2);
 extern void* cAppMan_TheAppMan;
 extern char str_265InGameError[];
@@ -719,21 +724,20 @@ public:
  * kT_PauseErrorCheckingServer; without one it shows Cancel. The TextError branch reads cGameComm_mGameComm
  * before that null check.
  */
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(void* self)
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(cOVState_PAUSE_ONLINE_ERROR* self)
 {
-    char* state = (char*)self;
-    void* eng = *(void**)(state + 0x10);
+    void* eng = self->mpEngine;
     void* scr = cUIEngine_addScreenByHashName(eng, self, GetHashValue32(str_265InGameError), 0);
-    *(void**)(state + 0x40) = scr;
+    self->mpScreen = (cUIScreen*)scr;
     if (scr != 0) {
         cUIScreen_playFrame(scr, 0, 0);
     }
     cOVState_onCreateScreen(self);
-    cUIText* subTitle = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(state + 0x40), GetHashValue32(str_SubTitle));
+    cUIText* subTitle = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_SubTitle));
     if (subTitle != 0) {
         cUIText_setUnicodeStringByID(subTitle, GetHashValue32(str_kT_OVROnlineError));
     }
-    cUIObj_1FAB18* errorText = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(state + 0x40), GetHashValue32(str_TextError));
+    cUIObj_1FAB18* errorText = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextError));
     if (errorText != 0) {
         errorText->setVisible(1);
         cGameComm* gameComm = cGameComm_mGameComm;
@@ -751,7 +755,7 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(void* self)
                 cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(str_kT_POPUPCMNCheatDetected));
             }
         } else if (gameComm->mCheating[1] != 0) {
-            *(int*)(state + 0xA0) = 0;
+            self->mbShouldDisplayAuxInfo = 0;
             int peerCheating = gameComm->mCheating[1];
             if (peerCheating == one) {
                 cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(str_kT_POPUPCMNConnectionLost_b));
@@ -764,15 +768,15 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(void* self)
             }
         } else if (gameComm->mRemoteEndGame != 0) {
             cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(str_kT_POPUPCMNOpponentQuit));
-            *(int*)(state + 0xA0) = 0;
+            self->mbShouldDisplayAuxInfo = 0;
         } else if (gameComm->mRemoteDisconnected != 0) {
-            *(int*)(state + 0xA0) = 0;
+            self->mbShouldDisplayAuxInfo = 0;
             cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(str_kT_POPUPCMNOpponentQuit));
         } else {
-            *(int*)(state + 0xA0) = 0;
+            self->mbShouldDisplayAuxInfo = 0;
             cUIText_setUnicodeStringByID((cUIText*)errorText, GetHashValue32(str_kT_POPUPCMNConnectionLost_b));
         }
-        cUIObj_1FAB18* widget = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(state + 0x40), GetHashValue32(str_Text_CancelGame));
+        cUIObj_1FAB18* widget = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Text_CancelGame));
         if (widget != 0) {
             if (cGameComm_mGameComm->mLocalFinishedRace != 0) {
                 cUIText_setUnicodeStringByID((cUIText*)widget, GetHashValue32(str_kT_BTNOK_b));
@@ -782,19 +786,19 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(void* self)
             widget->setVisible(0);
             *(int*)((char*)widget + 0x18) = 0;
         }
-        widget = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(state + 0x40), GetHashValue32(str_Cancelps2X));
+        widget = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Cancelps2X));
         if (widget != 0) {
             widget->setVisible(0);
         }
-        widget = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(state + 0x40), GetHashValue32(str_Continueps2X));
+        widget = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Continueps2X));
         if (widget != 0) {
             widget->setVisible(0);
         }
-        widget = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(state + 0x40), GetHashValue32(str_CancelButtonBack));
+        widget = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_CancelButtonBack));
         if (widget != 0) {
             widget->setVisible(0);
         }
-        widget = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(*(void**)(state + 0x40), GetHashValue32(str_ContinueButtonBack));
+        widget = (cUIObj_1FAB18*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ContinueButtonBack));
         if (widget != 0) {
             widget->setVisible(0);
         }
@@ -802,9 +806,9 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onCreateScreen(void* self)
     }
     if (cGameComm_mGameComm != 0) {
         func_002583A8(cGameComm_mGameComm, LobbyMan_mLobbyMan->mServerAddr, 3);
-        *(int*)(state + 0x9C) = *(int*)((char*)cAppMan_TheAppMan + 0x18);
+        self->miStartPingTick = (unsigned int)(*(int*)((char*)cAppMan_TheAppMan + 0x18));
         cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(self, 0);
-        cUIText* infoText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)(state + 0x40), GetHashValue32(str_TextInfo));
+        cUIText* infoText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextInfo));
         if (infoText != 0) {
             cUIText_setUnicodeStringByID(infoText, GetHashValue32(str_kT_PauseErrorCheckingServer));
         }
@@ -836,9 +840,9 @@ INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_onUpdate);
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 extern "C" void* cOVState_onUpdate(void* self);
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(void* self, bool on);
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut(void* self);
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingReceived(void* self);
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(cOVState_PAUSE_ONLINE_ERROR* self, bool on);
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut(cOVState_PAUSE_ONLINE_ERROR* self);
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingReceived(cOVState_PAUSE_ONLINE_ERROR* self);
 extern char str_TextInfo[];
 
 class cUIObj_1FAF10 {
@@ -865,11 +869,11 @@ public:
  * mCheating[0] is clear, else it hides the "TextInfo" object. In both cases it then calls cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(self, 1)
  * and clears +0x9C; with no reply and time left it waits.
  */
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_onUpdate(void* self)
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_onUpdate(cOVState_PAUSE_ONLINE_ERROR* self)
 {
     cOVState_onUpdate(self);
     cGameComm* gameComm = cGameComm_mGameComm;
-    if (gameComm != 0 && *(int*)((char*)self + 0x9C) != 0) {
+    if (gameComm != 0 && (int)self->miStartPingTick != 0) {
         int timedOut = gameComm->unk_138 <= 0 && gameComm->unk_13C == 0;
         if (timedOut) {
             gameComm->unk_09C = 0;
@@ -882,11 +886,11 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_onUpdate(void* self)
             if (received) {
                 cOVState_PAUSE_ONLINE_ERROR_displayPingReceived(self);
             } else {
-                ((cUIObj_1FAF10*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_TextInfo)))->setVisible(0);
+                ((cUIObj_1FAF10*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextInfo)))->setVisible(0);
             }
         }
         cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(self, 1);
-        *(int*)((char*)self + 0x9C) = 0;
+        self->miStartPingTick = (unsigned int)0;
     }
 }
 #endif
@@ -923,13 +927,13 @@ public:
  *
  * @param on  true to show and select the option, false to hide it and make it static
  */
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(void* self, bool on)
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(cOVState_PAUSE_ONLINE_ERROR* self, bool on)
 {
-    cUIObj_1FAFF8* cancelText = (cUIObj_1FAFF8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Text_CancelGame));
+    cUIObj_1FAFF8* cancelText = (cUIObj_1FAFF8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Text_CancelGame));
     cancelText->setVisible(on);
     cancelText->setStatic(!on);
     if (on) {
-        cUIObj_1FAFF8* menuWidget = (cUIObj_1FAFF8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Menu_b));
+        cUIObj_1FAFF8* menuWidget = (cUIObj_1FAFF8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu_b));
         menuWidget->v07(1);
         cUIMenu_setSelectedByIndex(menuWidget, 1);
     }
@@ -940,9 +944,9 @@ extern "C" void cOVState_PAUSE_ONLINE_ERROR_enableCancelButton(void* self, bool 
 INCLUDE_ASM("fe/ovstatepause", cOVState_PAUSE_ONLINE_ERROR_onWidgetEvent);
 #ifdef SKIP_ASM
 int GetHashValue32(char* str);
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_doContinueCancel(void* self, void* item, int msg);
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueHighLight(void* self, int on);
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_setCancelHighLight(void* self, int on);
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_doContinueCancel(cOVState_PAUSE_ONLINE_ERROR* self, void* item, int msg);
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueHighLight(cOVState_PAUSE_ONLINE_ERROR* self, int on);
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_setCancelHighLight(cOVState_PAUSE_ONLINE_ERROR* self, int on);
 extern char str_Text_CancelGame[];
 extern char str_Text_ContinueGame[];
 
@@ -955,7 +959,7 @@ extern char str_Text_ContinueGame[];
  * @param item  the widget
  * @param msg   the event
  */
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_onWidgetEvent(void* self, void* item, int msg)
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_onWidgetEvent(cOVState_PAUSE_ONLINE_ERROR* self, void* item, int msg)
 {
     if (item == 0) {
         return;
@@ -1003,15 +1007,15 @@ extern char str_kT_PauseErrorServerCheckTimedOut[];
  * Called by the overlay update (cOVState_PAUSE_ONLINE_ERROR_onUpdate) when the ping runs out with no reply. The text is set only
  * while +0xA0 is set, and TextInfo's visibility is set to +0xA0 without a null check on the object.
  */
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut(void* self)
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingTimedOut(cOVState_PAUSE_ONLINE_ERROR* self)
 {
-    if (*(void**)((char*)self + 0x40) != 0) {
-        cUIText* infoText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_TextInfo));
-        if (infoText != 0 && *(int*)((char*)self + 0xA0) != 0) {
+    if (self->mpScreen != 0) {
+        cUIText* infoText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextInfo));
+        if (infoText != 0 && self->mbShouldDisplayAuxInfo != 0) {
             cUIText_setUnicodeStringByID(infoText, GetHashValue32(str_kT_PauseErrorServerCheckTimedOut));
         }
         sVE_FB180* vt = *(sVE_FB180**)((char*)infoText + 0x8);
-        vt[9].fn((char*)infoText + vt[9].delta, *(int*)((char*)self + 0xA0));
+        vt[9].fn((char*)infoText + vt[9].delta, self->mbShouldDisplayAuxInfo);
     }
 }
 #endif
@@ -1028,7 +1032,7 @@ struct sVE_FB218 {
 int GetHashValue32(char* str);
 extern "C" void* cUIScreen_getObjectByHashName(void* self, int hash);
 void cUIText_setUnicodeStringByID(cUIText* text, int id);
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(void* self, int visible);
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(cOVState_PAUSE_ONLINE_ERROR* self, int visible);
 extern char str_TextInfo[];
 extern char str_kT_PauseErrorOpponentDisconnected[];
 
@@ -1040,15 +1044,15 @@ extern char str_kT_PauseErrorOpponentDisconnected[];
  * machine is not flagged. The text is set only while +0xA0 is set; TextInfo's visibility becomes +0xA0 (no
  * null check), then setContinueOptionVisible(self, 1).
  */
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingReceived(void* self)
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_displayPingReceived(cOVState_PAUSE_ONLINE_ERROR* self)
 {
-    if (*(void**)((char*)self + 0x40) != 0) {
-        cUIText* infoText = (cUIText*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_TextInfo));
-        if (infoText != 0 && *(int*)((char*)self + 0xA0) != 0) {
+    if (self->mpScreen != 0) {
+        cUIText* infoText = (cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_TextInfo));
+        if (infoText != 0 && self->mbShouldDisplayAuxInfo != 0) {
             cUIText_setUnicodeStringByID(infoText, GetHashValue32(str_kT_PauseErrorOpponentDisconnected));
         }
         sVE_FB218* vt = *(sVE_FB218**)((char*)infoText + 0x8);
-        vt[9].fn((char*)infoText + vt[9].delta, *(int*)((char*)self + 0xA0));
+        vt[9].fn((char*)infoText + vt[9].delta, self->mbShouldDisplayAuxInfo);
         cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(self, 1);
     }
 }
@@ -1077,10 +1081,10 @@ extern int D_004428F0[];
  * @param item  the widget that was selected
  * @param msg   the event (not read)
  */
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_doContinueCancel(void* self, void* item, int msg)
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_doContinueCancel(cOVState_PAUSE_ONLINE_ERROR* self, void* item, int msg)
 {
-    cUIStateStack_pop_r(*(char**)((char*)self + 0x10) + 0x18, 1);
-    *(int*)((char*)self + 0x1C) = (*(int*)((char*)self + 0x1C) & ~0x3F00) | 0x780;
+    cUIStateStack_pop_r((char*)self->mpEngine + 0x18, 1);
+    self->mAttrState = (self->mAttrState & ~0x3F00) | 0x780;
     switch (*(int*)((char*)item + 0x18)) {
     case 4:
         cAI_finishRemotePlayer(SSXApp->Game->AI);
@@ -1125,16 +1129,16 @@ public:
  *
  * @param visible  nonzero to show the option (On Tour bVisible)
  */
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(void* self, int visible)
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueOptionVisible(cOVState_PAUSE_ONLINE_ERROR* self, int visible)
 {
-    cUIObj_1FB378* continueText = (cUIObj_1FB378*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Text_ContinueGame));
+    cUIObj_1FB378* continueText = (cUIObj_1FB378*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Text_ContinueGame));
     if (continueText != 0) {
         cUIText_setUnicodeStringByID((cUIText*)continueText, GetHashValue32(str_kT_OVRContinueRacing));
         continueText->setStatic(visible ^ 1);
         continueText->setVisible(visible);
         *(int*)((char*)continueText + 0x18) = 4;
     }
-    continueText = (cUIObj_1FB378*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Menu_b));
+    continueText = (cUIObj_1FB378*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu_b));
     if (continueText != 0 && visible) {
         cUIMenu_setSelectedByIndex(continueText, 0);
     }
@@ -1179,11 +1183,11 @@ public:
  *
  * @param on  nonzero to highlight
  */
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueHighLight(void* self, int on)
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_setContinueHighLight(cOVState_PAUSE_ONLINE_ERROR* self, int on)
 {
-    cUIObj_FB458* continueText = (cUIObj_FB458*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Text_ContinueGame));
-    cUIObj_FB458* buttonIcon = (cUIObj_FB458*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Continueps2X));
-    cUIObj_FB458* buttonBack = (cUIObj_FB458*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ContinueButtonBack));
+    cUIObj_FB458* continueText = (cUIObj_FB458*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Text_ContinueGame));
+    cUIObj_FB458* buttonIcon = (cUIObj_FB458*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Continueps2X));
+    cUIObj_FB458* buttonBack = (cUIObj_FB458*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ContinueButtonBack));
     if (on) {
         continueText->setColor(sColor_FB458(1.0f, 1.0f, 1.0f, 1.0f));
     } else {
@@ -1232,11 +1236,11 @@ public:
  *
  * @param on  nonzero to highlight
  */
-extern "C" void cOVState_PAUSE_ONLINE_ERROR_setCancelHighLight(void* self, int on)
+extern "C" void cOVState_PAUSE_ONLINE_ERROR_setCancelHighLight(cOVState_PAUSE_ONLINE_ERROR* self, int on)
 {
-    cUIObj_FB588* cancelText = (cUIObj_FB588*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Text_CancelGame));
-    cUIObj_FB588* buttonIcon = (cUIObj_FB588*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Cancelps2X));
-    cUIObj_FB588* buttonBack = (cUIObj_FB588*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_CancelButtonBack));
+    cUIObj_FB588* cancelText = (cUIObj_FB588*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Text_CancelGame));
+    cUIObj_FB588* buttonIcon = (cUIObj_FB588*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Cancelps2X));
+    cUIObj_FB588* buttonBack = (cUIObj_FB588*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_CancelButtonBack));
     if (on) {
         cancelText->setColor(sColor_FB588(1.0f, 1.0f, 1.0f, 1.0f));
     } else {
@@ -1272,7 +1276,7 @@ extern signed char D_00535C11[];
  * cOVState_HEAT_PREEVENT_onUpdate closes the overlay. The overlay factory builds this state (vtable D_00472850, screen "40race_pre") for
  * overlay type 8. BE interface 0 is fetched and unused.
  */
-extern "C" void cOVState_HEAT_PREEVENT_onGainFocus(void* self)
+extern "C" void cOVState_HEAT_PREEVENT_onGainFocus(cOVState_HEAT_PREEVENT* self)
 {
     char buf[32];
     cUIState_onGainFocus(self);
@@ -1321,7 +1325,7 @@ extern "C" void* cOVState_onUpdate(void* self);
  * Runs cOVState_onUpdate; when cGameComm_mGameComm exists and its mOverlayTimeout has counted down to 0, sets it to -1
  * and cOVStateManager_mStatus to 1 (go to the next overlay).
  */
-extern "C" void cOVState_HEAT_PREEVENT_onUpdate(void* self)
+extern "C" void cOVState_HEAT_PREEVENT_onUpdate(cOVState_HEAT_PREEVENT* self)
 {
     cOVState_onUpdate(self);
     cGameComm* gameComm = cGameComm_mGameComm;
@@ -2408,12 +2412,12 @@ extern void* cOVState_SAVEREPLAY_vtbl[];
  * @param ovStateId  the overlay id, 18 (On Tour tOVStateEnum eOVState)
  * @return @p self
  */
-extern "C" void* cOVState_SAVEREPLAY_cOVState_SAVEREPLAY(void* self, int engine, int ovStateId)
+extern "C" void* cOVState_SAVEREPLAY_cOVState_SAVEREPLAY(cOVState_SAVEREPLAY* self, int engine, int ovStateId)
 {
     cFEMemCard_cFEMemCard(self, engine, 1, ovStateId);
-    *(void***)((char*)self + 0x8) = cOVState_SAVEREPLAY_vtbl;
-    *(int*)((char*)self + 0x22C) = 0;
-    return self;
+    self->mVtbl = cOVState_SAVEREPLAY_vtbl;
+    self->mIsHidden = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -2470,39 +2474,39 @@ static inline cUIObj_DC30* getObj_DC30(char* self, char* name)
  * (D_005366E8[++D_004A2A54] = 2, cPauseState_Flags = D_004428F0[2]) and runs cOVState_onCreateScreen. The `//` note
  * above calls this a device-select overlay that pushes its menu state; it pushes the pause state.
  */
-extern "C" void cOVState_SAVEREPLAY_onCreateScreen(char* self)
+extern "C" void cOVState_SAVEREPLAY_onCreateScreen(cOVState_SAVEREPLAY* self)
 {
-    void* engine = *(void**)(self + 0x10);
-    void* screen = cUIEngine_addScreenByHashName_DC30(engine, self, GetHashValue32(str_119Save_Replay), 0);
-    *(void**)(self + 0x40) = screen;
+    void* engine = self->mpEngine;
+    void* screen = cUIEngine_addScreenByHashName_DC30(engine, ((char*)self), GetHashValue32(str_119Save_Replay), 0);
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIObj_DC30* widget;
         cUIScreen_playFrame_DC30(screen, 0, 0);
-        widget = getObj_DC30(self, str_1percentage_b);
+        widget = getObj_DC30(((char*)self), str_1percentage_b);
         cUIText_setAsciiString((cUIText*)widget, D_004A2560);
-        widget = getObj_DC30(self, str_title_Save_Replay);
+        widget = getObj_DC30(((char*)self), str_title_Save_Replay);
         widget->setVisible(1);
-        widget = getObj_DC30(self, str_title_Save_Records);
+        widget = getObj_DC30(((char*)self), str_title_Save_Records);
         widget->setVisible(0);
-        widget = getObj_DC30(self, str_helptext01);
+        widget = getObj_DC30(((char*)self), str_helptext01);
         widget->setVisible(0);
-        widget = getObj_DC30(self, str_Memory_card_info);
+        widget = getObj_DC30(((char*)self), str_Memory_card_info);
         cUIText_setAsciiString((cUIText*)widget, D_004A2560);
         char name[0x20];
         for (int i = 1; i < 5; i++) {
             sprintf(name, str_pct_dmemory_card_b, i);
-            widget = getObj_DC30(self, name);
+            widget = getObj_DC30(((char*)self), name);
             *(int*)((char*)widget + 0x18) = i - 1;
         }
     }
-    engine = *(void**)(self + 0x10);
-    screen = cUIEngine_addScreenByHashName_DC30(engine, self, GetHashValue32(str_OV_darkblue), 0);
+    engine = (void*)self->mpEngine;
+    screen = cUIEngine_addScreenByHashName_DC30(engine, ((char*)self), GetHashValue32(str_OV_darkblue), 0);
     if (screen != 0) {
         cUIScreen_playFrame_DC30(screen, 0, 0);
     }
     D_005366E8[++D_004A2A54] = 2;
     cPauseState_Flags = D_004428F0[2];
-    cOVState_onCreateScreen_DC30(self);
+    cOVState_onCreateScreen_DC30(((char*)self));
 }
 #endif
 
@@ -2525,11 +2529,11 @@ extern "C" void cReplay_startReplay(void* self, void* a1, int a2, int a3);
  * D_004428F0[D_005366E8[--D_004A2A54]]), runs cFEMemCard_onDestroyScreen and restarts playback with
  * cReplay_startReplay(Replay, 0, 0, 0).
  */
-extern "C" void cOVState_SAVEREPLAY_onDestroyScreen(void* self)
+extern "C" void cOVState_SAVEREPLAY_onDestroyScreen(cOVState_SAVEREPLAY* self)
 {
-    if (*(int*)((char*)self + 0x1C8) == 1) {
+    if (self->mIsReplayAlloc == 1) {
         cReplay_purgeSave(SSXApp->Game->Replay);
-        *(int*)((char*)self + 0x1C8) = 0;
+        self->mIsReplayAlloc = 0;
     }
     cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
     cFEMemCard_onDestroyScreen(self);
@@ -2548,12 +2552,12 @@ extern "C" void cUIStateStack_popToStateInclusive(void* self);
  * When +0x1AC (On Tour mIsDone) is still 0 it calls cUIStateStack_popToStateInclusive(mpEngine + 0x18) (On Tour
  * cUIStateStack::popToStateInclusive); then sets +0x1AC to 1.
  */
-extern "C" void cOVState_SAVEREPLAY_updateDone(void* self)
+extern "C" void cOVState_SAVEREPLAY_updateDone(cOVState_SAVEREPLAY* self)
 {
-    if (*(int*)((char*)self + 0x1AC) == 0) {
-        cUIStateStack_popToStateInclusive(*(char**)((char*)self + 0x10) + 0x18);
+    if (self->mIsDone == 0) {
+        cUIStateStack_popToStateInclusive((char*)self->mpEngine + 0x18);
     }
-    *(int*)((char*)self + 0x1AC) = 1;
+    self->mIsDone = 1;
 }
 #endif
 
@@ -2760,24 +2764,24 @@ static inline cUIObj_DF40* getObj_DF40(cState_DF40* self, char* name)
  * cFEMemCard_checkNextAvailableDevice finds a device that way. When the display state (+0x214) is not 3, all four slots
  * end up static with the normal colour.
  */
-extern "C" void cOVState_SAVEREPLAY_displayStatus(cState_DF40* self)
+extern "C" void cOVState_SAVEREPLAY_displayStatus(cOVState_SAVEREPLAY* self)
 {
     unsigned short buf[800];
     char name[0x40];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-    if (self->v42()) {
+    if (((cState_DF40*)self)->v42()) {
         if (!(*(cMCSub_DF40**)(mp + 0x434))->v53()) {
             cFEMemCard_callbackDisplayNoCards();
-        } else if (*(int*)((char*)self + 0x214) != 3) {
-            self->v35(3);
+        } else if (self->mScreenStatus != 3) {
+            ((cState_DF40*)self)->v35(3);
         }
     }
-    if (self->v42()) {
+    if (((cState_DF40*)self)->v42()) {
         int sel = 0;
-        self->v43();
+        ((cState_DF40*)self)->v43();
         cMCOverlayManager_GetDeviceDisplayString(mp, *(int*)(mp + 0x428), buf, 800);
-        cUIText_setUnicodeStringWrap(getObj_DF40(self, str_Memory_card_info), buf);
-        cUIObj_DF40* widget = getObj_DF40(self, str_1percentage_b);
+        cUIText_setUnicodeStringWrap(getObj_DF40(((cState_DF40*)self), str_Memory_card_info), buf);
+        cUIObj_DF40* widget = getObj_DF40(((cState_DF40*)self), str_1percentage_b);
         (*(cMCSub_DF40**)(mp + 0x434))->v64(buf);
         cUIText_setUnicodeString(widget, buf);
         widget->v09(0);
@@ -2787,7 +2791,7 @@ extern "C" void cOVState_SAVEREPLAY_displayStatus(cState_DF40* self)
         vt[4].fn(localeThis, GetHashValue32(str_kT_MEMEmpty_b));
         for (int i = 1; i < 5; i++) {
             sprintf(name, str_pct_dmemory_card_b, i);
-            widget = getObj_DF40(self, name);
+            widget = getObj_DF40(((cState_DF40*)self), name);
             (*(cMCSub_DF40**)(mp + 0x434))->v14(i - 1, (char*)self + 0x230);
             cUIText_setUnicodeString(widget, (unsigned short*)((char*)self + 0x230));
             if (!(*(cMCSub_DF40**)(mp + 0x434))->v67(i - 1) && !(*(cMCSub_DF40**)(mp + 0x434))->v66(i - 1)
@@ -2813,19 +2817,19 @@ extern "C" void cOVState_SAVEREPLAY_displayStatus(cState_DF40* self)
                 widget->v08(1);
             }
         }
-        if (cFEMemCard_checkNextAvailableDevice(self, mp, *(int*)(mp + 0x428), 1) == -1)
-            getObj_DF40(self, str_arrw_left_b)->v09(0);
+        if (cFEMemCard_checkNextAvailableDevice(((cState_DF40*)self), mp, *(int*)(mp + 0x428), 1) == -1)
+            getObj_DF40(((cState_DF40*)self), str_arrw_left_b)->v09(0);
         else
-            getObj_DF40(self, str_arrw_left_b)->v09(1);
-        if (cFEMemCard_checkNextAvailableDevice(self, mp, *(int*)(mp + 0x428), 0) == -1)
-            getObj_DF40(self, str_arrw_right_b)->v09(0);
+            getObj_DF40(((cState_DF40*)self), str_arrw_left_b)->v09(1);
+        if (cFEMemCard_checkNextAvailableDevice(((cState_DF40*)self), mp, *(int*)(mp + 0x428), 0) == -1)
+            getObj_DF40(((cState_DF40*)self), str_arrw_right_b)->v09(0);
         else
-            getObj_DF40(self, str_arrw_right_b)->v09(1);
+            getObj_DF40(((cState_DF40*)self), str_arrw_right_b)->v09(1);
     }
-    if (*(int*)((char*)self + 0x214) != 3) {
+    if (self->mScreenStatus != 3) {
         for (int i = 1; i < 5; i++) {
             sprintf(name, str_pct_dmemory_card_b, i);
-            cUIObj_DF40* widget = getObj_DF40(self, name);
+            cUIObj_DF40* widget = getObj_DF40(((cState_DF40*)self), name);
             widget->v25(0);
             widget->v08(1);
         }
@@ -2864,15 +2868,15 @@ extern char str_ps2sq_b[];
  *
  * @param on  true to hide the buttons
  */
-extern "C" void cOVState_SAVEREPLAY_hideActionButtons(void* self, bool on)
+extern "C" void cOVState_SAVEREPLAY_hideActionButtons(cOVState_SAVEREPLAY* self, bool on)
 {
-    if (*(int*)((char*)self + 0x22C) != on) {
+    if (self->mIsHidden != on) {
         int off = !on;
-        ((cUIObj_1FE4A8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x_b)))->setVisible(off);
-        ((cUIObj_1FE4A8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_x_save)))->setVisible(off);
-        ((cUIObj_1FE4A8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_o_delete)))->setVisible(off);
-        ((cUIObj_1FE4A8*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq_b)))->setVisible(off);
-        *(int*)((char*)self + 0x22C) = on;
+        ((cUIObj_1FE4A8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x_b)))->setVisible(off);
+        ((cUIObj_1FE4A8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_x_save)))->setVisible(off);
+        ((cUIObj_1FE4A8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_o_delete)))->setVisible(off);
+        ((cUIObj_1FE4A8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq_b)))->setVisible(off);
+        self->mIsHidden = on;
     }
 }
 #endif
@@ -2906,11 +2910,11 @@ extern char str_ps2sq_b[];
  *
  * @param on  true to hide the button
  */
-extern "C" void cOVState_SAVEREPLAY_hideDeleteButton(void* self, bool on)
+extern "C" void cOVState_SAVEREPLAY_hideDeleteButton(cOVState_SAVEREPLAY* self, bool on)
 {
-    ((cUIObj_1FE5B0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_o_delete)))->setVisible(!on);
-    ((cUIObj_1FE5B0*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq_b)))->setVisible(!on);
-    *(int*)((char*)self + 0x220) = !on;
+    ((cUIObj_1FE5B0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_o_delete)))->setVisible(!on);
+    ((cUIObj_1FE5B0*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq_b)))->setVisible(!on);
+    self->mDeleteButtonActive = !on;
 }
 #endif
 
@@ -2944,11 +2948,11 @@ extern char str_x_save[];
  * @param loadBlocked  whether the load button should be hidden (unused: the screen has no load button)
  * @param on  true to hide the save button
  */
-extern "C" void cOVState_SAVEREPLAY_hideMainButton(void* self, int loadBlocked, bool on)
+extern "C" void cOVState_SAVEREPLAY_hideMainButton(cOVState_SAVEREPLAY* self, int loadBlocked, bool on)
 {
-    cUIObj_1FE648* xButton = (cUIObj_1FE648*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x_b));
-    ((cUIObj_1FE648*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_x_save)))->setVisible(!on);
-    *(int*)((char*)self + 0x224) = !on;
+    cUIObj_1FE648* xButton = (cUIObj_1FE648*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x_b));
+    ((cUIObj_1FE648*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_x_save)))->setVisible(!on);
+    self->mMainButtonActive = !on;
     xButton->setVisible(!on);
 }
 #endif
@@ -3054,70 +3058,70 @@ public:
  * @param msg  the widget the event is for (its miMiscData, +0x18, is the file slot)
  * @param type  the widget event: 5 select, 6 back, 7 delete
  */
-extern "C" void cOVState_SAVEREPLAY_onWidgetEvent(void* self, void* msg, unsigned int type)
+extern "C" void cOVState_SAVEREPLAY_onWidgetEvent(cOVState_SAVEREPLAY* self, void* msg, unsigned int type)
 {
     if (msg == 0)
         return;
-    if (*(int*)((char*)self + 0x1A8) != 0)
+    if (self->mIsProcessing != 0)
         return;
     switch (type)
     {
     case 5:
     {
         int one = 1;
-        if (*(int*)((char*)self + 0x1C0) == 6)
+        if (self->mState == 6)
             return;
         char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-        int st = *(int*)((char*)self + 0x214);
+        int st = self->mScreenStatus;
         if (st != 3)
             return;
         int fileSlot = *(int*)((char*)msg + 0x18);
-        *(int*)((char*)self + 0x1C4) = fileSlot;
+        self->mSlot = fileSlot;
         *(int*)(mp + 0xF8) = fileSlot;
-        *(int*)((char*)self + 0x1A8) = one;
-        if (*(int*)((char*)self + 0x1C8) == one)
+        self->mIsProcessing = one;
+        if (self->mIsReplayAlloc == one)
         {
             cReplay_purgeSave(SSXApp->Game->Replay);
-            *(int*)((char*)self + 0x1C8) = 0;
+            self->mIsReplayAlloc = 0;
         }
         cMCOverlayManager_writeSetFileType(mp, 0, -1);
-        *(int*)((char*)self + 0x1DC) = one;
-        *(int*)((char*)self + 0x1A8) = one;
-        *(int*)((char*)self + 0x1C0) = st;
+        self->mIsSavePressed = one;
+        self->mIsProcessing = one;
+        self->mState = st;
         break;
     }
     case 6:
     {
         char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-        if (*(int*)((char*)self + 0x1A8) == 1)
+        if (self->mIsProcessing == 1)
             return;
-        int cardState = *(int*)((char*)self + 0x1C0);
+        int cardState = self->mState;
         if (cardState == 6)
             return;
-        *(int*)((char*)self + 0x1E4) = 1;
+        self->mIsCancelPressed = 1;
         if (cardState == 0 || cardState == 2 || cardState == 1)
             ((cMoviePlayer_1FE6E8*)mp)->v01(0);
-        *(int*)((char*)self + 0x1C0) = 6;
+        self->mState = 6;
         break;
     }
     case 7:
     {
         int one = 1;
-        if (*(int*)((char*)self + 0x1C0) == 6)
+        if (self->mState == 6)
             return;
         char* mp = (char*)cSSXApp_getMCManager(SSXApp);
         if (!(*(cMovieSub434_1FE6E8**)(mp + 0x434))->v54(*(int*)(mp + 0x428)))
             return;
         int fileSlot = *(int*)((char*)msg + 0x18);
-        *(int*)((char*)self + 0x1C4) = fileSlot;
+        self->mSlot = fileSlot;
         *(int*)(mp + 0xF8) = fileSlot;
-        int cardState = *(int*)((char*)self + 0x1C0);
+        int cardState = self->mState;
         if (cardState != one)
             return;
-        if (!(*(cMovieSub434_1FE6E8**)(mp + 0x434))->v67(*(int*)((char*)self + 0x1C4)))
+        if (!(*(cMovieSub434_1FE6E8**)(mp + 0x434))->v67(self->mSlot))
             return;
-        *(int*)((char*)self + 0x1A8) = cardState;
-        *(int*)((char*)self + 0x1C0) = 4;
+        self->mIsProcessing = cardState;
+        self->mState = 4;
         cMCOverlayManager_SetAction_v(mp, 0);
         ((cMoviePlayer_1FE6E8*)mp)->v01(0x18);
         break;
@@ -3142,12 +3146,12 @@ extern "C" void cFEMemCard_onPopupEvent(void* self, void* a1, int key);
  * @param popup  the popup state that sent the event
  * @param key  the popup event
  */
-extern "C" void cOVState_SAVEREPLAY_onPopupEvent(void* self, void* popup, int key)
+extern "C" void cOVState_SAVEREPLAY_onPopupEvent(cOVState_SAVEREPLAY* self, void* popup, int key)
 {
     if (key == 22) {
-        if (*(int*)((char*)self + 0x19C) == 5) {
+        if (self->mPopupType == 5) {
             cReplay_purgeSave(SSXApp->Game->Replay);
-            *(int*)((char*)self + 0x1C8) = 0;
+            self->mIsReplayAlloc = 0;
         }
     }
     cFEMemCard_onPopupEvent(self, popup, key);
@@ -3171,12 +3175,12 @@ extern void* cOVState_SAVEOPTIONS_vtbl[];
  * @param ovStateId  the overlay id, 19 (On Tour tOVStateEnum eOVState)
  * @return @p self
  */
-extern "C" void* cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS(void* self, int engine, int ovStateId)
+extern "C" void* cOVState_SAVEOPTIONS_cOVState_SAVEOPTIONS(cOVState_SAVEOPTIONS* self, int engine, int ovStateId)
 {
     cFEMemCard_cFEMemCard(self, engine, 2, ovStateId);
-    *(void***)((char*)self + 0x8) = cOVState_SAVEOPTIONS_vtbl;
-    *(int*)((char*)self + 0x22C) = 0;
-    return self;
+    self->mVtbl = cOVState_SAVEOPTIONS_vtbl;
+    self->mIsHidden = 0;
+    return ((void*)self);
 }
 #endif
 
@@ -3229,24 +3233,24 @@ static inline void* engine_1FE9A8(char* self)
  * gets miMiscData 0; "2memory_card_b".."4memory_card_b" are made static and hidden, as are their number labels
  * "2".."4". Adds the "OV_darkblue" backdrop and runs cOVState_onCreateScreen.
  */
-extern "C" void cOVState_SAVEOPTIONS_onCreateScreen(char* self)
+extern "C" void cOVState_SAVEOPTIONS_onCreateScreen(cOVState_SAVEOPTIONS* self)
 {
-    void* scr = cUIEngine_addScreenByHashName(engine_1FE9A8(self), self, GetHashValue32(str_119Save_Replay), 0);
-    *(void**)(self + 0x40) = scr;
+    void* scr = cUIEngine_addScreenByHashName(engine_1FE9A8(((char*)self)), ((char*)self), GetHashValue32(str_119Save_Replay), 0);
+    self->mpScreen = (cUIScreen*)scr;
     if (scr != 0) {
         cUIScreen_playFrame(scr, 0, 0);
-        cUIText_setAsciiString((cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_1percentage_b)), D_004A2560);
-        cUIObj_1FE9A8* widget = (cUIObj_1FE9A8*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_title_Save_Replay));
+        cUIText_setAsciiString((cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_1percentage_b)), D_004A2560);
+        cUIObj_1FE9A8* widget = (cUIObj_1FE9A8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_Save_Replay));
         widget->v09(0);
-        widget = (cUIObj_1FE9A8*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_title_Save_Records));
+        widget = (cUIObj_1FE9A8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_Save_Records));
         widget->v09(1);
-        widget = (cUIObj_1FE9A8*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_helptext01));
+        widget = (cUIObj_1FE9A8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_helptext01));
         widget->v09(1);
-        cUIText_setAsciiString((cUIText*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_Memory_card_info)), D_004A2560);
+        cUIText_setAsciiString((cUIText*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Memory_card_info)), D_004A2560);
         for (int i = 1; i < 5; i++) {
             char buf[0x20];
             sprintf(buf, str_pct_dmemory_card_b, i);
-            widget = (cUIObj_1FE9A8*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(buf));
+            widget = (cUIObj_1FE9A8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
             if (i == 1) {
                 *(int*)((char*)widget + 0x18) = 0;
             } else {
@@ -3254,15 +3258,15 @@ extern "C" void cOVState_SAVEOPTIONS_onCreateScreen(char* self)
                 widget->v09(0);
             }
             sprintf(buf, D_004A2138, i);
-            widget = (cUIObj_1FE9A8*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(buf));
+            widget = (cUIObj_1FE9A8*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(buf));
             if (i >= 2)
                 widget->v09(0);
         }
     }
-    void* backdrop = cUIEngine_addScreenByHashName(engine_1FE9A8(self), self, GetHashValue32(str_OV_darkblue), 0);
+    void* backdrop = cUIEngine_addScreenByHashName(engine_1FE9A8(((char*)self)), ((char*)self), GetHashValue32(str_OV_darkblue), 0);
     if (backdrop != 0)
         cUIScreen_playFrame(backdrop, 0, 0);
-    cOVState_onCreateScreen(self);
+    cOVState_onCreateScreen(((char*)self));
 }
 #endif
 
@@ -3293,12 +3297,12 @@ extern "C" void cUIStateStack_popToStateInclusive(void* self);
  * When +0x1AC (On Tour mIsDone) is still 0 it calls cUIStateStack_popToStateInclusive(mpEngine + 0x18) (On Tour
  * cUIStateStack::popToStateInclusive); then sets +0x1AC to 1.
  */
-extern "C" void cOVState_SAVEOPTIONS_updateDone(void* self)
+extern "C" void cOVState_SAVEOPTIONS_updateDone(cOVState_SAVEOPTIONS* self)
 {
-    if (*(int*)((char*)self + 0x1AC) == 0) {
-        cUIStateStack_popToStateInclusive(*(char**)((char*)self + 0x10) + 0x18);
+    if (self->mIsDone == 0) {
+        cUIStateStack_popToStateInclusive((char*)self->mpEngine + 0x18);
     }
-    *(int*)((char*)self + 0x1AC) = 1;
+    self->mIsDone = 1;
 }
 #endif
 
@@ -3500,23 +3504,23 @@ static inline cUIObj_ECA0* getObj_ECA0(cState_ECA0* self, char* name)
  * The device arrows follow cFEMemCard_checkNextAvailableDevice. Outside display state 3 (+0x214) the slot ends up
  * static with the normal colour.
  */
-extern "C" void cOVState_SAVEOPTIONS_displayStatus(cState_ECA0* self)
+extern "C" void cOVState_SAVEOPTIONS_displayStatus(cOVState_SAVEOPTIONS* self)
 {
     unsigned short buf[800];
     char name[0x40];
     char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-    if (self->v42()) {
+    if (((cState_ECA0*)self)->v42()) {
         if (!(*(cMCSub_ECA0**)(mp + 0x434))->v53()) {
             cFEMemCard_callbackDisplayNoCards();
-        } else if (*(int*)((char*)self + 0x214) != 3) {
-            self->v35(3);
+        } else if (self->mScreenStatus != 3) {
+            ((cState_ECA0*)self)->v35(3);
         }
     }
-    if (self->v42()) {
-        self->v43();
+    if (((cState_ECA0*)self)->v42()) {
+        ((cState_ECA0*)self)->v43();
         cMCOverlayManager_GetDeviceDisplayString(mp, *(int*)(mp + 0x428), buf, 800);
-        cUIText_setUnicodeStringWrap(getObj_ECA0(self, str_Memory_card_info), buf);
-        cUIObj_ECA0* widget = getObj_ECA0(self, str_1percentage_b);
+        cUIText_setUnicodeStringWrap(getObj_ECA0(((cState_ECA0*)self), str_Memory_card_info), buf);
+        cUIObj_ECA0* widget = getObj_ECA0(((cState_ECA0*)self), str_1percentage_b);
         (*(cMCSub_ECA0**)(mp + 0x434))->v64(buf);
         cUIText_setUnicodeString(widget, buf);
         widget->v09(0);
@@ -3525,7 +3529,7 @@ extern "C" void cOVState_SAVEOPTIONS_displayStatus(cState_ECA0* self)
         char* localeThis = localeObj + vt[4].delta;
         vt[4].fn(localeThis, GetHashValue32(str_kT_MEMEmpty_b));
         sprintf(name, str_pct_dmemory_card_b, 1);
-        widget = getObj_ECA0(self, name);
+        widget = getObj_ECA0(((cState_ECA0*)self), name);
         (*(cMCSub_ECA0**)(mp + 0x434))->v14(0, (char*)self + 0x230);
         cUIText_setUnicodeString(widget, (unsigned short*)((char*)self + 0x230));
         if (!(*(cMCSub_ECA0**)(mp + 0x434))->v67(0) && !(*(cMCSub_ECA0**)(mp + 0x434))->v66(0)
@@ -3544,18 +3548,18 @@ extern "C" void cOVState_SAVEOPTIONS_displayStatus(cState_ECA0* self)
             widget->v25(1);
             widget->v08(1);
         }
-        if (cFEMemCard_checkNextAvailableDevice(self, mp, *(int*)(mp + 0x428), 1) == -1)
-            getObj_ECA0(self, str_arrw_left_b)->v09(0);
+        if (cFEMemCard_checkNextAvailableDevice(((cState_ECA0*)self), mp, *(int*)(mp + 0x428), 1) == -1)
+            getObj_ECA0(((cState_ECA0*)self), str_arrw_left_b)->v09(0);
         else
-            getObj_ECA0(self, str_arrw_left_b)->v09(1);
-        if (cFEMemCard_checkNextAvailableDevice(self, mp, *(int*)(mp + 0x428), 0) == -1)
-            getObj_ECA0(self, str_arrw_right_b)->v09(0);
+            getObj_ECA0(((cState_ECA0*)self), str_arrw_left_b)->v09(1);
+        if (cFEMemCard_checkNextAvailableDevice(((cState_ECA0*)self), mp, *(int*)(mp + 0x428), 0) == -1)
+            getObj_ECA0(((cState_ECA0*)self), str_arrw_right_b)->v09(0);
         else
-            getObj_ECA0(self, str_arrw_right_b)->v09(1);
+            getObj_ECA0(((cState_ECA0*)self), str_arrw_right_b)->v09(1);
     }
-    if (*(int*)((char*)self + 0x214) != 3) {
+    if (self->mScreenStatus != 3) {
         sprintf(name, str_pct_dmemory_card_b, 1);
-        cUIObj_ECA0* widget = getObj_ECA0(self, name);
+        cUIObj_ECA0* widget = getObj_ECA0(((cState_ECA0*)self), name);
         widget->v25(0);
         widget->v08(1);
     }
@@ -3593,15 +3597,15 @@ extern char str_ps2sq_b[];
  *
  * @param on  true to hide the buttons
  */
-extern "C" void cOVState_SAVEOPTIONS_hideActionButtons(void* self, bool on)
+extern "C" void cOVState_SAVEOPTIONS_hideActionButtons(cOVState_SAVEOPTIONS* self, bool on)
 {
-    if (*(int*)((char*)self + 0x22C) != on) {
+    if (self->mIsHidden != on) {
         int off = !on;
-        ((cUIObj_1FF170*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x_b)))->setVisible(off);
-        ((cUIObj_1FF170*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_x_save)))->setVisible(off);
-        ((cUIObj_1FF170*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_o_delete)))->setVisible(off);
-        ((cUIObj_1FF170*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq_b)))->setVisible(off);
-        *(int*)((char*)self + 0x22C) = on;
+        ((cUIObj_1FF170*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x_b)))->setVisible(off);
+        ((cUIObj_1FF170*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_x_save)))->setVisible(off);
+        ((cUIObj_1FF170*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_o_delete)))->setVisible(off);
+        ((cUIObj_1FF170*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq_b)))->setVisible(off);
+        self->mIsHidden = on;
     }
 }
 #endif
@@ -3635,11 +3639,11 @@ extern char str_ps2sq_b[];
  *
  * @param on  true to hide the button
  */
-extern "C" void cOVState_SAVEOPTIONS_hideDeleteButton(void* self, bool on)
+extern "C" void cOVState_SAVEOPTIONS_hideDeleteButton(cOVState_SAVEOPTIONS* self, bool on)
 {
-    ((cUIObj_1FF278*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_o_delete)))->setVisible(!on);
-    ((cUIObj_1FF278*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2sq_b)))->setVisible(!on);
-    *(int*)((char*)self + 0x220) = !on;
+    ((cUIObj_1FF278*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_o_delete)))->setVisible(!on);
+    ((cUIObj_1FF278*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2sq_b)))->setVisible(!on);
+    self->mDeleteButtonActive = !on;
 }
 #endif
 
@@ -3673,11 +3677,11 @@ extern char str_x_save[];
  * @param loadBlocked  whether the load button should be hidden (unused: the screen has no load button)
  * @param on  true to hide the save button
  */
-extern "C" void cOVState_SAVEOPTIONS_hideMainButton(void* self, int loadBlocked, bool on)
+extern "C" void cOVState_SAVEOPTIONS_hideMainButton(cOVState_SAVEOPTIONS* self, int loadBlocked, bool on)
 {
-    cUIObj_1FF310* xButton = (cUIObj_1FF310*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_ps2x_b));
-    ((cUIObj_1FF310*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_x_save)))->setVisible(!on);
-    *(int*)((char*)self + 0x224) = !on;
+    cUIObj_1FF310* xButton = (cUIObj_1FF310*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_ps2x_b));
+    ((cUIObj_1FF310*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_x_save)))->setVisible(!on);
+    self->mMainButtonActive = !on;
     xButton->setVisible(!on);
 }
 #endif
@@ -3782,65 +3786,65 @@ public:
  * @param msg  the widget the event is for (its miMiscData, +0x18, is the file slot)
  * @param type  the widget event: 5 select, 6 back, 7 delete
  */
-extern "C" void cOVState_SAVEOPTIONS_onWidgetEvent(void* self, void* msg, unsigned int type)
+extern "C" void cOVState_SAVEOPTIONS_onWidgetEvent(cOVState_SAVEOPTIONS* self, void* msg, unsigned int type)
 {
     if (msg == 0)
         return;
-    if (*(int*)((char*)self + 0x1A8) != 0)
+    if (self->mIsProcessing != 0)
         return;
     switch (type)
     {
     case 5:
     {
         int one = 1;
-        if (*(int*)((char*)self + 0x1C0) == 6)
+        if (self->mState == 6)
             return;
         char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-        int st = *(int*)((char*)self + 0x214);
+        int st = self->mScreenStatus;
         if (st != 3)
             return;
         int fileSlot = *(int*)((char*)msg + 0x18);
-        *(int*)((char*)self + 0x1C4) = fileSlot;
+        self->mSlot = fileSlot;
         *(int*)(mp + 0xF8) = fileSlot;
-        *(int*)((char*)self + 0x1A8) = one;
+        self->mIsProcessing = one;
         cMCOverlayManager_writeSetFileType(mp, 2, -1);
-        *(int*)((char*)self + 0x1DC) = one;
-        *(int*)((char*)self + 0x1A8) = one;
-        *(int*)((char*)self + 0x1C0) = st;
+        self->mIsSavePressed = one;
+        self->mIsProcessing = one;
+        self->mState = st;
         break;
     }
     case 6:
     {
         char* mp = (char*)cSSXApp_getMCManager(SSXApp);
-        if (*(int*)((char*)self + 0x1A8) == 1)
+        if (self->mIsProcessing == 1)
             return;
-        int cardState = *(int*)((char*)self + 0x1C0);
+        int cardState = self->mState;
         if (cardState == 6)
             return;
-        *(int*)((char*)self + 0x1E4) = 1;
+        self->mIsCancelPressed = 1;
         if (cardState == 0 || cardState == 2 || cardState == 1)
             ((cMoviePlayer_1FF3B0*)mp)->v01(0);
-        *(int*)((char*)self + 0x1C0) = 6;
+        self->mState = 6;
         break;
     }
     case 7:
     {
         int one = 1;
-        if (*(int*)((char*)self + 0x1C0) == 6)
+        if (self->mState == 6)
             return;
         char* mp = (char*)cSSXApp_getMCManager(SSXApp);
         if (!(*(cMovieSub434_1FF3B0**)(mp + 0x434))->v54(*(int*)(mp + 0x428)))
             return;
         int fileSlot = *(int*)((char*)msg + 0x18);
-        *(int*)((char*)self + 0x1C4) = fileSlot;
+        self->mSlot = fileSlot;
         *(int*)(mp + 0xF8) = fileSlot;
-        int cardState = *(int*)((char*)self + 0x1C0);
+        int cardState = self->mState;
         if (cardState != one)
             return;
-        if (!(*(cMovieSub434_1FF3B0**)(mp + 0x434))->v67(*(int*)((char*)self + 0x1C4)))
+        if (!(*(cMovieSub434_1FF3B0**)(mp + 0x434))->v67(self->mSlot))
             return;
-        *(int*)((char*)self + 0x1A8) = cardState;
-        *(int*)((char*)self + 0x1C0) = 4;
+        self->mIsProcessing = cardState;
+        self->mState = 4;
         cMCOverlayManager_SetAction_v(mp, 0);
         ((cMoviePlayer_1FF3B0*)mp)->v01(0x18);
         break;
@@ -3873,27 +3877,27 @@ extern char str_down[];
  * counts them into it. "Menu0000" loses its wrap flag and becomes scrollable when it has fewer rows than
  * rewards, else gets mDisableDirSound; the "up" / "down" arrows start hidden.
  */
-extern "C" void cOVState_REWARDS_onCreateScreen(void* self)
+extern "C" void cOVState_REWARDS_onCreateScreen(cOVState_REWARDS* self)
 {
-    void* engine = *(void**)((char*)self + 0x10);
+    void* engine = self->mpEngine;
     void* screen = cUIEngine_addScreenByHashName(engine, self, GetHashValue32(str_62reward_list), 0);
-    *(void**)((char*)self + 0x40) = screen;
+    self->mpScreen = (cUIScreen*)screen;
     if (screen != 0) {
         cUIScreen_playFrame(screen, 0, 0);
     }
-    void* engine2 = *(void**)((char*)self + 0x10);
+    void* engine2 = self->mpEngine;
     void* bg = cUIEngine_addScreenByHashName(engine2, self, GetHashValue32(str_OV_darkblue), 0);
     if (bg != 0) {
         cUIScreen_playFrame(bg, 0, 0);
     }
     cOVState_onCreateScreen(self);
-    *(int*)((char*)self + 0x9C) = 0;
+    self->mItemSize = 0;
     cOVState_REWARDS_checkRewardList(self, 0, -1);
-    char* menu = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_Menu0000_b));
+    char* menu = (char*)cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_Menu0000_b));
     if (menu != 0) {
         *(int*)(menu + 0x14) &= ~0x80;
-        if (*(unsigned char*)(menu + 0x96) < *(int*)((char*)self + 0x9C)) {
-            cUIMenu_setScrollableMenu(menu, *(int*)((char*)self + 0x9C));
+        if (*(unsigned char*)(menu + 0x96) < self->mItemSize) {
+            cUIMenu_setScrollableMenu(menu, self->mItemSize);
         } else {
             *(int*)(menu + 0x90) |= 8;
         }
@@ -3907,14 +3911,14 @@ extern "C" void cOVState_REWARDS_onCreateScreen(void* self)
 INCLUDE_ASM("fe/ovstatepause", cOVState_REWARDS_onGainFocus);
 #ifdef SKIP_ASM
 extern "C" void cUIState_onGainFocus(void* self);
-extern "C" void cOVState_REWARDS_updateMenu(void* self, int a1);
+extern "C" void cOVState_REWARDS_updateMenu(cOVState_REWARDS* self, int a1);
 
 /**
  * Runs the base UI-state focus handling, then refreshes the rewards menu.
  *
  * Calls cUIState_onGainFocus() and then cOVState_REWARDS_updateMenu(self, 0).
  */
-extern "C" void cOVState_REWARDS_onGainFocus(void* self)
+extern "C" void cOVState_REWARDS_onGainFocus(cOVState_REWARDS* self)
 {
     cUIState_onGainFocus(self);
     cOVState_REWARDS_updateMenu(self, 0);
@@ -3940,7 +3944,7 @@ extern "C" void cBERewardInterface_clearUserAwards(void* iface);
  * @param pWidget  the item; ignored when null
  * @param key  the widget event; only 5 (Cross) acts
  */
-extern "C" void cOVState_REWARDS_onWidgetEvent(void* self, void* pWidget, int key)
+extern "C" void cOVState_REWARDS_onWidgetEvent(cOVState_REWARDS* self, void* pWidget, int key)
 {
     if (pWidget != 0) {
         if (key == 5) {
@@ -3955,7 +3959,7 @@ extern "C" void cOVState_REWARDS_onWidgetEvent(void* self, void* pWidget, int ke
 INCLUDE_ASM("fe/ovstatepause", cOVState_REWARDS_onWidgetMenu);
 #ifdef SKIP_ASM
 // From peak3project's fork (github.com/peak3project/ssx3).
-extern "C" void cOVState_REWARDS_updateMenu(void* self, int a);
+extern "C" void cOVState_REWARDS_updateMenu(cOVState_REWARDS* self, int a);
 
 /**
  * Handles the rewards menu's notifications: refills the rows on a scroll and picks the button feedback.
@@ -3968,7 +3972,7 @@ extern "C" void cOVState_REWARDS_updateMenu(void* self, int a);
  * @param index  the new scroll offset for events 2-5
  * @return 1 for event 4, 0 as above, else 0x101 (animation and sound)
  */
-extern "C" int cOVState_REWARDS_onWidgetMenu(void* self, int id, int event, int index)
+extern "C" int cOVState_REWARDS_onWidgetMenu(cOVState_REWARDS* self, int id, int event, int index)
 {
     switch (event) {
     case 4:
@@ -3977,7 +3981,7 @@ extern "C" int cOVState_REWARDS_onWidgetMenu(void* self, int id, int event, int 
     case 7: case 8: case 9:
         return 0;
     case 2: case 3:
-        if (*(int*)((char*)self + 0x9C) < 10) {
+        if (self->mItemSize < 10) {
             return 0;
         }
         /* fall through */
@@ -4047,20 +4051,19 @@ public:
  * @param vself  the rewards overlay state (this)
  * @param base  index of the reward in the top row (On Tour offset)
  */
-extern "C" void cOVState_REWARDS_updateMenu(void* vself, int base)
+extern "C" void cOVState_REWARDS_updateMenu(cOVState_REWARDS* vself, int base)
 {
-    char* self = (char*)vself;
     sName_1FFD08 name = *(sName_1FFD08*)D_004A2580;
     unsigned short text[200];
     int i;
     for (i = 0; i < 9; i++) {
         name.c[0] = '0' + i;
-        cOVState_REWARDS_checkRewardList_1FFD08(self, text, i + base);
-        cUIObj_1FFD08* textObj = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(name.c));
+        cOVState_REWARDS_checkRewardList_1FFD08(((char*)vself), text, i + base);
+        cUIObj_1FFD08* textObj = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(name.c));
         if (textObj != 0) {
             cUIText_setUnicodeString(textObj, text);
         }
-        if (*(int*)(self + 0x9C) < 10) {
+        if (vself->mItemSize < 10) {
             sCol_1FFD08 color;
             color.r = 1.0f;
             color.g = 0.3960784673690796f;
@@ -4072,23 +4075,23 @@ extern "C" void cOVState_REWARDS_updateMenu(void* vself, int base)
         }
     }
     if (base == 0) {
-        cUIObj_1FFD08* textObj = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_up));
+        cUIObj_1FFD08* textObj = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_up));
         if (textObj != 0) {
             textObj->v09(0);
         }
     } else {
-        cUIObj_1FFD08* textObj = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_up));
+        cUIObj_1FFD08* textObj = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_up));
         if (textObj != 0) {
             textObj->v09(1);
         }
     }
-    if (*(int*)(self + 0x9C) <= base + 9) {
-        cUIObj_1FFD08* textObj = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_down));
+    if (vself->mItemSize <= base + 9) {
+        cUIObj_1FFD08* textObj = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_down));
         if (textObj != 0) {
             textObj->v09(0);
         }
     } else {
-        cUIObj_1FFD08* textObj = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(*(void**)(self + 0x40), GetHashValue32(str_down));
+        cUIObj_1FFD08* textObj = (cUIObj_1FFD08*)cUIScreen_getObjectByHashName(vself->mpScreen, GetHashValue32(str_down));
         if (textObj != 0) {
             textObj->v09(1);
         }
@@ -4148,9 +4151,9 @@ static inline unsigned short* lookupString_1FFF78(char* name)
  * @return always 0
  */
 // Rewards overlay: fills in the event-result and reward texts the first time it is shown.
-extern "C" int cOVState_REWARDS_onGainTransition(void* self)
+extern "C" int cOVState_REWARDS_onGainTransition(cOVState_REWARDS* self)
 {
-    if (*(int*)((char*)self + 0x48) == 0) {
+    if (self->mDoneTransition == 0) {
         unsigned short result[104];
         unsigned short fmt[0x10];
         unsigned short reward[104];
@@ -4191,15 +4194,15 @@ extern "C" int cOVState_REWARDS_onGainTransition(void* self)
             break;
         }
         }
-        cUIText_setUnicodeString(cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_title_rewardlisting)), result);
+        cUIText_setUnicodeString(cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_title_rewardlisting)), result);
         int id = cBENewPlayerInterface_getHumanRider(player, 0);
-        void* obj = cUIScreen_getObjectByHashName(*(void**)((char*)self + 0x40), GetHashValue32(str_1text));
+        void* obj = cUIScreen_getObjectByHashName(self->mpScreen, GetHashValue32(str_1text));
         sprintf2_void(name, D_004A2590, cBECharacterInterface_getShortName(board, id));
         unsigned short* text = lookupString_1FFF78(str_kT_OVRCMNCongratUser);
         sprintf1(reward, text, name);
         cUIText_setUnicodeString(obj, reward);
     }
-    *(int*)((char*)self + 0x48) = 1;
+    self->mDoneTransition = 1;
     return 0;
 }
 #endif

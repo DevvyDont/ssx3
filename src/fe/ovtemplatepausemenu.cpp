@@ -1,4 +1,5 @@
 #include "common.h"
+#include "fe/ovstatepause.h"
 #include "be/beintnetwork.h"
 #include "online/gamecomm.h"
 #include "main/game.h"
@@ -88,7 +89,7 @@ struct sPauseMenu_PM {
  *
  * @param state  the pause menu state
  */
-extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* state)
+extern "C" void cOVTemplate_PauseMenu_onCreateScreen(cOVTemplate_PauseMenu* state)
 {
     sPauseMenu_PM* self = (sPauseMenu_PM*)state;
     char name[2];
@@ -173,23 +174,23 @@ struct sVEnt_001F8448 { short delta; short index; void (*fn)(void*, int); };
  *
  * @return 0
  */
-extern "C" int cOVTemplate_PauseMenu_onGainTransition(void* self)
+extern "C" int cOVTemplate_PauseMenu_onGainTransition(cOVTemplate_PauseMenu* self)
 {
     char buf[64];
-    if (*(int*)((char*)self + 0xD4) != 0) {
-        *(int*)((char*)self + 0xD4) = 0;
+    if (self->mMoveIcons != 0) {
+        self->mMoveIcons = 0;
         for (int i = 0; i < 14; i++) {
             sprintf(buf, str_pct_s_group, D_00441C30[i]);
-            char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0xC0), GetHashValue32(buf));
+            char* obj = (char*)cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(buf));
             if (obj != 0) {
                 sVEnt_001F8448* vt = *(sVEnt_001F8448**)(obj + 8);
                 vt[9].fn(obj + vt[9].delta, 0);
             }
         }
         for (int i = 0; i < 8; i++) {
-            if (i < *(int*)((char*)self + 0xBC)) {
+            if (i < self->mPauseMenuNumOptions) {
                 sprintf(buf, str_pct_s_group, D_00441C30[((int*)((char*)self + 0x9C))[i]]);
-                char* obj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0xC0), GetHashValue32(buf));
+                char* obj = (char*)cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(buf));
                 if (obj != 0) {
                     sVEnt_001F8448* vt = *(sVEnt_001F8448**)(obj + 8);
                     vt[9].fn(obj + vt[9].delta, 1);
@@ -233,7 +234,7 @@ static inline void setColor_001F85C0(char* obj, void* c)
  *
  * @param pPrevState  the state that had focus before, passed on to cUIState_onGainFocus()
  */
-extern "C" void cOVTemplate_PauseMenu_onGainFocus(void* self, int pPrevState)
+extern "C" void cOVTemplate_PauseMenu_onGainFocus(cOVTemplate_PauseMenu* self, int pPrevState)
 {
     char buf[32];
     char* obj;
@@ -241,8 +242,8 @@ extern "C" void cOVTemplate_PauseMenu_onGainFocus(void* self, int pPrevState)
     char* flags = (char*)self + 0xD8;
     int i = 0;
     while (i < 8 && (sprintf(buf, D_004A2138, i),
-                     obj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0xC0), GetHashValue32(buf)),
-                     i < *(int*)((char*)self + 0xBC))) {
+                     obj = (char*)cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(buf)),
+                     i < self->mPauseMenuNumOptions)) {
         if (obj != 0) {
             if (i == D_004A2468) {
                 if (*(int*)(flags + (*sel << 2)) != 0) {
@@ -309,28 +310,28 @@ struct sVEnt_1F8728 { short delta; short index; void (*fn)(void*, void*); };
  * timeout
  * reaches 0 it sends an unpause, plays "trans_out", removes the PDA and pops the pause state.
  */
-extern "C" void cOVTemplate_PauseMenu_onUpdate(void* self)
+extern "C" void cOVTemplate_PauseMenu_onUpdate(cOVTemplate_PauseMenu* self)
 {
-    int st = *(int*)((char*)self + 0x110);
+    int st = self->mPauseMenuType;
     if ((st == 1 || st == 2 || st == 4) && func_001E3408() > 0)
     {
-        float phase = *(float*)((char*)self + 0xC8) + *(float*)((char*)self + 0xCC);
-        *(float*)((char*)self + 0xC8) = phase;
+        float phase = self->mNewMailAlpha + self->mNewMailAlphaDiff;
+        self->mNewMailAlpha = phase;
         if (phase >= 1.0f)
         {
-            *(float*)((char*)self + 0xC8) = 1.0f;
-            *(float*)((char*)self + 0xCC) = -*(float*)((char*)self + 0xCC);
+            self->mNewMailAlpha = 1.0f;
+            self->mNewMailAlphaDiff = -self->mNewMailAlphaDiff;
         }
         else if (phase < 0.0f)
         {
-            *(float*)((char*)self + 0xC8) = 0.0f;
-            *(float*)((char*)self + 0xCC) = -*(float*)((char*)self + 0xCC);
+            self->mNewMailAlpha = 0.0f;
+            self->mNewMailAlphaDiff = -self->mNewMailAlphaDiff;
         }
-        char* uiObj = (char*)cUIScreen_getObjectByHashName(*(void**)((char*)self + 0xC0), GetHashValue32(str_NewMail));
+        char* uiObj = (char*)cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(str_NewMail));
         if (uiObj != 0)
         {
             sColor_1F8728 color = *(sColor_1F8728*)(uiObj + 0x1C);
-            color.r = *(float*)((char*)self + 0xC8);
+            color.r = self->mNewMailAlpha;
             sVEnt_1F8728* vt = *(sVEnt_1F8728**)(uiObj + 8);
             vt[11].fn(uiObj + vt[11].delta, &color);
         }
@@ -348,11 +349,11 @@ extern "C" void cOVTemplate_PauseMenu_onUpdate(void* self)
     cGameComm* comm = cGameComm_mGameComm;
     comm->mPauseTimeout = -1;
     comm->mOverlayTimeout = -1;
-    int frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0xC0), GetHashValue32(str_trans_out));
-    cUIScreen_playFrame(*(void**)((char*)self + 0xC0), frame, 1);
-    *(int*)((char*)self + 0xD0) = 1;
+    int frame = cUIScreen_getFrameByLabel(self->mpPauseScreen, GetHashValue32(str_trans_out));
+    cUIScreen_playFrame(self->mpPauseScreen, frame, 1);
+    self->mScreenExiting = 1;
     cOVStateManager_removePDATemplate();
-    cUIStateStack_pop_r(*(char**)((char*)self + 0x10) + 0x18, 1);
+    cUIStateStack_pop_r((char*)self->mpEngine + 0x18, 1);
     cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
 }
 #endif
@@ -387,7 +388,7 @@ INCLUDE_ASM("fe/ovtemplatepausemenu", cOVTemplate_PauseMenu_onWidgetMenu);
  * @param event  menu event number (On Tour Event)
  * @return 0x100 for events 8 and 9, 0 for event 6, otherwise 0x101
  */
-extern "C" int cOVTemplate_PauseMenu_onWidgetMenu(void* self, int menu, unsigned int event)
+extern "C" int cOVTemplate_PauseMenu_onWidgetMenu(cOVTemplate_PauseMenu* self, int menu, unsigned int event)
 {
     switch (event) {
     case 8:
@@ -422,7 +423,7 @@ extern "C" void cOVStateManager_triggerOverlay(int cmd);
 extern "C" void* cFEStateAudioOptions_cFEStateAudioOptions(void* mem, void* owner, int a2, int a3);
 extern "C" void* cAudioInterface_bxAudio();
 extern "C" void cSSXAudio_ResumeAudio(void* audio);
-extern "C" void cOVTemplate_PauseMenu_setPDAIconColor(void* self, int idx, int on);
+extern "C" void cOVTemplate_PauseMenu_setPDAIconColor(cOVTemplate_PauseMenu* self, int idx, int on);
 extern int cPauseState_Flags;
 extern int D_004A2A54;
 extern int D_005366E8[];
@@ -497,30 +498,30 @@ static inline void setColor_PMWE(sWidget_PMWE* w, void* c)
  * @param w  the option row (its option at +0x18), or 0
  * @param event  widget event number: 5 select, 6 back, 1 highlight, 2 unhighlight
  */
-extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(sPauseMenu_PMWE* self, sWidget_PMWE* w, int event)
+extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(cOVTemplate_PauseMenu* self, sWidget_PMWE* w, int event)
 {
     if (w == 0)
         return;
     switch (event) {
     case 5: {
         sSnd_PMWE* snd = &gUISoundNull;
-        if (*(sSnd_PMWE**)(self->owner + 0x14) != 0)
-            snd = *(sSnd_PMWE**)(self->owner + 0x14);
-        cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_Menu_b));
-        if (self->enabled[w->idx] == 0) {
+        if (*(sSnd_PMWE**)((char*)self->mpEngine + 0x14) != 0)
+            snd = *(sSnd_PMWE**)((char*)self->mpEngine + 0x14);
+        cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(str_Menu_b));
+        if (self->mPauseOptionUnlocked[w->idx] == 0) {
             snd->vt[2].fn((char*)snd + snd->vt[2].delta, 4);
             return;
         }
         snd->vt[2].fn((char*)snd + snd->vt[2].delta, 6);
         D_004A2468 = *((unsigned char*)text + 0x95);
-        int frame = cUIScreen_getFrameByLabel((cUIScreen*)self->screen, GetHashValue32(str_trans_out));
-        cUIScreen_playFrame(self->screen, frame, 1);
-        self->busy = 1;
+        int frame = cUIScreen_getFrameByLabel((cUIScreen*)self->mpPauseScreen, GetHashValue32(str_trans_out));
+        cUIScreen_playFrame(self->mpPauseScreen, frame, 1);
+        self->mScreenExiting = 1;
         switch (w->idx) {
         case 1:
             stopReplay_PMWE();
             cOVStateManager_removePDATemplate();
-            cUIStateStack_pop_r(self->owner + 0x18, 1);
+            cUIStateStack_pop_r((char*)self->mpEngine + 0x18, 1);
             cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
             cSSXAudio_ResumeAudio(cAudioInterface_bxAudio());
             break;
@@ -571,31 +572,31 @@ extern "C" void cOVTemplate_PauseMenu_onWidgetEvent(sPauseMenu_PMWE* self, sWidg
         stopReplay_PMWE();
         cOVStateManager_removePDATemplate();
         cPauseState_Flags = D_004428F0[D_005366E8[--D_004A2A54]];
-        cUIStateStack_pop_r(self->owner + 0x18, 1);
+        cUIStateStack_pop_r((char*)self->mpEngine + 0x18, 1);
         cSSXAudio_ResumeAudio(cAudioInterface_bxAudio());
         break;
     case 1: {
-        if (self->busy == 0) {
-            if (self->enabled[w->idx] != 0)
+        if (self->mScreenExiting == 0) {
+            if (self->mPauseOptionUnlocked[w->idx] != 0)
                 setColor_PMWE(w, D_004C8AF8);
             else
                 setColor_PMWE(w, D_004C8AE8);
-            if (self->busy == 0)
+            if (self->mScreenExiting == 0)
                 cOVTemplate_PauseMenu_setPDAIconColor(self, w->idx, 1);
         }
-        cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->screen, GetHashValue32(str_help0));
+        cUIText* text = (cUIText*)cUIScreen_getObjectByHashName(self->mpPauseScreen, GetHashValue32(str_help0));
         if (text != 0)
             cUIText_setUnicodeStringByID(text, GetHashValue32(str_H_J_b[w->idx]));
         break;
     }
     case 2:
-        if (self->busy != 0)
+        if (self->mScreenExiting != 0)
             return;
-        if (self->enabled[w->idx] != 0)
+        if (self->mPauseOptionUnlocked[w->idx] != 0)
             setColor_PMWE(w, D_004C8B18);
         else
             setColor_PMWE(w, D_004C8B08);
-        if (self->busy == 0)
+        if (self->mScreenExiting == 0)
             cOVTemplate_PauseMenu_setPDAIconColor(self, w->idx, 0);
         break;
     case 3:
@@ -640,22 +641,22 @@ extern char str_pct_s_R[];
  * @param idx  the option (On Tour type), indexing the icon names
  * @param on  nonzero for focus (On Tour focus)
  */
-extern "C" void cOVTemplate_PauseMenu_setPDAIconColor(void* self, int idx, int on)
+extern "C" void cOVTemplate_PauseMenu_setPDAIconColor(cOVTemplate_PauseMenu* self, int idx, int on)
 {
     char buf[64];
     if (on) {
         sprintf(buf, str_pct_s_S, D_00441C30[idx]);
-        unsigned short frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0xC0), GetHashValue32(buf));
-        if (frame != 0xFFFF && *(void**)((char*)self + 0xC4) == 0) {
-            *(void**)((char*)self + 0xC4) = cUIScreen_playFrame(*(void**)((char*)self + 0xC0), frame, 1);
+        unsigned short frame = cUIScreen_getFrameByLabel(self->mpPauseScreen, GetHashValue32(buf));
+        if (frame != 0xFFFF && self->mpThread == 0) {
+            self->mpThread = (cUIThread*)cUIScreen_playFrame(self->mpPauseScreen, frame, 1);
         }
     } else {
         sprintf(buf, str_pct_s_R, D_00441C30[idx]);
-        unsigned short frame = cUIScreen_getFrameByLabel(*(cUIScreen**)((char*)self + 0xC0), GetHashValue32(buf));
+        unsigned short frame = cUIScreen_getFrameByLabel(self->mpPauseScreen, GetHashValue32(buf));
         if (frame != 0xFFFF) {
-            *(unsigned short*)((char*)*(void**)((char*)self + 0xC4) + 0xC) = frame;
-            *(unsigned short*)((char*)*(void**)((char*)self + 0xC4) + 0xE) = 0xFFFF;
-            *(void**)((char*)self + 0xC4) = 0;
+            *(unsigned short*)((char*)self->mpThread + 0xC) = frame;
+            *(unsigned short*)((char*)self->mpThread + 0xE) = 0xFFFF;
+            self->mpThread = 0;
         }
     }
 }
@@ -664,7 +665,7 @@ extern "C" void cOVTemplate_PauseMenu_setPDAIconColor(void* self, int idx, int o
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/ovtemplatepausemenu", cOVState_PAUSE_COMPETE_onCreateScreen);
 #ifdef SKIP_ASM
-extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* self);
+extern "C" void cOVTemplate_PauseMenu_onCreateScreen(cOVTemplate_PauseMenu* self);
 extern int D_00478160[];
 
 /**
@@ -676,14 +677,14 @@ extern int D_00478160[];
  * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of cOVState_PAUSE_COMPETE_vtbl, the vtable
  * cOVStateManager_triggerOverlay gives overlay 1 (the career (game path 0) event pause that func_0020CA10 opens).
  */
-extern "C" void cOVState_PAUSE_COMPETE_onCreateScreen(void* self)
+extern "C" void cOVState_PAUSE_COMPETE_onCreateScreen(cOVTemplate_PauseMenu* self)
 {
     int i;
-    *(int*)((char*)self + 0xBC) = 6;
-    for (i = 0; i < *(int*)((char*)self + 0xBC); i++) {
+    self->mPauseMenuNumOptions = 6;
+    for (i = 0; i < self->mPauseMenuNumOptions; i++) {
         ((int*)((char*)self + 0x9C))[i] = D_00478160[i];
     }
-    *(int*)((char*)self + 0x110) = 1;
+    self->mPauseMenuType = 1;
     cOVTemplate_PauseMenu_onCreateScreen(self);
 }
 #endif
@@ -691,7 +692,7 @@ extern "C" void cOVState_PAUSE_COMPETE_onCreateScreen(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/ovtemplatepausemenu", cOVState_PAUSE_BIGCHAL_onCreateScreen);
 #ifdef SKIP_ASM
-extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* self);
+extern "C" void cOVTemplate_PauseMenu_onCreateScreen(cOVTemplate_PauseMenu* self);
 extern int D_00478178[];
 
 /**
@@ -703,14 +704,14 @@ extern int D_00478178[];
  * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of cOVState_PAUSE_BIGCHAL_vtbl, the vtable
  * cOVStateManager_triggerOverlay gives overlay 2 (the local-mission pause that func_0020CA10 opens).
  */
-extern "C" void cOVState_PAUSE_BIGCHAL_onCreateScreen(void* self)
+extern "C" void cOVState_PAUSE_BIGCHAL_onCreateScreen(cOVTemplate_PauseMenu* self)
 {
     int i;
-    *(int*)((char*)self + 0xBC) = 6;
-    for (i = 0; i < *(int*)((char*)self + 0xBC); i++) {
+    self->mPauseMenuNumOptions = 6;
+    for (i = 0; i < self->mPauseMenuNumOptions; i++) {
         ((int*)((char*)self + 0x9C))[i] = D_00478178[i];
     }
-    *(int*)((char*)self + 0x110) = 2;
+    self->mPauseMenuType = 2;
     cOVTemplate_PauseMenu_onCreateScreen(self);
 }
 #endif
@@ -718,7 +719,7 @@ extern "C" void cOVState_PAUSE_BIGCHAL_onCreateScreen(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/ovtemplatepausemenu", cOVState_PAUSE_FREERIDE_onCreateScreen);
 #ifdef SKIP_ASM
-extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* self);
+extern "C" void cOVTemplate_PauseMenu_onCreateScreen(cOVTemplate_PauseMenu* self);
 extern int D_00478140[];
 
 /**
@@ -730,14 +731,14 @@ extern int D_00478140[];
  * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of cOVState_PAUSE_FREERIDE_vtbl, the vtable
  * cOVStateManager_triggerOverlay gives overlay 3 (the freeride (cGameMode 4) pause that func_0020CA10 opens).
  */
-extern "C" void cOVState_PAUSE_FREERIDE_onCreateScreen(void* self)
+extern "C" void cOVState_PAUSE_FREERIDE_onCreateScreen(cOVTemplate_PauseMenu* self)
 {
     int i;
-    *(int*)((char*)self + 0xBC) = 7;
-    for (i = 0; i < *(int*)((char*)self + 0xBC); i++) {
+    self->mPauseMenuNumOptions = 7;
+    for (i = 0; i < self->mPauseMenuNumOptions; i++) {
         ((int*)((char*)self + 0x9C))[i] = D_00478140[i];
     }
-    *(int*)((char*)self + 0x110) = 3;
+    self->mPauseMenuType = 3;
     cOVTemplate_PauseMenu_onCreateScreen(self);
 }
 #endif
@@ -745,7 +746,7 @@ extern "C" void cOVState_PAUSE_FREERIDE_onCreateScreen(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/ovtemplatepausemenu", cOVState_PAUSE_SPOKE_onCreateScreen);
 #ifdef SKIP_ASM
-extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* self);
+extern "C" void cOVTemplate_PauseMenu_onCreateScreen(cOVTemplate_PauseMenu* self);
 extern int D_00478190[];
 
 /**
@@ -757,14 +758,14 @@ extern int D_00478190[];
  * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of cOVState_PAUSE_SPOKE_vtbl, the vtable
  * cOVStateManager_triggerOverlay gives overlay 4 (the game-state-11 pause that func_0020CA10 opens).
  */
-extern "C" void cOVState_PAUSE_SPOKE_onCreateScreen(void* self)
+extern "C" void cOVState_PAUSE_SPOKE_onCreateScreen(cOVTemplate_PauseMenu* self)
 {
     int i;
-    *(int*)((char*)self + 0xBC) = 5;
-    for (i = 0; i < *(int*)((char*)self + 0xBC); i++) {
+    self->mPauseMenuNumOptions = 5;
+    for (i = 0; i < self->mPauseMenuNumOptions; i++) {
         ((int*)((char*)self + 0x9C))[i] = D_00478190[i];
     }
-    *(int*)((char*)self + 0x110) = 4;
+    self->mPauseMenuType = 4;
     cOVTemplate_PauseMenu_onCreateScreen(self);
 }
 #endif
@@ -772,7 +773,7 @@ extern "C" void cOVState_PAUSE_SPOKE_onCreateScreen(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/ovtemplatepausemenu", cOVState_PAUSE_QUICKPLAY_onCreateScreen);
 #ifdef SKIP_ASM
-extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* self);
+extern "C" void cOVTemplate_PauseMenu_onCreateScreen(cOVTemplate_PauseMenu* self);
 extern int D_004781A8[];
 
 /**
@@ -784,14 +785,14 @@ extern int D_004781A8[];
  * cOVTemplate_PauseMenu_onCreateScreen. It is the onCreateScreen slot (+0x24) of cOVState_PAUSE_QUICKPLAY_vtbl, the vtable
  * cOVStateManager_triggerOverlay gives overlay 5 (the fallback pause that func_0020CA10 opens).
  */
-extern "C" void cOVState_PAUSE_QUICKPLAY_onCreateScreen(void* self)
+extern "C" void cOVState_PAUSE_QUICKPLAY_onCreateScreen(cOVTemplate_PauseMenu* self)
 {
     int i;
-    *(int*)((char*)self + 0xBC) = 5;
-    for (i = 0; i < *(int*)((char*)self + 0xBC); i++) {
+    self->mPauseMenuNumOptions = 5;
+    for (i = 0; i < self->mPauseMenuNumOptions; i++) {
         ((int*)((char*)self + 0x9C))[i] = D_004781A8[i];
     }
-    *(int*)((char*)self + 0x110) = 5;
+    self->mPauseMenuType = 5;
     cOVTemplate_PauseMenu_onCreateScreen(self);
 }
 #endif
@@ -799,7 +800,7 @@ extern "C" void cOVState_PAUSE_QUICKPLAY_onCreateScreen(void* self)
 //100% - objdiff report; single-function view differs only in a relocation name
 INCLUDE_ASM("fe/ovtemplatepausemenu", cOVState_PAUSE_ONLINE_onCreateScreen);
 #ifdef SKIP_ASM
-extern "C" void cOVTemplate_PauseMenu_onCreateScreen(void* self);
+extern "C" void cOVTemplate_PauseMenu_onCreateScreen(cOVTemplate_PauseMenu* self);
 extern "C" int cGame_canUserActivatePauseMenu(void* game);
 extern int D_004781C0[];
 extern int D_004A2868[2];
@@ -811,19 +812,19 @@ extern int D_004A2868[2];
  * when cGame_canUserActivatePauseMenu (On Tour cGame::canUserActivatePauseMenu) returns 0; copies them to +0x9C with the count at
  * +0xBC, sets +0x110 to 6 and runs cOVTemplate_PauseMenu_onCreateScreen.
  */
-extern "C" void cOVState_PAUSE_ONLINE_onCreateScreen(void* self)
+extern "C" void cOVState_PAUSE_ONLINE_onCreateScreen(cOVTemplate_PauseMenu* self)
 {
     int* items = D_004781C0;
-    *(int*)((char*)self + 0xBC) = 3;
+    self->mPauseMenuNumOptions = 3;
     if (cGame_canUserActivatePauseMenu(SSXApp->Game) == 0) {
         items = D_004A2868;
-        *(int*)((char*)self + 0xBC) = 2;
+        self->mPauseMenuNumOptions = 2;
     }
     int i;
-    for (i = 0; i < *(int*)((char*)self + 0xBC); i++) {
+    for (i = 0; i < self->mPauseMenuNumOptions; i++) {
         ((int*)((char*)self + 0x9C))[i] = items[i];
     }
-    *(int*)((char*)self + 0x110) = 6;
+    self->mPauseMenuType = 6;
     cOVTemplate_PauseMenu_onCreateScreen(self);
 }
 #endif
